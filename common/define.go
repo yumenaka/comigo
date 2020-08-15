@@ -234,7 +234,7 @@ func (b *Book) ScanAllImage() {
 func (b *Book) ScanAllImageGo() {
 	var wg sync.WaitGroup
 	for i := 0; i < len(b.PageInfo); i++ { //此处不能用range，因为需要修改
-		if i < 10 {
+		if i < 10 {//为了优化打开速度，即便并发分析，前10张也要单线程做
 			SetImageType(&b.PageInfo[i])
 		} else {
 			wg.Add(1)

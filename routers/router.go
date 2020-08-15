@@ -97,6 +97,11 @@ func InitWebServer() {
 	engine.StaticFS("/js", pkger.Dir("/webui/static/js"))
 	engine.StaticFS("/css", pkger.Dir("/webui/static/css"))
 	engine.StaticFS("/resources", pkger.Dir("/webui/public"))
+	if common.ReadingBook.IsFolder{
+		engine.StaticFS("/raw/"+common.ReadingBook.Name, gin.Dir(common.ReadingBook.FilePath,true))
+	}else{
+		engine.StaticFile("/raw/"+common.ReadingBook.Name, common.ReadingBook.FilePath)
+	}
 	file, err := pkger.Open("/webui/static/index.html")
 	if err != nil {
 		log.Fatal(err)
@@ -107,13 +112,13 @@ func InitWebServer() {
 		log.Fatal(err)
 	}
 	templateString := string(data)
-	//获取模板，命名为"template-html"，同时把左右分隔符改为 [[ ]]
-	tmpl := template.Must(template.New("template-html").Delims("[[", "]]").Parse(templateString))
+	//获取模板，命名为"template-data"，同时把左右分隔符改为 [[ ]]
+	tmpl := template.Must(template.New("template-data").Delims("[[", "]]").Parse(templateString))
 	//使用模板
 	engine.SetHTMLTemplate(tmpl)
 	//解析模板到HTML
 	engine.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "template-html", gin.H{
+		c.HTML(http.StatusOK, "template-data", gin.H{
 			"title": common.ReadingBook.Name, //页面标题
 		})
 	})

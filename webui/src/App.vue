@@ -1,6 +1,6 @@
 <template>
   <div id="app" class="manga_div">
-    <h2>{{ book.name }}</h2>
+    <h2><a :href= "'raw/' + book.name" >{{ book.name }}</a></h2>
     <h4>总页数：{{ book.page_num }}</h4>
     <!-- <v-alert type="success" fixed>I'm a success alert.</v-alert> -->
   <!-- <div>bookshelf:{{bookshelf}}</div> -->
