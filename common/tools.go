@@ -200,6 +200,7 @@ func InitReadingBook() (err error) {
 		PictureDir = ReadingBook.FilePath
 		ReadingBook.ExtractComplete = true
 		ReadingBook.ExtractNum = ReadingBook.PageNum
+		ReadingBook.ScanAllImageGo() //图片文件见也需要获取分辨率
 	} else {
 		err = SetTempDir()
 		if err != nil {
@@ -214,7 +215,7 @@ func InitReadingBook() (err error) {
 		}
 		ReadingBook.SetArchiveBookName(ReadingBook.FilePath) //设置书名
 	}
-	//分析图片分辨率
+	//分析图片分辨率，不知道为什么，无法同时解压与分析
 	if Config.UseGO {
 		ReadingBook.ScanAllImageGo() //扫描所有图片，取得分辨率信息，使用了协程
 	}
