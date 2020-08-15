@@ -10,11 +10,8 @@ A simple comic book reader.
 3、支持webp-server压缩（[下载地址](https://github.com/webp-sh/webp_server_go/releases/latest)）
 
 4、Ctrl+C正常退出。直接关闭或kill，到下一次正常退出时，才可能清空系统临时文件夹的漫画缓存。
+
+
  
-Special Thanks：  
-spf13  
-mholt  
-disintegration  
-akavel  
-Unrud  
-……And You!
+
+Special Thanks：  spf13  mholt  disintegration  akavel  Unrud  ……And You!
