@@ -1,0 +1,56 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Dependency directories (remove the comment below to include it)
+# vendor/
+.vscode
+.cache
+.idea
+*.zip
+*.rar
+*.tar
+*.tar.gz
+*.7z
+*.log
+main
+*.DS_Store
+go_build_main_go
+bin
+comic
+test
+*md5Sums.txt
+resource.syso
+\[*
+
+
+webui/node_modules
+webui/dist
+
+# local env files
+webui/.env.local
+webui/.env.*.local
+
+# Log files
+webui/npm-debug.log*
+webui/yarn-debug.log*
+webui/yarn-error.log*
+
+# Editor directories and files
+webui/.idea
+webui/.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
