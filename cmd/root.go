@@ -16,19 +16,16 @@ var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "comi",
+	Use:   "comi [flags] file_or_dir",
 	Short: "A simple comic book reader.",
 	Example: `
 comi book.zip
 
-设定网页服务端口（默认为1234）：
-comi -p 2345 book.zip 
+设定网页服务端口（默认1234）：
+comi -p 2345 bookdir
 
 不打开浏览器（windows）：
-comi -b=false book.zip 
-
-本机浏览，不对外开放：
-comi -l book.zip  
+comi -b=false book.rar
 
 webp传输，需要webp-server配合：
 comi -w book.zip
@@ -36,8 +33,8 @@ comi -w book.zip
 指定多个参数：
 comi -lw -webp-command=C:\Users\test\Desktop\webp-server-windows-amd64.exe -p 3344 -q 45  test.zip
 `,
-	Version: "v0.2.0",
-	Long: `comi     一款简单的漫画阅读器`,
+	Version: "v0.2.1",
+	Long: `Comi Go: 简单粗暴的漫画阅读器`,
 	Run: func(cmd *cobra.Command, args []string) {
 		routers.StartComicServer(args)
 		return
@@ -63,21 +60,21 @@ func init() {
 	//rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	// persistent，任何命令下均可使用，适合全局flag
 	rootCmd.PersistentFlags().IntVarP(&common.Config.Port, "port", "p", 1234, "服务端口")
-	rootCmd.PersistentFlags().StringVarP(&common.Config.ConfigPath, "config", "c", "", "配置文件")
+	rootCmd.PersistentFlags().BoolVarP(&common.Config.OpenBrowser, "broswer", "b", false, "打开浏览器，windows=true")
 	rootCmd.PersistentFlags().IntVarP(&common.Config.MaxDepth, "max-depth", "m", 2, "最大搜索深度")
 	rootCmd.PersistentFlags().BoolVarP(&common.Config.OnlyLocal, "local-only", "l", false, "禁用LAN分享")
-	rootCmd.PersistentFlags().BoolVarP(&common.Config.UseWebpServer, "webp", "w", false, "webp传输，需要webp-server")
-	rootCmd.PersistentFlags().StringVar(&common.Config.WebpCommand, "webp-command", "webp-server", "webp-server命令,或webp-server可执行文件路径，默认为“webp-server")
-	rootCmd.PersistentFlags().StringVarP(&common.Config.WebpConfig.QUALITY, "webp-quality","q",  "60", "webp压缩质量（默认60）")
-	rootCmd.PersistentFlags().BoolVarP(&common.Config.UseGO, "usego", "g", false, "启用并发，减少解压时间")
-	rootCmd.PersistentFlags().BoolVarP(&common.Config.OpenBrowser, "broswer", "b", false, "同时打开浏览器，windows=true")
+	rootCmd.PersistentFlags().BoolVarP(&common.Config.UseWebpServer, "webp", "w", false, "启用webp压缩")
+	rootCmd.PersistentFlags().StringVar(&common.Config.WebpCommand, "webp-command", "webp-server", "webp-server命令，或可执行文件路径")
+	rootCmd.PersistentFlags().StringVarP(&common.Config.WebpConfig.QUALITY, "webp-quality","q",  "60", "webp压缩质量")
 	rootCmd.PersistentFlags().BoolVarP(&common.PrintVersion, "version", "v", false, "输出版本号")
 	rootCmd.PersistentFlags().BoolVar(&common.Config.LogToFile, "log", false, "记录log文件")
-	rootCmd.PersistentFlags().BoolVar(&common.Config.PrintAllIP, "print-allip", false, "打印所有可用网卡ip")
-	rootCmd.PersistentFlags().StringVarP(&common.Config.ZipFilenameEncoding, "zip-encoding", "e", "", "Zip non-utf8 Encoding(gbk、shiftjis、gb18030）")
+	rootCmd.PersistentFlags().BoolVar(&common.Config.PrintAllIP, "print-allip", false, "打印所有可用ip")
+	rootCmd.PersistentFlags().BoolVarP(&common.Config.UseGO, "usego", "g", false, "启用并发")
+	//rootCmd.PersistentFlags().StringVarP(&common.Config.ConfigPath, "config", "c", "", "配置文件(还没做)")
+	//rootCmd.PersistentFlags().StringVarP(&common.Config.ZipFilenameEncoding, "zip-encoding", "e", "", "Zip non-utf8 Encoding(gbk、shiftjis、gb18030）")
 	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFileName, "logname", "comigo", "log文件名")
 	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFilePath, "logpath", "~", "log文件位置")
-	rootCmd.PersistentFlags().IntVarP(&common.Config.MinImageNum, "imagenum", "i", 3, "至少有几张图片，才认定为漫画压缩包")
+	rootCmd.PersistentFlags().IntVarP(&common.Config.MinImageNum, "imagenum", "i", 3, "有几张图片，才认定为漫画")
 	if runtime.GOOS == "windows" {
 		common.Config.OpenBrowser = true
 	}
