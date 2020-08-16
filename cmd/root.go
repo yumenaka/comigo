@@ -34,7 +34,7 @@ comi -w book.zip
 comi -lw -webp-command=C:\Users\test\Desktop\webp-server-windows-amd64.exe -p 3344 -q 45  test.zip
 `,
 	Version: "v0.2.1",
-	Long: `Comi Go: 简单粗暴的漫画阅读器`,
+	Long: `ComiGo: 简单粗暴的漫画阅读器`,
 	Run: func(cmd *cobra.Command, args []string) {
 		routers.StartComicServer(args)
 		return
