@@ -1,6 +1,6 @@
 <h2 align="center">
-  <img src="https://raw.githubusercontent.com/yumenaka/comi/master/icon.ico" alt="ComiGo: 一个简单粗暴的漫画阅读器" width="200">
-  <br>ComiGo: 一个简单粗暴的漫画阅读器<br>
+  <img src="https://raw.githubusercontent.com/yumenaka/comi/master/icon.ico" alt="ComiGo: 一款简单粗暴的漫画阅读器" width="200">
+  <br>ComiGo: 一款简单粗暴的漫画阅读器<br>
 </h2>
 
 ![Windows示例](https://www.yumenaka.net/wp-content/uploads/2020/08/sample.gif "Windows示例")  
