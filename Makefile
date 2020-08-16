@@ -1,6 +1,6 @@
 # Makefile for cross-compilation
-# make all VERSION=v0.2.0
-# mingw32-make all VERSION=v0.2.0
+# make all VERSION=v0.2.1
+# mingw32-make all VERSION=v0.2.1
 NAME=comi
 OS := $(shell uname)
 BINDIR := ./bin
@@ -48,13 +48,14 @@ endif
 	zip -m -r -j -9 $(BINDIR)/$(NAME)-$@-$(VERSION).zip $(BINDIR)/$(NAME)-$@-$(VERSION)
 	rmdir $(BINDIR)/$(NAME)-$@-$(VERSION)
 	rm   resource.syso	
+	
 #32位arm，比如树莓派	
 linux-armv7:
 	GOARCH=arm GOOS=linux GOARM=7 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@-$(VERSION)/$(NAME) 
 ifdef UPX
 	upx -9 $(BINDIR)/$(NAME)-$@-$(VERSION)/$(NAME)
 endif
-	tar -zcvf $(BINDIR)/$(NAME)-$@-$(VERSION).tar.gz $(BINDIR)/$(NAME)-$@-$(VERSION)
+	tar --directory=$(BINDIR)/$(NAME)-$@-$(VERSION)  -zcvf $(BINDIR)/$(NAME)-$@-$(VERSION).tar.gz $(NAME)
 	rm -rf $(BINDIR)/$(NAME)-$@-$(VERSION)
 
 #64位arm，如今大多数手机	
@@ -63,7 +64,7 @@ linux-armv8:
 ifdef UPX
 	upx -9 $(BINDIR)/$(NAME)-$@-$(VERSION)/$(NAME)
 endif
-	tar -zcvf $(BINDIR)/$(NAME)-$@-$(VERSION).tar.gz $(BINDIR)/$(NAME)-$@-$(VERSION)
+	tar --directory=$(BINDIR)/$(NAME)-$@-$(VERSION)  -zcvf $(BINDIR)/$(NAME)-$@-$(VERSION).tar.gz $(NAME)
 	rm -rf $(BINDIR)/$(NAME)-$@-$(VERSION)
 
 #64位Linux
@@ -72,15 +73,15 @@ linux-amd64:
 ifdef UPX
 	upx -9 $(BINDIR)/$(NAME)-$@-$(VERSION)/$(NAME)
 endif
-	tar -zcvf $(BINDIR)/$(NAME)-$@-$(VERSION).tar.gz $(BINDIR)/$(NAME)-$@-$(VERSION)
+	tar --directory=$(BINDIR)/$(NAME)-$@-$(VERSION)  -zcvf $(BINDIR)/$(NAME)-$@-$(VERSION).tar.gz $(NAME)
 	rm -rf $(BINDIR)/$(NAME)-$@-$(VERSION)
-
+	
 #64位MACOS
 darwin-amd64:
 	GOARCH=amd64 GOOS=darwin $(GOBUILD) -o $(BINDIR)/$(NAME)-$@-$(VERSION)/$(NAME)
 ifdef UPX
 	upx -9 $(BINDIR)/$(NAME)-$@-$(VERSION)/$(NAME)
 endif
-	tar -zcvf $(BINDIR)/$(NAME)-$@-$(VERSION).tar.gz $(BINDIR)/$(NAME)-$@-$(VERSION)
+	tar --directory=$(BINDIR)/$(NAME)-$@-$(VERSION)  -zcvf $(BINDIR)/$(NAME)-$@-$(VERSION).tar.gz $(NAME)
 	rm -rf $(BINDIR)/$(NAME)-$@-$(VERSION)
 
