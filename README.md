@@ -1,7 +1,10 @@
 # comi
-一款简单的漫画压缩包阅读器
-A simple comic book reader.
 
+A simple comic book reader.
+一款简单的漫画压缩包阅读器。
+
+演示：  
+![sample](https://www.yumenaka.net/wp-content/uploads/2020/08/sample.gif "sample")
 
 1、命令行使用，需要将程序路径添加到系统PATH。
 
