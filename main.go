@@ -4,7 +4,7 @@
 package main
 
 import (
-	"comi/cmd"
+	"github.com/yumenaka/comi/cmd"
 )
 
 func main() {
