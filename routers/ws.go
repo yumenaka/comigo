@@ -1,7 +1,7 @@
 package routers
 
 import (
-	"comi/common"
+	"github.com/yumenaka/comi/common"
 	"encoding/json"
 	"fmt"
 	"net/http"

@@ -1,8 +1,8 @@
 package routers
 
 import (
-	"comi/common"
-	"comi/routers/reverse_proxy"
+	"github.com/yumenaka/comi/common"
+	"github.com/yumenaka/comi/routers/reverse_proxy"
 	"fmt"
 	"html/template"
 	"io/ioutil"

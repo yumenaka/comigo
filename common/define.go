@@ -57,6 +57,12 @@ var Config = ServerConfig{
 	ServerHost: "",
 }
 
+func init() {
+	var JAVAHOME string
+	JAVAHOME = os.Getenv("JAVA_HOME")
+	fmt.Println(JAVAHOME)
+}
+
 type WebPServerConfig struct {
 	HOST         string
 	PORT         string
