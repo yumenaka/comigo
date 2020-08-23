@@ -89,25 +89,34 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	if common.Config.ConfigPath != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(common.Config.ConfigPath)
-	} else {
-		// Find home directory.
-		home, err := homedir.Dir()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		// Search config in home directory with name ".config/comigo" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigName(".config/comigo")
+	// Find home directory.
+	home, err := homedir.Dir()
+	//if common.Config.ConfigPath != "" {
+	//	// Use config file from the flag.
+	//	viper.AddConfigPath(home)
+	//	viper.SetConfigFile(common.Config.ConfigPath)
+	//} else {
+	//	if err != nil {
+	//		fmt.Println(err)
+	//		os.Exit(1)
+	//	}
+	//	// Search config in home directory with name ".config/comigo" (without extension).
+	//	viper.AddConfigPath(home)
+	//	viper.SetConfigName(".config/comigo")
+	//}
+
+	viper.AddConfigPath(home)
+	viper.SetConfigFile(common.Config.ConfigPath)
+	err=viper.SafeWriteConfig()
+	if err!=nil{
+		fmt.Println("保存配置:",common.Config.ConfigPath)
 	}
 	//读取符合的环境变量
 	viper.AutomaticEnv() // read in environment variables that match
-
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
+	}else {
+		fmt.Println("No config file:",common.Config.ConfigPath)
 	}
 }
