@@ -30,6 +30,12 @@ func PrintAllReaderURL() {
 }
 
 func printURLAndQRCode(port int) {
+	if Config.ServerHost !=""{
+		readURL := "http://" + Config.ServerHost + ":" + strconv.Itoa(port)
+		fmt.Println("阅读链接可能是：" + readURL)
+		PrintQRCode(readURL)
+		return
+	}
 	//打印所有可用网卡IP
 	if Config.PrintAllIP {
 		IPList, err := GetIPList()
@@ -48,6 +54,7 @@ func printURLAndQRCode(port int) {
 		fmt.Println("阅读链接可能是：" + readURL)
 		PrintQRCode(readURL)
 	}
+
 }
 
 func PrintQRCode(text string) {

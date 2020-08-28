@@ -140,7 +140,11 @@ func InitWebServer() {
 	//检测端口
 	if !common.CheckPort(common.Config.Port) {
 		r := rand.New(rand.NewSource(time.Now().UnixNano()))
-		common.Config.Port = 10000 + r.Intn(10000)
+		if common.Config.Port+2000<65535{
+			common.Config.Port = common.Config.Port + r.Intn(2000)
+		}else{
+			common.Config.Port = 50000 + r.Intn(10000)
+		}
 		fmt.Println("端口被占用，尝试随机端口:" + strconv.Itoa(common.Config.Port))
 	}
 	//webp反向代理
