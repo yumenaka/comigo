@@ -72,9 +72,10 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&common.Config.UseWebpServer, "webp", "w", false, "webp传输，需要webp-server")
 	rootCmd.PersistentFlags().StringVar(&common.Config.WebpCommand, "webp-command", "webp-server", "webp-server命令,或webp-server可执行文件路径，默认为“webp-server")
 	rootCmd.PersistentFlags().StringVarP(&common.Config.WebpConfig.QUALITY, "webp-quality","q",  "60", "webp压缩质量（默认60）")
-	rootCmd.PersistentFlags().BoolVarP(&common.Config.UseGO, "usego", "g", false, "启用并发，减少解压时间")
+	rootCmd.PersistentFlags().BoolVarP(&common.Config.UseGO, "go", "g", false, "启用并发，减少解压时间")
 	rootCmd.PersistentFlags().BoolVarP(&common.Config.OpenBrowser, "broswer", "b", false, "同时打开浏览器，windows=true")
 	rootCmd.PersistentFlags().BoolVarP(&common.PrintVersion, "version", "v", false, "输出版本号")
+	rootCmd.PersistentFlags().StringVar(&common.Config.ServerHost, "host", "", "自定义域名")
 	rootCmd.PersistentFlags().BoolVar(&common.Config.LogToFile, "log", false, "记录log文件")
 	rootCmd.PersistentFlags().BoolVar(&common.Config.PrintAllIP, "print-allip", false, "打印所有可用网卡ip")
 	rootCmd.PersistentFlags().StringVarP(&common.Config.ZipFilenameEncoding, "zip-encoding", "e", "", "Zip non-utf8 Encoding(gbk、shiftjis、gb18030）")
@@ -84,30 +85,38 @@ func init() {
 	if runtime.GOOS == "windows" {
 		common.Config.OpenBrowser = true
 	}
-
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	if common.Config.ConfigPath != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(common.Config.ConfigPath)
-	} else {
-		// Find home directory.
-		home, err := homedir.Dir()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		// Search config in home directory with name ".config/comigo" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigName(".config/comigo")
+	// Find home directory.
+	home, err := homedir.Dir()
+	//if common.Config.ConfigPath != "" {
+	//	// Use config file from the flag.
+	//	viper.AddConfigPath(home)
+	//	viper.SetConfigFile(common.Config.ConfigPath)
+	//} else {
+	//	if err != nil {
+	//		fmt.Println(err)
+	//		os.Exit(1)
+	//	}
+	//	// Search config in home directory with name ".config/comigo" (without extension).
+	//	viper.AddConfigPath(home)
+	//	viper.SetConfigName(".config/comigo")
+	//}
+
+	viper.AddConfigPath(home)
+	viper.SetConfigFile(common.Config.ConfigPath)
+	err=viper.SafeWriteConfig()
+	if err!=nil{
+		fmt.Println("保存配置:",common.Config.ConfigPath)
 	}
 	//读取符合的环境变量
 	viper.AutomaticEnv() // read in environment variables that match
-
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
+	}else {
+		fmt.Println("No config file:",common.Config.ConfigPath)
 	}
 }
