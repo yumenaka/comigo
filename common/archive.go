@@ -4,6 +4,9 @@ import (
 	"archive/tar"
 	"archive/zip"
 	"fmt"
+	archiver "github.com/mholt/archiver/v3"
+	"github.com/nwaples/rardecode"
+	uuid "github.com/satori/go.uuid"
 	"io/ioutil"
 	"net/url"
 	"os"
@@ -11,11 +14,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
-	"sync"
-
-	archiver "github.com/mholt/archiver/v3"
-	"github.com/nwaples/rardecode"
-	uuid "github.com/satori/go.uuid"
 )
 
 var (
@@ -108,7 +106,7 @@ func ExtractArchive(b *Book) (err error) {
 	}
 	extraFolder := path.Join(TempDir, b.UUID)
 	extractNum := 0
-	var wg sync.WaitGroup
+	//var wg sync.WaitGroup
 	err = archiver.Walk(b.FilePath, func(f archiver.File) error {
 		//解压用
 		inArchiveName := f.Name()
@@ -177,28 +175,28 @@ func ExtractArchive(b *Book) (err error) {
 		b.PageInfo = append(b.PageInfo, temp)
 		//转义，避免特殊路径造成文件不能读取
 		b.PageInfo[len(b.PageInfo)-1].UrlPath = url.PathEscape(b.PageInfo[len(b.PageInfo)-1].UrlPath)
-		////解压文件
-		//err := e.Extract(b.FilePath, inArchiveName, TempDir+"/"+b.UUID) //解压到临时文件夹
-		//if err != nil {
-		//	fmt.Println(err)
-		//}
-		//go 并发解压
-		if extractNum < 40 {
-			extractAndCheck(b, e, inArchiveName) //解压到临时文件夹
-		} else {
-			if !Config.UseGO {
-				extractAndCheck(b, e, inArchiveName) //解压到临时文件夹
-			} else {
-				wg.Add(1)
-				go func(b *Book, e archiver.Extractor, inArchiveName string) {
-					defer wg.Done()
-					extractAndCheck(b, e, inArchiveName) //解压到临时文件夹
-				}(b, e, inArchiveName)
-			}
+		//解压文件
+		err := e.Extract(b.FilePath, inArchiveName, TempDir+"/"+b.UUID) //解压到临时文件夹
+		if err != nil {
+			fmt.Println(err)
 		}
+		//go 并发解压
+		//if extractNum < 40 {
+		//	extractAndCheck(b, e, inArchiveName) //解压到临时文件夹
+		//} else {
+		//	if !Config.UseGO {
+		//		extractAndCheck(b, e, inArchiveName) //解压到临时文件夹
+		//	} else {
+		//		wg.Add(1)
+		//		go func(b *Book, e archiver.Extractor, inArchiveName string) {
+		//			defer wg.Done()
+		//			extractAndCheck(b, e, inArchiveName) //解压到临时文件夹
+		//		}(b, e, inArchiveName)
+		//	}
+		//}
 		return err
 	})
-	wg.Wait()
+	//wg.Wait()
 	return err
 }
 
