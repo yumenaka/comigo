@@ -12,6 +12,7 @@ import (
 	"os"
 	"path"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -48,14 +49,20 @@ func StartComicServer(args []string) {
 	default:
 		setFirstBook(args)
 	}
+	var wg sync.WaitGroup
 	//解压图片，分析分辨率
 	if common.Config.UseGO {
-		go common.InitReadingBook()
+		wg.Add(1)
+		go func () {
+			common.InitReadingBook()
+			defer wg.Done()
+		}()
+		wg.Wait()
 	} else {
 		err := common.InitReadingBook()
 		if err != nil {
-			fmt.Println("无法初始化书籍，程序退出。", err, common.ReadingBook)
-			os.Exit(0)
+			fmt.Println("无法初始化书籍。", err, common.ReadingBook)
+			//os.Exit(0)
 		}
 	}
 	InitWebServer()
@@ -140,8 +147,8 @@ func InitWebServer() {
 	//检测端口
 	if !common.CheckPort(common.Config.Port) {
 		r := rand.New(rand.NewSource(time.Now().UnixNano()))
-		if common.Config.Port+2000<65535{
-			common.Config.Port = common.Config.Port + r.Intn(2000)
+		if common.Config.Port+2000>65535{
+			common.Config.Port = common.Config.Port + r.Intn(1024)
 		}else{
 			common.Config.Port = 50000 + r.Intn(10000)
 		}

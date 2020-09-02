@@ -72,7 +72,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&common.Config.UseWebpServer, "webp", "w", false, "webp传输，需要webp-server")
 	rootCmd.PersistentFlags().StringVar(&common.Config.WebpCommand, "webp-command", "webp-server", "webp-server命令,或webp-server可执行文件路径，默认为“webp-server")
 	rootCmd.PersistentFlags().StringVarP(&common.Config.WebpConfig.QUALITY, "webp-quality","q",  "60", "webp压缩质量（默认60）")
-	rootCmd.PersistentFlags().BoolVarP(&common.Config.UseGO, "go", "g", false, "启用并发，减少解压时间")
+	rootCmd.PersistentFlags().BoolVar(&common.Config.UseGO, "go",  true, "启用并发，减少分析图片时间")
 	rootCmd.PersistentFlags().BoolVarP(&common.Config.OpenBrowser, "broswer", "b", false, "同时打开浏览器，windows=true")
 	rootCmd.PersistentFlags().BoolVarP(&common.PrintVersion, "version", "v", false, "输出版本号")
 	rootCmd.PersistentFlags().StringVar(&common.Config.ServerHost, "host", "", "自定义域名")

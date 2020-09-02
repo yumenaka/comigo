@@ -40,7 +40,7 @@ var Config = ServerConfig{
 	OpenBrowser:         true,
 	OnlyLocal:           false,
 	Port:                1234,
-	UseGO:               false,
+	UseGO:               true,
 	LogToFile:           false,
 	MaxDepth:            2,
 	MinImageNum:         3,
