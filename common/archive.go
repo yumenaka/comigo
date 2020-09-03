@@ -180,35 +180,11 @@ func ExtractArchive(b *Book) (err error) {
 		if err != nil {
 			fmt.Println(err)
 		}
-		//go 并发解压
-		//if extractNum < 40 {
-		//	extractAndCheck(b, e, inArchiveName) //解压到临时文件夹
-		//} else {
-		//	if !Config.UseGO {
-		//		extractAndCheck(b, e, inArchiveName) //解压到临时文件夹
-		//	} else {
-		//		wg.Add(1)
-		//		go func(b *Book, e archiver.Extractor, inArchiveName string) {
-		//			defer wg.Done()
-		//			extractAndCheck(b, e, inArchiveName) //解压到临时文件夹
-		//		}(b, e, inArchiveName)
-		//	}
-		//}
+		//因为有最大打开文件限制，暂不并发解压
 		return err
 	})
 	//wg.Wait()
 	return err
-}
-
-func extractAndCheck(b *Book, e archiver.Extractor, inArchiveName string) {
-	err := e.Extract(b.FilePath, inArchiveName, TempDir+"/"+b.UUID) //解压到临时文件夹
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		if !Config.UseGO {
-			SetImageType(&b.PageInfo[len(b.PageInfo)-1])
-		}
-	}
 }
 
 func getFormat(subcommand string) (interface{}, error) {
