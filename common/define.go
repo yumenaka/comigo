@@ -23,7 +23,7 @@ type ServerConfig struct {
 	PrintAllIP          bool
 	Port                int
 	ConfigPath          string
-	UseGO               bool
+	CheckImageInServer  bool
 	LogToFile           bool
 	UseWebpServer       bool
 	LogFilePath         string
@@ -40,7 +40,7 @@ var Config = ServerConfig{
 	OpenBrowser:         true,
 	OnlyLocal:           false,
 	Port:                1234,
-	UseGO:               true,
+	CheckImageInServer:  false,
 	LogToFile:           false,
 	MaxDepth:            2,
 	MinImageNum:         3,

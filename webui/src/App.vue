@@ -1,28 +1,24 @@
 <template>
   <div id="app" class="manga_div">
-    <h2><a :href= "'raw/' + book.name" >{{ book.name }}</a></h2>
+    <h2>
+      <a v-bind:href="'raw/' + book.name">{{ book.name }}</a>
+    </h2>
     <h4>总页数：{{ book.page_num }}</h4>
     <!-- <v-alert type="success" fixed>I'm a success alert.</v-alert> -->
-  <!-- <div>bookshelf:{{bookshelf}}</div> -->
+    <!-- <div>bookshelf:{{bookshelf}}</div> -->
     <div v-for="b in bookshelf" :key="b.uuid" class="bookshelf">
-      <v-btn
-        @click="onChangeBook(b.uuid)"
-        class="book_button"
-      >{{ b.name}} ({{b.page_num}})</v-btn>
+      <v-btn @click="onChangeBook(b.uuid)" class="book_button">{{ b.name }} ({{ b.page_num }})</v-btn>
     </div>
     <div v-for="page in book.pages" :key="page.num" class="manga">
-      <img v-lazy="page.url" v-bind:H="page.height" v-bind:W="page.width" v-bind:class="page.class" />
+      <img
+        v-lazy="page.url"
+        v-bind:H="page.height"
+        v-bind:W="page.width"
+        v-bind:class="page.class | capitalize(page.url)"
+      />
     </div>
     <p></p>
-    <v-btn
-      v-scroll="onScroll"
-      v-show="btnFlag"
-      fab
-      color="#bbcbff"
-      bottom
-      right
-      @click="toTop"
-    >▲</v-btn>
+    <v-btn v-scroll="onScroll" v-show="btnFlag" fab color="#bbcbff" bottom right @click="toTop">▲</v-btn>
   </div>
 </template>
 
@@ -49,9 +45,44 @@ export default {
         server_status: "",
         now_book_uuid: "",
         read_percent: 0.0,
-        msg: ""
-      }
+        msg: "",
+      },
     };
+  },
+  filters: {
+    capitalize: function (value, image_url) {
+      //if (!value) return "Vertical";
+      value = value.toString();
+      //如果已经预先算好了
+      if (value=="Vertical"||value=="Horizontal")
+      {
+        return value
+      }
+      function getUrlInfo(url) {
+        let image = new Image();
+        image.src = url;
+        // 如果有缓存，读缓存
+        if (image.complete) {
+          if (image.width < image.height) {
+            value = "Vertical";
+          } else {
+            value = "Horizontal";
+          }
+        } else {
+          //否则加载图片
+          image.onload = function () {
+            image.onload = null; // 避免重复加载
+            if (image.width < image.height) {
+              value = "Vertical";
+            } else {
+              value = "Horizontal";
+            }
+          };
+        }
+      }
+      getUrlInfo(image_url);
+      return value;
+    },
   },
   mounted() {
     this.getBook();
@@ -67,10 +98,10 @@ export default {
   },
   methods: {
     getBook() {
-      axios.get("/book.json").then(response => (this.book = response.data));
+      axios.get("/book.json").then((response) => (this.book = response.data));
       axios
         .get("/bookshelf.json")
-        .then(response => (this.bookshelf = response.data))
+        .then((response) => (this.bookshelf = response.data))
         .finally();
     },
     getBookShelf() {
@@ -145,7 +176,7 @@ export default {
       this.hint = "接收消息";
       this.setButtonColor("blue", e);
     },
-    onChangeBook: function(e,uuid) {
+    onChangeBook: function (e, uuid) {
       // 当前元素
       this.message.now_book_uuid = uuid;
       this.message.msg = "ChangeBook";
@@ -179,8 +210,8 @@ export default {
     setButtonColor(color) {
       var hintButton = document.getElementsByClassName("hint")[0];
       hintButton.style.background = color;
-    }
-  }
+    },
+  },
 };
 </script>
 
