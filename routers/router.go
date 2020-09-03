@@ -51,7 +51,7 @@ func StartComicServer(args []string) {
 	}
 	var wg sync.WaitGroup
 	//解压图片，分析分辨率
-	if common.Config.UseGO {
+	if common.Config.CheckImageInServer {
 		wg.Add(1)
 		go func () {
 			common.InitReadingBook()
