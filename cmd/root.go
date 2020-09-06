@@ -38,7 +38,7 @@ comi -w -q 50 book.zip
 指定多个参数：
 comi -lw -webp-command=C:\Users\test\Desktop\webp-server-windows-amd64.exe -p 3344 -q 45  test.zip
 `,
-	Version: "v0.2.2",
+	Version: "v0.2.3",
 	Long: `comigo 一款简单的漫画阅读器
 `,
 	Run: func(cmd *cobra.Command, args []string) {
