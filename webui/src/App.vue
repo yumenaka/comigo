@@ -1,22 +1,26 @@
 <template>
-  <div id="app" class="manga_div">
-    <h2>
-      <a v-bind:href="'raw/' + book.name">{{ book.name }}</a>
-    </h2>
-    <h4>总页数：{{ book.page_num }}</h4>
-    <!-- <v-alert type="success" fixed>I'm a success alert.</v-alert> -->
-    <!-- <div>bookshelf:{{bookshelf}}</div> -->
-    <div v-for="b in bookshelf" :key="b.uuid" class="bookshelf">
-      <v-btn @click="onChangeBook(b.uuid)" class="book_button">{{ b.name }} ({{ b.page_num }})</v-btn>
-    </div>
-    <div v-for="page in book.pages" :key="page.num" class="manga">
+  <div id="app" class="app_div">
+    <Header v-if="defaultSetiing.page_mode === 'multi_page_mode'">
+      <h2>
+        <a v-bind:href="'raw/' + book.name">{{ book.name }}</a>
+      </h2>
+      <h4>总页数：{{ book.page_num }}</h4>
+    </Header>
+<MultiView>
+    <div  v-for="(page, key) in book.pages" :key="page.url" class="manga">
       <img
         v-lazy="page.url"
         v-bind:H="page.height"
         v-bind:W="page.width"
-        v-bind:class="page.class | capitalize(page.url)"
+        v-bind:key="k"
+        v-bind:class="page.class | check_image(page.url)"
       />
+      <p>{{key+1}}/{{book.page_num}}</p>
     </div>
+</MultiView>
+<v-pagination v-if="defaultSetiing.page_mode === 'single_page_mode'" v-model="book" :length="book.page_num">
+</v-pagination>
+
     <p></p>
     <v-btn v-scroll="onScroll" v-show="btnFlag" fab color="#bbcbff" bottom right @click="toTop">▲</v-btn>
   </div>
@@ -25,17 +29,23 @@
 <script>
 //代码参考：https://github.com/bradtraversy/vue_crash_todolist
 import axios from "axios";
-// import * as easings from 'vuetify/es5/services/goto/easing-patterns';
+import Header from "./components/Header.vue";
+import MultiView from "./views/MultiPage.vue";
+
 export default {
   name: "app",
   components: {
     //WebSocketTest
-    // Header
+    Header,
+    MultiView,
   },
   data() {
     return {
       book: null,
       bookshelf: null,
+      defaultSetiing: {
+        page_mode:"multi_page_mode",//single_page_mode,multi_page_mode,select_mode
+      },
       btnFlag: false,
       duration: 300,
       offset: 0,
@@ -49,45 +59,11 @@ export default {
       },
     };
   },
-  filters: {
-    capitalize: function (value, image_url) {
-      //if (!value) return "Vertical";
-      value = value.toString();
-      //如果已经预先算好了
-      if (value=="Vertical"||value=="Horizontal")
-      {
-        return value
-      }
-      function getUrlInfo(url) {
-        let image = new Image();
-        image.src = url;
-        // 如果有缓存，读缓存
-        if (image.complete) {
-          if (image.width < image.height) {
-            value = "Vertical";
-          } else {
-            value = "Horizontal";
-          }
-        } else {
-          //否则加载图片
-          image.onload = function () {
-            image.onload = null; // 避免重复加载
-            if (image.width < image.height) {
-              value = "Vertical";
-            } else {
-              value = "Horizontal";
-            }
-          };
-        }
-      }
-      getUrlInfo(image_url);
-      return value;
-    },
-  },
+
   mounted() {
+    this.initPage();
     this.getBook();
     this.getBookShelf();
-    this.reFreshBook();
     this.hintMessage();
     this.initWebSocket();
     // window.addEventListener("scroll", this.scrollToTop);
@@ -97,6 +73,10 @@ export default {
     // window.removeEventListener("scroll", this.scrollToTop); //销毁时解除绑定
   },
   methods: {
+    initPage() {
+      //Header.book=this.book;
+      this.$cookies.keys();
+    },
     getBook() {
       axios.get("/book.json").then((response) => (this.book = response.data));
       axios
@@ -104,6 +84,7 @@ export default {
         .then((response) => (this.bookshelf = response.data))
         .finally();
     },
+
     getBookShelf() {
       // axios
       //   .get("/bookshelf.json")
@@ -111,21 +92,7 @@ export default {
       //axios.get("/bookshelf.json").then(response => (this.bookshelf = response.data));
       // .finally(console.log(this.bookshelf));
     },
-    reFreshBook() {
-      // var root = this;
-      // setTimeout(function() {
-      //   if (root.book.extract_complete == true) {
-      //     console.log("解压完成");
-      //     //刷新当前文档
-      //     location.reload();
-      //     return;
-      //   }else {
-      //     console.log(root.book);
-      //   }
-      //   //定时执行，1秒后执行
-      //   root.getBook();
-      // }, 500);
-    },
+
     //缩放提示
     hintMessage() {
       // this.$toast({
@@ -212,6 +179,42 @@ export default {
       hintButton.style.background = color;
     },
   },
+  // 判断图片横宽比
+  filters: {
+    check_image: function (value, image_url) {
+      //if (!value) return "Vertical";
+      value = value.toString();
+      //如果已经预先算好了
+      if (value == "Vertical" || value == "Horizontal" || image_url == "") {
+        return value;
+      }
+      //value=this.$options.methods.getImageInfo(image_url);
+      function getImageInfo(url) {
+        let image = new Image();
+        image.src = url;
+        // 如果有缓存，读缓存
+        if (image.complete) {
+          if (image.width < image.height) {
+            return "Vertical";
+          } else {
+            return "Horizontal";
+          }
+        } else {
+          //否则加载图片
+          image.onload = function () {
+            image.onload = null; // 避免重复加载
+            if (image.width < image.height) {
+              return "Vertical";
+            } else {
+              return "Horizontal";
+            }
+          };
+        }
+      }
+      value = getImageInfo(image_url);
+      return value;
+    },
+  },
 };
 </script>
 
@@ -221,12 +224,12 @@ export default {
   background-color: #f6f7eb;
 }
 
-.manga_div {
+.app_div {
   margin: auto;
   align-items: center;
 }
 
-.manga img {
+.manga img{
   margin: auto;
   max-width: inherit;
   padding-top: 3px;
@@ -242,7 +245,7 @@ export default {
     width: 800px;
   }
   .Horizontal {
-    width: 100%;
+    width: 95%;
   }
 }
 /* 竖CSS样式，IE无效 */
@@ -251,7 +254,7 @@ export default {
     width: 100%;
   }
   .Horizontal {
-    width: 100%;
+    width: 90%;
   }
 }
 </style>
