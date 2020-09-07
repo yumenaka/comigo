@@ -1,44 +1,42 @@
 <template>
   <header class="header">
-    <mt-range
-            v-model="rangeValue"
-            :min="0"
-            :max="2400"
-            :step="20"
-            :bar-height="5"
-            @change="changeEvent()"
-            >
-      <div slot="start">手动调整图片宽度（{{rangeValue}}）： </div>
-      <div slot="end">2400</div>
-    </mt-range>
+    <slot></slot>
+    <!-- <div slot="start">手动调整图片宽度（{{rangeValue}}）： </div>
+    <div slot="end">2400</div>-->
+
+    <!-- <div v-for="b in bookshelf" :key="b.uuid" class="bookshelf">
+      <v-btn @click="onChangeBook(b.uuid)" class="book_button">{{ b.name }} ({{ b.page_num }})</v-btn>
+    </div>-->
   </header>
 </template>
 
 <script>
 export default {
   name: "Header",
+
   data() {
-      return {
-          rangeValue:500,
-      };
+    return {
+      mybook:this.book,
+      rangeValue: 500,
+    };
   },
-  methods:{
-      changeEvent(){
-          console.log("change to:"+this.rangeValue);
-      }
-  }
+
+  methods: {
+    changeEvent() {
+      console.log("change to:" + this.rangeValue);
+    },
+  },
 };
 </script>
 
 <style scoped>
 .header {
-  background: #333;
+  background: rgb(221, 187, 35);
   color: #fff;
   text-align: center;
   padding: 10px;
 }
 .header a {
-  color: #fff;
   padding-right: 5px;
   text-decoration: none;
 }
