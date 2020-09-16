@@ -239,8 +239,21 @@ export default {
   border-radius: 7px;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
-/* 显示区域为横时的CSS样式，IE无效 */
-@media screen and (min-aspect-ratio: 19/16) {
+
+
+/* 竖屏(显示区域)CSS样式，IE无效 */
+@media screen and (max-aspect-ratio: 19/19) {
+  .Vertical {
+    width: 100%;
+  }
+  .Horizontal {
+    width: 100%;
+  }
+}
+
+
+/* 横屏（显示区域）时的CSS样式，IE无效 */ 
+@media screen and (min-aspect-ratio: 19/19) {
   .Vertical {
     width: 800px;
   }
@@ -248,13 +261,43 @@ export default {
     width: 95%;
   }
 }
-/* 竖CSS样式，IE无效 */
-@media screen and (max-aspect-ratio: 19/16) {
+
+
+/* 高分横屏（显示区域）时的CSS样式，IE无效 */ 
+/* min-width 输出设备中页面最小可视区域宽度 大于这个width时，其中的css起作用 超宽屏 */
+@media screen and (min-aspect-ratio: 19/19) and (min-width: 1922px) {
   .Vertical {
-    width: 100%;
+    width: 800px;
   }
   .Horizontal {
-    width: 90%;
+    width: 1900px;
   }
 }
+
+
+/* max-width 输出设备中页面最大可视区域宽度 小于这个width时，其中的css起作用 1920x1080屏 */
+/* 
+@media screen and (min-aspect-ratio: 19/16) and (max-width: 1921px) {
+  .Vertical {
+    width: 800px;
+  }
+  .Horizontal {
+    width: 1700px;
+  }
+}
+ */
+
+ 
+/* max-width 输出设备中页面最大可视区域宽度 小于这个width时，其中的css起作用 1366x768屏 */
+/*
+@media screen and (min-aspect-ratio: 19/16) and (max-width: 1367px) {
+  .Vertical {
+    width: 800px;
+  }
+  .Horizontal {
+    width: 1200px;
+  }
+}
+ */
+
 </style>
