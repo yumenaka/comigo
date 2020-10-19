@@ -1,13 +1,14 @@
 package cmd
 
 import (
-	"github.com/yumenaka/comi/common"
-	"github.com/yumenaka/comi/routers"
 	"fmt"
 	"os"
 	"runtime"
 
-	homedir "github.com/mitchellh/go-homedir"
+	"github.com/mitchellh/go-homedir"
+	"github.com/yumenaka/comi/common"
+	"github.com/yumenaka/comi/routers"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -59,6 +60,7 @@ func Execute() {
 func init() {
 	cobra.MousetrapHelpText = ""       //屏蔽鼠标提示，支持拖拽、双击运行
 	cobra.MousetrapDisplayDuration = 5 //"这是命令行程序"的提醒表示时间
+	//根据配置或系统变量，初始化各种参数
 	cobra.OnInitialize(initConfig)
 	//还没做配置文件，暂时屏蔽
 	//rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.comicview.yaml)")
@@ -66,13 +68,13 @@ func init() {
 	//rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	// persistent，任何命令下均可使用，适合全局flag
 	rootCmd.PersistentFlags().IntVarP(&common.Config.Port, "port", "p", 1234, "服务端口")
-	rootCmd.PersistentFlags().StringVarP(&common.Config.ConfigPath, "config", "c", "", "配置文件")
+	rootCmd.PersistentFlags().StringVarP(&common.Config.ConfigPath, "config", "c", ".", "配置文件")
 	rootCmd.PersistentFlags().IntVarP(&common.Config.MaxDepth, "max-depth", "m", 2, "最大搜索深度")
 	rootCmd.PersistentFlags().BoolVarP(&common.Config.OnlyLocal, "local-only", "l", false, "禁用LAN分享")
 	rootCmd.PersistentFlags().BoolVarP(&common.Config.UseWebpServer, "webp", "w", false, "webp传输，需要webp-server")
 	rootCmd.PersistentFlags().StringVar(&common.Config.WebpCommand, "webp-command", "webp-server", "webp-server命令,或webp-server可执行文件路径，默认为“webp-server")
-	rootCmd.PersistentFlags().StringVarP(&common.Config.WebpConfig.QUALITY, "webp-quality","q",  "60", "webp压缩质量（默认60）")
-	rootCmd.PersistentFlags().BoolVar(&common.Config.CheckImageInServer, "checkimage",  false, "在服务器端分析图片分辨率")
+	rootCmd.PersistentFlags().StringVarP(&common.Config.WebpConfig.QUALITY, "webp-quality", "q", "60", "webp压缩质量（默认60）")
+	rootCmd.PersistentFlags().BoolVar(&common.Config.CheckImageInServer, "checkimage", true, "在服务器端分析图片分辨率")
 	rootCmd.PersistentFlags().BoolVarP(&common.Config.OpenBrowser, "broswer", "b", false, "同时打开浏览器，windows=true")
 	rootCmd.PersistentFlags().BoolVarP(&common.PrintVersion, "version", "v", false, "输出版本号")
 	rootCmd.PersistentFlags().StringVar(&common.Config.ServerHost, "host", "", "自定义域名")
@@ -88,35 +90,57 @@ func init() {
 }
 
 // initConfig reads in config file and ENV variables if set.
+//参考：https://www.loginradius.com/engineering/blog/environment-variables-in-golang/
 func initConfig() {
-	// Find home directory.
-	home, err := homedir.Dir()
-	//if common.Config.ConfigPath != "" {
-	//	// Use config file from the flag.
-	//	viper.AddConfigPath(home)
-	//	viper.SetConfigFile(common.Config.ConfigPath)
-	//} else {
-	//	if err != nil {
-	//		fmt.Println(err)
-	//		os.Exit(1)
-	//	}
-	//	// Search config in home directory with name ".config/comigo" (without extension).
-	//	viper.AddConfigPath(home)
-	//	viper.SetConfigName(".config/comigo")
-	//}
 
-	viper.AddConfigPath(home)
-	viper.SetConfigFile(common.Config.ConfigPath)
-	err=viper.SafeWriteConfig()
-	if err!=nil{
-		fmt.Println("保存配置:",common.Config.ConfigPath)
+	// Set the path to look for the configurations file
+	if common.Config.ConfigPath != "" {
+		viper.AddConfigPath(common.Config.ConfigPath)
+
+	} else {
+		// Find home directory.
+		home, err := homedir.Dir()
+		if err != nil {
+			viper.AddConfigPath(".")
+			fmt.Println(err)
+		}else {
+			viper.AddConfigPath(home)
+		}
+	}
+
+	viper.SetConfigType("yaml")
+	// Set the file name of the configurations file
+	viper.SetConfigName(".config/comigo")
+
+	//viper.SetConfigFile(common.Config.ConfigPath+"\/config.yaml")
+	//如果不存在，就写入
+	err := viper.SafeWriteConfig()
+	if err != nil {
+		fmt.Println("保存配置:", common.Config.ConfigPath)
 	}
 	//读取符合的环境变量
 	viper.AutomaticEnv() // read in environment variables that match
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
-	}else {
-		fmt.Println("No config file:",common.Config.ConfigPath)
+	} else {
+		fmt.Println("No config file:", common.Config.ConfigPath)
 	}
+
+	//读取案例：
+	// Set undefined variables
+	viper.SetDefault("COMI.HOST", "0.0.0.0")
+
+	// getting env variables DB.PORT
+	// viper.Get() returns an empty interface{}
+	// so we have to do the type assertion, to get the value
+	DBPort, ok := viper.Get("COMI.PORT").(string)
+
+	// if type assert is not valid it will throw an error
+	if !ok {
+		//log.Fatalf("Invalid type assertion")
+		fmt.Println("Invalid type assertion")
+		//os.Exit(0)
+	}
+	fmt.Printf("viper : %s = %s \n", "Database Port", DBPort)
 }
