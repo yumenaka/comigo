@@ -5,12 +5,10 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/mitchellh/go-homedir"
 	"github.com/yumenaka/comi/common"
 	"github.com/yumenaka/comi/routers"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 //var cfgFile string
@@ -93,54 +91,54 @@ func init() {
 //参考：https://www.loginradius.com/engineering/blog/environment-variables-in-golang/
 func initConfig() {
 
-	// Set the path to look for the configurations file
-	if common.Config.ConfigPath != "" {
-		viper.AddConfigPath(common.Config.ConfigPath)
+	// // Set the path to look for the configurations file
+	// if common.Config.ConfigPath != "" {
+	// 	viper.AddConfigPath(common.Config.ConfigPath)
 
-	} else {
-		// Find home directory.
-		home, err := homedir.Dir()
-		if err != nil {
-			viper.AddConfigPath(".")
-			fmt.Println(err)
-		}else {
-			viper.AddConfigPath(home)
-		}
-	}
+	// } else {
+	// 	// Find home directory.
+	// 	home, err := homedir.Dir()
+	// 	if err != nil {
+	// 		viper.AddConfigPath(".")
+	// 		fmt.Println(err)
+	// 	}else {
+	// 		viper.AddConfigPath(home)
+	// 	}
+	// }
 
-	viper.SetConfigType("yaml")
-	// Set the file name of the configurations file
-	viper.SetConfigName(".config/comigo")
+	// viper.SetConfigType("yaml")
+	// // Set the file name of the configurations file
+	// viper.SetConfigName(".config/comigo")
 
-	//viper.SetConfigFile(common.Config.ConfigPath+"\/config.yaml")
-	//如果不存在，就写入
-	err := viper.SafeWriteConfig()
-	if err != nil {
-		fmt.Println("保存配置:", common.Config.ConfigPath)
-	}
-	//读取符合的环境变量
-	viper.AutomaticEnv() // read in environment variables that match
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
-	} else {
-		fmt.Println("No config file:", common.Config.ConfigPath)
-	}
+	// //viper.SetConfigFile(common.Config.ConfigPath+"\/config.yaml")
+	// //如果不存在，就写入
+	// err := viper.SafeWriteConfig()
+	// if err != nil {
+	// 	fmt.Println("保存配置:", common.Config.ConfigPath)
+	// }
+	// //读取符合的环境变量
+	// viper.AutomaticEnv() // read in environment variables that match
+	// // If a config file is found, read it in.
+	// if err := viper.ReadInConfig(); err == nil {
+	// 	fmt.Println("Using config file:", viper.ConfigFileUsed())
+	// } else {
+	// 	fmt.Println("No config file:", common.Config.ConfigPath)
+	// }
 
-	//读取案例：
-	// Set undefined variables
-	viper.SetDefault("COMI.HOST", "0.0.0.0")
+	// //读取案例：
+	// // Set undefined variables
+	// viper.SetDefault("COMI.HOST", "0.0.0.0")
 
-	// getting env variables DB.PORT
-	// viper.Get() returns an empty interface{}
-	// so we have to do the type assertion, to get the value
-	DBPort, ok := viper.Get("COMI.PORT").(string)
+	// // getting env variables DB.PORT
+	// // viper.Get() returns an empty interface{}
+	// // so we have to do the type assertion, to get the value
+	// DBPort, ok := viper.Get("COMI.PORT").(string)
 
-	// if type assert is not valid it will throw an error
-	if !ok {
-		//log.Fatalf("Invalid type assertion")
-		fmt.Println("Invalid type assertion")
-		//os.Exit(0)
-	}
-	fmt.Printf("viper : %s = %s \n", "Database Port", DBPort)
+	// // if type assert is not valid it will throw an error
+	// if !ok {
+	// 	//log.Fatalf("Invalid type assertion")
+	// 	fmt.Println("Invalid type assertion")
+	// 	//os.Exit(0)
+	// }
+	// fmt.Printf("viper : %s = %s \n", "Database Port", DBPort)
 }
