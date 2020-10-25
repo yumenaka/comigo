@@ -173,7 +173,7 @@ func InitWebServer() {
 		engine.Static("/cache", common.PictureDir)
 	}
 	if common.Config.UseFrpc{
-		if common.Config.FrpConfig.RemotePort<0 ||common.Config.FrpConfig.RemotePort>65535{
+		if common.Config.FrpConfig.RemotePort<=0 ||common.Config.FrpConfig.RemotePort>65535{
 			common.Config.FrpConfig.RemotePort=common.Config.Port
 		}
 		frpcError := common.StartFrpC(common.TempDir)
