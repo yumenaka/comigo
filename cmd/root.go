@@ -33,12 +33,10 @@ comi -l book.zip
 webp传输，需要webp-server配合：
 comi -w book.zip  
 
-comi -w -q 50 book.zip  
-
 指定多个参数：
 comi -w -q 50 --frpc  --token aX4457d3O -p 23455 --frps-addr sh.example.com test.zip
 `,
-	Version: "v0.2.3",
+	Version: "v0.2.4",
 	Long: `comigo 一款简单的漫画阅读器
 `,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -73,6 +71,23 @@ func init() {
 		rootCmd.PersistentFlags().IntVarP(&common.Config.Port, "port", "p", 1234, "服务端口")
 	}
 
+	//打开浏览器
+	if viper.GetBool("COMI_OPEN_BROWSER"){
+		rootCmd.PersistentFlags().BoolVarP(&common.Config.OpenBrowser, "browser", "b", viper.GetBool("COMI_OPEN_BROWSER"), "同时打开浏览器，windows=true")
+	}else{
+		rootCmd.PersistentFlags().BoolVarP(&common.Config.OpenBrowser, "browser", "b", false, "同时打开浏览器，windows=true")
+	}
+	if runtime.GOOS == "windows" {
+		common.Config.OpenBrowser = true
+	}
+
+	//不对局域网开放
+	if viper.GetBool("COMI_DISABLE_LAN"){
+		rootCmd.PersistentFlags().BoolVarP(&common.Config.DisableLAN, "disable-lan", "d", viper.GetBool("COMI_DISABLE_LAN"), "禁用LAN分享")
+	}else{
+		rootCmd.PersistentFlags().BoolVarP(&common.Config.DisableLAN, "disable-lan", "d", false, "禁用LAN分享")
+	}
+
 	//配置文件位置
 	if viper.GetString("COMI_CONFIG")!=""{
 		rootCmd.PersistentFlags().StringVarP(&common.Config.ConfigPath, "config", "c", viper.GetString(""), "配置文件")
@@ -87,12 +102,6 @@ func init() {
 		rootCmd.PersistentFlags().IntVarP(&common.Config.MaxDepth, "max-depth", "m", 1, "最大搜索深度")
 	}
 
-	//不对局域网开放
-	if viper.GetBool("COMI_DISABLE_LAN"){
-		rootCmd.PersistentFlags().BoolVarP(&common.Config.DisableLAN, "disable-lan", "d", viper.GetBool("COMI_DISABLE_LAN"), "禁用LAN分享")
-	}else{
-		rootCmd.PersistentFlags().BoolVarP(&common.Config.DisableLAN, "disable-lan", "d", false, "禁用LAN分享")
-	}
 	//服务器解析分辨率
 	if viper.GetBool("COMI_CHECK_IMAGE"){
 		rootCmd.PersistentFlags().BoolVar(&common.Config.CheckImageInServer, "checkimage", viper.GetBool("COMI_CHECK_IMAGE"), "在服务器端分析图片分辨率")
@@ -100,6 +109,7 @@ func init() {
 		rootCmd.PersistentFlags().BoolVar(&common.Config.CheckImageInServer, "checkimage", true, "在服务器端分析图片分辨率")
 	}
 
+	//本地Host名
 	if viper.GetString("COMI_LOCAL_HOST")!=""{
 		rootCmd.PersistentFlags().StringVar(&common.Config.ServerHost, "local_host", viper.GetString("COMI_LOCAL_HOST"), "自定义域名")
 	}else{
@@ -176,21 +186,12 @@ func init() {
 		rootCmd.PersistentFlags().IntVar(&common.Config.FrpConfig.RemotePort, "remote_port",  65536, "frpc remote_port，默认与本地相同")
 	}
 
-	//打开浏览器相关
-	if viper.GetBool("COMI_OPEN_BROWSER"){
-		rootCmd.PersistentFlags().BoolVarP(&common.Config.OpenBrowser, "browser", "b", viper.GetBool("COMI_OPEN_BROWSER"), "同时打开浏览器，windows=true")
-	}else{
-		rootCmd.PersistentFlags().BoolVarP(&common.Config.OpenBrowser, "browser", "b", false, "同时打开浏览器，windows=true")
-	}
-	if runtime.GOOS == "windows" {
-		common.Config.OpenBrowser = true
-	}
-
 	//尚未启用的功能，暂时无意义的设置
 	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFileName, "logname", "comigo", "log文件名")
 	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFilePath, "logpath", "~", "log文件位置")
 	//rootCmd.PersistentFlags().StringVarP(&common.Config.ZipFilenameEncoding, "zip-encoding", "e", "", "Zip non-utf8 Encoding(gbk、shiftjis、gb18030）")
 	//	rootCmd.PersistentFlags().BoolVarP(&common.PrintVersion, "version", "v", false, "输出版本号")
+
 	//还没做配置文件，暂时屏蔽
 	//rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.comicview.yaml)")
 	if viper.GetBool("COMI_LOG.TO.FILE"){

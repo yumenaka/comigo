@@ -60,7 +60,7 @@ var Config = ServerConfig{
 		FrpcCommand: "frpc",
 		ServerAddr:  "localhost", //server_addr
 		ServerPort:  7000,      //server_port
-		Token:       "&&%%$#@!2356",
+		Token:       "&&%%!2356",
 		FrpType:     "tcp",
 		RemotePort:  -1, //remote_port
 		//AdminAddr:   "127.0.0.1",

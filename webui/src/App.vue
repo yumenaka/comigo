@@ -258,7 +258,7 @@ export default {
     width: 800px;
   }
   .Horizontal {
-    width: 95%;
+    width: 90%;
   }
 }
 
