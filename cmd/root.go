@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/spf13/viper"
 	"os"
 	"runtime"
 
@@ -35,7 +36,7 @@ comi -w book.zip
 comi -w -q 50 book.zip  
 
 指定多个参数：
-comi -lw -webp-command=C:\Users\test\Desktop\webp-server-windows-amd64.exe -p 3344 -q 45  test.zip
+comi -w -q 50 --frpc  --token aX4457d3O -p 23455 --frps-addr sh.example.com test.zip
 `,
 	Version: "v0.2.3",
 	Long: `comigo 一款简单的漫画阅读器
@@ -60,30 +61,142 @@ func init() {
 	cobra.MousetrapDisplayDuration = 5 //"这是命令行程序"的提醒表示时间
 	//根据配置或系统变量，初始化各种参数
 	cobra.OnInitialize(initConfig)
-	//还没做配置文件，暂时屏蔽
-	//rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.comicview.yaml)")
+	viper.AutomaticEnv()
 	// 局部标签(local flag)，只在直接调用它时运行
 	//rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	// persistent，任何命令下均可使用，适合全局flag
-	rootCmd.PersistentFlags().IntVarP(&common.Config.Port, "port", "p", 1234, "服务端口")
-	rootCmd.PersistentFlags().StringVarP(&common.Config.ConfigPath, "config", "c", ".", "配置文件")
-	rootCmd.PersistentFlags().IntVarP(&common.Config.MaxDepth, "max-depth", "m", 2, "最大搜索深度")
-	rootCmd.PersistentFlags().BoolVarP(&common.Config.OnlyLocal, "local-only", "l", false, "禁用LAN分享")
-	rootCmd.PersistentFlags().BoolVarP(&common.Config.UseWebpServer, "webp", "w", false, "webp传输，需要webp-server")
-	rootCmd.PersistentFlags().StringVar(&common.Config.WebpCommand, "webp-command", "webp-server", "webp-server命令,或webp-server可执行文件路径，默认为“webp-server")
-	rootCmd.PersistentFlags().StringVarP(&common.Config.WebpConfig.QUALITY, "webp-quality", "q", "60", "webp压缩质量（默认60）")
-	rootCmd.PersistentFlags().BoolVar(&common.Config.CheckImageInServer, "checkimage", true, "在服务器端分析图片分辨率")
-	rootCmd.PersistentFlags().BoolVarP(&common.Config.OpenBrowser, "broswer", "b", false, "同时打开浏览器，windows=true")
-	rootCmd.PersistentFlags().BoolVarP(&common.PrintVersion, "version", "v", false, "输出版本号")
-	rootCmd.PersistentFlags().StringVar(&common.Config.ServerHost, "host", "", "自定义域名")
-	rootCmd.PersistentFlags().BoolVar(&common.Config.LogToFile, "log", false, "记录log文件")
-	rootCmd.PersistentFlags().BoolVar(&common.Config.PrintAllIP, "print-allip", false, "打印所有可用网卡ip")
-	rootCmd.PersistentFlags().StringVarP(&common.Config.ZipFilenameEncoding, "zip-encoding", "e", "", "Zip non-utf8 Encoding(gbk、shiftjis、gb18030）")
-	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFileName, "logname", "comigo", "log文件名")
-	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFilePath, "logpath", "~", "log文件位置")
-	rootCmd.PersistentFlags().IntVarP(&common.Config.MinImageNum, "imagenum", "i", 3, "至少有几张图片，才认定为漫画压缩包")
+
+	//服务端口
+	if viper.GetInt("COMI_PORT")!=0{
+		rootCmd.PersistentFlags().IntVarP(&common.Config.Port, "port", "p", viper.GetInt("COMI_PORT"), "服务端口")
+	}else{
+		rootCmd.PersistentFlags().IntVarP(&common.Config.Port, "port", "p", 1234, "服务端口")
+	}
+
+	//配置文件位置
+	if viper.GetString("COMI_CONFIG")!=""{
+		rootCmd.PersistentFlags().StringVarP(&common.Config.ConfigPath, "config", "c", viper.GetString(""), "配置文件")
+	}else{
+		rootCmd.PersistentFlags().StringVarP(&common.Config.ConfigPath, "config", "c", ".", "配置文件")
+	}
+
+	//文件搜索深度
+	if viper.GetInt("COMI_MAX_DEPTH")!=0{
+		rootCmd.PersistentFlags().IntVarP(&common.Config.MaxDepth, "max-depth", "m", viper.GetInt("COMI_MAX_DEPTH"), "最大搜索深度")
+	}else{
+		rootCmd.PersistentFlags().IntVarP(&common.Config.MaxDepth, "max-depth", "m", 1, "最大搜索深度")
+	}
+
+	//不对局域网开放
+	if viper.GetBool("COMI_DISABLE_LAN"){
+		rootCmd.PersistentFlags().BoolVarP(&common.Config.DisableLAN, "disable-lan", "d", viper.GetBool("COMI_DISABLE_LAN"), "禁用LAN分享")
+	}else{
+		rootCmd.PersistentFlags().BoolVarP(&common.Config.DisableLAN, "disable-lan", "d", false, "禁用LAN分享")
+	}
+	//服务器解析分辨率
+	if viper.GetBool("COMI_CHECK_IMAGE"){
+		rootCmd.PersistentFlags().BoolVar(&common.Config.CheckImageInServer, "checkimage", viper.GetBool("COMI_CHECK_IMAGE"), "在服务器端分析图片分辨率")
+	}else{
+		rootCmd.PersistentFlags().BoolVar(&common.Config.CheckImageInServer, "checkimage", true, "在服务器端分析图片分辨率")
+	}
+
+	if viper.GetString("COMI_LOCAL_HOST")!=""{
+		rootCmd.PersistentFlags().StringVar(&common.Config.ServerHost, "local_host", viper.GetString("COMI_LOCAL_HOST"), "自定义域名")
+	}else{
+		rootCmd.PersistentFlags().StringVar(&common.Config.ServerHost, "local_host", "", "自定义域名")
+	}
+	//打印所有可用网卡ip
+	if viper.GetBool("COMI_PRINT_ALL_IP"){
+		rootCmd.PersistentFlags().BoolVar(&common.Config.PrintAllIP, "print_all_ip", viper.GetBool("COMI_PRINT_ALL_IP"), "打印所有可用网卡ip")
+	}else{
+		rootCmd.PersistentFlags().BoolVar(&common.Config.PrintAllIP, "print_all_ip", false, "打印所有可用网卡ip")
+	}
+	//至少有几张图片，才认定为漫画压缩包
+	if viper.GetInt("COMI_MIN_IMAGE_NUM")!=0{
+		rootCmd.PersistentFlags().IntVarP(&common.Config.MinImageNum, "min-image-num", "i", viper.GetInt("COMI_MIN_IMAGE_NUM"), "至少有几张图片，才认定为漫画压缩包")
+	}else{
+		rootCmd.PersistentFlags().IntVarP(&common.Config.MinImageNum, "min-image-num", "i", 3, "至少有几张图片，才认定为漫画压缩包")
+	}
+
+	////webp相关
+	//启用webp传输
+	if viper.GetBool("COMI_ENABLE_WEBP"){
+		rootCmd.PersistentFlags().BoolVarP(&common.Config.EnableWebpServer, "webp", "w", viper.GetBool("COMI_ENABLE_WEBP"), "webp传输，需要webp-server")
+	}else{
+		rootCmd.PersistentFlags().BoolVarP(&common.Config.EnableWebpServer, "webp", "w", false, "启用webp传输，需要webp-server")
+	}
+	//webp-server命令
+	if viper.GetString("COMI_WEBP_COMMAND")!=""{
+		rootCmd.PersistentFlags().StringVar(&common.Config.WebpConfig.WebpCommand, "webp-command", viper.GetString("COMI_WEBP_COMMAND"), "webp-server命令,或webp-server可执行文件路径，默认为“webp-server")
+	}else{
+		rootCmd.PersistentFlags().StringVar(&common.Config.WebpConfig.WebpCommand, "webp-command", "webp-server", "webp-server命令,或webp-server可执行文件路径，默认为“webp-server")
+	}
+	//webp压缩质量
+	if viper.GetInt("COMI_WEBP_QUALITY")!=0{
+		rootCmd.PersistentFlags().IntVarP(&common.Config.WebpConfig.QUALITY, "webp-quality", "q", viper.GetInt("COMI_WEBP_QUALITY"), "webp压缩质量（默认60）")
+	}else{
+		rootCmd.PersistentFlags().IntVarP(&common.Config.WebpConfig.QUALITY, "webp-quality", "q", 60, "webp压缩质量（默认60）")
+	}
+
+	////Frpc相关
+	//启用frp反向代理
+	if viper.GetBool("COMI_ENABLE_FRPC"){
+		rootCmd.PersistentFlags().BoolVarP(&common.Config.UseFrpc, "frpc", "f", viper.GetBool("COMI_ENABLE_FRPC"), "启用frp反向代理")
+	}else{
+		rootCmd.PersistentFlags().BoolVarP(&common.Config.UseFrpc, "frpc", "f", false, "启用frp反向代理")
+	}
+	//frps_addr
+	if viper.GetString("COMI_FRP_SERVER_ADDR")!=""{
+		rootCmd.PersistentFlags().StringVar(&common.Config.FrpConfig.ServerAddr, "frps-addr",  viper.GetString("COMI_FRP_SERVER_ADDR"), "frps_addr, frpc必须")
+	}else{
+		rootCmd.PersistentFlags().StringVar(&common.Config.FrpConfig.ServerAddr, "frps-addr",  "frps.example.com", "frps_addr, frpc必须")
+	}
+	//frps server_port
+	if viper.GetInt("COMI_FRP_SERVER_PORT")!=0{
+		rootCmd.PersistentFlags().IntVar(&common.Config.FrpConfig.ServerPort, "frps-port",  viper.GetInt("COMI_FRP_SERVER_PORT"), "frps server_port, frpc必须")
+	}else{
+		rootCmd.PersistentFlags().IntVar(&common.Config.FrpConfig.ServerPort, "frps-port",  7000, "frps server_port, frpc必须")
+	}
+	//frp token
+	if viper.GetString("COMI_FRP_TOKEN")!=""{
+		rootCmd.PersistentFlags().StringVar(&common.Config.FrpConfig.Token, "token",  viper.GetString("COMI_FRP_TOKEN"), "token, frpc必须")
+	}else{
+		rootCmd.PersistentFlags().StringVar(&common.Config.FrpConfig.Token, "token",  "", "token, frpc必须")
+	}
+	//frpc命令,或frpc可执行文件路径
+	if viper.GetString("COMI_FRP_COMMAND")!=""{
+		rootCmd.PersistentFlags().StringVar(&common.Config.FrpConfig.FrpcCommand, "frpc-command", viper.GetString("COMI_FRP_COMMAND"), "frpc命令,或frpc可执行文件路径，默认为“frpc")
+	}else{
+		rootCmd.PersistentFlags().StringVar(&common.Config.FrpConfig.FrpcCommand, "frpc-command", "frpc", "frpc命令,或frpc可执行文件路径，默认为“frpc")
+	}
+	//frpc remote_port
+	if viper.GetInt("COMI_FRP_REMOTE_PORT")!=0{
+		rootCmd.PersistentFlags().IntVar(&common.Config.FrpConfig.RemotePort, "remote_port",  viper.GetInt("COMI_FRP_REMOTE_PORT"), "frpc remote_port，默认与本地相同")
+	}else{
+		rootCmd.PersistentFlags().IntVar(&common.Config.FrpConfig.RemotePort, "remote_port",  65536, "frpc remote_port，默认与本地相同")
+	}
+
+	//打开浏览器相关
+	if viper.GetBool("COMI_OPEN_BROWSER"){
+		rootCmd.PersistentFlags().BoolVarP(&common.Config.OpenBrowser, "browser", "b", viper.GetBool("COMI_OPEN_BROWSER"), "同时打开浏览器，windows=true")
+	}else{
+		rootCmd.PersistentFlags().BoolVarP(&common.Config.OpenBrowser, "browser", "b", false, "同时打开浏览器，windows=true")
+	}
 	if runtime.GOOS == "windows" {
 		common.Config.OpenBrowser = true
+	}
+
+	//尚未启用的功能，暂时无意义的设置
+	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFileName, "logname", "comigo", "log文件名")
+	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFilePath, "logpath", "~", "log文件位置")
+	//rootCmd.PersistentFlags().StringVarP(&common.Config.ZipFilenameEncoding, "zip-encoding", "e", "", "Zip non-utf8 Encoding(gbk、shiftjis、gb18030）")
+	//	rootCmd.PersistentFlags().BoolVarP(&common.PrintVersion, "version", "v", false, "输出版本号")
+	//还没做配置文件，暂时屏蔽
+	//rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.comicview.yaml)")
+	if viper.GetBool("COMI_LOG.TO.FILE"){
+		rootCmd.PersistentFlags().BoolVar(&common.Config.LogToFile, "log", viper.GetBool("COMI_LOG.TO.FILE"), "记录log文件")
+	}else{
+		rootCmd.PersistentFlags().BoolVar(&common.Config.LogToFile, "log", false, "记录log文件")
 	}
 }
 
