@@ -141,7 +141,7 @@ func InitWebServer() {
 	engine.GET("/ws", wsHandler)
 	//是否同时对外服务
 	webHost := ":"
-	if common.Config.OnlyLocal {
+	if common.Config.DisableLAN {
 		webHost = "localhost:"
 	}
 	//检测端口
@@ -155,7 +155,7 @@ func InitWebServer() {
 		fmt.Println("端口被占用，尝试随机端口:" + strconv.Itoa(common.Config.Port))
 	}
 	//webp反向代理
-	if common.Config.UseWebpServer {
+	if common.Config.EnableWebpServer {
 		webpError := common.StartWebPServer(common.PictureDir, common.PictureDir, common.TempDir+"/webp", common.Config.Port+1)
 		if webpError != nil {
 			fmt.Println("无法启动webp转换服务,请检查命令格式，并确认PATH里面有webp-server可执行文件", webpError.Error())
@@ -171,6 +171,17 @@ func InitWebServer() {
 	} else {
 		//图片目录
 		engine.Static("/cache", common.PictureDir)
+	}
+	if common.Config.UseFrpc{
+		if common.Config.FrpConfig.RemotePort<0 ||common.Config.FrpConfig.RemotePort>65535{
+			common.Config.FrpConfig.RemotePort=common.Config.Port
+		}
+		frpcError := common.StartFrpC(common.TempDir)
+		if frpcError != nil {
+			fmt.Println("无法启动frpc服务,请检查命令格式，并确认PATH里面有frpc可执行文件", frpcError.Error())
+		} else {
+			fmt.Println("frpc已启动")
+		}
 	}
 	//开始服务
 	common.PrintAllReaderURL()

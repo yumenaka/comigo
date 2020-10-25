@@ -51,5 +51,5 @@ require (
 	golang.org/x/sys v0.0.0-20201022201747-fb209a7c41cd // indirect
 	golang.org/x/text v0.3.3
 	google.golang.org/protobuf v1.25.0 // indirect
-	gopkg.in/ini.v1 v1.60.2 // indirect
+	gopkg.in/ini.v1 v1.60.2
 )

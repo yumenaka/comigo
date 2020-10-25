@@ -7,7 +7,6 @@ import (
 	"image"
 	"os"
 	"os/exec"
-	"runtime"
 	"strconv"
 	"strings"
 	"sync"
@@ -15,61 +14,134 @@ import (
 
 	"github.com/disintegration/imaging"
 	"github.com/mitchellh/go-homedir"
+	"gopkg.in/ini.v1"
 )
 
 type ServerConfig struct {
-	OpenBrowser         bool
-	OnlyLocal           bool
-	PrintAllIP          bool
-	Port                int
-	ConfigPath          string
-	CheckImageInServer  bool
-	LogToFile           bool
-	UseWebpServer       bool
-	LogFilePath         string
-	LogFileName         string
-	MaxDepth            int
-	MinImageNum         int
-	ZipFilenameEncoding string
-	WebpCommand         string
+	OpenBrowser        bool
+	DisableLAN         bool
+	PrintAllIP         bool
+	Port               int
+	ConfigPath         string
+	CheckImageInServer bool
+	LogToFile          bool
+	LogFilePath        string
+	LogFileName        string
+	MaxDepth           int
+	MinImageNum        int
+	ServerHost         string
+	EnableWebpServer    bool
 	WebpConfig          WebPServerConfig
-	ServerHost          string
+	UseFrpc             bool
+	FrpConfig           FrpClientConfig
+	ZipFilenameEncoding string
 }
 
 var Config = ServerConfig{
 	OpenBrowser:         true,
-	OnlyLocal:           false,
+	DisableLAN:          false,
 	Port:                1234,
 	CheckImageInServer:  false,
 	LogToFile:           false,
 	MaxDepth:            2,
 	MinImageNum:         3,
 	ZipFilenameEncoding: "",
-	WebpCommand:         "webp-server",
+
 	WebpConfig: WebPServerConfig{
+		WebpCommand:  "webp-server",
 		HOST:         "127.0.0.1",
 		PORT:         "3333",
 		ImgPath:      "",
-		QUALITY:      "70",
+		QUALITY:      70,
 		AllowedTypes: []string{"jpg", "png", "jpeg", "bmp"},
 		ExhaustPath:  "",
+	},
+	FrpConfig: FrpClientConfig{
+		FrpcCommand: "frpc",
+		ServerAddr:  "localhost", //server_addr
+		ServerPort:  7000,      //server_port
+		Token:       "&&%%$#@!2356",
+		FrpType:     "tcp",
+		RemotePort:  -1, //remote_port
+		//AdminAddr:   "127.0.0.1",
+		//AdminPort:   "12340",
+		//AdminUser:   "",
+		//AdminPwd :   "",
 	},
 	ServerHost: "",
 }
 
-func init() {
-	var JAVAHOME string
-	JAVAHOME = os.Getenv("JAVA_HOME")
-	fmt.Println(JAVAHOME)
-}
+//func init() {
+//	var JAVAHOME string
+//	JAVAHOME = os.Getenv("JAVA_HOME")
+//	fmt.Println(JAVAHOME)
+//}
 
 type WebPServerConfig struct {
+	WebpCommand         string
 	HOST         string
 	PORT         string
 	ImgPath      string `json:"IMG_PATH"`
-	QUALITY      string
+	QUALITY      int
 	AllowedTypes []string `json:"ALLOWED_TYPES"`
 	ExhaustPath  string   `json:"EXHAUST_PATH"`
+}
+
+type FrpClientConfig struct {
+	//frp，服务器端
+	FrpcCommand string
+	ServerAddr  string
+	ServerPort  int
+	Token       string
+	////本地管理界面，暂不开启
+	//AdminAddr   string
+	//AdminPort   string
+	//AdminUser   string
+	//AdminPwd    string
+	//本地转发端口设置
+	FrpType     string
+	RemotePort  int
+
+}
+
+func StartFrpC(configPath string) error {
+	//借助ini库，保存一个ini文件
+	cfg := ini.Empty()
+	//写入以下字段：
+	//[common]
+	//server_addr = frp.example.net
+	//server_port = 7000
+	//token = NscevW3U%F
+	//[comi]
+	//type = tcp
+	//local_ip = 127.0.0.1
+	//local_port = 1234
+	//remote_port = 23456
+	_,err := cfg.NewSection("common")
+	_,err = cfg.Section("common").NewKey("server_addr", Config.FrpConfig.ServerAddr)
+	_,err = cfg.Section("common").NewKey("server_port", strconv.Itoa(Config.FrpConfig.ServerPort))
+	_,err = cfg.Section("common").NewKey("token", Config.FrpConfig.Token)
+	_,err = cfg.NewSection("comi")
+	_,err = cfg.Section("comi").NewKey("type", Config.FrpConfig.FrpType)
+	_,err = cfg.Section("comi").NewKey("local_ip", "127.0.0.1")
+	_,err = cfg.Section("comi").NewKey("local_port",  strconv.Itoa(Config.Port))
+	_,err = cfg.Section("comi").NewKey("remote_port", strconv.Itoa(Config.FrpConfig.RemotePort))
+	//保存文件
+	err = cfg.SaveToIndent(configPath+"/frpc.ini", "\t")
+	if err!=nil{
+		fmt.Println("frpc ini初始化错误")
+		return err
+	}else {
+		fmt.Println("成功保存frpc设定.", configPath, cfg)
+	}
+	//实际执行
+	var cmd *exec.Cmd
+	cmd = exec.Command(Config.FrpConfig.FrpcCommand, "-c", configPath+"/frpc.ini")
+	fmt.Println(cmd)
+	if err = cmd.Start(); err != nil {
+		return err
+	}
+	return err
 }
 
 func StartWebPServer(configPath string, imgPath string, exhaustPath string, port int) error {
@@ -78,7 +150,7 @@ func StartWebPServer(configPath string, imgPath string, exhaustPath string, port
 	Config.WebpConfig.ExhaustPath = exhaustPath
 	Config.WebpConfig.PORT = strconv.Itoa(port)
 	//Config.WebpConfig.QUALITY = quality
-	if Config.WebpCommand == "" || Config.WebpConfig.ImgPath == "" || Config.WebpConfig.ExhaustPath == "" {
+	if Config.WebpConfig.WebpCommand == "" || Config.WebpConfig.ImgPath == "" || Config.WebpConfig.ExhaustPath == "" {
 		return errors.New("webp设定错误")
 	}
 	jsonObject, err := os.OpenFile(configPath+"/config.json", os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
@@ -93,33 +165,40 @@ func StartWebPServer(configPath string, imgPath string, exhaustPath string, port
 	if _, err := jsonObject.Write(content); err == nil {
 		fmt.Println("成功保存webp设定.", configPath, content)
 	}
-	err = webpCMD(configPath, Config.WebpCommand)
-	return err
-}
-
-func webpCMD(configPath string, wepCommand string) (err error) {
+	//err = webpCMD(configPath, Config.WebpCommand)
 	var cmd *exec.Cmd
-	if runtime.GOOS == "windows" {
-		cmd = exec.Command(wepCommand, "--config", configPath+"\\config.json")
-		fmt.Println(cmd)
-		if err = cmd.Start(); err != nil {
-			return err
-		}
-	} else if runtime.GOOS == "darwin" {
-		cmd = exec.Command(wepCommand, "--config", configPath+"/config.json")
-		fmt.Println(cmd)
-		if err = cmd.Start(); err != nil {
-			return err
-		}
-	} else if runtime.GOOS == "linux" {
-		cmd = exec.Command(wepCommand, "--config", configPath+"/config.json")
-		fmt.Println(cmd)
-		if err = cmd.Start(); err != nil {
-			return err
-		}
+	cmd = exec.Command(Config.WebpConfig.WebpCommand, "--config", configPath+"/config.json")
+	fmt.Println(cmd)
+	if err = cmd.Start(); err != nil {
+		return err
 	}
 	return err
 }
+
+//func webpCMD(configPath string, wepCommand string) (err error) {
+//	var cmd *exec.Cmd
+//	if runtime.GOOS == "windows" {
+//		cmd = exec.Command(wepCommand, "--config", configPath+"\\config.json")
+//		fmt.Println(cmd)
+//		if err = cmd.Start(); err != nil {
+//			return err
+//		}
+//	} else if runtime.GOOS == "darwin" {
+//		cmd = exec.Command(wepCommand, "--config", configPath+"/config.json")
+//		fmt.Println(cmd)
+//		if err = cmd.Start(); err != nil {
+//			return err
+//		}
+//	} else if runtime.GOOS == "linux" {
+//		cmd = exec.Command(wepCommand, "--config", configPath+"/config.json")
+//		fmt.Println(cmd)
+//		if err = cmd.Start(); err != nil {
+//			return err
+//		}
+//	}
+//	return err
+//}
+
 
 var ReadingBook Book
 var BookList []Book
@@ -127,8 +206,8 @@ var (
 	//ReadFileName           string
 	TempDir         string
 	PictureDir      string
-	PrintVersion    bool
-	Version         string = "v0.1.6"
+	//PrintVersion    bool
+	Version         string = "v0.2.4"
 	SupportPicType         = [...]string{".png", ".jpg", ".jpeg", "bmp", ".gif", ".webp"}
 	SupportFileType        = [...]string{
 		".zip",
@@ -282,7 +361,7 @@ func (i *ImageInfo) GetImageSize() (err error) {
 	var img image.Image
 	img, err = imaging.Open(i.LocalPath)
 	if err != nil {
-		fmt.Println("failed to open image: %v", err)
+		fmt.Printf("failed to open image: %v\n", err)
 	} else {
 		i.Width = img.Bounds().Dx()
 		i.Height = img.Bounds().Dy()
