@@ -8,16 +8,13 @@ require (
 	github.com/disintegration/imaging v1.6.2
 	github.com/fastly/go-utils v0.0.0-20180712184237-d95a45783239 // indirect
 	github.com/frankban/quicktest v1.10.2 // indirect
-	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-playground/validator/v10 v10.4.1 // indirect
 	github.com/gobuffalo/here v0.6.2 // indirect
-	github.com/golang/gddo v0.0.0-20190419222130-af0f2af80721 // indirect
 	github.com/golang/protobuf v1.4.3 // indirect
 	github.com/golang/snappy v0.0.2 // indirect
 	github.com/gorilla/websocket v1.4.2
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869 // indirect
-	github.com/josephspurrier/goversioninfo v1.2.0 // indirect
 	github.com/json-iterator/go v1.1.10 // indirect
 	github.com/klauspost/compress v1.11.1 // indirect
 	github.com/klauspost/pgzip v1.2.5 // indirect
@@ -31,8 +28,6 @@ require (
 	github.com/mitchellh/mapstructure v1.3.3 // indirect
 	github.com/nwaples/rardecode v1.1.0
 	github.com/pelletier/go-toml v1.8.0 // indirect
-	github.com/pierrec/lz4 v2.5.2+incompatible // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.7.0
@@ -41,7 +36,6 @@ require (
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/cobra v1.1.1
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
-	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.7.1
 	github.com/tebeka/strftime v0.1.5 // indirect
 	github.com/ugorji/go v1.1.13 // indirect
