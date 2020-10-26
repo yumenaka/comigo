@@ -2,8 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/fsnotify/fsnotify"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"log"
 	"os"
 	"runtime"
 
@@ -55,12 +56,53 @@ func Execute() {
 	}
 }
 
+// 读取配置，参考下面三篇文章
+//1、https://www.loginradius.com/engineering/blog/environment-variables-in-golang/
+//2、https://www.liwenzhou.com/posts/Go/viper_tutorial/
+//3、https://ovh.github.io/tat/sdk/golang-full-example/
+func initConfig() {
+	//Viper优先级顺序： 显式调用 Set 函数 > 命令行参数 > 环境变量 > 配置文件 > 远程 key/value 存储系统 > 默认值
+	//读取环境变量
+	viper.AutomaticEnv()
+	viper.SetConfigFile("./config.yaml") // 指定配置文件路径
+	viper.SetConfigName("config") // 配置文件名称(无扩展名)
+	viper.SetConfigType("yaml") // 如果配置文件的名称中没有扩展名，则需要配置此项
+	viper.AddConfigPath("/etc/comi/")   // 查找配置文件所在的路径，可以使用相对路径，也可以使用绝对路径
+	viper.AddConfigPath("$HOME/.config/comi")  // 多次调用以添加多个搜索路径
+	viper.AddConfigPath(".")               // 还可以在工作目录中查找配置
+	//查找并读取配置文件
+	if err := viper.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			logrus.Debugf("配置文件未找到", viper.ConfigFileUsed())
+		} else {
+			logrus.Debugf("解析配置失败r",common.Config.ConfigPath)
+		}
+	}
+	//应用配置文件
+	if err := viper.Unmarshal(&common.Config); err != nil { // 读取配置文件转化成对应的结构体错误
+		panic(fmt.Errorf("read config file to struct err: %s \n", err))
+	}
+	//// 设置默认值
+	//viper.SetDefault("COMI_HOST", "0.0.0.0")
+	//将当前的viper配置写入预定义的路径。如果没有预定义的路径，则报错。如果存在，将不会覆盖当前的配置文件。
+	err := viper.SafeWriteConfig()
+	if err != nil {
+		fmt.Println("保存配置:", common.Config.ConfigPath)
+	}else{
+		fmt.Println("保存失败:",err.Error())
+	}
+	//监听配置变化，运行时动态加载配置
+	viper.WatchConfig()
+	viper.OnConfigChange(func(e fsnotify.Event) {
+		fmt.Println("配置发生变更：", e.Name)
+	})
+}
+
 func init() {
 	cobra.MousetrapHelpText = ""       //屏蔽鼠标提示，支持拖拽、双击运行
 	cobra.MousetrapDisplayDuration = 5 //"这是命令行程序"的提醒表示时间
 	//根据配置或系统变量，初始化各种参数
 	cobra.OnInitialize(initConfig)
-
 	// 局部标签(local flag)，只在直接调用它时运行
 	//rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	// persistent，任何命令下均可使用，适合全局flag
@@ -71,6 +113,14 @@ func init() {
 		rootCmd.PersistentFlags().IntVarP(&common.Config.Port, "port", "p", 1234, "服务端口")
 	}
 
+	//指定配置文件
+	if viper.GetString("COMI_CONFIG")!=""{
+		rootCmd.PersistentFlags().StringVarP(&common.Config.ConfigPath, "config", "c", viper.GetString("COMI_CONFIG"), "指定配置文件")
+		viper.SetConfigFile(viper.GetString("COMI_CONFIG"))
+	}else{
+		rootCmd.PersistentFlags().StringVarP(&common.Config.ConfigPath, "config", "c", ".", "指定配置文件")
+		viper.SetConfigFile(common.Config.ConfigPath)
+	}
 	//打开浏览器
 	if viper.GetBool("COMI_OPEN_BROWSER"){
 		rootCmd.PersistentFlags().BoolVarP(&common.Config.OpenBrowser, "browser", "b", viper.GetBool("COMI_OPEN_BROWSER"), "同时打开浏览器，windows=true")
@@ -80,19 +130,11 @@ func init() {
 	if runtime.GOOS == "windows" {
 		common.Config.OpenBrowser = true
 	}
-
 	//不对局域网开放
 	if viper.GetBool("COMI_DISABLE_LAN"){
 		rootCmd.PersistentFlags().BoolVarP(&common.Config.DisableLAN, "disable-lan", "d", viper.GetBool("COMI_DISABLE_LAN"), "禁用LAN分享")
 	}else{
 		rootCmd.PersistentFlags().BoolVarP(&common.Config.DisableLAN, "disable-lan", "d", false, "禁用LAN分享")
-	}
-
-	//配置文件位置
-	if viper.GetString("COMI_CONFIG")!=""{
-		rootCmd.PersistentFlags().StringVarP(&common.Config.ConfigPath, "config", "c", viper.GetString(""), "配置文件")
-	}else{
-		rootCmd.PersistentFlags().StringVarP(&common.Config.ConfigPath, "config", "c", ".", "配置文件")
 	}
 
 	//文件搜索深度
@@ -101,14 +143,12 @@ func init() {
 	}else{
 		rootCmd.PersistentFlags().IntVarP(&common.Config.MaxDepth, "max-depth", "m", 1, "最大搜索深度")
 	}
-
 	//服务器解析分辨率
 	if viper.GetBool("COMI_CHECK_IMAGE"){
 		rootCmd.PersistentFlags().BoolVar(&common.Config.CheckImageInServer, "checkimage", viper.GetBool("COMI_CHECK_IMAGE"), "在服务器端分析图片分辨率")
 	}else{
 		rootCmd.PersistentFlags().BoolVar(&common.Config.CheckImageInServer, "checkimage", true, "在服务器端分析图片分辨率")
 	}
-
 	//本地Host名
 	if viper.GetString("COMI_LOCAL_HOST")!=""{
 		rootCmd.PersistentFlags().StringVar(&common.Config.ServerHost, "local_host", viper.GetString("COMI_LOCAL_HOST"), "自定义域名")
@@ -127,7 +167,6 @@ func init() {
 	}else{
 		rootCmd.PersistentFlags().IntVarP(&common.Config.MinImageNum, "min-image-num", "i", 3, "至少有几张图片，才认定为漫画压缩包")
 	}
-
 	////webp相关
 	//启用webp传输
 	if viper.GetBool("COMI_ENABLE_WEBP"){
@@ -147,13 +186,12 @@ func init() {
 	}else{
 		rootCmd.PersistentFlags().IntVarP(&common.Config.WebpConfig.QUALITY, "webp-quality", "q", 60, "webp压缩质量（默认60）")
 	}
-
 	////Frpc相关
 	//启用frp反向代理
 	if viper.GetBool("COMI_ENABLE_FRPC"){
-		rootCmd.PersistentFlags().BoolVarP(&common.Config.UseFrpc, "frpc", "f", viper.GetBool("COMI_ENABLE_FRPC"), "启用frp反向代理")
+		rootCmd.PersistentFlags().BoolVarP(&common.Config.EnableFrpcServer, "frpc", "f", viper.GetBool("COMI_ENABLE_FRPC"), "启用frp反向代理")
 	}else{
-		rootCmd.PersistentFlags().BoolVarP(&common.Config.UseFrpc, "frpc", "f", false, "启用frp反向代理")
+		rootCmd.PersistentFlags().BoolVarP(&common.Config.EnableFrpcServer, "frpc", "f", false, "启用frp反向代理")
 	}
 	//frps_addr
 	if viper.GetString("COMI_FRP_SERVER_ADDR")!=""{
@@ -185,15 +223,14 @@ func init() {
 	}else{
 		rootCmd.PersistentFlags().IntVar(&common.Config.FrpConfig.RemotePort, "remote_port",  65536, "frpc remote_port，默认与本地相同")
 	}
-
 	//尚未启用的功能，暂时无意义的设置
 	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFileName, "logname", "comigo", "log文件名")
 	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFilePath, "logpath", "~", "log文件位置")
 	//rootCmd.PersistentFlags().StringVarP(&common.Config.ZipFilenameEncoding, "zip-encoding", "e", "", "Zip non-utf8 Encoding(gbk、shiftjis、gb18030）")
 	//	rootCmd.PersistentFlags().BoolVarP(&common.PrintVersion, "version", "v", false, "输出版本号")
 
-	//还没做配置文件，暂时屏蔽
-	//rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.comicview.yaml)")
+
+
 	if viper.GetBool("COMI_LOG.TO.FILE"){
 		rootCmd.PersistentFlags().BoolVar(&common.Config.LogToFile, "log", viper.GetBool("COMI_LOG.TO.FILE"), "记录log文件")
 	}else{
@@ -201,74 +238,4 @@ func init() {
 	}
 }
 
-// initConfig reads in config file and ENV variables if set.
-//参考：https://www.loginradius.com/engineering/blog/environment-variables-in-golang/
-func initConfig() {
-	viper.AutomaticEnv()
-	viper.SetConfigType("yaml")
-	viper.SetConfigName("comi") // 读取yaml配置文件
-	//viper.AddConfigPath("$HOME/.comi")  // 设置配置文件的搜索目录
-	viper.AddConfigPath(".")      // 设置配置文件和可执行二进制文件在用一个目录
-	if err := viper.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			// no such config file
-			log.Println("没找到配置文件")
-		} else {
-			// read config error
-			log.Println("解析文件失败r")
-		}
-		//log.Fatal(err) // 读取配置文件失败致命错误
-	}
 
-
-	// // Set the path to look for the configurations file
-	// if common.Config.ConfigPath != "" {
-	// 	viper.AddConfigPath(common.Config.ConfigPath)
-
-	// } else {
-	// 	// Find home directory.
-	// 	home, err := homedir.Dir()
-	// 	if err != nil {
-	// 		viper.AddConfigPath(".")
-	// 		fmt.Println(err)
-	// 	}else {
-	// 		viper.AddConfigPath(home)
-	// 	}
-	// }
-
-	// viper.SetConfigType("yaml")
-	// // Set the file name of the configurations file
-	// viper.SetConfigName(".config/comigo")
-
-	// //viper.SetConfigFile(common.Config.ConfigPath+"\/config.yaml")
-	// //如果不存在，就写入
-	// err := viper.SafeWriteConfig()
-	// if err != nil {
-	// 	fmt.Println("保存配置:", common.Config.ConfigPath)
-	// }
-	// //读取符合的环境变量
-	// viper.AutomaticEnv() // read in environment variables that match
-	// // If a config file is found, read it in.
-	// if err := viper.ReadInConfig(); err == nil {
-	// 	fmt.Println("Using config file:", viper.ConfigFileUsed())
-	// } else {
-	// 	fmt.Println("No config file:", common.Config.ConfigPath)
-	// }
-
-	// //读取案例：
-	// // Set undefined variables
-	// viper.SetDefault("COMI.HOST", "0.0.0.0")
-
-	// // getting env variables DB.PORT
-	// // viper.Get() returns an empty interface{}
-	// // so we have to do the type assertion, to get the value
-	// DBPort, ok := viper.Get("COMI.PORT").(string)
-
-	// // if type assert is not valid it will throw an error
-	// if !ok {
-	// 	//log.Fatalf("Invalid type assertion")
-	// 	fmt.Println("Invalid type assertion")
-	// 	//os.Exit(0)
-	// }
-	// fmt.Printf("viper : %s = %s \n", "Database Port", DBPort)
-}
