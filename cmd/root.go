@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/viper"
+	"log"
 	"os"
 	"runtime"
 
@@ -34,7 +35,7 @@ webp传输，需要webp-server配合：
 comi -w book.zip  
 
 指定多个参数：
-comi -w -q 50 --frpc  --token aX4457d3O -p 23455 --frps-addr sh.example.com test.zip
+comi -w -q 70 --frpc  --token aX4457d3O -p 23455 --frps-addr sh.example.com test.zip
 `,
 	Version: "v0.2.4",
 	Long: `comigo 一款简单的漫画阅读器
@@ -59,11 +60,10 @@ func init() {
 	cobra.MousetrapDisplayDuration = 5 //"这是命令行程序"的提醒表示时间
 	//根据配置或系统变量，初始化各种参数
 	cobra.OnInitialize(initConfig)
-	viper.AutomaticEnv()
+
 	// 局部标签(local flag)，只在直接调用它时运行
 	//rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	// persistent，任何命令下均可使用，适合全局flag
-
 	//服务端口
 	if viper.GetInt("COMI_PORT")!=0{
 		rootCmd.PersistentFlags().IntVarP(&common.Config.Port, "port", "p", viper.GetInt("COMI_PORT"), "服务端口")
@@ -204,6 +204,22 @@ func init() {
 // initConfig reads in config file and ENV variables if set.
 //参考：https://www.loginradius.com/engineering/blog/environment-variables-in-golang/
 func initConfig() {
+	viper.AutomaticEnv()
+	viper.SetConfigType("yaml")
+	viper.SetConfigName("comi") // 读取yaml配置文件
+	//viper.AddConfigPath("$HOME/.comi")  // 设置配置文件的搜索目录
+	viper.AddConfigPath(".")      // 设置配置文件和可执行二进制文件在用一个目录
+	if err := viper.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			// no such config file
+			log.Println("没找到配置文件")
+		} else {
+			// read config error
+			log.Println("解析文件失败r")
+		}
+		//log.Fatal(err) // 读取配置文件失败致命错误
+	}
+
 
 	// // Set the path to look for the configurations file
 	// if common.Config.ConfigPath != "" {

@@ -8,6 +8,7 @@ import (
 	"github.com/nwaples/rardecode"
 	uuid "github.com/satori/go.uuid"
 	"io/ioutil"
+	"log"
 	"net/url"
 	"os"
 	"path"
@@ -114,7 +115,7 @@ func ExtractArchive(b *Book) (err error) {
 		//inArchiveNameZip := f.Name()
 		switch h := f.Header.(type) {
 		case zip.FileHeader:
-			fmt.Printf("%s\t%d\t%d\t%s\t%s\n",
+			log.Println("%s\t%d\t%d\t%s\t%s\n",
 				f.Mode(),
 				h.Method,
 				f.Size(),
@@ -128,7 +129,7 @@ func ExtractArchive(b *Book) (err error) {
 			//	inArchiveNameZip = DecodeFileName(h.Name)
 			//}
 		case *tar.Header:
-			fmt.Printf("%s\t%s\t%s\t%d\t%s\t%s\n",
+			log.Printf("%s\t%s\t%s\t%d\t%s\t%s\n",
 				f.Mode(),
 				h.Uname,
 				h.Gname,
@@ -139,7 +140,7 @@ func ExtractArchive(b *Book) (err error) {
 			b.FileType = ".tar"
 			inArchiveName = h.Name
 		case *rardecode.FileHeader:
-			fmt.Printf("%s\t%d\t%d\t%s\t%s\n",
+			log.Printf("%s\t%d\t%d\t%s\t%s\n",
 				f.Mode(),
 				int(h.HostOS),
 				f.Size(),
@@ -149,7 +150,7 @@ func ExtractArchive(b *Book) (err error) {
 			b.FileType = ".rar"
 			inArchiveName = h.Name
 		default:
-			fmt.Printf("%s\t%d\t%s\t?/%s\n",
+			log.Printf("%s\t%d\t%s\t?/%s\n",
 				f.Mode(),
 				f.Size(),
 				f.ModTime(),
@@ -157,7 +158,7 @@ func ExtractArchive(b *Book) (err error) {
 			)
 		}
 		if !checkPicExt(inArchiveName) {
-			fmt.Println("不支持的格式：" + inArchiveName)
+			log.Println("不支持的格式：" + inArchiveName)
 			return nil
 		}
 		extractNum++
@@ -169,7 +170,7 @@ func ExtractArchive(b *Book) (err error) {
 			temp = ImageInfo{LocalPath: filePath, UrlPath: "cache/" + b.UUID + "/" + inArchiveName + "/" + inArchiveName}
 		}
 		if ChickFileExists(filePath) {
-			fmt.Println("文件已存在，跳过解压步骤：" + filePath)
+			log.Println("文件已存在，跳过解压步骤：" + filePath)
 			return err
 		}
 		b.PageInfo = append(b.PageInfo, temp)
@@ -178,7 +179,7 @@ func ExtractArchive(b *Book) (err error) {
 		//解压文件
 		err := e.Extract(b.FilePath, inArchiveName, TempDir+"/"+b.UUID) //解压到临时文件夹
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 		}
 		//因为有最大打开文件限制，暂不并发解压
 		return err
