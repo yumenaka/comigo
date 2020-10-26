@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"image"
+	"log"
 	"os"
 	"os/exec"
 	"strconv"
@@ -310,14 +311,17 @@ func (b *Book) GetPicNum() int {
 
 //服务器端分析单双页
 func (b *Book) ScanAllImage() {
+	log.Println("开始分析图片分辨率")
 	for i := 0; i < len(b.PageInfo); i++ { //此处不能用range，因为需要修改
 		SetImageType(&b.PageInfo[i])
 	}
+	log.Println("图片分辨率分析完成")
 }
 
 //并发分析
 func (b *Book) ScanAllImageGo() {
 	var wg sync.WaitGroup
+	log.Println("开始分析图片分辨率")
 	for i := 0; i < len(b.PageInfo); i++ { //此处不能用range，因为需要修改
 		wg.Add(1)
 		//并发处理，提升图片分析速度
@@ -337,13 +341,14 @@ func (b *Book) ScanAllImageGo() {
 		//}
 	}
 	wg.Wait()
+	log.Println("图片分辨率分析完成")
 }
 
 func SetImageType(p *ImageInfo) {
 	err := p.GetImageSize()
-	fmt.Println("分析图片分辨率中：", p.LocalPath)
+	//log.Println("分析图片分辨率中：", p.LocalPath)
 	if err != nil {
-		fmt.Println("读取分辨率出错：" + err.Error())
+		log.Println("读取分辨率出错：" + err.Error())
 	}
 	if p.Width == 0 && p.Height == 0 {
 		p.ImgType = "UnKnow"
@@ -361,7 +366,7 @@ func (i *ImageInfo) GetImageSize() (err error) {
 	var img image.Image
 	img, err = imaging.Open(i.LocalPath)
 	if err != nil {
-		fmt.Printf("failed to open image: %v\n", err)
+		log.Printf("failed to open image: %v\n", err)
 	} else {
 		i.Width = img.Bounds().Dx()
 		i.Height = img.Bounds().Dy()
