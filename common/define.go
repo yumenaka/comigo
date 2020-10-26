@@ -23,17 +23,17 @@ type ServerConfig struct {
 	DisableLAN         bool
 	PrintAllIP         bool
 	Port               int
-	ConfigPath         string
-	CheckImageInServer bool
-	LogToFile          bool
-	LogFilePath        string
-	LogFileName        string
-	MaxDepth           int
-	MinImageNum        int
-	ServerHost         string
+	ConfigPath          string
+	CheckImageInServer  bool
+	LogToFile           bool
+	LogFilePath         string
+	LogFileName         string
+	MaxDepth            int
+	MinImageNum         int
+	ServerHost          string
 	EnableWebpServer    bool
 	WebpConfig          WebPServerConfig
-	UseFrpc             bool
+	EnableFrpcServer    bool
 	FrpConfig           FrpClientConfig
 	ZipFilenameEncoding string
 }
@@ -47,7 +47,6 @@ var Config = ServerConfig{
 	MaxDepth:            2,
 	MinImageNum:         3,
 	ZipFilenameEncoding: "",
-
 	WebpConfig: WebPServerConfig{
 		WebpCommand:  "webp-server",
 		HOST:         "127.0.0.1",
@@ -57,6 +56,7 @@ var Config = ServerConfig{
 		AllowedTypes: []string{"jpg", "png", "jpeg", "bmp"},
 		ExhaustPath:  "",
 	},
+	EnableFrpcServer: false,
 	FrpConfig: FrpClientConfig{
 		FrpcCommand: "frpc",
 		ServerAddr:  "localhost", //server_addr
@@ -311,11 +311,11 @@ func (b *Book) GetPicNum() int {
 
 //服务器端分析单双页
 func (b *Book) ScanAllImage() {
-	log.Println("开始分析图片分辨率")
+	log.Println("开始解析图片")
 	for i := 0; i < len(b.PageInfo); i++ { //此处不能用range，因为需要修改
 		SetImageType(&b.PageInfo[i])
 	}
-	log.Println("图片分辨率分析完成")
+	log.Println("图片解析完成")
 }
 
 //并发分析

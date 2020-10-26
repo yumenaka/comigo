@@ -172,7 +172,7 @@ func InitWebServer() {
 		//图片目录
 		engine.Static("/cache", common.PictureDir)
 	}
-	if common.Config.UseFrpc{
+	if common.Config.EnableFrpcServer {
 		if common.Config.FrpConfig.RemotePort<=0 ||common.Config.FrpConfig.RemotePort>65535{
 			common.Config.FrpConfig.RemotePort=common.Config.Port
 		}

@@ -7,8 +7,8 @@ import (
 	archiver "github.com/mholt/archiver/v3"
 	"github.com/nwaples/rardecode"
 	uuid "github.com/satori/go.uuid"
+	"github.com/sirupsen/logrus"
 	"io/ioutil"
-	"log"
 	"net/url"
 	"os"
 	"path"
@@ -41,7 +41,7 @@ func ScanArchive(scanPath string) (*Book, error) {
 	}
 	_, ok := iface.(archiver.Extractor)
 	if !ok {
-		fmt.Println("不支持解压：%s", iface)
+		logrus.Debugf("不支持解压：%s", iface)
 		return &b, err
 	}
 	err = archiver.Walk(scanPath, func(f archiver.File) error {
@@ -49,7 +49,7 @@ func ScanArchive(scanPath string) (*Book, error) {
 
 		if !checkPicExt(inArchiveName) {
 			if inArchiveName != scanPath {
-				fmt.Println("不支持：" + inArchiveName)
+				logrus.Debugf("不支持：" + inArchiveName)
 			}
 		} else {
 			b.PageNum++
@@ -107,6 +107,7 @@ func ExtractArchive(b *Book) (err error) {
 	}
 	extraFolder := path.Join(TempDir, b.UUID)
 	extractNum := 0
+	fmt.Println("开始解压：", b.FilePath)
 	//var wg sync.WaitGroup
 	err = archiver.Walk(b.FilePath, func(f archiver.File) error {
 		//解压用
@@ -115,7 +116,7 @@ func ExtractArchive(b *Book) (err error) {
 		//inArchiveNameZip := f.Name()
 		switch h := f.Header.(type) {
 		case zip.FileHeader:
-			log.Println("%s\t%d\t%d\t%s\t%s\n",
+			logrus.Debugf("%s\t%d\t%d\t%s\t%s\n",
 				f.Mode(),
 				h.Method,
 				f.Size(),
@@ -129,7 +130,7 @@ func ExtractArchive(b *Book) (err error) {
 			//	inArchiveNameZip = DecodeFileName(h.Name)
 			//}
 		case *tar.Header:
-			log.Printf("%s\t%s\t%s\t%d\t%s\t%s\n",
+			logrus.Debugf("%s\t%s\t%s\t%d\t%s\t%s\n",
 				f.Mode(),
 				h.Uname,
 				h.Gname,
@@ -140,7 +141,7 @@ func ExtractArchive(b *Book) (err error) {
 			b.FileType = ".tar"
 			inArchiveName = h.Name
 		case *rardecode.FileHeader:
-			log.Printf("%s\t%d\t%d\t%s\t%s\n",
+			logrus.Debugf("%s\t%d\t%d\t%s\t%s\n",
 				f.Mode(),
 				int(h.HostOS),
 				f.Size(),
@@ -150,7 +151,7 @@ func ExtractArchive(b *Book) (err error) {
 			b.FileType = ".rar"
 			inArchiveName = h.Name
 		default:
-			log.Printf("%s\t%d\t%s\t?/%s\n",
+			logrus.Debugf("%s\t%d\t%s\t?/%s\n",
 				f.Mode(),
 				f.Size(),
 				f.ModTime(),
@@ -158,7 +159,7 @@ func ExtractArchive(b *Book) (err error) {
 			)
 		}
 		if !checkPicExt(inArchiveName) {
-			log.Println("不支持的格式：" + inArchiveName)
+			logrus.Debugf("不支持的格式：" + inArchiveName)
 			return nil
 		}
 		extractNum++
@@ -170,7 +171,7 @@ func ExtractArchive(b *Book) (err error) {
 			temp = ImageInfo{LocalPath: filePath, UrlPath: "cache/" + b.UUID + "/" + inArchiveName + "/" + inArchiveName}
 		}
 		if ChickFileExists(filePath) {
-			log.Println("文件已存在，跳过解压步骤：" + filePath)
+			logrus.Debugf("文件已存在，跳过解压步骤：" + filePath)
 			return err
 		}
 		b.PageInfo = append(b.PageInfo, temp)
@@ -179,12 +180,13 @@ func ExtractArchive(b *Book) (err error) {
 		//解压文件
 		err := e.Extract(b.FilePath, inArchiveName, TempDir+"/"+b.UUID) //解压到临时文件夹
 		if err != nil {
-			log.Println(err)
+			logrus.Debugf(err.Error())
 		}
 		//因为有最大打开文件限制，暂不并发解压
 		return err
 	})
 	//wg.Wait()
+	fmt.Println("解压完成：", b.FilePath)
 	return err
 }
 

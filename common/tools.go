@@ -23,7 +23,7 @@ func PrintAllReaderURL() {
 	//打开浏览器
 	if Config.OpenBrowser {
 		OpenBrowser("http://127.0.0.1:" + strconv.Itoa(Config.Port))
-		if Config.UseFrpc {
+		if Config.EnableFrpcServer {
 			OpenBrowser("http://" + Config.FrpConfig.ServerAddr + ":" + strconv.Itoa(Config.FrpConfig.RemotePort))
 		}
 	}
@@ -34,7 +34,7 @@ func PrintAllReaderURL() {
 
 func printURLAndQRCode(port int) {
 	//启用Frp的时候
-	if Config.UseFrpc {
+	if Config.EnableFrpcServer {
 		readURL := "http://" + Config.FrpConfig.ServerAddr + ":" + strconv.Itoa(Config.FrpConfig.RemotePort)
 		fmt.Println("Frp反代的阅读链接可能是：" + readURL)
 		PrintQRCode(readURL)

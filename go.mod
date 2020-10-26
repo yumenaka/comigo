@@ -8,6 +8,7 @@ require (
 	github.com/disintegration/imaging v1.6.2
 	github.com/fastly/go-utils v0.0.0-20180712184237-d95a45783239 // indirect
 	github.com/frankban/quicktest v1.10.2 // indirect
+	github.com/fsnotify/fsnotify v1.4.9
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-playground/validator/v10 v10.4.1 // indirect
 	github.com/gobuffalo/here v0.6.2 // indirect
@@ -15,6 +16,7 @@ require (
 	github.com/golang/snappy v0.0.2 // indirect
 	github.com/gorilla/websocket v1.4.2
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869 // indirect
+	github.com/josephspurrier/goversioninfo v1.2.0 // indirect
 	github.com/json-iterator/go v1.1.10 // indirect
 	github.com/klauspost/compress v1.11.1 // indirect
 	github.com/klauspost/pgzip v1.2.5 // indirect

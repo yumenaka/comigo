@@ -1,0 +1,31 @@
+#定义一个yaml配置文件
+OpenBrowser:         true
+DisableLAN:          false
+Port:                12345
+CheckImageInServer:  false
+LogToFile:           false
+MaxDepth:            2
+MinImageNum:         3
+ZipFilenameEncoding: ""
+EnableWebpServer: false
+WebpConfig: 
+　WebpCommand:  "webp-server"
+　HOST:         "127.0.0.1"
+　PORT:         "3333"
+　ImgPath:      ""
+　QUALITY:      70
+　AllowedTypes: 
+    - jpg
+    - png
+    - jpeg
+    - bmp
+　ExhaustPath: 　""
+EnableFrpcServer: true
+FrpConfig: 
+  FrpcCommand: "frpc"
+  ServerAddr:  "frp.youdomain.com" 
+  ServerPort:  7000      
+  Token:       "&&%%!2356"
+  FrpType:     "tcp"
+  RemotePort:  -1 
+ServerHost: ""
