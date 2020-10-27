@@ -1,9 +1,9 @@
 package routers
 
 import (
+	"fmt"
 	"github.com/yumenaka/comi/common"
 	"github.com/yumenaka/comi/routers/reverse_proxy"
-	"fmt"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -53,7 +53,7 @@ func StartComicServer(args []string) {
 	//解压图片，分析分辨率
 	if common.Config.CheckImageInServer {
 		wg.Add(1)
-		go func () {
+		go func() {
 			common.InitReadingBook()
 			defer wg.Done()
 		}()
@@ -104,9 +104,9 @@ func InitWebServer() {
 	engine.StaticFS("/js", pkger.Dir("/webui/static/js"))
 	engine.StaticFS("/css", pkger.Dir("/webui/static/css"))
 	engine.StaticFS("/resources", pkger.Dir("/webui/public"))
-	if common.ReadingBook.IsFolder{
-		engine.StaticFS("/raw/"+common.ReadingBook.Name, gin.Dir(common.ReadingBook.FilePath,true))
-	}else{
+	if common.ReadingBook.IsFolder {
+		engine.StaticFS("/raw/"+common.ReadingBook.Name, gin.Dir(common.ReadingBook.FilePath, true))
+	} else {
 		engine.StaticFile("/raw/"+common.ReadingBook.Name, common.ReadingBook.FilePath)
 	}
 	file, err := pkger.Open("/webui/static/index.html")
@@ -147,9 +147,9 @@ func InitWebServer() {
 	//检测端口
 	if !common.CheckPort(common.Config.Port) {
 		r := rand.New(rand.NewSource(time.Now().UnixNano()))
-		if common.Config.Port+2000>65535{
+		if common.Config.Port+2000 > 65535 {
 			common.Config.Port = common.Config.Port + r.Intn(1024)
-		}else{
+		} else {
 			common.Config.Port = 50000 + r.Intn(10000)
 		}
 		fmt.Println("端口被占用，尝试随机端口:" + strconv.Itoa(common.Config.Port))
@@ -173,8 +173,13 @@ func InitWebServer() {
 		engine.Static("/cache", common.PictureDir)
 	}
 	if common.Config.EnableFrpcServer {
-		if common.Config.FrpConfig.RemotePort<=0 ||common.Config.FrpConfig.RemotePort>65535{
-			common.Config.FrpConfig.RemotePort=common.Config.Port
+		if common.Config.FrpConfig.RandomRemotePort {
+			r := rand.New(rand.NewSource(time.Now().UnixNano()))
+			common.Config.FrpConfig.RemotePort = 40000 + r.Intn(10000)
+		} else {
+			if common.Config.FrpConfig.RemotePort <= 0 || common.Config.FrpConfig.RemotePort > 65535 {
+				common.Config.FrpConfig.RemotePort = common.Config.Port
+			}
 		}
 		frpcError := common.StartFrpC(common.TempDir)
 		if frpcError != nil {
@@ -189,5 +194,4 @@ func InitWebServer() {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "web服务启动失败，端口: %q\n", common.Config.Port)
 	}
-
 }

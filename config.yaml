@@ -1,7 +1,7 @@
 #定义一个yaml配置文件
 OpenBrowser:         true
 DisableLAN:          false
-Port:                12345
+Port:                22545
 CheckImageInServer:  false
 LogToFile:           false
 MaxDepth:            2
@@ -23,9 +23,10 @@ WebpConfig:
 EnableFrpcServer: true
 FrpConfig: 
   FrpcCommand: "frpc"
-  ServerAddr:  "frp.youdomain.com" 
+  ServerAddr:  "sh.youdomain.net" 
   ServerPort:  7000      
-  Token:       "&&%%!2356"
+  Token:       "NscevW3Usss"
   FrpType:     "tcp"
   RemotePort:  -1 
+  RandomRemotePort: true
 ServerHost: ""

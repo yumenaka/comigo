@@ -64,6 +64,7 @@ var Config = ServerConfig{
 		Token:       "&&%%!2356",
 		FrpType:     "tcp",
 		RemotePort:  -1, //remote_port
+		RandomRemotePort: true,
 		//AdminAddr:   "127.0.0.1",
 		//AdminPort:   "12340",
 		//AdminUser:   "",
@@ -102,17 +103,17 @@ type FrpClientConfig struct {
 	//本地转发端口设置
 	FrpType     string
 	RemotePort  int
-
+	RandomRemotePort bool
 }
 
 func StartFrpC(configPath string) error {
 	//借助ini库，保存一个ini文件
 	cfg := ini.Empty()
-	//写入以下字段：
+	//配置文件类似：
 	//[common]
 	//server_addr = frp.example.net
 	//server_port = 7000
-	//token = NscevW3U%F
+	//token = Nscffaass
 	//[comi]
 	//type = tcp
 	//local_ip = 127.0.0.1
@@ -175,31 +176,6 @@ func StartWebPServer(configPath string, imgPath string, exhaustPath string, port
 	}
 	return err
 }
-
-//func webpCMD(configPath string, wepCommand string) (err error) {
-//	var cmd *exec.Cmd
-//	if runtime.GOOS == "windows" {
-//		cmd = exec.Command(wepCommand, "--config", configPath+"\\config.json")
-//		fmt.Println(cmd)
-//		if err = cmd.Start(); err != nil {
-//			return err
-//		}
-//	} else if runtime.GOOS == "darwin" {
-//		cmd = exec.Command(wepCommand, "--config", configPath+"/config.json")
-//		fmt.Println(cmd)
-//		if err = cmd.Start(); err != nil {
-//			return err
-//		}
-//	} else if runtime.GOOS == "linux" {
-//		cmd = exec.Command(wepCommand, "--config", configPath+"/config.json")
-//		fmt.Println(cmd)
-//		if err = cmd.Start(); err != nil {
-//			return err
-//		}
-//	}
-//	return err
-//}
-
 
 var ReadingBook Book
 var BookList []Book

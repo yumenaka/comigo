@@ -217,11 +217,17 @@ func init() {
 	}else{
 		rootCmd.PersistentFlags().StringVar(&common.Config.FrpConfig.FrpcCommand, "frpc-command", "frpc", "frpc命令,或frpc可执行文件路径，默认为“frpc")
 	}
+	//frpc random remote_port
+	if viper.GetBool("COMI_FRP_RANDOM_REMOTE_PORT"){
+		rootCmd.PersistentFlags().BoolVar(&common.Config.FrpConfig.RandomRemotePort, "random_remote_port",  viper.GetBool("COMI_FRP_RANDOM_REMOTE_PORT"), "frpc 远程随机端口，默认启用（40000~50000）")
+	}else{
+		rootCmd.PersistentFlags().BoolVar(&common.Config.FrpConfig.RandomRemotePort, "random_remote_port",  true, "frpc 远程随机端口，默认启用（40000~50000）")
+	}
 	//frpc remote_port
 	if viper.GetInt("COMI_FRP_REMOTE_PORT")!=0{
 		rootCmd.PersistentFlags().IntVar(&common.Config.FrpConfig.RemotePort, "remote_port",  viper.GetInt("COMI_FRP_REMOTE_PORT"), "frpc remote_port，默认与本地相同")
 	}else{
-		rootCmd.PersistentFlags().IntVar(&common.Config.FrpConfig.RemotePort, "remote_port",  65536, "frpc remote_port，默认与本地相同")
+		rootCmd.PersistentFlags().IntVar(&common.Config.FrpConfig.RemotePort, "remote_port",  -1, "frpc remote_port，只关闭随机功能，则frp远程端口与本地相同")
 	}
 	//尚未启用的功能，暂时无意义的设置
 	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFileName, "logname", "comigo", "log文件名")
