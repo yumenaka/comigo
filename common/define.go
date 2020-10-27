@@ -123,11 +123,12 @@ func StartFrpC(configPath string) error {
 	_,err = cfg.Section("common").NewKey("server_addr", Config.FrpConfig.ServerAddr)
 	_,err = cfg.Section("common").NewKey("server_port", strconv.Itoa(Config.FrpConfig.ServerPort))
 	_,err = cfg.Section("common").NewKey("token", Config.FrpConfig.Token)
-	_,err = cfg.NewSection("comi")
-	_,err = cfg.Section("comi").NewKey("type", Config.FrpConfig.FrpType)
-	_,err = cfg.Section("comi").NewKey("local_ip", "127.0.0.1")
-	_,err = cfg.Section("comi").NewKey("local_port",  strconv.Itoa(Config.Port))
-	_,err = cfg.Section("comi").NewKey("remote_port", strconv.Itoa(Config.FrpConfig.RemotePort))
+	FrpConfigName :=ReadingBook.Name+"("+"comi "+Version+" "+time.Now().Format("2006-01-02 15:04:05")+")"
+	_,err = cfg.NewSection(FrpConfigName)
+	_,err = cfg.Section(FrpConfigName).NewKey("type", Config.FrpConfig.FrpType)
+	_,err = cfg.Section(FrpConfigName).NewKey("local_ip", "127.0.0.1")
+	_,err = cfg.Section(FrpConfigName).NewKey("local_port",  strconv.Itoa(Config.Port))
+	_,err = cfg.Section(FrpConfigName).NewKey("remote_port", strconv.Itoa(Config.FrpConfig.RemotePort))
 	//保存文件
 	err = cfg.SaveToIndent(configPath+"/frpc.ini", "\t")
 	if err!=nil{

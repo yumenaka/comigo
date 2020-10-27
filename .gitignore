@@ -24,9 +24,13 @@
 *.log
 main
 *.DS_Store
+
+#项目相关配置或文件
 go_build_main_go
 bin
 comic
+.config
+.comigo
 test
 *md5Sums.txt
 resource.syso
