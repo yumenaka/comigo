@@ -182,19 +182,29 @@ export default {
   // 判断图片横宽比
   filters: {
     check_image: function (value, image_url) {
-      //if (!value) return "Vertical";
+      console.log(value)
+      console.log(image_url)
+      //如果已经算好了
       value = value.toString();
-      //如果已经预先算好了
-      if (value == "Vertical" || value == "Horizontal" || image_url == "") {
+      if (value == "Vertical" || value == "Horizontal") {
         return value;
+      }
+      if (value=="") {
+        console.log("图片信息为空，开始本地JS分析"+image_url);
       }
       //value=this.$options.methods.getImageInfo(image_url);
       function getImageInfo(url) {
         let image = new Image();
         image.src = url;
-        // 如果有缓存，读缓存
+        // 如果有缓存，读缓存。
+        //还要避免默认占位图片的情况，目前远程网速较慢时似乎会出错
         if (image.complete) {
-          if (image.width < image.height) {
+          // if(image.width == image.height||image.height+image.width <10){
+          //   console.log(image.width)
+          //   console.log(image.height)
+          //   return value;//不变
+          // }
+          if (image.width < image.height ) {
             return "Vertical";
           } else {
             return "Horizontal";
@@ -255,10 +265,10 @@ export default {
 /* 横屏（显示区域）时的CSS样式，IE无效 */ 
 @media screen and (min-aspect-ratio: 19/19) {
   .Vertical {
-    width: 800px;
+    width: 900px;
   }
   .Horizontal {
-    width: 90%;
+    width: 95%;
   }
 }
 
@@ -267,7 +277,7 @@ export default {
 /* min-width 输出设备中页面最小可视区域宽度 大于这个width时，其中的css起作用 超宽屏 */
 @media screen and (min-aspect-ratio: 19/19) and (min-width: 1922px) {
   .Vertical {
-    width: 800px;
+    width: 1000px;
   }
   .Horizontal {
     width: 1900px;
