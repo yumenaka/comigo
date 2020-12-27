@@ -255,10 +255,10 @@ export default {
 /* 横屏（显示区域）时的CSS样式，IE无效 */ 
 @media screen and (min-aspect-ratio: 19/19) {
   .Vertical {
-    width: 800px;
+    width: 900px;
   }
   .Horizontal {
-    width: 90%;
+    width: 95%;
   }
 }
 
