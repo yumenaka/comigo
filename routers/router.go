@@ -1,12 +1,11 @@
 package routers
 
 import (
+	"embed"
 	"fmt"
 	"github.com/yumenaka/comi/common"
 	"github.com/yumenaka/comi/routers/reverse_proxy"
 	"html/template"
-	"io/ioutil"
-	"log"
 	"math/rand"
 	"net/http"
 	"os"
@@ -16,7 +15,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/markbates/pkger"
 )
 
 //退出时清理
@@ -100,26 +98,36 @@ func InitWebServer() {
 	}
 	//自定义分隔符，避免与vue.js冲突
 	engine.Delims("[[", "]]")
-	//pkger 打包的js静态资源目录
-	engine.StaticFS("/js", pkger.Dir("/webui/static/js"))
-	engine.StaticFS("/css", pkger.Dir("/webui/static/css"))
-	engine.StaticFS("/resources", pkger.Dir("/webui/public"))
+	////pkger 打包的js静态资源目录
+	//engine.StaticFS("/js", pkger.Dir("/webui/static/js"))
+	//engine.StaticFS("/css", pkger.Dir("/webui/static/css"))
+	//engine.StaticFS("/resources", pkger.Dir("/webui/public"))
+	//file, err := pkger.Open("/webui/static/index.html")
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//defer file.Close()
+	//data, err := ioutil.ReadAll(file)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//templateString := string(data)
+	////获取模板，命名为"template-data"，同时把左右分隔符改为 [[ ]]
+	//tmpl := template.Must(template.New("template-data").Delims("[[", "]]").Parse(templateString))
+
+	//静态资源
+	//go:embed js/*  css/*
+	var embedFiles embed.FS
+	engine.StaticFS("/assets", http.FS(embedFiles))
+
 	if common.ReadingBook.IsFolder {
 		engine.StaticFS("/raw/"+common.ReadingBook.Name, gin.Dir(common.ReadingBook.FilePath, true))
 	} else {
 		engine.StaticFile("/raw/"+common.ReadingBook.Name, common.ReadingBook.FilePath)
 	}
-	file, err := pkger.Open("/webui/static/index.html")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-	data, err := ioutil.ReadAll(file)
-	if err != nil {
-		log.Fatal(err)
-	}
-	templateString := string(data)
 	//获取模板，命名为"template-data"，同时把左右分隔符改为 [[ ]]
+	//go:embed index.html
+	var templateString string
 	tmpl := template.Must(template.New("template-data").Delims("[[", "]]").Parse(templateString))
 	//使用模板
 	engine.SetHTMLTemplate(tmpl)
@@ -190,7 +198,7 @@ func InitWebServer() {
 	}
 	//开始服务
 	common.PrintAllReaderURL()
-	err = engine.Run(webHost + strconv.Itoa(common.Config.Port))
+	err := engine.Run(webHost + strconv.Itoa(common.Config.Port))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "web服务启动失败，端口: %q\n", common.Config.Port)
 	}
