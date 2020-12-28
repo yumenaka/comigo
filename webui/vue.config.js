@@ -1,7 +1,7 @@
 module.exports = {
   "publicPath": "",
-  "outputDir": "static/resources",
-
+  "outputDir": "static",
+  "assetsDir": "assets",
   "devServer": {
     "host": "0.0.0.0",
     "port": 48080,
@@ -21,5 +21,5 @@ module.exports = {
 
   publicPath: '',
   outputDir: 'static',
-  assetsDir: ''
+  assetsDir: 'assets'
 }
