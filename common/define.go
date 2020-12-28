@@ -64,6 +64,7 @@ var Config = ServerConfig{
 		Token:       "&&%%!2356",
 		FrpType:     "tcp",
 		RemotePort:  -1, //remote_port
+		RandomRemotePort: true,
 		//AdminAddr:   "127.0.0.1",
 		//AdminPort:   "12340",
 		//AdminUser:   "",
@@ -102,17 +103,17 @@ type FrpClientConfig struct {
 	//本地转发端口设置
 	FrpType     string
 	RemotePort  int
-
+	RandomRemotePort bool
 }
 
 func StartFrpC(configPath string) error {
 	//借助ini库，保存一个ini文件
 	cfg := ini.Empty()
-	//写入以下字段：
+	//配置文件类似：
 	//[common]
 	//server_addr = frp.example.net
 	//server_port = 7000
-	//token = NscevW3U%F
+	//token = Nscffaass
 	//[comi]
 	//type = tcp
 	//local_ip = 127.0.0.1
@@ -122,11 +123,12 @@ func StartFrpC(configPath string) error {
 	_,err = cfg.Section("common").NewKey("server_addr", Config.FrpConfig.ServerAddr)
 	_,err = cfg.Section("common").NewKey("server_port", strconv.Itoa(Config.FrpConfig.ServerPort))
 	_,err = cfg.Section("common").NewKey("token", Config.FrpConfig.Token)
-	_,err = cfg.NewSection("comi")
-	_,err = cfg.Section("comi").NewKey("type", Config.FrpConfig.FrpType)
-	_,err = cfg.Section("comi").NewKey("local_ip", "127.0.0.1")
-	_,err = cfg.Section("comi").NewKey("local_port",  strconv.Itoa(Config.Port))
-	_,err = cfg.Section("comi").NewKey("remote_port", strconv.Itoa(Config.FrpConfig.RemotePort))
+	FrpConfigName :=ReadingBook.Name+"("+"comi "+Version+" "+time.Now().Format("2006-01-02 15:04:05")+")"
+	_,err = cfg.NewSection(FrpConfigName)
+	_,err = cfg.Section(FrpConfigName).NewKey("type", Config.FrpConfig.FrpType)
+	_,err = cfg.Section(FrpConfigName).NewKey("local_ip", "127.0.0.1")
+	_,err = cfg.Section(FrpConfigName).NewKey("local_port",  strconv.Itoa(Config.Port))
+	_,err = cfg.Section(FrpConfigName).NewKey("remote_port", strconv.Itoa(Config.FrpConfig.RemotePort))
 	//保存文件
 	err = cfg.SaveToIndent(configPath+"/frpc.ini", "\t")
 	if err!=nil{
@@ -175,31 +177,6 @@ func StartWebPServer(configPath string, imgPath string, exhaustPath string, port
 	}
 	return err
 }
-
-//func webpCMD(configPath string, wepCommand string) (err error) {
-//	var cmd *exec.Cmd
-//	if runtime.GOOS == "windows" {
-//		cmd = exec.Command(wepCommand, "--config", configPath+"\\config.json")
-//		fmt.Println(cmd)
-//		if err = cmd.Start(); err != nil {
-//			return err
-//		}
-//	} else if runtime.GOOS == "darwin" {
-//		cmd = exec.Command(wepCommand, "--config", configPath+"/config.json")
-//		fmt.Println(cmd)
-//		if err = cmd.Start(); err != nil {
-//			return err
-//		}
-//	} else if runtime.GOOS == "linux" {
-//		cmd = exec.Command(wepCommand, "--config", configPath+"/config.json")
-//		fmt.Println(cmd)
-//		if err = cmd.Start(); err != nil {
-//			return err
-//		}
-//	}
-//	return err
-//}
-
 
 var ReadingBook Book
 var BookList []Book
