@@ -1,9 +1,9 @@
 package routers
 
 import (
-	"github.com/yumenaka/comi/common"
 	"encoding/json"
 	"fmt"
+	"github.com/yumenaka/comi/common"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
