@@ -19,10 +19,10 @@ import (
 )
 
 type ServerConfig struct {
-	OpenBrowser        bool
-	DisableLAN         bool
-	PrintAllIP         bool
-	Port               int
+	OpenBrowser         bool
+	DisableLAN          bool
+	PrintAllIP          bool
+	Port                int
 	ConfigPath          string
 	CheckImageInServer  bool
 	LogToFile           bool
@@ -58,12 +58,12 @@ var Config = ServerConfig{
 	},
 	EnableFrpcServer: false,
 	FrpConfig: FrpClientConfig{
-		FrpcCommand: "frpc",
-		ServerAddr:  "localhost", //server_addr
-		ServerPort:  7000,      //server_port
-		Token:       "&&%%!2356",
-		FrpType:     "tcp",
-		RemotePort:  -1, //remote_port
+		FrpcCommand:      "frpc",
+		ServerAddr:       "localhost", //server_addr
+		ServerPort:       7000,        //server_port
+		Token:            "&&%%!2356",
+		FrpType:          "tcp",
+		RemotePort:       -1, //remote_port
 		RandomRemotePort: true,
 		//AdminAddr:   "127.0.0.1",
 		//AdminPort:   "12340",
@@ -80,7 +80,7 @@ var Config = ServerConfig{
 //}
 
 type WebPServerConfig struct {
-	WebpCommand         string
+	WebpCommand  string
 	HOST         string
 	PORT         string
 	ImgPath      string `json:"IMG_PATH"`
@@ -101,8 +101,8 @@ type FrpClientConfig struct {
 	//AdminUser   string
 	//AdminPwd    string
 	//本地转发端口设置
-	FrpType     string
-	RemotePort  int
+	FrpType          string
+	RemotePort       int
 	RandomRemotePort bool
 }
 
@@ -119,22 +119,22 @@ func StartFrpC(configPath string) error {
 	//local_ip = 127.0.0.1
 	//local_port = 1234
 	//remote_port = 23456
-	_,err := cfg.NewSection("common")
-	_,err = cfg.Section("common").NewKey("server_addr", Config.FrpConfig.ServerAddr)
-	_,err = cfg.Section("common").NewKey("server_port", strconv.Itoa(Config.FrpConfig.ServerPort))
-	_,err = cfg.Section("common").NewKey("token", Config.FrpConfig.Token)
-	FrpConfigName :=ReadingBook.Name+"("+"comi "+Version+" "+time.Now().Format("2006-01-02 15:04:05")+")"
-	_,err = cfg.NewSection(FrpConfigName)
-	_,err = cfg.Section(FrpConfigName).NewKey("type", Config.FrpConfig.FrpType)
-	_,err = cfg.Section(FrpConfigName).NewKey("local_ip", "127.0.0.1")
-	_,err = cfg.Section(FrpConfigName).NewKey("local_port",  strconv.Itoa(Config.Port))
-	_,err = cfg.Section(FrpConfigName).NewKey("remote_port", strconv.Itoa(Config.FrpConfig.RemotePort))
+	_, err := cfg.NewSection("common")
+	_, err = cfg.Section("common").NewKey("server_addr", Config.FrpConfig.ServerAddr)
+	_, err = cfg.Section("common").NewKey("server_port", strconv.Itoa(Config.FrpConfig.ServerPort))
+	_, err = cfg.Section("common").NewKey("token", Config.FrpConfig.Token)
+	FrpConfigName := ReadingBook.Name + "(" + "comi " + Version + " " + time.Now().Format("2006-01-02 15:04:05") + ")"
+	_, err = cfg.NewSection(FrpConfigName)
+	_, err = cfg.Section(FrpConfigName).NewKey("type", Config.FrpConfig.FrpType)
+	_, err = cfg.Section(FrpConfigName).NewKey("local_ip", "127.0.0.1")
+	_, err = cfg.Section(FrpConfigName).NewKey("local_port", strconv.Itoa(Config.Port))
+	_, err = cfg.Section(FrpConfigName).NewKey("remote_port", strconv.Itoa(Config.FrpConfig.RemotePort))
 	//保存文件
 	err = cfg.SaveToIndent(configPath+"/frpc.ini", "\t")
-	if err!=nil{
+	if err != nil {
 		fmt.Println("frpc ini初始化错误")
 		return err
-	}else {
+	} else {
 		fmt.Println("成功保存frpc设定.", configPath, cfg)
 	}
 	//实际执行
@@ -182,8 +182,8 @@ var ReadingBook Book
 var BookList []Book
 var (
 	//ReadFileName           string
-	TempDir         string
-	PictureDir      string
+	TempDir    string
+	PictureDir string
 	//PrintVersion    bool
 	Version         string = "v0.2.4"
 	SupportPicType         = [...]string{".png", ".jpg", ".jpeg", "bmp", ".gif", ".webp"}

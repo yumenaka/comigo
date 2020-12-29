@@ -7,20 +7,20 @@ LogToFile:           false
 MaxDepth:            2
 MinImageNum:         3
 ZipFilenameEncoding: ""
-EnableWebpServer: false
+EnableWebpServer: true
 WebpConfig: 
 　WebpCommand:  "webp-server"
 　HOST:         "127.0.0.1"
 　PORT:         "3333"
 　ImgPath:      ""
-　QUALITY:      70
+　QUALITY:      100
 　AllowedTypes: 
     - jpg
     - png
     - jpeg
     - bmp
 　ExhaustPath: 　""
-EnableFrpcServer: true
+EnableFrpcServer: false
 FrpConfig: 
   FrpcCommand: "frpc"
   ServerAddr:  "sh.japari-park.net" 

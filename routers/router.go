@@ -98,37 +98,29 @@ func InitWebServer() {
 	}
 	//自定义分隔符，避免与vue.js冲突
 	engine.Delims("[[", "]]")
-	////pkger 打包的js静态资源目录
-	//engine.StaticFS("/js", pkger.Dir("/webui/static/js"))
-	//engine.StaticFS("/css", pkger.Dir("/webui/static/css"))
-	//engine.StaticFS("/resources", pkger.Dir("/webui/public"))
-	//file, err := pkger.Open("/webui/static/index.html")
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//defer file.Close()
-	//data, err := ioutil.ReadAll(file)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//templateString := string(data)
-	////获取模板，命名为"template-data"，同时把左右分隔符改为 [[ ]]
-	//tmpl := template.Must(template.New("template-data").Delims("[[", "]]").Parse(templateString))
 
-	//静态资源
-	//go:embed js/*  css/*
-	var embedFiles embed.FS
-	engine.StaticFS("/assets", http.FS(embedFiles))
-
+	//静态资源(web.EmbedFiles)
+	//go:embed index.html
+	var TemplateString string
+	//go:embed  favicon.ico js/* css/*
+	var EmbedFiles embed.FS
+	//网站图标
+	engine.GET("favicon.ico", func(c *gin.Context) {
+		file, _ := EmbedFiles.ReadFile("favicon.ico")
+		c.Data(
+			http.StatusOK,
+			"image/x-icon",
+			file,
+		)
+	})
+	engine.StaticFS("/assets",http.FS(EmbedFiles))
 	if common.ReadingBook.IsFolder {
 		engine.StaticFS("/raw/"+common.ReadingBook.Name, gin.Dir(common.ReadingBook.FilePath, true))
 	} else {
 		engine.StaticFile("/raw/"+common.ReadingBook.Name, common.ReadingBook.FilePath)
 	}
 	//获取模板，命名为"template-data"，同时把左右分隔符改为 [[ ]]
-	//go:embed index.html
-	var templateString string
-	tmpl := template.Must(template.New("template-data").Delims("[[", "]]").Parse(templateString))
+	tmpl := template.Must(template.New("template-data").Delims("[[", "]]").Parse(TemplateString))
 	//使用模板
 	engine.SetHTMLTemplate(tmpl)
 	//解析模板到HTML
@@ -198,6 +190,9 @@ func InitWebServer() {
 	}
 	//开始服务
 	common.PrintAllReaderURL()
+	//打印配置
+	fmt.Println("打印配置")
+	fmt.Println(common.Config)
 	err := engine.Run(webHost + strconv.Itoa(common.Config.Port))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "web服务启动失败，端口: %q\n", common.Config.Port)

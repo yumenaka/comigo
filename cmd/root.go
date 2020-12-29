@@ -75,11 +75,11 @@ func initConfig() {
 	if err != nil {
 		viper.AddConfigPath(home)
 	}
-	viper.AddConfigPath(home+"/.config/comigo") // 多次调用以添加多个搜索路径
-	viper.AddConfigPath("./.config/comigo")     // 多次调用以添加多个搜索路径
-	viper.AddConfigPath("./.comigo")     // 多次调用以添加多个搜索路径
-	viper.AddConfigPath("./.config")            // 多次调用以添加多个搜索路径
-	viper.AddConfigPath(".")                    // 还可以在工作目录中查找配置
+	viper.AddConfigPath(home + "/.config/comigo") // 多次调用以添加多个搜索路径,home
+	//viper.AddConfigPath("./.config/comigo")       // 多次调用以添加多个搜索路径
+	//viper.AddConfigPath("./.comigo")              // 多次调用以添加多个搜索路径
+	viper.AddConfigPath("./.config")              // 多次调用以添加多个搜索路径
+	viper.AddConfigPath(".")                      // 在工作目录中查找配置
 	//查找并读取配置文件
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
@@ -192,9 +192,9 @@ func init() {
 	}
 	//webp压缩质量
 	if viper.GetInt("COMI_WEBP_QUALITY") != 0 {
-		rootCmd.PersistentFlags().IntVarP(&common.Config.WebpConfig.QUALITY, "webp-quality", "q", viper.GetInt("COMI_WEBP_QUALITY"), "webp压缩质量（默认60）")
+		rootCmd.PersistentFlags().IntVarP(&common.Config.WebpConfig.QUALITY, "webp-quality", "q", viper.GetInt("COMI_WEBP_QUALITY"), "webp压缩质量（默认100）")
 	} else {
-		rootCmd.PersistentFlags().IntVarP(&common.Config.WebpConfig.QUALITY, "webp-quality", "q", 60, "webp压缩质量（默认60）")
+		rootCmd.PersistentFlags().IntVarP(&common.Config.WebpConfig.QUALITY, "webp-quality", "q", 95, "webp压缩质量（默认100）")
 	}
 	////Frpc相关
 	//启用frp反向代理
@@ -245,7 +245,7 @@ func init() {
 	//rootCmd.PersistentFlags().StringVarP(&common.Config.ZipFilenameEncoding, "zip-encoding", "e", "", "Zip non-utf8 Encoding(gbk、shiftjis、gb18030）")
 	//	rootCmd.PersistentFlags().BoolVarP(&common.PrintVersion, "version", "v", false, "输出版本号")
 
-	if viper.GetBool("COMI_LOG.TO.FILE"){
+	if viper.GetBool("COMI_LOG.TO.FILE") {
 		rootCmd.PersistentFlags().BoolVar(&common.Config.LogToFile, "log", viper.GetBool("COMI_LOG.TO.FILE"), "记录log文件")
 	} else {
 		rootCmd.PersistentFlags().BoolVar(&common.Config.LogToFile, "log", false, "记录log文件")

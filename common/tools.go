@@ -39,7 +39,7 @@ func printURLAndQRCode(port int) {
 		fmt.Println("Frp反代的阅读链接可能是：" + readURL)
 		PrintQRCode(readURL)
 	}
-	if Config.ServerHost !=""{
+	if Config.ServerHost != "" {
 		readURL := "http://" + Config.ServerHost + ":" + strconv.Itoa(port)
 		fmt.Println("阅读链接可能是：" + readURL)
 		PrintQRCode(readURL)

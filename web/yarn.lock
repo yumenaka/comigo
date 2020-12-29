@@ -2268,9 +2268,9 @@ caniuse-api@^3.0.0:
     lodash.uniq "^4.5.0"
 
 caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001109, caniuse-lite@^1.0.30001165:
-  version "1.0.30001170"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001170.tgz#0088bfecc6a14694969e391cc29d7eb6362ca6a7"
-  integrity sha512-Dd4d/+0tsK0UNLrZs3CvNukqalnVTRrxb5mcQm8rHL49t7V5ZaTygwXkrq+FB+dVDf++4ri8eJnFEJAB8332PA==
+  version "1.0.30001171"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001171.tgz#3291e11e02699ad0a29e69b8d407666fc843eba7"
+  integrity sha512-5Alrh8TTYPG9IH4UkRqEBZoEToWRLvPbSQokvzSz0lii8/FOWKG4keO1HoYfPWs8IF/NH/dyNPg1cmJGvV3Zlg==
 
 case-sensitive-paths-webpack-plugin@^2.3.0:
   version "2.3.0"
@@ -8194,9 +8194,9 @@ vm-browserify@^1.0.1:
   integrity sha512-2ham8XPWTONajOR0ohOKOHXkm3+gaBmGut3SRuu75xLd/RRaY6vqgh8NBYYk7+RW3u5AtzPQZG8F10LHkl0lAQ==
 
 vue-cli-plugin-vuetify@^2.0.8:
-  version "2.0.8"
-  resolved "https://registry.yarnpkg.com/vue-cli-plugin-vuetify/-/vue-cli-plugin-vuetify-2.0.8.tgz#026051aad7820b356ec9cea208bf0f06e95a53a2"
-  integrity sha512-BHn9wwj/+B9v25mhZq2dV8NafM2LbogymjluPP+CjDnIdcwR3hW38r3nyKsZNPB1jXfWXsvVszipS3b8FqOBCg==
+  version "2.0.9"
+  resolved "https://registry.yarnpkg.com/vue-cli-plugin-vuetify/-/vue-cli-plugin-vuetify-2.0.9.tgz#982991aec28e79d1f0c2eb8f6e3d62e042087ee8"
+  integrity sha512-J4fzpz27OmCCAA3CI56ulYsUrZ859dQAh58Z9XZilY03kd/M+svLlPkK45cBIrGGfjSqQ40oyWezA3NiPBEG8g==
   dependencies:
     null-loader "^3.0.0"
     semver "^7.1.2"
