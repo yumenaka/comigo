@@ -37,21 +37,21 @@ resource.syso
 \[*
 config.yaml
 
-webui/node_modules
-webui/dist
+web/node_modules
+web/dist
 
 # local env files
-webui/.env.local
-webui/.env.*.local
+web/.env.local
+web/.env.*.local
 
 # Log files
-webui/npm-debug.log*
-webui/yarn-debug.log*
-webui/yarn-error.log*
+web/npm-debug.log*
+web/yarn-debug.log*
+web/yarn-error.log*
 
 # Editor directories and files
-webui/.idea
-webui/.vscode
+web/.idea
+web/.vscode
 *.suo
 *.ntvs*
 *.njsproj
