@@ -10,7 +10,9 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"path/filepath"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -22,7 +24,8 @@ func init() {
 	common.SetupCloseHander()
 }
 
-func StartComicServer(args []string) {
+func StartServer(args []string) {
+	initBaseMode()
 	cmdPath := path.Dir(os.Args[0]) //去除路径最后一个元素  /home/dir/comigo.exe -> /home/dir/
 	if len(args) == 0 {
 		err := common.ScanBookPath(cmdPath)
@@ -65,6 +68,34 @@ func StartComicServer(args []string) {
 	}
 	InitWebServer()
 }
+
+func initBaseMode() {
+
+
+
+
+
+	// 当前执行目录
+	runPath,_ := os.Getwd()
+	fmt.Println("runPath =", runPath)
+	// 带后缀的执行文件名
+	filenameWithSuffix := path.Base(os.Args[0])
+	// 文件后缀
+	fileSuffix := path.Ext(filenameWithSuffix)
+	// 去掉后缀后的执行文件名
+	filenameWithOutSuffix := strings.TrimSuffix(filenameWithSuffix, fileSuffix)
+	fmt.Println("filenameWithOutSuffix =", filenameWithOutSuffix)
+	ex, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+	extPath := filepath.Dir(ex)
+	fmt.Println(extPath)
+	ExtFileName:=  strings.Trim(filenameWithOutSuffix, extPath)
+	fmt.Println("ExtFileName =", ExtFileName)
+}
+
+
 
 func setFirstBook(args []string) {
 	if len(common.BookList) == 0 {
