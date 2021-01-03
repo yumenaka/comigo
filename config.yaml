@@ -1,13 +1,13 @@
 #定义一个yaml配置文件
-OpenBrowser:         true
+OpenBrowser:         false
 DisableLAN:          false
 Port:                1234
 CheckImageInServer:  true
 LogToFile:           false
-MaxDepth:            2
+MaxDepth:            1
 MinImageNum:         3
 ZipFilenameEncoding: ""
-EnableWebpServer: true
+EnableWebpServer: false
 WebpConfig: 
 　WebpCommand:  "webp-server"
 　HOST:         "127.0.0.1"

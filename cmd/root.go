@@ -42,7 +42,7 @@ comi -w -q 70 --frpc  --token aX4457d3O -p 23455 --frps-addr sh.example.com test
 	Long: `comigo 一款简单的漫画阅读器
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		routers.StartComicServer(args)
+		routers.StartServer(args)
 		return
 	},
 }
@@ -122,7 +122,6 @@ func init() {
 	} else {
 		rootCmd.PersistentFlags().IntVarP(&common.Config.Port, "port", "p", 1234, "服务端口")
 	}
-
 	//指定配置文件
 	if viper.GetString("COMI_CONFIG") != "" {
 		rootCmd.PersistentFlags().StringVarP(&common.Config.ConfigPath, "config", "c", viper.GetString("COMI_CONFIG"), "指定配置文件")
@@ -244,7 +243,6 @@ func init() {
 	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFilePath, "logpath", "~", "log文件位置")
 	//rootCmd.PersistentFlags().StringVarP(&common.Config.ZipFilenameEncoding, "zip-encoding", "e", "", "Zip non-utf8 Encoding(gbk、shiftjis、gb18030）")
 	//	rootCmd.PersistentFlags().BoolVarP(&common.PrintVersion, "version", "v", false, "输出版本号")
-
 	if viper.GetBool("COMI_LOG.TO.FILE") {
 		rootCmd.PersistentFlags().BoolVar(&common.Config.LogToFile, "log", viper.GetBool("COMI_LOG.TO.FILE"), "记录log文件")
 	} else {
