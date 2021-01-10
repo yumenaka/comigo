@@ -1,51 +1,128 @@
 <template>
   <div id="app" class="app_div">
-    <Header v-if="defaultSetiing.page_mode === 'multi_page_mode'">
-      <h2>
-        <a v-bind:href="'raw/' + book.name">{{ book.name }}</a>
-      </h2>
-      <h4>总页数：{{ book.page_num }}</h4>
-    </Header>
-<MultiView>
-    <div  v-for="(page, key) in book.pages" :key="page.url" class="manga">
-      <img
-        v-lazy="page.url"
-        v-bind:H="page.height"
-        v-bind:W="page.width"
-        v-bind:key="k"
-        v-bind:class="page.class | check_image(page.url)"
-      />
-      <p>{{key+1}}/{{book.page_num}}</p>
-    </div>
-</MultiView>
-<v-pagination v-if="defaultSetiing.page_mode === 'single_page_mode'" v-model="book" :length="book.page_num">
-</v-pagination>
+    <!-- 下拉阅读 -->
+    <MultiPage v-if="defaultSetiing.default_page_mode === 'multi'">
+      <Header>
+        <h2>
+          <a v-bind:href="'raw/' + book.name">{{ book.name }}</a>
+        </h2>
+        <h4>总页数：{{ book.page_num }}</h4>
+      </Header>
+      <div v-for="(page, key) in book.pages" :key="page.url" class="manga">
+        <img
+          v-lazy="page.url"
+          v-bind:H="page.height"
+          v-bind:W="page.width"
+          v-bind:key="k"
+          v-bind:class="page.class | check_image(page.url)"
+        />
+        <p>{{ key + 1 }}/{{ book.page_num }}</p>
+      </div>
+      <p></p>
+      <v-btn
+        v-scroll="onScroll"
+        v-show="btnFlag"
+        fab
+        color="#bbcbff"
+        bottom
+        right
+        @click="toTop"
+        >▲</v-btn
+      >
+    </MultiPage>
 
-    <p></p>
-    <v-btn v-scroll="onScroll" v-show="btnFlag" fab color="#bbcbff" bottom right @click="toTop">▲</v-btn>
+    <!-- 随机,或倒计时（绘图用） -->
+    <RandomPage v-if="defaultSetiing.default_page_mode === 'random'">
+      <Header>
+        <h2>
+          <a v-bind:href="'raw/' + book.name">{{ book.name }}</a>
+        </h2>
+      </Header>
+
+      <div
+        class="randombox"
+        style="
+          width: 600px;
+          height: 800px;
+          border: 3px #cccccc dashed;
+          margin: auto;
+        "
+      >
+        <img
+          v-lazy="book.pages[1].url"
+          v-bind:H="book.pages[1].height"
+          v-bind:W="book.pages[1].width"
+          height="95%"
+        />
+        <p>{{ book.page_num }}</p>
+      </div>
+    </RandomPage>
+
+    <!-- 单页阅读 -->
+    <SinglePage v-if="defaultSetiing.default_page_mode === 'single'">
+      <Header>
+        <h2>
+          <a v-bind:href="'raw/' + book.name">{{ book.name }}</a>
+        </h2>
+      </Header>
+
+      <div
+        class="singlebox"
+        style="
+          width: 600px;
+          height: 800px;
+          border: 3px #cccccc dashed;
+          margin: auto;
+        "
+      >
+        <v-img
+          contain
+          lazy-src=book.pages[page].url
+          max-height="600"
+          max-width="800"
+          src=book.pages[page].url
+        ></v-img>
+        <img v-bind:url="book.pages[0].url" height="95%" />
+        <v-pagination v-model="page" :length="book.page_num" @input = "getNumber"> </v-pagination>
+      </div>
+    </SinglePage>
   </div>
 </template>
 
 <script>
 //代码参考：https://github.com/bradtraversy/vue_crash_todolist
 import axios from "axios";
-import Header from "./components/Header.vue";
-import MultiView from "./views/MultiPage.vue";
+import Header from "./views/Header.vue";
+import MultiPage from "./views/MultiPage.vue";
+import SinglePage from "./views/SinglePage.vue";
 
 export default {
   name: "app",
   components: {
-    //WebSocketTest
     Header,
-    MultiView,
+    MultiPage,
+    SinglePage,
   },
   data() {
     return {
-      book: null,
-      bookshelf: null,
-      defaultSetiing: {
-        page_mode:"multi_page_mode",//single_page_mode,multi_page_mode,select_mode
+      book: {
+        name: "null",
+        page_num: 1,
+        pages: [
+          {
+            height: 2000,
+            width: 1419,
+            url: "/resources/favicon.ico",
+            class: "Vertical",
+          },
+        ],
       },
+      bookshelf: {},
+      defaultSetiing: {
+        default_page_mode: "single",
+      },
+      page: 1,
+      page_mode: "multi",
       btnFlag: false,
       duration: 300,
       offset: 0,
@@ -74,11 +151,17 @@ export default {
   },
   methods: {
     initPage() {
-      //Header.book=this.book;
       this.$cookies.keys();
+    },
+    getNumber: function(number){
+      this.page = number;
+      console.log(number)
     },
     getBook() {
       axios.get("/book.json").then((response) => (this.book = response.data));
+      axios
+        .get("/setting.json")
+        .then((response) => (this.defaultSetiing = response.data));
       axios
         .get("/bookshelf.json")
         .then((response) => (this.bookshelf = response.data))
@@ -98,7 +181,7 @@ export default {
       // this.$toast({
       //   message: "PC可使用“CTRL +”、“CTRL -”缩放",
       //   position: "bottom",
-      //   duration: 3000
+      //   duration: 3000,
       // });
     },
 
@@ -182,29 +265,23 @@ export default {
   // 判断图片横宽比
   filters: {
     check_image: function (value, image_url) {
-      console.log(value)
-      console.log(image_url)
+      console.log(value);
+      console.log(image_url);
       //如果已经算好了
       value = value.toString();
       if (value == "Vertical" || value == "Horizontal") {
         return value;
       }
-      if (value=="") {
-        console.log("图片信息为空，开始本地JS分析"+image_url);
+      if (value == "") {
+        console.log("图片信息为空，开始本地JS分析" + image_url);
       }
-      //value=this.$options.methods.getImageInfo(image_url);
       function getImageInfo(url) {
         let image = new Image();
         image.src = url;
         // 如果有缓存，读缓存。
         //还要避免默认占位图片的情况，目前远程网速较慢时似乎会出错
         if (image.complete) {
-          // if(image.width == image.height||image.height+image.width <10){
-          //   console.log(image.width)
-          //   console.log(image.height)
-          //   return value;//不变
-          // }
-          if (image.width < image.height ) {
+          if (image.width < image.height) {
             return "Vertical";
           } else {
             return "Horizontal";
@@ -239,7 +316,7 @@ export default {
   align-items: center;
 }
 
-.manga img{
+.manga img {
   margin: auto;
   max-width: inherit;
   padding-top: 3px;
@@ -249,7 +326,6 @@ export default {
   border-radius: 7px;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
-
 
 /* 竖屏(显示区域)CSS样式，IE无效 */
 @media screen and (max-aspect-ratio: 19/19) {
@@ -261,8 +337,7 @@ export default {
   }
 }
 
-
-/* 横屏（显示区域）时的CSS样式，IE无效 */ 
+/* 横屏（显示区域）时的CSS样式，IE无效 */
 @media screen and (min-aspect-ratio: 19/19) {
   .Vertical {
     width: 900px;
@@ -272,8 +347,7 @@ export default {
   }
 }
 
-
-/* 高分横屏（显示区域）时的CSS样式，IE无效 */ 
+/* 高分横屏（显示区域）时的CSS样式，IE无效 */
 /* min-width 输出设备中页面最小可视区域宽度 大于这个width时，其中的css起作用 超宽屏 */
 @media screen and (min-aspect-ratio: 19/19) and (min-width: 1922px) {
   .Vertical {
@@ -283,31 +357,4 @@ export default {
     width: 1900px;
   }
 }
-
-
-/* max-width 输出设备中页面最大可视区域宽度 小于这个width时，其中的css起作用 1920x1080屏 */
-/* 
-@media screen and (min-aspect-ratio: 19/16) and (max-width: 1921px) {
-  .Vertical {
-    width: 800px;
-  }
-  .Horizontal {
-    width: 1700px;
-  }
-}
- */
-
- 
-/* max-width 输出设备中页面最大可视区域宽度 小于这个width时，其中的css起作用 1366x768屏 */
-/*
-@media screen and (min-aspect-ratio: 19/16) and (max-width: 1367px) {
-  .Vertical {
-    width: 800px;
-  }
-  .Horizontal {
-    width: 1200px;
-  }
-}
- */
-
 </style>

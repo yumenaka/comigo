@@ -70,11 +70,6 @@ func StartServer(args []string) {
 }
 
 func initBaseMode() {
-
-
-
-
-
 	// 当前执行目录
 	runPath,_ := os.Getwd()
 	fmt.Println("runPath =", runPath)
@@ -93,9 +88,19 @@ func initBaseMode() {
 	fmt.Println(extPath)
 	ExtFileName:=  strings.Trim(filenameWithOutSuffix, extPath)
 	fmt.Println("ExtFileName =", ExtFileName)
+	//如果包含comi，默认漫画模式
+	if strings.Contains(ExtFileName, "comi"){
+		common.Config.DefaultPageMode="multi"
+	}
+	//如果包含random，设定为随机模式
+	if strings.Contains(ExtFileName, "random"){
+		common.Config.DefaultPageMode="random"
+	}
+	//如果用goland调试
+	if strings.Contains(ExtFileName, "build"){
+		common.Config.DefaultPageMode="multi"
+	}
 }
-
-
 
 func setFirstBook(args []string) {
 	if len(common.BookList) == 0 {
@@ -136,7 +141,7 @@ func InitWebServer() {
 	//go:embed  favicon.ico js/* css/*
 	var EmbedFiles embed.FS
 	//网站图标
-	engine.GET("favicon.ico", func(c *gin.Context) {
+	engine.GET("/resources/favicon.ico", func(c *gin.Context) {
 		file, _ := EmbedFiles.ReadFile("favicon.ico")
 		c.Data(
 			http.StatusOK,
@@ -167,6 +172,10 @@ func InitWebServer() {
 	//解析书架json
 	engine.GET("/bookshelf.json", func(c *gin.Context) {
 		c.PureJSON(http.StatusOK, common.BookList)
+	})
+	//服务器设定
+	engine.GET("/setting.json", func(c *gin.Context) {
+		c.PureJSON(http.StatusOK, common.Config)
 	})
 	//初始化websocket
 	engine.GET("/ws", wsHandler)
