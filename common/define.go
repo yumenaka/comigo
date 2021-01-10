@@ -19,28 +19,30 @@ import (
 )
 
 type ServerConfig struct {
-	OpenBrowser         bool
-	DisableLAN          bool
-	PrintAllIP          bool
+	OpenBrowser         bool	`json:"-"` //不要解析这个字段
+	DisableLAN          bool    `json:"-"` //不要解析这个字段
+	DefaultPageMode     string  `json:"default_page_mode"`
+	PrintAllIP          bool    `json:"-"` //不要解析这个字段
 	Port                int
-	ConfigPath          string
+	ConfigPath          string  `json:"-"` //不要解析这个字段
 	CheckImageInServer  bool
-	LogToFile           bool
-	LogFilePath         string
-	LogFileName         string
-	MaxDepth            int
+	LogToFile           bool    `json:"-"` //不要解析这个字段
+	LogFilePath         string  `json:"-"` //不要解析这个字段
+	LogFileName         string  `json:"-"` //不要解析这个字段
+	MaxDepth            int     `json:"-"` //不要解析这个字段
 	MinImageNum         int
 	ServerHost          string
 	EnableWebpServer    bool
-	WebpConfig          WebPServerConfig
+	WebpConfig          WebPServerConfig    `json:"-"` //不要解析这个字段
 	EnableFrpcServer    bool
-	FrpConfig           FrpClientConfig
-	ZipFilenameEncoding string
+	FrpConfig           FrpClientConfig     `json:"-"` //不要解析这个字段
+	ZipFilenameEncoding string              `json:"-"` //不要解析这个字段
 }
 
 var Config = ServerConfig{
 	OpenBrowser:         true,
 	DisableLAN:          false,
+	DefaultPageMode:     "random",//multi、single、random etc.
 	Port:                1234,
 	CheckImageInServer:  false,
 	LogToFile:           false,
@@ -72,12 +74,6 @@ var Config = ServerConfig{
 	},
 	ServerHost: "",
 }
-
-//func init() {
-//	var JAVAHOME string
-//	JAVAHOME = os.Getenv("JAVA_HOME")
-//	fmt.Println(JAVAHOME)
-//}
 
 type WebPServerConfig struct {
 	WebpCommand  string
