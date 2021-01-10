@@ -39,6 +39,7 @@ config.yaml
 
 web/node_modules
 web/dist
+web/static
 
 # local env files
 web/.env.local
