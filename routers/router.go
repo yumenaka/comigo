@@ -91,14 +91,17 @@ func initBaseMode() {
 	//如果包含comi，默认漫画模式
 	if strings.Contains(ExtFileName, "comi"){
 		common.Config.DefaultPageMode="multi"
+		fmt.Println("multi page mode")
 	}
 	//如果包含random，设定为随机模式
 	if strings.Contains(ExtFileName, "random"){
 		common.Config.DefaultPageMode="random"
+		fmt.Println("random page mode")
 	}
 	//如果用goland调试
 	if strings.Contains(ExtFileName, "build"){
 		common.Config.DefaultPageMode="multi"
+		fmt.Println("multi page mode")
 	}
 }
 
