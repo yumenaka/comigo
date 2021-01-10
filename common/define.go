@@ -42,7 +42,7 @@ type ServerConfig struct {
 var Config = ServerConfig{
 	OpenBrowser:         true,
 	DisableLAN:          false,
-	DefaultPageMode:     "random",//multi、single、random etc.
+	DefaultPageMode:     "multi",//multi、single、random etc.
 	Port:                1234,
 	CheckImageInServer:  false,
 	LogToFile:           false,
