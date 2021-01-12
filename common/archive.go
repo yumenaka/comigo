@@ -192,7 +192,11 @@ func ExtractArchive(b *Book) (err error) {
 				if (Percent %10)== 0 { //换个行
 					fmt.Println(strconv.Itoa(Percent)+"% ")
 				}else{
-					fmt.Print(strconv.Itoa(Percent)+"% ")
+					if Percent<10{
+						fmt.Print("0"+strconv.Itoa(Percent)+"% ")
+					}else {
+						fmt.Print(strconv.Itoa(Percent)+"% ")
+					}
 				}
 			}
 			tempPercent=Percent
