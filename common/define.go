@@ -10,7 +10,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
-	"sync"
+
 	"time"
 
 	"github.com/disintegration/imaging"
@@ -293,27 +293,40 @@ func (b *Book) ScanAllImage() {
 
 //并发分析
 func (b *Book) ScanAllImageGo() {
-	var wg sync.WaitGroup
+	//var wg sync.WaitGroup
 	log.Println("开始分析图片分辨率")
+
+
+	res := make(chan string)
+	count := 0
+	extractNum := 0
+	Percent :=0
+	tempPercent :=0
 	for i := 0; i < len(b.PageInfo); i++ { //此处不能用range，因为需要修改
-		wg.Add(1)
+		//wg.Add(1)
+		count++
 		//并发处理，提升图片分析速度
 		go func(i int) {
-			defer wg.Done()
+			//defer wg.Done()
 			SetImageType(&b.PageInfo[i])
+			res <- fmt.Sprintf("Finished %d", i)
 		}(i)
-		//if i < 10 {//为了优化打开速度，即便并发分析，前10张也要单线程做
-		//	SetImageType(&b.PageInfo[i])
-		//} else {
-		//	wg.Add(1)
-		//	//并发处理，提升图片分析速度
-		//	go func(i int) {
-		//		defer wg.Done()
-		//		SetImageType(&b.PageInfo[i])
-		//	}(i)
-		//}
 	}
-	wg.Wait()
+	//wg.Wait()
+	for i := 0; i < count; i++ {
+		extractNum++
+		if b.PageNum!=0{
+			Percent =int((float32(extractNum)/float32(b.PageNum))*100)
+			if  tempPercent!=Percent {
+				if (Percent %10)== 0 { 
+					fmt.Print(strconv.Itoa(Percent)+"% ")
+				}
+			}
+			tempPercent=Percent
+		}
+		//fmt.Println(<-res)
+		<-res
+	}
 	log.Println("图片分辨率分析完成")
 }
 
