@@ -14,6 +14,7 @@ import (
 	"path"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 )
 
@@ -107,6 +108,8 @@ func ExtractArchive(b *Book) (err error) {
 	}
 	extraFolder := path.Join(TempDir, b.UUID)
 	extractNum := 0
+	Percent :=0
+	tempPercent :=0
 	fmt.Println("开始解压：", b.FilePath)
 	//var wg sync.WaitGroup
 	err = archiver.Walk(b.FilePath, func(f archiver.File) error {
@@ -162,7 +165,6 @@ func ExtractArchive(b *Book) (err error) {
 			logrus.Debugf("不支持的格式：" + inArchiveName)
 			return nil
 		}
-		extractNum++
 		//解压后的文件
 		filePath := extraFolder + "/" + inArchiveName
 		temp := ImageInfo{LocalPath: filePath, InArchiveName: inArchiveName, UrlPath: "cache/" + b.UUID + "/" + inArchiveName}
@@ -181,6 +183,19 @@ func ExtractArchive(b *Book) (err error) {
 		err := e.Extract(b.FilePath, inArchiveName, TempDir+"/"+b.UUID) //解压到临时文件夹
 		if err != nil {
 			logrus.Debugf(err.Error())
+		}
+		//输出解压比例
+		extractNum++
+		if b.PageNum!=0{
+			Percent =int((float32(extractNum)/float32(b.PageNum))*100)
+			if  tempPercent!=Percent {
+				if (Percent %10)== 0 { //换个行
+					fmt.Println(strconv.Itoa(Percent)+"% ")
+				}else{
+					fmt.Print(strconv.Itoa(Percent)+"% ")
+				}
+			}
+			tempPercent=Percent
 		}
 		//因为有最大打开文件限制，暂不并发解压
 		return err
