@@ -294,9 +294,7 @@ func (b *Book) ScanAllImage() {
 //并发分析
 func (b *Book) ScanAllImageGo() {
 	//var wg sync.WaitGroup
-	log.Println("开始分析图片分辨率")
-
-
+	log.Println("开始分析图片")
 	res := make(chan string)
 	count := 0
 	extractNum := 0
@@ -318,8 +316,8 @@ func (b *Book) ScanAllImageGo() {
 		if b.PageNum!=0{
 			Percent =int((float32(extractNum)/float32(b.PageNum))*100)
 			if  tempPercent!=Percent {
-				if (Percent %10)== 0 { 
-					fmt.Print(strconv.Itoa(Percent)+"% ")
+				if (Percent %20)== 0 || Percent==10 {
+					fmt.Println(strconv.Itoa(Percent)+"% ")
 				}
 			}
 			tempPercent=Percent
@@ -327,7 +325,7 @@ func (b *Book) ScanAllImageGo() {
 		//fmt.Println(<-res)
 		<-res
 	}
-	log.Println("图片分辨率分析完成")
+	log.Println("图片分辨分析完成")
 }
 
 func SetImageType(p *ImageInfo) {
