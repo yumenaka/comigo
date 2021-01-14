@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/yumenaka/comi/locale"
 	"image"
 	"log"
 	"os"
@@ -19,30 +20,30 @@ import (
 )
 
 type ServerConfig struct {
-	OpenBrowser         bool	`json:"-"` //不要解析这个字段
-	DisableLAN          bool    `json:"-"` //不要解析这个字段
-	DefaultPageMode     string  `json:"default_page_mode"`
-	PrintAllIP          bool    `json:"-"` //不要解析这个字段
+	OpenBrowser         bool   `json:"-"` //不要解析这个字段
+	DisableLAN          bool   `json:"-"` //不要解析这个字段
+	DefaultPageMode     string `json:"default_page_mode"`
+	PrintAllIP          bool   `json:"-"` //不要解析这个字段
 	Port                int
-	ConfigPath          string  `json:"-"` //不要解析这个字段
+	ConfigPath          string `json:"-"` //不要解析这个字段
 	CheckImageInServer  bool
-	LogToFile           bool    `json:"-"` //不要解析这个字段
-	LogFilePath         string  `json:"-"` //不要解析这个字段
-	LogFileName         string  `json:"-"` //不要解析这个字段
-	MaxDepth            int     `json:"-"` //不要解析这个字段
+	LogToFile           bool   `json:"-"` //不要解析这个字段
+	LogFilePath         string `json:"-"` //不要解析这个字段
+	LogFileName         string `json:"-"` //不要解析这个字段
+	MaxDepth            int    `json:"-"` //不要解析这个字段
 	MinImageNum         int
 	ServerHost          string
 	EnableWebpServer    bool
-	WebpConfig          WebPServerConfig    `json:"-"` //不要解析这个字段
+	WebpConfig          WebPServerConfig `json:"-"` //不要解析这个字段
 	EnableFrpcServer    bool
-	FrpConfig           FrpClientConfig     `json:"-"` //不要解析这个字段
-	ZipFilenameEncoding string              `json:"-"` //不要解析这个字段
+	FrpConfig           FrpClientConfig `json:"-"` //不要解析这个字段
+	ZipFilenameEncoding string          `json:"-"` //不要解析这个字段
 }
 
 var Config = ServerConfig{
 	OpenBrowser:         true,
 	DisableLAN:          false,
-	DefaultPageMode:     "multi",//multi、single、random etc.
+	DefaultPageMode:     "multi", //multi、single、random etc.
 	Port:                1234,
 	CheckImageInServer:  false,
 	LogToFile:           false,
@@ -128,10 +129,10 @@ func StartFrpC(configPath string) error {
 	//保存文件
 	err = cfg.SaveToIndent(configPath+"/frpc.ini", "\t")
 	if err != nil {
-		fmt.Println("frpc ini初始化错误")
+		fmt.Println(locale.GetString("frpc_ini_error"))
 		return err
 	} else {
-		fmt.Println("成功保存frpc设定.", configPath, cfg)
+		fmt.Println(locale.GetString("frpc_setting_save_completed"), configPath, cfg)
 	}
 	//实际执行
 	var cmd *exec.Cmd
@@ -150,7 +151,7 @@ func StartWebPServer(configPath string, imgPath string, exhaustPath string, port
 	Config.WebpConfig.PORT = strconv.Itoa(port)
 	//Config.WebpConfig.QUALITY = quality
 	if Config.WebpConfig.WebpCommand == "" || Config.WebpConfig.ImgPath == "" || Config.WebpConfig.ExhaustPath == "" {
-		return errors.New("webp设定错误")
+		return errors.New(locale.GetString("webp_setting_error"))
 	}
 	jsonObject, err := os.OpenFile(configPath+"/config.json", os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
@@ -162,7 +163,7 @@ func StartWebPServer(configPath string, imgPath string, exhaustPath string, port
 		return err
 	}
 	if _, err := jsonObject.Write(content); err == nil {
-		fmt.Println("成功保存webp设定.", configPath, content)
+		fmt.Println(locale.GetString("webp_setting_save_completed"), configPath, content)
 	}
 	//err = webpCMD(configPath, Config.WebpCommand)
 	var cmd *exec.Cmd
@@ -284,22 +285,22 @@ func (b *Book) GetPicNum() int {
 
 //服务器端分析单双页
 func (b *Book) ScanAllImage() {
-	log.Println("开始解析图片")
+	log.Println(locale.GetString("check_image_start"))
 	for i := 0; i < len(b.PageInfo); i++ { //此处不能用range，因为需要修改
 		SetImageType(&b.PageInfo[i])
 	}
-	log.Println("图片解析完成")
+	log.Println(locale.GetString("check_image_completed"))
 }
 
 //并发分析
 func (b *Book) ScanAllImageGo() {
 	//var wg sync.WaitGroup
-	log.Println("开始分析图片")
+	log.Println(locale.GetString("check_image_start"))
 	res := make(chan string)
 	count := 0
 	extractNum := 0
-	Percent :=0
-	tempPercent :=0
+	Percent := 0
+	tempPercent := 0
 	for i := 0; i < len(b.PageInfo); i++ { //此处不能用range，因为需要修改
 		//wg.Add(1)
 		count++
@@ -313,26 +314,26 @@ func (b *Book) ScanAllImageGo() {
 	//wg.Wait()
 	for i := 0; i < count; i++ {
 		extractNum++
-		if b.PageNum!=0{
-			Percent =int((float32(extractNum)/float32(b.PageNum))*100)
-			if  tempPercent!=Percent {
-				if (Percent %20)== 0 || Percent==10 {
-					fmt.Println(strconv.Itoa(Percent)+"% ")
+		if b.PageNum != 0 {
+			Percent = int((float32(extractNum) / float32(b.PageNum)) * 100)
+			if tempPercent != Percent {
+				if (Percent%20) == 0 || Percent == 10 {
+					fmt.Println(strconv.Itoa(Percent) + "% ")
 				}
 			}
-			tempPercent=Percent
+			tempPercent = Percent
 		}
 		//fmt.Println(<-res)
 		<-res
 	}
-	log.Println("图片分辨分析完成")
+	log.Println(locale.GetString("check_image_completed"))
 }
 
 func SetImageType(p *ImageInfo) {
 	err := p.GetImageSize()
-	//log.Println("分析图片分辨率中：", p.LocalPath)
+	//log.Println(locale.GetString("check_image_ing"), p.LocalPath)
 	if err != nil {
-		log.Println("读取分辨率出错：" + err.Error())
+		log.Println(locale.GetString("check_image_error") + err.Error())
 	}
 	if p.Width == 0 && p.Height == 0 {
 		p.ImgType = "UnKnow"
@@ -350,7 +351,7 @@ func (i *ImageInfo) GetImageSize() (err error) {
 	var img image.Image
 	img, err = imaging.Open(i.LocalPath)
 	if err != nil {
-		log.Printf("failed to open image: %v\n", err)
+		log.Printf(locale.GetString("check_image_error")+" %v\n", err)
 	} else {
 		i.Width = img.Bounds().Dx()
 		i.Height = img.Bounds().Dy()

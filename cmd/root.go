@@ -19,23 +19,23 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
+	//Use:  locale.GetString("comigo_use") ,
+	//Short:locale.GetString("short_description")  ,
+	//Example: locale.GetString("comigo_example"),
+	//Version: locale.GetString("comigo_version"),
+	//Long: locale.GetString("long_description"),
 	Use:   "comi",
 	Short: "A simple comic book reader.",
 	Example: `
 comi book.zip
-
 设定网页服务端口（默认为1234）：
 comi -p 2345 book.zip 
-
 不打开浏览器（windows）：
 comi -b=false book.zip 
-
 本机浏览，不对外开放：
 comi -l book.zip  
-
 webp传输，需要webp-server配合：
 comi -w book.zip  
-
 指定多个参数：
 comi -w -q 70 --frpc  --token aX4457d3O -p 23455 --frps-addr sh.example.com test.zip
 `,
@@ -84,8 +84,10 @@ func initConfig() {
 	//查找并读取配置文件
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			//logrus.Debugf(locale.GetString("config_file_not_found") , viper.ConfigFileUsed())
 			logrus.Debugf("配置文件未找到", viper.ConfigFileUsed())
 		} else {
+			//logrus.Debugf(locale.GetString("config_file_not_resolve") , common.Config.ConfigPath)
 			logrus.Debugf("解析配置失败r", common.Config.ConfigPath)
 		}
 	}
