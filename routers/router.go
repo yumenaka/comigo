@@ -4,6 +4,7 @@ import (
 	"embed"
 	"fmt"
 	"github.com/yumenaka/comi/common"
+	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/routers/reverse_proxy"
 	"html/template"
 	"math/rand"
@@ -30,7 +31,7 @@ func StartServer(args []string) {
 	if len(args) == 0 {
 		err := common.ScanBookPath(cmdPath)
 		if err != nil {
-			fmt.Println("扫描出错，执行目录：", cmdPath)
+			fmt.Println(locale.GetString("scan_error"), cmdPath)
 		}
 	} else {
 		for _, p := range args {
@@ -39,13 +40,13 @@ func StartServer(args []string) {
 			}
 			err := common.ScanBookPath(p)
 			if err != nil {
-				fmt.Println("扫描出错，扫描路径：", p)
+				fmt.Println(locale.GetString("scan_error"), p)
 			}
 		}
 	}
 	switch len(common.BookList) {
 	case 0:
-		fmt.Println("没找到可阅读书籍，程序退出。")
+		fmt.Println(locale.GetString("book_not_found"))
 		os.Exit(0)
 	default:
 		setFirstBook(args)
@@ -62,8 +63,7 @@ func StartServer(args []string) {
 	} else {
 		err := common.InitReadingBook()
 		if err != nil {
-			fmt.Println("无法初始化书籍。", err, common.ReadingBook)
-			//os.Exit(0)
+			fmt.Println(locale.GetString("can_not_init_book"), err, common.ReadingBook)
 		}
 	}
 	InitWebServer()
@@ -79,29 +79,29 @@ func initBaseMode() {
 	fileSuffix := path.Ext(filenameWithSuffix)
 	// 去掉后缀后的执行文件名
 	filenameWithOutSuffix := strings.TrimSuffix(filenameWithSuffix, fileSuffix)
-	fmt.Println("filenameWithOutSuffix =", filenameWithOutSuffix)
+	//fmt.Println("filenameWithOutSuffix =", filenameWithOutSuffix)
 	ex, err := os.Executable()
 	if err != nil {
 		panic(err)
 	}
 	extPath := filepath.Dir(ex)
-	fmt.Println(extPath)
+	//fmt.Println(extPath)
 	ExtFileName:=  strings.Trim(filenameWithOutSuffix, extPath)
 	fmt.Println("ExtFileName =", ExtFileName)
 	//如果包含comi，默认漫画模式
 	if strings.Contains(ExtFileName, "comi"){
 		common.Config.DefaultPageMode="multi"
-		fmt.Println("multi page mode")
+		fmt.Println(locale.GetString("multi_page_mode"))
 	}
 	//如果包含random，设定为随机模式
 	if strings.Contains(ExtFileName, "random"){
 		common.Config.DefaultPageMode="random"
-		fmt.Println("random page mode")
+		fmt.Println(locale.GetString("random_page_mode"))
 	}
 	//如果用goland调试
 	if strings.Contains(ExtFileName, "build"){
 		common.Config.DefaultPageMode="multi"
-		fmt.Println("multi page mode")
+		fmt.Println(locale.GetString("multi_page_mode"))
 	}
 }
 
@@ -137,7 +137,6 @@ func InitWebServer() {
 	}
 	//自定义分隔符，避免与vue.js冲突
 	engine.Delims("[[", "]]")
-
 	//静态资源(web.EmbedFiles)
 	//go:embed index.html
 	var TemplateString string
@@ -195,16 +194,16 @@ func InitWebServer() {
 		} else {
 			common.Config.Port = 50000 + r.Intn(10000)
 		}
-		fmt.Println("端口被占用，尝试随机端口:" + strconv.Itoa(common.Config.Port))
+		fmt.Println(locale.GetString("port_busy") + strconv.Itoa(common.Config.Port))
 	}
 	//webp反向代理
 	if common.Config.EnableWebpServer {
 		webpError := common.StartWebPServer(common.PictureDir, common.PictureDir, common.TempDir+"/webp", common.Config.Port+1)
 		if webpError != nil {
-			fmt.Println("无法启动webp转换服务,请检查命令格式，并确认PATH里面有webp-server可执行文件", webpError.Error())
+			fmt.Println(locale.GetString("webp_server_error"), webpError.Error())
 			engine.Static("/cache", common.PictureDir)
 		} else {
-			fmt.Println("webp转换服务已启动")
+			fmt.Println(locale.GetString("werp_server_start"))
 			engine.Use(reverse_proxy.ReverseProxyHandle("/cache", reverse_proxy.ReverseProxyOptions{
 				TargetHost:  "http://localhost",
 				TargetPort:  strconv.Itoa(common.Config.Port + 1),
@@ -226,18 +225,18 @@ func InitWebServer() {
 		}
 		frpcError := common.StartFrpC(common.TempDir)
 		if frpcError != nil {
-			fmt.Println("无法启动frpc服务,请检查命令格式，并确认PATH里面有frpc可执行文件", frpcError.Error())
+			fmt.Println(locale.GetString("frpc_server_error"), frpcError.Error())
 		} else {
-			fmt.Println("frpc已启动")
+			fmt.Println(locale.GetString("frpc_server_start"))
 		}
 	}
 	//开始服务
 	common.PrintAllReaderURL()
 	//打印配置
-	fmt.Println("打印配置")
+	fmt.Println(locale.GetString("print_config"))
 	fmt.Println(common.Config)
 	err := engine.Run(webHost + strconv.Itoa(common.Config.Port))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "web服务启动失败，端口: %q\n", common.Config.Port)
+		fmt.Fprintf(os.Stderr, locale.GetString("web_server_error")+"%q\n", common.Config.Port)
 	}
 }

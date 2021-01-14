@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	github.com/Baozisoftware/qrcode-terminal-go v0.0.0-20170407111555-c0650d8dff0f
+	github.com/BurntSushi/toml v0.3.1
 	github.com/disintegration/imaging v1.6.2
 	github.com/fastly/go-utils v0.0.0-20180712184237-d95a45783239 // indirect
 	github.com/fsnotify/fsnotify v1.4.9
@@ -14,6 +15,7 @@ require (
 	github.com/lestrrat-go/strftime v1.0.3 // indirect
 	github.com/mholt/archiver/v3 v3.5.0
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/nicksnyder/go-i18n/v2 v2.1.1
 	github.com/nwaples/rardecode v1.1.0
 	github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5
 	github.com/satori/go.uuid v1.2.0
@@ -22,6 +24,7 @@ require (
 	github.com/spf13/cobra v1.1.1
 	github.com/spf13/viper v1.7.1
 	github.com/tebeka/strftime v0.1.5 // indirect
-	golang.org/x/text v0.3.4
+	golang.org/x/text v0.3.5
 	gopkg.in/ini.v1 v1.62.0
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
