@@ -79,6 +79,11 @@ func InitLocale() {
 	//go:embed zh-cn.toml
 	var cnBytes []byte
 	bundle.MustParseMessageFileBytes(cnBytes, "zh-cn.toml")
+
+	//go:embed ja-jp.toml
+	var jpBytes []byte
+	bundle.MustParseMessageFileBytes(jpBytes, "ja-jp.toml")
+
 	lang, loc := getLocale()
 	fmt.Printf("OK: language=%s, locale=%s\n", lang, loc)
 	switch lang {
@@ -89,6 +94,9 @@ func InitLocale() {
 		Localizer = i18n.NewLocalizer(bundle, "en-US")
 		fmt.Println(Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "init_locale"}))
 	case "ja":
+		Localizer = i18n.NewLocalizer(bundle, "ja-JP")
+		fmt.Println(Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "init_locale"}))
+	default:
 		Localizer = i18n.NewLocalizer(bundle, "en-US")
 		fmt.Println(Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "init_locale"}))
 	}

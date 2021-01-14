@@ -8,6 +8,7 @@ import (
 	"github.com/nwaples/rardecode"
 	uuid "github.com/satori/go.uuid"
 	"github.com/sirupsen/logrus"
+	"github.com/yumenaka/comi/locale"
 	"io/ioutil"
 	"net/url"
 	"os"
@@ -42,22 +43,22 @@ func ScanArchive(scanPath string) (*Book, error) {
 	}
 	_, ok := iface.(archiver.Extractor)
 	if !ok {
-		logrus.Debugf("不支持解压：%s", iface)
+		logrus.Debugf(locale.GetString("unsupported_extract")+"%s", iface)
 		return &b, err
+	}else{
+		fmt.Println(locale.GetString("scan_ing"), scanPath)
 	}
 	err = archiver.Walk(scanPath, func(f archiver.File) error {
 		inArchiveName := f.Name()
-
 		if !checkPicExt(inArchiveName) {
 			if inArchiveName != scanPath {
-				logrus.Debugf("不支持：" + inArchiveName)
+				logrus.Debugf(locale.GetString("unsupported_file_type") + inArchiveName)
 			}
 		} else {
 			b.PageNum++
 		}
 		return nil
 	})
-	fmt.Println("正在扫描文件", scanPath)
 	return &b, err
 }
 
@@ -70,7 +71,7 @@ func ExtractArchiveOnce(b *Book) (err error) {
 	}
 	u, ok := iface.(archiver.Unarchiver)
 	if !ok {
-		fmt.Println("不支持解压缩： %s", iface)
+		fmt.Println(locale.GetString("unsupported_extract")+" %s", iface)
 	}
 	//b.FileType = ".zip"
 	if b.UUID == "" {
@@ -100,7 +101,7 @@ func ExtractArchive(b *Book) (err error) {
 	}
 	e, ok := iface.(archiver.Extractor)
 	if !ok {
-		fmt.Println("不支持解压缩：%s", iface)
+		fmt.Println(locale.GetString("unsupported_extract")+"%s", iface)
 		return err
 	}
 	if b.UUID == "" {
@@ -110,7 +111,7 @@ func ExtractArchive(b *Book) (err error) {
 	extractNum := 0
 	Percent :=0
 	tempPercent :=0
-	fmt.Println("开始解压：", b.FilePath)
+	fmt.Println(locale.GetString("start_extract"), b.FilePath)
 	//var wg sync.WaitGroup
 	err = archiver.Walk(b.FilePath, func(f archiver.File) error {
 		//解压用
@@ -162,7 +163,7 @@ func ExtractArchive(b *Book) (err error) {
 			)
 		}
 		if !checkPicExt(inArchiveName) {
-			logrus.Debugf("不支持的格式：" + inArchiveName)
+			logrus.Debugf(locale.GetString("unsupported_file_type") + inArchiveName)
 			return nil
 		}
 		//解压后的文件
@@ -173,7 +174,7 @@ func ExtractArchive(b *Book) (err error) {
 			temp = ImageInfo{LocalPath: filePath, UrlPath: "cache/" + b.UUID + "/" + inArchiveName + "/" + inArchiveName}
 		}
 		if ChickFileExists(filePath) {
-			logrus.Debugf("文件已存在，跳过解压步骤：" + filePath)
+			logrus.Debugf(locale.GetString("file_exit") + filePath)
 			return err
 		}
 		b.PageInfo = append(b.PageInfo, temp)
@@ -205,7 +206,7 @@ func ExtractArchive(b *Book) (err error) {
 		return err
 	})
 	//wg.Wait()
-	fmt.Println("解压完成：", b.FilePath)
+	fmt.Println(locale.GetString("completed_extract") , b.FilePath)
 	return err
 }
 
@@ -272,7 +273,7 @@ func getFormat(subcommand string) (interface{}, error) {
 	case *archiver.Zstd:
 		// nothing to customize
 	default:
-		return nil, fmt.Errorf("format does not support customization: %s", f)
+		return nil, fmt.Errorf(locale.GetString("format_customization_error")+" %s", f)
 	}
 	return f, nil
 }
@@ -387,7 +388,7 @@ func ScanDirGetBook(folder string) (*Book, error) {
 			if errPath != nil {
 				fmt.Println(errPath)
 			}
-			fmt.Println(strAbsPath)
+			//fmt.Println(strAbsPath)
 			if checkPicExt(file.Name()) {
 				book.PageNum += 1
 				book.PageInfo = append(book.PageInfo, ImageInfo{LocalPath: strAbsPath, UrlPath: "/cache/" + file.Name()})

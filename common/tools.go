@@ -3,6 +3,7 @@ package common
 import (
 	"fmt"
 	"github.com/Baozisoftware/qrcode-terminal-go"
+	"github.com/yumenaka/comi/locale"
 	"io/ioutil"
 	"log"
 	"net"
@@ -18,7 +19,7 @@ import (
 //打印阅读链接
 func PrintAllReaderURL() {
 	localURL := "http://127.0.0.1:" + strconv.Itoa(Config.Port)
-	fmt.Println("本机阅读： " + localURL)
+	fmt.Println(locale.GetString("local_reading") + localURL)
 	//PrintQRCode(localURL)
 	//打开浏览器
 	if Config.OpenBrowser {
@@ -36,12 +37,12 @@ func printURLAndQRCode(port int) {
 	//启用Frp的时候
 	if Config.EnableFrpcServer {
 		readURL := "http://" + Config.FrpConfig.ServerAddr + ":" + strconv.Itoa(Config.FrpConfig.RemotePort)
-		fmt.Println("Frp反代的阅读链接可能是：" + readURL)
+		fmt.Println(locale.GetString("frp_reading_url_is")  + readURL)
 		PrintQRCode(readURL)
 	}
 	if Config.ServerHost != "" {
 		readURL := "http://" + Config.ServerHost + ":" + strconv.Itoa(port)
-		fmt.Println("阅读链接可能是：" + readURL)
+		fmt.Println(locale.GetString("reading_url_maybe")  + readURL)
 		PrintQRCode(readURL)
 		return
 	}
@@ -49,18 +50,18 @@ func printURLAndQRCode(port int) {
 	if Config.PrintAllIP {
 		IPList, err := GetIPList()
 		if err != nil {
-			fmt.Printf("获取IP出错: %v", err)
+			fmt.Printf(locale.GetString("get_ip_error")+" %v", err)
 		}
 		for _, IP := range IPList {
 			readURL := "http://" + IP + ":" + strconv.Itoa(port)
-			fmt.Println("阅读链接可能是：" + readURL)
+			fmt.Println(locale.GetString("reading_url_maybe") + readURL)
 			PrintQRCode(readURL)
 		}
 	} else {
 		//只打印出口IP
 		OutIP := GetOutboundIP().String()
 		readURL := "http://" + OutIP + ":" + strconv.Itoa(port)
-		fmt.Println("阅读链接可能是：" + readURL)
+		fmt.Println(locale.GetString("reading_url_maybe") + readURL)
 		PrintQRCode(readURL)
 	}
 
@@ -75,12 +76,12 @@ func PrintQRCode(text string) {
 func CheckPort(port int) bool {
 	ln, err := net.Listen("tcp", ":"+strconv.Itoa(port))
 	if err != nil {
-		//fmt.Fprintf(os.Stderr, "无法监听 %q: %s", port, err)
+		fmt.Fprintf(os.Stderr, locale.GetString("cannot_listen") +"%q: %s", port, err)
 		return false
 	}
 	err = ln.Close()
 	if err != nil {
-		fmt.Println("检测端口程序关闭失败:" + strconv.Itoa(port))
+		fmt.Println( locale.GetString("check_pork_error")+ strconv.Itoa(port))
 	}
 	fmt.Printf("TCP Port %q is available", port)
 	return true
@@ -101,7 +102,7 @@ func GetIPList() (IPList []string, err error) {
 		}
 		addrs, err := iface.Addrs()
 		if err != nil {
-			fmt.Printf("获取IP出错: %v", err)
+			fmt.Printf(locale.GetString("get_ip_error")+"%v", err)
 			return nil, err
 		}
 		for _, addr := range addrs {
@@ -141,7 +142,7 @@ func GetOutboundIP() net.IP {
 func GetMacAddrList() (macAddrList []string) {
 	netInterfaces, err := net.Interfaces()
 	if err != nil {
-		fmt.Printf("获取本机Mac地址出错: %v", err)
+		fmt.Printf(locale.GetString("check_mac_error")+": %v", err)
 		return macAddrList
 	}
 	//for _, netInterface := range netInterfaces {
@@ -178,13 +179,13 @@ func OpenBrowser(uri string) {
 	if runtime.GOOS == "windows" {
 		cmd = exec.Command("CMD", "/C", "start", uri)
 		if err := cmd.Start(); err != nil {
-			fmt.Println("打开浏览器失败")
+			fmt.Println(locale.GetString("open_browser_error"))
 			fmt.Println(err.Error())
 		}
 	} else if runtime.GOOS == "darwin" {
 		cmd = exec.Command("open", uri)
 		if err := cmd.Start(); err != nil {
-			fmt.Println("打开浏览器失败")
+			fmt.Println(locale.GetString("open_browser_error"))
 			fmt.Println(err.Error())
 		}
 	} else if runtime.GOOS == "linux" {
@@ -204,7 +205,7 @@ func SetupCloseHander() {
 	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGHUP)
 	go func() {
 		<-c
-		fmt.Println("\r- 程序运行中断，清理临时文件夹 -")
+		fmt.Println("\r"+locale.GetString("start_clear_file"))
 		deleteTempFiles()
 		os.Exit(0)
 	}()
@@ -219,13 +220,13 @@ func InitReadingBook() (err error) {
 	} else {
 		err = SetTempDir()
 		if err != nil {
-			fmt.Println("临时文件夹设置失败。", err)
+			fmt.Println(locale.GetString("temp_folder_error"), err)
 			return err
 		}
 		PictureDir = TempDir
 		err = ExtractArchive(&ReadingBook)
 		if err != nil {
-			fmt.Println("没找到合适的文件。")
+			fmt.Println(locale.GetString("file_not_found"))
 			return err
 		}
 		ReadingBook.SetArchiveBookName(ReadingBook.FilePath) //设置书名
@@ -244,21 +245,21 @@ func SetTempDir() (err error) {
 	}
 	TempDir, err = ioutil.TempDir("", "comic_cache_A8cG")
 	if err != nil {
-		println("创建临时文件夹失败")
+		println(locale.GetString("temp_folder_create_error"))
 	} else {
-		fmt.Println("临时文件夹路径为：" + TempDir)
+		fmt.Println(locale.GetString("temp_folder_path") + TempDir)
 	}
 	return err
 }
 
 func deleteTempFiles() {
-	fmt.Println("----  开始清理临时文件  ----")
+	fmt.Println(locale.GetString("clear_temp_file_start"))
 	if strings.Contains(TempDir, "comic_cache_A8cG") { //判断文件夹前缀，避免删错文件
 		err := os.RemoveAll(TempDir)
 		if err != nil {
-			fmt.Println("临时文件清理失败:" + TempDir)
+			fmt.Println(locale.GetString("clear_temp_file_error") + TempDir)
 		} else {
-			fmt.Println("临时文件清理成功:" + TempDir)
+			fmt.Println(locale.GetString("clear_temp_file_completed") + TempDir)
 		}
 	}
 	deleteOldTempFiles()
@@ -273,7 +274,7 @@ func deleteOldTempFiles() {
 	}
 	if post != -1 {
 		tempDirUpperFolder = string([]rune(TempDir)[:post]) //为了防止中文字符被错误截断，先转换成rune，再转回来
-		fmt.Println("系统临时文件夹为：", tempDirUpperFolder)
+		fmt.Println(locale.GetString("temp_folder_path"), tempDirUpperFolder)
 	}
 	files, err := ioutil.ReadDir(tempDirUpperFolder)
 	if err != nil {
@@ -285,9 +286,9 @@ func deleteOldTempFiles() {
 			if strings.Contains(oldTempDir, "comic_cache_A8cG") { //判断文件夹前缀，避免删错文件
 				err := os.RemoveAll(oldTempDir)
 				if err != nil {
-					fmt.Println("临时文件清理失败:" + oldTempDir)
+					fmt.Println(locale.GetString("clear_temp_file_error") + oldTempDir)
 				} else {
-					fmt.Println("临时文件清理成功:" + oldTempDir)
+					fmt.Println(locale.GetString("clear_temp_file_completed") + oldTempDir)
 				}
 			}
 		}
