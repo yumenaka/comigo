@@ -1,0 +1,7 @@
+init_locale = "The default language is set to English."
+scan_error = "扫描出错，执行目录："
+book_not_found = "没找到可阅读书籍，程序退出。"
+can_not_init_book = "无法初始化书籍。"
+multi_page_mode = "multi page mode"
+random_page_mode = "random page mode"
+single_page_mode = "multi page mode"

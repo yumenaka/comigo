@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/yumenaka/comi/common"
+	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/routers"
 )
 
@@ -109,6 +110,7 @@ func initConfig() {
 }
 
 func init() {
+	locale.InitLocale()
 	cobra.MousetrapHelpText = ""       //屏蔽鼠标提示，支持拖拽、双击运行
 	cobra.MousetrapDisplayDuration = 5 //"这是命令行程序"的提醒表示时间
 	//根据配置或系统变量，初始化各种参数
