@@ -1,4 +1,4 @@
-init_locale = "The default language is set to English."
+init_locale = "The default language is  English."
 scan_error = "Scan error, execute directory:"
 book_not_found = "No books to read are found, the program exits."
 can_not_init_book = "Unable to initialize book."
