@@ -1,0 +1,62 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Dependency directories (remove the comment below to include it)
+# vendor/
+.vscode
+.cache
+.idea
+*.zip
+*.rar
+*.tar
+*.tar.gz
+*.7z
+*.log
+main
+*.DS_Store
+
+#项目相关配置或文件
+go_build_main_go
+bin
+comic
+.config
+.comigo
+test
+*md5Sums.txt
+resource.syso
+\[*
+comigo.yaml
+*comigo.yaml
+__*
+web/node_modules
+web/dist
+web/static
+
+# local env files
+web/.env.local
+web/.env.*.local
+
+# Log files
+web/npm-debug.log*
+web/yarn-debug.log*
+web/yarn-error.log*
+
+# Editor directories and files
+web/.idea
+web/.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
