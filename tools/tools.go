@@ -1,53 +1,51 @@
-package common
+package tools
 
 import (
 	"fmt"
 	"github.com/Baozisoftware/qrcode-terminal-go"
 	"github.com/yumenaka/comi/locale"
-	"io/ioutil"
 	"log"
 	"net"
 	"os"
 	"os/exec"
-	"os/signal"
 	"runtime"
 	"strconv"
 	"strings"
-	"syscall"
+
 )
 
 //打印阅读链接
-func PrintAllReaderURL() {
-	localURL := "http://127.0.0.1:" + strconv.Itoa(Config.Port)
+func PrintAllReaderURL(Port int,OpenBrowserFlag bool,EnableFrpcServer bool,PrintAllIP bool,ServerHost string,ServerAddr string,FrpRemotePort int,DisableLAN bool) {
+	localURL := "http://127.0.0.1:" + strconv.Itoa(Port)
 	fmt.Println(locale.GetString("local_reading") + localURL)
 	//PrintQRCode(localURL)
 	//打开浏览器
-	if Config.OpenBrowser {
-		OpenBrowser("http://127.0.0.1:" + strconv.Itoa(Config.Port))
-		if Config.EnableFrpcServer {
-			OpenBrowser("http://" + Config.FrpConfig.ServerAddr + ":" + strconv.Itoa(Config.FrpConfig.RemotePort))
+	if OpenBrowserFlag {
+		OpenBrowser("http://127.0.0.1:" + strconv.Itoa(Port))
+		if EnableFrpcServer {
+			OpenBrowser("http://" + ServerAddr + ":" + strconv.Itoa(FrpRemotePort))
 		}
 	}
-	if !Config.DisableLAN {
-		printURLAndQRCode(Config.Port)
+	if !DisableLAN {
+		printURLAndQRCode(Port,EnableFrpcServer,PrintAllIP,ServerHost,ServerAddr,FrpRemotePort)
 	}
 }
 
-func printURLAndQRCode(port int) {
+func printURLAndQRCode(port int,EnableFrpcServer bool,PrintAllIP bool,ServerHost string, ServerAddr string, FrpRemotePort int) {
 	//启用Frp的时候
-	if Config.EnableFrpcServer {
-		readURL := "http://" + Config.FrpConfig.ServerAddr + ":" + strconv.Itoa(Config.FrpConfig.RemotePort)
+	if EnableFrpcServer {
+		readURL := "http://" + ServerAddr + ":" + strconv.Itoa(FrpRemotePort)
 		fmt.Println(locale.GetString("frp_reading_url_is")  + readURL)
 		PrintQRCode(readURL)
 	}
-	if Config.ServerHost != "" {
-		readURL := "http://" + Config.ServerHost + ":" + strconv.Itoa(port)
+	if ServerHost != "" {
+		readURL := "http://" + ServerHost + ":" + strconv.Itoa(port)
 		fmt.Println(locale.GetString("reading_url_maybe")  + readURL)
 		PrintQRCode(readURL)
 		return
 	}
 	//打印所有可用网卡IP
-	if Config.PrintAllIP {
+	if PrintAllIP {
 		IPList, err := GetIPList()
 		if err != nil {
 			fmt.Printf(locale.GetString("get_ip_error")+" %v", err)
@@ -193,104 +191,6 @@ func OpenBrowser(uri string) {
 	}
 }
 
-//中断处理：程序被中断的时候，清理临时文件
-func SetupCloseHander() {
-	c := make(chan os.Signal, 2)
-	//SIGHUP（挂起）, SIGINT（中断）或 SIGTERM（终止）默认会使得程序退出。
-	//1、SIGHUP 信号在用户终端连接(正常或非正常)结束时发出。
-	//2、syscall.SIGINT 和 os.Interrupt 是同义词,按下 CTRL+C 时发出。
-	//3、SIGTERM（终止）:kill终止进程,允许程序处理问题后退出。
-	//4.syscall.SIGHUP,终端控制进程结束(终端连接断开)
-	//5、syscall.SIGQUIT，CTRL+\ 退出
-	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGHUP)
-	go func() {
-		<-c
-		fmt.Println("\r"+locale.GetString("start_clear_file"))
-		deleteTempFiles()
-		os.Exit(0)
-	}()
-}
 
-func InitReadingBook() (err error) {
-	//准备解压，设置图片文件夹
-	if ReadingBook.IsFolder {
-		PictureDir = ReadingBook.FilePath
-		ReadingBook.ExtractComplete = true
-		ReadingBook.ExtractNum = ReadingBook.PageNum
-	} else {
-		err = SetTempDir()
-		if err != nil {
-			fmt.Println(locale.GetString("temp_folder_error"), err)
-			return err
-		}
-		PictureDir = TempDir
-		err = ExtractArchive(&ReadingBook)
-		if err != nil {
-			fmt.Println(locale.GetString("file_not_found"))
-			return err
-		}
-		ReadingBook.SetArchiveBookName(ReadingBook.FilePath) //设置书名
-	}
-	//服务器分析图片分辨率
-	if Config.CheckImageInServer {
-		ReadingBook.ScanAllImageGo() //扫描所有图片，取得分辨率信息，使用了协程
-	}
-	return err
-}
 
-//设置临时文件夹，退出时会被清理
-func SetTempDir() (err error) {
-	if TempDir != "" {
-		return err
-	}
-	TempDir, err = ioutil.TempDir("", "comic_cache_A8cG")
-	if err != nil {
-		println(locale.GetString("temp_folder_create_error"))
-	} else {
-		fmt.Println(locale.GetString("temp_folder_path") + TempDir)
-	}
-	return err
-}
 
-func deleteTempFiles() {
-	fmt.Println(locale.GetString("clear_temp_file_start"))
-	if strings.Contains(TempDir, "comic_cache_A8cG") { //判断文件夹前缀，避免删错文件
-		err := os.RemoveAll(TempDir)
-		if err != nil {
-			fmt.Println(locale.GetString("clear_temp_file_error") + TempDir)
-		} else {
-			fmt.Println(locale.GetString("clear_temp_file_completed") + TempDir)
-		}
-	}
-	deleteOldTempFiles()
-}
-
-//根据权限，清理老文件可能失败
-func deleteOldTempFiles() {
-	tempDirUpperFolder := TempDir
-	post := strings.LastIndex(TempDir, "/") //Unix风格的路径分隔符
-	if post == -1 {
-		post = strings.LastIndex(TempDir, "\\") //windows风格的分隔符
-	}
-	if post != -1 {
-		tempDirUpperFolder = string([]rune(TempDir)[:post]) //为了防止中文字符被错误截断，先转换成rune，再转回来
-		fmt.Println(locale.GetString("temp_folder_path"), tempDirUpperFolder)
-	}
-	files, err := ioutil.ReadDir(tempDirUpperFolder)
-	if err != nil {
-		fmt.Println(err)
-	}
-	for _, fi := range files {
-		if fi.IsDir() {
-			oldTempDir := tempDirUpperFolder + "/" + fi.Name()
-			if strings.Contains(oldTempDir, "comic_cache_A8cG") { //判断文件夹前缀，避免删错文件
-				err := os.RemoveAll(oldTempDir)
-				if err != nil {
-					fmt.Println(locale.GetString("clear_temp_file_error") + oldTempDir)
-				} else {
-					fmt.Println(locale.GetString("clear_temp_file_completed") + oldTempDir)
-				}
-			}
-		}
-	}
-}

@@ -6,6 +6,7 @@ import (
 	"github.com/yumenaka/comi/common"
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/routers/reverse_proxy"
+	"github.com/yumenaka/comi/tools"
 	"html/template"
 	"math/rand"
 	"net/http"
@@ -140,7 +141,7 @@ func InitWebServer() {
 		// 关闭 log 打印的字体颜色。输出到文件不需要颜色
 		gin.DisableConsoleColor()
 		// 输出 log 到文件(logrus)
-		engine.Use(common.LoggerToFile())
+		engine.Use(tools.LoggerToFile(common.Config.LogFilePath, common.Config.LogFileName))
 	}
 	//自定义分隔符，避免与vue.js冲突
 	engine.Delims("[[", "]]")
@@ -187,7 +188,7 @@ func InitWebServer() {
 		webHost = "localhost:"
 	}
 	//检测端口
-	if !common.CheckPort(common.Config.Port) {
+	if !tools.CheckPort(common.Config.Port) {
 		r := rand.New(rand.NewSource(time.Now().UnixNano()))
 		if common.Config.Port+2000 > 65535 {
 			common.Config.Port = common.Config.Port + r.Intn(1024)
@@ -231,7 +232,7 @@ func InitWebServer() {
 		}
 	}
 	//开始服务
-	common.PrintAllReaderURL()
+	tools.PrintAllReaderURL(common.Config.Port,common.Config.OpenBrowser,common.Config.EnableFrpcServer,common.Config.PrintAllIP,common.Config.ServerHost,common.Config.FrpConfig.ServerAddr,common.Config.FrpConfig.RemotePort,common.Config.DisableLAN)
 	//打印配置
 	//fmt.Println(locale.GetString("print_config"))
 	fmt.Println(common.Config)

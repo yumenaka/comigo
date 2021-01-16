@@ -1,4 +1,4 @@
-package common
+package tools
 
 import (
 	"fmt"
@@ -12,9 +12,9 @@ import (
 )
 
 //现在还没启用的log功能
-func LoggerToFile() gin.HandlerFunc {
+func LoggerToFile(LogFilePath string,LogFileName  string) gin.HandlerFunc {
 	//日志文件路径
-	filename := path.Join(Config.LogFilePath, Config.LogFileName)
+	filename := path.Join(LogFilePath, LogFileName)
 	src, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
 	if err != nil {
 		fmt.Println("Log err:", err)

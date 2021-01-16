@@ -9,6 +9,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"github.com/sirupsen/logrus"
 	"github.com/yumenaka/comi/locale"
+	"github.com/yumenaka/comi/tools"
 	"io/ioutil"
 	"net/url"
 	"os"
@@ -173,7 +174,7 @@ func ExtractArchive(b *Book) (err error) {
 			filePath = extraFolder + "/" + inArchiveName + "/" + inArchiveName
 			temp = ImageInfo{LocalPath: filePath, UrlPath: "cache/" + b.UUID + "/" + inArchiveName + "/" + inArchiveName}
 		}
-		if ChickFileExists(filePath) {
+		if tools.ChickFileExists(filePath) {
 			logrus.Debugf(locale.GetString("file_exit") + filePath)
 			return err
 		}

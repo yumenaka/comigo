@@ -1,4 +1,4 @@
-package common
+package tools
 
 //source:
 //https://github.com/mholt/archiver/pull/149/files/92cf5d0fb45d7fa943e25fc83fc71cd2e734a4fb
@@ -67,9 +67,9 @@ func Decode(in []byte, charset string) ([]byte, error) {
 	return nil, errors.New("charset not found!")
 }
 
-func DecodeFileName(headerName string) string {
-	if Config.ZipFilenameEncoding != "" {
-		if filename, err := Decode([]byte(headerName), Config.ZipFilenameEncoding); err == nil {
+func DecodeFileName(headerName string,ZipFilenameEncoding string) string {
+	if ZipFilenameEncoding != "" { //common.Config.ZipFilenameEncoding
+		if filename, err := Decode([]byte(headerName), ZipFilenameEncoding); err == nil {
 			return string(filename)
 		}
 	}
