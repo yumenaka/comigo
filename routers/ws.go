@@ -3,11 +3,10 @@ package routers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/yumenaka/comi/common"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/yumenaka/comi/common"
+	"net/http"
 )
 
 type WSMsg struct {

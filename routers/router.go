@@ -3,6 +3,7 @@ package routers
 import (
 	"embed"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comi/common"
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/routers/reverse_proxy"
@@ -17,8 +18,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/gin-gonic/gin"
 )
 
 //退出时清理
