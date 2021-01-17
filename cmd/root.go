@@ -14,8 +14,6 @@ import (
 	"runtime"
 )
 
-//var cfgFile string
-
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:  locale.GetString("comigo_use") ,
@@ -37,63 +35,13 @@ func Execute() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	//考虑试下termui
-}
-
-// 读取配置，参考下面三篇文章
-//1、https://www.loginradius.com/engineering/blog/environment-variables-in-golang/
-//2、https://www.liwenzhou.com/posts/Go/viper_tutorial/
-//3、https://ovh.github.io/tat/sdk/golang-full-example/
-func initConfig() {
-	//Viper优先级顺序： 显式调用 Set 函数 > 命令行参数 > 环境变量 > 配置文件 > 远程 key/value 存储系统 > 默认值
-	//读取环境变量
-	viper.AutomaticEnv()
-	//viper.SetConfigFile("./config.yaml") // 指定配置文件路径
-	viper.SetConfigName("comigo")      // 配置文件名称(无扩展名)
-	viper.SetConfigType("yaml")        // 如果配置文件的名称中没有扩展名，则需要配置此项
-	viper.AddConfigPath(".")           // 在当前目录中查找配置
-	// Find home directory.
-	home, err := homedir.Dir()
-	if err != nil {
-		viper.AddConfigPath(home) // 在Home目录中查找配置
-	}
-	viper.AddConfigPath(home + "/.config/comigo") // 多次调用以添加多个搜索路径,home
-	viper.AddConfigPath("./.config")          // 多次调用以添加多个搜索路径
-	//查找并读取配置文件
-	if err := viper.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			logrus.Debugf(locale.GetString("config_file_not_found") , viper.ConfigFileUsed())
-
-		} else {
-			logrus.Debugf(locale.GetString("config_file_not_resolve") , common.Config.ConfigPath)
-		}
-	}
-	//应用配置文件
-	if err := viper.Unmarshal(&common.Config); err != nil { // 读取配置文件转化成对应的结构体错误
-		panic(fmt.Errorf(locale.GetString("config_file_not_found")+" %s \n", err))
-	}
-	//// 设置默认值
-	//viper.SetDefault("COMI_HOST", "0.0.0.0")
-	//保存配置
-	////将当前的viper配置写入预定义的路径。如果没有预定义的路径，则报错。如果存在，将不会覆盖当前的配置文件。
-	//err = viper.SafeWriteConfigAs("sample_config.yaml")
-	//if err != nil {
-	//	fmt.Println(locale.GetString("save_config_failed") ,err.Error())
-	//} else {
-	//	fmt.Println(locale.GetString("save_config_file"), common.Config.ConfigPath)
-	//}
-	//监听配置变化，运行时动态加载配置
-	viper.WatchConfig()
-	viper.OnConfigChange(func(e fsnotify.Event) {
-		fmt.Println(locale.GetString("config_change") , e.Name)
-	})
 }
 
 func init() {
 	cobra.MousetrapHelpText = ""       //屏蔽鼠标提示，支持拖拽、双击运行
 	cobra.MousetrapDisplayDuration = 5 //"这是命令行程序"的提醒表示时间
 	//根据配置或系统变量，初始化各种参数
-	cobra.OnInitialize(initConfig)
+	cobra.OnInitialize(readConfigFile)
 	// 局部标签(local flag)，只在直接调用它时运行
 	//rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	// persistent，任何命令下均可使用，适合全局flag
@@ -126,7 +74,6 @@ func init() {
 	} else {
 		rootCmd.PersistentFlags().BoolVarP(&common.Config.DisableLAN, "disable-lan", "d", false, locale.GetString("COMI_DISABLE_LAN"))
 	}
-
 	//文件搜索深度
 	if viper.GetInt("COMI_MAX_DEPTH") != 0 {
 		rootCmd.PersistentFlags().IntVarP(&common.Config.MaxDepth, "max-depth", "m", viper.GetInt("COMI_MAX_DEPTH"), locale.GetString("COMI_MAX_DEPTH"))
@@ -177,7 +124,7 @@ func init() {
 		rootCmd.PersistentFlags().IntVarP(&common.Config.WebpConfig.QUALITY, "webp-quality", "q", 95, locale.GetString("COMI_WEBP_QUALITY"))
 	}
 	////Frpc相关
-	//启用frp反向代理
+	//frp反向代理
 	if viper.GetBool("COMI_ENABLE_FRPC") {
 		rootCmd.PersistentFlags().BoolVarP(&common.Config.EnableFrpcServer, "frpc", "f", viper.GetBool("COMI_ENABLE_FRPC"), locale.GetString("COMI_ENABLE_FRPC"))
 	} else {
@@ -219,14 +166,72 @@ func init() {
 	} else {
 		rootCmd.PersistentFlags().IntVar(&common.Config.FrpConfig.RemotePort, "remote_port", -1, locale.GetString("COMI_FRP_REMOTE_PORT"))
 	}
-	//尚未启用的功能，暂时无意义的设置
-	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFileName, "logname", "comigo", "log文件名")
-	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFilePath, "logpath", "~", "log文件位置")
-	//rootCmd.PersistentFlags().StringVarP(&common.Config.ZipFilenameEncoding, "zip-encoding", "e", "", "Zip non-utf8 Encoding(gbk、shiftjis、gb18030）")
-	//	rootCmd.PersistentFlags().BoolVarP(&common.PrintVersion, "version", "v", false, "输出版本号")
+	//输出log文件
 	if viper.GetBool("COMI_LOG_TO_FILE") {
 		rootCmd.PersistentFlags().BoolVar(&common.Config.LogToFile, "log", viper.GetBool("COMI_LOG_TO_FILE"), locale.GetString("COMI_LOG_TO_FILE"))
 	} else {
 		rootCmd.PersistentFlags().BoolVar(&common.Config.LogToFile, "log", false, locale.GetString("COMI_LOG_TO_FILE"))
 	}
+
+	//默认页面模式
+	if viper.GetBool("COMI_DEFAULT_page_template") {
+		rootCmd.PersistentFlags().StringVar(&common.Config.DefaultTemplate, "page-mode", viper.GetString("COMI_DEFAULT_page_template"), locale.GetString("COMI_DEFAULT_page_template"))
+	} else {
+		rootCmd.PersistentFlags().StringVar(&common.Config.DefaultTemplate, "page-mode", "auto", locale.GetString("COMI_DEFAULT_page_template"))
+	}
+
+	//尚未启用的功能，暂时无意义的设置
+	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFileName, "logname", "comigo", "log文件名")
+	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFilePath, "logpath", "~", "log文件位置")
+	//rootCmd.PersistentFlags().StringVarP(&common.Config.ZipFilenameEncoding, "zip-encoding", "e", "", "Zip non-utf8 Encoding(gbk、shiftjis、gb18030）")
+	//	rootCmd.PersistentFlags().BoolVarP(&common.PrintVersion, "version", "v", false, "输出版本号")
+}
+
+// 读取配置，参考下面三篇文章
+//1、https://www.loginradius.com/engineering/blog/environment-variables-in-golang/
+//2、https://www.liwenzhou.com/posts/Go/viper_tutorial/
+//3、https://ovh.github.io/tat/sdk/golang-full-example/
+func readConfigFile() {
+	//Viper优先级顺序： 显式调用 Set 函数 > 命令行参数 > 环境变量 > 配置文件 > 远程 key/value 存储系统 > 默认值
+	//读取环境变量
+	viper.AutomaticEnv()
+	//viper.SetConfigFile("./config.yaml") // 指定配置文件路径
+	viper.SetConfigName("comigo")      // 配置文件名称(无扩展名)
+	viper.SetConfigType("yaml")        // 如果配置文件的名称中没有扩展名，则需要配置此项
+	viper.AddConfigPath(".")           // 在当前目录中查找配置
+	// Find home directory.
+	home, err := homedir.Dir()
+	if err != nil {
+		viper.AddConfigPath(home) // 在Home目录中查找配置
+	}
+	viper.AddConfigPath(home + "/.config/comigo") // 多次调用以添加多个搜索路径,home
+	viper.AddConfigPath("./.config")          // 多次调用以添加多个搜索路径
+	//查找并读取配置文件
+	if err := viper.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			logrus.Debugf(locale.GetString("config_file_not_found") , viper.ConfigFileUsed())
+
+		} else {
+			logrus.Debugf(locale.GetString("config_file_not_resolve") , common.Config.ConfigPath)
+		}
+	}
+	//应用配置文件
+	if err := viper.Unmarshal(&common.Config); err != nil { // 读取配置文件转化成对应的结构体错误
+		panic(fmt.Errorf(locale.GetString("config_file_not_found")+" %s \n", err))
+	}
+	//// 设置默认值
+	//viper.SetDefault("COMI_HOST", "0.0.0.0")
+	//监听配置变化，运行时动态加载配置
+	viper.WatchConfig()
+	viper.OnConfigChange(func(e fsnotify.Event) {
+		fmt.Println(locale.GetString("config_change") , e.Name)
+	})
+	//保存配置並退出：
+	////将当前的viper配置写入预定义的路径。如果没有预定义的路径，则报错。如果存在，将不会覆盖当前的配置文件。
+	//err = viper.SafeWriteConfigAs("sample_config.yaml")
+	//if err != nil {
+	//	fmt.Println(locale.GetString("save_config_failed") ,err.Error())
+	//} else {
+	//	fmt.Println(locale.GetString("save_config_file"), common.Config.ConfigPath)
+	//}
 }

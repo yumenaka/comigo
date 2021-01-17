@@ -1,14 +1,30 @@
 <template>
   <div id="app" class="app_div">
     <!-- 下拉阅读 -->
-    <MultiPage v-if="defaultSetiing.default_page_mode === 'multi'"> </MultiPage>
+    <MultiPage
+      :book="book"
+      :bookshelf="bookshelf"
+      :defaultSetiing="defaultSetiing"
+      v-if="defaultSetiing.default_template === 'multi'"
+    >
+    </MultiPage>
 
     <!-- 随机,或倒计时（绘图用） -->
-    <RandomPage v-if="defaultSetiing.default_page_mode === 'random'">
+    <RandomPage
+      :book="book"
+      :bookshelf="bookshelf"
+      :defaultSetiing="defaultSetiing"
+      v-if="defaultSetiing.default_template === 'random'"
+    >
     </RandomPage>
 
     <!-- 单页阅读 -->
-    <SinglePage v-if="defaultSetiing.default_page_mode === 'single'">
+    <SinglePage
+      :book="book"
+      :bookshelf="bookshelf"
+      :defaultSetiing="defaultSetiing"
+      v-if="defaultSetiing.default_template === 'single'"
+    >
     </SinglePage>
   </div>
 </template>
@@ -16,21 +32,21 @@
 <script>
 //代码参考：https://github.com/bradtraversy/vue_crash_todolist
 import axios from "axios";
-// import Header from "./views/Header.vue";
 import MultiPage from "./views/MultiPage.vue";
 import SinglePage from "./views/SinglePage.vue";
+import RandomPage from "./views/RandomPage.vue";
 
 export default {
   name: "app",
   components: {
-    // Header,
     MultiPage,
     SinglePage,
+    RandomPage,
   },
   data() {
     return {
       book: {
-        name: "null",
+        name: "loading",
         page_num: 1,
         pages: [
           {
@@ -43,10 +59,9 @@ export default {
       },
       bookshelf: {},
       defaultSetiing: {
-        default_page_mode: "single",
+        default_page_template:"???",
       },
       page: 1,
-      page_mode: "multi",
       duration: 300,
       offset: 0,
       easing: "easeInOutCubic",
@@ -62,14 +77,6 @@ export default {
 
   mounted() {
     this.initPage();
-    axios.get("/book.json").then((response) => (this.book = response.data));
-    axios
-      .get("/setting.json")
-      .then((response) => (this.defaultSetiing = response.data));
-    axios
-      .get("/bookshelf.json")
-      .then((response) => (this.bookshelf = response.data))
-      .finally();
   },
   destroyed() {
     this.$socket.close();
@@ -77,6 +84,14 @@ export default {
   methods: {
     initPage() {
       this.$cookies.keys();
+      axios.get("/book.json").then((response) => (this.book = response.data));
+      axios
+        .get("/setting.json")
+        .then((response) => (this.defaultSetiing = response.data));
+      axios
+        .get("/bookshelf.json")
+        .then((response) => (this.bookshelf = response.data))
+        .finally();
     },
     getNumber: function (number) {
       this.page = number;
@@ -90,10 +105,11 @@ export default {
 #app {
   text-align: center;
   background-color: #f6f7eb;
+  align-items: center;
 }
 
 .app_div {
-  margin: auto;
+  /* margin: auto; */
   align-items: center;
 }
 </style>

@@ -1,8 +1,9 @@
 <template>
   <div id="multiPage">
       <Header>
-        <h2>
-          <a v-bind:href="'raw/' + book.name">{{ book.name }}</a>
+        <h2 >
+          <a v-if=!book.IsFolder v-bind:href="'raw/' + book.name">{{ book.name }}【Download】</a>
+          <a v-if=book.IsFolder v-bind:href="'raw/' + book.name">{{ book.name }}</a>
         </h2>
         <h4>总页数：{{ book.page_num }}</h4>
       </Header>
@@ -11,7 +12,7 @@
           v-lazy="page.url"
           v-bind:H="page.height"
           v-bind:W="page.width"
-          v-bind:key="k"
+          v-bind:key="key"
           v-bind:class="page.class | check_image(page.url)"
         />
         <p>{{ key + 1 }}/{{ book.page_num }}</p>
@@ -28,7 +29,6 @@
         >▲</v-btn
       >
     <slot></slot>
-
   </div>
 </template>
 
@@ -46,6 +46,7 @@ export default {
       book: {
         name: "null",
         page_num: 1,
+        IsFolder:false,
         pages: [
           {
             height: 2000,
@@ -57,7 +58,7 @@ export default {
       },
       bookshelf: {},
       defaultSetiing: {
-        default_page_mode: "single",
+        default_template: "multi",
       },
       page: 1,
       page_mode: "multi",
@@ -74,18 +75,13 @@ export default {
       },
     };
   },
-
   mounted() {
     this.initPage();
     this.getBook();
-    this.getBookShelf();
-    this.hintMessage();
     this.initWebSocket();
-    // window.addEventListener("scroll", this.scrollToTop);
   },
   destroyed() {
     this.$socket.close();
-    // window.removeEventListener("scroll", this.scrollToTop); //销毁时解除绑定
   },
   methods: {
     initPage() {
@@ -105,15 +101,6 @@ export default {
         .then((response) => (this.bookshelf = response.data))
         .finally();
     },
-
-    getBookShelf() {
-      // axios
-      //   .get("/bookshelf.json")
-      //   .then(response => (this.bookshelf = response.data));
-      //axios.get("/bookshelf.json").then(response => (this.bookshelf = response.data));
-      // .finally(console.log(this.bookshelf));
-    },
-
     onScroll(e) {
       if (typeof window === "undefined") return;
       const top = window.pageYOffset || e.target.scrollTop || 0;
@@ -131,20 +118,17 @@ export default {
       this.$socket.onmessage = this.websocketonmessage;
       this.$socket.onclose = this.websocketclose;
       this.hint = "连接建立";
-      this.setButtonColor("green");
     },
     websocketonopen(e) {
       //连接建立
       //  链接ws服务器，e.target.readyState = 0/1/2/3
       //0 CONNECTING ,1 OPEN, 2 CLOSING, 3 CLOSED
       this.hint = "连接成功";
-      this.setButtonColor("green");
       console.log("连接建立", e);
     },
     websocketonerror(e) {
       //连接失败
       this.hint = "连接出错";
-      this.setButtonColor("#999999");
       this.initWebSocket();
       console.log("Connection Error !!!", e);
     },
@@ -153,7 +137,6 @@ export default {
       console.log(e);
       this.msgList.push(JSON.parse(e.data));
       this.hint = "接收消息";
-      this.setButtonColor("blue", e);
     },
     onChangeBook: function (e, uuid) {
       // 当前元素
@@ -172,7 +155,6 @@ export default {
       //关闭
       this.hint = "连接断开";
       console.log("断开连接", e);
-      this.setButtonColor("#888888");
       //关闭链接时触发
       var code = e.code; //  状态码表 https://developer.mozilla.org/zh-CN/docs/Web/API/CloseEvent
       var reason = e.reason;
@@ -186,16 +168,12 @@ export default {
         }
       }, 3000);
     },
-    setButtonColor(color) {
-      var hintButton = document.getElementsByClassName("hint")[0];
-      hintButton.style.background = color;
-    },
   },
   // 判断图片横宽比
   filters: {
     check_image: function (value, image_url) {
-      console.log(value);
-      console.log(image_url);
+      // console.log(value);
+      // console.log(image_url);
       //如果已经算好了
       value = value.toString();
       if (value == "Vertical" || value == "Horizontal") {

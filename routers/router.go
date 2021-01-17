@@ -26,7 +26,27 @@ func init() {
 }
 
 func StartServer(args []string) {
-	initBaseMode()
+
+
+	switch {
+	case common.Config.DefaultTemplate =="auto" :
+		selectPageModeByExtFileName()
+	case common.Config.DefaultTemplate =="multi":
+		fmt.Println(locale.GetString("multi_page_template"))
+	case common.Config.DefaultTemplate =="random":
+		fmt.Println(locale.GetString("single_page_template"))
+	case common.Config.DefaultTemplate =="single":
+		fmt.Println(locale.GetString("single_page_template"))
+	default:
+		common.Config.DefaultTemplate ="multi"
+	}
+
+
+	if common.Config.DefaultTemplate =="auto" {
+
+	}else if common.Config.DefaultTemplate =="auto"  {
+
+	}
 	cmdPath := path.Dir(os.Args[0]) //去除路径最后一个元素  /home/dir/comigo.exe -> /home/dir/
 	if len(args) == 0 {
 		err := common.ScanBookPath(cmdPath)
@@ -69,7 +89,7 @@ func StartServer(args []string) {
 	InitWebServer()
 }
 
-func initBaseMode() {
+func selectPageModeByExtFileName() {
 	// 当前执行目录
 	targetPath,_ := os.Getwd()
 	fmt.Println(locale.GetString("target_path"), targetPath)
@@ -82,26 +102,31 @@ func initBaseMode() {
 	//fmt.Println("filenameWithOutSuffix =", filenameWithOutSuffix)
 	ex, err := os.Executable()
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 	extPath := filepath.Dir(ex)
-	//fmt.Println(extPath)
-	ExtFileName:=  strings.Trim(filenameWithOutSuffix, extPath)
-	fmt.Println("ExtFileName =", ExtFileName)
-	//如果包含comi，默认漫画模式
-	if strings.Contains(ExtFileName, "comi"){
-		common.Config.DefaultPageMode="multi"
-		fmt.Println(locale.GetString("multi_page_mode"))
+	//fmt.Println("extPath =",extPath)
+	ExtFileName:=  strings.TrimPrefix(filenameWithOutSuffix, extPath)
+	//fmt.Println("ExtFileName =", ExtFileName)
+	//如果执行文件名包含 comi或multi，设定为多页漫画模式
+	if strings.Contains(ExtFileName, "comi") || strings.Contains(ExtFileName, "multi")  || strings.Contains(ExtFileName, "多页"){
+		common.Config.DefaultTemplate ="multi"
+		fmt.Println(locale.GetString("multi_page_template"))
 	}
-	//如果包含random，设定为随机模式
-	if strings.Contains(ExtFileName, "random"){
-		common.Config.DefaultPageMode="random"
-		fmt.Println(locale.GetString("random_page_mode"))
+	//如果执行文件名包含 single，设定为 single 模式
+	if strings.Contains(ExtFileName, "single")|| strings.Contains(ExtFileName, "单页"){
+		common.Config.DefaultTemplate ="multi"
+		fmt.Println(locale.GetString("single_page_template"))
+	}
+	//如果执行文件名包含 random，设定为random模式
+	if strings.Contains(ExtFileName, "random") || strings.Contains(ExtFileName, "rand")|| strings.Contains(ExtFileName, "随机"){
+		common.Config.DefaultTemplate ="random"
+		fmt.Println(locale.GetString("random_page_template"))
 	}
 	//如果用goland调试
 	if strings.Contains(ExtFileName, "build"){
-		common.Config.DefaultPageMode="multi"
-		fmt.Println(locale.GetString("multi_page_mode"))
+		common.Config.DefaultTemplate ="multi"
+		fmt.Println(locale.GetString("multi_page_template"))
 	}
 }
 

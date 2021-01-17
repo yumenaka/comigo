@@ -17,19 +17,19 @@ import (
 )
 
 type ServerConfig struct {
-	OpenBrowser         bool   `json:"-"` //不要解析这个字段
-	DisableLAN          bool   `json:"-"` //不要解析这个字段
-	DefaultPageMode     string `json:"default_page_mode"`
-	PrintAllIP          bool   `json:"-"` //不要解析这个字段
-	Port                int
-	ConfigPath          string `json:"-"` //不要解析这个字段
-	CheckImageInServer  bool
-	LogToFile           bool   `json:"-"` //不要解析这个字段
-	LogFilePath         string `json:"-"` //不要解析这个字段
-	LogFileName         string `json:"-"` //不要解析这个字段
-	MaxDepth            int    `json:"-"` //不要解析这个字段
-	MinImageNum         int
-	ServerHost          string
+	OpenBrowser        bool   `json:"-"` //不要解析这个字段
+	DisableLAN         bool   `json:"-"` //不要解析这个字段
+	DefaultTemplate    string `json:"default_template"`
+	PrintAllIP         bool   `json:"-"` //不要解析这个字段
+	Port               int
+	ConfigPath         string `json:"-"` //不要解析这个字段
+	CheckImageInServer bool
+	LogToFile          bool   `json:"-"` //不要解析这个字段
+	LogFilePath        string `json:"-"` //不要解析这个字段
+	LogFileName        string `json:"-"` //不要解析这个字段
+	MaxDepth           int    `json:"-"` //不要解析这个字段
+	MinImageNum        int
+	ServerHost         string
 	EnableWebpServer    bool
 	WebpConfig          WebPServerConfig `json:"-"` //不要解析这个字段
 	EnableFrpcServer    bool
@@ -40,7 +40,7 @@ type ServerConfig struct {
 var Config = ServerConfig{
 	OpenBrowser:         true,
 	DisableLAN:          false,
-	DefaultPageMode:     "multi", //multi、single、random etc.
+	DefaultTemplate:     "multi", //multi、single、random etc.
 	Port:                1234,
 	CheckImageInServer:  false,
 	LogToFile:           false,

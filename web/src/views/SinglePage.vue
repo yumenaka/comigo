@@ -1,39 +1,138 @@
 <template>
   <div id="SinglePage">
-        <Header>
-        <h2>
-          <a v-bind:href="'raw/' + book.name">{{ book.name }}</a>
-        </h2>
-      </Header>
-
-      <div
-        class="singlebox"
-        style="
-          width: 600px;
-          height: 800px;
-          border: 3px #cccccc dashed;
-          margin: auto;
-        "
-      >
-        <v-img
-          contain
-          lazy-src=book.pages[page].url
-          max-height="600"
-          max-width="800"
-          src=book.pages[page].url
-        ></v-img>
-        <img v-bind:url="book.pages[0].url" height="95%" />
-        <v-pagination v-model="page" :length="book.page_num" @input = "getNumber"> </v-pagination>
-      </div>
+    <Header>
+      <h2>
+        <a v-if="!book.IsFolder" v-bind:href="'raw/' + book.name"
+          >{{ book.name }}【Download】</a
+        >
+        <a v-if="book.IsFolder" v-bind:href="'raw/' + book.name">{{
+          book.name
+        }}</a>
+      </h2>
+    </Header>
+    <div class="singe_page_main" v-on:click="nextPage">
+      <img
+        lazy-src="/resources/favicon.ico"
+        v-bind:src="book.pages[page - 1].url"
+      /><img />
+    </div>
+    <v-alert v-model="alert" type="info" close-text="Close Alert" dismissible>
+      已经翻到最后一页。
+    </v-alert>
+    <v-pagination
+      circle
+      v-model="page"
+      :length="book.page_num"
+      :total-visible="10"
+      @input="toPage"
+    >
+    </v-pagination>
     <slot></slot>
   </div>
 </template>
 
-<script>
-export default {
-    
-}
-</script>
-
 <style>
+.singe_page_main {
+  max-width: 80%;
+  max-height: 100%;
+  width: 600px;
+  height: 800px;
+  border: 2px solid rgb(84, 106, 233);
+  display: table-cell;
+
+  vertical-align: middle;
+}
+
+.singe_page_main img {
+  max-width: 80%;
+  max-height: 100%;
+  /* display: block; */
+  margin: center;
+  vertical-align: middle;
+}
 </style>
+
+<script>
+import Header from "./Header.vue";
+export default {
+  components: {
+    Header,
+  },
+
+  data() {
+    return {
+      page: 1,
+      alert: false,
+      easing: "easeInOutCubic",
+    };
+  },
+
+  mounted() {
+    // 增加监听
+    // window.addEventListener("keyup", this.handleKeyup);
+    // window.addEventListener("scroll", this.handleScroll);
+  },
+  destroyed() {
+    // window.removeEventListener("keyup", this.handleKeyup);
+    // window.removeEventListener("scroll", this.handleScroll);
+  },
+
+  methods: {
+    initPage() {
+      this.$cookies.keys();
+    },
+    nextPage: function (p) {
+      if (this.page < this.book.page_num) {
+        this.page = this.page + 1;
+      } else {
+        this.alert = true;
+        alert("Hello World!");
+      }
+      console.log(p);
+    },
+    toPage: function (p) {
+      this.page = p;
+      console.log(p);
+    },
+    moveSomething(e) {
+      switch (e.keyCode) {
+        case 37:
+          // left key pressed
+          //advancePage(-1);
+          break;
+        case 32:
+          // spacebar pressed
+          if (
+            window.innerHeight + window.scrollY >=
+            document.body.offsetHeight
+          ) {
+            //advancePage(1);
+          }
+          break;
+        case 39:
+          // right key pressed
+          //advancePage(1);
+          break;
+        case 17:
+          // Ctrl key pressed
+          //openOverlay();
+          break;
+      }
+    },
+    // 键盘事件
+    handleKeyup(event) {
+      const e = event || window.event || arguments.callee.caller.arguments[0];
+      if (!e) return;
+      const { key, keyCode } = e;
+      console.log(keyCode);
+      console.log(key);
+    },
+    //  滑轮事件
+    handleScroll() {
+      var e = document.body.scrollTop || document.documentElement.scrollTop;
+      if (!e) return;
+      // console.log(e);
+    },
+  },
+};
+</script>
