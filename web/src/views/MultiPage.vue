@@ -33,7 +33,7 @@
 </template>
 
 <script>
-import axios from "axios";
+// import axios from "axios";
 import Header from "./Header.vue";
 
 export default {
@@ -43,24 +43,10 @@ export default {
 
   data() {
     return {
-      book: {
-        name: "null",
-        page_num: 1,
-        IsFolder:false,
-        pages: [
-          {
-            height: 2000,
-            width: 1419,
-            url: "/resources/favicon.ico",
-            class: "Vertical",
-          },
-        ],
-      },
-      bookshelf: {},
-      defaultSetiing: {
-        default_template: "multi",
-      },
-      page: 1,
+      book: this.$store.getters.book,
+      bookshelf: this.$store.getters.bookshelf,
+      defaultSetiing: this.$store.getters.bookshelf,
+      page: this.$store.getters.now_page,
       page_mode: "multi",
       btnFlag: false,
       duration: 300,
@@ -76,31 +62,21 @@ export default {
     };
   },
   mounted() {
-    this.initPage();
-    this.getBook();
+    //this.initPage();
     this.initWebSocket();
   },
   destroyed() {
     this.$socket.close();
   },
   methods: {
-    initPage() {
-      this.$cookies.keys();
-    },
+    // initPage() {
+    //   this.$cookies.keys();
+    // },
     getNumber: function(number){
       this.page = number;
       console.log(number)
     },
-    getBook() {
-      axios.get("/book.json").then((response) => (this.book = response.data));
-      axios
-        .get("/setting.json")
-        .then((response) => (this.defaultSetiing = response.data));
-      axios
-        .get("/bookshelf.json")
-        .then((response) => (this.bookshelf = response.data))
-        .finally();
-    },
+
     onScroll(e) {
       if (typeof window === "undefined") return;
       const top = window.pageYOffset || e.target.scrollTop || 0;

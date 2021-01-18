@@ -45,33 +45,14 @@ export default {
   },
   data() {
     return {
-      book: {
-        name: "loading",
-        page_num: 1,
-        pages: [
-          {
-            height: 2000,
-            width: 1419,
-            url: "/resources/favicon.ico",
-            class: "Vertical",
-          },
-        ],
-      },
-      bookshelf: {},
-      defaultSetiing: {
-        default_page_template:"???",
-      },
-      page: 1,
+      book: this.$store.getters.book,
+      bookshelf: this.$store.getters.bookshelf,
+      defaultSetiing: this.$store.getters.bookshelf,
+      page: this.$store.getters.now_page,
       duration: 300,
       offset: 0,
       easing: "easeInOutCubic",
-      message: {
-        user_uuid: "",
-        server_status: "",
-        now_book_uuid: "",
-        read_percent: 0.0,
-        msg: "",
-      },
+      message: this.$store.getters.message,
     };
   },
 
@@ -84,14 +65,10 @@ export default {
   methods: {
     initPage() {
       this.$cookies.keys();
-      axios.get("/book.json").then((response) => (this.book = response.data));
-      axios
-        .get("/setting.json")
-        .then((response) => (this.defaultSetiing = response.data));
-      axios
-        .get("/bookshelf.json")
-        .then((response) => (this.bookshelf = response.data))
-        .finally();
+      this.$store.commit('syncRemoteSetting');
+      this.$store.commit('syncBookDate');
+      this.$store.commit('syncBookShelfDate');
+      
     },
     getNumber: function (number) {
       this.page = number;
