@@ -31,7 +31,7 @@
 
 <script>
 //代码参考：https://github.com/bradtraversy/vue_crash_todolist
-import axios from "axios";
+// import axios from "axios";
 import MultiPage from "./views/MultiPage.vue";
 import SinglePage from "./views/SinglePage.vue";
 import RandomPage from "./views/RandomPage.vue";

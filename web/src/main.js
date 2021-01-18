@@ -89,16 +89,16 @@ const store = new Vuex.Store({
     syncRemoteSetting() {
       axios
         .get("/bookshelf.json")
-        .then((response) => (bookshelf = response.data))
+        .then((response) => (this.state.bookshelf = response.data))
         .finally();
     },
     syncBookDate() {
-      axios.get("/book.json").then((response) => (ook = response.data));
+      axios.get("/book.json").then((response) => (this.state.book = response.data));
     },
     syncBookShelfDate() {
       axios
         .get("/bookshelf.json")
-        .then((response) => (bookshelf = response.data))
+        .then((response) => (this.state.bookshelf = response.data))
         .finally();
     },
   },
