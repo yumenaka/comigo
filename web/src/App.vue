@@ -5,7 +5,7 @@
       :book="book"
       :bookshelf="bookshelf"
       :defaultSetiing="defaultSetiing"
-      v-if="defaultSetiing.default_template === 'multi'"
+      v-if="defaultSetiing.template === 'multi'"
     >
     </MultiPage>
 
@@ -14,7 +14,7 @@
       :book="book"
       :bookshelf="bookshelf"
       :defaultSetiing="defaultSetiing"
-      v-if="defaultSetiing.default_template === 'random'"
+      v-if="defaultSetiing.template === 'random'"
     >
     </RandomPage>
 
@@ -23,7 +23,7 @@
       :book="book"
       :bookshelf="bookshelf"
       :defaultSetiing="defaultSetiing"
-      v-if="defaultSetiing.default_template === 'single'"
+      v-if="defaultSetiing.template === 'single'"
     >
     </SinglePage>
   </div>

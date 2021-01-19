@@ -41,6 +41,7 @@ __*
 web/node_modules
 web/dist
 web/static
+web/node_modules/*
 
 # local env files
 web/.env.local
