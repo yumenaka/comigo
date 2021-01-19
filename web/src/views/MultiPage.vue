@@ -43,24 +43,9 @@ export default {
 
   data() {
     return {
-      book: {
-        name: "null",
-        page_num: 1,
-        IsFolder:false,
-        pages: [
-          {
-            height: 2000,
-            width: 1419,
-            url: "/resources/favicon.ico",
-            class: "Vertical",
-          },
-        ],
-      },
-      bookshelf: {},
-      defaultSetiing: {
-        default_template: "multi",
-      },
-      page: 1,
+      book: null,
+      bookshelf: null,
+      defaultSetiing: null,
       page_mode: "multi",
       btnFlag: false,
       duration: 300,

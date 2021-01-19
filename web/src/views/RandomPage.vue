@@ -84,6 +84,7 @@ export default {
   methods: {
     initPage() {
       this.$cookies.keys();
+      this.book=this.$attrs.book;
     },
     nextPage: function (p) {
       if (this.page < this.book.page_num) {

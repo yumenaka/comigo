@@ -84,6 +84,8 @@ export default {
   methods: {
     initPage() {
       this.$cookies.keys();
+      //this.book = this.$store.book
+      // this.$store.commit('syncBookDate');
       axios.get("/book.json").then((response) => (this.book = response.data));
       axios
         .get("/setting.json")
