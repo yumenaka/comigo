@@ -1,29 +1,17 @@
 <template>
   <div id="app" class="app_div">
     <!-- 下拉阅读 -->
-    <MultiPage
-      :book="book"
-      :bookshelf="bookshelf"
-      :defaultSetiing="defaultSetiing"
-      v-if="defaultSetiing.default_template === 'multi'"
-    >
-    </MultiPage>
+    <MultiPage> </MultiPage>
 
     <!-- 随机,或倒计时（绘图用） -->
     <RandomPage
-      :book="book"
-      :bookshelf="bookshelf"
-      :defaultSetiing="defaultSetiing"
-      v-if="defaultSetiing.default_template === 'random'"
+      v-if="this.$store.getters.defaultSetiing.default_template === 'random'"
     >
     </RandomPage>
 
     <!-- 单页阅读 -->
     <SinglePage
-      :book="book"
-      :bookshelf="bookshelf"
-      :defaultSetiing="defaultSetiing"
-      v-if="defaultSetiing.default_template === 'single'"
+      v-if="this.$store.getters.defaultSetiing.default_template === 'single'"
     >
     </SinglePage>
   </div>
@@ -45,10 +33,10 @@ export default {
   },
   data() {
     return {
-      book: this.$store.getters.book,
-      bookshelf: this.$store.getters.bookshelf,
-      defaultSetiing: this.$store.getters.bookshelf,
-      page: this.$store.getters.now_page,
+      // book: this.$store.getters.book,
+      // bookshelf: this.$store.getters.bookshelf,
+      // defaultSetiing: this.$store.getters.defaultSetiing,
+      // page: this.$store.getters.now_page,
       duration: 300,
       offset: 0,
       easing: "easeInOutCubic",
@@ -65,10 +53,9 @@ export default {
   methods: {
     initPage() {
       this.$cookies.keys();
-      this.$store.commit('syncRemoteSetting');
-      this.$store.commit('syncBookDate');
-      this.$store.commit('syncBookShelfDate');
-      
+      this.$store.commit("syncRemoteSetting");
+      this.$store.commit("syncBookDate");
+      this.$store.commit("syncBookShelfDate");
     },
     getNumber: function (number) {
       this.page = number;

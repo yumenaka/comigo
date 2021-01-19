@@ -1,3 +1,4 @@
+import "es6-promise/auto";
 import Vue from "vue";
 import App from "./App.vue";
 import router from "./router";
@@ -5,6 +6,7 @@ import VueLazyload from "vue-lazyload";
 import websocket from "vue-native-websocket";
 import vuetify from "./plugins/vuetify";
 import VueCookies from "vue-cookies";
+
 import Vuex from "vuex";
 import axios from "axios";
 
@@ -34,8 +36,8 @@ const store = new Vuex.Store({
   state: {
     count: 0,
     todos: [
-      { id: 1, text: '...', done: true },
-      { id: 2, text: '...', done: false }
+      { id: 1, text: "...", done: true },
+      { id: 2, text: "...", done: false },
     ],
     now_page: 1,
     book: {
@@ -63,22 +65,23 @@ const store = new Vuex.Store({
     },
   },
   getters: {
-    doneTodos: state => {
-      return state.todos.filter(todo => todo.done)
+    doneTodos: (state) => {
+      return state.todos.filter((todo) => todo.done);
     },
-    now_page: state => {
+    now_page: (state) => {
       return state.now_page;
     },
-    book: state => {
+    book: (state) => {
+      console.log(this.state.book);
       return state.book;
     },
-    bookshelf: state => {
+    bookshelf: (state) => {
       return state.bookshelf;
     },
-    defaultSetiing: state => {
+    defaultSetiing: (state) => {
       return state.defaultSetiing;
     },
-    message: state => {
+    message: (state) => {
       return state.message;
     },
   },
@@ -86,20 +89,41 @@ const store = new Vuex.Store({
     increment(state) {
       state.count++;
     },
-    syncRemoteSetting() {
-      axios
-        .get("/bookshelf.json")
-        .then((response) => (this.state.bookshelf = response.data))
-        .finally();
+    // syncRemoteSetting(state) {
+    //   axios
+    //     .get("/bookshelf.json")
+    //     .then((response) => (state.defaultSetiing = response.data))
+    //     .finally();
+    //   //console.log(state.bookshelf);
+    //   console.log("syncRemoteSetting run");
+    // },
+    syncBookDate(state, payload) {
+      state.book=payload.msg
+      console.log(state.book);
+      console.log("syncBookDate run");
     },
-    syncBookDate() {
-      axios.get("/book.json").then((response) => (this.state.book = response.data));
+    // syncBookShelfDate(state) {
+    //   // axios
+    //   //   .get("/bookshelf.json")
+    //   //   .then((response) => (state.bookshelf = response.data))
+    //   //   .finally();
+    //   // console.log("syncBookShelfDate run");
+    // },
+  },
+
+  actions: {
+    incrementAction(context) {
+      context.commit("increment");
     },
-    syncBookShelfDate() {
-      axios
-        .get("/bookshelf.json")
-        .then((response) => (this.state.bookshelf = response.data))
-        .finally();
+    async getMessageAction(context) {
+      const msg = await axios.get("/book.json").then(
+        (res) => res.data,
+        () => ""
+      );
+      const payload = {
+        message: msg,
+      };
+      context.commit("syncBookDate", payload);
     },
   },
 });
@@ -107,6 +131,6 @@ const store = new Vuex.Store({
 new Vue({
   router,
   vuetify,
-  render: (h) => h(App),
   store: store,
+  render: (h) => h(App),
 }).$mount("#app");

@@ -2,12 +2,12 @@
   <div id="multiPage">
       <Header>
         <h2 >
-          <a v-if=!book.IsFolder v-bind:href="'raw/' + book.name">{{ book.name }}【Download】</a>
-          <a v-if=book.IsFolder v-bind:href="'raw/' + book.name">{{ book.name }}</a>
+          <a v-if=!this.$store.getters.book.IsFolder v-bind:href="'raw/' + book.name">{{ book.name }}【Download】</a>
+          <a v-if=this.$store.getters.book.IsFolder v-bind:href="'raw/' + book.name">{{ book.name }}</a>
         </h2>
         <h4>总页数：{{ book.page_num }}</h4>
       </Header>
-      <div v-for="(page, key) in book.pages" :key="page.url" class="manga">
+      <div v-for="(page, key) in this.$store.getters.book.pages" :key="page.url" class="manga">
         <img
           v-lazy="page.url"
           v-bind:H="page.height"
@@ -15,7 +15,7 @@
           v-bind:key="key"
           v-bind:class="page.class | check_image(page.url)"
         />
-        <p>{{ key + 1 }}/{{ book.page_num }}</p>
+        <p>{{ key + 1 }}/{{ this.$store.getters.book.page_num }}</p>
       </div>
       <p></p>
       <v-btn
