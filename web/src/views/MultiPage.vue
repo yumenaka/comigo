@@ -2,12 +2,12 @@
   <div id="multiPage">
       <Header>
         <h2 >
-          <a v-if=!this.$store.getters.book.IsFolder v-bind:href="'raw/' + book.name">{{ book.name }}【Download】</a>
-          <a v-if=this.$store.getters.book.IsFolder v-bind:href="'raw/' + book.name">{{ book.name }}</a>
+          <a v-if=!book.IsFolder v-bind:href="'raw/' + book.name">{{ book.name }}【Download】</a>
+          <a v-if=book.IsFolder v-bind:href="'raw/' + book.name">{{ book.name }}</a>
         </h2>
         <h4>总页数：{{ book.page_num }}</h4>
       </Header>
-      <div v-for="(page, key) in this.$store.getters.book.pages" :key="page.url" class="manga">
+      <div v-for="(page, key) in book.pages" :key="page.url" class="manga">
         <img
           v-lazy="page.url"
           v-bind:H="page.height"
@@ -15,7 +15,7 @@
           v-bind:key="key"
           v-bind:class="page.class | check_image(page.url)"
         />
-        <p>{{ key + 1 }}/{{ this.$store.getters.book.page_num }}</p>
+        <p>{{ key + 1 }}/{{ book.page_num }}</p>
       </div>
       <p></p>
       <v-btn
@@ -33,7 +33,7 @@
 </template>
 
 <script>
-// import axios from "axios";
+import axios from "axios";
 import Header from "./Header.vue";
 
 export default {
@@ -43,10 +43,24 @@ export default {
 
   data() {
     return {
-      book: this.$store.getters.book,
-      bookshelf: this.$store.getters.bookshelf,
-      defaultSetiing: this.$store.getters.bookshelf,
-      page: this.$store.getters.now_page,
+      book: {
+        name: "null",
+        page_num: 1,
+        IsFolder:false,
+        pages: [
+          {
+            height: 2000,
+            width: 1419,
+            url: "/resources/favicon.ico",
+            class: "Vertical",
+          },
+        ],
+      },
+      bookshelf: {},
+      defaultSetiing: {
+        default_template: "multi",
+      },
+      page: 1,
       page_mode: "multi",
       btnFlag: false,
       duration: 300,
@@ -62,21 +76,31 @@ export default {
     };
   },
   mounted() {
-    //this.initPage();
+    this.initPage();
+    this.getBook();
     this.initWebSocket();
   },
   destroyed() {
     this.$socket.close();
   },
   methods: {
-    // initPage() {
-    //   this.$cookies.keys();
-    // },
+    initPage() {
+      this.$cookies.keys();
+    },
     getNumber: function(number){
       this.page = number;
       console.log(number)
     },
-
+    getBook() {
+      axios.get("/book.json").then((response) => (this.book = response.data));
+      axios
+        .get("/setting.json")
+        .then((response) => (this.defaultSetiing = response.data));
+      axios
+        .get("/bookshelf.json")
+        .then((response) => (this.bookshelf = response.data))
+        .finally();
+    },
     onScroll(e) {
       if (typeof window === "undefined") return;
       const top = window.pageYOffset || e.target.scrollTop || 0;

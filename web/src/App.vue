@@ -1,17 +1,29 @@
 <template>
   <div id="app" class="app_div">
     <!-- 下拉阅读 -->
-    <MultiPage> </MultiPage>
+    <MultiPage
+      :book="book"
+      :bookshelf="bookshelf"
+      :defaultSetiing="defaultSetiing"
+      v-if="defaultSetiing.default_template === 'multi'"
+    >
+    </MultiPage>
 
     <!-- 随机,或倒计时（绘图用） -->
     <RandomPage
-      v-if="this.$store.getters.defaultSetiing.default_template === 'random'"
+      :book="book"
+      :bookshelf="bookshelf"
+      :defaultSetiing="defaultSetiing"
+      v-if="defaultSetiing.default_template === 'random'"
     >
     </RandomPage>
 
     <!-- 单页阅读 -->
     <SinglePage
-      v-if="this.$store.getters.defaultSetiing.default_template === 'single'"
+      :book="book"
+      :bookshelf="bookshelf"
+      :defaultSetiing="defaultSetiing"
+      v-if="defaultSetiing.default_template === 'single'"
     >
     </SinglePage>
   </div>
@@ -19,7 +31,7 @@
 
 <script>
 //代码参考：https://github.com/bradtraversy/vue_crash_todolist
-// import axios from "axios";
+import axios from "axios";
 import MultiPage from "./views/MultiPage.vue";
 import SinglePage from "./views/SinglePage.vue";
 import RandomPage from "./views/RandomPage.vue";
@@ -33,14 +45,33 @@ export default {
   },
   data() {
     return {
-      // book: this.$store.getters.book,
-      // bookshelf: this.$store.getters.bookshelf,
-      // defaultSetiing: this.$store.getters.defaultSetiing,
-      // page: this.$store.getters.now_page,
+      book: {
+        name: "loading",
+        page_num: 1,
+        pages: [
+          {
+            height: 2000,
+            width: 1419,
+            url: "/resources/favicon.ico",
+            class: "Vertical",
+          },
+        ],
+      },
+      bookshelf: {},
+      defaultSetiing: {
+        default_page_template:"???",
+      },
+      page: 1,
       duration: 300,
       offset: 0,
       easing: "easeInOutCubic",
-      message: this.$store.getters.message,
+      message: {
+        user_uuid: "",
+        server_status: "",
+        now_book_uuid: "",
+        read_percent: 0.0,
+        msg: "",
+      },
     };
   },
 
@@ -53,9 +84,14 @@ export default {
   methods: {
     initPage() {
       this.$cookies.keys();
-      this.$store.commit("syncRemoteSetting");
-      this.$store.commit("syncBookDate");
-      this.$store.commit("syncBookShelfDate");
+      axios.get("/book.json").then((response) => (this.book = response.data));
+      axios
+        .get("/setting.json")
+        .then((response) => (this.defaultSetiing = response.data));
+      axios
+        .get("/bookshelf.json")
+        .then((response) => (this.bookshelf = response.data))
+        .finally();
     },
     getNumber: function (number) {
       this.page = number;
