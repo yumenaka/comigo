@@ -174,10 +174,10 @@ func init() {
 	}
 
 	//默认页面模式
-	if viper.GetBool("COMI_DEFAULT_page_template") {
-		rootCmd.PersistentFlags().StringVar(&common.Config.DefaultTemplate, "page-mode", viper.GetString("COMI_DEFAULT_page_template"), locale.GetString("COMI_DEFAULT_page_template"))
+	if viper.GetBool("COMI_TEMPLATE") {
+		rootCmd.PersistentFlags().StringVar(&common.Config.Template, "template", viper.GetString("COMI_TEMPLATE"), locale.GetString("COMI_TEMPLATE"))
 	} else {
-		rootCmd.PersistentFlags().StringVar(&common.Config.DefaultTemplate, "page-mode", "auto", locale.GetString("COMI_DEFAULT_page_template"))
+		rootCmd.PersistentFlags().StringVar(&common.Config.Template, "template", "auto", locale.GetString("COMI_TEMPLATE"))
 	}
 
 	//尚未启用的功能，暂时无意义的设置

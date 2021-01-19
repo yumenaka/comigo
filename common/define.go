@@ -19,7 +19,7 @@ import (
 type ServerConfig struct {
 	OpenBrowser        bool   `json:"-"` //不要解析这个字段
 	DisableLAN         bool   `json:"-"` //不要解析这个字段
-	DefaultTemplate    string `json:"default_template"`
+	Template           string `json:"template"`
 	PrintAllIP         bool   `json:"-"` //不要解析这个字段
 	Port               int
 	ConfigPath         string `json:"-"` //不要解析这个字段
@@ -40,7 +40,7 @@ type ServerConfig struct {
 var Config = ServerConfig{
 	OpenBrowser:         true,
 	DisableLAN:          false,
-	DefaultTemplate:     "multi", //multi、single、random etc.
+	Template:            "multi", //multi、single、random etc.
 	Port:                1234,
 	CheckImageInServer:  false,
 	LogToFile:           false,

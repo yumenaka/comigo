@@ -29,22 +29,22 @@ func StartServer(args []string) {
 
 
 	switch {
-	case common.Config.DefaultTemplate =="auto" :
+	case common.Config.Template =="auto" :
 		selectPageModeByExtFileName()
-	case common.Config.DefaultTemplate =="multi":
+	case common.Config.Template =="multi":
 		fmt.Println(locale.GetString("multi_page_template"))
-	case common.Config.DefaultTemplate =="random":
+	case common.Config.Template =="random":
 		fmt.Println(locale.GetString("single_page_template"))
-	case common.Config.DefaultTemplate =="single":
+	case common.Config.Template =="single":
 		fmt.Println(locale.GetString("single_page_template"))
 	default:
-		common.Config.DefaultTemplate ="multi"
+		common.Config.Template ="multi"
 	}
 
 
-	if common.Config.DefaultTemplate =="auto" {
+	if common.Config.Template =="auto" {
 
-	}else if common.Config.DefaultTemplate =="auto"  {
+	}else if common.Config.Template =="auto"  {
 
 	}
 	cmdPath := path.Dir(os.Args[0]) //去除路径最后一个元素  /home/dir/comigo.exe -> /home/dir/
@@ -110,22 +110,22 @@ func selectPageModeByExtFileName() {
 	//fmt.Println("ExtFileName =", ExtFileName)
 	//如果执行文件名包含 comi或multi，设定为多页漫画模式
 	if strings.Contains(ExtFileName, "comi") || strings.Contains(ExtFileName, "multi")  || strings.Contains(ExtFileName, "多页"){
-		common.Config.DefaultTemplate ="multi"
+		common.Config.Template ="multi"
 		fmt.Println(locale.GetString("multi_page_template"))
 	}
 	//如果执行文件名包含 single，设定为 single 模式
 	if strings.Contains(ExtFileName, "single")|| strings.Contains(ExtFileName, "单页"){
-		common.Config.DefaultTemplate ="multi"
+		common.Config.Template ="multi"
 		fmt.Println(locale.GetString("single_page_template"))
 	}
 	//如果执行文件名包含 random，设定为random模式
 	if strings.Contains(ExtFileName, "random") || strings.Contains(ExtFileName, "rand")|| strings.Contains(ExtFileName, "随机"){
-		common.Config.DefaultTemplate ="random"
+		common.Config.Template ="random"
 		fmt.Println(locale.GetString("random_page_template"))
 	}
 	//如果用goland调试
 	if strings.Contains(ExtFileName, "build"){
-		common.Config.DefaultTemplate ="multi"
+		common.Config.Template ="multi"
 		fmt.Println(locale.GetString("multi_page_template"))
 	}
 }

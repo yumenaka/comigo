@@ -92,5 +92,5 @@ COMI_FRP_COMMAND = "frpc command, or frpc executable file path, the default isfr
 COMI_FRP_RANDOM_REMOTE_PORT = "frpc remote random port, enabled by default (40000~50000)"
 COMI_FRP_REMOTE_PORT = "Disable the Frp random port function, the remote port of frp is the same as the local"
 COMI_LOG_TO_FILE = "Enable logFile"
-COMI_DEFAULT_page_template  = "Default page mode(auto,multi,single,random)"
+COMI_TEMPLATE  = "Default page template(auto,multi,single,random)"
 target_path = "Target directory"

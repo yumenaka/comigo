@@ -90,5 +90,5 @@ COMI_FRP_COMMAND = "frpc コマンド、または frpc 実行ファイルのパ�
 COMI_FRP_RANDOM_REMOTE_PORT = "frpcリモートランダムポート、デフォルトで有効(40000~50000)"
 COMI_FRP_REMOTE_PORT = "关闭Frp随机端口功能，frp远程端口与本地相同"
 COMI_LOG_TO_FILE = "ログファイルをログに記録する"
-COMI_DEFAULT_page_template  = "デフォルトのページモード(auto,multi,single,random)"
+COMI_TEMPLATE  = "デフォルト テンプレート(auto,multi,single,random)"
 target_path = "対象ディレクトリ"
