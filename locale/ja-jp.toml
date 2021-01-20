@@ -92,3 +92,4 @@ COMI_FRP_REMOTE_PORT = "关闭Frp随机端口功能，frp远程端口与本地�
 COMI_LOG_TO_FILE = "ログファイルをログに記録する"
 COMI_TEMPLATE  = "デフォルト テンプレート(auto,multi,single,random)"
 target_path = "対象ディレクトリ"
+COMI_AUTH = "アカウントとパスワード"

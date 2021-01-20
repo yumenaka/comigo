@@ -89,3 +89,4 @@ COMI_FRP_REMOTE_PORT = "关闭Frp随机端口功能，frp远程端口与本地�
 COMI_LOG_TO_FILE = "记录log文件"
 COMI_TEMPLATE  = "默认页面模板(auto,multi,single,random)"
 target_path = "目标目录"
+COMI_AUTH = "网页认证账号与密码"

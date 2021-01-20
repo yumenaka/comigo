@@ -180,6 +180,13 @@ func init() {
 		rootCmd.PersistentFlags().StringVar(&common.Config.Template, "template", "auto", locale.GetString("COMI_TEMPLATE"))
 	}
 
+	//默认页面模式
+	if viper.GetBool("COMI_AUTH") {
+		rootCmd.PersistentFlags().StringVar(&common.Config.Template, "auth", viper.GetString("COMI_AUTH"), locale.GetString("COMI_AUTH"))
+	} else {
+		rootCmd.PersistentFlags().StringVar(&common.Config.Template, "auth", "auto", locale.GetString("COMI_AUTH"))
+	}
+
 	//尚未启用的功能，暂时无意义的设置
 	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFileName, "logname", "comigo", "log文件名")
 	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFilePath, "logpath", "~", "log文件位置")

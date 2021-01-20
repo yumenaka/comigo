@@ -27,7 +27,6 @@ func init() {
 
 func StartServer(args []string) {
 
-
 	switch {
 	case common.Config.Template =="auto" :
 		selectPageModeByExtFileName()
@@ -40,7 +39,6 @@ func StartServer(args []string) {
 	default:
 		common.Config.Template ="multi"
 	}
-
 
 	if common.Config.Template =="auto" {
 
@@ -150,6 +148,13 @@ func setFirstBook(args []string) {
 	}
 }
 
+// 测试用的假数据
+var secrets = gin.H{
+	"comi":    gin.H{"email": "foo@bar.com", "phone": "123433"},
+	"admin": gin.H{"email": "austin@example.com", "phone": "666"},
+	"user1":   gin.H{"email": "lena@guapa.com", "phone": "523443"},
+}
+
 //启动web服务
 func InitWebServer() {
 	//go:embed index.html
@@ -192,6 +197,20 @@ func InitWebServer() {
 			"title": common.ReadingBook.Name, //页面标题
 		})
 	})
+	//简单http认证测试
+	authorized := engine.Group("/", gin.BasicAuth(gin.Accounts{
+		"comi": "go",
+	}))
+	authorized.GET("/secrets", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"secret": "这个路径需要认证。",
+		})
+	})
+
+	if common.Config.Auth != ""{
+
+	}
+
 	//解析json
 	engine.GET("/book.json", func(c *gin.Context) {
 		c.PureJSON(http.StatusOK, common.ReadingBook)

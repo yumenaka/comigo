@@ -94,3 +94,4 @@ COMI_FRP_REMOTE_PORT = "Disable the Frp random port function, the remote port of
 COMI_LOG_TO_FILE = "Enable logFile"
 COMI_TEMPLATE  = "Default page template(auto,multi,single,random)"
 target_path = "Target directory"
+COMI_AUTH = "Web authentication account and password"

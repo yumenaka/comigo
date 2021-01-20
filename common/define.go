@@ -20,6 +20,7 @@ type ServerConfig struct {
 	OpenBrowser        bool   `json:"-"` //不要解析这个字段
 	DisableLAN         bool   `json:"-"` //不要解析这个字段
 	Template           string `json:"template"`
+	Auth               string `json:"-"` //不要解析这个字段
 	PrintAllIP         bool   `json:"-"` //不要解析这个字段
 	Port               int
 	ConfigPath         string `json:"-"` //不要解析这个字段
