@@ -1,46 +1,51 @@
 <template>
   <div id="multiPage">
-      <Header>
-        <h2 >
-          <a v-if=!book.IsFolder v-bind:href="'raw/' + book.name">{{ book.name }}【Download】</a>
-          <a v-if=book.IsFolder v-bind:href="'raw/' + book.name">{{ book.name }}</a>
-        </h2>
-        <h4>总页数：{{ book.page_num }}</h4>
-      </Header>
-      <div v-for="(page, key) in book.pages" :key="page.url" class="manga">
-        <img
-          v-lazy="page.url"
-          v-bind:H="page.height"
-          v-bind:W="page.width"
-          v-bind:key="key"
-          v-bind:class="page.class | check_image(page.url)"
-        />
-        <p>{{ key + 1 }}/{{ book.page_num }}</p>
-      </div>
-      <p></p>
-      <v-btn
-        v-scroll="onScroll"
-        v-show="btnFlag"
-        fab
-        color="#bbcbff"
-        bottom
-        right
-        @click="toTop"
-        >▲</v-btn
-      >
+    <Header>
+      <h2>
+        <a v-if="!book.IsFolder" v-bind:href="'raw/' + book.name"
+          >{{ book.name }}【Download】</a
+        >
+        <a v-if="book.IsFolder" v-bind:href="'raw/' + book.name">{{
+          book.name
+        }}</a>
+      </h2>
+      <h4>总页数：{{ book.page_num }}</h4>
+    </Header>
+    <div v-for="(page, key) in this.book.pages" :key="page.url" class="manga">
+      <img
+        v-lazy="page.url"
+        v-bind:H="page.height"
+        v-bind:W="page.width"
+        v-bind:key="key"
+        v-bind:class="page.class | check_image(page.url)"
+      />
+      <p>{{ key + 1 }}/{{ book.page_num }}</p>
+    </div>
+    <p></p>
+    <v-btn
+      v-scroll="onScroll"
+      v-show="btnFlag"
+      fab
+      color="#bbcbff"
+      bottom
+      right
+      @click="toTop"
+      >▲</v-btn
+    >
     <slot></slot>
   </div>
 </template>
 
 <script>
-import axios from "axios";
 import Header from "./Header.vue";
 
 export default {
   components: {
     Header,
   },
-
+  // props: ['book'],
+  //组件的 data 选项必须是一个函数
+  //每个实例可以维护一份被返回对象的独立的拷贝
   data() {
     return {
       book: null,
@@ -71,20 +76,13 @@ export default {
   methods: {
     initPage() {
       this.$cookies.keys();
+      this.book = this.$store.state.book;
+      this.bookshelf = this.$store.state.bookshelf;
+      this.defaultSetiing = this.$store.state.defaultSetiing;
     },
-    getNumber: function(number){
+    getNumber: function (number) {
       this.page = number;
-      console.log(number)
-    },
-    getBook() {
-      axios.get("/book.json").then((response) => (this.book = response.data));
-      axios
-        .get("/setting.json")
-        .then((response) => (this.defaultSetiing = response.data));
-      axios
-        .get("/bookshelf.json")
-        .then((response) => (this.bookshelf = response.data))
-        .finally();
+      console.log(number);
     },
     onScroll(e) {
       if (typeof window === "undefined") return;
@@ -194,7 +192,7 @@ export default {
       return value;
     },
   },
-}
+};
 </script>
 
 <style>
@@ -239,5 +237,4 @@ export default {
     width: 1900px;
   }
 }
-
 </style>

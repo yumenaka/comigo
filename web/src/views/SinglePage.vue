@@ -10,42 +10,29 @@
         }}</a>
       </h2>
     </Header>
-    <div class="singe_page_main" v-on:click="nextPage">
+    <div class="singe_page" v-on:click="nextPage">
       <img
         lazy-src="/resources/favicon.ico"
         v-bind:src="book.pages[page - 1].url"
       /><img />
     </div>
-    <v-alert v-model="alert" type="info" close-text="Close Alert" dismissible>
-      已经翻到最后一页。
-    </v-alert>
-    <v-pagination
-      circle
-      v-model="page"
-      :length="book.page_num"
-      :total-visible="10"
-      @input="toPage"
-    >
-    </v-pagination>
+
     <slot></slot>
   </div>
 </template>
 
 <style>
-.singe_page_main {
-  max-width: 80%;
-  max-height: 100%;
-  width: 600px;
-  height: 800px;
+.singe_page {
+  width: 100%;
+  height: calc(100vh - 100px);
   border: 2px solid rgb(84, 106, 233);
   display: table-cell;
-
   vertical-align: middle;
 }
 
-.singe_page_main img {
-  max-width: 80%;
-  max-height: 100%;
+.singe_page img {
+  width: 100%;
+  height: calc(100vh - 120px);
   /* display: block; */
   margin: center;
   vertical-align: middle;
@@ -64,10 +51,16 @@ export default {
       page: 1,
       alert: false,
       easing: "easeInOutCubic",
+      book: null,
+      bookshelf: null,
+      defaultSetiing: null,
     };
   },
 
   mounted() {
+      this.book = this.$store.state.book;
+      this.bookshelf = this.$store.state.bookshelf;
+      this.defaultSetiing = this.$store.state.defaultSetiing;
     // 增加监听
     // window.addEventListener("keyup", this.handleKeyup);
     // window.addEventListener("scroll", this.handleScroll);
@@ -85,8 +78,8 @@ export default {
       if (this.page < this.book.page_num) {
         this.page = this.page + 1;
       } else {
-        this.alert = true;
-        alert("Hello World!");
+        // this.alert = true;
+        alert("Last Page!");
       }
       console.log(p);
     },

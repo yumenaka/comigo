@@ -6,8 +6,8 @@ import VueLazyload from 'vue-lazyload'
 import websocket from 'vue-native-websocket'
 import vuetify from './plugins/vuetify';
 import VueCookies from 'vue-cookies'
-import Vuex from "vuex";
 import axios from "axios";
+import Vuex from "vuex";//[1]引入vuex  参考：https://my.oschina.net/u/4395108/blog/3317345
 
 Vue.use(websocket, "ws://" + document.location.host + "/ws", {//服务器的地址
   reconnection: true, // (Boolean)是否自动重连，默认false
@@ -26,9 +26,10 @@ Vue.use(VueCookies)
 Vue.$cookies.config('30d')
 
 //https://vuex.vuejs.org/zh/guide/
-Vue.use(Vuex);
-const store = new Vuex.Store({
-  state: {
+Vue.use(Vuex);//[2]使用vuex
+
+const store = new Vuex.Store({//[3]创建一个store实例
+  state: {//[4]所有组件共用数据存放处
     count: 0,
     todos: [
       { id: 1, text: "...", done: true },
@@ -126,6 +127,6 @@ const store = new Vuex.Store({
 new Vue({
   router,
   vuetify,
-  store: store,
+  store,//[5]注入store
   render: h => h(App)
 }).$mount('#app')

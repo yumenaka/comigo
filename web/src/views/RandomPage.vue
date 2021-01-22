@@ -1,5 +1,5 @@
 <template>
-  <div id="RandomPage">
+  <div id="RandomPage" class ="RandomPage">
     <Header>
       <h2>
         <a v-if="!book.IsFolder" v-bind:href="'raw/' + book.name"
@@ -10,15 +10,12 @@
         }}</a>
       </h2>
     </Header>
-    <div class="singe_page_main" v-on:click="nextPage">
+    <div class="random_div" v-on:click="nextPage">
       <img
         lazy-src="/resources/favicon.ico"
         v-bind:src="book.pages[page - 1].url"
       /><img />
     </div>
-    <v-alert v-model="alert" type="info" close-text="Close Alert" dismissible>
-      已经翻到最后一页。
-    </v-alert>
     <v-pagination
       circle
       v-model="page"
@@ -34,36 +31,42 @@
 
 <style>
 #RandomPage {
-  margin: 1000px 50px;
   align-items: center;
+  width: 100vw;
+  height: 100vh;
+  align-self: center;
 }
 
-.random_main {
-  max-width: 80%;
-  max-height: 100%;
+.random_div {
+  width: 100%;
+  height: 80vh; 
   align-items: center;
-  display: block;
-  margin: auto;
+  /* display: block; */
+  /* margin: auto; */
 }
 
-img {
-  max-width: 80%;
+.random_div img {
+  max-width: 100%;
   max-height: 100%;
+  height: 80vh; 
   display: block;
-  margin: auto;
+  margin: center;
 }
 </style>
 
 <script>
-// import Header from "./Header.vue";
+import Header from "./Header.vue";
 
 export default {
   components: {
-    // Header,
+    Header,
   },
 
   data() {
     return {
+      book: null,
+      bookshelf: null,
+      defaultSetiing: null,
       page: 1,
       time_cont: 0,
       alert: false,
@@ -73,18 +76,15 @@ export default {
 
   mounted() {
     this.time_cont = 0;
-    // // 增加监听
-    // window.addEventListener("keyup", this.handleKeyup);
-    // window.addEventListener("scroll", this.handleScroll);
+    this.initPage();
   },
-  destroyed() {
-    // window.removeEventListener("keyup", this.handleKeyup);
-    // window.removeEventListener("scroll", this.handleScroll);
-  },
+  destroyed() {},
   methods: {
     initPage() {
       this.$cookies.keys();
-      this.book=this.$attrs.book;
+      this.book = this.$store.state.book;
+      this.bookshelf = this.$store.state.bookshelf;
+      this.defaultSetiing = this.$store.state.defaultSetiing;
     },
     nextPage: function (p) {
       if (this.page < this.book.page_num) {

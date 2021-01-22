@@ -1,31 +1,13 @@
 <template>
-  <div id="app" class="app_div">
+  <div id="app">
     <!-- 下拉阅读 -->
-    <MultiPage
-      :book="book"
-      :bookshelf="bookshelf"
-      :defaultSetiing="defaultSetiing"
-      v-if="defaultSetiing.template === 'multi'"
-    >
-    </MultiPage>
+    <MultiPage v-if="defaultSetiing.template === 'multi--'"> </MultiPage>
 
     <!-- 随机,或倒计时（绘图用） -->
-    <RandomPage
-      :book="book"
-      :bookshelf="bookshelf"
-      :defaultSetiing="defaultSetiing"
-      v-if="defaultSetiing.template === 'random'"
-    >
-    </RandomPage>
+    <RandomPage v-if="defaultSetiing.template === 'multi'"> </RandomPage>
 
     <!-- 单页阅读 -->
-    <SinglePage
-      :book="book"
-      :bookshelf="bookshelf"
-      :defaultSetiing="defaultSetiing"
-      v-if="defaultSetiing.template === 'single'"
-    >
-    </SinglePage>
+    <SinglePage v-if="defaultSetiing.template === 'single'"> </SinglePage>
   </div>
 </template>
 
@@ -38,11 +20,14 @@ import RandomPage from "./views/RandomPage.vue";
 
 export default {
   name: "app",
+  //为了能在模板中使用，组件必须先注册以便 Vue 能够识别
   components: {
     MultiPage,
     SinglePage,
     RandomPage,
   },
+  //组件的 data 选项必须是一个函数
+  //每个实例可以维护一份被返回对象的独立的拷贝
   data() {
     return {
       book: {
@@ -57,9 +42,10 @@ export default {
           },
         ],
       },
+      //如果你知道你会在晚些时候需要一个 property，但是一开始它为空或不存在，那么你仅需要设置一些初始值。
       bookshelf: {},
       defaultSetiing: {
-        default_page_template:"???",
+        default_page_template: "???",
       },
       page: 1,
       duration: 300,
@@ -84,15 +70,19 @@ export default {
   methods: {
     initPage() {
       this.$cookies.keys();
-      //this.book = this.$store.book
+      this.book = this.$store.book;
+      this.defaultSetiing = this.$store.defaultSetiing;
+      this.bookshelf = this.$store.bookshelf;
       // this.$store.commit('syncBookDate');
-      axios.get("/book.json").then((response) => (this.book = response.data));
+      axios
+        .get("/book.json")
+        .then((response) => (this.$store.state.book = response.data));
       axios
         .get("/setting.json")
         .then((response) => (this.defaultSetiing = response.data));
       axios
         .get("/bookshelf.json")
-        .then((response) => (this.bookshelf = response.data))
+        .then((response) => (this.$store.state.bookshelf = response.data))
         .finally();
     },
     getNumber: function (number) {
@@ -107,11 +97,6 @@ export default {
 #app {
   text-align: center;
   background-color: #f6f7eb;
-  align-items: center;
-}
-
-.app_div {
-  /* margin: auto; */
   align-items: center;
 }
 </style>
