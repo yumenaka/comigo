@@ -2,11 +2,11 @@
   <div id="app">
     <div v-if="defaultSetting">
       <!-- 下拉阅读 -->
-      <MultiPage v-if="defaultSetting.template === 'sketch'"> </MultiPage>
+      <MultiPage v-if="defaultSetting.template === 'multi'"> </MultiPage>
             <!-- 单页阅读 -->
-      <SinglePage v-if="defaultSetting.template === '-single'"> </SinglePage>
+      <SinglePage v-if="defaultSetting.template === 'single'"> </SinglePage>
             <!-- 倒计时（绘图用） -->
-      <SketchPage v-if="defaultSetting.template === '-sketch'"> </SketchPage>
+      <SketchPage v-if="defaultSetting.template === 'sketch'"> </SketchPage>
     </div>
     <p v-else>loading.....</p>
   </div>
