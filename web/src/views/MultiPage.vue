@@ -2,16 +2,16 @@
   <div id="multiPage">
     <Header>
       <h2>
-        <a v-if="!book.IsFolder" v-bind:href="'raw/' + book.name"
-          >{{ book.name }}【Download】</a
+        <a v-if="!this.$store.state.book.IsFolder" v-bind:href="'raw/' + this.$store.state.book.name"
+          >{{ this.$store.state.book.name }}【Download】</a
         >
-        <a v-if="book.IsFolder" v-bind:href="'raw/' + book.name">{{
-          book.name
+        <a v-if="this.$store.state.book.IsFolder" v-bind:href="'raw/' + this.$store.state.book.name">{{
+          this.$store.state.book.name
         }}</a>
       </h2>
-      <h4>总页数：{{ book.page_num }}</h4>
+      <h4>总页数：{{ this.$store.state.book.page_num }}</h4>
     </Header>
-    <div v-for="(page, key) in this.book.pages" :key="page.url" class="manga">
+    <div v-for="(page, key) in this.$store.state.book.pages" :key="page.url" class="manga">
       <img
         v-lazy="page.url"
         v-bind:H="page.height"
@@ -19,7 +19,7 @@
         v-bind:key="key"
         v-bind:class="page.class | check_image(page.url)"
       />
-      <p>{{ key + 1 }}/{{ book.page_num }}</p>
+      <p>{{ key + 1 }}/{{ AllPageNum }}</p>
     </div>
     <p></p>
     <v-btn
@@ -48,14 +48,15 @@ export default {
   //每个实例可以维护一份被返回对象的独立的拷贝
   data() {
     return {
-      book: null,
-      bookshelf: null,
-      defaultSetiing: null,
+      // book: this.$store.state.book,
+      // bookshelf: null,
+      // defaultSetting: null,
       page_mode: "multi",
       btnFlag: false,
       duration: 300,
       offset: 0,
       easing: "easeInOutCubic",
+      AllPageNum: this.$store.state.book.page_num,
       message: {
         user_uuid: "",
         server_status: "",
@@ -67,18 +68,18 @@ export default {
   },
   mounted() {
     this.initPage();
-    this.getBook();
-    this.initWebSocket();
+    //以后再研究WebSocks
+    //this.initWebSocket();
   },
   destroyed() {
-    this.$socket.close();
+    //this.$socket.close();
   },
   methods: {
     initPage() {
       this.$cookies.keys();
-      this.book = this.$store.state.book;
-      this.bookshelf = this.$store.state.bookshelf;
-      this.defaultSetiing = this.$store.state.defaultSetiing;
+    },
+    getBook: function () {
+       return this.$store.state.book;
     },
     getNumber: function (number) {
       this.page = number;

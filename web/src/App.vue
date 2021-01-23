@@ -1,13 +1,14 @@
 <template>
   <div id="app">
-    <!-- 下拉阅读 -->
-    <MultiPage v-if="defaultSetiing.template === 'multi--'"> </MultiPage>
-
-    <!-- 随机,或倒计时（绘图用） -->
-    <RandomPage v-if="defaultSetiing.template === 'multi'"> </RandomPage>
-
-    <!-- 单页阅读 -->
-    <SinglePage v-if="defaultSetiing.template === 'single'"> </SinglePage>
+    <div v-if="defaultSetting">
+      <!-- 下拉阅读 -->
+      <MultiPage v-if="defaultSetting.template === 'sketch'"> </MultiPage>
+            <!-- 单页阅读 -->
+      <SinglePage v-if="defaultSetting.template === '-single'"> </SinglePage>
+            <!-- 倒计时（绘图用） -->
+      <SketchPage v-if="defaultSetting.template === '-sketch'"> </SketchPage>
+    </div>
+    <p v-else>loading.....</p>
   </div>
 </template>
 
@@ -16,7 +17,7 @@
 import axios from "axios";
 import MultiPage from "./views/MultiPage.vue";
 import SinglePage from "./views/SinglePage.vue";
-import RandomPage from "./views/RandomPage.vue";
+import SketchPage from "./views/SketchPage.vue";
 
 export default {
   name: "app",
@@ -24,29 +25,16 @@ export default {
   components: {
     MultiPage,
     SinglePage,
-    RandomPage,
+    SketchPage,
   },
   //组件的 data 选项必须是一个函数
   //每个实例可以维护一份被返回对象的独立的拷贝
   data() {
     return {
-      book: {
-        name: "loading",
-        page_num: 1,
-        pages: [
-          {
-            height: 2000,
-            width: 1419,
-            url: "/resources/favicon.ico",
-            class: "Vertical",
-          },
-        ],
-      },
+      book: null,
       //如果你知道你会在晚些时候需要一个 property，但是一开始它为空或不存在，那么你仅需要设置一些初始值。
       bookshelf: {},
-      defaultSetiing: {
-        default_page_template: "???",
-      },
+      defaultSetting: {},
       page: 1,
       duration: 300,
       offset: 0,
@@ -63,23 +51,22 @@ export default {
 
   mounted() {
     this.initPage();
+    this.$cookies.keys();
   },
   destroyed() {
-    this.$socket.close();
+    //this.$socket.close();
   },
   methods: {
     initPage() {
-      this.$cookies.keys();
       this.book = this.$store.book;
-      this.defaultSetiing = this.$store.defaultSetiing;
+      this.defaultSetting = this.$store.defaultSetting;
       this.bookshelf = this.$store.bookshelf;
-      // this.$store.commit('syncBookDate');
       axios
         .get("/book.json")
         .then((response) => (this.$store.state.book = response.data));
       axios
         .get("/setting.json")
-        .then((response) => (this.defaultSetiing = response.data));
+        .then((response) => (this.defaultSetting = response.data));
       axios
         .get("/bookshelf.json")
         .then((response) => (this.$store.state.bookshelf = response.data))

@@ -111,20 +111,20 @@ func selectPageModeByExtFileName() {
 		common.Config.Template ="multi"
 		fmt.Println(locale.GetString("multi_page_template"))
 	}
-	//如果执行文件名包含 single，设定为 single 模式
+	//如果执行文件名包含 single，设定为 single 漫画模式
 	if strings.Contains(ExtFileName, "single")|| strings.Contains(ExtFileName, "单页"){
-		common.Config.Template ="multi"
+		common.Config.Template ="single"
 		fmt.Println(locale.GetString("single_page_template"))
 	}
-	//如果执行文件名包含 random，设定为random模式
-	if strings.Contains(ExtFileName, "random") || strings.Contains(ExtFileName, "rand")|| strings.Contains(ExtFileName, "随机"){
-		common.Config.Template ="random"
-		fmt.Println(locale.GetString("random_page_template"))
+	//如果执行文件名包含 sketch croquis，设定为速写参考模式
+	if strings.Contains(ExtFileName, "sketch") || strings.Contains(ExtFileName, "croquis")|| strings.Contains(ExtFileName, "速写"){
+		common.Config.Template ="sketch"
+		fmt.Println(locale.GetString("sketch_page_template"))
 	}
 	//如果用goland调试
 	if strings.Contains(ExtFileName, "build"){
-		common.Config.Template ="multi"
-		fmt.Println(locale.GetString("multi_page_template"))
+		common.Config.Template ="sketch"
+		fmt.Println(locale.GetString("sketch_page_template"))
 	}
 }
 

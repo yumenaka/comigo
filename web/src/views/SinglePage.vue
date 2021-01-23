@@ -53,14 +53,14 @@ export default {
       easing: "easeInOutCubic",
       book: null,
       bookshelf: null,
-      defaultSetiing: null,
+      defaultSetting: null,
     };
   },
 
   mounted() {
       this.book = this.$store.state.book;
       this.bookshelf = this.$store.state.bookshelf;
-      this.defaultSetiing = this.$store.state.defaultSetiing;
+      this.defaultSetting = this.$store.state.defaultSetting;
     // 增加监听
     // window.addEventListener("keyup", this.handleKeyup);
     // window.addEventListener("scroll", this.handleScroll);
@@ -72,7 +72,7 @@ export default {
 
   methods: {
     initPage() {
-      this.$cookies.keys();
+      //this.$cookies.keys();
     },
     nextPage: function (p) {
       if (this.page < this.book.page_num) {

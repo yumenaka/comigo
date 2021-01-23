@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-type ServerConfig struct {
+type ServerConfig struct  {
 	OpenBrowser        bool   `json:"-"` //不要解析这个字段
 	DisableLAN         bool   `json:"-"` //不要解析这个字段
 	Template           string `json:"template"`
@@ -72,7 +72,7 @@ var Config = ServerConfig{
 		//AdminPwd :   "",
 	},
 	ServerHost: "",
-}
+} 
 
 var ReadingBook Book
 var BookList []Book

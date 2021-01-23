@@ -41,15 +41,15 @@ const store = new Vuex.Store({//[3]创建一个store实例
       page_num: 1,
       pages: [
         {
-          height: 2000,
-          width: 1419,
+          height: 500,
+          width: 449,
           url: "/resources/favicon.ico",
           class: "Vertical",
         },
       ],
     },
     bookshelf: {},
-    defaultSetiing: {
+    defaultSetting: {
       default_page_template: "multi",
     },
     message: {
@@ -74,39 +74,26 @@ const store = new Vuex.Store({//[3]创建一个store实例
     bookshelf: (state) => {
       return state.bookshelf;
     },
-    defaultSetiing: (state) => {
-      return state.defaultSetiing;
+    defaultSetting: (state) => {
+      return state.defaultSetting;
     },
     message: (state) => {
       return state.message;
     },
   },
+  // mutaitions内只能执行同步操作
   mutations: {
     increment(state) {
       state.count++;
     },
-    // syncRemoteSetting(state) {
-    //   axios
-    //     .get("/bookshelf.json")
-    //     .then((response) => (state.defaultSetiing = response.data))
-    //     .finally();
-    //   //console.log(state.bookshelf);
-    //   console.log("syncRemoteSetting run");
-    // },
+
     syncBookDate(state, payload) {
       state.book=payload.msg
       console.log(state.book);
       console.log("syncBookDate run");
     },
-    // syncBookShelfDate(state) {
-    //   // axios
-    //   //   .get("/bookshelf.json")
-    //   //   .then((response) => (state.bookshelf = response.data))
-    //   //   .finally();
-    //   // console.log("syncBookShelfDate run");
-    // },
   },
-
+  // Action 可以包含任意异步操作
   actions: {
     incrementAction(context) {
       context.commit("increment");
