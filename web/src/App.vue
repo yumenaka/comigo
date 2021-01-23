@@ -1,13 +1,15 @@
 <template>
   <div id="app">
+    <!-- 初始化后才显示，避免 defaultSetting错误 -->
     <div v-if="defaultSetting">
       <!-- 下拉阅读 -->
       <MultiPage v-if="defaultSetting.template === 'multi'"> </MultiPage>
-            <!-- 单页阅读 -->
+      <!-- 单页阅读 -->
       <SinglePage v-if="defaultSetting.template === 'single'"> </SinglePage>
-            <!-- 倒计时（绘图用） -->
+      <!-- 倒计时（绘图用） -->
       <SketchPage v-if="defaultSetting.template === 'sketch'"> </SketchPage>
     </div>
+    <!-- 加载中 -->
     <p v-else>loading.....</p>
   </div>
 </template>

@@ -38,6 +38,30 @@ type ServerConfig struct  {
 	ZipFilenameEncoding string          `json:"-"` //不要解析这个字段
 }
 
+//通过路径名或执行文件名，来设置默认网页模板这个参数
+func (config *ServerConfig) SetTemplateByName(FileName string){
+	//如果执行文件名包含 comi或multi，设定为多页漫画模式
+	if strings.Contains(FileName, "comi") || strings.Contains(FileName, "multi")  || strings.Contains(FileName, "多页"){
+		config.Template= "multi"
+		fmt.Println(locale.GetString("multi_page_template"))
+	}
+	//如果执行文件名包含 single，设定为 single 漫画模式
+	if strings.Contains(FileName, "single")|| strings.Contains(FileName, "单页"){
+		config.Template ="single"
+		fmt.Println(locale.GetString("single_page_template"))
+	}
+	//如果执行文件名包含 sketch或croquis，设定为速写参考模式
+	if strings.Contains(FileName, "sketch") || strings.Contains(FileName, "croquis")|| strings.Contains(FileName, "速写"){
+		config.Template ="sketch"
+		fmt.Println(locale.GetString("sketch_page_template"))
+	}
+	//如果用goland调试
+	if strings.Contains(FileName, "build"){
+		config.Template ="sketch"
+		fmt.Println(locale.GetString("sketch_page_template"))
+	}
+}
+
 var Config = ServerConfig{
 	OpenBrowser:         true,
 	DisableLAN:          false,
@@ -72,7 +96,7 @@ var Config = ServerConfig{
 		//AdminPwd :   "",
 	},
 	ServerHost: "",
-} 
+}
 
 var ReadingBook Book
 var BookList []Book

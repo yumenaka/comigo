@@ -2,15 +2,25 @@
   <div id="SketchPage" class="SketchPage">
     <Header>
       <h2>
-        <a v-if="!this.$store.state.book.IsFolder" v-bind:href="'raw/' + this.$store.state.book.name"
+        <a
+          v-if="!this.$store.state.book.IsFolder"
+          v-bind:href="'raw/' + this.$store.state.book.name"
           >{{ this.$store.state.book.name }}【Download】</a
         >
-        <a v-if="this.$store.state.book.IsFolder" v-bind:href="'raw/' + this.$store.state.book.name">{{
-          book.name
-        }}</a>
+        <a
+          v-if="this.$store.state.book.IsFolder"
+          v-bind:href="'raw/' + this.$store.state.book.name"
+          >{{ this.$store.state.book.name }}</a
+        >
       </h2>
     </Header>
     <div class="sketch_div" v-on:click="nextPage(2)">
+      <p>现在时刻：{{}}</p>
+      <img
+        v-if="page < this.$store.state.book.page_num"
+        lazy-src="/resources/favicon.ico"
+        v-bind:src="this.$store.state.book.pages[page].url"
+      /><img />
       <img
         lazy-src="/resources/favicon.ico"
         v-bind:src="this.$store.state.book.pages[page - 1].url"
@@ -29,7 +39,7 @@
 </template>
 
 <style>
-#RandomPage {
+#SketchPage {
   align-items: center;
   width: 100vw;
   height: 100vh;
@@ -39,6 +49,8 @@
 .sketch_div {
   width: 100%;
   height: 80vh;
+  display: flex;
+  justify-content: center;
   align-items: center;
 }
 
