@@ -36,7 +36,7 @@ func init() {
 	continueOnError = true
 }
 func ScanArchive(scanPath string) (*Book, error) {
-	b := Book{PageNum: 0, FilePath: scanPath, IsFolder: false, FileSize: 0, ExtractComplete: false}
+	b := Book{AllPageNum: 0, FilePath: scanPath, IsFolder: false, FileSize: 0, ExtractComplete: false}
 	// 获取支持的格式
 	iface, err := getFormat(scanPath)
 	if err != nil {
@@ -56,7 +56,7 @@ func ScanArchive(scanPath string) (*Book, error) {
 				logrus.Debugf(locale.GetString("unsupported_file_type") + inArchiveName)
 			}
 		} else {
-			b.PageNum++
+			b.AllPageNum++
 		}
 		return nil
 	})
@@ -90,7 +90,7 @@ func ExtractArchiveOnce(b *Book) (err error) {
 	}
 	PictureDir = extraFolder
 	ReadingBook.ExtractComplete = true
-	ReadingBook.ExtractNum = ReadingBook.PageNum
+	ReadingBook.ExtractNum = ReadingBook.AllPageNum
 	return err
 }
 
@@ -188,8 +188,8 @@ func ExtractArchive(b *Book) (err error) {
 		}
 		//输出解压比例
 		extractNum++
-		if b.PageNum!=0{
-			Percent =int((float32(extractNum)/float32(b.PageNum))*100)
+		if b.AllPageNum !=0{
+			Percent =int((float32(extractNum)/float32(b.AllPageNum))*100)
 			if  tempPercent!=Percent {
 				if (Percent %10)== 0 { //换个行
 					fmt.Println(strconv.Itoa(Percent)+"% ")
@@ -348,7 +348,7 @@ func ScanBookPath(pathname string) (err error) {
 			fmt.Println(err)
 		}
 		book.SetArchiveBookName(book.FilePath)
-		if book.PageNum > Config.MinImageNum {
+		if book.AllPageNum > Config.MinImageNum {
 			if book.UUID == "" {
 				book.UUID = uuid.NewV4().String()
 			}
@@ -361,7 +361,7 @@ func ScanBookPath(pathname string) (err error) {
 			fmt.Println(err)
 		}
 		book.SetImageFolderBookName(book.FilePath)
-		if book.PageNum >= Config.MinImageNum {
+		if book.AllPageNum >= Config.MinImageNum {
 			if book.UUID == "" {
 				book.UUID = uuid.NewV4().String()
 			}
@@ -373,7 +373,7 @@ func ScanBookPath(pathname string) (err error) {
 }
 
 func ScanDirGetBook(folder string) (*Book, error) {
-	var book = Book{IsFolder: true, PageNum: 0, ExtractComplete: true}
+	var book = Book{IsFolder: true, AllPageNum: 0, ExtractComplete: true}
 	archiveNum := 0
 	files, err := ioutil.ReadDir(folder)
 	if err != nil {
@@ -391,7 +391,7 @@ func ScanDirGetBook(folder string) (*Book, error) {
 			}
 			//fmt.Println(strAbsPath)
 			if checkPicExt(file.Name()) {
-				book.PageNum += 1
+				book.AllPageNum += 1
 				book.PageInfo = append(book.PageInfo, ImageInfo{LocalPath: strAbsPath, UrlPath: "/cache/" + file.Name()})
 			}
 			if checkArchiverExt(file.Name()) {

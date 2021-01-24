@@ -173,14 +173,14 @@ func init() {
 		rootCmd.PersistentFlags().BoolVar(&common.Config.LogToFile, "log", false, locale.GetString("COMI_LOG_TO_FILE"))
 	}
 
-	//默认页面模式
+	//默认web模板
 	if viper.GetBool("COMI_TEMPLATE") {
-		rootCmd.PersistentFlags().StringVar(&common.Config.Template, "template", viper.GetString("COMI_TEMPLATE"), locale.GetString("COMI_TEMPLATE"))
+		rootCmd.PersistentFlags().StringVarP(&common.Config.Template, "template","t", viper.GetString("COMI_TEMPLATE"), locale.GetString("COMI_TEMPLATE"))
 	} else {
-		rootCmd.PersistentFlags().StringVar(&common.Config.Template, "template", "auto", locale.GetString("COMI_TEMPLATE"))
+		rootCmd.PersistentFlags().StringVarP(&common.Config.Template, "template", "t","scroll", locale.GetString("COMI_TEMPLATE"))
 	}
 
-	//默认页面模式
+	//访问密码，还没做完
 	if viper.GetBool("COMI_AUTH") {
 		rootCmd.PersistentFlags().StringVar(&common.Config.Template, "auth", viper.GetString("COMI_AUTH"), locale.GetString("COMI_AUTH"))
 	} else {

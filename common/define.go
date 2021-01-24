@@ -16,21 +16,21 @@ import (
 	"time"
 )
 
-type ServerConfig struct  {
-	OpenBrowser        bool   `json:"-"` //不要解析这个字段
-	DisableLAN         bool   `json:"-"` //不要解析这个字段
-	Template           string `json:"template"`
-	Auth               string `json:"-"` //不要解析这个字段
-	PrintAllIP         bool   `json:"-"` //不要解析这个字段
-	Port               int
-	ConfigPath         string `json:"-"` //不要解析这个字段
-	CheckImageInServer bool
-	LogToFile          bool   `json:"-"` //不要解析这个字段
-	LogFilePath        string `json:"-"` //不要解析这个字段
-	LogFileName        string `json:"-"` //不要解析这个字段
-	MaxDepth           int    `json:"-"` //不要解析这个字段
-	MinImageNum        int
-	ServerHost         string
+type ServerConfig struct {
+	OpenBrowser         bool   `json:"-"` //不要解析这个字段
+	DisableLAN          bool   `json:"-"` //不要解析这个字段
+	Template            string `json:"template"`
+	Auth                string `json:"-"` //不要解析这个字段
+	PrintAllIP          bool   `json:"-"` //不要解析这个字段
+	Port                int
+	ConfigPath          string `json:"-"` //不要解析这个字段
+	CheckImageInServer  bool
+	LogToFile           bool   `json:"-"` //不要解析这个字段
+	LogFilePath         string `json:"-"` //不要解析这个字段
+	LogFileName         string `json:"-"` //不要解析这个字段
+	MaxDepth            int    `json:"-"` //不要解析这个字段
+	MinImageNum         int
+	ServerHost          string
 	EnableWebpServer    bool
 	WebpConfig          WebPServerConfig `json:"-"` //不要解析这个字段
 	EnableFrpcServer    bool
@@ -39,26 +39,39 @@ type ServerConfig struct  {
 }
 
 //通过路径名或执行文件名，来设置默认网页模板这个参数
-func (config *ServerConfig) SetTemplateByName(FileName string){
-	//如果执行文件名包含 comi或multi，设定为多页漫画模式
-	if strings.Contains(FileName, "comi") || strings.Contains(FileName, "multi")  || strings.Contains(FileName, "多页"){
-		config.Template= "multi"
-		fmt.Println(locale.GetString("multi_page_template"))
+func (config *ServerConfig) SetTemplateByName(FileName string) {
+	//如果执行文件名包含 comi或scroll，选择多页漫画模板
+	if strings.Contains(FileName, "comi") || strings.Contains(FileName, "scroll") || strings.Contains(FileName, "卷轴") {
+		config.Template = "scroll"
 	}
-	//如果执行文件名包含 single，设定为 single 漫画模式
-	if strings.Contains(FileName, "single")|| strings.Contains(FileName, "单页"){
-		config.Template ="single"
-		fmt.Println(locale.GetString("single_page_template"))
+	//如果执行文件名包含 sketch或croquis，选择速写参考模板
+	if strings.Contains(FileName, "sketch") || strings.Contains(FileName, "croquis") || strings.Contains(FileName, "速写") {
+		config.Template = "sketch"
 	}
-	//如果执行文件名包含 sketch或croquis，设定为速写参考模式
-	if strings.Contains(FileName, "sketch") || strings.Contains(FileName, "croquis")|| strings.Contains(FileName, "速写"){
-		config.Template ="sketch"
-		fmt.Println(locale.GetString("sketch_page_template"))
+	//如果执行文件名包含 single，选择 single 分页漫画模板
+	if strings.Contains(FileName, "single") || strings.Contains(FileName, "单页") {
+		config.Template = "single"
+	}
+	//如果执行文件名包含 double，选择 double 分页漫画模板
+	if strings.Contains(FileName, "double") || strings.Contains(FileName, "双页") {
+		config.Template = "double"
 	}
 	//如果用goland调试
-	if strings.Contains(FileName, "build"){
-		config.Template ="sketch"
-		fmt.Println(locale.GetString("sketch_page_template"))
+	if strings.Contains(FileName, "build") {
+		config.Template = "sketch"
+	}
+	switch config.Template {
+	case "scroll":
+		fmt.Println(locale.GetString("scroll_template"))
+	case "sketch":
+		fmt.Println(locale.GetString("sketch_template"))
+	case "single":
+		fmt.Println(locale.GetString("single_page_template"))
+	case "double":
+		fmt.Println(locale.GetString("double_page_template"))
+	default:
+		config.Template = "scroll"
+		fmt.Println(locale.GetString("scroll_template"))
 	}
 }
 
@@ -143,7 +156,7 @@ type Book struct {
 	Author          string      `json:"author"`
 	Title           string      `json:"title"`
 	FilePath        string      `json:"-"` //不要解析这个字段
-	PageNum         int         `json:"page_num"`
+	AllPageNum      int         `json:"all_page_num"`
 	PageInfo        []ImageInfo `json:"pages"`
 	FileType        string      `json:"file_type"`
 	FileSize        int64       `json:"file_size"`
@@ -161,7 +174,7 @@ type ImageInfo struct {
 	UrlPath       string `json:"url"`
 	LocalPath     string `json:"-"` //不要解析这个字段
 	InArchiveName string `json:"-"` //不要解析这个字段
-	ImgType       string `json:"class"`
+	ImgType       string `json:"image_type"`
 }
 
 //一些绑定到Book结构体的方法
@@ -185,7 +198,7 @@ func (b *Book) SetImageFolderBookName(name string) {
 
 func (b *Book) SetPageNum() {
 	//页数，目前只支持漫画
-	b.PageNum = len(b.PageInfo)
+	b.AllPageNum = len(b.PageInfo)
 }
 
 func (b *Book) SetFilePath(path string) {
@@ -237,8 +250,8 @@ func (b *Book) ScanAllImageGo() {
 	//wg.Wait()
 	for i := 0; i < count; i++ {
 		extractNum++
-		if b.PageNum != 0 {
-			Percent = int((float32(extractNum) / float32(b.PageNum)) * 100)
+		if b.AllPageNum != 0 {
+			Percent = int((float32(extractNum) / float32(b.AllPageNum)) * 100)
 			if tempPercent != Percent {
 				if (Percent%20) == 0 || Percent == 10 {
 					fmt.Println(strconv.Itoa(Percent) + "% ")
@@ -263,9 +276,9 @@ func SetImageType(p *ImageInfo) {
 		return
 	}
 	if p.Width > p.Height {
-		p.ImgType = "Horizontal"
+		p.ImgType = "DoublePage"
 	} else {
-		p.ImgType = "Vertical"
+		p.ImgType = "SinglePage"
 	}
 }
 
@@ -294,7 +307,7 @@ func SetupCloseHander() {
 	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGHUP)
 	go func() {
 		<-c
-		fmt.Println("\r"+locale.GetString("start_clear_file"))
+		fmt.Println("\r" + locale.GetString("start_clear_file"))
 		deleteTempFiles()
 		os.Exit(0)
 	}()
@@ -304,7 +317,7 @@ func InitReadingBook() (err error) {
 	if ReadingBook.IsFolder {
 		PictureDir = ReadingBook.FilePath
 		ReadingBook.ExtractComplete = true
-		ReadingBook.ExtractNum = ReadingBook.PageNum
+		ReadingBook.ExtractNum = ReadingBook.AllPageNum
 	} else {
 		err = SetTempDir()
 		if err != nil {

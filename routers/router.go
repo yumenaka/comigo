@@ -31,7 +31,7 @@ func StartServer(args []string) {
 	case common.Config.Template =="auto" :
 		selectTemplate()
 	case common.Config.Template =="multi":
-		fmt.Println(locale.GetString("multi_page_template"))
+		fmt.Println(locale.GetString("scroll_template"))
 	case common.Config.Template =="random":
 		fmt.Println(locale.GetString("single_page_template"))
 	case common.Config.Template =="single":

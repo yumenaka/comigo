@@ -3,11 +3,13 @@
     <!-- 初始化后才显示，避免 defaultSetting错误 -->
     <div v-if="defaultSetting">
       <!-- 下拉阅读 -->
-      <MultiPage v-if="defaultSetting.template === 'multi'"> </MultiPage>
+      <ScrollTemplate v-if="defaultSetting.template === 'scroll'"> </ScrollTemplate>
+      <!-- 绘图参考（倒计时速写什么的） -->
+      <SketchTemplate v-if="defaultSetting.template === 'sketch'"> </SketchTemplate>
       <!-- 单页阅读 -->
-      <SinglePage v-if="defaultSetting.template === 'single'"> </SinglePage>
-      <!-- 倒计时（绘图用） -->
-      <SketchPage v-if="defaultSetting.template === 'sketch'"> </SketchPage>
+      <SinglePageTemplate v-if="defaultSetting.template === 'single'"> </SinglePageTemplate>
+      <!-- 双页阅读 -->
+      <DoublePageTemplate v-if="defaultSetting.template === 'double'"> </DoublePageTemplate>
     </div>
     <!-- 加载中 -->
     <p v-else>loading.....</p>
@@ -17,17 +19,19 @@
 <script>
 //代码参考：https://github.com/bradtraversy/vue_crash_todolist
 import axios from "axios";
-import MultiPage from "./views/MultiPage.vue";
-import SinglePage from "./views/SinglePage.vue";
-import SketchPage from "./views/SketchPage.vue";
+import ScrollTemplate from "./views/ScrollTemplate.vue";
+import SketchTemplate from "./views/SketchTemplate.vue";
+import SinglePageTemplate from "./views/SinglePageTemplate.vue";
+import DoublePageTemplate from "./views/DoublePageTemplate.vue";
 
 export default {
   name: "app",
   //为了能在模板中使用，组件必须先注册以便 Vue 能够识别
   components: {
-    MultiPage,
-    SinglePage,
-    SketchPage,
+    ScrollTemplate,
+    SketchTemplate,
+    SinglePageTemplate,
+    DoublePageTemplate,
   },
   //组件的 data 选项必须是一个函数
   //每个实例可以维护一份被返回对象的独立的拷贝
@@ -37,7 +41,7 @@ export default {
       //如果你知道你会在晚些时候需要一个 property，但是一开始它为空或不存在，那么你仅需要设置一些初始值。
       bookshelf: {},
       defaultSetting: {},
-      page: 1,
+      now_page: 1,
       duration: 300,
       offset: 0,
       easing: "easeInOutCubic",

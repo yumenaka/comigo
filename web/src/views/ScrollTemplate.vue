@@ -1,5 +1,5 @@
 <template>
-  <div id="multiPage">
+  <div id="ScrollPage">
     <Header>
       <h2>
         <a v-if="!this.$store.state.book.IsFolder" v-bind:href="'raw/' + this.$store.state.book.name"
@@ -9,7 +9,7 @@
           this.$store.state.book.name
         }}</a>
       </h2>
-      <h4>总页数：{{ this.$store.state.book.page_num }}</h4>
+      <h4>总页数：{{ this.$store.state.book.all_page_num }}</h4>
     </Header>
     <div v-for="(page, key) in this.$store.state.book.pages" :key="page.url" class="manga">
       <img
@@ -17,7 +17,7 @@
         v-bind:H="page.height"
         v-bind:W="page.width"
         v-bind:key="key"
-        v-bind:class="page.class | check_image(page.url)"
+        v-bind:class="page.image_type | check_image(page.url)"
       />
       <p>{{ key + 1 }}/{{ AllPageNum }}</p>
     </div>
@@ -56,7 +56,7 @@ export default {
       duration: 300,
       offset: 0,
       easing: "easeInOutCubic",
-      AllPageNum: this.$store.state.book.page_num,
+      AllPageNum: this.$store.state.book.all_page_num,
       message: {
         user_uuid: "",
         server_status: "",
@@ -160,7 +160,7 @@ export default {
       // console.log(image_url);
       //如果已经算好了
       value = value.toString();
-      if (value == "Vertical" || value == "Horizontal") {
+      if (value == "SinglePage" || value == "DoublePage") {
         return value;
       }
       if (value == "") {
@@ -173,18 +173,18 @@ export default {
         //还要避免默认占位图片的情况，目前远程网速较慢时似乎会出错
         if (image.complete) {
           if (image.width < image.height) {
-            return "Vertical";
+            return "SinglePage";
           } else {
-            return "Horizontal";
+            return "DoublePage";
           }
         } else {
           //否则加载图片
           image.onload = function () {
             image.onload = null; // 避免重复加载
             if (image.width < image.height) {
-              return "Vertical";
+              return "SinglePage";
             } else {
-              return "Horizontal";
+              return "DoublePage";
             }
           };
         }
@@ -210,20 +210,20 @@ export default {
 
 /* 竖屏(显示区域)CSS样式，IE无效 */
 @media screen and (max-aspect-ratio: 19/19) {
-  .Vertical {
+  .SinglePage {
     width: 100%;
   }
-  .Horizontal {
+  .DoublePage {
     width: 100%;
   }
 }
 
 /* 横屏（显示区域）时的CSS样式，IE无效 */
 @media screen and (min-aspect-ratio: 19/19) {
-  .Vertical {
+  .SinglePage {
     width: 900px;
   }
-  .Horizontal {
+  .DoublePage {
     width: 95%;
   }
 }
@@ -231,10 +231,10 @@ export default {
 /* 高分横屏（显示区域）时的CSS样式，IE无效 */
 /* min-width 输出设备中页面最小可视区域宽度 大于这个width时，其中的css起作用 超宽屏 */
 @media screen and (min-aspect-ratio: 19/19) and (min-width: 1922px) {
-  .Vertical {
+  .SinglePage {
     width: 1000px;
   }
-  .Horizontal {
+  .DoublePage {
     width: 1900px;
   }
 }

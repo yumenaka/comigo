@@ -50,7 +50,7 @@ const store = new Vuex.Store({//[3]创建一个store实例
     },
     bookshelf: {},
     defaultSetting: {
-      default_page_template: "multi",
+      default_page_template: "scroll",
     },
     message: {
       user_uuid: "",
