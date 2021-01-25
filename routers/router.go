@@ -26,25 +26,7 @@ func init() {
 }
 
 func StartServer(args []string) {
-
-	switch {
-	case common.Config.Template =="auto" :
-		selectTemplate()
-	case common.Config.Template =="multi":
-		fmt.Println(locale.GetString("scroll_template"))
-	case common.Config.Template =="random":
-		fmt.Println(locale.GetString("single_page_template"))
-	case common.Config.Template =="single":
-		fmt.Println(locale.GetString("single_page_template"))
-	default:
-		common.Config.Template ="multi"
-	}
-
-	if common.Config.Template =="auto" {
-
-	}else if common.Config.Template =="auto"  {
-
-	}
+	selectTemplate()
 	cmdPath := path.Dir(os.Args[0]) //去除路径最后一个元素  /home/dir/comigo.exe -> /home/dir/
 	if len(args) == 0 {
 		err := common.ScanBookPath(cmdPath)

@@ -41,7 +41,7 @@ type ServerConfig struct {
 //通过路径名或执行文件名，来设置默认网页模板这个参数
 func (config *ServerConfig) SetTemplateByName(FileName string) {
 	//如果执行文件名包含 comi或scroll，选择多页漫画模板
-	if strings.Contains(FileName, "comi") || strings.Contains(FileName, "scroll") || strings.Contains(FileName, "卷轴") {
+	if  strings.Contains(FileName, "scroll") || strings.Contains(FileName, "卷轴") {
 		config.Template = "scroll"
 	}
 	//如果执行文件名包含 sketch或croquis，选择速写参考模板

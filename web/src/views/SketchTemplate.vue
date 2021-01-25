@@ -10,16 +10,14 @@
 
     <div class="sketch_main" v-on:click="addPage(1)">
       <div id="SketchHint">
-        <p>每{{ this.WaitSeconds }}秒翻页,{{ getNowCount()}}⏳</p>
+        <p>{{ this.WaitSeconds }}秒翻页,{{ getNowCount()}}⏳</p>
       </div>
       <img
         lazy-src="/resources/favicon.ico"
         v-bind:src="this.$store.state.book.pages[now_page - 1].url"
       /><img />
       <div id="SketchHint">
-        <p>&nbsp;&nbsp;&nbsp;&nbsp;</p>
         <p>🕒{{currentTime}}</p>
-        <p>&nbsp;&nbsp;&nbsp;&nbsp;</p>
       </div>
     </div>
     <v-pagination

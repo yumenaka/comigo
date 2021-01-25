@@ -174,17 +174,17 @@ func init() {
 	}
 
 	//默认web模板
-	if viper.GetBool("COMI_TEMPLATE") {
+	if viper.GetString("COMI_TEMPLATE") != ""{
 		rootCmd.PersistentFlags().StringVarP(&common.Config.Template, "template","t", viper.GetString("COMI_TEMPLATE"), locale.GetString("COMI_TEMPLATE"))
 	} else {
 		rootCmd.PersistentFlags().StringVarP(&common.Config.Template, "template", "t","scroll", locale.GetString("COMI_TEMPLATE"))
 	}
 
 	//访问密码，还没做完
-	if viper.GetBool("COMI_AUTH") {
+	if viper.GetString("COMI_AUTH")!= "" {
 		rootCmd.PersistentFlags().StringVar(&common.Config.Template, "auth", viper.GetString("COMI_AUTH"), locale.GetString("COMI_AUTH"))
 	} else {
-		rootCmd.PersistentFlags().StringVar(&common.Config.Template, "auth", "auto", locale.GetString("COMI_AUTH"))
+		rootCmd.PersistentFlags().StringVar(&common.Config.Template, "auth", "user:comigo", locale.GetString("COMI_AUTH"))
 	}
 
 	//尚未启用的功能，暂时无意义的设置
