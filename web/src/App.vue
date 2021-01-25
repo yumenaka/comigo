@@ -1,15 +1,15 @@
 <template>
   <div id="app">
     <!-- 初始化后才显示，避免 defaultSetting错误 -->
-    <div v-if="defaultSetting">
+    <div v-if="this.$store.state.defaultSetting">
       <!-- 下拉阅读 -->
-      <ScrollTemplate v-if="defaultSetting.template === 'scroll'"> </ScrollTemplate>
+      <ScrollTemplate v-if="this.$store.state.defaultSetting.template === 'scroll'"> </ScrollTemplate>
       <!-- 绘图参考（倒计时速写什么的） -->
-      <SketchTemplate v-if="defaultSetting.template === 'sketch'"> </SketchTemplate>
+      <SketchTemplate v-if="this.$store.state.defaultSetting.template === 'sketch'"> </SketchTemplate>
       <!-- 单页阅读 -->
-      <SinglePageTemplate v-if="defaultSetting.template === 'single'"> </SinglePageTemplate>
+      <SinglePageTemplate v-if="this.$store.state.defaultSetting.template === 'single'"> </SinglePageTemplate>
       <!-- 双页阅读 -->
-      <DoublePageTemplate v-if="defaultSetting.template === 'double'"> </DoublePageTemplate>
+      <DoublePageTemplate v-if="this.$store.state.defaultSetting.template === 'double'"> </DoublePageTemplate>
     </div>
     <!-- 加载中 -->
     <p v-else>loading.....</p>
@@ -64,19 +64,18 @@ export default {
   },
   methods: {
     initPage() {
-      this.book = this.$store.book;
-      this.defaultSetting = this.$store.defaultSetting;
-      this.bookshelf = this.$store.bookshelf;
       axios
         .get("/book.json")
-        .then((response) => (this.$store.state.book = response.data));
+        .then((response) => (this.$store.state.book = response.data))
+        .finally(this.book = this.$store.book);
       axios
         .get("/setting.json")
-        .then((response) => (this.defaultSetting = response.data));
+        .then((response) => (this.$store.state.defaultSetting = response.data))
+        .finally(this.defaultSetting = this.$store.defaultSetting);
       axios
         .get("/bookshelf.json")
         .then((response) => (this.$store.state.bookshelf = response.data))
-        .finally();
+        .finally(this.bookshelf = this.$store.bookshelf);
     },
     getNumber: function (number) {
       this.page = number;

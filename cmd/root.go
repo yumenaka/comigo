@@ -180,6 +180,12 @@ func init() {
 		rootCmd.PersistentFlags().StringVarP(&common.Config.Template, "template", "t","scroll", locale.GetString("COMI_TEMPLATE"))
 	}
 
+	//sketch模式的倒计时秒数
+	if viper.GetInt("COMI_SKETCH_COUNT_SECONDS") != 0{
+		rootCmd.PersistentFlags().IntVar(&common.Config.SketchCountSeconds, "sketch_count_seconds",viper.GetInt("COMI_SKETCH_COUNT_SECONDS"), locale.GetString("COMI_SKETCH_COUNT_SECONDS"))
+	} else {
+		rootCmd.PersistentFlags().IntVar(&common.Config.SketchCountSeconds, "sketch_count_seconds", 90, locale.GetString("COMI_SKETCH_COUNT_SECONDS"))
+	}
 	//访问密码，还没做完
 	if viper.GetString("COMI_AUTH")!= "" {
 		rootCmd.PersistentFlags().StringVar(&common.Config.Template, "auth", viper.GetString("COMI_AUTH"), locale.GetString("COMI_AUTH"))

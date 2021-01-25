@@ -51,6 +51,7 @@ const store = new Vuex.Store({//[3]创建一个store实例
     bookshelf: {},
     defaultSetting: {
       default_page_template: "scroll",
+      sketch_count_seconds: 90,
     },
     message: {
       user_uuid: "",

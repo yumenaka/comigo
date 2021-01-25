@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"regexp"
 	"strconv"
 	"strings"
 	"syscall"
@@ -36,43 +37,64 @@ type ServerConfig struct {
 	EnableFrpcServer    bool
 	FrpConfig           FrpClientConfig `json:"-"` //不要解析这个字段
 	ZipFilenameEncoding string          `json:"-"` //不要解析这个字段
+	SketchCountSeconds  int             `json:"sketch_count_seconds"`
 }
 
-//通过路径名或执行文件名，来设置默认网页模板这个参数
+//通过路径名或执行文件名，来设置默认网页模板参数
 func (config *ServerConfig) SetTemplateByName(FileName string) {
-	//如果执行文件名包含 comi或scroll，选择多页漫画模板
-	if  strings.Contains(FileName, "scroll") || strings.Contains(FileName, "卷轴") {
+	//如果执行文件名包含 scroll 等关键字，选择卷轴模板
+	if haveKeyWord(FileName, []string{"scroll", "スクロール", "默认", "下拉", "卷轴"}) {
 		config.Template = "scroll"
 	}
-	//如果执行文件名包含 sketch或croquis，选择速写参考模板
-	if strings.Contains(FileName, "sketch") || strings.Contains(FileName, "croquis") || strings.Contains(FileName, "速写") {
+	//如果执行文件名包含 sketch 等关键字，选择速写模板
+	if haveKeyWord(FileName, []string{"sketch", "croquis", "クロッキー", "素描", "速写"}) {
 		config.Template = "sketch"
+		//同时设定倒计时秒数
+		valid := regexp.MustCompile("[0-9]+")
+		numbers := valid.FindAllStringSubmatch(FileName, -1)
+		if len(numbers) > 0 {
+			//fmt.Println(numbers)
+			var err error
+			config.SketchCountSeconds, err = strconv.Atoi(numbers[0][0])
+			if err != nil {
+				fmt.Println(numbers[0][0], config.SketchCountSeconds)
+			}
+		}
 	}
-	//如果执行文件名包含 single，选择 single 分页漫画模板
-	if strings.Contains(FileName, "single") || strings.Contains(FileName, "单页") {
+	//如果执行文件名包含 single 等关键字，选择 single 分页漫画模板
+	if haveKeyWord(FileName, []string{"single", "单页", "シングル"}) {
 		config.Template = "single"
 	}
-	//如果执行文件名包含 double，选择 double 分页漫画模板
-	if strings.Contains(FileName, "double") || strings.Contains(FileName, "双页") {
+	//如果执行文件名包含 double 等关键字，选择 double 分页漫画模板
+	if haveKeyWord(FileName, []string{"double", "双页", "ダブルページ"}) {
 		config.Template = "double"
 	}
-	//如果用goland调试
-	if strings.Contains(FileName, "build") {
-		config.Template = "sketch"
-	}
+	//选择模式以后，打印提示
 	switch config.Template {
 	case "scroll":
 		fmt.Println(locale.GetString("scroll_template"))
 	case "sketch":
 		fmt.Println(locale.GetString("sketch_template"))
+		//速写倒计时秒数
+		fmt.Println(locale.GetString("COMI_SKETCH_COUNT_SECONDS"), config.SketchCountSeconds)
 	case "single":
 		fmt.Println(locale.GetString("single_page_template"))
 	case "double":
 		fmt.Println(locale.GetString("double_page_template"))
 	default:
-		config.Template = "scroll"
-		fmt.Println(locale.GetString("scroll_template"))
 	}
+}
+
+//检测字符串中是否有关键字
+func haveKeyWord(checkString string, list []string) bool {
+	//转换为小写，使Sketch、DOUBLE也生效
+	checkString=strings.ToLower(checkString)
+	for _, key := range list {
+		if strings.Contains(checkString, key) {
+			return true
+		}
+	}
+	return false
 }
 
 var Config = ServerConfig{

@@ -16,8 +16,9 @@
         >
       </h2>
     </Header>
-    <div class="double_page_main" v-on:click="nextPage">
+    <div class="double_page_main">
       <img
+        v-on:click="nextPageSinglePage"
         v-if="
           now_page < this.$store.state.book.all_page_num &&
           this.$store.state.book.pages[now_page - 1].image_type ==
@@ -28,7 +29,21 @@
         v-bind:src="this.$store.state.book.pages[now_page].url"
       /><img />
       <img
-        v-if="now_page - 1 >= 0"
+        v-on:click="previousPageSinglePage"
+        v-if="
+          now_page - 1 >= 0 &&
+          this.$store.state.book.pages[now_page - 1].image_type == 'SinglePage'
+        "
+        lazy-src="/resources/favicon.ico"
+        v-bind:src="this.$store.state.book.pages[now_page - 1].url"
+      /><img />
+
+      <img
+        v-on:click="nextPageDoublePage"
+        v-if="
+          now_page - 1 >= 0 &&
+          this.$store.state.book.pages[now_page - 1].image_type == 'DoublePage'
+        "
         lazy-src="/resources/favicon.ico"
         v-bind:src="this.$store.state.book.pages[now_page - 1].url"
       /><img />
@@ -45,35 +60,158 @@
   </div>
 </template>
 
-<style>
-#DoublePageTemplate {
-  align-items: center;
-  width: 100vw;
-  height: 100vh;
-  align-self: center;
-}
-
-.double_page_main {
-  width: 100%;
-  height: 95vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.double_page_main img {
-  max-width: 100%;
-  max-height: 100%;
-  height: 95vh;
-  display: block;
-  margin: center;
-}
-</style>
-
 <script>
 import Header from "./Header.vue";
 
 export default {
+  methods: {
+    initPage() {},
+    toPage: function (p) {
+      if (p >= this.$store.state.book.all_page_num && p < 0) {
+        console.log("now_page error", p);
+      }
+      this.now_page = p;
+      console.log(p);
+    },
+
+    nextPageDoublePage: function () {
+      this.now_page = this.now_page + 1;
+      console.log(this.now_page);
+    },
+
+    nextPageSinglePage: function () {
+      var _this = this;
+      //已经是最后一页，什么都不做，返回
+      if (_this.now_page + 1 > _this.AllPageNum) {
+        console.log(_this.now_page);
+        return;
+      }
+      //还差一页是最后一页，页数只能加1
+      if (_this.now_page + 1 == _this.AllPageNum) {
+        _this.now_page = _this.now_page + 1;
+        return;
+      }
+      //经过上面两轮判断，当前不是倒数前两页，+1或+2
+      if (_this.now_page + 1 < _this.AllPageNum) {
+        //如果目前是两张单页，加2页
+        if (
+          this.$store.state.book.pages[_this.now_page].image_type ==
+            "SinglePage" &&
+          this.$store.state.book.pages[_this.now_page - 1].image_type ==
+            "SinglePage"
+        ) {
+          _this.now_page = _this.now_page + 2;
+          console.log(_this.now_page);
+          return;
+        } else {
+          _this.now_page = _this.now_page + 1;
+          console.log(_this.now_page);
+          return;
+        }
+      } else {
+        _this.now_page = _this.now_page + 1;
+        console.log(_this.now_page);
+        return;
+      }
+    },
+    previousPageSinglePage: function () {
+      if (this.now_page == 0) {
+        console.log(this.now_page);
+        return;
+      }
+      if (this.now_page == 1) {
+        this.now_page = 1;
+        console.log(this.now_page);
+        return;
+      }
+      if (this.now_page == 2) {
+        this.now_page = this.now_page - 1;
+        console.log(this.now_page);
+        return;
+      }
+      //当前页与下一页都是单页，页数-2
+      if (
+        this.$store.state.book.pages[this.now_page - 2].image_type ==
+          "SinglePage" &&
+        this.$store.state.book.pages[this.now_page - 1].image_type ==
+          "SinglePage"
+      ) {
+        this.now_page = this.now_page - 2;
+        console.log(this.now_page);
+        return;
+      } else {
+        this.now_page = this.now_page - 1;
+        console.log(this.now_page);
+        return;
+      }
+    },
+    //键盘快捷键用的下一页、上一页函数
+    nextPage: function () {
+      if (
+        this.$store.state.book.pages[this.now_page].image_type == "SinglePage"
+      ) {
+        this.nextPageSinglePage();
+        return;
+      }
+      if (
+        this.$store.state.book.pages[this.now_page].image_type == "DoublePage"
+      ) {
+        this.nextPageDoublePage();
+        return;
+      }
+    },
+    previousPage: function () {
+      if (
+        this.$store.state.book.pages[this.now_page].image_type == "SinglePage"
+      ) {
+        this.previousPageSinglePage();
+      } else if (
+        this.$store.state.book.pages[this.now_page].image_type ==
+          "DoublePage" &&
+        this.now_page - 1 >= 0
+      ) {
+        this.now_page = this.now_page - 1;
+        console.log(this.now_page);
+      }
+    },
+
+    // 键盘事件
+    handleKeyup(event) {
+      const e = event || window.event || arguments.callee.caller.arguments[0];
+      if (!e) return;
+      //https://developer.mozilla.org/zh-CN/docs/Web/API/KeyboardEvent/keyCode
+      switch (e.key) {
+        case "PageUp":
+        case "ArrowLeft":
+          this.previousPage(); //上一页
+          break;
+        case "Space":
+        case "PageDown":
+        case "ArrowRight":
+          this.nextPage(); //下一页
+          break;
+        case "ArrowUp":
+          this.now_page = 1; //跳转到第一页
+          break;
+        case "ArrowDown":
+          this.now_page = this.AllPageNum - 1; //跳转到最后一页
+          break;
+        case "Ctrl":
+          // Ctrl key pressed //组合键？
+          //openOverlay();
+          break;
+      }
+      // console.log(e.keyCode);
+      // console.log(e.key);
+    },
+    //  滑轮事件
+    handleScroll() {
+      var e = document.body.scrollTop || document.documentElement.scrollTop;
+      if (!e) return;
+      // console.log(e);
+    },
+  },
+
   components: {
     Header,
   },
@@ -126,9 +264,6 @@ export default {
     }, 1000);
   },
   mounted() {
-    // this.book = this.$store.book;
-    // this.defaultSetting = this.$store.defaultSetting;
-    // this.bookshelf = this.$store.bookshelf;
     this.time_cont = 0;
     this.$cookies.keys();
     // 增加监听
@@ -144,91 +279,31 @@ export default {
       clearInterval(this.timer); // 在Vue实例销毁前，清除我们的定时器
     }
   },
-
-  methods: {
-    initPage() {},
-    toPage: function (p) {
-      this.now_page = p;
-      console.log(p);
-    },
-    nextPage: function () {
-      if (this.now_page + 1 >= this.AllPageNum) {
-        return;
-      }
-
-      var _this = this;
-      //当前页与下一页都是单页，页数加2
-      if (this.now_page + 2 < this.AllPageNum) {
-        if (
-          this.$store.state.book.pages[this.now_page].image_type ==
-            "SinglePage" &&
-          this.$store.state.book.pages[this.now_page - 1].image_type ==
-            "SinglePage"
-        ) {
-          _this.now_page = this.now_page + 2;
-        }
-      } else {
-        _this.now_page = this.now_page + 1;
-      }
-      console.log(_this.now_page);
-    },
-    previousPage: function () {
-      if (this.now_page < 1) {
-        return;
-      }
-      if (this.now_page == 2) {
-        this.now_page = this.now_page - 1;
-        return;
-      }
-      //当前页与下一页都是单页，页数加2
-      if (
-        this.$store.state.book.pages[this.now_page - 1].image_type ==
-          "SinglePage" &&
-        this.$store.state.book.pages[this.now_page - 2].image_type ==
-          "SinglePage"
-      ) {
-        this.now_page = this.now_page - 2;
-      } else {
-        this.now_page = this.now_page - 1;
-      }
-      console.log(this.now_page);
-    },
-    // 键盘事件
-    handleKeyup(event) {
-      const e = event || window.event || arguments.callee.caller.arguments[0];
-      if (!e) return;
-      //https://developer.mozilla.org/zh-CN/docs/Web/API/KeyboardEvent/keyCode
-      switch (e.key) {
-        case "PageUp":
-        case "ArrowLeft":
-          this.previousPage(); //上一页
-          break;
-        case "Space":
-        case "PageDown":
-        case "ArrowRight":
-          this.nextPage(); //下一页
-          break;
-        case "ArrowUp":
-          this.now_page = 1; //跳转到第一页
-          break;
-        case "ArrowDown":
-          this.now_page = this.AllPageNum - 1; //跳转到最后一页
-          break;
-        case "Ctrl":
-          // Ctrl key pressed //组合键？
-          //openOverlay();
-          break;
-      }
-      // console.log(e.keyCode);
-      // console.log(e.key);
-    },
-    //  滑轮事件
-    handleScroll() {
-      var e = document.body.scrollTop || document.documentElement.scrollTop;
-      if (!e) return;
-      // console.log(e);
-    },
-  },
 };
 </script>
 
+
+<style>
+#DoublePageTemplate {
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  align-self: center;
+}
+
+.double_page_main {
+  width: 100%;
+  height: 95vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.double_page_main img {
+  max-width: 100%;
+  max-height: 100%;
+  height: 95vh;
+  display: block;
+  margin: center;
+}
+</style>

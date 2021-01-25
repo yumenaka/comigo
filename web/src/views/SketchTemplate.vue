@@ -10,7 +10,7 @@
 
     <div class="sketch_main" v-on:click="addPage(1)">
       <div id="SketchHint">
-        <p>{{ this.WaitSeconds }}秒翻页,{{ getNowCount()}}⏳</p>
+        <p>{{ this.$store.state.defaultSetting.sketch_count_seconds }}秒翻页,{{ getNowCount()}}⏳</p>
       </div>
       <img
         lazy-src="/resources/favicon.ico"
@@ -91,14 +91,13 @@ export default {
   data() {
     return {
       time_cont: 1,
-      WaitSeconds: 90,
+      WaitSeconds: this.$store.state.defaultSetting.sketch_count_seconds,
       book: null,
       bookshelf: null,
       defaultSetting: null,
       showHeader: false,
       showPagination: true,
       now_page: 1,
-
       alert: false,
       easing: "easeInOutCubic",
       timer: "", //定义一个定时器的变量
@@ -167,6 +166,10 @@ export default {
 
   methods: {
     initPage() {},
+    getWaitSeconds(){
+      //console.log(this.$store.state.defaultSetting)
+      return this.$store.state.defaultSetting.sketch_count_seconds;
+    },
     getNowCount() {
       var Seconds = this.time_cont;
       if (Seconds >= 0 && Seconds <= 9) {
