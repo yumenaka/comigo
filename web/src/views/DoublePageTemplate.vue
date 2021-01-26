@@ -67,7 +67,7 @@ export default {
   methods: {
     initPage() {},
     toPage: function (p) {
-      if (p >= this.$store.state.book.all_page_num && p < 0) {
+      if (p > this.$store.state.book.all_page_num && p < 0) {
         console.log("now_page error", p);
       }
       this.now_page = p;
@@ -147,6 +147,14 @@ export default {
     },
     //键盘快捷键用的下一页、上一页函数
     nextPage: function () {
+      if (this.now_page > this.$store.state.book.all_page_num) {
+        console.log(this.now_page);
+        return;
+      }
+      if (this.now_page == this.$store.state.book.all_page_num) {
+        console.log(this.now_page);
+        return;
+      }
       if (
         this.$store.state.book.pages[this.now_page].image_type == "SinglePage"
       ) {
@@ -161,6 +169,14 @@ export default {
       }
     },
     previousPage: function () {
+      if (this.now_page > this.$store.state.book.all_page_num) {
+        console.log(this.now_page);
+        return;
+      }
+      if (this.now_page == this.$store.state.book.all_page_num) {
+        this.now_page = this.now_page - 1;
+        return;
+      }
       if (
         this.$store.state.book.pages[this.now_page].image_type == "SinglePage"
       ) {
@@ -181,20 +197,26 @@ export default {
       if (!e) return;
       //https://developer.mozilla.org/zh-CN/docs/Web/API/KeyboardEvent/keyCode
       switch (e.key) {
+        // case "KeyH":
         case "PageUp":
+        case "ArrowUp":
         case "ArrowLeft":
-          this.previousPage(); //上一页
+          this.previousPage(); //前一页
           break;
+        // case "KeyL":
         case "Space":
+        case "ArrowDown":
         case "PageDown":
         case "ArrowRight":
-          this.nextPage(); //下一页
+          this.nextPage(); //后一页
           break;
-        case "ArrowUp":
-          this.now_page = 1; //跳转到第一页
+        // case "KeyJ":  
+        case "Home":  
+          this.toPage(1); //跳转到第一页
           break;
-        case "ArrowDown":
-          this.now_page = this.AllPageNum - 1; //跳转到最后一页
+        // case "KeyK":
+        case "End":  
+          this.toPage(this.$store.state.book.all_page_num);
           break;
         case "Ctrl":
           // Ctrl key pressed //组合键？

@@ -14,8 +14,9 @@
         >
       </h2>
     </Header>
-    <div class="single_page_main" v-on:click="addPage(1)">
+    <div class="single_page_main">
       <img
+        v-on:click="addPage(1)"
         v-if="now_page <= this.$store.state.book.all_page_num && now_page >= 1"
         lazy-src="/resources/favicon.ico"
         v-bind:src="this.$store.state.book.pages[now_page - 1].url"
@@ -116,19 +117,21 @@ export default {
       if (!e) return;
       //https://developer.mozilla.org/zh-CN/docs/Web/API/KeyboardEvent/keyCode
       switch (e.key) {
+        case "ArrowUp":
         case "PageUp":
         case "ArrowLeft":
           this.addPage(-1); //上一页
           break;
         case "Space":
+        case "ArrowDown":
         case "PageDown":
         case "ArrowRight":
           this.addPage(1); //下一页
           break;
-        case "ArrowUp":
+        case "Home":  
           this.toPage(1); //跳转到第一页
           break;
-        case "ArrowDown":
+        case "End":  
           this.toPage(this.book.all_page_num); //跳转到最后一页
           break;
         case "Ctrl":

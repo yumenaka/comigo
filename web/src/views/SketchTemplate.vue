@@ -8,16 +8,21 @@
       </h2>
     </Header>
 
-    <div class="sketch_main" v-on:click="addPage(1)">
+    <div class="sketch_main">
       <div id="SketchHint">
-        <p>{{ this.$store.state.defaultSetting.sketch_count_seconds }}秒翻页,{{ getNowCount()}}⏳</p>
+        <p>
+          {{ this.$store.state.defaultSetting.sketch_count_seconds }}秒翻页,{{
+            getNowCount()
+          }}⏳
+        </p>
       </div>
       <img
+        v-on:click="addPage(1)"
         lazy-src="/resources/favicon.ico"
         v-bind:src="this.$store.state.book.pages[now_page - 1].url"
       /><img />
       <div id="SketchHint">
-        <p>🕒{{currentTime}}</p>
+        <p>🕒{{ currentTime }}</p>
       </div>
     </div>
     <v-pagination
@@ -41,7 +46,8 @@
 }
 
 #SketchHint {
-  font-family: 'Josefin Sans', -apple-system, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft Yahei', 'WenQuanYi Micro Hei', 'ST Heiti', sans-serif;
+  font-family: "Josefin Sans", -apple-system, "PingFang SC", "Hiragino Sans GB",
+    "Microsoft Yahei", "WenQuanYi Micro Hei", "ST Heiti", sans-serif;
   color: #066eb4;
   text-align: center;
   /* position: absolute;
@@ -61,14 +67,14 @@
   height: 95vh;
   display: flex;
   /* space-between space-evenly space-around */
-  justify-content: center; 
+  justify-content: center;
   align-items: center;
 }
 
 .sketch_main div {
   display: flex;
   /* space-between space-evenly space-around */
-  justify-content: center; 
+  justify-content: center;
 }
 
 .sketch_main img {
@@ -133,7 +139,7 @@ export default {
       //_this.currentTime =currentdate + " " + Hours + ":" + Minutes + ":" + Seconds;
       _this.currentTime = Hours + ":" + Minutes + ":" + Seconds;
       //每 WaitSeconds 秒翻页
-      console.log(currentdate+"time_cont：" + _this.time_cont);
+      console.log(currentdate + "time_cont：" + _this.time_cont);
       if (_this.time_cont < _this.WaitSeconds) {
         _this.time_cont++;
       } else {
@@ -166,7 +172,7 @@ export default {
 
   methods: {
     initPage() {},
-    getWaitSeconds(){
+    getWaitSeconds() {
       //console.log(this.$store.state.defaultSetting)
       return this.$store.state.defaultSetting.sketch_count_seconds;
     },
@@ -197,19 +203,21 @@ export default {
       //https://developer.mozilla.org/zh-CN/docs/Web/API/KeyboardEvent/keyCode
       switch (e.key) {
         case "PageUp":
+        case "ArrowUp":
         case "ArrowLeft":
           this.addPage(-1); //上一页
           break;
         case "Space":
+        case "ArrowDown":
         case "PageDown":
         case "ArrowRight":
           this.addPage(1); //下一页
           break;
-        case "ArrowUp":
+        case "Home":  
           this.toPage(1); //跳转到第一页
           break;
-        case "ArrowDown":
-          this.toPage(this.book.all_page_num); //跳转到最后一页
+        case "End":  
+          this.toPage(this.$store.state.book.all_page_num-1); //跳转到最后一页
           break;
         case "Ctrl":
           // Ctrl key pressed //组合键？
