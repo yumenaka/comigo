@@ -188,9 +188,9 @@ func init() {
 	}
 	//访问密码，还没做完
 	if viper.GetString("COMI_AUTH")!= "" {
-		rootCmd.PersistentFlags().StringVar(&common.Config.Template, "auth", viper.GetString("COMI_AUTH"), locale.GetString("COMI_AUTH"))
+		rootCmd.PersistentFlags().StringVar(&common.Config.Auth, "auth", viper.GetString("COMI_AUTH"), locale.GetString("COMI_AUTH"))
 	} else {
-		rootCmd.PersistentFlags().StringVar(&common.Config.Template, "auth", "user:comigo", locale.GetString("COMI_AUTH"))
+		rootCmd.PersistentFlags().StringVar(&common.Config.Auth, "auth", "user:comigo", locale.GetString("COMI_AUTH"))
 	}
 
 	//尚未启用的功能，暂时无意义的设置

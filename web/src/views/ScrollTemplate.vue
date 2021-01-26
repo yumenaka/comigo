@@ -19,7 +19,7 @@
         v-bind:key="key"
         v-bind:class="page.image_type | check_image(page.url)"
       />
-      <p>{{ key + 1 }}/{{ AllPageNum }}</p>
+      <p v-if="showPageNum">{{ key + 1 }}/{{ AllPageNum}}</p>
     </div>
     <p></p>
     <v-btn
@@ -53,6 +53,7 @@ export default {
       // defaultSetting: null,
       page_mode: "multi",
       btnFlag: false,
+      showPageNum: false,
       duration: 300,
       offset: 0,
       easing: "easeInOutCubic",

@@ -241,7 +241,8 @@ func InitWebServer() {
 	tools.PrintAllReaderURL(common.Config.Port,common.Config.OpenBrowser,common.Config.EnableFrpcServer,common.Config.PrintAllIP,common.Config.ServerHost,common.Config.FrpConfig.ServerAddr,common.Config.FrpConfig.RemotePort,common.Config.DisableLAN)
 	//打印配置
 	//fmt.Println(locale.GetString("print_config"))
-	fmt.Println(common.Config)
+	//fmt.Println(common.Config)
+	fmt.Println(locale.GetString("quit_hint"))
 	err := engine.Run(webHost + strconv.Itoa(common.Config.Port))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, locale.GetString("web_server_error")+"%q\n", common.Config.Port)
