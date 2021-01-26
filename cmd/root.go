@@ -209,16 +209,16 @@ func readConfigFile() {
 	//读取环境变量
 	viper.AutomaticEnv()
 	//viper.SetConfigFile("./config.yaml") // 指定配置文件路径
-	viper.SetConfigName("comigo")      // 配置文件名称(无扩展名)
-	viper.SetConfigType("yaml")        // 如果配置文件的名称中没有扩展名，则需要配置此项
+	viper.SetConfigName("config.yaml")      // 配置文件名称(有扩展名)
+	//viper.SetConfigType("yaml")        // 如果配置文件的名称中没有扩展名，则需要配置此项
 	viper.AddConfigPath(".")           // 在当前目录中查找配置
 	// Find home directory.
 	home, err := homedir.Dir()
 	if err != nil {
-		viper.AddConfigPath(home) // 在Home目录中查找配置
+		//viper.AddConfigPath(home) // 在Home目录中查找配置
 	}
 	viper.AddConfigPath(home + "/.config/comigo") // 多次调用以添加多个搜索路径,home
-	viper.AddConfigPath("./.config")          // 多次调用以添加多个搜索路径
+	viper.AddConfigPath("./.comigo")          // 多次调用以添加多个搜索路径
 	//查找并读取配置文件
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {

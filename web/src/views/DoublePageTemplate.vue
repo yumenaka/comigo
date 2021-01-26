@@ -17,40 +17,67 @@
       </h2>
     </Header>
     <div class="double_page_main">
+      <!-- "image1",page_mark取得。排列在左。page_mark初始值为1.-->
+      <!-- 可以是第二张图片，不可以是最后一张图片。 -->
+      <!-- page_mark 与 page_mark -1都为单页时才显示。 -->
       <img
+        id="image1"
         v-on:click="nextPageSinglePage"
         v-if="
-          now_page < this.$store.state.book.all_page_num &&
-          this.$store.state.book.pages[now_page - 1].image_type ==
+          page_mark < this.$store.state.book.all_page_num &&
+          this.$store.state.book.pages[page_mark - 1].image_type ==
             'SinglePage' &&
-          this.$store.state.book.pages[now_page].image_type == 'SinglePage'
+          this.$store.state.book.pages[page_mark].image_type == 'SinglePage'
         "
         lazy-src="/resources/favicon.ico"
-        v-bind:src="this.$store.state.book.pages[now_page].url"
+        v-bind:src="this.$store.state.book.pages[page_mark].url"
       /><img />
-      <img
-        v-on:click="previousPageSinglePage"
-        v-if="
-          now_page - 1 >= 0 &&
-          this.$store.state.book.pages[now_page - 1].image_type == 'SinglePage'
-        "
-        lazy-src="/resources/favicon.ico"
-        v-bind:src="this.$store.state.book.pages[now_page - 1].url"
-      /><img />
+      <!-- "image2",page_mark-1。排列在右，可以是第一张图片，也可以是最后一张图片。 -->
+      <!-- page_mark-1为单页，且page_mark为单页时，这一张共同显示。排列在右，点击后返回上一页。 -->
 
       <img
-        v-on:click="nextPageDoublePage"
+        id="image2"
+        v-on:click="previousPageSinglePage"
         v-if="
-          now_page - 1 >= 0 &&
-          this.$store.state.book.pages[now_page - 1].image_type == 'DoublePage'
+          page_mark - 1 >= 0 &&
+          this.$store.state.book.pages[page_mark - 1].image_type ==
+            'SinglePage' &&
+          this.$store.state.book.pages[page_mark].image_type == 'SinglePage'
         "
         lazy-src="/resources/favicon.ico"
-        v-bind:src="this.$store.state.book.pages[now_page - 1].url"
+        v-bind:src="this.$store.state.book.pages[page_mark - 1].url"
+      /><img />
+
+      <!-- page_mark-1为单页，且page_mark为双页时，这一张单独显示。与上面的图片的唯一不同，点击后翻下一页 -->
+      <img
+        id="image3"
+        v-on:click="nextPageSinglePage"
+        v-if="
+          page_mark - 1 >= 0 &&
+          this.$store.state.book.pages[page_mark - 1].image_type ==
+            'SinglePage' &&
+          this.$store.state.book.pages[page_mark].image_type == 'DoublePage'
+        "
+        lazy-src="/resources/favicon.ico"
+        v-bind:src="this.$store.state.book.pages[page_mark - 1].url"
+      /><img />
+
+      <!-- page_mark-1， page_mark的前一张。-->
+      <!-- 如为双叶，只显示这一张，可以是第一张图片  -->
+      <img
+        id="image4"
+        v-on:click="nextPageDoublePage"
+        v-if="
+          page_mark - 1 >= 0 &&
+          this.$store.state.book.pages[page_mark - 1].image_type == 'DoublePage'
+        "
+        lazy-src="/resources/favicon.ico"
+        v-bind:src="this.$store.state.book.pages[page_mark - 1].url"
       /><img />
     </div>
     <v-pagination
       v-if="showPagination"
-      v-model="now_page"
+      v-model="page_mark"
       :length="this.$store.state.book.all_page_num"
       :total-visible="15"
       @input="toPage"
@@ -68,126 +95,128 @@ export default {
     initPage() {},
     toPage: function (p) {
       if (p > this.$store.state.book.all_page_num && p < 0) {
-        console.log("now_page error", p);
+        console.log("page_mark error", p);
       }
-      this.now_page = p;
+      this.page_mark = p;
       console.log(p);
     },
-
     nextPageDoublePage: function () {
-      this.now_page = this.now_page + 1;
-      console.log(this.now_page);
+      this.page_mark = this.page_mark + 1;
+      console.log(this.page_mark);
     },
-
+    //感觉与其弄得这么复杂，不如干脆弄个字典，分别表示页数与图片数组……
     nextPageSinglePage: function () {
       var _this = this;
-      //已经是最后一页，什么都不做，返回
-      if (_this.now_page + 1 > _this.AllPageNum) {
-        console.log(_this.now_page);
+      //mark指向最后一页+[已经翻完了]，或者小于0、或大于AllPageNum：打印错误值，什么都不做、返回。
+      if (_this.page_mark >= _this.AllPageNum || _this.page_mark < 0) {
+        console.log(_this.page_mark);
         return;
       }
-      //还差一页是最后一页，页数只能加1
-      if (_this.now_page + 1 == _this.AllPageNum) {
-        _this.now_page = _this.now_page + 1;
+      //mark指向倒数第1页，页数加1
+      if (_this.page_mark == _this.AllPageNum - 1) {
+        _this.page_mark = _this.page_mark + 1;
         return;
       }
-      //经过上面两轮判断，当前不是倒数前两页，+1或+2
-      if (_this.now_page + 1 < _this.AllPageNum) {
-        //如果目前是两张单页，加2页
-        if (
-          this.$store.state.book.pages[_this.now_page].image_type ==
-            "SinglePage" &&
-          this.$store.state.book.pages[_this.now_page - 1].image_type ==
-            "SinglePage"
-        ) {
-          _this.now_page = _this.now_page + 2;
-          console.log(_this.now_page);
-          return;
-        } else {
-          _this.now_page = _this.now_page + 1;
-          console.log(_this.now_page);
-          return;
-        }
+      //mark指向倒数第2页，页数加1
+      if (_this.page_mark == this.AllPageNum - 2) {
+        _this.page_mark = _this.page_mark + 1;
+        console.log(_this.page_mark);
+      }
+      //经过上面3轮判断，_this.page_mark < this.AllPageNum - 2
+      //继续判断+1或+2
+      //如果后两张都是单页，加2页
+      if (
+        this.$store.state.book.pages[_this.page_mark + 1].image_type ==
+          "SinglePage" &&
+        this.$store.state.book.pages[_this.page_mark + 2].image_type ==
+          "SinglePage"
+      ) {
+        _this.page_mark = _this.page_mark + 2;
+        console.log(_this.page_mark);
+        //return;
       } else {
-        _this.now_page = _this.now_page + 1;
-        console.log(_this.now_page);
-        return;
+        //剩下的其他情况，比如有一张是双页，都只加1
+        _this.page_mark = _this.page_mark + 1;
+        console.log(_this.page_mark);
+        //return;
       }
     },
     previousPageSinglePage: function () {
-      if (this.now_page == 0) {
-        console.log(this.now_page);
+      //page_mark不应该小于或等于0，打印并返回。
+      if (this.page_mark <= 0) {
+        console.log(this.page_mark);
         return;
       }
-      if (this.now_page == 1) {
-        this.now_page = 1;
-        console.log(this.now_page);
+      //page_mark == 1，因为page_mark 起始值为1，不应该继续减
+      if (this.page_mark == 1) {
+        console.log(this.page_mark);
         return;
       }
-      if (this.now_page == 2) {
-        this.now_page = this.now_page - 1;
-        console.log(this.now_page);
+      //page_mark == 2，只能往前翻一页
+      if (this.page_mark == 2) {
+        this.page_mark = this.page_mark - 1;
+        console.log(this.page_mark);
         return;
       }
-      //当前页与下一页都是单页，页数-2
+      //到此为止，this.page_mark >=3
+      //-2后，两页都是单页，页数-2
       if (
-        this.$store.state.book.pages[this.now_page - 2].image_type ==
+        this.$store.state.book.pages[this.page_mark - 2].image_type ==
           "SinglePage" &&
-        this.$store.state.book.pages[this.now_page - 1].image_type ==
+        this.$store.state.book.pages[this.page_mark - 2 - 1].image_type ==
           "SinglePage"
       ) {
-        this.now_page = this.now_page - 2;
-        console.log(this.now_page);
-        return;
-      } else {
-        this.now_page = this.now_page - 1;
-        console.log(this.now_page);
+        this.page_mark = this.page_mark - 2;
+        console.log(this.page_mark);
         return;
       }
+      this.page_mark = this.page_mark - 1;
+      console.log(this.page_mark);
+      return;
     },
     //键盘快捷键用的下一页、上一页函数
     nextPage: function () {
-      if (this.now_page > this.$store.state.book.all_page_num) {
-        console.log(this.now_page);
+      if (this.page_mark > this.$store.state.book.all_page_num) {
+        console.log(this.page_mark);
         return;
       }
-      if (this.now_page == this.$store.state.book.all_page_num) {
-        console.log(this.now_page);
+      if (this.page_mark == this.$store.state.book.all_page_num) {
+        console.log(this.page_mark);
         return;
       }
       if (
-        this.$store.state.book.pages[this.now_page].image_type == "SinglePage"
+        this.$store.state.book.pages[this.page_mark].image_type == "SinglePage"
       ) {
         this.nextPageSinglePage();
         return;
       }
       if (
-        this.$store.state.book.pages[this.now_page].image_type == "DoublePage"
+        this.$store.state.book.pages[this.page_mark].image_type == "DoublePage"
       ) {
         this.nextPageDoublePage();
         return;
       }
     },
     previousPage: function () {
-      if (this.now_page > this.$store.state.book.all_page_num) {
-        console.log(this.now_page);
+      if (this.page_mark > this.$store.state.book.all_page_num) {
+        console.log(this.page_mark);
         return;
       }
-      if (this.now_page == this.$store.state.book.all_page_num) {
-        this.now_page = this.now_page - 1;
+      if (this.page_mark == this.$store.state.book.all_page_num) {
+        this.page_mark = this.page_mark - 1;
         return;
       }
       if (
-        this.$store.state.book.pages[this.now_page].image_type == "SinglePage"
+        this.$store.state.book.pages[this.page_mark].image_type == "SinglePage"
       ) {
         this.previousPageSinglePage();
       } else if (
-        this.$store.state.book.pages[this.now_page].image_type ==
+        this.$store.state.book.pages[this.page_mark].image_type ==
           "DoublePage" &&
-        this.now_page - 1 >= 0
+        this.page_mark - 1 >= 0
       ) {
-        this.now_page = this.now_page - 1;
-        console.log(this.now_page);
+        this.page_mark = this.page_mark - 1;
+        console.log(this.page_mark);
       }
     },
 
@@ -210,12 +239,12 @@ export default {
         case "ArrowRight":
           this.nextPage(); //后一页
           break;
-        // case "KeyJ":  
-        case "Home":  
+        // case "KeyJ":
+        case "Home":
           this.toPage(1); //跳转到第一页
           break;
         // case "KeyK":
-        case "End":  
+        case "End":
           this.toPage(this.$store.state.book.all_page_num);
           break;
         case "Ctrl":
@@ -243,7 +272,7 @@ export default {
       book: null,
       bookshelf: null,
       defaultSetting: null,
-      now_page: 1,
+      page_mark: 1,
       showHeader: false,
       showPagination: true,
       AllPageNum: this.$store.state.book.all_page_num,
@@ -256,7 +285,7 @@ export default {
   },
   created() {
     var _this = this; //声明一个变量指向Vue实例this，保证作用域一致
-    // _this.now_page=1;
+    // _this.page_mark=1;
     this.timer = setInterval(function () {
       var date = new Date();
       var year = date.getFullYear();
