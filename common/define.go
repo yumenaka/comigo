@@ -5,6 +5,7 @@ import (
 	"github.com/disintegration/imaging"
 	"github.com/mitchellh/go-homedir"
 	"github.com/yumenaka/comi/locale"
+	"github.com/zenthangplus/goccm"
 	"image"
 	"io/ioutil"
 	"log"
@@ -254,21 +255,26 @@ func (b *Book) ScanAllImage() {
 func (b *Book) ScanAllImageGo() {
 	//var wg sync.WaitGroup
 	log.Println(locale.GetString("check_image_start"))
-	res := make(chan string)
+	// Limit 3 goroutines to run concurrently.
+	c := goccm.New(5)
+	//res := make(chan string)
 	count := 0
 	extractNum := 0
 	Percent := 0
 	tempPercent := 0
 	for i := 0; i < len(b.PageInfo); i++ { //此处不能用range，因为需要修改
 		//wg.Add(1)
+		c.Wait()
 		count++
 		//并发处理，提升图片分析速度
 		go func(i int) {
 			//defer wg.Done()
+			c.Done()
 			SetImageType(&b.PageInfo[i])
-			res <- fmt.Sprintf("Finished %d", i)
+			//res <- fmt.Sprintf("Finished %d", i)
 		}(i)
 	}
+
 	//wg.Wait()
 	for i := 0; i < count; i++ {
 		extractNum++
@@ -282,8 +288,9 @@ func (b *Book) ScanAllImageGo() {
 			tempPercent = Percent
 		}
 		//fmt.Println(<-res)
-		<-res
+		//<-res
 	}
+	c.WaitAllDone()
 	log.Println(locale.GetString("check_image_completed"))
 }
 
