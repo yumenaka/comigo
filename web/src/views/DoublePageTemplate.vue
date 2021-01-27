@@ -1,12 +1,6 @@
 <template>
-  <v-app id="DoublePageTemplate" class="d-flex flex-row-reverse">
-    <v-app-bar
-      v-if="showHeader"
-      class="d-flex justify-center mb-6"
-      flat
-      tile
-      app
-    >
+  <div id="DoublePageTemplate">
+    <Header v-if="showHeader">
       <h2>
         <a
           v-if="!this.$store.state.book.IsFolder"
@@ -21,64 +15,54 @@
           >{{ this.$store.state.book.name }}现在时刻：{{ currentTime }}</a
         >
       </h2>
-    </v-app-bar>
-
-    <v-main>
-      <div class="double_page_main">
-        <!-- [page_mark]单页+双页:排列在左（两张都是单页）或中间（这一张为单页，下一张双页||这一张为双页）。-->
-        <!-- 上面三种情况，图片点击事件都是下一页 -->
-        <!-- page_mark初始值为0或1（前两张为单页，初始化为1）,最大值为this.$store.state.book.all_page_num，等于最大值时本image不显示  -->
-        <!-- 可以是第1张图片，不可以是最后的图片。 -->
-        <!--  page_mark < this.$store.state.book.all_page_num 时显示。 -->
-        <img
-          id="image1"
-          v-on:click="nextPageClick"
-          v-if="page_mark < this.$store.state.book.all_page_num"
-          lazy-src="/resources/favicon.ico"
-          v-bind:src="this.$store.state.book.pages[page_mark].url"
-        /><img />
-        <!-- [page_mark - 1]单页的情况:排列在右，可以是第2张图片，也可以是最后一张图片。 -->
-        <!-- page_mark为单页的前提下，page_mark-1为单页时，这一张作为右页共同显示。点击后返回上一页。 -->
-        <!-- page_mark为双页，page_mark-1无需显示。 -->
-        <img
-          id="image2"
-          v-on:click="previousPageClick"
-          v-if="
-            page_mark - 1 >= 0 &&
-            page_mark < this.$store.state.book.all_page_num &&
-            this.$store.state.book.pages[page_mark].image_type ==
-              'SinglePage' &&
-            this.$store.state.book.pages[page_mark - 1].image_type ==
-              'SinglePage'
-          "
-          lazy-src="/resources/favicon.ico"
-          v-bind:src="this.$store.state.book.pages[page_mark - 1].url"
-        /><img />
-      </div>
-      <slot></slot>
-    </v-main>
-
-    <v-footer class="d-flex justify-center mb-6" flat tile app>
-      <v-pagination
-        id="DoublePage_Pagination"
-        class="d-flex flex-row-reverse"
-        v-if="showPagination"
-        v-model="page_mark"
-        :length="this.$store.state.book.all_page_num - 1"
-        :total-visible="15"
-        @input="toPage"
-      >
-      </v-pagination>
-    </v-footer>
-  </v-app>
+    </Header>
+    <div class="double_page_main">
+      <!-- [page_mark]单页+双页:排列在左（两张都是单页）或中间（这一张为单页，下一张双页||这一张为双页）。-->
+      <!-- 上面三种情况，图片点击事件都是下一页 -->
+      <!-- page_mark初始值为0或1（前两张为单页，初始化为1）,最大值为this.$store.state.book.all_page_num，等于最大值时本image不显示  -->
+      <!-- 可以是第1张图片，不可以是最后的图片。 -->
+      <!--  page_mark < this.$store.state.book.all_page_num 时显示。 -->
+      <img
+        id="image1"
+        v-on:click="nextPageClick"
+        v-if="page_mark < this.$store.state.book.all_page_num"
+        lazy-src="/resources/favicon.ico"
+        v-bind:src="this.$store.state.book.pages[page_mark].url"
+      /><img />
+      <!-- [page_mark - 1]单页的情况:排列在右，可以是第2张图片，也可以是最后一张图片。 -->
+      <!-- page_mark为单页的前提下，page_mark-1为单页时，这一张作为右页共同显示。点击后返回上一页。 -->
+      <!-- page_mark为双页，page_mark-1无需显示。 -->
+      <img
+        id="image2"
+        v-on:click="previousPageClick"
+        v-if="
+          page_mark - 1 >= 0 &&
+          page_mark < this.$store.state.book.all_page_num &&
+          this.$store.state.book.pages[page_mark].image_type == 'SinglePage' &&
+          this.$store.state.book.pages[page_mark - 1].image_type == 'SinglePage'
+        "
+        lazy-src="/resources/favicon.ico"
+        v-bind:src="this.$store.state.book.pages[page_mark - 1].url"
+      /><img />
+    </div>
+    <v-pagination
+      v-if="showPagination"
+      v-model="page_mark"
+      :length="this.$store.state.book.all_page_num - 1"
+      :total-visible="15"
+      @input="toPage"
+    >
+    </v-pagination>
+    <slot></slot>
+  </div>
 </template>
 
 <script>
-// import Header from "./Header.vue";
+import Header from "./Header.vue";
 
 export default {
   components: {
-    // Header,
+    Header,
   },
 
   data() {
@@ -93,7 +77,7 @@ export default {
       bookshelf: null,
       defaultSetting: null,
       page_mark: 0, //初始值为0或1（根据单双页判断，initPageMark）,最大值为this.$store.state.book.all_page_num 最大值的时候，代码逻辑上需要一些特殊处理（page_mark数组越界，但page_mark-1依然有意义）。
-      showHeader: true,
+      showHeader: false,
       showPagination: true,
       AllPageNum: this.$store.state.book.all_page_num - 1,
       time_cont: 0,
