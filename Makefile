@@ -1,6 +1,6 @@
 # Makefile for cross-compilation
-# make all VERSION=v0.3.1
-# mingw32-make all VERSION=v0.3.1
+# make all VERSION=v0.4.0
+# mingw32-make all VERSION=v0.4.0
 NAME=comi
 OS := $(shell uname)
 BINDIR := ./bin
