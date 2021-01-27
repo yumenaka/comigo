@@ -21,7 +21,7 @@ require (
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e // indirect
 	github.com/spf13/cobra v1.1.1
 	github.com/spf13/viper v1.7.1
-	github.com/zenthangplus/goccm v0.0.0-20200608171100-39e9e08b694a
+	github.com/xxjwxc/gowp v0.0.0-20200603141413-57c3ba7108be
 	golang.org/x/text v0.3.5
 	gopkg.in/ini.v1 v1.62.0
 )
