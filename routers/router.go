@@ -3,6 +3,7 @@ package routers
 import (
 	"embed"
 	"fmt"
+	//"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comi/common"
 	"github.com/yumenaka/comi/locale"
@@ -150,7 +151,7 @@ func InitWebServer() {
 	})
 	engine.StaticFS("/assets",http.FS(EmbedFiles))
 	if common.ReadingBook.IsFolder {
-		engine.StaticFS("/raw/"+common.ReadingBook.Name, gin.Dir(common.ReadingBook.FilePath, true))
+		//engine.StaticFS("/raw/"+common.ReadingBook.Name, gin.Dir(common.ReadingBook.FilePath, true)) //URL parameters can not be used when serving a static folder
 	} else {
 		engine.StaticFile("/raw/"+common.ReadingBook.Name, common.ReadingBook.FilePath)
 	}

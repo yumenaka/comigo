@@ -88,9 +88,9 @@ func init() {
 	}
 	//本地Host名
 	if viper.GetString("COMI_LOCAL_HOST") != "" {
-		rootCmd.PersistentFlags().StringVar(&common.Config.ServerHost, "local_host", viper.GetString("COMI_LOCAL_HOST"), locale.GetString("COMI_LOCAL_HOST"))
+		rootCmd.PersistentFlags().StringVarP(&common.Config.ServerHost, "local_host", "l",viper.GetString("COMI_LOCAL_HOST"), locale.GetString("COMI_LOCAL_HOST"))
 	} else {
-		rootCmd.PersistentFlags().StringVar(&common.Config.ServerHost, "local_host", "", locale.GetString("COMI_LOCAL_HOST"))
+		rootCmd.PersistentFlags().StringVarP(&common.Config.ServerHost, "local_host", "l","", locale.GetString("COMI_LOCAL_HOST"))
 	}
 	//打印所有可用网卡ip
 	if viper.GetBool("COMI_PRINT_ALL_IP") {
@@ -186,12 +186,19 @@ func init() {
 	} else {
 		rootCmd.PersistentFlags().IntVar(&common.Config.SketchCountSeconds, "sketch_count_seconds", 90, locale.GetString("COMI_SKETCH_COUNT_SECONDS"))
 	}
-	//访问密码，还没做完
-	if viper.GetString("COMI_AUTH")!= "" {
-		rootCmd.PersistentFlags().StringVar(&common.Config.Auth, "auth", viper.GetString("COMI_AUTH"), locale.GetString("COMI_AUTH"))
-	} else {
-		rootCmd.PersistentFlags().StringVar(&common.Config.Auth, "auth", "user:comigo", locale.GetString("COMI_AUTH"))
-	}
+	////访问密码，还没做
+	//if viper.GetString("COMI_AUTH")!= "" {
+	//	rootCmd.PersistentFlags().StringVar(&common.Config.Auth, "auth", viper.GetString("COMI_AUTH"), locale.GetString("COMI_AUTH"))
+	//} else {
+	//	rootCmd.PersistentFlags().StringVar(&common.Config.Auth, "auth", "user:comigo", locale.GetString("COMI_AUTH"))
+	//}
+
+	////Generate sample yaml configuration，目前无效
+	//if viper.GetBool("COMI_GENERATE_SAMPLE_CONFIG") {
+	//	rootCmd.PersistentFlags().BoolVar(&common.Config.GenerateSampleConfig, "sample", viper.GetBool("COMI_CHECK_IMAGE"), locale.GetString("COMI_GENERATE_SAMPLE_CONFIG"))
+	//} else {
+	//	rootCmd.PersistentFlags().BoolVar(&common.Config.GenerateSampleConfig, "sample", false, locale.GetString("COMI_GENERATE_SAMPLE_CONFIG"))
+	//}
 
 	//尚未启用的功能，暂时无意义的设置
 	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFileName, "logname", "comigo", "log文件名")
@@ -239,12 +246,17 @@ func readConfigFile() {
 	viper.OnConfigChange(func(e fsnotify.Event) {
 		fmt.Println(locale.GetString("config_change") , e.Name)
 	})
-	//保存配置並退出：
-	////将当前的viper配置写入预定义的路径。如果没有预定义的路径，则报错。如果存在，将不会覆盖当前的配置文件。
-	//err = viper.SafeWriteConfigAs("sample_config.yaml")
-	//if err != nil {
-	//	fmt.Println(locale.GetString("save_config_failed") ,err.Error())
-	//} else {
-	//	fmt.Println(locale.GetString("save_config_file"), common.Config.ConfigPath)
+
+	////保存配置並退出,目前是空文件……
+	//if common.Config.GenerateSampleConfig {
+	//	//将当前的viper配置写入预定义的路径。如果没有预定义的路径，则报错。如果存在，将不会覆盖当前的配置文件。
+	//	err := viper.SafeWriteConfigAs("config.yaml")
+	//	if err != nil {
+	//		fmt.Println(locale.GetString("save_config_failed") ,err.Error())
+	//	} else {
+	//		fmt.Println(locale.GetString("save_config_file"), common.Config.ConfigPath)
+	//	}
+	//	os.Exit(0)
 	//}
+
 }

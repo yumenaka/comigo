@@ -27,6 +27,7 @@ type ServerConfig struct {
 	Port                int
 	ConfigPath          string `json:"-"` //不要解析这个字段
 	CheckImageInServer  bool
+	GenerateSampleConfig		bool   `json:"-"` //不要解析这个字段
 	LogToFile           bool   `json:"-"` //不要解析这个字段
 	LogFilePath         string `json:"-"` //不要解析这个字段
 	LogFileName         string `json:"-"` //不要解析这个字段

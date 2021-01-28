@@ -9,6 +9,7 @@ require (
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/gin-gonic/gin v1.6.3
 	github.com/gorilla/websocket v1.4.2
+	github.com/josephspurrier/goversioninfo v1.2.0 // indirect
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/lestrrat-go/strftime v1.0.4 // indirect
 	github.com/mholt/archiver/v3 v3.5.0

@@ -1,7 +1,8 @@
 # Makefile for cross-compilation
-# make all VERSION=v0.4.0
-# mingw32-make all VERSION=v0.4.0
+# make all VERSION=v0.4.1
+# mingw32-make all VERSION=v0.4.1
 NAME=comi
+SKETCH_NAME=sketch_66seconds
 OS := $(shell uname)
 BINDIR := ./bin
 MD5_TEXTFILE := $(BINDIR)/md5Sums.txt
@@ -18,7 +19,7 @@ endif
 
 all: compileThemAll md5SumThemAll
 
-compileThemAll: windows-amd64 windows-386 linux-armv7 linux-armv8 linux-amd64  darwin-amd64 
+compileThemAll: windows-amd64 windows-386 sample linux-armv7 linux-armv8 linux-amd64  darwin-amd64 
 
 UPX := $(shell command -v upx 2> /dev/null)
 
@@ -39,6 +40,17 @@ endif
 	rm  resource.syso 
 
 #32位Windows	
+sample:
+	go generate
+	GOARCH=386 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(SKETCH_NAME)-$@-$(VERSION)/$(SKETCH_NAME).exe 
+ifdef UPX
+	upx -9 $(BINDIR)/$(SKETCH_NAME)-$@-$(VERSION)/$(SKETCH_NAME).exe 
+endif
+	zip -m -r -j -9 $(BINDIR)/$(SKETCH_NAME)-$@-$(VERSION).zip $(BINDIR)/$(SKETCH_NAME)-$@-$(VERSION)
+	rmdir $(BINDIR)/$(SKETCH_NAME)-$@-$(VERSION)
+	rm   resource.syso	
+
+#32位Windows	
 windows-386:
 	go generate
 	GOARCH=386 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)-$@-$(VERSION)/$(NAME).exe 
@@ -48,7 +60,7 @@ endif
 	zip -m -r -j -9 $(BINDIR)/$(NAME)-$@-$(VERSION).zip $(BINDIR)/$(NAME)-$@-$(VERSION)
 	rmdir $(BINDIR)/$(NAME)-$@-$(VERSION)
 	rm   resource.syso	
-	
+
 #32位arm，比如树莓派	
 linux-armv7:
 	GOARCH=arm GOOS=linux GOARM=7 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@-$(VERSION)/$(NAME) 
