@@ -3,17 +3,17 @@ import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
 import VueLazyload from 'vue-lazyload'
-import websocket from 'vue-native-websocket'
+// import websocket from 'vue-native-websocket'
 import vuetify from './plugins/vuetify';
 import VueCookies from 'vue-cookies'
 import axios from "axios";
 import Vuex from "vuex";//[1]引入vuex  参考：https://my.oschina.net/u/4395108/blog/3317345
 
-Vue.use(websocket, "ws://" + document.location.host + "/ws", {//服务器的地址
-  reconnection: true, // (Boolean)是否自动重连，默认false
-  reconnectionAttempts: 500, // 重连次数
-  reconnectionDelay: 1000, // 再次重连等待时间间隔(1000)
-})
+// Vue.use(websocket, "ws://" + document.location.host + "/ws", {//服务器的地址
+//   reconnection: true, // (Boolean)是否自动重连，默认false
+//   reconnectionAttempts: 500, // 重连次数
+//   reconnectionDelay: 1000, // 再次重连等待时间间隔(1000)
+// })
 
 Vue.config.productionTip = false
 Vue.use(VueLazyload, {

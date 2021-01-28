@@ -10,11 +10,7 @@
 
     <div class="sketch_main">
       <div id="SketchHint">
-        <p>
-          {{ this.$store.state.defaultSetting.sketch_count_seconds }}秒翻页,{{
-            getNowCount()
-          }}⏳
-        </p>
+        <p>{{ getNowCount() }}/{{ getALLSeconds()}}⏳</p>
       </div>
       <img
         v-on:click="addPage(1)"
@@ -143,7 +139,7 @@ export default {
       if (_this.time_cont < _this.WaitSeconds) {
         _this.time_cont++;
       } else {
-        _this.time_cont = 1;
+        _this.time_cont = 0;
         console.log("时间到，翻页：" + _this.currentTime + "秒");
         if (_this.now_page < _this.$store.state.book.all_page_num) {
           _this.now_page += 1;
@@ -177,11 +173,20 @@ export default {
       return this.$store.state.defaultSetting.sketch_count_seconds;
     },
     getNowCount() {
-      var Seconds = this.time_cont;
+      var Seconds =
+        this.$store.state.defaultSetting.sketch_count_seconds - this.time_cont;
       if (Seconds >= 0 && Seconds <= 9) {
         Seconds = "0" + Seconds;
       }
+
       return Seconds;
+    },
+    getALLSeconds() {
+      var AllSeconds = this.$store.state.defaultSetting.sketch_count_seconds;
+      if (AllSeconds >= 0 && AllSeconds <= 9) {
+        AllSeconds = "0" + AllSeconds;
+      }
+      return AllSeconds;
     },
     addPage: function (num) {
       if (
@@ -213,11 +218,11 @@ export default {
         case "ArrowRight":
           this.addPage(1); //下一页
           break;
-        case "Home":  
+        case "Home":
           this.toPage(1); //跳转到第一页
           break;
-        case "End":  
-          this.toPage(this.$store.state.book.all_page_num-1); //跳转到最后一页
+        case "End":
+          this.toPage(this.$store.state.book.all_page_num - 1); //跳转到最后一页
           break;
         case "Ctrl":
           // Ctrl key pressed //组合键？
