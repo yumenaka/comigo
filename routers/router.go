@@ -3,12 +3,8 @@ package routers
 import (
 	"embed"
 	"fmt"
+
 	//"github.com/gin-gonic/contrib/static"
-	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comi/common"
-	"github.com/yumenaka/comi/locale"
-	"github.com/yumenaka/comi/routers/reverse_proxy"
-	"github.com/yumenaka/comi/tools"
 	"html/template"
 	"math/rand"
 	"net/http"
@@ -19,7 +15,19 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/yumenaka/comi/common"
+	"github.com/yumenaka/comi/locale"
+	"github.com/yumenaka/comi/routers/reverse_proxy"
+	"github.com/yumenaka/comi/tools"
 )
+
+//go:embed index.html
+var TemplateString string
+
+//go:embed  favicon.ico js/* css/*
+var EmbedFiles embed.FS
 
 //退出时清理
 func init() {
@@ -72,7 +80,7 @@ func StartServer(args []string) {
 
 func selectTemplate() {
 	// 当前执行目录
-	targetPath,_ := os.Getwd()
+	targetPath, _ := os.Getwd()
 	fmt.Println(locale.GetString("target_path"), targetPath)
 	// 带后缀的执行文件名
 	filenameWithSuffix := path.Base(os.Args[0])
@@ -87,7 +95,7 @@ func selectTemplate() {
 	}
 	extPath := filepath.Dir(ex)
 	//fmt.Println("extPath =",extPath)
-	ExtFileName:=  strings.TrimPrefix(filenameWithOutSuffix, extPath)
+	ExtFileName := strings.TrimPrefix(filenameWithOutSuffix, extPath)
 	//fmt.Println("ExtFileName =", ExtFileName)
 	common.Config.SetTemplateByName(ExtFileName)
 }
@@ -114,15 +122,14 @@ func setFirstBook(args []string) {
 
 // 测试用的假数据
 var secrets = gin.H{
-	"comi":    gin.H{"email": "foo@bar.com", "phone": "123433"},
+	"comi":  gin.H{"email": "foo@bar.com", "phone": "123433"},
 	"admin": gin.H{"email": "austin@example.com", "phone": "666"},
-	"user1":   gin.H{"email": "lena@guapa.com", "phone": "523443"},
+	"user1": gin.H{"email": "lena@guapa.com", "phone": "523443"},
 }
 
 //启动web服务
 func InitWebServer() {
-	//go:embed index.html
-	var TemplateString string
+
 	//获取模板，命名为"template-data"，同时把左右分隔符改为 [[ ]]
 	tmpl := template.Must(template.New("template-data").Delims("[[", "]]").Parse(TemplateString))
 	//设置 gin
@@ -138,8 +145,7 @@ func InitWebServer() {
 	}
 	//自定义分隔符，避免与vue.js冲突
 	engine.Delims("[[", "]]")
-	//go:embed  favicon.ico js/* css/*
-	var EmbedFiles embed.FS
+
 	//网站图标
 	engine.GET("/resources/favicon.ico", func(c *gin.Context) {
 		file, _ := EmbedFiles.ReadFile("favicon.ico")
@@ -149,7 +155,7 @@ func InitWebServer() {
 			file,
 		)
 	})
-	engine.StaticFS("/assets",http.FS(EmbedFiles))
+	engine.StaticFS("/assets", http.FS(EmbedFiles))
 	if common.ReadingBook.IsFolder {
 		//engine.StaticFS("/raw/"+common.ReadingBook.Name, gin.Dir(common.ReadingBook.FilePath, true)) //URL parameters can not be used when serving a static folder
 	} else {
@@ -171,7 +177,7 @@ func InitWebServer() {
 		})
 	})
 
-	if common.Config.Auth != ""{
+	if common.Config.Auth != "" {
 
 	}
 
@@ -239,7 +245,7 @@ func InitWebServer() {
 		}
 	}
 	//开始服务
-	tools.PrintAllReaderURL(common.Config.Port,common.Config.OpenBrowser,common.Config.EnableFrpcServer,common.Config.PrintAllIP,common.Config.ServerHost,common.Config.FrpConfig.ServerAddr,common.Config.FrpConfig.RemotePort,common.Config.DisableLAN)
+	tools.PrintAllReaderURL(common.Config.Port, common.Config.OpenBrowser, common.Config.EnableFrpcServer, common.Config.PrintAllIP, common.Config.ServerHost, common.Config.FrpConfig.ServerAddr, common.Config.FrpConfig.RemotePort, common.Config.DisableLAN)
 	//打印配置
 	//fmt.Println(locale.GetString("print_config"))
 	//fmt.Println(common.Config)
