@@ -3,18 +3,28 @@ package locale
 import (
 	_ "embed"
 	"fmt"
-	"github.com/BurntSushi/toml"
-	"github.com/nicksnyder/go-i18n/v2/i18n"
-	"golang.org/x/text/language"
 	"os"
 	"os/exec"
 	"runtime"
 	"strings"
+
+	"github.com/BurntSushi/toml"
+	"github.com/nicksnyder/go-i18n/v2/i18n"
+	"golang.org/x/text/language"
 )
 
 //https://github.com/nicksnyder/go-i18n/blob/main/v2/i18n/example_test.go
 
 var Localizer *i18n.Localizer
+
+//go:embed en-us.toml
+var enBytes []byte
+
+//go:embed zh-cn.toml
+var cnBytes []byte
+
+//go:embed ja-jp.toml
+var jpBytes []byte
 
 func getLocale() (string, string) {
 	osHost := runtime.GOOS
@@ -68,20 +78,14 @@ func chcpToUTF8() {
 	}
 }
 
-func init(){
+func init() {
 	bundle := i18n.NewBundle(language.English)
 	bundle.RegisterUnmarshalFunc("toml", toml.Unmarshal)
 
-	//go:embed en-us.toml
-	var enBytes []byte
 	bundle.MustParseMessageFileBytes(enBytes, "en-us.toml")
 
-	//go:embed zh-cn.toml
-	var cnBytes []byte
 	bundle.MustParseMessageFileBytes(cnBytes, "zh-cn.toml")
 
-	//go:embed ja-jp.toml
-	var jpBytes []byte
 	bundle.MustParseMessageFileBytes(jpBytes, "ja-jp.toml")
 
 	lang, _ := getLocale()
@@ -100,5 +104,5 @@ func init(){
 }
 
 func GetString(id string) string {
-	return Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID:id})
+	return Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: id})
 }
