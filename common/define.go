@@ -19,15 +19,15 @@ import (
 )
 
 type ServerConfig struct {
-	OpenBrowser         bool   `json:"-"` //不要解析这个字段
-	DisableLAN          bool   `json:"-"` //不要解析这个字段
-	Template            string `json:"template"`
-	Auth                string `json:"-"` //不要解析这个字段
-	PrintAllIP          bool   `json:"-"` //不要解析这个字段
-	Port                int
-	ConfigPath          string `json:"-"` //不要解析这个字段
-	CheckImageInServer  bool
-	GenerateSampleConfig		bool   `json:"-"` //不要解析这个字段
+	OpenBrowser        bool   `json:"-"` //不要解析这个字段
+	DisableLAN         bool   `json:"-"` //不要解析这个字段
+	Template           string `json:"template"`
+	Auth               string `json:"-"` //不要解析这个字段
+	PrintAllIP         bool   `json:"-"` //不要解析这个字段
+	Port               int
+	ConfigPath         string `json:"-"` //不要解析这个字段
+	CheckImageInServer bool
+	DebugMode           bool  `json:"-"`        //不要解析这个字段
 	LogToFile           bool   `json:"-"` //不要解析这个字段
 	LogFilePath         string `json:"-"` //不要解析这个字段
 	LogFileName         string `json:"-"` //不要解析这个字段
@@ -172,7 +172,7 @@ func init() {
 		fmt.Println(err)
 	}
 	Config.LogFilePath = home
-	Config.LogFileName = "comigo.ini"
+	Config.LogFileName = "comigo.log"
 }
 
 type Book struct {

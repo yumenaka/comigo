@@ -3,7 +3,13 @@ package routers
 import (
 	"embed"
 	"fmt"
+	"github.com/sanity-io/litter"
 
+	"github.com/gin-gonic/gin"
+	"github.com/yumenaka/comi/common"
+	"github.com/yumenaka/comi/locale"
+	"github.com/yumenaka/comi/routers/reverse_proxy"
+	"github.com/yumenaka/comi/tools"
 	//"github.com/gin-gonic/contrib/static"
 	"html/template"
 	"math/rand"
@@ -15,12 +21,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comi/common"
-	"github.com/yumenaka/comi/locale"
-	"github.com/yumenaka/comi/routers/reverse_proxy"
-	"github.com/yumenaka/comi/tools"
 )
 
 //go:embed index.html
@@ -249,6 +249,9 @@ func InitWebServer() {
 	//打印配置
 	//fmt.Println(locale.GetString("print_config"))
 	//fmt.Println(common.Config)
+	if common.Config.DebugMode {
+		litter.Dump(common.Config)
+	}
 	fmt.Println(locale.GetString("quit_hint"))
 	err := engine.Run(webHost + strconv.Itoa(common.Config.Port))
 	if err != nil {

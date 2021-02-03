@@ -186,6 +186,12 @@ func init() {
 	} else {
 		rootCmd.PersistentFlags().IntVar(&common.Config.SketchCountSeconds, "sketch_count_seconds", 90, locale.GetString("COMI_SKETCH_COUNT_SECONDS"))
 	}
+	//Debug
+	if viper.GetBool("COMI_DEBUG_MODE") {
+		rootCmd.PersistentFlags().BoolVar(&common.Config.DebugMode, "debug", viper.GetBool("COMI_DEBUG_MODE"), locale.GetString("COMI_DEBUG_MODE"))
+	} else {
+		rootCmd.PersistentFlags().BoolVar(&common.Config.DebugMode, "debug", false, locale.GetString("COMI_DEBUG_MODE"))
+	}
 	////访问密码，还没做
 	//if viper.GetString("COMI_AUTH")!= "" {
 	//	rootCmd.PersistentFlags().StringVar(&common.Config.Auth, "auth", viper.GetString("COMI_AUTH"), locale.GetString("COMI_AUTH"))

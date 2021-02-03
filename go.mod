@@ -17,6 +17,7 @@ require (
 	github.com/nicksnyder/go-i18n/v2 v2.1.2
 	github.com/nwaples/rardecode v1.1.0
 	github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5
+	github.com/sanity-io/litter v1.3.0 // indirect
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.7.0
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e // indirect

@@ -98,3 +98,4 @@ COMI_TEMPLATE  = "デフォルト テンプレート(scroll,single,double,sketch
 COMI_SKETCH_COUNT_SECONDS = "スケッチモードのカウントダウン秒数"
 quit_hint = "CTRL-Cを押して終了"
 COMI_GENERATE_SAMPLE_CONFIG = "サンプルyaml設定を生成する"
+COMI_DEBUG_MODE = "Debug Mode"
