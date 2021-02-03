@@ -117,6 +117,8 @@ func ExtractArchive(b *Book) (err error) {
 	err = archiver.Walk(b.FilePath, func(f archiver.File) error {
 		//解压用
 		inArchiveName := f.Name()
+		modeTime := f.ModTime()
+		fileSize := f.Size()
 		////zip编码用
 		//inArchiveNameZip := f.Name()
 		switch h := f.Header.(type) {
@@ -169,10 +171,10 @@ func ExtractArchive(b *Book) (err error) {
 		}
 		//解压后的文件
 		filePath := extraFolder + "/" + inArchiveName
-		temp := ImageInfo{LocalPath: filePath, InArchiveName: inArchiveName, UrlPath: "cache/" + b.UUID + "/" + inArchiveName}
+		temp := SinglePageInfo{ModeTime: modeTime,FileSize:fileSize,LocalPath: filePath, Name: inArchiveName, UrlPath: "cache/" + b.UUID + "/" + inArchiveName}
 		if b.FileType == ".zip" {
 			filePath = extraFolder + "/" + inArchiveName + "/" + inArchiveName
-			temp = ImageInfo{LocalPath: filePath, UrlPath: "cache/" + b.UUID + "/" + inArchiveName + "/" + inArchiveName}
+			temp = SinglePageInfo{ModeTime: modeTime,FileSize:fileSize,LocalPath: filePath, Name: inArchiveName, UrlPath: "cache/" + b.UUID + "/" + inArchiveName + "/" + inArchiveName}
 		}
 		if tools.ChickFileExists(filePath) {
 			logrus.Debugf(locale.GetString("file_exit") + filePath)
@@ -392,7 +394,7 @@ func ScanDirGetBook(folder string) (*Book, error) {
 			//fmt.Println(strAbsPath)
 			if checkPicExt(file.Name()) {
 				book.AllPageNum += 1
-				book.PageInfo = append(book.PageInfo, ImageInfo{LocalPath: strAbsPath, UrlPath: "/cache/" + file.Name()})
+				book.PageInfo = append(book.PageInfo, SinglePageInfo{LocalPath: strAbsPath, UrlPath: "/cache/" + file.Name()})
 			}
 			if checkArchiverExt(file.Name()) {
 				archiveNum += 1

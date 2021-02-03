@@ -192,6 +192,23 @@ func init() {
 	} else {
 		rootCmd.PersistentFlags().BoolVar(&common.Config.DebugMode, "debug", false, locale.GetString("COMI_DEBUG_MODE"))
 	}
+
+	//按文件名排序
+	if viper.GetBool("COMI_SORT_BY_NAME") {
+		rootCmd.PersistentFlags().BoolVar(&common.Config.SortByFileName, "sort-name", viper.GetBool("COMI_SORT_BY_NAME"), locale.GetString("COMI_SORT_BY_NAME"))
+	} else {
+		rootCmd.PersistentFlags().BoolVar(&common.Config.SortByFileName, "sort-name", false, locale.GetString("COMI_SORT_BY_NAME"))
+	}
+
+
+	//按文件修改时间排序
+	if viper.GetBool("COMI_SORT_BY_TIME") {
+		rootCmd.PersistentFlags().BoolVar(&common.Config.SortByModTime, "sort-time", viper.GetBool("COMI_SORT_BY_TIME"), locale.GetString("COMI_SORT_BY_TIME"))
+	} else {
+		rootCmd.PersistentFlags().BoolVar(&common.Config.SortByModTime, "sort-time", false, locale.GetString("COMI_SORT_BY_TIME"))
+	}
+
+
 	////访问密码，还没做
 	//if viper.GetString("COMI_AUTH")!= "" {
 	//	rootCmd.PersistentFlags().StringVar(&common.Config.Auth, "auth", viper.GetString("COMI_AUTH"), locale.GetString("COMI_AUTH"))

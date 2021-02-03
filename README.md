@@ -1,20 +1,20 @@
 <h2 align="center">
-  <img src="https://raw.githubusercontent.com/yumenaka/comi/master/icon.ico" alt="ComiGo: 简单粗暴的漫画阅读器" width="200">
-  <br>ComiGo: 简单粗暴的漫画阅读器<br>
+  <img src="https://raw.githubusercontent.com/yumenaka/comi/master/icon.ico" alt="ComiGo: simple comic reader" width="200">
+  <br>ComiGo: simple comic reader<br>
 </h2>
 
-![Windows示例](https://www.yumenaka.net/wp-content/uploads/2020/08/sample.gif "Windows示例")  
+![Windows example](https://www.yumenaka.net/wp-content/uploads/2020/08/sample.gif "Windows example")  
 
 
 
-## Platforms
+## Supported platforms：
 
 - Windows(386\64)
 - macOS
 - Linux（amd64、armv7\armv8）
 - and More(You can compile it yourself).
 
-### 下载地址：
+### Download：
 
 [https://github.com/yumenaka/comi/releases](https://github.com/yumenaka/comi/releases ) 
 

@@ -1,6 +1,7 @@
 package common
 
 import (
+	"errors"
 	"fmt"
 	"github.com/disintegration/imaging"
 	"github.com/mitchellh/go-homedir"
@@ -12,25 +13,53 @@ import (
 	"os"
 	"os/signal"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"syscall"
 	"time"
 )
 
+type WebPServerConfig struct {
+	WebpCommand  string
+	HOST         string
+	PORT         string
+	ImgPath      string `json:"IMG_PATH"`
+	QUALITY      int
+	AllowedTypes []string `json:"ALLOWED_TYPES"`
+	ExhaustPath  string   `json:"EXHAUST_PATH"`
+}
+
+type FrpClientConfig struct {
+	//frp，服务器端
+	FrpcCommand string
+	ServerAddr  string
+	ServerPort  int
+	Token       string
+	////本地管理界面，暂不开启
+	//AdminAddr   string
+	//AdminPort   string
+	//AdminUser   string
+	//AdminPwd    string
+	//本地转发端口设置
+	FrpType          string
+	RemotePort       int
+	RandomRemotePort bool
+}
+
 type ServerConfig struct {
-	OpenBrowser        bool   `json:"-"` //不要解析这个字段
-	DisableLAN         bool   `json:"-"` //不要解析这个字段
-	Template           string `json:"template"`
-	Auth               string `json:"-"` //不要解析这个字段
-	PrintAllIP         bool   `json:"-"` //不要解析这个字段
-	Port               int
-	ConfigPath         string `json:"-"` //不要解析这个字段
-	CheckImageInServer bool
-	DebugMode           bool  `json:"-"`        //不要解析这个字段
+	OpenBrowser         bool   `json:"-"` //不要解析这个字段
+	DisableLAN          bool   `json:"-"` //不要解析这个字段
+	Template            string `json:"template"`
+	Auth                string `json:"-"` //不要解析这个字段
+	PrintAllIP          bool   `json:"-"` //不要解析这个字段
+	Port                int
+	ConfigPath          string `json:"-"` //不要解析这个字段
+	CheckImageInServer  bool
+	DebugMode           bool   `json:"-"` //不要解析这个字段
 	LogToFile           bool   `json:"-"` //不要解析这个字段
 	LogFilePath         string `json:"-"` //不要解析这个字段
-	LogFileName         string `json:"-"` //不要解析这个字段
+	LogFileName          string `json:"-"` //不要解析这个字段
 	MaxDepth            int    `json:"-"` //不要解析这个字段
 	MinImageNum         int
 	ServerHost          string
@@ -40,6 +69,8 @@ type ServerConfig struct {
 	FrpConfig           FrpClientConfig `json:"-"` //不要解析这个字段
 	ZipFilenameEncoding string          `json:"-"` //不要解析这个字段
 	SketchCountSeconds  int             `json:"sketch_count_seconds"`
+	SortByModTime       bool            //SortByModificationTime
+	SortByFileName      bool
 }
 
 //通过路径名或执行文件名，来设置默认网页模板参数
@@ -51,18 +82,15 @@ func (config *ServerConfig) SetTemplateByName(FileName string) {
 	//如果执行文件名包含 sketch 等关键字，选择速写模板
 	if haveKeyWord(FileName, []string{"sketch", "croquis", "クロッキー", "素描", "速写"}) {
 		config.Template = "sketch"
-		//同时设定倒计时秒数
-		valid := regexp.MustCompile("[0-9]+")
-		numbers := valid.FindAllStringSubmatch(FileName, -1)
-		if len(numbers) > 0 {
-			//fmt.Println(numbers)
-			var err error
-			config.SketchCountSeconds, err = strconv.Atoi(numbers[0][0])
-			if err != nil {
-				fmt.Println(numbers[0][0], config.SketchCountSeconds)
-			}
-		}
 	}
+	//根据文件名设定倒计时秒数,不管默认是不是sketch模式
+	Seconds, err:= getNumberFromString(FileName)
+	if err != nil {
+		fmt.Println(Seconds)
+	}else {
+		config.SketchCountSeconds=Seconds
+	}
+
 	//如果执行文件名包含 single 等关键字，选择 single 分页漫画模板
 	if haveKeyWord(FileName, []string{"single", "单页", "シングル"}) {
 		config.Template = "single"
@@ -87,10 +115,37 @@ func (config *ServerConfig) SetTemplateByName(FileName string) {
 	}
 }
 
+//从字符串中提取数字,如果有几个数字，就简单地加起来
+func getNumberFromString(s string) (int,error) {
+	var err error
+	num := 0
+	//同时设定倒计时秒数
+	valid := regexp.MustCompile("[0-9]+")
+	numbers := valid.FindAllStringSubmatch(s, -1)
+	if len(numbers) > 0 {
+		//循环取出多维数组
+		for _,value := range numbers {
+			for _,v := range value {
+				temp, errTemp :=strconv.Atoi(v)
+				if errTemp !=nil{
+					fmt.Println("error num value:"+v)
+				}else {
+					num=num+temp
+				}
+			}
+		}
+		//fmt.Println("get Number:",num," form string:",s,"numbers[]=",numbers)
+	}else {
+		err = errors.New("number not found")
+		return 0, err
+	}
+	return num, err
+}
+
 //检测字符串中是否有关键字
 func haveKeyWord(checkString string, list []string) bool {
 	//转换为小写，使Sketch、DOUBLE也生效
-	checkString=strings.ToLower(checkString)
+	checkString = strings.ToLower(checkString)
 	for _, key := range list {
 		if strings.Contains(checkString, key) {
 			return true
@@ -115,7 +170,7 @@ var Config = ServerConfig{
 		PORT:         "3333",
 		ImgPath:      "",
 		QUALITY:      70,
-		AllowedTypes: []string{"jpg", "png", "jpeg", "bmp"},
+		AllowedTypes: []string{"jpg", "jpeg", "JPEG", "jpe", "jpf", "jfif", "jfi", "png", "bmp", "webp", "ico", "heic"},
 		ExhaustPath:  "",
 	},
 	EnableFrpcServer: false,
@@ -132,7 +187,10 @@ var Config = ServerConfig{
 		//AdminUser:   "",
 		//AdminPwd :   "",
 	},
-	ServerHost: "",
+	ServerHost:         "",
+	SketchCountSeconds: 90,
+	SortByModTime:      false,
+	SortByFileName:     false,
 }
 
 var ReadingBook Book
@@ -181,7 +239,7 @@ type Book struct {
 	Title           string      `json:"title"`
 	FilePath        string      `json:"-"` //不要解析这个字段
 	AllPageNum      int         `json:"all_page_num"`
-	PageInfo        []ImageInfo `json:"pages"`
+	PageInfo        AllPageInfo `json:"pages"`
 	FileType        string      `json:"file_type"`
 	FileSize        int64       `json:"file_size"`
 	Modified        time.Time   `json:"modified_time"`
@@ -192,13 +250,54 @@ type Book struct {
 	ReadPercent     float64     `json:"read_percent"`
 }
 
-type ImageInfo struct {
-	Height        int    `json:"height"`
-	Width         int    `json:"width"`
-	UrlPath       string `json:"url"`
-	LocalPath     string `json:"-"` //不要解析这个字段
-	InArchiveName string `json:"-"` //不要解析这个字段
-	ImgType       string `json:"image_type"`
+type SinglePageInfo struct {
+	ModeTime  time.Time `json:"-"` //不要解析这个字段
+	FileSize  int64     `json:"-"` //不要解析这个字段
+	Height    int       `json:"height"`
+	Width     int       `json:"width"`
+	UrlPath   string    `json:"url"`
+	LocalPath string    `json:"-"` //不要解析这个字段
+	Name      string    `json:"-"` //不要解析这个字段
+	ImgType   string    `json:"image_type"`
+}
+
+type AllPageInfo []SinglePageInfo
+
+//Len()
+func (s AllPageInfo) Len() int {
+	return len(s)
+}
+
+//Less():按时间或URL，将图片排序
+func (s AllPageInfo) Less(i, j int) bool {
+	//如何定义 s[i] < s[j]
+	less := s[i].ModeTime.After(s[j].ModeTime) // s[i] 的年龄（修改时间），是否比 s[j] 小？
+	if Config.SortByFileName {
+		numI,err1:=getNumberFromString(s[i].Name)
+		if err1!=nil{
+			less = strings.Compare(s[i].Name,s[j].Name)>0
+			return  less
+		}
+		numJ,err2:=getNumberFromString(s[j].Name)
+		if err2!=nil{
+			less = strings.Compare(s[i].Name,s[j].Name)>0
+			return  less
+		}
+		//fmt.Println("numI:",numI)
+		//fmt.Println("numJ:",numJ)
+		less = numI < numJ //如果有的话，比较文件名里的数字
+	}
+	return less
+}
+
+//Swap()
+func (s AllPageInfo) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+
+//上面三个函数定义好了，终于可以使用sort包排序了
+func (b *Book) SortPages() {
+	sort.Sort(b.PageInfo)
 }
 
 //一些绑定到Book结构体的方法
@@ -256,7 +355,7 @@ func (b *Book) ScanAllImage() {
 func (b *Book) ScanAllImageGo() {
 	//var wg sync.WaitGroup
 	log.Println(locale.GetString("check_image_start"))
-	wp := workpool.New(10)             //设置最大线程数
+	wp := workpool.New(10) //设置最大线程数
 	//res := make(chan string)
 	count := 0
 	extractNum := 0
@@ -267,7 +366,7 @@ func (b *Book) ScanAllImageGo() {
 		count++
 		ii := i
 		//并发处理，提升图片分析速度
-		wp.Do(func() error{
+		wp.Do(func() error {
 			//defer wg.Done()
 			SetImageType(&b.PageInfo[ii])
 			//res <- fmt.Sprintf("Finished %d", i)
@@ -293,7 +392,7 @@ func (b *Book) ScanAllImageGo() {
 	log.Println(locale.GetString("check_image_completed"))
 }
 
-func SetImageType(p *ImageInfo) {
+func SetImageType(p *SinglePageInfo) {
 	err := p.GetImageSize()
 	//log.Println(locale.GetString("check_image_ing"), p.LocalPath)
 	if err != nil {
@@ -311,7 +410,7 @@ func SetImageType(p *ImageInfo) {
 }
 
 //获取图片分辨率
-func (i *ImageInfo) GetImageSize() (err error) {
+func (i *SinglePageInfo) GetImageSize() (err error) {
 	var img image.Image
 	img, err = imaging.Open(i.LocalPath)
 	if err != nil {
@@ -360,9 +459,26 @@ func InitReadingBook() (err error) {
 		}
 		ReadingBook.SetArchiveBookName(ReadingBook.FilePath) //设置书名
 	}
-	//服务器分析图片分辨率
+	//服务器分析图片
 	if Config.CheckImageInServer {
 		ReadingBook.ScanAllImageGo() //扫描所有图片，取得分辨率信息，使用了协程
+	}
+	//服务器排序图片
+	if Config.SortByFileName || Config.SortByModTime {
+		if Config.SortByFileName{
+			ReadingBook.SortPages()
+			fmt.Println(locale.GetString("COMI_SORT_BY_NAME"))
+		}
+		if Config.SortByModTime{
+			ReadingBook.SortPages()
+			fmt.Println(locale.GetString("COMI_SORT_BY_TIME"))
+		}
+		if Config.DebugMode {
+			//判断是否已经排好顺序，将会打印true
+			fmt.Println("IS Sorted?\t", sort.IsSorted(ReadingBook.PageInfo))
+			//打印排序后的数据
+			//litter.Dump(ReadingBook.PageInfo)
+		}
 	}
 	return err
 }

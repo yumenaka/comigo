@@ -12,33 +12,6 @@ import (
 	"time"
 )
 
-type WebPServerConfig struct {
-	WebpCommand  string
-	HOST         string
-	PORT         string
-	ImgPath      string `json:"IMG_PATH"`
-	QUALITY      int
-	AllowedTypes []string `json:"ALLOWED_TYPES"`
-	ExhaustPath  string   `json:"EXHAUST_PATH"`
-}
-
-type FrpClientConfig struct {
-	//frp，服务器端
-	FrpcCommand string
-	ServerAddr  string
-	ServerPort  int
-	Token       string
-	////本地管理界面，暂不开启
-	//AdminAddr   string
-	//AdminPort   string
-	//AdminUser   string
-	//AdminPwd    string
-	//本地转发端口设置
-	FrpType          string
-	RemotePort       int
-	RandomRemotePort bool
-}
-
 func StartFrpC(configPath string) error {
 	//借助ini库，保存一个ini文件
 	cfg := ini.Empty()
