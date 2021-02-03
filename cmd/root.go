@@ -56,14 +56,14 @@ func init() {
 		rootCmd.PersistentFlags().StringVarP(&common.Config.ConfigPath, "config", "c", viper.GetString("COMI_CONFIG"), locale.GetString("COMI_CONFIG"))
 		viper.SetConfigFile(viper.GetString("COMI_CONFIG"))
 	} else {
-		rootCmd.PersistentFlags().StringVarP(&common.Config.ConfigPath, "config", "c", ".", locale.GetString("COMI_CONFIG"))
+		rootCmd.PersistentFlags().StringVarP(&common.Config.ConfigPath, "config", "c", "", locale.GetString("COMI_CONFIG"))
 		viper.SetConfigFile(common.Config.ConfigPath)
 	}
 	//打开浏览器
 	if viper.GetBool("COMI_OPEN_BROWSER") {
-		rootCmd.PersistentFlags().BoolVarP(&common.Config.OpenBrowser, "browser", "b", viper.GetBool("COMI_OPEN_BROWSER"), locale.GetString("COMI_OPEN_BROWSER"))
+		rootCmd.PersistentFlags().BoolVarP(&common.Config.OpenBrowser, "open-browser", "o", viper.GetBool("COMI_OPEN_BROWSER"), locale.GetString("COMI_OPEN_BROWSER"))
 	} else {
-		rootCmd.PersistentFlags().BoolVarP(&common.Config.OpenBrowser, "browser", "b", false, locale.GetString("COMI_OPEN_BROWSER"))
+		rootCmd.PersistentFlags().BoolVarP(&common.Config.OpenBrowser, "open-browser", "o", false, locale.GetString("COMI_OPEN_BROWSER"))
 	}
 	if runtime.GOOS == "windows" {
 		common.Config.OpenBrowser = true
@@ -82,27 +82,27 @@ func init() {
 	}
 	//服务器解析分辨率
 	if viper.GetBool("COMI_CHECK_IMAGE") {
-		rootCmd.PersistentFlags().BoolVar(&common.Config.CheckImageInServer, "checkimage", viper.GetBool("COMI_CHECK_IMAGE"), locale.GetString("COMI_CHECK_IMAGE"))
+		rootCmd.PersistentFlags().BoolVar(&common.Config.CheckImageInServer, "check-image", viper.GetBool("COMI_CHECK_IMAGE"), locale.GetString("COMI_CHECK_IMAGE"))
 	} else {
-		rootCmd.PersistentFlags().BoolVar(&common.Config.CheckImageInServer, "checkimage", true, locale.GetString("COMI_CHECK_IMAGE"))
+		rootCmd.PersistentFlags().BoolVar(&common.Config.CheckImageInServer, "check-image", true, locale.GetString("COMI_CHECK_IMAGE"))
 	}
 	//本地Host名
 	if viper.GetString("COMI_LOCAL_HOST") != "" {
-		rootCmd.PersistentFlags().StringVarP(&common.Config.ServerHost, "local_host", "l",viper.GetString("COMI_LOCAL_HOST"), locale.GetString("COMI_LOCAL_HOST"))
+		rootCmd.PersistentFlags().StringVar(&common.Config.ServerHost, "host", viper.GetString("COMI_LOCAL_HOST"), locale.GetString("COMI_LOCAL_HOST"))
 	} else {
-		rootCmd.PersistentFlags().StringVarP(&common.Config.ServerHost, "local_host", "l","", locale.GetString("COMI_LOCAL_HOST"))
+		rootCmd.PersistentFlags().StringVar(&common.Config.ServerHost, "host", "", locale.GetString("COMI_LOCAL_HOST"))
 	}
 	//打印所有可用网卡ip
 	if viper.GetBool("COMI_PRINT_ALL_IP") {
-		rootCmd.PersistentFlags().BoolVar(&common.Config.PrintAllIP, "print_all_ip", viper.GetBool("COMI_PRINT_ALL_IP"), locale.GetString("COMI_PRINT_ALL_IP"))
+		rootCmd.PersistentFlags().BoolVar(&common.Config.PrintAllIP, "print-all-ip", viper.GetBool("COMI_PRINT_ALL_IP"), locale.GetString("COMI_PRINT_ALL_IP"))
 	} else {
-		rootCmd.PersistentFlags().BoolVar(&common.Config.PrintAllIP, "print_all_ip", false, locale.GetString("COMI_PRINT_ALL_IP"))
+		rootCmd.PersistentFlags().BoolVar(&common.Config.PrintAllIP, "print-all-ip", false, locale.GetString("COMI_PRINT_ALL_IP"))
 	}
 	//至少有几张图片，才认定为漫画压缩包
 	if viper.GetInt("COMI_MIN_IMAGE_NUM") != 0 {
-		rootCmd.PersistentFlags().IntVarP(&common.Config.MinImageNum, "min-image-num", "i", viper.GetInt("COMI_MIN_IMAGE_NUM"), locale.GetString("COMI_MIN_IMAGE_NUM"))
+		rootCmd.PersistentFlags().IntVar(&common.Config.MinImageNum, "min-image-num",  viper.GetInt("COMI_MIN_IMAGE_NUM"), locale.GetString("COMI_MIN_IMAGE_NUM"))
 	} else {
-		rootCmd.PersistentFlags().IntVarP(&common.Config.MinImageNum, "min-image-num", "i", 3, locale.GetString("COMI_MIN_IMAGE_NUM"))
+		rootCmd.PersistentFlags().IntVar(&common.Config.MinImageNum, "min-image-num", 1, locale.GetString("COMI_MIN_IMAGE_NUM"))
 	}
 	////webp相关
 	//启用webp传输
@@ -121,7 +121,7 @@ func init() {
 	if viper.GetInt("COMI_WEBP_QUALITY") != 0 {
 		rootCmd.PersistentFlags().IntVarP(&common.Config.WebpConfig.QUALITY, "webp-quality", "q", viper.GetInt("COMI_WEBP_QUALITY"), locale.GetString("COMI_WEBP_QUALITY"))
 	} else {
-		rootCmd.PersistentFlags().IntVarP(&common.Config.WebpConfig.QUALITY, "webp-quality", "q", 95, locale.GetString("COMI_WEBP_QUALITY"))
+		rootCmd.PersistentFlags().IntVarP(&common.Config.WebpConfig.QUALITY, "webp-quality", "q", 85, locale.GetString("COMI_WEBP_QUALITY"))
 	}
 	////Frpc相关
 	//frp反向代理
@@ -156,15 +156,15 @@ func init() {
 	}
 	//frpc random remote_port
 	if viper.GetBool("COMI_FRP_RANDOM_REMOTE_PORT") {
-		rootCmd.PersistentFlags().BoolVar(&common.Config.FrpConfig.RandomRemotePort, "random_remote_port", viper.GetBool("COMI_FRP_RANDOM_REMOTE_PORT"), locale.GetString("COMI_FRP_RANDOM_REMOTE_PORT"))
+		rootCmd.PersistentFlags().BoolVar(&common.Config.FrpConfig.RandomRemotePort, "frps-random-remote", viper.GetBool("COMI_FRP_RANDOM_REMOTE_PORT"), locale.GetString("COMI_FRP_RANDOM_REMOTE_PORT"))
 	} else {
-		rootCmd.PersistentFlags().BoolVar(&common.Config.FrpConfig.RandomRemotePort, "random_remote_port", true, locale.GetString("COMI_FRP_RANDOM_REMOTE_PORT"))
+		rootCmd.PersistentFlags().BoolVar(&common.Config.FrpConfig.RandomRemotePort, "frps-random-remote", true, locale.GetString("COMI_FRP_RANDOM_REMOTE_PORT"))
 	}
 	//frpc remote_port
 	if viper.GetInt("COMI_FRP_REMOTE_PORT") != 0 {
-		rootCmd.PersistentFlags().IntVar(&common.Config.FrpConfig.RemotePort, "remote_port", viper.GetInt("COMI_FRP_REMOTE_PORT"), locale.GetString("COMI_FRP_REMOTE_PORT"))
+		rootCmd.PersistentFlags().IntVar(&common.Config.FrpConfig.RemotePort, "frps-remote-port", viper.GetInt("COMI_FRP_REMOTE_PORT"), locale.GetString("COMI_FRP_REMOTE_PORT"))
 	} else {
-		rootCmd.PersistentFlags().IntVar(&common.Config.FrpConfig.RemotePort, "remote_port", -1, locale.GetString("COMI_FRP_REMOTE_PORT"))
+		rootCmd.PersistentFlags().IntVar(&common.Config.FrpConfig.RemotePort, "frps-remote-port", -1, locale.GetString("COMI_FRP_REMOTE_PORT"))
 	}
 	//输出log文件
 	if viper.GetBool("COMI_LOG_TO_FILE") {
@@ -195,19 +195,17 @@ func init() {
 
 	//按文件名排序
 	if viper.GetBool("COMI_SORT_BY_NAME") {
-		rootCmd.PersistentFlags().BoolVar(&common.Config.SortByFileName, "sort-name", viper.GetBool("COMI_SORT_BY_NAME"), locale.GetString("COMI_SORT_BY_NAME"))
+		rootCmd.PersistentFlags().BoolVar(&common.Config.SortByFileName, "sort-by-name", viper.GetBool("COMI_SORT_BY_NAME"), locale.GetString("COMI_SORT_BY_NAME"))
 	} else {
-		rootCmd.PersistentFlags().BoolVar(&common.Config.SortByFileName, "sort-name", false, locale.GetString("COMI_SORT_BY_NAME"))
+		rootCmd.PersistentFlags().BoolVar(&common.Config.SortByFileName, "sort-by-name", false, locale.GetString("COMI_SORT_BY_NAME"))
 	}
-
 
 	//按文件修改时间排序
 	if viper.GetBool("COMI_SORT_BY_TIME") {
-		rootCmd.PersistentFlags().BoolVar(&common.Config.SortByModTime, "sort-time", viper.GetBool("COMI_SORT_BY_TIME"), locale.GetString("COMI_SORT_BY_TIME"))
+		rootCmd.PersistentFlags().BoolVar(&common.Config.SortByModTime, "sort-by-time", viper.GetBool("COMI_SORT_BY_TIME"), locale.GetString("COMI_SORT_BY_TIME"))
 	} else {
-		rootCmd.PersistentFlags().BoolVar(&common.Config.SortByModTime, "sort-time", false, locale.GetString("COMI_SORT_BY_TIME"))
+		rootCmd.PersistentFlags().BoolVar(&common.Config.SortByModTime, "sort-by-time", false, locale.GetString("COMI_SORT_BY_TIME"))
 	}
-
 
 	////访问密码，还没做
 	//if viper.GetString("COMI_AUTH")!= "" {

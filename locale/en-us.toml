@@ -52,7 +52,7 @@ Set the web service port (default is 1234):
 comi -p 2345 book.zip 
 
 Without opening a browser (windows):
-comi -b=false book.zip 
+comi -o=false book.zip
    
 For local browsing, not available for LAN:
 comi -l book.zip 
@@ -79,15 +79,15 @@ COMI_LOCAL_HOST = "Custom domain name"
 COMI_PRINT_ALL_IP = "Print all available network card ip"
 COMI_MIN_IMAGE_NUM = "There are at least a few pictures before it is considered a comic compression package"
 COMI_ENABLE_WEBP = "webp transmission, webp-server is required"
-COMI_WEBP_COMMAND = "webp-server command, or webp-server executable file path, the default is webp-server"
-COMI_WEBP_QUALITY = "webp compression quality (default 100)"
+COMI_WEBP_COMMAND = "webp-server command, or webp-server executable file path"
+COMI_WEBP_QUALITY = "webp compression quality"
 COMI_ENABLE_FRPC = "Enable frp reverse proxy"
-COMI_FRP_SERVER_ADDR = "frps_addr, frpc need"
+COMI_FRP_SERVER_ADDR = "frps-addr, frpc need"
 COMI_FRP_SERVER_PORT = "frps server_port, frpc need"
 COMI_FRP_TOKEN = "token, frpc need"
 COMI_FRP_COMMAND = "frpc command, or frpc executable file path, the default isfrpc"
-COMI_FRP_RANDOM_REMOTE_PORT = "frpc remote random port, enabled by default (40000~50000)"
-COMI_FRP_REMOTE_PORT = "Disable the Frp random port function, the remote port of frp is the same as the local"
+COMI_FRP_RANDOM_REMOTE_PORT = "frp remote random port(40000~50000)"
+COMI_FRP_REMOTE_PORT = "frp remote port, if set to -1, the port is the same as the local"
 COMI_LOG_TO_FILE = "Enable logFile"
 target_path = "Target directory"
 COMI_AUTH = "Web authentication account and password"

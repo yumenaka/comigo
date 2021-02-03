@@ -53,7 +53,7 @@ comi book.zip
 comi -p 2345 book.zip
 
 ブラウザを開かずに（windows）：
-comi -b=false book.zip LANと共有しない：
+comi -o=false book.zip LANと共有しない：
  comi -l book.zip 
  
 webp 転送、動作するためには webp-server が必要です： 
@@ -77,16 +77,16 @@ COMI_CHECK_IMAGE = "サーバー側の画像解像度を解析"
 COMI_LOCAL_HOST = "ドメイン名の設定"
 COMI_PRINT_ALL_IP = "すべてのローカルIPを表示"
 COMI_MIN_IMAGE_NUM = "読み取り可能なzip内の画像の数"
-COMI_ENABLE_WEBP = "webp転送、webp-serverが必要です。-server"
-COMI_WEBP_COMMAND = "webp-serverコマンド、またはwebp-server実行可能パス、デフォルトは webp-server です。"
-COMI_WEBP_QUALITY = "webp 圧縮品質 (デフォルト 100)"
+COMI_ENABLE_WEBP = "webp転送、webp-serverが必要です。"
+COMI_WEBP_COMMAND = "webp-serverコマンド、またはwebp-server実行可能パス。"
+COMI_WEBP_QUALITY = "webp 圧縮品質"
 COMI_ENABLE_FRPC = "frpcを有効にする"
-COMI_FRP_SERVER_ADDR = "frps_addr, frpcが必要です。"
+COMI_FRP_SERVER_ADDR = "frps-addr, frpcが必要です。"
 COMI_FRP_SERVER_PORT = "frps server_port, frpcが必要です。"
 COMI_FRP_TOKEN = "token, frpc必须"
-COMI_FRP_COMMAND = "frpc コマンド、または frpc 実行ファイルのパス、デフォルトは frpc です。"
-COMI_FRP_RANDOM_REMOTE_PORT = "frpcリモートランダムポート、デフォルトで有効(40000~50000)"
-COMI_FRP_REMOTE_PORT = "关闭Frp随机端口功能，frp远程端口与本地相同"
+COMI_FRP_COMMAND = "frpc コマンド、または frpc 実行ファイルのパス。"
+COMI_FRP_RANDOM_REMOTE_PORT = "frp リモートランダムポート(40000~50000)"
+COMI_FRP_REMOTE_PORT = "frp リモートポート、-1 に設定するとローカルと同じポートになります。"
 COMI_LOG_TO_FILE = "ログファイルをログに記録する"
 target_path = "対象ディレクトリ"
 COMI_AUTH = "アカウントとパスワード"

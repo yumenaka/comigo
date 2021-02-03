@@ -50,7 +50,7 @@ comi book.zip
 设定网页服务端口（默认为1234）：
 comi -p 2345 book.zip 
 不打开浏览器（windows）：
-comi -b=false book.zip 
+comi -o=false book.zip
 本机浏览，不对外开放：
 comi -l book.zip  
 webp传输，需要webp-server配合：
@@ -74,15 +74,15 @@ COMI_LOCAL_HOST = "自定义域名"
 COMI_PRINT_ALL_IP = "打印所有可用网卡ip"
 COMI_MIN_IMAGE_NUM = "至少有几张图片，才认定为漫画压缩包"
 COMI_ENABLE_WEBP = "webp传输，需要webp-server"
-COMI_WEBP_COMMAND = "webp-server命令,或webp-server可执行文件路径，默认为“webp-server"
-COMI_WEBP_QUALITY = "webp压缩质量（默认100）"
+COMI_WEBP_COMMAND = "webp-server命令,或webp-server可执行文件路径"
+COMI_WEBP_QUALITY = "webp压缩质量"
 COMI_ENABLE_FRPC = "启用frp反向代理"
-COMI_FRP_SERVER_ADDR = "frps_addr, frpc必须"
+COMI_FRP_SERVER_ADDR = "frps-addr, frpc必须"
 COMI_FRP_SERVER_PORT = "frps server_port, frpc必须"
 COMI_FRP_TOKEN = "token, frpc必须"
-COMI_FRP_COMMAND = "frpc命令,或frpc可执行文件路径，默认为frpc"
-COMI_FRP_RANDOM_REMOTE_PORT = "frpc 远程随机端口，默认启用（40000~50000）"
-COMI_FRP_REMOTE_PORT = "关闭Frp随机端口功能，frp远程端口与本地相同"
+COMI_FRP_COMMAND = "frpc命令,或frpc可执行文件路径"
+COMI_FRP_RANDOM_REMOTE_PORT = "frp 远程随机端口（40000~50000）"
+COMI_FRP_REMOTE_PORT = "frp 远程端口,如果设置为-1，端口与本地相同"
 COMI_LOG_TO_FILE = "记录log文件"
 target_path = "目标目录"
 COMI_AUTH = "网页认证账号与密码"
