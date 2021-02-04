@@ -99,5 +99,6 @@ COMI_SKETCH_COUNT_SECONDS = "スケッチモードのカウントダウン秒数
 quit_hint = "CTRL-Cを押して終了"
 COMI_GENERATE_SAMPLE_CONFIG = "サンプルyaml設定を生成する"
 COMI_DEBUG_MODE = "Debug Mode"
+COMI_SORT = "画像並べ替え(name time)"
 COMI_SORT_BY_TIME = "画像は修正時間で並べ替え"
 COMI_SORT_BY_NAME = "画像はファイル名で並べ替え"

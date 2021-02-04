@@ -69,8 +69,9 @@ type ServerConfig struct {
 	FrpConfig           FrpClientConfig `json:"-"` //不要解析这个字段
 	ZipFilenameEncoding string          `json:"-"` //不要解析这个字段
 	SketchCountSeconds  int             `json:"sketch_count_seconds"`
-	SortByModTime       bool            //SortByModificationTime
-	SortByFileName      bool
+	SortImage			string
+	//SortByModTime       bool            //SortByModificationTime
+	//SortByFileName      bool
 }
 
 //通过路径名或执行文件名，来设置默认网页模板参数
@@ -189,8 +190,7 @@ var Config = ServerConfig{
 	},
 	ServerHost:         "",
 	SketchCountSeconds: 90,
-	SortByModTime:      false,
-	SortByFileName:     false,
+	SortImage: 			"",
 }
 
 var ReadingBook Book
@@ -269,23 +269,25 @@ func (s AllPageInfo) Len() int {
 }
 
 //Less():按时间或URL，将图片排序
-func (s AllPageInfo) Less(i, j int) bool {
-	//如何定义 s[i] < s[j]
-	less := s[i].ModeTime.After(s[j].ModeTime) // s[i] 的年龄（修改时间），是否比 s[j] 小？
-	if Config.SortByFileName {
-		numI,err1:=getNumberFromString(s[i].Name)
-		if err1!=nil{
-			less = strings.Compare(s[i].Name,s[j].Name)>0
-			return  less
-		}
-		numJ,err2:=getNumberFromString(s[j].Name)
-		if err2!=nil{
-			less = strings.Compare(s[i].Name,s[j].Name)>0
-			return  less
-		}
-		//fmt.Println("numI:",numI)
-		//fmt.Println("numJ:",numJ)
-		less = numI < numJ //如果有的话，比较文件名里的数字
+func (s AllPageInfo) Less(i, j int) (less bool) {
+	//如何定义 s[i] < s[j]  根据文件名
+	numI,err1:=getNumberFromString(s[i].Name)
+	if err1!=nil{
+		less = strings.Compare(s[i].Name,s[j].Name)>0
+		return  less
+	}
+	numJ,err2:=getNumberFromString(s[j].Name)
+	if err2!=nil{
+		less = strings.Compare(s[i].Name,s[j].Name)>0
+		return  less
+	}
+	//fmt.Println("numI:",numI)
+	//fmt.Println("numJ:",numJ)
+	less = numI < numJ //如果有的话，比较文件名里的数字
+
+	//如何定义 s[i] < s[j]  根据修改时间
+	if Config.SortImage =="time"{
+		less = s[i].ModeTime.After(s[j].ModeTime) // s[i] 的年龄（修改时间），是否比 s[j] 小？
 	}
 	return less
 }
@@ -464,12 +466,12 @@ func InitReadingBook() (err error) {
 		ReadingBook.ScanAllImageGo() //扫描所有图片，取得分辨率信息，使用了协程
 	}
 	//服务器排序图片
-	if Config.SortByFileName || Config.SortByModTime {
-		if Config.SortByFileName{
+	if Config.SortImage!="" {
+		if Config.SortImage=="name"{
 			ReadingBook.SortPages()
 			fmt.Println(locale.GetString("COMI_SORT_BY_NAME"))
 		}
-		if Config.SortByModTime{
+		if Config.SortImage=="time"{
 			ReadingBook.SortPages()
 			fmt.Println(locale.GetString("COMI_SORT_BY_TIME"))
 		}
