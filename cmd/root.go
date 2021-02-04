@@ -198,7 +198,7 @@ func init() {
 	if viper.GetBool("COMI_SORT") {
 		rootCmd.PersistentFlags().StringVar(&common.Config.SortImage, "sort", viper.GetString("COMI_SORT"), locale.GetString("COMI_SORT"))
 	} else {
-		rootCmd.PersistentFlags().StringVar(&common.Config.SortImage, "sort", "name", locale.GetString("COMI_SORT"))
+		rootCmd.PersistentFlags().StringVar(&common.Config.SortImage, "sort", "none", locale.GetString("COMI_SORT"))
 	}
 
 
