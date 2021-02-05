@@ -171,7 +171,7 @@ var Config = ServerConfig{
 		PORT:         "3333",
 		ImgPath:      "",
 		QUALITY:      70,
-		AllowedTypes: []string{"jpg", "jpeg", "JPEG", "jpe", "jpf", "jfif", "jfi", "png", "bmp", "webp", "ico", "heic"},
+		AllowedTypes: []string{"jpg", "jpeg", "JPEG", "jpe", "jpf", "jfif", "jfi", "png", "bmp"},
 		ExhaustPath:  "",
 	},
 	EnableFrpcServer: false,
@@ -181,7 +181,7 @@ var Config = ServerConfig{
 		ServerPort:       7000,        //server_port
 		Token:            "&&%%!2356",
 		FrpType:          "tcp",
-		RemotePort:       -1, //remote_port
+		RemotePort:       50000, //remote_port
 		RandomRemotePort: true,
 		//AdminAddr:   "127.0.0.1",
 		//AdminPort:   "12340",
@@ -200,9 +200,9 @@ var (
 	TempDir    string
 	PictureDir string
 	//PrintVersion    bool
-	Version         string = "v0.2.4"
-	SupportPicType         = [...]string{".png", ".jpg", ".jpeg", "bmp", ".gif", ".webp"}
-	SupportFileType        = [...]string{
+	Version          string = "v0.2.4"
+	SupportMediaType        = []string{"jpg", "jpeg", "JPEG", "jpe", "jpf", "jfif", "jfi", "png", "bmp", "webp", "ico", "heic","pdf","mp4","webm"}
+	SupportFileType         = [...]string{
 		".zip",
 		".tar",
 		".rar",
@@ -337,7 +337,7 @@ func (b *Book) GetName() string { //绑定到Book结构体的方法
 func (b *Book) GetPicNum() int {
 	var PicNum = 0
 	for _, p := range b.PageInfo {
-		if checkPicExt(p.UrlPath) {
+		if isSupportMedia(p.UrlPath) {
 			PicNum++
 		}
 	}
@@ -490,6 +490,7 @@ func SetTempDir() (err error) {
 	if TempDir != "" {
 		return err
 	}
+	//replace os.MkDirTemp() in go1.16 ?
 	TempDir, err = ioutil.TempDir("", "comic_cache_A8cG")
 	if err != nil {
 		println(locale.GetString("temp_folder_create_error"))

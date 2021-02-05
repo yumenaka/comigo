@@ -55,9 +55,6 @@ comi -p 2345 book.zip
 ブラウザを開かずに（windows）：
 comi -o=false book.zip LANと共有しない：
  comi -l book.zip 
- 
-webp 転送、動作するためには webp-server が必要です： 
- comi -w book.zip 
 
 複数のパラメータ：
 comi -w -q 70 --frpc  --token aX4457d3O -p 23455 --frps-addr sh.example.com test.zip
@@ -76,7 +73,7 @@ COMI_MAX_DEPTH = "最大検索深度"
 COMI_CHECK_IMAGE = "サーバー側の画像解像度を解析"
 COMI_LOCAL_HOST = "ドメイン名の設定"
 COMI_PRINT_ALL_IP = "すべてのローカルIPを表示"
-COMI_MIN_IMAGE_NUM = "読み取り可能なzip内の画像の数"
+COMI_MIN_Media_NUM = "読み取り可能なzip内の画像、pdfの数"
 COMI_ENABLE_WEBP = "webp転送、webp-serverが必要です。"
 COMI_WEBP_COMMAND = "webp-serverコマンド、またはwebp-server実行可能パス。"
 COMI_WEBP_QUALITY = "webp 圧縮品質"

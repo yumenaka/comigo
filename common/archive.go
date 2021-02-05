@@ -51,7 +51,7 @@ func ScanArchive(scanPath string) (*Book, error) {
 	}
 	err = archiver.Walk(scanPath, func(f archiver.File) error {
 		inArchiveName := f.Name()
-		if !checkPicExt(inArchiveName) {
+		if !isSupportMedia(inArchiveName) {
 			if inArchiveName != scanPath {
 				logrus.Debugf(locale.GetString("unsupported_file_type") + inArchiveName)
 			}
@@ -165,7 +165,7 @@ func ExtractArchive(b *Book) (err error) {
 				f.Name(), // we don't know full path from this
 			)
 		}
-		if !checkPicExt(inArchiveName) {
+		if !isSupportMedia(inArchiveName) {
 			logrus.Debugf(locale.GetString("unsupported_file_type") + inArchiveName)
 			return nil
 		}
@@ -281,8 +281,8 @@ func getFormat(subcommand string) (interface{}, error) {
 	return f, nil
 }
 
-func checkPicExt(checkPath string) bool {
-	for _, ex := range SupportPicType {
+func isSupportMedia(checkPath string) bool {
+	for _, ex := range SupportMediaType {
 		filesuffix := path.Ext(checkPath)
 		if ex == filesuffix {
 			return true
@@ -291,7 +291,7 @@ func checkPicExt(checkPath string) bool {
 	return false
 }
 
-func checkArchiverExt(checkPath string) bool {
+func isSupportArchiver(checkPath string) bool {
 	for _, ex := range SupportFileType {
 		filesuffix := path.Ext(checkPath)
 		if ex == filesuffix {
@@ -338,7 +338,7 @@ func ScanBookPath(pathname string) (err error) {
 			dirList = append(dirList, path)
 			return nil
 		}
-		if !checkArchiverExt(path) {
+		if !isSupportArchiver(path) {
 			return nil
 		}
 		fileList = append(fileList, path)
@@ -392,11 +392,11 @@ func ScanDirGetBook(folder string) (*Book, error) {
 				fmt.Println(errPath)
 			}
 			//fmt.Println(strAbsPath)
-			if checkPicExt(file.Name()) {
+			if isSupportMedia(file.Name()) {
 				book.AllPageNum += 1
 				book.PageInfo = append(book.PageInfo, SinglePageInfo{LocalPath: strAbsPath, UrlPath: "/cache/" + file.Name()})
 			}
-			if checkArchiverExt(file.Name()) {
+			if isSupportArchiver(file.Name()) {
 				archiveNum += 1
 			}
 		}

@@ -99,10 +99,10 @@ func init() {
 		rootCmd.PersistentFlags().BoolVar(&common.Config.PrintAllIP, "print-all-ip", false, locale.GetString("COMI_PRINT_ALL_IP"))
 	}
 	//至少有几张图片，才认定为漫画压缩包
-	if viper.GetInt("COMI_MIN_IMAGE_NUM") != 0 {
-		rootCmd.PersistentFlags().IntVar(&common.Config.MinImageNum, "min-image-num",  viper.GetInt("COMI_MIN_IMAGE_NUM"), locale.GetString("COMI_MIN_IMAGE_NUM"))
+	if viper.GetInt("COMI_MIN_MEDIA_NUM") != 0 {
+		rootCmd.PersistentFlags().IntVar(&common.Config.MinImageNum, "min-image-num",  viper.GetInt("COMI_MIN_MEDIA_NUM"), locale.GetString("COMI_MIN_MEDIA_NUM"))
 	} else {
-		rootCmd.PersistentFlags().IntVar(&common.Config.MinImageNum, "min-image-num", 1, locale.GetString("COMI_MIN_IMAGE_NUM"))
+		rootCmd.PersistentFlags().IntVar(&common.Config.MinImageNum, "min-image-num", 1, locale.GetString("COMI_MIN_MEDIA_NUM"))
 	}
 	////webp相关
 	//启用webp传输
@@ -146,7 +146,7 @@ func init() {
 	if viper.GetString("COMI_FRP_TOKEN") != "" {
 		rootCmd.PersistentFlags().StringVar(&common.Config.FrpConfig.Token, "token", viper.GetString("COMI_FRP_TOKEN"), locale.GetString("COMI_FRP_TOKEN"))
 	} else {
-		rootCmd.PersistentFlags().StringVar(&common.Config.FrpConfig.Token, "token", "", locale.GetString("COMI_FRP_TOKEN"))
+		rootCmd.PersistentFlags().StringVar(&common.Config.FrpConfig.Token, "token", "token_secretSAMPLE", locale.GetString("COMI_FRP_TOKEN"))
 	}
 	//frpc命令,或frpc可执行文件路径
 	if viper.GetString("COMI_FRP_COMMAND") != "" {
@@ -164,7 +164,7 @@ func init() {
 	if viper.GetInt("COMI_FRP_REMOTE_PORT") != 0 {
 		rootCmd.PersistentFlags().IntVar(&common.Config.FrpConfig.RemotePort, "frps-remote-port", viper.GetInt("COMI_FRP_REMOTE_PORT"), locale.GetString("COMI_FRP_REMOTE_PORT"))
 	} else {
-		rootCmd.PersistentFlags().IntVar(&common.Config.FrpConfig.RemotePort, "frps-remote-port", -1, locale.GetString("COMI_FRP_REMOTE_PORT"))
+		rootCmd.PersistentFlags().IntVar(&common.Config.FrpConfig.RemotePort, "frps-remote-port", 50000, locale.GetString("COMI_FRP_REMOTE_PORT"))
 	}
 	//输出log文件
 	if viper.GetBool("COMI_LOG_TO_FILE") {
@@ -193,15 +193,12 @@ func init() {
 		rootCmd.PersistentFlags().BoolVar(&common.Config.DebugMode, "debug", false, locale.GetString("COMI_DEBUG_MODE"))
 	}
 
-
 	//图片文件排序
 	if viper.GetBool("COMI_SORT") {
 		rootCmd.PersistentFlags().StringVar(&common.Config.SortImage, "sort", viper.GetString("COMI_SORT"), locale.GetString("COMI_SORT"))
 	} else {
 		rootCmd.PersistentFlags().StringVar(&common.Config.SortImage, "sort", "none", locale.GetString("COMI_SORT"))
 	}
-
-
 
 	////访问密码，还没做
 	//if viper.GetString("COMI_AUTH")!= "" {
