@@ -171,7 +171,7 @@ var Config = ServerConfig{
 		PORT:         "3333",
 		ImgPath:      "",
 		QUALITY:      70,
-		AllowedTypes: []string{"jpg", "jpeg", "JPEG", "jpe", "jpf", "jfif", "jfi", "png", "bmp"},
+		AllowedTypes: []string{".jpg", ".jpeg", ".JPEG", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp"},
 		ExhaustPath:  "",
 	},
 	EnableFrpcServer: false,
@@ -201,7 +201,7 @@ var (
 	PictureDir string
 	//PrintVersion    bool
 	Version          string = "v0.2.4"
-	SupportMediaType        = []string{"jpg", "jpeg", "JPEG", "jpe", "jpf", "jfif", "jfi", "png", "bmp", "webp", "ico", "heic","pdf","mp4","webm"}
+	SupportMediaType        = []string{".jpg", ".jpeg", ".JPEG", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp", ".webp", ".ico", ".heic",".pdf",".mp4",".webm"}
 	SupportFileType         = [...]string{
 		".zip",
 		".tar",
