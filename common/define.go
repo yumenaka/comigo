@@ -87,7 +87,7 @@ func (config *ServerConfig) SetTemplateByName(FileName string) {
 	//根据文件名设定倒计时秒数,不管默认是不是sketch模式
 	Seconds, err:= getNumberFromString(FileName)
 	if err != nil {
-		fmt.Println(Seconds)
+		//fmt.Println(Seconds)
 	}else {
 		config.SketchCountSeconds=Seconds
 	}
