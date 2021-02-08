@@ -350,7 +350,7 @@ func ScanBookPath(pathname string) (err error) {
 			fmt.Println(err)
 		}
 		book.SetArchiveBookName(book.FilePath)
-		if book.AllPageNum > Config.MinImageNum {
+		if book.AllPageNum >= Config.MinImageNum {
 			if book.UUID == "" {
 				book.UUID = uuid.NewV4().String()
 			}

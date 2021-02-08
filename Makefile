@@ -1,6 +1,6 @@
 # Makefile for cross-compilation
-# make all VERSION=v0.4.1
-# mingw32-make all VERSION=v0.4.1
+# make all VERSION=v0.4.2
+# mingw32-make all VERSION=v0.4.2
 NAME=comi
 SKETCH_NAME=sketch_66seconds
 OS := $(shell uname)
