@@ -68,20 +68,20 @@ export default {
   data() {
     return {
       now_page: 1,
-      showHeader: false,
+      showHeader: true,
       showPagination: true,
       alert: false,
       easing: "easeInOutCubic",
       book: null,
       bookshelf: null,
-      defaultSetting: null,
+      setting: null,
     };
   },
 
   mounted() {
     this.book = this.$store.state.book;
     this.bookshelf = this.$store.state.bookshelf;
-    this.defaultSetting = this.$store.state.defaultSetting;
+    this.setting = this.$store.state.setting;
     // 注册监听
     window.addEventListener("keyup", this.handleKeyup);
     // window.addEventListener("scroll", this.handleScroll);

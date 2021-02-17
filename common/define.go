@@ -490,8 +490,9 @@ func SetTempDir() (err error) {
 	if TempDir != "" {
 		return err
 	}
-	//replace os.MkDirTemp() in go1.16 ?
-	TempDir, err = ioutil.TempDir("", "comic_cache_A8cG")
+	//replace os.MkDirTemp() in go1.16
+	TempDir, err = os.MkdirTemp("", "comic_cache_A8cG")
+	//TempDir, err = ioutil.TempDir("", "comic_cache_A8cG")
 	if err != nil {
 		println(locale.GetString("temp_folder_create_error"))
 	} else {

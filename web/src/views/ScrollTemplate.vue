@@ -50,7 +50,7 @@ export default {
     return {
       // book: this.$store.state.book,
       // bookshelf: null,
-      // defaultSetting: null,
+      // setting: null,
       page_mode: "multi",
       btnFlag: false,
       showPageNum: false,

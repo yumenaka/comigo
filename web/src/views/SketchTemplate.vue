@@ -92,12 +92,12 @@ export default {
 
   data() {
     return {
+      showHeader: true,
       time_cont: 1,
-      WaitSeconds: this.$store.state.defaultSetting.sketch_count_seconds,
+      WaitSeconds: this.$store.state.setting.sketch_count_seconds,
       book: null,
       bookshelf: null,
-      defaultSetting: null,
-      showHeader: false,
+      setting: null,
       showPagination: true,
       now_page: 1,
       alert: false,
@@ -169,12 +169,12 @@ export default {
   methods: {
     initPage() {},
     getWaitSeconds() {
-      //console.log(this.$store.state.defaultSetting)
-      return this.$store.state.defaultSetting.sketch_count_seconds;
+      //console.log(this.$store.state.setting)
+      return this.$store.state.setting.sketch_count_seconds;
     },
     getNowCount() {
       var Seconds =
-        this.$store.state.defaultSetting.sketch_count_seconds - this.time_cont;
+        this.$store.state.setting.sketch_count_seconds - this.time_cont;
       if (Seconds >= 0 && Seconds <= 9) {
         Seconds = "0" + Seconds;
       }
@@ -182,7 +182,7 @@ export default {
       return Seconds;
     },
     getALLSeconds() {
-      var AllSeconds = this.$store.state.defaultSetting.sketch_count_seconds;
+      var AllSeconds = this.$store.state.setting.sketch_count_seconds;
       if (AllSeconds >= 0 && AllSeconds <= 9) {
         AllSeconds = "0" + AllSeconds;
       }

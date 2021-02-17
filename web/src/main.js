@@ -49,8 +49,8 @@ const store = new Vuex.Store({//[3]创建一个store实例
       ],
     },
     bookshelf: {},
-    defaultSetting: {
-      default_page_template: "scroll",
+    setting: {
+      template: "scroll",
       sketch_count_seconds: 90,
     },
     message: {
@@ -61,6 +61,34 @@ const store = new Vuex.Store({//[3]创建一个store实例
       msg: "",
     },
   },
+
+  // mutaitions内只能执行同步操作
+  mutations: {
+    change_template_to_scroll(state) {
+      state.setting.template="scroll";
+      console.log("template:"+state.setting.template);
+    },
+    change_template_to_double(state) {
+      state.setting.template="double";
+      console.log("template:"+state.setting.template);
+    },
+    change_template_to_single(state) {
+      state.setting.template="single";
+      console.log("template:"+state.setting.template);
+    },
+    change_template_to_sketch(state) {
+      state.setting.template="sketch";
+      console.log("template:"+state.setting.template);
+    },
+    increment(state) {
+      state.count++;
+    },
+    syncBookDate(state, payload) {
+      state.book=payload.msg
+      console.log(state.book);
+      console.log("syncBookDate run");
+    },
+  },
   getters: {
     doneTodos: (state) => {
       return state.todos.filter((todo) => todo.done);
@@ -69,29 +97,17 @@ const store = new Vuex.Store({//[3]创建一个store实例
       return state.now_page;
     },
     book: (state) => {
-      console.log(this.state.book);
+      //console.log(state.book);
       return state.book;
     },
     bookshelf: (state) => {
       return state.bookshelf;
     },
-    defaultSetting: (state) => {
-      return state.defaultSetting;
+    setting: (state) => {
+      return state.setting;
     },
     message: (state) => {
       return state.message;
-    },
-  },
-  // mutaitions内只能执行同步操作
-  mutations: {
-    increment(state) {
-      state.count++;
-    },
-
-    syncBookDate(state, payload) {
-      state.book=payload.msg
-      console.log(state.book);
-      console.log("syncBookDate run");
     },
   },
   // Action 可以包含任意异步操作
