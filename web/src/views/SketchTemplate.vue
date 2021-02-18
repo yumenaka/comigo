@@ -76,7 +76,7 @@
 .sketch_main img {
   max-width: 100%;
   max-height: 100%;
-  height: 95vh;
+  /* height: 95vh; */
   display: block;
   margin: center;
 }

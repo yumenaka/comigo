@@ -73,7 +73,7 @@ export default {
 .header select {
   background: rgb(192, 205, 238);
   color: #111;
-  font-size: 20px;
+  font-size: 23px;
   float: left;
 }
 
