@@ -67,6 +67,7 @@ export default {
 
   data() {
     return {
+      showHeader: true,
       localbook: {
         name: this.$store.state.book.name,
         all_image_num: this.$store.state.book.all_page_num,
@@ -75,9 +76,9 @@ export default {
         all_page_num: 0, //需要根据all_image_num、images计算
       },
       bookshelf: null,
-      defaultSetting: null,
+      setting: null,
       page_mark: 0, //初始值为0或1（根据单双页判断，initPageMark）,最大值为this.$store.state.book.all_page_num 最大值的时候，代码逻辑上需要一些特殊处理（page_mark数组越界，但page_mark-1依然有意义）。
-      showHeader: false,
+      
       showPagination: true,
       AllPageNum: this.$store.state.book.all_page_num - 1,
       time_cont: 0,
