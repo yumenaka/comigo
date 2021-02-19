@@ -1,17 +1,17 @@
 <template>
   <header class="header">
-  <!-- <button v-on:click="change_template_to_scroll">scroll</button>
-  <button v-on:click="change_template_to_double">double</button>
-  <button v-on:click="change_template_to_sketch">sketch</button>
-  <button v-on:click="change_template_to_single">single</button> -->
-  <select v-model="selectedTemplate"  @change='onChange()'  >
-    <option disabled value="">点此切换阅读模式</option>
-    <option>scroll</option>
-    <option>double</option>
-    <option>single</option>
-    <option>sketch</option>
-  </select>
-  <slot></slot>
+    <!-- <v-btn v-on:click="change_template_to_scroll">scroll</v-btn>
+    <v-btn v-on:click="change_template_to_double">double</v-btn>
+    <v-btn v-on:click="change_template_to_sketch">sketch</v-btn>
+    <v-btn v-on:click="change_template_to_single">single</v-btn> -->
+    <select v-model="selectedTemplate" @change="onChange()">
+      <option disabled value="">切换阅读模式</option>
+      <option>scroll</option>
+      <option>double</option>
+      <option>single</option>
+      <option>sketch</option>
+    </select>
+    <slot></slot>
   </header>
 </template>
 
@@ -22,22 +22,22 @@ export default {
   data() {
     return {
       mybook: this.book,
-      selectedTemplate: ''
+      selectedTemplate: "",
     };
   },
 
   methods: {
     onChange() {
-      if (this.selectedTemplate ==="scroll") {
+      if (this.selectedTemplate === "scroll") {
         this.change_template_to_scroll();
       }
-      if (this.selectedTemplate ==="double") {
+      if (this.selectedTemplate === "double") {
         this.change_template_to_double();
       }
-      if (this.selectedTemplate ==="single") {
+      if (this.selectedTemplate === "single") {
         this.change_template_to_single();
       }
-      if (this.selectedTemplate ==="sketch") {
+      if (this.selectedTemplate === "sketch") {
         this.change_template_to_sketch();
       }
       //console.log(this.$store.state.setting.template);
@@ -60,7 +60,7 @@ export default {
 
 <style scoped>
 .header {
-  background: rgb(69, 224, 177);
+  background: rgb(229, 229, 229);
   color: #111;
   text-align: center;
   padding: 10px;
@@ -71,10 +71,16 @@ export default {
 }
 
 .header select {
-  background: rgb(192, 205, 238);
+  background: rgb(228, 248, 174);
   color: #111;
   font-size: 23px;
   float: left;
 }
 
+.header button {
+  background: rgb(192, 205, 238);
+  color: #111;
+  font-size: 23px;
+  float: left;
+}
 </style>

@@ -1,17 +1,10 @@
 <template>
   <div id="ScrollPage">
-    <Header>
-      <h2>
-        <a v-if="!this.$store.state.book.IsFolder" v-bind:href="'raw/' + this.$store.state.book.name"
-          >{{ this.$store.state.book.name }}【Download】</a
-        >
-        <a v-if="this.$store.state.book.IsFolder" v-bind:href="'raw/' + this.$store.state.book.name">{{
-          this.$store.state.book.name
-        }}</a>
-      </h2>
-      <h4>总页数：{{ this.$store.state.book.all_page_num }}</h4>
-    </Header>
-    <div v-for="(page, key) in this.$store.state.book.pages" :key="page.url" class="manga">
+    <div
+      v-for="(page, key) in this.$store.state.book.pages"
+      :key="page.url"
+      class="manga"
+    >
       <img
         v-lazy="page.url"
         v-bind:H="page.height"
@@ -19,7 +12,7 @@
         v-bind:key="key"
         v-bind:class="page.image_type | check_image(page.url)"
       />
-      <p v-if="showPageNum">{{ key + 1 }}/{{ AllPageNum}}</p>
+      <p v-if="showPageNum">{{ key + 1 }}/{{ AllPageNum }}</p>
     </div>
     <p></p>
     <v-btn
@@ -37,11 +30,11 @@
 </template>
 
 <script>
-import Header from "./Header.vue";
+// import Header from "./Header.vue";
 
 export default {
   components: {
-    Header,
+    // Header,
   },
   // props: ['book'],
   //组件的 data 选项必须是一个函数
@@ -80,7 +73,7 @@ export default {
       this.$cookies.keys();
     },
     getBook: function () {
-       return this.$store.state.book;
+      return this.$store.state.book;
     },
     getNumber: function (number) {
       this.page = number;
@@ -159,6 +152,10 @@ export default {
     check_image: function (value, image_url) {
       // console.log(value);
       // console.log(image_url);
+      //如果未定义，返回空，避免报错
+      if (!value) {
+        return "";
+      }
       //如果已经算好了
       value = value.toString();
       if (value == "SinglePage" || value == "DoublePage") {

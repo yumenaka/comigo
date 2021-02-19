@@ -1,13 +1,5 @@
 <template>
   <div id="SketchPage">
-    <Header v-if="showHeader">
-      <h2>
-        <a v-bind:href="'raw/' + this.$store.state.book.name"
-          >{{ this.$store.state.book.name }}现在时刻：{{ currentTime }}</a
-        >
-      </h2>
-    </Header>
-
     <div class="sketch_main">
       <div id="SketchHint">
         <p>{{ getNowCount() }}/{{ getALLSeconds()}}⏳</p>
@@ -84,11 +76,11 @@
 </style>
 
 <script>
-import Header from "./Header.vue";
+// import Header from "./Header.vue";
 
 export default {
   components: {
-    Header,
+    // Header,
   },
 
   data() {
@@ -142,7 +134,7 @@ export default {
       } else {
         _this.time_cont = 0;
         console.log("时间到，翻页：" + _this.currentTime + "秒");
-        if (_this.now_page < _this.$store.state.book.all_page_num) {
+        if (_this.now_page <= _this.$store.state.book.all_page_num) {
           _this.now_page += 1;
         } else {
           _this.now_page = 1;
@@ -191,7 +183,7 @@ export default {
     },
     addPage: function (num) {
       if (
-        this.now_page + num < this.$store.state.book.all_page_num &&
+        this.now_page + num <= this.$store.state.book.all_page_num &&
         this.now_page + num >= 1
       ) {
         this.now_page = this.now_page + num;

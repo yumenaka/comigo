@@ -1,19 +1,5 @@
 <template>
   <div id="SinglePageTemplate">
-    <Header v-if="showHeader">
-      <h2>
-        <a
-          v-if="!this.$store.state.book.IsFolder"
-          v-bind:href="'raw/' + this.$store.state.book.name"
-          >{{ this.$store.state.book.name }}【Download】</a
-        >
-        <a
-          v-if="this.$store.state.book.IsFolder"
-          v-bind:href="'raw/' + this.$store.state.book.name"
-          >{{ this.$store.state.book.name }}</a
-        >
-      </h2>
-    </Header>
     <div class="single_page_main">
       <img
         v-on:click="addPage(1)"
@@ -60,16 +46,15 @@
 </style>
 
 <script>
-import Header from "./Header.vue";
+// import Header from "./Header.vue";
 export default {
   components: {
-    Header,
+    // Header,
   },
 
   data() {
     return {
       now_page: 1,
-      showHeader: true,
       showPagination: true,
       alert: false,
       easing: "easeInOutCubic",
@@ -80,9 +65,6 @@ export default {
   },
 
   mounted() {
-    this.book = this.$store.state.book;
-    this.bookshelf = this.$store.state.bookshelf;
-    this.setting = this.$store.state.setting;
     // 注册监听
     window.addEventListener("keyup", this.handleKeyup);
     // window.addEventListener("scroll", this.handleScroll);
@@ -99,7 +81,7 @@ export default {
     },
     addPage: function (num) {
       if (
-        this.now_page + num < this.book.all_page_num &&
+        this.now_page + num <= this.$store.state.book.all_page_num &&
         this.now_page + num >= 1
       ) {
         this.now_page = this.now_page + num;
@@ -107,7 +89,7 @@ export default {
       // console.log(this.now_page);
     },
     toPage: function (num) {
-      if (num <= this.book.all_page_num && num >= 1) {
+      if (num <= this.$store.state.book.all_page_num && num >= 1) {
         this.now_page = num;
       }
       // console.log(num);
@@ -133,7 +115,7 @@ export default {
           this.toPage(1); //跳转到第一页
           break;
         case "End":  
-          this.toPage(this.book.all_page_num); //跳转到最后一页
+          this.toPage(this.$store.state.book.all_page_num); //跳转到最后一页
           break;
         case "Ctrl":
           // Ctrl key pressed //组合键？

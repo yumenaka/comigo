@@ -20,7 +20,7 @@ endif
 
 all: compileThemAll md5SumThemAll
 
-compileThemAll: windows-amd64 windows-386 sample linux-armv7 linux-armv8 linux-amd64  darwin-amd64 
+compileThemAll: windows-amd64 windows-386  linux-armv7 linux-armv8 linux-amd64  darwin-amd64 
 
 UPX := $(shell command -v upx 2> /dev/null)
 

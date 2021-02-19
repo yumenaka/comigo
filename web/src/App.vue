@@ -1,5 +1,19 @@
 <template>
-  <div id="app">
+  <v-app id="app">
+    <Header v-if="this.showHeader">
+      <h2>
+        <a
+          v-if="!this.$store.state.book.IsFolder"
+          v-bind:href="'raw/' + this.$store.state.book.name"
+          >{{ this.$store.state.book.name }}【Download】</a
+        >
+        <a
+          v-if="this.$store.state.book.IsFolder"
+          v-bind:href="'raw/' + this.$store.state.book.name"
+          >{{ this.$store.state.book.name }}</a
+        >
+      </h2>
+    </Header>
     <!-- 初始化后才显示，避免 setting错误 -->
     <!-- <div v-if="this.$store.state.setting"> -->
     <div v-if="this.$store.state.setting">
@@ -14,16 +28,17 @@
     </div>
     <!-- 加载中 -->
     <!-- <p v-else>loading.....</p> -->
-  </div>
+  </v-app>
 </template>
 
 <script>
 //代码参考：https://github.com/bradtraversy/vue_crash_todolist
-import axios from "axios";
+// import axios from "axios";
 import ScrollTemplate from "./views/ScrollTemplate.vue";
 import SketchTemplate from "./views/SketchTemplate.vue";
 import SinglePageTemplate from "./views/SinglePageTemplate.vue";
 import DoublePageTemplate from "./views/DoublePageTemplate.vue";
+import Header from "./views/Header.vue";
 
 export default {
   name: "app",
@@ -33,12 +48,14 @@ export default {
     SketchTemplate,
     SinglePageTemplate,
     DoublePageTemplate,
+    Header,
   },
   //组件的 data 选项必须是一个函数
   //每个实例可以维护一份被返回对象的独立的拷贝
   data() {
     return {
       book: null,
+      showHeader: true,
       //如果你知道你会在晚些时候需要一个 property，但是一开始它为空或不存在，那么你仅需要设置一些初始值。
       bookshelf: {},
       setting: {
@@ -77,18 +94,9 @@ export default {
   },
   methods: {
     initPage() {
-      axios
-        .get("/book.json")
-        .then((response) => (this.$store.state.book = response.data))
-        .finally((this.book = this.$store.book));
-      axios
-        .get("/setting.json")
-        .then((response) => (this.$store.state.setting = response.data))
-        .finally((this.setting = this.$store.setting));
-      axios
-        .get("/bookshelf.json")
-        .then((response) => (this.$store.state.bookshelf = response.data))
-        .finally((this.bookshelf = this.$store.bookshelf));
+      this.$store.dispatch("syncBookDataAction");
+      this.$store.dispatch("syncSettingDataAction");
+      this.$store.dispatch("syncBookShelfDataAction");
     },
     getNumber: function (number) {
       this.page = number;

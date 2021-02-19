@@ -1,21 +1,5 @@
 <template>
   <div id="DoublePageTemplate">
-    <Header v-if="showHeader">
-      <h2>
-        <a
-          v-if="!this.$store.state.book.IsFolder"
-          v-bind:href="'raw/' + this.$store.state.book.name"
-          >{{ this.$store.state.book.name }}【Download】现在时刻：{{
-            currentTime
-          }}</a
-        >
-        <a
-          v-if="this.$store.state.book.IsFolder"
-          v-bind:href="'raw/' + this.$store.state.book.name"
-          >{{ this.$store.state.book.name }}现在时刻：{{ currentTime }}</a
-        >
-      </h2>
-    </Header>
     <div class="double_page_main">
       <!-- [page_mark]单页+双页:排列在左（两张都是单页）或中间（这一张为单页，下一张双页||这一张为双页）。-->
       <!-- 上面三种情况，图片点击事件都是下一页 -->
@@ -58,11 +42,11 @@
 </template>
 
 <script>
-import Header from "./Header.vue";
+// import Header from "./Header.vue";
 
 export default {
   components: {
-    Header,
+    // Header,
   },
 
   data() {
@@ -332,7 +316,6 @@ export default {
 <style>
 #DoublePage_Pagination {
   color: #066eb4;
-  background-color: #f6f7eb;
   align-items: center;
 }
 
@@ -349,6 +332,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  background-color: #f6f7eb;
 }
 
 .double_page_main img {
