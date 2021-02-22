@@ -20,12 +20,12 @@
 </template>
 
 <style>
-#SinglePageTemplate {
+/* #SinglePageTemplate {
   align-items: center;
   width: 100vw;
   height: 100vh;
   align-self: center;
-}
+} */
 
 .single_page_main {
   width: 100%;
@@ -38,8 +38,6 @@
 .single_page_main img {
   max-width: 100%;
   max-height: 100%;
-  /* height: 95vh; */
-  min-height: 95vh;
   display: block;
   margin: center;
 }
