@@ -68,19 +68,19 @@ const store = new Vuex.Store({
   mutations: {
     change_template_to_scroll(state) {
       state.setting.template = "scroll";
-      console.log("template:" + state.setting.template);
+      console.log("change_template_to_scroll:" + state.setting.template);
     },
     change_template_to_double(state) {
       state.setting.template = "double";
-      console.log("template:" + state.setting.template);
+      console.log("change_template_to_double:" + state.setting.template);
     },
     change_template_to_single(state) {
       state.setting.template = "single";
-      console.log("template:" + state.setting.template);
+      console.log("change_template_to_single:" + state.setting.template);
     },
     change_template_to_sketch(state) {
       state.setting.template = "sketch";
-      console.log("template:" + state.setting.template);
+      console.log("change_template_to_sketch:" + state.setting.template);
     },
     increment(state) {
       state.count++;
@@ -133,7 +133,6 @@ const store = new Vuex.Store({
       };
       context.commit("syncBookShelfData", payload);
     },
-
   },
   getters: {
     doneTodos: (state) => {

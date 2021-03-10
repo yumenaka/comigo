@@ -40,18 +40,23 @@ export default {
       if (this.selectedTemplate === "sketch") {
         this.change_template_to_sketch();
       }
+      location.reload(); //暂时无法动态刷新，研究好了再去掉
       //console.log(this.$store.state.setting.template);
     },
     change_template_to_scroll() {
+      this.$cookies.set("nowTemplate", "scroll");
       this.$store.commit("change_template_to_scroll");
     },
     change_template_to_double() {
+      this.$cookies.set("nowTemplate", "double");
       this.$store.commit("change_template_to_double");
     },
     change_template_to_single() {
+      this.$cookies.set("nowTemplate", "single");
       this.$store.commit("change_template_to_single");
     },
     change_template_to_sketch() {
+      this.$cookies.set("nowTemplate", "sketch");
       this.$store.commit("change_template_to_sketch");
     },
   },

@@ -87,9 +87,13 @@ export default {
   computed: {
     // 计算属性的 getter
     nowTemplate: function () {
-      console.log("computed:" + this.$store.state.setting.template);
-      // `this` 指向 vm 实例
-      return this.$store.state.setting.template;
+      var localValue = this.$cookies.get("nowTemplate");
+      console.log("computed 1:" + localValue);
+      if (localValue !== null) {
+        return localValue;
+      } else {
+        return this.$store.state.setting.template;
+      }
     },
   },
   methods: {
@@ -101,6 +105,17 @@ export default {
     getNumber: function (number) {
       this.page = number;
       console.log(number);
+    },
+    getNowTemplate: function () {
+      var localValue = this.$cookies.get("nowTemplate");
+      console.log("computed 1:" + localValue);
+      if (localValue !== null) {
+        return localValue;
+      } else {
+        this.$cookies.set("nowTemplate", this.$store.state.setting.template);
+        console.log("computed 2:" + this.$store.state.setting.template);
+        return this.$store.state.setting.template;
+      }
     },
   },
 };
