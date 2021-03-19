@@ -200,6 +200,21 @@ func init() {
 		rootCmd.PersistentFlags().StringVar(&common.Config.SortImage, "sort", "none", locale.GetString("COMI_SORT"))
 	}
 
+
+	//退出时清除临时文件
+	if viper.GetBool("COMI_CLEAN") {
+		rootCmd.PersistentFlags().BoolVar(&common.Config.CleanOnExit, "clean", viper.GetBool("COMI_CLEAN"), locale.GetString("COMI_CLEAN"))
+	} else {
+		rootCmd.PersistentFlags().BoolVar(&common.Config.CleanOnExit, "clean", true, locale.GetString("COMI_CLEAN"))
+	}
+
+	//只清楚当前在读的文件
+	if viper.GetBool("COMI_CLEAN_NOT_ALL") {
+		rootCmd.PersistentFlags().BoolVar(&common.Config.CleanNotAll, "clean-not-all", viper.GetBool("COMI_CLEAN_NOT_ALL"), locale.GetString("COMI_CLEAN_NOT_ALL"))
+	} else {
+		rootCmd.PersistentFlags().BoolVar(&common.Config.CleanNotAll, "clean-not-all", true, locale.GetString("COMI_CLEAN_NOT_ALL"))
+	}
+
 	////访问密码，还没做
 	//if viper.GetString("COMI_AUTH")!= "" {
 	//	rootCmd.PersistentFlags().StringVar(&common.Config.Auth, "auth", viper.GetString("COMI_AUTH"), locale.GetString("COMI_AUTH"))

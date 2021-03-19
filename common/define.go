@@ -8,10 +8,11 @@ import (
 	"github.com/xxjwxc/gowp/workpool"
 	"github.com/yumenaka/comi/locale"
 	"image"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/signal"
+	"path"
+	"path/filepath"
 	"regexp"
 	"sort"
 	"strconv"
@@ -59,7 +60,7 @@ type ServerConfig struct {
 	DebugMode           bool   `json:"-"` //不要解析这个字段
 	LogToFile           bool   `json:"-"` //不要解析这个字段
 	LogFilePath         string `json:"-"` //不要解析这个字段
-	LogFileName          string `json:"-"` //不要解析这个字段
+	LogFileName         string `json:"-"` //不要解析这个字段
 	MaxDepth            int    `json:"-"` //不要解析这个字段
 	MinImageNum         int
 	ServerHost          string
@@ -69,92 +70,11 @@ type ServerConfig struct {
 	FrpConfig           FrpClientConfig `json:"-"` //不要解析这个字段
 	ZipFilenameEncoding string          `json:"-"` //不要解析这个字段
 	SketchCountSeconds  int             `json:"sketch_count_seconds"`
-	SortImage			string
+	SortImage           string
+	CleanOnExit         bool
+	CleanNotAll         bool
 	//SortByModTime       bool            //SortByModificationTime
 	//SortByFileName      bool
-}
-
-//通过路径名或执行文件名，来设置默认网页模板参数
-func (config *ServerConfig) SetTemplateByName(FileName string) {
-	//如果执行文件名包含 scroll 等关键字，选择卷轴模板
-	if haveKeyWord(FileName, []string{"scroll", "スクロール", "默认", "下拉", "卷轴"}) {
-		config.Template = "scroll"
-	}
-	//如果执行文件名包含 sketch 等关键字，选择速写模板
-	if haveKeyWord(FileName, []string{"sketch", "croquis", "クロッキー", "素描", "速写"}) {
-		config.Template = "sketch"
-	}
-	//根据文件名设定倒计时秒数,不管默认是不是sketch模式
-	Seconds, err:= getNumberFromString(FileName)
-	if err != nil {
-		if config.Template == "sketch" {
-			//fmt.Println(Seconds)
-		}
-	}else {
-		config.SketchCountSeconds=Seconds
-	}
-
-	//如果执行文件名包含 single 等关键字，选择 single 分页漫画模板
-	if haveKeyWord(FileName, []string{"single", "单页", "シングル"}) {
-		config.Template = "single"
-	}
-	//如果执行文件名包含 double 等关键字，选择 double 分页漫画模板
-	if haveKeyWord(FileName, []string{"double", "双页", "ダブルページ"}) {
-		config.Template = "double"
-	}
-	//选择模式以后，打印提示
-	switch config.Template {
-	case "scroll":
-		fmt.Println(locale.GetString("scroll_template"))
-	case "sketch":
-		fmt.Println(locale.GetString("sketch_template"))
-		//速写倒计时秒数
-		fmt.Println(locale.GetString("COMI_SKETCH_COUNT_SECONDS"), config.SketchCountSeconds)
-	case "single":
-		fmt.Println(locale.GetString("single_page_template"))
-	case "double":
-		fmt.Println(locale.GetString("double_page_template"))
-	default:
-	}
-}
-
-//从字符串中提取数字,如果有几个数字，就简单地加起来
-func getNumberFromString(s string) (int,error) {
-	var err error
-	num := 0
-	//同时设定倒计时秒数
-	valid := regexp.MustCompile("[0-9]+")
-	numbers := valid.FindAllStringSubmatch(s, -1)
-	if len(numbers) > 0 {
-		//循环取出多维数组
-		for _,value := range numbers {
-			for _,v := range value {
-				temp, errTemp :=strconv.Atoi(v)
-				if errTemp !=nil{
-					fmt.Println("error num value:"+v)
-				}else {
-					num=num+temp
-				}
-			}
-		}
-		//fmt.Println("get Number:",num," form string:",s,"numbers[]=",numbers)
-	}else {
-		err = errors.New("number not found")
-		return 0, err
-	}
-	return num, err
-}
-
-//检测字符串中是否有关键字
-func haveKeyWord(checkString string, list []string) bool {
-	//转换为小写，使Sketch、DOUBLE也生效
-	checkString = strings.ToLower(checkString)
-	for _, key := range list {
-		if strings.Contains(checkString, key) {
-			return true
-		}
-	}
-	return false
 }
 
 var Config = ServerConfig{
@@ -192,7 +112,92 @@ var Config = ServerConfig{
 	},
 	ServerHost:         "",
 	SketchCountSeconds: 90,
-	SortImage: 			"",
+	SortImage:          "",
+	CleanOnExit:        true,
+	CleanNotAll:        true,
+}
+
+//通过路径名或执行文件名，来设置默认网页模板参数
+func (config *ServerConfig) SetTemplateByName(FileName string) {
+	//如果执行文件名包含 scroll 等关键字，选择卷轴模板
+	if haveKeyWord(FileName, []string{"scroll", "スクロール", "默认", "下拉", "卷轴"}) {
+		config.Template = "scroll"
+	}
+	//如果执行文件名包含 sketch 等关键字，选择速写模板
+	if haveKeyWord(FileName, []string{"sketch", "croquis", "クロッキー", "素描", "速写"}) {
+		config.Template = "sketch"
+	}
+	//根据文件名设定倒计时秒数,不管默认是不是sketch模式
+	Seconds, err := getNumberFromString(FileName)
+	if err != nil {
+		if config.Template == "sketch" {
+			//fmt.Println(Seconds)
+		}
+	} else {
+		config.SketchCountSeconds = Seconds
+	}
+
+	//如果执行文件名包含 single 等关键字，选择 single 分页漫画模板
+	if haveKeyWord(FileName, []string{"single", "单页", "シングル"}) {
+		config.Template = "single"
+	}
+	//如果执行文件名包含 double 等关键字，选择 double 分页漫画模板
+	if haveKeyWord(FileName, []string{"double", "双页", "ダブルページ"}) {
+		config.Template = "double"
+	}
+	//选择模式以后，打印提示
+	switch config.Template {
+	case "scroll":
+		fmt.Println(locale.GetString("scroll_template"))
+	case "sketch":
+		fmt.Println(locale.GetString("sketch_template"))
+		//速写倒计时秒数
+		fmt.Println(locale.GetString("COMI_SKETCH_COUNT_SECONDS"), config.SketchCountSeconds)
+	case "single":
+		fmt.Println(locale.GetString("single_page_template"))
+	case "double":
+		fmt.Println(locale.GetString("double_page_template"))
+	default:
+	}
+}
+
+//从字符串中提取数字,如果有几个数字，就简单地加起来
+func getNumberFromString(s string) (int, error) {
+	var err error
+	num := 0
+	//同时设定倒计时秒数
+	valid := regexp.MustCompile("[0-9]+")
+	numbers := valid.FindAllStringSubmatch(s, -1)
+	if len(numbers) > 0 {
+		//循环取出多维数组
+		for _, value := range numbers {
+			for _, v := range value {
+				temp, errTemp := strconv.Atoi(v)
+				if errTemp != nil {
+					fmt.Println("error num value:" + v)
+				} else {
+					num = num + temp
+				}
+			}
+		}
+		//fmt.Println("get Number:",num," form string:",s,"numbers[]=",numbers)
+	} else {
+		err = errors.New("number not found")
+		return 0, err
+	}
+	return num, err
+}
+
+//检测字符串中是否有关键字
+func haveKeyWord(checkString string, list []string) bool {
+	//转换为小写，使Sketch、DOUBLE也生效
+	checkString = strings.ToLower(checkString)
+	for _, key := range list {
+		if strings.Contains(checkString, key) {
+			return true
+		}
+	}
+	return false
 }
 
 var ReadingBook Book
@@ -203,7 +208,7 @@ var (
 	PictureDir string
 	//PrintVersion    bool
 	Version          string = "v0.2.4"
-	SupportMediaType        = []string{".jpg", ".jpeg", ".JPEG", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp", ".webp", ".ico", ".heic",".pdf",".mp4",".webm"}
+	SupportMediaType        = []string{".jpg", ".jpeg", ".JPEG", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp", ".webp", ".ico", ".heic", ".pdf", ".mp4", ".webm"}
 	SupportFileType         = [...]string{
 		".zip",
 		".tar",
@@ -245,7 +250,7 @@ type Book struct {
 	FileType        string      `json:"file_type"`
 	FileSize        int64       `json:"file_size"`
 	Modified        time.Time   `json:"modified_time"`
-	UUID            string      `json:"uuid"`
+	FileID          string      `json:"uuid"`
 	IsFolder        bool        `json:"is_folder"`
 	ExtractNum      int         `json:"extract_num"`
 	ExtractComplete bool        `json:"extract_complete"`
@@ -273,22 +278,22 @@ func (s AllPageInfo) Len() int {
 //Less():按时间或URL，将图片排序
 func (s AllPageInfo) Less(i, j int) (less bool) {
 	//如何定义 s[i] < s[j]  根据文件名
-	numI,err1:=getNumberFromString(s[i].Name)
-	if err1!=nil{
-		less = strings.Compare(s[i].Name,s[j].Name)>0
-		return  less
+	numI, err1 := getNumberFromString(s[i].Name)
+	if err1 != nil {
+		less = strings.Compare(s[i].Name, s[j].Name) > 0
+		return less
 	}
-	numJ,err2:=getNumberFromString(s[j].Name)
-	if err2!=nil{
-		less = strings.Compare(s[i].Name,s[j].Name)>0
-		return  less
+	numJ, err2 := getNumberFromString(s[j].Name)
+	if err2 != nil {
+		less = strings.Compare(s[i].Name, s[j].Name) > 0
+		return less
 	}
 	//fmt.Println("numI:",numI)
 	//fmt.Println("numJ:",numJ)
 	less = numI < numJ //如果有的话，比较文件名里的数字
 
 	//如何定义 s[i] < s[j]  根据修改时间
-	if Config.SortImage =="time"{
+	if Config.SortImage == "time" {
 		less = s[i].ModeTime.After(s[j].ModeTime) // s[i] 的年龄（修改时间），是否比 s[j] 小？
 	}
 	return less
@@ -302,6 +307,16 @@ func (s AllPageInfo) Swap(i, j int) {
 //上面三个函数定义好了，终于可以使用sort包排序了
 func (b *Book) SortPages() {
 	sort.Sort(b.PageInfo)
+}
+
+func (b *Book) SetFileID() {
+	fileAbaPath, err := filepath.Abs(b.FilePath)
+	fmt.Println("文件绝对路径："+fileAbaPath, "路径的md5："+md5string(fileAbaPath))
+	if err != nil {
+		fmt.Println(err, fileAbaPath)
+	}
+	//fmt.Println(md5s(fileAbaPath))
+	b.FileID = md5string(fileAbaPath)
 }
 
 //一些绑定到Book结构体的方法
@@ -438,8 +453,14 @@ func SetupCloseHander() {
 	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGHUP)
 	go func() {
 		<-c
-		fmt.Println("\r" + locale.GetString("start_clear_file"))
-		deleteTempFiles()
+		if Config.CleanOnExit {
+			fmt.Println("\r" + locale.GetString("start_clear_file"))
+			if Config.CleanNotAll {
+				deleteTempFilesByFileID(ReadingBook.FileID)
+			} else {
+				deleteAllTempFiles()
+			}
+		}
 		os.Exit(0)
 	}()
 }
@@ -468,12 +489,12 @@ func InitReadingBook() (err error) {
 		ReadingBook.ScanAllImageGo() //扫描所有图片，取得分辨率信息，使用了协程
 	}
 	//服务器排序图片
-	if Config.SortImage!="" {
-		if Config.SortImage=="name"{
+	if Config.SortImage != "" {
+		if Config.SortImage == "name" {
 			ReadingBook.SortPages()
 			fmt.Println(locale.GetString("COMI_SORT_BY_NAME"))
 		}
-		if Config.SortImage=="time"{
+		if Config.SortImage == "time" {
 			ReadingBook.SortPages()
 			fmt.Println(locale.GetString("COMI_SORT_BY_TIME"))
 		}
@@ -492,9 +513,9 @@ func SetTempDir() (err error) {
 	if TempDir != "" {
 		return err
 	}
-	//replace os.MkDirTemp() in go1.16
-	TempDir, err = os.MkdirTemp("", "comic_cache_A8cG")
-	//TempDir, err = ioutil.TempDir("", "comic_cache_A8cG")
+	//TempDir, err = os.MkdirTemp("", "comic_cache_A8cG")
+	TempDir = path.Join(os.TempDir(), "comic_cache_A8cG")
+	err = os.MkdirAll(TempDir, os.ModePerm)
 	if err != nil {
 		println(locale.GetString("temp_folder_create_error"))
 	} else {
@@ -503,7 +524,7 @@ func SetTempDir() (err error) {
 	return err
 }
 
-func deleteTempFiles() {
+func deleteAllTempFiles() {
 	fmt.Println(locale.GetString("clear_temp_file_start"))
 	if strings.Contains(TempDir, "comic_cache_A8cG") { //判断文件夹前缀，避免删错文件
 		err := os.RemoveAll(TempDir)
@@ -513,35 +534,47 @@ func deleteTempFiles() {
 			fmt.Println(locale.GetString("clear_temp_file_completed") + TempDir)
 		}
 	}
-	deleteOldTempFiles()
 }
 
-//根据权限，清理老文件可能失败
-func deleteOldTempFiles() {
-	tempDirUpperFolder := TempDir
-	post := strings.LastIndex(TempDir, "/") //Unix风格的路径分隔符
-	if post == -1 {
-		post = strings.LastIndex(TempDir, "\\") //windows风格的分隔符
-	}
-	if post != -1 {
-		tempDirUpperFolder = string([]rune(TempDir)[:post]) //为了防止中文字符被错误截断，先转换成rune，再转回来
-		fmt.Println(locale.GetString("temp_folder_path"), tempDirUpperFolder)
-	}
-	files, err := ioutil.ReadDir(tempDirUpperFolder)
-	if err != nil {
-		fmt.Println(err)
-	}
-	for _, fi := range files {
-		if fi.IsDir() {
-			oldTempDir := tempDirUpperFolder + "/" + fi.Name()
-			if strings.Contains(oldTempDir, "comic_cache_A8cG") { //判断文件夹前缀，避免删错文件
-				err := os.RemoveAll(oldTempDir)
-				if err != nil {
-					fmt.Println(locale.GetString("clear_temp_file_error") + oldTempDir)
-				} else {
-					fmt.Println(locale.GetString("clear_temp_file_completed") + oldTempDir)
-				}
-			}
+func deleteTempFilesByFileID(UUID string) {
+	fmt.Println(locale.GetString("clear_temp_file_start"))
+	if strings.Contains(TempDir, "comic_cache_A8cG") { //判断文件夹前缀，避免删错文件
+		clearPath := path.Join(TempDir, UUID)
+		err := os.RemoveAll(clearPath)
+		if err != nil {
+			fmt.Println(locale.GetString("clear_temp_file_error") + clearPath)
+		} else {
+			fmt.Println(locale.GetString("clear_temp_file_completed") + clearPath)
 		}
 	}
 }
+
+////根据权限，清理文件可能失败
+//func deleteOldTempFiles() {
+//	tempDirUpperFolder := TempDir
+//	post := strings.LastIndex(TempDir, "/") //Unix风格的路径分隔符
+//	if post == -1 {
+//		post = strings.LastIndex(TempDir, "\\") //windows风格的分隔符
+//	}
+//	if post != -1 {
+//		tempDirUpperFolder = string([]rune(TempDir)[:post]) //为了防止中文字符被错误截断，先转换成rune，再转回来
+//		fmt.Println(locale.GetString("temp_folder_path"), tempDirUpperFolder)
+//	}
+//	files, err := ioutil.ReadDir(tempDirUpperFolder)
+//	if err != nil {
+//		fmt.Println(err)
+//	}
+//	for _, fi := range files {
+//		if fi.IsDir() {
+//			oldTempDir := tempDirUpperFolder + "/" + fi.Name()
+//			if strings.Contains(oldTempDir, "comic_cache_A8cG") { //判断文件夹前缀，避免删错文件
+//				err := os.RemoveAll(oldTempDir)
+//				if err != nil {
+//					fmt.Println(locale.GetString("clear_temp_file_error") + oldTempDir)
+//				} else {
+//					fmt.Println(locale.GetString("clear_temp_file_completed") + oldTempDir)
+//				}
+//			}
+//		}
+//	}
+//}

@@ -3,6 +3,8 @@ package common
 import (
 	"archive/tar"
 	"archive/zip"
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	archiver "github.com/mholt/archiver/v3"
 	"github.com/nwaples/rardecode"
@@ -10,7 +12,9 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/tools"
+	"io"
 	"io/ioutil"
+	"log"
 	"net/url"
 	"os"
 	"path"
@@ -75,10 +79,10 @@ func ExtractArchiveOnce(b *Book) (err error) {
 		fmt.Println(locale.GetString("unsupported_extract")+" %s", iface)
 	}
 	//b.FileType = ".zip"
-	if b.UUID == "" {
-		b.UUID = uuid.NewV4().String()
+	if b.FileID == "" {
+		b.FileID = uuid.NewV4().String()
 	}
-	extraFolder := path.Join(TempDir, b.UUID)
+	extraFolder := path.Join(TempDir, b.FileID)
 	fmt.Println(extraFolder)
 	err = u.Unarchive(b.FilePath, extraFolder)
 	if err != nil {
@@ -94,6 +98,26 @@ func ExtractArchiveOnce(b *Book) (err error) {
 	return err
 }
 
+
+func md5file(fName string) string {
+	f, e := os.Open(fName)
+	if e != nil {
+		log.Fatal(e)
+	}
+	h := md5.New()
+	_, e = io.Copy(h, f)
+	if e != nil {
+		log.Fatal(e)
+	}
+	return hex.EncodeToString(h.Sum(nil))
+}
+
+func md5string(s string) string {
+	r := md5.Sum([]byte(s))
+	return hex.EncodeToString(r[:])
+}
+
+
 func ExtractArchive(b *Book) (err error) {
 	// 获取支持的格式
 	iface, err := getFormat(b.FilePath)
@@ -105,10 +129,11 @@ func ExtractArchive(b *Book) (err error) {
 		fmt.Println(locale.GetString("unsupported_extract")+"%s", iface)
 		return err
 	}
-	if b.UUID == "" {
-		b.UUID = uuid.NewV4().String()
+	if b.FileID == "" {
+		//b.FileID = uuid.NewV4().String()
+		b.SetFileID()
 	}
-	extraFolder := path.Join(TempDir, b.UUID)
+	extraFolder := path.Join(TempDir, b.FileID)
 	extractNum := 0
 	Percent :=0
 	tempPercent :=0
@@ -171,22 +196,22 @@ func ExtractArchive(b *Book) (err error) {
 		}
 		//解压后的文件
 		filePath := extraFolder + "/" + inArchiveName
-		temp := SinglePageInfo{ModeTime: modeTime,FileSize:fileSize,LocalPath: filePath, Name: inArchiveName, UrlPath: "cache/" + b.UUID + "/" + inArchiveName}
+		temp := SinglePageInfo{ModeTime: modeTime,FileSize:fileSize,LocalPath: filePath, Name: inArchiveName, UrlPath: "cache/" + b.FileID + "/" + inArchiveName}
 		if b.FileType == ".zip" {
 			filePath = extraFolder + "/" + inArchiveName + "/" + inArchiveName
-			temp = SinglePageInfo{ModeTime: modeTime,FileSize:fileSize,LocalPath: filePath, Name: inArchiveName, UrlPath: "cache/" + b.UUID + "/" + inArchiveName + "/" + inArchiveName}
-		}
-		if tools.ChickFileExists(filePath) {
-			logrus.Debugf(locale.GetString("file_exit") + filePath)
-			return err
+			temp = SinglePageInfo{ModeTime: modeTime,FileSize:fileSize,LocalPath: filePath, Name: inArchiveName, UrlPath: "cache/" + b.FileID + "/" + inArchiveName + "/" + inArchiveName}
 		}
 		b.PageInfo = append(b.PageInfo, temp)
 		//转义，避免特殊路径造成文件不能读取
 		b.PageInfo[len(b.PageInfo)-1].UrlPath = url.PathEscape(b.PageInfo[len(b.PageInfo)-1].UrlPath)
-		//解压文件
-		err := e.Extract(b.FilePath, inArchiveName, TempDir+"/"+b.UUID) //解压到临时文件夹
-		if err != nil {
-			logrus.Debugf(err.Error())
+		if tools.ChickFileExists(filePath) {
+			logrus.Debugf(locale.GetString("file_exit") + filePath)
+		}else {
+			//解压文件
+			err := e.Extract(b.FilePath, inArchiveName, TempDir+"/"+b.FileID) //解压到临时文件夹
+			if err != nil {
+				logrus.Debugf(err.Error())
+			}
 		}
 		//输出解压比例
 		extractNum++
@@ -351,8 +376,8 @@ func ScanBookPath(pathname string) (err error) {
 		}
 		book.SetArchiveBookName(book.FilePath)
 		if book.AllPageNum >= Config.MinImageNum {
-			if book.UUID == "" {
-				book.UUID = uuid.NewV4().String()
+			if book.FileID == "" {
+				book.SetFileID()
 			}
 			bookList = append(bookList, *book)
 		}
@@ -364,8 +389,8 @@ func ScanBookPath(pathname string) (err error) {
 		}
 		book.SetImageFolderBookName(book.FilePath)
 		if book.AllPageNum >= Config.MinImageNum {
-			if book.UUID == "" {
-				book.UUID = uuid.NewV4().String()
+			if book.FileID == "" {
+				book.SetFileID()
 			}
 			bookList = append(bookList, *book)
 		}
