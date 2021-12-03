@@ -6,14 +6,12 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/klauspost/compress/zip"
-	archiver "github.com/mholt/archiver/v3"
+	"github.com/mholt/archiver/v3"
 	"github.com/nwaples/rardecode"
 	"github.com/sirupsen/logrus"
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/tools"
-	"io"
 	"io/ioutil"
-	"log"
 	"net/url"
 	"os"
 	"path"
@@ -96,18 +94,18 @@ func ScanArchive(scanPath string) (*Book, error) {
 //	return err
 //}
 
-func md5file(fName string) string {
-	f, e := os.Open(fName)
-	if e != nil {
-		log.Fatal(e)
-	}
-	h := md5.New()
-	_, e = io.Copy(h, f)
-	if e != nil {
-		log.Fatal(e)
-	}
-	return hex.EncodeToString(h.Sum(nil))
-}
+//func md5file(fName string) string {
+//	f, e := os.Open(fName)
+//	if e != nil {
+//		log.Fatal(e)
+//	}
+//	h := md5.New()
+//	_, e = io.Copy(h, f)
+//	if e != nil {
+//		log.Fatal(e)
+//	}
+//	return hex.EncodeToString(h.Sum(nil))
+//}
 
 func md5string(s string) string {
 	r := md5.Sum([]byte(s))

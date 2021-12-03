@@ -21,4 +21,13 @@ yarn lint
 ```
 
 ### Customize configuration
+
 See [Configuration Reference](https://cli.vuejs.org/config/).
+
+Update
+
+``` bash
+npm install npm@latest -g
+npm install yarn@latest -g
+yarn upgrade-interactive --latest
+```
