@@ -1,6 +1,7 @@
 package routers
 
 import (
+	"archive/zip"
 	"embed"
 	"fmt"
 	"github.com/sanity-io/litter"
@@ -65,7 +66,10 @@ func StartServer(args []string) {
 	if common.Config.CheckImageInServer {
 		wg.Add(1)
 		go func() {
-			common.InitReadingBook()
+			err := common.InitReadingBook()
+			if err != nil {
+				return
+			}
 			defer wg.Done()
 		}()
 		wg.Wait()
@@ -120,14 +124,7 @@ func setFirstBook(args []string) {
 	}
 }
 
-// 测试用的假数据
-var secrets = gin.H{
-	"comi":  gin.H{"email": "foo@bar.com", "phone": "123433"},
-	"admin": gin.H{"email": "austin@example.com", "phone": "666"},
-	"user1": gin.H{"email": "lena@guapa.com", "phone": "523443"},
-}
-
-//启动web服务
+// InitWebServer 启动web服务
 func InitWebServer() {
 
 	//获取模板，命名为"template-data"，同时把左右分隔符改为 [[ ]]
@@ -140,7 +137,7 @@ func InitWebServer() {
 	if common.Config.LogToFile {
 		// 关闭 log 打印的字体颜色。输出到文件不需要颜色
 		gin.DisableConsoleColor()
-		// 输出 log 到文件(logrus)
+		// 输出 log 到文件
 		engine.Use(tools.LoggerToFile(common.Config.LogFilePath, common.Config.LogFileName))
 	}
 	//自定义分隔符，避免与vue.js冲突
@@ -156,9 +153,8 @@ func InitWebServer() {
 		)
 	})
 	engine.StaticFS("/assets", http.FS(EmbedFiles))
-	if common.ReadingBook.IsFolder {
-		//engine.StaticFS("/raw/"+common.ReadingBook.Name, gin.Dir(common.ReadingBook.FilePath, true)) //URL parameters can not be used when serving a static folder
-	} else {
+	//Download archive file
+	if !common.ReadingBook.IsFolder {
 		engine.StaticFile("/raw/"+common.ReadingBook.Name, common.ReadingBook.FilePath)
 	}
 	//解析模板到HTML
@@ -210,6 +206,7 @@ func InitWebServer() {
 		}
 		fmt.Println(locale.GetString("port_busy") + strconv.Itoa(common.Config.Port))
 	}
+
 	//webp反向代理
 	if common.Config.EnableWebpServer {
 		webpError := common.StartWebPServer(common.PictureDir, common.PictureDir, common.TempDir+"/webp", common.Config.Port+1)
@@ -217,7 +214,7 @@ func InitWebServer() {
 			fmt.Println(locale.GetString("webp_server_error"), webpError.Error())
 			engine.Static("/cache", common.PictureDir)
 		} else {
-			fmt.Println(locale.GetString("werp_server_start"))
+			fmt.Println(locale.GetString("webp_server_start"))
 			engine.Use(reverse_proxy.ReverseProxyHandle("/cache", reverse_proxy.ReverseProxyOptions{
 				TargetHost:  "http://localhost",
 				TargetPort:  strconv.Itoa(common.Config.Port + 1),
@@ -225,8 +222,24 @@ func InitWebServer() {
 			}))
 		}
 	} else {
-		//图片目录
-		engine.Static("/cache", common.PictureDir)
+		ext := path.Ext(common.ReadingBook.FilePath)
+		if ext == ".zip" {
+			fsys, zip_err := zip.OpenReader(common.ReadingBook.FilePath)
+			if zip_err != nil {
+				fmt.Println(zip_err)
+			}
+			engine.StaticFS("/cache", http.FS(fsys))
+		} else {
+			//图片目录
+			engine.Static("/cache", common.PictureDir)
+		}
+		//大概需要自己实现一个rar fs？  https://github.com/forensicanalysis/zipfs
+		//// Error:*rardecode.ReadCloser does not implement fs.FS (missing Open method)
+		//fsys2, rar_err := rar.OpenReader("test.rar","")
+		//if rar_err != nil {
+		//	fmt.Println(rar_err)
+		//}
+		//engine.StaticFS("/rar", http.FS(fsys2))
 	}
 	if common.Config.EnableFrpcServer {
 		if common.Config.FrpConfig.RandomRemotePort {
@@ -255,6 +268,9 @@ func InitWebServer() {
 	fmt.Println(locale.GetString("quit_hint"))
 	err := engine.Run(webHost + strconv.Itoa(common.Config.Port))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, locale.GetString("web_server_error")+"%q\n", common.Config.Port)
+		_, err := fmt.Fprintf(os.Stderr, locale.GetString("web_server_error")+"%q\n", common.Config.Port)
+		if err != nil {
+			return
+		}
 	}
 }

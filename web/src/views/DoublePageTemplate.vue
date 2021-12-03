@@ -62,7 +62,7 @@ export default {
       bookshelf: null,
       setting: null,
       page_mark: 0, //初始值为0或1（根据单双页判断，initPageMark）,最大值为this.$store.state.book.all_page_num 最大值的时候，代码逻辑上需要一些特殊处理（page_mark数组越界，但page_mark-1依然有意义）。
-      
+
       showPagination: true,
       AllPageNum: this.$store.state.book.all_page_num - 1,
       time_cont: 0,
@@ -137,12 +137,10 @@ export default {
       ) {
         this.page_mark = this.page_mark + 2;
         console.log(this.page_mark);
-        //return;
       } else {
         //剩下的其他情况，比如有一张是双页，都只加1
         this.page_mark = this.page_mark + 1;
         console.log(this.page_mark);
-        //return;
       }
     },
     previousPageClick: function () {

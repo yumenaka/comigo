@@ -262,12 +262,13 @@ type SinglePageInfo struct {
 	FileSize  int64     `json:"-"` //不要解析这个字段
 	Height    int       `json:"height"`
 	Width     int       `json:"width"`
-	UrlPath   string    `json:"url"`
+	Url       string    `json:"url"`
 	LocalPath string    `json:"-"` //不要解析这个字段
 	Name      string    `json:"-"` //不要解析这个字段
 	ImgType   string    `json:"image_type"`
 }
 
+// Slice
 type AllPageInfo []SinglePageInfo
 
 //Len()
@@ -354,7 +355,7 @@ func (b *Book) GetName() string { //绑定到Book结构体的方法
 func (b *Book) GetPicNum() int {
 	var PicNum = 0
 	for _, p := range b.PageInfo {
-		if isSupportMedia(p.UrlPath) {
+		if isSupportMedia(p.Url) {
 			PicNum++
 		}
 	}
@@ -476,7 +477,7 @@ func InitReadingBook() (err error) {
 			fmt.Println(locale.GetString("temp_folder_error"), err)
 			return err
 		}
-		PictureDir = TempDir
+		PictureDir = path.Join(TempDir, ReadingBook.FileID) //extraFolder
 		err = ExtractArchive(&ReadingBook)
 		if err != nil {
 			fmt.Println(locale.GetString("file_not_found"))

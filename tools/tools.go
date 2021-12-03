@@ -10,11 +10,10 @@ import (
 	"os/exec"
 	"runtime"
 	"strconv"
-	"strings"
 )
 
-//打印阅读链接
-func PrintAllReaderURL(Port int,OpenBrowserFlag bool,EnableFrpcServer bool,PrintAllIP bool,ServerHost string,ServerAddr string,FrpRemotePort int,DisableLAN bool) {
+// PrintAllReaderURL 打印阅读链接
+func PrintAllReaderURL(Port int, OpenBrowserFlag bool, EnableFrpcServer bool, PrintAllIP bool, ServerHost string, ServerAddr string, FrpRemotePort int, DisableLAN bool) {
 	localURL := "http://127.0.0.1:" + strconv.Itoa(Port)
 	fmt.Println(locale.GetString("local_reading") + localURL)
 	//PrintQRCode(localURL)
@@ -26,20 +25,20 @@ func PrintAllReaderURL(Port int,OpenBrowserFlag bool,EnableFrpcServer bool,Print
 		}
 	}
 	if !DisableLAN {
-		printURLAndQRCode(Port,EnableFrpcServer,PrintAllIP,ServerHost,ServerAddr,FrpRemotePort)
+		printURLAndQRCode(Port, EnableFrpcServer, PrintAllIP, ServerHost, ServerAddr, FrpRemotePort)
 	}
 }
 
-func printURLAndQRCode(port int,EnableFrpcServer bool,PrintAllIP bool,ServerHost string, ServerAddr string, FrpRemotePort int) {
+func printURLAndQRCode(port int, EnableFrpcServer bool, PrintAllIP bool, ServerHost string, ServerAddr string, FrpRemotePort int) {
 	//启用Frp的时候
 	if EnableFrpcServer {
 		readURL := "http://" + ServerAddr + ":" + strconv.Itoa(FrpRemotePort)
-		fmt.Println(locale.GetString("frp_reading_url_is")  + readURL)
+		fmt.Println(locale.GetString("frp_reading_url_is") + readURL)
 		PrintQRCode(readURL)
 	}
 	if ServerHost != "" {
 		readURL := "http://" + ServerHost + ":" + strconv.Itoa(port)
-		fmt.Println(locale.GetString("reading_url_maybe")  + readURL)
+		fmt.Println(locale.GetString("reading_url_maybe") + readURL)
 		PrintQRCode(readURL)
 		return
 	}
@@ -55,7 +54,7 @@ func printURLAndQRCode(port int,EnableFrpcServer bool,PrintAllIP bool,ServerHost
 			PrintQRCode(readURL)
 		}
 	} else {
-		//只打印出口IP
+		//只打印本机的首选出站IP
 		OutIP := GetOutboundIP().String()
 		readURL := "http://" + OutIP + ":" + strconv.Itoa(port)
 		fmt.Println(locale.GetString("reading_url_maybe") + readURL)
@@ -69,35 +68,38 @@ func PrintQRCode(text string) {
 	obj.Get(text).Print()
 }
 
-//检测端口是否可用
+// CheckPort 检测端口是否可用
 func CheckPort(port int) bool {
 	ln, err := net.Listen("tcp", ":"+strconv.Itoa(port))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, locale.GetString("cannot_listen") +"%q: %s", port, err)
+		_, err := fmt.Fprintf(os.Stderr, locale.GetString("cannot_listen")+"%q: %s", port, err)
+		if err != nil {
+			return false
+		}
 		return false
 	}
 	err = ln.Close()
 	if err != nil {
-		fmt.Println( locale.GetString("check_pork_error")+ strconv.Itoa(port))
+		fmt.Println(locale.GetString("check_pork_error") + strconv.Itoa(port))
 	}
 	//fmt.Printf("TCP Port %q is available", port)
 	return true
 }
 
-//获取本机IP列表
+// GetIPList 获取本机IP列表
 func GetIPList() (IPList []string, err error) {
-	ifaces, err := net.Interfaces()
+	interfaces, err := net.Interfaces()
 	if err != nil {
 		return nil, err
 	}
-	for _, iface := range ifaces {
-		if iface.Flags&net.FlagUp == 0 {
+	for _, i := range interfaces {
+		if i.Flags&net.FlagUp == 0 {
 			continue // interface down
 		}
-		if iface.Flags&net.FlagLoopback != 0 {
+		if i.Flags&net.FlagLoopback != 0 {
 			continue // loopback interface
 		}
-		addrs, err := iface.Addrs()
+		addrs, err := i.Addrs()
 		if err != nil {
 			fmt.Printf(locale.GetString("get_ip_error")+"%v", err)
 			return nil, err
@@ -123,43 +125,48 @@ func GetIPList() (IPList []string, err error) {
 	return IPList, err
 }
 
+// GetOutboundIP 获取本机的首选出站IP
 // Get preferred outbound ip of this machine
 func GetOutboundIP() net.IP {
 	conn, err := net.Dial("udp", "8.8.8.8:80")
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer conn.Close()
+	defer func(conn net.Conn) {
+		err := conn.Close()
+		if err != nil {
+
+		}
+	}(conn)
 
 	localAddr := conn.LocalAddr().(*net.UDPAddr)
 	return localAddr.IP
 }
 
-// 获取mac地址列表,暂时用不着
-func GetMacAddrList() (macAddrList []string) {
-	netInterfaces, err := net.Interfaces()
-	if err != nil {
-		fmt.Printf(locale.GetString("check_mac_error")+": %v", err)
-		return macAddrList
-	}
-	//for _, netInterface := range netInterfaces {
-	//	macAddr := netInterface.HardwareAddr.String()
-	//	if len(macAddr) == 0 {
-	//		continue
-	//	}
-	//	macAddrList = append(macAddrList, macAddr)
-	//}
-	for _, netInterface := range netInterfaces {
-		flags := netInterface.Flags.String()
-		if strings.Contains(flags, "up") && strings.Contains(flags, "broadcast") {
-			macAddrList = append(macAddrList, netInterface.HardwareAddr.String())
-		}
-	}
-	return macAddrList
+//// 获取mac地址列表,暂时用不着
+//func GetMacAddrList() (macAddrList []string) {
+//	netInterfaces, err := net.Interfaces()
+//	if err != nil {
+//		fmt.Printf(locale.GetString("check_mac_error")+": %v", err)
+//		return macAddrList
+//	}
+//	//for _, netInterface := range netInterfaces {
+//	//	macAddr := netInterface.HardwareAddr.String()
+//	//	if len(macAddr) == 0 {
+//	//		continue
+//	//	}
+//	//	macAddrList = append(macAddrList, macAddr)
+//	//}
+//	for _, netInterface := range netInterfaces {
+//		flags := netInterface.Flags.String()
+//		if strings.Contains(flags, "up") && strings.Contains(flags, "broadcast") {
+//			macAddrList = append(macAddrList, netInterface.HardwareAddr.String())
+//		}
+//	}
+//	return macAddrList
+//}
 
-}
-
-//判断所给路径文件或文件夹是否存在
+// ChickFileExists 判断所给路径文件或文件夹是否存在
 func ChickFileExists(path string) bool {
 	_, err := os.Stat(path) //os.Stat获取文件信息
 	if err != nil {
@@ -189,7 +196,3 @@ func OpenBrowser(uri string) {
 		cmd = exec.Command("xdg-open", uri)
 	}
 }
-
-
-
-

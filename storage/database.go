@@ -6,10 +6,14 @@ import (
 	bolt "go.etcd.io/bbolt"
 	"time"
 )
+
+// 直接用 https://github.com/asdine/storm 有很多方便的特性、写起来更简单。
+// https://juejin.cn/post/7031361355856740389
 // https://github.com/etcd-io/bbolt
 // https://github.com/filebrowser/filebrowser/blob/master/storage/bolt/bolt.go
 // https://github.com/filebrowser/filebrowser/blob/master/storage/bolt/config.go
-// 或许直接用 https://github.com/asdine/storm 更简单？
+
+//阅读源码：https://github.com/filebrowser/filebrowser/commits/master?after=a078f0b787de83b58c3e5dd5699387e90f1bf0d6+2204&branch=master
 
 func initDatabase() {
 	// Open the my.db data file in your current directory.
@@ -43,19 +47,11 @@ func initDatabase() {
 
 		return nil
 	})
-
-
-
-
-
 }
 
 func DataBase() {
-//使用 db.Update 开启一个读写事务
-	err := db.Update(func(tx *bolt.Tx) error{
-
+	//使用 db.Update 开启一个读写事务
+	err := db.Update(func(tx *bolt.Tx) error {
 		return nil
 	})
-
-
 }

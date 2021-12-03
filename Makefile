@@ -1,6 +1,6 @@
 # Makefile for cross-compilation
-# make all VERSION=v0.4.3
-# mingw32-make all VERSION=v0.4.3
+# make all VERSION=v0.4.4
+# mingw32-make all VERSION=v0.4.4
 # need MSYS2 or mingw32
 NAME=comi
 SKETCH_NAME=sketch_66seconds

@@ -16,11 +16,11 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:  locale.GetString("comigo_use") ,
-	Short:locale.GetString("short_description")  ,
+	Use:     locale.GetString("comigo_use"),
+	Short:   locale.GetString("short_description"),
 	Example: locale.GetString("comigo_example"),
 	Version: locale.GetString("comigo_version"),
-	Long: locale.GetString("long_description"),
+	Long:    locale.GetString("long_description"),
 	Run: func(cmd *cobra.Command, args []string) {
 		routers.StartServer(args)
 		return
@@ -100,7 +100,7 @@ func init() {
 	}
 	//至少有几张图片，才认定为漫画压缩包
 	if viper.GetInt("COMI_MIN_MEDIA_NUM") != 0 {
-		rootCmd.PersistentFlags().IntVar(&common.Config.MinImageNum, "min-image-num",  viper.GetInt("COMI_MIN_MEDIA_NUM"), locale.GetString("COMI_MIN_MEDIA_NUM"))
+		rootCmd.PersistentFlags().IntVar(&common.Config.MinImageNum, "min-image-num", viper.GetInt("COMI_MIN_MEDIA_NUM"), locale.GetString("COMI_MIN_MEDIA_NUM"))
 	} else {
 		rootCmd.PersistentFlags().IntVar(&common.Config.MinImageNum, "min-image-num", 1, locale.GetString("COMI_MIN_MEDIA_NUM"))
 	}
@@ -174,15 +174,15 @@ func init() {
 	}
 
 	//默认web模板
-	if viper.GetString("COMI_TEMPLATE") != ""{
-		rootCmd.PersistentFlags().StringVarP(&common.Config.Template, "template","t", viper.GetString("COMI_TEMPLATE"), locale.GetString("COMI_TEMPLATE"))
+	if viper.GetString("COMI_TEMPLATE") != "" {
+		rootCmd.PersistentFlags().StringVarP(&common.Config.Template, "template", "t", viper.GetString("COMI_TEMPLATE"), locale.GetString("COMI_TEMPLATE"))
 	} else {
-		rootCmd.PersistentFlags().StringVarP(&common.Config.Template, "template", "t","scroll", locale.GetString("COMI_TEMPLATE"))
+		rootCmd.PersistentFlags().StringVarP(&common.Config.Template, "template", "t", "scroll", locale.GetString("COMI_TEMPLATE"))
 	}
 
 	//sketch模式的倒计时秒数
-	if viper.GetInt("COMI_SKETCH_COUNT_SECONDS") != 0{
-		rootCmd.PersistentFlags().IntVar(&common.Config.SketchCountSeconds, "sketch_count_seconds",viper.GetInt("COMI_SKETCH_COUNT_SECONDS"), locale.GetString("COMI_SKETCH_COUNT_SECONDS"))
+	if viper.GetInt("COMI_SKETCH_COUNT_SECONDS") != 0 {
+		rootCmd.PersistentFlags().IntVar(&common.Config.SketchCountSeconds, "sketch_count_seconds", viper.GetInt("COMI_SKETCH_COUNT_SECONDS"), locale.GetString("COMI_SKETCH_COUNT_SECONDS"))
 	} else {
 		rootCmd.PersistentFlags().IntVar(&common.Config.SketchCountSeconds, "sketch_count_seconds", 90, locale.GetString("COMI_SKETCH_COUNT_SECONDS"))
 	}
@@ -199,7 +199,6 @@ func init() {
 	} else {
 		rootCmd.PersistentFlags().StringVar(&common.Config.SortImage, "sort", "none", locale.GetString("COMI_SORT"))
 	}
-
 
 	//退出时清除临时文件
 	if viper.GetBool("COMI_CLEAN") {
@@ -230,10 +229,10 @@ func init() {
 	//}
 
 	//尚未启用的功能，暂时无意义的设置
-	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFileName, "logname", "comigo", "log文件名")
-	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFilePath, "logpath", "~", "log文件位置")
+	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFileName, "log_name", "comigo", "log文件名")
+	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFilePath, "log_path", "~", "log文件位置")
 	//rootCmd.PersistentFlags().StringVarP(&common.Config.ZipFilenameEncoding, "zip-encoding", "e", "", "Zip non-utf8 Encoding(gbk、shiftjis、gb18030）")
-	//	rootCmd.PersistentFlags().BoolVarP(&common.PrintVersion, "version", "v", false, "输出版本号")
+	//rootCmd.PersistentFlags().BoolVarP(&common.PrintVersion, "version", "v", false, "输出版本号")
 }
 
 // 读取配置，参考下面三篇文章
@@ -245,23 +244,23 @@ func readConfigFile() {
 	//读取环境变量
 	viper.AutomaticEnv()
 	//viper.SetConfigFile("./config.yaml") // 指定配置文件路径
-	viper.SetConfigName("config.yaml")      // 配置文件名称(有扩展名)
+	viper.SetConfigName("config.yaml") // 配置文件名称(有扩展名)
 	//viper.SetConfigType("yaml")        // 如果配置文件的名称中没有扩展名，则需要配置此项
-	viper.AddConfigPath(".")           // 在当前目录中查找配置
+	viper.AddConfigPath(".") // 在当前目录中查找配置
 	// Find home directory.
 	home, err := homedir.Dir()
 	if err != nil {
 		//viper.AddConfigPath(home) // 在Home目录中查找配置
 	}
 	viper.AddConfigPath(home + "/.config/comigo") // 多次调用以添加多个搜索路径,home
-	viper.AddConfigPath("./.comigo")          // 多次调用以添加多个搜索路径
+	viper.AddConfigPath("./.comigo")              // 多次调用以添加多个搜索路径
 	//查找并读取配置文件
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			logrus.Debugf(locale.GetString("config_file_not_found") , viper.ConfigFileUsed())
+			logrus.Debugf(locale.GetString("config_file_not_found"), viper.ConfigFileUsed())
 
 		} else {
-			logrus.Debugf(locale.GetString("config_file_not_resolve") , common.Config.ConfigPath)
+			logrus.Debugf(locale.GetString("config_file_not_resolve"), common.Config.ConfigPath)
 		}
 	}
 	//应用配置文件
@@ -273,7 +272,7 @@ func readConfigFile() {
 	//监听配置变化，运行时动态加载配置
 	viper.WatchConfig()
 	viper.OnConfigChange(func(e fsnotify.Event) {
-		fmt.Println(locale.GetString("config_change") , e.Name)
+		fmt.Println(locale.GetString("config_change"), e.Name)
 	})
 
 	////保存配置並退出,目前是空文件……
