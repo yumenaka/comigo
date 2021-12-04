@@ -11,7 +11,6 @@ import (
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/routers/reverse_proxy"
 	"github.com/yumenaka/comi/tools"
-	//"github.com/gin-gonic/contrib/static"
 	"html/template"
 	"math/rand"
 	"net/http"
@@ -202,7 +201,7 @@ func InitWebServer() {
 		if common.Config.Port+2000 > 65535 {
 			common.Config.Port = common.Config.Port + r.Intn(1024)
 		} else {
-			common.Config.Port = 50000 + r.Intn(10000)
+			common.Config.Port = 30000 + r.Intn(20000)
 		}
 		fmt.Println(locale.GetString("port_busy") + strconv.Itoa(common.Config.Port))
 	}
@@ -244,7 +243,7 @@ func InitWebServer() {
 	if common.Config.EnableFrpcServer {
 		if common.Config.FrpConfig.RandomRemotePort {
 			r := rand.New(rand.NewSource(time.Now().UnixNano()))
-			common.Config.FrpConfig.RemotePort = 40000 + r.Intn(10000)
+			common.Config.FrpConfig.RemotePort = 50000 + r.Intn(10000)
 		} else {
 			if common.Config.FrpConfig.RemotePort <= 0 || common.Config.FrpConfig.RemotePort > 65535 {
 				common.Config.FrpConfig.RemotePort = common.Config.Port

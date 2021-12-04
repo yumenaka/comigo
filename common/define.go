@@ -117,7 +117,7 @@ var Config = ServerConfig{
 	CleanNotAll:        true,
 }
 
-//通过路径名或执行文件名，来设置默认网页模板参数
+// SetTemplateByName 通过路径名或执行文件名，来设置默认网页模板参数
 func (config *ServerConfig) SetTemplateByName(FileName string) {
 	//如果执行文件名包含 scroll 等关键字，选择卷轴模板
 	if haveKeyWord(FileName, []string{"scroll", "スクロール", "默认", "下拉", "卷轴"}) {
@@ -203,13 +203,11 @@ func haveKeyWord(checkString string, list []string) bool {
 var ReadingBook Book
 var BookList []Book
 var (
-	//ReadFileName           string
-	TempDir    string
-	PictureDir string
-	//PrintVersion    bool
-	Version          string = "v0.2.4"
-	SupportMediaType        = []string{".jpg", ".jpeg", ".JPEG", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp", ".webp", ".ico", ".heic", ".pdf", ".mp4", ".webm"}
-	SupportFileType         = [...]string{
+	TempDir          string
+	PictureDir       string
+	Version          = "v0.2.4"
+	SupportMediaType = []string{".jpg", ".jpeg", ".JPEG", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp", ".webp", ".ico", ".heic", ".pdf", ".mp4", ".webm"}
+	SupportFileType  = [...]string{
 		".zip",
 		".tar",
 		".rar",
@@ -268,15 +266,14 @@ type SinglePageInfo struct {
 	ImgType   string    `json:"image_type"`
 }
 
-// Slice
+// AllPageInfo Slice
 type AllPageInfo []SinglePageInfo
 
-//Len()
 func (s AllPageInfo) Len() int {
 	return len(s)
 }
 
-//Less():按时间或URL，将图片排序
+// Less 按时间或URL，将图片排序
 func (s AllPageInfo) Less(i, j int) (less bool) {
 	//如何定义 s[i] < s[j]  根据文件名
 	numI, err1 := getNumberFromString(s[i].Name)
@@ -300,12 +297,11 @@ func (s AllPageInfo) Less(i, j int) (less bool) {
 	return less
 }
 
-//Swap()
 func (s AllPageInfo) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 
-//上面三个函数定义好了，终于可以使用sort包排序了
+// SortPages 上面三个函数定义好了，终于可以使用sort包排序了
 func (b *Book) SortPages() {
 	sort.Sort(b.PageInfo)
 }
@@ -320,7 +316,7 @@ func (b *Book) SetFileID() {
 	b.FileID = md5string(fileAbaPath)
 }
 
-//一些绑定到Book结构体的方法
+// SetArchiveBookName  绑定到Book结构体的方法
 func (b *Book) SetArchiveBookName(name string) {
 	post := strings.LastIndex(name, "/") //Unix路径分隔符
 	if post == -1 {
@@ -362,7 +358,7 @@ func (b *Book) GetPicNum() int {
 	return PicNum
 }
 
-//服务器端分析单双页
+// ScanAllImage 服务器端分析单双页
 func (b *Book) ScanAllImage() {
 	log.Println(locale.GetString("check_image_start"))
 	for i := 0; i < len(b.PageInfo); i++ { //此处不能用range，因为需要修改
@@ -371,7 +367,7 @@ func (b *Book) ScanAllImage() {
 	log.Println(locale.GetString("check_image_completed"))
 }
 
-//并发分析
+// ScanAllImageGo 并发分析
 func (b *Book) ScanAllImageGo() {
 	//var wg sync.WaitGroup
 	log.Println(locale.GetString("check_image_start"))
@@ -394,7 +390,7 @@ func (b *Book) ScanAllImageGo() {
 		})
 	}
 	//wg.Wait()
-	wp.Wait()
+	_ = wp.Wait()
 	for i := 0; i < count; i++ {
 		extractNum++
 		if b.AllPageNum != 0 {
@@ -429,7 +425,7 @@ func SetImageType(p *SinglePageInfo) {
 	}
 }
 
-//获取图片分辨率
+// GetImageSize 获取图片分辨率
 func (i *SinglePageInfo) GetImageSize() (err error) {
 	var img image.Image
 	img, err = imaging.Open(i.LocalPath)
@@ -442,7 +438,7 @@ func (i *SinglePageInfo) GetImageSize() (err error) {
 	return err
 }
 
-//中断处理：程序被中断的时候，清理临时文件
+// SetupCloseHander 中断处理：程序被中断的时候，清理临时文件
 func SetupCloseHander() {
 	c := make(chan os.Signal, 2)
 	//SIGHUP（挂起）, SIGINT（中断）或 SIGTERM（终止）默认会使得程序退出。
@@ -509,7 +505,7 @@ func InitReadingBook() (err error) {
 	return err
 }
 
-//设置临时文件夹，退出时会被清理
+// SetTempDir 设置临时文件夹，退出时会被清理
 func SetTempDir() (err error) {
 	if TempDir != "" {
 		return err

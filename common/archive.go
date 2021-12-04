@@ -141,7 +141,7 @@ func ExtractArchive(b *Book) (err error) {
 		////zip编码用
 		//inArchiveNameZip := f.Name()
 		switch h := f.Header.(type) {
-		case zip.FileHeader: //zip is  "github.com/klauspost/compress/zip" ，not "archive/zip"
+		case zip.FileHeader: //Now zip not "archive/zip"
 			logrus.Debugf("%s\t%d\t%d\t%s\t%s\n",
 				f.Mode(),
 				h.Method,
@@ -151,10 +151,6 @@ func ExtractArchive(b *Book) (err error) {
 			)
 			b.FileType = ".zip"
 			inArchiveName = h.Name
-			////手动指定zip编码
-			//if Config.ZipFilenameEncoding != "" {
-			//	inArchiveNameZip = DecodeFileName(h.Name)
-			//}
 		case *tar.Header:
 			logrus.Debugf("%s\t%s\t%s\t%d\t%s\t%s\n",
 				f.Mode(),
@@ -191,8 +187,7 @@ func ExtractArchive(b *Book) (err error) {
 		//解压后的文件
 		filePath := extractFolder + "/" + inArchiveName
 		temp := SinglePageInfo{ModeTime: modeTime, FileSize: fileSize, LocalPath: filePath, Name: inArchiveName, Url: "cache/" + inArchiveName}
-		ext := path.Ext(b.FilePath)
-		if ext == ".zip" {
+		if path.Ext(b.FilePath) == ".zip" {
 			filePath = extractFolder + "/" + inArchiveName + "/" + inArchiveName
 			temp = SinglePageInfo{ModeTime: modeTime, FileSize: fileSize, LocalPath: filePath, Name: inArchiveName, Url: "cache/" + inArchiveName}
 		}
@@ -203,7 +198,7 @@ func ExtractArchive(b *Book) (err error) {
 			logrus.Debugf(locale.GetString("file_exit") + filePath)
 		} else {
 			//解压文件
-			if ext == ".zip" {
+			if path.Ext(b.FilePath) == ".zip" {
 				err := e.Extract(b.FilePath, inArchiveName, TempDir+"/"+b.FileID) //解压到临时文件夹
 				if err != nil {
 					logrus.Debugf(err.Error())
@@ -248,7 +243,7 @@ func getFormat(subcommand string) (interface{}, error) {
 		return nil, err
 	}
 	// 准备一个Tar，以备不时之需
-	mytar := &archiver.Tar{
+	tar := &archiver.Tar{
 		OverwriteExisting:      overwriteExisting,
 		MkdirAll:               mkdirAll,
 		ImplicitTopLevelFolder: implicitTopLevelFolder,
@@ -263,25 +258,25 @@ func getFormat(subcommand string) (interface{}, error) {
 		v.ContinueOnError = continueOnError
 		v.Password = os.Getenv("ARCHIVE_PASSWORD")
 	case *archiver.Tar:
-		v = mytar
+		v = tar
 	case *archiver.TarBrotli:
-		v.Tar = mytar
+		v.Tar = tar
 		v.Quality = compressionLevel
 	case *archiver.TarBz2:
-		v.Tar = mytar
+		v.Tar = tar
 		v.CompressionLevel = compressionLevel
 	case *archiver.TarGz:
-		v.Tar = mytar
+		v.Tar = tar
 		v.CompressionLevel = compressionLevel
 	case *archiver.TarLz4:
-		v.Tar = mytar
+		v.Tar = tar
 		v.CompressionLevel = compressionLevel
 	case *archiver.TarSz:
-		v.Tar = mytar
+		v.Tar = tar
 	case *archiver.TarXz:
-		v.Tar = mytar
+		v.Tar = tar
 	case *archiver.TarZstd:
-		v.Tar = mytar
+		v.Tar = tar
 	case *archiver.Zip:
 		v.CompressionLevel = compressionLevel
 		v.OverwriteExisting = overwriteExisting
@@ -328,25 +323,26 @@ func isSupportArchiver(checkPath string) bool {
 	}
 	return false
 }
-func GetBookPath(scanPath string) (bookPath string, err error) {
-	f, err := os.Stat(scanPath)
-	if err, ok := err.(*os.PathError); ok {
-		fmt.Println("File at path", err.Path, "failed to stat")
-		return bookPath, err
-	}
-	if f.IsDir() == true { //如果是文件夹
-		err := ScanBookPath(scanPath)
-		if err != nil {
-			return bookPath, err
-		}
-		if len(BookList) > 0 {
-			bookPath = BookList[0].FilePath
-		}
-	} else {
-		bookPath = scanPath
-	}
-	return bookPath, err
-}
+
+//func GetBookPath(scanPath string) (bookPath string, err error) {
+//	f, err := os.Stat(scanPath)
+//	if err, ok := err.(*os.PathError); ok {
+//		fmt.Println("File at path", err.Path, "failed to stat")
+//		return bookPath, err
+//	}
+//	if f.IsDir() == true { //如果是文件夹
+//		err := ScanBookPath(scanPath)
+//		if err != nil {
+//			return bookPath, err
+//		}
+//		if len(BookList) > 0 {
+//			bookPath = BookList[0].FilePath
+//		}
+//	} else {
+//		bookPath = scanPath
+//	}
+//	return bookPath, err
+//}
 
 func ScanBookPath(pathname string) (err error) {
 	var fileList, dirList []string

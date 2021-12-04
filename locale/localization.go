@@ -2,7 +2,6 @@ package locale
 
 import (
 	_ "embed"
-	"fmt"
 	"os"
 	"os/exec"
 	"runtime"
@@ -15,7 +14,9 @@ import (
 
 //https://github.com/nicksnyder/go-i18n/blob/main/v2/i18n/example_test.go
 
-var Localizer *i18n.Localizer
+var (
+	Localizer *i18n.Localizer
+)
 
 //go:embed en-us.toml
 var enBytes []byte
@@ -67,16 +68,16 @@ func getLocale() (string, string) {
 	return defaultLang, defaultLoc
 }
 
-func chcpToUTF8() {
-	var cmd *exec.Cmd
-	if runtime.GOOS == "windows" {
-		cmd = exec.Command("CMD", "/C", "chcp.com", "65001")
-		if err := cmd.Start(); err != nil {
-			fmt.Println("设置Windows活动代码页失败")
-			fmt.Println(err.Error())
-		}
-	}
-}
+//func chcpToUTF8() {
+//	var cmd *exec.Cmd
+//	if runtime.GOOS == "windows" {
+//		cmd = exec.Command("CMD", "/C", "chcp.com", "65001")
+//		if err := cmd.Start(); err != nil {
+//			fmt.Println("设置Windows活动代码页失败")
+//			fmt.Println(err.Error())
+//		}
+//	}
+//}
 
 func init() {
 	bundle := i18n.NewBundle(language.English)
