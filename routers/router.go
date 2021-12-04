@@ -240,6 +240,9 @@ func InitWebServer() {
 		//}
 		//engine.StaticFS("/rar", http.FS(fsys2))
 	}
+	//打印链接
+	tools.PrintAllReaderURL(common.Config.Port, common.Config.OpenBrowser, common.Config.EnableFrpcServer, common.Config.PrintAllIP, common.Config.ServerHost, common.Config.FrpConfig.ServerAddr, common.Config.FrpConfig.RemotePort, common.Config.DisableLAN)
+	//开始服务
 	if common.Config.EnableFrpcServer {
 		if common.Config.FrpConfig.RandomRemotePort {
 			r := rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -256,8 +259,6 @@ func InitWebServer() {
 			fmt.Println(locale.GetString("frpc_server_start"))
 		}
 	}
-	//开始服务
-	tools.PrintAllReaderURL(common.Config.Port, common.Config.OpenBrowser, common.Config.EnableFrpcServer, common.Config.PrintAllIP, common.Config.ServerHost, common.Config.FrpConfig.ServerAddr, common.Config.FrpConfig.RemotePort, common.Config.DisableLAN)
 	//打印配置
 	//fmt.Println(locale.GetString("print_config"))
 	//fmt.Println(common.Config)

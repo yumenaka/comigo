@@ -5,12 +5,6 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	"github.com/klauspost/compress/zip"
-	"github.com/mholt/archiver/v3"
-	"github.com/nwaples/rardecode"
-	"github.com/sirupsen/logrus"
-	"github.com/yumenaka/comi/locale"
-	"github.com/yumenaka/comi/tools"
 	"io/ioutil"
 	"net/url"
 	"os"
@@ -19,6 +13,13 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+
+	"github.com/klauspost/compress/zip"
+	"github.com/mholt/archiver/v3"
+	"github.com/nwaples/rardecode"
+	"github.com/sirupsen/logrus"
+	"github.com/yumenaka/comi/locale"
+	"github.com/yumenaka/comi/tools"
 )
 
 var (
@@ -187,10 +188,12 @@ func ExtractArchive(b *Book) (err error) {
 		//解压后的文件
 		filePath := extractFolder + "/" + inArchiveName
 		temp := SinglePageInfo{ModeTime: modeTime, FileSize: fileSize, LocalPath: filePath, Name: inArchiveName, Url: "cache/" + inArchiveName}
-		if path.Ext(b.FilePath) == ".zip" {
-			filePath = extractFolder + "/" + inArchiveName + "/" + inArchiveName
-			temp = SinglePageInfo{ModeTime: modeTime, FileSize: fileSize, LocalPath: filePath, Name: inArchiveName, Url: "cache/" + inArchiveName}
-		}
+
+		//fix bugfix extract single file from zip，not use
+		//if path.Ext(b.FilePath) == ".zip" {
+		//	filePath = extractFolder + "/" + inArchiveName + "/" + inArchiveName
+		//	temp = SinglePageInfo{ModeTime: modeTime, FileSize: fileSize, LocalPath: filePath, Name: inArchiveName, Url: "cache/" + inArchiveName}
+		//}
 		b.PageInfo = append(b.PageInfo, temp)
 		//转义，避免特殊路径造成文件不能读取
 		b.PageInfo[len(b.PageInfo)-1].Url = url.PathEscape(b.PageInfo[len(b.PageInfo)-1].Url)
