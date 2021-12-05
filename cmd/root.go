@@ -231,7 +231,7 @@ func init() {
 	//尚未启用的功能，暂时无意义的设置
 	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFileName, "log_name", "comigo", "log文件名")
 	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFilePath, "log_path", "~", "log文件位置")
-	//rootCmd.PersistentFlags().StringVarP(&common.Config.ZipFilenameEncoding, "zip-encoding", "e", "", "Zip non-utf8 Encoding(gbk、shiftjis、gb18030）")
+	rootCmd.PersistentFlags().StringVarP(&common.Config.ZipFilenameEncoding, "zip-encode", "e", "", "Specify encoding if filename was not utf8 encoded(gbk、shiftjis、gb18030）")
 	//rootCmd.PersistentFlags().BoolVarP(&common.PrintVersion, "version", "v", false, "输出版本号")
 }
 

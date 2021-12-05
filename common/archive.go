@@ -119,6 +119,7 @@ func ExtractArchive(b *Book) (err error) {
 	if err != nil {
 		return err
 	}
+
 	e, ok := iface.(archiver.Extractor)
 	if !ok {
 		fmt.Println(locale.GetString("unsupported_extract")+"%s", iface)
@@ -140,7 +141,8 @@ func ExtractArchive(b *Book) (err error) {
 		modeTime := f.ModTime()
 		fileSize := f.Size()
 		////zip编码用
-		//inArchiveNameZip := f.Name()
+		decodeFileName := ""
+		decodeTool := archiver.Zip{FilenameEncoding: Config.ZipFilenameEncoding}
 		switch h := f.Header.(type) {
 		case zip.FileHeader: //Now zip not "archive/zip"
 			logrus.Debugf("%s\t%d\t%d\t%s\t%s\n",
@@ -152,6 +154,9 @@ func ExtractArchive(b *Book) (err error) {
 			)
 			b.FileType = ".zip"
 			inArchiveName = h.Name
+			if Config.ZipFilenameEncoding != "" {
+				decodeFileName = decodeTool.DecodeFileName(h)
+			}
 		case *tar.Header:
 			logrus.Debugf("%s\t%s\t%s\t%d\t%s\t%s\n",
 				f.Mode(),
@@ -188,7 +193,13 @@ func ExtractArchive(b *Book) (err error) {
 		//解压后的文件
 		filePath := extractFolder + "/" + inArchiveName
 		temp := SinglePageInfo{ModeTime: modeTime, FileSize: fileSize, LocalPath: filePath, Name: inArchiveName, Url: "cache/" + inArchiveName}
-
+		//zip编码处理
+		if Config.ZipFilenameEncoding != "" {
+			filePath = extractFolder + "/" + decodeFileName
+			temp.LocalPath = filePath
+			temp.Name = decodeFileName
+			temp.Url = "cache/" + decodeFileName
+		}
 		//fix bugfix extract single file from zip，not use
 		//if path.Ext(b.FilePath) == ".zip" {
 		//	filePath = extractFolder + "/" + inArchiveName + "/" + inArchiveName
@@ -200,19 +211,26 @@ func ExtractArchive(b *Book) (err error) {
 		if tools.ChickFileExists(filePath) {
 			logrus.Debugf(locale.GetString("file_exit") + filePath)
 		} else {
-			//解压文件
-			if path.Ext(b.FilePath) == ".zip" {
+
+			if Config.ZipFilenameEncoding == "" {
+				//解压文件
 				err := e.Extract(b.FilePath, inArchiveName, TempDir+"/"+b.FileID) //解压到临时文件夹
 				if err != nil {
 					logrus.Debugf(err.Error())
 				}
 			} else {
-				err := e.Extract(b.FilePath, inArchiveName, TempDir+"/"+b.FileID) //解压到临时文件夹
-				if err != nil {
-					logrus.Debugf(err.Error())
+				//zip编码处理
+				z, ok := iface.(*archiver.Zip)
+				if !ok {
+					fmt.Printf("虽然你指定了zip编码，但这好像不是zip文件")
+				} else {
+					z.FilenameEncoding = Config.ZipFilenameEncoding
+					err_zip := z.Extract(b.FilePath, inArchiveName, TempDir+"/"+b.FileID) //解压到临时文件夹
+					if err_zip != nil {
+						logrus.Debugf(err.Error())
+					}
 				}
 			}
-
 		}
 		//输出解压比例
 		extractNum++
@@ -287,6 +305,7 @@ func getFormat(subcommand string) (interface{}, error) {
 		v.SelectiveCompression = selectiveCompression
 		v.ImplicitTopLevelFolder = implicitTopLevelFolder
 		v.ContinueOnError = continueOnError
+		v.FilenameEncoding = Config.ZipFilenameEncoding
 	case *archiver.Gz:
 		v.CompressionLevel = compressionLevel
 	case *archiver.Brotli:

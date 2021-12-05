@@ -211,6 +211,8 @@ var (
 		".zip",
 		".tar",
 		".rar",
+		".cbr",
+		".cbz",
 		".tar.gz",
 		".tgz",
 		".tar.bz2",

@@ -20,6 +20,8 @@
 *.zip
 *.rar
 *.tar
+*.cbr
+*.cbz
 *.tar.gz
 *.7z
 *.log

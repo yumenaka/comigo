@@ -1,6 +1,6 @@
 # Makefile for cross-compilation
-# make all VERSION=v0.4.4
-# mingw32-make all VERSION=v0.4.4
+# make all VERSION=v0.4.5
+# mingw32-make all VERSION=v0.4.5
 # need MSYS2 or mingw32
 NAME=comi
 SKETCH_NAME=sketch_66seconds
@@ -20,7 +20,7 @@ endif
 
 all: compileThemAll md5SumThemAll
 
-compileThemAll: windows-amd64 windows-386  linux-armv7 linux-armv8 linux-amd64  darwin-amd64 
+compileThemAll: windows-amd64 windows-386  linux-armv7 linux-armv8 linux-amd64  darwin-amd64 darwin-arm64
 
 UPX := $(shell command -v upx 2> /dev/null)
 
@@ -39,17 +39,6 @@ endif
 	zip -m -r -j -9 $(BINDIR)/$(NAME)-$@-$(VERSION).zip $(BINDIR)/$(NAME)-$@-$(VERSION)
 	rmdir $(BINDIR)/$(NAME)-$@-$(VERSION)
 	rm  resource.syso 
-
-#32位Windows	
-sample:
-	go generate
-	GOARCH=386 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(SKETCH_NAME)-$@-$(VERSION)/$(SKETCH_NAME).exe 
-ifdef UPX
-	upx -9 $(BINDIR)/$(SKETCH_NAME)-$@-$(VERSION)/$(SKETCH_NAME).exe 
-endif
-	zip -m -r -j -9 $(BINDIR)/$(SKETCH_NAME)-$@-$(VERSION).zip $(BINDIR)/$(SKETCH_NAME)-$@-$(VERSION)
-	rmdir $(BINDIR)/$(SKETCH_NAME)-$@-$(VERSION)
-	rm   resource.syso	
 
 #32位Windows	
 windows-386:
@@ -88,8 +77,8 @@ ifdef UPX
 endif
 	tar --directory=$(BINDIR)/$(NAME)-$@-$(VERSION)  -zcvf $(BINDIR)/$(NAME)-$@-$(VERSION).tar.gz $(NAME)
 	rm -rf $(BINDIR)/$(NAME)-$@-$(VERSION)
-	
-#64位MACOS
+
+#MACOS amd64
 darwin-amd64:
 	GOARCH=amd64 GOOS=darwin $(GOBUILD) -o $(BINDIR)/$(NAME)-$@-$(VERSION)/$(NAME)
 ifdef UPX
@@ -97,4 +86,10 @@ ifdef UPX
 endif
 	tar --directory=$(BINDIR)/$(NAME)-$@-$(VERSION)  -zcvf $(BINDIR)/$(NAME)-$@-$(VERSION).tar.gz $(NAME)
 	rm -rf $(BINDIR)/$(NAME)-$@-$(VERSION)
-
+	
+#MACOS arm64 no upx
+darwin-arm64:
+	GOARCH=arm64 GOOS=darwin $(GOBUILD) -o $(BINDIR)/$(NAME)-$@-$(VERSION)/$(NAME)
+	tar --directory=$(BINDIR)/$(NAME)-$@-$(VERSION)  -zcvf $(BINDIR)/$(NAME)-$@-$(VERSION).tar.gz $(NAME)
+	rm -rf $(BINDIR)/$(NAME)-$@-$(VERSION)
+	
