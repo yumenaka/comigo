@@ -531,6 +531,8 @@ github.com/yumenaka/archiver/v3 v3.5.2-0.20211205081602-e5308b1394b8 h1:uzSw/S0J
 github.com/yumenaka/archiver/v3 v3.5.2-0.20211205081602-e5308b1394b8/go.mod h1:Lu6XW/PNwOh9tMRR2Jqk3B70Ot6OCrIQWR4tOS7Gs18=
 github.com/yumenaka/archiver/v3 v3.5.2-0.20211205121747-0b6ebbb4b707 h1:K0J3LrGv6nIN6RDAabWbuTnPIhyLjSBjCVdPXtC4kK0=
 github.com/yumenaka/archiver/v3 v3.5.2-0.20211205121747-0b6ebbb4b707/go.mod h1:DGDP9nUFfhnWFg4w09qZHQMuebhNyJXEU04HH64uFVU=
+github.com/yumenaka/archiver/v3 v3.5.2-0.20211206034820-d29886359421 h1:bQ12JIaQsNatBITPVC53NT7tk5d7JIf9txKKTFOvMN4=
+github.com/yumenaka/archiver/v3 v3.5.2-0.20211206034820-d29886359421/go.mod h1:DGDP9nUFfhnWFg4w09qZHQMuebhNyJXEU04HH64uFVU=
 go.etcd.io/bbolt v1.3.2/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.etcd.io/bbolt v1.3.6 h1:/ecaJf0sk1l4l6V4awd65v2C3ILy7MSj+s/x1ADCIMU=
 go.etcd.io/bbolt v1.3.6/go.mod h1:qXsaaIqmgQH0T+OPdb99Bf+PKfBBQVAdyD6TY9G8XM4=
@@ -751,6 +753,8 @@ golang.org/x/sys v0.0.0-20211124211545-fe61309f8881 h1:TyHqChC80pFkXWraUUf6RuB5I
 golang.org/x/sys v0.0.0-20211124211545-fe61309f8881/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20211204120058-94396e421777 h1:QAkhGVjOxMa+n4mlsAWeAU+BMZmimQAaNiMu+iUi94E=
 golang.org/x/sys v0.0.0-20211204120058-94396e421777/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.0.0-20211205182925-97ca703d548d h1:FjkYO/PPp4Wi0EAUOVLxePm7qVW4r4ctbWpURyuOD0E=
+golang.org/x/sys v0.0.0-20211205182925-97ca703d548d/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1/go.mod h1:bj7SfCRtBDWHUb9snDiAeCFNEtKQo2Wmx5Cou7ajbmo=
 golang.org/x/text v0.0.0-20170915032832-14c0d48ead0c/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=

@@ -5,6 +5,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"github.com/mholt/archiver/v3"
 	"io/ioutil"
 	"net/url"
 	"os"
@@ -15,7 +16,6 @@ import (
 	"strings"
 
 	"github.com/klauspost/compress/zip"
-	"github.com/mholt/archiver/v3"
 	"github.com/nwaples/rardecode"
 	"github.com/sirupsen/logrus"
 	"github.com/yumenaka/comi/locale"
@@ -225,7 +225,7 @@ func ExtractArchive(b *Book) (err error) {
 					fmt.Printf("虽然你指定了zip编码，但这好像不是zip文件")
 				} else {
 					z.FilenameEncoding = Config.ZipFilenameEncoding
-					err_zip := z.Extract(b.FilePath, inArchiveName, TempDir+"/"+b.FileID) //解压到临时文件夹
+					err_zip := z.Extract(b.FilePath, decodeFileName, TempDir+"/"+b.FileID) //解压到临时文件夹
 					if err_zip != nil {
 						logrus.Debugf(err.Error())
 					}

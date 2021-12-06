@@ -64,10 +64,10 @@ require (
 	github.com/xxjwxc/public v0.0.0-20211203072515-d923e3ae3cb4 // indirect
 	golang.org/x/crypto v0.0.0-20211202192323-5770296d904e // indirect
 	golang.org/x/image v0.0.0-20211028202545-6944b10bf410 // indirect
-	golang.org/x/sys v0.0.0-20211204120058-94396e421777 // indirect
+	golang.org/x/sys v0.0.0-20211205182925-97ca703d548d // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/eapache/queue.v1 v1.1.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
-replace github.com/mholt/archiver/v3 v3.5.1 => github.com/yumenaka/archiver/v3 v3.5.2-0.20211205121747-0b6ebbb4b707
+replace github.com/mholt/archiver/v3 v3.5.1 => github.com/yumenaka/archiver/v3 v3.5.2-0.20211206034820-d29886359421

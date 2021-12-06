@@ -1,7 +1,6 @@
 package routers
 
 import (
-	"archive/zip"
 	"embed"
 	"fmt"
 	"github.com/sanity-io/litter"
@@ -221,17 +220,22 @@ func InitWebServer() {
 			}))
 		}
 	} else {
-		ext := path.Ext(common.ReadingBook.FilePath)
-		if ext == ".zip" {
-			fsys, zip_err := zip.OpenReader(common.ReadingBook.FilePath)
-			if zip_err != nil {
-				fmt.Println(zip_err)
-			}
-			engine.StaticFS("/cache", http.FS(fsys))
-		} else {
-			//图片目录
-			engine.Static("/cache", common.PictureDir)
-		}
+		//具体的图片文件
+		engine.Static("/cache", common.PictureDir)
+
+		//直接建立一个zipfs，但是非UTF文件，会出现编码问题，待改进
+		//ext := path.Ext(common.ReadingBook.FilePath)
+		//if ext == ".zip" {
+		//	fsys, zip_err := zip.OpenReader(common.ReadingBook.FilePath)
+		//	if zip_err != nil {
+		//		fmt.Println(zip_err)
+		//	}
+		//	engine.StaticFS("/cache", http.FS(fsys))
+		//} else {
+		//	//图片目录
+		//	engine.Static("/cache", common.PictureDir)
+		//}
+
 		//大概需要自己实现一个rar fs？  https://github.com/forensicanalysis/zipfs
 		//// Error:*rardecode.ReadCloser does not implement fs.FS (missing Open method)
 		//fsys2, rar_err := rar.OpenReader("test.rar","")
