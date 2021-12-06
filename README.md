@@ -92,7 +92,7 @@ Flags:
 - [ ] 处理损坏文件，或扩展名错误的文件
 - [ ] 支持更多压缩包格式（目前支持zip与rar、tar，后期支持7z cbz cbr）
 - [ ] 虚拟文件系统、zip不用解压 
-- [ ] 固实压缩文件优化（tgz tar.gz,）
+- [ ] 固实压缩文件优化（tgz tar.gz,rar的rar29算法也有问题）
 - [ ] 支持非UTF-8编码的ZIP文件
 - [ ] 扫描文件夹，生成书单或书架
 - [ ] websocket通信（[参考](https://github.com/Unrud/remote-touchpad)）

@@ -200,6 +200,13 @@ func init() {
 		rootCmd.PersistentFlags().StringVar(&common.Config.SortImage, "sort", "none", locale.GetString("COMI_SORT"))
 	}
 
+	//临时图片解压路径
+	if viper.GetString("COMI_TEMP_FOLDER") != "" {
+		rootCmd.PersistentFlags().StringVar(&common.Config.TempFolderSetting, "temp-folder", viper.GetString("COMI_TEMP_FOLDER"), locale.GetString("COMI_TEMP_FOLDER"))
+	} else {
+		rootCmd.PersistentFlags().StringVar(&common.Config.TempFolderSetting, "temp-folder", "", locale.GetString("COMI_TEMP_FOLDER"))
+	}
+
 	//退出时清除临时文件
 	if viper.GetBool("COMI_CLEAN") {
 		rootCmd.PersistentFlags().BoolVar(&common.Config.CleanOnExit, "clean", viper.GetBool("COMI_CLEAN"), locale.GetString("COMI_CLEAN"))
@@ -207,11 +214,18 @@ func init() {
 		rootCmd.PersistentFlags().BoolVar(&common.Config.CleanOnExit, "clean", true, locale.GetString("COMI_CLEAN"))
 	}
 
-	//只清楚当前在读的文件
+	//只清除当前阅读的临时解压文件
 	if viper.GetBool("COMI_CLEAN_NOT_ALL") {
 		rootCmd.PersistentFlags().BoolVar(&common.Config.CleanNotAll, "clean-not-all", viper.GetBool("COMI_CLEAN_NOT_ALL"), locale.GetString("COMI_CLEAN_NOT_ALL"))
 	} else {
 		rootCmd.PersistentFlags().BoolVar(&common.Config.CleanNotAll, "clean-not-all", true, locale.GetString("COMI_CLEAN_NOT_ALL"))
+	}
+
+	//手动指定zip文件编码(gbk、shiftjis……etc）
+	if viper.GetString("COMI_ZIP_ENCODE") != "" {
+		rootCmd.PersistentFlags().StringVar(&common.Config.ZipFilenameEncoding, "zip-encode", viper.GetString("COMI_ZIP_ENCODE"), locale.GetString("COMI_ZIP_ENCODE"))
+	} else {
+		rootCmd.PersistentFlags().StringVar(&common.Config.ZipFilenameEncoding, "zip-encode", "", locale.GetString("COMI_ZIP_ENCODE"))
 	}
 
 	////访问密码，还没做
@@ -231,7 +245,7 @@ func init() {
 	//尚未启用的功能，暂时无意义的设置
 	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFileName, "log_name", "comigo", "log文件名")
 	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFilePath, "log_path", "~", "log文件位置")
-	rootCmd.PersistentFlags().StringVarP(&common.Config.ZipFilenameEncoding, "zip-encoding", "e", "", "Specify encoding if filename was not utf8 encoded(gbk、shiftjis、gb18030）")
+
 	//rootCmd.PersistentFlags().BoolVarP(&common.PrintVersion, "version", "v", false, "输出版本号")
 }
 

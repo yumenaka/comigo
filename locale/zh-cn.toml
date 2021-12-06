@@ -99,4 +99,6 @@ COMI_SORT_BY_TIME = "按修改时间排序"
 COMI_SORT_BY_NAME = "按文件名排序"
 COMI_CLEAN = "退出时清除临时文件"
 COMI_CLEAN_NOT_ALL = "只清除当前在读的临时文件"
+COMI_TEMP_FOLDER = "图片的临时解压文件夹"
+COMI_ZIP_ENCODE = "指定zip文件编码(gbk、shiftjis……etc）"
 

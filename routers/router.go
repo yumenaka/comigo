@@ -207,10 +207,10 @@ func InitWebServer() {
 
 	//webp反向代理
 	if common.Config.EnableWebpServer {
-		webpError := common.StartWebPServer(common.PictureDir, common.PictureDir, common.TempDir+"/webp", common.Config.Port+1)
+		webpError := common.StartWebPServer(common.WebImagePath, common.WebImagePath, common.RealExtractPath+"/webp", common.Config.Port+1)
 		if webpError != nil {
 			fmt.Println(locale.GetString("webp_server_error"), webpError.Error())
-			engine.Static("/cache", common.PictureDir)
+			engine.Static("/cache", common.WebImagePath)
 		} else {
 			fmt.Println(locale.GetString("webp_server_start"))
 			engine.Use(reverse_proxy.ReverseProxyHandle("/cache", reverse_proxy.ReverseProxyOptions{
@@ -221,7 +221,7 @@ func InitWebServer() {
 		}
 	} else {
 		//具体的图片文件
-		engine.Static("/cache", common.PictureDir)
+		engine.Static("/cache", common.WebImagePath)
 
 		//直接建立一个zipfs，但是非UTF文件，会出现编码问题，待改进
 		//ext := path.Ext(common.ReadingBook.FilePath)
@@ -233,7 +233,7 @@ func InitWebServer() {
 		//	engine.StaticFS("/cache", http.FS(fsys))
 		//} else {
 		//	//图片目录
-		//	engine.Static("/cache", common.PictureDir)
+		//	engine.Static("/cache", common.WebImagePath)
 		//}
 
 		//大概需要自己实现一个rar fs？  https://github.com/forensicanalysis/zipfs
@@ -256,7 +256,7 @@ func InitWebServer() {
 				common.Config.FrpConfig.RemotePort = common.Config.Port
 			}
 		}
-		frpcError := common.StartFrpC(common.TempDir)
+		frpcError := common.StartFrpC(common.RealExtractPath)
 		if frpcError != nil {
 			fmt.Println(locale.GetString("frpc_server_error"), frpcError.Error())
 		} else {

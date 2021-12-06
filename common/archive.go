@@ -79,7 +79,7 @@ func ScanArchive(scanPath string) (*Book, error) {
 //	if b.FileID == "" {
 //		b.FileID = uuid.NewV4().String()
 //	}
-//	extraFolder := path.Join(TempDir, b.FileID)
+//	extraFolder := path.Join(RealExtractPath, b.FileID)
 //	fmt.Println(extraFolder)
 //	err = u.Unarchive(b.FilePath, extraFolder)
 //	if err != nil {
@@ -89,7 +89,7 @@ func ScanArchive(scanPath string) (*Book, error) {
 //	if err != nil {
 //		return err
 //	}
-//	PictureDir = extraFolder
+//	WebImagePath = extraFolder
 //	ReadingBook.ExtractComplete = true
 //	ReadingBook.ExtractNum = ReadingBook.AllPageNum
 //	return err
@@ -129,7 +129,7 @@ func ExtractArchive(b *Book) (err error) {
 		//b.FileID = uuid.NewV4().String()
 		b.SetFileID()
 	}
-	extractFolder := path.Join(TempDir, b.FileID)
+	extractFolder := path.Join(RealExtractPath, b.FileID)
 	extractNum := 0
 	Percent := 0
 	tempPercent := 0
@@ -208,13 +208,13 @@ func ExtractArchive(b *Book) (err error) {
 		b.PageInfo = append(b.PageInfo, temp)
 		//转义，避免特殊路径造成文件不能读取
 		b.PageInfo[len(b.PageInfo)-1].Url = url.PathEscape(b.PageInfo[len(b.PageInfo)-1].Url)
-		if tools.ChickFileExists(filePath) {
+		if tools.ChickExists(filePath) {
 			logrus.Debugf(locale.GetString("file_exit") + filePath)
 		} else {
 
 			if Config.ZipFilenameEncoding == "" {
 				//解压文件
-				err := e.Extract(b.FilePath, inArchiveName, TempDir+"/"+b.FileID) //解压到临时文件夹
+				err := e.Extract(b.FilePath, inArchiveName, RealExtractPath+"/"+b.FileID) //解压到临时文件夹
 				if err != nil {
 					logrus.Debugf(err.Error())
 				}
@@ -225,8 +225,8 @@ func ExtractArchive(b *Book) (err error) {
 					fmt.Printf("虽然你指定了zip编码，但这好像不是zip文件")
 				} else {
 					z.FilenameEncoding = Config.ZipFilenameEncoding
-					err_zip := z.Extract(b.FilePath, decodeFileName, TempDir+"/"+b.FileID) //解压到临时文件夹
-					if err_zip != nil {
+					errZip := z.Extract(b.FilePath, decodeFileName, RealExtractPath+"/"+b.FileID) //解压到临时文件夹
+					if errZip != nil {
 						logrus.Debugf(err.Error())
 					}
 				}
@@ -264,7 +264,7 @@ func getFormat(subcommand string) (interface{}, error) {
 		return nil, err
 	}
 	// 准备一个Tar，以备不时之需
-	tar := &archiver.Tar{
+	tarball := &archiver.Tar{
 		OverwriteExisting:      overwriteExisting,
 		MkdirAll:               mkdirAll,
 		ImplicitTopLevelFolder: implicitTopLevelFolder,
@@ -279,25 +279,25 @@ func getFormat(subcommand string) (interface{}, error) {
 		v.ContinueOnError = continueOnError
 		v.Password = os.Getenv("ARCHIVE_PASSWORD")
 	case *archiver.Tar:
-		v = tar
+		v = tarball
 	case *archiver.TarBrotli:
-		v.Tar = tar
+		v.Tar = tarball
 		v.Quality = compressionLevel
 	case *archiver.TarBz2:
-		v.Tar = tar
+		v.Tar = tarball
 		v.CompressionLevel = compressionLevel
 	case *archiver.TarGz:
-		v.Tar = tar
+		v.Tar = tarball
 		v.CompressionLevel = compressionLevel
 	case *archiver.TarLz4:
-		v.Tar = tar
+		v.Tar = tarball
 		v.CompressionLevel = compressionLevel
 	case *archiver.TarSz:
-		v.Tar = tar
+		v.Tar = tarball
 	case *archiver.TarXz:
-		v.Tar = tar
+		v.Tar = tarball
 	case *archiver.TarZstd:
-		v.Tar = tar
+		v.Tar = tarball
 	case *archiver.Zip:
 		v.CompressionLevel = compressionLevel
 		v.OverwriteExisting = overwriteExisting

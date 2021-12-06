@@ -16,6 +16,7 @@
 # vendor/
 *.vscode
 .cache
+cache
 .idea
 *.zip
 *.rar

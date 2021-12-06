@@ -7,6 +7,7 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"github.com/xxjwxc/gowp/workpool"
 	"github.com/yumenaka/comi/locale"
+	"github.com/yumenaka/comi/tools"
 	"image"
 	"log"
 	"os"
@@ -52,7 +53,7 @@ type ServerConfig struct {
 	OpenBrowser         bool   `json:"-"` //不要解析这个字段
 	DisableLAN          bool   `json:"-"` //不要解析这个字段
 	Template            string `json:"template"`
-	Auth                string `json:"-"` //不要解析这个字段
+	Auth                string `json:"-"` //不要解析这个字段 访问密码，还没做
 	PrintAllIP          bool   `json:"-"` //不要解析这个字段
 	Port                int
 	ConfigPath          string `json:"-"` //不要解析这个字段
@@ -71,6 +72,7 @@ type ServerConfig struct {
 	ZipFilenameEncoding string          `json:"-"` //不要解析这个字段
 	SketchCountSeconds  int             `json:"sketch_count_seconds"`
 	SortImage           string
+	TempFolderSetting   string
 	CleanOnExit         bool
 	CleanNotAll         bool
 	//SortByModTime       bool            //SortByModificationTime
@@ -113,6 +115,7 @@ var Config = ServerConfig{
 	ServerHost:         "",
 	SketchCountSeconds: 90,
 	SortImage:          "",
+	TempFolderSetting:  "",
 	CleanOnExit:        true,
 	CleanNotAll:        true,
 }
@@ -203,8 +206,8 @@ func haveKeyWord(checkString string, list []string) bool {
 var ReadingBook Book
 var BookList []Book
 var (
-	TempDir          string
-	PictureDir       string
+	RealExtractPath  string
+	WebImagePath     string
 	Version          = "v0.2.4"
 	SupportMediaType = []string{".jpg", ".jpeg", ".JPEG", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp", ".webp", ".ico", ".heic", ".pdf", ".mp4", ".webm"}
 	SupportFileType  = [...]string{
@@ -466,16 +469,12 @@ func SetupCloseHander() {
 func InitReadingBook() (err error) {
 	//准备解压，设置图片文件夹
 	if ReadingBook.IsFolder {
-		PictureDir = ReadingBook.FilePath
+		WebImagePath = ReadingBook.FilePath
 		ReadingBook.ExtractComplete = true
 		ReadingBook.ExtractNum = ReadingBook.AllPageNum
 	} else {
-		err = SetTempDir()
-		if err != nil {
-			fmt.Println(locale.GetString("temp_folder_error"), err)
-			return err
-		}
-		PictureDir = path.Join(TempDir, ReadingBook.FileID) //extraFolder
+		SetTempDir()
+		WebImagePath = path.Join(RealExtractPath, ReadingBook.FileID) //extraFolder
 		err = ExtractArchive(&ReadingBook)
 		if err != nil {
 			fmt.Println(locale.GetString("file_not_found"))
@@ -508,37 +507,37 @@ func InitReadingBook() (err error) {
 }
 
 // SetTempDir 设置临时文件夹，退出时会被清理
-func SetTempDir() (err error) {
-	if TempDir != "" {
-		return err
-	}
-	//TempDir, err = os.MkdirTemp("", "comic_cache_A8cG")
-	TempDir = path.Join(os.TempDir(), "comic_cache_A8cG")
-	err = os.MkdirAll(TempDir, os.ModePerm)
-	if err != nil {
-		println(locale.GetString("temp_folder_create_error"))
+func SetTempDir() {
+	//手动设置的临时文件夹
+	if Config.TempFolderSetting != "" && tools.ChickExists(Config.TempFolderSetting) && tools.ChickIsDir(Config.TempFolderSetting) {
+		RealExtractPath = path.Join(Config.TempFolderSetting, "comigo_cache_files")
 	} else {
-		fmt.Println(locale.GetString("temp_folder_path") + TempDir)
+		RealExtractPath = path.Join(os.TempDir(), "comigo_cache_files") //直接使用系统文件夹
 	}
-	return err
+	err := os.MkdirAll(RealExtractPath, os.ModePerm)
+	if err != nil {
+		println(locale.GetString("temp_folder_error"))
+	} else {
+		fmt.Println(locale.GetString("temp_folder_path") + RealExtractPath)
+	}
 }
 
 func deleteAllTempFiles() {
 	fmt.Println(locale.GetString("clear_temp_file_start"))
-	if strings.Contains(TempDir, "comic_cache_A8cG") { //判断文件夹前缀，避免删错文件
-		err := os.RemoveAll(TempDir)
+	if strings.Contains(RealExtractPath, "comigo_cache_files") { //判断文件夹前缀，避免删错文件
+		err := os.RemoveAll(RealExtractPath)
 		if err != nil {
-			fmt.Println(locale.GetString("clear_temp_file_error") + TempDir)
+			fmt.Println(locale.GetString("clear_temp_file_error") + RealExtractPath)
 		} else {
-			fmt.Println(locale.GetString("clear_temp_file_completed") + TempDir)
+			fmt.Println(locale.GetString("clear_temp_file_completed") + RealExtractPath)
 		}
 	}
 }
 
 func deleteTempFilesByFileID(UUID string) {
 	fmt.Println(locale.GetString("clear_temp_file_start"))
-	if strings.Contains(TempDir, "comic_cache_A8cG") { //判断文件夹前缀，避免删错文件
-		clearPath := path.Join(TempDir, UUID)
+	if strings.Contains(RealExtractPath, "comigo_cache_files") { //判断文件夹前缀，避免删错文件
+		clearPath := path.Join(RealExtractPath, UUID)
 		err := os.RemoveAll(clearPath)
 		if err != nil {
 			fmt.Println(locale.GetString("clear_temp_file_error") + clearPath)
@@ -550,13 +549,13 @@ func deleteTempFilesByFileID(UUID string) {
 
 ////根据权限，清理文件可能失败
 //func deleteOldTempFiles() {
-//	tempDirUpperFolder := TempDir
-//	post := strings.LastIndex(TempDir, "/") //Unix风格的路径分隔符
+//	tempDirUpperFolder := RealExtractPath
+//	post := strings.LastIndex(RealExtractPath, "/") //Unix风格的路径分隔符
 //	if post == -1 {
-//		post = strings.LastIndex(TempDir, "\\") //windows风格的分隔符
+//		post = strings.LastIndex(RealExtractPath, "\\") //windows风格的分隔符
 //	}
 //	if post != -1 {
-//		tempDirUpperFolder = string([]rune(TempDir)[:post]) //为了防止中文字符被错误截断，先转换成rune，再转回来
+//		tempDirUpperFolder = string([]rune(RealExtractPath)[:post]) //为了防止中文字符被错误截断，先转换成rune，再转回来
 //		fmt.Println(locale.GetString("temp_folder_path"), tempDirUpperFolder)
 //	}
 //	files, err := ioutil.ReadDir(tempDirUpperFolder)
