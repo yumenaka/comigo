@@ -205,3 +205,16 @@ func OpenBrowser(uri string) {
 		cmd = exec.Command("xdg-open", uri)
 	}
 }
+
+//func md5file(fName string) string {
+//	f, e := os.Open(fName)
+//	if e != nil {
+//		log.Fatal(e)
+//	}
+//	h := md5.New()
+//	_, e = io.Copy(h, f)
+//	if e != nil {
+//		log.Fatal(e)
+//	}
+//	return hex.EncodeToString(h.Sum(nil))
+//}

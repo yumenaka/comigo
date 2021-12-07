@@ -14,7 +14,11 @@ unsupported_file_type =" Unsupported file types:"
 scan_ing ="Scanning file"
 start_extract ="Start decompression:"
 file_exit ="File already exists"
-completed_extract = "Decompression is complete:"
+completed_extract = "Decompression is complete"
+start_ls ="Start scanning compressed files:"
+scan_archive_error="File scan error"
+un_archive_error="File decompression error"
+completed_ls = "Compressed file scanning completed"
 format_customization_error = "format does not support customization:"
 frpc_ini_error = "frpc ini initialization error"
 frpc_setting_save_completed= "Successfully save frpc settings."
@@ -37,7 +41,7 @@ start_clear_file = "- The operation is interrupted and the temporary folder is c
 temp_folder_error = "Temporary folder setting failed."
 temp_folder_create_error = "Failed to create temporary folder."
 file_not_found = "No suitable file was found."
-temp_folder_path = "The temporary folder path is:"
+temp_folder_path = "The temporary folder is:"
 clear_temp_file_start= "Start cleaning up temporary files."
 clear_temp_file_error= "Temporary file cleanup failed:"
 clear_temp_file_completed= "Temporary files clean up successfully:"
@@ -61,7 +65,7 @@ webp transfer, requiring webp-server to work with:
 comi -w book.zip 
 
 Multiple parameters:
-comi -w -q 70 --frpc  --token aX4457d3O -p 23455 --frps-addr sh.example.com test.zip
+comi -w -q 70 --frpc  --token aX4457d3O -p 23455 --frps-addr server.example.com test.zip
 """
 config_file_not_found = "Config File Not Found,Use Default Congfig"
 config_file_not_resolve ="Failed to resolve configuration" 

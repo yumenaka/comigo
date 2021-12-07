@@ -3,6 +3,7 @@ package common
 import (
 	"errors"
 	"fmt"
+	"github.com/cheggaaa/pb/v3"
 	"github.com/disintegration/imaging"
 	"github.com/mitchellh/go-homedir"
 	"github.com/xxjwxc/gowp/workpool"
@@ -120,18 +121,36 @@ var Config = ServerConfig{
 	CleanNotAll:        true,
 }
 
-// SetTemplateByName 通过路径名或执行文件名，来设置默认网页模板参数
-func (config *ServerConfig) SetTemplateByName(FileName string) {
+// SetByExecutableFilename 通过执行文件名设置默认网页模板参数
+func (config *ServerConfig) SetByExecutableFilename() {
+	// 当前执行目录
+	targetPath, _ := os.Getwd()
+	fmt.Println(locale.GetString("target_path"), targetPath)
+	// 带后缀的执行文件名 comi.exe  sketch.exe
+	filenameWithSuffix := path.Base(os.Args[0])
+	// 执行文件名后缀
+	fileSuffix := path.Ext(filenameWithSuffix)
+	// 去掉后缀后的执行文件名
+	filenameWithOutSuffix := strings.TrimSuffix(filenameWithSuffix, fileSuffix)
+	//fmt.Println("filenameWithOutSuffix =", filenameWithOutSuffix)
+	ex, err := os.Executable()
+	if err != nil {
+		fmt.Println(err)
+	}
+	extPath := filepath.Dir(ex)
+	//fmt.Println("extPath =",extPath)
+	ExtFileName := strings.TrimPrefix(filenameWithOutSuffix, extPath)
+	//fmt.Println("ExtFileName =", ExtFileName)
 	//如果执行文件名包含 scroll 等关键字，选择卷轴模板
-	if haveKeyWord(FileName, []string{"scroll", "スクロール", "默认", "下拉", "卷轴"}) {
+	if haveKeyWord(ExtFileName, []string{"scroll", "スクロール", "默认", "下拉", "卷轴"}) {
 		config.Template = "scroll"
 	}
 	//如果执行文件名包含 sketch 等关键字，选择速写模板
-	if haveKeyWord(FileName, []string{"sketch", "croquis", "クロッキー", "素描", "速写"}) {
+	if haveKeyWord(ExtFileName, []string{"sketch", "croquis", "クロッキー", "素描", "速写"}) {
 		config.Template = "sketch"
 	}
 	//根据文件名设定倒计时秒数,不管默认是不是sketch模式
-	Seconds, err := getNumberFromString(FileName)
+	Seconds, err := getNumberFromString(ExtFileName)
 	if err != nil {
 		if config.Template == "sketch" {
 			//fmt.Println(Seconds)
@@ -139,13 +158,12 @@ func (config *ServerConfig) SetTemplateByName(FileName string) {
 	} else {
 		config.SketchCountSeconds = Seconds
 	}
-
 	//如果执行文件名包含 single 等关键字，选择 single 分页漫画模板
-	if haveKeyWord(FileName, []string{"single", "单页", "シングル"}) {
+	if haveKeyWord(ExtFileName, []string{"single", "单页", "シングル"}) {
 		config.Template = "single"
 	}
 	//如果执行文件名包含 double 等关键字，选择 double 分页漫画模板
-	if haveKeyWord(FileName, []string{"double", "双页", "ダブルページ"}) {
+	if haveKeyWord(ExtFileName, []string{"double", "双页", "ダブルページ"}) {
 		config.Template = "double"
 	}
 	//选择模式以后，打印提示
@@ -313,7 +331,7 @@ func (b *Book) SortPages() {
 
 func (b *Book) SetFileID() {
 	fileAbaPath, err := filepath.Abs(b.FilePath)
-	fmt.Println("文件绝对路径："+fileAbaPath, "路径的md5："+md5string(fileAbaPath))
+	//fmt.Println("文件绝对路径："+fileAbaPath, "路径的md5："+md5string(fileAbaPath))
 	if err != nil {
 		fmt.Println(err, fileAbaPath)
 	}
@@ -366,9 +384,15 @@ func (b *Book) GetPicNum() int {
 // ScanAllImage 服务器端分析单双页
 func (b *Book) ScanAllImage() {
 	log.Println(locale.GetString("check_image_start"))
+	// Console progress bar
+	bar := pb.StartNew(b.AllPageNum)
 	for i := 0; i < len(b.PageInfo); i++ { //此处不能用range，因为需要修改
 		SetImageType(&b.PageInfo[i])
+		//进度条计数
+		bar.Increment()
 	}
+	// 进度条跑完
+	bar.Finish()
 	log.Println(locale.GetString("check_image_completed"))
 }
 
@@ -382,6 +406,8 @@ func (b *Book) ScanAllImageGo() {
 	extractNum := 0
 	Percent := 0
 	tempPercent := 0
+	// Console progress bar
+	bar := pb.StartNew(b.AllPageNum)
 	for i := 0; i < len(b.PageInfo); i++ { //此处不能用range，因为需要修改
 		//wg.Add(1)
 		count++
@@ -390,6 +416,7 @@ func (b *Book) ScanAllImageGo() {
 		wp.Do(func() error {
 			//defer wg.Done()
 			SetImageType(&b.PageInfo[ii])
+			bar.Increment()
 			//res <- fmt.Sprintf("Finished %d", i)
 			return nil
 		})
@@ -402,14 +429,14 @@ func (b *Book) ScanAllImageGo() {
 			Percent = int((float32(extractNum) / float32(b.AllPageNum)) * 100)
 			if tempPercent != Percent {
 				if (Percent%20) == 0 || Percent == 10 {
-					fmt.Println(strconv.Itoa(Percent) + "% ")
+					//fmt.Print(strconv.Itoa(Percent) + "% ")
 				}
 			}
 			tempPercent = Percent
 		}
-		//fmt.Println(<-res)
-		//<-res
 	}
+	// finish bar
+	bar.Finish()
 	log.Println(locale.GetString("check_image_completed"))
 }
 
@@ -475,9 +502,14 @@ func InitReadingBook() (err error) {
 	} else {
 		SetTempDir()
 		WebImagePath = path.Join(RealExtractPath, ReadingBook.FileID) //extraFolder
-		err = ExtractArchive(&ReadingBook)
+		err = LsArchive(&ReadingBook)
 		if err != nil {
-			fmt.Println(locale.GetString("file_not_found"))
+			fmt.Println(locale.GetString("scan_archive_error"))
+			return err
+		}
+		err = UnArchive(&ReadingBook)
+		if err != nil {
+			fmt.Println(locale.GetString("un_archive_error"))
 			return err
 		}
 		ReadingBook.SetArchiveBookName(ReadingBook.FilePath) //设置书名

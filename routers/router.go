@@ -3,9 +3,8 @@ package routers
 import (
 	"embed"
 	"fmt"
-	"github.com/sanity-io/litter"
-
 	"github.com/gin-gonic/gin"
+	"github.com/sanity-io/litter"
 	"github.com/yumenaka/comi/common"
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/routers/reverse_proxy"
@@ -15,9 +14,7 @@ import (
 	"net/http"
 	"os"
 	"path"
-	"path/filepath"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 )
@@ -33,34 +30,45 @@ func init() {
 	common.SetupCloseHander()
 }
 
-func StartServer(args []string) {
-	selectTemplate()
-	cmdPath := path.Dir(os.Args[0]) //去除路径最后一个元素  /home/dir/comigo.exe -> /home/dir/
-	if len(args) == 0 {
+// ParseCommands 解析命令
+func ParseCommands(args []string) {
+	//通过“可执行文件名”设置默认阅读模板
+	common.Config.SetByExecutableFilename()
+	//决定如何扫描，扫描哪个路径
+
+	if len(args) == 0 { //没有指定路径或文件的情况下
+		cmdPath := path.Dir(os.Args[0]) //当前执行路径
 		err := common.ScanBookPath(cmdPath)
 		if err != nil {
 			fmt.Println(locale.GetString("scan_error"), cmdPath)
 		}
+		if len(common.BookList) > 0 {
+			common.ReadingBook = common.BookList[0]
+		}
 	} else {
+		//指定了多个参数的话，都扫描
 		for _, p := range args {
-			if p == cmdPath {
-				continue //指定参数的话，就不扫描当前目录
-			}
 			err := common.ScanBookPath(p)
 			if err != nil {
 				fmt.Println(locale.GetString("scan_error"), p)
 			}
 		}
 	}
+	//扫描完路径之后，选择第一本书开始解压
 	switch len(common.BookList) {
 	case 0:
 		fmt.Println(locale.GetString("book_not_found"))
 		os.Exit(0)
 	default:
-		setFirstBook(args)
+		for _, b := range common.BookList {
+			if b.FilePath == args[0] {
+				common.ReadingBook = b
+				break
+			}
+		}
 	}
+	//解压图片，分析分辨率（并发）
 	var wg sync.WaitGroup
-	//解压图片，分析分辨率
 	if common.Config.CheckImageInServer {
 		wg.Add(1)
 		go func() {
@@ -77,54 +85,11 @@ func StartServer(args []string) {
 			fmt.Println(locale.GetString("can_not_init_book"), err, common.ReadingBook)
 		}
 	}
-	InitWebServer()
+	StartWebServer()
 }
 
-func selectTemplate() {
-	// 当前执行目录
-	targetPath, _ := os.Getwd()
-	fmt.Println(locale.GetString("target_path"), targetPath)
-	// 带后缀的执行文件名
-	filenameWithSuffix := path.Base(os.Args[0])
-	// 文件后缀
-	fileSuffix := path.Ext(filenameWithSuffix)
-	// 去掉后缀后的执行文件名
-	filenameWithOutSuffix := strings.TrimSuffix(filenameWithSuffix, fileSuffix)
-	//fmt.Println("filenameWithOutSuffix =", filenameWithOutSuffix)
-	ex, err := os.Executable()
-	if err != nil {
-		fmt.Println(err)
-	}
-	extPath := filepath.Dir(ex)
-	//fmt.Println("extPath =",extPath)
-	ExtFileName := strings.TrimPrefix(filenameWithOutSuffix, extPath)
-	//fmt.Println("ExtFileName =", ExtFileName)
-	common.Config.SetTemplateByName(ExtFileName)
-}
-
-func setFirstBook(args []string) {
-	if len(common.BookList) == 0 {
-		return
-	}
-	//多本书，读第一本
-	if len(args) == 0 {
-		if len(common.BookList) > 0 {
-			common.ReadingBook = common.BookList[0]
-		}
-	}
-	if len(args) > 0 {
-		for _, b := range common.BookList {
-			if b.FilePath == args[0] {
-				common.ReadingBook = b
-				break
-			}
-		}
-	}
-}
-
-// InitWebServer 启动web服务
-func InitWebServer() {
-
+// StartWebServer 启动web服务
+func StartWebServer() {
 	//获取模板，命名为"template-data"，同时把左右分隔符改为 [[ ]]
 	tmpl := template.Must(template.New("template-data").Delims("[[", "]]").Parse(TemplateString))
 	//设置 gin
@@ -140,7 +105,6 @@ func InitWebServer() {
 	}
 	//自定义分隔符，避免与vue.js冲突
 	engine.Delims("[[", "]]")
-
 	//网站图标
 	engine.GET("/resources/favicon.ico", func(c *gin.Context) {
 		file, _ := EmbedFiles.ReadFile("favicon.ico")
@@ -170,11 +134,10 @@ func InitWebServer() {
 			"secret": "这个路径需要认证。",
 		})
 	})
-
+	//认证相关，还没写
 	if common.Config.Auth != "" {
 
 	}
-
 	//解析json
 	engine.GET("/book.json", func(c *gin.Context) {
 		c.PureJSON(http.StatusOK, common.ReadingBook)
@@ -204,7 +167,6 @@ func InitWebServer() {
 		}
 		fmt.Println(locale.GetString("port_busy") + strconv.Itoa(common.Config.Port))
 	}
-
 	//webp反向代理
 	if common.Config.EnableWebpServer {
 		webpError := common.StartWebPServer(common.WebImagePath, common.WebImagePath, common.RealExtractPath+"/webp", common.Config.Port+1)
@@ -222,8 +184,7 @@ func InitWebServer() {
 	} else {
 		//具体的图片文件
 		engine.Static("/cache", common.WebImagePath)
-
-		//直接建立一个zipfs，但是非UTF文件，会出现编码问题，待改进
+		//直接建立一个zipfs，但非UTF文件，会出现编码问题，待改进
 		//ext := path.Ext(common.ReadingBook.FilePath)
 		//if ext == ".zip" {
 		//	fsys, zip_err := zip.OpenReader(common.ReadingBook.FilePath)
@@ -235,7 +196,6 @@ func InitWebServer() {
 		//	//图片目录
 		//	engine.Static("/cache", common.WebImagePath)
 		//}
-
 		//大概需要自己实现一个rar fs？  https://github.com/forensicanalysis/zipfs
 		//// Error:*rardecode.ReadCloser does not implement fs.FS (missing Open method)
 		//fsys2, rar_err := rar.OpenReader("test.rar","")

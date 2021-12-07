@@ -22,7 +22,7 @@ var rootCmd = &cobra.Command{
 	Version: locale.GetString("comigo_version"),
 	Long:    locale.GetString("long_description"),
 	Run: func(cmd *cobra.Command, args []string) {
-		routers.StartServer(args)
+		routers.ParseCommands(args)
 		return
 	},
 }

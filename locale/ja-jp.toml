@@ -15,7 +15,11 @@ unsupported_file_type="サポートされていないファイルタイプ："
 scan_ing ="ファイルをスキャン中"
 start_extract ="解凍を開始する:"
 file_exit ="ファイルは既に存在しています" 
-completed_extract = "解凍終了：" 
+completed_extract = "解凍終了"
+start_ls ="圧縮ファイルのスキャンを開始:"
+scan_archive_error="ファイルスキャンエラー"
+un_archive_error="ファイル解凍エラー"
+completed_ls = "圧縮ファイルのスキャン完了"
 format_customization_error = "抽出フォーマットをサポートしていません:"
 frpc_ini_error = "frpc ini 初期化エラー"
 frpc_setting_save_completed= "frpc設定の保存に成功しました。。"
@@ -36,9 +40,9 @@ check_mac_error= "Macアドレス検出のエラー:"
 open_browser_error = "ブラウザを開くことができませんでした。"
 start_clear_file = "- 一時フォルダの掃除を開始します。 -"
 temp_folder_error = "一時フォルダの作成に失敗しました。"
-temp_folder_create_error = "创建临时文件夹失败。"
+temp_folder_create_error = "一時フォルダの作成に失敗しました。"
 file_not_found = "正しいファイルが見つかりませんでした。"
-temp_folder_path = "キャッシュフォルダーのパスは："
+temp_folder_path = "キャッシュフォルダーは："
 clear_temp_file_start= "----  キャッシュフォルダーのクリーンアップを開始  ----"
 clear_temp_file_error= "キャッシュフォルダーのクリーンアップ失敗:"
 clear_temp_file_completed= "キャッシュフォルダーのクリーンアップ成功:"
@@ -57,7 +61,7 @@ comi -o=false book.zip LANと共有しない：
  comi -l book.zip 
 
 複数のパラメータ：
-comi -w -q 70 --frpc  --token aX4457d3O -p 23455 --frps-addr sh.example.com test.zip
+comi -w -q 70 --frpc  --token aX4457d3O -p 23455 --frps-addr server.example.com test.zip
 """
 config_file_not_found =  "設定ファイルが見つからず、デフォルトの設定が使用されています" 
 config_file_not_resolve ="設定の解析に失敗しました。" 
