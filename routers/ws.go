@@ -43,7 +43,7 @@ func wsHandler(c *gin.Context) {
 		json.Unmarshal(message, msg)
 		fmt.Println(msg)
 		//客户端请求更换书籍
-		if msg.Message == "ChangeBook" && msg.NowBookUUID != common.ReadingBook.FileID {
+		if msg.Message == "ChangeBook" && msg.NowBookUUID != common.ReadingBook.GetBookID() {
 			if changeReadingBook(msg.NowBookUUID) {
 				fmt.Println("正在切换书籍：", common.ReadingBook.FilePath)
 				if err != nil {
@@ -57,7 +57,7 @@ func wsHandler(c *gin.Context) {
 			}
 		}
 		//返回漫画压缩包解压状态
-		if msg.Message == "CheckExtract" && msg.NowBookUUID == common.ReadingBook.FileID {
+		if msg.Message == "CheckExtract" && msg.NowBookUUID == common.ReadingBook.GetBookID() {
 			if common.ReadingBook.ExtractComplete {
 				msg.Message = "ExtractComplete"
 			} else {
@@ -65,11 +65,11 @@ func wsHandler(c *gin.Context) {
 			}
 		}
 		//
-		if msg.Message == "MasterDevicesSync" && msg.NowBookUUID == common.ReadingBook.FileID {
+		if msg.Message == "MasterDevicesSync" && msg.NowBookUUID == common.ReadingBook.GetBookID() {
 			common.ReadingBook.ReadPercent = msg.ReadPercent
 		}
 		//
-		if msg.Message == "SlaveDevicesSync" && msg.NowBookUUID == common.ReadingBook.FileID {
+		if msg.Message == "SlaveDevicesSync" && msg.NowBookUUID == common.ReadingBook.GetBookID() {
 			common.ReadingBook.ReadPercent = msg.ReadPercent
 		}
 		fmt.Println(msg)
@@ -83,7 +83,7 @@ func wsHandler(c *gin.Context) {
 
 func changeReadingBook(u string) bool {
 	for i := 0; i < len(common.BookList); i++ {
-		if common.BookList[i].FileID == u {
+		if common.BookList[i].GetBookID() == u {
 			common.ReadingBook = common.BookList[i]
 			//初始化书籍
 			err := common.InitReadingBook()

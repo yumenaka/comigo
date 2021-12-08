@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"github.com/mholt/archiver/v3"
 	"io/ioutil"
+	"log"
+	"net/http"
 	"net/url"
 	"os"
 	"path"
@@ -19,7 +21,6 @@ import (
 	"github.com/nwaples/rardecode"
 	"github.com/sirupsen/logrus"
 	"github.com/yumenaka/comi/locale"
-	"github.com/yumenaka/comi/tools"
 )
 
 var (
@@ -36,13 +37,27 @@ func init() {
 	overwriteExisting = false
 	continueOnError = true
 }
-func ScanArchive(scanPath string) (*Book, error) {
-	b := Book{AllPageNum: 0, FilePath: scanPath, IsFolder: false, FileSize: 0, ExtractComplete: false}
+func ScanArchive_InitBook(scanPath string) (*Book, error) {
+	//打开文件
+	var file, err = os.OpenFile(scanPath, os.O_RDONLY, 0400) //Use mode 0400 for a read-only // file and 0600 for a readable+writable file.
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	defer file.Close()
+	FileInfo, err := file.Stat()
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	//设置文件路径等等
+	b := Book{AllPageNum: 0, FilePath: scanPath, Modified: FileInfo.ModTime(), IsDir: FileInfo.IsDir(), FileSize: FileInfo.Size(), ExtractComplete: false}
+	//设置书籍ID，根据路径算出
+	b.InitBook(b.FilePath)
 	// 获取支持的格式
 	iface, err := getFormat(scanPath)
 	if err != nil {
 		return &b, err
 	}
+	//判断是否可解压
 	_, ok := iface.(archiver.Extractor)
 	if !ok {
 		logrus.Debugf(locale.GetString("unsupported_extract")+"%s", iface)
@@ -50,6 +65,7 @@ func ScanArchive(scanPath string) (*Book, error) {
 	} else {
 		fmt.Println(locale.GetString("scan_ing"), scanPath)
 	}
+	//可解压就统计页数
 	err = archiver.Walk(scanPath, func(f archiver.File) error {
 		inArchiveName := f.Name()
 		if !isSupportMedia(inArchiveName) {
@@ -75,10 +91,7 @@ func UnArchive(b *Book) (err error) {
 	if !ok {
 		fmt.Println(locale.GetString("unsupported_extract")+" %s", iface)
 	}
-	if b.FileID == "" {
-		b.SetFileID()
-	}
-	extraFolder := path.Join(RealExtractPath, b.FileID)
+	extraFolder := path.Join(RealExtractPath, b.GetBookID())
 	fmt.Println(extraFolder)
 	err = u.Unarchive(b.FilePath, extraFolder)
 	if err != nil {
@@ -109,10 +122,7 @@ func LsArchive(b *Book) (err error) {
 		fmt.Println(locale.GetString("unsupported_extract")+"%s", iface) //这个文件好像没法ls啊
 		return err
 	}
-	if b.FileID == "" {
-		b.SetFileID()
-	}
-	extractFolder := path.Join(RealExtractPath, b.FileID)
+	extractFolder := path.Join(RealExtractPath, b.GetBookID())
 	fmt.Println(locale.GetString("start_ls"), b.FilePath)
 	//// Console progress bar
 	//bar := pb.StartNew(b.AllPageNum)
@@ -194,138 +204,30 @@ func LsArchive(b *Book) (err error) {
 	return err
 }
 
-// ScanAndExtractArchiveStepByStep 一个一个地解压文件，rar有性能问题，留着是为了改造成提取封面
-func ScanAndExtractArchiveStepByStep(b *Book) (err error) {
-	// 获取支持的格式
+// GetSingleFile 不解压，只是提取单个文件的
+func GetSingleFile(b *Book) (err error) {
+	// 参考
+	// https://pkg.go.dev/github.com/mholt/archiver/v3#example-Zip-StreamingRead
 	iface, err := getFormat(b.FilePath)
 	if err != nil {
 		return err
 	}
-	e, ok := iface.(archiver.Extractor)
+	req := new(http.Request)
+	contentLen, err := strconv.Atoi(req.Header.Get("Content-Length"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	reader, ok := iface.(archiver.Reader)
 	if !ok {
-		fmt.Println(locale.GetString("unsupported_extract")+"%s", iface)
+		fmt.Println("unsupported_getSingleFile", iface)
 		return err
 	}
-	if b.FileID == "" {
-		b.SetFileID()
+	//Zip 格式需要知道流的长度，但其他格式通常不需要它，因此在使用它们时可以将其保留为 0
+	err = reader.Open(req.Body, int64(contentLen))
+	if err != nil {
+		log.Fatal(err)
 	}
-	extractFolder := path.Join(RealExtractPath, b.FileID)
-	extractNum := 0
-	Percent := 0
-	tempPercent := 0
-	fmt.Println(locale.GetString("start_extract"), b.FilePath)
-	//var wg sync.WaitGroup
-	err = archiver.Walk(b.FilePath, func(f archiver.File) error {
-		//解压用
-		inArchiveName := f.Name()
-		modeTime := f.ModTime()
-		fileSize := f.Size()
-		////zip编码用
-		decodeFileName := ""
-		decodeTool := archiver.Zip{FilenameEncoding: Config.ZipFilenameEncoding}
-		switch h := f.Header.(type) {
-		case zip.FileHeader: //Now zip not "archive/zip"
-			logrus.Debugf("%s\t%d\t%d\t%s\t%s\n",
-				f.Mode(),
-				h.Method,
-				f.Size(),
-				f.ModTime(),
-				h.Name,
-			)
-			b.FileType = ".zip"
-			inArchiveName = h.Name
-			if Config.ZipFilenameEncoding != "" {
-				decodeFileName = decodeTool.DecodeFileName(h)
-			}
-		case *tar.Header:
-			logrus.Debugf("%s\t%s\t%s\t%d\t%s\t%s\n",
-				f.Mode(),
-				h.Uname,
-				h.Gname,
-				f.Size(),
-				f.ModTime(),
-				h.Name,
-			)
-			b.FileType = ".tar"
-			inArchiveName = h.Name
-		case *rardecode.FileHeader:
-			logrus.Debugf("%s\t%d\t%d\t%s\t%s\n",
-				f.Mode(),
-				int(h.HostOS),
-				f.Size(),
-				f.ModTime(),
-				h.Name,
-			)
-			b.FileType = ".rar"
-			inArchiveName = h.Name
-		default:
-			fmt.Printf("%s\t%d\t%s\t?/%s\n",
-				f.Mode(),
-				f.Size(),
-				f.ModTime(),
-				f.Name(), // we don't know full path from this
-			)
-		}
-		if !isSupportMedia(inArchiveName) {
-			logrus.Debugf(locale.GetString("unsupported_file_type") + inArchiveName)
-			return nil
-		}
-		//解压后的文件
-		filePath := extractFolder + "/" + inArchiveName
-		temp := SinglePageInfo{ModeTime: modeTime, FileSize: fileSize, LocalPath: filePath, Name: inArchiveName, Url: "cache/" + inArchiveName}
-		//zip编码处理
-		if Config.ZipFilenameEncoding != "" {
-			filePath = extractFolder + "/" + decodeFileName
-			temp.LocalPath = filePath
-			temp.Name = decodeFileName
-			temp.Url = "cache/" + decodeFileName
-		}
-		b.PageInfo = append(b.PageInfo, temp)
-		//转义，避免特殊路径造成文件不能读取
-		b.PageInfo[len(b.PageInfo)-1].Url = url.PathEscape(b.PageInfo[len(b.PageInfo)-1].Url)
-		if tools.ChickExists(filePath) {
-			logrus.Debugf(locale.GetString("file_exit") + filePath)
-		} else {
-			if Config.ZipFilenameEncoding == "" {
-				//解压文件
-				err := e.Extract(b.FilePath, inArchiveName, RealExtractPath+"/"+b.FileID) //解压到临时文件夹
-				if err != nil {
-					logrus.Debugf(err.Error())
-				}
-			} else {
-				//zip编码处理
-				z, ok := iface.(*archiver.Zip)
-				if !ok {
-					fmt.Printf("虽然你指定了zip编码，但这好像不是zip文件")
-				} else {
-					z.FilenameEncoding = Config.ZipFilenameEncoding
-					errZip := z.Extract(b.FilePath, decodeFileName, RealExtractPath+"/"+b.FileID) //解压到临时文件夹
-					if errZip != nil {
-						logrus.Debugf(err.Error())
-					}
-				}
-			}
-		}
-		//输出解压比例
-		extractNum++
-		if b.AllPageNum != 0 {
-			Percent = int((float32(extractNum) / float32(b.AllPageNum)) * 100)
-			if tempPercent != Percent {
-				if (Percent % 10) == 0 { //换个行
-					fmt.Println(strconv.Itoa(Percent) + "% ")
-				} else {
-					if Percent < 10 {
-						fmt.Print("0" + strconv.Itoa(Percent) + "% ")
-					} else {
-						fmt.Print(strconv.Itoa(Percent) + "% ")
-					}
-				}
-			}
-			tempPercent = Percent
-		}
-		return err
-	})
-	fmt.Println(locale.GetString("completed_extract"), b.FilePath)
+	defer reader.Close()
 	return err
 }
 
@@ -463,15 +365,12 @@ func ScanBookPath(pathname string) (err error) {
 		return nil
 	})
 	for _, f := range fileList {
-		book, err := ScanArchive(f)
+		book, err := ScanArchive_InitBook(f)
 		if err != nil {
 			fmt.Println(err)
 		}
-		book.SetArchiveBookName(book.FilePath)
+
 		if book.AllPageNum >= Config.MinImageNum {
-			if book.FileID == "" {
-				book.SetFileID()
-			}
 			bookList = append(bookList, *book)
 		}
 	}
@@ -480,11 +379,7 @@ func ScanBookPath(pathname string) (err error) {
 		if err != nil {
 			fmt.Println(err)
 		}
-		book.SetImageFolderBookName(book.FilePath)
 		if book.AllPageNum >= Config.MinImageNum {
-			if book.FileID == "" {
-				book.SetFileID()
-			}
 			bookList = append(bookList, *book)
 		}
 	}
@@ -492,20 +387,19 @@ func ScanBookPath(pathname string) (err error) {
 	return err
 }
 
-func ScanDirGetBook(folder string) (*Book, error) {
-	var book = Book{IsFolder: true, AllPageNum: 0, ExtractComplete: true}
-	archiveNum := 0
-	files, err := ioutil.ReadDir(folder)
+func ScanDirGetBook(filePath string) (*Book, error) {
+	files, err := ioutil.ReadDir(filePath)
 	if err != nil {
-		return &book, err
+		return nil, err
 	}
+	var book = Book{FilePath: filePath, IsDir: true, AllPageNum: 0, ExtractComplete: true}
+	book.InitBook(book.FilePath)
 	for _, file := range files {
 		if file.IsDir() {
-			//递归处理
-			//ScanDirGetBook(folder + "/" + file.Name())
+			continue
 		} else {
 			// 输出绝对路径
-			strAbsPath, errPath := filepath.Abs(folder + "/" + file.Name())
+			strAbsPath, errPath := filepath.Abs(filePath + "/" + file.Name())
 			if errPath != nil {
 				fmt.Println(errPath)
 			}
@@ -514,11 +408,7 @@ func ScanDirGetBook(folder string) (*Book, error) {
 				book.AllPageNum += 1
 				book.PageInfo = append(book.PageInfo, SinglePageInfo{LocalPath: strAbsPath, Url: "/cache/" + file.Name()})
 			}
-			if isSupportArchiver(file.Name()) {
-				archiveNum += 1
-			}
 		}
 	}
-	book.FilePath = folder
 	return &book, err
 }

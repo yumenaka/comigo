@@ -41,8 +41,10 @@ test
 *md5Sums.txt
 resource.syso
 \[*
-config.yaml
-*config.yaml
+
+*comigo.yaml
+*comigo.ini
+
 __*
 web/node_modules
 web/dist

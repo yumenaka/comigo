@@ -39,7 +39,7 @@ type FrpClientConfig struct {
 	ServerAddr  string
 	ServerPort  int
 	Token       string
-	////本地管理界面，暂不开启
+	////本地管理界面，现在用不着
 	//AdminAddr   string
 	//AdminPort   string
 	//AdminUser   string
@@ -50,6 +50,8 @@ type FrpClientConfig struct {
 	RandomRemotePort bool
 }
 
+var CfgFile string //服务器配置文件路径
+
 type ServerConfig struct {
 	OpenBrowser         bool   `json:"-"` //不要解析这个字段
 	DisableLAN          bool   `json:"-"` //不要解析这个字段
@@ -57,7 +59,6 @@ type ServerConfig struct {
 	Auth                string `json:"-"` //不要解析这个字段 访问密码，还没做
 	PrintAllIP          bool   `json:"-"` //不要解析这个字段
 	Port                int
-	ConfigPath          string `json:"-"` //不要解析这个字段
 	CheckImageInServer  bool
 	DebugMode           bool   `json:"-"` //不要解析这个字段
 	LogToFile           bool   `json:"-"` //不要解析这个字段
@@ -76,6 +77,8 @@ type ServerConfig struct {
 	TempFolderSetting   string
 	CleanOnExit         bool
 	CleanNotAll         bool
+	GenerateConfig      bool
+
 	//SortByModTime       bool            //SortByModificationTime
 	//SortByFileName      bool
 }
@@ -226,7 +229,7 @@ var BookList []Book
 var (
 	RealExtractPath  string
 	WebImagePath     string
-	Version          = "v0.2.4"
+	Version          = "v0.4.6"
 	SupportMediaType = []string{".jpg", ".jpeg", ".JPEG", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp", ".webp", ".ico", ".heic", ".pdf", ".mp4", ".webm"}
 	SupportFileType  = [...]string{
 		".zip",
@@ -272,8 +275,8 @@ type Book struct {
 	FileType        string      `json:"file_type"`
 	FileSize        int64       `json:"file_size"`
 	Modified        time.Time   `json:"modified_time"`
-	FileID          string      `json:"uuid"`
-	IsFolder        bool        `json:"is_folder"`
+	BookID          string      `json:"uuid"` //根据FilePath计算
+	IsDir           bool        `json:"is_folder"`
 	ExtractNum      int         `json:"extract_num"`
 	ExtractComplete bool        `json:"extract_complete"`
 	ReadPercent     float64     `json:"read_percent"`
@@ -330,33 +333,46 @@ func (b *Book) SortPages() {
 	sort.Sort(b.PageInfo)
 }
 
-func (b *Book) SetFileID() {
-	fileAbaPath, err := filepath.Abs(b.FilePath)
+// SetBookID  根据路径的MD5，生成书籍ID
+func (b *Book) SetBookID() {
 	//fmt.Println("文件绝对路径："+fileAbaPath, "路径的md5："+md5string(fileAbaPath))
+	fileAbaPath, err := filepath.Abs(b.FilePath)
 	if err != nil {
 		fmt.Println(err, fileAbaPath)
 	}
 	//fmt.Println(md5s(fileAbaPath))
-	b.FileID = md5string(fileAbaPath)
+	b.BookID = md5string(fileAbaPath)
 }
 
-// SetArchiveBookName  绑定到Book结构体的方法
-func (b *Book) SetArchiveBookName(name string) {
-	post := strings.LastIndex(name, "/") //Unix路径分隔符
-	if post == -1 {
-		post = strings.LastIndex(name, "\\") //windows分隔符
+// GetBookID  根据路径的MD5，生成书籍ID
+func (b *Book) GetBookID() string {
+	if b.BookID == "" {
+		b.SetBookID()
 	}
-	if post != -1 {
-		//name = string([]rune(name)[post:]) //为了防止中文字符被错误截断，先转换成rune，再转回来?
-		name = name[post:]
-		name = strings.ReplaceAll(name, "\\", "")
-		name = strings.ReplaceAll(name, "/", "")
-	}
-	b.Name = name
+	return b.BookID
 }
 
-func (b *Book) SetImageFolderBookName(name string) {
-	b.Name = name
+// InitBook  设置书名与Book ID等
+func (b *Book) InitBook(name string) {
+	//文件夹直接用路径
+	if b.IsDir {
+		b.Name = name
+	} else {
+		//压缩文件的话，去除路径，取文件名
+		post := strings.LastIndex(name, "/") //Unix路径分隔符
+		if post == -1 {
+			post = strings.LastIndex(name, "\\") //windows分隔符
+		}
+		if post != -1 {
+			//name = string([]rune(name)[post:]) //为了防止中文字符被错误截断，先转换成rune，再转回来?
+			name = name[post:]
+			name = strings.ReplaceAll(name, "\\", "")
+			name = strings.ReplaceAll(name, "/", "")
+		}
+		b.Name = name
+		b.FileType = path.Ext(name) //获取文件后缀
+	}
+	b.SetBookID()
 }
 
 func (b *Book) SetPageNum() {
@@ -486,7 +502,7 @@ func SetupCloseHander() {
 		if Config.CleanOnExit {
 			fmt.Println("\r" + locale.GetString("start_clear_file"))
 			if Config.CleanNotAll {
-				deleteTempFilesByFileID(ReadingBook.FileID)
+				deleteTempFilesByFileID(ReadingBook.GetBookID())
 			} else {
 				deleteAllTempFiles()
 			}
@@ -496,13 +512,13 @@ func SetupCloseHander() {
 }
 func InitReadingBook() (err error) {
 	//准备解压，设置图片文件夹
-	if ReadingBook.IsFolder {
+	if ReadingBook.IsDir {
 		WebImagePath = ReadingBook.FilePath
 		ReadingBook.ExtractComplete = true
 		ReadingBook.ExtractNum = ReadingBook.AllPageNum
 	} else {
 		SetTempDir()
-		WebImagePath = path.Join(RealExtractPath, ReadingBook.FileID) //extraFolder
+		WebImagePath = path.Join(RealExtractPath, ReadingBook.GetBookID()) //extraFolder
 		err = LsArchive(&ReadingBook)
 		if err != nil {
 			fmt.Println(locale.GetString("scan_archive_error"))
@@ -513,7 +529,7 @@ func InitReadingBook() (err error) {
 			fmt.Println(locale.GetString("un_archive_error"))
 			return err
 		}
-		ReadingBook.SetArchiveBookName(ReadingBook.FilePath) //设置书名
+		ReadingBook.InitBook(ReadingBook.FilePath) //设置书名
 	}
 	//服务器分析图片
 	if Config.CheckImageInServer {

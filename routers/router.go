@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sanity-io/litter"
+	"github.com/spf13/viper"
 	"github.com/yumenaka/comi/common"
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/routers/reverse_proxy"
@@ -32,10 +33,30 @@ func init() {
 
 // ParseCommands 解析命令
 func ParseCommands(args []string) {
+	//保存配置並退出,目前是空文件……
+	if common.Config.GenerateConfig {
+		fmt.Println("viper.ConfigFileUsed(1):", viper.ConfigFileUsed())
+		targetPath, _ := os.Getwd()
+		viper.SetConfigFile(targetPath + "/comigo.yaml")
+		//应用配置文件
+		if err := viper.Unmarshal(&common.Config); err != nil { // 读取配置文件转化成对应的结构体错误
+			panic(fmt.Errorf(locale.GetString("config_file_not_found")+" %s \n", err))
+		}
+		fmt.Println("viper.ConfigFileUsed(2):", viper.ConfigFileUsed())
+		fmt.Println("viper.UnmarshalExact(&common.Config):", viper.UnmarshalExact(&common.Config))
+		viper.MergeInConfig()
+		//将当前的viper配置写入预定义的路径。如果没有预定义的路径，则报错。如果存在，将不会覆盖当前的配置文件。
+		err := viper.WriteConfigAs("comigo.yaml")
+		if err != nil {
+			fmt.Println(locale.GetString("save_config_failed"), err.Error())
+		} else {
+			fmt.Println(locale.GetString("save_config_file"), common.CfgFile)
+		}
+		os.Exit(0)
+	}
 	//通过“可执行文件名”设置默认阅读模板
 	common.Config.SetByExecutableFilename()
 	//决定如何扫描，扫描哪个路径
-
 	if len(args) == 0 { //没有指定路径或文件的情况下
 		cmdPath := path.Dir(os.Args[0]) //当前执行路径
 		err := common.ScanBookPath(cmdPath)
@@ -111,7 +132,7 @@ func StartWebServer() {
 	})
 	engine.StaticFS("/assets", http.FS(EmbedFiles))
 	//Download archive file
-	if !common.ReadingBook.IsFolder {
+	if !common.ReadingBook.IsDir {
 		engine.StaticFile("/raw/"+common.ReadingBook.Name, common.ReadingBook.FilePath)
 	}
 	//解析模板到HTML
@@ -144,6 +165,10 @@ func StartWebServer() {
 	//服务器设定
 	engine.GET("/setting.json", func(c *gin.Context) {
 		c.PureJSON(http.StatusOK, common.Config)
+	})
+	//服务器设定
+	engine.GET("/config.yaml", func(c *gin.Context) {
+		c.YAML(http.StatusOK, common.Config)
 	})
 	//初始化websocket
 	engine.GET("/ws", wsHandler)
@@ -199,7 +224,7 @@ func StartWebServer() {
 		//}
 		//engine.StaticFS("/rar", http.FS(fsys2))
 	}
-	//打印链接
+	//cmd打印链接二维码
 	tools.PrintAllReaderURL(common.Config.Port, common.Config.OpenBrowser, common.Config.EnableFrpcServer, common.Config.PrintAllIP, common.Config.ServerHost, common.Config.FrpConfig.ServerAddr, common.Config.FrpConfig.RemotePort, common.Config.DisableLAN)
 	//开始服务
 	if common.Config.EnableFrpcServer {
@@ -218,13 +243,11 @@ func StartWebServer() {
 			fmt.Println(locale.GetString("frpc_server_start"))
 		}
 	}
-	//打印配置
-	//fmt.Println(locale.GetString("print_config"))
-	//fmt.Println(common.Config)
+	//打印配置，调试用
 	if common.Config.DebugMode {
 		litter.Dump(common.Config)
 	}
-	fmt.Println(locale.GetString("quit_hint"))
+	fmt.Println(locale.GetString("ctrl_c_hint"))
 	err := engine.Run(webHost + strconv.Itoa(common.Config.Port))
 	if err != nil {
 		_, err := fmt.Fprintf(os.Stderr, locale.GetString("web_server_error")+"%q\n", common.Config.Port)
