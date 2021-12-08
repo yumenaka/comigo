@@ -22,6 +22,7 @@ cache
 *.rar
 *.tar
 *.cbr
+*.epub
 *.cbz
 *.tar.gz
 *.7z

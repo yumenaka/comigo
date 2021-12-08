@@ -234,6 +234,7 @@ var (
 		".rar",
 		".cbr",
 		".cbz",
+		".epub",
 		".tar.gz",
 		".tgz",
 		".tar.bz2",

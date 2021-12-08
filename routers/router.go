@@ -60,12 +60,7 @@ func ParseCommands(args []string) {
 		fmt.Println(locale.GetString("book_not_found"))
 		os.Exit(0)
 	default:
-		for _, b := range common.BookList {
-			if b.FilePath == args[0] {
-				common.ReadingBook = b
-				break
-			}
-		}
+		common.ReadingBook = common.BookList[0]
 	}
 	//解压图片，分析分辨率（并发）
 	var wg sync.WaitGroup
