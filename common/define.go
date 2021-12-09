@@ -53,34 +53,31 @@ type FrpClientConfig struct {
 var CfgFile string //服务器配置文件路径
 
 type ServerConfig struct {
-	OpenBrowser         bool   `json:"-"` //不要解析这个字段
-	DisableLAN          bool   `json:"-"` //不要解析这个字段
-	Template            string `json:"template"`
-	Auth                string `json:"-"` //不要解析这个字段 访问密码，还没做
-	PrintAllIP          bool   `json:"-"` //不要解析这个字段
-	Port                int
-	CheckImageInServer  bool
-	DebugMode           bool   `json:"-"` //不要解析这个字段
-	LogToFile           bool   `json:"-"` //不要解析这个字段
-	LogFilePath         string `json:"-"` //不要解析这个字段
-	LogFileName         string `json:"-"` //不要解析这个字段
-	MaxDepth            int    `json:"-"` //不要解析这个字段
-	MinImageNum         int
-	ServerHost          string
-	EnableWebpServer    bool
-	WebpConfig          WebPServerConfig `json:"-"` //不要解析这个字段
-	EnableFrpcServer    bool
-	FrpConfig           FrpClientConfig `json:"-"` //不要解析这个字段
-	ZipFilenameEncoding string          `json:"-"` //不要解析这个字段
-	SketchCountSeconds  int             `json:"sketch_count_seconds"`
-	SortImage           string
-	TempFolderSetting   string
-	CleanOnExit         bool
-	CleanNotAll         bool
-	GenerateConfig      bool
-
-	//SortByModTime       bool            //SortByModificationTime
-	//SortByFileName      bool
+	OpenBrowser            bool   `json:"-"` //不要解析这个字段
+	DisableLAN             bool   `json:"-"` //不要解析这个字段
+	Template               string `json:"template"`
+	Auth                   string `json:"-"` //不要解析这个字段 访问密码，还没做
+	PrintAllIP             bool   `json:"-"` //不要解析这个字段
+	Port                   int
+	CheckImageInServer     bool
+	DebugMode              bool   `json:"-"` //不要解析这个字段
+	LogToFile              bool   `json:"-"` //不要解析这个字段
+	LogFilePath            string `json:"-"` //不要解析这个字段
+	LogFileName            string `json:"-"` //不要解析这个字段
+	MaxDepth               int    `json:"-"` //不要解析这个字段
+	MinImageNum            int
+	ServerHost             string
+	EnableWebpServer       bool
+	WebpConfig             WebPServerConfig `json:"-"` //不要解析这个字段
+	EnableFrpcServer       bool
+	FrpConfig              FrpClientConfig `json:"-"` //不要解析这个字段
+	ZipFilenameEncoding    string          `json:"-"` //不要解析这个字段
+	SketchCountSeconds     int             `json:"sketch_count_seconds"`
+	SortImage              string
+	UserSetTempPATH        string `json:"-"` //不要解析这个字段
+	CleanAllTempFileOnExit bool   `json:"-"` //不要解析这个字段
+	CleanAllTempFile       bool   `json:"-"` //不要解析这个字段
+	GenerateConfig         bool   `json:"-"` //不要解析这个字段
 }
 
 var Config = ServerConfig{
@@ -116,12 +113,12 @@ var Config = ServerConfig{
 		//AdminUser:   "",
 		//AdminPwd :   "",
 	},
-	ServerHost:         "",
-	SketchCountSeconds: 90,
-	SortImage:          "",
-	TempFolderSetting:  "",
-	CleanOnExit:        true,
-	CleanNotAll:        true,
+	ServerHost:             "",
+	SketchCountSeconds:     90,
+	SortImage:              "",
+	UserSetTempPATH:        "",
+	CleanAllTempFileOnExit: true,
+	CleanAllTempFile:       true,
 }
 
 // SetByExecutableFilename 通过执行文件名设置默认网页模板参数
@@ -227,11 +224,11 @@ func haveKeyWord(checkString string, list []string) bool {
 var ReadingBook Book
 var BookList []Book
 var (
-	RealExtractPath  string
-	WebImagePath     string
-	Version          = "v0.4.6"
-	SupportMediaType = []string{".jpg", ".jpeg", ".JPEG", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp", ".webp", ".ico", ".heic", ".pdf", ".mp4", ".webm"}
-	SupportFileType  = [...]string{
+	ComigoCacheFilePath string
+	WebImagePath        string
+	Version             = "v0.4.6"
+	SupportMediaType    = []string{".jpg", ".jpeg", ".JPEG", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp", ".webp", ".ico", ".heic", ".pdf", ".mp4", ".webm"}
+	SupportFileType     = [...]string{
 		".zip",
 		".tar",
 		".rar",
@@ -283,14 +280,14 @@ type Book struct {
 }
 
 type SinglePageInfo struct {
-	ModeTime  time.Time `json:"-"` //不要解析这个字段
-	FileSize  int64     `json:"-"` //不要解析这个字段
-	Height    int       `json:"height"`
-	Width     int       `json:"width"`
-	Url       string    `json:"url"`
-	LocalPath string    `json:"-"` //不要解析这个字段
-	Name      string    `json:"-"` //不要解析这个字段
-	ImgType   string    `json:"image_type"`
+	ModeTime      time.Time `json:"-"` //不要解析这个字段
+	FileSize      int64     `json:"-"` //不要解析这个字段
+	Height        int       `json:"height"`
+	Width         int       `json:"width"`
+	Url           string    `json:"url"`
+	ImageFileName string    `json:"-"` //不要解析这个字段
+	ImageFilePATH string    `json:"-"` //不要解析这个字段
+	ImgType       string    `json:"image_type"`
 }
 
 // AllPageInfo Slice
@@ -303,14 +300,14 @@ func (s AllPageInfo) Len() int {
 // Less 按时间或URL，将图片排序
 func (s AllPageInfo) Less(i, j int) (less bool) {
 	//如何定义 s[i] < s[j]  根据文件名
-	numI, err1 := getNumberFromString(s[i].Name)
+	numI, err1 := getNumberFromString(s[i].ImageFileName)
 	if err1 != nil {
-		less = strings.Compare(s[i].Name, s[j].Name) > 0
+		less = strings.Compare(s[i].ImageFileName, s[j].ImageFileName) > 0
 		return less
 	}
-	numJ, err2 := getNumberFromString(s[j].Name)
+	numJ, err2 := getNumberFromString(s[j].ImageFileName)
 	if err2 != nil {
-		less = strings.Compare(s[i].Name, s[j].Name) > 0
+		less = strings.Compare(s[i].ImageFileName, s[j].ImageFileName) > 0
 		return less
 	}
 	//fmt.Println("numI:",numI)
@@ -420,9 +417,6 @@ func (b *Book) ScanAllImageGo() {
 	wp := workpool.New(10) //设置最大线程数
 	//res := make(chan string)
 	count := 0
-	extractNum := 0
-	Percent := 0
-	tempPercent := 0
 	// Console progress bar
 	bar := pb.StartNew(b.AllPageNum)
 	for i := 0; i < len(b.PageInfo); i++ { //此处不能用range，因为需要修改
@@ -440,18 +434,6 @@ func (b *Book) ScanAllImageGo() {
 	}
 	//wg.Wait()
 	_ = wp.Wait()
-	for i := 0; i < count; i++ {
-		extractNum++
-		if b.AllPageNum != 0 {
-			Percent = int((float32(extractNum) / float32(b.AllPageNum)) * 100)
-			if tempPercent != Percent {
-				if (Percent%20) == 0 || Percent == 10 {
-					//fmt.Print(strconv.Itoa(Percent) + "% ")
-				}
-			}
-			tempPercent = Percent
-		}
-	}
 	// finish bar
 	bar.Finish()
 	log.Println(locale.GetString("check_image_completed"))
@@ -459,7 +441,7 @@ func (b *Book) ScanAllImageGo() {
 
 func SetImageType(p *SinglePageInfo) {
 	err := p.GetImageSize()
-	//log.Println(locale.GetString("check_image_ing"), p.LocalPath)
+	//log.Println(locale.GetString("check_image_ing"), p.ImageFilePATH)
 	if err != nil {
 		log.Println(locale.GetString("check_image_error") + err.Error())
 	}
@@ -477,7 +459,7 @@ func SetImageType(p *SinglePageInfo) {
 // GetImageSize 获取图片分辨率
 func (i *SinglePageInfo) GetImageSize() (err error) {
 	var img image.Image
-	img, err = imaging.Open(i.LocalPath)
+	img, err = imaging.Open(i.ImageFilePATH)
 	if err != nil {
 		log.Printf(locale.GetString("check_image_error")+" %v\n", err)
 	} else {
@@ -499,13 +481,11 @@ func SetupCloseHander() {
 	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGHUP)
 	go func() {
 		<-c
-		if Config.CleanOnExit {
+		if Config.CleanAllTempFileOnExit {
 			fmt.Println("\r" + locale.GetString("start_clear_file"))
-			if Config.CleanNotAll {
-				deleteTempFilesByFileID(ReadingBook.GetBookID())
-			} else {
-				deleteAllTempFiles()
-			}
+			clearTempFilesALL()
+		} else {
+			clearTempFilesOne(&ReadingBook)
 		}
 		os.Exit(0)
 	}()
@@ -517,8 +497,8 @@ func InitReadingBook() (err error) {
 		ReadingBook.ExtractComplete = true
 		ReadingBook.ExtractNum = ReadingBook.AllPageNum
 	} else {
-		SetTempDir()
-		WebImagePath = path.Join(RealExtractPath, ReadingBook.GetBookID()) //extraFolder
+		setTempDir()
+		WebImagePath = path.Join(ComigoCacheFilePath, ReadingBook.GetBookID()) //extraFolder
 		err = LsArchive(&ReadingBook)
 		if err != nil {
 			fmt.Println(locale.GetString("scan_archive_error"))
@@ -555,73 +535,51 @@ func InitReadingBook() (err error) {
 	return err
 }
 
-// SetTempDir 设置临时文件夹，退出时会被清理
-func SetTempDir() {
+// setTempDir 设置临时文件夹，退出时会被清理
+func setTempDir() {
 	//手动设置的临时文件夹
-	if Config.TempFolderSetting != "" && tools.ChickExists(Config.TempFolderSetting) && tools.ChickIsDir(Config.TempFolderSetting) {
-		RealExtractPath = path.Join(Config.TempFolderSetting, "comigo_cache_files")
+	if Config.UserSetTempPATH != "" && tools.ChickExists(Config.UserSetTempPATH) && tools.ChickIsDir(Config.UserSetTempPATH) {
+		ComigoCacheFilePath = path.Join(Config.UserSetTempPATH)
 	} else {
-		RealExtractPath = path.Join(os.TempDir(), "comigo_cache_files") //直接使用系统文件夹
+		ComigoCacheFilePath = path.Join(os.TempDir(), "comigo_temp_files") //直接使用系统文件夹
 	}
-	err := os.MkdirAll(RealExtractPath, os.ModePerm)
+	err := os.MkdirAll(ComigoCacheFilePath, os.ModePerm)
 	if err != nil {
 		println(locale.GetString("temp_folder_error"))
 	} else {
-		fmt.Println(locale.GetString("temp_folder_path") + RealExtractPath)
+		fmt.Println(locale.GetString("temp_folder_path") + ComigoCacheFilePath)
 	}
 }
 
-func deleteAllTempFiles() {
+// 清空解压缓存
+func clearTempFilesALL() {
 	fmt.Println(locale.GetString("clear_temp_file_start"))
-	if strings.Contains(RealExtractPath, "comigo_cache_files") { //判断文件夹前缀，避免删错文件
-		err := os.RemoveAll(RealExtractPath)
+	for _, tempBook := range BookList {
+		clearTempFilesOne(&tempBook)
+	}
+}
+
+// 清空某一本压缩漫画的解压缓存
+func clearTempFilesOne(book *Book) {
+	fmt.Println(locale.GetString("clear_temp_file_start"))
+	haveThisBook := false
+	for _, tempBook := range BookList {
+		if tempBook.GetBookID() == book.GetBookID() {
+			haveThisBook = true
+		}
+	}
+	if haveThisBook {
+		extractPath := path.Join(ComigoCacheFilePath, book.GetBookID())
+		//避免删错文件,解压路径包含UUID，len不可能小于32
+		PathLen := len(extractPath)
+		if PathLen < 32 {
+			return
+		}
+		err := os.RemoveAll(extractPath)
 		if err != nil {
-			fmt.Println(locale.GetString("clear_temp_file_error") + RealExtractPath)
+			fmt.Println(locale.GetString("clear_temp_file_error") + extractPath)
 		} else {
-			fmt.Println(locale.GetString("clear_temp_file_completed") + RealExtractPath)
+			fmt.Println(locale.GetString("clear_temp_file_completed") + extractPath)
 		}
 	}
 }
-
-func deleteTempFilesByFileID(UUID string) {
-	fmt.Println(locale.GetString("clear_temp_file_start"))
-	if strings.Contains(RealExtractPath, "comigo_cache_files") { //判断文件夹前缀，避免删错文件
-		clearPath := path.Join(RealExtractPath, UUID)
-		err := os.RemoveAll(clearPath)
-		if err != nil {
-			fmt.Println(locale.GetString("clear_temp_file_error") + clearPath)
-		} else {
-			fmt.Println(locale.GetString("clear_temp_file_completed") + clearPath)
-		}
-	}
-}
-
-////根据权限，清理文件可能失败
-//func deleteOldTempFiles() {
-//	tempDirUpperFolder := RealExtractPath
-//	post := strings.LastIndex(RealExtractPath, "/") //Unix风格的路径分隔符
-//	if post == -1 {
-//		post = strings.LastIndex(RealExtractPath, "\\") //windows风格的分隔符
-//	}
-//	if post != -1 {
-//		tempDirUpperFolder = string([]rune(RealExtractPath)[:post]) //为了防止中文字符被错误截断，先转换成rune，再转回来
-//		fmt.Println(locale.GetString("temp_folder_path"), tempDirUpperFolder)
-//	}
-//	files, err := ioutil.ReadDir(tempDirUpperFolder)
-//	if err != nil {
-//		fmt.Println(err)
-//	}
-//	for _, fi := range files {
-//		if fi.IsDir() {
-//			oldTempDir := tempDirUpperFolder + "/" + fi.Name()
-//			if strings.Contains(oldTempDir, "comic_cache_A8cG") { //判断文件夹前缀，避免删错文件
-//				err := os.RemoveAll(oldTempDir)
-//				if err != nil {
-//					fmt.Println(locale.GetString("clear_temp_file_error") + oldTempDir)
-//				} else {
-//					fmt.Println(locale.GetString("clear_temp_file_completed") + oldTempDir)
-//				}
-//			}
-//		}
-//	}
-//}

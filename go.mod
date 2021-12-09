@@ -31,6 +31,7 @@ require (
 	github.com/VividCortex/ewma v1.2.0 // indirect
 	github.com/akavel/rsrc v0.10.2 // indirect
 	github.com/andybalholm/brotli v1.0.4 // indirect
+	github.com/asdine/storm/v3 v3.2.1 // indirect
 	github.com/dsnet/compress v0.0.2-0.20210315054119-f66993602bf5 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect

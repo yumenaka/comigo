@@ -189,7 +189,7 @@ func StartWebServer() {
 	}
 	//webp反向代理
 	if common.Config.EnableWebpServer {
-		webpError := common.StartWebPServer(common.WebImagePath, common.WebImagePath, common.RealExtractPath+"/webp", common.Config.Port+1)
+		webpError := common.StartWebPServer(common.WebImagePath, common.WebImagePath, common.ComigoCacheFilePath+"/webp", common.Config.Port+1)
 		if webpError != nil {
 			fmt.Println(locale.GetString("webp_server_error"), webpError.Error())
 			engine.Static("/cache", common.WebImagePath)
@@ -236,7 +236,7 @@ func StartWebServer() {
 				common.Config.FrpConfig.RemotePort = common.Config.Port
 			}
 		}
-		frpcError := common.StartFrpC(common.RealExtractPath)
+		frpcError := common.StartFrpC(common.ComigoCacheFilePath)
 		if frpcError != nil {
 			fmt.Println(locale.GetString("frpc_server_error"), frpcError.Error())
 		} else {

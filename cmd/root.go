@@ -196,22 +196,16 @@ func init() {
 		rootCmd.PersistentFlags().StringVar(&common.Config.SortImage, "sort", "none", locale.GetString("COMI_SORT"))
 	}
 	//临时图片解压路径
-	if viper.GetString("COMI_TEMP_FOLDER") != "" {
-		rootCmd.PersistentFlags().StringVar(&common.Config.TempFolderSetting, "temp-folder", viper.GetString("COMI_TEMP_FOLDER"), locale.GetString("COMI_TEMP_FOLDER"))
+	if viper.GetString("COMI_TEMP_PATH") != "" {
+		rootCmd.PersistentFlags().StringVar(&common.Config.UserSetTempPATH, "temp-path", viper.GetString("COMI_TEMP_PATH"), locale.GetString("COMI_TEMP_PATH"))
 	} else {
-		rootCmd.PersistentFlags().StringVar(&common.Config.TempFolderSetting, "temp-folder", "", locale.GetString("COMI_TEMP_FOLDER"))
+		rootCmd.PersistentFlags().StringVar(&common.Config.UserSetTempPATH, "temp-path", "", locale.GetString("COMI_TEMP_PATH"))
 	}
 	//退出时清除临时文件
-	if viper.GetBool("COMI_CLEAN") {
-		rootCmd.PersistentFlags().BoolVar(&common.Config.CleanOnExit, "clean", viper.GetBool("COMI_CLEAN"), locale.GetString("COMI_CLEAN"))
+	if viper.GetBool("COMI_CLEAN_ALL_TEMP_FILE") {
+		rootCmd.PersistentFlags().BoolVar(&common.Config.CleanAllTempFileOnExit, "clean", viper.GetBool("COMI_CLEAN_ALL_TEMP_FILE"), locale.GetString("COMI_CLEAN_ALL_TEMP_FILE"))
 	} else {
-		rootCmd.PersistentFlags().BoolVar(&common.Config.CleanOnExit, "clean", true, locale.GetString("COMI_CLEAN"))
-	}
-	//只清除当前阅读的临时解压文件
-	if viper.GetBool("COMI_CLEAN_NOT_ALL") {
-		rootCmd.PersistentFlags().BoolVar(&common.Config.CleanNotAll, "clean-not-all", viper.GetBool("COMI_CLEAN_NOT_ALL"), locale.GetString("COMI_CLEAN_NOT_ALL"))
-	} else {
-		rootCmd.PersistentFlags().BoolVar(&common.Config.CleanNotAll, "clean-not-all", true, locale.GetString("COMI_CLEAN_NOT_ALL"))
+		rootCmd.PersistentFlags().BoolVar(&common.Config.CleanAllTempFileOnExit, "clean", false, locale.GetString("COMI_CLEAN_ALL_TEMP_FILE"))
 	}
 	//手动指定zip文件编码(gbk、shiftjis……etc）
 	if viper.GetString("COMI_ZIP_ENCODE") != "" {

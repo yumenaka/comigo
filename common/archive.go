@@ -80,7 +80,7 @@ func ScanArchive_InitBook(scanPath string) (*Book, error) {
 	return &b, err
 }
 
-// UnArchive 一次解压所有文件，还在测试中，无法正常工作
+// UnArchive 一次解压所有文件
 func UnArchive(b *Book) (err error) {
 	// 获取支持的格式
 	iface, err := getFormat(b.FilePath)
@@ -91,7 +91,7 @@ func UnArchive(b *Book) (err error) {
 	if !ok {
 		fmt.Println(locale.GetString("unsupported_extract")+" %s", iface)
 	}
-	extraFolder := path.Join(RealExtractPath, b.GetBookID())
+	extraFolder := path.Join(ComigoCacheFilePath, b.GetBookID())
 	fmt.Println(extraFolder)
 	err = u.Unarchive(b.FilePath, extraFolder)
 	if err != nil {
@@ -122,7 +122,7 @@ func LsArchive(b *Book) (err error) {
 		fmt.Println(locale.GetString("unsupported_extract")+"%s", iface) //这个文件好像没法ls啊
 		return err
 	}
-	extractFolder := path.Join(RealExtractPath, b.GetBookID())
+	extractFolder := path.Join(ComigoCacheFilePath, b.GetBookID())
 	fmt.Println(locale.GetString("start_ls"), b.FilePath)
 	//// Console progress bar
 	//bar := pb.StartNew(b.AllPageNum)
@@ -182,13 +182,13 @@ func LsArchive(b *Book) (err error) {
 			return nil
 		}
 		//解压后的文件路径
-		filePath := extractFolder + "/" + inArchiveName
-		temp := SinglePageInfo{ModeTime: modeTime, FileSize: fileSize, LocalPath: filePath, Name: inArchiveName, Url: "cache/" + inArchiveName}
+		imageFilePath := extractFolder + "/" + inArchiveName
+		temp := SinglePageInfo{ModeTime: modeTime, FileSize: fileSize, ImageFilePATH: imageFilePath, ImageFileName: inArchiveName, Url: "cache/" + inArchiveName}
 		//zip编码处理
 		if Config.ZipFilenameEncoding != "" {
-			filePath = extractFolder + "/" + decodeFileName
-			temp.LocalPath = filePath
-			temp.Name = decodeFileName
+			imageFilePath = extractFolder + "/" + decodeFileName
+			temp.ImageFilePATH = imageFilePath
+			temp.ImageFileName = decodeFileName
 			temp.Url = "cache/" + decodeFileName
 		}
 		b.PageInfo = append(b.PageInfo, temp)
@@ -406,7 +406,7 @@ func ScanDirGetBook(filePath string) (*Book, error) {
 			//fmt.Println(strAbsPath)
 			if isSupportMedia(file.Name()) {
 				book.AllPageNum += 1
-				book.PageInfo = append(book.PageInfo, SinglePageInfo{LocalPath: strAbsPath, Url: "/cache/" + file.Name()})
+				book.PageInfo = append(book.PageInfo, SinglePageInfo{ImageFilePATH: strAbsPath, Url: "/cache/" + file.Name()})
 			}
 		}
 	}
