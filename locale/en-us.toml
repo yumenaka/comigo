@@ -3,16 +3,16 @@ comigo_use = "comi"
 short_description ="A simple comic book reader."
 long_description ="comigo , A simple comic book reader."
 comigo_example = """
-comi book.zip
+  comi book.zip
 
 Set the web service port (default is 1234):
-comi -p 2345 book.zip
+  comi -p 2345 book.zip
 
 Without opening a browser (windows):
-comi -o=false book.zip
+  comi -o=false book.zip
 
 Multiple parameters:
-comi -l  -p 23455 test.zip
+  comi -p 2345  --host exsample.com test.zip
 """
 init_locale = "The default language is  English."
 scan_error = "Scan error, execute directory:"

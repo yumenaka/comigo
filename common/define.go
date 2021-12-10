@@ -124,8 +124,8 @@ var Config = ServerConfig{
 // SetByExecutableFilename 通过执行文件名设置默认网页模板参数
 func (config *ServerConfig) SetByExecutableFilename() {
 	// 当前执行目录
-	targetPath, _ := os.Getwd()
-	fmt.Println(locale.GetString("target_path"), targetPath)
+	//targetPath, _ := os.Getwd()
+	//fmt.Println(locale.GetString("target_path"), targetPath)
 	// 带后缀的执行文件名 comi.exe  sketch.exe
 	filenameWithSuffix := path.Base(os.Args[0])
 	// 执行文件名后缀

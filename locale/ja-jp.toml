@@ -3,16 +3,16 @@ comigo_use = "comi"
 short_description ="A simple comic book reader."
 long_description ="comigo シンプルなコミックリーダー"
 comigo_example = """
-comi book.zip
+  comi book.zip
 
 ポートを設定します（デフォルトは1234）：
-comi -p 2345 book.zip
+  comi -p 2345 book.zip
 
 ブラウザを開かずに（windows）：
-comi -o=false book.zip
+  comi -o=false book.zip
 
 複数のパラメータ：
-comi -w -q 70 --frpc  --token aX4457d3O -p 23455 --frps-addr server.example.com test.zip
+  comi -p 2345  --host exsample.com test.zip
 """
 init_locale = "デフォルトの言語は日本語。"
 scan_error = "スキャンエラーで、実行ディレクトリは："
