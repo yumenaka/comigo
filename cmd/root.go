@@ -2,16 +2,18 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/fsnotify/fsnotify"
-	"github.com/sirupsen/logrus"
+	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/yumenaka/comi/common"
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/routers"
 	"os"
+	"path"
 	"runtime"
 )
+
+var vip *viper.Viper
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -39,240 +41,170 @@ func Execute() {
 func init() {
 	cobra.MousetrapHelpText = ""       //屏蔽鼠标提示，支持拖拽、双击运行
 	cobra.MousetrapDisplayDuration = 5 //"这是命令行程序"的提醒表示时间
-	//局部标签(local flag)，只在直接调用它时运行: rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	// 全局flag: rootCmd.PersistentFlags()，任何命令下均可使用，适合
-	//相较于系统变量，配置文件优先？
-	cobra.OnInitialize(initConfig)
-	//服务端口
-	if viper.GetInt("COMI_PORT") != 0 {
-		rootCmd.PersistentFlags().IntVarP(&common.Config.Port, "port", "p", viper.GetInt("COMI_PORT"), locale.GetString("COMI_PORT"))
-	} else {
-		rootCmd.PersistentFlags().IntVarP(&common.Config.Port, "port", "p", 1234, locale.GetString("COMI_PORT"))
-	}
 	//指定配置文件
-	if viper.GetString("COMI_CONFIG") != "" {
-		rootCmd.PersistentFlags().StringVarP(&common.CfgFile, "config", "c", viper.GetString("COMI_CONFIG"), locale.GetString("COMI_CONFIG"))
-		viper.SetConfigFile(viper.GetString("COMI_CONFIG"))
-	} else {
-		rootCmd.PersistentFlags().StringVarP(&common.CfgFile, "config", "c", "", locale.GetString("COMI_CONFIG"))
-	}
+	rootCmd.PersistentFlags().StringVarP(&common.ConfigFile, "config", "c", "", locale.GetString("CONFIG"))
+	//服务端口
+	rootCmd.PersistentFlags().IntVarP(&common.Config.Port, "port", "p", 1234, locale.GetString("PORT"))
+	//在当前目录生成示例配置文件
+	rootCmd.PersistentFlags().BoolVar(&common.Config.NewConfig, "new-config", false, locale.GetString("NewConfig"))
+	//DEBUG
+	rootCmd.PersistentFlags().BoolVar(&common.Config.Debug, "debug", false, locale.GetString("DEBUG_MODE"))
 	//打开浏览器
-	if viper.GetBool("COMI_OPEN_BROWSER") {
-		rootCmd.PersistentFlags().BoolVarP(&common.Config.OpenBrowser, "open-browser", "o", viper.GetBool("COMI_OPEN_BROWSER"), locale.GetString("COMI_OPEN_BROWSER"))
-	} else {
-		rootCmd.PersistentFlags().BoolVarP(&common.Config.OpenBrowser, "open-browser", "o", false, locale.GetString("COMI_OPEN_BROWSER"))
-	}
+	rootCmd.PersistentFlags().BoolVarP(&common.Config.OpenBrowser, "open-browser", "o", false, locale.GetString("OPEN_BROWSER"))
 	if runtime.GOOS == "windows" {
 		common.Config.OpenBrowser = true
 	}
-	//在当前目录生成示例配置文件
-	rootCmd.PersistentFlags().BoolVar(&common.Config.GenerateConfig, "generate", false, locale.GetString("GenerateConfig"))
 	//不对局域网开放
-	if viper.GetBool("COMI_DISABLE_LAN") {
-		rootCmd.PersistentFlags().BoolVarP(&common.Config.DisableLAN, "disable-lan", "d", viper.GetBool("COMI_DISABLE_LAN"), locale.GetString("COMI_DISABLE_LAN"))
-	} else {
-		rootCmd.PersistentFlags().BoolVarP(&common.Config.DisableLAN, "disable-lan", "d", false, locale.GetString("COMI_DISABLE_LAN"))
-	}
+	rootCmd.PersistentFlags().BoolVarP(&common.Config.DisableLAN, "disable-lan", "d", false, locale.GetString("DISABLE_LAN"))
 	//文件搜索深度
-	if viper.GetInt("COMI_MAX_DEPTH") != 0 {
-		rootCmd.PersistentFlags().IntVarP(&common.Config.MaxDepth, "max-depth", "m", viper.GetInt("COMI_MAX_DEPTH"), locale.GetString("COMI_MAX_DEPTH"))
-	} else {
-		rootCmd.PersistentFlags().IntVarP(&common.Config.MaxDepth, "max-depth", "m", 1, locale.GetString("COMI_MAX_DEPTH"))
-	}
+	rootCmd.PersistentFlags().IntVarP(&common.Config.MaxDepth, "max-depth", "m", 1, locale.GetString("MAX_DEPTH"))
 	//服务器解析分辨率
-	if viper.GetBool("COMI_CHECK_IMAGE") {
-		rootCmd.PersistentFlags().BoolVar(&common.Config.CheckImageInServer, "check-image", viper.GetBool("COMI_CHECK_IMAGE"), locale.GetString("COMI_CHECK_IMAGE"))
-	} else {
-		rootCmd.PersistentFlags().BoolVar(&common.Config.CheckImageInServer, "check-image", true, locale.GetString("COMI_CHECK_IMAGE"))
-	}
+	rootCmd.PersistentFlags().BoolVar(&common.Config.CheckImage, "check-image", true, locale.GetString("CHECK_IMAGE"))
 	//本地Host名
-	if viper.GetString("COMI_LOCAL_HOST") != "" {
-		rootCmd.PersistentFlags().StringVar(&common.Config.ServerHost, "host", viper.GetString("COMI_LOCAL_HOST"), locale.GetString("COMI_LOCAL_HOST"))
-	} else {
-		rootCmd.PersistentFlags().StringVar(&common.Config.ServerHost, "host", "", locale.GetString("COMI_LOCAL_HOST"))
-	}
+	rootCmd.PersistentFlags().StringVar(&common.Config.Host, "host", "", locale.GetString("LOCAL_HOST"))
 	//打印所有可用网卡ip
-	if viper.GetBool("COMI_PRINT_ALL_IP") {
-		rootCmd.PersistentFlags().BoolVar(&common.Config.PrintAllIP, "print-all-ip", viper.GetBool("COMI_PRINT_ALL_IP"), locale.GetString("COMI_PRINT_ALL_IP"))
-	} else {
-		rootCmd.PersistentFlags().BoolVar(&common.Config.PrintAllIP, "print-all-ip", false, locale.GetString("COMI_PRINT_ALL_IP"))
-	}
+	rootCmd.PersistentFlags().BoolVar(&common.Config.PrintAllIP, "print-all", false, locale.GetString("PRINT_ALL_IP"))
 	//至少有几张图片，才认定为漫画压缩包
-	if viper.GetInt("COMI_MIN_MEDIA_NUM") != 0 {
-		rootCmd.PersistentFlags().IntVar(&common.Config.MinImageNum, "min-image-num", viper.GetInt("COMI_MIN_MEDIA_NUM"), locale.GetString("COMI_MIN_MEDIA_NUM"))
-	} else {
-		rootCmd.PersistentFlags().IntVar(&common.Config.MinImageNum, "min-image-num", 1, locale.GetString("COMI_MIN_MEDIA_NUM"))
-	}
-	////webp相关
+	rootCmd.PersistentFlags().IntVar(&common.Config.MinImageNum, "min-image-num", 1, locale.GetString("MIN_MEDIA_NUM"))
+
+	////webp相关 打算拆分成子命令
 	//启用webp传输
-	if viper.GetBool("COMI_ENABLE_WEBP") {
-		rootCmd.PersistentFlags().BoolVarP(&common.Config.EnableWebpServer, "webp", "w", viper.GetBool("COMI_ENABLE_WEBP"), locale.GetString("COMI_ENABLE_WEBP"))
-	} else {
-		rootCmd.PersistentFlags().BoolVarP(&common.Config.EnableWebpServer, "webp", "w", false, locale.GetString("COMI_ENABLE_WEBP"))
-	}
+	rootCmd.PersistentFlags().BoolVarP(&common.Config.EnableWebpServer, "webp", "w", false, locale.GetString("ENABLE_WEBP"))
 	//webp-server命令
-	if viper.GetString("COMI_WEBP_COMMAND") != "" {
-		rootCmd.PersistentFlags().StringVar(&common.Config.WebpConfig.WebpCommand, "webp-command", viper.GetString("COMI_WEBP_COMMAND"), locale.GetString("COMI_WEBP_COMMAND"))
-	} else {
-		rootCmd.PersistentFlags().StringVar(&common.Config.WebpConfig.WebpCommand, "webp-command", "webp-server", locale.GetString("COMI_WEBP_COMMAND"))
-	}
+	rootCmd.PersistentFlags().StringVar(&common.Config.WebpConfig.WebpCommand, "webp-command", "webp-server", locale.GetString("WEBP_COMMAND"))
 	//webp压缩质量
-	if viper.GetInt("COMI_WEBP_QUALITY") != 0 {
-		rootCmd.PersistentFlags().IntVarP(&common.Config.WebpConfig.QUALITY, "webp-quality", "q", viper.GetInt("COMI_WEBP_QUALITY"), locale.GetString("COMI_WEBP_QUALITY"))
-	} else {
-		rootCmd.PersistentFlags().IntVarP(&common.Config.WebpConfig.QUALITY, "webp-quality", "q", 85, locale.GetString("COMI_WEBP_QUALITY"))
-	}
-	////Frpc相关
+	rootCmd.PersistentFlags().IntVarP(&common.Config.WebpConfig.QUALITY, "webp-quality", "q", 85, locale.GetString("WEBP_QUALITY"))
+
+	////Frpc相关  打算拆分成子命令
 	//frp反向代理
-	if viper.GetBool("COMI_ENABLE_FRPC") {
-		rootCmd.PersistentFlags().BoolVarP(&common.Config.EnableFrpcServer, "frpc", "f", viper.GetBool("COMI_ENABLE_FRPC"), locale.GetString("COMI_ENABLE_FRPC"))
-	} else {
-		rootCmd.PersistentFlags().BoolVarP(&common.Config.EnableFrpcServer, "frpc", "f", false, locale.GetString("COMI_ENABLE_FRPC"))
-	}
+	rootCmd.PersistentFlags().BoolVarP(&common.Config.EnableFrpcServer, "frpc", "f", false, locale.GetString("ENABLE_FRPC"))
 	//frps_addr
-	if viper.GetString("COMI_FRP_SERVER_ADDR") != "" {
-		rootCmd.PersistentFlags().StringVar(&common.Config.FrpConfig.ServerAddr, "frps-addr", viper.GetString("COMI_FRP_SERVER_ADDR"), locale.GetString("COMI_FRP_SERVER_ADDR"))
-	} else {
-		rootCmd.PersistentFlags().StringVar(&common.Config.FrpConfig.ServerAddr, "frps-addr", "frps.example.com", locale.GetString("COMI_FRP_SERVER_ADDR"))
-	}
+	rootCmd.PersistentFlags().StringVar(&common.Config.FrpConfig.ServerAddr, "frps-addr", "frps.example.com", locale.GetString("FRP_SERVER_ADDR"))
 	//frps server_port
-	if viper.GetInt("COMI_FRP_SERVER_PORT") != 0 {
-		rootCmd.PersistentFlags().IntVar(&common.Config.FrpConfig.ServerPort, "frps-port", viper.GetInt("COMI_FRP_SERVER_PORT"), locale.GetString("COMI_FRP_SERVER_PORT"))
-	} else {
-		rootCmd.PersistentFlags().IntVar(&common.Config.FrpConfig.ServerPort, "frps-port", 7000, locale.GetString("COMI_FRP_SERVER_PORT"))
-	}
+	rootCmd.PersistentFlags().IntVar(&common.Config.FrpConfig.ServerPort, "frps-port", 7000, locale.GetString("FRP_SERVER_PORT"))
 	//frp token
-	if viper.GetString("COMI_FRP_TOKEN") != "" {
-		rootCmd.PersistentFlags().StringVar(&common.Config.FrpConfig.Token, "token", viper.GetString("COMI_FRP_TOKEN"), locale.GetString("COMI_FRP_TOKEN"))
-	} else {
-		rootCmd.PersistentFlags().StringVar(&common.Config.FrpConfig.Token, "token", "token_secretSAMPLE", locale.GetString("COMI_FRP_TOKEN"))
-	}
+	rootCmd.PersistentFlags().StringVar(&common.Config.FrpConfig.Token, "token", "token_secretSAMPLE", locale.GetString("FRP_TOKEN"))
 	//frpc命令,或frpc可执行文件路径
-	if viper.GetString("COMI_FRP_COMMAND") != "" {
-		rootCmd.PersistentFlags().StringVar(&common.Config.FrpConfig.FrpcCommand, "frpc-command", viper.GetString("COMI_FRP_COMMAND"), locale.GetString("COMI_FRP_COMMAND"))
-	} else {
-		rootCmd.PersistentFlags().StringVar(&common.Config.FrpConfig.FrpcCommand, "frpc-command", "frpc", locale.GetString("COMI_FRP_COMMAND"))
-	}
+	rootCmd.PersistentFlags().StringVar(&common.Config.FrpConfig.FrpcCommand, "frpc-command", "frpc", locale.GetString("FRP_COMMAND"))
 	//frpc random remote_port
-	if viper.GetBool("COMI_FRP_RANDOM_REMOTE_PORT") {
-		rootCmd.PersistentFlags().BoolVar(&common.Config.FrpConfig.RandomRemotePort, "frps-random-remote", viper.GetBool("COMI_FRP_RANDOM_REMOTE_PORT"), locale.GetString("COMI_FRP_RANDOM_REMOTE_PORT"))
-	} else {
-		rootCmd.PersistentFlags().BoolVar(&common.Config.FrpConfig.RandomRemotePort, "frps-random-remote", true, locale.GetString("COMI_FRP_RANDOM_REMOTE_PORT"))
-	}
+	rootCmd.PersistentFlags().BoolVar(&common.Config.FrpConfig.RandomRemotePort, "frps-random-remote", true, locale.GetString("FRP_RANDOM_REMOTE_PORT"))
 	//frpc remote_port
-	if viper.GetInt("COMI_FRP_REMOTE_PORT") != 0 {
-		rootCmd.PersistentFlags().IntVar(&common.Config.FrpConfig.RemotePort, "frps-remote-port", viper.GetInt("COMI_FRP_REMOTE_PORT"), locale.GetString("COMI_FRP_REMOTE_PORT"))
-	} else {
-		rootCmd.PersistentFlags().IntVar(&common.Config.FrpConfig.RemotePort, "frps-remote-port", 50000, locale.GetString("COMI_FRP_REMOTE_PORT"))
-	}
+	rootCmd.PersistentFlags().IntVar(&common.Config.FrpConfig.RemotePort, "frps-remote-port", 50000, locale.GetString("FRP_REMOTE_PORT"))
 	//输出log文件
-	if viper.GetBool("COMI_LOG_TO_FILE") {
-		rootCmd.PersistentFlags().BoolVar(&common.Config.LogToFile, "log", viper.GetBool("COMI_LOG_TO_FILE"), locale.GetString("COMI_LOG_TO_FILE"))
-	} else {
-		rootCmd.PersistentFlags().BoolVar(&common.Config.LogToFile, "log", false, locale.GetString("COMI_LOG_TO_FILE"))
-	}
+	rootCmd.PersistentFlags().BoolVar(&common.Config.LogToFile, "log", false, locale.GetString("LOG_TO_FILE"))
 	//默认web模板
-	if viper.GetString("COMI_TEMPLATE") != "" {
-		rootCmd.PersistentFlags().StringVarP(&common.Config.Template, "template", "t", viper.GetString("COMI_TEMPLATE"), locale.GetString("COMI_TEMPLATE"))
-	} else {
-		rootCmd.PersistentFlags().StringVarP(&common.Config.Template, "template", "t", "scroll", locale.GetString("COMI_TEMPLATE"))
-	}
+	rootCmd.PersistentFlags().StringVarP(&common.Config.Template, "template", "t", "scroll", locale.GetString("TEMPLATE"))
 	//sketch模式的倒计时秒数
-	if viper.GetInt("COMI_SKETCH_COUNT_SECONDS") != 0 {
-		rootCmd.PersistentFlags().IntVar(&common.Config.SketchCountSeconds, "sketch_count_seconds", viper.GetInt("COMI_SKETCH_COUNT_SECONDS"), locale.GetString("COMI_SKETCH_COUNT_SECONDS"))
-	} else {
-		rootCmd.PersistentFlags().IntVar(&common.Config.SketchCountSeconds, "sketch_count_seconds", 90, locale.GetString("COMI_SKETCH_COUNT_SECONDS"))
-	}
-	//Debug
-	if viper.GetBool("COMI_DEBUG_MODE") {
-		rootCmd.PersistentFlags().BoolVar(&common.Config.DebugMode, "debug", viper.GetBool("COMI_DEBUG_MODE"), locale.GetString("COMI_DEBUG_MODE"))
-	} else {
-		rootCmd.PersistentFlags().BoolVar(&common.Config.DebugMode, "debug", false, locale.GetString("COMI_DEBUG_MODE"))
-	}
+	rootCmd.PersistentFlags().IntVar(&common.Config.SketchCountSeconds, "sketch_count_seconds", 90, locale.GetString("SKETCH_COUNT_SECONDS"))
 	//图片文件排序
-	if viper.GetBool("COMI_SORT") {
-		rootCmd.PersistentFlags().StringVar(&common.Config.SortImage, "sort", viper.GetString("COMI_SORT"), locale.GetString("COMI_SORT"))
-	} else {
-		rootCmd.PersistentFlags().StringVar(&common.Config.SortImage, "sort", "none", locale.GetString("COMI_SORT"))
-	}
+	rootCmd.PersistentFlags().StringVar(&common.Config.SortImage, "sort-image", "none", locale.GetString("SORT"))
 	//临时图片解压路径
-	if viper.GetString("COMI_TEMP_PATH") != "" {
-		rootCmd.PersistentFlags().StringVar(&common.Config.UserSetTempPATH, "temp-path", viper.GetString("COMI_TEMP_PATH"), locale.GetString("COMI_TEMP_PATH"))
-	} else {
-		rootCmd.PersistentFlags().StringVar(&common.Config.UserSetTempPATH, "temp-path", "", locale.GetString("COMI_TEMP_PATH"))
-	}
+	rootCmd.PersistentFlags().StringVar(&common.Config.TempPATH, "temp-path", "", locale.GetString("TEMP_PATH"))
 	//退出时清除临时文件
-	if viper.GetBool("COMI_CLEAN_ALL_TEMP_FILE") {
-		rootCmd.PersistentFlags().BoolVar(&common.Config.CleanAllTempFileOnExit, "clean", viper.GetBool("COMI_CLEAN_ALL_TEMP_FILE"), locale.GetString("COMI_CLEAN_ALL_TEMP_FILE"))
-	} else {
-		rootCmd.PersistentFlags().BoolVar(&common.Config.CleanAllTempFileOnExit, "clean", false, locale.GetString("COMI_CLEAN_ALL_TEMP_FILE"))
-	}
+	rootCmd.PersistentFlags().BoolVar(&common.Config.CleanAllTempFileOnExit, "clean", false, locale.GetString("CLEAN_ALL_TEMP_FILE"))
 	//手动指定zip文件编码(gbk、shiftjis……etc）
-	if viper.GetString("COMI_ZIP_ENCODE") != "" {
-		rootCmd.PersistentFlags().StringVar(&common.Config.ZipFilenameEncoding, "zip-encode", viper.GetString("COMI_ZIP_ENCODE"), locale.GetString("COMI_ZIP_ENCODE"))
-	} else {
-		rootCmd.PersistentFlags().StringVar(&common.Config.ZipFilenameEncoding, "zip-encode", "", locale.GetString("COMI_ZIP_ENCODE"))
-	}
-
+	rootCmd.PersistentFlags().StringVar(&common.Config.ZipFilenameEncoding, "zip-encode", "", locale.GetString("ZIP_ENCODE"))
 	////访问密码，还没做
-	//if viper.GetString("COMI_AUTH")!= "" {
-	//	rootCmd.PersistentFlags().StringVar(&common.Config.Auth, "auth", viper.GetString("COMI_AUTH"), locale.GetString("COMI_AUTH"))
-	//} else {
-	//	rootCmd.PersistentFlags().StringVar(&common.Config.Auth, "auth", "user:comigo", locale.GetString("COMI_AUTH"))
-	//}
-
-	////Generate sample yaml configuration，目前无效
-	//if viper.GetBool("COMI_GENERATE_SAMPLE_CONFIG") {
-	//	rootCmd.PersistentFlags().BoolVar(&common.Config.GenerateConfig, "sample", viper.GetBool("COMI_CHECK_IMAGE"), locale.GetString("COMI_GENERATE_SAMPLE_CONFIG"))
-	//} else {
-	//	rootCmd.PersistentFlags().BoolVar(&common.Config.GenerateConfig, "sample", false, locale.GetString("COMI_GENERATE_SAMPLE_CONFIG"))
-	//}
-
-	//尚未启用的功能，暂时无意义的设置
+	//	rootCmd.PersistentFlags().StringVar(&common.Config.Auth, "auth", "user:comigo", locale.GetString("AUTH"))
+	//尚未写完的功能
 	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFileName, "log_name", "comigo", "log文件名")
 	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFilePath, "log_path", "~", "log文件位置")
-	//rootCmd.PersistentFlags().BoolVarP(&common.PrintVersion, "version", "v", false, "输出版本号")
-}
+	//rootCmd.PersistentFlags().BoolVarP(&common.PrintVersion, "version", "vip", false, "输出版本号")
 
-// 读取配置，参考下面三篇文章
-//1、https://www.loginradius.com/engineering/blog/environment-variables-in-golang/
-//2、https://www.liwenzhou.com/posts/Go/viper_tutorial/
-//3、https://ovh.github.io/tat/sdk/golang-full-example/
-//Viper优先级顺序： 显式调用 Set 函数 > 命令行参数 > 环境变量 > 配置文件 > 远程 key/value 存储系统 > 默认值
-func initConfig() {
-	if common.CfgFile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(common.CfgFile)
-	} else {
-		//viper.SetConfigFile("./config.yaml") // 指定配置文件路径
-		viper.SetConfigName("comigo.yaml") // 配置文件名称(有扩展名)
-		//viper.SetConfigType("yaml")        // 如果配置文件的名称中没有扩展名，则需要配置此项
-		viper.AddConfigPath(".") // 在当前目录中查找配置文件
-		// Find home directory.
-		home, err := os.UserHomeDir()
-		cobra.CheckErr(err)
-		viper.AddConfigPath(home + "/.config/comigo") // 在 $home/.config/comigo 下面搜索
-		viper.AddConfigPath("./.comigo")              // 在本地文件夹下面的.comigo
-		//读取环境变量
-		viper.AutomaticEnv()
-		//查找并读取配置文件
-		if err := viper.ReadInConfig(); err != nil {
-			if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-				logrus.Debugf(locale.GetString("config_file_not_found"), viper.ConfigFileUsed())
-			} else {
-				logrus.Debugf(locale.GetString("config_file_not_resolve"), common.CfgFile)
+	//sample:https://qiita.com/nirasan/items/cc2ab5bc2889401fe596
+
+	// rootCmd.Run() 运行前的初始化定义。
+	// 运行前后顺序：rootCmd.Execute → 命令行参数的处理 → cobra.OnInitialize → rootCmd.Run、
+	// 于是可以通过CMD读取配置文件、按照配置文件的设定值执行。不一致的时候，配置文件优先于CMD参数
+	//cobra.OnInitialize(initConfig)
+	cobra.OnInitialize(func() {
+		vip = viper.New()
+		//自动读取环境变量，改写对应值
+		vip.AutomaticEnv()
+		//设置环境变量的前缀，将 PORT变为 COMI_PORT
+		vip.SetEnvPrefix("comi")
+		home, err := homedir.Dir()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		homeConfigPath := path.Join(home, ".config/comigo")
+		vip.AddConfigPath(homeConfigPath)
+		// 当前执行目录
+		nowPath, _ := os.Getwd()
+		vip.AddConfigPath(nowPath)
+		vip.SetConfigType("toml")
+		if common.ConfigFile == "" {
+			vip.SetConfigName("config.toml")
+		} else {
+			vip.SetConfigName(common.ConfigFile)
+		}
+		// 設定ファイルを読み込む
+		if err := vip.ReadInConfig(); err != nil {
+			if common.ConfigFile == "" && common.Config.Debug {
+				fmt.Println(err)
 			}
 		}
-		//应用配置文件
-		if err := viper.Unmarshal(&common.Config); err != nil { // 读取配置文件转化成对应的结构体错误
-			panic(fmt.Errorf(locale.GetString("config_file_not_found")+" %s \n", err))
+		//var tomlExample = []byte(`DebugMode = true
+		//OpenBrowser = true
+		//Host = "localhost"
+		//Port = "1234"
+		//Debug = false
+		//`)
+		//		vip.ReadConfig(bytes.NewBuffer(tomlExample))
+		// 把设定文件的内容，解析到构造体里面。
+		if err := vip.Unmarshal(&common.Config); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
 		}
-		//// 设置默认值
-		//viper.SetDefault("COMI_HOST", "0.0.0.0")
-		//监听配置变化，运行时动态加载配置
-		viper.WatchConfig()
-		viper.OnConfigChange(func(e fsnotify.Event) {
-			fmt.Println(locale.GetString("config_change"), e.Name)
-		})
-	}
+		vip.WriteConfigAs("comigo_test.toml")
+		//if common.Config.NewConfig {
+		//	viper.WriteConfig()
+		//}
+		//
+		//		if common.ConfigFile != "" {
+		//			// viper 定义配置文件名
+		//			vip.SetConfigFile(common.ConfigFile)
+		//			// 读取配置文件
+		//			if err := vip.ReadInConfig(); err != nil {
+		//				fmt.Println(err)
+		//				os.Exit(1)
+		//			}
+		//			// 把设定文件的内容，解析到构造体里面。
+		//			if err := vip.Unmarshal(&common.Config); err != nil {
+		//				fmt.Println(err)
+		//				os.Exit(1)
+		//			}
+		//		} else {
+		//			home, err := homedir.Dir()
+		//			if err != nil {
+		//				fmt.Println(err)
+		//				os.Exit(1)
+		//			}
+		//			// Search config in home directory with name ".comigo" (without extension).
+		//			vip.AddConfigPath(home)
+		//			vip.SetConfigType("TOML")
+		//			vip.SetConfigName(".comigo.toml")
+		//			var tomlExample = []byte(`DebugMode = true
+		//OpenBrowser = true
+		//Host = "localhost"
+		//Port = "1234"
+		//Debug = false
+		//`)
+		//			vip.ReadConfig(bytes.NewBuffer(tomlExample))
+		//			// 把设定文件的内容，解析到构造体里面。
+		//			if err := vip.Unmarshal(&common.Config); err != nil {
+		//				fmt.Println(err)
+		//				os.Exit(1)
+		//			}
+		//
+		//			vip.WriteConfigAs("D:\\cvgo")
+		//			//if common.Config.NewConfig {
+		//			//	viper.WriteConfig()
+		//			//}
+		//		}
+		//
+
+	})
+
 }

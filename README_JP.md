@@ -13,27 +13,14 @@
 ```
 comi [flags] file_or_dir
 
-Set the web service port (default is 1234): 
-comi -p 2345 book.zip 
-
-Without opening a browser (windows):
-comi -o=false book.zip
-   
-For local browsing, not available for LAN:
-comi -l book.zip 
-
-webp transfer, requiring webp-server to work with: 
-comi -w book.zip 
-
-Multiple parameters:
-comi -w -q 70 --frpc  --token aX4457d3O -p 23455 --frps-addr sh.example.com test.zip
+comi --help
 
 ```
 
 ### 詳細：
 わかりやすい漫画リーダー。
 
-1、画像フォルダ、zip、rarファイルをサポート。
+1、画像フォルダ、zip、rar、cbr、cbz、epubファイルをサポート。
 
 2、Windows、Linux、MacOSに対応しています。
 

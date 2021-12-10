@@ -1,0 +1,4 @@
+OpenBrowser = false
+Host = "localhost"
+Port = "12345"
+Debug = false

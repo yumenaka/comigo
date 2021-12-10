@@ -11,6 +11,7 @@ import (
 	"github.com/yumenaka/comi/routers/reverse_proxy"
 	"github.com/yumenaka/comi/tools"
 	"html/template"
+	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"os"
@@ -18,6 +19,8 @@ import (
 	"strconv"
 	"sync"
 	"time"
+
+	yaml "github.com/goccy/go-yaml"
 )
 
 //go:embed index.html
@@ -33,27 +36,61 @@ func init() {
 
 // ParseCommands 解析命令
 func ParseCommands(args []string) {
-	//保存配置並退出,目前是空文件……
-	if common.Config.GenerateConfig {
-		fmt.Println("viper.ConfigFileUsed(1):", viper.ConfigFileUsed())
-		targetPath, _ := os.Getwd()
-		viper.SetConfigFile(targetPath + "/comigo.yaml")
-		//应用配置文件
-		if err := viper.Unmarshal(&common.Config); err != nil { // 读取配置文件转化成对应的结构体错误
-			panic(fmt.Errorf(locale.GetString("config_file_not_found")+" %s \n", err))
-		}
-		fmt.Println("viper.ConfigFileUsed(2):", viper.ConfigFileUsed())
-		fmt.Println("viper.UnmarshalExact(&common.Config):", viper.UnmarshalExact(&common.Config))
-		viper.MergeInConfig()
-		//将当前的viper配置写入预定义的路径。如果没有预定义的路径，则报错。如果存在，将不会覆盖当前的配置文件。
-		err := viper.WriteConfigAs("comigo.yaml")
+
+	//保存配置並退出
+	if common.Config.NewConfig {
+		err := viper.WriteConfig()
 		if err != nil {
-			fmt.Println(locale.GetString("save_config_failed"), err.Error())
-		} else {
-			fmt.Println(locale.GetString("save_config_file"), common.CfgFile)
+			fmt.Println(err)
+			return
+		} // writes current config to predefined path set by 'viper.AddConfigPath()' and 'viper.SetConfigName'
+		err = viper.SafeWriteConfigAs("D:\\cvgo")
+		if err != nil {
+			return
 		}
+		err = viper.WriteConfigAs("D:\\cvgo")
+		if err != nil {
+			return
+		}
+		err = viper.SafeWriteConfigAs("D:\\cvgo")
+		if err != nil {
+			return
+		} // will error since it has already been written
+		err = viper.SafeWriteConfigAs("D:\\cvgo")
+		if err != nil {
+			return
+		}
+
+		bytes, err := yaml.Marshal(common.Config)
+		if err != nil {
+			fmt.Println("yaml.Marshal Error")
+		}
+		fmt.Println(string(bytes)) // "a: 1\nb: hello\n"
+		err = ioutil.WriteFile("test.yaml", bytes, 0644)
+		if err != nil {
+			panic(err)
+		}
+		//		cfg := `#定义一个yaml配置文件
+		//OpenBrowser:         false
+		//DisableLAN:          false
+		//Port:                1234
+		//CheckImage:  true
+		//LogToFile:           false
+		//MaxDepth:            2
+		//MinImageNum:         3
+		//ZipFilenameEncoding: ""
+		//EnableWebpServer: false
+		//Host: "localhost"
+		//`
+		//		data := []byte(cfg)
+		//		v := make(map[string]interface{})
+		//		err := yaml.Unmarshal(data, v)
+		//		if err != nil {
+		//			fmt.Println("failed to unmarshal YAML")
+		//		}
 		os.Exit(0)
 	}
+
 	//通过“可执行文件名”设置默认阅读模板
 	common.Config.SetByExecutableFilename()
 	//决定如何扫描，扫描哪个路径
@@ -85,7 +122,7 @@ func ParseCommands(args []string) {
 	}
 	//解压图片，分析分辨率（并发）
 	var wg sync.WaitGroup
-	if common.Config.CheckImageInServer {
+	if common.Config.CheckImage {
 		wg.Add(1)
 		go func() {
 			err := common.InitReadingBook()
@@ -225,7 +262,7 @@ func StartWebServer() {
 		//engine.StaticFS("/rar", http.FS(fsys2))
 	}
 	//cmd打印链接二维码
-	tools.PrintAllReaderURL(common.Config.Port, common.Config.OpenBrowser, common.Config.EnableFrpcServer, common.Config.PrintAllIP, common.Config.ServerHost, common.Config.FrpConfig.ServerAddr, common.Config.FrpConfig.RemotePort, common.Config.DisableLAN)
+	tools.PrintAllReaderURL(common.Config.Port, common.Config.OpenBrowser, common.Config.EnableFrpcServer, common.Config.PrintAllIP, common.Config.Host, common.Config.FrpConfig.ServerAddr, common.Config.FrpConfig.RemotePort, common.Config.DisableLAN)
 	//开始服务
 	if common.Config.EnableFrpcServer {
 		if common.Config.FrpConfig.RandomRemotePort {
@@ -244,7 +281,7 @@ func StartWebServer() {
 		}
 	}
 	//打印配置，调试用
-	if common.Config.DebugMode {
+	if common.Config.Debug {
 		litter.Dump(common.Config)
 	}
 	fmt.Println(locale.GetString("ctrl_c_hint"))

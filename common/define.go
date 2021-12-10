@@ -50,7 +50,7 @@ type FrpClientConfig struct {
 	RandomRemotePort bool
 }
 
-var CfgFile string //服务器配置文件路径
+var ConfigFile string //服务器配置文件路径
 
 type ServerConfig struct {
 	OpenBrowser            bool   `json:"-"` //不要解析这个字段
@@ -59,14 +59,14 @@ type ServerConfig struct {
 	Auth                   string `json:"-"` //不要解析这个字段 访问密码，还没做
 	PrintAllIP             bool   `json:"-"` //不要解析这个字段
 	Port                   int
-	CheckImageInServer     bool
-	DebugMode              bool   `json:"-"` //不要解析这个字段
+	CheckImage             bool
+	Debug                  bool   `json:"-"` //不要解析这个字段
 	LogToFile              bool   `json:"-"` //不要解析这个字段
 	LogFilePath            string `json:"-"` //不要解析这个字段
 	LogFileName            string `json:"-"` //不要解析这个字段
 	MaxDepth               int    `json:"-"` //不要解析这个字段
 	MinImageNum            int
-	ServerHost             string
+	Host                   string
 	EnableWebpServer       bool
 	WebpConfig             WebPServerConfig `json:"-"` //不要解析这个字段
 	EnableFrpcServer       bool
@@ -74,10 +74,10 @@ type ServerConfig struct {
 	ZipFilenameEncoding    string          `json:"-"` //不要解析这个字段
 	SketchCountSeconds     int             `json:"sketch_count_seconds"`
 	SortImage              string
-	UserSetTempPATH        string `json:"-"` //不要解析这个字段
+	TempPATH               string `json:"-"` //不要解析这个字段
 	CleanAllTempFileOnExit bool   `json:"-"` //不要解析这个字段
 	CleanAllTempFile       bool   `json:"-"` //不要解析这个字段
-	GenerateConfig         bool   `json:"-"` //不要解析这个字段
+	NewConfig              bool   `json:"-"` //不要解析这个字段
 }
 
 var Config = ServerConfig{
@@ -85,7 +85,7 @@ var Config = ServerConfig{
 	DisableLAN:          false,
 	Template:            "multi", //multi、single、random etc.
 	Port:                1234,
-	CheckImageInServer:  false,
+	CheckImage:          false,
 	LogToFile:           false,
 	MaxDepth:            2,
 	MinImageNum:         3,
@@ -113,10 +113,10 @@ var Config = ServerConfig{
 		//AdminUser:   "",
 		//AdminPwd :   "",
 	},
-	ServerHost:             "",
+	Host:                   "",
 	SketchCountSeconds:     90,
 	SortImage:              "",
-	UserSetTempPATH:        "",
+	TempPATH:               "",
 	CleanAllTempFileOnExit: true,
 	CleanAllTempFile:       true,
 }
@@ -173,7 +173,7 @@ func (config *ServerConfig) SetByExecutableFilename() {
 	case "sketch":
 		fmt.Println(locale.GetString("sketch_template"))
 		//速写倒计时秒数
-		fmt.Println(locale.GetString("COMI_SKETCH_COUNT_SECONDS"), config.SketchCountSeconds)
+		fmt.Println(locale.GetString("SKETCH_COUNT_SECONDS"), config.SketchCountSeconds)
 	case "single":
 		fmt.Println(locale.GetString("single_page_template"))
 	case "double":
@@ -512,20 +512,20 @@ func InitReadingBook() (err error) {
 		ReadingBook.InitBook(ReadingBook.FilePath) //设置书名
 	}
 	//服务器分析图片
-	if Config.CheckImageInServer {
+	if Config.CheckImage {
 		ReadingBook.ScanAllImageGo() //扫描所有图片，取得分辨率信息，使用了协程
 	}
 	//服务器排序图片
 	if Config.SortImage != "" {
 		if Config.SortImage == "name" {
 			ReadingBook.SortPages()
-			fmt.Println(locale.GetString("COMI_SORT_BY_NAME"))
+			fmt.Println(locale.GetString("SORT_BY_NAME"))
 		}
 		if Config.SortImage == "time" {
 			ReadingBook.SortPages()
-			fmt.Println(locale.GetString("COMI_SORT_BY_TIME"))
+			fmt.Println(locale.GetString("SORT_BY_TIME"))
 		}
-		if Config.DebugMode {
+		if Config.Debug {
 			//判断是否已经排好顺序，将会打印true
 			fmt.Println("IS Sorted?\t", sort.IsSorted(ReadingBook.PageInfo))
 			//打印排序后的数据
@@ -538,8 +538,8 @@ func InitReadingBook() (err error) {
 // setTempDir 设置临时文件夹，退出时会被清理
 func setTempDir() {
 	//手动设置的临时文件夹
-	if Config.UserSetTempPATH != "" && tools.ChickExists(Config.UserSetTempPATH) && tools.ChickIsDir(Config.UserSetTempPATH) {
-		ComigoCacheFilePath = path.Join(Config.UserSetTempPATH)
+	if Config.TempPATH != "" && tools.ChickExists(Config.TempPATH) && tools.ChickIsDir(Config.TempPATH) {
+		ComigoCacheFilePath = path.Join(Config.TempPATH)
 	} else {
 		ComigoCacheFilePath = path.Join(os.TempDir(), "comigo_temp_files") //直接使用系统文件夹
 	}

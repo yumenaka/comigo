@@ -1,3 +1,19 @@
+comigo_version = "v0.5.1"
+comigo_use = "comi"
+short_description ="A simple comic book reader."
+long_description ="comigo , A simple comic book reader."
+comigo_example = """
+comi book.zip
+
+Set the web service port (default is 1234):
+comi -p 2345 book.zip
+
+Without opening a browser (windows):
+comi -o=false book.zip
+
+Multiple parameters:
+comi -l  -p 23455 test.zip
+"""
 init_locale = "The default language is  English."
 scan_error = "Scan error, execute directory:"
 book_not_found = "No books to read are found, the program exits."
@@ -45,69 +61,46 @@ temp_folder_path = "The temporary folder is:"
 clear_temp_file_start= "Start cleaning up temporary files."
 clear_temp_file_error= "Temporary file cleanup failed:"
 clear_temp_file_completed= "Temporary files clean up successfully:"
-comigo_version = "v0.2.4"
-comigo_use = "comi"
-short_description ="A simple comic book reader."
-long_description ="comigo , A simple comic book reader."
-comigo_example = """
-comi book.zip 
-
-Set the web service port (default is 1234): 
-comi -p 2345 book.zip 
-
-Without opening a browser (windows):
-comi -o=false book.zip
-   
-For local browsing, not available for LAN:
-comi -l book.zip 
-
-webp transfer, requiring webp-server to work with: 
-comi -w book.zip 
-
-Multiple parameters:
-comi -w -q 70 --frpc  --token aX4457d3O -p 23455 --frps-addr server.example.com test.zip
-"""
 config_file_not_found = "Config File Not Found,Use Default Congfig"
 config_file_not_resolve ="Failed to resolve configuration" 
 unmarshal_config_file_error ="Failed to apply configuration file, please check the format"
 save_config_file = "Save the configuration:"
 save_config_failed = "Configuration save failed:"
 config_change = "Comigo Configuration changes:"
-COMI_PORT = "Service port"
-COMI_CONFIG = "Specify configuration file"
-COMI_OPEN_BROWSER = "Open the browser at the same time，windows=true"
-COMI_DISABLE_LAN = "Disable LAN sharing"
-COMI_MAX_DEPTH = "Maximum search depth"
-COMI_CHECK_IMAGE = "Analyze the image resolution on the server side"
-COMI_LOCAL_HOST = "Custom domain name"
-COMI_PRINT_ALL_IP = "Print all available network card ip"
-COMI_MIN_MEDIA_NUM = "There are at least a few media file before it is considered a comic compression package"
-COMI_ENABLE_WEBP = "webp transmission, webp-server is required"
-COMI_WEBP_COMMAND = "webp-server command, or webp-server executable file path"
-COMI_WEBP_QUALITY = "webp compression quality"
-COMI_ENABLE_FRPC = "Enable frp reverse proxy"
-COMI_FRP_SERVER_ADDR = "frps-addr, frpc need"
-COMI_FRP_SERVER_PORT = "frps server_port, frpc need"
-COMI_FRP_TOKEN = "token, frpc need"
-COMI_FRP_COMMAND = "frpc command, or frpc executable file path, the default isfrpc"
-COMI_FRP_RANDOM_REMOTE_PORT = "frp remote random port(40000~50000)"
-COMI_FRP_REMOTE_PORT = "frp remote port, if set to -1, the port is the same as the local"
-COMI_LOG_TO_FILE = "Enable logFile"
+PORT = "Service port"
+CONFIG = "Specify configuration file"
+OPEN_BROWSER = "Open the browser at the same time，windows=true"
+DISABLE_LAN = "Disable LAN sharing"
+MAX_DEPTH = "Maximum search depth"
+CHECK_IMAGE = "Analyze the image resolution on the server side"
+LOCAL_HOST = "Custom domain name"
+PRINT_ALL_IP = "Print all available network card ip"
+MIN_MEDIA_NUM = "There are at least a few media file before it is considered a comic compression package"
+ENABLE_WEBP = "webp transmission, webp-server is required"
+WEBP_COMMAND = "webp-server command, or webp-server executable file path"
+WEBP_QUALITY = "webp compression quality"
+ENABLE_FRPC = "Enable frp reverse proxy"
+FRP_SERVER_ADDR = "frps-addr, frpc need"
+FRP_SERVER_PORT = "frps server_port, frpc need"
+FRP_TOKEN = "token, frpc need"
+FRP_COMMAND = "frpc command, or frpc executable file path, the default isfrpc"
+FRP_RANDOM_REMOTE_PORT = "frp remote random port(40000~50000)"
+FRP_REMOTE_PORT = "frp remote port, if set to -1, the port is the same as the local"
+LOG_TO_FILE = "Enable logFile"
 target_path = "Target directory"
-COMI_AUTH = "Web authentication account and password"
+AUTH = "Web authentication account and password"
 single_page_template = "Default template: single page"
 double_page_template = "Default template: double page"
 scroll_template = "Default template: scroll"
 sketch_template = "Default template: sketch"
-COMI_TEMPLATE  = "Default page template(scroll,single,double,sketch)"
-COMI_SKETCH_COUNT_SECONDS = "Countdown seconds in sketch mode"
+TEMPLATE  = "Default page template(scroll,single,double,sketch)"
+SKETCH_COUNT_SECONDS = "Countdown seconds in sketch mode"
 ctrl_c_hint = "Quit by pressing CTRL-C"
-COMI_GENERATE_SAMPLE_CONFIG = "Generate sample yaml configuration"
-COMI_DEBUG_MODE = "Debug Mode"
-COMI_SORT = "Image rearrangement rules (none,name,time)"
-COMI_SORT_BY_TIME = "Image sort by modification time"
-COMI_SORT_BY_NAME = "Image sort by file name"
-COMI_CLEAN_ALL_TEMP_FILE = "Clear all temporary files on exit"
-COMI_TEMP_PATH = "Temporary decompression folder for images"
-COMI_ZIP_ENCODE = "Manually specify zip file encoding (gbk, shiftjis ......etc)"
-GenerateConfig = "Generate a sample configuration file in the current directory"
+DEBUG_MODE = "Debug Mode"
+SORT = "Image rearrangement rules (none,name,time)"
+SORT_BY_TIME = "Image sort by modification time"
+SORT_BY_NAME = "Image sort by file name"
+CLEAN_ALL_TEMP_FILE = "Clear all temporary files on exit"
+TEMP_PATH = "Temporary decompression folder for images"
+ZIP_ENCODE = "Manually specify zip file encoding (gbk, shiftjis ......etc)"
+NewConfig = "Generate a sample configuration file in the current directory"
