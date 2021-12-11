@@ -1,7 +1,7 @@
 comigo_version = "v0.5.1"
 comigo_use = "comi"
 short_description ="A simple comic book reader."
-long_description ="comigo，一款简单的漫画阅读器。"
+long_description ="comigo，简单的漫画阅读器。"
 comigo_example = """
   comi book.zip
 

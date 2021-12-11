@@ -161,13 +161,15 @@ func init() {
 		//vip.ReadConfig(bytes.NewBuffer(tomlExample))
 		//保存配置並退出
 		if common.Config.NewConfig {
-			if common.Config.NewConfig {
-				vip.SafeWriteConfigAs("config.toml")
-			}
+			common.Config.NewConfig = false
+			//if common.Config.NewConfig {
+			//	vip.SafeWriteConfigAs("config.toml")
+			//}
 			bytes, err := toml.Marshal(common.Config)
 			if err != nil {
 				fmt.Println("toml.Marshal Error")
 			}
+			//在命令行打印
 			fmt.Println(string(bytes))
 			err = ioutil.WriteFile("config.toml", bytes, 0644)
 			if err != nil {
