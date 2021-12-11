@@ -5,13 +5,11 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sanity-io/litter"
-	"github.com/spf13/viper"
 	"github.com/yumenaka/comi/common"
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/routers/reverse_proxy"
 	"github.com/yumenaka/comi/tools"
 	"html/template"
-	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"os"
@@ -19,8 +17,6 @@ import (
 	"strconv"
 	"sync"
 	"time"
-
-	yaml "github.com/goccy/go-yaml"
 )
 
 //go:embed index.html
@@ -36,60 +32,6 @@ func init() {
 
 // ParseCommands 解析命令
 func ParseCommands(args []string) {
-
-	//保存配置並退出
-	if common.Config.NewConfig {
-		err := viper.WriteConfig()
-		if err != nil {
-			fmt.Println(err)
-			return
-		} // writes current config to predefined path set by 'viper.AddConfigPath()' and 'viper.SetConfigName'
-		err = viper.SafeWriteConfigAs("D:\\cvgo")
-		if err != nil {
-			return
-		}
-		err = viper.WriteConfigAs("D:\\cvgo")
-		if err != nil {
-			return
-		}
-		err = viper.SafeWriteConfigAs("D:\\cvgo")
-		if err != nil {
-			return
-		} // will error since it has already been written
-		err = viper.SafeWriteConfigAs("D:\\cvgo")
-		if err != nil {
-			return
-		}
-
-		bytes, err := yaml.Marshal(common.Config)
-		if err != nil {
-			fmt.Println("yaml.Marshal Error")
-		}
-		fmt.Println(string(bytes)) // "a: 1\nb: hello\n"
-		err = ioutil.WriteFile("test.yaml", bytes, 0644)
-		if err != nil {
-			panic(err)
-		}
-		//		cfg := `#定义一个yaml配置文件
-		//OpenBrowser:         false
-		//DisableLAN:          false
-		//Port:                1234
-		//CheckImage:  true
-		//LogToFile:           false
-		//MaxDepth:            2
-		//MinImageNum:         3
-		//ZipFilenameEncoding: ""
-		//EnableWebpServer: false
-		//Host: "localhost"
-		//`
-		//		data := []byte(cfg)
-		//		v := make(map[string]interface{})
-		//		err := yaml.Unmarshal(data, v)
-		//		if err != nil {
-		//			fmt.Println("failed to unmarshal YAML")
-		//		}
-		os.Exit(0)
-	}
 
 	//通过“可执行文件名”设置默认阅读模板
 	common.Config.SetByExecutableFilename()

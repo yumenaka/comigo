@@ -3,11 +3,13 @@ package cmd
 import (
 	"fmt"
 	"github.com/mitchellh/go-homedir"
+	"github.com/pelletier/go-toml"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/yumenaka/comi/common"
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/routers"
+	"io/ioutil"
 	"os"
 	"path"
 	"runtime"
@@ -145,66 +147,34 @@ func init() {
 				fmt.Println(err)
 			}
 		}
+		// 把设定文件的内容，解析到构造体里面。
+		if err := vip.Unmarshal(&common.Config); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 		//var tomlExample = []byte(`DebugMode = true
 		//OpenBrowser = true
 		//Host = "localhost"
 		//Port = "1234"
 		//Debug = false
 		//`)
-		//		vip.ReadConfig(bytes.NewBuffer(tomlExample))
-		// 把设定文件的内容，解析到构造体里面。
-		if err := vip.Unmarshal(&common.Config); err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+		//vip.ReadConfig(bytes.NewBuffer(tomlExample))
+		//保存配置並退出
+		if common.Config.NewConfig {
+			if common.Config.NewConfig {
+				vip.SafeWriteConfigAs("config.toml")
+			}
+			bytes, err := toml.Marshal(common.Config)
+			if err != nil {
+				fmt.Println("toml.Marshal Error")
+			}
+			fmt.Println(string(bytes))
+			err = ioutil.WriteFile("config.toml", bytes, 0644)
+			if err != nil {
+				panic(err)
+			}
+			os.Exit(0)
 		}
-		vip.WriteConfigAs("comigo_test.toml")
-		//if common.Config.NewConfig {
-		//	viper.WriteConfig()
-		//}
-		//
-		//		if common.ConfigFile != "" {
-		//			// viper 定义配置文件名
-		//			vip.SetConfigFile(common.ConfigFile)
-		//			// 读取配置文件
-		//			if err := vip.ReadInConfig(); err != nil {
-		//				fmt.Println(err)
-		//				os.Exit(1)
-		//			}
-		//			// 把设定文件的内容，解析到构造体里面。
-		//			if err := vip.Unmarshal(&common.Config); err != nil {
-		//				fmt.Println(err)
-		//				os.Exit(1)
-		//			}
-		//		} else {
-		//			home, err := homedir.Dir()
-		//			if err != nil {
-		//				fmt.Println(err)
-		//				os.Exit(1)
-		//			}
-		//			// Search config in home directory with name ".comigo" (without extension).
-		//			vip.AddConfigPath(home)
-		//			vip.SetConfigType("TOML")
-		//			vip.SetConfigName(".comigo.toml")
-		//			var tomlExample = []byte(`DebugMode = true
-		//OpenBrowser = true
-		//Host = "localhost"
-		//Port = "1234"
-		//Debug = false
-		//`)
-		//			vip.ReadConfig(bytes.NewBuffer(tomlExample))
-		//			// 把设定文件的内容，解析到构造体里面。
-		//			if err := vip.Unmarshal(&common.Config); err != nil {
-		//				fmt.Println(err)
-		//				os.Exit(1)
-		//			}
-		//
-		//			vip.WriteConfigAs("D:\\cvgo")
-		//			//if common.Config.NewConfig {
-		//			//	viper.WriteConfig()
-		//			//}
-		//		}
-		//
-
 	})
 
 }
