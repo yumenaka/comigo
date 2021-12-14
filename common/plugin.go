@@ -53,7 +53,7 @@ func StartFrpC(configPath string) error {
 	return err
 }
 
-func StartWebPServer(configPath string, imgPath string, exhaustPath string, port int) error {
+func StartWebPServer(webpConfigFile string, imgPath string, exhaustPath string, port int) error {
 	//Config.WebpCommand = wepBinaryPath
 	Config.WebpConfig.ImgPath = imgPath
 	Config.WebpConfig.ExhaustPath = exhaustPath
@@ -62,7 +62,7 @@ func StartWebPServer(configPath string, imgPath string, exhaustPath string, port
 	if Config.WebpConfig.WebpCommand == "" || Config.WebpConfig.ImgPath == "" || Config.WebpConfig.ExhaustPath == "" {
 		return errors.New(locale.GetString("webp_setting_error"))
 	}
-	jsonObject, err := os.OpenFile(configPath+"/config.json", os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+	jsonObject, err := os.OpenFile(webpConfigFile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		return err
 	}
@@ -72,15 +72,14 @@ func StartWebPServer(configPath string, imgPath string, exhaustPath string, port
 		return err
 	}
 	if _, err := jsonObject.Write(content); err == nil {
-		fmt.Println(locale.GetString("webp_setting_save_completed"), configPath, content)
+		fmt.Println(locale.GetString("webp_setting_save_completed"), webpConfigFile, content)
 	}
-	//err = webpCMD(configPath, Config.WebpCommand)
+	//err = webpCMD(webpConfigFile, Config.WebpCommand)
 	var cmd *exec.Cmd
-	cmd = exec.Command(Config.WebpConfig.WebpCommand, "--config", configPath+"/config.json")
+	cmd = exec.Command(Config.WebpConfig.WebpCommand, "--config", webpConfigFile)
 	fmt.Println(cmd)
 	if err = cmd.Start(); err != nil {
 		return err
 	}
 	return err
 }
-

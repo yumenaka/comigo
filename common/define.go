@@ -400,6 +400,8 @@ func (b *Book) ScanAllImage() {
 	log.Println(locale.GetString("check_image_start"))
 	// Console progress bar
 	bar := pb.StartNew(b.AllPageNum)
+	tmpl := `{{ red "With funcs:" }} {{ bar . "<" "-" (cycle . "↖" "↗" "↘" "↙" ) "." ">"}} {{speed . | rndcolor }} {{percent .}} {{string . "my_green_string" | green}} {{string . "my_blue_string" | blue}}`
+	bar.SetTemplateString(tmpl)
 	for i := 0; i < len(b.PageInfo); i++ { //此处不能用range，因为需要修改
 		SetImageType(&b.PageInfo[i])
 		//进度条计数

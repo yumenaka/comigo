@@ -32,7 +32,6 @@ func init() {
 
 // ParseCommands 解析命令
 func ParseCommands(args []string) {
-
 	//通过“可执行文件名”设置默认阅读模板
 	common.Config.SetByExecutableFilename()
 	//决定如何扫描，扫描哪个路径
@@ -168,7 +167,7 @@ func StartWebServer() {
 	}
 	//webp反向代理
 	if common.Config.EnableWebpServer {
-		webpError := common.StartWebPServer(common.WebImagePath, common.WebImagePath, common.ComigoCacheFilePath+"/webp", common.Config.Port+1)
+		webpError := common.StartWebPServer(common.WebImagePath+"/webp_config.json", common.WebImagePath, common.ComigoCacheFilePath+"/webp", common.Config.Port+1)
 		if webpError != nil {
 			fmt.Println(locale.GetString("webp_server_error"), webpError.Error())
 			engine.Static("/cache", common.WebImagePath)
@@ -183,7 +182,7 @@ func StartWebServer() {
 	} else {
 		//具体的图片文件
 		engine.Static("/cache", common.WebImagePath)
-		//直接建立一个zipfs，但非UTF文件，会出现编码问题，待改进
+		//直接建立一个zipfs，但非UTF文件有编码问题，待改进
 		//ext := path.Ext(common.ReadingBook.FilePath)
 		//if ext == ".zip" {
 		//	fsys, zip_err := zip.OpenReader(common.ReadingBook.FilePath)
@@ -195,13 +194,6 @@ func StartWebServer() {
 		//	//图片目录
 		//	engine.Static("/cache", common.WebImagePath)
 		//}
-		//大概需要自己实现一个rar fs？  https://github.com/forensicanalysis/zipfs
-		//// Error:*rardecode.ReadCloser does not implement fs.FS (missing Open method)
-		//fsys2, rar_err := rar.OpenReader("test.rar","")
-		//if rar_err != nil {
-		//	fmt.Println(rar_err)
-		//}
-		//engine.StaticFS("/rar", http.FS(fsys2))
 	}
 	//cmd打印链接二维码
 	tools.PrintAllReaderURL(common.Config.Port, common.Config.OpenBrowser, common.Config.EnableFrpcServer, common.Config.PrintAllIP, common.Config.Host, common.Config.FrpConfig.ServerAddr, common.Config.FrpConfig.RemotePort, common.Config.DisableLAN)

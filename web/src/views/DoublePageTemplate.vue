@@ -263,26 +263,26 @@ export default {
     var _this = this; //声明一个变量指向Vue实例this，保证作用域一致
     // _this.page_mark=1;
     this.timer = setInterval(function () {
-      var date = new Date();
-      var year = date.getFullYear();
-      var month = date.getMonth() + 1;
-      var strDate = date.getDate();
+      let date = new Date();
+      let year = date.getFullYear();
+      let month = date.getMonth() + 1;
+      let strDate = date.getDate();
       if (month >= 1 && month <= 9) {
         month = "0" + month;
       }
       if (strDate >= 0 && strDate <= 9) {
         strDate = "0" + strDate;
       }
-      var currentdate = year + " 年 " + month + " 月 " + strDate + " 日 ";
-      var Hours = date.getHours();
+      let currentdate = year + " 年 " + month + " 月 " + strDate + " 日 ";
+      let Hours = date.getHours();
       if (Hours >= 0 && Hours <= 9) {
         Hours = "0" + Hours;
       }
-      var Minutes = date.getMinutes();
+      let Minutes = date.getMinutes();
       if (Minutes >= 0 && Minutes <= 9) {
         Minutes = "0" + Minutes;
       }
-      var Seconds = date.getSeconds();
+      let Seconds = date.getSeconds();
       if (Seconds >= 0 && Seconds <= 9) {
         Seconds = "0" + Seconds;
       }

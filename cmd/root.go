@@ -59,7 +59,7 @@ func init() {
 	//不对局域网开放
 	rootCmd.PersistentFlags().BoolVarP(&common.Config.DisableLAN, "disable-lan", "d", false, locale.GetString("DISABLE_LAN"))
 	//文件搜索深度
-	rootCmd.PersistentFlags().IntVarP(&common.Config.MaxDepth, "max-depth", "m", 1, locale.GetString("MAX_DEPTH"))
+	rootCmd.PersistentFlags().IntVarP(&common.Config.MaxDepth, "max-depth", "m", 2, locale.GetString("MAX_DEPTH"))
 	//服务器解析分辨率
 	rootCmd.PersistentFlags().BoolVar(&common.Config.CheckImage, "check-image", true, locale.GetString("CHECK_IMAGE"))
 	//本地Host名
