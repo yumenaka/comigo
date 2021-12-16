@@ -102,7 +102,7 @@ const store = new Vuex.Store({
     },
     //拉取远程设定数据
     async syncSettingDataAction(context) {
-      const msg = await axios.get("/setting.json").then(
+      const msg = await axios.get("api/setting.json").then(
         (res) => res.data,
         () => ""
       );
@@ -113,7 +113,7 @@ const store = new Vuex.Store({
     },
     //拉取当前阅读书籍数据
     async syncBookDataAction(context) {
-      const msg = await axios.get("/book.json").then(
+      const msg = await axios.get("api/book.json").then(
         (res) => res.data,
         () => ""
       );
@@ -124,7 +124,7 @@ const store = new Vuex.Store({
     },
     //拉取书架数据
     async syncBookShelfDataAction(context) {
-      const msg = await axios.get("/bookshelf.json").then(
+      const msg = await axios.get("api/bookshelf.json").then(
         (res) => res.data,
         () => ""
       );

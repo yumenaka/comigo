@@ -1,12 +1,13 @@
 module.exports = {
-  "devServer": {
-    "host": "0.0.0.0",
-    "port": 48080,
-    "disableHostCheck": true,
-    "proxy": {
-      "/*": {
+  devServer: {
+    host: "0.0.0.0",
+    port: 4080,
+    disableHostCheck: true,
+    proxy: {
+      '/': {
+        //后端服务器地址
         "target": "http://192.168.3.219:1234",
-        "secure": false,
+        //允许跨域
         "changeOrigin": true
       }
     }

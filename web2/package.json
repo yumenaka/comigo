@@ -13,6 +13,8 @@
     "vue": "^3.0.0",
     "vue-axios": "^3.4.0",
     "vue-router": "^4.0.0-0",
+    "vue3-cookies": "^1.0.6",
+    "vue3-lazyload": "^0.2.5-beta",
     "vuex": "^4.0.0-0"
   },
   "devDependencies": {

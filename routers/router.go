@@ -133,15 +133,15 @@ func StartWebServer() {
 
 	}
 	//解析json
-	engine.GET("/book.json", func(c *gin.Context) {
+	engine.GET("api/book.json", func(c *gin.Context) {
 		c.PureJSON(http.StatusOK, common.ReadingBook)
 	})
 	//解析书架json
-	engine.GET("/bookshelf.json", func(c *gin.Context) {
+	engine.GET("api/bookshelf.json", func(c *gin.Context) {
 		c.PureJSON(http.StatusOK, common.BookList)
 	})
 	//服务器设定
-	engine.GET("/setting.json", func(c *gin.Context) {
+	engine.GET("api/setting.json", func(c *gin.Context) {
 		c.PureJSON(http.StatusOK, common.Config)
 	})
 	//服务器设定

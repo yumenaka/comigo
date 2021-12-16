@@ -197,7 +197,7 @@ export default {
 <style>
 .manga img {
   margin: auto;
-  max-width: inherit;
+  max-width: 100%;
   padding-top: 3px;
   padding-bottom: 3px;
   padding-right: 0px;
