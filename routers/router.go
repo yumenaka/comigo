@@ -10,6 +10,7 @@ import (
 	"github.com/yumenaka/comi/routers/reverse_proxy"
 	"github.com/yumenaka/comi/tools"
 	"html/template"
+	"io/fs"
 	"math/rand"
 	"net/http"
 	"os"
@@ -19,11 +20,14 @@ import (
 	"time"
 )
 
-//go:embed index.html
+//go:embed static/index.html
 var TemplateString string
 
-//go:embed  favicon.ico js/* css/*
-var EmbedFiles embed.FS
+//go:embed  static
+var staticFS embed.FS
+
+//go:embed  static/assets
+var staticAssetFS embed.FS
 
 //退出时清理
 func init() {
@@ -99,16 +103,39 @@ func StartWebServer() {
 	}
 	//自定义分隔符，避免与vue.js冲突
 	engine.Delims("[[", "]]")
+	//https://stackoverflow.com/questions/66248258/serve-embedded-filesystem-from-root-path-of-url
+	EmbedFS, err := fs.Sub(staticAssetFS, "static/assets")
+	if err != nil {
+		fmt.Println(err)
+	}
+	engine.StaticFS("/assets/", http.FS(EmbedFS))
+
 	//网站图标
 	engine.GET("/resources/favicon.ico", func(c *gin.Context) {
-		file, _ := EmbedFiles.ReadFile("favicon.ico")
+		file, _ := staticFS.ReadFile("static/favicon.ico")
 		c.Data(
 			http.StatusOK,
 			"image/x-icon",
 			file,
 		)
 	})
-	engine.StaticFS("/assets", http.FS(EmbedFiles))
+	engine.GET("/loading.jpg", func(c *gin.Context) {
+		file, _ := staticFS.ReadFile("static/loading.jpg")
+		c.Data(
+			http.StatusOK,
+			"image/jpeg",
+			file,
+		)
+	})
+	engine.GET("/error.jpg", func(c *gin.Context) {
+		file, _ := staticFS.ReadFile("static/error.jpg")
+		c.Data(
+			http.StatusOK,
+			"image/jpeg",
+			file,
+		)
+	})
+
 	//Download archive file
 	if !common.ReadingBook.IsDir {
 		engine.StaticFile("/raw/"+common.ReadingBook.Name, common.ReadingBook.FilePath)
@@ -219,7 +246,7 @@ func StartWebServer() {
 		litter.Dump(common.Config)
 	}
 	fmt.Println(locale.GetString("ctrl_c_hint"))
-	err := engine.Run(webHost + strconv.Itoa(common.Config.Port))
+	err = engine.Run(webHost + strconv.Itoa(common.Config.Port))
 	if err != nil {
 		_, err := fmt.Fprintf(os.Stderr, locale.GetString("web_server_error")+"%q\n", common.Config.Port)
 		if err != nil {

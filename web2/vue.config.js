@@ -13,6 +13,6 @@ module.exports = {
     }
   },
   publicPath: '',
-  outputDir: 'static',
+  outputDir: '../routers/static',
   assetsDir: 'assets'
 }

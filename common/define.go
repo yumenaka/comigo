@@ -3,10 +3,8 @@ package common
 import (
 	"errors"
 	"fmt"
-	"github.com/cheggaaa/pb/v3"
 	"github.com/disintegration/imaging"
 	"github.com/mitchellh/go-homedir"
-	"github.com/xxjwxc/gowp/workpool"
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/tools"
 	"image"
@@ -395,51 +393,51 @@ func (b *Book) GetPicNum() int {
 	return PicNum
 }
 
-// ScanAllImage 服务器端分析单双页
-func (b *Book) ScanAllImage() {
-	log.Println(locale.GetString("check_image_start"))
-	// Console progress bar
-	bar := pb.StartNew(b.AllPageNum)
-	tmpl := `{{ red "With funcs:" }} {{ bar . "<" "-" (cycle . "↖" "↗" "↘" "↙" ) "." ">"}} {{speed . | rndcolor }} {{percent .}} {{string . "my_green_string" | green}} {{string . "my_blue_string" | blue}}`
-	bar.SetTemplateString(tmpl)
-	for i := 0; i < len(b.PageInfo); i++ { //此处不能用range，因为需要修改
-		SetImageType(&b.PageInfo[i])
-		//进度条计数
-		bar.Increment()
-	}
-	// 进度条跑完
-	bar.Finish()
-	log.Println(locale.GetString("check_image_completed"))
-}
-
-// ScanAllImageGo 并发分析
-func (b *Book) ScanAllImageGo() {
-	//var wg sync.WaitGroup
-	log.Println(locale.GetString("check_image_start"))
-	wp := workpool.New(10) //设置最大线程数
-	//res := make(chan string)
-	count := 0
-	// Console progress bar
-	bar := pb.StartNew(b.AllPageNum)
-	for i := 0; i < len(b.PageInfo); i++ { //此处不能用range，因为需要修改
-		//wg.Add(1)
-		count++
-		ii := i
-		//并发处理，提升图片分析速度
-		wp.Do(func() error {
-			//defer wg.Done()
-			SetImageType(&b.PageInfo[ii])
-			bar.Increment()
-			//res <- fmt.Sprintf("Finished %d", i)
-			return nil
-		})
-	}
-	//wg.Wait()
-	_ = wp.Wait()
-	// finish bar
-	bar.Finish()
-	log.Println(locale.GetString("check_image_completed"))
-}
+//// ScanAllImage 服务器端分析单双页
+//func (b *Book) ScanAllImage() {
+//	log.Println(locale.GetString("check_image_start"))
+//	// Console progress bar
+//	bar := pb.StartNew(b.AllPageNum)
+//	tmpl := `{{ red "With funcs:" }} {{ bar . "<" "-" (cycle . "↖" "↗" "↘" "↙" ) "." ">"}} {{speed . | rndcolor }} {{percent .}} {{string . "my_green_string" | green}} {{string . "my_blue_string" | blue}}`
+//	bar.SetTemplateString(tmpl)
+//	for i := 0; i < len(b.PageInfo); i++ { //此处不能用range，因为需要修改
+//		SetImageType(&b.PageInfo[i])
+//		//进度条计数
+//		bar.Increment()
+//	}
+//	// 进度条跑完
+//	bar.Finish()
+//	log.Println(locale.GetString("check_image_completed"))
+//}
+//
+//// ScanAllImageGo 并发分析
+//func (b *Book) ScanAllImageGo() {
+//	//var wg sync.WaitGroup
+//	log.Println(locale.GetString("check_image_start"))
+//	wp := workpool.New(10) //设置最大线程数
+//	//res := make(chan string)
+//	count := 0
+//	// Console progress bar
+//	bar := pb.StartNew(b.AllPageNum)
+//	for i := 0; i < len(b.PageInfo); i++ { //此处不能用range，因为需要修改
+//		//wg.Add(1)
+//		count++
+//		ii := i
+//		//并发处理，提升图片分析速度
+//		wp.Do(func() error {
+//			//defer wg.Done()
+//			SetImageType(&b.PageInfo[ii])
+//			bar.Increment()
+//			//res <- fmt.Sprintf("Finished %d", i)
+//			return nil
+//		})
+//	}
+//	//wg.Wait()
+//	_ = wp.Wait()
+//	// finish bar
+//	bar.Finish()
+//	log.Println(locale.GetString("check_image_completed"))
+//}
 
 func SetImageType(p *SinglePageInfo) {
 	err := p.GetImageSize()
@@ -513,10 +511,10 @@ func InitReadingBook() (err error) {
 		}
 		ReadingBook.InitBook(ReadingBook.FilePath) //设置书名
 	}
-	//服务器分析图片
-	if Config.CheckImage {
-		ReadingBook.ScanAllImageGo() //扫描所有图片，取得分辨率信息，使用了协程
-	}
+	////服务器分析图片，新版默认不做了
+	//if Config.CheckImage {
+	//	ReadingBook.ScanAllImageGo() //扫描所有图片，取得分辨率信息，使用了协程
+	//}
 	//服务器排序图片
 	if Config.SortImage != "" {
 		if Config.SortImage == "name" {

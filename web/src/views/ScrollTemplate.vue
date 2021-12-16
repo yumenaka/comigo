@@ -87,7 +87,6 @@ export default {
     toTop() {
       this.$vuetify.goTo(0);
     },
-
     initWebSocket() {
       //初始化weosocket
       //初始化weosocket,这些onopen是一个事件
@@ -197,7 +196,7 @@ export default {
 <style>
 .manga img {
   margin: auto;
-  max-width: 100%;
+  max-width: inherit;
   padding-top: 3px;
   padding-bottom: 3px;
   padding-right: 0px;
