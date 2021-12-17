@@ -33,15 +33,17 @@ app.use(VueCookies, {
 app.use(VueLazyLoad, {
     loading: "loading.jpg",
     error: "error.jpg",
-    //预先加载的相关设置
+    //懒加载相关设置
     observerOptions: { rootMargin: '500px', threshold: 0.1 },
     lifecycle: {
-        // loading: (el) => {
-        //     console.log("loading", el);
-        // },
-        // error: (el) => {
-        //     console.log("error", el);
-        // },
+        loading: (el) => {
+            el.setAttribute("class", "LoadingImage");
+            // console.log("loading", el);
+        },
+        error: (el) => {
+            el.setAttribute("class", "ErrorImage");
+            // console.log("error", el);
+        },
         //可以在这里插入判断分辨率的函数
         loaded: (el) => {
             let image = new Image();
@@ -52,23 +54,15 @@ app.use(VueLazyLoad, {
                 el.setAttribute("w", image.width);
                 el.setAttribute("h", image.height);
                 if (image.width < image.height) {
-                    el.setAttribute("class", "SinglePage");
+                    el.setAttribute("class", "SinglePageImage");
 
                 } else {
-                    el.setAttribute("class", "DoublePage");
+                    el.setAttribute("class", "DoublePageImage");
                 }
             } else {
-                //否则加载图片
-                image.onload = function () {
-                    image.onload = null; // 避免重复加载
-                    if (image.width < image.height) {
-                        el.setAttribute("class", "SinglePage");
-                    } else {
-                        el.setAttribute("class", "DoublePage");
-                    }
-                };
+                el.setAttribute("class", "SinglePageImage");
             }
-            console.log("loaded", el);
+            // console.log("loaded", el);
         },
     },
 });

@@ -50,4 +50,10 @@ export default {
   background-color: #f6f7eb;
   align-items: center;
 }
+/* 覆盖8px的浏览器默认值 */
+body {
+  margin: 0px;
+  padding: 0px;
+
+}
 </style>
