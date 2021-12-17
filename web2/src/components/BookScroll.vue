@@ -17,7 +17,7 @@
 			/>
 			<p v-if="showPageNum">{{ key + 1 }}/{{ book.all_page_num }}</p>
 		</div>
-		<button @click="toTop">回到顶部</button>
+		<button @click="scrollToTop(70);">Back To Top</button>
 	</div>
 </template>
 
@@ -48,11 +48,19 @@ export default {
 			.catch(console.log("this.book"), (error) => alert(error));
 	},
 	methods: {
-		toTop() { 
-			window.scrollTo(0,0);
+		scrollToTop(scrollDuration) {
+			var scrollStep = -window.scrollY / (scrollDuration / 15),
+				scrollInterval = setInterval(function () {
+					if (window.scrollY != 0) {
+						window.scrollBy(0, scrollStep);
+					}
+					else clearInterval(scrollInterval);
+				}, 15);
 		},
 	},
 };
+
+
 </script>
 
 <style></style>
@@ -91,7 +99,7 @@ button {
 		width: 900px;
 	}
 	.DoublePage {
-		width: 95%;
+		width: 98%;
 	}
 }
 

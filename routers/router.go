@@ -111,7 +111,7 @@ func StartWebServer() {
 	engine.StaticFS("/assets/", http.FS(EmbedFS))
 
 	//网站图标
-	engine.GET("/resources/favicon.ico", func(c *gin.Context) {
+	engine.GET("/favicon.ico", func(c *gin.Context) {
 		file, _ := staticFS.ReadFile("static/favicon.ico")
 		c.Data(
 			http.StatusOK,
