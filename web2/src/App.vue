@@ -1,31 +1,58 @@
 <template>
   <div class="home">
-    <BookScroll></BookScroll>
+    <ScrollMode v-if="nowTemplate === 'scroll'"></ScrollMode>
+    <SingleMode v-if="nowTemplate === 'single'"></SingleMode>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
-import BookScroll from "@/components/BookScroll.vue";
+import ScrollMode from "@/components/ScrollMode.vue";
+import SingleMode from "@/components/SingleMode.vue";
+import { useCookies } from "vue3-cookies";
 export default {
   name: "Home", //默认为 default。如果 <router-view>设置了名称，则会渲染对应的路由配置中 components 下的相应组件。
   components: {
-    BookScroll,
+    ScrollMode,
+    SingleMode,
   },
-  setup() {},
+  setup() {
+    const { cookies } = useCookies();
+    return { cookies };
+  },
   data() {
     return {
+      setting: null,
     };
+  },
+  beforeMount() {
+    this.axios
+      .get("/setting.json")
+      .then((response) => {
+        if (response.status == 200) {
+          this.setting = response.data;
+          console.log("get setting : "+this.setting);
+        }
+      })
+      .catch((error) => alert(error));
+      
   },
   computed: {
     // 计算属性的 getter
     nowTemplate: function () {
-      var localValue = this.$cookies.get("nowTemplate");
-      console.log("computed 1:" + localValue);
+      // var localValue ='scroll'
+      //document.cookie="nowTemplate=scroll"
+      // this.cookies.set("nowTemplate",'scroll');
+      var localValue = this.cookies.get("nowTemplate");
+      console.log("nowTemplate is "+localValue);
       if (localValue !== null) {
         return localValue;
       } else {
-        return this.$store.state.setting.template;
+        if (this.setting.template !== null) {
+          return this.setting.template;
+        } else {
+          return ""
+        }
       }
     },
   },
@@ -54,6 +81,5 @@ export default {
 body {
   margin: 0px;
   padding: 0px;
-
 }
 </style>

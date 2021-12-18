@@ -32,13 +32,13 @@ import {
 // import HelloWorld from '@/components/HelloWorld.vue'
 import Header from "@/components/Header.vue";
 // import Book from '@/components/Book.vue'
-// import BookScroll from "@/components/BookScroll.vue";
+// import ScrollMode from "@/components/ScrollMode.vue";
 
 export default {
 	name: "Home", //默认为 default。如果 <router-view>设置了名称，则会渲染对应的路由配置中 components 下的相应组件。
 	components: {
 		Header,
-		// BookScroll,
+		// ScrollMode,
 	},
 	setup() {
 		onBeforeMount(() => {
