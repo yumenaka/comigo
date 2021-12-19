@@ -1,6 +1,6 @@
 <template>
   <header class="header">
-    <select v-model="selectedTemplate" @change="onChange()">
+    <select v-model="selectedTemplate" @change="onChangeTemplate()">
       <option disabled value>切换阅读模式</option>
       <option>scroll</option>
       <option>single</option>
@@ -26,7 +26,7 @@ export default {
   },
 
   methods: {
-    onChange() {
+    onChangeTemplate() {
       if (this.selectedTemplate === "scroll") {
         this.cookies.set("nowTemplate", "scroll");
       }

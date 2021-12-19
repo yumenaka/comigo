@@ -42,7 +42,7 @@ export default {
     nowTemplate: function () {
       // var localValue ='scroll'
       //document.cookie="nowTemplate=scroll"
-      // this.cookies.set("nowTemplate",'scroll');
+      this.cookies.set("nowTemplate",'scroll');
       var localValue = this.cookies.get("nowTemplate");
       console.log("nowTemplate is "+localValue);
       if (localValue !== null) {

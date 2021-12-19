@@ -14,18 +14,10 @@ axios.defaults.baseURL = "/api"
 app.use(VueAxios, axios);
 app.use(store);
 app.use(router);
-app.mount("#app"); // look index.html:  <div id="app"></div>
-
-// Set default vue3-cookies config:
-// https://github.com/KanHarI/vue3-cookies
-// app.use(VueCookies, {
-//     expireTimes: "30d",
-//     path: "/",
-//     domain: "",
-//     secure: true,
-//     sameSite: "None",
-// });
-
+// 通用字体
+import 'vfonts/Lato.css'
+// 等宽字体
+import 'vfonts/FiraCode.css'
 // vue3-lazyload
 // https://github.com/murongg/vue3-lazyload
 app.use(VueLazyLoad, {
@@ -53,7 +45,6 @@ app.use(VueLazyLoad, {
                 el.setAttribute("h", image.height);
                 if (image.width < image.height) {
                     el.setAttribute("class", "SinglePageImage");
-
                 } else {
                     el.setAttribute("class", "DoublePageImage");
                 }
@@ -64,3 +55,21 @@ app.use(VueLazyLoad, {
         },
     },
 });
+
+//自定义指令 https://v3.cn.vuejs.org/guide/custom-directive.html
+app.directive('demo', {
+    beforeUpdate(el, binding) {
+        // console.log(el.getAttribute("class"))
+        // console.log(binding.value.singleWidth) 
+        // console.log(binding.value.doubleWidth)
+        if (el.getAttribute("class") === "SinglePageImage") {
+            el.style.width = binding.value.singleWidth
+        } else if (el.getAttribute("class") === "DoublePageImage") {
+            el.style.width = binding.value.doubleWidth
+        }
+    }
+})
+
+
+
+app.mount("#app"); // look index.html:  <div id="app"></div>
