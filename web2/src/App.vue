@@ -31,24 +31,22 @@ export default {
       .then((response) => {
         if (response.status == 200) {
           this.setting = response.data;
-          console.log("get setting : "+this.setting);
+          console.log("get setting : "+response.data);
         }
       })
       .catch((error) => alert(error));
-      
   },
   computed: {
     // 计算属性的 getter
     nowTemplate: function () {
       // var localValue ='scroll'
-      //document.cookie="nowTemplate=scroll"
-      // this.cookies.set("nowTemplate",'scroll');
+      this.cookies.set("nowTemplate",'scroll');
       var localValue = this.cookies.get("nowTemplate");
       console.log("nowTemplate is "+localValue);
       if (localValue !== null) {
         return localValue;
       } else {
-        if (this.setting.template !== null) {
+        if (this.setting & this.setting.template) {
           return this.setting.template;
         } else {
           return ""
