@@ -1,11 +1,6 @@
 <template>
   <header class="header">
-    <select v-model="selectedTemplate" @change="onChangeTemplate()">
-      <option disabled value>切换阅读模式</option>
-      <option>scroll</option>
-      <option>single</option>
-      <!-- <option>sketch</option> -->
-    </select>
+
     <slot></slot>
   </header>
 </template>
