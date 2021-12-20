@@ -513,7 +513,7 @@ export default defineComponent({
 			}
 			//防手抖，小于一定数值状态就不变
 			var step = Math.abs(this.scrollTopSave - scrollTop)
-			console.log("step:", step);
+			// console.log("step:", step);
 			this.scrollTopSave = scrollTop
 			if (step > 5) {
 				if (scrollTop > 400 && !this.scrollDownFlag) {
@@ -624,7 +624,7 @@ export default defineComponent({
 /* https://developer.mozilla.org/zh-CN/docs/Web/CSS/object-fit */
 .manga img {
 	margin: auto;
-	object-fit: scale-down;
+	/* object-fit: scale-down; */
 	padding-top: 3px;
 	padding-bottom: 3px;
 	padding-right: 0px;

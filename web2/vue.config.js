@@ -11,7 +11,7 @@ module.exports = {
     proxy: {
       '/': {
         //后端服务器地址
-        "target": "http://192.168.3.219:1234",
+        "target": "http://127.0.0.1:1234",
         //允许跨域
         "changeOrigin": true
       }
