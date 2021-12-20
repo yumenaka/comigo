@@ -1,4 +1,9 @@
 module.exports = {
+  // 在浏览器中展示源代码
+  configureWebpack: {
+    devtool: 'source-map',
+  },
+
   devServer: {
     host: "0.0.0.0",
     port: 4080,

@@ -14,10 +14,10 @@ axios.defaults.baseURL = "/api"
 app.use(VueAxios, axios);
 app.use(store);
 app.use(router);
-// 通用字体
-import 'vfonts/Lato.css'
-// 等宽字体
-import 'vfonts/FiraCode.css'
+// // 通用字体
+// import 'vfonts/Lato.css'
+// // 等宽字体
+// import 'vfonts/FiraCode.css'
 // vue3-lazyload
 // https://github.com/murongg/vue3-lazyload
 app.use(VueLazyLoad, {

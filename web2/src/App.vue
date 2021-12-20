@@ -40,13 +40,14 @@ export default {
     // 计算属性的 getter
     nowTemplate: function () {
       // var localValue ='scroll'
-      this.cookies.set("nowTemplate",'scroll');
+      // this.cookies.set("nowTemplate",'scroll');
       var localValue = this.cookies.get("nowTemplate");
-      console.log("nowTemplate is "+localValue);
+      // console.log("nowTemplate is "+localValue);
       if (localValue !== null) {
         return localValue;
       } else {
-        if (this.setting & this.setting.template) {
+        if (this.setting.template) {
+          this.cookies.set("nowTemplate",this.setting.template)
           return this.setting.template;
         } else {
           return ""

@@ -1,6 +1,6 @@
 <template>
 	<div id="ScrollMode" v-if="this.book" class="manga">
-		<Header v-if="this.showHeader">
+		<Header v-if="this.showHeaderFlag">
 			<n-space justify="space-between">
 				<!-- 放本书占位，以后放返回箭头 -->
 				<!-- SVG资源来自 https://www.xicons.org/#/ -->
@@ -58,12 +58,20 @@
 		<div v-for="(page, key) in book.pages" :key="page.url" @click="getMouseXY($event)">
 			<!-- v-lazy="page.url"  :src="page.url" -->
 			<img v-lazy="page.url" v-bind:H="page.height" v-bind:W="page.width" v-bind:key="key" />
-			<p v-if="showPageNum">{{ key + 1 }}/{{ book.all_page_num }}</p>
+			<p v-if="showPageNumFlag">{{ key + 1 }}/{{ book.all_page_num }}</p>
 		</div>
-		<n-drawer v-model:show="drawerActive" :height="275" :width="251" :placement="drawerPlacement">
+
+		<!-- 设置抽屉 -->
+		<n-drawer
+			v-model:show="drawerActive"
+			:height="275"
+			:width="251"
+			:placement="drawerPlacement"
+			@update:show="saveConfigToCookie"
+		>
 			<n-drawer-content title="页面设置" closable>
 				<!-- 切换页面模式 -->
-				<n-space v-if="this.debugMode">
+				<n-space v-if="this.debugModeFlag">
 					<n-radio-group v-model:value="selectedTemplate">
 						<n-radio-button
 							:checked="selectedTemplate === 'scroll'"
@@ -80,143 +88,136 @@
 					</n-radio-group>
 				</n-space>
 
-				<!-- 是否显示页头 -->
+				<!-- 开关：是否显示页头 -->
 				<n-space>
-					<n-switch size="large" v-model:value="showHeader" @update:value="setShowHeaderChange">
+					<n-switch size="large" v-model:value="this.showHeaderFlag" @update:value="setShowHeaderChange">
 						<template #checked>显示页头</template>
 						<template #unchecked>显示页头</template>
 					</n-switch>
 				</n-space>
 
-				<!-- 每一张漫画下面，是否显示当前页数 -->
+				<!-- 开关：是否显示当前页数 -->
 				<n-space>
-					<n-switch size="large" v-model:value="showPageNum" @update:value="setShowPageNumChange">
+					<n-switch
+						size="large"
+						v-model:value="this.showPageNumFlag"
+						@update:value="setShowPageNumChange"
+					>
 						<template #checked>显示页数</template>
 						<template #unchecked>显示页数</template>
 					</n-switch>
 				</n-space>
+				<p></p>
+				<n-space vertical>
+					<!-- 单页-漫画宽度-使用百分比 -->
+					<!-- 数字输入 -->
+					<n-input-number
+						v-if="this.imageWidth_usePercentFlag"
+						size="small"
+						:show-button="false"
+						v-model:value="this.singlePageWidth_Percent"
+					>
+						<template #prefix>单页漫画宽度：</template>
+						<template #suffix>%</template>
+					</n-input-number>
+					<!-- 滑动选择 -->
+					<n-slider
+						v-if="this.imageWidth_usePercentFlag"
+						v-model:value="this.singlePageWidth_Percent"
+						:step="1"
+						:max="100"
+						:min="10"
+						:format-tooltip="value => `${value}%`"
+						:marks="marks"
+					/>
 
-				<!-- <p>同步滚动</p> -->
-				<!-- <n-switch size="large"  v-model:value="syncScroll">syncScroll</n-switch> -->
+					<!-- 开页-漫画宽度-使用百分比  -->
+					<!-- 数字输入 -->
+					<n-input-number
+						v-if="this.imageWidth_usePercentFlag"
+						size="small"
+						:show-button="false"
+						v-model:value="this.doublePageWidth_Percent"
+					>
+						<template #prefix>双开页漫画宽度：</template>
+						<template #suffix>%</template>
+					</n-input-number>
+					<!-- 滑动选择 -->
+					<n-slider
+						v-if="this.imageWidth_usePercentFlag"
+						v-model:value="this.doublePageWidth_Percent"
+						:step="1"
+						:max="100"
+						:min="10"
+						:format-tooltip="value => `${value}%`"
+						:marks="marks"
+					/>
 
-				<!-- 页面宽度控制--单位是百分比 -->
-				<div v-if="this.WidthUsePercent">
-					<!-- 横屏模式 -->
-					<n-space vertical v-if="this.isLandscapeMode()">
-						<p>单页漫画宽度（%）</p>
-						<n-slider
-							v-model:value="singlePageWidth_Landscape"
-							:step="1"
-							:max="100"
-							:min="10"
-							:format-tooltip="value => `${value}%`"
-							:marks="marks"
-						/>
-						<p>开页漫画宽度（%）</p>
-						<n-slider
-							v-model:value="doublePageWidth_Landscape"
-							:step="1"
-							:max="100"
-							:min="10"
-							:format-tooltip="value => `${value}%`"
-							:marks="marks"
-						/>
-					</n-space>
+					<!-- 单页-漫画宽度-使用固定值 -->
+					<!-- 数字输入 -->
+					<n-input-number
+						v-if="!this.imageWidth_usePercentFlag"
+						size="small"
+						:show-button="false"
+						v-model:value="this.singlePageWidth_PX"
+					>
+						<template #prefix>单页漫画宽度：</template>
+						<template #suffix>px</template>
+					</n-input-number>
+					<!-- 滑动选择 -->
+					<n-slider
+						v-if="!this.imageWidth_usePercentFlag"
+						v-model:value="this.singlePageWidth_PX"
+						:step="20"
+						:max="1500"
+						:min="200"
+						:format-tooltip="value => `${value}px`"
+						:marks="marks2"
+					/>
 
-					<!-- 竖屏模式 -->
-					<n-space vertical v-if="!this.isLandscapeMode()">
-						<p>单页漫画宽度（%）</p>
-						<n-slider
-							v-model:value="singlePageWidth_Portrait"
-							:step="1"
-							:max="100"
-							:min="10"
-							:format-tooltip="value => `${value}%`"
-							:marks="marks"
-						/>
-						<p>开页漫画宽度（%）</p>
-						<n-slider
-							v-model:value="doublePageWidth_Portrait"
-							:step="1"
-							:max="100"
-							:min="10"
-							:format-tooltip="value => `${value}%`"
-							:marks="marks"
-						/>
-					</n-space>
-				</div>
+					<!-- 数字输入 -->
+					<n-input-number
+						v-if="!this.imageWidth_usePercentFlag"
+						size="small"
+						:show-button="false"
+						v-model:value="this.doublePageWidth_PX"
+					>
+						<template #prefix>双开页漫画宽度：</template>
+						<template #suffix>px</template>
+					</n-input-number>
 
-				<!-- 页面宽度控制--单位是指定值 -->
-				<div v-if="!this.WidthUsePercent">
-					<!-- 横屏模式 -->
-					<n-space vertical v-if="this.isLandscapeMode()">
-						<p>单页漫画宽度（px）</p>
-						<n-slider
-							v-model:value="singlePageWidth_Landscape"
-							:step="20"
-							:max="1500"
-							:min="200"
-							:format-tooltip="value => `${value}px`"
-							:marks="marks2"
-						/>
-						<p>开页漫画宽度（px）</p>
-						<n-slider
-							v-model:value="doublePageWidth_Landscape"
-							:step="20"
-							:max="1920"
-							:min="200"
-							:format-tooltip="value => `${value}px`"
-							:marks="marks3"
-						/>
-					</n-space>
+					<!-- 滑动选择 -->
+					<n-slider
+						v-if="!this.imageWidth_usePercentFlag"
+						v-model:value="this.doublePageWidth_PX"
+						:step="20"
+						:max="1920"
+						:min="200"
+						:format-tooltip="value => `${value}px`"
+						:marks="marks3"
+					/>
 
-					<!-- 竖屏模式 -->
-					<n-space vertical v-if="!this.isLandscapeMode()">
-						<p>单页漫画宽度（px）</p>
-						<n-slider
-							v-model:value="singlePageWidth_Portrait"
-							:step="20"
-							:max="1500"
-							:min="200"
-							:format-tooltip="value => `${value}px`"
-							:marks="marks2"
-						/>
-						<p>开页漫画宽度（px）</p>
-						<n-slider
-							v-model:value="doublePageWidth_Portrait"
-							:step="20"
-							:max="1500"
-							:min="200"
-							:format-tooltip="value => `${value}px`"
-							:marks="marks2"
-						/>
-					</n-space>
-				</div>
-
-				<!-- 设定宽度单位 -->
-				<n-space>
+					<!-- 开关：横屏状态下，宽度单位是百分比还是固定值 -->
 					<n-switch
 						size="large"
-						v-model:value="widthUsePercent"
+						v-model:value="this.imageWidth_usePercentFlag"
 						:rail-style="railStyle"
-						@update:value="setWidthUsePercent"
+						@update:value="this.setImageWidthUsePercentFlag"
 					>
 						<template #checked>宽度:使用百分比%</template>
 						<template #unchecked>宽度:使用固定值px</template>
 					</n-switch>
 				</n-space>
-				<p v-if="this.isLandscapeMode()">现在是横屏状态</p>
-				<p v-if="!this.isLandscapeMode()">现在是竖屏状态</p>
 			</n-drawer-content>
 		</n-drawer>
-		<n-back-top :show="showBackTop" type="info" color="#8a2be2" :right="20" :bottom="20" />
+		<n-back-top :show="showBackTopFlag" type="info" color="#8a2be2" :right="20" :bottom="20" />
 		<n-button @click="scrollToTop(90);" size="large" secondary strong>Back To Top</n-button>
 	</div>
 </template>
 
 <script>
 // 直接导入组件并使用它。这种情况下，只有导入的组件才会被打包。
-import { NButton, NBackTop, NDrawer, NDrawerContent, NSpace, NSlider, NRadioButton, NRadioGroup, NSwitch, NIcon, } from 'naive-ui'
+import { NButton, NBackTop, NDrawer, NDrawerContent, NSpace, NSlider, NRadioButton, NRadioGroup, NSwitch, NIcon,NInputNumber } from 'naive-ui'
 import Header from "@/components/Header.vue";
 import { defineComponent, ref } from 'vue'
 import { useCookies } from "vue3-cookies";// https://github.com/KanHarI/vue3-cookies
@@ -239,11 +240,12 @@ export default defineComponent({
 		NIcon,//图标  https://www.naiveui.com/zh-CN/os-theme/components/icon
 		// NPageHeader,//页头 https://www.naiveui.com/zh-CN/os-theme/components/page-header
 		// NAvatar, //头像 https://www.naiveui.com/zh-CN/os-theme/components/avatar
+		NInputNumber,//数字输入 https://www.naiveui.com/zh-CN/os-theme/components/input-number
 	},
 	setup() {
 		//此处不能使用this
 		const { cookies } = useCookies();
-		//抽屉相关
+		//设置用的抽屉
 		const drawerActive = ref(false)
 		const drawerPlacement = ref('right')
 		const drawerActivate = (place) => {
@@ -260,8 +262,6 @@ export default defineComponent({
 			drawerPlacement,
 			//激活抽屉的函数
 			drawerActivate,
-
-
 			//开关用的颜色
 			railStyle: ({ focused, checked }) => {
 				const style = {}
@@ -303,42 +303,43 @@ export default defineComponent({
 	data() {
 		return {
 			//开发模式 还没有做的功能与设置，设置Debug以后才能见到
-			debugMode: true,
+			debugModeFlag: true,
 			//书籍数据，需要从远程拉取
 			book: null,
 			//是否显示页头
-			showHeader: true,
+			showHeaderFlag: true,
 			//是否显示页数
-			showPageNum: false,
+			showPageNumFlag: false,
 			//是否显示回到顶部按钮
-			showBackTop: false,
+			showBackTopFlag: false,
 			//是否正在向下滚动
-			scrollDown: false,
+			scrollDownFlag: false,
 			//存储现在滚动的位置
 			scrollTopSave: 0,
 			//同步滚动，目前还没做
-			syncScroll: false,
+			syncScrollFlag: false,
 			//鼠标点击或触摸的位置
 			clickX: 0,
 			clickY: 0,
 			//可见范围是否是横向
-			landscapeView: true,
-			//屏幕宽横比，landscapeView的判断依据
+			isLandscapeMode: true,
+			isPortraitMode: false,
+			//屏幕宽横比，inLandscapeMode的判断依据
 			aspectRatio: 1.2,
 
 			//状态驱动的动态 CSS!!!!!
 			// https://v3.cn.vuejs.org/api/sfc-style.html#%E7%8A%B6%E6%80%81%E9%A9%B1%E5%8A%A8%E7%9A%84%E5%8A%A8%E6%80%81-css
-			WidthUsePercent: true,
-			//横屏(Landscape)模式的漫画页宽度
-			singlePageWidth_Landscape: 50,
-			doublePageWidth_Landscape: 95,
-			// sPWL: "50%",
-			// dPWL: "95%",
-			//竖屏(Portrait)模式的漫画页宽度
-			singlePageWidth_Portrait: 100,
-			doublePageWidth_Portrait: 100,
-			// sPWP: "100%",
-			// dPWP: "100%",
+			//图片宽度的单位，是否使用百分比
+			imageWidth_usePercentFlag: true,
+
+			//横屏(Landscape)状态的漫画页宽度，百分比
+			singlePageWidth_Percent: 50,
+			doublePageWidth_Percent: 95,
+
+			//横屏(Landscape)状态的漫画页宽度，PX
+			singlePageWidth_PX: 720,
+			doublePageWidth_PX: 1080,
+
 			//选择了哪个阅读模板
 			selectedTemplate: "",
 			//可见范围宽高的具体值
@@ -347,7 +348,69 @@ export default defineComponent({
 		};
 	},
 	//Vue3生命周期:  https://v3.cn.vuejs.org/api/options-lifecycle-hooks.html#beforecreate
-	//挂载前
+	created() {
+
+		window.addEventListener("scroll", this.onScroll);
+		window.addEventListener("resize", this.onResize);
+		//根据cookie初始化默认值,或初始化cookie值,cookie读取出来的都是字符串，不要直接用
+		//是否显示页头
+		if (this.cookies.get("showHeaderFlag") === "true") {
+			this.showHeaderFlag = true;
+		} else if (this.cookies.get("showHeaderFlag") === "false") {
+			this.showHeaderFlag = false;
+		}
+		//console.log("读取cookie并初始化: showHeaderFlag=" + this.showHeaderFlag);
+
+		//是否显示页数
+		if (this.cookies.get("showPageNumFlag") === "true") {
+			this.showPageNumFlag = true;
+		} else if (this.cookies.get("showPageNumFlag") === "false") {
+			this.showPageNumFlag = false;
+		}
+		//console.log("读取cookie并初始化: showPageNumFlag=" + this.showPageNumFlag);
+
+		//宽度是否使用百分比
+		if (this.cookies.get("imageWidth_usePercentFlag") === "true") {
+			this.imageWidth_usePercentFlag = true;
+		} else if (this.cookies.get("imageWidth_usePercentFlag") === "false") {
+			this.imageWidth_usePercentFlag = false;
+		}
+
+		//javascript 数字类型转换：https://www.runoob.com/js/js-type-conversion.html
+		// NaN不能通过相等操作符（== 和 ===）来判断
+
+		//漫画页宽度，Percent
+		if (this.cookies.get("singlePageWidth_Percent") != null) {
+			let saveNum = Number(this.cookies.get("singlePageWidth_Percent"));
+			if (!isNaN(saveNum)) {
+				this.singlePageWidth_Percent = saveNum;
+			}
+		}
+
+		if (this.cookies.get("doublePageWidth_Percent") != null) {
+			let saveNum = Number(this.cookies.get("doublePageWidth_Percent"));
+			if (!isNaN(saveNum)) {
+				this.doublePageWidth_Percent = saveNum;
+			}
+		}
+
+		//漫画页宽度，PX
+		if (this.cookies.get("singlePageWidth_PX") != null) {
+			let saveNum = Number(this.cookies.get("singlePageWidth_PX"));
+			if (!isNaN(saveNum)) {
+				this.singlePageWidth_PX = saveNum;
+			}
+		}
+		if (this.cookies.get("doublePageWidth_PX") != null) {
+			let saveNum = Number(this.cookies.get("doublePageWidth_PX"));
+			if (!isNaN(saveNum)) {
+				this.doublePageWidth_PX = saveNum;
+			}
+		}
+
+	},
+
+	// //挂载前
 	beforeMount() {
 		this.axios
 			.get("/book.json")
@@ -360,48 +423,51 @@ export default defineComponent({
 	},
 	onMounted() {
 		//console.log('mounted in the composition api!')
-		window.addEventListener("scroll", this.onScroll);
-		window.addEventListener("resize", this.onResize);
-		this.landscapeView = this.isLandscapeMode();
+
+		this.isLandscapeMode = this.inLandscapeModeCheck();
+		this.isPortraitMode = !this.inLandscapeModeCheck();
 		// https://v3.cn.vuejs.org/api/options-lifecycle-hooks.html#beforemount
 		this.$nextTick(function () {
 			// 仅在整个视图都被渲染之后才会运行的代码
-			//根据cookie初始化默认值
-			if (this.cookies.get("showHeader")) {
-				this.showHeader = this.cookies.get("showHeader");
-				console.log("读取cookie并初始化: showHeader=" + this.showHeader);
-			}
-			if (this.cookies.get("showPageNum")) {
-				this.showPageNum = this.cookies.get("showPageNum");
-				console.log("读取cookie并初始化: showPageNum=" + this.showPageNum);
-			}
 		})
 	},
 	//卸载前
 	beforeUnmount() {
-		// 组件销毁时，销毁监听事件
+		// 组件销毁前，销毁监听事件
 		window.removeEventListener("scroll", this.onScroll);
 		window.removeEventListener('resize', this.onResize)
 	},
 	methods: {
+		//如果在一个组件上使用了 v-model:xxx，应该使用 @update:xxx  https://www.naiveui.com/zh-CN/os-theme/docs/common-issues
+		saveConfigToCookie(show) {
+			console.log("show:" + show)
+			// 组件销毁前，储存cookie
+			this.cookies.set("showHeaderFlag", this.showHeaderFlag);
+			this.cookies.set("showPageNumFlag", this.showPageNumFlag);
+			this.cookies.set("imageWidth_usePercentFlag", this.imageWidth_usePercentFlag);
+			this.cookies.set("singlePageWidth_Percent", this.singlePageWidth_Percent);
+			this.cookies.set("doublePageWidth_Percent", this.doublePageWidth_Percent);
+			this.cookies.set("singlePageWidth_PX", this.singlePageWidth_PX);
+			this.cookies.set("doublePageWidth_PX", this.doublePageWidth_PX);
+		},
 		setShowHeaderChange(value) {
 			console.log("value:" + value);
-			this.showHeader = value;
-			this.cookies.set("showHeader", value);
-			console.log("cookie设置完毕: showHeader=" + this.cookies.get("showHeader"));
+			this.showHeaderFlag = value;
+			this.cookies.set("showHeaderFlag", value);
+			console.log("cookie设置完毕: showHeaderFlag=" + this.cookies.get("showHeaderFlag"));
 		},
 		setShowPageNumChange(value) {
 			console.log("value:" + value);
-			this.showPageNum = value;
-			this.cookies.set("showPageNum", value);
-			console.log("cookie设置完毕: showPageNum=" + this.cookies.get("showPageNum"));
+			this.showPageNumFlag = value;
+			this.cookies.set("showPageNumFlag", value);
+			console.log("cookie设置完毕: showPageNumFlag=" + this.cookies.get("showPageNumFlag"));
 		},
 
-		setWidthUsePercent(value) {
+		setImageWidthUsePercentFlag(value) {
 			console.log("value:" + value);
-			this.WidthUsePercent = value;
-			this.cookies.set("WidthUsePercent", value);
-			console.log("cookie设置完毕: WidthUsePercent=" + this.WidthUsePercent);
+			this.imageWidth_usePercentFlag = value;
+			this.cookies.set("imageWidth_usePercentFlag", value);
+			console.log("cookie设置完毕: imageWidth_usePercentFlag=" + this.imageWidth_usePercentFlag);
 		},
 
 		//切换模板的函数，需要配合vue-router
@@ -426,38 +492,40 @@ export default defineComponent({
 			// var aspectRatio = window.innerWidth / window.innerHeight
 			this.aspectRatio = this.clientWidth / this.clientHeight
 			//console.log("OnReSize,aspectRatio=" + this.aspectRatio);
-			// 为了调试的时候更方便，阈值并不是正方形
-			if (this.aspectRatio > (17 / 19)) {
-				this.landscapeView = true
+			// 为了调试的时候方便，阈值是正方形
+			if (this.aspectRatio > (19 / 19)) {
+				this.isLandscapeMode = true
+				this.isPortraitMode = false
 			} else {
-				this.landscapeView = false
+				this.isLandscapeMode = false
+				this.isPortraitMode = true
 			}
 		},
 		//页面滚动的时候改变各种值
 		onScroll() {
 			var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
 			if (scrollTop > this.scrollTopSave) {
-				this.scrollDown = true
+				this.scrollDownFlag = true
 				// console.log("下滚中，距离", scrollTop);
 			} else {
-				this.scrollDown = false
+				this.scrollDownFlag = false
 				// console.log("上滚中，距离", scrollTop);
 			}
 			//防手抖，小于一定数值状态就不变
 			var step = Math.abs(this.scrollTopSave - scrollTop)
-			// console.log("step:", step);
+			console.log("step:", step);
 			this.scrollTopSave = scrollTop
 			if (step > 5) {
-				if (scrollTop > 400 && !this.scrollDown) {
+				if (scrollTop > 400 && !this.scrollDownFlag) {
 					//页面高度大于400，且正在上滚的时候显示按钮
-					this.showBackTop = true
+					this.showBackTopFlag = true
 				} else {
 					//页面高度小于200执行操作
-					this.showBackTop = false
+					this.showBackTopFlag = false
 				}
 			}
 		},
-		//获取鼠标位置，然后做点什么
+		//获取鼠标位置，决定是否打开设置面板
 		getMouseXY(e) {
 			this.clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离，单位为px）
 			this.clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离，单位为px）
@@ -469,10 +537,10 @@ export default defineComponent({
 
 			var availHeight = window.innerWidth
 			var availWidth = window.innerHeight
-			var MinX = availHeight * 0.40
-			var MaxX = availHeight * 0.60
-			var MinY = availWidth * 0.40
-			var MaxY = availWidth * 0.60
+			var MinX = availHeight * 0.37
+			var MaxX = availHeight * 0.65
+			var MinY = availWidth * 0.37
+			var MaxY = availWidth * 0.65
 			if ((this.clickX > MinX && this.clickX < MaxX) && (this.clickY > MinY && this.clickY < MaxY)) {
 				//alert("点中了设置区域！")
 				//console.log("点中了设置区域！");
@@ -495,57 +563,52 @@ export default defineComponent({
 		//根据可视区域(viewport)长宽比，确认是横屏还是竖屏
 		// aspect-ratio https://developer.mozilla.org/zh-CN/docs/Web/CSS/@media/aspect-ratio
 		// window.innerWidth  不是响应式依赖，所以不能用计算属性
-		isLandscapeMode() {
+		inLandscapeModeCheck() {
 			//避免除数等于0，虽然正常情况下不会触发
 			// if (window.innerHeight == 0) {
 			// 	return false
 			// }
-			this.aspectRatio = window.innerWidth / window.innerHeight
 			// var aspectRatio = document.documentElement.clientWidth / document.documentElement.clientHeight
-
-			var landscape = true
-			// 为了半屏的时候更方便，阈值并不是正方形
-			if (this.aspectRatio > (17 / 19)) {
-				landscape = true
+			this.aspectRatio = window.innerWidth / window.innerHeight
+			// console.log("aspectRatio=" + this.aspectRatio);
+			// 为了半屏的时候更方便，阈值是正方形
+			if (this.aspectRatio > (19 / 19)) {
+				return true
 			} else {
-				landscape = false
+				return false
 			}
-			// console.log("LandscapeMode=" + landscape + " aspectRatio=" + this.aspectRatio);
-			return landscape
 		},
 	},
 
-
 	computed: {
 		sPWL() {
-			if (this.WidthUsePercent) {
-				return this.singlePageWidth_Landscape + '%';
+			if (this.imageWidth_usePercentFlag) {
+				return this.singlePageWidth_Percent + '%';
 			} else {
-				return this.singlePageWidth_Landscape + 'px';
+				return this.singlePageWidth_PX + 'px';
+			}
+		},
+		dPWL() {
+			if (this.imageWidth_usePercentFlag) {
+				return this.doublePageWidth_Percent + '%';
+			} else {
+				return this.doublePageWidth_PX + 'px';
 			}
 
 		},
-		dPWL() {
-			if (this.WidthUsePercent) {
-				return this.doublePageWidth_Landscape + '%';
-			} else {
-				return this.doublePageWidth_Landscape + 'px';
-			}
-		},
 		sPWP() {
-			if (this.WidthUsePercent) {
-				return this.singlePageWidth_Portrait + '%';
+			if (this.imageWidth_usePercentFlag) {
+				return this.singlePageWidth_Percent + '%';
 			} else {
-				return this.singlePageWidth_Portrait + 'px';
+				return this.singlePageWidth_PX + 'px';
 			}
 		},
 		dPWP() {
-			if (this.WidthUsePercent) {
-				return this.doublePageWidth_Portrait + '%';
+			if (this.imageWidth_usePercentFlag) {
+				return this.doublePageWidth_Percent + '%';
 			} else {
-				return this.doublePageWidth_Portrait + 'px';
+				return this.doublePageWidth_PX + 'px';
 			}
-
 		},
 	}
 });
