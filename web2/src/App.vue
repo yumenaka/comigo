@@ -1,23 +1,27 @@
 <template>
   <div class="home">
-    <ScrollMode v-if="nowTemplate === 'scroll'"></ScrollMode>
-    <SingleMode v-if="nowTemplate === 'single'"></SingleMode>
+      <ScrollMode v-if="nowTemplate === 'scroll'"></ScrollMode>
+      <FlipMode v-if="nowTemplate === 'single'"></FlipMode>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
 import ScrollMode from "@/components/ScrollMode.vue";
-import SingleMode from "@/components/SingleMode.vue";
+import FlipMode from "@/components/FlipMode.vue";
 import { useCookies } from "vue3-cookies";
-export default {
+import { defineComponent } from 'vue'
+
+
+export default  defineComponent({
   name: "Home", //默认为 default。如果 <router-view>设置了名称，则会渲染对应的路由配置中 components 下的相应组件。
   components: {
     ScrollMode,
-    SingleMode,
+    FlipMode,
+    
   },
   setup() {
-    const { cookies } = useCookies(); 
+    const { cookies } = useCookies();
     return { cookies };
   },
   data() {
@@ -31,7 +35,7 @@ export default {
       .then((response) => {
         if (response.status == 200) {
           this.setting = response.data;
-          console.log("get setting : "+response.data);
+          console.log("get setting : " + response.data);
         }
       })
       .catch((error) => alert(error));
@@ -47,7 +51,7 @@ export default {
         return localValue;
       } else {
         if (this.setting.template) {
-          this.cookies.set("nowTemplate",this.setting.template)
+          this.cookies.set("nowTemplate", this.setting.template)
           return this.setting.template;
         } else {
           return ""
@@ -64,7 +68,7 @@ export default {
       console.log(number);
     },
   },
-};
+});
 </script>
 
 <style>

@@ -170,7 +170,7 @@
 						v-model:value="this.singlePageWidth_PX"
 						:step="20"
 						:max="1500"
-						:min="200"
+						:min="300"
 						:format-tooltip="value => `${value}px`"
 						:marks="marks2"
 					/>
@@ -192,7 +192,7 @@
 						v-model:value="this.doublePageWidth_PX"
 						:step="20"
 						:max="1920"
-						:min="200"
+						:min="300"
 						:format-tooltip="value => `${value}px`"
 						:marks="marks3"
 					/>
@@ -349,7 +349,6 @@ export default defineComponent({
 	},
 	//Vue3生命周期:  https://v3.cn.vuejs.org/api/options-lifecycle-hooks.html#beforecreate
 	created() {
-
 		window.addEventListener("scroll", this.onScroll);
 		window.addEventListener("resize", this.onResize);
 		//根据cookie初始化默认值,或初始化cookie值,cookie读取出来的都是字符串，不要直接用

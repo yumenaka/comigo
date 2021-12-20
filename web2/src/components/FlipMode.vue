@@ -1,6 +1,6 @@
 <template>
-	<div id="SingleMode" v-if="this.book">
-		<Header v-if="this.showHeader">
+	<div id="FlipMode" v-if="this.book">
+		<Header v-if="this.showHeaderFlag_FlipMode">
 			<n-space justify="space-between">
 				<!-- 放本书占位，以后放返回箭头 -->
 				<!-- SVG资源来自 https://www.xicons.org/#/ -->
@@ -55,20 +55,25 @@
 			</n-space>
 		</Header>
 
-		<div id="SinglePageTemplate">
+		<n-space vertical align="center" justify="center" size="large">
 			<div class="single_page_main" @click="getMouseXY($event)">
 				<img
-					v-on:click="addPage(1)"
 					v-if="now_page <= this.book.all_page_num && now_page >= 1"
 					lazy-src="/resources/favicon.ico"
 					v-bind:src="this.book.pages[now_page - 1].url"
 				/>
 				<img />
 			</div>
-			<slot></slot>
-		</div>
+			<n-pagination v-if="this.showPaginationFlag" v-model:page="now_page" :page-count="this.book.all_page_num" />
+		</n-space>
 
-		<n-drawer v-model:show="drawerActive" :height="275" :width="251" :placement="drawerPlacement">
+		<n-drawer
+			v-model:show="drawerActive"
+			@update:show="saveConfigToCookie"
+			:height="275"
+			:width="251"
+			:placement="drawerPlacement"
+		>
 			<n-drawer-content title="页面设置" closable>
 				<!-- 切换页面模式 -->
 				<n-space v-if="this.debugModeFlag">
@@ -90,15 +95,11 @@
 
 				<!-- 开关：开启自动双页模式 -->
 				<n-space>
-					<n-switch size="large" v-model:value="this.showHeaderFlag" @update:value="setShowHeaderChange">
-						<template #checked>显示页头</template>
-						<template #unchecked>显示页头</template>
-					</n-switch>
-				</n-space>
-
-				<!-- 开关：是否显示页头 -->
-				<n-space>
-					<n-switch size="large" v-model:value="this.showHeaderFlag" @update:value="setShowHeaderChange">
+					<n-switch
+						size="large"
+						v-model:value="this.showHeaderFlag_FlipMode"
+						@update:value="setShowHeaderChange"
+					>
 						<template #checked>显示页头</template>
 						<template #unchecked>显示页头</template>
 					</n-switch>
@@ -111,8 +112,8 @@
 						v-model:value="this.showPaginationFlag"
 						@update:value="setShowPaginationFlagChange"
 					>
-						<template #checked>显示页数</template>
-						<template #unchecked>显示页数</template>
+						<template #checked>显示分页导航条</template>
+						<template #unchecked>显示分页导航条</template>
 					</n-switch>
 				</n-space>
 
@@ -139,7 +140,7 @@ import { useCookies } from "vue3-cookies";
 import Header from "@/components/Header.vue";
 import { defineComponent, ref } from 'vue'
 // 直接导入组件并使用它。这种情况下，只有导入的组件才会被打包。
-import { NDrawer, NDrawerContent, NSpace, NSlider, NRadioButton, NRadioGroup, NSwitch, NIcon, } from 'naive-ui'
+import { NDrawer, NDrawerContent, NSpace, NSlider, NRadioButton, NRadioGroup, NSwitch, NIcon, NPagination } from 'naive-ui'
 
 export default defineComponent({
 	components: {
@@ -158,6 +159,7 @@ export default defineComponent({
 		NIcon,//图标  https://www.naiveui.com/zh-CN/os-theme/components/icon
 		// NPageHeader,//页头 https://www.naiveui.com/zh-CN/os-theme/components/page-header
 		// NAvatar, //头像 https://www.naiveui.com/zh-CN/os-theme/components/avatar
+		NPagination, //分页 https://www.naiveui.com/zh-CN/os-theme/components/pagination
 	},
 	setup() {
 		const { cookies } = useCookies();
@@ -201,7 +203,7 @@ export default defineComponent({
 			//书籍数据，需要从远程拉取
 			book: null,
 			//是否显示页头
-			showHeaderFlag: true,
+			showHeaderFlag_FlipMode: true,
 			//是否显示分页
 			showPaginationFlag: true,//https://www.naiveui.com/zh-CN/os-theme/components/pagination
 			//鼠标点击或触摸的位置
@@ -216,21 +218,17 @@ export default defineComponent({
 
 	created() {
 		//是否显示页头
-		if (this.cookies.get("showHeaderFlag_SingleMode") === "true") {
-			this.showHeaderFlag = true;
-		} else if (this.cookies.get("showHeaderFlag_SingleMode") === "false") {
-			this.showHeaderFlag = false;
-		} else {
-			this.cookies.set("showHeaderFlag_SingleMode", this.showHeaderFlag);
+		if (this.cookies.get("showHeaderFlag_FlipMode") === "true") {
+			this.showHeaderFlag_FlipMode = true;
+		} else if (this.cookies.get("showHeaderFlag_FlipMode") === "false") {
+			this.showHeaderFlag_FlipMode = false;
 		}
 
 		//是否显示分页导航
-		if (this.cookies.get("showPaginationFlag_SingleMode") === "true") {
+		if (this.cookies.get("showPaginationFlag_FlipMode") === "true") {
 			this.showPaginationFlag = true;
-		} else if (this.cookies.get("showPaginationFlag_SingleMode") === "false") {
+		} else if (this.cookies.get("showPaginationFlag_FlipMode") === "false") {
 			this.showPaginationFlag = false;
-		} else {
-			this.cookies.set("showPaginationFlag_SingleMode", this.showPaginationFlag);
 		}
 	},
 	//挂载前
@@ -255,21 +253,30 @@ export default defineComponent({
 	},
 
 	methods: {
+		// 关闭抽屉的时候保存设置
+		saveConfigToCookie() {
+			// console.log("show:" + show)
+			// 组件销毁前，储存cookie
+			this.cookies.set("showHeaderFlag_FlipMode", this.showHeaderFlag_FlipMode);
+			this.cookies.set("showPaginationFlag", this.showPaginationFlag);
+
+		},
+
 
 		setShowHeaderChange(value) {
 			console.log("value:" + value);
-			this.showHeaderFlag = value;
-			this.cookies.set("showHeaderFlag", value);
-			console.log("cookie设置完毕: showHeaderFlag=" + this.cookies.get("showHeaderFlag"));
+			this.showHeaderFlag_FlipMode = value;
+			this.cookies.set("showHeaderFlag_FlipMode", value);
+			console.log("cookie设置完毕: showHeaderFlag_FlipMode=" + this.cookies.get("showHeaderFlag_FlipMode"));
 		},
 		setShowPaginationFlagChange(value) {
 			console.log("value:" + value);
-			this.showPageshowPaginationFlagNumFlag = value;
+			this.showPaginationFlag = value;
 			this.cookies.set("showPaginationFlag", value);
 			console.log("cookie设置完毕: showPaginationFlag=" + this.cookies.get("showPaginationFlag"));
 		},
 
-		
+
 		//切换模板的函数，需要配合vue-router
 		onChangeTemplate() {
 			// this.selectedTemplate = e.target.value
@@ -297,14 +304,16 @@ export default defineComponent({
 
 			var availHeight = window.innerWidth
 			var availWidth = window.innerHeight
-			var MinX = availHeight * 0.37
-			var MaxX = availHeight * 0.65
-			var MinY = availWidth * 0.37
-			var MaxY = availWidth * 0.65
+			var MinX = availHeight * 0.40
+			var MaxX = availHeight * 0.60
+			var MinY = availWidth * 0.40
+			var MaxY = availWidth * 0.60
 			if ((this.clickX > MinX && this.clickX < MaxX) && (this.clickY > MinY && this.clickY < MaxY)) {
 				//alert("点中了设置区域！")
 				//console.log("点中了设置区域！");
 				this.drawerActivate('right')
+			}else {
+				this.flipPage(1);
 			}
 			// console.log("window.innerWidth=", window.innerWidth, "window.innerHeight=", window.innerHeight);
 			// console.log("MinX=", MinX, "MaxX=", MaxX);
@@ -312,7 +321,7 @@ export default defineComponent({
 			// console.log("x=", e.x, "y=", e.y);
 		},
 
-		addPage: function (num) {
+		flipPage: function (num) {
 			if (
 				this.now_page + num <= this.book.all_page_num &&
 				this.now_page + num >= 1
@@ -336,13 +345,13 @@ export default defineComponent({
 				case "ArrowUp":
 				case "PageUp":
 				case "ArrowLeft":
-					this.addPage(-1); //上一页
+					this.flipPage(-1); //上一页
 					break;
 				case "Space":
 				case "ArrowDown":
 				case "PageDown":
 				case "ArrowRight":
-					this.addPage(1); //下一页
+					this.flipPage(1); //下一页
 					break;
 				case "Home":
 					this.toPage(1); //跳转到第一页
@@ -370,17 +379,28 @@ export default defineComponent({
 
 <style scoped>
 .single_page_main {
-	width: 100%;
-	height: 95vh;
-	display: flex;
+	width: 1500px;
+	height: 900px;
+	/* display: flex;
 	justify-content: center;
-	align-items: center;
+	align-items: center; */
+	background-color: rgb(154, 108, 201);
+	/* padding-top: 3px;
+	padding-bottom: 3px;
+	padding-right: 0px;
+	padding-left: 0px; */
+	border-radius: 7px;
+	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 .single_page_main img {
-	max-width: 100%;
-	max-height: 100%;
-	display: block;
-	margin: center;
+
+	height: 100%;
+	padding-top: 3px;
+	padding-bottom: 3px;
+	padding-right: 0px;
+	padding-left: 0px;
+	border-radius: 7px;
+	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 </style>
