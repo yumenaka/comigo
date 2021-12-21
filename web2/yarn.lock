@@ -1239,6 +1239,11 @@
   dependencies:
     "@types/yargs-parser" "*"
 
+"@vicons/ionicons5@^0.11.0":
+  "integrity" "sha512-4IWamqtXUsuCdlW6NQc2xyoJ+PUXGMwzSrppQbdVCYg0pjYld89jOfLOIkuTWq8o2XUa+Q1/78jzWBtXMTojNg=="
+  "resolved" "https://registry.npmjs.org/@vicons/ionicons5/-/ionicons5-0.11.0.tgz"
+  "version" "0.11.0"
+
 "@vue/babel-helper-vue-jsx-merge-props@^1.2.1":
   "integrity" "sha1-MWJKelBfsU2h1YAjclpMXycOaoE="
   "resolved" "https://registry.nlark.com/@vue/babel-helper-vue-jsx-merge-props/download/@vue/babel-helper-vue-jsx-merge-props-1.2.1.tgz"

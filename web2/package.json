@@ -18,6 +18,7 @@
     "vuex": "^4.0.0-0"
   },
   "devDependencies": {
+    "@vicons/ionicons5": "^0.11.0",
     "@vue/cli-plugin-babel": "~4.5.0",
     "@vue/cli-plugin-eslint": "~4.5.0",
     "@vue/cli-plugin-router": "~4.5.0",

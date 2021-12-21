@@ -56,7 +56,13 @@
 		</Header>
 
 		<n-space vertical align="center" justify="center" size="large">
-			<div class="single_page_main" @click="getMouseXY($event)">
+			<div
+				class="single_page_main"
+				@click="getMouseXY($event)"
+				@mouseover="mouseOver"
+				:style="active"
+				@mouseleave="mouseLeave"
+			>
 				<img
 					v-if="now_page <= this.book.all_page_num && now_page >= 1"
 					lazy-src="/resources/favicon.ico"
@@ -64,7 +70,11 @@
 				/>
 				<img />
 			</div>
-			<n-pagination v-if="this.showPaginationFlag" v-model:page="now_page" :page-count="this.book.all_page_num" />
+			<n-pagination
+				v-if="this.showPaginationFlag"
+				v-model:page="now_page"
+				:page-count="this.book.all_page_num"
+			/>
 		</n-space>
 
 		<n-drawer
@@ -212,6 +222,7 @@ export default defineComponent({
 			//图片宽度的单位，是否使用百分比
 			imageWidth_usePercentFlag: true,
 			now_page: 1,
+			active: ""
 		};
 	},
 	//在选项API中使用 Vue 生命周期钩子
@@ -253,6 +264,16 @@ export default defineComponent({
 	},
 
 	methods: {
+
+		mouseOver() {
+			//鼠标移入改变样式
+			this.active = 'background-color: rgb(235,235,235)';
+		},
+		mouseLeave() {
+			//清空样式
+			this.active = '';
+		},
+
 		// 关闭抽屉的时候保存设置
 		saveConfigToCookie() {
 			// console.log("show:" + show)
@@ -261,8 +282,6 @@ export default defineComponent({
 			this.cookies.set("showPaginationFlag", this.showPaginationFlag);
 
 		},
-
-
 		setShowHeaderChange(value) {
 			console.log("value:" + value);
 			this.showHeaderFlag_FlipMode = value;
@@ -296,12 +315,7 @@ export default defineComponent({
 		getMouseXY(e) {
 			this.clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离，单位为px）
 			this.clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离，单位为px）
-			//浏览器的视口，不包括工具栏和滚动条:
-			// document.documentElement.clientHeight document.documentElement.ClientWidth不兼容手机？ 
-			// var availHeight = document.documentElement.clientHeight
-			// var availWidth = document.documentElement.clientWidth
-			// console.log("clientHeigh=", document.documentElement.clientHeight, "ClientWidth=", document.documentElement.clientWidth);
-
+			//浏览器的可视范围，不包括工具栏和滚动条:
 			var availHeight = window.innerWidth
 			var availWidth = window.innerHeight
 			var MinX = availHeight * 0.40
@@ -312,7 +326,7 @@ export default defineComponent({
 				//alert("点中了设置区域！")
 				//console.log("点中了设置区域！");
 				this.drawerActivate('right')
-			}else {
+			} else {
 				this.flipPage(1);
 			}
 			// console.log("window.innerWidth=", window.innerWidth, "window.innerHeight=", window.innerHeight);
@@ -380,22 +394,17 @@ export default defineComponent({
 <style scoped>
 .single_page_main {
 	width: 1500px;
-	height: 900px;
-	/* display: flex;
-	justify-content: center;
-	align-items: center; */
+	max-width: 100%;
+	height: 820px;
 	background-color: rgb(154, 108, 201);
-	/* padding-top: 3px;
-	padding-bottom: 3px;
-	padding-right: 0px;
-	padding-left: 0px; */
+
 	border-radius: 7px;
 	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 .single_page_main img {
-
 	height: 100%;
+	max-width: 100%;
 	padding-top: 3px;
 	padding-bottom: 3px;
 	padding-right: 0px;

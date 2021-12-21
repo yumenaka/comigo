@@ -2,55 +2,26 @@
 	<div id="ScrollMode" v-if="this.book" class="manga">
 		<Header v-if="this.showHeaderFlag">
 			<n-space justify="space-between">
-				<!-- 放本书占位，以后放返回箭头 -->
+				<!-- 以后放返回箭头？ -->
 				<!-- SVG资源来自 https://www.xicons.org/#/ -->
+
 				<n-icon size="40">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						xmlns:xlink="http://www.w3.org/1999/xlink"
-						viewBox="0 0 512 512"
-					>
-						<path
-							d="M256 160c16-63.16 76.43-95.41 208-96a15.94 15.94 0 0 1 16 16v288a16 16 0 0 1-16 16c-128 0-177.45 25.81-208 64c-30.37-38-80-64-208-64c-9.88 0-16-8.05-16-17.93V80a15.94 15.94 0 0 1 16-16c131.57.59 192 32.84 208 96z"
-							fill="none"
-							stroke="currentColor"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="32"
-						/>
-						<path
-							fill="none"
-							stroke="currentColor"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="32"
-							d="M256 160v288"
-						/>
-					</svg>
+					<book-outline />
 				</n-icon>
+
 				<!-- 标题，可下载压缩包 -->
 				<n-space>
-					<h2 v-if="book.IsFolder" :href="'raw/' + book.name">{{ book.name }}</h2>
-					<h2>
-						<a v-if="!book.IsFolder" :href="'raw/' + book.name">{{ book.name }}</a>
-					</h2>
+					<n-ellipsis style="max-width: 190px;">
+						<h2 v-if="book.IsFolder" :href="'raw/' + book.name">{{ book.name }}</h2>
+						<h2>
+							<a v-if="!book.IsFolder" :href="'raw/' + book.name">{{ book.name }}</a>
+						</h2>
+					</n-ellipsis>
 				</n-space>
-				<!-- 右边的设置图标，点击屏幕中央也可以打开设置 -->
+				<!-- 右边的设置图标，点击屏幕中央也可以打开 -->
+
 				<n-icon size="40" @click="drawerActivate('right')">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						xmlns:xlink="http://www.w3.org/1999/xlink"
-						viewBox="0 0 512 512"
-					>
-						<path
-							d="M262.29 192.31a64 64 0 1 0 57.4 57.4a64.13 64.13 0 0 0-57.4-57.4zM416.39 256a154.34 154.34 0 0 1-1.53 20.79l45.21 35.46a10.81 10.81 0 0 1 2.45 13.75l-42.77 74a10.81 10.81 0 0 1-13.14 4.59l-44.9-18.08a16.11 16.11 0 0 0-15.17 1.75A164.48 164.48 0 0 1 325 400.8a15.94 15.94 0 0 0-8.82 12.14l-6.73 47.89a11.08 11.08 0 0 1-10.68 9.17h-85.54a11.11 11.11 0 0 1-10.69-8.87l-6.72-47.82a16.07 16.07 0 0 0-9-12.22a155.3 155.3 0 0 1-21.46-12.57a16 16 0 0 0-15.11-1.71l-44.89 18.07a10.81 10.81 0 0 1-13.14-4.58l-42.77-74a10.8 10.8 0 0 1 2.45-13.75l38.21-30a16.05 16.05 0 0 0 6-14.08c-.36-4.17-.58-8.33-.58-12.5s.21-8.27.58-12.35a16 16 0 0 0-6.07-13.94l-38.19-30A10.81 10.81 0 0 1 49.48 186l42.77-74a10.81 10.81 0 0 1 13.14-4.59l44.9 18.08a16.11 16.11 0 0 0 15.17-1.75A164.48 164.48 0 0 1 187 111.2a15.94 15.94 0 0 0 8.82-12.14l6.73-47.89A11.08 11.08 0 0 1 213.23 42h85.54a11.11 11.11 0 0 1 10.69 8.87l6.72 47.82a16.07 16.07 0 0 0 9 12.22a155.3 155.3 0 0 1 21.46 12.57a16 16 0 0 0 15.11 1.71l44.89-18.07a10.81 10.81 0 0 1 13.14 4.58l42.77 74a10.8 10.8 0 0 1-2.45 13.75l-38.21 30a16.05 16.05 0 0 0-6.05 14.08c.33 4.14.55 8.3.55 12.47z"
-							fill="none"
-							stroke="currentColor"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="32"
-						/>
-					</svg>
+					<settings-outline />
 				</n-icon>
 			</n-space>
 		</Header>
@@ -69,7 +40,12 @@
 			:placement="drawerPlacement"
 			@update:show="saveConfigToCookie"
 		>
-			<n-drawer-content title="页面设置" closable>
+			<!-- 抽屉内容 -->
+			<n-drawer-content closable>
+				<!-- 抽屉：自定义头部 -->
+				<template #header>
+					<span>页面设置</span>
+				</template>
 				<!-- 切换页面模式 -->
 				<n-space v-if="this.debugModeFlag">
 					<n-radio-group v-model:value="selectedTemplate">
@@ -88,11 +64,11 @@
 					</n-radio-group>
 				</n-space>
 
-				<!-- 开关：是否显示页头 -->
+				<!-- 开关：是否显示顶部页头 -->
 				<n-space>
 					<n-switch size="large" v-model:value="this.showHeaderFlag" @update:value="setShowHeaderChange">
-						<template #checked>显示页头</template>
-						<template #unchecked>显示页头</template>
+						<template #checked>显示顶部页头</template>
+						<template #unchecked>显示顶部页头</template>
 					</n-switch>
 				</n-space>
 
@@ -107,20 +83,23 @@
 						<template #unchecked>显示页数</template>
 					</n-switch>
 				</n-space>
+
 				<p></p>
 				<n-space vertical>
 					<!-- 单页-漫画宽度-使用百分比 -->
-					<!-- 数字输入 -->
+					<!-- 数字输入% -->
 					<n-input-number
 						v-if="this.imageWidth_usePercentFlag"
 						size="small"
 						:show-button="false"
 						v-model:value="this.singlePageWidth_Percent"
+						:max="100"
+						:min="10"
 					>
 						<template #prefix>单页漫画宽度：</template>
 						<template #suffix>%</template>
 					</n-input-number>
-					<!-- 滑动选择 -->
+					<!-- 滑动选择% -->
 					<n-slider
 						v-if="this.imageWidth_usePercentFlag"
 						v-model:value="this.singlePageWidth_Percent"
@@ -132,17 +111,19 @@
 					/>
 
 					<!-- 开页-漫画宽度-使用百分比  -->
-					<!-- 数字输入 -->
+					<!-- 数字输入% -->
 					<n-input-number
 						v-if="this.imageWidth_usePercentFlag"
 						size="small"
 						:show-button="false"
 						v-model:value="this.doublePageWidth_Percent"
+						:max="100"
+						:min="10"
 					>
-						<template #prefix>双开页漫画宽度：</template>
+						<template #prefix>双开页漫画宽：</template>
 						<template #suffix>%</template>
 					</n-input-number>
-					<!-- 滑动选择 -->
+					<!-- 滑动选择% -->
 					<n-slider
 						v-if="this.imageWidth_usePercentFlag"
 						v-model:value="this.doublePageWidth_Percent"
@@ -153,48 +134,50 @@
 						:marks="marks"
 					/>
 
-					<!-- 单页-漫画宽度-使用固定值 -->
-					<!-- 数字输入 -->
+					<!-- 单页-漫画宽度-使用固定值PX -->
+					<!-- 数字输入PX -->
 					<n-input-number
 						v-if="!this.imageWidth_usePercentFlag"
 						size="small"
 						:show-button="false"
 						v-model:value="this.singlePageWidth_PX"
+						:max="this.imageMaxWidth"
+						:min="50"
 					>
 						<template #prefix>单页漫画宽度：</template>
 						<template #suffix>px</template>
 					</n-input-number>
-					<!-- 滑动选择 -->
+					<!-- 滑动选择PX -->
 					<n-slider
 						v-if="!this.imageWidth_usePercentFlag"
 						v-model:value="this.singlePageWidth_PX"
-						:step="20"
-						:max="1500"
-						:min="300"
+						:step="10"
+						:max="this.imageMaxWidth"
+						:min="50"
 						:format-tooltip="value => `${value}px`"
-						:marks="marks2"
 					/>
 
-					<!-- 数字输入 -->
+					<!-- 数字输入PX -->
 					<n-input-number
 						v-if="!this.imageWidth_usePercentFlag"
 						size="small"
 						:show-button="false"
 						v-model:value="this.doublePageWidth_PX"
+						:max="this.imageMaxWidth"
+						:min="50"
 					>
-						<template #prefix>双开页漫画宽度：</template>
+						<template #prefix>双开页漫画宽：</template>
 						<template #suffix>px</template>
 					</n-input-number>
 
-					<!-- 滑动选择 -->
+					<!-- 滑动选择PX -->
 					<n-slider
 						v-if="!this.imageWidth_usePercentFlag"
 						v-model:value="this.doublePageWidth_PX"
-						:step="20"
-						:max="1920"
-						:min="300"
+						:step="10"
+						:max="this.imageMaxWidth"
+						:min="50"
 						:format-tooltip="value => `${value}px`"
-						:marks="marks3"
 					/>
 
 					<!-- 开关：横屏状态下，宽度单位是百分比还是固定值 -->
@@ -208,6 +191,11 @@
 						<template #unchecked>宽度:使用固定值px</template>
 					</n-switch>
 				</n-space>
+				<!-- 抽屉：自定义底部 -->
+				<template #footer>
+					<n-button>素描模式</n-button>
+					<n-avatar size="small" src="/favicon.ico"/>
+				</template>
 			</n-drawer-content>
 		</n-drawer>
 		<n-back-top :show="showBackTopFlag" type="info" color="#8a2be2" :right="20" :bottom="20" />
@@ -217,10 +205,12 @@
 
 <script>
 // 直接导入组件并使用它。这种情况下，只有导入的组件才会被打包。
-import { NButton, NBackTop, NDrawer, NDrawerContent, NSpace, NSlider, NRadioButton, NRadioGroup, NSwitch, NIcon,NInputNumber } from 'naive-ui'
+import { NButton, NBackTop, NDrawer, NDrawerContent, NSpace, NSlider, NRadioButton, NRadioGroup, NSwitch, NIcon, NInputNumber, NEllipsis, NAvatar, } from 'naive-ui'
 import Header from "@/components/Header.vue";
 import { defineComponent, ref } from 'vue'
 import { useCookies } from "vue3-cookies";// https://github.com/KanHarI/vue3-cookies
+import { SettingsOutline, BookOutline } from '@vicons/ionicons5'
+
 export default defineComponent({
 	components: {
 		Header,//页头，有点丑
@@ -239,8 +229,12 @@ export default defineComponent({
 		// NLayoutContent,
 		NIcon,//图标  https://www.naiveui.com/zh-CN/os-theme/components/icon
 		// NPageHeader,//页头 https://www.naiveui.com/zh-CN/os-theme/components/page-header
-		// NAvatar, //头像 https://www.naiveui.com/zh-CN/os-theme/components/avatar
+		NAvatar, //头像 https://www.naiveui.com/zh-CN/os-theme/components/avatar
 		NInputNumber,//数字输入 https://www.naiveui.com/zh-CN/os-theme/components/input-number
+		NEllipsis,//长文本省略 https://www.naiveui.com/zh-CN/os-theme/components/ellipsis
+		BookOutline,//图标,来自 https://www.xicons.org/#/   需要安装（npm i -D @vicons/ionicons5）与导入
+		SettingsOutline,//同上
+
 	},
 	setup() {
 		//此处不能使用this
@@ -286,18 +280,6 @@ export default defineComponent({
 				75: '75%',
 				95: '95%',
 			},
-			marks2: {
-				500: '500',
-				720: '720',
-				1080: '1080',
-				1440: '1440',
-			},
-			marks3: {
-				500: '500',
-				800: '800',
-				1280: '1280',
-				1700: '1700',
-			},
 		}
 	},
 	data() {
@@ -306,7 +288,7 @@ export default defineComponent({
 			debugModeFlag: true,
 			//书籍数据，需要从远程拉取
 			book: null,
-			//是否显示页头
+			//是否显示顶部页头
 			showHeaderFlag: true,
 			//是否显示页数
 			showPageNumFlag: false,
@@ -324,6 +306,7 @@ export default defineComponent({
 			//可见范围是否是横向
 			isLandscapeMode: true,
 			isPortraitMode: false,
+			imageMaxWidth: 10,
 			//屏幕宽横比，inLandscapeMode的判断依据
 			aspectRatio: 1.2,
 
@@ -351,8 +334,9 @@ export default defineComponent({
 	created() {
 		window.addEventListener("scroll", this.onScroll);
 		window.addEventListener("resize", this.onResize);
+		this.imageMaxWidth = window.innerWidth;
 		//根据cookie初始化默认值,或初始化cookie值,cookie读取出来的都是字符串，不要直接用
-		//是否显示页头
+		//是否显示顶部页头
 		if (this.cookies.get("showHeaderFlag") === "true") {
 			this.showHeaderFlag = true;
 		} else if (this.cookies.get("showHeaderFlag") === "false") {
@@ -479,12 +463,13 @@ export default defineComponent({
 				this.cookies.set("nowTemplate", "single");
 			}
 			if (this.selectedTemplate === "sketch") {
-				//this.cookies.set("nowTemplate", "sketch");
+				this.cookies.set("nowTemplate", "sketch");
 			}
 			location.reload(); //暂时无法动态刷新，研究vue-router去掉
 		},
 		//可见区域变化的时候改变页面状态
 		onResize() {
+			this.imageMaxWidth = window.innerWidth
 			// document.querySelectorAll(".name");
 			this.clientWidth = document.documentElement.clientWidth
 			this.clientHeight = document.documentElement.clientHeight
@@ -633,21 +618,23 @@ export default defineComponent({
 }
 
 .LoadingImage {
-	width: 80vw;
-	max-width: 80vw;
+	width: 90vw;
+	max-width: 90vw;
 }
 .ErrorImage {
-	width: 80vw;
-	max-width: 80vw;
+	width: 90vw;
+	max-width: 90vw;
 }
 
 /* 横屏（显示区域）时的CSS样式，IE无效 */
 @media screen and (min-aspect-ratio: 19/19) {
 	.SinglePageImage {
 		width: v-bind(sPWL);
+		max-width: 100%;
 	}
 	.DoublePageImage {
 		width: v-bind(dPWL);
+		max-width: 100%;
 	}
 }
 
@@ -656,10 +643,12 @@ export default defineComponent({
 	.SinglePageImage {
 		/* width: 100%; */
 		width: v-bind(sPWP);
+		max-width: 100%;
 	}
 	.DoublePageImage {
 		/* width: 100%; */
 		width: v-bind(dPWP);
+		max-width: 100%;
 	}
 }
 </style>
