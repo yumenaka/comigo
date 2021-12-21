@@ -1,7 +1,7 @@
 <template>
   <div class="home">
-      <ScrollMode v-if="nowTemplate === 'scroll'"></ScrollMode>
-      <FlipMode v-if="nowTemplate === 'single'"></FlipMode>
+    <ScrollMode v-if="nowTemplate === 'scroll'" :book="this.book"></ScrollMode>
+    <FlipMode v-if="nowTemplate === 'single'" :book="this.book"></FlipMode>
   </div>
 </template>
 
@@ -13,12 +13,12 @@ import { useCookies } from "vue3-cookies";
 import { defineComponent } from 'vue'
 
 
-export default  defineComponent({
+export default defineComponent({
   name: "Home", //默认为 default。如果 <router-view>设置了名称，则会渲染对应的路由配置中 components 下的相应组件。
   components: {
     ScrollMode,
     FlipMode,
-    
+
   },
   setup() {
     const { cookies } = useCookies();
@@ -27,9 +27,18 @@ export default  defineComponent({
   data() {
     return {
       setting: null,
+      book: null,
     };
   },
   beforeMount() {
+    this.axios
+      .get("/book.json")
+      .then((response) => {
+        if (response.status == 200) {
+          this.book = response.data;
+        }
+      })
+      .catch((error) => alert(error));
     this.axios
       .get("/setting.json")
       .then((response) => {
@@ -77,12 +86,15 @@ export default  defineComponent({
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
+  /* 整体颜色，以后可以做成用户设定？ */
   background-color: #f6f7eb;
   align-items: center;
 }
 /* 覆盖8px的浏览器默认值 */
 body {
+  /* 外边距，不指定的话，浏览器默认设置成8px */
   margin: 0px;
+  /* 内边框 */
   padding: 0px;
 }
 </style>

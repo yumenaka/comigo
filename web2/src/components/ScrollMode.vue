@@ -1,35 +1,18 @@
 <template>
+
 	<div id="ScrollMode" v-if="this.book" class="manga">
-		<Header v-if="this.showHeaderFlag">
-			<n-space justify="space-between">
-				<!-- 以后放返回箭头？ -->
-				<!-- SVG资源来自 https://www.xicons.org/#/ -->
-
-				<n-icon size="40">
-					<book-outline />
-				</n-icon>
-
-				<!-- 标题，可下载压缩包 -->
-				<n-space>
-					<n-ellipsis style="max-width: 190px;">
-						<h2 v-if="book.IsFolder" :href="'raw/' + book.name">{{ book.name }}</h2>
-						<h2>
-							<a v-if="!book.IsFolder" :href="'raw/' + book.name">{{ book.name }}</a>
-						</h2>
-					</n-ellipsis>
-				</n-space>
-				<!-- 右边的设置图标，点击屏幕中央也可以打开 -->
-
-				<n-icon size="40" @click="drawerActivate('right')">
-					<settings-outline />
-				</n-icon>
-			</n-space>
+		<Header v-if="this.showHeaderFlag" :bookIsFolder="book.IsFolder" :bookName="book.name">
+			<!-- 右边的设置图标，点击屏幕中央也可以打开 -->
+			<n-icon size="40" @click="drawerActivate('right')">
+				<settings-outline />
+			</n-icon>
 		</Header>
+
 		<!-- 渲染漫画部分 -->
 		<div v-for="(page, key) in book.pages" :key="page.url" @click="getMouseXY($event)">
 			<!-- v-lazy="page.url"  :src="page.url" -->
 			<img v-lazy="page.url" v-bind:H="page.height" v-bind:W="page.width" v-bind:key="key" />
-			<p v-if="showPageNumFlag">{{ key + 1 }}/{{ book.all_page_num }}</p>
+			<span v-if="showPageNumFlag">{{ key + 1 }}/{{ book.all_page_num }}</span>
 		</div>
 
 		<!-- 设置抽屉 -->
@@ -54,13 +37,15 @@
 							@change="onChangeTemplate"
 							value="scroll"
 							name="basic-demo"
-						>卷轴模式</n-radio-button>
+						>卷轴模式
+						
+						</n-radio-button>
 						<n-radio-button
 							:checked="selectedTemplate === 'single'"
 							@change="onChangeTemplate"
 							value="single"
 							name="basic-demo"
-						>单页模式</n-radio-button>
+						>翻页模式</n-radio-button>
 					</n-radio-group>
 				</n-space>
 
@@ -86,6 +71,16 @@
 
 				<p></p>
 				<n-space vertical>
+					<!-- 开关：横屏状态下，宽度单位是百分比还是固定值 -->
+					<n-switch
+						size="large"
+						v-model:value="this.imageWidth_usePercentFlag"
+						:rail-style="railStyle"
+						@update:value="this.setImageWidthUsePercentFlag"
+					>
+						<template #checked>宽度:使用百分比%</template>
+						<template #unchecked>宽度:使用固定值px</template>
+					</n-switch>
 					<!-- 单页-漫画宽度-使用百分比 -->
 					<!-- 数字输入% -->
 					<n-input-number
@@ -107,7 +102,6 @@
 						:max="100"
 						:min="10"
 						:format-tooltip="value => `${value}%`"
-						:marks="marks"
 					/>
 
 					<!-- 开页-漫画宽度-使用百分比  -->
@@ -131,7 +125,6 @@
 						:max="100"
 						:min="10"
 						:format-tooltip="value => `${value}%`"
-						:marks="marks"
 					/>
 
 					<!-- 单页-漫画宽度-使用固定值PX -->
@@ -179,22 +172,11 @@
 						:min="50"
 						:format-tooltip="value => `${value}px`"
 					/>
-
-					<!-- 开关：横屏状态下，宽度单位是百分比还是固定值 -->
-					<n-switch
-						size="large"
-						v-model:value="this.imageWidth_usePercentFlag"
-						:rail-style="railStyle"
-						@update:value="this.setImageWidthUsePercentFlag"
-					>
-						<template #checked>宽度:使用百分比%</template>
-						<template #unchecked>宽度:使用固定值px</template>
-					</n-switch>
 				</n-space>
 				<!-- 抽屉：自定义底部 -->
 				<template #footer>
 					<n-button>素描模式</n-button>
-					<n-avatar size="small" src="/favicon.ico"/>
+					<n-avatar size="small" src="/favicon.ico" />
 				</template>
 			</n-drawer-content>
 		</n-drawer>
@@ -205,13 +187,15 @@
 
 <script>
 // 直接导入组件并使用它。这种情况下，只有导入的组件才会被打包。
-import { NButton, NBackTop, NDrawer, NDrawerContent, NSpace, NSlider, NRadioButton, NRadioGroup, NSwitch, NIcon, NInputNumber, NEllipsis, NAvatar, } from 'naive-ui'
+import { NButton, NBackTop, NDrawer, NDrawerContent, NSpace, NSlider, NRadioButton, NRadioGroup, NSwitch, NIcon, NInputNumber, NAvatar, } from 'naive-ui'
 import Header from "@/components/Header.vue";
 import { defineComponent, ref } from 'vue'
 import { useCookies } from "vue3-cookies";// https://github.com/KanHarI/vue3-cookies
-import { SettingsOutline, BookOutline } from '@vicons/ionicons5'
+import { SettingsOutline } from '@vicons/ionicons5'
 
 export default defineComponent({
+	name: "ScrollMode",
+	props: ['book'],
 	components: {
 		Header,//页头，有点丑
 		NButton,//按钮，来自:https://www.naiveui.com/zh-CN/os-theme/components/button
@@ -231,10 +215,7 @@ export default defineComponent({
 		// NPageHeader,//页头 https://www.naiveui.com/zh-CN/os-theme/components/page-header
 		NAvatar, //头像 https://www.naiveui.com/zh-CN/os-theme/components/avatar
 		NInputNumber,//数字输入 https://www.naiveui.com/zh-CN/os-theme/components/input-number
-		NEllipsis,//长文本省略 https://www.naiveui.com/zh-CN/os-theme/components/ellipsis
-		BookOutline,//图标,来自 https://www.xicons.org/#/   需要安装（npm i -D @vicons/ionicons5）与导入
-		SettingsOutline,//同上
-
+		SettingsOutline,//图标,来自 https://www.xicons.org/#/   需要安装（npm i -D @vicons/ionicons5）
 	},
 	setup() {
 		//此处不能使用this
@@ -287,7 +268,6 @@ export default defineComponent({
 			//开发模式 还没有做的功能与设置，设置Debug以后才能见到
 			debugModeFlag: true,
 			//书籍数据，需要从远程拉取
-			book: null,
 			//是否显示顶部页头
 			showHeaderFlag: true,
 			//是否显示页数
@@ -331,8 +311,18 @@ export default defineComponent({
 		};
 	},
 	//Vue3生命周期:  https://v3.cn.vuejs.org/api/options-lifecycle-hooks.html#beforecreate
+
+    // created : 在绑定元素的属性或事件监听器被应用之前调用。
+    // beforeMount : 指令第一次绑定到元素并且在挂载父组件之前调用。。
+    // mounted : 在绑定元素的父组件被挂载后调用。。
+    // beforeUpdate: 在更新包含组件的 VNode 之前调用。。
+    // updated: 在包含组件的 VNode 及其子组件的 VNode 更新后调用。
+    // beforeUnmount: 当指令与在绑定元素父组件卸载之前时，只调用一次。
+    // unmounted: 当指令与元素解除绑定且父组件已卸载时，只调用一次。
+
 	created() {
 		window.addEventListener("scroll", this.onScroll);
+		//文档视图调整大小时会触发 resize 事件。 https://developer.mozilla.org/zh-CN/docs/Web/API/Window/resize_event
 		window.addEventListener("resize", this.onResize);
 		this.imageMaxWidth = window.innerWidth;
 		//根据cookie初始化默认值,或初始化cookie值,cookie读取出来的都是字符串，不要直接用
@@ -395,14 +385,7 @@ export default defineComponent({
 
 	// //挂载前
 	beforeMount() {
-		this.axios
-			.get("/book.json")
-			.then((response) => {
-				if (response.status == 200) {
-					this.book = response.data;
-				}
-			})
-			.catch((error) => alert(error));
+
 	},
 	onMounted() {
 		//console.log('mounted in the composition api!')

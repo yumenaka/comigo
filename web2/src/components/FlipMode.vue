@@ -1,81 +1,37 @@
 <template>
-	<div id="FlipMode" v-if="this.book">
-		<Header v-if="this.showHeaderFlag_FlipMode">
-			<n-space justify="space-between">
-				<!-- 放本书占位，以后放返回箭头 -->
-				<!-- SVG资源来自 https://www.xicons.org/#/ -->
-				<n-icon size="40">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						xmlns:xlink="http://www.w3.org/1999/xlink"
-						viewBox="0 0 512 512"
-					>
-						<path
-							d="M256 160c16-63.16 76.43-95.41 208-96a15.94 15.94 0 0 1 16 16v288a16 16 0 0 1-16 16c-128 0-177.45 25.81-208 64c-30.37-38-80-64-208-64c-9.88 0-16-8.05-16-17.93V80a15.94 15.94 0 0 1 16-16c131.57.59 192 32.84 208 96z"
-							fill="none"
-							stroke="currentColor"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="32"
-						/>
-						<path
-							fill="none"
-							stroke="currentColor"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="32"
-							d="M256 160v288"
-						/>
-					</svg>
-				</n-icon>
-				<!-- 标题，可下载压缩包 -->
-				<n-space>
-					<h2 v-if="book.IsFolder" :href="'raw/' + book.name">{{ book.name }}</h2>
-					<h2>
-						<a v-if="!book.IsFolder" :href="'raw/' + book.name">{{ book.name }}</a>
-					</h2>
-				</n-space>
-				<!-- 右边的设置图标，点击屏幕中央也可以打开设置 -->
-				<n-icon size="40" @click="drawerActivate('right')">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						xmlns:xlink="http://www.w3.org/1999/xlink"
-						viewBox="0 0 512 512"
-					>
-						<path
-							d="M262.29 192.31a64 64 0 1 0 57.4 57.4a64.13 64.13 0 0 0-57.4-57.4zM416.39 256a154.34 154.34 0 0 1-1.53 20.79l45.21 35.46a10.81 10.81 0 0 1 2.45 13.75l-42.77 74a10.81 10.81 0 0 1-13.14 4.59l-44.9-18.08a16.11 16.11 0 0 0-15.17 1.75A164.48 164.48 0 0 1 325 400.8a15.94 15.94 0 0 0-8.82 12.14l-6.73 47.89a11.08 11.08 0 0 1-10.68 9.17h-85.54a11.11 11.11 0 0 1-10.69-8.87l-6.72-47.82a16.07 16.07 0 0 0-9-12.22a155.3 155.3 0 0 1-21.46-12.57a16 16 0 0 0-15.11-1.71l-44.89 18.07a10.81 10.81 0 0 1-13.14-4.58l-42.77-74a10.8 10.8 0 0 1 2.45-13.75l38.21-30a16.05 16.05 0 0 0 6-14.08c-.36-4.17-.58-8.33-.58-12.5s.21-8.27.58-12.35a16 16 0 0 0-6.07-13.94l-38.19-30A10.81 10.81 0 0 1 49.48 186l42.77-74a10.81 10.81 0 0 1 13.14-4.59l44.9 18.08a16.11 16.11 0 0 0 15.17-1.75A164.48 164.48 0 0 1 187 111.2a15.94 15.94 0 0 0 8.82-12.14l6.73-47.89A11.08 11.08 0 0 1 213.23 42h85.54a11.11 11.11 0 0 1 10.69 8.87l6.72 47.82a16.07 16.07 0 0 0 9 12.22a155.3 155.3 0 0 1 21.46 12.57a16 16 0 0 0 15.11 1.71l44.89-18.07a10.81 10.81 0 0 1 13.14 4.58l42.77 74a10.8 10.8 0 0 1-2.45 13.75l-38.21 30a16.05 16.05 0 0 0-6.05 14.08c.33 4.14.55 8.3.55 12.47z"
-							fill="none"
-							stroke="currentColor"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="32"
-						/>
-					</svg>
-				</n-icon>
-			</n-space>
+	<div class="MainBody" v-if="this.book">
+		<Header
+			class="header"
+			v-if="this.showHeaderFlag_FlipMode"
+			:bookIsFolder="book.IsFolder"
+			:bookName="book.name"
+		>
+			<!-- 右边的设置图标，点击屏幕中央也可以打开 -->
+			<n-icon size="40" @click="drawerActivate('right')">
+				<settings-outline />
+			</n-icon>
 		</Header>
-
-		<n-space vertical align="center" justify="center" size="large">
-			<div
-				class="single_page_main"
-				@click="getMouseXY($event)"
-				@mouseover="mouseOver"
-				:style="active"
-				@mouseleave="mouseLeave"
-			>
-				<img
-					v-if="now_page <= this.book.all_page_num && now_page >= 1"
-					lazy-src="/resources/favicon.ico"
-					v-bind:src="this.book.pages[now_page - 1].url"
-				/>
-				<img />
-			</div>
-			<n-pagination
-				v-if="this.showPaginationFlag"
-				v-model:page="now_page"
-				:page-count="this.book.all_page_num"
+		<div
+			class="main"
+			@click="getMouseXY($event)"
+			@mouseover="mouseOver"
+			:style="randomColor"
+			@mouseleave="mouseLeave"
+		>
+			<img
+				v-if="now_page <= this.book.all_page_num && now_page >= 1"
+				lazy-src="/resources/favicon.ico"
+				v-bind:src="this.book.pages[now_page - 1].url"
 			/>
-		</n-space>
+			<img />
+		</div>
+
+		<n-pagination
+			class="footer"
+			v-if="this.showPaginationFlag"
+			v-model:page="now_page"
+			:page-count="this.book.all_page_num"
+		/>
 
 		<n-drawer
 			v-model:show="drawerActive"
@@ -122,8 +78,8 @@
 						v-model:value="this.showPaginationFlag"
 						@update:value="setShowPaginationFlagChange"
 					>
-						<template #checked>显示分页导航条</template>
-						<template #unchecked>显示分页导航条</template>
+						<template #checked>显示底部导航条</template>
+						<template #unchecked>显示底部导航条</template>
 					</n-switch>
 				</n-space>
 
@@ -151,8 +107,10 @@ import Header from "@/components/Header.vue";
 import { defineComponent, ref } from 'vue'
 // 直接导入组件并使用它。这种情况下，只有导入的组件才会被打包。
 import { NDrawer, NDrawerContent, NSpace, NSlider, NRadioButton, NRadioGroup, NSwitch, NIcon, NPagination } from 'naive-ui'
-
+import { SettingsOutline } from '@vicons/ionicons5'
 export default defineComponent({
+	name: "FlipMode",
+	props: ['book'],
 	components: {
 		Header,
 		NDrawer,//抽屉，可以从上下左右4个方向冒出. https://www.naiveui.com/zh-CN/os-theme/components/drawer
@@ -170,6 +128,7 @@ export default defineComponent({
 		// NPageHeader,//页头 https://www.naiveui.com/zh-CN/os-theme/components/page-header
 		// NAvatar, //头像 https://www.naiveui.com/zh-CN/os-theme/components/avatar
 		NPagination, //分页 https://www.naiveui.com/zh-CN/os-theme/components/pagination
+		SettingsOutline,//图标,来自 https://www.xicons.org/#/   需要安装（npm i -D @vicons/ionicons5）
 	},
 	setup() {
 		const { cookies } = useCookies();
@@ -211,7 +170,6 @@ export default defineComponent({
 			//开发模式 还没有做的功能与设置，设置Debug以后才能见到
 			debugModeFlag: true,
 			//书籍数据，需要从远程拉取
-			book: null,
 			//是否显示页头
 			showHeaderFlag_FlipMode: true,
 			//是否显示分页
@@ -222,7 +180,7 @@ export default defineComponent({
 			//图片宽度的单位，是否使用百分比
 			imageWidth_usePercentFlag: true,
 			now_page: 1,
-			active: ""
+			randomColor: ""
 		};
 	},
 	//在选项API中使用 Vue 生命周期钩子
@@ -241,20 +199,14 @@ export default defineComponent({
 		} else if (this.cookies.get("showPaginationFlag_FlipMode") === "false") {
 			this.showPaginationFlag = false;
 		}
+		setInterval(this.changeColor, 1000);
+
 	},
 	//挂载前
 	beforeMount() {
 		// window.addEventListener("scroll", this.handleScroll);
 		// 注册监听
 		window.addEventListener("keyup", this.handleKeyup);
-		this.axios
-			.get("/book.json")
-			.then((response) => {
-				if (response.status == 200) {
-					this.book = response.data;
-					//console.log(this.book);
-				}
-			}).catch((error) => console.log(error),);
 	},
 	//卸载前
 	beforeUnmount() {
@@ -264,14 +216,27 @@ export default defineComponent({
 	},
 
 	methods: {
-
+		changeColor() {
+			// let R = Math.ceil(Math.random() * 255);
+			// let G = Math.ceil(Math.random() * 255);
+			// let B = Math.ceil(Math.random() * 255);
+			let R = Math.ceil(Math.random() * 155)+100;
+			let G = Math.ceil(Math.random() * 155)+100;
+			let B = Math.ceil(Math.random() * 100)+100;
+			// this.randomColor = 'background-color: rgb(235,235,235)';
+			//rgb(235,235,235)
+			let RGB = 'rgb(' + R + "," + G + "," + B + ")";
+			// console.log(RGB);
+			this.randomColor = RGB;
+		},
+		//HTML DOM 事件 https://www.runoob.com/jsref/dom-obj-event.html
 		mouseOver() {
 			//鼠标移入改变样式
-			this.active = 'background-color: rgb(235,235,235)';
+			// this.randomColor = 'background-color: rgb(235,235,235)';
 		},
 		mouseLeave() {
 			//清空样式
-			this.active = '';
+			// this.randomColor = '';
 		},
 
 		// 关闭抽屉的时候保存设置
@@ -392,24 +357,62 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.single_page_main {
-	width: 1500px;
-	max-width: 100%;
-	height: 820px;
-	background-color: rgb(154, 108, 201);
+/* 参考CSS盒子模型慢慢改 */
+/* https://www.runoob.com/css/css-boxmodel.html */
+/* CSS 高度和宽度 */
+/* https://www.w3school.com.cn/css/css_dimension.asp */
+/* CSS Flexbox 布局 */
+/* https://www.w3school.com.cn/css/css3_flexbox.asp */
 
-	border-radius: 7px;
+* {
+	box-sizing: border-box;
+}
+
+.MainBody {
+	font-family: Arial;
+	margin: 0;
+	padding: 0px;
+	display: flex;
+	/* column 值设置垂直堆叠 flex 项目（从上到下）： */
+	flex-direction: column;
+	/* justify-content 属性用于对齐 flex 项目： */
+	/* 将 justify-content 和 align-items 属性设置为居中，flex 项目将完美居中： */
+	justify-content: center;
+	/* center 值将 flex 项目在容器中间对齐： */
+	align-items: center;
+	background: v-bind(randomColor);
+}
+
+.header {
+	padding: 0px;
+	text-align: center;
+	width: 100%;
+}
+
+/* 漫画本身 */
+.main {
+	height: 100vh;
+	padding: 0px;
+}
+
+/* 漫画div中的图片*/
+.main img {
+	background-color: #aaa;
+	height: 100vh;
+	/* width: 100%; */
+	padding: 0px;
+	border-radius: 3px;
 	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
-.single_page_main img {
-	height: 100%;
-	max-width: 100%;
-	padding-top: 3px;
-	padding-bottom: 3px;
-	padding-right: 0px;
-	padding-left: 0px;
-	border-radius: 7px;
-	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+/* 页脚 */
+.footer {
+	padding: 10px;
+	text-align: center;
+	background: rgba(221, 221, 221, 0.842);
+	width: 100vw;
+	justify-content: center;
+	/* center 值将 flex 项目在容器中间对齐： */
+	align-items: center;
 }
 </style>

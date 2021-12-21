@@ -1,11 +1,24 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
-import Home from '../views/Home.vue'
+
+// 1. 定义路由组件.
+// 也可以从其他文件导入
+// import Home from '../views/Home.vue'
+
+import FlipMode from '@/components/FlipMode.vue'
+
+import ScrollMode from '@/components/ScrollMode.vue'
+
 
 const routes = [
   {
     path: '/',
-    name: 'Home',
-    component: Home
+    name: 'FlipMode',
+    component: FlipMode
+  },
+  {
+    path: '/scroll',
+    name: 'ScrollMode',
+    component: ScrollMode
   },
   {
     path: '/about',
