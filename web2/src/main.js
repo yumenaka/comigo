@@ -21,8 +21,8 @@ app.use(router);
 // vue3-lazyload
 // https://github.com/murongg/vue3-lazyload
 app.use(VueLazyLoad, {
-    loading: "loading.jpg",
-    error: "error.jpg",
+    loading: "/images/loading.jpg",
+    error: "/images/error.jpg",
     //懒加载相关设置
     observerOptions: { rootMargin: '500px', threshold: 0.1 },
     lifecycle: {

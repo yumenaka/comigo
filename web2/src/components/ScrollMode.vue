@@ -1,7 +1,11 @@
 <template>
-
 	<div id="ScrollMode" v-if="this.book" class="manga">
-		<Header v-if="this.showHeaderFlag" :bookIsFolder="book.IsFolder" :bookName="book.name">
+		<Header
+			class="footer"
+			v-if="this.showHeaderFlag"
+			:bookIsFolder="book.IsFolder"
+			:bookName="book.name"
+		>
 			<!-- 右边的设置图标，点击屏幕中央也可以打开 -->
 			<n-icon size="40" @click="drawerActivate('right')">
 				<settings-outline />
@@ -9,10 +13,16 @@
 		</Header>
 
 		<!-- 渲染漫画部分 -->
-		<div v-for="(page, key) in book.pages" :key="page.url" @click="getMouseXY($event)">
+		<div
+			v-for="(page, key) in book.pages"
+			:key="page.url"
+			@click="onMouseClick($event)"
+			@mousemove="onMouseMove"
+			@mouseleave="onMouseLeave"
+		>
 			<!-- v-lazy="page.url"  :src="page.url" -->
 			<img v-lazy="page.url" v-bind:H="page.height" v-bind:W="page.width" v-bind:key="key" />
-			<span v-if="showPageNumFlag">{{ key + 1 }}/{{ book.all_page_num }}</span>
+			<span v-if="showPageNumFlag_ScrollMode">{{ key + 1 }}/{{ book.all_page_num }}</span>
 		</div>
 
 		<!-- 设置抽屉 -->
@@ -37,50 +47,19 @@
 							@change="onChangeTemplate"
 							value="scroll"
 							name="basic-demo"
-						>卷轴模式
-						
-						</n-radio-button>
+						>卷轴模式</n-radio-button>
 						<n-radio-button
-							:checked="selectedTemplate === 'single'"
+							:checked="selectedTemplate === 'flip'"
 							@change="onChangeTemplate"
-							value="single"
+							value="flip"
 							name="basic-demo"
 						>翻页模式</n-radio-button>
 					</n-radio-group>
 				</n-space>
+				<!-- 分割线 -->
+				<n-divider />
 
-				<!-- 开关：是否显示顶部页头 -->
-				<n-space>
-					<n-switch size="large" v-model:value="this.showHeaderFlag" @update:value="setShowHeaderChange">
-						<template #checked>显示顶部页头</template>
-						<template #unchecked>显示顶部页头</template>
-					</n-switch>
-				</n-space>
-
-				<!-- 开关：是否显示当前页数 -->
-				<n-space>
-					<n-switch
-						size="large"
-						v-model:value="this.showPageNumFlag"
-						@update:value="setShowPageNumChange"
-					>
-						<template #checked>显示页数</template>
-						<template #unchecked>显示页数</template>
-					</n-switch>
-				</n-space>
-
-				<p></p>
 				<n-space vertical>
-					<!-- 开关：横屏状态下，宽度单位是百分比还是固定值 -->
-					<n-switch
-						size="large"
-						v-model:value="this.imageWidth_usePercentFlag"
-						:rail-style="railStyle"
-						@update:value="this.setImageWidthUsePercentFlag"
-					>
-						<template #checked>宽度:使用百分比%</template>
-						<template #unchecked>宽度:使用固定值px</template>
-					</n-switch>
 					<!-- 单页-漫画宽度-使用百分比 -->
 					<!-- 数字输入% -->
 					<n-input-number
@@ -105,6 +84,7 @@
 					/>
 
 					<!-- 开页-漫画宽度-使用百分比  -->
+
 					<!-- 数字输入% -->
 					<n-input-number
 						v-if="this.imageWidth_usePercentFlag"
@@ -128,6 +108,7 @@
 					/>
 
 					<!-- 单页-漫画宽度-使用固定值PX -->
+
 					<!-- 数字输入PX -->
 					<n-input-number
 						v-if="!this.imageWidth_usePercentFlag"
@@ -173,11 +154,45 @@
 						:format-tooltip="value => `${value}px`"
 					/>
 				</n-space>
-				<!-- 抽屉：自定义底部 -->
-				<template #footer>
-					<n-button>素描模式</n-button>
-					<n-avatar size="small" src="/favicon.ico" />
-				</template>
+
+				<p></p>
+				<!-- 开关：横屏状态下，宽度单位是百分比还是固定值 -->
+				<n-space>
+					<n-switch
+						size="large"
+						v-model:value="this.imageWidth_usePercentFlag"
+						:rail-style="railStyle"
+						@update:value="this.setImageWidthUsePercentFlag"
+					>
+						<template #checked>宽度:百分比%</template>
+						<template #unchecked>宽度:固定值px</template>
+					</n-switch>
+				</n-space>
+
+				<!-- 分割线 -->
+				<n-divider />
+
+				<!-- 开关：是否显示页头 -->
+				<n-space>
+					<n-switch size="large" v-model:value="this.showHeaderFlag" @update:value="setShowHeaderChange">
+						<template #checked>显示页头</template>
+						<template #unchecked>显示页头</template>
+					</n-switch>
+					<p></p>
+				</n-space>
+
+				<!-- 开关：是否显示当前页数 -->
+				<n-space>
+					<n-switch
+						size="large"
+						v-model:value="this.showPageNumFlag_ScrollMode"
+						@update:value="setShowPageNumChange"
+					>
+						<template #checked>显示页数</template>
+						<template #unchecked>显示页数</template>
+					</n-switch>
+				</n-space>
+
 			</n-drawer-content>
 		</n-drawer>
 		<n-back-top :show="showBackTopFlag" type="info" color="#8a2be2" :right="20" :bottom="20" />
@@ -187,7 +202,7 @@
 
 <script>
 // 直接导入组件并使用它。这种情况下，只有导入的组件才会被打包。
-import { NButton, NBackTop, NDrawer, NDrawerContent, NSpace, NSlider, NRadioButton, NRadioGroup, NSwitch, NIcon, NInputNumber, NAvatar, } from 'naive-ui'
+import { NButton, NBackTop, NDrawer, NDrawerContent, NSpace, NSlider, NRadioButton, NRadioGroup, NSwitch, NIcon, NInputNumber,NDivider  } from 'naive-ui'
 import Header from "@/components/Header.vue";
 import { defineComponent, ref } from 'vue'
 import { useCookies } from "vue3-cookies";// https://github.com/KanHarI/vue3-cookies
@@ -213,9 +228,10 @@ export default defineComponent({
 		// NLayoutContent,
 		NIcon,//图标  https://www.naiveui.com/zh-CN/os-theme/components/icon
 		// NPageHeader,//页头 https://www.naiveui.com/zh-CN/os-theme/components/page-header
-		NAvatar, //头像 https://www.naiveui.com/zh-CN/os-theme/components/avatar
+		// NAvatar, //头像 https://www.naiveui.com/zh-CN/os-theme/components/avatar
 		NInputNumber,//数字输入 https://www.naiveui.com/zh-CN/os-theme/components/input-number
 		SettingsOutline,//图标,来自 https://www.xicons.org/#/   需要安装（npm i -D @vicons/ionicons5）
+		NDivider,//分割线  https://www.naiveui.com/zh-CN/os-theme/components/divider
 	},
 	setup() {
 		//此处不能使用this
@@ -271,7 +287,7 @@ export default defineComponent({
 			//是否显示顶部页头
 			showHeaderFlag: true,
 			//是否显示页数
-			showPageNumFlag: false,
+			showPageNumFlag_ScrollMode: false,
 			//是否显示回到顶部按钮
 			showBackTopFlag: false,
 			//是否正在向下滚动
@@ -304,7 +320,7 @@ export default defineComponent({
 			doublePageWidth_PX: 1080,
 
 			//选择了哪个阅读模板
-			selectedTemplate: "",
+			selectedTemplate: "scroll",
 			//可见范围宽高的具体值
 			clientWidth: 0,
 			clientHeight: 0,
@@ -312,13 +328,13 @@ export default defineComponent({
 	},
 	//Vue3生命周期:  https://v3.cn.vuejs.org/api/options-lifecycle-hooks.html#beforecreate
 
-    // created : 在绑定元素的属性或事件监听器被应用之前调用。
-    // beforeMount : 指令第一次绑定到元素并且在挂载父组件之前调用。。
-    // mounted : 在绑定元素的父组件被挂载后调用。。
-    // beforeUpdate: 在更新包含组件的 VNode 之前调用。。
-    // updated: 在包含组件的 VNode 及其子组件的 VNode 更新后调用。
-    // beforeUnmount: 当指令与在绑定元素父组件卸载之前时，只调用一次。
-    // unmounted: 当指令与元素解除绑定且父组件已卸载时，只调用一次。
+	// created : 在绑定元素的属性或事件监听器被应用之前调用。
+	// beforeMount : 指令第一次绑定到元素并且在挂载父组件之前调用。。
+	// mounted : 在绑定元素的父组件被挂载后调用。。
+	// beforeUpdate: 在更新包含组件的 VNode 之前调用。。
+	// updated: 在包含组件的 VNode 及其子组件的 VNode 更新后调用。
+	// beforeUnmount: 当指令与在绑定元素父组件卸载之前时，只调用一次。
+	// unmounted: 当指令与元素解除绑定且父组件已卸载时，只调用一次。
 
 	created() {
 		window.addEventListener("scroll", this.onScroll);
@@ -335,12 +351,12 @@ export default defineComponent({
 		//console.log("读取cookie并初始化: showHeaderFlag=" + this.showHeaderFlag);
 
 		//是否显示页数
-		if (this.cookies.get("showPageNumFlag") === "true") {
-			this.showPageNumFlag = true;
-		} else if (this.cookies.get("showPageNumFlag") === "false") {
-			this.showPageNumFlag = false;
+		if (this.cookies.get("showPageNumFlag_ScrollMode") === "true") {
+			this.showPageNumFlag_ScrollMode = true;
+		} else if (this.cookies.get("showPageNumFlag_ScrollMode") === "false") {
+			this.showPageNumFlag_ScrollMode = false;
 		}
-		//console.log("读取cookie并初始化: showPageNumFlag=" + this.showPageNumFlag);
+		//console.log("读取cookie并初始化: showPageNumFlag_ScrollMode=" + this.showPageNumFlag_ScrollMode);
 
 		//宽度是否使用百分比
 		if (this.cookies.get("imageWidth_usePercentFlag") === "true") {
@@ -409,7 +425,7 @@ export default defineComponent({
 			console.log("show:" + show)
 			// 组件销毁前，储存cookie
 			this.cookies.set("showHeaderFlag", this.showHeaderFlag);
-			this.cookies.set("showPageNumFlag", this.showPageNumFlag);
+			this.cookies.set("showPageNumFlag_ScrollMode", this.showPageNumFlag_ScrollMode);
 			this.cookies.set("imageWidth_usePercentFlag", this.imageWidth_usePercentFlag);
 			this.cookies.set("singlePageWidth_Percent", this.singlePageWidth_Percent);
 			this.cookies.set("doublePageWidth_Percent", this.doublePageWidth_Percent);
@@ -424,9 +440,9 @@ export default defineComponent({
 		},
 		setShowPageNumChange(value) {
 			console.log("value:" + value);
-			this.showPageNumFlag = value;
-			this.cookies.set("showPageNumFlag", value);
-			console.log("cookie设置完毕: showPageNumFlag=" + this.cookies.get("showPageNumFlag"));
+			this.showPageNumFlag_ScrollMode = value;
+			this.cookies.set("showPageNumFlag_ScrollMode", value);
+			console.log("cookie设置完毕: showPageNumFlag_ScrollMode=" + this.cookies.get("showPageNumFlag_ScrollMode"));
 		},
 
 		setImageWidthUsePercentFlag(value) {
@@ -442,11 +458,8 @@ export default defineComponent({
 			if (this.selectedTemplate === "scroll") {
 				this.cookies.set("nowTemplate", "scroll");
 			}
-			if (this.selectedTemplate === "single") {
-				this.cookies.set("nowTemplate", "single");
-			}
-			if (this.selectedTemplate === "sketch") {
-				this.cookies.set("nowTemplate", "sketch");
+			if (this.selectedTemplate === "flip") {
+				this.cookies.set("nowTemplate", "flip");
 			}
 			location.reload(); //暂时无法动态刷新，研究vue-router去掉
 		},
@@ -493,15 +506,10 @@ export default defineComponent({
 			}
 		},
 		//获取鼠标位置，决定是否打开设置面板
-		getMouseXY(e) {
+		onMouseClick(e) {
 			this.clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离，单位为px）
 			this.clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离，单位为px）
 			//浏览器的视口，不包括工具栏和滚动条:
-			// document.documentElement.clientHeight document.documentElement.ClientWidth不兼容手机？ 
-			// var availHeight = document.documentElement.clientHeight
-			// var availWidth = document.documentElement.clientWidth
-			// console.log("clientHeigh=", document.documentElement.clientHeight, "ClientWidth=", document.documentElement.clientWidth);
-
 			var availHeight = window.innerWidth
 			var availWidth = window.innerHeight
 			var MinX = availHeight * 0.37
@@ -518,6 +526,29 @@ export default defineComponent({
 			// console.log("MinY=", MinY, "MaxY=", MaxY);
 			// console.log("x=", e.x, "y=", e.y);
 		},
+
+		onMouseMove(e) {
+			this.clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离，单位为px）
+			this.clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离，单位为px）
+			//浏览器的视口，不包括工具栏和滚动条:
+			var availHeight = window.innerWidth
+			var availWidth = window.innerHeight
+			var MinX = availHeight * 0.37
+			var MaxX = availHeight * 0.65
+			var MinY = availWidth * 0.37
+			var MaxY = availWidth * 0.65
+			if ((this.clickX > MinX && this.clickX < MaxX) && (this.clickY > MinY && this.clickY < MaxY)) {
+				//console.log("在设置区域！");
+				e.currentTarget.style.cursor = 'url(/images/SettingsOutline.png), pointer';
+			} else {
+				e.currentTarget.style.cursor = '';
+			}
+		},
+		onMouseLeave(e) {
+			//离开区域的时候，清空鼠标样式
+			e.currentTarget.style.cursor = '';
+		},
+
 		scrollToTop(scrollDuration) {
 			var scrollStep = -window.scrollY / (scrollDuration / 15),
 				scrollInterval = setInterval(function () {
@@ -586,6 +617,12 @@ export default defineComponent({
 <style scoped>
 .manga {
 	max-width: 100%;
+}
+
+.header {
+	padding: 0px;
+	width: 100%;
+	height: 7vh;
 }
 
 /* https://developer.mozilla.org/zh-CN/docs/Web/CSS/object-fit */

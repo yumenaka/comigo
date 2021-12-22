@@ -8,7 +8,7 @@
       </n-icon>
       <!-- 标题，可下载压缩包 -->
       <n-space>
-        <n-ellipsis style="max-width: 190px;">
+        <n-ellipsis style="max-width: 60vw;" >
           <h2 v-if="bookIsFolder" :href="'raw/' + bookName">{{ bookName }}</h2>
           <h2>
             <a v-if="!this.bookIsFolder" :href="'raw/' + bookName">{{ bookName }}</a>
@@ -58,8 +58,6 @@ export default defineComponent({
   text-align: center;
   padding: 12px;
   font-size: 12px;
-  /* width:100%; */
-
   display: flex;
   /* https://www.w3school.com.cn/tiy/t.asp?f=css3_flexbox_justify-content_space-between */
   justify-content: space-between;

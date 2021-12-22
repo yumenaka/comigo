@@ -81,7 +81,7 @@ type ServerConfig struct {
 var Config = ServerConfig{
 	OpenBrowser:         true,
 	DisableLAN:          false,
-	Template:            "multi", //multi、single、random etc.
+	Template:            "scrool", //multi、single、random etc.
 	Port:                1234,
 	CheckImage:          false,
 	LogToFile:           false,
@@ -156,26 +156,21 @@ func (config *ServerConfig) SetByExecutableFilename() {
 	} else {
 		config.SketchCountSeconds = Seconds
 	}
-	//如果执行文件名包含 single 等关键字，选择 single 分页漫画模板
-	if haveKeyWord(ExtFileName, []string{"single", "单页", "シングル"}) {
-		config.Template = "single"
+	//如果执行文件名包含 single 等关键字，选择 flip分页漫画模板
+	if haveKeyWord(ExtFileName, []string{"flip", "翻页", "めく"}) {
+		config.Template = "flip"
 	}
-	//如果执行文件名包含 double 等关键字，选择 double 分页漫画模板
-	if haveKeyWord(ExtFileName, []string{"double", "双页", "ダブルページ"}) {
-		config.Template = "double"
-	}
+
 	//选择模式以后，打印提示
 	switch config.Template {
 	case "scroll":
 		fmt.Println(locale.GetString("scroll_template"))
+	case "flip":
+		fmt.Println(locale.GetString("single_page_template"))
 	case "sketch":
 		fmt.Println(locale.GetString("sketch_template"))
 		//速写倒计时秒数
 		fmt.Println(locale.GetString("SKETCH_COUNT_SECONDS"), config.SketchCountSeconds)
-	case "single":
-		fmt.Println(locale.GetString("single_page_template"))
-	case "double":
-		fmt.Println(locale.GetString("double_page_template"))
 	default:
 	}
 }

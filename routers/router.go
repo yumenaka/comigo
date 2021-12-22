@@ -87,6 +87,17 @@ func ParseCommands(args []string) {
 	StartWebServer()
 }
 
+func setStaticFiles(engine *gin.Engine, fileUrl string, filePath string, contentType string) {
+	engine.GET(fileUrl, func(c *gin.Context) {
+		file, _ := staticFS.ReadFile(filePath)
+		c.Data(
+			http.StatusOK,
+			contentType,
+			file,
+		)
+	})
+}
+
 // StartWebServer 启动web服务
 func StartWebServer() {
 
@@ -99,7 +110,7 @@ func StartWebServer() {
 	engine.SetHTMLTemplate(tmpl)
 	if common.Config.LogToFile {
 		// 关闭 log 打印的字体颜色。输出到文件不需要颜色
-		gin.DisableConsoleColor()
+		//gin.DisableConsoleColor()
 		// 输出 log 到文件
 		engine.Use(tools.LoggerToFile(common.Config.LogFilePath, common.Config.LogFileName))
 		//禁止控制台输出
@@ -108,22 +119,23 @@ func StartWebServer() {
 	//自定义分隔符，避免与vue.js冲突
 	engine.Delims("[[", "]]")
 	//https://stackoverflow.com/questions/66248258/serve-embedded-filesystem-from-root-path-of-url
-	EmbedFS, err := fs.Sub(staticAssetFS, "static/assets")
+	assetsEmbedFS, err := fs.Sub(staticAssetFS, "static/assets")
 	if err != nil {
 		fmt.Println(err)
 	}
-	engine.StaticFS("/images/", http.FS(EmbedFS))
-	engine.StaticFS("/assets/", http.FS(EmbedFS))
-
-	//网站图标
-	engine.GET("/favicon.ico", func(c *gin.Context) {
-		file, _ := staticFS.ReadFile("static/images/favicon.ico")
-		c.Data(
-			http.StatusOK,
-			"image/x-icon",
-			file,
-		)
-	})
+	engine.StaticFS("/assets/", http.FS(assetsEmbedFS))
+	//imagesEmbedFS, err := fs.Sub(staticAssetFS, "static/images")
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//engine.StaticFS("/images/", http.FS(imagesEmbedFS))
+	//静态图片，以后再研究为什么上面的方案出错
+	setStaticFiles(engine, "/favicon.ico", "static/images/favicon.ico", "image/x-icon")
+	setStaticFiles(engine, "/images/ArrowLeft.png", "static/images/ArrowLeft.png", "image/png")
+	setStaticFiles(engine, "/images/ArrowRight.png", "static/images/ArrowRight.png", "image/png")
+	setStaticFiles(engine, "/images/SettingsOutline.png", "static/images/SettingsOutline.png", "image/png")
+	setStaticFiles(engine, "/images/error.jpg", "static/images/error.jpg", "image/jpeg")
+	setStaticFiles(engine, "/images/loading.jpg", "static/images/loading.jpg", "image/jpeg")
 
 	//Download archive file
 	if !common.ReadingBook.IsDir {

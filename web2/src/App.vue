@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <ScrollMode v-if="nowTemplate === 'scroll'" :book="this.book"></ScrollMode>
-    <FlipMode v-if="nowTemplate === 'single'" :book="this.book"></FlipMode>
+    <FlipMode v-if="nowTemplate === 'flip'||nowTemplate === 'sketch'" :book="this.book"></FlipMode>
   </div>
 </template>
 
@@ -52,7 +52,6 @@ export default defineComponent({
   computed: {
     // 计算属性的 getter
     nowTemplate: function () {
-      // var localValue ='scroll'
       // this.cookies.set("nowTemplate",'scroll');
       var localValue = this.cookies.get("nowTemplate");
       // console.log("nowTemplate is "+localValue);
@@ -91,7 +90,7 @@ export default defineComponent({
   align-items: center;
 }
 /* 覆盖8px的浏览器默认值 */
-body {
+* {
   /* 外边距，不指定的话，浏览器默认设置成8px */
   margin: 0px;
   /* 内边框 */
