@@ -11,6 +11,7 @@ import (
 	"github.com/yumenaka/comi/tools"
 	"html/template"
 	"io/fs"
+	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"os"
@@ -88,6 +89,7 @@ func ParseCommands(args []string) {
 
 // StartWebServer 启动web服务
 func StartWebServer() {
+
 	//获取模板，命名为"template-data"，同时把左右分隔符改为 [[ ]]
 	tmpl := template.Must(template.New("template-data").Delims("[[", "]]").Parse(TemplateString))
 	//设置 gin
@@ -100,6 +102,8 @@ func StartWebServer() {
 		gin.DisableConsoleColor()
 		// 输出 log 到文件
 		engine.Use(tools.LoggerToFile(common.Config.LogFilePath, common.Config.LogFileName))
+		//禁止控制台输出
+		gin.DefaultWriter = ioutil.Discard
 	}
 	//自定义分隔符，避免与vue.js冲突
 	engine.Delims("[[", "]]")
@@ -108,30 +112,15 @@ func StartWebServer() {
 	if err != nil {
 		fmt.Println(err)
 	}
+	engine.StaticFS("/images/", http.FS(EmbedFS))
 	engine.StaticFS("/assets/", http.FS(EmbedFS))
 
 	//网站图标
 	engine.GET("/favicon.ico", func(c *gin.Context) {
-		file, _ := staticFS.ReadFile("static/favicon.ico")
+		file, _ := staticFS.ReadFile("static/images/favicon.ico")
 		c.Data(
 			http.StatusOK,
 			"image/x-icon",
-			file,
-		)
-	})
-	engine.GET("/loading.jpg", func(c *gin.Context) {
-		file, _ := staticFS.ReadFile("static/loading.jpg")
-		c.Data(
-			http.StatusOK,
-			"image/jpeg",
-			file,
-		)
-	})
-	engine.GET("/error.jpg", func(c *gin.Context) {
-		file, _ := staticFS.ReadFile("static/error.jpg")
-		c.Data(
-			http.StatusOK,
-			"image/jpeg",
 			file,
 		)
 	})

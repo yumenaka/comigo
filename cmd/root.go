@@ -93,7 +93,7 @@ func init() {
 	//frpc remote_port
 	rootCmd.PersistentFlags().IntVar(&common.Config.FrpConfig.RemotePort, "frps-remote-port", 50000, locale.GetString("FRP_REMOTE_PORT"))
 	//输出log文件
-	rootCmd.PersistentFlags().BoolVar(&common.Config.LogToFile, "log", false, locale.GetString("LOG_TO_FILE"))
+	rootCmd.PersistentFlags().BoolVar(&common.Config.LogToFile, "log", true, locale.GetString("LOG_TO_FILE"))
 	//默认web模板
 	rootCmd.PersistentFlags().StringVarP(&common.Config.Template, "template", "t", "scroll", locale.GetString("TEMPLATE"))
 	//sketch模式的倒计时秒数
