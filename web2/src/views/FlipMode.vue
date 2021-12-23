@@ -12,7 +12,7 @@
 			</n-icon>
 		</Header>
 		<div
-			class="main_manga"
+			class="manga_area"
 			id="MangaMain"
 			@click.self="onMouseClick"
 			@mousemove.self="onMouseMove"
@@ -27,13 +27,13 @@
 				lazy-src="/resources/favicon.ico"
 				v-bind:src="this.book.pages[now_page - 1].url"
 			/>
+			<div v-if="this.showSketchHintFlag_FlipMode" class="sketch_hint">{{ pageNumOrSketchHint }}</div>
 			<img />
-			<span v-if="this.showPageNumFlag_FlipMode">{{ now_page }}/{{ book.all_page_num }}</span>
 		</div>
 		<div class="footer" v-if="this.showFooterFlag_FlipMode">
 			<!-- 右手模式用 ，底部滑动条 -->
 
-			<div v-if="this.useRightHandFlag">
+			<div v-if="this.useRightHalfScreenFlipFlag">
 				<span>第{{ this.now_page }}页</span>
 				<n-slider
 					v-model:value="now_page"
@@ -47,7 +47,7 @@
 
 			<!-- 左手模式用 底部滑动条，设置reverse翻转计数方向 -->
 
-			<div v-if="!this.useRightHandFlag">
+			<div v-if="!this.useRightHalfScreenFlipFlag">
 				<span>第{{ this.book.all_page_num }}页</span>
 				<n-slider
 					reverse
@@ -121,18 +121,6 @@
 				</n-switch>
 			</n-space>
 
-			<!-- 开关：显示当前页数 -->
-			<n-space>
-				<n-switch
-					size="large"
-					v-model:value="this.showPageNumFlag_FlipMode"
-					@update:value="setShowPageNumChange"
-				>
-					<template #checked>显示页数</template>
-					<template #unchecked>显示页数</template>
-				</n-switch>
-			</n-space>
-
 			<!-- 保存阅读进度 -->
 			<n-space>
 				<n-switch
@@ -145,22 +133,22 @@
 				</n-switch>
 			</n-space>
 
-			<!-- 开关：翻页模式，默认右手-->
+			<!-- 开关：翻页模式，默认右半屏-->
 			<n-space>
 				<n-switch
 					size="large"
-					v-model:value="this.useRightHandFlag"
+					v-model:value="this.useRightHalfScreenFlipFlag"
 					:rail-style="railStyle"
-					@update:value="this.setUseLeftHandFlag"
+					@update:value="this.setFlipScreenFlag"
 				>
-					<template #checked>右手翻页</template>
-					<template #unchecked>左手翻页</template>
+					<template #checked>右半屏翻下一页</template>
+					<template #unchecked>左半屏翻下一页</template>
 				</n-switch>
 			</n-space>
 			<!-- 分割线 -->
 			<n-divider />
 
-			<!-- 随机切换背景色 -->
+			<!-- 开关：Debug，现在只会随机背景色 -->
 			<n-space>
 				<n-switch
 					size="large"
@@ -172,9 +160,21 @@
 				</n-switch>
 			</n-space>
 
+			<!-- 开关：显示当前页数 -->
+			<n-space>
+				<n-switch
+					size="large"
+					v-model:value="this.showSketchHintFlag_FlipMode"
+					@update:value="setShowPageNumChange"
+				>
+					<template #checked>素描提示</template>
+					<template #unchecked>素描提示</template>
+				</n-switch>
+			</n-space>
+
 			<!-- 抽屉：自定义底部 -->
 			<template #footer>
-				<n-button @click="changeTemplateToSketch">倒计时素描-开始</n-button>
+				<n-button @click="changeTemplateToSketch">倒计时素描</n-button>
 				<n-avatar size="small" src="/favicon.ico" />
 			</template>
 		</n-drawer-content>
@@ -260,10 +260,9 @@ export default defineComponent({
 			showHeaderFlag_FlipMode: true,
 			//是否显示页脚
 			showFooterFlag_FlipMode: true,
-			//是否显示页数
-			showPageNumFlag_FlipMode: false,
-			//是否是右手翻页
-			useRightHandFlag: true,
+
+			//是否是右半屏翻页
+			useRightHalfScreenFlipFlag: true,
 			//是否拼合双叶
 			autoDoublepage_FlipMode: true,
 			//是否保存当前页数
@@ -271,7 +270,10 @@ export default defineComponent({
 			//当前页数
 			now_page: 1,
 			selectedTemplate: "flip",
+			//素描模式标记
 			sketchModeFlag: false,
+			//是否显示素描提示
+			showSketchHintFlag_FlipMode: false,
 			sketchSecondCount: 0,
 			sketchFlipSecond: 30,
 			interval: null,
@@ -299,15 +301,15 @@ export default defineComponent({
 			this.showFooterFlag_FlipMode = false;
 		}
 		//是否显示页数
-		if (this.cookies.get("showPageNumFlag_FlipMode") === "true") {
-			this.showPageNumFlag_FlipMode = true;
-		} else if (this.cookies.get("showPageNumFlag_FlipMode") === "false") {
-			this.showPageNumFlag_FlipMode = false;
+		if (this.cookies.get("showSketchHintFlag_FlipMode") === "true") {
+			this.showSketchHintFlag_FlipMode = true;
+		} else if (this.cookies.get("showSketchHintFlag_FlipMode") === "false") {
+			this.showSketchHintFlag_FlipMode = false;
 		}
-		if (this.cookies.get("useRightHandFlag") === "true") {
-			this.useRightHandFlag = true;
-		} else if (this.cookies.get("useRightHandFlag") === "false") {
-			this.useRightHandFlag = false;
+		if (this.cookies.get("useRightHalfScreenFlipFlag") === "true") {
+			this.useRightHalfScreenFlipFlag = true;
+		} else if (this.cookies.get("useRightHalfScreenFlipFlag") === "false") {
+			this.useRightHalfScreenFlipFlag = false;
 		}
 
 		if (this.cookies.get("autoDoublepage_FlipMode") === "true") {
@@ -340,7 +342,6 @@ export default defineComponent({
 	//挂载后
 	mounted() {
 		// setInterval(this.changeRandomColor, 1000);
-
 	},
 
 	updated() {
@@ -354,7 +355,6 @@ export default defineComponent({
 	},
 
 	methods: {
-
 		changeTemplateToSketch(e) {
 			this.sketchModeFlag = !this.sketchModeFlag;
 			if (this.sketchModeFlag) {
@@ -363,6 +363,10 @@ export default defineComponent({
 				this.cookies.set("nowTemplate", "sketch");
 				this.selectedTemplate = "sketch";
 				this.sketchModeFlag = true;
+				//setTimeout和setInterval函数，都返回一个表示计数器编号的整数值，将该整数传入clearTimeout和clearInterval函数，就可以取消对应的定时器。
+				//setTimeout()用于在指定的毫秒数后调用函数或计算表达式
+				//setTimeout('console.log(2)',1000);
+				//setInterval指定某个任务每隔一段时间就执行一次
 				this.interval = setInterval(this.sketchCount, 1000);
 			} else {
 				//停止倒计时素描
@@ -379,8 +383,8 @@ export default defineComponent({
 				this.sketchSecondCount = 0;
 			}
 			this.sketchSecondCount = this.sketchSecondCount + 1;
-			let nowSeconnd =this.sketchSecondCount % this.sketchFlipSecond
-			console.log("sketchSecondCount="+this.sketchSecondCount+" nowSeconnd:"+nowSeconnd)
+			let nowSeconnd = this.sketchSecondCount % this.sketchFlipSecond
+			console.log("sketchSecondCount=" + this.sketchSecondCount + " nowSeconnd:" + nowSeconnd)
 			if (nowSeconnd == 0) {
 				if (this.now_page < this.book.all_page_num) {
 					this.flipPage(1);
@@ -395,8 +399,8 @@ export default defineComponent({
 			this.cookies.set("debugModeFlag", this.debugModeFlag);
 			this.cookies.set("showHeaderFlag_FlipMode", this.showHeaderFlag_FlipMode);
 			this.cookies.set("showFooterFlag_FlipMode", this.showFooterFlag_FlipMode);
-			this.cookies.set("showPageNumFlag_FlipMode", this.showPageNumFlag_FlipMode);
-			this.cookies.set("useRightHandFlag", this.useRightHandFlag);
+			this.cookies.set("showSketchHintFlag_FlipMode", this.showSketchHintFlag_FlipMode);
+			this.cookies.set("useRightHalfScreenFlipFlag", this.useRightHalfScreenFlipFlag);
 			this.cookies.set("autoDoublepage_FlipMode", this.autoDoublepage_FlipMode);
 			this.cookies.set("savePageNumFlag", this.savePageNumFlag);
 			this.cookies.set("now_page" + this.book.name, this.now_page);
@@ -476,14 +480,14 @@ export default defineComponent({
 				//决定如何翻页
 				if (offsetX <= (offsetWidth / 2.0)) {
 					//左边的翻页
-					if (this.useRightHandFlag) {
+					if (this.useRightHalfScreenFlipFlag) {
 						this.flipPage(-1);
 					} else {
 						this.flipPage(1);
 					}
 				} else {
 					//右边的翻页
-					if (this.useRightHandFlag) {
+					if (this.useRightHalfScreenFlipFlag) {
 						this.flipPage(1);
 					} else {
 						this.flipPage(-1);
@@ -506,16 +510,16 @@ export default defineComponent({
 
 		setShowPageNumChange(value) {
 			console.log("value:" + value);
-			this.showPageNumFlag_FlipMode = value;
-			this.cookies.set("showPageNumFlag_FlipMode", value);
-			console.log("cookie设置完毕: showPageNumFlag_FlipMode=" + this.cookies.get("showPageNumFlag_FlipMode"));
+			this.showSketchHintFlag_FlipMode = value;
+			this.cookies.set("showSketchHintFlag_FlipMode", value);
+			console.log("cookie设置完毕: showSketchHintFlag_FlipMode=" + this.cookies.get("showSketchHintFlag_FlipMode"));
 		},
 
-		setUseLeftHandFlag(value) {
+		setFlipScreenFlag(value) {
 			console.log("value:" + value);
-			this.useRightHandFlag = value;
-			this.cookies.set("useRightHandFlag", value);
-			console.log("cookie设置完毕: useRightHandFlag=" + this.cookies.get("useRightHandFlag"));
+			this.useRightHalfScreenFlipFlag = value;
+			this.cookies.set("useRightHalfScreenFlipFlag", value);
+			console.log("cookie设置完毕: useRightHalfScreenFlipFlag=" + this.cookies.get("useRightHalfScreenFlipFlag"));
 		},
 
 		setSavePageNumFlag(value) {
@@ -608,32 +612,58 @@ export default defineComponent({
 	},
 
 	computed: {
-		mainHeight() {
-			let Height = "100vh";
-			if (this.showFooterFlag_FlipMode || this.showHeaderFlag_FlipMode) {
-				if (this.showPageNumFlag_FlipMode) {
-					Height = "95vh"
-				} else {
-					Height = "95vh"
-				}
-
+		//页数或素描模式的提示
+		pageNumOrSketchHint() {
+			if (this.sketchModeFlag) {
+				let nowSeconnd = this.sketchSecondCount % this.sketchFlipSecond
+				let hintString = "现在:" + nowSeconnd  + "秒    总共:" +  this.sketchSecondCount + "秒   翻页间隔:" + this.sketchFlipSecond
+				return hintString
+			} else {
+				return this.now_page + "/" + this.book.all_page_num
 			}
-			return Height;
 		},
-		imgHeight() {
-			let Height = "100vh";
-			if (this.showFooterFlag_FlipMode || this.showHeaderFlag_FlipMode) {
-				if (this.showPageNumFlag_FlipMode) {
-					Height = "92vh"
-				} else {
-					Height = "95vh"
-				}
-
+		mangaAreaHeight() {
+			let Height = 95
+			//页头和底部拖动条都显示,或有一个显示的时候，95%
+			if (this.showFooterFlag_FlipMode && this.showHeaderFlag_FlipMode) {
+				Height = 95
 			}
-			return Height;
+			if (this.showFooterFlag_FlipMode && !this.showHeaderFlag_FlipMode) {
+				Height = 95
+			}
+			if (!this.showFooterFlag_FlipMode && this.showHeaderFlag_FlipMode) {
+				Height = 95
+			}
+			//页头和底部拖动条都不显示的时候，漫画占满屏幕
+			if ((!this.showFooterFlag_FlipMode) && (!this.showHeaderFlag_FlipMode)) {
+				Height = 100
+			}
+			return Height + "vh";
+
+		},
+		mangaImageHeight() {
+			let Height = 95
+			//页头和底部拖动条都显示,或有一个显示的时候，95%
+			if (this.showFooterFlag_FlipMode && this.showHeaderFlag_FlipMode) {
+				Height = 95
+			}
+			if (this.showFooterFlag_FlipMode && !this.showHeaderFlag_FlipMode) {
+				Height = 95
+			}
+			if (!this.showFooterFlag_FlipMode && this.showHeaderFlag_FlipMode) {
+				Height = 95
+			}
+			//页头和拖动条都不显示的时候，漫画占满屏幕
+			if ((!this.showFooterFlag_FlipMode) && (!this.showHeaderFlag_FlipMode)) {
+				Height = 100
+			}
+			//与上面唯一的不同，减去素描提示的空间
+			if (this.showSketchHintFlag_FlipMode) {
+				Height = Height - 3
+			}
+			return Height + "vh";
 		},
 	},
-
 });
 </script>
 
@@ -671,9 +701,9 @@ export default defineComponent({
 }
 
 /* 漫画div */
-.main_manga {
+.manga_area {
 	width: 100vw;
-	height: v-bind(mainHeight);
+	height: v-bind(mangaAreaHeight);
 	max-height: 100vh;
 	max-width: 100vw;
 	padding: 0px;
@@ -681,15 +711,17 @@ export default defineComponent({
 	flex-direction: column;
 	justify-content: center;
 	align-items: baseline;
+	user-select: none; /* 不可以被选中 */
+	-moz-user-select: none; /* 火狐 */
+	-webkit-user-select: none; /* 谷歌 */
 }
 
 /* 漫画div中的图片*/
-.main_manga img {
+.manga_area img {
 	/* max-height: inherit 继承 */
 	/* max-height: inherit; */
-	max-height: v-bind(imgHeight);
+	max-height: v-bind(mangaImageHeight);
 	max-width: 100vw;
-
 	margin: 0 auto; /* center */
 	padding: 0px;
 	left: 0; /* center */
@@ -701,12 +733,16 @@ export default defineComponent({
 	/* flex-grow: 100; */
 }
 
-.main_manga span {
+/* 漫画div图片下面的页数*/
+.sketch_hint {
 	height: 3vh;
-	/* padding: 0px; */
+	padding: 0px;
 	text-align: center;
-	font-size: 20px;
-	/* flex-grow: 10; */
+	font-size: 16px;
+	/* 文字颜色 */
+	color: rgb(238, 238, 238);
+	/* 文字阴影：https://www.w3school.com.cn/css/css3_shadows.asp*/
+	text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
 	width: 100vw;
 }
 
@@ -726,12 +762,11 @@ export default defineComponent({
 	justify-content: row;
 	/* center 值将 flex 项目在容器中间对齐： */
 	align-items: center;
-	.span {
-		width: 28px;
-	}
+	color: rgb(80, 80, 255);
+	text-shadow: 2px 2px 5px yellowgreen;
 }
 
 .footer div > span {
-	width: 8vw;
+	width: 10vw;
 }
 </style>

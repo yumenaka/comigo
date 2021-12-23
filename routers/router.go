@@ -30,6 +30,9 @@ var staticFS embed.FS
 //go:embed  static/assets
 var staticAssetFS embed.FS
 
+//go:embed  static/images
+var staticImageFS embed.FS
+
 //退出时清理
 func init() {
 	common.SetupCloseHander()
@@ -87,6 +90,7 @@ func ParseCommands(args []string) {
 	StartWebServer()
 }
 
+//单独设定某个文件
 func setStaticFiles(engine *gin.Engine, fileUrl string, filePath string, contentType string) {
 	engine.GET(fileUrl, func(c *gin.Context) {
 		file, _ := staticFS.ReadFile(filePath)
@@ -124,18 +128,13 @@ func StartWebServer() {
 		fmt.Println(err)
 	}
 	engine.StaticFS("/assets/", http.FS(assetsEmbedFS))
-	//imagesEmbedFS, err := fs.Sub(staticAssetFS, "static/images")
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
-	//engine.StaticFS("/images/", http.FS(imagesEmbedFS))
-	//静态图片，以后再研究为什么上面的方案出错
+	imagesEmbedFS, errStaticImageFS := fs.Sub(staticImageFS, "static/images")
+	if errStaticImageFS != nil {
+		fmt.Println(errStaticImageFS)
+	}
+	engine.StaticFS("/images/", http.FS(imagesEmbedFS))
+	//单独一张静态图片，没必要再定义一个FS
 	setStaticFiles(engine, "/favicon.ico", "static/images/favicon.ico", "image/x-icon")
-	setStaticFiles(engine, "/images/ArrowLeft.png", "static/images/ArrowLeft.png", "image/png")
-	setStaticFiles(engine, "/images/ArrowRight.png", "static/images/ArrowRight.png", "image/png")
-	setStaticFiles(engine, "/images/SettingsOutline.png", "static/images/SettingsOutline.png", "image/png")
-	setStaticFiles(engine, "/images/error.jpg", "static/images/error.jpg", "image/jpeg")
-	setStaticFiles(engine, "/images/loading.jpg", "static/images/loading.jpg", "image/jpeg")
 
 	//Download archive file
 	if !common.ReadingBook.IsDir {

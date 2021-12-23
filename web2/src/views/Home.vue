@@ -29,9 +29,7 @@ import {
 } from "vue";
 
 // @ is an alias to /src
-// import HelloWorld from '@/components/HelloWorld.vue'
 import Header from "@/components/Header.vue";
-// import Book from '@/components/Book.vue'
 // import ScrollMode from "@/components/ScrollMode.vue";
 
 export default {

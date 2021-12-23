@@ -13,7 +13,7 @@
 		</Header>
 
 		<!-- 渲染漫画部分 -->
-		<div
+		<div class="main_manga"
 			v-for="(page, key) in book.pages"
 			:key="page.url"
 			@click="onMouseClick($event)"
@@ -22,7 +22,7 @@
 		>
 			<!-- v-lazy="page.url"  :src="page.url" -->
 			<img v-lazy="page.url" v-bind:H="page.height" v-bind:W="page.width" v-bind:key="key" />
-			<span v-if="showPageNumFlag_ScrollMode">{{ key + 1 }}/{{ book.all_page_num }}</span>
+			<div class="page_num" v-if="showPageNumFlag_ScrollMode">{{ key + 1 }}/{{ book.all_page_num }}</div>
 		</div>
 
 		<!-- 设置抽屉 -->
@@ -327,7 +327,6 @@ export default defineComponent({
 		};
 	},
 	//Vue3生命周期:  https://v3.cn.vuejs.org/api/options-lifecycle-hooks.html#beforecreate
-
 	// created : 在绑定元素的属性或事件监听器被应用之前调用。
 	// beforeMount : 指令第一次绑定到元素并且在挂载父组件之前调用。。
 	// mounted : 在绑定元素的父组件被挂载后调用。。

@@ -1,14 +1,14 @@
 <template>
   <div class="home">
     <ScrollMode v-if="nowTemplate === 'scroll'" :book="this.book"></ScrollMode>
-    <FlipMode v-if="nowTemplate === 'flip'||nowTemplate === 'sketch'" :book="this.book"></FlipMode>
+    <FlipMode v-if="nowTemplate === 'flip' || nowTemplate === 'sketch'" :book="this.book"></FlipMode>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
-import ScrollMode from "@/components/ScrollMode.vue";
-import FlipMode from "@/components/FlipMode.vue";
+import ScrollMode from "@/views/ScrollMode.vue";
+import FlipMode from "@/views/FlipMode.vue";
 import { useCookies } from "vue3-cookies";
 import { defineComponent } from 'vue'
 
@@ -18,7 +18,6 @@ export default defineComponent({
   components: {
     ScrollMode,
     FlipMode,
-
   },
   setup() {
     const { cookies } = useCookies();
@@ -26,30 +25,42 @@ export default defineComponent({
   },
   data() {
     return {
-      setting: null,
-      book: null,
     };
   },
+
+  created() {
+    this.$store.dispatch("syncBookDataAction");
+    this.$store.dispatch("syncSettingDataAction");
+    this.$store.dispatch("syncBookShelfDataAction");
+  },
   beforeMount() {
-    this.axios
-      .get("/book.json")
-      .then((response) => {
-        if (response.status == 200) {
-          this.book = response.data;
-        }
-      })
-      .catch((error) => alert(error));
-    this.axios
-      .get("/setting.json")
-      .then((response) => {
-        if (response.status == 200) {
-          this.setting = response.data;
-          console.log("get setting : " + response.data);
-        }
-      })
-      .catch((error) => alert(error));
+    // this.axios
+    //   .get("/book.json")
+    //   .then((response) => {
+    //     if (response.status == 200) {
+    //       this.book = response.data;
+    //     }
+    //   })
+    //   .catch((error) => alert(error));
+    // this.axios
+    //   .get("/setting.json")
+    //   .then((response) => {
+    //     if (response.status == 200) {
+    //       this.setting = response.data;
+    //       console.log("get setting : " + response.data);
+    //     }
+    //   })
+    //   .catch((error) => alert(error));
+
   },
   computed: {
+
+    book(){
+      return this.$store.state.book;
+    },
+    setting(){
+      return this.$store.state.setting;
+    },
     // 计算属性的 getter
     nowTemplate: function () {
       // this.cookies.set("nowTemplate",'scroll');

@@ -1,6 +1,9 @@
 import { createStore } from 'vuex'
+import axios from 'axios'
 
-export default createStore({
+const store = createStore({
+  //开启严格模式，避免直接的修改
+  // strict :true,
   //state 存放所有组件的共用数据
   state: {
     count: 0,
@@ -16,7 +19,7 @@ export default createStore({
         {
           height: 500,
           width: 449,
-          url: "/resources/favicon.ico",
+          url: "/favicon.ico",
           class: "Vertical",
         },
       ],
@@ -24,7 +27,7 @@ export default createStore({
     bookshelf: {},
     setting: {
       template: "scroll",
-      sketch_count_seconds: 90,
+      sketch_count_seconds: 30,
     },
     message: {
       user_uuid: "",
@@ -34,19 +37,15 @@ export default createStore({
       msg: "",
     },
   },
-  //mutaitions 只能执行同步操作
+  //mutaitions改变 只能执行同步操作。不能直接调用。需要使用 store.commit('函数名') 方法
   mutations: {
     change_template_to_scroll(state) {
       state.setting.template = "scroll";
       console.log("change_template_to_scroll:" + state.setting.template);
     },
-    change_template_to_double(state) {
-      state.setting.template = "double";
-      console.log("change_template_to_double:" + state.setting.template);
-    },
-    change_template_to_single(state) {
-      state.setting.template = "single";
-      console.log("change_template_to_single:" + state.setting.template);
+    change_template_to_flip(state) {
+      state.setting.template = "flip";
+      console.log("change_template_to_flip:" + state.setting.template);
     },
     change_template_to_sketch(state) {
       state.setting.template = "sketch";
@@ -55,6 +54,7 @@ export default createStore({
     increment(state) {
       state.count++;
     },
+    //使用mutation()函数（store.commit('')）的时候，还可以传入额外的参数，也就是载荷payload
     syncSettingData(state, payload) {
       state.setting = payload.message;
     },
@@ -66,13 +66,15 @@ export default createStore({
     },
   },
   //actions 可以包含任意异步操作，通过 store.dispatch 方法触发
+  //接收context，与store具有相同方法与属性，不是store本身，
+  //context可以访问state与getter，还可以用context.dispatch调用其他Action
   actions: {
     incrementAction(context) {
       context.commit("increment");
     },
     //拉取远程设定数据
     async syncSettingDataAction(context) {
-      const msg = await this.axios.get("/setting.json").then(
+      const msg = await axios.get("/setting.json").then(
         (res) => res.data,
         () => ""
       );
@@ -84,7 +86,7 @@ export default createStore({
     },
     //拉取当前阅读书籍数据
     async syncBookDataAction(context) {
-      const msg = await this.axios.get("/book.json").then(
+      const msg = await axios.get("/book.json").then(
         (res) => res.data,
         () => ""
       );
@@ -96,7 +98,7 @@ export default createStore({
     },
     //拉取书架数据
     async syncBookShelfDataAction(context) {
-      const msg = await this.axios.get("/bookshelf.json").then(
+      const msg = await axios.get("/bookshelf.json").then(
         (res) => res.data,
         () => ""
       );
@@ -107,6 +109,7 @@ export default createStore({
       console.log("syncBookShelfData!");
     },
   },
+  //相当于store的计算属性，会被缓存，变化的时候才重新计算
   getters: {
     doneTodos: (state) => {
       return state.todos.filter((todo) => todo.done);
@@ -130,3 +133,6 @@ export default createStore({
   modules: {
   }
 })
+
+
+export default store
