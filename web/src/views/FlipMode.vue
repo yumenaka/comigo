@@ -362,9 +362,12 @@ export default defineComponent({
 			clearInterval(this.interval); // 清除定时器
 		},
 		sketchCount() {
+			if (this.sketchModeFlag == false){
+				this.stopSketchMode()
+			}
 			this.sketchSecondCount = this.sketchSecondCount + 1;
 			let nowSeconnd = this.sketchSecondCount % this.sketchFlipSecond
-			console.log("sketchSecondCount=" + this.sketchSecondCount + " nowSeconnd:" + nowSeconnd)
+			// console.log("sketchSecondCount=" + this.sketchSecondCount + " nowSeconnd:" + nowSeconnd)
 			if (nowSeconnd == 0) {
 				if (this.now_page_FlipMode < this.book.all_page_num) {
 					this.flipPage(1);
