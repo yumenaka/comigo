@@ -1,5 +1,6 @@
 <template>
 	<div class="body" v-if="this.book">
+		<!-- 顶部，标题页头 -->
 		<Header
 			class="header"
 			v-if="this.showHeaderFlag_FlipMode"
@@ -12,6 +13,7 @@
 			</n-icon>
 		</Header>
 
+		<!-- 主题，漫画div -->
 		<div
 			class="manga_area"
 			id="MangaMain"
@@ -28,16 +30,17 @@
 				lazy-src="/resources/favicon.ico"
 				v-bind:src="this.book.pages[now_page_FlipMode - 1].url"
 			/>
-			<div v-if="this.showPageNumFlag_FlipMode" class="sketch_hint">{{ pageNumOrSketchHint }}</div>
 			<img />
+			<div v-if="this.showPageNumFlag_FlipMode" class="sketch_hint">{{ pageNumOrSketchHint }}</div>
 		</div>
+
+		<!-- 页脚 拖动条 -->
 		<div class="footer" v-if="this.showFooterFlag_FlipMode">
 			<!-- 右手模式用 ，底部滑动条 -->
-
 			<div v-if="this.useRightHalfScreen_FlipMode">
 				<span>{{ this.now_page_FlipMode }}</span>
 				<n-slider
-					v-model:value="this.now_page_FlipMode"
+					v-model:value="now_page_FlipMode"
 					:max="this.book.all_page_num"
 					:min="1"
 					:step="1"
@@ -45,9 +48,7 @@
 				/>
 				<span>{{ this.book.all_page_num }}</span>
 			</div>
-
 			<!-- 左手模式用 底部滑动条，设置reverse翻转计数方向 -->
-
 			<div v-if="!this.useRightHalfScreen_FlipMode">
 				<span>{{ this.book.all_page_num }}</span>
 				<n-slider
@@ -63,15 +64,18 @@
 		</div>
 	</div>
 
+	<!-- 设置抽屉，一开始隐藏 -->
 	<Drawer
 		:initDrawerActive="this.drawerActive"
 		:initDrawerPlacement="this.drawerPlacement"
 		@saveConfig="this.saveConfigToCookie"
 		@startSketch="this.startSketchMode"
+		@stopSketch="this.stopSketchMode"
 		@closeDrawer="this.drawerDeactivate"
+		@setT="OnSetTemplate"
+		:nowTemplateDrawer="this.nowTemplate"
 	>
-		<!-- 分割线 -->
-		<n-divider />
+
 		<span>{{ this.$t('message.setBackColor') }}</span>
 		<n-color-picker v-model:value="model.color" :modes="['rgb']" :show-alpha="false" />
 
@@ -167,7 +171,8 @@ import { NSpace, NSlider, NSwitch, NIcon, NColorPicker, NDivider, } from 'naive-
 import { SettingsOutline } from '@vicons/ionicons5'
 export default defineComponent({
 	name: "FlipMode",
-	props: ['book'],
+	props: ['book', 'nowTemplate'],
+	emits: ["setTemplate"],
 	components: {
 		Header,
 		Drawer,
@@ -215,7 +220,7 @@ export default defineComponent({
 			drawerActive: false,
 			drawerPlacement: 'right',
 			//开发模式 没做的功能与设置，设置Debug以后才能见到
-			debugModeFlag: true,
+			debugModeFlag: false,
 			//是否显示页头
 			showHeaderFlag_FlipMode: true,
 			//是否显示页脚
@@ -228,7 +233,6 @@ export default defineComponent({
 			savePageNumFlag_FlipMode: true,
 			//当前页数
 			now_page_FlipMode: 1,
-			selectedTemplate: "flip",
 			//素描模式标记
 			sketchModeFlag: false,
 			//是否显示素描提示
@@ -292,6 +296,17 @@ export default defineComponent({
 	beforeMount() {
 		// 注册监听
 		window.addEventListener("keyup", this.handleKeyup);
+		//当前页数
+		if (this.cookies.get("now_page_FlipMode" + this.book.name) != null) {
+			let saveNum = Number(this.cookies.get("now_page_FlipMode" + this.book.name));
+			if (!isNaN(saveNum)) {
+				this.now_page_FlipMode = saveNum;
+			}
+		}
+		//自動開始Sketch模式
+		if (this.nowTemplate == "sketch") {
+			this.startSketchMode();
+		}
 	},
 	//卸载前
 	beforeUnmount() {
@@ -302,18 +317,17 @@ export default defineComponent({
 	mounted() {
 		// setInterval(this.changeRandomColor, 1000);
 	},
-
 	updated() {
-		//当前页数
-		if (this.cookies.get("now_page_FlipMode" + this.book.name) != null) {
-			let saveNum = Number(this.cookies.get("now_page_FlipMode" + this.book.name));
-			if (!isNaN(saveNum)) {
-				this.now_page_FlipMode = saveNum;
-			}
-		}
+		//界面有更新就会调用，随便乱放会引起难以调试的BUG
 	},
-
 	methods: {
+		//接收Drawer的参数，继续往父组件传
+		OnSetTemplate(value) {
+			this.$emit("setTemplate", value);
+		},
+		sayHello(name) {
+			alert("hello " + name);
+		},
 		//打开抽屉
 		drawerActivate(place) {
 			this.drawerActive = true
@@ -323,32 +337,31 @@ export default defineComponent({
 		drawerDeactivate() {
 			this.drawerActive = false
 		},
+		//开始速写倒计时
 		startSketchMode() {
-			this.sketchModeFlag = !this.sketchModeFlag;
-			if (this.sketchModeFlag) {
-				//开始倒计时素描
-				this.cookies.set("nowTemplate", "sketch");
-				this.selectedTemplate = "sketch";
-				this.sketchModeFlag = true;
-				//setTimeout和setInterval函数，都返回一个表示计数器编号的整数值，将该整数传入clearTimeout和clearInterval函数，就可以取消对应的定时器。
-				//setTimeout()用于在指定的毫秒数后调用函数或计算表达式
-				//setTimeout('console.log(2)',1000);
-				//setInterval指定某个任务每隔一段时间就执行一次
-				this.interval = setInterval(this.sketchCount, 1000);
-			} else {
-				//停止倒计时素描
-
-				this.sketchModeFlag = false;
-				this.cookies.set("nowTemplate", "flip");
-				this.selectedTemplate = "flip";
-				this.sketchSecondCount = 0;
-			}
+			this.sketchModeFlag = true;
+			this.showPageNumFlag_FlipMode = true;
+			//是否显示页头
+			this.showHeaderFlag_FlipMode=false,
+			//是否显示页脚
+			this.showFooterFlag_FlipMode=false,
+			this.$emit("setTemplate", "sketch");
+			//setTimeout和setInterval函数，都返回一个表示计数器编号的整数值，将该整数传入clearTimeout和clearInterval函数，就可以取消对应的定时器。setInterval指定某个任务每隔一段时间就执行一次。setTimeout()用于在指定的毫秒数后调用函数或计算表达式  setTimeout('console.log(2)',1000);
+			this.interval = setInterval(this.sketchCount, 1000);
+		},
+		//停止速写倒计时
+		stopSketchMode() {
+			this.sketchModeFlag = false;
+			this.showPageNumFlag_FlipMode = false;
+			this.sketchSecondCount = 0;
+			//是否显示页头
+			this.showHeaderFlag_FlipMode=true,
+			//是否显示页脚
+			this.showFooterFlag_FlipMode=true,
+			this.$emit("setTemplate", "flip");
+			clearInterval(this.interval); // 清除定时器
 		},
 		sketchCount() {
-			if (!this.sketchModeFlag) {
-				clearInterval(this.interval); // 清除定时器
-				this.sketchSecondCount = 0;
-			}
 			this.sketchSecondCount = this.sketchSecondCount + 1;
 			let nowSeconnd = this.sketchSecondCount % this.sketchFlipSecond
 			console.log("sketchSecondCount=" + this.sketchSecondCount + " nowSeconnd:" + nowSeconnd)
@@ -359,7 +372,6 @@ export default defineComponent({
 					this.toPage(1);
 				}
 			}
-
 		},
 		// 关闭抽屉时，保存设置到cookies
 		saveConfigToCookie() {
@@ -503,22 +515,6 @@ export default defineComponent({
 			console.log("cookie设置完毕: debugModeFlag=" + this.cookies.get("debugModeFlag"));
 		},
 
-
-		//切换模板的函数，需要配合vue-router
-		onChangeTemplate() {
-			// this.selectedTemplate = e.target.value
-			if (this.selectedTemplate === "scroll") {
-				this.cookies.set("nowTemplate", "scroll");
-			}
-			if (this.selectedTemplate === "flip") {
-				this.cookies.set("nowTemplate", "flip");
-			}
-			if (this.selectedTemplate === "sketch") {
-				this.cookies.set("nowTemplate", "sketch");
-			}
-			location.reload(); //暂时无法动态刷新，研究vue-router去掉
-		},
-
 		flipPage: function (num) {
 			if (
 				this.now_page_FlipMode + num <= this.book.all_page_num &&
@@ -526,7 +522,12 @@ export default defineComponent({
 			) {
 				this.now_page_FlipMode = this.now_page_FlipMode + num;
 			} else {
-				console.log("无法继续翻了，Num:" + num)
+				// console.log("无法继续翻，Num:" + num)
+				if (num > 0) {
+					alert(this.$t('message.hintLastPage'));
+				} else {
+					alert(this.$t('message.hintFirstPage'));
+				}
 			}
 			if (this.savePageNumFlag_FlipMode) {
 				this.cookies.set("now_page_FlipMode" + this.book.name, this.now_page_FlipMode);
@@ -584,8 +585,9 @@ export default defineComponent({
 		//页数或素描模式的提示
 		pageNumOrSketchHint() {
 			if (this.sketchModeFlag) {
-				let nowSeconnd = this.sketchSecondCount % this.sketchFlipSecond
-				let hintString = "现在:" + nowSeconnd + "秒    总共:" + this.sketchSecondCount + "秒   翻页间隔:" + this.sketchFlipSecond
+				let nowSeconnd = (this.sketchSecondCount % this.sketchFlipSecond)+1
+				let AllString =parseInt((this.sketchSecondCount+1)/60)+"分 "+ (this.sketchSecondCount+1)%60+"秒"
+				let hintString = "现在:" + nowSeconnd + "秒    总共:" + AllString + "   翻页间隔:" + this.sketchFlipSecond
 				return hintString
 			} else {
 				return this.now_page_FlipMode + "/" + this.book.all_page_num

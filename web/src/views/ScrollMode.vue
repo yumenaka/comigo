@@ -32,6 +32,8 @@
 			@saveConfig="this.saveConfigToCookie"
 			@startSketch="this.startSketchMode"
 			@closeDrawer="this.drawerDeactivate"
+			@setT="this.OnSetTemplate"
+			:nowTemplateDrawer="this.nowTemplate"
 		>
 			<n-space vertical>
 				<!-- 单页-漫画宽度-使用百分比 -->
@@ -184,7 +186,8 @@ import { SettingsOutline } from '@vicons/ionicons5'
 
 export default defineComponent({
 	name: "ScrollMode",
-	props: ['book'],
+	props: ['book','nowTemplate'],
+	emits: ["setTemplate"],
 	components: {
 		Header,//自定义页头，有点丑
 		Drawer,//自定义抽屉，还行
@@ -232,7 +235,6 @@ export default defineComponent({
 				}
 				return style
 			},
-
 			//滑动选择用建议值
 			marks: {
 				30: '25%',
@@ -284,8 +286,6 @@ export default defineComponent({
 			singlePageWidth_PX: 720,
 			doublePageWidth_PX: 1080,
 
-			//选择了哪个阅读模板
-			selectedTemplate: "scroll",
 			//可见范围宽高的具体值
 			clientWidth: 0,
 			clientHeight: 0,
@@ -395,8 +395,11 @@ export default defineComponent({
 		},
 		//TODO
 		startSketchMode() {
-			this.cookies.set("nowTemplate", "sketch");
-			location.reload(); //暂时无法动态刷新，研究vue-router去掉
+			this.$emit("setTemplate", "sketch");
+		},
+		//接收Draw的参数，继续往父组件传
+		OnSetTemplate(value) {
+			this.$emit("setTemplate", value);
 		},
 		//如果在一个组件上使用了 v-model:xxx，应该使用 @update:xxx  https://www.naiveui.com/zh-CN/os-theme/docs/common-issues
 		saveConfigToCookie() {
@@ -429,17 +432,6 @@ export default defineComponent({
 			console.log("cookie设置完毕: imageWidth_usePercentFlag=" + this.imageWidth_usePercentFlag);
 		},
 
-		//切换模板的函数，需要配合vue-router
-		onChangeTemplate() {
-			// this.selectedTemplate = e.target.value
-			if (this.selectedTemplate === "scroll") {
-				this.cookies.set("nowTemplate", "scroll");
-			}
-			if (this.selectedTemplate === "flip") {
-				this.cookies.set("nowTemplate", "flip");
-			}
-			location.reload(); //暂时无法动态刷新，研究vue-router去掉
-		},
 		//可见区域变化的时候改变页面状态
 		onResize() {
 			this.imageMaxWidth = window.innerWidth

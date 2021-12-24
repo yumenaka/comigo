@@ -27,15 +27,15 @@ comi --help
 - [ ] 引入多文件机制
 - [ ] 网页端：简易书架
 - [ ] 优化打开速度，压缩包后台解压
-- [ ] 虚拟文件系统、zip不用解压 
 - [ ] 固实压缩文件（7z）
 - [ ] 扫描文件夹，生成书单或书架
+- [ ] 浏览器JS：[PDF.js](https://github.com/mozilla/pdf.js) [epub.js](https://github.com/futurepress/epub.js/) [jszip](https://stuk.github.io/jszip/)
 - [ ] websocket通信（[参考](https://github.com/Unrud/remote-touchpad)）
 - [ ] 访问权限设置，账号系统
 - [ ] 程序log，阅读历史
+- [ ] 子命令，download rar2zip 
 - [ ] 处理损坏文件，扩展名错误的文件
 - [ ] 崩溃后恢复
-- [ ] rar2zip？
 - [ ] 恶意存档处理?
 - [ ] 编写测试程序
 - [ ] 支持rar压缩包密码
@@ -43,18 +43,17 @@ comi --help
 - [ ] 命令行交互
 - [ ] 支持中间件，可整合frp与webpserver
 - [ ] 网页端：分享功能
-- [ ] 网页端：网页判断分辨率，去除服务器分析步骤
+- [x] 网页端：网页判断分辨率，去除服务器分析步骤
 - [ ] 网页端：显示QRCode
 - [ ] 网页端：配合后台解压，更新本地数据
-- [ ] 网页端：设定展现效果
-- [ ] 网页端：自定义页面样式，与保存设置
-- [ ] 网页端：浏览器快捷键
+- [x] 网页端：设定展现效果
+- [x] 网页端：自定义页面样式，与保存设置
+- [x] 网页端：浏览器快捷键
 - [ ] 网页端：HTTPS加密
 - [ ] 网页端：显示服务器信息
 - [ ] 阅读历史记录与统计
 - [ ] 新一代图片格式支持（heic）
 - [ ] 图片自动裁边，分割、拼接单双页。
-- [ ] [pdf支持](https://github.com/pdfcpu/pdfcpu)，直接交给epub.js与浏览器？
 - [ ] 第三方调用API
 - [ ] 挂载smb、webdav虚拟文件系统？
 - [ ] CPU、内存占用、状态监控

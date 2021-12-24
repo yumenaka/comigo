@@ -1,130 +1,99 @@
 <template>
-  <v-app id="app">
-    <Header v-if="this.showHeader">
-      <h2>
-        <a
-          v-if="!this.$store.state.book.IsFolder"
-          v-bind:href="'raw/' + this.$store.state.book.name"
-          >{{ this.$store.state.book.name }}【Download】</a
-        >
-        <a
-          v-if="this.$store.state.book.IsFolder"
-          v-bind:href="'raw/' + this.$store.state.book.name"
-          >{{ this.$store.state.book.name }}</a
-        >
-      </h2>
-    </Header>
-    <!-- 初始化后才显示，避免 setting错误 -->
-    <!-- <div v-if="this.$store.state.setting"> -->
-    <div v-if="this.$store.state.setting">
-      <!-- 下拉阅读 -->
-      <ScrollTemplate v-if="nowTemplate === 'scroll'"> </ScrollTemplate>
-      <!-- 绘图参考（倒计时速写什么的） -->
-      <SketchTemplate v-if="nowTemplate === 'sketch'"> </SketchTemplate>
-      <!-- 单页阅读 -->
-      <SinglePageTemplate v-if="nowTemplate === 'single'"> </SinglePageTemplate>
-      <!-- 双页阅读 -->
-      <DoublePageTemplate v-if="nowTemplate === 'double'"> </DoublePageTemplate>
-    </div>
-    <!-- 加载中 -->
-    <!-- <p v-else>loading.....</p> -->
-  </v-app>
+  <div class="home">
+    <ScrollMode
+      v-if="selectTemplate === 'scroll'"
+      :book="this.book"
+      :nowTemplate="this.selectTemplate"
+      @setTemplate="OnSetTemplate"
+    ></ScrollMode>
+    <FlipMode
+      v-if="selectTemplate === 'flip' || selectTemplate === 'sketch'"
+      :book="this.book"
+      :nowTemplate="this.selectTemplate"
+      @setTemplate="OnSetTemplate"
+    ></FlipMode>
+  </div>
 </template>
 
 <script>
-//代码参考：https://github.com/bradtraversy/vue_crash_todolist
-// import axios from "axios";
-import ScrollTemplate from "./views/ScrollTemplate.vue";
-import SketchTemplate from "./views/SketchTemplate.vue";
-import SinglePageTemplate from "./views/SinglePageTemplate.vue";
-import DoublePageTemplate from "./views/DoublePageTemplate.vue";
-import Header from "./views/Header.vue";
+// @ is an alias to /src
+import ScrollMode from "@/views/ScrollMode.vue";
+import FlipMode from "@/views/FlipMode.vue";
+import { useCookies } from "vue3-cookies";
+import { defineComponent } from 'vue'
 
-export default {
-  name: "app",
-  //为了能在模板中使用，组件必须先注册以便 Vue 能够识别
+export default defineComponent({
+  name: "Home", //默认为 default。如果 <router-view>设置了名称，则会渲染对应的路由配置中 components 下的相应组件。
   components: {
-    ScrollTemplate,
-    SketchTemplate,
-    SinglePageTemplate,
-    DoublePageTemplate,
-    Header,
+    ScrollMode,
+    FlipMode,
   },
-  //组件的 data 选项必须是一个函数
-  //每个实例可以维护一份被返回对象的独立的拷贝
+  setup() {
+    const { cookies } = useCookies();
+    return { cookies };
+  },
   data() {
     return {
-      book: null,
-      showHeader: true,
-      //如果你知道你会在晚些时候需要一个 property，但是一开始它为空或不存在，那么你仅需要设置一些初始值。
-      bookshelf: {},
-      setting: {
-        template: "scroll",
-        sketch_count_seconds: 90,
-      },
-      now_page: 1,
-      duration: 300,
-      offset: 0,
-      easing: "easeInOutCubic",
-      message: {
-        user_uuid: "",
-        server_status: "",
-        now_book_uuid: "",
-        read_percent: 0.0,
-        msg: "",
-      },
+      selectTemplate: "",
     };
   },
+  created() {
+    this.$store.dispatch("syncBookDataAction");
+    this.$store.dispatch("syncSettingDataAction");
+    this.$store.dispatch("syncBookShelfDataAction");
+    this.selectTemplate = this.getDefaultTemplate;
+  },
+  beforeMount() {
+  },
 
-  mounted() {
-    this.initPage();
-    this.$cookies.keys();
-  },
-  destroyed() {
-    //this.$socket.close();
-  },
-
-  computed: {
-    // 计算属性的 getter
-    nowTemplate: function () {
-      var localValue = this.$cookies.get("nowTemplate");
-      console.log("computed 1:" + localValue);
-      if (localValue !== null) {
-        return localValue;
-      } else {
-        return this.$store.state.setting.template;
-      }
-    },
-  },
   methods: {
-    initPage() {
-      this.$store.dispatch("syncBookDataAction");
-      this.$store.dispatch("syncSettingDataAction");
-      this.$store.dispatch("syncBookShelfDataAction");
+    OnSetTemplate(value) {
+      this.cookies.set("nowTemplate", value);
+      this.selectTemplate = value; 
     },
     getNumber: function (number) {
       this.page = number;
       console.log(number);
     },
-    getNowTemplate: function () {
-      var localValue = this.$cookies.get("nowTemplate");
-      console.log("computed 1:" + localValue);
+  },
+  //计算属性
+  computed: {
+    book() {
+      return this.$store.state.book;
+    },
+    setting() {
+      return this.$store.state.setting;
+    },
+    getDefaultTemplate: function () {
+      var localValue = this.cookies.get("nowTemplate");
       if (localValue !== null) {
         return localValue;
-      } else {
-        this.$cookies.set("nowTemplate", this.$store.state.setting.template);
-        console.log("computed 2:" + this.$store.state.setting.template);
-        return this.$store.state.setting.template;
       }
+      if (this.setting.template) {
+        this.cookies.set("nowTemplate", this.setting.template)
+        return this.setting.template;
+      }
+      return "scroll";
     },
   },
-};
+});
 </script>
 
 <style>
 #app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   text-align: center;
+  /* 整体颜色，做成用户设定？ */
   background-color: #f6f7eb;
   align-items: center;
+}
+/* 覆盖8px的浏览器默认值 */
+* {
+  /* 外边距，不指定的话，浏览器默认设置成8px */
+  margin: 0px;
+  /* 内边框 */
+  padding: 0px;
 }
 </style>

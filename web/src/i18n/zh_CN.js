@@ -1,4 +1,4 @@
-// https://www.cnblogs.com/baifangzi/p/15213522.html
+
 export default {
     message: {
         test: '测试',
@@ -17,7 +17,10 @@ export default {
         savePageNum: '保存阅读进度',
         rightScreenToNext: '右半屏翻下一页',
         leftScreenToNext: '左半屏翻下一页',
-        startSketchMode: '倒计时素描',
-        
+        startSketchMode: '开始速写',
+        stopSketchMode: '停止速写',
+        hintFirstPage: '现在是第一页,无法向前翻页',
+        hintLastPage: '现在是最后一页，无法往后翻页',
+
     },
 }

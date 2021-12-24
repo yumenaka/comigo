@@ -16,7 +16,9 @@ export default {
         savePageNum: '読書進捗の保存',
         rightScreenToNext: '右半分の画面で次ページへ',
         leftScreenToNext: '左半分の画面で次ページへ',
-        startSketchMode: 'クロッキー',
-        
+        startSketchMode: 'クロッキー開始',
+        stopSketchMode: 'クロッキー終了',
+        hintFirstPage: 'これは最初のページで、ページを進めることはできません',
+        hintLastPage: '最後のページです',
     },
 }

@@ -1,23 +1,39 @@
-import Vue from 'vue'
-import VueRouter from 'vue-router'
-import Scroll from '../views/ScrollTemplate.vue'
+import { createRouter, createWebHashHistory } from 'vue-router'
 
-Vue.use(VueRouter)
+// 1. 定义路由组件.
+// 也可以从其他文件导入
+// import Home from '../views/Home.vue'
 
-  const routes = [
+import FlipMode from '@/views/FlipMode.vue'
+
+import ScrollMode from '@/views/ScrollMode.vue'
+
+
+const routes = [
   {
     path: '/',
-    name: 'Scrool',
-    component: Scroll
+    name: 'FlipMode',
+    component: FlipMode
   },
   {
-    path: '/sketch',
-    name: 'Sketch',
-    component: () => import( '../views/SketchTemplate.vue')
+    path: '/scroll',
+    name: 'ScrollMode',
+    component: ScrollMode
+  },
+  {
+    path: '/flip',
+    name: 'About',
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import('@/components/About.vue')
   }
 ]
 
-const router = new VueRouter({
+const router = createRouter({
+  // history: createWebHistory(process.env.BASE_URL),
+    // 4. 内部提供了 history 模式的实现。为了简单起见，我们在这里使用 hash 模式。
+  history: createWebHashHistory(),
   routes
 })
 

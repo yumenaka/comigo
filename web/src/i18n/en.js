@@ -16,7 +16,9 @@ export default {
         savePageNum: 'Save Reading Progress',
         rightScreenToNext: 'Right screen to next page',
         leftScreenToNext: 'Left screen to next page',
-        startSketchMode: 'To Sketch Mode',
-        
+        startSketchMode: 'Start Sketch Mode',
+        stopSketchMode: 'Stop Sketch Mode',
+        hintFirstPage: 'Now is the first page, can not turn forward',
+        hintLastPage: 'Now is the last page, can not turn the page',
     },
 }

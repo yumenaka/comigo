@@ -1,21 +1,23 @@
 module.exports = {
-  "devServer": {
-    "host": "0.0.0.0",
-    "port": 48080,
-    "disableHostCheck": true,
-    "proxy": {
-      "/*": {
-        "target": "http://localhost:1234",
-        "secure": false,
+  // 在浏览器中展示源代码
+  configureWebpack: {
+    devtool: 'source-map',
+  },
+
+  devServer: {
+    host: "0.0.0.0",
+    port: 4080,
+    disableHostCheck: true,
+    proxy: {
+      '/': {
+        //后端服务器地址
+        "target": "http://127.0.0.1:1234",
+        //允许跨域
         "changeOrigin": true
       }
     }
   },
-
-  "transpileDependencies": [
-    "vuetify"
-  ],
   publicPath: '',
-  outputDir: 'static',
+  outputDir: '../routers/static',
   assetsDir: 'assets'
 }
