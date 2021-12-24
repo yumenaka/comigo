@@ -12,7 +12,6 @@ import FlipMode from "@/views/FlipMode.vue";
 import { useCookies } from "vue3-cookies";
 import { defineComponent } from 'vue'
 
-
 export default defineComponent({
   name: "Home", //默认为 default。如果 <router-view>设置了名称，则会渲染对应的路由配置中 components 下的相应组件。
   components: {
@@ -27,34 +26,14 @@ export default defineComponent({
     return {
     };
   },
-
   created() {
     this.$store.dispatch("syncBookDataAction");
     this.$store.dispatch("syncSettingDataAction");
     this.$store.dispatch("syncBookShelfDataAction");
   },
   beforeMount() {
-    // this.axios
-    //   .get("/book.json")
-    //   .then((response) => {
-    //     if (response.status == 200) {
-    //       this.book = response.data;
-    //     }
-    //   })
-    //   .catch((error) => alert(error));
-    // this.axios
-    //   .get("/setting.json")
-    //   .then((response) => {
-    //     if (response.status == 200) {
-    //       this.setting = response.data;
-    //       console.log("get setting : " + response.data);
-    //     }
-    //   })
-    //   .catch((error) => alert(error));
-
   },
   computed: {
-
     book(){
       return this.$store.state.book;
     },
@@ -63,9 +42,7 @@ export default defineComponent({
     },
     // 计算属性的 getter
     nowTemplate: function () {
-      // this.cookies.set("nowTemplate",'scroll');
       var localValue = this.cookies.get("nowTemplate");
-      // console.log("nowTemplate is "+localValue);
       if (localValue !== null) {
         return localValue;
       } else {
@@ -73,7 +50,7 @@ export default defineComponent({
           this.cookies.set("nowTemplate", this.setting.template)
           return this.setting.template;
         } else {
-          return ""
+          return "scroll"
         }
       }
     },
@@ -96,7 +73,7 @@ export default defineComponent({
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  /* 整体颜色，以后可以做成用户设定？ */
+  /* 整体颜色，做成用户设定？ */
   background-color: #f6f7eb;
   align-items: center;
 }

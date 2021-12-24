@@ -1,19 +1,23 @@
 import { createApp } from "vue";
 import VueAxios from "vue-axios";
 import axios from "axios";
-import App from "./App.vue";
-import router from "./router"; //vue-router
-import store from "./store"; //VueX
+import App from "@/App.vue";
+import router from "@/router"; //vue-router
+import store from "@/store"; //VueX
 // import VueCookies from "vue3-cookies";
 import VueLazyLoad from "vue3-lazyload";
+import i18n from '@/i18n'
+
+// 以后后端改成 /api/book/:id的形式
+axios.defaults.baseURL = "/api"
 
 // createApp(App).use(store).use(router).use(VueAxios,axios).mount('#app')
 const app = createApp(App);
-// 以后后端改成 /api/book/:id的形式
-axios.defaults.baseURL = "/api"
+app.use(i18n)
 app.use(VueAxios, axios);
 app.use(store);
 app.use(router);
+
 // // 通用字体
 // import 'vfonts/Lato.css'
 // // 等宽字体

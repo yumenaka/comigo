@@ -19,7 +19,7 @@ const store = createStore({
         {
           height: 500,
           width: 449,
-          url: "/favicon.ico",
+          url: "/images/error.jpg",
           class: "Vertical",
         },
       ],
