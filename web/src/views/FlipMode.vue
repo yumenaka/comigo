@@ -44,7 +44,7 @@
 					:max="this.book.all_page_num"
 					:min="1"
 					:step="1"
-					:format-tooltip="value => `${value}`"
+					:format-tooltip="(value) => `${value}`"
 				/>
 				<span>{{ this.book.all_page_num }}</span>
 			</div>
@@ -57,7 +57,7 @@
 					:max="this.book.all_page_num"
 					:min="1"
 					:step="1"
-					:format-tooltip="value => `${value}`"
+					:format-tooltip="(value) => `${value}`"
 				/>
 				<span>{{ this.now_page_FlipMode }}</span>
 			</div>
@@ -75,8 +75,7 @@
 		@setT="OnSetTemplate"
 		:nowTemplate="this.nowTemplate"
 	>
-
-		<span>{{ $t('setBackColor') }}</span>
+		<span>{{ $t("setBackColor") }}</span>
 		<n-color-picker v-model:value="model.color" :modes="['rgb']" :show-alpha="false" />
 
 		<!-- 分割线 -->
@@ -89,8 +88,8 @@
 				v-model:value="this.showHeaderFlag_FlipMode"
 				@update:value="setShowHeaderChange"
 			>
-				<template #checked>{{ $t('showHeader') }}</template>
-				<template #unchecked>{{ $t('showHeader') }}</template>
+				<template #checked>{{ $t("showHeader") }}</template>
+				<template #unchecked>{{ $t("showHeader") }}</template>
 			</n-switch>
 		</n-space>
 
@@ -101,8 +100,8 @@
 				v-model:value="this.showFooterFlag_FlipMode"
 				@update:value="setShowFooterFlagChange"
 			>
-				<template #checked>{{ $t('readingProgressBar') }}</template>
-				<template #unchecked>{{ $t('readingProgressBar') }}</template>
+				<template #checked>{{ $t("readingProgressBar") }}</template>
+				<template #unchecked>{{ $t("readingProgressBar") }}</template>
 			</n-switch>
 		</n-space>
 
@@ -113,25 +112,13 @@
 				v-model:value="this.showPageNumFlag_FlipMode"
 				@update:value="setShowPageNumChange"
 			>
-				<template #checked>{{ $t('showPageNum') }}</template>
-				<template #unchecked>{{ $t('showPageNum') }}</template>
+				<template #checked>{{ $t("showPageNum") }}</template>
+				<template #unchecked>{{ $t("showPageNum") }}</template>
 			</n-switch>
 		</n-space>
 
 		<!-- 分割线 -->
 		<n-divider />
-
-		<!-- 开关：Debug，现在只会随机背景色 -->
-		<n-space>
-			<n-switch
-				size="large"
-				v-model:value="this.debugModeFlag"
-				@update:value="this.setDebugModeFlagFlag"
-			>
-				<template #checked>{{ $t('debugMode') }}</template>
-				<template #unchecked>{{ $t('debugMode') }}</template>
-			</n-switch>
-		</n-space>
 
 		<!-- 保存阅读进度 -->
 		<n-space>
@@ -140,8 +127,8 @@
 				v-model:value="this.savePageNumFlag_FlipMode"
 				@update:value="this.setSavePageNumFlag"
 			>
-				<template #checked>{{ $t('savePageNum') }}</template>
-				<template #unchecked>{{ $t('savePageNum') }}</template>
+				<template #checked>{{ $t("savePageNum") }}</template>
+				<template #unchecked>{{ $t("savePageNum") }}</template>
 			</n-switch>
 		</n-space>
 
@@ -153,10 +140,51 @@
 				:rail-style="railStyle"
 				@update:value="this.setFlipScreenFlag"
 			>
-				<template #checked>{{ $t('rightScreenToNext') }}</template>
-				<template #unchecked>{{ $t('leftScreenToNext') }}</template>
+				<template #checked>{{ $t("rightScreenToNext") }}</template>
+				<template #unchecked>{{ $t("leftScreenToNext") }}</template>
 			</n-switch>
 		</n-space>
+
+		<!-- 开关：Debug，现在只会随机背景色 -->
+		<!-- <n-space>
+			<n-switch
+				size="large"
+				v-model:value="this.debugModeFlag"
+				@update:value="this.setDebugModeFlagFlag"
+			>
+				<template #checked>{{ $t("debugMode") }}</template>
+				<template #unchecked>{{ $t("debugMode") }}</template>
+			</n-switch>
+		</n-space>-->
+
+		<!-- 分割线 -->
+		<n-divider v-if="this.nowTemplate == 'sketch'" />
+		<!-- 自动翻页秒数 -->
+		<!-- 数字输入% -->
+		<n-input-number
+			v-if="this.nowTemplate == 'sketch'"
+			size="small"
+			:show-button="false"
+			v-model:value="this.sketchFlipSecond"
+			:max="65535"
+			:min="1"
+			:update-value-on-input="false"
+			@update:value="this.resetSketchSecondCount"
+		>
+			<template #prefix>{{ $t('pageTurningSeconds') }}</template>
+			<template #suffix>{{ $t("second") }}</template>
+		</n-input-number>
+		<!-- 滑动选择% -->
+		<n-slider
+			v-if="this.nowTemplate == 'sketch'"
+			v-model:value="this.sketchFlipSecond"
+			:step="1"
+			:max="120"
+			:min="1"
+			:marks="marks"
+			:format-tooltip="value => `${value}s`"
+			@update:value="this.resetSketchSecondCount"
+		/>
 	</Drawer>
 </template>
 
@@ -165,60 +193,74 @@ import { useCookies } from "vue3-cookies";
 // 自定义组件
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
-import { defineComponent, reactive } from 'vue'
+import { defineComponent, reactive } from "vue";
 // 直接导入组件并使用它。这种情况下，只有导入的组件才会被打包。
-import { NSpace, NSlider, NSwitch, NIcon, NColorPicker, NDivider, } from 'naive-ui'
-import { SettingsOutline } from '@vicons/ionicons5'
+import { NSpace, NSlider, NSwitch, NIcon, NColorPicker, NDivider, NInputNumber,  useMessage,  } from "naive-ui";
+import { SettingsOutline } from "@vicons/ionicons5";
 export default defineComponent({
 	name: "FlipMode",
-	props: ['book', 'nowTemplate'],
+	props: ["book", "nowTemplate"],
 	emits: ["setTemplate"],
 	components: {
 		Header,
 		Drawer,
-		NSpace,//间距 https://www.naiveui.com/zh-CN/os-theme/components/space
-		NSlider,//滑动选择  Slider https://www.naiveui.com/zh-CN/os-theme/components/slider
-		NSwitch,//开关   https://www.naiveui.com/zh-CN/os-theme/components/switch
+		NSpace, //间距 https://www.naiveui.com/zh-CN/os-theme/components/space
+		NSlider, //滑动选择  Slider https://www.naiveui.com/zh-CN/os-theme/components/slider
+		NSwitch, //开关   https://www.naiveui.com/zh-CN/os-theme/components/switch
 		// NLayout,//布局 https://www.naiveui.com/zh-CN/os-theme/components/layout
 		// NLayoutSider,
 		// NLayoutContent,
-		NIcon,//图标  https://www.naiveui.com/zh-CN/os-theme/components/icon
-		SettingsOutline,//图标,来自 https://www.xicons.org/#/   需要安装（npm i -D @vicons/ionicons5）
+		NIcon, //图标  https://www.naiveui.com/zh-CN/os-theme/components/icon
+		SettingsOutline, //图标,来自 https://www.xicons.org/#/   需要安装（npm i -D @vicons/ionicons5）
 		NColorPicker, //颜色选择器 Color Picker https://www.naiveui.com/zh-CN/os-theme/components/color-picker
-		NDivider,//分割线  https://www.naiveui.com/zh-CN/os-theme/components/divider
+		NDivider, //分割线  https://www.naiveui.com/zh-CN/os-theme/components/divider
+		NInputNumber,///  https://www.naiveui.com/zh-CN/os-theme/components/input-number
+		// useNotification, // https://www.naiveui.com/zh-CN/os-theme/components/notification
 	},
 	setup() {
 		const { cookies } = useCookies();
 		//设置抽屉
 		//颜色选择器
 		const model = reactive({
-			color: '#252525'
-		})
+			color: "#252525",
+		});
+		//警告信息
+		const message = useMessage()
+		// const notification = useNotification()
 		return {
+			message,
+			//颜色选择器的颜色
 			model,
 			cookies,
 			//开关用的颜色
 			railStyle: ({ focused, checked }) => {
-				const style = {}
+				const style = {};
 				if (checked) {
-					style.background = '#18a058'
+					style.background = "#18a058";
 					if (focused) {
-						style.boxShadow = '0 0 0 2px #d0305040'
+						style.boxShadow = "0 0 0 2px #d0305040";
 					}
 				} else {
-					style.background = '#2080f0'
+					style.background = "#2080f0";
 					if (focused) {
-						style.boxShadow = '0 0 0 2px #2080f040'
+						style.boxShadow = "0 0 0 2px #2080f040";
 					}
 				}
-				return style
+				return style;
+			},
+			//滑动秒数建议值
+			marks: {
+				30: '30',
+				60: '60',
+				90: '90',
+				120: '120',
 			},
 		};
 	},
 	data() {
 		return {
 			drawerActive: false,
-			drawerPlacement: 'right',
+			drawerPlacement: "right",
 			//开发模式 没做的功能与设置，设置Debug以后才能见到
 			debugModeFlag: false,
 			//是否显示页头
@@ -237,8 +279,11 @@ export default defineComponent({
 			sketchModeFlag: false,
 			//是否显示素描提示
 			showPageNumFlag_FlipMode: false,
-			sketchSecondCount: 0,
+			//翻页间隔时间
 			sketchFlipSecond: 30,
+			//计时用，从0开始
+			sketchSecondCount: 0,
+			//计时器ID
 			interval: null,
 		};
 	},
@@ -291,6 +336,14 @@ export default defineComponent({
 		if (this.cookies.get("FlipModeDefaultColor") != null) {
 			this.model.color = this.cookies.get("FlipModeDefaultColor");
 		}
+
+		if (this.cookies.get("sketchFlipSecond") != null) {
+			let saveNum = Number(this.cookies.get("sketchFlipSecond"));
+			if (!isNaN(saveNum)) {
+				this.sketchFlipSecond = saveNum;
+			}
+		}
+
 	},
 	//挂载前
 	beforeMount() {
@@ -325,29 +378,32 @@ export default defineComponent({
 		OnSetTemplate(value) {
 			this.$emit("setTemplate", value);
 		},
-		sayHello(name) {
-			alert("hello " + name);
-		},
 		//打开抽屉
 		drawerActivate(place) {
-			this.drawerActive = true
-			this.drawerPlacement = place
+			this.drawerActive = true;
+			this.drawerPlacement = place;
 		},
 		//关闭抽屉
 		drawerDeactivate() {
-			this.drawerActive = false
+			this.drawerActive = false;
 		},
 		//开始速写倒计时
 		startSketchMode() {
+			this.message.success(this.$t('startSketchMessage'));
+			this.drawerActive = false; //关闭设置抽屉
 			this.sketchModeFlag = true;
 			this.showPageNumFlag_FlipMode = true;
 			//是否显示页头
-			this.showHeaderFlag_FlipMode=false,
-			//是否显示页脚
-			this.showFooterFlag_FlipMode=false,
-			this.$emit("setTemplate", "sketch");
+			(this.showHeaderFlag_FlipMode = false),
+				//是否显示页脚
+				(this.showFooterFlag_FlipMode = false),
+				this.$emit("setTemplate", "sketch");
 			//setTimeout和setInterval函数，都返回一个表示计数器编号的整数值，将该整数传入clearTimeout和clearInterval函数，就可以取消对应的定时器。setInterval指定某个任务每隔一段时间就执行一次。setTimeout()用于在指定的毫秒数后调用函数或计算表达式  setTimeout('console.log(2)',1000);
 			this.interval = setInterval(this.sketchCount, 1000);
+		},
+		//修改间隔的时候重新计秒数
+		resetSketchSecondCount() {
+			this.sketchSecondCount = 0;
 		},
 		//停止速写倒计时
 		stopSketchMode() {
@@ -355,18 +411,19 @@ export default defineComponent({
 			this.showPageNumFlag_FlipMode = false;
 			this.sketchSecondCount = 0;
 			//是否显示页头
-			this.showHeaderFlag_FlipMode=true,
-			//是否显示页脚
-			this.showFooterFlag_FlipMode=true,
-			this.$emit("setTemplate", "flip");
+			(this.showHeaderFlag_FlipMode = true),
+				//是否显示页脚
+				(this.showFooterFlag_FlipMode = true),
+				this.$emit("setTemplate", "flip");
 			clearInterval(this.interval); // 清除定时器
 		},
+		//每一秒执行一次的循环
 		sketchCount() {
-			if (this.sketchModeFlag == false||this.nowTemplate!="sketch"){
-				this.stopSketchMode()
+			if (this.sketchModeFlag == false || this.nowTemplate != "sketch") {
+				this.stopSketchMode();
 			}
 			this.sketchSecondCount = this.sketchSecondCount + 1;
-			let nowSeconnd = this.sketchSecondCount % this.sketchFlipSecond
+			let nowSeconnd = this.sketchSecondCount % this.sketchFlipSecond;
 			// console.log("sketchSecondCount=" + this.sketchSecondCount + " nowSeconnd:" + nowSeconnd)
 			if (nowSeconnd == 0) {
 				if (this.now_page_FlipMode < this.book.all_page_num) {
@@ -387,27 +444,27 @@ export default defineComponent({
 			this.cookies.set("savePageNumFlag_FlipMode", this.savePageNumFlag_FlipMode);
 			this.cookies.set("now_page_FlipMode" + this.book.name, this.now_page_FlipMode);
 			this.cookies.set("FlipModeDefaultColor", this.model.color);
+			this.cookies.set("sketchFlipSecond", this.sketchFlipSecond);
 		},
 		changeRandomColor() {
 			let R = Math.ceil(Math.random() * 155) + 100;
 			let G = Math.ceil(Math.random() * 155) + 100;
 			let B = Math.ceil(Math.random() * 100) + 100;
 			//rgb(185,175,145)
-			let RGB = 'rgb(' + R + "," + G + "," + B + ")";
+			let RGB = "rgb(" + R + "," + G + "," + B + ")";
 			// console.log(RGB);
 			this.model.color = RGB;
 		},
 		//HTML DOM 事件 https://www.runoob.com/jsref/dom-obj-event.html
 		// 进入绑定该事件的元素和其子元素均会触发该事件，所以有一个重复触发，冒泡过程。其对应的离开事件 mouseout
-		onMouseOver() {
-		},
+		onMouseOver() { },
 		// 只有进入绑定该事件的元素才会触发事件，也就是不会冒泡。其对应的离开事件mouseleave
 		onMouseEnter() {
 			// this.randomColor = 'background-color: rgb(235,235,235)';
 		},
 		onMouseLeave(e) {
 			//离开区域的时候，清空鼠标样式
-			e.currentTarget.style.cursor = '';
+			e.currentTarget.style.cursor = "";
 		},
 		//事件修饰符: https://v3.cn.vuejs.org/guide/events.html#%E4%BA%8B%E4%BB%B6%E4%BF%AE%E9%A5%B0%E7%AC%A6
 		onMouseMove(e) {
@@ -421,21 +478,20 @@ export default defineComponent({
 			let offsetHeight = e.currentTarget.offsetHeight;
 			// console.log("e.offsetX=" + offsetX, "e.offsetY=" + offsetY);
 			// console.log("e.offsetWidth=" + offsetWidth, "e.offsetHeight=" + offsetHeight);
-			var MinX = offsetWidth * 0.40
-			var MaxX = offsetWidth * 0.60
-			var MinY = offsetHeight * 0.40
-			var MaxY = offsetHeight * 0.60
-			if ((offsetX > MinX && offsetX < MaxX) && (offsetY > MinY && offsetY < MaxY)) {
+			var MinX = offsetWidth * 0.4;
+			var MaxX = offsetWidth * 0.6;
+			var MinY = offsetHeight * 0.4;
+			var MaxY = offsetHeight * 0.6;
+			if (offsetX > MinX && offsetX < MaxX && offsetY > MinY && offsetY < MaxY) {
 				//设置区域;
-				e.currentTarget.style.cursor = 'url(/images/SettingsOutline.png), pointer';
+				e.currentTarget.style.cursor = "url(/images/SettingsOutline.png), pointer";
 			} else {
-				if (offsetX < (offsetWidth * 0.50)) {
+				if (offsetX < offsetWidth * 0.5) {
 					//左边的翻页
-					e.currentTarget.style.cursor = 'url(/images/ArrowLeft.png), pointer';
-
+					e.currentTarget.style.cursor = "url(/images/ArrowLeft.png), pointer";
 				} else {
 					//右边的翻页
-					e.currentTarget.style.cursor = 'url(/images/ArrowRight.png), pointer';
+					e.currentTarget.style.cursor = "url(/images/ArrowRight.png), pointer";
 				}
 			}
 		},
@@ -446,21 +502,21 @@ export default defineComponent({
 			let offsetY = e.offsetY;
 			let offsetWidth = e.currentTarget.offsetWidth;
 			let offsetHeight = e.currentTarget.offsetHeight;
-			var MinX = offsetWidth * 0.40
-			var MaxX = offsetWidth * 0.60
-			var MinY = offsetHeight * 0.40
-			var MaxY = offsetHeight * 0.60
+			var MinX = offsetWidth * 0.4;
+			var MaxX = offsetWidth * 0.6;
+			var MinY = offsetHeight * 0.4;
+			var MaxY = offsetHeight * 0.6;
 			// console.log("鼠标点击：e.offsetX=" + offsetX, "e.offsetY=" + offsetY);
-			if ((offsetX > MinX && offsetX < MaxX) && (offsetY > MinY && offsetY < MaxY)) {
+			if (offsetX > MinX && offsetX < MaxX && offsetY > MinY && offsetY < MaxY) {
 				//点中了设置区域
-				this.drawerActivate('right')
+				this.drawerActivate("right");
 			} else {
 				//随机一下背景色，只是为了好玩
 				if (this.debugModeFlag) {
 					this.changeRandomColor();
 				}
 				//决定如何翻页
-				if (offsetX <= (offsetWidth / 2.0)) {
+				if (offsetX <= offsetWidth / 2.0) {
 					//左边的翻页
 					if (this.useRightHalfScreen_FlipMode) {
 						this.flipPage(-1);
@@ -481,34 +537,49 @@ export default defineComponent({
 			console.log("value:" + value);
 			this.showHeaderFlag_FlipMode = value;
 			this.cookies.set("showHeaderFlag_FlipMode", value);
-			console.log("cookie设置完毕: showHeaderFlag_FlipMode=" + this.cookies.get("showHeaderFlag_FlipMode"));
+			console.log(
+				"cookie设置完毕: showHeaderFlag_FlipMode=" +
+				this.cookies.get("showHeaderFlag_FlipMode")
+			);
 		},
 		setShowFooterFlagChange(value) {
 			console.log("value:" + value);
 			this.showFooterFlag_FlipMode = value;
 			this.cookies.set("showFooterFlag_FlipMode", value);
-			console.log("cookie设置完毕: showFooterFlag_FlipMode=" + this.cookies.get("showFooterFlag_FlipMode"));
+			console.log(
+				"cookie设置完毕: showFooterFlag_FlipMode=" +
+				this.cookies.get("showFooterFlag_FlipMode")
+			);
 		},
 
 		setShowPageNumChange(value) {
 			console.log("value:" + value);
 			this.showPageNumFlag_FlipMode = value;
 			this.cookies.set("showPageNumFlag_FlipMode", value);
-			console.log("cookie设置完毕: showPageNumFlag_FlipMode=" + this.cookies.get("showPageNumFlag_FlipMode"));
+			console.log(
+				"cookie设置完毕: showPageNumFlag_FlipMode=" +
+				this.cookies.get("showPageNumFlag_FlipMode")
+			);
 		},
 
 		setFlipScreenFlag(value) {
 			console.log("value:" + value);
 			this.useRightHalfScreen_FlipMode = value;
 			this.cookies.set("useRightHalfScreen_FlipMode", value);
-			console.log("cookie设置完毕: useRightHalfScreen_FlipMode=" + this.cookies.get("useRightHalfScreen_FlipMode"));
+			console.log(
+				"cookie设置完毕: useRightHalfScreen_FlipMode=" +
+				this.cookies.get("useRightHalfScreen_FlipMode")
+			);
 		},
 
 		setSavePageNumFlag(value) {
 			console.log("value:" + value);
 			this.savePageNumFlag_FlipMode = value;
 			this.cookies.set("savePageNumFlag_FlipMode", value);
-			console.log("cookie设置完毕: savePageNumFlag_FlipMode=" + this.cookies.get("savePageNumFlag_FlipMode"));
+			console.log(
+				"cookie设置完毕: savePageNumFlag_FlipMode=" +
+				this.cookies.get("savePageNumFlag_FlipMode")
+			);
 		},
 
 		setDebugModeFlagFlag(value) {
@@ -527,9 +598,9 @@ export default defineComponent({
 			} else {
 				// console.log("无法继续翻，Num:" + num)
 				if (num > 0) {
-					alert(this.$t('hintLastPage'));
+					this.message.info(this.$t("hintLastPage"));
 				} else {
-					alert(this.$t('hintFirstPage'));
+					this.message.info(this.$t("hintFirstPage"));
 				}
 			}
 			if (this.savePageNumFlag_FlipMode) {
@@ -588,54 +659,101 @@ export default defineComponent({
 		//页数或素描模式的提示
 		pageNumOrSketchHint() {
 			if (this.sketchModeFlag) {
-				let nowSecond = (this.sketchSecondCount % this.sketchFlipSecond)+1
-				let AllTimeString =parseInt((this.sketchSecondCount+1)/60)+this.$t('minute')+ (this.sketchSecondCount+1)%60+this.$t('second')
-				let hintString = this.$t('now_is') + nowSecond+"  " + this.$t('total_is') + AllTimeString +"  "+ this.$t('interval') + this.sketchFlipSecond
-				return hintString
+				let nowSecond = (this.sketchSecondCount % this.sketchFlipSecond) + 1;
+				let donePage = parseInt(this.sketchSecondCount / this.sketchFlipSecond);
+				let totalMinutes = parseInt((this.sketchSecondCount + 1) / 60);
+				//计算几小时几分
+				let MinutesAndHourString = "";
+				//如果不满意1小时，就不显示小时
+				if (parseInt(totalMinutes / 60) == 0) {
+					MinutesAndHourString = totalMinutes + this.$t("minute");
+				} else {
+					MinutesAndHourString =
+						parseInt(totalMinutes / 5) +
+						this.$t("hour") +
+						(totalMinutes % 60) +
+						this.$t("minute");
+				}
+				let AllTimeString =
+					MinutesAndHourString + ((this.sketchSecondCount + 1) % 60) + this.$t("second");
+				let hintString =
+					this.$t("now_is") +
+					nowSecond +
+					this.$t("second") +
+					"  " +
+					this.$t("total_is") +
+					donePage +
+					this.$t("page") +
+					"  " +
+					this.$t("totalTime") +
+					AllTimeString +
+					"  " +
+					this.$t("interval") +
+					this.sketchFlipSecond +
+					this.$t("second");
+				return hintString;
 			} else {
-				return this.now_page_FlipMode + "/" + this.book.all_page_num
+				return this.now_page_FlipMode + "/" + this.book.all_page_num;
 			}
 		},
 		mangaAreaHeight() {
-			let Height = 95
+			let Height = 95;
 			//页头和底部拖动条都显示,或有一个显示的时候，95%
 			if (this.showFooterFlag_FlipMode && this.showHeaderFlag_FlipMode) {
-				Height = 95
+				Height = 95;
 			}
 			if (this.showFooterFlag_FlipMode && !this.showHeaderFlag_FlipMode) {
-				Height = 95
+				Height = 95;
 			}
 			if (!this.showFooterFlag_FlipMode && this.showHeaderFlag_FlipMode) {
-				Height = 95
+				Height = 95;
 			}
 			//页头和底部拖动条都不显示的时候，漫画占满屏幕
-			if ((!this.showFooterFlag_FlipMode) && (!this.showHeaderFlag_FlipMode)) {
-				Height = 100
+			if (!this.showFooterFlag_FlipMode && !this.showHeaderFlag_FlipMode) {
+				Height = 100;
 			}
 			return Height + "vh";
-
 		},
 		mangaImageHeight() {
-			let Height = 95
+			let Height = 95;
 			//页头和底部拖动条都显示,或有一个显示的时候，95%
 			if (this.showFooterFlag_FlipMode && this.showHeaderFlag_FlipMode) {
-				Height = 95
+				Height = 95;
 			}
 			if (this.showFooterFlag_FlipMode && !this.showHeaderFlag_FlipMode) {
-				Height = 95
+				Height = 95;
 			}
 			if (!this.showFooterFlag_FlipMode && this.showHeaderFlag_FlipMode) {
-				Height = 95
+				Height = 95;
 			}
 			//页头和拖动条都不显示的时候，漫画占满屏幕
-			if ((!this.showFooterFlag_FlipMode) && (!this.showHeaderFlag_FlipMode)) {
-				Height = 100
+			if (!this.showFooterFlag_FlipMode && !this.showHeaderFlag_FlipMode) {
+				Height = 100;
 			}
 			//与上面唯一的不同，减去素描提示的空间
 			if (this.showPageNumFlag_FlipMode) {
-				Height = Height - 3
+				if (this.nowTemplate == "sketch") {
+					Height = Height - 6;
+				} else {
+					Height = Height - 3;
+				}
 			}
 			return Height + "vh";
+		},
+		//进入素描模式的时候，把字体与高度放大一倍
+		sketchHintHeight() {
+			if (this.nowTemplate == "sketch") {
+				return "6vh";
+			} else {
+				return "3vh";
+			}
+		},
+		sketchHintFontSize() {
+			if (this.nowTemplate == "sketch") {
+				return "32px";
+			} else {
+				return "16px";
+			}
 		},
 	},
 });
@@ -709,10 +827,10 @@ export default defineComponent({
 
 /* 漫画div图片下面的页数*/
 .sketch_hint {
-	height: 3vh;
+	height: v-bind(sketchHintHeight);
 	padding: 0px;
 	text-align: center;
-	font-size: 16px;
+	font-size: v-bind(sketchHintFontSize);
 	/* 文字颜色 */
 	color: rgb(238, 238, 238);
 	/* 文字阴影：https://www.w3school.com.cn/css/css3_shadows.asp*/

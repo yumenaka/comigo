@@ -1,17 +1,19 @@
 <template>
   <div class="home">
-    <ScrollMode
-      v-if="selectTemplate === 'scroll'"
-      :book="this.book"
-      :nowTemplate="this.selectTemplate"
-      @setTemplate="OnSetTemplate"
-    ></ScrollMode>
-    <FlipMode
-      v-if="selectTemplate === 'flip' || selectTemplate === 'sketch'"
-      :book="this.book"
-      :nowTemplate="this.selectTemplate"
-      @setTemplate="OnSetTemplate"
-    ></FlipMode>
+    <n-message-provider>
+      <ScrollMode
+        v-if="selectTemplate === 'scroll'"
+        :book="this.book"
+        :nowTemplate="this.selectTemplate"
+        @setTemplate="OnSetTemplate"
+      ></ScrollMode>
+      <FlipMode
+        v-if="selectTemplate === 'flip' || selectTemplate === 'sketch'"
+        :book="this.book"
+        :nowTemplate="this.selectTemplate"
+        @setTemplate="OnSetTemplate"
+      ></FlipMode>
+    </n-message-provider>
   </div>
 </template>
 
@@ -21,12 +23,14 @@ import ScrollMode from "@/views/ScrollMode.vue";
 import FlipMode from "@/views/FlipMode.vue";
 import { useCookies } from "vue3-cookies";
 import { defineComponent } from 'vue'
+import { NMessageProvider } from 'naive-ui'
 
 export default defineComponent({
   name: "Home", //默认为 default。如果 <router-view>设置了名称，则会渲染对应的路由配置中 components 下的相应组件。
   components: {
     ScrollMode,
     FlipMode,
+    NMessageProvider,
   },
   setup() {
     const { cookies } = useCookies();
@@ -49,7 +53,7 @@ export default defineComponent({
   methods: {
     OnSetTemplate(value) {
       this.cookies.set("nowTemplate", value);
-      this.selectTemplate = value; 
+      this.selectTemplate = value;
     },
     getNumber: function (number) {
       this.page = number;

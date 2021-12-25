@@ -23,5 +23,10 @@
   "second": "second",
   "minute": "minute",
   "total_is": "total:",
-  "interval": "interval:"
+  "interval": "interval:",
+  "page": "page",
+  "totalTime": "Total time:",
+  "hour": "hour",
+  "pageTurningSeconds": "Page Turning Seconds:",
+  "startSketchMessage": "The countdown begins, Have a nice day."
 }

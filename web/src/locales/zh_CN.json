@@ -22,6 +22,11 @@
   "now_is": "现在:",
   "second": "秒",
   "minute": "分",
-  "total_is": "总共:",
-  "interval": "翻页间隔:"
+  "total_is": "完成:",
+  "interval": "翻页间隔:",
+  "page": "张",
+  "totalTime": "经过时间:",
+  "hour": "小时",
+  "pageTurningSeconds": "翻页间隔:",
+  "startSketchMessage": "开始倒计时速写，祝你心情愉快。"
 }

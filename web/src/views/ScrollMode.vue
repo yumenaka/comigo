@@ -44,6 +44,7 @@
 					v-model:value="this.singlePageWidth_Percent"
 					:max="100"
 					:min="10"
+					:update-value-on-input="false"
 				>
 					<template #prefix>{{ $t('singlePageWidth') }}</template>
 					<template #suffix>%</template>
@@ -67,6 +68,7 @@
 					v-model:value="this.doublePageWidth_Percent"
 					:max="100"
 					:min="10"
+					:update-value-on-input="false"
 				>
 					<template #prefix>{{ $t('doublePageWidth') }}</template>
 					<template #suffix>%</template>
@@ -91,6 +93,7 @@
 					v-model:value="this.singlePageWidth_PX"
 					:max="this.imageMaxWidth"
 					:min="50"
+					:update-value-on-input="false"
 				>
 					<template #prefix>{{ $t('singlePageWidth') }}</template>
 					<template #suffix>px</template>
@@ -113,6 +116,7 @@
 					v-model:value="this.doublePageWidth_PX"
 					:max="this.imageMaxWidth"
 					:min="50"
+					:update-value-on-input="false"
 				>
 					<template #prefix>{{ $t('doublePageWidth') }}</template>
 					<template #suffix>px</template>

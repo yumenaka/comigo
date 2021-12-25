@@ -16,4 +16,5 @@
       "json"
     ],
     "i18n-ally.dirStructure": "auto",
+    "vue3snippets.enable-compile-vue-file-on-did-save-code": false,
   }

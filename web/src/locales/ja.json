@@ -23,5 +23,10 @@
   "second": "秒",
   "minute": "分",
   "total_is": "合計:",
-  "interval": "間隔:"
+  "interval": "間隔:",
+  "page": "ページ",
+  "totalTime": "合計時間:",
+  "hour": "時間",
+  "pageTurningSeconds": "ページをめくる秒数:",
+  "startSketchMessage": "クロッキーが始まりました、良い一日を。"
 }
