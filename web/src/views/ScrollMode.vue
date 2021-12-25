@@ -21,7 +21,6 @@
 			@mousemove="onMouseMove"
 			@mouseleave="onMouseLeave"
 		>
-			<!-- v-lazy="page.url"  :src="page.url" -->
 			<img v-lazy="page.url" v-bind:H="page.height" v-bind:W="page.width" v-bind:key="key" />
 			<div class="page_num" v-if="showPageNumFlag_ScrollMode">{{ key + 1 }}/{{ book.all_page_num }}</div>
 		</div>
@@ -33,7 +32,7 @@
 			@startSketch="this.startSketchMode"
 			@closeDrawer="this.drawerDeactivate"
 			@setT="this.OnSetTemplate"
-			:nowTemplateDrawer="this.nowTemplate"
+			:nowTemplate="this.nowTemplate"
 		>
 			<n-space vertical>
 				<!-- 单页-漫画宽度-使用百分比 -->
@@ -46,7 +45,7 @@
 					:max="100"
 					:min="10"
 				>
-					<template #prefix>{{ this.$t('message.singlePageWidth') }}</template>
+					<template #prefix>{{ $t('singlePageWidth') }}</template>
 					<template #suffix>%</template>
 				</n-input-number>
 				<!-- 滑动选择% -->
@@ -60,7 +59,6 @@
 				/>
 
 				<!-- 开页-漫画宽度-使用百分比  -->
-
 				<!-- 数字输入% -->
 				<n-input-number
 					v-if="this.imageWidth_usePercentFlag"
@@ -70,7 +68,7 @@
 					:max="100"
 					:min="10"
 				>
-					<template #prefix>{{ this.$t('message.doublePageWidth') }}</template>
+					<template #prefix>{{ $t('doublePageWidth') }}</template>
 					<template #suffix>%</template>
 				</n-input-number>
 				<!-- 滑动选择% -->
@@ -94,7 +92,7 @@
 					:max="this.imageMaxWidth"
 					:min="50"
 				>
-					<template #prefix>{{ this.$t('message.singlePageWidth') }}</template>
+					<template #prefix>{{ $t('singlePageWidth') }}</template>
 					<template #suffix>px</template>
 				</n-input-number>
 				<!-- 滑动选择PX -->
@@ -116,7 +114,7 @@
 					:max="this.imageMaxWidth"
 					:min="50"
 				>
-					<template #prefix>{{ this.$t('message.doublePageWidth') }}</template>
+					<template #prefix>{{ $t('doublePageWidth') }}</template>
 					<template #suffix>px</template>
 				</n-input-number>
 
@@ -140,8 +138,8 @@
 					:rail-style="railStyle"
 					@update:value="this.setImageWidthUsePercentFlag"
 				>
-					<template #checked>{{ this.$t('message.width_usePercent') }}</template>
-					<template #unchecked>{{ this.$t('message.width_useFixedValue') }}</template>
+					<template #checked>{{ $t('width_usePercent') }}</template>
+					<template #unchecked>{{ $t('width_useFixedValue') }}</template>
 				</n-switch>
 			</n-space>
 
@@ -151,8 +149,8 @@
 			<!-- 开关：是否显示页头 -->
 			<n-space>
 				<n-switch size="large" v-model:value="this.showHeaderFlag" @update:value="setShowHeaderChange">
-					<template #checked>{{ this.$t('message.showHeader') }}</template>
-					<template #unchecked>{{ this.$t('message.showHeader') }}</template>
+					<template #checked>{{ $t('showHeader') }}</template>
+					<template #unchecked>{{ $t('showHeader') }}</template>
 				</n-switch>
 				<p></p>
 			</n-space>
@@ -164,8 +162,8 @@
 					v-model:value="this.showPageNumFlag_ScrollMode"
 					@update:value="setShowPageNumChange"
 				>
-					<template #checked>{{ this.$t('message.showPageNum') }}</template>
-					<template #unchecked>{{ this.$t('message.showPageNum') }}</template>
+					<template #checked>{{ $t('showPageNum') }}</template>
+					<template #unchecked>{{ $t('showPageNum') }}</template>
 				</n-switch>
 			</n-space>
 		</Drawer>

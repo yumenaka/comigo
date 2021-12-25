@@ -73,10 +73,10 @@
 		@stopSketch="this.stopSketchMode"
 		@closeDrawer="this.drawerDeactivate"
 		@setT="OnSetTemplate"
-		:nowTemplateDrawer="this.nowTemplate"
+		:nowTemplate="this.nowTemplate"
 	>
 
-		<span>{{ this.$t('message.setBackColor') }}</span>
+		<span>{{ $t('setBackColor') }}</span>
 		<n-color-picker v-model:value="model.color" :modes="['rgb']" :show-alpha="false" />
 
 		<!-- 分割线 -->
@@ -89,8 +89,8 @@
 				v-model:value="this.showHeaderFlag_FlipMode"
 				@update:value="setShowHeaderChange"
 			>
-				<template #checked>{{ this.$t('message.showHeader') }}</template>
-				<template #unchecked>{{ this.$t('message.showHeader') }}</template>
+				<template #checked>{{ $t('showHeader') }}</template>
+				<template #unchecked>{{ $t('showHeader') }}</template>
 			</n-switch>
 		</n-space>
 
@@ -101,8 +101,8 @@
 				v-model:value="this.showFooterFlag_FlipMode"
 				@update:value="setShowFooterFlagChange"
 			>
-				<template #checked>{{ this.$t('message.readingProgressBar') }}</template>
-				<template #unchecked>{{ this.$t('message.readingProgressBar') }}</template>
+				<template #checked>{{ $t('readingProgressBar') }}</template>
+				<template #unchecked>{{ $t('readingProgressBar') }}</template>
 			</n-switch>
 		</n-space>
 
@@ -113,8 +113,8 @@
 				v-model:value="this.showPageNumFlag_FlipMode"
 				@update:value="setShowPageNumChange"
 			>
-				<template #checked>{{ this.$t('message.showPageNum') }}</template>
-				<template #unchecked>{{ this.$t('message.showPageNum') }}</template>
+				<template #checked>{{ $t('showPageNum') }}</template>
+				<template #unchecked>{{ $t('showPageNum') }}</template>
 			</n-switch>
 		</n-space>
 
@@ -128,8 +128,8 @@
 				v-model:value="this.debugModeFlag"
 				@update:value="this.setDebugModeFlagFlag"
 			>
-				<template #checked>{{ this.$t('message.debugMode') }}</template>
-				<template #unchecked>{{ this.$t('message.debugMode') }}</template>
+				<template #checked>{{ $t('debugMode') }}</template>
+				<template #unchecked>{{ $t('debugMode') }}</template>
 			</n-switch>
 		</n-space>
 
@@ -140,8 +140,8 @@
 				v-model:value="this.savePageNumFlag_FlipMode"
 				@update:value="this.setSavePageNumFlag"
 			>
-				<template #checked>{{ this.$t('message.savePageNum') }}</template>
-				<template #unchecked>{{ this.$t('message.savePageNum') }}</template>
+				<template #checked>{{ $t('savePageNum') }}</template>
+				<template #unchecked>{{ $t('savePageNum') }}</template>
 			</n-switch>
 		</n-space>
 
@@ -153,8 +153,8 @@
 				:rail-style="railStyle"
 				@update:value="this.setFlipScreenFlag"
 			>
-				<template #checked>{{ this.$t('message.rightScreenToNext') }}</template>
-				<template #unchecked>{{ this.$t('message.leftScreenToNext') }}</template>
+				<template #checked>{{ $t('rightScreenToNext') }}</template>
+				<template #unchecked>{{ $t('leftScreenToNext') }}</template>
 			</n-switch>
 		</n-space>
 	</Drawer>
@@ -362,7 +362,7 @@ export default defineComponent({
 			clearInterval(this.interval); // 清除定时器
 		},
 		sketchCount() {
-			if (this.sketchModeFlag == false){
+			if (this.sketchModeFlag == false||this.nowTemplate!="sketch"){
 				this.stopSketchMode()
 			}
 			this.sketchSecondCount = this.sketchSecondCount + 1;
@@ -527,9 +527,9 @@ export default defineComponent({
 			} else {
 				// console.log("无法继续翻，Num:" + num)
 				if (num > 0) {
-					alert(this.$t('message.hintLastPage'));
+					alert(this.$t('hintLastPage'));
 				} else {
-					alert(this.$t('message.hintFirstPage'));
+					alert(this.$t('hintFirstPage'));
 				}
 			}
 			if (this.savePageNumFlag_FlipMode) {
@@ -588,9 +588,9 @@ export default defineComponent({
 		//页数或素描模式的提示
 		pageNumOrSketchHint() {
 			if (this.sketchModeFlag) {
-				let nowSeconnd = (this.sketchSecondCount % this.sketchFlipSecond)+1
-				let AllString =parseInt((this.sketchSecondCount+1)/60)+"分 "+ (this.sketchSecondCount+1)%60+"秒"
-				let hintString = "现在:" + nowSeconnd + "秒    总共:" + AllString + "   翻页间隔:" + this.sketchFlipSecond
+				let nowSecond = (this.sketchSecondCount % this.sketchFlipSecond)+1
+				let AllTimeString =parseInt((this.sketchSecondCount+1)/60)+this.$t('minute')+ (this.sketchSecondCount+1)%60+this.$t('second')
+				let hintString = this.$t('now_is') + nowSecond+"  " + this.$t('total_is') + AllTimeString +"  "+ this.$t('interval') + this.sketchFlipSecond
 				return hintString
 			} else {
 				return this.now_page_FlipMode + "/" + this.book.all_page_num

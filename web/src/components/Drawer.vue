@@ -9,7 +9,7 @@
     <n-drawer-content closable>
       <!-- 抽屉：自定义头部 -->
       <template #header>
-        <span>{{ this.$t('message.ReaderSettings') }}</span>
+        <span>{{ $t('ReaderSettings') }}</span>
         <n-avatar size="small" src="/favicon.ico" />
       </template>
       <!-- 选择：切换页面模式 -->
@@ -21,14 +21,14 @@
             @change="onChangeTemplate"
             value="scroll"
             name="basic-demo"
-          >{{ this.$t('message.scroll_mode') }}</n-radio-button>
+          >{{ $t('scroll_mode') }}</n-radio-button>
           <!-- 翻頁模式 -->
           <n-radio-button
             :checked="nowTemplateLocal === 'flip'"
             @change="onChangeTemplate"
             value="flip"
             name="basic-demo"
-          >{{ this.$t('message.flip_mode') }}</n-radio-button>
+          >{{ $t('flip_mode') }}</n-radio-button>
         </n-radio-group>
       </n-space>
       <!-- 分割线 -->
@@ -38,21 +38,20 @@
 
       <!-- 抽屉：自定义底部 -->
       <template #footer>
-        <!-- <n-space vertical>
-          <n-select
-            v-model:value="this.locale"
-            :options="this.languageOptions"
-            @on-update:value="onchangeLanguage"
-          />
-        </n-space>-->
+        <n-select
+          placeholder="select language"
+          v-model:value="this.$i18n.locale"
+          :options="this.languageOptions"
+          @update:value="OnChangeLanguage"
+        />
         <n-button
-          v-if="nowTemplateDrawer == 'flip' || nowTemplateDrawer == 'scroll'"
+          v-if="nowTemplate == 'flip' || nowTemplate == 'scroll'"
           @click="startSketchMode"
-        >{{ this.$t('message.startSketchMode') }}</n-button>
+        >{{ $t('startSketchMode') }}</n-button>
         <n-button
-          v-if="nowTemplateDrawer == 'sketch'"
+          v-if="nowTemplate == 'sketch'"
           @click="stopSketchMode"
-        >{{ this.$t('message.stopSketchMode') }}</n-button>
+        >{{ $t('stopSketchMode') }}</n-button>
       </template>
     </n-drawer-content>
   </n-drawer>
@@ -61,35 +60,30 @@
 <script>
 
 import { useCookies } from "vue3-cookies";
-import { NDrawer,NDivider, NDrawerContent, NSpace, NRadioGroup, NRadioButton, NAvatar, NButton } from 'naive-ui'
+import { NDrawer, NDivider, NDrawerContent, NSpace, NRadioGroup, NRadioButton, NAvatar, NButton, NSelect, } from 'naive-ui'
 import { defineComponent, } from 'vue'
 // import { useI18n } from 'vue-i18n'
 
 export default defineComponent({
   name: "Drawer",
-  props: ['book', 'initDrawerActive', 'initDrawerPlacement', 'nowTemplateDrawer'],
+  props: ['book', 'initDrawerActive', 'initDrawerPlacement', 'nowTemplate'],
   emits: ["setT", "saveConfig", "startSketch", "stopSketch", "closeDrawer"],
   components: {
     NDrawer,//抽屉，可以从上下左右4个方向冒出. https://www.naiveui.com/zh-CN/os-theme/components/drawer
     NDrawerContent,//抽屉内容
-    NSpace,
+    NSpace,//间距 https://www.naiveui.com/zh-CN/os-theme/components/space
     NDivider,//间隔
     NRadioGroup,//单选  https://www.naiveui.com/zh-CN/os-theme/components/radio
     NRadioButton,//单选 用按钮显得更优雅一点
     NButton,//按钮，来自:https://www.naiveui.com/zh-CN/os-theme/components/button
     NAvatar,//头像 https://www.naiveui.com/zh-CN/os-theme/components/avatar
-    // NSelect, //选择器 https://www.naiveui.com/zh-CN/os-theme/components/select
+    NSelect, //选择器 https://www.naiveui.com/zh-CN/os-theme/components/select
   },
   setup() {
     const { cookies } = useCookies();
-    // const { locale } = useI18n();
-    // const onchangeLanguage = (value) => {
-    //   //切换语言
-    //   locale.value = value
-    // }
+
     return {
       cookies,
-      // onchangeLanguage,
       languageOptions: [
         {
           label: "English",
@@ -100,8 +94,8 @@ export default defineComponent({
           value: 'ja'
         },
         {
-          label: '简体中文',
-          value: 'zh_CN'
+          label: '中文',
+          value: 'zh'
         },
       ],
     };
@@ -114,6 +108,11 @@ export default defineComponent({
   },
   //挂载前
   beforeMount() {
+    var lang= this.cookies.get("userLanguageSetting");
+    if (lang){
+      this.$i18n.locale=lang;
+    }
+    this.nowTemplateLocal=this.nowTemplate;
   },
   computed: {
     drawerActive() {
@@ -124,6 +123,9 @@ export default defineComponent({
     },
   },
   methods: {
+    OnChangeLanguage(value){
+      this.cookies.set("userLanguageSetting",value);
+    },
     // 关闭抽屉时，保存设置到cookies
     saveConfigToCookie(show) {
       if (show == false) {

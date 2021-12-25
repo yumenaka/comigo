@@ -1,0 +1,19 @@
+{
+    "i18n-ally.localesPaths": [
+      "src/locales" // 翻译文件放在哪个目录
+    ],
+    "i18n-ally.sourceLanguage": "zh", // 默认中文
+    "i18n-ally.keystyle": "nested", // 翻译路径格式
+    "i18n-ally.displayLanguage": "zh",//显示语系
+    "i18n-ally.enabledFrameworks": [
+      "vue",
+      "flutter"
+    ],
+    "i18n-ally.enabledParsers": [
+      "js",
+      "ts",
+      "yaml",
+      "json"
+    ],
+    "i18n-ally.dirStructure": "auto",
+  }

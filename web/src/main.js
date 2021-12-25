@@ -6,7 +6,7 @@ import router from "@/router"; //vue-router
 import store from "@/store"; //VueX
 // import VueCookies from "vue3-cookies";
 import VueLazyLoad from "vue3-lazyload";
-import i18n from '@/i18n'
+import i18n from '@/locales'
 
 // 以后后端改成 /api/book/:id的形式
 axios.defaults.baseURL = "/api"
@@ -59,20 +59,5 @@ app.use(VueLazyLoad, {
         },
     },
 });
-
-//自定义指令 https://v3.cn.vuejs.org/guide/custom-directive.html
-// app.directive('demo', {
-//     beforeUpdate(el, binding) {
-//         // console.log(el.getAttribute("class"))
-//         // console.log(binding.value.singleWidth) 
-//         // console.log(binding.value.doubleWidth)
-//         if (el.getAttribute("class") === "SinglePageImage") {
-//             el.style.width = binding.value.singleWidth
-//         } else if (el.getAttribute("class") === "DoublePageImage") {
-//             el.style.width = binding.value.doubleWidth
-//         }
-//         console.log("directive isLandscape:"+binding.value.isLandscape)
-//     }
-// })
 
 app.mount("#app"); // look index.html:  <div id="app"></div>
