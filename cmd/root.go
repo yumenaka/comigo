@@ -95,7 +95,7 @@ func init() {
 	//输出log文件
 	rootCmd.PersistentFlags().BoolVar(&common.Config.LogToFile, "log", true, locale.GetString("LOG_TO_FILE"))
 	//默认web模板
-	rootCmd.PersistentFlags().StringVarP(&common.Config.Template, "template", "t", "scroll", locale.GetString("TEMPLATE"))
+	//rootCmd.PersistentFlags().StringVarP(&common.Config.Template, "template", "t", "scroll", locale.GetString("TEMPLATE"))
 	//sketch模式的倒计时秒数
 	rootCmd.PersistentFlags().IntVar(&common.Config.SketchCountSeconds, "sketch_count_seconds", 90, locale.GetString("SKETCH_COUNT_SECONDS"))
 	//图片文件排序
@@ -105,7 +105,7 @@ func init() {
 	//退出时清除临时文件
 	rootCmd.PersistentFlags().BoolVar(&common.Config.CleanAllTempFileOnExit, "clean", false, locale.GetString("CLEAN_ALL_TEMP_FILE"))
 	//手动指定zip文件编码(gbk、shiftjis……etc）
-	rootCmd.PersistentFlags().StringVar(&common.Config.ZipFilenameEncoding, "zip-encode", "", locale.GetString("ZIP_ENCODE"))
+	//rootCmd.PersistentFlags().StringVar(&common.Config.ZipFilenameEncoding, "zip-encode", "", locale.GetString("ZIP_ENCODE"))
 	////访问密码，还没做
 	//	rootCmd.PersistentFlags().StringVar(&common.Config.Auth, "auth", "user:comigo", locale.GetString("AUTH"))
 	//尚未写完的功能

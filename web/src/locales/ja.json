@@ -10,7 +10,7 @@
   "width_useFixedValue": "横幅:固定値",
   "showHeader": "タイトル表示",
   "showPageNum": "ページ数表示",
-  "setBackColor": "背景色を設定する:",
+  "setBackColor": "背景色を指定する:",
   "readingProgressBar": "プログレスバー",
   "savePageNum": "読書進捗の保存",
   "rightScreenToNext": "右半分の画面で次ページ",
@@ -28,5 +28,6 @@
   "totalTime": "合計時間:",
   "hour": "時間",
   "pageTurningSeconds": "ページをめくる秒数:",
-  "startSketchMessage": "クロッキーが始まりました、良い一日を。"
+  "startSketchMessage": "クロッキーが始まりました、良い一日を。",
+  "goodjob_and_byebye": "お疲れ様でした、バイバイ。"
 }

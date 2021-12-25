@@ -45,6 +45,7 @@
 					:min="1"
 					:step="1"
 					:format-tooltip="(value) => `${value}`"
+					@update:value="this.saveNowPageNumOnUpdate"
 				/>
 				<span>{{ this.book.all_page_num }}</span>
 			</div>
@@ -58,6 +59,7 @@
 					:min="1"
 					:step="1"
 					:format-tooltip="(value) => `${value}`"
+					@update:value="this.saveNowPageNumOnUpdate"
 				/>
 				<span>{{ this.now_page_FlipMode }}</span>
 			</div>
@@ -195,7 +197,7 @@ import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
 import { defineComponent, reactive } from "vue";
 // 直接导入组件并使用它。这种情况下，只有导入的组件才会被打包。
-import { NSpace, NSlider, NSwitch, NIcon, NColorPicker, NDivider, NInputNumber,  useMessage,  } from "naive-ui";
+import { NSpace, NSlider, NSwitch, NIcon, NColorPicker, NDivider, NInputNumber, useMessage, } from "naive-ui";
 import { SettingsOutline } from "@vicons/ionicons5";
 export default defineComponent({
 	name: "FlipMode",
@@ -219,20 +221,19 @@ export default defineComponent({
 	},
 	setup() {
 		const { cookies } = useCookies();
-		//设置抽屉
-		//颜色选择器
+		//背景颜色，颜色选择器用
 		const model = reactive({
-			color: "#252525",
+			color: "#E0D9CD",
 		});
 		//警告信息
 		const message = useMessage()
 		// const notification = useNotification()
 		return {
 			message,
-			//颜色选择器的颜色
+			//背景色
 			model,
 			cookies,
-			//开关用的颜色
+			//开关的颜色
 			railStyle: ({ focused, checked }) => {
 				const style = {};
 				if (checked) {
@@ -269,8 +270,8 @@ export default defineComponent({
 			showFooterFlag_FlipMode: true,
 			//是否是右半屏翻页
 			useRightHalfScreen_FlipMode: true,
-			//是否拼合双叶
-			autoDoublepage_FlipMode: true,
+			//尝试拼合双叶
+			autoDoublepage_FlipMode: false,
 			//是否保存当前页数
 			savePageNumFlag_FlipMode: true,
 			//当前页数
@@ -332,7 +333,7 @@ export default defineComponent({
 			this.savePageNumFlag_FlipMode = false;
 		}
 
-		//当前颜色
+		//当前背景色
 		if (this.cookies.get("FlipModeDefaultColor") != null) {
 			this.model.color = this.cookies.get("FlipModeDefaultColor");
 		}
@@ -345,17 +346,11 @@ export default defineComponent({
 		}
 
 	},
-	//挂载前
+	// beforeMount : 指令第一次绑定到元素并且在挂载父组件之前调用。
 	beforeMount() {
 		// 注册监听
 		window.addEventListener("keyup", this.handleKeyup);
-		//当前页数
-		if (this.cookies.get("now_page_FlipMode" + this.book.name) != null) {
-			let saveNum = Number(this.cookies.get("now_page_FlipMode" + this.book.name));
-			if (!isNaN(saveNum)) {
-				this.now_page_FlipMode = saveNum;
-			}
-		}
+
 		//自動開始Sketch模式
 		if (this.nowTemplate == "sketch") {
 			this.startSketchMode();
@@ -366,14 +361,38 @@ export default defineComponent({
 		// 销毁监听
 		window.removeEventListener("keyup", this.handleKeyup);
 	},
-	//挂载后
+	// mounted : 在绑定元素的父组件被挂载后调用。
 	mounted() {
-		// setInterval(this.changeRandomColor, 1000);
+		//需要得书籍远程数据，避免初始化失败，所以延迟0.5秒执行
+		setTimeout(this.getNowPageInCookie, 500);
 	},
 	updated() {
 		//界面有更新就会调用，随便乱放会引起难以调试的BUG
 	},
 	methods: {
+		//根据书籍UUID，读取当前页数，因为需要取得远程书籍数据（this.book），所以延迟1秒执行
+		getNowPageInCookie() {
+			if (this.savePageNumFlag_FlipMode) {
+				let cookieValue = this.cookies.get("now_page_FlipMode" + this.book.uuid);
+				if (cookieValue != null) {
+					let saveNum = Number(cookieValue);
+					if (!isNaN(saveNum)) {
+						this.now_page_FlipMode = saveNum;
+						// console.log("成功读取页数" + saveNum);
+					} else {
+						console.log("读取页数失败，this.now_page_FlipMode=" + this.now_page_FlipMode);
+					}
+				} else {
+					console.log("cookie里面没找到:" + "now_page_FlipMode" + this.book.uuid);
+				}
+			} else {
+				console.log("不读取页数，this.savePageNumFlag_FlipMode=" + this.savePageNumFlag_FlipMode);
+			}
+		},
+		saveNowPageNumOnUpdate(value){
+			this.cookies.set("now_page_FlipMode" + this.book.uuid,value);
+		},
+
 		//接收Drawer的参数，继续往父组件传
 		OnSetTemplate(value) {
 			this.$emit("setTemplate", value);
@@ -407,6 +426,7 @@ export default defineComponent({
 		},
 		//停止速写倒计时
 		stopSketchMode() {
+			this.message.success(this.$t('goodjob_and_byebye'));
 			this.sketchModeFlag = false;
 			this.showPageNumFlag_FlipMode = false;
 			this.sketchSecondCount = 0;
@@ -442,7 +462,7 @@ export default defineComponent({
 			this.cookies.set("useRightHalfScreen_FlipMode", this.useRightHalfScreen_FlipMode);
 			this.cookies.set("autoDoublepage_FlipMode", this.autoDoublepage_FlipMode);
 			this.cookies.set("savePageNumFlag_FlipMode", this.savePageNumFlag_FlipMode);
-			this.cookies.set("now_page_FlipMode" + this.book.name, this.now_page_FlipMode);
+			this.cookies.set("now_page_FlipMode" + this.book.uuid, this.now_page_FlipMode);
 			this.cookies.set("FlipModeDefaultColor", this.model.color);
 			this.cookies.set("sketchFlipSecond", this.sketchFlipSecond);
 		},
@@ -604,7 +624,7 @@ export default defineComponent({
 				}
 			}
 			if (this.savePageNumFlag_FlipMode) {
-				this.cookies.set("now_page_FlipMode" + this.book.name, this.now_page_FlipMode);
+				this.cookies.set("now_page_FlipMode" + this.book.uuid, this.now_page_FlipMode);
 			}
 		},
 		toPage: function (num) {
@@ -612,7 +632,7 @@ export default defineComponent({
 				this.now_page_FlipMode = num;
 			}
 			if (this.savePageNumFlag_FlipMode) {
-				this.cookies.set("now_page_FlipMode" + this.book.name, this.now_page_FlipMode);
+				this.cookies.set("now_page_FlipMode" + this.book.uuid, this.now_page_FlipMode);
 			}
 			// console.log(num);
 		},
@@ -669,7 +689,7 @@ export default defineComponent({
 					MinutesAndHourString = totalMinutes + this.$t("minute");
 				} else {
 					MinutesAndHourString =
-						parseInt(totalMinutes / 5) +
+						parseInt(totalMinutes / 60) +
 						this.$t("hour") +
 						(totalMinutes % 60) +
 						this.$t("minute");

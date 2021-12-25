@@ -19,14 +19,15 @@
   "stopSketchMode": "Stop Sketch",
   "hintFirstPage": "Now is the first page, can not turn forward",
   "hintLastPage": "Now is the last page, can not turn the page",
-  "now_is": "now:",
+  "now_is": "now: ",
   "second": "second",
   "minute": "minute",
-  "total_is": "total:",
-  "interval": "interval:",
+  "total_is": "total: ",
+  "interval": "interval: ",
   "page": "page",
-  "totalTime": "Total time:",
+  "totalTime": "Total time: ",
   "hour": "hour",
-  "pageTurningSeconds": "Page Turning Seconds:",
-  "startSketchMessage": "The countdown begins, Have a nice day."
+  "pageTurningSeconds": "interval: ",
+  "startSketchMessage": "The countdown begins, Have a nice day.",
+  "goodjob_and_byebye": "Goodjob,bye."
 }

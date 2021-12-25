@@ -34,6 +34,12 @@
 			@setT="this.OnSetTemplate"
 			:nowTemplate="this.nowTemplate"
 		>
+			<span>{{ $t("setBackColor") }}</span>
+			<n-color-picker v-model:value="model.color" :modes="['rgb']" :show-alpha="false" />
+
+			<!-- 分割线 -->
+			<n-divider />
+
 			<n-space vertical>
 				<!-- 单页-漫画宽度-使用百分比 -->
 				<!-- 数字输入% -->
@@ -179,16 +185,16 @@
 
 <script>
 // 直接导入组件并使用它。这种情况下，只有导入的组件才会被打包。
-import { NButton, NBackTop, NSpace, NSlider, NSwitch, NIcon, NInputNumber, NDivider } from 'naive-ui'
+import { NButton, NBackTop, NSpace, NSlider, NSwitch, NIcon, NInputNumber, NDivider, NColorPicker, } from 'naive-ui'
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
-import { defineComponent, } from 'vue'
+import { defineComponent, reactive } from 'vue'
 import { useCookies } from "vue3-cookies";// https://github.com/KanHarI/vue3-cookies
 import { SettingsOutline } from '@vicons/ionicons5'
 
 export default defineComponent({
 	name: "ScrollMode",
-	props: ['book','nowTemplate'],
+	props: ['book', 'nowTemplate'],
 	emits: ["setTemplate"],
 	components: {
 		Header,//自定义页头，有点丑
@@ -212,16 +218,23 @@ export default defineComponent({
 		NInputNumber,//数字输入 https://www.naiveui.com/zh-CN/os-theme/components/input-number
 		SettingsOutline,//图标,来自 https://www.xicons.org/#/   需要安装（npm i -D @vicons/ionicons5）
 		NDivider,//分割线  https://www.naiveui.com/zh-CN/os-theme/components/divider
+		NColorPicker,
 	},
 	setup() {
 		//此处不能使用this
 		const { cookies } = useCookies();
+		//背景颜色，颜色选择器用
+		const model = reactive({
+			color: "#E0D9CD",
+		});
 
 		//单选按钮绑定的数值
 		// const checkedValueRef = ref(null)
 		return {
 			cookies,
-			//开关用的颜色
+			//背景色
+			model,
+			//开关的颜色
 			railStyle: ({ focused, checked }) => {
 				const style = {}
 				if (checked) {
@@ -278,7 +291,7 @@ export default defineComponent({
 			//状态驱动的动态 CSS!!!!!
 			// https://v3.cn.vuejs.org/api/sfc-style.html#%E7%8A%B6%E6%80%81%E9%A9%B1%E5%8A%A8%E7%9A%84%E5%8A%A8%E6%80%81-css
 			//图片宽度的单位，是否使用百分比
-			imageWidth_usePercentFlag: true,
+			imageWidth_usePercentFlag: false,
 
 			//横屏(Landscape)状态的漫画页宽度，百分比
 			singlePageWidth_Percent: 50,
@@ -295,8 +308,8 @@ export default defineComponent({
 	},
 	//Vue3生命周期:  https://v3.cn.vuejs.org/api/options-lifecycle-hooks.html#beforecreate
 	// created : 在绑定元素的属性或事件监听器被应用之前调用。
-	// beforeMount : 指令第一次绑定到元素并且在挂载父组件之前调用。。
-	// mounted : 在绑定元素的父组件被挂载后调用。。
+	// beforeMount : 指令第一次绑定到元素并且在挂载父组件之前调用。
+	// mounted : 在绑定元素的父组件被挂载后调用。
 	// beforeUpdate: 在更新包含组件的 VNode 之前调用。。
 	// updated: 在包含组件的 VNode 及其子组件的 VNode 更新后调用。
 	// beforeUnmount: 当指令与在绑定元素父组件卸载之前时，只调用一次。
@@ -363,6 +376,11 @@ export default defineComponent({
 			}
 		}
 
+		//当前颜色
+		if (this.cookies.get("ScrollModeDefaultColor") != null) {
+			this.model.color = this.cookies.get("ScrollModeDefaultColor");
+		}
+
 	},
 
 	// //挂载前
@@ -413,6 +431,7 @@ export default defineComponent({
 			this.cookies.set("doublePageWidth_Percent", this.doublePageWidth_Percent);
 			this.cookies.set("singlePageWidth_PX", this.singlePageWidth_PX);
 			this.cookies.set("doublePageWidth_PX", this.doublePageWidth_PX);
+			this.cookies.set("ScrollModeDefaultColor", this.model.color);
 		},
 		setShowHeaderChange(value) {
 			console.log("value:" + value);
@@ -588,6 +607,7 @@ export default defineComponent({
 <style scoped>
 .manga {
 	max-width: 100%;
+	background: v-bind("model.color");
 }
 
 .header {

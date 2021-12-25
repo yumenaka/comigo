@@ -25,10 +25,13 @@ app.use(router);
 // vue3-lazyload
 // https://github.com/murongg/vue3-lazyload
 app.use(VueLazyLoad, {
+    //懒加载相关设置
+    //https://www.cnblogs.com/niuzijie/p/13703710.html
+    preLoad: 2.5,//预加载高度比例,默认1.3
     loading: "/images/loading.jpg",
     error: "/images/error.jpg",
-    //懒加载相关设置
-    observerOptions: { rootMargin: '500px', threshold: 0.1 },
+    attempt: 4,//尝试加载图片数量，默认3
+    observerOptions: { rootMargin: '1500px', threshold: 0.05},
     lifecycle: {
         loading: (el) => {
             el.setAttribute("class", "LoadingImage");
