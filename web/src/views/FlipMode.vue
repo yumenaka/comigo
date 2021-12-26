@@ -26,9 +26,15 @@
 				<!-- 非自动拼合模式最简单，直接显示一张图 -->
 				<img v-bind:src="this.book.pages[nowPageNum - 1].url" />
 
+				<!-- 简单拼合双页，不管单双页什么的 -->
+				<img
+					v-if="(!this.autoDoublePage_FlipMode) && this.simpleDoublePage_FlipMode && this.nowPageNum < this.book.all_page_num"
+					v-bind:src="this.book.pages[nowPageNum].url"
+				/>
+
 				<!-- 自动拼合模式当前页，如果开启自动拼合，右边可能显示拼合页 -->
 				<img
-					v-if="this.autoDoublepage_FlipMode && this.nowPageNum < book.all_page_num && this.nowAndNextPageIsSingle()"
+					v-if="this.autoDoublePage_FlipMode && this.nowPageNum < this.book.all_page_num && this.nowAndNextPageIsSingle()"
 					v-bind:src="this.book.pages[nowPageNum].url"
 				/>
 			</div>
@@ -157,11 +163,22 @@
 			</n-switch>
 		</n-space>
 
+		<n-space>
+			<n-switch
+				size="large"
+				v-model:value="this.simpleDoublePage_FlipMode"
+				@update:value="this.setSimpleDoublePage_FlipMode"
+			>
+				<template #checked>简单合并双页</template>
+				<template #unchecked>简单合并双页</template>
+			</n-switch>
+		</n-space>
+
 		<n-space v-if="this.debugModeFlag">
 			<n-switch
 				size="large"
-				v-model:value="this.autoDoublepage_FlipMode"
-				@update:value="this.setAutoDoublepage_FlipMode"
+				v-model:value="this.autoDoublePage_FlipMode"
+				@update:value="this.setAutoDoublePage_FlipMode"
 			>
 				<template #checked>自动合并单双页</template>
 				<template #unchecked>自动合并单双页</template>
@@ -277,10 +294,12 @@ export default defineComponent({
 			showHeaderFlag_FlipMode: true,
 			//是否显示页脚
 			showFooterFlag_FlipMode: true,
-			//是否是右半屏翻页
-			rightScreenToNextFlag_FlipMode: true,
-			//尝试拼合双叶
-			autoDoublepage_FlipMode: false,
+			//是否是右半屏翻页?默认是日本漫画，所以默认是左半屏
+			rightScreenToNextFlag_FlipMode: false,
+			//简单拼合双叶
+			simpleDoublePage_FlipMode: false,
+			//自动拼合双叶，效果不太好
+			autoDoublePage_FlipMode: false,
 			//是否保存当前页数
 			saveNowPageNumFlag_FlipMode: true,
 			//当前页数，注意语义，直接就是1开始的页数，不是数组下标，在pages数组当中用的时候需要-1
@@ -332,11 +351,17 @@ export default defineComponent({
 		} else if (this.cookies.get("rightScreenToNextFlag_FlipMode") === "false") {
 			this.rightScreenToNextFlag_FlipMode = false;
 		}
+		//简单合并单页
+		if (this.cookies.get("simpleDoublePage_FlipMode") === "true") {
+			this.simpleDoublePage_FlipMode = true;
+		} else if (this.cookies.get("simpleDoublePage_FlipMode") === "false") {
+			this.simpleDoublePage_FlipMode = false;
+		}
 		//自动合并单页
-		if (this.cookies.get("autoDoublepage_FlipMode") === "true") {
-			this.autoDoublepage_FlipMode = true;
-		} else if (this.cookies.get("autoDoublepage_FlipMode") === "false") {
-			this.autoDoublepage_FlipMode = false;
+		if (this.cookies.get("autoDoublePage_FlipMode") === "true") {
+			this.autoDoublePage_FlipMode = true;
+		} else if (this.cookies.get("autoDoublePage_FlipMode") === "false") {
+			this.autoDoublePage_FlipMode = false;
 		}
 		//是否保存阅读进度
 		if (this.cookies.get("saveNowPageNumFlag_FlipMode") === "true") {
@@ -477,7 +502,8 @@ export default defineComponent({
 			this.cookies.set("showFooterFlag_FlipMode", this.showFooterFlag_FlipMode);
 			this.cookies.set("showPageHintFlag_FlipMode", this.showPageHintFlag_FlipMode);
 			this.cookies.set("rightScreenToNextFlag_FlipMode", this.rightScreenToNextFlag_FlipMode);
-			this.cookies.set("autoDoublepage_FlipMode", this.autoDoublepage_FlipMode);
+			this.cookies.set("simpleDoublePage_FlipMode", this.simpleDoublePage_FlipMode);
+			this.cookies.set("autoDoublePage_FlipMode", this.autoDoublePage_FlipMode);
 			this.cookies.set("saveNowPageNumFlag_FlipMode", this.saveNowPageNumFlag_FlipMode);
 			this.cookies.set("nowPageNum" + this.book.uuid, this.nowPageNum);
 			this.cookies.set("FlipModeDefaultColor", this.model.color);
@@ -601,8 +627,19 @@ export default defineComponent({
 			}
 		},
 		toNextPage() {
+			//简单合并模式
+			if (this.simpleDoublePage_FlipMode) {
+				if (this.nowPageNum < this.book.all_page_num - 1) {
+					this.flipPage(2);
+					return;
+				} else {
+					this.flipPage(1);
+					return;
+				}
+			}
+
 			//如果开启了自动合并模式，并且当前页应该被合并
-			if (this.autoDoublepage_FlipMode && this.checkMergedStatus_ByPageNum(this.nowPageNum)) {
+			if (this.autoDoublePage_FlipMode && this.checkMergedStatus_ByPageNum(this.nowPageNum)) {
 				if (this.nowPageNum < this.book.all_page_num - 1) {
 					this.flipPage(2);
 				} else {
@@ -613,24 +650,37 @@ export default defineComponent({
 			}
 		},
 		toPerviousPage() {
-			//错误值
+			//错误值,第0或第1页。
 			if (this.nowPageNum <= 1) {
 				console.log("Error toPerviousPage");
 				return;
 			}
-			//如果没有开启自动合并模式，或现在是第二页
-			if (this.nowPageNum == 2 || !this.autoDoublepage_FlipMode) {
+
+			//简单合并模式
+			if (this.simpleDoublePage_FlipMode) {
+				if (this.nowPageNum-2>0) {
+					this.flipPage(-2);
+					return;
+				} else {
+					this.flipPage(-1);
+					return;
+				}
+			}
+
+			//自动合并模式
+			//如果没有开启自动合并模式，或现在是第2页
+			if (this.nowPageNum == 2 || !this.autoDoublePage_FlipMode) {
 				this.flipPage(-1);
 				return
 			}
 			//如果前一页是双开叶
-			let pervIsDouble = this.checkImageIsDoublePage_byPageNum(this.nowPageNum - 2)
+			let pervIsDouble = this.checkImageIsDoublePage_byPageNum(this.nowPageNum - 1)
 			if (pervIsDouble) {
 				this.flipPage(-1);
 				return
 			}
 			//如果前前页是双开叶
-			let PervPervIsDouble = this.checkImageIsDoublePage_byPageNum(this.nowPageNum - 3)
+			let PervPervIsDouble = this.checkImageIsDoublePage_byPageNum(this.nowPageNum - 2)
 			if (PervPervIsDouble) {
 				this.flipPage(-1);
 				return
@@ -642,17 +692,7 @@ export default defineComponent({
 		//给一个页数，然后判断自动双页模式下，是否应该预读并合并显示下一页
 		checkMergedStatus_ByPageNum(pageNum) {
 			//如果没有开启自动双页模式，当然不需要
-			if (!this.autoDoublepage_FlipMode) {
-				return false;
-			}
-			// //预读下下张图片，不做任何判断，相当于手动的lazy load
-			// if (pageNum + 2 < this.book.all_page_num) {
-			// 	this.book.all_page_num
-			// 	let temp_image = new Image();
-			// 	temp_image.src = this.book.pages[pageNum + 2].url;
-			// }
-			//已经是最后一页了，显然不需要自动合并下一页
-			if (pageNum == this.book.all_page_num) {
+			if (!this.autoDoublePage_FlipMode) {
 				return false;
 			}
 			//可能传入的错误值，打印到控制台
@@ -660,15 +700,20 @@ export default defineComponent({
 				console.log("Error pageNum :" + pageNum);
 				return false;
 			}
-			//分析下一张漫画的宽高比,看是不是双开页
-			let next_page_is_double_page = this.checkImageIsDoublePage_byPageNum(pageNum + 1);
+
+			//已经是最后一页了，显然不需要自动合并下一页
+			if (pageNum == this.book.all_page_num) {
+				return false;
+			}
 			//分析现在这张图片的宽高比,看是不是双开页
 			let now_page_is_double_page = this.checkImageIsDoublePage_byPageNum(pageNum);
+			//分析下一张漫画的宽高比,看是不是双开页
+			let next_page_is_double_page = this.checkImageIsDoublePage_byPageNum(pageNum + 1);
 			//如果现在这张就是开页漫画，直接不用比了
 			if (now_page_is_double_page) {
 				return false;
 			} else if (next_page_is_double_page) {
-				//如果下一张漫画是开页，显然也没法合并过来
+				//如果下一张漫画是开页，显然也没法合并
 				return false;
 			} else {
 				//前两个条件不满足，也就是说两边都是单页，可以合并显示
@@ -676,13 +721,25 @@ export default defineComponent({
 			}
 		},
 		checkImageIsDoublePage_byPageNum(pageNum) {
+			//如果传进了错误值
 			if (pageNum <= 0 || pageNum > this.book.all_page_num) {
 				console.log("Error checkImageIsDoublePage_byPageNum:" + pageNum);
+				return;
 			}
 			let image = new Image();
+			let temp_flag = false;//返回结果用
 			image.src = this.book.pages[pageNum - 1].url;
-			// 图片是否完全加载完成。
+			// image.complete 图片是否完全加载完成。
 			//https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLImageElement/complete
+
+
+			// https://corbusier.github.io/2017/06/29/%E5%9B%BE%E7%89%87%E7%9A%84%E5%BC%82%E6%AD%A5%E5%8A%A0%E8%BD%BD%E4%B8%8Eonload%E5%87%BD%E6%95%B0/
+			// onload函数要写在改变src前,这样确保了onload函数一定会被调用
+			// complete只是变向的在判断img是否已经触发了load事件,而且是不精准的判断
+			// complete在不同浏览器下,表现不一致,不建议使用
+			// 无论浏览器是否存在图片缓存,重新请求图片地址,都会触发onload事件
+
+			// 因为牵扯到异步处理，这段代码的执行结果似乎靠不住……
 			if (image.complete) {
 				if (image.width < image.height) {
 					return false;//宽小于高，竖着的，单页漫画
@@ -691,7 +748,6 @@ export default defineComponent({
 				}
 			} else {
 				//否则加载图片
-				let temp_flag = false;
 				image.onload = function () {
 					//是单页漫画
 					if (image.width < image.height) {
@@ -828,18 +884,32 @@ export default defineComponent({
 			this.debugModeFlag = value;
 			//关闭Debug模式的时候顺便也关上“自动合并单双页”的功能（因为还有BUG）
 			if (value == false) {
-				this.autoDoublepage_FlipMode = false;
+				this.autoDoublePage_FlipMode = false;
 			}
 			this.cookies.set("debugModeFlag", value);
 			console.log("cookie设置完毕: debugModeFlag=" + this.cookies.get("debugModeFlag"));
 		},
 
-		setAutoDoublepage_FlipMode(value) {
+		setAutoDoublePage_FlipMode(value) {
 			console.log("value:" + value);
-			this.autoDoublepage_FlipMode = value;
-			this.cookies.set("autoDoublepage_FlipMode", value);
-			console.log("cookie设置完毕: autoDoublepage_FlipMode=" + this.cookies.get("autoDoublepage_FlipMode"));
+			this.autoDoublePage_FlipMode = value;
+			if (value == true) {
+				this.simpleDoublePage_FlipMode = false;
+			}
+			this.cookies.set("autoDoublePage_FlipMode", value);
+			console.log("cookie设置完毕: autoDoublePage_FlipMode=" + this.cookies.get("autoDoublePage_FlipMode"));
 		},
+
+		setSimpleDoublePage_FlipMode(value) {
+			console.log("value:" + value);
+			this.simpleDoublePage_FlipMode = value;
+			if (value == true) {
+				this.autoDoublePage_FlipMode = false;
+			}
+			this.cookies.set("simpleDoublePage_FlipMode", value);
+			console.log("cookie设置完毕: simpleDoublePage_FlipMode=" + this.cookies.get("simpleDoublePage_FlipMode"));
+		},
+
 	},
 
 	computed: {
