@@ -155,13 +155,6 @@
 			</n-switch>
 		</n-space>
 
-		<!-- 开关：Debug，现在只会随机背景色 -->
-		<n-space>
-			<n-switch size="large" v-model:value="this.debugModeFlag" @update:value="this.setDebugModeFlag">
-				<template #checked>{{ $t("debugMode") }}</template>
-				<template #unchecked>{{ $t("debugMode") }}</template>
-			</n-switch>
-		</n-space>
 
 		<n-space>
 			<n-switch
@@ -171,6 +164,17 @@
 			>
 				<template #checked>简单合并双页</template>
 				<template #unchecked>简单合并双页</template>
+			</n-switch>
+		</n-space>
+
+		<!-- 分割线 -->
+		<n-divider />
+
+		<!-- 开关：Debug，开启一些不稳定功能 -->
+		<n-space>
+			<n-switch size="large" v-model:value="this.debugModeFlag" @update:value="this.setDebugModeFlag">
+				<template #checked>{{ $t("debugMode") }}</template>
+				<template #unchecked>{{ $t("debugMode") }}</template>
 			</n-switch>
 		</n-space>
 
