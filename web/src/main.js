@@ -27,11 +27,11 @@ app.use(router);
 app.use(VueLazyLoad, {
     //懒加载相关设置
     //https://www.cnblogs.com/niuzijie/p/13703710.html
-    preLoad: 2.5,//预加载高度比例,默认1.3
+    preLoad: 1.5,//预加载高度比例,默认1.3
     loading: "/images/loading.jpg",
     error: "/images/error.jpg",
     attempt: 4,//尝试加载图片数量，默认3
-    observerOptions: { rootMargin: '1500px', threshold: 0.05},
+    observerOptions: { rootMargin: '1200px', threshold: 0.1},
     lifecycle: {
         loading: (el) => {
             el.setAttribute("class", "LoadingImage");
@@ -45,8 +45,8 @@ app.use(VueLazyLoad, {
         loaded: (el) => {
             let image = new Image();
             image.src = el.src;
-            // 如果有缓存，读缓存。
-            //还要避免默认占位图片的情况，目前远程网速较慢时似乎会出错
+			// 图片是否完全加载完成。
+			//https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLImageElement/complete
             if (image.complete) {
                 el.setAttribute("w", image.width);
                 el.setAttribute("h", image.height);

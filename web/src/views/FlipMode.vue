@@ -14,33 +14,56 @@
 		</Header>
 
 		<!-- 主题，漫画div -->
+		<!-- 事件修饰符： https://v3.cn.vuejs.org/guide/events.html#%E4%BA%8B%E4%BB%B6%E4%BF%AE%E9%A5%B0%E7%AC%A6 -->
 		<div
 			class="manga_area"
 			id="MangaMain"
-			@click.self="onMouseClick"
-			@mousemove.self="onMouseMove"
-			@mouseleave.self="onMouseLeave"
+			@click.stop="onMouseClick"
+			@mousemove.stop="onMouseMove"
+			@mouseleave.stop="onMouseLeave"
 		>
-			<img
-				@click.self="onMouseClick"
-				@mousemove.self="onMouseMove"
-				@mouseleave.self="onMouseLeave"
-				class="manga_img"
-				v-if="now_page_FlipMode <= this.book.all_page_num && now_page_FlipMode >= 1"
-				lazy-src="/resources/favicon.ico"
-				v-bind:src="this.book.pages[now_page_FlipMode - 1].url"
-			/>
-			<img />
-			<div v-if="this.showPageNumFlag_FlipMode" class="sketch_hint">{{ pageNumOrSketchHint }}</div>
+			<div class="manga_area_img_div">
+				<!-- 非自动拼合模式最简单，直接显示一张图就成了 -->
+				<img
+					v-if="!this.autoDoublepage_FlipMode"
+					v-bind:src="this.book.pages[nowPageNum_FlipMode - 1].url"
+				/>
+
+				<!-- 右手模式当前页，如果指定了自动拼合，右边可能显示拼合页 -->
+				<!-- v-if="nowPageNum_FlipMode <= this.book.all_page_num && nowPageNum_FlipMode >= 1" -->
+				<img
+					v-if="this.rightScreenToNextFlag_FlipMode && this.autoDoublepage_FlipMode"
+					v-bind:src="this.book.pages[nowPageNum_FlipMode - 1].url"
+				/>
+				<!-- 右手模式下一页，根据情况显示，自动拼合用 -->
+				<img
+					v-if="this.nowPageNum_FlipMode < book.all_page_num && this.rightScreenToNextFlag_FlipMode && this.autoDoublepage_FlipMode && !this.checkImageIsDoublePage_byPageNum(nowPageNum_FlipMode)&& !this.checkImageIsDoublePage_byPageNum(nowPageNum_FlipMode+1)"
+					v-bind:src="this.book.pages[nowPageNum_FlipMode].url"
+				/>
+
+				<!-- 左手模式下一页，根据情况显示，自动拼合用 -->
+				<img
+					v-if="this.nowPageNum_FlipMode < book.all_page_num && !this.rightScreenToNextFlag_FlipMode && this.autoDoublepage_FlipMode && !this.checkImageIsDoublePage_byPageNum(nowPageNum_FlipMode)&& !this.checkImageIsDoublePage_byPageNum(nowPageNum_FlipMode+1)"
+					v-bind:src="this.book.pages[nowPageNum_FlipMode].url"
+				/>
+				<!-- 左手模式当前页，如果指定了自动拼合，右边可能显示拼合页 -->
+				<!-- v-if="nowPageNum_FlipMode <= this.book.all_page_num && nowPageNum_FlipMode >= 1" -->
+				<img
+					v-if="!this.rightScreenToNextFlag_FlipMode && this.autoDoublepage_FlipMode"
+					v-bind:src="this.book.pages[nowPageNum_FlipMode - 1].url"
+				/>
+			</div>
+
+			<div v-if="this.showPageHintFlag_FlipMode" class="sketch_hint">{{ pageNumOrSketchHint }}</div>
 		</div>
 
 		<!-- 页脚 拖动条 -->
 		<div class="footer" v-if="this.showFooterFlag_FlipMode">
 			<!-- 右手模式用 ，底部滑动条 -->
-			<div v-if="this.useRightHalfScreen_FlipMode">
-				<span>{{ this.now_page_FlipMode }}</span>
+			<div v-if="this.rightScreenToNextFlag_FlipMode">
+				<span>{{ this.nowPageNum_FlipMode }}</span>
 				<n-slider
-					v-model:value="now_page_FlipMode"
+					v-model:value="nowPageNum_FlipMode"
 					:max="this.book.all_page_num"
 					:min="1"
 					:step="1"
@@ -50,18 +73,18 @@
 				<span>{{ this.book.all_page_num }}</span>
 			</div>
 			<!-- 左手模式用 底部滑动条，设置reverse翻转计数方向 -->
-			<div v-if="!this.useRightHalfScreen_FlipMode">
+			<div v-if="!this.rightScreenToNextFlag_FlipMode">
 				<span>{{ this.book.all_page_num }}</span>
 				<n-slider
 					reverse
-					v-model:value="now_page_FlipMode"
+					v-model:value="nowPageNum_FlipMode"
 					:max="this.book.all_page_num"
 					:min="1"
 					:step="1"
 					:format-tooltip="(value) => `${value}`"
 					@update:value="this.saveNowPageNumOnUpdate"
 				/>
-				<span>{{ this.now_page_FlipMode }}</span>
+				<span>{{ this.nowPageNum_FlipMode }}</span>
 			</div>
 		</div>
 	</div>
@@ -111,7 +134,7 @@
 		<n-space>
 			<n-switch
 				size="large"
-				v-model:value="this.showPageNumFlag_FlipMode"
+				v-model:value="this.showPageHintFlag_FlipMode"
 				@update:value="setShowPageNumChange"
 			>
 				<template #checked>{{ $t("showPageNum") }}</template>
@@ -126,7 +149,7 @@
 		<n-space>
 			<n-switch
 				size="large"
-				v-model:value="this.savePageNumFlag_FlipMode"
+				v-model:value="this.saveNowPageNumFlag_FlipMode"
 				@update:value="this.setSavePageNumFlag"
 			>
 				<template #checked>{{ $t("savePageNum") }}</template>
@@ -138,7 +161,7 @@
 		<n-space>
 			<n-switch
 				size="large"
-				v-model:value="this.useRightHalfScreen_FlipMode"
+				v-model:value="this.rightScreenToNextFlag_FlipMode"
 				:rail-style="railStyle"
 				@update:value="this.setFlipScreenFlag"
 			>
@@ -148,16 +171,29 @@
 		</n-space>
 
 		<!-- 开关：Debug，现在只会随机背景色 -->
-		<!-- <n-space>
+		<n-space>
 			<n-switch
 				size="large"
 				v-model:value="this.debugModeFlag"
-				@update:value="this.setDebugModeFlagFlag"
+				@update:value="this.setDebugModeFlag"
 			>
 				<template #checked>{{ $t("debugMode") }}</template>
 				<template #unchecked>{{ $t("debugMode") }}</template>
 			</n-switch>
-		</n-space>-->
+		</n-space>
+
+
+		<n-space v-if="this.debugModeFlag">
+			<n-switch
+				size="large"
+				v-model:value="this.autoDoublepage_FlipMode"
+				@update:value="this.setAutoDoublepage_FlipMode"
+			>
+				<template #checked>自动合并单双页</template>
+				<template #unchecked>自动合并单双页</template>
+			</n-switch>
+		</n-space>
+
 
 		<!-- 分割线 -->
 		<n-divider v-if="this.nowTemplate == 'sketch'" />
@@ -269,17 +305,17 @@ export default defineComponent({
 			//是否显示页脚
 			showFooterFlag_FlipMode: true,
 			//是否是右半屏翻页
-			useRightHalfScreen_FlipMode: true,
+			rightScreenToNextFlag_FlipMode: true,
 			//尝试拼合双叶
-			autoDoublepage_FlipMode: false,
+			autoDoublepage_FlipMode: true,
 			//是否保存当前页数
-			savePageNumFlag_FlipMode: true,
-			//当前页数
-			now_page_FlipMode: 1,
+			saveNowPageNumFlag_FlipMode: true,
+			//当前页数，注意语义，直接就是1开始的页数，不是数组下标，在pages数组当中用的时候需要-1
+			nowPageNum_FlipMode: 1,
 			//素描模式标记
 			sketchModeFlag: false,
 			//是否显示素描提示
-			showPageNumFlag_FlipMode: false,
+			showPageHintFlag_FlipMode: false,
 			//翻页间隔时间
 			sketchFlipSecond: 30,
 			//计时用，从0开始
@@ -288,8 +324,7 @@ export default defineComponent({
 			interval: null,
 		};
 	},
-	//在选项API中使用 Vue 生命周期钩子
-
+	//在选项API中使用 Vue 生命周期钩子：
 	created() {
 		//从cookies初始化默认值
 		if (this.cookies.get("debugModeFlag") === "true") {
@@ -297,60 +332,58 @@ export default defineComponent({
 		} else if (this.cookies.get("debugModeFlag") === "false") {
 			this.debugModeFlag = false;
 		}
-
+		//是否显示标题
 		if (this.cookies.get("showHeaderFlag_FlipMode") === "true") {
 			this.showHeaderFlag_FlipMode = true;
 		} else if (this.cookies.get("showHeaderFlag_FlipMode") === "false") {
 			this.showHeaderFlag_FlipMode = false;
 		}
-
+		//是否显示页脚
 		if (this.cookies.get("showFooterFlag_FlipMode_FlipMode") === "true") {
 			this.showFooterFlag_FlipMode = true;
 		} else if (this.cookies.get("showFooterFlag_FlipMode_FlipMode") === "false") {
 			this.showFooterFlag_FlipMode = false;
 		}
 		//是否显示页数
-		if (this.cookies.get("showPageNumFlag_FlipMode") === "true") {
-			this.showPageNumFlag_FlipMode = true;
-		} else if (this.cookies.get("showPageNumFlag_FlipMode") === "false") {
-			this.showPageNumFlag_FlipMode = false;
+		if (this.cookies.get("showPageHintFlag_FlipMode") === "true") {
+			this.showPageHintFlag_FlipMode = true;
+		} else if (this.cookies.get("showPageHintFlag_FlipMode") === "false") {
+			this.showPageHintFlag_FlipMode = false;
 		}
-		if (this.cookies.get("useRightHalfScreen_FlipMode") === "true") {
-			this.useRightHalfScreen_FlipMode = true;
-		} else if (this.cookies.get("useRightHalfScreen_FlipMode") === "false") {
-			this.useRightHalfScreen_FlipMode = false;
+		//是否用右半屏翻页
+		if (this.cookies.get("rightScreenToNextFlag_FlipMode") === "true") {
+			this.rightScreenToNextFlag_FlipMode = true;
+		} else if (this.cookies.get("rightScreenToNextFlag_FlipMode") === "false") {
+			this.rightScreenToNextFlag_FlipMode = false;
 		}
-
+		//自动合并单页
 		if (this.cookies.get("autoDoublepage_FlipMode") === "true") {
 			this.autoDoublepage_FlipMode = true;
 		} else if (this.cookies.get("autoDoublepage_FlipMode") === "false") {
 			this.autoDoublepage_FlipMode = false;
 		}
-
-		if (this.cookies.get("savePageNumFlag_FlipMode") === "true") {
-			this.savePageNumFlag_FlipMode = true;
-		} else if (this.cookies.get("savePageNumFlag_FlipMode") === "false") {
-			this.savePageNumFlag_FlipMode = false;
+		//是否保存阅读进度
+		if (this.cookies.get("saveNowPageNumFlag_FlipMode") === "true") {
+			this.saveNowPageNumFlag_FlipMode = true;
+		} else if (this.cookies.get("saveNowPageNumFlag_FlipMode") === "false") {
+			this.saveNowPageNumFlag_FlipMode = false;
 		}
-
 		//当前背景色
 		if (this.cookies.get("FlipModeDefaultColor") != null) {
 			this.model.color = this.cookies.get("FlipModeDefaultColor");
 		}
-
+		//倒计时秒数
 		if (this.cookies.get("sketchFlipSecond") != null) {
 			let saveNum = Number(this.cookies.get("sketchFlipSecond"));
 			if (!isNaN(saveNum)) {
 				this.sketchFlipSecond = saveNum;
 			}
 		}
-
 	},
 	// beforeMount : 指令第一次绑定到元素并且在挂载父组件之前调用。
 	beforeMount() {
 		// 注册监听
 		window.addEventListener("keyup", this.handleKeyup);
-
 		//自動開始Sketch模式
 		if (this.nowTemplate == "sketch") {
 			this.startSketchMode();
@@ -364,36 +397,33 @@ export default defineComponent({
 	// mounted : 在绑定元素的父组件被挂载后调用。
 	mounted() {
 		//需要得书籍远程数据，避免初始化失败，所以延迟0.5秒执行
-		setTimeout(this.getNowPageInCookie, 500);
+		setTimeout(this.setNowPageNumByCookie, 500);
 	},
 	updated() {
 		//界面有更新就会调用，随便乱放会引起难以调试的BUG
 	},
 	methods: {
-		//根据书籍UUID，读取当前页数，因为需要取得远程书籍数据（this.book），所以延迟1秒执行
-		getNowPageInCookie() {
-			if (this.savePageNumFlag_FlipMode) {
-				let cookieValue = this.cookies.get("now_page_FlipMode" + this.book.uuid);
+		//根据书籍UUID，设定当前页数，因为需要取得远程书籍数据（this.book），所以延迟执行
+		setNowPageNumByCookie() {
+			if (this.saveNowPageNumFlag_FlipMode) {
+				let cookieValue = this.cookies.get("nowPageNum_FlipMode" + this.book.uuid);
 				if (cookieValue != null) {
 					let saveNum = Number(cookieValue);
 					if (!isNaN(saveNum)) {
-						this.now_page_FlipMode = saveNum;
+						this.nowPageNum_FlipMode = saveNum;
 						// console.log("成功读取页数" + saveNum);
 					} else {
-						console.log("读取页数失败，this.now_page_FlipMode=" + this.now_page_FlipMode);
+						console.log("读取页数失败，this.nowPageNum_FlipMode=" + this.nowPageNum_FlipMode);
 					}
 				} else {
-					console.log("cookie里面没找到:" + "now_page_FlipMode" + this.book.uuid);
+					console.log("cookie里面没找到:" + "nowPageNum_FlipMode" + this.book.uuid);
 				}
 			} else {
-				console.log("不读取页数，this.savePageNumFlag_FlipMode=" + this.savePageNumFlag_FlipMode);
+				console.log("不读取页数，this.saveNowPageNumFlag_FlipMode=" + this.saveNowPageNumFlag_FlipMode);
 			}
 		},
-		saveNowPageNumOnUpdate(value){
-			this.cookies.set("now_page_FlipMode" + this.book.uuid,value);
-		},
 
-		//接收Drawer的参数，继续往父组件传
+		//设置当前模板-接收Drawer的参数，继续往父组件传
 		OnSetTemplate(value) {
 			this.$emit("setTemplate", value);
 		},
@@ -411,7 +441,7 @@ export default defineComponent({
 			this.message.success(this.$t('startSketchMessage'));
 			this.drawerActive = false; //关闭设置抽屉
 			this.sketchModeFlag = true;
-			this.showPageNumFlag_FlipMode = true;
+			this.showPageHintFlag_FlipMode = true;
 			//是否显示页头
 			(this.showHeaderFlag_FlipMode = false),
 				//是否显示页脚
@@ -428,7 +458,7 @@ export default defineComponent({
 		stopSketchMode() {
 			this.message.success(this.$t('goodjob_and_byebye'));
 			this.sketchModeFlag = false;
-			this.showPageNumFlag_FlipMode = false;
+			this.showPageHintFlag_FlipMode = false;
 			this.sketchSecondCount = 0;
 			//是否显示页头
 			(this.showHeaderFlag_FlipMode = true),
@@ -437,7 +467,7 @@ export default defineComponent({
 				this.$emit("setTemplate", "flip");
 			clearInterval(this.interval); // 清除定时器
 		},
-		//每一秒执行一次的循环
+		//开始速写（quick sketch），每秒执行一次
 		sketchCount() {
 			if (this.sketchModeFlag == false || this.nowTemplate != "sketch") {
 				this.stopSketchMode();
@@ -446,7 +476,7 @@ export default defineComponent({
 			let nowSeconnd = this.sketchSecondCount % this.sketchFlipSecond;
 			// console.log("sketchSecondCount=" + this.sketchSecondCount + " nowSeconnd:" + nowSeconnd)
 			if (nowSeconnd == 0) {
-				if (this.now_page_FlipMode < this.book.all_page_num) {
+				if (this.nowPageNum_FlipMode < this.book.all_page_num) {
 					this.flipPage(1);
 				} else {
 					this.toPage(1);
@@ -458,15 +488,15 @@ export default defineComponent({
 			this.cookies.set("debugModeFlag", this.debugModeFlag);
 			this.cookies.set("showHeaderFlag_FlipMode", this.showHeaderFlag_FlipMode);
 			this.cookies.set("showFooterFlag_FlipMode", this.showFooterFlag_FlipMode);
-			this.cookies.set("showPageNumFlag_FlipMode", this.showPageNumFlag_FlipMode);
-			this.cookies.set("useRightHalfScreen_FlipMode", this.useRightHalfScreen_FlipMode);
+			this.cookies.set("showPageHintFlag_FlipMode", this.showPageHintFlag_FlipMode);
+			this.cookies.set("rightScreenToNextFlag_FlipMode", this.rightScreenToNextFlag_FlipMode);
 			this.cookies.set("autoDoublepage_FlipMode", this.autoDoublepage_FlipMode);
-			this.cookies.set("savePageNumFlag_FlipMode", this.savePageNumFlag_FlipMode);
-			this.cookies.set("now_page_FlipMode" + this.book.uuid, this.now_page_FlipMode);
+			this.cookies.set("saveNowPageNumFlag_FlipMode", this.saveNowPageNumFlag_FlipMode);
+			this.cookies.set("nowPageNum_FlipMode" + this.book.uuid, this.nowPageNum_FlipMode);
 			this.cookies.set("FlipModeDefaultColor", this.model.color);
 			this.cookies.set("sketchFlipSecond", this.sketchFlipSecond);
 		},
-		changeRandomColor() {
+		randomBackgroundColor() {
 			let R = Math.ceil(Math.random() * 155) + 100;
 			let G = Math.ceil(Math.random() * 155) + 100;
 			let B = Math.ceil(Math.random() * 100) + 100;
@@ -488,133 +518,212 @@ export default defineComponent({
 		},
 		//事件修饰符: https://v3.cn.vuejs.org/guide/events.html#%E4%BA%8B%E4%BB%B6%E4%BF%AE%E9%A5%B0%E7%AC%A6
 		onMouseMove(e) {
-			// offsetX/Y获取到是触发点相对被触发dom的左上角距离
-			let offsetX = e.offsetX;
-			let offsetY = e.offsetY;
+			// // offsetX/Y获取到是触发点相对被触发dom的左上角距离
+			// let offsetX = e.offsetX;
+			// let offsetY = e.offsetY;
 			//根据ID获取元素
 			// let mangaDiv =document.getElementById("MangaMain")
 			//不用自己获取元素
-			let offsetWidth = e.currentTarget.offsetWidth;
-			let offsetHeight = e.currentTarget.offsetHeight;
-			// console.log("e.offsetX=" + offsetX, "e.offsetY=" + offsetY);
-			// console.log("e.offsetWidth=" + offsetWidth, "e.offsetHeight=" + offsetHeight);
-			var MinX = offsetWidth * 0.4;
-			var MaxX = offsetWidth * 0.6;
-			var MinY = offsetHeight * 0.4;
-			var MaxY = offsetHeight * 0.6;
-			if (offsetX > MinX && offsetX < MaxX && offsetY > MinY && offsetY < MaxY) {
+			// let offsetWidth = e.currentTarget.offsetWidth;
+			// let offsetHeight = e.currentTarget.offsetHeight;
+
+			let clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离，单位为px）
+			let clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离，单位为px）
+			//浏览器的视口，不包括工具栏和滚动条:
+			let innerWidth = window.innerWidth
+			let innerHeight = window.innerHeight
+
+			var MinX = innerWidth * 0.4;
+			var MaxX = innerWidth * 0.6;
+			var MinY = innerHeight * 0.4;
+			var MaxY = innerHeight * 0.6;
+			if (clickX > MinX && clickX < MaxX && clickY > MinY && clickY < MaxY) {
 				//设置区域;
 				e.currentTarget.style.cursor = "url(/images/SettingsOutline.png), pointer";
 			} else {
-				if (offsetX < offsetWidth * 0.5) {
-					//左边的翻页
-					e.currentTarget.style.cursor = "url(/images/ArrowLeft.png), pointer";
+				if (clickX < innerWidth * 0.5) {
+					//设置左边的鼠标指针
+					if (this.rightScreenToNextFlag_FlipMode && this.nowPageNum_FlipMode == 1) {
+						//右边翻下一页，且目前是第一页的时候，左边的鼠标指针，设置为禁止翻页
+						e.currentTarget.style.cursor = "url(/images/Prohibited28Filled.png), pointer";
+					} else if (!this.rightScreenToNextFlag_FlipMode && this.nowPageNum_FlipMode == this.book.all_page_num) {
+						//左边翻下一页，且目前是最后一页的时候，左边的鼠标指针，设置为禁止翻页
+						e.currentTarget.style.cursor = "url(/images/Prohibited28Filled.png), pointer";
+					} else {
+						//正常情况下，左边是向左的箭头
+						e.currentTarget.style.cursor = "url(/images/ArrowLeft.png), pointer";
+					}
 				} else {
-					//右边的翻页
-					e.currentTarget.style.cursor = "url(/images/ArrowRight.png), pointer";
+					//设置右边的鼠标指针
+					if (this.rightScreenToNextFlag_FlipMode && this.nowPageNum_FlipMode == this.book.all_page_num) {
+						//右边翻下一页，且目前是最后页的时候，右边的鼠标指针，设置为禁止翻页
+						e.currentTarget.style.cursor = "url(/images/Prohibited28Filled.png), pointer";
+					} else if (!this.rightScreenToNextFlag_FlipMode && this.nowPageNum_FlipMode == 1) {
+						//左边翻下一页，且目前是第一页的时候，右边的鼠标指针，设置为禁止翻页
+						e.currentTarget.style.cursor = "url(/images/Prohibited28Filled.png), pointer";
+					} else {
+						//正常情况下，右边是向右的箭头
+						e.currentTarget.style.cursor = "url(/images/ArrowRight.png), pointer";
+					}
 				}
 			}
 		},
 
 		//根据鼠标点击事件的位置，决定是左右翻页还是打开设置
 		onMouseClick(e) {
-			let offsetX = e.offsetX;
-			let offsetY = e.offsetY;
-			let offsetWidth = e.currentTarget.offsetWidth;
-			let offsetHeight = e.currentTarget.offsetHeight;
-			var MinX = offsetWidth * 0.4;
-			var MaxX = offsetWidth * 0.6;
-			var MinY = offsetHeight * 0.4;
-			var MaxY = offsetHeight * 0.6;
+			//元素自身的宽高，会有子元素问题
+			// let offsetX = e.offsetX;
+			// let offsetY = e.offsetY;
+			// let offsetWidth = e.currentTarget.offsetWidth;
+			// let offsetHeight = e.currentTarget.offsetHeight;
+
+			let clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离，单位为px）
+			let clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离，单位为px）
+			//浏览器的可视区域宽高，不包括工具栏和滚动条:
+			let availHeight = window.innerWidth
+			let availWidth = window.innerHeight
+			var MinX = availHeight * 0.4;
+			var MaxX = availHeight * 0.6;
+			var MinY = availWidth * 0.4;
+			var MaxY = availWidth * 0.6;
 			// console.log("鼠标点击：e.offsetX=" + offsetX, "e.offsetY=" + offsetY);
-			if (offsetX > MinX && offsetX < MaxX && offsetY > MinY && offsetY < MaxY) {
+			if (clickX > MinX && clickX < MaxX && clickY > MinY && clickY < MaxY) {
 				//点中了设置区域
 				this.drawerActivate("right");
 			} else {
-				//随机一下背景色，只是为了好玩
-				if (this.debugModeFlag) {
-					this.changeRandomColor();
-				}
+				// //随机一下背景色，只是为了好玩
+				// if (this.debugModeFlag) {
+				// 	this.randomBackgroundColor();
+				// }
 				//决定如何翻页
-				if (offsetX <= offsetWidth / 2.0) {
+				if (clickX <= availHeight / 2.0) {
 					//左边的翻页
-					if (this.useRightHalfScreen_FlipMode) {
-						this.flipPage(-1);
+					if (this.rightScreenToNextFlag_FlipMode) {
+						this.toPerviousPage();
 					} else {
-						this.flipPage(1);
+						this.toNextPage();
 					}
 				} else {
 					//右边的翻页
-					if (this.useRightHalfScreen_FlipMode) {
-						this.flipPage(1);
+					if (this.rightScreenToNextFlag_FlipMode) {
+						this.toNextPage();
 					} else {
-						this.flipPage(-1);
+						this.toPerviousPage();
 					}
 				}
 			}
 		},
-		setShowHeaderChange(value) {
-			console.log("value:" + value);
-			this.showHeaderFlag_FlipMode = value;
-			this.cookies.set("showHeaderFlag_FlipMode", value);
-			console.log(
-				"cookie设置完毕: showHeaderFlag_FlipMode=" +
-				this.cookies.get("showHeaderFlag_FlipMode")
-			);
+		toNextPage() {
+			//如果开启了自动合并模式，并且当前页应该被合并
+			if (this.autoDoublepage_FlipMode && this.checkMergedStatus_ByPageNum(this.nowPageNum_FlipMode)) {
+				if (this.nowPageNum_FlipMode < this.book.all_page_num - 1) {
+					this.flipPage(2);
+				} else {
+					this.flipPage(1);
+				}
+			} else {
+				this.flipPage(1);
+			}
 		},
-		setShowFooterFlagChange(value) {
-			console.log("value:" + value);
-			this.showFooterFlag_FlipMode = value;
-			this.cookies.set("showFooterFlag_FlipMode", value);
-			console.log(
-				"cookie设置完毕: showFooterFlag_FlipMode=" +
-				this.cookies.get("showFooterFlag_FlipMode")
-			);
-		},
-
-		setShowPageNumChange(value) {
-			console.log("value:" + value);
-			this.showPageNumFlag_FlipMode = value;
-			this.cookies.set("showPageNumFlag_FlipMode", value);
-			console.log(
-				"cookie设置完毕: showPageNumFlag_FlipMode=" +
-				this.cookies.get("showPageNumFlag_FlipMode")
-			);
-		},
-
-		setFlipScreenFlag(value) {
-			console.log("value:" + value);
-			this.useRightHalfScreen_FlipMode = value;
-			this.cookies.set("useRightHalfScreen_FlipMode", value);
-			console.log(
-				"cookie设置完毕: useRightHalfScreen_FlipMode=" +
-				this.cookies.get("useRightHalfScreen_FlipMode")
-			);
-		},
-
-		setSavePageNumFlag(value) {
-			console.log("value:" + value);
-			this.savePageNumFlag_FlipMode = value;
-			this.cookies.set("savePageNumFlag_FlipMode", value);
-			console.log(
-				"cookie设置完毕: savePageNumFlag_FlipMode=" +
-				this.cookies.get("savePageNumFlag_FlipMode")
-			);
+		toPerviousPage() {
+			//错误值
+			if (this.book.nowPageNum_FlipMode <= 1) {
+				console.log("Error toPerviousPage");
+				return;
+			}
+			//如果没有开启自动合并模式，或现在是第二页
+			if (this.book.nowPageNum_FlipMode == 2 || !this.autoDoublepage_FlipMode) {
+				this.flipPage(-1);
+				return
+			}
+			//如果前一页是双开叶
+			let pervIsDouble=this.checkImageIsDoublePage_byPageNum(this.nowPageNum_FlipMode - 2)
+			if (pervIsDouble) {
+				this.flipPage(-1);
+				return
+			}
+			//如果前前页是双开叶
+			let PervPervIsDouble=this.checkImageIsDoublePage_byPageNum(this.nowPageNum_FlipMode - 3)
+			if (PervPervIsDouble) {
+				this.flipPage(-1);
+				return
+			}
+			//都没return掉，那么前两张可以合并，减两页
+			this.flipPage(-2);
 		},
 
-		setDebugModeFlagFlag(value) {
-			console.log("value:" + value);
-			this.debugModeFlag = value;
-			this.cookies.set("debugModeFlag", value);
-			console.log("cookie设置完毕: debugModeFlag=" + this.cookies.get("debugModeFlag"));
+		//给一个页数，然后判断自动双页模式下，是否应该预读并合并显示下一页
+		checkMergedStatus_ByPageNum(pageNum) {
+			//如果没有开启自动双页模式，当然不需要
+			if (!this.autoDoublepage_FlipMode) {
+				return false;
+			}
+			// //预读下下张图片，不做任何判断，相当于手动的lazy load
+			// if (pageNum + 2 < this.book.all_page_num) {
+			// 	this.book.all_page_num
+			// 	let temp_image = new Image();
+			// 	temp_image.src = this.book.pages[pageNum + 2].url;
+			// }
+			//已经是最后一页了，显然不需要自动合并下一页
+			if (pageNum == this.book.all_page_num) {
+				return false;
+			}
+			//可能传入的错误值，打印到控制台
+			if (pageNum <= 0 || pageNum >= this.book.all_page_num) {
+				console.log("Error pageNum :" + pageNum);
+				return false;
+			}
+			//分析下一张漫画的宽高比,看是不是双开页
+			let next_page_is_double_page = this.checkImageIsDoublePage_byPageNum(pageNum+1);
+			//分析现在这张图片的宽高比,看是不是双开页
+			let now_page_is_double_page = this.checkImageIsDoublePage_byPageNum(pageNum);
+			//如果现在这张就是开页漫画，直接不用比了
+			if (now_page_is_double_page) {
+				return false;
+			} else if (next_page_is_double_page) {
+				//如果下一张漫画是开页，显然也没法合并过来
+				return false;
+			} else {
+				//前两个条件不满足，也就是说两边都是单页，可以合并显示
+				return true;
+			}
+		},
+		checkImageIsDoublePage_byPageNum(pageNum) {
+			let image = new Image();
+			image.src = this.book.pages[pageNum-1].url;
+			// 图片是否完全加载完成。
+			//https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLImageElement/complete
+			if (image.complete) {
+				if (image.width < image.height) {
+					return false;//宽小于高，是是竖着的，单页漫画
+				} else {
+					return true;//宽大于高，很可能是开页
+				}
+			} else {
+				//否则加载图片
+				let temp_flag = false;
+				image.onload = function () {
+					//是单页漫画
+					if (image.width < image.height) {
+						image.onload = null;	// 避免重复加载
+						temp_flag = false;//宽小于高，是是竖着的，单页漫画
+					} else {
+						//是双页漫画
+						image.onload = null;	// 避免重复加载
+						temp_flag = true;//宽大于高，很可能是开页
+					}
+				};
+				return temp_flag;
+			}
 		},
 
+		//翻页，其实不限页数
 		flipPage: function (num) {
 			if (
-				this.now_page_FlipMode + num <= this.book.all_page_num &&
-				this.now_page_FlipMode + num >= 1
+				this.nowPageNum_FlipMode + num <= this.book.all_page_num &&
+				this.nowPageNum_FlipMode + num >= 1
 			) {
-				this.now_page_FlipMode = this.now_page_FlipMode + num;
+				this.nowPageNum_FlipMode = this.nowPageNum_FlipMode + num;
 			} else {
 				// console.log("无法继续翻，Num:" + num)
 				if (num > 0) {
@@ -623,19 +732,26 @@ export default defineComponent({
 					this.message.info(this.$t("hintFirstPage"));
 				}
 			}
-			if (this.savePageNumFlag_FlipMode) {
-				this.cookies.set("now_page_FlipMode" + this.book.uuid, this.now_page_FlipMode);
+			//保存页数
+			this.saveNowPageNumOnUpdate(this.nowPageNum_FlipMode);
+		},
+		//拖动进度条,或翻页的时候保存页数
+		saveNowPageNumOnUpdate(value) {
+			if (this.saveNowPageNumFlag_FlipMode) {
+				this.cookies.set("nowPageNum_FlipMode" + this.book.uuid, value);
 			}
 		},
+		//跳转到指定页数
 		toPage: function (num) {
 			if (num <= this.book.all_page_num && num >= 1) {
-				this.now_page_FlipMode = num;
+				this.nowPageNum_FlipMode = num;
 			}
-			if (this.savePageNumFlag_FlipMode) {
-				this.cookies.set("now_page_FlipMode" + this.book.uuid, this.now_page_FlipMode);
+			if (this.saveNowPageNumFlag_FlipMode) {
+				this.cookies.set("nowPageNum_FlipMode" + this.book.uuid, this.nowPageNum_FlipMode);
 			}
 			// console.log(num);
 		},
+
 		// 键盘事件
 		handleKeyup(event) {
 			const e = event || window.event || arguments.callee.caller.arguments[0];
@@ -667,12 +783,72 @@ export default defineComponent({
 			// console.log(e.keyCode);
 			// console.log(e.key);
 		},
-		//  滑轮事件
-		handleScroll() {
-			var e = document.body.scrollTop || document.documentElement.scrollTop;
-			if (!e) return;
-			// console.log(e);
+
+		setShowHeaderChange(value) {
+			console.log("value:" + value);
+			this.showHeaderFlag_FlipMode = value;
+			this.cookies.set("showHeaderFlag_FlipMode", value);
+			console.log(
+				"cookie设置完毕: showHeaderFlag_FlipMode=" +
+				this.cookies.get("showHeaderFlag_FlipMode")
+			);
 		},
+		setShowFooterFlagChange(value) {
+			console.log("value:" + value);
+			this.showFooterFlag_FlipMode = value;
+			this.cookies.set("showFooterFlag_FlipMode", value);
+			console.log(
+				"cookie设置完毕: showFooterFlag_FlipMode=" +
+				this.cookies.get("showFooterFlag_FlipMode")
+			);
+		},
+
+		setShowPageNumChange(value) {
+			console.log("value:" + value);
+			this.showPageHintFlag_FlipMode = value;
+			this.cookies.set("showPageHintFlag_FlipMode", value);
+			console.log(
+				"cookie设置完毕: showPageHintFlag_FlipMode=" +
+				this.cookies.get("showPageHintFlag_FlipMode")
+			);
+		},
+
+		setFlipScreenFlag(value) {
+			console.log("value:" + value);
+			this.rightScreenToNextFlag_FlipMode = value;
+			this.cookies.set("rightScreenToNextFlag_FlipMode", value);
+			console.log(
+				"cookie设置完毕: rightScreenToNextFlag_FlipMode=" +
+				this.cookies.get("rightScreenToNextFlag_FlipMode")
+			);
+		},
+
+		setSavePageNumFlag(value) {
+			console.log("value:" + value);
+			this.saveNowPageNumFlag_FlipMode = value;
+			this.cookies.set("saveNowPageNumFlag_FlipMode", value);
+			console.log(
+				"cookie设置完毕: saveNowPageNumFlag_FlipMode=" +
+				this.cookies.get("saveNowPageNumFlag_FlipMode")
+			);
+		},
+
+		setDebugModeFlag(value) {
+			console.log("value:" + value);
+			this.debugModeFlag = value;
+			this.cookies.set("debugModeFlag", value);
+			console.log("cookie设置完毕: debugModeFlag=" + this.cookies.get("debugModeFlag"));
+		},
+
+		setAutoDoublepage_FlipMode(value) {
+			console.log("value:" + value);
+			this.autoDoublepage_FlipMode = value;
+			this.cookies.set("autoDoublepage_FlipMode", value);
+			console.log("cookie设置完毕: autoDoublepage_FlipMode=" + this.cookies.get("autoDoublepage_FlipMode"));
+		},
+
+
+
 	},
 
 	computed: {
@@ -713,7 +889,7 @@ export default defineComponent({
 					this.$t("second");
 				return hintString;
 			} else {
-				return this.now_page_FlipMode + "/" + this.book.all_page_num;
+				return this.nowPageNum_FlipMode + "/" + this.book.all_page_num;
 			}
 		},
 		mangaAreaHeight() {
@@ -751,7 +927,7 @@ export default defineComponent({
 				Height = 100;
 			}
 			//与上面唯一的不同，减去素描提示的空间
-			if (this.showPageNumFlag_FlipMode) {
+			if (this.showPageHintFlag_FlipMode) {
 				if (this.nowTemplate == "sketch") {
 					Height = Height - 6;
 				} else {
@@ -820,7 +996,7 @@ export default defineComponent({
 	max-width: 100vw;
 	padding: 0px;
 	display: flex;
-	flex-direction: column;
+	flex-direction: row;
 	justify-content: center;
 	align-items: baseline;
 	user-select: none; /* 不可以被选中 */
@@ -828,20 +1004,29 @@ export default defineComponent({
 	-webkit-user-select: none; /* 谷歌 */
 }
 
-/* 漫画div中的图片*/
-.manga_area img {
+/* 漫画div中的图片div*/
+.manga_area_img_div {
+	width: 100vw;
+	height: v-bind(mangaAreaHeight);
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	margin: 0px;
+	border-radius: 3px;
+	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+/* 最后的一或两张图片*/
+.manga_area_img_div img {
 	/* max-height: inherit 继承 */
 	/* max-height: inherit; */
 	max-height: v-bind(mangaImageHeight);
 	max-width: 100vw;
-	margin: 0 auto; /* center */
+	margin: 0px; /* 两张图片之间不要留空间*/
 	padding: 0px;
-	left: 0; /* center */
-	right: 0; /* center */
 	background-color: #aaa;
-	padding: 0px;
-	border-radius: 3px;
-	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+
 	/* flex-grow: 100; */
 }
 

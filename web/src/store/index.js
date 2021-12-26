@@ -14,12 +14,12 @@ const store = createStore({
     now_page: 1,
     book: {
       name: "loading",
-      page_num: 1,
+      all_page_num: 1,
       pages: [
         {
           height: 500,
           width: 449,
-          url: "/images/error.jpg",
+          url: "/images/loading.jpg",
           class: "Vertical",
         },
       ],
