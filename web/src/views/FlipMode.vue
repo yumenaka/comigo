@@ -23,34 +23,13 @@
 			@mouseleave.stop="onMouseLeave"
 		>
 			<div class="manga_area_img_div">
-				<!-- 非自动拼合模式最简单，直接显示一张图就成了 -->
-				<img
-					v-if="!this.autoDoublepage_FlipMode"
-					v-bind:src="this.book.pages[nowPageNum_FlipMode - 1].url"
-				/>
+				<!-- 非自动拼合模式最简单，直接显示一张图 -->
+				<img v-bind:src="this.book.pages[nowPageNum - 1].url" />
 
-				<!-- 右手模式当前页，如果指定了自动拼合，右边可能显示拼合页 -->
-				<!-- v-if="nowPageNum_FlipMode <= this.book.all_page_num && nowPageNum_FlipMode >= 1" -->
+				<!-- 自动拼合模式当前页，如果开启自动拼合，右边可能显示拼合页 -->
 				<img
-					v-if="this.rightScreenToNextFlag_FlipMode && this.autoDoublepage_FlipMode"
-					v-bind:src="this.book.pages[nowPageNum_FlipMode - 1].url"
-				/>
-				<!-- 右手模式下一页，根据情况显示，自动拼合用 -->
-				<img
-					v-if="this.nowPageNum_FlipMode < book.all_page_num && this.rightScreenToNextFlag_FlipMode && this.autoDoublepage_FlipMode && !this.checkImageIsDoublePage_byPageNum(nowPageNum_FlipMode)&& !this.checkImageIsDoublePage_byPageNum(nowPageNum_FlipMode+1)"
-					v-bind:src="this.book.pages[nowPageNum_FlipMode].url"
-				/>
-
-				<!-- 左手模式下一页，根据情况显示，自动拼合用 -->
-				<img
-					v-if="this.nowPageNum_FlipMode < book.all_page_num && !this.rightScreenToNextFlag_FlipMode && this.autoDoublepage_FlipMode && !this.checkImageIsDoublePage_byPageNum(nowPageNum_FlipMode)&& !this.checkImageIsDoublePage_byPageNum(nowPageNum_FlipMode+1)"
-					v-bind:src="this.book.pages[nowPageNum_FlipMode].url"
-				/>
-				<!-- 左手模式当前页，如果指定了自动拼合，右边可能显示拼合页 -->
-				<!-- v-if="nowPageNum_FlipMode <= this.book.all_page_num && nowPageNum_FlipMode >= 1" -->
-				<img
-					v-if="!this.rightScreenToNextFlag_FlipMode && this.autoDoublepage_FlipMode"
-					v-bind:src="this.book.pages[nowPageNum_FlipMode - 1].url"
+					v-if="this.autoDoublepage_FlipMode && this.nowPageNum < book.all_page_num && this.nowAndNextPageIsSingle()"
+					v-bind:src="this.book.pages[nowPageNum].url"
 				/>
 			</div>
 
@@ -61,9 +40,9 @@
 		<div class="footer" v-if="this.showFooterFlag_FlipMode">
 			<!-- 右手模式用 ，底部滑动条 -->
 			<div v-if="this.rightScreenToNextFlag_FlipMode">
-				<span>{{ this.nowPageNum_FlipMode }}</span>
+				<span>{{ this.nowPageNum }}</span>
 				<n-slider
-					v-model:value="nowPageNum_FlipMode"
+					v-model:value="nowPageNum"
 					:max="this.book.all_page_num"
 					:min="1"
 					:step="1"
@@ -77,14 +56,14 @@
 				<span>{{ this.book.all_page_num }}</span>
 				<n-slider
 					reverse
-					v-model:value="nowPageNum_FlipMode"
+					v-model:value="nowPageNum"
 					:max="this.book.all_page_num"
 					:min="1"
 					:step="1"
 					:format-tooltip="(value) => `${value}`"
 					@update:value="this.saveNowPageNumOnUpdate"
 				/>
-				<span>{{ this.nowPageNum_FlipMode }}</span>
+				<span>{{ this.nowPageNum }}</span>
 			</div>
 		</div>
 	</div>
@@ -172,16 +151,11 @@
 
 		<!-- 开关：Debug，现在只会随机背景色 -->
 		<n-space>
-			<n-switch
-				size="large"
-				v-model:value="this.debugModeFlag"
-				@update:value="this.setDebugModeFlag"
-			>
+			<n-switch size="large" v-model:value="this.debugModeFlag" @update:value="this.setDebugModeFlag">
 				<template #checked>{{ $t("debugMode") }}</template>
 				<template #unchecked>{{ $t("debugMode") }}</template>
 			</n-switch>
 		</n-space>
-
 
 		<n-space v-if="this.debugModeFlag">
 			<n-switch
@@ -193,7 +167,6 @@
 				<template #unchecked>自动合并单双页</template>
 			</n-switch>
 		</n-space>
-
 
 		<!-- 分割线 -->
 		<n-divider v-if="this.nowTemplate == 'sketch'" />
@@ -307,11 +280,11 @@ export default defineComponent({
 			//是否是右半屏翻页
 			rightScreenToNextFlag_FlipMode: true,
 			//尝试拼合双叶
-			autoDoublepage_FlipMode: true,
+			autoDoublepage_FlipMode: false,
 			//是否保存当前页数
 			saveNowPageNumFlag_FlipMode: true,
 			//当前页数，注意语义，直接就是1开始的页数，不是数组下标，在pages数组当中用的时候需要-1
-			nowPageNum_FlipMode: 1,
+			nowPageNum: 1,
 			//素描模式标记
 			sketchModeFlag: false,
 			//是否显示素描提示
@@ -322,6 +295,9 @@ export default defineComponent({
 			sketchSecondCount: 0,
 			//计时器ID
 			interval: null,
+			nowPageIsDouble: false,
+			nextPageIsDouble: false,
+			nowAndNextPageIsSingleFlag: true,
 		};
 	},
 	//在选项API中使用 Vue 生命周期钩子：
@@ -403,20 +379,31 @@ export default defineComponent({
 		//界面有更新就会调用，随便乱放会引起难以调试的BUG
 	},
 	methods: {
+		nowAndNextPageIsSingle() {
+			this.nowPageIsDouble = this.checkImageIsDoublePage_byPageNum(this.nowPageNum);
+			this.nextPageIsDouble = this.checkImageIsDoublePage_byPageNum(this.nowPageNum + 1);
+			if (this.nowPageIsDouble || this.nextPageIsDouble) {
+				this.nowAndNextPageIsSingleFlag = false;
+				return false
+			} else {
+				this.nowAndNextPageIsSingleFlag = false;
+				return true
+			}
+		},
 		//根据书籍UUID，设定当前页数，因为需要取得远程书籍数据（this.book），所以延迟执行
 		setNowPageNumByCookie() {
 			if (this.saveNowPageNumFlag_FlipMode) {
-				let cookieValue = this.cookies.get("nowPageNum_FlipMode" + this.book.uuid);
+				let cookieValue = this.cookies.get("nowPageNum" + this.book.uuid);
 				if (cookieValue != null) {
 					let saveNum = Number(cookieValue);
 					if (!isNaN(saveNum)) {
-						this.nowPageNum_FlipMode = saveNum;
+						this.nowPageNum = saveNum;
 						// console.log("成功读取页数" + saveNum);
 					} else {
-						console.log("读取页数失败，this.nowPageNum_FlipMode=" + this.nowPageNum_FlipMode);
+						console.log("读取页数失败，this.nowPageNum=" + this.nowPageNum);
 					}
 				} else {
-					console.log("cookie里面没找到:" + "nowPageNum_FlipMode" + this.book.uuid);
+					console.log("cookie里面没找到:" + "nowPageNum" + this.book.uuid);
 				}
 			} else {
 				console.log("不读取页数，this.saveNowPageNumFlag_FlipMode=" + this.saveNowPageNumFlag_FlipMode);
@@ -476,7 +463,7 @@ export default defineComponent({
 			let nowSeconnd = this.sketchSecondCount % this.sketchFlipSecond;
 			// console.log("sketchSecondCount=" + this.sketchSecondCount + " nowSeconnd:" + nowSeconnd)
 			if (nowSeconnd == 0) {
-				if (this.nowPageNum_FlipMode < this.book.all_page_num) {
+				if (this.nowPageNum < this.book.all_page_num) {
 					this.flipPage(1);
 				} else {
 					this.toPage(1);
@@ -492,7 +479,7 @@ export default defineComponent({
 			this.cookies.set("rightScreenToNextFlag_FlipMode", this.rightScreenToNextFlag_FlipMode);
 			this.cookies.set("autoDoublepage_FlipMode", this.autoDoublepage_FlipMode);
 			this.cookies.set("saveNowPageNumFlag_FlipMode", this.saveNowPageNumFlag_FlipMode);
-			this.cookies.set("nowPageNum_FlipMode" + this.book.uuid, this.nowPageNum_FlipMode);
+			this.cookies.set("nowPageNum" + this.book.uuid, this.nowPageNum);
 			this.cookies.set("FlipModeDefaultColor", this.model.color);
 			this.cookies.set("sketchFlipSecond", this.sketchFlipSecond);
 		},
@@ -543,10 +530,10 @@ export default defineComponent({
 			} else {
 				if (clickX < innerWidth * 0.5) {
 					//设置左边的鼠标指针
-					if (this.rightScreenToNextFlag_FlipMode && this.nowPageNum_FlipMode == 1) {
+					if (this.rightScreenToNextFlag_FlipMode && this.nowPageNum == 1) {
 						//右边翻下一页，且目前是第一页的时候，左边的鼠标指针，设置为禁止翻页
 						e.currentTarget.style.cursor = "url(/images/Prohibited28Filled.png), pointer";
-					} else if (!this.rightScreenToNextFlag_FlipMode && this.nowPageNum_FlipMode == this.book.all_page_num) {
+					} else if (!this.rightScreenToNextFlag_FlipMode && this.nowPageNum == this.book.all_page_num) {
 						//左边翻下一页，且目前是最后一页的时候，左边的鼠标指针，设置为禁止翻页
 						e.currentTarget.style.cursor = "url(/images/Prohibited28Filled.png), pointer";
 					} else {
@@ -555,10 +542,10 @@ export default defineComponent({
 					}
 				} else {
 					//设置右边的鼠标指针
-					if (this.rightScreenToNextFlag_FlipMode && this.nowPageNum_FlipMode == this.book.all_page_num) {
+					if (this.rightScreenToNextFlag_FlipMode && this.nowPageNum == this.book.all_page_num) {
 						//右边翻下一页，且目前是最后页的时候，右边的鼠标指针，设置为禁止翻页
 						e.currentTarget.style.cursor = "url(/images/Prohibited28Filled.png), pointer";
-					} else if (!this.rightScreenToNextFlag_FlipMode && this.nowPageNum_FlipMode == 1) {
+					} else if (!this.rightScreenToNextFlag_FlipMode && this.nowPageNum == 1) {
 						//左边翻下一页，且目前是第一页的时候，右边的鼠标指针，设置为禁止翻页
 						e.currentTarget.style.cursor = "url(/images/Prohibited28Filled.png), pointer";
 					} else {
@@ -615,8 +602,8 @@ export default defineComponent({
 		},
 		toNextPage() {
 			//如果开启了自动合并模式，并且当前页应该被合并
-			if (this.autoDoublepage_FlipMode && this.checkMergedStatus_ByPageNum(this.nowPageNum_FlipMode)) {
-				if (this.nowPageNum_FlipMode < this.book.all_page_num - 1) {
+			if (this.autoDoublepage_FlipMode && this.checkMergedStatus_ByPageNum(this.nowPageNum)) {
+				if (this.nowPageNum < this.book.all_page_num - 1) {
 					this.flipPage(2);
 				} else {
 					this.flipPage(1);
@@ -627,23 +614,23 @@ export default defineComponent({
 		},
 		toPerviousPage() {
 			//错误值
-			if (this.book.nowPageNum_FlipMode <= 1) {
+			if (this.nowPageNum <= 1) {
 				console.log("Error toPerviousPage");
 				return;
 			}
 			//如果没有开启自动合并模式，或现在是第二页
-			if (this.book.nowPageNum_FlipMode == 2 || !this.autoDoublepage_FlipMode) {
+			if (this.nowPageNum == 2 || !this.autoDoublepage_FlipMode) {
 				this.flipPage(-1);
 				return
 			}
 			//如果前一页是双开叶
-			let pervIsDouble=this.checkImageIsDoublePage_byPageNum(this.nowPageNum_FlipMode - 2)
+			let pervIsDouble = this.checkImageIsDoublePage_byPageNum(this.nowPageNum - 2)
 			if (pervIsDouble) {
 				this.flipPage(-1);
 				return
 			}
 			//如果前前页是双开叶
-			let PervPervIsDouble=this.checkImageIsDoublePage_byPageNum(this.nowPageNum_FlipMode - 3)
+			let PervPervIsDouble = this.checkImageIsDoublePage_byPageNum(this.nowPageNum - 3)
 			if (PervPervIsDouble) {
 				this.flipPage(-1);
 				return
@@ -674,7 +661,7 @@ export default defineComponent({
 				return false;
 			}
 			//分析下一张漫画的宽高比,看是不是双开页
-			let next_page_is_double_page = this.checkImageIsDoublePage_byPageNum(pageNum+1);
+			let next_page_is_double_page = this.checkImageIsDoublePage_byPageNum(pageNum + 1);
 			//分析现在这张图片的宽高比,看是不是双开页
 			let now_page_is_double_page = this.checkImageIsDoublePage_byPageNum(pageNum);
 			//如果现在这张就是开页漫画，直接不用比了
@@ -689,15 +676,18 @@ export default defineComponent({
 			}
 		},
 		checkImageIsDoublePage_byPageNum(pageNum) {
+			if (pageNum <= 0 || pageNum > this.book.all_page_num) {
+				console.log("Error checkImageIsDoublePage_byPageNum:" + pageNum);
+			}
 			let image = new Image();
-			image.src = this.book.pages[pageNum-1].url;
+			image.src = this.book.pages[pageNum - 1].url;
 			// 图片是否完全加载完成。
 			//https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLImageElement/complete
 			if (image.complete) {
 				if (image.width < image.height) {
-					return false;//宽小于高，是是竖着的，单页漫画
+					return false;//宽小于高，竖着的，单页漫画
 				} else {
-					return true;//宽大于高，很可能是开页
+					return true;//宽大于高，是开页
 				}
 			} else {
 				//否则加载图片
@@ -720,10 +710,10 @@ export default defineComponent({
 		//翻页，其实不限页数
 		flipPage: function (num) {
 			if (
-				this.nowPageNum_FlipMode + num <= this.book.all_page_num &&
-				this.nowPageNum_FlipMode + num >= 1
+				this.nowPageNum + num <= this.book.all_page_num &&
+				this.nowPageNum + num >= 1
 			) {
-				this.nowPageNum_FlipMode = this.nowPageNum_FlipMode + num;
+				this.nowPageNum = this.nowPageNum + num;
 			} else {
 				// console.log("无法继续翻，Num:" + num)
 				if (num > 0) {
@@ -733,21 +723,21 @@ export default defineComponent({
 				}
 			}
 			//保存页数
-			this.saveNowPageNumOnUpdate(this.nowPageNum_FlipMode);
+			this.saveNowPageNumOnUpdate(this.nowPageNum);
 		},
 		//拖动进度条,或翻页的时候保存页数
 		saveNowPageNumOnUpdate(value) {
 			if (this.saveNowPageNumFlag_FlipMode) {
-				this.cookies.set("nowPageNum_FlipMode" + this.book.uuid, value);
+				this.cookies.set("nowPageNum" + this.book.uuid, value);
 			}
 		},
 		//跳转到指定页数
 		toPage: function (num) {
 			if (num <= this.book.all_page_num && num >= 1) {
-				this.nowPageNum_FlipMode = num;
+				this.nowPageNum = num;
 			}
 			if (this.saveNowPageNumFlag_FlipMode) {
-				this.cookies.set("nowPageNum_FlipMode" + this.book.uuid, this.nowPageNum_FlipMode);
+				this.cookies.set("nowPageNum" + this.book.uuid, this.nowPageNum);
 			}
 			// console.log(num);
 		},
@@ -836,6 +826,10 @@ export default defineComponent({
 		setDebugModeFlag(value) {
 			console.log("value:" + value);
 			this.debugModeFlag = value;
+			//关闭Debug模式的时候顺便也关上“自动合并单双页”的功能（因为还有BUG）
+			if (value == false) {
+				this.autoDoublepage_FlipMode = false;
+			}
 			this.cookies.set("debugModeFlag", value);
 			console.log("cookie设置完毕: debugModeFlag=" + this.cookies.get("debugModeFlag"));
 		},
@@ -846,9 +840,6 @@ export default defineComponent({
 			this.cookies.set("autoDoublepage_FlipMode", value);
 			console.log("cookie设置完毕: autoDoublepage_FlipMode=" + this.cookies.get("autoDoublepage_FlipMode"));
 		},
-
-
-
 	},
 
 	computed: {
@@ -889,7 +880,7 @@ export default defineComponent({
 					this.$t("second");
 				return hintString;
 			} else {
-				return this.nowPageNum_FlipMode + "/" + this.book.all_page_num;
+				return this.nowPageNum + "/" + this.book.all_page_num;
 			}
 		},
 		mangaAreaHeight() {
@@ -951,6 +942,13 @@ export default defineComponent({
 				return "16px";
 			}
 		},
+		get_flex_direction() {
+			if (this.rightScreenToNextFlag_FlipMode == true) {
+				return "row"
+			} else {
+				return "row-reverse"
+			}
+		},
 	},
 });
 </script>
@@ -1009,7 +1007,7 @@ export default defineComponent({
 	width: 100vw;
 	height: v-bind(mangaAreaHeight);
 	display: flex;
-	flex-direction: row;
+	flex-direction: v-bind(get_flex_direction);
 	justify-content: center;
 	align-items: center;
 	margin: 0px;
