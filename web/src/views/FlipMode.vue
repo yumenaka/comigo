@@ -730,6 +730,13 @@ export default defineComponent({
 				console.log("Error checkImageIsDoublePage_byPageNum:" + pageNum);
 				return;
 			}
+
+			if (this.book.pages[pageNum - 1].image_type=="SinglePage"){
+				return false;
+			}
+			if (this.book.pages[pageNum - 1].image_type=="DoublePage"){
+				return true;
+			}
 			let image = new Image();
 			let temp_flag = false;//返回结果用
 			image.src = this.book.pages[pageNum - 1].url;
