@@ -61,7 +61,7 @@ func init() {
 	//文件搜索深度
 	rootCmd.PersistentFlags().IntVarP(&common.Config.MaxDepth, "max-depth", "m", 2, locale.GetString("MAX_DEPTH"))
 	////服务器解析分辨率
-	rootCmd.PersistentFlags().BoolVar(&common.Config.CheckImage, "check-image", true, locale.GetString("CHECK_IMAGE"))
+	rootCmd.PersistentFlags().BoolVar(&common.Config.CheckImage, "check-image", false, locale.GetString("CHECK_IMAGE"))
 	//本地Host名
 	rootCmd.PersistentFlags().StringVar(&common.Config.Host, "host", "", locale.GetString("LOCAL_HOST"))
 	//打印所有可用网卡ip
@@ -93,7 +93,7 @@ func init() {
 	//frpc remote_port
 	rootCmd.PersistentFlags().IntVar(&common.Config.FrpConfig.RemotePort, "frps-remote-port", 50000, locale.GetString("FRP_REMOTE_PORT"))
 	//输出log文件
-	rootCmd.PersistentFlags().BoolVar(&common.Config.LogToFile, "log", true, locale.GetString("LOG_TO_FILE"))
+	rootCmd.PersistentFlags().BoolVar(&common.Config.LogToFile, "log", false, locale.GetString("LOG_TO_FILE"))
 	//默认web模板
 	//rootCmd.PersistentFlags().StringVarP(&common.Config.Template, "template", "t", "scroll", locale.GetString("TEMPLATE"))
 	//sketch模式的倒计时秒数

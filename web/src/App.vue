@@ -52,7 +52,7 @@ export default defineComponent({
 
   methods: {
     OnSetTemplate(value) {
-      this.cookies.set("nowTemplate", value);
+      localStorage.setItem("nowTemplate", value);
       this.selectTemplate = value;
     },
     getNumber: function (number) {
@@ -69,13 +69,13 @@ export default defineComponent({
       return this.$store.state.setting;
     },
     getDefaultTemplate: function () {
-      var localValue = this.cookies.get("nowTemplate");
+      var localValue = localStorage.getItem("nowTemplate");
       if (localValue !== null) {
         return localValue;
       }
       //不管服务器设置，完全按照本地值来
       // if (this.setting.template) {
-      //   this.cookies.set("nowTemplate", this.setting.template)
+      //   localStorage.setItem("nowTemplate", this.setting.template)
       //   return this.setting.template;
       // }
       return "scroll";

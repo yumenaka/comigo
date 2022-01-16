@@ -70,8 +70,8 @@ func ParseCommands(args []string) {
 		common.ReadingBook = common.BookList[0]
 	}
 	//解压图片，分析分辨率（并发）
-	var wg sync.WaitGroup
 	if common.Config.CheckImage {
+		var wg sync.WaitGroup
 		wg.Add(1)
 		go func() {
 			err := common.InitReadingBook()
@@ -194,10 +194,10 @@ func StartWebServer() {
 	}
 	//webp反向代理
 	if common.Config.EnableWebpServer {
-		webpError := common.StartWebPServer(common.WebImagePath+"/webp_config.json", common.WebImagePath, common.ComigoCacheFilePath+"/webp", common.Config.Port+1)
+		webpError := common.StartWebPServer(common.CacheFilePath+"/webp_config.json", common.ReadingBook.ExtractPath, common.CacheFilePath+"/webp", common.Config.Port+1)
 		if webpError != nil {
 			fmt.Println(locale.GetString("webp_server_error"), webpError.Error())
-			engine.Static("/cache", common.WebImagePath)
+			engine.Static("/cache", common.CacheFilePath)
 		} else {
 			fmt.Println(locale.GetString("webp_server_start"))
 			engine.Use(reverse_proxy.ReverseProxyHandle("/cache", reverse_proxy.ReverseProxyOptions{
@@ -208,7 +208,7 @@ func StartWebServer() {
 		}
 	} else {
 		//具体的图片文件
-		engine.Static("/cache", common.WebImagePath)
+		engine.Static("/cache", common.CacheFilePath)
 		//直接建立一个zipfs，但非UTF文件有编码问题，待改进
 		//ext := path.Ext(common.ReadingBook.FilePath)
 		//if ext == ".zip" {
@@ -219,7 +219,7 @@ func StartWebServer() {
 		//	engine.StaticFS("/cache", http.FS(fsys))
 		//} else {
 		//	//图片目录
-		//	engine.Static("/cache", common.WebImagePath)
+		//	engine.Static("/cache", common.ExtractPath)
 		//}
 	}
 	//cmd打印链接二维码
@@ -234,7 +234,7 @@ func StartWebServer() {
 				common.Config.FrpConfig.RemotePort = common.Config.Port
 			}
 		}
-		frpcError := common.StartFrpC(common.ComigoCacheFilePath)
+		frpcError := common.StartFrpC(common.CacheFilePath)
 		if frpcError != nil {
 			fmt.Println(locale.GetString("frpc_server_error"), frpcError.Error())
 		} else {

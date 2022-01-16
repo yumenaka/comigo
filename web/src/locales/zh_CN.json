@@ -29,5 +29,7 @@
   "hour": "小时",
   "pageTurningSeconds": "翻页间隔:",
   "startSketchMessage": "开始倒计时速写，祝你心情愉快。",
-  "goodjob_and_byebye": "做得不错，再见~"
+  "goodjob_and_byebye": "做得不错，再见~",
+  "simpleDoublePage": "合并双页",
+  "autoDoublePage": "合并双页（beta）"
 }

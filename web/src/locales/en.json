@@ -29,5 +29,7 @@
   "hour": "hour",
   "pageTurningSeconds": "interval: ",
   "startSketchMessage": "The countdown begins, Have a nice day.",
-  "goodjob_and_byebye": "Goodjob,bye."
+  "goodjob_and_byebye": "Goodjob,bye.",
+  "simpleDoublePage": "DoublePage",
+  "autoDoublePage": "DoublePage（beta）"
 }

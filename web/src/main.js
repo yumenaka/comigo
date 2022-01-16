@@ -7,8 +7,7 @@ import store from "@/store"; //VueX
 // import VueCookies from "vue3-cookies";
 import VueLazyLoad from "vue3-lazyload";
 import i18n from '@/locales'
-
-// 以后后端改成 /api/book/:id的形式
+// 后端改成 /api/book/:id的形式
 axios.defaults.baseURL = "/api"
 
 // createApp(App).use(store).use(router).use(VueAxios,axios).mount('#app')
@@ -27,11 +26,11 @@ app.use(router);
 app.use(VueLazyLoad, {
     //懒加载相关设置
     //https://www.cnblogs.com/niuzijie/p/13703710.html
-    preLoad: 1.5,//预加载高度比例,默认1.3
+    preLoad: 1.9,//预加载高度比例,默认1.3
     loading: "/images/loading.jpg",
     error: "/images/error.jpg",
     attempt: 4,//尝试加载图片数量，默认3
-    observerOptions: { rootMargin: '1200px', threshold: 0.1},
+    observerOptions: { rootMargin: '200px', threshold: 0.1},
     lifecycle: {
         loading: (el) => {
             el.setAttribute("class", "LoadingImage");

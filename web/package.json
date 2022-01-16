@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "axios": "^0.24.0",
-    "core-js": "^3.6.5",
+    "core-js": "^3.20.3",
     "vue": "^3.0.0",
     "vue-axios": "^3.4.0",
     "vue-i18n": "^9.2.0-beta.25",
@@ -29,6 +29,6 @@
     "babel-eslint": "^10.1.0",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^7.0.0",
-    "naive-ui": "^2.23.1"
+    "naive-ui": "^2.24.1"
   }
 }

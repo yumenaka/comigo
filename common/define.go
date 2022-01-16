@@ -3,7 +3,6 @@ package common
 import (
 	"errors"
 	"fmt"
-	"github.com/buckket/go-blurhash"
 	"github.com/cheggaaa/pb/v3"
 	"github.com/disintegration/imaging"
 	"github.com/mitchellh/go-homedir"
@@ -220,11 +219,10 @@ func haveKeyWord(checkString string, list []string) bool {
 var ReadingBook Book
 var BookList []Book
 var (
-	ComigoCacheFilePath string
-	WebImagePath        string
-	Version             = "v0.4.6"
-	SupportMediaType    = []string{".jpg", ".jpeg", ".JPEG", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp", ".webp", ".ico", ".heic", ".pdf", ".mp4", ".webm"}
-	SupportFileType     = [...]string{
+	CacheFilePath    string
+	Version          = "v0.4.6"
+	SupportMediaType = []string{".jpg", ".jpeg", ".JPEG", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp", ".webp", ".ico", ".heic", ".pdf", ".mp4", ".webm"}
+	SupportFileType  = [...]string{
 		".zip",
 		".tar",
 		".rar",
@@ -263,8 +261,8 @@ type Book struct {
 	Author          string      `json:"author"`
 	Title           string      `json:"title"`
 	FilePath        string      `json:"-"` //不要解析这个字段
+	ExtractPath     string      `json:"-"` //不要解析这个字段
 	AllPageNum      int         `json:"all_page_num"`
-	PageInfo        AllPageInfo `json:"pages"`
 	FileType        string      `json:"file_type"`
 	FileSize        int64       `json:"file_size"`
 	Modified        time.Time   `json:"modified_time"`
@@ -273,18 +271,19 @@ type Book struct {
 	ExtractNum      int         `json:"extract_num"`
 	ExtractComplete bool        `json:"extract_complete"`
 	ReadPercent     float64     `json:"read_percent"`
+	PageInfo        AllPageInfo `json:"pages"`
 }
 
 type SinglePageInfo struct {
-	ModeTime      time.Time `json:"-"` //不要解析这个字段
-	FileSize      int64     `json:"-"` //不要解析这个字段
-	Height        int       `json:"height"`
-	Width         int       `json:"width"`
-	Url           string    `json:"url"`
-	ImageFileName string    `json:"-"` //不要解析这个字段
-	ImageFilePATH string    `json:"-"` //不要解析这个字段
-	ImgType       string    `json:"image_type"`
-	Blurhash      string    `json:"blurhash"`
+	ModeTime          time.Time `json:"-"` //不要解析这个字段
+	FileSize          int64     `json:"-"` //不要解析这个字段
+	Height            int       `json:"height"`
+	Width             int       `json:"width"`
+	Url               string    `json:"url"` //远程用户读取图片的实际URL，为了适应特殊字符，经过一次转义
+	InArchiveName     string    `json:"-"`   //不要解析这个字段  书籍为压缩文件的时候，用于解压的压缩文件内文件路径
+	RealImageFilePATH string    `json:"-"`   //不要解析这个字段  书籍为文件夹的时候，实际图片的路径
+	ImgType           string    `json:"image_type"`
+	Blurhash          string    `json:"blurhash"`
 }
 
 // AllPageInfo Slice
@@ -297,14 +296,14 @@ func (s AllPageInfo) Len() int {
 // Less 按时间或URL，将图片排序
 func (s AllPageInfo) Less(i, j int) (less bool) {
 	//如何定义 s[i] < s[j]  根据文件名
-	numI, err1 := getNumberFromString(s[i].ImageFileName)
+	numI, err1 := getNumberFromString(s[i].InArchiveName)
 	if err1 != nil {
-		less = strings.Compare(s[i].ImageFileName, s[j].ImageFileName) > 0
+		less = strings.Compare(s[i].InArchiveName, s[j].InArchiveName) > 0
 		return less
 	}
-	numJ, err2 := getNumberFromString(s[j].ImageFileName)
+	numJ, err2 := getNumberFromString(s[j].InArchiveName)
 	if err2 != nil {
-		less = strings.Compare(s[i].ImageFileName, s[j].ImageFileName) > 0
+		less = strings.Compare(s[i].InArchiveName, s[j].InArchiveName) > 0
 		return less
 	}
 	//fmt.Println("numI:",numI)
@@ -440,7 +439,7 @@ func (b *Book) ScanAllImageGo() {
 
 func SetImageType(p *SinglePageInfo) {
 	err := p.GetImageSize()
-	//log.Println(locale.GetString("check_image_ing"), p.ImageFilePATH)
+	//log.Println(locale.GetString("check_image_ing"), p.RealImageFilePATH)
 	if err != nil {
 		log.Println(locale.GetString("check_image_error") + err.Error())
 	}
@@ -458,18 +457,20 @@ func SetImageType(p *SinglePageInfo) {
 // GetImageSize 获取图片分辨率
 func (i *SinglePageInfo) GetImageSize() (err error) {
 	var img image.Image
-	img, err = imaging.Open(i.ImageFilePATH)
+	img, err = imaging.Open(i.RealImageFilePATH)
 	if err != nil {
 		log.Printf(locale.GetString("check_image_error")+" %v\n", err)
 	} else {
 		i.Width = img.Bounds().Dx()
 		i.Height = img.Bounds().Dy()
-		str, err := blurhash.Encode(4, 3, img)
-		if err != nil {
-			// Handle errors
-			log.Printf(locale.GetString("check_image_error")+" %v\n", err)
-		}
-		i.Blurhash = str
+		//简单占位符，很耗费服务器资源，以后再研究。
+		////"github.com/buckket/go-blurhash"
+		//str, err := blurhash.Encode(4, 3, img)
+		//if err != nil {
+		//	// Handle errors
+		//	log.Printf(locale.GetString("check_image_error")+" %v\n", err)
+		//}
+		//i.Blurhash = str
 	}
 	return err
 }
@@ -498,17 +499,17 @@ func SetupCloseHander() {
 func InitReadingBook() (err error) {
 	//准备解压，设置图片文件夹
 	if ReadingBook.IsDir {
-		WebImagePath = ReadingBook.FilePath
+		ReadingBook.ExtractPath = ReadingBook.FilePath
 		ReadingBook.ExtractComplete = true
 		ReadingBook.ExtractNum = ReadingBook.AllPageNum
 	} else {
 		setTempDir()
-		WebImagePath = path.Join(ComigoCacheFilePath, ReadingBook.GetBookID()) //extraFolder
-		err = LsArchive(&ReadingBook)
-		if err != nil {
-			fmt.Println(locale.GetString("scan_archive_error"))
-			return err
-		}
+		ReadingBook.ExtractPath = path.Join(CacheFilePath, ReadingBook.GetBookID()) //extraFolder
+		//err = LsArchive(&ReadingBook)
+		//if err != nil {
+		//	fmt.Println(locale.GetString("scan_archive_error"))
+		//	return err
+		//}
 		err = UnArchive(&ReadingBook)
 		if err != nil {
 			fmt.Println(locale.GetString("un_archive_error"))
@@ -516,7 +517,7 @@ func InitReadingBook() (err error) {
 		}
 		ReadingBook.InitBook(ReadingBook.FilePath) //设置书名
 	}
-	//服务器分析图片，新版默认不做了
+	//服务器分析图片，新版默认不做
 	if Config.CheckImage {
 		ReadingBook.ScanAllImageGo() //扫描所有图片，取得分辨率信息，使用了协程
 	}
@@ -544,15 +545,15 @@ func InitReadingBook() (err error) {
 func setTempDir() {
 	//手动设置的临时文件夹
 	if Config.TempPATH != "" && tools.ChickExists(Config.TempPATH) && tools.ChickIsDir(Config.TempPATH) {
-		ComigoCacheFilePath = path.Join(Config.TempPATH)
+		CacheFilePath = path.Join(Config.TempPATH)
 	} else {
-		ComigoCacheFilePath = path.Join(os.TempDir(), "comigo_temp_files") //直接使用系统文件夹
+		CacheFilePath = path.Join(os.TempDir(), "comigo_temp_files") //直接使用系统文件夹
 	}
-	err := os.MkdirAll(ComigoCacheFilePath, os.ModePerm)
+	err := os.MkdirAll(CacheFilePath, os.ModePerm)
 	if err != nil {
 		println(locale.GetString("temp_folder_error"))
 	} else {
-		fmt.Println(locale.GetString("temp_folder_path") + ComigoCacheFilePath)
+		fmt.Println(locale.GetString("temp_folder_path") + CacheFilePath)
 	}
 }
 
@@ -574,7 +575,7 @@ func clearTempFilesOne(book *Book) {
 		}
 	}
 	if haveThisBook {
-		extractPath := path.Join(ComigoCacheFilePath, book.GetBookID())
+		extractPath := path.Join(CacheFilePath, book.GetBookID())
 		//避免删错文件,解压路径包含UUID，len不可能小于32
 		PathLen := len(extractPath)
 		if PathLen < 32 {

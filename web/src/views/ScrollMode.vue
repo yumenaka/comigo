@@ -21,8 +21,8 @@
 			@mousemove="onMouseMove"
 			@mouseleave="onMouseLeave"
 		>
-			<img v-lazy="page.url" v-bind:H="page.height" v-bind:W="page.width" v-bind:key="key" />
-			<div class="page_num" v-if="showPageNumFlag_ScrollMode">{{ key + 1 }}/{{ book.all_page_num }}</div>
+			<img v-lazy="page.url" v-bind:alt="key+1" v-bind:key="key" />
+			<div class="page_hint" v-if="showPageNumFlag_ScrollMode">{{ key + 1 }}/{{ book.all_page_num }}</div>
 		</div>
 
 		<Drawer
@@ -322,25 +322,25 @@ export default defineComponent({
 		this.imageMaxWidth = window.innerWidth;
 		//根据cookie初始化默认值,或初始化cookie值,cookie读取出来的都是字符串，不要直接用
 		//是否显示顶部页头
-		if (this.cookies.get("showHeaderFlag") === "true") {
+		if (localStorage.getItem("showHeaderFlag") === "true") {
 			this.showHeaderFlag = true;
-		} else if (this.cookies.get("showHeaderFlag") === "false") {
+		} else if (localStorage.getItem("showHeaderFlag") === "false") {
 			this.showHeaderFlag = false;
 		}
 		//console.log("读取cookie并初始化: showHeaderFlag=" + this.showHeaderFlag);
 
 		//是否显示页数
-		if (this.cookies.get("showPageNumFlag_ScrollMode") === "true") {
+		if (localStorage.getItem("showPageNumFlag_ScrollMode") === "true") {
 			this.showPageNumFlag_ScrollMode = true;
-		} else if (this.cookies.get("showPageNumFlag_ScrollMode") === "false") {
+		} else if (localStorage.getItem("showPageNumFlag_ScrollMode") === "false") {
 			this.showPageNumFlag_ScrollMode = false;
 		}
 		//console.log("读取cookie并初始化: showPageNumFlag_ScrollMode=" + this.showPageNumFlag_ScrollMode);
 
 		//宽度是否使用百分比
-		if (this.cookies.get("imageWidth_usePercentFlag") === "true") {
+		if (localStorage.getItem("imageWidth_usePercentFlag") === "true") {
 			this.imageWidth_usePercentFlag = true;
-		} else if (this.cookies.get("imageWidth_usePercentFlag") === "false") {
+		} else if (localStorage.getItem("imageWidth_usePercentFlag") === "false") {
 			this.imageWidth_usePercentFlag = false;
 		}
 
@@ -348,37 +348,37 @@ export default defineComponent({
 		// NaN不能通过相等操作符（== 和 ===）来判断
 
 		//漫画页宽度，Percent
-		if (this.cookies.get("singlePageWidth_Percent") != null) {
-			let saveNum = Number(this.cookies.get("singlePageWidth_Percent"));
+		if (localStorage.getItem("singlePageWidth_Percent") != null) {
+			let saveNum = Number(localStorage.getItem("singlePageWidth_Percent"));
 			if (!isNaN(saveNum)) {
 				this.singlePageWidth_Percent = saveNum;
 			}
 		}
 
-		if (this.cookies.get("doublePageWidth_Percent") != null) {
-			let saveNum = Number(this.cookies.get("doublePageWidth_Percent"));
+		if (localStorage.getItem("doublePageWidth_Percent") != null) {
+			let saveNum = Number(localStorage.getItem("doublePageWidth_Percent"));
 			if (!isNaN(saveNum)) {
 				this.doublePageWidth_Percent = saveNum;
 			}
 		}
 
 		//漫画页宽度，PX
-		if (this.cookies.get("singlePageWidth_PX") != null) {
-			let saveNum = Number(this.cookies.get("singlePageWidth_PX"));
+		if (localStorage.getItem("singlePageWidth_PX") != null) {
+			let saveNum = Number(localStorage.getItem("singlePageWidth_PX"));
 			if (!isNaN(saveNum)) {
 				this.singlePageWidth_PX = saveNum;
 			}
 		}
-		if (this.cookies.get("doublePageWidth_PX") != null) {
-			let saveNum = Number(this.cookies.get("doublePageWidth_PX"));
+		if (localStorage.getItem("doublePageWidth_PX") != null) {
+			let saveNum = Number(localStorage.getItem("doublePageWidth_PX"));
 			if (!isNaN(saveNum)) {
 				this.doublePageWidth_PX = saveNum;
 			}
 		}
 
 		//当前颜色
-		if (this.cookies.get("ScrollModeDefaultColor") != null) {
-			this.model.color = this.cookies.get("ScrollModeDefaultColor");
+		if (localStorage.getItem("ScrollModeDefaultColor") != null) {
+			this.model.color = localStorage.getItem("ScrollModeDefaultColor");
 		}
 
 	},
@@ -389,17 +389,16 @@ export default defineComponent({
 	},
 	onMounted() {
 		//console.log('mounted in the composition api!')
-
 		this.isLandscapeMode = this.inLandscapeModeCheck();
 		this.isPortraitMode = !this.inLandscapeModeCheck();
 		// https://v3.cn.vuejs.org/api/options-lifecycle-hooks.html#beforemount
 		this.$nextTick(function () {
-			// 仅在整个视图都被渲染之后才会运行的代码
+			//视图渲染之后运行的代码
 		})
 	},
 	//卸载前
 	beforeUnmount() {
-		// 组件销毁前，销毁监听事件
+		//组件销毁前，销毁监听事件
 		window.removeEventListener("scroll", this.onScroll);
 		window.removeEventListener('resize', this.onResize)
 	},
@@ -413,7 +412,7 @@ export default defineComponent({
 		drawerDeactivate() {
 			this.drawerActive = false
 		},
-		//TODO
+		//开始素描模式
 		startSketchMode() {
 			this.$emit("setTemplate", "sketch");
 		},
@@ -424,32 +423,32 @@ export default defineComponent({
 		//如果在一个组件上使用了 v-model:xxx，应该使用 @update:xxx  https://www.naiveui.com/zh-CN/os-theme/docs/common-issues
 		saveConfigToCookie() {
 			// 储存cookie
-			this.cookies.set("showHeaderFlag", this.showHeaderFlag);
-			this.cookies.set("showPageNumFlag_ScrollMode", this.showPageNumFlag_ScrollMode);
-			this.cookies.set("imageWidth_usePercentFlag", this.imageWidth_usePercentFlag);
-			this.cookies.set("singlePageWidth_Percent", this.singlePageWidth_Percent);
-			this.cookies.set("doublePageWidth_Percent", this.doublePageWidth_Percent);
-			this.cookies.set("singlePageWidth_PX", this.singlePageWidth_PX);
-			this.cookies.set("doublePageWidth_PX", this.doublePageWidth_PX);
-			this.cookies.set("ScrollModeDefaultColor", this.model.color);
+			localStorage.setItem("showHeaderFlag", this.showHeaderFlag);
+			localStorage.setItem("showPageNumFlag_ScrollMode", this.showPageNumFlag_ScrollMode);
+			localStorage.setItem("imageWidth_usePercentFlag", this.imageWidth_usePercentFlag);
+			localStorage.setItem("singlePageWidth_Percent", this.singlePageWidth_Percent);
+			localStorage.setItem("doublePageWidth_Percent", this.doublePageWidth_Percent);
+			localStorage.setItem("singlePageWidth_PX", this.singlePageWidth_PX);
+			localStorage.setItem("doublePageWidth_PX", this.doublePageWidth_PX);
+			localStorage.setItem("ScrollModeDefaultColor", this.model.color);
 		},
 		setShowHeaderChange(value) {
 			console.log("value:" + value);
 			this.showHeaderFlag = value;
-			this.cookies.set("showHeaderFlag", value);
-			console.log("cookie设置完毕: showHeaderFlag=" + this.cookies.get("showHeaderFlag"));
+			localStorage.setItem("showHeaderFlag", value);
+			console.log("cookie设置完毕: showHeaderFlag=" + localStorage.getItem("showHeaderFlag"));
 		},
 		setShowPageNumChange(value) {
 			console.log("value:" + value);
 			this.showPageNumFlag_ScrollMode = value;
-			this.cookies.set("showPageNumFlag_ScrollMode", value);
-			console.log("cookie设置完毕: showPageNumFlag_ScrollMode=" + this.cookies.get("showPageNumFlag_ScrollMode"));
+			localStorage.setItem("showPageNumFlag_ScrollMode", value);
+			console.log("cookie设置完毕: showPageNumFlag_ScrollMode=" + localStorage.getItem("showPageNumFlag_ScrollMode"));
 		},
 
 		setImageWidthUsePercentFlag(value) {
 			console.log("value:" + value);
 			this.imageWidth_usePercentFlag = value;
-			this.cookies.set("imageWidth_usePercentFlag", value);
+			localStorage.setItem("imageWidth_usePercentFlag", value);
 			console.log("cookie设置完毕: imageWidth_usePercentFlag=" + this.imageWidth_usePercentFlag);
 		},
 
@@ -473,26 +472,14 @@ export default defineComponent({
 		},
 		//页面滚动的时候改变各种值
 		onScroll() {
-			var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-			if (scrollTop > this.scrollTopSave) {
-				this.scrollDownFlag = true
-				// console.log("下滚中，距离", scrollTop);
-			} else {
-				this.scrollDownFlag = false
-				// console.log("上滚中，距离", scrollTop);
-			}
+      let scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+      this.scrollDownFlag = scrollTop > this.scrollTopSave;
 			//防手抖，小于一定数值状态就不变
-			var step = Math.abs(this.scrollTopSave - scrollTop)
-			// console.log("step:", step);
+      let step = Math.abs(this.scrollTopSave - scrollTop);
+      // console.log("step:", step);
 			this.scrollTopSave = scrollTop
 			if (step > 5) {
-				if (scrollTop > 400 && !this.scrollDownFlag) {
-					//页面高度大于400，且正在上滚的时候显示按钮
-					this.showBackTopFlag = true
-				} else {
-					//页面高度小于200执行操作
-					this.showBackTopFlag = false
-				}
+				this.showBackTopFlag = scrollTop > 400 && !this.scrollDownFlag;
 			}
 		},
 		//获取鼠标位置，决定是否打开设置面板
@@ -500,12 +487,12 @@ export default defineComponent({
 			this.clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离，单位为px）
 			this.clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离，单位为px）
 			//浏览器的视口，不包括工具栏和滚动条:
-			var availHeight = window.innerWidth
-			var availWidth = window.innerHeight
-			var MinX = availHeight * 0.37
-			var MaxX = availHeight * 0.65
-			var MinY = availWidth * 0.37
-			var MaxY = availWidth * 0.65
+			let innerWidth = window.innerWidth
+			let innerHeight = window.innerHeight
+			let MinX = innerWidth * 0.4
+			let MaxX = innerWidth * 0.6
+			let MinY = innerHeight * 0.4
+			let MaxY = innerHeight * 0.6
 			if ((this.clickX > MinX && this.clickX < MaxX) && (this.clickY > MinY && this.clickY < MaxY)) {
 				//alert("点中了设置区域！")
 				//console.log("点中了设置区域！");
@@ -521,12 +508,12 @@ export default defineComponent({
 			this.clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离，单位为px）
 			this.clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离，单位为px）
 			//浏览器的视口，不包括工具栏和滚动条:
-			var availHeight = window.innerWidth
-			var availWidth = window.innerHeight
-			var MinX = availHeight * 0.37
-			var MaxX = availHeight * 0.65
-			var MinY = availWidth * 0.37
-			var MaxY = availWidth * 0.65
+			let innerWidth = window.innerWidth
+      let innerHeight = window.innerHeight
+      let MinX = innerWidth * 0.4
+      let MaxX = innerWidth * 0.6
+      let MinY = innerHeight * 0.4
+      let MaxY = innerHeight * 0.6
 			if ((this.clickX > MinX && this.clickX < MaxX) && (this.clickY > MinY && this.clickY < MaxY)) {
 				//console.log("在设置区域！");
 				e.currentTarget.style.cursor = 'url(/images/SettingsOutline.png), pointer';
@@ -540,9 +527,9 @@ export default defineComponent({
 		},
 
 		scrollToTop(scrollDuration) {
-			var scrollStep = -window.scrollY / (scrollDuration / 15),
+			let scrollStep = -window.scrollY / (scrollDuration / 15),
 				scrollInterval = setInterval(function () {
-					if (window.scrollY != 0) {
+					if (window.scrollY !== 0) {
 						window.scrollBy(0, scrollStep);
 					}
 					else clearInterval(scrollInterval);
@@ -559,12 +546,8 @@ export default defineComponent({
 			// var aspectRatio = document.documentElement.clientWidth / document.documentElement.clientHeight
 			this.aspectRatio = window.innerWidth / window.innerHeight
 			// console.log("aspectRatio=" + this.aspectRatio);
-			// 为了半屏的时候更方便，阈值是正方形
-			if (this.aspectRatio > (19 / 19)) {
-				return true
-			} else {
-				return false
-			}
+			// 为了测试方便，阈值是正方形
+			return this.aspectRatio > (19 / 19);
 		},
 	},
 
@@ -582,7 +565,6 @@ export default defineComponent({
 			} else {
 				return this.doublePageWidth_PX + 'px';
 			}
-
 		},
 		sPWP() {
 			if (this.imageWidth_usePercentFlag) {
@@ -620,13 +602,18 @@ export default defineComponent({
 .manga img {
 	margin: auto;
 	/* object-fit: scale-down; */
-	padding-top: 3px;
-	padding-bottom: 3px;
-	padding-right: 0px;
-	padding-left: 0px;
-	border-radius: 7px;
+  padding: 3px 0px;
+  border-radius: 7px;
 	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
+
+.page_hint{
+	/* 文字颜色 */
+	color: #7e6e6e;
+	/* 文字阴影：https://www.w3school.com.cn/css/css3_shadows.asp*/
+	text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+}
+
 
 .LoadingImage {
 	width: 90vw;

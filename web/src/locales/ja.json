@@ -29,5 +29,7 @@
   "hour": "時間",
   "pageTurningSeconds": "ページをめくる秒数:",
   "startSketchMessage": "クロッキーが始まりました、良い一日を。",
-  "goodjob_and_byebye": "お疲れ様でした、バイバイ。"
+  "goodjob_and_byebye": "お疲れ様でした、バイバイ。",
+  "simpleDoublePage": "ページ合併",
+  "autoDoublePage": "ページ合併（beta）"
 }
