@@ -191,11 +191,11 @@
 		</n-space>
 
 		<!-- 分割线 -->
-		<n-divider v-if="this.nowTemplate === 'sketch'" />
+		<n-divider v-if="this.nowTemplate == 'sketch'" />
 		<!-- 自动翻页秒数 -->
 		<!-- 数字输入% -->
 		<n-input-number
-			v-if="this.nowTemplate === 'sketch'"
+			v-if="this.nowTemplate == 'sketch'"
 			size="small"
 			:show-button="false"
 			v-model:value="this.sketchFlipSecond"
@@ -209,7 +209,7 @@
 		</n-input-number>
 		<!-- 滑动选择% -->
 		<n-slider
-			v-if="this.nowTemplate === 'sketch'"
+			v-if="this.nowTemplate == 'sketch'"
 			v-model:value="this.sketchFlipSecond"
 			:step="1"
 			:max="120"
@@ -300,8 +300,8 @@ export default defineComponent({
 			showHeaderFlag_FlipMode: true,
 			//是否显示页脚
 			showFooterFlag_FlipMode: true,
-			//是否是右半屏翻页（从右到左）?默认是日本漫画，所以默认从左到右
-			rightToLeftFlag: false,
+			//是否是右半屏翻页（从右到左）?日本漫画从左到右
+			rightToLeftFlag: true,
 			//简单拼合双叶
 			simpleDoublePageModeFlag: false,
 			//自动拼合双叶，效果不太好
@@ -331,51 +331,51 @@ export default defineComponent({
 		// https://www.developers.pub/wiki/1006381/1013545
 		// https://developer.mozilla.org/zh-CN/docs/Web/API/Storage/setItem
 		//一个域名下存放的cookie的个数有限制，不同的浏览器存放的个数不一样,一般为20个。因为不需要上传，使用localStorage（本地存储）存储在浏览器，永不过期。
-		if (localStorage.getItem("debugModeFlag") === "true") {
+		if (localStorage.getItem("debugModeFlag") == "true") {
 			this.debugModeFlag = true;
-		} else if (localStorage.getItem("debugModeFlag") === "false") {
+		} else if (localStorage.getItem("debugModeFlag") == "false") {
 			this.debugModeFlag = false;
 		}
 		//是否显示标题
-		if (localStorage.getItem("showHeaderFlag_FlipMode") === "true") {
+		if (localStorage.getItem("showHeaderFlag_FlipMode") == "true") {
 			this.showHeaderFlag_FlipMode = true;
-		} else if (localStorage.getItem("showHeaderFlag_FlipMode") === "false") {
+		} else if (localStorage.getItem("showHeaderFlag_FlipMode") == "false") {
 			this.showHeaderFlag_FlipMode = false;
 		}
 		//是否显示页脚
-		if (localStorage.getItem("showFooterFlag_FlipMode_FlipMode") === "true") {
+		if (localStorage.getItem("showFooterFlag_FlipMode_FlipMode") == "true") {
 			this.showFooterFlag_FlipMode = true;
-		} else if (localStorage.getItem("showFooterFlag_FlipMode_FlipMode") === "false") {
+		} else if (localStorage.getItem("showFooterFlag_FlipMode_FlipMode") == "false") {
 			this.showFooterFlag_FlipMode = false;
 		}
 		//是否显示页数
-		if (localStorage.getItem("showPageHintFlag_FlipMode") === "true") {
+		if (localStorage.getItem("showPageHintFlag_FlipMode") == "true") {
 			this.showPageHintFlag_FlipMode = true;
-		} else if (localStorage.getItem("showPageHintFlag_FlipMode") === "false") {
+		} else if (localStorage.getItem("showPageHintFlag_FlipMode") == "false") {
 			this.showPageHintFlag_FlipMode = false;
 		}
 		//翻页方向、是否用右半屏翻页
-		if (localStorage.getItem("rightToLeftFlag") === "true") {
+		if (localStorage.getItem("rightToLeftFlag") == "true") {
 			this.rightToLeftFlag = true;
-		} else if (localStorage.getItem("rightToLeftFlag") === "false") {
+		} else if (localStorage.getItem("rightToLeftFlag") == "false") {
 			this.rightToLeftFlag = false;
 		}
 		//简单合并单页
-		if (localStorage.getItem("simpleDoublePageModeFlag") === "true") {
+		if (localStorage.getItem("simpleDoublePageModeFlag") == "true") {
 			this.simpleDoublePageModeFlag = true;
-		} else if (localStorage.getItem("simpleDoublePageModeFlag") === "false") {
+		} else if (localStorage.getItem("simpleDoublePageModeFlag") == "false") {
 			this.simpleDoublePageModeFlag = false;
 		}
 		//自动合并单页
-		if (localStorage.getItem("autoDoublePageModeFlag") === "true") {
+		if (localStorage.getItem("autoDoublePageModeFlag") == "true") {
 			this.autoDoublePageModeFlag = true;
-		} else if (localStorage.getItem("autoDoublePageModeFlag") === "false") {
+		} else if (localStorage.getItem("autoDoublePageModeFlag") == "false") {
 			this.autoDoublePageModeFlag = false;
 		}
 		//是否保存阅读进度
-		if (localStorage.getItem("saveNowPageNumFlag_FlipMode") === "true") {
+		if (localStorage.getItem("saveNowPageNumFlag_FlipMode") == "true") {
 			this.saveNowPageNumFlag_FlipMode = true;
-		} else if (localStorage.getItem("saveNowPageNumFlag_FlipMode") === "false") {
+		} else if (localStorage.getItem("saveNowPageNumFlag_FlipMode") == "false") {
 			this.saveNowPageNumFlag_FlipMode = false;
 		}
 		//当前背景色
@@ -395,7 +395,7 @@ export default defineComponent({
 		// 注册监听
 		window.addEventListener("keyup", this.handleKeyup);
 		// 自动开始Sketch模式
-		if (this.nowTemplate === "sketch") {
+		if (this.nowTemplate == "sketch") {
 			this.startSketchMode();
 		}
 	},
@@ -491,13 +491,13 @@ export default defineComponent({
 		},
 		//开始速写（quick sketch），每秒执行一次
 		sketchCount() {
-			if (this.sketchModeFlag === false || this.nowTemplate !== "sketch") {
+			if (this.sketchModeFlag == false || this.nowTemplate != "sketch") {
 				this.stopSketchMode();
 			}
 			this.sketchSecondCount = this.sketchSecondCount + 1;
 			let nowSecond = this.sketchSecondCount % this.sketchFlipSecond;
 			// console.log("sketchSecondCount=" + this.sketchSecondCount + " nowSecond:" + nowSecond)
-			if (nowSecond === 0) {
+			if (nowSecond == 0) {
 				if (this.nowPageNum < this.book.all_page_num) {
 					this.flipPage(1);
 				} else {
@@ -554,23 +554,23 @@ export default defineComponent({
 			let clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离，单位为px）
 			let clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离，单位为px）
 			//浏览器的视口，不包括工具栏和滚动条:
-			let innerWidth = window.innerWidth
-			let innerHeight = window.innerHeight
+			let innerWidth = window.innerWidth;
+			let innerHeight = window.innerHeight;
 
-      let MinX = innerWidth * 0.4;
-      let MaxX = innerWidth * 0.6;
-      let MinY = innerHeight * 0.4;
-      let MaxY = innerHeight * 0.6;
+			let MinX = innerWidth * 0.4;
+			let MaxX = innerWidth * 0.6;
+			let MinY = innerHeight * 0.4;
+			let MaxY = innerHeight * 0.6;
 			if (clickX > MinX && clickX < MaxX && clickY > MinY && clickY < MaxY) {
 				//设置区域;
 				e.currentTarget.style.cursor = "url(/images/SettingsOutline.png), pointer";
 			} else {
 				if (clickX < innerWidth * 0.5) {
 					//设置左边的鼠标指针
-					if (this.rightToLeftFlag && this.nowPageNum === 1) {
+					if (this.rightToLeftFlag && this.nowPageNum == 1) {
 						//右边翻下一页，且目前是第一页的时候，左边的鼠标指针，设置为禁止翻页
 						e.currentTarget.style.cursor = "url(/images/Prohibited28Filled.png), pointer";
-					} else if (!this.rightToLeftFlag && this.nowPageNum === this.book.all_page_num) {
+					} else if (!this.rightToLeftFlag && this.nowPageNum == this.book.all_page_num) {
 						//左边翻下一页，且目前是最后一页的时候，左边的鼠标指针，设置为禁止翻页
 						e.currentTarget.style.cursor = "url(/images/Prohibited28Filled.png), pointer";
 					} else {
@@ -579,10 +579,10 @@ export default defineComponent({
 					}
 				} else {
 					//设置右边的鼠标指针
-					if (this.rightToLeftFlag && this.nowPageNum === this.book.all_page_num) {
+					if (this.rightToLeftFlag && this.nowPageNum == this.book.all_page_num) {
 						//右边翻下一页，且目前是最后页的时候，右边的鼠标指针，设置为禁止翻页
 						e.currentTarget.style.cursor = "url(/images/Prohibited28Filled.png), pointer";
-					} else if (!this.rightToLeftFlag && this.nowPageNum === 1) {
+					} else if (!this.rightToLeftFlag && this.nowPageNum == 1) {
 						//左边翻下一页，且目前是第一页的时候，右边的鼠标指针，设置为禁止翻页
 						e.currentTarget.style.cursor = "url(/images/Prohibited28Filled.png), pointer";
 					} else {
@@ -607,12 +607,12 @@ export default defineComponent({
 			let clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离，单位为px）
 			let clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离，单位为px）
 			//浏览器的可视区域宽高，不包括工具栏和滚动条:
-			let innerHeight = window.innerHeight
-			let innerWidth = window.innerWidth
-      let MinX = innerWidth * 0.4;
-      let MaxX = innerWidth * 0.6;
-      let MinY = innerHeight * 0.4;
-      let MaxY = innerHeight * 0.6;
+			let innerHeight = window.innerHeight;
+			let innerWidth = window.innerWidth;
+			let MinX = innerWidth * 0.4;
+			let MaxX = innerWidth * 0.6;
+			let MinY = innerHeight * 0.4;
+			let MaxY = innerHeight * 0.6;
 			// console.log("鼠标点击：e.offsetX=" + offsetX, "e.offsetY=" + offsetY);
 			if (clickX > MinX && clickX < MaxX && clickY > MinY && clickY < MaxY) {
 				//点中了设置区域
@@ -679,7 +679,7 @@ export default defineComponent({
 
 			//自动合并模式
 			//如果没有开启自动合并模式，或现在是第2页
-			if (this.nowPageNum === 2 || !this.autoDoublePageModeFlag) {
+			if (this.nowPageNum == 2 || !this.autoDoublePageModeFlag) {
 				this.flipPage(-1);
 				return
 			}
@@ -712,7 +712,7 @@ export default defineComponent({
 			}
 
 			//已经是最后一页了，显然不需要自动合并下一页
-			if (pageNum === this.book.all_page_num) {
+			if (pageNum == this.book.all_page_num) {
 				return false;
 			}
 			//分析现在这张图片的宽高比,看是不是双开页
@@ -729,10 +729,10 @@ export default defineComponent({
 				console.log("Error checkImageIsDoublePage_byPageNum:" + pageNum);
 				return;
 			}
-			if (this.book.pages[pageNum - 1].image_type === "SinglePage") {
+			if (this.book.pages[pageNum - 1].image_type == "SinglePage") {
 				return false;
 			}
-			if (this.book.pages[pageNum - 1].image_type === "DoublePage") {
+			if (this.book.pages[pageNum - 1].image_type == "DoublePage") {
 				return true;
 			}
 			let image = new Image();
@@ -888,7 +888,7 @@ export default defineComponent({
 			console.log("value:" + value);
 			this.debugModeFlag = value;
 			//关闭Debug模式的时候顺便也关上“自动合并单双页”的功能（因为还有BUG）
-			if (value === false) {
+			if (value == false) {
 				this.autoDoublePageModeFlag = false;
 			}
 			localStorage.setItem("debugModeFlag", value);
@@ -898,7 +898,7 @@ export default defineComponent({
 		setAutoDoublePage_FlipMode(value) {
 			console.log("value:" + value);
 			this.autoDoublePageModeFlag = value;
-			if (value === true) {
+			if (value == true) {
 				this.simpleDoublePageModeFlag = false;
 			}
 			localStorage.setItem("autoDoublePageModeFlag", value);
@@ -908,7 +908,7 @@ export default defineComponent({
 		setSimpleDoublePage_FlipMode(value) {
 			console.log("value:" + value);
 			this.simpleDoublePageModeFlag = value;
-			if (value === true) {
+			if (value == true) {
 				this.autoDoublePageModeFlag = false;
 			}
 			localStorage.setItem("simpleDoublePageModeFlag", value);
@@ -926,7 +926,7 @@ export default defineComponent({
 				//计算几小时几分
 				let MinutesAndHourString = "";
 				//如果不满意1小时，就不显示小时
-				if (parseInt(totalMinutes / 60) === 0) {
+				if (parseInt(totalMinutes / 60) == 0) {
 					MinutesAndHourString = totalMinutes + this.$t("minute");
 				} else {
 					MinutesAndHourString =
@@ -991,7 +991,7 @@ export default defineComponent({
 			}
 			//与上面唯一的不同，减去素描提示的空间
 			if (this.showPageHintFlag_FlipMode) {
-				if (this.nowTemplate === "sketch") {
+				if (this.nowTemplate == "sketch") {
 					Height = Height - 6;
 				} else {
 					Height = Height - 3;
@@ -1001,7 +1001,7 @@ export default defineComponent({
 		},
 		//进入素描模式的时候，把高度放大一倍
 		sketchHintHeight() {
-			if (this.nowTemplate === "sketch") {
+			if (this.nowTemplate == "sketch") {
 				return "6vh";
 			} else {
 				return "3vh";
@@ -1009,7 +1009,7 @@ export default defineComponent({
 		},
 		//进入素描模式的时候，把字体放大
 		sketchHintFontSize() {
-			if (this.nowTemplate === "sketch") {
+			if (this.nowTemplate == "sketch") {
 				return "24px";
 			} else {
 				return "16px";
@@ -1017,7 +1017,7 @@ export default defineComponent({
 		},
 		//从左到右还是从右到左
 		get_flex_direction() {
-			if (this.rightToLeftFlag === true) {
+			if (this.rightToLeftFlag == true) {
 				return "row"
 			} else {
 				return "row-reverse"

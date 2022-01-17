@@ -97,7 +97,7 @@ export default {
 		nowTemplate: function () {
 			var localValue = this.$cookies.get("nowTemplate");
 			console.log("computed 1:" + localValue);
-			if (localValue !== null) {
+			if (localValue != null) {
 				return localValue;
 			} else {
 				return this.$store.state.setting.template;
@@ -117,7 +117,7 @@ export default {
 		getNowTemplate: function () {
 			var localValue = this.$cookies.get("nowTemplate");
 			console.log("computed 1:" + localValue);
-			if (localValue !== null) {
+			if (localValue != null) {
 				return localValue;
 			} else {
 				this.$cookies.set("nowTemplate", this.$store.state.setting.template);
