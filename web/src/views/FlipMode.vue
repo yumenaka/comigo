@@ -550,13 +550,11 @@ export default defineComponent({
 			//不用自己获取元素
 			// let offsetWidth = e.currentTarget.offsetWidth;
 			// let offsetHeight = e.currentTarget.offsetHeight;
-
 			let clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离，单位为px）
 			let clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离，单位为px）
 			//浏览器的视口，不包括工具栏和滚动条:
 			let innerWidth = window.innerWidth;
 			let innerHeight = window.innerHeight;
-
 			let MinX = innerWidth * 0.4;
 			let MaxX = innerWidth * 0.6;
 			let MinY = innerHeight * 0.4;
@@ -619,16 +617,16 @@ export default defineComponent({
 				this.drawerActivate("right");
 			} else {
 				//决定如何翻页
-				if (clickX <= innerHeight / 2.0) {
+				if (clickX < innerWidth * 0.5) {
 					//左边的翻页
-					if (this.rightToLeftFlag) {
+					if (this.rightToLeftFlag==true) {
 						this.toPerviousPage();
 					} else {
 						this.toNextPage();
 					}
 				} else {
 					//右边的翻页
-					if (this.rightToLeftFlag) {
+					if (this.rightToLeftFlag==true) {
 						this.toNextPage();
 					} else {
 						this.toPerviousPage();
