@@ -207,8 +207,14 @@ func StartWebServer() {
 			}))
 		}
 	} else {
+		if common.ReadingBook.IsDir {
+			common.ReadingBook.SetBookID()
+			engine.Static("/cache/"+common.ReadingBook.BookID, common.ReadingBook.FilePath)
+		} else {
+			engine.Static("/cache", common.CacheFilePath)
+		}
+
 		//具体的图片文件
-		engine.Static("/cache", common.CacheFilePath)
 		//直接建立一个zipfs，但非UTF文件有编码问题，待改进
 		//ext := path.Ext(common.ReadingBook.FilePath)
 		//if ext == ".zip" {

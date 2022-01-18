@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -127,7 +128,7 @@ func ScanArchive_InitBook(scanPath string) (*Book, error) {
 			logrus.Debugf(locale.GetString("unsupported_file_type") + inArchiveName)
 		} else {
 			book.AllPageNum++
-			book.PageInfo = append(book.PageInfo, SinglePageInfo{RealImageFilePATH: imageFilePath, FileSize: f.Size(), ModeTime: f.ModTime(), Url: "/cache/" + book.BookID + "/" + inArchiveName})
+			book.PageInfo = append(book.PageInfo, SinglePageInfo{RealImageFilePATH: imageFilePath, FileSize: f.Size(), ModeTime: f.ModTime(), InArchiveName: inArchiveName, Url: "/cache/" + book.BookID + "/" + url.PathEscape(inArchiveName)})
 		}
 		return nil
 	})
@@ -370,7 +371,7 @@ func ScanDir_InitBook(dirPath string) (*Book, error) {
 			//fmt.Println(strAbsPath)
 			if isSupportMedia(file.Name()) {
 				book.AllPageNum += 1
-				book.PageInfo = append(book.PageInfo, SinglePageInfo{RealImageFilePATH: strAbsPath, FileSize: file.Size(), ModeTime: file.ModTime(), Url: "/cache/" + book.BookID + "/" + file.Name()})
+				book.PageInfo = append(book.PageInfo, SinglePageInfo{RealImageFilePATH: strAbsPath, FileSize: file.Size(), ModeTime: file.ModTime(), InArchiveName: file.Name(), Url: "/cache/" + book.BookID + "/" + url.PathEscape(file.Name())})
 			}
 		}
 	}

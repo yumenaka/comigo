@@ -279,9 +279,9 @@ type SinglePageInfo struct {
 	FileSize          int64     `json:"-"` //不要解析这个字段
 	Height            int       `json:"height"`
 	Width             int       `json:"width"`
-	Url               string    `json:"url"` //远程用户读取图片的实际URL，为了适应特殊字符，经过一次转义
-	InArchiveName     string    `json:"-"`   //不要解析这个字段  书籍为压缩文件的时候，用于解压的压缩文件内文件路径
-	RealImageFilePATH string    `json:"-"`   //不要解析这个字段  书籍为文件夹的时候，实际图片的路径
+	Url               string    `json:"url"`      //远程用户读取图片的实际URL，为了适应特殊字符，经过一次转义
+	InArchiveName     string    `json:"filename"` //书籍为压缩文件的时候，用于解压的压缩文件内文件路径
+	RealImageFilePATH string    `json:"-"`        //不要解析这个字段  书籍为文件夹的时候，实际图片的路径
 	ImgType           string    `json:"image_type"`
 	Blurhash          string    `json:"blurhash"`
 }

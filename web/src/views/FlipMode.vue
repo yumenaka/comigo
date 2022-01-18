@@ -1072,6 +1072,8 @@ export default defineComponent({
 	user-select: none; /* 不可以被选中 */
 	-moz-user-select: none; /* 火狐 */
 	-webkit-user-select: none; /* 谷歌 */
+	border-radius: 3px;
+	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 /* 漫画div中的图片div*/
@@ -1083,8 +1085,6 @@ export default defineComponent({
 	justify-content: center;
 	align-items: center;
 	margin: 0px;
-	border-radius: 3px;
-	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 /* 最后的一或两张图片*/
