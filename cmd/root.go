@@ -99,7 +99,7 @@ func init() {
 	//sketch模式的倒计时秒数
 	rootCmd.PersistentFlags().IntVar(&common.Config.SketchCountSeconds, "sketch_count_seconds", 90, locale.GetString("SKETCH_COUNT_SECONDS"))
 	//图片文件排序
-	rootCmd.PersistentFlags().StringVar(&common.Config.SortImage, "sort-image", "none", locale.GetString("SORT"))
+	rootCmd.PersistentFlags().StringVarP(&common.Config.SortImage, "sort", "s", "none", locale.GetString("SORT"))
 	//临时图片解压路径
 	rootCmd.PersistentFlags().StringVar(&common.Config.TempPATH, "temp-path", "", locale.GetString("TEMP_PATH"))
 	//退出时清除临时文件
