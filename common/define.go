@@ -345,7 +345,7 @@ func (b *Book) GetBookID() string {
 	return b.BookID
 }
 
-// InitBook  设置书名与Book ID等
+// ScanArchive  设置书名与Book ID等
 func (b *Book) InitBook(name string) {
 	//文件夹直接用路径
 	if b.IsDir {
@@ -503,18 +503,18 @@ func InitReadingBook() (err error) {
 		ReadingBook.ExtractComplete = true
 		ReadingBook.ExtractNum = ReadingBook.AllPageNum
 	} else {
-		setTempDir()
+		//setTempDir()
 		ReadingBook.ExtractPath = path.Join(CacheFilePath, ReadingBook.GetBookID()) //extraFolder
 		//err = LsArchive(&ReadingBook)
 		//if err != nil {
 		//	fmt.Println(locale.GetString("scan_archive_error"))
 		//	return err
 		//}
-		err = UnArchive(&ReadingBook)
-		if err != nil {
-			fmt.Println(locale.GetString("un_archive_error"))
-			return err
-		}
+		//err = UnArchive(&ReadingBook)
+		//if err != nil {
+		//	fmt.Println(locale.GetString("un_archive_error"))
+		//	return err
+		//}
 		ReadingBook.InitBook(ReadingBook.FilePath) //设置书名
 	}
 	//服务器分析图片，新版默认不做

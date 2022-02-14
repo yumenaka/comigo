@@ -71,11 +71,11 @@ func init() {
 
 	////webp相关 打算拆分成子命令
 	//启用webp传输
-	rootCmd.PersistentFlags().BoolVarP(&common.Config.EnableWebpServer, "webp", "w", false, locale.GetString("ENABLE_WEBP"))
+	//rootCmd.PersistentFlags().BoolVarP(&common.Config.EnableWebpServer, "webp", "w", false, locale.GetString("ENABLE_WEBP"))
 	//webp-server命令
-	rootCmd.PersistentFlags().StringVar(&common.Config.WebpConfig.WebpCommand, "webp-command", "webp-server", locale.GetString("WEBP_COMMAND"))
+	//rootCmd.PersistentFlags().StringVar(&common.Config.WebpConfig.WebpCommand, "webp-command", "webp-server", locale.GetString("WEBP_COMMAND"))
 	//webp压缩质量
-	rootCmd.PersistentFlags().IntVarP(&common.Config.WebpConfig.QUALITY, "webp-quality", "q", 85, locale.GetString("WEBP_QUALITY"))
+	//rootCmd.PersistentFlags().IntVarP(&common.Config.WebpConfig.QUALITY, "webp-quality", "q", 85, locale.GetString("WEBP_QUALITY"))
 
 	////Frpc相关  打算拆分成子命令
 	//frp反向代理

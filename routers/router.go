@@ -4,10 +4,10 @@ import (
 	"embed"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/mholt/archiver/v4"
 	"github.com/sanity-io/litter"
 	"github.com/yumenaka/comi/common"
 	"github.com/yumenaka/comi/locale"
-	"github.com/yumenaka/comi/routers/reverse_proxy"
 	"github.com/yumenaka/comi/tools"
 	"html/template"
 	"io/fs"
@@ -17,7 +17,6 @@ import (
 	"os"
 	"path"
 	"strconv"
-	"sync"
 	"time"
 )
 
@@ -69,24 +68,25 @@ func ParseCommands(args []string) {
 	default:
 		common.ReadingBook = common.BookList[0]
 	}
-	//解压图片，分析分辨率（并发）
-	if common.Config.CheckImage {
-		var wg sync.WaitGroup
-		wg.Add(1)
-		go func() {
-			err := common.InitReadingBook()
-			if err != nil {
-				return
-			}
-			defer wg.Done()
-		}()
-		wg.Wait()
-	} else {
-		err := common.InitReadingBook()
-		if err != nil {
-			fmt.Println(locale.GetString("can_not_init_book"), err, common.ReadingBook)
-		}
-	}
+	////解压图片，分析分辨率（并发）
+	//if common.Config.CheckImage {
+	//	var wg sync.WaitGroup
+	//	wg.Add(1)
+	//	go func() {
+	//		err := common.InitReadingBook()
+	//		if err != nil {
+	//			return
+	//		}
+	//		defer wg.Done()
+	//	}()
+	//	wg.Wait()
+	//} else {
+	//	err := common.InitReadingBook()
+	//	if err != nil {
+	//		fmt.Println(locale.GetString("can_not_init_book"), err, common.ReadingBook)
+	//	}
+	//}
+
 	StartWebServer()
 }
 
@@ -192,42 +192,67 @@ func StartWebServer() {
 		}
 		fmt.Println(locale.GetString("port_busy") + strconv.Itoa(common.Config.Port))
 	}
-	//webp反向代理
-	if common.Config.EnableWebpServer {
-		webpError := common.StartWebPServer(common.CacheFilePath+"/webp_config.json", common.ReadingBook.ExtractPath, common.CacheFilePath+"/webp", common.Config.Port+1)
-		if webpError != nil {
-			fmt.Println(locale.GetString("webp_server_error"), webpError.Error())
-			engine.Static("/cache", common.CacheFilePath)
-		} else {
-			fmt.Println(locale.GetString("webp_server_start"))
-			engine.Use(reverse_proxy.ReverseProxyHandle("/cache", reverse_proxy.ReverseProxyOptions{
-				TargetHost:  "http://localhost",
-				TargetPort:  strconv.Itoa(common.Config.Port + 1),
-				RewritePath: "/cache",
-			}))
-		}
-	} else {
-		if common.ReadingBook.IsDir {
-			common.ReadingBook.SetBookID()
-			engine.Static("/cache/"+common.ReadingBook.BookID, common.ReadingBook.FilePath)
-		} else {
-			engine.Static("/cache", common.CacheFilePath)
-		}
 
-		//具体的图片文件
-		//直接建立一个zipfs，但非UTF文件有编码问题，待改进
-		//ext := path.Ext(common.ReadingBook.FilePath)
-		//if ext == ".zip" {
-		//	fsys, zip_err := zip.OpenReader(common.ReadingBook.FilePath)
-		//	if zip_err != nil {
-		//		fmt.Println(zip_err)
-		//	}
-		//	engine.StaticFS("/cache", http.FS(fsys))
-		//} else {
-		//	//图片目录
-		//	engine.Static("/cache", common.ExtractPath)
-		//}
+	////直接建立一个zipfs，非UTF文件有编码问题，待改进
+	//ext := path.Ext(common.ReadingBook.FilePath)
+	//if ext == ".zip" || ext == ".epub" {
+	//	fsys, zip_err := zip.OpenReader(common.ReadingBook.FilePath)
+	//	if zip_err != nil {
+	//		fmt.Println(zip_err)
+	//	}
+	//	engine.StaticFS("/cache", http.FS(fsys))
+	//}
+
+	fsys, err := archiver.FileSystem(common.ReadingBook.FilePath)
+	httpFS := http.FS(fsys)
+	if err != nil {
+		fmt.Println(err)
 	}
+	if common.ReadingBook.IsDir {
+		common.ReadingBook.SetBookID()
+		engine.Static("/cache/"+common.ReadingBook.BookID, common.ReadingBook.FilePath)
+	} else {
+		engine.StaticFS("/cache/"+common.ReadingBook.BookID, httpFS)
+	}
+
+	////webp反向代理
+	//if common.Config.EnableWebpServer {
+	//	webpError := common.StartWebPServer(common.CacheFilePath+"/webp_config.json", common.ReadingBook.ExtractPath, common.CacheFilePath+"/webp", common.Config.Port+1)
+	//	if webpError != nil {
+	//		fmt.Println(locale.GetString("webp_server_error"), webpError.Error())
+	//		//engine.Static("/cache", common.CacheFilePath)
+	//
+	//	} else {
+	//		fmt.Println(locale.GetString("webp_server_start"))
+	//		engine.Use(reverse_proxy.ReverseProxyHandle("/cache", reverse_proxy.ReverseProxyOptions{
+	//			TargetHost:  "http://localhost",
+	//			TargetPort:  strconv.Itoa(common.Config.Port + 1),
+	//			RewritePath: "/cache",
+	//		}))
+	//	}
+	//} else {
+	//	if common.ReadingBook.IsDir {
+	//		common.ReadingBook.SetBookID()
+	//		engine.Static("/cache/"+common.ReadingBook.BookID, common.ReadingBook.FilePath)
+	//	} else {
+	//		engine.Static("/cache", common.CacheFilePath)
+	//	}
+	//
+	//	//具体的图片文件
+	//	//直接建立一个zipfs，但非UTF文件有编码问题，待改进
+	//	//ext := path.Ext(common.ReadingBook.FilePath)
+	//	//if ext == ".zip" {
+	//	//	fsys, zip_err := zip.OpenReader(common.ReadingBook.FilePath)
+	//	//	if zip_err != nil {
+	//	//		fmt.Println(zip_err)
+	//	//	}
+	//	//	engine.StaticFS("/cache", http.FS(fsys))
+	//	//} else {
+	//	//	//图片目录
+	//	//	engine.Static("/cache", common.ExtractPath)
+	//	//}
+	//}
+
 	//cmd打印链接二维码
 	tools.PrintAllReaderURL(common.Config.Port, common.Config.OpenBrowser, common.Config.EnableFrpcServer, common.Config.PrintAllIP, common.Config.Host, common.Config.FrpConfig.ServerAddr, common.Config.FrpConfig.RemotePort, common.Config.DisableLAN)
 	//开始服务
