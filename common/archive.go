@@ -1,12 +1,15 @@
 package common
 
 import (
+	"archive/zip"
+	"context"
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
 	"github.com/mholt/archiver/v4"
 	"io/fs"
 	"io/ioutil"
+	"log"
 	"net/url"
 	"os"
 	"path"
@@ -47,32 +50,108 @@ func ScanArchive(scanPath string) (*Book, error) {
 	book := Book{AllPageNum: 0, FilePath: scanPath, Modified: FileInfo.ModTime(), IsDir: FileInfo.IsDir(), FileSize: FileInfo.Size(), ExtractComplete: false}
 	//设置书籍UUID，根据路径算出
 	book.InitBook(book.FilePath)
-	fsys, err := archiver.FileSystem(scanPath)
-	if err != nil {
-		return nil, err
+
+	//建立一个zipfs
+	ext := path.Ext(scanPath)
+	if ext == ".zip" || ext == ".epub" { //为了解决早期BUG：zip文件无法读取2级目录？
+		fsys, zip_err := zip.OpenReader(scanPath)
+		if zip_err != nil {
+			fmt.Println(zip_err)
+		}
+		err = walkZipFs(fsys, "", ".", &book)
+	} else {
+		fsys, err := archiver.FileSystem(scanPath)
+		if err != nil {
+			return nil, err
+		}
+		////等效函数：
+		//walkArchiveFs(fsys, "", ".", &book)
+		// https://bitfieldconsulting.com/golang/filesystems
+		err = fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+			if d.IsDir() {
+				switch path {
+				case ".comigo":
+					return fs.SkipDir
+				default:
+					return nil
+				}
+			} else {
+				f, errInfo := d.Info()
+				if errInfo != nil {
+					fmt.Println(locale.GetString("unsupported_file_type")+" %s", f)
+				}
+				u, ok := f.(archiver.File) //f.Name不包含路径信息.需要转换一下
+				if !ok {
+					fmt.Println(locale.GetString("unsupported_extract")+" %s", f)
+				}
+				if !isSupportMedia(path) {
+					logrus.Debugf(locale.GetString("unsupported_file_type") + path)
+				} else {
+					book.AllPageNum++
+					inArchiveName := u.NameInArchive
+					book.PageInfo = append(book.PageInfo, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), InArchiveName: inArchiveName, Url: "/cache/" + book.BookID + "/" + url.PathEscape(inArchiveName)})
+				}
+				return nil
+			}
+		})
 	}
-	// https://bitfieldconsulting.com/golang/filesystems
-	err = fs.WalkDir(fsys, ".", func(p string, d fs.DirEntry, err error) error {
-		if !isSupportMedia(p) {
-			logrus.Debugf(locale.GetString("unsupported_file_type") + p)
-			return nil
-		}
-		f, errInfo := d.Info()
+	return &book, err
+}
+
+//手动写的递归查找，功能与fs.WalkDir()相同。发现zip文件的虚拟文件系统，似乎找不到正确的文件夹？
+// https://books.studygolang.com/The-Golang-Standard-Library-by-Example/chapter06/06.3.html
+func walkZipFs(fsys fs.FS, parent, base string, book *Book) error {
+	fmt.Println("parent:" + parent + " base:" + base)
+	dirEntries, err := fs.ReadDir(fsys, filepath.Join(parent, base))
+	if err != nil {
+		return err
+	}
+	for _, dirEntry := range dirEntries {
+		name := dirEntry.Name()
+		f, errInfo := dirEntry.Info()
 		if errInfo != nil {
-			fmt.Println(locale.GetString("unsupported_file_type")+" %s", f)
-			return nil
+			continue
 		}
-		u, ok := f.(archiver.File) //f.Name不包含路径信息.需要转换一下
-		if !ok {
-			fmt.Println(locale.GetString("unsupported_extract")+" %s", f)
-			return nil
+		if dirEntry.IsDir() == true {
+			join_path := path.Join(parent, name)
+			walkZipFs(fsys, join_path, "", book)
+		} else if !isSupportMedia(name) {
+			logrus.Debugf(locale.GetString("unsupported_file_type") + name)
+		} else {
+			book.AllPageNum++
+			inArchiveName := path.Join(parent, f.Name())
+			book.PageInfo = append(book.PageInfo, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), InArchiveName: inArchiveName, Url: "/cache/" + book.BookID + "/" + url.PathEscape(inArchiveName)})
 		}
-		book.AllPageNum++
-		inArchiveName := u.NameInArchive
-		book.PageInfo = append(book.PageInfo, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), InArchiveName: inArchiveName, Url: "/cache/" + book.BookID + "/" + url.PathEscape(inArchiveName)})
+	}
+	return err
+}
+
+// UnArchive 一次解压所有文件,未测试
+// https://github.com/mholt/archiver/issues/309
+func UnArchiveRar(b *Book) (err error) {
+	f, err := os.Open(b.FilePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+	err = archiver.Rar{}.Extract(context.Background(), f, nil, func(_ context.Context, f archiver.File) error {
+		log.Println(f.NameInArchive)
 		return nil
 	})
-	return &book, err
+	if err != nil {
+		log.Fatal(err)
+	}
+	extraFolder := path.Join(CacheFilePath, b.GetBookID())
+	fmt.Println(extraFolder)
+	//解压完成提示
+	fmt.Println(locale.GetString("completed_ls"), b.FilePath)
+	//ExtractPath = extraFolder
+	ReadingBook.ExtractComplete = true
+	ReadingBook.ExtractNum = ReadingBook.AllPageNum
+	return err
 }
 
 //func ScanArchive(scanPath string) (*Book, error) {

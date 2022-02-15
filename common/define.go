@@ -53,11 +53,13 @@ type FrpClientConfig struct {
 var ConfigFile string //服务器配置文件路径
 
 type ServerConfig struct {
-	OpenBrowser            bool   `json:"-"` //不要解析这个字段
-	DisableLAN             bool   `json:"-"` //不要解析这个字段
-	Template               string `json:"template"`
-	Auth                   string `json:"-"` //不要解析这个字段 访问密码，还没做
-	PrintAllIP             bool   `json:"-"` //不要解析这个字段
+	UserName    string `json:"-"` //不要解析这个字段
+	Password    string `json:"-"` //不要解析这个字段
+	OpenBrowser bool   `json:"-"` //不要解析这个字段
+	DisableLAN  bool   `json:"-"` //不要解析这个字段
+	Template    string `json:"template"`
+	//Auth                   string `json:"-"` //不要解析这个字段 访问密码，还没做
+	PrintAllIP             bool `json:"-"` //不要解析这个字段
 	Port                   int
 	CheckImage             bool
 	Debug                  bool   `json:"-"` //不要解析这个字段
@@ -87,7 +89,7 @@ var Config = ServerConfig{
 	Port:                1234,
 	CheckImage:          false,
 	LogToFile:           false,
-	MaxDepth:            2,
+	MaxDepth:            3,
 	MinImageNum:         3,
 	ZipFilenameEncoding: "",
 	WebpConfig: WebPServerConfig{

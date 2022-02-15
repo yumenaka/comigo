@@ -1,5 +1,4 @@
-Auth = ""
-CheckImage = true
+CheckImage = false
 CleanAllTempFile = true
 CleanAllTempFileOnExit = false
 Debug = false
@@ -10,16 +9,18 @@ Host = ""
 LogFileName = "comigo.log"
 LogFilePath = "C:\\Users\\bai"
 LogToFile = false
-MaxDepth = 1
+MaxDepth = 2
 MinImageNum = 1
 NewConfig = false
 OpenBrowser = true
+Password = ""
 Port = 1234
 PrintAllIP = false
 SketchCountSeconds = 90
 SortImage = "none"
 TempPATH = ""
-Template = "scroll"
+Template = "scrool"
+UserName = "comi"
 ZipFilenameEncoding = ""
 
 [FrpConfig]
@@ -37,5 +38,5 @@ ZipFilenameEncoding = ""
   HOST = "127.0.0.1"
   ImgPath = ""
   PORT = "3333"
-  QUALITY = 85
+  QUALITY = 70
   WebpCommand = "webp-server"

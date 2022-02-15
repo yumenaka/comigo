@@ -43,12 +43,19 @@ func Execute() {
 func init() {
 	cobra.MousetrapHelpText = ""       //屏蔽鼠标提示，支持拖拽、双击运行
 	cobra.MousetrapDisplayDuration = 5 //"这是命令行程序"的提醒表示时间
+
+	//简单认证
+	rootCmd.PersistentFlags().StringVarP(&common.Config.UserName, "username", "u", "comi", "用户名")
+	rootCmd.PersistentFlags().StringVarP(&common.Config.Password, "password", "k", "", "密码")
 	//指定配置文件
 	rootCmd.PersistentFlags().StringVarP(&common.ConfigFile, "config", "c", "", locale.GetString("CONFIG"))
-	//服务端口
-	rootCmd.PersistentFlags().IntVarP(&common.Config.Port, "port", "p", 1234, locale.GetString("PORT"))
 	//在当前目录生成示例配置文件
 	rootCmd.PersistentFlags().BoolVar(&common.Config.NewConfig, "new-config", false, locale.GetString("NewConfig"))
+	//服务端口
+	rootCmd.PersistentFlags().IntVarP(&common.Config.Port, "port", "p", 1234, locale.GetString("PORT"))
+	//本地Host名
+	rootCmd.PersistentFlags().StringVar(&common.Config.Host, "host", "", locale.GetString("LOCAL_HOST"))
+
 	//DEBUG
 	rootCmd.PersistentFlags().BoolVar(&common.Config.Debug, "debug", false, locale.GetString("DEBUG_MODE"))
 	//打开浏览器
@@ -62,8 +69,6 @@ func init() {
 	rootCmd.PersistentFlags().IntVarP(&common.Config.MaxDepth, "max-depth", "m", 2, locale.GetString("MAX_DEPTH"))
 	////服务器解析分辨率
 	rootCmd.PersistentFlags().BoolVar(&common.Config.CheckImage, "check-image", false, locale.GetString("CHECK_IMAGE"))
-	//本地Host名
-	rootCmd.PersistentFlags().StringVar(&common.Config.Host, "host", "", locale.GetString("LOCAL_HOST"))
 	//打印所有可用网卡ip
 	rootCmd.PersistentFlags().BoolVar(&common.Config.PrintAllIP, "print-all", false, locale.GetString("PRINT_ALL_IP"))
 	//至少有几张图片，才认定为漫画压缩包

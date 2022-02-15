@@ -68,25 +68,6 @@ func ParseCommands(args []string) {
 	default:
 		common.ReadingBook = common.BookList[0]
 	}
-	////解压图片，分析分辨率（并发）
-	//if common.Config.CheckImage {
-	//	var wg sync.WaitGroup
-	//	wg.Add(1)
-	//	go func() {
-	//		err := common.InitReadingBook()
-	//		if err != nil {
-	//			return
-	//		}
-	//		defer wg.Done()
-	//	}()
-	//	wg.Wait()
-	//} else {
-	//	err := common.InitReadingBook()
-	//	if err != nil {
-	//		fmt.Println(locale.GetString("can_not_init_book"), err, common.ReadingBook)
-	//	}
-	//}
-
 	StartWebServer()
 }
 
@@ -104,12 +85,12 @@ func setStaticFiles(engine *gin.Engine, fileUrl string, filePath string, content
 
 // StartWebServer 启动web服务
 func StartWebServer() {
-
 	//获取模板，命名为"template-data"，同时把左右分隔符改为 [[ ]]
 	tmpl := template.Must(template.New("template-data").Delims("[[", "]]").Parse(TemplateString))
 	//设置 gin
 	gin.SetMode(gin.ReleaseMode)
 	engine := gin.Default()
+
 	//使用模板
 	engine.SetHTMLTemplate(tmpl)
 	if common.Config.LogToFile {
@@ -146,37 +127,51 @@ func StartWebServer() {
 			"title": common.ReadingBook.Name, //页面标题
 		})
 	})
-	//简单http认证测试
-	authorized := engine.Group("/", gin.BasicAuth(gin.Accounts{
-		"comi": "go",
-	}))
-	authorized.GET("/secrets", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"secret": "这个路径需要认证。",
-		})
-	})
-	//认证相关，还没写
-	if common.Config.Auth != "" {
 
+	if common.Config.UserName != "" && common.Config.Password != "" {
+		//简单http认证
+		authorized := engine.Group("/", gin.BasicAuth(gin.Accounts{
+			common.Config.UserName: common.Config.Password,
+		}))
+		//解析json
+		authorized.GET("api/book.json", func(c *gin.Context) {
+			c.PureJSON(http.StatusOK, common.ReadingBook)
+		})
+		//解析书架json
+		authorized.GET("api/bookshelf.json", func(c *gin.Context) {
+			c.PureJSON(http.StatusOK, common.BookList)
+		})
+		//服务器设定
+		authorized.GET("api/setting.json", func(c *gin.Context) {
+			c.PureJSON(http.StatusOK, common.Config)
+		})
+		//服务器设定
+		authorized.GET("api/config.yaml", func(c *gin.Context) {
+			c.YAML(http.StatusOK, common.Config)
+		})
+		//初始化websocket
+		engine.GET("api/ws", wsHandler)
+	} else {
+		//解析json
+		engine.GET("api/book.json", func(c *gin.Context) {
+			c.PureJSON(http.StatusOK, common.ReadingBook)
+		})
+		//解析书架json
+		engine.GET("api/bookshelf.json", func(c *gin.Context) {
+			c.PureJSON(http.StatusOK, common.BookList)
+		})
+		//服务器设定
+		engine.GET("api/setting.json", func(c *gin.Context) {
+			c.PureJSON(http.StatusOK, common.Config)
+		})
+		//服务器设定
+		engine.GET("api/config.yaml", func(c *gin.Context) {
+			c.YAML(http.StatusOK, common.Config)
+		})
+		//初始化websocket
+		engine.GET("api/ws", wsHandler)
 	}
-	//解析json
-	engine.GET("api/book.json", func(c *gin.Context) {
-		c.PureJSON(http.StatusOK, common.ReadingBook)
-	})
-	//解析书架json
-	engine.GET("api/bookshelf.json", func(c *gin.Context) {
-		c.PureJSON(http.StatusOK, common.BookList)
-	})
-	//服务器设定
-	engine.GET("api/setting.json", func(c *gin.Context) {
-		c.PureJSON(http.StatusOK, common.Config)
-	})
-	//服务器设定
-	engine.GET("/config.yaml", func(c *gin.Context) {
-		c.YAML(http.StatusOK, common.Config)
-	})
-	//初始化websocket
-	engine.GET("/ws", wsHandler)
+
 	//是否同时对外服务
 	webHost := ":"
 	if common.Config.DisableLAN {
@@ -193,7 +188,7 @@ func StartWebServer() {
 		fmt.Println(locale.GetString("port_busy") + strconv.Itoa(common.Config.Port))
 	}
 
-	////直接建立一个zipfs，非UTF文件有编码问题，待改进
+	////直接建立一个zipfs，
 	//ext := path.Ext(common.ReadingBook.FilePath)
 	//if ext == ".zip" || ext == ".epub" {
 	//	fsys, zip_err := zip.OpenReader(common.ReadingBook.FilePath)
@@ -203,6 +198,7 @@ func StartWebServer() {
 	//	engine.StaticFS("/cache", http.FS(fsys))
 	//}
 
+	// 通过archiver/v4，建立虚拟FS。非UTF文件有编码问题，待改进
 	fsys, err := archiver.FileSystem(common.ReadingBook.FilePath)
 	httpFS := http.FS(fsys)
 	if err != nil {
