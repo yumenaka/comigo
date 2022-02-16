@@ -96,7 +96,7 @@ func StartWebServer() {
 	if common.Config.LogToFile {
 		// 关闭 log 打印的字体颜色。输出到文件不需要颜色
 		//gin.DisableConsoleColor()
-		// 输出 log 到文件
+		// 中间件，输出 log 到文件
 		engine.Use(tools.LoggerToFile(common.Config.LogFilePath, common.Config.LogFileName))
 		//禁止控制台输出
 		gin.DefaultWriter = ioutil.Discard
@@ -129,47 +129,54 @@ func StartWebServer() {
 	})
 
 	if common.Config.UserName != "" && common.Config.Password != "" {
-		//简单http认证
-		authorized := engine.Group("/", gin.BasicAuth(gin.Accounts{
+		//简单http认证的路由组
+		// 路由组：https://learnku.com/docs/gin-gonic/1.7/examples-grouping-routes/11399
+		//使用 BasicAuth 中间件  https://learnku.com/docs/gin-gonic/1.7/examples-using-basicauth-middleware/11377
+		authorized := engine.Group("/api", gin.BasicAuth(gin.Accounts{
 			common.Config.UserName: common.Config.Password,
 		}))
-		//解析json
-		authorized.GET("api/book.json", func(c *gin.Context) {
-			c.PureJSON(http.StatusOK, common.ReadingBook)
-		})
-		//解析书架json
-		authorized.GET("api/bookshelf.json", func(c *gin.Context) {
-			c.PureJSON(http.StatusOK, common.BookList)
-		})
-		//服务器设定
-		authorized.GET("api/setting.json", func(c *gin.Context) {
-			c.PureJSON(http.StatusOK, common.Config)
-		})
-		//服务器设定
-		authorized.GET("api/config.yaml", func(c *gin.Context) {
-			c.YAML(http.StatusOK, common.Config)
-		})
-		//初始化websocket
-		engine.GET("api/ws", wsHandler)
+		{
+			//解析json
+			authorized.GET("/book.json", func(c *gin.Context) {
+				c.PureJSON(http.StatusOK, common.ReadingBook)
+			})
+			//解析书架json
+			authorized.GET("/bookshelf.json", func(c *gin.Context) {
+				c.PureJSON(http.StatusOK, common.BookList)
+			})
+			//服务器设定
+			authorized.GET("/setting.json", func(c *gin.Context) {
+				c.PureJSON(http.StatusOK, common.Config)
+			})
+			//服务器设定
+			authorized.GET("/config.yaml", func(c *gin.Context) {
+				c.YAML(http.StatusOK, common.Config)
+			})
+			//初始化websocket
+			authorized.GET("/ws", wsHandler)
+		}
+
 	} else {
+		// 简单的路由组: v1
+		api := engine.Group("/api")
 		//解析json
-		engine.GET("api/book.json", func(c *gin.Context) {
+		api.GET("/book.json", func(c *gin.Context) {
 			c.PureJSON(http.StatusOK, common.ReadingBook)
 		})
 		//解析书架json
-		engine.GET("api/bookshelf.json", func(c *gin.Context) {
+		api.GET("/bookshelf.json", func(c *gin.Context) {
 			c.PureJSON(http.StatusOK, common.BookList)
 		})
 		//服务器设定
-		engine.GET("api/setting.json", func(c *gin.Context) {
+		api.GET("/setting.json", func(c *gin.Context) {
 			c.PureJSON(http.StatusOK, common.Config)
 		})
 		//服务器设定
-		engine.GET("api/config.yaml", func(c *gin.Context) {
+		api.GET("/config.yaml", func(c *gin.Context) {
 			c.YAML(http.StatusOK, common.Config)
 		})
 		//初始化websocket
-		engine.GET("api/ws", wsHandler)
+		api.GET("/ws", wsHandler)
 	}
 
 	//是否同时对外服务
@@ -273,11 +280,24 @@ func StartWebServer() {
 		litter.Dump(common.Config)
 	}
 	fmt.Println(locale.GetString("ctrl_c_hint"))
-	err = engine.Run(webHost + strconv.Itoa(common.Config.Port))
-	if err != nil {
-		_, err := fmt.Fprintf(os.Stderr, locale.GetString("web_server_error")+"%q\n", common.Config.Port)
+
+	if common.Config.CertFile != "" && common.Config.KeyFile != "" {
+		// 监听并启动服务
+		engine.RunTLS(webHost+strconv.Itoa(common.Config.Port), common.Config.CertFile, common.Config.KeyFile)
 		if err != nil {
-			return
+			_, err := fmt.Fprintf(os.Stderr, locale.GetString("web_server_error")+"%q\n", common.Config.Port)
+			if err != nil {
+				return
+			}
+		}
+	} else {
+		// 监听并启动服务
+		err = engine.Run(webHost + strconv.Itoa(common.Config.Port))
+		if err != nil {
+			_, err := fmt.Fprintf(os.Stderr, locale.GetString("web_server_error")+"%q\n", common.Config.Port)
+			if err != nil {
+				return
+			}
 		}
 	}
 }

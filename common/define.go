@@ -55,6 +55,8 @@ var ConfigFile string //服务器配置文件路径
 type ServerConfig struct {
 	UserName    string `json:"-"` //不要解析这个字段
 	Password    string `json:"-"` //不要解析这个字段
+	CertFile    string `json:"-"` //不要解析这个字段
+	KeyFile     string `json:"-"` //不要解析这个字段
 	OpenBrowser bool   `json:"-"` //不要解析这个字段
 	DisableLAN  bool   `json:"-"` //不要解析这个字段
 	Template    string `json:"template"`

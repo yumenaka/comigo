@@ -45,8 +45,13 @@ func init() {
 	cobra.MousetrapDisplayDuration = 5 //"这是命令行程序"的提醒表示时间
 
 	//简单认证
-	rootCmd.PersistentFlags().StringVarP(&common.Config.UserName, "username", "u", "comi", "用户名")
+	rootCmd.PersistentFlags().StringVarP(&common.Config.UserName, "username", "u", "admin", "用户名")
 	rootCmd.PersistentFlags().StringVarP(&common.Config.Password, "password", "k", "", "密码")
+
+	//简单认证
+	rootCmd.PersistentFlags().StringVar(&common.Config.CertFile, "certfile", "", "tls certfile")
+	rootCmd.PersistentFlags().StringVar(&common.Config.KeyFile, "keyfile", "", "tls keyfile")
+
 	//指定配置文件
 	rootCmd.PersistentFlags().StringVarP(&common.ConfigFile, "config", "c", "", locale.GetString("CONFIG"))
 	//在当前目录生成示例配置文件
