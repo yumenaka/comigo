@@ -86,11 +86,11 @@ func changeReadingBook(u string) bool {
 		if common.BookList[i].GetBookID() == u {
 			common.ReadingBook = common.BookList[i]
 			//初始化书籍
-			err := common.InitReadingBook()
-			if err != nil {
-				fmt.Println("无法初始化书籍。", err, common.ReadingBook)
-				return false
-			}
+			//err := common.InitReadingBook()
+			//if err != nil {
+			//	fmt.Println("无法初始化书籍。", err, common.ReadingBook)
+			//	return false
+			//}
 			return true
 		}
 	}

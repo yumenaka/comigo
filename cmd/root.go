@@ -25,9 +25,40 @@ var rootCmd = &cobra.Command{
 	Version: locale.GetString("comigo_version"),
 	Long:    locale.GetString("long_description"),
 	Run: func(cmd *cobra.Command, args []string) {
-		routers.ParseCommands(args)
+		ParseCommands(args)
+		routers.StartWebServer()
 		return
 	},
+}
+
+//ParseCommands 解析命令
+func ParseCommands(args []string) {
+	//通过“可执行文件名”设置默认阅读模板
+	common.Config.SetByExecutableFilename()
+	//决定如何扫描，扫描哪个路径
+	if len(args) == 0 { //没有指定路径或文件的情况下
+		cmdPath := path.Dir(os.Args[0]) //当前执行路径
+		err := common.ScanBookPath(cmdPath)
+		if err != nil {
+			fmt.Println(locale.GetString("scan_error"), cmdPath)
+		}
+	} else {
+		//指定了多个参数的话，都扫描一遍
+		for _, p := range args {
+			err := common.ScanBookPath(p)
+			if err != nil {
+				fmt.Println(locale.GetString("scan_error"), p)
+			}
+		}
+	}
+	////扫描完路径之后，选择第一本书
+	//switch len(common.BookList) {
+	//case 0:
+	//	fmt.Println(locale.GetString("book_not_found"))
+	//	os.Exit(0)
+	//default:
+	//	common.ReadingBook = common.BookList[0]
+	//}
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

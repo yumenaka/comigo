@@ -224,7 +224,8 @@ var ReadingBook Book
 var BookList []Book
 var (
 	CacheFilePath    string
-	Version          = "v0.4.6"
+	Version          = "v0.5.1"
+	ExcludeFolders   = []string{".comigo", "node_modules", "flutter_ui", "$RECYCLE.BIN", "Config.Msi"}
 	SupportMediaType = []string{".jpg", ".jpeg", ".JPEG", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp", ".webp", ".ico", ".heic", ".pdf", ".mp4", ".webm"}
 	SupportFileType  = [...]string{
 		".zip",
@@ -500,50 +501,51 @@ func SetupCloseHander() {
 		os.Exit(0)
 	}()
 }
-func InitReadingBook() (err error) {
-	//准备解压，设置图片文件夹
-	if ReadingBook.IsDir {
-		ReadingBook.ExtractPath = ReadingBook.FilePath
-		ReadingBook.ExtractComplete = true
-		ReadingBook.ExtractNum = ReadingBook.AllPageNum
-	} else {
-		//setTempDir()
-		ReadingBook.ExtractPath = path.Join(CacheFilePath, ReadingBook.GetBookID()) //extraFolder
-		//err = LsArchive(&ReadingBook)
-		//if err != nil {
-		//	fmt.Println(locale.GetString("scan_archive_error"))
-		//	return err
-		//}
-		//err = UnArchive(&ReadingBook)
-		//if err != nil {
-		//	fmt.Println(locale.GetString("un_archive_error"))
-		//	return err
-		//}
-		ReadingBook.InitBook(ReadingBook.FilePath) //设置书名
-	}
-	//服务器分析图片，新版默认不做
-	if Config.CheckImage {
-		ReadingBook.ScanAllImageGo() //扫描所有图片，取得分辨率信息，使用了协程
-	}
-	//服务器排序图片
-	if Config.SortImage != "" {
-		if Config.SortImage == "name" {
-			ReadingBook.SortPages()
-			fmt.Println(locale.GetString("SORT_BY_NAME"))
-		}
-		if Config.SortImage == "time" {
-			ReadingBook.SortPages()
-			fmt.Println(locale.GetString("SORT_BY_TIME"))
-		}
-		if Config.Debug {
-			//判断是否已经排好顺序，将会打印true
-			fmt.Println("IS Sorted?\t", sort.IsSorted(ReadingBook.PageInfo))
-			//打印排序后的数据
-			//litter.Dump(ReadingBook.PageInfo)
-		}
-	}
-	return err
-}
+
+//func InitReadingBook() (err error) {
+//	//准备解压，设置图片文件夹
+//	if ReadingBook.IsDir {
+//		ReadingBook.ExtractPath = ReadingBook.FilePath
+//		ReadingBook.ExtractComplete = true
+//		ReadingBook.ExtractNum = ReadingBook.AllPageNum
+//	} else {
+//		//setTempDir()
+//		ReadingBook.ExtractPath = path.Join(CacheFilePath, ReadingBook.GetBookID()) //extraFolder
+//		//err = LsArchive(&ReadingBook)
+//		//if err != nil {
+//		//	fmt.Println(locale.GetString("scan_archive_error"))
+//		//	return err
+//		//}
+//		//err = UnArchive(&ReadingBook)
+//		//if err != nil {
+//		//	fmt.Println(locale.GetString("un_archive_error"))
+//		//	return err
+//		//}
+//		ReadingBook.InitBook(ReadingBook.FilePath) //设置书名
+//	}
+//	//服务器分析图片，新版默认不做
+//	if Config.CheckImage {
+//		ReadingBook.ScanAllImageGo() //扫描所有图片，取得分辨率信息，使用了协程
+//	}
+//	//服务器排序图片
+//	if Config.SortImage != "" {
+//		if Config.SortImage == "name" {
+//			ReadingBook.SortPages()
+//			fmt.Println(locale.GetString("SORT_BY_NAME"))
+//		}
+//		if Config.SortImage == "time" {
+//			ReadingBook.SortPages()
+//			fmt.Println(locale.GetString("SORT_BY_TIME"))
+//		}
+//		if Config.Debug {
+//			//判断是否已经排好顺序，将会打印true
+//			fmt.Println("IS Sorted?\t", sort.IsSorted(ReadingBook.PageInfo))
+//			//打印排序后的数据
+//			//litter.Dump(ReadingBook.PageInfo)
+//		}
+//	}
+//	return err
+//}
 
 // setTempDir 设置临时文件夹，退出时会被清理
 func setTempDir() {

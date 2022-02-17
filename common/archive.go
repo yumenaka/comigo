@@ -75,6 +75,10 @@ func ScanArchive(scanPath string) (*Book, error) {
 				switch path {
 				case ".comigo":
 					return fs.SkipDir
+				case "flutter_ui":
+					return fs.SkipDir
+				case "node_modules":
+					return fs.SkipDir
 				default:
 					return nil
 				}
@@ -116,6 +120,15 @@ func walkZipFs(fsys fs.FS, parent, base string, book *Book) error {
 			continue
 		}
 		if dirEntry.IsDir() == true {
+			switch name {
+			case ".comigo":
+				return fs.SkipDir
+			case "flutter_ui":
+				return fs.SkipDir
+			case "node_modules":
+				return fs.SkipDir
+			default:
+			}
 			join_path := path.Join(parent, name)
 			walkZipFs(fsys, join_path, base, book)
 		} else if !isSupportMedia(name) {

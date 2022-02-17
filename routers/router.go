@@ -15,7 +15,6 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
-	"path"
 	"strconv"
 	"time"
 )
@@ -37,60 +36,10 @@ func init() {
 	common.SetupCloseHander()
 }
 
-// ParseCommands 解析命令
-func ParseCommands(args []string) {
-	//通过“可执行文件名”设置默认阅读模板
-	common.Config.SetByExecutableFilename()
-	//决定如何扫描，扫描哪个路径
-	if len(args) == 0 { //没有指定路径或文件的情况下
-		cmdPath := path.Dir(os.Args[0]) //当前执行路径
-		err := common.ScanBookPath(cmdPath)
-		if err != nil {
-			fmt.Println(locale.GetString("scan_error"), cmdPath)
-		}
-		if len(common.BookList) > 0 {
-			common.ReadingBook = common.BookList[0]
-		}
-	} else {
-		//指定了多个参数的话，都扫描
-		for _, p := range args {
-			err := common.ScanBookPath(p)
-			if err != nil {
-				fmt.Println(locale.GetString("scan_error"), p)
-			}
-		}
-	}
-	//扫描完路径之后，选择第一本书开始解压
-	switch len(common.BookList) {
-	case 0:
-		fmt.Println(locale.GetString("book_not_found"))
-		os.Exit(0)
-	default:
-		common.ReadingBook = common.BookList[0]
-	}
-	StartWebServer()
-}
-
-//单独设定某个文件
-func setStaticFiles(engine *gin.Engine, fileUrl string, filePath string, contentType string) {
-	engine.GET(fileUrl, func(c *gin.Context) {
-		file, _ := staticFS.ReadFile(filePath)
-		c.Data(
-			http.StatusOK,
-			contentType,
-			file,
-		)
-	})
-}
-
-// StartWebServer 启动web服务
-func StartWebServer() {
+//1、设置静态文件
+func setStaticFiles(engine *gin.Engine) {
 	//获取模板，命名为"template-data"，同时把左右分隔符改为 [[ ]]
 	tmpl := template.Must(template.New("template-data").Delims("[[", "]]").Parse(TemplateString))
-	//设置 gin
-	gin.SetMode(gin.ReleaseMode)
-	engine := gin.Default()
-
 	//使用模板
 	engine.SetHTMLTemplate(tmpl)
 	if common.Config.LogToFile {
@@ -114,76 +63,64 @@ func StartWebServer() {
 		fmt.Println(errStaticImageFS)
 	}
 	engine.StaticFS("/images/", http.FS(imagesEmbedFS))
-	//单独一张静态图片，没必要再定义一个FS
-	setStaticFiles(engine, "/favicon.ico", "static/images/favicon.ico", "image/x-icon")
-
-	//Download archive file
-	if !common.ReadingBook.IsDir {
-		engine.StaticFile("/raw/"+common.ReadingBook.Name, common.ReadingBook.FilePath)
-	}
+	//单独一张静态图片
+	//singleStaticFiles(engine, "/favicon.ico", "static/images/favicon.ico", "image/x-icon")
+	engine.GET("/favicon.ico", func(c *gin.Context) {
+		file, _ := staticFS.ReadFile("static/images/favicon.ico")
+		c.Data(
+			http.StatusOK,
+			"image/x-icon",
+			file,
+		)
+	})
 	//解析模板到HTML
 	engine.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "template-data", gin.H{
 			"title": common.ReadingBook.Name, //页面标题
 		})
 	})
+	if !common.ReadingBook.IsDir {
+		engine.StaticFile("/raw/"+common.ReadingBook.Name, common.ReadingBook.FilePath)
+	}
+}
 
-	if common.Config.UserName != "" && common.Config.Password != "" {
+//2、设置Json与websocks API
+func setWebAPI(engine *gin.Engine) {
+	enableAuth := common.Config.UserName != "" && common.Config.Password != ""
+	var api *gin.RouterGroup
+	if enableAuth {
 		//简单http认证的路由组
 		// 路由组：https://learnku.com/docs/gin-gonic/1.7/examples-grouping-routes/11399
 		//使用 BasicAuth 中间件  https://learnku.com/docs/gin-gonic/1.7/examples-using-basicauth-middleware/11377
-		authorized := engine.Group("/api", gin.BasicAuth(gin.Accounts{
+		api = engine.Group("/api", gin.BasicAuth(gin.Accounts{
 			common.Config.UserName: common.Config.Password,
 		}))
-		{
-			//解析json
-			authorized.GET("/book.json", func(c *gin.Context) {
-				c.PureJSON(http.StatusOK, common.ReadingBook)
-			})
-			//解析书架json
-			authorized.GET("/bookshelf.json", func(c *gin.Context) {
-				c.PureJSON(http.StatusOK, common.BookList)
-			})
-			//服务器设定
-			authorized.GET("/setting.json", func(c *gin.Context) {
-				c.PureJSON(http.StatusOK, common.Config)
-			})
-			//服务器设定
-			authorized.GET("/config.yaml", func(c *gin.Context) {
-				c.YAML(http.StatusOK, common.Config)
-			})
-			//初始化websocket
-			authorized.GET("/ws", wsHandler)
-		}
-
 	} else {
-		// 简单的路由组: v1
-		api := engine.Group("/api")
-		//解析json
-		api.GET("/book.json", func(c *gin.Context) {
-			c.PureJSON(http.StatusOK, common.ReadingBook)
-		})
-		//解析书架json
-		api.GET("/bookshelf.json", func(c *gin.Context) {
-			c.PureJSON(http.StatusOK, common.BookList)
-		})
-		//服务器设定
-		api.GET("/setting.json", func(c *gin.Context) {
-			c.PureJSON(http.StatusOK, common.Config)
-		})
-		//服务器设定
-		api.GET("/config.yaml", func(c *gin.Context) {
-			c.YAML(http.StatusOK, common.Config)
-		})
-		//初始化websocket
-		api.GET("/ws", wsHandler)
+		// 简单的路由组: api
+		api = engine.Group("/api")
 	}
+	//解析json
+	api.GET("/book.json", func(c *gin.Context) {
+		c.PureJSON(http.StatusOK, common.ReadingBook)
+	})
+	//解析书架json
+	api.GET("/bookshelf.json", func(c *gin.Context) {
+		c.PureJSON(http.StatusOK, common.BookList)
+	})
+	//服务器设定
+	api.GET("/setting.json", func(c *gin.Context) {
+		c.PureJSON(http.StatusOK, common.Config)
+	})
+	//服务器设定
+	api.GET("/config.yaml", func(c *gin.Context) {
+		c.YAML(http.StatusOK, common.Config)
+	})
+	//初始化websocket
+	api.GET("/ws", wsHandler)
+}
 
-	//是否同时对外服务
-	webHost := ":"
-	if common.Config.DisableLAN {
-		webHost = "localhost:"
-	}
+//3、选择服务端口
+func setPort() {
 	//检测端口
 	if !tools.CheckPort(common.Config.Port) {
 		r := rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -194,30 +131,32 @@ func StartWebServer() {
 		}
 		fmt.Println(locale.GetString("port_busy") + strconv.Itoa(common.Config.Port))
 	}
+}
 
-	////直接建立一个zipfs，
-	//ext := path.Ext(common.ReadingBook.FilePath)
-	//if ext == ".zip" || ext == ".epub" {
-	//	fsys, zip_err := zip.OpenReader(common.ReadingBook.FilePath)
-	//	if zip_err != nil {
-	//		fmt.Println(zip_err)
-	//	}
-	//	engine.StaticFS("/cache", http.FS(fsys))
+//4、设置图片（每一个文件都设置一遍看看）
+func setImageCache(engine *gin.Engine) {
+	for _, book := range common.BookList {
+		// 通过archiver/v4，建立虚拟FS。非UTF文件有编码问题，待改进
+		fsys, err := archiver.FileSystem(book.FilePath)
+		httpFS := http.FS(fsys)
+		if err != nil {
+			fmt.Println(err)
+		}
+		if book.IsDir {
+			book.SetBookID()
+			engine.Static("/cache/"+book.BookID, book.FilePath)
+		} else {
+			engine.StaticFS("/cache/"+book.BookID, httpFS)
+		}
+	}
+	//if len(common.BookList)-1 >= 0 {
+	//	common.ReadingBook = common.BookList[len(common.BookList)-1]
 	//}
+	common.ReadingBook = common.BookList[0]
+}
 
-	// 通过archiver/v4，建立虚拟FS。非UTF文件有编码问题，待改进
-	fsys, err := archiver.FileSystem(common.ReadingBook.FilePath)
-	httpFS := http.FS(fsys)
-	if err != nil {
-		fmt.Println(err)
-	}
-	if common.ReadingBook.IsDir {
-		common.ReadingBook.SetBookID()
-		engine.Static("/cache/"+common.ReadingBook.BookID, common.ReadingBook.FilePath)
-	} else {
-		engine.StaticFS("/cache/"+common.ReadingBook.BookID, httpFS)
-	}
-
+//5、setWebpServer
+func setWebpServer(engine *gin.Engine) {
 	////webp反向代理
 	//if common.Config.EnableWebpServer {
 	//	webpError := common.StartWebPServer(common.CacheFilePath+"/webp_config.json", common.ReadingBook.ExtractPath, common.CacheFilePath+"/webp", common.Config.Port+1)
@@ -240,25 +179,11 @@ func StartWebServer() {
 	//	} else {
 	//		engine.Static("/cache", common.CacheFilePath)
 	//	}
-	//
-	//	//具体的图片文件
-	//	//直接建立一个zipfs，但非UTF文件有编码问题，待改进
-	//	//ext := path.Ext(common.ReadingBook.FilePath)
-	//	//if ext == ".zip" {
-	//	//	fsys, zip_err := zip.OpenReader(common.ReadingBook.FilePath)
-	//	//	if zip_err != nil {
-	//	//		fmt.Println(zip_err)
-	//	//	}
-	//	//	engine.StaticFS("/cache", http.FS(fsys))
-	//	//} else {
-	//	//	//图片目录
-	//	//	engine.Static("/cache", common.ExtractPath)
-	//	//}
-	//}
-	enableTls := common.Config.CertFile != "" && common.Config.KeyFile != ""
-	//cmd打印链接二维码
-	tools.PrintAllReaderURL(common.Config.Port, common.Config.OpenBrowser, common.Config.EnableFrpcServer, common.Config.PrintAllIP, common.Config.Host, common.Config.FrpConfig.ServerAddr, common.Config.FrpConfig.RemotePort, common.Config.DisableLAN, enableTls)
-	//开始服务
+}
+
+//6、setFrpc
+func setFrpc(engine *gin.Engine) {
+	//frp服务
 	if common.Config.EnableFrpcServer {
 		if common.Config.FrpConfig.RandomRemotePort {
 			r := rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -275,15 +200,48 @@ func StartWebServer() {
 			fmt.Println(locale.GetString("frpc_server_start"))
 		}
 	}
+}
+
+//7、printCMDMessage
+func printCMDMessage() {
+	//cmd打印链接二维码
+	enableTls := common.Config.CertFile != "" && common.Config.KeyFile != ""
+	tools.PrintAllReaderURL(common.Config.Port, common.Config.OpenBrowser, common.Config.EnableFrpcServer, common.Config.PrintAllIP, common.Config.Host, common.Config.FrpConfig.ServerAddr, common.Config.FrpConfig.RemotePort, common.Config.DisableLAN, enableTls)
 	//打印配置，调试用
 	if common.Config.Debug {
 		litter.Dump(common.Config)
 	}
 	fmt.Println(locale.GetString("ctrl_c_hint"))
+}
 
+// StartWebServer 启动web服务
+func StartWebServer() {
+	//设置 gin
+	gin.SetMode(gin.ReleaseMode)
+	engine := gin.Default()
+	//1、setStaticFiles
+	setStaticFiles(engine)
+	//2、setWebAPI
+	setWebAPI(engine)
+	//3、setPort
+	setPort()
+	//4、setImageCache
+	setImageCache(engine)
+	//5、setWebpServer
+	setWebpServer(engine)
+	//6、setFrpc
+	setFrpc(engine)
+	//7、printCMDMessage
+	printCMDMessage()
+	//8、StartWebServer 监听并启动web服务
+	//是否对外服务
+	webHost := ":"
+	if common.Config.DisableLAN {
+		webHost = "localhost:"
+	}
+	enableTls := common.Config.CertFile != "" && common.Config.KeyFile != ""
 	if enableTls {
-		// 监听并启动服务
-		engine.RunTLS(webHost+strconv.Itoa(common.Config.Port), common.Config.CertFile, common.Config.KeyFile)
+		err := engine.RunTLS(webHost+strconv.Itoa(common.Config.Port), common.Config.CertFile, common.Config.KeyFile)
 		if err != nil {
 			_, err := fmt.Fprintf(os.Stderr, locale.GetString("web_server_error")+"%q\n", common.Config.Port)
 			if err != nil {
@@ -292,7 +250,7 @@ func StartWebServer() {
 		}
 	} else {
 		// 监听并启动服务
-		err = engine.Run(webHost + strconv.Itoa(common.Config.Port))
+		err := engine.Run(webHost + strconv.Itoa(common.Config.Port))
 		if err != nil {
 			_, err := fmt.Fprintf(os.Stderr, locale.GetString("web_server_error")+"%q\n", common.Config.Port)
 			if err != nil {
@@ -300,4 +258,16 @@ func StartWebServer() {
 			}
 		}
 	}
+}
+
+//单独设定某个文件
+func singleStaticFiles(engine *gin.Engine, fileUrl string, filePath string, contentType string) {
+	engine.GET(fileUrl, func(c *gin.Context) {
+		file, _ := staticFS.ReadFile(filePath)
+		c.Data(
+			http.StatusOK,
+			contentType,
+			file,
+		)
+	})
 }
