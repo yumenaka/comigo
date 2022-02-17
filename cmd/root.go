@@ -49,8 +49,8 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&common.Config.Password, "password", "k", "", "密码")
 
 	//简单认证
-	rootCmd.PersistentFlags().StringVar(&common.Config.CertFile, "certfile", "", "tls certfile")
-	rootCmd.PersistentFlags().StringVar(&common.Config.KeyFile, "keyfile", "", "tls keyfile")
+	rootCmd.PersistentFlags().StringVar(&common.Config.CertFile, "cert", "", "tls certfile")
+	rootCmd.PersistentFlags().StringVar(&common.Config.KeyFile, "key", "", "tls keyfile")
 
 	//指定配置文件
 	rootCmd.PersistentFlags().StringVarP(&common.ConfigFile, "config", "c", "", locale.GetString("CONFIG"))

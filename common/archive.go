@@ -53,7 +53,7 @@ func ScanArchive(scanPath string) (*Book, error) {
 
 	//建立一个zipfs
 	ext := path.Ext(scanPath)
-	if ext == ".zip" || ext == ".epub" { //为了解决早期BUG：zip文件无法读取2级目录？
+	if ext == ".zip" || ext == ".epub" { //为了解决archiver/v4的BUG：zip文件无法读取2级目录
 		fsys, zip_err := zip.OpenReader(scanPath)
 		if zip_err != nil {
 			fmt.Println(zip_err)
@@ -104,8 +104,8 @@ func ScanArchive(scanPath string) (*Book, error) {
 //手动写的递归查找，功能与fs.WalkDir()相同。发现zip文件的虚拟文件系统，似乎找不到正确的文件夹？
 // https://books.studygolang.com/The-Golang-Standard-Library-by-Example/chapter06/06.3.html
 func walkZipFs(fsys fs.FS, parent, base string, book *Book) error {
-	fmt.Println("parent:" + parent + " base:" + base)
-	dirEntries, err := fs.ReadDir(fsys, filepath.Join(parent, base))
+	//fmt.Println("parent:" + parent + " base:" + base)
+	dirEntries, err := fs.ReadDir(fsys, path.Join(parent, base))
 	if err != nil {
 		return err
 	}
@@ -117,7 +117,7 @@ func walkZipFs(fsys fs.FS, parent, base string, book *Book) error {
 		}
 		if dirEntry.IsDir() == true {
 			join_path := path.Join(parent, name)
-			walkZipFs(fsys, join_path, "", book)
+			walkZipFs(fsys, join_path, base, book)
 		} else if !isSupportMedia(name) {
 			logrus.Debugf(locale.GetString("unsupported_file_type") + name)
 		} else {

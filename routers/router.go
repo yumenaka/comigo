@@ -255,9 +255,9 @@ func StartWebServer() {
 	//	//	engine.Static("/cache", common.ExtractPath)
 	//	//}
 	//}
-
+	enableTls := common.Config.CertFile != "" && common.Config.KeyFile != ""
 	//cmd打印链接二维码
-	tools.PrintAllReaderURL(common.Config.Port, common.Config.OpenBrowser, common.Config.EnableFrpcServer, common.Config.PrintAllIP, common.Config.Host, common.Config.FrpConfig.ServerAddr, common.Config.FrpConfig.RemotePort, common.Config.DisableLAN)
+	tools.PrintAllReaderURL(common.Config.Port, common.Config.OpenBrowser, common.Config.EnableFrpcServer, common.Config.PrintAllIP, common.Config.Host, common.Config.FrpConfig.ServerAddr, common.Config.FrpConfig.RemotePort, common.Config.DisableLAN, enableTls)
 	//开始服务
 	if common.Config.EnableFrpcServer {
 		if common.Config.FrpConfig.RandomRemotePort {
@@ -281,7 +281,7 @@ func StartWebServer() {
 	}
 	fmt.Println(locale.GetString("ctrl_c_hint"))
 
-	if common.Config.CertFile != "" && common.Config.KeyFile != "" {
+	if enableTls {
 		// 监听并启动服务
 		engine.RunTLS(webHost+strconv.Itoa(common.Config.Port), common.Config.CertFile, common.Config.KeyFile)
 		if err != nil {
