@@ -220,8 +220,6 @@ func haveKeyWord(checkString string, list []string) bool {
 	return false
 }
 
-var ReadingBook Book
-var BookList []Book
 var (
 	CacheFilePath    string
 	Version          = "v0.5.1"
@@ -280,15 +278,101 @@ type Book struct {
 }
 
 type SinglePageInfo struct {
-	ModeTime          time.Time `json:"-"` //不要解析这个字段
-	FileSize          int64     `json:"-"` //不要解析这个字段
-	Height            int       `json:"height"`
-	Width             int       `json:"width"`
-	Url               string    `json:"url"`      //远程用户读取图片的实际URL，为了适应特殊字符，经过一次转义
-	InArchiveName     string    `json:"filename"` //书籍为压缩文件的时候，用于解压的压缩文件内文件路径
-	RealImageFilePATH string    `json:"-"`        //不要解析这个字段  书籍为文件夹的时候，实际图片的路径
-	ImgType           string    `json:"image_type"`
-	Blurhash          string    `json:"blurhash"`
+	InArchiveName string    `json:"filename"` //书籍为压缩文件的时候，用于解压的压缩文件内文件路径
+	Url           string    `json:"url"`      //远程用户读取图片的实际URL，为了适应特殊字符，经过一次转义
+	ModeTime      time.Time `json:"-"`        //不要解析这个字段
+	FileSize      int64     `json:"-"`        //不要解析这个字段
+	//Height            int       `json:"height"`
+	//Width             int       `json:"width"`
+	Height            int    `json:"-"` //不要解析这个字段
+	Width             int    `json:"-"` //不要解析这个字段
+	RealImageFilePATH string `json:"-"` //不要解析这个字段  书籍为文件夹的时候，实际图片的路径
+	//ImgType           string    `json:"image_type"`
+	//Blurhash          string    `json:"blurhash"`
+	ImgType  string `json:"-"` //不要解析这个字段
+	Blurhash string `json:"-"` //不要解析这个字段
+}
+
+//与Book唯一的区别是没有AllPageInfo,而是封面图URL
+type BookInfo struct {
+	Name            string    `json:"name"`
+	Author          string    `json:"author"`
+	Title           string    `json:"title"`
+	FilePath        string    `json:"-"` //不要解析这个字段
+	ExtractPath     string    `json:"-"` //不要解析这个字段
+	AllPageNum      int       `json:"all_page_num"`
+	FileType        string    `json:"file_type"`
+	FileSize        int64     `json:"file_size"`
+	Modified        time.Time `json:"modified_time"`
+	BookID          string    `json:"uuid"` //根据FilePath计算
+	IsDir           bool      `json:"is_folder"`
+	ExtractNum      int       `json:"extract_num"`
+	ExtractComplete bool      `json:"extract_complete"`
+	ReadPercent     float64   `json:"read_percent"`
+	//PageInfo        AllPageInfo `json:"pages"`
+	CoverInfo SinglePageInfo
+}
+
+//BookInfo的构造函数
+func NewBookInfoByBook(b Book) *BookInfo {
+	coverInfo := SinglePageInfo{}
+	if len(b.PageInfo) > 0 {
+		coverInfo = b.PageInfo[0]
+	}
+	return &BookInfo{
+		Name:            b.Name,
+		Author:          b.Author,
+		Title:           b.Title,
+		FilePath:        b.FilePath,
+		ExtractPath:     b.ExtractPath,
+		AllPageNum:      b.AllPageNum,
+		FileType:        b.FileType,
+		FileSize:        b.FileSize,
+		Modified:        b.Modified,
+		BookID:          b.BookID,
+		IsDir:           b.IsDir,
+		ExtractNum:      b.ExtractNum,
+		ExtractComplete: b.ExtractComplete,
+		ReadPercent:     b.ReadPercent,
+		CoverInfo:       coverInfo,
+	}
+}
+
+var ReadingBook Book
+var BookList []Book
+
+func GetBookShelf() (*[]BookInfo, error) {
+	var bookShelf []BookInfo
+	for _, b := range BookList {
+		info := NewBookInfoByBook(b)
+		bookShelf = append(bookShelf, *info)
+	}
+	if len(bookShelf) > 0 {
+		return &bookShelf, nil
+	}
+	return nil, errors.New("Can not Found bookShelf")
+}
+
+func GetBookByUUID(uuid string) (*Book, error) {
+	for _, b := range BookList {
+		if b.BookID == uuid {
+			return &b, nil
+		}
+	}
+	return nil, errors.New("Can not Found book,uuid=" + uuid)
+}
+
+func GetBookByAuthor(author string) (*[]Book, error) {
+	var bookList []Book
+	for _, b := range BookList {
+		if b.Author == author {
+			bookList = append(bookList, b)
+		}
+	}
+	if len(bookList) > 0 {
+		return &bookList, nil
+	}
+	return nil, errors.New("Can not Found book,author=" + author)
 }
 
 // AllPageInfo Slice

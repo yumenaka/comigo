@@ -105,7 +105,36 @@ func setWebAPI(engine *gin.Engine) {
 	})
 	//解析书架json
 	api.GET("/bookshelf.json", func(c *gin.Context) {
-		c.PureJSON(http.StatusOK, common.BookList)
+		bookShelf, err := common.GetBookShelf()
+		if err != nil {
+			fmt.Println(err)
+		}
+		c.PureJSON(http.StatusOK, bookShelf)
+	})
+	//通过字符串参数 查询书籍
+	// 示例 URL： /get?uuid=2b15a130-06c1-4462-a3fe-5276b566d9db
+	// 示例 URL： /get?&author=Doe&name=book_name
+	api.GET("/get", func(c *gin.Context) {
+		author := c.DefaultQuery("author", "")
+		if author != "" {
+			bookList, err := common.GetBookByAuthor(author)
+			if err != nil {
+				fmt.Println(err)
+			} else {
+				c.PureJSON(http.StatusOK, bookList)
+			}
+			return
+		}
+		uuid := c.DefaultQuery("uuid", "")
+		if uuid != "" {
+			b, err := common.GetBookByUUID(uuid)
+			if err != nil {
+				fmt.Println(err)
+			} else {
+				c.PureJSON(http.StatusOK, b)
+			}
+			return
+		}
 	})
 	//服务器设定
 	api.GET("/setting.json", func(c *gin.Context) {
