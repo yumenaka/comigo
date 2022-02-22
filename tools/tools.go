@@ -10,7 +10,34 @@ import (
 	"os/exec"
 	"runtime"
 	"strconv"
+	"unicode/utf8"
 )
+
+//来自： go\src\archive\zip\reader.go
+
+// detectUTF8 reports whether s is a valid UTF-8 string, and whether the string
+// must be considered UTF-8 encoding (i.e., not compatible with CP-437, ASCII,
+// or any other common encoding).
+//detectUTF8 检测 s 是否为有效的 UTF-8 字符串，以及该字符串是否必须被视为 UTF-8 编码（即，不兼容CP-437、ASCII 或任何其他常见编码）。
+func DetectUTF8(s string) (valid, require bool) {
+	for i := 0; i < len(s); {
+		r, size := utf8.DecodeRuneInString(s[i:])
+		i += size
+		// Officially, ZIP uses CP-437, but many readers use the system's
+		// local character encoding. Most encoding are compatible with a large
+		// subset of CP-437, which itself is ASCII-like.
+		//
+		// Forbid 0x7e and 0x5c since EUC-KR and Shift-JIS replace those
+		// characters with localized currency and overline characters.
+		if r < 0x20 || r > 0x7d || r == 0x5c {
+			if !utf8.ValidRune(r) || (r == utf8.RuneError && size == 1) {
+				return false, false
+			}
+			require = true
+		}
+	}
+	return true, require
+}
 
 // PrintAllReaderURL 打印阅读链接
 func PrintAllReaderURL(Port int, OpenBrowserFlag bool, EnableFrpcServer bool, PrintAllIP bool, ServerHost string, ServerAddr string, FrpRemotePort int, DisableLAN bool, enableTls bool) {

@@ -1,6 +1,7 @@
 package routers
 
 import (
+	"archive/zip"
 	"embed"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -15,6 +16,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"path"
 	"strconv"
 	"time"
 )
@@ -165,23 +167,42 @@ func setPort() {
 //4、设置图片（每一个文件都设置一遍看看）
 func setImageCache(engine *gin.Engine) {
 	for _, book := range common.BookList {
-		// 通过archiver/v4，建立虚拟FS。非UTF文件有编码问题，待改进
-		fsys, err := archiver.FileSystem(book.FilePath)
-		httpFS := http.FS(fsys)
-		if err != nil {
-			fmt.Println(err)
-		}
-		if book.IsDir {
-			book.SetBookID()
-			engine.Static("/cache/"+book.BookID, book.FilePath)
+
+		ext := path.Ext(book.FilePath)
+		if ext == ".zip" || ext == ".epub" { //为了解决archiver/v4的BUG：zip文件无法读取2级目录
+			fsys, zip_err := zip.OpenReader(book.FilePath)
+			if zip_err != nil {
+				fmt.Println(zip_err)
+			}
+			httpFS := http.FS(fsys)
+			if book.IsDir {
+				book.SetBookID()
+				engine.Static("/cache/"+book.BookID, book.FilePath)
+			} else {
+				engine.StaticFS("/cache/"+book.BookID, httpFS)
+			}
 		} else {
-			engine.StaticFS("/cache/"+book.BookID, httpFS)
+			// 通过archiver/v4，建立虚拟FS。非UTF文件有编码问题，待改进
+			fsys, err := archiver.FileSystem(book.FilePath)
+			httpFS := http.FS(fsys)
+			if err != nil {
+				fmt.Println(err)
+			}
+			if book.IsDir {
+				book.SetBookID()
+				engine.Static("/cache/"+book.BookID, book.FilePath)
+			} else {
+				engine.StaticFS("/cache/"+book.BookID, httpFS)
+			}
 		}
+
 	}
 	//if len(common.BookList)-1 >= 0 {
 	//	common.ReadingBook = common.BookList[len(common.BookList)-1]
 	//}
-	common.ReadingBook = common.BookList[0]
+	if len(common.BookList) >= 1 {
+		common.ReadingBook = common.BookList[0]
+	}
 }
 
 //5、setWebpServer

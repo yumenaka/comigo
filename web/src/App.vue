@@ -1,5 +1,5 @@
 <template>
-  <div class="home">
+  <div class="app">
     <n-message-provider>
       <ScrollMode
         v-if="selectTemplate === 'scroll'"
@@ -13,6 +13,12 @@
         :nowTemplate="this.selectTemplate"
         @setTemplate="OnSetTemplate"
       ></FlipMode>
+      <BookShelf
+        v-if="selectTemplate === 'bookshelf'"
+        :book="this.book"
+        :nowTemplate="this.selectTemplate"
+        @setTemplate="OnSetTemplate"
+      ></BookShelf>
     </n-message-provider>
   </div>
 </template>
@@ -21,6 +27,7 @@
 // @ is an alias to /src
 import ScrollMode from "@/views/ScrollMode.vue";
 import FlipMode from "@/views/FlipMode.vue";
+import BookShelf from "@/views/BookShelf.vue";
 import { useCookies } from "vue3-cookies";
 import { defineComponent } from 'vue'
 import { NMessageProvider } from 'naive-ui'
@@ -30,6 +37,7 @@ export default defineComponent({
   components: {
     ScrollMode,
     FlipMode,
+    BookShelf,
     NMessageProvider,
   },
   setup() {

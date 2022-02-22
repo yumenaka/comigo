@@ -38,14 +38,14 @@ func ParseCommands(args []string) {
 	//决定如何扫描，扫描哪个路径
 	if len(args) == 0 { //没有指定路径或文件的情况下
 		cmdPath := path.Dir(os.Args[0]) //当前执行路径
-		err := common.ScanBookPath(cmdPath)
+		err := common.ScanPath(cmdPath)
 		if err != nil {
 			fmt.Println(locale.GetString("scan_error"), cmdPath)
 		}
 	} else {
 		//指定了多个参数的话，都扫描一遍
 		for _, p := range args {
-			err := common.ScanBookPath(p)
+			err := common.ScanPath(p)
 			if err != nil {
 				fmt.Println(locale.GetString("scan_error"), p)
 			}

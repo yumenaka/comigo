@@ -260,21 +260,23 @@ func init() {
 }
 
 type Book struct {
-	Name            string      `json:"name"`
-	Author          string      `json:"author"`
-	Title           string      `json:"title"`
-	FilePath        string      `json:"-"` //不要解析这个字段
-	ExtractPath     string      `json:"-"` //不要解析这个字段
-	AllPageNum      int         `json:"all_page_num"`
-	FileType        string      `json:"file_type"`
-	FileSize        int64       `json:"file_size"`
-	Modified        time.Time   `json:"modified_time"`
-	BookID          string      `json:"uuid"` //根据FilePath计算
-	IsDir           bool        `json:"is_folder"`
-	ExtractNum      int         `json:"extract_num"`
-	ExtractComplete bool        `json:"extract_complete"`
-	ReadPercent     float64     `json:"read_percent"`
-	PageInfo        AllPageInfo `json:"pages"`
+	Name            string    `json:"name"`
+	Author          string    `json:"author"`
+	Title           string    `json:"title"`
+	FilePath        string    `json:"-"` //不要解析这个字段
+	ExtractPath     string    `json:"-"` //不要解析这个字段
+	AllPageNum      int       `json:"all_page_num"`
+	FileType        string    `json:"file_type"`
+	FileSize        int64     `json:"file_size"`
+	Modified        time.Time `json:"modified_time"`
+	BookID          string    `json:"uuid"` //根据FilePath计算
+	IsDir           bool      `json:"is_folder"`
+	ExtractNum      int       `json:"extract_num"`
+	ExtractComplete bool      `json:"extract_complete"`
+	ReadPercent     float64   `json:"read_percent"`
+	//NonUTF8 表示 Name 和 Comment 未以 UTF-8 编码。根据规范，唯一允许的其他编码应该是 CP-437，但从历史上看，许多 ZIP 阅读器将 Name 和 Comment 解释为系统的本地字符编码。仅当用户打算为特定本地化区域编码不可移植的 ZIP 文件时，才应设置此标志。否则，Writer 会自动为有效的 UTF-8 字符串设置 ZIP 格式的 UTF-8 标志。
+	NonUTF8  bool        `json:"non_utf8"`
+	PageInfo AllPageInfo `json:"pages"`
 }
 
 type SinglePageInfo struct {
@@ -309,12 +311,13 @@ type BookInfo struct {
 	ExtractNum      int       `json:"extract_num"`
 	ExtractComplete bool      `json:"extract_complete"`
 	ReadPercent     float64   `json:"read_percent"`
+	NonUTF8         bool      `json:"non-utf-8"`
 	//PageInfo        AllPageInfo `json:"pages"`
 	CoverInfo SinglePageInfo
 }
 
-//BookInfo的构造函数
-func NewBookInfoByBook(b Book) *BookInfo {
+//BookInfo的模拟构造函数
+func NewBookInfo(b Book) *BookInfo {
 	coverInfo := SinglePageInfo{}
 	if len(b.PageInfo) > 0 {
 		coverInfo = b.PageInfo[0]
@@ -334,6 +337,7 @@ func NewBookInfoByBook(b Book) *BookInfo {
 		ExtractNum:      b.ExtractNum,
 		ExtractComplete: b.ExtractComplete,
 		ReadPercent:     b.ReadPercent,
+		NonUTF8:         b.NonUTF8,
 		CoverInfo:       coverInfo,
 	}
 }
@@ -344,13 +348,13 @@ var BookList []Book
 func GetBookShelf() (*[]BookInfo, error) {
 	var bookShelf []BookInfo
 	for _, b := range BookList {
-		info := NewBookInfoByBook(b)
+		info := NewBookInfo(b)
 		bookShelf = append(bookShelf, *info)
 	}
 	if len(bookShelf) > 0 {
 		return &bookShelf, nil
 	}
-	return nil, errors.New("Can not Found bookShelf")
+	return nil, errors.New("can not found bookshelf")
 }
 
 func GetBookByUUID(uuid string) (*Book, error) {
@@ -359,7 +363,7 @@ func GetBookByUUID(uuid string) (*Book, error) {
 			return &b, nil
 		}
 	}
-	return nil, errors.New("Can not Found book,uuid=" + uuid)
+	return nil, errors.New("can not found book,uuid=" + uuid)
 }
 
 func GetBookByAuthor(author string) (*[]Book, error) {
@@ -372,7 +376,7 @@ func GetBookByAuthor(author string) (*[]Book, error) {
 	if len(bookList) > 0 {
 		return &bookList, nil
 	}
-	return nil, errors.New("Can not Found book,author=" + author)
+	return nil, errors.New("can not found book,author=" + author)
 }
 
 // AllPageInfo Slice
@@ -434,7 +438,7 @@ func (b *Book) GetBookID() string {
 	return b.BookID
 }
 
-// ScanArchive  设置书名与Book ID等
+// ScanArchiveOrFolder  设置书名与Book ID等
 func (b *Book) InitBook(name string) {
 	//文件夹直接用路径
 	if b.IsDir {

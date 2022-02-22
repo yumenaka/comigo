@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/mholt/archiver/v4"
+	"github.com/yumenaka/comi/tools"
 	"io/fs"
 	"io/ioutil"
 	"log"
@@ -35,9 +36,9 @@ func init() {
 	continueOnError = true
 }
 
-func ScanArchive(scanPath string) (*Book, error) {
+func ScanArchiveOrFolder(FolderOrFile string) (*Book, error) {
 	//打开文件
-	var file, err = os.OpenFile(scanPath, os.O_RDONLY, 0400) //Use mode 0400 for a read-only // file and 0600 for a readable+writable file.
+	var file, err = os.OpenFile(FolderOrFile, os.O_RDONLY, 0400) //Use mode 0400 for a read-only // file and 0600 for a readable+writable file.
 	if err != nil {
 		fmt.Println(err.Error())
 	}
@@ -47,20 +48,30 @@ func ScanArchive(scanPath string) (*Book, error) {
 		fmt.Println(err.Error())
 	}
 	//设置文件路径等等
-	book := Book{AllPageNum: 0, FilePath: scanPath, Modified: FileInfo.ModTime(), IsDir: FileInfo.IsDir(), FileSize: FileInfo.Size(), ExtractComplete: false}
+	book := Book{AllPageNum: 0, FilePath: FolderOrFile, Modified: FileInfo.ModTime(), IsDir: FileInfo.IsDir(), FileSize: FileInfo.Size(), ExtractComplete: false}
 	//设置书籍UUID，根据路径算出
 	book.InitBook(book.FilePath)
-
 	//建立一个zipfs
-	ext := path.Ext(scanPath)
+	ext := path.Ext(FolderOrFile)
 	if ext == ".zip" || ext == ".epub" { //为了解决archiver/v4的BUG：zip文件无法读取2级目录
-		fsys, zip_err := zip.OpenReader(scanPath)
+		//fsys, err := archiver.FileSystem(FolderOrFile)
+		//if err != nil {
+		//	return nil, err
+		//}
+		fsys, zip_err := zip.OpenReader(FolderOrFile)
 		if zip_err != nil {
 			fmt.Println(zip_err)
 		}
 		err = walkZipFs(fsys, "", ".", &book)
+		//if _, ok := err.(*fs.PathError); ok {
+		//	fsys, zip_err := zip.OpenReader(FolderOrFile)
+		//	if zip_err != nil {
+		//		fmt.Println(zip_err)
+		//	}
+		//	err = walkZipFs(fsys, "", ".", &book)
+		//}
 	} else {
-		fsys, err := archiver.FileSystem(scanPath)
+		fsys, err := archiver.FileSystem(FolderOrFile)
 		if err != nil {
 			return nil, err
 		}
@@ -87,16 +98,20 @@ func ScanArchive(scanPath string) (*Book, error) {
 				if errInfo != nil {
 					fmt.Println(locale.GetString("unsupported_file_type")+" %s", f)
 				}
-				u, ok := f.(archiver.File) //f.Name不包含路径信息.需要转换一下
-				if !ok {
-					fmt.Println(locale.GetString("unsupported_extract")+" %s", f)
-				}
 				if !isSupportMedia(path) {
 					logrus.Debugf(locale.GetString("unsupported_file_type") + path)
 				} else {
 					book.AllPageNum++
-					inArchiveName := u.NameInArchive
-					book.PageInfo = append(book.PageInfo, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), InArchiveName: inArchiveName, Url: "/cache/" + book.BookID + "/" + url.PathEscape(inArchiveName)})
+					inArchiveName := ""
+					u, ok := f.(archiver.File) //f.Name不包含路径信息.需要转换一下
+					if !ok {
+						//fmt.Println(locale.GetString("unsupported_extract")+" %s", f)
+						book.PageInfo = append(book.PageInfo, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), InArchiveName: inArchiveName, Url: "/cache/" + book.BookID + "/" + url.PathEscape(path)})
+					} else {
+						inArchiveName = u.NameInArchive
+						book.PageInfo = append(book.PageInfo, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), InArchiveName: inArchiveName, Url: "/cache/" + book.BookID + "/" + url.PathEscape(inArchiveName)})
+					}
+
 				}
 				return nil
 			}
@@ -109,9 +124,16 @@ func ScanArchive(scanPath string) (*Book, error) {
 // https://books.studygolang.com/The-Golang-Standard-Library-by-Example/chapter06/06.3.html
 func walkZipFs(fsys fs.FS, parent, base string, book *Book) error {
 	//fmt.Println("parent:" + parent + " base:" + base)
-	dirEntries, err := fs.ReadDir(fsys, path.Join(parent, base))
+	dirName := path.Join(parent, base)
+
+	dirEntries, err := fs.ReadDir(fsys, dirName)
 	if err != nil {
-		return err
+		dirName = tools.DecodeFileName(dirName, "shiftjis")
+		var errJP error
+		dirEntries, errJP = fs.ReadDir(fsys, dirName)
+		if errJP != nil {
+			return err
+		}
 	}
 	for _, dirEntry := range dirEntries {
 		name := dirEntry.Name()
@@ -167,7 +189,7 @@ func UnArchiveRar(b *Book) (err error) {
 	return err
 }
 
-//func ScanArchive(scanPath string) (*Book, error) {
+//func ScanArchiveOrFolder(scanPath string) (*Book, error) {
 //	//打开文件
 //	var file, err = os.OpenFile(scanPath, os.O_RDONLY, 0400) //Use mode 0400 for a read-only // file and 0600 for a readable+writable file.
 //	if err != nil {
@@ -181,7 +203,7 @@ func UnArchiveRar(b *Book) (err error) {
 //	//设置文件路径等等
 //	book := Book{AllPageNum: 0, FilePath: scanPath, Modified: FileInfo.ModTime(), IsDir: FileInfo.IsDir(), FileSize: FileInfo.Size(), ExtractComplete: false}
 //	//设置书籍UUID，根据路径算出
-//	book.ScanArchive(book.FilePath)
+//	book.ScanArchiveOrFolder(book.FilePath)
 //	// 获取支持的格式
 //	iface, err := getFormat(scanPath)
 //	if err != nil {
@@ -429,47 +451,29 @@ func isSupportArchiver(checkPath string) bool {
 	return false
 }
 
-func ScanBookPath(pathname string) (err error) {
-	var fileList, dirList []string
+func ScanPath(path string) (err error) {
+	//var fileList, dirList []string
+	var pathList []string
 	var bookList []Book
-	err = filepath.Walk(pathname, func(path string, fileInfo os.FileInfo, err error) error {
+	err = filepath.Walk(path, func(path string, fileInfo os.FileInfo, err error) error {
 		//路径深度
-		depth := strings.Count(path, "/") - strings.Count(pathname, "/")
-		//windows替换 “/” 为 “\”，去掉
-		//if runtime.GOOS == "windows" {
-		//	depth = strings.Count(path, "\\") - strings.Count(pathname, "\\")
-		//}
+		depth := strings.Count(path, "/") - strings.Count(path, "/")
 		if depth > Config.MaxDepth {
 			return filepath.SkipDir
 		}
 		if fileInfo == nil {
 			return err
 		}
-		if fileInfo.IsDir() {
-			dirList = append(dirList, path) //文件夹列表
+		if !isSupportArchiver(path) && !fileInfo.IsDir() {
 			return nil
 		}
-		if !isSupportArchiver(path) {
-			return nil
-		}
-		fileList = append(fileList, path) //文件列表
+		pathList = append(pathList, path) //文件与路径列表
 		return nil
 	})
 	//分析所有的文件
-	for _, f := range fileList {
+	for _, f := range pathList {
 		//得到书籍的文件数据
-		book, err := ScanArchive(f)
-		if err != nil {
-			fmt.Println(err)
-		}
-		if book.AllPageNum >= Config.MinImageNum {
-			bookList = append(bookList, *book)
-		}
-	}
-	//分析所有的文件夹
-	for _, f := range dirList {
-		//得到书籍的文件数据
-		book, err := ScanDir_InitBook(f)
+		book, err := ScanArchiveOrFolder(f)
 		if err != nil {
 			fmt.Println(err)
 		}
