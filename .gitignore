@@ -33,6 +33,7 @@ main
 
 #项目相关配置或文件
 go_build_main_go
+archiver
 bin
 comic
 .config

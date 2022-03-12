@@ -224,11 +224,12 @@ export default defineComponent({
 		//此处不能使用this
 		const { cookies } = useCookies();
 		//背景颜色，颜色选择器用
+		//reactive({}) 创建并返回一个响应式对象: https://www.bilibili.com/video/av925511720/?p=4  也讲到了toRefs()
 		const model = reactive({
 			color: "#E0D9CD",
 		});
 
-		//单选按钮绑定的数值
+		//单选按钮绑定的数值,ref函数：返回一个响应式的引用
 		// const checkedValueRef = ref(null)
 		return {
 			cookies,

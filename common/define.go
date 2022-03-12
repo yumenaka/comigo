@@ -1,6 +1,8 @@
 package common
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"github.com/cheggaaa/pb/v3"
@@ -221,11 +223,11 @@ func haveKeyWord(checkString string, list []string) bool {
 }
 
 var (
-	CacheFilePath    string
-	Version          = "v0.5.1"
-	ExcludeFolders   = []string{".comigo", "node_modules", "flutter_ui", "$RECYCLE.BIN", "Config.Msi"}
-	SupportMediaType = []string{".jpg", ".jpeg", ".JPEG", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp", ".webp", ".ico", ".heic", ".pdf", ".mp4", ".webm"}
-	SupportFileType  = [...]string{
+	CacheFilePath        string
+	Version              = "v0.5.1"
+	ExcludeFileOrFolders = []string{".comigo", "node_modules", "flutter_ui", "$RECYCLE.BIN", "Config.Msi"}
+	SupportMediaType     = []string{".jpg", ".jpeg", ".JPEG", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp", ".webp", ".ico", ".heic", ".pdf", ".mp4", ".webm"}
+	SupportFileType      = [...]string{
 		".zip",
 		".tar",
 		".rar",
@@ -280,10 +282,10 @@ type Book struct {
 }
 
 type SinglePageInfo struct {
-	InArchiveName string    `json:"filename"` //书籍为压缩文件的时候，用于解压的压缩文件内文件路径
-	Url           string    `json:"url"`      //远程用户读取图片的实际URL，为了适应特殊字符，经过一次转义
-	ModeTime      time.Time `json:"-"`        //不要解析这个字段
-	FileSize      int64     `json:"-"`        //不要解析这个字段
+	NameInArchive string    `json:"-"`   //书籍为压缩文件的时候，用于解压的压缩文件内文件路径
+	Url           string    `json:"url"` //远程用户读取图片的实际URL，为了适应特殊字符，经过一次转义
+	ModeTime      time.Time `json:"-"`   //不要解析这个字段
+	FileSize      int64     `json:"-"`   //不要解析这个字段
 	//Height            int       `json:"height"`
 	//Width             int       `json:"width"`
 	Height            int    `json:"-"` //不要解析这个字段
@@ -389,19 +391,22 @@ func (s AllPageInfo) Len() int {
 // Less 按时间或URL，将图片排序
 func (s AllPageInfo) Less(i, j int) (less bool) {
 	//如何定义 s[i] < s[j]  根据文件名
-	numI, err1 := getNumberFromString(s[i].InArchiveName)
-	if err1 != nil {
-		less = strings.Compare(s[i].InArchiveName, s[j].InArchiveName) > 0
-		return less
-	}
-	numJ, err2 := getNumberFromString(s[j].InArchiveName)
-	if err2 != nil {
-		less = strings.Compare(s[i].InArchiveName, s[j].InArchiveName) > 0
-		return less
-	}
-	//fmt.Println("numI:",numI)
-	//fmt.Println("numJ:",numJ)
-	less = numI < numJ //如果有的话，比较文件名里的数字
+	//numI, err1 := getNumberFromString(s[i].NameInArchive)
+	//if err1 != nil {
+	//	less = strings.Compare(s[i].NameInArchive, s[j].NameInArchive) > 0
+	//	return less
+	//}
+	//numJ, err2 := getNumberFromString(s[j].NameInArchive)
+	//if err2 != nil {
+	//	less = strings.Compare(s[i].NameInArchive, s[j].NameInArchive) > 0
+	//	return less
+	//}
+	////fmt.Println("numI:",numI)
+	////fmt.Println("numJ:",numJ)
+	//less = numI < numJ //如果有的话，比较文件名里的数字
+
+	//如何定义 s[i] < s[j]  根据文件名(自然语言字符串)
+	less = tools.Compare(s[i].NameInArchive, s[j].NameInArchive)
 
 	//如何定义 s[i] < s[j]  根据修改时间
 	if Config.SortImage == "time" {
@@ -426,8 +431,11 @@ func (b *Book) SetBookID() {
 	if err != nil {
 		fmt.Println(err, fileAbaPath)
 	}
-	//fmt.Println(md5s(fileAbaPath))
 	b.BookID = md5string(fileAbaPath)
+}
+func md5string(s string) string {
+	r := md5.Sum([]byte(s))
+	return hex.EncodeToString(r[:])
 }
 
 // GetBookID  根据路径的MD5，生成书籍ID
