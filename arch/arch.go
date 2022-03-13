@@ -11,27 +11,22 @@ import (
 	"path/filepath"
 )
 
-// replace  github.com/mholt/archiver/v4  => D:\archiver
+//var (
+//	compressionLevel       int
+//	overwriteExisting      bool
+//	mkdirAll               bool
+//	selectiveCompression   bool
+//	implicitTopLevelFolder bool
+//	continueOnError        bool
+//)
+//
+//func init() {
+//	mkdirAll = true
+//	overwriteExisting = false
+//	continueOnError = true
+//}
 
-// go get github.com/yumenaka/archiver
-// go mod edit -replace github.com/mholt/archiver/v4 v4.0.0-alpha.5 => github.com/yumenaka/archiver/v4@master
-
-var (
-	compressionLevel       int
-	overwriteExisting      bool
-	mkdirAll               bool
-	selectiveCompression   bool
-	implicitTopLevelFolder bool
-	continueOnError        bool
-)
-
-func init() {
-	mkdirAll = true
-	overwriteExisting = false
-	continueOnError = true
-}
-
-// ScanZip 扫描文件，初始化书籍用
+// ScanNonUTF8Zip 扫描文件，初始化书籍用
 func ScanNonUTF8Zip(filePath string, textEncoding string) (reader *zip.Reader, err error) {
 	//打开文件，只读模式
 	file, err := os.OpenFile(filePath, os.O_RDONLY, 0400) //Use mode 0400 for a read-only // file and 0600 for a readable+writable file.
@@ -96,7 +91,7 @@ func UnArchiveZip(filePath string, extractPath string, textEncoding string) erro
 	return nil
 }
 
-// UnArchiveFle 一次性解压rar文件
+// UnArchiveRar  一次性解压rar文件
 func UnArchiveRar(filePath string, extractPath string) error {
 	extractPath = getAbsPath(extractPath)
 	//如果解压路径不存在，创建路径
@@ -173,11 +168,11 @@ func extractFileHandler(ctx context.Context, f archiver.File) error {
 	return err
 }
 
-// UnArchiveZip 一次性解压zip文件
-func GetFileInArchive(filePath string, pathsInArchive []string, textEncoding string) ([]byte, error) {
+// GetSingleFile  获取单个文件
+func GetSingleFile(filePath string, NameInArchive string, textEncoding string) ([]byte, error) {
 	//必须传值
-	if len(pathsInArchive) == 0 {
-		return nil, errors.New("pathsInArchive error")
+	if NameInArchive == "" {
+		return nil, errors.New("NameInArchive is empty")
 	}
 	//打开文件，只读模式
 	file, err := os.OpenFile(filePath, os.O_RDONLY, 0400) //Use mode 0400 for a read-only // file and 0600 for a readable+writable file.
@@ -195,9 +190,8 @@ func GetFileInArchive(filePath string, pathsInArchive []string, textEncoding str
 	if ex, ok := format.(archiver.Zip); ok {
 		ex.TextEncoding = textEncoding // “”  "shiftjis" "gbk"
 		ctx := context.Background()
-		//ctx = context.WithValue(ctx, "GetFileInArchive_filePath", filePath)
-		err := ex.Extract(ctx, file, pathsInArchive, func(ctx context.Context, f archiver.File) error {
-			// 取得压缩文件
+		err := ex.Extract(ctx, file, []string{NameInArchive}, func(ctx context.Context, f archiver.File) error {
+			// 取得特定压缩文件
 			file, err := f.Open()
 			if err != nil {
 				fmt.Println(err)
@@ -212,29 +206,7 @@ func GetFileInArchive(filePath string, pathsInArchive []string, textEncoding str
 		})
 		return data, err
 	}
-	return nil, errors.New("2,not Found " + pathsInArchive[0] + " in " + filePath)
-}
-
-//提供提取单个文件的函数
-func getFileHandler(ctx context.Context, f archiver.File) error {
-	zipFilePath := ""
-	if e, ok := ctx.Value("GetFileInArchive_filePath").(string); ok {
-		zipFilePath = e
-	}
-	// 取得压缩文件
-	file, err := f.Open()
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer file.Close()
-	content, err := ioutil.ReadAll(file)
-	if err != nil {
-		fmt.Println(err)
-	}
-	//写入ctx
-	key := zipFilePath + f.NameInArchive
-	ctx = context.WithValue(ctx, key, content)
-	return err
+	return nil, errors.New("2,not Found " + NameInArchive + " in " + filePath)
 }
 
 //判断文件夹或文件是否存在

@@ -87,7 +87,7 @@ func setStaticFiles(engine *gin.Engine) {
 	}
 }
 
-//2、设置Json与websocks API
+//2、设置获取书籍信息、图片文件的 API
 func setWebAPI(engine *gin.Engine) {
 	enableAuth := common.Config.UserName != "" && common.Config.Password != ""
 	var api *gin.RouterGroup
@@ -150,7 +150,7 @@ func setWebAPI(engine *gin.Engine) {
 	//初始化websocket
 	api.GET("/ws", wsHandler)
 
-	//通过字符串参数 获取图片
+	//通过字符串参数获取图片，目前只有非UTF-8编码的ZIP文件会用到。
 	// 示例 URL： /getfile?uuid=2b15a130-06c1-4462-a3fe-5276b566d9db&filename=NameInArchive
 	api.GET("/getfile", func(c *gin.Context) {
 		uuid := c.DefaultQuery("uuid", "")
@@ -161,16 +161,24 @@ func setWebAPI(engine *gin.Engine) {
 				fmt.Println(err)
 			}
 			filePath := book.FilePath
-			fmt.Println(filePath)
-			content, err := arch.GetFileInArchive(filePath, []string{NameInArchive}, "gbk")
-			if err != nil {
-				fmt.Println(err)
+			//fmt.Println(filePath)
+			if book.NonUTF8ZipFile {
+				content, err := arch.GetSingleFile(filePath, NameInArchive, "gbk")
+				if err != nil {
+					fmt.Println(err)
+				}
+				c.Data(http.StatusOK, tools.GetContentTypeByFileName(NameInArchive), content)
+			} else {
+				content, err := arch.GetSingleFile(filePath, NameInArchive, "")
+				if err != nil {
+					fmt.Println(err)
+				}
+				c.Data(http.StatusOK, tools.GetContentTypeByFileName(NameInArchive), content)
 			}
-			c.Data(http.StatusOK, tools.GetContentTypeByFileName(NameInArchive), content)
 		}
 	})
 
-	//设置图片（每本书都设置一遍）
+	//使用虚拟文件系统，设置服务路径（每本书都设置一遍）
 	for _, book := range common.BookList {
 		if book.NonUTF8ZipFile {
 			continue
@@ -202,7 +210,6 @@ func setWebAPI(engine *gin.Engine) {
 				engine.StaticFS("/cache/"+book.BookID, httpFS)
 			}
 		}
-
 	}
 	//if len(common.BookList)-1 >= 0 {
 	//	common.ReadingBook = common.BookList[len(common.BookList)-1]
@@ -210,15 +217,9 @@ func setWebAPI(engine *gin.Engine) {
 	if len(common.BookList) >= 1 {
 		common.ReadingBook = common.BookList[0]
 	}
-
 }
 
-//4、设置图片（每个文件都设置一遍）
-func setImageCache(engine *gin.Engine) {
-
-}
-
-//4、选择服务端口
+//3、选择服务端口
 func setPort() {
 	//检测端口
 	if !tools.CheckPort(common.Config.Port) {
@@ -232,7 +233,7 @@ func setPort() {
 	}
 }
 
-//5、setWebpServer
+//4、setWebpServer
 func setWebpServer(engine *gin.Engine) {
 	////webp反向代理
 	//if common.Config.EnableWebpServer {
@@ -258,7 +259,7 @@ func setWebpServer(engine *gin.Engine) {
 	//	}
 }
 
-//6、setFrpc
+//5、setFrpc
 func setFrpc(engine *gin.Engine) {
 	//frp服务
 	if common.Config.EnableFrpcServer {
@@ -279,7 +280,7 @@ func setFrpc(engine *gin.Engine) {
 	}
 }
 
-//7、printCMDMessage
+//6、printCMDMessage
 func printCMDMessage() {
 	//cmd打印链接二维码
 	enableTls := common.Config.CertFile != "" && common.Config.KeyFile != ""
@@ -300,17 +301,15 @@ func StartWebServer() {
 	setStaticFiles(engine)
 	//2、setWebAPI
 	setWebAPI(engine)
-	//3、setImageCache
-	setImageCache(engine)
-	//4、setPort
+	//3、setPort
 	setPort()
-	//5、setWebpServer
+	//4、setWebpServer
 	setWebpServer(engine)
-	//6、setFrpc
+	//5、setFrpc
 	setFrpc(engine)
-	//7、printCMDMessage
+	//6、printCMDMessage
 	printCMDMessage()
-	//8、StartWebServer 监听并启动web服务
+	//7、StartWebServer 监听并启动web服务
 	//是否对外服务
 	webHost := ":"
 	if common.Config.DisableLAN {

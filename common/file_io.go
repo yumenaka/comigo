@@ -56,7 +56,7 @@ func ScanArchiveOrFolder(FilePath string) (*Book, error) {
 			for _, f := range reader.File {
 				if isSupportMedia(f.Name) {
 					//如果是压缩文件
-					TempURL := "api/getfile?uuid=" + book.BookID + "&filename=" + f.Name
+					TempURL := "api/getfile?uuid=" + book.BookID + "&filename=" + url.PathEscape(f.Name)
 					book.PageInfo = append(book.PageInfo, SinglePageInfo{RealImageFilePATH: "", FileSize: f.FileInfo().Size(), ModeTime: f.FileInfo().ModTime(), NameInArchive: f.Name, Url: TempURL})
 					book.AllPageNum++
 					//fmt.Println(i)

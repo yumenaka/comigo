@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/mholt/archiver/v4"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -24,11 +25,6 @@ func main() {
 	//if err != nil {
 	//	fmt.Println(err)
 	//}
-}
-
-func GetSingleFile(filePath string, extractPath string, textEncoding string) error {
-
-	return nil
 }
 
 // UnArchiveZip 一次性解压zip文件
