@@ -1,5 +1,16 @@
 package arch
 
+import (
+	"archive/zip"
+	"context"
+	"errors"
+	"fmt"
+	"github.com/mholt/archiver/v4"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+)
+
 // replace  github.com/mholt/archiver/v4  => D:\archiver
 
 // go get github.com/yumenaka/archiver
@@ -20,241 +31,233 @@ func init() {
 	continueOnError = true
 }
 
-//v3 code:
+// ScanZip 扫描文件，初始化书籍用
+func ScanNonUTF8Zip(filePath string, textEncoding string) (reader *zip.Reader, err error) {
+	//打开文件，只读模式
+	file, err := os.OpenFile(filePath, os.O_RDONLY, 0400) //Use mode 0400 for a read-only // file and 0600 for a readable+writable file.
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer file.Close()
+	//是否是压缩包
+	format, err := archiver.Identify(filePath, file)
+	if err != nil {
+		return nil, err
+	}
+	//如果是zip
+	if ex, ok := format.(archiver.Zip); ok {
+		ex.TextEncoding = textEncoding // “”  "shiftjis" "gbk"
+		ctx := context.Background()
+		////WithValue返回parent的一个副本，该副本保存了传入的key/value，而调用Context接口的Value(key)方法就可以得到val。注意在同一个context中设置key/value，若key相同，值会被覆盖。
+		//ctx = context.WithValue(ctx, "extractPath", extractPath)
+		reader, err := ex.LsAllFile(ctx, file, func(ctx context.Context, f archiver.File) error {
+			//fmt.Println(f.Name())
+			return nil
+		})
+		if err != nil {
+			return nil, err
+		}
+		return reader, err
+	}
+	return nil, errors.New("扫描文件错误")
+}
 
-//func ScanArchiveOrFolder(scanPath string) (*Book, error) {
-//	//打开文件
-//	var file, err = os.OpenFile(scanPath, os.O_RDONLY, 0400) //Use mode 0400 for a read-only // file and 0600 for a readable+writable file.
-//	if err != nil {
-//		fmt.Println(err.Error())
-//	}
-//	defer file.Close()
-//	FileInfo, err := file.Stat()
-//	if err != nil {
-//		fmt.Println(err.Error())
-//	}
-//	//设置文件路径等等
-//	book := Book{AllPageNum: 0, FilePath: scanPath, Modified: FileInfo.ModTime(), IsDir: FileInfo.IsDir(), FileSize: FileInfo.Size(), ExtractComplete: false}
-//	//设置书籍UUID，根据路径算出
-//	book.ScanArchiveOrFolder(book.FilePath)
-//	// 获取支持的格式
-//	iface, err := getFormat(scanPath)
-//	if err != nil {
-//		return &book, err
-//	}
-//	//判断是否可解压（判断是否可解析： w, ok := iface.(archiver.Walker)）
-//	_, ok := iface.(archiver.Extractor)
-//	if !ok {
-//		logrus.Debugf(locale.GetString("unsupported_extract")+"%s", iface)
-//		return &book, err
-//	} else {
-//		fmt.Println(locale.GetString("scan_ing"), scanPath)
-//	}
-//
-//	//统计页数,分析有几张图片
-//	err = archiver.Walk(scanPath, func(f archiver.File) error {
-//		inArchiveName := "" //f.Name不包含路径信息.
-//		////zip编码用
-//		decodeFileName := ""
-//		//解压后的路径
-//		extractFolder := path.Join(CacheFilePath, book.GetBookID())
-//		//f.Name()不包括路径，inArchiveName需要从f.Header当中获取
-//		switch h := f.Header.(type) {
-//		case zip.FileHeader: //Now zip not "archive/zip"
-//			book.FileType = ".zip"
-//			inArchiveName = h.Name
-//			if Config.ZipFilenameEncoding != "" {
-//				decodeTool := archiver.Zip{FilenameEncoding: Config.ZipFilenameEncoding}
-//				decodeFileName = decodeTool.DecodeFileName(h)
-//			}
-//			logrus.Debugf("%s\t%d\t%d\t%s\t%s\n",
-//				f.Mode(),
-//				h.Method,
-//				f.Size(),
-//				f.ModTime(),
-//				h.Name,
-//			)
-//		case *tar.Header:
-//			book.FileType = ".tar"
-//			inArchiveName = h.Name
-//			logrus.Debugf("%s\t%s\t%s\t%d\t%s\t%s\n",
-//				f.Mode(),
-//				h.Uname,
-//				h.Gname,
-//				f.Size(),
-//				f.ModTime(),
-//				h.Name,
-//			)
-//		case *rardecode.FileHeader:
-//			book.FileType = ".rar"
-//			inArchiveName = h.Name
-//			logrus.Debugf("%s\t%d\t%d\t%s\t%s\n",
-//				f.Mode(),
-//				int(h.HostOS),
-//				f.Size(),
-//				f.ModTime(),
-//				h.Name,
-//			)
-//		default:
-//			fmt.Printf("%s\t%d\t%s\t?/%s\n",
-//				f.Mode(),
-//				f.Size(),
-//				f.ModTime(),
-//				f.Name(), // we don't know full path from this
-//			)
-//		}
-//		//解压后的文件路径
-//		imageFilePath := extractFolder + "/" + inArchiveName
-//		//zip编码的额外处理
-//		if Config.ZipFilenameEncoding != "" {
-//			imageFilePath = extractFolder + "/" + decodeFileName
-//			inArchiveName = decodeFileName
-//		}
-//		if !isSupportMedia(inArchiveName) {
-//			logrus.Debugf(locale.GetString("unsupported_file_type") + inArchiveName)
-//		} else {
-//			book.AllPageNum++
-//			book.PageInfo = append(book.PageInfo, SinglePageInfo{RealImageFilePATH: imageFilePath, FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: inArchiveName, Url: "/cache/" + book.BookID + "/" + url.PathEscape(inArchiveName)})
-//		}
-//		return nil
-//	})
-//	return &book, err
-//}
+// UnArchiveZip 一次性解压zip文件
+func UnArchiveZip(filePath string, extractPath string, textEncoding string) error {
+	extractPath = getAbsPath(extractPath)
+	//如果解压路径不存在，创建路径
+	err := os.MkdirAll(extractPath, os.ModePerm)
+	if err != nil {
+		fmt.Println(err)
+	}
+	//打开文件，只读模式
+	file, err := os.OpenFile(filePath, os.O_RDONLY, 0400) //Use mode 0400 for a read-only // file and 0600 for a readable+writable file.
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer file.Close()
+	//是否是压缩包
+	format, err := archiver.Identify(filePath, file)
+	if err != nil {
+		return err
+	}
+	//如果是zip
+	if ex, ok := format.(archiver.Zip); ok {
+		ex.TextEncoding = textEncoding // “”  "shiftjis" "gbk"
+		ctx := context.Background()
+		//WithValue返回parent的一个副本，该副本保存了传入的key/value，而调用Context接口的Value(key)方法就可以得到val。注意在同一个context中设置key/value，若key相同，值会被覆盖。
+		ctx = context.WithValue(ctx, "extractPath", extractPath)
+		_, err := ex.LsAllFile(ctx, file, extractFileHandler)
+		if err != nil {
+			return err
+		}
+		fmt.Println("zip文件解压完成：" + getAbsPath(filePath) + " 解压到：" + getAbsPath(extractPath))
+	}
+	return nil
+}
 
-//// UnArchive 一次解压所有文件
-//func UnArchive(b *Book) (err error) {
-//	// 获取支持的格式
-//	iface, err := getFormat(b.FilePath)
-//	if err != nil {
-//		return err
-//	}
-//	u, ok := iface.(archiver.Unarchiver)
-//	if !ok {
-//		fmt.Println(locale.GetString("unsupported_extract")+" %s", iface)
-//	}
-//	extraFolder := path.Join(CacheFilePath, b.GetBookID())
-//	fmt.Println(extraFolder)
-//	err = u.Unarchive(b.FilePath, extraFolder)
-//	if err != nil {
-//		return err
-//	}
-//	//解压完成提示
-//	fmt.Println(locale.GetString("completed_ls"), b.FilePath)
-//	//ExtractPath = extraFolder
-//	ReadingBook.ExtractComplete = true
-//	ReadingBook.ExtractNum = ReadingBook.AllPageNum
-//	return err
-//}
+// UnArchiveFle 一次性解压rar文件
+func UnArchiveRar(filePath string, extractPath string) error {
+	extractPath = getAbsPath(extractPath)
+	//如果解压路径不存在，创建路径
+	err := os.MkdirAll(extractPath, os.ModePerm)
+	if err != nil {
+		fmt.Println(err)
+	}
+	//打开文件，只读模式
+	file, err := os.OpenFile(filePath, os.O_RDONLY, 0400) //Use mode 0400 for a read-only // file and 0600 for a readable+writable file.
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer file.Close()
+	//是否是压缩包
+	format, err := archiver.Identify(filePath, file)
+	if err != nil {
+		return err
+	}
+	//如果是rar
+	if ex, ok := format.(archiver.Rar); ok {
+		ctx := context.Background()
+		//WithValue返回parent的一个副本，该副本保存了传入的key/value，而调用Context接口的Value(key)方法就可以得到val。注意在同一个context中设置key/value，若key相同，值会被覆盖。
+		ctx = context.WithValue(ctx, "extractPath", extractPath)
+		err := ex.LsAllFile(ctx, file, extractFileHandler)
+		if err != nil {
+			return err
+		}
+		fmt.Println("rar文件解压完成：" + getAbsPath(filePath) + " 解压到：" + getAbsPath(extractPath))
+	}
+	return nil
+}
 
-//// 解压单个文件
-//func DecompressionSingleFlie(b *Book, pageNum int) (err error) {
-//	// 获取支持的格式
-//	iface, err := getFormat(b.FilePath)
-//	if err != nil {
-//		return err
-//	}
-//	e, ok := iface.(archiver.Extractor)
-//	if !ok {
-//		fmt.Println(locale.GetString("unsupported_extract")+"%s", iface) //这个文件好像没法ls啊
-//		return err
-//	}
-//	extractFolder := path.Join(CacheFilePath, b.GetBookID())
-//	//fmt.Println(locale.GetString("start_ls"), b.FilePath)
-//	return e.Extract(b.FilePath, b.PageInfo[pageNum-1].NameInArchive, extractFolder)
-//}
+//解压文件的函数
+func extractFileHandler(ctx context.Context, f archiver.File) error {
+	extractPath := ""
+	if e, ok := ctx.Value("extractPath").(string); ok {
+		extractPath = e
+	}
+	// 取得压缩文件
+	file, err := f.Open()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer file.Close()
+	//如果是文件夹，直接创建文件夹
+	if f.IsDir() {
+		err = os.MkdirAll(filepath.Join(extractPath, f.NameInArchive), os.ModePerm)
+		if err != nil {
+			fmt.Println(err)
+		}
+		return err
+	}
+	//如果是一般文件，将文件写入磁盘
+	writeFilePath := filepath.Join(extractPath, f.NameInArchive)
+	//写文件前，如果对应文件夹不存在，就创建对应文件夹
+	checkDir := filepath.Dir(writeFilePath)
+	if !isExist(checkDir) {
+		err = os.MkdirAll(checkDir, os.ModePerm)
+		if err != nil {
+			fmt.Println(err)
+		}
+		return err
+	}
+	//具体内容
+	content, err := ioutil.ReadAll(file)
+	if err != nil {
+		fmt.Println(err)
+	}
+	//写入文件
+	err = ioutil.WriteFile(writeFilePath, content, 0644)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return err
+}
 
-//// GetSingleFile 不解压，只是提取单个文件
-//func GetSingleFile(b *Book, pageNum int) (err error) {
-//	// 参考
-//	// https://pkg.go.dev/github.com/mholt/archiver/v3#example-Zip-StreamingRead
-//	iface, err := getFormat(b.FilePath)
-//	if err != nil {
-//		return err
-//	}
-//	req := new(http.Request)
-//	contentLen, err := strconv.Atoi(req.Header.Get("Content-Length"))
-//	if err != nil {
-//		log.Fatal(err)
-//	}
-//	reader, ok := iface.(archiver.Reader)
-//	if !ok {
-//		fmt.Println("unsupported_getSingleFile", iface)
-//		return err
-//	}
-//	//Zip 格式需要知道流的长度，但其他格式通常不需要它，因此在使用它们时可以将其保留为 0
-//	err = reader.Open(req.Body, int64(contentLen))
-//	if err != nil {
-//		log.Fatal(err)
-//	}
-//	defer reader.Close()
-//	return err
-//}
+// UnArchiveZip 一次性解压zip文件
+func GetFileInArchive(filePath string, pathsInArchive []string, textEncoding string) ([]byte, error) {
+	//必须传值
+	if len(pathsInArchive) == 0 {
+		return nil, errors.New("pathsInArchive error")
+	}
+	//打开文件，只读模式
+	file, err := os.OpenFile(filePath, os.O_RDONLY, 0400) //Use mode 0400 for a read-only // file and 0600 for a readable+writable file.
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer file.Close()
+	//是否是压缩包
+	format, err := archiver.Identify(filePath, file)
+	if err != nil {
+		return nil, err
+	}
+	//如果是zip
+	var data []byte
+	if ex, ok := format.(archiver.Zip); ok {
+		ex.TextEncoding = textEncoding // “”  "shiftjis" "gbk"
+		ctx := context.Background()
+		//ctx = context.WithValue(ctx, "GetFileInArchive_filePath", filePath)
+		err := ex.Extract(ctx, file, pathsInArchive, func(ctx context.Context, f archiver.File) error {
+			// 取得压缩文件
+			file, err := f.Open()
+			if err != nil {
+				fmt.Println(err)
+			}
+			defer file.Close()
+			content, err := ioutil.ReadAll(file)
+			if err != nil {
+				fmt.Println(err)
+			}
+			data = content
+			return err
+		})
+		return data, err
+	}
+	return nil, errors.New("2,not Found " + pathsInArchive[0] + " in " + filePath)
+}
 
-//func getFormat(subcommand string) (interface{}, error) {
-//	// 通过文件扩展名获取格式
-//	f, err := archiver.ByExtension(subcommand)
-//	if err != nil {
-//		return nil, err
-//	}
-//	// 准备一个Tar，下面要用到
-//	tarball := &archiver.Tar{
-//		//OverwriteExisting:      overwriteExisting,
-//		//MkdirAll:               mkdirAll,
-//		//ImplicitTopLevelFolder: implicitTopLevelFolder,
-//		ContinueOnError: continueOnError,
-//	}
-//	// fully configure the new value
-//	switch v := f.(type) {
-//	case *archiver.Rar:
-//		v.OverwriteExisting = overwriteExisting
-//		v.MkdirAll = mkdirAll
-//		v.ImplicitTopLevelFolder = implicitTopLevelFolder
-//		v.ContinueOnError = continueOnError
-//		v.Password = os.Getenv("ARCHIVE_PASSWORD")
-//	case *archiver.Tar:
-//		v = tarball
-//	case *archiver.TarBrotli:
-//		v.Tar = tarball
-//		v.Quality = compressionLevel
-//	case *archiver.TarBz2:
-//		v.Tar = tarball
-//		v.CompressionLevel = compressionLevel
-//	case *archiver.TarGz:
-//		v.Tar = tarball
-//		v.CompressionLevel = compressionLevel
-//	case *archiver.TarLz4:
-//		v.Tar = tarball
-//		v.CompressionLevel = compressionLevel
-//	case *archiver.TarSz:
-//		v.Tar = tarball
-//	case *archiver.TarXz:
-//		v.Tar = tarball
-//	case *archiver.TarZstd:
-//		v.Tar = tarball
-//	case *archiver.Zip:
-//		v.CompressionLevel = compressionLevel
-//		v.OverwriteExisting = overwriteExisting
-//		v.MkdirAll = mkdirAll
-//		v.SelectiveCompression = selectiveCompression
-//		v.ImplicitTopLevelFolder = implicitTopLevelFolder
-//		v.ContinueOnError = continueOnError
-//		v.FilenameEncoding = Config.ZipFilenameEncoding
-//	case *archiver.Gz:
-//		v.CompressionLevel = compressionLevel
-//	case *archiver.Brotli:
-//		v.Quality = compressionLevel
-//	case *archiver.Bz2:
-//		v.CompressionLevel = compressionLevel
-//	case *archiver.Lz4:
-//		v.CompressionLevel = compressionLevel
-//	case *archiver.Snappy:
-//		// nothing to customize
-//	case *archiver.Xz:
-//		// nothing to customize
-//	case *archiver.Zstd:
-//		// nothing to customize
-//	default:
-//		return nil, fmt.Errorf(locale.GetString("format_customization_error")+" %s", f)
-//	}
-//	return f, nil
-//}
+//提供提取单个文件的函数
+func getFileHandler(ctx context.Context, f archiver.File) error {
+	zipFilePath := ""
+	if e, ok := ctx.Value("GetFileInArchive_filePath").(string); ok {
+		zipFilePath = e
+	}
+	// 取得压缩文件
+	file, err := f.Open()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer file.Close()
+	content, err := ioutil.ReadAll(file)
+	if err != nil {
+		fmt.Println(err)
+	}
+	//写入ctx
+	key := zipFilePath + f.NameInArchive
+	ctx = context.WithValue(ctx, key, content)
+	return err
+}
+
+//判断文件夹或文件是否存在
+func isExist(path string) bool {
+	_, err := os.Stat(path)
+	if err != nil {
+		if os.IsExist(err) {
+			return true
+		}
+		if os.IsNotExist(err) {
+			return false
+		}
+		fmt.Println(err)
+		return false
+	}
+	return true
+}
+
+//获取绝对路径
+func getAbsPath(path string) string {
+	abs, err := filepath.Abs(path)
+	if err != nil {
+		abs = path
+	}
+	return abs
+}

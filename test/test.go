@@ -3,23 +3,32 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/mholt/archiver/v4"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 )
 
 func main() {
-	zipPath := "gbk.zip"
-	err := UnArchiveZip(zipPath, "解压zip", "gbk")
-	if err != nil {
-		fmt.Println(err)
-	}
-	rarPath := "rar.rar"
-	err = UnArchiveRar(rarPath, "解压rar")
-	if err != nil {
-		fmt.Println(err)
-	}
+	//zipPath := "gbk.zip"
+	//err := UnArchiveZip(zipPath, "解压zip", "gbk")
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//rarPath := "rar.rar"
+	//err = UnArchiveRar(rarPath, "解压rar")
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//zipPath := "gbk.zip"
+	//_, err := ScanNonUTF8Zip(zipPath, "解压zip", []string{""}, "gbk")
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+}
+
+func GetSingleFile(filePath string, extractPath string, textEncoding string) error {
+
+	return nil
 }
 
 // UnArchiveZip 一次性解压zip文件
@@ -47,7 +56,7 @@ func UnArchiveZip(filePath string, extractPath string, textEncoding string) erro
 		ctx := context.Background()
 		//WithValue返回parent的一个副本，该副本保存了传入的key/value，而调用Context接口的Value(key)方法就可以得到val。注意在同一个context中设置key/value，若key相同，值会被覆盖。
 		ctx = context.WithValue(ctx, "extractPath", extractPath)
-		err := ex.LsAllFile(ctx, file, extractFileHandler)
+		_, err := ex.LsAllFile(ctx, file, extractFileHandler)
 		if err != nil {
 			return err
 		}

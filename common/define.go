@@ -276,16 +276,16 @@ type Book struct {
 	ExtractNum      int       `json:"extract_num"`
 	ExtractComplete bool      `json:"extract_complete"`
 	ReadPercent     float64   `json:"read_percent"`
-	//NonUTF8 表示 Name 和 Comment 未以 UTF-8 编码。根据规范，唯一允许的其他编码应该是 CP-437，但从历史上看，许多 ZIP 阅读器将 Name 和 Comment 解释为系统的本地字符编码。仅当用户打算为特定本地化区域编码不可移植的 ZIP 文件时，才应设置此标志。否则，Writer 会自动为有效的 UTF-8 字符串设置 ZIP 格式的 UTF-8 标志。
-	NonUTF8  bool        `json:"non_utf8"`
-	PageInfo AllPageInfo `json:"pages"`
+	//NonUTF8ZipFile 表示 Name 和 Comment 未以 UTF-8 编码。根据规范，唯一允许的其他编码应该是 CP-437，但从历史上看，许多 ZIP 阅读器将 Name 和 Comment 解释为系统的本地字符编码。仅当用户打算为特定本地化区域编码不可移植的 ZIP 文件时，才应设置此标志。否则，Writer 会自动为有效的 UTF-8 字符串设置 ZIP 格式的 UTF-8 标志。
+	NonUTF8ZipFile bool        `json:"non_utf8_zip"`
+	PageInfo       AllPageInfo `json:"pages"`
 }
 
 type SinglePageInfo struct {
-	NameInArchive string    `json:"-"`   //书籍为压缩文件的时候，用于解压的压缩文件内文件路径
-	Url           string    `json:"url"` //远程用户读取图片的实际URL，为了适应特殊字符，经过一次转义
-	ModeTime      time.Time `json:"-"`   //不要解析这个字段
-	FileSize      int64     `json:"-"`   //不要解析这个字段
+	NameInArchive string    `json:"name"` //书籍为压缩文件的时候，用于解压的压缩文件内文件路径
+	Url           string    `json:"url"`  //远程用户读取图片的实际URL，为了适应特殊字符，经过一次转义
+	ModeTime      time.Time `json:"-"`    //不要解析这个字段
+	FileSize      int64     `json:"-"`    //不要解析这个字段
 	//Height            int       `json:"height"`
 	//Width             int       `json:"width"`
 	Height            int    `json:"-"` //不要解析这个字段
@@ -339,7 +339,7 @@ func NewBookInfo(b Book) *BookInfo {
 		ExtractNum:      b.ExtractNum,
 		ExtractComplete: b.ExtractComplete,
 		ReadPercent:     b.ReadPercent,
-		NonUTF8:         b.NonUTF8,
+		NonUTF8:         b.NonUTF8ZipFile,
 		CoverInfo:       coverInfo,
 	}
 }

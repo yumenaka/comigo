@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mholt/archiver/v4"
 	"github.com/sanity-io/litter"
+	"github.com/yumenaka/comi/arch"
 	"github.com/yumenaka/comi/common"
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/tools"
@@ -148,28 +149,34 @@ func setWebAPI(engine *gin.Engine) {
 	})
 	//初始化websocket
 	api.GET("/ws", wsHandler)
-}
 
-//3、选择服务端口
-func setPort() {
-	//检测端口
-	if !tools.CheckPort(common.Config.Port) {
-		r := rand.New(rand.NewSource(time.Now().UnixNano()))
-		if common.Config.Port+2000 > 65535 {
-			common.Config.Port = common.Config.Port + r.Intn(1024)
-		} else {
-			common.Config.Port = 30000 + r.Intn(20000)
+	//通过字符串参数 获取图片
+	// 示例 URL： /getfile?uuid=2b15a130-06c1-4462-a3fe-5276b566d9db&filename=NameInArchive
+	api.GET("/getfile", func(c *gin.Context) {
+		uuid := c.DefaultQuery("uuid", "")
+		NameInArchive := c.DefaultQuery("filename", "")
+		if uuid != "" && NameInArchive != "" {
+			book, err := common.GetBookByUUID(uuid)
+			if err != nil {
+				fmt.Println(err)
+			}
+			filePath := book.FilePath
+			fmt.Println(filePath)
+			content, err := arch.GetFileInArchive(filePath, []string{NameInArchive}, "gbk")
+			if err != nil {
+				fmt.Println(err)
+			}
+			c.Data(http.StatusOK, tools.GetContentTypeByFileName(NameInArchive), content)
 		}
-		fmt.Println(locale.GetString("port_busy") + strconv.Itoa(common.Config.Port))
-	}
-}
+	})
 
-//4、设置图片（每一个文件都设置一遍看看）
-func setImageCache(engine *gin.Engine) {
+	//设置图片（每本书都设置一遍）
 	for _, book := range common.BookList {
-
+		if book.NonUTF8ZipFile {
+			continue
+		}
 		ext := path.Ext(book.FilePath)
-		if ext == ".zip" || ext == ".epub" { //为了解决archiver/v4的BUG：zip文件无法读取2级目录
+		if (ext == ".zip" || ext == ".epub" || ext == ".cbz") && !book.NonUTF8ZipFile {
 			fsys, zip_err := zip.OpenReader(book.FilePath)
 			if zip_err != nil {
 				fmt.Println(zip_err)
@@ -202,6 +209,26 @@ func setImageCache(engine *gin.Engine) {
 	//}
 	if len(common.BookList) >= 1 {
 		common.ReadingBook = common.BookList[0]
+	}
+
+}
+
+//4、设置图片（每个文件都设置一遍）
+func setImageCache(engine *gin.Engine) {
+
+}
+
+//4、选择服务端口
+func setPort() {
+	//检测端口
+	if !tools.CheckPort(common.Config.Port) {
+		r := rand.New(rand.NewSource(time.Now().UnixNano()))
+		if common.Config.Port+2000 > 65535 {
+			common.Config.Port = common.Config.Port + r.Intn(1024)
+		} else {
+			common.Config.Port = 30000 + r.Intn(20000)
+		}
+		fmt.Println(locale.GetString("port_busy") + strconv.Itoa(common.Config.Port))
 	}
 }
 
@@ -273,10 +300,10 @@ func StartWebServer() {
 	setStaticFiles(engine)
 	//2、setWebAPI
 	setWebAPI(engine)
-	//3、setPort
-	setPort()
-	//4、setImageCache
+	//3、setImageCache
 	setImageCache(engine)
+	//4、setPort
+	setPort()
 	//5、setWebpServer
 	setWebpServer(engine)
 	//6、setFrpc

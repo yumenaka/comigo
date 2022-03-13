@@ -8,8 +8,10 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"path"
 	"runtime"
 	"strconv"
+	"strings"
 	"unicode/utf8"
 )
 
@@ -37,6 +39,29 @@ func DetectUTF8(s string) (valid, require bool) {
 		}
 	}
 	return true, require
+}
+
+func GetContentTypeByFileName(fileName string) (contentType string) {
+	ext := strings.ToLower(path.Ext(fileName))
+	switch {
+	case ext == ".png":
+		contentType = "image/png"
+	case ext == ".jpg" || ext == ".jpeg":
+		contentType = "image/jpeg"
+	case ext == ".webp":
+		contentType = "image/jpeg"
+	case ext == ".gif":
+		contentType = "image/gif"
+	case ext == ".ico":
+		contentType = "image/x-icon"
+	case ext == ".heif":
+		contentType = "image/heif"
+	case ext == ".ico":
+		contentType = "image/x-icon"
+	default:
+		contentType = ""
+	}
+	return contentType
 }
 
 // PrintAllReaderURL 打印阅读链接

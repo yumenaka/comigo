@@ -2,9 +2,9 @@ package common
 
 import (
 	"archive/zip"
-	"context"
 	"fmt"
 	"github.com/mholt/archiver/v4"
+	"github.com/yumenaka/comi/arch"
 	"io/fs"
 	"io/ioutil"
 	"net/url"
@@ -47,22 +47,22 @@ func ScanArchiveOrFolder(FilePath string) (*Book, error) {
 		//}
 		err = walkZipFs(fsys, "", ".", &book)
 		if _, ok := err.(*fs.PathError); ok {
-			book.NonUTF8 = true
+			book.NonUTF8ZipFile = true
 			fmt.Println("出现编码错误")
-			err = walkZipFs(fsys, "", ".", &book)
-
-			format, err := archiver.Identify(FilePath, file)
+			reader, err := arch.ScanNonUTF8Zip(FilePath, "gbk")
 			if err != nil {
-				fmt.Println(err)
+				return nil, err
 			}
-			if ex, ok := format.(archiver.Zip); ok {
-				ex.TextEncoding = "shiftjis"
-				ex.LsAllFile(context.Background(), file, func(_ context.Context, f archiver.File) error {
-					// do something with the file ...
-					fmt.Println(f)
-					f.Open()
-					return nil
-				})
+			for _, f := range reader.File {
+				if isSupportMedia(f.Name) {
+					//如果是压缩文件
+					TempURL := "api/getfile?uuid=" + book.BookID + "&filename=" + f.Name
+					book.PageInfo = append(book.PageInfo, SinglePageInfo{RealImageFilePATH: "", FileSize: f.FileInfo().Size(), ModeTime: f.FileInfo().ModTime(), NameInArchive: f.Name, Url: TempURL})
+					book.AllPageNum++
+					//fmt.Println(i)
+				} else {
+					logrus.Debugf(locale.GetString("unsupported_file_type") + f.Name)
+				}
 			}
 		}
 		if Config.SortImage != "none" {
@@ -197,7 +197,7 @@ func ScanPath(path string) (err error) {
 		if err != nil {
 			fmt.Println(err)
 		}
-		if book.AllPageNum >= Config.MinImageNum || book.NonUTF8 {
+		if book.AllPageNum >= Config.MinImageNum || book.NonUTF8ZipFile {
 			bookList = append(bookList, *book)
 		}
 	}
