@@ -153,7 +153,8 @@ func walkZipFs(fsys fs.FS, parent, base string, book *Book) error {
 
 func isSupportMedia(checkPath string) bool {
 	for _, ex := range SupportMediaType {
-		suffix := path.Ext(checkPath)
+		//strings.ToLower():某些文件会用大写文件名
+		suffix := strings.ToLower(path.Ext(checkPath))
 		if ex == suffix {
 			return true
 		}
