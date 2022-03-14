@@ -135,7 +135,7 @@ func Decode(in []byte, charset string) ([]byte, error) {
 }
 
 func DecodeFileName(headerName string, ZipFilenameEncoding string) string {
-	if ZipFilenameEncoding != "" { //common.Config.ZipFilenameEncoding
+	if ZipFilenameEncoding != "" { //common.Config.ZipFileTextEncoding
 		if filename, err := Decode([]byte(headerName), ZipFilenameEncoding); err == nil {
 			return string(filename)
 		}

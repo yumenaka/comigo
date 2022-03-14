@@ -11,8 +11,8 @@ import (
 	"time"
 )
 
-//现在还没启用的log功能
-func LoggerToFile(LogFilePath string,LogFileName  string) gin.HandlerFunc {
+// LoggerToFile log功能，现在还没做完
+func LoggerToFile(LogFilePath string, LogFileName string) gin.HandlerFunc {
 	//日志文件路径
 	filename := path.Join(LogFilePath, LogFileName)
 	src, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, os.ModeAppend)

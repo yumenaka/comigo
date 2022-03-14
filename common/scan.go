@@ -2,6 +2,7 @@ package common
 
 import (
 	"archive/zip"
+	"errors"
 	"fmt"
 	"github.com/mholt/archiver/v4"
 	"github.com/yumenaka/comi/arch"
@@ -11,7 +12,9 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/yumenaka/comi/locale"
@@ -28,28 +31,24 @@ func ScanArchiveOrFolder(FilePath string) (*Book, error) {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	//设置文件路径等等
-	book := Book{AllPageNum: 0, FilePath: FilePath, Modified: FileInfo.ModTime(), IsDir: FileInfo.IsDir(), FileSize: FileInfo.Size(), ExtractComplete: false}
-	//设置书籍UUID，根据路径算出
-	book.InitBook(book.FilePath)
+	//初始化一本书，设置文件路径等等
+	book := InitBook(0, FilePath, FileInfo.ModTime(), FileInfo.IsDir(), FileInfo.Size(), false)
 	//为了解决archiver/v4的BUG “zip文件无法读取2级目录” 单独处理zip文件
 	ext := path.Ext(FilePath)
-	if ext == ".zip" || ext == ".epub" {
+	if ext == ".zip" || ext == ".cbz" || ext == ".epub" {
 		//建立一个zipfs，无法处理非UTF-8编码
-		fsys, zip_err := zip.OpenReader(FilePath)
-		if zip_err != nil {
-			fmt.Println(zip_err)
+		fsys, zipErr := zip.OpenReader(FilePath)
+		if zipErr != nil {
+			fmt.Println(zipErr)
 		}
-		////其他类型的压缩文件或文件夹
-		//fsys, err := archiver.FileSystem(FilePath)
-		//if err != nil {
-		//	return nil, err
-		//}
-		err = walkZipFs(fsys, "", ".", &book)
+		err = walkZipFs(fsys, "", ".", book)
+		//如果扫描ZIP文件的时候遇到了 fs.PathError ，则可能遇到了NonUTF-8 ZIP文件，需要特殊处理
 		if _, ok := err.(*fs.PathError); ok {
+			//忽略 fs.PathError 并换个方式扫描
+			err = nil
 			book.NonUTF8ZipFile = true
-			fmt.Println("出现编码错误")
-			reader, err := arch.ScanNonUTF8Zip(FilePath, "gbk")
+			fmt.Println(err)
+			reader, err := arch.ScanNonUTF8Zip(FilePath, Config.ZipFileTextEncoding)
 			if err != nil {
 				return nil, err
 			}
@@ -58,8 +57,6 @@ func ScanArchiveOrFolder(FilePath string) (*Book, error) {
 					//如果是压缩文件
 					TempURL := "api/getfile?uuid=" + book.BookID + "&filename=" + url.PathEscape(f.Name)
 					book.PageInfo = append(book.PageInfo, SinglePageInfo{RealImageFilePATH: "", FileSize: f.FileInfo().Size(), ModeTime: f.FileInfo().ModTime(), NameInArchive: f.Name, Url: TempURL})
-					book.AllPageNum++
-					//fmt.Println(i)
 				} else {
 					logrus.Debugf(locale.GetString("unsupported_file_type") + f.Name)
 				}
@@ -68,7 +65,14 @@ func ScanArchiveOrFolder(FilePath string) (*Book, error) {
 		if Config.SortImage != "none" {
 			book.SortPages()
 		}
-		return &book, err
+		//根据文件数决定是否返回这本书
+		totalPageHint := "FilePath: " + FilePath + " Total number of pages in the book:" + strconv.Itoa(book.GetAllPageNum())
+		if book.GetAllPageNum() >= Config.MinImageNum {
+			fmt.Println(totalPageHint)
+			return book, err
+		} else {
+			return nil, errors.New(totalPageHint)
+		}
 	}
 	//其他类型的压缩文件或文件夹
 	fsys, err := archiver.FileSystem(FilePath)
@@ -91,29 +95,36 @@ func ScanArchiveOrFolder(FilePath string) (*Book, error) {
 		f, errInfo := d.Info()
 		if errInfo != nil {
 			fmt.Println(errInfo)
+			return fs.SkipDir
 		}
-		if isSupportMedia(path) {
-			book.AllPageNum++
-			u, ok := f.(archiver.File) //f.Name不包含路径信息.需要转换一下
-			if !ok {
-				//如果是文件夹中的图片
-				book.PageInfo = append(book.PageInfo, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: "", Url: "/cache/" + book.BookID + "/" + url.PathEscape(path)})
-				//fmt.Println(locale.GetString("unsupported_extract")+" %s", f)
-			} else {
-				//如果是压缩文件
-				TempURL := "/cache/" + book.BookID + "/" + url.PathEscape(u.NameInArchive)
-				book.PageInfo = append(book.PageInfo, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: u.NameInArchive, Url: TempURL})
-			}
-		} else {
+		if !isSupportMedia(path) {
 			logrus.Debugf(locale.GetString("unsupported_file_type") + path)
+			return fs.SkipDir
+		}
+
+		u, ok := f.(archiver.File) //f.Name不包含路径信息.需要转换一下
+		if !ok {
+			//如果是文件夹中的图片
+			book.PageInfo = append(book.PageInfo, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: "", Url: "/cache/" + book.BookID + "/" + url.PathEscape(path)})
+			//fmt.Println(locale.GetString("unsupported_extract")+" %s", f)
+		} else {
+			//如果是压缩文件
+			TempURL := "/cache/" + book.BookID + "/" + url.PathEscape(u.NameInArchive)
+			book.PageInfo = append(book.PageInfo, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: u.NameInArchive, Url: TempURL})
 		}
 		return nil
-
 	})
 	if Config.SortImage != "none" {
 		book.SortPages()
 	}
-	return &book, err
+	//根据文件数决定是否返回这本书
+	totalPageHint := "FilePath: " + FilePath + " Total number of pages in the book:" + strconv.Itoa(book.GetAllPageNum())
+	if book.GetAllPageNum() >= Config.MinImageNum {
+		fmt.Println(totalPageHint)
+		return book, err
+	} else {
+		return nil, errors.New(totalPageHint)
+	}
 }
 
 //手动写的递归查找，功能与fs.WalkDir()相同。发现zip文件的虚拟文件系统，似乎找不到正确的文件夹？
@@ -138,12 +149,11 @@ func walkZipFs(fsys fs.FS, parent, base string, book *Book) error {
 				return fs.SkipDir
 			default:
 			}
-			join_path := path.Join(parent, name)
-			err = walkZipFs(fsys, join_path, base, book)
+			joinPath := path.Join(parent, name)
+			err = walkZipFs(fsys, joinPath, base, book)
 		} else if !isSupportMedia(name) {
 			logrus.Debugf(locale.GetString("unsupported_file_type") + name)
 		} else {
-			book.AllPageNum++
 			inArchiveName := path.Join(parent, f.Name())
 			book.PageInfo = append(book.PageInfo, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: inArchiveName, Url: "/cache/" + book.BookID + "/" + url.PathEscape(inArchiveName)})
 		}
@@ -172,10 +182,9 @@ func isSupportArchiver(checkPath string) bool {
 	return false
 }
 
-func ScanPath(path string) (err error) {
+func ScanPath(path string) (bookList []Book, err error) {
 	//var fileList, dirList []string
 	var pathList []string
-	var bookList []Book
 	err = filepath.Walk(path, func(path string, fileInfo os.FileInfo, err error) error {
 		//路径深度
 		depth := strings.Count(path, "/") - strings.Count(path, "/")
@@ -193,28 +202,26 @@ func ScanPath(path string) (err error) {
 	})
 	//分析所有的文件
 	for _, f := range pathList {
-		//得到书籍的文件数据
+		//得到书籍文件数据
 		book, err := ScanArchiveOrFolder(f)
 		if err != nil {
 			fmt.Println(err)
+			continue
 		}
-		if book.AllPageNum >= Config.MinImageNum || book.NonUTF8ZipFile {
-			bookList = append(bookList, *book)
-		}
+		bookList = append(bookList, *book)
 	}
-	//最后的所有可用书籍，包括压缩包与文件夹
-	BookList = bookList
-	return err
+	//所有可用书籍，包括压缩包与文件夹
+	return bookList, err
 }
 
-func ScanDir_InitBook(dirPath string) (*Book, error) {
+func ScandirInitbook(dirPath string) (*Book, error) {
 	files, err := ioutil.ReadDir(dirPath)
 	if err != nil {
 		return nil, err
 	}
-	var book = Book{FilePath: dirPath, IsDir: true, AllPageNum: 0, ExtractComplete: true}
 	//初始化，生成UUID
-	book.InitBook(book.FilePath)
+	book := InitBook(0, dirPath, time.Now(), true, 0, true)
+
 	for _, file := range files {
 		if file.IsDir() {
 			continue
@@ -226,10 +233,16 @@ func ScanDir_InitBook(dirPath string) (*Book, error) {
 			}
 			//fmt.Println(strAbsPath)
 			if isSupportMedia(file.Name()) {
-				book.AllPageNum += 1
 				book.PageInfo = append(book.PageInfo, SinglePageInfo{RealImageFilePATH: strAbsPath, FileSize: file.Size(), ModeTime: file.ModTime(), NameInArchive: file.Name(), Url: "/cache/" + book.BookID + "/" + url.PathEscape(file.Name())})
 			}
 		}
 	}
-	return &book, err
+	//根据文件数决定是否返回这本书
+	totalPageHint := "FilePath: " + dirPath + " Total number of pages in the book:" + strconv.Itoa(book.GetAllPageNum())
+	if book.GetAllPageNum() >= Config.MinImageNum {
+		fmt.Println(totalPageHint)
+		return book, err
+	} else {
+		return nil, errors.New(totalPageHint)
+	}
 }

@@ -33,32 +33,28 @@ var rootCmd = &cobra.Command{
 
 //ParseCommands 解析命令
 func ParseCommands(args []string) {
-	//通过“可执行文件名”设置默认阅读模板
+	//通过“可执行文件名”设置部分默认参数
 	common.Config.SetByExecutableFilename()
 	//决定如何扫描，扫描哪个路径
 	if len(args) == 0 { //没有指定路径或文件的情况下
-		cmdPath := path.Dir(os.Args[0]) //当前执行路径
-		err := common.ScanPath(cmdPath)
+		cmdPath := path.Dir(os.Args[0]) //扫描程序执行的路径
+		list, err := common.ScanPath(cmdPath)
 		if err != nil {
 			fmt.Println(locale.GetString("scan_error"), cmdPath)
+		} else {
+			common.BookList = append(common.BookList, list...)
 		}
 	} else {
 		//指定了多个参数的话，都扫描一遍
 		for _, p := range args {
-			err := common.ScanPath(p)
+			list, err := common.ScanPath(p)
 			if err != nil {
 				fmt.Println(locale.GetString("scan_error"), p)
+			} else {
+				common.BookList = append(common.BookList, list...)
 			}
 		}
 	}
-	////扫描完路径之后，选择第一本书
-	//switch len(common.BookList) {
-	//case 0:
-	//	fmt.Println(locale.GetString("book_not_found"))
-	//	os.Exit(0)
-	//default:
-	//	common.ReadingBook = common.BookList[0]
-	//}
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -80,8 +76,8 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&common.Config.Password, "password", "k", "", "密码")
 
 	//简单认证
-	rootCmd.PersistentFlags().StringVar(&common.Config.CertFile, "cert", "", "tls certfile")
-	rootCmd.PersistentFlags().StringVar(&common.Config.KeyFile, "key", "", "tls keyfile")
+	rootCmd.PersistentFlags().StringVar(&common.Config.CertFile, "cert", "", "tls CertFile")
+	rootCmd.PersistentFlags().StringVar(&common.Config.KeyFile, "key", "", "tls KeyFile")
 
 	//指定配置文件
 	rootCmd.PersistentFlags().StringVarP(&common.ConfigFile, "config", "c", "", locale.GetString("CONFIG"))
@@ -145,8 +141,8 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&common.Config.TempPATH, "temp-path", "", locale.GetString("TEMP_PATH"))
 	//退出时清除临时文件
 	rootCmd.PersistentFlags().BoolVar(&common.Config.CleanAllTempFileOnExit, "clean", false, locale.GetString("CLEAN_ALL_TEMP_FILE"))
-	//手动指定zip文件编码(gbk、shiftjis……etc）
-	//rootCmd.PersistentFlags().StringVar(&common.Config.ZipFilenameEncoding, "zip-encode", "", locale.GetString("ZIP_ENCODE"))
+	//手动指定zip文件编码 gbk、shiftjis……
+	rootCmd.PersistentFlags().StringVar(&common.Config.ZipFileTextEncoding, "zip-encode", "gbk", locale.GetString("ZIP_ENCODE"))
 	////访问密码，还没做
 	//	rootCmd.PersistentFlags().StringVar(&common.Config.Auth, "auth", "user:comigo", locale.GetString("AUTH"))
 	//尚未写完的功能

@@ -185,13 +185,12 @@ func setWebAPI(engine *gin.Engine) {
 		}
 		ext := path.Ext(book.FilePath)
 		if (ext == ".zip" || ext == ".epub" || ext == ".cbz") && !book.NonUTF8ZipFile {
-			fsys, zip_err := zip.OpenReader(book.FilePath)
-			if zip_err != nil {
-				fmt.Println(zip_err)
+			fsys, zipErr := zip.OpenReader(book.FilePath)
+			if zipErr != nil {
+				fmt.Println(zipErr)
 			}
 			httpFS := http.FS(fsys)
 			if book.IsDir {
-				book.SetBookID()
 				engine.Static("/cache/"+book.BookID, book.FilePath)
 			} else {
 				engine.StaticFS("/cache/"+book.BookID, httpFS)
@@ -204,16 +203,12 @@ func setWebAPI(engine *gin.Engine) {
 				fmt.Println(err)
 			}
 			if book.IsDir {
-				book.SetBookID()
 				engine.Static("/cache/"+book.BookID, book.FilePath)
 			} else {
 				engine.StaticFS("/cache/"+book.BookID, httpFS)
 			}
 		}
 	}
-	//if len(common.BookList)-1 >= 0 {
-	//	common.ReadingBook = common.BookList[len(common.BookList)-1]
-	//}
 	if len(common.BookList) >= 1 {
 		common.ReadingBook = common.BookList[0]
 	}
@@ -252,15 +247,15 @@ func setWebpServer(engine *gin.Engine) {
 	//	}
 	//} else {
 	//	if common.ReadingBook.IsDir {
-	//		common.ReadingBook.SetBookID()
+	//		common.ReadingBook.setBookID()
 	//		engine.Static("/cache/"+common.ReadingBook.BookID, common.ReadingBook.FilePath)
 	//	} else {
 	//		engine.Static("/cache", common.CacheFilePath)
 	//	}
 }
 
-//5、setFrpc
-func setFrpc(engine *gin.Engine) {
+//5、setFrpClient
+func setFrpClient(engine *gin.Engine) {
 	//frp服务
 	if common.Config.EnableFrpcServer {
 		if common.Config.FrpConfig.RandomRemotePort {
@@ -305,8 +300,8 @@ func StartWebServer() {
 	setPort()
 	//4、setWebpServer
 	setWebpServer(engine)
-	//5、setFrpc
-	setFrpc(engine)
+	//5、setFrpClient
+	setFrpClient(engine)
 	//6、printCMDMessage
 	printCMDMessage()
 	//7、StartWebServer 监听并启动web服务

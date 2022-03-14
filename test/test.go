@@ -1,12 +1,15 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"github.com/disintegration/imaging"
 	"github.com/mholt/archiver/v4"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"testing"
 )
 
 func main() {
@@ -25,6 +28,23 @@ func main() {
 	//if err != nil {
 	//	fmt.Println(err)
 	//}
+}
+
+func TestImageResize(t *testing.T) {
+	//读取本地文件，本地文件尺寸300*400
+	imgData, _ := ioutil.ReadFile("d:/1.jpg")
+	buf := bytes.NewBuffer(imgData)
+	image, err := imaging.Decode(buf)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	//生成缩略图，尺寸150*200，并保持到为文件2.jpg
+	image = imaging.Resize(image, 150, 200, imaging.Lanczos)
+	err = imaging.Save(image, "d:/2.jpg")
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 // UnArchiveZip 一次性解压zip文件

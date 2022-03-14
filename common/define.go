@@ -25,6 +25,88 @@ import (
 	"time"
 )
 
+func init() {
+	// Find home directory.
+	home, err := homedir.Dir()
+	if err != nil {
+		fmt.Println(err)
+	}
+	Config.LogFilePath = home
+	Config.LogFileName = "comigo.log"
+}
+
+var (
+	ReadingBook          Book
+	BookList             []Book
+	CacheFilePath        = ""
+	ConfigFile           = ""
+	Version              = "v0.5.2"
+	ExcludeFileOrFolders = []string{".comigo", "node_modules", "flutter_ui", "$RECYCLE.BIN", "Config.Msi"}
+	SupportMediaType     = []string{".jpg", ".jpeg", ".JPEG", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp", ".webp", ".ico", ".heic", ".pdf", ".mp4", ".webm"}
+	SupportFileType      = [...]string{
+		".zip",
+		".tar",
+		".rar",
+		".cbr",
+		".cbz",
+		".epub",
+		".tar.gz",
+		".tgz",
+		".tar.bz2",
+		".tbz2",
+		".tar.xz",
+		".txz",
+		".tar.lz4",
+		".tlz4",
+		".tar.sz",
+		".tsz",
+		".bz2",
+		".gz",
+		".lz4",
+		".sz",
+		".xz"}
+	Config = ServerConfig{
+		OpenBrowser:         true,
+		DisableLAN:          false,
+		Template:            "scroll", //multi、single、random etc.
+		Port:                1234,
+		CheckImage:          false,
+		LogToFile:           false,
+		MaxDepth:            3,
+		MinImageNum:         3,
+		ZipFileTextEncoding: "",
+		WebpConfig: WebPServerConfig{
+			WebpCommand:  "webp-server",
+			HOST:         "127.0.0.1",
+			PORT:         "3333",
+			ImgPath:      "",
+			QUALITY:      70,
+			AllowedTypes: []string{".jpg", ".jpeg", ".JPEG", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp"},
+			ExhaustPath:  "",
+		},
+		EnableFrpcServer: false,
+		FrpConfig: FrpClientConfig{
+			FrpcCommand:      "frpc",
+			ServerAddr:       "localhost", //server_addr
+			ServerPort:       7000,        //server_port
+			Token:            "&&%%!2356",
+			FrpType:          "tcp",
+			RemotePort:       50000, //remote_port
+			RandomRemotePort: true,
+			//AdminAddr:   "127.0.0.1",
+			//AdminPort:   "12340",
+			//AdminUser:   "",
+			//AdminPwd :   "",
+		},
+		Host:                   "",
+		SketchCountSeconds:     90,
+		SortImage:              "",
+		TempPATH:               "",
+		CleanAllTempFileOnExit: true,
+		CleanAllTempFile:       true,
+	}
+)
+
 type WebPServerConfig struct {
 	WebpCommand  string
 	HOST         string
@@ -52,8 +134,6 @@ type FrpClientConfig struct {
 	RandomRemotePort bool
 }
 
-var ConfigFile string //服务器配置文件路径
-
 type ServerConfig struct {
 	UserName    string `json:"-"` //不要解析这个字段
 	Password    string `json:"-"` //不要解析这个字段
@@ -77,54 +157,13 @@ type ServerConfig struct {
 	WebpConfig             WebPServerConfig `json:"-"` //不要解析这个字段
 	EnableFrpcServer       bool
 	FrpConfig              FrpClientConfig `json:"-"` //不要解析这个字段
-	ZipFilenameEncoding    string          `json:"-"` //不要解析这个字段
+	ZipFileTextEncoding    string          `json:"-"` //不要解析这个字段
 	SketchCountSeconds     int             `json:"sketch_count_seconds"`
 	SortImage              string
 	TempPATH               string `json:"-"` //不要解析这个字段
 	CleanAllTempFileOnExit bool   `json:"-"` //不要解析这个字段
 	CleanAllTempFile       bool   `json:"-"` //不要解析这个字段
 	NewConfig              bool   `json:"-"` //不要解析这个字段
-}
-
-var Config = ServerConfig{
-	OpenBrowser:         true,
-	DisableLAN:          false,
-	Template:            "scrool", //multi、single、random etc.
-	Port:                1234,
-	CheckImage:          false,
-	LogToFile:           false,
-	MaxDepth:            3,
-	MinImageNum:         3,
-	ZipFilenameEncoding: "",
-	WebpConfig: WebPServerConfig{
-		WebpCommand:  "webp-server",
-		HOST:         "127.0.0.1",
-		PORT:         "3333",
-		ImgPath:      "",
-		QUALITY:      70,
-		AllowedTypes: []string{".jpg", ".jpeg", ".JPEG", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp"},
-		ExhaustPath:  "",
-	},
-	EnableFrpcServer: false,
-	FrpConfig: FrpClientConfig{
-		FrpcCommand:      "frpc",
-		ServerAddr:       "localhost", //server_addr
-		ServerPort:       7000,        //server_port
-		Token:            "&&%%!2356",
-		FrpType:          "tcp",
-		RemotePort:       50000, //remote_port
-		RandomRemotePort: true,
-		//AdminAddr:   "127.0.0.1",
-		//AdminPort:   "12340",
-		//AdminUser:   "",
-		//AdminPwd :   "",
-	},
-	Host:                   "",
-	SketchCountSeconds:     90,
-	SortImage:              "",
-	TempPATH:               "",
-	CleanAllTempFileOnExit: true,
-	CleanAllTempFile:       true,
 }
 
 // SetByExecutableFilename 通过执行文件名设置默认网页模板参数
@@ -222,45 +261,6 @@ func haveKeyWord(checkString string, list []string) bool {
 	return false
 }
 
-var (
-	CacheFilePath        string
-	Version              = "v0.5.1"
-	ExcludeFileOrFolders = []string{".comigo", "node_modules", "flutter_ui", "$RECYCLE.BIN", "Config.Msi"}
-	SupportMediaType     = []string{".jpg", ".jpeg", ".JPEG", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp", ".webp", ".ico", ".heic", ".pdf", ".mp4", ".webm"}
-	SupportFileType      = [...]string{
-		".zip",
-		".tar",
-		".rar",
-		".cbr",
-		".cbz",
-		".epub",
-		".tar.gz",
-		".tgz",
-		".tar.bz2",
-		".tbz2",
-		".tar.xz",
-		".txz",
-		".tar.lz4",
-		".tlz4",
-		".tar.sz",
-		".tsz",
-		".bz2",
-		".gz",
-		".lz4",
-		".sz",
-		".xz"}
-)
-
-func init() {
-	// Find home directory.
-	home, err := homedir.Dir()
-	if err != nil {
-		fmt.Println(err)
-	}
-	Config.LogFilePath = home
-	Config.LogFileName = "comigo.log"
-}
-
 type Book struct {
 	Name            string    `json:"name"`
 	Author          string    `json:"author"`
@@ -297,7 +297,7 @@ type SinglePageInfo struct {
 	Blurhash string `json:"-"` //不要解析这个字段
 }
 
-//与Book唯一的区别是没有AllPageInfo,而是封面图URL
+// BookInfo 与Book唯一的区别是没有AllPageInfo,而是封面图URL
 type BookInfo struct {
 	Name            string    `json:"name"`
 	Author          string    `json:"author"`
@@ -318,7 +318,7 @@ type BookInfo struct {
 	CoverInfo SinglePageInfo
 }
 
-//BookInfo的模拟构造函数
+// NewBookInfo BookInfo的模拟构造函数
 func NewBookInfo(b Book) *BookInfo {
 	coverInfo := SinglePageInfo{}
 	if len(b.PageInfo) > 0 {
@@ -344,9 +344,6 @@ func NewBookInfo(b Book) *BookInfo {
 	}
 }
 
-var ReadingBook Book
-var BookList []Book
-
 func GetBookShelf() (*[]BookInfo, error) {
 	var bookShelf []BookInfo
 	for _, b := range BookList {
@@ -357,6 +354,37 @@ func GetBookShelf() (*[]BookInfo, error) {
 		return &bookShelf, nil
 	}
 	return nil, errors.New("can not found bookshelf")
+}
+
+// InitBook 初始化一本书，设置文件路径、书名、BookID等等
+func InitBook(allPageNum int, filePath string, modified time.Time, isDir bool, fileSize int64, extractComplete bool) *Book {
+	var b = Book{
+		AllPageNum:      allPageNum,
+		FilePath:        filePath,
+		Modified:        modified,
+		IsDir:           isDir,
+		FileSize:        fileSize,
+		ExtractComplete: extractComplete,
+	}
+	//书名直接用路径
+	b.Name = filePath
+	//压缩文件的话，去除路径，取文件名
+	if !b.IsDir {
+		post := strings.LastIndex(filePath, "/") //Unix路径分隔符
+		if post == -1 {
+			post = strings.LastIndex(filePath, "\\") //windows分隔符
+		}
+		if post != -1 {
+			//filePath = string([]rune(filePath)[post:]) //为了防止中文字符被错误截断，先转换成rune，再转回来
+			filePath = filePath[post:]
+			filePath = strings.ReplaceAll(filePath, "\\", "")
+			filePath = strings.ReplaceAll(filePath, "/", "")
+		}
+		b.Name = filePath
+		b.FileType = path.Ext(filePath) //获取文件后缀
+	}
+	b.setBookID()
+	return &b
 }
 
 func GetBookByUUID(uuid string) (*Book, error) {
@@ -424,8 +452,8 @@ func (b *Book) SortPages() {
 	sort.Sort(b.PageInfo)
 }
 
-// SetBookID  根据路径的MD5，生成书籍ID
-func (b *Book) SetBookID() {
+// setBookID  根据路径的MD5，生成书籍ID
+func (b *Book) setBookID() {
 	//fmt.Println("文件绝对路径："+fileAbaPath, "路径的md5："+md5string(fileAbaPath))
 	fileAbaPath, err := filepath.Abs(b.FilePath)
 	if err != nil {
@@ -441,37 +469,20 @@ func md5string(s string) string {
 // GetBookID  根据路径的MD5，生成书籍ID
 func (b *Book) GetBookID() string {
 	if b.BookID == "" {
-		b.SetBookID()
+		b.setBookID()
 	}
 	return b.BookID
 }
 
-// ScanArchiveOrFolder  设置书名与Book ID等
-func (b *Book) InitBook(name string) {
-	//文件夹直接用路径
-	if b.IsDir {
-		b.Name = name
-	} else {
-		//压缩文件的话，去除路径，取文件名
-		post := strings.LastIndex(name, "/") //Unix路径分隔符
-		if post == -1 {
-			post = strings.LastIndex(name, "\\") //windows分隔符
-		}
-		if post != -1 {
-			//name = string([]rune(name)[post:]) //为了防止中文字符被错误截断，先转换成rune，再转回来?
-			name = name[post:]
-			name = strings.ReplaceAll(name, "\\", "")
-			name = strings.ReplaceAll(name, "/", "")
-		}
-		b.Name = name
-		b.FileType = path.Ext(name) //获取文件后缀
-	}
-	b.SetBookID()
+func (b *Book) setPageNum() {
+	//设置页数
+	b.AllPageNum = len(b.PageInfo)
 }
 
-func (b *Book) SetPageNum() {
-	//页数，目前只支持漫画
-	b.AllPageNum = len(b.PageInfo)
+func (b *Book) GetAllPageNum() int {
+	//设置页数
+	b.setPageNum()
+	return b.AllPageNum
 }
 
 func (b *Book) SetFilePath(path string) {
@@ -496,7 +507,7 @@ func (b *Book) GetPicNum() int {
 func (b *Book) ScanAllImage() {
 	log.Println(locale.GetString("check_image_start"))
 	// Console progress bar
-	bar := pb.StartNew(b.AllPageNum)
+	bar := pb.StartNew(b.GetAllPageNum())
 	tmpl := `{{ red "With funcs:" }} {{ bar . "<" "-" (cycle . "↖" "↗" "↘" "↙" ) "." ">"}} {{speed . | rndcolor }} {{percent .}} {{string . "my_green_string" | green}} {{string . "my_blue_string" | blue}}`
 	bar.SetTemplateString(tmpl)
 	for i := 0; i < len(b.PageInfo); i++ { //此处不能用range，因为需要修改
@@ -517,7 +528,7 @@ func (b *Book) ScanAllImageGo() {
 	//res := make(chan string)
 	count := 0
 	// Console progress bar
-	bar := pb.StartNew(b.AllPageNum)
+	bar := pb.StartNew(b.GetAllPageNum())
 	for i := 0; i < len(b.PageInfo); i++ { //此处不能用range，因为需要修改
 		//wg.Add(1)
 		count++
@@ -555,7 +566,7 @@ func SetImageType(p *SinglePageInfo) {
 	}
 }
 
-// GetImageSize 获取图片分辨率
+// GetImageSize 获取硬盘上某个图片文件的分辨率
 func (i *SinglePageInfo) GetImageSize() (err error) {
 	var img image.Image
 	img, err = imaging.Open(i.RealImageFilePATH)

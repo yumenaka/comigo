@@ -1,9 +1,12 @@
 package tools
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"github.com/Baozisoftware/qrcode-terminal-go"
 	"github.com/yumenaka/comi/locale"
+	"io"
 	"log"
 	"net"
 	"os"
@@ -17,10 +20,7 @@ import (
 
 //来自： go\src\archive\zip\reader.go
 
-// detectUTF8 reports whether s is a valid UTF-8 string, and whether the string
-// must be considered UTF-8 encoding (i.e., not compatible with CP-437, ASCII,
-// or any other common encoding).
-//detectUTF8 检测 s 是否为有效的 UTF-8 字符串，以及该字符串是否必须被视为 UTF-8 编码（即，不兼容CP-437、ASCII 或任何其他常见编码）。
+// DetectUTF8 检测 s 是否为有效的 UTF-8 字符串，以及该字符串是否必须被视为 UTF-8 编码（即，不兼容CP-437、ASCII 或任何其他常见编码）。
 func DetectUTF8(s string) (valid, require bool) {
 	for i := 0; i < len(s); {
 		r, size := utf8.DecodeRuneInString(s[i:])
@@ -41,6 +41,7 @@ func DetectUTF8(s string) (valid, require bool) {
 	return true, require
 }
 
+// GetContentTypeByFileName https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
 func GetContentTypeByFileName(fileName string) (contentType string) {
 	ext := strings.ToLower(path.Ext(fileName))
 	switch {
@@ -49,17 +50,27 @@ func GetContentTypeByFileName(fileName string) (contentType string) {
 	case ext == ".jpg" || ext == ".jpeg":
 		contentType = "image/jpeg"
 	case ext == ".webp":
-		contentType = "image/jpeg"
+		contentType = "image/webp"
 	case ext == ".gif":
 		contentType = "image/gif"
-	case ext == ".ico":
-		contentType = "image/x-icon"
+	case ext == ".bmp":
+		contentType = "image/bmp"
 	case ext == ".heif":
 		contentType = "image/heif"
 	case ext == ".ico":
-		contentType = "image/x-icon"
+		contentType = "image/image/vnd.microsoft.icon"
+	case ext == ".zip":
+		contentType = "application/zip"
+	case ext == ".rar":
+		contentType = "application/x-rar-compressed"
+	case ext == ".pdf":
+		contentType = "application/pdf"
+	case ext == ".tar":
+		contentType = "application/x-tar"
+	case ext == ".epub":
+		contentType = "application/epub+zip"
 	default:
-		contentType = ""
+		contentType = "application/octet-stream"
 	}
 	return contentType
 }
@@ -234,7 +245,7 @@ func ChickExists(path string) bool {
 	return true
 }
 
-// 判断所给路径是否为文件夹
+// ChickIsDir 判断所给路径是否为文件夹
 func ChickIsDir(path string) bool {
 	s, err := os.Stat(path)
 	if err != nil {
@@ -243,6 +254,7 @@ func ChickIsDir(path string) bool {
 	return s.IsDir()
 }
 
+// OpenBrowser 打开浏览器
 func OpenBrowser(uri string) {
 	var cmd *exec.Cmd
 	if runtime.GOOS == "windows" {
@@ -262,15 +274,16 @@ func OpenBrowser(uri string) {
 	}
 }
 
-//func md5file(fName string) string {
-//	f, e := os.Open(fName)
-//	if e != nil {
-//		log.Fatal(e)
-//	}
-//	h := md5.New()
-//	_, e = io.Copy(h, f)
-//	if e != nil {
-//		log.Fatal(e)
-//	}
-//	return hex.EncodeToString(h.Sum(nil))
-//}
+// MD5file 计算文件MD5
+func MD5file(fName string) string {
+	f, e := os.Open(fName)
+	if e != nil {
+		log.Fatal(e)
+	}
+	h := md5.New()
+	_, e = io.Copy(h, f)
+	if e != nil {
+		log.Fatal(e)
+	}
+	return hex.EncodeToString(h.Sum(nil))
+}

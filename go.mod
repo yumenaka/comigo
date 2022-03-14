@@ -75,4 +75,4 @@ require (
 
 //go mod edit -replace github.com/mholt/archiver/v4@v4.0.0-alpha.5=github.com/yumenaka/archiver/v4@master
 //replace github.com/mholt/archiver/v4 => .\archiver
-replace github.com/mholt/archiver/v4 v4.0.0-alpha.5 => github.com/yumenaka/archiver/v4 v4.0.0-alpha.1.0.20220313144730-c9ed5edd3787
+replace github.com/mholt/archiver/v4 v4.0.0-alpha.5 => github.com/yumenaka/archiver/v4 v4.0.0-alpha.1.0.20220314055817-10e82d694695
