@@ -277,9 +277,10 @@ type Book struct {
 	ExtractComplete bool      `json:"extract_complete"`
 	ReadPercent     float64   `json:"read_percent"`
 	//NonUTF8Zip 表示 Name 和 Comment 未以 UTF-8 编码。根据规范，唯一允许的其他编码应该是 CP-437，但从历史上看，许多 ZIP 阅读器将 Name 和 Comment 解释为系统的本地字符编码。仅当用户打算为特定本地化区域编码不可移植的 ZIP 文件时，才应设置此标志。否则，Writer 会自动为有效的 UTF-8 字符串设置 ZIP 格式的 UTF-8 标志。
-	NonUTF8Zip      bool        `json:"non_utf8_zip"`
-	ZipTextEncoding string      `json:"zip_text_encoding"`
-	PageInfo        AllPageInfo `json:"pages"`
+	NonUTF8Zip      bool           `json:"non_utf8_zip"`
+	ZipTextEncoding string         `json:"zip_text_encoding"`
+	Cover           SinglePageInfo `json:"cover"`
+	Pages           AllPageInfo    `json:"pages"`
 }
 
 type SinglePageInfo struct {
@@ -300,32 +301,28 @@ type SinglePageInfo struct {
 
 // BookInfo 与Book唯一的区别是没有AllPageInfo,而是封面图URL
 type BookInfo struct {
-	Name            string    `json:"name"`
-	Author          string    `json:"author"`
-	Title           string    `json:"title"`
-	FilePath        string    `json:"-"` //不要解析这个字段
-	ExtractPath     string    `json:"-"` //不要解析这个字段
-	AllPageNum      int       `json:"all_page_num"`
-	FileType        string    `json:"file_type"`
-	FileSize        int64     `json:"file_size"`
-	Modified        time.Time `json:"modified_time"`
-	BookID          string    `json:"uuid"` //根据FilePath计算
-	IsDir           bool      `json:"is_folder"`
-	ExtractNum      int       `json:"extract_num"`
-	ExtractComplete bool      `json:"extract_complete"`
-	ReadPercent     float64   `json:"read_percent"`
-	NonUTF8Zip      bool      `json:"non_utf_8_zip"`
-	ZipTextEncoding string    `json:"zip_text_encoding"`
-	//PageInfo        AllPageInfo `json:"pages"`
-	CoverInfo SinglePageInfo
+	Name            string         `json:"name"`
+	Author          string         `json:"author"`
+	Title           string         `json:"title"`
+	FilePath        string         `json:"-"` //不要解析这个字段
+	ExtractPath     string         `json:"-"` //不要解析这个字段
+	AllPageNum      int            `json:"all_page_num"`
+	FileType        string         `json:"file_type"`
+	FileSize        int64          `json:"file_size"`
+	Modified        time.Time      `json:"modified_time"`
+	BookID          string         `json:"uuid"` //根据FilePath计算
+	IsDir           bool           `json:"is_folder"`
+	ExtractNum      int            `json:"extract_num"`
+	ExtractComplete bool           `json:"extract_complete"`
+	ReadPercent     float64        `json:"read_percent"`
+	NonUTF8Zip      bool           `json:"non_utf_8_zip"`
+	ZipTextEncoding string         `json:"zip_text_encoding"`
+	Cover           SinglePageInfo `json:"cover"`
+	//Pages         AllPageInfo `json:"pages"`
 }
 
 // NewBookInfo BookInfo的模拟构造函数
 func NewBookInfo(b Book) *BookInfo {
-	coverInfo := SinglePageInfo{}
-	if len(b.PageInfo) > 0 {
-		coverInfo = b.PageInfo[0]
-	}
 	return &BookInfo{
 		Name:            b.Name,
 		Author:          b.Author,
@@ -342,7 +339,7 @@ func NewBookInfo(b Book) *BookInfo {
 		ExtractComplete: b.ExtractComplete,
 		ReadPercent:     b.ReadPercent,
 		NonUTF8Zip:      b.NonUTF8Zip,
-		CoverInfo:       coverInfo,
+		Cover:           b.Cover,
 	}
 }
 
@@ -392,6 +389,12 @@ func InitBook(allPageNum int, filePath string, modified time.Time, isDir bool, f
 func GetBookByUUID(uuid string) (*Book, error) {
 	for _, b := range BookList {
 		if b.BookID == uuid {
+			return &b, nil
+		}
+	}
+	//为了调试方便，支持模糊查找，可以使用UUID的开头来查找书籍，当然这样有可能出错
+	for _, b := range BookList {
+		if strings.HasPrefix(b.BookID, uuid) {
 			return &b, nil
 		}
 	}
@@ -451,7 +454,7 @@ func (s AllPageInfo) Swap(i, j int) {
 
 // SortPages 上面三个函数定义好了，终于可以使用sort包排序了
 func (b *Book) SortPages() {
-	sort.Sort(b.PageInfo)
+	sort.Sort(b.Pages)
 }
 
 func md5string(s string) string {
@@ -483,7 +486,7 @@ func (b *Book) GetBookID() string {
 
 //设置页数
 func (b *Book) setPageNum() {
-	b.AllPageNum = len(b.PageInfo)
+	b.AllPageNum = len(b.Pages)
 }
 
 func (b *Book) GetAllPageNum() int {
@@ -513,7 +516,7 @@ func (b *Book) GetName() string { //绑定到Book结构体的方法
 
 func (b *Book) GetPicNum() int {
 	var PicNum = 0
-	for _, p := range b.PageInfo {
+	for _, p := range b.Pages {
 		if isSupportMedia(p.Url) {
 			PicNum++
 		}
@@ -528,8 +531,8 @@ func (b *Book) ScanAllImage() {
 	bar := pb.StartNew(b.GetAllPageNum())
 	tmpl := `{{ red "With funcs:" }} {{ bar . "<" "-" (cycle . "↖" "↗" "↘" "↙" ) "." ">"}} {{speed . | rndcolor }} {{percent .}} {{string . "my_green_string" | green}} {{string . "my_blue_string" | blue}}`
 	bar.SetTemplateString(tmpl)
-	for i := 0; i < len(b.PageInfo); i++ { //此处不能用range，因为需要修改
-		SetImageType(&b.PageInfo[i])
+	for i := 0; i < len(b.Pages); i++ { //此处不能用range，因为需要修改
+		SetImageType(&b.Pages[i])
 		//进度条计数
 		bar.Increment()
 	}
@@ -547,14 +550,14 @@ func (b *Book) ScanAllImageGo() {
 	count := 0
 	// Console progress bar
 	bar := pb.StartNew(b.GetAllPageNum())
-	for i := 0; i < len(b.PageInfo); i++ { //此处不能用range，因为需要修改
+	for i := 0; i < len(b.Pages); i++ { //此处不能用range，因为需要修改
 		//wg.Add(1)
 		count++
 		ii := i
 		//并发处理，提升图片分析速度
 		wp.Do(func() error {
 			//defer wg.Done()
-			SetImageType(&b.PageInfo[ii])
+			SetImageType(&b.Pages[ii])
 			bar.Increment()
 			//res <- fmt.Sprintf("Finished %d", i)
 			return nil

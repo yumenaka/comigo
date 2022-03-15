@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"testing"
 )
 
 func main() {
@@ -30,7 +29,7 @@ func main() {
 	//}
 }
 
-func TestImageResize(t *testing.T) {
+func ImageResize() {
 	//读取本地文件，本地文件尺寸300*400
 	imgData, _ := ioutil.ReadFile("d:/1.jpg")
 	buf := bytes.NewBuffer(imgData)

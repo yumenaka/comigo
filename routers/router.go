@@ -149,7 +149,8 @@ func setWebAPI(engine *gin.Engine) {
 	api.GET("/ws", wsHandler)
 
 	//通过字符串参数获取图片，目前只有非UTF-8编码的ZIP文件会用到。
-	// 示例 URL： /getfile?uuid=2b15a130-06c1-4462-a3fe-5276b566d9db&filename=NameInArchive
+	// 示例 URL： 127.0.0.1:1234/getfile?uuid=2b17a130-06c1-4222-a3fe-55ddb5ccd9db&filename=1.jpg
+	//缩放文件，会转化为jpeg：http://127.0.0.1:1234/api/getfile?resize_width=300&resize_height=400&uuid=597e06&filename=01.jpeg
 	api.GET("/getfile", func(c *gin.Context) {
 		uuid := c.DefaultQuery("uuid", "")
 		needFile := c.DefaultQuery("filename", "")
@@ -160,33 +161,52 @@ func setWebAPI(engine *gin.Engine) {
 			}
 			bookPath := book.GetFilePath()
 			//fmt.Println(bookPath)
+			var imgData []byte
+			//如果是特殊编码的ZIP文件
 			if book.NonUTF8Zip && !book.IsDir {
-				imgData, err := arch.GetSingleFile(bookPath, needFile, "gbk")
+				imgData, err = arch.GetSingleFile(bookPath, needFile, "gbk")
 				if err != nil {
 					fmt.Println(err)
 				}
-				c.Data(http.StatusOK, tools.GetContentTypeByFileName(needFile), imgData)
 			}
+			//如果是一般压缩文件
 			if !book.NonUTF8Zip && !book.IsDir {
-				imgData, err := arch.GetSingleFile(bookPath, needFile, "")
+				imgData, err = arch.GetSingleFile(bookPath, needFile, "")
 				if err != nil {
 					fmt.Println(err)
 				}
-				c.Data(http.StatusOK, tools.GetContentTypeByFileName(needFile), imgData)
 			}
+			//如果是本地文件夹
 			if book.IsDir {
 				//直接读取磁盘文件
-				imgData, err := ioutil.ReadFile(filepath.Join(bookPath, needFile))
+				imgData, err = ioutil.ReadFile(filepath.Join(bookPath, needFile))
 				if err != nil {
 					fmt.Println(err)
+				}
+			}
+			if imgData != nil {
+				resizeWidth, errX := strconv.Atoi(c.DefaultQuery("resize_width", "???"))
+				resizeHeight, errY := strconv.Atoi(c.DefaultQuery("resize_height", "???"))
+				//width 与 height 都设置了，按照数值缩放
+				if errX == nil && errY == nil && resizeWidth > 0 && resizeHeight > 0 {
+					imgData = tools.ImageResize(imgData, resizeWidth, resizeHeight)
+				}
+				//只设置 width， height 未设置 按照宽度缩放
+				if errX == nil && errY != nil && resizeWidth > 0 {
+					imgData = tools.ImageResizeByWidth(imgData, resizeWidth)
+				}
+				//只设置 height，  width未设置 按照高度缩放
+				if errY == nil && errX != nil && resizeHeight > 0 {
+					imgData = tools.ImageResizeByHeight(imgData, resizeHeight)
 				}
 				c.Data(http.StatusOK, tools.GetContentTypeByFileName(needFile), imgData)
 			}
 		}
 	})
 
-	//// getFileApi正常运作的话，或许不需要这个虚拟文件系统？
+	//// getFileApi正常运作的话，就不需要这个虚拟文件系统
 	////使用虚拟文件系统，设置服务路径（每本书都设置一遍）
+	////参考了: https://bitfieldconsulting.com/golang/filesystems
 	//for _, book := range common.BookList {
 	//	if book.NonUTF8Zip {
 	//		continue

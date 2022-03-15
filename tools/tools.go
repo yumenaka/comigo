@@ -1,10 +1,12 @@
 package tools
 
 import (
+	"bytes"
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
 	"github.com/Baozisoftware/qrcode-terminal-go"
+	"github.com/disintegration/imaging"
 	"github.com/yumenaka/comi/locale"
 	"io"
 	"log"
@@ -18,27 +20,72 @@ import (
 	"unicode/utf8"
 )
 
-//来自： go\src\archive\zip\reader.go
-
-// DetectUTF8 检测 s 是否为有效的 UTF-8 字符串，以及该字符串是否必须被视为 UTF-8 编码（即，不兼容CP-437、ASCII 或任何其他常见编码）。
-func DetectUTF8(s string) (valid, require bool) {
-	for i := 0; i < len(s); {
-		r, size := utf8.DecodeRuneInString(s[i:])
-		i += size
-		// Officially, ZIP uses CP-437, but many readers use the system's
-		// local character encoding. Most encoding are compatible with a large
-		// subset of CP-437, which itself is ASCII-like.
-		//
-		// Forbid 0x7e and 0x5c since EUC-KR and Shift-JIS replace those
-		// characters with localized currency and overline characters.
-		if r < 0x20 || r > 0x7d || r == 0x5c {
-			if !utf8.ValidRune(r) || (r == utf8.RuneError && size == 1) {
-				return false, false
-			}
-			require = true
-		}
+func ImageResizeByWidth(imgData []byte, width int) []byte {
+	buf := bytes.NewBuffer(imgData)
+	image, err := imaging.Decode(buf)
+	if err != nil {
+		fmt.Println(err)
+		return imgData
 	}
-	return true, require
+	sourceWidth := image.Bounds().Dx()
+	scalingRatio := float64(width) / float64(sourceWidth)
+	height := int(float64(image.Bounds().Dy()) * scalingRatio)
+	//生成缩略图，尺寸150*200，并保持到为文件2.jpg
+	image = imaging.Resize(image, width, height, imaging.Lanczos)
+	buf2 := &bytes.Buffer{}
+	//将图片编码成jpeg
+	err = imaging.Encode(buf2, image, imaging.JPEG)
+	if err != nil {
+		return imgData
+	}
+	return buf2.Bytes()
+}
+
+func ImageResizeByHeight(imgData []byte, height int) []byte {
+	buf := bytes.NewBuffer(imgData)
+	image, err := imaging.Decode(buf)
+	if err != nil {
+		fmt.Println(err)
+		return imgData
+	}
+	sourceHeight := image.Bounds().Dy()
+	scalingRatio := float64(height) / float64(sourceHeight)
+	width := int(float64(image.Bounds().Dx()) * scalingRatio)
+	image = imaging.Resize(image, width, height, imaging.Lanczos)
+	buf2 := &bytes.Buffer{}
+	//将图片编码成jpeg
+	err = imaging.Encode(buf2, image, imaging.JPEG)
+	if err != nil {
+		return imgData
+	}
+	return buf2.Bytes()
+}
+
+func ImageResize(imgData []byte, width int, height int) []byte {
+	////读取本地文件，本地文件尺寸300*400
+	//imgData, _ := ioutil.ReadFile("d:/1.jpg")
+	buf := bytes.NewBuffer(imgData)
+	image, err := imaging.Decode(buf)
+	if err != nil {
+		fmt.Println(err)
+		return imgData
+	}
+	//生成缩略图，尺寸150*200，并保持到为文件2.jpg
+	image = imaging.Resize(image, width, height, imaging.Lanczos)
+	//err = imaging.Save(image, "d:/2.jpg")
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//fmt.Println(image)
+
+	// create buffer
+	buf2 := &bytes.Buffer{}
+	//将图片编码成jpeg
+	err = imaging.Encode(buf2, image, imaging.JPEG)
+	if err != nil {
+		return imgData
+	}
+	return buf2.Bytes()
 }
 
 // GetContentTypeByFileName https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
@@ -73,6 +120,28 @@ func GetContentTypeByFileName(fileName string) (contentType string) {
 		contentType = "application/octet-stream"
 	}
 	return contentType
+}
+
+// DetectUTF8 检测 s 是否为有效的 UTF-8 字符串，以及该字符串是否必须被视为 UTF-8 编码（即，不兼容CP-437、ASCII 或任何其他常见编码）。
+//来自： go\src\archive\zip\reader.go
+func DetectUTF8(s string) (valid, require bool) {
+	for i := 0; i < len(s); {
+		r, size := utf8.DecodeRuneInString(s[i:])
+		i += size
+		// Officially, ZIP uses CP-437, but many readers use the system's
+		// local character encoding. Most encoding are compatible with a large
+		// subset of CP-437, which itself is ASCII-like.
+		//
+		// Forbid 0x7e and 0x5c since EUC-KR and Shift-JIS replace those
+		// characters with localized currency and overline characters.
+		if r < 0x20 || r > 0x7d || r == 0x5c {
+			if !utf8.ValidRune(r) || (r == utf8.RuneError && size == 1) {
+				return false, false
+			}
+			require = true
+		}
+	}
+	return true, require
 }
 
 // PrintAllReaderURL 打印阅读链接

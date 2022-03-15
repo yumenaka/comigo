@@ -103,9 +103,6 @@ func scanAndGetBook(filePath string) (*Book, error) {
 		if err != nil {
 			return nil, err
 		}
-		////等效函数：
-		//walkArchiveFs(fsys, "", ".", &book)
-		// https://bitfieldconsulting.com/golang/filesystems
 		err = fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
 			var exclude = false
 			for _, substr := range ExcludeFileOrFolders {
@@ -127,21 +124,21 @@ func scanAndGetBook(filePath string) (*Book, error) {
 				u, ok := f.(archiver.File) //f.Name不包含路径信息.需要转换一下
 				if !ok {
 					//如果是文件夹中的图片
-					////用Archiver的虚拟文件系统提供图片服务
-					//book.PageInfo = append(book.PageInfo, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: "", Url: "/cache/" + book.BookID + "/" + url.PathEscape(path)})
+					////用Archiver的虚拟文件系统提供图片文件
+					//book.Pages = append(book.Pages, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: "", Url: "/cache/" + book.BookID + "/" + url.PathEscape(path)})
 
 					//实验：用getfile接口提供文件服务
 					TempURL := "api/getfile?uuid=" + book.BookID + "&filename=" + url.PathEscape(path)
-					book.PageInfo = append(book.PageInfo, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: "", Url: TempURL})
+					book.Pages = append(book.Pages, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: "", Url: TempURL})
 					//fmt.Println(locale.GetString("unsupported_extract")+" %s", f)
 				} else {
-					////用Archiver的虚拟文件系统提供图片服务
+					////用Archiver的虚拟文件系统提供图片文件
 					//TempURL := "/cache/" + book.BookID + "/" + url.PathEscape(u.NameInArchive)
-					//book.PageInfo = append(book.PageInfo, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: u.NameInArchive, Url: TempURL})
+					//book.Pages = append(book.Pages, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: u.NameInArchive, Url: TempURL})
 
-					//实验：用getfile接口提供文件服务
+					//实验：用getfile接口提供提供图片文件
 					TempURL := "api/getfile?uuid=" + book.BookID + "&filename=" + url.PathEscape(u.NameInArchive)
-					book.PageInfo = append(book.PageInfo, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: u.NameInArchive, Url: TempURL})
+					book.Pages = append(book.Pages, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: u.NameInArchive, Url: TempURL})
 				}
 			}
 			return nil
@@ -170,7 +167,7 @@ func scanNonUTF8ZipFile(filePath string, book *Book) error {
 		if isSupportMedia(f.Name) {
 			//如果是压缩文件
 			TempURL := "api/getfile?uuid=" + book.BookID + "&filename=" + url.PathEscape(f.Name)
-			book.PageInfo = append(book.PageInfo, SinglePageInfo{RealImageFilePATH: "", FileSize: f.FileInfo().Size(), ModeTime: f.FileInfo().ModTime(), NameInArchive: f.Name, Url: TempURL})
+			book.Pages = append(book.Pages, SinglePageInfo{RealImageFilePATH: "", FileSize: f.FileInfo().Size(), ModeTime: f.FileInfo().ModTime(), NameInArchive: f.Name, Url: TempURL})
 		} else {
 			logrus.Debugf(locale.GetString("unsupported_file_type") + f.Name)
 		}
@@ -206,7 +203,7 @@ func walkUTF8ZipFs(fsys fs.FS, parent, base string, book *Book) error {
 			logrus.Debugf(locale.GetString("unsupported_file_type") + name)
 		} else {
 			inArchiveName := path.Join(parent, f.Name())
-			book.PageInfo = append(book.PageInfo, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: inArchiveName, Url: "/cache/" + book.BookID + "/" + url.PathEscape(inArchiveName)})
+			book.Pages = append(book.Pages, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: inArchiveName, Url: "/cache/" + book.BookID + "/" + url.PathEscape(inArchiveName)})
 		}
 	}
 	return err
@@ -251,7 +248,7 @@ func isSupportArchiver(checkPath string) bool {
 //			}
 //			//fmt.Println(strAbsPath)
 //			if isSupportMedia(file.Name()) {
-//				book.PageInfo = append(book.PageInfo, SinglePageInfo{RealImageFilePATH: strAbsPath, FileSize: file.Size(), ModeTime: file.ModTime(), NameInArchive: file.Name(), Url: "/cache/" + book.BookID + "/" + url.PathEscape(file.Name())})
+//				book.Pages = append(book.Pages, SinglePageInfo{RealImageFilePATH: strAbsPath, FileSize: file.Size(), ModeTime: file.ModTime(), NameInArchive: file.Name(), Url: "/cache/" + book.BookID + "/" + url.PathEscape(file.Name())})
 //			}
 //		}
 //	}
