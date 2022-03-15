@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"crypto/md5"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"github.com/Baozisoftware/qrcode-terminal-go"
+	"github.com/bbrks/go-blurhash"
 	"github.com/disintegration/imaging"
 	"github.com/yumenaka/comi/locale"
 	"io"
@@ -20,33 +22,130 @@ import (
 	"unicode/utf8"
 )
 
-func ImageResizeByWidth(imgData []byte, width int) []byte {
-	buf := bytes.NewBuffer(imgData)
+// GetImageDataBlurHash  获取图片的BlurHash
+func GetImageDataBlurHash(loadedImage []byte, components int) string {
+	// Generate the BlurHash for a given image
+	buf := bytes.NewBuffer(loadedImage)
 	image, err := imaging.Decode(buf)
 	if err != nil {
 		fmt.Println(err)
-		return imgData
+		return "error blurhash!"
+	}
+	str, err := blurhash.Encode(components, components, image)
+	if err != nil {
+		// Handle errors
+		fmt.Println(err)
+		return "error blurhash!"
+	}
+	fmt.Printf("Hash: %s\n", str)
+	return str
+}
+
+// GetImageDataBlurHashImage 获取图片的BlurHash图
+func GetImageDataBlurHashImage(loadedImage []byte, components int) []byte {
+	// Generate the BlurHash for a given image
+	buf := bytes.NewBuffer(loadedImage)
+	image, err := imaging.Decode(buf)
+	if err != nil {
+		fmt.Println(err)
+	}
+	str, err := blurhash.Encode(components, components, image)
+	if err != nil {
+		fmt.Println(err)
+	}
+	// Generate an image for a given BlurHash
+	// Punch specifies the contrasts and defaults to 1
+	img, err := blurhash.Decode(str, image.Bounds().Dx(), image.Bounds().Dy(), 1)
+	if err != nil {
+		fmt.Println(err)
+	}
+	buf2 := &bytes.Buffer{}
+	//将图片编码成jpeg
+	err = imaging.Encode(buf2, img, imaging.JPEG)
+	if err != nil {
+		return loadedImage
+	}
+	return buf2.Bytes()
+}
+
+// ImageResizeByWidth 根据一个固定宽度缩放图片
+func ImageResizeByWidth(loadedImage []byte, width int) []byte {
+	buf := bytes.NewBuffer(loadedImage)
+	image, err := imaging.Decode(buf)
+	if err != nil {
+		fmt.Println(err)
+		return loadedImage
 	}
 	sourceWidth := image.Bounds().Dx()
 	scalingRatio := float64(width) / float64(sourceWidth)
 	height := int(float64(image.Bounds().Dy()) * scalingRatio)
-	//生成缩略图，尺寸150*200，并保持到为文件2.jpg
+	//生成缩略图
 	image = imaging.Resize(image, width, height, imaging.Lanczos)
 	buf2 := &bytes.Buffer{}
 	//将图片编码成jpeg
 	err = imaging.Encode(buf2, image, imaging.JPEG)
 	if err != nil {
-		return imgData
+		return loadedImage
 	}
 	return buf2.Bytes()
 }
 
-func ImageResizeByHeight(imgData []byte, height int) []byte {
-	buf := bytes.NewBuffer(imgData)
+// ImageResizeByMaxWidth  设定一个图片宽度上限，大于这个宽度就缩放
+func ImageResizeByMaxWidth(loadedImage []byte, maxWidth int) ([]byte, error) {
+	buf := bytes.NewBuffer(loadedImage)
 	image, err := imaging.Decode(buf)
 	if err != nil {
 		fmt.Println(err)
-		return imgData
+		return nil, errors.New("imaging.Decode() Error")
+	}
+	sourceWidth := image.Bounds().Dx()
+	if maxWidth > sourceWidth {
+		return nil, errors.New("ImageResizeByMaxWidth Error maxWidth(" + strconv.Itoa(maxWidth) + ")> sourceWidth(" + strconv.Itoa(sourceWidth) + ")")
+	}
+	scalingRatio := float64(maxWidth) / float64(sourceWidth)
+	height := int(float64(image.Bounds().Dy()) * scalingRatio)
+	//生成缩略图
+	image = imaging.Resize(image, maxWidth, height, imaging.Lanczos)
+	buf2 := &bytes.Buffer{}
+	//将图片编码成jpeg
+	err = imaging.Encode(buf2, image, imaging.JPEG)
+	if err != nil {
+		return nil, errors.New("imaging.Encode() Error")
+	}
+	return buf2.Bytes(), nil
+}
+
+// ImageResizeByMaxHeight  设定一个图片高度上限，大于这个高度就缩放
+func ImageResizeByMaxHeight(loadedImage []byte, maxHeight int) ([]byte, error) {
+	buf := bytes.NewBuffer(loadedImage)
+	image, err := imaging.Decode(buf)
+	if err != nil {
+		fmt.Println(err)
+		return nil, errors.New("imaging.Decode() Error")
+	}
+	sourceHeight := image.Bounds().Dy()
+	if maxHeight > sourceHeight {
+		return nil, errors.New("ImageResizeByMaxHeight Error maxWidth(" + strconv.Itoa(maxHeight) + ")> sourceWidth(" + strconv.Itoa(sourceHeight) + ")")
+	}
+	scalingRatio := float64(maxHeight) / float64(sourceHeight)
+	width := int(float64(image.Bounds().Dx()) * scalingRatio)
+	image = imaging.Resize(image, width, maxHeight, imaging.Lanczos)
+	buf2 := &bytes.Buffer{}
+	//将图片编码成jpeg
+	err = imaging.Encode(buf2, image, imaging.JPEG)
+	if err != nil {
+		return nil, errors.New("imaging.Encode() Error")
+	}
+	return buf2.Bytes(), nil
+}
+
+// ImageResizeByHeight 根据一个固定 Height 缩放图片
+func ImageResizeByHeight(loadedImage []byte, height int) []byte {
+	buf := bytes.NewBuffer(loadedImage)
+	image, err := imaging.Decode(buf)
+	if err != nil {
+		fmt.Println(err)
+		return loadedImage
 	}
 	sourceHeight := image.Bounds().Dy()
 	scalingRatio := float64(height) / float64(sourceHeight)
@@ -56,34 +155,28 @@ func ImageResizeByHeight(imgData []byte, height int) []byte {
 	//将图片编码成jpeg
 	err = imaging.Encode(buf2, image, imaging.JPEG)
 	if err != nil {
-		return imgData
+		return loadedImage
 	}
 	return buf2.Bytes()
 }
 
-func ImageResize(imgData []byte, width int, height int) []byte {
+// ImageResize 重设图片分辨率
+func ImageResize(loadedImage []byte, width int, height int) []byte {
 	////读取本地文件，本地文件尺寸300*400
-	//imgData, _ := ioutil.ReadFile("d:/1.jpg")
-	buf := bytes.NewBuffer(imgData)
+	//loadedImage, _ := ioutil.ReadFile("d:/1.jpg")
+	buf := bytes.NewBuffer(loadedImage)
 	image, err := imaging.Decode(buf)
 	if err != nil {
 		fmt.Println(err)
-		return imgData
+		return loadedImage
 	}
 	//生成缩略图，尺寸150*200，并保持到为文件2.jpg
 	image = imaging.Resize(image, width, height, imaging.Lanczos)
-	//err = imaging.Save(image, "d:/2.jpg")
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
-	//fmt.Println(image)
-
-	// create buffer
 	buf2 := &bytes.Buffer{}
 	//将图片编码成jpeg
 	err = imaging.Encode(buf2, image, imaging.JPEG)
 	if err != nil {
-		return imgData
+		return loadedImage
 	}
 	return buf2.Bytes()
 }
@@ -112,6 +205,8 @@ func GetContentTypeByFileName(fileName string) (contentType string) {
 		contentType = "application/x-rar-compressed"
 	case ext == ".pdf":
 		contentType = "application/pdf"
+	case ext == ".txt":
+		contentType = "text/plain"
 	case ext == ".tar":
 		contentType = "application/x-tar"
 	case ext == ".epub":

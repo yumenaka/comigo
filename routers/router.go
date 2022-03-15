@@ -148,7 +148,14 @@ func setWebAPI(engine *gin.Engine) {
 	//初始化websocket
 	api.GET("/ws", wsHandler)
 
-	//通过字符串参数获取图片，目前只有非UTF-8编码的ZIP文件会用到。
+	// uuid：书籍的UUID，必须项目
+	// filename:获取的文件名，必须项目
+	// resize_width:指定宽度，缩放图片  &resize_width=300
+	// resize_height:指定高度，缩放图片 &resize_height=300
+	// resize_max_width:指定宽度上限，图片宽度大于这个上限时缩小图片  &resize_max_width=300
+	// resize_max_height:指定高度上限，图片高度大于这个上限时缩小图片  &resize_max_height=300
+	// blurhash:获取对应图片的blurhash，而不是原始图片 &blurhash=3
+	// blurhash_image:获取对应图片的blurhash图片，而不是原始图片  &blurhash_image=3
 	// 示例 URL： 127.0.0.1:1234/getfile?uuid=2b17a130-06c1-4222-a3fe-55ddb5ccd9db&filename=1.jpg
 	//缩放文件，会转化为jpeg：http://127.0.0.1:1234/api/getfile?resize_width=300&resize_height=400&uuid=597e06&filename=01.jpeg
 	api.GET("/getfile", func(c *gin.Context) {
@@ -184,22 +191,87 @@ func setWebAPI(engine *gin.Engine) {
 					fmt.Println(err)
 				}
 			}
+			//处理图像文件
 			if imgData != nil {
-				resizeWidth, errX := strconv.Atoi(c.DefaultQuery("resize_width", "???"))
-				resizeHeight, errY := strconv.Atoi(c.DefaultQuery("resize_height", "???"))
-				//width 与 height 都设置了，按照数值缩放
+				//默认的媒体类型，根据文件后缀判断。可能在后面有变动。
+				contentType := tools.GetContentTypeByFileName(needFile)
+				//读取图片Resize用的resizeWidth
+				resizeWidth, errX := strconv.Atoi(c.DefaultQuery("resize_width", "0"))
+				if errX != nil {
+					fmt.Println(errX)
+				}
+				//读取图片Resize用的resizeHeight
+				resizeHeight, errY := strconv.Atoi(c.DefaultQuery("resize_height", "0"))
+				if errY != nil {
+					fmt.Println(errY)
+				}
+				//图片Resize, 按照固定的width height缩放
 				if errX == nil && errY == nil && resizeWidth > 0 && resizeHeight > 0 {
 					imgData = tools.ImageResize(imgData, resizeWidth, resizeHeight)
+					contentType = tools.GetContentTypeByFileName(".jpg")
 				}
-				//只设置 width， height 未设置 按照宽度缩放
+
+				//图片Resize, 按照 width 等比例缩放
 				if errX == nil && errY != nil && resizeWidth > 0 {
 					imgData = tools.ImageResizeByWidth(imgData, resizeWidth)
+					contentType = tools.GetContentTypeByFileName(".jpg")
 				}
-				//只设置 height，  width未设置 按照高度缩放
+				//图片Resize, 按照 height 等比例缩放
 				if errY == nil && errX != nil && resizeHeight > 0 {
 					imgData = tools.ImageResizeByHeight(imgData, resizeHeight)
+					contentType = tools.GetContentTypeByFileName(".jpg")
 				}
-				c.Data(http.StatusOK, tools.GetContentTypeByFileName(needFile), imgData)
+				//图片Resize, 按照 maxWidth 限制大小
+				resizeMaxWidth, errMX := strconv.Atoi(c.DefaultQuery("resize_max_width", "0"))
+				if errMX != nil {
+					fmt.Println(errMX)
+				}
+				if errMX == nil && resizeMaxWidth > 0 {
+					tempData, limitErr := tools.ImageResizeByMaxWidth(imgData, resizeMaxWidth)
+					if limitErr != nil {
+						fmt.Println(limitErr)
+					} else {
+						imgData = tempData
+						contentType = tools.GetContentTypeByFileName(".jpg")
+					}
+				}
+				//图片Resize, 按照 MaxHeight 限制大小
+				resizeMaxHeight, errMY := strconv.Atoi(c.DefaultQuery("resize_max_height", "0"))
+				if errMY != nil {
+					fmt.Println(errMY)
+				}
+				if errMY == nil && resizeMaxHeight > 0 {
+					tempData, limitErr := tools.ImageResizeByMaxHeight(imgData, resizeMaxHeight)
+					if limitErr != nil {
+						fmt.Println(limitErr)
+					} else {
+						imgData = tempData
+						contentType = tools.GetContentTypeByFileName(".jpg")
+					}
+				}
+
+				//获取对应图片的blurhash并返回，而不是原始图片
+				blurhash, blurErr := strconv.Atoi(c.DefaultQuery("blurhash", "0"))
+				if blurErr != nil {
+					fmt.Println(blurErr)
+				}
+				//虽然blurhash components 理论上最大可以设到9，但反应速度太慢，毫无实用性、所以最大为2
+				if blurhash >= 1 && blurhash <= 3 && blurErr == nil {
+					hash := tools.GetImageDataBlurHash(imgData, blurhash)
+					contentType = tools.GetContentTypeByFileName(".txt")
+					imgData = []byte(hash)
+				}
+				//获取对应图片的blurhash图片，而不是原始图片
+				blurhashImage, blurImageErr := strconv.Atoi(c.DefaultQuery("blurhash_image", "0"))
+				if blurImageErr != nil {
+					fmt.Println(blurImageErr)
+				}
+				//虽然blurhash components 理论上最大可以设到9，但反应速度太慢，毫无实用性、所以最大为3
+				if blurhashImage >= 1 && blurhashImage <= 3 && blurErr == nil {
+					imgData = tools.GetImageDataBlurHashImage(imgData, blurhashImage)
+					contentType = tools.GetContentTypeByFileName(".jpg")
+				}
+				c.Data(http.StatusOK, contentType, imgData)
 			}
 		}
 	})
