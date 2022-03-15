@@ -33,8 +33,6 @@ var rootCmd = &cobra.Command{
 
 //ParseCommands 解析命令
 func ParseCommands(args []string) {
-	//通过“可执行文件名”设置部分默认参数
-	common.Config.SetByExecutableFilename()
 	//决定如何扫描，扫描哪个路径
 	if len(args) == 0 { //没有指定路径或文件的情况下
 		cmdPath := path.Dir(os.Args[0]) //扫描程序执行的路径
@@ -55,6 +53,8 @@ func ParseCommands(args []string) {
 			}
 		}
 	}
+	//通过“可执行文件名”设置部分默认参数
+	common.Config.SetByExecutableFilename()
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -199,9 +199,6 @@ func init() {
 		//保存配置並退出
 		if common.Config.NewConfig {
 			common.Config.NewConfig = false
-			//if common.Config.NewConfig {
-			//	vip.SafeWriteConfigAs("config.toml")
-			//}
 			bytes, err := toml.Marshal(common.Config)
 			if err != nil {
 				fmt.Println("toml.Marshal Error")
@@ -215,5 +212,4 @@ func init() {
 			os.Exit(0)
 		}
 	})
-
 }

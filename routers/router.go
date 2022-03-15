@@ -1,11 +1,9 @@
 package routers
 
 import (
-	"archive/zip"
 	"embed"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/mholt/archiver/v4"
 	"github.com/sanity-io/litter"
 	"github.com/yumenaka/comi/arch"
 	"github.com/yumenaka/comi/common"
@@ -17,7 +15,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
-	"path"
+	"path/filepath"
 	"strconv"
 	"time"
 )
@@ -154,64 +152,71 @@ func setWebAPI(engine *gin.Engine) {
 	// 示例 URL： /getfile?uuid=2b15a130-06c1-4462-a3fe-5276b566d9db&filename=NameInArchive
 	api.GET("/getfile", func(c *gin.Context) {
 		uuid := c.DefaultQuery("uuid", "")
-		NameInArchive := c.DefaultQuery("filename", "")
-		if uuid != "" && NameInArchive != "" {
+		needFile := c.DefaultQuery("filename", "")
+		if uuid != "" && needFile != "" {
 			book, err := common.GetBookByUUID(uuid)
 			if err != nil {
 				fmt.Println(err)
 			}
-			filePath := book.GetFilePath()
-			//fmt.Println(filePath)
-			if book.NonUTF8Zip {
-				content, err := arch.GetSingleFile(filePath, NameInArchive, "gbk")
+			bookPath := book.GetFilePath()
+			//fmt.Println(bookPath)
+			if book.NonUTF8Zip && !book.IsDir {
+				imgData, err := arch.GetSingleFile(bookPath, needFile, "gbk")
 				if err != nil {
 					fmt.Println(err)
 				}
-				c.Data(http.StatusOK, tools.GetContentTypeByFileName(NameInArchive), content)
-			} else {
-				content, err := arch.GetSingleFile(filePath, NameInArchive, "")
+				c.Data(http.StatusOK, tools.GetContentTypeByFileName(needFile), imgData)
+			}
+			if !book.NonUTF8Zip && !book.IsDir {
+				imgData, err := arch.GetSingleFile(bookPath, needFile, "")
 				if err != nil {
 					fmt.Println(err)
 				}
-				c.Data(http.StatusOK, tools.GetContentTypeByFileName(NameInArchive), content)
+				c.Data(http.StatusOK, tools.GetContentTypeByFileName(needFile), imgData)
+			}
+			if book.IsDir {
+				//直接读取磁盘文件
+				imgData, err := ioutil.ReadFile(filepath.Join(bookPath, needFile))
+				if err != nil {
+					fmt.Println(err)
+				}
+				c.Data(http.StatusOK, tools.GetContentTypeByFileName(needFile), imgData)
 			}
 		}
 	})
 
-	//使用虚拟文件系统，设置服务路径（每本书都设置一遍）
-	for _, book := range common.BookList {
-		if book.NonUTF8Zip {
-			continue
-		}
-		ext := path.Ext(book.GetFilePath())
-		if (ext == ".zip" || ext == ".epub" || ext == ".cbz") && !book.NonUTF8Zip {
-			fsys, zipErr := zip.OpenReader(book.GetFilePath())
-			if zipErr != nil {
-				fmt.Println(zipErr)
-			}
-			httpFS := http.FS(fsys)
-			if book.IsDir {
-				engine.Static("/cache/"+book.BookID, book.GetFilePath())
-			} else {
-				engine.StaticFS("/cache/"+book.BookID, httpFS)
-			}
-		} else {
-			// 通过archiver/v4，建立虚拟FS。非UTF文件有编码问题，待改进
-			fsys, err := archiver.FileSystem(book.GetFilePath())
-			httpFS := http.FS(fsys)
-			if err != nil {
-				fmt.Println(err)
-			}
-			if book.IsDir {
-				engine.Static("/cache/"+book.BookID, book.GetFilePath())
-			} else {
-				engine.StaticFS("/cache/"+book.BookID, httpFS)
-			}
-		}
-	}
-	if len(common.BookList) >= 1 {
-		common.ReadingBook = common.BookList[0]
-	}
+	//// getFileApi正常运作的话，或许不需要这个虚拟文件系统？
+	////使用虚拟文件系统，设置服务路径（每本书都设置一遍）
+	//for _, book := range common.BookList {
+	//	if book.NonUTF8Zip {
+	//		continue
+	//	}
+	//	ext := path.Ext(book.GetFilePath())
+	//	if (ext == ".zip" || ext == ".epub" || ext == ".cbz") && !book.NonUTF8Zip {
+	//		fsys, zipErr := zip.OpenReader(book.GetFilePath())
+	//		if zipErr != nil {
+	//			fmt.Println(zipErr)
+	//		}
+	//		httpFS := http.FS(fsys)
+	//		if book.IsDir {
+	//			engine.Static("/cache/"+book.BookID, book.GetFilePath())
+	//		} else {
+	//			engine.StaticFS("/cache/"+book.BookID, httpFS)
+	//		}
+	//	} else {
+	//		// 通过archiver/v4，建立虚拟FS。非UTF zip文件有编码问题
+	//		fsys, err := archiver.FileSystem(book.GetFilePath())
+	//		httpFS := http.FS(fsys)
+	//		if err != nil {
+	//			fmt.Println(err)
+	//		}
+	//		if book.IsDir {
+	//			engine.Static("/cache/"+book.BookID, book.GetFilePath())
+	//		} else {
+	//			engine.StaticFS("/cache/"+book.BookID, httpFS)
+	//		}
+	//	}
+	//}
 }
 
 //3、选择服务端口
@@ -228,34 +233,34 @@ func setPort() {
 	}
 }
 
-//4、setWebpServer
-func setWebpServer(engine *gin.Engine) {
-	////webp反向代理
-	//if common.Config.EnableWebpServer {
-	//	webpError := common.StartWebPServer(common.CacheFilePath+"/webp_config.json", common.ReadingBook.ExtractPath, common.CacheFilePath+"/webp", common.Config.Port+1)
-	//	if webpError != nil {
-	//		fmt.Println(locale.GetString("webp_server_error"), webpError.Error())
-	//		//engine.Static("/cache", common.CacheFilePath)
-	//
-	//	} else {
-	//		fmt.Println(locale.GetString("webp_server_start"))
-	//		engine.Use(reverse_proxy.ReverseProxyHandle("/cache", reverse_proxy.ReverseProxyOptions{
-	//			TargetHost:  "http://localhost",
-	//			TargetPort:  strconv.Itoa(common.Config.Port + 1),
-	//			RewritePath: "/cache",
-	//		}))
-	//	}
-	//} else {
-	//	if common.ReadingBook.IsDir {
-	//		common.ReadingBook.setBookID()
-	//		engine.Static("/cache/"+common.ReadingBook.BookID, common.ReadingBook.filePath)
-	//	} else {
-	//		engine.Static("/cache", common.CacheFilePath)
-	//	}
-}
+////4、setWebpServer TODO：新的webp模式
+//func setWebpServer(engine *gin.Engine) {
+//	//webp反向代理
+//	if common.Config.EnableWebpServer {
+//		webpError := common.StartWebPServer(common.CacheFilePath+"/webp_config.json", common.ReadingBook.ExtractPath, common.CacheFilePath+"/webp", common.Config.Port+1)
+//		if webpError != nil {
+//			fmt.Println(locale.GetString("webp_server_error"), webpError.Error())
+//			//engine.Static("/cache", common.CacheFilePath)
+//
+//		} else {
+//			fmt.Println(locale.GetString("webp_server_start"))
+//			engine.Use(reverse_proxy.ReverseProxyHandle("/cache", reverse_proxy.ReverseProxyOptions{
+//				TargetHost:  "http://localhost",
+//				TargetPort:  strconv.Itoa(common.Config.Port + 1),
+//				RewritePath: "/cache",
+//			}))
+//		}
+//	} else {
+//		if common.ReadingBook.IsDir {
+//			engine.Static("/cache/"+common.ReadingBook.BookID, common.ReadingBook.GetFilePath())
+//		} else {
+//			engine.Static("/cache", common.CacheFilePath)
+//		}
+//	}
+//}
 
 //5、setFrpClient
-func setFrpClient(engine *gin.Engine) {
+func setFrpClient() {
 	//frp服务
 	if common.Config.EnableFrpcServer {
 		if common.Config.FrpConfig.RandomRemotePort {
@@ -296,12 +301,16 @@ func StartWebServer() {
 	setStaticFiles(engine)
 	//2、setWebAPI
 	setWebAPI(engine)
+	//TODO：设定第一本书
+	if len(common.BookList) >= 1 {
+		common.ReadingBook = common.BookList[0]
+	}
 	//3、setPort
 	setPort()
 	//4、setWebpServer
-	setWebpServer(engine)
+	//setWebpServer(engine)
 	//5、setFrpClient
-	setFrpClient(engine)
+	setFrpClient()
 	//6、printCMDMessage
 	printCMDMessage()
 	//7、StartWebServer 监听并启动web服务
@@ -331,14 +340,14 @@ func StartWebServer() {
 	}
 }
 
-//单独设定某个文件
-func singleStaticFiles(engine *gin.Engine, fileUrl string, filePath string, contentType string) {
-	engine.GET(fileUrl, func(c *gin.Context) {
-		file, _ := staticFS.ReadFile(filePath)
-		c.Data(
-			http.StatusOK,
-			contentType,
-			file,
-		)
-	})
-}
+////单独设定某个文件
+//func singleStaticFiles(engine *gin.Engine, fileUrl string, filePath string, contentType string) {
+//	engine.GET(fileUrl, func(c *gin.Context) {
+//		file, _ := staticFS.ReadFile(filePath)
+//		c.Data(
+//			http.StatusOK,
+//			contentType,
+//			file,
+//		)
+//	})
+//}

@@ -97,7 +97,8 @@ func scanAndGetBook(filePath string) (*Book, error) {
 		if Config.SortImage != "none" {
 			book.SortPages()
 		}
-	} else { //其他类型的压缩文件或文件夹
+	} else {
+		//其他类型的压缩文件或文件夹
 		fsys, err := archiver.FileSystem(filePath)
 		if err != nil {
 			return nil, err
@@ -126,11 +127,20 @@ func scanAndGetBook(filePath string) (*Book, error) {
 				u, ok := f.(archiver.File) //f.Name不包含路径信息.需要转换一下
 				if !ok {
 					//如果是文件夹中的图片
-					book.PageInfo = append(book.PageInfo, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: "", Url: "/cache/" + book.BookID + "/" + url.PathEscape(path)})
+					////用Archiver的虚拟文件系统提供图片服务
+					//book.PageInfo = append(book.PageInfo, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: "", Url: "/cache/" + book.BookID + "/" + url.PathEscape(path)})
+
+					//实验：用getfile接口提供文件服务
+					TempURL := "api/getfile?uuid=" + book.BookID + "&filename=" + url.PathEscape(path)
+					book.PageInfo = append(book.PageInfo, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: "", Url: TempURL})
 					//fmt.Println(locale.GetString("unsupported_extract")+" %s", f)
 				} else {
-					//如果是压缩文件
-					TempURL := "/cache/" + book.BookID + "/" + url.PathEscape(u.NameInArchive)
+					////用Archiver的虚拟文件系统提供图片服务
+					//TempURL := "/cache/" + book.BookID + "/" + url.PathEscape(u.NameInArchive)
+					//book.PageInfo = append(book.PageInfo, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: u.NameInArchive, Url: TempURL})
+
+					//实验：用getfile接口提供文件服务
+					TempURL := "api/getfile?uuid=" + book.BookID + "&filename=" + url.PathEscape(u.NameInArchive)
 					book.PageInfo = append(book.PageInfo, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: u.NameInArchive, Url: TempURL})
 				}
 			}

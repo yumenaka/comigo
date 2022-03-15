@@ -185,26 +185,50 @@ func GetSingleFile(filePath string, NameInArchive string, textEncoding string) (
 	if err != nil {
 		return nil, err
 	}
-	//如果是zip
+
 	var data []byte
-	if ex, ok := format.(archiver.Zip); ok {
-		ex.TextEncoding = textEncoding // “”  "shiftjis" "gbk"
-		ctx := context.Background()
-		err := ex.Extract(ctx, file, []string{NameInArchive}, func(ctx context.Context, f archiver.File) error {
-			// 取得特定压缩文件
-			file, err := f.Open()
-			if err != nil {
-				fmt.Println(err)
-			}
-			defer file.Close()
-			content, err := ioutil.ReadAll(file)
-			if err != nil {
-				fmt.Println(err)
-			}
-			data = content
-			return err
-		})
-		return data, err
+	//如果是特殊编码的zip文件
+	if textEncoding != "" {
+		if ex, ok := format.(archiver.Zip); ok {
+			ex.TextEncoding = textEncoding // “”  "shiftjis" "gbk"
+			ctx := context.Background()
+			err := ex.Extract(ctx, file, []string{NameInArchive}, func(ctx context.Context, f archiver.File) error {
+				// 取得特定压缩文件
+				file, err := f.Open()
+				if err != nil {
+					fmt.Println(err)
+				}
+				defer file.Close()
+				content, err := ioutil.ReadAll(file)
+				if err != nil {
+					fmt.Println(err)
+				}
+				data = content
+				return err
+			})
+			return data, err
+		}
+	} else {
+		//如果不是特殊编码的zip文件
+		if ex, ok := format.(archiver.Extractor); ok {
+
+			ctx := context.Background()
+			err := ex.Extract(ctx, file, []string{NameInArchive}, func(ctx context.Context, f archiver.File) error {
+				// 取得特定压缩文件
+				file, err := f.Open()
+				if err != nil {
+					fmt.Println(err)
+				}
+				defer file.Close()
+				content, err := ioutil.ReadAll(file)
+				if err != nil {
+					fmt.Println(err)
+				}
+				data = content
+				return err
+			})
+			return data, err
+		}
 	}
 	return nil, errors.New("2,not Found " + NameInArchive + " in " + filePath)
 }
