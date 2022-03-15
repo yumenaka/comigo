@@ -159,7 +159,7 @@ func setWebAPI(engine *gin.Engine) {
 	// gray:黑白化												&gray=true
 	// blurhash:获取对应图片的blurhash，而不是原始图片 				&blurhash=3
 	// blurhash_image:获取对应图片的blurhash图片，而不是原始图片  	&blurhash_image=3
-	
+
 	// 示例 URL： 127.0.0.1:1234/getfile?uuid=2b17a130-06c1-4222-a3fe-55ddb5ccd9db&filename=1.jpg
 	//缩放文件，会转化为jpeg：http://127.0.0.1:1234/api/getfile?resize_width=300&resize_height=400&uuid=597e06&filename=01.jpeg
 	api.GET("/getfile", func(c *gin.Context) {
@@ -299,7 +299,7 @@ func setWebAPI(engine *gin.Engine) {
 		}
 	})
 
-	//// getFileApi正常运作的话，就不需要这个虚拟文件系统
+	//// getFileApi正常运作的话，就不需要这个 虚拟文件系统 的实现方式了
 	////使用虚拟文件系统，设置服务路径（每本书都设置一遍）
 	////参考了: https://bitfieldconsulting.com/golang/filesystems
 	//for _, book := range common.BookList {
@@ -348,7 +348,7 @@ func setPort() {
 	}
 }
 
-////4、setWebpServer TODO：新的webp模式
+////4、setWebpServer TODO：新的webp模式：https://docs.webp.sh/usage/remote-backend/
 //func setWebpServer(engine *gin.Engine) {
 //	//webp反向代理
 //	if common.Config.EnableWebpServer {

@@ -284,19 +284,15 @@ type Book struct {
 }
 
 type SinglePageInfo struct {
-	NameInArchive string    `json:"name"` //书籍为压缩文件的时候，用于解压的压缩文件内文件路径
-	Url           string    `json:"url"`  //远程用户读取图片的实际URL，为了适应特殊字符，经过一次转义
-	ModeTime      time.Time `json:"-"`    //不要解析这个字段
-	FileSize      int64     `json:"-"`    //不要解析这个字段
-	//Height            int       `json:"height"`
-	//Width             int       `json:"width"`
-	Height            int    `json:"-"` //不要解析这个字段
-	Width             int    `json:"-"` //不要解析这个字段
-	RealImageFilePATH string `json:"-"` //不要解析这个字段  书籍为文件夹的时候，实际图片的路径
-	//ImgType           string    `json:"image_type"`
-	//Blurhash          string    `json:"blurhash"`
-	ImgType  string `json:"-"` //不要解析这个字段
-	Blurhash string `json:"-"` //不要解析这个字段
+	NameInArchive     string    `json:"filename"` //用于解压的压缩文件内文件路径，或图片名，为了适应特殊字符，经过一次转义
+	Url               string    `json:"url"`      //远程用户读取图片的URL，为了适应特殊字符，经过一次转义
+	Blurhash          string    `json:"blurhash"` //blurhash占位符。需要扫描图片生成（tools.GetImageDataBlurHash）
+	ModeTime          time.Time `json:"-"`        //不要解析这个字段
+	FileSize          int64     `json:"-"`        //不要解析这个字段
+	Height            int       `json:"-"`        //不要解析这个字段
+	Width             int       `json:"-"`        //不要解析这个字段
+	RealImageFilePATH string    `json:"-"`        //不要解析这个字段  书籍为文件夹的时候，实际图片的路径
+	ImgType           string    `json:"-"`        //不要解析这个字段
 }
 
 // BookInfo 与Book唯一的区别是没有AllPageInfo,而是封面图URL
