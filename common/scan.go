@@ -203,7 +203,9 @@ func walkUTF8ZipFs(fsys fs.FS, parent, base string, book *Book) error {
 			logrus.Debugf(locale.GetString("unsupported_file_type") + name)
 		} else {
 			inArchiveName := path.Join(parent, f.Name())
-			book.Pages = append(book.Pages, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: inArchiveName, Url: "/cache/" + book.BookID + "/" + url.PathEscape(inArchiveName)})
+			//book.Pages = append(book.Pages, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: inArchiveName, Url: "/cache/" + book.BookID + "/" + url.PathEscape(inArchiveName)})
+			TempURL := "api/getfile?uuid=" + book.BookID + "&filename=" + url.PathEscape(inArchiveName)
+			book.Pages = append(book.Pages, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: inArchiveName, Url: TempURL})
 		}
 	}
 	return err
