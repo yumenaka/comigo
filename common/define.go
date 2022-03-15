@@ -265,7 +265,7 @@ type Book struct {
 	Name            string    `json:"name"`
 	Author          string    `json:"author"`
 	Title           string    `json:"title"`
-	FilePath        string    `json:"-"` //不要解析这个字段
+	filePath        string    `json:"-"` //不要解析这个字段
 	ExtractPath     string    `json:"-"` //不要解析这个字段
 	AllPageNum      int       `json:"all_page_num"`
 	FileType        string    `json:"file_type"`
@@ -276,9 +276,10 @@ type Book struct {
 	ExtractNum      int       `json:"extract_num"`
 	ExtractComplete bool      `json:"extract_complete"`
 	ReadPercent     float64   `json:"read_percent"`
-	//NonUTF8ZipFile 表示 Name 和 Comment 未以 UTF-8 编码。根据规范，唯一允许的其他编码应该是 CP-437，但从历史上看，许多 ZIP 阅读器将 Name 和 Comment 解释为系统的本地字符编码。仅当用户打算为特定本地化区域编码不可移植的 ZIP 文件时，才应设置此标志。否则，Writer 会自动为有效的 UTF-8 字符串设置 ZIP 格式的 UTF-8 标志。
-	NonUTF8ZipFile bool        `json:"non_utf8_zip"`
-	PageInfo       AllPageInfo `json:"pages"`
+	//NonUTF8Zip 表示 Name 和 Comment 未以 UTF-8 编码。根据规范，唯一允许的其他编码应该是 CP-437，但从历史上看，许多 ZIP 阅读器将 Name 和 Comment 解释为系统的本地字符编码。仅当用户打算为特定本地化区域编码不可移植的 ZIP 文件时，才应设置此标志。否则，Writer 会自动为有效的 UTF-8 字符串设置 ZIP 格式的 UTF-8 标志。
+	NonUTF8Zip      bool        `json:"non_utf8_zip"`
+	ZipTextEncoding string      `json:"zip_text_encoding"`
+	PageInfo        AllPageInfo `json:"pages"`
 }
 
 type SinglePageInfo struct {
@@ -313,7 +314,8 @@ type BookInfo struct {
 	ExtractNum      int       `json:"extract_num"`
 	ExtractComplete bool      `json:"extract_complete"`
 	ReadPercent     float64   `json:"read_percent"`
-	NonUTF8         bool      `json:"non-utf-8"`
+	NonUTF8Zip      bool      `json:"non_utf_8_zip"`
+	ZipTextEncoding string    `json:"zip_text_encoding"`
 	//PageInfo        AllPageInfo `json:"pages"`
 	CoverInfo SinglePageInfo
 }
@@ -328,9 +330,9 @@ func NewBookInfo(b Book) *BookInfo {
 		Name:            b.Name,
 		Author:          b.Author,
 		Title:           b.Title,
-		FilePath:        b.FilePath,
+		FilePath:        b.GetFilePath(),
 		ExtractPath:     b.ExtractPath,
-		AllPageNum:      b.AllPageNum,
+		AllPageNum:      b.GetAllPageNum(),
 		FileType:        b.FileType,
 		FileSize:        b.FileSize,
 		Modified:        b.Modified,
@@ -339,7 +341,7 @@ func NewBookInfo(b Book) *BookInfo {
 		ExtractNum:      b.ExtractNum,
 		ExtractComplete: b.ExtractComplete,
 		ReadPercent:     b.ReadPercent,
-		NonUTF8:         b.NonUTF8ZipFile,
+		NonUTF8Zip:      b.NonUTF8Zip,
 		CoverInfo:       coverInfo,
 	}
 }
@@ -360,7 +362,6 @@ func GetBookShelf() (*[]BookInfo, error) {
 func InitBook(allPageNum int, filePath string, modified time.Time, isDir bool, fileSize int64, extractComplete bool) *Book {
 	var b = Book{
 		AllPageNum:      allPageNum,
-		FilePath:        filePath,
 		Modified:        modified,
 		IsDir:           isDir,
 		FileSize:        fileSize,
@@ -368,6 +369,7 @@ func InitBook(allPageNum int, filePath string, modified time.Time, isDir bool, f
 	}
 	//书名直接用路径
 	b.Name = filePath
+	b.SetFilePath(filePath)
 	//压缩文件的话，去除路径，取文件名
 	if !b.IsDir {
 		post := strings.LastIndex(filePath, "/") //Unix路径分隔符
@@ -433,7 +435,7 @@ func (s AllPageInfo) Less(i, j int) (less bool) {
 	////fmt.Println("numJ:",numJ)
 	//less = numI < numJ //如果有的话，比较文件名里的数字
 
-	//如何定义 s[i] < s[j]  根据文件名(自然语言字符串)
+	//如何定义 s[i] < s[j]  根据文件名(第三方库、自然语言字符串)
 	less = tools.Compare(s[i].NameInArchive, s[j].NameInArchive)
 
 	//如何定义 s[i] < s[j]  根据修改时间
@@ -452,30 +454,35 @@ func (b *Book) SortPages() {
 	sort.Sort(b.PageInfo)
 }
 
-// setBookID  根据路径的MD5，生成书籍ID
-func (b *Book) setBookID() {
-	//fmt.Println("文件绝对路径："+fileAbaPath, "路径的md5："+md5string(fileAbaPath))
-	fileAbaPath, err := filepath.Abs(b.FilePath)
-	if err != nil {
-		fmt.Println(err, fileAbaPath)
-	}
-	b.BookID = md5string(fileAbaPath)
-}
 func md5string(s string) string {
 	r := md5.Sum([]byte(s))
 	return hex.EncodeToString(r[:])
 }
 
+// setBookID  根据路径的MD5，生成书籍ID。初始化的时候应该调用。
+func (b *Book) setBookID() {
+	//fmt.Println("文件绝对路径："+fileAbaPath, "路径的md5："+md5string(fileAbaPath))
+	fileAbaPath, err := filepath.Abs(b.filePath)
+	if err != nil {
+		b.BookID = md5string(b.filePath)
+		fmt.Println(err, fileAbaPath)
+	} else {
+		b.BookID = md5string(b.GetFilePath())
+	}
+}
+
 // GetBookID  根据路径的MD5，生成书籍ID
 func (b *Book) GetBookID() string {
+	//防止未初始化，最好不要用到
 	if b.BookID == "" {
+		fmt.Println("BookID未初始化，一定是哪里写错了")
 		b.setBookID()
 	}
 	return b.BookID
 }
 
+//设置页数
 func (b *Book) setPageNum() {
-	//设置页数
 	b.AllPageNum = len(b.PageInfo)
 }
 
@@ -486,7 +493,18 @@ func (b *Book) GetAllPageNum() int {
 }
 
 func (b *Book) SetFilePath(path string) {
-	b.FilePath = path
+	fileAbaPath, err := filepath.Abs(path)
+	if err != nil {
+		//因为权限问题，无法取得绝对路径的情况下，用相对路径
+		fmt.Println(err, fileAbaPath)
+		b.filePath = path
+	} else {
+		b.filePath = fileAbaPath
+	}
+}
+
+func (b *Book) GetFilePath() string {
+	return b.filePath
 }
 
 func (b *Book) GetName() string { //绑定到Book结构体的方法
@@ -503,7 +521,7 @@ func (b *Book) GetPicNum() int {
 	return PicNum
 }
 
-// ScanAllImage 服务器端分析单双页
+// ScanAllImage 服务器端分析分辨率、漫画单双页，只适合已解压文件
 func (b *Book) ScanAllImage() {
 	log.Println(locale.GetString("check_image_start"))
 	// Console progress bar
@@ -608,51 +626,6 @@ func SetupCloseHander() {
 		os.Exit(0)
 	}()
 }
-
-//func InitReadingBook() (err error) {
-//	//准备解压，设置图片文件夹
-//	if ReadingBook.IsDir {
-//		ReadingBook.ExtractPath = ReadingBook.FilePath
-//		ReadingBook.ExtractComplete = true
-//		ReadingBook.ExtractNum = ReadingBook.AllPageNum
-//	} else {
-//		//setTempDir()
-//		ReadingBook.ExtractPath = path.Join(CacheFilePath, ReadingBook.GetBookID()) //extraFolder
-//		//err = LsArchive(&ReadingBook)
-//		//if err != nil {
-//		//	fmt.Println(locale.GetString("scan_archive_error"))
-//		//	return err
-//		//}
-//		//err = UnArchive(&ReadingBook)
-//		//if err != nil {
-//		//	fmt.Println(locale.GetString("un_archive_error"))
-//		//	return err
-//		//}
-//		ReadingBook.InitBook(ReadingBook.FilePath) //设置书名
-//	}
-//	//服务器分析图片，新版默认不做
-//	if Config.CheckImage {
-//		ReadingBook.ScanAllImageGo() //扫描所有图片，取得分辨率信息，使用了协程
-//	}
-//	//服务器排序图片
-//	if Config.SortImage != "" {
-//		if Config.SortImage == "name" {
-//			ReadingBook.SortPages()
-//			fmt.Println(locale.GetString("SORT_BY_NAME"))
-//		}
-//		if Config.SortImage == "time" {
-//			ReadingBook.SortPages()
-//			fmt.Println(locale.GetString("SORT_BY_TIME"))
-//		}
-//		if Config.Debug {
-//			//判断是否已经排好顺序，将会打印true
-//			fmt.Println("IS Sorted?\t", sort.IsSorted(ReadingBook.PageInfo))
-//			//打印排序后的数据
-//			//litter.Dump(ReadingBook.PageInfo)
-//		}
-//	}
-//	return err
-//}
 
 // setTempDir 设置临时文件夹，退出时会被清理
 func setTempDir() {

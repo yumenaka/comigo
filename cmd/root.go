@@ -38,7 +38,7 @@ func ParseCommands(args []string) {
 	//决定如何扫描，扫描哪个路径
 	if len(args) == 0 { //没有指定路径或文件的情况下
 		cmdPath := path.Dir(os.Args[0]) //扫描程序执行的路径
-		list, err := common.ScanPath(cmdPath)
+		list, err := common.ScanAndGetBookList(cmdPath)
 		if err != nil {
 			fmt.Println(locale.GetString("scan_error"), cmdPath)
 		} else {
@@ -47,7 +47,7 @@ func ParseCommands(args []string) {
 	} else {
 		//指定了多个参数的话，都扫描一遍
 		for _, p := range args {
-			list, err := common.ScanPath(p)
+			list, err := common.ScanAndGetBookList(p)
 			if err != nil {
 				fmt.Println(locale.GetString("scan_error"), p)
 			} else {

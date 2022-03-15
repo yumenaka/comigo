@@ -45,7 +45,7 @@ func wsHandler(c *gin.Context) {
 		//客户端请求更换书籍
 		if msg.Message == "ChangeBook" && msg.NowBookUUID != common.ReadingBook.GetBookID() {
 			if changeReadingBook(msg.NowBookUUID) {
-				fmt.Println("正在切换书籍：", common.ReadingBook.FilePath)
+				fmt.Println("正在切换书籍：", common.ReadingBook.GetFilePath())
 				if err != nil {
 					fmt.Println("无法初始化书籍。", err, common.ReadingBook)
 				} else {

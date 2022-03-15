@@ -13,11 +13,11 @@ import (
 )
 
 func main() {
-	//zipPath := "gbk.zip"
-	//err := UnArchiveZip(zipPath, "解压zip", "gbk")
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
+	zipPath := "gbk.zip"
+	err := UnArchiveZip(zipPath, "解压zip", "gbk")
+	if err != nil {
+		fmt.Println(err)
+	}
 	//rarPath := "rar.rar"
 	//err = UnArchiveRar(rarPath, "解压rar")
 	//if err != nil {

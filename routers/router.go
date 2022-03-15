@@ -83,7 +83,7 @@ func setStaticFiles(engine *gin.Engine) {
 		})
 	})
 	if !common.ReadingBook.IsDir {
-		engine.StaticFile("/raw/"+common.ReadingBook.Name, common.ReadingBook.FilePath)
+		engine.StaticFile("/raw/"+common.ReadingBook.Name, common.ReadingBook.GetFilePath())
 	}
 }
 
@@ -160,9 +160,9 @@ func setWebAPI(engine *gin.Engine) {
 			if err != nil {
 				fmt.Println(err)
 			}
-			filePath := book.FilePath
+			filePath := book.GetFilePath()
 			//fmt.Println(filePath)
-			if book.NonUTF8ZipFile {
+			if book.NonUTF8Zip {
 				content, err := arch.GetSingleFile(filePath, NameInArchive, "gbk")
 				if err != nil {
 					fmt.Println(err)
@@ -180,30 +180,30 @@ func setWebAPI(engine *gin.Engine) {
 
 	//使用虚拟文件系统，设置服务路径（每本书都设置一遍）
 	for _, book := range common.BookList {
-		if book.NonUTF8ZipFile {
+		if book.NonUTF8Zip {
 			continue
 		}
-		ext := path.Ext(book.FilePath)
-		if (ext == ".zip" || ext == ".epub" || ext == ".cbz") && !book.NonUTF8ZipFile {
-			fsys, zipErr := zip.OpenReader(book.FilePath)
+		ext := path.Ext(book.GetFilePath())
+		if (ext == ".zip" || ext == ".epub" || ext == ".cbz") && !book.NonUTF8Zip {
+			fsys, zipErr := zip.OpenReader(book.GetFilePath())
 			if zipErr != nil {
 				fmt.Println(zipErr)
 			}
 			httpFS := http.FS(fsys)
 			if book.IsDir {
-				engine.Static("/cache/"+book.BookID, book.FilePath)
+				engine.Static("/cache/"+book.BookID, book.GetFilePath())
 			} else {
 				engine.StaticFS("/cache/"+book.BookID, httpFS)
 			}
 		} else {
 			// 通过archiver/v4，建立虚拟FS。非UTF文件有编码问题，待改进
-			fsys, err := archiver.FileSystem(book.FilePath)
+			fsys, err := archiver.FileSystem(book.GetFilePath())
 			httpFS := http.FS(fsys)
 			if err != nil {
 				fmt.Println(err)
 			}
 			if book.IsDir {
-				engine.Static("/cache/"+book.BookID, book.FilePath)
+				engine.Static("/cache/"+book.BookID, book.GetFilePath())
 			} else {
 				engine.StaticFS("/cache/"+book.BookID, httpFS)
 			}
@@ -248,7 +248,7 @@ func setWebpServer(engine *gin.Engine) {
 	//} else {
 	//	if common.ReadingBook.IsDir {
 	//		common.ReadingBook.setBookID()
-	//		engine.Static("/cache/"+common.ReadingBook.BookID, common.ReadingBook.FilePath)
+	//		engine.Static("/cache/"+common.ReadingBook.BookID, common.ReadingBook.filePath)
 	//	} else {
 	//		engine.Static("/cache", common.CacheFilePath)
 	//	}
