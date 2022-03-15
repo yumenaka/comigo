@@ -9,7 +9,10 @@ import (
 	"github.com/Baozisoftware/qrcode-terminal-go"
 	"github.com/bbrks/go-blurhash"
 	"github.com/disintegration/imaging"
+	"github.com/mandykoh/autocrop"
 	"github.com/yumenaka/comi/locale"
+	"image"
+	"image/draw"
 	"io"
 	"log"
 	"net"
@@ -162,7 +165,6 @@ func ImageResizeByHeight(loadedImage []byte, height int) []byte {
 
 // ImageResize 重设图片分辨率
 func ImageResize(loadedImage []byte, width int, height int) []byte {
-	////读取本地文件，本地文件尺寸300*400
 	//loadedImage, _ := ioutil.ReadFile("d:/1.jpg")
 	buf := bytes.NewBuffer(loadedImage)
 	image, err := imaging.Decode(buf)
@@ -170,11 +172,38 @@ func ImageResize(loadedImage []byte, width int, height int) []byte {
 		fmt.Println(err)
 		return loadedImage
 	}
-	//生成缩略图，尺寸150*200，并保持到为文件2.jpg
+	//生成缩略图，尺寸width*height
 	image = imaging.Resize(image, width, height, imaging.Lanczos)
 	buf2 := &bytes.Buffer{}
 	//将图片编码成jpeg
 	err = imaging.Encode(buf2, image, imaging.JPEG)
+	if err != nil {
+		return loadedImage
+	}
+	return buf2.Bytes()
+}
+
+// ImageAutoCrop  重设图片分辨率
+func ImageAutoCrop(loadedImage []byte, energyThreshold float32) []byte {
+	////读取本地文件，本地文件尺寸300*400
+	//loadedImage, _ := ioutil.ReadFile("d:/1.jpg")
+	buf := bytes.NewBuffer(loadedImage)
+	img, err := imaging.Decode(buf)
+	if err != nil {
+		fmt.Println(err)
+		return loadedImage
+	}
+	//使用 BoundsForThreshold 查找图像的自动裁剪边界
+	//croppedBounds := autocrop.BoundsForThreshold(image, energyThreshold/100)
+
+	nRGBAImg := image.NewNRGBA(image.Rect(0, 0, img.Bounds().Dx(), img.Bounds().Dy()))
+	draw.Draw(nRGBAImg, nRGBAImg.Bounds(), img, img.Bounds().Min, draw.Src)
+	result := autocrop.ToThreshold(nRGBAImg, energyThreshold/100)
+	//如果不需要边界，可以使用ToThreshold函数方便地获得裁剪图像
+	//croppedImg := autocrop.ToThreshold(image, energyThreshold)
+	buf2 := &bytes.Buffer{}
+	//将图片编码成jpeg
+	err = imaging.Encode(buf2, result, imaging.JPEG)
 	if err != nil {
 		return loadedImage
 	}

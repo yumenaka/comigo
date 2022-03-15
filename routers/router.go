@@ -148,14 +148,15 @@ func setWebAPI(engine *gin.Engine) {
 	//初始化websocket
 	api.GET("/ws", wsHandler)
 
-	// uuid：书籍的UUID，必须项目
-	// filename:获取的文件名，必须项目
-	// resize_width:指定宽度，缩放图片  &resize_width=300
-	// resize_height:指定高度，缩放图片 &resize_height=300
-	// resize_max_width:指定宽度上限，图片宽度大于这个上限时缩小图片  &resize_max_width=300
-	// resize_max_height:指定高度上限，图片高度大于这个上限时缩小图片  &resize_max_height=300
-	// blurhash:获取对应图片的blurhash，而不是原始图片 &blurhash=3
-	// blurhash_image:获取对应图片的blurhash图片，而不是原始图片  &blurhash_image=3
+	// uuid：书籍的UUID，必须项目       							&uuid=2b17a130-1
+	// filename:获取的文件名，必须项目   							&filename=01.jpg
+	// resize_width:指定宽度，缩放图片  							&resize_width=300
+	// resize_height:指定高度，缩放图片 							&resize_height=300
+	// resize_max_width:指定宽度上限，图片宽度大于这个上限时缩小图片  	&resize_max_width=300
+	// resize_max_height:指定高度上限，图片高度大于这个上限时缩小图片  	&resize_max_height=300
+	// blurhash:获取对应图片的blurhash，而不是原始图片 				&blurhash=3
+	// blurhash_image:获取对应图片的blurhash图片，而不是原始图片  	&blurhash_image=3
+	// auto_crop:自动切白边，数字是切白边的阈值，范围是0~100 			&auto_crop=10
 	// 示例 URL： 127.0.0.1:1234/getfile?uuid=2b17a130-06c1-4222-a3fe-55ddb5ccd9db&filename=1.jpg
 	//缩放文件，会转化为jpeg：http://127.0.0.1:1234/api/getfile?resize_width=300&resize_height=400&uuid=597e06&filename=01.jpeg
 	api.GET("/getfile", func(c *gin.Context) {
@@ -250,7 +251,17 @@ func setWebAPI(engine *gin.Engine) {
 					}
 				}
 
-				//获取对应图片的blurhash并返回，而不是原始图片
+				//读取自动切白边用的阈值
+				autoCrop, errCrop := strconv.Atoi(c.DefaultQuery("auto_crop", "-1"))
+				if errCrop != nil {
+					fmt.Println(errCrop)
+				}
+				if errCrop == nil && autoCrop > 0 && autoCrop <= 100 {
+					imgData = tools.ImageAutoCrop(imgData, float32(autoCrop))
+					contentType = tools.GetContentTypeByFileName(".jpg")
+				}
+
+				//获取对应图片的blurhash字符串并返回，不是原始图片
 				blurhash, blurErr := strconv.Atoi(c.DefaultQuery("blurhash", "0"))
 				if blurErr != nil {
 					fmt.Println(blurErr)
@@ -261,7 +272,7 @@ func setWebAPI(engine *gin.Engine) {
 					contentType = tools.GetContentTypeByFileName(".txt")
 					imgData = []byte(hash)
 				}
-				//获取对应图片的blurhash图片，而不是原始图片
+				//获取对应图片的blurhash图
 				blurhashImage, blurImageErr := strconv.Atoi(c.DefaultQuery("blurhash_image", "0"))
 				if blurImageErr != nil {
 					fmt.Println(blurImageErr)
