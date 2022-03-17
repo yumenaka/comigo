@@ -75,17 +75,17 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&common.Config.UserName, "username", "u", "admin", "用户名")
 	rootCmd.PersistentFlags().StringVarP(&common.Config.Password, "password", "k", "", "密码")
 
-	//简单认证
+	//TLS设定
 	rootCmd.PersistentFlags().StringVar(&common.Config.CertFile, "cert", "", "tls CertFile")
 	rootCmd.PersistentFlags().StringVar(&common.Config.KeyFile, "key", "", "tls KeyFile")
 
 	//指定配置文件
 	rootCmd.PersistentFlags().StringVarP(&common.ConfigFile, "config", "c", "", locale.GetString("CONFIG"))
 	//在当前目录生成示例配置文件
-	rootCmd.PersistentFlags().BoolVar(&common.Config.NewConfig, "new-config", false, locale.GetString("NewConfig"))
+	rootCmd.PersistentFlags().BoolVar(&common.Config.GenerateConfig, "generate-config", false, locale.GetString("GenerateConfig"))
 	//服务端口
 	rootCmd.PersistentFlags().IntVarP(&common.Config.Port, "port", "p", 1234, locale.GetString("PORT"))
-	//本地Host名
+	//本地Host
 	rootCmd.PersistentFlags().StringVar(&common.Config.Host, "host", "", locale.GetString("LOCAL_HOST"))
 
 	//DEBUG
@@ -99,14 +99,14 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&common.Config.DisableLAN, "disable-lan", "d", false, locale.GetString("DISABLE_LAN"))
 	//文件搜索深度
 	rootCmd.PersistentFlags().IntVarP(&common.Config.MaxDepth, "max-depth", "m", 2, locale.GetString("MAX_DEPTH"))
-	////服务器解析分辨率
-	rootCmd.PersistentFlags().BoolVar(&common.Config.CheckImage, "check-image", false, locale.GetString("CHECK_IMAGE"))
+	////服务器解析书籍元数据，如果生成blurhash，需要消耗大量资源
+	rootCmd.PersistentFlags().BoolVar(&common.Config.GenerateMetaData, "generate-metadata", false, locale.GetString("GENERATE_METADATA"))
 	//打印所有可用网卡ip
 	rootCmd.PersistentFlags().BoolVar(&common.Config.PrintAllIP, "print-all", false, locale.GetString("PRINT_ALL_IP"))
 	//至少有几张图片，才认定为漫画压缩包
 	rootCmd.PersistentFlags().IntVar(&common.Config.MinImageNum, "min-image-num", 1, locale.GetString("MIN_MEDIA_NUM"))
 
-	////webp相关 打算拆分成子命令
+	////webp相关 拆分成子命令？
 	//启用webp传输
 	//rootCmd.PersistentFlags().BoolVarP(&common.Config.EnableWebpServer, "webp", "w", false, locale.GetString("ENABLE_WEBP"))
 	//webp-server命令
@@ -114,7 +114,7 @@ func init() {
 	//webp压缩质量
 	//rootCmd.PersistentFlags().IntVarP(&common.Config.WebpConfig.QUALITY, "webp-quality", "q", 85, locale.GetString("WEBP_QUALITY"))
 
-	////Frpc相关  打算拆分成子命令
+	////Frpc相关  拆分成子命令？
 	//frp反向代理
 	rootCmd.PersistentFlags().BoolVarP(&common.Config.EnableFrpcServer, "frpc", "f", false, locale.GetString("ENABLE_FRPC"))
 	//frps_addr
@@ -131,12 +131,8 @@ func init() {
 	rootCmd.PersistentFlags().IntVar(&common.Config.FrpConfig.RemotePort, "frps-remote-port", 50000, locale.GetString("FRP_REMOTE_PORT"))
 	//输出log文件
 	rootCmd.PersistentFlags().BoolVar(&common.Config.LogToFile, "log", false, locale.GetString("LOG_TO_FILE"))
-	//默认web模板
-	//rootCmd.PersistentFlags().StringVarP(&common.Config.Template, "template", "t", "scroll", locale.GetString("TEMPLATE"))
 	//sketch模式的倒计时秒数
 	rootCmd.PersistentFlags().IntVar(&common.Config.SketchCountSeconds, "sketch_count_seconds", 90, locale.GetString("SKETCH_COUNT_SECONDS"))
-	//图片文件排序
-	rootCmd.PersistentFlags().StringVarP(&common.Config.SortImage, "sort", "s", "none", locale.GetString("SORT"))
 	//临时图片解压路径
 	rootCmd.PersistentFlags().StringVar(&common.Config.TempPATH, "temp-path", "", locale.GetString("TEMP_PATH"))
 	//退出时清除临时文件
@@ -197,8 +193,8 @@ func init() {
 		//`)
 		//vip.ReadConfig(bytes.NewBuffer(tomlExample))
 		//保存配置並退出
-		if common.Config.NewConfig {
-			common.Config.NewConfig = false
+		if common.Config.GenerateConfig {
+			common.Config.GenerateConfig = false
 			bytes, err := toml.Marshal(common.Config)
 			if err != nil {
 				fmt.Println("toml.Marshal Error")

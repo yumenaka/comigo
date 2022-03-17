@@ -21,7 +21,7 @@
 			@mousemove="onMouseMove"
 			@mouseleave="onMouseLeave"
 		>
-			<img v-lazy="page.url" v-bind:alt="key+1" v-bind:key="key" />
+			<img v-lazy="page.url + imageParametersString()" v-bind:alt="key + 1" v-bind:key="key" />
 			<div class="page_hint" v-if="showPageNumFlag_ScrollMode">{{ key + 1 }}/{{ book.all_page_num }}</div>
 		</div>
 
@@ -229,12 +229,26 @@ export default defineComponent({
 			color: "#E0D9CD",
 		});
 
+		const imageParameters = reactive({
+			resize_width: -1,// 缩放图片，指定宽度
+			resize_height: -1,// 指定高度，缩放图片
+			resize_max_width: -1,//图片宽度大于这个上限时缩小 
+			resize_max_height: -1,//图片高度大于这个上限时缩小 
+			auto_crop: -1,// 自动切白边阈值，范围是0~100,其实为0就很够了	
+			gray: "false",//黑白化
+			// all_str: "",//
+		});
+
 		//单选按钮绑定的数值,ref函数：返回一个响应式的引用
 		// const checkedValueRef = ref(null)
 		return {
 			cookies,
 			//背景色
 			model,
+			imageParameters,//获取图片所用的参数
+			imageParametersString: () => {
+				return "&resize_width=" + imageParameters.resize_width + "&resize_height=" + imageParameters.resize_height + "&resize_max_width=" + imageParameters.resize_max_width + "&resize_max_height=" + imageParameters.resize_max_height + "&auto_crop=" + imageParameters.auto_crop + "&gray=" + imageParameters.gray
+			},
 			//开关的颜色
 			railStyle: ({ focused, checked }) => {
 				const style = {}
@@ -473,11 +487,11 @@ export default defineComponent({
 		},
 		//页面滚动的时候改变各种值
 		onScroll() {
-      let scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-      this.scrollDownFlag = scrollTop > this.scrollTopSave;
+			let scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+			this.scrollDownFlag = scrollTop > this.scrollTopSave;
 			//防手抖，小于一定数值状态就不变
-      let step = Math.abs(this.scrollTopSave - scrollTop);
-      // console.log("step:", step);
+			let step = Math.abs(this.scrollTopSave - scrollTop);
+			// console.log("step:", step);
 			this.scrollTopSave = scrollTop
 			if (step > 5) {
 				this.showBackTopFlag = scrollTop > 400 && !this.scrollDownFlag;
@@ -510,11 +524,11 @@ export default defineComponent({
 			this.clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离，单位为px）
 			//浏览器的视口，不包括工具栏和滚动条:
 			let innerWidth = window.innerWidth
-      let innerHeight = window.innerHeight
-      let MinX = innerWidth * 0.4
-      let MaxX = innerWidth * 0.6
-      let MinY = innerHeight * 0.4
-      let MaxY = innerHeight * 0.6
+			let innerHeight = window.innerHeight
+			let MinX = innerWidth * 0.4
+			let MaxX = innerWidth * 0.6
+			let MinY = innerHeight * 0.4
+			let MaxY = innerHeight * 0.6
 			if ((this.clickX > MinX && this.clickX < MaxX) && (this.clickY > MinY && this.clickY < MaxY)) {
 				//console.log("在设置区域！");
 				e.currentTarget.style.cursor = 'url(/images/SettingsOutline.png), pointer';
@@ -603,18 +617,17 @@ export default defineComponent({
 .manga img {
 	margin: auto;
 	/* object-fit: scale-down; */
-  padding: 3px 0px;
-  border-radius: 7px;
+	padding: 3px 0px;
+	border-radius: 7px;
 	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
-.page_hint{
+.page_hint {
 	/* 文字颜色 */
 	color: #7e6e6e;
 	/* 文字阴影：https://www.w3school.com.cn/css/css3_shadows.asp*/
 	text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
 }
-
 
 .LoadingImage {
 	width: 90vw;

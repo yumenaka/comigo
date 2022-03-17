@@ -94,9 +94,6 @@ func scanAndGetBook(filePath string) (*Book, error) {
 			fmt.Println("扫描到NonUTF-8 ZIP文件:" + filePath + "  Error:" + err.Error())
 			err = scanNonUTF8ZipFile(filePath, book)
 		}
-		if Config.SortImage != "none" {
-			book.SortPages()
-		}
 	} else {
 		//其他类型的压缩文件或文件夹
 		fsys, err := archiver.FileSystem(filePath)
@@ -145,9 +142,6 @@ func scanAndGetBook(filePath string) (*Book, error) {
 		})
 	}
 	//根据文件数决定是否返回这本书
-	if Config.SortImage != "none" {
-		book.SortPages()
-	}
 	totalPageHint := "filePath: " + filePath + " Total number of pages in the book:" + strconv.Itoa(book.GetAllPageNum())
 	if book.GetAllPageNum() >= Config.MinImageNum {
 		fmt.Println(totalPageHint)

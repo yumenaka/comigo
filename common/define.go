@@ -1,14 +1,17 @@
 package common
 
 import (
+	"bytes"
 	"crypto/md5"
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/bbrks/go-blurhash"
 	"github.com/cheggaaa/pb/v3"
 	"github.com/disintegration/imaging"
 	"github.com/mitchellh/go-homedir"
 	"github.com/xxjwxc/gowp/workpool"
+	"github.com/yumenaka/comi/arch"
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/tools"
 	"image"
@@ -33,6 +36,8 @@ func init() {
 	}
 	Config.LogFilePath = home
 	Config.LogFileName = "comigo.log"
+	//退出时清理
+	SetupCloseHander()
 }
 
 var (
@@ -70,7 +75,7 @@ var (
 		DisableLAN:          false,
 		Template:            "scroll", //multi、single、random etc.
 		Port:                1234,
-		CheckImage:          false,
+		GenerateMetaData:    false,
 		LogToFile:           false,
 		MaxDepth:            3,
 		MinImageNum:         3,
@@ -135,35 +140,34 @@ type FrpClientConfig struct {
 }
 
 type ServerConfig struct {
-	UserName    string `json:"-"` //不要解析这个字段
-	Password    string `json:"-"` //不要解析这个字段
-	CertFile    string `json:"-"` //不要解析这个字段
-	KeyFile     string `json:"-"` //不要解析这个字段
-	OpenBrowser bool   `json:"-"` //不要解析这个字段
-	DisableLAN  bool   `json:"-"` //不要解析这个字段
-	Template    string `json:"template"`
-	//Auth                   string `json:"-"` //不要解析这个字段 访问密码，还没做
-	PrintAllIP             bool `json:"-"` //不要解析这个字段
-	Port                   int
-	CheckImage             bool
-	Debug                  bool   `json:"-"` //不要解析这个字段
-	LogToFile              bool   `json:"-"` //不要解析这个字段
-	LogFilePath            string `json:"-"` //不要解析这个字段
-	LogFileName            string `json:"-"` //不要解析这个字段
-	MaxDepth               int    `json:"-"` //不要解析这个字段
 	MinImageNum            int
 	Host                   string
 	EnableWebpServer       bool
-	WebpConfig             WebPServerConfig `json:"-"` //不要解析这个字段
 	EnableFrpcServer       bool
-	FrpConfig              FrpClientConfig `json:"-"` //不要解析这个字段
-	ZipFileTextEncoding    string          `json:"-"` //不要解析这个字段
-	SketchCountSeconds     int             `json:"sketch_count_seconds"`
+	Port                   int
+	GenerateMetaData       bool
 	SortImage              string
-	TempPATH               string `json:"-"` //不要解析这个字段
-	CleanAllTempFileOnExit bool   `json:"-"` //不要解析这个字段
-	CleanAllTempFile       bool   `json:"-"` //不要解析这个字段
-	NewConfig              bool   `json:"-"` //不要解析这个字段
+	SketchCountSeconds     int              `json:"sketch_count_seconds"`
+	Template               string           `json:"template"`
+	UserName               string           `json:"-"` //不要解析这个字段
+	Password               string           `json:"-"` //不要解析这个字段
+	CertFile               string           `json:"-"` //不要解析这个字段
+	KeyFile                string           `json:"-"` //不要解析这个字段
+	OpenBrowser            bool             `json:"-"` //不要解析这个字段
+	DisableLAN             bool             `json:"-"` //不要解析这个字段
+	PrintAllIP             bool             `json:"-"` //不要解析这个字段
+	Debug                  bool             `json:"-"` //不要解析这个字段
+	LogToFile              bool             `json:"-"` //不要解析这个字段
+	LogFilePath            string           `json:"-"` //不要解析这个字段
+	LogFileName            string           `json:"-"` //不要解析这个字段
+	MaxDepth               int              `json:"-"` //不要解析这个字段
+	ZipFileTextEncoding    string           `json:"-"` //不要解析这个字段
+	TempPATH               string           `json:"-"` //不要解析这个字段
+	CleanAllTempFileOnExit bool             `json:"-"` //不要解析这个字段
+	CleanAllTempFile       bool             `json:"-"` //不要解析这个字段
+	GenerateConfig         bool             `json:"-"` //不要解析这个字段
+	WebpConfig             WebPServerConfig `json:"-"` //不要解析这个字段
+	FrpConfig              FrpClientConfig  `json:"-"` //不要解析这个字段
 }
 
 // SetByExecutableFilename 通过执行文件名设置默认网页模板参数
@@ -284,15 +288,16 @@ type Book struct {
 }
 
 type SinglePageInfo struct {
-	NameInArchive     string    `json:"filename"` //用于解压的压缩文件内文件路径，或图片名，为了适应特殊字符，经过一次转义
-	Url               string    `json:"url"`      //远程用户读取图片的URL，为了适应特殊字符，经过一次转义
-	Blurhash          string    `json:"blurhash"` //blurhash占位符。需要扫描图片生成（tools.GetImageDataBlurHash）
-	ModeTime          time.Time `json:"-"`        //不要解析这个字段
-	FileSize          int64     `json:"-"`        //不要解析这个字段
-	Height            int       `json:"-"`        //不要解析这个字段
-	Width             int       `json:"-"`        //不要解析这个字段
-	RealImageFilePATH string    `json:"-"`        //不要解析这个字段  书籍为文件夹的时候，实际图片的路径
-	ImgType           string    `json:"-"`        //不要解析这个字段
+	NameInArchive string    `json:"filename"` //用于解压的压缩文件内文件路径，或图片名，为了适应特殊字符，经过一次转义
+	Url           string    `json:"url"`      //远程用户读取图片的URL，为了适应特殊字符，经过一次转义
+	Blurhash      string    `json:"blurhash"` //blurhash占位符。需要扫描图片生成（tools.GetImageDataBlurHash）
+	Height        int       `json:"height"`   //blurhash用，图片的高
+	Width         int       `json:"width"`    //blurhash用，图片的宽
+	ModeTime      time.Time `json:"-"`        //不要解析这个字段
+	FileSize      int64     `json:"-"`        //不要解析这个字段
+
+	RealImageFilePATH string `json:"-"` //不要解析这个字段  书籍为文件夹的时候，实际图片的路径
+	ImgType           string `json:"-"` //不要解析这个字段
 }
 
 // BookInfo 与Book唯一的区别是没有AllPageInfo,而是封面图URL
@@ -382,30 +387,43 @@ func InitBook(allPageNum int, filePath string, modified time.Time, isDir bool, f
 	return &b
 }
 
-func GetBookByUUID(uuid string) (*Book, error) {
+// GetBookByUUID 获取特定书籍，复制一份数据
+// TODO: 只获取、不改变原始数据。
+func GetBookByUUID(uuid string, sort bool) (Book, error) {
 	for _, b := range BookList {
 		if b.BookID == uuid {
-			return &b, nil
+			if sort {
+				b.SortPages()
+			}
+			return b, nil
 		}
 	}
 	//为了调试方便，支持模糊查找，可以使用UUID的开头来查找书籍，当然这样有可能出错
 	for _, b := range BookList {
 		if strings.HasPrefix(b.BookID, uuid) {
-			return &b, nil
+			if sort {
+				b.SortPages()
+			}
+			return b, nil
 		}
 	}
-	return nil, errors.New("can not found book,uuid=" + uuid)
+	return Book{}, errors.New("can not found book,uuid=" + uuid)
 }
 
-func GetBookByAuthor(author string) (*[]Book, error) {
+// GetBookByAuthor 获取同一作者的书籍。
+// TODO: 只获取、不改变原始数据。
+func GetBookByAuthor(author string, sort bool) ([]Book, error) {
 	var bookList []Book
 	for _, b := range BookList {
 		if b.Author == author {
+			if sort {
+				b.SortPages()
+			}
 			bookList = append(bookList, b)
 		}
 	}
 	if len(bookList) > 0 {
-		return &bookList, nil
+		return bookList, nil
 	}
 	return nil, errors.New("can not found book,author=" + author)
 }
@@ -437,10 +455,10 @@ func (s AllPageInfo) Less(i, j int) (less bool) {
 	//如何定义 s[i] < s[j]  根据文件名(第三方库、自然语言字符串)
 	less = tools.Compare(s[i].NameInArchive, s[j].NameInArchive)
 
-	//如何定义 s[i] < s[j]  根据修改时间
-	if Config.SortImage == "time" {
-		less = s[i].ModeTime.After(s[j].ModeTime) // s[i] 的年龄（修改时间），是否比 s[j] 小？
-	}
+	////如何定义 s[i] < s[j]  根据修改时间
+	//if Config.SortImage == "time" {
+	//	less = s[i].ModeTime.After(s[j].ModeTime) // s[i] 的年龄（修改时间），是否比 s[j] 小？
+	//}
 	return less
 }
 
@@ -458,7 +476,7 @@ func md5string(s string) string {
 	return hex.EncodeToString(r[:])
 }
 
-// setBookID  根据路径的MD5，生成书籍ID。初始化的时候应该调用。
+// setBookID  根据路径的MD5，生成书籍ID。初始化时调用。
 func (b *Book) setBookID() {
 	//fmt.Println("文件绝对路径："+fileAbaPath, "路径的md5："+md5string(fileAbaPath))
 	fileAbaPath, err := filepath.Abs(b.filePath)
@@ -528,7 +546,7 @@ func (b *Book) ScanAllImage() {
 	tmpl := `{{ red "With funcs:" }} {{ bar . "<" "-" (cycle . "↖" "↗" "↘" "↙" ) "." ">"}} {{speed . | rndcolor }} {{percent .}} {{string . "my_green_string" | green}} {{string . "my_blue_string" | blue}}`
 	bar.SetTemplateString(tmpl)
 	for i := 0; i < len(b.Pages); i++ { //此处不能用range，因为需要修改
-		SetImageType(&b.Pages[i])
+		analyzePageImages(&b.Pages[i], b.filePath)
 		//进度条计数
 		bar.Increment()
 	}
@@ -553,7 +571,7 @@ func (b *Book) ScanAllImageGo() {
 		//并发处理，提升图片分析速度
 		wp.Do(func() error {
 			//defer wg.Done()
-			SetImageType(&b.Pages[ii])
+			analyzePageImages(&b.Pages[ii], b.filePath)
 			bar.Increment()
 			//res <- fmt.Sprintf("Finished %d", i)
 			return nil
@@ -566,8 +584,9 @@ func (b *Book) ScanAllImageGo() {
 	log.Println(locale.GetString("check_image_completed"))
 }
 
-func SetImageType(p *SinglePageInfo) {
-	err := p.GetImageSize()
+//analyzePageImages 解析漫画的分辨率与blurhash
+func analyzePageImages(p *SinglePageInfo, bookPath string) {
+	err := p.analyzeImage(bookPath)
 	//log.Println(locale.GetString("check_image_ing"), p.RealImageFilePATH)
 	if err != nil {
 		log.Println(locale.GetString("check_image_error") + err.Error())
@@ -583,23 +602,29 @@ func SetImageType(p *SinglePageInfo) {
 	}
 }
 
-// GetImageSize 获取硬盘上某个图片文件的分辨率
-func (i *SinglePageInfo) GetImageSize() (err error) {
+// analyzeImage 获取某页漫画的分辨率与blurhash
+func (i *SinglePageInfo) analyzeImage(bookPath string) (err error) {
 	var img image.Image
-	img, err = imaging.Open(i.RealImageFilePATH)
+	//img, err = imaging.Open(i.RealImageFilePATH)
+
+	imgData, err := arch.GetSingleFile(bookPath, i.NameInArchive, "gbk")
+	if err != nil {
+		fmt.Println(err)
+	}
+	buf := bytes.NewBuffer(imgData)
+	img, err = imaging.Decode(buf)
 	if err != nil {
 		log.Printf(locale.GetString("check_image_error")+" %v\n", err)
 	} else {
 		i.Width = img.Bounds().Dx()
 		i.Height = img.Bounds().Dy()
-		//简单占位符，很耗费服务器资源，以后再研究。
-		////"github.com/buckket/go-blurhash"
-		//str, err := blurhash.Encode(4, 3, img)
-		//if err != nil {
-		//	// Handle errors
-		//	log.Printf(locale.GetString("check_image_error")+" %v\n", err)
-		//}
-		//i.Blurhash = str
+		//很耗费服务器资源，以后再研究。
+		str, err := blurhash.Encode(1, 1, img)
+		if err != nil {
+			// Handle errors
+			log.Printf(locale.GetString("check_image_error")+" %v\n", err)
+		}
+		i.Blurhash = str
 	}
 	return err
 }
