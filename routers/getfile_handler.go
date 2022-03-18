@@ -12,7 +12,7 @@ import (
 	"strconv"
 )
 
-// 示例 URL： 127.0.0.1:1234/getfile?uuid=2b17a130-06c1-4222-a3fe-55ddb5ccd9db&filename=1.jpg
+// 示例 URL： 127.0.0.1:1234/getfile?uuid=2b17a13&filename=1.jpg
 // 缩放文件，会转化为jpeg：http://127.0.0.1:1234/api/getfile?resize_width=300&resize_height=400&uuid=597e06&filename=01.jpeg
 // 相关参数：
 // uuid：书籍的UUID，必须项目       							&uuid=2b17a130-1

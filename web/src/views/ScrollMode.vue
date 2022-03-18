@@ -21,14 +21,14 @@
 			@mousemove="onMouseMove"
 			@mouseleave="onMouseLeave"
 		>
-			<img v-lazy="page.url + imageParametersString()" v-bind:alt="key + 1" v-bind:key="key" />
+			<img v-lazy="imageParametersString(page.url)" v-bind:alt="key + 1" v-bind:key="key" />
 			<div class="page_hint" v-if="showPageNumFlag_ScrollMode">{{ key + 1 }}/{{ book.all_page_num }}</div>
 		</div>
 
 		<Drawer
 			:initDrawerActive="this.drawerActive"
 			:initDrawerPlacement="this.drawerPlacement"
-			@saveConfig="this.saveConfigToCookie"
+			@saveConfig="this.saveConfigToLocalStorage"
 			@startSketch="this.startSketchMode"
 			@closeDrawer="this.drawerDeactivate"
 			@setT="this.OnSetTemplate"
@@ -91,7 +91,7 @@
 
 				<!-- 单页-漫画宽度-使用固定值PX -->
 
-				<!-- 数字输入PX -->
+				<!-- 数字输入框 -->
 				<n-input-number
 					v-if="!this.imageWidth_usePercentFlag"
 					size="small"
@@ -114,7 +114,7 @@
 					:format-tooltip="value => `${value}px`"
 				/>
 
-				<!-- 数字输入PX -->
+				<!-- 数字输入框 -->
 				<n-input-number
 					v-if="!this.imageWidth_usePercentFlag"
 					size="small"
@@ -176,10 +176,70 @@
 					<template #unchecked>{{ $t('showPageNum') }}</template>
 				</n-switch>
 			</n-space>
+
+			<!-- 开关：显示原图 黑白 -->
+			<n-space>
+				<n-switch
+					size="large"
+					v-model:value="this.imageParameters.gray"
+					@update:value="setImageParameters_Gray"
+				>
+					<template #checked>{{ $t('gray_image') }}</template>
+					<template #unchecked>{{ $t('gray_image') }}</template>
+				</n-switch>
+			</n-space>
+			<!-- 分割线 -->
+			<n-divider />
+			<!-- 开关：自动切边 -->
+			<n-space>
+				<n-switch
+					size="large"
+					v-model:value="this.imageParameters.do_auto_crop"
+					@update:value="setImageParameters_DoAutoCrop"
+				>
+					<template #checked>{{ $t('auto_crop') }}</template>
+					<template #unchecked>{{ $t('auto_crop') }}</template>
+				</n-switch>
+				<!-- 切白边阈值 -->
+				<n-input-number
+					size="small"
+					:show-button="false"
+					v-if="this.imageParameters.do_auto_crop"
+					v-model:value="this.imageParameters.auto_crop"
+					:max="10"
+					:min="0"
+				>
+					<template #prefix>{{ $t('energy_threshold') }}</template>
+				</n-input-number>
+			</n-space>
+			<!-- 开关：压缩图片 -->
+			<n-space>
+				<n-switch
+					size="large"
+					:rail-style="railStyle"
+					v-model:value="this.imageParameters.do_auto_resize"
+					@update:value="setImageParameters_DoAutoResize"
+				>
+					<template #checked>{{ $t('image_width_limit') }}</template>
+					<template #unchecked>{{ $t('raw_resolution') }}</template>
+				</n-switch>
+				<!-- 压缩图片参数：数字输入框 -->
+				<n-input-number
+					v-if="this.imageParameters.do_auto_resize"
+					size="small"
+					:show-button="false"
+					v-model:value="this.imageParameters.resize_max_width"
+					:max="this.imageMaxWidth"
+					:min="100"
+				>
+					<template #prefix>{{ $t('max_width') }}</template>
+					<template #suffix>px</template>
+				</n-input-number>
+			</n-space>
 		</Drawer>
 
 		<n-back-top :show="showBackTopFlag" type="info" color="#8a2be2" :right="20" :bottom="20" />
-		<n-button @click="scrollToTop(90);" size="large" secondary strong>Back To Top</n-button>
+		<n-button @click="scrollToTop(90);" size="large" secondary strong>{{ $t('back-to-top') }}</n-button>
 	</div>
 </template>
 
@@ -232,11 +292,12 @@ export default defineComponent({
 		const imageParameters = reactive({
 			resize_width: -1,// 缩放图片，指定宽度
 			resize_height: -1,// 指定高度，缩放图片
-			resize_max_width: -1,//图片宽度大于这个上限时缩小 
-			resize_max_height: -1,//图片高度大于这个上限时缩小 
-			auto_crop: -1,// 自动切白边阈值，范围是0~100,其实为0就很够了	
-			gray: "false",//黑白化
-			// all_str: "",//
+			do_auto_resize: false,
+			resize_max_width: 800,//图片宽度大于这个上限时缩小 
+			resize_max_height: -1,//图片高度大于这个上限时缩小
+			do_auto_crop: false,
+			auto_crop: 1,// 自动切白边阈值，范围是0~100,其实为1就够了	
+			gray: false,//黑白化
 		});
 
 		//单选按钮绑定的数值,ref函数：返回一个响应式的引用
@@ -246,8 +307,14 @@ export default defineComponent({
 			//背景色
 			model,
 			imageParameters,//获取图片所用的参数
-			imageParametersString: () => {
-				return "&resize_width=" + imageParameters.resize_width + "&resize_height=" + imageParameters.resize_height + "&resize_max_width=" + imageParameters.resize_max_width + "&resize_max_height=" + imageParameters.resize_max_height + "&auto_crop=" + imageParameters.auto_crop + "&gray=" + imageParameters.gray
+			imageParametersString: (source_url) => {
+				// var temp =
+				if (source_url.substr(0, 12) == "api/getfile?") {
+					return source_url + "&resize_width=" + imageParameters.resize_width + "&resize_height=" + imageParameters.resize_height + "&resize_max_width=" + (imageParameters.do_auto_resize ? imageParameters.resize_max_width : -1) + "&resize_max_height=" + imageParameters.resize_max_height + "&auto_crop=" + (imageParameters.do_auto_crop ? imageParameters.auto_crop : -1) + "&gray=" + (imageParameters.gray ? 'true' : 'false')
+				} else {
+					return source_url
+				}
+
 			},
 			//开关的颜色
 			railStyle: ({ focused, checked }) => {
@@ -342,7 +409,7 @@ export default defineComponent({
 		} else if (localStorage.getItem("showHeaderFlag") === "false") {
 			this.showHeaderFlag = false;
 		}
-		//console.log("读取cookie并初始化: showHeaderFlag=" + this.showHeaderFlag);
+		//console.log("读取设置并初始化: showHeaderFlag=" + this.showHeaderFlag);
 
 		//是否显示页数
 		if (localStorage.getItem("showPageNumFlag_ScrollMode") === "true") {
@@ -350,7 +417,31 @@ export default defineComponent({
 		} else if (localStorage.getItem("showPageNumFlag_ScrollMode") === "false") {
 			this.showPageNumFlag_ScrollMode = false;
 		}
-		//console.log("读取cookie并初始化: showPageNumFlag_ScrollMode=" + this.showPageNumFlag_ScrollMode);
+		//console.log("读取设置并初始化: showPageNumFlag_ScrollMode=" + this.showPageNumFlag_ScrollMode);
+
+		//是否获取黑白图片
+		if (localStorage.getItem("ImageParameters_Gray") === "true") {
+			this.imageParameters.gray = true;
+		} else if (localStorage.getItem("ImageParameters_Gray") === "false") {
+			this.imageParameters.gray = false;
+		}
+		// console.log("读取设置并初始化: ImageParameters_Gray=" + this.imageParameters.gray);
+
+		//是否压缩图片
+		if (localStorage.getItem("ImageParameters_DoAutoResize") === "true") {
+			this.imageParameters.do_auto_resize = true;
+		} else if (localStorage.getItem("ImageParameters_DoAutoResize") === "false") {
+			this.imageParameters.do_auto_resize = false;
+		}
+
+
+		//是否自动切白边
+		if (localStorage.getItem("ImageParameters_DoAutoCrop") === "true") {
+			this.imageParameters.do_auto_crop = true;
+		} else if (localStorage.getItem("ImageParameters_DoAutoCrop") === "false") {
+			this.imageParameters.do_auto_crop = false;
+		}
+
 
 		//宽度是否使用百分比
 		if (localStorage.getItem("imageWidth_usePercentFlag") === "true") {
@@ -435,9 +526,10 @@ export default defineComponent({
 		OnSetTemplate(value) {
 			this.$emit("setTemplate", value);
 		},
+		//关闭抽屉的时候保存配置，似乎有些多余？
 		//如果在一个组件上使用了 v-model:xxx，应该使用 @update:xxx  https://www.naiveui.com/zh-CN/os-theme/docs/common-issues
-		saveConfigToCookie() {
-			// 储存cookie
+		saveConfigToLocalStorage() {
+			// 储存配置
 			localStorage.setItem("showHeaderFlag", this.showHeaderFlag);
 			localStorage.setItem("showPageNumFlag_ScrollMode", this.showPageNumFlag_ScrollMode);
 			localStorage.setItem("imageWidth_usePercentFlag", this.imageWidth_usePercentFlag);
@@ -448,23 +540,41 @@ export default defineComponent({
 			localStorage.setItem("ScrollModeDefaultColor", this.model.color);
 		},
 		setShowHeaderChange(value) {
-			console.log("value:" + value);
+			// console.log("value:" + value);
 			this.showHeaderFlag = value;
 			localStorage.setItem("showHeaderFlag", value);
-			console.log("cookie设置完毕: showHeaderFlag=" + localStorage.getItem("showHeaderFlag"));
+			console.log("成功保存设置: showHeaderFlag=" + localStorage.getItem("showHeaderFlag"));
 		},
 		setShowPageNumChange(value) {
-			console.log("value:" + value);
+			// console.log("value:" + value);
 			this.showPageNumFlag_ScrollMode = value;
 			localStorage.setItem("showPageNumFlag_ScrollMode", value);
-			console.log("cookie设置完毕: showPageNumFlag_ScrollMode=" + localStorage.getItem("showPageNumFlag_ScrollMode"));
+			console.log("成功保存设置: showPageNumFlag_ScrollMode=" + localStorage.getItem("showPageNumFlag_ScrollMode"));
+		},
+		setImageParameters_Gray(value) {
+			// console.log("value:" + value);
+			this.imageParameters.gray = value;
+			localStorage.setItem("ImageParameters_Gray", value);
+			console.log("成功保存设置: ImageParameters_Gray=" + localStorage.getItem("ImageParameters_Gray"));
+		},
+
+		setImageParameters_DoAutoResize(value) {
+			this.imageParameters.do_auto_resize = value;
+			localStorage.setItem("ImageParameters_DoAutoResize", value);
+			console.log("成功保存设置: ImageParameters_DoAutoResize=" + localStorage.getItem("ImageParameters_DoAutoResize"));
+		},
+
+		setImageParameters_DoAutoCrop(value) {
+			this.imageParameters.do_auto_crop = value;
+			localStorage.setItem("ImageParameters_DoAutoCrop", value);
+			console.log("成功保存设置: ImageParameters_DoAutoCrop=" + localStorage.getItem("ImageParameters_DoAutoCrop"));
 		},
 
 		setImageWidthUsePercentFlag(value) {
 			console.log("value:" + value);
 			this.imageWidth_usePercentFlag = value;
 			localStorage.setItem("imageWidth_usePercentFlag", value);
-			console.log("cookie设置完毕: imageWidth_usePercentFlag=" + this.imageWidth_usePercentFlag);
+			console.log("成功保存设置: imageWidth_usePercentFlag=" + this.imageWidth_usePercentFlag);
 		},
 
 		//可见区域变化的时候改变页面状态
@@ -494,7 +604,7 @@ export default defineComponent({
 			// console.log("step:", step);
 			this.scrollTopSave = scrollTop
 			if (step > 5) {
-				this.showBackTopFlag = scrollTop > 400 && !this.scrollDownFlag;
+				this.showBackTopFlag = (scrollTop > 400) && !this.scrollDownFlag;
 			}
 		},
 		//获取鼠标位置，决定是否打开设置面板
@@ -624,7 +734,7 @@ export default defineComponent({
 
 .page_hint {
 	/* 文字颜色 */
-	color: #7e6e6e;
+	color: #ffffff;
 	/* 文字阴影：https://www.w3school.com.cn/css/css3_shadows.asp*/
 	text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
 }

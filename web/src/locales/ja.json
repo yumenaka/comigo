@@ -31,5 +31,11 @@
   "startSketchMessage": "クロッキーが始まりました、良い一日を。",
   "goodjob_and_byebye": "お疲れ様でした、バイバイ。",
   "simpleDoublePage": "ページ合併",
-  "autoDoublePage": "ページ合併（beta）"
+  "autoDoublePage": "ページ合併（beta）",
+  "gray_image": "モノクロ化",
+  "image_width_limit": "サイズ（幅）を制限",
+  "auto_crop": "余白自動トリミング",
+  "max_width": "最大幅:",
+  "energy_threshold": "エネルギー閾値：",
+  "back-to-top": "ページのトップへ戻る"
 }

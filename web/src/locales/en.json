@@ -31,5 +31,11 @@
   "startSketchMessage": "The countdown begins, Have a nice day.",
   "goodjob_and_byebye": "Goodjob,bye.",
   "simpleDoublePage": "DoublePage",
-  "autoDoublePage": "DoublePage（beta）"
+  "autoDoublePage": "DoublePage（beta）",
+  "gray_image": "gray image",
+  "image_width_limit": "Limit size (width)",
+  "auto_crop": "Auto white cut",
+  "max_width": "max width:",
+  "energy_threshold": "Energy Threshold:",
+  "back-to-top": "Back To Top"
 }

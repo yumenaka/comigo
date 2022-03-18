@@ -31,5 +31,13 @@
   "startSketchMessage": "开始倒计时速写，祝你心情愉快。",
   "goodjob_and_byebye": "做得不错，再见~",
   "simpleDoublePage": "合并双页",
-  "autoDoublePage": "合并双页（beta）"
+  "autoDoublePage": "合并双页（beta）",
+  "original_image": "显示原图",
+  "gray_image": "黑白化",
+  "image_width_limit": "限制尺寸(宽)",
+  "raw_resolution": "原始分辨率",
+  "auto_crop": "自动切边",
+  "max_width": "最大宽度：",
+  "energy_threshold": "切边强度：",
+  "back-to-top": "回到页首"
 }
