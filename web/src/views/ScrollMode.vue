@@ -35,7 +35,12 @@
 			:nowTemplate="this.nowTemplate"
 		>
 			<span>{{ $t("setBackColor") }}</span>
-			<n-color-picker v-model:value="model.color" :modes="['rgb']" :show-alpha="false" />
+			<n-color-picker
+				v-model:value="model.color"
+				:modes="['rgb']"
+				:show-alpha="false"
+				@update:value="onBackgroundColorChange"
+			/>
 
 			<!-- 分割线 -->
 			<n-divider />
@@ -202,15 +207,12 @@
 				</n-switch>
 				<!-- 切白边阈值 -->
 				<n-input-number
-					size="small"
 					:show-button="false"
 					v-if="this.imageParameters.do_auto_crop"
 					v-model:value="this.imageParameters.auto_crop"
 					:max="10"
 					:min="0"
-				>
-					<template #prefix>{{ $t('energy_threshold') }}</template>
-				</n-input-number>
+				></n-input-number>
 			</n-space>
 			<!-- 开关：压缩图片 -->
 			<n-space>
@@ -286,7 +288,8 @@ export default defineComponent({
 		//背景颜色，颜色选择器用
 		//reactive({}) 创建并返回一个响应式对象: https://www.bilibili.com/video/av925511720/?p=4  也讲到了toRefs()
 		const model = reactive({
-			color: "#E0D9CD",
+			color: "#f6f7eb",
+			colorHeader: "#d1c9c1",
 		});
 
 		const imageParameters = reactive({
@@ -403,7 +406,8 @@ export default defineComponent({
 		window.addEventListener("resize", this.onResize);
 		this.imageMaxWidth = window.innerWidth;
 		//根据cookie初始化默认值,或初始化cookie值,cookie读取出来的都是字符串，不要直接用
-		//是否显示顶部页头
+
+		//是否显示页头
 		if (localStorage.getItem("showHeaderFlag") === "true") {
 			this.showHeaderFlag = true;
 		} else if (localStorage.getItem("showHeaderFlag") === "false") {
@@ -434,6 +438,13 @@ export default defineComponent({
 			this.imageParameters.do_auto_resize = false;
 		}
 
+		//启用压缩的Width下限
+		if (localStorage.getItem("ImageParametersResizeMaxWidth") != null) {
+			let saveNum = Number(localStorage.getItem("ImageParametersResizeMaxWidth"));
+			if (!isNaN(saveNum)) {
+				this.imageParameters.resize_max_width = saveNum;
+			}
+		}
 
 		//是否自动切白边
 		if (localStorage.getItem("ImageParameters_DoAutoCrop") === "true") {
@@ -442,6 +453,13 @@ export default defineComponent({
 			this.imageParameters.do_auto_crop = false;
 		}
 
+		//切白边参数
+		if (localStorage.getItem("ImageParameters_DoAutoCrop") != null) {
+			let saveNum = Number(localStorage.getItem("ImageParameters_DoAutoCrop"));
+			if (!isNaN(saveNum)) {
+				this.imageParameters.auto_crop = saveNum;
+			}
+		}
 
 		//宽度是否使用百分比
 		if (localStorage.getItem("imageWidth_usePercentFlag") === "true") {
@@ -485,6 +503,7 @@ export default defineComponent({
 		//当前颜色
 		if (localStorage.getItem("ScrollModeDefaultColor") != null) {
 			this.model.color = localStorage.getItem("ScrollModeDefaultColor");
+			this.onBackgroundColorChange(this.model.color);
 		}
 
 	},
@@ -526,7 +545,53 @@ export default defineComponent({
 		OnSetTemplate(value) {
 			this.$emit("setTemplate", value);
 		},
-		//关闭抽屉的时候保存配置，似乎有些多余？
+		onBackgroundColorChange(value) {
+			// value #997E50
+			// 16进制转10进制
+			let r = Number('0x' + value.substr(1, 2))
+			let g = Number('0x' + value.substr(3, 2))
+			let b = Number('0x' + value.substr(5, 2))
+			// console.log(value);
+			// console.log("R:" + r + " G:" + g + " B:" + b);
+			//题头在背景色的基础上亮一些
+			let subR = 40
+			let subG = 30
+			let subB = 42
+			let r2 = (r < 255 - subR) ? (r + subR) : (r + parseInt((255 - r) / 2))
+			let g2 = (g < 255 - subG) ? (g + subG) : (g + parseInt((255 - g) / 2))
+			let b2 = (b < 255 - subB) ? (b + subB) : (b + parseInt((255 - b) / 2))
+			if (r > 250) {
+				r2 = r - subR
+			}
+			if (g > 250) {
+				g2 = g - subG
+			}
+			if (b > 250) {
+				b2 = b - subB
+			}
+			if (r < 50) {
+				r2 = r + 3 * subR
+			}
+			if (g < 50) {
+				g2 = g + 3 * subG
+			}
+			if (b < 50) {
+				b2 = b + 3 * subB
+			}
+			// //背景亮的时候，页头暗。背景暗的时候，页头亮。
+			// let subR = 40
+			// let subG = 30
+			// let subB = 42
+			// let r2 = (r < 125) ? (r + subR) : (r - subR)
+			// let g2 = (g < 255) ? (g + subG) : (g - subG)
+			// let b2 = (b < 255) ? (b + subB) : (b - subB)
+
+
+			// console.log("R2:" + r2 + " G2:" + g2 + " B2:" + b2);
+			// 10进制转16进制
+			this.model.colorHeader = "#" + r2.toString(16) + g2.toString(16) + b2.toString(16)
+		},
+		//关闭抽屉的时候保存配置 
 		//如果在一个组件上使用了 v-model:xxx，应该使用 @update:xxx  https://www.naiveui.com/zh-CN/os-theme/docs/common-issues
 		saveConfigToLocalStorage() {
 			// 储存配置
@@ -538,6 +603,9 @@ export default defineComponent({
 			localStorage.setItem("singlePageWidth_PX", this.singlePageWidth_PX);
 			localStorage.setItem("doublePageWidth_PX", this.doublePageWidth_PX);
 			localStorage.setItem("ScrollModeDefaultColor", this.model.color);
+			//set对有setXXXChange函数的来说有些多余，但没有set函数的话就有必要了
+			localStorage.setItem("ImageParameters_DoAutoCrop", this.imageParameters.auto_crop);
+			localStorage.setItem("ImageParametersResizeMaxWidth", this.imageParameters.resize_max_width);
 		},
 		setShowHeaderChange(value) {
 			// console.log("value:" + value);
@@ -566,7 +634,7 @@ export default defineComponent({
 
 		setImageParameters_DoAutoCrop(value) {
 			this.imageParameters.do_auto_crop = value;
-			localStorage.setItem("ImageParameters_DoAutoCrop", value);
+			localStorage.setItem("ImageParameters_DoAutoCrop", this.imageParameters.do_auto_crop);
 			console.log("成功保存设置: ImageParameters_DoAutoCrop=" + localStorage.getItem("ImageParameters_DoAutoCrop"));
 		},
 
@@ -721,6 +789,7 @@ export default defineComponent({
 	padding: 0px;
 	width: 100%;
 	height: 7vh;
+	background: v-bind("model.colorHeader");
 }
 
 /* https://developer.mozilla.org/zh-CN/docs/Web/CSS/object-fit */

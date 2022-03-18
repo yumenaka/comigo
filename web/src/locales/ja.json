@@ -37,5 +37,8 @@
   "auto_crop": "余白自動トリミング",
   "max_width": "最大幅:",
   "energy_threshold": "エネルギー閾値：",
-  "back-to-top": "ページのトップへ戻る"
+  "back-to-top": "ページのトップへ戻る",
+  "raw_resolution": "元の解像度",
+  "reset_all_settings": " 初期設定に戻す",
+  "do_you_reset_all_settings": "初期設定に戻すか？"
 }

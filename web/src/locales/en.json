@@ -37,5 +37,8 @@
   "auto_crop": "Auto white cut",
   "max_width": "max width:",
   "energy_threshold": "Energy Threshold:",
-  "back-to-top": "Back To Top"
+  "back-to-top": "Back To Top",
+  "raw_resolution": "Raw Resolution",
+  "reset_all_settings": "Reset all settings",
+  "do_you_reset_all_settings": " Do you want to reset to the default settings?"
 }

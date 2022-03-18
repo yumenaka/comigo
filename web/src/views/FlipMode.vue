@@ -24,20 +24,20 @@
 		>
 			<div class="manga_area_img_div">
 				<!-- 非自动拼合模式最简单，直接显示一张图 -->
-				<img v-bind:src="this.book.pages[nowPageNum - 1].url"  v-bind:alt="nowPageNum"  />
+				<img v-bind:src="this.book.pages[nowPageNum - 1].url" v-bind:alt="nowPageNum" />
 
 				<!-- 简单拼合双页，不管单双页什么的 -->
 				<img
 					v-if="(!this.autoDoublePageModeFlag) && this.simpleDoublePageModeFlag && this.nowPageNum < this.book.all_page_num"
 					v-bind:src="this.book.pages[nowPageNum].url"
-          v-bind:alt="nowPageNum+1"
-        />
+					v-bind:alt="nowPageNum + 1"
+				/>
 
 				<!-- 自动拼合模式当前页，如果开启自动拼合，右边可能显示拼合页 -->
 				<img
 					v-if="this.autoDoublePageModeFlag && this.nowPageNum < this.book.all_page_num && this.nowAndNextPageIsSingle()"
 					v-bind:src="this.book.pages[nowPageNum].url"
-          v-bind:alt="nowPageNum+1"
+					v-bind:alt="nowPageNum + 1"
 				/>
 			</div>
 
@@ -88,7 +88,12 @@
 		:nowTemplate="this.nowTemplate"
 	>
 		<span>{{ $t("setBackColor") }}</span>
-		<n-color-picker v-model:value="model.color" :modes="['rgb']" :show-alpha="false" />
+		<n-color-picker
+			v-model:value="model.color"
+			:modes="['rgb']"
+			:show-alpha="false"
+			@update:value="onBackgroundColorChange"
+		/>
 
 		<!-- 分割线 -->
 		<n-divider />
@@ -222,14 +227,14 @@
 </template>
 
 <script>
-import {useCookies} from "vue3-cookies";
+import { useCookies } from "vue3-cookies";
 // 自定义组件
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
-import {defineComponent, reactive} from "vue";
+import { defineComponent, reactive } from "vue";
 // 直接导入组件并使用它。这种情况下，只有导入的组件才会被打包。
-import {NColorPicker, NDivider, NIcon, NInputNumber, NSlider, NSpace, NSwitch, useMessage,} from "naive-ui";
-import {SettingsOutline} from "@vicons/ionicons5";
+import { NColorPicker, NDivider, NIcon, NInputNumber, NSlider, NSpace, NSwitch, useMessage, } from "naive-ui";
+import { SettingsOutline } from "@vicons/ionicons5";
 
 export default defineComponent({
 	name: "FlipMode",
@@ -255,7 +260,8 @@ export default defineComponent({
 		const { cookies } = useCookies();
 		//背景颜色，颜色选择器用
 		const model = reactive({
-			color: "#E0D9CD",
+			color: "#f6f7eb",
+			colorHeader: "#d1c9c1",
 		});
 		//警告信息
 		const message = useMessage()
@@ -381,6 +387,7 @@ export default defineComponent({
 		//当前背景色
 		if (localStorage.getItem("FlipModeDefaultColor") != null) {
 			this.model.color = localStorage.getItem("FlipModeDefaultColor");
+			this.onBackgroundColorChange(this.model.color);
 		}
 		//倒计时秒数
 		if (localStorage.getItem("sketchFlipSecond") != null) {
@@ -413,6 +420,50 @@ export default defineComponent({
 		//界面有更新就会调用，随便乱放会引起难以调试的BUG
 	},
 	methods: {
+		onBackgroundColorChange(value) {
+			// value #997E50
+			// 16进制转10进制
+			let r = Number('0x' + value.substr(1, 2))
+			let g = Number('0x' + value.substr(3, 2))
+			let b = Number('0x' + value.substr(5, 2))
+			// console.log(value);
+			// console.log("R:" + r + " G:" + g + " B:" + b);
+			//题头在背景色的基础上亮一些
+			let subR = 40
+			let subG = 30
+			let subB = 42
+			let r2 = (r < 255 - subR) ? (r + subR) : (r + parseInt((255 - r) / 2))
+			let g2 = (g < 255 - subG) ? (g + subG) : (g + parseInt((255 - g) / 2))
+			let b2 = (b < 255 - subB) ? (b + subB) : (b + parseInt((255 - b) / 2))
+			if (r > 250) {
+				r2 = r - subR
+			}
+			if (g > 250) {
+				g2 = g - subG
+			}
+			if (b > 250) {
+				b2 = b - subB
+			}
+			if (r < 50) {
+				r2 = r + 3 * subR
+			}
+			if (g < 50) {
+				g2 = g + 3 * subG
+			}
+			if (b < 50) {
+				b2 = b + 3 * subB
+			}
+			// //背景亮的时候，页头暗。背景暗的时候，页头亮。
+			// let subR = 40
+			// let subG = 30
+			// let subB = 42
+			// let r2 = (r < 125) ? (r + subR) : (r - subR)
+			// let g2 = (g < 255) ? (g + subG) : (g - subG)
+			// let b2 = (b < 255) ? (b + subB) : (b - subB)
+			// console.log("R2:" + r2 + " G2:" + g2 + " B2:" + b2);
+			// 10进制转16进制
+			this.model.colorHeader = "#" + r2.toString(16) + g2.toString(16) + b2.toString(16)
+		},
 		// 分析单双页用
 		nowAndNextPageIsSingle() {
 			this.nowPageIsDouble = this.checkImageIsDoublePage_byPageNum(this.nowPageNum);
@@ -466,9 +517,9 @@ export default defineComponent({
 			this.showPageHintFlag_FlipMode = true;
 			//是否显示页头
 			this.showHeaderFlag_FlipMode = false;
-      //是否显示页脚
-      this.showFooterFlag_FlipMode = false;
-      this.$emit("setTemplate", "sketch");
+			//是否显示页脚
+			this.showFooterFlag_FlipMode = false;
+			this.$emit("setTemplate", "sketch");
 			//setTimeout和setInterval函数，都返回一个表示计数器编号的整数值，将该整数传入clearTimeout和clearInterval函数，就可以取消对应的定时器。setInterval指定某个任务每隔一段时间就执行一次。setTimeout()用于在指定的毫秒数后调用函数或计算表达式  setTimeout('console.log(2)',1000);
 			this.interval = setInterval(this.sketchCount, 1000);
 		},
@@ -484,9 +535,9 @@ export default defineComponent({
 			this.sketchSecondCount = 0;
 			//是否显示页头
 			this.showHeaderFlag_FlipMode = true;
-      //是否显示页脚
-      this.showFooterFlag_FlipMode = true;
-      this.$emit("setTemplate", "flip");
+			//是否显示页脚
+			this.showFooterFlag_FlipMode = true;
+			this.$emit("setTemplate", "flip");
 			clearInterval(this.interval); // 清除定时器
 		},
 		//开始速写（quick sketch），每秒执行一次
@@ -619,14 +670,14 @@ export default defineComponent({
 				//决定如何翻页
 				if (clickX < innerWidth * 0.5) {
 					//左边的翻页
-					if (this.rightToLeftFlag==true) {
+					if (this.rightToLeftFlag == true) {
 						this.toPerviousPage();
 					} else {
 						this.toNextPage();
 					}
 				} else {
 					//右边的翻页
-					if (this.rightToLeftFlag==true) {
+					if (this.rightToLeftFlag == true) {
 						this.toNextPage();
 					} else {
 						this.toPerviousPage();
@@ -718,7 +769,7 @@ export default defineComponent({
 			//分析下一张漫画的宽高比,看是不是双开页
 			let next_page_is_double_page = this.checkImageIsDoublePage_byPageNum(pageNum + 1);
 			//如果现在这张就是开页漫画，直接不用比
-      //如果下一张漫画是开页，显然也没法合并
+			//如果下一张漫画是开页，显然也没法合并
 			return !(now_page_is_double_page || next_page_is_double_page);
 		},
 		checkImageIsDoublePage_byPageNum(pageNum) {
@@ -802,7 +853,7 @@ export default defineComponent({
 
 		// 键盘事件
 		handleKeyup(event) {
-      //错误:(815, 49) 不允许从实参中引用 'caller' 和 'callee'
+			//错误:(815, 49) 不允许从实参中引用 'caller' 和 'callee'
 			const e = event || window.event;
 			if (!e) return;
 			//https://developer.mozilla.org/zh-CN/docs/Web/API/KeyboardEvent/keyCode
@@ -935,20 +986,20 @@ export default defineComponent({
 				}
 				let AllTimeString =
 					MinutesAndHourString + ((this.sketchSecondCount + 1) % 60) + this.$t("second");
-        return this.$t("now_is") +
-            nowSecond +
-            this.$t("second") +
-            "  " +
-            this.$t("total_is") +
-            donePage +
-            this.$t("page") +
-            "  " +
-            this.$t("totalTime") +
-            AllTimeString +
-            "  " +
-            this.$t("interval") +
-            this.sketchFlipSecond +
-            this.$t("second");
+				return this.$t("now_is") +
+					nowSecond +
+					this.$t("second") +
+					"  " +
+					this.$t("total_is") +
+					donePage +
+					this.$t("page") +
+					"  " +
+					this.$t("totalTime") +
+					AllTimeString +
+					"  " +
+					this.$t("interval") +
+					this.sketchFlipSecond +
+					this.$t("second");
 			} else {
 				return this.nowPageNum + "/" + this.book.all_page_num;
 			}
@@ -1056,6 +1107,7 @@ export default defineComponent({
 	padding: 0px;
 	width: 100%;
 	height: 5vh;
+	background: v-bind("model.colorHeader");
 }
 
 /* 漫画div */
@@ -1117,7 +1169,7 @@ export default defineComponent({
 .footer {
 	height: 5vh;
 	text-align: center;
-	background: #f6f7eb;
+	background: v-bind("model.colorHeader");
 	width: 80vw;
 	padding: 0px;
 }

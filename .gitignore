@@ -47,6 +47,7 @@ resource.syso
 *comigo.ini
 
 __*
+routers/static
 web/node_modules
 web/dist
 web/static

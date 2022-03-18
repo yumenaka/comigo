@@ -10,7 +10,6 @@
       <!-- 抽屉：自定义头部 -->
       <template #header>
         <span>{{ $t('ReaderSettings') }}</span>
-        <n-avatar size="small" src="/favicon.ico" />
       </template>
       <!-- 选择：切换页面模式 -->
       <n-space>
@@ -35,7 +34,13 @@
       <n-divider />
       <!-- 父组件在此处插入自定义内容 -->
       <slot></slot>
-
+      <n-divider />
+      <n-popconfirm @positive-click="handlePositiveClick" @negative-click="handleNegativeClick">
+        <template #trigger>
+          <n-button>{{ $t('reset_all_settings') }}</n-button>
+        </template>
+        {{ $t('do_you_reset_all_settings') }}
+      </n-popconfirm>
       <!-- 抽屉：自定义底部 -->
       <template #footer>
         <n-select
@@ -48,10 +53,7 @@
           v-if="nowTemplate == 'flip' || nowTemplate == 'scroll'"
           @click="startSketchMode"
         >{{ $t('startSketchMode') }}</n-button>
-        <n-button
-          v-if="nowTemplate == 'sketch'"
-          @click="stopSketchMode"
-        >{{ $t('stopSketchMode') }}</n-button>
+        <n-button v-if="nowTemplate == 'sketch'" @click="stopSketchMode">{{ $t('stopSketchMode') }}</n-button>
       </template>
     </n-drawer-content>
   </n-drawer>
@@ -60,9 +62,10 @@
 <script>
 
 import { useCookies } from "vue3-cookies";
-import { NDrawer, NDivider, NDrawerContent, NSpace, NRadioGroup, NRadioButton, NAvatar, NButton, NSelect, } from 'naive-ui'
+import { NDrawer, NDivider, NDrawerContent, NSpace, NRadioGroup, NRadioButton, NButton, NSelect, NPopconfirm, } from 'naive-ui'
 import { defineComponent, } from 'vue'
 // import { useI18n } from 'vue-i18n'
+
 
 export default defineComponent({
   name: "Drawer",
@@ -76,13 +79,25 @@ export default defineComponent({
     NRadioGroup,//单选  https://www.naiveui.com/zh-CN/os-theme/components/radio
     NRadioButton,//单选 用按钮显得更优雅一点
     NButton,//按钮，来自:https://www.naiveui.com/zh-CN/os-theme/components/button
-    NAvatar,//头像 https://www.naiveui.com/zh-CN/os-theme/components/avatar
+    // NAvatar,//头像 https://www.naiveui.com/zh-CN/os-theme/components/avatar
     NSelect, //选择器 https://www.naiveui.com/zh-CN/os-theme/components/select
+    NPopconfirm, //弹出确认 https://www.naiveui.com/zh-CN/os-theme/components/popconfirm
   },
   setup() {
     const { cookies } = useCookies();
+    // const message = useMessage(); 需要导入 'naive-ui'的useMessage
 
     return {
+      handlePositiveClick() {
+        // message.info("是的");
+        //清除localStorage保存的设定
+        localStorage.clear();
+        //刷新当前页面
+        location.reload();
+      },
+      handleNegativeClick() {
+        // message.info("并不");
+      },
       cookies,
       languageOptions: [
         {
@@ -108,11 +123,11 @@ export default defineComponent({
   },
   //挂载前
   beforeMount() {
-    var lang= this.cookies.get("userLanguageSetting");
-    if (lang){
-      this.$i18n.locale=lang;
+    var lang = this.cookies.get("userLanguageSetting");
+    if (lang) {
+      this.$i18n.locale = lang;
     }
-    this.nowTemplateLocal=this.nowTemplate;
+    this.nowTemplateLocal = this.nowTemplate;
   },
   computed: {
     drawerActive() {
@@ -123,8 +138,18 @@ export default defineComponent({
     },
   },
   methods: {
-    OnChangeLanguage(value){
-      this.cookies.set("userLanguageSetting",value);
+
+    onClearLocalSetting() {
+      // //清除localStorage保存的设定
+      // localStorage.clear();
+      // //刷新当前页面
+      // location.reload();
+      //载入新文档替换当前页面
+      //window.location.replace("http://www.example.com")
+    },
+
+    OnChangeLanguage(value) {
+      this.cookies.set("userLanguageSetting", value);
     },
     // 关闭抽屉时，保存设置到cookies
     saveConfigToCookie(show) {
