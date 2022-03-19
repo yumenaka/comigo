@@ -35,7 +35,7 @@ func ScanNonUTF8Zip(filePath string, textEncoding string) (reader *zip.Reader, e
 	}
 	defer file.Close()
 	//是否是压缩包
-	format, err := archiver.Identify(filePath, file)
+	format, _, err := archiver.Identify(filePath, file)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +72,7 @@ func UnArchiveZip(filePath string, extractPath string, textEncoding string) erro
 	}
 	defer file.Close()
 	//是否是压缩包
-	format, err := archiver.Identify(filePath, file)
+	format, _, err := archiver.Identify(filePath, file)
 	if err != nil {
 		return err
 	}
@@ -106,7 +106,7 @@ func UnArchiveRar(filePath string, extractPath string) error {
 	}
 	defer file.Close()
 	//是否是压缩包
-	format, err := archiver.Identify(filePath, file)
+	format, _, err := archiver.Identify(filePath, file)
 	if err != nil {
 		return err
 	}
@@ -181,7 +181,7 @@ func GetSingleFile(filePath string, NameInArchive string, textEncoding string) (
 	}
 	defer file.Close()
 	//是否是压缩包
-	format, err := archiver.Identify(filePath, file)
+	format, _, err := archiver.Identify(filePath, file)
 	if err != nil {
 		return nil, err
 	}
