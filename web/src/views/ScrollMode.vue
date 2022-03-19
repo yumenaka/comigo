@@ -212,7 +212,9 @@
 					v-model:value="this.imageParameters.auto_crop"
 					:max="10"
 					:min="0"
-				></n-input-number>
+				>
+					<template #prefix>{{ $t('energy_threshold') }}</template>
+				</n-input-number>
 			</n-space>
 			<!-- 开关：压缩图片 -->
 			<n-space>
@@ -553,22 +555,22 @@ export default defineComponent({
 			let b = Number('0x' + value.substr(5, 2))
 			// console.log(value);
 			// console.log("R:" + r + " G:" + g + " B:" + b);
-			//题头在背景色的基础上亮一些
+			//题头在背景色的基础上暗一些
 			let subR = 40
 			let subG = 30
 			let subB = 42
-			let r2 = (r < 255 - subR) ? (r + subR) : (r + parseInt((255 - r) / 2))
-			let g2 = (g < 255 - subG) ? (g + subG) : (g + parseInt((255 - g) / 2))
-			let b2 = (b < 255 - subB) ? (b + subB) : (b + parseInt((255 - b) / 2))
-			if (r > 250) {
-				r2 = r - subR
-			}
-			if (g > 250) {
-				g2 = g - subG
-			}
-			if (b > 250) {
-				b2 = b - subB
-			}
+			let r2 = (r < 255 - subR) ? (r - subR) : (r + parseInt((255 - r) / 2))
+			let g2 = (g < 255 - subG) ? (g - subG) : (g + parseInt((255 - g) / 2))
+			let b2 = (b < 255 - subB) ? (b - subB) : (b + parseInt((255 - b) / 2))
+			// if (r > 250) {
+			// 	r2 = r - subR
+			// }
+			// if (g > 250) {
+			// 	g2 = g - subG
+			// }
+			// if (b > 250) {
+			// 	b2 = b - subB
+			// }
 			if (r < 50) {
 				r2 = r + 3 * subR
 			}

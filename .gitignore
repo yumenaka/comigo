@@ -48,6 +48,8 @@ resource.syso
 
 __*
 routers/static
+tmp
+bin/main
 web/node_modules
 web/dist
 web/static

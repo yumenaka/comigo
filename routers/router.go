@@ -145,7 +145,7 @@ func setWebAPI(engine *gin.Engine) {
 	})
 
 	//文件上传
-	// 除了设置头像以外，可以做上传文件并阅读
+	// 除了设置头像以外，也可以做上传文件并阅读功能
 	// Set a lower memory limit for multipart forms (default is 32 MiB)
 	//engine.MaxMultipartMemory = 160 << 20  // 160 MiB
 	api.POST("/upload", func(c *gin.Context) {
@@ -169,11 +169,21 @@ func setWebAPI(engine *gin.Engine) {
 		c.String(http.StatusOK, fmt.Sprintf("'%s' uploaded!", file.Filename))
 	})
 
-	//解析json
+	//web端需要的服务器设定
+	api.GET("/setting.json", func(c *gin.Context) {
+		c.PureJSON(http.StatusOK, common.Config)
+	})
+
+	//web端需要的服务器设定
+	api.GET("/server_status.json", func(c *gin.Context) {
+		c.PureJSON(http.StatusOK, common.GetServerStatus())
+	})
+
+	//阅读中的书籍json
 	api.GET("/book.json", func(c *gin.Context) {
 		c.PureJSON(http.StatusOK, common.ReadingBook)
 	})
-	//解析书架json
+	//书架信息，不包含每页信息
 	api.GET("/bookshelf.json", func(c *gin.Context) {
 		bookShelf, err := common.GetBookShelf()
 		if err != nil {
@@ -185,18 +195,15 @@ func setWebAPI(engine *gin.Engine) {
 	api.GET("/getbook", getBookHandler)
 	//通过URL字符串参数获取特定文件
 	api.GET("/getfile", getFileHandler)
-	//web段需要的服务器设定
-	api.GET("/setting.json", func(c *gin.Context) {
-		c.PureJSON(http.StatusOK, common.Config)
-	})
-	//直接下载示例配置
+
+	//下载示例配置
 	api.GET("/config.yaml", func(c *gin.Context) {
 		c.YAML(http.StatusOK, common.Config)
 	})
 	//301重定向跳转示例
 	api.GET("/redirect", func(c *gin.Context) {
 		//支持内部和外部的重定向
-		c.Redirect(http.StatusMovedPermanently, "http://www.youtube.com/")
+		c.Redirect(http.StatusMovedPermanently, "http://www.google.com/")
 	})
 
 	//初始化websocket
@@ -229,7 +236,7 @@ func setFrpClient() {
 				common.Config.FrpConfig.RemotePort = common.Config.Port
 			}
 		}
-		frpcError := common.StartFrpC(common.CacheFilePath)
+		frpcError := common.StartFrpC(common.Config.CacheFilePath)
 		if frpcError != nil {
 			fmt.Println(locale.GetString("frpc_server_error"), frpcError.Error())
 		} else {

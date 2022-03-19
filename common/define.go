@@ -9,7 +9,7 @@ import (
 	"github.com/bbrks/go-blurhash"
 	"github.com/cheggaaa/pb/v3"
 	"github.com/disintegration/imaging"
-	"github.com/mitchellh/go-homedir"
+	"github.com/mitchellh/go-homedir" //不使用 cgo 获取用户主目录的第三方库，支持交叉编译
 	"github.com/xxjwxc/gowp/workpool"
 	"github.com/yumenaka/comi/arch"
 	"github.com/yumenaka/comi/locale"
@@ -29,6 +29,9 @@ import (
 )
 
 func init() {
+	slcBooks = make([]*Book, 0, 10) //make:为slice, map, channel分配内存，并返回一个初始化的值,第二参数指定的是切片的长度，第三个参数是用来指定预留的空间长度——避免二次分配内存带来的开销，提高程序的性能.
+	mapBooks = make(map[string]*Book)
+
 	// Find home directory.
 	home, err := homedir.Dir()
 	if err != nil {
@@ -37,49 +40,30 @@ func init() {
 	Config.LogFilePath = home
 	Config.LogFileName = "comigo.log"
 	//退出时清理
-	SetupCloseHander()
+	setupCloseHander()
 }
 
 var (
-	ReadingBook          Book
-	BookList             []Book
-	CacheFilePath        = ""
-	ConfigFile           = ""
-	Version              = "v0.5.2"
-	ExcludeFileOrFolders = []string{".comigo", "node_modules", "flutter_ui", "$RECYCLE.BIN", "Config.Msi"}
-	SupportMediaType     = []string{".jpg", ".jpeg", ".JPEG", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp", ".webp", ".ico", ".heic", ".pdf", ".mp4", ".webm"}
-	SupportFileType      = [...]string{
-		".zip",
-		".tar",
-		".rar",
-		".cbr",
-		".cbz",
-		".epub",
-		".tar.gz",
-		".tgz",
-		".tar.bz2",
-		".tbz2",
-		".tar.xz",
-		".txz",
-		".tar.lz4",
-		".tlz4",
-		".tar.sz",
-		".tsz",
-		".bz2",
-		".gz",
-		".lz4",
-		".sz",
-		".xz"}
-	Config = ServerConfig{
-		OpenBrowser:         true,
-		DisableLAN:          false,
-		Template:            "scroll", //multi、single、random etc.
-		Port:                1234,
-		GenerateMetaData:    false,
-		LogToFile:           false,
-		MaxDepth:            3,
-		MinImageNum:         3,
-		ZipFileTextEncoding: "",
+	ReadingBook Book
+	BookList    []Book
+	slcBooks    []*Book
+	mapBooks    map[string]*Book
+	ConfigFile  = ""
+	Version     = "v0.5.2"
+	Config      = ServerSettings{
+		OpenBrowser:          true,
+		DisableLAN:           false,
+		Template:             "scroll", //multi、single、random etc.
+		Port:                 1234,
+		GenerateMetaData:     false,
+		LogToFile:            false,
+		MaxDepth:             3,
+		MinImageNum:          3,
+		ZipFileTextEncoding:  "",
+		CacheFilePath:        "",
+		SupportFileType:      []string{".zip", ".tar", ".rar", ".cbr", ".cbz", ".epub", ".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".tar.xz", ".txz", ".tar.lz4", ".tlz4", ".tar.sz", ".tsz", ".bz2", ".gz", ".lz4", ".sz", ".xz"},
+		SupportMediaType:     []string{".jpg", ".jpeg", ".JPEG", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp", ".webp", ".ico", ".heic", ".pdf", ".mp4", ".webm"},
+		ExcludeFileOrFolders: []string{".comigo", "node_modules", "flutter_ui", "$RECYCLE.BIN", "Config.Msi"},
 		WebpConfig: WebPServerConfig{
 			WebpCommand:  "webp-server",
 			HOST:         "127.0.0.1",
@@ -98,19 +82,68 @@ var (
 			FrpType:          "tcp",
 			RemotePort:       50000, //remote_port
 			RandomRemotePort: true,
-			//AdminAddr:   "127.0.0.1",
-			//AdminPort:   "12340",
-			//AdminUser:   "",
-			//AdminPwd :   "",
 		},
 		Host:                   "",
 		SketchCountSeconds:     90,
-		SortImage:              "",
 		TempPATH:               "",
 		CleanAllTempFileOnExit: true,
 		CleanAllTempFile:       true,
 	}
 )
+
+// ServerStatus 服务器当前状况
+type ServerStatus struct {
+	//当前拥有的书籍总数
+	NumberOfBooks int
+	//在线用户数
+	NumberOfOnLineUser int
+	//在线设备数
+	NumberOfOnLineDevices int
+	OSInfo                tools.SystemStatus
+}
+
+func GetServerStatus() *ServerStatus {
+	return &ServerStatus{
+		NumberOfBooks:         len(BookList),
+		NumberOfOnLineUser:    1,
+		NumberOfOnLineDevices: 1,
+		OSInfo:                tools.GetSystemStatus(),
+	}
+}
+
+type ServerSettings struct {
+	Host                   string           `json:"host"`
+	EnableWebpServer       bool             `json:"enable_webp_server"`
+	EnableFrpcServer       bool             `json:"frpc_enable"`
+	Port                   int              `json:"port"`
+	SketchCountSeconds     int              `json:"sketch_count_seconds"`
+	Template               string           `json:"template"`
+	CacheFilePath          string           `json:"-"` //这个字段不解析
+	ExcludeFileOrFolders   []string         `json:"-"` //这个字段不解析
+	SupportMediaType       []string         `json:"-"` //这个字段不解析
+	SupportFileType        []string         `json:"-"` //这个字段不解析
+	MinImageNum            int              `json:"-"` //这个字段不解析
+	GenerateMetaData       bool             `json:"-"` //这个字段不解析
+	UserName               string           `json:"-"` //这个字段不解析
+	Password               string           `json:"-"` //这个字段不解析
+	CertFile               string           `json:"-"` //这个字段不解析
+	KeyFile                string           `json:"-"` //这个字段不解析
+	OpenBrowser            bool             `json:"-"` //这个字段不解析
+	DisableLAN             bool             `json:"-"` //这个字段不解析
+	PrintAllIP             bool             `json:"-"` //这个字段不解析
+	Debug                  bool             `json:"-"` //这个字段不解析
+	LogToFile              bool             `json:"-"` //这个字段不解析
+	LogFilePath            string           `json:"-"` //这个字段不解析
+	LogFileName            string           `json:"-"` //这个字段不解析
+	MaxDepth               int              `json:"-"` //这个字段不解析
+	ZipFileTextEncoding    string           `json:"-"` //这个字段不解析
+	TempPATH               string           `json:"-"` //这个字段不解析
+	CleanAllTempFileOnExit bool             `json:"-"` //这个字段不解析
+	CleanAllTempFile       bool             `json:"-"` //这个字段不解析
+	GenerateConfig         bool             `json:"-"` //这个字段不解析
+	WebpConfig             WebPServerConfig `json:"-"` //这个字段不解析
+	FrpConfig              FrpClientConfig  `json:"-"` //这个字段不解析
+}
 
 type WebPServerConfig struct {
 	WebpCommand  string
@@ -128,50 +161,14 @@ type FrpClientConfig struct {
 	ServerAddr  string
 	ServerPort  int
 	Token       string
-	////本地管理界面，现在用不着
-	//AdminAddr   string
-	//AdminPort   string
-	//AdminUser   string
-	//AdminPwd    string
 	//本地转发端口设置
 	FrpType          string
 	RemotePort       int
 	RandomRemotePort bool
 }
 
-type ServerConfig struct {
-	MinImageNum            int
-	Host                   string
-	EnableWebpServer       bool
-	EnableFrpcServer       bool
-	Port                   int
-	GenerateMetaData       bool
-	SortImage              string
-	SketchCountSeconds     int              `json:"sketch_count_seconds"`
-	Template               string           `json:"template"`
-	UserName               string           `json:"-"` //不要解析这个字段
-	Password               string           `json:"-"` //不要解析这个字段
-	CertFile               string           `json:"-"` //不要解析这个字段
-	KeyFile                string           `json:"-"` //不要解析这个字段
-	OpenBrowser            bool             `json:"-"` //不要解析这个字段
-	DisableLAN             bool             `json:"-"` //不要解析这个字段
-	PrintAllIP             bool             `json:"-"` //不要解析这个字段
-	Debug                  bool             `json:"-"` //不要解析这个字段
-	LogToFile              bool             `json:"-"` //不要解析这个字段
-	LogFilePath            string           `json:"-"` //不要解析这个字段
-	LogFileName            string           `json:"-"` //不要解析这个字段
-	MaxDepth               int              `json:"-"` //不要解析这个字段
-	ZipFileTextEncoding    string           `json:"-"` //不要解析这个字段
-	TempPATH               string           `json:"-"` //不要解析这个字段
-	CleanAllTempFileOnExit bool             `json:"-"` //不要解析这个字段
-	CleanAllTempFile       bool             `json:"-"` //不要解析这个字段
-	GenerateConfig         bool             `json:"-"` //不要解析这个字段
-	WebpConfig             WebPServerConfig `json:"-"` //不要解析这个字段
-	FrpConfig              FrpClientConfig  `json:"-"` //不要解析这个字段
-}
-
 // SetByExecutableFilename 通过执行文件名设置默认网页模板参数
-func (config *ServerConfig) SetByExecutableFilename() {
+func (config *ServerSettings) SetByExecutableFilename() {
 	// 当前执行目录
 	//targetPath, _ := os.Getwd()
 	//fmt.Println(locale.GetString("target_path"), targetPath)
@@ -267,10 +264,12 @@ func haveKeyWord(checkString string, list []string) bool {
 
 type Book struct {
 	Name            string    `json:"name"`
-	Author          string    `json:"author"`
-	Title           string    `json:"title"`
-	filePath        string    `json:"-"` //不要解析这个字段
-	ExtractPath     string    `json:"-"` //不要解析这个字段
+	Author          []string  `json:"author"`
+	ISBN            string    `json:"isbn"`
+	Press           string    `json:"press"`        //出版社
+	PublishedAt     string    `json:"published_at"` //出版日期
+	filePath        string    `json:"-"`            //这个字段不解析
+	ExtractPath     string    `json:"-"`            //这个字段不解析
 	AllPageNum      int       `json:"all_page_num"`
 	FileType        string    `json:"file_type"`
 	FileSize        int64     `json:"file_size"`
@@ -293,20 +292,20 @@ type SinglePageInfo struct {
 	Blurhash      string    `json:"blurhash"` //blurhash占位符。需要扫描图片生成（tools.GetImageDataBlurHash）
 	Height        int       `json:"height"`   //blurhash用，图片的高
 	Width         int       `json:"width"`    //blurhash用，图片的宽
-	ModeTime      time.Time `json:"-"`        //不要解析这个字段
-	FileSize      int64     `json:"-"`        //不要解析这个字段
+	ModeTime      time.Time `json:"-"`        //这个字段不解析
+	FileSize      int64     `json:"-"`        //这个字段不解析
 
-	RealImageFilePATH string `json:"-"` //不要解析这个字段  书籍为文件夹的时候，实际图片的路径
-	ImgType           string `json:"-"` //不要解析这个字段
+	RealImageFilePATH string `json:"-"` //这个字段不解析  书籍为文件夹的时候，实际图片的路径
+	ImgType           string `json:"-"` //这个字段不解析
 }
 
 // BookInfo 与Book唯一的区别是没有AllPageInfo,而是封面图URL
 type BookInfo struct {
 	Name            string         `json:"name"`
-	Author          string         `json:"author"`
-	Title           string         `json:"title"`
-	FilePath        string         `json:"-"` //不要解析这个字段
-	ExtractPath     string         `json:"-"` //不要解析这个字段
+	Author          []string       `json:"author"`
+	ISBN            string         `json:"isbn"`
+	FilePath        string         `json:"-"` //这个字段不解析
+	ExtractPath     string         `json:"-"` //这个字段不解析
 	AllPageNum      int            `json:"all_page_num"`
 	FileType        string         `json:"file_type"`
 	FileSize        int64          `json:"file_size"`
@@ -327,7 +326,7 @@ func NewBookInfo(b Book) *BookInfo {
 	return &BookInfo{
 		Name:            b.Name,
 		Author:          b.Author,
-		Title:           b.Title,
+		ISBN:            b.ISBN,
 		FilePath:        b.GetFilePath(),
 		ExtractPath:     b.ExtractPath,
 		AllPageNum:      b.GetAllPageNum(),
@@ -415,7 +414,10 @@ func GetBookByUUID(uuid string, sort bool) (Book, error) {
 func GetBookByAuthor(author string, sort bool) ([]Book, error) {
 	var bookList []Book
 	for _, b := range BookList {
-		if b.Author == author {
+		if len(b.Author) == 0 {
+			continue
+		}
+		if b.Author[0] == author {
 			if sort {
 				b.SortPages()
 			}
@@ -629,8 +631,8 @@ func (i *SinglePageInfo) analyzeImage(bookPath string) (err error) {
 	return err
 }
 
-// SetupCloseHander 中断处理：程序被中断的时候，清理临时文件
-func SetupCloseHander() {
+// setupCloseHander 中断处理：程序被中断的时候，清理临时文件
+func setupCloseHander() {
 	c := make(chan os.Signal, 2)
 	//SIGHUP（挂起）, SIGINT（中断）或 SIGTERM（终止）默认会使得程序退出。
 	//1、SIGHUP 信号在用户终端连接(正常或非正常)结束时发出。
@@ -655,15 +657,15 @@ func SetupCloseHander() {
 func setTempDir() {
 	//手动设置的临时文件夹
 	if Config.TempPATH != "" && tools.ChickExists(Config.TempPATH) && tools.ChickIsDir(Config.TempPATH) {
-		CacheFilePath = path.Join(Config.TempPATH)
+		Config.CacheFilePath = path.Join(Config.TempPATH)
 	} else {
-		CacheFilePath = path.Join(os.TempDir(), "comigo_temp_files") //直接使用系统文件夹
+		Config.CacheFilePath = path.Join(os.TempDir(), "comigo_temp_files") //直接使用系统文件夹
 	}
-	err := os.MkdirAll(CacheFilePath, os.ModePerm)
+	err := os.MkdirAll(Config.CacheFilePath, os.ModePerm)
 	if err != nil {
 		println(locale.GetString("temp_folder_error"))
 	} else {
-		fmt.Println(locale.GetString("temp_folder_path") + CacheFilePath)
+		fmt.Println(locale.GetString("temp_folder_path") + Config.CacheFilePath)
 	}
 }
 
@@ -685,7 +687,7 @@ func clearTempFilesOne(book *Book) {
 		}
 	}
 	if haveThisBook {
-		extractPath := path.Join(CacheFilePath, book.GetBookID())
+		extractPath := path.Join(Config.CacheFilePath, book.GetBookID())
 		//避免删错文件,解压路径包含UUID，len不可能小于32
 		PathLen := len(extractPath)
 		if PathLen < 32 {

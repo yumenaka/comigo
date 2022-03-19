@@ -102,7 +102,7 @@ func scanAndGetBook(filePath string) (*Book, error) {
 		}
 		err = fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
 			var exclude = false
-			for _, substr := range ExcludeFileOrFolders {
+			for _, substr := range Config.ExcludeFileOrFolders {
 				if strings.Contains(path, substr) && path != "" {
 					exclude = true
 				}
@@ -206,7 +206,7 @@ func walkUTF8ZipFs(fsys fs.FS, parent, base string, book *Book) error {
 }
 
 func isSupportMedia(checkPath string) bool {
-	for _, ex := range SupportMediaType {
+	for _, ex := range Config.SupportMediaType {
 		//strings.ToLower():某些文件会用大写文件名
 		suffix := strings.ToLower(path.Ext(checkPath))
 		if ex == suffix {
@@ -217,7 +217,7 @@ func isSupportMedia(checkPath string) bool {
 }
 
 func isSupportArchiver(checkPath string) bool {
-	for _, ex := range SupportFileType {
+	for _, ex := range Config.SupportFileType {
 		suffix := path.Ext(checkPath)
 		if ex == suffix {
 			return true
