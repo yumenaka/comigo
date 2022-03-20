@@ -266,7 +266,7 @@ func StartWebServer() {
 	setWebAPI(engine)
 	//TODO：设定第一本书
 	if common.GetBooksNumber() >= 1 {
-		common.ReadingBook = common.GetFirstBook()
+		common.ReadingBook = common.GetRandomBook()
 		//下载文件
 		if !common.ReadingBook.IsDir {
 			engine.StaticFile("/raw/"+common.ReadingBook.Name, common.ReadingBook.GetFilePath())

@@ -15,6 +15,7 @@ import (
 	"github.com/yumenaka/comi/tools"
 	"image"
 	"log"
+	"math/rand"
 	"path"
 	"path/filepath"
 	"sort"
@@ -145,9 +146,19 @@ func GetBooksNumber() int {
 	return len(mapBooks)
 }
 
-func GetFirstBook() *Book {
+// GetRandomBook 随机选取一本书
+func GetRandomBook() *Book {
+	if len(mapBooks) == 0 {
+		return nil
+	}
+	rand.Seed(time.Now().UnixNano())
+	randNum := rand.Intn(100) % len(mapBooks)
+	start := 0
 	for _, b := range mapBooks {
-		return b
+		if randNum == start {
+			return b
+		}
+		start++
 	}
 	return nil
 }

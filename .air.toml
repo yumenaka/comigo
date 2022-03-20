@@ -12,7 +12,7 @@ cmd = "go build -o ./tmp/main ."
 # Binary file yields from `cmd`.
 bin = "tmp/main"
 # Customize binary, can setup environment variables when run your app.
-#full_bin = "COMI_DEBUG_MODE=true COMI_MIN_MEDIA_NUM=2 ./bin/main"
+full_bin = "COMI_DEBUG_MODE=true COMI_MIN_MEDIA_NUM=2 ./tmp/main test"
 # Watch these filename extensions.
 include_ext = ["go", "tpl", "tmpl", "html"]
 # Ignore these filename extensions or directories.
