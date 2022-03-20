@@ -18,7 +18,7 @@ import (
 )
 
 // ScanAndGetBookList 扫描一个路径，并返回书籍列表
-func ScanAndGetBookList(path string) (bookList []Book, err error) {
+func ScanAndGetBookList(path string) (bookList []*Book, err error) {
 	//var fileList, dirList []string
 	var pathList []string
 	err = filepath.Walk(path, func(path string, fileInfo os.FileInfo, err error) error {
@@ -46,7 +46,7 @@ func ScanAndGetBookList(path string) (bookList []Book, err error) {
 		}
 		//多级路径的图片文件夹，避免重复
 		if !book.IsDir {
-			bookList = append(bookList, *book)
+			bookList = append(bookList, book)
 		}
 		//多级路径的图片文件夹，避免重复添加
 		if book.IsDir {
@@ -57,7 +57,7 @@ func ScanAndGetBookList(path string) (bookList []Book, err error) {
 				}
 			}
 			if !added {
-				bookList = append(bookList, *book)
+				bookList = append(bookList, book)
 			}
 		}
 	}

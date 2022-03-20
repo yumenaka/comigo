@@ -40,7 +40,7 @@ func ParseCommands(args []string) {
 		if err != nil {
 			fmt.Println(locale.GetString("scan_error"), cmdPath)
 		} else {
-			common.BookList = append(common.BookList, list...)
+			common.AddBooks(list)
 		}
 	} else {
 		//指定了多个参数的话，都扫描一遍
@@ -49,7 +49,7 @@ func ParseCommands(args []string) {
 			if err != nil {
 				fmt.Println(locale.GetString("scan_error"), p)
 			} else {
-				common.BookList = append(common.BookList, list...)
+				common.AddBooks(list)
 			}
 		}
 	}

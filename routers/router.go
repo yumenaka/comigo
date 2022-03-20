@@ -75,9 +75,6 @@ func setStaticFiles(engine *gin.Engine) {
 			"title": common.ReadingBook.Name, //页面标题
 		})
 	})
-	if !common.ReadingBook.IsDir {
-		engine.StaticFile("/raw/"+common.ReadingBook.Name, common.ReadingBook.GetFilePath())
-	}
 }
 
 type Login struct {
@@ -88,7 +85,8 @@ type Login struct {
 //2、设置获取书籍信息、图片文件的 API
 func setWebAPI(engine *gin.Engine) {
 
-	//处理登陆 https://www.chaindesk.cn/witbook/19/329
+	//TODO：处理登陆 https://www.chaindesk.cn/witbook/19/329
+	//TODO：实现第三方认证，可参考 https://darjun.github.io/2021/07/26/godailylib/goth/
 	engine.POST("/login", func(c *gin.Context) {
 		RememberPassword := c.DefaultPostForm("RememberPassword", "true") //可设置默认值
 		username := c.PostForm("username")
@@ -97,9 +95,7 @@ func setWebAPI(engine *gin.Engine) {
 		//bookList := c.PostFormMap("book_list")
 		//bookList := c.QueryArray("book_list")
 		bookList := c.PostFormArray("book_list")
-
 		c.String(http.StatusOK, fmt.Sprintf("RememberPassword is %s, username is %s, password is %s,hobby is %v", RememberPassword, username, password, bookList))
-
 	})
 
 	//1.binding JSON
@@ -121,6 +117,7 @@ func setWebAPI(engine *gin.Engine) {
 	// 简单的路由组: api,方便管理部分相同的URL
 	var api *gin.RouterGroup
 	//简单http认证
+
 	enableAuth := common.Config.UserName != "" && common.Config.Password != ""
 	if enableAuth {
 		// 路由组：https://learnku.com/docs/gin-gonic/1.7/examples-grouping-routes/11399
@@ -268,9 +265,14 @@ func StartWebServer() {
 	//2、setWebAPI
 	setWebAPI(engine)
 	//TODO：设定第一本书
-	if len(common.BookList) >= 1 {
-		common.ReadingBook = common.BookList[0]
+	if common.GetBooksNumber() >= 1 {
+		common.ReadingBook = common.GetFirstBook()
+		//下载文件
+		if !common.ReadingBook.IsDir {
+			engine.StaticFile("/raw/"+common.ReadingBook.Name, common.ReadingBook.GetFilePath())
+		}
 	}
+
 	//生成元数据
 	if common.Config.GenerateMetaData {
 		common.ReadingBook.ScanAllImageGo()
@@ -349,7 +351,7 @@ func StartWebServer() {
 //	})
 //}
 
-//// getFileApi正常运作，不需要这个 虚拟文件系统实现方式了
+//// getFileApi正常运作，虚拟文件系统实现方式
 //func set-archiverFileSystem(engine *gin.Engine) {
 ////使用虚拟文件系统，设置服务路径（每本书都设置一遍）
 ////参考了: https://bitfieldconsulting.com/golang/filesystems

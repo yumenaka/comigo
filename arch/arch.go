@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/mholt/archiver/v4"
+	"io/fs"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -25,6 +26,12 @@ import (
 //	overwriteExisting = false
 //	continueOnError = true
 //}
+
+var mapBookFS map[string]fs.FS
+
+func init() {
+	mapBookFS = make(map[string]fs.FS)
+}
 
 // ScanNonUTF8Zip 扫描文件，初始化书籍用
 func ScanNonUTF8Zip(filePath string, textEncoding string) (reader *zip.Reader, err error) {
@@ -169,6 +176,8 @@ func extractFileHandler(ctx context.Context, f archiver.File) error {
 }
 
 // GetSingleFile  获取单个文件
+//TODO:大文件需要针对性优化，可能需要保持打开状态、或通过持久化的虚拟文件系统获取
+//TODO:可选择文件缓存功能，一旦解压，下次直接读缓存文件
 func GetSingleFile(filePath string, NameInArchive string, textEncoding string) ([]byte, error) {
 	//必须传值
 	if NameInArchive == "" {
@@ -185,68 +194,97 @@ func GetSingleFile(filePath string, NameInArchive string, textEncoding string) (
 	if err != nil {
 		return nil, err
 	}
-
 	var data []byte
-	//如果是特殊编码的zip文件
-	if textEncoding != "" {
-		if ex, ok := format.(archiver.Zip); ok {
-			ex.TextEncoding = textEncoding // “”  "shiftjis" "gbk"
-			ctx := context.Background()
-			err := ex.Extract(ctx, sourceArchive, []string{NameInArchive}, func(ctx context.Context, f archiver.File) error {
-				// 取得特定压缩文件
-				file, err := f.Open()
-				if err != nil {
-					fmt.Println(err)
-				}
-				defer file.Close()
-				content, err := ioutil.ReadAll(file)
-				if err != nil {
-					fmt.Println(err)
-				}
-				data = content
-				return err
-			})
-			return data, err
+	//如果是zip文件,文件编码为UTF-8时textEncoding为空,其他特殊编码的zip文件根据设定指定（默认GBK）
+	if ex, ok := format.(archiver.Zip); ok {
+		//特殊编码
+		ex.TextEncoding = textEncoding // “”  "shiftjis" "gbk"
+		ctx := context.Background()
+		//这里是file，而不是sourceArchive，否则会出错。
+		err := ex.Extract(ctx, file, []string{NameInArchive}, func(ctx context.Context, f archiver.File) error {
+			// 取得特定压缩文件
+			file, err := f.Open()
+			if err != nil {
+				fmt.Println(err)
+			}
+			defer file.Close()
+			content, err := ioutil.ReadAll(file)
+			if err != nil {
+				fmt.Println(err)
+			}
+			data = content
+			return err
+		})
+		return data, err
+	}
+
+	//通过一个持久化的虚拟文件系统读取文件（加快rar文件的解压速度），key是文件路径
+	fsys, fsOK := mapBookFS[filePath]
+	if !fsOK { //从来没保存过这个文件系统
+		temp, errFS := archiver.FileSystem(filePath)
+		if errFS == nil {
+			//将文件系统加入到map
+			mapBookFS[filePath] = temp
+			fsys = temp
+		} else {
+			fmt.Println(errFS)
 		}
-	} else {
-		//如果是 Rar 文件
-		if ex, ok := format.(archiver.Rar); ok {
-			ctx := context.Background()
-			err := ex.Extract(ctx, sourceArchive, []string{NameInArchive}, func(ctx context.Context, f archiver.File) error {
-				// 取得特定压缩文件
-				file, err := f.Open()
-				if err != nil {
-					fmt.Println(err)
-				}
-				defer file.Close()
-				content, err := ioutil.ReadAll(file)
-				if err != nil {
-					fmt.Println(err)
-				}
-				data = content
-				return err
-			})
-			return data, err
+	}
+	//通过虚拟文件系统打开特定文件
+	f, errFSOpen := fsys.Open(NameInArchive)
+	if errFSOpen != nil {
+		fmt.Println(errFSOpen)
+	}
+	defer f.Close()
+	if errFSOpen == nil {
+		content, err := ioutil.ReadAll(f)
+		if err != nil {
+			fmt.Println(err)
 		}
-		//非特殊编码的zip文件，或其他格式的压缩包
-		if ex, ok := format.(archiver.Extractor); ok {
-			ctx := context.Background()
-			err := ex.Extract(ctx, sourceArchive, []string{NameInArchive}, func(ctx context.Context, f archiver.File) error {
-				// 取得特定压缩文件
-				file, err := f.Open()
-				if err != nil {
-					fmt.Println(err)
-				}
-				defer file.Close()
-				content, err := ioutil.ReadAll(file)
-				if err != nil {
-					fmt.Println(err)
-				}
-				data = content
-				return err
-			})
-			return data, err
-		}
+		data = content
+		return data, nil
+	}
+
+	//TODO:Rar密码
+	//如果是 Rar 文件
+	if ex, ok := format.(archiver.Rar); ok {
+		//如果虚拟FS方案无效，继续用Extract方案
+		ctx := context.Background()
+		err := ex.Extract(ctx, sourceArchive, []string{NameInArchive}, func(ctx context.Context, f archiver.File) error {
+			// 取得特定压缩文件
+			file, err := f.Open()
+			if err != nil {
+				fmt.Println(err)
+			}
+			defer file.Close()
+			content, err := ioutil.ReadAll(file)
+			if err != nil {
+				fmt.Println(err)
+			}
+			data = content
+			return err
+		})
+		return data, err
+	}
+
+	//其他格式的压缩包，正常情况下不应该用到
+	if ex, ok := format.(archiver.Extractor); ok {
+		ctx := context.Background()
+		err := ex.Extract(ctx, sourceArchive, []string{NameInArchive}, func(ctx context.Context, f archiver.File) error {
+			// 取得特定压缩文件
+			file, err := f.Open()
+			if err != nil {
+				fmt.Println(err)
+			}
+			defer file.Close()
+			content, err := ioutil.ReadAll(file)
+			if err != nil {
+				fmt.Println(err)
+			}
+			data = content
+			return err
+		})
+		return data, err
 	}
 	return nil, errors.New("2,not Found " + NameInArchive + " in " + filePath)
 }

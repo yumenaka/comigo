@@ -82,17 +82,10 @@ func wsHandler(c *gin.Context) {
 }
 
 func changeReadingBook(u string) bool {
-	for i := 0; i < len(common.BookList); i++ {
-		if common.BookList[i].GetBookID() == u {
-			common.ReadingBook = common.BookList[i]
-			//初始化书籍
-			//err := common.InitReadingBook()
-			//if err != nil {
-			//	fmt.Println("无法初始化书籍。", err, common.ReadingBook)
-			//	return false
-			//}
-			return true
-		}
+	b, err := common.GetBookByUUID(u, false)
+	if err != nil {
+		return false
 	}
+	common.ReadingBook = b
 	return false
 }
