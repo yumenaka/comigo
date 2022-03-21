@@ -10,9 +10,9 @@ import (
 )
 
 type WSMsg struct {
-	UserUUID     string  `json:"user_uuid"`
+	UserUUID     string  `json:"user_id"`
 	ServerStatus string  `json:"server_status"`
-	NowBookUUID  string  `json:"now_book_uuid"`
+	NowBookUUID  string  `json:"now_book_id"`
 	ReadPercent  float64 `json:"read_percent"`
 	Message      string  `json:"msg"`
 }
@@ -82,7 +82,7 @@ func wsHandler(c *gin.Context) {
 }
 
 func changeReadingBook(u string) bool {
-	b, err := common.GetBookByUUID(u, false)
+	b, err := common.GetBookByID(u, false)
 	if err != nil {
 		return false
 	}

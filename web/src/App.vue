@@ -1,7 +1,7 @@
 <template>
   <div class="app">
     <n-message-provider>
-      <ScrollMode
+      <!-- <ScrollMode
         v-if="selectTemplate === 'scroll'"
         :book="this.book"
         :nowTemplate="this.selectTemplate"
@@ -17,17 +17,28 @@
         v-if="selectTemplate === 'bookshelf'"
         :book="this.book"
         :nowTemplate="this.selectTemplate"
-        @setTemplate="OnSetTemplate"
-      ></BookShelf>
+        @setTemplate="OnSetTemplate"  
+      ></BookShelf>-->
+
+      <!--使用 router-link 来导航 -->
+      <h1>Comigo 路由测试</h1>
+      <p>
+        <router-link to="/">Router-link: home</router-link>
+        <router-link to="/about">Router-link: about</router-link>
+        <router-link to="/book/3AzY2">Router-link: book</router-link>
+        <!-- <router-link :to="{ name: 'ScrollMode', params: { book_id: '3AzY2' } }">ScrollMode</router-link> -->
+      </p>
+      <!-- 路由出口 路由匹配到的组件将渲染在这里 -->
+      <router-view></router-view>
     </n-message-provider>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
-import ScrollMode from "@/views/ScrollMode.vue";
-import FlipMode from "@/views/FlipMode.vue";
-import BookShelf from "@/views/BookShelf.vue";
+// import ScrollMode from "@/views/ScrollMode.vue";
+// import FlipMode from "@/views/FlipMode.vue";
+// import BookShelf from "@/views/BookShelf.vue";
 import { useCookies } from "vue3-cookies";
 import { defineComponent } from 'vue'
 import { NMessageProvider } from 'naive-ui'
@@ -35,9 +46,9 @@ import { NMessageProvider } from 'naive-ui'
 export default defineComponent({
   name: "Home", //默认为 default。如果 <router-view>设置了名称，则会渲染对应的路由配置中 components 下的相应组件。
   components: {
-    ScrollMode,
-    FlipMode,
-    BookShelf,
+    // ScrollMode,
+    // FlipMode,
+    // BookShelf,
     NMessageProvider,
   },
   setup() {
@@ -47,6 +58,7 @@ export default defineComponent({
   data() {
     return {
       selectTemplate: "",
+      isAuthenticated: false,
     };
   },
   created() {
@@ -59,6 +71,13 @@ export default defineComponent({
   },
 
   methods: {
+    goToDashboard() {
+      if (this.isAuthenticated) {
+        this.$router.push('/dashboard')
+      } else {
+        this.$router.push('/login')
+      }
+    },
     OnSetTemplate(value) {
       localStorage.setItem("nowTemplate", value);
       this.selectTemplate = value;
@@ -70,6 +89,10 @@ export default defineComponent({
   },
   //计算属性
   computed: {
+    username() {
+      // 我们很快就会看到 `params` 是什么
+      return this.$route.params.username
+    },
     book() {
       return this.$store.state.book;
     },

@@ -146,7 +146,7 @@ func init() {
 	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFilePath, "log_path", "~", "log文件位置")
 	//rootCmd.PersistentFlags().BoolVarP(&common.PrintVersion, "version", "vip", false, "输出版本号")
 
-	//sample:https://qiita.com/nirasan/items/cc2ab5bc2889401fe596
+	//cobra & viper sample:https://qiita.com/nirasan/items/cc2ab5bc2889401fe596
 
 	// rootCmd.Run() 运行前的初始化定义。
 	// 运行前后顺序：rootCmd.Execute → 命令行参数的处理 → cobra.OnInitialize → rootCmd.Run、

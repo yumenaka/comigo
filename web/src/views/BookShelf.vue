@@ -1,5 +1,5 @@
 <template>
-    <div id="BookShelf" v-if="this.book" class="manga">
+    <div id="BookShelf" class="manga">
         <Header
             class="footer"
             v-if="this.showHeaderFlag"
@@ -57,10 +57,11 @@ import Drawer from "@/components/Drawer.vue";
 import { defineComponent, reactive } from 'vue'
 import { useCookies } from "vue3-cookies";// https://github.com/KanHarI/vue3-cookies
 import { SettingsOutline } from '@vicons/ionicons5'
+import axios from "axios";
 
 export default defineComponent({
     name: "BookShelf",
-    props: ['book', 'nowTemplate'],
+    props: ['nowTemplate'],
     emits: ["setTemplate"],
     components: {
         Header,//自定义页头，有点丑
@@ -128,6 +129,22 @@ export default defineComponent({
     },
     data() {
         return {
+            book: {
+                name: "loading",
+                all_page_num: 2,
+                pages: [
+                    {
+                        height: 500,
+                        width: 449,
+                        url: "/images/loading.jpg",
+                    },
+                    {
+                        height: 500,
+                        width: 449,
+                        url: "/images/loading.jpg",
+                    },
+                ],
+            },
             drawerActive: false,
             drawerPlacement: 'right',
             //开发模式 还没有做的功能与设置，设置Debug以后才能见到
@@ -183,6 +200,26 @@ export default defineComponent({
     // unmounted: 当指令与元素解除绑定且父组件已卸载时，只调用一次。
 
     created() {
+
+        axios
+            .get("/getbook?id=" + this.$route.params.id)
+            .then((response) => (this.book = response.data))
+            .finally(console.log("成功获取书籍数据,书籍ID：" + this.$route.params.id));
+        //监听路由参数的变化，刷新本地的Book数据
+        this.$watch(
+            () => this.$route.params,
+            (toParams) => {
+                console.log(toParams)
+                axios
+                    .get("/getbook?id=" + this.$route.params.id)
+                    .then((response) => (this.book = response.data))
+                    .finally(console.log("成功获取书籍数据,书籍ID：" + this.$route.params.id));
+            }
+        )
+
+
+
+
         window.addEventListener("scroll", this.onScroll);
         //文档视图调整大小时会触发 resize 事件。 https://developer.mozilla.org/zh-CN/docs/Web/API/Window/resize_event
         window.addEventListener("resize", this.onResize);

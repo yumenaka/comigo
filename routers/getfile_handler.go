@@ -12,10 +12,10 @@ import (
 	"strconv"
 )
 
-// 示例 URL： 127.0.0.1:1234/getfile?uuid=2b17a13&filename=1.jpg
-// 缩放文件，会转化为jpeg：http://127.0.0.1:1234/api/getfile?resize_width=300&resize_height=400&uuid=597e06&filename=01.jpeg
+// 示例 URL： 127.0.0.1:1234/getfile?id=2b17a13&filename=1.jpg
+// 缩放文件，会转化为jpeg：http://127.0.0.1:1234/api/getfile?resize_width=300&resize_height=400&id=597e06&filename=01.jpeg
 // 相关参数：
-// uuid：书籍的UUID，必须项目       							&uuid=2b17a130-1
+// id：书籍的ID，必须项目       							&id=2B17a
 // filename:获取的文件名，必须项目   							&filename=01.jpg
 ////可选参数：
 // resize_width:指定宽度，缩放图片  							&resize_width=300
@@ -27,10 +27,10 @@ import (
 // blurhash:获取对应图片的blurhash，而不是原始图片 				&blurhash=3
 // blurhash_image:获取对应图片的blurhash图片，而不是原始图片  	&blurhash_image=3
 func getFileHandler(c *gin.Context) {
-	uuid := c.DefaultQuery("uuid", "")
+	id := c.DefaultQuery("id", "")
 	needFile := c.DefaultQuery("filename", "")
-	if uuid != "" && needFile != "" {
-		book, err := common.GetBookByUUID(uuid, false)
+	if id != "" && needFile != "" {
+		book, err := common.GetBookByID(id, false)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -63,7 +63,6 @@ func getFileHandler(c *gin.Context) {
 		if imgData != nil {
 			//默认的媒体类型，根据文件后缀判断。可能在后面有变动。
 			contentType := tools.GetContentTypeByFileName(needFile)
-
 			//读取图片Resize用的resizeWidth
 			resizeWidth, errX := strconv.Atoi(c.DefaultQuery("resize_width", "0"))
 			if errX != nil {
@@ -79,7 +78,6 @@ func getFileHandler(c *gin.Context) {
 				imgData = tools.ImageResize(imgData, resizeWidth, resizeHeight)
 				contentType = tools.GetContentTypeByFileName(".jpg")
 			}
-
 			//图片Resize, 按照 width 等比例缩放
 			if errX == nil && errY != nil && resizeWidth > 0 {
 				imgData = tools.ImageResizeByWidth(imgData, resizeWidth)
@@ -118,7 +116,6 @@ func getFileHandler(c *gin.Context) {
 					contentType = tools.GetContentTypeByFileName(".jpg")
 				}
 			}
-
 			//自动切白边
 			autoCrop, errCrop := strconv.Atoi(c.DefaultQuery("auto_crop", "-1"))
 			if errCrop != nil {
@@ -128,14 +125,12 @@ func getFileHandler(c *gin.Context) {
 				imgData = tools.ImageAutoCrop(imgData, float32(autoCrop))
 				contentType = tools.GetContentTypeByFileName(".jpg")
 			}
-
 			//转换为黑白图片
 			gray := c.DefaultQuery("gray", "false")
 			if gray == "true" {
 				imgData = tools.ImageGray(imgData)
 				contentType = tools.GetContentTypeByFileName(".jpg")
 			}
-
 			//获取对应图片的blurhash字符串并返回，不是图片
 			blurhash, blurErr := strconv.Atoi(c.DefaultQuery("blurhash", "0"))
 			if blurErr != nil {
@@ -160,7 +155,6 @@ func getFileHandler(c *gin.Context) {
 				contentType = tools.GetContentTypeByFileName(".txt")
 				imgData = []byte(hash)
 			}
-
 			//返回图片的blurhash图
 			blurhashImage, blurImageErr := strconv.Atoi(c.DefaultQuery("blurhash_image", "0"))
 			if blurImageErr != nil {

@@ -1,5 +1,5 @@
 <template>
-	<div class="body" v-if="this.book">
+	<div class="body">
 		<!-- 顶部，标题页头 -->
 		<Header
 			class="header"
@@ -435,15 +435,6 @@ export default defineComponent({
 			let r2 = (r < 255 - subR) ? (r - subR) : (r + parseInt((255 - r) / 2))
 			let g2 = (g < 255 - subG) ? (g - subG) : (g + parseInt((255 - g) / 2))
 			let b2 = (b < 255 - subB) ? (b - subB) : (b + parseInt((255 - b) / 2))
-			// if (r > 250) {
-			// 	r2 = r - subR
-			// }
-			// if (g > 250) {
-			// 	g2 = g - subG
-			// }
-			// if (b > 250) {
-			// 	b2 = b - subB
-			// }
 			if (r < 50) {
 				r2 = r + 3 * subR
 			}
@@ -453,14 +444,6 @@ export default defineComponent({
 			if (b < 50) {
 				b2 = b + 3 * subB
 			}
-			// //背景亮的时候，页头暗。背景暗的时候，页头亮。
-			// let subR = 40
-			// let subG = 30
-			// let subB = 42
-			// let r2 = (r < 125) ? (r + subR) : (r - subR)
-			// let g2 = (g < 255) ? (g + subG) : (g - subG)
-			// let b2 = (b < 255) ? (b + subB) : (b - subB)
-			// console.log("R2:" + r2 + " G2:" + g2 + " B2:" + b2);
 			// 10进制转16进制
 			this.model.colorHeader = "#" + r2.toString(16) + g2.toString(16) + b2.toString(16)
 		},

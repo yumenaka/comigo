@@ -125,7 +125,7 @@ func scanAndGetBook(filePath string) (*Book, error) {
 					//book.Pages = append(book.Pages, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: "", Url: "/cache/" + book.BookID + "/" + url.PathEscape(path)})
 
 					//实验：用getfile接口提供文件服务
-					TempURL := "api/getfile?uuid=" + book.BookID + "&filename=" + url.PathEscape(path)
+					TempURL := "api/getfile?id=" + book.BookID + "&filename=" + url.PathEscape(path)
 					book.Pages = append(book.Pages, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: "", Url: TempURL})
 					//fmt.Println(locale.GetString("unsupported_extract")+" %s", f)
 				} else {
@@ -134,7 +134,7 @@ func scanAndGetBook(filePath string) (*Book, error) {
 					//book.Pages = append(book.Pages, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: u.NameInArchive, Url: TempURL})
 
 					//实验：用getfile接口提供提供图片文件
-					TempURL := "api/getfile?uuid=" + book.BookID + "&filename=" + url.PathEscape(u.NameInArchive)
+					TempURL := "api/getfile?id=" + book.BookID + "&filename=" + url.PathEscape(u.NameInArchive)
 					book.Pages = append(book.Pages, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: u.NameInArchive, Url: TempURL})
 				}
 			}
@@ -160,7 +160,7 @@ func scanNonUTF8ZipFile(filePath string, book *Book) error {
 	for _, f := range reader.File {
 		if isSupportMedia(f.Name) {
 			//如果是压缩文件
-			TempURL := "api/getfile?uuid=" + book.BookID + "&filename=" + url.PathEscape(f.Name)
+			TempURL := "api/getfile?id=" + book.BookID + "&filename=" + url.PathEscape(f.Name)
 			book.Pages = append(book.Pages, SinglePageInfo{RealImageFilePATH: "", FileSize: f.FileInfo().Size(), ModeTime: f.FileInfo().ModTime(), NameInArchive: f.Name, Url: TempURL})
 		} else {
 			logrus.Debugf(locale.GetString("unsupported_file_type") + f.Name)
@@ -198,7 +198,7 @@ func walkUTF8ZipFs(fsys fs.FS, parent, base string, book *Book) error {
 		} else {
 			inArchiveName := path.Join(parent, f.Name())
 			//book.Pages = append(book.Pages, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: inArchiveName, Url: "/cache/" + book.BookID + "/" + url.PathEscape(inArchiveName)})
-			TempURL := "api/getfile?uuid=" + book.BookID + "&filename=" + url.PathEscape(inArchiveName)
+			TempURL := "api/getfile?id=" + book.BookID + "&filename=" + url.PathEscape(inArchiveName)
 			book.Pages = append(book.Pages, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: inArchiveName, Url: TempURL})
 		}
 	}

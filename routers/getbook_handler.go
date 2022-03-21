@@ -8,15 +8,15 @@ import (
 )
 
 // 相关参数：
-// uuid：书籍的UUID，必须项目       							&uuid=2b17a130
+// id：书籍的ID，必须项目       							&id=2b17a130
 // author：书籍的作者，未必存在									&author=佚名
 // sort_page：按照自然文件名重新排序							&sort_page=true
-// 示例 URL： http://127.0.0.1:1234/api/getbook?uuid=1215a
+// 示例 URL： http://127.0.0.1:1234/api/getbook?bid=1215a
 // 示例 URL： http://127.0.0.1:1234/api/getbook?&author=Doe&name=book_name
 func getBookHandler(c *gin.Context) {
 	author := c.DefaultQuery("author", "")
 	sort := c.DefaultQuery("sort", "false")
-	uuid := c.DefaultQuery("uuid", "")
+	id := c.DefaultQuery("id", "")
 	if author != "" {
 		bookList, err := common.GetBookByAuthor(author, sort == "true")
 		if err != nil {
@@ -26,9 +26,8 @@ func getBookHandler(c *gin.Context) {
 		}
 		return
 	}
-
-	if uuid != "" {
-		b, err := common.GetBookByUUID(uuid, sort == "true")
+	if id != "" {
+		b, err := common.GetBookByID(id, sort == "true")
 		if err != nil {
 			fmt.Println(err)
 		} else {

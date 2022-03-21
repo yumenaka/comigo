@@ -9,6 +9,7 @@ import (
 	"github.com/bbrks/go-blurhash"
 	"github.com/cheggaaa/pb/v3"
 	"github.com/disintegration/imaging"
+	"github.com/jxskiss/base62"
 	"github.com/xxjwxc/gowp/workpool"
 	"github.com/yumenaka/comi/arch"
 	"github.com/yumenaka/comi/locale"
@@ -26,8 +27,8 @@ import (
 // Book 书籍的定义，最基本的BooID与文件路径
 type Book struct {
 	Name            string    `json:"name"` //书名
-	filePath        string    `json:"-"`    //这个字段不解析
-	BookID          string    `json:"uuid"` //根据FilePath计算
+	filePath        string    //不可导出字段
+	BookID          string    `json:"id"` //根据FilePath计算
 	Author          []string  `json:"author"`
 	ISBN            string    `json:"isbn"`
 	Press           string    `json:"press"`        //出版社
@@ -49,16 +50,15 @@ type Book struct {
 }
 
 type SinglePageInfo struct {
-	NameInArchive string    `json:"filename"` //用于解压的压缩文件内文件路径，或图片名，为了适应特殊字符，经过一次转义
-	Url           string    `json:"url"`      //远程用户读取图片的URL，为了适应特殊字符，经过一次转义
-	Blurhash      string    `json:"blurhash"` //blurhash占位符。需要扫描图片生成（tools.GetImageDataBlurHash）
-	Height        int       `json:"height"`   //blurhash用，图片的高
-	Width         int       `json:"width"`    //blurhash用，图片的宽
-	ModeTime      time.Time `json:"-"`        //这个字段不解析
-	FileSize      int64     `json:"-"`        //这个字段不解析
-
-	RealImageFilePATH string `json:"-"` //这个字段不解析  书籍为文件夹的时候，实际图片的路径
-	ImgType           string `json:"-"` //这个字段不解析
+	NameInArchive     string    `json:"filename"` //用于解压的压缩文件内文件路径，或图片名，为了适应特殊字符，经过一次转义
+	Url               string    `json:"url"`      //远程用户读取图片的URL，为了适应特殊字符，经过一次转义
+	Blurhash          string    `json:"blurhash"` //blurhash占位符。需要扫描图片生成（tools.GetImageDataBlurHash）
+	Height            int       `json:"height"`   //blurhash用，图片的高
+	Width             int       `json:"width"`    //blurhash用，图片的宽
+	ModeTime          time.Time `json:"-"`        //这个字段不解析
+	FileSize          int64     `json:"-"`        //这个字段不解析
+	RealImageFilePATH string    `json:"-"`        //这个字段不解析  书籍为文件夹的时候，实际图片的路径
+	ImgType           string    `json:"-"`        //这个字段不解析
 }
 
 // BookInfo 与Book唯一的区别是没有AllPageInfo,而是封面图URL
@@ -72,7 +72,7 @@ type BookInfo struct {
 	FileType        string         `json:"file_type"`
 	FileSize        int64          `json:"file_size"`
 	Modified        time.Time      `json:"modified_time"`
-	BookID          string         `json:"uuid"` //根据FilePath计算
+	BookID          string         `json:"id"` //根据FilePath计算
 	IsDir           bool           `json:"is_folder"`
 	ExtractNum      int            `json:"extract_num"`
 	ExtractComplete bool           `json:"extract_complete"`
@@ -151,7 +151,7 @@ func GetRandomBook() *Book {
 	if len(mapBooks) == 0 {
 		return nil
 	}
-	rand.Seed(time.Now().UnixNano())
+	rand.Seed(time.Now().UnixNano()) //随机种子，否则每回都会一样
 	randNum := rand.Intn(100) % len(mapBooks)
 	start := 0
 	for _, b := range mapBooks {
@@ -163,14 +163,14 @@ func GetRandomBook() *Book {
 	return nil
 }
 
-func GetBookShelf() (*[]BookInfo, error) {
-	var bookShelf []BookInfo
+func GetAllBookInfo() (*[]BookInfo, error) {
+	var bookInfos []BookInfo
 	for _, b := range mapBooks {
 		info := NewBookInfo(b)
-		bookShelf = append(bookShelf, *info)
+		bookInfos = append(bookInfos, *info)
 	}
-	if len(bookShelf) > 0 {
-		return &bookShelf, nil
+	if len(bookInfos) > 0 {
+		return &bookInfos, nil
 	}
 	return nil, errors.New("can not found bookshelf")
 }
@@ -206,11 +206,11 @@ func InitBook(allPageNum int, filePath string, modified time.Time, isDir bool, f
 	return &b
 }
 
-// GetBookByUUID 获取特定书籍，复制一份数据
+// GetBookByID 获取特定书籍，复制一份数据
 // TODO: 只获取、不改变原始数据。
-func GetBookByUUID(uuid string, sort bool) (*Book, error) {
-	//根据uuid查找
-	b, ok := mapBooks[uuid]
+func GetBookByID(id string, sort bool) (*Book, error) {
+	//根据id查找
+	b, ok := mapBooks[id]
 	if ok {
 		if sort {
 			b.SortPages()
@@ -219,14 +219,14 @@ func GetBookByUUID(uuid string, sort bool) (*Book, error) {
 	}
 	//为了调试方便，支持模糊查找，可以使用UUID的开头来查找书籍，当然这样有可能出错
 	for _, b := range mapBooks {
-		if strings.HasPrefix(b.BookID, uuid) {
+		if strings.HasPrefix(b.BookID, id) {
 			if sort {
 				b.SortPages()
 			}
 			return b, nil
 		}
 	}
-	return nil, errors.New("can not found book,uuid=" + uuid)
+	return nil, errors.New("can not found book,id=" + id)
 }
 
 // GetBookByAuthor 获取同一作者的书籍。
@@ -303,11 +303,33 @@ func (b *Book) setBookID() {
 	//fmt.Println("文件绝对路径："+fileAbaPath, "路径的md5："+md5string(fileAbaPath))
 	fileAbaPath, err := filepath.Abs(b.filePath)
 	if err != nil {
-		b.BookID = md5string(b.filePath)
 		fmt.Println(err, fileAbaPath)
-	} else {
-		b.BookID = md5string(b.GetFilePath())
 	}
+	b62 := base62.EncodeToString([]byte(md5string(b.filePath)))
+	b.BookID = getShortBookID(b62, 5)
+}
+
+func getShortBookID(fullID string, minLength int) string {
+	if len(fullID) <= minLength {
+		fmt.Println("can not short ID:" + fullID)
+		return fullID
+	}
+	shortID := ""
+	//最短为5位，最长等于全长
+	for i := minLength; i <= len(fullID); i++ {
+		canUse := true
+		for key, _ := range mapBooks {
+			if strings.HasPrefix(key, fullID[0:i]) {
+				canUse = false
+			}
+		}
+		if canUse {
+			shortID = fullID[0:i]
+			break
+		}
+	}
+
+	return shortID
 }
 
 // GetBookID  根据路径的MD5，生成书籍ID

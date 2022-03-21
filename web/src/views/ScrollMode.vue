@@ -1,5 +1,5 @@
 <template>
-	<div id="ScrollMode" v-if="this.book" class="manga">
+	<div id="ScrollMode" class="manga">
 		<Header
 			class="footer"
 			v-if="this.showHeaderFlag"
@@ -14,6 +14,7 @@
 
 		<!-- 渲染漫画部分 -->
 		<div
+			v-if:="book"
 			class="main_manga"
 			v-for="(page, key) in book.pages"
 			:key="page.url"
@@ -256,9 +257,11 @@ import { defineComponent, reactive } from 'vue'
 import { useCookies } from "vue3-cookies";// https://github.com/KanHarI/vue3-cookies
 import { SettingsOutline } from '@vicons/ionicons5'
 
+import axios from "axios";
+
 export default defineComponent({
 	name: "ScrollMode",
-	props: ['book', 'nowTemplate'],
+	props: ['nowTemplate'],
 	emits: ["setTemplate"],
 	components: {
 		Header,//自定义页头，有点丑
@@ -348,6 +351,22 @@ export default defineComponent({
 	},
 	data() {
 		return {
+			book: {
+				name: "loading",
+				all_page_num: 2,
+				pages: [
+					{
+						height: 500,
+						width: 449,
+						url: "/images/loading.jpg",
+					},
+					{
+						height: 500,
+						width: 449,
+						url: "/images/loading.jpg",
+					},
+				],
+			},
 			drawerActive: false,
 			drawerPlacement: 'right',
 			//开发模式 还没有做的功能与设置，设置Debug以后才能见到
@@ -403,6 +422,23 @@ export default defineComponent({
 	// unmounted: 当指令与元素解除绑定且父组件已卸载时，只调用一次。
 
 	created() {
+		//根据路由参数获取特定书籍
+		axios
+			.get("/getbook?id=" + this.$route.params.id)
+			.then((response) => (this.book = response.data))
+			.finally(console.log("成功获取书籍数据,书籍ID：" + this.$route.params.id));
+		//监听路由参数的变化，刷新本地的Book数据
+		this.$watch(
+			() => this.$route.params,
+			(toParams) => {
+				console.log(toParams)
+				axios
+					.get("/getbook?id=" + this.$route.params.id)
+					.then((response) => (this.book = response.data))
+					.finally(console.log("成功获取书籍数据,书籍ID：" + this.$route.params.id));
+			}
+		)
+
 		window.addEventListener("scroll", this.onScroll);
 		//文档视图调整大小时会触发 resize 事件。 https://developer.mozilla.org/zh-CN/docs/Web/API/Window/resize_event
 		window.addEventListener("resize", this.onResize);
@@ -512,9 +548,9 @@ export default defineComponent({
 
 	// //挂载前
 	beforeMount() {
-
 	},
 	onMounted() {
+
 		//console.log('mounted in the composition api!')
 		this.isLandscapeMode = this.inLandscapeModeCheck();
 		this.isPortraitMode = !this.inLandscapeModeCheck();
@@ -562,15 +598,6 @@ export default defineComponent({
 			let r2 = (r < 255 - subR) ? (r - subR) : (r + parseInt((255 - r) / 2))
 			let g2 = (g < 255 - subG) ? (g - subG) : (g + parseInt((255 - g) / 2))
 			let b2 = (b < 255 - subB) ? (b - subB) : (b + parseInt((255 - b) / 2))
-			// if (r > 250) {
-			// 	r2 = r - subR
-			// }
-			// if (g > 250) {
-			// 	g2 = g - subG
-			// }
-			// if (b > 250) {
-			// 	b2 = b - subB
-			// }
 			if (r < 50) {
 				r2 = r + 3 * subR
 			}
@@ -580,15 +607,6 @@ export default defineComponent({
 			if (b < 50) {
 				b2 = b + 3 * subB
 			}
-			// //背景亮的时候，页头暗。背景暗的时候，页头亮。
-			// let subR = 40
-			// let subG = 30
-			// let subB = 42
-			// let r2 = (r < 125) ? (r + subR) : (r - subR)
-			// let g2 = (g < 255) ? (g + subG) : (g - subG)
-			// let b2 = (b < 255) ? (b + subB) : (b - subB)
-
-
 			// console.log("R2:" + r2 + " G2:" + g2 + " B2:" + b2);
 			// 10进制转16进制
 			this.model.colorHeader = "#" + r2.toString(16) + g2.toString(16) + b2.toString(16)

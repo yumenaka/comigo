@@ -91,7 +91,6 @@ func setWebAPI(engine *gin.Engine) {
 		RememberPassword := c.DefaultPostForm("RememberPassword", "true") //可设置默认值
 		username := c.PostForm("username")
 		password := c.PostForm("password")
-
 		//bookList := c.PostFormMap("book_list")
 		//bookList := c.QueryArray("book_list")
 		bookList := c.PostFormArray("book_list")
@@ -117,7 +116,6 @@ func setWebAPI(engine *gin.Engine) {
 	// 简单的路由组: api,方便管理部分相同的URL
 	var api *gin.RouterGroup
 	//简单http认证
-
 	enableAuth := common.Config.UserName != "" && common.Config.Password != ""
 	if enableAuth {
 		// 路由组：https://learnku.com/docs/gin-gonic/1.7/examples-grouping-routes/11399
@@ -131,14 +129,14 @@ func setWebAPI(engine *gin.Engine) {
 
 	//处理表单 https://www.chaindesk.cn/witbook/19/329
 	api.POST("/form", func(c *gin.Context) {
-		template := c.DefaultPostForm("template", "scroll") //可设置默认值
+		t := c.DefaultPostForm("template", "scroll") //可设置默认值
 		username := c.PostForm("username")
 		password := c.PostForm("password")
 
 		//bookList := c.PostFormMap("book_list")
 		//bookList := c.QueryArray("book_list")
 		bookList := c.PostFormArray("book_list")
-		c.String(http.StatusOK, fmt.Sprintf("template is %s, username is %s, password is %s,hobby is %v", template, username, password, bookList))
+		c.String(http.StatusOK, fmt.Sprintf("template is %s, username is %s, password is %s,hobby is %v", t, username, password, bookList))
 	})
 
 	//文件上传
@@ -154,39 +152,37 @@ func setWebAPI(engine *gin.Engine) {
 		log.Println(file.Filename)
 
 		// Upload the file to specific dst.
-		c.SaveUploadedFile(file, file.Filename)
-
+		err = c.SaveUploadedFile(file, file.Filename)
+		if err != nil {
+			fmt.Println(err)
+		}
 		/*
 		   也可以直接使用io操作，拷贝文件数据。
 		   out, err := os.Create(filename)
 		   defer out.Close()
 		   _, err = io.Copy(out, file)
 		*/
-
 		c.String(http.StatusOK, fmt.Sprintf("'%s' uploaded!", file.Filename))
 	})
-
 	//web端需要的服务器设定
 	api.GET("/setting.json", func(c *gin.Context) {
 		c.PureJSON(http.StatusOK, common.Config)
 	})
-
 	//web端需要的服务器设定
 	api.GET("/server_status.json", func(c *gin.Context) {
 		c.PureJSON(http.StatusOK, common.GetServerStatus())
 	})
-
 	//阅读中的书籍json
 	api.GET("/book.json", func(c *gin.Context) {
 		c.PureJSON(http.StatusOK, common.ReadingBook)
 	})
 	//书架信息，不包含每页信息
 	api.GET("/bookshelf.json", func(c *gin.Context) {
-		bookShelf, err := common.GetBookShelf()
+		bookInfoList, err := common.GetAllBookInfo()
 		if err != nil {
 			fmt.Println(err)
 		}
-		c.PureJSON(http.StatusOK, bookShelf)
+		c.PureJSON(http.StatusOK, bookInfoList)
 	})
 	//通过URL字符串参数查询书籍信息
 	api.GET("/getbook", getBookHandler)
@@ -202,7 +198,6 @@ func setWebAPI(engine *gin.Engine) {
 		//支持内部和外部的重定向
 		c.Redirect(http.StatusMovedPermanently, "http://www.google.com/")
 	})
-
 	//初始化websocket
 	api.GET("/ws", wsHandler)
 }
@@ -264,20 +259,18 @@ func StartWebServer() {
 	setStaticFiles(engine)
 	//2、setWebAPI
 	setWebAPI(engine)
-	//TODO：设定第一本书
+	//TODO：设定一本书
 	if common.GetBooksNumber() >= 1 {
 		common.ReadingBook = common.GetRandomBook()
 		//下载文件
 		if !common.ReadingBook.IsDir {
-			engine.StaticFile("/raw/"+common.ReadingBook.Name, common.ReadingBook.GetFilePath())
+			engine.StaticFile("/raw/"+common.ReadingBook.GetFilePath(), common.ReadingBook.GetFilePath())
 		}
 	}
-
-	//生成元数据
+	//TODO：生成元数据
 	if common.Config.GenerateMetaData {
 		common.ReadingBook.ScanAllImageGo()
 	}
-
 	//3、setPort
 	setPort()
 	//4、setWebpServer
