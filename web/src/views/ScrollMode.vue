@@ -321,9 +321,9 @@ export default defineComponent({
 					var url = document.location.toString();
 					//按照“/”分割字符串
 					var arrUrl = url.split("/");
-					//拼一个完整的图片URL（因为路由路径会变化，所以不能用相对路径）
+					//拼一个完整的图片URL（因为路由路径会变化，所以不能用相对路径？）
 					var full_url = arrUrl[0] + "//" + arrUrl[2] + "/" + source_url + "&resize_width=" + imageParameters.resize_width + "&resize_height=" + imageParameters.resize_height + "&resize_max_width=" + (imageParameters.do_auto_resize ? imageParameters.resize_max_width : -1) + "&resize_max_height=" + imageParameters.resize_max_height + "&auto_crop=" + (imageParameters.do_auto_crop ? imageParameters.auto_crop : -1) + "&gray=" + (imageParameters.gray ? 'true' : 'false')
-					console.log(full_url);
+					// console.log(full_url);
 					return full_url;
 
 					// return source_url + "&resize_width=" + imageParameters.resize_width + "&resize_height=" + imageParameters.resize_height + "&resize_max_width=" + (imageParameters.do_auto_resize ? imageParameters.resize_max_width : -1) + "&resize_max_height=" + imageParameters.resize_max_height + "&auto_crop=" + (imageParameters.do_auto_crop ? imageParameters.auto_crop : -1) + "&gray=" + (imageParameters.gray ? 'true' : 'false')
@@ -402,7 +402,7 @@ export default defineComponent({
 			//屏幕宽横比，inLandscapeMode的判断依据
 			aspectRatio: 1.2,
 
-			//状态驱动的动态 CSS!!!!!
+			//状态驱动的动态 CSS
 			// https://v3.cn.vuejs.org/api/sfc-style.html#%E7%8A%B6%E6%80%81%E9%A9%B1%E5%8A%A8%E7%9A%84%E5%8A%A8%E6%80%81-css
 			//图片宽度的单位，是否使用百分比
 			imageWidth_usePercentFlag: false,
@@ -451,7 +451,7 @@ export default defineComponent({
 		//文档视图调整大小时会触发 resize 事件。 https://developer.mozilla.org/zh-CN/docs/Web/API/Window/resize_event
 		window.addEventListener("resize", this.onResize);
 		this.imageMaxWidth = window.innerWidth;
-		//根据cookie初始化默认值,或初始化cookie值,cookie读取出来的都是字符串，不要直接用
+		//根据本地存储初始化默认值,读取出来的是字符串，不要直接用
 
 		//是否显示页头
 		if (localStorage.getItem("showHeaderFlag") === "true") {
@@ -558,7 +558,6 @@ export default defineComponent({
 	beforeMount() {
 	},
 	onMounted() {
-
 		//console.log('mounted in the composition api!')
 		this.isLandscapeMode = this.inLandscapeModeCheck();
 		this.isPortraitMode = !this.inLandscapeModeCheck();
@@ -831,9 +830,10 @@ export default defineComponent({
 
 .page_hint {
 	/* 文字颜色 */
-	color: #ffffff;
+	color: #413d3d;
 	/* 文字阴影：https://www.w3school.com.cn/css/css3_shadows.asp*/
-	text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+	text-shadow: -1px 0 rgb(240, 229, 229), 0 1px rgb(253, 242, 242),
+		1px 0 rgb(206, 183, 183), 0 -1px rgb(196, 175, 175);
 }
 
 .LoadingImage {

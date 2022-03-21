@@ -1177,9 +1177,10 @@ export default defineComponent({
 	text-align: center;
 	font-size: v-bind(sketchHintFontSize);
 	/* 文字颜色 */
-	color: #7e6e6e;
+	color: #e4d3d3;
 	/* 文字阴影：https://www.w3school.com.cn/css/css3_shadows.asp*/
-	text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+	text-shadow: -1px 0 rgb(240, 229, 229), 0 1px rgb(253, 242, 242),
+		1px 0 rgb(206, 183, 183), 0 -1px rgb(196, 175, 175);
 	width: 100vw;
 }
 
@@ -1187,6 +1188,7 @@ export default defineComponent({
 .footer {
 	height: 5vh;
 	text-align: center;
+
 	background: v-bind("model.colorHeader");
 	width: 80vw;
 	padding: 0px;
@@ -1198,8 +1200,11 @@ export default defineComponent({
 	justify-content: center;
 	/* center 值将 flex 项目在容器中间对齐： */
 	align-items: center;
-	color: rgb(80, 80, 255);
-	text-shadow: 2px 2px 5px yellowgreen;
+	/* 文字颜色 */
+	color: #363333;
+	/* 文字阴影：https://www.w3school.com.cn/css/css3_shadows.asp*/
+	text-shadow: -1px 0 rgb(240, 229, 229), 0 1px rgb(253, 242, 242),
+		1px 0 rgb(206, 183, 183), 0 -1px rgb(196, 175, 175);
 }
 
 .footer div > span {

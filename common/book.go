@@ -64,21 +64,21 @@ type SinglePageInfo struct {
 // BookInfo 与Book唯一的区别是没有AllPageInfo,而是封面图URL
 type BookInfo struct {
 	Name            string         `json:"name"`
-	Author          []string       `json:"author"`
-	ISBN            string         `json:"isbn"`
+	Author          []string       `json:"-"` //暂时用不着 这个字段不解析 `json:"author"`
+	ISBN            string         `json:"-"` //暂时用不着 这个字段不解析 `json:"isbn"`
 	FilePath        string         `json:"-"` //这个字段不解析
 	ExtractPath     string         `json:"-"` //这个字段不解析
 	AllPageNum      int            `json:"all_page_num"`
 	FileType        string         `json:"file_type"`
 	FileSize        int64          `json:"file_size"`
-	Modified        time.Time      `json:"modified_time"`
+	Modified        time.Time      `json:"-"`  //暂时用不着 这个字段不解析 `json:"modified_time"`
 	BookID          string         `json:"id"` //根据FilePath计算
-	IsDir           bool           `json:"is_folder"`
-	ExtractNum      int            `json:"extract_num"`
-	ExtractComplete bool           `json:"extract_complete"`
+	IsDir           bool           `json:"-"`  //暂时用不着 这个字段不解析 `json:"is_folder"`
+	ExtractNum      int            `json:"-"`  //暂时用不着 这个字段不解析 `json:"extract_num"`
+	ExtractComplete bool           `json:"-"`  //暂时用不着 这个字段不解析 `json:"extract_complete"`
 	ReadPercent     float64        `json:"read_percent"`
-	NonUTF8Zip      bool           `json:"non_utf_8_zip"`
-	ZipTextEncoding string         `json:"zip_text_encoding"`
+	NonUTF8Zip      bool           `json:"-"` //暂时用不着 这个字段不解析 `json:"non_utf_8_zip"`
+	ZipTextEncoding string         `json:"-"` //暂时用不着 这个字段不解析 `json:"zip_text_encoding"`
 	Cover           SinglePageInfo `json:"cover"`
 	//Pages         AllPageInfo `json:"pages"`
 }
@@ -291,6 +291,7 @@ func (s AllPageInfo) Swap(i, j int) {
 // SortPages 上面三个函数定义好了，终于可以使用sort包排序了
 func (b *Book) SortPages() {
 	sort.Sort(b.Pages)
+	b.setClover() //重新排序后重新设置封面
 }
 
 func md5string(s string) string {
@@ -328,7 +329,6 @@ func getShortBookID(fullID string, minLength int) string {
 			break
 		}
 	}
-
 	return shortID
 }
 
@@ -350,7 +350,17 @@ func (b *Book) setPageNum() {
 func (b *Book) GetAllPageNum() int {
 	//设置页数
 	b.setPageNum()
+	if b.Cover.Url == "" {
+		b.setClover()
+	}
 	return b.AllPageNum
+}
+
+// 设置封面信息
+func (b *Book) setClover() {
+	if len(b.Pages) >= 1 {
+		b.Cover = b.Pages[0]
+	}
 }
 
 func (b *Book) SetFilePath(path string) {

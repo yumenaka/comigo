@@ -183,6 +183,25 @@ func ImageResize(loadedImage []byte, width int, height int) []byte {
 	return buf2.Bytes()
 }
 
+// ImageResizeCut 重设图片分辨率,剪切图片
+func ImageResizeCut(loadedImage []byte, width int, height int) []byte {
+	buf := bytes.NewBuffer(loadedImage)
+	image, err := imaging.Decode(buf)
+	if err != nil {
+		fmt.Println(err)
+		return loadedImage
+	}
+	//生成缩略图，尺寸width*height
+	image = imaging.Thumbnail(image, width, height, imaging.Lanczos)
+	buf2 := &bytes.Buffer{}
+	//将图片编码成jpeg
+	err = imaging.Encode(buf2, image, imaging.JPEG)
+	if err != nil {
+		return loadedImage
+	}
+	return buf2.Bytes()
+}
+
 // ImageAutoCrop  自动裁白边
 func ImageAutoCrop(loadedImage []byte, energyThreshold float32) []byte {
 	////读取本地文件，本地文件尺寸300*400

@@ -20,6 +20,7 @@ import (
 ////可选参数：
 // resize_width:指定宽度，缩放图片  							&resize_width=300
 // resize_height:指定高度，缩放图片 							&resize_height=300
+// resize_cut:同时指定宽高的时候要不要剪切图片					&resize_cut=true
 // resize_max_width:指定宽度上限，图片宽度大于这个上限时缩小图片  	&resize_max_width=740
 // resize_max_height:指定高度上限，图片高度大于这个上限时缩小图片  	&resize_max_height=300
 // auto_crop:自动切白边，数字是切白边的阈值，范围是0~100 			&auto_crop=10
@@ -75,7 +76,13 @@ func getFileHandler(c *gin.Context) {
 			}
 			//图片Resize, 按照固定的width height缩放
 			if errX == nil && errY == nil && resizeWidth > 0 && resizeHeight > 0 {
-				imgData = tools.ImageResize(imgData, resizeWidth, resizeHeight)
+				//读取图片Resize用的resizeWidth
+				resizeCut := c.DefaultQuery("resize_cut", "false")
+				if resizeCut != "true" {
+					imgData = tools.ImageResize(imgData, resizeWidth, resizeHeight)
+				} else {
+					imgData = tools.ImageResizeCut(imgData, resizeWidth, resizeHeight)
+				}
 				contentType = tools.GetContentTypeByFileName(".jpg")
 			}
 			//图片Resize, 按照 width 等比例缩放

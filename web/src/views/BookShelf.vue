@@ -1,19 +1,26 @@
 <template>
     <div id="BookShelf" class="manga">
-        <Header
-            class="footer"
-            v-if="this.showHeaderFlag"
-            :bookIsFolder="book.IsFolder"
-            :bookName="book.name"
-        >
+        <Header class="footer" v-if="this.showHeaderFlag" :bookIsFolder="flase" :bookName="Comigo">
             <!-- 右边的设置图标，点击屏幕中央也可以打开 -->
             <n-icon size="40" @click="drawerActivate('right')">
                 <settings-outline />
             </n-icon>
         </Header>
 
-        <!-- 渲染漫画部分 -->
-        <div
+        <!-- 渲染书架部分 -->
+
+        <n-grid cols="2 400:4 600:6">
+            <!-- 在组件中使用v-for时，key是必须的 -->
+            <n-grid-item v-for="(book_info, key) in this.bookshelf" :key="key">
+                <BookCard
+                    v-bind:title="book_info.name"
+                    v-bind:id="book_info.id"
+                    v-bind:image_src="book_info.cover.url"
+                ></BookCard>
+            </n-grid-item>
+        </n-grid>
+
+        <!-- <div
             class="main_manga"
             v-for="(page, key) in book.pages"
             :key="page.url"
@@ -26,7 +33,7 @@
                 class="page_hint"
                 v-if="showPageNumFlag_BookShelf"
             >{{ key + 1 }}/{{ book.all_page_num }}</div>
-        </div>
+        </div>-->
 
         <Drawer
             :initDrawerActive="this.drawerActive"
@@ -44,16 +51,17 @@
             <n-divider />
         </Drawer>
 
-        <n-back-top :show="showBackTopFlag" type="info" color="#8a2be2" :right="20" :bottom="20" />
-        <n-button @click="scrollToTop(90);" size="large" secondary strong>Back To Top</n-button>
+        <!-- <n-back-top :show="showBackTopFlag" type="info" color="#8a2be2" :right="20" :bottom="20" />
+        <n-button @click="scrollToTop(90);" size="large" secondary strong>Back To Top</n-button>-->
     </div>
 </template>
 
 <script>
 // 直接导入组件并使用它。这种情况下，只有导入的组件才会被打包。
-import { NButton, NBackTop, NIcon, NDivider, NColorPicker, } from 'naive-ui'
+import { NIcon, NDivider, NColorPicker, NGrid, NGridItem, } from 'naive-ui'
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
+import BookCard from "@/components/BookCard.vue";
 import { defineComponent, reactive } from 'vue'
 import { useCookies } from "vue3-cookies";// https://github.com/KanHarI/vue3-cookies
 import { SettingsOutline } from '@vicons/ionicons5'
@@ -66,24 +74,12 @@ export default defineComponent({
     components: {
         Header,//自定义页头，有点丑
         Drawer,//自定义抽屉，还行
-        NButton,//按钮，来自:https://www.naiveui.com/zh-CN/os-theme/components/button
-        NBackTop,//回到顶部按钮，来自:https://www.naiveui.com/zh-CN/os-theme/components/back-top
-        // NDrawer,//抽屉，可以从上下左右4个方向冒出. https://www.naiveui.com/zh-CN/os-theme/components/drawer
-        // NDrawerContent,//抽屉内容
-        // NSpace,//间距 https://www.naiveui.com/zh-CN/os-theme/components/space
-        // NSlider,//滑动选择  Slider https://www.naiveui.com/zh-CN/os-theme/components/slider
-        // NSwitch,//开关   https://www.naiveui.com/zh-CN/os-theme/components/switch
-        // NRadio,//单选  https://www.naiveui.com/zh-CN/os-theme/components/radio
-        // NRadioButton,//单选  用按钮显得更优雅一点
-        // NInputNumber,//数字输入 https://www.naiveui.com/zh-CN/os-theme/components/input-number
-        // NRadioGroup,
-        // NLayout,//布局 https://www.naiveui.com/zh-CN/os-theme/components/layout
-        // NLayoutSider,
-        // NLayoutContent,
+        BookCard,//自定义抽屉，还行
+        // NButton,//按钮，来自:https://www.naiveui.com/zh-CN/os-theme/components/button
+        // NBackTop,//回到顶部按钮，来自:https://www.naiveui.com/zh-CN/os-theme/components/back-top
+        NGrid,
+        NGridItem,//https://www.naiveui.com/zh-CN/os-theme/components/grid
         NIcon,//图标  https://www.naiveui.com/zh-CN/os-theme/components/icon
-        // NPageHeader,//页头 https://www.naiveui.com/zh-CN/os-theme/components/page-header
-        // NAvatar, //头像 https://www.naiveui.com/zh-CN/os-theme/components/avatar
-
         SettingsOutline,//图标,来自 https://www.xicons.org/#/   需要安装（npm i -D @vicons/ionicons5）
         NDivider,//分割线  https://www.naiveui.com/zh-CN/os-theme/components/divider
         NColorPicker,
@@ -129,22 +125,7 @@ export default defineComponent({
     },
     data() {
         return {
-            book: {
-                name: "loading",
-                all_page_num: 2,
-                pages: [
-                    {
-                        height: 500,
-                        width: 449,
-                        url: "/images/loading.jpg",
-                    },
-                    {
-                        height: 500,
-                        width: 449,
-                        url: "/images/loading.jpg",
-                    },
-                ],
-            },
+            bookshelf: {},
             drawerActive: false,
             drawerPlacement: 'right',
             //开发模式 还没有做的功能与设置，设置Debug以后才能见到
@@ -202,20 +183,10 @@ export default defineComponent({
     created() {
 
         axios
-            .get("/getbook?id=" + this.$route.params.id)
-            .then((response) => (this.book = response.data))
-            .finally(console.log("成功获取书籍数据,书籍ID：" + this.$route.params.id));
-        //监听路由参数的变化，刷新本地的Book数据
-        this.$watch(
-            () => this.$route.params,
-            (toParams) => {
-                console.log(toParams)
-                axios
-                    .get("/getbook?id=" + this.$route.params.id)
-                    .then((response) => (this.book = response.data))
-                    .finally(console.log("成功获取书籍数据,书籍ID：" + this.$route.params.id));
-            }
-        )
+            .get("/bookshelf.json")
+            .then((response) => (this.bookshelf = response.data))
+            .finally(console.log(this.bookshelf));
+
 
         window.addEventListener("scroll", this.onScroll);
         //文档视图调整大小时会触发 resize 事件。 https://developer.mozilla.org/zh-CN/docs/Web/API/Window/resize_event

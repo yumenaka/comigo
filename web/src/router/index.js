@@ -21,11 +21,11 @@ const routes = [
   {
     path: '/',//  以 / 开头的嵌套路径将被视为根路径。这允许你利用组件嵌套，而不必使用嵌套的 URL。
     component: BookShelf,
-    // name: 'default',
   },
   {
     path: '/s/:id',
     component: ScrollMode
+    // name: 'ScrollMode',
   },
   {
     path: '/f/:id',
