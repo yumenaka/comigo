@@ -217,9 +217,6 @@ export default defineComponent({
             }
         )
 
-
-
-
         window.addEventListener("scroll", this.onScroll);
         //文档视图调整大小时会触发 resize 事件。 https://developer.mozilla.org/zh-CN/docs/Web/API/Window/resize_event
         window.addEventListener("resize", this.onResize);

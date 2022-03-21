@@ -235,10 +235,11 @@ import { defineComponent, reactive } from "vue";
 // 直接导入组件并使用它。这种情况下，只有导入的组件才会被打包。
 import { NColorPicker, NDivider, NIcon, NInputNumber, NSlider, NSpace, NSwitch, useMessage, } from "naive-ui";
 import { SettingsOutline } from "@vicons/ionicons5";
+import axios from "axios";
 
 export default defineComponent({
 	name: "FlipMode",
-	props: ["book", "nowTemplate"],
+	props: ["nowTemplate"],
 	emits: ["setTemplate"],
 	components: {
 		Header,
@@ -298,6 +299,22 @@ export default defineComponent({
 	},
 	data() {
 		return {
+			book: {
+				name: "loading",
+				all_page_num: 2,
+				pages: [
+					{
+						height: 500,
+						width: 449,
+						url: "/images/loading.jpg",
+					},
+					{
+						height: 500,
+						width: 449,
+						url: "/images/loading.jpg",
+					},
+				],
+			},
 			drawerActive: false,
 			drawerPlacement: "right",
 			//开发模式 未完成的功能与设置，开启Debug以后才能见到
@@ -334,6 +351,24 @@ export default defineComponent({
 	//在选项API中使用 Vue 生命周期钩子：
 	created() {
 		//初始化默认值
+		//根据路由参数获取特定书籍
+		axios
+			.get("/getbook?id=" + this.$route.params.id)
+			.then((response) => (this.book = response.data))
+			.finally(console.log("成功获取书籍数据,书籍ID：" + this.$route.params.id));
+		//监听路由参数的变化，刷新本地的Book数据
+		this.$watch(
+			() => this.$route.params.id,
+			(id) => {
+				console.log(id)
+				axios
+					.get("/getbook?id=" + this.$route.params.id)
+					.then((response) => (this.book = response.data))
+					.finally(console.log("成功获取书籍数据,书籍ID：" + id));
+			}
+		)
+
+
 		// https://www.developers.pub/wiki/1006381/1013545
 		// https://developer.mozilla.org/zh-CN/docs/Web/API/Storage/setItem
 		//一个域名下存放的cookie的个数有限制，不同的浏览器存放的个数不一样,一般为20个。因为不需要上传，使用localStorage（本地存储）存储在浏览器，永不过期。

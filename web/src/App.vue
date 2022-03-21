@@ -20,14 +20,16 @@
         @setTemplate="OnSetTemplate"  
       ></BookShelf>-->
 
-      <!--使用 router-link 来导航 -->
-      <h1>Comigo 路由测试</h1>
-      <p>
-        <router-link to="/">Router-link: home</router-link>
-        <router-link to="/about">Router-link: about</router-link>
-        <router-link to="/book/3AzY2">Router-link: book</router-link>
-        <!-- <router-link :to="{ name: 'ScrollMode', params: { book_id: '3AzY2' } }">ScrollMode</router-link> -->
-      </p>
+      <!--使用 router-link 导航 -->
+      <router-link to="/">Router-link: home&nbsp;&nbsp;</router-link>
+      <span>&nbsp;&nbsp;</span>
+      <router-link to="/about">Router-link: about&nbsp;&nbsp;</router-link>
+      <span>&nbsp;&nbsp;</span>
+      <router-link to="/s/3AzY2">Router-link: scroll&nbsp;&nbsp;</router-link>
+      <span>&nbsp;&nbsp;</span>
+      <router-link to="/f/3AzY2">Router-link: flip&nbsp;&nbsp;</router-link>
+      <!-- <router-link :to="{ name: 'ScrollMode', params: { book_id: '3AzY2' } }">ScrollMode</router-link> -->
+
       <!-- 路由出口 路由匹配到的组件将渲染在这里 -->
       <router-view></router-view>
     </n-message-provider>

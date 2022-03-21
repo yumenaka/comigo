@@ -22,7 +22,7 @@
 			@mousemove="onMouseMove"
 			@mouseleave="onMouseLeave"
 		>
-			<img v-lazy="imageParametersString(page.url)" v-bind:alt="key + 1" v-bind:key="key" />
+			<img v-lazy="this.imageParametersString(page.url)" v-bind:alt="key + 1" v-bind:key="key" />
 			<div class="page_hint" v-if="showPageNumFlag_ScrollMode">{{ key + 1 }}/{{ book.all_page_num }}</div>
 		</div>
 
@@ -256,7 +256,6 @@ import Drawer from "@/components/Drawer.vue";
 import { defineComponent, reactive } from 'vue'
 import { useCookies } from "vue3-cookies";// https://github.com/KanHarI/vue3-cookies
 import { SettingsOutline } from '@vicons/ionicons5'
-
 import axios from "axios";
 
 export default defineComponent({
@@ -318,7 +317,16 @@ export default defineComponent({
 			imageParametersString: (source_url) => {
 				// var temp =
 				if (source_url.substr(0, 12) == "api/getfile?") {
-					return source_url + "&resize_width=" + imageParameters.resize_width + "&resize_height=" + imageParameters.resize_height + "&resize_max_width=" + (imageParameters.do_auto_resize ? imageParameters.resize_max_width : -1) + "&resize_max_height=" + imageParameters.resize_max_height + "&auto_crop=" + (imageParameters.do_auto_crop ? imageParameters.auto_crop : -1) + "&gray=" + (imageParameters.gray ? 'true' : 'false')
+					//当前URL
+					var url = document.location.toString();
+					//按照“/”分割字符串
+					var arrUrl = url.split("/");
+					//拼一个完整的图片URL（因为路由路径会变化，所以不能用相对路径）
+					var full_url = arrUrl[0] + "//" + arrUrl[2] + "/" + source_url + "&resize_width=" + imageParameters.resize_width + "&resize_height=" + imageParameters.resize_height + "&resize_max_width=" + (imageParameters.do_auto_resize ? imageParameters.resize_max_width : -1) + "&resize_max_height=" + imageParameters.resize_max_height + "&auto_crop=" + (imageParameters.do_auto_crop ? imageParameters.auto_crop : -1) + "&gray=" + (imageParameters.gray ? 'true' : 'false')
+					console.log(full_url);
+					return full_url;
+
+					// return source_url + "&resize_width=" + imageParameters.resize_width + "&resize_height=" + imageParameters.resize_height + "&resize_max_width=" + (imageParameters.do_auto_resize ? imageParameters.resize_max_width : -1) + "&resize_max_height=" + imageParameters.resize_max_height + "&auto_crop=" + (imageParameters.do_auto_crop ? imageParameters.auto_crop : -1) + "&gray=" + (imageParameters.gray ? 'true' : 'false')
 				} else {
 					return source_url
 				}
@@ -429,13 +437,13 @@ export default defineComponent({
 			.finally(console.log("成功获取书籍数据,书籍ID：" + this.$route.params.id));
 		//监听路由参数的变化，刷新本地的Book数据
 		this.$watch(
-			() => this.$route.params,
-			(toParams) => {
-				console.log(toParams)
+			() => this.$route.params.id,
+			(id) => {
+				console.log(id)
 				axios
 					.get("/getbook?id=" + this.$route.params.id)
 					.then((response) => (this.book = response.data))
-					.finally(console.log("成功获取书籍数据,书籍ID：" + this.$route.params.id));
+					.finally(console.log("成功获取书籍数据,书籍ID：" + id));
 			}
 		)
 

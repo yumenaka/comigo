@@ -6,8 +6,8 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 // 1. 定义路由组件.
 // 也可以从其他文件导入
 // import App from '@/App.vue'
-// import FlipMode from '@/views/FlipMode.vue'
 import ScrollMode from '@/views/ScrollMode.vue'
+import FlipMode from '@/views/FlipMode.vue'
 import BookShelf from '@/views/BookShelf.vue'
 
 
@@ -24,9 +24,12 @@ const routes = [
     // name: 'default',
   },
   {
-    path: '/book/:id',
-    // name: 'About',
+    path: '/s/:id',
     component: ScrollMode
+  },
+  {
+    path: '/f/:id',
+    component: FlipMode
   },
   {
     path: '/about',
