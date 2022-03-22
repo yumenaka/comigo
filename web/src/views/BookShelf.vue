@@ -1,6 +1,11 @@
 <template>
     <div id="BookShelf">
-        <Header class="footer" v-if="this.showHeaderFlag" :bookIsFolder="false" :bookName="Comigo">
+        <Header
+            class="footer"
+            v-if="this.showHeaderFlag"
+            :bookIsFolder="false"
+            :showReturnIcon="false"
+        >
             <!-- 右边的设置图标，点击屏幕中央也可以打开 -->
             <n-icon size="40" @click="drawerActivate('right')">
                 <settings-outline />
@@ -15,15 +20,12 @@
             <!-- responsive: 'self' 根据自身宽度进行响应式布局，'screen' 根据屏幕断点进行响应式布局 -->
             <n-grid cols="2 s:4 m:5 l:6 xl:8 2xl:10" x-gap="2" y-gap="23" responsive="screen">
                 <!-- 在组件中使用v-for时，key是必须的 -->
-                <n-grid-item
-                    v-for="(book_info, key) in this.bookshelf"
-                    :key="key"
-                    @click="onOpenBook(book_info.id)"
-                >
+                <n-grid-item v-for="(book_info, key) in this.bookshelf" :key="key">
                     <BookCard
-                        v-bind:title="book_info.name"
-                        v-bind:id="book_info.id"
-                        v-bind:image_src="book_info.cover.url"
+                        :title="book_info.name"
+                        :id="book_info.id"
+                        :image_src="book_info.cover.url"
+                        :nowMode="this.nowMode"
                     ></BookCard>
                 </n-grid-item>
             </n-grid>
@@ -60,7 +62,7 @@ import axios from "axios";
 
 export default defineComponent({
     name: "BookShelf",
-    props: ['nowTemplate'],
+    props: ['nowMode'],
     emits: ["setTemplate"],
     components: {
         Header,//自定义页头，有点丑
@@ -247,42 +249,10 @@ export default defineComponent({
 .shelf {
     padding-bottom: 10px;
     padding-left: 20px;
-    padding-right: 20px;
+    padding-right: 10px;
     padding-top: 30px;
     max-width: 100%;
-    height: 93vh;
+    min-height: 93vh;
     background: v-bind("model.color");
-}
-
-.header {
-    padding: 0px;
-    width: 100%;
-    height: 7vh;
-    background: v-bind("model.colorHeader");
-}
-
-/* https://developer.mozilla.org/zh-CN/docs/Web/CSS/object-fit */
-.manga img {
-    margin: auto;
-    /* object-fit: scale-down; */
-    padding: 3px 0px;
-    border-radius: 7px;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-}
-
-.page_hint {
-    /* 文字颜色 */
-    color: #7e6e6e;
-    /* 文字阴影：https://www.w3school.com.cn/css/css3_shadows.asp*/
-    text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
-}
-
-.LoadingImage {
-    width: 90vw;
-    max-width: 90vw;
-}
-.ErrorImage {
-    width: 90vw;
-    max-width: 90vw;
 }
 </style>

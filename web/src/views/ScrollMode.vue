@@ -5,6 +5,7 @@
 			v-if="this.showHeaderFlag"
 			:bookIsFolder="book.IsFolder"
 			:bookName="book.name"
+			:showReturnIcon="true"
 		>
 			<!-- 右边的设置图标，点击屏幕中央也可以打开 -->
 			<n-icon size="40" @click="drawerActivate('right')">
@@ -35,16 +36,13 @@
 			@setT="this.OnSetTemplate"
 			:nowTemplate="this.nowTemplate"
 		>
-			<span>{{ $t("setBackColor") }}</span>
+			<!-- <span>{{ $t("setBackColor") }}</span>
 			<n-color-picker
 				v-model:value="model.color"
 				:modes="['rgb']"
 				:show-alpha="false"
 				@update:value="onBackgroundColorChange"
-			/>
-
-			<!-- 分割线 -->
-			<n-divider />
+			/>-->
 
 			<n-space vertical>
 				<!-- 单页-漫画宽度-使用百分比 -->
@@ -103,7 +101,6 @@
 					size="small"
 					:show-button="false"
 					v-model:value="this.singlePageWidth_PX"
-					:max="this.imageMaxWidth"
 					:min="50"
 					:update-value-on-input="false"
 				>
@@ -115,7 +112,7 @@
 					v-if="!this.imageWidth_usePercentFlag"
 					v-model:value="this.singlePageWidth_PX"
 					:step="10"
-					:max="this.imageMaxWidth"
+					:max="1600"
 					:min="50"
 					:format-tooltip="value => `${value}px`"
 				/>
@@ -126,7 +123,6 @@
 					size="small"
 					:show-button="false"
 					v-model:value="this.doublePageWidth_PX"
-					:max="this.imageMaxWidth"
 					:min="50"
 					:update-value-on-input="false"
 				>
@@ -139,7 +135,7 @@
 					v-if="!this.imageWidth_usePercentFlag"
 					v-model:value="this.doublePageWidth_PX"
 					:step="10"
-					:max="this.imageMaxWidth"
+					:max="1600"
 					:min="50"
 					:format-tooltip="value => `${value}px`"
 				/>
@@ -249,7 +245,7 @@
 
 <script>
 // 直接导入组件并使用它。这种情况下，只有导入的组件才会被打包。
-import { NButton, NBackTop, NSpace, NSlider, NSwitch, NIcon, NInputNumber, NDivider, NColorPicker, } from 'naive-ui'
+import { NButton, NBackTop, NSpace, NSlider, NSwitch, NIcon, NInputNumber, NDivider, } from 'naive-ui'
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
 import { defineComponent, reactive } from 'vue'
@@ -283,7 +279,7 @@ export default defineComponent({
 		NInputNumber,//数字输入 https://www.naiveui.com/zh-CN/os-theme/components/input-number
 		SettingsOutline,//图标,来自 https://www.xicons.org/#/   需要安装（npm i -D @vicons/ionicons5）
 		NDivider,//分割线  https://www.naiveui.com/zh-CN/os-theme/components/divider
-		NColorPicker,
+		// NColorPicker,
 	},
 	setup() {
 		//此处不能使用this

@@ -13,22 +13,22 @@
       </template>
       <!-- 选择：切换页面模式 -->
       <n-space>
-        <n-radio-group v-model:value="nowTemplateLocal">
-          <!-- 卷軸模式 -->
+        <n-button @click="toFlipMode">切换为翻页阅读</n-button>
+        <n-button @click="toScrollMode">切换为滚动阅读</n-button>
+        <!-- <n-radio-group v-model:value="nowTemplateLocal">
           <n-radio-button
             :checked="nowTemplateLocal === 'scroll'"
             @change="onChangeTemplate"
             value="scroll"
             name="basic-demo"
           >{{ $t('scroll_mode') }}</n-radio-button>
-          <!-- 翻頁模式 -->
           <n-radio-button
             :checked="nowTemplateLocal === 'flip'"
             @change="onChangeTemplate"
             value="flip"
             name="basic-demo"
           >{{ $t('flip_mode') }}</n-radio-button>
-        </n-radio-group>
+        </n-radio-group>-->
       </n-space>
       <!-- 分割线 -->
       <n-divider />
@@ -49,23 +49,18 @@
           :options="this.languageOptions"
           @update:value="OnChangeLanguage"
         />
-        <n-button
-          v-if="nowTemplate == 'flip' || nowTemplate == 'scroll'"
-          @click="startSketchMode"
-        >{{ $t('startSketchMode') }}</n-button>
+        <n-button @click="startSketchMode">{{ $t('startSketchMode') }}</n-button>
         <n-button v-if="nowTemplate == 'sketch'" @click="stopSketchMode">{{ $t('stopSketchMode') }}</n-button>
       </template>
     </n-drawer-content>
   </n-drawer>
 </template>
-
 <script>
 
 import { useCookies } from "vue3-cookies";
-import { NDrawer, NDivider, NDrawerContent, NSpace, NRadioGroup, NRadioButton, NButton, NSelect, NPopconfirm, } from 'naive-ui'
+import { NDrawer, NDivider, NDrawerContent, NSpace, NButton, NSelect, NPopconfirm, } from 'naive-ui'
 import { defineComponent, } from 'vue'
 // import { useI18n } from 'vue-i18n'
-
 
 export default defineComponent({
   name: "Drawer",
@@ -76,8 +71,8 @@ export default defineComponent({
     NDrawerContent,//抽屉内容
     NSpace,//间距 https://www.naiveui.com/zh-CN/os-theme/components/space
     NDivider,//间隔
-    NRadioGroup,//单选  https://www.naiveui.com/zh-CN/os-theme/components/radio
-    NRadioButton,//单选 用按钮显得更优雅一点
+    // NRadioGroup,//单选  https://www.naiveui.com/zh-CN/os-theme/components/radio
+    // NRadioButton,//单选 用按钮显得更优雅一点
     NButton,//按钮，来自:https://www.naiveui.com/zh-CN/os-theme/components/button
     // NAvatar,//头像 https://www.naiveui.com/zh-CN/os-theme/components/avatar
     NSelect, //选择器 https://www.naiveui.com/zh-CN/os-theme/components/select
@@ -138,16 +133,6 @@ export default defineComponent({
     },
   },
   methods: {
-
-    onClearLocalSetting() {
-      // //清除localStorage保存的设定
-      // localStorage.clear();
-      // //刷新当前页面
-      // location.reload();
-      //载入新文档替换当前页面
-      //window.location.replace("http://www.example.com")
-    },
-
     OnChangeLanguage(value) {
       this.cookies.set("userLanguageSetting", value);
     },

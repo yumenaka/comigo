@@ -1,10 +1,14 @@
 <template>
-    <n-card class="book_card">
-        <template #cover>
-            <img :src="this.image_src + this.resize_str" />
-        </template>
-        <span tooltip="false">{{ this.ellipsisTitle }}</span>
-    </n-card>
+    <router-link :to="{ name: 'ScrollMode', params: { id: this.id } }">
+        <n-card class="book_card">
+            <template #cover>
+                <img :src="this.image_src + this.resize_str" />
+            </template>
+            <router-link
+                :to="{ name: 'FlipMode', params: { id: this.id } }"
+            >{{ this.ellipsisTitle }}</router-link>
+        </n-card>
+    </router-link>
 </template>
 
 <script>
@@ -14,7 +18,7 @@ import { useCookies } from "vue3-cookies";
 import { defineComponent } from 'vue'
 export default defineComponent({
     name: "BookCover",
-    props: ['title', 'image_src', 'id'],
+    props: ['title', 'image_src', 'id', 'nowMode'],
     components: {
         NCard,
         // NEllipsis,
@@ -25,10 +29,10 @@ export default defineComponent({
     },
     computed: {
         ellipsisTitle() {
-            if (this.title.length <= 15) {
+            if (this.title.length <= 12) {
                 return this.title
             } else {
-                return this.title.substr(0, 15) + "……"
+                return this.title.substr(0, 12) + "…"
             }
         },
     },
@@ -37,6 +41,27 @@ export default defineComponent({
             // resize_str: "&resize_height=340",
             resize_str: "&resize_width=128&resize_height=180&resize_cut=true",
         };
+    },
+    methods: {
+        //回首页
+        onBackTop() {
+            // 字符串路径
+            this.$router.push('/')
+        },
+        //自己构建一个<a>链接，后来发现不如可以直接用router-link与命名路由
+        getHref() {
+            //当前URL
+            var url = document.location.toString();
+            //按照“/”分割字符串
+            var arrUrl = url.split("/");
+            var new_url = arrUrl[0] + "//" + arrUrl[2] + "/#" + "f/" + this.id
+            //拼一个完整的图片URL
+            if (this.nowMode == "scroll") {
+                new_url = arrUrl[0] + "//" + arrUrl[2] + "/#" + "s/" + this.id
+            }
+            console.log(new_url)
+            return new_url
+        },
     },
 });
 </script>
@@ -49,9 +74,40 @@ export default defineComponent({
     padding-right: 5px;
     padding-top: 7px;
 
-    width: 134px;
-    height: 200px;
+    width: 160px;
+    height: 230px;
     border-radius: 6px;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+/* 样式化链接 */
+/* https://developer.mozilla.org/zh-CN/docs/Learn/CSS/Styling_text/Styling_links */
+a {
+    outline: none;
+    text-decoration: none;
+    padding: 2px 1px 0;
+}
+
+a:link {
+    color: #265301;
+}
+
+a:visited {
+    color: #437a16;
+}
+
+a:focus {
+    border-bottom: 1px solid;
+    background: #bae498;
+}
+
+a:hover {
+    border-bottom: 1px solid;
+    background: #cdfeaa;
+}
+
+a:active {
+    background: #265301;
+    color: #cdfeaa;
 }
 </style>

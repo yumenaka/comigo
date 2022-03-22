@@ -6,6 +6,7 @@
 			v-if="this.showHeaderFlag_FlipMode"
 			:bookIsFolder="book.IsFolder"
 			:bookName="book.name"
+			:showReturnIcon="true"
 		>
 			<!-- 右边的设置图标，点击屏幕中央也可以打开 -->
 			<n-icon size="40" @click="drawerActivate('right')">

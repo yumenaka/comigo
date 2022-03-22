@@ -11,11 +11,9 @@ import FlipMode from '@/views/FlipMode.vue'
 import BookShelf from '@/views/BookShelf.vue'
 import NotFound from '@/views/NotFound404.vue'
 
-//最简方案：
-//https://localhost/#/scroll/id
 
-//加上语言的话：
-//https://localhost/#/scroll/id/lang/zh
+//https://localhost/#/s/bookid
+
 
 const routes = [
   {
@@ -34,7 +32,7 @@ const routes = [
   },
   {
     path: '/about',
-    component: () => import('@/components/About.vue'),
+    component: () => import('@/views/About.vue'),
     name: 'About',
   },
   // 将匹配所有内容并将其放在 `$route.params.pathMatch` 下
