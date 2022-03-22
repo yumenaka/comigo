@@ -2,7 +2,7 @@
   <header class="header">
     <!-- 以后放返回箭头？ -->
     <!-- SVG资源来自 https://www.xicons.org/#/ -->
-    <n-icon size="40">
+    <n-icon size="40" @click="onBackTop()">
       <book-outline />
     </n-icon>
     <!-- 标题，可下载压缩包 -->
@@ -44,6 +44,12 @@ export default defineComponent({
   },
 
   methods: {
+    //回首页
+    onBackTop() {
+      // 字符串路径
+      this.$router.push('/')
+
+    },
   },
 });
 </script>

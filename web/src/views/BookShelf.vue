@@ -1,6 +1,6 @@
 <template>
-    <div id="BookShelf" class="manga">
-        <Header class="footer" v-if="this.showHeaderFlag" :bookIsFolder="flase" :bookName="Comigo">
+    <div id="BookShelf">
+        <Header class="footer" v-if="this.showHeaderFlag" :bookIsFolder="false" :bookName="Comigo">
             <!-- 右边的设置图标，点击屏幕中央也可以打开 -->
             <n-icon size="40" @click="drawerActivate('right')">
                 <settings-outline />
@@ -8,32 +8,26 @@
         </Header>
 
         <!-- 渲染书架部分 -->
-
-        <n-grid cols="2 400:4 600:6">
-            <!-- 在组件中使用v-for时，key是必须的 -->
-            <n-grid-item v-for="(book_info, key) in this.bookshelf" :key="key">
-                <BookCard
-                    v-bind:title="book_info.name"
-                    v-bind:id="book_info.id"
-                    v-bind:image_src="book_info.cover.url"
-                ></BookCard>
-            </n-grid-item>
-        </n-grid>
-
-        <!-- <div
-            class="main_manga"
-            v-for="(page, key) in book.pages"
-            :key="page.url"
-            @click="onMouseClick($event)"
-            @mousemove="onMouseMove"
-            @mouseleave="onMouseLeave"
-        >
-            <img v-lazy="page.url" v-bind:alt="key + 1" v-bind:key="key" />
-            <div
-                class="page_hint"
-                v-if="showPageNumFlag_BookShelf"
-            >{{ key + 1 }}/{{ book.all_page_num }}</div>
-        </div>-->
+        <div class="shelf">
+            <!-- cols: 显示的栅格数量 -->
+            <!-- x-gap: 横向间隔槽 -->
+            <!-- y-gap: 纵向间隔槽 -->
+            <!-- responsive: 'self' 根据自身宽度进行响应式布局，'screen' 根据屏幕断点进行响应式布局 -->
+            <n-grid cols="2 s:4 m:5 l:6 xl:8 2xl:10" x-gap="2" y-gap="23" responsive="screen">
+                <!-- 在组件中使用v-for时，key是必须的 -->
+                <n-grid-item
+                    v-for="(book_info, key) in this.bookshelf"
+                    :key="key"
+                    @click="onOpenBook(book_info.id)"
+                >
+                    <BookCard
+                        v-bind:title="book_info.name"
+                        v-bind:id="book_info.id"
+                        v-bind:image_src="book_info.cover.url"
+                    ></BookCard>
+                </n-grid-item>
+            </n-grid>
+        </div>
 
         <Drawer
             :initDrawerActive="this.drawerActive"
@@ -50,9 +44,6 @@
             <!-- 分割线 -->
             <n-divider />
         </Drawer>
-
-        <!-- <n-back-top :show="showBackTopFlag" type="info" color="#8a2be2" :right="20" :bottom="20" />
-        <n-button @click="scrollToTop(90);" size="large" secondary strong>Back To Top</n-button>-->
     </div>
 </template>
 
@@ -77,8 +68,8 @@ export default defineComponent({
         BookCard,//自定义抽屉，还行
         // NButton,//按钮，来自:https://www.naiveui.com/zh-CN/os-theme/components/button
         // NBackTop,//回到顶部按钮，来自:https://www.naiveui.com/zh-CN/os-theme/components/back-top
-        NGrid,
-        NGridItem,//https://www.naiveui.com/zh-CN/os-theme/components/grid
+        NGrid,//https://www.naiveui.com/zh-CN/os-theme/components/grid
+        NGridItem,
         NIcon,//图标  https://www.naiveui.com/zh-CN/os-theme/components/icon
         SettingsOutline,//图标,来自 https://www.xicons.org/#/   需要安装（npm i -D @vicons/ionicons5）
         NDivider,//分割线  https://www.naiveui.com/zh-CN/os-theme/components/divider
@@ -90,8 +81,8 @@ export default defineComponent({
         //背景颜色，颜色选择器用
         const model = reactive({
             color: "#E0D9CD",
+            colorHeader: "#d1c9c1",
         });
-
         //单选按钮绑定的数值
         // const checkedValueRef = ref(null)
         return {
@@ -133,14 +124,6 @@ export default defineComponent({
             //书籍数据，需要从远程拉取
             //是否显示顶部页头
             showHeaderFlag: true,
-            //是否显示页数
-            showPageNumFlag_BookShelf: false,
-            //是否显示回到顶部按钮
-            showBackTopFlag: false,
-            //是否正在向下滚动
-            scrollDownFlag: false,
-            //存储现在滚动的位置
-            scrollTopSave: 0,
             //同步滚动，目前还没做
             syncScrollFlag: false,
             //鼠标点击或触摸的位置
@@ -152,20 +135,6 @@ export default defineComponent({
             imageMaxWidth: 10,
             //屏幕宽横比，inLandscapeMode的判断依据
             aspectRatio: 1.2,
-
-            //状态驱动的动态 CSS!!!!!
-            // https://v3.cn.vuejs.org/api/sfc-style.html#%E7%8A%B6%E6%80%81%E9%A9%B1%E5%8A%A8%E7%9A%84%E5%8A%A8%E6%80%81-css
-            //图片宽度的单位，是否使用百分比
-            imageWidth_usePercentFlag: false,
-
-            //横屏(Landscape)状态的漫画页宽度，百分比
-            singlePageWidth_Percent: 50,
-            doublePageWidth_Percent: 95,
-
-            //横屏(Landscape)状态的漫画页宽度，PX
-            singlePageWidth_PX: 720,
-            doublePageWidth_PX: 1080,
-
             //可见范围宽高的具体值
             clientWidth: 0,
             clientHeight: 0,
@@ -179,85 +148,28 @@ export default defineComponent({
     // updated: 在包含组件的 VNode 及其子组件的 VNode 更新后调用。
     // beforeUnmount: 当指令与在绑定元素父组件卸载之前时，只调用一次。
     // unmounted: 当指令与元素解除绑定且父组件已卸载时，只调用一次。
-
     created() {
-
         axios
             .get("/bookshelf.json")
             .then((response) => (this.bookshelf = response.data))
             .finally(console.log(this.bookshelf));
-
-
-        window.addEventListener("scroll", this.onScroll);
-        //文档视图调整大小时会触发 resize 事件。 https://developer.mozilla.org/zh-CN/docs/Web/API/Window/resize_event
-        window.addEventListener("resize", this.onResize);
+        // window.addEventListener("scroll", this.onScroll);
+        // window.addEventListener("resize", this.onResize);
         this.imageMaxWidth = window.innerWidth;
-        //根据cookie初始化默认值,或初始化cookie值,cookie读取出来的都是字符串，不要直接用
+        //初始化默认值,读取出来的都是字符串，不要直接用
         //是否显示顶部页头
         if (localStorage.getItem("showHeaderFlag") === "true") {
             this.showHeaderFlag = true;
         } else if (localStorage.getItem("showHeaderFlag") === "false") {
             this.showHeaderFlag = false;
         }
-        //console.log("读取cookie并初始化: showHeaderFlag=" + this.showHeaderFlag);
-
-        //是否显示页数
-        if (localStorage.getItem("showPageNumFlag_BookShelf") === "true") {
-            this.showPageNumFlag_BookShelf = true;
-        } else if (localStorage.getItem("showPageNumFlag_BookShelf") === "false") {
-            this.showPageNumFlag_BookShelf = false;
-        }
-        //console.log("读取cookie并初始化: showPageNumFlag_BookShelf=" + this.showPageNumFlag_BookShelf);
-
-        //宽度是否使用百分比
-        if (localStorage.getItem("imageWidth_usePercentFlag") === "true") {
-            this.imageWidth_usePercentFlag = true;
-        } else if (localStorage.getItem("imageWidth_usePercentFlag") === "false") {
-            this.imageWidth_usePercentFlag = false;
-        }
-
-        //javascript 数字类型转换：https://www.runoob.com/js/js-type-conversion.html
-        // NaN不能通过相等操作符（== 和 ===）来判断
-
-        //漫画页宽度，Percent
-        if (localStorage.getItem("singlePageWidth_Percent") != null) {
-            let saveNum = Number(localStorage.getItem("singlePageWidth_Percent"));
-            if (!isNaN(saveNum)) {
-                this.singlePageWidth_Percent = saveNum;
-            }
-        }
-
-        if (localStorage.getItem("doublePageWidth_Percent") != null) {
-            let saveNum = Number(localStorage.getItem("doublePageWidth_Percent"));
-            if (!isNaN(saveNum)) {
-                this.doublePageWidth_Percent = saveNum;
-            }
-        }
-
-        //漫画页宽度，PX
-        if (localStorage.getItem("singlePageWidth_PX") != null) {
-            let saveNum = Number(localStorage.getItem("singlePageWidth_PX"));
-            if (!isNaN(saveNum)) {
-                this.singlePageWidth_PX = saveNum;
-            }
-        }
-        if (localStorage.getItem("doublePageWidth_PX") != null) {
-            let saveNum = Number(localStorage.getItem("doublePageWidth_PX"));
-            if (!isNaN(saveNum)) {
-                this.doublePageWidth_PX = saveNum;
-            }
-        }
-
         //当前颜色
         if (localStorage.getItem("BookShelfDefaultColor") != null) {
             this.model.color = localStorage.getItem("BookShelfDefaultColor");
         }
-
     },
-
-    // //挂载前
+    //挂载前
     beforeMount() {
-
     },
     onMounted() {
         //console.log('mounted in the composition api!')
@@ -271,10 +183,23 @@ export default defineComponent({
     //卸载前
     beforeUnmount() {
         //组件销毁前，销毁监听事件
-        window.removeEventListener("scroll", this.onScroll);
-        window.removeEventListener('resize', this.onResize)
+        // window.removeEventListener("scroll", this.onScroll);
+        // window.removeEventListener('resize', this.onResize)
     },
     methods: {
+        //打开书籍
+        onOpenBook(bookID) {
+            if (this.nowTemplate == "flip" || this.nowTemplate == "sketch") {
+                // 命名路由，并加上参数，让路由建立 url
+                this.$router.push({ name: 'FlipMode', params: { id: bookID } })
+            } else if (this.nowTemplate == "scroll") {
+                // 命名路由，并加上参数，让路由建立 url
+                this.$router.push({ name: 'ScrollMode', params: { id: bookID } })
+            } else {
+                // 命名路由，并加上参数，让路由建立 url
+                this.$router.push({ name: 'ScrollMode', params: { id: bookID } })
+            }
+        },
         //打开抽屉
         drawerActivate(place) {
             this.drawerActive = true
@@ -296,12 +221,6 @@ export default defineComponent({
         saveConfigToCookie() {
             // 储存cookie
             localStorage.setItem("showHeaderFlag", this.showHeaderFlag);
-            localStorage.setItem("showPageNumFlag_BookShelf", this.showPageNumFlag_BookShelf);
-            localStorage.setItem("imageWidth_usePercentFlag", this.imageWidth_usePercentFlag);
-            localStorage.setItem("singlePageWidth_Percent", this.singlePageWidth_Percent);
-            localStorage.setItem("doublePageWidth_Percent", this.doublePageWidth_Percent);
-            localStorage.setItem("singlePageWidth_PX", this.singlePageWidth_PX);
-            localStorage.setItem("doublePageWidth_PX", this.doublePageWidth_PX);
             localStorage.setItem("BookShelfDefaultColor", this.model.color);
         },
         setShowHeaderChange(value) {
@@ -309,99 +228,6 @@ export default defineComponent({
             this.showHeaderFlag = value;
             localStorage.setItem("showHeaderFlag", value);
             console.log("cookie设置完毕: showHeaderFlag=" + localStorage.getItem("showHeaderFlag"));
-        },
-        setShowPageNumChange(value) {
-            console.log("value:" + value);
-            this.showPageNumFlag_BookShelf = value;
-            localStorage.setItem("showPageNumFlag_BookShelf", value);
-            console.log("cookie设置完毕: showPageNumFlag_BookShelf=" + localStorage.getItem("showPageNumFlag_BookShelf"));
-        },
-
-        setImageWidthUsePercentFlag(value) {
-            console.log("value:" + value);
-            this.imageWidth_usePercentFlag = value;
-            localStorage.setItem("imageWidth_usePercentFlag", value);
-            console.log("cookie设置完毕: imageWidth_usePercentFlag=" + this.imageWidth_usePercentFlag);
-        },
-
-        //可见区域变化的时候改变页面状态
-        onResize() {
-            this.imageMaxWidth = window.innerWidth
-            // document.querySelectorAll(".name");
-            this.clientWidth = document.documentElement.clientWidth
-            this.clientHeight = document.documentElement.clientHeight
-            // var aspectRatio = window.innerWidth / window.innerHeight
-            this.aspectRatio = this.clientWidth / this.clientHeight
-            //console.log("OnReSize,aspectRatio=" + this.aspectRatio);
-            // 为了调试的时候方便，阈值是正方形
-            if (this.aspectRatio > (19 / 19)) {
-                this.isLandscapeMode = true
-                this.isPortraitMode = false
-            } else {
-                this.isLandscapeMode = false
-                this.isPortraitMode = true
-            }
-        },
-        //页面滚动的时候改变各种值
-        onScroll() {
-            let scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-            this.scrollDownFlag = scrollTop > this.scrollTopSave;
-            //防手抖，小于一定数值状态就不变
-            let step = Math.abs(this.scrollTopSave - scrollTop);
-            // console.log("step:", step);
-            this.scrollTopSave = scrollTop
-            if (step > 5) {
-                this.showBackTopFlag = scrollTop > 400 && !this.scrollDownFlag;
-            }
-        },
-        //获取鼠标位置，决定是否打开设置面板
-        onMouseClick(e) {
-            this.clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离，单位为px）
-            this.clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离，单位为px）
-            //浏览器的视口，不包括工具栏和滚动条:
-            let innerWidth = window.innerWidth
-            let innerHeight = window.innerHeight
-            let MinX = innerWidth * 0.4
-            let MaxX = innerWidth * 0.6
-            let MinY = innerHeight * 0.4
-            let MaxY = innerHeight * 0.6
-            if ((this.clickX > MinX && this.clickX < MaxX) && (this.clickY > MinY && this.clickY < MaxY)) {
-                //alert("点中了设置区域！")
-                //console.log("点中了设置区域！");
-                this.drawerActivate('right')
-            }
-        },
-
-        onMouseMove(e) {
-            this.clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离，单位为px）
-            this.clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离，单位为px）
-            //浏览器的视口，不包括工具栏和滚动条:
-            let innerWidth = window.innerWidth
-            let innerHeight = window.innerHeight
-            let MinX = innerWidth * 0.4
-            let MaxX = innerWidth * 0.6
-            let MinY = innerHeight * 0.4
-            let MaxY = innerHeight * 0.6
-            if ((this.clickX > MinX && this.clickX < MaxX) && (this.clickY > MinY && this.clickY < MaxY)) {
-                //console.log("在设置区域！");
-                e.currentTarget.style.cursor = 'url(/images/SettingsOutline.png), pointer';
-            } else {
-                e.currentTarget.style.cursor = '';
-            }
-        },
-        onMouseLeave(e) {
-            //离开区域的时候，清空鼠标样式
-            e.currentTarget.style.cursor = '';
-        },
-
-        scrollToTop(scrollDuration) {
-            let scrollStep = -window.scrollY / (scrollDuration / 15),
-                scrollInterval = setInterval(function () {
-                    if (window.scrollY !== 0) {
-                        window.scrollBy(0, scrollStep);
-                    }
-                    else clearInterval(scrollInterval);
-                }, 15);
         },
         //根据可视区域(viewport)长宽比，确认是横屏还是竖屏
         // aspect-ratio https://developer.mozilla.org/zh-CN/docs/Web/CSS/@media/aspect-ratio
@@ -412,45 +238,19 @@ export default defineComponent({
             return this.aspectRatio > (19 / 19);
         },
     },
-
     computed: {
-        sPWL() {
-            if (this.imageWidth_usePercentFlag) {
-                return this.singlePageWidth_Percent + '%';
-            } else {
-                return this.singlePageWidth_PX + 'px';
-            }
-        },
-        dPWL() {
-            if (this.imageWidth_usePercentFlag) {
-                return this.doublePageWidth_Percent + '%';
-            } else {
-                return this.doublePageWidth_PX + 'px';
-            }
-        },
-        sPWP() {
-            if (this.imageWidth_usePercentFlag) {
-                return this.singlePageWidth_Percent + '%';
-            } else {
-                return this.singlePageWidth_PX + 'px';
-            }
-        },
-        dPWP() {
-            if (this.imageWidth_usePercentFlag) {
-                return this.doublePageWidth_Percent + '%';
-            } else {
-                return this.doublePageWidth_PX + 'px';
-            }
-        },
     }
 });
 </script>
 
-<style></style>
-
 <style scoped>
-.manga {
+.shelf {
+    padding-bottom: 10px;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 30px;
     max-width: 100%;
+    height: 93vh;
     background: v-bind("model.color");
 }
 
@@ -458,6 +258,7 @@ export default defineComponent({
     padding: 0px;
     width: 100%;
     height: 7vh;
+    background: v-bind("model.colorHeader");
 }
 
 /* https://developer.mozilla.org/zh-CN/docs/Web/CSS/object-fit */
@@ -483,31 +284,5 @@ export default defineComponent({
 .ErrorImage {
     width: 90vw;
     max-width: 90vw;
-}
-
-/* 横屏（显示区域）时的CSS样式，IE无效 */
-@media screen and (min-aspect-ratio: 19/19) {
-    .SinglePageImage {
-        width: v-bind(sPWL);
-        max-width: 100%;
-    }
-    .DoublePageImage {
-        width: v-bind(dPWL);
-        max-width: 100%;
-    }
-}
-
-/* 竖屏(显示区域)CSS样式，IE无效 */
-@media screen and (max-aspect-ratio: 19/19) {
-    .SinglePageImage {
-        /* width: 100%; */
-        width: v-bind(sPWP);
-        max-width: 100%;
-    }
-    .DoublePageImage {
-        /* width: 100%; */
-        width: v-bind(dPWP);
-        max-width: 100%;
-    }
 }
 </style>

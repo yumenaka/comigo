@@ -234,7 +234,6 @@
 					size="small"
 					:show-button="false"
 					v-model:value="this.imageParameters.resize_max_width"
-					:max="this.imageMaxWidth"
 					:min="100"
 				>
 					<template #prefix>{{ $t('max_width') }}</template>
@@ -322,11 +321,18 @@ export default defineComponent({
 					//按照“/”分割字符串
 					var arrUrl = url.split("/");
 					//拼一个完整的图片URL（因为路由路径会变化，所以不能用相对路径？）
-					var full_url = arrUrl[0] + "//" + arrUrl[2] + "/" + source_url + "&resize_width=" + imageParameters.resize_width + "&resize_height=" + imageParameters.resize_height + "&resize_max_width=" + (imageParameters.do_auto_resize ? imageParameters.resize_max_width : -1) + "&resize_max_height=" + imageParameters.resize_max_height + "&auto_crop=" + (imageParameters.do_auto_crop ? imageParameters.auto_crop : -1) + "&gray=" + (imageParameters.gray ? 'true' : 'false')
+					var base_str = arrUrl[0] + "//" + arrUrl[2] + "/" + source_url
+					//添加各种字符串参数，不需要的话为空
+					var resize_width_str = (imageParameters.resize_width > 0 ? "&resize_width=" + imageParameters.resize_width : "")
+					var resize_height_str = (imageParameters.resize_height > 0 ? "&resize_height=" + imageParameters.resize_height : "")
+					var gray_str = (imageParameters.gray ? "&gray=true" : "")
+					var do_auto_resize_str = (imageParameters.do_auto_resize ? ("&resize_max_width=" + imageParameters.resize_max_width) : "")
+					var resize_max_height_str = (imageParameters.resize_max_height > 0 ? "&resize_max_height=" + imageParameters.resize_max_height : "")
+					var auto_crop_str = (imageParameters.do_auto_crop ? "&auto_crop=" + imageParameters.auto_crop : "")
+					var full_url = base_str + resize_width_str + resize_height_str + do_auto_resize_str + resize_max_height_str + auto_crop_str + gray_str
 					// console.log(full_url);
 					return full_url;
 
-					// return source_url + "&resize_width=" + imageParameters.resize_width + "&resize_height=" + imageParameters.resize_height + "&resize_max_width=" + (imageParameters.do_auto_resize ? imageParameters.resize_max_width : -1) + "&resize_max_height=" + imageParameters.resize_max_height + "&auto_crop=" + (imageParameters.do_auto_crop ? imageParameters.auto_crop : -1) + "&gray=" + (imageParameters.gray ? 'true' : 'false')
 				} else {
 					return source_url
 				}

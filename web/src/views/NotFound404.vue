@@ -1,7 +1,7 @@
 <template>
-    <n-result status="404" title="404 资源不存在" description="生活总归带点荒谬">
+    <n-result status="404" title="404 资源不存在" description="没找到你想要的东西">
         <template #footer>
-            <n-button>找点乐子吧</n-button>
+            <n-button @click="onBackTop()">回首页╮(￣▽￣")╭</n-button>
         </template>
     </n-result>
 </template>
@@ -21,8 +21,29 @@ export default defineComponent({
         const { cookies } = useCookies();
         return { cookies };
     },
+    methods: {
+        //回到首页
+        onBackTop() {
+            // 字符串路径
+            this.$router.push('/')
+
+        },
+    },
 });
 </script>
 
 <style scoped>
+.n-result {
+    /* 内边距区域 */
+    padding-bottom: 0px;
+    padding-left: 3px;
+    padding-right: 3px;
+    padding-top: 200px;
+
+    align-content: center;
+    width: 100%;
+    height: 100vh;
+    border-radius: 7px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
 </style>

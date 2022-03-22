@@ -9,7 +9,7 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import ScrollMode from '@/views/ScrollMode.vue'
 import FlipMode from '@/views/FlipMode.vue'
 import BookShelf from '@/views/BookShelf.vue'
-
+import NotFound from '@/views/NotFound404.vue'
 
 //最简方案：
 //https://localhost/#/scroll/id
@@ -24,17 +24,21 @@ const routes = [
   },
   {
     path: '/s/:id',
-    component: ScrollMode
-    // name: 'ScrollMode',
+    component: ScrollMode,
+    name: 'ScrollMode',
   },
   {
     path: '/f/:id',
-    component: FlipMode
+    component: FlipMode,
+    name: 'FlipMode',
   },
   {
     path: '/about',
-    component: () => import('@/components/About.vue')
+    component: () => import('@/components/About.vue'),
+    name: 'About',
   },
+  // 将匹配所有内容并将其放在 `$route.params.pathMatch` 下
+  { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound },
 ]
 
 const router = createRouter({

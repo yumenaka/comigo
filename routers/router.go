@@ -259,14 +259,21 @@ func StartWebServer() {
 	setStaticFiles(engine)
 	//2、setWebAPI
 	setWebAPI(engine)
-	//TODO：设定一本书
+	//TODO：设定书的心下载链接
 	if common.GetBooksNumber() >= 1 {
-		common.ReadingBook = common.GetRandomBook()
-		//下载文件
-		if !common.ReadingBook.IsDir {
-			engine.StaticFile("/raw/"+common.ReadingBook.GetFilePath(), common.ReadingBook.GetFilePath())
+		allBook, err := common.GetAllBookInfo()
+		if err != nil {
+			fmt.Println("设置文件下载失败")
+		} else {
+			for _, info := range *allBook {
+				//下载文件
+				if !info.IsDir {
+					engine.StaticFile("/raw/"+info.Name, info.FilePath)
+				}
+			}
 		}
 	}
+
 	//TODO：生成元数据
 	if common.Config.GenerateMetaData {
 		common.ReadingBook.ScanAllImageGo()
