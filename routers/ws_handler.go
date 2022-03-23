@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-	"github.com/yumenaka/comi/common"
 	"net/http"
 )
 
@@ -43,35 +42,35 @@ func wsHandler(c *gin.Context) {
 		json.Unmarshal(message, msg)
 		fmt.Println(msg)
 		//客户端请求更换书籍
-		if msg.Message == "ChangeBook" && msg.NowBookUUID != common.ReadingBook.GetBookID() {
-			if changeReadingBook(msg.NowBookUUID) {
-				fmt.Println("正在切换书籍：", common.ReadingBook.GetFilePath())
-				if err != nil {
-					fmt.Println("无法初始化书籍。", err, common.ReadingBook)
-				} else {
-					msg.Message = "Extracting"
-				}
-			} else {
-				msg.Message = "BookNotFund"
-				fmt.Println("没找到这本书：", msg)
-			}
-		}
-		//返回漫画压缩包解压状态
-		if msg.Message == "CheckExtract" && msg.NowBookUUID == common.ReadingBook.GetBookID() {
-			if common.ReadingBook.ExtractComplete {
-				msg.Message = "ExtractComplete"
-			} else {
-				msg.Message = "Extracting"
-			}
-		}
+		//if msg.Message == "ChangeBook" && msg.NowBookUUID != common.ReadingBook.GetBookID() {
+		//	if changeReadingBook(msg.NowBookUUID) {
+		//		fmt.Println("正在切换书籍：", common.ReadingBook.GetFilePath())
+		//		if err != nil {
+		//			fmt.Println("无法初始化书籍。", err, common.ReadingBook)
+		//		} else {
+		//			msg.Message = "Extracting"
+		//		}
+		//	} else {
+		//		msg.Message = "BookNotFund"
+		//		fmt.Println("没找到这本书：", msg)
+		//	}
+		//}
+		////返回漫画压缩包解压状态
+		//if msg.Message == "CheckExtract" && msg.NowBookUUID == common.ReadingBook.GetBookID() {
+		//	if common.ReadingBook.ExtractComplete {
+		//		msg.Message = "ExtractComplete"
+		//	} else {
+		//		msg.Message = "Extracting"
+		//	}
+		//}
 		//
-		if msg.Message == "MasterDevicesSync" && msg.NowBookUUID == common.ReadingBook.GetBookID() {
-			common.ReadingBook.ReadPercent = msg.ReadPercent
-		}
-		//
-		if msg.Message == "SlaveDevicesSync" && msg.NowBookUUID == common.ReadingBook.GetBookID() {
-			common.ReadingBook.ReadPercent = msg.ReadPercent
-		}
+		//if msg.Message == "MasterDevicesSync" && msg.NowBookUUID == common.ReadingBook.GetBookID() {
+		//	common.ReadingBook.ReadPercent = msg.ReadPercent
+		//}
+		////
+		//if msg.Message == "SlaveDevicesSync" && msg.NowBookUUID == common.ReadingBook.GetBookID() {
+		//	common.ReadingBook.ReadPercent = msg.ReadPercent
+		//}
 		fmt.Println(msg)
 		err = ws.WriteJSON(msg)
 		if err != nil {
@@ -82,10 +81,10 @@ func wsHandler(c *gin.Context) {
 }
 
 func changeReadingBook(u string) bool {
-	b, err := common.GetBookByID(u, false)
-	if err != nil {
-		return false
-	}
-	common.ReadingBook = b
+	//b, err := common.GetBookByID(u, false)
+	//if err != nil {
+	//	return false
+	//}
+	//common.ReadingBook = b
 	return false
 }

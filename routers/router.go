@@ -72,7 +72,7 @@ func setStaticFiles(engine *gin.Engine) {
 	//解析模板到HTML
 	engine.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "template-data", gin.H{
-			"title": common.ReadingBook.Name, //页面标题
+			"title": "Comigo 漫画阅读器 " + common.Version, //页面标题
 		})
 	})
 }
@@ -172,10 +172,10 @@ func setWebAPI(engine *gin.Engine) {
 	api.GET("/server_status.json", func(c *gin.Context) {
 		c.PureJSON(http.StatusOK, common.GetServerStatus())
 	})
-	//阅读中的书籍json
-	api.GET("/book.json", func(c *gin.Context) {
-		c.PureJSON(http.StatusOK, common.ReadingBook)
-	})
+	////阅读中的书籍json
+	//api.GET("/book.json", func(c *gin.Context) {
+	//	c.PureJSON(http.StatusOK, common.ReadingBook)
+	//})
 	//书架信息，不包含每页信息
 	api.GET("/bookshelf.json", func(c *gin.Context) {
 		//书籍排列的方式，默认name，TODO:按照修改时间、作者、文件大小等排序书籍
@@ -278,9 +278,8 @@ func StartWebServer() {
 		}
 	}
 
-	//TODO：生成元数据
 	if common.Config.GenerateMetaData {
-		common.ReadingBook.ScanAllImageGo()
+		//TODO：生成元数据
 	}
 	//3、setPort
 	setPort()

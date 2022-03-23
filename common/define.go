@@ -270,7 +270,7 @@ func setupCloseHander() {
 			fmt.Println("\r" + locale.GetString("start_clear_file"))
 			clearTempFilesALL()
 		} else {
-			clearTempFilesOne(ReadingBook)
+			//clearTempFilesOne(ReadingBook)
 		}
 		os.Exit(0)
 	}()
