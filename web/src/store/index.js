@@ -23,7 +23,17 @@ const store = createStore({
         },
       ],
     },
-    bookshelf: {},
+    bookshelf: [{
+      name: "loading",
+      all_page_num: 1,
+      pages: [
+        {
+          height: 500,
+          width: 449,
+          url: "/images/loading.jpg",
+        },
+      ],
+    }],
     setting: {
       template: "scroll",
       sketch_count_seconds: 30,

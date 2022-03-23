@@ -178,11 +178,15 @@ func setWebAPI(engine *gin.Engine) {
 	})
 	//书架信息，不包含每页信息
 	api.GET("/bookshelf.json", func(c *gin.Context) {
-		bookInfoList, err := common.GetAllBookInfo()
+		//书籍排列的方式，默认name，TODO:按照修改时间、作者、文件大小等排序书籍
+		sort := c.DefaultQuery("sort", "name")
+		bookInfoList, err := common.GetAllBookInfo(sort)
 		if err != nil {
 			fmt.Println(err)
+			return
 		}
-		c.PureJSON(http.StatusOK, bookInfoList)
+		bookInfoList.SortBooks()
+		c.PureJSON(http.StatusOK, bookInfoList.BookInfos)
 	})
 	//通过URL字符串参数查询书籍信息
 	api.GET("/getbook", getBookHandler)
@@ -261,11 +265,11 @@ func StartWebServer() {
 	setWebAPI(engine)
 	//TODO：设定书的心下载链接
 	if common.GetBooksNumber() >= 1 {
-		allBook, err := common.GetAllBookInfo()
+		allBook, err := common.GetAllBookInfo("name")
 		if err != nil {
 			fmt.Println("设置文件下载失败")
 		} else {
-			for _, info := range *allBook {
+			for _, info := range allBook.BookInfos {
 				//下载文件
 				if !info.IsDir {
 					engine.StaticFile("/raw/"+info.Name, info.FilePath)

@@ -1,4 +1,3 @@
-//弄清楚以后使用HTML5模式
 //两种历史模式的区别：https://router.vuejs.org/zh/guide/essentials/history-mode.html
 // import { createRouter, createWebHistory } from 'vue-router'
 import { createRouter, createWebHashHistory } from 'vue-router'

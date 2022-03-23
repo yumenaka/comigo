@@ -20,6 +20,7 @@ import (
 	"path"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -163,22 +164,61 @@ func GetRandomBook() *Book {
 	return nil
 }
 
-func GetAllBookInfo() (*[]BookInfo, error) {
-	var bookInfos []BookInfo
+func GetAllBookInfo(sort string) (*BookInfoList, error) {
+	var infoList BookInfoList
 	for _, b := range mapBooks {
 		info := NewBookInfo(b)
-		bookInfos = append(bookInfos, *info)
+		infoList.BookInfos = append(infoList.BookInfos, *info)
 	}
-	if len(bookInfos) > 0 {
-		return &bookInfos, nil
+	if len(infoList.BookInfos) > 0 {
+		infoList.SortBy = sort
+		infoList.SortBooks()
+		return &infoList, nil
 	}
 	return nil, errors.New("can not found bookshelf")
+}
+
+// BookInfoList Slice
+type BookInfoList struct {
+	BookInfos []BookInfo
+	SortBy    string
+}
+
+func (s BookInfoList) Len() int {
+	return len(s.BookInfos)
+}
+
+// Less 按时间或URL，将图片排序
+func (s BookInfoList) Less(i, j int) (less bool) {
+	//如何定义 s[i] < s[j]  根据文件名(第三方库、自然语言字符串)
+	if s.SortBy == "name" {
+		less = tools.Compare(s.BookInfos[i].Name, s.BookInfos[j].Name)
+	} else if s.SortBy == "file_size" {
+		less = tools.Compare(strconv.Itoa(int(s.BookInfos[i].FileSize)), strconv.Itoa(int(s.BookInfos[j].FileSize)))
+	} else if s.SortBy == "time" {
+		less = tools.Compare(s.BookInfos[i].Modified.String(), s.BookInfos[j].Modified.String())
+	} else if s.SortBy == "author" {
+		less = tools.Compare(s.BookInfos[i].Author[0], s.BookInfos[j].Author[0])
+	} else {
+		less = tools.Compare(s.BookInfos[i].Name, s.BookInfos[j].Name)
+	}
+	return less
+}
+
+func (s BookInfoList) Swap(i, j int) {
+	s.BookInfos[i], s.BookInfos[j] = s.BookInfos[j], s.BookInfos[i]
+}
+
+// SortBooks 上面三个函数定义好了，终于可以使用sort包排序了
+func (s *BookInfoList) SortBooks() {
+	sort.Sort(s)
 }
 
 // InitBook 初始化一本书，设置文件路径、书名、BookID等等
 func InitBook(allPageNum int, filePath string, modified time.Time, isDir bool, fileSize int64, extractComplete bool) *Book {
 	var b = Book{
 		AllPageNum:      allPageNum,
+		Author:          []string{""},
 		Modified:        modified,
 		IsDir:           isDir,
 		FileSize:        fileSize,

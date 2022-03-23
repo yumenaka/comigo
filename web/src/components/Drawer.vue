@@ -15,20 +15,6 @@
       <n-space>
         <n-button @click="toFlipMode">切换为翻页阅读</n-button>
         <n-button @click="toScrollMode">切换为滚动阅读</n-button>
-        <!-- <n-radio-group v-model:value="nowTemplateLocal">
-          <n-radio-button
-            :checked="nowTemplateLocal === 'scroll'"
-            @change="onChangeTemplate"
-            value="scroll"
-            name="basic-demo"
-          >{{ $t('scroll_mode') }}</n-radio-button>
-          <n-radio-button
-            :checked="nowTemplateLocal === 'flip'"
-            @change="onChangeTemplate"
-            value="flip"
-            name="basic-demo"
-          >{{ $t('flip_mode') }}</n-radio-button>
-        </n-radio-group>-->
       </n-space>
       <!-- 分割线 -->
       <n-divider />
@@ -50,7 +36,7 @@
           @update:value="OnChangeLanguage"
         />
         <n-button @click="startSketchMode">{{ $t('startSketchMode') }}</n-button>
-        <n-button v-if="nowTemplate == 'sketch'" @click="stopSketchMode">{{ $t('stopSketchMode') }}</n-button>
+        <n-button v-if="readMode == 'sketch'" @click="stopSketchMode">{{ $t('stopSketchMode') }}</n-button>
       </template>
     </n-drawer-content>
   </n-drawer>
@@ -64,8 +50,8 @@ import { defineComponent, } from 'vue'
 
 export default defineComponent({
   name: "Drawer",
-  props: ['book', 'initDrawerActive', 'initDrawerPlacement', 'nowTemplate'],
-  emits: ["setT", "saveConfig", "startSketch", "stopSketch", "closeDrawer"],
+  props: ['book', 'initDrawerActive', 'initDrawerPlacement', 'readMode'],
+  emits: ["setM", "saveConfig", "startSketch", "stopSketch", "closeDrawer"],//用于向父组件传递信息
   components: {
     NDrawer,//抽屉，可以从上下左右4个方向冒出. https://www.naiveui.com/zh-CN/os-theme/components/drawer
     NDrawerContent,//抽屉内容
@@ -113,7 +99,7 @@ export default defineComponent({
   data() {
     return {
       someflag: "",
-      nowTemplateLocal: "",
+      readModeLocal: "",
     };
   },
   //挂载前
@@ -122,7 +108,7 @@ export default defineComponent({
     if (lang) {
       this.$i18n.locale = lang;
     }
-    this.nowTemplateLocal = this.nowTemplate;
+    this.readModeLocal = this.readMode;
   },
   computed: {
     drawerActive() {
@@ -151,16 +137,14 @@ export default defineComponent({
     },
     //切换模板的函数，需要配合vue-router
     onChangeTemplate() {
-      // this.$emit("greet", this.nowTemplateLocal);
-      // console.log("onChangeTemplate:"+value);
-      if (this.nowTemplateLocal === "scroll") {
-        this.$emit("setT", "scroll");
+      if (this.readModeLocal === "scroll") {
+        this.$emit("setM", "scroll");
       }
-      if (this.nowTemplateLocal === "flip") {
-        this.$emit("setT", "flip");
+      if (this.readModeLocal === "flip") {
+        this.$emit("setM", "flip");
       }
-      if (this.nowTemplateLocal === "sketch") {
-        this.$emit("setT", "sketch");
+      if (this.readModeLocal === "sketch") {
+        this.$emit("setM", "sketch");
       }
       // location.reload(); //需要刷新？ 以后研究VueRouter并去掉
     },

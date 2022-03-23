@@ -2,9 +2,10 @@
     <router-link :to="{ name: 'ScrollMode', params: { id: this.id } }">
         <n-card class="book_card">
             <template #cover>
-                <img :src="this.image_src + this.resize_str" />
+                <img :src="getThumbnailsImageUrl()" />
             </template>
             <router-link
+                v-if="showTitle"
                 :to="{ name: 'FlipMode', params: { id: this.id } }"
             >{{ this.ellipsisTitle }}</router-link>
         </n-card>
@@ -18,7 +19,7 @@ import { useCookies } from "vue3-cookies";
 import { defineComponent } from 'vue'
 export default defineComponent({
     name: "BookCover",
-    props: ['title', 'image_src', 'id', 'nowMode'],
+    props: ['title', 'image_src', 'id', 'nowMode', 'showTitle'],
     components: {
         NCard,
         // NEllipsis,
@@ -39,7 +40,7 @@ export default defineComponent({
     data() {
         return {
             // resize_str: "&resize_height=340",
-            resize_str: "&resize_width=128&resize_height=180&resize_cut=true",
+            resize_str: "&resize_width=256&resize_height=360&resize_cut=true",
         };
     },
     methods: {
@@ -47,6 +48,16 @@ export default defineComponent({
         onBackTop() {
             // 字符串路径
             this.$router.push('/')
+        },
+        getThumbnailsImageUrl() {
+            //按照“/”分割字符串
+            var arrUrl = this.image_src.split("/");
+            // console.log(arrUrl)
+            if (arrUrl[0] == "api") {
+                return this.image_src + "&resize_width=256&resize_height=360&resize_cut=true"
+            } else {
+                return this.image_src
+            }
         },
         //自己构建一个<a>链接，后来发现不如可以直接用router-link与命名路由
         getHref() {
@@ -74,8 +85,8 @@ export default defineComponent({
     padding-right: 5px;
     padding-top: 7px;
 
-    width: 160px;
-    height: 230px;
+    width: 140px;
+    height: 195px;
     border-radius: 6px;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }

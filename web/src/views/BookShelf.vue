@@ -18,7 +18,10 @@
             <!-- x-gap: 横向间隔槽 -->
             <!-- y-gap: 纵向间隔槽 -->
             <!-- responsive: 'self' 根据自身宽度进行响应式布局，'screen' 根据屏幕断点进行响应式布局 -->
-            <n-grid cols="2 s:4 m:5 l:6 xl:8 2xl:10" x-gap="2" y-gap="23" responsive="screen">
+            <!-- <n-grid cols="2 s:4 m:5 l:6 xl:8 2xl:10" x-gap="2" y-gap="23" responsive="screen"> -->
+            <n-grid
+                cols="1 150:1 280:2 450:3 600:4 750:5 900:6 1050:7 1200:8 1350:9 1500:10 1800:12 2100:14 2400:16 2700:18 3000:20"
+            >
                 <!-- 在组件中使用v-for时，key是必须的 -->
                 <n-grid-item v-for="(book_info, key) in this.bookshelf" :key="key">
                     <BookCard
@@ -26,6 +29,7 @@
                         :id="book_info.id"
                         :image_src="book_info.cover.url"
                         :nowMode="this.nowMode"
+                        :showTitle="false"
                     ></BookCard>
                 </n-grid-item>
             </n-grid>
@@ -37,8 +41,8 @@
             @saveConfig="this.saveConfigToCookie"
             @startSketch="this.startSketchMode"
             @closeDrawer="this.drawerDeactivate"
-            @setT="this.OnSetTemplate"
-            :nowTemplate="this.nowTemplate"
+            @setR="this.OnSetReadMode"
+            :readMode="this.readMode"
         >
             <span>{{ $t("setBackColor") }}</span>
             <n-color-picker v-model:value="model.color" :modes="['rgb']" :show-alpha="false" />
@@ -51,6 +55,8 @@
 
 <script>
 // 直接导入组件并使用它。这种情况下，只有导入的组件才会被打包。
+//Firefox插件Textarea Cache 报错：源映射错误：Error: NetworkError when attempting to fetch resource.
+//Firefox插件Video DownloadHelper报错:已不赞成使用 CanvasRenderingContext2D 中的 drawWindow 方法
 import { NIcon, NDivider, NColorPicker, NGrid, NGridItem, } from 'naive-ui'
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
@@ -62,7 +68,7 @@ import axios from "axios";
 
 export default defineComponent({
     name: "BookShelf",
-    props: ['nowMode'],
+    props: ['readMode'],
     emits: ["setTemplate"],
     components: {
         Header,//自定义页头，有点丑
@@ -118,7 +124,25 @@ export default defineComponent({
     },
     data() {
         return {
-            bookshelf: {},
+            readerMode: "",
+            bookshelf: [{
+                name: "loading",
+                all_page_num: 1,
+                id: "12345",
+                pages: [
+                    {
+                        height: 500,
+                        width: 449,
+                        url: "/images/loading.jpg",
+                    },
+                ],
+                cover: {
+                    filename: "loading.jpg",
+                    height: 500,
+                    width: 449,
+                    url: "/images/loading.jpg",
+                },
+            }],
             drawerActive: false,
             drawerPlacement: 'right',
             //开发模式 还没有做的功能与设置，设置Debug以后才能见到
@@ -154,9 +178,16 @@ export default defineComponent({
         axios
             .get("/bookshelf.json")
             .then((response) => (this.bookshelf = response.data))
-            .finally(console.log(this.bookshelf));
+            .finally(() => {
+                if (this.bookshelf.lenth == 1) {
+                    this.onOpenBook(this.bookshelf[0].id)
+                }
+                console.log(this.bookshelf)
+            })
+
         // window.addEventListener("scroll", this.onScroll);
         // window.addEventListener("resize", this.onResize);
+
         this.imageMaxWidth = window.innerWidth;
         //初始化默认值,读取出来的都是字符串，不要直接用
         //是否显示顶部页头
@@ -213,11 +244,11 @@ export default defineComponent({
         },
         //开始素描模式
         startSketchMode() {
-            this.$emit("setTemplate", "sketch");
+            // this.$emit("setTemplate", "sketch");
         },
         //接收Draw的参数，继续往父组件传
-        OnSetTemplate(value) {
-            this.$emit("setTemplate", value);
+        OnSetReadMode(value) {
+            this.readerMode = value
         },
         //如果在一个组件上使用了 v-model:xxx，应该使用 @update:xxx  https://www.naiveui.com/zh-CN/os-theme/docs/common-issues
         saveConfigToCookie() {
@@ -247,10 +278,10 @@ export default defineComponent({
 
 <style scoped>
 .shelf {
-    padding-bottom: 10px;
+    padding-bottom: 20px;
     padding-left: 20px;
-    padding-right: 10px;
-    padding-top: 30px;
+    padding-right: 20px;
+    padding-top: 20px;
     max-width: 100%;
     min-height: 93vh;
     background: v-bind("model.color");

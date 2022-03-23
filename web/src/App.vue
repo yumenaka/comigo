@@ -2,35 +2,6 @@
   <n-config-provider :theme="lightTheme">
     <div class="app">
       <n-message-provider>
-        <!-- <ScrollMode
-        v-if="selectTemplate === 'scroll'"
-        :book="this.book"
-        :nowTemplate="this.selectTemplate"
-        @setTemplate="OnSetTemplate"
-      ></ScrollMode>
-      <FlipMode
-        v-if="selectTemplate === 'flip' || selectTemplate === 'sketch'"
-        :book="this.book"
-        :nowTemplate="this.selectTemplate"
-        @setTemplate="OnSetTemplate"
-      ></FlipMode>
-      <BookShelf
-        v-if="selectTemplate === 'bookshelf'"
-        :book="this.book"
-        :nowTemplate="this.selectTemplate"
-        @setTemplate="OnSetTemplate"  
-        ></BookShelf>-->
-
-        <!--使用 router-link 导航 -->
-        <!-- <router-link to="/">Router-link: home&nbsp;&nbsp;</router-link>
-      <span>&nbsp;&nbsp;</span>
-      <router-link to="/about">Router-link: about&nbsp;&nbsp;</router-link>
-      <span>&nbsp;&nbsp;</span>
-      <router-link to="/s/jNGMz">Router-link: scroll&nbsp;&nbsp;</router-link>
-      <span>&nbsp;&nbsp;</span>
-        <router-link to="/f/xMTZ5">Router-link: flip&nbsp;&nbsp;</router-link>-->
-        <!-- <router-link :to="{ name: 'ScrollMode', params: { book_id: '3AzY2' } }">ScrollMode</router-link> -->
-
         <!-- 路由出口 路由匹配到的组件将渲染在这里 -->
         <router-view></router-view>
       </n-message-provider>
@@ -50,9 +21,6 @@ import { NMessageProvider, NConfigProvider, darkTheme, lightTheme } from 'naive-
 export default defineComponent({
   name: "Home", //默认为 default。如果 <router-view>设置了名称，则会渲染对应的路由配置中 components 下的相应组件。
   components: {
-    // ScrollMode,
-    // FlipMode,
-    // BookShelf,
     NMessageProvider,
     NConfigProvider,//调整主题：https://www.naiveui.com/zh-CN/light/docs/customize-theme
   },

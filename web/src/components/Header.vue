@@ -63,7 +63,7 @@ export default defineComponent({
   color: #111;
   text-align: center;
 
-  font-size: 15px;
+  font-size: 12px;
   display: flex;
   /* https://www.w3school.com.cn/tiy/t.asp?f=css3_flexbox_justify-content_space-between */
   justify-content: space-between;
