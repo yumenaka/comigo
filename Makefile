@@ -1,8 +1,8 @@
 # Makefile for cross-compilation
-# make all VERSION=v0.5.0
-# make md5SumThemAll VERSION=v0.5.0
+# make all VERSION=v0.6.0
+# make md5SumThemAll VERSION=v0.6.0
 
-# mingw32-make all VERSION=v0.4.5
+# mingw32-make all VERSION=v0.6.0
 # need MSYS2 or mingw32 or find.exe make.exe zip.exe upx.exe
 NAME=comi
 SKETCH_NAME=sketch_66seconds

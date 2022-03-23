@@ -85,7 +85,7 @@
 		@startSketch="this.startSketchMode"
 		@stopSketch="this.stopSketchMode"
 		@closeDrawer="this.drawerDeactivate"
-		@setT="OnSetTemplate"
+		@setRM="OnSetReaderMode"
 		:nowTemplate="this.nowTemplate"
 	>
 		<span>{{ $t("setBackColor") }}</span>
@@ -240,8 +240,8 @@ import axios from "axios";
 
 export default defineComponent({
 	name: "FlipMode",
-	props: ["nowTemplate"],
-	emits: ["setTemplate"],
+	props: [],
+	emits: ["childMark"],// 向父组件传递参数的函数，用法： 子组件调用：this.$emit("childMark", value); 父组件：@childMark="this.fatherMethod"
 	components: {
 		Header,
 		Drawer,
@@ -302,6 +302,7 @@ export default defineComponent({
 		return {
 			book: {
 				name: "loading",
+				id: "abcde",
 				all_page_num: 2,
 				pages: [
 					{
@@ -361,14 +362,14 @@ export default defineComponent({
 		this.$watch(
 			() => this.$route.params.id,
 			(id) => {
-				console.log(id)
+				// console.log(id)
 				axios
 					.get("/getbook?id=" + this.$route.params.id)
 					.then((response) => (this.book = response.data))
-					.finally(console.log("成功获取书籍数据,书籍ID：" + id));
+					.finally(console.log("路由参数改变,书籍ID：" + id));
+				// .finally(console.log("路由参数改变,书籍ID：" + id));
 			}
 		)
-
 
 		// https://www.developers.pub/wiki/1006381/1013545
 		// https://developer.mozilla.org/zh-CN/docs/Web/API/Storage/setItem
@@ -515,9 +516,16 @@ export default defineComponent({
 			}
 		},
 
-		//设置当前模板-接收Drawer的参数，继续往父组件传
+		// // 设置当前模板-接收Drawer的参数，继续往父组件传
+		// 改变阅读模式
 		OnSetTemplate(value) {
-			this.$emit("setTemplate", value);
+
+			if (value == "scroll") {
+				console.log("跳转到卷轴阅读模式")
+			} else if (this.nowTemplate == "scroll") {
+				// 命名路由，并加上参数，让路由建立 url
+				this.$router.push({ name: 'ScrollMode', params: { id: this.book.id } })
+			}
 		},
 		//打开抽屉
 		drawerActivate(place) {
@@ -538,7 +546,7 @@ export default defineComponent({
 			this.showHeaderFlag_FlipMode = false;
 			//是否显示页脚
 			this.showFooterFlag_FlipMode = false;
-			this.$emit("setTemplate", "sketch");
+			// this.$emit("setTemplate", "sketch");
 			//setTimeout和setInterval函数，都返回一个表示计数器编号的整数值，将该整数传入clearTimeout和clearInterval函数，就可以取消对应的定时器。setInterval指定某个任务每隔一段时间就执行一次。setTimeout()用于在指定的毫秒数后调用函数或计算表达式  setTimeout('console.log(2)',1000);
 			this.interval = setInterval(this.sketchCount, 1000);
 		},
@@ -556,7 +564,7 @@ export default defineComponent({
 			this.showHeaderFlag_FlipMode = true;
 			//是否显示页脚
 			this.showFooterFlag_FlipMode = true;
-			this.$emit("setTemplate", "flip");
+			// this.$emit("setTemplate", "flip");
 			clearInterval(this.interval); // 清除定时器
 		},
 		//开始速写（quick sketch），每秒执行一次

@@ -35,8 +35,11 @@
           :options="this.languageOptions"
           @update:value="OnChangeLanguage"
         />
-        <n-button @click="startSketchMode">{{ $t('startSketchMode') }}</n-button>
-        <n-button v-if="readMode == 'sketch'" @click="stopSketchMode">{{ $t('stopSketchMode') }}</n-button>
+        <n-button
+          v-if="this.sketching == false"
+          @click="startSketchMode"
+        >{{ $t('startSketchMode') }}</n-button>
+        <n-button v-if="this.sketching == true" @click="stopSketchMode">{{ $t('stopSketchMode') }}</n-button>
       </template>
     </n-drawer-content>
   </n-drawer>
@@ -50,8 +53,8 @@ import { defineComponent, } from 'vue'
 
 export default defineComponent({
   name: "Drawer",
-  props: ['book', 'initDrawerActive', 'initDrawerPlacement', 'readMode'],
-  emits: ["setM", "saveConfig", "startSketch", "stopSketch", "closeDrawer"],//用于向父组件传递信息
+  props: ['book', 'initDrawerActive', 'initDrawerPlacement', 'ReaderMode', "sketching"],
+  emits: ["setRM", "saveConfig", "startSketch", "stopSketch", "closeDrawer"],//用于向父组件传递信息，父组件的语法为@setRM="OnSetReaderMode"
   components: {
     NDrawer,//抽屉，可以从上下左右4个方向冒出. https://www.naiveui.com/zh-CN/os-theme/components/drawer
     NDrawerContent,//抽屉内容
@@ -138,13 +141,13 @@ export default defineComponent({
     //切换模板的函数，需要配合vue-router
     onChangeTemplate() {
       if (this.readModeLocal === "scroll") {
-        this.$emit("setM", "scroll");
+        this.$emit("setRM", "scroll");
       }
       if (this.readModeLocal === "flip") {
-        this.$emit("setM", "flip");
+        this.$emit("setRM", "flip");
       }
       if (this.readModeLocal === "sketch") {
-        this.$emit("setM", "sketch");
+        this.$emit("setRM", "sketch");
       }
       // location.reload(); //需要刷新？ 以后研究VueRouter并去掉
     },

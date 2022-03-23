@@ -30,7 +30,7 @@ func init() {
 
 var (
 	ConfigFile = ""
-	Version    = "v0.5.2"
+	Version    = "v0.6.0"
 	Config     = ServerSettings{
 		OpenBrowser:          true,
 		DisableLAN:           false,
@@ -43,8 +43,8 @@ var (
 		ZipFileTextEncoding:  "",
 		CacheFilePath:        "",
 		SupportFileType:      []string{".zip", ".tar", ".rar", ".cbr", ".cbz", ".epub", ".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".tar.xz", ".txz", ".tar.lz4", ".tlz4", ".tar.sz", ".tsz", ".bz2", ".gz", ".lz4", ".sz", ".xz", ".pdf", ".mp4", ".webm"},
-		SupportMediaType:     []string{".jpg", ".jpeg", ".JPEG", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp", ".webp", ".ico", ".heic"},
-		ExcludeFileOrFolders: []string{".comigo", "node_modules", "flutter_ui", "$RECYCLE.BIN", "Config.Msi"},
+		SupportMediaType:     []string{".jpg", ".jpeg", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp", ".webp", ".ico", ".heic", ".avif"},
+		ExcludeFileOrFolders: []string{".idea", ".vscode", ".git", "node_modules", "flutter_ui", ".local/share/Trash", "$RECYCLE.BIN", "Config.Msi", "System Volume Information", ".sys", " .DS_Store", ".dll", ".log", ".cache", ".exe"},
 		WebpConfig: WebPServerConfig{
 			WebpCommand:  "webp-server",
 			HOST:         "127.0.0.1",
@@ -83,6 +83,17 @@ type ServerStatus struct {
 	OSInfo                tools.SystemStatus
 }
 
+// CheckPathSkip 检查路径是否应该跳过（排除文件，文件夹列表）。
+func CheckPathSkip(path string) bool {
+	for _, substr := range Config.ExcludeFileOrFolders {
+		if strings.HasSuffix(path, substr) {
+			return true
+		}
+	}
+	return false
+}
+
+// GetServerStatus 获取服务器的状态
 func GetServerStatus() *ServerStatus {
 	return &ServerStatus{
 		NumberOfBooks:         len(mapBooks),

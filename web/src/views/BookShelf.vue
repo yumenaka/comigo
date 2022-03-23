@@ -28,7 +28,7 @@
                         :title="book_info.name"
                         :id="book_info.id"
                         :image_src="book_info.cover.url"
-                        :nowMode="this.nowMode"
+                        :ReaderMode="this.ReaderMode"
                         :showTitle="false"
                     ></BookCard>
                 </n-grid-item>
@@ -41,8 +41,9 @@
             @saveConfig="this.saveConfigToCookie"
             @startSketch="this.startSketchMode"
             @closeDrawer="this.drawerDeactivate"
-            @setR="this.OnSetReadMode"
-            :readMode="this.readMode"
+            @setRM="this.OnSetReaderMode"
+            :ReaderMode="this.ReaderMode"
+            :sketching="false"
         >
             <span>{{ $t("setBackColor") }}</span>
             <n-color-picker v-model:value="model.color" :modes="['rgb']" :show-alpha="false" />
@@ -124,7 +125,7 @@ export default defineComponent({
     },
     data() {
         return {
-            readerMode: "",
+            ReaderMode: "scroll",
             bookshelf: [{
                 name: "loading",
                 all_page_num: 1,
@@ -182,12 +183,32 @@ export default defineComponent({
                 if (this.bookshelf.lenth == 1) {
                     this.onOpenBook(this.bookshelf[0].id)
                 }
-                console.log(this.bookshelf)
             })
-
-        // window.addEventListener("scroll", this.onScroll);
-        // window.addEventListener("resize", this.onResize);
-
+        //阅读器模式，scroll或flip
+        if (localStorage.getItem("ReaderMode") != null) {
+            this.ReaderMode = localStorage.getItem("ReaderMode");
+        }
+        //监听路由参数的变化，刷新本地的ReaderMode
+        this.$watch(
+            () => this.$route.params,
+            () => {
+                console.log("BookShelf: route change");
+                //阅读器模式，scroll或flip
+                if (localStorage.getItem("ReaderMode") != null) {
+                    this.ReaderMode = localStorage.getItem("ReaderMode");
+                    console.log("setReaderMode" + this.ReaderMode);
+                }
+            }
+            // (toParams, previousParams) => {
+            //     console.log(toParams);
+            //     console.log(previousParams);
+            //     //阅读器模式，scroll或flip
+            //     if (localStorage.getItem("ReaderMode") != null) {
+            //         this.ReaderMode = localStorage.getItem("ReaderMode");
+            //         console.log("setReaderMode" + this.ReaderMode);
+            //     }
+            // }
+        )
         this.imageMaxWidth = window.innerWidth;
         //初始化默认值,读取出来的都是字符串，不要直接用
         //是否显示顶部页头
@@ -247,8 +268,9 @@ export default defineComponent({
             // this.$emit("setTemplate", "sketch");
         },
         //接收Draw的参数，继续往父组件传
-        OnSetReadMode(value) {
-            this.readerMode = value
+        OnSetReaderMode(value) {
+            if (value == "scroll" || value == "scroll")
+                this.ReaderMode = value
         },
         //如果在一个组件上使用了 v-model:xxx，应该使用 @update:xxx  https://www.naiveui.com/zh-CN/os-theme/docs/common-issues
         saveConfigToCookie() {
@@ -277,13 +299,20 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.header {
+    padding: 0px;
+    width: 100%;
+    height: 5vh;
+    background: v-bind("model.colorHeader");
+}
 .shelf {
     padding-bottom: 20px;
     padding-left: 20px;
     padding-right: 20px;
     padding-top: 20px;
     max-width: 100%;
-    min-height: 93vh;
+    min-height: 95vh;
+    height: auto;
     background: v-bind("model.color");
 }
 </style>

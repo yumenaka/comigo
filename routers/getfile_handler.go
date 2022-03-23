@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"strconv"
+	"strings"
 )
 
 // 示例 URL： 127.0.0.1:1234/getfile?id=2b17a13&filename=1.jpg
@@ -60,10 +61,22 @@ func getFileHandler(c *gin.Context) {
 				fmt.Println(err)
 			}
 		}
+		//默认的媒体类型，默认值根据文件后缀设定。
+		contentType := tools.GetContentTypeByFileName(needFile)
+		canConvert := false
+		for _, ext := range []string{".jpg", ".jpeg", ".gif", ".png", ".bmp"} {
+			if strings.HasSuffix(strings.ToLower(needFile), ext) {
+				canConvert = true
+			}
+		}
+		//不支持类型的图片直接返回原始数据
+		if !canConvert {
+			c.Data(http.StatusOK, contentType, imgData)
+			return
+		}
+
 		//处理图像文件
 		if imgData != nil {
-			//默认的媒体类型，根据文件后缀判断。可能在后面有变动。
-			contentType := tools.GetContentTypeByFileName(needFile)
 			//读取图片Resize用的resizeWidth
 			resizeWidth, errX := strconv.Atoi(c.DefaultQuery("resize_width", "0"))
 			if errX != nil {

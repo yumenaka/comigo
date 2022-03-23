@@ -441,11 +441,12 @@ export default defineComponent({
 		this.$watch(
 			() => this.$route.params.id,
 			(id) => {
-				console.log(id)
-				axios
-					.get("/getbook?id=" + this.$route.params.id)
-					.then((response) => (this.book = response.data))
-					.finally(console.log("成功获取书籍数据,书籍ID：" + id));
+				if (id) {
+					axios
+						.get("/getbook?id=" + this.$route.params.id)
+						.then((response) => (this.book = response.data))
+						.finally(console.log("路由参数改变,书籍ID：" + id));
+				}
 			}
 		)
 
@@ -696,12 +697,13 @@ export default defineComponent({
 		onScroll() {
 			let scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
 			this.scrollDownFlag = scrollTop > this.scrollTopSave;
-			//防手抖，小于一定数值状态就不变
-			let step = Math.abs(this.scrollTopSave - scrollTop);
+			//防手抖，小于一定数值状态就不变 Math.abs()会导致报错
+			// let step = Math.abs(this.scrollTopSave - scrollTop);
+			let step = this.scrollTopSave - scrollTop;
 			// console.log("step:", step);
 			this.scrollTopSave = scrollTop
-			if (step > 5) {
-				this.showBackTopFlag = (scrollTop > 400) && !this.scrollDownFlag;
+			if (step < -5 && step > 5) {
+				this.showBackTopFlag = ((scrollTop > 400) && !this.scrollDownFlag);
 			}
 		},
 		//获取鼠标位置，决定是否打开设置面板

@@ -25,7 +25,12 @@ func ScanAndGetBookList(path string) (bookList []*Book, err error) {
 		//路径深度
 		depth := strings.Count(path, "/") - strings.Count(path, "/")
 		if depth > Config.MaxDepth {
+			fmt.Println("超过最大搜索深度，path:" + path)
 			return filepath.SkipDir //当WalkFunc的返回值是filepath.SkipDir时，Walk将会跳过这个目录，照常执行下一个文件。
+		}
+		if CheckPathSkip(path) {
+			fmt.Println("Skip Scan:" + path)
+			return filepath.SkipDir
 		}
 		if fileInfo == nil {
 			return err
@@ -101,13 +106,8 @@ func scanAndGetBook(filePath string) (*Book, error) {
 			return nil, err
 		}
 		err = fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
-			var exclude = false
-			for _, substr := range Config.ExcludeFileOrFolders {
-				if strings.Contains(path, substr) && path != "" {
-					exclude = true
-				}
-			}
-			if exclude {
+			if CheckPathSkip(path) {
+				fmt.Println("Skip Scan:" + path)
 				return fs.SkipDir
 			}
 			f, errInfo := d.Info()

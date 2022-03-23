@@ -7,7 +7,7 @@
             <router-link
                 v-if="showTitle"
                 :to="{ name: 'FlipMode', params: { id: this.id } }"
-            >{{ this.ellipsisTitle }}</router-link>
+            >{{ this.shortTitle }}</router-link>
         </n-card>
     </router-link>
 </template>
@@ -19,7 +19,7 @@ import { useCookies } from "vue3-cookies";
 import { defineComponent } from 'vue'
 export default defineComponent({
     name: "BookCover",
-    props: ['title', 'image_src', 'id', 'nowMode', 'showTitle'],
+    props: ['title', 'image_src', 'id', 'readerMode', 'showTitle'],
     components: {
         NCard,
         // NEllipsis,
@@ -29,7 +29,7 @@ export default defineComponent({
         return { cookies };
     },
     computed: {
-        ellipsisTitle() {
+        shortTitle() {
             if (this.title.length <= 12) {
                 return this.title
             } else {
@@ -65,9 +65,11 @@ export default defineComponent({
             var url = document.location.toString();
             //按照“/”分割字符串
             var arrUrl = url.split("/");
-            var new_url = arrUrl[0] + "//" + arrUrl[2] + "/#" + "f/" + this.id
             //拼一个完整的图片URL
-            if (this.nowMode == "scroll") {
+            if (this.readerMode == "flip") {
+                var new_url = arrUrl[0] + "//" + arrUrl[2] + "/#" + "f/" + this.id
+            }
+            if (this.readerMode == "scroll") {
                 new_url = arrUrl[0] + "//" + arrUrl[2] + "/#" + "s/" + this.id
             }
             console.log(new_url)
