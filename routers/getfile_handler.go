@@ -28,6 +28,7 @@ import (
 // gray:黑白化												&gray=true
 // blurhash:获取对应图片的blurhash，而不是原始图片 				&blurhash=3
 // blurhash_image:获取对应图片的blurhash图片，而不是原始图片  	&blurhash_image=3
+//TODO：生成临时文件加速下一次访问，并在退出后清理
 func getFileHandler(c *gin.Context) {
 	id := c.DefaultQuery("id", "")
 	needFile := c.DefaultQuery("filename", "")
@@ -40,21 +41,21 @@ func getFileHandler(c *gin.Context) {
 		//fmt.Println(bookPath)
 		var imgData []byte
 		//如果是特殊编码的ZIP文件
-		if book.NonUTF8Zip && !book.IsDir {
+		if book.NonUTF8Zip && book.BookType != common.BookTypeDir {
 			imgData, err = arch.GetSingleFile(bookPath, needFile, "gbk")
 			if err != nil {
 				fmt.Println(err)
 			}
 		}
 		//如果是一般压缩文件
-		if !book.NonUTF8Zip && !book.IsDir {
+		if !book.NonUTF8Zip && book.BookType != common.BookTypeDir {
 			imgData, err = arch.GetSingleFile(bookPath, needFile, "")
 			if err != nil {
 				fmt.Println(err)
 			}
 		}
 		//如果是本地文件夹
-		if book.IsDir {
+		if book.BookType == common.BookTypeDir {
 			//直接读取磁盘文件
 			imgData, err = ioutil.ReadFile(filepath.Join(bookPath, needFile))
 			if err != nil {
@@ -167,7 +168,7 @@ func getFileHandler(c *gin.Context) {
 				//	imgData = []byte(hash)
 				//	// 读上下文，写会出错╮(￣▽￣")╭
 				//	//cCp.Data(http.StatusOK, contentType, imgData)
-				//	log.Println("GetBlurHash Done! in path " + cCp.Request.URL.Path)
+				//	log.Println("GetBlurHash Done! in path " + cCp.Request.URL.BasePath)
 				//	fmt.Println(hash)
 				//	return
 				//}()

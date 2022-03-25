@@ -32,9 +32,12 @@ var (
 	ConfigFile = ""
 	Version    = "v0.6.0"
 	Config     = ServerSettings{
-		OpenBrowser:          true,
-		DisableLAN:           false,
-		Template:             "scroll", //multi、single、random etc.
+		OpenBrowser: true,
+		DisableLAN:  false,
+		Stores: Bookstores{
+			mapBookstores: make(map[string]*singleBookstore),
+			SortBy:        "name",
+		},
 		Port:                 1234,
 		GenerateMetaData:     false,
 		LogToFile:            false,
@@ -69,6 +72,7 @@ var (
 		TempPATH:               "",
 		CleanAllTempFileOnExit: true,
 		CleanAllTempFile:       true,
+		//Template:             "scroll", //multi、single、random etc.
 	}
 )
 
@@ -109,34 +113,36 @@ type ServerSettings struct {
 	EnableFrpcServer       bool             `json:"frpc_enable"`
 	Port                   int              `json:"port"`
 	SketchCountSeconds     int              `json:"sketch_count_seconds"`
-	Template               string           `json:"template"`
-	CacheFilePath          string           `json:"-"` //这个字段不解析
-	ExcludeFileOrFolders   []string         `json:"-"` //这个字段不解析
-	SupportMediaType       []string         `json:"-"` //这个字段不解析
-	SupportFileType        []string         `json:"-"` //这个字段不解析
-	MinImageNum            int              `json:"-"` //这个字段不解析
-	GenerateMetaData       bool             `json:"-"` //这个字段不解析
-	UserName               string           `json:"-"` //这个字段不解析
-	Password               string           `json:"-"` //这个字段不解析
-	CertFile               string           `json:"-"` //这个字段不解析
-	KeyFile                string           `json:"-"` //这个字段不解析
-	OpenBrowser            bool             `json:"-"` //这个字段不解析
-	DisableLAN             bool             `json:"-"` //这个字段不解析
-	PrintAllIP             bool             `json:"-"` //这个字段不解析
-	Debug                  bool             `json:"-"` //这个字段不解析
-	LogToFile              bool             `json:"-"` //这个字段不解析
-	LogFilePath            string           `json:"-"` //这个字段不解析
-	LogFileName            string           `json:"-"` //这个字段不解析
-	MaxDepth               int              `json:"-"` //这个字段不解析
-	ZipFileTextEncoding    string           `json:"-"` //这个字段不解析
-	TempPATH               string           `json:"-"` //这个字段不解析
-	CleanAllTempFileOnExit bool             `json:"-"` //这个字段不解析
-	CleanAllTempFile       bool             `json:"-"` //这个字段不解析
-	GenerateConfig         bool             `json:"-"` //这个字段不解析
-	WebpConfig             WebPServerConfig `json:"-"` //这个字段不解析
-	FrpConfig              FrpClientConfig  `json:"-"` //这个字段不解析
+	Stores                 Bookstores       `json:"stores"` //这个字段不解析
+	CacheFilePath          string           `json:"-"`      //这个字段不解析
+	ExcludeFileOrFolders   []string         `json:"-"`      //这个字段不解析
+	SupportMediaType       []string         `json:"-"`      //这个字段不解析
+	SupportFileType        []string         `json:"-"`      //这个字段不解析
+	MinImageNum            int              `json:"-"`      //这个字段不解析
+	GenerateMetaData       bool             `json:"-"`      //这个字段不解析
+	UserName               string           `json:"-"`      //这个字段不解析
+	Password               string           `json:"-"`      //这个字段不解析
+	CertFile               string           `json:"-"`      //这个字段不解析
+	KeyFile                string           `json:"-"`      //这个字段不解析
+	OpenBrowser            bool             `json:"-"`      //这个字段不解析
+	DisableLAN             bool             `json:"-"`      //这个字段不解析
+	PrintAllIP             bool             `json:"-"`      //这个字段不解析
+	Debug                  bool             `json:"-"`      //这个字段不解析
+	LogToFile              bool             `json:"-"`      //这个字段不解析
+	LogFilePath            string           `json:"-"`      //这个字段不解析
+	LogFileName            string           `json:"-"`      //这个字段不解析
+	MaxDepth               int              `json:"-"`      //这个字段不解析
+	ZipFileTextEncoding    string           `json:"-"`      //这个字段不解析
+	TempPATH               string           `json:"-"`      //这个字段不解析
+	CleanAllTempFileOnExit bool             `json:"-"`      //这个字段不解析
+	CleanAllTempFile       bool             `json:"-"`      //这个字段不解析
+	GenerateConfig         bool             `json:"-"`      //这个字段不解析
+	WebpConfig             WebPServerConfig `json:"-"`      //这个字段不解析
+	FrpConfig              FrpClientConfig  `json:"-"`      //这个字段不解析
+	//Template               string           `json:"-"` //这个字段不解析
 }
 
+//WebPServerConfig  WebPServer服务端配置
 type WebPServerConfig struct {
 	WebpCommand  string
 	HOST         string
@@ -147,111 +153,15 @@ type WebPServerConfig struct {
 	ExhaustPath  string   `json:"EXHAUST_PATH"`
 }
 
+//FrpClientConfig frp客户端配置
 type FrpClientConfig struct {
-	//frp，服务器端
-	FrpcCommand string
-	ServerAddr  string
-	ServerPort  int
-	Token       string
-	//本地转发端口设置
-	FrpType          string
+	FrpcCommand      string
+	ServerAddr       string
+	ServerPort       int
+	Token            string
+	FrpType          string //本地转发端口设置
 	RemotePort       int
 	RandomRemotePort bool
-}
-
-// SetByExecutableFilename 通过执行文件名设置默认网页模板参数
-func (config *ServerSettings) SetByExecutableFilename() {
-	// 当前执行目录
-	//targetPath, _ := os.Getwd()
-	//fmt.Println(locale.GetString("target_path"), targetPath)
-	// 带后缀的执行文件名 comi.exe  sketch.exe
-	filenameWithSuffix := path.Base(os.Args[0])
-	// 执行文件名后缀
-	fileSuffix := path.Ext(filenameWithSuffix)
-	// 去掉后缀后的执行文件名
-	filenameWithOutSuffix := strings.TrimSuffix(filenameWithSuffix, fileSuffix)
-	//fmt.Println("filenameWithOutSuffix =", filenameWithOutSuffix)
-	ex, err := os.Executable()
-	if err != nil {
-		fmt.Println(err)
-	}
-	extPath := filepath.Dir(ex)
-	//fmt.Println("extPath =",extPath)
-	ExtFileName := strings.TrimPrefix(filenameWithOutSuffix, extPath)
-	//fmt.Println("ExtFileName =", ExtFileName)
-	//如果执行文件名包含 scroll 等关键字，选择卷轴模板
-	if haveKeyWord(ExtFileName, []string{"scroll", "スクロール", "默认", "下拉", "卷轴"}) {
-		config.Template = "scroll"
-	}
-	//如果执行文件名包含 sketch 等关键字，选择速写模板
-	if haveKeyWord(ExtFileName, []string{"sketch", "croquis", "クロッキー", "素描", "速写"}) {
-		config.Template = "sketch"
-	}
-	//根据文件名设定倒计时秒数,不管默认是不是sketch模式
-	Seconds, err := getNumberFromString(ExtFileName)
-	if err != nil {
-		if config.Template == "sketch" {
-			//fmt.Println(Seconds)
-		}
-	} else {
-		config.SketchCountSeconds = Seconds
-	}
-	//如果执行文件名包含 single 等关键字，选择 flip分页漫画模板
-	if haveKeyWord(ExtFileName, []string{"flip", "翻页", "めく"}) {
-		config.Template = "flip"
-	}
-
-	//选择模式以后，打印提示
-	switch config.Template {
-	case "scroll":
-		fmt.Println(locale.GetString("scroll_template"))
-	case "flip":
-		fmt.Println(locale.GetString("single_page_template"))
-	case "sketch":
-		fmt.Println(locale.GetString("sketch_template"))
-		//速写倒计时秒数
-		fmt.Println(locale.GetString("SKETCH_COUNT_SECONDS"), config.SketchCountSeconds)
-	default:
-	}
-}
-
-//从字符串中提取数字,如果有几个数字，就简单地加起来
-func getNumberFromString(s string) (int, error) {
-	var err error
-	num := 0
-	//同时设定倒计时秒数
-	valid := regexp.MustCompile("[0-9]+")
-	numbers := valid.FindAllStringSubmatch(s, -1)
-	if len(numbers) > 0 {
-		//循环取出多维数组
-		for _, value := range numbers {
-			for _, v := range value {
-				temp, errTemp := strconv.Atoi(v)
-				if errTemp != nil {
-					fmt.Println("error num value:" + v)
-				} else {
-					num = num + temp
-				}
-			}
-		}
-		//fmt.Println("get Number:",num," form string:",s,"numbers[]=",numbers)
-	} else {
-		err = errors.New("number not found")
-		return 0, err
-	}
-	return num, err
-}
-
-//检测字符串中是否有关键字
-func haveKeyWord(checkString string, list []string) bool {
-	//转换为小写，使Sketch、DOUBLE也生效
-	checkString = strings.ToLower(checkString)
-	for _, key := range list {
-		if strings.Contains(checkString, key) {
-			return true
-		}
-	}
-	return false
 }
 
 // setupCloseHander 中断处理：程序被中断的时候，清理临时文件
@@ -292,7 +202,7 @@ func setTempDir() {
 	}
 }
 
-// 清空解压缓存
+// 清空程序缓存 TODO：生成临时文件，并在退出后清理
 func clearTempFilesALL() {
 	fmt.Println(locale.GetString("clear_temp_file_start"))
 	for _, tempBook := range mapBooks {
@@ -323,4 +233,98 @@ func clearTempFilesOne(book *Book) {
 			fmt.Println(locale.GetString("clear_temp_file_completed") + extractPath)
 		}
 	}
+}
+
+// SetByExecutableFilename 通过执行文件名设置默认网页模板参数
+func (config *ServerSettings) SetByExecutableFilename() {
+	// 当前执行目录
+	//targetPath, _ := os.Getwd()
+	//fmt.Println(locale.GetString("target_path"), targetPath)
+	// 带后缀的执行文件名 comi.exe  sketch.exe
+	filenameWithSuffix := path.Base(os.Args[0])
+	// 执行文件名后缀
+	fileSuffix := path.Ext(filenameWithSuffix)
+	// 去掉后缀后的执行文件名
+	filenameWithOutSuffix := strings.TrimSuffix(filenameWithSuffix, fileSuffix)
+	//fmt.Println("filenameWithOutSuffix =", filenameWithOutSuffix)
+	ex, err := os.Executable()
+	if err != nil {
+		fmt.Println(err)
+	}
+	extPath := filepath.Dir(ex)
+	//fmt.Println("extPath =",extPath)
+	ExtFileName := strings.TrimPrefix(filenameWithOutSuffix, extPath)
+	fmt.Println("ExtFileName =", ExtFileName)
+	////如果执行文件名包含 scroll 等关键字，选择卷轴模板
+	//if haveKeyWord(ExtFileName, []string{"scroll", "スクロール", "默认", "下拉", "卷轴"}) {
+	//	config.Template = "scroll"
+	//}
+	////如果执行文件名包含 sketch 等关键字，选择速写模板
+	//if haveKeyWord(ExtFileName, []string{"sketch", "croquis", "クロッキー", "素描", "速写"}) {
+	//	config.Template = "sketch"
+	//}
+	////根据文件名设定倒计时秒数,不管默认是不是sketch模式
+	//Seconds, err := getNumberFromString(ExtFileName)
+	//if err != nil {
+	//	if config.Template == "sketch" {
+	//		//fmt.Println(Seconds)
+	//	}
+	//} else {
+	//	config.SketchCountSeconds = Seconds
+	//}
+	////如果执行文件名包含 single 等关键字，选择 flip分页漫画模板
+	//if haveKeyWord(ExtFileName, []string{"flip", "翻页", "めく"}) {
+	//	config.Template = "flip"
+	//}
+	////选择模式以后，打印提示
+	//switch config.Template {
+	//case "scroll":
+	//	fmt.Println(locale.GetString("scroll_template"))
+	//case "flip":
+	//	fmt.Println(locale.GetString("single_page_template"))
+	//case "sketch":
+	//	fmt.Println(locale.GetString("sketch_template"))
+	//	//速写倒计时秒数
+	//	fmt.Println(locale.GetString("SKETCH_COUNT_SECONDS"), config.SketchCountSeconds)
+	//default:
+	//}
+}
+
+//从字符串中提取数字,如果有几个数字，就简单地加起来
+func getNumberFromString(s string) (int, error) {
+	var err error
+	num := 0
+	//同时设定倒计时秒数
+	valid := regexp.MustCompile("[0-9]+")
+	numbers := valid.FindAllStringSubmatch(s, -1)
+	if len(numbers) > 0 {
+		//循环取出多维数组
+		for _, value := range numbers {
+			for _, v := range value {
+				temp, errTemp := strconv.Atoi(v)
+				if errTemp != nil {
+					fmt.Println("error num value:" + v)
+				} else {
+					num = num + temp
+				}
+			}
+		}
+		//fmt.Println("get Number:",num," form string:",s,"numbers[]=",numbers)
+	} else {
+		err = errors.New("number not found")
+		return 0, err
+	}
+	return num, err
+}
+
+//检测字符串中是否有关键字
+func haveKeyWord(checkString string, list []string) bool {
+	//转换为小写，使Sketch、DOUBLE也生效
+	checkString = strings.ToLower(checkString)
+	for _, key := range list {
+		if strings.Contains(checkString, key) {
+			return true
+		}
+	}
+	return false
 }

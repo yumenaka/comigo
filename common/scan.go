@@ -19,11 +19,14 @@ import (
 
 // ScanAndGetBookList 扫描一个路径，并返回书籍列表
 func ScanAndGetBookList(path string) (bookList []*Book, err error) {
-	//var fileList, dirList []string
-	var pathList []string
-	err = filepath.Walk(path, func(path string, fileInfo os.FileInfo, err error) error {
+	fileOrDirPath, err := filepath.Abs(path)
+	if err != nil {
+		fileOrDirPath = path
+		fmt.Println(err)
+	}
+	err = filepath.Walk(fileOrDirPath, func(path string, fileInfo os.FileInfo, err error) error {
 		//路径深度
-		depth := strings.Count(path, "/") - strings.Count(path, "/")
+		depth := strings.Count(path, "/") - strings.Count(fileOrDirPath, "/")
 		if depth > Config.MaxDepth {
 			fmt.Println("超过最大搜索深度，path:" + path)
 			return filepath.SkipDir //当WalkFunc的返回值是filepath.SkipDir时，Walk将会跳过这个目录，照常执行下一个文件。
@@ -38,23 +41,18 @@ func ScanAndGetBookList(path string) (bookList []*Book, err error) {
 		if !isSupportArchiver(path) && !fileInfo.IsDir() {
 			return nil
 		}
-		pathList = append(pathList, path) //文件与路径列表
-		return nil
-	})
-	//分析所有的文件
-	for _, f := range pathList {
 		//得到书籍文件数据
-		book, err := scanAndGetBook(f)
+		book, err := scanAndGetBook(path)
 		if err != nil {
 			fmt.Println(err)
-			continue
+			return nil
 		}
 		//多级路径的图片文件夹，避免重复
-		if !book.IsDir {
+		if book.BookType != BookTypeDir {
 			bookList = append(bookList, book)
 		}
 		//多级路径的图片文件夹，避免重复添加
-		if book.IsDir {
+		if book.BookType == BookTypeDir {
 			added := false
 			for _, b := range bookList {
 				if strings.HasPrefix(book.GetFilePath(), b.GetFilePath()) {
@@ -65,7 +63,8 @@ func ScanAndGetBookList(path string) (bookList []*Book, err error) {
 				bookList = append(bookList, book)
 			}
 		}
-	}
+		return nil
+	})
 	//所有可用书籍，包括压缩包与文件夹
 	return bookList, err
 }
@@ -83,10 +82,10 @@ func scanAndGetBook(filePath string) (*Book, error) {
 		fmt.Println(err.Error())
 	}
 	//初始化一本书，设置文件路径等等
-	book := InitBook(0, filePath, FileInfo.ModTime(), FileInfo.IsDir(), FileInfo.Size(), false)
-	ext := path.Ext(filePath)
+
+	book := InitBook(filePath, FileInfo.ModTime(), FileInfo.Size())
 	//为解决archiver/v4的BUG “zip文件无法读取2级目录” 单独处理zip文件
-	if ext == ".zip" || ext == ".cbz" || ext == ".epub" {
+	if book.BookType == BookTypeZip || book.BookType == BookTypeCbz || book.BookType == BookTypeEpub {
 		//使用Archiver的虚拟文件系统，无法处理非UTF-8编码
 		fsys, zipErr := zip.OpenReader(filePath)
 		if zipErr != nil {
