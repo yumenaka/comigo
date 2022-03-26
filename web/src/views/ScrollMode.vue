@@ -407,7 +407,7 @@ export default defineComponent({
 			//状态驱动的动态 CSS
 			// https://v3.cn.vuejs.org/api/sfc-style.html#%E7%8A%B6%E6%80%81%E9%A9%B1%E5%8A%A8%E7%9A%84%E5%8A%A8%E6%80%81-css
 			//图片宽度的单位，是否使用百分比
-			imageWidth_usePercentFlag: false,
+			imageWidth_usePercentFlag: true,
 
 			//横屏(Landscape)状态的漫画页宽度，百分比
 			singlePageWidth_Percent: 50,
@@ -436,7 +436,12 @@ export default defineComponent({
 		axios
 			.get("/getbook?id=" + this.$route.params.id)
 			.then((response) => (this.book = response.data))
-			.finally(console.log("成功获取书籍数据,书籍ID：" + this.$route.params.id));
+			.finally(
+				() => {
+					document.title = this.book.name;
+					console.log("成功获取书籍数据,书籍ID：" + this.$route.params.id);
+				}
+			);
 		//监听路由参数的变化，刷新本地的Book数据
 		this.$watch(
 			() => this.$route.params.id,

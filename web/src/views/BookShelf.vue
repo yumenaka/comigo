@@ -125,6 +125,7 @@ export default defineComponent({
     },
     data() {
         return {
+            // firstOpenFlag: true,
             ReaderMode: "scroll",
             bookshelf: [{
                 name: "loading",
@@ -176,13 +177,20 @@ export default defineComponent({
     // beforeUnmount: 当指令与在绑定元素父组件卸载之前时，只调用一次。
     // unmounted: 当指令与元素解除绑定且父组件已卸载时，只调用一次。
     created() {
+        if (localStorage.getItem("ReaderMode") != null) {
+            this.ReaderMode = localStorage.getItem("ReaderMode");
+        }
+
         axios
-            .get("/getshelf")
+            .get("getshelf")
             .then((response) => (this.bookshelf = response.data))
             .finally(() => {
-                if (this.bookshelf.lenth == 1) {
-                    this.onOpenBook(this.bookshelf[0].id)
-                }
+                // //不能这么写，每回返回书架都会执行
+                // if (this.firstOpenFlag) {
+                //     this.firstOpenFlag = false
+                //     console.log("this.bookshelf[0].id :" + this.bookshelf[0].id)
+                //     setTimeout(this.openBookOnce, 1000)
+                // }
             })
         //阅读器模式，scroll或flip
         if (localStorage.getItem("ReaderMode") != null) {
@@ -225,6 +233,12 @@ export default defineComponent({
     //挂载前
     beforeMount() {
     },
+    //在绑定元素的父组件被挂载后调用。
+    mounted() {
+        //this.bookshelf.lenth != 1 && 
+
+    },
+
     onMounted() {
         //console.log('mounted in the composition api!')
         this.isLandscapeMode = this.inLandscapeModeCheck();
@@ -252,6 +266,12 @@ export default defineComponent({
             } else {
                 // 命名路由，并加上参数，让路由建立 url
                 this.$router.push({ name: 'ScrollMode', params: { id: bookID } })
+            }
+        },
+        openBookOnce() {
+            console.log("this.bookshelf[0].id :" + this.bookshelf[0].id)
+            if (this.bookshelf[0].id != "12345") {
+                this.onOpenBook(this.bookshelf[0].id)
             }
         },
         //打开抽屉

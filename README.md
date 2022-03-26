@@ -27,6 +27,18 @@ comi --help
 ### Special Thanks：
 [mholt](https://github.com/mholt)  、[spf13](https://github.com/spf13)  [disintegration](https://github.com/disintegration)   、 [Baozisoftware ](https://github.com/Baozisoftware) 、 [markbates](github.com/markbates/pkger)  and more。
 
+### Possible Problems：
+
+#### MIME type ('text/plain') error。
+
+[If you use Windows，and webpage cannot be loaded：](https://github.com/golang/go/issues/32350)
+
+```bash
+1、Win+R 
+2、type "regedit".
+3、into the registry \HKEY_CLASSES_ROOT.js > "Content Type" 4、 changed it from "text/plain" to "application/javascript" and i restart the Comigo and that fixed it
+```
+
 ## License
 
 This software is released under the GPL-3.0 license.

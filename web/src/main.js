@@ -30,7 +30,7 @@ app.use(VueLazyLoad, {
     loading: "/images/loading.jpg",
     error: "/images/error.jpg",
     attempt: 4,//尝试加载图片数量，默认3
-    observerOptions: { rootMargin: '200px', threshold: 0.1},
+    observerOptions: { rootMargin: '200px', threshold: 0.1 },
     lifecycle: {
         loading: (el) => {
             el.setAttribute("class", "LoadingImage");
@@ -44,8 +44,8 @@ app.use(VueLazyLoad, {
         loaded: (el) => {
             let image = new Image();
             image.src = el.src;
-			// 图片是否完全加载完成。
-			//https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLImageElement/complete
+            // 图片是否完全加载完成。
+            //https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLImageElement/complete
             if (image.complete) {
                 el.setAttribute("w", image.width);
                 el.setAttribute("h", image.height);
