@@ -177,17 +177,7 @@ func setWebAPI(engine *gin.Engine) {
 	//	c.PureJSON(http.StatusOK, common.ReadingBook)
 	//})
 	//书架信息，不包含每页信息
-	api.GET("/bookshelf.json", func(c *gin.Context) {
-		//书籍排列的方式，默认name，TODO:按照修改时间、作者、文件大小等排序书籍
-		sort := c.DefaultQuery("sort", "name")
-		bookInfoList, err := common.GetAllBookInfo(sort)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		bookInfoList.SortBooks()
-		c.PureJSON(http.StatusOK, bookInfoList.BookInfos)
-	})
+	api.GET("/getshelf", getBookShelfHandler)
 	//通过URL字符串参数查询书籍信息
 	api.GET("/getbook", getBookHandler)
 	//通过URL字符串参数获取特定文件

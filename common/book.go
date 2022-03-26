@@ -26,18 +26,18 @@ import (
 )
 
 const (
-	BookTypeBooksGroup = iota //0
-	BookTypeZip               //1
-	BookTypeRar               //2
-	BookTypeDir
-	BookTypeCbz
-	BookTypeCbr
-	BookTypeEpub
-	BookTypePDF
-	BookTypeUnknownFile
+	BookTypeDir         = "dir"
+	BookTypeZip         = ".zip"
+	BookTypeRar         = ".rar"
+	BookTypeBooksGroup  = "bookgroup"
+	BookTypeCbz         = ".cbz"
+	BookTypeCbr         = ".cbr"
+	BookTypeEpub        = ".ebpu"
+	BookTypePDF         = ".pdf"
+	BookTypeUnknownFile = "unknown"
 )
 
-func GetBookTypeByFilename(filename string) int {
+func GetBookTypeByFilename(filename string) string {
 	//获取文件后缀
 	switch strings.ToLower(path.Ext(filename)) {
 	case ".zip":
@@ -63,8 +63,8 @@ type Book struct {
 	filePath        string           //不可导出字段
 	BookID          string           `json:"id"`            //根据FilePath计算
 	BookStoreID     string           `json:"book_store_id"` //在那个子书库
-	BookType        int              `json:"book_type"`     //可以是书籍组(book_group)、文件夹(dir)、文件后缀( .zip .rar .pdf .mp4)等
-	ChildBook       map[string]*Book `json:"child_book"`    //key：每本书在书库中的subPath
+	BookType        string           `json:"book_type"`     //可以是书籍组(book_group)、文件夹(dir)、文件后缀( .zip .rar .pdf .mp4)等
+	ChildBook       map[string]*Book `json:"child_book"`    //key：BookID /
 	Author          []string         `json:"author"`
 	ISBN            string           `json:"-"` //暂不解析，启用可改为`json:"isbn"`
 	Press           string           `json:"-"` //暂不解析，启用可改为`json:"press"`        //出版社
@@ -82,17 +82,17 @@ type Book struct {
 	Cover           SinglePageInfo   `json:"cover"`
 	Pages           AllPageInfo      `json:"pages"`
 	BasicPath       string           `json:"basic_path"` //TODO:防止信息泄露，改成basic_path_id
-	ChildFolder     int              `json:"child_folder"`
 	Depth           int              `json:"depth"`
+	ParentFolder    string           `json:"parent_folder"` //所在父文件夹
 	//NonUTF8Zip 表示 Name 和 Comment 未以 UTF-8 编码。根据规范，唯一允许的其他编码应该是 CP-437，但从历史上看，许多 ZIP 阅读器将 Name 和 Comment 解释为系统的本地字符编码。仅当用户打算为特定本地化区域编码不可移植的 ZIP 文件时，才应设置此标志。否则，Writer 会自动为有效的 UTF-8 字符串设置 ZIP 格式的 UTF-8 标志。
 }
 
 type SinglePageInfo struct {
 	NameInArchive     string    `json:"filename"` //用于解压的压缩文件内文件路径，或图片名，为了适应特殊字符，经过一次转义
 	Url               string    `json:"url"`      //远程用户读取图片的URL，为了适应特殊字符，经过一次转义
-	Blurhash          string    `json:"blurhash"` //blurhash占位符。需要扫描图片生成（tools.GetImageDataBlurHash）
-	Height            int       `json:"height"`   //blurhash用，图片的高
-	Width             int       `json:"width"`    //blurhash用，图片的宽
+	Blurhash          string    `json:"-"`        //`json:"blurhash"` //blurhash占位符。需要扫描图片生成（tools.GetImageDataBlurHash）
+	Height            int       `json:"-"`        //暂时用不着 这个字段不解析`json:"height"`   //blurhash用，图片的高
+	Width             int       `json:"-"`        //暂时用不着 这个字段不解析`json:"width"`    //blurhash用，图片的宽
 	ModeTime          time.Time `json:"-"`        //这个字段不解析
 	FileSize          int64     `json:"-"`        //这个字段不解析
 	RealImageFilePATH string    `json:"-"`        //这个字段不解析  书籍为文件夹的时候，实际图片的路径
@@ -101,24 +101,27 @@ type SinglePageInfo struct {
 
 // BookInfo 与Book唯一的区别是没有AllPageInfo,而是封面图URL
 type BookInfo struct {
-	Name            string         `json:"name"`
-	Author          []string       `json:"-"` //暂时用不着 这个字段不解析 `json:"author"`
-	ISBN            string         `json:"-"` //暂时用不着 这个字段不解析 `json:"isbn"`
-	FilePath        string         `json:"-"` //这个字段不解析
-	ExtractPath     string         `json:"-"` //这个字段不解析
-	AllPageNum      int            `json:"all_page_num"`
-	BookType        int            `json:"file_type"`
-	FileSize        int64          `json:"file_size"`
-	Modified        time.Time      `json:"-"`  //暂时用不着 这个字段不解析 `json:"modified_time"`
-	BookID          string         `json:"id"` //根据FilePath计算
-	IsDir           bool           `json:"-"`  //暂时用不着 这个字段不解析 `json:"is_folder"`
-	ExtractNum      int            `json:"-"`  //暂时用不着 这个字段不解析 `json:"extract_num"`
-	ExtractComplete bool           `json:"-"`  //暂时用不着 这个字段不解析 `json:"extract_complete"`
-	ReadPercent     float64        `json:"read_percent"`
-	NonUTF8Zip      bool           `json:"-"` //暂时用不着 这个字段不解析 `json:"non_utf_8_zip"`
-	ZipTextEncoding string         `json:"-"` //暂时用不着 这个字段不解析 `json:"zip_text_encoding"`
-	Cover           SinglePageInfo `json:"cover"`
+	Name            string           `json:"name"`
+	Author          []string         `json:"-"` //暂时用不着 这个字段不解析 `json:"author"`
+	ISBN            string           `json:"-"` //暂时用不着 这个字段不解析 `json:"isbn"`
+	FilePath        string           `json:"-"` //这个字段不解析
+	ExtractPath     string           `json:"-"` //这个字段不解析
+	AllPageNum      int              `json:"all_page_num"`
+	BookType        string           `json:"book_type"`
+	ChildBook       map[string]*Book `json:"child_book"` //key：BookID /
+	FileSize        int64            `json:"file_size"`
+	Modified        time.Time        `json:"-"`  //暂时用不着 这个字段不解析 `json:"modified_time"`
+	BookID          string           `json:"id"` //根据FilePath计算
+	IsDir           bool             `json:"-"`  //暂时用不着 这个字段不解析 `json:"is_folder"`
+	ExtractNum      int              `json:"-"`  //暂时用不着 这个字段不解析 `json:"extract_num"`
+	ExtractComplete bool             `json:"-"`  //暂时用不着 这个字段不解析 `json:"extract_complete"`
+	ReadPercent     float64          `json:"read_percent"`
+	NonUTF8Zip      bool             `json:"-"` //暂时用不着 这个字段不解析 `json:"non_utf_8_zip"`
+	ZipTextEncoding string           `json:"-"` //暂时用不着 这个字段不解析 `json:"zip_text_encoding"`
+	Cover           SinglePageInfo   `json:"cover"`
+	ParentFolder    string           `json:"parent_folder"` //所在父文件夹
 	//Pages         AllPageInfo `json:"pages"`
+
 }
 
 // NewBookInfo BookInfo的模拟构造函数
@@ -131,6 +134,7 @@ func NewBookInfo(b *Book) *BookInfo {
 		ExtractPath:     b.ExtractPath,
 		AllPageNum:      b.GetAllPageNum(),
 		BookType:        b.BookType,
+		ChildBook:       b.ChildBook,
 		FileSize:        b.FileSize,
 		Modified:        b.Modified,
 		BookID:          b.BookID,
@@ -139,6 +143,7 @@ func NewBookInfo(b *Book) *BookInfo {
 		ReadPercent:     b.ReadPercent,
 		NonUTF8Zip:      b.NonUTF8Zip,
 		Cover:           b.Cover,
+		ParentFolder:    b.ParentFolder,
 	}
 }
 
@@ -161,32 +166,60 @@ type Bookstores struct {
 
 // 对应某个扫描路径的子书库
 type singleBookstore struct {
-	StoreId       int              //书库ID，从0开始？用 mapBookstores的大小定义
-	BasePath      string           //扫描路径，可能是相对路径。Bookstores的Key。
-	Name          string           //书库名，不指定就默认等于Path
-	mapBooks      map[string]*Book //拥有的书籍,key是BookID
-	mapBooksGroup map[string]*Book //拥有的书籍组,通过扫描书库生成，key是BookID。需要通过Depth从深到浅生成
+	StoreId             int              //书库ID，从0开始？用 mapBookstores的大小定义
+	BasePath            string           //扫描路径，可能是相对路径。Bookstores的Key。
+	Name                string           //书库名，不指定就默认等于Path
+	singleMapBooks      map[string]*Book //拥有的书籍,key是BookID
+	singleMapBooksGroup map[string]*Book //拥有的书籍组,通过扫描书库生成，key是BookID。需要通过Depth从深到浅生成
 }
 
 func (s *singleBookstore) generateBookGroup() error {
-	if len(mapBooks) == 0 {
+	if len(s.singleMapBooks) == 0 {
 		return errors.New("empty Bookstore")
 	}
 	depthBooksMap := make(map[int][]Book) //key是Depth的临时map
 	maxDepth := 0
-	for _, b := range s.mapBooks {
+	for _, b := range s.singleMapBooks {
 		depthBooksMap[b.Depth] = append(depthBooksMap[b.Depth], *b)
 		if b.Depth > maxDepth {
 			maxDepth = b.Depth
 		}
 	}
-	for i := maxDepth; i > 0; i-- {
-		//如果有几本书同时有同一个父文件夹，那么应该生成一个书籍组
-		for _, b := range depthBooksMap[i] {
+	//从深往浅遍历
+	//如果有几本书同时有同一个父文件夹，那么应该【新建]一本书(组)，并加入到depth-1层里面
+	for depth := maxDepth; depth >= 0; depth-- {
+		//最上层的书籍直接展示，不需要在上一级创建书籍组
+		if depth == 0 {
+			continue
+		}
+		//用父文件夹做key的parentMap，后面遍历用
+		parentTempMap := make(map[string][]Book)
+		////遍历depth等于i的所有book
+		for _, b := range depthBooksMap[depth] {
+			parentTempMap[b.ParentFolder] = append(parentTempMap[b.ParentFolder], b)
+		}
+		//循环parentMap，把有相同parent的书创建为一个书组
+		for parent, list := range parentTempMap {
+			newBook := InitBook(filepath.Dir(list[0].filePath), time.Now(), 0)
+			newBook.BookType = BookTypeBooksGroup
+			if newBook.Name != parent {
+				fmt.Printf("newBook.Name!=parent!?")
+			}
+			//初始化ChildBook
+			newBook.ChildBook = make(map[string]*Book)
+			//然后把书加进书籍组
+			for _, b := range list {
+				newBook.ChildBook[b.BookID] = &b
+			}
+			//如果书籍组的子书籍数量大于等于1，将书籍组加到上一层
+			if len(newBook.ChildBook) >= 1 {
+				depthBooksMap[depth-1] = append(depthBooksMap[depth-1], *newBook)
+				s.singleMapBooksGroup[newBook.BookID] = newBook
+			}
 
 		}
 	}
-
+	return nil
 }
 
 // NewSingleBookstore 创建一个新书库
@@ -196,11 +229,11 @@ func (bs *Bookstores) NewSingleBookstore(basePath string) error {
 		return errors.New("add Bookstore Error： The key already exists [" + basePath + "]")
 	}
 	s := singleBookstore{
-		StoreId:       len(bs.mapBookstores),
-		BasePath:      basePath, //暂时与路径同名 TODO：自定义书库名
-		Name:          basePath,
-		mapBooks:      make(map[string]*Book),
-		mapBooksGroup: make(map[string]*Book),
+		StoreId:             len(bs.mapBookstores),
+		BasePath:            basePath, //暂时与路径同名 TODO：自定义书库名
+		Name:                basePath,
+		singleMapBooks:      make(map[string]*Book),
+		singleMapBooksGroup: make(map[string]*Book),
 	}
 	bs.mapBookstores[basePath] = &s
 	return nil
@@ -210,12 +243,12 @@ func (bs *Bookstores) NewSingleBookstore(basePath string) error {
 func (bs *Bookstores) AddBookToStores(basePath string, b *Book) error {
 	if _, ok := bs.mapBookstores[basePath]; !ok {
 		//创建一个新子书库，并添加一本书
-		bs.mapBookstores[basePath].mapBooks[b.BookID] = b
+		bs.mapBookstores[basePath].singleMapBooks[b.BookID] = b
 		return errors.New("add Bookstore Error： The key not found [" + basePath + "]")
 	}
 	//给已有子书库添加一本书
-	bs.mapBookstores[basePath].mapBooks[b.BookID] = b
-	return nil
+	bs.mapBookstores[basePath].singleMapBooks[b.BookID] = b
+	return bs.mapBookstores[basePath].generateBookGroup()
 }
 
 // AddBooks 添加一组书
@@ -237,9 +270,8 @@ func AddBook(b *Book, basePath string) error {
 	if _, ok := Config.Stores.mapBookstores[basePath]; !ok {
 		Config.Stores.NewSingleBookstore(basePath)
 	}
-	Config.Stores.AddBookToStores(basePath, b)
 	mapBooks[b.BookID] = b
-	return nil
+	return Config.Stores.AddBookToStores(basePath, b)
 }
 
 // DeleteBookByID 删除一本书
@@ -271,9 +303,17 @@ func GetRandomBook() *Book {
 
 func GetAllBookInfo(sort string) (*BookInfoList, error) {
 	var infoList BookInfoList
+	//首先加上所有真实的书籍
 	for _, b := range mapBooks {
 		info := NewBookInfo(b)
 		infoList.BookInfos = append(infoList.BookInfos, *info)
+	}
+	//接下来还要加上扫描生成出来的书籍组
+	for _, bs := range Config.Stores.mapBookstores {
+		for _, b := range bs.singleMapBooksGroup {
+			info := NewBookInfo(b)
+			infoList.BookInfos = append(infoList.BookInfos, *info)
+		}
 	}
 	if len(infoList.BookInfos) > 0 {
 		infoList.SortBy = sort
@@ -341,26 +381,81 @@ func InitBook(filePath string, modified time.Time, fileSize int64) *Book {
 		FileSize:        fileSize,
 		ExtractComplete: false,
 	}
-	//书名直接用路径
-	b.Name = filePath
-	b.SetFilePath(filePath)
+	//设置属性：
+	//filePath，转换为绝对路径
+	b.setFilePath(filePath)
+	//书籍类型
 	b.BookType = GetBookTypeByFilename(filePath)
-	//不是书籍组(book_group)，也不是文件夹(dir)。取文件后缀(可能为 .zip .rar .pdf .mp4等等)
-	if b.BookType != BookTypeDir && b.BookType != BookTypeBooksGroup {
+	b.setName(filePath)
+	//设置属性：父文件夹
+	b.setParentFolder(filePath)
+	b.setBookID()
+	return &b
+}
+
+func (b *Book) setParentFolder(filePath string) {
+	//取得文件所在文件夹的路径
+	//如果类型是文件夹，同时最后一个字符是路径分隔符的话，就多取一次dir，移除多余的Unix路径分隔符或windows分隔符
+	if b.BookType == BookTypeDir {
+		if filePath[len(filePath)-1] == '/' || filePath[len(filePath)-1] == '\\' {
+			filePath = filepath.Dir(filePath)
+		}
+	}
+	folder := filepath.Dir(filePath)
+	//Example
+	//Code:
+	//fmt.Println("On Unix:")
+	//fmt.Println(filepath.Dir("/foo/bar/baz.js"))
+	//fmt.Println(filepath.Dir("/foo/bar/baz"))
+	//fmt.Println(filepath.Dir("/foo/bar/baz/"))
+	//fmt.Println(filepath.Dir("/dirty//path///"))
+	//fmt.Println(filepath.Dir("dev.txt"))
+	//fmt.Println(filepath.Dir("../test.txt"))
+	//fmt.Println(filepath.Dir(".."))
+	//fmt.Println(filepath.Dir("."))
+	//fmt.Println(filepath.Dir("/"))
+	//fmt.Println(filepath.Dir(""))
+	//Output:
+	//	On Unix:
+	//	/foo/bar
+	//	/foo/bar
+	//	/foo/bar/baz
+	//	/dirty/path
+	//	.
+	//	..
+	//	.
+	//	.
+	//	/
+	//	.
+	post := strings.LastIndex(folder, "/") //Unix路径分隔符
+	if post == -1 {
+		post = strings.LastIndex(folder, "\\") //windows分隔符
+	}
+	if post != -1 {
+		//filePath = string([]rune(filePath)[post:]) //为了防止中文字符被错误截断，先转换成rune，再转回来
+		p := folder[post:]
+		p = strings.ReplaceAll(p, "\\", "")
+		p = strings.ReplaceAll(p, "/", "")
+		b.ParentFolder = p
+	}
+}
+
+func (b *Book) setName(filePath string) {
+	b.Name = filePath
+	//设置属性：书籍名，取文件后缀(可能为 .zip .rar .pdf .mp4等等)。
+	if b.BookType != BookTypeBooksGroup { //不是书籍组(book_group)。
 		post := strings.LastIndex(filePath, "/") //Unix路径分隔符
 		if post == -1 {
 			post = strings.LastIndex(filePath, "\\") //windows分隔符
 		}
 		if post != -1 {
 			//filePath = string([]rune(filePath)[post:]) //为了防止中文字符被错误截断，先转换成rune，再转回来
-			filePath = filePath[post:]
-			filePath = strings.ReplaceAll(filePath, "\\", "")
-			filePath = strings.ReplaceAll(filePath, "/", "")
+			name := filePath[post:]
+			name = strings.ReplaceAll(name, "\\", "")
+			name = strings.ReplaceAll(name, "/", "")
+			b.Name = name
 		}
-		b.Name = filePath
 	}
-	b.setBookID()
-	return &b
 }
 
 // GetBookByID 获取特定书籍，复制一份数据
@@ -416,21 +511,6 @@ func (s AllPageInfo) Len() int {
 
 // Less 按时间或URL，将图片排序
 func (s AllPageInfo) Less(i, j int) (less bool) {
-	//如何定义 s[i] < s[j]  根据文件名
-	//numI, err1 := getNumberFromString(s[i].NameInArchive)
-	//if err1 != nil {
-	//	less = strings.Compare(s[i].NameInArchive, s[j].NameInArchive) > 0
-	//	return less
-	//}
-	//numJ, err2 := getNumberFromString(s[j].NameInArchive)
-	//if err2 != nil {
-	//	less = strings.Compare(s[i].NameInArchive, s[j].NameInArchive) > 0
-	//	return less
-	//}
-	////fmt.Println("numI:",numI)
-	////fmt.Println("numJ:",numJ)
-	//less = numI < numJ //如果有的话，比较文件名里的数字
-
 	//如何定义 s[i] < s[j]  根据文件名(第三方库、自然语言字符串)
 	less = tools.Compare(s[i].NameInArchive, s[j].NameInArchive)
 
@@ -520,7 +600,7 @@ func (b *Book) setClover() {
 	}
 }
 
-func (b *Book) SetFilePath(path string) {
+func (b *Book) setFilePath(path string) {
 	fileAbaPath, err := filepath.Abs(path)
 	if err != nil {
 		//因为权限问题，无法取得绝对路径的情况下，用相对路径

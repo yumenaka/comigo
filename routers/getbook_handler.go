@@ -36,3 +36,15 @@ func getBookHandler(c *gin.Context) {
 		return
 	}
 }
+
+func getBookShelfHandler(c *gin.Context) {
+	//书籍排列的方式，默认name，TODO:按照修改时间、作者、文件大小等排序书籍
+	sort := c.DefaultQuery("sort", "name")
+	bookInfoList, err := common.GetAllBookInfo(sort)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	bookInfoList.SortBooks()
+	c.PureJSON(http.StatusOK, bookInfoList.BookInfos)
+}

@@ -28,7 +28,7 @@ func ScanAndGetBookList(path string) (bookList []*Book, err error) {
 		//路径深度
 		depth := strings.Count(path, "/") - strings.Count(fileOrDirPath, "/")
 		if depth > Config.MaxDepth {
-			fmt.Println("超过最大搜索深度，path:" + path)
+			fmt.Printf("超过最大搜索深度 %d，base：%s scan: %s:\n", Config.MaxDepth, fileOrDirPath, path)
 			return filepath.SkipDir //当WalkFunc的返回值是filepath.SkipDir时，Walk将会跳过这个目录，照常执行下一个文件。
 		}
 		if CheckPathSkip(path) {
@@ -119,7 +119,8 @@ func scanAndGetBook(filePath string) (*Book, error) {
 			} else {
 				u, ok := f.(archiver.File) //f.Name不包含路径信息.需要转换一下
 				if !ok {
-					//如果是文件夹中的图片
+					//如果是文件夹+图片
+					book.BookType = BookTypeDir
 					////用Archiver的虚拟文件系统提供图片文件
 					//book.Pages = append(book.Pages, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: "", Url: "/cache/" + book.BookID + "/" + url.PathEscape(path)})
 
@@ -131,7 +132,6 @@ func scanAndGetBook(filePath string) (*Book, error) {
 					////用Archiver的虚拟文件系统提供图片文件
 					//TempURL := "/cache/" + book.BookID + "/" + url.PathEscape(u.NameInArchive)
 					//book.Pages = append(book.Pages, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: u.NameInArchive, Url: TempURL})
-
 					//实验：用getfile接口提供提供图片文件
 					TempURL := "api/getfile?id=" + book.BookID + "&filename=" + url.PathEscape(u.NameInArchive)
 					book.Pages = append(book.Pages, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: u.NameInArchive, Url: TempURL})
