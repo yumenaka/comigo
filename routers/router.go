@@ -84,7 +84,6 @@ type Login struct {
 
 //2、设置获取书籍信息、图片文件的 API
 func setWebAPI(engine *gin.Engine) {
-
 	//TODO：处理登陆 https://www.chaindesk.cn/witbook/19/329
 	//TODO：实现第三方认证，可参考 https://darjun.github.io/2021/07/26/godailylib/goth/
 	engine.POST("/login", func(c *gin.Context) {
@@ -164,20 +163,10 @@ func setWebAPI(engine *gin.Engine) {
 		*/
 		c.String(http.StatusOK, fmt.Sprintf("'%s' uploaded!", file.Filename))
 	})
-	//web端需要的服务器设定
-	api.GET("/setting.json", func(c *gin.Context) {
-		c.PureJSON(http.StatusOK, common.Config)
-	})
-	//web端需要的服务器设定
-	api.GET("/server_status.json", func(c *gin.Context) {
-		c.PureJSON(http.StatusOK, common.GetServerStatus())
-	})
-	////阅读中的书籍json
-	//api.GET("/book.json", func(c *gin.Context) {
-	//	c.PureJSON(http.StatusOK, common.ReadingBook)
-	//})
-	//书架信息，不包含每页信息
-	api.GET("/getshelf", getBookShelfHandler)
+	//web端需要的服务器状态，包括标题、机器状态等
+	api.GET("/server_status", serverStatusHandler)
+	//获取书架信息，不包含每页信息
+	api.GET("/getlist", getBookListHandler)
 	//通过URL字符串参数查询书籍信息
 	api.GET("/getbook", getBookHandler)
 	//通过URL字符串参数获取特定文件
@@ -255,13 +244,13 @@ func StartWebServer() {
 	setWebAPI(engine)
 	//TODO：设定书的心下载链接
 	if common.GetBooksNumber() >= 1 {
-		allBook, err := common.GetAllBookInfo("name")
+		allBook, err := common.GetAllBookInfoList("name")
 		if err != nil {
 			fmt.Println("设置文件下载失败")
 		} else {
 			for _, info := range allBook.BookInfos {
 				//下载文件
-				if !info.IsDir {
+				if info.BookType != common.BookTypeBooksGroup && info.BookType != common.BookTypeDir {
 					engine.StaticFile("/raw/"+info.Name, info.FilePath)
 				}
 			}

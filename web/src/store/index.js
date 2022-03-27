@@ -34,7 +34,7 @@ const store = createStore({
         },
       ],
     }],
-    setting: {
+    server_status: {
       template: "scroll",
       sketch_count_seconds: 30,
     },
@@ -48,24 +48,24 @@ const store = createStore({
   },
   //mutaitions改变 只能执行同步操作。不能直接调用。需要使用 store.commit('函数名') 方法
   mutations: {
-    change_template_to_scroll(state) {
-      state.setting.template = "scroll";
-      console.log("change_template_to_scroll:" + state.setting.template);
-    },
-    change_template_to_flip(state) {
-      state.setting.template = "flip";
-      console.log("change_template_to_flip:" + state.setting.template);
-    },
-    change_template_to_sketch(state) {
-      state.setting.template = "sketch";
-      console.log("change_template_to_sketch:" + state.setting.template);
-    },
+    // change_template_to_scroll(state) {
+    //   state.server_status.template = "scroll";
+    //   console.log("change_template_to_scroll:" + state.server_status.template);
+    // },
+    // change_template_to_flip(state) {
+    //   state.server_status.template = "flip";
+    //   console.log("change_template_to_flip:" + state.server_status.template);
+    // },
+    // change_template_to_sketch(state) {
+    //   state.server_status.template = "sketch";
+    //   console.log("change_template_to_sketch:" + state.server_status.template);
+    // },
     increment(state) {
       state.count++;
     },
     //使用mutation()函数（store.commit('')）的时候，还可以传入额外的参数，也就是载荷payload
-    syncSettingData(state, payload) {
-      state.setting = payload.message;
+    syncSeverStatusData(state, payload) {
+      state.server_status = payload.message;
     },
     syncBookData(state, payload) {
       state.book = payload.message;
@@ -82,16 +82,18 @@ const store = createStore({
       context.commit("increment");
     },
     //拉取远程设定数据
-    async syncSettingDataAction(context) {
-      const msg = await axios.get("setting.json").then(
+    async syncSeverStatusDataAction(context) {
+      const msg = await axios.get("server_status").then(
         (res) => res.data,
         () => ""
-      );
+      ).finally(() => {
+
+      });
       const payload = {
         message: msg,
       };
-      context.commit("syncSettingData", payload);
-      console.log("syncSettingData!");
+      context.commit("syncSeverStatusData", payload);
+      console.log("syncSeverStatusData!");
     },
     //拉取当前阅读书籍数据
     async syncBookDataAction(context) {

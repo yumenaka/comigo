@@ -31,25 +31,31 @@ func init() {
 }
 
 var (
-	ConfigFile  = ""
-	Version     = "v0.6.0"
-	ReadingBook *Book
-	slcBooks    []*Book
-	mapBooks    map[string]*Book
-	Config      = ServerSettings{
-		OpenBrowser: true,
-		DisableLAN:  false,
+	ConfigFile    = ""
+	Version       = "v0.6.0"
+	ReadingBook   *Book
+	slcBooks      []*Book
+	mapBooks      map[string]*Book //实际存在的书
+	mapBookGroups map[string]*Book //通过分析，生成的书籍分组
+	Config        = ServerSettings{
+		OpenBrowser:            true,
+		DisableLAN:             false,
+		Port:                   1234,
+		GenerateMetaData:       false,
+		LogToFile:              false,
+		MaxDepth:               3,
+		MinImageNum:            3,
+		ZipFileTextEncoding:    "",
+		CacheFilePath:          "",
+		Host:                   "",
+		SketchCountSeconds:     90,
+		TempPATH:               "",
+		CleanAllTempFileOnExit: true,
+		CleanAllTempFile:       true,
 		Stores: Bookstores{
 			mapBookstores: make(map[string]*singleBookstore),
 			SortBy:        "name",
 		},
-		Port:                 1234,
-		GenerateMetaData:     false,
-		LogToFile:            false,
-		MaxDepth:             3,
-		MinImageNum:          3,
-		ZipFileTextEncoding:  "",
-		CacheFilePath:        "",
 		SupportFileType:      []string{".zip", ".tar", ".rar", ".cbr", ".cbz", ".epub", ".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".tar.xz", ".txz", ".tar.lz4", ".tlz4", ".tar.sz", ".tsz", ".bz2", ".gz", ".lz4", ".sz", ".xz", ".pdf", ".mp4", ".webm"},
 		SupportMediaType:     []string{".jpg", ".jpeg", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp", ".webp", ".ico", ".heic", ".avif"},
 		ExcludeFileOrFolders: []string{".idea", ".vscode", ".git", "node_modules", "flutter_ui", ".local/share/Trash", "$RECYCLE.BIN", "Config.Msi", "System Volume Information", ".sys", " .DS_Store", ".dll", ".log", ".cache", ".exe"},
@@ -72,25 +78,10 @@ var (
 			RemotePort:       50000, //remote_port
 			RandomRemotePort: true,
 		},
-		Host:                   "",
-		SketchCountSeconds:     90,
-		TempPATH:               "",
-		CleanAllTempFileOnExit: true,
-		CleanAllTempFile:       true,
+
 		//Template:             "scroll", //multi、single、random etc.
 	}
 )
-
-// ServerStatus 服务器当前状况
-type ServerStatus struct {
-	//当前拥有的书籍总数
-	NumberOfBooks int
-	//在线用户数
-	NumberOfOnLineUser int
-	//在线设备数
-	NumberOfOnLineDevices int
-	OSInfo                tools.SystemStatus
-}
 
 // CheckPathSkip 检查路径是否应该跳过（排除文件，文件夹列表）。
 func CheckPathSkip(path string) bool {
@@ -100,16 +91,6 @@ func CheckPathSkip(path string) bool {
 		}
 	}
 	return false
-}
-
-// GetServerStatus 获取服务器的状态
-func GetServerStatus() *ServerStatus {
-	return &ServerStatus{
-		NumberOfBooks:         len(mapBooks),
-		NumberOfOnLineUser:    1,
-		NumberOfOnLineDevices: 1,
-		OSInfo:                tools.GetSystemStatus(),
-	}
 }
 
 type ServerSettings struct {

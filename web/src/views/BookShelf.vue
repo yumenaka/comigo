@@ -177,21 +177,14 @@ export default defineComponent({
     // beforeUnmount: 当指令与在绑定元素父组件卸载之前时，只调用一次。
     // unmounted: 当指令与元素解除绑定且父组件已卸载时，只调用一次。
     created() {
+        if (this.$store.state.server_status.ServerName != null) {
+            document.title = this.$store.state.server_status.ServerName
+        }
+
+        this.initBookShelf()
         if (localStorage.getItem("ReaderMode") != null) {
             this.ReaderMode = localStorage.getItem("ReaderMode");
         }
-
-        axios
-            .get("getshelf")
-            .then((response) => (this.bookshelf = response.data))
-            .finally(() => {
-                // //不能这么写，每回返回书架都会执行
-                // if (this.firstOpenFlag) {
-                //     this.firstOpenFlag = false
-                //     console.log("this.bookshelf[0].id :" + this.bookshelf[0].id)
-                //     setTimeout(this.openBookOnce, 1000)
-                // }
-            })
         //阅读器模式，scroll或flip
         if (localStorage.getItem("ReaderMode") != null) {
             this.ReaderMode = localStorage.getItem("ReaderMode");
@@ -236,10 +229,6 @@ export default defineComponent({
     //在绑定元素的父组件被挂载后调用。
     mounted() {
         //this.bookshelf.lenth != 1 && 
-
-    },
-
-    onMounted() {
         //console.log('mounted in the composition api!')
         this.isLandscapeMode = this.inLandscapeModeCheck();
         this.isPortraitMode = !this.inLandscapeModeCheck();
@@ -248,6 +237,7 @@ export default defineComponent({
             //视图渲染之后运行的代码
         })
     },
+
     //卸载前
     beforeUnmount() {
         //组件销毁前，销毁监听事件
@@ -255,6 +245,37 @@ export default defineComponent({
         // window.removeEventListener('resize', this.onResize)
     },
     methods: {
+        //获取所有书籍信息
+        initBookShelf() {
+            axios
+                .get("getlist?max_depth=1")
+                .then((response) => (this.bookshelf = response.data))
+                .finally(() => {
+                    // //不能这么写，每回返回书架都会执行
+                    // if (this.firstOpenFlag) {
+                    //     this.firstOpenFlag = false
+                    //     console.log("this.bookshelf[0].id :" + this.bookshelf[0].id)
+                    //     setTimeout(this.openBookOnce, 1000)
+                    // }
+                })
+        },
+        getBooksGroupByBookID(bookID) {
+            axios
+                .get("getshelf?book_group_id=" + bookID)
+                .then((response) => {
+                    if (response.data.name != null) {
+                        this.bookshelf = response.data
+                    }
+                })
+                .finally(() => {
+                    // //不能这么写，每回返回书架都会执行
+                    // if (this.firstOpenFlag) {
+                    //     this.firstOpenFlag = false
+                    //     console.log("this.bookshelf[0].id :" + this.bookshelf[0].id)
+                    //     setTimeout(this.openBookOnce, 1000)
+                    // }
+                })
+        },
         //打开书籍
         onOpenBook(bookID) {
             if (this.nowTemplate == "flip" || this.nowTemplate == "sketch") {

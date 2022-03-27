@@ -237,7 +237,6 @@
 				</n-input-number>
 			</n-space>
 		</Drawer>
-
 		<n-back-top :show="showBackTopFlag" type="info" color="#8a2be2" :right="20" :bottom="20" />
 		<n-button @click="scrollToTop(90);" size="large" secondary strong>{{ $t('back-to-top') }}</n-button>
 	</div>
@@ -290,7 +289,6 @@ export default defineComponent({
 			color: "#f6f7eb",
 			colorHeader: "#d1c9c1",
 		});
-
 		const imageParameters = reactive({
 			resize_width: -1,// 缩放图片，指定宽度
 			resize_height: -1,// 指定高度，缩放图片
@@ -301,7 +299,6 @@ export default defineComponent({
 			auto_crop: 1,// 自动切白边阈值，范围是0~100,其实为1就够了	
 			gray: false,//黑白化
 		});
-
 		//单选按钮绑定的数值,ref函数：返回一个响应式的引用
 		// const checkedValueRef = ref(null)
 		return {
@@ -328,11 +325,9 @@ export default defineComponent({
 					var full_url = base_str + resize_width_str + resize_height_str + do_auto_resize_str + resize_max_height_str + auto_crop_str + gray_str
 					// console.log(full_url);
 					return full_url;
-
 				} else {
 					return source_url
 				}
-
 			},
 			//开关的颜色
 			railStyle: ({ focused, checked }) => {
@@ -403,20 +398,16 @@ export default defineComponent({
 			imageMaxWidth: 10,
 			//屏幕宽横比，inLandscapeMode的判断依据
 			aspectRatio: 1.2,
-
 			//状态驱动的动态 CSS
 			// https://v3.cn.vuejs.org/api/sfc-style.html#%E7%8A%B6%E6%80%81%E9%A9%B1%E5%8A%A8%E7%9A%84%E5%8A%A8%E6%80%81-css
 			//图片宽度的单位，是否使用百分比
-			imageWidth_usePercentFlag: true,
-
+			imageWidth_usePercentFlag: false,
 			//横屏(Landscape)状态的漫画页宽度，百分比
 			singlePageWidth_Percent: 50,
 			doublePageWidth_Percent: 95,
-
 			//横屏(Landscape)状态的漫画页宽度，PX
 			singlePageWidth_PX: 720,
 			doublePageWidth_PX: 1080,
-
 			//可见范围宽高的具体值
 			clientWidth: 0,
 			clientHeight: 0,

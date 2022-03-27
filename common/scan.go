@@ -13,36 +13,40 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 )
 
 // ScanAndGetBookList 扫描一个路径，并返回书籍列表
-func ScanAndGetBookList(path string) (bookList []*Book, err error) {
-	fileOrDirPath, err := filepath.Abs(path)
+func ScanAndGetBookList(storePath string) (bookList []*Book, err error) {
+	storePathAbs, err := filepath.Abs(storePath)
 	if err != nil {
-		fileOrDirPath = path
+		storePathAbs = storePath
 		fmt.Println(err)
 	}
-	err = filepath.Walk(fileOrDirPath, func(path string, fileInfo os.FileInfo, err error) error {
+	err = filepath.Walk(storePathAbs, func(bookFilePath string, fileInfo os.FileInfo, err error) error {
 		//路径深度
-		depth := strings.Count(path, "/") - strings.Count(fileOrDirPath, "/")
+		depth := strings.Count(bookFilePath, "/") - strings.Count(storePathAbs, "/")
+		if runtime.GOOS == "windows" {
+			depth = strings.Count(bookFilePath, "\\") - strings.Count(storePathAbs, "\\")
+		}
 		if depth > Config.MaxDepth {
-			fmt.Printf("超过最大搜索深度 %d，base：%s scan: %s:\n", Config.MaxDepth, fileOrDirPath, path)
+			fmt.Printf("超过最大搜索深度 %d，base：%s scan: %s:\n", Config.MaxDepth, storePathAbs, bookFilePath)
 			return filepath.SkipDir //当WalkFunc的返回值是filepath.SkipDir时，Walk将会跳过这个目录，照常执行下一个文件。
 		}
-		if CheckPathSkip(path) {
-			fmt.Println("Skip Scan:" + path)
+		if CheckPathSkip(bookFilePath) {
+			fmt.Println("Skip Scan:" + bookFilePath)
 			return filepath.SkipDir
 		}
 		if fileInfo == nil {
 			return err
 		}
-		if !isSupportArchiver(path) && !fileInfo.IsDir() {
+		if !isSupportArchiver(bookFilePath) && !fileInfo.IsDir() {
 			return nil
 		}
 		//得到书籍文件数据
-		book, err := scanAndGetBook(path)
+		book, err := scanAndGetBook(bookFilePath, storePath, depth)
 		if err != nil {
 			fmt.Println(err)
 			return nil
@@ -70,7 +74,7 @@ func ScanAndGetBookList(path string) (bookList []*Book, err error) {
 }
 
 // 扫描一个路径，并返回对应书籍
-func scanAndGetBook(filePath string) (*Book, error) {
+func scanAndGetBook(filePath string, storePath string, depth int) (*Book, error) {
 	//打开文件
 	var file, err = os.OpenFile(filePath, os.O_RDONLY, 0400) //Use mode 0400 for a read-only // file and 0600 for a readable+writable file.
 	if err != nil {
@@ -83,7 +87,7 @@ func scanAndGetBook(filePath string) (*Book, error) {
 	}
 	//初始化一本书，设置文件路径等等
 
-	book := InitBook(filePath, FileInfo.ModTime(), FileInfo.Size())
+	book := NewBook(filePath, FileInfo.ModTime(), FileInfo.Size(), storePath, depth)
 	//为解决archiver/v4的BUG “zip文件无法读取2级目录” 单独处理zip文件
 	if book.BookType == BookTypeZip || book.BookType == BookTypeCbz || book.BookType == BookTypeEpub {
 		//使用Archiver的虚拟文件系统，无法处理非UTF-8编码
@@ -231,7 +235,7 @@ func isSupportArchiver(checkPath string) bool {
 //		return nil, err
 //	}
 //	//初始化，生成UUID
-//	book := InitBook(0, dirPath, time.Now(), true, 0, true)
+//	book := NewBook(0, dirPath, time.Now(), true, 0, true)
 //	for _, file := range files {
 //		if file.IsDir() {
 //			continue

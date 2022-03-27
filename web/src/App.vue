@@ -36,8 +36,8 @@ export default defineComponent({
   },
   created() {
     // this.$store.dispatch("syncBookDataAction");
-    this.$store.dispatch("syncSettingDataAction");
-    this.$store.dispatch("syncBookShelfDataAction");
+    this.$store.dispatch("syncSeverStatusDataAction");
+    // this.$store.dispatch("syncBookShelfDataAction");
     this.selectTemplate = this.getDefaultTemplate;
   },
   beforeMount() {
