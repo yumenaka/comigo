@@ -49,6 +49,9 @@ export default defineConfig({
       '/api': {
         target: 'http://127.0.0.1:1234/',
       },
+      '/favicon.ico': {
+        target: 'http://127.0.0.1:1234/',
+      },
       '/raw': {
         target: 'http://127.0.0.1:1234/',
         changeOrigin: true

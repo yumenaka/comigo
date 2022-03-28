@@ -3,7 +3,7 @@
 		<Header
 			class="footer"
 			v-if="this.showHeaderFlag"
-			:bookIsFolder="book.IsFolder"
+			:setDownLoadLink="this.needDownloadLink()"
 			:bookName="book.name"
 			:showReturnIcon="true"
 		>
@@ -421,7 +421,6 @@ export default defineComponent({
 	// updated: 在包含组件的 VNode 及其子组件的 VNode 更新后调用。
 	// beforeUnmount: 当指令与在绑定元素父组件卸载之前时，只调用一次。
 	// unmounted: 当指令与元素解除绑定且父组件已卸载时，只调用一次。
-
 	created() {
 		//根据路由参数获取特定书籍
 		axios
@@ -572,6 +571,9 @@ export default defineComponent({
 		window.removeEventListener('resize', this.onResize)
 	},
 	methods: {
+		needDownloadLink() {
+			return this.book.book_type != "dir"
+		},
 		//打开抽屉
 		drawerActivate(place) {
 			this.drawerActive = true

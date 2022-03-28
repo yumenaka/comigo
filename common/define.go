@@ -28,11 +28,12 @@ func init() {
 	setupCloseHander()
 	slcBooks = make([]*Book, 0, 10) //make:为slice, map, channel分配内存，并返回一个初始化的值,第二参数指定的是切片的长度，第三个参数是用来指定预留的空间长度——避免二次分配内存带来的开销，提高程序的性能.
 	mapBooks = make(map[string]*Book)
+	mapBookGroups = make(map[string]*Book)
 }
 
 var (
 	ConfigFile    = ""
-	Version       = "v0.6.0"
+	Version       = "v0.7.1"
 	ReadingBook   *Book
 	slcBooks      []*Book
 	mapBooks      map[string]*Book //实际存在的书

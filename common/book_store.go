@@ -59,9 +59,9 @@ func (s *singleBookstore) initBookGroupMap() error {
 			parentTempMap[b.ParentFolder] = append(parentTempMap[b.ParentFolder], b)
 		}
 		//循环parentMap，把有相同parent的书创建为一个书组
-		for parent, list := range parentTempMap {
-			//新建一本书籍
-			newBook := NewBook(filepath.Dir(list[0].FilePath), time.Now(), 0, s.StorePath, depth-1)
+		for parent, sameParentBookList := range parentTempMap {
+			//新建一本书
+			newBook := NewBook(filepath.Dir(sameParentBookList[0].FilePath), time.Now(), 0, s.StorePath, depth-1)
 			//类型是书籍组
 			newBook.BookType = BookTypeBooksGroup
 			//名字应该设置成Name
@@ -69,22 +69,24 @@ func (s *singleBookstore) initBookGroupMap() error {
 				fmt.Printf("newBook.Name!=parent!?")
 			}
 			//初始化ChildBook
-			newBook.ChildBook = make(map[string]*Book)
-
 			//然后把同一parent的书，都加进某个书籍组
-			setCover := true
-			for _, b := range list {
+			setCover := true //封面只设置一次
+			newBook.ChildBook = make(map[string]*Book)
+			for i, bookInList := range sameParentBookList {
 				//顺便设置一下封面，只设置一次
 				if setCover {
 					setCover = false
-					newBook.Cover = b.Cover //
+					newBook.Cover = bookInList.Cover //
 				}
-				newBook.ChildBook[b.BookID] = &b
+				newBook.ChildBook[bookInList.BookID] = &sameParentBookList[i]
 			}
 			//如果书籍组的子书籍数量大于等于1，将书籍组加到上一层
 			if len(newBook.ChildBook) >= 1 {
 				depthBooksMap[depth-1] = append(depthBooksMap[depth-1], *newBook)
+				//将这本书加到子书库的BookGroup表（s.BookGroupMap）里面去
 				s.BookGroupMap[newBook.BookID] = newBook
+				//将这本书加到BookGroup总表（mapBookGroups）里面去
+				mapBookGroups[newBook.BookID] = newBook
 				fmt.Print("生成book_group：")
 				fmt.Println(newBook)
 			}

@@ -4,7 +4,9 @@
             class="footer"
             v-if="this.showHeaderFlag"
             :bookIsFolder="false"
-            :showReturnIcon="false"
+            :bookName="this.bookShelfTitle"
+            :showReturnIcon="this.headerShowReturnIcon"
+            :setDownLoadLink="false"
         >
             <!-- 右边的设置图标，点击屏幕中央也可以打开 -->
             <n-icon size="40" @click="drawerActivate('right')">
@@ -21,6 +23,7 @@
             <!-- <n-grid cols="2 s:4 m:5 l:6 xl:8 2xl:10" x-gap="2" y-gap="23" responsive="screen"> -->
             <n-grid
                 cols="1 150:1 280:2 450:3 600:4 750:5 900:6 1050:7 1200:8 1350:9 1500:10 1800:12 2100:14 2400:16 2700:18 3000:20"
+                y-gap="23"
             >
                 <!-- 在组件中使用v-for时，key是必须的 -->
                 <n-grid-item v-for="(book_info, key) in this.bookshelf" :key="key">
@@ -29,7 +32,8 @@
                         :id="book_info.id"
                         :image_src="book_info.cover.url"
                         :ReaderMode="this.ReaderMode"
-                        :showTitle="false"
+                        :showTitle="this.bookCardShowTitle"
+                        @click="onOpenBook(book_info.id, book_info.book_type)"
                     ></BookCard>
                 </n-grid-item>
             </n-grid>
@@ -125,12 +129,18 @@ export default defineComponent({
     },
     data() {
         return {
-            // firstOpenFlag: true,
+            bookShelfTitle: "loading",
+            headerShowReturnIcon: false,
+            bookCardShowTitle: true,
             ReaderMode: "scroll",
+            maxDepth: 1,
             bookshelf: [{
                 name: "loading",
                 all_page_num: 1,
                 id: "12345",
+                book_type: "dir",
+                parent_folder: "",
+                depth: 1,
                 pages: [
                     {
                         height: 500,
@@ -177,40 +187,20 @@ export default defineComponent({
     // beforeUnmount: 当指令与在绑定元素父组件卸载之前时，只调用一次。
     // unmounted: 当指令与元素解除绑定且父组件已卸载时，只调用一次。
     created() {
-        if (this.$store.state.server_status.ServerName != null) {
-            document.title = this.$store.state.server_status.ServerName
-        }
-
-        this.initBookShelf()
-        if (localStorage.getItem("ReaderMode") != null) {
-            this.ReaderMode = localStorage.getItem("ReaderMode");
-        }
-        //阅读器模式，scroll或flip
-        if (localStorage.getItem("ReaderMode") != null) {
-            this.ReaderMode = localStorage.getItem("ReaderMode");
-        }
+        this.getBookShelfData();
+        this.setReaderMode();
         //监听路由参数的变化，刷新本地的ReaderMode
         this.$watch(
             () => this.$route.params,
-            () => {
-                console.log("BookShelf: route change");
-                //阅读器模式，scroll或flip
-                if (localStorage.getItem("ReaderMode") != null) {
-                    this.ReaderMode = localStorage.getItem("ReaderMode");
-                    console.log("setReaderMode" + this.ReaderMode);
-                }
+            () => {//想知道参数的变化的话，可把参数设置为 toParams, previousParams
+                // console.log(toParams);
+                // console.log(previousParams);
+                // console.log("BookShelf: route change");
+                this.setReaderMode();
+                this.setBookShelfTitle();
+                this.getBookShelfData();
             }
-            // (toParams, previousParams) => {
-            //     console.log(toParams);
-            //     console.log(previousParams);
-            //     //阅读器模式，scroll或flip
-            //     if (localStorage.getItem("ReaderMode") != null) {
-            //         this.ReaderMode = localStorage.getItem("ReaderMode");
-            //         console.log("setReaderMode" + this.ReaderMode);
-            //     }
-            // }
         )
-        this.imageMaxWidth = window.innerWidth;
         //初始化默认值,读取出来的都是字符串，不要直接用
         //是否显示顶部页头
         if (localStorage.getItem("showHeaderFlag") === "true") {
@@ -240,51 +230,83 @@ export default defineComponent({
 
     //卸载前
     beforeUnmount() {
-        //组件销毁前，销毁监听事件
-        // window.removeEventListener("scroll", this.onScroll);
-        // window.removeEventListener('resize', this.onResize)
     },
     methods: {
+        //初始化或者路由变化时，更新本地BookShelf相关数据
+        getBookShelfData() {
+            if (this.$route.params.id) {
+                // console.log("BookShelf getBookShelfData!  this.$route.params.id" + this.$route.params.id)
+                //根据路由参数获取特定书籍组
+                this.getBooksGroupByBookID(this.$route.params.id)
+                this.headerShowReturnIcon = true
+            } else {
+                this.initBookShelf()
+                this.headerShowReturnIcon = false
+            }
+        },
+        //初始化或者路由变化时，读取其他页面的更改，并存储到本地存储的阅读器模式（ReaderMode）这个值，
+        setReaderMode() {
+            //阅读器模式，scroll或flip
+            if (localStorage.getItem("ReaderMode") != null) {
+                this.ReaderMode = localStorage.getItem("ReaderMode");
+            }
+        },
         //获取所有书籍信息
         initBookShelf() {
             axios
                 .get("getlist?max_depth=1")
                 .then((response) => (this.bookshelf = response.data))
                 .finally(() => {
-                    // //不能这么写，每回返回书架都会执行
-                    // if (this.firstOpenFlag) {
-                    //     this.firstOpenFlag = false
-                    //     console.log("this.bookshelf[0].id :" + this.bookshelf[0].id)
-                    //     setTimeout(this.openBookOnce, 1000)
-                    // }
+                    this.setBookShelfTitle();
                 })
         },
         getBooksGroupByBookID(bookID) {
+            // console.log("getBooksGroupByBookID bookID:" + bookID)
             axios
-                .get("getshelf?book_group_id=" + bookID)
+                .get("getlist?book_group_book_id=" + bookID)
                 .then((response) => {
-                    if (response.data.name != null) {
+                    if (response.data[0].name != null) {
                         this.bookshelf = response.data
                     }
                 })
                 .finally(() => {
-                    // //不能这么写，每回返回书架都会执行
-                    // if (this.firstOpenFlag) {
-                    //     this.firstOpenFlag = false
-                    //     console.log("this.bookshelf[0].id :" + this.bookshelf[0].id)
-                    //     setTimeout(this.openBookOnce, 1000)
-                    // }
+                    this.setBookShelfTitle();
                 })
         },
+        setBookShelfTitle() {
+            if (this.bookshelf[0].depth != null) {
+                this.max_depth = this.bookshelf[0].depth
+            }
+            //默认显示服务器版本
+            if (this.$store.state.server_status.ServerName) {
+                //设置浏览器标签标题
+                document.title = this.$store.state.server_status.ServerName
+                //设置Header标题
+                this.bookShelfTitle = this.$store.state.server_status.ServerName
+            }
+            //如果路由参数里面有ID（正在展示某个书籍组）
+            if (this.$route.params.id) {
+                if (this.bookshelf[0].parent_folder != null && this.bookshelf[0].parent_folder != "") {
+                    console.log("this.bookshelf[0]:" + this.bookshelf[0].parent_folder)
+                    //设置浏览器标签标题
+                    document.title = this.bookshelf[0].parent_folder;
+                    //设置Header标题
+                    this.bookShelfTitle = this.bookshelf[0].parent_folder;
+                }
+            }
+        },
         //打开书籍
-        onOpenBook(bookID) {
-            if (this.nowTemplate == "flip" || this.nowTemplate == "sketch") {
+        onOpenBook(bookID, bookType) {
+            console.log("onOpenBook  bookID：" + bookID + " bookType：" + bookType)
+            if (bookType == "book_group") {
+                this.$router.push({ name: 'ChildBookShelf', params: { id: bookID } })
+                return
+            }
+            if (this.ReaderMode == "flip" || this.ReaderMode == "sketch") {
                 // 命名路由，并加上参数，让路由建立 url
                 this.$router.push({ name: 'FlipMode', params: { id: bookID } })
-            } else if (this.nowTemplate == "scroll") {
-                // 命名路由，并加上参数，让路由建立 url
-                this.$router.push({ name: 'ScrollMode', params: { id: bookID } })
-            } else {
+            }
+            if (this.ReaderMode == "scroll") {
                 // 命名路由，并加上参数，让路由建立 url
                 this.$router.push({ name: 'ScrollMode', params: { id: bookID } })
             }
@@ -292,7 +314,7 @@ export default defineComponent({
         openBookOnce() {
             console.log("this.bookshelf[0].id :" + this.bookshelf[0].id)
             if (this.bookshelf[0].id != "12345") {
-                this.onOpenBook(this.bookshelf[0].id)
+                this.onOpenBook(this.bookshelf[0].id, this.bookshelf[0].book_type)
             }
         },
         //打开抽屉

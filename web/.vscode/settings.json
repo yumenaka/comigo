@@ -17,4 +17,5 @@
     ],
     "i18n-ally.dirStructure": "auto",
     "vue3snippets.enable-compile-vue-file-on-did-save-code": false,
+    "vue-i18n.i18nPaths": "src\\locales",
   }

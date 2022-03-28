@@ -164,7 +164,7 @@ func setWebAPI(engine *gin.Engine) {
 		c.String(http.StatusOK, fmt.Sprintf("'%s' uploaded!", file.Filename))
 	})
 	//web端需要的服务器状态，包括标题、机器状态等
-	api.GET("/server_status", serverStatusHandler)
+	api.GET("/getstatus", serverStatusHandler)
 	//获取书架信息，不包含每页信息
 	api.GET("/getlist", getBookListHandler)
 	//通过URL字符串参数查询书籍信息

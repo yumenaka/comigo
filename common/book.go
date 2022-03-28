@@ -326,9 +326,9 @@ func GetBookInfoListByMaxDepth(depth int, sort string) (*BookInfoList, error) {
 	return nil, errors.New("can not found bookshelf")
 }
 
-func GetBookInfoListByBookID(BookID string, sort string) (*BookInfoList, error) {
+func GetBookInfoListByBookGroupBookID(BookID string, sort string) (*BookInfoList, error) {
 	var infoList BookInfoList
-	book := mapBooks[BookID]
+	book := mapBookGroups[BookID]
 	if book != nil {
 		//首先加上所有真实的书籍
 		for _, b := range book.ChildBook {

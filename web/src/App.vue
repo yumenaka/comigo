@@ -41,6 +41,9 @@ export default defineComponent({
     this.selectTemplate = this.getDefaultTemplate;
   },
   beforeMount() {
+    if (this.$store.state.server_status.ServerName != null) {
+      document.title = this.$store.state.server_status.ServerName
+    }
   },
 
   methods: {

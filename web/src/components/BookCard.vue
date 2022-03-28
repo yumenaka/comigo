@@ -1,15 +1,10 @@
 <template>
-    <router-link :to="{ name: 'ScrollMode', params: { id: this.id } }">
-        <n-card class="book_card">
-            <template #cover>
-                <img :src="getThumbnailsImageUrl()" />
-            </template>
-            <router-link
-                v-if="showTitle"
-                :to="{ name: 'FlipMode', params: { id: this.id } }"
-            >{{ this.shortTitle }}</router-link>
-        </n-card>
-    </router-link>
+    <n-card class="book_card">
+        <template #cover>
+            <img :src="getThumbnailsImageUrl()" />
+        </template>
+        {{ this.shortTitle }}
+    </n-card>
 </template>
 
 <script>

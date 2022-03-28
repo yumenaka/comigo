@@ -1,17 +1,21 @@
 <template>
   <header class="header">
-    <!-- 以后放返回箭头？ -->
-    <!-- SVG资源来自 https://www.xicons.org/#/ -->
-    <n-icon size="40" @click="onBackTop()">
-      <book-outline v-if="!showReturnIcon" />
-      <return-up-back v-if="showReturnIcon" />
+    <!-- 返回箭头,点击返回上一页 -->
+    <n-icon v-if="showReturnIcon" size="40" @click="onClickReturnIcon()">
+      <return-up-back />
     </n-icon>
+
+    <!-- 一本书，点击返回主页，但是目前应该没有任何反应 -->
+    <n-icon v-if="!showReturnIcon" @click="onClickToTop()" size="40">
+      <book-outline />
+    </n-icon>
+
     <!-- 标题，可下载压缩包 -->
     <n-space>
       <n-ellipsis style="max-width: 60vw;">
-        <h2 v-if="bookIsFolder" :href="'raw/' + bookName">{{ bookName }}</h2>
+        <h2 v-if="!setDownLoadLink">{{ bookName }}</h2>
         <h2>
-          <a v-if="!this.bookIsFolder" :href="'raw/' + bookName">{{ bookName }}</a>
+          <a v-if="this.setDownLoadLink" :href="'raw/' + bookName">{{ bookName }}</a>
         </h2>
       </n-ellipsis>
     </n-space>
@@ -27,7 +31,7 @@ import { BookOutline, ReturnUpBack } from '@vicons/ionicons5'
 import { defineComponent } from 'vue'
 export default defineComponent({
   name: "Header",
-  props: ['bookIsFolder', 'bookName', 'showReturnIcon'],
+  props: ['setDownLoadLink', 'bookName', 'showReturnIcon'],
   components: {
     NSpace,
     NIcon,
@@ -45,11 +49,13 @@ export default defineComponent({
     };
   },
   methods: {
-    //回首页
-    onBackTop() {
-      // 字符串路径
+    //点击返回的时候，后退到上一页
+    onClickReturnIcon() {
+      this.$router.back()
+    },
+    //点击返回的时候，后退到上一页
+    onClickToTop() {
       this.$router.push('/')
-
     },
   },
 });
