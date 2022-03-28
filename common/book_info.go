@@ -13,7 +13,8 @@ type BookInfo struct {
 	BookID          string           `json:"id"` //根据FilePath计算
 	BookType        string           `json:"book_type"`
 	Depth           int              `json:"depth"`
-	ChildBook       map[string]*Book `json:"child_book"` //key：BookID
+	ChildBookNum    int              `json:"child_book_num"` //子书籍的数量
+	ChildBook       map[string]*Book `json:"child_book"`     //key：BookID
 	AllPageNum      int              `json:"all_page_num"`
 	Cover           SinglePageInfo   `json:"cover"`
 	ParentFolder    string           `json:"parent_folder"` //所在父文件夹
@@ -41,6 +42,7 @@ func NewBookInfo(b *Book) *BookInfo {
 		ExtractPath:     b.ExtractPath,
 		AllPageNum:      b.GetAllPageNum(),
 		BookType:        b.BookType,
+		ChildBookNum:    b.ChildBookNum,
 		ChildBook:       b.ChildBook,
 		FileSize:        b.FileSize,
 		Modified:        b.Modified,

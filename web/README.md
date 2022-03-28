@@ -9,14 +9,10 @@
 yarn
 
 # 启动开发服务器
-yarn vite
-# 或
-yarn serve-vite
+yarn serve
 
 # 为生产环境构建
-yarn vite build
-# 或
-yarn build-vite
+yarn  build
 
 # 目标目录不在工程项目下的时候，添加指示，清空目标目录
 yarn build-vite --emptyOutDir

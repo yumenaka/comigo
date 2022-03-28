@@ -21,11 +21,11 @@
             <!-- y-gap: 纵向间隔槽 -->
             <!-- responsive: 'self' 根据自身宽度进行响应式布局，'screen' 根据屏幕断点进行响应式布局 -->
             <!-- <n-grid cols="2 s:4 m:5 l:6 xl:8 2xl:10" x-gap="2" y-gap="23" responsive="screen"> -->
-            <n-grid
+            <!-- 在组件中使用v-for时，key是必须的 -->
+            <!-- <n-grid
                 cols="1 150:1 280:2 450:3 600:4 750:5 900:6 1050:7 1200:8 1350:9 1500:10 1800:12 2100:14 2400:16 2700:18 3000:20"
-                y-gap="23"
+                y-gap="43"
             >
-                <!-- 在组件中使用v-for时，key是必须的 -->
                 <n-grid-item v-for="(book_info, key) in this.bookshelf" :key="key">
                     <BookCard
                         :title="book_info.name"
@@ -36,7 +36,25 @@
                         @click="onOpenBook(book_info.id, book_info.book_type)"
                     ></BookCard>
                 </n-grid-item>
-            </n-grid>
+            </n-grid>-->
+
+            <!-- 使用tailwindcss提供的flex布局： -->
+            <!-- flex-row：https://www.tailwindcss.cn/docs/flex-direction -->
+            <!-- 使用 flex-wrap 允许 flex 项目换行 https://www.tailwindcss.cn/docs/flex-wrap -->
+            <!-- 在组件中使用v-for时，key是必须的 -->
+            <div class="flex flex-row flex-wrap">
+                <BookCard
+                    v-for="(book_info, key) in this.bookshelf"
+                    :key="key"
+                    :title="book_info.name"
+                    :id="book_info.id"
+                    :image_src="book_info.cover.url"
+                    :ReaderMode="this.ReaderMode"
+                    :showTitle="this.bookCardShowTitle"
+                    :childBookNum="book_info.child_book_num ? 'x' + book_info.child_book_num : ''"
+                    @click="onOpenBook(book_info.id, book_info.book_type)"
+                ></BookCard>
+            </div>
         </div>
 
         <Drawer

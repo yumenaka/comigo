@@ -80,8 +80,9 @@ func (s *singleBookstore) initBookGroupMap() error {
 				}
 				newBook.ChildBook[bookInList.BookID] = &sameParentBookList[i]
 			}
+			newBook.ChildBookNum = len(newBook.ChildBook)
 			//如果书籍组的子书籍数量大于等于1，将书籍组加到上一层
-			if len(newBook.ChildBook) >= 1 {
+			if newBook.ChildBookNum >= 1 {
 				depthBooksMap[depth-1] = append(depthBooksMap[depth-1], *newBook)
 				//将这本书加到子书库的BookGroup表（s.BookGroupMap）里面去
 				s.BookGroupMap[newBook.BookID] = newBook

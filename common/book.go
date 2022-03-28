@@ -26,13 +26,14 @@ import (
 
 // Book 定义书籍，BooID不应该重复，根据文件路径生成
 type Book struct {
-	Name            string           `json:"name"`       //书名
-	BookID          string           `json:"id"`         //根据FilePath计算
-	BookStorePath   string           `json:"-"`          //在哪个子书库
-	BookType        string           `json:"book_type"`  //可以是书籍组(book_group)、文件夹(dir)、文件后缀( .zip .rar .pdf .mp4)等
-	ChildBook       map[string]*Book `json:"child_book"` //key：BookID /
-	Depth           int              `json:"depth"`
-	ParentFolder    string           `json:"parent_folder"` //所在父文件夹
+	Name            string           `json:"name"`           //书名
+	BookID          string           `json:"id"`             //根据FilePath计算
+	BookStorePath   string           `json:"-"`              //在哪个子书库
+	BookType        string           `json:"book_type"`      //可以是书籍组(book_group)、文件夹(dir)、文件后缀( .zip .rar .pdf .mp4)等
+	ChildBookNum    int              `json:"child_book_num"` //子书籍的数量
+	ChildBook       map[string]*Book `json:"child_book"`     //key：BookID
+	Depth           int              `json:"depth"`          //文件深度
+	ParentFolder    string           `json:"parent_folder"`  //所在父文件夹
 	AllPageNum      int              `json:"all_page_num"`
 	FileSize        int64            `json:"file_size"`
 	Cover           SinglePageInfo   `json:"cover"`

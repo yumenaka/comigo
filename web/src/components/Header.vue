@@ -13,10 +13,10 @@
     <!-- 标题，可下载压缩包 -->
     <n-space>
       <n-ellipsis style="max-width: 60vw;">
-        <h2 v-if="!setDownLoadLink">{{ bookName }}</h2>
-        <h2>
+        <span class="text-lg" v-if="!setDownLoadLink">{{ bookName }}</span>
+        <span class="text-lg">
           <a v-if="this.setDownLoadLink" :href="'raw/' + bookName">{{ bookName }}</a>
-        </h2>
+        </span>
       </n-ellipsis>
     </n-space>
     <!-- slot，用来插入右边的设置图标 -->
@@ -31,7 +31,7 @@ import { BookOutline, ReturnUpBack } from '@vicons/ionicons5'
 import { defineComponent } from 'vue'
 export default defineComponent({
   name: "Header",
-  props: ['setDownLoadLink', 'bookName', 'showReturnIcon'],
+  props: ['setDownLoadLink', 'bookName', 'showReturnIcon',],
   components: {
     NSpace,
     NIcon,
@@ -64,12 +64,8 @@ export default defineComponent({
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .header {
-  /* padding: 12px; */
-  /* background: #f2f3df; */
   color: #111;
   text-align: center;
-
-  font-size: 12px;
   display: flex;
   /* https://www.w3school.com.cn/tiy/t.asp?f=css3_flexbox_justify-content_space-between */
   justify-content: space-between;
