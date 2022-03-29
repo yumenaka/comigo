@@ -1,0 +1,47 @@
+<template>
+  <div class="text-gray-900 h-12 py-4 space-x-2 content-center">
+    <span class="text-base">Power by</span>
+    <a
+      href="https://github.com/yumenaka/comi"
+      class="text-blue-700 hover:underline text-base font-semibold"
+    >Comigo 2022</a>
+    <span>
+      <a
+        href="https://www.yumenaka.net"
+        class="text-blue-700 hover:underline text-base"
+      >www.yumenaka.net</a>
+    </span>
+    <!-- <a href="https://github.com/yumenaka/comi/issues/new" class="text-gray-900">File an Issue</a> -->
+  </div>
+</template>
+
+<script>
+import { defineComponent } from 'vue'
+export default defineComponent({
+  name: "Bottom",
+  props: ['setDownLoadLink', 'bookName', 'showReturnIcon',],
+  components: {
+
+  },
+  setup() {
+
+  },
+  data() {
+    return {
+      someflag: "",
+    };
+  },
+  methods: {
+    //点击返回的时候，后退到上一页
+    onClick() {
+    },
+  },
+});
+</script>
+
+<style scoped>
+</style>
+
+
+
+

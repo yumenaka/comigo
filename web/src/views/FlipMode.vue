@@ -357,7 +357,10 @@ export default defineComponent({
 		axios
 			.get("/getbook?id=" + this.$route.params.id)
 			.then((response) => (this.book = response.data))
-			.finally(console.log("成功获取书籍数据,书籍ID：" + this.$route.params.id));
+			.finally(() => {
+				document.title = this.book.name;
+				console.log("成功获取书籍数据,书籍ID:" + this.$route.params.id);
+			});
 		//监听路由参数的变化，刷新本地的Book数据
 		this.$watch(
 			() => this.$route.params.id,
@@ -366,11 +369,9 @@ export default defineComponent({
 				axios
 					.get("/getbook?id=" + this.$route.params.id)
 					.then((response) => (this.book = response.data))
-					.finally(console.log("路由参数改变,书籍ID：" + id));
-				// .finally(console.log("路由参数改变,书籍ID：" + id));
+					.finally(console.log("路由参数改变,书籍ID:" + id));
 			}
 		)
-
 		// https://www.developers.pub/wiki/1006381/1013545
 		// https://developer.mozilla.org/zh-CN/docs/Web/API/Storage/setItem
 		//一个域名下存放的cookie的个数有限制，不同的浏览器存放的个数不一样,一般为20个。因为不需要上传，使用localStorage（本地存储）存储在浏览器，永不过期。
@@ -515,11 +516,9 @@ export default defineComponent({
 				//console.log("不读取页数，this.saveNowPageNumFlag_FlipMode=" + this.saveNowPageNumFlag_FlipMode);
 			}
 		},
-
 		// // 设置当前模板-接收Drawer的参数，继续往父组件传
 		// 改变阅读模式
 		OnSetTemplate(value) {
-
 			if (value == "scroll") {
 				console.log("跳转到卷轴阅读模式")
 			} else if (this.nowTemplate == "scroll") {

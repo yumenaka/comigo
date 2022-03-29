@@ -13,8 +13,8 @@
       </template>
       <!-- 选择：切换页面模式 -->
       <n-space>
-        <n-button @click="toFlipMode">切换为翻页阅读</n-button>
-        <n-button @click="toScrollMode">切换为滚动阅读</n-button>
+        <n-button v-if="this.ReaderMode == 'scroll'" @click="onChangeReaderMode">切换为翻页阅读</n-button>
+        <n-button v-if="this.ReaderMode == 'flip'" @click="onChangeReaderMode">切换为滚动阅读</n-button>
       </n-space>
       <!-- 分割线 -->
       <n-divider />
@@ -122,6 +122,9 @@ export default defineComponent({
     },
   },
   methods: {
+    onChangeReaderMode() {
+
+    },
     OnChangeLanguage(value) {
       this.cookies.set("userLanguageSetting", value);
     },

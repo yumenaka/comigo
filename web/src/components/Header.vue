@@ -1,24 +1,28 @@
 <template>
-  <header class="header">
+  <!-- 外边距: m-2 https://www.tailwindcss.cn/docs/margin -->
+  <!-- 内边距： p-4 https://www.tailwindcss.cn/docs/padding -->
+  <header class="header p-1 m-0 h-12 flex justify-between content-center">
     <!-- 返回箭头,点击返回上一页 -->
-    <n-icon v-if="showReturnIcon" size="40" @click="onClickReturnIcon()">
+    <n-icon class="p-0 m-0" v-if="showReturnIcon" size="40" @click="onClickReturnIcon()">
       <return-up-back />
     </n-icon>
 
     <!-- 一本书，点击返回主页，但是目前应该没有任何反应 -->
-    <n-icon v-if="!showReturnIcon" @click="onClickToTop()" size="40">
+    <n-icon class="p-0 m-0" v-if="!showReturnIcon" @click="onClickToTop()" size="40">
       <book-outline />
     </n-icon>
 
-    <!-- 标题，可下载压缩包 -->
-    <n-space>
-      <n-ellipsis style="max-width: 60vw;">
-        <span class="text-lg" v-if="!setDownLoadLink">{{ bookName }}</span>
-        <span class="text-lg">
-          <a v-if="this.setDownLoadLink" :href="'raw/' + bookName">{{ bookName }}</a>
-        </span>
-      </n-ellipsis>
-    </n-space>
+    <!-- 标题-->
+    <!-- 文本颜色： https://www.tailwindcss.cn/docs/text-color -->
+    <!-- 文本装饰（下划线）：https://www.tailwindcss.cn/docs/text-decoration -->
+    <div class="p-0 m-0 py-2 content-center">
+      <!-- 标题，只显示 -->
+      <span class="text-lg" v-if="!setDownLoadLink">{{ bookName }}</span>
+      <!-- 标题，可下载压缩包 -->
+      <span class="text-lg text-blue-700 hover:underline">
+        <a v-if="this.setDownLoadLink" :href="'raw/' + bookName">{{ bookName }}</a>
+      </span>
+    </div>
     <!-- slot，用来插入右边的设置图标 -->
     <slot></slot>
   </header>
@@ -63,15 +67,15 @@ export default defineComponent({
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.header {
-  color: #111;
-  text-align: center;
-  display: flex;
-  /* https://www.w3school.com.cn/tiy/t.asp?f=css3_flexbox_justify-content_space-between */
-  justify-content: space-between;
-  align-items: center;
-  line-height: 75px;
-}
+/* .header { */
+/* color: #111; */
+/* text-align: center; */
+/* display: flex; */
+/* https://www.w3school.com.cn/tiy/t.asp?f=css3_flexbox_justify-content_space-between */
+/* justify-content: space-between; */
+/* align-items: center; */
+/* line-height: 75px; */
+/* } */
 </style>
 
 

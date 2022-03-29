@@ -9,7 +9,7 @@
     <!-- 盒阴影 shadow: https://www.tailwindcss.cn/docs/box-shadow -->
     <!-- 外边距 m-x m-y  https://www.tailwindcss.cn/docs/margin -->
     <div
-        class="relative w-32 h-44 mx-3 my-4 text-gray-800 dark:text-gray-300 rounded-xl shadow-xl .bg-top bg-cover"
+        class="relative w-32 h-44 mx-3 my-4 text-gray-800 dark:text-gray-300 rounded shadow-xl hover:shadow-2xl ring-1 ring-gray-400 hover:ring hover:ring-blue-500 .bg-top bg-cover"
         :style="getBackgroundImageStyle()"
     >
         <div v-if="this.childBookNum != ''" class="absolute inset-x-0 top-0 text-right">
@@ -23,8 +23,11 @@
         <!-- 背景色不透明度: https://www.tailwindcss.cn/docs/background-opacity -->
         <!-- 文本溢出：      https://www.tailwindcss.cn/docs/text-overflow -->
         <!-- 字体粗细：     https://www.tailwindcss.cn/docs/font-weight -->
-        <div class="absolute inset-x-0 bottom-0 h-1/4 bg-gray-200 bg-opacity-80 font-medium">
-            <span class="align-middle">{{ this.shortTitle }}</span>
+        <div
+            v-if="this.showTitle"
+            class="absolute inset-x-0 bottom-0 h-1/4 bg-gray-200 bg-opacity-70 font-semibold border-blue-800 rounded-b"
+        >
+            <span class="absolute inset-x-0 bottom-0 align-middle">{{ this.shortTitle }}</span>
         </div>
     </div>
 </template>

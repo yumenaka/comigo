@@ -16,28 +16,6 @@
 
         <!-- 渲染书架部分 -->
         <div class="shelf">
-            <!-- cols: 显示的栅格数量 -->
-            <!-- x-gap: 横向间隔槽 -->
-            <!-- y-gap: 纵向间隔槽 -->
-            <!-- responsive: 'self' 根据自身宽度进行响应式布局，'screen' 根据屏幕断点进行响应式布局 -->
-            <!-- <n-grid cols="2 s:4 m:5 l:6 xl:8 2xl:10" x-gap="2" y-gap="23" responsive="screen"> -->
-            <!-- 在组件中使用v-for时，key是必须的 -->
-            <!-- <n-grid
-                cols="1 150:1 280:2 450:3 600:4 750:5 900:6 1050:7 1200:8 1350:9 1500:10 1800:12 2100:14 2400:16 2700:18 3000:20"
-                y-gap="43"
-            >
-                <n-grid-item v-for="(book_info, key) in this.bookshelf" :key="key">
-                    <BookCard
-                        :title="book_info.name"
-                        :id="book_info.id"
-                        :image_src="book_info.cover.url"
-                        :ReaderMode="this.ReaderMode"
-                        :showTitle="this.bookCardShowTitle"
-                        @click="onOpenBook(book_info.id, book_info.book_type)"
-                    ></BookCard>
-                </n-grid-item>
-            </n-grid>-->
-
             <!-- 使用tailwindcss提供的flex布局： -->
             <!-- flex-row：https://www.tailwindcss.cn/docs/flex-direction -->
             <!-- 使用 flex-wrap 允许 flex 项目换行 https://www.tailwindcss.cn/docs/flex-wrap -->
@@ -50,7 +28,7 @@
                     :id="book_info.id"
                     :image_src="book_info.cover.url"
                     :ReaderMode="this.ReaderMode"
-                    :showTitle="this.bookCardShowTitle"
+                    :showTitle="this.bookCardShowTitleFlag"
                     :childBookNum="book_info.child_book_num ? 'x' + book_info.child_book_num : ''"
                     @click="onOpenBook(book_info.id, book_info.book_type)"
                 ></BookCard>
@@ -69,10 +47,21 @@
         >
             <span>{{ $t("setBackColor") }}</span>
             <n-color-picker v-model:value="model.color" :modes="['rgb']" :show-alpha="false" />
-
             <!-- 分割线 -->
             <n-divider />
+            <!-- 开关：显示原图 黑白 -->
+            <n-space>
+                <n-switch
+                    size="large"
+                    v-model:value="this.bookCardShowTitleFlag"
+                    @update:value="setBookCardShowTitleFlag"
+                >
+                    <template #checked>显示小标题</template>
+                    <template #unchecked>显示小标题</template>
+                </n-switch>
+            </n-space>
         </Drawer>
+        <Bottom></Bottom>
     </div>
 </template>
 
@@ -80,10 +69,11 @@
 // 直接导入组件并使用它。这种情况下，只有导入的组件才会被打包。
 //Firefox插件Textarea Cache 报错：源映射错误：Error: NetworkError when attempting to fetch resource.
 //Firefox插件Video DownloadHelper报错:已不赞成使用 CanvasRenderingContext2D 中的 drawWindow 方法
-import { NIcon, NDivider, NColorPicker, NGrid, NGridItem, } from 'naive-ui'
+import { NIcon, NDivider, NColorPicker, NSwitch, NSpace } from 'naive-ui'
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
 import BookCard from "@/components/BookCard.vue";
+import Bottom from "@/components/Bottom.vue";
 import { defineComponent, reactive } from 'vue'
 import { useCookies } from "vue3-cookies";// https://github.com/KanHarI/vue3-cookies
 import { SettingsOutline } from '@vicons/ionicons5'
@@ -94,13 +84,13 @@ export default defineComponent({
     props: ['readMode'],
     emits: ["setTemplate"],
     components: {
-        Header,//自定义页头，有点丑
-        Drawer,//自定义抽屉，还行
-        BookCard,//自定义抽屉，还行
+        Header,//自定义页头
+        Drawer,//自定义抽屉
+        BookCard,//自定义抽屉
+        Bottom,//自定义页尾
         // NButton,//按钮，来自:https://www.naiveui.com/zh-CN/os-theme/components/button
-        // NBackTop,//回到顶部按钮，来自:https://www.naiveui.com/zh-CN/os-theme/components/back-top
-        NGrid,//https://www.naiveui.com/zh-CN/os-theme/components/grid
-        NGridItem,
+        NSpace,
+        NSwitch,
         NIcon,//图标  https://www.naiveui.com/zh-CN/os-theme/components/icon
         SettingsOutline,//图标,来自 https://www.xicons.org/#/   需要安装（npm i -D @vicons/ionicons5）
         NDivider,//分割线  https://www.naiveui.com/zh-CN/os-theme/components/divider
@@ -149,7 +139,7 @@ export default defineComponent({
         return {
             bookShelfTitle: "loading",
             headerShowReturnIcon: false,
-            bookCardShowTitle: true,
+            bookCardShowTitleFlag: true,//书库中的书籍是否显示文字版标题
             ReaderMode: "scroll",
             maxDepth: 1,
             bookshelf: [{
@@ -216,10 +206,16 @@ export default defineComponent({
                 // console.log("BookShelf: route change");
                 this.setReaderMode();
                 this.setBookShelfTitle();
-                this.getBookShelfData();
+                this.getBookShelfData();//会导致500错误，emmm……
             }
         )
-        //初始化默认值,读取出来的都是字符串，不要直接用
+        //初始化默认值,读取出来的都是字符串，不要直接用  			
+        //书籍卡片是否显示文字版标题
+        if (localStorage.getItem("BookCardShowTitleFlag") === "true") {
+            this.bookCardShowTitleFlag = true;
+        } else if (localStorage.getItem("BookCardShowTitleFlag") === "false") {
+            this.bookCardShowTitleFlag = false;
+        }
         //是否显示顶部页头
         if (localStorage.getItem("showHeaderFlag") === "true") {
             this.showHeaderFlag = true;
@@ -250,12 +246,18 @@ export default defineComponent({
     beforeUnmount() {
     },
     methods: {
+        //书籍卡片是否显示文字标题
+        setBookCardShowTitleFlag(value) {
+            this.bookCardShowTitleFlag = value;
+            localStorage.setItem("BookCardShowTitleFlag", value);
+            // console.log("成功保存设置: BookCardShowTitleFlag=" + localStorage.getItem("BookCardShowTitleFlag"));
+        },
+
         //初始化或者路由变化时，更新本地BookShelf相关数据
         getBookShelfData() {
-            if (this.$route.params.id) {
+            if (this.$route.params.group_id) {
                 // console.log("BookShelf getBookShelfData!  this.$route.params.id" + this.$route.params.id)
-                //根据路由参数获取特定书籍组
-                this.getBooksGroupByBookID(this.$route.params.id)
+                this.getBooksGroupByBookID(this.$route.params.group_id)
                 this.headerShowReturnIcon = true
             } else {
                 this.initBookShelf()
@@ -278,10 +280,11 @@ export default defineComponent({
                     this.setBookShelfTitle();
                 })
         },
-        getBooksGroupByBookID(bookID) {
-            // console.log("getBooksGroupByBookID bookID:" + bookID)
+        getBooksGroupByBookID(group_id) {
+            // console.log("getBooksGroupByBookID bookID:" + group_id);
+            //根据路由参数获取特定书籍组
             axios
-                .get("getlist?book_group_book_id=" + bookID)
+                .get("getlist?book_group_book_id=" + group_id)
                 .then((response) => {
                     if (response.data[0].name != null) {
                         this.bookshelf = response.data
@@ -305,7 +308,7 @@ export default defineComponent({
             //如果路由参数里面有ID（正在展示某个书籍组）
             if (this.$route.params.id) {
                 if (this.bookshelf[0].parent_folder != null && this.bookshelf[0].parent_folder != "") {
-                    console.log("this.bookshelf[0]:" + this.bookshelf[0].parent_folder)
+                    // console.log("this.bookshelf[0]:" + this.bookshelf[0].parent_folder)
                     //设置浏览器标签标题
                     document.title = this.bookshelf[0].parent_folder;
                     //设置Header标题
@@ -315,9 +318,9 @@ export default defineComponent({
         },
         //打开书籍
         onOpenBook(bookID, bookType) {
-            console.log("onOpenBook  bookID：" + bookID + " bookType：" + bookType)
+            // console.log("onOpenBook  bookID：" + bookID + " bookType：" + bookType)
             if (bookType == "book_group") {
-                this.$router.push({ name: 'ChildBookShelf', params: { id: bookID } })
+                this.$router.push({ name: 'ChildBookShelf', params: { group_id: bookID } })
                 return
             }
             if (this.ReaderMode == "flip" || this.ReaderMode == "sketch") {
@@ -327,12 +330,6 @@ export default defineComponent({
             if (this.ReaderMode == "scroll") {
                 // 命名路由，并加上参数，让路由建立 url
                 this.$router.push({ name: 'ScrollMode', params: { id: bookID } })
-            }
-        },
-        openBookOnce() {
-            console.log("this.bookshelf[0].id :" + this.bookshelf[0].id)
-            if (this.bookshelf[0].id != "12345") {
-                this.onOpenBook(this.bookshelf[0].id, this.bookshelf[0].book_type)
             }
         },
         //打开抽屉
@@ -381,16 +378,13 @@ export default defineComponent({
 
 <style scoped>
 .header {
-    padding: 0px;
-    width: 100%;
-    height: 5vh;
     background: v-bind("model.colorHeader");
 }
 .shelf {
-    padding-bottom: 20px;
+    /* padding-bottom: 20px;
     padding-left: 20px;
     padding-right: 20px;
-    padding-top: 20px;
+    padding-top: 20px; */
     max-width: 100%;
     min-height: 95vh;
     height: auto;

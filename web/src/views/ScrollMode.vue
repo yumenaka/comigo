@@ -1,14 +1,13 @@
 <template>
 	<div id="ScrollMode" class="manga">
 		<Header
-			class="footer"
 			v-if="this.showHeaderFlag"
 			:setDownLoadLink="this.needDownloadLink()"
 			:bookName="book.name"
 			:showReturnIcon="true"
 		>
 			<!-- 右边的设置图标，点击屏幕中央也可以打开 -->
-			<n-icon size="40" @click="drawerActivate('right')">
+			<n-icon class="p-0 m-0" size="40" @click="drawerActivate('right')">
 				<settings-outline />
 			</n-icon>
 		</Header>
@@ -238,15 +237,21 @@
 			</n-space>
 		</Drawer>
 		<n-back-top :show="showBackTopFlag" type="info" color="#8a2be2" :right="20" :bottom="20" />
-		<n-button @click="scrollToTop(90);" size="large" secondary strong>{{ $t('back-to-top') }}</n-button>
+		<button
+			class="w-24 h-12 m-2 bg-blue-300 text-gray-900 hover:bg-blue-500 rounded"
+			@click="scrollToTop(90);"
+			size="large"
+		>{{ $t('back-to-top') }}</button>
+		<Bottom></Bottom>
 	</div>
 </template>
 
 <script>
 // 直接导入组件并使用它。这种情况下，只有导入的组件才会被打包。
-import { NButton, NBackTop, NSpace, NSlider, NSwitch, NIcon, NInputNumber, NDivider, } from 'naive-ui'
+import { NBackTop, NSpace, NSlider, NSwitch, NIcon, NInputNumber, NDivider, } from 'naive-ui'
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
+import Bottom from "@/components/Bottom.vue";
 import { defineComponent, reactive } from 'vue'
 import { useCookies } from "vue3-cookies";// https://github.com/KanHarI/vue3-cookies
 import { SettingsOutline } from '@vicons/ionicons5'
@@ -257,9 +262,9 @@ export default defineComponent({
 	props: ['nowTemplate'],
 	emits: ["setTemplate"],
 	components: {
-		Header,//自定义页头，有点丑
-		Drawer,//自定义抽屉，还行
-		NButton,//按钮，来自:https://www.naiveui.com/zh-CN/os-theme/components/button
+		Header,//自定义页头
+		Drawer,//自定义抽屉
+		Bottom,//自定义页尾
 		NBackTop,//回到顶部按钮，来自:https://www.naiveui.com/zh-CN/os-theme/components/back-top
 		// NDrawer,//抽屉，可以从上下左右4个方向冒出. https://www.naiveui.com/zh-CN/os-theme/components/drawer
 		// NDrawerContent,//抽屉内容
@@ -429,7 +434,7 @@ export default defineComponent({
 			.finally(
 				() => {
 					document.title = this.book.name;
-					console.log("成功获取书籍数据,书籍ID：" + this.$route.params.id);
+					// console.log("成功获取书籍数据,书籍ID:" + this.$route.params.id);
 				}
 			);
 		//监听路由参数的变化，刷新本地的Book数据
@@ -440,7 +445,7 @@ export default defineComponent({
 					axios
 						.get("/getbook?id=" + this.$route.params.id)
 						.then((response) => (this.book = response.data))
-						.finally(console.log("路由参数改变,书籍ID：" + id));
+						.finally(console.log("路由参数改变,书籍ID:" + id));
 				}
 			}
 		)
@@ -815,9 +820,6 @@ export default defineComponent({
 }
 
 .header {
-	padding: 0px;
-	width: 100%;
-	height: 7vh;
 	background: v-bind("model.colorHeader");
 }
 

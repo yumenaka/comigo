@@ -5,7 +5,6 @@
 
 /* 自定义样式：文字阴影 */
 @layer utilities {
-    @variants responsive {
         .text-shadow {
           text-shadow: 2px 2px 4px black;
         }
@@ -18,5 +17,4 @@
         .text-shadow-none {
           text-shadow: none;
         }
-    } 
 }
