@@ -11,13 +11,6 @@
       <template #header>
         <span>{{ $t('ReaderSettings') }}</span>
       </template>
-      <!-- 选择：切换页面模式 -->
-      <n-space>
-        <n-button v-if="this.ReaderMode == 'scroll'" @click="onChangeReaderMode">切换为翻页阅读</n-button>
-        <n-button v-if="this.ReaderMode == 'flip'" @click="onChangeReaderMode">切换为滚动阅读</n-button>
-      </n-space>
-      <!-- 分割线 -->
-      <n-divider />
       <!-- 父组件在此处插入自定义内容 -->
       <slot></slot>
       <n-divider />
@@ -47,7 +40,7 @@
 <script>
 
 import { useCookies } from "vue3-cookies";
-import { NDrawer, NDivider, NDrawerContent, NSpace, NButton, NSelect, NPopconfirm, } from 'naive-ui'
+import { NDrawer, NDivider, NDrawerContent, NButton, NSelect, NPopconfirm, } from 'naive-ui'
 import { defineComponent, } from 'vue'
 // import { useI18n } from 'vue-i18n'
 
@@ -58,7 +51,7 @@ export default defineComponent({
   components: {
     NDrawer,//抽屉，可以从上下左右4个方向冒出. https://www.naiveui.com/zh-CN/os-theme/components/drawer
     NDrawerContent,//抽屉内容
-    NSpace,//间距 https://www.naiveui.com/zh-CN/os-theme/components/space
+    // NSpace,//间距 https://www.naiveui.com/zh-CN/os-theme/components/space
     NDivider,//间隔
     // NRadioGroup,//单选  https://www.naiveui.com/zh-CN/os-theme/components/radio
     // NRadioButton,//单选 用按钮显得更优雅一点

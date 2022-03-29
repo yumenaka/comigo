@@ -1,14 +1,13 @@
 <template>
     <div id="BookShelf">
         <Header
-            class="footer"
             v-if="this.showHeaderFlag"
             :bookIsFolder="false"
             :headerTitle="this.bookShelfTitle"
             :showReturnIcon="this.headerShowReturnIcon"
             :setDownLoadLink="false"
         >
-            <!-- 右边的设置图标，点击屏幕中央也可以打开 -->
+            <!-- 右边的设置图标,点击屏幕中央也可以打开 -->
             <n-icon size="40" @click="drawerActivate('right')">
                 <settings-outline />
             </n-icon>
@@ -19,7 +18,7 @@
             <!-- 使用tailwindcss提供的flex布局： -->
             <!-- flex-row：https://www.tailwindcss.cn/docs/flex-direction -->
             <!-- 使用 flex-wrap 允许 flex 项目换行 https://www.tailwindcss.cn/docs/flex-wrap -->
-            <!-- 在组件中使用v-for时，key是必须的 -->
+            <!-- 在组件中使用v-for时,key是必须的 -->
             <div class="flex flex-row flex-wrap">
                 <BookCard
                     v-for="(book_info, key) in this.bookshelf"
@@ -45,8 +44,21 @@
             :ReaderMode="this.ReaderMode"
             :sketching="false"
         >
+            <span>UI颜色</span>
+            <n-color-picker
+                v-model:value="model.interfaceColor"
+                :modes="['rgb']"
+                :show-alpha="false"
+                @update:value="onInterfaceColorChange"
+            />
             <span>{{ $t("setBackColor") }}</span>
-            <n-color-picker v-model:value="model.color" :modes="['rgb']" :show-alpha="false" />
+            <n-color-picker
+                v-model:value="model.backgroundColor"
+                :modes="['rgb']"
+                :show-alpha="false"
+                @update:value="onBackgroundColorChange"
+            />
+
             <!-- 分割线 -->
             <n-divider />
             <!-- 开关：显示原图 黑白 -->
@@ -68,7 +80,7 @@
 </template>
 
 <script>
-// 直接导入组件并使用它。这种情况下，只有导入的组件才会被打包。
+// 直接导入组件并使用它。这种情况下,只有导入的组件才会被打包。
 //Firefox插件Textarea Cache 报错：源映射错误：Error: NetworkError when attempting to fetch resource.
 //Firefox插件Video DownloadHelper报错:已不赞成使用 CanvasRenderingContext2D 中的 drawWindow 方法
 import { NIcon, NDivider, NColorPicker, NSwitch, NSpace } from 'naive-ui'
@@ -90,7 +102,7 @@ export default defineComponent({
         Drawer,//自定义抽屉
         BookCard,//自定义抽屉
         Bottom,//自定义页尾
-        // NButton,//按钮，来自:https://www.naiveui.com/zh-CN/os-theme/components/button
+        // NButton,//按钮,来自:https://www.naiveui.com/zh-CN/os-theme/components/button
         NSpace,
         NSwitch,
         NIcon,//图标  https://www.naiveui.com/zh-CN/os-theme/components/icon
@@ -101,10 +113,10 @@ export default defineComponent({
     setup() {
         //此处不能使用this
         const { cookies } = useCookies();
-        //背景颜色，颜色选择器用
+        //背景颜色,颜色选择器用
         const model = reactive({
-            color: "#E0D9CD",
-            colorHeader: "#d1c9c1",
+            backgroundColor: "#E0D9CD",
+            interfaceColor: "#f5f5e4",
         });
         //单选按钮绑定的数值
         // const checkedValueRef = ref(null)
@@ -167,12 +179,12 @@ export default defineComponent({
             }],
             drawerActive: false,
             drawerPlacement: 'right',
-            //开发模式 还没有做的功能与设置，设置Debug以后才能见到
+            //开发模式 还没有做的功能与设置,设置Debug以后才能见到
             debugModeFlag: true,
-            //书籍数据，需要从远程拉取
+            //书籍数据,需要从远程拉取
             //是否显示顶部页头
             showHeaderFlag: true,
-            //同步滚动，目前还没做
+            //同步滚动,目前还没做
             syncScrollFlag: false,
             //鼠标点击或触摸的位置
             clickX: 0,
@@ -181,7 +193,7 @@ export default defineComponent({
             isLandscapeMode: true,
             isPortraitMode: false,
             imageMaxWidth: 10,
-            //屏幕宽横比，inLandscapeMode的判断依据
+            //屏幕宽横比,inLandscapeMode的判断依据
             aspectRatio: 1.2,
             //可见范围宽高的具体值
             clientWidth: 0,
@@ -194,24 +206,24 @@ export default defineComponent({
     // mounted : 在绑定元素的父组件被挂载后调用。
     // beforeUpdate: 在更新包含组件的 VNode 之前调用。。
     // updated: 在包含组件的 VNode 及其子组件的 VNode 更新后调用。
-    // beforeUnmount: 当指令与在绑定元素父组件卸载之前时，只调用一次。
-    // unmounted: 当指令与元素解除绑定且父组件已卸载时，只调用一次。
+    // beforeUnmount: 当指令与在绑定元素父组件卸载之前时,只调用一次。
+    // unmounted: 当指令与元素解除绑定且父组件已卸载时,只调用一次。
     created() {
         this.getBookShelfData();
         this.setReaderMode();
-        //监听路由参数的变化，刷新本地的ReaderMode
+        //监听路由参数的变化,刷新本地的ReaderMode
         this.$watch(
             () => this.$route.params,
-            () => {//想知道参数的变化的话，可把参数设置为 toParams, previousParams
+            () => {//想知道参数的变化的话,可把参数设置为 toParams, previousParams
                 // console.log(toParams);
                 // console.log(previousParams);
                 // console.log("BookShelf: route change");
                 this.setReaderMode();
                 this.setBookShelfTitle();
-                this.getBookShelfData();//会导致500错误，emmm……
+                this.getBookShelfData();//会导致500错误,emmm……
             }
         )
-        //初始化默认值,读取出来的都是字符串，不要直接用  			
+        //初始化默认值,读取出来的都是字符串,不要直接用  			
         //书籍卡片是否显示文字版标题
         if (localStorage.getItem("BookCardShowTitleFlag") === "true") {
             this.bookCardShowTitleFlag = true;
@@ -225,8 +237,11 @@ export default defineComponent({
             this.showHeaderFlag = false;
         }
         //当前颜色
-        if (localStorage.getItem("BookShelfDefaultColor") != null) {
-            this.model.color = localStorage.getItem("BookShelfDefaultColor");
+        if (localStorage.getItem("BackgroundColor") != null) {
+            this.model.backgroundColor = localStorage.getItem("BackgroundColor");
+        }
+        if (localStorage.getItem("InterfaceColor") != null) {
+            this.model.interfaceColor = localStorage.getItem("InterfaceColor");
         }
     },
     //挂载前
@@ -248,6 +263,16 @@ export default defineComponent({
     beforeUnmount() {
     },
     methods: {
+        //设置背景色的时候
+        onBackgroundColorChange(value) {
+            this.model.backgroundColor = value
+            localStorage.setItem("BackgroundColor", value);
+        },
+        //设置UI颜色的时候
+        onInterfaceColorChange(value) {
+            this.model.interfaceColor = value
+            localStorage.setItem("InterfaceColor", value);
+        },
         //书籍卡片是否显示文字标题
         setBookCardShowTitleFlag(value) {
             this.bookCardShowTitleFlag = value;
@@ -255,7 +280,7 @@ export default defineComponent({
             // console.log("成功保存设置: BookCardShowTitleFlag=" + localStorage.getItem("BookCardShowTitleFlag"));
         },
 
-        //初始化或者路由变化时，更新本地BookShelf相关数据
+        //初始化或者路由变化时,更新本地BookShelf相关数据
         getBookShelfData() {
             if (this.$route.params.group_id) {
                 // console.log("BookShelf getBookShelfData!  this.$route.params.id" + this.$route.params.id)
@@ -266,9 +291,9 @@ export default defineComponent({
                 this.headerShowReturnIcon = false
             }
         },
-        //初始化或者路由变化时，读取其他页面的更改，并存储到本地存储的阅读器模式（ReaderMode）这个值，
+        //初始化或者路由变化时,读取其他页面的更改,并存储到本地存储的阅读器模式（ReaderMode）这个值,
         setReaderMode() {
-            //阅读器模式，scroll或flip
+            //阅读器模式,scroll或flip
             if (localStorage.getItem("ReaderMode") != null) {
                 this.ReaderMode = localStorage.getItem("ReaderMode");
             }
@@ -298,11 +323,11 @@ export default defineComponent({
         },
         //设置书架名
         setBookShelfTitle() {
-            //阅读某本书的时候，当然不需要设置
+            //阅读某本书的时候,当然不需要设置
             if (this.$route.params.id != null) {
                 return
             }
-            //设置当前深度，这个值目前没用到
+            //设置当前深度,这个值目前没用到
             if (this.bookshelf[0].depth != null) {
                 this.max_depth = this.bookshelf[0].depth
             }
@@ -328,11 +353,11 @@ export default defineComponent({
                 return
             }
             if (this.ReaderMode == "flip" || this.ReaderMode == "sketch") {
-                // 命名路由，并加上参数，让路由建立 url
+                // 命名路由,并加上参数,让路由建立 url
                 this.$router.push({ name: 'FlipMode', params: { id: bookID } })
             }
             if (this.ReaderMode == "scroll") {
-                // 命名路由，并加上参数，让路由建立 url
+                // 命名路由,并加上参数,让路由建立 url
                 this.$router.push({ name: 'ScrollMode', params: { id: bookID } })
             }
         },
@@ -349,16 +374,16 @@ export default defineComponent({
         startSketchMode() {
             // this.$emit("setTemplate", "sketch");
         },
-        //接收Draw的参数，继续往父组件传
+        //接收Draw的参数,继续往父组件传
         OnSetReaderMode(value) {
             if (value == "scroll" || value == "scroll")
                 this.ReaderMode = value
         },
-        //如果在一个组件上使用了 v-model:xxx，应该使用 @update:xxx  https://www.naiveui.com/zh-CN/os-theme/docs/common-issues
+        //如果在一个组件上使用了 v-model:xxx,应该使用 @update:xxx  https://www.naiveui.com/zh-CN/os-theme/docs/common-issues
         saveConfigToCookie() {
             // 储存cookie
             localStorage.setItem("showHeaderFlag", this.showHeaderFlag);
-            localStorage.setItem("BookShelfDefaultColor", this.model.color);
+            localStorage.setItem("BackgroundColor", this.model.backgroundColor);
         },
         setShowHeaderChange(value) {
             console.log("value:" + value);
@@ -366,12 +391,12 @@ export default defineComponent({
             localStorage.setItem("showHeaderFlag", value);
             console.log("cookie设置完毕: showHeaderFlag=" + localStorage.getItem("showHeaderFlag"));
         },
-        //根据可视区域(viewport)长宽比，确认是横屏还是竖屏
+        //根据可视区域(viewport)长宽比,确认是横屏还是竖屏
         // aspect-ratio https://developer.mozilla.org/zh-CN/docs/Web/CSS/@media/aspect-ratio
-        // window.innerWidth  不是响应式依赖，所以不能用计算属性
+        // window.innerWidth  不是响应式依赖,所以不能用计算属性
         inLandscapeModeCheck() {
             this.aspectRatio = window.innerWidth / window.innerHeight
-            // 为了测试方便，阈值是正方形
+            // 为了测试方便,阈值是正方形
             return this.aspectRatio > (19 / 19);
         },
     },
@@ -382,7 +407,10 @@ export default defineComponent({
 
 <style scoped>
 .header {
-    background: v-bind("model.colorHeader");
+    background: v-bind("model.interfaceColor");
+}
+.bottom {
+    background: v-bind("model.interfaceColor");
 }
 .shelf {
     /* padding-bottom: 20px;
@@ -390,8 +418,8 @@ export default defineComponent({
     padding-right: 20px;
     padding-top: 20px; */
     max-width: 100%;
-    min-height: 95vh;
+    min-height: 90vh;
     height: auto;
-    background: v-bind("model.color");
+    background: v-bind("model.backgroundColor");
 }
 </style>

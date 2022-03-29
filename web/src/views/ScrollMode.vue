@@ -6,7 +6,7 @@
 			:headerTitle="book.name"
 			:showReturnIcon="true"
 		>
-			<!-- 右边的设置图标，点击屏幕中央也可以打开 -->
+			<!-- 右边的设置图标,点击屏幕中央也可以打开 -->
 			<n-icon class="p-0 m-0" size="40" @click="drawerActivate('right')">
 				<settings-outline />
 			</n-icon>
@@ -35,14 +35,12 @@
 			@setT="this.OnSetTemplate"
 			:nowTemplate="this.nowTemplate"
 		>
-			<!-- <span>{{ $t("setBackColor") }}</span>
-			<n-color-picker
-				v-model:value="model.color"
-				:modes="['rgb']"
-				:show-alpha="false"
-				@update:value="onBackgroundColorChange"
-			/>-->
-
+			<!-- 选择：切换页面模式 -->
+			<n-space>
+				<n-button v-if="this.ReaderMode == 'scroll'" @click="onChangeReaderMode">切换翻页模式</n-button>
+			</n-space>
+			<!-- 分割线 -->
+			<n-divider />
 			<n-space vertical>
 				<!-- 单页-漫画宽度-使用百分比 -->
 				<!-- 数字输入% -->
@@ -141,7 +139,7 @@
 			</n-space>
 
 			<p></p>
-			<!-- 开关：横屏状态下，宽度单位是百分比还是固定值 -->
+			<!-- 开关：横屏状态下,宽度单位是百分比还是固定值 -->
 			<n-space>
 				<n-switch
 					size="large"
@@ -249,7 +247,7 @@
 </template>
 
 <script>
-// 直接导入组件并使用它。这种情况下，只有导入的组件才会被打包。
+// 直接导入组件并使用它。这种情况下,只有导入的组件才会被打包。
 import { NBackTop, NSpace, NSlider, NSwitch, NIcon, NInputNumber, NDivider, } from 'naive-ui'
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
@@ -267,8 +265,8 @@ export default defineComponent({
 		Header,//自定义页头
 		Drawer,//自定义抽屉
 		Bottom,//自定义页尾
-		NBackTop,//回到顶部按钮，来自:https://www.naiveui.com/zh-CN/os-theme/components/back-top
-		// NDrawer,//抽屉，可以从上下左右4个方向冒出. https://www.naiveui.com/zh-CN/os-theme/components/drawer
+		NBackTop,//回到顶部按钮,来自:https://www.naiveui.com/zh-CN/os-theme/components/back-top
+		// NDrawer,//抽屉,可以从上下左右4个方向冒出. https://www.naiveui.com/zh-CN/os-theme/components/drawer
 		// NDrawerContent,//抽屉内容
 		NSpace,//间距 https://www.naiveui.com/zh-CN/os-theme/components/space
 		// NRadio,//单选  https://www.naiveui.com/zh-CN/os-theme/components/radio
@@ -290,20 +288,20 @@ export default defineComponent({
 	setup() {
 		//此处不能使用this
 		const { cookies } = useCookies();
-		//背景颜色，颜色选择器用
+		//背景颜色,颜色选择器用
 		//reactive({}) 创建并返回一个响应式对象: https://www.bilibili.com/video/av925511720/?p=4  也讲到了toRefs()
 		const model = reactive({
-			color: "#f6f7eb",
-			colorHeader: "#d1c9c1",
+			backgroundColor: "#f6f7eb",
+			interfaceColor: "#d1c9c1",
 		});
 		const imageParameters = reactive({
-			resize_width: -1,// 缩放图片，指定宽度
-			resize_height: -1,// 指定高度，缩放图片
+			resize_width: -1,// 缩放图片,指定宽度
+			resize_height: -1,// 指定高度,缩放图片
 			do_auto_resize: false,
 			resize_max_width: 800,//图片宽度大于这个上限时缩小 
 			resize_max_height: -1,//图片高度大于这个上限时缩小
 			do_auto_crop: false,
-			auto_crop: 1,// 自动切白边阈值，范围是0~100,其实为1就够了	
+			auto_crop: 1,// 自动切白边阈值,范围是0~100,其实为1就够了	
 			gray: false,//黑白化
 		});
 		//单选按钮绑定的数值,ref函数：返回一个响应式的引用
@@ -320,9 +318,9 @@ export default defineComponent({
 					var url = document.location.toString();
 					//按照“/”分割字符串
 					var arrUrl = url.split("/");
-					//拼一个完整的图片URL（因为路由路径会变化，所以不能用相对路径？）
+					//拼一个完整的图片URL（因为路由路径会变化,所以不能用相对路径？）
 					var base_str = arrUrl[0] + "//" + arrUrl[2] + "/" + source_url
-					//添加各种字符串参数，不需要的话为空
+					//添加各种字符串参数,不需要的话为空
 					var resize_width_str = (imageParameters.resize_width > 0 ? "&resize_width=" + imageParameters.resize_width : "")
 					var resize_height_str = (imageParameters.resize_height > 0 ? "&resize_height=" + imageParameters.resize_height : "")
 					var gray_str = (imageParameters.gray ? "&gray=true" : "")
@@ -382,9 +380,9 @@ export default defineComponent({
 			},
 			drawerActive: false,
 			drawerPlacement: 'right',
-			//开发模式 还没有做的功能与设置，设置Debug以后才能见到
+			//开发模式 还没有做的功能与设置,设置Debug以后才能见到
 			debugModeFlag: true,
-			//书籍数据，需要从远程拉取
+			//书籍数据,需要从远程拉取
 			//是否显示顶部页头
 			showHeaderFlag: true,
 			//是否显示页数
@@ -395,7 +393,7 @@ export default defineComponent({
 			scrollDownFlag: false,
 			//存储现在滚动的位置
 			scrollTopSave: 0,
-			//同步滚动，目前还没做
+			//同步滚动,目前还没做
 			syncScrollFlag: false,
 			//鼠标点击或触摸的位置
 			clickX: 0,
@@ -404,16 +402,16 @@ export default defineComponent({
 			isLandscapeMode: true,
 			isPortraitMode: false,
 			imageMaxWidth: 10,
-			//屏幕宽横比，inLandscapeMode的判断依据
+			//屏幕宽横比,inLandscapeMode的判断依据
 			aspectRatio: 1.2,
 			//状态驱动的动态 CSS
 			// https://v3.cn.vuejs.org/api/sfc-style.html#%E7%8A%B6%E6%80%81%E9%A9%B1%E5%8A%A8%E7%9A%84%E5%8A%A8%E6%80%81-css
-			//图片宽度的单位，是否使用百分比
+			//图片宽度的单位,是否使用百分比
 			imageWidth_usePercentFlag: false,
-			//横屏(Landscape)状态的漫画页宽度，百分比
+			//横屏(Landscape)状态的漫画页宽度,百分比
 			singlePageWidth_Percent: 50,
 			doublePageWidth_Percent: 95,
-			//横屏(Landscape)状态的漫画页宽度，PX
+			//横屏(Landscape)状态的漫画页宽度,PX
 			singlePageWidth_PX: 720,
 			doublePageWidth_PX: 1080,
 			//可见范围宽高的具体值
@@ -427,8 +425,8 @@ export default defineComponent({
 	// mounted : 在绑定元素的父组件被挂载后调用。
 	// beforeUpdate: 在更新包含组件的 VNode 之前调用。。
 	// updated: 在包含组件的 VNode 及其子组件的 VNode 更新后调用。
-	// beforeUnmount: 当指令与在绑定元素父组件卸载之前时，只调用一次。
-	// unmounted: 当指令与元素解除绑定且父组件已卸载时，只调用一次。
+	// beforeUnmount: 当指令与在绑定元素父组件卸载之前时,只调用一次。
+	// unmounted: 当指令与元素解除绑定且父组件已卸载时,只调用一次。
 	created() {
 		//根据路由参数获取特定书籍
 		axios
@@ -440,7 +438,7 @@ export default defineComponent({
 					// console.log("成功获取书籍数据,书籍ID:" + this.$route.params.id);
 				}
 			);
-		//监听路由参数的变化，刷新本地的Book数据
+		//监听路由参数的变化,刷新本地的Book数据
 		this.$watch(
 			() => this.$route.params.id,
 			(id) => {
@@ -457,7 +455,7 @@ export default defineComponent({
 		//文档视图调整大小时会触发 resize 事件。 https://developer.mozilla.org/zh-CN/docs/Web/API/Window/resize_event
 		window.addEventListener("resize", this.onResize);
 		this.imageMaxWidth = window.innerWidth;
-		//根据本地存储初始化默认值,读取出来的是字符串，不要直接用
+		//根据本地存储初始化默认值,读取出来的是字符串,不要直接用
 
 		//是否显示页头
 		if (localStorage.getItem("showHeaderFlag") === "true") {
@@ -523,7 +521,7 @@ export default defineComponent({
 		//javascript 数字类型转换：https://www.runoob.com/js/js-type-conversion.html
 		// NaN不能通过相等操作符（== 和 ===）来判断
 
-		//漫画页宽度，Percent
+		//漫画页宽度,Percent
 		if (localStorage.getItem("singlePageWidth_Percent") != null) {
 			let saveNum = Number(localStorage.getItem("singlePageWidth_Percent"));
 			if (!isNaN(saveNum)) {
@@ -538,7 +536,7 @@ export default defineComponent({
 			}
 		}
 
-		//漫画页宽度，PX
+		//漫画页宽度,PX
 		if (localStorage.getItem("singlePageWidth_PX") != null) {
 			let saveNum = Number(localStorage.getItem("singlePageWidth_PX"));
 			if (!isNaN(saveNum)) {
@@ -551,13 +549,14 @@ export default defineComponent({
 				this.doublePageWidth_PX = saveNum;
 			}
 		}
-
 		//当前颜色
-		if (localStorage.getItem("ScrollModeDefaultColor") != null) {
-			this.model.color = localStorage.getItem("ScrollModeDefaultColor");
-			this.onBackgroundColorChange(this.model.color);
+		if (localStorage.getItem("BackgroundColor") != null) {
+			this.model.backgroundColor = localStorage.getItem("BackgroundColor");
+			// this.onBackgroundColorChange(this.model.backgroundColor);
 		}
-
+		if (localStorage.getItem("InterfaceColor") != null) {
+			this.model.interfaceColor = localStorage.getItem("InterfaceColor");
+		}
 	},
 
 	// //挂载前
@@ -574,7 +573,7 @@ export default defineComponent({
 	},
 	//卸载前
 	beforeUnmount() {
-		//组件销毁前，销毁监听事件
+		//组件销毁前,销毁监听事件
 		window.removeEventListener("scroll", this.onScroll);
 		window.removeEventListener('resize', this.onResize)
 	},
@@ -595,40 +594,42 @@ export default defineComponent({
 		startSketchMode() {
 			this.$emit("setTemplate", "sketch");
 		},
-		//接收Draw的参数，继续往父组件传
+		//接收Draw的参数,继续往父组件传
 		OnSetTemplate(value) {
 			this.$emit("setTemplate", value);
 		},
 		onBackgroundColorChange(value) {
-			// value #997E50
-			// 16进制转10进制
-			let r = Number('0x' + value.substr(1, 2))
-			let g = Number('0x' + value.substr(3, 2))
-			let b = Number('0x' + value.substr(5, 2))
-			// console.log(value);
-			// console.log("R:" + r + " G:" + g + " B:" + b);
-			//题头在背景色的基础上暗一些
-			let subR = 40
-			let subG = 30
-			let subB = 42
-			let r2 = (r < 255 - subR) ? (r - subR) : (r + parseInt((255 - r) / 2))
-			let g2 = (g < 255 - subG) ? (g - subG) : (g + parseInt((255 - g) / 2))
-			let b2 = (b < 255 - subB) ? (b - subB) : (b + parseInt((255 - b) / 2))
-			if (r < 50) {
-				r2 = r + 3 * subR
-			}
-			if (g < 50) {
-				g2 = g + 3 * subG
-			}
-			if (b < 50) {
-				b2 = b + 3 * subB
-			}
-			// console.log("R2:" + r2 + " G2:" + g2 + " B2:" + b2);
-			// 10进制转16进制
-			this.model.colorHeader = "#" + r2.toString(16) + g2.toString(16) + b2.toString(16)
+			this.model.backgroundColor = value
+			localStorage.setItem("BackgroundColor", value);
+			// // value #997E50
+			// // 16进制转10进制
+			// let r = Number('0x' + value.substr(1, 2))
+			// let g = Number('0x' + value.substr(3, 2))
+			// let b = Number('0x' + value.substr(5, 2))
+			// // console.log(value);
+			// // console.log("R:" + r + " G:" + g + " B:" + b);
+			// //题头在背景色的基础上暗一些
+			// let subR = 40
+			// let subG = 30
+			// let subB = 42
+			// let r2 = (r < 255 - subR) ? (r - subR) : (r + parseInt((255 - r) / 2))
+			// let g2 = (g < 255 - subG) ? (g - subG) : (g + parseInt((255 - g) / 2))
+			// let b2 = (b < 255 - subB) ? (b - subB) : (b + parseInt((255 - b) / 2))
+			// if (r < 50) {
+			// 	r2 = r + 3 * subR
+			// }
+			// if (g < 50) {
+			// 	g2 = g + 3 * subG
+			// }
+			// if (b < 50) {
+			// 	b2 = b + 3 * subB
+			// }
+			// // console.log("R2:" + r2 + " G2:" + g2 + " B2:" + b2);
+			// // 10进制转16进制
+			// this.model.interfaceColor = "#" + r2.toString(16) + g2.toString(16) + b2.toString(16)
 		},
 		//关闭抽屉的时候保存配置 
-		//如果在一个组件上使用了 v-model:xxx，应该使用 @update:xxx  https://www.naiveui.com/zh-CN/os-theme/docs/common-issues
+		//如果在一个组件上使用了 v-model:xxx,应该使用 @update:xxx  https://www.naiveui.com/zh-CN/os-theme/docs/common-issues
 		saveConfigToLocalStorage() {
 			// 储存配置
 			localStorage.setItem("showHeaderFlag", this.showHeaderFlag);
@@ -638,8 +639,8 @@ export default defineComponent({
 			localStorage.setItem("doublePageWidth_Percent", this.doublePageWidth_Percent);
 			localStorage.setItem("singlePageWidth_PX", this.singlePageWidth_PX);
 			localStorage.setItem("doublePageWidth_PX", this.doublePageWidth_PX);
-			localStorage.setItem("ScrollModeDefaultColor", this.model.color);
-			//set对有setXXXChange函数的来说有些多余，但没有set函数的话就有必要了
+			localStorage.setItem("BackgroundColor", this.model.backgroundColor);
+			//set对有setXXXChange函数的来说有些多余,但没有set函数的话就有必要了
 			localStorage.setItem("ImageParameters_DoAutoCrop", this.imageParameters.auto_crop);
 			localStorage.setItem("ImageParametersResizeMaxWidth", this.imageParameters.resize_max_width);
 		},
@@ -690,7 +691,7 @@ export default defineComponent({
 			// var aspectRatio = window.innerWidth / window.innerHeight
 			this.aspectRatio = this.clientWidth / this.clientHeight
 			//console.log("OnReSize,aspectRatio=" + this.aspectRatio);
-			// 为了调试的时候方便，阈值是正方形
+			// 为了调试的时候方便,阈值是正方形
 			if (this.aspectRatio > (19 / 19)) {
 				this.isLandscapeMode = true
 				this.isPortraitMode = false
@@ -703,7 +704,7 @@ export default defineComponent({
 		onScroll() {
 			let scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
 			this.scrollDownFlag = scrollTop > this.scrollTopSave;
-			//防手抖，小于一定数值状态就不变 Math.abs()会导致报错
+			//防手抖,小于一定数值状态就不变 Math.abs()会导致报错
 			// let step = Math.abs(this.scrollTopSave - scrollTop);
 			let step = this.scrollTopSave - scrollTop;
 			// console.log("step:", step);
@@ -712,11 +713,11 @@ export default defineComponent({
 				this.showBackTopFlag = ((scrollTop > 400) && !this.scrollDownFlag);
 			}
 		},
-		//获取鼠标位置，决定是否打开设置面板
+		//获取鼠标位置,决定是否打开设置面板
 		onMouseClick(e) {
-			this.clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离，单位为px）
-			this.clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离，单位为px）
-			//浏览器的视口，不包括工具栏和滚动条:
+			this.clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
+			this.clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离,单位为px）
+			//浏览器的视口,不包括工具栏和滚动条:
 			let innerWidth = window.innerWidth
 			let innerHeight = window.innerHeight
 			let MinX = innerWidth * 0.4
@@ -735,9 +736,9 @@ export default defineComponent({
 		},
 
 		onMouseMove(e) {
-			this.clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离，单位为px）
-			this.clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离，单位为px）
-			//浏览器的视口，不包括工具栏和滚动条:
+			this.clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
+			this.clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离,单位为px）
+			//浏览器的视口,不包括工具栏和滚动条:
 			let innerWidth = window.innerWidth
 			let innerHeight = window.innerHeight
 			let MinX = innerWidth * 0.4
@@ -752,7 +753,7 @@ export default defineComponent({
 			}
 		},
 		onMouseLeave(e) {
-			//离开区域的时候，清空鼠标样式
+			//离开区域的时候,清空鼠标样式
 			e.currentTarget.style.cursor = '';
 		},
 
@@ -765,18 +766,18 @@ export default defineComponent({
 					else clearInterval(scrollInterval);
 				}, 15);
 		},
-		//根据可视区域(viewport)长宽比，确认是横屏还是竖屏
+		//根据可视区域(viewport)长宽比,确认是横屏还是竖屏
 		// aspect-ratio https://developer.mozilla.org/zh-CN/docs/Web/CSS/@media/aspect-ratio
-		// window.innerWidth  不是响应式依赖，所以不能用计算属性
+		// window.innerWidth  不是响应式依赖,所以不能用计算属性
 		inLandscapeModeCheck() {
-			//避免除数等于0，虽然正常情况下不会触发
+			//避免除数等于0,虽然正常情况下不会触发
 			// if (window.innerHeight == 0) {
 			// 	return false
 			// }
 			// var aspectRatio = document.documentElement.clientWidth / document.documentElement.clientHeight
 			this.aspectRatio = window.innerWidth / window.innerHeight
 			// console.log("aspectRatio=" + this.aspectRatio);
-			// 为了测试方便，阈值是正方形
+			// 为了测试方便,阈值是正方形
 			return this.aspectRatio > (19 / 19);
 		},
 	},
@@ -817,13 +818,15 @@ export default defineComponent({
 <style></style>
 
 <style scoped>
+.header {
+	background: v-bind("model.interfaceColor");
+}
+.bottom {
+	background: v-bind("model.interfaceColor");
+}
 .manga {
 	max-width: 100%;
-	background: v-bind("model.color");
-}
-
-.header {
-	background: v-bind("model.colorHeader");
+	background: v-bind("model.backgroundColor");
 }
 
 /* https://developer.mozilla.org/zh-CN/docs/Web/CSS/object-fit */
@@ -852,7 +855,7 @@ export default defineComponent({
 	max-width: 90vw;
 }
 
-/* 横屏（显示区域）时的CSS样式，IE无效 */
+/* 横屏（显示区域）时的CSS样式,IE无效 */
 @media screen and (min-aspect-ratio: 19/19) {
 	.SinglePageImage {
 		width: v-bind(sPWL);
@@ -864,7 +867,7 @@ export default defineComponent({
 	}
 }
 
-/* 竖屏(显示区域)CSS样式，IE无效 */
+/* 竖屏(显示区域)CSS样式,IE无效 */
 @media screen and (max-aspect-ratio: 19/19) {
 	.SinglePageImage {
 		/* width: 100%; */

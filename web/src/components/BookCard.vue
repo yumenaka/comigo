@@ -59,7 +59,7 @@ export default defineComponent({
     },
     data() {
         return {
-            // resize_str: "&resize_height=340",
+            // resize_str: "&resize_height=340",   &auto_crop=1
             resize_str: "&resize_width=256&resize_height=360&resize_cut=true",
         };
     },

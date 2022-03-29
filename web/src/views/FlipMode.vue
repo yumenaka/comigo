@@ -1,6 +1,6 @@
 <template>
 	<div class="body">
-		<!-- 顶部，标题页头 -->
+		<!-- 顶部,标题页头 -->
 		<Header
 			class="header"
 			v-if="this.showHeaderFlag_FlipMode"
@@ -8,13 +8,13 @@
 			:headerTitle="book.name"
 			:showReturnIcon="true"
 		>
-			<!-- 右边的设置图标，点击屏幕中央也可以打开 -->
+			<!-- 右边的设置图标,点击屏幕中央也可以打开 -->
 			<n-icon size="40" @click="drawerActivate('right')">
 				<settings-outline />
 			</n-icon>
 		</Header>
 
-		<!-- 主题，漫画div -->
+		<!-- 主题,漫画div -->
 		<!-- 事件修饰符： https://v3.cn.vuejs.org/guide/events.html#%E4%BA%8B%E4%BB%B6%E4%BF%AE%E9%A5%B0%E7%AC%A6 -->
 		<div
 			class="manga_area"
@@ -24,17 +24,17 @@
 			@mouseleave.stop="onMouseLeave"
 		>
 			<div class="manga_area_img_div">
-				<!-- 非自动拼合模式最简单，直接显示一张图 -->
+				<!-- 非自动拼合模式最简单,直接显示一张图 -->
 				<img v-bind:src="this.book.pages[nowPageNum - 1].url" v-bind:alt="nowPageNum" />
 
-				<!-- 简单拼合双页，不管单双页什么的 -->
+				<!-- 简单拼合双页,不管单双页什么的 -->
 				<img
 					v-if="(!this.autoDoublePageModeFlag) && this.simpleDoublePageModeFlag && this.nowPageNum < this.book.all_page_num"
 					v-bind:src="this.book.pages[nowPageNum].url"
 					v-bind:alt="nowPageNum + 1"
 				/>
 
-				<!-- 自动拼合模式当前页，如果开启自动拼合，右边可能显示拼合页 -->
+				<!-- 自动拼合模式当前页,如果开启自动拼合,右边可能显示拼合页 -->
 				<img
 					v-if="this.autoDoublePageModeFlag && this.nowPageNum < this.book.all_page_num && this.nowAndNextPageIsSingle()"
 					v-bind:src="this.book.pages[nowPageNum].url"
@@ -47,7 +47,7 @@
 
 		<!-- 页脚 拖动条 -->
 		<div class="footer" v-if="this.showFooterFlag_FlipMode">
-			<!-- 右手模式用 ，底部滑动条 -->
+			<!-- 右手模式用 ,底部滑动条 -->
 			<div v-if="this.rightToLeftFlag">
 				<span>{{ this.nowPageNum }}</span>
 				<n-slider
@@ -60,7 +60,7 @@
 				/>
 				<span>{{ this.book.all_page_num }}</span>
 			</div>
-			<!-- 左手模式用 底部滑动条，设置reverse翻转计数方向 -->
+			<!-- 左手模式用 底部滑动条,设置reverse翻转计数方向 -->
 			<div v-if="!this.rightToLeftFlag">
 				<span>{{ this.book.all_page_num }}</span>
 				<n-slider
@@ -78,7 +78,7 @@
 		<Bottom></Bottom>
 	</div>
 
-	<!-- 设置抽屉，一开始隐藏 -->
+	<!-- 设置抽屉,一开始隐藏 -->
 	<Drawer
 		:initDrawerActive="this.drawerActive"
 		:initDrawerPlacement="this.drawerPlacement"
@@ -89,14 +89,10 @@
 		@setRM="OnSetReaderMode"
 		:nowTemplate="this.nowTemplate"
 	>
-		<span>{{ $t("setBackColor") }}</span>
-		<n-color-picker
-			v-model:value="model.color"
-			:modes="['rgb']"
-			:show-alpha="false"
-			@update:value="onBackgroundColorChange"
-		/>
-
+		<!-- 选择：切换页面模式 -->
+		<n-space>
+			<n-button v-if="this.ReaderMode == 'flip'" @click="onChangeReaderMode">切换下拉模式</n-button>
+		</n-space>
 		<!-- 分割线 -->
 		<n-divider />
 
@@ -151,7 +147,7 @@
 			</n-switch>
 		</n-space>
 
-		<!-- 开关：翻页模式，默认右半屏-->
+		<!-- 开关：翻页模式,默认右半屏-->
 		<n-space>
 			<n-switch
 				size="large"
@@ -178,7 +174,7 @@
 		<!-- 分割线 -->
 		<n-divider />
 
-		<!-- 开关：Debug，开启一些不稳定功能 -->
+		<!-- 开关：Debug,开启一些不稳定功能 -->
 		<n-space>
 			<n-switch size="large" v-model:value="this.debugModeFlag" @update:value="this.setDebugModeFlag">
 				<template #checked>{{ $t("debugMode") }}</template>
@@ -237,15 +233,15 @@ import { useCookies } from "vue3-cookies";
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
 import { defineComponent, reactive } from "vue";
-// 直接导入组件并使用它。这种情况下，只有导入的组件才会被打包。
-import { NColorPicker, NDivider, NIcon, NInputNumber, NSlider, NSpace, NSwitch, useMessage, } from "naive-ui";
+// 直接导入组件并使用它。这种情况下,只有导入的组件才会被打包。
+import { NDivider, NIcon, NInputNumber, NSlider, NSpace, NSwitch, useMessage, } from "naive-ui";
 import { SettingsOutline } from "@vicons/ionicons5";
 import axios from "axios";
 
 export default defineComponent({
 	name: "FlipMode",
 	props: [],
-	emits: ["childMark"],// 向父组件传递参数的函数，用法： 子组件调用：this.$emit("childMark", value); 父组件：@childMark="this.fatherMethod"
+	emits: ["childMark"],// 向父组件传递参数的函数,用法： 子组件调用：this.$emit("childMark", value); 父组件：@childMark="this.fatherMethod"
 	components: {
 		Header,
 		Drawer,
@@ -257,17 +253,17 @@ export default defineComponent({
 		// NLayoutContent,
 		NIcon, //图标  https://www.naiveui.com/zh-CN/os-theme/components/icon
 		SettingsOutline, //图标,来自 https://www.xicons.org/#/   需要安装（npm i -D @vicons/ionicons5）
-		NColorPicker, //颜色选择器 Color Picker https://www.naiveui.com/zh-CN/os-theme/components/color-picker
+		// NColorPicker, //颜色选择器 Color Picker https://www.naiveui.com/zh-CN/os-theme/components/color-picker
 		NDivider, //分割线  https://www.naiveui.com/zh-CN/os-theme/components/divider
 		NInputNumber,///  https://www.naiveui.com/zh-CN/os-theme/components/input-number
 		// useNotification, // https://www.naiveui.com/zh-CN/os-theme/components/notification
 	},
 	setup() {
 		const { cookies } = useCookies();
-		//背景颜色，颜色选择器用
+		//背景颜色,颜色选择器用
 		const model = reactive({
-			color: "#f6f7eb",
-			colorHeader: "#d1c9c1",
+			backgroundColor: "#f6f7eb",
+			interfaceColor: "#d1c9c1",
 		});
 		//警告信息
 		const message = useMessage()
@@ -324,7 +320,7 @@ export default defineComponent({
 			},
 			drawerActive: false,
 			drawerPlacement: "right",
-			//开发模式 未完成的功能与设置，开启Debug以后才能见到
+			//开发模式 未完成的功能与设置,开启Debug以后才能见到
 			debugModeFlag: true,
 			//是否显示页头
 			showHeaderFlag_FlipMode: true,
@@ -334,11 +330,11 @@ export default defineComponent({
 			rightToLeftFlag: false,
 			//简单拼合双叶
 			simpleDoublePageModeFlag: false,
-			//自动拼合双叶，效果不太好
+			//自动拼合双叶,效果不太好
 			autoDoublePageModeFlag: false,
 			//是否保存当前页数
 			saveNowPageNumFlag_FlipMode: true,
-			//当前页数，注意语义，直接就是1开始的页数，不是数组下标，在pages数组当中用的时候需要-1
+			//当前页数,注意语义,直接就是1开始的页数,不是数组下标,在pages数组当中用的时候需要-1
 			nowPageNum: 1,
 			//素描模式标记
 			sketchModeFlag: false,
@@ -346,7 +342,7 @@ export default defineComponent({
 			showPageHintFlag_FlipMode: false,
 			//翻页间隔时间
 			sketchFlipSecond: 30,
-			//计时用，从0开始
+			//计时用,从0开始
 			sketchSecondCount: 0,
 			//计时器ID
 			interval: null,
@@ -366,7 +362,7 @@ export default defineComponent({
 				document.title = this.book.name;
 				console.log("成功获取书籍数据,书籍ID:" + this.$route.params.id);
 			});
-		//监听路由参数的变化，刷新本地的Book数据
+		//监听路由参数的变化,刷新本地的Book数据
 		this.$watch(
 			() => this.$route.params.id,
 			(id) => {
@@ -379,7 +375,7 @@ export default defineComponent({
 		)
 		// https://www.developers.pub/wiki/1006381/1013545
 		// https://developer.mozilla.org/zh-CN/docs/Web/API/Storage/setItem
-		//一个域名下存放的cookie的个数有限制，不同的浏览器存放的个数不一样,一般为20个。因为不需要上传，使用localStorage（本地存储）存储在浏览器，永不过期。
+		//一个域名下存放的cookie的个数有限制,不同的浏览器存放的个数不一样,一般为20个。因为不需要上传,使用localStorage（本地存储）存储在浏览器,永不过期。
 		if (localStorage.getItem("debugModeFlag") == "true") {
 			this.debugModeFlag = true;
 		} else if (localStorage.getItem("debugModeFlag") == "false") {
@@ -428,9 +424,11 @@ export default defineComponent({
 			this.saveNowPageNumFlag_FlipMode = false;
 		}
 		//当前背景色
-		if (localStorage.getItem("FlipModeDefaultColor") != null) {
-			this.model.color = localStorage.getItem("FlipModeDefaultColor");
-			this.onBackgroundColorChange(this.model.color);
+		if (localStorage.getItem("BackgroundColor") != null) {
+			this.model.backgroundColor = localStorage.getItem("BackgroundColor");
+		}
+		if (localStorage.getItem("InterfaceColor") != null) {
+			this.model.interfaceColor = localStorage.getItem("InterfaceColor");
 		}
 		//倒计时秒数
 		if (localStorage.getItem("sketchFlipSecond") != null) {
@@ -456,42 +454,44 @@ export default defineComponent({
 	},
 	// mounted : 在绑定元素的父组件被挂载后调用。
 	mounted() {
-		//需要得书籍远程数据，避免初始化失败，所以延迟0.5秒执行
+		//需要得书籍远程数据,避免初始化失败,所以延迟0.5秒执行
 		setTimeout(this.setNowPageNumByCookie, 500);
 	},
 	updated() {
-		//界面有更新就会调用，随便乱放会引起难以调试的BUG
+		//界面有更新就会调用,随便乱放会引起难以调试的BUG
 	},
 	methods: {
 		needDownloadLink() {
 			return this.book.book_type != "dir"
 		},
 		onBackgroundColorChange(value) {
-			// value #997E50
-			// 16进制转10进制
-			let r = Number('0x' + value.substr(1, 2))
-			let g = Number('0x' + value.substr(3, 2))
-			let b = Number('0x' + value.substr(5, 2))
-			// console.log(value);
-			// console.log("R:" + r + " G:" + g + " B:" + b);
-			//题头在背景色的基础上暗一些
-			let subR = 40
-			let subG = 30
-			let subB = 42
-			let r2 = (r < 255 - subR) ? (r - subR) : (r + parseInt((255 - r) / 2))
-			let g2 = (g < 255 - subG) ? (g - subG) : (g + parseInt((255 - g) / 2))
-			let b2 = (b < 255 - subB) ? (b - subB) : (b + parseInt((255 - b) / 2))
-			if (r < 50) {
-				r2 = r + 3 * subR
-			}
-			if (g < 50) {
-				g2 = g + 3 * subG
-			}
-			if (b < 50) {
-				b2 = b + 3 * subB
-			}
-			// 10进制转16进制
-			this.model.colorHeader = "#" + r2.toString(16) + g2.toString(16) + b2.toString(16)
+			this.model.backgroundColor = value
+			localStorage.setItem("BackgroundColor", value);
+			// // value #997E50
+			// // 16进制转10进制
+			// let r = Number('0x' + value.substr(1, 2))
+			// let g = Number('0x' + value.substr(3, 2))
+			// let b = Number('0x' + value.substr(5, 2))
+			// // console.log(value);
+			// // console.log("R:" + r + " G:" + g + " B:" + b);
+			// //题头在背景色的基础上暗一些
+			// let subR = 40
+			// let subG = 30
+			// let subB = 42
+			// let r2 = (r < 255 - subR) ? (r - subR) : (r + parseInt((255 - r) / 2))
+			// let g2 = (g < 255 - subG) ? (g - subG) : (g + parseInt((255 - g) / 2))
+			// let b2 = (b < 255 - subB) ? (b - subB) : (b + parseInt((255 - b) / 2))
+			// if (r < 50) {
+			// 	r2 = r + 3 * subR
+			// }
+			// if (g < 50) {
+			// 	g2 = g + 3 * subG
+			// }
+			// if (b < 50) {
+			// 	b2 = b + 3 * subB
+			// }
+			// // 10进制转16进制
+			// this.model.interfaceColor = "#" + r2.toString(16) + g2.toString(16) + b2.toString(16)
 		},
 		// 分析单双页用
 		nowAndNextPageIsSingle() {
@@ -505,7 +505,7 @@ export default defineComponent({
 				return true
 			}
 		},
-		//根据书籍UUID，设定当前页数，因为需要取得远程书籍数据（this.book），所以延迟执行
+		//根据书籍UUID,设定当前页数,因为需要取得远程书籍数据（this.book）,所以延迟执行
 		setNowPageNumByCookie() {
 			if (this.saveNowPageNumFlag_FlipMode) {
 				let cookieValue = localStorage.getItem("nowPageNum" + this.book.uuid);
@@ -515,22 +515,22 @@ export default defineComponent({
 						this.nowPageNum = saveNum;
 						// console.log("成功读取页数" + saveNum);
 					} else {
-						console.log("读取页数失败，this.nowPageNum=" + this.nowPageNum);
+						console.log("读取页数失败,this.nowPageNum=" + this.nowPageNum);
 					}
 				} else {
 					console.log("cookie里面没找到:" + "nowPageNum" + this.book.uuid);
 				}
 			} else {
-				//console.log("不读取页数，this.saveNowPageNumFlag_FlipMode=" + this.saveNowPageNumFlag_FlipMode);
+				//console.log("不读取页数,this.saveNowPageNumFlag_FlipMode=" + this.saveNowPageNumFlag_FlipMode);
 			}
 		},
-		// // 设置当前模板-接收Drawer的参数，继续往父组件传
+		// // 设置当前模板-接收Drawer的参数,继续往父组件传
 		// 改变阅读模式
 		OnSetTemplate(value) {
 			if (value == "scroll") {
 				console.log("跳转到卷轴阅读模式")
 			} else if (this.nowTemplate == "scroll") {
-				// 命名路由，并加上参数，让路由建立 url
+				// 命名路由,并加上参数,让路由建立 url
 				this.$router.push({ name: 'ScrollMode', params: { id: this.book.id } })
 			}
 		},
@@ -554,7 +554,7 @@ export default defineComponent({
 			//是否显示页脚
 			this.showFooterFlag_FlipMode = false;
 			// this.$emit("setTemplate", "sketch");
-			//setTimeout和setInterval函数，都返回一个表示计数器编号的整数值，将该整数传入clearTimeout和clearInterval函数，就可以取消对应的定时器。setInterval指定某个任务每隔一段时间就执行一次。setTimeout()用于在指定的毫秒数后调用函数或计算表达式  setTimeout('console.log(2)',1000);
+			//setTimeout和setInterval函数,都返回一个表示计数器编号的整数值,将该整数传入clearTimeout和clearInterval函数,就可以取消对应的定时器。setInterval指定某个任务每隔一段时间就执行一次。setTimeout()用于在指定的毫秒数后调用函数或计算表达式  setTimeout('console.log(2)',1000);
 			this.interval = setInterval(this.sketchCount, 1000);
 		},
 		//修改间隔的时候重新计秒数
@@ -574,7 +574,7 @@ export default defineComponent({
 			// this.$emit("setTemplate", "flip");
 			clearInterval(this.interval); // 清除定时器
 		},
-		//开始速写（quick sketch），每秒执行一次
+		//开始速写（quick sketch）,每秒执行一次
 		sketchCount() {
 			if (this.sketchModeFlag == false || this.nowTemplate != "sketch") {
 				this.stopSketchMode();
@@ -590,7 +590,7 @@ export default defineComponent({
 				}
 			}
 		},
-		// 关闭抽屉时，保存设置到cookies
+		// 关闭抽屉时,保存设置到cookies
 		saveConfigToCookie() {
 			localStorage.setItem("debugModeFlag", this.debugModeFlag);
 			localStorage.setItem("showHeaderFlag_FlipMode", this.showHeaderFlag_FlipMode);
@@ -600,8 +600,8 @@ export default defineComponent({
 			localStorage.setItem("simpleDoublePageModeFlag", this.simpleDoublePageModeFlag);
 			localStorage.setItem("autoDoublePageModeFlag", this.autoDoublePageModeFlag);
 			localStorage.setItem("saveNowPageNumFlag_FlipMode", this.saveNowPageNumFlag_FlipMode);
-			localStorage.setItem("nowPageNum" + this.book.uuid, this.nowPageNum);
-			localStorage.setItem("FlipModeDefaultColor", this.model.color);
+			localStorage.setItem("nowPageNum" + this.book.id, this.nowPageNum);
+			localStorage.setItem("BackgroundColor", this.model.backgroundColor);
 			localStorage.setItem("sketchFlipSecond", this.sketchFlipSecond);
 		},
 		// 随即换一下背景色
@@ -612,17 +612,17 @@ export default defineComponent({
 			//rgb(185,175,145)
 			let RGB = "rgb(" + R + "," + G + "," + B + ")";
 			// console.log(RGB);
-			this.model.color = RGB;
+			this.model.backgroundColor = RGB;
 		},
 		//HTML DOM 事件 https://www.runoob.com/jsref/dom-obj-event.html
-		// 进入绑定该事件的元素和其子元素均会触发该事件，所以有一个重复触发，冒泡过程。其对应的离开事件 mouseout
+		// 进入绑定该事件的元素和其子元素均会触发该事件,所以有一个重复触发,冒泡过程。其对应的离开事件 mouseout
 		onMouseOver() { },
-		// 只有进入绑定该事件的元素才会触发事件，也就是不会冒泡。其对应的离开事件mouseleave
+		// 只有进入绑定该事件的元素才会触发事件,也就是不会冒泡。其对应的离开事件mouseleave
 		onMouseEnter() {
 			// this.randomColor = 'background-color: rgb(235,235,235)';
 		},
 		onMouseLeave(e) {
-			//离开区域的时候，清空鼠标样式
+			//离开区域的时候,清空鼠标样式
 			e.currentTarget.style.cursor = "";
 		},
 		//事件修饰符: https://v3.cn.vuejs.org/guide/events.html#%E4%BA%8B%E4%BB%B6%E4%BF%AE%E9%A5%B0%E7%AC%A6
@@ -635,9 +635,9 @@ export default defineComponent({
 			//不用自己获取元素
 			// let offsetWidth = e.currentTarget.offsetWidth;
 			// let offsetHeight = e.currentTarget.offsetHeight;
-			let clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离，单位为px）
-			let clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离，单位为px）
-			//浏览器的视口，不包括工具栏和滚动条:
+			let clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
+			let clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离,单位为px）
+			//浏览器的视口,不包括工具栏和滚动条:
 			let innerWidth = window.innerWidth;
 			let innerHeight = window.innerHeight;
 			let MinX = innerWidth * 0.4;
@@ -651,45 +651,45 @@ export default defineComponent({
 				if (clickX < innerWidth * 0.5) {
 					//设置左边的鼠标指针
 					if (this.rightToLeftFlag && this.nowPageNum == 1) {
-						//右边翻下一页，且目前是第一页的时候，左边的鼠标指针，设置为禁止翻页
+						//右边翻下一页,且目前是第一页的时候,左边的鼠标指针,设置为禁止翻页
 						e.currentTarget.style.cursor = "url(/images/Prohibited28Filled.png), pointer";
 					} else if (!this.rightToLeftFlag && this.nowPageNum == this.book.all_page_num) {
-						//左边翻下一页，且目前是最后一页的时候，左边的鼠标指针，设置为禁止翻页
+						//左边翻下一页,且目前是最后一页的时候,左边的鼠标指针,设置为禁止翻页
 						e.currentTarget.style.cursor = "url(/images/Prohibited28Filled.png), pointer";
 					} else {
-						//正常情况下，左边是向左的箭头
+						//正常情况下,左边是向左的箭头
 						e.currentTarget.style.cursor = "url(/images/ArrowLeft.png), pointer";
 					}
 				} else {
 					//设置右边的鼠标指针
 					if (this.rightToLeftFlag && this.nowPageNum == this.book.all_page_num) {
-						//右边翻下一页，且目前是最后页的时候，右边的鼠标指针，设置为禁止翻页
+						//右边翻下一页,且目前是最后页的时候,右边的鼠标指针,设置为禁止翻页
 						e.currentTarget.style.cursor = "url(/images/Prohibited28Filled.png), pointer";
 					} else if (!this.rightToLeftFlag && this.nowPageNum == 1) {
-						//左边翻下一页，且目前是第一页的时候，右边的鼠标指针，设置为禁止翻页
+						//左边翻下一页,且目前是第一页的时候,右边的鼠标指针,设置为禁止翻页
 						e.currentTarget.style.cursor = "url(/images/Prohibited28Filled.png), pointer";
 					} else {
-						//正常情况下，右边是向右的箭头
+						//正常情况下,右边是向右的箭头
 						e.currentTarget.style.cursor = "url(/images/ArrowRight.png), pointer";
 					}
 				}
 			}
 		},
 
-		//根据鼠标点击事件的位置，决定是左右翻页还是打开设置
+		//根据鼠标点击事件的位置,决定是左右翻页还是打开设置
 		onMouseClick(e) {
-			//元素自身的宽高，会有子元素问题
+			//元素自身的宽高,会有子元素问题
 			// let offsetX = e.offsetX;
 			// let offsetY = e.offsetY;
 			// let offsetWidth = e.currentTarget.offsetWidth;
 			// let offsetHeight = e.currentTarget.offsetHeight;
-			// //随机一下背景色，只是为了好玩
+			// //随机一下背景色,只是为了好玩
 			// if (this.debugModeFlag) {
 			// 	this.randomBackgroundColor();
 			// }
-			let clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离，单位为px）
-			let clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离，单位为px）
-			//浏览器的可视区域宽高，不包括工具栏和滚动条:
+			let clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
+			let clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离,单位为px）
+			//浏览器的可视区域宽高,不包括工具栏和滚动条:
 			let innerHeight = window.innerHeight;
 			let innerWidth = window.innerWidth;
 			let MinX = innerWidth * 0.4;
@@ -731,7 +731,7 @@ export default defineComponent({
 				}
 			}
 
-			//如果开启了自动合并模式，并且当前页应该被合并
+			//如果开启了自动合并模式,并且当前页应该被合并
 			if (this.autoDoublePageModeFlag && this.checkMergedStatus_ByPageNum(this.nowPageNum)) {
 				if (this.nowPageNum < this.book.all_page_num - 1) {
 					this.flipPage(2);
@@ -761,7 +761,7 @@ export default defineComponent({
 			}
 
 			//自动合并模式
-			//如果没有开启自动合并模式，或现在是第2页
+			//如果没有开启自动合并模式,或现在是第2页
 			if (this.nowPageNum == 2 || !this.autoDoublePageModeFlag) {
 				this.flipPage(-1);
 				return
@@ -778,23 +778,23 @@ export default defineComponent({
 				this.flipPage(-1);
 				return
 			}
-			//都没return掉，那么前两张可以合并，减两页
+			//都没return掉,那么前两张可以合并,减两页
 			this.flipPage(-2);
 		},
 
-		//给一个页数，然后判断自动双页模式下，是否应该预读并合并显示下一页
+		//给一个页数,然后判断自动双页模式下,是否应该预读并合并显示下一页
 		checkMergedStatus_ByPageNum(pageNum) {
-			//如果没有开启自动双页模式，当然不需要
+			//如果没有开启自动双页模式,当然不需要
 			if (!this.autoDoublePageModeFlag) {
 				return false;
 			}
-			//可能传入的错误值，打印到控制台
+			//可能传入的错误值,打印到控制台
 			if (pageNum <= 0 || pageNum >= this.book.all_page_num) {
 				console.log("Error pageNum :" + pageNum);
 				return false;
 			}
 
-			//已经是最后一页了，显然不需要自动合并下一页
+			//已经是最后一页了,显然不需要自动合并下一页
 			if (pageNum == this.book.all_page_num) {
 				return false;
 			}
@@ -802,8 +802,8 @@ export default defineComponent({
 			let now_page_is_double_page = this.checkImageIsDoublePage_byPageNum(pageNum);
 			//分析下一张漫画的宽高比,看是不是双开页
 			let next_page_is_double_page = this.checkImageIsDoublePage_byPageNum(pageNum + 1);
-			//如果现在这张就是开页漫画，直接不用比
-			//如果下一张漫画是开页，显然也没法合并
+			//如果现在这张就是开页漫画,直接不用比
+			//如果下一张漫画是开页,显然也没法合并
 			return !(now_page_is_double_page || next_page_is_double_page);
 		},
 		checkImageIsDoublePage_byPageNum(pageNum) {
@@ -830,7 +830,7 @@ export default defineComponent({
 			// complete在不同浏览器下,表现不一致,不建议使用
 			// 无论浏览器是否存在图片缓存,重新请求图片地址,都会触发onload事件
 
-			// 牵扯到加载资源，这段代码需要改进……
+			// 牵扯到加载资源,这段代码需要改进……
 			if (image.complete) {
 				return image.width >= image.height;
 			} else {
@@ -839,18 +839,18 @@ export default defineComponent({
 					//是单页漫画
 					if (image.width < image.height) {
 						image.onload = null;	// 避免重复加载
-						temp_flag = false;//宽小于高，是是竖着的，单页漫画
+						temp_flag = false;//宽小于高,是是竖着的,单页漫画
 					} else {
 						//是双页漫画
 						image.onload = null;	// 避免重复加载
-						temp_flag = true;//宽大于高，很可能是开页
+						temp_flag = true;//宽大于高,很可能是开页
 					}
 				};
 				return temp_flag;
 			}
 		},
 
-		//翻页，其实不限页数
+		//翻页,其实不限页数
 		flipPage: function (num) {
 			if (
 				this.nowPageNum + num <= this.book.all_page_num &&
@@ -858,7 +858,7 @@ export default defineComponent({
 			) {
 				this.nowPageNum = this.nowPageNum + num;
 			} else {
-				// console.log("无法继续翻，Num:" + num)
+				// console.log("无法继续翻,Num:" + num)
 				if (num > 0) {
 					this.message.info(this.$t("hintLastPage"));
 				} else {
@@ -1008,7 +1008,7 @@ export default defineComponent({
 				let totalMinutes = parseInt((this.sketchSecondCount + 1) / 60);
 				//计算几小时几分
 				let MinutesAndHourString = "";
-				//如果不满意1小时，就不显示小时
+				//如果不满意1小时,就不显示小时
 				if (parseInt(totalMinutes / 60) == 0) {
 					MinutesAndHourString = totalMinutes + this.$t("minute");
 				} else {
@@ -1040,7 +1040,7 @@ export default defineComponent({
 		},
 		mangaAreaHeight() {
 			let Height = 95;
-			//页头和底部拖动条都显示,或有一个显示的时候，95%
+			//页头和底部拖动条都显示,或有一个显示的时候,95%
 			if (this.showFooterFlag_FlipMode && this.showHeaderFlag_FlipMode) {
 				Height = 95;
 			}
@@ -1050,7 +1050,7 @@ export default defineComponent({
 			if (!this.showFooterFlag_FlipMode && this.showHeaderFlag_FlipMode) {
 				Height = 95;
 			}
-			//页头和底部拖动条都不显示的时候，漫画占满屏幕
+			//页头和底部拖动条都不显示的时候,漫画占满屏幕
 			if (!this.showFooterFlag_FlipMode && !this.showHeaderFlag_FlipMode) {
 				Height = 100;
 			}
@@ -1058,7 +1058,7 @@ export default defineComponent({
 		},
 		mangaImageHeight() {
 			let Height = 95;
-			//页头和底部拖动条都显示,或有一个显示的时候，95%
+			//页头和底部拖动条都显示,或有一个显示的时候,95%
 			if (this.showFooterFlag_FlipMode && this.showHeaderFlag_FlipMode) {
 				Height = 95;
 			}
@@ -1068,11 +1068,11 @@ export default defineComponent({
 			if (!this.showFooterFlag_FlipMode && this.showHeaderFlag_FlipMode) {
 				Height = 95;
 			}
-			//页头和拖动条都不显示的时候，漫画占满屏幕
+			//页头和拖动条都不显示的时候,漫画占满屏幕
 			if (!this.showFooterFlag_FlipMode && !this.showHeaderFlag_FlipMode) {
 				Height = 100;
 			}
-			//与上面唯一的不同，减去素描提示的空间
+			//与上面唯一的不同,减去素描提示的空间
 			if (this.showPageHintFlag_FlipMode) {
 				if (this.nowTemplate == "sketch") {
 					Height = Height - 6;
@@ -1082,7 +1082,7 @@ export default defineComponent({
 			}
 			return Height + "vh";
 		},
-		//进入素描模式的时候，把高度放大一倍
+		//进入素描模式的时候,把高度放大一倍
 		sketchHintHeight() {
 			if (this.nowTemplate == "sketch") {
 				return "6vh";
@@ -1090,7 +1090,7 @@ export default defineComponent({
 				return "3vh";
 			}
 		},
-		//进入素描模式的时候，把字体放大
+		//进入素描模式的时候,把字体放大
 		sketchHintFontSize() {
 			if (this.nowTemplate == "sketch") {
 				return "24px";
@@ -1111,6 +1111,13 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.header {
+	background: v-bind("model.interfaceColor");
+}
+.bottom {
+	background: v-bind("model.interfaceColor");
+}
+
 /* 参考CSS盒子模型慢慢改 */
 /* https://www.runoob.com/css/css-boxmodel.html */
 /* CSS 高度和宽度 */
@@ -1128,17 +1135,13 @@ export default defineComponent({
 	padding: 0px;
 	display: flex;
 	max-width: 100%;
-	/* flex-direction: column垂直堆叠 flex 项目（从上到下），column-reverse从下到上 row从左到右 row-reverse从右到左 */
+	/* flex-direction: column垂直堆叠 flex 项目（从上到下）,column-reverse从下到上 row从左到右 row-reverse从右到左 */
 	flex-direction: column;
-	/* justify-content 属性用于对齐 flex 项目。 将 justify-content 和 align-items 属性设置为居中，flex 项目将完美居中： */
+	/* justify-content 属性用于对齐 flex 项目。 将 justify-content 和 align-items 属性设置为居中,flex 项目将完美居中： */
 	justify-content: center;
 	/* center 值将 flex 项目在容器中间对齐： */
 	align-items: center;
-	background: v-bind("model.color");
-}
-
-.header {
-	background: v-bind("model.colorHeader");
+	background: v-bind("model.backgroundColor");
 }
 
 /* 漫画div */
@@ -1202,7 +1205,7 @@ export default defineComponent({
 	height: 5vh;
 	text-align: center;
 
-	background: v-bind("model.colorHeader");
+	background: v-bind("model.interfaceColor");
 	width: 80vw;
 	padding: 0px;
 }
