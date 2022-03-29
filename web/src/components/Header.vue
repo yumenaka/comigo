@@ -15,12 +15,13 @@
     <!-- 标题-->
     <!-- 文本颜色： https://www.tailwindcss.cn/docs/text-color -->
     <!-- 文本装饰（下划线）：https://www.tailwindcss.cn/docs/text-decoration -->
-    <div class="p-0 m-0 py-2 content-center">
+    <!-- 文本溢出：https://www.tailwindcss.cn/docs/text-overflow -->
+    <div class="p-0 m-0 py-2 content-center truncate">
       <!-- 标题，只显示 -->
-      <span class="text-lg" v-if="!setDownLoadLink">{{ bookName }}</span>
+      <span class="text-lg" v-if="!setDownLoadLink">{{ headerTitle }}</span>
       <!-- 标题，可下载压缩包 -->
       <span class="text-lg text-blue-700 hover:underline">
-        <a v-if="this.setDownLoadLink" :href="'raw/' + bookName">{{ bookName }}</a>
+        <a v-if="this.setDownLoadLink" :href="'raw/' + headerTitle">{{ headerTitle }}</a>
       </span>
     </div>
     <!-- slot，用来插入右边的设置图标 -->
@@ -30,16 +31,14 @@
 
 <script>
 import { useCookies } from "vue3-cookies";
-import { NSpace, NIcon, NEllipsis, } from 'naive-ui'
+import { NIcon, } from 'naive-ui'
 import { BookOutline, ReturnUpBack } from '@vicons/ionicons5'
 import { defineComponent } from 'vue'
 export default defineComponent({
   name: "Header",
-  props: ['setDownLoadLink', 'bookName', 'showReturnIcon',],
+  props: ['setDownLoadLink', 'headerTitle', 'showReturnIcon',],
   components: {
-    NSpace,
     NIcon,
-    NEllipsis,
     BookOutline,//图标,来自 https://www.xicons.org/#/   需要安装（npm i -D @vicons/ionicons5）与导入
     ReturnUpBack,
   },

@@ -12,8 +12,7 @@ import FlipMode from '@/views/FlipMode.vue'
 import BookShelf from '@/views/BookShelf.vue'
 import NotFound from '@/views/NotFound404.vue'
 
-//https://localhost/#/s/bookid
-
+//link like: https://localhost/#/scroll/4ZaZc
 
 const routes = [
   {

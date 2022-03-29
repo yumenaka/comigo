@@ -4,8 +4,8 @@
 		<Header
 			class="header"
 			v-if="this.showHeaderFlag_FlipMode"
-			:bookIsFolder="book.IsFolder"
-			:bookName="book.name"
+			:setDownLoadLink="this.needDownloadLink()"
+			:headerTitle="book.name"
 			:showReturnIcon="true"
 		>
 			<!-- 右边的设置图标，点击屏幕中央也可以打开 -->
@@ -75,6 +75,7 @@
 				<span>{{ this.nowPageNum }}</span>
 			</div>
 		</div>
+		<Bottom></Bottom>
 	</div>
 
 	<!-- 设置抽屉，一开始隐藏 -->
@@ -225,6 +226,9 @@
 			@update:value="this.resetSketchSecondCount"
 		/>
 	</Drawer>
+	<Bottom
+		:softVersion="this.$store.state.server_status.ServerName ? this.$store.state.server_status.ServerName : 'Comigo'"
+	></Bottom>
 </template>
 
 <script>
@@ -304,6 +308,7 @@ export default defineComponent({
 				name: "loading",
 				id: "abcde",
 				all_page_num: 2,
+				book_type: "dir",
 				pages: [
 					{
 						height: 500,
@@ -458,6 +463,9 @@ export default defineComponent({
 		//界面有更新就会调用，随便乱放会引起难以调试的BUG
 	},
 	methods: {
+		needDownloadLink() {
+			return this.book.book_type != "dir"
+		},
 		onBackgroundColorChange(value) {
 			// value #997E50
 			// 16进制转10进制
@@ -1130,9 +1138,6 @@ export default defineComponent({
 }
 
 .header {
-	padding: 0px;
-	width: 100%;
-	height: 5vh;
 	background: v-bind("model.colorHeader");
 }
 

@@ -4,7 +4,7 @@
             class="footer"
             v-if="this.showHeaderFlag"
             :bookIsFolder="false"
-            :bookName="this.bookShelfTitle"
+            :headerTitle="this.bookShelfTitle"
             :showReturnIcon="this.headerShowReturnIcon"
             :setDownLoadLink="false"
         >
@@ -61,7 +61,9 @@
                 </n-switch>
             </n-space>
         </Drawer>
-        <Bottom></Bottom>
+        <Bottom
+            :softVersion="this.$store.state.server_status.ServerName ? this.$store.state.server_status.ServerName : 'Comigo'"
+        ></Bottom>
     </div>
 </template>
 
@@ -280,9 +282,9 @@ export default defineComponent({
                     this.setBookShelfTitle();
                 })
         },
+        //根据路由参数获取特定书籍组
         getBooksGroupByBookID(group_id) {
             // console.log("getBooksGroupByBookID bookID:" + group_id);
-            //根据路由参数获取特定书籍组
             axios
                 .get("getlist?book_group_book_id=" + group_id)
                 .then((response) => {
@@ -294,27 +296,29 @@ export default defineComponent({
                     this.setBookShelfTitle();
                 })
         },
+        //设置书架名
         setBookShelfTitle() {
+            //阅读某本书的时候，当然不需要设置
+            if (this.$route.params.id != null) {
+                return
+            }
+            //设置当前深度，这个值目前没用到
             if (this.bookshelf[0].depth != null) {
                 this.max_depth = this.bookshelf[0].depth
             }
-            //默认显示服务器版本
-            if (this.$store.state.server_status.ServerName) {
-                //设置浏览器标签标题
-                document.title = this.$store.state.server_status.ServerName
-                //设置Header标题
-                this.bookShelfTitle = this.$store.state.server_status.ServerName
+            if (this.bookshelf[0].parent_folder != null && this.bookshelf[0].parent_folder != "") {
+                document.title = this.bookshelf[0].parent_folder
+                this.bookShelfTitle = this.bookshelf[0].parent_folder
             }
-            //如果路由参数里面有ID（正在展示某个书籍组）
-            if (this.$route.params.id) {
-                if (this.bookshelf[0].parent_folder != null && this.bookshelf[0].parent_folder != "") {
-                    // console.log("this.bookshelf[0]:" + this.bookshelf[0].parent_folder)
-                    //设置浏览器标签标题
-                    document.title = this.bookshelf[0].parent_folder;
-                    //设置Header标题
-                    this.bookShelfTitle = this.bookshelf[0].parent_folder;
-                }
-            }
+            // //默认显示服务器版本
+            // if (this.$store.state.server_status.ServerName) {
+            //     //设置浏览器标签标题
+            //     document.title = this.$store.state.server_status.ServerName
+            //     //设置Header标题
+            //     this.bookShelfTitle = this.$store.state.server_status.ServerName
+            // }
+
+
         },
         //打开书籍
         onOpenBook(bookID, bookType) {

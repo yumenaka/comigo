@@ -3,7 +3,7 @@
 		<Header
 			v-if="this.showHeaderFlag"
 			:setDownLoadLink="this.needDownloadLink()"
-			:bookName="book.name"
+			:headerTitle="book.name"
 			:showReturnIcon="true"
 		>
 			<!-- 右边的设置图标，点击屏幕中央也可以打开 -->
@@ -242,7 +242,9 @@
 			@click="scrollToTop(90);"
 			size="large"
 		>{{ $t('back-to-top') }}</button>
-		<Bottom></Bottom>
+		<Bottom
+			:softVersion="this.$store.state.server_status.ServerName ? this.$store.state.server_status.ServerName : 'Comigo'"
+		></Bottom>
 	</div>
 </template>
 
@@ -364,6 +366,7 @@ export default defineComponent({
 			book: {
 				name: "loading",
 				all_page_num: 2,
+				book_type: "dir",
 				pages: [
 					{
 						height: 500,
@@ -644,38 +647,38 @@ export default defineComponent({
 			// console.log("value:" + value);
 			this.showHeaderFlag = value;
 			localStorage.setItem("showHeaderFlag", value);
-			console.log("成功保存设置: showHeaderFlag=" + localStorage.getItem("showHeaderFlag"));
+			// console.log("成功保存设置: showHeaderFlag=" + localStorage.getItem("showHeaderFlag"));
 		},
 		setShowPageNumChange(value) {
 			// console.log("value:" + value);
 			this.showPageNumFlag_ScrollMode = value;
 			localStorage.setItem("showPageNumFlag_ScrollMode", value);
-			console.log("成功保存设置: showPageNumFlag_ScrollMode=" + localStorage.getItem("showPageNumFlag_ScrollMode"));
+			// console.log("成功保存设置: showPageNumFlag_ScrollMode=" + localStorage.getItem("showPageNumFlag_ScrollMode"));
 		},
 		setImageParameters_Gray(value) {
 			// console.log("value:" + value);
 			this.imageParameters.gray = value;
 			localStorage.setItem("ImageParameters_Gray", value);
-			console.log("成功保存设置: ImageParameters_Gray=" + localStorage.getItem("ImageParameters_Gray"));
+			// console.log("成功保存设置: ImageParameters_Gray=" + localStorage.getItem("ImageParameters_Gray"));
 		},
 
 		setImageParameters_DoAutoResize(value) {
 			this.imageParameters.do_auto_resize = value;
 			localStorage.setItem("ImageParameters_DoAutoResize", value);
-			console.log("成功保存设置: ImageParameters_DoAutoResize=" + localStorage.getItem("ImageParameters_DoAutoResize"));
+			// console.log("成功保存设置: ImageParameters_DoAutoResize=" + localStorage.getItem("ImageParameters_DoAutoResize"));
 		},
 
 		setImageParameters_DoAutoCrop(value) {
 			this.imageParameters.do_auto_crop = value;
 			localStorage.setItem("ImageParameters_DoAutoCrop", this.imageParameters.do_auto_crop);
-			console.log("成功保存设置: ImageParameters_DoAutoCrop=" + localStorage.getItem("ImageParameters_DoAutoCrop"));
+			// console.log("成功保存设置: ImageParameters_DoAutoCrop=" + localStorage.getItem("ImageParameters_DoAutoCrop"));
 		},
 
 		setImageWidthUsePercentFlag(value) {
 			console.log("value:" + value);
 			this.imageWidth_usePercentFlag = value;
 			localStorage.setItem("imageWidth_usePercentFlag", value);
-			console.log("成功保存设置: imageWidth_usePercentFlag=" + this.imageWidth_usePercentFlag);
+			// console.log("成功保存设置: imageWidth_usePercentFlag=" + this.imageWidth_usePercentFlag);
 		},
 
 		//可见区域变化的时候改变页面状态
