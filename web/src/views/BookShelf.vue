@@ -37,7 +37,7 @@
         <Drawer
             :initDrawerActive="this.drawerActive"
             :initDrawerPlacement="this.drawerPlacement"
-            @saveConfig="this.saveConfigToCookie"
+            @saveConfig="this.saveConfigToLocal"
             @startSketch="this.startSketchMode"
             @closeDrawer="this.drawerDeactivate"
             @setRM="this.OnSetReaderMode"
@@ -424,10 +424,11 @@ export default defineComponent({
             if (value == "scroll" || value == "scroll") this.readerMode = value;
         },
         // 如果在一个组件上使用了 v-model:xxx,应该使用 @update:xxx  https://www.naiveui.com/zh-CN/os-theme/docs/common-issues
-        saveConfigToCookie() {
+        saveConfigToLocal() {
             // 储存cookie
             localStorage.setItem("showHeaderFlag", this.showHeaderFlag);
             localStorage.setItem("BackgroundColor", this.model.backgroundColor);
+            localStorage.setItem("InterfaceColor", this.model.interfaceColor);
         },
         setShowHeaderChange(value) {
             console.log("value:" + value);

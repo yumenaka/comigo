@@ -29,10 +29,13 @@
           @update:value="OnChangeLanguage"
         />
         <n-button
-          v-if="this.sketching == false"
+          v-if="this.sketching == 'TODO:Sketch Mode'"
           @click="startSketchMode"
         >{{ $t('startSketchMode') }}</n-button>
-        <n-button v-if="this.sketching == true" @click="stopSketchMode">{{ $t('stopSketchMode') }}</n-button>
+        <n-button
+          v-if="this.sketching == 'TODO:Sketch Mode'"
+          @click="stopSketchMode"
+        >{{ $t('stopSketchMode') }}</n-button>
       </template>
     </n-drawer-content>
   </n-drawer>
