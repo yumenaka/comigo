@@ -43,6 +43,7 @@
             @setRM="this.OnSetReaderMode"
             :readerMode="this.readerMode"
             :sketching="false"
+            :inBookShelf="true"
         >
             <span>{{ $t('setInterfaceColor') }}</span>
             <n-color-picker

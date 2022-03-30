@@ -34,6 +34,8 @@
 			@closeDrawer="this.drawerDeactivate"
 			@setT="this.OnSetTemplate"
 			:readerMode="this.readerMode"
+			:inBookShelf="false"
+			:sketching="false"
 		>
 			<!-- 选择：切换页面模式 -->
 			<n-space>
@@ -600,7 +602,8 @@ export default defineComponent({
 		},
 		//开始素描模式
 		startSketchMode() {
-			this.$emit("setTemplate", "sketch");
+			localStorage.setItem("ReaderMode", "sketch");
+			this.$router.push({ name: "FlipMode", replace: true, params: { id: this.$route.params.id } });
 		},
 		//接收Draw的参数,继续往父组件传
 		OnSetTemplate(value) {

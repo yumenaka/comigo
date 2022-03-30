@@ -29,11 +29,11 @@
           @update:value="OnChangeLanguage"
         />
         <n-button
-          v-if="this.sketching == 'TODO:Sketch Mode'"
+          v-if="this.sketching === false && this.inBookShelf === false"
           @click="startSketchMode"
         >{{ $t('startSketchMode') }}</n-button>
         <n-button
-          v-if="this.sketching == 'TODO:Sketch Mode'"
+          v-if="this.sketching === true && this.inBookShelf === false"
           @click="stopSketchMode"
         >{{ $t('stopSketchMode') }}</n-button>
       </template>
@@ -49,7 +49,7 @@ import { defineComponent, } from 'vue'
 
 export default defineComponent({
   name: "SettingsDrawer",
-  props: ['book', 'initDrawerActive', 'initDrawerPlacement', 'readerMode', "sketching"],
+  props: ['book', 'initDrawerActive', 'initDrawerPlacement', 'readerMode', 'inBookShelf', "sketching"],
   emits: ["setRM", "saveConfig", "startSketch", "stopSketch", "closeDrawer"],//用于向父组件传递信息，父组件的语法为@setRM="OnSetReaderMode"
   components: {
     NDrawer,//抽屉，可以从上下左右4个方向冒出. https://www.naiveui.com/zh-CN/os-theme/components/drawer

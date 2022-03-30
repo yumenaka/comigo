@@ -85,6 +85,8 @@
 		@stopSketch="this.stopSketchMode"
 		@closeDrawer="this.drawerDeactivate"
 		:readerMode="this.readerMode"
+		:inBookShelf="false"
+		:sketching="this.sketchModeFlag"
 	>
 		<!-- 选择：切换页面模式 -->
 		<n-space>
@@ -441,12 +443,14 @@ export default defineComponent({
 	},
 	// beforeMount : 指令第一次绑定到元素并且在挂载父组件之前调用。
 	beforeMount() {
+		// 自动开始Sketch模式
+		if (localStorage.getItem("ReaderMode") === "sketch") {
+			this.startSketchMode();
+			this.readerMode = "sketch"
+			this.sketching = "sketch"
+		}
 		// 注册监听
 		window.addEventListener("keyup", this.handleKeyup);
-		// 自动开始Sketch模式
-		if (this.readerMode == "sketch") {
-			this.startSketchMode();
-		}
 	},
 	//卸载前
 	beforeUnmount() {
@@ -471,36 +475,6 @@ export default defineComponent({
 		//判断这本书是否需要提供原始压缩包下载
 		needDownloadLink() {
 			return this.book.book_type != "dir"
-		},
-		//改变颜色的函数，已经没用了
-		onBackgroundColorChange(value) {
-			this.model.backgroundColor = value
-			localStorage.setItem("BackgroundColor", value);
-			// // value #997E50
-			// // 16进制转10进制
-			// let r = Number('0x' + value.substr(1, 2))
-			// let g = Number('0x' + value.substr(3, 2))
-			// let b = Number('0x' + value.substr(5, 2))
-			// // console.log(value);
-			// // console.log("R:" + r + " G:" + g + " B:" + b);
-			// //题头在背景色的基础上暗一些
-			// let subR = 40
-			// let subG = 30
-			// let subB = 42
-			// let r2 = (r < 255 - subR) ? (r - subR) : (r + parseInt((255 - r) / 2))
-			// let g2 = (g < 255 - subG) ? (g - subG) : (g + parseInt((255 - g) / 2))
-			// let b2 = (b < 255 - subB) ? (b - subB) : (b + parseInt((255 - b) / 2))
-			// if (r < 50) {
-			// 	r2 = r + 3 * subR
-			// }
-			// if (g < 50) {
-			// 	g2 = g + 3 * subG
-			// }
-			// if (b < 50) {
-			// 	b2 = b + 3 * subB
-			// }
-			// // 10进制转16进制
-			// this.model.interfaceColor = "#" + r2.toString(16) + g2.toString(16) + b2.toString(16)
 		},
 		// 分析单双页用
 		nowAndNextPageIsSingle() {
