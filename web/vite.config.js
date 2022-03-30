@@ -47,29 +47,29 @@ export default defineConfig({
     //https://zxuqian.cn/vite-proxy-config/
     proxy: {
       '/api': {
-        target: 'http://192.168.3.219:1234/',
+        target: 'http://127.0.0.1:1234/',
       },
       '/favicon.ico': {
-        target: 'http://192.168.3.219:1234/',
+        target: 'http://127.0.0.1:1234/',
       },
       '/raw': {
-        target: 'http://192.168.3.219:1234/',
+        target: 'http://127.0.0.1:1234/',
         changeOrigin: true
       },
       '/asssets': {
-        target: 'http://192.168.3.219:1234/',
+        target: 'http://127.0.0.1:1234/',
         changeOrigin: true
       },
       '/images': {
-        target: 'http://192.168.3.219:1234/',
+        target: 'http://127.0.0.1:1234/',
         changeOrigin: true
       },
       '/login': {
-        target: 'http://192.168.3.219:1234/',
+        target: 'http://127.0.0.1:1234/',
         changeOrigin: true
       },
       '/loginJSON': {
-        target: 'http://192.168.3.219:1234/',
+        target: 'http://127.0.0.1:1234/',
         changeOrigin: true
       },
       '/index.html': {

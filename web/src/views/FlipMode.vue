@@ -446,8 +446,6 @@ export default defineComponent({
 		// 自动开始Sketch模式
 		if (localStorage.getItem("ReaderMode") === "sketch") {
 			this.startSketchMode();
-			this.readerMode = "sketch"
-			this.sketching = "sketch"
 		}
 		// 注册监听
 		window.addEventListener("keyup", this.handleKeyup);
@@ -512,7 +510,7 @@ export default defineComponent({
 		OnSetTemplate(value) {
 			if (value == "scroll") {
 				console.log("跳转到卷轴阅读模式")
-			} else if (this.readerMode == "scroll") {
+			} else if (this.readerMode == "scroll" || this.readerMode == "sketch") {
 				// 命名路由,并加上参数,让路由建立 url
 				this.$router.push({ name: 'ScrollMode', params: { id: this.book.id } })
 			}
@@ -528,9 +526,11 @@ export default defineComponent({
 		},
 		//开始速写倒计时
 		startSketchMode() {
+			this.readerMode = "sketch"
 			this.message.success(this.$t('startSketchMessage'));
 			this.drawerActive = false; //关闭设置抽屉
 			this.sketchModeFlag = true;
+			//是否倒计时提示文字
 			this.showPageHintFlag_FlipMode = true;
 			//是否显示页头
 			this.showHeaderFlag_FlipMode = false;
@@ -554,12 +554,13 @@ export default defineComponent({
 			this.showHeaderFlag_FlipMode = true;
 			//是否显示页脚
 			this.showFooterFlag_FlipMode = true;
+			this.readerMode = "flip"
 			// this.$emit("setTemplate", "flip");
 			clearInterval(this.interval); // 清除定时器
 		},
 		//开始速写（quick sketch）,每秒执行一次
 		sketchCount() {
-			if (this.sketchModeFlag == false || this.readerMode != "sketch") {
+			if (this.sketchModeFlag == false) {
 				this.stopSketchMode();
 			}
 			this.sketchSecondCount = this.sketchSecondCount + 1;
