@@ -35,7 +35,7 @@ import { NIcon, } from 'naive-ui'
 import { BookOutline, ReturnUpBack } from '@vicons/ionicons5'
 import { defineComponent } from 'vue'
 export default defineComponent({
-  name: "Header",
+  name: "ComigoHeader",
   props: ['setDownLoadLink', 'headerTitle', 'showReturnIcon',],
   components: {
     NIcon,

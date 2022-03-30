@@ -13,8 +13,8 @@
   "setBackColor": "背景色を指定する:",
   "readingProgressBar": "プログレスバー",
   "savePageNum": "読書進捗の保存",
-  "rightScreenToNext": "右半分の画面で次ページ",
-  "leftScreenToNext": "左半分の画面で次ページ",
+  "rightScreenToNext": "左右の向き:マンガ",
+  "leftScreenToNext": "左右の向き:Comic",
   "startSketchMode": "クロッキー開始",
   "stopSketchMode": "クロッキー終了",
   "hintFirstPage": "最初のページで、進めることはできません",
@@ -31,7 +31,7 @@
   "startSketchMessage": "クロッキーが始まりました、良い一日を。",
   "goodjob_and_byebye": "お疲れ様でした、バイバイ。",
   "simpleDoublePage": "ページ合併",
-  "autoDoublePage": "ページ合併（beta）",
+  "autoDoublePage": "ページ合併(beta)",
   "gray_image": "モノクロ化",
   "image_width_limit": "サイズ（幅）を制限",
   "auto_crop": "余白自動トリミング",
@@ -40,5 +40,10 @@
   "back-to-top": "ページのトップへ戻る",
   "raw_resolution": "元の解像度",
   "reset_all_settings": " 初期設定に戻す",
-  "do_you_reset_all_settings": "初期設定に戻すか？"
+  "do_you_reset_all_settings": "初期設定に戻すか？",
+  "original_image": "元の解像度",
+  "setInterfaceColor": "UIカラー:",
+  "show_book_titles": "本のタイトルを表示する",
+  "switch_to_scrolling_mode": "スクロールモードへ",
+  "switch_to_flip_mode": "めくりモードへ"
 }

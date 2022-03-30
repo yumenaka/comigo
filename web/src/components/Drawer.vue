@@ -45,8 +45,8 @@ import { defineComponent, } from 'vue'
 // import { useI18n } from 'vue-i18n'
 
 export default defineComponent({
-  name: "Drawer",
-  props: ['book', 'initDrawerActive', 'initDrawerPlacement', 'ReaderMode', "sketching"],
+  name: "SettingsDrawer",
+  props: ['book', 'initDrawerActive', 'initDrawerPlacement', 'readerMode', "sketching"],
   emits: ["setRM", "saveConfig", "startSketch", "stopSketch", "closeDrawer"],//用于向父组件传递信息，父组件的语法为@setRM="OnSetReaderMode"
   components: {
     NDrawer,//抽屉，可以从上下左右4个方向冒出. https://www.naiveui.com/zh-CN/os-theme/components/drawer

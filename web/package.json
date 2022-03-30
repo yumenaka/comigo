@@ -8,7 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "axios": "^0.24.0",
+    "axios": "^0.26.1",
     "core-js": "^3.21.1",
     "vue": "^3.2.31",
     "vue-axios": "^3.4.1",

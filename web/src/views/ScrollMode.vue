@@ -33,11 +33,11 @@
 			@startSketch="this.startSketchMode"
 			@closeDrawer="this.drawerDeactivate"
 			@setT="this.OnSetTemplate"
-			:nowTemplate="this.nowTemplate"
+			:readerMode="this.readerMode"
 		>
 			<!-- 选择：切换页面模式 -->
 			<n-space>
-				<n-button v-if="this.ReaderMode == 'scroll'" @click="onChangeReaderMode">切换翻页模式</n-button>
+				<n-button @click="changeReaderModeToFlipMode">{{ $t('switch_to_flip_mode') }}</n-button>
 			</n-space>
 			<!-- 分割线 -->
 			<n-divider />
@@ -248,7 +248,7 @@
 
 <script>
 // 直接导入组件并使用它。这种情况下,只有导入的组件才会被打包。
-import { NBackTop, NSpace, NSlider, NSwitch, NIcon, NInputNumber, NDivider, } from 'naive-ui'
+import { NBackTop, NSpace, NSlider, NSwitch, NIcon, NInputNumber, NDivider, NButton, } from 'naive-ui'
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
 import Bottom from "@/components/Bottom.vue";
@@ -259,7 +259,7 @@ import axios from "axios";
 
 export default defineComponent({
 	name: "ScrollMode",
-	props: ['nowTemplate'],
+	props: ['test_prop'],
 	emits: ["setTemplate"],
 	components: {
 		Header,//自定义页头
@@ -284,6 +284,7 @@ export default defineComponent({
 		SettingsOutline,//图标,来自 https://www.xicons.org/#/   需要安装（npm i -D @vicons/ionicons5）
 		NDivider,//分割线  https://www.naiveui.com/zh-CN/os-theme/components/divider
 		// NColorPicker,
+		NButton,//按钮，来自:https://www.naiveui.com/zh-CN/os-theme/components/button
 	},
 	setup() {
 		//此处不能使用this
@@ -291,8 +292,8 @@ export default defineComponent({
 		//背景颜色,颜色选择器用
 		//reactive({}) 创建并返回一个响应式对象: https://www.bilibili.com/video/av925511720/?p=4  也讲到了toRefs()
 		const model = reactive({
-			backgroundColor: "#f6f7eb",
-			interfaceColor: "#d1c9c1",
+			backgroundColor: "#E0D9CD",
+			interfaceColor: "#f5f5e4",
 		});
 		const imageParameters = reactive({
 			resize_width: -1,// 缩放图片,指定宽度
@@ -361,6 +362,7 @@ export default defineComponent({
 	},
 	data() {
 		return {
+			readerMode: "scroll",
 			book: {
 				name: "loading",
 				all_page_num: 2,
@@ -578,6 +580,12 @@ export default defineComponent({
 		window.removeEventListener('resize', this.onResize)
 	},
 	methods: {
+		//切换到翻页模式
+		changeReaderModeToFlipMode() {
+			localStorage.setItem("ReaderMode", "flip");
+			//replace的作用类似于 router.push，唯一不同的是，它在导航时不会向 history 添加新记录，正如它的名字所暗示的那样——它取代了当前的条目。
+			this.$router.push({ name: "FlipMode", replace: true, params: { id: this.$route.params.id } });
+		},
 		needDownloadLink() {
 			return this.book.book_type != "dir"
 		},

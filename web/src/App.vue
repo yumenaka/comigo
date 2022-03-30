@@ -19,7 +19,7 @@ import { defineComponent } from 'vue'
 import { NMessageProvider, NConfigProvider, darkTheme, lightTheme } from 'naive-ui'
 
 export default defineComponent({
-  name: "Home", //默认为 default。如果 <router-view>设置了名称，则会渲染对应的路由配置中 components 下的相应组件。
+  name: "ComigoHome", //默认为 default。如果 <router-view>设置了名称，则会渲染对应的路由配置中 components 下的相应组件。
   components: {
     NMessageProvider,
     NConfigProvider,//调整主题：https://www.naiveui.com/zh-CN/light/docs/customize-theme

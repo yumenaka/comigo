@@ -5,7 +5,7 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 // 1. 定义路由组件.
 // 也可以从其他文件导入
 
-//vite默认不支持@别名，但通过配置vite.config.js启用
+//vite默认不支持@别名路径，但可以通过配置vite.config.js启用
 // import App from '@/App.vue'
 import ScrollMode from '@/views/ScrollMode.vue'
 import FlipMode from '@/views/FlipMode.vue'

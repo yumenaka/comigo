@@ -1,19 +1,18 @@
 <template>
-	<div class="body">
-		<!-- 顶部,标题页头 -->
-		<Header
-			class="header"
-			v-if="this.showHeaderFlag_FlipMode"
-			:setDownLoadLink="this.needDownloadLink()"
-			:headerTitle="book.name"
-			:showReturnIcon="true"
-		>
-			<!-- 右边的设置图标,点击屏幕中央也可以打开 -->
-			<n-icon size="40" @click="drawerActivate('right')">
-				<settings-outline />
-			</n-icon>
-		</Header>
-
+	<!-- 顶部,标题页头 -->
+	<Header
+		class="header"
+		v-if="this.showHeaderFlag_FlipMode"
+		:setDownLoadLink="this.needDownloadLink()"
+		:headerTitle="book.name"
+		:showReturnIcon="true"
+	>
+		<!-- 右边的设置图标,点击屏幕中央也可以打开 -->
+		<n-icon size="40" @click="drawerActivate('right')">
+			<settings-outline />
+		</n-icon>
+	</Header>
+	<div class="main">
 		<!-- 主题,漫画div -->
 		<!-- 事件修饰符： https://v3.cn.vuejs.org/guide/events.html#%E4%BA%8B%E4%BB%B6%E4%BF%AE%E9%A5%B0%E7%AC%A6 -->
 		<div
@@ -75,7 +74,6 @@
 				<span>{{ this.nowPageNum }}</span>
 			</div>
 		</div>
-		<Bottom></Bottom>
 	</div>
 
 	<!-- 设置抽屉,一开始隐藏 -->
@@ -86,12 +84,11 @@
 		@startSketch="this.startSketchMode"
 		@stopSketch="this.stopSketchMode"
 		@closeDrawer="this.drawerDeactivate"
-		@setRM="OnSetReaderMode"
-		:nowTemplate="this.nowTemplate"
+		:readerMode="this.readerMode"
 	>
 		<!-- 选择：切换页面模式 -->
 		<n-space>
-			<n-button v-if="this.ReaderMode == 'flip'" @click="onChangeReaderMode">切换下拉模式</n-button>
+			<n-button @click="changeReaderModeToScrollMode">{{ $t('switch_to_scrolling_mode') }}</n-button>
 		</n-space>
 		<!-- 分割线 -->
 		<n-divider />
@@ -147,7 +144,7 @@
 			</n-switch>
 		</n-space>
 
-		<!-- 开关：翻页模式,默认右半屏-->
+		<!-- 开关：翻页模式,默认右开本（日漫）-->
 		<n-space>
 			<n-switch
 				size="large"
@@ -155,8 +152,8 @@
 				:rail-style="railStyle"
 				@update:value="this.setFlipScreenFlag"
 			>
-				<template #checked>{{ $t("rightScreenToNext") }}</template>
-				<template #unchecked>{{ $t("leftScreenToNext") }}</template>
+				<template #unchecked>{{ $t("rightScreenToNext") }}</template>
+				<template #checked>{{ $t("leftScreenToNext") }}</template>
 			</n-switch>
 		</n-space>
 
@@ -175,7 +172,7 @@
 		<n-divider />
 
 		<!-- 开关：Debug,开启一些不稳定功能 -->
-		<n-space>
+		<!-- <n-space>
 			<n-switch size="large" v-model:value="this.debugModeFlag" @update:value="this.setDebugModeFlag">
 				<template #checked>{{ $t("debugMode") }}</template>
 				<template #unchecked>{{ $t("debugMode") }}</template>
@@ -191,14 +188,14 @@
 				<template #checked>{{ $t('autoDoublePage') }}</template>
 				<template #unchecked>{{ $t('autoDoublePage') }}</template>
 			</n-switch>
-		</n-space>
+		</n-space>-->
 
 		<!-- 分割线 -->
-		<n-divider v-if="this.nowTemplate == 'sketch'" />
+		<n-divider v-if="this.readerMode == 'sketch'" />
 		<!-- 自动翻页秒数 -->
 		<!-- 数字输入% -->
 		<n-input-number
-			v-if="this.nowTemplate == 'sketch'"
+			v-if="this.readerMode == 'sketch'"
 			size="small"
 			:show-button="false"
 			v-model:value="this.sketchFlipSecond"
@@ -212,7 +209,7 @@
 		</n-input-number>
 		<!-- 滑动选择% -->
 		<n-slider
-			v-if="this.nowTemplate == 'sketch'"
+			v-if="this.readerMode == 'sketch'"
 			v-model:value="this.sketchFlipSecond"
 			:step="1"
 			:max="120"
@@ -222,9 +219,9 @@
 			@update:value="this.resetSketchSecondCount"
 		/>
 	</Drawer>
-	<Bottom
+	<!-- <Bottom
 		:softVersion="this.$store.state.server_status.ServerName ? this.$store.state.server_status.ServerName : 'Comigo'"
-	></Bottom>
+	></Bottom>-->
 </template>
 
 <script>
@@ -232,9 +229,10 @@ import { useCookies } from "vue3-cookies";
 // 自定义组件
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
+// import Bottom from "@/components/Bottom.vue";
 import { defineComponent, reactive } from "vue";
 // 直接导入组件并使用它。这种情况下,只有导入的组件才会被打包。
-import { NDivider, NIcon, NInputNumber, NSlider, NSpace, NSwitch, useMessage, } from "naive-ui";
+import { NDivider, NIcon, NInputNumber, NSlider, NSpace, NSwitch, useMessage, NButton, } from "naive-ui";
 import { SettingsOutline } from "@vicons/ionicons5";
 import axios from "axios";
 
@@ -245,6 +243,7 @@ export default defineComponent({
 	components: {
 		Header,
 		Drawer,
+		// Bottom,
 		NSpace, //间距 https://www.naiveui.com/zh-CN/os-theme/components/space
 		NSlider, //滑动选择  Slider https://www.naiveui.com/zh-CN/os-theme/components/slider
 		NSwitch, //开关   https://www.naiveui.com/zh-CN/os-theme/components/switch
@@ -257,13 +256,14 @@ export default defineComponent({
 		NDivider, //分割线  https://www.naiveui.com/zh-CN/os-theme/components/divider
 		NInputNumber,///  https://www.naiveui.com/zh-CN/os-theme/components/input-number
 		// useNotification, // https://www.naiveui.com/zh-CN/os-theme/components/notification
+		NButton,//按钮，来自:https://www.naiveui.com/zh-CN/os-theme/components/button
 	},
 	setup() {
 		const { cookies } = useCookies();
 		//背景颜色,颜色选择器用
 		const model = reactive({
-			backgroundColor: "#f6f7eb",
-			interfaceColor: "#d1c9c1",
+			backgroundColor: "#E0D9CD",
+			interfaceColor: "#f5f5e4",
 		});
 		//警告信息
 		const message = useMessage()
@@ -300,6 +300,7 @@ export default defineComponent({
 	},
 	data() {
 		return {
+			readerMode: "flip",
 			book: {
 				name: "loading",
 				id: "abcde",
@@ -443,7 +444,7 @@ export default defineComponent({
 		// 注册监听
 		window.addEventListener("keyup", this.handleKeyup);
 		// 自动开始Sketch模式
-		if (this.nowTemplate == "sketch") {
+		if (this.readerMode == "sketch") {
 			this.startSketchMode();
 		}
 	},
@@ -455,15 +456,23 @@ export default defineComponent({
 	// mounted : 在绑定元素的父组件被挂载后调用。
 	mounted() {
 		//需要得书籍远程数据,避免初始化失败,所以延迟0.5秒执行
-		setTimeout(this.setNowPageNumByCookie, 500);
+		setTimeout(this.setNowPageNumByLocalStorage, 500);
 	},
 	updated() {
 		//界面有更新就会调用,随便乱放会引起难以调试的BUG
 	},
 	methods: {
+		//切换到卷轴模式
+		changeReaderModeToScrollMode() {
+			localStorage.setItem("ReaderMode", "scroll");
+			//replace的作用类似于 router.push，唯一不同的是，它在导航时不会向 history 添加新记录，正如它的名字所暗示的那样——它取代了当前的条目。
+			this.$router.replace({ name: "ScrollMode", replace: true, params: { id: this.$route.params.id } });
+		},
+		//判断这本书是否需要提供原始压缩包下载
 		needDownloadLink() {
 			return this.book.book_type != "dir"
 		},
+		//改变颜色的函数，已经没用了
 		onBackgroundColorChange(value) {
 			this.model.backgroundColor = value
 			localStorage.setItem("BackgroundColor", value);
@@ -506,19 +515,19 @@ export default defineComponent({
 			}
 		},
 		//根据书籍UUID,设定当前页数,因为需要取得远程书籍数据（this.book）,所以延迟执行
-		setNowPageNumByCookie() {
+		setNowPageNumByLocalStorage() {
 			if (this.saveNowPageNumFlag_FlipMode) {
-				let cookieValue = localStorage.getItem("nowPageNum" + this.book.uuid);
+				let cookieValue = localStorage.getItem("nowPageNum" + this.book.id);
 				if (cookieValue != null) {
 					let saveNum = Number(cookieValue);
 					if (!isNaN(saveNum)) {
 						this.nowPageNum = saveNum;
-						// console.log("成功读取页数" + saveNum);
+						console.log("成功读取页数" + saveNum);
 					} else {
 						console.log("读取页数失败,this.nowPageNum=" + this.nowPageNum);
 					}
 				} else {
-					console.log("cookie里面没找到:" + "nowPageNum" + this.book.uuid);
+					console.log("本队存储里没找到:" + "nowPageNum" + this.book.id);
 				}
 			} else {
 				//console.log("不读取页数,this.saveNowPageNumFlag_FlipMode=" + this.saveNowPageNumFlag_FlipMode);
@@ -529,7 +538,7 @@ export default defineComponent({
 		OnSetTemplate(value) {
 			if (value == "scroll") {
 				console.log("跳转到卷轴阅读模式")
-			} else if (this.nowTemplate == "scroll") {
+			} else if (this.readerMode == "scroll") {
 				// 命名路由,并加上参数,让路由建立 url
 				this.$router.push({ name: 'ScrollMode', params: { id: this.book.id } })
 			}
@@ -576,7 +585,7 @@ export default defineComponent({
 		},
 		//开始速写（quick sketch）,每秒执行一次
 		sketchCount() {
-			if (this.sketchModeFlag == false || this.nowTemplate != "sketch") {
+			if (this.sketchModeFlag == false || this.readerMode != "sketch") {
 				this.stopSketchMode();
 			}
 			this.sketchSecondCount = this.sketchSecondCount + 1;
@@ -871,7 +880,7 @@ export default defineComponent({
 		//拖动进度条,或翻页的时候保存页数
 		saveNowPageNumOnUpdate(value) {
 			if (this.saveNowPageNumFlag_FlipMode) {
-				localStorage.setItem("nowPageNum" + this.book.uuid, value);
+				localStorage.setItem("nowPageNum" + this.book.id, value);
 			}
 		},
 		//跳转到指定页数
@@ -880,7 +889,7 @@ export default defineComponent({
 				this.nowPageNum = num;
 			}
 			if (this.saveNowPageNumFlag_FlipMode) {
-				localStorage.setItem("nowPageNum" + this.book.uuid, this.nowPageNum);
+				localStorage.setItem("nowPageNum" + this.book.id, this.nowPageNum);
 			}
 			// console.log(num);
 		},
@@ -1074,7 +1083,7 @@ export default defineComponent({
 			}
 			//与上面唯一的不同,减去素描提示的空间
 			if (this.showPageHintFlag_FlipMode) {
-				if (this.nowTemplate == "sketch") {
+				if (this.readerMode == "sketch") {
 					Height = Height - 6;
 				} else {
 					Height = Height - 3;
@@ -1084,7 +1093,7 @@ export default defineComponent({
 		},
 		//进入素描模式的时候,把高度放大一倍
 		sketchHintHeight() {
-			if (this.nowTemplate == "sketch") {
+			if (this.readerMode == "sketch") {
 				return "6vh";
 			} else {
 				return "3vh";
@@ -1092,7 +1101,7 @@ export default defineComponent({
 		},
 		//进入素描模式的时候,把字体放大
 		sketchHintFontSize() {
-			if (this.nowTemplate == "sketch") {
+			if (this.readerMode == "sketch") {
 				return "24px";
 			} else {
 				return "16px";
@@ -1113,6 +1122,7 @@ export default defineComponent({
 <style scoped>
 .header {
 	background: v-bind("model.interfaceColor");
+	height: 5vh;
 }
 .bottom {
 	background: v-bind("model.interfaceColor");
@@ -1129,7 +1139,7 @@ export default defineComponent({
 	box-sizing: border-box;
 }
 
-.body {
+.main {
 	font-family: Arial;
 	margin: 0;
 	padding: 0px;
@@ -1193,7 +1203,7 @@ export default defineComponent({
 	text-align: center;
 	font-size: v-bind(sketchHintFontSize);
 	/* 文字颜色 */
-	color: #e4d3d3;
+	color: #131111;
 	/* 文字阴影：https://www.w3school.com.cn/css/css3_shadows.asp*/
 	text-shadow: -1px 0 rgb(240, 229, 229), 0 1px rgb(253, 242, 242),
 		1px 0 rgb(206, 183, 183), 0 -1px rgb(196, 175, 175);
@@ -1215,7 +1225,7 @@ export default defineComponent({
 	display: flex;
 	justify-content: center;
 	/* center 值将 flex 项目在容器中间对齐： */
-	align-items: center;
+	/* align-items: center; */
 	/* 文字颜色 */
 	color: #363333;
 	/* 文字阴影：https://www.w3school.com.cn/css/css3_shadows.asp*/

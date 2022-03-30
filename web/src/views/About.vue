@@ -11,7 +11,7 @@ import { defineComponent, reactive } from 'vue'
 import { useCookies } from "vue3-cookies";// https://github.com/KanHarI/vue3-cookies
 
 export default defineComponent({
-  name: "About",
+  name: "AboutPage",
   props: ['readMode'],
   emits: ["setSome"],
   components: {
