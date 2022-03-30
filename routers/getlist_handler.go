@@ -24,11 +24,11 @@ func getBookListHandler(c *gin.Context) {
 		bookInfoList, err := common.GetBookInfoListByMaxDepth(maxDepth, sort)
 		if err != nil {
 			fmt.Println(err)
+			return
 		}
 		bookInfoList.SortBy = sort
 		bookInfoList.SortBooks()
 		c.PureJSON(http.StatusOK, bookInfoList.BookInfos)
-		return
 	}
 
 	//bookGroup的BookId获取

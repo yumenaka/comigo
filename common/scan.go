@@ -9,6 +9,7 @@ import (
 	"github.com/yumenaka/comi/arch"
 	"github.com/yumenaka/comi/locale"
 	"io/fs"
+	"io/ioutil"
 	"net/url"
 	"os"
 	"path"
@@ -16,6 +17,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // ScanAndGetBookList 扫描一个路径，并返回书籍列表
@@ -25,47 +27,58 @@ func ScanAndGetBookList(storePath string) (bookList []*Book, err error) {
 		storePathAbs = storePath
 		fmt.Println(err)
 	}
-	err = filepath.Walk(storePathAbs, func(bookFilePath string, fileInfo os.FileInfo, err error) error {
+	err = filepath.Walk(storePathAbs, func(walkPath string, fileInfo os.FileInfo, err error) error {
 		//路径深度
-		depth := strings.Count(bookFilePath, "/") - strings.Count(storePathAbs, "/")
+		depth := strings.Count(walkPath, "/") - strings.Count(storePathAbs, "/")
 		if runtime.GOOS == "windows" {
-			depth = strings.Count(bookFilePath, "\\") - strings.Count(storePathAbs, "\\")
+			depth = strings.Count(walkPath, "\\") - strings.Count(storePathAbs, "\\")
 		}
 		if depth > Config.MaxDepth {
-			fmt.Printf("超过最大搜索深度 %d，base：%s scan: %s:\n", Config.MaxDepth, storePathAbs, bookFilePath)
+			fmt.Printf("超过最大搜索深度 %d，base：%s scan: %s:\n", Config.MaxDepth, storePathAbs, walkPath)
 			return filepath.SkipDir //当WalkFunc的返回值是filepath.SkipDir时，Walk将会跳过这个目录，照常执行下一个文件。
 		}
-		if CheckPathSkip(bookFilePath) {
-			fmt.Println("Skip Scan:" + bookFilePath)
+		if CheckPathSkip(walkPath) {
+			fmt.Println("Skip Scan:" + walkPath)
 			return filepath.SkipDir
 		}
 		if fileInfo == nil {
 			return err
 		}
-		if !isSupportArchiver(bookFilePath) && !fileInfo.IsDir() {
-			return nil
-		}
-		//得到书籍文件数据
-		book, err := scanAndGetBook(bookFilePath, storePath, depth)
-		if err != nil {
-			fmt.Println(err)
-			return nil
-		}
-		//多级路径的图片文件夹，避免重复
-		if book.BookType != BookTypeDir {
+		//如果不是文件夹
+		if !fileInfo.IsDir() {
+			if !isSupportArchiver(walkPath) {
+				return nil
+			}
+			//得到书籍文件数据
+			book, err := scanFileGetBook(walkPath, storePathAbs, depth)
+			if err != nil {
+				fmt.Println(err)
+				return nil
+			}
 			bookList = append(bookList, book)
 		}
-		//多级路径的图片文件夹，避免重复添加
-		if book.BookType == BookTypeDir {
-			added := false
-			for _, b := range bookList {
-				if strings.HasPrefix(book.GetFilePath(), b.GetFilePath()) {
-					added = true
-				}
+
+		//如果是文件夹
+		if fileInfo.IsDir() {
+			//得到书籍文件数据
+			book, err := scanDirGetBook(walkPath, storePathAbs, depth)
+			if err != nil {
+				fmt.Println(err)
+				return nil
 			}
-			if !added {
-				bookList = append(bookList, book)
-			}
+			////多级路径的图片文件夹，避免重复添加
+			//needAdd := true
+			//for _, b := range bookList {
+			//	if strings.HasPrefix(book.GetFilePath(), b.GetFilePath()) {
+			//		needAdd = false
+			//	}
+			//}
+			//if needAdd {
+			//	bookList = append(bookList, book)
+			//}
+			//全部添加，管他重复不重复添加
+			bookList = append(bookList, book)
+
 		}
 		return nil
 	})
@@ -73,8 +86,44 @@ func ScanAndGetBookList(storePath string) (bookList []*Book, err error) {
 	return bookList, err
 }
 
+func scanDirGetBook(dirPath string, storePath string, depth int) (*Book, error) {
+	//初始化，生成UUID
+	book := NewBook(dirPath, time.Now(), 0, storePath, depth)
+	book.BookType = BookTypeDir
+	// 目录中的文件和子目录
+	files, err := ioutil.ReadDir(dirPath)
+	if err != nil {
+		return nil, err
+	}
+	for _, file := range files {
+		// 跳过子目录, 只搜寻目录中的文件
+		if file.IsDir() {
+			continue
+		}
+		// 输出绝对路径
+		strAbsPath, errPath := filepath.Abs(dirPath + "/" + file.Name())
+		if errPath != nil {
+			fmt.Println(errPath)
+		}
+		//fmt.Println(strAbsPath)
+		if isSupportMedia(file.Name()) {
+			TempURL := "api/getfile?id=" + book.BookID + "&filename=" + url.PathEscape(file.Name())
+			book.Pages = append(book.Pages, SinglePageInfo{RealImageFilePATH: strAbsPath, FileSize: file.Size(), ModeTime: file.ModTime(), NameInArchive: file.Name(), Url: TempURL})
+		}
+
+	}
+	//根据文件数决定是否返回这本书
+	totalPageHint := "dirPath: " + dirPath + " Total number of pages in the book:" + strconv.Itoa(book.GetAllPageNum())
+	if book.GetAllPageNum() >= Config.MinImageNum {
+		fmt.Println(totalPageHint)
+		return book, err
+	} else {
+		return nil, errors.New(totalPageHint)
+	}
+}
+
 // 扫描一个路径，并返回对应书籍
-func scanAndGetBook(filePath string, storePath string, depth int) (*Book, error) {
+func scanFileGetBook(filePath string, storePath string, depth int) (*Book, error) {
 	//打开文件
 	var file, err = os.OpenFile(filePath, os.O_RDONLY, 0400) //Use mode 0400 for a read-only // file and 0600 for a readable+writable file.
 	if err != nil {
@@ -228,35 +277,3 @@ func isSupportArchiver(checkPath string) bool {
 	}
 	return false
 }
-
-//func ScandirInitbook(dirPath string) (*Book, error) {
-//	files, err := ioutil.ReadDir(dirPath)
-//	if err != nil {
-//		return nil, err
-//	}
-//	//初始化，生成UUID
-//	book := NewBook(0, dirPath, time.Now(), true, 0, true)
-//	for _, file := range files {
-//		if file.IsDir() {
-//			continue
-//		} else {
-//			// 输出绝对路径
-//			strAbsPath, errPath := filepath.Abs(dirPath + "/" + file.Name())
-//			if errPath != nil {
-//				fmt.Println(errPath)
-//			}
-//			//fmt.Println(strAbsPath)
-//			if isSupportMedia(file.Name()) {
-//				book.Pages = append(book.Pages, SinglePageInfo{RealImageFilePATH: strAbsPath, FileSize: file.Size(), ModeTime: file.ModTime(), NameInArchive: file.Name(), Url: "/cache/" + book.BookID + "/" + url.PathEscape(file.Name())})
-//			}
-//		}
-//	}
-//	//根据文件数决定是否返回这本书
-//	totalPageHint := "filePath: " + dirPath + " Total number of pages in the book:" + strconv.Itoa(book.GetAllPageNum())
-//	if book.GetAllPageNum() >= Config.MinImageNum {
-//		fmt.Println(totalPageHint)
-//		return book, err
-//	} else {
-//		return nil, errors.New(totalPageHint)
-//	}
-//}

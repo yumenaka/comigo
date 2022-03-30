@@ -1,9 +1,10 @@
 # Makefile for cross-compilation
 # make all VERSION=v0.7.1
 # make md5SumThemAll VERSION=v0.7.1
-
 # mingw32-make all VERSION=v0.7.1
+# make  Windows_arm64  VERSION=v0.7.1
 # need MSYS2 or mingw32 or find.exe make.exe zip.exe upx.exe
+
 NAME=comi
 SKETCH_NAME=sketch_66seconds
 OS := $(shell uname)
@@ -57,8 +58,8 @@ endif
 
 #windows arm64 no upx
 Windows_arm64:
-	GOARCH=arm64 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME)
-	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME)
+	GOARCH=arm64 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME).exe 
+	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME).exe 
 	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
 
 
