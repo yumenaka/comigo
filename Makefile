@@ -22,7 +22,7 @@ endif
 
 all: compileThemAll md5SumThemAll
 
-compileThemAll: Windows_x86_64 Windows_i386 Linux_x86_64 Linux_i386 MacOS_x86_64 MacOS_arm64 Linux-armv5 Linux-armv7 Linux-armv6 Linux-armv8 
+compileThemAll: Windows_x86_64 Windows_i386 Windows_arm64 Linux_x86_64 Linux_i386 MacOS_x86_64 MacOS_arm64 Linux-armv5 Linux-armv7 Linux-armv6 Linux-armv8 
 
 android: Linux-arm-android Linux-arm64-android
 
@@ -54,6 +54,13 @@ endif
 	zip -m -r -j -9 $(BINDIR)/$(NAME)_$(VERSION)_$@.zip $(BINDIR)/$(NAME)_$(VERSION)_$@
 	rmdir $(BINDIR)/$(NAME)_$(VERSION)_$@
 	rm   resource.syso	
+
+#windows arm64 no upx
+Windows_arm64:
+	GOARCH=arm64 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME)
+	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME)
+	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
+
 
 # golang支持的交叉编译架构的列表，参见 go tool dist list
 # 看ARM处理器是否支持VFP功能:grep -i vfp /proc/cpuinfo
@@ -126,7 +133,7 @@ MacOS_arm64:
 	GOARCH=arm64 GOOS=darwin $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME)
 	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME)
 	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
-
+	
 #Android，32位arm，Termux	
 Linux-arm-android:
 	GOARCH=arm GOOS=android $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME) 
