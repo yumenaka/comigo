@@ -20,15 +20,12 @@ var vip *viper.Viper
 func init() {
 	cobra.MousetrapHelpText = ""       //屏蔽鼠标提示，支持拖拽、双击运行
 	cobra.MousetrapDisplayDuration = 5 //"这是命令行程序"的提醒表示时间
-
 	//简单认证
 	rootCmd.PersistentFlags().StringVarP(&common.Config.UserName, "username", "u", "admin", "用户名")
 	rootCmd.PersistentFlags().StringVarP(&common.Config.Password, "password", "k", "", "密码")
-
 	//TLS设定
 	rootCmd.PersistentFlags().StringVar(&common.Config.CertFile, "cert", "", "tls CertFile")
 	rootCmd.PersistentFlags().StringVar(&common.Config.KeyFile, "key", "", "tls KeyFile")
-
 	//指定配置文件
 	rootCmd.PersistentFlags().StringVarP(&common.ConfigFile, "config", "c", "", locale.GetString("CONFIG"))
 	//在当前目录生成示例配置文件
@@ -37,7 +34,6 @@ func init() {
 	rootCmd.PersistentFlags().IntVarP(&common.Config.Port, "port", "p", 1234, locale.GetString("PORT"))
 	//本地Host
 	rootCmd.PersistentFlags().StringVar(&common.Config.Host, "host", "", locale.GetString("LOCAL_HOST"))
-
 	//DEBUG
 	rootCmd.PersistentFlags().BoolVar(&common.Config.Debug, "debug", false, locale.GetString("DEBUG_MODE"))
 	//打开浏览器
@@ -55,7 +51,6 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&common.Config.PrintAllIP, "print-all", false, locale.GetString("PRINT_ALL_IP"))
 	//至少有几张图片，才认定为漫画压缩包
 	rootCmd.PersistentFlags().IntVar(&common.Config.MinImageNum, "min-image-num", 1, locale.GetString("MIN_MEDIA_NUM"))
-
 	////webp相关 拆分成子命令？
 	//启用webp传输
 	//rootCmd.PersistentFlags().BoolVarP(&common.Config.EnableWebpServer, "webp", "w", false, locale.GetString("ENABLE_WEBP"))
@@ -63,7 +58,6 @@ func init() {
 	//rootCmd.PersistentFlags().StringVar(&common.Config.WebpConfig.WebpCommand, "webp-command", "webp-server", locale.GetString("WEBP_COMMAND"))
 	//webp压缩质量
 	//rootCmd.PersistentFlags().IntVarP(&common.Config.WebpConfig.QUALITY, "webp-quality", "q", 85, locale.GetString("WEBP_QUALITY"))
-
 	////Frpc相关  拆分成子命令？
 	//frp反向代理
 	rootCmd.PersistentFlags().BoolVarP(&common.Config.EnableFrpcServer, "frpc", "f", false, locale.GetString("ENABLE_FRPC"))
@@ -95,9 +89,7 @@ func init() {
 	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFileName, "log_name", "comigo", "log文件名")
 	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFilePath, "log_path", "~", "log文件位置")
 	//rootCmd.PersistentFlags().BoolVarP(&common.PrintVersion, "version", "vip", false, "输出版本号")
-
 	//cobra & viper sample:https://qiita.com/nirasan/items/cc2ab5bc2889401fe596
-
 	// rootCmd.Run() 运行前的初始化定义。
 	// 运行前后顺序：rootCmd.Execute → 命令行参数的处理 → cobra.OnInitialize → rootCmd.Run、
 	// 于是可以通过CMD读取配置文件、按照配置文件的设定值执行。不一致的时候，配置文件优先于CMD参数
@@ -175,8 +167,11 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		//解析命令，扫描文件
 		initBookStores(args)
+		//设置临时文件夹
+		common.SetTempDir()
 		//设置书籍API
 		routers.StartComigoServer()
+
 		//退出时清理临时文件
 		routers.SetShutdownHandler()
 		return

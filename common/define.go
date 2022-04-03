@@ -173,13 +173,13 @@ func SetupCloseHander() {
 	}()
 }
 
-// setTempDir 设置临时文件夹，退出时会被清理
-func setTempDir() {
+// SetTempDir 设置临时文件夹，退出时会被清理
+func SetTempDir() {
 	//手动设置的临时文件夹
 	if Config.CacheFilePath != "" && tools.ChickExists(Config.CacheFilePath) && tools.ChickIsDir(Config.CacheFilePath) {
 		Config.CacheFilePath = path.Join(Config.CacheFilePath)
 	} else {
-		Config.CacheFilePath = path.Join(os.TempDir(), "comigo_temp_files") //直接使用系统文件夹
+		Config.CacheFilePath = path.Join(os.TempDir(), "comigo_cache") //直接使用系统文件夹
 	}
 	err := os.MkdirAll(Config.CacheFilePath, os.ModePerm)
 	if err != nil {
