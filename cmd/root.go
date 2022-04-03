@@ -17,70 +17,6 @@ import (
 
 var vip *viper.Viper
 
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
-	Use:     locale.GetString("comigo_use"),
-	Short:   locale.GetString("short_description"),
-	Example: locale.GetString("comigo_example"),
-	Version: locale.GetString("comigo_version"),
-	Long:    locale.GetString("long_description"),
-	Run: func(cmd *cobra.Command, args []string) {
-		//解析命令，扫描文件
-		startScanFiles(args)
-		//设置书籍API
-		routers.StartComigoServer()
-		//退出时清理临时文件
-		routers.SetShutdownHandler()
-		return
-	},
-}
-
-//startScanFiles 解析命令
-func startScanFiles(args []string) {
-	//决定如何扫描，扫描哪个路径
-	if len(args) == 0 { //没有指定路径或文件的情况下
-		cmdPath := path.Dir(os.Args[0]) //扫描程序执行的路径
-		list, err := common.ScanAndGetBookList(cmdPath)
-		if err != nil {
-			fmt.Println(locale.GetString("scan_error"), cmdPath)
-		} else {
-			err := common.AddBooks(list, cmdPath)
-			if err != nil {
-				fmt.Println(locale.GetString("AddBook_error"), cmdPath)
-			}
-			//然后生成对应的虚拟书籍组
-			common.Config.Stores.GenerateBookGroup()
-		}
-	} else {
-		//指定了多个参数的话，都扫描一遍
-		for _, p := range args {
-			list, err := common.ScanAndGetBookList(p)
-			if err != nil {
-				fmt.Println(locale.GetString("scan_error"), p)
-			} else {
-				err := common.AddBooks(list, p)
-				if err != nil {
-					fmt.Println(locale.GetString("AddBook_error"), p)
-				}
-				//然后生成对应的虚拟书籍组
-				common.Config.Stores.GenerateBookGroup()
-			}
-		}
-	}
-	//通过“可执行文件名”设置部分默认参数
-	common.Config.SetByExecutableFilename()
-}
-
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
-func Execute() {
-	//执行命令
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-}
-
 func init() {
 	cobra.MousetrapHelpText = ""       //屏蔽鼠标提示，支持拖拽、双击运行
 	cobra.MousetrapDisplayDuration = 5 //"这是命令行程序"的提醒表示时间
@@ -136,7 +72,7 @@ func init() {
 	//frps server_port
 	rootCmd.PersistentFlags().IntVar(&common.Config.FrpConfig.ServerPort, "frps-port", 7000, locale.GetString("FRP_SERVER_PORT"))
 	//frp token
-	rootCmd.PersistentFlags().StringVar(&common.Config.FrpConfig.Token, "token", "token_secretSAMPLE", locale.GetString("FRP_TOKEN"))
+	rootCmd.PersistentFlags().StringVar(&common.Config.FrpConfig.Token, "token", "token_secret_sample", locale.GetString("FRP_TOKEN"))
 	//frpc命令,或frpc可执行文件路径
 	rootCmd.PersistentFlags().StringVar(&common.Config.FrpConfig.FrpcCommand, "frpc-command", "frpc", locale.GetString("FRP_COMMAND"))
 	//frpc random remote_port
@@ -224,7 +160,71 @@ func init() {
 		}
 		//监听文件修改
 		vip.WatchConfig()
-		//然后执行服务重启
+		//文件修改时，执行重载设置、服务重启的函数
 		vip.OnConfigChange(configReloadHandler)
 	})
+}
+
+// rootCmd represents the base command when called without any subcommands
+var rootCmd = &cobra.Command{
+	Use:     locale.GetString("comigo_use"),
+	Short:   locale.GetString("short_description"),
+	Example: locale.GetString("comigo_example"),
+	Version: locale.GetString("comigo_version"),
+	Long:    locale.GetString("long_description"),
+	Run: func(cmd *cobra.Command, args []string) {
+		//解析命令，扫描文件
+		initBookStores(args)
+		//设置书籍API
+		routers.StartComigoServer()
+		//退出时清理临时文件
+		routers.SetShutdownHandler()
+		return
+	},
+}
+
+//initBookStores 解析命令,扫描书库
+func initBookStores(args []string) {
+	//决定如何扫描，扫描哪个路径
+	if len(args) == 0 { //没有指定路径或文件的情况下
+		cmdPath := path.Dir(os.Args[0]) //扫描程序执行的路径
+		list, err := common.ScanAndGetBookList(cmdPath)
+		if err != nil {
+			fmt.Println(locale.GetString("scan_error"), cmdPath)
+		} else {
+			err := common.AddBooks(list, cmdPath)
+			if err != nil {
+				fmt.Println(locale.GetString("AddBook_error"), cmdPath)
+			}
+			//然后生成对应的虚拟书籍组
+			common.Config.Stores.GenerateBookGroup()
+		}
+	} else {
+		//指定了多个参数的话，都扫描一遍
+		for _, p := range args {
+			list, err := common.ScanAndGetBookList(p)
+			if err != nil {
+				fmt.Println(locale.GetString("scan_error"), p)
+			} else {
+				err := common.AddBooks(list, p)
+				if err != nil {
+					fmt.Println(locale.GetString("AddBook_error"), p)
+				}
+				//然后生成对应的虚拟书籍组
+				common.Config.Stores.GenerateBookGroup()
+			}
+		}
+	}
+	//通过“可执行文件名”设置部分默认参数
+	common.Config.SetByExecutableFilename()
+}
+
+// Execute adds all child commands to the root command and sets flags appropriately.
+// This is called by main.main(). It only needs to happen once to the rootCmd.
+func Execute() {
+	//执行命令
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }

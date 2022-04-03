@@ -5,6 +5,7 @@
             :bookIsFolder="false"
             :headerTitle="this.bookShelfTitle"
             :showReturnIcon="this.headerShowReturnIcon"
+            :bookID="this.bookshelf[0].id"
             :setDownLoadLink="false"
         >
             <!-- 右边的设置图标,点击屏幕中央也可以打开 -->

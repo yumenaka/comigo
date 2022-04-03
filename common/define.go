@@ -32,43 +32,33 @@ func init() {
 
 var (
 	ConfigFile    = ""
-	Version       = "v0.7.1"
+	Version       = "v0.7.2"
 	ReadingBook   *Book
 	slcBooks      []*Book
 	Srv           *http.Server
 	mapBooks      map[string]*Book //实际存在的书
 	mapBookGroups map[string]*Book //通过分析，生成的书籍分组
 	Config        = ServerSettings{
-		OpenBrowser:         true,
-		DisableLAN:          false,
-		Port:                1234,
-		GenerateMetaData:    false,
-		LogToFile:           false,
-		MaxDepth:            3,
-		MinImageNum:         3,
-		ZipFileTextEncoding: "",
-		CacheFilePath:       "",
-		Host:                "",
-		//SketchCountSeconds:     90,
+		Port:                   1234,
+		Host:                   "",
+		StoresPath:             []string{""},
+		CacheFilePath:          "",
+		OpenBrowser:            true,
+		DisableLAN:             false,
+		GenerateMetaData:       false,
+		LogToFile:              false,
+		MaxDepth:               3,
+		MinImageNum:            3,
+		ZipFileTextEncoding:    "",
 		CleanAllTempFileOnExit: true,
-		//CleanAllTempFile:       true,
+		EnableFrpcServer:       false,
+		SupportFileType:        []string{".zip", ".tar", ".rar", ".cbr", ".cbz", ".epub", ".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".tar.xz", ".txz", ".tar.lz4", ".tlz4", ".tar.sz", ".tsz", ".bz2", ".gz", ".lz4", ".sz", ".xz", ".pdf", ".mp4", ".webm"},
+		SupportMediaType:       []string{".jpg", ".jpeg", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp", ".webp", ".ico", ".heic", ".avif"},
+		ExcludeFileOrFolders:   []string{".idea", ".vscode", ".git", "node_modules", "flutter_ui", ".local/share/Trash", "$RECYCLE.BIN", "Config.Msi", "System Volume Information", ".sys", " .DS_Store", ".dll", ".log", ".cache", ".exe"},
 		Stores: Bookstores{
 			mapBookstores: make(map[string]*singleBookstore),
 			SortBy:        "name",
 		},
-		SupportFileType:      []string{".zip", ".tar", ".rar", ".cbr", ".cbz", ".epub", ".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".tar.xz", ".txz", ".tar.lz4", ".tlz4", ".tar.sz", ".tsz", ".bz2", ".gz", ".lz4", ".sz", ".xz", ".pdf", ".mp4", ".webm"},
-		SupportMediaType:     []string{".jpg", ".jpeg", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp", ".webp", ".ico", ".heic", ".avif"},
-		ExcludeFileOrFolders: []string{".idea", ".vscode", ".git", "node_modules", "flutter_ui", ".local/share/Trash", "$RECYCLE.BIN", "Config.Msi", "System Volume Information", ".sys", " .DS_Store", ".dll", ".log", ".cache", ".exe"},
-		//WebpConfig: WebPServerConfig{
-		//	WebpCommand:  "webp-server",
-		//	HOST:         "127.0.0.1",
-		//	PORT:         "3333",
-		//	ImgPath:      "",
-		//	QUALITY:      70,
-		//	AllowedTypes: []string{".jpg", ".jpeg", ".JPEG", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp"},
-		//	ExhaustPath:  "",
-		//},
-		EnableFrpcServer: false,
 		FrpConfig: FrpClientConfig{
 			FrpcCommand:      "frpc",
 			ServerAddr:       "localhost", //server_addr
@@ -78,7 +68,15 @@ var (
 			RemotePort:       50000, //remote_port
 			RandomRemotePort: true,
 		},
-
+		//WebpConfig: WebPServerConfig{
+		//	WebpCommand:  "webp-server",
+		//	HOST:         "127.0.0.1",
+		//	PORT:         "3333",
+		//	ImgPath:      "",
+		//	QUALITY:      70,
+		//	AllowedTypes: []string{".jpg", ".jpeg", ".JPEG", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp"},
+		//	ExhaustPath:  "",
+		//},
 		//Template:             "scroll", //multi、single、random etc.
 	}
 )
@@ -96,6 +94,7 @@ func CheckPathSkip(path string) bool {
 type ServerSettings struct {
 	Port                   int             `json:"port" toml:"Port" comment:"提供服务的端口"`
 	Host                   string          `json:"host"  comment:"二维码打印的主机名"`
+	StoresPath             []string        `json:"-"  comment:"默认书库文件夹"`
 	Stores                 Bookstores      `json:"stores" toml:"-"`
 	CacheFilePath          string          `json:"-" comment:"临时文件存储位置"`
 	ExcludeFileOrFolders   []string        `json:"-" comment:"需要排除的文件夹"`

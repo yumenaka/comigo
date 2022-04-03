@@ -188,6 +188,23 @@ func setWebAPI(engine *gin.Engine) {
 	})
 	//初始化websocket
 	api.GET("/ws", wsHandler)
+
+	//TODO：设定压缩包下载链接
+	// panic: handlers are already registered for path
+	if common.GetBooksNumber() >= 1 {
+		allBook, err := common.GetAllBookInfoList("name")
+		if err != nil {
+			fmt.Println("设置文件下载失败")
+		} else {
+			for _, info := range allBook.BookInfos {
+				//下载文件
+				if info.BookType != common.BookTypeBooksGroup && info.BookType != common.BookTypeDir {
+					api.StaticFile("/raw/"+info.BookID+"/"+info.Name, info.FilePath)
+				}
+			}
+		}
+	}
+
 }
 
 //3、选择服务端口
@@ -289,7 +306,7 @@ func SetShutdownHandler() {
 	log.Println("shutting down processing, press Ctrl+C again to force")
 
 	// 上下文用于通知服务器它有 5 秒的时间来完成它当前正在处理的请求
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := common.Srv.Shutdown(ctx); err != nil {
 		log.Fatal("Server forced to shutdown: ", err)
@@ -307,20 +324,7 @@ func StartComigoServer() {
 	setStaticFiles(engine)
 	//2、setWebAPI
 	setWebAPI(engine)
-	//TODO：设定压缩包下载链接
-	if common.GetBooksNumber() >= 1 {
-		allBook, err := common.GetAllBookInfoList("name")
-		if err != nil {
-			fmt.Println("设置文件下载失败")
-		} else {
-			for _, info := range allBook.BookInfos {
-				//下载文件
-				if info.BookType != common.BookTypeBooksGroup && info.BookType != common.BookTypeDir {
-					engine.StaticFile("/raw/"+info.Name, info.FilePath)
-				}
-			}
-		}
-	}
+
 	//生成元数据
 	if common.Config.GenerateMetaData {
 		//TODO：生成元数据

@@ -76,9 +76,8 @@ func ScanAndGetBookList(storePath string) (bookList []*Book, err error) {
 			//if needAdd {
 			//	bookList = append(bookList, book)
 			//}
-			//全部添加，管他重复不重复添加
+			//全部添加，管他重复不重复
 			bookList = append(bookList, book)
-
 		}
 		return nil
 	})
@@ -107,14 +106,14 @@ func scanDirGetBook(dirPath string, storePath string, depth int) (*Book, error) 
 		}
 		//fmt.Println(strAbsPath)
 		if isSupportMedia(file.Name()) {
-			TempURL := "api/getfile?id=" + book.BookID + "&filename=" + url.PathEscape(file.Name())
+			TempURL := "api/getfile?id=" + book.BookID + "&filename=" + url.QueryEscape(file.Name())
 			book.Pages = append(book.Pages, SinglePageInfo{RealImageFilePATH: strAbsPath, FileSize: file.Size(), ModeTime: file.ModTime(), NameInArchive: file.Name(), Url: TempURL})
 		}
-
 	}
 	//根据文件数决定是否返回这本书
-	totalPageHint := "dirPath: " + dirPath + " Total number of pages in the book:" + strconv.Itoa(book.GetAllPageNum())
+	totalPageHint := "dirPath: " + dirPath + " Total image in the book:" + strconv.Itoa(book.GetAllPageNum())
 	if book.GetAllPageNum() >= Config.MinImageNum {
+		//找到了一本书的提示
 		fmt.Println(totalPageHint)
 		return book, err
 	} else {
@@ -143,12 +142,16 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*Book, error
 		fsys, zipErr := zip.OpenReader(filePath)
 		if zipErr != nil {
 			fmt.Println(zipErr)
+			return nil, errors.New("not a valid zip file:" + filePath)
 		}
 		err = walkUTF8ZipFs(fsys, "", ".", book)
 		//如果扫描ZIP文件的时候遇到了 fs.PathError ，则扫描到NonUTF-8 ZIP文件，需要特殊处理
 		if _, ok := err.(*fs.PathError); ok {
+			if Config.Debug {
+				fmt.Println("NonUTF-8 ZIP:" + filePath)
+				fmt.Println("  Error:" + err.Error())
+			}
 			//忽略 fs.PathError 并换个方式扫描
-			fmt.Println("扫描到NonUTF-8 ZIP文件:" + filePath + "  Error:" + err.Error())
 			err = scanNonUTF8ZipFile(filePath, book)
 		}
 	} else {
@@ -175,18 +178,16 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*Book, error
 					//如果是文件夹+图片
 					book.BookType = BookTypeDir
 					////用Archiver的虚拟文件系统提供图片文件
-					//book.Pages = append(book.Pages, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: "", Url: "/cache/" + book.BookID + "/" + url.PathEscape(path)})
-
+					//book.Pages = append(book.Pages, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: "", Url: "/cache/" + book.BookID + "/" + url.QueryEscape(path)})
 					//实验：用getfile接口提供文件服务
-					TempURL := "api/getfile?id=" + book.BookID + "&filename=" + url.PathEscape(path)
+					TempURL := "api/getfile?id=" + book.BookID + "&filename=" + url.QueryEscape(path)
 					book.Pages = append(book.Pages, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: "", Url: TempURL})
 					//fmt.Println(locale.GetString("unsupported_extract")+" %s", f)
 				} else {
-					////用Archiver的虚拟文件系统提供图片文件
-					//TempURL := "/cache/" + book.BookID + "/" + url.PathEscape(u.NameInArchive)
-					//book.Pages = append(book.Pages, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: u.NameInArchive, Url: TempURL})
-					//实验：用getfile接口提供提供图片文件
-					TempURL := "api/getfile?id=" + book.BookID + "&filename=" + url.PathEscape(u.NameInArchive)
+					//替换特殊字符的时候，额外将“+替换成"%2b"，因为gin会将+解析为空格。
+					TempURL := "api/getfile?id=" + book.BookID + "&filename=" + url.QueryEscape(u.NameInArchive)
+					//不替换特殊字符
+					//TempURL := "api/getfile?id=" + book.BookID + "&filename=" + u.NameInArchive
 					book.Pages = append(book.Pages, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: u.NameInArchive, Url: TempURL})
 				}
 			}
@@ -194,7 +195,7 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*Book, error
 		})
 	}
 	//根据文件数决定是否返回这本书
-	totalPageHint := "filePath: " + filePath + " Total number of pages in the book:" + strconv.Itoa(book.GetAllPageNum())
+	totalPageHint := "filePath: " + filePath + " Total image in the book:" + strconv.Itoa(book.GetAllPageNum())
 	if book.GetAllPageNum() >= Config.MinImageNum {
 		fmt.Println(totalPageHint)
 		return book, err
@@ -204,6 +205,7 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*Book, error
 }
 
 func scanNonUTF8ZipFile(filePath string, book *Book) error {
+
 	book.NonUTF8Zip = true
 	reader, err := arch.ScanNonUTF8Zip(filePath, Config.ZipFileTextEncoding)
 	if err != nil {
@@ -212,7 +214,8 @@ func scanNonUTF8ZipFile(filePath string, book *Book) error {
 	for _, f := range reader.File {
 		if isSupportMedia(f.Name) {
 			//如果是压缩文件
-			TempURL := "api/getfile?id=" + book.BookID + "&filename=" + url.PathEscape(f.Name)
+			//替换特殊字符的时候，额外将“+替换成"%2b"，因为gin会将+解析为空格。
+			TempURL := "api/getfile?id=" + book.BookID + "&filename=" + url.QueryEscape(f.Name)
 			book.Pages = append(book.Pages, SinglePageInfo{RealImageFilePATH: "", FileSize: f.FileInfo().Size(), ModeTime: f.FileInfo().ModTime(), NameInArchive: f.Name, Url: TempURL})
 		} else {
 			logrus.Debugf(locale.GetString("unsupported_file_type") + f.Name)
@@ -249,8 +252,8 @@ func walkUTF8ZipFs(fsys fs.FS, parent, base string, book *Book) error {
 			logrus.Debugf(locale.GetString("unsupported_file_type") + name)
 		} else {
 			inArchiveName := path.Join(parent, f.Name())
-			//book.Pages = append(book.Pages, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: inArchiveName, Url: "/cache/" + book.BookID + "/" + url.PathEscape(inArchiveName)})
-			TempURL := "api/getfile?id=" + book.BookID + "&filename=" + url.PathEscape(inArchiveName)
+			TempURL := "api/getfile?id=" + book.BookID + "&filename=" + url.QueryEscape(inArchiveName)
+			//替换特殊字符的时候,不要用url.PathEscape()，PathEscape不会把“+“替换成"%2b"，会导致BUG，让gin会将+解析为空格。
 			book.Pages = append(book.Pages, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: inArchiveName, Url: TempURL})
 		}
 	}

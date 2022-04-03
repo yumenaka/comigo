@@ -88,8 +88,10 @@ func (s *singleBookstore) initBookGroupMap() error {
 				s.BookGroupMap[newBook.BookID] = newBook
 				//将这本书加到BookGroup总表（mapBookGroups）里面去
 				mapBookGroups[newBook.BookID] = newBook
-				fmt.Print("生成book_group：")
-				fmt.Println(newBook)
+				if Config.Debug {
+					fmt.Print("生成book_group：")
+					fmt.Println(newBook)
+				}
 			}
 		}
 	}

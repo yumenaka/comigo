@@ -21,7 +21,10 @@
       <span class="text-lg" v-if="!setDownLoadLink">{{ headerTitle }}</span>
       <!-- 标题，可下载压缩包 -->
       <span class="text-lg text-blue-700 hover:underline">
-        <a v-if="this.setDownLoadLink" :href="'raw/' + headerTitle">{{ headerTitle }}</a>
+        <a
+          v-if="this.setDownLoadLink"
+          :href="'api/raw/' + bookID + '/' + headerTitle"
+        >{{ headerTitle }}</a>
       </span>
     </div>
     <!-- slot，用来插入右边的设置图标 -->
@@ -36,7 +39,7 @@ import { BookOutline, ReturnUpBack } from '@vicons/ionicons5'
 import { defineComponent } from 'vue'
 export default defineComponent({
   name: "ComigoHeader",
-  props: ['setDownLoadLink', 'headerTitle', 'showReturnIcon',],
+  props: ['setDownLoadLink', 'headerTitle', 'bookID', 'showReturnIcon',],
   components: {
     NIcon,
     BookOutline,//图标,来自 https://www.xicons.org/#/   需要安装（npm i -D @vicons/ionicons5）与导入
@@ -44,7 +47,7 @@ export default defineComponent({
   },
   setup() {
     const { cookies } = useCookies();
-    console.log(window.history)
+    // console.log(window.history)
     return { cookies };
   },
   data() {

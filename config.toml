@@ -17,7 +17,7 @@ GenerateMetaData = false
 # 访问限制：用户名
 UserName = 'admin'
 # 访问限制：密码
-Password = '12345'
+Password = ''
 # Https证书
 CertFile = ''
 # Https证书
@@ -52,7 +52,7 @@ EnableFrpcServer = false
 FrpcCommand = 'frpc'
 ServerAddr = 'frps.example.com'
 ServerPort = 7000
-Token = 'token_secretSAMPLE'
+Token = 'token_secret_sample'
 FrpType = 'tcp'
 RemotePort = 50000
 RandomRemotePort = true

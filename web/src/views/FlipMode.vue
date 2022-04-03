@@ -5,6 +5,7 @@
 		v-if="this.showHeaderFlag_FlipMode"
 		:setDownLoadLink="this.needDownloadLink()"
 		:headerTitle="book.name"
+		:bookID="this.book.id"
 		:showReturnIcon="true"
 	>
 		<!-- 右边的设置图标,点击屏幕中央也可以打开 -->

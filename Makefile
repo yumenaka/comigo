@@ -1,8 +1,8 @@
 # Makefile for cross-compilation
-# make all VERSION=v0.7.1
-# make md5SumThemAll VERSION=v0.7.1
-# mingw32-make all VERSION=v0.7.1
-# make  Windows_arm64  VERSION=v0.7.1
+# make all VERSION=v0.7.2
+# make md5SumThemAll VERSION=v0.7.2
+# mingw32-make all VERSION=v0.7.2
+# make  Windows_arm64  VERSION=v0.7.2
 # need MSYS2 or mingw32 or find.exe make.exe zip.exe upx.exe
 
 NAME=comi
