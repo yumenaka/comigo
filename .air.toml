@@ -18,9 +18,9 @@ include_ext = ["go", "tpl", "tmpl", "html"]
 # Ignore these filename extensions or directories.
 exclude_dir = ["assets", "bin", ".idea",".git", ".vscode", "web","flutter_ui","web/node_modules"]
 # Watch these directories if you specified.
-include_dir = []
+include_dir = ["zip", "rar","cbr","cbz"]
 # Exclude files.
-exclude_file = ["zip", "rar","cbr",]
+exclude_file = ["mb",]
 # Exclude specific regular expressions.
 exclude_regex = ["_test.go"]
 # Exclude unchanged files.

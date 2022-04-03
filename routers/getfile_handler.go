@@ -21,7 +21,7 @@ import (
 ////可选参数：
 // resize_width:指定宽度，缩放图片  							&resize_width=300
 // resize_height:指定高度，缩放图片 							&resize_height=300
-// resize_cut:同时指定宽高的时候要不要剪切图片					&resize_cut=true
+// thumbnail_mode:缩略图模式，同时指定宽高的时候要不要剪切图片		&thumbnail_mode=true
 // resize_max_width:指定宽度上限，图片宽度大于这个上限时缩小图片  	&resize_max_width=740
 // resize_max_height:指定高度上限，图片高度大于这个上限时缩小图片  	&resize_max_height=300
 // auto_crop:自动切白边，数字是切白边的阈值，范围是0~100 			&auto_crop=10
@@ -30,6 +30,7 @@ import (
 // blurhash_image:获取对应图片的blurhash图片，而不是原始图片  	&blurhash_image=3
 //TODO：生成临时文件加速下一次访问，并在退出后清理
 func getFileHandler(c *gin.Context) {
+	//time.Sleep(5 * time.Second)
 	id := c.DefaultQuery("id", "")
 	needFile := c.DefaultQuery("filename", "")
 	if id != "" && needFile != "" {
@@ -90,12 +91,12 @@ func getFileHandler(c *gin.Context) {
 			}
 			//图片Resize, 按照固定的width height缩放
 			if errX == nil && errY == nil && resizeWidth > 0 && resizeHeight > 0 {
-				//读取图片Resize用的resizeWidth
-				resizeCut := c.DefaultQuery("resize_cut", "false")
-				if resizeCut != "true" {
-					imgData = tools.ImageResize(imgData, resizeWidth, resizeHeight)
+				//是否要用缩略图模式
+				thumbnailMode := c.DefaultQuery("thumbnail_mode", "false")
+				if thumbnailMode == "true" {
+					imgData = tools.ImageThumbnail(imgData, resizeWidth, resizeHeight)
 				} else {
-					imgData = tools.ImageResizeCut(imgData, resizeWidth, resizeHeight)
+					imgData = tools.ImageResize(imgData, resizeWidth, resizeHeight)
 				}
 				contentType = tools.GetContentTypeByFileName(".jpg")
 			}

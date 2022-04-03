@@ -44,6 +44,7 @@ export default defineComponent({
   },
   setup() {
     const { cookies } = useCookies();
+    console.log(window.history)
     return { cookies };
   },
   data() {
@@ -52,11 +53,23 @@ export default defineComponent({
     };
   },
   methods: {
-    //点击返回的时候，后退到上一页
+    //点击返回图标的时候，后退到上一页或主页
     onClickReturnIcon() {
+      // console.log(window.history)
+      //如果直接进入本页面，没有上一页，那么回到主页。不过这时候浏览器back按钮本来应该也不能按。
+      if (window.history.length == 1) {
+        this.$router.push('/')
+        return
+      }
+      //如果是新建标签页,并不是从书架点进去的时候，window.history.state.back为null，直接回到主页。
+      if (window.history.state.back === null) {
+        this.$router.push('/')
+        return
+      }
+      //其他情况下，后退一页。与单击浏览器中的“后退”按钮相同。
       this.$router.back()
     },
-    //点击返回的时候，后退到上一页
+    //点击主页图标的时候，回到主页
     onClickToTop() {
       this.$router.push('/')
     },

@@ -1,0 +1,59 @@
+# 提供服务的端口
+Port = 1234
+# 二维码打印的主机名
+Host = ''
+# 临时文件存储位置
+CacheFilePath = ''
+# 需要排除的文件夹
+ExcludeFileOrFolders = ['.idea', '.vscode', '.git', 'node_modules', 'flutter_ui', '.local/share/Trash', '$RECYCLE.BIN', 'Config.Msi', 'System Volume Information', '.sys', ' .DS_Store', '.dll', '.log', '.cache', '.exe']
+# 需要扫描的图片文件
+SupportMediaType = ['.jpg', '.jpeg', '.jpe', '.jpf', '.jfif', '.jfi', '.png', '.bmp', '.webp', '.ico', '.heic', '.avif']
+# 需要扫描的图书文件
+SupportFileType = ['.zip', '.tar', '.rar', '.cbr', '.cbz', '.epub', '.tar.gz', '.tgz', '.tar.bz2', '.tbz2', '.tar.xz', '.txz', '.tar.lz4', '.tlz4', '.tar.sz', '.tsz', '.bz2', '.gz', '.lz4', '.sz', '.xz', '.pdf', '.mp4', '.webm']
+# 至少有几张图片，才算作书籍
+MinImageNum = 1
+# 生成书籍元数据（TODO）
+GenerateMetaData = false
+# 访问限制：用户名
+UserName = 'admin'
+# 访问限制：密码
+Password = '12345'
+# Https证书
+CertFile = ''
+# Https证书
+KeyFile = ''
+# 是否同时打开浏览器
+OpenBrowser = false
+# 只在本机localhost提供服务，不对外共享
+DisableLAN = false
+# 打印所有可能可用的地址的二维码
+PrintAllIP = false
+# 开启Debug模式
+Debug = false
+# 记录Log到本地文件
+LogToFile = false
+# Log保存的位置
+LogFilePath = ''
+# Log文件名
+LogFileName = 'comigo.log'
+# 最大扫描深度
+MaxDepth = 3
+# 非utf-8编码的ZIP文件，使用何种编码来解码
+ZipFileTextEncoding = 'gbk'
+# 临时文件存储位置
+TempPATH = ''
+# 退出的时候，清理临时文件
+CleanAllTempFileOnExit = false
+# 后台启动FrpClient
+EnableFrpcServer = false
+# FrpClient设置
+[FrpConfig]
+# 手动设定frpc可执行程序的路径,默认为frpc
+FrpcCommand = 'frpc'
+ServerAddr = 'frps.example.com'
+ServerPort = 7000
+Token = 'token_secretSAMPLE'
+FrpType = 'tcp'
+RemotePort = 50000
+RandomRemotePort = true
+

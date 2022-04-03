@@ -6,6 +6,7 @@ import (
 	"github.com/mitchellh/go-homedir" //不使用 cgo 获取用户主目录的第三方库，支持交叉编译
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/tools"
+	"net/http"
 	"os"
 	"os/signal"
 	"path"
@@ -24,8 +25,6 @@ func init() {
 	}
 	Config.LogFilePath = home
 	Config.LogFileName = "comigo.log"
-	//退出时清理
-	setupCloseHander()
 	slcBooks = make([]*Book, 0, 10) //make:为slice, map, channel分配内存，并返回一个初始化的值,第二参数指定的是切片的长度，第三个参数是用来指定预留的空间长度——避免二次分配内存带来的开销，提高程序的性能.
 	mapBooks = make(map[string]*Book)
 	mapBookGroups = make(map[string]*Book)
@@ -36,23 +35,23 @@ var (
 	Version       = "v0.7.1"
 	ReadingBook   *Book
 	slcBooks      []*Book
+	Srv           *http.Server
 	mapBooks      map[string]*Book //实际存在的书
 	mapBookGroups map[string]*Book //通过分析，生成的书籍分组
 	Config        = ServerSettings{
-		OpenBrowser:            true,
-		DisableLAN:             false,
-		Port:                   1234,
-		GenerateMetaData:       false,
-		LogToFile:              false,
-		MaxDepth:               3,
-		MinImageNum:            3,
-		ZipFileTextEncoding:    "",
-		CacheFilePath:          "",
-		Host:                   "",
-		SketchCountSeconds:     90,
-		TempPATH:               "",
+		OpenBrowser:         true,
+		DisableLAN:          false,
+		Port:                1234,
+		GenerateMetaData:    false,
+		LogToFile:           false,
+		MaxDepth:            3,
+		MinImageNum:         3,
+		ZipFileTextEncoding: "",
+		CacheFilePath:       "",
+		Host:                "",
+		//SketchCountSeconds:     90,
 		CleanAllTempFileOnExit: true,
-		CleanAllTempFile:       true,
+		//CleanAllTempFile:       true,
 		Stores: Bookstores{
 			mapBookstores: make(map[string]*singleBookstore),
 			SortBy:        "name",
@@ -60,15 +59,15 @@ var (
 		SupportFileType:      []string{".zip", ".tar", ".rar", ".cbr", ".cbz", ".epub", ".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".tar.xz", ".txz", ".tar.lz4", ".tlz4", ".tar.sz", ".tsz", ".bz2", ".gz", ".lz4", ".sz", ".xz", ".pdf", ".mp4", ".webm"},
 		SupportMediaType:     []string{".jpg", ".jpeg", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp", ".webp", ".ico", ".heic", ".avif"},
 		ExcludeFileOrFolders: []string{".idea", ".vscode", ".git", "node_modules", "flutter_ui", ".local/share/Trash", "$RECYCLE.BIN", "Config.Msi", "System Volume Information", ".sys", " .DS_Store", ".dll", ".log", ".cache", ".exe"},
-		WebpConfig: WebPServerConfig{
-			WebpCommand:  "webp-server",
-			HOST:         "127.0.0.1",
-			PORT:         "3333",
-			ImgPath:      "",
-			QUALITY:      70,
-			AllowedTypes: []string{".jpg", ".jpeg", ".JPEG", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp"},
-			ExhaustPath:  "",
-		},
+		//WebpConfig: WebPServerConfig{
+		//	WebpCommand:  "webp-server",
+		//	HOST:         "127.0.0.1",
+		//	PORT:         "3333",
+		//	ImgPath:      "",
+		//	QUALITY:      70,
+		//	AllowedTypes: []string{".jpg", ".jpeg", ".JPEG", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp"},
+		//	ExhaustPath:  "",
+		//},
 		EnableFrpcServer: false,
 		FrpConfig: FrpClientConfig{
 			FrpcCommand:      "frpc",
@@ -95,38 +94,36 @@ func CheckPathSkip(path string) bool {
 }
 
 type ServerSettings struct {
-	Host                   string           `json:"host"`
-	EnableWebpServer       bool             `json:"enable_webp_server"`
-	EnableFrpcServer       bool             `json:"frpc_enable"`
-	Port                   int              `json:"port"`
-	SketchCountSeconds     int              `json:"sketch_count_seconds"`
-	Stores                 Bookstores       `json:"stores"` //这个字段不解析
-	CacheFilePath          string           `json:"-"`      //这个字段不解析
-	ExcludeFileOrFolders   []string         `json:"-"`      //这个字段不解析
-	SupportMediaType       []string         `json:"-"`      //这个字段不解析
-	SupportFileType        []string         `json:"-"`      //这个字段不解析
-	MinImageNum            int              `json:"-"`      //这个字段不解析
-	GenerateMetaData       bool             `json:"-"`      //这个字段不解析
-	UserName               string           `json:"-"`      //这个字段不解析
-	Password               string           `json:"-"`      //这个字段不解析
-	CertFile               string           `json:"-"`      //这个字段不解析
-	KeyFile                string           `json:"-"`      //这个字段不解析
-	OpenBrowser            bool             `json:"-"`      //这个字段不解析
-	DisableLAN             bool             `json:"-"`      //这个字段不解析
-	PrintAllIP             bool             `json:"-"`      //这个字段不解析
-	Debug                  bool             `json:"-"`      //这个字段不解析
-	LogToFile              bool             `json:"-"`      //这个字段不解析
-	LogFilePath            string           `json:"-"`      //这个字段不解析
-	LogFileName            string           `json:"-"`      //这个字段不解析
-	MaxDepth               int              `json:"-"`      //这个字段不解析
-	ZipFileTextEncoding    string           `json:"-"`      //这个字段不解析
-	TempPATH               string           `json:"-"`      //这个字段不解析
-	CleanAllTempFileOnExit bool             `json:"-"`      //这个字段不解析
-	CleanAllTempFile       bool             `json:"-"`      //这个字段不解析
-	GenerateConfig         bool             `json:"-"`      //这个字段不解析
-	WebpConfig             WebPServerConfig `json:"-"`      //这个字段不解析
-	FrpConfig              FrpClientConfig  `json:"-"`      //这个字段不解析
-	//Template               string           `json:"-"` //这个字段不解析
+	Port                   int             `json:"port" toml:"Port" comment:"提供服务的端口"`
+	Host                   string          `json:"host"  comment:"二维码打印的主机名"`
+	Stores                 Bookstores      `json:"stores" toml:"-"`
+	CacheFilePath          string          `json:"-" comment:"临时文件存储位置"`
+	ExcludeFileOrFolders   []string        `json:"-" comment:"需要排除的文件夹"`
+	SupportMediaType       []string        `json:"-" comment:"需要扫描的图片文件"`
+	SupportFileType        []string        `json:"-" comment:"需要扫描的图书文件"`
+	MinImageNum            int             `json:"-" comment:"至少有几张图片，才算作书籍"`
+	GenerateMetaData       bool            `json:"-" comment:"生成书籍元数据（TODO）"`
+	UserName               string          `json:"-" comment:"访问限制：用户名"`
+	Password               string          `json:"-" comment:"访问限制：密码"`
+	CertFile               string          `json:"-" comment:"Https证书"`
+	KeyFile                string          `json:"-" comment:"Https证书"`
+	OpenBrowser            bool            `json:"-" comment:"是否同时打开浏览器"`
+	DisableLAN             bool            `json:"-" comment:"只在本机localhost提供服务，不对外共享"`
+	PrintAllIP             bool            `json:"-" comment:"打印所有可能可用的地址的二维码"`
+	Debug                  bool            `json:"-" comment:"开启Debug模式"`
+	LogToFile              bool            `json:"-" comment:"记录Log到本地文件"`
+	LogFilePath            string          `json:"-" comment:"Log保存的位置"`
+	LogFileName            string          `json:"-" comment:"Log文件名"`
+	MaxDepth               int             `json:"-" comment:"最大扫描深度"`
+	ZipFileTextEncoding    string          `json:"-" comment:"非utf-8编码的ZIP文件，使用何种编码来解码"`
+	CleanAllTempFileOnExit bool            `json:"-" comment:"退出的时候，清理临时文件"`
+	GenerateConfig         bool            `toml:"-" comment:"退出的时候，清理临时文件"`
+	EnableFrpcServer       bool            `json:"frpc_enable"  comment:"后台启动FrpClient"`
+	FrpConfig              FrpClientConfig `json:"-"   comment:"FrpClient设置"`
+	//EnableWebpServer       bool             `json:"enable_webp_server"`
+	//SketchCountSeconds     int              `json:"sketch_count_seconds"`
+	//WebpConfig             WebPServerConfig `json:"-"  comment:" WebPServer设置"`
+	//Template               string           `json:"-"`
 }
 
 //WebPServerConfig  WebPServer服务端配置
@@ -142,7 +139,7 @@ type WebPServerConfig struct {
 
 //FrpClientConfig frp客户端配置
 type FrpClientConfig struct {
-	FrpcCommand      string
+	FrpcCommand      string `comment:"手动设定frpc可执行程序的路径,默认为frpc"`
 	ServerAddr       string
 	ServerPort       int
 	Token            string
@@ -151,8 +148,10 @@ type FrpClientConfig struct {
 	RandomRemotePort bool
 }
 
-// setupCloseHander 中断处理：程序被中断的时候，清理临时文件
-func setupCloseHander() {
+// SetupCloseHander 中断处理：程序被中断的时候，清理临时文件
+func SetupCloseHander() {
+	//中断处理：程序被中断的时候，清理临时文件
+	//容量2(capacity)代表Channel容纳的最多的元素的数量，代表Channel的缓存的大小。如果设置了缓存，就有可能不发生阻塞， 只有buffer满了后 send才会阻塞， 而只有缓存空了后receive才会阻塞。
 	c := make(chan os.Signal, 2)
 	//SIGHUP（挂起）, SIGINT（中断）或 SIGTERM（终止）默认会使得程序退出。
 	//1、SIGHUP 信号在用户终端连接(正常或非正常)结束时发出。
@@ -160,14 +159,16 @@ func setupCloseHander() {
 	//3、SIGTERM（终止）:kill终止进程,允许程序处理问题后退出。
 	//4.syscall.SIGHUP,终端控制进程结束(终端连接断开)
 	//5、syscall.SIGQUIT，CTRL+\ 退出
-	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGHUP)
+
+	// kill (no param) default send syscall.SIGTERM
+	// kill -2 is syscall.SIGINT
+	// kill -9 is syscall.SIGKILL but can't be catch, so don't need add it
+	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGHUP)
 	go func() {
 		<-c
 		if Config.CleanAllTempFileOnExit {
 			fmt.Println("\r" + locale.GetString("start_clear_file"))
-			clearTempFilesALL()
-		} else {
-			//clearTempFilesOne(ReadingBook)
+			ClearTempFilesALL()
 		}
 		os.Exit(0)
 	}()
@@ -176,8 +177,8 @@ func setupCloseHander() {
 // setTempDir 设置临时文件夹，退出时会被清理
 func setTempDir() {
 	//手动设置的临时文件夹
-	if Config.TempPATH != "" && tools.ChickExists(Config.TempPATH) && tools.ChickIsDir(Config.TempPATH) {
-		Config.CacheFilePath = path.Join(Config.TempPATH)
+	if Config.CacheFilePath != "" && tools.ChickExists(Config.CacheFilePath) && tools.ChickIsDir(Config.CacheFilePath) {
+		Config.CacheFilePath = path.Join(Config.CacheFilePath)
 	} else {
 		Config.CacheFilePath = path.Join(os.TempDir(), "comigo_temp_files") //直接使用系统文件夹
 	}
@@ -190,7 +191,7 @@ func setTempDir() {
 }
 
 // 清空程序缓存 TODO：生成临时文件，并在退出后清理
-func clearTempFilesALL() {
+func ClearTempFilesALL() {
 	fmt.Println(locale.GetString("clear_temp_file_start"))
 	for _, tempBook := range mapBooks {
 		clearTempFilesOne(tempBook)

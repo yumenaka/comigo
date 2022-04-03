@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/mitchellh/go-homedir"
-	"github.com/pelletier/go-toml"
+	"github.com/pelletier/go-toml/v2"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/yumenaka/comi/common"
@@ -25,14 +25,18 @@ var rootCmd = &cobra.Command{
 	Version: locale.GetString("comigo_version"),
 	Long:    locale.GetString("long_description"),
 	Run: func(cmd *cobra.Command, args []string) {
-		ParseCommands(args)
-		routers.StartWebServer()
+		//解析命令，扫描文件
+		startScanFiles(args)
+		//设置书籍API
+		routers.StartComigoServer()
+		//退出时清理临时文件
+		routers.SetShutdownHandler()
 		return
 	},
 }
 
-//ParseCommands 解析命令
-func ParseCommands(args []string) {
+//startScanFiles 解析命令
+func startScanFiles(args []string) {
 	//决定如何扫描，扫描哪个路径
 	if len(args) == 0 { //没有指定路径或文件的情况下
 		cmdPath := path.Dir(os.Args[0]) //扫描程序执行的路径
@@ -108,7 +112,7 @@ func init() {
 	//不对局域网开放
 	rootCmd.PersistentFlags().BoolVarP(&common.Config.DisableLAN, "disable-lan", "d", false, locale.GetString("DISABLE_LAN"))
 	//文件搜索深度
-	rootCmd.PersistentFlags().IntVarP(&common.Config.MaxDepth, "max-depth", "m", 2, locale.GetString("MAX_DEPTH"))
+	rootCmd.PersistentFlags().IntVarP(&common.Config.MaxDepth, "max-depth", "m", 3, locale.GetString("MAX_DEPTH"))
 	////服务器解析书籍元数据，如果生成blurhash，需要消耗大量资源
 	rootCmd.PersistentFlags().BoolVar(&common.Config.GenerateMetaData, "generate-metadata", false, locale.GetString("GENERATE_METADATA"))
 	//打印所有可用网卡ip
@@ -142,9 +146,9 @@ func init() {
 	//输出log文件
 	rootCmd.PersistentFlags().BoolVar(&common.Config.LogToFile, "log", false, locale.GetString("LOG_TO_FILE"))
 	//sketch模式的倒计时秒数
-	rootCmd.PersistentFlags().IntVar(&common.Config.SketchCountSeconds, "sketch_count_seconds", 90, locale.GetString("SKETCH_COUNT_SECONDS"))
+	//rootCmd.PersistentFlags().IntVar(&common.Config.SketchCountSeconds, "sketch_count_seconds", 90, locale.GetString("SKETCH_COUNT_SECONDS"))
 	//临时图片解压路径
-	rootCmd.PersistentFlags().StringVar(&common.Config.TempPATH, "temp-path", "", locale.GetString("TEMP_PATH"))
+	rootCmd.PersistentFlags().StringVar(&common.Config.CacheFilePath, "cache-path", "", locale.GetString("CACHE_PATH"))
 	//退出时清除临时文件
 	rootCmd.PersistentFlags().BoolVar(&common.Config.CleanAllTempFileOnExit, "clean", false, locale.GetString("CLEAN_ALL_TEMP_FILE"))
 	//手动指定zip文件编码 gbk、shiftjis……
@@ -205,6 +209,7 @@ func init() {
 		//保存配置並退出
 		if common.Config.GenerateConfig {
 			common.Config.GenerateConfig = false
+			common.Config.LogFilePath = ""
 			bytes, err := toml.Marshal(common.Config)
 			if err != nil {
 				fmt.Println("toml.Marshal Error")
@@ -217,5 +222,9 @@ func init() {
 			}
 			os.Exit(0)
 		}
+		//监听文件修改
+		vip.WatchConfig()
+		//然后执行服务重启
+		vip.OnConfigChange(configReloadHandler)
 	})
 }

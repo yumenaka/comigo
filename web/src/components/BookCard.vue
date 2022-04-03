@@ -57,8 +57,7 @@ export default defineComponent({
   },
   data() {
     return {
-      // resize_str: '&resize_height=340',   &auto_crop=1
-      resize_str: "&resize_width=256&resize_height=360&resize_cut=true",
+      test: "",
     };
   },
   methods: {
@@ -75,7 +74,7 @@ export default defineComponent({
       const arrUrl = this.image_src.split("/");
       // console.log(arrUrl)
       if (arrUrl[0] === "api") {
-        return `${this.image_src}&resize_width=256&resize_height=360&resize_cut=true`;
+        return `${this.image_src}&resize_width=256&resize_height=360&thumbnail_mode=true`;
       }
       return this.image_src;
     },

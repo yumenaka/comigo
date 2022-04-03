@@ -1,6 +1,7 @@
 package routers
 
 import (
+	"context"
 	"embed"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -14,8 +15,9 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
-	"os"
+	"os/signal"
 	"strconv"
+	"syscall"
 	"time"
 )
 
@@ -141,7 +143,10 @@ func setWebAPI(engine *gin.Engine) {
 	//文件上传
 	// 除了设置头像以外，也可以做上传文件并阅读功能
 	// Set a lower memory limit for multipart forms (default is 32 MiB)
-	//engine.MaxMultipartMemory = 160 << 20  // 160 MiB
+	// https://github.com/gin-gonic/examples/blob/master/upload-file/single/main.go
+	// 也能上传多个文件，示例：
+	//https://github.com/gin-gonic/examples/blob/master/upload-file/multiple/main.go
+	//engine.MaxMultipartMemory = 60 << 20  // 60 MiB  只限制程序在上传文件时可以使用多少内存，而不限制上传文件的大小。
 	api.POST("/upload", func(c *gin.Context) {
 		// single file
 		file, err := c.FormFile("file")
@@ -232,8 +237,68 @@ func printCMDMessage() {
 	fmt.Println(locale.GetString("ctrl_c_hint"))
 }
 
-// StartWebServer 启动web服务
-func StartWebServer() {
+// StartWebServer 7、启动网页服务
+func StartWebServer(engine *gin.Engine) {
+	//是否对外服务
+	webHost := ":"
+	if common.Config.DisableLAN {
+		webHost = "localhost:"
+	}
+	//是否启用TLS
+	enableTls := common.Config.CertFile != "" && common.Config.KeyFile != ""
+	common.Srv = &http.Server{
+		Addr:    webHost + strconv.Itoa(common.Config.Port),
+		Handler: engine,
+	}
+	// Initializing the server in a goroutine so that
+	// it won't block the graceful shutdown handling below
+	//在 goroutine 中初始化服务器，这样它就不会阻塞下面的正常关闭处理
+	go func() {
+		// 监听并启动服务(TLS)
+		if enableTls {
+			if err := common.Srv.ListenAndServeTLS(common.Config.CertFile, common.Config.KeyFile); err != nil && err != http.ErrServerClosed {
+				log.Fatalf("listen: %s\n", err)
+			}
+		}
+		if !enableTls {
+			// 监听并启动服务(HTTP)
+			if err := common.Srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+				log.Fatalf("listen: %s\n", err)
+			}
+		}
+	}()
+}
+
+//SetShutdownHandler 退出时清理临时文件的函数
+func SetShutdownHandler() {
+	//优雅地停止或重启： https://github.com/gin-gonic/examples/blob/master/graceful-shutdown/graceful-shutdown/notify-with-context/server.go
+	// 创建侦听来自操作系统的中断信号的上下文。
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGHUP)
+	defer stop()
+	// Listen for the interrupt signal.
+	//监听中断信号。
+	<-ctx.Done()
+	//清理临时文件
+	if common.Config.CleanAllTempFileOnExit {
+		fmt.Println("\r" + locale.GetString("start_clear_file"))
+		common.ClearTempFilesALL()
+	}
+	// Restore default behavior on the interrupt signal and notify user of shutdown.
+	//恢复中断信号的默认行为并通知用户关机。
+	stop()
+	log.Println("shutting down processing, press Ctrl+C again to force")
+
+	// 上下文用于通知服务器它有 5 秒的时间来完成它当前正在处理的请求
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	if err := common.Srv.Shutdown(ctx); err != nil {
+		log.Fatal("Server forced to shutdown: ", err)
+	}
+	log.Println("Comigo Server exit.")
+}
+
+// StartComigoServer 启动web服务
+func StartComigoServer() {
 	//设置 gin
 	gin.SetMode(gin.ReleaseMode)
 	//// 创建带有默认中间件的路由: 日志与恢复中间件
@@ -242,7 +307,7 @@ func StartWebServer() {
 	setStaticFiles(engine)
 	//2、setWebAPI
 	setWebAPI(engine)
-	//TODO：设定书的心下载链接
+	//TODO：设定压缩包下载链接
 	if common.GetBooksNumber() >= 1 {
 		allBook, err := common.GetAllBookInfoList("name")
 		if err != nil {
@@ -256,7 +321,7 @@ func StartWebServer() {
 			}
 		}
 	}
-
+	//生成元数据
 	if common.Config.GenerateMetaData {
 		//TODO：生成元数据
 	}
@@ -269,30 +334,8 @@ func StartWebServer() {
 	//6、printCMDMessage
 	printCMDMessage()
 	//7、StartWebServer 监听并启动web服务
-	//是否对外服务
-	webHost := ":"
-	if common.Config.DisableLAN {
-		webHost = "localhost:"
-	}
-	enableTls := common.Config.CertFile != "" && common.Config.KeyFile != ""
-	if enableTls {
-		err := engine.RunTLS(webHost+strconv.Itoa(common.Config.Port), common.Config.CertFile, common.Config.KeyFile)
-		if err != nil {
-			_, err := fmt.Fprintf(os.Stderr, locale.GetString("web_server_error")+"%q\n", common.Config.Port)
-			if err != nil {
-				return
-			}
-		}
-	} else {
-		// 监听并启动服务
-		err := engine.Run(webHost + strconv.Itoa(common.Config.Port))
-		if err != nil {
-			_, err := fmt.Fprintf(os.Stderr, locale.GetString("web_server_error")+"%q\n", common.Config.Port)
-			if err != nil {
-				return
-			}
-		}
-	}
+	StartWebServer(engine)
+
 }
 
 ////4、setWebpServer TODO：新的webp模式：https://docs.webp.sh/usage/remote-backend/

@@ -183,8 +183,8 @@ func ImageResize(loadedImage []byte, width int, height int) []byte {
 	return buf2.Bytes()
 }
 
-// ImageResizeCut 重设图片分辨率,剪切图片
-func ImageResizeCut(loadedImage []byte, width int, height int) []byte {
+// ImageThumbnail 根据设定的图片大小,剪裁图片
+func ImageThumbnail(loadedImage []byte, width int, height int) []byte {
 	buf := bytes.NewBuffer(loadedImage)
 	image, err := imaging.Decode(buf)
 	if err != nil {

@@ -1,12 +1,9 @@
 package common
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/yumenaka/comi/locale"
 	"gopkg.in/ini.v1"
-	"os"
 	"os/exec"
 	"strconv"
 	"time"
@@ -53,33 +50,33 @@ func StartFrpC(configPath string) error {
 	return err
 }
 
-func StartWebPServer(webpConfigFile string, imgPath string, exhaustPath string, port int) error {
-	//Config.WebpCommand = wepBinaryPath
-	Config.WebpConfig.ImgPath = imgPath
-	Config.WebpConfig.ExhaustPath = exhaustPath
-	Config.WebpConfig.PORT = strconv.Itoa(port)
-	//Config.WebpConfig.QUALITY = quality
-	if Config.WebpConfig.WebpCommand == "" || Config.WebpConfig.ImgPath == "" || Config.WebpConfig.ExhaustPath == "" {
-		return errors.New(locale.GetString("webp_setting_error"))
-	}
-	jsonObject, err := os.OpenFile(webpConfigFile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
-	if err != nil {
-		return err
-	}
-	defer jsonObject.Close()
-	content, err := json.Marshal(Config.WebpConfig)
-	if err != nil {
-		return err
-	}
-	if _, err := jsonObject.Write(content); err == nil {
-		fmt.Println(locale.GetString("webp_setting_save_completed"), webpConfigFile, content)
-	}
-	//err = webpCMD(webpConfigFile, Config.WebpCommand)
-	var cmd *exec.Cmd
-	cmd = exec.Command(Config.WebpConfig.WebpCommand, "--config", webpConfigFile)
-	fmt.Println(cmd)
-	if err = cmd.Start(); err != nil {
-		return err
-	}
-	return err
-}
+//func StartWebPServer(webpConfigFile string, imgPath string, exhaustPath string, port int) error {
+//	//Config.WebpCommand = wepBinaryPath
+//	Config.WebpConfig.ImgPath = imgPath
+//	Config.WebpConfig.ExhaustPath = exhaustPath
+//	Config.WebpConfig.PORT = strconv.Itoa(port)
+//	//Config.WebpConfig.QUALITY = quality
+//	if Config.WebpConfig.WebpCommand == "" || Config.WebpConfig.ImgPath == "" || Config.WebpConfig.ExhaustPath == "" {
+//		return errors.New(locale.GetString("webp_setting_error"))
+//	}
+//	jsonObject, err := os.OpenFile(webpConfigFile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+//	if err != nil {
+//		return err
+//	}
+//	defer jsonObject.Close()
+//	content, err := json.Marshal(Config.WebpConfig)
+//	if err != nil {
+//		return err
+//	}
+//	if _, err := jsonObject.Write(content); err == nil {
+//		fmt.Println(locale.GetString("webp_setting_save_completed"), webpConfigFile, content)
+//	}
+//	//err = webpCMD(webpConfigFile, Config.WebpCommand)
+//	var cmd *exec.Cmd
+//	cmd = exec.Command(Config.WebpConfig.WebpCommand, "--config", webpConfigFile)
+//	fmt.Println(cmd)
+//	if err = cmd.Start(); err != nil {
+//		return err
+//	}
+//	return err
+//}
