@@ -1,6 +1,7 @@
 package routers
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comi/arch"
@@ -15,6 +16,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 // 示例 URL： 127.0.0.1:1234/getfile?id=2b17a13&filename=1.jpg
@@ -46,7 +48,7 @@ func getFileHandler(c *gin.Context) {
 	//fmt.Println(query)
 	//如果有缓存，直接读取本地获取缓存文件并返回
 	cacheData, ct, errGet := getFileFromCache(id, needFile, query, c.DefaultQuery("thumbnail_mode", "false") == "true")
-	if errGet == nil {
+	if errGet == nil && cacheData != nil {
 		c.Data(http.StatusOK, ct, cacheData)
 		return
 	}
@@ -207,11 +209,32 @@ type cacheKey struct {
 	queryString string
 }
 
-//需要一个Map保存ContentType
-var mapContentType map[cacheKey]string
+//SyncMap 有读写锁的map
+type SyncMap struct {
+	sync.RWMutex                       // map不是并发安全的 , 当有多个并发的goroutine读写同一个map时会出现panic错误(fatal error: concurrent map writes)
+	mapContentType map[cacheKey]string //需要一个Map保存ContentType
+}
+
+//读写锁
+func (l *SyncMap) readMap(key cacheKey) (string, bool) {
+	l.RLock()
+	value, ok := l.mapContentType[key]
+	l.RUnlock()
+	return value, ok
+}
+
+//读写锁
+func (l *SyncMap) writeMap(key cacheKey, value string) {
+	l.Lock()
+	l.mapContentType[key] = value
+	l.Unlock()
+}
+
+//SyncMap 有读写锁的map.除此之外，还可以使用channel，或使用sync.map保证map的并发安全
+var sMap SyncMap
 
 func init() {
-	mapContentType = make(map[cacheKey]string)
+	sMap.mapContentType = make(map[cacheKey]string)
 }
 
 //读取过一次的文件，就保存到硬盘上加快读取
@@ -240,7 +263,7 @@ func saveFileToCache(id string, filename string, data []byte, query url.Values, 
 	}
 	key := cacheKey{bookID: id, queryString: qS}
 	//将ContentType存入Map
-	mapContentType[key] = contentType
+	sMap.writeMap(key, contentType)
 	return err
 }
 
@@ -253,8 +276,8 @@ func getFileFromCache(id string, filename string, query url.Values, isCover bool
 		filename = "cover" + path.Ext(filename)
 	}
 	loadedImage, err := ioutil.ReadFile(filepath.Join(common.Config.CacheFilePath, id, filename))
-	if err != nil {
-		fmt.Println("getFileFromCache Error:" + filename)
+	if err != nil && common.Config.Debug {
+		fmt.Println("getFileFromCache,file not found:" + filename)
 	}
 	qS := ""
 	for k, values := range query {
@@ -265,6 +288,13 @@ func getFileFromCache(id string, filename string, query url.Values, isCover bool
 		qS = qS + k + temp
 	}
 	key := cacheKey{bookID: id, queryString: qS}
-	contentType := mapContentType[key]
-	return loadedImage, contentType, err
+	contentType, ok := sMap.readMap(key)
+	if ok {
+		return loadedImage, contentType, err
+	} else {
+		if common.Config.Debug {
+			return nil, contentType, errors.New("getFileFromCache key not found")
+		}
+		return nil, contentType, nil
+	}
 }
