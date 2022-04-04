@@ -20,7 +20,8 @@
             <!-- flex-row：https://www.tailwindcss.cn/docs/flex-direction -->
             <!-- 使用 flex-wrap 允许 flex 项目换行 https://www.tailwindcss.cn/docs/flex-wrap -->
             <!-- 在组件中使用v-for时,key是必须的 -->
-            <div class="flex flex-row flex-wrap">
+            <!-- justify-center：让项目沿着容器主轴的中心点对齐 https://www.tailwindcss.cn/docs/justify-content -->
+            <div class="flex flex-row flex-wrap justify-center">
                 <BookCard
                     v-for="(book_info, key) in this.bookshelf"
                     :key="key"
@@ -230,6 +231,7 @@ export default defineComponent({
     // beforeUnmount: 当指令与在绑定元素父组件卸载之前时,只调用一次。
     // unmounted: 当指令与元素解除绑定且父组件已卸载时,只调用一次。
     created() {
+        //TODO:读取服务器书籍总数，避免重复加载（尤其是书很多的时候）
         // 从服务器上拉取书架信息
         this.getBookShelfData();
         // 刷新ReadMode

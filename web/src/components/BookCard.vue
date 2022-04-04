@@ -9,7 +9,7 @@
   <!-- 盒阴影 shadow: https://www.tailwindcss.cn/docs/box-shadow -->
   <!-- 外边距 m-x m-y  https://www.tailwindcss.cn/docs/margin -->
   <div
-    class="relative w-32 h-44 mx-3 my-4 text-gray-800 dark:text-gray-300 rounded shadow-xl hover:shadow-2xl ring-1 ring-gray-400 hover:ring hover:ring-blue-500 .bg-top bg-cover"
+    class="relative w-32 h-44 mx-4 my-4 text-gray-800 dark:text-gray-300 rounded shadow-xl hover:shadow-2xl ring-1 ring-gray-400 hover:ring hover:ring-blue-500 .bg-top bg-cover"
     :style="getBackgroundImageStyle()"
   >
     <div v-if="this.childBookNum != ''" class="absolute inset-x-0 top-0 text-right">
