@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sync"
 )
 
 //var (
@@ -27,10 +28,12 @@ import (
 //	continueOnError = true
 //}
 
-var mapBookFS map[string]fs.FS
+//var mapBookFS map[string]fs.FS
+//使用sync.Map代替map，保证并发情况下的读写安全
+var mapBookFS sync.Map
 
 func init() {
-	mapBookFS = make(map[string]fs.FS)
+	//mapBookFS = make(map[string]fs.FS)
 }
 
 // ScanNonUTF8Zip 扫描文件，初始化书籍用
@@ -219,17 +222,22 @@ func GetSingleFile(filePath string, NameInArchive string, textEncoding string) (
 	}
 
 	//通过一个持久化的虚拟文件系统读取文件（加快rar文件的解压速度），key是文件路径
-	fsys, fsOK := mapBookFS[filePath]
-	if !fsOK { //从来没保存过这个文件系统
+	var fsys fs.FS
+	fsysAny, fsOK := mapBookFS.Load(filePath)
+	if fsOK {
+		fsys = fsysAny.(fs.FS)
+	} else {
+		//从来没保存过这个文件系统
 		temp, errFS := archiver.FileSystem(filePath)
 		if errFS == nil {
-			//将文件系统加入到map
-			mapBookFS[filePath] = temp
+			//将文件系统加入到sync.Map
+			mapBookFS.Store(filePath, temp) //因为被gin并发调用，需要考虑并发读写问题
 			fsys = temp
 		} else {
 			fmt.Println(errFS)
 		}
 	}
+
 	//通过虚拟文件系统打开特定文件
 	f, errFSOpen := fsys.Open(NameInArchive)
 	if errFSOpen != nil {
