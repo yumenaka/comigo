@@ -45,5 +45,7 @@
   "setInterfaceColor": "InterfaceColor:",
   "show_book_titles": "Show book titles",
   "switch_to_scrolling_mode": "Switch to scroll mode",
-  "switch_to_flip_mode": "switch to flip mode"
+  "switch_to_flip_mode": "switch to flip mode",
+  "select-language": "Select Language",
+  "DownloadSampleConfigFile": "Download sample config "
 }

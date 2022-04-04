@@ -39,21 +39,19 @@ var (
 	mapBooks      map[string]*Book //实际存在的书
 	mapBookGroups map[string]*Book //通过分析，生成的书籍分组
 	Config        = ServerSettings{
-		Port:            1234,
-		Host:            "",
-		StoresPath:      []string{""},
-		CacheFileEnable: true,
-		CacheFilePath:   "",
-		CacheFileClean:  true,
-
-		OpenBrowser:         true,
-		DisableLAN:          false,
-		GenerateMetaData:    false,
-		LogToFile:           false,
-		MaxDepth:            3,
-		MinImageNum:         3,
-		ZipFileTextEncoding: "",
-
+		Port:                 1234,
+		Host:                 "",
+		StoresPath:           []string{},
+		CacheFileEnable:      true,
+		CacheFilePath:        "",
+		CacheFileClean:       true,
+		OpenBrowser:          true,
+		DisableLAN:           false,
+		GenerateMetaData:     false,
+		LogToFile:            false,
+		MaxDepth:             3,
+		MinImageNum:          3,
+		ZipFileTextEncoding:  "",
 		EnableFrpcServer:     false,
 		SupportFileType:      []string{".zip", ".tar", ".rar", ".cbr", ".cbz", ".epub", ".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".tar.xz", ".txz", ".tar.lz4", ".tlz4", ".tar.sz", ".tsz", ".bz2", ".gz", ".lz4", ".sz", ".xz", ".pdf", ".mp4", ".webm"},
 		SupportMediaType:     []string{".jpg", ".jpeg", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp", ".webp", ".ico", ".heic", ".avif"},
@@ -94,35 +92,36 @@ func CheckPathSkip(path string) bool {
 	return false
 }
 
+// ServerSettings 服务器设置(config.toml)，配置文件放在被扫描的根目录中，或$HOME/config/comigo.可以用“comi --generate-config”生成本示例文件
 type ServerSettings struct {
-	Port                 int             `json:"port" toml:"Port" comment:"提供服务的端口"`
-	Host                 string          `json:"host"  comment:"二维码打印的主机名"`
-	StoresPath           []string        `json:"-"  comment:"默认书库文件夹"`
-	Stores               Bookstores      `json:"stores" toml:"-"`
-	CacheFileEnable      bool            `json:"use_cache_file" comment:"是否保存web图片缓存，可以加快二次读取，但会占用硬盘空间"`
-	CacheFilePath        string          `json:"-" comment:"缓存文件的存储位置，默认系统临时文件夹"`
-	ExcludeFileOrFolders []string        `json:"-" comment:"需要排除的文件夹"`
-	SupportMediaType     []string        `json:"-" comment:"需要扫描的图片文件"`
-	SupportFileType      []string        `json:"-" comment:"需要扫描的图书文件"`
-	MinImageNum          int             `json:"-" comment:"至少有几张图片，才算作书籍"`
-	GenerateMetaData     bool            `json:"-" comment:"生成书籍元数据（TODO）"`
-	UserName             string          `json:"-" comment:"访问限制：用户名"`
-	Password             string          `json:"-" comment:"访问限制：密码"`
-	CertFile             string          `json:"-" comment:"Https证书"`
-	KeyFile              string          `json:"-" comment:"Https证书"`
-	OpenBrowser          bool            `json:"-" comment:"是否同时打开浏览器"`
+	Port                 int             `json:"port" comment:"Comigo设置(config.toml)，放在被扫描根目录中，或$HOME/config/comigo。可用“comi --generate-config”生成本文件\n# 网页端口"`
+	Host                 string          `json:"host" comment:"自定义二维码显示的主机名"`
+	StoresPath           []string        `json:"-"    comment:"设置默认扫描的书库文件夹"`
+	MaxDepth             int             `json:"-" comment:"最大扫描深度"`
+	OpenBrowser          bool            `json:"-" comment:"是否同时打开浏览器，windows默认true，其他默认false"`
 	DisableLAN           bool            `json:"-" comment:"只在本机localhost提供服务，不对外共享"`
-	PrintAllIP           bool            `json:"-" comment:"打印所有可能可用的地址的二维码"`
+	UserName             string          `json:"-" comment:"访问限制：用户名。需要设置密码"`
+	Password             string          `json:"-" comment:"访问限制：密码。需要设置用户名。"`
+	CertFile             string          `json:"-" comment:"Https证书，同时设置KeyFile则启用HTTPS协议"`
+	KeyFile              string          `json:"-" comment:"Https证书，同时设置CertFile则启用HTTPS协议"`
+	CacheFileEnable      bool            `json:"-" comment:"是否保存web图片缓存，可以加快二次读取，但会占用硬盘空间"`
+	CacheFilePath        string          `json:"-" comment:"web图片缓存存储位置，默认系统临时文件夹"`
+	CacheFileClean       bool            `json:"-" comment:"退出程序的时候，清理web图片缓存"`
+	ExcludeFileOrFolders []string        `json:"-" comment:"需要排除的文件或文件夹"`
+	SupportMediaType     []string        `json:"-" comment:"需要扫描的图片文件后缀"`
+	SupportFileType      []string        `json:"-" comment:"需要扫描的图书文件后缀"`
+	MinImageNum          int             `json:"-" comment:"压缩包或文件夹内，至少有几张图片，才算作书籍"`
+	PrintAllIP           bool            `json:"-" comment:"打印所有可能阅读链接的二维码"`
 	Debug                bool            `json:"-" comment:"开启Debug模式"`
 	LogToFile            bool            `json:"-" comment:"记录Log到本地文件"`
 	LogFilePath          string          `json:"-" comment:"Log保存的位置"`
 	LogFileName          string          `json:"-" comment:"Log文件名"`
-	MaxDepth             int             `json:"-" comment:"最大扫描深度"`
-	ZipFileTextEncoding  string          `json:"-" comment:"非utf-8编码的ZIP文件，使用何种编码来解码"`
-	CacheFileClean       bool            `json:"-" comment:"退出的时候，清理临时文件"`
-	GenerateConfig       bool            `toml:"-" comment:"退出的时候，清理临时文件"`
-	EnableFrpcServer     bool            `json:"frpc_enable"  comment:"后台启动FrpClient"`
-	FrpConfig            FrpClientConfig `json:"-"   comment:"FrpClient设置"`
+	ZipFileTextEncoding  string          `json:"-" comment:"非utf-8编码的ZIP文件，尝试用什么编码解析，默认GBK"`
+	GenerateConfig       bool            `toml:"-" comment:"生成示例配置文件的标志"`
+	EnableFrpcServer     bool            `json:"-" comment:"后台启动FrpClient"`
+	FrpConfig            FrpClientConfig `json:"-" comment:"FrpClient设置"`
+	GenerateMetaData     bool            `json:"-" toml:"-" comment:"生成书籍元数据（TODO）"`
+	Stores               Bookstores      `json:"stores" toml:"-"`
 	//EnableWebpServer       bool             `json:"enable_webp_server"`
 	//SketchCountSeconds     int              `json:"sketch_count_seconds"`
 	//WebpConfig             WebPServerConfig `json:"-"  comment:" WebPServer设置"`
@@ -152,6 +151,7 @@ type FrpClientConfig struct {
 }
 
 // SetupCloseHander 中断处理：程序被中断的时候，清理临时文件
+// 在一个新的 goroutine 上创建一个监听器。 如果接收到了一个 interrupt 信号，就会立即通知程序，做一些清理工作并退出
 func SetupCloseHander() {
 	//中断处理：程序被中断的时候，清理临时文件
 	//容量2(capacity)代表Channel容纳的最多的元素的数量，代表Channel的缓存的大小。如果设置了缓存，就有可能不发生阻塞， 只有buffer满了后 send才会阻塞， 而只有缓存空了后receive才会阻塞。
@@ -166,9 +166,11 @@ func SetupCloseHander() {
 	// kill (no param) default send syscall.SIGTERM
 	// kill -2 is syscall.SIGINT
 	// kill -9 is syscall.SIGKILL but can't be catch, so don't need add it
-	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGHUP)
+	//signal.Notify(c, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGHUP)
+	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
-		<-c
+		var temp = <-c
+		fmt.Println(temp)
 		if Config.CacheFileClean {
 			fmt.Println("\r" + locale.GetString("start_clear_file"))
 			ClearTempFilesALL()
@@ -193,9 +195,9 @@ func SetTempDir() {
 	}
 }
 
-// 清空程序缓存 TODO：生成临时文件，并在退出后清理
+// ClearTempFilesALL web加载时保存的临时图片，在在退出后清理
 func ClearTempFilesALL() {
-	fmt.Println(locale.GetString("clear_temp_file_start"))
+	//fmt.Println(locale.GetString("clear_temp_file_start"))
 	for _, tempBook := range mapBooks {
 		clearTempFilesOne(tempBook)
 	}
@@ -203,7 +205,7 @@ func ClearTempFilesALL() {
 
 // 清空某一本压缩漫画的解压缓存
 func clearTempFilesOne(book *Book) {
-	fmt.Println(locale.GetString("clear_temp_file_start"))
+	//fmt.Println(locale.GetString("clear_temp_file_start"))
 	haveThisBook := false
 	for _, tempBook := range mapBooks {
 		if tempBook.GetBookID() == book.GetBookID() {
@@ -216,7 +218,9 @@ func clearTempFilesOne(book *Book) {
 		if err != nil {
 			fmt.Println(locale.GetString("clear_temp_file_error") + cachePath)
 		} else {
-			fmt.Println(locale.GetString("clear_temp_file_completed：") + cachePath)
+			if Config.Debug {
+				fmt.Println(locale.GetString("clear_temp_file_completed") + cachePath)
+			}
 		}
 	}
 }

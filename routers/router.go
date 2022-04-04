@@ -176,11 +176,8 @@ func setWebAPI(engine *gin.Engine) {
 	api.GET("/getbook", getBookHandler)
 	//通过URL字符串参数获取特定文件
 	api.GET("/getfile", getFileHandler)
-
-	//下载示例配置
-	api.GET("/config.yaml", func(c *gin.Context) {
-		c.YAML(http.StatusOK, common.Config)
-	})
+	//通过链接下载示例配置
+	api.GET("/config.toml", getConfigHandler)
 	//301重定向跳转示例
 	api.GET("/redirect", func(c *gin.Context) {
 		//支持内部和外部的重定向
@@ -254,8 +251,8 @@ func printCMDMessage() {
 	fmt.Println(locale.GetString("ctrl_c_hint"))
 }
 
-// StartWebServer 7、启动网页服务
-func StartWebServer(engine *gin.Engine) {
+// StartGinEngine 7、启动网页服务
+func StartGinEngine(engine *gin.Engine) {
 	//是否对外服务
 	webHost := ":"
 	if common.Config.DisableLAN {
@@ -268,36 +265,21 @@ func StartWebServer(engine *gin.Engine) {
 		Handler: engine,
 	}
 
-	// 监听并启动服务(TLS)
-	if enableTls {
-		if err := common.Srv.ListenAndServeTLS(common.Config.CertFile, common.Config.KeyFile); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("listen: %s\n", err)
+	//在 goroutine 中初始化服务器，这样它就不会阻塞下面的正常关闭处理
+	go func() {
+		// 监听并启动服务(TLS)
+		if enableTls {
+			if err := common.Srv.ListenAndServeTLS(common.Config.CertFile, common.Config.KeyFile); err != nil && err != http.ErrServerClosed {
+				log.Fatalf("listen: %s\n", err)
+			}
 		}
-	}
-	if !enableTls {
-		// 监听并启动服务(HTTP)
-		if err := common.Srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("listen: %s\n", err)
+		if !enableTls {
+			// 监听并启动服务(HTTP)
+			if err := common.Srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+				log.Fatalf("listen: %s\n", err)
+			}
 		}
-	}
-
-	//// Initializing the server in a goroutine so that
-	//// it won't block the graceful shutdown handling below
-	////在 goroutine 中初始化服务器，这样它就不会阻塞下面的正常关闭处理
-	//go func() {
-	//	// 监听并启动服务(TLS)
-	//	if enableTls {
-	//		if err := common.Srv.ListenAndServeTLS(common.Config.CertFile, common.Config.KeyFile); err != nil && err != http.ErrServerClosed {
-	//			log.Fatalf("listen: %s\n", err)
-	//		}
-	//	}
-	//	if !enableTls {
-	//		// 监听并启动服务(HTTP)
-	//		if err := common.Srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-	//			log.Fatalf("listen: %s\n", err)
-	//		}
-	//	}
-	//}()
+	}()
 }
 
 //SetShutdownHandler TODO:退出时清理临时文件的函数
@@ -309,27 +291,26 @@ func SetShutdownHandler() {
 	// Listen for the interrupt signal.
 	//监听中断信号。
 	<-ctx.Done()
-	//清理临时文件
-	if common.Config.CacheFileClean {
-		fmt.Println("\r" + locale.GetString("start_clear_file"))
-		common.ClearTempFilesALL()
-	}
-	// Restore default behavior on the interrupt signal and notify user of shutdown.
 	//恢复中断信号的默认行为并通知用户关机。
 	stop()
 	log.Println("shutting down processing, press Ctrl+C again to force")
-
+	//清理临时文件
+	if common.Config.CacheFileClean {
+		fmt.Println("\r" + locale.GetString("start_clear_file") + " CacheFilePath:" + common.Config.CacheFilePath)
+		common.ClearTempFilesALL()
+		fmt.Println(locale.GetString("clear_temp_file_completed"))
+	}
 	// 上下文用于通知服务器它有 5 秒的时间来完成它当前正在处理的请求
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := common.Srv.Shutdown(ctx); err != nil {
-		log.Fatal("Server forced to shutdown: ", err)
+		log.Fatal("Comigo Server forced to shutdown: ", err)
 	}
 	log.Println("Comigo Server exit.")
 }
 
-// StartComigoServer 启动web服务
-func StartComigoServer() {
+// StartWebServer 启动web服务
+func StartWebServer() {
 	//设置 gin
 	gin.SetMode(gin.ReleaseMode)
 	//// 创建带有默认中间件的路由: 日志与恢复中间件
@@ -338,7 +319,6 @@ func StartComigoServer() {
 	setStaticFiles(engine)
 	//2、setWebAPI
 	setWebAPI(engine)
-
 	//生成元数据
 	if common.Config.GenerateMetaData {
 		//TODO：生成元数据
@@ -351,8 +331,8 @@ func StartComigoServer() {
 	setFrpClient()
 	//6、printCMDMessage
 	printCMDMessage()
-	//7、StartWebServer 监听并启动web服务
-	StartWebServer(engine)
+	//7、StartGinEngine 监听并启动web服务
+	StartGinEngine(engine)
 }
 
 ////4、setWebpServer TODO：新的webp模式：https://docs.webp.sh/usage/remote-backend/

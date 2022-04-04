@@ -78,11 +78,11 @@ func init() {
 	//sketch模式的倒计时秒数
 	//rootCmd.PersistentFlags().IntVar(&common.Config.SketchCountSeconds, "sketch_count_seconds", 90, locale.GetString("SKETCH_COUNT_SECONDS"))
 
-	rootCmd.PersistentFlags().BoolVar(&common.Config.CacheFileEnable, "cache-enable", false, locale.GetString("CACHE_FILE_ENABLE"))
+	rootCmd.PersistentFlags().BoolVar(&common.Config.CacheFileEnable, "cache-enable", true, locale.GetString("CACHE_FILE_ENABLE"))
 	//web图片缓存路径
 	rootCmd.PersistentFlags().StringVar(&common.Config.CacheFilePath, "cache-path", "", locale.GetString("CACHE_FILE_PATH"))
 	//退出时清除临时文件
-	rootCmd.PersistentFlags().BoolVar(&common.Config.CacheFileClean, "cache-clean", false, locale.GetString("CACHE_FILE_CLEAN"))
+	rootCmd.PersistentFlags().BoolVar(&common.Config.CacheFileClean, "cache-clean", true, locale.GetString("CACHE_FILE_CLEAN"))
 	//手动指定zip文件编码 gbk、shiftjis……
 	rootCmd.PersistentFlags().StringVar(&common.Config.ZipFileTextEncoding, "zip-encode", "gbk", locale.GetString("ZIP_ENCODE"))
 	////访问密码，还没做
@@ -129,17 +129,11 @@ func init() {
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		//var tomlExample = []byte(`DebugMode = true
-		//OpenBrowser = true
-		//Host = "localhost"
-		//Port = "1234"
-		//Debug = false
-		//`)
-		//vip.ReadConfig(bytes.NewBuffer(tomlExample))
-		//保存配置並退出
+		//保存配置示例並退出
 		if common.Config.GenerateConfig {
 			common.Config.GenerateConfig = false
 			common.Config.LogFilePath = ""
+			common.Config.StoresPath = []string{"C:\\test\\Comic", "D:\\some_path\\book"}
 			bytes, err := toml.Marshal(common.Config)
 			if err != nil {
 				fmt.Println("toml.Marshal Error")
@@ -159,7 +153,7 @@ func init() {
 	})
 }
 
-// rootCmd represents the base command when called without any subcommands
+// rootCmd 没有任何子命令的情况下调用时的基本命令
 var rootCmd = &cobra.Command{
 	Use:     locale.GetString("comigo_use"),
 	Short:   locale.GetString("short_description"),
@@ -172,10 +166,10 @@ var rootCmd = &cobra.Command{
 		//设置临时文件夹
 		common.SetTempDir()
 		//设置书籍API
-		routers.StartComigoServer()
+		routers.StartWebServer()
 		//退出时清理临时文件
-		common.SetupCloseHander()
-		//routers.SetShutdownHandler()
+		//common.SetupCloseHander()
+		routers.SetShutdownHandler()
 		return
 	},
 }
@@ -214,6 +208,21 @@ func initBookStores(args []string) {
 	}
 	//通过“可执行文件名”设置部分默认参数
 	common.Config.SetByExecutableFilename()
+	if len(common.Config.StoresPath) > 0 {
+		for _, p := range common.Config.StoresPath {
+			list, err := common.ScanAndGetBookList(p)
+			if err != nil {
+				fmt.Println(locale.GetString("scan_error"), p)
+			} else {
+				err := common.AddBooks(list, p)
+				if err != nil {
+					fmt.Println(locale.GetString("AddBook_error"), p)
+				}
+				//然后生成对应的虚拟书籍组
+				common.Config.Stores.GenerateBookGroup()
+			}
+		}
+	}
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

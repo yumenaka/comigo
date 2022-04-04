@@ -45,5 +45,7 @@
   "setInterfaceColor": "UIカラー:",
   "show_book_titles": "本のタイトルを表示する",
   "switch_to_scrolling_mode": "スクロールモードへ",
-  "switch_to_flip_mode": "めくりモードへ"
+  "switch_to_flip_mode": "めくりモードへ",
+  "DownloadSampleConfigFile": "設定ファイルのダウンロード",
+  "select-language": "言語を選択する"
 }

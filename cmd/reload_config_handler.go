@@ -29,14 +29,13 @@ func configReloadHandler(e fsnotify.Event) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-
-	// 上下文用于通知服务器它有 3 秒的时间来完成它当前正在处理的请求
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	// 上下文用于通知服务器它有 5 秒的时间来完成它当前正在处理的请求
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := common.Srv.Shutdown(ctx); err != nil {
 		log.Fatal("Server forced to shutdown: ", err)
 	}
 	<-ctx.Done()
 	//重启 web 服务器
-	routers.StartComigoServer()
+	routers.StartWebServer()
 }
