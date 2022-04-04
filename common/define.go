@@ -39,22 +39,25 @@ var (
 	mapBooks      map[string]*Book //实际存在的书
 	mapBookGroups map[string]*Book //通过分析，生成的书籍分组
 	Config        = ServerSettings{
-		Port:                   1234,
-		Host:                   "",
-		StoresPath:             []string{""},
-		CacheFilePath:          "",
-		OpenBrowser:            true,
-		DisableLAN:             false,
-		GenerateMetaData:       false,
-		LogToFile:              false,
-		MaxDepth:               3,
-		MinImageNum:            3,
-		ZipFileTextEncoding:    "",
-		CleanAllTempFileOnExit: true,
-		EnableFrpcServer:       false,
-		SupportFileType:        []string{".zip", ".tar", ".rar", ".cbr", ".cbz", ".epub", ".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".tar.xz", ".txz", ".tar.lz4", ".tlz4", ".tar.sz", ".tsz", ".bz2", ".gz", ".lz4", ".sz", ".xz", ".pdf", ".mp4", ".webm"},
-		SupportMediaType:       []string{".jpg", ".jpeg", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp", ".webp", ".ico", ".heic", ".avif"},
-		ExcludeFileOrFolders:   []string{".idea", ".vscode", ".git", "node_modules", "flutter_ui", ".local/share/Trash", "$RECYCLE.BIN", "Config.Msi", "System Volume Information", ".sys", " .DS_Store", ".dll", ".log", ".cache", ".exe"},
+		Port:            1234,
+		Host:            "",
+		StoresPath:      []string{""},
+		CacheFileEnable: true,
+		CacheFilePath:   "",
+		CacheFileClean:  true,
+
+		OpenBrowser:         true,
+		DisableLAN:          false,
+		GenerateMetaData:    false,
+		LogToFile:           false,
+		MaxDepth:            3,
+		MinImageNum:         3,
+		ZipFileTextEncoding: "",
+
+		EnableFrpcServer:     false,
+		SupportFileType:      []string{".zip", ".tar", ".rar", ".cbr", ".cbz", ".epub", ".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".tar.xz", ".txz", ".tar.lz4", ".tlz4", ".tar.sz", ".tsz", ".bz2", ".gz", ".lz4", ".sz", ".xz", ".pdf", ".mp4", ".webm"},
+		SupportMediaType:     []string{".jpg", ".jpeg", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp", ".webp", ".ico", ".heic", ".avif"},
+		ExcludeFileOrFolders: []string{".idea", ".vscode", ".git", "node_modules", "flutter_ui", ".local/share/Trash", "$RECYCLE.BIN", "Config.Msi", "System Volume Information", ".sys", " .DS_Store", ".dll", ".log", ".cache", ".exe"},
 		Stores: Bookstores{
 			mapBookstores: make(map[string]*singleBookstore),
 			SortBy:        "name",
@@ -92,33 +95,34 @@ func CheckPathSkip(path string) bool {
 }
 
 type ServerSettings struct {
-	Port                   int             `json:"port" toml:"Port" comment:"提供服务的端口"`
-	Host                   string          `json:"host"  comment:"二维码打印的主机名"`
-	StoresPath             []string        `json:"-"  comment:"默认书库文件夹"`
-	Stores                 Bookstores      `json:"stores" toml:"-"`
-	CacheFilePath          string          `json:"-" comment:"临时文件存储位置"`
-	ExcludeFileOrFolders   []string        `json:"-" comment:"需要排除的文件夹"`
-	SupportMediaType       []string        `json:"-" comment:"需要扫描的图片文件"`
-	SupportFileType        []string        `json:"-" comment:"需要扫描的图书文件"`
-	MinImageNum            int             `json:"-" comment:"至少有几张图片，才算作书籍"`
-	GenerateMetaData       bool            `json:"-" comment:"生成书籍元数据（TODO）"`
-	UserName               string          `json:"-" comment:"访问限制：用户名"`
-	Password               string          `json:"-" comment:"访问限制：密码"`
-	CertFile               string          `json:"-" comment:"Https证书"`
-	KeyFile                string          `json:"-" comment:"Https证书"`
-	OpenBrowser            bool            `json:"-" comment:"是否同时打开浏览器"`
-	DisableLAN             bool            `json:"-" comment:"只在本机localhost提供服务，不对外共享"`
-	PrintAllIP             bool            `json:"-" comment:"打印所有可能可用的地址的二维码"`
-	Debug                  bool            `json:"-" comment:"开启Debug模式"`
-	LogToFile              bool            `json:"-" comment:"记录Log到本地文件"`
-	LogFilePath            string          `json:"-" comment:"Log保存的位置"`
-	LogFileName            string          `json:"-" comment:"Log文件名"`
-	MaxDepth               int             `json:"-" comment:"最大扫描深度"`
-	ZipFileTextEncoding    string          `json:"-" comment:"非utf-8编码的ZIP文件，使用何种编码来解码"`
-	CleanAllTempFileOnExit bool            `json:"-" comment:"退出的时候，清理临时文件"`
-	GenerateConfig         bool            `toml:"-" comment:"退出的时候，清理临时文件"`
-	EnableFrpcServer       bool            `json:"frpc_enable"  comment:"后台启动FrpClient"`
-	FrpConfig              FrpClientConfig `json:"-"   comment:"FrpClient设置"`
+	Port                 int             `json:"port" toml:"Port" comment:"提供服务的端口"`
+	Host                 string          `json:"host"  comment:"二维码打印的主机名"`
+	StoresPath           []string        `json:"-"  comment:"默认书库文件夹"`
+	Stores               Bookstores      `json:"stores" toml:"-"`
+	CacheFileEnable      bool            `json:"use_cache_file" comment:"是否保存web图片缓存，可以加快二次读取，但会占用硬盘空间"`
+	CacheFilePath        string          `json:"-" comment:"缓存文件的存储位置，默认系统临时文件夹"`
+	ExcludeFileOrFolders []string        `json:"-" comment:"需要排除的文件夹"`
+	SupportMediaType     []string        `json:"-" comment:"需要扫描的图片文件"`
+	SupportFileType      []string        `json:"-" comment:"需要扫描的图书文件"`
+	MinImageNum          int             `json:"-" comment:"至少有几张图片，才算作书籍"`
+	GenerateMetaData     bool            `json:"-" comment:"生成书籍元数据（TODO）"`
+	UserName             string          `json:"-" comment:"访问限制：用户名"`
+	Password             string          `json:"-" comment:"访问限制：密码"`
+	CertFile             string          `json:"-" comment:"Https证书"`
+	KeyFile              string          `json:"-" comment:"Https证书"`
+	OpenBrowser          bool            `json:"-" comment:"是否同时打开浏览器"`
+	DisableLAN           bool            `json:"-" comment:"只在本机localhost提供服务，不对外共享"`
+	PrintAllIP           bool            `json:"-" comment:"打印所有可能可用的地址的二维码"`
+	Debug                bool            `json:"-" comment:"开启Debug模式"`
+	LogToFile            bool            `json:"-" comment:"记录Log到本地文件"`
+	LogFilePath          string          `json:"-" comment:"Log保存的位置"`
+	LogFileName          string          `json:"-" comment:"Log文件名"`
+	MaxDepth             int             `json:"-" comment:"最大扫描深度"`
+	ZipFileTextEncoding  string          `json:"-" comment:"非utf-8编码的ZIP文件，使用何种编码来解码"`
+	CacheFileClean       bool            `json:"-" comment:"退出的时候，清理临时文件"`
+	GenerateConfig       bool            `toml:"-" comment:"退出的时候，清理临时文件"`
+	EnableFrpcServer     bool            `json:"frpc_enable"  comment:"后台启动FrpClient"`
+	FrpConfig            FrpClientConfig `json:"-"   comment:"FrpClient设置"`
 	//EnableWebpServer       bool             `json:"enable_webp_server"`
 	//SketchCountSeconds     int              `json:"sketch_count_seconds"`
 	//WebpConfig             WebPServerConfig `json:"-"  comment:" WebPServer设置"`
@@ -162,10 +166,10 @@ func SetupCloseHander() {
 	// kill (no param) default send syscall.SIGTERM
 	// kill -2 is syscall.SIGINT
 	// kill -9 is syscall.SIGKILL but can't be catch, so don't need add it
-	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGHUP)
+	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGHUP)
 	go func() {
 		<-c
-		if Config.CleanAllTempFileOnExit {
+		if Config.CacheFileClean {
 			fmt.Println("\r" + locale.GetString("start_clear_file"))
 			ClearTempFilesALL()
 		}
@@ -207,17 +211,12 @@ func clearTempFilesOne(book *Book) {
 		}
 	}
 	if haveThisBook {
-		extractPath := path.Join(Config.CacheFilePath, book.GetBookID())
-		//避免删错文件,解压路径包含UUID，len不可能小于32
-		PathLen := len(extractPath)
-		if PathLen < 32 {
-			return
-		}
-		err := os.RemoveAll(extractPath)
+		cachePath := path.Join(Config.CacheFilePath, book.GetBookID())
+		err := os.RemoveAll(cachePath)
 		if err != nil {
-			fmt.Println(locale.GetString("clear_temp_file_error") + extractPath)
+			fmt.Println(locale.GetString("clear_temp_file_error") + cachePath)
 		} else {
-			fmt.Println(locale.GetString("clear_temp_file_completed") + extractPath)
+			fmt.Println(locale.GetString("clear_temp_file_completed：") + cachePath)
 		}
 	}
 }

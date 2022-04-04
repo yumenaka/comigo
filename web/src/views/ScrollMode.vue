@@ -206,7 +206,8 @@
 				<n-input-number
 					:show-button="false"
 					v-if="this.imageParameters.do_auto_crop"
-					v-model:value="this.imageParameters.auto_crop"
+					v-model:value="this.imageParameters.auto_crop_num"
+					@update:value="setImageParameters_AutoCropNum"
 					:max="10"
 					:min="0"
 				>
@@ -330,7 +331,7 @@ export default defineComponent({
 					var gray_str = (imageParameters.gray ? "&gray=true" : "")
 					var do_auto_resize_str = (imageParameters.do_auto_resize ? ("&resize_max_width=" + imageParameters.resize_max_width) : "")
 					var resize_max_height_str = (imageParameters.resize_max_height > 0 ? "&resize_max_height=" + imageParameters.resize_max_height : "")
-					var auto_crop_str = (imageParameters.do_auto_crop ? "&auto_crop=" + imageParameters.auto_crop : "")
+					var auto_crop_str = (imageParameters.do_auto_crop ? "&auto_crop=" + imageParameters.auto_crop_num : "")
 					var full_url = base_str + resize_width_str + resize_height_str + do_auto_resize_str + resize_max_height_str + auto_crop_str + gray_str
 					// console.log(full_url);
 					return full_url;
@@ -509,10 +510,10 @@ export default defineComponent({
 		}
 
 		//切白边参数
-		if (localStorage.getItem("ImageParameters_DoAutoCrop") != null) {
-			let saveNum = Number(localStorage.getItem("ImageParameters_DoAutoCrop"));
+		if (localStorage.getItem("ImageParameters_AutoCropNum") != null) {
+			let saveNum = Number(localStorage.getItem("ImageParameters_AutoCropNum"));
 			if (!isNaN(saveNum)) {
-				this.imageParameters.auto_crop = saveNum;
+				this.imageParameters.auto_crop_num = saveNum;
 			}
 		}
 
@@ -653,7 +654,7 @@ export default defineComponent({
 			localStorage.setItem("doublePageWidth_PX", this.doublePageWidth_PX);
 			localStorage.setItem("BackgroundColor", this.model.backgroundColor);
 			//set对有setXXXChange函数的来说有些多余,但没有set函数的话就有必要了
-			localStorage.setItem("ImageParameters_DoAutoCrop", this.imageParameters.auto_crop);
+			localStorage.setItem("ImageParameters_DoAutoCrop", this.imageParameters.do_auto_crop);
 			localStorage.setItem("ImageParametersResizeMaxWidth", this.imageParameters.resize_max_width);
 		},
 		setShowHeaderChange(value) {
@@ -680,11 +681,16 @@ export default defineComponent({
 			localStorage.setItem("ImageParameters_DoAutoResize", value);
 			// console.log("成功保存设置: ImageParameters_DoAutoResize=" + localStorage.getItem("ImageParameters_DoAutoResize"));
 		},
-
+		//设置是否切白边的时候
 		setImageParameters_DoAutoCrop(value) {
 			this.imageParameters.do_auto_crop = value;
 			localStorage.setItem("ImageParameters_DoAutoCrop", this.imageParameters.do_auto_crop);
 			// console.log("成功保存设置: ImageParameters_DoAutoCrop=" + localStorage.getItem("ImageParameters_DoAutoCrop"));
+		},
+
+		setImageParameters_AutoCropNum(value) {
+			this.imageParameters.auto_crop_num = value;
+			localStorage.setItem("ImageParameters_AutoCropNum", this.imageParameters.auto_crop_num);
 		},
 
 		setImageWidthUsePercentFlag(value) {

@@ -36,6 +36,8 @@ require (
 	github.com/akavel/rsrc v0.10.2 // indirect
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/dsnet/compress v0.0.1 // indirect
+	github.com/elliotchance/orderedmap v1.4.0 // indirect
+	github.com/elliotchance/pie/v2 v2.0.1 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
@@ -82,6 +84,7 @@ require (
 	github.com/xxjwxc/public v0.0.0-20220329090053-2e8fb16c7da7 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	golang.org/x/crypto v0.0.0-20220321153916-2c7772ba3064 // indirect
+	golang.org/x/exp v0.0.0-20220321173239-a90fa8a75705 // indirect
 	golang.org/x/image v0.0.0-20220321031419-a8550c1d254a // indirect
 	golang.org/x/sys v0.0.0-20220330033206-e17cdc41300f // indirect
 	google.golang.org/protobuf v1.28.0 // indirect

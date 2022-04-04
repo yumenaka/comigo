@@ -77,10 +77,12 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&common.Config.LogToFile, "log", false, locale.GetString("LOG_TO_FILE"))
 	//sketch模式的倒计时秒数
 	//rootCmd.PersistentFlags().IntVar(&common.Config.SketchCountSeconds, "sketch_count_seconds", 90, locale.GetString("SKETCH_COUNT_SECONDS"))
-	//临时图片解压路径
-	rootCmd.PersistentFlags().StringVar(&common.Config.CacheFilePath, "cache-path", "", locale.GetString("CACHE_PATH"))
+
+	rootCmd.PersistentFlags().BoolVar(&common.Config.CacheFileEnable, "cache-enable", false, locale.GetString("CACHE_FILE_ENABLE"))
+	//web图片缓存路径
+	rootCmd.PersistentFlags().StringVar(&common.Config.CacheFilePath, "cache-path", "", locale.GetString("CACHE_FILE_PATH"))
 	//退出时清除临时文件
-	rootCmd.PersistentFlags().BoolVar(&common.Config.CleanAllTempFileOnExit, "clean", false, locale.GetString("CLEAN_ALL_TEMP_FILE"))
+	rootCmd.PersistentFlags().BoolVar(&common.Config.CacheFileClean, "cache-clean", false, locale.GetString("CACHE_FILE_CLEAN"))
 	//手动指定zip文件编码 gbk、shiftjis……
 	rootCmd.PersistentFlags().StringVar(&common.Config.ZipFileTextEncoding, "zip-encode", "gbk", locale.GetString("ZIP_ENCODE"))
 	////访问密码，还没做
@@ -171,9 +173,9 @@ var rootCmd = &cobra.Command{
 		common.SetTempDir()
 		//设置书籍API
 		routers.StartComigoServer()
-
 		//退出时清理临时文件
-		routers.SetShutdownHandler()
+		common.SetupCloseHander()
+		//routers.SetShutdownHandler()
 		return
 	},
 }

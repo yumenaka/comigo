@@ -267,26 +267,40 @@ func StartWebServer(engine *gin.Engine) {
 		Addr:    webHost + strconv.Itoa(common.Config.Port),
 		Handler: engine,
 	}
-	// Initializing the server in a goroutine so that
-	// it won't block the graceful shutdown handling below
-	//在 goroutine 中初始化服务器，这样它就不会阻塞下面的正常关闭处理
-	go func() {
-		// 监听并启动服务(TLS)
-		if enableTls {
-			if err := common.Srv.ListenAndServeTLS(common.Config.CertFile, common.Config.KeyFile); err != nil && err != http.ErrServerClosed {
-				log.Fatalf("listen: %s\n", err)
-			}
+
+	// 监听并启动服务(TLS)
+	if enableTls {
+		if err := common.Srv.ListenAndServeTLS(common.Config.CertFile, common.Config.KeyFile); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("listen: %s\n", err)
 		}
-		if !enableTls {
-			// 监听并启动服务(HTTP)
-			if err := common.Srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-				log.Fatalf("listen: %s\n", err)
-			}
+	}
+	if !enableTls {
+		// 监听并启动服务(HTTP)
+		if err := common.Srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("listen: %s\n", err)
 		}
-	}()
+	}
+
+	//// Initializing the server in a goroutine so that
+	//// it won't block the graceful shutdown handling below
+	////在 goroutine 中初始化服务器，这样它就不会阻塞下面的正常关闭处理
+	//go func() {
+	//	// 监听并启动服务(TLS)
+	//	if enableTls {
+	//		if err := common.Srv.ListenAndServeTLS(common.Config.CertFile, common.Config.KeyFile); err != nil && err != http.ErrServerClosed {
+	//			log.Fatalf("listen: %s\n", err)
+	//		}
+	//	}
+	//	if !enableTls {
+	//		// 监听并启动服务(HTTP)
+	//		if err := common.Srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+	//			log.Fatalf("listen: %s\n", err)
+	//		}
+	//	}
+	//}()
 }
 
-//SetShutdownHandler 退出时清理临时文件的函数
+//SetShutdownHandler TODO:退出时清理临时文件的函数
 func SetShutdownHandler() {
 	//优雅地停止或重启： https://github.com/gin-gonic/examples/blob/master/graceful-shutdown/graceful-shutdown/notify-with-context/server.go
 	// 创建侦听来自操作系统的中断信号的上下文。
@@ -296,7 +310,7 @@ func SetShutdownHandler() {
 	//监听中断信号。
 	<-ctx.Done()
 	//清理临时文件
-	if common.Config.CleanAllTempFileOnExit {
+	if common.Config.CacheFileClean {
 		fmt.Println("\r" + locale.GetString("start_clear_file"))
 		common.ClearTempFilesALL()
 	}
@@ -339,7 +353,6 @@ func StartComigoServer() {
 	printCMDMessage()
 	//7、StartWebServer 监听并启动web服务
 	StartWebServer(engine)
-
 }
 
 ////4、setWebpServer TODO：新的webp模式：https://docs.webp.sh/usage/remote-backend/
