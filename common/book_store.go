@@ -81,16 +81,26 @@ func (s *singleBookstore) initBookGroupMap() error {
 				newBook.ChildBook[bookInList.BookID] = &sameParentBookList[i]
 			}
 			newBook.ChildBookNum = len(newBook.ChildBook)
-			//如果书籍组的子书籍数量大于等于1，将书籍组加到上一层
+			//如果书籍组的子书籍数量大于等于1，且从来没有添加过，将书籍组加到上一层
 			if newBook.ChildBookNum >= 1 {
-				depthBooksMap[depth-1] = append(depthBooksMap[depth-1], *newBook)
-				//将这本书加到子书库的BookGroup表（s.BookGroupMap）里面去
-				s.BookGroupMap[newBook.BookID] = newBook
-				//将这本书加到BookGroup总表（mapBookGroups）里面去
-				mapBookGroups[newBook.BookID] = newBook
-				if Config.Debug {
-					fmt.Print("生成book_group：")
-					fmt.Println(newBook)
+				//检测是否已经生成并添加过
+				Added := false
+				for _, checkB := range mapBookGroups {
+					if checkB.FilePath == newBook.FilePath {
+						Added = true
+					}
+				}
+				//从来没有添加过的才需要添加
+				if !Added {
+					depthBooksMap[depth-1] = append(depthBooksMap[depth-1], *newBook)
+					//将这本书加到子书库的BookGroup表（s.BookGroupMap）里面去
+					s.BookGroupMap[newBook.BookID] = newBook
+					//将这本书加到BookGroup总表（mapBookGroups）里面去
+					mapBookGroups[newBook.BookID] = newBook
+					if Config.Debug {
+						fmt.Print("生成book_group：")
+						fmt.Println(newBook)
+					}
 				}
 			}
 		}

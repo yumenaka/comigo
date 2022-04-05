@@ -94,7 +94,7 @@ func CheckPathSkip(path string) bool {
 
 // ServerSettings 服务器设置(config.toml)，配置文件放在被扫描的根目录中，或$HOME/config/comigo.可以用“comi --generate-config”生成本示例文件
 type ServerSettings struct {
-	Port                 int             `json:"port" comment:"Comigo设置(config.toml)，放在被扫描根目录中，或$HOME/config/comigo。可用“comi --generate-config”生成本文件\n# 网页端口"`
+	Port                 int             `json:"port" comment:"Comigo设置(config.toml)，放在执行目录中，或$HOME/.config/comigo/下。可用“comi --generate-config”生成本文件\n# 网页端口"`
 	Host                 string          `json:"host" comment:"自定义二维码显示的主机名"`
 	StoresPath           []string        `json:"-"    comment:"设置默认扫描的书库文件夹"`
 	MaxDepth             int             `json:"-" comment:"最大扫描深度"`
