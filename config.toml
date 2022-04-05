@@ -16,17 +16,17 @@ CertFile = ''
 # Https证书，同时设置CertFile则启用HTTPS协议
 KeyFile = ''
 # 是否同时打开浏览器，windows默认true，其他默认false
-OpenBrowser = true
+OpenBrowser = false
 # 只在本机localhost提供服务，不对外共享
 DisableLAN = false
 # 是否保存web图片缓存，可以加快二次读取，但会占用硬盘空间
 CacheFileEnable = true
 # web图片缓存存储位置，默认系统临时文件夹
-CacheFilePath = ''
+CacheFilePath = '.comigo'
 # 退出的时候，清理web图片缓存
-CacheFileClean = true
+CacheFileClean = false
 # 需要排除的文件或文件夹
-ExcludeFileOrFolders = ['.idea', '.vscode', '.git', 'node_modules', 'flutter_ui', '.local/share/Trash', '$RECYCLE.BIN', 'Config.Msi', 'System Volume Information', '.sys', ' .DS_Store', '.dll', '.log', '.cache', '.exe']
+ExcludeFileOrFolders = ['.comigo', '.idea', '.vscode', '.git', 'node_modules', 'flutter_ui', '.local/share/Trash', '$RECYCLE.BIN', 'Config.Msi', 'System Volume Information', '.sys', ' .DS_Store', '.dll', '.log', '.cache', '.exe']
 # 需要扫描的图片文件后缀
 SupportMediaType = ['.jpg', '.jpeg', '.jpe', '.jpf', '.jfif', '.jfi', '.png', '.bmp', '.webp', '.ico', '.heic', '.avif']
 # 需要扫描的图书文件后缀

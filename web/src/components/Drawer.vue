@@ -21,13 +21,6 @@
         {{ $t('do_you_reset_all_settings') }}
       </n-popconfirm>
 
-      <!-- 如果在书架，显示下载示例配置文件的按钮 -->
-      <n-divider v-if="this.inBookShelf === true" />
-      <!-- 下载示例配置文件的按钮 -->
-      <a v-if="this.inBookShelf === true" href="/api/config.toml" target="_blank">
-        <n-button>{{ $t('DownloadSampleConfigFile') }}</n-button>
-      </a>
-
       <!-- 抽屉：自定义底部 -->
       <template #footer>
         <n-select

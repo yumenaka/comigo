@@ -46,6 +46,7 @@
   "show_book_titles": "显示书名",
   "switch_to_scrolling_mode": "切换到卷轴模式",
   "switch_to_flip_mode": "切换到翻页模式",
-  "DownloadSampleConfigFile": "下载配置文件示例",
-  "select-language": "选择语言"
+  "DownloadSampleConfigFile": "下载示例配置文件",
+  "select-language": "选择语言",
+  "scan_qrcode": "扫码阅读："
 }

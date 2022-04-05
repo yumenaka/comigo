@@ -15,6 +15,7 @@ func getConfigHandler(c *gin.Context) {
 	tempConfig.GenerateConfig = false
 	tempConfig.LogFilePath = ""
 	tempConfig.StoresPath = []string{"C:\\test\\Comic", "D:\\some_path\\book"}
+	tempConfig.CacheFilePath = ".comigo"
 	bytes, err := toml.Marshal(tempConfig)
 	if err != nil {
 		fmt.Println("toml.Marshal Error")

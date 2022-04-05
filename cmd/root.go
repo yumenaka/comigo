@@ -134,6 +134,7 @@ func init() {
 			common.Config.GenerateConfig = false
 			common.Config.LogFilePath = ""
 			common.Config.StoresPath = []string{"C:\\test\\Comic", "D:\\some_path\\book"}
+			common.Config.CacheFilePath = ".comigo"
 			bytes, err := toml.Marshal(common.Config)
 			if err != nil {
 				fmt.Println("toml.Marshal Error")

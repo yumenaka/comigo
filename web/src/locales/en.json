@@ -47,5 +47,6 @@
   "switch_to_scrolling_mode": "Switch to scroll mode",
   "switch_to_flip_mode": "switch to flip mode",
   "select-language": "Select Language",
-  "DownloadSampleConfigFile": "Download sample config "
+  "DownloadSampleConfigFile": "Download sample config ",
+  "scan_qrcode": "QRCode:"
 }

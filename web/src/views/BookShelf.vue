@@ -49,21 +49,22 @@
         >
             <span>{{ $t('setInterfaceColor') }}</span>
             <n-color-picker
-                v-model="model.interfaceColor"
-                :modes="['rgb']"
+                v-model:value="model.interfaceColor"
+                :modes="['hex']"
                 :show-alpha="false"
                 @update:value="onInterfaceColorChange"
             />
             <span>{{ $t("setBackColor") }}</span>
             <n-color-picker
                 v-model:value="model.backgroundColor"
-                :modes="['rgb']"
+                :modes="['hex']"
                 :show-alpha="false"
                 @update:value="onBackgroundColorChange"
             />
-
+            <span>{{ $t('scan_qrcode') }}</span>
+            <n-image width="200" src="api/qrcode.png" />
             <!-- 分割线 -->
-            <n-divider />
+            <!-- <n-divider /> -->
             <!-- 开关：下拉阅读 -->
             <n-space>
                 <n-switch
@@ -87,6 +88,12 @@
                     <template #unchecked>{{ $t('show_book_titles') }}</template>
                 </n-switch>
             </n-space>
+            <!-- 下载示例配置文件的按钮 -->
+            <n-divider />
+            <!-- 下载示例配置文件的按钮 -->
+            <a href="/api/config.toml" target="_blank">
+                <n-button>{{ $t('DownloadSampleConfigFile') }}</n-button>
+            </a>
         </Drawer>
         <Bottom
             :softVersion="
@@ -102,7 +109,7 @@
 // 直接导入组件并使用它。这种情况下,只有导入的组件才会被打包。
 // Firefox插件Textarea Cache 报错：源映射错误：Error: NetworkError when attempting to fetch resource.
 // Firefox插件Video DownloadHelper报错:已不赞成使用 CanvasRenderingContext2D 中的 drawWindow 方法
-import { NIcon, NDivider, NColorPicker, NSwitch, NSpace } from "naive-ui";
+import { NIcon, NDivider, NColorPicker, NSwitch, NButton, NSpace, NImage } from "naive-ui";
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
 import BookCard from "@/components/BookCard.vue";
@@ -121,21 +128,22 @@ export default defineComponent({
         Drawer, // 自定义抽屉
         BookCard, // 自定义抽屉
         Bottom, // 自定义页尾
-        // NButton,//按钮,来自:https://www.naiveui.com/zh-CN/os-theme/components/button
+        NButton,//按钮,来自:https://www.naiveui.com/zh-CN/os-theme/components/button
+        NImage,
         NSpace,
         NSwitch,
         NIcon, // 图标  https://www.naiveui.com/zh-CN/os-theme/components/icon
         SettingsOutline, // 图标,来自 https://www.xicons.org/#/   需要安装（npm i -D @vicons/ionicons5）
         NDivider, // 分割线  https://www.naiveui.com/zh-CN/os-theme/components/divider
-        NColorPicker,
+        NColorPicker,//颜色选择器 https://www.naiveui.com/zh-CN/os-theme/components/color-picker
     },
     setup() {
         // 此处不能使用this
         const { cookies } = useCookies();
         // 背景颜色,颜色选择器用
         const model = reactive({
+            interfaceColor: "#F5F5E4",
             backgroundColor: "#E0D9CD",
-            interfaceColor: "#f5f5e4",
         });
         // 单选按钮绑定的数值
         // const checkedValueRef = ref(null)
@@ -463,10 +471,6 @@ export default defineComponent({
     background: v-bind("model.interfaceColor");
 }
 .shelf {
-    /* padding-bottom: 20px;
-    padding-left: 20px;
-    padding-right: 20px;
-    padding-top: 20px; */
     max-width: 100%;
     min-height: 90vh;
     height: auto;
