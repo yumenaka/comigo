@@ -12,15 +12,15 @@ cmd = "go build -o ./tmp/main.exe ."
 # Binary file yields from `cmd`.
 bin = "tmp/main.exe"
 # Customize binary, can setup environment variables when run your app.
-full_bin = "./bin/main.exe --open-browser=false test  CLI_argumentsbug_in_windows"
+full_bin = "./tmp/main.exe --open-browser=false test  CLI_argumentsbug_in_windows"
 # Watch these filename extensions.
-include_ext = ["go", "tpl", "tmpl", "html"]
+include_ext = ["go", "rar","zip","cbr","cbz","tpl", "tmpl", "html"]
 # Ignore these filename extensions or directories.
-exclude_dir = ["assets", "bin", ".idea",".git", ".vscode", "web","flutter_ui","web/node_modules"]
+exclude_dir = [".comigo", "bin","tmp", ".idea",".git", ".vscode", "web","flutter_ui","web/node_modules",".cache"]
 # Watch these directories if you specified.
-include_dir = ["zip", "rar","cbr","cbz"]
+include_dir = ["common", "routers","tools","archiver","test","storage","cmd","locale","tools","routers"]
 # Exclude files.
-exclude_file = []
+exclude_file = ["mb",]
 # Exclude specific regular expressions.
 exclude_regex = ["_test.go"]
 # Exclude unchanged files.

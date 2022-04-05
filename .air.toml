@@ -14,11 +14,11 @@ bin = "tmp/main"
 # Customize binary, can setup environment variables when run your app.
 full_bin = "COMI_DEBUG_MODE=true COMI_MIN_MEDIA_NUM=2 ./tmp/main test --max-depth=5"
 # Watch these filename extensions.
-include_ext = ["go", "tpl", "tmpl", "html"]
+include_ext = ["go", "rar","zip","cbr","cbz","tpl", "tmpl", "html"]
 # Ignore these filename extensions or directories.
-exclude_dir = ["assets", "bin", ".idea",".git", ".vscode", "web","flutter_ui","web/node_modules"]
+exclude_dir = [".comigo", "bin","tmp", ".idea",".git", ".vscode", "web","flutter_ui","web/node_modules",".cache"]
 # Watch these directories if you specified.
-include_dir = ["zip", "rar","cbr","cbz"]
+include_dir = ["common", "routers","tools","archiver","test","storage","cmd","locale","tools","routers"]
 # Exclude files.
 exclude_file = ["mb",]
 # Exclude specific regular expressions.
