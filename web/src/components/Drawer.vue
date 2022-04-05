@@ -11,6 +11,12 @@
       <template #header>
         <span>{{ $t('ReaderSettings') }}</span>
       </template>
+      <span>{{ $t('scan_qrcode') }}</span>
+      <Qrcode></Qrcode>
+      <!-- <n-image width="200" src="api/qrcode.png" /> -->
+      <!-- 分割线 -->
+      <n-divider />
+
       <!-- 父组件在此处插入自定义内容 -->
       <slot></slot>
       <n-divider />
@@ -47,7 +53,7 @@ import { useCookies } from "vue3-cookies";
 import { NDrawer, NDivider, NDrawerContent, NButton, NSelect, NPopconfirm, } from 'naive-ui'
 import { defineComponent, } from 'vue'
 // import { useI18n } from 'vue-i18n'
-
+import Qrcode from "@/components/Qrcode.vue";
 export default defineComponent({
   name: "SettingsDrawer",
   props: ['book', 'initDrawerActive', 'initDrawerPlacement', 'readerMode', 'inBookShelf', "sketching"],
@@ -63,6 +69,7 @@ export default defineComponent({
     // NAvatar,//头像 https://www.naiveui.com/zh-CN/os-theme/components/avatar
     NSelect, //选择器 https://www.naiveui.com/zh-CN/os-theme/components/select
     NPopconfirm, //弹出确认 https://www.naiveui.com/zh-CN/os-theme/components/popconfirm
+    Qrcode,//https://github.com/scopewu/qrcode.vue
   },
   setup() {
     const { cookies } = useCookies();

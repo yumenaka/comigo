@@ -61,10 +61,7 @@
                 :show-alpha="false"
                 @update:value="onBackgroundColorChange"
             />
-            <span>{{ $t('scan_qrcode') }}</span>
-            <n-image width="200" src="api/qrcode.png" />
-            <!-- 分割线 -->
-            <!-- <n-divider /> -->
+
             <!-- 开关：下拉阅读 -->
             <n-space>
                 <n-switch
@@ -114,6 +111,7 @@ import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
 import BookCard from "@/components/BookCard.vue";
 import Bottom from "@/components/Bottom.vue";
+
 import { defineComponent, reactive } from "vue";
 import { useCookies } from "vue3-cookies"; // https://github.com/KanHarI/vue3-cookies
 import { SettingsOutline } from "@vicons/ionicons5";
