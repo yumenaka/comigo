@@ -5,13 +5,13 @@ import (
 	"github.com/yumenaka/comi/common"
 	"github.com/yumenaka/comi/tools"
 	"net/http"
-	"strconv"
 )
 
 // ServerStatus 服务器当前状况
 type ServerStatus struct {
 	ServerName            string //服务器描述
-	ServerHostAndPort     string
+	ServerHost            string
+	ServerPort            int
 	NumberOfBooks         int                //当前拥有的书籍总数
 	NumberOfOnLineUser    int                //TODO：在线用户数
 	NumberOfOnLineDevices int                //TODO：在线设备数
@@ -22,15 +22,16 @@ func serverStatusHandler(c *gin.Context) {
 	serverName := "Comigo " + common.Version
 	//取得本机的首选出站IP
 	OutIP := tools.GetOutboundIP().String()
-	hostAndPort := ""
+	host := ""
 	if common.Config.Host == "" {
-		hostAndPort = OutIP + ":" + strconv.Itoa(common.Config.Port)
+		host = OutIP
 	} else {
-		hostAndPort = common.Config.Host + ":" + strconv.Itoa(common.Config.Port)
+		host = common.Config.Host
 	}
 	var serverStatus = ServerStatus{
 		ServerName:            serverName,
-		ServerHostAndPort:     hostAndPort,
+		ServerHost:            host,
+		ServerPort:            common.Config.Port,
 		NumberOfBooks:         common.GetBooksNumber(),
 		NumberOfOnLineUser:    1,
 		NumberOfOnLineDevices: 1,

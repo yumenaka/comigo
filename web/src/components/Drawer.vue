@@ -11,14 +11,13 @@
       <template #header>
         <span>{{ $t('ReaderSettings') }}</span>
       </template>
-      <span>{{ $t('scan_qrcode') }}</span>
-      <Qrcode></Qrcode>
-      <!-- <n-image width="200" src="api/qrcode.png" /> -->
-      <!-- 分割线 -->
-      <n-divider />
 
       <!-- 父组件在此处插入自定义内容 -->
       <slot></slot>
+      <!-- 分割线 -->
+      <n-divider />
+      <span>{{ $t('scan_qrcode') }}</span>
+      <Qrcode></Qrcode>
       <n-divider />
       <n-popconfirm @positive-click="handlePositiveClick" @negative-click="handleNegativeClick">
         <template #trigger>

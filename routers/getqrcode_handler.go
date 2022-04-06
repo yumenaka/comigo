@@ -12,6 +12,17 @@ import (
 
 // 下载服务器配置
 func getQrcodeHandler(c *gin.Context) {
+	//通过参数过去自定义文本的二维码，更通用
+	qrcode_str := c.DefaultQuery("qrcode_str", "")
+	if qrcode_str != "" {
+		png, err := qrcode.Encode(qrcode_str, qrcode.Medium, 256)
+		if err != nil {
+			fmt.Println(err)
+		}
+		c.Data(http.StatusOK, "image/png", png)
+		return
+	}
+
 	//cmd打印链接二维码
 	enableTls := common.Config.CertFile != "" && common.Config.KeyFile != ""
 	protocol := "http://"
