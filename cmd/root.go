@@ -15,7 +15,7 @@ import (
 	"runtime"
 )
 
-var vip *viper.Viper
+var viperInstance *viper.Viper
 
 func init() {
 	cobra.MousetrapHelpText = ""       //屏蔽鼠标提示，支持拖拽、双击运行
@@ -90,42 +90,42 @@ func init() {
 	//尚未写完的功能
 	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFileName, "log_name", "comigo", "log文件名")
 	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFilePath, "log_path", "~", "log文件位置")
-	//rootCmd.PersistentFlags().BoolVarP(&common.PrintVersion, "version", "vip", false, "输出版本号")
+	//rootCmd.PersistentFlags().BoolVarP(&common.PrintVersion, "version", "viperInstance", false, "输出版本号")
 	//cobra & viper sample:https://qiita.com/nirasan/items/cc2ab5bc2889401fe596
 	// rootCmd.Run() 运行前的初始化定义。
 	// 运行前后顺序：rootCmd.Execute → 命令行参数的处理 → cobra.OnInitialize → rootCmd.Run、
 	// 于是可以通过CMD读取配置文件、按照配置文件的设定值执行。不一致的时候，配置文件优先于CMD参数
 	//cobra.OnInitialize(initConfig)
 	cobra.OnInitialize(func() {
-		vip = viper.New()
+		viperInstance = viper.New()
 		//自动读取环境变量，改写对应值
-		vip.AutomaticEnv()
+		viperInstance.AutomaticEnv()
 		//设置环境变量的前缀，将 PORT变为 COMI_PORT
-		vip.SetEnvPrefix("comi")
+		viperInstance.SetEnvPrefix("comi")
 		home, err := homedir.Dir()
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 		homeConfigPath := path.Join(home, ".config/comigo")
-		vip.AddConfigPath(homeConfigPath)
+		viperInstance.AddConfigPath(homeConfigPath)
 		// 当前执行目录
 		nowPath, _ := os.Getwd()
-		vip.AddConfigPath(nowPath)
-		vip.SetConfigType("toml")
+		viperInstance.AddConfigPath(nowPath)
+		viperInstance.SetConfigType("toml")
 		if common.ConfigFile == "" {
-			vip.SetConfigName("config.toml")
+			viperInstance.SetConfigName("config.toml")
 		} else {
-			vip.SetConfigName(common.ConfigFile)
+			viperInstance.SetConfigName(common.ConfigFile)
 		}
 		// 設定ファイルを読み込む
-		if err := vip.ReadInConfig(); err != nil {
+		if err := viperInstance.ReadInConfig(); err != nil {
 			if common.ConfigFile == "" && common.Config.Debug {
 				fmt.Println(err)
 			}
 		}
 		// 把设定文件的内容，解析到构造体里面。
-		if err := vip.Unmarshal(&common.Config); err != nil {
+		if err := viperInstance.Unmarshal(&common.Config); err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
@@ -148,9 +148,9 @@ func init() {
 			os.Exit(0)
 		}
 		//监听文件修改
-		vip.WatchConfig()
+		viperInstance.WatchConfig()
 		//文件修改时，执行重载设置、服务重启的函数
-		vip.OnConfigChange(configReloadHandler)
+		viperInstance.OnConfigChange(configReloadHandler)
 	})
 }
 

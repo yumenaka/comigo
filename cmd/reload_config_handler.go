@@ -19,13 +19,13 @@ func configReloadHandler(e fsnotify.Event) {
 	fmt.Printf("配置文件改变，Comigo将在5秒后重启:%s Op:%s\n", e.Name, e.Op)
 
 	//重新读取改变后的配置文件
-	if err := vip.ReadInConfig(); err != nil {
+	if err := viperInstance.ReadInConfig(); err != nil {
 		if common.ConfigFile == "" && common.Config.Debug {
 			fmt.Println(err)
 		}
 	}
 	// 把设定文件的内容，解析到构造体里面。
-	if err := vip.Unmarshal(&common.Config); err != nil {
+	if err := viperInstance.Unmarshal(&common.Config); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}

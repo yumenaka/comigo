@@ -106,7 +106,7 @@
 // 直接导入组件并使用它。这种情况下,只有导入的组件才会被打包。
 // Firefox插件Textarea Cache 报错：源映射错误：Error: NetworkError when attempting to fetch resource.
 // Firefox插件Video DownloadHelper报错:已不赞成使用 CanvasRenderingContext2D 中的 drawWindow 方法
-import { NIcon, NDivider, NColorPicker, NSwitch, NButton, NSpace, NImage } from "naive-ui";
+import { NIcon, NDivider, NColorPicker, NSwitch, NButton, NSpace, } from "naive-ui";
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
 import BookCard from "@/components/BookCard.vue";
@@ -127,7 +127,6 @@ export default defineComponent({
         BookCard, // 自定义抽屉
         Bottom, // 自定义页尾
         NButton,//按钮,来自:https://www.naiveui.com/zh-CN/os-theme/components/button
-        NImage,
         NSpace,
         NSwitch,
         NIcon, // 图标  https://www.naiveui.com/zh-CN/os-theme/components/icon

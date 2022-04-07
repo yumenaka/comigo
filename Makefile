@@ -1,8 +1,8 @@
 # Makefile for cross-compilation
-# make all VERSION=v0.7.2
-# make md5SumThemAll VERSION=v0.7.2
-# mingw32-make all VERSION=v0.7.2
-# make  Windows_arm64  VERSION=v0.7.2
+# make all VERSION=v0.7.3
+# make md5SumThemAll VERSION=v0.7.3
+# mingw32-make all VERSION=v0.7.3
+# make  Windows_arm64  VERSION=v0.7.3
 # need MSYS2 or mingw32 or find.exe make.exe zip.exe upx.exe
 
 NAME=comi
@@ -23,7 +23,7 @@ endif
 
 all: compileThemAll md5SumThemAll
 
-compileThemAll: Windows_x86_64 Windows_i386 Windows_arm64 Linux_x86_64 Linux_i386 MacOS_x86_64 MacOS_arm64 Linux-armv5 Linux-armv7 Linux-armv6 Linux-armv8 
+compileThemAll: Windows_x86_64 Windows_i386 Windows_arm64 Linux_x86_64 Linux_i386 MacOS_x86_64 MacOS_arm64 Linux-armv6 Linux-armv7 Linux-armv8 
 
 android: Linux-arm-android Linux-arm64-android
 
