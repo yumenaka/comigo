@@ -749,15 +749,23 @@ export default defineComponent({
 			//浏览器的视口,不包括工具栏和滚动条:
 			let innerWidth = window.innerWidth
 			let innerHeight = window.innerHeight
-			let MinX = innerWidth * 0.4
-			let MaxX = innerWidth * 0.6
+			// 设置区域为正方形
 			let MinY = innerHeight * 0.4
 			let MaxY = innerHeight * 0.6
+			let MinX = (innerWidth * 0.5) - (innerHeight * 0.5 - MinY);
+			let MaxX = (innerWidth * 0.5) + (MaxY - innerHeight * 0.5);
+			//设置区域的边长，按照宽或高里面，比较小的那个值而定
+			if (innerWidth < innerHeight) {
+				MinX = innerWidth * 0.4
+				MaxX = innerWidth * 0.6
+				MinY = (innerHeight * 0.5) - (innerWidth * 0.5 - MinX);
+				MaxY = (innerHeight * 0.5) + (MaxX - innerWidth * 0.5);
+			}
 			if ((this.clickX > MinX && this.clickX < MaxX) && (this.clickY > MinY && this.clickY < MaxY)) {
-				//alert("点中了设置区域！")
 				//console.log("点中了设置区域！");
 				this.drawerActivate('right')
 			}
+
 			// console.log("window.innerWidth=", window.innerWidth, "window.innerHeight=", window.innerHeight);
 			// console.log("MinX=", MinX, "MaxX=", MaxX);
 			// console.log("MinY=", MinY, "MaxY=", MaxY);
@@ -770,16 +778,25 @@ export default defineComponent({
 			//浏览器的视口,不包括工具栏和滚动条:
 			let innerWidth = window.innerWidth
 			let innerHeight = window.innerHeight
-			let MinX = innerWidth * 0.4
-			let MaxX = innerWidth * 0.6
+			// 设置区域为正方形
 			let MinY = innerHeight * 0.4
 			let MaxY = innerHeight * 0.6
+			let MinX = (innerWidth * 0.5) - (innerHeight * 0.5 - MinY);
+			let MaxX = (innerWidth * 0.5) + (MaxY - innerHeight * 0.5);
+			//设置区域的边长，按照宽或高里面，比较小的那个值而定
+			if (innerWidth < innerHeight) {
+				MinX = innerWidth * 0.4
+				MaxX = innerWidth * 0.6
+				MinY = (innerHeight * 0.5) - (innerWidth * 0.5 - MinX);
+				MaxY = (innerHeight * 0.5) + (MaxX - innerWidth * 0.5);
+			}
 			if ((this.clickX > MinX && this.clickX < MaxX) && (this.clickY > MinY && this.clickY < MaxY)) {
 				//console.log("在设置区域！");
 				e.currentTarget.style.cursor = 'url(/images/SettingsOutline.png), pointer';
 			} else {
 				e.currentTarget.style.cursor = '';
 			}
+
 		},
 		onMouseLeave(e) {
 			//离开区域的时候,清空鼠标样式

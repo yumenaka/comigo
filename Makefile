@@ -56,7 +56,8 @@ Windows_i386:
 #windows arm64 no upx
 Windows_arm64:
 	GOARCH=arm64 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME).exe 
-	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME).exe 
+	zip -m -r -j -9 $(BINDIR)/$(NAME)_$(VERSION)_$@.zip $(BINDIR)/$(NAME)_$(VERSION)_$@
+	rmdir $(BINDIR)/$(NAME)_$(VERSION)_$@
 	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
 
 # golang支持的交叉编译架构的列表，参见 go tool dist list

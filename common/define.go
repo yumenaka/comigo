@@ -34,7 +34,7 @@ func init() {
 
 var (
 	ConfigFile    = ""
-	Version       = "v0.7.2"
+	Version       = "v0.7.3"
 	ReadingBook   *Book
 	slcBooks      []*Book
 	Srv           *http.Server

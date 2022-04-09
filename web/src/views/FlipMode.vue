@@ -51,7 +51,21 @@
 		<!-- 页脚 拖动条 -->
 		<div class="footer" v-if="this.showFooterFlag_FlipMode">
 			<!-- 底部滑动条不翻转，一直都是一个样 -->
-			<div>
+			<!-- <div>
+				<span>{{ this.nowPageNum }}</span>
+				<n-slider
+					v-model:value="nowPageNum"
+					:max="this.book.all_page_num"
+					:min="1"
+					:step="1"
+					:format-tooltip="(value) => `${value}`"
+					@update:value="this.saveNowPageNumOnUpdate"
+				/>
+				<span>{{ this.book.all_page_num }}</span>
+			</div>-->
+
+			<!-- 右手模式用 ,底部滑动条 -->
+			<div v-if="this.rightToLeftFlag">
 				<span>{{ this.nowPageNum }}</span>
 				<n-slider
 					v-model:value="nowPageNum"
@@ -63,22 +77,8 @@
 				/>
 				<span>{{ this.book.all_page_num }}</span>
 			</div>
-
-			<!-- 右手模式用 ,底部滑动条 -->
-			<!-- <div v-if="this.rightToLeftFlag">
-				<span>{{ this.nowPageNum }}</span>
-				<n-slider
-					v-model:value="nowPageNum"
-					:max="this.book.all_page_num"
-					:min="1"
-					:step="1"
-					:format-tooltip="(value) => `${value}`"
-					@update:value="this.saveNowPageNumOnUpdate"
-				/>
-				<span>{{ this.book.all_page_num }}</span>
-			</div>-->
 			<!-- 左手模式用 底部滑动条,设置reverse翻转计数方向 -->
-			<!-- <div v-if="!this.rightToLeftFlag">
+			<div v-if="!this.rightToLeftFlag">
 				<span>{{ this.book.all_page_num }}</span>
 				<n-slider
 					reverse
@@ -90,7 +90,7 @@
 					@update:value="this.saveNowPageNumOnUpdate"
 				/>
 				<span>{{ this.nowPageNum }}</span>
-			</div>-->
+			</div>
 		</div>
 	</div>
 
@@ -767,15 +767,23 @@ export default defineComponent({
 			// let offsetHeight = e.currentTarget.offsetHeight;
 			let clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
 			let clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离,单位为px）
-			//浏览器的视口,不包括工具栏和滚动条:
+			// 浏览器的视口,不包括工具栏和滚动条:
 			let innerWidth = window.innerWidth;
 			let innerHeight = window.innerHeight;
-			let MinX = innerWidth * 0.4;
-			let MaxX = innerWidth * 0.6;
-			let MinY = innerHeight * 0.4;
-			let MaxY = innerHeight * 0.6;
+			// 设置区域为正方形
+			let MinY = innerHeight * 0.4
+			let MaxY = innerHeight * 0.6
+			let MinX = (innerWidth * 0.5) - (innerHeight * 0.5 - MinY);
+			let MaxX = (innerWidth * 0.5) + (MaxY - innerHeight * 0.5);
+			//设置区域的边长，按照宽或高里面，比较小的那个值而定
+			if (innerWidth < innerHeight) {
+				MinX = innerWidth * 0.4
+				MaxX = innerWidth * 0.6
+				MinY = (innerHeight * 0.5) - (innerWidth * 0.5 - MinX);
+				MaxY = (innerHeight * 0.5) + (MaxX - innerWidth * 0.5);
+			}
 			if (clickX > MinX && clickX < MaxX && clickY > MinY && clickY < MaxY) {
-				//设置区域;
+				//在设置区域;
 				e.currentTarget.style.cursor = "url(/images/SettingsOutline.png), pointer";
 			} else {
 				if (clickX < innerWidth * 0.5) {
@@ -808,24 +816,23 @@ export default defineComponent({
 
 		//根据鼠标点击事件的位置,决定是左右翻页还是打开设置
 		onMouseClick(e) {
-			//元素自身的宽高,会有子元素问题
-			// let offsetX = e.offsetX;
-			// let offsetY = e.offsetY;
-			// let offsetWidth = e.currentTarget.offsetWidth;
-			// let offsetHeight = e.currentTarget.offsetHeight;
-			// //随机一下背景色,只是为了好玩
-			// if (this.debugModeFlag) {
-			// 	this.randomBackgroundColor();
-			// }
 			let clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
 			let clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离,单位为px）
 			//浏览器的可视区域宽高,不包括工具栏和滚动条:
 			let innerHeight = window.innerHeight;
 			let innerWidth = window.innerWidth;
-			let MinX = innerWidth * 0.4;
-			let MaxX = innerWidth * 0.6;
-			let MinY = innerHeight * 0.4;
-			let MaxY = innerHeight * 0.6;
+			// 设置区域为正方形
+			let MinY = innerHeight * 0.4
+			let MaxY = innerHeight * 0.6
+			let MinX = (innerWidth * 0.5) - (innerHeight * 0.5 - MinY);
+			let MaxX = (innerWidth * 0.5) + (MaxY - innerHeight * 0.5);
+			//设置区域的边长，按照宽或高里面，比较小的那个值而定
+			if (innerWidth < innerHeight) {
+				MinX = innerWidth * 0.4
+				MaxX = innerWidth * 0.6
+				MinY = (innerHeight * 0.5) - (innerWidth * 0.5 - MinX);
+				MaxY = (innerHeight * 0.5) + (MaxX - innerWidth * 0.5);
+			}
 			// console.log("鼠标点击：e.offsetX=" + offsetX, "e.offsetY=" + offsetY);
 			if (clickX > MinX && clickX < MaxX && clickY > MinY && clickY < MaxY) {
 				//点中了设置区域
