@@ -25,19 +25,22 @@
 		>
 			<div class="manga_area_img_div">
 				<!-- 非自动拼合模式最简单,直接显示一张图 -->
-				<img v-bind:src="this.book.pages[nowPageNum - 1].url" v-bind:alt="nowPageNum" />
+				<img
+					v-bind:src="this.imageParametersString(this.book.pages[nowPageNum - 1].url)"
+					v-bind:alt="nowPageNum"
+				/>
 
 				<!-- 简单拼合双页,不管单双页什么的 -->
 				<img
 					v-if="(!this.autoDoublePageModeFlag) && this.simpleDoublePageModeFlag && this.nowPageNum < this.book.all_page_num"
-					v-bind:src="this.book.pages[nowPageNum].url"
+					v-bind:src="this.imageParametersString(this.book.pages[nowPageNum].url)"
 					v-bind:alt="nowPageNum + 1"
 				/>
 
 				<!-- 自动拼合模式当前页,如果开启自动拼合,右边可能显示拼合页 -->
 				<img
 					v-if="this.autoDoublePageModeFlag && this.nowPageNum < this.book.all_page_num && this.nowAndNextPageIsSingle()"
-					v-bind:src="this.book.pages[nowPageNum].url"
+					v-bind:src="this.imageParametersString(this.book.pages[nowPageNum].url)"
 					v-bind:alt="nowPageNum + 1"
 				/>
 			</div>
@@ -47,8 +50,8 @@
 
 		<!-- 页脚 拖动条 -->
 		<div class="footer" v-if="this.showFooterFlag_FlipMode">
-			<!-- 右手模式用 ,底部滑动条 -->
-			<div v-if="this.rightToLeftFlag">
+			<!-- 底部滑动条不翻转，一直都是一个样 -->
+			<div>
 				<span>{{ this.nowPageNum }}</span>
 				<n-slider
 					v-model:value="nowPageNum"
@@ -60,8 +63,22 @@
 				/>
 				<span>{{ this.book.all_page_num }}</span>
 			</div>
+
+			<!-- 右手模式用 ,底部滑动条 -->
+			<!-- <div v-if="this.rightToLeftFlag">
+				<span>{{ this.nowPageNum }}</span>
+				<n-slider
+					v-model:value="nowPageNum"
+					:max="this.book.all_page_num"
+					:min="1"
+					:step="1"
+					:format-tooltip="(value) => `${value}`"
+					@update:value="this.saveNowPageNumOnUpdate"
+				/>
+				<span>{{ this.book.all_page_num }}</span>
+			</div>-->
 			<!-- 左手模式用 底部滑动条,设置reverse翻转计数方向 -->
-			<div v-if="!this.rightToLeftFlag">
+			<!-- <div v-if="!this.rightToLeftFlag">
 				<span>{{ this.book.all_page_num }}</span>
 				<n-slider
 					reverse
@@ -73,7 +90,7 @@
 					@update:value="this.saveNowPageNumOnUpdate"
 				/>
 				<span>{{ this.nowPageNum }}</span>
-			</div>
+			</div>-->
 		</div>
 	</div>
 
@@ -96,7 +113,7 @@
 		<!-- 分割线 -->
 		<n-divider />
 
-		<!-- 开关：页头与书名 -->
+		<!-- Switch：页头与书名 -->
 		<n-space>
 			<n-switch
 				size="large"
@@ -108,7 +125,7 @@
 			</n-switch>
 		</n-space>
 
-		<!-- 开关：显示阅读进度条） -->
+		<!-- Switch：显示阅读进度条） -->
 		<n-space>
 			<n-switch
 				size="large"
@@ -120,7 +137,7 @@
 			</n-switch>
 		</n-space>
 
-		<!-- 开关：显示当前页数 -->
+		<!-- Switch：显示当前页数 -->
 		<n-space>
 			<n-switch
 				size="large"
@@ -131,10 +148,6 @@
 				<template #unchecked>{{ $t("showPageNum") }}</template>
 			</n-switch>
 		</n-space>
-
-		<!-- 分割线 -->
-		<n-divider />
-
 		<!-- 保存阅读进度 -->
 		<n-space>
 			<n-switch
@@ -147,7 +160,21 @@
 			</n-switch>
 		</n-space>
 
-		<!-- 开关：翻页模式,默认右开本（日漫）-->
+		<!-- 分割线 -->
+		<n-divider />
+		<!-- Switch：合并双页 -->
+		<n-space>
+			<n-switch
+				size="large"
+				v-model:value="this.simpleDoublePageModeFlag"
+				@update:value="this.setSimpleDoublePage_FlipMode"
+			>
+				<template #checked>{{ $t('simpleDoublePage') }}</template>
+				<template #unchecked>{{ $t('simpleDoublePage') }}</template>
+			</n-switch>
+		</n-space>
+
+		<!-- Switch：翻页模式,默认右开本（日漫）-->
 		<n-space>
 			<n-switch
 				size="large"
@@ -160,21 +187,32 @@
 			</n-switch>
 		</n-space>
 
+		<!-- Switch：自动切边 -->
 		<n-space>
 			<n-switch
 				size="large"
-				v-model:value="this.simpleDoublePageModeFlag"
-				@update:value="this.setSimpleDoublePage_FlipMode"
+				v-model:value="this.imageParameters.do_auto_crop"
+				@update:value="setImageParameters_DoAutoCrop"
 			>
-				<template #checked>{{ $t('simpleDoublePage') }}</template>
-				<template #unchecked>{{ $t('simpleDoublePage') }}</template>
+				<template #checked>{{ $t('auto_crop') }}</template>
+				<template #unchecked>{{ $t('auto_crop') }}</template>
 			</n-switch>
+			<!-- 切白边阈值 -->
+			<n-input-number
+				:show-button="false"
+				v-if="this.imageParameters.do_auto_crop"
+				v-model:value="this.imageParameters.auto_crop_num"
+				@update:value="setImageParameters_AutoCropNum"
+				:max="10"
+				:min="0"
+			>
+				<template #prefix>{{ $t('energy_threshold') }}</template>
+			</n-input-number>
 		</n-space>
-
 		<!-- 分割线 -->
-		<n-divider />
+		<!-- <n-divider /> -->
 
-		<!-- 开关：Debug,开启一些不稳定功能 -->
+		<!-- Switch：Debug,开启一些不稳定功能 -->
 		<!-- <n-space>
 			<n-switch size="large" v-model:value="this.debugModeFlag" @update:value="this.setDebugModeFlag">
 				<template #checked>{{ $t("debugMode") }}</template>
@@ -260,6 +298,7 @@ export default defineComponent({
 		NInputNumber,///  https://www.naiveui.com/zh-CN/os-theme/components/input-number
 		// useNotification, // https://www.naiveui.com/zh-CN/os-theme/components/notification
 		NButton,//按钮，来自:https://www.naiveui.com/zh-CN/os-theme/components/button
+		// NMessageProvider,
 	},
 	setup() {
 		const { cookies } = useCookies();
@@ -267,6 +306,17 @@ export default defineComponent({
 		const model = reactive({
 			backgroundColor: "#E0D9CD",
 			interfaceColor: "#f5f5e4",
+		});
+		//请求图片文件时，可添加的额外参数
+		const imageParameters = reactive({
+			resize_width: -1,// 缩放图片,指定宽度
+			resize_height: -1,// 指定高度,缩放图片
+			do_auto_resize: false,
+			resize_max_width: 800,//图片宽度大于这个上限时缩小 
+			resize_max_height: -1,//图片高度大于这个上限时缩小
+			do_auto_crop: false,
+			auto_crop_num: 1,// 自动切白边阈值,范围是0~100,其实为1就够了	
+			gray: false,//黑白化
 		});
 		//警告信息
 		const message = useMessage()
@@ -276,6 +326,34 @@ export default defineComponent({
 			//背景色
 			model,
 			cookies,
+			imageParameters,//获取图片所用的参数
+			imageParametersString: (source_url) => {
+				// var temp =
+				if (source_url.substr(0, 12) == "api/getfile?") {
+					//当前URL
+					var url = document.location.toString();
+					//按照“/”分割字符串
+					var arrUrl = url.split("/");
+					//拼一个完整的图片URL（因为路由路径会变化,所以不能用相对路径？）
+					var base_str = arrUrl[0] + "//" + arrUrl[2] + "/" + source_url
+					//添加各种字符串参数,不需要的话为空
+					var resize_width_str = (imageParameters.resize_width > 0 ? "&resize_width=" + imageParameters.resize_width : "")
+					var resize_height_str = (imageParameters.resize_height > 0 ? "&resize_height=" + imageParameters.resize_height : "")
+					var gray_str = (imageParameters.gray ? "&gray=true" : "")
+					var do_auto_resize_str = (imageParameters.do_auto_resize ? ("&resize_max_width=" + imageParameters.resize_max_width) : "")
+					var resize_max_height_str = (imageParameters.resize_max_height > 0 ? "&resize_max_height=" + imageParameters.resize_max_height : "")
+					var auto_crop_str = (imageParameters.do_auto_crop ? "&auto_crop=" + imageParameters.auto_crop_num : "")
+					//所有附加的转换参数
+					var addStr = resize_width_str + resize_height_str + do_auto_resize_str + resize_max_height_str + auto_crop_str + gray_str
+					//如果有附加转换参数，则设置成不缓存
+					var nocache_str = (addStr === "" ? "" : "&no-cache=true")
+					var full_url = base_str + addStr + nocache_str
+					// console.log(full_url);
+					return full_url;
+				} else {
+					return source_url
+				}
+			},
 			//开关的颜色
 			railStyle: ({ focused, checked }) => {
 				const style = {};
@@ -441,6 +519,45 @@ export default defineComponent({
 				this.sketchFlipSecond = saveNum;
 			}
 		}
+
+		// 图片处理相关
+		//是否获取黑白图片
+		if (localStorage.getItem("ImageParameters_Gray") === "true") {
+			this.imageParameters.gray = true;
+		} else if (localStorage.getItem("ImageParameters_Gray") === "false") {
+			this.imageParameters.gray = false;
+		}
+		// console.log("读取设置并初始化: ImageParameters_Gray=" + this.imageParameters.gray);
+
+		//是否压缩图片
+		if (localStorage.getItem("ImageParameters_DoAutoResize") === "true") {
+			this.imageParameters.do_auto_resize = true;
+		} else if (localStorage.getItem("ImageParameters_DoAutoResize") === "false") {
+			this.imageParameters.do_auto_resize = false;
+		}
+
+		//启用压缩的Width下限
+		if (localStorage.getItem("ImageParametersResizeMaxWidth") != null) {
+			let saveNum = Number(localStorage.getItem("ImageParametersResizeMaxWidth"));
+			if (!isNaN(saveNum)) {
+				this.imageParameters.resize_max_width = saveNum;
+			}
+		}
+
+		//是否自动切白边
+		if (localStorage.getItem("ImageParameters_DoAutoCrop") === "true") {
+			this.imageParameters.do_auto_crop = true;
+		} else if (localStorage.getItem("ImageParameters_DoAutoCrop") === "false") {
+			this.imageParameters.do_auto_crop = false;
+		}
+
+		//切白边参数
+		if (localStorage.getItem("ImageParameters_AutoCropNum") != null) {
+			let saveNum = Number(localStorage.getItem("ImageParameters_AutoCropNum"));
+			if (!isNaN(saveNum)) {
+				this.imageParameters.auto_crop_num = saveNum;
+			}
+		}
 	},
 	// beforeMount : 指令第一次绑定到元素并且在挂载父组件之前调用。
 	beforeMount() {
@@ -465,6 +582,31 @@ export default defineComponent({
 		//界面有更新就会调用,随便乱放会引起难以调试的BUG
 	},
 	methods: {
+		//图片处理相关
+		//黑白化参数
+		setImageParameters_Gray(value) {
+			// console.log("value:" + value);
+			this.imageParameters.gray = value;
+			localStorage.setItem("ImageParameters_Gray", value);
+			// console.log("成功保存设置: ImageParameters_Gray=" + localStorage.getItem("ImageParameters_Gray"));
+		},
+		//缩放图片大小的参数
+		setImageParameters_DoAutoResize(value) {
+			this.imageParameters.do_auto_resize = value;
+			localStorage.setItem("ImageParameters_DoAutoResize", value);
+			// console.log("成功保存设置: ImageParameters_DoAutoResize=" + localStorage.getItem("ImageParameters_DoAutoResize"));
+		},
+		//设置是否切白边
+		setImageParameters_DoAutoCrop(value) {
+			this.imageParameters.do_auto_crop = value;
+			localStorage.setItem("ImageParameters_DoAutoCrop", this.imageParameters.do_auto_crop);
+			// console.log("成功保存设置: ImageParameters_DoAutoCrop=" + localStorage.getItem("ImageParameters_DoAutoCrop"));
+		},
+		//切白边参数
+		setImageParameters_AutoCropNum(value) {
+			this.imageParameters.auto_crop_num = value;
+			localStorage.setItem("ImageParameters_AutoCropNum", this.imageParameters.auto_crop_num);
+		},
 		//切换到卷轴模式
 		changeReaderModeToScrollMode() {
 			localStorage.setItem("ReaderMode", "scroll");
@@ -588,6 +730,9 @@ export default defineComponent({
 			localStorage.setItem("nowPageNum" + this.book.id, this.nowPageNum);
 			localStorage.setItem("BackgroundColor", this.model.backgroundColor);
 			localStorage.setItem("sketchFlipSecond", this.sketchFlipSecond);
+			//set对有setXXXChange函数的来说有些多余,但没有set函数的话就有必要了
+			localStorage.setItem("ImageParameters_DoAutoCrop", this.imageParameters.do_auto_crop);
+			localStorage.setItem("ImageParametersResizeMaxWidth", this.imageParameters.resize_max_width);
 		},
 		// 随即换一下背景色
 		randomBackgroundColor() {
@@ -730,7 +875,8 @@ export default defineComponent({
 		toPerviousPage() {
 			//错误值,第0或第1页。
 			if (this.nowPageNum <= 1) {
-				console.log("Error toPerviousPage");
+				// console.log("Error toPerviousPage");
+				this.message.info(this.$t("hintFirstPage"));
 				return;
 			}
 

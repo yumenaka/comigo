@@ -19,7 +19,6 @@ require (
 	github.com/mholt/archiver/v4 v4.0.0-alpha.6
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nicksnyder/go-i18n/v2 v2.2.0
-	github.com/pelletier/go-toml v1.9.4
 	github.com/pelletier/go-toml/v2 v2.0.0-beta.6
 	github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5
 	github.com/sanity-io/litter v1.5.4
@@ -29,7 +28,6 @@ require (
 	github.com/spf13/cobra v1.4.0
 	github.com/spf13/viper v1.10.1
 	github.com/xxjwxc/gowp v0.0.0-20210520113007-57eb4693b12d
-	go.etcd.io/bbolt v1.3.6
 	golang.org/x/text v0.3.7
 	gopkg.in/ini.v1 v1.66.4
 )
@@ -38,9 +36,6 @@ require (
 	github.com/VividCortex/ewma v1.2.0 // indirect
 	github.com/akavel/rsrc v0.10.2 // indirect
 	github.com/andybalholm/brotli v1.0.4 // indirect
-	github.com/asdine/storm v2.1.2+incompatible // indirect
-	github.com/asdine/storm/v3 v3.2.1 // indirect
-	github.com/boltdb/bolt v1.3.1 // indirect
 	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
@@ -69,6 +64,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/nwaples/rardecode/v2 v2.0.0-beta.2 // indirect
+	github.com/pelletier/go-toml v1.9.4 // indirect
 	github.com/pierrec/lz4/v4 v4.1.14 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/power-devops/perfstat v0.0.0-20220216144756-c35f1ee13d7c // indirect
@@ -77,7 +73,6 @@ require (
 	github.com/spf13/cast v1.4.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/stretchr/testify v1.7.1 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/therootcompany/xz v1.0.1 // indirect
 	github.com/tklauser/go-sysconf v0.3.10 // indirect

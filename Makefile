@@ -34,13 +34,13 @@ md5SumThemAll:
 	find $(BINDIR) -type f -name "$(NAME)_*" -exec $(MD5_UTIL) {} >> $(MD5_TEXTFILE) \;
 	cat $(MD5_TEXTFILE)
 
+
+# upx可能导致报毒，取消windows平台的upx压缩
+
 #64位Windows	$(NAME)_$(VERSION)_$@   
 Windows_x86_64:
 	go generate
 	GOARCH=amd64 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME).exe 
-ifdef UPX
-	upx -9 $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME).exe 
-endif
 	zip -m -r -j -9 $(BINDIR)/$(NAME)_$(VERSION)_$@.zip $(BINDIR)/$(NAME)_$(VERSION)_$@
 	rmdir $(BINDIR)/$(NAME)_$(VERSION)_$@
 	rm  resource.syso 
@@ -49,9 +49,6 @@ endif
 Windows_i386:
 	go generate
 	GOARCH=386 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME).exe 
-ifdef UPX
-	upx -9 $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME).exe 
-endif
 	zip -m -r -j -9 $(BINDIR)/$(NAME)_$(VERSION)_$@.zip $(BINDIR)/$(NAME)_$(VERSION)_$@
 	rmdir $(BINDIR)/$(NAME)_$(VERSION)_$@
 	rm   resource.syso	
@@ -61,7 +58,6 @@ Windows_arm64:
 	GOARCH=arm64 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME).exe 
 	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME).exe 
 	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
-
 
 # golang支持的交叉编译架构的列表，参见 go tool dist list
 # 看ARM处理器是否支持VFP功能:grep -i vfp /proc/cpuinfo

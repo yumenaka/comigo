@@ -26,7 +26,9 @@ func init() {
 	Config.LogFilePath = home
 	Config.LogFileName = "comigo.log"
 	slcBooks = make([]*Book, 0, 10) //make:为slice, map, channel分配内存，并返回一个初始化的值,第二参数指定的是切片的长度，第三个参数是用来指定预留的空间长度——避免二次分配内存带来的开销，提高程序的性能.
+	//真实存在的总书库，通过扫描生成
 	mapBooks = make(map[string]*Book)
+	//通过分析路径与深度生成的丛书集合
 	mapBookGroups = make(map[string]*Book)
 }
 
@@ -45,6 +47,7 @@ var (
 		CacheFileEnable:      true,
 		CacheFilePath:        "",
 		CacheFileClean:       true,
+		DatabaseFilePath:     "",
 		OpenBrowser:          true,
 		DisableLAN:           false,
 		GenerateMetaData:     false,
@@ -82,6 +85,21 @@ var (
 	}
 )
 
+//func InitMapBooksByDatabase() {
+//	tempMap, err := GetAllBookFromDatabase()
+//	if err != nil {
+//		mapBooks = tempMap
+//	}
+//}
+//
+////根据扫描完成的书籍数据，覆盖本地数据库
+//func CleanMapBooksByLocalData() {
+//	err := SaveAllBookToDatabase(mapBooks)
+//	if err != nil {
+//		fmt.Println(err)
+//	}
+//}
+
 // CheckPathSkip 检查路径是否应该跳过（排除文件，文件夹列表）。
 func CheckPathSkip(path string) bool {
 	for _, substr := range Config.ExcludeFileOrFolders {
@@ -107,6 +125,7 @@ type ServerSettings struct {
 	CacheFileEnable      bool            `json:"-" comment:"是否保存web图片缓存，可以加快二次读取，但会占用硬盘空间"`
 	CacheFilePath        string          `json:"-" comment:"web图片缓存存储位置，默认系统临时文件夹"`
 	CacheFileClean       bool            `json:"-" comment:"退出程序的时候，清理web图片缓存"`
+	DatabaseFilePath     string          `json:"-" comment:"数据库文件存储位置，默认当前目录"`
 	ExcludeFileOrFolders []string        `json:"-" comment:"需要排除的文件或文件夹"`
 	SupportMediaType     []string        `json:"-" comment:"需要扫描的图片文件后缀"`
 	SupportFileType      []string        `json:"-" comment:"需要扫描的图书文件后缀"`

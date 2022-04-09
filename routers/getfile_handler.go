@@ -36,17 +36,18 @@ import (
 // gray:黑白化												&gray=true
 // blurhash:获取对应图片的blurhash，而不是原始图片 				&blurhash=3
 // blurhash_image:获取对应图片的blurhash图片，而不是原始图片  	&blurhash_image=3
-//TODO：生成临时文件加速下一次访问，并在退出后清理
 func getFileHandler(c *gin.Context) {
 	//time.Sleep(5 * time.Second)
 	id := c.DefaultQuery("id", "")
 	needFile := c.DefaultQuery("filename", "")
+
 	//没有指定这两项，直接返回
 	if id == "" && needFile == "" {
 		return
 	}
+	noCache := c.DefaultQuery("no-cache", "false")
 	//如果启用了本地缓存
-	if common.Config.CacheFileEnable {
+	if common.Config.CacheFileEnable && noCache == "false" {
 		//获取所有的参数键值对
 		query := c.Request.URL.Query()
 		//如果有缓存，直接读取本地获取缓存文件并返回
@@ -198,7 +199,7 @@ func getFileHandler(c *gin.Context) {
 			contentType = tools.GetContentTypeByFileName(".jpg")
 		}
 		//如果启用了本地缓存
-		if common.Config.CacheFileEnable {
+		if common.Config.CacheFileEnable && noCache == "false" {
 			//获取所有的参数键值对
 			query := c.Request.URL.Query()
 			//缓存文件到本地，避免重复解压

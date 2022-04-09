@@ -177,6 +177,10 @@ var rootCmd = &cobra.Command{
 
 //initBookStores 解析命令,扫描书库
 func initBookStores(args []string) {
+	//////初始化数据库
+	//common.InitDatabase()
+	////从数据库里面读取扫描过的书籍，
+	//common.InitMapBooksByDatabase()
 	//决定如何扫描，扫描哪个路径
 	if len(args) == 0 { //没有指定路径或文件的情况下
 		cmdPath := path.Dir(os.Args[0]) //扫描程序执行的路径
@@ -224,6 +228,8 @@ func initBookStores(args []string) {
 			}
 		}
 	}
+	////用扫描完成的书籍数据，覆盖本地数据库
+	//common.CleanMapBooksByLocalData()
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

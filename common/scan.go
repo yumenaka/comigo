@@ -44,6 +44,16 @@ func ScanAndGetBookList(storePath string) (bookList []*Book, err error) {
 		if fileInfo == nil {
 			return err
 		}
+		////从数据库里面读取，看是不是已经扫描过。以前扫描过的文件就跳过。
+		//dataBaseBook, dataBaseErr := GetBookFromDatabase(walkPath)
+		//if dataBaseErr == nil {
+		//	//扫描过的压缩档文件，如果修改时间没变，就不必重复扫描。
+		//	if dataBaseBook.FilePath == walkPath && dataBaseBook.FileSize == fileInfo.Size() && dataBaseBook.Modified == fileInfo.ModTime() {
+		//		//bookList = append(bookList, dataBaseBook)
+		//		fmt.Println("Found in Database,Skip File:" + walkPath)
+		//		return nil
+		//	}
+		//}
 		//如果不是文件夹
 		if !fileInfo.IsDir() {
 			if !isSupportArchiver(walkPath) {
@@ -66,17 +76,6 @@ func ScanAndGetBookList(storePath string) (bookList []*Book, err error) {
 				fmt.Println(err)
 				return nil
 			}
-			////多级路径的图片文件夹，避免重复添加
-			//needAdd := true
-			//for _, b := range bookList {
-			//	if strings.HasPrefix(book.GetFilePath(), b.GetFilePath()) {
-			//		needAdd = false
-			//	}
-			//}
-			//if needAdd {
-			//	bookList = append(bookList, book)
-			//}
-			//全部添加，管他重复不重复
 			bookList = append(bookList, book)
 		}
 		return nil

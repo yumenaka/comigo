@@ -299,6 +299,7 @@ export default defineComponent({
 			backgroundColor: "#E0D9CD",
 			interfaceColor: "#f5f5e4",
 		});
+		//请求图片文件时，可添加的额外参数
 		const imageParameters = reactive({
 			resize_width: -1,// 缩放图片,指定宽度
 			resize_height: -1,// 指定高度,缩放图片
@@ -306,7 +307,7 @@ export default defineComponent({
 			resize_max_width: 800,//图片宽度大于这个上限时缩小 
 			resize_max_height: -1,//图片高度大于这个上限时缩小
 			do_auto_crop: false,
-			auto_crop: 1,// 自动切白边阈值,范围是0~100,其实为1就够了	
+			auto_crop_num: 1,// 自动切白边阈值,范围是0~100,其实为1就够了	
 			gray: false,//黑白化
 		});
 		//单选按钮绑定的数值,ref函数：返回一个响应式的引用
@@ -332,7 +333,11 @@ export default defineComponent({
 					var do_auto_resize_str = (imageParameters.do_auto_resize ? ("&resize_max_width=" + imageParameters.resize_max_width) : "")
 					var resize_max_height_str = (imageParameters.resize_max_height > 0 ? "&resize_max_height=" + imageParameters.resize_max_height : "")
 					var auto_crop_str = (imageParameters.do_auto_crop ? "&auto_crop=" + imageParameters.auto_crop_num : "")
-					var full_url = base_str + resize_width_str + resize_height_str + do_auto_resize_str + resize_max_height_str + auto_crop_str + gray_str
+					//所有附加的转换参数
+					var addStr = resize_width_str + resize_height_str + do_auto_resize_str + resize_max_height_str + auto_crop_str + gray_str
+					//如果有附加转换参数，则设置成不缓存
+					var nocache_str = (addStr === "" ? "" : "&no-cache=true")
+					var full_url = base_str + addStr + nocache_str
 					// console.log(full_url);
 					return full_url;
 				} else {
@@ -479,50 +484,7 @@ export default defineComponent({
 		}
 		//console.log("读取设置并初始化: showPageNumFlag_ScrollMode=" + this.showPageNumFlag_ScrollMode);
 
-		//是否获取黑白图片
-		if (localStorage.getItem("ImageParameters_Gray") === "true") {
-			this.imageParameters.gray = true;
-		} else if (localStorage.getItem("ImageParameters_Gray") === "false") {
-			this.imageParameters.gray = false;
-		}
-		// console.log("读取设置并初始化: ImageParameters_Gray=" + this.imageParameters.gray);
 
-		//是否压缩图片
-		if (localStorage.getItem("ImageParameters_DoAutoResize") === "true") {
-			this.imageParameters.do_auto_resize = true;
-		} else if (localStorage.getItem("ImageParameters_DoAutoResize") === "false") {
-			this.imageParameters.do_auto_resize = false;
-		}
-
-		//启用压缩的Width下限
-		if (localStorage.getItem("ImageParametersResizeMaxWidth") != null) {
-			let saveNum = Number(localStorage.getItem("ImageParametersResizeMaxWidth"));
-			if (!isNaN(saveNum)) {
-				this.imageParameters.resize_max_width = saveNum;
-			}
-		}
-
-		//是否自动切白边
-		if (localStorage.getItem("ImageParameters_DoAutoCrop") === "true") {
-			this.imageParameters.do_auto_crop = true;
-		} else if (localStorage.getItem("ImageParameters_DoAutoCrop") === "false") {
-			this.imageParameters.do_auto_crop = false;
-		}
-
-		//切白边参数
-		if (localStorage.getItem("ImageParameters_AutoCropNum") != null) {
-			let saveNum = Number(localStorage.getItem("ImageParameters_AutoCropNum"));
-			if (!isNaN(saveNum)) {
-				this.imageParameters.auto_crop_num = saveNum;
-			}
-		}
-
-		//宽度是否使用百分比
-		if (localStorage.getItem("imageWidth_usePercentFlag") === "true") {
-			this.imageWidth_usePercentFlag = true;
-		} else if (localStorage.getItem("imageWidth_usePercentFlag") === "false") {
-			this.imageWidth_usePercentFlag = false;
-		}
 
 		//javascript 数字类型转换：https://www.runoob.com/js/js-type-conversion.html
 		// NaN不能通过相等操作符（== 和 ===）来判断
@@ -562,6 +524,53 @@ export default defineComponent({
 		}
 		if (localStorage.getItem("InterfaceColor") != null) {
 			this.model.interfaceColor = localStorage.getItem("InterfaceColor");
+		}
+
+
+		//宽度是否使用百分比
+		if (localStorage.getItem("imageWidth_usePercentFlag") === "true") {
+			this.imageWidth_usePercentFlag = true;
+		} else if (localStorage.getItem("imageWidth_usePercentFlag") === "false") {
+			this.imageWidth_usePercentFlag = false;
+		}
+
+		// 图片处理相关
+		//是否获取黑白图片
+		if (localStorage.getItem("ImageParameters_Gray") === "true") {
+			this.imageParameters.gray = true;
+		} else if (localStorage.getItem("ImageParameters_Gray") === "false") {
+			this.imageParameters.gray = false;
+		}
+		// console.log("读取设置并初始化: ImageParameters_Gray=" + this.imageParameters.gray);
+
+		//是否压缩图片
+		if (localStorage.getItem("ImageParameters_DoAutoResize") === "true") {
+			this.imageParameters.do_auto_resize = true;
+		} else if (localStorage.getItem("ImageParameters_DoAutoResize") === "false") {
+			this.imageParameters.do_auto_resize = false;
+		}
+
+		//启用压缩的Width下限
+		if (localStorage.getItem("ImageParametersResizeMaxWidth") != null) {
+			let saveNum = Number(localStorage.getItem("ImageParametersResizeMaxWidth"));
+			if (!isNaN(saveNum)) {
+				this.imageParameters.resize_max_width = saveNum;
+			}
+		}
+
+		//是否自动切白边
+		if (localStorage.getItem("ImageParameters_DoAutoCrop") === "true") {
+			this.imageParameters.do_auto_crop = true;
+		} else if (localStorage.getItem("ImageParameters_DoAutoCrop") === "false") {
+			this.imageParameters.do_auto_crop = false;
+		}
+
+		//切白边参数
+		if (localStorage.getItem("ImageParameters_AutoCropNum") != null) {
+			let saveNum = Number(localStorage.getItem("ImageParameters_AutoCropNum"));
+			if (!isNaN(saveNum)) {
+				this.imageParameters.auto_crop_num = saveNum;
+			}
 		}
 	},
 
@@ -669,25 +678,27 @@ export default defineComponent({
 			localStorage.setItem("showPageNumFlag_ScrollMode", value);
 			// console.log("成功保存设置: showPageNumFlag_ScrollMode=" + localStorage.getItem("showPageNumFlag_ScrollMode"));
 		},
+		//图片处理相关
+		//黑白化参数
 		setImageParameters_Gray(value) {
 			// console.log("value:" + value);
 			this.imageParameters.gray = value;
 			localStorage.setItem("ImageParameters_Gray", value);
 			// console.log("成功保存设置: ImageParameters_Gray=" + localStorage.getItem("ImageParameters_Gray"));
 		},
-
+		//缩放图片大小的参数
 		setImageParameters_DoAutoResize(value) {
 			this.imageParameters.do_auto_resize = value;
 			localStorage.setItem("ImageParameters_DoAutoResize", value);
 			// console.log("成功保存设置: ImageParameters_DoAutoResize=" + localStorage.getItem("ImageParameters_DoAutoResize"));
 		},
-		//设置是否切白边的时候
+		//设置是否切白边
 		setImageParameters_DoAutoCrop(value) {
 			this.imageParameters.do_auto_crop = value;
 			localStorage.setItem("ImageParameters_DoAutoCrop", this.imageParameters.do_auto_crop);
 			// console.log("成功保存设置: ImageParameters_DoAutoCrop=" + localStorage.getItem("ImageParameters_DoAutoCrop"));
 		},
-
+		//切白边参数
 		setImageParameters_AutoCropNum(value) {
 			this.imageParameters.auto_crop_num = value;
 			localStorage.setItem("ImageParameters_AutoCropNum", this.imageParameters.auto_crop_num);

@@ -46,6 +46,7 @@ resource.syso
 
 *comigo.yaml
 *comigo.ini
+*comigo.db
 
 __*
 #routers/static
