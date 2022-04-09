@@ -750,14 +750,15 @@ export default defineComponent({
 			let innerWidth = window.innerWidth
 			let innerHeight = window.innerHeight
 			// 设置区域为正方形
-			let MinY = innerHeight * 0.4
-			let MaxY = innerHeight * 0.6
+			let setArea = 0.18
+			let MinY = innerHeight * (0.5 - setArea)
+			let MaxY = innerHeight * (0.5 + setArea)
 			let MinX = (innerWidth * 0.5) - (innerHeight * 0.5 - MinY);
 			let MaxX = (innerWidth * 0.5) + (MaxY - innerHeight * 0.5);
 			//设置区域的边长，按照宽或高里面，比较小的那个值而定
 			if (innerWidth < innerHeight) {
-				MinX = innerWidth * 0.4
-				MaxX = innerWidth * 0.6
+				MinX = innerWidth * (0.5 - setArea)
+				MaxX = innerWidth * (0.5 + setArea)
 				MinY = (innerHeight * 0.5) - (innerWidth * 0.5 - MinX);
 				MaxY = (innerHeight * 0.5) + (MaxX - innerWidth * 0.5);
 			}
@@ -779,14 +780,15 @@ export default defineComponent({
 			let innerWidth = window.innerWidth
 			let innerHeight = window.innerHeight
 			// 设置区域为正方形
-			let MinY = innerHeight * 0.4
-			let MaxY = innerHeight * 0.6
+			let setArea = 0.18
+			let MinY = innerHeight * (0.5 - setArea)
+			let MaxY = innerHeight * (0.5 + setArea)
 			let MinX = (innerWidth * 0.5) - (innerHeight * 0.5 - MinY);
 			let MaxX = (innerWidth * 0.5) + (MaxY - innerHeight * 0.5);
 			//设置区域的边长，按照宽或高里面，比较小的那个值而定
 			if (innerWidth < innerHeight) {
-				MinX = innerWidth * 0.4
-				MaxX = innerWidth * 0.6
+				MinX = innerWidth * (0.5 - setArea)
+				MaxX = innerWidth * (0.5 + setArea)
 				MinY = (innerHeight * 0.5) - (innerWidth * 0.5 - MinX);
 				MaxY = (innerHeight * 0.5) + (MaxX - innerWidth * 0.5);
 			}
