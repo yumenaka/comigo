@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/yumenaka/comi/common"
+	"github.com/yumenaka/comi/book"
 )
 
 // 相关参数：
@@ -20,7 +20,7 @@ func getBookHandler(c *gin.Context) {
 	sort := c.DefaultQuery("sort", "false")
 	id := c.DefaultQuery("id", "")
 	if author != "" {
-		bookList, err := common.GetBookByAuthor(author, sort == "true")
+		bookList, err := book.GetBookByAuthor(author, sort == "true")
 		if err != nil {
 			fmt.Println(err)
 		} else {
@@ -29,7 +29,7 @@ func getBookHandler(c *gin.Context) {
 		return
 	}
 	if id != "" {
-		b, err := common.GetBookByID(id, sort == "true")
+		b, err := book.GetBookByID(id, sort == "true")
 		if err != nil {
 			fmt.Println(err)
 		} else {

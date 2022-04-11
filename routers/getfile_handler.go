@@ -18,6 +18,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/yumenaka/comi/arch"
+	"github.com/yumenaka/comi/book"
 	"github.com/yumenaka/comi/common"
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/tools"
@@ -59,29 +60,29 @@ func getFileHandler(c *gin.Context) {
 			return
 		}
 	}
-	book, err := common.GetBookByID(id, false)
+	bookByID, err := book.GetBookByID(id, false)
 	if err != nil {
 		fmt.Println(err)
 	}
-	bookPath := book.GetFilePath()
+	bookPath := bookByID.GetFilePath()
 	//fmt.Println(bookPath)
 	var imgData []byte
 	//如果是特殊编码的ZIP文件
-	if book.NonUTF8Zip && book.Type != common.BookTypeDir {
+	if bookByID.NonUTF8Zip && bookByID.Type != book.BookTypeDir {
 		imgData, err = arch.GetSingleFile(bookPath, needFile, "gbk")
 		if err != nil {
 			fmt.Println(err)
 		}
 	}
 	//如果是一般压缩文件
-	if !book.NonUTF8Zip && book.Type != common.BookTypeDir {
+	if !bookByID.NonUTF8Zip && bookByID.Type != book.BookTypeDir {
 		imgData, err = arch.GetSingleFile(bookPath, needFile, "")
 		if err != nil {
 			fmt.Println(err)
 		}
 	}
 	//如果是本地文件夹
-	if book.Type == common.BookTypeDir {
+	if bookByID.Type == book.BookTypeDir {
 		//直接读取磁盘文件
 		imgData, err = ioutil.ReadFile(filepath.Join(bookPath, needFile))
 		if err != nil {

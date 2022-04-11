@@ -18,8 +18,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sanity-io/litter"
 
+	"github.com/yumenaka/comi/book"
 	"github.com/yumenaka/comi/common"
 	"github.com/yumenaka/comi/locale"
+	"github.com/yumenaka/comi/plugin"
 	"github.com/yumenaka/comi/tools"
 )
 
@@ -218,14 +220,14 @@ func setWebAPI(engine *gin.Engine) {
 
 	//TODO：设定压缩包下载链接
 	// panic: handlers are already registered for path
-	if common.GetBooksNumber() >= 1 {
-		allBook, err := common.GetAllBookInfoList("name")
+	if book.GetBooksNumber() >= 1 {
+		allBook, err := book.GetAllBookInfoList("name")
 		if err != nil {
 			fmt.Println("设置文件下载失败")
 		} else {
 			for _, info := range allBook.BookInfos {
 				//下载文件
-				if info.Type != common.BookTypeBooksGroup && info.Type != common.BookTypeDir {
+				if info.Type != book.BookTypeBooksGroup && info.Type != book.BookTypeDir {
 					api.StaticFile("/raw/"+info.BookID+"/"+info.Name, info.FilePath)
 				}
 			}
@@ -251,22 +253,23 @@ func setPort() {
 //5、setFrpClient
 func setFrpClient() {
 	//frp服务
-	if common.Config.EnableFrpcServer {
-		if common.Config.FrpConfig.RandomRemotePort {
-			r := rand.New(rand.NewSource(time.Now().UnixNano()))
-			common.Config.FrpConfig.RemotePort = 50000 + r.Intn(10000)
-		} else {
-			if common.Config.FrpConfig.RemotePort <= 0 || common.Config.FrpConfig.RemotePort > 65535 {
-				common.Config.FrpConfig.RemotePort = common.Config.Port
-			}
-		}
-		frpcError := common.StartFrpC(common.Config.CacheFilePath)
-		if frpcError != nil {
-			fmt.Println(locale.GetString("frpc_server_error"), frpcError.Error())
-		} else {
-			fmt.Println(locale.GetString("frpc_server_start"))
-		}
+	if !common.Config.EnableFrpcServer {
+		return
 	}
+	if common.Config.FrpConfig.RemotePort <= 0 || common.Config.FrpConfig.RemotePort > 65535 {
+		common.Config.FrpConfig.RemotePort = common.Config.Port
+	}
+	if common.Config.FrpConfig.RandomRemotePort {
+		r := rand.New(rand.NewSource(time.Now().UnixNano()))
+		common.Config.FrpConfig.RemotePort = 50000 + r.Intn(10000)
+	}
+	frpcError := plugin.StartFrpC(common.Config.CacheFilePath)
+	if frpcError != nil {
+		fmt.Println(locale.GetString("frpc_server_error"), frpcError.Error())
+	} else {
+		fmt.Println(locale.GetString("frpc_server_start"))
+	}
+
 }
 
 //6、printCMDMessage
@@ -327,7 +330,7 @@ func SetShutdownHandler() {
 	//清理临时文件
 	if common.Config.CacheFileClean {
 		fmt.Println("\r" + locale.GetString("start_clear_file") + " CacheFilePath:" + common.Config.CacheFilePath)
-		common.ClearTempFilesALL()
+		book.ClearTempFilesALL(common.Config.Debug, common.Config.CacheFilePath)
 		fmt.Println(locale.GetString("clear_temp_file_completed"))
 	}
 	// 上下文用于通知服务器它有 5 秒的时间来完成它当前正在处理的请求

@@ -1,4 +1,4 @@
-package common
+package book
 
 import (
 	"sort"
@@ -34,7 +34,6 @@ type BookInfo struct {
 
 func getChildInfoMap(ChildBookMap map[string]*Book) (ChildInfoMap map[string]*BookInfo) {
 	ChildInfoMap = make(map[string]*BookInfo)
-
 	for key, book := range ChildBookMap {
 		ChildInfoMap[key] = NewBookInfo(book)
 	}
@@ -79,18 +78,18 @@ func (s BookInfoList) Len() int {
 // Less 按时间或URL，将图片排序
 func (s BookInfoList) Less(i, j int) (less bool) {
 	//如何定义 s[i] < s[j]  根据文件名(第三方库、自然语言字符串)
-	if s.SortBy == "name" {
-		less = tools.Compare(s.BookInfos[i].Name, s.BookInfos[j].Name)
-	} else if s.SortBy == "file_size" {
-		less = tools.Compare(strconv.Itoa(int(s.BookInfos[i].FileSize)), strconv.Itoa(int(s.BookInfos[j].FileSize)))
-	} else if s.SortBy == "time" {
-		less = tools.Compare(s.BookInfos[i].Modified.String(), s.BookInfos[j].Modified.String())
-	} else if s.SortBy == "author" {
-		less = tools.Compare(s.BookInfos[i].Author[0], s.BookInfos[j].Author[0])
-	} else {
-		less = tools.Compare(s.BookInfos[i].Name, s.BookInfos[j].Name)
+	switch s.SortBy {
+	case "name":
+		return tools.Compare(s.BookInfos[i].Name, s.BookInfos[j].Name)
+	case "file_size":
+		return tools.Compare(strconv.Itoa(int(s.BookInfos[i].FileSize)), strconv.Itoa(int(s.BookInfos[j].FileSize)))
+	case "time":
+		return tools.Compare(s.BookInfos[i].Modified.String(), s.BookInfos[j].Modified.String())
+	case "author":
+		return tools.Compare(s.BookInfos[i].Author[0], s.BookInfos[j].Author[0])
+	default:
+		return tools.Compare(s.BookInfos[i].Name, s.BookInfos[j].Name)
 	}
-	return less
 }
 
 func (s BookInfoList) Swap(i, j int) {

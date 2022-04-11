@@ -66,6 +66,28 @@ type WebPServerConfig struct {
 	ExhaustPath  string   `json:"EXHAUST_PATH"`
 }
 
+// 判断压缩包内的文件是否需要展示（是图片或媒体文件）
+func (config *ServerSettings) IsSupportMedia(checkPath string) bool {
+	for _, ex := range config.SupportMediaType {
+		//strings.ToLower():某些文件会用大写文件名
+		suffix := strings.ToLower(path.Ext(checkPath))
+		if ex == suffix {
+			return true
+		}
+	}
+	return false
+}
+
+func (config *ServerSettings) IsSupportArchiver(checkPath string) bool {
+	for _, ex := range config.SupportFileType {
+		suffix := path.Ext(checkPath)
+		if ex == suffix {
+			return true
+		}
+	}
+	return false
+}
+
 // SetByExecutableFilename 通过执行文件名设置默认网页模板参数
 func (config *ServerSettings) SetByExecutableFilename() {
 	// 当前执行目录

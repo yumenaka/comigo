@@ -1,4 +1,4 @@
-package common
+package plugin
 
 import (
 	"fmt"
@@ -8,6 +8,7 @@ import (
 
 	"gopkg.in/ini.v1"
 
+	"github.com/yumenaka/comi/common"
 	"github.com/yumenaka/comi/locale"
 )
 
@@ -25,15 +26,15 @@ func StartFrpC(configPath string) error {
 	//local_port = 1234
 	//remote_port = 23456
 	_, err := cfg.NewSection("common")
-	_, err = cfg.Section("common").NewKey("server_addr", Config.FrpConfig.ServerAddr)
-	_, err = cfg.Section("common").NewKey("server_port", strconv.Itoa(Config.FrpConfig.ServerPort))
-	_, err = cfg.Section("common").NewKey("token", Config.FrpConfig.Token)
-	FrpConfigName := ReadingBook.Name + "(" + "comi " + Version + " " + time.Now().Format("2006-01-02 15:04:05") + ")"
+	_, err = cfg.Section("common").NewKey("server_addr", common.Config.FrpConfig.ServerAddr)
+	_, err = cfg.Section("common").NewKey("server_port", strconv.Itoa(common.Config.FrpConfig.ServerPort))
+	_, err = cfg.Section("common").NewKey("token", common.Config.FrpConfig.Token)
+	FrpConfigName := common.ReadingBook.Name + "(" + "comi " + common.Version + " " + time.Now().Format("2006-01-02 15:04:05") + ")"
 	_, err = cfg.NewSection(FrpConfigName)
-	_, err = cfg.Section(FrpConfigName).NewKey("type", Config.FrpConfig.FrpType)
+	_, err = cfg.Section(FrpConfigName).NewKey("type", common.Config.FrpConfig.FrpType)
 	_, err = cfg.Section(FrpConfigName).NewKey("local_ip", "127.0.0.1")
-	_, err = cfg.Section(FrpConfigName).NewKey("local_port", strconv.Itoa(Config.Port))
-	_, err = cfg.Section(FrpConfigName).NewKey("remote_port", strconv.Itoa(Config.FrpConfig.RemotePort))
+	_, err = cfg.Section(FrpConfigName).NewKey("local_port", strconv.Itoa(common.Config.Port))
+	_, err = cfg.Section(FrpConfigName).NewKey("remote_port", strconv.Itoa(common.Config.FrpConfig.RemotePort))
 	//保存文件
 	err = cfg.SaveToIndent(configPath+"/frpc.ini", "\t")
 	if err != nil {
@@ -44,7 +45,7 @@ func StartFrpC(configPath string) error {
 	}
 	//实际执行
 	var cmd *exec.Cmd
-	cmd = exec.Command(Config.FrpConfig.FrpcCommand, "-c", configPath+"/frpc.ini")
+	cmd = exec.Command(common.Config.FrpConfig.FrpcCommand, "-c", configPath+"/frpc.ini")
 	fmt.Println(cmd)
 	if err = cmd.Start(); err != nil {
 		return err

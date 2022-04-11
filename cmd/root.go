@@ -190,14 +190,7 @@ func initBookStores(args []string) {
 		if err != nil {
 			fmt.Println(locale.GetString("scan_error"), cmdPath)
 		} else {
-			err := common.AddBooks(list, cmdPath)
-			if err != nil {
-				fmt.Println(locale.GetString("AddBook_error"), cmdPath)
-			}
-			//然后生成对应的虚拟书籍组
-			if err := common.Stores.GenerateBookGroup(); err != nil {
-				fmt.Println(err)
-			}
+			common.AddBooksToStore(list, cmdPath)
 		}
 	} else {
 		//指定了多个参数的话，都扫描一遍
@@ -206,14 +199,7 @@ func initBookStores(args []string) {
 			if err != nil {
 				fmt.Println(locale.GetString("scan_error"), p)
 			} else {
-				err := common.AddBooks(list, p)
-				if err != nil {
-					fmt.Println(locale.GetString("AddBook_error"), p)
-				}
-				//然后生成对应的虚拟书籍组
-				if err := common.Stores.GenerateBookGroup(); err != nil {
-					fmt.Println(err)
-				}
+				common.AddBooksToStore(list, p)
 			}
 		}
 	}
@@ -225,14 +211,7 @@ func initBookStores(args []string) {
 			if err != nil {
 				fmt.Println(locale.GetString("scan_error"), p)
 			} else {
-				err := common.AddBooks(list, p)
-				if err != nil {
-					fmt.Println(locale.GetString("AddBook_error"), p)
-				}
-				//然后生成对应的虚拟书籍组
-				if err := common.Stores.GenerateBookGroup(); err != nil {
-					fmt.Println(err)
-				}
+				common.AddBooksToStore(list, p)
 			}
 		}
 	}

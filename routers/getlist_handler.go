@@ -7,7 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/yumenaka/comi/common"
+	"github.com/yumenaka/comi/book"
 )
 
 // 可选参数，三者择一：
@@ -23,7 +23,7 @@ func getBookListHandler(c *gin.Context) {
 	maxDepth, err := strconv.Atoi(c.DefaultQuery("max_depth", ""))
 	//如果传了maxDepth这个参数
 	if err == nil {
-		bookInfoList, err := common.GetBookInfoListByMaxDepth(maxDepth, sort)
+		bookInfoList, err := book.GetBookInfoListByMaxDepth(maxDepth, sort)
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -37,7 +37,7 @@ func getBookListHandler(c *gin.Context) {
 	bookGroupId := c.DefaultQuery("book_group_book_id", "")
 	//如果传了bookGroupId这个参数
 	if bookGroupId != "" {
-		bookInfoList, err := common.GetBookInfoListByBookGroupBookID(bookGroupId, sort)
+		bookInfoList, err := book.GetBookInfoListByBookGroupBookID(bookGroupId, sort)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -51,7 +51,7 @@ func getBookListHandler(c *gin.Context) {
 	depth, err := strconv.Atoi(c.DefaultQuery("depth", ""))
 	//如果传了depth这个参数
 	if err == nil {
-		bookInfoList, err := common.GetBookInfoListByDepth(depth, sort)
+		bookInfoList, err := book.GetBookInfoListByDepth(depth, sort)
 		if err != nil {
 			fmt.Println(err)
 		} else {

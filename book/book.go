@@ -1,4 +1,4 @@
-package common
+package book
 
 import (
 	"bytes"
@@ -9,6 +9,7 @@ import (
 	"image"
 	"log"
 	"math/rand"
+	"os"
 	"path"
 	"path/filepath"
 	"sort"
@@ -25,6 +26,23 @@ import (
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/tools"
 )
+
+var (
+	mapBooks      map[string]*Book //实际存在的书
+	mapBookGroups map[string]*Book //通过分析，生成的书籍分组
+	Stores        = Bookstores{
+		mapBookstores: make(map[string]*singleBookstore),
+		SortBy:        "name",
+	}
+)
+
+func init() {
+	//slcBooks = make([]*Book, 0, 10) //make:为slice, map, channel分配内存，并返回一个初始化的值,第二参数指定的是切片的长度，第三个参数是用来指定预留的空间长度——避免二次分配内存带来的开销，提高程序的性能.
+	//真实存在的总书库，通过扫描生成
+	mapBooks = make(map[string]*Book)
+	//通过分析路径与深度生成的书组
+	mapBookGroups = make(map[string]*Book)
+}
 
 // Book 定义书籍，BooID不应该重复，根据文件路径生成
 type Book struct {
@@ -209,7 +227,6 @@ func AddBook(b *Book, basePath string) error {
 		if err := Stores.NewSingleBookstore(basePath); err != nil {
 			fmt.Println(err)
 		}
-
 	}
 	mapBooks[b.BookID] = b
 	return Stores.AddBookToStores(basePath, b)
@@ -470,16 +487,6 @@ func (b *Book) GetName() string { //绑定到Book结构体的方法
 	return b.Name
 }
 
-func (b *Book) GetPicNum() int {
-	var PicNum = 0
-	for _, p := range b.Pages {
-		if isSupportMedia(p.Url) {
-			PicNum++
-		}
-	}
-	return PicNum
-}
-
 // ScanAllImage 服务器端分析分辨率、漫画单双页，只适合已解压文件
 func (b *Book) ScanAllImage() {
 	log.Println(locale.GetString("check_image_start"))
@@ -569,4 +576,34 @@ func (i *SinglePageInfo) analyzeImage(bookPath string) (err error) {
 		i.Blurhash = str
 	}
 	return err
+}
+
+// ClearTempFilesALL web加载时保存的临时图片，在在退出后清理
+func ClearTempFilesALL(debug bool, cacheFilePath string) {
+	//fmt.Println(locale.GetString("clear_temp_file_start"))
+	for _, tempBook := range mapBooks {
+		clearTempFilesOne(debug, cacheFilePath, tempBook)
+	}
+}
+
+// 清空某一本压缩漫画的解压缓存
+func clearTempFilesOne(debug bool, cacheFilePath string, book *Book) {
+	//fmt.Println(locale.GetString("clear_temp_file_start"))
+	haveThisBook := false
+	for _, tempBook := range mapBooks {
+		if tempBook.GetBookID() == book.GetBookID() {
+			haveThisBook = true
+		}
+	}
+	if haveThisBook {
+		cachePath := path.Join(cacheFilePath, book.GetBookID())
+		err := os.RemoveAll(cachePath)
+		if err != nil {
+			fmt.Println(locale.GetString("clear_temp_file_error") + cachePath)
+		} else {
+			if debug {
+				fmt.Println(locale.GetString("clear_temp_file_completed") + cachePath)
+			}
+		}
+	}
 }

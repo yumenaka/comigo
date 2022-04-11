@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/yumenaka/comi/book"
 	"github.com/yumenaka/comi/common"
 	"github.com/yumenaka/comi/tools"
 )
@@ -34,7 +35,7 @@ func serverStatusHandler(c *gin.Context) {
 		ServerName:            serverName,
 		ServerHost:            host,
 		ServerPort:            common.Config.Port,
-		NumberOfBooks:         common.GetBooksNumber(),
+		NumberOfBooks:         book.GetBooksNumber(),
 		NumberOfOnLineUser:    1,
 		NumberOfOnLineDevices: 1,
 		OSInfo:                tools.GetSystemStatus(),
