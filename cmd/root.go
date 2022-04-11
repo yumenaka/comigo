@@ -2,17 +2,19 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/mitchellh/go-homedir"
-	"github.com/pelletier/go-toml/v2"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	"github.com/yumenaka/comi/common"
-	"github.com/yumenaka/comi/locale"
-	"github.com/yumenaka/comi/routers"
 	"io/ioutil"
 	"os"
 	"path"
 	"runtime"
+
+	"github.com/mitchellh/go-homedir"
+	"github.com/pelletier/go-toml/v2"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+
+	"github.com/yumenaka/comi/common"
+	"github.com/yumenaka/comi/locale"
+	"github.com/yumenaka/comi/routers"
 )
 
 var viperInstance *viper.Viper
@@ -193,7 +195,9 @@ func initBookStores(args []string) {
 				fmt.Println(locale.GetString("AddBook_error"), cmdPath)
 			}
 			//然后生成对应的虚拟书籍组
-			common.Config.Stores.GenerateBookGroup()
+			if err := common.Stores.GenerateBookGroup(); err != nil {
+				fmt.Println(err)
+			}
 		}
 	} else {
 		//指定了多个参数的话，都扫描一遍
@@ -207,7 +211,9 @@ func initBookStores(args []string) {
 					fmt.Println(locale.GetString("AddBook_error"), p)
 				}
 				//然后生成对应的虚拟书籍组
-				common.Config.Stores.GenerateBookGroup()
+				if err := common.Stores.GenerateBookGroup(); err != nil {
+					fmt.Println(err)
+				}
 			}
 		}
 	}
@@ -224,7 +230,9 @@ func initBookStores(args []string) {
 					fmt.Println(locale.GetString("AddBook_error"), p)
 				}
 				//然后生成对应的虚拟书籍组
-				common.Config.Stores.GenerateBookGroup()
+				if err := common.Stores.GenerateBookGroup(); err != nil {
+					fmt.Println(err)
+				}
 			}
 		}
 	}

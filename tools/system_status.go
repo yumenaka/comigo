@@ -2,10 +2,10 @@ package tools
 
 import (
 	"fmt"
-	"github.com/shirou/gopsutil/v3/cpu"
 	"os"
 	"runtime"
 
+	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/mem"
 )
 

@@ -2,11 +2,13 @@ package common
 
 import (
 	"fmt"
-	"github.com/yumenaka/comi/locale"
-	"gopkg.in/ini.v1"
 	"os/exec"
 	"strconv"
 	"time"
+
+	"gopkg.in/ini.v1"
+
+	"github.com/yumenaka/comi/locale"
 )
 
 func StartFrpC(configPath string) error {

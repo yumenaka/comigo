@@ -3,6 +3,10 @@ package tools
 //source: github.com/mholt/archiver/pull/149/files/92cf5d0fb45d7fa943e25fc83fc71cd2e734a4fb
 import (
 	"errors"
+	"io"
+	"io/ioutil"
+	"strings"
+
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/japanese"
@@ -11,9 +15,6 @@ import (
 	"golang.org/x/text/encoding/traditionalchinese"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
-	"io"
-	"io/ioutil"
-	"strings"
 )
 
 var encodings = map[string]encoding.Encoding{

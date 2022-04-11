@@ -2,10 +2,12 @@ package routers
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comi/common"
 	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+
+	"github.com/yumenaka/comi/common"
 )
 
 // 可选参数，三者择一：

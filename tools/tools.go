@@ -6,11 +6,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/Baozisoftware/qrcode-terminal-go"
-	"github.com/bbrks/go-blurhash"
-	"github.com/disintegration/imaging"
-	"github.com/mandykoh/autocrop"
-	"github.com/yumenaka/comi/locale"
 	"image"
 	"image/draw"
 	"io"
@@ -19,22 +14,30 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
 	"unicode/utf8"
+
+	"github.com/Baozisoftware/qrcode-terminal-go"
+	"github.com/bbrks/go-blurhash"
+	"github.com/disintegration/imaging"
+	"github.com/mandykoh/autocrop"
+
+	"github.com/yumenaka/comi/locale"
 )
 
 // GetImageDataBlurHash  获取图片的BlurHash
 func GetImageDataBlurHash(loadedImage []byte, components int) string {
 	// Generate the BlurHash for a given image
 	buf := bytes.NewBuffer(loadedImage)
-	image, err := imaging.Decode(buf)
+	imageData, err := imaging.Decode(buf)
 	if err != nil {
 		fmt.Println(err)
 		return "error blurhash!"
 	}
-	str, err := blurhash.Encode(components, components, image)
+	str, err := blurhash.Encode(components, components, imageData)
 	if err != nil {
 		// Handle errors
 		fmt.Println(err)
@@ -48,17 +51,17 @@ func GetImageDataBlurHash(loadedImage []byte, components int) string {
 func GetImageDataBlurHashImage(loadedImage []byte, components int) []byte {
 	// Generate the BlurHash for a given image
 	buf := bytes.NewBuffer(loadedImage)
-	image, err := imaging.Decode(buf)
+	imageData, err := imaging.Decode(buf)
 	if err != nil {
 		fmt.Println(err)
 	}
-	str, err := blurhash.Encode(components, components, image)
+	str, err := blurhash.Encode(components, components, imageData)
 	if err != nil {
 		fmt.Println(err)
 	}
-	// Generate an image for a given BlurHash
+	// Generate an imageData for a given BlurHash
 	// Punch specifies the contrasts and defaults to 1
-	img, err := blurhash.Decode(str, image.Bounds().Dx(), image.Bounds().Dy(), 1)
+	img, err := blurhash.Decode(str, imageData.Bounds().Dx(), imageData.Bounds().Dy(), 1)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -186,16 +189,16 @@ func ImageResize(loadedImage []byte, width int, height int) []byte {
 // ImageThumbnail 根据设定的图片大小,剪裁图片
 func ImageThumbnail(loadedImage []byte, width int, height int) []byte {
 	buf := bytes.NewBuffer(loadedImage)
-	image, err := imaging.Decode(buf)
+	imageData, err := imaging.Decode(buf)
 	if err != nil {
 		fmt.Println(err)
 		return loadedImage
 	}
 	//生成缩略图，尺寸width*height
-	image = imaging.Thumbnail(image, width, height, imaging.Lanczos)
+	imageData = imaging.Thumbnail(imageData, width, height, imaging.Lanczos)
 	buf2 := &bytes.Buffer{}
 	//将图片编码成jpeg
-	err = imaging.Encode(buf2, image, imaging.JPEG)
+	err = imaging.Encode(buf2, imageData, imaging.JPEG)
 	if err != nil {
 		return loadedImage
 	}
@@ -520,4 +523,43 @@ func MD5file(fName string) string {
 		log.Fatal(e)
 	}
 	return hex.EncodeToString(h.Sum(nil))
+}
+
+//从字符串中提取数字,如果有几个数字，就简单地加起来
+func getNumberFromString(s string) (int, error) {
+	var err error
+	num := 0
+	//同时设定倒计时秒数
+	valid := regexp.MustCompile("[0-9]+")
+	numbers := valid.FindAllStringSubmatch(s, -1)
+	if len(numbers) > 0 {
+		//循环取出多维数组
+		for _, value := range numbers {
+			for _, v := range value {
+				temp, errTemp := strconv.Atoi(v)
+				if errTemp != nil {
+					fmt.Println("error num value:" + v)
+				} else {
+					num = num + temp
+				}
+			}
+		}
+		//fmt.Println("get Number:",num," form string:",s,"numbers[]=",numbers)
+	} else {
+		err = errors.New("number not found")
+		return 0, err
+	}
+	return num, err
+}
+
+//检测字符串中是否有关键字
+func haveKeyWord(checkString string, list []string) bool {
+	//转换为小写，使Sketch、DOUBLE也生效
+	checkString = strings.ToLower(checkString)
+	for _, key := range list {
+		if strings.Contains(checkString, key) {
+			return true
+		}
+	}
+	return false
 }

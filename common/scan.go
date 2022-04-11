@@ -4,10 +4,6 @@ import (
 	"archive/zip"
 	"errors"
 	"fmt"
-	"github.com/mholt/archiver/v4"
-	"github.com/sirupsen/logrus"
-	"github.com/yumenaka/comi/arch"
-	"github.com/yumenaka/comi/locale"
 	"io/fs"
 	"io/ioutil"
 	"net/url"
@@ -18,6 +14,12 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/mholt/archiver/v4"
+	"github.com/sirupsen/logrus"
+
+	"github.com/yumenaka/comi/arch"
+	"github.com/yumenaka/comi/locale"
 )
 
 // ScanAndGetBookList 扫描一个路径，并返回书籍列表
@@ -87,7 +89,7 @@ func ScanAndGetBookList(storePath string) (bookList []*Book, err error) {
 func scanDirGetBook(dirPath string, storePath string, depth int) (*Book, error) {
 	//初始化，生成UUID
 	book := NewBook(dirPath, time.Now(), 0, storePath, depth)
-	book.BookType = BookTypeDir
+	book.Type = BookTypeDir
 	// 目录中的文件和子目录
 	files, err := ioutil.ReadDir(dirPath)
 	if err != nil {
@@ -136,7 +138,7 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*Book, error
 
 	book := NewBook(filePath, FileInfo.ModTime(), FileInfo.Size(), storePath, depth)
 	//为解决archiver/v4的BUG “zip文件无法读取2级目录” 单独处理zip文件
-	if book.BookType == BookTypeZip || book.BookType == BookTypeCbz || book.BookType == BookTypeEpub {
+	if book.Type == BookTypeZip || book.Type == BookTypeCbz || book.Type == BookTypeEpub {
 		//使用Archiver的虚拟文件系统，无法处理非UTF-8编码
 		fsys, zipErr := zip.OpenReader(filePath)
 		if zipErr != nil {
@@ -175,7 +177,7 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*Book, error
 				u, ok := f.(archiver.File) //f.Name不包含路径信息.需要转换一下
 				if !ok {
 					//如果是文件夹+图片
-					book.BookType = BookTypeDir
+					book.Type = BookTypeDir
 					////用Archiver的虚拟文件系统提供图片文件
 					//book.Pages = append(book.Pages, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: "", Url: "/cache/" + book.BookID + "/" + url.QueryEscape(path)})
 					//实验：用getfile接口提供文件服务

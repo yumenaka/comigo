@@ -2,13 +2,14 @@ package tools
 
 import (
 	"fmt"
+	"os"
+	"path"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"github.com/rifflock/lfshook"
 	"github.com/sirupsen/logrus"
-	"os"
-	"path"
-	"time"
 )
 
 // LoggerToFile log功能，现在还没做完

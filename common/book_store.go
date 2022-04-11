@@ -63,7 +63,7 @@ func (s *singleBookstore) initBookGroupMap() error {
 			//新建一本书
 			newBook := NewBook(filepath.Dir(sameParentBookList[0].FilePath), time.Now(), 0, s.StorePath, depth-1)
 			//类型是书籍组
-			newBook.BookType = BookTypeBooksGroup
+			newBook.Type = BookTypeBooksGroup
 			//名字应该设置成Name
 			if newBook.Name != parent {
 				fmt.Printf("newBook.Name!=parent!?")

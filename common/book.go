@@ -6,14 +6,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/bbrks/go-blurhash"
-	"github.com/cheggaaa/pb/v3"
-	"github.com/disintegration/imaging"
-	"github.com/jxskiss/base62"
-	"github.com/xxjwxc/gowp/workpool"
-	"github.com/yumenaka/comi/arch"
-	"github.com/yumenaka/comi/locale"
-	"github.com/yumenaka/comi/tools"
 	"image"
 	"log"
 	"math/rand"
@@ -22,6 +14,16 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/bbrks/go-blurhash"
+	"github.com/cheggaaa/pb/v3"
+	"github.com/disintegration/imaging"
+	"github.com/jxskiss/base62"
+	"github.com/xxjwxc/gowp/workpool"
+
+	"github.com/yumenaka/comi/arch"
+	"github.com/yumenaka/comi/locale"
+	"github.com/yumenaka/comi/tools"
 )
 
 // Book 定义书籍，BooID不应该重复，根据文件路径生成
@@ -30,7 +32,7 @@ type Book struct {
 	BookID          string           `json:"id"   storm:"id"`                                 //根据FilePath计算 //storm会搜索id或ID做为主键
 	FilePath        string           `json:"-" storm:"filepath" storm:"index" storm:"unique"` //storm:"index" 索引字段 storm:"unique" 唯一字段
 	BookStorePath   string           `json:"-"    storm:"index"`                              //在哪个子书库
-	BookType        string           `json:"book_type" storm:"index"`                         //可以是书籍组(book_group)、文件夹(dir)、文件后缀( .zip .rar .pdf .mp4)等
+	Type            BookType         `json:"book_type" storm:"index"`                         //可以是书籍组(book_group)、文件夹(dir)、文件后缀( .zip .rar .pdf .mp4)等
 	ChildBookNum    int              `json:"child_book_num" storm:"index"`                    //子书籍的数量
 	ChildBook       map[string]*Book `json:"child_book" `                                     //key：BookID
 	Depth           int              `json:"depth" storm:"index"`                             //文件深度
@@ -52,17 +54,19 @@ type Book struct {
 	ZipTextEncoding string           `json:"-"`                                               //json不解析，启用可改为   `json:"zip_text_encoding"`
 }
 
+type BookType string
+
 //书籍类型
 const (
-	BookTypeDir         = "dir"
-	BookTypeZip         = ".zip"
-	BookTypeRar         = ".rar"
-	BookTypeBooksGroup  = "book_group"
-	BookTypeCbz         = ".cbz"
-	BookTypeCbr         = ".cbr"
-	BookTypeEpub        = ".epub"
-	BookTypePDF         = ".pdf"
-	BookTypeUnknownFile = "unknown"
+	BookTypeDir         BookType = "dir"
+	BookTypeZip         BookType = ".zip"
+	BookTypeRar         BookType = ".rar"
+	BookTypeBooksGroup  BookType = "book_group"
+	BookTypeCbz         BookType = ".cbz"
+	BookTypeCbr         BookType = ".cbr"
+	BookTypeEpub        BookType = ".epub"
+	BookTypePDF         BookType = ".pdf"
+	BookTypeUnknownFile BookType = "unknown"
 )
 
 //SinglePageInfo 单张书页
@@ -92,7 +96,7 @@ func NewBook(filePath string, modified time.Time, fileSize int64, storePath stri
 	//FilePath，转换为绝对路径
 	b.setFilePath(filePath)
 	//书籍类型
-	b.BookType = getBookTypeByFilename(filePath)
+	b.Type = getBookTypeByFilename(filePath)
 	b.setName(filePath)
 	//设置属性：父文件夹
 	b.setParentFolder(filePath)
@@ -113,7 +117,7 @@ func (b *Book) setFilePath(path string) {
 }
 
 //初始化Book时，取得BookType
-func getBookTypeByFilename(filename string) string {
+func getBookTypeByFilename(filename string) BookType {
 	//获取文件后缀
 	switch strings.ToLower(path.Ext(filename)) {
 	case ".zip":
@@ -136,37 +140,12 @@ func getBookTypeByFilename(filename string) string {
 func (b *Book) setParentFolder(filePath string) {
 	//取得文件所在文件夹的路径
 	//如果类型是文件夹，同时最后一个字符是路径分隔符的话，就多取一次dir，移除多余的Unix路径分隔符或windows分隔符
-	if b.BookType == BookTypeDir {
+	if b.Type == BookTypeDir {
 		if filePath[len(filePath)-1] == '/' || filePath[len(filePath)-1] == '\\' {
 			filePath = filepath.Dir(filePath)
 		}
 	}
 	folder := filepath.Dir(filePath)
-	//Example
-	//Code:
-	//fmt.Println("On Unix:")
-	//fmt.Println(filepath.Dir("/foo/bar/baz.js"))
-	//fmt.Println(filepath.Dir("/foo/bar/baz"))
-	//fmt.Println(filepath.Dir("/foo/bar/baz/"))
-	//fmt.Println(filepath.Dir("/dirty//path///"))
-	//fmt.Println(filepath.Dir("dev.txt"))
-	//fmt.Println(filepath.Dir("../test.txt"))
-	//fmt.Println(filepath.Dir(".."))
-	//fmt.Println(filepath.Dir("."))
-	//fmt.Println(filepath.Dir("/"))
-	//fmt.Println(filepath.Dir(""))
-	//Output:
-	//	On Unix:
-	//	/foo/bar
-	//	/foo/bar
-	//	/foo/bar/baz
-	//	/dirty/path
-	//	.
-	//	..
-	//	.
-	//	.
-	//	/
-	//	.
 	post := strings.LastIndex(folder, "/") //Unix路径分隔符
 	if post == -1 {
 		post = strings.LastIndex(folder, "\\") //windows分隔符
@@ -183,7 +162,7 @@ func (b *Book) setParentFolder(filePath string) {
 func (b *Book) setName(filePath string) {
 	b.Name = filePath
 	//设置属性：书籍名，取文件后缀(可能为 .zip .rar .pdf .mp4等等)。
-	if b.BookType != BookTypeBooksGroup { //不是书籍组(book_group)。
+	if b.Type != BookTypeBooksGroup { //不是书籍组(book_group)。
 		post := strings.LastIndex(filePath, "/") //Unix路径分隔符
 		if post == -1 {
 			post = strings.LastIndex(filePath, "\\") //windows分隔符
@@ -226,11 +205,14 @@ func AddBook(b *Book, basePath string) error {
 	if b.BookID == "" {
 		return errors.New("add book Error：empty BookID")
 	}
-	if _, ok := Config.Stores.mapBookstores[basePath]; !ok {
-		Config.Stores.NewSingleBookstore(basePath)
+	if _, ok := Stores.mapBookstores[basePath]; !ok {
+		if err := Stores.NewSingleBookstore(basePath); err != nil {
+			fmt.Println(err)
+		}
+
 	}
 	mapBooks[b.BookID] = b
-	return Config.Stores.AddBookToStores(basePath, b)
+	return Stores.AddBookToStores(basePath, b)
 }
 
 // DeleteBookByID 删除一本书
@@ -285,7 +267,7 @@ func GetBookInfoListByDepth(depth int, sort string) (*BookInfoList, error) {
 		}
 	}
 	//接下来还要加上扫描生成出来的书籍组
-	for _, bs := range Config.Stores.mapBookstores {
+	for _, bs := range Stores.mapBookstores {
 		for _, b := range bs.BookGroupMap {
 			if b.Depth == depth {
 				info := NewBookInfo(b)
@@ -311,7 +293,7 @@ func GetBookInfoListByMaxDepth(depth int, sort string) (*BookInfoList, error) {
 		}
 	}
 	//接下来还要加上扫描生成出来的书籍组
-	for _, bs := range Config.Stores.mapBookstores {
+	for _, bs := range Stores.mapBookstores {
 		for _, b := range bs.BookGroupMap {
 			if b.Depth <= depth {
 				info := NewBookInfo(b)
@@ -443,12 +425,12 @@ func getShortBookID(fullID string, minLength int) string {
 	//最短为5位，最长等于全长
 	for i := minLength; i <= len(fullID); i++ {
 		canUse := true
-		for key, _ := range mapBooks {
+		for key := range mapBooks {
 			if strings.HasPrefix(key, fullID[0:i]) {
 				canUse = false
 			}
 		}
-		for key, _ := range mapBookGroups {
+		for key := range mapBookGroups {
 			if strings.HasPrefix(key, fullID[0:i]) {
 				canUse = false
 			}

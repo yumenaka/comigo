@@ -3,13 +3,6 @@ package routers
 import (
 	"errors"
 	"fmt"
-	"github.com/elliotchance/orderedmap"
-	"github.com/elliotchance/pie/v2"
-	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comi/arch"
-	"github.com/yumenaka/comi/common"
-	"github.com/yumenaka/comi/locale"
-	"github.com/yumenaka/comi/tools"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -19,6 +12,15 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/elliotchance/orderedmap"
+	"github.com/elliotchance/pie/v2"
+	"github.com/gin-gonic/gin"
+
+	"github.com/yumenaka/comi/arch"
+	"github.com/yumenaka/comi/common"
+	"github.com/yumenaka/comi/locale"
+	"github.com/yumenaka/comi/tools"
 )
 
 // 示例 URL： 127.0.0.1:1234/getfile?id=2b17a13&filename=1.jpg
@@ -65,21 +67,21 @@ func getFileHandler(c *gin.Context) {
 	//fmt.Println(bookPath)
 	var imgData []byte
 	//如果是特殊编码的ZIP文件
-	if book.NonUTF8Zip && book.BookType != common.BookTypeDir {
+	if book.NonUTF8Zip && book.Type != common.BookTypeDir {
 		imgData, err = arch.GetSingleFile(bookPath, needFile, "gbk")
 		if err != nil {
 			fmt.Println(err)
 		}
 	}
 	//如果是一般压缩文件
-	if !book.NonUTF8Zip && book.BookType != common.BookTypeDir {
+	if !book.NonUTF8Zip && book.Type != common.BookTypeDir {
 		imgData, err = arch.GetSingleFile(bookPath, needFile, "")
 		if err != nil {
 			fmt.Println(err)
 		}
 	}
 	//如果是本地文件夹
-	if book.BookType == common.BookTypeDir {
+	if book.Type == common.BookTypeDir {
 		//直接读取磁盘文件
 		imgData, err = ioutil.ReadFile(filepath.Join(bookPath, needFile))
 		if err != nil {
@@ -276,7 +278,7 @@ func getQueryStringKey(query url.Values) string {
 	m := orderedmap.NewOrderedMap()
 	//构建一个key列表，并用pie排序
 	var keyList []string
-	for k, _ := range query {
+	for k := range query {
 		keyList = append(keyList, k)
 	}
 	//pie.Sort()返回一个排好序的slice

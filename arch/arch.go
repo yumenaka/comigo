@@ -5,12 +5,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/mholt/archiver/v4"
 	"io/fs"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sync"
+
+	"github.com/mholt/archiver/v4"
 )
 
 //var (

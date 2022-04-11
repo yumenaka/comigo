@@ -2,10 +2,12 @@ package routers
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/pelletier/go-toml/v2"
+
 	"github.com/yumenaka/comi/common"
-	"net/http"
 )
 
 // 下载服务器配置

@@ -1,10 +1,11 @@
 package reverse_proxy
 
 import (
-	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 type ReverseProxyOptions struct {

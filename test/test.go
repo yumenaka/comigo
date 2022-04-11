@@ -1,14 +1,13 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"fmt"
-	"github.com/disintegration/imaging"
-	"github.com/mholt/archiver/v4"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"github.com/mholt/archiver/v4"
 )
 
 func main() {
@@ -29,22 +28,22 @@ func main() {
 	//}
 }
 
-func ImageResize() {
-	//读取本地文件，本地文件尺寸300*400
-	imgData, _ := ioutil.ReadFile("d:/1.jpg")
-	buf := bytes.NewBuffer(imgData)
-	image, err := imaging.Decode(buf)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	//生成缩略图，尺寸150*200，并保持到为文件2.jpg
-	image = imaging.Resize(image, 150, 200, imaging.Lanczos)
-	err = imaging.Save(image, "d:/2.jpg")
-	if err != nil {
-		fmt.Println(err)
-	}
-}
+//func ImageResize() {
+//	//读取本地文件，本地文件尺寸300*400
+//	imgData, _ := ioutil.ReadFile("d:/1.jpg")
+//	buf := bytes.NewBuffer(imgData)
+//	image, err := imaging.Decode(buf)
+//	if err != nil {
+//		fmt.Println(err)
+//		return
+//	}
+//	//生成缩略图，尺寸150*200，并保持到为文件2.jpg
+//	image = imaging.Resize(image, 150, 200, imaging.Lanczos)
+//	err = imaging.Save(image, "d:/2.jpg")
+//	if err != nil {
+//		fmt.Println(err)
+//	}
+//}
 
 // UnArchiveZip 一次性解压zip文件
 func UnArchiveZip(filePath string, extractPath string, textEncoding string) error {
@@ -61,7 +60,7 @@ func UnArchiveZip(filePath string, extractPath string, textEncoding string) erro
 	}
 	defer file.Close()
 	//是否是压缩包
-	format, err := archiver.Identify(filePath, file)
+	format, _, err := archiver.Identify(filePath, file)
 	if err != nil {
 		return err
 	}
@@ -80,38 +79,38 @@ func UnArchiveZip(filePath string, extractPath string, textEncoding string) erro
 	return nil
 }
 
-// UnArchiveFle 一次性解压rar文件
-func UnArchiveRar(filePath string, extractPath string) error {
-	extractPath = getAbsPath(extractPath)
-	//如果解压路径不存在，创建路径
-	err := os.MkdirAll(extractPath, os.ModePerm)
-	if err != nil {
-		fmt.Println(err)
-	}
-	//打开文件，只读模式
-	file, err := os.OpenFile(filePath, os.O_RDONLY, 0400) //Use mode 0400 for a read-only // file and 0600 for a readable+writable file.
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer file.Close()
-	//是否是压缩包
-	format, err := archiver.Identify(filePath, file)
-	if err != nil {
-		return err
-	}
-	//如果是rar
-	if ex, ok := format.(archiver.Rar); ok {
-		ctx := context.Background()
-		//WithValue返回parent的一个副本，该副本保存了传入的key/value，而调用Context接口的Value(key)方法就可以得到val。注意在同一个context中设置key/value，若key相同，值会被覆盖。
-		ctx = context.WithValue(ctx, "extractPath", extractPath)
-		err := ex.LsAllFile(ctx, file, extractFileHandler)
-		if err != nil {
-			return err
-		}
-		fmt.Println("rar文件解压完成：" + getAbsPath(filePath) + " 解压到：" + getAbsPath(extractPath))
-	}
-	return nil
-}
+//// UnArchiveFle 一次性解压rar文件
+//func UnArchiveRar(filePath string, extractPath string) error {
+//	extractPath = getAbsPath(extractPath)
+//	//如果解压路径不存在，创建路径
+//	err := os.MkdirAll(extractPath, os.ModePerm)
+//	if err != nil {
+//		fmt.Println(err)
+//	}
+//	//打开文件，只读模式
+//	file, err := os.OpenFile(filePath, os.O_RDONLY, 0400) //Use mode 0400 for a read-only // file and 0600 for a readable+writable file.
+//	if err != nil {
+//		fmt.Println(err)
+//	}
+//	defer file.Close()
+//	//是否是压缩包
+//	format, _, err := archiver.Identify(filePath, file)
+//	if err != nil {
+//		return err
+//	}
+//	//如果是rar
+//	if ex, ok := format.(archiver.Rar); ok {
+//		ctx := context.Background()
+//		//WithValue返回parent的一个副本，该副本保存了传入的key/value，而调用Context接口的Value(key)方法就可以得到val。注意在同一个context中设置key/value，若key相同，值会被覆盖。
+//		ctx = context.WithValue(ctx, "extractPath", extractPath)
+//		err := ex.LsAllFile(ctx, file, extractFileHandler)
+//		if err != nil {
+//			return err
+//		}
+//		fmt.Println("rar文件解压完成：" + getAbsPath(filePath) + " 解压到：" + getAbsPath(extractPath))
+//	}
+//	return nil
+//}
 
 //解压文件的函数
 func extractFileHandler(ctx context.Context, f archiver.File) error {

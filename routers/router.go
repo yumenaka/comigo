@@ -4,11 +4,6 @@ import (
 	"context"
 	"embed"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/sanity-io/litter"
-	"github.com/yumenaka/comi/common"
-	"github.com/yumenaka/comi/locale"
-	"github.com/yumenaka/comi/tools"
 	"html/template"
 	"io/fs"
 	"io/ioutil"
@@ -19,6 +14,13 @@ import (
 	"strconv"
 	"syscall"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/sanity-io/litter"
+
+	"github.com/yumenaka/comi/common"
+	"github.com/yumenaka/comi/locale"
+	"github.com/yumenaka/comi/tools"
 )
 
 // TemplateString 模板文件
@@ -33,6 +35,32 @@ var staticAssetFS embed.FS
 
 //go:embed  static/images
 var staticImageFS embed.FS
+
+// StartWebServer 启动web服务
+func StartWebServer() {
+	//设置 gin
+	gin.SetMode(gin.ReleaseMode)
+	//// 创建带有默认中间件的路由: 日志与恢复中间件
+	engine := gin.Default()
+	//1、setStaticFiles
+	setStaticFiles(engine)
+	//2、setWebAPI
+	setWebAPI(engine)
+	//生成元数据
+	if common.Config.GenerateMetaData {
+		//TODO：生成元数据
+	}
+	//3、setPort
+	setPort()
+	//4、setWebpServer
+	//setWebpServer(engine)
+	//5、setFrpClient
+	setFrpClient()
+	//6、printCMDMessage
+	printCMDMessage()
+	//7、StartGinEngine 监听并启动web服务
+	StartGinEngine(engine)
+}
 
 //1、设置静态文件
 func setStaticFiles(engine *gin.Engine) {
@@ -197,7 +225,7 @@ func setWebAPI(engine *gin.Engine) {
 		} else {
 			for _, info := range allBook.BookInfos {
 				//下载文件
-				if info.BookType != common.BookTypeBooksGroup && info.BookType != common.BookTypeDir {
+				if info.Type != common.BookTypeBooksGroup && info.Type != common.BookTypeDir {
 					api.StaticFile("/raw/"+info.BookID+"/"+info.Name, info.FilePath)
 				}
 			}
@@ -309,32 +337,6 @@ func SetShutdownHandler() {
 		log.Fatal("Comigo Server forced to shutdown: ", err)
 	}
 	log.Println("Comigo Server exit.")
-}
-
-// StartWebServer 启动web服务
-func StartWebServer() {
-	//设置 gin
-	gin.SetMode(gin.ReleaseMode)
-	//// 创建带有默认中间件的路由: 日志与恢复中间件
-	engine := gin.Default()
-	//1、setStaticFiles
-	setStaticFiles(engine)
-	//2、setWebAPI
-	setWebAPI(engine)
-	//生成元数据
-	if common.Config.GenerateMetaData {
-		//TODO：生成元数据
-	}
-	//3、setPort
-	setPort()
-	//4、setWebpServer
-	//setWebpServer(engine)
-	//5、setFrpClient
-	setFrpClient()
-	//6、printCMDMessage
-	printCMDMessage()
-	//7、StartGinEngine 监听并启动web服务
-	StartGinEngine(engine)
 }
 
 ////4、setWebpServer TODO：新的webp模式：https://docs.webp.sh/usage/remote-backend/

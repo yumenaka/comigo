@@ -1,17 +1,18 @@
 package common
 
 import (
-	"github.com/yumenaka/comi/tools"
 	"sort"
 	"strconv"
 	"time"
+
+	"github.com/yumenaka/comi/tools"
 )
 
 // BookInfo 与Book唯一的区别是没有AllPageInfo,而是封面图URL
 type BookInfo struct {
 	Name            string               `json:"name"`
 	BookID          string               `json:"id"` //根据FilePath计算
-	BookType        string               `json:"book_type"`
+	Type            BookType             `json:"book_type"`
 	Depth           int                  `json:"depth"`
 	ChildBookNum    int                  `json:"child_book_num"` //子书籍的数量
 	ChildBook       map[string]*BookInfo `json:"child_book"`     //key：BookID
@@ -50,7 +51,7 @@ func NewBookInfo(b *Book) *BookInfo {
 		FilePath:        b.GetFilePath(),
 		ExtractPath:     b.ExtractPath,
 		AllPageNum:      b.GetAllPageNum(),
-		BookType:        b.BookType,
+		Type:            b.Type,
 		ChildBookNum:    b.ChildBookNum,
 		ChildBook:       getChildInfoMap(b.ChildBook),
 		FileSize:        b.FileSize,

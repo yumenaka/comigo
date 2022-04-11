@@ -2,12 +2,14 @@ package routers
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/skip2/go-qrcode"
-	"github.com/yumenaka/comi/common"
-	"github.com/yumenaka/comi/tools"
 	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"github.com/skip2/go-qrcode"
+
+	"github.com/yumenaka/comi/common"
+	"github.com/yumenaka/comi/tools"
 )
 
 // 下载服务器配置
