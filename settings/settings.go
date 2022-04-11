@@ -78,10 +78,21 @@ func (config *ServerSettings) IsSupportMedia(checkPath string) bool {
 	return false
 }
 
+// IsSupportArchiver 是否是支持的压缩文件
 func (config *ServerSettings) IsSupportArchiver(checkPath string) bool {
 	for _, ex := range config.SupportFileType {
 		suffix := path.Ext(checkPath)
 		if ex == suffix {
+			return true
+		}
+	}
+	return false
+}
+
+// CheckPathSkip 检查路径是否应该跳过（排除文件，文件夹列表）。
+func (config *ServerSettings) IsSkipDir(path string) bool {
+	for _, substr := range config.ExcludeFileOrFolders {
+		if strings.HasSuffix(path, substr) {
 			return true
 		}
 	}

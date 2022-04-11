@@ -51,7 +51,7 @@ func ScanAndGetBookList(storePath string) (bookList []*book.Book, err error) {
 			fmt.Printf("超过最大搜索深度 %d，base：%s scan: %s:\n", Config.MaxDepth, storePathAbs, walkPath)
 			return filepath.SkipDir //当WalkFunc的返回值是filepath.SkipDir时，Walk将会跳过这个目录，照常执行下一个文件。
 		}
-		if CheckPathSkip(walkPath) {
+		if Config.IsSkipDir(walkPath) {
 			fmt.Println("Skip Scan:" + walkPath)
 			return filepath.SkipDir
 		}
@@ -174,7 +174,7 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*book.Book, 
 			return nil, err
 		}
 		err = fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
-			if CheckPathSkip(path) {
+			if Config.IsSkipDir(path) {
 				fmt.Println("Skip Scan:" + path)
 				return fs.SkipDir
 			}

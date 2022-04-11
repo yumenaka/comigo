@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"os"
 	"path"
-	"strings"
 
 	"github.com/mitchellh/go-homedir" //不使用 cgo 获取用户主目录的第三方库，支持交叉编译
 
@@ -30,8 +29,7 @@ var (
 	Version     = "v0.7.3"
 	ReadingBook *book.Book
 	Srv         *http.Server
-
-	Config = settings.ServerSettings{
+	Config      = settings.ServerSettings{
 		Port:                 1234,
 		Host:                 "",
 		StoresPath:           []string{},
@@ -68,48 +66,8 @@ var (
 		//	AllowedTypes: []string{".jpg", ".jpeg", ".JPEG", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp"},
 		//	ExhaustPath:  "",
 		//},
-		//Template:             "scroll", //multi、single、random etc.
 	}
 )
-
-// CheckPathSkip 检查路径是否应该跳过（排除文件，文件夹列表）。
-func CheckPathSkip(path string) bool {
-	for _, substr := range Config.ExcludeFileOrFolders {
-		if strings.HasSuffix(path, substr) {
-			return true
-		}
-	}
-	return false
-}
-
-//// SetupCloseHander 中断处理：程序被中断的时候，清理临时文件
-//// 在一个新的 goroutine 上创建一个监听器。 如果接收到了一个 interrupt 信号，就会立即通知程序，做一些清理工作并退出
-//func SetupCloseHander() {
-//	//中断处理：程序被中断的时候，清理临时文件
-//	//容量2(capacity)代表Channel容纳的最多的元素的数量，代表Channel的缓存的大小。如果设置了缓存，就有可能不发生阻塞， 只有buffer满了后 send才会阻塞， 而只有缓存空了后receive才会阻塞。
-//	c := make(chan os.Signal, 2)
-//	//SIGHUP（挂起）, SIGINT（中断）或 SIGTERM（终止）默认会使得程序退出。
-//	//1、SIGHUP 信号在用户终端连接(正常或非正常)结束时发出。
-//	//2、syscall.SIGINT 和 os.Interrupt 是同义词,按下 CTRL+C 时发出。
-//	//3、SIGTERM（终止）:kill终止进程,允许程序处理问题后退出。
-//	//4.syscall.SIGHUP,终端控制进程结束(终端连接断开)
-//	//5、syscall.SIGQUIT，CTRL+\ 退出
-//
-//	// kill (no param) default send syscall.SIGTERM
-//	// kill -2 is syscall.SIGINT
-//	// kill -9 is syscall.SIGKILL but can't be catch, so don't need add it
-//	//signal.Notify(c, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGHUP)
-//	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
-//	go func() {
-//		var temp = <-c
-//		fmt.Println(temp)
-//		if Config.CacheFileClean {
-//			fmt.Println("\r" + locale.GetString("start_clear_file"))
-//			ClearTempFilesALL()
-//		}
-//		os.Exit(0)
-//	}()
-//}
 
 // SetTempDir 设置临时文件夹，退出时会被清理
 func SetTempDir() {

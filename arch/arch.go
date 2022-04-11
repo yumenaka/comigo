@@ -29,13 +29,8 @@ import (
 //	continueOnError = true
 //}
 
-//var mapBookFS map[string]fs.FS
 //使用sync.Map代替map，保证并发情况下的读写安全
 var mapBookFS sync.Map
-
-func init() {
-	//mapBookFS = make(map[string]fs.FS)
-}
 
 // ScanNonUTF8Zip 扫描文件，初始化书籍用
 func ScanNonUTF8Zip(filePath string, textEncoding string) (reader *zip.Reader, err error) {
