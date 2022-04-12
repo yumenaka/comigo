@@ -1,4 +1,4 @@
-package routers
+package handler
 
 import (
 	"net/http"
@@ -21,7 +21,7 @@ type ServerStatus struct {
 	OSInfo                tools.SystemStatus //系统信息
 }
 
-func serverStatusHandler(c *gin.Context) {
+func ServerStatusHandler(c *gin.Context) {
 	serverName := "Comigo " + common.Version
 	//取得本机的首选出站IP
 	OutIP := tools.GetOutboundIP().String()

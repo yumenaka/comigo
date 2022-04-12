@@ -1,4 +1,4 @@
-package routers
+package handler
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ import (
 // sort_page：按照自然文件名重新排序							&sort_page=true
 // 示例 URL： http://127.0.0.1:1234/api/getbook?bid=1215a
 // 示例 URL： http://127.0.0.1:1234/api/getbook?&author=Doe&name=book_name
-func getBookHandler(c *gin.Context) {
+func GetBookHandler(c *gin.Context) {
 	author := c.DefaultQuery("author", "")
 	sort := c.DefaultQuery("sort", "false")
 	id := c.DefaultQuery("id", "")

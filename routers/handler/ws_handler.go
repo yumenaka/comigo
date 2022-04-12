@@ -1,4 +1,4 @@
-package routers
+package handler
 
 import (
 	"encoding/json"
@@ -24,7 +24,7 @@ var upGrader = websocket.Upgrader{
 }
 
 //webSocket请求ping 返回pong
-func wsHandler(c *gin.Context) {
+func WsHandler(c *gin.Context) {
 	//升级get请求为webSocket协议
 	ws, err := upGrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
@@ -58,8 +58,8 @@ func wsHandler(c *gin.Context) {
 		//}
 		////返回漫画压缩包解压状态
 		//if msg.Message == "CheckExtract" && msg.NowBookUUID == common.ReadingBook.GetBookID() {
-		//	if common.ReadingBook.ExtractComplete {
-		//		msg.Message = "ExtractComplete"
+		//	if common.ReadingBook.InitComplete {
+		//		msg.Message = "InitComplete"
 		//	} else {
 		//		msg.Message = "Extracting"
 		//	}

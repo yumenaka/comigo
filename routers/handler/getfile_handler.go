@@ -1,4 +1,4 @@
-package routers
+package handler
 
 import (
 	"errors"
@@ -39,7 +39,7 @@ import (
 // gray:黑白化												&gray=true
 // blurhash:获取对应图片的blurhash，而不是原始图片 				&blurhash=3
 // blurhash_image:获取对应图片的blurhash图片，而不是原始图片  	&blurhash_image=3
-func getFileHandler(c *gin.Context) {
+func GetFileHandler(c *gin.Context) {
 	//time.Sleep(5 * time.Second)
 	id := c.DefaultQuery("id", "")
 	needFile := c.DefaultQuery("filename", "")
@@ -68,21 +68,21 @@ func getFileHandler(c *gin.Context) {
 	//fmt.Println(bookPath)
 	var imgData []byte
 	//如果是特殊编码的ZIP文件
-	if bookByID.NonUTF8Zip && bookByID.Type != book.BookTypeDir {
+	if bookByID.NonUTF8Zip && bookByID.Type != book.TypeDir {
 		imgData, err = arch.GetSingleFile(bookPath, needFile, "gbk")
 		if err != nil {
 			fmt.Println(err)
 		}
 	}
 	//如果是一般压缩文件
-	if !bookByID.NonUTF8Zip && bookByID.Type != book.BookTypeDir {
+	if !bookByID.NonUTF8Zip && bookByID.Type != book.TypeDir {
 		imgData, err = arch.GetSingleFile(bookPath, needFile, "")
 		if err != nil {
 			fmt.Println(err)
 		}
 	}
 	//如果是本地文件夹
-	if bookByID.Type == book.BookTypeDir {
+	if bookByID.Type == book.TypeDir {
 		//直接读取磁盘文件
 		imgData, err = ioutil.ReadFile(filepath.Join(bookPath, needFile))
 		if err != nil {

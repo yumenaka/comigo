@@ -12,7 +12,7 @@ import (
 type BookInfo struct {
 	Name            string               `json:"name"`
 	BookID          string               `json:"id"` //根据FilePath计算
-	Type            BookType             `json:"book_type"`
+	Type            SupportFileType      `json:"book_type"`
 	Depth           int                  `json:"depth"`
 	ChildBookNum    int                  `json:"child_book_num"` //子书籍的数量
 	ChildBook       map[string]*BookInfo `json:"child_book"`     //key：BookID
@@ -26,7 +26,7 @@ type BookInfo struct {
 	FileSize        int64                `json:"-"`             //暂不解析，启用可改为`json:"file_size"`
 	Modified        time.Time            `json:"-"`             //暂时用不着 这个字段不解析 `json:"modified_time"`
 	ExtractNum      int                  `json:"-"`             //暂时用不着 这个字段不解析 `json:"extract_num"`
-	ExtractComplete bool                 `json:"-"`             //暂时用不着 这个字段不解析 `json:"extract_complete"`
+	InitComplete    bool                 `json:"-"`             //暂时用不着 这个字段不解析 `json:"extract_complete"`
 	ReadPercent     float64              `json:"-"`             //暂不解析，启用可改为`json:"read_percent"`
 	NonUTF8Zip      bool                 `json:"-"`             //暂时用不着 这个字段不解析 `json:"non_utf_8_zip"`
 	ZipTextEncoding string               `json:"-"`             //暂时用不着 这个字段不解析 `json:"zip_text_encoding"`
@@ -43,25 +43,25 @@ func getChildInfoMap(ChildBookMap map[string]*Book) (ChildInfoMap map[string]*Bo
 // NewBookInfo BookInfo的模拟构造函数
 func NewBookInfo(b *Book) *BookInfo {
 	return &BookInfo{
-		Name:            b.Name,
-		Author:          b.Author,
-		Depth:           b.Depth,
-		ISBN:            b.ISBN,
-		FilePath:        b.GetFilePath(),
-		ExtractPath:     b.ExtractPath,
-		AllPageNum:      b.GetAllPageNum(),
-		Type:            b.Type,
-		ChildBookNum:    b.ChildBookNum,
-		ChildBook:       getChildInfoMap(b.ChildBook),
-		FileSize:        b.FileSize,
-		Modified:        b.Modified,
-		BookID:          b.BookID,
-		ExtractNum:      b.ExtractNum,
-		ExtractComplete: b.ExtractComplete,
-		ReadPercent:     b.ReadPercent,
-		NonUTF8Zip:      b.NonUTF8Zip,
-		Cover:           b.Cover,
-		ParentFolder:    b.ParentFolder,
+		Name:         b.Name,
+		Author:       b.Author,
+		Depth:        b.Depth,
+		ISBN:         b.ISBN,
+		FilePath:     b.GetFilePath(),
+		ExtractPath:  b.ExtractPath,
+		AllPageNum:   b.GetAllPageNum(),
+		Type:         b.Type,
+		ChildBookNum: b.ChildBookNum,
+		ChildBook:    getChildInfoMap(b.ChildBook),
+		FileSize:     b.FileSize,
+		Modified:     b.Modified,
+		BookID:       b.BookID,
+		ExtractNum:   b.ExtractNum,
+		InitComplete: b.InitComplete,
+		ReadPercent:  b.ReadPercent,
+		NonUTF8Zip:   b.NonUTF8Zip,
+		Cover:        b.Cover,
+		ParentFolder: b.ParentFolder,
 	}
 }
 

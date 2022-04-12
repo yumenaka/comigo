@@ -28,21 +28,13 @@ import (
 )
 
 var (
-	mapBooks      map[string]*Book //实际存在的书
-	mapBookGroups map[string]*Book //通过分析，生成的书籍分组
+	mapBooks      = make(map[string]*Book) //实际存在的书，通过扫描生成
+	mapBookGroups = make(map[string]*Book) //通过分析路径与深度生成的书组
 	Stores        = Bookstores{
 		mapBookstores: make(map[string]*singleBookstore),
 		SortBy:        "name",
 	}
 )
-
-func init() {
-	//slcBooks = make([]*Book, 0, 10) //make:为slice, map, channel分配内存，并返回一个初始化的值,第二参数指定的是切片的长度，第三个参数是用来指定预留的空间长度——避免二次分配内存带来的开销，提高程序的性能.
-	//真实存在的总书库，通过扫描生成
-	mapBooks = make(map[string]*Book)
-	//通过分析路径与深度生成的书组
-	mapBookGroups = make(map[string]*Book)
-}
 
 // Book 定义书籍，BooID不应该重复，根据文件路径生成
 type Book struct {
@@ -50,7 +42,7 @@ type Book struct {
 	BookID          string           `json:"id"   storm:"id"`                                 //根据FilePath计算 //storm会搜索id或ID做为主键
 	FilePath        string           `json:"-" storm:"filepath" storm:"index" storm:"unique"` //storm:"index" 索引字段 storm:"unique" 唯一字段
 	BookStorePath   string           `json:"-"    storm:"index"`                              //在哪个子书库
-	Type            BookType         `json:"book_type" storm:"index"`                         //可以是书籍组(book_group)、文件夹(dir)、文件后缀( .zip .rar .pdf .mp4)等
+	Type            SupportFileType  `json:"book_type" storm:"index"`                         //可以是书籍组(book_group)、文件夹(dir)、文件后缀( .zip .rar .pdf .mp4)等
 	ChildBookNum    int              `json:"child_book_num" storm:"index"`                    //子书籍的数量
 	ChildBook       map[string]*Book `json:"child_book" `                                     //key：BookID
 	Depth           int              `json:"depth" storm:"index"`                             //文件深度
@@ -66,25 +58,29 @@ type Book struct {
 	ExtractPath     string           `json:"-"`                                               //json不解析
 	Modified        time.Time        `json:"-"`                                               //json不解析，启用可改为`json:"modified_time"`
 	ExtractNum      int              `json:"-"`                                               //json不解析，启用可改为`json:"extract_num"`
-	ExtractComplete bool             `json:"-"`                                               //json不解析，启用可改为`json:"extract_complete"`
+	InitComplete    bool             `json:"-"`                                               //json不解析，启用可改为`json:"extract_complete"`
 	ReadPercent     float64          `json:"-"`                                               //json不解析，启用可改为`json:"read_percent"`
 	NonUTF8Zip      bool             `json:"-"`                                               //json不解析，启用可改为    `json:"non_utf8_zip"`
 	ZipTextEncoding string           `json:"-"`                                               //json不解析，启用可改为   `json:"zip_text_encoding"`
 }
 
-type BookType string
+type SupportFileType string
 
 //书籍类型
 const (
-	BookTypeDir         BookType = "dir"
-	BookTypeZip         BookType = ".zip"
-	BookTypeRar         BookType = ".rar"
-	BookTypeBooksGroup  BookType = "book_group"
-	BookTypeCbz         BookType = ".cbz"
-	BookTypeCbr         BookType = ".cbr"
-	BookTypeEpub        BookType = ".epub"
-	BookTypePDF         BookType = ".pdf"
-	BookTypeUnknownFile BookType = "unknown"
+	TypeDir         SupportFileType = "dir"
+	TypeZip         SupportFileType = ".zip"
+	TypeRar         SupportFileType = ".rar"
+	TypeBooksGroup  SupportFileType = "book_group"
+	TypeCbz         SupportFileType = ".cbz"
+	TypeCbr         SupportFileType = ".cbr"
+	TypeEpub        SupportFileType = ".epub"
+	TypePDF         SupportFileType = ".pdf"
+	TypeMP4         SupportFileType = ".mp4"
+	TypeM4V         SupportFileType = ".m4v"
+	TypeFLV         SupportFileType = ".flv"
+	TypeWEBM        SupportFileType = ".webm"
+	TypeUnknownFile SupportFileType = "unknown"
 )
 
 //SinglePageInfo 单张书页
@@ -100,15 +96,15 @@ type SinglePageInfo struct {
 	ImgType           string    `json:"-"`        //这个字段不解析
 }
 
-//NewBook  初始化Book，设置文件路径、书名、BookID等等
-func NewBook(filePath string, modified time.Time, fileSize int64, storePath string, depth int) *Book {
+//New  初始化Book，设置文件路径、书名、BookID等等
+func New(filePath string, modified time.Time, fileSize int64, storePath string, depth int) *Book {
 	var b = Book{
-		Author:          []string{""},
-		Modified:        modified,
-		FileSize:        fileSize,
-		ExtractComplete: false,
-		Depth:           depth,
-		BookStorePath:   storePath,
+		Author:        []string{""},
+		Modified:      modified,
+		FileSize:      fileSize,
+		InitComplete:  false,
+		Depth:         depth,
+		BookStorePath: storePath,
 	}
 	//设置属性：
 	//FilePath，转换为绝对路径
@@ -135,30 +131,38 @@ func (b *Book) setFilePath(path string) {
 }
 
 //初始化Book时，取得BookType
-func getBookTypeByFilename(filename string) BookType {
+func getBookTypeByFilename(filename string) SupportFileType {
 	//获取文件后缀
 	switch strings.ToLower(path.Ext(filename)) {
 	case ".zip":
-		return BookTypeZip
+		return TypeZip
 	case ".rar":
-		return BookTypeRar
+		return TypeRar
 	case ".cbz":
-		return BookTypeCbz
+		return TypeCbz
 	case ".cbr":
-		return BookTypeCbr
+		return TypeCbr
 	case ".epub":
-		return BookTypeEpub
+		return TypeEpub
 	case ".pdf":
-		return BookTypePDF
+		return TypePDF
+	case ".mp4":
+		return TypeMP4
+	case ".m4v":
+		return TypeM4V
+	case ".flv":
+		return TypeFLV
+	case ".webm":
+		return TypeWEBM
 	default:
-		return BookTypeUnknownFile
+		return TypeUnknownFile
 	}
 }
 
 func (b *Book) setParentFolder(filePath string) {
 	//取得文件所在文件夹的路径
 	//如果类型是文件夹，同时最后一个字符是路径分隔符的话，就多取一次dir，移除多余的Unix路径分隔符或windows分隔符
-	if b.Type == BookTypeDir {
+	if b.Type == TypeDir {
 		if filePath[len(filePath)-1] == '/' || filePath[len(filePath)-1] == '\\' {
 			filePath = filepath.Dir(filePath)
 		}
@@ -180,7 +184,7 @@ func (b *Book) setParentFolder(filePath string) {
 func (b *Book) setName(filePath string) {
 	b.Name = filePath
 	//设置属性：书籍名，取文件后缀(可能为 .zip .rar .pdf .mp4等等)。
-	if b.Type != BookTypeBooksGroup { //不是书籍组(book_group)。
+	if b.Type != TypeBooksGroup { //不是书籍组(book_group)。
 		post := strings.LastIndex(filePath, "/") //Unix路径分隔符
 		if post == -1 {
 			post = strings.LastIndex(filePath, "\\") //windows分隔符
@@ -471,10 +475,14 @@ func (b *Book) GetBookID() string {
 }
 
 func (b *Book) GetAllPageNum() int {
-	//设置页数
-	b.setPageNum()
+
 	if b.Cover.Url == "" {
 		b.setClover()
+	}
+	if !b.InitComplete {
+		//设置页数
+		b.setPageNum()
+		b.InitComplete = true
 	}
 	return b.AllPageNum
 }

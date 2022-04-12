@@ -100,8 +100,8 @@ func ScanAndGetBookList(storePath string) (bookList []*book.Book, err error) {
 
 func scanDirGetBook(dirPath string, storePath string, depth int) (*book.Book, error) {
 	//初始化，生成UUID
-	newBook := book.NewBook(dirPath, time.Now(), 0, storePath, depth)
-	newBook.Type = book.BookTypeDir
+	newBook := book.New(dirPath, time.Now(), 0, storePath, depth)
+	newBook.Type = book.TypeDir
 	// 目录中的文件和子目录
 	files, err := ioutil.ReadDir(dirPath)
 	if err != nil {
@@ -147,10 +147,11 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*book.Book, 
 		fmt.Println(err.Error())
 	}
 	//初始化一本书，设置文件路径等等
-
-	newBook := book.NewBook(filePath, FileInfo.ModTime(), FileInfo.Size(), storePath, depth)
+	newBook := book.New(filePath, FileInfo.ModTime(), FileInfo.Size(), storePath, depth)
+	//根据文件类型，走不同的初始化流程
+	switch newBook.Type {
 	//为解决archiver/v4的BUG “zip文件无法读取2级目录” 单独处理zip文件
-	if newBook.Type == book.BookTypeZip || newBook.Type == book.BookTypeCbz || newBook.Type == book.BookTypeEpub {
+	case book.TypeZip, book.TypeCbz, book.TypeEpub:
 		//使用Archiver的虚拟文件系统，无法处理非UTF-8编码
 		fsys, zipErr := zip.OpenReader(filePath)
 		if zipErr != nil {
@@ -167,8 +168,16 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*book.Book, 
 			//忽略 fs.PathError 并换个方式扫描
 			err = scanNonUTF8ZipFile(filePath, newBook)
 		}
-	} else {
-		//其他类型的压缩文件或文件夹
+	////TODO:网页尝试用PDF.js解析
+	//case book.TypePDF:
+	//	newBook.AllPageNum = 1
+	//	newBook.InitComplete = true
+	////TODO：简单的网页播放器
+	//case book.TypeMP4, book.TypeM4V, book.TypeFLV, book.TypeWEBM:
+	//	newBook.AllPageNum = 1
+	//	newBook.InitComplete = true
+	//其他类型的压缩文件或文件夹
+	default:
 		fsys, err := archiver.FileSystem(filePath)
 		if err != nil {
 			return nil, err
@@ -189,7 +198,7 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*book.Book, 
 				u, ok := f.(archiver.File) //f.Name不包含路径信息.需要转换一下
 				if !ok {
 					//如果是文件夹+图片
-					newBook.Type = book.BookTypeDir
+					newBook.Type = book.TypeDir
 					////用Archiver的虚拟文件系统提供图片文件，理论上现在不应该用到
 					//newBook.Pages = append(newBook.Pages, SinglePageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: "", Url: "/cache/" + newBook.BookID + "/" + url.QueryEscape(path)})
 					//实验：用getfile接口提供文件服务

@@ -1,4 +1,4 @@
-package routers
+package handler
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ import (
 )
 
 // 下载服务器配置
-func getConfigHandler(c *gin.Context) {
+func GetConfigHandler(c *gin.Context) {
 	//golang结构体默认深拷贝（但是基本类型浅拷贝）
 	tempConfig := common.Config
 	tempConfig.GenerateConfig = false

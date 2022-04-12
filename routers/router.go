@@ -22,6 +22,7 @@ import (
 	"github.com/yumenaka/comi/common"
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/plugin"
+	"github.com/yumenaka/comi/routers/handler"
 	"github.com/yumenaka/comi/tools"
 )
 
@@ -199,24 +200,24 @@ func setWebAPI(engine *gin.Engine) {
 		c.String(http.StatusOK, fmt.Sprintf("'%s' uploaded!", file.Filename))
 	})
 	//web端需要的服务器状态，包括标题、机器状态等
-	api.GET("/getstatus", serverStatusHandler)
+	api.GET("/getstatus", handler.ServerStatusHandler)
 	//获取书架信息，不包含每页信息
-	api.GET("/getlist", getBookListHandler)
+	api.GET("/getlist", handler.GetBookListHandler)
 	//通过URL字符串参数查询书籍信息
-	api.GET("/getbook", getBookHandler)
+	api.GET("/getbook", handler.GetBookHandler)
 	//通过URL字符串参数获取特定文件
-	api.GET("/getfile", getFileHandler)
+	api.GET("/getfile", handler.GetFileHandler)
 	//通过链接下载示例配置
-	api.GET("/config.toml", getConfigHandler)
+	api.GET("/config.toml", handler.GetConfigHandler)
 	//通过链接下载示例配置
-	api.GET("/qrcode.png", getQrcodeHandler)
+	api.GET("/qrcode.png", handler.GetQrcodeHandler)
 	//301重定向跳转示例
 	api.GET("/redirect", func(c *gin.Context) {
 		//支持内部和外部的重定向
 		c.Redirect(http.StatusMovedPermanently, "http://www.google.com/")
 	})
 	//初始化websocket
-	api.GET("/ws", wsHandler)
+	api.GET("/ws", handler.WsHandler)
 
 	//TODO：设定压缩包下载链接
 	// panic: handlers are already registered for path
@@ -227,7 +228,7 @@ func setWebAPI(engine *gin.Engine) {
 		} else {
 			for _, info := range allBook.BookInfos {
 				//下载文件
-				if info.Type != book.BookTypeBooksGroup && info.Type != book.BookTypeDir {
+				if info.Type != book.TypeBooksGroup && info.Type != book.TypeDir {
 					api.StaticFile("/raw/"+info.BookID+"/"+info.Name, info.FilePath)
 				}
 			}

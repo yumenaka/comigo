@@ -1,4 +1,4 @@
-package routers
+package handler
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ import (
 )
 
 // 下载服务器配置
-func getQrcodeHandler(c *gin.Context) {
+func GetQrcodeHandler(c *gin.Context) {
 	//通过参数过去自定义文本的二维码，更通用
 	qrcode_str := c.DefaultQuery("qrcode_str", "")
 	if qrcode_str != "" {
