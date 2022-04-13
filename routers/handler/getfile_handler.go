@@ -24,7 +24,7 @@ import (
 	"github.com/yumenaka/comi/tools"
 )
 
-// 示例 URL： 127.0.0.1:1234/getfile?id=2b17a13&filename=1.jpg
+// GetFileHandler 示例 URL： 127.0.0.1:1234/getfile?id=2b17a13&filename=1.jpg
 // 缩放文件，会转化为jpeg：http://127.0.0.1:1234/api/getfile?resize_width=300&resize_height=400&id=597e06&filename=01.jpeg
 // 相关参数：
 // id：书籍的ID，必须项目       							&id=2B17a
@@ -75,11 +75,15 @@ func GetFileHandler(c *gin.Context) {
 		}
 	}
 	//如果是一般压缩文件
-	if !bookByID.NonUTF8Zip && bookByID.Type != book.TypeDir {
+	if !bookByID.NonUTF8Zip && bookByID.Type != book.TypeDir && bookByID.Type != book.TypePDF {
 		imgData, err = arch.GetSingleFile(bookPath, needFile, "")
 		if err != nil {
 			fmt.Println(err)
 		}
+	}
+	//如果是本地文件夹
+	if bookByID.Type == book.TypePDF {
+
 	}
 	//如果是本地文件夹
 	if bookByID.Type == book.TypeDir {

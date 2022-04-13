@@ -1,13 +1,7 @@
 <template>
 	<!-- 顶部,标题页头 -->
-	<Header
-		class="header"
-		v-if="this.showHeaderFlag_FlipMode"
-		:setDownLoadLink="this.needDownloadLink()"
-		:headerTitle="book.name"
-		:bookID="this.book.id"
-		:showReturnIcon="true"
-	>
+	<Header class="header" v-if="this.showHeaderFlag_FlipMode" :setDownLoadLink="this.needDownloadLink()"
+		:headerTitle="book.name" :bookID="this.book.id" :showReturnIcon="true">
 		<!-- 右边的设置图标,点击屏幕中央也可以打开 -->
 		<n-icon size="40" @click="drawerActivate('right')">
 			<settings-outline />
@@ -16,33 +10,22 @@
 	<div class="main">
 		<!-- 主题,漫画div -->
 		<!-- 事件修饰符： https://v3.cn.vuejs.org/guide/events.html#%E4%BA%8B%E4%BB%B6%E4%BF%AE%E9%A5%B0%E7%AC%A6 -->
-		<div
-			class="manga_area"
-			id="MangaMain"
-			@click.stop="onMouseClick"
-			@mousemove.stop="onMouseMove"
-			@mouseleave.stop="onMouseLeave"
-		>
+		<div class="manga_area" id="MangaMain" @click.stop="onMouseClick" @mousemove.stop="onMouseMove"
+			@mouseleave.stop="onMouseLeave">
 			<div class="manga_area_img_div">
 				<!-- 非自动拼合模式最简单,直接显示一张图 -->
-				<img
-					v-bind:src="this.imageParametersString(this.book.pages[nowPageNum - 1].url)"
-					v-bind:alt="nowPageNum"
-				/>
+				<img v-bind:src="this.imageParametersString(this.book.pages[nowPageNum - 1].url)"
+					v-bind:alt="nowPageNum" />
 
 				<!-- 简单拼合双页,不管单双页什么的 -->
-				<img
-					v-if="(!this.autoDoublePageModeFlag) && this.simpleDoublePageModeFlag && this.nowPageNum < this.book.all_page_num"
+				<img v-if="(!this.autoDoublePageModeFlag) && this.simpleDoublePageModeFlag && this.nowPageNum < this.book.all_page_num"
 					v-bind:src="this.imageParametersString(this.book.pages[nowPageNum].url)"
-					v-bind:alt="nowPageNum + 1"
-				/>
+					v-bind:alt="nowPageNum + 1" />
 
 				<!-- 自动拼合模式当前页,如果开启自动拼合,右边可能显示拼合页 -->
-				<img
-					v-if="this.autoDoublePageModeFlag && this.nowPageNum < this.book.all_page_num && this.nowAndNextPageIsSingle()"
+				<img v-if="this.autoDoublePageModeFlag && this.nowPageNum < this.book.all_page_num && this.nowAndNextPageIsSingle()"
 					v-bind:src="this.imageParametersString(this.book.pages[nowPageNum].url)"
-					v-bind:alt="nowPageNum + 1"
-				/>
+					v-bind:alt="nowPageNum + 1" />
 			</div>
 
 			<div v-if="this.showPageHintFlag_FlipMode" class="sketch_hint">{{ pageNumOrSketchHint }}</div>
@@ -67,45 +50,25 @@
 			<!-- 右手模式用 ,底部滑动条 -->
 			<div v-if="this.rightToLeftFlag">
 				<span>{{ this.nowPageNum }}</span>
-				<n-slider
-					v-model:value="nowPageNum"
-					:max="this.book.all_page_num"
-					:min="1"
-					:step="1"
-					:format-tooltip="(value) => `${value}`"
-					@update:value="this.saveNowPageNumOnUpdate"
-				/>
+				<n-slider v-model:value="nowPageNum" :max="this.book.all_page_num" :min="1" :step="1"
+					:format-tooltip="(value) => `${value}`" @update:value="this.saveNowPageNumOnUpdate" />
 				<span>{{ this.book.all_page_num }}</span>
 			</div>
 			<!-- 左手模式用 底部滑动条,设置reverse翻转计数方向 -->
 			<div v-if="!this.rightToLeftFlag">
 				<span>{{ this.book.all_page_num }}</span>
-				<n-slider
-					reverse
-					v-model:value="nowPageNum"
-					:max="this.book.all_page_num"
-					:min="1"
-					:step="1"
-					:format-tooltip="(value) => `${value}`"
-					@update:value="this.saveNowPageNumOnUpdate"
-				/>
+				<n-slider reverse v-model:value="nowPageNum" :max="this.book.all_page_num" :min="1" :step="1"
+					:format-tooltip="(value) => `${value}`" @update:value="this.saveNowPageNumOnUpdate" />
 				<span>{{ this.nowPageNum }}</span>
 			</div>
 		</div>
 	</div>
 
 	<!-- 设置抽屉,一开始隐藏 -->
-	<Drawer
-		:initDrawerActive="this.drawerActive"
-		:initDrawerPlacement="this.drawerPlacement"
-		@saveConfig="this.saveConfigToCookie"
-		@startSketch="this.startSketchMode"
-		@stopSketch="this.stopSketchMode"
-		@closeDrawer="this.drawerDeactivate"
-		:readerMode="this.readerMode"
-		:inBookShelf="false"
-		:sketching="this.sketchModeFlag"
-	>
+	<Drawer :initDrawerActive="this.drawerActive" :initDrawerPlacement="this.drawerPlacement"
+		@saveConfig="this.saveConfigToLocal" @startSketch="this.startSketchMode" @stopSketch="this.stopSketchMode"
+		@closeDrawer="this.drawerDeactivate" :readerMode="this.readerMode" :inBookShelf="false"
+		:sketching="this.sketchModeFlag">
 		<!-- 选择：切换页面模式 -->
 		<n-space>
 			<n-button @click="changeReaderModeToScrollMode">{{ $t('switch_to_scrolling_mode') }}</n-button>
@@ -115,11 +78,7 @@
 
 		<!-- Switch：页头与书名 -->
 		<n-space>
-			<n-switch
-				size="large"
-				v-model:value="this.showHeaderFlag_FlipMode"
-				@update:value="setShowHeaderChange"
-			>
+			<n-switch size="large" v-model:value="this.showHeaderFlag_FlipMode" @update:value="setShowHeaderChange">
 				<template #checked>{{ $t("showHeader") }}</template>
 				<template #unchecked>{{ $t("showHeader") }}</template>
 			</n-switch>
@@ -127,11 +86,7 @@
 
 		<!-- Switch：显示阅读进度条） -->
 		<n-space>
-			<n-switch
-				size="large"
-				v-model:value="this.showFooterFlag_FlipMode"
-				@update:value="setShowFooterFlagChange"
-			>
+			<n-switch size="large" v-model:value="this.showFooterFlag_FlipMode" @update:value="setShowFooterFlagChange">
 				<template #checked>{{ $t("readingProgressBar") }}</template>
 				<template #unchecked>{{ $t("readingProgressBar") }}</template>
 			</n-switch>
@@ -139,22 +94,15 @@
 
 		<!-- Switch：显示当前页数 -->
 		<n-space>
-			<n-switch
-				size="large"
-				v-model:value="this.showPageHintFlag_FlipMode"
-				@update:value="setShowPageNumChange"
-			>
+			<n-switch size="large" v-model:value="this.showPageHintFlag_FlipMode" @update:value="setShowPageNumChange">
 				<template #checked>{{ $t("showPageNum") }}</template>
 				<template #unchecked>{{ $t("showPageNum") }}</template>
 			</n-switch>
 		</n-space>
 		<!-- 保存阅读进度 -->
 		<n-space>
-			<n-switch
-				size="large"
-				v-model:value="this.saveNowPageNumFlag_FlipMode"
-				@update:value="this.setSavePageNumFlag"
-			>
+			<n-switch size="large" v-model:value="this.saveNowPageNumFlag_FlipMode"
+				@update:value="this.setSavePageNumFlag">
 				<template #checked>{{ $t("savePageNum") }}</template>
 				<template #unchecked>{{ $t("savePageNum") }}</template>
 			</n-switch>
@@ -164,11 +112,8 @@
 		<n-divider />
 		<!-- Switch：合并双页 -->
 		<n-space>
-			<n-switch
-				size="large"
-				v-model:value="this.simpleDoublePageModeFlag"
-				@update:value="this.setSimpleDoublePage_FlipMode"
-			>
+			<n-switch size="large" v-model:value="this.simpleDoublePageModeFlag"
+				@update:value="this.setSimpleDoublePage_FlipMode">
 				<template #checked>{{ $t('simpleDoublePage') }}</template>
 				<template #unchecked>{{ $t('simpleDoublePage') }}</template>
 			</n-switch>
@@ -176,12 +121,8 @@
 
 		<!-- Switch：翻页模式,默认右开本（日漫）-->
 		<n-space>
-			<n-switch
-				size="large"
-				v-model:value="this.rightToLeftFlag"
-				:rail-style="railStyle"
-				@update:value="this.setFlipScreenFlag"
-			>
+			<n-switch size="large" v-model:value="this.rightToLeftFlag" :rail-style="railStyle"
+				@update:value="this.setFlipScreenFlag">
 				<template #unchecked>{{ $t("rightScreenToNext") }}</template>
 				<template #checked>{{ $t("leftScreenToNext") }}</template>
 			</n-switch>
@@ -189,23 +130,15 @@
 
 		<!-- Switch：自动切边 -->
 		<n-space>
-			<n-switch
-				size="large"
-				v-model:value="this.imageParameters.do_auto_crop"
-				@update:value="setImageParameters_DoAutoCrop"
-			>
+			<n-switch size="large" v-model:value="this.imageParameters.do_auto_crop"
+				@update:value="setImageParameters_DoAutoCrop">
 				<template #checked>{{ $t('auto_crop') }}</template>
 				<template #unchecked>{{ $t('auto_crop') }}</template>
 			</n-switch>
 			<!-- 切白边阈值 -->
-			<n-input-number
-				:show-button="false"
-				v-if="this.imageParameters.do_auto_crop"
-				v-model:value="this.imageParameters.auto_crop_num"
-				@update:value="setImageParameters_AutoCropNum"
-				:max="10"
-				:min="0"
-			>
+			<n-input-number :show-button="false" v-if="this.imageParameters.do_auto_crop"
+				v-model:value="this.imageParameters.auto_crop_num" @update:value="setImageParameters_AutoCropNum"
+				:max="10" :min="0">
 				<template #prefix>{{ $t('energy_threshold') }}</template>
 			</n-input-number>
 		</n-space>
@@ -235,30 +168,15 @@
 		<n-divider v-if="this.readerMode == 'sketch'" />
 		<!-- 自动翻页秒数 -->
 		<!-- 数字输入% -->
-		<n-input-number
-			v-if="this.readerMode == 'sketch'"
-			size="small"
-			:show-button="false"
-			v-model:value="this.sketchFlipSecond"
-			:max="65535"
-			:min="1"
-			:update-value-on-input="false"
-			@update:value="this.resetSketchSecondCount"
-		>
+		<n-input-number v-if="this.readerMode == 'sketch'" size="small" :show-button="false"
+			v-model:value="this.sketchFlipSecond" :max="65535" :min="1" :update-value-on-input="false"
+			@update:value="this.resetSketchSecondCount">
 			<template #prefix>{{ $t('pageTurningSeconds') }}</template>
 			<template #suffix>{{ $t("second") }}</template>
 		</n-input-number>
 		<!-- 滑动选择% -->
-		<n-slider
-			v-if="this.readerMode == 'sketch'"
-			v-model:value="this.sketchFlipSecond"
-			:step="1"
-			:max="120"
-			:min="1"
-			:marks="marks"
-			:format-tooltip="value => `${value}s`"
-			@update:value="this.resetSketchSecondCount"
-		/>
+		<n-slider v-if="this.readerMode == 'sketch'" v-model:value="this.sketchFlipSecond" :step="1" :max="120" :min="1"
+			:marks="marks" :format-tooltip="value => `${value}s`" @update:value="this.resetSketchSecondCount" />
 	</Drawer>
 	<!-- <Bottom
 		:softVersion="this.$store.state.server_status.ServerName ? this.$store.state.server_status.ServerName : 'Comigo'"
@@ -718,7 +636,7 @@ export default defineComponent({
 			}
 		},
 		// 关闭抽屉时,保存设置到cookies
-		saveConfigToCookie() {
+		saveConfigToLocal() {
 			localStorage.setItem("debugModeFlag", this.debugModeFlag);
 			localStorage.setItem("showHeaderFlag_FlipMode", this.showHeaderFlag_FlipMode);
 			localStorage.setItem("showFooterFlag_FlipMode", this.showFooterFlag_FlipMode);
@@ -1255,6 +1173,7 @@ export default defineComponent({
 	background: v-bind("model.interfaceColor");
 	height: 5vh;
 }
+
 .bottom {
 	background: v-bind("model.interfaceColor");
 }
@@ -1296,9 +1215,12 @@ export default defineComponent({
 	flex-direction: column;
 	justify-content: center;
 	align-items: baseline;
-	user-select: none; /* 不可以被选中 */
-	-moz-user-select: none; /* 火狐 */
-	-webkit-user-select: none; /* 谷歌 */
+	user-select: none;
+	/* 不可以被选中 */
+	-moz-user-select: none;
+	/* 火狐 */
+	-webkit-user-select: none;
+	/* 谷歌 */
 	border-radius: 3px;
 	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
@@ -1320,7 +1242,8 @@ export default defineComponent({
 	/* max-height: inherit; */
 	max-height: v-bind(mangaImageHeight);
 	max-width: 100vw;
-	margin: 0px; /* 两张图片之间不要留空间*/
+	margin: 0px;
+	/* 两张图片之间不要留空间*/
 	padding: 0px;
 	background-color: #aaa;
 
@@ -1364,7 +1287,7 @@ export default defineComponent({
 		1px 0 rgb(206, 183, 183), 0 -1px rgb(196, 175, 175);
 }
 
-.footer div > span {
+.footer div>span {
 	width: 10vw;
 }
 </style>

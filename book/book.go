@@ -76,10 +76,7 @@ const (
 	TypeCbr         SupportFileType = ".cbr"
 	TypeEpub        SupportFileType = ".epub"
 	TypePDF         SupportFileType = ".pdf"
-	TypeMP4         SupportFileType = ".mp4"
-	TypeM4V         SupportFileType = ".m4v"
-	TypeFLV         SupportFileType = ".flv"
-	TypeWEBM        SupportFileType = ".webm"
+	TypeVideo       SupportFileType = "video"
 	TypeUnknownFile SupportFileType = "unknown"
 )
 
@@ -146,14 +143,8 @@ func getBookTypeByFilename(filename string) SupportFileType {
 		return TypeEpub
 	case ".pdf":
 		return TypePDF
-	case ".mp4":
-		return TypeMP4
-	case ".m4v":
-		return TypeM4V
-	case ".flv":
-		return TypeFLV
-	case ".webm":
-		return TypeWEBM
+	case ".mp4", ".m4v", ".flv", ".webm":
+		return TypeVideo
 	default:
 		return TypeUnknownFile
 	}

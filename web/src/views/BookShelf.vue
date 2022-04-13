@@ -1,13 +1,7 @@
 <template>
     <div id="BookShelf">
-        <Header
-            v-if="this.showHeaderFlag"
-            :bookIsFolder="false"
-            :headerTitle="this.bookShelfTitle"
-            :showReturnIcon="this.headerShowReturnIcon"
-            :bookID="this.bookshelf[0].id"
-            :setDownLoadLink="false"
-        >
+        <Header :bookIsFolder="false" :headerTitle="this.bookShelfTitle" :showReturnIcon="this.headerShowReturnIcon"
+            :bookID="this.bookshelf[0].id" :setDownLoadLink="false">
             <!-- 右边的设置图标,点击屏幕中央也可以打开 -->
             <n-icon size="40" @click="drawerActivate('right')">
                 <settings-outline />
@@ -22,65 +16,37 @@
             <!-- 在组件中使用v-for时,key是必须的 -->
             <!-- justify-center：让项目沿着容器主轴的中心点对齐 https://www.tailwindcss.cn/docs/justify-content -->
             <div class="flex flex-row flex-wrap justify-center">
-                <BookCard
-                    v-for="(book_info, key) in this.bookshelf"
-                    :key="key"
-                    :title="book_info.name"
-                    :id="book_info.id"
-                    :image_src="book_info.cover.url"
-                    :readerMode="this.readerMode"
+                <BookCard v-for="(book_info, key) in this.bookshelf" :key="key" :title="book_info.name"
+                    :id="book_info.id" :image_src="book_info.cover.url" :readerMode="this.readerMode"
                     :showTitle="this.bookCardShowTitleFlag"
                     :childBookNum="book_info.child_book_num ? 'x' + book_info.child_book_num : ''"
-                    @click="onOpenBook(book_info.id, book_info.book_type)"
-                ></BookCard>
+                    @click="onOpenBook(book_info.id, book_info.book_type)"></BookCard>
             </div>
         </div>
 
-        <Drawer
-            :initDrawerActive="this.drawerActive"
-            :initDrawerPlacement="this.drawerPlacement"
-            @saveConfig="this.saveConfigToLocal"
-            @startSketch="this.startSketchMode"
-            @closeDrawer="this.drawerDeactivate"
-            @setRM="this.OnSetReaderMode"
-            :readerMode="this.readerMode"
-            :sketching="false"
-            :inBookShelf="true"
-        >
+        <Drawer :initDrawerActive="this.drawerActive" :initDrawerPlacement="this.drawerPlacement"
+            @saveConfig="this.saveConfigToLocal" @startSketch="this.startSketchMode"
+            @closeDrawer="this.drawerDeactivate" @setRM="this.OnSetReaderMode" :readerMode="this.readerMode"
+            :sketching="false" :inBookShelf="true">
             <span>{{ $t('setInterfaceColor') }}</span>
-            <n-color-picker
-                v-model:value="model.interfaceColor"
-                :modes="['hex']"
-                :show-alpha="false"
-                @update:value="onInterfaceColorChange"
-            />
+            <n-color-picker v-model:value="model.interfaceColor" :modes="['hex']" :show-alpha="false"
+                @update:value="onInterfaceColorChange" />
             <span>{{ $t("setBackColor") }}</span>
-            <n-color-picker
-                v-model:value="model.backgroundColor"
-                :modes="['hex']"
-                :show-alpha="false"
-                @update:value="onBackgroundColorChange"
-            />
+            <n-color-picker v-model:value="model.backgroundColor" :modes="['hex']" :show-alpha="false"
+                @update:value="onBackgroundColorChange" />
 
             <!-- 开关：下拉阅读 -->
             <n-space>
-                <n-switch
-                    size="large"
-                    :rail-style="railStyle"
-                    v-model:value="this.readerModeIsScroll"
-                    @update:value="setReaderModeIsScroll"
-                >
+                <n-switch size="large" :rail-style="railStyle" v-model:value="this.readerModeIsScroll"
+                    @update:value="setReaderModeIsScroll">
                     <template #checked>{{ $t('scroll_mode') }}</template>
                     <template #unchecked>{{ $t('flip_mode') }}</template>
                 </n-switch>
             </n-space>
             <!-- 开关：显示书名 -->
             <n-space>
-                <n-switch
-                    size="large"
-                    v-model:value="this.bookCardShowTitleFlag"
-                    @update:value="setBookCardShowTitleFlag"
-                >
+                <n-switch size="large" v-model:value="this.bookCardShowTitleFlag"
+                    @update:value="setBookCardShowTitleFlag">
                     <template #checked>{{ $t('show_book_titles') }}</template>
                     <template #unchecked>{{ $t('show_book_titles') }}</template>
                 </n-switch>
@@ -92,13 +58,11 @@
                 <n-button>{{ $t('DownloadSampleConfigFile') }}</n-button>
             </a>
         </Drawer>
-        <Bottom
-            :softVersion="
-                this.$store.state.server_status.ServerName
-                    ? this.$store.state.server_status.ServerName
-                    : 'Comigo'
-            "
-        ></Bottom>
+        <Bottom :softVersion="
+            this.$store.state.server_status.ServerName
+                ? this.$store.state.server_status.ServerName
+                : 'Comigo'
+        "></Bottom>
     </div>
 </template>
 
@@ -209,8 +173,6 @@ export default defineComponent({
             // 开发模式 还没有做的功能与设置,设置Debug以后才能见到
             debugModeFlag: true,
             // 书籍数据,需要从远程拉取
-            // 是否显示顶部页头
-            showHeaderFlag: true,
             // 同步滚动,目前还没做
             syncScrollFlag: false,
             // 鼠标点击或触摸的位置
@@ -261,12 +223,7 @@ export default defineComponent({
         } else if (localStorage.getItem("BookCardShowTitleFlag") === "false") {
             this.bookCardShowTitleFlag = false;
         }
-        // 是否显示顶部页头
-        if (localStorage.getItem("showHeaderFlag") === "true") {
-            this.showHeaderFlag = true;
-        } else if (localStorage.getItem("showHeaderFlag") === "false") {
-            this.showHeaderFlag = false;
-        }
+
         // 当前颜色
         if (localStorage.getItem("BackgroundColor") != null) {
             this.model.backgroundColor = localStorage.getItem("BackgroundColor");
@@ -292,10 +249,9 @@ export default defineComponent({
     // 卸载前
     beforeUnmount() { },
     methods: {
-
         // 打开书阅读，或继续在书架里展示一组书
         onOpenBook(bookID, bookType) {
-            // console.log("onOpenBook  bookID：" + bookID + " bookType：" + bookType)
+            console.log("onOpenBook  bookID：" + bookID + " bookType：" + bookType)
             if (bookType == "book_group") {
                 this.$router.push({
                     name: "ChildBookShelf",
@@ -303,6 +259,11 @@ export default defineComponent({
                 });
                 return;
             }
+            // if (bookType == ".pdf") {
+            //     // 命名路由,并加上参数,让路由建立 url
+            //     this.$router.push({ name: "PDFView", params: { id: bookID } });
+            //     return;
+            // }
             if (this.readerMode == "flip" || this.readerMode == "sketch") {
                 // 命名路由,并加上参数,让路由建立 url
                 this.$router.push({ name: "FlipMode", params: { id: bookID } });
@@ -435,18 +396,10 @@ export default defineComponent({
         // 如果在一个组件上使用了 v-model:xxx,应该使用 @update:xxx  https://www.naiveui.com/zh-CN/os-theme/docs/common-issues
         saveConfigToLocal() {
             // 储存cookie
-            localStorage.setItem("showHeaderFlag", this.showHeaderFlag);
             localStorage.setItem("BackgroundColor", this.model.backgroundColor);
             localStorage.setItem("InterfaceColor", this.model.interfaceColor);
         },
-        setShowHeaderChange(value) {
-            console.log("value:" + value);
-            this.showHeaderFlag = value;
-            localStorage.setItem("showHeaderFlag", value);
-            console.log(
-                "cookie设置完毕: showHeaderFlag=" + localStorage.getItem("showHeaderFlag")
-            );
-        },
+
         // 根据可视区域(viewport)长宽比,确认是横屏还是竖屏
         // aspect-ratio https://developer.mozilla.org/zh-CN/docs/Web/CSS/@media/aspect-ratio
         // window.innerWidth  不是响应式依赖,所以不能用计算属性
@@ -464,9 +417,11 @@ export default defineComponent({
 .header {
     background: v-bind("model.interfaceColor");
 }
+
 .bottom {
     background: v-bind("model.interfaceColor");
 }
+
 .shelf {
     max-width: 100%;
     min-height: 90vh;

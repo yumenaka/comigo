@@ -8,6 +8,18 @@ import { viteCommonjs } from '@originjs/vite-plugin-commonjs';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+
+  // pdfjs-dist插件中使用了 es11 的语法，需要特殊配置：https://juejin.cn/post/6995856687106261000
+  chainWebpack: config => {
+    config.module.rule('pdfjs-dist').test({
+      test: /\.js$/,
+      include: path.join(__dirname, 'node_modules/pdfjs-dist')
+    }).use('babel-loader').loader('babel-loader').options({
+      presets: ['@babel/preset-env'],
+      plugins: ['@babel/plugin-proposal-optional-chaining']
+    })
+  },
+
   // 静态资源基础路径 base: './' || '',
   // base: process.env.NODE_ENV === 'production' ? './' : '/',
   base: '/',

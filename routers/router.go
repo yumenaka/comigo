@@ -207,6 +207,8 @@ func setWebAPI(engine *gin.Engine) {
 	api.GET("/getbook", handler.GetBookHandler)
 	//通过URL字符串参数获取特定文件
 	api.GET("/getfile", handler.GetFileHandler)
+	//通过URL字符串参数获取特定文件
+	api.GET("/get_pdf_image", handler.GetPdfImageHandler)
 	//通过链接下载示例配置
 	api.GET("/config.toml", handler.GetConfigHandler)
 	//通过链接下载示例配置

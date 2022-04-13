@@ -1,49 +1,44 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 
+	"github.com/disintegration/imaging"
 	"github.com/mholt/archiver/v4"
 )
 
 func main() {
-	zipPath := "gbk.zip"
-	err := UnArchiveZip(zipPath, "解压zip", "gbk")
+	//pageCount, err := CountPagesOfPDFFile("01.pdf")
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//for i := 0; i < pageCount; i++ {
+	//	ExportImageFromPDF("01.pdf", i+1)
+	//}
+	//ExportAllImageFromPDF("01.pdf")
+}
+
+func ImageResize() {
+	//读取本地文件，本地文件尺寸300*400
+	imgData, _ := ioutil.ReadFile("d:/1.jpg")
+	buf := bytes.NewBuffer(imgData)
+	image, err := imaging.Decode(buf)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	//生成缩略图，尺寸150*200，并保持到为文件2.jpg
+	image = imaging.Resize(image, 150, 200, imaging.Lanczos)
+	err = imaging.Save(image, "d:/2.jpg")
 	if err != nil {
 		fmt.Println(err)
 	}
-	//rarPath := "rar.rar"
-	//err = UnArchiveRar(rarPath, "解压rar")
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
-	//zipPath := "gbk.zip"
-	//_, err := ScanNonUTF8Zip(zipPath, "解压zip", []string{""}, "gbk")
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
 }
-
-//func ImageResize() {
-//	//读取本地文件，本地文件尺寸300*400
-//	imgData, _ := ioutil.ReadFile("d:/1.jpg")
-//	buf := bytes.NewBuffer(imgData)
-//	image, err := imaging.Decode(buf)
-//	if err != nil {
-//		fmt.Println(err)
-//		return
-//	}
-//	//生成缩略图，尺寸150*200，并保持到为文件2.jpg
-//	image = imaging.Resize(image, 150, 200, imaging.Lanczos)
-//	err = imaging.Save(image, "d:/2.jpg")
-//	if err != nil {
-//		fmt.Println(err)
-//	}
-//}
 
 // UnArchiveZip 一次性解压zip文件
 func UnArchiveZip(filePath string, extractPath string, textEncoding string) error {

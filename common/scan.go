@@ -168,14 +168,25 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*book.Book, 
 			//忽略 fs.PathError 并换个方式扫描
 			err = scanNonUTF8ZipFile(filePath, newBook)
 		}
-	////TODO:网页尝试用PDF.js解析
-	//case book.TypePDF:
-	//	newBook.AllPageNum = 1
-	//	newBook.InitComplete = true
-	////TODO：简单的网页播放器
-	//case book.TypeMP4, book.TypeM4V, book.TypeFLV, book.TypeWEBM:
-	//	newBook.AllPageNum = 1
-	//	newBook.InitComplete = true
+	//TODO:服务器解压速度太慢，网页用PDF.js解析？
+	case book.TypePDF:
+		pageCount, err := arch.CountPagesOfPDF(newBook.FilePath)
+		if err != nil {
+			return nil, errors.New("PDF Error：" + newBook.FilePath)
+		}
+		newBook.AllPageNum = pageCount
+		for i := 0; i < pageCount; i++ {
+			imageUrl := "api/get_pdf_image?id=" + newBook.BookID + "&filename=" + strconv.Itoa(i+1) + ".jpg"
+			newBook.Pages = append(newBook.Pages, book.SinglePageInfo{RealImageFilePATH: "", FileSize: int64(i + 1), ModeTime: FileInfo.ModTime(), NameInArchive: "", Url: imageUrl})
+		}
+		newBook.InitComplete = true
+		newBook.Cover = newBook.Pages[0]
+		newBook.Cover.Url = "/images/pdf.png"
+	//TODO：简单的网页播放器
+	case book.TypeVideo:
+		newBook.AllPageNum = 1
+		newBook.InitComplete = true
+		newBook.Cover = book.SinglePageInfo{NameInArchive: "video.png", Url: "/images/video.png"}
 	//其他类型的压缩文件或文件夹
 	default:
 		fsys, err := archiver.FileSystem(filePath)
