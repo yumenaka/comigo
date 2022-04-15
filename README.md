@@ -16,11 +16,12 @@
 
 </div>
 
-
-
+---
 
 <div align = center>
 
+<br>
+  
 ## Supported Platforms
 
 <br>
@@ -33,8 +34,20 @@
 
 </div>
 
+<br>
+
+---
+
+<br>
+
 ### Install：
 Download [the latest release for your system][Releases] 
+
+<br>
+
+---
+
+<br>
 
 ### Usage：
 ```
@@ -43,8 +56,20 @@ comi [flags] file_or_dir
 comi --help
 ```
 
+<br>
+
+---
+
+<br>
+
 ### Special Thanks：
 [mholt]、[spf13]、[disintegration]、[Baozisoftware]、[markbates] and more。
+
+<br>
+
+---
+
+<br>
 
 ### Possible Problems：
 
