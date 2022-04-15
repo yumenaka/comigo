@@ -32,7 +32,6 @@
 
 *You can also compile it yourself*
 
-</div>
 
 <br>
 
@@ -40,7 +39,8 @@
 
 <br>
 
-### Install：
+## Install
+
 Download [the latest release for your system][Releases] 
 
 <br>
@@ -49,21 +49,19 @@ Download [the latest release for your system][Releases]
 
 <br>
 
-### Usage：
-```
+## Usage
+
+<div align = left>
+
+```sh
 comi [flags] file_or_dir
-#more：
+```
+
+```sh
 comi --help
 ```
 
-<br>
-
----
-
-<br>
-
-### Special Thanks：
-[mholt]、[spf13]、[disintegration]、[Baozisoftware]、[markbates] and more。
+</div>
 
 <br>
 
@@ -71,17 +69,35 @@ comi --help
 
 <br>
 
-### Possible Problems：
+## Special Thanks
 
-#### MIME type ('text/plain') error。
+**[mholt]** **[spf13]** **[disintegration]** <br>
+**[Baozisoftware]** **[markbates]** <br>
+and more..
 
-[If you use Windows，and webpage cannot be loaded：][Windows Page Issue]
+<br>
 
-```bash
-1、Win+R 
-2、type "regedit".
-3、into the registry \HKEY_CLASSES_ROOT.js > "Content Type" 4、 changed it from "text/plain" to "application/javascript" and i restart the Comigo and that fixed it
-```
+---
+
+<br>
+
+## Possible Problems
+
+</div>
+
+#### MIMEType / `text/plain` Error
+
+*[If you use Windows，and webpage cannot be loaded.][Windows Page Issue]*
+
+1. **<kbd>Win</kbd> + <kbd>R</kbd>**
+
+2. Type `regedit`
+
+3. In the registry navigate to `\HKEY_CLASSES_ROOT.js` **>** `Content Type`
+
+4. Change `text/plain` to `application/javascript`
+
+5. Restart **ComiGo**
 
 
 <!----------------------------------------------------------------------------->
