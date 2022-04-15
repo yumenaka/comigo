@@ -3,9 +3,9 @@
   <br>ComiGo: simple comic reader<br>
 </h2>
 
-![Windows example](https://www.yumenaka.net/wp-content/uploads/2020/08/sample.gif "Windows example")  
+![Windows Example]  
 
-[中文文档](https://github.com/yumenaka/comi/blob/master/README_CN.md)   [日本語](https://github.com/yumenaka/comi/blob/master/README_JP.md)
+[中文文档][README CN]   [日本語][README JP]
 
 ## Supported platforms：
 
@@ -15,7 +15,7 @@
 - and More(You can compile it yourself).
 
 ### Install：
-Download [the latest release for your system](https://github.com/yumenaka/comi/releases ) 
+Download [the latest release for your system][Releases] 
 
 ### Usage：
 ```
@@ -25,13 +25,13 @@ comi --help
 ```
 
 ### Special Thanks：
-[mholt](https://github.com/mholt)  、[spf13](https://github.com/spf13)  [disintegration](https://github.com/disintegration)   、 [Baozisoftware ](https://github.com/Baozisoftware) 、 [markbates](github.com/markbates/pkger)  and more。
+[mholt]、[spf13]、[disintegration]、[Baozisoftware]、[markbates] and more。
 
 ### Possible Problems：
 
 #### MIME type ('text/plain') error。
 
-[If you use Windows，and webpage cannot be loaded：](https://github.com/golang/go/issues/32350)
+[If you use Windows，and webpage cannot be loaded：][Windows Page Issue]
 
 ```bash
 1、Win+R 
@@ -42,3 +42,21 @@ comi --help
 ## License
 
 This software is released under the GPL-3.0 license.
+
+
+<!----------------------------------------------------------------------------->
+
+[README JP]: README_JP.md
+[README CN]: README_CN.md
+
+[Windows Page Issue]: https://github.com/golang/go/issues/32350
+[Releases]: https://github.com/yumenaka/comi/releases
+
+[Windows Example]: https://www.yumenaka.net/wp-content/uploads/2020/08/sample.gif 'Windows Example'
+
+
+[disintegration]: https://github.com/disintegration
+[Baozisoftware]: https://github.com/Baozisoftware
+[markbates]: github.com/markbates/pkger
+[mholt]: https://github.com/mholt
+[spf13]: https://github.com/spf13
