@@ -3,6 +3,8 @@
   <br>ComiGo: simple comic reader<br>
 </h2>
 
+[![Badge License]][License]
+
 ![Windows Example]  
 
 [中文文档][README CN]   [日本語][README JP]
@@ -39,18 +41,17 @@ comi --help
 3、into the registry \HKEY_CLASSES_ROOT.js > "Content Type" 4、 changed it from "text/plain" to "application/javascript" and i restart the Comigo and that fixed it
 ```
 
-## License
-
-This software is released under the GPL-3.0 license.
-
 
 <!----------------------------------------------------------------------------->
+
+[Badge License]: https://img.shields.io/badge/License-GPLv3-blue.svg?style=for-the-badge
 
 [README JP]: README_JP.md
 [README CN]: README_CN.md
 
 [Windows Page Issue]: https://github.com/golang/go/issues/32350
 [Releases]: https://github.com/yumenaka/comi/releases
+[License]: LICENSE
 
 [Windows Example]: https://www.yumenaka.net/wp-content/uploads/2020/08/sample.gif 'Windows Example'
 
