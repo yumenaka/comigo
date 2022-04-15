@@ -172,7 +172,7 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*book.Book, 
 	case book.TypePDF:
 		newBook.AllPageNum = 1
 		newBook.InitComplete = true
-		newBook.Cover = book.SinglePageInfo{RealImageFilePATH: "", FileSize: int64(i + 1), ModeTime: FileInfo.ModTime(), NameInArchive: "", Url: "/images/pdf.png"}
+		newBook.Cover = book.SinglePageInfo{RealImageFilePATH: "", FileSize: FileInfo.Size(), ModeTime: FileInfo.ModTime(), NameInArchive: "", Url: "/images/pdf.png"}
 		//pageCount, err := arch.CountPagesOfPDF(newBook.FilePath)
 		//if err != nil {
 		//	return nil, errors.New("PDF Error：" + newBook.FilePath)
@@ -230,8 +230,8 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*book.Book, 
 		})
 	}
 	//根据文件数决定是否返回这本书
-	totalPageHint := "filePath: " + filePath + " Total image in the newBook:" + strconv.Itoa(newBook.GetAllPageNum())
-	if newBook.GetAllPageNum() >= Config.MinImageNum && newBook.Type != book.TypePDF && newBook.Type != book.TypeVideo {
+	totalPageHint := "filePath: " + filePath + " Total image:" + strconv.Itoa(newBook.GetAllPageNum())
+	if newBook.GetAllPageNum() >= Config.MinImageNum || newBook.Type == book.TypePDF || newBook.Type == book.TypeVideo {
 		fmt.Println(totalPageHint)
 		return newBook, err
 	} else {

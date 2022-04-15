@@ -1,5 +1,6 @@
 <template>
-    <div class="pdfCanvas" v-for="item in pageNum" :key="item">
+    <!-- 定位: https://www.tailwindcss.cn/docs/top-right-bottom-left -->
+    <div class="pdfCanvas flex flex-col" v-for="item in pageNum" :key="item">
         <canvas :id="`pdf-canvas-${item}`" class="pdf-page" />
     </div>
 </template>
@@ -17,6 +18,9 @@ export default {
     props: {
         url: { type: String },
         index: {
+            type: Number
+        },
+        pdfPageWidth: {
             type: Number
         },
     },
@@ -76,8 +80,13 @@ export default {
                 const ctx = canvas.getContext('2d')
                 const viewport = page.getViewport({ scale: 1 })
                 // 画布大小,默认值是width:300px,height:150px
-                canvas.height = viewport.height
-                canvas.width = viewport.width
+                // canvas.height = viewport.height
+                // canvas.width = viewport.width
+
+                canvas.width = this.pdfPageWidth
+                canvas.height = this.pdfPageWidth * (viewport.height / viewport.width)
+
+
                 // // 画布的dom大小, 设置移动端,宽度设置铺满整个屏幕
                 // const clientWidth = document.body.clientWidth
                 // canvas.style.width = clientWidth + 'px'

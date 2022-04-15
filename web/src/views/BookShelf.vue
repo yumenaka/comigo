@@ -259,11 +259,11 @@ export default defineComponent({
                 });
                 return;
             }
-            // if (bookType == ".pdf") {
-            //     // 命名路由,并加上参数,让路由建立 url
-            //     this.$router.push({ name: "PDFView", params: { id: bookID } });
-            //     return;
-            // }
+            if (bookType == ".pdf") {
+                // 命名路由,并加上参数,让路由建立 url
+                this.$router.push({ name: "PDFView", params: { id: bookID } });
+                return;
+            }
             if (this.readerMode == "flip" || this.readerMode == "sketch") {
                 // 命名路由,并加上参数,让路由建立 url
                 this.$router.push({ name: "FlipMode", params: { id: bookID } });
