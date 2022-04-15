@@ -170,18 +170,20 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*book.Book, 
 		}
 	//TODO:服务器解压速度太慢，网页用PDF.js解析？
 	case book.TypePDF:
-		pageCount, err := arch.CountPagesOfPDF(newBook.FilePath)
-		if err != nil {
-			return nil, errors.New("PDF Error：" + newBook.FilePath)
-		}
-		newBook.AllPageNum = pageCount
-		for i := 0; i < pageCount; i++ {
-			imageUrl := "api/get_pdf_image?id=" + newBook.BookID + "&filename=" + strconv.Itoa(i+1) + ".jpg"
-			newBook.Pages = append(newBook.Pages, book.SinglePageInfo{RealImageFilePATH: "", FileSize: int64(i + 1), ModeTime: FileInfo.ModTime(), NameInArchive: "", Url: imageUrl})
-		}
+		newBook.AllPageNum = 1
 		newBook.InitComplete = true
-		newBook.Cover = newBook.Pages[0]
-		newBook.Cover.Url = "/images/pdf.png"
+		newBook.Cover = book.SinglePageInfo{RealImageFilePATH: "", FileSize: int64(i + 1), ModeTime: FileInfo.ModTime(), NameInArchive: "", Url: "/images/pdf.png"}
+		//pageCount, err := arch.CountPagesOfPDF(newBook.FilePath)
+		//if err != nil {
+		//	return nil, errors.New("PDF Error：" + newBook.FilePath)
+		//}
+		//newBook.AllPageNum = pageCount
+		//for i := 0; i < pageCount; i++ {
+		//	imageUrl := "api/get_pdf_image?id=" + newBook.BookID + "&filename=" + strconv.Itoa(i+1) + ".jpg"
+		//	newBook.Pages = append(newBook.Pages, book.SinglePageInfo{RealImageFilePATH: "", FileSize: int64(i + 1), ModeTime: FileInfo.ModTime(), NameInArchive: "", Url: imageUrl})
+		//}
+		//newBook.Cover = newBook.Pages[0]
+		//newBook.Cover.Url = "/images/pdf.png"
 	//TODO：简单的网页播放器
 	case book.TypeVideo:
 		newBook.AllPageNum = 1
@@ -229,7 +231,7 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*book.Book, 
 	}
 	//根据文件数决定是否返回这本书
 	totalPageHint := "filePath: " + filePath + " Total image in the newBook:" + strconv.Itoa(newBook.GetAllPageNum())
-	if newBook.GetAllPageNum() >= Config.MinImageNum {
+	if newBook.GetAllPageNum() >= Config.MinImageNum && newBook.Type != book.TypePDF && newBook.Type != book.TypeVideo {
 		fmt.Println(totalPageHint)
 		return newBook, err
 	} else {
