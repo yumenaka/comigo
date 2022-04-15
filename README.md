@@ -1,13 +1,21 @@
-<h2 align="center">
-  <img src="https://raw.githubusercontent.com/yumenaka/comi/master/icon.ico" alt="ComiGo: simple comic reader" width="200">
-  <br>ComiGo: simple comic reader<br>
-</h2>
-
 [![Badge License]][License]
+
+<div align = center>
+
+<img width = 200 alt = 'ComiGo Logo' align = right src = icon.ico>
+
+<br>
+
+# ComiGo
+
+**A Simple Manga Reader**
+
+[:jp:][README JP] [:cn:][README CN]
 
 ![Windows Example]  
 
-[中文文档][README CN]   [日本語][README JP]
+</div>
+
 
 ## Supported platforms：
 
@@ -46,8 +54,8 @@ comi --help
 
 [Badge License]: https://img.shields.io/badge/License-GPLv3-blue.svg?style=for-the-badge
 
-[README JP]: README_JP.md
-[README CN]: README_CN.md
+[README JP]: README_JP.md '日本語'
+[README CN]: README_CN.md '中文文档'
 
 [Windows Page Issue]: https://github.com/golang/go/issues/32350
 [Releases]: https://github.com/yumenaka/comi/releases
