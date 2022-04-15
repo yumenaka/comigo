@@ -17,12 +17,21 @@
 </div>
 
 
-## Supported platforms：
 
-- Windows(386\64)
-- macOS
-- Linux（amd64、armv7\armv8）
-- and More(You can compile it yourself).
+
+<div align = center>
+
+## Supported Platforms
+
+<br>
+
+![Badge Linux] 
+![Badge Windows] 
+![Badge MacOs]
+
+*You can also compile it yourself*
+
+</div>
 
 ### Install：
 Download [the latest release for your system][Releases] 
@@ -53,6 +62,9 @@ comi --help
 <!----------------------------------------------------------------------------->
 
 [Badge License]: https://img.shields.io/badge/License-GPLv3-blue.svg?style=for-the-badge
+[Badge Windows]: https://img.shields.io/badge/Windows_-32_/_64-0078D6?style=for-the-badge&logo=windows&logoColor=white
+[Badge Linux]: https://img.shields.io/badge/Linux-AMD64_/_ARMv7/8-10B981?style=for-the-badge&logo=linux&logoColor=white
+[Badge MacOS]: https://img.shields.io/badge/MacOS-999999?style=for-the-badge&logo=apple&logoColor=white
 
 [README JP]: README_JP.md '日本語'
 [README CN]: README_CN.md '中文文档'
