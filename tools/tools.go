@@ -313,35 +313,35 @@ func DetectUTF8(s string) (valid, require bool) {
 }
 
 // PrintAllReaderURL 打印阅读链接
-func PrintAllReaderURL(Port int, OpenBrowserFlag bool, EnableFrpcServer bool, PrintAllIP bool, ServerHost string, ServerAddr string, FrpRemotePort int, DisableLAN bool, enableTls bool) {
+func PrintAllReaderURL(Port int, OpenBrowserFlag bool, EnableFrpcServer bool, PrintAllIP bool, ServerHost string, ServerAddr string, FrpRemotePort int, DisableLAN bool, enableTls bool, etcStr string) {
 	protocol := "http://"
 	if enableTls {
 		protocol = "https://"
 	}
-	localURL := protocol + "127.0.0.1:" + strconv.Itoa(Port)
-	fmt.Println(locale.GetString("local_reading") + localURL)
+	localURL := protocol + "127.0.0.1:" + strconv.Itoa(Port) + etcStr
+	fmt.Println(locale.GetString("local_reading") + localURL + etcStr)
 	//PrintQRCode(localURL)
 	//打开浏览器
 	if OpenBrowserFlag {
-		OpenBrowser(protocol + "127.0.0.1:" + strconv.Itoa(Port))
+		OpenBrowser(protocol + "127.0.0.1:" + strconv.Itoa(Port) + etcStr)
 		if EnableFrpcServer {
-			OpenBrowser(protocol + ServerAddr + ":" + strconv.Itoa(FrpRemotePort))
+			OpenBrowser(protocol + ServerAddr + ":" + strconv.Itoa(FrpRemotePort) + etcStr)
 		}
 	}
 	if !DisableLAN {
-		printURLAndQRCode(Port, EnableFrpcServer, PrintAllIP, ServerHost, ServerAddr, FrpRemotePort, protocol)
+		printURLAndQRCode(Port, EnableFrpcServer, PrintAllIP, ServerHost, ServerAddr, FrpRemotePort, protocol, etcStr)
 	}
 }
 
-func printURLAndQRCode(port int, EnableFrpcServer bool, PrintAllIP bool, ServerHost string, ServerAddr string, FrpRemotePort int, protocol string) {
+func printURLAndQRCode(port int, EnableFrpcServer bool, PrintAllIP bool, ServerHost string, ServerAddr string, FrpRemotePort int, protocol string, etcStr string) {
 	//启用Frp的时候
 	if EnableFrpcServer {
-		readURL := protocol + ServerAddr + ":" + strconv.Itoa(FrpRemotePort)
+		readURL := protocol + ServerAddr + ":" + strconv.Itoa(FrpRemotePort) + etcStr
 		fmt.Println(locale.GetString("frp_reading_url_is") + readURL)
 		PrintQRCode(readURL)
 	}
 	if ServerHost != "" {
-		readURL := protocol + ServerHost + ":" + strconv.Itoa(port)
+		readURL := protocol + ServerHost + ":" + strconv.Itoa(port) + etcStr
 		fmt.Println(locale.GetString("reading_url_maybe") + readURL)
 		PrintQRCode(readURL)
 		return
@@ -353,18 +353,17 @@ func printURLAndQRCode(port int, EnableFrpcServer bool, PrintAllIP bool, ServerH
 			fmt.Printf(locale.GetString("get_ip_error")+" %v", err)
 		}
 		for _, IP := range IPList {
-			readURL := protocol + IP + ":" + strconv.Itoa(port)
+			readURL := protocol + IP + ":" + strconv.Itoa(port) + etcStr
 			fmt.Println(locale.GetString("reading_url_maybe") + readURL)
 			PrintQRCode(readURL)
 		}
 	} else {
 		//只打印本机的首选出站IP
 		OutIP := GetOutboundIP().String()
-		readURL := protocol + OutIP + ":" + strconv.Itoa(port)
+		readURL := protocol + OutIP + ":" + strconv.Itoa(port) + etcStr
 		fmt.Println(locale.GetString("reading_url_maybe") + readURL)
 		PrintQRCode(readURL)
 	}
-
 }
 
 func PrintQRCode(text string) {

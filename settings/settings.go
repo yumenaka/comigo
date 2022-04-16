@@ -16,6 +16,7 @@ type ServerSettings struct {
 	MaxDepth             int             `json:"-" comment:"最大扫描深度"`
 	OpenBrowser          bool            `json:"-" comment:"是否同时打开浏览器，windows默认true，其他默认false"`
 	DisableLAN           bool            `json:"-" comment:"只在本机localhost提供服务，不对外共享"`
+	DefaultMode          string          `json:"default_mode" comment:"默认阅读模式，默认为空，可以设置为scroll或flip"`
 	UserName             string          `json:"-" comment:"访问限制：用户名。需要设置密码"`
 	Password             string          `json:"-" comment:"访问限制：密码。需要设置用户名。"`
 	CertFile             string          `json:"-" comment:"Https证书，同时设置KeyFile则启用HTTPS协议"`

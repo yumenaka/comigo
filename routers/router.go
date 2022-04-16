@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os/signal"
 	"strconv"
+	"strings"
 	"syscall"
 	"time"
 
@@ -277,9 +278,23 @@ func setFrpClient() {
 
 //6、printCMDMessage
 func printCMDMessage() {
-	//cmd打印链接二维码
+	//cmd打印链接二维码.如果只有一本书，就直接打开那本书.
+	etcStr := ""
+	//只有一本书的时候，URL需要附加的参数
+	if book.GetBooksNumber() == 1 {
+		bookList, err := book.GetAllBookInfoList("name")
+		if err != nil {
+			fmt.Println(err)
+		}
+		if len(bookList.BookInfos) == 1 {
+			etcStr = "/#/scroll/" + bookList.BookInfos[0].BookID
+		}
+		if common.Config.DefaultMode != "" {
+			etcStr = "/#/" + strings.ToLower(common.Config.DefaultMode) + "/" + bookList.BookInfos[0].BookID
+		}
+	}
 	enableTls := common.Config.CertFile != "" && common.Config.KeyFile != ""
-	tools.PrintAllReaderURL(common.Config.Port, common.Config.OpenBrowser, common.Config.EnableFrpcServer, common.Config.PrintAllIP, common.Config.Host, common.Config.FrpConfig.ServerAddr, common.Config.FrpConfig.RemotePort, common.Config.DisableLAN, enableTls)
+	tools.PrintAllReaderURL(common.Config.Port, common.Config.OpenBrowser, common.Config.EnableFrpcServer, common.Config.PrintAllIP, common.Config.Host, common.Config.FrpConfig.ServerAddr, common.Config.FrpConfig.RemotePort, common.Config.DisableLAN, enableTls, etcStr)
 	//打印配置，调试用
 	if common.Config.Debug {
 		litter.Dump(common.Config)

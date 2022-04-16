@@ -39,6 +39,7 @@ var (
 		DatabaseFilePath:     "",
 		OpenBrowser:          true,
 		DisableLAN:           false,
+		DefaultMode:          "scroll",
 		GenerateMetaData:     false,
 		LogToFile:            false,
 		MaxDepth:             3,
