@@ -11,7 +11,7 @@ import ScrollMode from '@/views/ScrollMode.vue'
 import FlipMode from '@/views/FlipMode.vue'
 import BookShelf from '@/views/BookShelf.vue'
 import NotFound from '@/views/NotFound404.vue'
-import PDFView from '@/views/PDFView.vue'
+// import PDFView from '@/views/PDFView.vue'
 
 //link like: https://localhost/#/scroll/4ZaZc
 
@@ -36,11 +36,11 @@ const routes = [
     component: FlipMode,
     name: 'FlipMode',
   },
-  {
-    path: '/pdf/:id',
-    component: PDFView,
-    name: 'PDFView',
-  },
+  // {
+  //   path: '/pdf/:id',
+  //   component: PDFView,
+  //   name: 'PDFView',
+  // },
   {
     path: '/about',
     component: () => import('@/views/About.vue'),

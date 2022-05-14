@@ -15,8 +15,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mholt/archiver/v4"
 	"github.com/sirupsen/logrus"
+	archiver "github.com/yumenaka/archiver/v4"
 
 	"github.com/yumenaka/comi/arch"
 	"github.com/yumenaka/comi/book"
