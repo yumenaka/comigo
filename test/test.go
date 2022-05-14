@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 
 	"github.com/disintegration/imaging"
-	"github.com/mholt/archiver/v4"
 )
 
 func main() {
