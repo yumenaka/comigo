@@ -15,6 +15,8 @@ import (
 	"github.com/yumenaka/comi/common"
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/routers"
+
+	_ "modernc.org/sqlite" //仅运行init函数
 )
 
 var viperInstance *viper.Viper
