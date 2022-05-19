@@ -3,13 +3,49 @@ package main
 import (
 	"bytes"
 	"context"
+	"database/sql"
+	"database/sql/driver"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 
+	"entgo.io/ent/dialect"
 	"github.com/disintegration/imaging"
+	"github.com/yumenaka/archiver/v4"
+	"modernc.org/sqlite"
+	//_ "modernc.org/sqlite"// //_操作其实只是引入该包。当导入一个包时，它所有的init()函数就会被执行，但有些时候并非真的需要使用这些包，仅仅是希望它的init()函数被执 行而已。这个时候就可以使用_操作引用该包了。匿名导入的包与其他方式导入包一样会让导入包编译到可执行文件中。
+
+	"github.com/yumenaka/comi/ent"
 )
+
+// 数据库参考：
+// Go製CGOフリーなSQLiteドライバーでentを使う
+// https://zenn.dev/nobonobo/articles/e9f17d183c19f6
+
+type sqliteDriver struct {
+	*sqlite.Driver
+}
+
+func (d sqliteDriver) Open(name string) (driver.Conn, error) {
+	conn, err := d.Driver.Open(name)
+	if err != nil {
+		return conn, err
+	}
+	c := conn.(interface {
+		Exec(stmt string, args []driver.Value) (driver.Result, error)
+	})
+	if _, err := c.Exec("PRAGMA foreign_keys = on;", nil); err != nil {
+		conn.Close()
+		return nil, fmt.Errorf("failed to enable enable foreign keys: %w", err)
+	}
+	return conn, nil
+}
+
+func init() {
+	sql.Register("sqlite3", sqliteDriver{Driver: &sqlite.Driver{}})
+}
 
 func main() {
 	//pageCount, err := CountPagesOfPDFFile("01.pdf")
@@ -20,6 +56,28 @@ func main() {
 	//	ExportImageFromPDF("01.pdf", i+1)
 	//}
 	//ExportAllImageFromPDF("01.pdf")
+
+	entOptions := []ent.Option{}
+	entOptions = append(entOptions, ent.Debug())
+	client, err := ent.Open(dialect.SQLite, "file:comigo.sqlite?cache=shared", entOptions...)
+	if err != nil {
+		log.Fatalf("failed opening connection to sqlite: %v", err)
+	}
+	defer client.Close()
+	if err := client.Schema.Create(context.Background()); err != nil {
+		log.Fatalf("failed creating schema resources: %v", err)
+	}
+	ctx := context.Background()
+	u, err := client.User.
+		Create().
+		SetAge(32).
+		SetName("comi").
+		Save(ctx)
+	if err != nil {
+		log.Fatalf("failed creating user: %v", err)
+	}
+	log.Println("user was created: ", u)
+
 }
 
 func ImageResize() {
