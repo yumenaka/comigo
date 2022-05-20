@@ -9,6 +9,32 @@ import (
 	"github.com/yumenaka/comi/ent"
 )
 
+// The BookFunc type is an adapter to allow the use of ordinary
+// function as Book mutator.
+type BookFunc func(context.Context, *ent.BookMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f BookFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.BookMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BookMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The SinglePageInfoFunc type is an adapter to allow the use of ordinary
+// function as SinglePageInfo mutator.
+type SinglePageInfoFunc func(context.Context, *ent.SinglePageInfoMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SinglePageInfoFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.SinglePageInfoMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SinglePageInfoMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The UserFunc type is an adapter to allow the use of ordinary
 // function as User mutator.
 type UserFunc func(context.Context, *ent.UserMutation) (ent.Value, error)

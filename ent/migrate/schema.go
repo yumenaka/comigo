@@ -8,11 +8,55 @@ import (
 )
 
 var (
+	// BooksColumns holds the columns for the "books" table.
+	BooksColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString, Size: 50},
+		{Name: "book_id", Type: field.TypeString, Unique: true},
+		{Name: "file_path", Type: field.TypeString, Unique: true},
+		{Name: "book_store_path", Type: field.TypeString},
+		{Name: "type", Type: field.TypeString},
+		{Name: "child_book_num", Type: field.TypeInt},
+		{Name: "depth", Type: field.TypeInt},
+		{Name: "parent_folder", Type: field.TypeString},
+		{Name: "all_page_num", Type: field.TypeInt},
+		{Name: "file_size", Type: field.TypeInt64},
+		{Name: "authors", Type: field.TypeString},
+		{Name: "isbn", Type: field.TypeString},
+		{Name: "press", Type: field.TypeString},
+		{Name: "published_at", Type: field.TypeString},
+		{Name: "extract_path", Type: field.TypeString},
+		{Name: "modified", Type: field.TypeTime},
+		{Name: "extract_num", Type: field.TypeInt},
+		{Name: "init_complete", Type: field.TypeBool},
+		{Name: "read_percent", Type: field.TypeFloat64},
+		{Name: "non_utf8zip", Type: field.TypeBool},
+		{Name: "zip_text_encoding", Type: field.TypeString},
+	}
+	// BooksTable holds the schema information for the "books" table.
+	BooksTable = &schema.Table{
+		Name:       "books",
+		Columns:    BooksColumns,
+		PrimaryKey: []*schema.Column{BooksColumns[0]},
+	}
+	// SinglePageInfosColumns holds the columns for the "single_page_infos" table.
+	SinglePageInfosColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+	}
+	// SinglePageInfosTable holds the schema information for the "single_page_infos" table.
+	SinglePageInfosTable = &schema.Table{
+		Name:       "single_page_infos",
+		Columns:    SinglePageInfosColumns,
+		PrimaryKey: []*schema.Column{SinglePageInfosColumns[0]},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString, Unique: true, Size: 50},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "username", Type: field.TypeString, Unique: true, Size: 50},
+		{Name: "password", Type: field.TypeString},
 		{Name: "age", Type: field.TypeInt},
-		{Name: "name", Type: field.TypeString, Default: "unknown"},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
@@ -22,6 +66,8 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		BooksTable,
+		SinglePageInfosTable,
 		UsersTable,
 	}
 )
