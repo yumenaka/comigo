@@ -2,15 +2,25 @@
 
 package user
 
+import (
+	"time"
+)
+
 const (
 	// Label holds the string label denoting the user type in the database.
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldAge holds the string denoting the age field in the database.
-	FieldAge = "age"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldCreatedAt holds the string denoting the created_at field in the database.
+	FieldCreatedAt = "created_at"
+	// FieldUsername holds the string denoting the username field in the database.
+	FieldUsername = "username"
+	// FieldPassword holds the string denoting the password field in the database.
+	FieldPassword = "password"
+	// FieldAge holds the string denoting the age field in the database.
+	FieldAge = "age"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 )
@@ -18,8 +28,11 @@ const (
 // Columns holds all SQL columns for user fields.
 var Columns = []string{
 	FieldID,
-	FieldAge,
 	FieldName,
+	FieldCreatedAt,
+	FieldUsername,
+	FieldPassword,
+	FieldAge,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -33,8 +46,12 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// NameValidator is a validator for the "name" field. It is called by the builders before save.
+	NameValidator func(string) error
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
+	DefaultCreatedAt func() time.Time
+	// UsernameValidator is a validator for the "username" field. It is called by the builders before save.
+	UsernameValidator func(string) error
 	// AgeValidator is a validator for the "age" field. It is called by the builders before save.
 	AgeValidator func(int) error
-	// DefaultName holds the default value on creation for the "name" field.
-	DefaultName string
 )

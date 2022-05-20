@@ -9,6 +9,8 @@ import (
 
 	"github.com/yumenaka/comi/ent/migrate"
 
+	"github.com/yumenaka/comi/ent/book"
+	"github.com/yumenaka/comi/ent/singlepageinfo"
 	"github.com/yumenaka/comi/ent/user"
 
 	"entgo.io/ent/dialect"
@@ -20,6 +22,10 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// Book is the client for interacting with the Book builders.
+	Book *BookClient
+	// SinglePageInfo is the client for interacting with the SinglePageInfo builders.
+	SinglePageInfo *SinglePageInfoClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 }
@@ -35,6 +41,8 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.Book = NewBookClient(c.config)
+	c.SinglePageInfo = NewSinglePageInfoClient(c.config)
 	c.User = NewUserClient(c.config)
 }
 
@@ -67,9 +75,11 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:    ctx,
-		config: cfg,
-		User:   NewUserClient(cfg),
+		ctx:            ctx,
+		config:         cfg,
+		Book:           NewBookClient(cfg),
+		SinglePageInfo: NewSinglePageInfoClient(cfg),
+		User:           NewUserClient(cfg),
 	}, nil
 }
 
@@ -87,16 +97,18 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:    ctx,
-		config: cfg,
-		User:   NewUserClient(cfg),
+		ctx:            ctx,
+		config:         cfg,
+		Book:           NewBookClient(cfg),
+		SinglePageInfo: NewSinglePageInfoClient(cfg),
+		User:           NewUserClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		User.
+//		Book.
 //		Query().
 //		Count(ctx)
 //
@@ -119,7 +131,189 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.Book.Use(hooks...)
+	c.SinglePageInfo.Use(hooks...)
 	c.User.Use(hooks...)
+}
+
+// BookClient is a client for the Book schema.
+type BookClient struct {
+	config
+}
+
+// NewBookClient returns a client for the Book from the given config.
+func NewBookClient(c config) *BookClient {
+	return &BookClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `book.Hooks(f(g(h())))`.
+func (c *BookClient) Use(hooks ...Hook) {
+	c.hooks.Book = append(c.hooks.Book, hooks...)
+}
+
+// Create returns a create builder for Book.
+func (c *BookClient) Create() *BookCreate {
+	mutation := newBookMutation(c.config, OpCreate)
+	return &BookCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Book entities.
+func (c *BookClient) CreateBulk(builders ...*BookCreate) *BookCreateBulk {
+	return &BookCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Book.
+func (c *BookClient) Update() *BookUpdate {
+	mutation := newBookMutation(c.config, OpUpdate)
+	return &BookUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *BookClient) UpdateOne(b *Book) *BookUpdateOne {
+	mutation := newBookMutation(c.config, OpUpdateOne, withBook(b))
+	return &BookUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *BookClient) UpdateOneID(id int) *BookUpdateOne {
+	mutation := newBookMutation(c.config, OpUpdateOne, withBookID(id))
+	return &BookUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Book.
+func (c *BookClient) Delete() *BookDelete {
+	mutation := newBookMutation(c.config, OpDelete)
+	return &BookDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *BookClient) DeleteOne(b *Book) *BookDeleteOne {
+	return c.DeleteOneID(b.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *BookClient) DeleteOneID(id int) *BookDeleteOne {
+	builder := c.Delete().Where(book.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &BookDeleteOne{builder}
+}
+
+// Query returns a query builder for Book.
+func (c *BookClient) Query() *BookQuery {
+	return &BookQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Book entity by its id.
+func (c *BookClient) Get(ctx context.Context, id int) (*Book, error) {
+	return c.Query().Where(book.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *BookClient) GetX(ctx context.Context, id int) *Book {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *BookClient) Hooks() []Hook {
+	return c.hooks.Book
+}
+
+// SinglePageInfoClient is a client for the SinglePageInfo schema.
+type SinglePageInfoClient struct {
+	config
+}
+
+// NewSinglePageInfoClient returns a client for the SinglePageInfo from the given config.
+func NewSinglePageInfoClient(c config) *SinglePageInfoClient {
+	return &SinglePageInfoClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `singlepageinfo.Hooks(f(g(h())))`.
+func (c *SinglePageInfoClient) Use(hooks ...Hook) {
+	c.hooks.SinglePageInfo = append(c.hooks.SinglePageInfo, hooks...)
+}
+
+// Create returns a create builder for SinglePageInfo.
+func (c *SinglePageInfoClient) Create() *SinglePageInfoCreate {
+	mutation := newSinglePageInfoMutation(c.config, OpCreate)
+	return &SinglePageInfoCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SinglePageInfo entities.
+func (c *SinglePageInfoClient) CreateBulk(builders ...*SinglePageInfoCreate) *SinglePageInfoCreateBulk {
+	return &SinglePageInfoCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SinglePageInfo.
+func (c *SinglePageInfoClient) Update() *SinglePageInfoUpdate {
+	mutation := newSinglePageInfoMutation(c.config, OpUpdate)
+	return &SinglePageInfoUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SinglePageInfoClient) UpdateOne(spi *SinglePageInfo) *SinglePageInfoUpdateOne {
+	mutation := newSinglePageInfoMutation(c.config, OpUpdateOne, withSinglePageInfo(spi))
+	return &SinglePageInfoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SinglePageInfoClient) UpdateOneID(id int) *SinglePageInfoUpdateOne {
+	mutation := newSinglePageInfoMutation(c.config, OpUpdateOne, withSinglePageInfoID(id))
+	return &SinglePageInfoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SinglePageInfo.
+func (c *SinglePageInfoClient) Delete() *SinglePageInfoDelete {
+	mutation := newSinglePageInfoMutation(c.config, OpDelete)
+	return &SinglePageInfoDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *SinglePageInfoClient) DeleteOne(spi *SinglePageInfo) *SinglePageInfoDeleteOne {
+	return c.DeleteOneID(spi.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *SinglePageInfoClient) DeleteOneID(id int) *SinglePageInfoDeleteOne {
+	builder := c.Delete().Where(singlepageinfo.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SinglePageInfoDeleteOne{builder}
+}
+
+// Query returns a query builder for SinglePageInfo.
+func (c *SinglePageInfoClient) Query() *SinglePageInfoQuery {
+	return &SinglePageInfoQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a SinglePageInfo entity by its id.
+func (c *SinglePageInfoClient) Get(ctx context.Context, id int) (*SinglePageInfo, error) {
+	return c.Query().Where(singlepageinfo.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SinglePageInfoClient) GetX(ctx context.Context, id int) *SinglePageInfo {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *SinglePageInfoClient) Hooks() []Hook {
+	return c.hooks.SinglePageInfo
 }
 
 // UserClient is a client for the User schema.

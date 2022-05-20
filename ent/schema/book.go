@@ -4,44 +4,48 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/schema/field"
 )
 
-// Book holds the schema definition for the Book entity.
+// Book 定义书籍，BooID不应该重复，根据文件路径生成
 type Book struct {
 	ent.Schema
 }
 
-// Book 定义书籍，BooID不应该重复，根据文件路径生成
-type Book struct {
-	Name            string           `json:"name" storm:"index"`                              //书名 //storm:"index" 索引字段
-	BookID          string           `json:"id"   storm:"id"`                                 //根据FilePath计算 //storm会搜索id或ID做为主键
-	FilePath        string           `json:"-" storm:"filepath" storm:"index" storm:"unique"` //storm:"index" 索引字段 storm:"unique" 唯一字段
-	BookStorePath   string           `json:"-"    storm:"index"`                              //在哪个子书库
-	Type            SupportFileType  `json:"book_type" storm:"index"`                         //可以是书籍组(book_group)、文件夹(dir)、文件后缀( .zip .rar .pdf .mp4)等
-	ChildBookNum    int              `json:"child_book_num" storm:"index"`                    //子书籍的数量
-	ChildBook       map[string]*Book `json:"child_book" `                                     //key：BookID
-	Depth           int              `json:"depth" storm:"index"`                             //文件深度
-	ParentFolder    string           `json:"parent_folder" storm:"index"`                     //所在父文件夹
-	AllPageNum      int              `json:"all_page_num" storm:"index"`                      //storm:"index" 索引字段
-	FileSize        int64            `json:"file_size" storm:"index"`                         //storm:"index" 索引字段
-	Cover           SinglePageInfo   `json:"cover" storm:"inline"`                            //storm:"inline" 内联字段，结构体嵌套时使用
-	Pages           AllPageInfo      `json:"pages" storm:"inline"`                            //storm:"inline" 内联字段，结构体嵌套时使用
-	Author          []string         `json:"-"`                                               //json不解析，启用可改为`json:"author"`
-	ISBN            string           `json:"-"`                                               //json不解析，启用可改为`json:"isbn"`
-	Press           string           `json:"-"`                                               //json不解析，启用可改为`json:"press"`        //出版社
-	PublishedAt     string           `json:"-"`                                               //json不解析，启用可改为`json:"published_at"` //出版日期
-	ExtractPath     string           `json:"-"`                                               //json不解析
-	Modified        time.Time        `json:"-"`                                               //json不解析，启用可改为`json:"modified_time"`
-	ExtractNum      int              `json:"-"`                                               //json不解析，启用可改为`json:"extract_num"`
-	InitComplete    bool             `json:"-"`                                               //json不解析，启用可改为`json:"extract_complete"`
-	ReadPercent     float64          `json:"-"`                                               //json不解析，启用可改为`json:"read_percent"`
-	NonUTF8Zip      bool             `json:"-"`                                               //json不解析，启用可改为    `json:"non_utf8_zip"`
-	ZipTextEncoding string           `json:"-"`                                               //json不解析，启用可改为   `json:"zip_text_encoding"`
-}
-
+//每次添加或修改 fields 和 edges后, 你都需要生成新的实体. 在项目的根目录执行 ent generate或直接执行 go generate ./ent 命令重新生成资源文件
 // Fields of the Book.
 func (Book) Fields() []ent.Field {
-	return nil
+	return []ent.Field{
+		field.String("Name").
+			MaxLen(50). //限制长度
+			Comment("书名"),
+		field.String("BookID").
+			Unique().Comment("书籍ID"),
+		field.String("FilePath").Comment("文件路径").
+			Unique(), //字段可以使用 Unique 方法定义为唯一字段。 注意：唯一字段不能有默认值。
+		field.String("BookStorePath").Comment("书库路径"),
+		field.String("Type").Comment("书籍类型"),
+		field.Int("ChildBookNum").NonNegative(),
+		field.Int("Depth").NonNegative(),
+		field.String("ParentFolder"),
+		field.Int("AllPageNum").
+			NonNegative(). //内置校验器，非负数
+			Comment("总页数"),
+		field.Int64("FileSize"),
+		field.String("Authors"),
+		field.String("ISBN"),
+		field.String("Press"),
+		field.String("PublishedAt"),
+		field.String("ExtractPath"),
+		field.Time("Modified").
+			Default(time.Now). //设置默认值
+			Comment("创建时间"),
+		field.Int("ExtractNum"),
+		field.Bool("InitComplete"),
+		field.Float("ReadPercent"),
+		field.Bool("NonUTF8Zip"),
+		field.String("ZipTextEncoding"),
+	}
 }
 
 // Edges of the Book.

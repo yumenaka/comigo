@@ -3,6 +3,9 @@
 package ent
 
 import (
+	"time"
+
+	"github.com/yumenaka/comi/ent/book"
 	"github.com/yumenaka/comi/ent/schema"
 	"github.com/yumenaka/comi/ent/user"
 )
@@ -11,14 +14,44 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	bookFields := schema.Book{}.Fields()
+	_ = bookFields
+	// bookDescName is the schema descriptor for Name field.
+	bookDescName := bookFields[0].Descriptor()
+	// book.NameValidator is a validator for the "Name" field. It is called by the builders before save.
+	book.NameValidator = bookDescName.Validators[0].(func(string) error)
+	// bookDescChildBookNum is the schema descriptor for ChildBookNum field.
+	bookDescChildBookNum := bookFields[5].Descriptor()
+	// book.ChildBookNumValidator is a validator for the "ChildBookNum" field. It is called by the builders before save.
+	book.ChildBookNumValidator = bookDescChildBookNum.Validators[0].(func(int) error)
+	// bookDescDepth is the schema descriptor for Depth field.
+	bookDescDepth := bookFields[6].Descriptor()
+	// book.DepthValidator is a validator for the "Depth" field. It is called by the builders before save.
+	book.DepthValidator = bookDescDepth.Validators[0].(func(int) error)
+	// bookDescAllPageNum is the schema descriptor for AllPageNum field.
+	bookDescAllPageNum := bookFields[8].Descriptor()
+	// book.AllPageNumValidator is a validator for the "AllPageNum" field. It is called by the builders before save.
+	book.AllPageNumValidator = bookDescAllPageNum.Validators[0].(func(int) error)
+	// bookDescModified is the schema descriptor for Modified field.
+	bookDescModified := bookFields[15].Descriptor()
+	// book.DefaultModified holds the default value on creation for the Modified field.
+	book.DefaultModified = bookDescModified.Default.(func() time.Time)
 	userFields := schema.User{}.Fields()
 	_ = userFields
+	// userDescName is the schema descriptor for name field.
+	userDescName := userFields[0].Descriptor()
+	// user.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	user.NameValidator = userDescName.Validators[0].(func(string) error)
+	// userDescCreatedAt is the schema descriptor for created_at field.
+	userDescCreatedAt := userFields[1].Descriptor()
+	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
+	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
+	// userDescUsername is the schema descriptor for username field.
+	userDescUsername := userFields[2].Descriptor()
+	// user.UsernameValidator is a validator for the "username" field. It is called by the builders before save.
+	user.UsernameValidator = userDescUsername.Validators[0].(func(string) error)
 	// userDescAge is the schema descriptor for age field.
-	userDescAge := userFields[0].Descriptor()
+	userDescAge := userFields[4].Descriptor()
 	// user.AgeValidator is a validator for the "age" field. It is called by the builders before save.
 	user.AgeValidator = userDescAge.Validators[0].(func(int) error)
-	// userDescName is the schema descriptor for name field.
-	userDescName := userFields[1].Descriptor()
-	// user.DefaultName holds the default value on creation for the name field.
-	user.DefaultName = userDescName.Default.(string)
 }

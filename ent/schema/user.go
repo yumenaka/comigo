@@ -15,15 +15,17 @@ type User struct {
 // Fields of the User.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
+		field.String("name").
+			MaxLen(50). //限制长度
+			Unique().Comment("用户称呼"),
+		field.Time("created_at").
+			Default(time.Now).Comment("创建时间"),
+		field.String("username").Comment("用户名").
+			MaxLen(50). //限制长度
+			Unique(),   //字段可以使用 Unique 方法定义为唯一字段。 注意：唯一字段不能有默认值。
+		field.String("password").Comment("登录密码"),
 		field.Int("age").
 			Positive(), //只能取正数
-		field.String("name").
-			Unique(),
-		field.Time("created_at").
-			Default(time.Now),
-		field.String("username").
-			Unique(), //字段可以使用 Unique 方法定义为唯一字段。 注意：唯一字段不能有默认值。
-		field.String("password"),
 	}
 }
 
