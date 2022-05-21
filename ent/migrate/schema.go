@@ -42,12 +42,32 @@ var (
 	// SinglePageInfosColumns holds the columns for the "single_page_infos" table.
 	SinglePageInfosColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "book_id", Type: field.TypeString},
+		{Name: "page_num", Type: field.TypeInt},
+		{Name: "name_in_archive", Type: field.TypeString},
+		{Name: "url", Type: field.TypeString},
+		{Name: "blur_hash", Type: field.TypeString},
+		{Name: "height", Type: field.TypeInt},
+		{Name: "width", Type: field.TypeInt},
+		{Name: "mode_time", Type: field.TypeTime},
+		{Name: "file_size", Type: field.TypeFloat64},
+		{Name: "real_image_file_path", Type: field.TypeString},
+		{Name: "img_type", Type: field.TypeString},
+		{Name: "book_page_infos", Type: field.TypeInt, Nullable: true},
 	}
 	// SinglePageInfosTable holds the schema information for the "single_page_infos" table.
 	SinglePageInfosTable = &schema.Table{
 		Name:       "single_page_infos",
 		Columns:    SinglePageInfosColumns,
 		PrimaryKey: []*schema.Column{SinglePageInfosColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "single_page_infos_books_PageInfos",
+				Columns:    []*schema.Column{SinglePageInfosColumns[12]},
+				RefColumns: []*schema.Column{BooksColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
@@ -73,4 +93,5 @@ var (
 )
 
 func init() {
+	SinglePageInfosTable.ForeignKeys[0].RefTable = BooksTable
 }

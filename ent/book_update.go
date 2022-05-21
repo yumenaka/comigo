@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/yumenaka/comi/ent/book"
 	"github.com/yumenaka/comi/ent/predicate"
+	"github.com/yumenaka/comi/ent/singlepageinfo"
 )
 
 // BookUpdate is the builder for updating Book entities.
@@ -204,9 +205,45 @@ func (bu *BookUpdate) SetZipTextEncoding(s string) *BookUpdate {
 	return bu
 }
 
+// AddPageInfoIDs adds the "PageInfos" edge to the SinglePageInfo entity by IDs.
+func (bu *BookUpdate) AddPageInfoIDs(ids ...int) *BookUpdate {
+	bu.mutation.AddPageInfoIDs(ids...)
+	return bu
+}
+
+// AddPageInfos adds the "PageInfos" edges to the SinglePageInfo entity.
+func (bu *BookUpdate) AddPageInfos(s ...*SinglePageInfo) *BookUpdate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return bu.AddPageInfoIDs(ids...)
+}
+
 // Mutation returns the BookMutation object of the builder.
 func (bu *BookUpdate) Mutation() *BookMutation {
 	return bu.mutation
+}
+
+// ClearPageInfos clears all "PageInfos" edges to the SinglePageInfo entity.
+func (bu *BookUpdate) ClearPageInfos() *BookUpdate {
+	bu.mutation.ClearPageInfos()
+	return bu
+}
+
+// RemovePageInfoIDs removes the "PageInfos" edge to SinglePageInfo entities by IDs.
+func (bu *BookUpdate) RemovePageInfoIDs(ids ...int) *BookUpdate {
+	bu.mutation.RemovePageInfoIDs(ids...)
+	return bu
+}
+
+// RemovePageInfos removes "PageInfos" edges to SinglePageInfo entities.
+func (bu *BookUpdate) RemovePageInfos(s ...*SinglePageInfo) *BookUpdate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return bu.RemovePageInfoIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -501,6 +538,60 @@ func (bu *BookUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: book.FieldZipTextEncoding,
 		})
 	}
+	if bu.mutation.PageInfosCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   book.PageInfosTable,
+			Columns: []string{book.PageInfosColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: singlepageinfo.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bu.mutation.RemovedPageInfosIDs(); len(nodes) > 0 && !bu.mutation.PageInfosCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   book.PageInfosTable,
+			Columns: []string{book.PageInfosColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: singlepageinfo.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bu.mutation.PageInfosIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   book.PageInfosTable,
+			Columns: []string{book.PageInfosColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: singlepageinfo.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, bu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{book.Label}
@@ -696,9 +787,45 @@ func (buo *BookUpdateOne) SetZipTextEncoding(s string) *BookUpdateOne {
 	return buo
 }
 
+// AddPageInfoIDs adds the "PageInfos" edge to the SinglePageInfo entity by IDs.
+func (buo *BookUpdateOne) AddPageInfoIDs(ids ...int) *BookUpdateOne {
+	buo.mutation.AddPageInfoIDs(ids...)
+	return buo
+}
+
+// AddPageInfos adds the "PageInfos" edges to the SinglePageInfo entity.
+func (buo *BookUpdateOne) AddPageInfos(s ...*SinglePageInfo) *BookUpdateOne {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return buo.AddPageInfoIDs(ids...)
+}
+
 // Mutation returns the BookMutation object of the builder.
 func (buo *BookUpdateOne) Mutation() *BookMutation {
 	return buo.mutation
+}
+
+// ClearPageInfos clears all "PageInfos" edges to the SinglePageInfo entity.
+func (buo *BookUpdateOne) ClearPageInfos() *BookUpdateOne {
+	buo.mutation.ClearPageInfos()
+	return buo
+}
+
+// RemovePageInfoIDs removes the "PageInfos" edge to SinglePageInfo entities by IDs.
+func (buo *BookUpdateOne) RemovePageInfoIDs(ids ...int) *BookUpdateOne {
+	buo.mutation.RemovePageInfoIDs(ids...)
+	return buo
+}
+
+// RemovePageInfos removes "PageInfos" edges to SinglePageInfo entities.
+func (buo *BookUpdateOne) RemovePageInfos(s ...*SinglePageInfo) *BookUpdateOne {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return buo.RemovePageInfoIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -1016,6 +1143,60 @@ func (buo *BookUpdateOne) sqlSave(ctx context.Context) (_node *Book, err error) 
 			Value:  value,
 			Column: book.FieldZipTextEncoding,
 		})
+	}
+	if buo.mutation.PageInfosCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   book.PageInfosTable,
+			Columns: []string{book.PageInfosColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: singlepageinfo.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := buo.mutation.RemovedPageInfosIDs(); len(nodes) > 0 && !buo.mutation.PageInfosCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   book.PageInfosTable,
+			Columns: []string{book.PageInfosColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: singlepageinfo.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := buo.mutation.PageInfosIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   book.PageInfosTable,
+			Columns: []string{book.PageInfosColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: singlepageinfo.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Book{config: buo.config}
 	_spec.Assign = _node.assignValues

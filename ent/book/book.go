@@ -53,8 +53,17 @@ const (
 	FieldNonUTF8Zip = "non_utf8zip"
 	// FieldZipTextEncoding holds the string denoting the ziptextencoding field in the database.
 	FieldZipTextEncoding = "zip_text_encoding"
+	// EdgePageInfos holds the string denoting the pageinfos edge name in mutations.
+	EdgePageInfos = "PageInfos"
 	// Table holds the table name of the book in the database.
 	Table = "books"
+	// PageInfosTable is the table that holds the PageInfos relation/edge.
+	PageInfosTable = "single_page_infos"
+	// PageInfosInverseTable is the table name for the SinglePageInfo entity.
+	// It exists in this package in order to avoid circular dependency with the "singlepageinfo" package.
+	PageInfosInverseTable = "single_page_infos"
+	// PageInfosColumn is the table column denoting the PageInfos relation/edge.
+	PageInfosColumn = "book_page_infos"
 )
 
 // Columns holds all SQL columns for book fields.

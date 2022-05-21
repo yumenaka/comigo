@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/yumenaka/comi/ent/book"
+	"github.com/yumenaka/comi/ent/singlepageinfo"
 )
 
 // BookCreate is the builder for creating a Book entity.
@@ -152,6 +153,21 @@ func (bc *BookCreate) SetNonUTF8Zip(b bool) *BookCreate {
 func (bc *BookCreate) SetZipTextEncoding(s string) *BookCreate {
 	bc.mutation.SetZipTextEncoding(s)
 	return bc
+}
+
+// AddPageInfoIDs adds the "PageInfos" edge to the SinglePageInfo entity by IDs.
+func (bc *BookCreate) AddPageInfoIDs(ids ...int) *BookCreate {
+	bc.mutation.AddPageInfoIDs(ids...)
+	return bc
+}
+
+// AddPageInfos adds the "PageInfos" edges to the SinglePageInfo entity.
+func (bc *BookCreate) AddPageInfos(s ...*SinglePageInfo) *BookCreate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return bc.AddPageInfoIDs(ids...)
 }
 
 // Mutation returns the BookMutation object of the builder.
@@ -510,6 +526,25 @@ func (bc *BookCreate) createSpec() (*Book, *sqlgraph.CreateSpec) {
 			Column: book.FieldZipTextEncoding,
 		})
 		_node.ZipTextEncoding = value
+	}
+	if nodes := bc.mutation.PageInfosIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   book.PageInfosTable,
+			Columns: []string{book.PageInfosColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: singlepageinfo.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

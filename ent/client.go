@@ -15,6 +15,7 @@ import (
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -219,6 +220,22 @@ func (c *BookClient) GetX(ctx context.Context, id int) *Book {
 		panic(err)
 	}
 	return obj
+}
+
+// QueryPageInfos queries the PageInfos edge of a Book.
+func (c *BookClient) QueryPageInfos(b *Book) *SinglePageInfoQuery {
+	query := &SinglePageInfoQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := b.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(book.Table, book.FieldID, id),
+			sqlgraph.To(singlepageinfo.Table, singlepageinfo.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, book.PageInfosTable, book.PageInfosColumn),
+		)
+		fromV = sqlgraph.Neighbors(b.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // Hooks returns the client hooks.

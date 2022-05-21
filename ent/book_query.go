@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
@@ -13,6 +14,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/yumenaka/comi/ent/book"
 	"github.com/yumenaka/comi/ent/predicate"
+	"github.com/yumenaka/comi/ent/singlepageinfo"
 )
 
 // BookQuery is the builder for querying Book entities.
@@ -24,6 +26,8 @@ type BookQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Book
+	// eager-loading edges.
+	withPageInfos *SinglePageInfoQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -58,6 +62,28 @@ func (bq *BookQuery) Unique(unique bool) *BookQuery {
 func (bq *BookQuery) Order(o ...OrderFunc) *BookQuery {
 	bq.order = append(bq.order, o...)
 	return bq
+}
+
+// QueryPageInfos chains the current query on the "PageInfos" edge.
+func (bq *BookQuery) QueryPageInfos() *SinglePageInfoQuery {
+	query := &SinglePageInfoQuery{config: bq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := bq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := bq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(book.Table, book.FieldID, selector),
+			sqlgraph.To(singlepageinfo.Table, singlepageinfo.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, book.PageInfosTable, book.PageInfosColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(bq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first Book entity from the query.
@@ -236,16 +262,28 @@ func (bq *BookQuery) Clone() *BookQuery {
 		return nil
 	}
 	return &BookQuery{
-		config:     bq.config,
-		limit:      bq.limit,
-		offset:     bq.offset,
-		order:      append([]OrderFunc{}, bq.order...),
-		predicates: append([]predicate.Book{}, bq.predicates...),
+		config:        bq.config,
+		limit:         bq.limit,
+		offset:        bq.offset,
+		order:         append([]OrderFunc{}, bq.order...),
+		predicates:    append([]predicate.Book{}, bq.predicates...),
+		withPageInfos: bq.withPageInfos.Clone(),
 		// clone intermediate query.
 		sql:    bq.sql.Clone(),
 		path:   bq.path,
 		unique: bq.unique,
 	}
+}
+
+// WithPageInfos tells the query-builder to eager-load the nodes that are connected to
+// the "PageInfos" edge. The optional arguments are used to configure the query builder of the edge.
+func (bq *BookQuery) WithPageInfos(opts ...func(*SinglePageInfoQuery)) *BookQuery {
+	query := &SinglePageInfoQuery{config: bq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	bq.withPageInfos = query
+	return bq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -311,8 +349,11 @@ func (bq *BookQuery) prepareQuery(ctx context.Context) error {
 
 func (bq *BookQuery) sqlAll(ctx context.Context) ([]*Book, error) {
 	var (
-		nodes = []*Book{}
-		_spec = bq.querySpec()
+		nodes       = []*Book{}
+		_spec       = bq.querySpec()
+		loadedTypes = [1]bool{
+			bq.withPageInfos != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &Book{config: bq.config}
@@ -324,6 +365,7 @@ func (bq *BookQuery) sqlAll(ctx context.Context) ([]*Book, error) {
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	if err := sqlgraph.QueryNodes(ctx, bq.driver, _spec); err != nil {
@@ -332,6 +374,36 @@ func (bq *BookQuery) sqlAll(ctx context.Context) ([]*Book, error) {
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+
+	if query := bq.withPageInfos; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*Book)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.PageInfos = []*SinglePageInfo{}
+		}
+		query.withFKs = true
+		query.Where(predicate.SinglePageInfo(func(s *sql.Selector) {
+			s.Where(sql.InValues(book.PageInfosColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.book_page_infos
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "book_page_infos" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "book_page_infos" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.PageInfos = append(node.Edges.PageInfos, n)
+		}
+	}
+
 	return nodes, nil
 }
 

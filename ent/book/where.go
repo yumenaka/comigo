@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/yumenaka/comi/ent/predicate"
 )
 
@@ -2128,6 +2129,34 @@ func ZipTextEncodingEqualFold(v string) predicate.Book {
 func ZipTextEncodingContainsFold(v string) predicate.Book {
 	return predicate.Book(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldZipTextEncoding), v))
+	})
+}
+
+// HasPageInfos applies the HasEdge predicate on the "PageInfos" edge.
+func HasPageInfos() predicate.Book {
+	return predicate.Book(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(PageInfosTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, PageInfosTable, PageInfosColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPageInfosWith applies the HasEdge predicate on the "PageInfos" edge with a given conditions (other predicates).
+func HasPageInfosWith(preds ...predicate.SinglePageInfo) predicate.Book {
+	return predicate.Book(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(PageInfosInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, PageInfosTable, PageInfosColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
 	})
 }
 

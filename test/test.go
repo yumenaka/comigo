@@ -8,8 +8,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"os"
 	"path/filepath"
+	"strconv"
+	"time"
 
 	"entgo.io/ent/dialect"
 	"github.com/disintegration/imaging"
@@ -48,6 +51,75 @@ func init() {
 }
 
 func main() {
+	testDatabase()
+}
+
+func testDatabase() {
+
+	//链接或创建数据库
+	entOptions := []ent.Option{}
+	entOptions = append(entOptions, ent.Debug())
+	//连接器
+	client, err := ent.Open(dialect.SQLite, "file:comigo.sqlite?cache=shared", entOptions...)
+	if err != nil {
+		log.Fatalf("failed opening connection to sqlite: %v", err)
+	}
+	defer client.Close()
+
+	if err := client.Schema.Create(context.Background()); err != nil {
+		log.Fatalf("failed creating schema resources: %v", err)
+	}
+	//弄个随机数、为那些不能重复的字段加个随机后缀
+	r := rand.New(rand.NewSource(time.Now().Unix()))
+	randString := strconv.Itoa(r.Intn(100000))
+
+	//如何增删查改： https://entgo.io/zh/docs/crud
+
+	//插入一个User
+	ctx := context.Background()
+	u, err := client.User.
+		Create().
+		SetAge(32).
+		SetUsername("test UserName" + randString).
+		SetPassword("12345").
+		SetName("Test Admin" + randString).
+		Save(ctx)
+	if err != nil {
+		log.Fatalf("failed creating user: %v", err)
+	}
+	log.Println("user was created: ", u)
+
+	//插入一本书
+	b, err := client.Book.
+		Create().
+		SetName("Test Book Name" + randString).
+		SetBookID("BookID" + randString).
+		SetFilePath("path" + randString).
+		SetBookStorePath("path2").
+		SetChildBookNum(0).
+		SetType("zip").
+		SetDepth(1).
+		SetParentFolder("ParentPath").
+		SetAllPageNum(99).
+		SetFileSize(66).
+		SetAuthors("unknown").
+		SetISBN("").
+		SetPress("").
+		SetPublishedAt("").
+		SetExtractPath("").
+		SetInitComplete(true).
+		SetReadPercent(0.01).
+		SetNonUTF8Zip(false).
+		SetZipTextEncoding("").
+		SetExtractNum(0).
+		Save(ctx) // 创建并返回 //还有一个SaveX(ctx)，和 Save() 不一样， SaveX 在出错时 panic。
+	if err != nil {
+		log.Fatalf("failed creating book: %v", err)
+	}
+	log.Println("book was created: ", b)
+}
+
+func testPDF() {
 	//pageCount, err := CountPagesOfPDFFile("01.pdf")
 	//if err != nil {
 	//	fmt.Println(err)
@@ -56,28 +128,6 @@ func main() {
 	//	ExportImageFromPDF("01.pdf", i+1)
 	//}
 	//ExportAllImageFromPDF("01.pdf")
-
-	entOptions := []ent.Option{}
-	entOptions = append(entOptions, ent.Debug())
-	client, err := ent.Open(dialect.SQLite, "file:comigo.sqlite?cache=shared", entOptions...)
-	if err != nil {
-		log.Fatalf("failed opening connection to sqlite: %v", err)
-	}
-	defer client.Close()
-	if err := client.Schema.Create(context.Background()); err != nil {
-		log.Fatalf("failed creating schema resources: %v", err)
-	}
-	ctx := context.Background()
-	u, err := client.User.
-		Create().
-		SetAge(32).
-		SetName("comi").
-		Save(ctx)
-	if err != nil {
-		log.Fatalf("failed creating user: %v", err)
-	}
-	log.Println("user was created: ", u)
-
 }
 
 func ImageResize() {

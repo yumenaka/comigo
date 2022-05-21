@@ -3,6 +3,8 @@
 package singlepageinfo
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"github.com/yumenaka/comi/ent/predicate"
 )
@@ -87,6 +89,1129 @@ func IDLT(id int) predicate.SinglePageInfo {
 func IDLTE(id int) predicate.SinglePageInfo {
 	return predicate.SinglePageInfo(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldID), id))
+	})
+}
+
+// BookID applies equality check predicate on the "BookID" field. It's identical to BookIDEQ.
+func BookID(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldBookID), v))
+	})
+}
+
+// PageNum applies equality check predicate on the "PageNum" field. It's identical to PageNumEQ.
+func PageNum(v int) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldPageNum), v))
+	})
+}
+
+// NameInArchive applies equality check predicate on the "NameInArchive" field. It's identical to NameInArchiveEQ.
+func NameInArchive(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldNameInArchive), v))
+	})
+}
+
+// URL applies equality check predicate on the "Url" field. It's identical to URLEQ.
+func URL(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldURL), v))
+	})
+}
+
+// BlurHash applies equality check predicate on the "BlurHash" field. It's identical to BlurHashEQ.
+func BlurHash(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldBlurHash), v))
+	})
+}
+
+// Height applies equality check predicate on the "Height" field. It's identical to HeightEQ.
+func Height(v int) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldHeight), v))
+	})
+}
+
+// Width applies equality check predicate on the "Width" field. It's identical to WidthEQ.
+func Width(v int) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldWidth), v))
+	})
+}
+
+// ModeTime applies equality check predicate on the "ModeTime" field. It's identical to ModeTimeEQ.
+func ModeTime(v time.Time) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldModeTime), v))
+	})
+}
+
+// FileSize applies equality check predicate on the "FileSize" field. It's identical to FileSizeEQ.
+func FileSize(v float64) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldFileSize), v))
+	})
+}
+
+// RealImageFilePATH applies equality check predicate on the "RealImageFilePATH" field. It's identical to RealImageFilePATHEQ.
+func RealImageFilePATH(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldRealImageFilePATH), v))
+	})
+}
+
+// ImgType applies equality check predicate on the "ImgType" field. It's identical to ImgTypeEQ.
+func ImgType(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldImgType), v))
+	})
+}
+
+// BookIDEQ applies the EQ predicate on the "BookID" field.
+func BookIDEQ(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldBookID), v))
+	})
+}
+
+// BookIDNEQ applies the NEQ predicate on the "BookID" field.
+func BookIDNEQ(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldBookID), v))
+	})
+}
+
+// BookIDIn applies the In predicate on the "BookID" field.
+func BookIDIn(vs ...string) predicate.SinglePageInfo {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldBookID), v...))
+	})
+}
+
+// BookIDNotIn applies the NotIn predicate on the "BookID" field.
+func BookIDNotIn(vs ...string) predicate.SinglePageInfo {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldBookID), v...))
+	})
+}
+
+// BookIDGT applies the GT predicate on the "BookID" field.
+func BookIDGT(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldBookID), v))
+	})
+}
+
+// BookIDGTE applies the GTE predicate on the "BookID" field.
+func BookIDGTE(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldBookID), v))
+	})
+}
+
+// BookIDLT applies the LT predicate on the "BookID" field.
+func BookIDLT(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldBookID), v))
+	})
+}
+
+// BookIDLTE applies the LTE predicate on the "BookID" field.
+func BookIDLTE(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldBookID), v))
+	})
+}
+
+// BookIDContains applies the Contains predicate on the "BookID" field.
+func BookIDContains(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldBookID), v))
+	})
+}
+
+// BookIDHasPrefix applies the HasPrefix predicate on the "BookID" field.
+func BookIDHasPrefix(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldBookID), v))
+	})
+}
+
+// BookIDHasSuffix applies the HasSuffix predicate on the "BookID" field.
+func BookIDHasSuffix(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldBookID), v))
+	})
+}
+
+// BookIDEqualFold applies the EqualFold predicate on the "BookID" field.
+func BookIDEqualFold(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldBookID), v))
+	})
+}
+
+// BookIDContainsFold applies the ContainsFold predicate on the "BookID" field.
+func BookIDContainsFold(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldBookID), v))
+	})
+}
+
+// PageNumEQ applies the EQ predicate on the "PageNum" field.
+func PageNumEQ(v int) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldPageNum), v))
+	})
+}
+
+// PageNumNEQ applies the NEQ predicate on the "PageNum" field.
+func PageNumNEQ(v int) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldPageNum), v))
+	})
+}
+
+// PageNumIn applies the In predicate on the "PageNum" field.
+func PageNumIn(vs ...int) predicate.SinglePageInfo {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldPageNum), v...))
+	})
+}
+
+// PageNumNotIn applies the NotIn predicate on the "PageNum" field.
+func PageNumNotIn(vs ...int) predicate.SinglePageInfo {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldPageNum), v...))
+	})
+}
+
+// PageNumGT applies the GT predicate on the "PageNum" field.
+func PageNumGT(v int) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldPageNum), v))
+	})
+}
+
+// PageNumGTE applies the GTE predicate on the "PageNum" field.
+func PageNumGTE(v int) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldPageNum), v))
+	})
+}
+
+// PageNumLT applies the LT predicate on the "PageNum" field.
+func PageNumLT(v int) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldPageNum), v))
+	})
+}
+
+// PageNumLTE applies the LTE predicate on the "PageNum" field.
+func PageNumLTE(v int) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldPageNum), v))
+	})
+}
+
+// NameInArchiveEQ applies the EQ predicate on the "NameInArchive" field.
+func NameInArchiveEQ(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldNameInArchive), v))
+	})
+}
+
+// NameInArchiveNEQ applies the NEQ predicate on the "NameInArchive" field.
+func NameInArchiveNEQ(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldNameInArchive), v))
+	})
+}
+
+// NameInArchiveIn applies the In predicate on the "NameInArchive" field.
+func NameInArchiveIn(vs ...string) predicate.SinglePageInfo {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldNameInArchive), v...))
+	})
+}
+
+// NameInArchiveNotIn applies the NotIn predicate on the "NameInArchive" field.
+func NameInArchiveNotIn(vs ...string) predicate.SinglePageInfo {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldNameInArchive), v...))
+	})
+}
+
+// NameInArchiveGT applies the GT predicate on the "NameInArchive" field.
+func NameInArchiveGT(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldNameInArchive), v))
+	})
+}
+
+// NameInArchiveGTE applies the GTE predicate on the "NameInArchive" field.
+func NameInArchiveGTE(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldNameInArchive), v))
+	})
+}
+
+// NameInArchiveLT applies the LT predicate on the "NameInArchive" field.
+func NameInArchiveLT(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldNameInArchive), v))
+	})
+}
+
+// NameInArchiveLTE applies the LTE predicate on the "NameInArchive" field.
+func NameInArchiveLTE(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldNameInArchive), v))
+	})
+}
+
+// NameInArchiveContains applies the Contains predicate on the "NameInArchive" field.
+func NameInArchiveContains(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldNameInArchive), v))
+	})
+}
+
+// NameInArchiveHasPrefix applies the HasPrefix predicate on the "NameInArchive" field.
+func NameInArchiveHasPrefix(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldNameInArchive), v))
+	})
+}
+
+// NameInArchiveHasSuffix applies the HasSuffix predicate on the "NameInArchive" field.
+func NameInArchiveHasSuffix(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldNameInArchive), v))
+	})
+}
+
+// NameInArchiveEqualFold applies the EqualFold predicate on the "NameInArchive" field.
+func NameInArchiveEqualFold(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldNameInArchive), v))
+	})
+}
+
+// NameInArchiveContainsFold applies the ContainsFold predicate on the "NameInArchive" field.
+func NameInArchiveContainsFold(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldNameInArchive), v))
+	})
+}
+
+// URLEQ applies the EQ predicate on the "Url" field.
+func URLEQ(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldURL), v))
+	})
+}
+
+// URLNEQ applies the NEQ predicate on the "Url" field.
+func URLNEQ(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldURL), v))
+	})
+}
+
+// URLIn applies the In predicate on the "Url" field.
+func URLIn(vs ...string) predicate.SinglePageInfo {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldURL), v...))
+	})
+}
+
+// URLNotIn applies the NotIn predicate on the "Url" field.
+func URLNotIn(vs ...string) predicate.SinglePageInfo {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldURL), v...))
+	})
+}
+
+// URLGT applies the GT predicate on the "Url" field.
+func URLGT(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldURL), v))
+	})
+}
+
+// URLGTE applies the GTE predicate on the "Url" field.
+func URLGTE(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldURL), v))
+	})
+}
+
+// URLLT applies the LT predicate on the "Url" field.
+func URLLT(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldURL), v))
+	})
+}
+
+// URLLTE applies the LTE predicate on the "Url" field.
+func URLLTE(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldURL), v))
+	})
+}
+
+// URLContains applies the Contains predicate on the "Url" field.
+func URLContains(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldURL), v))
+	})
+}
+
+// URLHasPrefix applies the HasPrefix predicate on the "Url" field.
+func URLHasPrefix(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldURL), v))
+	})
+}
+
+// URLHasSuffix applies the HasSuffix predicate on the "Url" field.
+func URLHasSuffix(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldURL), v))
+	})
+}
+
+// URLEqualFold applies the EqualFold predicate on the "Url" field.
+func URLEqualFold(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldURL), v))
+	})
+}
+
+// URLContainsFold applies the ContainsFold predicate on the "Url" field.
+func URLContainsFold(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldURL), v))
+	})
+}
+
+// BlurHashEQ applies the EQ predicate on the "BlurHash" field.
+func BlurHashEQ(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldBlurHash), v))
+	})
+}
+
+// BlurHashNEQ applies the NEQ predicate on the "BlurHash" field.
+func BlurHashNEQ(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldBlurHash), v))
+	})
+}
+
+// BlurHashIn applies the In predicate on the "BlurHash" field.
+func BlurHashIn(vs ...string) predicate.SinglePageInfo {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldBlurHash), v...))
+	})
+}
+
+// BlurHashNotIn applies the NotIn predicate on the "BlurHash" field.
+func BlurHashNotIn(vs ...string) predicate.SinglePageInfo {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldBlurHash), v...))
+	})
+}
+
+// BlurHashGT applies the GT predicate on the "BlurHash" field.
+func BlurHashGT(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldBlurHash), v))
+	})
+}
+
+// BlurHashGTE applies the GTE predicate on the "BlurHash" field.
+func BlurHashGTE(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldBlurHash), v))
+	})
+}
+
+// BlurHashLT applies the LT predicate on the "BlurHash" field.
+func BlurHashLT(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldBlurHash), v))
+	})
+}
+
+// BlurHashLTE applies the LTE predicate on the "BlurHash" field.
+func BlurHashLTE(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldBlurHash), v))
+	})
+}
+
+// BlurHashContains applies the Contains predicate on the "BlurHash" field.
+func BlurHashContains(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldBlurHash), v))
+	})
+}
+
+// BlurHashHasPrefix applies the HasPrefix predicate on the "BlurHash" field.
+func BlurHashHasPrefix(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldBlurHash), v))
+	})
+}
+
+// BlurHashHasSuffix applies the HasSuffix predicate on the "BlurHash" field.
+func BlurHashHasSuffix(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldBlurHash), v))
+	})
+}
+
+// BlurHashEqualFold applies the EqualFold predicate on the "BlurHash" field.
+func BlurHashEqualFold(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldBlurHash), v))
+	})
+}
+
+// BlurHashContainsFold applies the ContainsFold predicate on the "BlurHash" field.
+func BlurHashContainsFold(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldBlurHash), v))
+	})
+}
+
+// HeightEQ applies the EQ predicate on the "Height" field.
+func HeightEQ(v int) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldHeight), v))
+	})
+}
+
+// HeightNEQ applies the NEQ predicate on the "Height" field.
+func HeightNEQ(v int) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldHeight), v))
+	})
+}
+
+// HeightIn applies the In predicate on the "Height" field.
+func HeightIn(vs ...int) predicate.SinglePageInfo {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldHeight), v...))
+	})
+}
+
+// HeightNotIn applies the NotIn predicate on the "Height" field.
+func HeightNotIn(vs ...int) predicate.SinglePageInfo {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldHeight), v...))
+	})
+}
+
+// HeightGT applies the GT predicate on the "Height" field.
+func HeightGT(v int) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldHeight), v))
+	})
+}
+
+// HeightGTE applies the GTE predicate on the "Height" field.
+func HeightGTE(v int) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldHeight), v))
+	})
+}
+
+// HeightLT applies the LT predicate on the "Height" field.
+func HeightLT(v int) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldHeight), v))
+	})
+}
+
+// HeightLTE applies the LTE predicate on the "Height" field.
+func HeightLTE(v int) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldHeight), v))
+	})
+}
+
+// WidthEQ applies the EQ predicate on the "Width" field.
+func WidthEQ(v int) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldWidth), v))
+	})
+}
+
+// WidthNEQ applies the NEQ predicate on the "Width" field.
+func WidthNEQ(v int) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldWidth), v))
+	})
+}
+
+// WidthIn applies the In predicate on the "Width" field.
+func WidthIn(vs ...int) predicate.SinglePageInfo {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldWidth), v...))
+	})
+}
+
+// WidthNotIn applies the NotIn predicate on the "Width" field.
+func WidthNotIn(vs ...int) predicate.SinglePageInfo {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldWidth), v...))
+	})
+}
+
+// WidthGT applies the GT predicate on the "Width" field.
+func WidthGT(v int) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldWidth), v))
+	})
+}
+
+// WidthGTE applies the GTE predicate on the "Width" field.
+func WidthGTE(v int) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldWidth), v))
+	})
+}
+
+// WidthLT applies the LT predicate on the "Width" field.
+func WidthLT(v int) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldWidth), v))
+	})
+}
+
+// WidthLTE applies the LTE predicate on the "Width" field.
+func WidthLTE(v int) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldWidth), v))
+	})
+}
+
+// ModeTimeEQ applies the EQ predicate on the "ModeTime" field.
+func ModeTimeEQ(v time.Time) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldModeTime), v))
+	})
+}
+
+// ModeTimeNEQ applies the NEQ predicate on the "ModeTime" field.
+func ModeTimeNEQ(v time.Time) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldModeTime), v))
+	})
+}
+
+// ModeTimeIn applies the In predicate on the "ModeTime" field.
+func ModeTimeIn(vs ...time.Time) predicate.SinglePageInfo {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldModeTime), v...))
+	})
+}
+
+// ModeTimeNotIn applies the NotIn predicate on the "ModeTime" field.
+func ModeTimeNotIn(vs ...time.Time) predicate.SinglePageInfo {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldModeTime), v...))
+	})
+}
+
+// ModeTimeGT applies the GT predicate on the "ModeTime" field.
+func ModeTimeGT(v time.Time) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldModeTime), v))
+	})
+}
+
+// ModeTimeGTE applies the GTE predicate on the "ModeTime" field.
+func ModeTimeGTE(v time.Time) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldModeTime), v))
+	})
+}
+
+// ModeTimeLT applies the LT predicate on the "ModeTime" field.
+func ModeTimeLT(v time.Time) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldModeTime), v))
+	})
+}
+
+// ModeTimeLTE applies the LTE predicate on the "ModeTime" field.
+func ModeTimeLTE(v time.Time) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldModeTime), v))
+	})
+}
+
+// FileSizeEQ applies the EQ predicate on the "FileSize" field.
+func FileSizeEQ(v float64) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldFileSize), v))
+	})
+}
+
+// FileSizeNEQ applies the NEQ predicate on the "FileSize" field.
+func FileSizeNEQ(v float64) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldFileSize), v))
+	})
+}
+
+// FileSizeIn applies the In predicate on the "FileSize" field.
+func FileSizeIn(vs ...float64) predicate.SinglePageInfo {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldFileSize), v...))
+	})
+}
+
+// FileSizeNotIn applies the NotIn predicate on the "FileSize" field.
+func FileSizeNotIn(vs ...float64) predicate.SinglePageInfo {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldFileSize), v...))
+	})
+}
+
+// FileSizeGT applies the GT predicate on the "FileSize" field.
+func FileSizeGT(v float64) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldFileSize), v))
+	})
+}
+
+// FileSizeGTE applies the GTE predicate on the "FileSize" field.
+func FileSizeGTE(v float64) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldFileSize), v))
+	})
+}
+
+// FileSizeLT applies the LT predicate on the "FileSize" field.
+func FileSizeLT(v float64) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldFileSize), v))
+	})
+}
+
+// FileSizeLTE applies the LTE predicate on the "FileSize" field.
+func FileSizeLTE(v float64) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldFileSize), v))
+	})
+}
+
+// RealImageFilePATHEQ applies the EQ predicate on the "RealImageFilePATH" field.
+func RealImageFilePATHEQ(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldRealImageFilePATH), v))
+	})
+}
+
+// RealImageFilePATHNEQ applies the NEQ predicate on the "RealImageFilePATH" field.
+func RealImageFilePATHNEQ(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldRealImageFilePATH), v))
+	})
+}
+
+// RealImageFilePATHIn applies the In predicate on the "RealImageFilePATH" field.
+func RealImageFilePATHIn(vs ...string) predicate.SinglePageInfo {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldRealImageFilePATH), v...))
+	})
+}
+
+// RealImageFilePATHNotIn applies the NotIn predicate on the "RealImageFilePATH" field.
+func RealImageFilePATHNotIn(vs ...string) predicate.SinglePageInfo {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldRealImageFilePATH), v...))
+	})
+}
+
+// RealImageFilePATHGT applies the GT predicate on the "RealImageFilePATH" field.
+func RealImageFilePATHGT(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldRealImageFilePATH), v))
+	})
+}
+
+// RealImageFilePATHGTE applies the GTE predicate on the "RealImageFilePATH" field.
+func RealImageFilePATHGTE(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldRealImageFilePATH), v))
+	})
+}
+
+// RealImageFilePATHLT applies the LT predicate on the "RealImageFilePATH" field.
+func RealImageFilePATHLT(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldRealImageFilePATH), v))
+	})
+}
+
+// RealImageFilePATHLTE applies the LTE predicate on the "RealImageFilePATH" field.
+func RealImageFilePATHLTE(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldRealImageFilePATH), v))
+	})
+}
+
+// RealImageFilePATHContains applies the Contains predicate on the "RealImageFilePATH" field.
+func RealImageFilePATHContains(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldRealImageFilePATH), v))
+	})
+}
+
+// RealImageFilePATHHasPrefix applies the HasPrefix predicate on the "RealImageFilePATH" field.
+func RealImageFilePATHHasPrefix(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldRealImageFilePATH), v))
+	})
+}
+
+// RealImageFilePATHHasSuffix applies the HasSuffix predicate on the "RealImageFilePATH" field.
+func RealImageFilePATHHasSuffix(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldRealImageFilePATH), v))
+	})
+}
+
+// RealImageFilePATHEqualFold applies the EqualFold predicate on the "RealImageFilePATH" field.
+func RealImageFilePATHEqualFold(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldRealImageFilePATH), v))
+	})
+}
+
+// RealImageFilePATHContainsFold applies the ContainsFold predicate on the "RealImageFilePATH" field.
+func RealImageFilePATHContainsFold(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldRealImageFilePATH), v))
+	})
+}
+
+// ImgTypeEQ applies the EQ predicate on the "ImgType" field.
+func ImgTypeEQ(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldImgType), v))
+	})
+}
+
+// ImgTypeNEQ applies the NEQ predicate on the "ImgType" field.
+func ImgTypeNEQ(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldImgType), v))
+	})
+}
+
+// ImgTypeIn applies the In predicate on the "ImgType" field.
+func ImgTypeIn(vs ...string) predicate.SinglePageInfo {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldImgType), v...))
+	})
+}
+
+// ImgTypeNotIn applies the NotIn predicate on the "ImgType" field.
+func ImgTypeNotIn(vs ...string) predicate.SinglePageInfo {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldImgType), v...))
+	})
+}
+
+// ImgTypeGT applies the GT predicate on the "ImgType" field.
+func ImgTypeGT(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldImgType), v))
+	})
+}
+
+// ImgTypeGTE applies the GTE predicate on the "ImgType" field.
+func ImgTypeGTE(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldImgType), v))
+	})
+}
+
+// ImgTypeLT applies the LT predicate on the "ImgType" field.
+func ImgTypeLT(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldImgType), v))
+	})
+}
+
+// ImgTypeLTE applies the LTE predicate on the "ImgType" field.
+func ImgTypeLTE(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldImgType), v))
+	})
+}
+
+// ImgTypeContains applies the Contains predicate on the "ImgType" field.
+func ImgTypeContains(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldImgType), v))
+	})
+}
+
+// ImgTypeHasPrefix applies the HasPrefix predicate on the "ImgType" field.
+func ImgTypeHasPrefix(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldImgType), v))
+	})
+}
+
+// ImgTypeHasSuffix applies the HasSuffix predicate on the "ImgType" field.
+func ImgTypeHasSuffix(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldImgType), v))
+	})
+}
+
+// ImgTypeEqualFold applies the EqualFold predicate on the "ImgType" field.
+func ImgTypeEqualFold(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldImgType), v))
+	})
+}
+
+// ImgTypeContainsFold applies the ContainsFold predicate on the "ImgType" field.
+func ImgTypeContainsFold(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldImgType), v))
 	})
 }
 
