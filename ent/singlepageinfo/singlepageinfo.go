@@ -2,11 +2,37 @@
 
 package singlepageinfo
 
+import (
+	"time"
+)
+
 const (
 	// Label holds the string label denoting the singlepageinfo type in the database.
 	Label = "single_page_info"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldBookID holds the string denoting the bookid field in the database.
+	FieldBookID = "book_id"
+	// FieldPageNum holds the string denoting the pagenum field in the database.
+	FieldPageNum = "page_num"
+	// FieldNameInArchive holds the string denoting the nameinarchive field in the database.
+	FieldNameInArchive = "name_in_archive"
+	// FieldURL holds the string denoting the url field in the database.
+	FieldURL = "url"
+	// FieldBlurHash holds the string denoting the blurhash field in the database.
+	FieldBlurHash = "blur_hash"
+	// FieldHeight holds the string denoting the height field in the database.
+	FieldHeight = "height"
+	// FieldWidth holds the string denoting the width field in the database.
+	FieldWidth = "width"
+	// FieldModeTime holds the string denoting the modetime field in the database.
+	FieldModeTime = "mode_time"
+	// FieldFileSize holds the string denoting the filesize field in the database.
+	FieldFileSize = "file_size"
+	// FieldRealImageFilePATH holds the string denoting the realimagefilepath field in the database.
+	FieldRealImageFilePATH = "real_image_file_path"
+	// FieldImgType holds the string denoting the imgtype field in the database.
+	FieldImgType = "img_type"
 	// Table holds the table name of the singlepageinfo in the database.
 	Table = "single_page_infos"
 )
@@ -14,6 +40,23 @@ const (
 // Columns holds all SQL columns for singlepageinfo fields.
 var Columns = []string{
 	FieldID,
+	FieldBookID,
+	FieldPageNum,
+	FieldNameInArchive,
+	FieldURL,
+	FieldBlurHash,
+	FieldHeight,
+	FieldWidth,
+	FieldModeTime,
+	FieldFileSize,
+	FieldRealImageFilePATH,
+	FieldImgType,
+}
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the "single_page_infos"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"book_page_infos",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -23,5 +66,15 @@ func ValidColumn(column string) bool {
 			return true
 		}
 	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
+			return true
+		}
+	}
 	return false
 }
+
+var (
+	// DefaultModeTime holds the default value on creation for the "ModeTime" field.
+	DefaultModeTime func() time.Time
+)

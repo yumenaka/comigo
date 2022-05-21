@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -24,6 +25,108 @@ type SinglePageInfoUpdate struct {
 // Where appends a list predicates to the SinglePageInfoUpdate builder.
 func (spiu *SinglePageInfoUpdate) Where(ps ...predicate.SinglePageInfo) *SinglePageInfoUpdate {
 	spiu.mutation.Where(ps...)
+	return spiu
+}
+
+// SetBookID sets the "BookID" field.
+func (spiu *SinglePageInfoUpdate) SetBookID(s string) *SinglePageInfoUpdate {
+	spiu.mutation.SetBookID(s)
+	return spiu
+}
+
+// SetPageNum sets the "PageNum" field.
+func (spiu *SinglePageInfoUpdate) SetPageNum(i int) *SinglePageInfoUpdate {
+	spiu.mutation.ResetPageNum()
+	spiu.mutation.SetPageNum(i)
+	return spiu
+}
+
+// AddPageNum adds i to the "PageNum" field.
+func (spiu *SinglePageInfoUpdate) AddPageNum(i int) *SinglePageInfoUpdate {
+	spiu.mutation.AddPageNum(i)
+	return spiu
+}
+
+// SetNameInArchive sets the "NameInArchive" field.
+func (spiu *SinglePageInfoUpdate) SetNameInArchive(s string) *SinglePageInfoUpdate {
+	spiu.mutation.SetNameInArchive(s)
+	return spiu
+}
+
+// SetURL sets the "Url" field.
+func (spiu *SinglePageInfoUpdate) SetURL(s string) *SinglePageInfoUpdate {
+	spiu.mutation.SetURL(s)
+	return spiu
+}
+
+// SetBlurHash sets the "BlurHash" field.
+func (spiu *SinglePageInfoUpdate) SetBlurHash(s string) *SinglePageInfoUpdate {
+	spiu.mutation.SetBlurHash(s)
+	return spiu
+}
+
+// SetHeight sets the "Height" field.
+func (spiu *SinglePageInfoUpdate) SetHeight(i int) *SinglePageInfoUpdate {
+	spiu.mutation.ResetHeight()
+	spiu.mutation.SetHeight(i)
+	return spiu
+}
+
+// AddHeight adds i to the "Height" field.
+func (spiu *SinglePageInfoUpdate) AddHeight(i int) *SinglePageInfoUpdate {
+	spiu.mutation.AddHeight(i)
+	return spiu
+}
+
+// SetWidth sets the "Width" field.
+func (spiu *SinglePageInfoUpdate) SetWidth(i int) *SinglePageInfoUpdate {
+	spiu.mutation.ResetWidth()
+	spiu.mutation.SetWidth(i)
+	return spiu
+}
+
+// AddWidth adds i to the "Width" field.
+func (spiu *SinglePageInfoUpdate) AddWidth(i int) *SinglePageInfoUpdate {
+	spiu.mutation.AddWidth(i)
+	return spiu
+}
+
+// SetModeTime sets the "ModeTime" field.
+func (spiu *SinglePageInfoUpdate) SetModeTime(t time.Time) *SinglePageInfoUpdate {
+	spiu.mutation.SetModeTime(t)
+	return spiu
+}
+
+// SetNillableModeTime sets the "ModeTime" field if the given value is not nil.
+func (spiu *SinglePageInfoUpdate) SetNillableModeTime(t *time.Time) *SinglePageInfoUpdate {
+	if t != nil {
+		spiu.SetModeTime(*t)
+	}
+	return spiu
+}
+
+// SetFileSize sets the "FileSize" field.
+func (spiu *SinglePageInfoUpdate) SetFileSize(f float64) *SinglePageInfoUpdate {
+	spiu.mutation.ResetFileSize()
+	spiu.mutation.SetFileSize(f)
+	return spiu
+}
+
+// AddFileSize adds f to the "FileSize" field.
+func (spiu *SinglePageInfoUpdate) AddFileSize(f float64) *SinglePageInfoUpdate {
+	spiu.mutation.AddFileSize(f)
+	return spiu
+}
+
+// SetRealImageFilePATH sets the "RealImageFilePATH" field.
+func (spiu *SinglePageInfoUpdate) SetRealImageFilePATH(s string) *SinglePageInfoUpdate {
+	spiu.mutation.SetRealImageFilePATH(s)
+	return spiu
+}
+
+// SetImgType sets the "ImgType" field.
+func (spiu *SinglePageInfoUpdate) SetImgType(s string) *SinglePageInfoUpdate {
+	spiu.mutation.SetImgType(s)
 	return spiu
 }
 
@@ -104,6 +207,111 @@ func (spiu *SinglePageInfoUpdate) sqlSave(ctx context.Context) (n int, err error
 			}
 		}
 	}
+	if value, ok := spiu.mutation.BookID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: singlepageinfo.FieldBookID,
+		})
+	}
+	if value, ok := spiu.mutation.PageNum(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: singlepageinfo.FieldPageNum,
+		})
+	}
+	if value, ok := spiu.mutation.AddedPageNum(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: singlepageinfo.FieldPageNum,
+		})
+	}
+	if value, ok := spiu.mutation.NameInArchive(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: singlepageinfo.FieldNameInArchive,
+		})
+	}
+	if value, ok := spiu.mutation.URL(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: singlepageinfo.FieldURL,
+		})
+	}
+	if value, ok := spiu.mutation.BlurHash(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: singlepageinfo.FieldBlurHash,
+		})
+	}
+	if value, ok := spiu.mutation.Height(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: singlepageinfo.FieldHeight,
+		})
+	}
+	if value, ok := spiu.mutation.AddedHeight(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: singlepageinfo.FieldHeight,
+		})
+	}
+	if value, ok := spiu.mutation.Width(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: singlepageinfo.FieldWidth,
+		})
+	}
+	if value, ok := spiu.mutation.AddedWidth(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: singlepageinfo.FieldWidth,
+		})
+	}
+	if value, ok := spiu.mutation.ModeTime(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: singlepageinfo.FieldModeTime,
+		})
+	}
+	if value, ok := spiu.mutation.FileSize(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: singlepageinfo.FieldFileSize,
+		})
+	}
+	if value, ok := spiu.mutation.AddedFileSize(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: singlepageinfo.FieldFileSize,
+		})
+	}
+	if value, ok := spiu.mutation.RealImageFilePATH(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: singlepageinfo.FieldRealImageFilePATH,
+		})
+	}
+	if value, ok := spiu.mutation.ImgType(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: singlepageinfo.FieldImgType,
+		})
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, spiu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{singlepageinfo.Label}
@@ -121,6 +329,108 @@ type SinglePageInfoUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *SinglePageInfoMutation
+}
+
+// SetBookID sets the "BookID" field.
+func (spiuo *SinglePageInfoUpdateOne) SetBookID(s string) *SinglePageInfoUpdateOne {
+	spiuo.mutation.SetBookID(s)
+	return spiuo
+}
+
+// SetPageNum sets the "PageNum" field.
+func (spiuo *SinglePageInfoUpdateOne) SetPageNum(i int) *SinglePageInfoUpdateOne {
+	spiuo.mutation.ResetPageNum()
+	spiuo.mutation.SetPageNum(i)
+	return spiuo
+}
+
+// AddPageNum adds i to the "PageNum" field.
+func (spiuo *SinglePageInfoUpdateOne) AddPageNum(i int) *SinglePageInfoUpdateOne {
+	spiuo.mutation.AddPageNum(i)
+	return spiuo
+}
+
+// SetNameInArchive sets the "NameInArchive" field.
+func (spiuo *SinglePageInfoUpdateOne) SetNameInArchive(s string) *SinglePageInfoUpdateOne {
+	spiuo.mutation.SetNameInArchive(s)
+	return spiuo
+}
+
+// SetURL sets the "Url" field.
+func (spiuo *SinglePageInfoUpdateOne) SetURL(s string) *SinglePageInfoUpdateOne {
+	spiuo.mutation.SetURL(s)
+	return spiuo
+}
+
+// SetBlurHash sets the "BlurHash" field.
+func (spiuo *SinglePageInfoUpdateOne) SetBlurHash(s string) *SinglePageInfoUpdateOne {
+	spiuo.mutation.SetBlurHash(s)
+	return spiuo
+}
+
+// SetHeight sets the "Height" field.
+func (spiuo *SinglePageInfoUpdateOne) SetHeight(i int) *SinglePageInfoUpdateOne {
+	spiuo.mutation.ResetHeight()
+	spiuo.mutation.SetHeight(i)
+	return spiuo
+}
+
+// AddHeight adds i to the "Height" field.
+func (spiuo *SinglePageInfoUpdateOne) AddHeight(i int) *SinglePageInfoUpdateOne {
+	spiuo.mutation.AddHeight(i)
+	return spiuo
+}
+
+// SetWidth sets the "Width" field.
+func (spiuo *SinglePageInfoUpdateOne) SetWidth(i int) *SinglePageInfoUpdateOne {
+	spiuo.mutation.ResetWidth()
+	spiuo.mutation.SetWidth(i)
+	return spiuo
+}
+
+// AddWidth adds i to the "Width" field.
+func (spiuo *SinglePageInfoUpdateOne) AddWidth(i int) *SinglePageInfoUpdateOne {
+	spiuo.mutation.AddWidth(i)
+	return spiuo
+}
+
+// SetModeTime sets the "ModeTime" field.
+func (spiuo *SinglePageInfoUpdateOne) SetModeTime(t time.Time) *SinglePageInfoUpdateOne {
+	spiuo.mutation.SetModeTime(t)
+	return spiuo
+}
+
+// SetNillableModeTime sets the "ModeTime" field if the given value is not nil.
+func (spiuo *SinglePageInfoUpdateOne) SetNillableModeTime(t *time.Time) *SinglePageInfoUpdateOne {
+	if t != nil {
+		spiuo.SetModeTime(*t)
+	}
+	return spiuo
+}
+
+// SetFileSize sets the "FileSize" field.
+func (spiuo *SinglePageInfoUpdateOne) SetFileSize(f float64) *SinglePageInfoUpdateOne {
+	spiuo.mutation.ResetFileSize()
+	spiuo.mutation.SetFileSize(f)
+	return spiuo
+}
+
+// AddFileSize adds f to the "FileSize" field.
+func (spiuo *SinglePageInfoUpdateOne) AddFileSize(f float64) *SinglePageInfoUpdateOne {
+	spiuo.mutation.AddFileSize(f)
+	return spiuo
+}
+
+// SetRealImageFilePATH sets the "RealImageFilePATH" field.
+func (spiuo *SinglePageInfoUpdateOne) SetRealImageFilePATH(s string) *SinglePageInfoUpdateOne {
+	spiuo.mutation.SetRealImageFilePATH(s)
+	return spiuo
+}
+
+// SetImgType sets the "ImgType" field.
+func (spiuo *SinglePageInfoUpdateOne) SetImgType(s string) *SinglePageInfoUpdateOne {
+	spiuo.mutation.SetImgType(s)
+	return spiuo
 }
 
 // Mutation returns the SinglePageInfoMutation object of the builder.
@@ -223,6 +533,111 @@ func (spiuo *SinglePageInfoUpdateOne) sqlSave(ctx context.Context) (_node *Singl
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := spiuo.mutation.BookID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: singlepageinfo.FieldBookID,
+		})
+	}
+	if value, ok := spiuo.mutation.PageNum(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: singlepageinfo.FieldPageNum,
+		})
+	}
+	if value, ok := spiuo.mutation.AddedPageNum(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: singlepageinfo.FieldPageNum,
+		})
+	}
+	if value, ok := spiuo.mutation.NameInArchive(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: singlepageinfo.FieldNameInArchive,
+		})
+	}
+	if value, ok := spiuo.mutation.URL(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: singlepageinfo.FieldURL,
+		})
+	}
+	if value, ok := spiuo.mutation.BlurHash(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: singlepageinfo.FieldBlurHash,
+		})
+	}
+	if value, ok := spiuo.mutation.Height(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: singlepageinfo.FieldHeight,
+		})
+	}
+	if value, ok := spiuo.mutation.AddedHeight(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: singlepageinfo.FieldHeight,
+		})
+	}
+	if value, ok := spiuo.mutation.Width(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: singlepageinfo.FieldWidth,
+		})
+	}
+	if value, ok := spiuo.mutation.AddedWidth(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: singlepageinfo.FieldWidth,
+		})
+	}
+	if value, ok := spiuo.mutation.ModeTime(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: singlepageinfo.FieldModeTime,
+		})
+	}
+	if value, ok := spiuo.mutation.FileSize(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: singlepageinfo.FieldFileSize,
+		})
+	}
+	if value, ok := spiuo.mutation.AddedFileSize(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: singlepageinfo.FieldFileSize,
+		})
+	}
+	if value, ok := spiuo.mutation.RealImageFilePATH(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: singlepageinfo.FieldRealImageFilePATH,
+		})
+	}
+	if value, ok := spiuo.mutation.ImgType(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: singlepageinfo.FieldImgType,
+		})
 	}
 	_node = &SinglePageInfo{config: spiuo.config}
 	_spec.Assign = _node.assignValues

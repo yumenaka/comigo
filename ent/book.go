@@ -65,6 +65,27 @@ type Book struct {
 	NonUTF8Zip bool `json:"NonUTF8Zip,omitempty"`
 	// ZipTextEncoding holds the value of the "ZipTextEncoding" field.
 	ZipTextEncoding string `json:"ZipTextEncoding,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the BookQuery when eager-loading is set.
+	Edges BookEdges `json:"edges"`
+}
+
+// BookEdges holds the relations/edges for other nodes in the graph.
+type BookEdges struct {
+	// PageInfos holds the value of the PageInfos edge.
+	PageInfos []*SinglePageInfo `json:"PageInfos,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// PageInfosOrErr returns the PageInfos value or an error if the edge
+// was not loaded in eager-loading.
+func (e BookEdges) PageInfosOrErr() ([]*SinglePageInfo, error) {
+	if e.loadedTypes[0] {
+		return e.PageInfos, nil
+	}
+	return nil, &NotLoadedError{edge: "PageInfos"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -232,6 +253,11 @@ func (b *Book) assignValues(columns []string, values []interface{}) error {
 		}
 	}
 	return nil
+}
+
+// QueryPageInfos queries the "PageInfos" edge of the Book entity.
+func (b *Book) QueryPageInfos() *SinglePageInfoQuery {
+	return (&BookClient{config: b.config}).QueryPageInfos(b)
 }
 
 // Update returns a builder for updating this Book.

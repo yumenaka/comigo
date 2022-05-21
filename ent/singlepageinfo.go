@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/yumenaka/comi/ent/singlepageinfo"
@@ -12,9 +13,32 @@ import (
 
 // SinglePageInfo is the model entity for the SinglePageInfo schema.
 type SinglePageInfo struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// BookID holds the value of the "BookID" field.
+	BookID string `json:"BookID,omitempty"`
+	// PageNum holds the value of the "PageNum" field.
+	PageNum int `json:"PageNum,omitempty"`
+	// NameInArchive holds the value of the "NameInArchive" field.
+	NameInArchive string `json:"NameInArchive,omitempty"`
+	// URL holds the value of the "Url" field.
+	URL string `json:"Url,omitempty"`
+	// BlurHash holds the value of the "BlurHash" field.
+	BlurHash string `json:"BlurHash,omitempty"`
+	// Height holds the value of the "Height" field.
+	Height int `json:"Height,omitempty"`
+	// Width holds the value of the "Width" field.
+	Width int `json:"Width,omitempty"`
+	// ModeTime holds the value of the "ModeTime" field.
+	ModeTime time.Time `json:"ModeTime,omitempty"`
+	// FileSize holds the value of the "FileSize" field.
+	FileSize float64 `json:"FileSize,omitempty"`
+	// RealImageFilePATH holds the value of the "RealImageFilePATH" field.
+	RealImageFilePATH string `json:"RealImageFilePATH,omitempty"`
+	// ImgType holds the value of the "ImgType" field.
+	ImgType         string `json:"ImgType,omitempty"`
+	book_page_infos *int
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -22,7 +46,15 @@ func (*SinglePageInfo) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case singlepageinfo.FieldID:
+		case singlepageinfo.FieldFileSize:
+			values[i] = new(sql.NullFloat64)
+		case singlepageinfo.FieldID, singlepageinfo.FieldPageNum, singlepageinfo.FieldHeight, singlepageinfo.FieldWidth:
+			values[i] = new(sql.NullInt64)
+		case singlepageinfo.FieldBookID, singlepageinfo.FieldNameInArchive, singlepageinfo.FieldURL, singlepageinfo.FieldBlurHash, singlepageinfo.FieldRealImageFilePATH, singlepageinfo.FieldImgType:
+			values[i] = new(sql.NullString)
+		case singlepageinfo.FieldModeTime:
+			values[i] = new(sql.NullTime)
+		case singlepageinfo.ForeignKeys[0]: // book_page_infos
 			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type SinglePageInfo", columns[i])
@@ -45,6 +77,79 @@ func (spi *SinglePageInfo) assignValues(columns []string, values []interface{}) 
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			spi.ID = int(value.Int64)
+		case singlepageinfo.FieldBookID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field BookID", values[i])
+			} else if value.Valid {
+				spi.BookID = value.String
+			}
+		case singlepageinfo.FieldPageNum:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field PageNum", values[i])
+			} else if value.Valid {
+				spi.PageNum = int(value.Int64)
+			}
+		case singlepageinfo.FieldNameInArchive:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field NameInArchive", values[i])
+			} else if value.Valid {
+				spi.NameInArchive = value.String
+			}
+		case singlepageinfo.FieldURL:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field Url", values[i])
+			} else if value.Valid {
+				spi.URL = value.String
+			}
+		case singlepageinfo.FieldBlurHash:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field BlurHash", values[i])
+			} else if value.Valid {
+				spi.BlurHash = value.String
+			}
+		case singlepageinfo.FieldHeight:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field Height", values[i])
+			} else if value.Valid {
+				spi.Height = int(value.Int64)
+			}
+		case singlepageinfo.FieldWidth:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field Width", values[i])
+			} else if value.Valid {
+				spi.Width = int(value.Int64)
+			}
+		case singlepageinfo.FieldModeTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field ModeTime", values[i])
+			} else if value.Valid {
+				spi.ModeTime = value.Time
+			}
+		case singlepageinfo.FieldFileSize:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field FileSize", values[i])
+			} else if value.Valid {
+				spi.FileSize = value.Float64
+			}
+		case singlepageinfo.FieldRealImageFilePATH:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field RealImageFilePATH", values[i])
+			} else if value.Valid {
+				spi.RealImageFilePATH = value.String
+			}
+		case singlepageinfo.FieldImgType:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field ImgType", values[i])
+			} else if value.Valid {
+				spi.ImgType = value.String
+			}
+		case singlepageinfo.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field book_page_infos", value)
+			} else if value.Valid {
+				spi.book_page_infos = new(int)
+				*spi.book_page_infos = int(value.Int64)
+			}
 		}
 	}
 	return nil
@@ -73,6 +178,28 @@ func (spi *SinglePageInfo) String() string {
 	var builder strings.Builder
 	builder.WriteString("SinglePageInfo(")
 	builder.WriteString(fmt.Sprintf("id=%v", spi.ID))
+	builder.WriteString(", BookID=")
+	builder.WriteString(spi.BookID)
+	builder.WriteString(", PageNum=")
+	builder.WriteString(fmt.Sprintf("%v", spi.PageNum))
+	builder.WriteString(", NameInArchive=")
+	builder.WriteString(spi.NameInArchive)
+	builder.WriteString(", Url=")
+	builder.WriteString(spi.URL)
+	builder.WriteString(", BlurHash=")
+	builder.WriteString(spi.BlurHash)
+	builder.WriteString(", Height=")
+	builder.WriteString(fmt.Sprintf("%v", spi.Height))
+	builder.WriteString(", Width=")
+	builder.WriteString(fmt.Sprintf("%v", spi.Width))
+	builder.WriteString(", ModeTime=")
+	builder.WriteString(spi.ModeTime.Format(time.ANSIC))
+	builder.WriteString(", FileSize=")
+	builder.WriteString(fmt.Sprintf("%v", spi.FileSize))
+	builder.WriteString(", RealImageFilePATH=")
+	builder.WriteString(spi.RealImageFilePATH)
+	builder.WriteString(", ImgType=")
+	builder.WriteString(spi.ImgType)
 	builder.WriteByte(')')
 	return builder.String()
 }

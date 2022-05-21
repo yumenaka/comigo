@@ -7,6 +7,7 @@ import (
 
 	"github.com/yumenaka/comi/ent/book"
 	"github.com/yumenaka/comi/ent/schema"
+	"github.com/yumenaka/comi/ent/singlepageinfo"
 	"github.com/yumenaka/comi/ent/user"
 )
 
@@ -36,6 +37,12 @@ func init() {
 	bookDescModified := bookFields[15].Descriptor()
 	// book.DefaultModified holds the default value on creation for the Modified field.
 	book.DefaultModified = bookDescModified.Default.(func() time.Time)
+	singlepageinfoFields := schema.SinglePageInfo{}.Fields()
+	_ = singlepageinfoFields
+	// singlepageinfoDescModeTime is the schema descriptor for ModeTime field.
+	singlepageinfoDescModeTime := singlepageinfoFields[7].Descriptor()
+	// singlepageinfo.DefaultModeTime holds the default value on creation for the ModeTime field.
+	singlepageinfo.DefaultModeTime = singlepageinfoDescModeTime.Default.(func() time.Time)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescName is the schema descriptor for name field.

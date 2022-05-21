@@ -4,7 +4,9 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -18,6 +20,80 @@ type SinglePageInfoCreate struct {
 	hooks    []Hook
 }
 
+// SetBookID sets the "BookID" field.
+func (spic *SinglePageInfoCreate) SetBookID(s string) *SinglePageInfoCreate {
+	spic.mutation.SetBookID(s)
+	return spic
+}
+
+// SetPageNum sets the "PageNum" field.
+func (spic *SinglePageInfoCreate) SetPageNum(i int) *SinglePageInfoCreate {
+	spic.mutation.SetPageNum(i)
+	return spic
+}
+
+// SetNameInArchive sets the "NameInArchive" field.
+func (spic *SinglePageInfoCreate) SetNameInArchive(s string) *SinglePageInfoCreate {
+	spic.mutation.SetNameInArchive(s)
+	return spic
+}
+
+// SetURL sets the "Url" field.
+func (spic *SinglePageInfoCreate) SetURL(s string) *SinglePageInfoCreate {
+	spic.mutation.SetURL(s)
+	return spic
+}
+
+// SetBlurHash sets the "BlurHash" field.
+func (spic *SinglePageInfoCreate) SetBlurHash(s string) *SinglePageInfoCreate {
+	spic.mutation.SetBlurHash(s)
+	return spic
+}
+
+// SetHeight sets the "Height" field.
+func (spic *SinglePageInfoCreate) SetHeight(i int) *SinglePageInfoCreate {
+	spic.mutation.SetHeight(i)
+	return spic
+}
+
+// SetWidth sets the "Width" field.
+func (spic *SinglePageInfoCreate) SetWidth(i int) *SinglePageInfoCreate {
+	spic.mutation.SetWidth(i)
+	return spic
+}
+
+// SetModeTime sets the "ModeTime" field.
+func (spic *SinglePageInfoCreate) SetModeTime(t time.Time) *SinglePageInfoCreate {
+	spic.mutation.SetModeTime(t)
+	return spic
+}
+
+// SetNillableModeTime sets the "ModeTime" field if the given value is not nil.
+func (spic *SinglePageInfoCreate) SetNillableModeTime(t *time.Time) *SinglePageInfoCreate {
+	if t != nil {
+		spic.SetModeTime(*t)
+	}
+	return spic
+}
+
+// SetFileSize sets the "FileSize" field.
+func (spic *SinglePageInfoCreate) SetFileSize(f float64) *SinglePageInfoCreate {
+	spic.mutation.SetFileSize(f)
+	return spic
+}
+
+// SetRealImageFilePATH sets the "RealImageFilePATH" field.
+func (spic *SinglePageInfoCreate) SetRealImageFilePATH(s string) *SinglePageInfoCreate {
+	spic.mutation.SetRealImageFilePATH(s)
+	return spic
+}
+
+// SetImgType sets the "ImgType" field.
+func (spic *SinglePageInfoCreate) SetImgType(s string) *SinglePageInfoCreate {
+	spic.mutation.SetImgType(s)
+	return spic
+}
+
 // Mutation returns the SinglePageInfoMutation object of the builder.
 func (spic *SinglePageInfoCreate) Mutation() *SinglePageInfoMutation {
 	return spic.mutation
@@ -29,6 +105,7 @@ func (spic *SinglePageInfoCreate) Save(ctx context.Context) (*SinglePageInfo, er
 		err  error
 		node *SinglePageInfo
 	)
+	spic.defaults()
 	if len(spic.hooks) == 0 {
 		if err = spic.check(); err != nil {
 			return nil, err
@@ -86,8 +163,49 @@ func (spic *SinglePageInfoCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (spic *SinglePageInfoCreate) defaults() {
+	if _, ok := spic.mutation.ModeTime(); !ok {
+		v := singlepageinfo.DefaultModeTime()
+		spic.mutation.SetModeTime(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (spic *SinglePageInfoCreate) check() error {
+	if _, ok := spic.mutation.BookID(); !ok {
+		return &ValidationError{Name: "BookID", err: errors.New(`ent: missing required field "SinglePageInfo.BookID"`)}
+	}
+	if _, ok := spic.mutation.PageNum(); !ok {
+		return &ValidationError{Name: "PageNum", err: errors.New(`ent: missing required field "SinglePageInfo.PageNum"`)}
+	}
+	if _, ok := spic.mutation.NameInArchive(); !ok {
+		return &ValidationError{Name: "NameInArchive", err: errors.New(`ent: missing required field "SinglePageInfo.NameInArchive"`)}
+	}
+	if _, ok := spic.mutation.URL(); !ok {
+		return &ValidationError{Name: "Url", err: errors.New(`ent: missing required field "SinglePageInfo.Url"`)}
+	}
+	if _, ok := spic.mutation.BlurHash(); !ok {
+		return &ValidationError{Name: "BlurHash", err: errors.New(`ent: missing required field "SinglePageInfo.BlurHash"`)}
+	}
+	if _, ok := spic.mutation.Height(); !ok {
+		return &ValidationError{Name: "Height", err: errors.New(`ent: missing required field "SinglePageInfo.Height"`)}
+	}
+	if _, ok := spic.mutation.Width(); !ok {
+		return &ValidationError{Name: "Width", err: errors.New(`ent: missing required field "SinglePageInfo.Width"`)}
+	}
+	if _, ok := spic.mutation.ModeTime(); !ok {
+		return &ValidationError{Name: "ModeTime", err: errors.New(`ent: missing required field "SinglePageInfo.ModeTime"`)}
+	}
+	if _, ok := spic.mutation.FileSize(); !ok {
+		return &ValidationError{Name: "FileSize", err: errors.New(`ent: missing required field "SinglePageInfo.FileSize"`)}
+	}
+	if _, ok := spic.mutation.RealImageFilePATH(); !ok {
+		return &ValidationError{Name: "RealImageFilePATH", err: errors.New(`ent: missing required field "SinglePageInfo.RealImageFilePATH"`)}
+	}
+	if _, ok := spic.mutation.ImgType(); !ok {
+		return &ValidationError{Name: "ImgType", err: errors.New(`ent: missing required field "SinglePageInfo.ImgType"`)}
+	}
 	return nil
 }
 
@@ -115,6 +233,94 @@ func (spic *SinglePageInfoCreate) createSpec() (*SinglePageInfo, *sqlgraph.Creat
 			},
 		}
 	)
+	if value, ok := spic.mutation.BookID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: singlepageinfo.FieldBookID,
+		})
+		_node.BookID = value
+	}
+	if value, ok := spic.mutation.PageNum(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: singlepageinfo.FieldPageNum,
+		})
+		_node.PageNum = value
+	}
+	if value, ok := spic.mutation.NameInArchive(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: singlepageinfo.FieldNameInArchive,
+		})
+		_node.NameInArchive = value
+	}
+	if value, ok := spic.mutation.URL(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: singlepageinfo.FieldURL,
+		})
+		_node.URL = value
+	}
+	if value, ok := spic.mutation.BlurHash(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: singlepageinfo.FieldBlurHash,
+		})
+		_node.BlurHash = value
+	}
+	if value, ok := spic.mutation.Height(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: singlepageinfo.FieldHeight,
+		})
+		_node.Height = value
+	}
+	if value, ok := spic.mutation.Width(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: singlepageinfo.FieldWidth,
+		})
+		_node.Width = value
+	}
+	if value, ok := spic.mutation.ModeTime(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: singlepageinfo.FieldModeTime,
+		})
+		_node.ModeTime = value
+	}
+	if value, ok := spic.mutation.FileSize(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: singlepageinfo.FieldFileSize,
+		})
+		_node.FileSize = value
+	}
+	if value, ok := spic.mutation.RealImageFilePATH(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: singlepageinfo.FieldRealImageFilePATH,
+		})
+		_node.RealImageFilePATH = value
+	}
+	if value, ok := spic.mutation.ImgType(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: singlepageinfo.FieldImgType,
+		})
+		_node.ImgType = value
+	}
 	return _node, _spec
 }
 
@@ -132,6 +338,7 @@ func (spicb *SinglePageInfoCreateBulk) Save(ctx context.Context) ([]*SinglePageI
 	for i := range spicb.builders {
 		func(i int, root context.Context) {
 			builder := spicb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*SinglePageInfoMutation)
 				if !ok {

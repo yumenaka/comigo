@@ -24,6 +24,7 @@ type SinglePageInfoQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.SinglePageInfo
+	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -250,6 +251,19 @@ func (spiq *SinglePageInfoQuery) Clone() *SinglePageInfoQuery {
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
+//
+// Example:
+//
+//	var v []struct {
+//		BookID string `json:"BookID,omitempty"`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.SinglePageInfo.Query().
+//		GroupBy(singlepageinfo.FieldBookID).
+//		Aggregate(ent.Count()).
+//		Scan(ctx, &v)
+//
 func (spiq *SinglePageInfoQuery) GroupBy(field string, fields ...string) *SinglePageInfoGroupBy {
 	group := &SinglePageInfoGroupBy{config: spiq.config}
 	group.fields = append([]string{field}, fields...)
@@ -264,6 +278,17 @@ func (spiq *SinglePageInfoQuery) GroupBy(field string, fields ...string) *Single
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
+//
+// Example:
+//
+//	var v []struct {
+//		BookID string `json:"BookID,omitempty"`
+//	}
+//
+//	client.SinglePageInfo.Query().
+//		Select(singlepageinfo.FieldBookID).
+//		Scan(ctx, &v)
+//
 func (spiq *SinglePageInfoQuery) Select(fields ...string) *SinglePageInfoSelect {
 	spiq.fields = append(spiq.fields, fields...)
 	return &SinglePageInfoSelect{SinglePageInfoQuery: spiq}
@@ -287,9 +312,13 @@ func (spiq *SinglePageInfoQuery) prepareQuery(ctx context.Context) error {
 
 func (spiq *SinglePageInfoQuery) sqlAll(ctx context.Context) ([]*SinglePageInfo, error) {
 	var (
-		nodes = []*SinglePageInfo{}
-		_spec = spiq.querySpec()
+		nodes   = []*SinglePageInfo{}
+		withFKs = spiq.withFKs
+		_spec   = spiq.querySpec()
 	)
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, singlepageinfo.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &SinglePageInfo{config: spiq.config}
 		nodes = append(nodes, node)
