@@ -37,7 +37,6 @@ func AddBooksToStore(bookList []*book.Book, path string) {
 
 // ScanAndGetBookList 扫描一个路径，并返回书籍列表
 func ScanAndGetBookList(storePath string) (bookList []*book.Book, err error) {
-
 	storePathAbs, err := filepath.Abs(storePath)
 	if err != nil {
 		storePathAbs = storePath
@@ -65,12 +64,16 @@ func ScanAndGetBookList(storePath string) (bookList []*book.Book, err error) {
 		//从数据库里面读取，看是不是已经扫描过。以前扫描过的文件就跳过。
 		dataBaseBook, dataBaseErr := storage.GetBookFromDatabase(walkPath)
 		if dataBaseErr == nil {
-			//扫描过的压缩档文件，如果修改时间没变，就不必重复扫描。
-			if dataBaseBook.FilePath == walkPath && dataBaseBook.FileSize == fileInfo.Size() && dataBaseBook.Modified == fileInfo.ModTime() {
-				bookList = append(bookList, dataBaseBook)
-				fmt.Println("Found in Database,Skip File:" + walkPath)
-				return nil
-			}
+			////扫描过的压缩档文件，如果修改时间与大小没变，就不必重复扫描。
+			////tempTime := fileInfo.ModTime()
+			//if dataBaseBook.FileSize == fileInfo.Size() {
+			//	bookList = append(bookList, dataBaseBook)
+			//	fmt.Println("Found in Database,Skip scan:" + walkPath)
+			//	return nil
+			//}
+			bookList = append(bookList, dataBaseBook)
+			fmt.Println("Found in Database,Skip scan:" + walkPath)
+			return nil
 		}
 		//如果不是文件夹
 		if !fileInfo.IsDir() {

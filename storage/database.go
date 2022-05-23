@@ -56,7 +56,8 @@ func InitDatabase(p string) {
 	}
 	//链接或创建数据库
 	var entOptions []ent.Option
-	entOptions = append(entOptions, ent.Debug())
+	//是否打印log
+	//entOptions = append(entOptions, ent.Debug())
 	//连接器
 	var err error
 	sqliteFilePath := "file:comigo.sqlite?cache=shared"
