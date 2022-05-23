@@ -106,15 +106,15 @@ func (spiu *SinglePageInfoUpdate) SetNillableModeTime(t *time.Time) *SinglePageI
 }
 
 // SetFileSize sets the "FileSize" field.
-func (spiu *SinglePageInfoUpdate) SetFileSize(f float64) *SinglePageInfoUpdate {
+func (spiu *SinglePageInfoUpdate) SetFileSize(i int64) *SinglePageInfoUpdate {
 	spiu.mutation.ResetFileSize()
-	spiu.mutation.SetFileSize(f)
+	spiu.mutation.SetFileSize(i)
 	return spiu
 }
 
-// AddFileSize adds f to the "FileSize" field.
-func (spiu *SinglePageInfoUpdate) AddFileSize(f float64) *SinglePageInfoUpdate {
-	spiu.mutation.AddFileSize(f)
+// AddFileSize adds i to the "FileSize" field.
+func (spiu *SinglePageInfoUpdate) AddFileSize(i int64) *SinglePageInfoUpdate {
+	spiu.mutation.AddFileSize(i)
 	return spiu
 }
 
@@ -286,14 +286,14 @@ func (spiu *SinglePageInfoUpdate) sqlSave(ctx context.Context) (n int, err error
 	}
 	if value, ok := spiu.mutation.FileSize(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
+			Type:   field.TypeInt64,
 			Value:  value,
 			Column: singlepageinfo.FieldFileSize,
 		})
 	}
 	if value, ok := spiu.mutation.AddedFileSize(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
+			Type:   field.TypeInt64,
 			Value:  value,
 			Column: singlepageinfo.FieldFileSize,
 		})
@@ -409,15 +409,15 @@ func (spiuo *SinglePageInfoUpdateOne) SetNillableModeTime(t *time.Time) *SingleP
 }
 
 // SetFileSize sets the "FileSize" field.
-func (spiuo *SinglePageInfoUpdateOne) SetFileSize(f float64) *SinglePageInfoUpdateOne {
+func (spiuo *SinglePageInfoUpdateOne) SetFileSize(i int64) *SinglePageInfoUpdateOne {
 	spiuo.mutation.ResetFileSize()
-	spiuo.mutation.SetFileSize(f)
+	spiuo.mutation.SetFileSize(i)
 	return spiuo
 }
 
-// AddFileSize adds f to the "FileSize" field.
-func (spiuo *SinglePageInfoUpdateOne) AddFileSize(f float64) *SinglePageInfoUpdateOne {
-	spiuo.mutation.AddFileSize(f)
+// AddFileSize adds i to the "FileSize" field.
+func (spiuo *SinglePageInfoUpdateOne) AddFileSize(i int64) *SinglePageInfoUpdateOne {
+	spiuo.mutation.AddFileSize(i)
 	return spiuo
 }
 
@@ -613,14 +613,14 @@ func (spiuo *SinglePageInfoUpdateOne) sqlSave(ctx context.Context) (_node *Singl
 	}
 	if value, ok := spiuo.mutation.FileSize(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
+			Type:   field.TypeInt64,
 			Value:  value,
 			Column: singlepageinfo.FieldFileSize,
 		})
 	}
 	if value, ok := spiuo.mutation.AddedFileSize(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
+			Type:   field.TypeInt64,
 			Value:  value,
 			Column: singlepageinfo.FieldFileSize,
 		})

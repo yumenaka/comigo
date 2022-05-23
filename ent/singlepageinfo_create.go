@@ -77,8 +77,8 @@ func (spic *SinglePageInfoCreate) SetNillableModeTime(t *time.Time) *SinglePageI
 }
 
 // SetFileSize sets the "FileSize" field.
-func (spic *SinglePageInfoCreate) SetFileSize(f float64) *SinglePageInfoCreate {
-	spic.mutation.SetFileSize(f)
+func (spic *SinglePageInfoCreate) SetFileSize(i int64) *SinglePageInfoCreate {
+	spic.mutation.SetFileSize(i)
 	return spic
 }
 
@@ -299,7 +299,7 @@ func (spic *SinglePageInfoCreate) createSpec() (*SinglePageInfo, *sqlgraph.Creat
 	}
 	if value, ok := spic.mutation.FileSize(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
+			Type:   field.TypeInt64,
 			Value:  value,
 			Column: singlepageinfo.FieldFileSize,
 		})

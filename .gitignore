@@ -16,6 +16,7 @@
 # vendor/
 *.vscode
 .comigo
+*comigo.sqlite
 .cache
 cache
 .idea

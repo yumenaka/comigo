@@ -23,7 +23,7 @@ func (SinglePageInfo) Fields() []ent.Field {
 		field.Int("Height"),
 		field.Int("Width"),
 		field.Time("ModeTime").Default(time.Now),
-		field.Float("FileSize"),
+		field.Int64("FileSize"),
 		field.String("RealImageFilePATH"),
 		field.String("ImgType"),
 	}

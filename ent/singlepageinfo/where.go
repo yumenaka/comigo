@@ -149,7 +149,7 @@ func ModeTime(v time.Time) predicate.SinglePageInfo {
 }
 
 // FileSize applies equality check predicate on the "FileSize" field. It's identical to FileSizeEQ.
-func FileSize(v float64) predicate.SinglePageInfo {
+func FileSize(v int64) predicate.SinglePageInfo {
 	return predicate.SinglePageInfo(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldFileSize), v))
 	})
@@ -918,21 +918,21 @@ func ModeTimeLTE(v time.Time) predicate.SinglePageInfo {
 }
 
 // FileSizeEQ applies the EQ predicate on the "FileSize" field.
-func FileSizeEQ(v float64) predicate.SinglePageInfo {
+func FileSizeEQ(v int64) predicate.SinglePageInfo {
 	return predicate.SinglePageInfo(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldFileSize), v))
 	})
 }
 
 // FileSizeNEQ applies the NEQ predicate on the "FileSize" field.
-func FileSizeNEQ(v float64) predicate.SinglePageInfo {
+func FileSizeNEQ(v int64) predicate.SinglePageInfo {
 	return predicate.SinglePageInfo(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldFileSize), v))
 	})
 }
 
 // FileSizeIn applies the In predicate on the "FileSize" field.
-func FileSizeIn(vs ...float64) predicate.SinglePageInfo {
+func FileSizeIn(vs ...int64) predicate.SinglePageInfo {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -949,7 +949,7 @@ func FileSizeIn(vs ...float64) predicate.SinglePageInfo {
 }
 
 // FileSizeNotIn applies the NotIn predicate on the "FileSize" field.
-func FileSizeNotIn(vs ...float64) predicate.SinglePageInfo {
+func FileSizeNotIn(vs ...int64) predicate.SinglePageInfo {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -966,28 +966,28 @@ func FileSizeNotIn(vs ...float64) predicate.SinglePageInfo {
 }
 
 // FileSizeGT applies the GT predicate on the "FileSize" field.
-func FileSizeGT(v float64) predicate.SinglePageInfo {
+func FileSizeGT(v int64) predicate.SinglePageInfo {
 	return predicate.SinglePageInfo(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldFileSize), v))
 	})
 }
 
 // FileSizeGTE applies the GTE predicate on the "FileSize" field.
-func FileSizeGTE(v float64) predicate.SinglePageInfo {
+func FileSizeGTE(v int64) predicate.SinglePageInfo {
 	return predicate.SinglePageInfo(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldFileSize), v))
 	})
 }
 
 // FileSizeLT applies the LT predicate on the "FileSize" field.
-func FileSizeLT(v float64) predicate.SinglePageInfo {
+func FileSizeLT(v int64) predicate.SinglePageInfo {
 	return predicate.SinglePageInfo(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldFileSize), v))
 	})
 }
 
 // FileSizeLTE applies the LTE predicate on the "FileSize" field.
-func FileSizeLTE(v float64) predicate.SinglePageInfo {
+func FileSizeLTE(v int64) predicate.SinglePageInfo {
 	return predicate.SinglePageInfo(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldFileSize), v))
 	})

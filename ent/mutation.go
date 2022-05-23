@@ -1733,8 +1733,8 @@ type SinglePageInfoMutation struct {
 	_Width             *int
 	add_Width          *int
 	_ModeTime          *time.Time
-	_FileSize          *float64
-	add_FileSize       *float64
+	_FileSize          *int64
+	add_FileSize       *int64
 	_RealImageFilePATH *string
 	_ImgType           *string
 	clearedFields      map[string]struct{}
@@ -2190,13 +2190,13 @@ func (m *SinglePageInfoMutation) ResetModeTime() {
 }
 
 // SetFileSize sets the "FileSize" field.
-func (m *SinglePageInfoMutation) SetFileSize(f float64) {
-	m._FileSize = &f
+func (m *SinglePageInfoMutation) SetFileSize(i int64) {
+	m._FileSize = &i
 	m.add_FileSize = nil
 }
 
 // FileSize returns the value of the "FileSize" field in the mutation.
-func (m *SinglePageInfoMutation) FileSize() (r float64, exists bool) {
+func (m *SinglePageInfoMutation) FileSize() (r int64, exists bool) {
 	v := m._FileSize
 	if v == nil {
 		return
@@ -2207,7 +2207,7 @@ func (m *SinglePageInfoMutation) FileSize() (r float64, exists bool) {
 // OldFileSize returns the old "FileSize" field's value of the SinglePageInfo entity.
 // If the SinglePageInfo object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SinglePageInfoMutation) OldFileSize(ctx context.Context) (v float64, err error) {
+func (m *SinglePageInfoMutation) OldFileSize(ctx context.Context) (v int64, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldFileSize is only allowed on UpdateOne operations")
 	}
@@ -2221,17 +2221,17 @@ func (m *SinglePageInfoMutation) OldFileSize(ctx context.Context) (v float64, er
 	return oldValue.FileSize, nil
 }
 
-// AddFileSize adds f to the "FileSize" field.
-func (m *SinglePageInfoMutation) AddFileSize(f float64) {
+// AddFileSize adds i to the "FileSize" field.
+func (m *SinglePageInfoMutation) AddFileSize(i int64) {
 	if m.add_FileSize != nil {
-		*m.add_FileSize += f
+		*m.add_FileSize += i
 	} else {
-		m.add_FileSize = &f
+		m.add_FileSize = &i
 	}
 }
 
 // AddedFileSize returns the value that was added to the "FileSize" field in this mutation.
-func (m *SinglePageInfoMutation) AddedFileSize() (r float64, exists bool) {
+func (m *SinglePageInfoMutation) AddedFileSize() (r int64, exists bool) {
 	v := m.add_FileSize
 	if v == nil {
 		return
@@ -2497,7 +2497,7 @@ func (m *SinglePageInfoMutation) SetField(name string, value ent.Value) error {
 		m.SetModeTime(v)
 		return nil
 	case singlepageinfo.FieldFileSize:
-		v, ok := value.(float64)
+		v, ok := value.(int64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -2584,7 +2584,7 @@ func (m *SinglePageInfoMutation) AddField(name string, value ent.Value) error {
 		m.AddWidth(v)
 		return nil
 	case singlepageinfo.FieldFileSize:
-		v, ok := value.(float64)
+		v, ok := value.(int64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

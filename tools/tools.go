@@ -28,6 +28,27 @@ import (
 	"github.com/yumenaka/comi/locale"
 )
 
+//// 一个语言检测包，它告诉您某些提供的文本数据是用哪种（人类）语言编写的。 需要导入：
+////go get github.com/pemistahl/lingua-go@v1.0.5
+//func CheckStringLanguage(s string) string {
+//	languages := []lingua.Language{
+//		lingua.English,
+//		lingua.Japanese,
+//		lingua.Chinese,
+//		lingua.French,
+//		lingua.German,
+//		lingua.Spanish,
+//	}
+//	detector := lingua.NewLanguageDetectorBuilder().
+//		FromLanguages(languages...).
+//		Build()
+//	if language, exists := detector.DetectLanguageOf("languages are awesome"); exists {
+//		fmt.Println(language)
+//		return language
+//	}
+//	return ""
+//}
+
 // GetImageDataBlurHash  获取图片的BlurHash
 func GetImageDataBlurHash(loadedImage []byte, components int) string {
 	// Generate the BlurHash for a given image

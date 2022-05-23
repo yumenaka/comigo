@@ -33,7 +33,7 @@ type SinglePageInfo struct {
 	// ModeTime holds the value of the "ModeTime" field.
 	ModeTime time.Time `json:"ModeTime,omitempty"`
 	// FileSize holds the value of the "FileSize" field.
-	FileSize float64 `json:"FileSize,omitempty"`
+	FileSize int64 `json:"FileSize,omitempty"`
 	// RealImageFilePATH holds the value of the "RealImageFilePATH" field.
 	RealImageFilePATH string `json:"RealImageFilePATH,omitempty"`
 	// ImgType holds the value of the "ImgType" field.
@@ -46,9 +46,7 @@ func (*SinglePageInfo) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case singlepageinfo.FieldFileSize:
-			values[i] = new(sql.NullFloat64)
-		case singlepageinfo.FieldID, singlepageinfo.FieldPageNum, singlepageinfo.FieldHeight, singlepageinfo.FieldWidth:
+		case singlepageinfo.FieldID, singlepageinfo.FieldPageNum, singlepageinfo.FieldHeight, singlepageinfo.FieldWidth, singlepageinfo.FieldFileSize:
 			values[i] = new(sql.NullInt64)
 		case singlepageinfo.FieldBookID, singlepageinfo.FieldNameInArchive, singlepageinfo.FieldURL, singlepageinfo.FieldBlurHash, singlepageinfo.FieldRealImageFilePATH, singlepageinfo.FieldImgType:
 			values[i] = new(sql.NullString)
@@ -126,10 +124,10 @@ func (spi *SinglePageInfo) assignValues(columns []string, values []interface{}) 
 				spi.ModeTime = value.Time
 			}
 		case singlepageinfo.FieldFileSize:
-			if value, ok := values[i].(*sql.NullFloat64); !ok {
+			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field FileSize", values[i])
 			} else if value.Valid {
-				spi.FileSize = value.Float64
+				spi.FileSize = value.Int64
 			}
 		case singlepageinfo.FieldRealImageFilePATH:
 			if value, ok := values[i].(*sql.NullString); !ok {
