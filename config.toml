@@ -1,5 +1,5 @@
-# 服务器设置(config.toml)，配置文件放在被扫描的根目录中，或$HOME/config/comigo.可以用“comi --generate-config”生成本示例文件
- # 提供阅读服务的端口
+# Comigo设置(config.toml)，放在执行目录中，或$HOME/.config/comigo/下。可用“comi --generate-config”生成本文件
+# # 网页端口
 Port = 1234
 # 自定义二维码显示的主机名
 Host = ''
@@ -7,6 +7,12 @@ Host = ''
 StoresPath = ['C:\test\Comic', 'D:\some_path\book']
 # 最大扫描深度
 MaxDepth = 3
+# 是否同时打开浏览器，windows默认true，其他默认false
+OpenBrowser = false
+# 只在本机localhost提供服务，不对外共享
+DisableLAN = false
+# 默认阅读模式，默认为空，可以设置为scroll或flip
+DefaultMode = 'scroll'
 # 访问限制：用户名。需要设置密码
 UserName = 'admin'
 # 访问限制：密码。需要设置用户名。
@@ -15,25 +21,25 @@ Password = ''
 CertFile = ''
 # Https证书，同时设置CertFile则启用HTTPS协议
 KeyFile = ''
-# 是否同时打开浏览器，windows默认true，其他默认false
-OpenBrowser = false
-# 只在本机localhost提供服务，不对外共享
-DisableLAN = false
 # 是否保存web图片缓存，可以加快二次读取，但会占用硬盘空间
 CacheFileEnable = true
 # web图片缓存存储位置，默认系统临时文件夹
 CacheFilePath = '.comigo'
-# 退出的时候，清理web图片缓存
+# 退出程序的时候，清理web图片缓存
 CacheFileClean = false
+# 启用本地数据库，保存扫描到的书籍数据
+EnableDatabase = true
+# 数据库文件存储位置，默认当前目录
+DatabaseFilePath = ''
 # 需要排除的文件或文件夹
 ExcludeFileOrFolders = ['.comigo', '.idea', '.vscode', '.git', 'node_modules', 'flutter_ui', '.local/share/Trash', '$RECYCLE.BIN', 'Config.Msi', 'System Volume Information', '.sys', ' .DS_Store', '.dll', '.log', '.cache', '.exe']
 # 需要扫描的图片文件后缀
-SupportMediaType = ['.jpg', '.jpeg', '.jpe', '.jpf', '.jfif', '.jfi', '.png', '.bmp', '.webp', '.ico', '.heic', '.avif']
+SupportMediaType = ['.jpg', '.jpeg', '.jpe', '.jpf', '.jfif', '.jfi', '.png', '.bmp', '.webp', '.ico', '.heic', '.avif', '.heic', '.heif', '.avif']
 # 需要扫描的图书文件后缀
-SupportFileType = ['.zip', '.tar', '.rar',".pdf", '.cbr', '.cbz', '.epub', '.tar.gz', '.tgz', '.tar.bz2', '.tbz2', '.tar.xz', '.txz', '.tar.lz4', '.tlz4', '.tar.sz', '.tsz', '.bz2', '.gz', '.lz4', '.sz', '.xz', '.pdf','.mp4', '.webm']
+SupportFileType = ['.zip', '.tar', '.rar', '.pdf', '.cbr', '.cbz', '.epub', '.tar.gz', '.tgz', '.tar.bz2', '.tbz2', '.tar.xz', '.txz', '.tar.lz4', '.tlz4', '.tar.sz', '.tsz', '.bz2', '.gz', '.lz4', '.sz', '.xz', '.pdf', '.mp4', '.webm']
 # 压缩包或文件夹内，至少有几张图片，才算作书籍
 MinImageNum = 1
-# 打印所有可能可用的地址的二维码
+# 打印所有可能阅读链接的二维码
 PrintAllIP = false
 # 开启Debug模式
 Debug = false
@@ -43,7 +49,7 @@ LogToFile = false
 LogFilePath = ''
 # Log文件名
 LogFileName = 'comigo.log'
-# 非utf-8编码的ZIP文件，尝试哪一种编码，默认GBK
+# 非utf-8编码的ZIP文件，尝试用什么编码解析，默认GBK
 ZipFileTextEncoding = 'gbk'
 # 后台启动FrpClient
 EnableFrpcServer = false

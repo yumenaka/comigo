@@ -24,12 +24,13 @@ type ServerSettings struct {
 	CacheFileEnable      bool            `json:"-" comment:"是否保存web图片缓存，可以加快二次读取，但会占用硬盘空间"`
 	CacheFilePath        string          `json:"-" comment:"web图片缓存存储位置，默认系统临时文件夹"`
 	CacheFileClean       bool            `json:"-" comment:"退出程序的时候，清理web图片缓存"`
-	EnableDatabase       bool            `toml:"-" comment:"启用本地数据库，保存扫描到的书籍数据"`
+	EnableDatabase       bool            `json:"-" comment:"启用本地数据库，保存扫描到的书籍数据"`
 	DatabaseFilePath     string          `json:"-" comment:"数据库文件存储位置，默认当前目录"`
 	ExcludeFileOrFolders []string        `json:"-" comment:"需要排除的文件或文件夹"`
 	SupportMediaType     []string        `json:"-" comment:"需要扫描的图片文件后缀"`
 	SupportFileType      []string        `json:"-" comment:"需要扫描的图书文件后缀"`
 	MinImageNum          int             `json:"-" comment:"压缩包或文件夹内，至少有几张图片，才算作书籍"`
+	TimeoutLimitForScan  int             `json:"-" comment:"扫描文件时，超过几秒钟，就放弃扫描这个文件，避免卡在特殊文件上"`
 	PrintAllIP           bool            `json:"-" comment:"打印所有可能阅读链接的二维码"`
 	Debug                bool            `json:"-" comment:"开启Debug模式"`
 	LogToFile            bool            `json:"-" comment:"记录Log到本地文件"`
