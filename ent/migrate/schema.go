@@ -50,7 +50,7 @@ var (
 		{Name: "height", Type: field.TypeInt},
 		{Name: "width", Type: field.TypeInt},
 		{Name: "mode_time", Type: field.TypeTime},
-		{Name: "file_size", Type: field.TypeFloat64},
+		{Name: "file_size", Type: field.TypeInt64},
 		{Name: "real_image_file_path", Type: field.TypeString},
 		{Name: "img_type", Type: field.TypeString},
 		{Name: "book_page_infos", Type: field.TypeInt, Nullable: true},

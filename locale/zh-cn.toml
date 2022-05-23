@@ -104,3 +104,4 @@ CACHE_FILE_PATH = "缓存文件夹，默认系统临时目录，程序退出时�
 CACHE_FILE_CLEAN = "退出时清除全部缓存文件"
 ZIP_ENCODE = "指定zip文件编码(gbk、shiftjis……etc）"
 GenerateConfig = "在当前目录生成示例配置文件"
+EnableDatabase = "启用本地数据库，保存扫描到的书籍数据"

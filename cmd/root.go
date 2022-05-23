@@ -34,6 +34,8 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&common.ConfigFile, "config", "c", "", locale.GetString("CONFIG"))
 	//在当前目录生成示例配置文件
 	rootCmd.PersistentFlags().BoolVar(&common.Config.GenerateConfig, "generate-config", false, locale.GetString("GenerateConfig"))
+	//启用数据库，保存扫描数据
+	rootCmd.PersistentFlags().BoolVar(&common.Config.EnableDatabase, "enable-database", false, locale.GetString("EnableDatabase"))
 	//服务端口
 	rootCmd.PersistentFlags().IntVarP(&common.Config.Port, "port", "p", 1234, locale.GetString("PORT"))
 	//本地Host

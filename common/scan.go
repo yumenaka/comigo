@@ -21,6 +21,7 @@ import (
 	"github.com/yumenaka/comi/arch"
 	"github.com/yumenaka/comi/book"
 	"github.com/yumenaka/comi/locale"
+	"github.com/yumenaka/comi/storage"
 )
 
 func AddBooksToStore(bookList []*book.Book, path string) {
@@ -36,11 +37,14 @@ func AddBooksToStore(bookList []*book.Book, path string) {
 
 // ScanAndGetBookList 扫描一个路径，并返回书籍列表
 func ScanAndGetBookList(storePath string) (bookList []*book.Book, err error) {
+
 	storePathAbs, err := filepath.Abs(storePath)
 	if err != nil {
 		storePathAbs = storePath
 		fmt.Println(err)
 	}
+	//初始化数据库
+	storage.InitDatabase("")
 	err = filepath.Walk(storePathAbs, func(walkPath string, fileInfo os.FileInfo, err error) error {
 		//路径深度
 		depth := strings.Count(walkPath, "/") - strings.Count(storePathAbs, "/")
@@ -58,16 +62,16 @@ func ScanAndGetBookList(storePath string) (bookList []*book.Book, err error) {
 		if fileInfo == nil {
 			return err
 		}
-		////从数据库里面读取，看是不是已经扫描过。以前扫描过的文件就跳过。
-		//dataBaseBook, dataBaseErr := GetBookFromDatabase(walkPath)
-		//if dataBaseErr == nil {
-		//	//扫描过的压缩档文件，如果修改时间没变，就不必重复扫描。
-		//	if dataBaseBook.FilePath == walkPath && dataBaseBook.FileSize == fileInfo.Size() && dataBaseBook.Modified == fileInfo.ModTime() {
-		//		//bookList = append(bookList, dataBaseBook)
-		//		fmt.Println("Found in Database,Skip File:" + walkPath)
-		//		return nil
-		//	}
-		//}
+		//从数据库里面读取，看是不是已经扫描过。以前扫描过的文件就跳过。
+		dataBaseBook, dataBaseErr := storage.GetBookFromDatabase(walkPath)
+		if dataBaseErr == nil {
+			//扫描过的压缩档文件，如果修改时间没变，就不必重复扫描。
+			if dataBaseBook.FilePath == walkPath && dataBaseBook.FileSize == fileInfo.Size() && dataBaseBook.Modified == fileInfo.ModTime() {
+				bookList = append(bookList, dataBaseBook)
+				fmt.Println("Found in Database,Skip File:" + walkPath)
+				return nil
+			}
+		}
 		//如果不是文件夹
 		if !fileInfo.IsDir() {
 			if !Config.IsSupportArchiver(walkPath) {
@@ -79,6 +83,11 @@ func ScanAndGetBookList(storePath string) (bookList []*book.Book, err error) {
 				fmt.Println(err)
 				return nil
 			}
+			//将扫描好的书籍存入数据库
+			saveErr := storage.SaveBookToDatabase(getBook)
+			if saveErr == nil {
+				fmt.Println(saveErr)
+			}
 			bookList = append(bookList, getBook)
 		}
 
@@ -89,6 +98,11 @@ func ScanAndGetBookList(storePath string) (bookList []*book.Book, err error) {
 			if err != nil {
 				fmt.Println(err)
 				return nil
+			}
+			//将扫描好的书籍存入数据库
+			saveErr := storage.SaveBookToDatabase(getBook)
+			if saveErr == nil {
+				fmt.Println(saveErr)
 			}
 			bookList = append(bookList, getBook)
 		}

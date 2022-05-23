@@ -24,6 +24,7 @@ type ServerSettings struct {
 	CacheFileEnable      bool            `json:"-" comment:"是否保存web图片缓存，可以加快二次读取，但会占用硬盘空间"`
 	CacheFilePath        string          `json:"-" comment:"web图片缓存存储位置，默认系统临时文件夹"`
 	CacheFileClean       bool            `json:"-" comment:"退出程序的时候，清理web图片缓存"`
+	EnableDatabase       bool            `toml:"-" comment:"启用本地数据库，保存扫描到的书籍数据"`
 	DatabaseFilePath     string          `json:"-" comment:"数据库文件存储位置，默认当前目录"`
 	ExcludeFileOrFolders []string        `json:"-" comment:"需要排除的文件或文件夹"`
 	SupportMediaType     []string        `json:"-" comment:"需要扫描的图片文件后缀"`

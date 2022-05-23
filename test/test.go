@@ -23,10 +23,11 @@ import (
 	"github.com/yumenaka/comi/ent"
 )
 
-// 数据库参考：
+// 参考：
 // Go製CGOフリーなSQLiteドライバーでentを使う
 // https://zenn.dev/nobonobo/articles/e9f17d183c19f6
 
+//初始化数据库为sqlite3
 type sqliteDriver struct {
 	*sqlite.Driver
 }
@@ -57,7 +58,7 @@ func main() {
 func testDatabase() {
 
 	//链接或创建数据库
-	entOptions := []ent.Option{}
+	var entOptions []ent.Option
 	entOptions = append(entOptions, ent.Debug())
 	//连接器
 	client, err := ent.Open(dialect.SQLite, "file:comigo.sqlite?cache=shared", entOptions...)

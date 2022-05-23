@@ -108,7 +108,7 @@ func New(filePath string, modified time.Time, fileSize int64, storePath string, 
 	//FilePath，转换为绝对路径
 	b.setFilePath(filePath)
 	//书籍类型
-	b.Type = getBookTypeByFilename(filePath)
+	b.Type = GetBookTypeByFilename(filePath)
 	b.setName(filePath)
 	//设置属性：父文件夹
 	b.setParentFolder(filePath)
@@ -129,7 +129,7 @@ func (b *Book) setFilePath(path string) {
 }
 
 //初始化Book时，取得BookType
-func getBookTypeByFilename(filename string) SupportFileType {
+func GetBookTypeByFilename(filename string) SupportFileType {
 	//获取文件后缀
 	switch strings.ToLower(path.Ext(filename)) {
 	case ".zip":
