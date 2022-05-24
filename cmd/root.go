@@ -6,6 +6,7 @@ import (
 	"os"
 	"path"
 	"runtime"
+	"time"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/pelletier/go-toml/v2"
@@ -111,6 +112,7 @@ func init() {
 		home, err := homedir.Dir()
 		if err != nil {
 			fmt.Println(err)
+			time.Sleep(3 * time.Second)
 			os.Exit(1)
 		}
 		homeConfigPath := path.Join(home, ".config/comigo")
@@ -133,6 +135,7 @@ func init() {
 		// 把设定文件的内容，解析到构造体里面。
 		if err := viperInstance.Unmarshal(&common.Config); err != nil {
 			fmt.Println(err)
+			time.Sleep(3 * time.Second)
 			os.Exit(1)
 		}
 		//保存配置示例並退出
@@ -151,6 +154,7 @@ func init() {
 			if err != nil {
 				panic(err)
 			}
+			time.Sleep(3 * time.Second)
 			os.Exit(0)
 		}
 		//监听文件修改
@@ -229,6 +233,7 @@ func Execute() {
 	//执行命令
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
+		time.Sleep(3 * time.Second)
 		os.Exit(1)
 	}
 }

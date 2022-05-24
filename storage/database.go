@@ -6,13 +6,12 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
-	"log"
 	"path"
 
 	"entgo.io/ent/dialect"
 	"modernc.org/sqlite"
 
-	comigo_book "github.com/yumenaka/comi/book"
+	comigoBook "github.com/yumenaka/comi/book"
 	"github.com/yumenaka/comi/ent"
 	"github.com/yumenaka/comi/ent/book"
 	"github.com/yumenaka/comi/ent/singlepageinfo"
@@ -37,7 +36,10 @@ func (d sqliteDriver) Open(name string) (driver.Conn, error) {
 		Exec(stmt string, args []driver.Value) (driver.Result, error)
 	})
 	if _, err := c.Exec("PRAGMA foreign_keys = on;", nil); err != nil {
-		conn.Close()
+		err := conn.Close()
+		if err != nil {
+			return nil, err
+		}
 		return nil, fmt.Errorf("failed to enable enable foreign keys: %w", err)
 	}
 	return conn, nil
@@ -66,11 +68,15 @@ func InitDatabase(p string) {
 	}
 	client, err = ent.Open(dialect.SQLite, sqliteFilePath, entOptions...)
 	if err != nil {
-		log.Fatalf("failed opening connection to sqlite: %v", err)
+		fmt.Printf("failed opening connection to sqlite: %v", err)
+		//time.Sleep(3 * time.Second)
+		//log.Fatalf("failed opening connection to sqlite: %v", err)
 	}
 	//defer client.Close()
 	if err := client.Schema.Create(context.Background()); err != nil {
-		log.Fatalf("failed creating schema resources: %v", err)
+		fmt.Printf("failed creating schema resources: %v", err)
+		//time.Sleep(3 * time.Second)
+		//log.Fatalf("failed creating schema resources: %v", err)
 	}
 }
 
@@ -82,10 +88,10 @@ func CloseDatabase() {
 }
 
 // SaveAllBookToDatabase 将Map里面的书籍信息，全部保存到本地数据库中
-func SaveAllBookToDatabase(databaseFilePath string, m map[string]*comigo_book.Book) {
+func SaveAllBookToDatabase(databaseFilePath string, m map[string]*comigoBook.Book) {
 	for _, b := range m {
-		var book = *b
-		err := SaveBookToDatabase(&book)
+		var c = *b
+		err := SaveBookToDatabase(&c)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -93,7 +99,7 @@ func SaveAllBookToDatabase(databaseFilePath string, m map[string]*comigo_book.Bo
 }
 
 // SaveBookToDatabase 向数据库中插入一本书
-func SaveBookToDatabase(save *comigo_book.Book) error {
+func SaveBookToDatabase(save *comigoBook.Book) error {
 	//如何增删查改： https://entgo.io/zh/docs/crud
 	ctx := context.Background()
 	b, err := client.Book.
@@ -150,7 +156,7 @@ func SaveBookToDatabase(save *comigo_book.Book) error {
 }
 
 // GetBookFromDatabase 根据文件路径，从数据库查询一本书的详细信息,避免重复扫描压缩包。
-func GetBookFromDatabase(filepath string) (*comigo_book.Book, error) {
+func GetBookFromDatabase(filepath string) (*comigoBook.Book, error) {
 	ctx := context.Background()
 	books, err := client.Book. // UserClient.
 					Query(). // 用户查询生成器。
@@ -163,7 +169,7 @@ func GetBookFromDatabase(filepath string) (*comigo_book.Book, error) {
 		return nil, errors.New("not found in database,filepath:" + filepath)
 	}
 	temp := books[0]
-	b := comigo_book.Book{
+	b := comigoBook.Book{
 		Name:            temp.Name,
 		BookID:          temp.BookID,
 		FilePath:        temp.FilePath,
@@ -184,7 +190,7 @@ func GetBookFromDatabase(filepath string) (*comigo_book.Book, error) {
 		NonUTF8Zip:      temp.NonUTF8Zip,
 		ZipTextEncoding: temp.ZipTextEncoding,
 	}
-	b.Type = comigo_book.GetBookTypeByFilename(temp.Type)
+	b.Type = comigoBook.GetBookTypeByFilename(temp.Type)
 	//查询数据库里的封面与页面信息
 	//https://entgo.io/zh/docs/crud
 	pages, err := client.SinglePageInfo. // UserClient.
@@ -192,7 +198,7 @@ func GetBookFromDatabase(filepath string) (*comigo_book.Book, error) {
 						Where(singlepageinfo.BookID(temp.BookID)).
 						All(ctx) // query and return.
 	for _, v := range pages {
-		b.Pages = append(b.Pages, comigo_book.SinglePageInfo{
+		b.Pages = append(b.Pages, comigoBook.SinglePageInfo{
 			PageNum:           v.PageNum,
 			NameInArchive:     v.NameInArchive,
 			Url:               v.URL,
@@ -231,11 +237,11 @@ func GetBookFromDatabase(filepath string) (*comigo_book.Book, error) {
 //}
 
 // GetAllBookFromDatabase 从本地数据库里面取出全部书籍信息，并以Map形式返回
-func GetAllBookFromDatabase(databasePath string) (map[string]*comigo_book.Book, error) {
-	var allBook []comigo_book.Book
+func GetAllBookFromDatabase(databasePath string) (map[string]*comigoBook.Book, error) {
+	var allBook []comigoBook.Book
 
-	var temp map[string]*comigo_book.Book
-	temp = make(map[string]*comigo_book.Book)
+	var temp map[string]*comigoBook.Book
+	temp = make(map[string]*comigoBook.Book)
 	for _, b := range allBook {
 		temp[b.BookID] = &b
 	}
@@ -244,7 +250,7 @@ func GetAllBookFromDatabase(databasePath string) (map[string]*comigo_book.Book, 
 }
 
 //// CleanAndSaveAllBookToDatabase  同时清空Map里面不存在的书。然后将Map里面的书籍信息，全部保存到本地数据库中。
-//func CleanAndSaveAllBookToDatabase(databaseFilePath string, m map[string]*comigo_book.Book) error {
+//func CleanAndSaveAllBookToDatabase(databaseFilePath string, m map[string]*comigoBook.Book) error {
 //	//Open函数默认创建的db文件权限是0600(属主读写),1秒超时的选项,可以自行传值修改
 //	//db, err := storm.Open(path.Join(databaseFilePath, "comigo.db"), storm.BoltOptions(0600, &bolt.Options{Timeout: 100 * time.Millisecond}))
 //	//if err != nil {

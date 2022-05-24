@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 )
 
 var testList = []string{
@@ -86,6 +87,7 @@ func Test_Sort1(t *testing.T) {
 	Sort(testListSorted)
 
 	if !reflect.DeepEqual(testListSortedOK, testListSorted) {
+		time.Sleep(3 * time.Second)
 		t.Fatalf(`ERROR: sorted list different from expected results:
 	Expected results:
 %v
@@ -151,6 +153,7 @@ func Test_Sort2(t *testing.T) {
 	Sort(testListSorted)
 
 	if !reflect.DeepEqual(testListSortedOK, testListSorted) {
+		time.Sleep(3 * time.Second)
 		t.Fatalf(`ERROR: sorted list different from expected results:
 	Expected results:
 %v
