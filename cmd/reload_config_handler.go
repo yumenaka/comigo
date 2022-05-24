@@ -29,12 +29,14 @@ func configReloadHandler(e fsnotify.Event) {
 	// 把设定文件的内容，解析到构造体里面。
 	if err := viperInstance.Unmarshal(&common.Config); err != nil {
 		fmt.Println(err)
+		time.Sleep(3 * time.Second)
 		os.Exit(1)
 	}
 	// 上下文用于通知服务器它有 5 秒的时间来完成它当前正在处理的请求
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := common.Srv.Shutdown(ctx); err != nil {
+		time.Sleep(3 * time.Second)
 		log.Fatal("Server forced to shutdown: ", err)
 	}
 	<-ctx.Done()

@@ -18,6 +18,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"time"
 	"unicode/utf8"
 
 	"github.com/Baozisoftware/qrcode-terminal-go"
@@ -98,19 +99,19 @@ func GetImageDataBlurHashImage(loadedImage []byte, components int) []byte {
 // ImageResizeByWidth 根据一个固定宽度缩放图片
 func ImageResizeByWidth(loadedImage []byte, width int) []byte {
 	buf := bytes.NewBuffer(loadedImage)
-	image, err := imaging.Decode(buf)
+	decode, err := imaging.Decode(buf)
 	if err != nil {
 		fmt.Println(err)
 		return loadedImage
 	}
-	sourceWidth := image.Bounds().Dx()
+	sourceWidth := decode.Bounds().Dx()
 	scalingRatio := float64(width) / float64(sourceWidth)
-	height := int(float64(image.Bounds().Dy()) * scalingRatio)
+	height := int(float64(decode.Bounds().Dy()) * scalingRatio)
 	//生成缩略图
-	image = imaging.Resize(image, width, height, imaging.Lanczos)
+	decode = imaging.Resize(decode, width, height, imaging.Lanczos)
 	buf2 := &bytes.Buffer{}
 	//将图片编码成jpeg
-	err = imaging.Encode(buf2, image, imaging.JPEG)
+	err = imaging.Encode(buf2, decode, imaging.JPEG)
 	if err != nil {
 		return loadedImage
 	}
@@ -120,22 +121,22 @@ func ImageResizeByWidth(loadedImage []byte, width int) []byte {
 // ImageResizeByMaxWidth  设定一个图片宽度上限，大于这个宽度就缩放
 func ImageResizeByMaxWidth(loadedImage []byte, maxWidth int) ([]byte, error) {
 	buf := bytes.NewBuffer(loadedImage)
-	image, err := imaging.Decode(buf)
+	decode, err := imaging.Decode(buf)
 	if err != nil {
 		fmt.Println(err)
 		return nil, errors.New("imaging.Decode() Error")
 	}
-	sourceWidth := image.Bounds().Dx()
+	sourceWidth := decode.Bounds().Dx()
 	if maxWidth > sourceWidth {
 		return nil, errors.New("ImageResizeByMaxWidth Error maxWidth(" + strconv.Itoa(maxWidth) + ")> sourceWidth(" + strconv.Itoa(sourceWidth) + ")")
 	}
 	scalingRatio := float64(maxWidth) / float64(sourceWidth)
-	height := int(float64(image.Bounds().Dy()) * scalingRatio)
+	height := int(float64(decode.Bounds().Dy()) * scalingRatio)
 	//生成缩略图
-	image = imaging.Resize(image, maxWidth, height, imaging.Lanczos)
+	decode = imaging.Resize(decode, maxWidth, height, imaging.Lanczos)
 	buf2 := &bytes.Buffer{}
 	//将图片编码成jpeg
-	err = imaging.Encode(buf2, image, imaging.JPEG)
+	err = imaging.Encode(buf2, decode, imaging.JPEG)
 	if err != nil {
 		return nil, errors.New("imaging.Encode() Error")
 	}
@@ -145,21 +146,21 @@ func ImageResizeByMaxWidth(loadedImage []byte, maxWidth int) ([]byte, error) {
 // ImageResizeByMaxHeight  设定一个图片高度上限，大于这个高度就缩放
 func ImageResizeByMaxHeight(loadedImage []byte, maxHeight int) ([]byte, error) {
 	buf := bytes.NewBuffer(loadedImage)
-	image, err := imaging.Decode(buf)
+	decode, err := imaging.Decode(buf)
 	if err != nil {
 		fmt.Println(err)
 		return nil, errors.New("imaging.Decode() Error")
 	}
-	sourceHeight := image.Bounds().Dy()
+	sourceHeight := decode.Bounds().Dy()
 	if maxHeight > sourceHeight {
 		return nil, errors.New("ImageResizeByMaxHeight Error maxWidth(" + strconv.Itoa(maxHeight) + ")> sourceWidth(" + strconv.Itoa(sourceHeight) + ")")
 	}
 	scalingRatio := float64(maxHeight) / float64(sourceHeight)
-	width := int(float64(image.Bounds().Dx()) * scalingRatio)
-	image = imaging.Resize(image, width, maxHeight, imaging.Lanczos)
+	width := int(float64(decode.Bounds().Dx()) * scalingRatio)
+	decode = imaging.Resize(decode, width, maxHeight, imaging.Lanczos)
 	buf2 := &bytes.Buffer{}
 	//将图片编码成jpeg
-	err = imaging.Encode(buf2, image, imaging.JPEG)
+	err = imaging.Encode(buf2, decode, imaging.JPEG)
 	if err != nil {
 		return nil, errors.New("imaging.Encode() Error")
 	}
@@ -169,18 +170,18 @@ func ImageResizeByMaxHeight(loadedImage []byte, maxHeight int) ([]byte, error) {
 // ImageResizeByHeight 根据一个固定 Height 缩放图片
 func ImageResizeByHeight(loadedImage []byte, height int) []byte {
 	buf := bytes.NewBuffer(loadedImage)
-	image, err := imaging.Decode(buf)
+	decode, err := imaging.Decode(buf)
 	if err != nil {
 		fmt.Println(err)
 		return loadedImage
 	}
-	sourceHeight := image.Bounds().Dy()
+	sourceHeight := decode.Bounds().Dy()
 	scalingRatio := float64(height) / float64(sourceHeight)
-	width := int(float64(image.Bounds().Dx()) * scalingRatio)
-	image = imaging.Resize(image, width, height, imaging.Lanczos)
+	width := int(float64(decode.Bounds().Dx()) * scalingRatio)
+	decode = imaging.Resize(decode, width, height, imaging.Lanczos)
 	buf2 := &bytes.Buffer{}
 	//将图片编码成jpeg
-	err = imaging.Encode(buf2, image, imaging.JPEG)
+	err = imaging.Encode(buf2, decode, imaging.JPEG)
 	if err != nil {
 		return loadedImage
 	}
@@ -191,16 +192,16 @@ func ImageResizeByHeight(loadedImage []byte, height int) []byte {
 func ImageResize(loadedImage []byte, width int, height int) []byte {
 	//loadedImage, _ := ioutil.ReadFile("d:/1.jpg")
 	buf := bytes.NewBuffer(loadedImage)
-	image, err := imaging.Decode(buf)
+	decode, err := imaging.Decode(buf)
 	if err != nil {
 		fmt.Println(err)
 		return loadedImage
 	}
 	//生成缩略图，尺寸width*height
-	image = imaging.Resize(image, width, height, imaging.Lanczos)
+	decode = imaging.Resize(decode, width, height, imaging.Lanczos)
 	buf2 := &bytes.Buffer{}
 	//将图片编码成jpeg
-	err = imaging.Encode(buf2, image, imaging.JPEG)
+	err = imaging.Encode(buf2, decode, imaging.JPEG)
 	if err != nil {
 		return loadedImage
 	}
@@ -454,6 +455,7 @@ func GetIPList() (IPList []string, err error) {
 func GetOutboundIP() net.IP {
 	conn, err := net.Dial("udp", "8.8.8.8:80")
 	if err != nil {
+		time.Sleep(3 * time.Second)
 		log.Fatal(err)
 	}
 	defer func(conn net.Conn) {
@@ -535,12 +537,14 @@ func OpenBrowser(uri string) {
 func MD5file(fName string) string {
 	f, e := os.Open(fName)
 	if e != nil {
-		log.Fatal(e)
+		fmt.Println(e)
+		//log.Fatal(e)
 	}
 	h := md5.New()
 	_, e = io.Copy(h, f)
 	if e != nil {
-		log.Fatal(e)
+		fmt.Println(e)
+		//log.Fatal(e)
 	}
 	return hex.EncodeToString(h.Sum(nil))
 }
@@ -550,7 +554,7 @@ func getNumberFromString(s string) (int, error) {
 	var err error
 	num := 0
 	//同时设定倒计时秒数
-	valid := regexp.MustCompile("[0-9]+")
+	valid := regexp.MustCompile("\\d+")
 	numbers := valid.FindAllStringSubmatch(s, -1)
 	if len(numbers) > 0 {
 		//循环取出多维数组

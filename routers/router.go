@@ -145,6 +145,7 @@ func StartWebServer() {
 	})
 
 	if err != nil {
+		time.Sleep(3 * time.Second)
 		log.Fatal("JWT Error:" + err.Error())
 	}
 
@@ -153,6 +154,7 @@ func StartWebServer() {
 	errInit := authMiddleware.MiddlewareInit()
 
 	if errInit != nil {
+		time.Sleep(3 * time.Second)
 		log.Fatal("authMiddleware.MiddlewareInit() Error:" + errInit.Error())
 	}
 
@@ -447,12 +449,14 @@ func StartGinEngine(engine *gin.Engine) {
 		// 监听并启动服务(TLS)
 		if enableTls {
 			if err := common.Srv.ListenAndServeTLS(common.Config.CertFile, common.Config.KeyFile); err != nil && err != http.ErrServerClosed {
+				time.Sleep(3 * time.Second)
 				log.Fatalf("listen: %s\n", err)
 			}
 		}
 		if !enableTls {
 			// 监听并启动服务(HTTP)
 			if err := common.Srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+				time.Sleep(3 * time.Second)
 				log.Fatalf("listen: %s\n", err)
 			}
 		}
@@ -481,6 +485,8 @@ func SetShutdownHandler() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := common.Srv.Shutdown(ctx); err != nil {
+		//fmt.Println("Comigo Server forced to shutdown: ", err)
+		//time.Sleep(3 * time.Second)
 		log.Fatal("Comigo Server forced to shutdown: ", err)
 	}
 	log.Println("Comigo Server exit.")
