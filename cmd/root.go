@@ -115,6 +115,7 @@ func init() {
 			time.Sleep(3 * time.Second)
 			os.Exit(1)
 		}
+		//需要在home目录下面搜索配置文件
 		homeConfigPath := path.Join(home, ".config/comigo")
 		viperInstance.AddConfigPath(homeConfigPath)
 		// 当前执行目录
@@ -122,6 +123,7 @@ func init() {
 		viperInstance.AddConfigPath(nowPath)
 		viperInstance.SetConfigType("toml")
 		if common.ConfigFile == "" {
+			common.ConfigFile = homeConfigPath
 			viperInstance.SetConfigName("config.toml")
 		} else {
 			viperInstance.SetConfigName(common.ConfigFile)

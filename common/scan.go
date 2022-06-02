@@ -61,20 +61,24 @@ func ScanAndGetBookList(storePath string) (bookList []*book.Book, err error) {
 		if fileInfo == nil {
 			return err
 		}
-		//从数据库里面读取，看是不是已经扫描过。以前扫描过的文件就跳过。
-		dataBaseBook, dataBaseErr := storage.GetBookFromDatabase(walkPath)
-		if dataBaseErr == nil {
-			////扫描过的压缩档文件，如果修改时间与大小没变，就不必重复扫描。
-			////tempTime := fileInfo.ModTime()
-			//if dataBaseBook.FileSize == fileInfo.Size() {
-			//	bookList = append(bookList, dataBaseBook)
-			//	fmt.Println("Found in Database,Skip scan:" + walkPath)
-			//	return nil
-			//}
-			bookList = append(bookList, dataBaseBook)
-			fmt.Println("Found in Database,Skip scan:" + walkPath)
-			return nil
+		//yaml设置文件路径，数据库文件(comigo.db)在同一个文件夹。所以没有设置文件，就不查数据库
+		if Config.EnableDatabase {
+			//从数据库里面读取，看是不是已经扫描过。以前扫描过的文件就跳过。
+			dataBaseBook, dataBaseErr := storage.GetBookFromDatabase(walkPath)
+			if dataBaseErr == nil {
+				////扫描过的压缩档文件，如果修改时间与大小没变，就不必重复扫描。
+				////tempTime := fileInfo.ModTime()
+				//if dataBaseBook.FileSize == fileInfo.Size() {
+				//	bookList = append(bookList, dataBaseBook)
+				//	fmt.Println("Found in Database,Skip scan:" + walkPath)
+				//	return nil
+				//}
+				bookList = append(bookList, dataBaseBook)
+				fmt.Println("Found in Database,Skip scan:" + walkPath)
+				return nil
+			}
 		}
+
 		//如果不是文件夹
 		if !fileInfo.IsDir() {
 			if !Config.IsSupportArchiver(walkPath) {
@@ -86,10 +90,13 @@ func ScanAndGetBookList(storePath string) (bookList []*book.Book, err error) {
 				fmt.Println(err)
 				return nil
 			}
-			//将扫描好的书籍存入数据库
-			saveErr := storage.SaveBookToDatabase(getBook)
-			if saveErr == nil {
-				fmt.Println(saveErr)
+			//yaml设置文件，数据库文件(comigo.db)在同一个文件夹。所以没有设置文件，就不查数据库
+			if Config.EnableDatabase {
+				//将扫描好的书籍存入数据库
+				saveErr := storage.SaveBookToDatabase(getBook)
+				if saveErr == nil {
+					fmt.Println(saveErr)
+				}
 			}
 			bookList = append(bookList, getBook)
 		}
@@ -102,10 +109,12 @@ func ScanAndGetBookList(storePath string) (bookList []*book.Book, err error) {
 				fmt.Println(err)
 				return nil
 			}
-			//将扫描好的书籍存入数据库
-			saveErr := storage.SaveBookToDatabase(getBook)
-			if saveErr == nil {
-				fmt.Println(saveErr)
+			//yaml设置文件，数据库文件(comigo.db)在同一个文件夹。所以没有设置文件，就不查数据库
+			if Config.EnableDatabase {
+				saveErr := storage.SaveBookToDatabase(getBook)
+				if saveErr == nil {
+					fmt.Println(saveErr)
+				}
 			}
 			bookList = append(bookList, getBook)
 		}
