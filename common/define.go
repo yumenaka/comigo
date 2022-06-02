@@ -25,7 +25,7 @@ func init() {
 }
 
 var (
-	ConfigFile  = ""
+	ConfigFile  = "" //yaml设置文件路径，数据库文件(comigo.db)在同一个文件夹。
 	Version     = "v0.7.3"
 	ReadingBook *book.Book
 	Srv         *http.Server

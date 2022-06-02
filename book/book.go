@@ -94,6 +94,10 @@ type SinglePageInfo struct {
 	ImgType           string    `json:"-"`        //这个字段不解析
 }
 
+func NewSinglePageInfo(pageNum int, nameInArchive string, url string, fileSize int64) *SinglePageInfo {
+	return &SinglePageInfo{PageNum: pageNum, NameInArchive: nameInArchive, Url: url, FileSize: fileSize}
+}
+
 //New  初始化Book，设置文件路径、书名、BookID等等
 func New(filePath string, modified time.Time, fileSize int64, storePath string, depth int) *Book {
 	var b = Book{
