@@ -13,9 +13,11 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	"github.com/yumenaka/comi/book"
 	"github.com/yumenaka/comi/common"
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/routers"
+	"github.com/yumenaka/comi/storage"
 
 	_ "modernc.org/sqlite" //仅运行init函数
 )
@@ -190,26 +192,53 @@ var rootCmd = &cobra.Command{
 //initBookStores 解析命令,扫描书库
 func initBookStores(args []string) {
 	//////初始化数据库
-	//common.InitDatabase()
-	////从数据库里面读取扫描过的书籍，
-	//common.InitMapBooksByDatabase()
+	//初始化数据库
+	storage.InitDatabase("")
+	////从数据库里面读取扫描过的书籍，初始化skipPathList
+	var skipPathList []string
+	if common.Config.EnableDatabase {
+		saveBookList, dataErr := storage.GetAllBookFromDatabase()
+		if dataErr != nil {
+			fmt.Println(dataErr)
+		}
+		//将数据库中的书，添加到内存里面
+		for _, temp := range saveBookList {
+			skipPathList = append(skipPathList, temp.FilePath)
+			book.AddBook(temp, temp.BookStorePath)
+		}
+	}
+
 	//决定如何扫描，扫描哪个路径
 	if len(args) == 0 { //没有指定路径或文件的情况下
 		cmdPath := path.Dir(os.Args[0]) //扫描程序执行的路径
-		list, err := common.ScanAndGetBookList(cmdPath)
+		list, err := common.ScanAndGetBookList(cmdPath, skipPathList)
 		if err != nil {
 			fmt.Println(locale.GetString("scan_error"), cmdPath)
 		} else {
 			common.AddBooksToStore(list, cmdPath)
+			//yaml设置文件，数据库文件(comigo.db)在同一个文件夹。所以没有设置文件，就不查数据库
+			if common.Config.EnableDatabase {
+				saveErr := storage.SaveBookListToDatabase(list)
+				if saveErr != nil {
+					fmt.Println(saveErr)
+				}
+			}
 		}
 	} else {
 		//指定了多个参数的话，都扫描一遍
 		for _, p := range args {
-			list, err := common.ScanAndGetBookList(p)
+			list, err := common.ScanAndGetBookList(p, skipPathList)
 			if err != nil {
 				fmt.Println(locale.GetString("scan_error"), p)
 			} else {
 				common.AddBooksToStore(list, p)
+				//yaml设置文件，数据库文件(comigo.db)在同一个文件夹。所以没有设置文件，就不查数据库
+				if common.Config.EnableDatabase {
+					saveErr := storage.SaveBookListToDatabase(list)
+					if saveErr != nil {
+						fmt.Println(saveErr)
+					}
+				}
 			}
 		}
 	}
@@ -217,7 +246,7 @@ func initBookStores(args []string) {
 	common.Config.SetByExecutableFilename()
 	if len(common.Config.StoresPath) > 0 {
 		for _, p := range common.Config.StoresPath {
-			list, err := common.ScanAndGetBookList(p)
+			list, err := common.ScanAndGetBookList(p, skipPathList)
 			if err != nil {
 				fmt.Println(locale.GetString("scan_error"), p)
 			} else {

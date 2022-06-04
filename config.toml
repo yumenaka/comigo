@@ -39,6 +39,8 @@ SupportMediaType = ['.jpg', '.jpeg', '.jpe', '.jpf', '.jfif', '.jfi', '.png', '.
 SupportFileType = ['.zip', '.tar', '.rar', '.pdf', '.cbr', '.cbz', '.epub', '.tar.gz', '.tgz', '.tar.bz2', '.tbz2', '.tar.xz', '.txz', '.tar.lz4', '.tlz4', '.tar.sz', '.tsz', '.bz2', '.gz', '.lz4', '.sz', '.xz', '.pdf', '.mp4', '.webm']
 # 压缩包或文件夹内，至少有几张图片，才算作书籍
 MinImageNum = 1
+# 扫描文件时，超过几秒钟，就放弃扫描这个文件，避免卡在特殊文件上
+TimeoutLimitForScan = 0
 # 打印所有可能阅读链接的二维码
 PrintAllIP = false
 # 开启Debug模式
