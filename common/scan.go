@@ -21,7 +21,6 @@ import (
 	"github.com/yumenaka/comi/arch"
 	"github.com/yumenaka/comi/book"
 	"github.com/yumenaka/comi/locale"
-	"github.com/yumenaka/comi/storage"
 )
 
 func AddBooksToStore(bookList []*book.Book, path string) {
@@ -36,15 +35,29 @@ func AddBooksToStore(bookList []*book.Book, path string) {
 }
 
 // ScanAndGetBookList 扫描一个路径，并返回书籍列表
-func ScanAndGetBookList(storePath string) (bookList []*book.Book, err error) {
+func ScanAndGetBookList(storePath string, skipPathList []string) (bookList []*book.Book, err error) {
 	storePathAbs, err := filepath.Abs(storePath)
 	if err != nil {
 		storePathAbs = storePath
 		fmt.Println(err)
 	}
-	//初始化数据库
-	storage.InitDatabase("")
 	err = filepath.Walk(storePathAbs, func(walkPath string, fileInfo os.FileInfo, err error) error {
+		//是否需要跳过
+		skip := false
+		for _, p := range skipPathList {
+			AbsW, err := filepath.Abs(walkPath) //取得绝对路径
+			if err != nil {
+				//因为权限问题，无法的情况下，用相对路径
+				fmt.Println(err, AbsW)
+			}
+			if walkPath == p || AbsW == p {
+				skip = true
+			}
+		}
+		if skip {
+			fmt.Println("Found in Database,Skip scan:" + walkPath)
+			return nil
+		}
 		//路径深度
 		depth := strings.Count(walkPath, "/") - strings.Count(storePathAbs, "/")
 		if runtime.GOOS == "windows" {
@@ -61,23 +74,23 @@ func ScanAndGetBookList(storePath string) (bookList []*book.Book, err error) {
 		if fileInfo == nil {
 			return err
 		}
-		//yaml设置文件路径，数据库文件(comigo.db)在同一个文件夹。所以没有设置文件，就不查数据库
-		if Config.EnableDatabase {
-			//从数据库里面读取，看是不是已经扫描过。以前扫描过的文件就跳过。
-			dataBaseBook, dataBaseErr := storage.GetBookFromDatabase(walkPath)
-			if dataBaseErr == nil {
-				////扫描过的压缩档文件，如果修改时间与大小没变，就不必重复扫描。
-				////tempTime := fileInfo.ModTime()
-				//if dataBaseBook.FileSize == fileInfo.Size() {
-				//	bookList = append(bookList, dataBaseBook)
-				//	fmt.Println("Found in Database,Skip scan:" + walkPath)
-				//	return nil
-				//}
-				bookList = append(bookList, dataBaseBook)
-				fmt.Println("Found in Database,Skip scan:" + walkPath)
-				return nil
-			}
-		}
+		////yaml设置文件路径，数据库文件(comigo.db)在同一个文件夹。所以没有设置文件，就不查数据库
+		//if Config.EnableDatabase {
+		//	//从数据库里面读取，看是不是已经扫描过。以前扫描过的文件就跳过。
+		//	dataBaseBook, dataBaseErr := storage.GetBookFromDatabase(walkPath)
+		//	if dataBaseErr == nil {
+		//		////扫描过的压缩档文件，如果修改时间与大小没变，就不必重复扫描。
+		//		////tempTime := fileInfo.ModTime()
+		//		//if dataBaseBook.FileSize == fileInfo.Size() {
+		//		//	bookList = append(bookList, dataBaseBook)
+		//		//	fmt.Println("Found in Database,Skip scan:" + walkPath)
+		//		//	return nil
+		//		//}
+		//		bookList = append(bookList, dataBaseBook)
+		//		fmt.Println("Found in Database,Skip scan:" + walkPath)
+		//		return nil
+		//	}
+		//}
 
 		//如果不是文件夹
 		if !fileInfo.IsDir() {
@@ -90,14 +103,6 @@ func ScanAndGetBookList(storePath string) (bookList []*book.Book, err error) {
 				fmt.Println(err)
 				return nil
 			}
-			//yaml设置文件，数据库文件(comigo.db)在同一个文件夹。所以没有设置文件，就不查数据库
-			if Config.EnableDatabase {
-				//将扫描好的书籍存入数据库
-				saveErr := storage.SaveBookToDatabase(getBook)
-				if saveErr == nil {
-					fmt.Println(saveErr)
-				}
-			}
 			bookList = append(bookList, getBook)
 		}
 
@@ -108,13 +113,6 @@ func ScanAndGetBookList(storePath string) (bookList []*book.Book, err error) {
 			if err != nil {
 				fmt.Println(err)
 				return nil
-			}
-			//yaml设置文件，数据库文件(comigo.db)在同一个文件夹。所以没有设置文件，就不查数据库
-			if Config.EnableDatabase {
-				saveErr := storage.SaveBookToDatabase(getBook)
-				if saveErr == nil {
-					fmt.Println(saveErr)
-				}
 			}
 			bookList = append(bookList, getBook)
 		}

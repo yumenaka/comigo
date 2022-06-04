@@ -98,6 +98,17 @@ func SaveAllBookToDatabase(databaseFilePath string, m map[string]*comigoBook.Boo
 	}
 }
 
+// SaveBookListToDatabase  向数据库中插入一组书
+func SaveBookListToDatabase(bookList []*comigoBook.Book) error {
+	for _, b := range bookList {
+		err := SaveBookToDatabase(b)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // SaveBookToDatabase 向数据库中插入一本书
 func SaveBookToDatabase(save *comigoBook.Book) error {
 	//如何增删查改： https://entgo.io/zh/docs/crud
@@ -221,6 +232,74 @@ func GetBookFromDatabase(filepath string) (*comigoBook.Book, error) {
 	return &b, err
 }
 
+// GetAllBookFromDatabase  根据文件路径，从数据库查询一本书的详细信息,避免重复扫描压缩包。
+func GetAllBookFromDatabase() (list []*comigoBook.Book, err error) {
+	ctx := context.Background()
+	books, err := client.Book. // UserClient.
+					Query(). // 用户查询生成器。
+					All(ctx) // query and return.
+	if err != nil {
+		fmt.Println(err)
+	}
+	if len(books) == 0 {
+		return nil, errors.New("not found in database")
+	}
+	for _, temp := range books {
+		b := comigoBook.Book{
+			Name:            temp.Name,
+			BookID:          temp.BookID,
+			FilePath:        temp.FilePath,
+			BookStorePath:   temp.BookStorePath,
+			ChildBookNum:    temp.ChildBookNum,
+			Depth:           temp.Depth,
+			ParentFolder:    temp.ParentFolder,
+			AllPageNum:      temp.AllPageNum,
+			FileSize:        temp.FileSize,
+			ISBN:            temp.ISBN,
+			Press:           temp.Press,
+			PublishedAt:     temp.PublishedAt,
+			ExtractPath:     temp.ExtractPath,
+			Modified:        temp.Modified,
+			ExtractNum:      temp.ExtractNum,
+			InitComplete:    temp.InitComplete,
+			ReadPercent:     temp.ReadPercent,
+			NonUTF8Zip:      temp.NonUTF8Zip,
+			ZipTextEncoding: temp.ZipTextEncoding,
+		}
+		b.Type = comigoBook.GetBookTypeByFilename(temp.Type)
+		//查询数据库里的封面与页面信息
+		//https://entgo.io/zh/docs/crud
+		pages, err := client.SinglePageInfo. // UserClient.
+							Query(). // 用户查询生成器。
+							Where(singlepageinfo.BookID(temp.BookID)).
+							All(ctx) // query and return.
+		if err != nil {
+			fmt.Println(err)
+		}
+		for _, v := range pages {
+			b.Pages = append(b.Pages, comigoBook.SinglePageInfo{
+				PageNum:           v.PageNum,
+				NameInArchive:     v.NameInArchive,
+				Url:               v.URL,
+				Blurhash:          v.BlurHash,
+				Height:            v.Height,
+				Width:             v.Width,
+				ModeTime:          v.ModeTime,
+				FileSize:          v.FileSize,
+				RealImageFilePATH: v.RealImageFilePATH,
+				ImgType:           v.ImgType,
+			})
+		}
+		//设置封面
+		if len(b.Pages) > 0 {
+			b.Cover = b.Pages[0]
+		}
+		list = append(list, &b)
+	}
+
+	return list, err
+}
+
 //func InitMapBooksByDatabase() {
 //	tempMap, err := GetAllBookFromDatabase()
 //	if err != nil {
@@ -235,19 +314,6 @@ func GetBookFromDatabase(filepath string) (*comigoBook.Book, error) {
 //		fmt.Println(err)
 //	}
 //}
-
-// GetAllBookFromDatabase 从本地数据库里面取出全部书籍信息，并以Map形式返回
-func GetAllBookFromDatabase(databasePath string) (map[string]*comigoBook.Book, error) {
-	var allBook []comigoBook.Book
-
-	var temp map[string]*comigoBook.Book
-	temp = make(map[string]*comigoBook.Book)
-	for _, b := range allBook {
-		temp[b.BookID] = &b
-	}
-	fmt.Println("成功读取数据库,恢复了")
-	return temp, nil
-}
 
 //// CleanAndSaveAllBookToDatabase  同时清空Map里面不存在的书。然后将Map里面的书籍信息，全部保存到本地数据库中。
 //func CleanAndSaveAllBookToDatabase(databaseFilePath string, m map[string]*comigoBook.Book) error {
