@@ -11,7 +11,6 @@ import (
 	"path"
 	"path/filepath"
 	"runtime"
-	"strconv"
 	"strings"
 	"time"
 
@@ -24,7 +23,7 @@ import (
 )
 
 func AddBooksToStore(bookList []*book.Book, path string) {
-	err := book.AddBooks(bookList, path)
+	err := book.AddBooks(bookList, path, Config.MinImageNum)
 	if err != nil {
 		fmt.Println(locale.GetString("AddBook_error"), path)
 	}
@@ -74,23 +73,6 @@ func ScanAndGetBookList(storePath string, skipPathList []string) (bookList []*bo
 		if fileInfo == nil {
 			return err
 		}
-		////yaml设置文件路径，数据库文件(comigo.db)在同一个文件夹。所以没有设置文件，就不查数据库
-		//if Config.EnableDatabase {
-		//	//从数据库里面读取，看是不是已经扫描过。以前扫描过的文件就跳过。
-		//	dataBaseBook, dataBaseErr := storage.GetBookFromDatabase(walkPath)
-		//	if dataBaseErr == nil {
-		//		////扫描过的压缩档文件，如果修改时间与大小没变，就不必重复扫描。
-		//		////tempTime := fileInfo.ModTime()
-		//		//if dataBaseBook.FileSize == fileInfo.Size() {
-		//		//	bookList = append(bookList, dataBaseBook)
-		//		//	fmt.Println("Found in Database,Skip scan:" + walkPath)
-		//		//	return nil
-		//		//}
-		//		bookList = append(bookList, dataBaseBook)
-		//		fmt.Println("Found in Database,Skip scan:" + walkPath)
-		//		return nil
-		//	}
-		//}
 
 		//如果不是文件夹
 		if !fileInfo.IsDir() {
@@ -147,15 +129,18 @@ func scanDirGetBook(dirPath string, storePath string, depth int) (*book.Book, er
 			newBook.Pages = append(newBook.Pages, book.SinglePageInfo{RealImageFilePATH: strAbsPath, FileSize: file.Size(), ModeTime: file.ModTime(), NameInArchive: file.Name(), Url: TempURL})
 		}
 	}
-	//根据文件数决定是否返回这本书
-	totalPageHint := "dirPath: " + dirPath + " Total image in the newBook:" + strconv.Itoa(newBook.GetAllPageNum())
-	if newBook.GetAllPageNum() >= Config.MinImageNum {
-		//找到了一本书的提示
-		fmt.Println(totalPageHint)
-		return newBook, err
-	} else {
-		return nil, errors.New(totalPageHint)
-	}
+	////根据页数决定是否返回这本书
+	//totalPageHint := "dirPath: " + dirPath + " Total image in the newBook:" + strconv.Itoa(newBook.GetAllPageNum())
+	//if newBook.GetAllPageNum() >= Config.MinImageNum {
+	//	//找到了一本书的提示
+	//	fmt.Println(totalPageHint)
+	//	return newBook, err
+	//} else {
+	//	return nil, errors.New(totalPageHint)
+	//}
+
+	//不管页数，直接返回：在添加到书库时判断页数
+	return newBook, err
 }
 
 // 扫描一个路径，并返回对应书籍
@@ -253,14 +238,17 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*book.Book, 
 			return nil
 		})
 	}
-	//根据文件数决定是否返回这本书
-	totalPageHint := "filePath: " + filePath + " Total image:" + strconv.Itoa(newBook.GetAllPageNum())
-	if newBook.GetAllPageNum() >= Config.MinImageNum || newBook.Type == book.TypePDF || newBook.Type == book.TypeVideo {
-		fmt.Println(totalPageHint)
-		return newBook, err
-	} else {
-		return nil, errors.New(totalPageHint)
-	}
+	////根据页数决定是否返回这本书
+	//totalPageHint := "filePath: " + filePath + " Total image:" + strconv.Itoa(newBook.GetAllPageNum())
+	//if newBook.GetAllPageNum() >= Config.MinImageNum || newBook.Type == book.TypePDF || newBook.Type == book.TypeVideo {
+	//	fmt.Println(totalPageHint)
+	//	return newBook, err
+	//} else {
+	//	return nil, errors.New(totalPageHint)
+	//}
+
+	//不管页数，直接返回：在添加到书库时判断页数
+	return newBook, err
 }
 
 func scanNonUTF8ZipFile(filePath string, b *book.Book) error {

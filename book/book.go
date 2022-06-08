@@ -13,6 +13,7 @@ import (
 	"path"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -208,9 +209,12 @@ func (b *Book) setClover() {
 }
 
 // AddBooks 添加一组书
-func AddBooks(list []*Book, basePath string) (err error) {
+func AddBooks(list []*Book, basePath string, minPageNum int) (err error) {
 	for _, b := range list {
-		err = AddBook(b, basePath)
+		if b.GetAllPageNum() < minPageNum {
+			continue
+		}
+		err = AddBook(b, basePath, minPageNum)
 		if err != nil {
 			return err
 		}
@@ -219,9 +223,14 @@ func AddBooks(list []*Book, basePath string) (err error) {
 }
 
 // AddBook 添加一本书
-func AddBook(b *Book, basePath string) error {
+func AddBook(b *Book, basePath string, minPageNum int) error {
+	//没有初始化BookID
 	if b.BookID == "" {
 		return errors.New("add book Error：empty BookID")
+	}
+	//页数不符合要求
+	if b.GetAllPageNum() < minPageNum {
+		return errors.New("add book Error：minPageNum = " + strconv.Itoa(b.GetAllPageNum()))
 	}
 	if _, ok := Stores.mapBookstores[basePath]; !ok {
 		if err := Stores.NewSingleBookstore(basePath); err != nil {

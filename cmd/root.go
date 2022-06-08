@@ -204,7 +204,7 @@ func initBookStores(args []string) {
 		//将数据库中的书，添加到内存里面
 		for _, temp := range saveBookList {
 			skipPathList = append(skipPathList, temp.FilePath)
-			book.AddBook(temp, temp.BookStorePath)
+			book.AddBook(temp, temp.BookStorePath, common.Config.MinImageNum)
 		}
 	}
 
@@ -242,7 +242,11 @@ func initBookStores(args []string) {
 			}
 		}
 	}
-	//通过“可执行文件名”设置部分默认参数
+
+	////用扫描完成的书籍数据，覆盖本地数据库
+	//common.CleanMapBooksByLocalData()
+
+	//通过“可执行文件名”设置部分默认参数,目前不生效
 	common.Config.SetByExecutableFilename()
 	if len(common.Config.StoresPath) > 0 {
 		for _, p := range common.Config.StoresPath {
@@ -254,8 +258,6 @@ func initBookStores(args []string) {
 			}
 		}
 	}
-	////用扫描完成的书籍数据，覆盖本地数据库
-	//common.CleanMapBooksByLocalData()
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
