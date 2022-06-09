@@ -129,15 +129,6 @@ func scanDirGetBook(dirPath string, storePath string, depth int) (*book.Book, er
 			newBook.Pages = append(newBook.Pages, book.SinglePageInfo{RealImageFilePATH: strAbsPath, FileSize: file.Size(), ModeTime: file.ModTime(), NameInArchive: file.Name(), Url: TempURL})
 		}
 	}
-	////根据页数决定是否返回这本书
-	//totalPageHint := "dirPath: " + dirPath + " Total image in the newBook:" + strconv.Itoa(newBook.GetAllPageNum())
-	//if newBook.GetAllPageNum() >= Config.MinImageNum {
-	//	//找到了一本书的提示
-	//	fmt.Println(totalPageHint)
-	//	return newBook, err
-	//} else {
-	//	return nil, errors.New(totalPageHint)
-	//}
 
 	//不管页数，直接返回：在添加到书库时判断页数
 	return newBook, err
@@ -238,15 +229,6 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*book.Book, 
 			return nil
 		})
 	}
-	////根据页数决定是否返回这本书
-	//totalPageHint := "filePath: " + filePath + " Total image:" + strconv.Itoa(newBook.GetAllPageNum())
-	//if newBook.GetAllPageNum() >= Config.MinImageNum || newBook.Type == book.TypePDF || newBook.Type == book.TypeVideo {
-	//	fmt.Println(totalPageHint)
-	//	return newBook, err
-	//} else {
-	//	return nil, errors.New(totalPageHint)
-	//}
-
 	//不管页数，直接返回：在添加到书库时判断页数
 	return newBook, err
 }

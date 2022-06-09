@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math"
 
@@ -265,15 +264,17 @@ func (spiq *SinglePageInfoQuery) Clone() *SinglePageInfoQuery {
 //		Scan(ctx, &v)
 //
 func (spiq *SinglePageInfoQuery) GroupBy(field string, fields ...string) *SinglePageInfoGroupBy {
-	group := &SinglePageInfoGroupBy{config: spiq.config}
-	group.fields = append([]string{field}, fields...)
-	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+	grbuild := &SinglePageInfoGroupBy{config: spiq.config}
+	grbuild.fields = append([]string{field}, fields...)
+	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
 		if err := spiq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
 		return spiq.sqlQuery(ctx), nil
 	}
-	return group
+	grbuild.label = singlepageinfo.Label
+	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	return grbuild
 }
 
 // Select allows the selection one or more fields/columns for the given query,
@@ -291,7 +292,10 @@ func (spiq *SinglePageInfoQuery) GroupBy(field string, fields ...string) *Single
 //
 func (spiq *SinglePageInfoQuery) Select(fields ...string) *SinglePageInfoSelect {
 	spiq.fields = append(spiq.fields, fields...)
-	return &SinglePageInfoSelect{SinglePageInfoQuery: spiq}
+	selbuild := &SinglePageInfoSelect{SinglePageInfoQuery: spiq}
+	selbuild.label = singlepageinfo.Label
+	selbuild.flds, selbuild.scan = &spiq.fields, selbuild.Scan
+	return selbuild
 }
 
 func (spiq *SinglePageInfoQuery) prepareQuery(ctx context.Context) error {
@@ -310,7 +314,7 @@ func (spiq *SinglePageInfoQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (spiq *SinglePageInfoQuery) sqlAll(ctx context.Context) ([]*SinglePageInfo, error) {
+func (spiq *SinglePageInfoQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*SinglePageInfo, error) {
 	var (
 		nodes   = []*SinglePageInfo{}
 		withFKs = spiq.withFKs
@@ -320,16 +324,15 @@ func (spiq *SinglePageInfoQuery) sqlAll(ctx context.Context) ([]*SinglePageInfo,
 		_spec.Node.Columns = append(_spec.Node.Columns, singlepageinfo.ForeignKeys...)
 	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &SinglePageInfo{config: spiq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*SinglePageInfo).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("ent: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &SinglePageInfo{config: spiq.config}
+		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, spiq.driver, _spec); err != nil {
 		return nil, err
@@ -440,6 +443,7 @@ func (spiq *SinglePageInfoQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // SinglePageInfoGroupBy is the group-by builder for SinglePageInfo entities.
 type SinglePageInfoGroupBy struct {
 	config
+	selector
 	fields []string
 	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
@@ -461,209 +465,6 @@ func (spigb *SinglePageInfoGroupBy) Scan(ctx context.Context, v interface{}) err
 	}
 	spigb.sql = query
 	return spigb.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (spigb *SinglePageInfoGroupBy) ScanX(ctx context.Context, v interface{}) {
-	if err := spigb.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (spigb *SinglePageInfoGroupBy) Strings(ctx context.Context) ([]string, error) {
-	if len(spigb.fields) > 1 {
-		return nil, errors.New("ent: SinglePageInfoGroupBy.Strings is not achievable when grouping more than 1 field")
-	}
-	var v []string
-	if err := spigb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (spigb *SinglePageInfoGroupBy) StringsX(ctx context.Context) []string {
-	v, err := spigb.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (spigb *SinglePageInfoGroupBy) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = spigb.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{singlepageinfo.Label}
-	default:
-		err = fmt.Errorf("ent: SinglePageInfoGroupBy.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (spigb *SinglePageInfoGroupBy) StringX(ctx context.Context) string {
-	v, err := spigb.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (spigb *SinglePageInfoGroupBy) Ints(ctx context.Context) ([]int, error) {
-	if len(spigb.fields) > 1 {
-		return nil, errors.New("ent: SinglePageInfoGroupBy.Ints is not achievable when grouping more than 1 field")
-	}
-	var v []int
-	if err := spigb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (spigb *SinglePageInfoGroupBy) IntsX(ctx context.Context) []int {
-	v, err := spigb.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (spigb *SinglePageInfoGroupBy) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = spigb.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{singlepageinfo.Label}
-	default:
-		err = fmt.Errorf("ent: SinglePageInfoGroupBy.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (spigb *SinglePageInfoGroupBy) IntX(ctx context.Context) int {
-	v, err := spigb.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (spigb *SinglePageInfoGroupBy) Float64s(ctx context.Context) ([]float64, error) {
-	if len(spigb.fields) > 1 {
-		return nil, errors.New("ent: SinglePageInfoGroupBy.Float64s is not achievable when grouping more than 1 field")
-	}
-	var v []float64
-	if err := spigb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (spigb *SinglePageInfoGroupBy) Float64sX(ctx context.Context) []float64 {
-	v, err := spigb.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (spigb *SinglePageInfoGroupBy) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = spigb.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{singlepageinfo.Label}
-	default:
-		err = fmt.Errorf("ent: SinglePageInfoGroupBy.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (spigb *SinglePageInfoGroupBy) Float64X(ctx context.Context) float64 {
-	v, err := spigb.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (spigb *SinglePageInfoGroupBy) Bools(ctx context.Context) ([]bool, error) {
-	if len(spigb.fields) > 1 {
-		return nil, errors.New("ent: SinglePageInfoGroupBy.Bools is not achievable when grouping more than 1 field")
-	}
-	var v []bool
-	if err := spigb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (spigb *SinglePageInfoGroupBy) BoolsX(ctx context.Context) []bool {
-	v, err := spigb.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (spigb *SinglePageInfoGroupBy) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = spigb.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{singlepageinfo.Label}
-	default:
-		err = fmt.Errorf("ent: SinglePageInfoGroupBy.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (spigb *SinglePageInfoGroupBy) BoolX(ctx context.Context) bool {
-	v, err := spigb.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (spigb *SinglePageInfoGroupBy) sqlScan(ctx context.Context, v interface{}) error {
@@ -707,6 +508,7 @@ func (spigb *SinglePageInfoGroupBy) sqlQuery() *sql.Selector {
 // SinglePageInfoSelect is the builder for selecting fields of SinglePageInfo entities.
 type SinglePageInfoSelect struct {
 	*SinglePageInfoQuery
+	selector
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
@@ -718,201 +520,6 @@ func (spis *SinglePageInfoSelect) Scan(ctx context.Context, v interface{}) error
 	}
 	spis.sql = spis.SinglePageInfoQuery.sqlQuery(ctx)
 	return spis.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (spis *SinglePageInfoSelect) ScanX(ctx context.Context, v interface{}) {
-	if err := spis.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from a selector. It is only allowed when selecting one field.
-func (spis *SinglePageInfoSelect) Strings(ctx context.Context) ([]string, error) {
-	if len(spis.fields) > 1 {
-		return nil, errors.New("ent: SinglePageInfoSelect.Strings is not achievable when selecting more than 1 field")
-	}
-	var v []string
-	if err := spis.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (spis *SinglePageInfoSelect) StringsX(ctx context.Context) []string {
-	v, err := spis.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a selector. It is only allowed when selecting one field.
-func (spis *SinglePageInfoSelect) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = spis.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{singlepageinfo.Label}
-	default:
-		err = fmt.Errorf("ent: SinglePageInfoSelect.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (spis *SinglePageInfoSelect) StringX(ctx context.Context) string {
-	v, err := spis.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from a selector. It is only allowed when selecting one field.
-func (spis *SinglePageInfoSelect) Ints(ctx context.Context) ([]int, error) {
-	if len(spis.fields) > 1 {
-		return nil, errors.New("ent: SinglePageInfoSelect.Ints is not achievable when selecting more than 1 field")
-	}
-	var v []int
-	if err := spis.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (spis *SinglePageInfoSelect) IntsX(ctx context.Context) []int {
-	v, err := spis.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a selector. It is only allowed when selecting one field.
-func (spis *SinglePageInfoSelect) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = spis.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{singlepageinfo.Label}
-	default:
-		err = fmt.Errorf("ent: SinglePageInfoSelect.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (spis *SinglePageInfoSelect) IntX(ctx context.Context) int {
-	v, err := spis.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
-func (spis *SinglePageInfoSelect) Float64s(ctx context.Context) ([]float64, error) {
-	if len(spis.fields) > 1 {
-		return nil, errors.New("ent: SinglePageInfoSelect.Float64s is not achievable when selecting more than 1 field")
-	}
-	var v []float64
-	if err := spis.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (spis *SinglePageInfoSelect) Float64sX(ctx context.Context) []float64 {
-	v, err := spis.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
-func (spis *SinglePageInfoSelect) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = spis.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{singlepageinfo.Label}
-	default:
-		err = fmt.Errorf("ent: SinglePageInfoSelect.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (spis *SinglePageInfoSelect) Float64X(ctx context.Context) float64 {
-	v, err := spis.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from a selector. It is only allowed when selecting one field.
-func (spis *SinglePageInfoSelect) Bools(ctx context.Context) ([]bool, error) {
-	if len(spis.fields) > 1 {
-		return nil, errors.New("ent: SinglePageInfoSelect.Bools is not achievable when selecting more than 1 field")
-	}
-	var v []bool
-	if err := spis.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (spis *SinglePageInfoSelect) BoolsX(ctx context.Context) []bool {
-	v, err := spis.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a selector. It is only allowed when selecting one field.
-func (spis *SinglePageInfoSelect) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = spis.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{singlepageinfo.Label}
-	default:
-		err = fmt.Errorf("ent: SinglePageInfoSelect.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (spis *SinglePageInfoSelect) BoolX(ctx context.Context) bool {
-	v, err := spis.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (spis *SinglePageInfoSelect) sqlScan(ctx context.Context, v interface{}) error {

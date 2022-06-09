@@ -38,7 +38,7 @@ func init() {
 	//在当前目录生成示例配置文件
 	rootCmd.PersistentFlags().BoolVar(&common.Config.GenerateConfig, "generate-config", false, locale.GetString("GenerateConfig"))
 	//启用数据库，保存扫描数据
-	rootCmd.PersistentFlags().BoolVar(&common.Config.EnableDatabase, "enable-database", false, locale.GetString("EnableDatabase"))
+	rootCmd.PersistentFlags().BoolVarP(&common.Config.EnableDatabase, "enable-database", "e", false, locale.GetString("EnableDatabase"))
 	//服务端口
 	rootCmd.PersistentFlags().IntVarP(&common.Config.Port, "port", "p", 1234, locale.GetString("PORT"))
 	//本地Host
@@ -197,13 +197,16 @@ func initBookStores(args []string) {
 	////从数据库里面读取扫描过的书籍，初始化skipPathList
 	var skipPathList []string
 	if common.Config.EnableDatabase {
-		saveBookList, dataErr := storage.GetAllBookFromDatabase()
+		saveBookList, dataErr := storage.GetArchiveBookFromDatabase()
 		if dataErr != nil {
 			fmt.Println(dataErr)
 		}
 		//将数据库中的书，添加到内存里面
 		for _, temp := range saveBookList {
-			skipPathList = append(skipPathList, temp.FilePath)
+			//文件夹类型的需要重新扫描
+			if temp.Type != book.TypeDir && temp.Type != "book_group" {
+				skipPathList = append(skipPathList, temp.FilePath)
+			}
 			book.AddBook(temp, temp.BookStorePath, common.Config.MinImageNum)
 		}
 	}
@@ -216,13 +219,7 @@ func initBookStores(args []string) {
 			fmt.Println(locale.GetString("scan_error"), cmdPath)
 		} else {
 			common.AddBooksToStore(list, cmdPath)
-			//yaml设置文件，数据库文件(comigo.db)在同一个文件夹。所以没有设置文件，就不查数据库
-			if common.Config.EnableDatabase {
-				saveErr := storage.SaveBookListToDatabase(list)
-				if saveErr != nil {
-					fmt.Println(saveErr)
-				}
-			}
+
 		}
 	} else {
 		//指定了多个参数的话，都扫描一遍
@@ -232,13 +229,6 @@ func initBookStores(args []string) {
 				fmt.Println(locale.GetString("scan_error"), p)
 			} else {
 				common.AddBooksToStore(list, p)
-				//yaml设置文件，数据库文件(comigo.db)在同一个文件夹。所以没有设置文件，就不查数据库
-				if common.Config.EnableDatabase {
-					saveErr := storage.SaveBookListToDatabase(list)
-					if saveErr != nil {
-						fmt.Println(saveErr)
-					}
-				}
 			}
 		}
 	}
@@ -258,6 +248,15 @@ func initBookStores(args []string) {
 			}
 		}
 	}
+
+	//yaml设置文件，数据库文件(comigo.db)在同一个文件夹。所以没有设置文件，就不查数据库
+	if common.Config.EnableDatabase {
+		saveErr := storage.SaveBookListToDatabase(book.GetAllBookList())
+		if saveErr != nil {
+			fmt.Println(saveErr)
+		}
+	}
+
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

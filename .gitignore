@@ -16,6 +16,7 @@
 # vendor/
 *.vscode
 .comigo
+*config.toml
 *comigo.sqlite
 .cache
 cache

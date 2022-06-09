@@ -4,7 +4,7 @@ Port = 1234
 # 自定义二维码显示的主机名
 Host = ''
 # 设置默认扫描的书库文件夹
-StoresPath = ['C:\test\Comic', 'D:\some_path\book']
+StoresPath = ['C:\sample\Comic', 'D:\some_path\book']
 # 最大扫描深度
 MaxDepth = 3
 # 是否同时打开浏览器，windows默认true，其他默认false
