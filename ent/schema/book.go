@@ -18,7 +18,7 @@ type Book struct {
 func (Book) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("Name").
-			MaxLen(50). //限制长度
+			MaxLen(1024). //限制长度
 			Comment("书名"),
 		field.String("BookID").
 			Unique().Comment("书籍ID"),

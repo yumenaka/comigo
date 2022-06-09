@@ -283,6 +283,15 @@ func GetAllBookInfoList(sort string) (*BookInfoList, error) {
 	return nil, errors.New("can not found bookshelf")
 }
 
+func GetAllBookList() []*Book {
+	var list []*Book
+	//加上所有真实书籍
+	for _, b := range mapBooks {
+		list = append(list, b)
+	}
+	return list
+}
+
 func GetBookInfoListByDepth(depth int, sort string) (*BookInfoList, error) {
 	var infoList BookInfoList
 	//首先加上所有真实的书籍
@@ -479,8 +488,16 @@ func (b *Book) GetBookID() string {
 	return b.BookID
 }
 
-func (b *Book) GetAllPageNum() int {
+// GetBookID  根据路径的MD5，生成书籍ID
+func (b *Book) GetAuthor() string {
+	//防止未初始化，最好不要用到
+	if len(b.Author) == 0 {
+		return ""
+	}
+	return b.Author[0]
+}
 
+func (b *Book) GetAllPageNum() int {
 	if b.Cover.Url == "" {
 		b.setClover()
 	}

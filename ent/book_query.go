@@ -5,7 +5,6 @@ package ent
 import (
 	"context"
 	"database/sql/driver"
-	"errors"
 	"fmt"
 	"math"
 
@@ -302,15 +301,17 @@ func (bq *BookQuery) WithPageInfos(opts ...func(*SinglePageInfoQuery)) *BookQuer
 //		Scan(ctx, &v)
 //
 func (bq *BookQuery) GroupBy(field string, fields ...string) *BookGroupBy {
-	group := &BookGroupBy{config: bq.config}
-	group.fields = append([]string{field}, fields...)
-	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+	grbuild := &BookGroupBy{config: bq.config}
+	grbuild.fields = append([]string{field}, fields...)
+	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
 		if err := bq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
 		return bq.sqlQuery(ctx), nil
 	}
-	return group
+	grbuild.label = book.Label
+	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	return grbuild
 }
 
 // Select allows the selection one or more fields/columns for the given query,
@@ -328,7 +329,10 @@ func (bq *BookQuery) GroupBy(field string, fields ...string) *BookGroupBy {
 //
 func (bq *BookQuery) Select(fields ...string) *BookSelect {
 	bq.fields = append(bq.fields, fields...)
-	return &BookSelect{BookQuery: bq}
+	selbuild := &BookSelect{BookQuery: bq}
+	selbuild.label = book.Label
+	selbuild.flds, selbuild.scan = &bq.fields, selbuild.Scan
+	return selbuild
 }
 
 func (bq *BookQuery) prepareQuery(ctx context.Context) error {
@@ -347,7 +351,7 @@ func (bq *BookQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (bq *BookQuery) sqlAll(ctx context.Context) ([]*Book, error) {
+func (bq *BookQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Book, error) {
 	var (
 		nodes       = []*Book{}
 		_spec       = bq.querySpec()
@@ -356,17 +360,16 @@ func (bq *BookQuery) sqlAll(ctx context.Context) ([]*Book, error) {
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &Book{config: bq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*Book).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("ent: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &Book{config: bq.config}
+		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, bq.driver, _spec); err != nil {
 		return nil, err
@@ -507,6 +510,7 @@ func (bq *BookQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // BookGroupBy is the group-by builder for Book entities.
 type BookGroupBy struct {
 	config
+	selector
 	fields []string
 	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
@@ -528,209 +532,6 @@ func (bgb *BookGroupBy) Scan(ctx context.Context, v interface{}) error {
 	}
 	bgb.sql = query
 	return bgb.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (bgb *BookGroupBy) ScanX(ctx context.Context, v interface{}) {
-	if err := bgb.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (bgb *BookGroupBy) Strings(ctx context.Context) ([]string, error) {
-	if len(bgb.fields) > 1 {
-		return nil, errors.New("ent: BookGroupBy.Strings is not achievable when grouping more than 1 field")
-	}
-	var v []string
-	if err := bgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (bgb *BookGroupBy) StringsX(ctx context.Context) []string {
-	v, err := bgb.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (bgb *BookGroupBy) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = bgb.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{book.Label}
-	default:
-		err = fmt.Errorf("ent: BookGroupBy.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (bgb *BookGroupBy) StringX(ctx context.Context) string {
-	v, err := bgb.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (bgb *BookGroupBy) Ints(ctx context.Context) ([]int, error) {
-	if len(bgb.fields) > 1 {
-		return nil, errors.New("ent: BookGroupBy.Ints is not achievable when grouping more than 1 field")
-	}
-	var v []int
-	if err := bgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (bgb *BookGroupBy) IntsX(ctx context.Context) []int {
-	v, err := bgb.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (bgb *BookGroupBy) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = bgb.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{book.Label}
-	default:
-		err = fmt.Errorf("ent: BookGroupBy.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (bgb *BookGroupBy) IntX(ctx context.Context) int {
-	v, err := bgb.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (bgb *BookGroupBy) Float64s(ctx context.Context) ([]float64, error) {
-	if len(bgb.fields) > 1 {
-		return nil, errors.New("ent: BookGroupBy.Float64s is not achievable when grouping more than 1 field")
-	}
-	var v []float64
-	if err := bgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (bgb *BookGroupBy) Float64sX(ctx context.Context) []float64 {
-	v, err := bgb.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (bgb *BookGroupBy) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = bgb.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{book.Label}
-	default:
-		err = fmt.Errorf("ent: BookGroupBy.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (bgb *BookGroupBy) Float64X(ctx context.Context) float64 {
-	v, err := bgb.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (bgb *BookGroupBy) Bools(ctx context.Context) ([]bool, error) {
-	if len(bgb.fields) > 1 {
-		return nil, errors.New("ent: BookGroupBy.Bools is not achievable when grouping more than 1 field")
-	}
-	var v []bool
-	if err := bgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (bgb *BookGroupBy) BoolsX(ctx context.Context) []bool {
-	v, err := bgb.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (bgb *BookGroupBy) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = bgb.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{book.Label}
-	default:
-		err = fmt.Errorf("ent: BookGroupBy.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (bgb *BookGroupBy) BoolX(ctx context.Context) bool {
-	v, err := bgb.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (bgb *BookGroupBy) sqlScan(ctx context.Context, v interface{}) error {
@@ -774,6 +575,7 @@ func (bgb *BookGroupBy) sqlQuery() *sql.Selector {
 // BookSelect is the builder for selecting fields of Book entities.
 type BookSelect struct {
 	*BookQuery
+	selector
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
@@ -785,201 +587,6 @@ func (bs *BookSelect) Scan(ctx context.Context, v interface{}) error {
 	}
 	bs.sql = bs.BookQuery.sqlQuery(ctx)
 	return bs.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (bs *BookSelect) ScanX(ctx context.Context, v interface{}) {
-	if err := bs.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from a selector. It is only allowed when selecting one field.
-func (bs *BookSelect) Strings(ctx context.Context) ([]string, error) {
-	if len(bs.fields) > 1 {
-		return nil, errors.New("ent: BookSelect.Strings is not achievable when selecting more than 1 field")
-	}
-	var v []string
-	if err := bs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (bs *BookSelect) StringsX(ctx context.Context) []string {
-	v, err := bs.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a selector. It is only allowed when selecting one field.
-func (bs *BookSelect) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = bs.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{book.Label}
-	default:
-		err = fmt.Errorf("ent: BookSelect.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (bs *BookSelect) StringX(ctx context.Context) string {
-	v, err := bs.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from a selector. It is only allowed when selecting one field.
-func (bs *BookSelect) Ints(ctx context.Context) ([]int, error) {
-	if len(bs.fields) > 1 {
-		return nil, errors.New("ent: BookSelect.Ints is not achievable when selecting more than 1 field")
-	}
-	var v []int
-	if err := bs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (bs *BookSelect) IntsX(ctx context.Context) []int {
-	v, err := bs.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a selector. It is only allowed when selecting one field.
-func (bs *BookSelect) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = bs.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{book.Label}
-	default:
-		err = fmt.Errorf("ent: BookSelect.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (bs *BookSelect) IntX(ctx context.Context) int {
-	v, err := bs.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
-func (bs *BookSelect) Float64s(ctx context.Context) ([]float64, error) {
-	if len(bs.fields) > 1 {
-		return nil, errors.New("ent: BookSelect.Float64s is not achievable when selecting more than 1 field")
-	}
-	var v []float64
-	if err := bs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (bs *BookSelect) Float64sX(ctx context.Context) []float64 {
-	v, err := bs.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
-func (bs *BookSelect) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = bs.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{book.Label}
-	default:
-		err = fmt.Errorf("ent: BookSelect.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (bs *BookSelect) Float64X(ctx context.Context) float64 {
-	v, err := bs.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from a selector. It is only allowed when selecting one field.
-func (bs *BookSelect) Bools(ctx context.Context) ([]bool, error) {
-	if len(bs.fields) > 1 {
-		return nil, errors.New("ent: BookSelect.Bools is not achievable when selecting more than 1 field")
-	}
-	var v []bool
-	if err := bs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (bs *BookSelect) BoolsX(ctx context.Context) []bool {
-	v, err := bs.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a selector. It is only allowed when selecting one field.
-func (bs *BookSelect) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = bs.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{book.Label}
-	default:
-		err = fmt.Errorf("ent: BookSelect.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (bs *BookSelect) BoolX(ctx context.Context) bool {
-	v, err := bs.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (bs *BookSelect) sqlScan(ctx context.Context, v interface{}) error {

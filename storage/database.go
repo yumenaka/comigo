@@ -125,7 +125,7 @@ func SaveBookToDatabase(save *comigoBook.Book) error {
 		SetParentFolder(save.ParentFolder).
 		SetAllPageNum(save.AllPageNum).
 		SetFileSize(save.FileSize).
-		SetAuthors(save.Author[0]).
+		SetAuthors(save.GetAuthor()).
 		SetISBN(save.ISBN).
 		SetPress(save.Press).
 		SetPublishedAt(save.PublishedAt).
@@ -232,12 +232,13 @@ func GetBookFromDatabase(filepath string) (*comigoBook.Book, error) {
 	return &b, err
 }
 
-// GetAllBookFromDatabase  根据文件路径，从数据库查询一本书的详细信息,避免重复扫描压缩包。
-func GetAllBookFromDatabase() (list []*comigoBook.Book, err error) {
+// GetArchiveBookFromDatabase  根据文件路径，从数据库查询书的详细信息,避免重复扫描压缩包。//忽略文件夹型的书籍
+func GetArchiveBookFromDatabase() (list []*comigoBook.Book, err error) {
 	ctx := context.Background()
 	books, err := client.Book. // UserClient.
 					Query(). // 用户查询生成器。
-					All(ctx) // query and return.
+		//Where(book.Not(book.Type("dir"))). //忽略文件夹型的书籍
+		All(ctx) // query and return.
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -301,7 +302,7 @@ func GetAllBookFromDatabase() (list []*comigoBook.Book, err error) {
 }
 
 //func InitMapBooksByDatabase() {
-//	tempMap, err := GetAllBookFromDatabase()
+//	tempMap, err := GetArchiveBookFromDatabase()
 //	if err != nil {
 //		mapBooks = tempMap
 //	}
