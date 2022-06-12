@@ -50,7 +50,7 @@ type Book struct {
 	ParentFolder    string           `json:"parent_folder"`  //所在父文件夹
 	AllPageNum      int              `json:"all_page_num"`   //storm:"index" 索引字段
 	FileSize        int64            `json:"file_size"`      //storm:"index" 索引字段
-	Cover           SinglePageInfo   `json:"cover"`          //storm:"inline" 内联字段，结构体嵌套时使用
+	Cover           ImageInfo        `json:"cover"`          //storm:"inline" 内联字段，结构体嵌套时使用
 	Pages           AllPageInfo      `json:"pages"`          //storm:"inline" 内联字段，结构体嵌套时使用
 	Author          []string         `json:"-"`              //json不解析，启用可改为`json:"author"`
 	ISBN            string           `json:"-"`              //json不解析，启用可改为`json:"isbn"`
@@ -81,8 +81,8 @@ const (
 	TypeUnknownFile SupportFileType = "unknown"
 )
 
-//SinglePageInfo 单张书页
-type SinglePageInfo struct {
+//ImageInfo 单张书页
+type ImageInfo struct {
 	PageNum           int       `json:"-"`        //这个字段不解析
 	NameInArchive     string    `json:"filename"` //用于解压的压缩文件内文件路径，或图片名，为了适应特殊字符，经过一次转义
 	Url               string    `json:"url"`      //远程用户读取图片的URL，为了适应特殊字符，经过一次转义
@@ -95,8 +95,8 @@ type SinglePageInfo struct {
 	ImgType           string    `json:"-"`        //这个字段不解析
 }
 
-func NewSinglePageInfo(pageNum int, nameInArchive string, url string, fileSize int64) *SinglePageInfo {
-	return &SinglePageInfo{PageNum: pageNum, NameInArchive: nameInArchive, Url: url, FileSize: fileSize}
+func NewImageInfo(pageNum int, nameInArchive string, url string, fileSize int64) *ImageInfo {
+	return &ImageInfo{PageNum: pageNum, NameInArchive: nameInArchive, Url: url, FileSize: fileSize}
 }
 
 //New  初始化Book，设置文件路径、书名、BookID等等
@@ -198,13 +198,13 @@ func (b *Book) setName(filePath string) {
 
 //初始化Book时，设置页数
 func (b *Book) setPageNum() {
-	b.AllPageNum = len(b.Pages)
+	b.AllPageNum = len(b.Pages.Images)
 }
 
 //初始化Book时， 设置封面信息
 func (b *Book) setClover() {
-	if len(b.Pages) >= 1 {
-		b.Cover = b.Pages[0]
+	if len(b.Pages.Images) >= 1 {
+		b.Cover = b.Pages.Images[0]
 	}
 }
 
@@ -363,22 +363,19 @@ func GetBookInfoListByBookGroupBookID(BookID string, sort string) (*BookInfoList
 }
 
 // GetBookByID 获取特定书籍，复制一份数据
-// TODO: 只获取、不改变原始数据。
-func GetBookByID(id string, sort bool) (*Book, error) {
+//TODO: 只获取、不改变原始数据。
+//TODO: 根据压缩包原始顺序、时间、文件名排序
+func GetBookByID(id string, sortBy string) (*Book, error) {
 	//根据id查找
 	b, ok := mapBooks[id]
 	if ok {
-		if sort {
-			b.SortPages()
-		}
+		b.SortPages(sortBy)
 		return b, nil
 	}
 	//为了调试方便，支持模糊查找，可以使用UUID的开头来查找书籍，当然这样有可能出错
 	for _, b := range mapBooks {
 		if strings.HasPrefix(b.BookID, id) {
-			if sort {
-				b.SortPages()
-			}
+			b.SortPages(sortBy)
 			return b, nil
 		}
 	}
@@ -387,16 +384,15 @@ func GetBookByID(id string, sort bool) (*Book, error) {
 
 // GetBookByAuthor 获取同一作者的书籍。
 // TODO: 只获取、不改变原始数据。
-func GetBookByAuthor(author string, sort bool) ([]*Book, error) {
+// TODO: 根据压缩包原始顺序、时间、文件名排序
+func GetBookByAuthor(author string, sortBy string) ([]*Book, error) {
 	var bookList []*Book
 	for _, b := range mapBooks {
 		if len(b.Author) == 0 {
 			continue
 		}
 		if b.Author[0] == author {
-			if sort {
-				b.SortPages()
-			}
+			b.SortPages(sortBy)
 			bookList = append(bookList, b)
 		}
 	}
@@ -406,32 +402,41 @@ func GetBookByAuthor(author string, sort bool) ([]*Book, error) {
 	return nil, errors.New("can not found book,author=" + author)
 }
 
-// AllPageInfo Slice
-type AllPageInfo []SinglePageInfo
+// AllPageInfo
+type AllPageInfo struct {
+	Images []ImageInfo `json:"images"`
+	SortBy string      `json:"sort_by"`
+}
 
 func (s AllPageInfo) Len() int {
-	return len(s)
+	return len(s.Images)
 }
 
 // Less 按时间或URL，将图片排序
 func (s AllPageInfo) Less(i, j int) (less bool) {
-	//如何定义 s[i] < s[j]  根据文件名(第三方库、自然语言字符串)
-	less = tools.Compare(s[i].NameInArchive, s[j].NameInArchive)
+	if s.SortBy == "" {
+		//如何定义 Images[i] < Images[j]  根据文件名(第三方库、自然语言字符串)
+		less = tools.Compare(s.Images[i].NameInArchive, s.Images[j].NameInArchive)
+	}
 
-	////如何定义 s[i] < s[j]  根据修改时间
-	//if Config.SortImage == "time" {
-	//	less = s[i].ModeTime.After(s[j].ModeTime) // s[i] 的年龄（修改时间），是否比 s[j] 小？
-	//}
+	//如何定义 Images[i] < Images[j]  根据修改时间
+	if s.SortBy == "time" {
+		less = s.Images[i].ModeTime.After(s.Images[j].ModeTime) // Images[i] 的年龄（修改时间），是否比 Images[j] 小？
+	}
 	return less
 }
 
 func (s AllPageInfo) Swap(i, j int) {
-	s[i], s[j] = s[j], s[i]
+	s.Images[i], s.Images[j] = s.Images[j], s.Images[i]
 }
 
 // SortPages 上面三个函数定义好了，终于可以使用sort包排序了
-func (b *Book) SortPages() {
-	sort.Sort(b.Pages)
+func (b *Book) SortPages(s string) {
+	//  s == "default" 不排序
+	if s == "filename" || s == "modify_time" || s == "filesize" {
+		b.Pages.SortBy = s
+		sort.Sort(b.Pages)
+	}
 	b.setClover() //重新排序后重新设置封面
 }
 
@@ -524,8 +529,8 @@ func (b *Book) ScanAllImage() {
 	bar := pb.StartNew(b.GetAllPageNum())
 	tmpl := `{{ red "With funcs:" }} {{ bar . "<" "-" (cycle . "↖" "↗" "↘" "↙" ) "." ">"}} {{speed . | rndcolor }} {{percent .}} {{string . "my_green_string" | green}} {{string . "my_blue_string" | blue}}`
 	bar.SetTemplateString(tmpl)
-	for i := 0; i < len(b.Pages); i++ { //此处不能用range，因为需要修改
-		analyzePageImages(&b.Pages[i], b.FilePath)
+	for i := 0; i < len(b.Pages.Images); i++ { //此处不能用range，因为需要修改
+		analyzePageImages(&b.Pages.Images[i], b.FilePath)
 		//进度条计数
 		bar.Increment()
 	}
@@ -543,14 +548,14 @@ func (b *Book) ScanAllImageGo() {
 	count := 0
 	// Console progress bar
 	bar := pb.StartNew(b.GetAllPageNum())
-	for i := 0; i < len(b.Pages); i++ { //此处不能用range，因为需要修改
+	for i := 0; i < len(b.Pages.Images); i++ { //此处不能用range，因为需要修改
 		//wg.Add(1)
 		count++
 		ii := i
 		//并发处理，提升图片分析速度
 		wp.Do(func() error {
 			//defer wg.Done()
-			analyzePageImages(&b.Pages[ii], b.FilePath)
+			analyzePageImages(&b.Pages.Images[ii], b.FilePath)
 			bar.Increment()
 			//res <- fmt.Sprintf("Finished %d", i)
 			return nil
@@ -564,7 +569,7 @@ func (b *Book) ScanAllImageGo() {
 }
 
 //analyzePageImages 解析漫画的分辨率与blurhash
-func analyzePageImages(p *SinglePageInfo, bookPath string) {
+func analyzePageImages(p *ImageInfo, bookPath string) {
 	err := p.analyzeImage(bookPath)
 	//log.Println(locale.GetString("check_image_ing"), p.RealImageFilePATH)
 	if err != nil {
@@ -582,7 +587,7 @@ func analyzePageImages(p *SinglePageInfo, bookPath string) {
 }
 
 // analyzeImage 获取某页漫画的分辨率与blurhash
-func (i *SinglePageInfo) analyzeImage(bookPath string) (err error) {
+func (i *ImageInfo) analyzeImage(bookPath string) (err error) {
 	var img image.Image
 	//img, err = imaging.Open(i.RealImageFilePATH)
 

@@ -97,7 +97,7 @@ func (s *singleBookstore) initBookGroupMap() error {
 				continue
 			}
 			depthBooksMap[depth-1] = append(depthBooksMap[depth-1], *newBook)
-			//将这本书加到子书库的BookGroup表（s.BookGroupMap）里面去
+			//将这本书加到子书库的BookGroup表（Images.BookGroupMap）里面去
 			s.BookGroupMap[newBook.BookID] = newBook
 			//将这本书加到BookGroup总表（mapBookGroups）里面去
 			mapBookGroups[newBook.BookID] = newBook

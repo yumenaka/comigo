@@ -30,6 +30,7 @@ const routes = [
     path: '/scroll/:id',
     component: ScrollMode,
     name: 'ScrollMode',
+    props: route => ({ query: route.query.sort_by })
   },
   {
     path: '/flip/:id',

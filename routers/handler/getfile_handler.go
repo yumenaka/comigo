@@ -60,7 +60,7 @@ func GetFileHandler(c *gin.Context) {
 			return
 		}
 	}
-	bookByID, err := book.GetBookByID(id, false)
+	bookByID, err := book.GetBookByID(id, "")
 	if err != nil {
 		fmt.Println(err)
 	}

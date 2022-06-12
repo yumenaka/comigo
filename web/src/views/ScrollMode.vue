@@ -9,9 +9,9 @@
 		</Header>
 
 		<!-- 渲染漫画部分 -->
-		<div class="main_manga" v-for="(page, key) in book.pages" :key="page.url" @click="onMouseClick($event)"
+		<div class="main_manga" v-for="(image, key) in book.pages.images" :key="image.url" @click="onMouseClick($event)"
 			@mousemove="onMouseMove" @mouseleave="onMouseLeave">
-			<img v-lazy="this.imageParametersString(page.url)" v-bind:alt="key + 1" v-bind:key="key" />
+			<img v-lazy="this.imageParametersString(image.url)" v-bind:alt="key + 1" v-bind:key="key" />
 
 			<div class="page_hint" v-if="showPageNumFlag_ScrollMode">{{ key + 1 }}/{{ book.all_page_num }}</div>
 		</div>
@@ -23,6 +23,7 @@
 			<n-space>
 				<n-button @click="changeReaderModeToFlipMode">{{ $t('switch_to_flip_mode') }}</n-button>
 			</n-space>
+
 			<!-- 分割线 -->
 			<n-divider />
 			<n-space vertical>
@@ -141,6 +142,11 @@
 					<template #suffix>px</template>
 				</n-input-number>
 			</n-space>
+			<!-- 分割线 -->
+			<n-divider />
+			<n-dropdown trigger="hover" :options="options" @select="reloadBookData">
+				<n-button>页面排序</n-button>
+			</n-dropdown>
 		</Drawer>
 		<n-back-top :show="showBackTopFlag" type="info" color="#8a2be2" :right="20" :bottom="20" />
 		<button class="w-24 h-12 m-2 bg-blue-300 text-gray-900 hover:bg-blue-500 rounded" @click="scrollToTop(90);"
@@ -153,7 +159,7 @@
 
 <script>
 // 直接导入组件并使用它。这种情况下,只有导入的组件才会被打包。
-import { NBackTop, NSpace, NSlider, NSwitch, NIcon, NInputNumber, NDivider, NButton, } from 'naive-ui'
+import { NBackTop, NSpace, NSlider, NSwitch, NIcon, NInputNumber, NDivider, NButton, NDropdown, } from 'naive-ui'
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
 import Bottom from "@/components/Bottom.vue";
@@ -174,6 +180,7 @@ export default defineComponent({
 		// NDrawer,//抽屉,可以从上下左右4个方向冒出. https://www.naiveui.com/zh-CN/os-theme/components/drawer
 		// NDrawerContent,//抽屉内容
 		NSpace,//间距 https://www.naiveui.com/zh-CN/os-theme/components/space
+		NDropdown,//下拉菜单 https://www.naiveui.com/zh-CN/os-theme/components/dropdown
 		// NRadio,//单选  https://www.naiveui.com/zh-CN/os-theme/components/radio
 		// NRadioButton,//单选  用按钮显得更优雅一点
 		// NRadioGroup,
@@ -215,7 +222,30 @@ export default defineComponent({
 		//单选按钮绑定的数值,ref函数：返回一个响应式的引用
 		// const checkedValueRef = ref(null)
 		return {
+			options: [
+				{
+					label: "保持原样",
+					key: "default",
+				},
+				{
+					label: "按照文件名",
+					key: "filename",
+				},
+				{
+					label: "修改时间",
+					key: "modify_time"
+				},
+				{
+					label: "文件大小",
+					key: "filesize"
+				},
+				// {
+				// 	label: "压缩包顺序",
+				// 	key: "page_num"
+				// }
+			],
 			pdfUrl: "",
+
 			// cookies,
 			//背景色
 			model,
@@ -274,24 +304,29 @@ export default defineComponent({
 	},
 	data() {
 		return {
-			readerMode: "scroll",
+			sort_by: "default",
 			book: {
 				name: "loading",
+				id: "abcde",
 				all_page_num: 2,
 				book_type: "dir",
-				pages: [
-					{
-						height: 500,
-						width: 449,
-						url: "/images/loading.jpg",
-					},
-					{
-						height: 500,
-						width: 449,
-						url: "/images/loading.jpg",
-					},
-				],
+				pages: {
+					sort_by: "",
+					images: [
+						{
+							height: 500,
+							width: 449,
+							url: "/images/loading.jpg",
+						},
+						{
+							height: 500,
+							width: 449,
+							url: "/images/loading.jpg",
+						},
+					],
+				}
 			},
+			readerMode: "scroll",
 			drawerActive: false,
 			drawerPlacement: 'right',
 			//开发模式 还没有做的功能与设置,设置Debug以后才能见到
@@ -342,9 +377,10 @@ export default defineComponent({
 	// beforeUnmount: 当指令与在绑定元素父组件卸载之前时,只调用一次。
 	// unmounted: 当指令与元素解除绑定且父组件已卸载时,只调用一次。
 	created() {
+		//TODO: 根据压缩包原始顺序、时间、文件名排序
 		//根据路由参数获取特定书籍
 		axios
-			.get("/getbook?id=" + this.$route.params.id)
+			.get("/getbook?id=" + this.$route.params.id + "&sort_by=" + this.sort_by)
 			.then((response) => (this.book = response.data))
 			.finally(
 				() => {
@@ -495,6 +531,22 @@ export default defineComponent({
 		window.removeEventListener('resize', this.onResize)
 	},
 	methods: {
+		reloadBookData(key) {
+			this.sort_by = key
+			axios
+				.get("/getbook?id=" + this.$route.params.id + "&sort_by=" + this.sort_by)
+				.then((response) => (this.book = response.data))
+				.finally(
+					() => {
+						document.title = this.book.name;
+						console.log("成功刷新书籍数据,书籍ID:" + this.$route.params.id + "  sort_by=" + this.sort_by);
+					}
+				);
+
+			this.$router.push({ name: "ScrollMode", replace: true, params: { id: this.$route.params.id } });
+
+
+		},
 		//切换到翻页模式
 		changeReaderModeToFlipMode() {
 			localStorage.setItem("ReaderMode", "flip");
