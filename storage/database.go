@@ -142,8 +142,8 @@ func SaveBookToDatabase(save *comigoBook.Book) error {
 	}
 
 	//保存封面与页面信息
-	bulk := make([]*ent.SinglePageInfoCreate, len(save.Pages))
-	for i, p := range save.Pages {
+	bulk := make([]*ent.SinglePageInfoCreate, len(save.Pages.Images))
+	for i, p := range save.Pages.Images {
 		bulk[i] = client.SinglePageInfo.
 			Create().
 			SetBookID(save.BookID).
@@ -209,7 +209,7 @@ func GetBookFromDatabase(filepath string) (*comigoBook.Book, error) {
 						Where(singlepageinfo.BookID(temp.BookID)).
 						All(ctx) // query and return.
 	for _, v := range pages {
-		b.Pages = append(b.Pages, comigoBook.SinglePageInfo{
+		b.Pages.Images = append(b.Pages.Images, comigoBook.ImageInfo{
 			PageNum:           v.PageNum,
 			NameInArchive:     v.NameInArchive,
 			Url:               v.URL,
@@ -223,8 +223,8 @@ func GetBookFromDatabase(filepath string) (*comigoBook.Book, error) {
 		})
 	}
 	//设置封面
-	if len(b.Pages) > 0 {
-		b.Cover = b.Pages[0]
+	if len(b.Pages.Images) > 0 {
+		b.Cover = b.Pages.Images[0]
 	}
 	if err != nil {
 		fmt.Println(err)
@@ -278,7 +278,7 @@ func GetArchiveBookFromDatabase() (list []*comigoBook.Book, err error) {
 			fmt.Println(err)
 		}
 		for _, v := range pages {
-			b.Pages = append(b.Pages, comigoBook.SinglePageInfo{
+			b.Pages.Images = append(b.Pages.Images, comigoBook.ImageInfo{
 				PageNum:           v.PageNum,
 				NameInArchive:     v.NameInArchive,
 				Url:               v.URL,
@@ -292,8 +292,8 @@ func GetArchiveBookFromDatabase() (list []*comigoBook.Book, err error) {
 			})
 		}
 		//设置封面
-		if len(b.Pages) > 0 {
-			b.Cover = b.Pages[0]
+		if len(b.Pages.Images) > 0 {
+			b.Cover = b.Pages.Images[0]
 		}
 		list = append(list, &b)
 	}

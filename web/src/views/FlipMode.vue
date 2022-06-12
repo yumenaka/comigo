@@ -14,17 +14,17 @@
 			@mouseleave.stop="onMouseLeave">
 			<div class="manga_area_img_div">
 				<!-- 非自动拼合模式最简单,直接显示一张图 -->
-				<img v-bind:src="this.imageParametersString(this.book.pages[nowPageNum - 1].url)"
+				<img v-bind:src="this.imageParametersString(book.pages.images[nowPageNum - 1].url)"
 					v-bind:alt="nowPageNum" />
 
 				<!-- 简单拼合双页,不管单双页什么的 -->
 				<img v-if="(!this.autoDoublePageModeFlag) && this.simpleDoublePageModeFlag && this.nowPageNum < this.book.all_page_num"
-					v-bind:src="this.imageParametersString(this.book.pages[nowPageNum].url)"
+					v-bind:src="this.imageParametersString(book.pages.images[nowPageNum].url)"
 					v-bind:alt="nowPageNum + 1" />
 
 				<!-- 自动拼合模式当前页,如果开启自动拼合,右边可能显示拼合页 -->
 				<img v-if="this.autoDoublePageModeFlag && this.nowPageNum < this.book.all_page_num && this.nowAndNextPageIsSingle()"
-					v-bind:src="this.imageParametersString(this.book.pages[nowPageNum].url)"
+					v-bind:src="this.imageParametersString(book.pages.images[nowPageNum].url)"
 					v-bind:alt="nowPageNum + 1" />
 			</div>
 
@@ -236,6 +236,7 @@ export default defineComponent({
 			auto_crop_num: 1,// 自动切白边阈值,范围是0~100,其实为1就够了	
 			gray: false,//黑白化
 		});
+
 		//警告信息
 		const message = useMessage()
 		// const notification = useNotification()
@@ -299,25 +300,28 @@ export default defineComponent({
 	},
 	data() {
 		return {
-			readerMode: "flip",
 			book: {
 				name: "loading",
 				id: "abcde",
 				all_page_num: 2,
 				book_type: "dir",
-				pages: [
-					{
-						height: 500,
-						width: 449,
-						url: "/images/loading.jpg",
-					},
-					{
-						height: 500,
-						width: 449,
-						url: "/images/loading.jpg",
-					},
-				],
+				pages: {
+					sort_by: "",
+					images: [
+						{
+							height: 500,
+							width: 449,
+							url: "/images/loading.jpg",
+						},
+						{
+							height: 500,
+							width: 449,
+							url: "/images/loading.jpg",
+						},
+					],
+				}
 			},
+			readerMode: "flip",
 			drawerActive: false,
 			drawerPlacement: "right",
 			//开发模式 未完成的功能与设置,开启Debug以后才能见到
@@ -870,15 +874,15 @@ export default defineComponent({
 				console.log("Error checkImageIsDoublePage_byPageNum:" + pageNum);
 				return;
 			}
-			if (this.book.pages[pageNum - 1].image_type == "SinglePage") {
+			if (this.book.pages.images[pageNum - 1].image_type == "SinglePage") {
 				return false;
 			}
-			if (this.book.pages[pageNum - 1].image_type == "DoublePage") {
+			if (this.book.pages.images[pageNum - 1].image_type == "DoublePage") {
 				return true;
 			}
 			let image = new Image();
 			let temp_flag = false;//返回结果用
-			image.src = this.book.pages[pageNum - 1].url;
+			image.src = this.book.pages.images[pageNum - 1].url;
 			// image.complete 图片是否完全加载完成。
 			//https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLImageElement/complete
 

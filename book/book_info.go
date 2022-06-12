@@ -17,7 +17,7 @@ type BookInfo struct {
 	ChildBookNum    int                  `json:"child_book_num"` //子书籍的数量
 	ChildBook       map[string]*BookInfo `json:"child_book"`     //key：BookID
 	AllPageNum      int                  `json:"all_page_num"`
-	Cover           SinglePageInfo       `json:"cover"`
+	Cover           ImageInfo            `json:"cover"`
 	ParentFolder    string               `json:"parent_folder"` //所在父文件夹
 	Author          []string             `json:"-"`             //暂时用不着 这个字段不解析 `json:"author"`
 	ISBN            string               `json:"-"`             //暂时用不着 这个字段不解析 `json:"isbn"`
@@ -77,7 +77,7 @@ func (s BookInfoList) Len() int {
 
 // Less 按时间或URL，将图片排序
 func (s BookInfoList) Less(i, j int) (less bool) {
-	//如何定义 s[i] < s[j]  根据文件名(第三方库、自然语言字符串)
+	//如何定义 Images[i] < Images[j]  根据文件名(第三方库、自然语言字符串)
 	switch s.SortBy {
 	case "name":
 		return tools.Compare(s.BookInfos[i].Name, s.BookInfos[j].Name)

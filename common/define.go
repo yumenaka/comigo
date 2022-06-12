@@ -37,6 +37,7 @@ var (
 		CacheFilePath:        "",
 		CacheFileClean:       true,
 		EnableDatabase:       false,
+		ClearDatabase:        true,
 		DatabaseFilePath:     "",
 		OpenBrowser:          true,
 		DisableLAN:           false,
