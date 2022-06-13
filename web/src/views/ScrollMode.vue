@@ -144,8 +144,8 @@
 			</n-space>
 			<!-- 分割线 -->
 			<n-divider />
-			<n-dropdown trigger="hover" :options="options" @select="reloadBookData">
-				<n-button>页面排序</n-button>
+			<n-dropdown trigger="hover" :options="options" @select="onResort">
+				<n-button>{{ this.getSortHintText(resort_hint_key) }}</n-button>
 			</n-dropdown>
 		</Drawer>
 		<n-back-top :show="showBackTopFlag" type="info" color="#8a2be2" :right="20" :bottom="20" />
@@ -180,7 +180,6 @@ export default defineComponent({
 		// NDrawer,//抽屉,可以从上下左右4个方向冒出. https://www.naiveui.com/zh-CN/os-theme/components/drawer
 		// NDrawerContent,//抽屉内容
 		NSpace,//间距 https://www.naiveui.com/zh-CN/os-theme/components/space
-		NDropdown,//下拉菜单 https://www.naiveui.com/zh-CN/os-theme/components/dropdown
 		// NRadio,//单选  https://www.naiveui.com/zh-CN/os-theme/components/radio
 		// NRadioButton,//单选  用按钮显得更优雅一点
 		// NRadioGroup,
@@ -197,6 +196,7 @@ export default defineComponent({
 		NDivider,//分割线  https://www.naiveui.com/zh-CN/os-theme/components/divider
 		// NColorPicker,
 		NButton,//按钮，来自:https://www.naiveui.com/zh-CN/os-theme/components/button
+		NDropdown,//下拉菜单 https://www.naiveui.com/zh-CN/os-theme/components/dropdown
 	},
 	setup() {
 		//此处不能使用this
@@ -222,30 +222,7 @@ export default defineComponent({
 		//单选按钮绑定的数值,ref函数：返回一个响应式的引用
 		// const checkedValueRef = ref(null)
 		return {
-			options: [
-				{
-					label: "保持原样",
-					key: "default",
-				},
-				{
-					label: "按照文件名",
-					key: "filename",
-				},
-				{
-					label: "修改时间",
-					key: "modify_time"
-				},
-				{
-					label: "文件大小",
-					key: "filesize"
-				},
-				// {
-				// 	label: "压缩包顺序",
-				// 	key: "page_num"
-				// }
-			],
 			pdfUrl: "",
-
 			// cookies,
 			//背景色
 			model,
@@ -304,7 +281,33 @@ export default defineComponent({
 	},
 	data() {
 		return {
-			sort_by: "default",
+			resort_hint_key: "resort",
+			options: [
+				{
+					label: this.$t('sort_by_filename'),
+					key: "filename",
+				},
+				{
+					label: this.$t('sort_by_modify_time'),
+					key: "modify_time"
+				},
+				{
+					label: this.$t('sort_by_filesize'),
+					key: "filesize"
+				},
+				{
+					label: this.$t('sort_by_filename') + this.$t('sort_reverse'),
+					key: "filename_reverse",
+				},
+				{
+					label: this.$t('sort_by_modify_time') + this.$t('sort_reverse'),
+					key: "modify_time_reverse"
+				},
+				{
+					label: this.$t('sort_by_filesize') + this.$t('sort_reverse'),
+					key: "filesize_reverse"
+				},
+			],
 			book: {
 				name: "loading",
 				id: "abcde",
@@ -377,10 +380,14 @@ export default defineComponent({
 	// beforeUnmount: 当指令与在绑定元素父组件卸载之前时,只调用一次。
 	// unmounted: 当指令与元素解除绑定且父组件已卸载时,只调用一次。
 	created() {
-		//TODO: 根据压缩包原始顺序、时间、文件名排序
+		//根据文件名、修改时间、文件大小等要素排序的参数
+		var sort_image_by_str = ""
+		if (this.$route.query.sort_by) {
+			sort_image_by_str = "&sort_by=" + this.$route.query.sort_by
+		}
 		//根据路由参数获取特定书籍
 		axios
-			.get("/getbook?id=" + this.$route.params.id + "&sort_by=" + this.sort_by)
+			.get("/getbook?id=" + this.$route.params.id + sort_image_by_str)
 			.then((response) => (this.book = response.data))
 			.finally(
 				() => {
@@ -463,7 +470,6 @@ export default defineComponent({
 			this.model.interfaceColor = localStorage.getItem("InterfaceColor");
 		}
 
-
 		//宽度是否使用百分比
 		if (localStorage.getItem("imageWidth_usePercentFlag") === "true") {
 			this.imageWidth_usePercentFlag = true;
@@ -531,22 +537,35 @@ export default defineComponent({
 		window.removeEventListener('resize', this.onResize)
 	},
 	methods: {
-		reloadBookData(key) {
-			this.sort_by = key
+		onResort(key) {
 			axios
-				.get("/getbook?id=" + this.$route.params.id + "&sort_by=" + this.sort_by)
+				.get("/getbook?id=" + this.$route.params.id + "&sort_by=" + key)
 				.then((response) => (this.book = response.data))
 				.finally(
 					() => {
 						document.title = this.book.name;
-						console.log("成功刷新书籍数据,书籍ID:" + this.$route.params.id + "  sort_by=" + this.sort_by);
+						this.resort_hint_key = key
+						// 带查询参数，结果是 /#/scroll/abc123?sort_by="filesize"
+						this.$router.push({ name: "ScrollMode", replace: true, query: { sort_by: key } })
+						console.log("成功刷新书籍数据,书籍ID:" + this.$route.params.id + "  sort_by=" + key);
 					}
 				);
-
-			this.$router.push({ name: "ScrollMode", replace: true, params: { id: this.$route.params.id } });
-
-
 		},
+
+		//返回“重新排序”选择菜单的文字提示
+		getSortHintText(key) {
+			switch (key) {
+				case "resort": return this.$t('re_sort');
+				case "filename": return this.$t('sort_by_filename');
+				case "filesize": return this.$t('sort_by_filesize');
+				case "filename_reverse": return this.$t('sort_by_filename') + this.$t('sort_reverse');
+				case "modify_time_reverse": return this.$t('sort_by_modify_time') + this.$t('sort_reverse');
+				case "filesize_reverse": return this.$t('sort_by_filesize') + this.$t('sort_reverse');
+				default:
+					return this.$t('re_sort');
+			}
+		},
+
 		//切换到翻页模式
 		changeReaderModeToFlipMode() {
 			localStorage.setItem("ReaderMode", "flip");

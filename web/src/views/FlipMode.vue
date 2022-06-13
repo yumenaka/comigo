@@ -561,10 +561,10 @@ export default defineComponent({
 						this.nowPageNum = saveNum;
 						console.log("成功读取页数" + saveNum);
 					} else {
-						console.log("读取页数失败,this.nowPageNum=" + this.nowPageNum);
+						console.log("读取页数失败,this.nowPageNum = " + this.nowPageNum);
 					}
 				} else {
-					console.log("本队存储里没找到:" + "nowPageNum" + this.book.id);
+					console.log("本队存储里没找到:" + "nowPageNum = " + this.nowPageNum);
 				}
 			} else {
 				//console.log("不读取页数,this.saveNowPageNumFlag_FlipMode=" + this.saveNowPageNumFlag_FlipMode);

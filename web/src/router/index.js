@@ -17,25 +17,29 @@ import NotFound from '@/views/NotFound404.vue'
 
 const routes = [
   {
-    path: '/',//  以 / 开头的嵌套路径将被视为根路径。这允许你利用组件嵌套，而不必使用嵌套的 URL。
+    //以 / 开头的嵌套路径将被视为根路径。这允许你利用组件嵌套，而不必使用嵌套的 URL。
+    path: '/',
     component: BookShelf,
     name: 'BookShelf',
+    props: route => ({ query: route.query.sort_by }),
   },
   {
-    path: '/child_shelf/:group_id',//  以 / 开头的嵌套路径将被视为根路径。这允许你利用组件嵌套，而不必使用嵌套的 URL。
+    path: '/child_shelf/:group_id',
     component: BookShelf,
     name: 'ChildBookShelf',
+    props: route => ({ query: route.query.sort_by }),
   },
   {
     path: '/scroll/:id',
     component: ScrollMode,
     name: 'ScrollMode',
-    props: route => ({ query: route.query.sort_by })
+    props: route => ({ query: route.query.sort_by }),
   },
   {
     path: '/flip/:id',
     component: FlipMode,
     name: 'FlipMode',
+    props: route => ({ query: route.query.sort_by }),
   },
   // {
   //   path: '/pdf/:id',

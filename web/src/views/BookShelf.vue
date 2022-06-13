@@ -57,6 +57,11 @@
             <a href="/api/config.toml" target="_blank">
                 <n-button>{{ $t('DownloadSampleConfigFile') }}</n-button>
             </a>
+            <!-- 分割线 -->
+            <n-divider />
+            <n-dropdown trigger="hover" :options="options" @select="onResort">
+                <n-button>{{ this.getSortHintText(resort_hint_key) }}</n-button>
+            </n-dropdown>
         </Drawer>
         <Bottom :softVersion="
             this.$store.state.server_status.ServerName
@@ -70,7 +75,7 @@
 // 直接导入组件并使用它。这种情况下,只有导入的组件才会被打包。
 // Firefox插件Textarea Cache 报错：源映射错误：Error: NetworkError when attempting to fetch resource.
 // Firefox插件Video DownloadHelper报错:已不赞成使用 CanvasRenderingContext2D 中的 drawWindow 方法
-import { NIcon, NDivider, NColorPicker, NSwitch, NButton, NSpace, } from "naive-ui";
+import { NIcon, NDivider, NColorPicker, NSwitch, NButton, NSpace, NDropdown, } from "naive-ui";
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
 import BookCard from "@/components/BookCard.vue";
@@ -97,6 +102,7 @@ export default defineComponent({
         SettingsOutline, // 图标,来自 https://www.xicons.org/#/   需要安装（npm i -D @vicons/ionicons5）
         NDivider, // 分割线  https://www.naiveui.com/zh-CN/os-theme/components/divider
         NColorPicker,//颜色选择器 https://www.naiveui.com/zh-CN/os-theme/components/color-picker
+        NDropdown,//下拉菜单 https://www.naiveui.com/zh-CN/os-theme/components/dropdown
     },
     setup() {
         // 此处不能使用this
@@ -139,6 +145,33 @@ export default defineComponent({
     },
     data() {
         return {
+            resort_hint_key: "resort",
+            options: [
+                {
+                    label: this.$t('sort_by_filename'),
+                    key: "filename",
+                },
+                {
+                    label: this.$t('sort_by_modify_time'),
+                    key: "modify_time"
+                },
+                {
+                    label: this.$t('sort_by_filesize'),
+                    key: "filesize"
+                },
+                {
+                    label: this.$t('sort_by_filename') + this.$t('sort_reverse'),
+                    key: "filename_reverse",
+                },
+                {
+                    label: this.$t('sort_by_modify_time') + this.$t('sort_reverse'),
+                    key: "modify_time_reverse"
+                },
+                {
+                    label: this.$t('sort_by_filesize') + this.$t('sort_reverse'),
+                    key: "filesize_reverse"
+                },
+            ],
             readerMode: "scroll",
             readerModeIsScroll: true,
             bookShelfTitle: "loading",
@@ -249,6 +282,34 @@ export default defineComponent({
     // 卸载前
     beforeUnmount() { },
     methods: {
+        //根据文件名、修改时间、文件大小等参数重新排序
+        onResort(key) {
+            if (this.$route.params.group_id) {
+                console.log("onResort  bookID：" + this.$route.params.group_id)
+                this.$router.push({
+                    name: "ChildBookShelf",
+                    params: { group_id: this.$route.params.group_id },
+                    query: { sort_by: key }
+                });
+            } else {
+                console.log("onResort  bookID：" + this.bookshelf.id + " bookType：" + this.bookshelf.book_type)
+                this.$router.push({ name: "BookShelf", replace: true, query: { sort_by: key } })
+            }
+        },
+        //返回“重新排序”选择菜单的文字提示
+        getSortHintText(key) {
+            switch (key) {
+                case "resort": return this.$t('re_sort');
+                case "filename": return this.$t('sort_by_filename');
+                case "filesize": return this.$t('sort_by_filesize');
+                case "filename_reverse": return this.$t('sort_by_filename') + this.$t('sort_reverse');
+                case "modify_time_reverse": return this.$t('sort_by_modify_time') + this.$t('sort_reverse');
+                case "filesize_reverse": return this.$t('sort_by_filesize') + this.$t('sort_reverse');
+                default:
+                    return this.$t('re_sort');
+            }
+        },
+
         // 打开书阅读，或继续在书架里展示一组书
         onOpenBook(bookID, bookType) {
             console.log("onOpenBook  bookID：" + bookID + " bookType：" + bookType)
@@ -329,8 +390,13 @@ export default defineComponent({
 
         // 获取所有书籍信息
         initBookShelf() {
+            //根据文件名、修改时间、文件大小等要素排序的参数
+            var sort_image_by_str = ""
+            if (this.$route.query.sort_by) {
+                sort_image_by_str = "&sort_by=" + this.$route.query.sort_by
+            }
             axios
-                .get("getlist?max_depth=1")
+                .get("getlist?max_depth=1" + sort_image_by_str)
                 .then((response) => (this.bookshelf = response.data))
                 .finally(() => {
                     this.setBookShelfTitle();
@@ -339,8 +405,13 @@ export default defineComponent({
         // 根据路由参数获取特定书籍组
         getBooksGroupByBookID(group_id) {
             // console.log("getBooksGroupByBookID bookID:" + group_id);
+            //根据文件名、修改时间、文件大小等要素排序的参数
+            var sort_image_by_str = ""
+            if (this.$route.query.sort_by) {
+                sort_image_by_str = "&sort_by=" + this.$route.query.sort_by
+            }
             axios
-                .get("getlist?book_group_book_id=" + group_id)
+                .get("getlist?book_group_book_id=" + group_id + sort_image_by_str)
                 .then((response) => {
                     if (response.data[0].name != null) {
                         this.bookshelf = response.data;

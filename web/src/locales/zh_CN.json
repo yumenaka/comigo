@@ -48,5 +48,11 @@
   "switch_to_flip_mode": "切换到翻页模式",
   "DownloadSampleConfigFile": "下载示例配置文件",
   "select-language": "选择语言",
-  "scan_qrcode": "扫码阅读："
+  "scan_qrcode": "扫码阅读：",
+  "sort_by_filename": "文件名",
+  "sort_by_filesize": "文件大小",
+  "sort_by_modify_time": "修改时间",
+  "sort_by_default": "保持原样",
+  "sort_reverse": "（反向）",
+  "re_sort": "重新排序"
 }
