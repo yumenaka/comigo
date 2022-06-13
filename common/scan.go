@@ -189,6 +189,14 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*book.Book, 
 		newBook.AllPageNum = 1
 		newBook.InitComplete = true
 		newBook.Cover = book.ImageInfo{NameInArchive: "video.png", Url: "/images/video.png"}
+	case book.TypeAudio:
+		newBook.AllPageNum = 1
+		newBook.InitComplete = true
+		newBook.Cover = book.ImageInfo{NameInArchive: "audio.png", Url: "/images/audio.png"}
+	case book.TypeUnknownFile:
+		newBook.AllPageNum = 1
+		newBook.InitComplete = true
+		newBook.Cover = book.ImageInfo{NameInArchive: "unknown.png", Url: "/images/unknown.png"}
 	//其他类型的压缩文件或文件夹
 	default:
 		fsys, err := archiver.FileSystem(filePath)

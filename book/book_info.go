@@ -83,18 +83,36 @@ func (s BookInfoList) Less(i, j int) (less bool) {
 	case "filename":
 		return tools.Compare(s.BookInfos[i].Name, s.BookInfos[j].Name) //(使用了第三方库、比较自然语言字符串)
 	case "filesize":
-		return tools.Compare(strconv.Itoa(int(s.BookInfos[i].FileSize)), strconv.Itoa(int(s.BookInfos[j].FileSize)))
+		//如果一样大（可能是大小默认为0的文件夹），先比较子书籍数量
+		if s.BookInfos[i].FileSize == s.BookInfos[j].FileSize && s.BookInfos[i].ChildBookNum != s.BookInfos[j].ChildBookNum {
+			return !(s.BookInfos[i].ChildBookNum < s.BookInfos[j].ChildBookNum) //
+		}
+		//子书籍数量也一样，就比较书名（免得结果都不一样）
+		if s.BookInfos[i].FileSize == s.BookInfos[j].FileSize && s.BookInfos[i].ChildBookNum == s.BookInfos[j].ChildBookNum {
+			return !tools.Compare(s.BookInfos[i].Name, s.BookInfos[j].Name) //
+		}
+		//一般情况，比较文件大小
+		return !tools.Compare(strconv.Itoa(int(s.BookInfos[i].FileSize)), strconv.Itoa(int(s.BookInfos[j].FileSize)))
 	case "modify_time":
-		return tools.Compare(s.BookInfos[i].Modified.String(), s.BookInfos[j].Modified.String())
+		return !tools.Compare(s.BookInfos[i].Modified.String(), s.BookInfos[j].Modified.String())
 	case "author":
 		return tools.Compare(s.BookInfos[i].Author[0], s.BookInfos[j].Author[0])
 	//如何定义 Images[i] < Images[j] 反向
 	case "filename_reverse":
 		return !tools.Compare(s.BookInfos[i].Name, s.BookInfos[j].Name) //(使用了第三方库、比较自然语言字符串)
 	case "filesize_reverse":
-		return !tools.Compare(strconv.Itoa(int(s.BookInfos[i].FileSize)), strconv.Itoa(int(s.BookInfos[j].FileSize)))
+		//如果一样大（很可能是大小默认为0的文件夹），先比较子书籍数量
+		if s.BookInfos[i].FileSize == s.BookInfos[j].FileSize && s.BookInfos[i].ChildBookNum != s.BookInfos[j].ChildBookNum {
+			return s.BookInfos[i].ChildBookNum < s.BookInfos[j].ChildBookNum //
+		}
+		//子书籍数量也一样的话，就比较书名（免得结果都不一样）
+		if s.BookInfos[i].FileSize == s.BookInfos[j].FileSize && s.BookInfos[i].ChildBookNum == s.BookInfos[j].ChildBookNum {
+			return tools.Compare(s.BookInfos[i].Name, s.BookInfos[j].Name) //
+		}
+		//一般情况，比较文件大小
+		return tools.Compare(strconv.Itoa(int(s.BookInfos[i].FileSize)), strconv.Itoa(int(s.BookInfos[j].FileSize)))
 	case "modify_time_reverse":
-		return !tools.Compare(s.BookInfos[i].Modified.String(), s.BookInfos[j].Modified.String())
+		return tools.Compare(s.BookInfos[i].Modified.String(), s.BookInfos[j].Modified.String())
 	case "author_reverse":
 		return !tools.Compare(s.BookInfos[i].Author[0], s.BookInfos[j].Author[0])
 	default:
