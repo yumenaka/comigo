@@ -60,7 +60,7 @@
             <!-- 分割线 -->
             <n-divider />
             <n-dropdown trigger="hover" :options="options" @select="onResort">
-                <n-button>{{ this.getSortHintText(resort_hint_key) }}</n-button>
+                <n-button>{{ this.getSortHintText(this.resort_hint_key) }}</n-button>
             </n-dropdown>
         </Drawer>
         <Bottom :softVersion="
@@ -145,7 +145,7 @@ export default defineComponent({
     },
     data() {
         return {
-            resort_hint_key: "resort",
+            resort_hint_key: "filename",//书籍的排序方式。可以按照文件名、修改时间、文件大小排序（或反向排序）
             options: [
                 {
                     label: this.$t('sort_by_filename'),
@@ -231,6 +231,14 @@ export default defineComponent({
     // beforeUnmount: 当指令与在绑定元素父组件卸载之前时,只调用一次。
     // unmounted: 当指令与元素解除绑定且父组件已卸载时,只调用一次。
     created() {
+
+        // 初始化默认值,读取出来的都是字符串,不要直接用
+        //书籍排序方式。可以按照文件名、修改时间、文件大小排序（或反向排序）
+        if (localStorage.getItem("ResortKey_BookShelf") !== null) {
+            this.resort_hint_key = localStorage.getItem("ResortKey_BookShelf")
+        }
+
+
         //TODO:读取服务器书籍总数，避免重复加载（尤其是书很多的时候）
         // 从服务器上拉取书架信息
         this.getBookShelfData();
@@ -249,7 +257,7 @@ export default defineComponent({
                 this.getBookShelfData();
             }
         );
-        // 初始化默认值,读取出来的都是字符串,不要直接用
+        // 继续初始化默认值
         // 书籍卡片是否显示文字版标题
         if (localStorage.getItem("BookCardShowTitleFlag") === "true") {
             this.bookCardShowTitleFlag = true;
@@ -284,23 +292,26 @@ export default defineComponent({
     methods: {
         //根据文件名、修改时间、文件大小等参数重新排序
         onResort(key) {
+            this.resort_hint_key = key
+            localStorage.setItem("ResortKey_BookShelf", key)
             if (this.$route.params.group_id) {
-                console.log("onResort  bookID：" + this.$route.params.group_id)
+                console.log("onResort  bookID：" + this.$route.params.group_id + ", key:" + key)
                 this.$router.push({
                     name: "ChildBookShelf",
                     params: { group_id: this.$route.params.group_id },
+                    replace: true,
                     query: { sort_by: key }
                 });
             } else {
-                console.log("onResort  bookID：" + this.bookshelf.id + " bookType：" + this.bookshelf.book_type)
+                console.log("onResort  key：" + key)
                 this.$router.push({ name: "BookShelf", replace: true, query: { sort_by: key } })
             }
         },
         //返回“重新排序”选择菜单的文字提示
         getSortHintText(key) {
             switch (key) {
-                case "resort": return this.$t('re_sort');
                 case "filename": return this.$t('sort_by_filename');
+                case "modify_time": return this.$t('sort_by_modify_time');
                 case "filesize": return this.$t('sort_by_filesize');
                 case "filename_reverse": return this.$t('sort_by_filename') + this.$t('sort_reverse');
                 case "modify_time_reverse": return this.$t('sort_by_modify_time') + this.$t('sort_reverse');
@@ -320,11 +331,19 @@ export default defineComponent({
                 });
                 return;
             }
-            // if (bookType == ".pdf") {
-            //     // 命名路由,并加上参数,让路由建立 url
-            //     this.$router.push({ name: "PDFView", params: { id: bookID } });
-            //     return;
-            // }
+            if (bookType === ".pdf" || bookType === ".mp4" || bookType === "video" || bookType === "audio" || bookType === "unknown") {
+                //打开新的标签页,跳转到浏览器自带的打开功能
+                // Window open() 方法 https://www.runoob.com/jsref/met-win-open.html
+                axios
+                    .get("/getbook?id=" + bookID)
+                    .then((response) => (window.open('api/raw/' + bookID + '/' + response.data.name, '_blank')))// _blank - URL加载到一个新的窗口。默认值
+                    .finally(
+                        () => {
+                            console.log("成功刷新书籍数据,书籍ID:" + bookID);
+                        }
+                    );
+                return;
+            }
             if (this.readerMode == "flip" || this.readerMode == "sketch") {
                 // 命名路由,并加上参数,让路由建立 url
                 this.$router.push({ name: "FlipMode", params: { id: bookID } });
@@ -393,7 +412,11 @@ export default defineComponent({
             //根据文件名、修改时间、文件大小等要素排序的参数
             var sort_image_by_str = ""
             if (this.$route.query.sort_by) {
+                //有路由查询参数的时候，按照路由里的查询参数排序
                 sort_image_by_str = "&sort_by=" + this.$route.query.sort_by
+            } else if (this.resort_hint_key !== "") {
+                //没有的时候，就按照本地的存储值或默认值排序
+                sort_image_by_str = "&sort_by=" + this.resort_hint_key
             }
             axios
                 .get("getlist?max_depth=1" + sort_image_by_str)
@@ -405,10 +428,14 @@ export default defineComponent({
         // 根据路由参数获取特定书籍组
         getBooksGroupByBookID(group_id) {
             // console.log("getBooksGroupByBookID bookID:" + group_id);
-            //根据文件名、修改时间、文件大小等要素排序的参数
+            //排序参数（文件名、修改时间、文件大小等）
             var sort_image_by_str = ""
             if (this.$route.query.sort_by) {
+                //有路由查询参数的时候，按照路由里的查询参数排序
                 sort_image_by_str = "&sort_by=" + this.$route.query.sort_by
+            } else if (this.resort_hint_key !== "") {
+                //没有的时候，就按照本地的存储值或默认值排序
+                sort_image_by_str = "&sort_by=" + this.resort_hint_key
             }
             axios
                 .get("getlist?book_group_book_id=" + group_id + sort_image_by_str)

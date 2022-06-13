@@ -145,7 +145,7 @@
 			<!-- 分割线 -->
 			<n-divider />
 			<n-dropdown trigger="hover" :options="options" @select="onResort">
-				<n-button>{{ this.getSortHintText(resort_hint_key) }}</n-button>
+				<n-button>{{ this.getSortHintText(this.resort_hint_key) }}</n-button>
 			</n-dropdown>
 		</Drawer>
 		<n-back-top :show="showBackTopFlag" type="info" color="#8a2be2" :right="20" :bottom="20" />
@@ -401,7 +401,7 @@ export default defineComponent({
 			(id) => {
 				if (id) {
 					axios
-						.get("/getbook?id=" + this.$route.params.id)
+						.get("/getbook?id=" + this.$route.params.id + sort_image_by_str)
 						.then((response) => (this.book = response.data))
 						.finally(console.log("路由参数改变,书籍ID:" + id));
 				}
@@ -537,6 +537,7 @@ export default defineComponent({
 		window.removeEventListener('resize', this.onResize)
 	},
 	methods: {
+		//页面排序相关
 		onResort(key) {
 			axios
 				.get("/getbook?id=" + this.$route.params.id + "&sort_by=" + key)
@@ -555,8 +556,8 @@ export default defineComponent({
 		//返回“重新排序”选择菜单的文字提示
 		getSortHintText(key) {
 			switch (key) {
-				case "resort": return this.$t('re_sort');
 				case "filename": return this.$t('sort_by_filename');
+				case "modify_time": return this.$t('sort_by_modify_time');
 				case "filesize": return this.$t('sort_by_filesize');
 				case "filename_reverse": return this.$t('sort_by_filename') + this.$t('sort_reverse');
 				case "modify_time_reverse": return this.$t('sort_by_modify_time') + this.$t('sort_reverse');

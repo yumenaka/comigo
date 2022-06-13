@@ -177,6 +177,12 @@
 		<!-- 滑动选择% -->
 		<n-slider v-if="this.readerMode == 'sketch'" v-model:value="this.sketchFlipSecond" :step="1" :max="120" :min="1"
 			:marks="marks" :format-tooltip="value => `${value}s`" @update:value="this.resetSketchSecondCount" />
+
+		<!-- 分割线 -->
+		<n-divider />
+		<n-dropdown trigger="hover" :options="options" @select="onResort">
+			<n-button>{{ this.getSortHintText(this.resort_hint_key) }}</n-button>
+		</n-dropdown>
 	</Drawer>
 	<!-- <Bottom
 		:softVersion="this.$store.state.server_status.ServerName ? this.$store.state.server_status.ServerName : 'Comigo'"
@@ -191,7 +197,7 @@ import Drawer from "@/components/Drawer.vue";
 // import Bottom from "@/components/Bottom.vue";
 import { defineComponent, reactive } from "vue";
 // 直接导入组件并使用它。这种情况下,只有导入的组件才会被打包。
-import { NDivider, NIcon, NInputNumber, NSlider, NSpace, NSwitch, useMessage, NButton, } from "naive-ui";
+import { NDivider, NIcon, NInputNumber, NSlider, NSpace, NSwitch, useMessage, NButton, NDropdown, } from "naive-ui";
 import { SettingsOutline } from "@vicons/ionicons5";
 import axios from "axios";
 
@@ -217,6 +223,7 @@ export default defineComponent({
 		// useNotification, // https://www.naiveui.com/zh-CN/os-theme/components/notification
 		NButton,//按钮，来自:https://www.naiveui.com/zh-CN/os-theme/components/button
 		// NMessageProvider,
+		NDropdown,//下拉菜单 https://www.naiveui.com/zh-CN/os-theme/components/dropdown
 	},
 	setup() {
 		const { cookies } = useCookies();
@@ -300,6 +307,33 @@ export default defineComponent({
 	},
 	data() {
 		return {
+			resort_hint_key: "resort",
+			options: [
+				{
+					label: this.$t('sort_by_filename'),
+					key: "filename",
+				},
+				{
+					label: this.$t('sort_by_modify_time'),
+					key: "modify_time"
+				},
+				{
+					label: this.$t('sort_by_filesize'),
+					key: "filesize"
+				},
+				{
+					label: this.$t('sort_by_filename') + this.$t('sort_reverse'),
+					key: "filename_reverse",
+				},
+				{
+					label: this.$t('sort_by_modify_time') + this.$t('sort_reverse'),
+					key: "modify_time_reverse"
+				},
+				{
+					label: this.$t('sort_by_filesize') + this.$t('sort_reverse'),
+					key: "filesize_reverse"
+				},
+			],
 			book: {
 				name: "loading",
 				id: "abcde",
@@ -357,10 +391,15 @@ export default defineComponent({
 	},
 	//在选项API中使用 Vue 生命周期钩子：
 	created() {
-		//初始化默认值
+		//根据文件名、修改时间、文件大小等要素排序的参数
+		var sort_image_by_str = ""
+		if (this.$route.query.sort_by) {
+			sort_image_by_str = "&sort_by=" + this.$route.query.sort_by
+		}
+
 		//根据路由参数获取特定书籍
 		axios
-			.get("/getbook?id=" + this.$route.params.id)
+			.get("/getbook?id=" + this.$route.params.id + sort_image_by_str)
 			.then((response) => (this.book = response.data))
 			.finally(() => {
 				document.title = this.book.name;
@@ -372,11 +411,12 @@ export default defineComponent({
 			(id) => {
 				// console.log(id)
 				axios
-					.get("/getbook?id=" + this.$route.params.id)
+					.get("/getbook?id=" + this.$route.params.id + sort_image_by_str)
 					.then((response) => (this.book = response.data))
 					.finally(console.log("路由参数改变,书籍ID:" + id));
 			}
 		)
+		//初始化默认值
 		// https://www.developers.pub/wiki/1006381/1013545
 		// https://developer.mozilla.org/zh-CN/docs/Web/API/Storage/setItem
 		//一个域名下存放的cookie的个数有限制,不同的浏览器存放的个数不一样,一般为20个。因为不需要上传,使用localStorage（本地存储）存储在浏览器,永不过期。
@@ -504,6 +544,38 @@ export default defineComponent({
 		//界面有更新就会调用,随便乱放会引起难以调试的BUG
 	},
 	methods: {
+
+		//页面排序相关
+		onResort(key) {
+			axios
+				.get("/getbook?id=" + this.$route.params.id + "&sort_by=" + key)
+				.then((response) => (this.book = response.data))
+				.finally(
+					() => {
+						document.title = this.book.name;
+						this.resort_hint_key = key
+						// 带查询参数，结果是 /#/scroll/abc123?sort_by="filesize"
+						this.$router.push({ name: "ScrollMode", replace: true, query: { sort_by: key } })
+						console.log("成功刷新书籍数据,书籍ID:" + this.$route.params.id + "  sort_by=" + key);
+					}
+				);
+		},
+
+		//返回“重新排序”选择菜单的文字提示
+		getSortHintText(key) {
+			switch (key) {
+				case "filename": return this.$t('sort_by_filename');
+				case "modify_time": return this.$t('sort_by_modify_time');
+				case "filesize": return this.$t('sort_by_filesize');
+				case "filename_reverse": return this.$t('sort_by_filename') + this.$t('sort_reverse');
+				case "modify_time_reverse": return this.$t('sort_by_modify_time') + this.$t('sort_reverse');
+				case "filesize_reverse": return this.$t('sort_by_filesize') + this.$t('sort_reverse');
+				default:
+					return this.$t('re_sort');
+			}
+		},
+
+
 		//图片处理相关
 		//黑白化参数
 		setImageParameters_Gray(value) {

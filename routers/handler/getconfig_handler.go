@@ -16,7 +16,8 @@ func GetConfigHandler(c *gin.Context) {
 	tempConfig := common.Config
 	tempConfig.GenerateConfig = false
 	tempConfig.LogFilePath = ""
-	tempConfig.StoresPath = []string{"C:\\test\\Comic", "D:\\some_path\\book"}
+	common.Config.EnableDatabase = true
+	tempConfig.StoresPath = []string{"C:\\test\\Comic", "D:\\some_path\\book", "/home/username/download"}
 	tempConfig.CacheFilePath = ".comigo"
 	bytes, err := toml.Marshal(tempConfig)
 	if err != nil {
