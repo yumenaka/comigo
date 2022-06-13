@@ -68,7 +68,7 @@ func NewBookInfo(b *Book) *BookInfo {
 // BookInfoList Slice
 type BookInfoList struct {
 	BookInfos []BookInfo
-	SortBy    string
+	sortBy    string
 }
 
 func (s BookInfoList) Len() int {
@@ -77,16 +77,26 @@ func (s BookInfoList) Len() int {
 
 // Less 按时间或URL，将图片排序
 func (s BookInfoList) Less(i, j int) (less bool) {
-	//如何定义 Images[i] < Images[j]  根据文件名(第三方库、自然语言字符串)
-	switch s.SortBy {
-	case "name":
-		return tools.Compare(s.BookInfos[i].Name, s.BookInfos[j].Name)
-	case "file_size":
+	//如何定义 Images[i] < Images[j]
+	//根据文件名
+	switch s.sortBy {
+	case "filename":
+		return tools.Compare(s.BookInfos[i].Name, s.BookInfos[j].Name) //(使用了第三方库、比较自然语言字符串)
+	case "filesize":
 		return tools.Compare(strconv.Itoa(int(s.BookInfos[i].FileSize)), strconv.Itoa(int(s.BookInfos[j].FileSize)))
-	case "time":
+	case "modify_time":
 		return tools.Compare(s.BookInfos[i].Modified.String(), s.BookInfos[j].Modified.String())
 	case "author":
 		return tools.Compare(s.BookInfos[i].Author[0], s.BookInfos[j].Author[0])
+	//如何定义 Images[i] < Images[j] 反向
+	case "filename_reverse":
+		return !tools.Compare(s.BookInfos[i].Name, s.BookInfos[j].Name) //(使用了第三方库、比较自然语言字符串)
+	case "filesize_reverse":
+		return !tools.Compare(strconv.Itoa(int(s.BookInfos[i].FileSize)), strconv.Itoa(int(s.BookInfos[j].FileSize)))
+	case "modify_time_reverse":
+		return !tools.Compare(s.BookInfos[i].Modified.String(), s.BookInfos[j].Modified.String())
+	case "author_reverse":
+		return !tools.Compare(s.BookInfos[i].Author[0], s.BookInfos[j].Author[0])
 	default:
 		return tools.Compare(s.BookInfos[i].Name, s.BookInfos[j].Name)
 	}
@@ -97,6 +107,9 @@ func (s BookInfoList) Swap(i, j int) {
 }
 
 // SortBooks 上面三个函数定义好了，终于可以使用sort包排序了
-func (s *BookInfoList) SortBooks() {
-	sort.Sort(s)
+func (s *BookInfoList) SortBooks(by string) {
+	if by != "" {
+		s.sortBy = by
+		sort.Sort(s)
+	}
 }

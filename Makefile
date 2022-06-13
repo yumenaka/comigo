@@ -1,8 +1,8 @@
 # Makefile for cross-compilation
-# make all VERSION=v0.7.3
-# make md5SumThemAll VERSION=v0.7.3
-# mingw32-make all VERSION=v0.7.3
-#	rm  resource.syso && make  Linux-armv8   VERSION=v0.7.3
+# make all VERSION=v0.8.1
+# make md5SumThemAll VERSION=v0.8.1
+# mingw32-make all VERSION=v0.8.1
+# rm  resource.syso && make  Linux-armv8   VERSION=v0.8.1
 # need MSYS2 or mingw32 or find.exe make.exe zip.exe upx.exe
 
 NAME=comi

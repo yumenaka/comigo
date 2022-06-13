@@ -48,5 +48,10 @@
   "switch_to_flip_mode": "switch to flip mode",
   "select-language": "Select Language",
   "DownloadSampleConfigFile": "Download sample config ",
-  "scan_qrcode": "QRCode:"
+  "scan_qrcode": "QRCode:",
+  "sort_by_filename": "Filename",
+  "sort_by_filesize": "Filesize",
+  "sort_by_modify_time": "Modify Time",
+  "sort_reverse": "(Reverse)",
+  "re_sort": "Resort"
 }

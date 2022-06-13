@@ -48,5 +48,10 @@
   "switch_to_flip_mode": "めくりモードへ",
   "DownloadSampleConfigFile": "設定ファイルのダウンロード",
   "select-language": "言語を選択する",
-  "scan_qrcode": "QRコード："
+  "scan_qrcode": "QRコード：",
+  "sort_by_filename": "ファイル名",
+  "sort_by_filesize": "ファイルサイズ",
+  "sort_by_modify_time": "更新日時",
+  "sort_reverse": "（逆）",
+  "re_sort": "並べ替え"
 }

@@ -268,7 +268,7 @@ func GetRandomBook() *Book {
 	return nil
 }
 
-func GetAllBookInfoList(sort string) (*BookInfoList, error) {
+func GetAllBookInfoList(sortBy string) (*BookInfoList, error) {
 	var infoList BookInfoList
 	//首先加上所有真实的书籍
 	for _, b := range mapBooks {
@@ -276,8 +276,7 @@ func GetAllBookInfoList(sort string) (*BookInfoList, error) {
 		infoList.BookInfos = append(infoList.BookInfos, *info)
 	}
 	if len(infoList.BookInfos) > 0 {
-		infoList.SortBy = sort
-		infoList.SortBooks()
+		infoList.SortBooks(sortBy)
 		return &infoList, nil
 	}
 	return nil, errors.New("can not found bookshelf")
@@ -292,7 +291,7 @@ func GetAllBookList() []*Book {
 	return list
 }
 
-func GetBookInfoListByDepth(depth int, sort string) (*BookInfoList, error) {
+func GetBookInfoListByDepth(depth int, sortBy string) (*BookInfoList, error) {
 	var infoList BookInfoList
 	//首先加上所有真实的书籍
 	for _, b := range mapBooks {
@@ -311,14 +310,13 @@ func GetBookInfoListByDepth(depth int, sort string) (*BookInfoList, error) {
 		}
 	}
 	if len(infoList.BookInfos) > 0 {
-		infoList.SortBy = sort
-		infoList.SortBooks()
+		infoList.SortBooks(sortBy)
 		return &infoList, nil
 	}
 	return nil, errors.New("can not found bookshelf")
 }
 
-func GetBookInfoListByMaxDepth(depth int, sort string) (*BookInfoList, error) {
+func GetBookInfoListByMaxDepth(depth int, sortBy string) (*BookInfoList, error) {
 	var infoList BookInfoList
 	//首先加上所有真实的书籍
 	for _, b := range mapBooks {
@@ -337,14 +335,13 @@ func GetBookInfoListByMaxDepth(depth int, sort string) (*BookInfoList, error) {
 		}
 	}
 	if len(infoList.BookInfos) > 0 {
-		infoList.SortBy = sort
-		infoList.SortBooks()
+		infoList.SortBooks(sortBy)
 		return &infoList, nil
 	}
 	return nil, errors.New("can not found bookshelf")
 }
 
-func GetBookInfoListByBookGroupBookID(BookID string, sort string) (*BookInfoList, error) {
+func GetBookInfoListByBookGroupBookID(BookID string, sortBy string) (*BookInfoList, error) {
 	var infoList BookInfoList
 	book := mapBookGroups[BookID]
 	if book != nil {
@@ -354,8 +351,7 @@ func GetBookInfoListByBookGroupBookID(BookID string, sort string) (*BookInfoList
 			infoList.BookInfos = append(infoList.BookInfos, *info)
 		}
 		if len(infoList.BookInfos) > 0 {
-			infoList.SortBy = sort
-			infoList.SortBooks()
+			infoList.SortBooks(sortBy)
 			return &infoList, nil
 		}
 	}
@@ -414,16 +410,24 @@ func (s AllPageInfo) Len() int {
 
 // Less 按时间或URL，将图片排序
 func (s AllPageInfo) Less(i, j int) (less bool) {
-	if s.SortBy == "" {
-		//如何定义 Images[i] < Images[j]  根据文件名(第三方库、自然语言字符串)
-		less = tools.Compare(s.Images[i].NameInArchive, s.Images[j].NameInArchive)
+	//如何定义 Images[i] < Images[j]
+	switch s.SortBy {
+	case "filename": //根据文件名(第三方库、自然语言字符串)
+		return tools.Compare(s.Images[i].NameInArchive, s.Images[j].NameInArchive)
+	case "filesize": //根据文件大小
+		return s.Images[i].FileSize < s.Images[j].FileSize
+	case "modify_time": //根据修改时间
+		return s.Images[i].ModeTime.Before(s.Images[j].ModeTime) // Images[i] 的修改时间，是否比 Images[j] 晚
+	// 如何定义 Images[i] < Images[j](反向)
+	case "filename_reverse": //根据文件名(反向)
+		return !tools.Compare(s.Images[i].NameInArchive, s.Images[j].NameInArchive)
+	case "filesize_reverse": //根据文件大小(反向)
+		return !(s.Images[i].FileSize < s.Images[j].FileSize)
+	case "modify_time_reverse": //根据修改时间(反向)
+		return !s.Images[i].ModeTime.Before(s.Images[j].ModeTime) // Images[i] 的修改时间，是否比 Images[j] 晚
+	default: //默认根据文件名(第三方库、自然语言字符串)
+		return tools.Compare(s.Images[i].NameInArchive, s.Images[j].NameInArchive)
 	}
-
-	//如何定义 Images[i] < Images[j]  根据修改时间
-	if s.SortBy == "time" {
-		less = s.Images[i].ModeTime.After(s.Images[j].ModeTime) // Images[i] 的年龄（修改时间），是否比 Images[j] 小？
-	}
-	return less
 }
 
 func (s AllPageInfo) Swap(i, j int) {
@@ -432,10 +436,10 @@ func (s AllPageInfo) Swap(i, j int) {
 
 // SortPages 上面三个函数定义好了，终于可以使用sort包排序了
 func (b *Book) SortPages(s string) {
-	//  s == "default" 不排序
-	if s == "filename" || s == "modify_time" || s == "filesize" {
+	if s != "" {
 		b.Pages.SortBy = s
 		sort.Sort(b.Pages)
+		fmt.Println("sort_by:" + s)
 	}
 	b.setClover() //重新排序后重新设置封面
 }
