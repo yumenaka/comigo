@@ -124,18 +124,20 @@ func init() {
 		nowPath, _ := os.Getwd()
 		viperInstance.AddConfigPath(nowPath)
 		viperInstance.SetConfigType("toml")
-		if common.ConfigFile == "" {
-			common.ConfigFile = homeConfigPath
-			viperInstance.SetConfigName("config.toml")
-		} else {
-			viperInstance.SetConfigName(common.ConfigFile)
-		}
-		// 設定ファイルを読み込む
+		viperInstance.SetConfigName("config.toml")
+
+		// 读取设定文件
 		if err := viperInstance.ReadInConfig(); err != nil {
 			if common.ConfigFile == "" && common.Config.Debug {
 				fmt.Println(err)
 			}
+		} else {
+			//获取当前使用的配置文件路径
+			//https://github.com/spf13/viper/issues/89
+			common.ConfigFile = viperInstance.ConfigFileUsed()
+			fmt.Println("应用配置文件：" + common.ConfigFile)
 		}
+
 		// 把设定文件的内容，解析到构造体里面。
 		if err := viperInstance.Unmarshal(&common.Config); err != nil {
 			fmt.Println(err)
@@ -147,6 +149,7 @@ func init() {
 			common.Config.GenerateConfig = false
 			common.Config.LogFilePath = ""
 			common.Config.EnableDatabase = true
+			common.Config.OpenBrowser = false
 			common.Config.StoresPath = []string{"C:\\test\\Comic", "D:\\some_path\\book", "/home/username/download"}
 			common.Config.CacheFilePath = ".comigo"
 			bytes, err := toml.Marshal(common.Config)
@@ -194,43 +197,43 @@ var rootCmd = &cobra.Command{
 func initBookStores(args []string) {
 	//////初始化数据库
 	//初始化数据库
-	storage.InitDatabase("")
-	////从数据库里面读取扫描过的书籍，初始化skipPathList
-	var skipPathList []string
+	storage.InitDatabase(common.ConfigFile)
+	////从数据库里面读取出的书籍信息，持久化用
+	var databaseBookList []*book.Book
 	if common.Config.EnableDatabase {
-		saveBookList, dataErr := storage.GetArchiveBookFromDatabase()
+		var dataErr error
+		databaseBookList, dataErr = storage.GetArchiveBookFromDatabase()
 		if dataErr != nil {
 			fmt.Println(dataErr)
-		}
-		//将数据库中的书，添加到内存里面
-		for _, temp := range saveBookList {
-			//文件夹类型的需要重新扫描
-			if temp.Type != book.TypeDir && temp.Type != "book_group" {
-				skipPathList = append(skipPathList, temp.FilePath)
-			}
-			book.AddBook(temp, temp.BookStorePath, common.Config.MinImageNum)
 		}
 	}
 
 	//决定如何扫描，扫描哪个路径
 	if len(args) == 0 { //没有指定路径或文件的情况下
 		cmdPath := path.Dir(os.Args[0]) //扫描程序执行的路径
-		list, err := common.ScanAndGetBookList(cmdPath, skipPathList)
+		addList, err := common.ScanAndGetBookList(cmdPath, databaseBookList)
 		if err != nil {
 			fmt.Println(locale.GetString("scan_error"), cmdPath)
 		} else {
-			common.AddBooksToStore(list, cmdPath)
-
+			common.AddBooksToStore(addList, cmdPath)
 		}
 	} else {
 		//指定了多个参数的话，都扫描一遍
 		for _, p := range args {
-			list, err := common.ScanAndGetBookList(p, skipPathList)
+			addList, err := common.ScanAndGetBookList(p, databaseBookList)
 			if err != nil {
 				fmt.Println(locale.GetString("scan_error"), p)
 			} else {
-				common.AddBooksToStore(list, p)
+				common.AddBooksToStore(addList, p)
+
 			}
+		}
+	}
+
+	if common.Config.EnableDatabase {
+		//将数据库中的书，添加到内存里面
+		for _, temp := range databaseBookList {
+			book.AddBook(temp, temp.BookStorePath, common.Config.MinImageNum)
 		}
 	}
 
@@ -241,23 +244,37 @@ func initBookStores(args []string) {
 	common.Config.SetByExecutableFilename()
 	if len(common.Config.StoresPath) > 0 {
 		for _, p := range common.Config.StoresPath {
-			list, err := common.ScanAndGetBookList(p, skipPathList)
+			addList, err := common.ScanAndGetBookList(p, databaseBookList)
 			if err != nil {
 				fmt.Println(locale.GetString("scan_error"), p)
 			} else {
-				common.AddBooksToStore(list, p)
+				common.AddBooksToStore(addList, p)
 			}
 		}
 	}
 
-	//yaml设置文件，数据库文件(comigo.db)在同一个文件夹。所以没有设置文件，就不查数据库
+	//保存扫描结果到数据库
 	if common.Config.EnableDatabase {
-		saveErr := storage.SaveBookListToDatabase(book.GetAllBookList())
+		AllBook := book.GetAllBookList()
+		//设置清理数据库的时候，是否清理没扫描到的书籍信息
+		if common.Config.ClearDatabase {
+			for _, checkBook := range databaseBookList {
+				needClear := true //这条数据是否需要清理
+				for _, b := range AllBook {
+					if b.BookID == checkBook.BookID {
+						needClear = false //如果扫到了这本书就不清理相关数据
+					}
+				}
+				if needClear {
+					storage.DeleteBookByBookID(checkBook.BookID, common.Config.Debug)
+				}
+			}
+		}
+		saveErr := storage.SaveBookListToDatabase(AllBook)
 		if saveErr != nil {
 			fmt.Println(saveErr)
 		}
 	}
-
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

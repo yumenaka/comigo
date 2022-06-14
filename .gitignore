@@ -18,6 +18,7 @@
 .comigo
 *config.toml
 *comigo.sqlite
+*comigo.sqlite*
 .cache
 cache
 .idea
@@ -42,6 +43,7 @@ comic
 .config
 .comigo
 test
+test2
 *md5Sums.txt
 resource.syso
 \[*

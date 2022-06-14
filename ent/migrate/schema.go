@@ -13,7 +13,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString, Size: 1024},
 		{Name: "book_id", Type: field.TypeString, Unique: true},
-		{Name: "file_path", Type: field.TypeString, Unique: true},
+		{Name: "file_path", Type: field.TypeString},
 		{Name: "book_store_path", Type: field.TypeString},
 		{Name: "type", Type: field.TypeString},
 		{Name: "child_book_num", Type: field.TypeInt},

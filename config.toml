@@ -8,7 +8,7 @@ StoresPath = ['C:\test\Comic', 'D:\some_path\book', '/home/username/download']
 # 最大扫描深度
 MaxDepth = 3
 # 是否同时打开浏览器，windows默认true，其他默认false
-OpenBrowser = true
+OpenBrowser = false
 # 只在本机localhost提供服务，不对外共享
 DisableLAN = false
 # 默认阅读模式，默认为空，可以设置为scroll或flip
@@ -31,8 +31,6 @@ CacheFileClean = true
 EnableDatabase = true
 # 启用本地数据库时，扫描完成后，清除不存在的书籍
 ClearDatabase = true
-# 数据库文件存储位置，默认当前目录
-DatabaseFilePath = ''
 # 需要排除的文件或文件夹
 ExcludeFileOrFolders = ['.comigo', '.idea', '.vscode', '.git', 'node_modules', 'flutter_ui', '$RECYCLE.BIN', 'System Volume Information', '.cache']
 # 需要扫描的图片文件后缀
@@ -46,7 +44,7 @@ TimeoutLimitForScan = 0
 # 打印所有可能阅读链接的二维码
 PrintAllIP = false
 # 开启Debug模式
-Debug = false
+Debug = true
 # 记录Log到本地文件
 LogToFile = false
 # Log保存的位置

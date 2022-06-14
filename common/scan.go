@@ -34,7 +34,7 @@ func AddBooksToStore(bookList []*book.Book, path string) {
 }
 
 // ScanAndGetBookList 扫描一个路径，并返回书籍列表
-func ScanAndGetBookList(storePath string, skipPathList []string) (bookList []*book.Book, err error) {
+func ScanAndGetBookList(storePath string, databaseBookList []*book.Book) (newBookList []*book.Book, err error) {
 	storePathAbs, err := filepath.Abs(storePath)
 	if err != nil {
 		storePathAbs = storePath
@@ -43,14 +43,15 @@ func ScanAndGetBookList(storePath string, skipPathList []string) (bookList []*bo
 	err = filepath.Walk(storePathAbs, func(walkPath string, fileInfo os.FileInfo, err error) error {
 		//是否需要跳过
 		skip := false
-		for _, p := range skipPathList {
+		for _, p := range databaseBookList {
 			AbsW, err := filepath.Abs(walkPath) //取得绝对路径
 			if err != nil {
 				//因为权限问题，无法的情况下，用相对路径
 				fmt.Println(err, AbsW)
 			}
-			if walkPath == p || AbsW == p {
+			if walkPath == p.FilePath || AbsW == p.FilePath {
 				skip = true
+				newBookList = append(newBookList, p)
 			}
 		}
 		if skip {
@@ -85,7 +86,7 @@ func ScanAndGetBookList(storePath string, skipPathList []string) (bookList []*bo
 				fmt.Println(err)
 				return nil
 			}
-			bookList = append(bookList, getBook)
+			newBookList = append(newBookList, getBook)
 		}
 
 		//如果是文件夹
@@ -96,18 +97,17 @@ func ScanAndGetBookList(storePath string, skipPathList []string) (bookList []*bo
 				fmt.Println(err)
 				return nil
 			}
-			bookList = append(bookList, getBook)
+			newBookList = append(newBookList, getBook)
 		}
 		return nil
 	})
 	//所有可用书籍，包括压缩包与文件夹
-	return bookList, err
+	return newBookList, err
 }
 
 func scanDirGetBook(dirPath string, storePath string, depth int) (*book.Book, error) {
 	//初始化，生成UUID
-	newBook := book.New(dirPath, time.Now(), 0, storePath, depth)
-	newBook.Type = book.TypeDir
+	newBook := book.New(dirPath, time.Now(), 0, storePath, depth, book.TypeDir)
 	// 目录中的文件和子目录
 	files, err := ioutil.ReadDir(dirPath)
 	if err != nil {
@@ -147,7 +147,7 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*book.Book, 
 		fmt.Println(err.Error())
 	}
 	//初始化一本书，设置文件路径等等
-	newBook := book.New(filePath, FileInfo.ModTime(), FileInfo.Size(), storePath, depth)
+	newBook := book.New(filePath, FileInfo.ModTime(), FileInfo.Size(), storePath, depth, book.GetBookTypeByFilename(filePath))
 	//根据文件类型，走不同的初始化流程
 	switch newBook.Type {
 	//为解决archiver/v4的BUG “zip文件无法读取2级目录” 单独处理zip文件
@@ -173,17 +173,6 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*book.Book, 
 		newBook.AllPageNum = 1
 		newBook.InitComplete = true
 		newBook.Cover = book.ImageInfo{RealImageFilePATH: "", FileSize: FileInfo.Size(), ModeTime: FileInfo.ModTime(), NameInArchive: "", Url: "/images/pdf.png"}
-		//pageCount, err := arch.CountPagesOfPDF(newBook.FilePath)
-		//if err != nil {
-		//	return nil, errors.New("PDF Error：" + newBook.FilePath)
-		//}
-		//newBook.AllPageNum = pageCount
-		//for i := 0; i < pageCount; i++ {
-		//	imageUrl := "api/get_pdf_image?id=" + newBook.BookID + "&filename=" + strconv.Itoa(i+1) + ".jpg"
-		//	newBook.Pages = append(newBook.Pages, book.ImageInfo{RealImageFilePATH: "", FileSize: int64(i + 1), ModeTime: FileInfo.ModTime(), NameInArchive: "", Url: imageUrl})
-		//}
-		//newBook.Cover = newBook.Pages[0]
-		//newBook.Cover.Url = "/images/pdf.png"
 	//TODO：简单的网页播放器
 	case book.TypeVideo:
 		newBook.AllPageNum = 1

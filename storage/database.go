@@ -7,6 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"path"
+	"path/filepath"
+	"strconv"
 
 	"entgo.io/ent/dialect"
 	"modernc.org/sqlite"
@@ -23,6 +25,7 @@ import (
 
 //数据库为sqlite3
 //查看工具：SQLiteStudio https://github.com/pawelsalawa/sqlitestudio/releases
+// 查看工具： DB Browser for SQLite  https://sqlitebrowser.org/dl/
 type sqliteDriver struct {
 	*sqlite.Driver
 }
@@ -52,7 +55,7 @@ func init() {
 
 var client *ent.Client
 
-func InitDatabase(p string) {
+func InitDatabase(configFilePath string) {
 	if client != nil {
 		return
 	}
@@ -62,11 +65,14 @@ func InitDatabase(p string) {
 	//entOptions = append(entOptions, ent.Debug())
 	//连接器
 	var err error
-	sqliteFilePath := "file:comigo.sqlite?cache=shared"
-	if p != "" {
-		sqliteFilePath = "file:" + path.Join(sqliteFilePath, "comigo.sqlite") + "?cache=shared"
+	dataSourceName := "file:comigo.sqlite?cache=shared"
+	//如果有配置文件的话，数据库文件，就在同一文件夹内
+	if configFilePath != "" {
+		configDir := filepath.Dir(configFilePath) //不能用path.Dir()，那个函数windows返回 "."
+		dataSourceName = "file:" + path.Join(configDir, "comigo.sqlite") + "?cache=shared"
 	}
-	client, err = ent.Open(dialect.SQLite, sqliteFilePath, entOptions...)
+	fmt.Println("InitDatabase: " + dataSourceName)
+	client, err = ent.Open(dialect.SQLite, dataSourceName, entOptions...)
 	if err != nil {
 		fmt.Printf("failed opening connection to sqlite: %v", err)
 		//time.Sleep(3 * time.Second)
@@ -84,6 +90,60 @@ func CloseDatabase() {
 	err := client.Close()
 	if err != nil {
 		fmt.Println(err)
+	}
+}
+
+// DeleteAllBookInDatabase  清空数据库的Book与SinglePageInfo表
+// 后台并发执行，所以不能保证结果如预期，不用这个函数。
+func DeleteBookByBookID(bookID string, debug bool) {
+	//如何增删查改： https://entgo.io/zh/docs/crud
+	ctx := context.Background()
+	deleteBookNum, err := client.Book.
+		Delete().
+		Where(book.BookIDEQ(bookID)).
+		Exec(ctx)
+	if err != nil {
+		fmt.Println(err)
+	}
+	if debug {
+		fmt.Println("Delete Book Num：" + strconv.Itoa(deleteBookNum))
+	}
+	deletePageInfoNum, err := client.SinglePageInfo.
+		Delete().
+		Where(singlepageinfo.BookIDEQ(bookID)).
+		Exec(ctx)
+	if err != nil {
+		fmt.Println(err)
+	}
+	if debug {
+		fmt.Println("Delete SinglePageInfo Num：" + strconv.Itoa(deletePageInfoNum))
+	}
+}
+
+// DeleteAllBookInDatabase  清空数据库的Book与SinglePageInfo表
+// 后台并发执行，所以不能保证结果如预期，不用这个函数。
+func DeleteAllBookInDatabase(debug bool) {
+	//如何增删查改： https://entgo.io/zh/docs/crud
+	ctx := context.Background()
+	deleteBookNum, err := client.Book.
+		Delete().
+		Where(book.AllPageNumNEQ(-99999)).
+		Exec(ctx)
+	if err != nil {
+		fmt.Println(err)
+	}
+	if debug {
+		fmt.Println("Delete Book Num：" + strconv.Itoa(deleteBookNum))
+	}
+	deletePageInfoNum, err := client.SinglePageInfo.
+		Delete().
+		Where(singlepageinfo.WidthNEQ(-99999)).
+		Exec(ctx)
+	if err != nil {
+		fmt.Println(err)
+	}
+	if debug {
+		fmt.Println("Delete SinglePageInfo Num：" + strconv.Itoa(deletePageInfoNum))
 	}
 }
 
@@ -201,7 +261,7 @@ func GetBookFromDatabase(filepath string) (*comigoBook.Book, error) {
 		NonUTF8Zip:      temp.NonUTF8Zip,
 		ZipTextEncoding: temp.ZipTextEncoding,
 	}
-	b.Type = comigoBook.GetBookTypeByFilename(temp.Type)
+	b.Type = comigoBook.GetBookTypeByFilename(temp.FilePath)
 	//查询数据库里的封面与页面信息
 	//https://entgo.io/zh/docs/crud
 	pages, err := client.SinglePageInfo. // UserClient.
@@ -267,7 +327,10 @@ func GetArchiveBookFromDatabase() (list []*comigoBook.Book, err error) {
 			NonUTF8Zip:      temp.NonUTF8Zip,
 			ZipTextEncoding: temp.ZipTextEncoding,
 		}
-		b.Type = comigoBook.GetBookTypeByFilename(temp.Type)
+		b.Type = comigoBook.GetBookTypeByFilename(temp.FilePath)
+		if b.ChildBookNum > 0 {
+			b.Type = comigoBook.TypeBooksGroup
+		}
 		//查询数据库里的封面与页面信息
 		//https://entgo.io/zh/docs/crud
 		pages, err := client.SinglePageInfo. // UserClient.
@@ -295,10 +358,25 @@ func GetArchiveBookFromDatabase() (list []*comigoBook.Book, err error) {
 		if len(b.Pages.Images) > 0 {
 			b.Cover = b.Pages.Images[0]
 		}
+		//硬写一个封面
+		switch b.Type {
+		case comigoBook.TypePDF:
+			b.Cover = comigoBook.ImageInfo{NameInArchive: "pdf.png", Url: "/images/pdf.png"}
+		case comigoBook.TypeVideo:
+			b.Cover = comigoBook.ImageInfo{NameInArchive: "video.png", Url: "/images/video.png"}
+		case comigoBook.TypeAudio:
+			b.Cover = comigoBook.ImageInfo{NameInArchive: "audio.png", Url: "/images/audio.png"}
+		case comigoBook.TypeUnknownFile:
+			b.Cover = comigoBook.ImageInfo{NameInArchive: "unknown.png", Url: "/images/unknown.png"}
+		}
 		list = append(list, &b)
 	}
-
 	return list, err
+}
+
+// CleanDatabaseByLocalData 根据扫描完成的书籍数据，清理本地数据库当中不存在的书籍
+func CleanDatabaseByLocalData() {
+
 }
 
 //func InitMapBooksByDatabase() {
@@ -308,13 +386,6 @@ func GetArchiveBookFromDatabase() (list []*comigoBook.Book, err error) {
 //	}
 //}
 //
-////根据扫描完成的书籍数据，覆盖本地数据库
-//func CleanMapBooksByLocalData() {
-//	err := SaveAllBookToDatabase(mapBooks)
-//	if err != nil {
-//		fmt.Println(err)
-//	}
-//}
 
 //// CleanAndSaveAllBookToDatabase  同时清空Map里面不存在的书。然后将Map里面的书籍信息，全部保存到本地数据库中。
 //func CleanAndSaveAllBookToDatabase(databaseFilePath string, m map[string]*comigoBook.Book) error {

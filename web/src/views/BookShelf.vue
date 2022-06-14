@@ -20,7 +20,9 @@
                     :id="book_info.id" :image_src="book_info.cover.url" :readerMode="this.readerMode"
                     :showTitle="this.bookCardShowTitleFlag"
                     :childBookNum="book_info.child_book_num ? 'x' + book_info.child_book_num : ''"
-                    @click="onOpenBook(book_info.id, book_info.book_type)"></BookCard>
+                    :openURL="getBookCardOpenURL(book_info.id, book_info.book_type, book_info.name)"
+                    :a_target="getBookCardTarget(book_info.book_type)">
+                </BookCard>
             </div>
         </div>
 
@@ -321,9 +323,37 @@ export default defineComponent({
             }
         },
 
+        getBookCardTarget(bookType) {
+            if (bookType === ".pdf" || bookType === "video" || bookType === "audio" || bookType === "unknown") {
+                return "_blank";
+            }
+            // if (this.readerMode == "flip" || this.readerMode == "sketch" || this.readerMode == "scroll") {
+            //     return "_self";
+            // }
+            return "_self";
+        },
+
+        getBookCardOpenURL(bookID, bookType, bookName) {
+            // console.log("getBookCardOpenURL  bookID：" + bookID + " bookType：" + bookType)
+            if (bookType == "book_group") {
+                return "/#/child_shelf/" + bookID + "/";
+            }
+            if (bookType === ".pdf" || bookType === "video" || bookType === "audio" || bookType === "unknown") {
+                return "/api/raw/" + bookID + "/" + bookName;
+            }
+            if (this.readerMode == "flip" || this.readerMode == "sketch") {
+                return "/#/flip/" + bookID
+            }
+            if (this.readerMode == "scroll") {
+                // 命名路由,并加上参数,让路由建立 url
+                return "/#/scroll/" + bookID
+            }
+        },
+
+        //已经被 getBookCardOpenURL与getBookCardOpenURL代替
         // 打开书阅读，或继续在书架里展示一组书
         onOpenBook(bookID, bookType) {
-            console.log("onOpenBook  bookID：" + bookID + " bookType：" + bookType)
+            // console.log("onOpenBook  bookID：" + bookID + " bookType：" + bookType)
             if (bookType == "book_group") {
                 this.$router.push({
                     name: "ChildBookShelf",

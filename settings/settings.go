@@ -10,7 +10,7 @@ import (
 
 // ServerSettings 服务器设置(config.toml)，配置文件放在被扫描的根目录中，或$HOME/config/comigo.可以用“comi --generate-config”生成本示例文件
 type ServerSettings struct {
-	Port                 int             `json:"port" comment:"Comigo设置(config.toml)，放在执行目录中，或$HOME/.config/comigo/下。可用“comi --generate-config”生成本文件\n# 网页端口"`
+	Port                 int             `json:"port" comment:"Comigo设置文件(config.toml)，放在执行目录中，或$HOME/.config/comigo/下。可用“comi --generate-config”生成本文件\n网页端口"`
 	Host                 string          `json:"host" comment:"自定义二维码显示的主机名"`
 	StoresPath           []string        `json:"-"    comment:"设置默认扫描的书库文件夹"`
 	MaxDepth             int             `json:"-" comment:"最大扫描深度"`
@@ -26,7 +26,6 @@ type ServerSettings struct {
 	CacheFileClean       bool            `json:"-" comment:"退出程序的时候，清理web图片缓存"`
 	EnableDatabase       bool            `json:"-" comment:"启用本地数据库，保存扫描到的书籍数据"`
 	ClearDatabase        bool            `json:"-" comment:"启用本地数据库时，扫描完成后，清除不存在的书籍"`
-	DatabaseFilePath     string          `json:"-" comment:"数据库文件存储位置，默认当前目录"`
 	ExcludeFileOrFolders []string        `json:"-" comment:"需要排除的文件或文件夹"`
 	SupportMediaType     []string        `json:"-" comment:"需要扫描的图片文件后缀"`
 	SupportFileType      []string        `json:"-" comment:"需要扫描的图书文件后缀"`
@@ -46,6 +45,7 @@ type ServerSettings struct {
 	//SketchCountSeconds     int              `json:"sketch_count_seconds"`
 	//WebpConfig             WebPServerConfig `json:"-"  comment:" WebPServer设置"`
 	//Template               string           `json:"-"`
+	//DatabaseFilePath     string          `json:"-" comment:"数据库文件存储位置，默认当前目录"`
 }
 
 //FrpClientConfig frp客户端配置
