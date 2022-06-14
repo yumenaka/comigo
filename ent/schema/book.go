@@ -21,9 +21,8 @@ func (Book) Fields() []ent.Field {
 			MaxLen(1024). //限制长度
 			Comment("书名"),
 		field.String("BookID").
-			Unique().Comment("书籍ID"),
-		field.String("FilePath").Comment("文件路径").
-			Unique(), //字段可以使用 Unique 方法定义为唯一字段。 注意：唯一字段不能有默认值。
+			Unique().Comment("书籍ID"), //字段可以使用 Unique 方法定义为唯一字段。 注意：唯一字段不能有默认值。
+		field.String("FilePath").Comment("文件路径"),
 		field.String("BookStorePath").Comment("书库路径"),
 		field.String("Type").Comment("书籍类型"),
 		field.Int("ChildBookNum").NonNegative(),

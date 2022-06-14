@@ -16,6 +16,7 @@ func GetConfigHandler(c *gin.Context) {
 	tempConfig := common.Config
 	tempConfig.GenerateConfig = false
 	tempConfig.LogFilePath = ""
+	common.Config.OpenBrowser = false
 	common.Config.EnableDatabase = true
 	tempConfig.StoresPath = []string{"C:\\test\\Comic", "D:\\some_path\\book", "/home/username/download"}
 	tempConfig.CacheFilePath = ".comigo"

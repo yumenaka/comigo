@@ -40,7 +40,7 @@ var (
 // Book 定义书籍，BooID不应该重复，根据文件路径生成
 type Book struct {
 	Name            string           `json:"name"` //书名
-	BookID          string           `json:"id"`   //根据FilePath计算 //storm会搜索id或ID做为主键
+	BookID          string           `json:"id"`   //根据FilePath+BookType计算 //数据库中bookID唯一
 	FilePath        string           `json:"-" storm:"filepath"`
 	BookStorePath   string           `json:"-"   `           //在哪个子书库
 	Type            SupportFileType  `json:"book_type"`      //可以是书籍组(book_group)、文件夹(dir)、文件后缀( .zip .rar .pdf .mp4)等
@@ -101,7 +101,7 @@ func NewImageInfo(pageNum int, nameInArchive string, url string, fileSize int64)
 }
 
 //New  初始化Book，设置文件路径、书名、BookID等等
-func New(filePath string, modified time.Time, fileSize int64, storePath string, depth int) *Book {
+func New(filePath string, modified time.Time, fileSize int64, storePath string, depth int, bookType SupportFileType) *Book {
 	var b = Book{
 		Author:        []string{""},
 		Modified:      modified,
@@ -109,12 +109,11 @@ func New(filePath string, modified time.Time, fileSize int64, storePath string, 
 		InitComplete:  false,
 		Depth:         depth,
 		BookStorePath: storePath,
+		Type:          bookType,
 	}
 	//设置属性：
 	//FilePath，转换为绝对路径
 	b.setFilePath(filePath)
-	//书籍类型
-	b.Type = GetBookTypeByFilename(filePath)
 	b.setName(filePath)
 	//设置属性：父文件夹
 	b.setParentFolder(filePath)
@@ -459,7 +458,8 @@ func (b *Book) setBookID() {
 	if err != nil {
 		fmt.Println(err, fileAbaPath)
 	}
-	b62 := base62.EncodeToString([]byte(md5string(b.FilePath)))
+	tempStr := b.FilePath + strconv.Itoa(b.ChildBookNum) + string(b.Type)
+	b62 := base62.EncodeToString([]byte(md5string(tempStr)))
 	b.BookID = getShortBookID(b62, 5)
 }
 

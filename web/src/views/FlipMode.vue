@@ -554,8 +554,8 @@ export default defineComponent({
 					() => {
 						document.title = this.book.name;
 						this.resort_hint_key = key
-						// 带查询参数，结果是 /#/scroll/abc123?sort_by="filesize"
-						this.$router.push({ name: "ScrollMode", replace: true, query: { sort_by: key } })
+						// 带查询参数，结果是 /#/flip/abc123?sort_by="filesize"
+						this.$router.push({ name: "FlipMode", replace: true, query: { sort_by: key } })
 						console.log("成功刷新书籍数据,书籍ID:" + this.$route.params.id + "  sort_by=" + key);
 					}
 				);
@@ -574,7 +574,6 @@ export default defineComponent({
 					return this.$t('re_sort');
 			}
 		},
-
 
 		//图片处理相关
 		//黑白化参数

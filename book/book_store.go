@@ -2,7 +2,6 @@ package book
 
 import (
 	"errors"
-	"fmt"
 	"path/filepath"
 	"time"
 )
@@ -60,13 +59,12 @@ func (s *singleBookstore) initBookGroupMap() error {
 		}
 		//循环parentMap，把有相同parent的书创建为一个书组
 		for parent, sameParentBookList := range parentTempMap {
-			//新建一本书
-			newBook := New(filepath.Dir(sameParentBookList[0].FilePath), time.Now(), 0, s.StorePath, depth-1)
-			//类型是书籍组
-			newBook.Type = TypeBooksGroup
-			//名字应该设置成Name
+			//新建一本书 //类型是书籍组
+			newBook := New(filepath.Dir(sameParentBookList[0].FilePath), time.Now(), 0, s.StorePath, depth-1, TypeBooksGroup)
+			//名字应该设置成parent
 			if newBook.Name != parent {
-				fmt.Printf("newBook.Name!=parent!?")
+				newBook.Name = parent
+				//fmt.Printf("newBook.Name!=parent!?")
 			}
 			//初始化ChildBook
 			//然后把同一parent的书，都加进某个书籍组

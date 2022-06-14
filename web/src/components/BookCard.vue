@@ -8,26 +8,29 @@
   <!-- 边框圆角 rounded-xl：https://www.tailwindcss.cn/docs/border-radius -->
   <!-- 盒阴影 shadow: https://www.tailwindcss.cn/docs/box-shadow -->
   <!-- 外边距 m-x m-y  https://www.tailwindcss.cn/docs/margin -->
-  <div
-    class="relative w-32 h-44 mx-4 my-4 text-gray-800 dark:text-gray-300 rounded shadow-xl hover:shadow-2xl ring-1 ring-gray-400 hover:ring hover:ring-blue-500 .bg-top bg-cover"
-    :style="getBackgroundImageStyle()"
-  >
-    <div v-if="this.childBookNum != ''" class="absolute inset-x-0 top-0 text-right">
-      <span class="text-2xl text-yellow-500 font-extrabold text-shadow">{{ this.childBookNum }}</span>
-    </div>
-    <!-- 文本对齐:       https://www.tailwindcss.cn/docs/text-align -->
-    <!-- 定位:          https://www.tailwindcss.cn/docs/top-right-bottom-left -->
-    <!-- 背景色:        https://www.tailwindcss.cn/docs/background-color -->
-    <!-- 背景色不透明度: https://www.tailwindcss.cn/docs/background-opacity -->
-    <!-- 文本溢出：      https://www.tailwindcss.cn/docs/text-overflow -->
-    <!-- 字体粗细：     https://www.tailwindcss.cn/docs/font-weight -->
+  <a :href="this.openURL" :target="this.a_target">
     <div
-      v-if="this.showTitle"
-      class="absolute inset-x-0 bottom-0 h-1/4 bg-gray-200 bg-opacity-70 font-semibold border-blue-800 rounded-b"
-    >
-      <span class="absolute inset-x-0 bottom-0 align-middle">{{ this.shortTitle }}</span>
+      class="relative w-32 h-44 mx-4 my-4 text-gray-800 dark:text-gray-300 rounded shadow-xl hover:shadow-2xl ring-1 ring-gray-400 hover:ring hover:ring-blue-500 .bg-top bg-cover"
+      :style="getBackgroundImageStyle()">
+      <div v-if="this.childBookNum != ''" class="absolute inset-x-0 top-0 text-right">
+        <span class="text-2xl text-yellow-500 font-extrabold text-shadow">{{ this.childBookNum }}</span>
+      </div>
+      <!-- 文本对齐:       https://www.tailwindcss.cn/docs/text-align -->
+      <!-- 定位:          https://www.tailwindcss.cn/docs/top-right-bottom-left -->
+      <!-- 背景色:        https://www.tailwindcss.cn/docs/background-color -->
+      <!-- 背景色不透明度: https://www.tailwindcss.cn/docs/background-opacity -->
+      <!-- 文本溢出：      https://www.tailwindcss.cn/docs/text-overflow -->
+      <!-- 字体粗细：     https://www.tailwindcss.cn/docs/font-weight -->
+      <div v-if="this.showTitle"
+        class="absolute inset-x-0 bottom-0 h-1/4 bg-gray-200 bg-opacity-70 font-semibold border-blue-800 rounded-b">
+        <!-- 如果把链接的 target 属性设置为 "_blank"，该链接会在新窗口中打开。 -->
+        <span class="absolute inset-x-0 bottom-0 align-middle">{{
+            this.shortTitle
+        }}</span>
+      </div>
     </div>
-  </div>
+  </a>
+
 </template>
 
 <script>
@@ -38,7 +41,7 @@ import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "BookCover",
-  props: ["title", "image_src", "id", "readerMode", "showTitle", "childBookNum"],
+  props: ["title", "image_src", "id", "readerMode", "showTitle", "childBookNum", "openURL", "a_target"],
   components: {
     // NCard,
     // NEllipsis,
@@ -100,4 +103,5 @@ export default defineComponent({
 });
 </script>
 //自定义样式
-<style scoped></style>
+<style scoped>
+</style>

@@ -27,7 +27,7 @@ const (
 
 	// Node types.
 	TypeBook           = "Book"
-	TypeSinglePageInfo = "ImageInfo"
+	TypeSinglePageInfo = "SinglePageInfo"
 	TypeUser           = "User"
 )
 
@@ -2432,7 +2432,7 @@ func (m *SinglePageInfoMutation) OldField(ctx context.Context, name string) (ent
 	case singlepageinfo.FieldImgType:
 		return m.OldImgType(ctx)
 	}
-	return nil, fmt.Errorf("unknown ImageInfo field %s", name)
+	return nil, fmt.Errorf("unknown SinglePageInfo field %s", name)
 }
 
 // SetField sets the value of a field with the given name. It returns an error if
@@ -2518,7 +2518,7 @@ func (m *SinglePageInfoMutation) SetField(name string, value ent.Value) error {
 		m.SetImgType(v)
 		return nil
 	}
-	return fmt.Errorf("unknown ImageInfo field %s", name)
+	return fmt.Errorf("unknown SinglePageInfo field %s", name)
 }
 
 // AddedFields returns all numeric fields that were incremented/decremented during
@@ -2591,7 +2591,7 @@ func (m *SinglePageInfoMutation) AddField(name string, value ent.Value) error {
 		m.AddFileSize(v)
 		return nil
 	}
-	return fmt.Errorf("unknown ImageInfo numeric field %s", name)
+	return fmt.Errorf("unknown SinglePageInfo numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared during this
@@ -2610,7 +2610,7 @@ func (m *SinglePageInfoMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *SinglePageInfoMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown ImageInfo nullable field %s", name)
+	return fmt.Errorf("unknown SinglePageInfo nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation for the field with the given name.
@@ -2651,7 +2651,7 @@ func (m *SinglePageInfoMutation) ResetField(name string) error {
 		m.ResetImgType()
 		return nil
 	}
-	return fmt.Errorf("unknown ImageInfo field %s", name)
+	return fmt.Errorf("unknown SinglePageInfo field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
@@ -2693,13 +2693,13 @@ func (m *SinglePageInfoMutation) EdgeCleared(name string) bool {
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *SinglePageInfoMutation) ClearEdge(name string) error {
-	return fmt.Errorf("unknown ImageInfo unique edge %s", name)
+	return fmt.Errorf("unknown SinglePageInfo unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *SinglePageInfoMutation) ResetEdge(name string) error {
-	return fmt.Errorf("unknown ImageInfo edge %s", name)
+	return fmt.Errorf("unknown SinglePageInfo edge %s", name)
 }
 
 // UserMutation represents an operation that mutates the User nodes in the graph.
