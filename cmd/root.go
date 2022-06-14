@@ -230,13 +230,6 @@ func initBookStores(args []string) {
 		}
 	}
 
-	if common.Config.EnableDatabase {
-		//将数据库中的书，添加到内存里面
-		for _, temp := range databaseBookList {
-			book.AddBook(temp, temp.BookStorePath, common.Config.MinImageNum)
-		}
-	}
-
 	////用扫描完成的书籍数据，覆盖本地数据库
 	//common.CleanMapBooksByLocalData()
 
@@ -262,11 +255,11 @@ func initBookStores(args []string) {
 				needClear := true //这条数据是否需要清理
 				for _, b := range AllBook {
 					if b.BookID == checkBook.BookID {
-						needClear = false //如果扫到了这本书就不清理相关数据
+						needClear = false //如果扫到了这本书,就不清理相关数据
 					}
 				}
 				if needClear {
-					storage.DeleteBookByBookID(checkBook.BookID, common.Config.Debug)
+					storage.ClearBookData(checkBook, common.Config.Debug)
 				}
 			}
 		}
