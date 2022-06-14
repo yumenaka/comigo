@@ -40,7 +40,7 @@ var (
 // Book 定义书籍，BooID不应该重复，根据文件路径生成
 type Book struct {
 	Name            string           `json:"name"` //书名
-	BookID          string           `json:"id"`   //根据FilePath+BookType计算 //数据库中bookID唯一
+	BookID          string           `json:"id"`   //根据FilePath+BookType+修改时间+filesize等等计算，bookID应该唯一
 	FilePath        string           `json:"-" storm:"filepath"`
 	BookStorePath   string           `json:"-"   `           //在哪个子书库
 	Type            SupportFileType  `json:"book_type"`      //可以是书籍组(book_group)、文件夹(dir)、文件后缀( .zip .rar .pdf .mp4)等
@@ -458,7 +458,7 @@ func (b *Book) setBookID() {
 	if err != nil {
 		fmt.Println(err, fileAbaPath)
 	}
-	tempStr := b.FilePath + strconv.Itoa(b.ChildBookNum) + string(b.Type)
+	tempStr := b.FilePath + strconv.Itoa(b.ChildBookNum) + strconv.Itoa(int(b.FileSize)) + string(b.Type) + b.Modified.String()
 	b62 := base62.EncodeToString([]byte(md5string(tempStr)))
 	b.BookID = getShortBookID(b62, 5)
 }

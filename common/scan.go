@@ -55,6 +55,7 @@ func ScanAndGetBookList(storePath string, databaseBookList []*book.Book) (newBoo
 			}
 		}
 		if skip {
+			//TODO:提示字符串国际化
 			fmt.Println("Found in Database,Skip scan:" + walkPath)
 			return nil
 		}
