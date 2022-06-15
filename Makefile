@@ -5,6 +5,9 @@
 # rm  resource.syso && make  Linux-armv8   VERSION=v0.8.1
 # need MSYS2 or mingw32 or find.exe make.exe zip.exe upx.exe
 
+
+# 因为sqlite（ent）库的关系，Windows_i386版本目前无法编译通过？
+
 NAME=comi
 SKETCH_NAME=sketch_66seconds
 OS := $(shell uname)

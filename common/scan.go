@@ -55,8 +55,7 @@ func ScanAndGetBookList(storePath string, databaseBookList []*book.Book) (newBoo
 			}
 		}
 		if skip {
-			//TODO:提示字符串国际化
-			fmt.Println("Found in Database,Skip scan:" + walkPath)
+			fmt.Println(locale.GetString("FoundInDatabase") + walkPath)
 			return nil
 		}
 		//路径深度
@@ -65,11 +64,11 @@ func ScanAndGetBookList(storePath string, databaseBookList []*book.Book) (newBoo
 			depth = strings.Count(walkPath, "\\") - strings.Count(storePathAbs, "\\")
 		}
 		if depth > Config.MaxDepth {
-			fmt.Printf("超过最大搜索深度 %d，base：%s scan: %s:\n", Config.MaxDepth, storePathAbs, walkPath)
+			fmt.Printf(locale.GetString("ExceedsMaximumDepth")+" %d，base：%s scan: %s:\n", Config.MaxDepth, storePathAbs, walkPath)
 			return filepath.SkipDir //当WalkFunc的返回值是filepath.SkipDir时，Walk将会跳过这个目录，照常执行下一个文件。
 		}
 		if Config.IsSkipDir(walkPath) {
-			fmt.Println("Skip Scan:" + walkPath)
+			fmt.Println(locale.GetString("SkipPath") + walkPath)
 			return filepath.SkipDir
 		}
 		if fileInfo == nil {

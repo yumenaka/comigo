@@ -135,7 +135,7 @@ func init() {
 			//获取当前使用的配置文件路径
 			//https://github.com/spf13/viper/issues/89
 			common.ConfigFile = viperInstance.ConfigFileUsed()
-			fmt.Println("应用配置文件：" + common.ConfigFile)
+			fmt.Println(locale.GetString("FoundConfigFile") + common.ConfigFile)
 		}
 
 		// 把设定文件的内容，解析到构造体里面。
