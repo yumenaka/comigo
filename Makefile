@@ -6,8 +6,6 @@
 # need MSYS2 or mingw32 or find.exe make.exe zip.exe upx.exe
 
 
-# 因为sqlite（ent）库的关系，Windows_i386版本目前无法编译通过？
-
 NAME=comi
 SKETCH_NAME=sketch_66seconds
 OS := $(shell uname)
@@ -26,7 +24,9 @@ endif
 
 all: compileThemAll md5SumThemAll
 
-compileThemAll: Windows_x86_64 Windows_i386 Windows_arm64 Linux_x86_64 Linux_i386 MacOS_x86_64 MacOS_arm64 Linux-armv6 Linux-armv7 Linux-armv8 
+# 因为sqlite（ent）库的关系，部分架构（Windows_i386）无法正常运行，暂时忽略。 ent库的编译检测状态： https://modern-c.appspot.com/-/builder/?importpath=modernc.org%2Fsqlite
+
+compileThemAll: Windows_x86_64  Windows_arm64 Linux_x86_64 Linux_i386 MacOS_x86_64 MacOS_arm64 Linux-armv6 Linux-armv7 Linux-armv8 
 
 android: Linux-arm-android Linux-arm64-android
 

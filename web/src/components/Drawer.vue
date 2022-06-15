@@ -1,11 +1,6 @@
 <template>
-  <n-drawer
-    v-bind:show="drawerActive"
-    @update:show="saveConfigToCookie"
-    :height="275"
-    :width="251"
-    :placement="drawerPlacement"
-  >
+  <n-drawer v-bind:show="drawerActive" @update:show="saveConfigToCookie" :height="275" :width="251"
+    :placement="drawerPlacement">
     <n-drawer-content closable>
       <!-- 抽屉：自定义头部 -->
       <template #header>
@@ -18,7 +13,6 @@
       <n-divider />
       <span>{{ $t('scan_qrcode') }}</span>
       <Qrcode></Qrcode>
-      <n-divider />
       <n-popconfirm @positive-click="handlePositiveClick" @negative-click="handleNegativeClick">
         <template #trigger>
           <n-button>{{ $t('reset_all_settings') }}</n-button>
@@ -28,20 +22,14 @@
 
       <!-- 抽屉：自定义底部 -->
       <template #footer>
-        <n-select
-          placeholder="{{ $t('select-language') }}"
-          v-model:value="this.$i18n.locale"
-          :options="this.languageOptions"
-          @update:value="OnChangeLanguage"
-        />
-        <n-button
-          v-if="this.sketching === false && this.inBookShelf === false"
-          @click="startSketchMode"
-        >{{ $t('startSketchMode') }}</n-button>
-        <n-button
-          v-if="this.sketching === true && this.inBookShelf === false"
-          @click="stopSketchMode"
-        >{{ $t('stopSketchMode') }}</n-button>
+        <n-select placeholder="{{ $t('select-language') }}" v-model:value="this.$i18n.locale"
+          :options="this.languageOptions" @update:value="OnChangeLanguage" />
+        <n-button v-if="this.sketching === false && this.inBookShelf === false" @click="startSketchMode">{{
+            $t('startSketchMode')
+        }}</n-button>
+        <n-button v-if="this.sketching === true && this.inBookShelf === false" @click="stopSketchMode">{{
+            $t('stopSketchMode')
+        }}</n-button>
       </template>
     </n-drawer-content>
   </n-drawer>
