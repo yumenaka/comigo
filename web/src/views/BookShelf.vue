@@ -36,7 +36,7 @@
             <span>{{ $t("setBackColor") }}</span>
             <n-color-picker v-model:value="model.backgroundColor" :modes="['hex']" :show-alpha="false"
                 @update:value="onBackgroundColorChange" />
-
+            <p> &nbsp;</p>
             <!-- 开关：下拉阅读 -->
             <n-space>
                 <n-switch size="large" :rail-style="railStyle" v-model:value="this.readerModeIsScroll"
@@ -45,6 +45,7 @@
                     <template #unchecked>{{ $t('flip_mode') }}</template>
                 </n-switch>
             </n-space>
+
             <!-- 开关：显示书名 -->
             <n-space>
                 <n-switch size="large" v-model:value="this.bookCardShowTitleFlag"
@@ -53,17 +54,19 @@
                     <template #unchecked>{{ $t('show_book_titles') }}</template>
                 </n-switch>
             </n-space>
-            <!-- 下载示例配置文件的按钮 -->
+            <!-- 分割线 -->
             <n-divider />
+            <n-space>
+                <!-- 切换排序方式的按钮 -->
+                <n-dropdown trigger="hover" :options="options" @select="onResort">
+                    <n-button>{{ this.getSortHintText(this.resort_hint_key) }}</n-button>
+                </n-dropdown>
+            </n-space>
+            <p> &nbsp;</p>
             <!-- 下载示例配置文件的按钮 -->
             <a href="/api/config.toml" target="_blank">
                 <n-button>{{ $t('DownloadSampleConfigFile') }}</n-button>
             </a>
-            <!-- 分割线 -->
-            <n-divider />
-            <n-dropdown trigger="hover" :options="options" @select="onResort">
-                <n-button>{{ this.getSortHintText(this.resort_hint_key) }}</n-button>
-            </n-dropdown>
         </Drawer>
         <Bottom :softVersion="
             this.$store.state.server_status.ServerName

@@ -16,15 +16,13 @@
     <!-- 文本颜色： https://www.tailwindcss.cn/docs/text-color -->
     <!-- 文本装饰（下划线）：https://www.tailwindcss.cn/docs/text-decoration -->
     <!-- 文本溢出：https://www.tailwindcss.cn/docs/text-overflow -->
-    <div class="p-0 m-0 py-2 content-center truncate">
+    <!-- 字体粗细:https://www.tailwindcss.cn/docs/font-weight -->
+    <div class="p-0 m-0 py-2 font-semibold content-center truncate">
       <!-- 标题，只显示 -->
       <span class="text-lg" v-if="!setDownLoadLink">{{ headerTitle }}</span>
       <!-- 标题，可下载压缩包 -->
-      <span class="text-lg text-blue-700 hover:underline">
-        <a
-          v-if="this.setDownLoadLink"
-          :href="'api/raw/' + bookID + '/' + headerTitle"
-        >{{ headerTitle }}</a>
+      <span class="text-lg text-blue-700 text-opacity-100  hover:underline">
+        <a v-if="this.setDownLoadLink" :href="'api/raw/' + bookID + '/' + headerTitle">{{ headerTitle }}</a>
       </span>
     </div>
     <!-- slot，用来插入右边的设置图标 -->
