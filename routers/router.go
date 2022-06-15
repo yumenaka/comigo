@@ -471,7 +471,7 @@ func SetShutdownHandler() {
 	<-ctx.Done()
 	//恢复中断信号的默认行为并通知用户关机。
 	stop()
-	log.Println("shutting down processing, press Ctrl+C again to force")
+	log.Println(locale.GetString("ShutdownHint"))
 	//清理临时文件
 	if common.Config.CacheFileClean {
 		fmt.Println("\r" + locale.GetString("start_clear_file") + " CacheFilePath:" + common.Config.CacheFilePath)

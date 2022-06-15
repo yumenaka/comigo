@@ -397,7 +397,7 @@ func PrintQRCode(text string) {
 func CheckPort(port int) bool {
 	ln, err := net.Listen("tcp", ":"+strconv.Itoa(port))
 	if err != nil {
-		_, err := fmt.Fprintf(os.Stderr, locale.GetString("cannot_listen")+"%q: %s", port, err)
+		_, err := fmt.Println(os.Stderr, locale.GetString("cannot_listen"), port, err)
 		if err != nil {
 			return false
 		}

@@ -122,7 +122,10 @@ func (config *ServerSettings) SetByExecutableFilename() {
 	extPath := filepath.Dir(ex)
 	//fmt.Println("extPath =",extPath)
 	ExtFileName := strings.TrimPrefix(filenameWithOutSuffix, extPath)
-	fmt.Println("ExtFileName =", ExtFileName)
+	if config.Debug {
+		fmt.Println("ExtFileName =", ExtFileName)
+	}
+
 	////如果执行文件名包含 scroll 等关键字，选择卷轴模板
 	//if haveKeyWord(ExtFileName, []string{"scroll", "スクロール", "默认", "下拉", "卷轴"}) {
 	//	config.Template = "scroll"

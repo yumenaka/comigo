@@ -17,6 +17,7 @@ import (
 	"github.com/yumenaka/comi/ent"
 	"github.com/yumenaka/comi/ent/book"
 	"github.com/yumenaka/comi/ent/singlepageinfo"
+	"github.com/yumenaka/comi/locale"
 )
 
 // 参考：
@@ -71,8 +72,7 @@ func InitDatabase(configFilePath string) {
 		configDir := filepath.Dir(configFilePath) //不能用path.Dir()，那个函数windows返回 "."
 		dataSourceName = "file:" + path.Join(configDir, "comigo.sqlite") + "?cache=shared"
 	}
-	//TODO:提示字符串国际化
-	fmt.Println("InitDatabase: " + dataSourceName)
+	fmt.Println(locale.GetString("InitDatabase") + dataSourceName)
 	client, err = ent.Open(dialect.SQLite, dataSourceName, entOptions...)
 	if err != nil {
 		fmt.Printf("failed opening connection to sqlite: %v", err)
@@ -104,7 +104,7 @@ func ClearBookData(clearBook *comigoBook.Book, debug bool) {
 		Where(book.BookIDEQ(clearBook.BookID)).
 		Exec(ctx)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("ClearBookData Book:" + err.Error())
 	}
 	if debug {
 		fmt.Println("Clear Book ：" + clearBook.Name)
@@ -114,7 +114,7 @@ func ClearBookData(clearBook *comigoBook.Book, debug bool) {
 		Where(singlepageinfo.BookIDEQ(clearBook.BookID)).
 		Exec(ctx)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("ClearBookData SinglePageInfo:" + err.Error())
 	}
 	if debug {
 		fmt.Println("Clear SinglePageInfo Num：" + strconv.Itoa(deletePageInfoNum))
@@ -122,7 +122,7 @@ func ClearBookData(clearBook *comigoBook.Book, debug bool) {
 }
 
 // DeleteAllBookInDatabase  清空数据库的Book与SinglePageInfo表
-// 后台并发执行，所以不能保证结果如预期，不用这个函数。
+// 后台并发执行，不能保证结果如预期，不用这个函数。
 func DeleteAllBookInDatabase(debug bool) {
 	//如何增删查改： https://entgo.io/zh/docs/crud
 	ctx := context.Background()
@@ -154,7 +154,7 @@ func SaveAllBookToDatabase(databaseFilePath string, m map[string]*comigoBook.Boo
 		var c = *b
 		err := SaveBookToDatabase(&c)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("SaveAllBookToDatabase error :" + err.Error())
 		}
 	}
 }
@@ -231,9 +231,9 @@ func SaveBookToDatabase(save *comigoBook.Book) error {
 func GetBookFromDatabase(filepath string) (*comigoBook.Book, error) {
 	ctx := context.Background()
 	books, err := client.Book. // UserClient.
-		Query(). // 用户查询生成器。
-		Where(book.FilePath(filepath)).
-		All(ctx) // query and return.
+					Query(). // 用户查询生成器。
+					Where(book.FilePath(filepath)).
+					All(ctx) // query and return.
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -266,9 +266,9 @@ func GetBookFromDatabase(filepath string) (*comigoBook.Book, error) {
 	//查询数据库里的封面与页面信息
 	//https://entgo.io/zh/docs/crud
 	pages, err := client.SinglePageInfo. // UserClient.
-		Query(). // 用户查询生成器。
-		Where(singlepageinfo.BookID(temp.BookID)).
-		All(ctx) // query and return.
+						Query(). // 用户查询生成器。
+						Where(singlepageinfo.BookID(temp.BookID)).
+						All(ctx) // query and return.
 	for _, v := range pages {
 		b.Pages.Images = append(b.Pages.Images, comigoBook.ImageInfo{
 			PageNum:           v.PageNum,
@@ -297,7 +297,7 @@ func GetBookFromDatabase(filepath string) (*comigoBook.Book, error) {
 func GetArchiveBookFromDatabase() (list []*comigoBook.Book, err error) {
 	ctx := context.Background()
 	books, err := client.Book. // UserClient.
-		Query(). // 用户查询生成器。
+					Query(). // 用户查询生成器。
 		//Where(book.Not(book.Type("dir"))). //忽略文件夹型的书籍
 		All(ctx) // query and return.
 	if err != nil {
@@ -335,9 +335,9 @@ func GetArchiveBookFromDatabase() (list []*comigoBook.Book, err error) {
 		//查询数据库里的封面与页面信息
 		//https://entgo.io/zh/docs/crud
 		pages, err := client.SinglePageInfo. // UserClient.
-			Query(). // 用户查询生成器。
-			Where(singlepageinfo.BookID(temp.BookID)).
-			All(ctx) // query and return.
+							Query(). // 用户查询生成器。
+							Where(singlepageinfo.BookID(temp.BookID)).
+							All(ctx) // query and return.
 		if err != nil {
 			fmt.Println(err)
 		}
