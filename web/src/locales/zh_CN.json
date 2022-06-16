@@ -40,7 +40,7 @@
   "max_width": "最大宽度：",
   "energy_threshold": "切边强度：",
   "back-to-top": "回到页首",
-  "reset_all_settings": "重置所有设定",
+  "reset_all_settings": "重置设定",
   "do_you_reset_all_settings": "是否要重置为默认设定？",
   "setInterfaceColor": "UI颜色:",
   "show_book_titles": "显示书名",
@@ -54,5 +54,6 @@
   "sort_by_modify_time": "修改时间",
   "sort_by_default": "保持原样",
   "sort_reverse": "（反向）",
-  "re_sort": "重新排序"
+  "re_sort": "重新排序",
+  "fullscreen": "切换全屏"
 }

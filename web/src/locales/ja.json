@@ -39,7 +39,7 @@
   "energy_threshold": "エネルギー閾値：",
   "back-to-top": "ページのトップへ戻る",
   "raw_resolution": "元の解像度",
-  "reset_all_settings": " 初期設定に戻す",
+  "reset_all_settings": " 初期設定",
   "do_you_reset_all_settings": "初期設定に戻すか？",
   "original_image": "元の解像度",
   "setInterfaceColor": "UIカラー:",
@@ -53,5 +53,7 @@
   "sort_by_filesize": "ファイルサイズ",
   "sort_by_modify_time": "更新日時",
   "sort_reverse": "（逆）",
-  "re_sort": "並べ替え"
+  "re_sort": "並べ替え",
+  "fullscreen": "フルスクリーン",
+  "sort_by_default": "圧縮順序"
 }

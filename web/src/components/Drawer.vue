@@ -10,15 +10,20 @@
       <!-- 父组件在此处插入自定义内容 -->
       <slot></slot>
       <!-- 分割线 -->
+      <p> &nbsp;</p>
+      <n-button @click="onFullSreen">{{ $t('fullscreen') }}</n-button>
       <n-divider />
       <span>{{ $t('scan_qrcode') }}</span>
       <Qrcode></Qrcode>
-      <n-popconfirm @positive-click="handlePositiveClick" @negative-click="handleNegativeClick">
-        <template #trigger>
-          <n-button>{{ $t('reset_all_settings') }}</n-button>
-        </template>
-        {{ $t('do_you_reset_all_settings') }}
-      </n-popconfirm>
+      <n-space>
+
+        <n-popconfirm @positive-click="handlePositiveClick" @negative-click="handleNegativeClick">
+          <template #trigger>
+            <n-button>{{ $t('reset_all_settings') }}</n-button>
+          </template>
+          {{ $t('do_you_reset_all_settings') }}
+        </n-popconfirm>
+      </n-space>
 
       <!-- 抽屉：自定义底部 -->
       <template #footer>
@@ -93,6 +98,7 @@ export default defineComponent({
   data() {
     return {
       someflag: "",
+      fullscreen: false,
       readModeLocal: "",
     };
   },
@@ -113,8 +119,31 @@ export default defineComponent({
     },
   },
   methods: {
-    onChangeReaderMode() {
-
+    onFullSreen() {
+      let element = document.documentElement;
+      if (this.fullscreen) {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitCancelFullScreen) {
+          document.webkitCancelFullScreen();
+        } else if (document.mozCancelFullScreen) {
+          document.mozCancelFullScreen();
+        } else if (document.msExitFullscreen) {
+          document.msExitFullscreen();
+        }
+      } else {
+        if (element.requestFullscreen) {
+          element.requestFullscreen();
+        } else if (element.webkitRequestFullScreen) {
+          element.webkitRequestFullScreen();
+        } else if (element.mozRequestFullScreen) {
+          element.mozRequestFullScreen();
+        } else if (element.msRequestFullscreen) {
+          // IE11
+          element.msRequestFullscreen();
+        }
+      }
+      this.fullscreen = !this.fullscreen;
     },
     OnChangeLanguage(value) {
       this.cookies.set("userLanguageSetting", value);
