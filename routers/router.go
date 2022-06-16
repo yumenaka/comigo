@@ -72,6 +72,10 @@ func StartWebServer() {
 	gin.SetMode(gin.ReleaseMode)
 	//// 创建带有默认中间件的路由: 日志与恢复中间件
 	engine := gin.Default()
+	////Recovery 中间件会恢复(recovers) 任何恐慌(panics) 如果存在恐慌，中间件将会写入500 gin.Default()已经默认启用了这个中间件
+	//engine.Use(gin.Recovery())
+	////Logger() 以默认配置创建日志中间件，将所有请求信息按指定格式打印到标准输出。 gin.Default()已经默认启用了这个中间件
+	//engine.Use(gin.Logger())
 
 	//TODO：登录、认证、鉴权etc //授权有些问题，会导致audio.png报401错误，暂时注释掉
 	//// the jwt middleware
@@ -345,10 +349,9 @@ func setWebAPI(engine *gin.Engine) {
 		c.Redirect(http.StatusMovedPermanently, "http://www.google.com/")
 	})
 	//初始化websocket
-	api.GET("/ws", handler.WsHandler)
+	api.GET("/ws", handler.WebSocketHandler)
 
-	//TODO：设定压缩包下载链接
-	// panic: handlers are already registered for path
+	//设定压缩包下载链接
 	if book.GetBooksNumber() >= 1 {
 		allBook, err := book.GetAllBookInfoList("name")
 		if err != nil {

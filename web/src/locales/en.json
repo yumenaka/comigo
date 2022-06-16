@@ -39,7 +39,7 @@
   "energy_threshold": "Energy Threshold:",
   "back-to-top": "Back To Top",
   "raw_resolution": "Raw Resolution",
-  "reset_all_settings": "Reset all settings",
+  "reset_all_settings": "Reset",
   "do_you_reset_all_settings": " Do you want to reset to the default settings?",
   "original_image": "Original Image",
   "setInterfaceColor": "InterfaceColor:",
@@ -53,5 +53,7 @@
   "sort_by_filesize": "Filesize",
   "sort_by_modify_time": "Modify Time",
   "sort_reverse": "(Reverse)",
-  "re_sort": "Resort"
+  "re_sort": "Resort",
+  "fullscreen": "Fullscreen",
+  "sort_by_default": "default sort"
 }

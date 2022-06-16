@@ -1,3 +1,6 @@
+//go:build !(windows && 386)
+
+//最上面这一句是“条件编译”，格式是1.18以后的推荐格式
 package storage
 
 import (
