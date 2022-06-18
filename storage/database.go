@@ -1,6 +1,6 @@
 //go:build !(windows && 386)
 
-//最上面这一句是“条件编译”，格式是1.18以后的推荐格式
+//上面这一句“条件编译”的约束，go:build 是1.18以后的推荐语法
 package storage
 
 import (
@@ -234,9 +234,9 @@ func SaveBookToDatabase(save *comigoBook.Book) error {
 func GetBookFromDatabase(filepath string) (*comigoBook.Book, error) {
 	ctx := context.Background()
 	books, err := client.Book. // UserClient.
-					Query(). // 用户查询生成器。
-					Where(book.FilePath(filepath)).
-					All(ctx) // query and return.
+		Query(). // 用户查询生成器。
+		Where(book.FilePath(filepath)).
+		All(ctx) // query and return.
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -269,9 +269,9 @@ func GetBookFromDatabase(filepath string) (*comigoBook.Book, error) {
 	//查询数据库里的封面与页面信息
 	//https://entgo.io/zh/docs/crud
 	pages, err := client.SinglePageInfo. // UserClient.
-						Query(). // 用户查询生成器。
-						Where(singlepageinfo.BookID(temp.BookID)).
-						All(ctx) // query and return.
+		Query(). // 用户查询生成器。
+		Where(singlepageinfo.BookID(temp.BookID)).
+		All(ctx) // query and return.
 	for _, v := range pages {
 		b.Pages.Images = append(b.Pages.Images, comigoBook.ImageInfo{
 			PageNum:           v.PageNum,
@@ -300,7 +300,7 @@ func GetBookFromDatabase(filepath string) (*comigoBook.Book, error) {
 func GetArchiveBookFromDatabase() (list []*comigoBook.Book, err error) {
 	ctx := context.Background()
 	books, err := client.Book. // UserClient.
-					Query(). // 用户查询生成器。
+		Query(). // 用户查询生成器。
 		//Where(book.Not(book.Type("dir"))). //忽略文件夹型的书籍
 		All(ctx) // query and return.
 	if err != nil {
@@ -338,9 +338,9 @@ func GetArchiveBookFromDatabase() (list []*comigoBook.Book, err error) {
 		//查询数据库里的封面与页面信息
 		//https://entgo.io/zh/docs/crud
 		pages, err := client.SinglePageInfo. // UserClient.
-							Query(). // 用户查询生成器。
-							Where(singlepageinfo.BookID(temp.BookID)).
-							All(ctx) // query and return.
+			Query(). // 用户查询生成器。
+			Where(singlepageinfo.BookID(temp.BookID)).
+			All(ctx) // query and return.
 		if err != nil {
 			fmt.Println(err)
 		}

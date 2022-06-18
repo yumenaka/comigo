@@ -1,5 +1,5 @@
 # Makefile for cross-compilation
-# make all VERSION=v0.8.1
+# make all VERSION=v0.8.2
 # make md5SumThemAll VERSION=v0.8.2
 # mingw32-make all VERSION=v0.8.2
 # rm  resource.syso && make  Linux-armv8   VERSION=v0.8.2
@@ -26,7 +26,7 @@ endif
 
 all: compileThemAll md5SumThemAll
 
-# 因为sqlite（ent）库的关系，部分架构（Windows_i386）无法正常运行，暂时忽略。 ent库的编译检测状态： https://modern-c.appspot.com/-/builder/?importpath=modernc.org%2Fsqlite
+# 因为sqlite（ent）库的关系，部分架构（Windows_i386）无法正常运行，需要写条件编译代码。 ent库的编译检测状态： https://modern-c.appspot.com/-/builder/?importpath=modernc.org%2Fsqlite
 
 compileThemAll: Windows_x86_64 Windows_i386  Windows_arm64 Linux_x86_64 Linux_i386 MacOS_x86_64 MacOS_arm64 Linux-armv6 Linux-armv7 Linux-armv8 
 
