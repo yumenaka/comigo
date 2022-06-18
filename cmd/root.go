@@ -180,8 +180,10 @@ var rootCmd = &cobra.Command{
 	Version: locale.GetString("comigo_version"),
 	Long:    locale.GetString("long_description"),
 	Run: func(cmd *cobra.Command, args []string) {
+
 		//解析命令，扫描文件
 		initBookStores(args)
+
 		//设置临时文件夹
 		common.SetTempDir()
 		//设置书籍API
@@ -196,11 +198,10 @@ var rootCmd = &cobra.Command{
 //initBookStores 解析命令,扫描书库
 func initBookStores(args []string) {
 	//////初始化数据库
-	//初始化数据库
-	storage.InitDatabase(common.ConfigFile)
-	////从数据库里面读取出的书籍信息，持久化用
 	var databaseBookList []*book.Book
 	if common.Config.EnableDatabase {
+		////从数据库里面读取出的书籍信息，持久化
+		storage.InitDatabase(common.ConfigFile)
 		var dataErr error
 		databaseBookList, dataErr = storage.GetArchiveBookFromDatabase()
 		if dataErr != nil {

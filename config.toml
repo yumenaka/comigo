@@ -28,7 +28,7 @@ CacheFilePath = '.comigo'
 # 退出程序的时候，清理web图片缓存
 CacheFileClean = true
 # 启用本地数据库，保存扫描到的书籍数据
-EnableDatabase = true
+EnableDatabase = false
 # 启用本地数据库时，扫描完成后，清除不存在的书籍
 ClearDatabase = true
 # 需要排除的文件或文件夹

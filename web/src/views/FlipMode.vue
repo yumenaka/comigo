@@ -1027,13 +1027,17 @@ export default defineComponent({
 			switch (e.key) {
 				case "ArrowUp":
 				case "PageUp":
-				case "ArrowLeft":
 					this.flipPage(-1); //上一页
+					break;
+				case "ArrowLeft":
+					this.rightToLeftFlag == true ? this.toNextPage() : this.toPerviousPage();
+					break;
+				case "ArrowRight":
+					this.rightToLeftFlag == true ? this.toPerviousPage() : this.toNextPage();
 					break;
 				case "Space":
 				case "ArrowDown":
 				case "PageDown":
-				case "ArrowRight":
 					this.flipPage(1); //下一页
 					break;
 				case "Home":
