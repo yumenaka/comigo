@@ -278,7 +278,7 @@ func saveFileToCache(id string, filename string, data []byte, query url.Values, 
 
 //根据query生成一个key string，用到两个第三方库
 func getQueryStringKey(query url.Values) string {
-	//因为map没有排序，相同参数每次形成的strin都g不一样,所以需要第三方库，建立一个有序map。
+	//因为map没有排序，相同参数每次形成的string都不一样,所以需要第三方库，建立一个有序map。
 	//OrderedMap按照插入顺序排序迭代，所以插入的时候也要保证顺序
 	m := orderedmap.NewOrderedMap()
 	//构建一个key列表，并用pie排序

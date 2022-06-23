@@ -25,10 +25,10 @@ import './index.css'
 app.use(VueLazyLoad, {
     //懒加载相关设置
     //https://www.cnblogs.com/niuzijie/p/13703710.html
-    preLoad: 1.9,//预加载高度比例,默认1.3
-    loading: "/images/loading.jpg",
+    preLoad: 1.5,//预加载高度比例,默认1.3
+    loading: "/images/loading.gif",
     error: "/images/error.jpg",
-    attempt: 4,//尝试加载图片数量，默认3
+    attempt: 3,//尝试加载图片数量，默认3
     observerOptions: { rootMargin: '200px', threshold: 0.1 },
     lifecycle: {
         loading: (el) => {

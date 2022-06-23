@@ -345,12 +345,12 @@ export default defineComponent({
 						{
 							height: 500,
 							width: 449,
-							url: "/images/loading.jpg",
+							url: "/images/loading.gif",
 						},
 						{
 							height: 500,
 							width: 449,
-							url: "/images/loading.jpg",
+							url: "/images/loading.gif",
 						},
 					],
 				}
@@ -1030,10 +1030,10 @@ export default defineComponent({
 					this.flipPage(-1); //上一页
 					break;
 				case "ArrowLeft":
-					this.rightToLeftFlag == true ? this.toNextPage() : this.toPerviousPage();
+					this.rightToLeftFlag == true ? this.toPerviousPage() : this.toNextPage();
 					break;
 				case "ArrowRight":
-					this.rightToLeftFlag == true ? this.toPerviousPage() : this.toNextPage();
+					this.rightToLeftFlag == true ? this.toNextPage() : this.toPerviousPage();
 					break;
 				case "Space":
 				case "ArrowDown":

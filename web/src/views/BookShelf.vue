@@ -195,14 +195,14 @@ export default defineComponent({
                         {
                             height: 500,
                             width: 449,
-                            url: "/images/loading.jpg",
+                            url: "/images/loading.gif",
                         },
                     ],
                     cover: {
                         filename: "loading.jpg",
                         height: 500,
                         width: 449,
-                        url: "/images/loading.jpg",
+                        url: "/images/loading.gif",
                     },
                 },
             ],

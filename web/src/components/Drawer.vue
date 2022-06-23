@@ -11,7 +11,13 @@
       <slot></slot>
       <!-- 分割线 -->
       <p> &nbsp;</p>
-      <n-button @click="onFullSreen">{{ $t('fullscreen') }}</n-button>
+      <n-button v-if="this.sketching === false && this.inBookShelf === false" @click="startSketchMode">{{
+          $t('startSketchMode')
+      }}</n-button>
+      <n-button v-if="this.sketching === true && this.inBookShelf === false" @click="stopSketchMode">{{
+          $t('stopSketchMode')
+      }}</n-button>
+
       <n-divider />
       <span>{{ $t('scan_qrcode') }}</span>
       <Qrcode></Qrcode>
@@ -27,20 +33,15 @@
 
       <!-- 抽屉：自定义底部 -->
       <template #footer>
+        <n-button @click="onFullSreen">{{ $t('fullscreen') }}</n-button>
         <n-select placeholder="{{ $t('select-language') }}" v-model:value="this.$i18n.locale"
           :options="this.languageOptions" @update:value="OnChangeLanguage" />
-        <n-button v-if="this.sketching === false && this.inBookShelf === false" @click="startSketchMode">{{
-            $t('startSketchMode')
-        }}</n-button>
-        <n-button v-if="this.sketching === true && this.inBookShelf === false" @click="stopSketchMode">{{
-            $t('stopSketchMode')
-        }}</n-button>
       </template>
     </n-drawer-content>
   </n-drawer>
 </template>
 <script>
-
+import screenfull from 'screenfull'
 import { useCookies } from "vue3-cookies";
 import { NDrawer, NDivider, NDrawerContent, NButton, NSelect, NPopconfirm, } from 'naive-ui'
 import { defineComponent, } from 'vue'
@@ -66,7 +67,6 @@ export default defineComponent({
   setup() {
     const { cookies } = useCookies();
     // const message = useMessage(); 需要导入 'naive-ui'的useMessage
-
     return {
       handlePositiveClick() {
         // message.info("是的");
@@ -78,6 +78,7 @@ export default defineComponent({
       handleNegativeClick() {
         // message.info("并不");
       },
+
       cookies,
       languageOptions: [
         {
@@ -98,7 +99,7 @@ export default defineComponent({
   data() {
     return {
       someflag: "",
-      fullscreen: false,
+      isFullscreen: false,
       readModeLocal: "",
     };
   },
@@ -120,61 +121,75 @@ export default defineComponent({
   },
   methods: {
     onFullSreen() {
-      let element = document.documentElement;
-      if (this.fullscreen) {
-        if (document.exitFullscreen) {
-          document.exitFullscreen();
-        } else if (document.webkitCancelFullScreen) {
-          document.webkitCancelFullScreen();
-        } else if (document.mozCancelFullScreen) {
-          document.mozCancelFullScreen();
-        } else if (document.msExitFullscreen) {
-          document.msExitFullscreen();
-        }
-      } else {
-        if (element.requestFullscreen) {
-          element.requestFullscreen();
-        } else if (element.webkitRequestFullScreen) {
-          element.webkitRequestFullScreen();
-        } else if (element.mozRequestFullScreen) {
-          element.mozRequestFullScreen();
-        } else if (element.msRequestFullscreen) {
-          // IE11
-          element.msRequestFullscreen();
-        }
+      if (!screenfull.isEnabled) { // 测试浏览器是否支持全screenfull 如果不允许进入全屏，发出不允许提示
+        this.$message({
+          message: '不支持全屏',
+          type: 'warning'
+        })
+        return false
       }
-      this.fullscreen = !this.fullscreen;
-    },
-    OnChangeLanguage(value) {
-      this.cookies.set("userLanguageSetting", value);
-    },
-    // 关闭抽屉时，保存设置到cookies
-    saveConfigToCookie(show) {
-      if (show == false) {
-        this.$emit('closeDrawer');
-        this.$emit('saveConfig');
-      }
-    },
-    startSketchMode() {
-      this.$emit('startSketch');
-    },
-    stopSketchMode() {
-      this.$emit('stopSketch');
-    },
-    //切换模板的函数，需要配合vue-router
-    onChangeTemplate() {
-      if (this.readModeLocal === "scroll") {
-        this.$emit("setRM", "scroll");
-      }
-      if (this.readModeLocal === "flip") {
-        this.$emit("setRM", "flip");
-      }
-      if (this.readModeLocal === "sketch") {
-        this.$emit("setRM", "sketch");
-      }
-      // location.reload(); //需要刷新？ 以后研究VueRouter并去掉
-    },
+      screenfull.toggle()
+      this.$message({
+        message: '进入全屏',
+        type: 'success'
+      })
+      //全屏 API： https://developer.mozilla.org/zh-CN/docs/Web/API/Fullscreen_API
+
+      // let element = document.documentElement;
+      // if (this.fullscreen) {
+      //   if (document.exitFullscreen) {
+      //     document.exitFullscreen();
+      //   } else if (document.webkitCancelFullScreen) {
+      //     document.webkitCancelFullScreen();
+      //   } else if (document.mozCancelFullScreen) {
+      //     document.mozCancelFullScreen();
+      //   } else if (document.msExitFullscreen) {
+      //     document.msExitFullscreen();
+      //   }
+      // } else {
+      //   if (element.requestFullscreen) {
+      //     element.requestFullscreen();
+      //   } else if (element.webkitRequestFullScreen) {
+      //     element.webkitRequestFullScreen();
+      //   } else if (element.mozRequestFullScreen) {
+      //     element.mozRequestFullScreen();
+      //   } else if (element.msRequestFullscreen) {
+      //     // IE11
+      //     element.msRequestFullscreen();
+      //   }
+    // }
+      this.isFullscreen = !this.isFullscreen;
   },
+  OnChangeLanguage(value) {
+    this.cookies.set("userLanguageSetting", value);
+  },
+  // 关闭抽屉时，保存设置到cookies
+  saveConfigToCookie(show) {
+    if (show == false) {
+      this.$emit('closeDrawer');
+      this.$emit('saveConfig');
+    }
+  },
+  startSketchMode() {
+    this.$emit('startSketch');
+  },
+  stopSketchMode() {
+    this.$emit('stopSketch');
+  },
+  //切换模板的函数，需要配合vue-router
+  onChangeTemplate() {
+    if (this.readModeLocal === "scroll") {
+      this.$emit("setRM", "scroll");
+    }
+    if (this.readModeLocal === "flip") {
+      this.$emit("setRM", "flip");
+    }
+    if (this.readModeLocal === "sketch") {
+      this.$emit("setRM", "sketch");
+    }
+    // location.reload(); //需要刷新？ 以后研究VueRouter并去掉
+  },
+},
 });
 </script>
 

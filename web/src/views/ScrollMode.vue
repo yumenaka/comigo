@@ -15,6 +15,7 @@
 
 			<div class="page_hint" v-if="showPageNumFlag_ScrollMode">{{ key + 1 }}/{{ book.all_page_num }}</div>
 		</div>
+
 		<Drawer :initDrawerActive="this.drawerActive" :initDrawerPlacement="this.drawerPlacement"
 			@saveConfig="this.saveConfigToLocalStorage" @startSketch="this.startSketchMode"
 			@closeDrawer="this.drawerDeactivate" @setT="this.OnSetTemplate" :readerMode="this.readerMode"
@@ -319,12 +320,12 @@ export default defineComponent({
 						{
 							height: 500,
 							width: 449,
-							url: "/images/loading.jpg",
+							url: "/images/loading.gif",
 						},
 						{
 							height: 500,
 							width: 449,
-							url: "/images/loading.jpg",
+							url: "/images/loading.gif",
 						},
 					],
 				}

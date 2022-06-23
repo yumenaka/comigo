@@ -13,11 +13,10 @@ import (
 type MessageType int
 
 const (
-	TestOnlineMessage MessageType = iota // 开始生成枚举值, 默认为0
-	SyncPageNum                          //翻页用
-	ErrorHint                            //书籍不存在、文件已移除的提示
-	Rifle
-	Blower
+	OnlineStatus MessageType = iota //在线状态  //开始生成枚举值, 默认为0
+	SyncPageNum                     //同步翻页用
+	ErrorHint                       //书籍不存在、文件已移除的提示
+	Test
 )
 
 //json格式的消息体，用来传递比较复杂的信息
