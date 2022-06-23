@@ -58,12 +58,12 @@ export default {
                     {
                         height: 500,
                         width: 449,
-                        url: "/images/loading.jpg",
+                        url: "/images/loading.gif",
                     },
                     {
                         height: 500,
                         width: 449,
-                        url: "/images/loading.jpg",
+                        url: "/images/loading.gif",
                     },
                 ],
             },
