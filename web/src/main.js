@@ -7,6 +7,7 @@ import store from "@/store"; //VueX
 // import VueCookies from "vue3-cookies";
 import VueLazyLoad from "vue3-lazyload";
 import i18n from '@/locales'
+
 // 后端改成 /api/book/:id的形式
 axios.defaults.baseURL = "/api"
 

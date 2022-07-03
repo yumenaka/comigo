@@ -200,6 +200,8 @@ import { defineComponent, reactive } from "vue";
 import { NDivider, NIcon, NInputNumber, NSlider, NSpace, NSwitch, useMessage, NButton, NDropdown, } from "naive-ui";
 import { SettingsOutline } from "@vicons/ionicons5";
 import axios from "axios";
+import md5 from 'js-md5';
+
 
 export default defineComponent({
 	name: "FlipMode",
@@ -387,10 +389,33 @@ export default defineComponent({
 			nowPageIsDouble: false,
 			nextPageIsDouble: false,
 			nowAndNextPageIsSingleFlag: true,
+			// Websocket相关
+			ws: null, // Our websocket
+			newMsg: '', // Holds new messages to be sent to the server
+			chatContent: '', // A running list of chat messages displayed on the screen
+			email: null, // Email address used for grabbing an avatar
+			username: null, // Our username
+			joined: false, // True if email and username have been filled in
 		};
 	},
 	//在选项API中使用 Vue 生命周期钩子：
 	created() {
+
+		// Websocket相关
+		// var self = this;
+		this.ws = new WebSocket('ws://' + window.location.host + '/api/ws');
+		this.ws.addEventListener('message', function (e) {
+			var msg = JSON.parse(e.data);
+			// self.chatContent += '<div class="chip">'
+			// 	+ '<img src="' + self.gravatarURL(msg.email) + '">' // Avatar
+			// 	+ msg.username
+			// 	+ '</div>'
+			// 	'☀'+ '<br/>'; // Parse emojis
+			// var element = document.getElementById('chat-messages');
+			// element.scrollTop = element.scrollHeight; // Auto scroll to the bottom
+			console.log(msg)
+		});
+
 		//根据文件名、修改时间、文件大小等要素排序的参数
 		var sort_image_by_str = ""
 		if (this.$route.query.sort_by) {
@@ -544,6 +569,40 @@ export default defineComponent({
 		//界面有更新就会调用,随便乱放会引起难以调试的BUG
 	},
 	methods: {
+		//Websocket 发送消息
+		send() {
+			if (this.newMsg != '') {
+				this.ws.send(
+					//提供将 JavaScript 值与 JavaScript 对象表示法 (JSON) 格式相互转换的函数的内在对象。
+					JSON.stringify({
+						message_type: 1,
+						book_id: this.book.id,
+						now_page_num: this.nowPageNum,
+						message_data: "翻页模式，发送数据" // Strip out html
+					}
+					));
+				this.newMsg = ''; // Reset newMsg
+			}
+		},
+
+		// "join"函数会确保用户在发送消息前输入 email 地址和用户名。一旦他们输入了这些信息，将 joined 设置为 "true"，同时允许他们开始交谈。同样，会处理 HTML 和 JavaScript 的特殊字符。
+		join: function () {
+			if (!this.email) {
+				console.log('You must enter an email', 2000);
+				return
+			}
+			if (!this.username) {
+				console.log('You must choose a username', 2000);
+				return
+			}
+			this.email = $('<p>').html(this.email).text();
+			this.username = $('<p>').html(this.username).text();
+			this.joined = true;
+		},
+		// 辅助函数，用于从 Gravatar 获取头像。URL 的最后一段需要用户的 email 地址的 MD5 编码。
+		gravatarURL: function (email) {
+			return 'http://www.gravatar.com/avatar/' + md5(email);
+		},
 
 		//页面排序相关
 		onResort(key) {
@@ -852,6 +911,7 @@ export default defineComponent({
 			}
 		},
 		toNextPage() {
+			this.send();
 			//简单合并模式
 			if (this.simpleDoublePageModeFlag) {
 				if (this.nowPageNum < this.book.all_page_num - 1) {

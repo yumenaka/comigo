@@ -58,8 +58,20 @@ export default defineConfig({
     host: '0.0.0.0',//为开发服务器指定 ip 地址。 设置为 0.0.0.0 或 true 会监听所有地址，包括局域网和公共地址。
     //https://zxuqian.cn/vite-proxy-config/
     proxy: {
-      '/api': {
+      //正则表达式：https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Regular_Expressions
+      '^/api/(getstatus|getlist|getbook|getfile|config.toml|qrcode.png|redirect|upload|form|raw).*': {
         target: 'http://127.0.0.1:1234/',
+        // 是否改写 origin，设置为 true 之后，就会把请求 API header 中的 origin，改成跟 target 里边的域名一样
+        changeOrigin: true, 
+      },
+      //在线测试正则表达式，测试的时候不需要表示开头的 ^   
+      // https://tool.chinaz.com/regex
+      //  127.0.0.1:1234/api/ws/api/ws
+      '^/api/ws.*': {
+        target: 'ws://127.0.0.1:1234/api/ws',
+        // 是否改写 origin，设置为 true 之后，就会把请求 API header 中的 origin，改成跟 target 里边的域名一样
+        changeOrigin: true, 
+        rewrite: (path) =>  path.replace(/^\/api/, "").replace(/^\/ws/, ""),
       },
       '/favicon.ico': {
         target: 'http://127.0.0.1:1234/',
