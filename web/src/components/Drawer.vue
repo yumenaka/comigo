@@ -21,15 +21,13 @@
       <n-divider />
       <span>{{ $t('scan_qrcode') }}</span>
       <Qrcode></Qrcode>
-      <n-space>
 
-        <n-popconfirm @positive-click="handlePositiveClick" @negative-click="handleNegativeClick">
-          <template #trigger>
-            <n-button>{{ $t('reset_all_settings') }}</n-button>
-          </template>
-          {{ $t('do_you_reset_all_settings') }}
-        </n-popconfirm>
-      </n-space>
+      <n-popconfirm @positive-click="handlePositiveClick" @negative-click="handleNegativeClick">
+        <template #trigger>
+          <n-button>{{ $t('reset_all_settings') }}</n-button>
+        </template>
+        {{ $t('do_you_reset_all_settings') }}
+      </n-popconfirm>
 
       <!-- 抽屉：自定义底部 -->
       <template #footer>
@@ -157,39 +155,39 @@ export default defineComponent({
       //     // IE11
       //     element.msRequestFullscreen();
       //   }
-    // }
+      // }
       this.isFullscreen = !this.isFullscreen;
+    },
+    OnChangeLanguage(value) {
+      this.cookies.set("userLanguageSetting", value);
+    },
+    // 关闭抽屉时，保存设置到cookies
+    saveConfigToCookie(show) {
+      if (show == false) {
+        this.$emit('closeDrawer');
+        this.$emit('saveConfig');
+      }
+    },
+    startSketchMode() {
+      this.$emit('startSketch');
+    },
+    stopSketchMode() {
+      this.$emit('stopSketch');
+    },
+    //切换模板的函数，需要配合vue-router
+    onChangeTemplate() {
+      if (this.readModeLocal === "scroll") {
+        this.$emit("setRM", "scroll");
+      }
+      if (this.readModeLocal === "flip") {
+        this.$emit("setRM", "flip");
+      }
+      if (this.readModeLocal === "sketch") {
+        this.$emit("setRM", "sketch");
+      }
+      // location.reload(); //需要刷新？ 以后研究VueRouter并去掉
+    },
   },
-  OnChangeLanguage(value) {
-    this.cookies.set("userLanguageSetting", value);
-  },
-  // 关闭抽屉时，保存设置到cookies
-  saveConfigToCookie(show) {
-    if (show == false) {
-      this.$emit('closeDrawer');
-      this.$emit('saveConfig');
-    }
-  },
-  startSketchMode() {
-    this.$emit('startSketch');
-  },
-  stopSketchMode() {
-    this.$emit('stopSketch');
-  },
-  //切换模板的函数，需要配合vue-router
-  onChangeTemplate() {
-    if (this.readModeLocal === "scroll") {
-      this.$emit("setRM", "scroll");
-    }
-    if (this.readModeLocal === "flip") {
-      this.$emit("setRM", "flip");
-    }
-    if (this.readModeLocal === "sketch") {
-      this.$emit("setRM", "sketch");
-    }
-    // location.reload(); //需要刷新？ 以后研究VueRouter并去掉
-  },
-},
 });
 </script>
 
