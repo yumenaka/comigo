@@ -18,6 +18,7 @@ type ServerStatus struct {
 	NumberOfBooks         int                //当前拥有的书籍总数
 	NumberOfOnLineUser    int                //TODO：在线用户数
 	NumberOfOnLineDevices int                //TODO：在线设备数
+	ClientIP              string             //客户端IP
 	OSInfo                tools.SystemStatus //系统信息
 }
 
@@ -31,6 +32,7 @@ func ServerStatusHandler(c *gin.Context) {
 	} else {
 		host = common.Config.Host
 	}
+
 	var serverStatus = ServerStatus{
 		ServerName:            serverName,
 		ServerHost:            host,
@@ -38,6 +40,7 @@ func ServerStatusHandler(c *gin.Context) {
 		NumberOfBooks:         book.GetBooksNumber(),
 		NumberOfOnLineUser:    1,
 		NumberOfOnLineDevices: 1,
+		ClientIP:              c.ClientIP(),
 		OSInfo:                tools.GetSystemStatus(),
 	}
 	c.PureJSON(http.StatusOK, serverStatus)

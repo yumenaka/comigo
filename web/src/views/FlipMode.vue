@@ -400,10 +400,13 @@ export default defineComponent({
 	},
 	//在选项API中使用 Vue 生命周期钩子：
 	created() {
-
 		// Websocket相关
+		var protocol ='ws://'
+		if( window.location.protocol ==="https"){
+			protocol ='wss://'
+		}
+		this.ws = new WebSocket(protocol + window.location.host + '/api/ws');
 		// var self = this;
-		this.ws = new WebSocket('ws://' + window.location.host + '/api/ws');
 		this.ws.addEventListener('message', function (e) {
 			var msg = JSON.parse(e.data);
 			// self.chatContent += '<div class="chip">'
@@ -571,7 +574,8 @@ export default defineComponent({
 	methods: {
 		//Websocket 发送消息
 		send() {
-			if (this.newMsg != '') {
+			
+			if (this.newMsg === '') {
 				this.ws.send(
 					//提供将 JavaScript 值与 JavaScript 对象表示法 (JSON) 格式相互转换的函数的内在对象。
 					JSON.stringify({
@@ -581,6 +585,7 @@ export default defineComponent({
 						message_data: "翻页模式，发送数据" // Strip out html
 					}
 					));
+				console.log("send:",this.newMsg)
 				this.newMsg = ''; // Reset newMsg
 			}
 		},
