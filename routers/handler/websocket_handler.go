@@ -80,39 +80,45 @@ func WebSocketHandler(c *gin.Context) {
 		}
 	}()
 
-	// 无限循环，一直等待着要写入 WebSocket 的新消息，将其从 JSON 反序列化为 Message 对象然后送入广播频道。
+	// 无限循环，等待要写入 WebSocket 的新消息，将其从 JSON 反序列化为 Message 对象然后送入广播频道。
 	for {
-		//测试用的乒乓逻辑
-		messageType, message, err := wsConn.ReadMessage()
+
+		////测试用的乒乓逻辑
+		//messageType, message, err := wsConn.ReadMessage()
+		//if err != nil {
+		//	log.Println("Error during message reading:", err)
+		//	//break
+		//} else {
+		//	fmt.Printf("Message Type: %d, Message: %s\n", messageType, string(message))
+		//	//如果是乒乓
+		//	if string(message) == "ping!" || string(message) == "ping" || string(message) == "乒" || string(message) == "乒!" {
+		//		message = []byte("pang!")
+		//		if string(message) == "乒" || string(message) == "乒!" {
+		//			message = []byte("乓!")
+		//		}
+		//		//写入ws数据
+		//		err = wsConn.WriteMessage(messageType, message)
+		//		if err != nil {
+		//			log.Println("Error during message writing:", err)
+		//			break
+		//		}
+		//		continue
+		//	}
+		//}
+
+		////读取ws中的数据,反序列为json（序列化：将对象转化成字节序列的过程。 反序列化：就是讲字节序列转化成对象的过程。）
+		var msg Message // Read in a new message as JSON and map it to a Message object
+		err = wsConn.ReadJSON(&msg)
 		if err != nil {
-			log.Println("Error during message reading:", err)
+			//fmt.Println()
+			log.Printf("Websocket error: %v", err)
+			//如果从 socket 中读取数据有误，我们假设客户端已经因为某种原因断开。我们记录错误并从全局的 “clients” 映射表里删除该客户端，这样一来，我们不会继续尝试与其通信。
+			delete(clients, wsConn)
 			break
 		}
-		fmt.Printf("Message Type: %d, Message: %s\n", messageType, string(message))
-		//如果是乒乓
-		if string(message) == "ping!" || string(message) == "ping" || string(message) == "乒" {
-			message = []byte("pang!")
-			//写入ws数据
-			err = wsConn.WriteMessage(messageType, message)
-			if err != nil {
-				log.Println("Error during message writing:", err)
-				//break
-			}
-		}
-
-		//////读取ws中的数据,反序列为json（序列化：将对象转化成字节序列的过程。 反序列化：就是讲字节序列转化成对象的过程。）
-		//var msg Message // Read in a new message as JSON and map it to a Message object
-		//err = wsConn.ReadJSON(&msg)
-		//if err != nil {
-		//	//fmt.Println()
-		//	log.Printf("Websocket error: %v", err)
-		//	//如果从 socket 中读取数据有误，我们假设客户端已经因为某种原因断开。我们记录错误并从全局的 “clients” 映射表里删除该客户端，这样一来，我们不会继续尝试与其通信。
-		//	delete(clients, wsConn)
-		//	break
-		//}
-		//fmt.Printf("Message Type: %d, Message: %s\n", msg.MessageType, msg)
-		//// Send the newly received message to the broadcast channel
-		//broadcast <- msg
+		fmt.Printf("Message Type: %d, Message: %v\n", msg.MessageType, msg)
+		// Send the newly received message to the broadcast channel
+		broadcast <- msg
 	}
 }
 
@@ -120,7 +126,7 @@ func WebSocketHandler(c *gin.Context) {
 func handleMessages() {
 	for {
 		// Grab the next message from the broadcast channel
-		msg := <-broadcast
+		msg := <-broadcast //广播频道
 		// Send it out to every client that is currently connected
 		for client := range clients {
 			err := client.WriteJSON(msg)
