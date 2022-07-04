@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-//收发消息的时候，用来区分消息类型
+// MessageType 收发消息的时候，用来区分消息类型
 type MessageType int
 
 const (
@@ -25,7 +25,7 @@ type Message struct {
 	UserID            string  `json:"user_id"`
 	BookID            string  `json:"book_id"`
 	NowPageNum        int     `json:"now_page_num"`
-	NowPageNumPercent int     `json:"now_page_num_percent"`
+	NowPageNumPercent float64 `json:"now_page_num_percent"`
 	ReadPercent       float64 `json:"read_percent"`
 	Message           string  `json:"message_data"`
 }
@@ -37,7 +37,7 @@ var upGrader = websocket.Upgrader{
 	// use default options
 	// 检测请求来源 //检查是否跨域
 	CheckOrigin: func(r *http.Request) bool {
-		////验证方法，这是只支持Get
+		////验证方法，只支持Get的话这样写
 		//if r.Method != "GET" {
 		//	fmt.Println("method is not GET")
 		//	return false
@@ -56,7 +56,7 @@ var clients = make(map[*websocket.Conn]bool) // connected clients
 //用于由客户端发送消息的队列，扮演通道的角色。后面定义了一个 goroutine 来从这个通道读取新消息，然后将它们发送给其它连接到服务器的客户端。
 var broadcast = make(chan Message) // broadcast channel
 
-//webSocket请求ping 返回pong
+// WebSocketHandler
 //路由是 "/ws",即 ws://127.0.0.1:1234/api/ws
 func WebSocketHandler(c *gin.Context) {
 	//Upgrade 函数将 http get请求升级到 WebSocket 协议。

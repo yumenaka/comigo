@@ -1,7 +1,9 @@
-<template>
+<template class="static">
 	<!-- 顶部,标题页头 -->
-	<Header class="header" v-if="this.showHeaderFlag_FlipMode" :setDownLoadLink="this.needDownloadLink()"
-		:headerTitle="book.name" :bookID="this.book.id" :showReturnIcon="true">
+	<!-- 定位：https://www.tailwindcss.cn/docs/position -->
+	<Header class="header fixed mx-auto w-full" v-if="this.showHeaderFlag_FlipMode"
+		:setDownLoadLink="this.needDownloadLink()" :headerTitle="book.name" :bookID="this.book.id"
+		:showReturnIcon="true">
 		<!-- 右边的设置图标,点击屏幕中央也可以打开 -->
 		<n-icon size="40" @click="drawerActivate('right')">
 			<settings-outline />
@@ -27,39 +29,41 @@
 					v-bind:src="this.imageParametersString(book.pages.images[nowPageNum].url)"
 					v-bind:alt="nowPageNum + 1" />
 			</div>
-
 			<div v-if="this.showPageHintFlag_FlipMode" class="sketch_hint">{{ pageNumOrSketchHint }}</div>
 		</div>
+	</div>
 
-		<!-- 页脚 拖动条 -->
-		<div class="footer" v-if="this.showFooterFlag_FlipMode">
-			<!-- 底部滑动条不翻转，一直都是一个样 -->
-			<!-- <div>
-				<span>{{ this.nowPageNum }}</span>
-				<n-slider
-					v-model:value="nowPageNum"
-					:max="this.book.all_page_num"
-					:min="1"
-					:step="1"
-					:format-tooltip="(value) => `${value}`"
-					@update:value="this.saveNowPageNumOnUpdate"
-				/>
-				<span>{{ this.book.all_page_num }}</span>
-			</div>-->
 
-			<!-- 右手模式用 ,底部滑动条 -->
-			<div v-if="this.rightToLeftFlag">
-				<span>{{ this.nowPageNum }}</span>
-				<n-slider v-model:value="nowPageNum" :max="this.book.all_page_num" :min="1" :step="1"
-					:format-tooltip="(value) => `${value}`" @update:value="this.saveNowPageNumOnUpdate" />
-				<span>{{ this.book.all_page_num }}</span>
+	<!-- 页脚 拖动条 -->
+	<!-- 宽度：w-5/6 https://www.tailwindcss.cn/docs/width 使用 w-{fraction} 或 w-full 将元素设置为基于百分比的宽度。 -->
+	<!-- 定位：https://www.tailwindcss.cn/docs/position  -->
+	<!-- 使用 fixed 来定位一个元素相对于浏览器窗视口的位置。偏移量是相对于视口计算的，且该元素将作为绝对定位的子元素的位置参考。 -->
+	<!-- 控制 flex 和 grid 项目如何沿着容器的主轴定位:https://www.tailwindcss.cn/docs/justify-content -->
+	<!-- Tailwind 的容器不会自动居中，也没有任何内置的水平方向的内边距。要使一个容器居中，使用 mx-auto 功能类： -->
+	<div class="absolute bottom-0 w-full h-10 ">
+		<div class="bg-red-300 flex flex-row justify-center items-end  mx-auto w-full h-10 "
+			v-if="this.showFooterFlag_FlipMode">
+
+			<!-- 日漫模式 底部滑动条,设置reverse翻转计数方向 -->
+			<!-- 背景颜色：bg-blue-300  https://www.tailwindcss.cn/docs/background-color  -->
+			<div class="bg-blue-300 flex  flex-row  justify-center items-center  w-5/6  px-4 h-full"
+				v-if="!this.rightToLeftFlag">
+				<span class="right">{{ this.book.all_page_num }}</span>
+				
+				<n-slider class="w-10/11" reverse v-model:value="nowPageNum" :max="this.book.all_page_num" :min="1"
+					:step="1" :format-tooltip="(value) => `${value}`" @update:value="this.saveNowPageNumOnUpdate" />
+				<span class="left">{{ this.nowPageNum }}</span>
 			</div>
-			<!-- 左手模式用 底部滑动条,设置reverse翻转计数方向 -->
-			<div v-if="!this.rightToLeftFlag">
-				<span>{{ this.book.all_page_num }}</span>
-				<n-slider reverse v-model:value="nowPageNum" :max="this.book.all_page_num" :min="1" :step="1"
-					:format-tooltip="(value) => `${value}`" @update:value="this.saveNowPageNumOnUpdate" />
-				<span>{{ this.nowPageNum }}</span>
+
+			<!-- 美漫模式用 ,底部滑动条 -->
+			<!-- h-full: 将一个元素的高度设置为其父元素的 100%，只要父元素有一个定义的高度。 https://www.tailwindcss.cn/docs/height -->
+			<!-- 使用 items-center 沿着容器的交叉轴中心对齐项目：https://www.tailwindcss.cn/docs/align-items#center=  -->
+			<div class="bg-blue-300 flex  flex-row  justify-center items-center  w-5/6  px-4 h-full"
+				v-if="this.rightToLeftFlag">
+				<span class="right">{{ this.nowPageNum }}</span>
+				<n-slider class="bg-yellow-300" v-model:value="nowPageNum" :max="this.book.all_page_num" :min="1"
+					:step="1" :format-tooltip="(value) => `${value}`" @update:value="this.saveNowPageNumOnUpdate" />
+				<span class="left">{{ this.book.all_page_num }}</span>
 			</div>
 		</div>
 	</div>
@@ -184,9 +188,7 @@
 			<n-button>{{ this.getSortHintText(this.resort_hint_key) }}</n-button>
 		</n-dropdown>
 	</Drawer>
-	<!-- <Bottom
-		:softVersion="this.$store.state.server_status.ServerName ? this.$store.state.server_status.ServerName : 'Comigo'"
-	></Bottom>-->
+
 </template>
 
 <script>
@@ -401,9 +403,9 @@ export default defineComponent({
 	//在选项API中使用 Vue 生命周期钩子：
 	created() {
 		// Websocket相关
-		var protocol ='ws://'
-		if( window.location.protocol ==="https"){
-			protocol ='wss://'
+		var protocol = 'ws://'
+		if (window.location.protocol === "https") {
+			protocol = 'wss://'
 		}
 		this.ws = new WebSocket(protocol + window.location.host + '/api/ws');
 		// var self = this;
@@ -574,18 +576,22 @@ export default defineComponent({
 	methods: {
 		//Websocket 发送消息
 		send() {
-			
+			var readPercent = parseFloat(this.nowPageNum) / parseFloat(this.book.all_page_num)
+			console.debug("ReadPercent: " + readPercent)
 			if (this.newMsg === '') {
 				this.ws.send(
 					//提供将 JavaScript 值与 JavaScript 对象表示法 (JSON) 格式相互转换的函数的内在对象。
 					JSON.stringify({
 						message_type: 1,
+						user_id: "test_user",
 						book_id: this.book.id,
 						now_page_num: this.nowPageNum,
+						now_page_num_percent: 0.3333,
+						read_percent: readPercent,
 						message_data: "翻页模式，发送数据" // Strip out html
 					}
 					));
-				console.log("send:",this.newMsg)
+				console.log("send:", this.newMsg)
 				this.newMsg = ''; // Reset newMsg
 			}
 		},
@@ -1316,10 +1322,14 @@ export default defineComponent({
 .header {
 	background: v-bind("model.interfaceColor");
 	height: 5vh;
+	/* position: sticky;
+	top: 0;
+	z-index: var(--z-index-top); */
 }
 
 .bottom {
 	background: v-bind("model.interfaceColor");
+
 }
 
 /* 参考CSS盒子模型慢慢改 */
@@ -1337,6 +1347,7 @@ export default defineComponent({
 	font-family: Arial;
 	margin: 0;
 	padding: 0px;
+	/* height: v-bind(mangaAreaHeight); */
 	display: flex;
 	max-width: 100%;
 	/* flex-direction: column垂直堆叠 flex 项目（从上到下）,column-reverse从下到上 row从左到右 row-reverse从右到左 */
@@ -1351,8 +1362,8 @@ export default defineComponent({
 /* 漫画div */
 .manga_area {
 	width: 100vw;
-	height: v-bind(mangaAreaHeight);
 	max-height: 100vh;
+	height: 100vh;
 	max-width: 100vw;
 	padding: 0px;
 	display: flex;
@@ -1361,18 +1372,19 @@ export default defineComponent({
 	align-items: baseline;
 	user-select: none;
 	/* 不可以被选中 */
-	-moz-user-select: none;
 	/* 火狐 */
-	-webkit-user-select: none;
+	-moz-user-select: none;
 	/* 谷歌 */
-	border-radius: 3px;
-	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+	-webkit-user-select: none;
+	/* border-radius: 3px; */
+	/* box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); */
 }
 
 /* 漫画div中的图片div*/
 .manga_area_img_div {
 	width: 100vw;
-	height: v-bind(mangaAreaHeight);
+	/* height: v-bind(mangaAreaHeight); */
+	height: 100vh;
 	display: flex;
 	flex-direction: v-bind(get_flex_direction);
 	justify-content: center;
@@ -1384,7 +1396,8 @@ export default defineComponent({
 .manga_area_img_div img {
 	/* max-height: inherit 继承 */
 	/* max-height: inherit; */
-	max-height: v-bind(mangaImageHeight);
+	/* max-height: v-bind(mangaImageHeight); */
+	max-height: 100vh;
 	max-width: 100vw;
 	margin: 0px;
 	/* 两张图片之间不要留空间*/
@@ -1410,28 +1423,25 @@ export default defineComponent({
 
 /* 页脚 */
 .footer {
-	height: 5vh;
-	text-align: center;
+	/* height: 5vh; */
+	/* text-align: center; */
+	/* display: flex;
+	justify-content: center; */
 
 	background: v-bind("model.interfaceColor");
-	width: 80vw;
-	padding: 0px;
+	/* width: 80vw; */
+
 }
 
-.footer div {
-	height: 5vh;
-	display: flex;
-	justify-content: center;
-	/* center 值将 flex 项目在容器中间对齐： */
-	/* align-items: center; */
-	/* 文字颜色 */
-	color: #363333;
-	/* 文字阴影：https://www.w3school.com.cn/css/css3_shadows.asp*/
-	text-shadow: -1px 0 rgb(240, 229, 229), 0 1px rgb(253, 242, 242),
-		1px 0 rgb(206, 183, 183), 0 -1px rgb(196, 175, 175);
-}
+/* .footer_div { */
+/* 文字颜色 */
+/* color: #363333; */
+/* 文字阴影：https://www.w3school.com.cn/css/css3_shadows.asp*/
+/* text-shadow: -1px 0 rgb(240, 229, 229), 0 1px rgb(253, 242, 242), */
+/* 1px 0 rgb(206, 183, 183), 0 -1px rgb(196, 175, 175); */
+/* } */
 
-.footer div>span {
+/* .footer_div>span {
 	width: 10vw;
-}
+} */
 </style>

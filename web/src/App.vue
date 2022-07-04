@@ -1,12 +1,12 @@
 <template>
-  <n-config-provider :theme="lightTheme">
-    <div class="app">
+  <!-- <n-config-provider :theme="lightTheme"> -->
+  <div class="app">
       <n-message-provider>
         <!-- 路由出口 路由匹配到的组件将渲染在这里 -->
         <router-view></router-view>
       </n-message-provider>
-    </div>
-  </n-config-provider>
+  </div>
+  <!-- </n-config-provider> -->
 </template>
 
 <script>
@@ -101,6 +101,7 @@ export default defineComponent({
   background-color: #f6f7eb;
   align-items: center;
 }
+
 /* 覆盖8px的浏览器默认值 */
 * {
   /* 外边距，不指定的话，浏览器默认设置成8px */
