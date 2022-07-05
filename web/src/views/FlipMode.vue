@@ -1,4 +1,5 @@
-<template class="static">
+<template >
+<div class="static">
 	<!-- 顶部,标题页头 -->
 	<!-- 定位：https://www.tailwindcss.cn/docs/position -->
 	<Header class="header fixed mx-auto w-full" v-if="this.showHeaderFlag_FlipMode"
@@ -49,7 +50,7 @@
 			<div class="bg-blue-300 flex  flex-row  justify-center items-center  w-5/6  px-4 h-full"
 				v-if="!this.rightToLeftFlag">
 				<span class="right">{{ this.book.all_page_num }}</span>
-				
+
 				<n-slider class="w-10/11" reverse v-model:value="nowPageNum" :max="this.book.all_page_num" :min="1"
 					:step="1" :format-tooltip="(value) => `${value}`" @update:value="this.saveNowPageNumOnUpdate" />
 				<span class="left">{{ this.nowPageNum }}</span>
@@ -188,7 +189,7 @@
 			<n-button>{{ this.getSortHintText(this.resort_hint_key) }}</n-button>
 		</n-dropdown>
 	</Drawer>
-
+</div>
 </template>
 
 <script>
@@ -203,7 +204,7 @@ import { NDivider, NIcon, NInputNumber, NSlider, NSpace, NSwitch, useMessage, NB
 import { SettingsOutline } from "@vicons/ionicons5";
 import axios from "axios";
 import md5 from 'js-md5';
-
+import websocket from '@/websocket'
 
 export default defineComponent({
 	name: "FlipMode",
@@ -398,28 +399,21 @@ export default defineComponent({
 			email: null, // Email address used for grabbing an avatar
 			username: null, // Our username
 			joined: false, // True if email and username have been filled in
+			// Websocket心跳包
+			isOpen: false,//是否连接
+			pingIntervalSeconds: 3000,//心跳连接时间
+			lockReconnect: false,//是否真正建立连接
+			heartTimer: null,//心跳定时器
+			serverTimer: null,//服务器超时 定时器
+			reconnectTimer: null,//断开 重连倒计时
+			sendFixHeartTimer: null,//20s固定发送心跳定时器
 		};
 	},
 	//在选项API中使用 Vue 生命周期钩子：
 	created() {
-		// Websocket相关
-		var protocol = 'ws://'
-		if (window.location.protocol === "https") {
-			protocol = 'wss://'
-		}
-		this.ws = new WebSocket(protocol + window.location.host + '/api/ws');
-		// var self = this;
-		this.ws.addEventListener('message', function (e) {
-			var msg = JSON.parse(e.data);
-			// self.chatContent += '<div class="chip">'
-			// 	+ '<img src="' + self.gravatarURL(msg.email) + '">' // Avatar
-			// 	+ msg.username
-			// 	+ '</div>'
-			// 	'☀'+ '<br/>'; // Parse emojis
-			// var element = document.getElementById('chat-messages');
-			// element.scrollTop = element.scrollHeight; // Auto scroll to the bottom
-			console.log(msg)
-		});
+		// this.startWebsocket();
+		localStorage.setItem("clientId", "user-1");
+		websocket.Init("user-1");
 
 		//根据文件名、修改时间、文件大小等要素排序的参数
 		var sort_image_by_str = ""
@@ -574,6 +568,53 @@ export default defineComponent({
 		//界面有更新就会调用,随便乱放会引起难以调试的BUG
 	},
 	methods: {
+		//初始化或重连Websocket
+		startWebsocket() {
+			// Websocket相关
+			var protocol = 'ws://'
+			if (window.location.protocol === "https") {
+				protocol = 'wss://'
+			}
+			// 实例化socket，这里的实例化直接赋值给this.ws是为了后面可以在其它的函数中也能调用websocket方法，例如：this.ws.close(); 完成通信后关闭WebSocket连接
+			this.ws = new WebSocket(protocol + window.location.host + '/api/ws');
+
+			//监听是否连接成功
+			this.ws.onopen = () => {
+				console.log('ws连接状态：' + this.ws.readyState);
+				//连接成功则发送一个数据
+				this.ws.send('连接成功');
+			}
+
+			//接听服务器发回的信息并处理展示
+			this.ws.onmessage = (data) => {
+				console.log('接收到来自服务器的消息：');
+				console.log(data)
+			}
+
+			//监听连接关闭事件
+			this.ws.onclose = () => {
+				//监听整个过程中websocket的状态
+				console.log('ws连接状态：' + this.ws.readyState);
+			}
+
+			//监听并处理error事件
+			this.ws.onerror = function (error) {
+				console.log(error);
+			}
+
+			// // var self = this;
+			// this.ws.addEventListener('message', function (e) {
+			// 	var msg = JSON.parse(e.data);
+			// 	// self.chatContent += '<div class="chip">'
+			// 	// 	+ '<img src="' + self.gravatarURL(msg.email) + '">' // Avatar
+			// 	// 	+ msg.username
+			// 	// 	+ '</div>'
+			// 	// 	'☀'+ '<br/>'; // Parse emojis
+			// 	// var element = document.getElementById('chat-messages');
+			// 	// element.scrollTop = element.scrollHeight; // Auto scroll to the bottom
+			// 	console.debug("收到服务器传回的消息：", msg)
+			// });
+		},
 		//Websocket 发送消息
 		send() {
 			var readPercent = parseFloat(this.nowPageNum) / parseFloat(this.book.all_page_num)
@@ -922,7 +963,7 @@ export default defineComponent({
 			}
 		},
 		toNextPage() {
-			this.send();
+			// this.send();
 			//简单合并模式
 			if (this.simpleDoublePageModeFlag) {
 				if (this.nowPageNum < this.book.all_page_num - 1) {

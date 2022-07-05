@@ -12,16 +12,9 @@ import (
 // MessageType 收发消息的时候，用来区分消息类型
 type MessageType int
 
-const (
-	OnlineStatus MessageType = iota //在线状态  //开始生成枚举值, 默认为0
-	nowPageNum                      //同步翻页用 1
-	ErrorHint                       //书籍不存在、文件已移除的提示
-	Test
-)
-
 // Message 定义一个对象来管理消息，反引号包含的文本是 Go 在对象和 JSON 之间进行序列化和反序列化时需要的元数据。
 type Message struct {
-	MessageType       int     `json:"message_type"`
+	MessageType       string  `json:"message_type"`
 	UserID            string  `json:"user_id"`
 	BookID            string  `json:"book_id"`
 	NowPageNum        int     `json:"now_page_num"`
