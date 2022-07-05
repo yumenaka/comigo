@@ -3,6 +3,8 @@ import path from 'path';
 import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
 import envCompatible from 'vite-plugin-env-compatible';
+//vite-plugin-html:一个针对 index.html，提供压缩和基于 ejs 模板功能的 vite 插件。通过搭配 .env 文件，可以在开发或构建项目时，对 index.html 注入动态数据，例如替换网站标题。
+//Vite 应用的 title 默认是写死的，如需要替换成实际的 title 值需要安装 vite-plugin-html 插件，然后通过 ejs 模板注入变量。 https://juejin.cn/post/6988704825450397709
 import { injectHtml } from 'vite-plugin-html';
 import { viteCommonjs } from '@originjs/vite-plugin-commonjs';
 
@@ -49,7 +51,7 @@ export default defineConfig({
     vueJsx(),
     viteCommonjs(),
     envCompatible(),
-    injectHtml()
+    injectHtml(),
   ],
   server: {
     strictPort: false,//设置为 true 时，如果端口已被使用，则直接退出，而不会再进行后续端口的尝试。
