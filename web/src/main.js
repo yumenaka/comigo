@@ -7,6 +7,7 @@ import store from "@/store"; //VueX
 // import VueCookies from "vue3-cookies";
 import VueLazyLoad from "vue3-lazyload";
 import i18n from '@/locales'
+import VueNativeSock from "vue-native-websocket-vue3";
 
 // 后端改成 /api/book/:id的形式
 axios.defaults.baseURL = "/api"
@@ -63,3 +64,32 @@ app.use(VueLazyLoad, {
 });
 
 app.mount("#app"); // look index.html:  <div id="app"></div>
+
+// 使用VueNativeSock插件，并进行相关配置
+// 参考https://github.com/likaia/vue-native-websocket-vue3
+var protocol = 'ws://'
+if (window.location.protocol === "https") {
+    protocol = 'wss://'
+}
+var ws_url = protocol + window.location.host + '/api/ws';
+app.use(
+    VueNativeSock,
+    ws_url + `/${localStorage.getItem("userID")}`,
+    {
+        // 启用Vuex集成
+        store: store,
+        // 数据发送/接收使用使用json
+        format: "json",
+        // 开启手动调用 connect() 连接服务器
+        connectManually: true,
+        // 开启自动重连
+        reconnection: true,
+        // 尝试重连的次数
+        reconnectionAttempts: 60,
+        // 重连间隔时间
+        reconnectionDelay: 3000
+    }
+);
+
+//store的websockets需要导入main，所以要有这一句，参考： https://github.com/likaia/chat-system/blob/master/src/main.ts
+export default app;

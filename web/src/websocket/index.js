@@ -1,4 +1,4 @@
-import store from '@/store'
+// import store from '@/store'
 // import { Message } from 'element-ui'
 
 
@@ -50,7 +50,7 @@ var websocket = {
             heartCheck.start();
         }
 
-        ws.onerror = function (e) {
+        ws.onerror = function () {
             console.log("数据传输发生错误");
             // Message({
             //     message: '数据传输发生错误',
@@ -106,7 +106,7 @@ function messageHandle(message) {
 function reconnect(sname) {
     if (lockReconnect) {
         return;
-    };
+    }
     lockReconnect = true;
     //没连接上会一直重连，设置延迟避免请求过多
     timeoutId && clearTimeout(timeoutId);

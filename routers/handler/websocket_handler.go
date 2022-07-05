@@ -20,7 +20,7 @@ type Message struct {
 	NowPageNum        int     `json:"now_page_num"`
 	NowPageNumPercent float64 `json:"now_page_num_percent"`
 	ReadPercent       float64 `json:"read_percent"`
-	Message           string  `json:"message_data"`
+	Msg               string  `json:"msg"`
 }
 
 //创建一个 upGrader 的实例。这只是一个对象，它具备一些方法，这些方法可以获取一个普通 HTTP 链接然后将其升级成一个 WebSocket
@@ -73,16 +73,15 @@ func WebSocketHandler(c *gin.Context) {
 		}
 	}()
 
-	// 无限循环，等待要写入 WebSocket 的新消息，将其从 JSON 反序列化为 Message 对象然后送入广播频道。
+	// 无限循环，等待要写入 WebSocket 的新消息，将其从 JSON 反序列化为 Msg 对象然后送入广播频道。
 	for {
-
 		////测试用的乒乓逻辑
 		//messageType, message, err := wsConn.ReadMessage()
 		//if err != nil {
 		//	log.Println("Error during message reading:", err)
 		//	//break
 		//} else {
-		//	fmt.Printf("Message Type: %d, Message: %s\n", messageType, string(message))
+		//	fmt.Printf("Msg Type: %d, Msg: %s\n", messageType, string(message))
 		//	//如果是乒乓
 		//	if string(message) == "ping!" || string(message) == "ping" || string(message) == "乒" || string(message) == "乒!" {
 		//		message = []byte("pang!")
@@ -100,7 +99,7 @@ func WebSocketHandler(c *gin.Context) {
 		//}
 
 		////读取ws中的数据,反序列为json（序列化：将对象转化成字节序列的过程。 反序列化：就是讲字节序列转化成对象的过程。）
-		var msg Message // Read in a new message as JSON and map it to a Message object
+		var msg Message // Read in a new message as JSON and map it to a Msg object
 		err = wsConn.ReadJSON(&msg)
 		if err != nil {
 			//fmt.Println()
@@ -108,10 +107,11 @@ func WebSocketHandler(c *gin.Context) {
 			//如果从 socket 中读取数据有误，我们假设客户端已经因为某种原因断开。我们记录错误并从全局的 “clients” 映射表里删除该客户端，这样一来，我们不会继续尝试与其通信。
 			delete(clients, wsConn)
 			break
+		} else {
+			fmt.Printf("【WebSocketHandler】Msg: %v\n", msg)
+			// Send the newly received message to the broadcast channel
+			broadcast <- msg
 		}
-		fmt.Printf("Message Type: %d, Message: %v\n", msg.MessageType, msg)
-		// Send the newly received message to the broadcast channel
-		broadcast <- msg
 	}
 }
 
