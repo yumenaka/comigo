@@ -1,157 +1,159 @@
 <template >
-<div class="static">
-	<!-- 顶部,标题页头 -->
-	<!-- 定位：https://www.tailwindcss.cn/docs/position -->
-	<Header class="header fixed mx-auto w-full" v-if="this.showHeaderFlag_FlipMode"
-		:setDownLoadLink="this.needDownloadLink()" :headerTitle="book.name" :bookID="this.book.id"
-		:showReturnIcon="true">
-		<!-- 右边的设置图标,点击屏幕中央也可以打开 -->
-		<n-icon size="40" @click="drawerActivate('right')">
-			<settings-outline />
-		</n-icon>
-	</Header>
-	<div class="main">
-		<!-- 主题,漫画div -->
-		<!-- 事件修饰符： https://v3.cn.vuejs.org/guide/events.html#%E4%BA%8B%E4%BB%B6%E4%BF%AE%E9%A5%B0%E7%AC%A6 -->
-		<div class="manga_area" id="MangaMain" @click.stop="onMouseClick" @mousemove.stop="onMouseMove"
-			@mouseleave.stop="onMouseLeave">
-			<div class="manga_area_img_div">
-				<!-- 非自动拼合模式最简单,直接显示一张图 -->
-				<img v-bind:src="this.imageParametersString(book.pages.images[nowPageNum - 1].url)"
-					v-bind:alt="nowPageNum" />
+	<div class="static">
+		<!-- 顶部,标题页头 -->
+		<!-- 定位：https://www.tailwindcss.cn/docs/position -->
+		<Header class="header fixed mx-auto w-full" v-if="this.showHeaderFlag_FlipMode"
+			:setDownLoadLink="this.needDownloadLink()" :headerTitle="book.name" :bookID="this.book.id"
+			:showReturnIcon="true">
+			<!-- 右边的设置图标,点击屏幕中央也可以打开 -->
+			<n-icon size="40" @click="drawerActivate('right')">
+				<settings-outline />
+			</n-icon>
+		</Header>
+		<div class="main">
+			<!-- 主题,漫画div -->
+			<!-- 事件修饰符： https://v3.cn.vuejs.org/guide/events.html#%E4%BA%8B%E4%BB%B6%E4%BF%AE%E9%A5%B0%E7%AC%A6 -->
+			<div class="manga_area" id="MangaMain" @click.stop="onMouseClick" @mousemove.stop="onMouseMove"
+				@mouseleave.stop="onMouseLeave">
+				<div class="manga_area_img_div">
+					<!-- 非自动拼合模式最简单,直接显示一张图 -->
+					<img v-bind:src="this.imageParametersString(book.pages.images[nowPageNum - 1].url)"
+						v-bind:alt="nowPageNum" />
 
-				<!-- 简单拼合双页,不管单双页什么的 -->
-				<img v-if="(!this.autoDoublePageModeFlag) && this.simpleDoublePageModeFlag && this.nowPageNum < this.book.all_page_num"
-					v-bind:src="this.imageParametersString(book.pages.images[nowPageNum].url)"
-					v-bind:alt="nowPageNum + 1" />
+					<!-- 简单拼合双页,不管单双页什么的 -->
+					<img v-if="(!this.autoDoublePageModeFlag) && this.simpleDoublePageModeFlag && this.nowPageNum < this.book.all_page_num"
+						v-bind:src="this.imageParametersString(book.pages.images[nowPageNum].url)"
+						v-bind:alt="nowPageNum + 1" />
 
-				<!-- 自动拼合模式当前页,如果开启自动拼合,右边可能显示拼合页 -->
-				<img v-if="this.autoDoublePageModeFlag && this.nowPageNum < this.book.all_page_num && this.nowAndNextPageIsSingle()"
-					v-bind:src="this.imageParametersString(book.pages.images[nowPageNum].url)"
-					v-bind:alt="nowPageNum + 1" />
-			</div>
-			<div v-if="this.showPageHintFlag_FlipMode" class="sketch_hint">{{ pageNumOrSketchHint }}</div>
-		</div>
-	</div>
-
-
-	<!-- 页脚 拖动条 -->
-	<!-- 宽度：w-5/6 https://www.tailwindcss.cn/docs/width 使用 w-{fraction} 或 w-full 将元素设置为基于百分比的宽度。 -->
-	<!-- 定位：https://www.tailwindcss.cn/docs/position  -->
-	<!-- 使用 fixed 来定位一个元素相对于浏览器窗视口的位置。偏移量是相对于视口计算的，且该元素将作为绝对定位的子元素的位置参考。 -->
-	<!-- 控制 flex 和 grid 项目如何沿着容器的主轴定位:https://www.tailwindcss.cn/docs/justify-content -->
-	<!-- Tailwind 的容器不会自动居中，也没有任何内置的水平方向的内边距。要使一个容器居中，使用 mx-auto 功能类： -->
-	<div class="absolute bottom-0 w-full h-10 ">
-		<div class="bg-red-300 flex flex-row justify-center items-end  mx-auto w-full h-10 "
-			v-if="this.showFooterFlag_FlipMode">
-
-			<!-- 日漫模式 底部滑动条,设置reverse翻转计数方向 -->
-			<!-- 背景颜色：bg-blue-300  https://www.tailwindcss.cn/docs/background-color  -->
-			<div class="bg-blue-300 flex  flex-row  justify-center items-center  w-5/6  px-4 h-full"
-				v-if="!this.rightToLeftFlag">
-				<span class="right">{{ this.book.all_page_num }}</span>
-
-				<n-slider class="w-10/11" reverse v-model:value="nowPageNum" :max="this.book.all_page_num" :min="1"
-					:step="1" :format-tooltip="(value) => `${value}`" @update:value="this.saveNowPageNumOnUpdate" />
-				<span class="left">{{ this.nowPageNum }}</span>
-			</div>
-
-			<!-- 美漫模式用 ,底部滑动条 -->
-			<!-- h-full: 将一个元素的高度设置为其父元素的 100%，只要父元素有一个定义的高度。 https://www.tailwindcss.cn/docs/height -->
-			<!-- 使用 items-center 沿着容器的交叉轴中心对齐项目：https://www.tailwindcss.cn/docs/align-items#center=  -->
-			<div class="bg-blue-300 flex  flex-row  justify-center items-center  w-5/6  px-4 h-full"
-				v-if="this.rightToLeftFlag">
-				<span class="right">{{ this.nowPageNum }}</span>
-				<n-slider class="bg-yellow-300" v-model:value="nowPageNum" :max="this.book.all_page_num" :min="1"
-					:step="1" :format-tooltip="(value) => `${value}`" @update:value="this.saveNowPageNumOnUpdate" />
-				<span class="left">{{ this.book.all_page_num }}</span>
+					<!-- 自动拼合模式当前页,如果开启自动拼合,右边可能显示拼合页 -->
+					<img v-if="this.autoDoublePageModeFlag && this.nowPageNum < this.book.all_page_num && this.nowAndNextPageIsSingle()"
+						v-bind:src="this.imageParametersString(book.pages.images[nowPageNum].url)"
+						v-bind:alt="nowPageNum + 1" />
+				</div>
+				<div v-if="this.showPageHintFlag_FlipMode" class="sketch_hint">{{ pageNumOrSketchHint }}</div>
 			</div>
 		</div>
-	</div>
 
-	<!-- 设置抽屉,一开始隐藏 -->
-	<Drawer :initDrawerActive="this.drawerActive" :initDrawerPlacement="this.drawerPlacement"
-		@saveConfig="this.saveConfigToLocal" @startSketch="this.startSketchMode" @stopSketch="this.stopSketchMode"
-		@closeDrawer="this.drawerDeactivate" :readerMode="this.readerMode" :inBookShelf="false"
-		:sketching="this.sketchModeFlag">
-		<!-- 选择：切换页面模式 -->
-		<n-space>
-			<n-button @click="changeReaderModeToScrollMode">{{ $t('switch_to_scrolling_mode') }}</n-button>
-		</n-space>
-		<!-- 分割线 -->
-		<n-divider />
 
-		<!-- Switch：页头与书名 -->
-		<n-space>
-			<n-switch size="large" v-model:value="this.showHeaderFlag_FlipMode" @update:value="setShowHeaderChange">
-				<template #checked>{{ $t("showHeader") }}</template>
-				<template #unchecked>{{ $t("showHeader") }}</template>
-			</n-switch>
-		</n-space>
+		<!-- 页脚 拖动条 -->
+		<!-- 宽度：w-5/6 https://www.tailwindcss.cn/docs/width 使用 w-{fraction} 或 w-full 将元素设置为基于百分比的宽度。 -->
+		<!-- 定位：https://www.tailwindcss.cn/docs/position  -->
+		<!-- 使用 fixed 来定位一个元素相对于浏览器窗视口的位置。偏移量是相对于视口计算的，且该元素将作为绝对定位的子元素的位置参考。 -->
+		<!-- 控制 flex 和 grid 项目如何沿着容器的主轴定位:https://www.tailwindcss.cn/docs/justify-content -->
+		<!-- Tailwind 的容器不会自动居中，也没有任何内置的水平方向的内边距。要使一个容器居中，使用 mx-auto 功能类： -->
+		<div class="absolute bottom-0 w-full h-10 ">
+			<div class="bg-red-300 flex flex-row justify-center items-end  mx-auto w-full h-10 "
+				v-if="this.showFooterFlag_FlipMode">
 
-		<!-- Switch：显示阅读进度条） -->
-		<n-space>
-			<n-switch size="large" v-model:value="this.showFooterFlag_FlipMode" @update:value="setShowFooterFlagChange">
-				<template #checked>{{ $t("readingProgressBar") }}</template>
-				<template #unchecked>{{ $t("readingProgressBar") }}</template>
-			</n-switch>
-		</n-space>
+				<!-- 日漫模式 底部滑动条,设置reverse翻转计数方向 -->
+				<!-- 背景颜色：bg-blue-300  https://www.tailwindcss.cn/docs/background-color  -->
+				<div class="bg-blue-300 flex  flex-row  justify-center items-center  w-5/6  px-4 h-full"
+					v-if="!this.rightToLeftFlag">
+					<span class="right">{{ this.book.all_page_num }}</span>
 
-		<!-- Switch：显示当前页数 -->
-		<n-space>
-			<n-switch size="large" v-model:value="this.showPageHintFlag_FlipMode" @update:value="setShowPageNumChange">
-				<template #checked>{{ $t("showPageNum") }}</template>
-				<template #unchecked>{{ $t("showPageNum") }}</template>
-			</n-switch>
-		</n-space>
-		<!-- 保存阅读进度 -->
-		<n-space>
-			<n-switch size="large" v-model:value="this.saveNowPageNumFlag_FlipMode"
-				@update:value="this.setSavePageNumFlag">
-				<template #checked>{{ $t("savePageNum") }}</template>
-				<template #unchecked>{{ $t("savePageNum") }}</template>
-			</n-switch>
-		</n-space>
+					<n-slider class="w-10/11" reverse v-model:value="nowPageNum" :max="this.book.all_page_num" :min="1"
+						:step="1" :format-tooltip="(value) => `${value}`" @update:value="this.saveNowPageNumOnUpdate" />
+					<span class="left">{{ this.nowPageNum }}</span>
+				</div>
 
-		<!-- 分割线 -->
-		<n-divider />
-		<!-- Switch：合并双页 -->
-		<n-space>
-			<n-switch size="large" v-model:value="this.simpleDoublePageModeFlag"
-				@update:value="this.setSimpleDoublePage_FlipMode">
-				<template #checked>{{ $t('simpleDoublePage') }}</template>
-				<template #unchecked>{{ $t('simpleDoublePage') }}</template>
-			</n-switch>
-		</n-space>
+				<!-- 美漫模式用 ,底部滑动条 -->
+				<!-- h-full: 将一个元素的高度设置为其父元素的 100%，只要父元素有一个定义的高度。 https://www.tailwindcss.cn/docs/height -->
+				<!-- 使用 items-center 沿着容器的交叉轴中心对齐项目：https://www.tailwindcss.cn/docs/align-items#center=  -->
+				<div class="bg-blue-300 flex  flex-row  justify-center items-center  w-5/6  px-4 h-full"
+					v-if="this.rightToLeftFlag">
+					<span class="right">{{ this.nowPageNum }}</span>
+					<n-slider class="bg-yellow-300" v-model:value="nowPageNum" :max="this.book.all_page_num" :min="1"
+						:step="1" :format-tooltip="(value) => `${value}`" @update:value="this.saveNowPageNumOnUpdate" />
+					<span class="left">{{ this.book.all_page_num }}</span>
+				</div>
+			</div>
+		</div>
 
-		<!-- Switch：翻页模式,默认右开本（日漫）-->
-		<n-space>
-			<n-switch size="large" v-model:value="this.rightToLeftFlag" :rail-style="railStyle"
-				@update:value="this.setFlipScreenFlag">
-				<template #unchecked>{{ $t("rightScreenToNext") }}</template>
-				<template #checked>{{ $t("leftScreenToNext") }}</template>
-			</n-switch>
-		</n-space>
+		<!-- 设置抽屉,一开始隐藏 -->
+		<Drawer :initDrawerActive="this.drawerActive" :initDrawerPlacement="this.drawerPlacement"
+			@saveConfig="this.saveConfigToLocal" @startSketch="this.startSketchMode" @stopSketch="this.stopSketchMode"
+			@closeDrawer="this.drawerDeactivate" :readerMode="this.readerMode" :inBookShelf="false"
+			:sketching="this.sketchModeFlag">
+			<!-- 选择：切换页面模式 -->
+			<n-space>
+				<n-button @click="changeReaderModeToScrollMode">{{ $t('switch_to_scrolling_mode') }}</n-button>
+			</n-space>
+			<!-- 分割线 -->
+			<n-divider />
 
-		<!-- Switch：自动切边 -->
-		<n-space>
-			<n-switch size="large" v-model:value="this.imageParameters.do_auto_crop"
-				@update:value="setImageParameters_DoAutoCrop">
-				<template #checked>{{ $t('auto_crop') }}</template>
-				<template #unchecked>{{ $t('auto_crop') }}</template>
-			</n-switch>
-			<!-- 切白边阈值 -->
-			<n-input-number :show-button="false" v-if="this.imageParameters.do_auto_crop"
-				v-model:value="this.imageParameters.auto_crop_num" @update:value="setImageParameters_AutoCropNum"
-				:max="10" :min="0">
-				<template #prefix>{{ $t('energy_threshold') }}</template>
-			</n-input-number>
-		</n-space>
-		<!-- 分割线 -->
-		<!-- <n-divider /> -->
+			<!-- Switch：页头与书名 -->
+			<n-space>
+				<n-switch size="large" v-model:value="this.showHeaderFlag_FlipMode" @update:value="setShowHeaderChange">
+					<template #checked>{{ $t("showHeader") }}</template>
+					<template #unchecked>{{ $t("showHeader") }}</template>
+				</n-switch>
+			</n-space>
 
-		<!-- Switch：Debug,开启一些不稳定功能 -->
-		<!-- <n-space>
+			<!-- Switch：显示阅读进度条） -->
+			<n-space>
+				<n-switch size="large" v-model:value="this.showFooterFlag_FlipMode"
+					@update:value="setShowFooterFlagChange">
+					<template #checked>{{ $t("readingProgressBar") }}</template>
+					<template #unchecked>{{ $t("readingProgressBar") }}</template>
+				</n-switch>
+			</n-space>
+
+			<!-- Switch：显示当前页数 -->
+			<n-space>
+				<n-switch size="large" v-model:value="this.showPageHintFlag_FlipMode"
+					@update:value="setShowPageNumChange">
+					<template #checked>{{ $t("showPageNum") }}</template>
+					<template #unchecked>{{ $t("showPageNum") }}</template>
+				</n-switch>
+			</n-space>
+			<!-- 保存阅读进度 -->
+			<n-space>
+				<n-switch size="large" v-model:value="this.saveNowPageNumFlag_FlipMode"
+					@update:value="this.setSavePageNumFlag">
+					<template #checked>{{ $t("savePageNum") }}</template>
+					<template #unchecked>{{ $t("savePageNum") }}</template>
+				</n-switch>
+			</n-space>
+
+			<!-- 分割线 -->
+			<n-divider />
+			<!-- Switch：合并双页 -->
+			<n-space>
+				<n-switch size="large" v-model:value="this.simpleDoublePageModeFlag"
+					@update:value="this.setSimpleDoublePage_FlipMode">
+					<template #checked>{{ $t('simpleDoublePage') }}</template>
+					<template #unchecked>{{ $t('simpleDoublePage') }}</template>
+				</n-switch>
+			</n-space>
+
+			<!-- Switch：翻页模式,默认右开本（日漫）-->
+			<n-space>
+				<n-switch size="large" v-model:value="this.rightToLeftFlag" :rail-style="railStyle"
+					@update:value="this.setFlipScreenFlag">
+					<template #unchecked>{{ $t("rightScreenToNext") }}</template>
+					<template #checked>{{ $t("leftScreenToNext") }}</template>
+				</n-switch>
+			</n-space>
+
+			<!-- Switch：自动切边 -->
+			<n-space>
+				<n-switch size="large" v-model:value="this.imageParameters.do_auto_crop"
+					@update:value="setImageParameters_DoAutoCrop">
+					<template #checked>{{ $t('auto_crop') }}</template>
+					<template #unchecked>{{ $t('auto_crop') }}</template>
+				</n-switch>
+				<!-- 切白边阈值 -->
+				<n-input-number :show-button="false" v-if="this.imageParameters.do_auto_crop"
+					v-model:value="this.imageParameters.auto_crop_num" @update:value="setImageParameters_AutoCropNum"
+					:max="10" :min="0">
+					<template #prefix>{{ $t('energy_threshold') }}</template>
+				</n-input-number>
+			</n-space>
+			<!-- 分割线 -->
+			<!-- <n-divider /> -->
+
+			<!-- Switch：Debug,开启一些不稳定功能 -->
+			<!-- <n-space>
 			<n-switch size="large" v-model:value="this.debugModeFlag" @update:value="this.setDebugModeFlag">
 				<template #checked>{{ $t("debugMode") }}</template>
 				<template #unchecked>{{ $t("debugMode") }}</template>
@@ -169,27 +171,28 @@
 			</n-switch>
 		</n-space>-->
 
-		<!-- 分割线 -->
-		<n-divider v-if="this.readerMode == 'sketch'" />
-		<!-- 自动翻页秒数 -->
-		<!-- 数字输入% -->
-		<n-input-number v-if="this.readerMode == 'sketch'" size="small" :show-button="false"
-			v-model:value="this.sketchFlipSecond" :max="65535" :min="1" :update-value-on-input="false"
-			@update:value="this.resetSketchSecondCount">
-			<template #prefix>{{ $t('pageTurningSeconds') }}</template>
-			<template #suffix>{{ $t("second") }}</template>
-		</n-input-number>
-		<!-- 滑动选择% -->
-		<n-slider v-if="this.readerMode == 'sketch'" v-model:value="this.sketchFlipSecond" :step="1" :max="120" :min="1"
-			:marks="marks" :format-tooltip="value => `${value}s`" @update:value="this.resetSketchSecondCount" />
+			<!-- 分割线 -->
+			<n-divider v-if="this.readerMode == 'sketch'" />
+			<!-- 自动翻页秒数 -->
+			<!-- 数字输入% -->
+			<n-input-number v-if="this.readerMode == 'sketch'" size="small" :show-button="false"
+				v-model:value="this.sketchFlipSecond" :max="65535" :min="1" :update-value-on-input="false"
+				@update:value="this.resetSketchSecondCount">
+				<template #prefix>{{ $t('pageTurningSeconds') }}</template>
+				<template #suffix>{{ $t("second") }}</template>
+			</n-input-number>
+			<!-- 滑动选择% -->
+			<n-slider v-if="this.readerMode == 'sketch'" v-model:value="this.sketchFlipSecond" :step="1" :max="120"
+				:min="1" :marks="marks" :format-tooltip="value => `${value}s`"
+				@update:value="this.resetSketchSecondCount" />
 
-		<!-- 分割线 -->
-		<n-divider />
-		<n-dropdown trigger="hover" :options="options" @select="onResort">
-			<n-button>{{ this.getSortHintText(this.resort_hint_key) }}</n-button>
-		</n-dropdown>
-	</Drawer>
-</div>
+			<!-- 分割线 -->
+			<n-divider />
+			<n-dropdown trigger="hover" :options="options" @select="onResort">
+				<n-button>{{ this.getSortHintText(this.resort_hint_key) }}</n-button>
+			</n-dropdown>
+		</Drawer>
+	</div>
 </template>
 
 <script>
@@ -204,7 +207,6 @@ import { NDivider, NIcon, NInputNumber, NSlider, NSpace, NSwitch, useMessage, NB
 import { SettingsOutline } from "@vicons/ionicons5";
 import axios from "axios";
 import md5 from 'js-md5';
-import websocket from '@/websocket'
 
 export default defineComponent({
 	name: "FlipMode",
@@ -411,9 +413,18 @@ export default defineComponent({
 	},
 	//在选项API中使用 Vue 生命周期钩子：
 	created() {
-		// this.startWebsocket();
-		localStorage.setItem("clientId", "user-1");
-		websocket.Init("user-1");
+		// // this.startWebsocket();
+		// localStorage.setItem("clientId", "user-1");
+		// websocket.Init("user-1");
+
+		// 连接websocket服务器，参数为websocket服务地址
+		var protocol = 'ws://'
+		if (window.location.protocol === "https") {
+			protocol = 'wss://'
+		}
+		var ws_url = protocol + window.location.host + '/api/ws';
+		this.$connect(ws_url);
+		console.log("ws_url:"+ws_url)
 
 		//根据文件名、修改时间、文件大小等要素排序的参数
 		var sort_image_by_str = ""
@@ -647,8 +658,8 @@ export default defineComponent({
 				console.log('You must choose a username', 2000);
 				return
 			}
-			this.email = $('<p>').html(this.email).text();
-			this.username = $('<p>').html(this.username).text();
+			// this.email = $('<p>').html(this.email).text();
+			// this.username = $('<p>').html(this.username).text();
 			this.joined = true;
 		},
 		// 辅助函数，用于从 Gravatar 获取头像。URL 的最后一段需要用户的 email 地址的 MD5 编码。

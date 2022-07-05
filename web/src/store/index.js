@@ -1,5 +1,6 @@
 import { createStore } from 'vuex'
 import axios from 'axios'
+import main from "../main";
 
 const store = createStore({
   //开启严格模式，避免直接的修改
@@ -45,21 +46,85 @@ const store = createStore({
       read_percent: 0.0,
       msg: "",
     },
+    token: "",
+    refreshToken: "",
+    userID: "",
+    // 用户头像
+    profilePicture: "",
+    username: "",
+    // 在线人数
+    onlineUsers: 0,
+    currentComponentName: null,
+    //websockets相关，参考https://github.com/likaia/vue-native-websocket-vue3
+    socket: {
+      // 连接状态
+      isConnected: false,
+      // 消息内容
+      message: "",
+      // 重新连接错误
+      reconnectError: false,
+      // 心跳消息发送时间
+      heartBeatInterval: 50000,
+      // 心跳定时器
+      heartBeatTimer: 0
+    }
   },
   //mutaitions改变 只能执行同步操作。不能直接调用。需要使用 store.commit('函数名') 方法
   mutations: {
-    // change_template_to_scroll(state) {
-    //   state.server_status.template = "scroll";
-    //   console.log("change_template_to_scroll:" + state.server_status.template);
-    // },
-    // change_template_to_flip(state) {
-    //   state.server_status.template = "flip";
-    //   console.log("change_template_to_flip:" + state.server_status.template);
-    // },
-    // change_template_to_sketch(state) {
-    //   state.server_status.template = "sketch";
-    //   console.log("change_template_to_sketch:" + state.server_status.template);
-    // },
+    // 连接打开
+    SOCKET_ONOPEN(state, event) {
+      main.config.globalProperties.$socket = event.currentTarget;
+      // Vue.prototype.$socket = event.currentTarget
+
+      // console.log(app, "app");
+      // app.config.globalProperties.$socket = event.currentTarget;
+
+      state.socket.isConnected = true;
+      // 连接成功时启动定时发送心跳消息，避免被服务器断开连接
+      state.socket.heartBeatTimer = setInterval(() => {
+        const message = "【Websockets】心跳消息";
+        state.socket.isConnected &&
+        // Vue.prototype.$socket.sendObj({
+            main.config.globalProperties.$socket.sendObj({
+            code: 200,
+            msg: message
+          });
+      }, state.socket.heartBeatInterval);
+
+      main.config.globalProperties.$socket.sendObj({
+        code: 200,
+        token: state.token,
+        userID: state.userID,
+        msg: state.userID + "【Websockets】上线"
+      });
+
+      console.log("【Websockets】连接建立: " + new Date());
+    },
+    // 连接关闭
+    SOCKET_ONCLOSE(state, event) {
+      state.socket.isConnected = false;
+      // 连接关闭时停掉心跳消息
+      clearInterval(state.socket.heartBeatTimer);
+      state.socket.heartBeatTimer = 0;
+      console.log("【Websockets】连接已断开: " + new Date());
+      console.log(event);
+    },
+    // 发生错误
+    SOCKET_ONERROR(state, event) {
+      console.error(state, event);
+    },
+    // 收到服务端发送的消息
+    SOCKET_ONMESSAGE(state, message) {
+      state.socket.message = message;
+    },
+    // 自动重连
+    SOCKET_RECONNECT(state, count) {
+      console.info("【Websockets】消息系统重连中...", state, count);
+    },
+    // 重连错误
+    SOCKET_RECONNECT_ERROR(state) {
+      state.socket.reconnectError = true;
+    },
     increment(state) {
       state.count++;
     },
