@@ -2,7 +2,8 @@
 	<div class="static">
 		<!-- 顶部,标题页头 -->
 		<!-- 定位：https://www.tailwindcss.cn/docs/position -->
-		<Header class="header fixed mx-auto w-full" v-if="this.showHeaderFlag_FlipMode"
+		<!-- 不透明度：opacity-70 https://www.tailwindcss.cn/docs/opacity -->
+		<Header class="header fixed mx-auto w-full opacity-70" v-if="this.showHeaderFlag_FlipMode"
 			:setDownLoadLink="this.needDownloadLink()" :headerTitle="book.name" :bookID="this.book.id"
 			:showReturnIcon="true">
 			<!-- 右边的设置图标,点击屏幕中央也可以打开 -->
@@ -41,7 +42,7 @@
 		<!-- 使用 fixed 来定位一个元素相对于浏览器窗视口的位置。偏移量是相对于视口计算的，且该元素将作为绝对定位的子元素的位置参考。 -->
 		<!-- 控制 flex 和 grid 项目如何沿着容器的主轴定位:https://www.tailwindcss.cn/docs/justify-content -->
 		<!-- Tailwind 的容器不会自动居中，也没有任何内置的水平方向的内边距。要使一个容器居中，使用 mx-auto 功能类： -->
-		<div class="absolute bottom-0 w-full h-10 ">
+		<div class="absolute bottom-0 w-full h-10 opacity-70">
 			<div class="bg-red-300 flex flex-row justify-center items-end  mx-auto w-full h-10 "
 				v-if="this.showFooterFlag_FlipMode">
 
@@ -389,42 +390,12 @@ export default defineComponent({
 			sketchFlipSecond: 30,
 			//计时用,从0开始
 			sketchSecondCount: 0,
-			//计时器ID
-			interval: null,
-			nowPageIsDouble: false,
-			nextPageIsDouble: false,
-			nowAndNextPageIsSingleFlag: true,
-			// Websocket相关
-			ws: null, // Our websocket
-			newMsg: '', // Holds new messages to be sent to the server
-			chatContent: '', // A running list of chat messages displayed on the screen
-			email: null, // Email address used for grabbing an avatar
-			username: null, // Our username
-			joined: false, // True if email and username have been filled in
-			// Websocket心跳包
-			isOpen: false,//是否连接
-			pingIntervalSeconds: 3000,//心跳连接时间
-			lockReconnect: false,//是否真正建立连接
-			heartTimer: null,//心跳定时器
-			serverTimer: null,//服务器超时 定时器
-			reconnectTimer: null,//断开 重连倒计时
-			sendFixHeartTimer: null,//20s固定发送心跳定时器
 		};
 	},
 	//在选项API中使用 Vue 生命周期钩子：
 	created() {
 		// // this.startWebsocket();
 		// localStorage.setItem("clientId", "user-1");
-		// websocket.Init("user-1");
-
-		// 连接websocket服务器，参数为websocket服务地址
-		var protocol = 'ws://'
-		if (window.location.protocol === "https") {
-			protocol = 'wss://'
-		}
-		var ws_url = protocol + window.location.host + '/api/ws';
-		this.$connect(ws_url);
-		console.log("ws_url:"+ws_url)
 
 		//根据文件名、修改时间、文件大小等要素排序的参数
 		var sort_image_by_str = ""
@@ -579,89 +550,25 @@ export default defineComponent({
 		//界面有更新就会调用,随便乱放会引起难以调试的BUG
 	},
 	methods: {
-		//初始化或重连Websocket
-		startWebsocket() {
-			// Websocket相关
-			var protocol = 'ws://'
-			if (window.location.protocol === "https") {
-				protocol = 'wss://'
-			}
-			// 实例化socket，这里的实例化直接赋值给this.ws是为了后面可以在其它的函数中也能调用websocket方法，例如：this.ws.close(); 完成通信后关闭WebSocket连接
-			this.ws = new WebSocket(protocol + window.location.host + '/api/ws');
-
-			//监听是否连接成功
-			this.ws.onopen = () => {
-				console.log('ws连接状态：' + this.ws.readyState);
-				//连接成功则发送一个数据
-				this.ws.send('连接成功');
-			}
-
-			//接听服务器发回的信息并处理展示
-			this.ws.onmessage = (data) => {
-				console.log('接收到来自服务器的消息：');
-				console.log(data)
-			}
-
-			//监听连接关闭事件
-			this.ws.onclose = () => {
-				//监听整个过程中websocket的状态
-				console.log('ws连接状态：' + this.ws.readyState);
-			}
-
-			//监听并处理error事件
-			this.ws.onerror = function (error) {
-				console.log(error);
-			}
-
-			// // var self = this;
-			// this.ws.addEventListener('message', function (e) {
-			// 	var msg = JSON.parse(e.data);
-			// 	// self.chatContent += '<div class="chip">'
-			// 	// 	+ '<img src="' + self.gravatarURL(msg.email) + '">' // Avatar
-			// 	// 	+ msg.username
-			// 	// 	+ '</div>'
-			// 	// 	'☀'+ '<br/>'; // Parse emojis
-			// 	// var element = document.getElementById('chat-messages');
-			// 	// element.scrollTop = element.scrollHeight; // Auto scroll to the bottom
-			// 	console.debug("收到服务器传回的消息：", msg)
-			// });
-		},
 		//Websocket 发送消息
 		send() {
 			var readPercent = parseFloat(this.nowPageNum) / parseFloat(this.book.all_page_num)
 			console.debug("ReadPercent: " + readPercent)
-			if (this.newMsg === '') {
-				this.ws.send(
-					//提供将 JavaScript 值与 JavaScript 对象表示法 (JSON) 格式相互转换的函数的内在对象。
-					JSON.stringify({
-						message_type: 1,
-						user_id: "test_user",
-						book_id: this.book.id,
-						now_page_num: this.nowPageNum,
-						now_page_num_percent: 0.3333,
-						read_percent: readPercent,
-						message_data: "翻页模式，发送数据" // Strip out html
-					}
-					));
-				console.log("send:", this.newMsg)
-				this.newMsg = ''; // Reset newMsg
-			}
+			this.newMsg = {
+				message_type: 1,
+				user_id: "test_user",
+				book_id: this.book.id,
+				now_page_num: this.nowPageNum,
+				now_page_num_percent: 0.3333,
+				read_percent: readPercent,
+				message_data: "翻页模式，发送数据" // Strip out html
+			};
+			// 如果fomat配置为了json，即可调用sendObj方法来发送数据
+			this.$socket.sendObj(this.newMsg);
+			console.log("send:", this.newMsg);
+			this.newMsg = ''; // Reset newMsg
 		},
 
-		// "join"函数会确保用户在发送消息前输入 email 地址和用户名。一旦他们输入了这些信息，将 joined 设置为 "true"，同时允许他们开始交谈。同样，会处理 HTML 和 JavaScript 的特殊字符。
-		join: function () {
-			if (!this.email) {
-				console.log('You must enter an email', 2000);
-				return
-			}
-			if (!this.username) {
-				console.log('You must choose a username', 2000);
-				return
-			}
-			// this.email = $('<p>').html(this.email).text();
-			// this.username = $('<p>').html(this.username).text();
-			this.joined = true;
-		},
 		// 辅助函数，用于从 Gravatar 获取头像。URL 的最后一段需要用户的 email 地址的 MD5 编码。
 		gravatarURL: function (email) {
 			return 'http://www.gravatar.com/avatar/' + md5(email);
@@ -1373,7 +1280,7 @@ export default defineComponent({
 <style scoped>
 .header {
 	background: v-bind("model.interfaceColor");
-	height: 5vh;
+	/* height: 5vh; */
 	/* position: sticky;
 	top: 0;
 	z-index: var(--z-index-top); */

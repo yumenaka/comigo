@@ -40,18 +40,18 @@ const store = createStore({
       sketch_count_seconds: 30,
     },
     message: {
-      user_id: "",
+      user_id: "userID",
       server_status: "",
       now_book_id: "",
       read_percent: 0.0,
       msg: "",
     },
-    token: "",
-    refreshToken: "",
-    userID: "",
+    userID: "testUserID",
+    token: "abc123",
+    refreshToken: "xxx321",
     // 用户头像
-    profilePicture: "",
-    username: "",
+    profilePicture: "default",
+    username: "adminTest",
     // 在线人数
     onlineUsers: 0,
     currentComponentName: null,
@@ -74,31 +74,23 @@ const store = createStore({
     // 连接打开
     SOCKET_ONOPEN(state, event) {
       main.config.globalProperties.$socket = event.currentTarget;
-      // Vue.prototype.$socket = event.currentTarget
-
-      // console.log(app, "app");
-      // app.config.globalProperties.$socket = event.currentTarget;
-
       state.socket.isConnected = true;
       // 连接成功时启动定时发送心跳消息，避免被服务器断开连接
       state.socket.heartBeatTimer = setInterval(() => {
         const message = "【Websockets】心跳消息";
         state.socket.isConnected &&
-        // Vue.prototype.$socket.sendObj({
             main.config.globalProperties.$socket.sendObj({
             code: 200,
             msg: message
           });
       }, state.socket.heartBeatInterval);
-
       main.config.globalProperties.$socket.sendObj({
         code: 200,
         token: state.token,
-        userID: state.userID,
+        user_id: state.userID,
         msg: state.userID + "【Websockets】上线"
       });
-
-      console.log("【Websockets】连接建立: " + new Date());
+      // console.log("【Websockets】连接建立: " + new Date());
     },
     // 连接关闭
     SOCKET_ONCLOSE(state, event) {

@@ -15,6 +15,8 @@ type MessageType int
 // Message 定义一个对象来管理消息，反引号包含的文本是 Go 在对象和 JSON 之间进行序列化和反序列化时需要的元数据。
 type Message struct {
 	MessageType       string  `json:"message_type"`
+	HttpCode          int     `json:"code"`  //参考http状态码： https://zh.wikipedia.org/zh-hans/HTTP%E7%8A%B6%E6%80%81%E7%A0%81
+	token             string  `json:"token"` //认证用
 	UserID            string  `json:"user_id"`
 	BookID            string  `json:"book_id"`
 	NowPageNum        int     `json:"now_page_num"`
@@ -103,7 +105,7 @@ func WebSocketHandler(c *gin.Context) {
 		err = wsConn.ReadJSON(&msg)
 		if err != nil {
 			//fmt.Println()
-			log.Printf("Websocket error: %v", err)
+			log.Printf("【WebSocketHandler】error: %v", err)
 			//如果从 socket 中读取数据有误，我们假设客户端已经因为某种原因断开。我们记录错误并从全局的 “clients” 映射表里删除该客户端，这样一来，我们不会继续尝试与其通信。
 			delete(clients, wsConn)
 			break

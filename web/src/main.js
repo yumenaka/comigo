@@ -63,8 +63,6 @@ app.use(VueLazyLoad, {
     },
 });
 
-app.mount("#app"); // look index.html:  <div id="app"></div>
-
 // 使用VueNativeSock插件，并进行相关配置
 // 参考https://github.com/likaia/vue-native-websocket-vue3
 var protocol = 'ws://'
@@ -90,6 +88,8 @@ app.use(
         reconnectionDelay: 3000
     }
 );
+
+app.mount("#app"); // look index.html:  <div id="app"></div>
 
 //store的websockets需要导入main，所以要有这一句，参考： https://github.com/likaia/chat-system/blob/master/src/main.ts
 export default app;
