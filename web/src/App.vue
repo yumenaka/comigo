@@ -16,13 +16,13 @@
 // import BookShelf from "@/views/BookShelf.vue";
 import { useCookies } from "vue3-cookies";
 import { defineComponent } from 'vue'
-import { NMessageProvider, NConfigProvider, darkTheme, lightTheme } from 'naive-ui'
+import { NMessageProvider, darkTheme, lightTheme } from 'naive-ui'
 
 export default defineComponent({
   name: "ComigoHome", //默认为 default。如果 <router-view>设置了名称，则会渲染对应的路由配置中 components 下的相应组件。
   components: {
     NMessageProvider,
-    NConfigProvider,//调整主题：https://www.naiveui.com/zh-CN/light/docs/customize-theme
+    // NConfigProvider,//调整主题：https://www.naiveui.com/zh-CN/light/docs/customize-theme
   },
   setup() {
     const { cookies } = useCookies();
@@ -39,6 +39,15 @@ export default defineComponent({
     this.$store.dispatch("syncSeverStatusDataAction");
     // this.$store.dispatch("syncBookShelfDataAction");
     this.selectTemplate = this.getDefaultTemplate;
+    
+    // 连接websocket服务器，参数为websocket服务地址
+		var protocol = 'ws://'
+		if (window.location.protocol === "https") {
+			protocol = 'wss://'
+		}
+		var ws_url = protocol + window.location.host + '/api/ws';
+		this.$connect(ws_url);
+		console.log("ws_url:"+ws_url)
   },
   beforeMount() {
     if (this.$store.state.server_status.ServerName != null) {
