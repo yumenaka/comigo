@@ -29,6 +29,21 @@ import (
 	"github.com/yumenaka/comi/locale"
 )
 
+//获取一个空闲可用的端口号
+func GetFreePort() (int, error) {
+	addr, err := net.ResolveTCPAddr("tcp", "127.0.0.1:0")
+	if err != nil {
+		return 0, err
+	}
+
+	l, err := net.ListenTCP("tcp", addr)
+	if err != nil {
+		return 0, err
+	}
+	defer l.Close()
+	return l.Addr().(*net.TCPAddr).Port, nil
+}
+
 //// 一个语言检测包，它告诉您某些提供的文本数据是用哪种（人类）语言编写的。 需要导入：
 ////go get github.com/pemistahl/lingua-go@v1.0.5
 //func CheckStringLanguage(s string) string {
@@ -461,10 +476,8 @@ func GetOutboundIP() net.IP {
 	defer func(conn net.Conn) {
 		err := conn.Close()
 		if err != nil {
-
 		}
 	}(conn)
-
 	localAddr := conn.LocalAddr().(*net.UDPAddr)
 	return localAddr.IP
 }

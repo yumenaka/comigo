@@ -25,6 +25,7 @@ import (
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/plugin"
 	"github.com/yumenaka/comi/routers/handler"
+	"github.com/yumenaka/comi/routers/websocket"
 	"github.com/yumenaka/comi/tools"
 )
 
@@ -349,7 +350,7 @@ func setWebAPI(engine *gin.Engine) {
 		c.Redirect(http.StatusMovedPermanently, "http://www.google.com/")
 	})
 	//初始化websocket
-	api.GET("/ws", handler.WebSocketHandler)
+	api.GET("/ws", websocket.WsHandler)
 
 	//设定压缩包下载链接
 	if book.GetBooksNumber() >= 1 {
@@ -372,11 +373,18 @@ func setWebAPI(engine *gin.Engine) {
 func setPort() {
 	//检测端口
 	if !tools.CheckPort(common.Config.Port) {
-		r := rand.New(rand.NewSource(time.Now().UnixNano()))
-		if common.Config.Port+2000 > 65535 {
-			common.Config.Port = common.Config.Port + r.Intn(1024)
+		//获取一个空闲可用的系统端口号
+		port, err := tools.GetFreePort()
+		if err != nil {
+			fmt.Println(err)
+			r := rand.New(rand.NewSource(time.Now().UnixNano()))
+			if common.Config.Port+2000 > 65535 {
+				common.Config.Port = common.Config.Port + r.Intn(1024)
+			} else {
+				common.Config.Port = 30000 + r.Intn(20000)
+			}
 		} else {
-			common.Config.Port = 30000 + r.Intn(20000)
+			common.Config.Port = port
 		}
 		fmt.Println(locale.GetString("port_busy") + strconv.Itoa(common.Config.Port))
 	}

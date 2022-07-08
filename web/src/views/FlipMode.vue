@@ -397,6 +397,10 @@ export default defineComponent({
 		// // this.startWebsocket();
 		// localStorage.setItem("clientId", "user-1");
 
+		// 消息监听，即接收websocket服务端推送的消息. optionsAPI用法
+		this.$options.sockets.onmessage = data => this.handlePacket(data);
+
+
 		//根据文件名、修改时间、文件大小等要素排序的参数
 		var sort_image_by_str = ""
 		if (this.$route.query.sort_by) {
@@ -540,6 +544,8 @@ export default defineComponent({
 	beforeUnmount() {
 		// 销毁监听
 		window.removeEventListener("keyup", this.handleKeyup);
+		//移除websockets消息监听
+		delete this.$options.sockets.onmessage
 	},
 	// mounted : 在绑定元素的父组件被挂载后调用。
 	mounted() {
@@ -550,6 +556,12 @@ export default defineComponent({
 		//界面有更新就会调用,随便乱放会引起难以调试的BUG
 	},
 	methods: {
+
+		handlePacket(data) {
+			console.log("FlipMode  页面接收到Message");
+			console.log(data.data);
+		},
+
 		//Websocket 发送消息
 		send() {
 			var readPercent = parseFloat(this.nowPageNum) / parseFloat(this.book.all_page_num)

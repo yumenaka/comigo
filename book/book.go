@@ -441,7 +441,7 @@ func (b *Book) SortPages(s string) {
 	if s != "" {
 		b.Pages.SortBy = s
 		sort.Sort(b.Pages)
-		fmt.Println("sort_by:" + s)
+		//fmt.Println("sort_by:" + s)
 	}
 	b.setClover() //重新排序后重新设置封面
 }
