@@ -85,7 +85,7 @@ app.use(
         // 尝试重连的次数
         reconnectionAttempts: 60,
         // 重连间隔时间
-        reconnectionDelay: 3000
+        reconnectionDelay: 3000,//掉线后每3秒重连一次
     }
 );
 

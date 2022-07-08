@@ -1,4 +1,4 @@
-package handler
+package websocket
 
 import (
 	"fmt"
@@ -9,20 +9,19 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-// MessageType 收发消息的时候，用来区分消息类型
-type MessageType int
+func init() {
+	// Start listening for incoming chat messages
+	go handleMessages()
+}
 
 // Message 定义一个对象来管理消息，反引号包含的文本是 Go 在对象和 JSON 之间进行序列化和反序列化时需要的元数据。
 type Message struct {
-	MessageType       string  `json:"message_type"`
-	HttpCode          int     `json:"code"`  //参考http状态码： https://zh.wikipedia.org/zh-hans/HTTP%E7%8A%B6%E6%80%81%E7%A0%81
-	token             string  `json:"token"` //认证用
-	UserID            string  `json:"user_id"`
-	BookID            string  `json:"book_id"`
-	NowPageNum        int     `json:"now_page_num"`
-	NowPageNumPercent float64 `json:"now_page_num_percent"`
-	ReadPercent       float64 `json:"read_percent"`
-	Msg               string  `json:"msg"`
+	Type     string `json:"type"`
+	HttpCode int    `json:"code"`  //参考http状态码： https://zh.wikipedia.org/zh-hans/HTTP%E7%8A%B6%E6%80%81%E7%A0%81
+	token    string `json:"token"` //认证用
+	UserID   string `json:"user_id"`
+	Msg      string `json:"msg"`
+	data     string `json:"data"` //附加的原始数据，服务器根据情况解析
 }
 
 //创建一个 upGrader 的实例。这只是一个对象，它具备一些方法，这些方法可以获取一个普通 HTTP 链接然后将其升级成一个 WebSocket
@@ -51,9 +50,9 @@ var clients = make(map[*websocket.Conn]bool) // connected clients
 //用于由客户端发送消息的队列，扮演通道的角色。后面定义了一个 goroutine 来从这个通道读取新消息，然后将它们发送给其它连接到服务器的客户端。
 var broadcast = make(chan Message) // broadcast channel
 
-// WebSocketHandler
+// WsHandler
 //路由是 "/ws",即 ws://127.0.0.1:1234/api/ws
-func WebSocketHandler(c *gin.Context) {
+func WsHandler(c *gin.Context) {
 	//Upgrade 函数将 http get请求升级到 WebSocket 协议。
 	//   responseHeader包含在对客户端升级请求的响应中。
 	//// 使用responseHeader指定cookie（Set-Cookie）和应用程序协商的子协议（Sec-WebSocket-Protocol）。
@@ -77,40 +76,17 @@ func WebSocketHandler(c *gin.Context) {
 
 	// 无限循环，等待要写入 WebSocket 的新消息，将其从 JSON 反序列化为 Msg 对象然后送入广播频道。
 	for {
-		////测试用的乒乓逻辑
-		//messageType, message, err := wsConn.ReadMessage()
-		//if err != nil {
-		//	log.Println("Error during message reading:", err)
-		//	//break
-		//} else {
-		//	fmt.Printf("Msg Type: %d, Msg: %s\n", messageType, string(message))
-		//	//如果是乒乓
-		//	if string(message) == "ping!" || string(message) == "ping" || string(message) == "乒" || string(message) == "乒!" {
-		//		message = []byte("pang!")
-		//		if string(message) == "乒" || string(message) == "乒!" {
-		//			message = []byte("乓!")
-		//		}
-		//		//写入ws数据
-		//		err = wsConn.WriteMessage(messageType, message)
-		//		if err != nil {
-		//			log.Println("Error during message writing:", err)
-		//			break
-		//		}
-		//		continue
-		//	}
-		//}
-
 		////读取ws中的数据,反序列为json（序列化：将对象转化成字节序列的过程。 反序列化：就是讲字节序列转化成对象的过程。）
 		var msg Message // Read in a new message as JSON and map it to a Msg object
 		err = wsConn.ReadJSON(&msg)
 		if err != nil {
 			//fmt.Println()
-			log.Printf("【WebSocketHandler】error: %v", err)
+			log.Printf("【WsHandler】error: %v", err)
 			//如果从 socket 中读取数据有误，我们假设客户端已经因为某种原因断开。我们记录错误并从全局的 “clients” 映射表里删除该客户端，这样一来，我们不会继续尝试与其通信。
 			delete(clients, wsConn)
 			break
 		} else {
-			fmt.Printf("【WebSocketHandler】Msg: %v\n", msg)
+			fmt.Printf("【WsHandler】Msg: %v\n", msg)
 			// Send the newly received message to the broadcast channel
 			broadcast <- msg
 		}
@@ -124,18 +100,16 @@ func handleMessages() {
 		msg := <-broadcast //广播频道
 		// Send it out to every client that is currently connected
 		for client := range clients {
-			err := client.WriteJSON(msg)
-			if err != nil {
-				log.Printf("error: %v", err)
-				//同样，如果写入 Websocket 时出现错误，我们将关闭连接，并将其从“clients” 映射中删除。
-				client.Close()
-				delete(clients, client)
+			switch msg.Type {
+			case "ping", "ping!", "乒":
+				handPingMessage(client, msg)
+			case "heartbeat":
+				handHeartbeatMessage(client, msg)
+			case "sync_page":
+				handSyncPageMessage(client, msg)
+			default:
+				handDefaultMessage(client, msg)
 			}
 		}
 	}
-}
-
-func init() {
-	// Start listening for incoming chat messages
-	go handleMessages()
 }

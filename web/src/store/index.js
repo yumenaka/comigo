@@ -2,6 +2,14 @@ import { createStore } from 'vuex'
 import axios from 'axios'
 import main from "../main";
 
+//生成一个随机ID
+var tempUserID="Comigo_"+Math.floor(Math.random()*100000); //可均衡获取 0 到 99999 的随机整数。
+if (localStorage.getItem("ComigoTempUserID") != null) {
+  tempUserID = localStorage.getItem("ComigoTempUserID");
+}else{
+  localStorage.setItem("ComigoTempUserID",tempUserID)
+}
+
 const store = createStore({
   //开启严格模式，避免直接的修改
   // strict :true,
@@ -40,13 +48,13 @@ const store = createStore({
       sketch_count_seconds: 30,
     },
     message: {
-      user_id: "userID",
+      user_id: tempUserID,
       server_status: "",
       now_book_id: "",
       read_percent: 0.0,
       msg: "",
     },
-    userID: "testUserID",
+    userID: tempUserID,
     token: "abc123",
     refreshToken: "xxx321",
     // 用户头像
@@ -64,7 +72,7 @@ const store = createStore({
       // 重新连接错误
       reconnectError: false,
       // 心跳消息发送时间
-      heartBeatInterval: 50000,
+      heartBeatInterval: 5000,//本来是50000（50秒）.不过为了测试，暂时把间隔弄小一点
       // 心跳定时器
       heartBeatTimer: 0
     }
@@ -77,20 +85,25 @@ const store = createStore({
       state.socket.isConnected = true;
       // 连接成功时启动定时发送心跳消息，避免被服务器断开连接
       state.socket.heartBeatTimer = setInterval(() => {
-        const message = "【Websockets】心跳消息";
+        var date_json = new Date( new Date()).toJSON();
+        var date_str = new Date(+new Date(date_json) + 8 * 3600 * 1000).toISOString().replace(/T/g, ' ').replace(/\.[\d]{3}Z/, '') 
+        const message = "【Websockets】心跳消息。"+ date_str;
         state.socket.isConnected &&
             main.config.globalProperties.$socket.sendObj({
+            type:"heartbeat",
             code: 200,
+            token: state.token,
+            user_id: state.userID,
             msg: message
           });
       }, state.socket.heartBeatInterval);
-      main.config.globalProperties.$socket.sendObj({
-        code: 200,
-        token: state.token,
-        user_id: state.userID,
-        msg: state.userID + "【Websockets】上线"
-      });
-      // console.log("【Websockets】连接建立: " + new Date());
+      // main.config.globalProperties.$socket.sendObj({
+      //   code: 200,
+      //   token: state.token,
+      //   user_id: state.userID,
+      //   msg: state.userID + "【Websockets】上线"
+      // });
+      console.log("【Websockets】连接建立。 " +  new Date().toLocaleDateString().replace(/\//g,"-")+" "+new Date().toTimeString().substr(0,8));
     },
     // 连接关闭
     SOCKET_ONCLOSE(state, event) {
@@ -108,6 +121,7 @@ const store = createStore({
     // 收到服务端发送的消息
     SOCKET_ONMESSAGE(state, message) {
       state.socket.message = message;
+      // console.info("收到服务器消息：",message);
     },
     // 自动重连
     SOCKET_RECONNECT(state, count) {
