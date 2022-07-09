@@ -12,7 +12,7 @@
   "showPageNum": "显示页数",
   "setBackColor": "背景色:",
   "readingProgressBar": "阅读进度条",
-  "savePageNum": "保存阅读进度",
+  "savePageNum": "保存页数",
   "rightScreenToNext": "右开本（日漫）",
   "leftScreenToNext": "左开本（美漫）",
   "startSketchMode": "开始速写",
@@ -23,11 +23,11 @@
   "second": "秒",
   "minute": "分",
   "total_is": "完成:",
-  "interval": "翻页间隔:",
+  "interval": "间隔:",
   "page": "张",
   "totalTime": "经过时间:",
   "hour": "小时",
-  "pageTurningSeconds": "翻页间隔:",
+  "pageTurningSeconds": "间隔:",
   "startSketchMessage": "开始倒计时速写，祝你心情愉快。",
   "goodjob_and_byebye": "做得不错，再见~",
   "simpleDoublePage": "合并双页",
@@ -55,5 +55,6 @@
   "sort_by_default": "保持原样",
   "sort_reverse": "（反向）",
   "re_sort": "重新排序",
-  "fullscreen": "切换全屏"
+  "fullscreen": "切换全屏",
+  "sync_page": "同步页数"
 }

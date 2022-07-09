@@ -1,11 +1,10 @@
-<template >
+<template>
 	<div class="static">
 		<!-- 顶部,标题页头 -->
 		<!-- 定位：https://www.tailwindcss.cn/docs/position -->
 		<!-- 不透明度：opacity-70 https://www.tailwindcss.cn/docs/opacity -->
-		<Header class="header fixed mx-auto w-full opacity-70" v-if="this.showHeaderFlag_FlipMode"
-			:setDownLoadLink="this.needDownloadLink()" :headerTitle="book.name" :bookID="this.book.id"
-			:showReturnIcon="true">
+		<Header v-if="this.showHeaderFlag_FlipMode" class="header fixed mx-auto w-full opacity-70" :setDownLoadLink="this.needDownloadLink()"
+			:headerTitle="book.name" :bookID="this.book.id" :showReturnIcon="true">
 			<!-- 右边的设置图标,点击屏幕中央也可以打开 -->
 			<n-icon size="40" @click="drawerActivate('right')">
 				<settings-outline />
@@ -18,40 +17,73 @@
 				@mouseleave.stop="onMouseLeave">
 				<div class="manga_area_img_div">
 					<!-- 非自动拼合模式最简单,直接显示一张图 -->
-					<img v-bind:src="this.imageParametersString(book.pages.images[nowPageNum - 1].url)"
-						v-bind:alt="nowPageNum" />
+					<img v-bind:src="
+						this.imageParametersString(book.pages.images[nowPageNum - 1].url)
+					" v-bind:alt="nowPageNum" />
 
 					<!-- 简单拼合双页,不管单双页什么的 -->
-					<img v-if="(!this.autoDoublePageModeFlag) && this.simpleDoublePageModeFlag && this.nowPageNum < this.book.all_page_num"
-						v-bind:src="this.imageParametersString(book.pages.images[nowPageNum].url)"
-						v-bind:alt="nowPageNum + 1" />
+					<img v-if="
+						!this.autoDoublePageModeFlag &&
+						this.simpleDoublePageModeFlag &&
+						this.nowPageNum < this.book.all_page_num
+					" v-bind:src="
+	this.imageParametersString(book.pages.images[nowPageNum].url)
+" v-bind:alt="nowPageNum + 1" />
 
 					<!-- 自动拼合模式当前页,如果开启自动拼合,右边可能显示拼合页 -->
-					<img v-if="this.autoDoublePageModeFlag && this.nowPageNum < this.book.all_page_num && this.nowAndNextPageIsSingle()"
-						v-bind:src="this.imageParametersString(book.pages.images[nowPageNum].url)"
-						v-bind:alt="nowPageNum + 1" />
+					<img v-if="
+						this.autoDoublePageModeFlag &&
+						this.nowPageNum < this.book.all_page_num &&
+						this.nowAndNextPageIsSingle()
+					" v-bind:src="
+	this.imageParametersString(book.pages.images[nowPageNum].url)
+" v-bind:alt="nowPageNum + 1" />
 				</div>
-				<div v-if="this.showPageHintFlag_FlipMode" class="sketch_hint">{{ pageNumOrSketchHint }}</div>
 			</div>
 		</div>
-
-
+		<!-- 倒计的文字提示 -->
+		<!-- Top / Right / Bottom / Left :用于控制定位元素的位置的功能类。https://www.tailwindcss.cn/docs/top-right-bottom-left -->
+		<div class="
+        text-2xl
+        break-words
+        text-purple-700 text-opacity-90
+        h-auto
+        w-1/4
+        opacity-70
+		absolute
+        bottom-0
+        left-0
+      " v-if="this.showPageHintFlag_FlipMode">
+			{{ pageNumOrSketchHint }}
+		</div>
 		<!-- 页脚 拖动条 -->
 		<!-- 宽度：w-5/6 https://www.tailwindcss.cn/docs/width 使用 w-{fraction} 或 w-full 将元素设置为基于百分比的宽度。 -->
 		<!-- 定位：https://www.tailwindcss.cn/docs/position  -->
 		<!-- 使用 fixed 来定位一个元素相对于浏览器窗视口的位置。偏移量是相对于视口计算的，且该元素将作为绝对定位的子元素的位置参考。 -->
 		<!-- 控制 flex 和 grid 项目如何沿着容器的主轴定位:https://www.tailwindcss.cn/docs/justify-content -->
 		<!-- Tailwind 的容器不会自动居中，也没有任何内置的水平方向的内边距。要使一个容器居中，使用 mx-auto 功能类： -->
-		<div class="absolute bottom-0 w-full h-10 opacity-70">
-			<div class="bg-red-300 flex flex-row justify-center items-end  mx-auto w-full h-10 "
-				v-if="this.showFooterFlag_FlipMode">
-
+		<div class="absolute bottom-0 w-full h-10 opacity-70" v-if="this.showFooterFlag_FlipMode">
+			<div class="
+          bg-yellow-400
+          flex flex-row
+          justify-center
+          items-end
+          mx-auto
+          w-full
+          h-10
+        ">
 				<!-- 日漫模式 底部滑动条,设置reverse翻转计数方向 -->
 				<!-- 背景颜色：bg-blue-300  https://www.tailwindcss.cn/docs/background-color  -->
-				<div class="bg-blue-300 flex  flex-row  justify-center items-center  w-5/6  px-4 h-full"
-					v-if="!this.rightToLeftFlag">
+				<div class="
+            bg-blue-300
+            flex flex-row
+            justify-center
+            items-center
+            w-5/6
+            px-4
+            h-full
+          " v-if="!this.rightToLeftFlag">
 					<span class="right">{{ this.book.all_page_num }}</span>
-
 					<n-slider class="w-10/11" reverse v-model:value="nowPageNum" :max="this.book.all_page_num" :min="1"
 						:step="1" :format-tooltip="(value) => `${value}`" @update:value="this.saveNowPageNumOnUpdate" />
 					<span class="left">{{ this.nowPageNum }}</span>
@@ -60,8 +92,15 @@
 				<!-- 美漫模式用 ,底部滑动条 -->
 				<!-- h-full: 将一个元素的高度设置为其父元素的 100%，只要父元素有一个定义的高度。 https://www.tailwindcss.cn/docs/height -->
 				<!-- 使用 items-center 沿着容器的交叉轴中心对齐项目：https://www.tailwindcss.cn/docs/align-items#center=  -->
-				<div class="bg-blue-300 flex  flex-row  justify-center items-center  w-5/6  px-4 h-full"
-					v-if="this.rightToLeftFlag">
+				<div class="
+            bg-blue-300
+            flex flex-row
+            justify-center
+            items-center
+            w-5/6
+            px-4
+            h-full
+          " v-if="this.rightToLeftFlag">
 					<span class="right">{{ this.nowPageNum }}</span>
 					<n-slider class="bg-yellow-300" v-model:value="nowPageNum" :max="this.book.all_page_num" :min="1"
 						:step="1" :format-tooltip="(value) => `${value}`" @update:value="this.saveNowPageNumOnUpdate" />
@@ -77,44 +116,52 @@
 			:sketching="this.sketchModeFlag">
 			<!-- 选择：切换页面模式 -->
 			<n-space>
-				<n-button @click="changeReaderModeToScrollMode">{{ $t('switch_to_scrolling_mode') }}</n-button>
+				<n-button @click="changeReaderModeToScrollMode">{{
+						$t("switch_to_scrolling_mode")
+				}}</n-button>
 			</n-space>
 			<!-- 分割线 -->
 			<n-divider />
 
 			<!-- Switch：页头与书名 -->
-			<n-space>
+			<!-- <n-space>
 				<n-switch size="large" v-model:value="this.showHeaderFlag_FlipMode" @update:value="setShowHeaderChange">
 					<template #checked>{{ $t("showHeader") }}</template>
 					<template #unchecked>{{ $t("showHeader") }}</template>
 				</n-switch>
-			</n-space>
+			</n-space> -->
 
 			<!-- Switch：显示阅读进度条） -->
-			<n-space>
+			<!-- <n-space>
 				<n-switch size="large" v-model:value="this.showFooterFlag_FlipMode"
 					@update:value="setShowFooterFlagChange">
 					<template #checked>{{ $t("readingProgressBar") }}</template>
 					<template #unchecked>{{ $t("readingProgressBar") }}</template>
 				</n-switch>
-			</n-space>
+			</n-space> -->
 
-			<!-- Switch：显示当前页数 -->
+			<!-- Switch：客户端之间的同步页数 -->
 			<n-space>
+				<n-switch size="large" v-model:value="this.syncPageFlag" @update:value="this.syncPageFlag">
+					<template #checked>{{ $t("sync_page") }}</template>
+					<template #unchecked>{{ $t("sync_page") }}</template>
+				</n-switch>
+			</n-space>
+			<!-- 保存阅读的页数 -->
+			<n-space>
+				<n-switch size="large" v-model:value="this.saveNowPageNumFlag" @update:value="this.setSavePageNumFlag">
+					<template #checked>{{ $t("savePageNum") }}</template>
+					<template #unchecked>{{ $t("savePageNum") }}</template>
+				</n-switch>
+			</n-space>
+			<!-- Switch：显示当前页数 -->
+			<!-- <n-space>
 				<n-switch size="large" v-model:value="this.showPageHintFlag_FlipMode"
 					@update:value="setShowPageNumChange">
 					<template #checked>{{ $t("showPageNum") }}</template>
 					<template #unchecked>{{ $t("showPageNum") }}</template>
 				</n-switch>
-			</n-space>
-			<!-- 保存阅读进度 -->
-			<n-space>
-				<n-switch size="large" v-model:value="this.saveNowPageNumFlag_FlipMode"
-					@update:value="this.setSavePageNumFlag">
-					<template #checked>{{ $t("savePageNum") }}</template>
-					<template #unchecked>{{ $t("savePageNum") }}</template>
-				</n-switch>
-			</n-space>
+			</n-space> -->
 
 			<!-- 分割线 -->
 			<n-divider />
@@ -122,8 +169,8 @@
 			<n-space>
 				<n-switch size="large" v-model:value="this.simpleDoublePageModeFlag"
 					@update:value="this.setSimpleDoublePage_FlipMode">
-					<template #checked>{{ $t('simpleDoublePage') }}</template>
-					<template #unchecked>{{ $t('simpleDoublePage') }}</template>
+					<template #checked>{{ $t("simpleDoublePage") }}</template>
+					<template #unchecked>{{ $t("simpleDoublePage") }}</template>
 				</n-switch>
 			</n-space>
 
@@ -131,8 +178,8 @@
 			<n-space>
 				<n-switch size="large" v-model:value="this.rightToLeftFlag" :rail-style="railStyle"
 					@update:value="this.setFlipScreenFlag">
-					<template #unchecked>{{ $t("rightScreenToNext") }}</template>
 					<template #checked>{{ $t("leftScreenToNext") }}</template>
+					<template #unchecked>{{ $t("rightScreenToNext") }}</template>
 				</n-switch>
 			</n-space>
 
@@ -140,14 +187,14 @@
 			<n-space>
 				<n-switch size="large" v-model:value="this.imageParameters.do_auto_crop"
 					@update:value="setImageParameters_DoAutoCrop">
-					<template #checked>{{ $t('auto_crop') }}</template>
-					<template #unchecked>{{ $t('auto_crop') }}</template>
+					<template #checked>{{ $t("auto_crop") }}</template>
+					<template #unchecked>{{ $t("auto_crop") }}</template>
 				</n-switch>
 				<!-- 切白边阈值 -->
 				<n-input-number :show-button="false" v-if="this.imageParameters.do_auto_crop"
 					v-model:value="this.imageParameters.auto_crop_num" @update:value="setImageParameters_AutoCropNum"
 					:max="10" :min="0">
-					<template #prefix>{{ $t('energy_threshold') }}</template>
+					<template #prefix>{{ $t("energy_threshold") }}</template>
 				</n-input-number>
 			</n-space>
 			<!-- 分割线 -->
@@ -179,12 +226,12 @@
 			<n-input-number v-if="this.readerMode == 'sketch'" size="small" :show-button="false"
 				v-model:value="this.sketchFlipSecond" :max="65535" :min="1" :update-value-on-input="false"
 				@update:value="this.resetSketchSecondCount">
-				<template #prefix>{{ $t('pageTurningSeconds') }}</template>
+				<template #prefix>{{ $t("pageTurningSeconds") }}</template>
 				<template #suffix>{{ $t("second") }}</template>
 			</n-input-number>
 			<!-- 滑动选择% -->
 			<n-slider v-if="this.readerMode == 'sketch'" v-model:value="this.sketchFlipSecond" :step="1" :max="120"
-				:min="1" :marks="marks" :format-tooltip="value => `${value}s`"
+				:min="1" :marks="marks" :format-tooltip="(value) => `${value}s`"
 				@update:value="this.resetSketchSecondCount" />
 
 			<!-- 分割线 -->
@@ -204,15 +251,25 @@ import Drawer from "@/components/Drawer.vue";
 // import Bottom from "@/components/Bottom.vue";
 import { defineComponent, reactive } from "vue";
 // 直接导入组件并使用它。这种情况下,只有导入的组件才会被打包。
-import { NDivider, NIcon, NInputNumber, NSlider, NSpace, NSwitch, useMessage, NButton, NDropdown, } from "naive-ui";
+import {
+	NDivider,
+	NIcon,
+	NInputNumber,
+	NSlider,
+	NSpace,
+	NSwitch,
+	useMessage,
+	NButton,
+	NDropdown,
+} from "naive-ui";
 import { SettingsOutline } from "@vicons/ionicons5";
 import axios from "axios";
-import md5 from 'js-md5';
+import md5 from "js-md5";
 
 export default defineComponent({
 	name: "FlipMode",
 	props: [],
-	emits: ["childMark"],// 向父组件传递参数的函数,用法： 子组件调用：this.$emit("childMark", value); 父组件：@childMark="this.fatherMethod"
+	emits: ["childMark"], // 向父组件传递参数的函数,用法： 子组件调用：this.$emit("childMark", value); 父组件：@childMark="this.fatherMethod"
 	components: {
 		Header,
 		Drawer,
@@ -227,11 +284,11 @@ export default defineComponent({
 		SettingsOutline, //图标,来自 https://www.xicons.org/#/   需要安装（npm i -D @vicons/ionicons5）
 		// NColorPicker, //颜色选择器 Color Picker https://www.naiveui.com/zh-CN/os-theme/components/color-picker
 		NDivider, //分割线  https://www.naiveui.com/zh-CN/os-theme/components/divider
-		NInputNumber,///  https://www.naiveui.com/zh-CN/os-theme/components/input-number
+		NInputNumber, ///  https://www.naiveui.com/zh-CN/os-theme/components/input-number
 		// useNotification, // https://www.naiveui.com/zh-CN/os-theme/components/notification
-		NButton,//按钮，来自:https://www.naiveui.com/zh-CN/os-theme/components/button
+		NButton, //按钮，来自:https://www.naiveui.com/zh-CN/os-theme/components/button
 		// NMessageProvider,
-		NDropdown,//下拉菜单 https://www.naiveui.com/zh-CN/os-theme/components/dropdown
+		NDropdown, //下拉菜单 https://www.naiveui.com/zh-CN/os-theme/components/dropdown
 	},
 	setup() {
 		const { cookies } = useCookies();
@@ -242,25 +299,25 @@ export default defineComponent({
 		});
 		//请求图片文件时，可添加的额外参数
 		const imageParameters = reactive({
-			resize_width: -1,// 缩放图片,指定宽度
-			resize_height: -1,// 指定高度,缩放图片
+			resize_width: -1, // 缩放图片,指定宽度
+			resize_height: -1, // 指定高度,缩放图片
 			do_auto_resize: false,
-			resize_max_width: 800,//图片宽度大于这个上限时缩小 
-			resize_max_height: -1,//图片高度大于这个上限时缩小
+			resize_max_width: 800, //图片宽度大于这个上限时缩小
+			resize_max_height: -1, //图片高度大于这个上限时缩小
 			do_auto_crop: false,
-			auto_crop_num: 1,// 自动切白边阈值,范围是0~100,其实为1就够了	
-			gray: false,//黑白化
+			auto_crop_num: 1, // 自动切白边阈值,范围是0~100,其实为1就够了
+			gray: false, //黑白化
 		});
 
 		//警告信息
-		const message = useMessage()
+		const message = useMessage();
 		// const notification = useNotification()
 		return {
 			message,
 			//背景色
 			model,
 			cookies,
-			imageParameters,//获取图片所用的参数
+			imageParameters, //获取图片所用的参数
 			imageParametersString: (source_url) => {
 				// var temp =
 				if (source_url.substr(0, 12) == "api/getfile?") {
@@ -269,23 +326,42 @@ export default defineComponent({
 					//按照“/”分割字符串
 					var arrUrl = url.split("/");
 					//拼一个完整的图片URL（因为路由路径会变化,所以不能用相对路径？）
-					var base_str = arrUrl[0] + "//" + arrUrl[2] + "/" + source_url
+					var base_str = arrUrl[0] + "//" + arrUrl[2] + "/" + source_url;
 					//添加各种字符串参数,不需要的话为空
-					var resize_width_str = (imageParameters.resize_width > 0 ? "&resize_width=" + imageParameters.resize_width : "")
-					var resize_height_str = (imageParameters.resize_height > 0 ? "&resize_height=" + imageParameters.resize_height : "")
-					var gray_str = (imageParameters.gray ? "&gray=true" : "")
-					var do_auto_resize_str = (imageParameters.do_auto_resize ? ("&resize_max_width=" + imageParameters.resize_max_width) : "")
-					var resize_max_height_str = (imageParameters.resize_max_height > 0 ? "&resize_max_height=" + imageParameters.resize_max_height : "")
-					var auto_crop_str = (imageParameters.do_auto_crop ? "&auto_crop=" + imageParameters.auto_crop_num : "")
+					var resize_width_str =
+						imageParameters.resize_width > 0
+							? "&resize_width=" + imageParameters.resize_width
+							: "";
+					var resize_height_str =
+						imageParameters.resize_height > 0
+							? "&resize_height=" + imageParameters.resize_height
+							: "";
+					var gray_str = imageParameters.gray ? "&gray=true" : "";
+					var do_auto_resize_str = imageParameters.do_auto_resize
+						? "&resize_max_width=" + imageParameters.resize_max_width
+						: "";
+					var resize_max_height_str =
+						imageParameters.resize_max_height > 0
+							? "&resize_max_height=" + imageParameters.resize_max_height
+							: "";
+					var auto_crop_str = imageParameters.do_auto_crop
+						? "&auto_crop=" + imageParameters.auto_crop_num
+						: "";
 					//所有附加的转换参数
-					var addStr = resize_width_str + resize_height_str + do_auto_resize_str + resize_max_height_str + auto_crop_str + gray_str
+					var addStr =
+						resize_width_str +
+						resize_height_str +
+						do_auto_resize_str +
+						resize_max_height_str +
+						auto_crop_str +
+						gray_str;
 					//如果有附加转换参数，则设置成不缓存
-					var nocache_str = (addStr === "" ? "" : "&no-cache=true")
-					var full_url = base_str + addStr + nocache_str
+					var nocache_str = addStr === "" ? "" : "&no-cache=true";
+					var full_url = base_str + addStr + nocache_str;
 					// console.log(full_url);
 					return full_url;
 				} else {
-					return source_url
+					return source_url;
 				}
 			},
 			//开关的颜色
@@ -306,10 +382,10 @@ export default defineComponent({
 			},
 			//滑动秒数建议值
 			marks: {
-				30: '30',
-				60: '60',
-				90: '90',
-				120: '120',
+				30: "30",
+				60: "60",
+				90: "90",
+				120: "120",
 			},
 		};
 	},
@@ -318,33 +394,33 @@ export default defineComponent({
 			resort_hint_key: "resort",
 			options: [
 				{
-					label: this.$t('sort_by_filename'),
+					label: this.$t("sort_by_filename"),
 					key: "filename",
 				},
 				{
-					label: this.$t('sort_by_modify_time'),
-					key: "modify_time"
+					label: this.$t("sort_by_modify_time"),
+					key: "modify_time",
 				},
 				{
-					label: this.$t('sort_by_filesize'),
-					key: "filesize"
+					label: this.$t("sort_by_filesize"),
+					key: "filesize",
 				},
 				{
-					label: this.$t('sort_by_filename') + this.$t('sort_reverse'),
+					label: this.$t("sort_by_filename") + this.$t("sort_reverse"),
 					key: "filename_reverse",
 				},
 				{
-					label: this.$t('sort_by_modify_time') + this.$t('sort_reverse'),
-					key: "modify_time_reverse"
+					label: this.$t("sort_by_modify_time") + this.$t("sort_reverse"),
+					key: "modify_time_reverse",
 				},
 				{
-					label: this.$t('sort_by_filesize') + this.$t('sort_reverse'),
-					key: "filesize_reverse"
+					label: this.$t("sort_by_filesize") + this.$t("sort_reverse"),
+					key: "filesize_reverse",
 				},
 			],
 			book: {
 				name: "loading",
-				id: "abcde",
+				id: "loading",
 				all_page_num: 2,
 				book_type: "dir",
 				pages: {
@@ -361,13 +437,15 @@ export default defineComponent({
 							url: "/images/loading.gif",
 						},
 					],
-				}
+				},
 			},
 			readerMode: "flip",
 			drawerActive: false,
 			drawerPlacement: "right",
 			//开发模式 未完成的功能与设置,开启Debug以后才能见到
 			debugModeFlag: true,
+			//是否通过websocket同步翻页
+			syncPageFlag: true,
 			//是否显示页头
 			showHeaderFlag_FlipMode: true,
 			//是否显示页脚
@@ -379,7 +457,7 @@ export default defineComponent({
 			//自动拼合双叶,效果不太好
 			autoDoublePageModeFlag: false,
 			//是否保存当前页数
-			saveNowPageNumFlag_FlipMode: true,
+			saveNowPageNumFlag: true,
 			//当前页数,注意语义,直接就是1开始的页数,不是数组下标,在pages数组当中用的时候需要-1
 			nowPageNum: 1,
 			//素描模式标记
@@ -398,13 +476,12 @@ export default defineComponent({
 		// localStorage.setItem("clientId", "user-1");
 
 		// 消息监听，即接收websocket服务端推送的消息. optionsAPI用法
-		this.$options.sockets.onmessage = data => this.handlePacket(data);
-
+		this.$options.sockets.onmessage = (data) => this.handlePacket(data);
 
 		//根据文件名、修改时间、文件大小等要素排序的参数
-		var sort_image_by_str = ""
+		var sort_image_by_str = "";
 		if (this.$route.query.sort_by) {
-			sort_image_by_str = "&sort_by=" + this.$route.query.sort_by
+			sort_image_by_str = "&sort_by=" + this.$route.query.sort_by;
 		}
 
 		//根据路由参数获取特定书籍
@@ -425,7 +502,7 @@ export default defineComponent({
 					.then((response) => (this.book = response.data))
 					.finally(console.log("路由参数改变,书籍ID:" + id));
 			}
-		)
+		);
 		//初始化默认值
 		// https://www.developers.pub/wiki/1006381/1013545
 		// https://developer.mozilla.org/zh-CN/docs/Web/API/Storage/setItem
@@ -444,7 +521,9 @@ export default defineComponent({
 		//是否显示页脚
 		if (localStorage.getItem("showFooterFlag_FlipMode_FlipMode") == "true") {
 			this.showFooterFlag_FlipMode = true;
-		} else if (localStorage.getItem("showFooterFlag_FlipMode_FlipMode") == "false") {
+		} else if (
+			localStorage.getItem("showFooterFlag_FlipMode_FlipMode") == "false"
+		) {
 			this.showFooterFlag_FlipMode = false;
 		}
 		//是否显示页数
@@ -472,10 +551,10 @@ export default defineComponent({
 			this.autoDoublePageModeFlag = false;
 		}
 		//是否保存阅读进度
-		if (localStorage.getItem("saveNowPageNumFlag_FlipMode") == "true") {
-			this.saveNowPageNumFlag_FlipMode = true;
-		} else if (localStorage.getItem("saveNowPageNumFlag_FlipMode") == "false") {
-			this.saveNowPageNumFlag_FlipMode = false;
+		if (localStorage.getItem("saveNowPageNumFlag") == "true") {
+			this.saveNowPageNumFlag = true;
+		} else if (localStorage.getItem("saveNowPageNumFlag") == "false") {
+			this.saveNowPageNumFlag = false;
 		}
 		//当前背景色
 		if (localStorage.getItem("BackgroundColor") != null) {
@@ -504,13 +583,17 @@ export default defineComponent({
 		//是否压缩图片
 		if (localStorage.getItem("ImageParameters_DoAutoResize") === "true") {
 			this.imageParameters.do_auto_resize = true;
-		} else if (localStorage.getItem("ImageParameters_DoAutoResize") === "false") {
+		} else if (
+			localStorage.getItem("ImageParameters_DoAutoResize") === "false"
+		) {
 			this.imageParameters.do_auto_resize = false;
 		}
 
 		//启用压缩的Width下限
 		if (localStorage.getItem("ImageParametersResizeMaxWidth") != null) {
-			let saveNum = Number(localStorage.getItem("ImageParametersResizeMaxWidth"));
+			let saveNum = Number(
+				localStorage.getItem("ImageParametersResizeMaxWidth")
+			);
 			if (!isNaN(saveNum)) {
 				this.imageParameters.resize_max_width = saveNum;
 			}
@@ -530,6 +613,13 @@ export default defineComponent({
 				this.imageParameters.auto_crop_num = saveNum;
 			}
 		}
+
+		//是否通过websocket同步页数
+		if (localStorage.getItem("SyncPageFlag") === "true") {
+			this.syncPageFlag = true;
+		} else if (localStorage.getItem("SyncPageFlag") === "false") {
+			this.syncPageFlag = false;
+		}
 	},
 	// beforeMount : 指令第一次绑定到元素并且在挂载父组件之前调用。
 	beforeMount() {
@@ -545,7 +635,7 @@ export default defineComponent({
 		// 销毁监听
 		window.removeEventListener("keyup", this.handleKeyup);
 		//移除websockets消息监听
-		delete this.$options.sockets.onmessage
+		delete this.$options.sockets.onmessage;
 	},
 	// mounted : 在绑定元素的父组件被挂载后调用。
 	mounted() {
@@ -556,34 +646,58 @@ export default defineComponent({
 		//界面有更新就会调用,随便乱放会引起难以调试的BUG
 	},
 	methods: {
-
+		//接收服务器发来的websocket消息，做各种反应（翻页、提示信息）
 		handlePacket(data) {
-			console.log("FlipMode  页面接收到Message");
-			console.log(data.data);
+			if (!this.syncPageFlag) {
+				return;
+			}
+			console.log("FlipMode 接收到Message:");
+			//data.data也是个字符串，需要解析成对象
+			var msg = JSON.parse(data.data);
+			//心跳信息,直接返回
+			if (msg.type === "heartbeat") {
+				// console.log(msg);
+				return;
+			}
+			//服务器发来翻页信息，来自于另一个用户，
+			if (msg.type === "sync_page" && msg.user_id !== this.$store.userID) {
+				var syncData = JSON.parse(msg.data_string);
+				//正在读的是同一本书、就翻页。
+				if (syncData.book_id === this.book.id) {
+					console.log(syncData);
+					this.toPage(syncData.now_page_num, false);
+				}
+			}
 		},
 
 		//Websocket 发送消息
-		send() {
-			var readPercent = parseFloat(this.nowPageNum) / parseFloat(this.book.all_page_num)
-			console.debug("ReadPercent: " + readPercent)
-			this.newMsg = {
-				message_type: 1,
-				user_id: "test_user",
+		sendNowPage() {
+			var readPercent =
+				parseFloat(this.nowPageNum) / parseFloat(this.book.all_page_num);
+			// console.debug("ReadPercent: " + readPercent)
+			var data = {
 				book_id: this.book.id,
 				now_page_num: this.nowPageNum,
-				now_page_num_percent: 0.3333,
+				now_page_num_percent: 0.5,
 				read_percent: readPercent,
-				message_data: "翻页模式，发送数据" // Strip out html
 			};
-			// 如果fomat配置为了json，即可调用sendObj方法来发送数据
-			this.$socket.sendObj(this.newMsg);
-			console.log("send:", this.newMsg);
-			this.newMsg = ''; // Reset newMsg
+			// console.log("this.$store.userID: " + this.$store.state.userID)
+			var newMsg = {
+				type: "sync_page",
+				status_code: 200,
+				user_id: this.$store.state.userID,
+				token: this.$store.state.token,
+				msg: "翻页模式，发送数据", // Strip out html
+				data_string: JSON.stringify(data),
+			};
+			// fomat配置为了json，可调用sendObj方法来发送数据
+			this.$socket.sendObj(newMsg);
+			console.log("send:", newMsg);
 		},
 
 		// 辅助函数，用于从 Gravatar 获取头像。URL 的最后一段需要用户的 email 地址的 MD5 编码。
 		gravatarURL: function (email) {
-			return 'http://www.gravatar.com/avatar/' + md5(email);
+			return "http://www.gravatar.com/avatar/" + md5(email);
 		},
 
 		//页面排序相关
@@ -591,28 +705,41 @@ export default defineComponent({
 			axios
 				.get("/getbook?id=" + this.$route.params.id + "&sort_by=" + key)
 				.then((response) => (this.book = response.data))
-				.finally(
-					() => {
-						document.title = this.book.name;
-						this.resort_hint_key = key
-						// 带查询参数，结果是 /#/flip/abc123?sort_by="filesize"
-						this.$router.push({ name: "FlipMode", replace: true, query: { sort_by: key } })
-						console.log("成功刷新书籍数据,书籍ID:" + this.$route.params.id + "  sort_by=" + key);
-					}
-				);
+				.finally(() => {
+					document.title = this.book.name;
+					this.resort_hint_key = key;
+					// 带查询参数，结果是 /#/flip/abc123?sort_by="filesize"
+					this.$router.push({
+						name: "FlipMode",
+						replace: true,
+						query: { sort_by: key },
+					});
+					console.log(
+						"成功刷新书籍数据,书籍ID:" +
+						this.$route.params.id +
+						"  sort_by=" +
+						key
+					);
+				});
 		},
 
 		//返回“重新排序”选择菜单的文字提示
 		getSortHintText(key) {
 			switch (key) {
-				case "filename": return this.$t('sort_by_filename');
-				case "modify_time": return this.$t('sort_by_modify_time');
-				case "filesize": return this.$t('sort_by_filesize');
-				case "filename_reverse": return this.$t('sort_by_filename') + this.$t('sort_reverse');
-				case "modify_time_reverse": return this.$t('sort_by_modify_time') + this.$t('sort_reverse');
-				case "filesize_reverse": return this.$t('sort_by_filesize') + this.$t('sort_reverse');
+				case "filename":
+					return this.$t("sort_by_filename");
+				case "modify_time":
+					return this.$t("sort_by_modify_time");
+				case "filesize":
+					return this.$t("sort_by_filesize");
+				case "filename_reverse":
+					return this.$t("sort_by_filename") + this.$t("sort_reverse");
+				case "modify_time_reverse":
+					return this.$t("sort_by_modify_time") + this.$t("sort_reverse");
+				case "filesize_reverse":
+					return this.$t("sort_by_filesize") + this.$t("sort_reverse");
 				default:
-					return this.$t('re_sort');
+					return this.$t("re_sort");
 			}
 		},
 
@@ -633,39 +760,53 @@ export default defineComponent({
 		//设置是否切白边
 		setImageParameters_DoAutoCrop(value) {
 			this.imageParameters.do_auto_crop = value;
-			localStorage.setItem("ImageParameters_DoAutoCrop", this.imageParameters.do_auto_crop);
+			localStorage.setItem(
+				"ImageParameters_DoAutoCrop",
+				this.imageParameters.do_auto_crop
+			);
 			// console.log("成功保存设置: ImageParameters_DoAutoCrop=" + localStorage.getItem("ImageParameters_DoAutoCrop"));
 		},
 		//切白边参数
 		setImageParameters_AutoCropNum(value) {
 			this.imageParameters.auto_crop_num = value;
-			localStorage.setItem("ImageParameters_AutoCropNum", this.imageParameters.auto_crop_num);
+			localStorage.setItem(
+				"ImageParameters_AutoCropNum",
+				this.imageParameters.auto_crop_num
+			);
 		},
 		//切换到卷轴模式
 		changeReaderModeToScrollMode() {
 			localStorage.setItem("ReaderMode", "scroll");
 			//replace的作用类似于 router.push，唯一不同的是，它在导航时不会向 history 添加新记录，正如它的名字所暗示的那样——它取代了当前的条目。
-			this.$router.replace({ name: "ScrollMode", replace: true, params: { id: this.$route.params.id } });
+			this.$router.replace({
+				name: "ScrollMode",
+				replace: true,
+				params: { id: this.$route.params.id },
+			});
 		},
 		//判断这本书是否需要提供原始压缩包下载
 		needDownloadLink() {
-			return this.book.book_type != "dir"
+			return this.book.book_type != "dir";
 		},
 		// 分析单双页用
 		nowAndNextPageIsSingle() {
-			this.nowPageIsDouble = this.checkImageIsDoublePage_byPageNum(this.nowPageNum);
-			this.nextPageIsDouble = this.checkImageIsDoublePage_byPageNum(this.nowPageNum + 1);
+			this.nowPageIsDouble = this.checkImageIsDoublePage_byPageNum(
+				this.nowPageNum
+			);
+			this.nextPageIsDouble = this.checkImageIsDoublePage_byPageNum(
+				this.nowPageNum + 1
+			);
 			if (this.nowPageIsDouble || this.nextPageIsDouble) {
 				this.nowAndNextPageIsSingleFlag = false;
-				return false
+				return false;
 			} else {
 				this.nowAndNextPageIsSingleFlag = false;
-				return true
+				return true;
 			}
 		},
 		//根据书籍UUID,设定当前页数,因为需要取得远程书籍数据（this.book）,所以延迟执行
 		setNowPageNumByLocalStorage() {
-			if (this.saveNowPageNumFlag_FlipMode) {
+			if (this.saveNowPageNumFlag) {
 				let cookieValue = localStorage.getItem("nowPageNum" + this.book.id);
 				if (cookieValue != null) {
 					let saveNum = Number(cookieValue);
@@ -679,17 +820,17 @@ export default defineComponent({
 					console.log("本队存储里没找到:" + "nowPageNum = " + this.nowPageNum);
 				}
 			} else {
-				//console.log("不读取页数,this.saveNowPageNumFlag_FlipMode=" + this.saveNowPageNumFlag_FlipMode);
+				//console.log("不读取页数,this.saveNowPageNumFlag=" + this.saveNowPageNumFlag);
 			}
 		},
 		// // 设置当前模板-接收Drawer的参数,继续往父组件传
 		// 改变阅读模式
 		OnSetTemplate(value) {
 			if (value == "scroll") {
-				console.log("跳转到卷轴阅读模式")
+				console.log("跳转到卷轴阅读模式");
 			} else if (this.readerMode == "scroll" || this.readerMode == "sketch") {
 				// 命名路由,并加上参数,让路由建立 url
-				this.$router.push({ name: 'ScrollMode', params: { id: this.book.id } })
+				this.$router.push({ name: "ScrollMode", params: { id: this.book.id } });
 			}
 		},
 		//打开抽屉
@@ -703,8 +844,8 @@ export default defineComponent({
 		},
 		//开始速写倒计时
 		startSketchMode() {
-			this.readerMode = "sketch"
-			this.message.success(this.$t('startSketchMessage'));
+			this.readerMode = "sketch";
+			this.message.success(this.$t("startSketchMessage"));
 			this.drawerActive = false; //关闭设置抽屉
 			this.sketchModeFlag = true;
 			//是否倒计时提示文字
@@ -723,7 +864,7 @@ export default defineComponent({
 		},
 		//停止速写倒计时
 		stopSketchMode() {
-			this.message.success(this.$t('goodjob_and_byebye'));
+			this.message.success(this.$t("goodjob_and_byebye"));
 			this.sketchModeFlag = false;
 			this.showPageHintFlag_FlipMode = false;
 			this.sketchSecondCount = 0;
@@ -731,7 +872,7 @@ export default defineComponent({
 			this.showHeaderFlag_FlipMode = true;
 			//是否显示页脚
 			this.showFooterFlag_FlipMode = true;
-			this.readerMode = "flip"
+			this.readerMode = "flip";
 			// this.$emit("setTemplate", "flip");
 			clearInterval(this.interval); // 清除定时器
 		},
@@ -753,20 +894,42 @@ export default defineComponent({
 		},
 		// 关闭抽屉时,保存设置到cookies
 		saveConfigToLocal() {
+			localStorage.setItem("SyncPageFlag", this.syncPageFlag);
 			localStorage.setItem("debugModeFlag", this.debugModeFlag);
-			localStorage.setItem("showHeaderFlag_FlipMode", this.showHeaderFlag_FlipMode);
-			localStorage.setItem("showFooterFlag_FlipMode", this.showFooterFlag_FlipMode);
-			localStorage.setItem("showPageHintFlag_FlipMode", this.showPageHintFlag_FlipMode);
+			localStorage.setItem(
+				"showHeaderFlag_FlipMode",
+				this.showHeaderFlag_FlipMode
+			);
+			localStorage.setItem(
+				"showFooterFlag_FlipMode",
+				this.showFooterFlag_FlipMode
+			);
+			localStorage.setItem(
+				"showPageHintFlag_FlipMode",
+				this.showPageHintFlag_FlipMode
+			);
 			localStorage.setItem("rightToLeftFlag", this.rightToLeftFlag);
-			localStorage.setItem("simpleDoublePageModeFlag", this.simpleDoublePageModeFlag);
-			localStorage.setItem("autoDoublePageModeFlag", this.autoDoublePageModeFlag);
-			localStorage.setItem("saveNowPageNumFlag_FlipMode", this.saveNowPageNumFlag_FlipMode);
+			localStorage.setItem(
+				"simpleDoublePageModeFlag",
+				this.simpleDoublePageModeFlag
+			);
+			localStorage.setItem(
+				"autoDoublePageModeFlag",
+				this.autoDoublePageModeFlag
+			);
+			localStorage.setItem("saveNowPageNumFlag", this.saveNowPageNumFlag);
 			localStorage.setItem("nowPageNum" + this.book.id, this.nowPageNum);
 			localStorage.setItem("BackgroundColor", this.model.backgroundColor);
 			localStorage.setItem("sketchFlipSecond", this.sketchFlipSecond);
 			//set对有setXXXChange函数的来说有些多余,但没有set函数的话就有必要了
-			localStorage.setItem("ImageParameters_DoAutoCrop", this.imageParameters.do_auto_crop);
-			localStorage.setItem("ImageParametersResizeMaxWidth", this.imageParameters.resize_max_width);
+			localStorage.setItem(
+				"ImageParameters_DoAutoCrop",
+				this.imageParameters.do_auto_crop
+			);
+			localStorage.setItem(
+				"ImageParametersResizeMaxWidth",
+				this.imageParameters.resize_max_width
+			);
 		},
 		// 随即换一下背景色
 		randomBackgroundColor() {
@@ -799,51 +962,64 @@ export default defineComponent({
 			//不用自己获取元素
 			// let offsetWidth = e.currentTarget.offsetWidth;
 			// let offsetHeight = e.currentTarget.offsetHeight;
-			let clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
-			let clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离,单位为px）
+			let clickX = e.x; //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
+			let clickY = e.y; //获取鼠标的Y坐标（鼠标与屏幕顶部的距离,单位为px）
 			// 浏览器的视口,不包括工具栏和滚动条:
 			let innerWidth = window.innerWidth;
 			let innerHeight = window.innerHeight;
 			// 设置区域为正方形
-			let setArea = 0.18
-			let MinY = innerHeight * (0.5 - setArea)
-			let MaxY = innerHeight * (0.5 + setArea)
-			let MinX = (innerWidth * 0.5) - (innerHeight * 0.5 - MinY);
-			let MaxX = (innerWidth * 0.5) + (MaxY - innerHeight * 0.5);
+			let setArea = 0.18;
+			let MinY = innerHeight * (0.5 - setArea);
+			let MaxY = innerHeight * (0.5 + setArea);
+			let MinX = innerWidth * 0.5 - (innerHeight * 0.5 - MinY);
+			let MaxX = innerWidth * 0.5 + (MaxY - innerHeight * 0.5);
 			//设置区域的边长，按照宽或高里面，比较小的那个值而定
 			if (innerWidth < innerHeight) {
-				MinX = innerWidth * (0.5 - setArea)
-				MaxX = innerWidth * (0.5 + setArea)
-				MinY = (innerHeight * 0.5) - (innerWidth * 0.5 - MinX);
-				MaxY = (innerHeight * 0.5) + (MaxX - innerWidth * 0.5);
+				MinX = innerWidth * (0.5 - setArea);
+				MaxX = innerWidth * (0.5 + setArea);
+				MinY = innerHeight * 0.5 - (innerWidth * 0.5 - MinX);
+				MaxY = innerHeight * 0.5 + (MaxX - innerWidth * 0.5);
 			}
 			if (clickX > MinX && clickX < MaxX && clickY > MinY && clickY < MaxY) {
 				//在设置区域;
-				e.currentTarget.style.cursor = "url(/images/SettingsOutline.png), pointer";
+				e.currentTarget.style.cursor =
+					"url(/images/SettingsOutline.png), pointer";
 			} else {
 				if (clickX < innerWidth * 0.5) {
 					//设置左边的鼠标指针
 					if (this.rightToLeftFlag && this.nowPageNum == 1) {
 						//右边翻下一页,且目前是第一页的时候,左边的鼠标指针,设置为禁止翻页
-						e.currentTarget.style.cursor = "url(/images/Prohibited28Filled.png), pointer";
-					} else if (!this.rightToLeftFlag && this.nowPageNum == this.book.all_page_num) {
+						e.currentTarget.style.cursor =
+							"url(/images/Prohibited28Filled.png), pointer";
+					} else if (
+						!this.rightToLeftFlag &&
+						this.nowPageNum == this.book.all_page_num
+					) {
 						//左边翻下一页,且目前是最后一页的时候,左边的鼠标指针,设置为禁止翻页
-						e.currentTarget.style.cursor = "url(/images/Prohibited28Filled.png), pointer";
+						e.currentTarget.style.cursor =
+							"url(/images/Prohibited28Filled.png), pointer";
 					} else {
 						//正常情况下,左边是向左的箭头
-						e.currentTarget.style.cursor = "url(/images/ArrowLeft.png), pointer";
+						e.currentTarget.style.cursor =
+							"url(/images/ArrowLeft.png), pointer";
 					}
 				} else {
 					//设置右边的鼠标指针
-					if (this.rightToLeftFlag && this.nowPageNum == this.book.all_page_num) {
+					if (
+						this.rightToLeftFlag &&
+						this.nowPageNum == this.book.all_page_num
+					) {
 						//右边翻下一页,且目前是最后页的时候,右边的鼠标指针,设置为禁止翻页
-						e.currentTarget.style.cursor = "url(/images/Prohibited28Filled.png), pointer";
+						e.currentTarget.style.cursor =
+							"url(/images/Prohibited28Filled.png), pointer";
 					} else if (!this.rightToLeftFlag && this.nowPageNum == 1) {
 						//左边翻下一页,且目前是第一页的时候,右边的鼠标指针,设置为禁止翻页
-						e.currentTarget.style.cursor = "url(/images/Prohibited28Filled.png), pointer";
+						e.currentTarget.style.cursor =
+							"url(/images/Prohibited28Filled.png), pointer";
 					} else {
 						//正常情况下,右边是向右的箭头
-						e.currentTarget.style.cursor = "url(/images/ArrowRight.png), pointer";
+						e.currentTarget.style.cursor =
+							"url(/images/ArrowRight.png), pointer";
 					}
 				}
 			}
@@ -851,23 +1027,23 @@ export default defineComponent({
 
 		//根据鼠标点击事件的位置,决定是左右翻页还是打开设置
 		onMouseClick(e) {
-			let clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
-			let clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离,单位为px）
+			let clickX = e.x; //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
+			let clickY = e.y; //获取鼠标的Y坐标（鼠标与屏幕顶部的距离,单位为px）
 			//浏览器的可视区域宽高,不包括工具栏和滚动条:
 			let innerHeight = window.innerHeight;
 			let innerWidth = window.innerWidth;
 			// 设置区域为正方形
-			let setArea = 0.18
-			let MinY = innerHeight * (0.5 - setArea)
-			let MaxY = innerHeight * (0.5 + setArea)
-			let MinX = (innerWidth * 0.5) - (innerHeight * 0.5 - MinY);
-			let MaxX = (innerWidth * 0.5) + (MaxY - innerHeight * 0.5);
+			let setArea = 0.18;
+			let MinY = innerHeight * (0.5 - setArea);
+			let MaxY = innerHeight * (0.5 + setArea);
+			let MinX = innerWidth * 0.5 - (innerHeight * 0.5 - MinY);
+			let MaxX = innerWidth * 0.5 + (MaxY - innerHeight * 0.5);
 			//设置区域的边长，按照宽或高里面，比较小的那个值而定
 			if (innerWidth < innerHeight) {
-				MinX = innerWidth * (0.5 - setArea)
-				MaxX = innerWidth * (0.5 + setArea)
-				MinY = (innerHeight * 0.5) - (innerWidth * 0.5 - MinX);
-				MaxY = (innerHeight * 0.5) + (MaxX - innerWidth * 0.5);
+				MinX = innerWidth * (0.5 - setArea);
+				MaxX = innerWidth * (0.5 + setArea);
+				MinY = innerHeight * 0.5 - (innerWidth * 0.5 - MinX);
+				MaxY = innerHeight * 0.5 + (MaxX - innerWidth * 0.5);
 			}
 			// console.log("鼠标点击：e.offsetX=" + offsetX, "e.offsetY=" + offsetY);
 			if (clickX > MinX && clickX < MaxX && clickY > MinY && clickY < MaxY) {
@@ -893,7 +1069,6 @@ export default defineComponent({
 			}
 		},
 		toNextPage() {
-			// this.send();
 			//简单合并模式
 			if (this.simpleDoublePageModeFlag) {
 				if (this.nowPageNum < this.book.all_page_num - 1) {
@@ -906,7 +1081,10 @@ export default defineComponent({
 			}
 
 			//如果开启了自动合并模式,并且当前页应该被合并
-			if (this.autoDoublePageModeFlag && this.checkMergedStatus_ByPageNum(this.nowPageNum)) {
+			if (
+				this.autoDoublePageModeFlag &&
+				this.checkMergedStatus_ByPageNum(this.nowPageNum)
+			) {
 				if (this.nowPageNum < this.book.all_page_num - 1) {
 					this.flipPage(2);
 				} else {
@@ -939,19 +1117,23 @@ export default defineComponent({
 			//如果没有开启自动合并模式,或现在是第2页
 			if (this.nowPageNum == 2 || !this.autoDoublePageModeFlag) {
 				this.flipPage(-1);
-				return
+				return;
 			}
 			//如果前一页是双开叶
-			let pervIsDouble = this.checkImageIsDoublePage_byPageNum(this.nowPageNum - 1)
+			let pervIsDouble = this.checkImageIsDoublePage_byPageNum(
+				this.nowPageNum - 1
+			);
 			if (pervIsDouble) {
 				this.flipPage(-1);
-				return
+				return;
 			}
 			//如果前前页是双开叶
-			let PervPervIsDouble = this.checkImageIsDoublePage_byPageNum(this.nowPageNum - 2)
+			let PervPervIsDouble = this.checkImageIsDoublePage_byPageNum(
+				this.nowPageNum - 2
+			);
 			if (PervPervIsDouble) {
 				this.flipPage(-1);
-				return
+				return;
 			}
 			//都没return掉,那么前两张可以合并,减两页
 			this.flipPage(-2);
@@ -974,9 +1156,12 @@ export default defineComponent({
 				return false;
 			}
 			//分析现在这张图片的宽高比,看是不是双开页
-			let now_page_is_double_page = this.checkImageIsDoublePage_byPageNum(pageNum);
+			let now_page_is_double_page =
+				this.checkImageIsDoublePage_byPageNum(pageNum);
 			//分析下一张漫画的宽高比,看是不是双开页
-			let next_page_is_double_page = this.checkImageIsDoublePage_byPageNum(pageNum + 1);
+			let next_page_is_double_page = this.checkImageIsDoublePage_byPageNum(
+				pageNum + 1
+			);
 			//如果现在这张就是开页漫画,直接不用比
 			//如果下一张漫画是开页,显然也没法合并
 			return !(now_page_is_double_page || next_page_is_double_page);
@@ -994,7 +1179,7 @@ export default defineComponent({
 				return true;
 			}
 			let image = new Image();
-			let temp_flag = false;//返回结果用
+			let temp_flag = false; //返回结果用
 			image.src = this.book.pages.images[pageNum - 1].url;
 			// image.complete 图片是否完全加载完成。
 			//https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLImageElement/complete
@@ -1013,12 +1198,12 @@ export default defineComponent({
 				image.onload = function () {
 					//是单页漫画
 					if (image.width < image.height) {
-						image.onload = null;	// 避免重复加载
-						temp_flag = false;//宽小于高,是是竖着的,单页漫画
+						image.onload = null; // 避免重复加载
+						temp_flag = false; //宽小于高,是是竖着的,单页漫画
 					} else {
 						//是双页漫画
-						image.onload = null;	// 避免重复加载
-						temp_flag = true;//宽大于高,很可能是开页
+						image.onload = null; // 避免重复加载
+						temp_flag = true; //宽大于高,很可能是开页
 					}
 				};
 				return temp_flag;
@@ -1044,20 +1229,22 @@ export default defineComponent({
 			this.saveNowPageNumOnUpdate(this.nowPageNum);
 		},
 		//拖动进度条,或翻页的时候保存页数
-		saveNowPageNumOnUpdate(value) {
-			if (this.saveNowPageNumFlag_FlipMode) {
+		saveNowPageNumOnUpdate(value, sendWSMessage = true) {
+			if (this.saveNowPageNumFlag) {
 				localStorage.setItem("nowPageNum" + this.book.id, value);
+			}
+			//发送翻页消息到服务器
+			if (sendWSMessage && this.syncPageFlag) {
+				this.sendNowPage();
 			}
 		},
 		//跳转到指定页数
-		toPage: function (num) {
+		toPage: function (num, sendWSMessage = true) {
 			if (num <= this.book.all_page_num && num >= 1) {
 				this.nowPageNum = num;
 			}
-			if (this.saveNowPageNumFlag_FlipMode) {
-				localStorage.setItem("nowPageNum" + this.book.id, this.nowPageNum);
-			}
-			// console.log(num);
+			//保存页数
+			this.saveNowPageNumOnUpdate(this.nowPageNum, sendWSMessage);
 		},
 
 		// 键盘事件
@@ -1072,10 +1259,14 @@ export default defineComponent({
 					this.flipPage(-1); //上一页
 					break;
 				case "ArrowLeft":
-					this.rightToLeftFlag == true ? this.toPerviousPage() : this.toNextPage();
+					this.rightToLeftFlag == true
+						? this.toPerviousPage()
+						: this.toNextPage();
 					break;
 				case "ArrowRight":
-					this.rightToLeftFlag == true ? this.toNextPage() : this.toPerviousPage();
+					this.rightToLeftFlag == true
+						? this.toNextPage()
+						: this.toPerviousPage();
 					break;
 				case "Space":
 				case "ArrowDown":
@@ -1138,11 +1329,11 @@ export default defineComponent({
 
 		setSavePageNumFlag(value) {
 			console.log("value:" + value);
-			this.saveNowPageNumFlag_FlipMode = value;
-			localStorage.setItem("saveNowPageNumFlag_FlipMode", value);
+			this.saveNowPageNumFlag = value;
+			localStorage.setItem("saveNowPageNumFlag", value);
 			console.log(
-				"cookie设置完毕: saveNowPageNumFlag_FlipMode=" +
-				localStorage.getItem("saveNowPageNumFlag_FlipMode")
+				"cookie设置完毕: saveNowPageNumFlag=" +
+				localStorage.getItem("saveNowPageNumFlag")
 			);
 		},
 
@@ -1154,7 +1345,9 @@ export default defineComponent({
 				this.autoDoublePageModeFlag = false;
 			}
 			localStorage.setItem("debugModeFlag", value);
-			console.log("cookie设置完毕: debugModeFlag=" + localStorage.getItem("debugModeFlag"));
+			console.log(
+				"cookie设置完毕: debugModeFlag=" + localStorage.getItem("debugModeFlag")
+			);
 		},
 
 		setAutoDoublePage_FlipMode(value) {
@@ -1164,7 +1357,10 @@ export default defineComponent({
 				this.simpleDoublePageModeFlag = false;
 			}
 			localStorage.setItem("autoDoublePageModeFlag", value);
-			console.log("cookie设置完毕: autoDoublePageModeFlag=" + localStorage.getItem("autoDoublePageModeFlag"));
+			console.log(
+				"cookie设置完毕: autoDoublePageModeFlag=" +
+				localStorage.getItem("autoDoublePageModeFlag")
+			);
 		},
 
 		setSimpleDoublePage_FlipMode(value) {
@@ -1174,7 +1370,10 @@ export default defineComponent({
 				this.autoDoublePageModeFlag = false;
 			}
 			localStorage.setItem("simpleDoublePageModeFlag", value);
-			console.log("cookie设置完毕: simpleDoublePageModeFlag=" + localStorage.getItem("simpleDoublePageModeFlag"));
+			console.log(
+				"cookie设置完毕: simpleDoublePageModeFlag=" +
+				localStorage.getItem("simpleDoublePageModeFlag")
+			);
 		},
 	},
 
@@ -1198,21 +1397,25 @@ export default defineComponent({
 						this.$t("minute");
 				}
 				let AllTimeString =
-					MinutesAndHourString + ((this.sketchSecondCount + 1) % 60) + this.$t("second");
-				return this.$t("now_is") +
+					MinutesAndHourString +
+					((this.sketchSecondCount + 1) % 60) +
+					this.$t("second");
+				return (
+					this.$t("now_is") +
 					nowSecond +
+					this.$t("second") +
+					"  " +
+					this.$t("totalTime") +
+					AllTimeString +
+					"   " +
+					this.$t("interval") +
+					this.sketchFlipSecond +
 					this.$t("second") +
 					"  " +
 					this.$t("total_is") +
 					donePage +
-					this.$t("page") +
-					"  " +
-					this.$t("totalTime") +
-					AllTimeString +
-					"  " +
-					this.$t("interval") +
-					this.sketchFlipSecond +
-					this.$t("second");
+					this.$t("page")
+				);
 			} else {
 				return this.nowPageNum + "/" + this.book.all_page_num;
 			}
@@ -1280,9 +1483,9 @@ export default defineComponent({
 		//从左到右还是从右到左
 		get_flex_direction() {
 			if (this.rightToLeftFlag == true) {
-				return "row"
+				return "row";
 			} else {
-				return "row-reverse"
+				return "row-reverse";
 			}
 		},
 	},
@@ -1300,7 +1503,6 @@ export default defineComponent({
 
 .bottom {
 	background: v-bind("model.interfaceColor");
-
 }
 
 /* 参考CSS盒子模型慢慢改 */
@@ -1379,18 +1581,18 @@ export default defineComponent({
 }
 
 /* 漫画div图片下面的页数*/
-.sketch_hint {
-	height: v-bind(sketchHintHeight);
-	padding: 0px;
-	text-align: center;
-	font-size: v-bind(sketchHintFontSize);
-	/* 文字颜色 */
-	color: #131111;
-	/* 文字阴影：https://www.w3school.com.cn/css/css3_shadows.asp*/
-	text-shadow: -1px 0 rgb(240, 229, 229), 0 1px rgb(253, 242, 242),
-		1px 0 rgb(206, 183, 183), 0 -1px rgb(196, 175, 175);
-	width: 100vw;
-}
+/* .sketch_hint { */
+/* height: v-bind(sketchHintHeight); */
+/* padding: 0px;
+	text-align: center; */
+/* font-size: v-bind(sketchHintFontSize); */
+/* 文字颜色 */
+/* color: #131111; */
+/* 文字阴影：https://www.w3school.com.cn/css/css3_shadows.asp*/
+/* text-shadow: -1px 0 rgb(240, 229, 229), 0 1px rgb(253, 242, 242),
+		1px 0 rgb(206, 183, 183), 0 -1px rgb(196, 175, 175); */
+/* width: 50vw; */
+/* } */
 
 /* 页脚 */
 .footer {
@@ -1401,7 +1603,6 @@ export default defineComponent({
 
 	background: v-bind("model.interfaceColor");
 	/* width: 80vw; */
-
 }
 
 /* .footer_div { */

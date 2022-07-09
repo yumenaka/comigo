@@ -350,6 +350,7 @@ func setWebAPI(engine *gin.Engine) {
 		c.Redirect(http.StatusMovedPermanently, "http://www.google.com/")
 	})
 	//初始化websocket
+	websocket.WsDebug = common.Config.Debug
 	api.GET("/ws", websocket.WsHandler)
 
 	//设定压缩包下载链接
@@ -366,7 +367,6 @@ func setWebAPI(engine *gin.Engine) {
 			}
 		}
 	}
-
 }
 
 //3、选择服务端口

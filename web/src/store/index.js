@@ -72,7 +72,7 @@ const store = createStore({
       // 重新连接错误
       reconnectError: false,
       // 心跳消息发送时间
-      heartBeatInterval: 5000,//本来是50000（50秒）.不过为了测试，暂时把间隔弄小一点
+      heartBeatInterval: 50000,//50000（50秒）一次的信条消息。为了测试，有时会把间隔改小一点
       // 心跳定时器
       heartBeatTimer: 0
     }
@@ -91,18 +91,12 @@ const store = createStore({
         state.socket.isConnected &&
             main.config.globalProperties.$socket.sendObj({
             type:"heartbeat",
-            code: 200,
-            token: state.token,
+            status_code: 200,
             user_id: state.userID,
+            token: state.token,
             msg: message
           });
       }, state.socket.heartBeatInterval);
-      // main.config.globalProperties.$socket.sendObj({
-      //   code: 200,
-      //   token: state.token,
-      //   user_id: state.userID,
-      //   msg: state.userID + "【Websockets】上线"
-      // });
       console.log("【Websockets】连接建立。 " +  new Date().toLocaleDateString().replace(/\//g,"-")+" "+new Date().toTimeString().substr(0,8));
     },
     // 连接关闭

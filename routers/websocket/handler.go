@@ -16,12 +16,12 @@ func init() {
 
 // Message 定义一个对象来管理消息，反引号包含的文本是 Go 在对象和 JSON 之间进行序列化和反序列化时需要的元数据。
 type Message struct {
-	Type     string `json:"type"`
-	HttpCode int    `json:"code"`  //参考http状态码： https://zh.wikipedia.org/zh-hans/HTTP%E7%8A%B6%E6%80%81%E7%A0%81
-	token    string `json:"token"` //认证用
-	UserID   string `json:"user_id"`
-	Msg      string `json:"msg"`
-	data     string `json:"data"` //附加的原始数据，服务器根据情况解析
+	Type       string `json:"type"`
+	StatusCode int    `json:"status_code"` //参考http状态码： https://zh.wikipedia.org/zh-hans/HTTP%E7%8A%B6%E6%80%81%E7%A0%81
+	UserID     string `json:"user_id"`
+	token      string `json:"token"` //认证用
+	Msg        string `json:"msg"`
+	DataString string `json:"data_string"` //附加的json字符串数据，服务器根据情况解析
 }
 
 //创建一个 upGrader 的实例。这只是一个对象，它具备一些方法，这些方法可以获取一个普通 HTTP 链接然后将其升级成一个 WebSocket
@@ -44,9 +44,11 @@ var upGrader = websocket.Upgrader{
 		return true
 	},
 }
+var clientID = 0
 
-//map 映射，其键对应是一个指向 WebSocket 的指针，其值就是一个布尔值。我们实际上并不需要这个值，但使用的映射数据结构需要有一个映射值，这样做更容易添加和删除单项。
-var clients = make(map[*websocket.Conn]bool) // connected clients
+//map 映射，其键对应是一个指向 WebSocket 的指针，
+//其值是一个int值。我们实际上并不需要这个值，但使用的映射数据结构需要有一个映射值，这样做更容易添加和删除单项。
+var clients = make(map[*websocket.Conn]int) // connected clients
 //用于由客户端发送消息的队列，扮演通道的角色。后面定义了一个 goroutine 来从这个通道读取新消息，然后将它们发送给其它连接到服务器的客户端。
 var broadcast = make(chan Message) // broadcast channel
 
@@ -64,7 +66,8 @@ func WsHandler(c *gin.Context) {
 		return
 	}
 	// 把新的客户端添加到全局的 "clients" 映射表中进行注册
-	clients[wsConn] = true
+	clients[wsConn] = clientID
+	clientID++
 	//比 defer wsConn.Close() 更好?
 	//通知 Go 在函数返回的时候关闭 WebSocket。
 	defer func() {
@@ -81,12 +84,14 @@ func WsHandler(c *gin.Context) {
 		err = wsConn.ReadJSON(&msg)
 		if err != nil {
 			//fmt.Println()
-			log.Printf("【WsHandler】error: %v", err)
+			log.Printf("websocket服务器错误: %v", err)
 			//如果从 socket 中读取数据有误，我们假设客户端已经因为某种原因断开。我们记录错误并从全局的 “clients” 映射表里删除该客户端，这样一来，我们不会继续尝试与其通信。
 			delete(clients, wsConn)
 			break
 		} else {
-			fmt.Printf("【WsHandler】Msg: %v\n", msg)
+			if WsDebug {
+				fmt.Printf("websocket服务器收到: %v\n", msg)
+			}
 			// Send the newly received message to the broadcast channel
 			broadcast <- msg
 		}
