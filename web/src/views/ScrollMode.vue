@@ -1,6 +1,6 @@
 <template>
 	<div id="ScrollMode" class="manga">
-		<Header v-if="this.showHeaderFlag" :setDownLoadLink="this.needDownloadLink()" :headerTitle="book.name"
+		<Header :setDownLoadLink="this.needDownloadLink()" :headerTitle="book.name"
 			:bookID="this.book.id" :showReturnIcon="true">
 			<!-- 右边的设置图标,点击屏幕中央也可以打开 -->
 			<n-icon class="p-0 m-0" size="40" @click="drawerActivate('right')">
@@ -87,14 +87,14 @@
 			<!-- 分割线 -->
 			<n-divider />
 
-			<!-- 开关：是否显示页头 -->
+			<!-- 开关：是否显示页头
 			<n-space>
 				<n-switch size="large" v-model:value="this.showHeaderFlag" @update:value="setShowHeaderChange">
 					<template #checked>{{ $t('showHeader') }}</template>
 					<template #unchecked>{{ $t('showHeader') }}</template>
 				</n-switch>
 				<p></p>
-			</n-space>
+			</n-space> -->
 
 			<!-- 开关：是否显示当前页数 -->
 			<n-space>
@@ -142,6 +142,13 @@
 					<template #prefix>{{ $t('max_width') }}</template>
 					<template #suffix>px</template>
 				</n-input-number>
+			</n-space>
+
+			<n-space>
+				<n-switch size="large" v-model:value="this.syncPageFlag" @update:value="this.syncPageFlag">
+					<template #checked>{{ $t('sync_page') }}</template>
+					<template #unchecked>{{ $t('sync_page') }}</template>
+				</n-switch>
 			</n-space>
 			<!-- 分割线 -->
 			<n-divider />
@@ -282,6 +289,8 @@ export default defineComponent({
 	},
 	data() {
 		return {
+			//是否通过websocket同步翻页
+			syncPageFlag: true,
 			resort_hint_key: "resort",
 			options: [
 				{
@@ -415,6 +424,13 @@ export default defineComponent({
 		this.imageMaxWidth = window.innerWidth;
 		//根据本地存储初始化默认值,读取出来的是字符串,不要直接用
 
+		//是否通过websocket同步页数
+		if (localStorage.getItem("SyncPageFlag") === "true") {
+			this.syncPageFlag = true;
+		} else if (localStorage.getItem("SyncPageFlag") === "false") {
+			this.syncPageFlag = false;
+		}
+
 		//是否显示页头
 		if (localStorage.getItem("showHeaderFlag") === "true") {
 			this.showHeaderFlag = true;
@@ -522,7 +538,6 @@ export default defineComponent({
 	beforeMount() {
 	},
 	onMounted() {
-
 		//console.log('mounted in the composition api!')
 		this.isLandscapeMode = this.inLandscapeModeCheck();
 		this.isPortraitMode = !this.inLandscapeModeCheck();
@@ -603,6 +618,7 @@ export default defineComponent({
 		//如果在一个组件上使用了 v-model:xxx,应该使用 @update:xxx  https://www.naiveui.com/zh-CN/os-theme/docs/common-issues
 		saveConfigToLocalStorage() {
 			// 储存配置
+			localStorage.setItem("SyncPageFlag", this.syncPageFlag);
 			localStorage.setItem("showHeaderFlag", this.showHeaderFlag);
 			localStorage.setItem("showPageNumFlag_ScrollMode", this.showPageNumFlag_ScrollMode);
 			localStorage.setItem("imageWidth_usePercentFlag", this.imageWidth_usePercentFlag);

@@ -2,7 +2,6 @@ package tools
 
 import (
 	"fmt"
-	"os"
 	"runtime"
 
 	"github.com/shirou/gopsutil/v3/cpu"
@@ -13,7 +12,6 @@ import (
 
 // SystemStatus 服务器当前状况
 type SystemStatus struct {
-
 	//CPU相关
 	CPUNumLogical  int     `json:"cpu_num_logical_total"`
 	CPUNumPhysical int     `json:"cpu_num_physical"`
@@ -49,10 +47,10 @@ func GetSystemStatus() SystemStatus {
 	//// convert to JSON. String() is also implemented
 	//fmt.Println(v)
 
-	hostname, err := os.Hostname()
-	if err == nil {
-		fmt.Println(hostname)
-	}
+	//hostname, err := os.Hostname()
+	//if err == nil {
+	//	fmt.Println(hostname)
+	//}
 
 	return SystemStatus{
 		Description:       runtime.GOOS + " " + runtime.GOARCH,

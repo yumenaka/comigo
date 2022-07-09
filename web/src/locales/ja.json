@@ -12,7 +12,7 @@
   "showPageNum": "ページ数表示",
   "setBackColor": "背景色を指定する:",
   "readingProgressBar": "プログレスバー",
-  "savePageNum": "読書進捗の保存",
+  "savePageNum": "進捗の保存",
   "rightScreenToNext": "左右の向き:マンガ",
   "leftScreenToNext": "左右の向き:Comic",
   "startSketchMode": "クロッキー開始",
@@ -55,5 +55,6 @@
   "sort_reverse": "（逆）",
   "re_sort": "並べ替え",
   "fullscreen": "フルスクリーン",
-  "sort_by_default": "圧縮順序"
+  "sort_by_default": "圧縮順序",
+  "sync_page": "ページ同期"
 }

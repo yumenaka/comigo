@@ -12,7 +12,7 @@
   "showPageNum": "show PageNumber",
   "setBackColor": "Background Color:",
   "readingProgressBar": "Reading Progress Bar",
-  "savePageNum": "Save Reading Progress",
+  "savePageNum": "Save Progress",
   "rightScreenToNext": "RightToLeft-Manga",
   "leftScreenToNext": "RightToLeft-Comic",
   "startSketchMode": "Start Sketch",
@@ -55,5 +55,6 @@
   "sort_reverse": "(Reverse)",
   "re_sort": "Resort",
   "fullscreen": "Fullscreen",
-  "sort_by_default": "default sort"
+  "sort_by_default": "default sort",
+  "sync_page": "Sync Page"
 }

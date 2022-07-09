@@ -9,6 +9,8 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+var WsDebug = true
+
 //默认的处理方式：原样返回
 func handDefaultMessage(client *websocket.Conn, msg Message) {
 	err := client.WriteJSON(msg)
@@ -54,6 +56,7 @@ func handSyncPageMessage(client *websocket.Conn, msg Message) {
 		client.Close()
 		delete(clients, client)
 	}
+
 	// Message 定义一个对象来管理消息，反引号包含的文本是 Go 在对象和 JSON 之间进行序列化和反序列化时需要的元数据。
 	type syncData struct {
 		BookID            string  `json:"book_id"`
@@ -62,10 +65,26 @@ func handSyncPageMessage(client *websocket.Conn, msg Message) {
 		ReadPercent       float64 `json:"read_percent"`
 	}
 	var data syncData
-	if err := json.Unmarshal([]byte(msg.data), &data); err != nil {
-		log.Printf("handSyncPageMessage syncData error: %v", err)
+	if err := json.Unmarshal([]byte(msg.DataString), &data); err != nil {
+		log.Printf("handSyncPageMessage error: %v", err)
 		return
 	}
-	fmt.Println(data.BookID)
+	if WsDebug {
+		fmt.Println(data)
+	}
+	//验证收到的数据
+	if data.BookID == "" || data.NowPageNum < 0 || data.NowPageNum > 99999999999 || data.NowPageNumPercent > 1 {
+		log.Printf("handSyncPageMessage data error: %v", data)
+		return
+	}
 
+	//向所有在线客户端发送翻页信息
+	for c := range clients {
+		err := c.WriteJSON(msg)
+		if err != nil {
+			log.Printf("error: %v", err)
+			c.Close()
+			delete(clients, c)
+		}
+	}
 }
