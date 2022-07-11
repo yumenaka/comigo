@@ -56,5 +56,6 @@
   "re_sort": "Resort",
   "fullscreen": "Fullscreen",
   "sort_by_default": "default sort",
-  "sync_page": "Sync Page"
+  "sync_page": "Sync Page",
+  "hide_toolbar": "AHideToolBar"
 }

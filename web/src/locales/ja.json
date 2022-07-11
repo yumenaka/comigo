@@ -56,5 +56,6 @@
   "re_sort": "並べ替え",
   "fullscreen": "フルスクリーン",
   "sort_by_default": "圧縮順序",
-  "sync_page": "ページ同期"
+  "sync_page": "ページ同期",
+  "hide_toolbar": "ツールバー非表示"
 }
