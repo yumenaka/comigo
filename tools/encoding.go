@@ -99,7 +99,7 @@ func transformEncoding(rawReader io.Reader, trans transform.Transformer) (string
 
 func isGBK(data []byte) bool {
 	length := len(data)
-	var i int = 0
+	var i = 0
 	for i < length {
 		if data[i] <= 0x7f {
 			//编码0~127,只有一个字节的编码，兼容ASCII码

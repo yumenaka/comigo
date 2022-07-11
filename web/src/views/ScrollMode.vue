@@ -1,7 +1,7 @@
 <template>
 	<div id="ScrollMode" class="manga">
-		<Header :setDownLoadLink="this.needDownloadLink()" :headerTitle="book.name"
-			:bookID="this.book.id" :showReturnIcon="true">
+		<Header :setDownLoadLink="this.needDownloadLink()" :headerTitle="book.name" :bookID="this.book.id"
+			:showReturnIcon="true">
 			<!-- 右边的设置图标,点击屏幕中央也可以打开 -->
 			<n-icon class="p-0 m-0" size="40" @click="drawerActivate('right')">
 				<settings-outline />
@@ -24,9 +24,31 @@
 			<n-space>
 				<n-button @click="changeReaderModeToFlipMode">{{ $t('switch_to_flip_mode') }}</n-button>
 			</n-space>
+			<p> &nbsp;</p>
+			<!-- 同步页数 -->
+			<n-space>
+				<n-switch size="large" v-model:value="this.syncPageFlag" @update:value="this.setSyncPageFlag">
+					<template #checked>{{ $t("sync_page") }}</template>
+					<template #unchecked>{{ $t("sync_page") }}</template>
+				</n-switch>
+			</n-space>
+			<!-- 保存页数 -->
+			<n-space>
+				<n-switch size="large" v-model:value="this.saveNowPageNumFlag" @update:value="this.setSavePageNumFlag">
+					<template #checked>{{ $t("savePageNum") }}</template>
+					<template #unchecked>{{ $t("savePageNum") }}</template>
+				</n-switch>
+			</n-space>
+			<!-- 显示页数 -->
+			<n-space>
+				<n-switch size="large" v-model:value="this.showPageNumFlag_ScrollMode"
+					@update:value="setShowPageNumChange">
+					<template #checked>{{ $t('showPageNum') }}</template>
+					<template #unchecked>{{ $t('showPageNum') }}</template>
+				</n-switch>
+			</n-space>
 
-			<!-- 分割线 -->
-			<n-divider />
+			<p> &nbsp;</p>
 			<n-space vertical>
 				<!-- 单页-漫画宽度-使用百分比 -->
 				<!-- 数字输入% -->
@@ -84,8 +106,7 @@
 				</n-switch>
 			</n-space>
 
-			<!-- 分割线 -->
-			<n-divider />
+			<p> &nbsp;</p>
 
 			<!-- 开关：是否显示页头
 			<n-space>
@@ -96,25 +117,6 @@
 				<p></p>
 			</n-space> -->
 
-			<!-- 开关：是否显示当前页数 -->
-			<n-space>
-				<n-switch size="large" v-model:value="this.showPageNumFlag_ScrollMode"
-					@update:value="setShowPageNumChange">
-					<template #checked>{{ $t('showPageNum') }}</template>
-					<template #unchecked>{{ $t('showPageNum') }}</template>
-				</n-switch>
-			</n-space>
-
-			<!-- 开关：显示原图 黑白 -->
-			<n-space>
-				<n-switch size="large" v-model:value="this.imageParameters.gray"
-					@update:value="setImageParameters_Gray">
-					<template #checked>{{ $t('gray_image') }}</template>
-					<template #unchecked>{{ $t('gray_image') }}</template>
-				</n-switch>
-			</n-space>
-			<!-- 分割线 -->
-			<n-divider />
 			<!-- 开关：自动切边 -->
 			<n-space>
 				<n-switch size="large" v-model:value="this.imageParameters.do_auto_crop"
@@ -144,14 +146,18 @@
 				</n-input-number>
 			</n-space>
 
-			<n-space>
-				<n-switch size="large" v-model:value="this.syncPageFlag" @update:value="this.syncPageFlag">
-					<template #checked>{{ $t('sync_page') }}</template>
-					<template #unchecked>{{ $t('sync_page') }}</template>
+			<!-- 开关：显示原图 黑白 -->
+			<!-- <n-space>
+				<n-switch size="large" v-model:value="this.imageParameters.gray"
+					@update:value="setImageParameters_Gray">
+					<template #checked>{{ $t('gray_image') }}</template>
+					<template #unchecked>{{ $t('gray_image') }}</template>
 				</n-switch>
-			</n-space>
+			</n-space> -->
+
 			<!-- 分割线 -->
-			<n-divider />
+			<!-- <n-divider /> -->
+			<p> &nbsp;</p>
 			<n-dropdown trigger="hover" :options="options" @select="onResort">
 				<n-button>{{ this.getSortHintText(this.resort_hint_key) }}</n-button>
 			</n-dropdown>
@@ -167,7 +173,7 @@
 
 <script>
 // 直接导入组件并使用它。这种情况下,只有导入的组件才会被打包。
-import { NBackTop, NSpace, NSlider, NSwitch, NIcon, NInputNumber, NDivider, NButton, NDropdown, } from 'naive-ui'
+import { NBackTop, NSpace, NSlider, NSwitch, NIcon, NInputNumber, NButton, NDropdown, } from 'naive-ui'
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
 import Bottom from "@/components/Bottom.vue";
@@ -201,7 +207,7 @@ export default defineComponent({
 		// NAvatar, //头像 https://www.naiveui.com/zh-CN/os-theme/components/avatar
 		NInputNumber,//数字输入 https://www.naiveui.com/zh-CN/os-theme/components/input-number
 		SettingsOutline,//图标,来自 https://www.xicons.org/#/   需要安装（npm i -D @vicons/ionicons5）
-		NDivider,//分割线  https://www.naiveui.com/zh-CN/os-theme/components/divider
+		// NDivider,//分割线  https://www.naiveui.com/zh-CN/os-theme/components/divider
 		// NColorPicker,
 		NButton,//按钮，来自:https://www.naiveui.com/zh-CN/os-theme/components/button
 		NDropdown,//下拉菜单 https://www.naiveui.com/zh-CN/os-theme/components/dropdown
@@ -236,26 +242,26 @@ export default defineComponent({
 			model,
 			imageParameters,//获取图片所用的参数
 			imageParametersString: (source_url) => {
-				// var temp =
+
 				if (source_url.substr(0, 12) == "api/getfile?") {
 					//当前URL
-					var url = document.location.toString();
+					const url = document.location.toString();
 					//按照“/”分割字符串
-					var arrUrl = url.split("/");
+					const arrUrl = url.split("/");
 					//拼一个完整的图片URL（因为路由路径会变化,所以不能用相对路径？）
-					var base_str = arrUrl[0] + "//" + arrUrl[2] + "/" + source_url
+					const base_str = arrUrl[0] + "//" + arrUrl[2] + "/" + source_url;
 					//添加各种字符串参数,不需要的话为空
-					var resize_width_str = (imageParameters.resize_width > 0 ? "&resize_width=" + imageParameters.resize_width : "")
-					var resize_height_str = (imageParameters.resize_height > 0 ? "&resize_height=" + imageParameters.resize_height : "")
-					var gray_str = (imageParameters.gray ? "&gray=true" : "")
-					var do_auto_resize_str = (imageParameters.do_auto_resize ? ("&resize_max_width=" + imageParameters.resize_max_width) : "")
-					var resize_max_height_str = (imageParameters.resize_max_height > 0 ? "&resize_max_height=" + imageParameters.resize_max_height : "")
-					var auto_crop_str = (imageParameters.do_auto_crop ? "&auto_crop=" + imageParameters.auto_crop_num : "")
+					const resize_width_str = (imageParameters.resize_width > 0 ? "&resize_width=" + imageParameters.resize_width : "");
+					const resize_height_str = (imageParameters.resize_height > 0 ? "&resize_height=" + imageParameters.resize_height : "");
+					const gray_str = (imageParameters.gray ? "&gray=true" : "");
+					const do_auto_resize_str = (imageParameters.do_auto_resize ? ("&resize_max_width=" + imageParameters.resize_max_width) : "");
+					const resize_max_height_str = (imageParameters.resize_max_height > 0 ? "&resize_max_height=" + imageParameters.resize_max_height : "");
+					const auto_crop_str = (imageParameters.do_auto_crop ? "&auto_crop=" + imageParameters.auto_crop_num : "");
 					//所有附加的转换参数
-					var addStr = resize_width_str + resize_height_str + do_auto_resize_str + resize_max_height_str + auto_crop_str + gray_str
+					const addStr = resize_width_str + resize_height_str + do_auto_resize_str + resize_max_height_str + auto_crop_str + gray_str;
 					//如果有附加转换参数，则设置成不缓存
-					var nocache_str = (addStr === "" ? "" : "&no-cache=true")
-					var full_url = base_str + addStr + nocache_str
+					const nocache_str = (addStr === "" ? "" : "&no-cache=true");
+					const full_url = base_str + addStr + nocache_str;
 					// console.log(full_url);
 					return full_url;
 				} else {
@@ -291,6 +297,7 @@ export default defineComponent({
 		return {
 			//是否通过websocket同步翻页
 			syncPageFlag: true,
+			saveNowPageNumFlag: true,
 			resort_hint_key: "resort",
 			options: [
 				{
@@ -391,7 +398,7 @@ export default defineComponent({
 	// unmounted: 当指令与元素解除绑定且父组件已卸载时,只调用一次。
 	created() {
 		//根据文件名、修改时间、文件大小等要素排序的参数
-		var sort_image_by_str = ""
+		let sort_image_by_str = "";
 		if (this.$route.query.sort_by) {
 			sort_image_by_str = "&sort_by=" + this.$route.query.sort_by
 		}
@@ -532,6 +539,18 @@ export default defineComponent({
 				this.imageParameters.auto_crop_num = saveNum;
 			}
 		}
+		//是否保存页数
+		if (localStorage.getItem("saveNowPageNumFlag") === "true") {
+			this.saveNowPageNumFlag = true;
+		} else if (localStorage.getItem("saveNowPageNumFlag") === "false") {
+			this.saveNowPageNumFlag = false;
+		}
+		//是否通过websocket同步页数
+		if (localStorage.getItem("SyncPageFlag") === "true") {
+			this.syncPageFlag = true;
+		} else if (localStorage.getItem("SyncPageFlag") === "false") {
+			this.syncPageFlag = false;
+		}
 	},
 
 	// //挂载前
@@ -590,7 +609,7 @@ export default defineComponent({
 			this.$router.push({ name: "FlipMode", replace: true, params: { id: this.$route.params.id } });
 		},
 		needDownloadLink() {
-			return this.book.book_type != "dir"
+			return this.book.book_type !== "dir"
 		},
 		//打开抽屉
 		drawerActivate(place) {
@@ -676,6 +695,29 @@ export default defineComponent({
 			// console.log("成功保存设置: imageWidth_usePercentFlag=" + this.imageWidth_usePercentFlag);
 		},
 
+		setSavePageNumFlag(value) {
+			console.log("value:" + value);
+			this.saveNowPageNumFlag = value;
+			localStorage.setItem("saveNowPageNumFlag", value);
+			console.log(
+				"cookie设置完毕: saveNowPageNumFlag=" +
+				localStorage.getItem("saveNowPageNumFlag")
+			);
+		},
+
+		setDebugModeFlag(value) {
+			console.log("value:" + value);
+			this.debugModeFlag = value;
+			//关闭Debug模式的时候顺便也关上“自动合并单双页”的功能（因为还有BUG）
+			if (value === false) {
+				this.autoDoublePageModeFlag = false;
+			}
+			localStorage.setItem("debugModeFlag", value);
+			console.log(
+				"cookie设置完毕: debugModeFlag=" + localStorage.getItem("debugModeFlag")
+			);
+		},
+
 		//可见区域变化的时候改变页面状态
 		onResize() {
 			this.imageMaxWidth = window.innerWidth
@@ -714,21 +756,26 @@ export default defineComponent({
 			//浏览器的视口,不包括工具栏和滚动条:
 			let innerWidth = window.innerWidth
 			let innerHeight = window.innerHeight
-			// 设置区域为正方形
-			let setArea = 0.18
-			let MinY = innerHeight * (0.5 - setArea)
-			let MaxY = innerHeight * (0.5 + setArea)
-			let MinX = (innerWidth * 0.5) - (innerHeight * 0.5 - MinY);
-			let MaxX = (innerWidth * 0.5) + (MaxY - innerHeight * 0.5);
-			//设置区域的边长，按照宽或高里面，比较小的那个值而定
+			//设置区域为正方形，边长按照宽或高里面，比较小的值决定
+			const setArea = 0.15;
+			// innerWidth >= innerHeight 的情况下
+			let MinY = innerHeight * (0.5 - setArea);
+			let MaxY = innerHeight * (0.5 + setArea);
+			let MinX = innerWidth * 0.5 - (MaxY - MinY) * 0.5;
+			let MaxX = innerWidth * 0.5 + (MaxY - MinY) * 0.5;
 			if (innerWidth < innerHeight) {
-				MinX = innerWidth * (0.5 - setArea)
-				MaxX = innerWidth * (0.5 + setArea)
-				MinY = (innerHeight * 0.5) - (innerWidth * 0.5 - MinX);
-				MaxY = (innerHeight * 0.5) + (MaxX - innerWidth * 0.5);
+				MinX = innerWidth * (0.5 - setArea);
+				MaxX = innerWidth * (0.5 + setArea);
+				MinY = innerHeight * 0.5 - (MaxX - MinX) * 0.5;
+				MaxY = innerHeight * 0.5 + (MaxX - MinX) * 0.5;
 			}
+			//在设置区域
+			let inSetArea = false
 			if ((this.clickX > MinX && this.clickX < MaxX) && (this.clickY > MinY && this.clickY < MaxY)) {
 				//console.log("点中了设置区域！");
+				inSetArea = true
+			}
+			if (inSetArea) {
 				this.drawerActivate('right')
 			}
 
@@ -744,20 +791,25 @@ export default defineComponent({
 			//浏览器的视口,不包括工具栏和滚动条:
 			let innerWidth = window.innerWidth
 			let innerHeight = window.innerHeight
-			// 设置区域为正方形
-			let setArea = 0.18
-			let MinY = innerHeight * (0.5 - setArea)
-			let MaxY = innerHeight * (0.5 + setArea)
-			let MinX = (innerWidth * 0.5) - (innerHeight * 0.5 - MinY);
-			let MaxX = (innerWidth * 0.5) + (MaxY - innerHeight * 0.5);
-			//设置区域的边长，按照宽或高里面，比较小的那个值而定
+			//设置区域为正方形，边长按照宽或高里面，比较小的值决定
+			const setArea = 0.15;
+			// innerWidth >= innerHeight 的情况下
+			let MinY = innerHeight * (0.5 - setArea);
+			let MaxY = innerHeight * (0.5 + setArea);
+			let MinX = innerWidth * 0.5 - (MaxY - MinY) * 0.5;
+			let MaxX = innerWidth * 0.5 + (MaxY - MinY) * 0.5;
 			if (innerWidth < innerHeight) {
-				MinX = innerWidth * (0.5 - setArea)
-				MaxX = innerWidth * (0.5 + setArea)
-				MinY = (innerHeight * 0.5) - (innerWidth * 0.5 - MinX);
-				MaxY = (innerHeight * 0.5) + (MaxX - innerWidth * 0.5);
+				MinX = innerWidth * (0.5 - setArea);
+				MaxX = innerWidth * (0.5 + setArea);
+				MinY = innerHeight * 0.5 - (MaxX - MinX) * 0.5;
+				MaxY = innerHeight * 0.5 + (MaxX - MinX) * 0.5;
 			}
+			//在设置区域
+			let inSetArea = false
 			if ((this.clickX > MinX && this.clickX < MaxX) && (this.clickY > MinY && this.clickY < MaxY)) {
+				inSetArea = true
+			}
+			if (inSetArea) {
 				//console.log("在设置区域！");
 				e.currentTarget.style.cursor = 'url(/images/SettingsOutline.png), pointer';
 			} else {

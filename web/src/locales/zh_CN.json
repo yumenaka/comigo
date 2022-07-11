@@ -56,5 +56,6 @@
   "sort_reverse": "（反向）",
   "re_sort": "重新排序",
   "fullscreen": "切换全屏",
-  "sync_page": "同步页数"
+  "sync_page": "同步页数",
+  "hide_toolbar": "隐藏工具栏"
 }
