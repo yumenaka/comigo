@@ -1,20 +1,20 @@
 <template>
-  <div class="static">
+  <div class="">
     <!-- 顶部,标题页头 -->
     <!-- 定位：https://www.tailwindcss.cn/docs/position -->
     <!-- 不透明度：opacity-70 https://www.tailwindcss.cn/docs/opacity -->
     <!-- Vue组建过渡：https://v3.cn.vuejs.org/guide/transitions-enterleave.html#%E5%8D%95%E5%85%83%E7%B4%A0-%E7%BB%84%E4%BB%B6%E7%9A%84%E8%BF%87%E6%B8%A1= -->
     <transition name="header-slide-fade">
-      <Header v-if="this.showHeaderFlag_FlipMode" class="header fixed mx-auto w-full opacity-80"
-        :setDownLoadLink="this.needDownloadLink()" :headerTitle="book.name" :bookID="this.book.id"
-        :showReturnIcon="true">
+      <!-- fixed -->
+      <Header v-if="this.showHeaderFlag_FlipMode" class="header  mx-auto w-full opacity-80"
+        v-bind:class="{ 'fixed': this.hideToolbar }" :setDownLoadLink="this.needDownloadLink()" :headerTitle="book.name"
+        :bookID="this.book.id" :showReturnIcon="true">
         <!-- 右边的设置图标,点击屏幕中央也可以打开 -->
         <n-icon size="40" @click="drawerActivate('right')">
           <settings-outline />
         </n-icon>
       </Header>
     </transition>
-
 
     <div class="main">
       <!-- 主题,漫画div -->
@@ -47,19 +47,22 @@
         </div>
       </div>
     </div>
-    <!-- 倒计的文字提示 -->
+    <!-- 页数、倒计时文字提示 -->
     <!-- Top / Right / Bottom / Left :用于控制定位元素的位置的功能类。https://www.tailwindcss.cn/docs/top-right-bottom-left -->
     <div class="
-        text-2xl
+        
         break-words
         text-purple-700 text-opacity-90
         h-auto
-        w-1/4
+        w-full
         opacity-70
-		absolute
+        absolute
         bottom-0
-        left-0
-      " v-if="this.showPageHintFlag_FlipMode">
+        fixed
+      " 
+      v-bind:class="{ 'text-2xl': this.sketchModeFlag, 'text-lg': (!this.sketchModeFlag)}"
+      
+      v-if="this.showPageHintFlag_FlipMode">
       {{ pageNumOrSketchHint }}
     </div>
 
@@ -71,7 +74,11 @@
       <!-- 使用 fixed 来定位一个元素相对于浏览器窗视口的位置。偏移量是相对于视口计算的，且该元素将作为绝对定位的子元素的位置参考。 -->
       <!-- 控制 flex 和 grid 项目如何沿着容器的主轴定位:https://www.tailwindcss.cn/docs/justify-content -->
       <!-- Tailwind 的容器不会自动居中，也没有任何内置的水平方向的内边距。要使一个容器居中，使用 mx-auto 功能类： -->
-      <div class="absolute bottom-0 w-full h-10 opacity-80" v-if="this.showFooterFlag_FlipMode">
+      <!-- absolute bottom-0  -->
+      <!-- v-bind:class="{ absolute: this.hideToolbar, 'bottom-0': this.hideToolbar, 'fixed': this.hideToolbar, 'flex': !this.hideToolbar}" -->
+      <div class="  w-full h-10 opacity-80"
+        v-bind:class="{ absolute: this.hideToolbar, 'bottom-0': this.hideToolbar, 'fixed': this.hideToolbar, 'flex': (!this.hideToolbar) }"
+        v-if="this.showFooterFlag_FlipMode">
         <div class="
           bg-yellow-400
           flex flex-row
@@ -142,7 +149,15 @@
         </n-switch>
       </n-space>
 
-      <!-- websocket同步页数 -->
+      <!-- 显示当前页数 -->
+      <n-space>
+        <n-switch size="large" v-model:value="this.showPageHintFlag_FlipMode" @update:value="setShowPageNumChange">
+          <template #checked>{{ $t("showPageNum") }}</template>
+          <template #unchecked>{{ $t("showPageNum") }}</template>
+        </n-switch>
+      </n-space>
+
+      <!-- websocket同步 -->
       <n-space>
         <n-switch size="large" v-model:value="this.syncPageFlag" @update:value="this.setSyncPageFlag">
           <template #checked>{{ $t("sync_page") }}</template>
@@ -1574,11 +1589,6 @@ export default defineComponent({
   opacity: 0;
 }
 
-
-
-
-
-
 .header {
   background: v-bind("model.interfaceColor");
 }
@@ -1625,8 +1635,8 @@ export default defineComponent({
   flex-direction: column;
   justify-content: center;
   align-items: baseline;
-  user-select: none;
   /* 不可以被选中 */
+  user-select: none;
   /* 火狐 */
   -moz-user-select: none;
   /* 谷歌 */
@@ -1649,8 +1659,6 @@ export default defineComponent({
 
 /* 最后的一或两张图片*/
 .manga_area_img_div img {
-  /* max-height: inherit 继承 */
-  /* max-height: inherit; */
   /* max-height: v-bind(mangaImageHeight); */
   max-height: 100vh;
   max-width: 100vw;

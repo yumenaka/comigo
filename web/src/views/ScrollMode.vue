@@ -16,6 +16,8 @@
 			<div class="page_hint" v-if="showPageNumFlag_ScrollMode">{{ key + 1 }}/{{ book.all_page_num }}</div>
 		</div>
 
+		<Observer @intersect="intersected"/>
+
 		<Drawer :initDrawerActive="this.drawerActive" :initDrawerPlacement="this.drawerPlacement"
 			@saveConfig="this.saveConfigToLocalStorage" @startSketch="this.startSketchMode"
 			@closeDrawer="this.drawerDeactivate" @setT="this.OnSetTemplate" :readerMode="this.readerMode"
@@ -177,6 +179,7 @@ import { NBackTop, NSpace, NSlider, NSwitch, NIcon, NInputNumber, NButton, NDrop
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
 import Bottom from "@/components/Bottom.vue";
+import Observer from    "@/components/Observer_in_Scroll.vue"; 
 import { defineComponent, reactive } from 'vue'
 // import { useCookies } from "vue3-cookies";// https://github.com/KanHarI/vue3-cookies
 import { SettingsOutline } from '@vicons/ionicons5'
@@ -190,6 +193,7 @@ export default defineComponent({
 		Header,//自定义页头
 		Drawer,//自定义抽屉
 		Bottom,//自定义页尾
+		Observer,//Observer组件,下拉刷新用
 		NBackTop,//回到顶部按钮,来自:https://www.naiveui.com/zh-CN/os-theme/components/back-top
 		// NDrawer,//抽屉,可以从上下左右4个方向冒出. https://www.naiveui.com/zh-CN/os-theme/components/drawer
 		// NDrawerContent,//抽屉内容
@@ -569,7 +573,9 @@ export default defineComponent({
 	beforeUnmount() {
 		//组件销毁前,销毁监听事件
 		window.removeEventListener("scroll", this.onScroll);
-		window.removeEventListener('resize', this.onResize)
+		window.removeEventListener('resize', this.onResize);
+		// 组件被销毁时清理观察者,不做的话会造成内存泄漏，因为事件监听器不会被清除。
+		this.observer.disconnect();//停止观察所有元素
 	},
 	methods: {
 		//页面排序相关
@@ -815,6 +821,12 @@ export default defineComponent({
 			} else {
 				e.currentTarget.style.cursor = '';
 			}
+
+      //获取元素,统计页数
+      // let offsetWidth = e.currentTarget.offsetWidth;
+      // let offsetHeight = e.currentTarget.offsetHeight;
+
+
 
 		},
 		onMouseLeave(e) {
