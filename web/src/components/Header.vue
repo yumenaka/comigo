@@ -80,15 +80,7 @@ export default defineComponent({
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-/* .header { */
-/* color: #111; */
-/* text-align: center; */
-/* display: flex; */
-/* https://www.w3school.com.cn/tiy/t.asp?f=css3_flexbox_justify-content_space-between */
-/* justify-content: space-between; */
-/* align-items: center; */
-/* line-height: 75px; */
-/* } */
+
 </style>
 
 
