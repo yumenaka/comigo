@@ -338,16 +338,16 @@ export default defineComponent({
 
         getBookCardOpenURL(bookID, bookType, bookName) {
             // console.log("getBookCardOpenURL  bookID：" + bookID + " bookType：" + bookType)
-            if (bookType == "book_group") {
+            if (bookType === "book_group") {
                 return "/#/child_shelf/" + bookID + "/";
             }
             if (bookType === ".pdf" || bookType === "video" || bookType === "audio" || bookType === "unknown") {
                 return "/api/raw/" + bookID + "/" + bookName;
             }
-            if (this.readerMode == "flip" || this.readerMode == "sketch") {
+            if (this.readerMode === "flip" || this.readerMode === "sketch") {
                 return "/#/flip/" + bookID
             }
-            if (this.readerMode == "scroll") {
+            if (this.readerMode === "scroll") {
                 // 命名路由,并加上参数,让路由建立 url
                 return "/#/scroll/" + bookID
             }
@@ -377,11 +377,11 @@ export default defineComponent({
                     );
                 return;
             }
-            if (this.readerMode == "flip" || this.readerMode == "sketch") {
+            if (this.readerMode === "flip" || this.readerMode === "sketch") {
                 // 命名路由,并加上参数,让路由建立 url
                 this.$router.push({ name: "FlipMode", params: { id: bookID } });
             }
-            if (this.readerMode == "scroll") {
+            if (this.readerMode === "scroll") {
                 // 命名路由,并加上参数,让路由建立 url
                 this.$router.push({ name: "ScrollMode", params: { id: bookID } });
             }
@@ -389,21 +389,21 @@ export default defineComponent({
 
         refreshReadMode() {
             // 初始化或者路由变化时,读取其他页面的更改,并存储到本地存储的阅读器模式（ReaderMode）这个值,
-            if (localStorage.getItem("ReaderModeIsScroll") == "true") {
+            if (localStorage.getItem("ReaderMode") === "true") {
                 this.readerModeIsScroll = true;
                 this.readerMode = "scroll";
-                localStorage.setItem("ReaderMode", "scroll");
+                // localStorage.setItem("ReaderMode", "scroll");
             }
-            if (localStorage.getItem("ReaderModeIsScroll") == "false") {
+            if (localStorage.getItem("ReaderMode") === "false") {
                 this.readerModeIsScroll = false;
                 this.readerMode = "flip";
-                localStorage.setItem("ReaderMode", "flip");
+                // localStorage.setItem("ReaderMode", "flip");
             }
         },
         // 切换下拉、翻页阅读模式
         setReaderModeIsScroll(value) {
             this.readerModeIsScroll = value;
-            if (this.readerModeIsScroll == true) {
+            if (this.readerModeIsScroll === true) {
                 this.readerMode = "scroll";
                 localStorage.setItem("ReaderMode", "scroll");
             } else {

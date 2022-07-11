@@ -50,9 +50,9 @@
     <!-- 页数、倒计时文字提示 -->
     <!-- Top / Right / Bottom / Left :用于控制定位元素的位置的功能类。https://www.tailwindcss.cn/docs/top-right-bottom-left -->
     <div class="
-        
-        break-words
-        text-purple-700 text-opacity-90
+        font-sans
+        text-blue-700 text-opacity-90
+        shadow-lg shadow-blue-500/50
         h-auto
         w-full
         opacity-70
@@ -77,7 +77,7 @@
       <!-- absolute bottom-0  -->
       <!-- v-bind:class="{ absolute: this.hideToolbar, 'bottom-0': this.hideToolbar, 'fixed': this.hideToolbar, 'flex': !this.hideToolbar}" -->
       <div class="  w-full h-10 opacity-80"
-        v-bind:class="{ absolute: this.hideToolbar, 'bottom-0': this.hideToolbar, 'fixed': this.hideToolbar, 'flex': (!this.hideToolbar) }"
+        v-bind:class="{ absolute: this.hideToolbar, 'bottom-0': this.hideToolbar, 'sticky': this.hideToolbar, 'flex': (!this.hideToolbar) }"
         v-if="this.showFooterFlag_FlipMode">
         <div class="
           bg-yellow-400
@@ -1559,7 +1559,7 @@ export default defineComponent({
 </script>
 
 <style scoped>
-/* 题头与进度条的显隐效果 */
+/* 题头的显隐效果 */
 /* 可以为进入和离开动画设置不同的持续时间和动画函数 */
 .header-slide-fade-enter-active {
   transition: all 0.3s ease-out;
@@ -1574,7 +1574,7 @@ export default defineComponent({
   transform: translateY(-20px);
   opacity: 0;
 }
-
+/* 进度条的显隐效果 */
 .bottom-slide-fade-enter-active {
   transition: all 0.3s ease-out;
 }
@@ -1597,7 +1597,7 @@ export default defineComponent({
   background: v-bind("model.interfaceColor");
 }
 
-/* 参考CSS盒子模型慢慢改 */
+/* 参考CSS盒子模型改 */
 /* https://www.runoob.com/css/css-boxmodel.html */
 /* CSS 高度和宽度 */
 /* https://www.w3school.com.cn/css/css_dimension.asp */

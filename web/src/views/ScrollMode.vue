@@ -16,7 +16,7 @@
 			<div class="page_hint" v-if="showPageNumFlag_ScrollMode">{{ key + 1 }}/{{ book.all_page_num }}</div>
 		</div>
 
-		<Observer @intersect="intersected"/>
+		<Observer @intersect="intersected" />
 
 		<Drawer :initDrawerActive="this.drawerActive" :initDrawerPlacement="this.drawerPlacement"
 			@saveConfig="this.saveConfigToLocalStorage" @startSketch="this.startSketchMode"
@@ -179,7 +179,7 @@ import { NBackTop, NSpace, NSlider, NSwitch, NIcon, NInputNumber, NButton, NDrop
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
 import Bottom from "@/components/Bottom.vue";
-import Observer from    "@/components/Observer_in_Scroll.vue"; 
+import Observer from "@/components/Observer_in_Scroll.vue";
 import { defineComponent, reactive } from 'vue'
 // import { useCookies } from "vue3-cookies";// https://github.com/KanHarI/vue3-cookies
 import { SettingsOutline } from '@vicons/ionicons5'
@@ -299,6 +299,42 @@ export default defineComponent({
 	},
 	data() {
 		return {
+			//当前页数,注意语义,直接就是1开始的页数,不是数组下标,在pages\images数组当中用的时候需要-1
+			nowPageNum: 1,
+			images: [
+				{
+					height: 500,
+					width: 449,
+					url: "/images/loading.gif",
+				},
+				{
+					height: 500,
+					width: 449,
+					url: "/images/loading.gif",
+				},
+			],
+			saveNowPageNumFlag: true,
+			book: {
+				name: "loading",
+				id: "abcde",
+				all_page_num: 2,
+				book_type: "dir",
+				pages: {
+					sort_by: "",
+					images: [
+						{
+							height: 500,
+							width: 449,
+							url: "/images/loading.gif",
+						},
+						{
+							height: 500,
+							width: 449,
+							url: "/images/loading.gif",
+						},
+					],
+				}
+			},
 			//是否通过websocket同步翻页
 			syncPageFlag: true,
 			saveNowPageNumFlag: true,
@@ -329,27 +365,7 @@ export default defineComponent({
 					key: "filesize_reverse"
 				},
 			],
-			book: {
-				name: "loading",
-				id: "abcde",
-				all_page_num: 2,
-				book_type: "dir",
-				pages: {
-					sort_by: "",
-					images: [
-						{
-							height: 500,
-							width: 449,
-							url: "/images/loading.gif",
-						},
-						{
-							height: 500,
-							width: 449,
-							url: "/images/loading.gif",
-						},
-					],
-				}
-			},
+
 			readerMode: "scroll",
 			drawerActive: false,
 			drawerPlacement: 'right',
@@ -568,6 +584,8 @@ export default defineComponent({
 		this.$nextTick(function () {
 			//视图渲染之后运行的代码
 		})
+		//需要得书籍远程数据,避免初始化失败,所以延迟0.5秒执行
+		setTimeout(this.setNowPageNumByLocalStorage, 500);
 	},
 	//卸载前
 	beforeUnmount() {
@@ -578,6 +596,84 @@ export default defineComponent({
 		this.observer.disconnect();//停止观察所有元素
 	},
 	methods: {
+		//TODO：根据书籍UUID,设定当前页数,因为需要取得远程书籍数据（this.book）,所以延迟执行
+		setNowPageNumByLocalStorage() {
+			if (this.saveNowPageNumFlag) {
+				let cookieValue = localStorage.getItem("nowPageNum" + this.book.id);
+				if (cookieValue != null) {
+					let saveNum = Number(cookieValue);
+					if (!isNaN(saveNum)) {
+						this.nowPageNum = saveNum;
+						console.log("成功读取页数" + saveNum);
+					} else {
+						console.log("读取页数失败,this.nowPageNum = " + this.nowPageNum);
+					}
+				} else {
+					console.log("本队存储里没找到:" + "nowPageNum = " + this.nowPageNum);
+				}
+			}
+		},
+		//TODO：滑动页面、停止滚动的时候保存页数
+		saveNowPageNumOnUpdate(value, sendWSMessage = true) {
+			if (this.saveNowPageNumFlag) {
+				localStorage.setItem("nowPageNum" + this.book.id, value);
+			}
+			//发送翻页消息到服务器
+			if (sendWSMessage && this.syncPageFlag) {
+				this.sendNowPage();
+			}
+		},
+		//TODO：滚动跳转到指定页数，需要写一个滚动函数
+		toPage: function (num, sendWSMessage = true) {
+			if (num <= this.book.all_page_num && num >= 1) {
+				this.nowPageNum = num;
+			}
+			//保存页数
+			this.saveNowPageNumOnUpdate(this.nowPageNum, sendWSMessage);
+		},
+		// TODO：各种翻页函数，或许不需要都写
+		flipPage() {
+		},
+		toNextPage() {
+		},
+		toPerviousPage() {
+		},
+		// TODO：键盘事件，需要改造成支持滚动的逻辑
+		handleKeyup(event) {
+			//错误:(815, 49) 不允许从实参中引用 'caller' 和 'callee'
+			const e = event || window.event;
+			if (!e) return;
+			//https://developer.mozilla.org/zh-CN/docs/Web/API/KeyboardEvent/keyCode
+			switch (e.key) {
+				case "ArrowUp":
+				case "PageUp":
+					this.flipPage(-1); //上一页
+					break;
+				case "ArrowLeft":
+					this.toNextPage();
+					break;
+				case "ArrowRight":
+					this.toPerviousPage();
+					break;
+				case "Space":
+				case "ArrowDown":
+				case "PageDown":
+					this.flipPage(1); //下一页
+					break;
+				case "Home":
+					this.toPage(1); //跳转到第一页
+					break;
+				case "End":
+					this.toPage(this.book.all_page_num); //跳转到最后一页
+					break;
+				case "Ctrl":
+					// Ctrl key pressed //组合键？
+					break;
+			}
+			// console.log(e.keyCode);
+			// console.log(e.key);
+		},
+
 		//页面排序相关
 		onResort(key) {
 			axios
@@ -643,6 +739,7 @@ export default defineComponent({
 		//如果在一个组件上使用了 v-model:xxx,应该使用 @update:xxx  https://www.naiveui.com/zh-CN/os-theme/docs/common-issues
 		saveConfigToLocalStorage() {
 			// 储存配置
+			localStorage.setItem("nowPageNum" + this.book.id, this.nowPageNum);
 			localStorage.setItem("SyncPageFlag", this.syncPageFlag);
 			localStorage.setItem("showHeaderFlag", this.showHeaderFlag);
 			localStorage.setItem("showPageNumFlag_ScrollMode", this.showPageNumFlag_ScrollMode);
@@ -822,9 +919,9 @@ export default defineComponent({
 				e.currentTarget.style.cursor = '';
 			}
 
-      //获取元素,统计页数
-      // let offsetWidth = e.currentTarget.offsetWidth;
-      // let offsetHeight = e.currentTarget.offsetHeight;
+			//获取元素,统计页数
+			// let offsetWidth = e.currentTarget.offsetWidth;
+			// let offsetHeight = e.currentTarget.offsetHeight;
 
 
 
