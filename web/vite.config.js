@@ -55,7 +55,7 @@ export default defineConfig({
   ],
   server: {
     strictPort: false,//设置为 true 时，如果端口已被使用，则直接退出，而不会再进行后续端口的尝试。
-    open: false, //开发服务器启动时，自动在浏览器中打开应用程序。
+    open: 'index.html', //开发服务器启动时，自动在浏览器中打开应用程序。(false  或 'index.html')
     port: 4080,//开发服务器端口。如果设端口已被使用，Vite 将自动尝试下一个可用端口。
     host: '0.0.0.0',//为开发服务器指定 ip 地址。 设置为 0.0.0.0 或 true 会监听所有地址，包括局域网和公共地址。
     //https://zxuqian.cn/vite-proxy-config/

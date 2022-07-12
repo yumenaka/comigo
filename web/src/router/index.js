@@ -41,11 +41,6 @@ const routes = [
     name: 'FlipMode',
     props: route => ({ query: route.query.sort_by }),
   },
-  // {
-  //   path: '/pdf/:id',
-  //   component: PDFView,
-  //   name: 'PDFView',
-  // },
   {
     path: '/about',
     component: () => import('@/views/About.vue'),

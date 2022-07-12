@@ -58,7 +58,7 @@ export default defineComponent({
     onClickReturnIcon() {
       // console.log(window.history)
       //如果直接进入本页面，没有上一页，那么回到主页。不过这时候浏览器back按钮本来应该也不能按。
-      if (window.history.length == 1) {
+      if (window.history.length === 1) {
         this.$router.push('/')
         return
       }
@@ -68,7 +68,8 @@ export default defineComponent({
         return
       }
       //其他情况下，后退一页。与单击浏览器中的“后退”按钮相同。
-      this.$router.back()
+      this.$router.back();
+      // location.reload();
     },
     //点击主页图标的时候，回到主页
     onClickToTop() {

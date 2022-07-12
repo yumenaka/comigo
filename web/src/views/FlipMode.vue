@@ -699,7 +699,7 @@ export default defineComponent({
         status_code: 200,
         user_id: this.$store.state.userID,
         token: this.$store.state.token,
-        msg: "翻页模式，发送数据", // Strip out html
+        detail: "翻页模式，发送数据", // 消息描述
         data_string: JSON.stringify(data),
       };
       // 配置为了json，可调用sendObj方法来发送数据
@@ -1560,20 +1560,25 @@ export default defineComponent({
 
 <style scoped>
 /* 题头的显隐效果 */
+/* https://v3.cn.vuejs.org/guide/transitions-enterleave.html#%E5%8D%95%E5%85%83%E7%B4%A0-%E7%BB%84%E4%BB%B6%E7%9A%84%E8%BF%87%E6%B8%A1= */
 /* 可以为进入和离开动画设置不同的持续时间和动画函数 */
+/* v-enter-active：定义进入过渡生效时的状态。在整个进入过渡的阶段中应用，在元素被插入之前生效，在过渡/动画完成之后移除。这个类可以被用来定义进入过渡的过程时间，延迟和曲线函数。 */
 .header-slide-fade-enter-active {
   transition: all 0.3s ease-out;
 }
-
+/* v-leave-active：定义离开过渡生效时的状态。在整个离开过渡的阶段中应用，在离开过渡被触发时立刻生效，在过渡/动画完成之后移除。这个类可以被用来定义离开过渡的过程时间，延迟和曲线函数。 */
 .header-slide-fade-leave-active {
   transition: all 0.8s cubic-bezier(1, 0.5, 0.8, 1);
 }
-
+/* v-enter-from：定义进入过渡的开始状态。在元素被插入之前生效，在元素被插入之后的下一帧移除。 */
+/* v-leave-to：离开过渡的结束状态。在离开过渡被触发之后下一帧生效 (与此同时 v-leave-from 被移除)，在过渡/动画完成之后移除。 */
 .header-slide-fade-enter-from,
 .header-slide-fade-leave-to {
   transform: translateY(-20px);
   opacity: 0;
 }
+
+
 /* 进度条的显隐效果 */
 .bottom-slide-fade-enter-active {
   transition: all 0.3s ease-out;
