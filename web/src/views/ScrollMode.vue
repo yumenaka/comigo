@@ -612,7 +612,7 @@ export default defineComponent({
 		window.removeEventListener("scroll", this.onScroll);
 		window.removeEventListener('resize', this.onResize);
 		// 组件被销毁时清理观察者,不做的话会造成内存泄漏，因为事件监听器不会被清除。
-		this.observer.disconnect();//停止观察所有元素
+		// this.observer.disconnect();//停止观察所有元素
 	},
 	methods: {
 		//刷新到底部的时候改变images数据
@@ -622,7 +622,7 @@ export default defineComponent({
 			const NowPageNum = this.nowPageNum
 			const NowBlockNum = Math.ceil(NowPageNum / LoadPageLimit)//现在在哪个区块（向上取整，有小数，则整数部分加1）取整：parseInt()
 			// const AllBlockNum = Math.ceil(MaxPageNum/LoadPageLimit)//总区块数（向上取整，有小数，则整数部分加1）
-			const startLoadPageNum = (NowBlockNum - 1) * this.loadPageLimit + 1
+			// const startLoadPageNum = (NowBlockNum - 1) * this.loadPageLimit + 1
 			const endLoadPageNum = NowBlockNum * this.loadPageLimit
 			//打印对象
 			// console.dir(this.localImages)
