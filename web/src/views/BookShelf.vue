@@ -243,7 +243,6 @@ export default defineComponent({
             this.resort_hint_key = localStorage.getItem("ResortKey_BookShelf")
         }
 
-
         //TODO:读取服务器书籍总数，避免重复加载（尤其是书很多的时候）
         // 从服务器上拉取书架信息
         this.getBookShelfData();

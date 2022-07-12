@@ -9,11 +9,20 @@
 		</Header>
 
 		<!-- 渲染漫画部分 -->
-		<div class="main_manga" v-for="(image, key) in book.pages.images" :key="image.url" @click="onMouseClick($event)"
+		<!-- <div class="main_manga" v-for="(image, key) in book.pages.images" :key="image.url" @click="onMouseClick($event)"
 			@mousemove="onMouseMove" @mouseleave="onMouseLeave">
 			<img v-lazy="this.imageParametersString(image.url)" v-bind:alt="key + 1" v-bind:key="key" />
-
 			<div class="page_hint" v-if="showPageNumFlag_ScrollMode">{{ key + 1 }}/{{ book.all_page_num }}</div>
+		</div> -->
+
+
+
+		<div class="main_manga" v-for="(image, key) in this.localImages" :key="image.url" @click="onMouseClick($event)"
+			@mousemove="onMouseMove" @mouseleave="onMouseLeave">
+			<img v-lazy="this.imageParametersString(image.url ? image.url : image)" />
+			<div class="page_hint" v-if="showPageNumFlag_ScrollMode">{{ key + 1 }}/{{
+					this.book.all_page_num
+			}}</div>
 		</div>
 
 		<Observer @intersect="intersected" />
@@ -75,7 +84,6 @@
 					:max="100" :min="10" :format-tooltip="value => `${value}%`" />
 
 				<!-- 单页-漫画宽度-使用固定值PX -->
-
 				<!-- 数字输入框 -->
 				<n-input-number v-if="!this.imageWidth_usePercentFlag" size="small" :show-button="false"
 					v-model:value="this.singlePageWidth_PX" :min="50" :update-value-on-input="false">
@@ -246,7 +254,10 @@ export default defineComponent({
 			model,
 			imageParameters,//获取图片所用的参数
 			imageParametersString: (source_url) => {
-
+				// if (!source_url) {
+				// 	return
+				// }
+				// console.log("source_url:" + source_url)
 				if (source_url.substr(0, 12) == "api/getfile?") {
 					//当前URL
 					const url = document.location.toString();
@@ -301,19 +312,27 @@ export default defineComponent({
 		return {
 			//当前页数,注意语义,直接就是1开始的页数,不是数组下标,在pages\images数组当中用的时候需要-1
 			nowPageNum: 1,
-			images: [
-				{
-					height: 500,
-					width: 449,
-					url: "/images/loading.gif",
-				},
-				{
-					height: 500,
-					width: 449,
-					url: "/images/loading.gif",
-				},
-			],
+			//是否通过websocket同步翻页
+			syncPageFlag: true,
+			//是否（在本地存储里面）保存与恢复页数
 			saveNowPageNumFlag: true,
+			loadPageLimit: 20,//一次最多载入的漫画张数，默认为20.
+			firstloadComplete: true,
+			localImages: null,
+			// localImages: [
+			// 	{
+			// 		key: 0,
+			// 		height: 500,
+			// 		width: 449,
+			// 		url: "/images/loading.gif",
+			// 	},
+			// 	{
+			// 		key: 0,
+			// 		height: 500,
+			// 		width: 449,
+			// 		url: "/images/loading.gif",
+			// 	},
+			// ],
 			book: {
 				name: "loading",
 				id: "abcde",
@@ -335,9 +354,6 @@ export default defineComponent({
 					],
 				}
 			},
-			//是否通过websocket同步翻页
-			syncPageFlag: true,
-			saveNowPageNumFlag: true,
 			resort_hint_key: "resort",
 			options: [
 				{
@@ -365,7 +381,6 @@ export default defineComponent({
 					key: "filesize_reverse"
 				},
 			],
-
 			readerMode: "scroll",
 			drawerActive: false,
 			drawerPlacement: 'right',
@@ -425,7 +440,11 @@ export default defineComponent({
 		//根据路由参数获取特定书籍
 		axios
 			.get("/getbook?id=" + this.$route.params.id + sort_image_by_str)
-			.then((response) => (this.book = response.data))
+			.then((response) => {
+				//请求接口成功的逻辑
+				this.book = response.data;
+				this.loadPages();
+			})
 			.finally(
 				() => {
 					document.title = this.book.name;
@@ -596,6 +615,45 @@ export default defineComponent({
 		this.observer.disconnect();//停止观察所有元素
 	},
 	methods: {
+		//刷新到底部的时候改变images数据
+		loadPages() {
+			// const MaxPageNum = this.book.all_page_num
+			const LoadPageLimit = this.loadPageLimit
+			const NowPageNum = this.nowPageNum
+			const NowBlockNum = Math.ceil(NowPageNum / LoadPageLimit)//现在在哪个区块（向上取整，有小数，则整数部分加1）取整：parseInt()
+			// const AllBlockNum = Math.ceil(MaxPageNum/LoadPageLimit)//总区块数（向上取整，有小数，则整数部分加1）
+			const startLoadPageNum = (NowBlockNum - 1) * this.loadPageLimit + 1
+			const endLoadPageNum = NowBlockNum * this.loadPageLimit
+			//打印对象
+			// console.dir(this.localImages)
+			// console.log("startLoadPageNum:", startLoadPageNum)
+			// console.log("endLoadPageNum:", endLoadPageNum)
+			this.localImages = this.book.pages.images.slice(0, endLoadPageNum - 1);//javascript的接片不能直接用[a,b]，而是需要调用.slice()函数
+
+			// const res = await fetch(
+			// 	`https://jsonplaceholder.typicode.com/comments?_page=${this.page
+			// 	}&_limit=50`
+			// );
+			// this.page++;
+			// // const items = await res.json();
+			// this.items = [...this.items, ...items];
+		},
+		//TODO:底部刷新
+		intersected() {
+			this.nowPageNum = this.nowPageNum + this.loadPageLimit;
+			this.loadPages();
+		},
+		// //异步函数的写法
+		// async intersected() {
+		// 	const res = await fetch(
+		// 		`https://jsonplaceholder.typicode.com/comments?_page=${this.page
+		// 		}&_limit=50`
+		// 	);
+		// 	this.page++;
+		// 	const items = await res.json();
+		// 	this.items = [...this.items, ...items];
+		// },
+
 		//TODO：根据书籍UUID,设定当前页数,因为需要取得远程书籍数据（this.book）,所以延迟执行
 		setNowPageNumByLocalStorage() {
 			if (this.saveNowPageNumFlag) {
@@ -682,9 +740,10 @@ export default defineComponent({
 				.finally(
 					() => {
 						document.title = this.book.name;
-						this.resort_hint_key = key
+						this.resort_hint_key = key;
+						this.loadPages();
 						// 带查询参数，结果是 /#/scroll/abc123?sort_by="filesize"
-						this.$router.push({ name: "ScrollMode", replace: true, query: { sort_by: key } })
+						this.$router.push({ name: "ScrollMode", replace: true, query: { sort_by: key } });
 						console.log("成功刷新书籍数据,书籍ID:" + this.$route.params.id + "  sort_by=" + key);
 					}
 				);
