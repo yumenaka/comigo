@@ -24,7 +24,7 @@ func handDefaultMessage(client *websocket.Conn, msg Message) {
 
 //处理乒乓信息
 func handPingMessage(client *websocket.Conn, msg Message) {
-	msg.Msg = "pong!"
+	msg.Detail = "pong!"
 	err := client.WriteJSON(msg)
 	if err != nil {
 		log.Printf("error: %v", err)
@@ -36,7 +36,7 @@ func handPingMessage(client *websocket.Conn, msg Message) {
 
 //处理心跳信息
 func handHeartbeatMessage(client *websocket.Conn, msg Message) {
-	msg.Msg = " 服务器收到心跳消息。" + time.Now().Format("2006.01.02 15:04:05")
+	msg.Detail = " 服务器收到心跳消息。" + time.Now().Format("2006.01.02 15:04:05")
 	err := client.WriteJSON(msg)
 	if err != nil {
 		log.Printf("error: %v", err)
@@ -48,7 +48,7 @@ func handHeartbeatMessage(client *websocket.Conn, msg Message) {
 
 //处理翻页消息
 func handSyncPageMessage(client *websocket.Conn, msg Message) {
-	msg.Msg = "同步页数。"
+	msg.Detail = "同步页数。"
 	err := client.WriteJSON(msg)
 	if err != nil {
 		log.Printf("handSyncPageMessage error: %v", err)

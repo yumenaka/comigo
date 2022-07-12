@@ -20,7 +20,7 @@ type Message struct {
 	StatusCode int    `json:"status_code"` //参考http状态码： https://zh.wikipedia.org/zh-hans/HTTP%E7%8A%B6%E6%80%81%E7%A0%81
 	UserID     string `json:"user_id"`
 	token      string `json:"token"` //认证用
-	Msg        string `json:"msg"`
+	Detail     string `json:"detail"`
 	DataString string `json:"data_string"` //附加的json字符串数据，服务器根据情况解析
 }
 
@@ -77,10 +77,10 @@ func WsHandler(c *gin.Context) {
 		}
 	}()
 
-	// 无限循环，等待要写入 WebSocket 的新消息，将其从 JSON 反序列化为 Msg 对象然后送入广播频道。
+	// 无限循环，等待要写入 WebSocket 的新消息，将其从 JSON 反序列化为 Detail 对象然后送入广播频道。
 	for {
 		////读取ws中的数据,反序列为json（序列化：将对象转化成字节序列的过程。 反序列化：就是讲字节序列转化成对象的过程。）
-		var msg Message // Read in a new message as JSON and map it to a Msg object
+		var msg Message // Read in a new message as JSON and map it to a Detail object
 		err = wsConn.ReadJSON(&msg)
 		if err != nil {
 			//fmt.Println()
