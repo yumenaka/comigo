@@ -9,14 +9,24 @@
 		</Header>
 
 		<!-- 渲染漫画部分 -->
-		<div class="main_manga" v-for="(image, pageNum) in this.localImages" :key="image.url"
-			@click="onMouseClick($event)" @mousemove="onMouseMove" @mouseleave="onMouseLeave">
+		<div class="main_manga" v-for="(image, n) in this.localImages" :key="image.url" @click="onMouseClick($event)"
+			@mousemove="onMouseMove" @mouseleave="onMouseLeave">
 			<ImageScroll :image_url="this.imageParametersString(image.url)" :sPWL="this.sPWL" :dPWL="this.dPWL"
-				:sPWP="this.sPWP" :dPWP="this.dPWP" :pageNum="pageNum" :all_page_num="this.book.all_page_num"
-				:showPageNumFlag_ScrollMode="this.showPageNumFlag_ScrollMode"></ImageScroll>
+				:sPWP="this.sPWP" :dPWP="this.dPWP" :pageNum="n + 1" :all_page_num="this.book.all_page_num"
+				:book_id="this.book.id" :showPageNumFlag_ScrollMode="this.showPageNumFlag_ScrollMode"
+				:sendWSMessage="this.sendWSMessage" :syncPageFlag="this.syncPageFlag" :id="'JUMP_ID:' + (n + 1)"
+				@refreshNowPageNum="refreshNowPageNum">
+			</ImageScroll>
 		</div>
 
 		<Observer @intersect="intersected" />
+		<n-back-top :show="showBackTopFlag" type="info" color="#8a2be2" :right="20" :bottom="20" />
+		<button class="w-24 h-12 m-2 bg-blue-300 text-gray-900 hover:bg-blue-500 rounded" @click="scrollToTop(90);"
+			size="large">{{ $t('back-to-top') }}</button>
+
+		<Bottom v-bind:style="{ background: model.interfaceColor }"
+			:softVersion="this.$store.state.server_status.ServerName ? this.$store.state.server_status.ServerName : 'Comigo'">
+		</Bottom>
 
 		<Drawer :initDrawerActive="this.drawerActive" :initDrawerPlacement="this.drawerPlacement"
 			@saveConfig="this.saveConfigToLocalStorage" @startSketch="this.startSketchMode"
@@ -163,12 +173,6 @@
 				<n-button>{{ this.getSortHintText(this.resort_hint_key) }}</n-button>
 			</n-dropdown>
 		</Drawer>
-		<n-back-top :show="showBackTopFlag" type="info" color="#8a2be2" :right="20" :bottom="20" />
-		<button class="w-24 h-12 m-2 bg-blue-300 text-gray-900 hover:bg-blue-500 rounded" @click="scrollToTop(90);"
-			size="large">{{ $t('back-to-top') }}</button>
-		<Bottom
-			:softVersion="this.$store.state.server_status.ServerName ? this.$store.state.server_status.ServerName : 'Comigo'">
-		</Bottom>
 	</div>
 </template>
 
@@ -305,27 +309,13 @@ export default defineComponent({
 		return {
 			//当前页数,注意语义,直接就是1开始的页数,不是数组下标,在pages\images数组当中用的时候需要-1
 			nowPageNum: 1,
-			//是否通过websocket同步翻页
-			syncPageFlag: true,
-			//是否（在本地存储里面）保存与恢复页数
-			saveNowPageNumFlag: true,
 			loadPageLimit: 20,//一次最多载入的漫画张数，默认为20.
+			endLoadPageNum: 20,//载入漫画的最后一页，默认为20.
+			syncPageFlag: true,//是否通过websocket同步翻页
+			sendWSMessage: false,
+			saveNowPageNumFlag: true,//是否（在本地存储里面）保存与恢复页数
 			firstloadComplete: true,
 			localImages: null,
-			// localImages: [
-			// 	{
-			// 		key: 0,
-			// 		height: 500,
-			// 		width: 449,
-			// 		url: "/images/loading.gif",
-			// 	},
-			// 	{
-			// 		key: 0,
-			// 		height: 500,
-			// 		width: 449,
-			// 		url: "/images/loading.gif",
-			// 	},
-			// ],
 			book: {
 				name: "loading",
 				id: "abcde",
@@ -425,6 +415,8 @@ export default defineComponent({
 	// beforeUnmount: 当指令与在绑定元素父组件卸载之前时,只调用一次。
 	// unmounted: 当指令与元素解除绑定且父组件已卸载时,只调用一次。
 	created() {
+		// 消息监听，即接收websocket服务端推送的消息. optionsAPI用法
+		this.$options.sockets.onmessage = (data) => this.handlePacket(data);
 		//根据文件名、修改时间、文件大小等要素排序的参数
 		let sort_image_by_str = "";
 		if (this.$route.query.sort_by) {
@@ -455,7 +447,7 @@ export default defineComponent({
 						.finally(console.log("路由参数改变,书籍ID:" + id));
 				}
 			}
-		)
+		);
 
 		window.addEventListener("scroll", this.onScroll);
 		//文档视图调整大小时会触发 resize 事件。 https://developer.mozilla.org/zh-CN/docs/Web/API/Window/resize_event
@@ -608,34 +600,91 @@ export default defineComponent({
 		// this.observer.disconnect();//停止观察所有元素
 	},
 	methods: {
-		//刷新到底部的时候改变images数据
+		//接收服务器发来的websocket消息，做各种反应（翻页、提示信息）
+		handlePacket(data) {
+			if (!this.syncPageFlag) {
+				return;
+			}
+			const msg = JSON.parse(data.data);
+			//心跳信息,直接返回
+			if (msg.type === "heartbeat") {
+				return;
+			}
+			//服务器发来翻页信息，来自于另一个用户，
+			if (msg.type === "sync_page" && msg.user_id !== this.$store.userID) {
+				const syncData = JSON.parse(msg.data_string);
+				//正在读的是同一本书、就翻页。
+				if (syncData.book_id === this.book.id && syncData.now_page_num !== this.nowPageNum) {
+					// console.log(syncData);
+					// this.toPage(syncData.now_page_num, false);
+				}
+			}
+		},
+		//刷新到底部的时候,改变images数据
 		loadPages() {
 			// const MaxPageNum = this.book.all_page_num
-			const LoadPageLimit = this.loadPageLimit
-			const NowPageNum = this.nowPageNum
-			const NowBlockNum = Math.ceil(NowPageNum / LoadPageLimit)//现在在哪个区块（向上取整，有小数，则整数部分加1）取整：parseInt()
+			// const LoadPageLimit = this.loadPageLimit
+			// const NowPageNum = this.nowPageNum
+			// const NowBlockNum = Math.ceil(NowPageNum / LoadPageLimit)//现在在哪个区块（向上取整，有小数，则整数部分加1）取整：parseInt()
 			// const AllBlockNum = Math.ceil(MaxPageNum/LoadPageLimit)//总区块数（向上取整，有小数，则整数部分加1）
 			// const startLoadPageNum = (NowBlockNum - 1) * this.loadPageLimit + 1
-			const endLoadPageNum = NowBlockNum * this.loadPageLimit
+			// this.endLoadPageNum = NowBlockNum * this.loadPageLimit
 			//打印对象
 			// console.dir(this.localImages)
 			// console.log("startLoadPageNum:", startLoadPageNum)
 			// console.log("endLoadPageNum:", endLoadPageNum)
-			this.localImages = this.book.pages.images.slice(0, endLoadPageNum - 1);//javascript的接片不能直接用[a,b]，而是需要调用.slice()函数
-
-			// const res = await fetch(
-			// 	`https://jsonplaceholder.typicode.com/comments?_page=${this.page
-			// 	}&_limit=50`
-			// );
-			// this.page++;
-			// // const items = await res.json();
-			// this.items = [...this.items, ...items];
+			this.localImages = this.book.pages.images.slice(0, this.endLoadPageNum - 1);//javascript的接片不能直接用[a,b]，而是需要调用.slice()函数
 		},
-		//TODO:底部刷新
+		//无限加载之拉到底部刷新
 		intersected() {
-			this.nowPageNum = this.nowPageNum + this.loadPageLimit;
+			if (this.endLoadPageNum + this.loadPageLimit <= this.book.all_page_num) {
+				this.endLoadPageNum = this.endLoadPageNum + this.loadPageLimit;
+			} else {
+				this.endLoadPageNum = this.book.all_page_num;
+			}
+			this.endLoadPageNum = this.endLoadPageNum + this.loadPageLimit;
 			this.loadPages();
 		},
+		//监听子组件事件: https://v3.cn.vuejs.org/guide/component-basics.html#%E7%9B%91%E5%90%AC%E5%AD%90%E7%BB%84%E4%BB%B6%E4%BA%8B%E4%BB%B6
+		//滚动页面的时候刷新页数
+		refreshNowPageNum(n) {
+			this.nowPageNum = n;
+			this.loadPages();
+		},
+		//滚动跳转到指定页数，需要写一个滚动函数
+		toPage: function (num, sendWSMessage = true) {
+			// this.sendWSMessage = sendWSMessage;
+			if (num <= this.book.all_page_num && num >= 1) {
+				this.nowPageNum = num;
+			}
+			const MaxPageNum = this.book.all_page_num
+			const LoadPageLimit = this.loadPageLimit
+			const NowPageNum = this.nowPageNum
+			const NowBlockNum = Math.ceil(NowPageNum / LoadPageLimit)//现在在哪个区块（向上取整，有小数，则整数部分加1）取整：parseInt()
+			this.endLoadPageNum = (NowBlockNum * this.loadPageLimit)>MaxPageNum?MaxPageNum:(NowBlockNum * this.loadPageLimit)
+			this.loadPages();
+			// 前端页面滚动到某个位置的方式
+			//获取目标元素
+			let element = document.getElementById("JUMP_ID:" + this.nowPageNum);
+			if (!element) {
+				console.log("没找到：", element);
+				this.intersected();
+				element = document.getElementById("JUMP_ID:" + this.nowPageNum);
+			}
+			//元素方法调用,自动刷新的时候，需要避免死锁,将syncPageFlag暂时设置为false不管用，
+			// https://blog.csdn.net/weixin_41804429/article/details/102954146
+			// https://developer.mozilla.org/zh-CN/docs/Web/API/Element/scrollIntoView
+
+			if (element) {
+				element.scrollIntoView(true)
+			}
+			//保存页数
+			this.saveNowPageNumOnUpdate(this.nowPageNum, sendWSMessage);
+			// let _this = this
+			// setTimeout(() => { _this.sendWSMessage = true; }, 2000);
+		},
+
+
 		// //异步函数的写法
 		// async intersected() {
 		// 	const res = await fetch(
@@ -674,14 +723,7 @@ export default defineComponent({
 				this.sendNowPage();
 			}
 		},
-		//TODO：滚动跳转到指定页数，需要写一个滚动函数
-		toPage: function (num, sendWSMessage = true) {
-			if (num <= this.book.all_page_num && num >= 1) {
-				this.nowPageNum = num;
-			}
-			//保存页数
-			this.saveNowPageNumOnUpdate(this.nowPageNum, sendWSMessage);
-		},
+
 		// TODO：各种翻页函数，或许不需要都写
 		flipPage() {
 		},
@@ -804,6 +846,15 @@ export default defineComponent({
 			//set对有setXXXChange函数的来说有些多余,但没有set函数的话就有必要了
 			localStorage.setItem("ImageParameters_DoAutoCrop", this.imageParameters.do_auto_crop);
 			localStorage.setItem("ImageParametersResizeMaxWidth", this.imageParameters.resize_max_width);
+		},
+		setSyncPageFlag(value) {
+			console.log("value:" + value);
+			this.syncPageFlag = value;
+			localStorage.setItem("SyncPageFlag", value);
+			console.log(
+				"cookie设置完毕: SyncPageFlag=" +
+				localStorage.getItem("SyncPageFlag")
+			);
 		},
 		setShowHeaderChange(value) {
 			// console.log("value:" + value);

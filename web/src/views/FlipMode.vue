@@ -479,9 +479,6 @@ export default defineComponent({
   },
   //在选项API中使用 Vue 生命周期钩子：
   created() {
-    // // this.startWebsocket();
-    // localStorage.setItem("clientId", "user-1");
-
     // 消息监听，即接收websocket服务端推送的消息. optionsAPI用法
     this.$options.sockets.onmessage = (data) => this.handlePacket(data);
 
@@ -652,8 +649,8 @@ export default defineComponent({
   },
   // mounted : 在绑定元素的父组件被挂载后调用。
   mounted() {
-    //需要得书籍远程数据,避免初始化失败,所以延迟0.5秒执行
-    setTimeout(this.setNowPageNumByLocalStorage, 500);
+    //需要得书籍远程数据,避免初始化失败,所以延迟1秒执行
+    setTimeout(this.setNowPageNumByLocalStorage, 1000);
   },
   updated() {
     //界面有更新就会调用,随便乱放会引起难以调试的BUG
@@ -664,20 +661,19 @@ export default defineComponent({
       if (!this.syncPageFlag) {
         return;
       }
-      console.log("FlipMode 接收到Message:");
+      // console.log("FlipMode 接收到Message:");
       //data.data也是个字符串，需要解析成对象
       const msg = JSON.parse(data.data);
       //心跳信息,直接返回
       if (msg.type === "heartbeat") {
-        // console.log(msg);
         return;
       }
       //服务器发来翻页信息，来自于另一个用户，
       if (msg.type === "sync_page" && msg.user_id !== this.$store.userID) {
         const syncData = JSON.parse(msg.data_string);
         //正在读的是同一本书、就翻页。
-        if (syncData.book_id === this.book.id) {
-          console.log(syncData);
+        if (syncData.book_id === this.book.id&&syncData.now_page_num!==this.nowPageNum) {
+          // console.log(syncData);
           this.toPage(syncData.now_page_num, false);
         }
       }
@@ -691,7 +687,7 @@ export default defineComponent({
       const data = {
         book_id: this.book.id,
         now_page_num: this.nowPageNum,
-        now_page_num_percent: 0.5,
+        now_page_num_percent: 1.0,
         read_percent: readPercent,
       };
       // console.log("this.$store.userID: " + this.$store.state.userID)
@@ -705,7 +701,7 @@ export default defineComponent({
       };
       // 配置为了json，可调用sendObj方法来发送数据
       this.$socket.sendObj(newMsg);
-      console.log("send:", newMsg);
+      // console.log("send:", newMsg);
     },
 
     // 辅助函数，用于从 Gravatar 获取头像。URL 的最后一段需要用户的 email 地址的 MD5 编码。

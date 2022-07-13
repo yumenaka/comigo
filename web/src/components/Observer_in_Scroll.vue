@@ -9,6 +9,7 @@
 // https://vueschool.io/articles/vuejs-tutorials/build-an-infinite-scroll-component-using-intersection-observer-api/
 export default {
     props: ['options'],
+    emits: ['intersect'],
     data: () => ({
         observer: null,
     }),
