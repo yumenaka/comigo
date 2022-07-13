@@ -2,13 +2,15 @@
   <div class="">
     <!-- 顶部,标题页头 -->
     <!-- 定位：https://www.tailwindcss.cn/docs/position -->
+    <!-- 使用 fixed 来定位一个元素相对于浏览器窗视口的位置。偏移量是相对于视口计算的，且该元素将作为绝对定位的子元素的位置参考。 -->
+    <!-- 控制 flex 和 grid 项目如何沿着容器的主轴定位:https://www.tailwindcss.cn/docs/justify-content -->
     <!-- 不透明度：opacity-70 https://www.tailwindcss.cn/docs/opacity -->
     <!-- Vue组建过渡：https://v3.cn.vuejs.org/guide/transitions-enterleave.html#%E5%8D%95%E5%85%83%E7%B4%A0-%E7%BB%84%E4%BB%B6%E7%9A%84%E8%BF%87%E6%B8%A1= -->
-    <transition name="header-slide-fade">
-      <!-- fixed -->
-      <Header v-if="this.showHeaderFlag_FlipMode" class="header  mx-auto w-full opacity-80"
-        v-bind:class="{ 'fixed': this.hideToolbar }" :setDownLoadLink="this.needDownloadLink()" :headerTitle="book.name"
-        :bookID="this.book.id" :showReturnIcon="true">
+    <transition name="header-bottom">
+      <Header v-if="this.showHeaderFlag_FlipMode" class="mx-auto w-full opacity-80"
+        v-bind:class="{ 'fixed': this.hideToolbar, absolute: this.hideToolbar, 'top-0': this.hideToolbar }"
+        v-bind:style="{ background: model.interfaceColor }" :setDownLoadLink="this.needDownloadLink()"
+        :headerTitle="book.name" :bookID="this.book.id" :showReturnIcon="true">
         <!-- 右边的设置图标,点击屏幕中央也可以打开 -->
         <n-icon size="40" @click="drawerActivate('right')">
           <settings-outline />
@@ -16,7 +18,7 @@
       </Header>
     </transition>
 
-    <div class="main">
+    <div class="main" v-bind:style="{ overflow: 'hidden' }">
       <!-- 主题,漫画div -->
       <!-- 事件修饰符： https://v3.cn.vuejs.org/guide/events.html#%E4%BA%8B%E4%BB%B6%E4%BF%AE%E9%A5%B0%E7%AC%A6 -->
       <div class="manga_area" id="MangaMain" @click.stop="onMouseClick" @mousemove.stop="onMouseMove"
@@ -59,15 +61,13 @@
         absolute
         bottom-0
         fixed
-      " 
-      v-bind:class="{ 'text-2xl': this.sketchModeFlag, 'text-lg': (!this.sketchModeFlag)}"
-      
+      " v-bind:class="{ 'text-2xl': this.sketchModeFlag, 'text-lg': (!this.sketchModeFlag) }"
       v-if="this.showPageHintFlag_FlipMode">
       {{ pageNumOrSketchHint }}
     </div>
 
     <!-- 底部的阅读进度条 -->
-    <transition name="bottom-slide-fade">
+    <transition name="header-bottom">
       <!-- 进度条 -->
       <!-- 宽度：w-5/6 https://www.tailwindcss.cn/docs/width 使用 w-{fraction} 或 w-full 将元素设置为基于百分比的宽度。 -->
       <!-- 定位：https://www.tailwindcss.cn/docs/position  -->
@@ -76,8 +76,9 @@
       <!-- Tailwind 的容器不会自动居中，也没有任何内置的水平方向的内边距。要使一个容器居中，使用 mx-auto 功能类： -->
       <!-- absolute bottom-0  -->
       <!-- v-bind:class="{ absolute: this.hideToolbar, 'bottom-0': this.hideToolbar, 'fixed': this.hideToolbar, 'flex': !this.hideToolbar}" -->
-      <div class="  w-full h-10 opacity-80"
-        v-bind:class="{ absolute: this.hideToolbar, 'bottom-0': this.hideToolbar, 'sticky': this.hideToolbar, 'flex': (!this.hideToolbar) }"
+
+      <div class="m-0 w-full h-10 opacity-80 overflow-hidden"
+        v-bind:class="{ absolute: this.hideToolbar, 'bottom-0': this.hideToolbar, 'flex': (!this.hideToolbar) }"
         v-if="this.showFooterFlag_FlipMode">
         <div class="
           bg-yellow-400
@@ -1563,44 +1564,25 @@ export default defineComponent({
 /* https://v3.cn.vuejs.org/guide/transitions-enterleave.html#%E5%8D%95%E5%85%83%E7%B4%A0-%E7%BB%84%E4%BB%B6%E7%9A%84%E8%BF%87%E6%B8%A1= */
 /* 可以为进入和离开动画设置不同的持续时间和动画函数 */
 /* v-enter-active：定义进入过渡生效时的状态。在整个进入过渡的阶段中应用，在元素被插入之前生效，在过渡/动画完成之后移除。这个类可以被用来定义进入过渡的过程时间，延迟和曲线函数。 */
-.header-slide-fade-enter-active {
-  transition: all 0.3s ease-out;
+.header-bottom-enter-active {
+  transition: all 0.3s ease;
 }
+
 /* v-leave-active：定义离开过渡生效时的状态。在整个离开过渡的阶段中应用，在离开过渡被触发时立刻生效，在过渡/动画完成之后移除。这个类可以被用来定义离开过渡的过程时间，延迟和曲线函数。 */
-.header-slide-fade-leave-active {
+/* cubic-bezier() 函数定义了一个贝塞尔曲线(Cubic Bezier) */
+.header-bottom-leave-active {
   transition: all 0.8s cubic-bezier(1, 0.5, 0.8, 1);
 }
+
 /* v-enter-from：定义进入过渡的开始状态。在元素被插入之前生效，在元素被插入之后的下一帧移除。 */
 /* v-leave-to：离开过渡的结束状态。在离开过渡被触发之后下一帧生效 (与此同时 v-leave-from 被移除)，在过渡/动画完成之后移除。 */
-.header-slide-fade-enter-from,
-.header-slide-fade-leave-to {
-  transform: translateY(-20px);
+.header-bottom-enter-from,
+.header-bottom-leave-to {
+  /* transform: translateY(-20px); */
   opacity: 0;
 }
 
 
-/* 进度条的显隐效果 */
-.bottom-slide-fade-enter-active {
-  transition: all 0.3s ease-out;
-}
-
-.bottom-slide-fade-leave-active {
-  transition: all 0.8s cubic-bezier(1, 0.5, 0.8, 1);
-}
-
-.bottom-slide-fade-enter-from,
-.bottom-slide-fade-leave-to {
-  transform: translateY(20px);
-  opacity: 0;
-}
-
-.header {
-  background: v-bind("model.interfaceColor");
-}
-
-.bottom {
-  background: v-bind("model.interfaceColor");
-}
 
 /* 参考CSS盒子模型改 */
 /* https://www.runoob.com/css/css-boxmodel.html */

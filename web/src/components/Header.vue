@@ -1,7 +1,7 @@
 <template>
   <!-- 外边距: m-2 https://www.tailwindcss.cn/docs/margin -->
-  <!-- 内边距： p-4 https://www.tailwindcss.cn/docs/padding -->
-  <header class="header p-1 m-0 h-12 flex justify-between content-center">
+  <!-- 内边距： p-4 https://www.tailwindcss.cn/docs/padding  p-0 m-0  -->
+  <header class="h-12 w-full flex justify-between content-center">
     <!-- 返回箭头,点击返回上一页 -->
     <n-icon class="p-0 m-0" v-if="showReturnIcon" size="40" @click="onClickReturnIcon()">
       <return-up-back />
