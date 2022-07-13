@@ -399,6 +399,15 @@ export default defineComponent({
                 // localStorage.setItem("ReaderMode", "flip");
             }
         },
+        setSyncPageFlag(value) {
+            console.log("value:" + value);
+            this.syncPageFlag = value;
+            localStorage.setItem("SyncPageFlag", value);
+            console.log(
+                "cookie设置完毕: SyncPageFlag=" +
+                localStorage.getItem("SyncPageFlag")
+            );
+        },
         // 切换下拉、翻页阅读模式
         setReaderModeIsScroll(value) {
             this.readerModeIsScroll = value;

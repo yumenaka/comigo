@@ -1,7 +1,7 @@
 <template>
 	<div id="ScrollMode" class="manga">
 		<Header :setDownLoadLink="this.needDownloadLink()" :headerTitle="book.name" :bookID="this.book.id"
-			:showReturnIcon="true">
+			:showReturnIcon="true" v-bind:style="{ background: model.interfaceColor }">
 			<!-- 右边的设置图标,点击屏幕中央也可以打开 -->
 			<n-icon class="p-0 m-0" size="40" @click="drawerActivate('right')">
 				<settings-outline />
@@ -9,20 +9,11 @@
 		</Header>
 
 		<!-- 渲染漫画部分 -->
-		<!-- <div class="main_manga" v-for="(image, key) in book.pages.images" :key="image.url" @click="onMouseClick($event)"
-			@mousemove="onMouseMove" @mouseleave="onMouseLeave">
-			<img v-lazy="this.imageParametersString(image.url)" v-bind:alt="key + 1" v-bind:key="key" />
-			<div class="page_hint" v-if="showPageNumFlag_ScrollMode">{{ key + 1 }}/{{ book.all_page_num }}</div>
-		</div> -->
-
-
-
-		<div class="main_manga" v-for="(image, key) in this.localImages" :key="image.url" @click="onMouseClick($event)"
-			@mousemove="onMouseMove" @mouseleave="onMouseLeave">
-			<img v-lazy="this.imageParametersString(image.url ? image.url : image)" />
-			<div class="page_hint" v-if="showPageNumFlag_ScrollMode">{{ key + 1 }}/{{
-					this.book.all_page_num
-			}}</div>
+		<div class="main_manga" v-for="(image, pageNum) in this.localImages" :key="image.url"
+			@click="onMouseClick($event)" @mousemove="onMouseMove" @mouseleave="onMouseLeave">
+			<ImageScroll :image_url="this.imageParametersString(image.url)" :sPWL="this.sPWL" :dPWL="this.dPWL"
+				:sPWP="this.sPWP" :dPWP="this.dPWP" :pageNum="pageNum" :all_page_num="this.book.all_page_num"
+				:showPageNumFlag_ScrollMode="this.showPageNumFlag_ScrollMode"></ImageScroll>
 		</div>
 
 		<Observer @intersect="intersected" />
@@ -188,6 +179,7 @@ import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
 import Bottom from "@/components/Bottom.vue";
 import Observer from "@/components/Observer_in_Scroll.vue";
+import ImageScroll from "@/components/Image_in_Scroll.vue";
 import { defineComponent, reactive } from 'vue'
 // import { useCookies } from "vue3-cookies";// https://github.com/KanHarI/vue3-cookies
 import { SettingsOutline } from '@vicons/ionicons5'
@@ -202,6 +194,7 @@ export default defineComponent({
 		Drawer,//自定义抽屉
 		Bottom,//自定义页尾
 		Observer,//Observer组件,下拉刷新用
+		ImageScroll,//漫画页，包含Observer组，获取当前页用
 		NBackTop,//回到顶部按钮,来自:https://www.naiveui.com/zh-CN/os-theme/components/back-top
 		// NDrawer,//抽屉,可以从上下左右4个方向冒出. https://www.naiveui.com/zh-CN/os-theme/components/drawer
 		// NDrawerContent,//抽屉内容
@@ -1048,18 +1041,8 @@ export default defineComponent({
 });
 </script>
 
-<style>
-</style>
 
 <style scoped>
-.header {
-	background: v-bind("model.interfaceColor");
-}
-
-.bottom {
-	background: v-bind("model.interfaceColor");
-}
-
 .manga {
 	max-width: 100%;
 	background: v-bind("model.backgroundColor");
@@ -1080,50 +1063,5 @@ export default defineComponent({
 	padding: 3px 0px;
 	border-radius: 7px;
 	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-}
-
-.page_hint {
-	/* 文字颜色 */
-	color: #413d3d;
-	/* 文字阴影：https://www.w3school.com.cn/css/css3_shadows.asp*/
-	text-shadow: -1px 0 rgb(240, 229, 229), 0 1px rgb(253, 242, 242),
-		1px 0 rgb(206, 183, 183), 0 -1px rgb(196, 175, 175);
-}
-
-.LoadingImage {
-	width: 90vw;
-	max-width: 90vw;
-}
-
-.ErrorImage {
-	width: 90vw;
-	max-width: 90vw;
-}
-
-/* 横屏（显示区域）时的CSS样式,IE无效 */
-@media screen and (min-aspect-ratio: 19/19) {
-	.SinglePageImage {
-		width: v-bind(sPWL);
-		max-width: 100%;
-	}
-
-	.DoublePageImage {
-		width: v-bind(dPWL);
-		max-width: 100%;
-	}
-}
-
-/* 竖屏(显示区域)CSS样式,IE无效 */
-@media screen and (max-aspect-ratio: 19/19) {
-	.SinglePageImage {
-		width: v-bind(sPWP);
-		max-width: 100%;
-	}
-
-	.DoublePageImage {
-		/* width: 100%; */
-		width: v-bind(dPWP);
-		max-width: 100%;
-	}
 }
 </style>
