@@ -57,8 +57,8 @@
   "fullscreen": "フルスクリーン",
   "sort_by_default": "圧縮順序",
   "sync_page": "ページ同期",
-  "hide_toolbar": "ツールバー非表示",
   "success_fullScreen": "フルスクリーン成功",
   "not_support_fullscreen": "このブラウザはフルスクリーンに対応していません",
-  "exit_fullScreen": "フルスクリーンを終了"
+  "exit_fullScreen": "フルスクリーンを終了",
+  "auto_hide_toolbar": "ツールバー自動非表示"
 }
