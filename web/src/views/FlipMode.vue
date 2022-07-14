@@ -21,7 +21,7 @@
         @mouseleave.stop="onMouseLeave">
         <div class="manga_area_img_div">
           <!-- 非自动拼合模式最简单,直接显示一张图 -->
-          <img v-bind:src="
+          <img class="w-auto h-auto" v-bind:src="
             this.imageParametersString(book.pages.images[nowPageNum - 1].url)
           " v-bind:alt="nowPageNum" />
 
@@ -138,14 +138,6 @@
       <!-- 分割线 -->
       <p> &nbsp;</p>
 
-      <!-- 自动隐藏工具栏 -->
-      <n-space>
-        <n-switch size="large" v-model:value="this.hideToolbar" @update:value="this.setHideToolbar">
-          <template #checked>{{ $t('hide_toolbar') }}</template>
-          <template #unchecked>{{ $t('hide_toolbar') }}</template>
-        </n-switch>
-      </n-space>
-
       <!-- 显示当前页数 -->
       <n-space>
         <n-switch size="large" v-model:value="this.showPageHintFlag_FlipMode" @update:value="setShowPageNumChange">
@@ -200,6 +192,15 @@
           <template #unchecked>{{ $t("rightScreenToNext") }}</template>
         </n-switch>
       </n-space>
+
+      <!-- 自动隐藏工具栏 -->
+      <n-space>
+        <n-switch size="large" v-model:value="this.hideToolbar" @update:value="this.setHideToolbar">
+          <template #checked>{{ $t('auto_hide_toolbar') }}</template>
+          <template #unchecked>{{ $t('auto_hide_toolbar') }}</template>
+        </n-switch>
+      </n-space>
+
       <!-- 分割线 -->
       <!-- <n-divider /> -->
 
@@ -1634,13 +1635,17 @@ export default defineComponent({
 
 /* 最后的一或两张图片*/
 .manga_area_img_div img {
-  /* max-height: v-bind(mangaImageHeight); */
   max-height: 100vh;
   max-width: 100vw;
-  margin: 0px;
+  min-width: 0;
+  width: auto;
+  display: block;
+  user-select: none;
+  /* 下面两句，是设定高度为100%，同时保持比例缩放的关键（类似stetch small pages） */
+  min-height: 100vh; 
+  object-fit: contain;
   /* 两张图片之间不要留空间*/
   padding: 0px;
-  background-color: #aaa;
-
+  /* background-color: #aaa; */
 }
 </style>

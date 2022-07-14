@@ -133,7 +133,7 @@ func (b *Book) setFilePath(path string) {
 	}
 }
 
-//初始化Book时，取得BookType
+//GetBookTypeByFilename 初始化Book时，取得BookType
 func GetBookTypeByFilename(filename string) SupportFileType {
 	//获取文件后缀
 	switch strings.ToLower(path.Ext(filename)) {
