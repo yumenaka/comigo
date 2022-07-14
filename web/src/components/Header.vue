@@ -25,28 +25,64 @@
         <a v-if="this.setDownLoadLink" :href="'api/raw/' + bookID + '/' + headerTitle">{{ headerTitle }}</a>
       </span>
     </div>
-    <!-- slot，用来插入右边的设置图标 -->
-    <slot></slot>
+    <!-- slot，用来插入自定义组件。但是目前没需求 -->
+    <!-- <slot></slot> -->
+
+    <!-- 溢出 overflow-x-auton :https://www.tailwindcss.cn/docs/overflow -->
+
+    <div class="h-10 w-33 p-0 flex justify-between content-center overflow-x-auton">
+      <!-- QRCode图片，点击可以在屏幕正中显示二维码 -->
+      <Qrcode class="h-10 w-10 p-0"></Qrcode>
+
+      <!-- 全屏图标 -->
+      <svg @click="onFullSreen" class="h-10 w-10 p-0 static" xmlns="http://www.w3.org/2000/svg"
+        xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24">
+        <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 4h4v4"></path>
+          <path d="M14 10l6-6"></path>
+          <path d="M8 20H4v-4"></path>
+          <path d="M4 20l6-6"></path>
+          <path d="M16 20h4v-4"></path>
+          <path d="M14 14l6 6"></path>
+          <path d="M8 4H4v4"></path>
+          <path d="M4 4l6 6"></path>
+        </g>
+      </svg>
+      <!-- 右边的设置图标,点击屏幕中央也可以打开  可自定义方向 -->
+      <n-icon class="h-10 w-10 p-0" size="40" @click="this.onClickSettingIcon('right')">
+        <settings-outline />
+      </n-icon>
+    </div>
+
+
+
   </header>
 </template>
 
 <script>
 import { useCookies } from "vue3-cookies";
-import { NIcon, } from 'naive-ui'
-import { BookOutline, ReturnUpBack } from '@vicons/ionicons5'
+import { NIcon, useMessage, } from 'naive-ui'
+import { BookOutline, ReturnUpBack, SettingsOutline } from '@vicons/ionicons5'
 import { defineComponent } from 'vue'
+import Qrcode from "@/components/Qrcode.vue";
+import screenfull from 'screenfull'
 export default defineComponent({
   name: "ComigoHeader",
   props: ['setDownLoadLink', 'headerTitle', 'bookID', 'showReturnIcon',],
+  emits: ['drawerActivate'],
   components: {
     NIcon,
     BookOutline,//图标,来自 https://www.xicons.org/#/   需要安装（npm i -D @vicons/ionicons5）与导入
     ReturnUpBack,
+    SettingsOutline, //图标,来自 https://www.xicons.org/#/   需要安装（npm i -D @vicons/ionicons5）
+    Qrcode,//https://github.com/scopewu/qrcode.vue
   },
   setup() {
     const { cookies } = useCookies();
     // console.log(window.history)
-    return { cookies };
+    //警告信息
+    const message = useMessage();
+    return { cookies, message, };
   },
   data() {
     return {
@@ -54,6 +90,23 @@ export default defineComponent({
     };
   },
   methods: {
+    //进入全屏，由screenfull实现 https://github.com/sindresorhus/screenfull
+    //全屏 API： https://developer.mozilla.org/zh-CN/docs/Web/API/Fullscreen_API
+    onFullSreen() {
+      //如果不允许进入全屏，发提示
+      if (!screenfull.isEnabled) {
+        this.message.warning(this.$t('not_support_fullscreen'))
+        return false
+      }
+      //切换提示
+      if (!screenfull.isFullscreen) {
+        this.message.success(this.$t('success_fullScreen'));
+      } else {
+        this.message.success(this.$t('exit_fullScreen'));
+      }
+      //切换全屏状态
+      screenfull.toggle()
+    },
     //点击返回图标的时候，后退到上一页或主页
     onClickReturnIcon() {
       // console.log(window.history)
@@ -75,13 +128,18 @@ export default defineComponent({
     onClickToTop() {
       this.$router.push('/')
     },
+
+    //点击主页图标的时候，回到主页
+    onClickSettingIcon(place) {
+      this.$emit("drawerActivate", place);
+    },
+
   },
 });
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
 </style>
 
 

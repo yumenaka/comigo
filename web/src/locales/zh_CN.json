@@ -57,5 +57,8 @@
   "re_sort": "重新排序",
   "fullscreen": "切换全屏",
   "sync_page": "同步页数",
-  "hide_toolbar": "隐藏工具栏"
+  "hide_toolbar": "隐藏工具栏",
+  "success_fullScreen": "进入全屏",
+  "not_support_fullscreen": "不支持全屏",
+  "exit_fullScreen": "退出全屏"
 }

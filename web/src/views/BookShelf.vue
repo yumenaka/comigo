@@ -1,11 +1,7 @@
 <template>
     <div id="BookShelf">
         <Header :bookIsFolder="false" :headerTitle="this.bookShelfTitle" :showReturnIcon="this.headerShowReturnIcon"
-            :bookID="this.bookshelf[0].id" :setDownLoadLink="false">
-            <!-- 右边的设置图标,点击屏幕中央也可以打开 -->
-            <n-icon size="40" @click="drawerActivate('right')">
-                <settings-outline />
-            </n-icon>
+            :bookID="this.bookshelf[0].id" :setDownLoadLink="false"  @drawerActivate="this.drawerActivate">
         </Header>
 
         <!-- 渲染书架部分 -->
@@ -80,7 +76,7 @@
 // 直接导入组件并使用它。这种情况下,只有导入的组件才会被打包。
 // Firefox插件Textarea Cache 报错：源映射错误：Error: NetworkError when attempting to fetch resource.
 // Firefox插件Video DownloadHelper报错:已不赞成使用 CanvasRenderingContext2D 中的 drawWindow 方法
-import { NIcon, NDivider, NColorPicker, NSwitch, NButton, NSpace, NDropdown, } from "naive-ui";
+import {NDivider, NColorPicker, NSwitch, NButton, NSpace, NDropdown, } from "naive-ui";
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
 import BookCard from "@/components/BookCard.vue";
@@ -88,7 +84,6 @@ import Bottom from "@/components/Bottom.vue";
 
 import { defineComponent, reactive } from "vue";
 import { useCookies } from "vue3-cookies"; // https://github.com/KanHarI/vue3-cookies
-import { SettingsOutline } from "@vicons/ionicons5";
 import axios from "axios";
 
 export default defineComponent({
@@ -103,8 +98,6 @@ export default defineComponent({
         NButton,//按钮,来自:https://www.naiveui.com/zh-CN/os-theme/components/button
         NSpace,
         NSwitch,
-        NIcon, // 图标  https://www.naiveui.com/zh-CN/os-theme/components/icon
-        SettingsOutline, // 图标,来自 https://www.xicons.org/#/   需要安装（npm i -D @vicons/ionicons5）
         NDivider, // 分割线  https://www.naiveui.com/zh-CN/os-theme/components/divider
         NColorPicker,//颜色选择器 https://www.naiveui.com/zh-CN/os-theme/components/color-picker
         NDropdown,//下拉菜单 https://www.naiveui.com/zh-CN/os-theme/components/dropdown
