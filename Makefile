@@ -1,10 +1,10 @@
 # Makefile for cross-compilation
-# make all VERSION=v0.8.2
-# make md5SumThemAll VERSION=v0.8.2
-# mingw32-make all VERSION=v0.8.2
-# rm  resource.syso && make  Linux-armv8   VERSION=v0.8.2
-# make Windows_i386  VERSION=v0.8.2
-# make Windows_x86_64  VERSION=v0.8.2 
+# make all VERSION=v0.8.5
+# make md5SumThemAll VERSION=v0.8.5
+# mingw32-make all VERSION=v0.8.5
+# rm  resource.syso && make  Linux-armv8   VERSION=v0.8.5
+# make Windows_i386  VERSION=v0.8.5
+# make Windows_x86_64  VERSION=v0.8.5
 
 # Windows： MSYS2 or mingw32 + find.exe make.exe zip.exe upx.exe ！！
 
