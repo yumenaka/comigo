@@ -381,12 +381,12 @@ export default defineComponent({
 
         refreshReadMode() {
             // 初始化或者路由变化时,读取其他页面的更改,并存储到本地存储的阅读器模式（ReaderMode）这个值,
-            if (localStorage.getItem("ReaderMode") === "true") {
+            if (localStorage.getItem("ReaderMode") === "scroll") {
                 this.readerModeIsScroll = true;
                 this.readerMode = "scroll";
                 // localStorage.setItem("ReaderMode", "scroll");
             }
-            if (localStorage.getItem("ReaderMode") === "false") {
+            if (localStorage.getItem("ReaderMode") === "flip") {
                 this.readerModeIsScroll = false;
                 this.readerMode = "flip";
                 // localStorage.setItem("ReaderMode", "flip");
