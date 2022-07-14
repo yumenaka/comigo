@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -73,7 +74,7 @@ func handSyncPageMessage(client *websocket.Conn, msg Message) {
 		fmt.Println(data)
 	}
 	//验证收到的数据
-	if data.BookID == "" || data.NowPageNum < 0 || data.NowPageNum > 99999999999 || data.NowPageNumPercent > 1 {
+	if data.BookID == "" || data.NowPageNum < 0 || data.NowPageNum > math.MaxInt || data.NowPageNumPercent > 1 {
 		log.Printf("handSyncPageMessage data error: %v", data)
 		return
 	}
