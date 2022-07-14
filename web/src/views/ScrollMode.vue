@@ -1,11 +1,8 @@
 <template>
 	<div id="ScrollMode" class="manga">
 		<Header :setDownLoadLink="this.needDownloadLink()" :headerTitle="book.name" :bookID="this.book.id"
-			:showReturnIcon="true" v-bind:style="{ background: model.interfaceColor }">
-			<!-- 右边的设置图标,点击屏幕中央也可以打开 -->
-			<n-icon class="p-0 m-0" size="40" @click="drawerActivate('right')">
-				<settings-outline />
-			</n-icon>
+			:showReturnIcon="true" v-bind:style="{ background: model.interfaceColor }"
+			@drawerActivate="this.drawerActivate">
 		</Header>
 
 		<!-- 渲染漫画部分 -->
@@ -178,7 +175,7 @@
 
 <script>
 // 直接导入组件并使用它。这种情况下,只有导入的组件才会被打包。
-import { NBackTop, NSpace, NSlider, NSwitch, NIcon, NInputNumber, NButton, NDropdown, } from 'naive-ui'
+import { NBackTop, NSpace, NSlider, NSwitch, NInputNumber, NButton, NDropdown, } from 'naive-ui'
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
 import Bottom from "@/components/Bottom.vue";
@@ -186,7 +183,6 @@ import Observer from "@/components/Observer_in_Scroll.vue";
 import ImageScroll from "@/components/Image_in_Scroll.vue";
 import { defineComponent, reactive } from 'vue'
 // import { useCookies } from "vue3-cookies";// https://github.com/KanHarI/vue3-cookies
-import { SettingsOutline } from '@vicons/ionicons5'
 import axios from "axios";
 
 export default defineComponent({
@@ -211,11 +207,9 @@ export default defineComponent({
 		// NLayout,//布局 https://www.naiveui.com/zh-CN/os-theme/components/layout
 		// NLayoutSider,
 		// NLayoutContent,
-		NIcon,//图标  https://www.naiveui.com/zh-CN/os-theme/components/icon
 		// NPageHeader,//页头 https://www.naiveui.com/zh-CN/os-theme/components/page-header
 		// NAvatar, //头像 https://www.naiveui.com/zh-CN/os-theme/components/avatar
 		NInputNumber,//数字输入 https://www.naiveui.com/zh-CN/os-theme/components/input-number
-		SettingsOutline,//图标,来自 https://www.xicons.org/#/   需要安装（npm i -D @vicons/ionicons5）
 		// NDivider,//分割线  https://www.naiveui.com/zh-CN/os-theme/components/divider
 		// NColorPicker,
 		NButton,//按钮，来自:https://www.naiveui.com/zh-CN/os-theme/components/button
@@ -661,7 +655,7 @@ export default defineComponent({
 			const LoadPageLimit = this.loadPageLimit
 			const NowPageNum = this.nowPageNum
 			const NowBlockNum = Math.ceil(NowPageNum / LoadPageLimit)//现在在哪个区块（向上取整，有小数，则整数部分加1）取整：parseInt()
-			this.endLoadPageNum = (NowBlockNum * this.loadPageLimit)>MaxPageNum?MaxPageNum:(NowBlockNum * this.loadPageLimit)
+			this.endLoadPageNum = (NowBlockNum * this.loadPageLimit) > MaxPageNum ? MaxPageNum : (NowBlockNum * this.loadPageLimit)
 			this.loadPages();
 			// 前端页面滚动到某个位置的方式
 			//获取目标元素

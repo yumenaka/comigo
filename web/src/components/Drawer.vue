@@ -42,7 +42,7 @@
 <script>
 import screenfull from 'screenfull'
 import { useCookies } from "vue3-cookies";
-import { NDrawer, NDrawerContent, NButton, NSelect, NPopconfirm, } from 'naive-ui'
+import { NDrawer, NDrawerContent, NButton, NSelect, NPopconfirm,useMessage, } from 'naive-ui'
 import { defineComponent, } from 'vue'
 // import { useI18n } from 'vue-i18n'
 import Qrcode from "@/components/Qrcode.vue";
@@ -65,8 +65,9 @@ export default defineComponent({
   },
   setup() {
     const { cookies } = useCookies();
-    // const message = useMessage(); 需要导入 'naive-ui'的useMessage
+    const message = useMessage(); //需要导入 'naive-ui'的useMessage
     return {
+      message,
       handlePositiveClick() {
         // message.info("是的");
         //清除localStorage保存的设定
@@ -119,45 +120,22 @@ export default defineComponent({
     },
   },
   methods: {
+    //进入全屏，由screenfull实现 https://github.com/sindresorhus/screenfull
+    //全屏 API： https://developer.mozilla.org/zh-CN/docs/Web/API/Fullscreen_API
     onFullSreen() {
-      if (!screenfull.isEnabled) { // 测试浏览器是否支持全screenfull 如果不允许进入全屏，发出不允许提示
-        this.$message({
-          message: '不支持全屏',
-          type: 'warning'
-        })
+      //如果不允许进入全屏，发提示
+      if (!screenfull.isEnabled) {
+        this.message.warning(this.$t('not_support_fullscreen'))
         return false
       }
+      //切换提示
+      if (!screenfull.isFullscreen) {
+        this.message.success(this.$t('success_fullScreen'));
+      } else {
+        this.message.success(this.$t('exit_fullScreen'));
+      }
+      //切换全屏状态
       screenfull.toggle()
-      this.$message({
-        message: '进入全屏',
-        type: 'success'
-      })
-      //全屏 API： https://developer.mozilla.org/zh-CN/docs/Web/API/Fullscreen_API
-
-      // let element = document.documentElement;
-      // if (this.fullscreen) {
-      //   if (document.exitFullscreen) {
-      //     document.exitFullscreen();
-      //   } else if (document.webkitCancelFullScreen) {
-      //     document.webkitCancelFullScreen();
-      //   } else if (document.mozCancelFullScreen) {
-      //     document.mozCancelFullScreen();
-      //   } else if (document.msExitFullscreen) {
-      //     document.msExitFullscreen();
-      //   }
-      // } else {
-      //   if (element.requestFullscreen) {
-      //     element.requestFullscreen();
-      //   } else if (element.webkitRequestFullScreen) {
-      //     element.webkitRequestFullScreen();
-      //   } else if (element.mozRequestFullScreen) {
-      //     element.mozRequestFullScreen();
-      //   } else if (element.msRequestFullscreen) {
-      //     // IE11
-      //     element.msRequestFullscreen();
-      //   }
-      // }
-      this.isFullscreen = !this.isFullscreen;
     },
     OnChangeLanguage(value) {
       this.cookies.set("userLanguageSetting", value);

@@ -55,7 +55,7 @@ export default defineConfig({
   ],
   server: {
     strictPort: false,//设置为 true 时，如果端口已被使用，则直接退出，而不会再进行后续端口的尝试。
-    open: 'index.html', //开发服务器启动时，自动在浏览器中打开应用程序。(false  或 'index.html')
+    open: '/#/', //开发服务器启动时，自动在浏览器中打开应用程序。(false  或 'index.html')
     port: 4080,//开发服务器端口。如果设端口已被使用，Vite 将自动尝试下一个可用端口。
     host: '0.0.0.0',//为开发服务器指定 ip 地址。 设置为 0.0.0.0 或 true 会监听所有地址，包括局域网和公共地址。
     //https://zxuqian.cn/vite-proxy-config/
@@ -107,6 +107,7 @@ export default defineConfig({
     target: 'esnext',//设置最终构建的浏览器兼容目标。默认值是一个 Vite 特有的值——'modules'，这是指 支持原生 ES 模块的浏览器。另一个特殊值是 “esnext” —— 即假设有原生动态导入支持，并且将会转译得尽可能小。
     minify: 'terser',//如果 build.minify 选项为 'terser'， 'esnext' 将会强制降级为 'es2019'
     outDir: '../routers/static',
-    emptyOutDir: true,//清除目标目录：https://cn.vitejs.dev/config/#build-emptyoutdir
+    emptyOutDir: true,//清除目标目录：
+    chunkSizeWarningLimit:1500,//规定触发警告的 chunk 大小。（以 kbs 为单位）https://cn.vitejs.dev/config/#build-emptyoutdir
   }
 })

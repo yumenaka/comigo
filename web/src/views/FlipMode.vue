@@ -10,11 +10,7 @@
       <Header v-if="this.showHeaderFlag_FlipMode" class="mx-auto w-full opacity-80"
         v-bind:class="{ 'fixed': this.hideToolbar, absolute: this.hideToolbar, 'top-0': this.hideToolbar }"
         v-bind:style="{ background: model.interfaceColor }" :setDownLoadLink="this.needDownloadLink()"
-        :headerTitle="book.name" :bookID="this.book.id" :showReturnIcon="true">
-        <!-- 右边的设置图标,点击屏幕中央也可以打开 -->
-        <n-icon size="40" @click="drawerActivate('right')">
-          <settings-outline />
-        </n-icon>
+        :headerTitle="book.name" :bookID="this.book.id" :showReturnIcon="true" @drawerActivate="this.drawerActivate">
       </Header>
     </transition>
 
@@ -259,7 +255,6 @@ import { defineComponent, reactive } from "vue";
 // 直接导入组件并使用它。这种情况下,只有导入的组件才会被打包。
 import {
   NDivider,
-  NIcon,
   NInputNumber,
   NSlider,
   NSpace,
@@ -268,7 +263,6 @@ import {
   NButton,
   NSelect,
 } from "naive-ui";
-import { SettingsOutline } from "@vicons/ionicons5";
 import axios from "axios";
 import md5 from "js-md5";
 
@@ -286,8 +280,6 @@ export default defineComponent({
     // NLayout,//布局 https://www.naiveui.com/zh-CN/os-theme/components/layout
     // NLayoutSider,
     // NLayoutContent,
-    NIcon, //图标  https://www.naiveui.com/zh-CN/os-theme/components/icon
-    SettingsOutline, //图标,来自 https://www.xicons.org/#/   需要安装（npm i -D @vicons/ionicons5）
     // NColorPicker, //颜色选择器 Color Picker https://www.naiveui.com/zh-CN/os-theme/components/color-picker
     NDivider, //分割线  https://www.naiveui.com/zh-CN/os-theme/components/divider
     NInputNumber, ///  https://www.naiveui.com/zh-CN/os-theme/components/input-number
@@ -672,7 +664,7 @@ export default defineComponent({
       if (msg.type === "sync_page" && msg.user_id !== this.$store.userID) {
         const syncData = JSON.parse(msg.data_string);
         //正在读的是同一本书、就翻页。
-        if (syncData.book_id === this.book.id&&syncData.now_page_num!==this.nowPageNum) {
+        if (syncData.book_id === this.book.id && syncData.now_page_num !== this.nowPageNum) {
           // console.log(syncData);
           this.toPage(syncData.now_page_num, false);
         }
