@@ -5,7 +5,6 @@
         <div class="page_hint" v-if="this.showPageNumFlag_ScrollMode">{{ this.pageNum }}/{{
                 this.all_page_num
         }}</div>
-        <p> &nbsp;</p>
     </div>
 </template>
 
@@ -15,12 +14,12 @@
 // https://www.w3cplus.com/vue/build-an-infinite-scroll-component-using-intersection-observer-api.html 
 // https://vueschool.io/articles/vuejs-tutorials/build-an-infinite-scroll-component-using-intersection-observer-api/
 export default {
-    props: ['options', "syncPageFlag",'sendWSMessage','book_id', 'image_url', 'pageNum', 'all_page_num', "showPageNumFlag_ScrollMode", "sPWL", "dPWL", "sPWP", "dPWP"],
+    props: ['options', "syncPageFlag", 'sendWSMessage', 'book_id', 'image_url', 'pageNum', 'all_page_num', "showPageNumFlag_ScrollMode", "sPWL", "dPWL", "sPWP", "dPWP"],
     emits: ['refreshNowPageNum'],
     data: () => ({
         observer: null,
         tempThreshold: 0,
-        entering: false,
+        sendMessageNum: 0,
     }),
     mounted() {
         const options = {
@@ -32,7 +31,10 @@ export default {
         // https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry/intersectionRatio
         this.observer = new IntersectionObserver(([entry]) => {
             //isIntersecting：被监视对象与root是否交叉。如果没交叉，不做任何事情
-            if (!entry.isIntersecting) return;
+            if (!entry.isIntersecting) {
+                this.sendMessageNum = 0;
+                return
+            }
             // DOMRect 对象，提供元素的大小及其相对于视口的位置。
             // https://developer.mozilla.org/zh-CN/docs/Web/API/Element/getBoundingClientRect
             // console.dir(entry.boundingClientRect);
@@ -42,16 +44,14 @@ export default {
             // console.log("viewport_clientHeight:", viewport_clientHeight);
             // //以底部为准：从下往上，进入viewport的时候才增加页数
             // if (entry.boundingClientRect.bottom >= viewportHeight) {
-            //TODO：以顶部为准：从下往上，接触顶部的时候才增加页数.需要优化。
+            //以顶部为准：从下往上，接触顶部的时候才改变页数。因为要留一些提前量，所以不是0而是50.
             if (entry.boundingClientRect.top <= 50) {
-                this.entering = true;
-                this.$emit("refreshNowPageNum",this.pageNum);
+                this.$emit("refreshNowPageNum", this.pageNum);
                 // console.log("pageNum", this.pageNum);
-                if(this.syncPageFlag){
+                //如果发送过一次了，就不再重复发送，避免大量发包
+                if (this.syncPageFlag && this.sendMessageNum === 0) {
                     this.sendNowPage(entry.intersectionRatio);
                 }
-            } else {
-                this.entering = false;
             }
         }, options);
         this.observer.observe(this.$el);//使用this.$el作为root元素以便观察DOM元素。$el指向当前组件的DOM元素。this.$el在mounted中才会出现的，在created的时候没有。
@@ -62,6 +62,7 @@ export default {
     methods: {
         //Websocket 发送消息
         sendNowPage(now_page_num_percent) {
+            this.sendMessageNum = this.sendMessageNum + 1
             const readPercent =
                 parseFloat(this.pageNum) / parseFloat(this.all_page_num);
             // console.debug("ReadPercent: " + readPercent)
@@ -81,8 +82,10 @@ export default {
                 data_string: JSON.stringify(data),
             };
             // 配置为了json，可调用sendObj方法来发送数据
-            this.$socket.sendObj(newMsg);
-            // console.log("send:", newMsg);
+            if (this.$socket.readyState === 1) {
+                this.$socket.sendObj(newMsg);
+            }
+            // console.log("send:", newMsg); 
         },
     },
 

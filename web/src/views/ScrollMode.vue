@@ -4,26 +4,32 @@
 			:showReturnIcon="true" v-bind:style="{ background: model.interfaceColor }"
 			@drawerActivate="this.drawerActivate">
 		</Header>
-
+		<!-- 顶部的加载全部页面顶部按钮 -->
+		<button v-if="this.startLoadPageNum > 1 && (!this.onloading)"
+			class="w-24 h-12 m-2 bg-blue-300 text-gray-900 hover:bg-blue-500 rounded" @click="this.loadAllPage"
+			size="large">this.$t('load_all_pages')</button>
 		<!-- 渲染漫画部分 -->
 		<div class="main_manga" v-for="(image, n) in this.localImages" :key="image.url" @click="onMouseClick($event)"
 			@mousemove="onMouseMove" @mouseleave="onMouseLeave">
 			<ImageScroll :image_url="this.imageParametersString(image.url)" :sPWL="this.sPWL" :dPWL="this.dPWL"
-				:sPWP="this.sPWP" :dPWP="this.dPWP" :pageNum="n + 1" :all_page_num="this.book.all_page_num"
-				:book_id="this.book.id" :showPageNumFlag_ScrollMode="this.showPageNumFlag_ScrollMode"
-				:sendWSMessage="this.sendWSMessage" :syncPageFlag="this.syncPageFlag" :id="'JUMP_ID:' + (n + 1)"
-				@refreshNowPageNum="refreshNowPageNum">
+				:sPWP="this.sPWP" :dPWP="this.dPWP" :pageNum="n + this.startLoadPageNum"
+				:all_page_num="this.book.all_page_num" :book_id="this.book.id"
+				:showPageNumFlag_ScrollMode="this.showPageNumFlag_ScrollMode" :sendWSMessage="this.sendWSMessage"
+				:syncPageFlag="this.syncPageFlag" :id="'JUMP_ID:' + (n + 1)" @refreshNowPageNum="refreshNowPageNum">
 			</ImageScroll>
 		</div>
 
-		<Observer @intersect="intersected" />
+		<Observer @loadNextBlock="loadNextBlock" />
+		<!-- 返回顶部的圆形按钮，向上滑动的时候出现 -->
 		<n-back-top :show="showBackTopFlag" type="info" color="#8a2be2" :right="20" :bottom="20" />
+		<!-- 底部最下面的返回顶部按钮 -->
 		<button class="w-24 h-12 m-2 bg-blue-300 text-gray-900 hover:bg-blue-500 rounded" @click="scrollToTop(90);"
 			size="large">{{ $t('back-to-top') }}</button>
 
 		<Bottom v-bind:style="{ background: model.interfaceColor }"
 			:softVersion="this.$store.state.server_status.ServerName ? this.$store.state.server_status.ServerName : 'Comigo'">
 		</Bottom>
+
 
 		<Drawer :initDrawerActive="this.drawerActive" :initDrawerPlacement="this.drawerPlacement"
 			@saveConfig="this.saveConfigToLocalStorage" @startSketch="this.startSketchMode"
@@ -175,7 +181,7 @@
 
 <script>
 // 直接导入组件并使用它。这种情况下,只有导入的组件才会被打包。
-import { NBackTop, NSpace, NSlider, NSwitch, NInputNumber, NButton, NDropdown, } from 'naive-ui'
+import { NBackTop, NSpace, NSlider, NSwitch, NInputNumber, NButton, NDropdown, useMessage, useDialog } from 'naive-ui'
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
 import Bottom from "@/components/Bottom.vue";
@@ -215,9 +221,11 @@ export default defineComponent({
 		NButton,//按钮，来自:https://www.naiveui.com/zh-CN/os-theme/components/button
 		NDropdown,//下拉菜单 https://www.naiveui.com/zh-CN/os-theme/components/dropdown
 	},
+	// setup在创建组件前执行，因此没有this
 	setup() {
-		//此处不能使用this
+		//此处不能使用this,但可以用getCurrentInstance 这个vue函数取得Proxy，实现类似 proxy.$socket.onmessage 这样的调用(https://github.com/likaia/vue-native-websocket-vue3)。
 		// const { cookies } = useCookies();
+		//在setup中访问vuex需要通过useStore()来访问  https://juejin.cn/post/6917592199140458504#heading-22=
 		//背景颜色,颜色选择器用
 		//reactive({}) 创建并返回一个响应式对象: https://www.bilibili.com/video/av925511720/?p=4  也讲到了toRefs()
 		const model = reactive({
@@ -238,16 +246,17 @@ export default defineComponent({
 		});
 		//单选按钮绑定的数值,ref函数：返回一个响应式的引用
 		// const checkedValueRef = ref(null)
+		const message = useMessage();
+		const dialog = useDialog();
 		return {
 			pdfUrl: "",
 			// cookies,
 			//背景色
 			model,
-			imageParameters,//获取图片所用的参数
+			message,
+			dialog,
+			imageParameters,//获取图片所用参数
 			imageParametersString: (source_url) => {
-				// if (!source_url) {
-				// 	return
-				// }
 				// console.log("source_url:" + source_url)
 				if (source_url.substr(0, 12) == "api/getfile?") {
 					//当前URL
@@ -303,13 +312,16 @@ export default defineComponent({
 		return {
 			//当前页数,注意语义,直接就是1开始的页数,不是数组下标,在pages\images数组当中用的时候需要-1
 			nowPageNum: 1,
+			startLoadPageNum: 1,
+			StartFromBreakpoint: false,
 			loadPageLimit: 20,//一次最多载入的漫画张数，默认为20.
 			endLoadPageNum: 20,//载入漫画的最后一页，默认为20.
 			syncPageFlag: true,//是否通过websocket同步翻页
-			sendWSMessage: false,
 			saveNowPageNumFlag: true,//是否（在本地存储里面）保存与恢复页数
+			sendWSMessage: false,
 			firstloadComplete: true,
 			localImages: null,
+			onloading: true,//是否正在加载，延迟执行各种操作用
 			book: {
 				name: "loading",
 				id: "abcde",
@@ -416,6 +428,19 @@ export default defineComponent({
 		if (this.$route.query.sort_by) {
 			sort_image_by_str = "&sort_by=" + this.$route.query.sort_by
 		}
+		//是否保存页数
+		if (localStorage.getItem("saveNowPageNumFlag") === "true") {
+			this.saveNowPageNumFlag = true;
+		} else if (localStorage.getItem("saveNowPageNumFlag") === "false") {
+			this.saveNowPageNumFlag = false;
+		}
+		//是否通过websocket同步页数
+		if (localStorage.getItem("SyncPageFlag") === "true") {
+			this.syncPageFlag = true;
+		} else if (localStorage.getItem("SyncPageFlag") === "false") {
+			this.syncPageFlag = false;
+		}
+
 		//根据路由参数获取特定书籍
 		axios
 			.get("/getbook?id=" + this.$route.params.id + sort_image_by_str)
@@ -428,6 +453,12 @@ export default defineComponent({
 				() => {
 					document.title = this.book.name;
 					// console.log("成功获取书籍数据,书籍ID:" + this.$route.params.id);
+					// 询问用户是否从中间开始加载，延迟1.5秒执行
+					var _this = this
+					setTimeout(function () {
+						_this.loadLocalBookMark();
+						_this.onloading = false
+					}, 1500);
 				}
 			);
 		//监听路由参数的变化,刷新本地的Book数据
@@ -471,7 +502,6 @@ export default defineComponent({
 			this.showPageNumFlag_ScrollMode = false;
 		}
 		//console.log("读取设置并初始化: showPageNumFlag_ScrollMode=" + this.showPageNumFlag_ScrollMode);
-
 		//javascript 数字类型转换：https://www.runoob.com/js/js-type-conversion.html
 		// NaN不能通过相等操作符（== 和 ===）来判断
 
@@ -506,7 +536,6 @@ export default defineComponent({
 		//当前颜色
 		if (localStorage.getItem("BackgroundColor") != null) {
 			this.model.backgroundColor = localStorage.getItem("BackgroundColor");
-			// this.onBackgroundColorChange(this.model.backgroundColor);
 		}
 		if (localStorage.getItem("InterfaceColor") != null) {
 			this.model.interfaceColor = localStorage.getItem("InterfaceColor");
@@ -557,21 +586,8 @@ export default defineComponent({
 				this.imageParameters.auto_crop_num = saveNum;
 			}
 		}
-		//是否保存页数
-		if (localStorage.getItem("saveNowPageNumFlag") === "true") {
-			this.saveNowPageNumFlag = true;
-		} else if (localStorage.getItem("saveNowPageNumFlag") === "false") {
-			this.saveNowPageNumFlag = false;
-		}
-		//是否通过websocket同步页数
-		if (localStorage.getItem("SyncPageFlag") === "true") {
-			this.syncPageFlag = true;
-		} else if (localStorage.getItem("SyncPageFlag") === "false") {
-			this.syncPageFlag = false;
-		}
 	},
-
-	// //挂载前
+	// 挂载前 : 指令第一次绑定到元素并且在挂载父组件之前调用。
 	beforeMount() {
 	},
 	onMounted() {
@@ -582,8 +598,7 @@ export default defineComponent({
 		this.$nextTick(function () {
 			//视图渲染之后运行的代码
 		})
-		//需要得书籍远程数据,避免初始化失败,所以延迟0.5秒执行
-		setTimeout(this.setNowPageNumByLocalStorage, 500);
+
 	},
 	//卸载前
 	beforeUnmount() {
@@ -614,35 +629,68 @@ export default defineComponent({
 				}
 			}
 		},
-		//刷新到底部的时候,改变images数据
+
+		loadBookMarkDialog() {
+			this.dialog.warning({
+				title: this.$t('found_read_history'),
+				content: this.$t('load_from_interrupt').replace("XX", this.startLoadPageNum),
+				positiveText: this.$t('from_interrupt'),
+				negativeText: this.$t('starting_from_beginning'),
+				onPositiveClick: () => {
+					if (this.startLoadPageNum + this.loadPageLimit <= this.book.all_page_num) {
+						this.endLoadPageNum = this.startLoadPageNum + this.loadPageLimit;
+					} else {
+						this.endLoadPageNum = this.book.all_page_num;
+					}
+					this.message.success(this.$t('successfully_loaded_reading_progress'));
+					this.loadPages();
+				},
+				onNegativeClick: () => {
+					this.startLoadPageNum = 1;
+					this.nowPageNum = 1;
+					this.message.success(this.$t('starting_from_beginning_hint'));
+					this.loadPages();
+				}
+			});
+		},
+
+		//刷新到底部的时候,改变images数据 默认参数： NowBlockNumPlusOne = false
 		loadPages() {
 			// const MaxPageNum = this.book.all_page_num
 			// const LoadPageLimit = this.loadPageLimit
-			// const NowPageNum = this.nowPageNum
-			// const NowBlockNum = Math.ceil(NowPageNum / LoadPageLimit)//现在在哪个区块（向上取整，有小数，则整数部分加1）取整：parseInt()
+			// var NowBlockNum = Math.ceil(this.nowPageNum / LoadPageLimit)//现在在哪个区块（向上取整，有小数，则整数部分加1）取整：parseInt()
 			// const AllBlockNum = Math.ceil(MaxPageNum/LoadPageLimit)//总区块数（向上取整，有小数，则整数部分加1）
-			// const startLoadPageNum = (NowBlockNum - 1) * this.loadPageLimit + 1
-			// this.endLoadPageNum = NowBlockNum * this.loadPageLimit
-			//打印对象
+
+			// console.log("startLoadPageNum:", this.startLoadPageNum)
+			// console.log("endLoadPageNum:", this.endLoadPageNum)
 			// console.dir(this.localImages)
-			// console.log("startLoadPageNum:", startLoadPageNum)
-			// console.log("endLoadPageNum:", endLoadPageNum)
-			this.localImages = this.book.pages.images.slice(0, this.endLoadPageNum - 1);//javascript的接片不能直接用[a,b]，而是需要调用.slice()函数
+			//slice() 方法返回一个新的数组对象，这一对象是一个由 begin 和 end 决定的原数组的浅拷贝（包括 begin，不包括end）
+			this.localImages = this.book.pages.images.slice(this.startLoadPageNum - 1, this.endLoadPageNum);//javascript的接片不能直接用[a,b]，而是需要调用.slice()函数
 		},
-		//无限加载之拉到底部刷新
-		intersected() {
+		loadAllPage() {
+			this.startLoadPageNum = 1;
+			this.nowPageNum = 1;
+			this.loadPages()
+		},
+		//无限加载用,底部刷新
+		loadNextBlock() {
 			if (this.endLoadPageNum + this.loadPageLimit <= this.book.all_page_num) {
 				this.endLoadPageNum = this.endLoadPageNum + this.loadPageLimit;
 			} else {
 				this.endLoadPageNum = this.book.all_page_num;
 			}
-			this.endLoadPageNum = this.endLoadPageNum + this.loadPageLimit;
-			this.loadPages();
+			// console.log("loadNextBlock");
+			this.loadPages(true);
 		},
 		//监听子组件事件: https://v3.cn.vuejs.org/guide/component-basics.html#%E7%9B%91%E5%90%AC%E5%AD%90%E7%BB%84%E4%BB%B6%E4%BA%8B%E4%BB%B6
 		//滚动页面的时候刷新页数
 		refreshNowPageNum(n) {
+			if (this.onloading) {
+				return
+			}
 			this.nowPageNum = n;
+			//保存页数
+			this.saveLocalBookMark(this.nowPageNum, false);
 			this.loadPages();
 		},
 		//滚动跳转到指定页数，需要写一个滚动函数
@@ -651,18 +699,13 @@ export default defineComponent({
 			if (num <= this.book.all_page_num && num >= 1) {
 				this.nowPageNum = num;
 			}
-			const MaxPageNum = this.book.all_page_num
-			const LoadPageLimit = this.loadPageLimit
-			const NowPageNum = this.nowPageNum
-			const NowBlockNum = Math.ceil(NowPageNum / LoadPageLimit)//现在在哪个区块（向上取整，有小数，则整数部分加1）取整：parseInt()
-			this.endLoadPageNum = (NowBlockNum * this.loadPageLimit) > MaxPageNum ? MaxPageNum : (NowBlockNum * this.loadPageLimit)
 			this.loadPages();
 			// 前端页面滚动到某个位置的方式
 			//获取目标元素
 			let element = document.getElementById("JUMP_ID:" + this.nowPageNum);
 			if (!element) {
 				console.log("没找到：", element);
-				this.intersected();
+				this.loadNextBlock();
 				element = document.getElementById("JUMP_ID:" + this.nowPageNum);
 			}
 			//元素方法调用,自动刷新的时候，需要避免死锁,将syncPageFlag暂时设置为false不管用，
@@ -673,42 +716,12 @@ export default defineComponent({
 				element.scrollIntoView(true)
 			}
 			//保存页数
-			this.saveNowPageNumOnUpdate(this.nowPageNum, sendWSMessage);
+			this.saveLocalBookMark(this.nowPageNum, sendWSMessage);
 			// let _this = this
 			// setTimeout(() => { _this.sendWSMessage = true; }, 2000);
 		},
-
-
-		// //异步函数的写法
-		// async intersected() {
-		// 	const res = await fetch(
-		// 		`https://jsonplaceholder.typicode.com/comments?_page=${this.page
-		// 		}&_limit=50`
-		// 	);
-		// 	this.page++;
-		// 	const items = await res.json();
-		// 	this.items = [...this.items, ...items];
-		// },
-
-		//TODO：根据书籍UUID,设定当前页数,因为需要取得远程书籍数据（this.book）,所以延迟执行
-		setNowPageNumByLocalStorage() {
-			if (this.saveNowPageNumFlag) {
-				let cookieValue = localStorage.getItem("nowPageNum" + this.book.id);
-				if (cookieValue != null) {
-					let saveNum = Number(cookieValue);
-					if (!isNaN(saveNum)) {
-						this.nowPageNum = saveNum;
-						console.log("成功读取页数" + saveNum);
-					} else {
-						console.log("读取页数失败,this.nowPageNum = " + this.nowPageNum);
-					}
-				} else {
-					console.log("本队存储里没找到:" + "nowPageNum = " + this.nowPageNum);
-				}
-			}
-		},
-		//TODO：滑动页面、停止滚动的时候保存页数
-		saveNowPageNumOnUpdate(value, sendWSMessage = true) {
+		//滑动页面、停止滚动的时候保存页数
+		saveLocalBookMark(value, sendWSMessage = true) {
 			if (this.saveNowPageNumFlag) {
 				localStorage.setItem("nowPageNum" + this.book.id, value);
 			}
@@ -718,14 +731,37 @@ export default defineComponent({
 			}
 		},
 
-		// TODO：各种翻页函数，或许不需要都写
+		//根据书籍UUID,设定当前页数,显示的时候需要远程书籍数据（this.book）,可能需要延迟执行
+		loadLocalBookMark() {
+			if (!this.saveNowPageNumFlag) {
+				return
+			}
+			let cookieValue = localStorage.getItem("nowPageNum" + this.book.id);
+			if (cookieValue === null) {
+				console.log("本队存储里没找到:" + "nowPageNum = " + this.nowPageNum);
+				return
+			}
+			let saveNum = Number(cookieValue);
+			if (isNaN(saveNum)) {
+				console.log("读取页数失败,this.nowPageNum = " + this.nowPageNum);
+				return
+			}
+			this.nowPageNum = saveNum;
+			this.startLoadPageNum = saveNum;
+			//至少读到第三页才开始提醒中途加载
+			if (this.nowPageNum >= 3) {
+				this.loadBookMarkDialog();
+			}
+			console.log("成功读取页数" + saveNum);
+		},
+		// 各种翻页函数，或许不需要都写
 		flipPage() {
 		},
 		toNextPage() {
 		},
 		toPerviousPage() {
 		},
-		// TODO：键盘事件，需要改造成支持滚动的逻辑
+		// 键盘事件，需要改造成支持滚动的逻辑
 		handleKeyup(event) {
 			//错误:(815, 49) 不允许从实参中引用 'caller' 和 'callee'
 			const e = event || window.event;
@@ -936,16 +972,17 @@ export default defineComponent({
 				this.isPortraitMode = true
 			}
 		},
-		//页面滚动的时候改变各种值
+		//页面滚动的时候,改变返回顶部按钮的显隐
 		onScroll() {
 			let scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
 			this.scrollDownFlag = scrollTop > this.scrollTopSave;
 			//防手抖,小于一定数值状态就不变 Math.abs()会导致报错
 			// let step = Math.abs(this.scrollTopSave - scrollTop);
 			let step = this.scrollTopSave - scrollTop;
-			// console.log("step:", step);
+			// console.log("this.scrollDownFlag:",this.scrollDownFlag,"scrollTop:",scrollTop,"step:", step);
 			this.scrollTopSave = scrollTop
-			if (step < -5 && step > 5) {
+			// this.showBackTopFlag=true
+			if (step < -5 || step > 5) {
 				this.showBackTopFlag = ((scrollTop > 400) && !this.scrollDownFlag);
 			}
 		},

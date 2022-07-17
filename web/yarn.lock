@@ -960,25 +960,25 @@
   resolved "https://registry.yarnpkg.com/@vue/shared/-/shared-3.2.37.tgz#8e6adc3f2759af52f0e85863dfb0b711ecc5c702"
   integrity sha512-4rSJemR2NQIo9Klm1vabqWjD8rs/ZaJSzMxkMNeJS6lHiUjjUeYFbooN19NgFjztubEKh3WlZUeOLVdbbUWHsw==
 
-"@vueuse/core@^8.9.2":
-  version "8.9.2"
-  resolved "https://registry.yarnpkg.com/@vueuse/core/-/core-8.9.2.tgz#49499abc4db31232d21574cf0d996bd5581dfc13"
-  integrity sha512-dE3/JgwqIHmmtmRBdZAnq87rZCSFbYVps2t3gWy9Jv/+Qp6sHSSKuPFtwguJVZ2OnaGnB/AMRmx4CuFRxFin3A==
+"@vueuse/core@^8.9.4":
+  version "8.9.4"
+  resolved "https://registry.yarnpkg.com/@vueuse/core/-/core-8.9.4.tgz#c7db40f19390b3c9f4ff9294a30461497f62ec19"
+  integrity sha512-B/Mdj9TK1peFyWaPof+Zf/mP9XuGAngaJZBwPaXBvU3aCTZlx3ltlrFFFyMV4iGBwsjSCeUCgZrtkEj9dS2Y3Q==
   dependencies:
     "@types/web-bluetooth" "^0.0.14"
-    "@vueuse/metadata" "8.9.2"
-    "@vueuse/shared" "8.9.2"
+    "@vueuse/metadata" "8.9.4"
+    "@vueuse/shared" "8.9.4"
     vue-demi "*"
 
-"@vueuse/metadata@8.9.2":
-  version "8.9.2"
-  resolved "https://registry.yarnpkg.com/@vueuse/metadata/-/metadata-8.9.2.tgz#ce9d535968ad23d452566f3f61ad86b3e5606ad1"
-  integrity sha512-g2s2BeyeEtJElmMFfFPnM+BTvnt0omniyvz8U18/zXDpQIMGozlNQgHoFeratyMfgVBhH/u2VKzmchChtDsgPQ==
+"@vueuse/metadata@8.9.4":
+  version "8.9.4"
+  resolved "https://registry.yarnpkg.com/@vueuse/metadata/-/metadata-8.9.4.tgz#a4132db33e4c1b1023636acfa20aa7b37ab3d978"
+  integrity sha512-IwSfzH80bnJMzqhaapqJl9JRIiyQU0zsRGEgnxN6jhq7992cPUJIRfV+JHRIZXjYqbwt07E1gTEp0R0zPJ1aqw==
 
-"@vueuse/shared@8.9.2":
-  version "8.9.2"
-  resolved "https://registry.yarnpkg.com/@vueuse/shared/-/shared-8.9.2.tgz#d8a46f73ae2a971754ea9572505239bfbc311e2a"
-  integrity sha512-s4Nk82oheL5z1GywyGnqjob0MzbAt88olMZa0vgt/p3gcMsT8Ff7+SqmNgEFC6AAs6xiuhOAZpnew9Zs3d90yQ==
+"@vueuse/shared@8.9.4":
+  version "8.9.4"
+  resolved "https://registry.yarnpkg.com/@vueuse/shared/-/shared-8.9.4.tgz#c9741c30ffb666b50d62f0dd80b76119fd47573e"
+  integrity sha512-wt+T30c4K6dGRMVqPddexEVLa28YwxW5OFIPmzUHICjphfAuBFTTdDoyqREZNDOFJZ44ARH1WWQNCUK8koJ+Ag==
   dependencies:
     vue-demi "*"
 

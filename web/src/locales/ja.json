@@ -60,5 +60,12 @@
   "success_fullScreen": "フルスクリーン成功",
   "not_support_fullscreen": "このブラウザはフルスクリーンに対応していません",
   "exit_fullScreen": "フルスクリーンを終了",
-  "auto_hide_toolbar": "ツールバー自動非表示"
+  "auto_hide_toolbar": "ツールバー自動非表示",
+  "found_read_history": "読書記録が見つかりました",
+  "from_interrupt": "途中から",
+  "starting_from_beginning": "最初から",
+  "successfully_loaded_reading_progress": "読書進捗の読み込みに成功しました",
+  "starting_from_beginning_hint": "最初のページから読み込む",
+  "load_from_interrupt": "XXページから読み込みを開始しますか？",
+  "load_all_pages": "全てのページを読み込む"
 }

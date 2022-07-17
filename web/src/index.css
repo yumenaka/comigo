@@ -18,3 +18,9 @@
           text-shadow: none;
         }
 }
+/* 解决 Naive UI 与 Tailwind 的 button 样式冲突 */
+@layer base {
+  button, [type='button'], [type='reset'], [type='submit'] {
+      background-color: var(--n-color); 
+  }
+}
