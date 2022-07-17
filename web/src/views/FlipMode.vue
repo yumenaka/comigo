@@ -124,53 +124,46 @@
     </transition>
 
     <!-- 设置抽屉,一开始隐藏 -->
-    <Drawer :initDrawerActive="this.drawerActive" :initDrawerPlacement="this.drawerPlacement"
+    <Drawer  :initDrawerActive="this.drawerActive" :initDrawerPlacement="this.drawerPlacement"
       @saveConfig="this.saveConfigToLocal" @startSketch="this.startSketchMode" @stopSketch="this.stopSketchMode"
       @closeDrawer="this.drawerDeactivate" :readerMode="this.readerMode" :inBookShelf="false"
       :sketching="this.sketchModeFlag">
+   
       <!-- 选择：切换页面模式 -->
-      <n-space>
         <n-button @click="changeReaderModeToScrollMode">{{
             $t("switch_to_scrolling_mode")
         }}
         </n-button>
-      </n-space>
-      <!-- 分割线 -->
-      <p> &nbsp;</p>
+
+      <!-- 空白行-->
+      <!-- <p> &nbsp;</p> -->
 
       <!-- 显示当前页数 -->
-      <n-space>
         <n-switch size="large" v-model:value="this.showPageHintFlag_FlipMode" @update:value="setShowPageNumChange">
           <template #checked>{{ $t("showPageNum") }}</template>
           <template #unchecked>{{ $t("showPageNum") }}</template>
         </n-switch>
-      </n-space>
 
       <!-- websocket同步 -->
-      <n-space>
         <n-switch size="large" v-model:value="this.syncPageFlag" @update:value="this.setSyncPageFlag">
           <template #checked>{{ $t("sync_page") }}</template>
           <template #unchecked>{{ $t("sync_page") }}</template>
         </n-switch>
-      </n-space>
+
       <!-- 保存阅读的页数 -->
-      <n-space>
         <n-switch size="large" v-model:value="this.saveNowPageNumFlag" @update:value="this.setSavePageNumFlag">
           <template #checked>{{ $t("savePageNum") }}</template>
           <template #unchecked>{{ $t("savePageNum") }}</template>
         </n-switch>
-      </n-space>
 
       <!-- 合并双页 -->
-      <n-space>
         <n-switch size="large" v-model:value="this.simpleDoublePageModeFlag"
           @update:value="this.setSimpleDoublePage_FlipMode">
           <template #checked>{{ $t("simpleDoublePage") }}</template>
           <template #unchecked>{{ $t("simpleDoublePage") }}</template>
         </n-switch>
-      </n-space>
+
       <!-- 自动切边 -->
-      <n-space>
         <n-switch size="large" v-model:value="this.imageParameters.do_auto_crop"
           @update:value="setImageParameters_DoAutoCrop">
           <template #checked>{{ $t("auto_crop") }}</template>
@@ -182,28 +175,25 @@
           :min="0">
           <template #prefix>{{ $t("energy_threshold") }}</template>
         </n-input-number>
-      </n-space>
+
 
       <!-- 翻页模式,默认右开本（日漫）-->
-      <n-space>
         <n-switch size="large" v-model:value="this.rightToLeftFlag" :rail-style="railStyle"
           @update:value="this.setFlipScreenFlag">
           <template #checked>{{ $t("leftScreenToNext") }}</template>
           <template #unchecked>{{ $t("rightScreenToNext") }}</template>
         </n-switch>
-      </n-space>
+
 
       <!-- 自动隐藏工具栏 -->
-      <n-space>
         <n-switch size="large" v-model:value="this.hideToolbar" @update:value="this.setHideToolbar">
           <template #checked>{{ $t('auto_hide_toolbar') }}</template>
           <template #unchecked>{{ $t('auto_hide_toolbar') }}</template>
         </n-switch>
-      </n-space>
+
 
       <!-- 分割线 -->
       <!-- <n-divider /> -->
-
       <!-- Debug,开启一些不稳定功能 -->
       <!-- <n-space>
       <n-switch size="large" v-model:value="this.debugModeFlag" @update:value="this.setDebugModeFlag">
@@ -238,7 +228,7 @@
         :marks="marks" :format-tooltip="(value) => `${value}s`" @update:value="this.resetSketchSecondCount" />
 
       <!-- 分割线 -->
-      <n-divider />
+      <!-- <n-divider /> -->
       <!-- 页面排序方式 -->
       <n-select placeholder=this.getSortHintText() @update:value="this.onResort" v-model:value="this.resort_hint_key"
         :options="options" />

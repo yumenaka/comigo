@@ -1,4 +1,6 @@
 <template>
+  <!-- 外边距: m-2 https://www.tailwindcss.cn/docs/margin -->
+  <!-- 内边距： p-4 https://www.tailwindcss.cn/docs/padding  p-0 m-0  -->
   <n-drawer v-bind:show="drawerActive" @update:show="saveConfigToCookie" :height="275" :width="251"
     :placement="drawerPlacement">
     <n-drawer-content closable>
@@ -8,21 +10,18 @@
       </template>
 
       <!-- 父组件在此处插入自定义内容 -->
-      <slot></slot>
-      <!-- 分割线 -->
-      <p> &nbsp;</p>
-      <n-button v-if="this.sketching === false && this.inBookShelf === false" @click="startSketchMode">{{
-          $t('startSketchMode')
-      }}</n-button>
-      <n-button v-if="this.sketching === true && this.inBookShelf === false" @click="stopSketchMode">{{
-          $t('stopSketchMode')
-      }}</n-button>
-
-      <!-- <n-divider /> -->
-      <p> &nbsp;</p>
-      <span>{{ $t('scan_qrcode') }}</span>
-      <Qrcode></Qrcode>
-
+      <n-space vertical>
+        <slot></slot>
+        <n-button v-if="this.sketching === false && this.inBookShelf === false" @click="startSketchMode">{{
+            $t('startSketchMode')
+        }}</n-button>
+        <n-button v-if="this.sketching === true && this.inBookShelf === false" @click="stopSketchMode">{{
+            $t('stopSketchMode')
+        }}</n-button>
+        <!-- <n-divider /> -->
+        <span>{{ $t('scan_qrcode') }}</span>
+        <Qrcode></Qrcode>
+      </n-space>
       <n-popconfirm @positive-click="handlePositiveClick" @negative-click="handleNegativeClick">
         <template #trigger>
           <n-button>{{ $t('reset_all_settings') }}</n-button>
@@ -42,7 +41,7 @@
 <script>
 import screenfull from 'screenfull'
 import { useCookies } from "vue3-cookies";
-import { NDrawer, NDrawerContent, NButton, NSelect, NPopconfirm,useMessage, } from 'naive-ui'
+import { NDrawer, NDrawerContent, NButton, NSelect, NPopconfirm, useMessage, NSpace, } from 'naive-ui'
 import { defineComponent, } from 'vue'
 // import { useI18n } from 'vue-i18n'
 import Qrcode from "@/components/Qrcode.vue";
@@ -53,7 +52,7 @@ export default defineComponent({
   components: {
     NDrawer,//抽屉，可以从上下左右4个方向冒出. https://www.naiveui.com/zh-CN/os-theme/components/drawer
     NDrawerContent,//抽屉内容
-    // NSpace,//间距 https://www.naiveui.com/zh-CN/os-theme/components/space
+    NSpace,//间距 https://www.naiveui.com/zh-CN/os-theme/components/space
     // NDivider,//间隔
     // NRadioGroup,//单选  https://www.naiveui.com/zh-CN/os-theme/components/radio
     // NRadioButton,//单选 用按钮显得更优雅一点
