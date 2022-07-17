@@ -5,9 +5,9 @@
 			@drawerActivate="this.drawerActivate">
 		</Header>
 		<!-- 顶部的加载全部页面顶部按钮 -->
-		<button v-if="this.startLoadPageNum > 1 && (!this.onloading)"
+		<button v-if="((this.startLoadPageNum > 1) && (!this.inLoading))"
 			class="w-24 h-12 m-2 bg-blue-300 text-gray-900 hover:bg-blue-500 rounded" @click="this.loadAllPage"
-			size="large">this.$t('load_all_pages')</button>
+			size="large">{{ $t('load_all_pages')}}</button>
 		<!-- 渲染漫画部分 -->
 		<div class="main_manga" v-for="(image, n) in this.localImages" :key="image.url" @click="onMouseClick($event)"
 			@mousemove="onMouseMove" @mouseleave="onMouseLeave">
@@ -321,7 +321,7 @@ export default defineComponent({
 			sendWSMessage: false,
 			firstloadComplete: true,
 			localImages: null,
-			onloading: true,//是否正在加载，延迟执行各种操作用
+			inLoading: true,//是否正在加载，延迟执行操作、隐藏按钮用
 			book: {
 				name: "loading",
 				id: "abcde",
@@ -457,7 +457,7 @@ export default defineComponent({
 					var _this = this
 					setTimeout(function () {
 						_this.loadLocalBookMark();
-						_this.onloading = false
+						_this.inLoading = false
 					}, 1500);
 				}
 			);
@@ -685,7 +685,7 @@ export default defineComponent({
 		//监听子组件事件: https://v3.cn.vuejs.org/guide/component-basics.html#%E7%9B%91%E5%90%AC%E5%AD%90%E7%BB%84%E4%BB%B6%E4%BA%8B%E4%BB%B6
 		//滚动页面的时候刷新页数
 		refreshNowPageNum(n) {
-			if (this.onloading) {
+			if (this.inLoading) {
 				return
 			}
 			this.nowPageNum = n;
