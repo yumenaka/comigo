@@ -3,7 +3,7 @@
   <!-- 内边距： p-4 https://www.tailwindcss.cn/docs/padding  p-0 m-0  -->
   <header class="header h-12 w-full flex justify-between content-center">
     <!-- 返回箭头,点击返回上一页 -->
-    <n-icon class="p-0 m-0" v-if="showReturnIcon" size="40" @click="onClickReturnIcon()">
+    <n-icon class="m-4" v-if="showReturnIcon" size="40" @click="onClickReturnIcon()">
       <return-up-back />
     </n-icon>
 
@@ -53,9 +53,6 @@
         <settings-outline />
       </n-icon>
     </div>
-
-
-
   </header>
 </template>
 

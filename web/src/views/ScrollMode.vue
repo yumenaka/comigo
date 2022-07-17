@@ -7,7 +7,7 @@
 		<!-- 顶部的加载全部页面顶部按钮 -->
 		<button v-if="((this.startLoadPageNum > 1) && (!this.inLoading))"
 			class="w-24 h-12 m-2 bg-blue-300 text-gray-900 hover:bg-blue-500 rounded" @click="this.loadAllPage"
-			size="large">{{ $t('load_all_pages')}}</button>
+			size="large">{{ $t('load_all_pages') }}</button>
 		<!-- 渲染漫画部分 -->
 		<div class="main_manga" v-for="(image, n) in this.localImages" :key="image.url" @click="onMouseClick($event)"
 			@mousemove="onMouseMove" @mouseleave="onMouseLeave">
@@ -35,143 +35,109 @@
 			@saveConfig="this.saveConfigToLocalStorage" @startSketch="this.startSketchMode"
 			@closeDrawer="this.drawerDeactivate" @setT="this.OnSetTemplate" :readerMode="this.readerMode"
 			:inBookShelf="false" :sketching="false">
+
 			<!-- 选择：切换页面模式 -->
-			<n-space>
-				<n-button @click="changeReaderModeToFlipMode">{{ $t('switch_to_flip_mode') }}</n-button>
-			</n-space>
-			<p> &nbsp;</p>
+			<n-button @click="changeReaderModeToFlipMode">{{ $t('switch_to_flip_mode') }}</n-button>
+
 			<!-- 同步页数 -->
-			<n-space>
-				<n-switch size="large" v-model:value="this.syncPageFlag" @update:value="this.setSyncPageFlag">
-					<template #checked>{{ $t("sync_page") }}</template>
-					<template #unchecked>{{ $t("sync_page") }}</template>
-				</n-switch>
-			</n-space>
+			<n-switch size="large" v-model:value="this.syncPageFlag" @update:value="this.setSyncPageFlag">
+				<template #checked>{{ $t("sync_page") }}</template>
+				<template #unchecked>{{ $t("sync_page") }}</template>
+			</n-switch>
 			<!-- 保存页数 -->
-			<n-space>
-				<n-switch size="large" v-model:value="this.saveNowPageNumFlag" @update:value="this.setSavePageNumFlag">
-					<template #checked>{{ $t("savePageNum") }}</template>
-					<template #unchecked>{{ $t("savePageNum") }}</template>
-				</n-switch>
-			</n-space>
+			<n-switch size="large" v-model:value="this.saveNowPageNumFlag" @update:value="this.setSavePageNumFlag">
+				<template #checked>{{ $t("savePageNum") }}</template>
+				<template #unchecked>{{ $t("savePageNum") }}</template>
+			</n-switch>
+
 			<!-- 显示页数 -->
-			<n-space>
-				<n-switch size="large" v-model:value="this.showPageNumFlag_ScrollMode"
-					@update:value="setShowPageNumChange">
-					<template #checked>{{ $t('showPageNum') }}</template>
-					<template #unchecked>{{ $t('showPageNum') }}</template>
-				</n-switch>
-			</n-space>
+			<n-switch size="large" v-model:value="this.showPageNumFlag_ScrollMode" @update:value="setShowPageNumChange">
+				<template #checked>{{ $t('showPageNum') }}</template>
+				<template #unchecked>{{ $t('showPageNum') }}</template>
+			</n-switch>
 
-			<p> &nbsp;</p>
-			<n-space vertical>
-				<!-- 单页-漫画宽度-使用百分比 -->
-				<!-- 数字输入% -->
-				<n-input-number v-if="this.imageWidth_usePercentFlag" size="small" :show-button="false"
-					v-model:value="this.singlePageWidth_Percent" :max="100" :min="10" :update-value-on-input="false">
-					<template #prefix>{{ $t('singlePageWidth') }}</template>
-					<template #suffix>%</template>
-				</n-input-number>
-				<!-- 滑动选择% -->
-				<n-slider v-if="this.imageWidth_usePercentFlag" v-model:value="this.singlePageWidth_Percent" :step="1"
-					:max="100" :min="10" :format-tooltip="value => `${value}%`" />
-
-				<!-- 开页-漫画宽度-使用百分比  -->
-				<!-- 数字输入% -->
-				<n-input-number v-if="this.imageWidth_usePercentFlag" size="small" :show-button="false"
-					v-model:value="this.doublePageWidth_Percent" :max="100" :min="10" :update-value-on-input="false">
-					<template #prefix>{{ $t('doublePageWidth') }}</template>
-					<template #suffix>%</template>
-				</n-input-number>
-				<!-- 滑动选择% -->
-				<n-slider v-if="this.imageWidth_usePercentFlag" v-model:value="this.doublePageWidth_Percent" :step="1"
-					:max="100" :min="10" :format-tooltip="value => `${value}%`" />
-
-				<!-- 单页-漫画宽度-使用固定值PX -->
-				<!-- 数字输入框 -->
-				<n-input-number v-if="!this.imageWidth_usePercentFlag" size="small" :show-button="false"
-					v-model:value="this.singlePageWidth_PX" :min="50" :update-value-on-input="false">
-					<template #prefix>{{ $t('singlePageWidth') }}</template>
-					<template #suffix>px</template>
-				</n-input-number>
-				<!-- 滑动选择PX -->
-				<n-slider v-if="!this.imageWidth_usePercentFlag" v-model:value="this.singlePageWidth_PX" :step="10"
-					:max="1600" :min="50" :format-tooltip="value => `${value}px`" />
-
-				<!-- 数字输入框 -->
-				<n-input-number v-if="!this.imageWidth_usePercentFlag" size="small" :show-button="false"
-					v-model:value="this.doublePageWidth_PX" :min="50" :update-value-on-input="false">
-					<template #prefix>{{ $t('doublePageWidth') }}</template>
-					<template #suffix>px</template>
-				</n-input-number>
-
-				<!-- 滑动选择PX -->
-				<n-slider v-if="!this.imageWidth_usePercentFlag" v-model:value="this.doublePageWidth_PX" :step="10"
-					:max="1600" :min="50" :format-tooltip="value => `${value}px`" />
-			</n-space>
-
-			<p></p>
 			<!-- 开关：横屏状态下,宽度单位是百分比还是固定值 -->
-			<n-space>
-				<n-switch size="large" v-model:value="this.imageWidth_usePercentFlag" :rail-style="railStyle"
-					@update:value="this.setImageWidthUsePercentFlag">
-					<template #checked>{{ $t('width_usePercent') }}</template>
-					<template #unchecked>{{ $t('width_useFixedValue') }}</template>
-				</n-switch>
-			</n-space>
+			<n-switch size="large" v-model:value="this.imageWidth_usePercentFlag" :rail-style="railStyle"
+				@update:value="this.setImageWidthUsePercentFlag">
+				<template #checked>{{ $t('width_usePercent') }}</template>
+				<template #unchecked>{{ $t('width_useFixedValue') }}</template>
+			</n-switch>
 
-			<p> &nbsp;</p>
+			<!-- 单页-漫画宽度-使用百分比 -->
+			<!-- 数字输入% -->
+			<n-input-number v-if="this.imageWidth_usePercentFlag" size="small" :show-button="false"
+				v-model:value="this.singlePageWidth_Percent" :max="100" :min="10" :update-value-on-input="false">
+				<template #prefix>{{ $t('singlePageWidth') }}</template>
+				<template #suffix>%</template>
+			</n-input-number>
 
-			<!-- 开关：是否显示页头
-			<n-space>
-				<n-switch size="large" v-model:value="this.showHeaderFlag" @update:value="setShowHeaderChange">
-					<template #checked>{{ $t('showHeader') }}</template>
-					<template #unchecked>{{ $t('showHeader') }}</template>
-				</n-switch>
-				<p></p>
-			</n-space> -->
+			<!-- 滑动选择% -->
+			<n-slider v-if="this.imageWidth_usePercentFlag" v-model:value="this.singlePageWidth_Percent" :step="1"
+				:max="100" :min="10" :format-tooltip="value => `${value}%`" />
+
+			<!-- 开页-漫画宽度-使用百分比  -->
+			<!-- 数字输入% -->
+			<n-input-number v-if="this.imageWidth_usePercentFlag" size="small" :show-button="false"
+				v-model:value="this.doublePageWidth_Percent" :max="100" :min="10" :update-value-on-input="false">
+				<template #prefix>{{ $t('doublePageWidth') }}</template>
+				<template #suffix>%</template>
+			</n-input-number>
+			<!-- 滑动选择% -->
+			<n-slider v-if="this.imageWidth_usePercentFlag" v-model:value="this.doublePageWidth_Percent" :step="1"
+				:max="100" :min="10" :format-tooltip="value => `${value}%`" />
+
+			<!-- 单页-漫画宽度-使用固定值PX -->
+			<!-- 数字输入框 -->
+			<n-input-number v-if="!this.imageWidth_usePercentFlag" size="small" :show-button="false"
+				v-model:value="this.singlePageWidth_PX" :min="50" :update-value-on-input="false">
+				<template #prefix>{{ $t('singlePageWidth') }}</template>
+				<template #suffix>px</template>
+			</n-input-number>
+
+			<!-- 滑动选择PX -->
+			<n-slider v-if="!this.imageWidth_usePercentFlag" v-model:value="this.singlePageWidth_PX" :step="10"
+				:max="1600" :min="50" :format-tooltip="value => `${value}px`" />
+
+			<!-- 数字输入框 -->
+			<n-input-number v-if="!this.imageWidth_usePercentFlag" size="small" :show-button="false"
+				v-model:value="this.doublePageWidth_PX" :min="50" :update-value-on-input="false">
+				<template #prefix>{{ $t('doublePageWidth') }}</template>
+				<template #suffix>px</template>
+			</n-input-number>
+
+			<!-- 滑动选择PX -->
+			<n-slider v-if="!this.imageWidth_usePercentFlag" v-model:value="this.doublePageWidth_PX" :step="10"
+				:max="1600" :min="50" :format-tooltip="value => `${value}px`" />
+			
+
 
 			<!-- 开关：自动切边 -->
-			<n-space>
-				<n-switch size="large" v-model:value="this.imageParameters.do_auto_crop"
-					@update:value="setImageParameters_DoAutoCrop">
-					<template #checked>{{ $t('auto_crop') }}</template>
-					<template #unchecked>{{ $t('auto_crop') }}</template>
-				</n-switch>
-				<!-- 切白边阈值 -->
-				<n-input-number :show-button="false" v-if="this.imageParameters.do_auto_crop"
-					v-model:value="this.imageParameters.auto_crop_num" @update:value="setImageParameters_AutoCropNum"
-					:max="10" :min="0">
-					<template #prefix>{{ $t('energy_threshold') }}</template>
-				</n-input-number>
-			</n-space>
+			<n-switch size="large" v-model:value="this.imageParameters.do_auto_crop"
+				@update:value="setImageParameters_DoAutoCrop">
+				<template #checked>{{ $t('auto_crop') }}</template>
+				<template #unchecked>{{ $t('auto_crop') }}</template>
+			</n-switch>
+			<!-- 切白边阈值 -->
+			<n-input-number :show-button="false" v-if="this.imageParameters.do_auto_crop"
+				v-model:value="this.imageParameters.auto_crop_num" @update:value="setImageParameters_AutoCropNum"
+				:max="10" :min="0">
+				<template #prefix>{{ $t('energy_threshold') }}</template>
+			</n-input-number>
+
 			<!-- 开关：压缩图片 -->
-			<n-space>
-				<n-switch size="large" :rail-style="railStyle" v-model:value="this.imageParameters.do_auto_resize"
-					@update:value="setImageParameters_DoAutoResize">
-					<template #checked>{{ $t('image_width_limit') }}</template>
-					<template #unchecked>{{ $t('raw_resolution') }}</template>
-				</n-switch>
-				<!-- 压缩图片参数：数字输入框 -->
-				<n-input-number v-if="this.imageParameters.do_auto_resize" size="small" :show-button="false"
-					v-model:value="this.imageParameters.resize_max_width" :min="100">
-					<template #prefix>{{ $t('max_width') }}</template>
-					<template #suffix>px</template>
-				</n-input-number>
-			</n-space>
-
-			<!-- 开关：显示原图 黑白 -->
-			<!-- <n-space>
-				<n-switch size="large" v-model:value="this.imageParameters.gray"
-					@update:value="setImageParameters_Gray">
-					<template #checked>{{ $t('gray_image') }}</template>
-					<template #unchecked>{{ $t('gray_image') }}</template>
-				</n-switch>
-			</n-space> -->
-
+			<n-switch size="large" :rail-style="railStyle" v-model:value="this.imageParameters.do_auto_resize"
+				@update:value="setImageParameters_DoAutoResize">
+				<template #checked>{{ $t('image_width_limit') }}</template>
+				<template #unchecked>{{ $t('raw_resolution') }}</template>
+			</n-switch>
+			<!-- 压缩图片参数：数字输入框 -->
+			<n-input-number v-if="this.imageParameters.do_auto_resize" size="small" :show-button="false"
+				v-model:value="this.imageParameters.resize_max_width" :min="100">
+				<template #prefix>{{ $t('max_width') }}</template>
+				<template #suffix>px</template>
+			</n-input-number>
 			<!-- 分割线 -->
-			<!-- <n-divider /> -->
-			<p> &nbsp;</p>
+			<n-divider></n-divider> 
 			<n-dropdown trigger="hover" :options="options" @select="onResort">
 				<n-button>{{ this.getSortHintText(this.resort_hint_key) }}</n-button>
 			</n-dropdown>
@@ -181,7 +147,7 @@
 
 <script>
 // 直接导入组件并使用它。这种情况下,只有导入的组件才会被打包。
-import { NBackTop, NSpace, NSlider, NSwitch, NInputNumber, NButton, NDropdown, useMessage, useDialog } from 'naive-ui'
+import { NBackTop, NSpace, NSlider, NSwitch, NInputNumber, NButton, NDropdown, useMessage, useDialog,NDivider, } from 'naive-ui'
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
 import Bottom from "@/components/Bottom.vue";
@@ -216,7 +182,7 @@ export default defineComponent({
 		// NPageHeader,//页头 https://www.naiveui.com/zh-CN/os-theme/components/page-header
 		// NAvatar, //头像 https://www.naiveui.com/zh-CN/os-theme/components/avatar
 		NInputNumber,//数字输入 https://www.naiveui.com/zh-CN/os-theme/components/input-number
-		// NDivider,//分割线  https://www.naiveui.com/zh-CN/os-theme/components/divider
+		NDivider,//分割线  https://www.naiveui.com/zh-CN/os-theme/components/divider
 		// NColorPicker,
 		NButton,//按钮，来自:https://www.naiveui.com/zh-CN/os-theme/components/button
 		NDropdown,//下拉菜单 https://www.naiveui.com/zh-CN/os-theme/components/dropdown
