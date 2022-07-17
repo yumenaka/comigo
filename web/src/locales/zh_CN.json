@@ -60,5 +60,12 @@
   "success_fullScreen": "进入全屏",
   "not_support_fullscreen": "不支持全屏",
   "exit_fullScreen": "退出全屏",
-  "auto_hide_toolbar": "自动隐藏工具栏"
+  "auto_hide_toolbar": "自动隐藏工具栏",
+  "found_read_history": "发现本地阅读记录",
+  "load_from_interrupt": "是否从XX页开始加载？",
+  "from_interrupt": "从中断处",
+  "starting_from_beginning": "从头开始",
+  "successfully_loaded_reading_progress": "成功加载阅读进度",
+  "starting_from_beginning_hint": "从头开始加载",
+  "load_all_pages": "加载所有页面"
 }

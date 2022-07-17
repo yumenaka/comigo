@@ -98,7 +98,7 @@
           " v-if="!this.rightToLeftFlag">
             <span class="right">{{ this.book.all_page_num }}</span>
             <n-slider class="w-10/11" reverse v-model:value="nowPageNum" :max="this.book.all_page_num" :min="1"
-              :step="1" :format-tooltip="(value) => `${value}`" @update:value="this.saveNowPageNumOnUpdate" />
+              :step="1" :format-tooltip="(value) => `${value}`" @update:value="this.saveLocalBookMark" />
             <span class="left">{{ this.nowPageNum }}</span>
           </div>
 
@@ -116,7 +116,7 @@
           " v-if="this.rightToLeftFlag">
             <span class="right">{{ this.nowPageNum }}</span>
             <n-slider class="bg-yellow-300" v-model:value="nowPageNum" :max="this.book.all_page_num" :min="1" :step="1"
-              :format-tooltip="(value) => `${value}`" @update:value="this.saveNowPageNumOnUpdate" />
+              :format-tooltip="(value) => `${value}`" @update:value="this.saveLocalBookMark" />
             <span class="left">{{ this.book.all_page_num }}</span>
           </div>
         </div>
@@ -488,6 +488,7 @@ export default defineComponent({
       .finally(() => {
         document.title = this.book.name;
         console.log("成功获取书籍数据,书籍ID:" + this.$route.params.id);
+        this.loadLocalBookMark();
       });
     //监听路由参数的变化,刷新本地的Book数据
     this.$watch(
@@ -642,8 +643,8 @@ export default defineComponent({
   },
   // mounted : 在绑定元素的父组件被挂载后调用。
   mounted() {
-    //需要得书籍远程数据,避免初始化失败,所以延迟1秒执行
-    setTimeout(this.setNowPageNumByLocalStorage, 1000);
+    //延迟1秒执行
+    // setTimeout(this.doSomeThing, 1000);
   },
   updated() {
     //界面有更新就会调用,随便乱放会引起难以调试的BUG
@@ -807,23 +808,22 @@ export default defineComponent({
       }
     },
     //根据书籍UUID,设定当前页数,因为需要取得远程书籍数据（this.book）,所以延迟执行
-    setNowPageNumByLocalStorage() {
-      if (this.saveNowPageNumFlag) {
-        let cookieValue = localStorage.getItem("nowPageNum" + this.book.id);
-        if (cookieValue != null) {
-          let saveNum = Number(cookieValue);
-          if (!isNaN(saveNum)) {
-            this.nowPageNum = saveNum;
-            console.log("成功读取页数" + saveNum);
-          } else {
-            console.log("读取页数失败,this.nowPageNum = " + this.nowPageNum);
-          }
-        } else {
-          console.log("本队存储里没找到:" + "nowPageNum = " + this.nowPageNum);
-        }
-      } else {
-        //console.log("不读取页数,this.saveNowPageNumFlag=" + this.saveNowPageNumFlag);
+    loadLocalBookMark() {
+      if (!this.saveNowPageNumFlag) {
+        return
       }
+      let cookieValue = localStorage.getItem("nowPageNum" + this.book.id);
+      if (cookieValue === null) {
+        console.log("本队存储里没找到:" + "nowPageNum = " + this.nowPageNum);
+        return
+      }
+      let saveNum = Number(cookieValue);
+      if (isNaN(saveNum)) {
+        console.log("读取页数失败,this.nowPageNum = " + this.nowPageNum);
+        return
+      }
+      this.nowPageNum = saveNum;
+      console.log("成功读取页数" + saveNum);
     },
     // // 设置当前模板-接收Drawer的参数,继续往父组件传
     // 改变阅读模式
@@ -1262,10 +1262,10 @@ export default defineComponent({
         }
       }
       //保存页数
-      this.saveNowPageNumOnUpdate(this.nowPageNum);
+      this.saveLocalBookMark(this.nowPageNum);
     },
     //拖动进度条,或翻页的时候保存页数
-    saveNowPageNumOnUpdate(value, sendWSMessage = true) {
+    saveLocalBookMark(value, sendWSMessage = true) {
       if (this.saveNowPageNumFlag) {
         localStorage.setItem("nowPageNum" + this.book.id, value);
       }
@@ -1280,7 +1280,7 @@ export default defineComponent({
         this.nowPageNum = num;
       }
       //保存页数
-      this.saveNowPageNumOnUpdate(this.nowPageNum, sendWSMessage);
+      this.saveLocalBookMark(this.nowPageNum, sendWSMessage);
     },
 
     // 键盘事件
@@ -1642,7 +1642,7 @@ export default defineComponent({
   display: block;
   user-select: none;
   /* 下面两句，是设定高度为100%，同时保持比例缩放的关键（类似stetch small pages） */
-  min-height: 100vh; 
+  min-height: 100vh;
   object-fit: contain;
   /* 两张图片之间不要留空间*/
   padding: 0px;

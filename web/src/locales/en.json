@@ -60,5 +60,12 @@
   "success_fullScreen": "Success Full Screen",
   "not_support_fullscreen": "This browser does not support full screen",
   "exit_fullScreen": "Exit fullscreen",
-  "auto_hide_toolbar": "Auto HideToolBar"
+  "auto_hide_toolbar": "Auto HideToolBar",
+  "found_read_history": "Local reading history found",
+  "load_from_interrupt": "Loading from the break (page XX)?",
+  "from_interrupt": "From the interruption",
+  "starting_from_beginning": "Restart",
+  "successfully_loaded_reading_progress": "Successfully loaded reading progress",
+  "starting_from_beginning_hint": "Load from the first page",
+  "load_all_pages": "Load all pages"
 }
