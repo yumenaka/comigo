@@ -5,7 +5,7 @@
 			@drawerActivate="this.drawerActivate">
 		</Header>
 		<!-- 顶部的加载全部页面顶部按钮 -->
-		<button v-if="((this.startLoadPageNum > 1) && (!this.inLoading))"
+		<button v-if="((this.startLoadPageNum > 1) && (this.nowLoading===false))"
 			class="w-24 h-12 m-2 bg-blue-300 text-gray-900 hover:bg-blue-500 rounded" @click="this.loadAllPage"
 			size="large">{{ $t('load_all_pages') }}</button>
 		<!-- 渲染漫画部分 -->
@@ -287,7 +287,7 @@ export default defineComponent({
 			sendWSMessage: false,
 			firstloadComplete: true,
 			localImages: null,
-			inLoading: true,//是否正在加载，延迟执行操作、隐藏按钮用
+			nowLoading: true,//是否正在加载，延迟执行操作、隐藏按钮用
 			book: {
 				name: "loading",
 				id: "abcde",
@@ -387,6 +387,7 @@ export default defineComponent({
 	// beforeUnmount: 当指令与在绑定元素父组件卸载之前时,只调用一次。
 	// unmounted: 当指令与元素解除绑定且父组件已卸载时,只调用一次。
 	created() {
+		
 		// 消息监听，即接收websocket服务端推送的消息. optionsAPI用法
 		this.$options.sockets.onmessage = (data) => this.handlePacket(data);
 		//根据文件名、修改时间、文件大小等要素排序的参数
@@ -406,8 +407,8 @@ export default defineComponent({
 		} else if (localStorage.getItem("SyncPageFlag") === "false") {
 			this.syncPageFlag = false;
 		}
-
 		//根据路由参数获取特定书籍
+		this.nowLoading=true;
 		axios
 			.get("/getbook?id=" + this.$route.params.id + sort_image_by_str)
 			.then((response) => {
@@ -423,7 +424,6 @@ export default defineComponent({
 					var _this = this
 					setTimeout(function () {
 						_this.loadLocalBookMark();
-						_this.inLoading = false
 					}, 1500);
 				}
 			);
@@ -610,12 +610,14 @@ export default defineComponent({
 					}
 					this.message.success(this.$t('successfully_loaded_reading_progress'));
 					this.loadPages();
+					this.nowLoading=false;
 				},
 				onNegativeClick: () => {
 					this.startLoadPageNum = 1;
 					this.nowPageNum = 1;
 					this.message.success(this.$t('starting_from_beginning_hint'));
 					this.loadPages();
+					this.nowLoading=false;
 				}
 			});
 		},
@@ -651,7 +653,7 @@ export default defineComponent({
 		//监听子组件事件: https://v3.cn.vuejs.org/guide/component-basics.html#%E7%9B%91%E5%90%AC%E5%AD%90%E7%BB%84%E4%BB%B6%E4%BA%8B%E4%BB%B6
 		//滚动页面的时候刷新页数
 		refreshNowPageNum(n) {
-			if (this.inLoading) {
+			if (this.nowLoading) {
 				return
 			}
 			this.nowPageNum = n;
