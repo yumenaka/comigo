@@ -347,7 +347,7 @@ export default defineComponent({
 			//是否显示顶部页头
 			showHeaderFlag: true,
 			//是否显示页数
-			showPageNumFlag_ScrollMode: false,
+			showPageNumFlag_ScrollMode: true,
 			//是否显示回到顶部按钮
 			showBackTopFlag: false,
 			//是否正在向下滚动
