@@ -1,9 +1,9 @@
 <template>
   <!-- 外边距: m-2 https://www.tailwindcss.cn/docs/margin -->
   <!-- 内边距： p-4 https://www.tailwindcss.cn/docs/padding  p-0 m-0  -->
-  <header class="header h-12 w-full flex justify-between content-center">
+  <header class="header p-1 h-12 w-full flex justify-between content-center">
     <!-- 返回箭头,点击返回上一页 -->
-    <n-icon class="m-4" v-if="showReturnIcon" size="40" @click="onClickReturnIcon()">
+    <n-icon class="p-0 m-0" v-if="showReturnIcon" size="40" @click="onClickReturnIcon()">
       <return-up-back />
     </n-icon>
 
@@ -29,13 +29,11 @@
     <!-- <slot></slot> -->
 
     <!-- 溢出 overflow-x-auton :https://www.tailwindcss.cn/docs/overflow -->
-
-    <div class="h-10 w-33 p-0 flex justify-between content-center overflow-x-auton">
+    <div class="p-0 h-10 w-33 flex justify-between content-center overflow-x-auton">
       <!-- QRCode图片，点击可以在屏幕正中显示二维码 -->
-      <Qrcode class="h-10 w-10 p-0"></Qrcode>
-
+      <Qrcode class="w-10 p-0"></Qrcode>
       <!-- 全屏图标 -->
-      <svg @click="onFullSreen" class="h-10 w-10 p-0 static" xmlns="http://www.w3.org/2000/svg"
+      <svg class="w-10 static" @click="onFullSreen" xmlns="http://www.w3.org/2000/svg"
         xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24">
         <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M16 4h4v4"></path>
@@ -49,7 +47,7 @@
         </g>
       </svg>
       <!-- 右边的设置图标,点击屏幕中央也可以打开  可自定义方向 -->
-      <n-icon class="h-10 w-10 p-0" size="40" @click="this.onClickSettingIcon('right')">
+      <n-icon class="w-10" size="40" @click="this.onClickSettingIcon('right')">
         <settings-outline />
       </n-icon>
     </div>
