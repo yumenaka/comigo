@@ -1,7 +1,7 @@
 <template>
     <div id="BookShelf">
         <Header :bookIsFolder="false" :headerTitle="this.bookShelfTitle" :showReturnIcon="this.headerShowReturnIcon"
-            :bookID="this.bookshelf[0].id" :setDownLoadLink="false"  @drawerActivate="this.drawerActivate">
+            :bookID="this.bookshelf[0].id" :setDownLoadLink="false" @drawerActivate="this.drawerActivate">
         </Header>
 
         <!-- 渲染书架部分 -->
@@ -26,38 +26,30 @@
             @saveConfig="this.saveConfigToLocal" @startSketch="this.startSketchMode"
             @closeDrawer="this.drawerDeactivate" @setRM="this.OnSetReaderMode" :readerMode="this.readerMode"
             :sketching="false" :inBookShelf="true">
+
+            <!-- 设置颜色 -->
             <span>{{ $t('setInterfaceColor') }}</span>
             <n-color-picker v-model:value="model.interfaceColor" :modes="['hex']" :show-alpha="false"
                 @update:value="onInterfaceColorChange" />
             <span>{{ $t("setBackColor") }}</span>
             <n-color-picker v-model:value="model.backgroundColor" :modes="['hex']" :show-alpha="false"
                 @update:value="onBackgroundColorChange" />
-            <p> &nbsp;</p>
+
             <!-- 开关：下拉阅读 -->
-            <n-space>
-                <n-switch size="large" :rail-style="railStyle" v-model:value="this.readerModeIsScroll"
-                    @update:value="setReaderModeIsScroll">
-                    <template #checked>{{ $t('scroll_mode') }}</template>
-                    <template #unchecked>{{ $t('flip_mode') }}</template>
-                </n-switch>
-            </n-space>
+            <n-switch size="large" :rail-style="railStyle" v-model:value="this.readerModeIsScroll"
+                @update:value="setReaderModeIsScroll">
+                <template #checked>{{ $t('scroll_mode') }}</template>
+                <template #unchecked>{{ $t('flip_mode') }}</template>
+            </n-switch>
 
             <!-- 开关：显示书名 -->
-            <n-space>
-                <n-switch size="large" v-model:value="this.bookCardShowTitleFlag"
-                    @update:value="setBookCardShowTitleFlag">
-                    <template #checked>{{ $t('show_book_titles') }}</template>
-                    <template #unchecked>{{ $t('show_book_titles') }}</template>
-                </n-switch>
-            </n-space>
-            <!-- 分割线 -->
-            <n-divider />
-            <n-space>
-                <!-- 切换排序方式的按钮 -->
-                <n-dropdown trigger="hover" :options="options" @select="onResort">
-                    <n-button>{{ this.getSortHintText(this.resort_hint_key) }}</n-button>
-                </n-dropdown>
-            </n-space>
+            <n-switch size="large" v-model:value="this.bookCardShowTitleFlag" @update:value="setBookCardShowTitleFlag">
+                <template #checked>{{ $t('show_book_titles') }}</template>
+                <template #unchecked>{{ $t('show_book_titles') }}</template>
+            </n-switch>
+
+            <!-- 页面重新排序 -->
+            <n-select :placeholder='this.$t("re_sort_book")' @update:value="this.onResort" :options="options" />
             <p> &nbsp;</p>
             <!-- 下载示例配置文件的按钮 -->
             <a href="/api/config.toml" target="_blank">
@@ -76,7 +68,7 @@
 // 直接导入组件并使用它。这种情况下,只有导入的组件才会被打包。
 // Firefox插件Textarea Cache 报错：源映射错误：Error: NetworkError when attempting to fetch resource.
 // Firefox插件Video DownloadHelper报错:已不赞成使用 CanvasRenderingContext2D 中的 drawWindow 方法
-import {NDivider, NColorPicker, NSwitch, NButton, NSpace, NDropdown, } from "naive-ui";
+import { NColorPicker, NSwitch, NButton, NSelect, } from "naive-ui";
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
 import BookCard from "@/components/BookCard.vue";
@@ -96,11 +88,12 @@ export default defineComponent({
         BookCard, // 自定义抽屉
         Bottom, // 自定义页尾
         NButton,//按钮,来自:https://www.naiveui.com/zh-CN/os-theme/components/button
-        NSpace,
+        // NSpace,
         NSwitch,
-        NDivider, // 分割线  https://www.naiveui.com/zh-CN/os-theme/components/divider
+        // NDivider, // 分割线  https://www.naiveui.com/zh-CN/os-theme/components/divider
         NColorPicker,//颜色选择器 https://www.naiveui.com/zh-CN/os-theme/components/color-picker
-        NDropdown,//下拉菜单 https://www.naiveui.com/zh-CN/os-theme/components/dropdown
+        // NDropdown,//下拉菜单 https://www.naiveui.com/zh-CN/os-theme/components/dropdown
+        NSelect,
     },
     setup() {
         // 此处不能使用this
@@ -302,19 +295,6 @@ export default defineComponent({
             } else {
                 console.log("onResort  key：" + key)
                 this.$router.push({ name: "BookShelf", replace: true, query: { sort_by: key } })
-            }
-        },
-        //返回“重新排序”选择菜单的文字提示
-        getSortHintText(key) {
-            switch (key) {
-                case "filename": return this.$t('sort_by_filename');
-                case "modify_time": return this.$t('sort_by_modify_time');
-                case "filesize": return this.$t('sort_by_filesize');
-                case "filename_reverse": return this.$t('sort_by_filename') + this.$t('sort_reverse');
-                case "modify_time_reverse": return this.$t('sort_by_modify_time') + this.$t('sort_reverse');
-                case "filesize_reverse": return this.$t('sort_by_filesize') + this.$t('sort_reverse');
-                default:
-                    return this.$t('re_sort');
             }
         },
 

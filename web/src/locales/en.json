@@ -53,7 +53,6 @@
   "sort_by_filesize": "Filesize",
   "sort_by_modify_time": "Modify Time",
   "sort_reverse": "(Reverse)",
-  "re_sort": "Resort",
   "fullscreen": "Fullscreen",
   "sort_by_default": "default sort",
   "sync_page": "Sync Page",
@@ -67,5 +66,7 @@
   "starting_from_beginning": "Restart",
   "successfully_loaded_reading_progress": "Successfully loaded reading progress",
   "starting_from_beginning_hint": "Load from the first page",
-  "load_all_pages": "Load all pages"
+  "load_all_pages": "Load all pages",
+  "re_sort_page": "Resort pages",
+  "re_sort_book": "Resort Book"
 }

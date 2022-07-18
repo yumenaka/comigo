@@ -5,7 +5,7 @@
 			@drawerActivate="this.drawerActivate">
 		</Header>
 		<!-- 顶部的加载全部页面顶部按钮 -->
-		<button v-if="((this.startLoadPageNum > 1) && (this.nowLoading===false))"
+		<button v-if="((this.startLoadPageNum > 1) && (this.nowLoading === false))"
 			class="w-24 h-12 m-2 bg-blue-300 text-gray-900 hover:bg-blue-500 rounded" @click="this.loadAllPage"
 			size="large">{{ $t('load_all_pages') }}</button>
 		<!-- 渲染漫画部分 -->
@@ -38,6 +38,13 @@
 
 			<!-- 选择：切换页面模式 -->
 			<n-button @click="changeReaderModeToFlipMode">{{ $t('switch_to_flip_mode') }}</n-button>
+
+			<!-- <n-dropdown trigger="hover" :options="options" @select="onResort">
+				<n-button>{{ this.getSortHintText(this.resort_hint_key) }}</n-button>
+			</n-dropdown> -->
+
+			<!-- 页面重新排序 -->
+			<n-select :placeholder='this.$t("re_sort_page")' @update:value="this.onResort" :options="options" />
 
 			<!-- 同步页数 -->
 			<n-switch size="large" v-model:value="this.syncPageFlag" @update:value="this.setSyncPageFlag">
@@ -108,8 +115,6 @@
 			<!-- 滑动选择PX -->
 			<n-slider v-if="!this.imageWidth_usePercentFlag" v-model:value="this.doublePageWidth_PX" :step="10"
 				:max="1600" :min="50" :format-tooltip="value => `${value}px`" />
-			
-
 
 			<!-- 开关：自动切边 -->
 			<n-switch size="large" v-model:value="this.imageParameters.do_auto_crop"
@@ -136,18 +141,14 @@
 				<template #prefix>{{ $t('max_width') }}</template>
 				<template #suffix>px</template>
 			</n-input-number>
-			<!-- 分割线 -->
-			<n-divider></n-divider> 
-			<n-dropdown trigger="hover" :options="options" @select="onResort">
-				<n-button>{{ this.getSortHintText(this.resort_hint_key) }}</n-button>
-			</n-dropdown>
+
 		</Drawer>
 	</div>
 </template>
 
 <script>
 // 直接导入组件并使用它。这种情况下,只有导入的组件才会被打包。
-import { NBackTop, NSpace, NSlider, NSwitch, NInputNumber, NButton, NDropdown, useMessage, useDialog,NDivider, } from 'naive-ui'
+import { NBackTop, NSlider, NSwitch, NInputNumber, NButton,  useMessage, useDialog,NSelect, } from 'naive-ui'
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
 import Bottom from "@/components/Bottom.vue";
@@ -170,7 +171,7 @@ export default defineComponent({
 		NBackTop,//回到顶部按钮,来自:https://www.naiveui.com/zh-CN/os-theme/components/back-top
 		// NDrawer,//抽屉,可以从上下左右4个方向冒出. https://www.naiveui.com/zh-CN/os-theme/components/drawer
 		// NDrawerContent,//抽屉内容
-		NSpace,//间距 https://www.naiveui.com/zh-CN/os-theme/components/space
+		// NSpace,//间距 https://www.naiveui.com/zh-CN/os-theme/components/space
 		// NRadio,//单选  https://www.naiveui.com/zh-CN/os-theme/components/radio
 		// NRadioButton,//单选  用按钮显得更优雅一点
 		// NRadioGroup,
@@ -182,10 +183,11 @@ export default defineComponent({
 		// NPageHeader,//页头 https://www.naiveui.com/zh-CN/os-theme/components/page-header
 		// NAvatar, //头像 https://www.naiveui.com/zh-CN/os-theme/components/avatar
 		NInputNumber,//数字输入 https://www.naiveui.com/zh-CN/os-theme/components/input-number
-		NDivider,//分割线  https://www.naiveui.com/zh-CN/os-theme/components/divider
+		// NDivider,//分割线  https://www.naiveui.com/zh-CN/os-theme/components/divider
 		// NColorPicker,
 		NButton,//按钮，来自:https://www.naiveui.com/zh-CN/os-theme/components/button
-		NDropdown,//下拉菜单 https://www.naiveui.com/zh-CN/os-theme/components/dropdown
+		// NDropdown,//下拉菜单 https://www.naiveui.com/zh-CN/os-theme/components/dropdown
+		NSelect,
 	},
 	// setup在创建组件前执行，因此没有this
 	setup() {
@@ -313,27 +315,27 @@ export default defineComponent({
 			options: [
 				{
 					label: this.$t('sort_by_filename'),
-					key: "filename",
+					value: "filename",
 				},
 				{
 					label: this.$t('sort_by_modify_time'),
-					key: "modify_time"
+					value: "modify_time"
 				},
 				{
 					label: this.$t('sort_by_filesize'),
-					key: "filesize"
+					value: "filesize"
 				},
 				{
 					label: this.$t('sort_by_filename') + this.$t('sort_reverse'),
-					key: "filename_reverse",
+					value: "filename_reverse",
 				},
 				{
 					label: this.$t('sort_by_modify_time') + this.$t('sort_reverse'),
-					key: "modify_time_reverse"
+					value: "modify_time_reverse"
 				},
 				{
 					label: this.$t('sort_by_filesize') + this.$t('sort_reverse'),
-					key: "filesize_reverse"
+					value: "filesize_reverse"
 				},
 			],
 			readerMode: "scroll",
@@ -387,7 +389,7 @@ export default defineComponent({
 	// beforeUnmount: 当指令与在绑定元素父组件卸载之前时,只调用一次。
 	// unmounted: 当指令与元素解除绑定且父组件已卸载时,只调用一次。
 	created() {
-		
+
 		// 消息监听，即接收websocket服务端推送的消息. optionsAPI用法
 		this.$options.sockets.onmessage = (data) => this.handlePacket(data);
 		//根据文件名、修改时间、文件大小等要素排序的参数
@@ -408,7 +410,7 @@ export default defineComponent({
 			this.syncPageFlag = false;
 		}
 		//根据路由参数获取特定书籍
-		this.nowLoading=true;
+		this.nowLoading = true;
 		axios
 			.get("/getbook?id=" + this.$route.params.id + sort_image_by_str)
 			.then((response) => {
@@ -610,14 +612,14 @@ export default defineComponent({
 					}
 					this.message.success(this.$t('successfully_loaded_reading_progress'));
 					this.loadPages();
-					this.nowLoading=false;
+					this.nowLoading = false;
 				},
 				onNegativeClick: () => {
 					this.startLoadPageNum = 1;
 					this.nowPageNum = 1;
 					this.message.success(this.$t('starting_from_beginning_hint'));
 					this.loadPages();
-					this.nowLoading=false;
+					this.nowLoading = false;
 				}
 			});
 		},
@@ -792,7 +794,7 @@ export default defineComponent({
 				case "modify_time_reverse": return this.$t('sort_by_modify_time') + this.$t('sort_reverse');
 				case "filesize_reverse": return this.$t('sort_by_filesize') + this.$t('sort_reverse');
 				default:
-					return this.$t('re_sort');
+					return this.$t('re_sort_page');
 			}
 		},
 

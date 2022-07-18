@@ -53,7 +53,6 @@
   "sort_by_filesize": "ファイルサイズ",
   "sort_by_modify_time": "更新日時",
   "sort_reverse": "（逆）",
-  "re_sort": "並べ替え",
   "fullscreen": "フルスクリーン",
   "sort_by_default": "圧縮順序",
   "sync_page": "ページ同期",
@@ -67,5 +66,7 @@
   "successfully_loaded_reading_progress": "読書進捗の読み込みに成功しました",
   "starting_from_beginning_hint": "最初のページから読み込む",
   "load_from_interrupt": "XXページから読み込みを開始しますか？",
-  "load_all_pages": "全てのページを読み込む"
+  "load_all_pages": "全てのページを読み込む",
+  "re_sort_page": "ページ並べ替え",
+  "re_sort_book": "本の並び替え"
 }

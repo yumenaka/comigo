@@ -124,72 +124,75 @@
     </transition>
 
     <!-- 设置抽屉,一开始隐藏 -->
-    <Drawer  :initDrawerActive="this.drawerActive" :initDrawerPlacement="this.drawerPlacement"
+    <Drawer :initDrawerActive="this.drawerActive" :initDrawerPlacement="this.drawerPlacement"
       @saveConfig="this.saveConfigToLocal" @startSketch="this.startSketchMode" @stopSketch="this.stopSketchMode"
       @closeDrawer="this.drawerDeactivate" :readerMode="this.readerMode" :inBookShelf="false"
       :sketching="this.sketchModeFlag">
-   
+
       <!-- 选择：切换页面模式 -->
-        <n-button @click="changeReaderModeToScrollMode">{{
-            $t("switch_to_scrolling_mode")
-        }}
-        </n-button>
+      <n-button @click="changeReaderModeToScrollMode">{{
+          $t("switch_to_scrolling_mode")
+      }}
+      </n-button>
 
       <!-- 空白行-->
       <!-- <p> &nbsp;</p> -->
 
+      <!-- 页面重新排序 -->
+      <n-select :placeholder='this.$t("re_sort_page")' @update:value="this.onResort" :options="options" />
+
       <!-- 显示当前页数 -->
-        <n-switch size="large" v-model:value="this.showPageHintFlag_FlipMode" @update:value="setShowPageNumChange">
-          <template #checked>{{ $t("showPageNum") }}</template>
-          <template #unchecked>{{ $t("showPageNum") }}</template>
-        </n-switch>
+      <n-switch size="large" v-model:value="this.showPageHintFlag_FlipMode" @update:value="setShowPageNumChange">
+        <template #checked>{{ $t("showPageNum") }}</template>
+        <template #unchecked>{{ $t("showPageNum") }}</template>
+      </n-switch>
 
       <!-- websocket同步 -->
-        <n-switch size="large" v-model:value="this.syncPageFlag" @update:value="this.setSyncPageFlag">
-          <template #checked>{{ $t("sync_page") }}</template>
-          <template #unchecked>{{ $t("sync_page") }}</template>
-        </n-switch>
+      <n-switch size="large" v-model:value="this.syncPageFlag" @update:value="this.setSyncPageFlag">
+        <template #checked>{{ $t("sync_page") }}</template>
+        <template #unchecked>{{ $t("sync_page") }}</template>
+      </n-switch>
 
       <!-- 保存阅读的页数 -->
-        <n-switch size="large" v-model:value="this.saveNowPageNumFlag" @update:value="this.setSavePageNumFlag">
-          <template #checked>{{ $t("savePageNum") }}</template>
-          <template #unchecked>{{ $t("savePageNum") }}</template>
-        </n-switch>
+      <n-switch size="large" v-model:value="this.saveNowPageNumFlag" @update:value="this.setSavePageNumFlag">
+        <template #checked>{{ $t("savePageNum") }}</template>
+        <template #unchecked>{{ $t("savePageNum") }}</template>
+      </n-switch>
 
       <!-- 合并双页 -->
-        <n-switch size="large" v-model:value="this.simpleDoublePageModeFlag"
-          @update:value="this.setSimpleDoublePage_FlipMode">
-          <template #checked>{{ $t("simpleDoublePage") }}</template>
-          <template #unchecked>{{ $t("simpleDoublePage") }}</template>
-        </n-switch>
+      <n-switch size="large" v-model:value="this.simpleDoublePageModeFlag"
+        @update:value="this.setSimpleDoublePage_FlipMode">
+        <template #checked>{{ $t("simpleDoublePage") }}</template>
+        <template #unchecked>{{ $t("simpleDoublePage") }}</template>
+      </n-switch>
 
       <!-- 自动切边 -->
-        <n-switch size="large" v-model:value="this.imageParameters.do_auto_crop"
-          @update:value="setImageParameters_DoAutoCrop">
-          <template #checked>{{ $t("auto_crop") }}</template>
-          <template #unchecked>{{ $t("auto_crop") }}</template>
-        </n-switch>
-        <!-- 切白边阈值 -->
-        <n-input-number :show-button="false" v-if="this.imageParameters.do_auto_crop"
-          v-model:value="this.imageParameters.auto_crop_num" @update:value="setImageParameters_AutoCropNum" :max="10"
-          :min="0">
-          <template #prefix>{{ $t("energy_threshold") }}</template>
-        </n-input-number>
+      <n-switch size="large" v-model:value="this.imageParameters.do_auto_crop"
+        @update:value="setImageParameters_DoAutoCrop">
+        <template #checked>{{ $t("auto_crop") }}</template>
+        <template #unchecked>{{ $t("auto_crop") }}</template>
+      </n-switch>
+      <!-- 切白边阈值 -->
+      <n-input-number :show-button="false" v-if="this.imageParameters.do_auto_crop"
+        v-model:value="this.imageParameters.auto_crop_num" @update:value="setImageParameters_AutoCropNum" :max="10"
+        :min="0">
+        <template #prefix>{{ $t("energy_threshold") }}</template>
+      </n-input-number>
 
 
       <!-- 翻页模式,默认右开本（日漫）-->
-        <n-switch size="large" v-model:value="this.rightToLeftFlag" :rail-style="railStyle"
-          @update:value="this.setFlipScreenFlag">
-          <template #checked>{{ $t("leftScreenToNext") }}</template>
-          <template #unchecked>{{ $t("rightScreenToNext") }}</template>
-        </n-switch>
+      <n-switch size="large" v-model:value="this.rightToLeftFlag" :rail-style="railStyle"
+        @update:value="this.setFlipScreenFlag">
+        <template #checked>{{ $t("leftScreenToNext") }}</template>
+        <template #unchecked>{{ $t("rightScreenToNext") }}</template>
+      </n-switch>
 
 
       <!-- 自动隐藏工具栏 -->
-        <n-switch size="large" v-model:value="this.hideToolbar" @update:value="this.setHideToolbar">
-          <template #checked>{{ $t('auto_hide_toolbar') }}</template>
-          <template #unchecked>{{ $t('auto_hide_toolbar') }}</template>
-        </n-switch>
+      <n-switch size="large" v-model:value="this.hideToolbar" @update:value="this.setHideToolbar">
+        <template #checked>{{ $t('auto_hide_toolbar') }}</template>
+        <template #unchecked>{{ $t('auto_hide_toolbar') }}</template>
+      </n-switch>
 
 
       <!-- 分割线 -->
@@ -227,11 +230,7 @@
       <n-slider v-if="this.readerMode === 'sketch'" v-model:value="this.sketchFlipSecond" :step="1" :max="120" :min="1"
         :marks="marks" :format-tooltip="(value) => `${value}s`" @update:value="this.resetSketchSecondCount" />
 
-      <!-- 分割线 -->
-      <!-- <n-divider /> -->
-      <!-- 页面排序方式 -->
-      <n-select placeholder=this.getSortHintText() @update:value="this.onResort" v-model:value="this.resort_hint_key"
-        :options="options" />
+
     </Drawer>
   </div>
 </template>
@@ -248,7 +247,7 @@ import {
   NDivider,
   NInputNumber,
   NSlider,
-  NSpace,
+  // NSpace,
   NSwitch,
   useMessage,
   NButton,
@@ -265,7 +264,7 @@ export default defineComponent({
     Header,
     Drawer,
     // Bottom,
-    NSpace, //间距 https://www.naiveui.com/zh-CN/os-theme/components/space
+    // NSpace, //间距 https://www.naiveui.com/zh-CN/os-theme/components/space
     NSlider, //滑动选择  Slider https://www.naiveui.com/zh-CN/os-theme/components/slider
     NSwitch, //开关   https://www.naiveui.com/zh-CN/os-theme/components/switch
     // NLayout,//布局 https://www.naiveui.com/zh-CN/os-theme/components/layout
@@ -652,7 +651,7 @@ export default defineComponent({
       if (msg.type === "heartbeat") {
         return;
       }
-      //服务器发来翻页信息，来自于另一个用户，
+      //服务器发来翻页信息，来自于另一个用户才做反应
       if (msg.type === "sync_page" && msg.user_id !== this.$store.userID) {
         const syncData = JSON.parse(msg.data_string);
         //正在读的是同一本书、就翻页。
@@ -695,6 +694,7 @@ export default defineComponent({
 
     //页面排序相关
     onResort(key) {
+      this.resort_hint_key = key;
       axios
         .get("/getbook?id=" + this.$route.params.id + "&sort_by=" + key)
         .then((response) => (this.book = response.data))
@@ -715,27 +715,6 @@ export default defineComponent({
           );
         });
     },
-
-    //返回“重新排序”选择菜单的文字提示
-    getSortHintText() {
-      switch (this.resort_hint_key) {
-        case "filename":
-          return this.$t("sort_by_filename");
-        case "modify_time":
-          return this.$t("sort_by_modify_time");
-        case "filesize":
-          return this.$t("sort_by_filesize");
-        case "filename_reverse":
-          return this.$t("sort_by_filename") + this.$t("sort_reverse");
-        case "modify_time_reverse":
-          return this.$t("sort_by_modify_time") + this.$t("sort_reverse");
-        case "filesize_reverse":
-          return this.$t("sort_by_filesize") + this.$t("sort_reverse");
-        default:
-          return this.$t("re_sort");
-      }
-    },
-
     //图片处理相关
     //黑白化参数
     setImageParameters_Gray(value) {
@@ -847,6 +826,7 @@ export default defineComponent({
     //开始速写倒计时
     startSketchMode() {
       this.readerMode = "sketch";
+      localStorage.setItem("ReaderMode", "sketch");
       this.message.success(this.$t("startSketchMessage"));
       this.drawerActive = false; //关闭设置抽屉
       this.sketchModeFlag = true;
@@ -875,13 +855,14 @@ export default defineComponent({
       //是否显示页脚
       this.showFooterFlag_FlipMode = true;
       this.readerMode = "flip";
-      // this.$emit("setTemplate", "flip");
+      localStorage.setItem("ReaderMode", "flip");
       clearInterval(this.interval); // 清除定时器
     },
     //开始速写（quick sketch）,每秒执行一次
     sketchCount() {
-      if (this.sketchModeFlag === false) {
+      if (this.sketchModeFlag === false || this.readerMode === "flip") {
         this.stopSketchMode();
+        return
       }
       this.sketchSecondCount = this.sketchSecondCount + 1;
       let nowSecond = this.sketchSecondCount % this.sketchFlipSecond;
