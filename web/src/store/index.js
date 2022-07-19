@@ -97,6 +97,7 @@ const store = createStore({
             detail: detail
           });
       }, state.socket.heartBeatInterval);
+      console.log("临时客户端ID：",state.userID);
       console.log("【Websockets】连接建立。 " +  new Date().toLocaleDateString().replace(/\//g,"-")+" "+new Date().toTimeString().substr(0,8));
     },
     // 连接关闭

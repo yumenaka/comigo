@@ -14,8 +14,10 @@
 			<ImageScroll :image_url="this.imageParametersString(image.url)" :sPWL="this.sPWL" :dPWL="this.dPWL"
 				:sPWP="this.sPWP" :dPWP="this.dPWP" :pageNum="n + this.startLoadPageNum"
 				:all_page_num="this.book.all_page_num" :book_id="this.book.id"
-				:showPageNumFlag_ScrollMode="this.showPageNumFlag_ScrollMode" :sendWSMessage="this.sendWSMessage"
-				:syncPageFlag="this.syncPageFlag" :id="'JUMP_ID:' + (n + 1)" @refreshNowPageNum="refreshNowPageNum">
+				:showPageNumFlag_ScrollMode="this.showPageNumFlag_ScrollMode" :syncPageByWS="this.syncPageByWS"
+				:id="'JUMP_ID:' + (n + this.startLoadPageNum)" :startLoadPageNum="this.startLoadPageNum"
+				:endLoadPageNum="this.endLoadPageNum" :autoScrolling="this.autoScrolling"
+				@refreshNowPageNum="refreshNowPageNum">
 			</ImageScroll>
 		</div>
 
@@ -47,7 +49,7 @@
 			<n-select :placeholder='this.$t("re_sort_page")' @update:value="this.onResort" :options="options" />
 
 			<!-- 同步页数 -->
-			<n-switch size="large" v-model:value="this.syncPageFlag" @update:value="this.setSyncPageFlag">
+			<n-switch size="large" v-model:value="this.syncPageByWS" @update:value="this.setSyncPageByWS">
 				<template #checked>{{ $t("sync_page") }}</template>
 				<template #unchecked>{{ $t("sync_page") }}</template>
 			</n-switch>
@@ -148,7 +150,7 @@
 
 <script>
 // 直接导入组件并使用它。这种情况下,只有导入的组件才会被打包。
-import { NBackTop, NSlider, NSwitch, NInputNumber, NButton,  useMessage, useDialog,NSelect, } from 'naive-ui'
+import { NBackTop, NSlider, NSwitch, NInputNumber, NButton, useMessage, useDialog, NSelect, } from 'naive-ui'
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
 import Bottom from "@/components/Bottom.vue";
@@ -284,10 +286,10 @@ export default defineComponent({
 			StartFromBreakpoint: false,
 			loadPageLimit: 20,//一次最多载入的漫画张数，默认为20.
 			endLoadPageNum: 20,//载入漫画的最后一页，默认为20.
-			syncPageFlag: true,//是否通过websocket同步翻页
+			syncPageByWS: true,//是否通过websocket同步翻页
 			saveNowPageNumFlag: true,//是否（在本地存储里面）保存与恢复页数
-			sendWSMessage: false,
-			firstloadComplete: true,
+			firstloadComplete: true,//首次加载是否完成
+			autoScrolling: false,//是否正在自动翻页，为真的时候，不发送WS消息
 			localImages: null,
 			nowLoading: true,//是否正在加载，延迟执行操作、隐藏按钮用
 			book: {
@@ -347,7 +349,7 @@ export default defineComponent({
 			//是否显示顶部页头
 			showHeaderFlag: true,
 			//是否显示页数
-			showPageNumFlag_ScrollMode: true,
+			showPageNumFlag_ScrollMode: false,
 			//是否显示回到顶部按钮
 			showBackTopFlag: false,
 			//是否正在向下滚动
@@ -389,7 +391,6 @@ export default defineComponent({
 	// beforeUnmount: 当指令与在绑定元素父组件卸载之前时,只调用一次。
 	// unmounted: 当指令与元素解除绑定且父组件已卸载时,只调用一次。
 	created() {
-
 		// 消息监听，即接收websocket服务端推送的消息. optionsAPI用法
 		this.$options.sockets.onmessage = (data) => this.handlePacket(data);
 		//根据文件名、修改时间、文件大小等要素排序的参数
@@ -404,10 +405,10 @@ export default defineComponent({
 			this.saveNowPageNumFlag = false;
 		}
 		//是否通过websocket同步页数
-		if (localStorage.getItem("SyncPageFlag") === "true") {
-			this.syncPageFlag = true;
-		} else if (localStorage.getItem("SyncPageFlag") === "false") {
-			this.syncPageFlag = false;
+		if (localStorage.getItem("SyncPageByWS") === "true") {
+			this.syncPageByWS = true;
+		} else if (localStorage.getItem("SyncPageByWS") === "false") {
+			this.syncPageByWS = false;
 		}
 		//根据路由参数获取特定书籍
 		this.nowLoading = true;
@@ -449,10 +450,10 @@ export default defineComponent({
 		//根据本地存储初始化默认值,读取出来的是字符串,不要直接用
 
 		//是否通过websocket同步页数
-		if (localStorage.getItem("SyncPageFlag") === "true") {
-			this.syncPageFlag = true;
-		} else if (localStorage.getItem("SyncPageFlag") === "false") {
-			this.syncPageFlag = false;
+		if (localStorage.getItem("SyncPageByWS") === "true") {
+			this.syncPageByWS = true;
+		} else if (localStorage.getItem("SyncPageByWS") === "false") {
+			this.syncPageByWS = false;
 		}
 
 		//是否显示页头
@@ -579,7 +580,7 @@ export default defineComponent({
 	methods: {
 		//接收服务器发来的websocket消息，做各种反应（翻页、提示信息）
 		handlePacket(data) {
-			if (!this.syncPageFlag) {
+			if (!this.syncPageByWS) {
 				return;
 			}
 			const msg = JSON.parse(data.data);
@@ -587,15 +588,56 @@ export default defineComponent({
 			if (msg.type === "heartbeat") {
 				return;
 			}
-			//服务器发来翻页信息，来自于另一个用户，
-			if (msg.type === "sync_page" && msg.user_id !== this.$store.userID) {
+			var localUserID = this.$store.userID;
+			//确保服务器发来翻页信息，来自于另一个用户
+			if (msg.user_id == localUserID) {
+				console.log(this.$store.userID + "接收到Message:msg.user_id=" + msg.user_id);
+				return;
+			}
+			if (msg.type === "scroll_mode_sync_page") {
 				const syncData = JSON.parse(msg.data_string);
-				//正在读的是同一本书、就翻页。
+				//正在读的是同一本书就翻页。
 				if (syncData.book_id === this.book.id && syncData.now_page_num !== this.nowPageNum) {
-					// console.log(syncData);
-					// this.toPage(syncData.now_page_num, false);
+					console.log("自动翻页 msg:", msg);
+					this.toPage(syncData);
 				}
 			}
+		},
+
+		//滚动跳转到指定页数
+		toPage: function (syncData) {
+			if (syncData.now_page_num <= this.book.all_page_num && syncData.now_page_num >= 1) {
+				this.nowPageNum = syncData.now_page_num;
+				this.startLoadPageNum = syncData.start_load_page_num;
+				this.endLoadPageNum = syncData.end_load_page_num;
+			}
+			this.loadPages();
+			// 前端页面滚动到某个位置的方式
+			//获取目标元素
+			let element = document.getElementById("JUMP_ID:" + this.nowPageNum);
+			if (!element) {
+				console.log("没找到：", element);
+				this.loadNextBlock();
+				element = document.getElementById("JUMP_ID:" + this.nowPageNum);
+			}
+			//元素方法调用
+			// https://blog.csdn.net/weixin_41804429/article/details/102954146
+			// https://developer.mozilla.org/zh-CN/docs/Web/API/Element/scrollIntoView
+			var height = element.offsetTop + syncData.now_page_num_percent * element.clientHeight;
+			if (element) {
+				this.autoScrolling = true;
+				var scrollInterval = setInterval(function () {
+					if (window.scrollY !== 0) {
+						window.scrollBy(0, height);
+					}
+					else {
+						clearInterval(scrollInterval);
+						this.autoScrolling = false;
+					}
+				}, 1000);
+			}
+			//保存页数
+			this.saveLocalBookMark(this.nowPageNum);
 		},
 
 		loadBookMarkDialog() {
@@ -660,44 +702,14 @@ export default defineComponent({
 			}
 			this.nowPageNum = n;
 			//保存页数
-			this.saveLocalBookMark(this.nowPageNum, false);
+			this.saveLocalBookMark(this.nowPageNum);
 			this.loadPages();
 		},
-		//滚动跳转到指定页数，需要写一个滚动函数
-		toPage: function (num, sendWSMessage = true) {
-			// this.sendWSMessage = sendWSMessage;
-			if (num <= this.book.all_page_num && num >= 1) {
-				this.nowPageNum = num;
-			}
-			this.loadPages();
-			// 前端页面滚动到某个位置的方式
-			//获取目标元素
-			let element = document.getElementById("JUMP_ID:" + this.nowPageNum);
-			if (!element) {
-				console.log("没找到：", element);
-				this.loadNextBlock();
-				element = document.getElementById("JUMP_ID:" + this.nowPageNum);
-			}
-			//元素方法调用,自动刷新的时候，需要避免死锁,将syncPageFlag暂时设置为false不管用，
-			// https://blog.csdn.net/weixin_41804429/article/details/102954146
-			// https://developer.mozilla.org/zh-CN/docs/Web/API/Element/scrollIntoView
 
-			if (element) {
-				element.scrollIntoView(true)
-			}
-			//保存页数
-			this.saveLocalBookMark(this.nowPageNum, sendWSMessage);
-			// let _this = this
-			// setTimeout(() => { _this.sendWSMessage = true; }, 2000);
-		},
 		//滑动页面、停止滚动的时候保存页数
-		saveLocalBookMark(value, sendWSMessage = true) {
+		saveLocalBookMark(value) {
 			if (this.saveNowPageNumFlag) {
 				localStorage.setItem("nowPageNum" + this.book.id, value);
-			}
-			//发送翻页消息到服务器
-			if (sendWSMessage && this.syncPageFlag) {
-				this.sendNowPage();
 			}
 		},
 
@@ -724,49 +736,6 @@ export default defineComponent({
 			}
 			console.log("成功读取页数" + saveNum);
 		},
-		// 各种翻页函数，或许不需要都写
-		flipPage() {
-		},
-		toNextPage() {
-		},
-		toPerviousPage() {
-		},
-		// 键盘事件，需要改造成支持滚动的逻辑
-		handleKeyup(event) {
-			//错误:(815, 49) 不允许从实参中引用 'caller' 和 'callee'
-			const e = event || window.event;
-			if (!e) return;
-			//https://developer.mozilla.org/zh-CN/docs/Web/API/KeyboardEvent/keyCode
-			switch (e.key) {
-				case "ArrowUp":
-				case "PageUp":
-					this.flipPage(-1); //上一页
-					break;
-				case "ArrowLeft":
-					this.toNextPage();
-					break;
-				case "ArrowRight":
-					this.toPerviousPage();
-					break;
-				case "Space":
-				case "ArrowDown":
-				case "PageDown":
-					this.flipPage(1); //下一页
-					break;
-				case "Home":
-					this.toPage(1); //跳转到第一页
-					break;
-				case "End":
-					this.toPage(this.book.all_page_num); //跳转到最后一页
-					break;
-				case "Ctrl":
-					// Ctrl key pressed //组合键？
-					break;
-			}
-			// console.log(e.keyCode);
-			// console.log(e.key);
-		},
-
 		//页面排序相关
 		onResort(key) {
 			axios
@@ -834,7 +803,7 @@ export default defineComponent({
 		saveConfigToLocalStorage() {
 			// 储存配置
 			localStorage.setItem("nowPageNum" + this.book.id, this.nowPageNum);
-			localStorage.setItem("SyncPageFlag", this.syncPageFlag);
+			localStorage.setItem("SyncPageFlag", this.syncPageByWS);
 			localStorage.setItem("showHeaderFlag", this.showHeaderFlag);
 			localStorage.setItem("showPageNumFlag_ScrollMode", this.showPageNumFlag_ScrollMode);
 			localStorage.setItem("imageWidth_usePercentFlag", this.imageWidth_usePercentFlag);
@@ -847,13 +816,13 @@ export default defineComponent({
 			localStorage.setItem("ImageParameters_DoAutoCrop", this.imageParameters.do_auto_crop);
 			localStorage.setItem("ImageParametersResizeMaxWidth", this.imageParameters.resize_max_width);
 		},
-		setSyncPageFlag(value) {
+		setSyncPageByWS(value) {
 			console.log("value:" + value);
-			this.syncPageFlag = value;
+			this.syncPageByWS = value;
 			localStorage.setItem("SyncPageFlag", value);
 			console.log(
 				"cookie设置完毕: SyncPageFlag=" +
-				localStorage.getItem("SyncPageFlag")
+				localStorage.getItem("SyncPageByWS")
 			);
 		},
 		setShowHeaderChange(value) {
