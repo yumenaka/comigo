@@ -14,12 +14,12 @@
 // https://www.w3cplus.com/vue/build-an-infinite-scroll-component-using-intersection-observer-api.html 
 // https://vueschool.io/articles/vuejs-tutorials/build-an-infinite-scroll-component-using-intersection-observer-api/
 export default {
-    props: ['options', "syncPageFlag", 'sendWSMessage', 'book_id', 'image_url', 'pageNum', 'all_page_num', "showPageNumFlag_ScrollMode", "sPWL", "dPWL", "sPWP", "dPWP"],
+    props: ['options', "syncPageByWS", 'sendWSMessage', 'book_id', 'image_url', 'pageNum', 'all_page_num', "showPageNumFlag_ScrollMode", "sPWL", "dPWL", "sPWP", "dPWP", "startLoadPageNum", "endLoadPageNum", "autoScrolling"],
     emits: ['refreshNowPageNum'],
     data: () => ({
         observer: null,
         tempThreshold: 0,
-        sendMessageNum: 0,
+        flipModeMessageNumCount: 0,
     }),
     mounted() {
         const options = {
@@ -30,9 +30,13 @@ export default {
         //let observer = new IntersectionObserver(callback, options);
         // https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry/intersectionRatio
         this.observer = new IntersectionObserver(([entry]) => {
-            //isIntersecting：被监视对象与root是否交叉。如果没交叉，不做任何事情
-            if (!entry.isIntersecting) {
-                this.sendMessageNum = 0;
+            //如果没有开同步，不反应。
+            if (!this.syncPageByWS) {
+                return
+            }
+            //如果没交叉，发送数清零，可再次发送消息
+            if (!entry.isIntersecting) {//isIntersecting：被监视对象与root是否交叉。
+                this.flipModeMessageNumCount = 0;
                 return
             }
             // DOMRect 对象，提供元素的大小及其相对于视口的位置。
@@ -44,14 +48,19 @@ export default {
             // console.log("viewport_clientHeight:", viewport_clientHeight);
             // //以底部为准：从下往上，进入viewport的时候才增加页数
             // if (entry.boundingClientRect.bottom >= viewportHeight) {
-            //以顶部为准：从下往上，接触顶部的时候才改变页数。因为要留一些提前量，所以不是0而是50.
-            if (entry.boundingClientRect.top <= 50) {
+            //以顶部为准：从下往上，接触顶部的时候才改变页数。因为要留一些提前量，所以不是0.
+            if (entry.boundingClientRect.top <= 30) {
                 this.$emit("refreshNowPageNum", this.pageNum);
-                // console.log("pageNum", this.pageNum);
-                //如果发送过一次了，就不再重复发送，避免大量发包
-                if (this.syncPageFlag && this.sendMessageNum === 0) {
-                    this.sendNowPage(entry.intersectionRatio);
+                //如果正在自动滚动，禁止发翻页消息
+                if (this.autoScrolling) {
+                    return
                 }
+                // this.sendNowPageToScrollMode(entry.intersectionRatio);
+                //发送给翻页模式的消息。如果发送过一次了，就不再重复发送。
+                if (this.flipModeMessageNumCount === 0) {
+                    this.sendNowPageToFlipMode();
+                }
+                //  this.sendNowPageToFlipMode();
             }
         }, options);
         this.observer.observe(this.$el);//使用this.$el作为root元素以便观察DOM元素。$el指向当前组件的DOM元素。this.$el在mounted中才会出现的，在created的时候没有。
@@ -60,35 +69,57 @@ export default {
         this.observer.disconnect();
     },
     methods: {
-        //Websocket 发送消息
-        sendNowPage(now_page_num_percent) {
-            this.sendMessageNum = this.sendMessageNum + 1
-            const readPercent =
-                parseFloat(this.pageNum) / parseFloat(this.all_page_num);
-            // console.debug("ReadPercent: " + readPercent)
-            const data = {
+        //Websocket 发送消息，给卷轴模式
+        sendNowPageToScrollMode(intersectionRatio) {
+            //socket未初始化的时候不发送
+            if (this.$socket.readyState !== 1) {
+                return
+            }
+            const scroll_data = {
                 book_id: this.book_id,
                 now_page_num: this.pageNum,
-                now_page_num_percent: now_page_num_percent,
-                read_percent: readPercent,
+                now_page_num_percent: intersectionRatio,
+                start_load_page_num: this.startLoadPageNum,
+                end_load_page_num: this.endLoadPageNum,
             };
-            // console.log("this.$store.userID: " + this.$store.state.userID)
-            const newMsg = {
-                type: "sync_page",
+            const scrollMsg = {
+                type: "scroll_mode_sync_page",
+                status_code: 200,
+                user_id: this.$store.state.userID,
+                token: this.$store.state.token,
+                detail: "发送给Scroll模式的数据",
+                data_string: JSON.stringify(scroll_data),
+            };
+            // console.log("send scrollMsg:", scrollMsg); 
+            this.$socket.sendObj(scrollMsg);
+        },
+
+        //Websocket 发送消息，给翻页模式
+        sendNowPageToFlipMode() {
+            //socket未初始化的时候不发送
+            if (this.$socket.readyState !== 1) {
+                return
+            }
+            const flip_data = {
+                book_id: this.book_id,
+                now_page_num: this.pageNum,
+                need_double_page_mode: false,
+            };
+            console.log("this.$store.userID: " + this.$store.state.userID);
+            const flipMsg = {
+                type: "flip_mode_sync_page",
                 status_code: 200,
                 user_id: this.$store.state.userID,
                 token: this.$store.state.token,
                 detail: "翻页模式，发送数据", // 消息描述
-                data_string: JSON.stringify(data),
+                data_string: JSON.stringify(flip_data),
             };
             // 配置为了json，可调用sendObj方法来发送数据
-            if (this.$socket.readyState === 1) {
-                this.$socket.sendObj(newMsg);
-            }
-            // console.log("send:", newMsg); 
+            this.$socket.sendObj(flipMsg);
+            this.flipModeMessageNumCount = this.flipModeMessageNumCount + 1;
+            console.log("send flipMsg:", flipMsg);
         },
     },
-
 };
 </script>
 

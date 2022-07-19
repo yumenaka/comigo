@@ -1,14 +1,17 @@
 
 
 <template>
-  <div id="about">
-    <h1>This is an about page</h1>
+  <div id="openfile">
+    <!-- https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/Input/file -->
+    <!-- https://blog.jijian.link/2020-01-08/html-upload-folder/ -->
+    <!-- <input type="file"></input> -->
   </div>
 </template>
 
 <script>
 import { defineComponent, reactive } from 'vue'
 import { useCookies } from "vue3-cookies";// https://github.com/KanHarI/vue3-cookies
+
 
 export default defineComponent({
   name: "AboutPage",

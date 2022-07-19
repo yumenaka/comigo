@@ -148,7 +148,7 @@
       </n-switch>
 
       <!-- websocket同步 -->
-      <n-switch size="large" v-model:value="this.syncPageFlag" @update:value="this.setSyncPageFlag">
+      <n-switch size="large" v-model:value="this.syncPageByWS" @update:value="this.setSyncPageByWS">
         <template #checked>{{ $t("sync_page") }}</template>
         <template #unchecked>{{ $t("sync_page") }}</template>
       </n-switch>
@@ -379,7 +379,7 @@ export default defineComponent({
   data() {
     return {
       //自动隐藏工具条
-      hideToolbar: true,
+      hideToolbar: false,
       resort_hint_key: "resort",
       options: [
         {
@@ -434,7 +434,7 @@ export default defineComponent({
       //开发模式 未完成的功能与设置,开启Debug以后才能见到
       debugModeFlag: true,
       //是否通过websocket同步翻页
-      syncPageFlag: true,
+      syncPageByWS: true,
       //是否显示页头
       showHeaderFlag_FlipMode: true,
       //是否显示页脚
@@ -449,6 +449,8 @@ export default defineComponent({
       saveNowPageNumFlag: true,
       //当前页数,注意语义,直接就是1开始的页数,不是数组下标,在pages数组当中用的时候需要-1
       nowPageNum: 1,
+      //最后发送的页数，用来避免重复发送用
+      lastSendNowPageNum: 1,
       //素描模式标记
       sketchModeFlag: false,
       //是否显示素描提示
@@ -601,10 +603,10 @@ export default defineComponent({
       this.saveNowPageNumFlag = false;
     }
     //是否通过websocket同步页数
-    if (localStorage.getItem("SyncPageFlag") === "true") {
-      this.syncPageFlag = true;
-    } else if (localStorage.getItem("SyncPageFlag") === "false") {
-      this.syncPageFlag = false;
+    if (localStorage.getItem("SyncPageByWS") === "true") {
+      this.syncPageByWS = true;
+    } else if (localStorage.getItem("SyncPageByWS") === "false") {
+      this.syncPageByWS = false;
     }
 
     //是否自动隐藏工具条
@@ -641,18 +643,24 @@ export default defineComponent({
   methods: {
     //接收服务器发来的websocket消息，做各种反应（翻页、提示信息）
     handlePacket(data) {
-      if (!this.syncPageFlag) {
+      if (this.syncPageByWS === false) {
         return;
       }
-      // console.log("FlipMode 接收到Message:");
       //data.data也是个字符串，需要解析成对象
       const msg = JSON.parse(data.data);
       //心跳信息,直接返回
       if (msg.type === "heartbeat") {
         return;
       }
+      //确保服务器发来翻页信息，来自于另一个用户
+			if(msg.user_id == this.$store.userID){
+        console.log(this.$store.userID+"接收到Message:msg.user_id="+msg.user_id);
+				return;
+			}
+      // console.log("FlipMode 接收到Message:");
+      // console.log(msg);
       //服务器发来翻页信息，来自于另一个用户才做反应
-      if (msg.type === "sync_page" && msg.user_id !== this.$store.userID) {
+      if (msg.type === "flip_mode_sync_page") {
         const syncData = JSON.parse(msg.data_string);
         //正在读的是同一本书、就翻页。
         if (syncData.book_id === this.book.id && syncData.now_page_num !== this.nowPageNum) {
@@ -664,18 +672,19 @@ export default defineComponent({
 
     //Websocket 发送消息
     sendNowPage() {
-      const readPercent =
-        parseFloat(this.nowPageNum) / parseFloat(this.book.all_page_num);
-      // console.debug("ReadPercent: " + readPercent)
+      //同一个页数只发送一回
+      if (this.lastSendNowPageNum === this.nowPageNum) {
+        return
+      }
+      this.lastSendNowPageNum = this.nowPageNum;
       const data = {
         book_id: this.book.id,
         now_page_num: this.nowPageNum,
-        now_page_num_percent: 1.0,
-        read_percent: readPercent,
+        need_double_page_mode: this.simpleDoublePageModeFlag,
       };
       // console.log("this.$store.userID: " + this.$store.state.userID)
       const newMsg = {
-        type: "sync_page",
+        type: "flip_mode_sync_page",
         status_code: 200,
         user_id: this.$store.state.userID,
         token: this.$store.state.token,
@@ -684,7 +693,7 @@ export default defineComponent({
       };
       // 配置为了json，可调用sendObj方法来发送数据
       this.$socket.sendObj(newMsg);
-      // console.log("send:", newMsg);
+      console.log("send:", newMsg);
     },
 
     // 辅助函数，用于从 Gravatar 获取头像。URL 的最后一段需要用户的 email 地址的 MD5 编码。
@@ -877,7 +886,7 @@ export default defineComponent({
     },
     // 关闭抽屉时,保存设置到cookies
     saveConfigToLocal() {
-      localStorage.setItem("SyncPageFlag", this.syncPageFlag);
+      localStorage.setItem("SyncPageFlag", this.syncPageByWS);
       localStorage.setItem("debugModeFlag", this.debugModeFlag);
       localStorage.setItem(
         "showHeaderFlag_FlipMode",
@@ -1241,7 +1250,7 @@ export default defineComponent({
         localStorage.setItem("nowPageNum" + this.book.id, value);
       }
       //发送翻页消息到服务器
-      if (sendWSMessage && this.syncPageFlag) {
+      if (sendWSMessage && this.syncPageByWS) {
         this.sendNowPage();
       }
     },
@@ -1298,7 +1307,7 @@ export default defineComponent({
     setShowHeaderChange(value) {
       console.log("value:" + value);
       this.showHeaderFlag_FlipMode = value;
-      localStorage.setItem("showHeaderFlag_FlipMode", value);
+      localStorage.setItem("showHeaderFlag_FlipMode", (value === true) ? "true" : "false");
       console.log(
         "cookie设置完毕: showHeaderFlag_FlipMode=" +
         localStorage.getItem("showHeaderFlag_FlipMode")
@@ -1307,7 +1316,7 @@ export default defineComponent({
     setShowFooterFlagChange(value) {
       console.log("value:" + value);
       this.showFooterFlag_FlipMode = value;
-      localStorage.setItem("showFooterFlag_FlipMode", value);
+      localStorage.setItem("showFooterFlag_FlipMode", (value === true) ? "true" : "false");
       console.log(
         "cookie设置完毕: showFooterFlag_FlipMode=" +
         localStorage.getItem("showFooterFlag_FlipMode")
@@ -1317,7 +1326,7 @@ export default defineComponent({
     setShowPageNumChange(value) {
       console.log("value:" + value);
       this.showPageHintFlag_FlipMode = value;
-      localStorage.setItem("showPageHintFlag_FlipMode", value);
+      localStorage.setItem("showPageHintFlag_FlipMode", (value === true) ? "true" : "false");
       console.log(
         "cookie设置完毕: showPageHintFlag_FlipMode=" +
         localStorage.getItem("showPageHintFlag_FlipMode")
@@ -1327,7 +1336,7 @@ export default defineComponent({
     setFlipScreenFlag(value) {
       console.log("value:" + value);
       this.rightToLeftFlag = value;
-      localStorage.setItem("rightToLeftFlag", value);
+      localStorage.setItem("rightToLeftFlag", (value === true) ? "true" : "false");
       console.log(
         "cookie设置完毕: rightToLeftFlag=" +
         localStorage.getItem("rightToLeftFlag")
@@ -1337,27 +1346,27 @@ export default defineComponent({
     setHideToolbar(value) {
       console.log("value:" + value);
       this.hideToolbar = value;
-      localStorage.setItem("HideToolbar", value);
+      localStorage.setItem("HideToolbar", (value === true) ? "true" : "false");
       console.log(
         "cookie设置完毕: HideToolbar=" +
         localStorage.getItem("HideToolbar")
       );
     },
 
-    setSyncPageFlag(value) {
+    setSyncPageByWS(value) {
       console.log("value:" + value);
-      this.syncPageFlag = value;
-      localStorage.setItem("SyncPageFlag", value);
+      this.syncPageByWS = value;
+      localStorage.setItem("SyncPageFlag", (value === true) ? "true" : "false");
       console.log(
-        "cookie设置完毕: SyncPageFlag=" +
-        localStorage.getItem("SyncPageFlag")
+        "cookie设置完毕: SyncPageByWS=" +
+        localStorage.getItem("SyncPageByWS")
       );
     },
 
     setSavePageNumFlag(value) {
       console.log("value:" + value);
       this.saveNowPageNumFlag = value;
-      localStorage.setItem("saveNowPageNumFlag", value);
+      localStorage.setItem("saveNowPageNumFlag", (value === true) ? "true" : "false");
       console.log(
         "cookie设置完毕: saveNowPageNumFlag=" +
         localStorage.getItem("saveNowPageNumFlag")
@@ -1371,7 +1380,7 @@ export default defineComponent({
       if (value === false) {
         this.autoDoublePageModeFlag = false;
       }
-      localStorage.setItem("debugModeFlag", value);
+      localStorage.setItem("debugModeFlag", (value === true) ? "true" : "false");
       console.log(
         "cookie设置完毕: debugModeFlag=" + localStorage.getItem("debugModeFlag")
       );
@@ -1383,7 +1392,7 @@ export default defineComponent({
       if (value === true) {
         this.simpleDoublePageModeFlag = false;
       }
-      localStorage.setItem("autoDoublePageModeFlag", value);
+      localStorage.setItem("autoDoublePageModeFlag", (value === true) ? "true" : "false");
       console.log(
         "cookie设置完毕: autoDoublePageModeFlag=" +
         localStorage.getItem("autoDoublePageModeFlag")
@@ -1396,7 +1405,7 @@ export default defineComponent({
       if (value === true) {
         this.autoDoublePageModeFlag = false;
       }
-      localStorage.setItem("simpleDoublePageModeFlag", value);
+      localStorage.setItem("simpleDoublePageModeFlag", (value === true) ? "true" : "false");
       console.log(
         "cookie设置完毕: simpleDoublePageModeFlag=" +
         localStorage.getItem("simpleDoublePageModeFlag")
