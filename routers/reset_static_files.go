@@ -5,8 +5,8 @@ import (
 	"github.com/yumenaka/comi/book"
 )
 
-//ResetStaticFiles 重新设定压缩包下载链接
-func ResetStaticFiles() {
+//SetDownloadLink 重新设定压缩包下载链接
+func SetDownloadLink() {
 	if book.GetBooksNumber() >= 1 {
 		allBook, err := book.GetAllBookInfoList("name")
 		if err != nil {

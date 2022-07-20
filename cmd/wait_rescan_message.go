@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/yumenaka/comi/common"
 	"github.com/yumenaka/comi/locale"
+	"github.com/yumenaka/comi/routers"
 	"github.com/yumenaka/comi/routers/handler"
 )
 
@@ -31,14 +32,17 @@ func waitRescanMessages() {
 	}
 }
 
-//ReScanUploadPath 6、扫描上传目录的文件
+//ReScanUploadPath
 func ReScanUploadPath(p string) {
+	//扫描上传目录的文件
 	addList, err := common.ScanAndGetBookList(p, databaseBookList)
 	if err != nil {
 		fmt.Println(locale.GetString("scan_error"), p)
 	} else {
 		common.AddBooksToStore(addList, p)
 	}
-	//4，保存扫描结果到数据库
+	//保存扫描结果到数据库
 	SaveResultsToDatabase()
+	//重新设置文件下载链接
+	routers.SetDownloadLink()
 }

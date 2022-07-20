@@ -327,7 +327,7 @@ func setWebAPI(engine *gin.Engine) {
 	//初始化websocket
 	websocket.WsDebug = common.Config.Debug
 	api.GET("/ws", websocket.WsHandler)
-	ResetStaticFiles()
+	SetDownloadLink()
 }
 
 //3、选择服务端口

@@ -28,11 +28,11 @@
       </n-upload-dragger>
     </n-upload>
     <!-- 上传文件扫描好了的提示 -->
-    <n-p v-if="this.$store.state.server_status.NumberOfBooks = 0" depth="3" style="margin: 8px 0 0 0">
+    <n-p v-if="this.$store.state.server_status.NumberOfBooks > 0" depth="3" style="margin: 8px 0 0 0">
       {{ this.$t('scanned_hint').replace("XX", this.$store.state.server_status.NumberOfBooks) }}
     </n-p>
     <!-- 上传完毕刷新页面的按钮 -->
-    <n-button class="w-22 h-12"  color="#ff69b4" v-if="this.$store.state.server_status.NumberOfBooks = 0" @click="this.onRefreshPage">{{ $t('refresh_page')
+    <n-button class="w-22 h-12"  color="#ff69b4" v-if="this.$store.state.server_status.NumberOfBooks > 0" @click="this.onRefreshPage">{{ $t('refresh_page')
     }}</n-button>
   </div>
 </template>
@@ -109,7 +109,7 @@ export default defineComponent({
         console.log(`this.$store.state.server_status.NumberOfBooks：${this.$store.state.server_status.NumberOfBooks}`);
         if (this.$store.state.server_status.NumberOfBooks > 0) {
           //重新拉取书架数据
-          this.$store.dispatch("syncSeverStatusDataAction");
+          this.$store.dispatch("syncBookShelfDataAction");
           minTryNum = minTryNum - 1;
           if (minTryNum <= 0) {
             clearInterval(pollTimer);
