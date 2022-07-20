@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"path"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -15,23 +14,23 @@ import (
 // GetRegFIleHandler 下载服务器配置
 func GetRegFIleHandler(c *gin.Context) {
 	// 带后缀的执行文件名 comi.exe  sketch.exe
-	exeFilePath := path.Base(os.Args[0])
-	newStr := strings.Replace(exeFilePath, "/", "\\", -1) + ",0\""
+	exeFilePath := os.Args[0]
+	newStr := strings.Replace(exeFilePath, `\`, `\\`, -1)
 	fmt.Println("exe_file_path:", exeFilePath)
-	var regText = `
-Windows Registry Editor Version 5.00
+	fmt.Println("newStr:", newStr)
+	var regText = `Windows Registry Editor Version 5.00
 
 [HKEY_CLASSES_ROOT\Directory\Background\shell\ComiGo]
 "Icon"="C:\\Users\\%USERNAME%\\Desktop\\comi.exe,0"
 @="ComiGo Here"
 
-[HKEY_CLASSES_ROOT\Directory\Background\shell\GitHubDesktop\command]
-@="cmd /c cd %v & ComigoExePath"`
+[HKEY_CLASSES_ROOT\Directory\Background\shell\ComiGo\command]
+@="ComigoExePath  \"%V\""`
 
 	//替换Icon那一行
 	regText = strings.Replace(regText, `C:\\Users\\%USERNAME%\\Desktop\\comi.exe`, newStr, 1)
 	//替换 ComigoExePath
-	regText = strings.Replace(regText, "ComigoExePath", exeFilePath, 1)
+	regText = strings.Replace(regText, "ComigoExePath", newStr, 1)
 	//命令行打印
 	fmt.Println(regText)
 	regFileName := strings.Replace("comigo(XXX).reg", "XXX", locale.GetString("REG_FILE_HINT"), 1)
