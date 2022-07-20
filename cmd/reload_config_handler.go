@@ -40,6 +40,12 @@ func configReloadHandler(e fsnotify.Event) {
 		log.Fatal("Server forced to shutdown: ", err)
 	}
 	<-ctx.Done()
+	//3、扫描配置文件指定的的书籍库
+	ScanStorePathInConfig()
+	//4，保存扫描结果到数据库
+	SaveResultsToDatabase()
+	//5、通过“可执行文件名”设置部分默认参数,目前不生效
+	common.Config.SetByExecutableFilename()
 	//重启 web 服务器
 	routers.StartWebServer()
 }

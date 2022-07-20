@@ -39,7 +39,7 @@ export default defineComponent({
     this.$store.dispatch("syncSeverStatusDataAction");
     // this.$store.dispatch("syncBookShelfDataAction");
     this.selectTemplate = this.getDefaultTemplate;
-
+    
     // 连接websocket服务器，参数为websocket服务地址
     var protocol = 'ws://'
     if (window.location.protocol === "https") {
