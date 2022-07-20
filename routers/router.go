@@ -318,6 +318,8 @@ func setWebAPI(engine *gin.Engine) {
 	//通过链接下载示例配置
 	api.GET("/config.toml", handler.GetConfigHandler)
 	//通过链接下载示例配置
+	api.GET("/comigo.reg", handler.GetRegFIleHandler)
+	//通过链接下载示例配置
 	api.GET("/qrcode.png", handler.GetQrcodeHandler)
 	//301重定向跳转示例
 	api.GET("/redirect", func(c *gin.Context) {

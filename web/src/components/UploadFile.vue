@@ -119,7 +119,7 @@ export default defineComponent({
     },
     // 拼接上传接口路径
     actionUrl() {
-      var protocol = 'http://'
+      let protocol = 'http://'
       if (window.location.protocol === "https") {
         protocol = 'https://'
       }
@@ -133,10 +133,7 @@ export default defineComponent({
 
 <style scoped>
 #UploadFile {
-  padding-bottom: 20px;
-  padding-left: 20px;
-  padding-right: 20px;
-  padding-top: 20px;
+  padding: 20px;
   background: v-bind("model.color");
 }
 </style>

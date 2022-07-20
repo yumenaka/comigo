@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/yumenaka/comi/common"
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/routers"
@@ -32,7 +33,7 @@ func waitRescanMessages() {
 	}
 }
 
-//ReScanUploadPath
+//ReScanUploadPath 重新扫描上传目录
 func ReScanUploadPath(p string) {
 	//扫描上传目录的文件
 	addList, err := common.ScanAndGetBookList(p, databaseBookList)

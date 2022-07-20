@@ -1,10 +1,10 @@
 <template>
     <div class="BookShelf w-full h-screen flex flex-col">
-        <Header class="flex-none h-12" :bookIsFolder="false" :headerTitle="this.bookShelfTitle" :showReturnIcon="this.headerShowReturnIcon"
-            :bookID="this.bookshelf ? this.bookshelf[0].id : 'null'" :setDownLoadLink="false"
-            @drawerActivate="this.drawerActivate">
+        <Header class="flex-none h-12" :bookIsFolder="false" :headerTitle="this.bookShelfTitle"
+            :showReturnIcon="this.headerShowReturnIcon" :bookID="this.bookshelf ? this.bookshelf[0].id : 'null'"
+            :setDownLoadLink="false" @drawerActivate="this.drawerActivate">
         </Header>
-        
+
         <!-- 渲染书架部分 有书的时候显示书  没有的时候显示上传控件-->
         <!-- Flex Grow 控制 flex 项目放大的功能类 https://www.tailwindcss.cn/docs/flex-grow -->
         <div class="bookshelf flex-grow">
@@ -64,6 +64,10 @@
             <!-- 下载示例配置文件的按钮 -->
             <a href="/api/config.toml" target="_blank">
                 <n-button>{{ $t('DownloadSampleConfigFile') }}</n-button>
+            </a>
+            <!-- 下载windows reg文件的按钮 -->
+            <a v-if="this.remoteIsWindows" href="api/comigo.reg" target="_blank">
+                <n-button>{{ $t('DownloadWindowsRegFile') }}</n-button>
             </a>
         </Drawer>
     </div>
@@ -284,6 +288,14 @@ export default defineComponent({
     // 卸载前
     beforeUnmount() { },
     methods: {
+
+        remoteIsWindows() {
+            if (!this.$store.state.server_status) {
+                return false
+            }
+            console.dir(this.$store.state.server_status.Description);
+            return this.$store.state.server_status.Description.indexOf("windows") !== -1
+        },
         //根据文件名、修改时间、文件大小等参数重新排序
         onResort(key) {
             this.resort_hint_key = key

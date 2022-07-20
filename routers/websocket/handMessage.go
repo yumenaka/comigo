@@ -47,8 +47,8 @@ func handHeartbeatMessage(client *websocket.Conn, msg Message, clientID string) 
 	}
 }
 
-// handSyncPageMessageForFlipMode 处理翻页消息(翻页模式)
-func handSyncPageMessageForFlipMode(client *websocket.Conn, msg Message, clientID string) {
+// handSyncPageMessageToFlipMode 处理翻页消息(翻页模式)
+func handSyncPageMessageToFlipMode(client *websocket.Conn, msg Message, clientID string) {
 	msg.Detail = "同步页数。"
 	err := client.WriteJSON(msg)
 	if err != nil {
@@ -68,9 +68,9 @@ func handSyncPageMessageForFlipMode(client *websocket.Conn, msg Message, clientI
 		log.Printf("handSyncPage_ToFlipode error: %v", err)
 		return
 	}
-	//if WsDebug {
-	fmt.Println(data, clientID)
-	//}
+	if WsDebug {
+		fmt.Println(" SyncPage message toFlipMode:", data, clientID)
+	}
 	//验证收到的数据
 	if data.BookID == "" || data.NowPageNum < 0 || data.NowPageNum > math.MaxInt {
 		log.Printf("handSyncPage_ToFlipode data error: %v", data)
@@ -91,8 +91,8 @@ func handSyncPageMessageForFlipMode(client *websocket.Conn, msg Message, clientI
 	}
 }
 
-// handSyncPageMessageForScrollMode 处理翻页信息(下拉阅读模式)
-func handSyncPageMessageForScrollMode(client *websocket.Conn, msg Message, clientID string) {
+// handSyncPageMessageToScrollMode 处理翻页信息(下拉阅读模式)
+func handSyncPageMessageToScrollMode(client *websocket.Conn, msg Message, clientID string) {
 	msg.Detail = "同步页数。"
 	err := client.WriteJSON(msg)
 	if err != nil {
@@ -113,7 +113,7 @@ func handSyncPageMessageForScrollMode(client *websocket.Conn, msg Message, clien
 		return
 	}
 	if WsDebug {
-		fmt.Println(data, clientID)
+		fmt.Println(" SyncPage message to ScrollMode:", data, clientID)
 	}
 	if data.BookID == "" || data.NowPageNum < 0 || data.NowPageNum > math.MaxInt || data.NowPageNumPercent > 1 {
 		log.Printf("handSyncPage_ToFlipode data error: %v", data)

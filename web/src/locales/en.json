@@ -73,5 +73,6 @@
   "drop_to_upload": "Click or drag files to this area to upload",
   "uploaded_folder_hint": "The file will be uploaded to the ComigoUpload folder in the executive directory",
   "scanned_hint": "A total of XX books scanned, go read them immediately?",
-  "refresh_page": "Refresh page"
+  "refresh_page": "Refresh page",
+  "DownloadWindowsRegFile": "WindowsRegFileDownload"
 }
