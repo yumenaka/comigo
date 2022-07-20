@@ -1,17 +1,20 @@
 <template>
-    <div id="BookShelf">
-        <Header :bookIsFolder="false" :headerTitle="this.bookShelfTitle" :showReturnIcon="this.headerShowReturnIcon"
-            :bookID="this.bookshelf[0].id" :setDownLoadLink="false" @drawerActivate="this.drawerActivate">
+    <div class="BookShelf w-full h-screen flex flex-col">
+        <Header class="flex-none h-12" :bookIsFolder="false" :headerTitle="this.bookShelfTitle" :showReturnIcon="this.headerShowReturnIcon"
+            :bookID="this.bookshelf ? this.bookshelf[0].id : 'null'" :setDownLoadLink="false"
+            @drawerActivate="this.drawerActivate">
         </Header>
-
-        <!-- 渲染书架部分 -->
-        <div class="shelf">
+        
+        <!-- 渲染书架部分 有书的时候显示书  没有的时候显示上传控件-->
+        <!-- Flex Grow 控制 flex 项目放大的功能类 https://www.tailwindcss.cn/docs/flex-grow -->
+        <div class="bookshelf flex-grow">
             <!-- 使用tailwindcss提供的flex布局： -->
             <!-- flex-row：https://www.tailwindcss.cn/docs/flex-direction -->
             <!-- 使用 flex-wrap 允许 flex 项目换行 https://www.tailwindcss.cn/docs/flex-wrap -->
             <!-- 在组件中使用v-for时,key是必须的 -->
             <!-- justify-center：让项目沿着容器主轴的中心点对齐 https://www.tailwindcss.cn/docs/justify-content -->
-            <div class="flex flex-row flex-wrap justify-center">
+            <!-- 有书的时候显示书 -->
+            <div class="flex flex-row flex-wrap justify-center min-h-48">
                 <BookCard v-for="(book_info, key) in this.bookshelf" :key="key" :title="book_info.name"
                     :id="book_info.id" :image_src="book_info.cover.url" :readerMode="this.readerMode"
                     :showTitle="this.bookCardShowTitleFlag"
@@ -19,9 +22,16 @@
                     :openURL="getBookCardOpenURL(book_info.id, book_info.book_type, book_info.name)"
                     :a_target="getBookCardTarget(book_info.book_type)">
                 </BookCard>
+                <!-- 没有书的时候显示上传控件 -->
+                <UploadFile class="w-9/12 h-full flex flex-col justify-center" v-if="this.bookshelf === null">
+                </UploadFile>
             </div>
         </div>
-
+        <Bottom class="flex-none h-12" :softVersion="
+            this.$store.state.server_status.ServerName
+                ? this.$store.state.server_status.ServerName
+                : 'Comigo'
+        "></Bottom>
         <Drawer :initDrawerActive="this.drawerActive" :initDrawerPlacement="this.drawerPlacement"
             @saveConfig="this.saveConfigToLocal" @startSketch="this.startSketchMode"
             @closeDrawer="this.drawerDeactivate" @setRM="this.OnSetReaderMode" :readerMode="this.readerMode"
@@ -56,11 +66,6 @@
                 <n-button>{{ $t('DownloadSampleConfigFile') }}</n-button>
             </a>
         </Drawer>
-        <Bottom :softVersion="
-            this.$store.state.server_status.ServerName
-                ? this.$store.state.server_status.ServerName
-                : 'Comigo'
-        "></Bottom>
     </div>
 </template>
 
@@ -73,6 +78,7 @@ import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
 import BookCard from "@/components/BookCard.vue";
 import Bottom from "@/components/Bottom.vue";
+import UploadFile from "@/components/UploadFile.vue";
 
 import { defineComponent, reactive } from "vue";
 import { useCookies } from "vue3-cookies"; // https://github.com/KanHarI/vue3-cookies
@@ -87,6 +93,7 @@ export default defineComponent({
         Drawer, // 自定义抽屉
         BookCard, // 自定义抽屉
         Bottom, // 自定义页尾
+        UploadFile,//自定义的文件上传领域，一本书也没有的时候用
         NButton,//按钮,来自:https://www.naiveui.com/zh-CN/os-theme/components/button
         // NSpace,
         NSwitch,
@@ -165,7 +172,7 @@ export default defineComponent({
             ],
             readerMode: "scroll",
             readerModeIsScroll: true,
-            bookShelfTitle: "loading",
+            bookShelfTitle: "Loading",
             headerShowReturnIcon: false,
             bookCardShowTitleFlag: true, // 书库中的书籍是否显示文字版标题
             maxDepth: 1,
@@ -222,14 +229,11 @@ export default defineComponent({
     // beforeUnmount: 当指令与在绑定元素父组件卸载之前时,只调用一次。
     // unmounted: 当指令与元素解除绑定且父组件已卸载时,只调用一次。
     created() {
-
         // 初始化默认值,读取出来的都是字符串,不要直接用
         //书籍排序方式。可以按照文件名、修改时间、文件大小排序（或反向排序）
         if (localStorage.getItem("ResortKey_BookShelf") !== null) {
             this.resort_hint_key = localStorage.getItem("ResortKey_BookShelf")
         }
-
-        //TODO:读取服务器书籍总数，避免重复加载（尤其是书很多的时候）
         // 从服务器上拉取书架信息
         this.getBookShelfData();
         // 刷新ReadMode
@@ -434,7 +438,16 @@ export default defineComponent({
             }
             axios
                 .get("getlist?max_depth=1" + sort_image_by_str)
-                .then((response) => (this.bookshelf = response.data))
+                .then((response) => {
+                    if (response.data !== "") {
+                        this.bookshelf = response.data;
+                    } else {
+                        this.bookshelf = null;
+                        // console.dir(response);
+                        // console.dir(response.data);
+                        // console.dir(this.bookshelf);
+                    }
+                })
                 .finally(() => {
                     this.setBookShelfTitle();
                 });
@@ -454,8 +467,13 @@ export default defineComponent({
             axios
                 .get("getlist?book_group_book_id=" + group_id + sort_image_by_str)
                 .then((response) => {
-                    if (response.data[0].name != null) {
+                    if (response.data !== "") {
                         this.bookshelf = response.data;
+                    } else {
+                        this.bookshelf = null;
+                        // console.dir(response);
+                        // console.dir(response.data);
+                        // console.dir(this.bookshelf);
                     }
                 })
                 .finally(() => {
@@ -464,28 +482,30 @@ export default defineComponent({
         },
         // 设置书架名
         setBookShelfTitle() {
-            // 阅读某本书的时候,当然不需要设置
-            if (this.$route.params.id != null) {
+            // console.log(this.$route.params.id);
+            // 路由里面有id这个参数、也就是处于scroll或filp模式，正在阅读某本书的时候,不需要设置书架名
+            if (this.$route.params.id !== undefined) {//不是null而是undefined
                 return;
             }
+            // console.log(this.bookShelfTitle);
+
+            //如果没有一本书
+            if (this.bookshelf === null) {
+                this.bookShelfTitle = this.$t('no_book_found_hint');
+                return
+            }
             // 设置当前深度,这个值目前没用到
-            if (this.bookshelf[0].depth != null) {
+            if (this.bookshelf[0].depth !== null) {
                 this.max_depth = this.bookshelf[0].depth;
             }
+            //如果是书籍组的时候，如何设置标题
             if (
-                this.bookshelf[0].parent_folder != null &&
-                this.bookshelf[0].parent_folder != ""
+                this.bookshelf[0].parent_folder !== null &&
+                this.bookshelf[0].parent_folder !== ""
             ) {
                 document.title = this.bookshelf[0].parent_folder;
                 this.bookShelfTitle = this.bookshelf[0].parent_folder;
             }
-            // //默认显示服务器版本
-            // if (this.$store.state.server_status.ServerName) {
-            //     //设置浏览器标签标题
-            //     document.title = this.$store.state.server_status.ServerName
-            //     //设置Header标题
-            //     this.bookShelfTitle = this.$store.state.server_status.ServerName
-            // }
         },
 
         // 打开抽屉
@@ -534,10 +554,10 @@ export default defineComponent({
     background: v-bind("model.interfaceColor");
 }
 
-.shelf {
-    max-width: 100%;
-    min-height: 90vh;
-    height: auto;
+.bookshelf {
+    /* max-width: 100%;
+    min-height: 90vh; */
+    /* height: auto; */
     background: v-bind("model.backgroundColor");
 }
 </style>

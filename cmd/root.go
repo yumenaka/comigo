@@ -183,7 +183,6 @@ var rootCmd = &cobra.Command{
 
 		//解析命令，扫描文件
 		initBookStores(args)
-
 		//设置临时文件夹
 		common.SetTempDir()
 		//设置书籍API
@@ -194,13 +193,13 @@ var rootCmd = &cobra.Command{
 		return
 	},
 }
+var databaseBookList []*book.Book
 
 //initBookStores 解析命令,扫描书库
 func initBookStores(args []string) {
-	//////初始化数据库
-	var databaseBookList []*book.Book
+	//初始化数据库
 	if common.Config.EnableDatabase {
-		////从数据库里面读取出的书籍信息，持久化
+		//从数据库里面读取书籍信息，持久化
 		storage.InitDatabase(common.ConfigFile)
 		var dataErr error
 		databaseBookList, dataErr = storage.GetArchiveBookFromDatabase()
@@ -208,9 +207,21 @@ func initBookStores(args []string) {
 			fmt.Println(dataErr)
 		}
 	}
+	//2、搜索基本路径，来自程序启动时的参数
+	ScanDefaultPath(args)
+	//3、扫描配置文件指定的书籍库
+	ScanStorePathInConfig()
+	//4，保存扫描结果到数据库
+	SaveResultsToDatabase()
+	//5、通过“可执行文件名”设置部分默认参数,目前不生效
+	common.Config.SetByExecutableFilename()
+}
 
+//ScanDefaultPath 2、搜索基本路径，来自程序启动时的参数
+func ScanDefaultPath(args []string) {
 	//决定如何扫描，扫描哪个路径
-	if len(args) == 0 { //没有指定路径或文件的情况下
+	//没有指定路径或文件的情况下
+	if len(args) == 0 {
 		cmdPath := path.Dir(os.Args[0]) //扫描程序执行的路径
 		addList, err := common.ScanAndGetBookList(cmdPath, databaseBookList)
 		if err != nil {
@@ -226,16 +237,13 @@ func initBookStores(args []string) {
 				fmt.Println(locale.GetString("scan_error"), p)
 			} else {
 				common.AddBooksToStore(addList, p)
-
 			}
 		}
 	}
+}
 
-	////用扫描完成的书籍数据，覆盖本地数据库
-	//common.CleanMapBooksByLocalData()
-
-	//通过“可执行文件名”设置部分默认参数,目前不生效
-	common.Config.SetByExecutableFilename()
+//ScanStorePathInConfig 3、扫描配置文件指定的的书籍库
+func ScanStorePathInConfig() {
 	if len(common.Config.StoresPath) > 0 {
 		for _, p := range common.Config.StoresPath {
 			addList, err := common.ScanAndGetBookList(p, databaseBookList)
@@ -246,8 +254,10 @@ func initBookStores(args []string) {
 			}
 		}
 	}
+}
 
-	//保存扫描结果到数据库
+//SaveResultsToDatabase 4，保存扫描结果到数据库，并清理不存在的书籍
+func SaveResultsToDatabase() {
 	if common.Config.EnableDatabase {
 		AllBook := book.GetAllBookList()
 		//设置清理数据库的时候，是否清理没扫描到的书籍信息

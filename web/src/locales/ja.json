@@ -68,5 +68,10 @@
   "load_from_interrupt": "XXページから読み込みを開始しますか？",
   "load_all_pages": "全てのページを読み込む",
   "re_sort_page": "ページ並べ替え",
-  "re_sort_book": "本の並び替え"
+  "re_sort_book": "本の並び替え",
+  "no_book_found_hint": "本が見つかりません。ファイルをアップロードしてみてはいかがでしょうか？",
+  "scanned_hint": "XX冊見つかりました、観に行くか?",
+  "refresh_page": "ページを更新する",
+  "drop_to_upload": "ファイルをクリックまたはこの領域にドラッグしてアップロードします",
+  "uploaded_folder_hint": "ファイルは実行ディレクトリの下のComigoUploadフォルダにアップロードされます"
 }

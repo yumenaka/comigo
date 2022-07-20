@@ -246,6 +246,9 @@ type Login struct {
 	Password string `form:"password" json:"password" uri:"password" xml:"password" binding:"required"`
 }
 
+// 简单的路由组: api,方便管理部分相同的URL
+var api *gin.RouterGroup
+
 //2、设置获取书籍信息、图片文件的 API
 func setWebAPI(engine *gin.Engine) {
 	////TODO：处理登陆 https://www.chaindesk.cn/witbook/19/329
@@ -276,8 +279,6 @@ func setWebAPI(engine *gin.Engine) {
 		c.JSON(http.StatusOK, gin.H{"status": "you are logged in"})
 	})
 
-	// 简单的路由组: api,方便管理部分相同的URL
-	var api *gin.RouterGroup
 	//简单http认证
 	enableAuth := common.Config.UserName != "" && common.Config.Password != ""
 	if enableAuth {
@@ -303,33 +304,7 @@ func setWebAPI(engine *gin.Engine) {
 	})
 
 	//文件上传
-	// 除了设置头像以外，也可以做上传文件并阅读功能
-	// Set a lower memory limit for multipart forms (default is 32 MiB)
-	// https://github.com/gin-gonic/examples/blob/master/upload-file/single/main.go
-	// 也能上传多个文件，示例：
-	//https://github.com/gin-gonic/examples/blob/master/upload-file/multiple/main.go
-	//engine.MaxMultipartMemory = 60 << 20  // 60 MiB  只限制程序在上传文件时可以使用多少内存，而不限制上传文件的大小。
-	api.POST("/upload", func(c *gin.Context) {
-		// single file
-		file, err := c.FormFile("file")
-		if err != nil { //没有传文件会报错，处理这个错误。
-			fmt.Println(err)
-		}
-		log.Println(file.Filename)
-
-		// Upload the file to specific dst.
-		err = c.SaveUploadedFile(file, file.Filename)
-		if err != nil {
-			fmt.Println(err)
-		}
-		/*
-		   也可以直接使用io操作，拷贝文件数据。
-		   out, err := os.Create(filename)
-		   defer out.Close()
-		   _, err = io.Copy(out, file)
-		*/
-		c.String(http.StatusOK, fmt.Sprintf("'%s' uploaded!", file.Filename))
-	})
+	api.POST("/upload", handler.UploadHandler)
 	//web端需要的服务器状态，包括标题、机器状态等
 	api.GET("/getstatus", handler.ServerStatusHandler)
 	//获取书架信息，不包含每页信息
@@ -352,21 +327,7 @@ func setWebAPI(engine *gin.Engine) {
 	//初始化websocket
 	websocket.WsDebug = common.Config.Debug
 	api.GET("/ws", websocket.WsHandler)
-
-	//设定压缩包下载链接
-	if book.GetBooksNumber() >= 1 {
-		allBook, err := book.GetAllBookInfoList("name")
-		if err != nil {
-			fmt.Println("设置文件下载失败")
-		} else {
-			for _, info := range allBook.BookInfos {
-				//下载文件
-				if info.Type != book.TypeBooksGroup && info.Type != book.TypeDir {
-					api.StaticFile("/raw/"+info.BookID+"/"+info.Name, info.FilePath)
-				}
-			}
-		}
-	}
+	ResetStaticFiles()
 }
 
 //3、选择服务端口

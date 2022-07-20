@@ -29,7 +29,7 @@ import (
 	"github.com/yumenaka/comi/locale"
 )
 
-//获取一个空闲可用的端口号
+// GetFreePort 获取一个空闲可用的端口号
 func GetFreePort() (int, error) {
 	addr, err := net.ResolveTCPAddr("tcp", "127.0.0.1:0")
 	if err != nil {

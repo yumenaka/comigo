@@ -68,5 +68,10 @@
   "starting_from_beginning_hint": "从头开始加载",
   "load_all_pages": "加载所有页面",
   "re_sort_page": "页面重新排序",
-  "re_sort_book": "重新排列书籍"
+  "re_sort_book": "重新排列书籍",
+  "no_book_found_hint": "没找到书、试试上传文件？",
+  "drop_to_upload": "点击或者拖动文件到该区域上传",
+  "uploaded_folder_hint": "文件将上传到执行目录下的 ComigoUpload 文件夹",
+  "scanned_hint": "一共扫描到XX本书，立刻去观看？",
+  "refresh_page": "刷新页面"
 }

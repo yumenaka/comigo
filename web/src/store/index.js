@@ -210,6 +210,4 @@ const store = createStore({
   modules: {
   }
 })
-
-
 export default store

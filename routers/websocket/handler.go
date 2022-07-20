@@ -2,6 +2,7 @@ package websocket
 
 import (
 	"fmt"
+	"github.com/google/uuid"
 	"log"
 	"net/http"
 
@@ -22,6 +23,10 @@ type Message struct {
 	token      string `json:"token"` //认证用
 	Detail     string `json:"detail"`
 	DataString string `json:"data_string"` //附加的json字符串数据，服务器根据情况解析
+}
+type MessageWithClientID struct {
+	Msg      Message
+	ClientID string
 }
 
 //创建一个 upGrader 的实例。这只是一个对象，它具备一些方法，这些方法可以获取一个普通 HTTP 链接然后将其升级成一个 WebSocket
@@ -44,13 +49,13 @@ var upGrader = websocket.Upgrader{
 		return true
 	},
 }
-var clientID = 0
 
 //map 映射，其键对应是一个指向 WebSocket 的指针，
 //其值是一个int值。我们实际上并不需要这个值，但使用的映射数据结构需要有一个映射值，这样做更容易添加和删除单项。
-var clients = make(map[*websocket.Conn]int) // connected clients
+var clients = make(map[*websocket.Conn]string) // connected clients
+
 //用于由客户端发送消息的队列，扮演通道的角色。后面定义了一个 goroutine 来从这个通道读取新消息，然后将它们发送给其它连接到服务器的客户端。
-var broadcast = make(chan Message) // broadcast channel
+var broadcast = make(chan MessageWithClientID) // broadcast channel
 
 // WsHandler
 //路由是 "/ws",即 ws://127.0.0.1:1234/api/ws
@@ -66,8 +71,9 @@ func WsHandler(c *gin.Context) {
 		return
 	}
 	// 把新的客户端添加到全局的 "clients" 映射表中进行注册
+	var clientID = uuid.New().String()
 	clients[wsConn] = clientID
-	clientID++
+
 	//比 defer wsConn.Close() 更好?
 	//通知 Go 在函数返回的时候关闭 WebSocket。
 	defer func() {
@@ -92,8 +98,9 @@ func WsHandler(c *gin.Context) {
 			if WsDebug {
 				fmt.Printf("websocket服务器收到: %v\n", msg)
 			}
+			msgWithClientID := MessageWithClientID{Msg: msg, ClientID: clientID}
 			// Send the newly received message to the broadcast channel
-			broadcast <- msg
+			broadcast <- msgWithClientID
 		}
 	}
 }
@@ -102,18 +109,20 @@ func WsHandler(c *gin.Context) {
 func handleMessages() {
 	for {
 		// Grab the next message from the broadcast channel
-		msg := <-broadcast //广播频道
+		msgWithClientID := <-broadcast //广播频道
 		// Send it out to every client that is currently connected
 		for client := range clients {
-			switch msg.Type {
+			switch msgWithClientID.Msg.Type {
 			case "ping", "ping!", "乒":
-				handPingMessage(client, msg)
+				handPingMessage(client, msgWithClientID.Msg, msgWithClientID.ClientID)
 			case "heartbeat":
-				handHeartbeatMessage(client, msg)
-			case "sync_page":
-				handSyncPageMessage(client, msg)
+				handHeartbeatMessage(client, msgWithClientID.Msg, msgWithClientID.ClientID)
+			case "flip_mode_sync_page":
+				handSyncPageMessageForFlipMode(client, msgWithClientID.Msg, msgWithClientID.ClientID)
+			case "scroll_mode_sync_page":
+				handSyncPageMessageForScrollMode(client, msgWithClientID.Msg, msgWithClientID.ClientID)
 			default:
-				handDefaultMessage(client, msg)
+				handDefaultMessage(client, msgWithClientID.Msg, msgWithClientID.ClientID)
 			}
 		}
 	}

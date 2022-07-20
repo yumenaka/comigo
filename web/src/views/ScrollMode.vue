@@ -1,6 +1,6 @@
 <template>
 	<div id="ScrollMode" class="manga">
-		<Header :setDownLoadLink="this.needDownloadLink()" :headerTitle="book.name" :bookID="this.book.id"
+		<Header :setDownLoadLink="this.needDownloadLink()" :headerTitle="this.book.name" :bookID="this.book.id"
 			:showReturnIcon="true" v-bind:style="{ background: model.interfaceColor }"
 			@drawerActivate="this.drawerActivate">
 		</Header>
@@ -32,7 +32,7 @@
 			:softVersion="this.$store.state.server_status.ServerName ? this.$store.state.server_status.ServerName : 'Comigo'">
 		</Bottom>
 
-
+		
 		<Drawer :initDrawerActive="this.drawerActive" :initDrawerPlacement="this.drawerPlacement"
 			@saveConfig="this.saveConfigToLocalStorage" @startSketch="this.startSketchMode"
 			@closeDrawer="this.drawerDeactivate" @setT="this.OnSetTemplate" :readerMode="this.readerMode"
@@ -143,7 +143,6 @@
 				<template #prefix>{{ $t('max_width') }}</template>
 				<template #suffix>px</template>
 			</n-input-number>
-
 		</Drawer>
 	</div>
 </template>
