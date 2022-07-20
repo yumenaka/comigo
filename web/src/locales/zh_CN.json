@@ -73,5 +73,6 @@
   "drop_to_upload": "点击或者拖动文件到该区域上传",
   "uploaded_folder_hint": "文件将上传到执行目录下的 ComigoUpload 文件夹",
   "scanned_hint": "一共扫描到XX本书，立刻去观看？",
-  "refresh_page": "刷新页面"
+  "refresh_page": "刷新页面",
+  "DownloadWindowsRegFile": "右键注册文件下载"
 }

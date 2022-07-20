@@ -2,9 +2,10 @@ package websocket
 
 import (
 	"fmt"
-	"github.com/google/uuid"
 	"log"
 	"net/http"
+
+	"github.com/google/uuid"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -118,9 +119,9 @@ func handleMessages() {
 			case "heartbeat":
 				handHeartbeatMessage(client, msgWithClientID.Msg, msgWithClientID.ClientID)
 			case "flip_mode_sync_page":
-				handSyncPageMessageForFlipMode(client, msgWithClientID.Msg, msgWithClientID.ClientID)
+				handSyncPageMessageToFlipMode(client, msgWithClientID.Msg, msgWithClientID.ClientID)
 			case "scroll_mode_sync_page":
-				handSyncPageMessageForScrollMode(client, msgWithClientID.Msg, msgWithClientID.ClientID)
+				handSyncPageMessageToScrollMode(client, msgWithClientID.Msg, msgWithClientID.ClientID)
 			default:
 				handDefaultMessage(client, msgWithClientID.Msg, msgWithClientID.ClientID)
 			}

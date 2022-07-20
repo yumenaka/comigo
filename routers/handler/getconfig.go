@@ -10,7 +10,7 @@ import (
 	"github.com/yumenaka/comi/common"
 )
 
-// 下载服务器配置
+// GetConfigHandler 下载服务器配置
 func GetConfigHandler(c *gin.Context) {
 	//golang结构体默认深拷贝（但是基本类型浅拷贝）
 	tempConfig := common.Config

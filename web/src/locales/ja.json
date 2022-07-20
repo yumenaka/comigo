@@ -73,5 +73,6 @@
   "scanned_hint": "XX冊見つかりました、観に行くか?",
   "refresh_page": "ページを更新する",
   "drop_to_upload": "ファイルをクリックまたはこの領域にドラッグしてアップロードします",
-  "uploaded_folder_hint": "ファイルは実行ディレクトリの下のComigoUploadフォルダにアップロードされます"
+  "uploaded_folder_hint": "ファイルは実行ディレクトリの下のComigoUploadフォルダにアップロードされます",
+  "DownloadWindowsRegFile": "REGファイルダウンロード"
 }
