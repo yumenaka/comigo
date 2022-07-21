@@ -175,7 +175,7 @@ const store = createStore({
     },
     //拉取书架数据
     async syncBookShelfDataAction(context) {
-      const msg = await axios.get("getshelf").then(
+      const msg = await axios.get("getlist").then(
         (res) => res.data,
         () => ""
       );

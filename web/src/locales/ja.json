@@ -74,5 +74,7 @@
   "refresh_page": "ページを更新する",
   "drop_to_upload": "ファイルをクリックまたはこの領域にドラッグしてアップロードします",
   "uploaded_folder_hint": "ファイルは実行ディレクトリの下のComigoUploadフォルダにアップロードされます",
-  "DownloadWindowsRegFile": "REGファイルダウンロード"
+  "DownloadWindowsRegFile": "REGファイルダウンロード",
+  "number_of_online_books": "オンライン蔵書数：",
+  "back_to_bookshelf": "本棚画面に戻る"
 }

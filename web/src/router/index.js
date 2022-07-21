@@ -12,6 +12,8 @@ import FlipMode from '@/views/FlipMode.vue'
 import BookShelf from '@/views/BookShelf.vue'
 import NotFound from '@/views/NotFound404.vue'
 // import PDFView from '@/views/PDFView.vue'
+import UploadPage from '@/views/UploadPage.vue'
+
 
 //link like: https://localhost/#/scroll/4ZaZc
 
@@ -40,6 +42,11 @@ const routes = [
     component: FlipMode,
     name: 'FlipMode',
     props: route => ({ query: route.query.sort_by }),
+  },
+  {
+    path: '/upload',
+    component: UploadPage,
+    name: 'UploadPage',
   },
   {
     path: '/about',

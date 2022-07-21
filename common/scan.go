@@ -107,7 +107,10 @@ func ScanAndGetBookList(storePath string, databaseBookList []*book.Book) (newBoo
 
 func scanDirGetBook(dirPath string, storePath string, depth int) (*book.Book, error) {
 	//初始化，生成UUID
-	newBook := book.New(dirPath, time.Now(), 0, storePath, depth, book.TypeDir)
+	newBook, err := book.New(dirPath, time.Now(), 0, storePath, depth, book.TypeDir)
+	if err != nil {
+		return nil, err
+	}
 	// 目录中的文件和子目录
 	files, err := ioutil.ReadDir(dirPath)
 	if err != nil {
@@ -147,7 +150,10 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*book.Book, 
 		fmt.Println(err.Error())
 	}
 	//初始化一本书，设置文件路径等等
-	newBook := book.New(filePath, FileInfo.ModTime(), FileInfo.Size(), storePath, depth, book.GetBookTypeByFilename(filePath))
+	newBook, err := book.New(filePath, FileInfo.ModTime(), FileInfo.Size(), storePath, depth, book.GetBookTypeByFilename(filePath))
+	if err != nil {
+		return nil, err
+	}
 	//根据文件类型，走不同的初始化流程
 	switch newBook.Type {
 	//为解决archiver/v4的BUG “zip文件无法读取2级目录” 单独处理zip文件

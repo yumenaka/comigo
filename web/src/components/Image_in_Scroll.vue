@@ -68,9 +68,6 @@ export default {
             //Dom本身的宽高 entry.target.clientWidth entry.target.clientHeight
             //视口的宽高  window.innerWidth  window.innerHeight
 
-
-
-
             // 翻页信息发送时机：顶部接触中线的时候才改变页数。
             if ((entry.isIntersecting) && isCross) {
                 this.$emit("refreshNowPageNum", this.pageNum);

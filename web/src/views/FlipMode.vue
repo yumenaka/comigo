@@ -10,7 +10,7 @@
       <Header v-if="this.showHeaderFlag_FlipMode" class="mx-auto w-full opacity-80"
         v-bind:class="{ 'fixed': this.hideToolbar, absolute: this.hideToolbar, 'top-0': this.hideToolbar }"
         v-bind:style="{ background: model.interfaceColor }" :setDownLoadLink="this.needDownloadLink()"
-        :headerTitle="book.name" :bookID="this.book.id" :showReturnIcon="true" @drawerActivate="this.drawerActivate">
+        :headerTitle="book.name" :bookID="this.book.id" :showReturnIcon="true" :showSettingsIcon="true" @drawerActivate="this.drawerActivate">
       </Header>
     </transition>
 
@@ -247,7 +247,6 @@ import {
   NDivider,
   NInputNumber,
   NSlider,
-  // NSpace,
   NSwitch,
   useMessage,
   NButton,

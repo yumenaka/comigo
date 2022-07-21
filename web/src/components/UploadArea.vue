@@ -27,19 +27,21 @@
         </n-p>
       </n-upload-dragger>
     </n-upload>
-    <!-- 上传文件扫描好了的提示 -->
-    <n-p v-if="this.$store.state.server_status.NumberOfBooks > 0" depth="3" style="margin: 8px 0 0 0">
-      {{ this.$t('scanned_hint').replace("XX", this.$store.state.server_status.NumberOfBooks) }}
-    </n-p>
-    <!-- 上传完毕刷新页面的按钮 -->
-    <n-button class="w-22 h-12"  color="#ff69b4" v-if="this.$store.state.server_status.NumberOfBooks > 0" @click="this.onRefreshPage">{{ $t('refresh_page')
-    }}</n-button>
+    <!-- 上传完毕提示 -->
+    <!-- <n-p v-if="this.$store.state.server_status.NumberOfBooks > 0" depth="3" style="margin: 8px 0 0 0">
+      {{ this.$t('scanned_hint').replace("XX", (this.$store.state.server_status.NumberOfBooks - this.beforeBookNum)) }}
+    </n-p> -->
+    <!-- 上传完毕按钮 -->
+    <n-button class="w-22 h-12" color="#ff69b4"
+      v-if="this.$store.state.server_status.NumberOfBooks > 0" @click="this.onBackToBookShelf">{{
+          $t('back_to_bookshelf')
+      }}</n-button>
   </div>
 </template>
 
 <script>
 import { NUpload, NUploadDragger, NText, NP, NIcon, NButton } from "naive-ui";
-import { defineComponent, reactive } from 'vue'
+import { defineComponent } from 'vue'
 import { ArchiveOutline as ArchiveIcon } from "@vicons/ionicons5";
 export default defineComponent({
   name: "AboutPage",
@@ -55,18 +57,12 @@ export default defineComponent({
     NButton,
   },
   setup() {
-    // 背景颜色,颜色选择器用
-    const model = reactive({
-      interfaceColor: "#F5F5E4",
-      backgroundColor: "#E0D9CD",
-    });
     return {
-      // 背景色
-      model,
     }
   },
   data() {
     return {
+      beforeBookNum: 0,
       readerMode: "",
       upLoadHint: "",
     };
@@ -80,20 +76,22 @@ export default defineComponent({
   // beforeUnmount: 当指令与在绑定元素父组件卸载之前时，只调用一次。
   // unmounted: 当指令与元素解除绑定且父组件已卸载时，只调用一次。
   created() {
+    this.beforeBookNum = this.$store.state.server_status.NumberOfBooks;
   },
   //挂载前
   beforeMount() {
   },
   onMounted() {
-    // https://v3.cn.vuejs.org/api/options-lifecycle-hooks.html#beforemount
-    this.$nextTick(function () {
-      //视图渲染之后运行的代码
-    })
   },
   //卸载前
   beforeUnmount() {
   },
   methods: {
+    onBackToBookShelf() {
+      this.$router.push({
+        name: "BookShelf"
+      });
+    },
     onRefreshPage() {
       location.reload();
     },
@@ -101,21 +99,21 @@ export default defineComponent({
     onFinishUpload({ file }) {
       console.log(file);
       //每次上传完成后，触发轮询的次数
-      let minTryNum = 20;
+      let minTryNum = 5;
       const pollTimer = setInterval(() => {
         //服务器拉取最新状态，看是否新加了书籍
         this.$store.dispatch("syncSeverStatusDataAction");
-        //ES6语法，需要反单引号
-        console.log(`this.$store.state.server_status.NumberOfBooks：${this.$store.state.server_status.NumberOfBooks}`);
+        //重新拉取书架数据,目前的写法并不需要执行
+        // this.$store.dispatch("syncBookShelfDataAction");
+        //ES6语法的格式化，字符串需要使用反单引号
+        console.log(`this.$store.state.server_status.NumberOfBooks: ${this.$store.state.server_status.NumberOfBooks}`);
         if (this.$store.state.server_status.NumberOfBooks > 0) {
-          //重新拉取书架数据
-          this.$store.dispatch("syncBookShelfDataAction");
           minTryNum = minTryNum - 1;
           if (minTryNum <= 0) {
             clearInterval(pollTimer);
           }
         }
-      }, 1500);
+      }, 2000);
     },
     // 拼接上传接口路径
     actionUrl() {
@@ -134,6 +132,5 @@ export default defineComponent({
 <style scoped>
 #UploadFile {
   padding: 20px;
-  background: v-bind("model.color");
 }
 </style>

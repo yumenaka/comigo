@@ -261,9 +261,9 @@ func saveFileToCache(id string, filename string, data []byte, query url.Values, 
 	}
 	//特殊字符转义，避免保存不了
 	filename = url.PathEscape(filename)
-	//如果是封面，另存为cover.png、cover.jpeg
+	//如果是封面，另存为comigo_cover.png、comigo_cover.jpeg
 	if isCover {
-		filename = "cover" + path.Ext(filename)
+		filename = "comigo_cover" + path.Ext(filename)
 	}
 	err = ioutil.WriteFile(filepath.Join(common.Config.CacheFilePath, id, filename), data, 0644)
 	if err != nil {
@@ -326,9 +326,9 @@ func getFileFromCache(id string, filename string, query url.Values, isCover bool
 	}
 	//文件名经过转义，避免保存不了，所以这里也必须转义才能取到本地文件
 	filename = url.PathEscape(filename)
-	//如果是封面，另存为cover.png、cover.jpeg
+	//如果是封面，另存为comigo_cover.png、comigo_cover.jpeg
 	if isCover {
-		filename = "cover" + path.Ext(filename)
+		filename = "comigo_cover" + path.Ext(filename)
 	}
 	loadedImage, err := ioutil.ReadFile(filepath.Join(common.Config.CacheFilePath, id, filename))
 	if err != nil && common.Config.Debug {
