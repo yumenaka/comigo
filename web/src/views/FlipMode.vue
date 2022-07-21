@@ -665,6 +665,10 @@ export default defineComponent({
         //正在读的是同一本书、就翻页。
         if (syncData.book_id === this.book.id && syncData.now_page_num !== this.nowPageNum) {
           // console.log(syncData);
+          //如果是合并双页的状态，那么页数差距必须大于1才翻页
+          if(this.simpleDoublePageModeFlag&&(syncData.now_page_num-this.nowPageNum===1||syncData.now_page_num-this.nowPageNum===-1)){
+            return
+          }
           this.toPage(syncData.now_page_num, false);
         }
       }
