@@ -30,26 +30,49 @@ export default {
         //let observer = new IntersectionObserver(callback, options);
         // https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry/intersectionRatio
         this.observer = new IntersectionObserver(([entry]) => {
+
+            // //测试用，只看某一页
+            // if (this.pageNum !== 2) {
+            //     return
+            // }
+
             //如果没有开同步，不反应。
             if (!this.syncPageByWS) {
                 return
             }
-            //如果没交叉，发送数清零，可再次发送消息
-            if (!entry.isIntersecting) {//isIntersecting：被监视对象与root是否交叉。
+
+            // 翻页判断：以顶部为准：从下往上，接触顶部的时候才改变页数。因为要留一些提前量，所以不是0.
+            // 测试了一下，提前量设置为固定值似乎比 (window.innerHeight * 0.3)这样的比例值好？
+            let isCross=entry.boundingClientRect.top <=30;
+
+            // 翻页判断1：以底部为准：从下往上，进入viewport的时候才改变页数
+            // let isCross=entry.boundingClientRect.bottom >= entry.target.clientHeight;
+
+            // 翻页判断3：视口中线：window.innerHeight * 0.5
+            // let ElementHight = entry.boundingClientRect.bottom - entry.boundingClientRect.top;
+            // let ElementMiddleLine = entry.boundingClientRect.top + ElementHight * 0.5;
+            // let isCross = (ElementMiddleLine >= window.innerHeight * 0.5);
+            // console.log("ElementHight * 0.5:", ElementHight * 0.5,"entry.boundingClientRect.top:",entry.boundingClientRect.top, "window.innerHeight*0.5:", window.innerHeight * 0.5);
+            // console.dir(entry.boundingClientRect);
+
+            //如果没交叉（不可见），或不满足发送信息的条件，发送数清零。滚动到满足条件时，可再次发送消息
+            if ((!entry.isIntersecting) || (!isCross)) {//isIntersecting：被监视对象与root是否交叉。
                 this.flipModeMessageNumCount = 0;
                 return
             }
             // DOMRect 对象，提供元素的大小及其相对于视口的位置。
             // https://developer.mozilla.org/zh-CN/docs/Web/API/Element/getBoundingClientRect
-            // console.dir(entry.boundingClientRect);
+
             //viewport
             // console.dir(entry.target);
-            // const viewportHeight = entry.target.clientHeight;
-            // console.log("viewport_clientHeight:", viewport_clientHeight);
-            // //以底部为准：从下往上，进入viewport的时候才增加页数
-            // if (entry.boundingClientRect.bottom >= viewportHeight) {
-            //以顶部为准：从下往上，接触顶部的时候才改变页数。因为要留一些提前量，所以不是0.
-            if (entry.boundingClientRect.top <= 30) {
+            //Dom本身的宽高 entry.target.clientWidth entry.target.clientHeight
+            //视口的宽高  window.innerWidth  window.innerHeight
+
+
+
+
+            // 翻页信息发送时机：顶部接触中线的时候才改变页数。
+            if ((entry.isIntersecting) && isCross) {
                 this.$emit("refreshNowPageNum", this.pageNum);
                 //如果正在自动滚动，禁止发翻页消息
                 if (this.autoScrolling) {
@@ -69,7 +92,32 @@ export default {
         this.observer.disconnect();
     },
     methods: {
-        //Websocket 发送消息，给卷轴模式
+        //发消息，给翻页模式
+        sendNowPageToFlipMode() {
+            //socket未初始化的时候不发送
+            if (this.$socket.readyState !== 1) {
+                return
+            }
+            const flip_data = {
+                book_id: this.book_id,
+                now_page_num: this.pageNum,
+                need_double_page_mode: false,
+            };
+            // console.log("this.$store.userID: " + this.$store.state.userID);
+            const flipMsg = {
+                type: "flip_mode_sync_page",
+                status_code: 200,
+                user_id: this.$store.state.userID,
+                token: this.$store.state.token,
+                detail: "翻页模式，发送数据", // 消息描述
+                data_string: JSON.stringify(flip_data),
+            };
+            // 配置为了json，可调用sendObj方法来发送数据
+            this.$socket.sendObj(flipMsg);
+            this.flipModeMessageNumCount = this.flipModeMessageNumCount + 1;
+            // console.log("send flipMsg:", flipMsg);
+        },
+        //发消息，给卷轴模式
         sendNowPageToScrollMode(intersectionRatio) {
             //socket未初始化的时候不发送
             if (this.$socket.readyState !== 1) {
@@ -92,32 +140,6 @@ export default {
             };
             // console.log("send scrollMsg:", scrollMsg); 
             this.$socket.sendObj(scrollMsg);
-        },
-
-        //Websocket 发送消息，给翻页模式
-        sendNowPageToFlipMode() {
-            //socket未初始化的时候不发送
-            if (this.$socket.readyState !== 1) {
-                return
-            }
-            const flip_data = {
-                book_id: this.book_id,
-                now_page_num: this.pageNum,
-                need_double_page_mode: false,
-            };
-            console.log("this.$store.userID: " + this.$store.state.userID);
-            const flipMsg = {
-                type: "flip_mode_sync_page",
-                status_code: 200,
-                user_id: this.$store.state.userID,
-                token: this.$store.state.token,
-                detail: "翻页模式，发送数据", // 消息描述
-                data_string: JSON.stringify(flip_data),
-            };
-            // 配置为了json，可调用sendObj方法来发送数据
-            this.$socket.sendObj(flipMsg);
-            this.flipModeMessageNumCount = this.flipModeMessageNumCount + 1;
-            console.log("send flipMsg:", flipMsg);
         },
     },
 };

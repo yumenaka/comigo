@@ -279,9 +279,8 @@ export default defineComponent({
 	},
 	data() {
 		return {
-			//当前页数,注意语义,直接就是1开始的页数,不是数组下标,在pages\images数组当中用的时候需要-1
-			nowPageNum: 1,
-			startLoadPageNum: 1,
+			nowPageNum: 1,//当前页数,从1开始,,不是数组下标,在pages.images数组当中用的时候需要-1
+			startLoadPageNum: 1,//开始加载的页数,从1开始,不是数组下标,在pages.images数组当中用的时候需要-1
 			StartFromBreakpoint: false,
 			loadPageLimit: 20,//一次最多载入的漫画张数，默认为20.
 			endLoadPageNum: 20,//载入漫画的最后一页，默认为20.
@@ -665,13 +664,8 @@ export default defineComponent({
 			});
 		},
 
-		//刷新到底部的时候,改变images数据 默认参数： NowBlockNumPlusOne = false
+		//刷新到底部的时候,改变images数据
 		loadPages() {
-			// const MaxPageNum = this.book.all_page_num
-			// const LoadPageLimit = this.loadPageLimit
-			// var NowBlockNum = Math.ceil(this.nowPageNum / LoadPageLimit)//现在在哪个区块（向上取整，有小数，则整数部分加1）取整：parseInt()
-			// const AllBlockNum = Math.ceil(MaxPageNum/LoadPageLimit)//总区块数（向上取整，有小数，则整数部分加1）
-
 			// console.log("startLoadPageNum:", this.startLoadPageNum)
 			// console.log("endLoadPageNum:", this.endLoadPageNum)
 			// console.dir(this.localImages)
@@ -727,13 +721,14 @@ export default defineComponent({
 				console.log("读取页数失败,this.nowPageNum = " + this.nowPageNum);
 				return
 			}
-			this.nowPageNum = saveNum;
-			this.startLoadPageNum = saveNum;
+
 			//至少读到第三页才开始提醒中途加载
-			if (this.nowPageNum >= 3) {
+			if (saveNum >= 3) {
+				this.nowPageNum = saveNum;
+				this.startLoadPageNum = saveNum;
 				this.loadBookMarkDialog();
+				console.log("成功读取页数" + saveNum);
 			}
-			console.log("成功读取页数" + saveNum);
 		},
 		//页面排序相关
 		onResort(key) {
