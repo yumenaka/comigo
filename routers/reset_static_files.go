@@ -29,7 +29,7 @@ func SetDownloadLink() {
 					staticUrl := "/raw/" + info.BookID + "/" + info.Name
 					if checkUrlRegistered(info.BookID) {
 						if common.Config.Debug {
-							fmt.Println("static 注册过了：" + info)
+							fmt.Println("static 注册过了：", info)
 						}
 						continue
 					} else {

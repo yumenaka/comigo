@@ -107,7 +107,7 @@ const store = createStore({
       clearInterval(state.socket.heartBeatTimer);
       state.socket.heartBeatTimer = 0;
       console.log("【Websockets】连接已断开: " + new Date());
-      console.log(event);
+      // console.log(event);
     },
     // 发生错误
     SOCKET_ONERROR(state, event) {
