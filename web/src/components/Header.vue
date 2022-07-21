@@ -7,9 +7,17 @@
       <return-up-back />
     </n-icon>
 
-    <!-- 一本书，点击返回主页，但是目前应该没有任何反应 -->
-    <n-icon class="p-0 m-0" v-if="!showReturnIcon" @click="onClickToTop()" size="40">
-      <book-outline />
+    <!-- 上传按钮，点击进入上传页面 -->
+    <n-icon class="p-0 m-0" v-if="!showReturnIcon" @click="gotoUploadPage()" size="40">
+      <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512">
+        <path
+          d="M320 367.79h76c55 0 100-29.21 100-83.6s-53-81.47-96-83.6c-8.89-85.06-71-136.8-144-136.8c-69 0-113.44 45.79-128 91.2c-60 5.7-112 43.88-112 106.4s54 106.4 120 106.4h56"
+          fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></path>
+        <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"
+          d="M320 255.79l-64-64l-64 64"></path>
+        <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"
+          d="M256 448.21V207.79"></path>
+      </svg>
     </n-icon>
 
     <!-- 标题-->
@@ -47,7 +55,7 @@
         </g>
       </svg>
       <!-- 右边的设置图标,点击屏幕中央也可以打开  可自定义方向 -->
-      <n-icon class="w-10" size="40" @click="this.onClickSettingIcon('right')">
+      <n-icon v-if="showSettingsIcon" class="w-10" size="40" @click="this.onClickSettingIcon('right')">
         <settings-outline />
       </n-icon>
     </div>
@@ -57,17 +65,17 @@
 <script>
 import { useCookies } from "vue3-cookies";
 import { NIcon, useMessage, } from 'naive-ui'
-import { BookOutline, ReturnUpBack, SettingsOutline } from '@vicons/ionicons5'
+import { ReturnUpBack, SettingsOutline } from '@vicons/ionicons5'
 import { defineComponent } from 'vue'
 import Qrcode from "@/components/Qrcode.vue";
 import screenfull from 'screenfull'
 export default defineComponent({
   name: "ComigoHeader",
-  props: ['setDownLoadLink', 'headerTitle', 'bookID', 'showReturnIcon',],
+  props: ['setDownLoadLink', 'headerTitle', 'bookID', 'showReturnIcon','showSettingsIcon',],
   emits: ['drawerActivate'],
   components: {
     NIcon,
-    BookOutline,//图标,来自 https://www.xicons.org/#/   需要安装（npm i -D @vicons/ionicons5）与导入
+    // BookOutline,//图标,来自 https://www.xicons.org/#/   需要安装（npm i -D @vicons/ionicons5）与导入
     ReturnUpBack,
     SettingsOutline, //图标,来自 https://www.xicons.org/#/   需要安装（npm i -D @vicons/ionicons5）
     Qrcode,//https://github.com/scopewu/qrcode.vue
@@ -119,9 +127,11 @@ export default defineComponent({
       this.$router.back();
       // location.reload();
     },
-    //点击主页图标的时候，回到主页
-    onClickToTop() {
-      this.$router.push('/')
+    //点击上传的时候，去上传页
+    gotoUploadPage() {
+      this.$router.push({
+        name: "UploadPage"
+      });
     },
 
     //点击主页图标的时候，回到主页

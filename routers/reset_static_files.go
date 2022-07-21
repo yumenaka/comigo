@@ -2,8 +2,18 @@ package routers
 
 import (
 	"fmt"
+
 	"github.com/yumenaka/comi/book"
+	"github.com/yumenaka/comi/common"
 )
+
+//用来防止重复注册的URL表，key是bookID，值是StaticURL
+var staticUrlMap = make(map[string]string)
+
+func checkUrlRegistered(bookID string) bool {
+	_, ok := staticUrlMap[bookID]
+	return ok
+}
 
 //SetDownloadLink 重新设定压缩包下载链接
 func SetDownloadLink() {
@@ -15,7 +25,17 @@ func SetDownloadLink() {
 			for _, info := range allBook.BookInfos {
 				//下载文件
 				if info.Type != book.TypeBooksGroup && info.Type != book.TypeDir {
-					api.StaticFile("/raw/"+info.BookID+"/"+info.Name, info.FilePath)
+					//staticUrl := "/raw/" + info.BookID + "/" + url.QueryEscape(info.Name)
+					staticUrl := "/raw/" + info.BookID + "/" + info.Name
+					if checkUrlRegistered(info.BookID) {
+						if common.Config.Debug {
+							fmt.Println("static 注册过了：" + info)
+						}
+						continue
+					} else {
+						api.StaticFile(staticUrl, info.FilePath)
+						staticUrlMap[info.BookID] = staticUrl
+					}
 				}
 			}
 		}

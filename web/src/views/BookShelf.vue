@@ -1,7 +1,7 @@
 <template>
     <div class="BookShelf w-full h-screen flex flex-col">
         <Header class="flex-none h-12" :bookIsFolder="false" :headerTitle="this.bookShelfTitle"
-            :showReturnIcon="this.headerShowReturnIcon" :bookID="this.bookshelf ? this.bookshelf[0].id : 'null'"
+            :showReturnIcon="this.headerShowReturnIcon" :showSettingsIcon="true" :bookID="this.bookshelf ? this.bookshelf[0].id : 'null'"
             :setDownLoadLink="false" @drawerActivate="this.drawerActivate">
         </Header>
 
@@ -22,9 +22,6 @@
                     :openURL="getBookCardOpenURL(book_info.id, book_info.book_type, book_info.name)"
                     :a_target="getBookCardTarget(book_info.book_type)">
                 </BookCard>
-                <!-- 没有书的时候显示上传控件 -->
-                <UploadFile class="w-9/12 h-full flex flex-col justify-center" v-if="this.bookshelf === null">
-                </UploadFile>
             </div>
         </div>
         <Bottom class="flex-none h-12" :softVersion="
@@ -82,8 +79,6 @@ import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
 import BookCard from "@/components/BookCard.vue";
 import Bottom from "@/components/Bottom.vue";
-import UploadFile from "@/components/UploadFile.vue";
-
 import { defineComponent, reactive } from "vue";
 import { useCookies } from "vue3-cookies"; // https://github.com/KanHarI/vue3-cookies
 import axios from "axios";
@@ -95,9 +90,8 @@ export default defineComponent({
     components: {
         Header, // 自定义页头
         Drawer, // 自定义抽屉
-        BookCard, // 自定义抽屉
+        BookCard, // 书本
         Bottom, // 自定义页尾
-        UploadFile,//自定义的文件上传领域，一本书也没有的时候用
         NButton,//按钮,来自:https://www.naiveui.com/zh-CN/os-theme/components/button
         // NSpace,
         NSwitch,
@@ -242,6 +236,7 @@ export default defineComponent({
         this.getBookShelfData();
         // 刷新ReadMode
         this.refreshReadMode();
+
         // 监听路由参数的变化,刷新本地数据
         this.$watch(
             () => this.$route.params,
@@ -288,7 +283,6 @@ export default defineComponent({
     // 卸载前
     beforeUnmount() { },
     methods: {
-
         remoteIsWindows() {
             if (!this.$store.state.server_status) {
                 return false
@@ -448,6 +442,7 @@ export default defineComponent({
                 //没有的时候，就按照本地的存储值或默认值排序
                 sort_image_by_str = "&sort_by=" + this.resort_hint_key
             }
+            let _this=this
             axios
                 .get("getlist?max_depth=1" + sort_image_by_str)
                 .then((response) => {
@@ -455,6 +450,10 @@ export default defineComponent({
                         this.bookshelf = response.data;
                     } else {
                         this.bookshelf = null;
+                        this.bookShelfTitle = _this.$t('no_book_found_hint');
+                        this.$router.push({
+                            name: "UploadPage"
+                        });
                         // console.dir(response);
                         // console.dir(response.data);
                         // console.dir(this.bookshelf);
@@ -499,13 +498,10 @@ export default defineComponent({
             if (this.$route.params.id !== undefined) {//不是null而是undefined
                 return;
             }
-            // console.log(this.bookShelfTitle);
-
-            //如果没有一本书
-            if (this.bookshelf === null) {
-                this.bookShelfTitle = this.$t('no_book_found_hint');
+            if(this.bookshelf === null){
                 return
             }
+
             // 设置当前深度,这个值目前没用到
             if (this.bookshelf[0].depth !== null) {
                 this.max_depth = this.bookshelf[0].depth;
@@ -567,9 +563,6 @@ export default defineComponent({
 }
 
 .bookshelf {
-    /* max-width: 100%;
-    min-height: 90vh; */
-    /* height: auto; */
     background: v-bind("model.backgroundColor");
 }
 </style>

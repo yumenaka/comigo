@@ -1,7 +1,7 @@
 <template>
 	<div id="ScrollMode" class="manga">
 		<Header :setDownLoadLink="this.needDownloadLink()" :headerTitle="this.book.name" :bookID="this.book.id"
-			:showReturnIcon="true" v-bind:style="{ background: model.interfaceColor }"
+			:showReturnIcon="true" :showSettingsIcon="true" v-bind:style="{ background: model.interfaceColor }"
 			@drawerActivate="this.drawerActivate">
 		</Header>
 		<!-- 顶部的加载全部页面顶部按钮 -->
@@ -32,7 +32,7 @@
 			:softVersion="this.$store.state.server_status.ServerName ? this.$store.state.server_status.ServerName : 'Comigo'">
 		</Bottom>
 
-		
+
 		<Drawer :initDrawerActive="this.drawerActive" :initDrawerPlacement="this.drawerPlacement"
 			@saveConfig="this.saveConfigToLocalStorage" @startSketch="this.startSketchMode"
 			@closeDrawer="this.drawerDeactivate" @setT="this.OnSetTemplate" :readerMode="this.readerMode"
@@ -410,22 +410,23 @@ export default defineComponent({
 		}
 		//根据路由参数获取特定书籍
 		this.nowLoading = true;
+		var _this = this
 		axios
 			.get("/getbook?id=" + this.$route.params.id + sort_image_by_str)
 			.then((response) => {
 				//请求接口成功的逻辑
 				this.book = response.data;
 				this.loadPages();
+				// 询问用户是否从中间开始加载，延迟1.5秒执行
+				setTimeout(function () {
+					_this.loadLocalBookMark();
+					_this.nowLoading = false;
+				}, 1500);
 			})
 			.finally(
 				() => {
 					document.title = this.book.name;
 					// console.log("成功获取书籍数据,书籍ID:" + this.$route.params.id);
-					// 询问用户是否从中间开始加载，延迟1.5秒执行
-					var _this = this
-					setTimeout(function () {
-						_this.loadLocalBookMark();
-					}, 1500);
 				}
 			);
 		//监听路由参数的变化,刷新本地的Book数据
@@ -641,10 +642,11 @@ export default defineComponent({
 		loadBookMarkDialog() {
 			this.dialog.warning({
 				title: this.$t('found_read_history'),
-				content: this.$t('load_from_interrupt').replace("XX", this.startLoadPageNum),
+				content: this.$t('load_from_interrupt').replace("XX", this.nowPageNum),
 				positiveText: this.$t('from_interrupt'),
 				negativeText: this.$t('starting_from_beginning'),
 				onPositiveClick: () => {
+					this.startLoadPageNum = this.nowPageNum
 					if (this.startLoadPageNum + this.loadPageLimit <= this.book.all_page_num) {
 						this.endLoadPageNum = this.startLoadPageNum + this.loadPageLimit;
 					} else {
@@ -690,6 +692,8 @@ export default defineComponent({
 		//监听子组件事件: https://v3.cn.vuejs.org/guide/component-basics.html#%E7%9B%91%E5%90%AC%E5%AD%90%E7%BB%84%E4%BB%B6%E4%BA%8B%E4%BB%B6
 		//滚动页面的时候刷新页数
 		refreshNowPageNum(n) {
+			// console.log("refreshNowPageNum:"+n);
+			// console.log("this.nowLoading:"+this.nowLoading);
 			if (this.nowLoading) {
 				return
 			}
@@ -701,8 +705,9 @@ export default defineComponent({
 
 		//滑动页面、停止滚动的时候保存页数
 		saveLocalBookMark(value) {
-			if (this.saveNowPageNumFlag) {
+			if (this.saveNowPageNumFlag&&(!this.nowLoading)) {
 				localStorage.setItem("nowPageNum" + this.book.id, value);
+				// console.log("save nowPageNum:"+value);
 			}
 		},
 
@@ -711,21 +716,21 @@ export default defineComponent({
 			if (!this.saveNowPageNumFlag) {
 				return
 			}
-			let cookieValue = localStorage.getItem("nowPageNum" + this.book.id);
-			if (cookieValue === null) {
+			let localValue = localStorage.getItem("nowPageNum" + this.book.id);
+			if (localValue === null) {
 				console.log("本队存储里没找到:" + "nowPageNum = " + this.nowPageNum);
 				return
 			}
-			let saveNum = Number(cookieValue);
+			let saveNum = Number(localValue);
 			if (isNaN(saveNum)) {
 				console.log("读取页数失败,this.nowPageNum = " + this.nowPageNum);
 				return
 			}
-
+			console.log("this.loadLocalBookMark() localValue:"+localValue);
 			//至少读到第三页才开始提醒中途加载
 			if (saveNum >= 3) {
 				this.nowPageNum = saveNum;
-				this.startLoadPageNum = saveNum;
+				this.startLoadPageNum = 1;
 				this.loadBookMarkDialog();
 				console.log("成功读取页数" + saveNum);
 			}
@@ -815,7 +820,7 @@ export default defineComponent({
 			this.syncPageByWS = value;
 			localStorage.setItem("SyncPageFlag", value);
 			console.log(
-				"cookie设置完毕: SyncPageFlag=" +
+				"设置完毕: SyncPageFlag=" +
 				localStorage.getItem("SyncPageByWS")
 			);
 		},
@@ -989,9 +994,6 @@ export default defineComponent({
 			//获取元素,统计页数
 			// let offsetWidth = e.currentTarget.offsetWidth;
 			// let offsetHeight = e.currentTarget.offsetHeight;
-
-
-
 		},
 		onMouseLeave(e) {
 			//离开区域的时候,清空鼠标样式

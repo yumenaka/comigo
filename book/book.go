@@ -101,7 +101,35 @@ func NewImageInfo(pageNum int, nameInArchive string, url string, fileSize int64)
 }
 
 //New  初始化Book，设置文件路径、书名、BookID等等
-func New(filePath string, modified time.Time, fileSize int64, storePath string, depth int, bookType SupportFileType) *Book {
+func New(filePath string, modified time.Time, fileSize int64, storePath string, depth int, bookType SupportFileType) (*Book, error) {
+	//查看内存中是否已经有了这本书,有了就报错，让调用者跳过
+	for _, realBook := range mapBooks {
+		fileAbaPath, err := filepath.Abs(filePath)
+		if err != nil {
+			fmt.Println(err, fileAbaPath)
+			if realBook.FilePath == filePath && realBook.ParentFolder == storePath {
+				return nil, errors.New("Duplicate books:" + filePath)
+			}
+		} else {
+			if realBook.FilePath == fileAbaPath {
+				return nil, errors.New("Duplicate books:" + fileAbaPath)
+			}
+		}
+	}
+	for _, groupBook := range mapBookGroups {
+		fileAbaPath, err := filepath.Abs(filePath)
+		if err != nil {
+			fmt.Println(err, fileAbaPath)
+			if groupBook.FilePath == filePath && groupBook.ParentFolder == storePath {
+				return nil, errors.New("Duplicate books:" + filePath)
+			}
+		} else {
+			if groupBook.FilePath == fileAbaPath {
+				return nil, errors.New("Duplicate books:" + fileAbaPath)
+			}
+		}
+	}
+	//初始化书籍
 	var b = Book{
 		Author:        []string{""},
 		Modified:      modified,
@@ -118,7 +146,7 @@ func New(filePath string, modified time.Time, fileSize int64, storePath string, 
 	//设置属性：父文件夹
 	b.setParentFolder(filePath)
 	b.setBookID()
-	return &b
+	return &b, nil
 }
 
 //初始化Book时，设置FilePath
