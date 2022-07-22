@@ -15,9 +15,10 @@ type ServerStatus struct {
 	ServerName            string //服务器描述
 	ServerHost            string
 	ServerPort            int
-	NumberOfBooks         int                //当前拥有的书籍总数
-	NumberOfOnLineUser    int                //TODO：在线用户数
-	NumberOfOnLineDevices int                //TODO：在线设备数
+	NumberOfBooks         int //当前拥有的书籍总数
+	NumberOfOnLineUser    int //TODO：在线用户数
+	NumberOfOnLineDevices int //TODO：在线设备数
+	SupportUploadFile     bool
 	ClientIP              string             //客户端IP
 	OSInfo                tools.SystemStatus //系统信息
 }
@@ -37,6 +38,7 @@ func ServerStatusHandler(c *gin.Context) {
 		ServerName:            serverName,
 		ServerHost:            host,
 		ServerPort:            common.Config.Port,
+		SupportUploadFile:     common.Config.EnableUpload,
 		NumberOfBooks:         book.GetBooksNumber(),
 		NumberOfOnLineUser:    1,
 		NumberOfOnLineDevices: 1,

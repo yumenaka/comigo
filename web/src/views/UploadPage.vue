@@ -61,6 +61,10 @@ export default defineComponent({
     methods: {
         getUploadTitile() {
             //如果没有一本书
+            if (this.$store.state.server_status.SupportUploadFile === false) {
+                return this.$t('no_support_upload_file');
+            }
+            //如果没有一本书
             if (this.$store.state.server_status.NumberOfBooks === 0) {
                 return this.$t('no_book_found_hint');
             }

@@ -50,7 +50,7 @@ func GetFileHandler(c *gin.Context) {
 	}
 	noCache := c.DefaultQuery("no-cache", "false")
 	//如果启用了本地缓存
-	if common.Config.CacheFileEnable && noCache == "false" {
+	if common.Config.CacheEnable && noCache == "false" {
 		//获取所有的参数键值对
 		query := c.Request.URL.Query()
 		//如果有缓存，直接读取本地获取缓存文件并返回
@@ -206,7 +206,7 @@ func GetFileHandler(c *gin.Context) {
 			contentType = tools.GetContentTypeByFileName(".jpg")
 		}
 		//如果启用了本地缓存
-		if common.Config.CacheFileEnable && noCache == "false" {
+		if common.Config.CacheEnable && noCache == "false" {
 			//获取所有的参数键值对
 			query := c.Request.URL.Query()
 			//缓存文件到本地，避免重复解压
@@ -255,7 +255,7 @@ func init() {
 
 //读取过一次的文件，就保存到硬盘上加快读取
 func saveFileToCache(id string, filename string, data []byte, query url.Values, contentType string, isCover bool) error {
-	err := os.MkdirAll(filepath.Join(common.Config.CacheFilePath, id), os.ModePerm)
+	err := os.MkdirAll(filepath.Join(common.Config.CachePath, id), os.ModePerm)
 	if err != nil {
 		println(locale.GetString("saveFileToCache_error"))
 	}
@@ -265,7 +265,7 @@ func saveFileToCache(id string, filename string, data []byte, query url.Values, 
 	if isCover {
 		filename = "comigo_cover" + path.Ext(filename)
 	}
-	err = ioutil.WriteFile(filepath.Join(common.Config.CacheFilePath, id, filename), data, 0644)
+	err = ioutil.WriteFile(filepath.Join(common.Config.CachePath, id, filename), data, 0644)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -330,7 +330,7 @@ func getFileFromCache(id string, filename string, query url.Values, isCover bool
 	if isCover {
 		filename = "comigo_cover" + path.Ext(filename)
 	}
-	loadedImage, err := ioutil.ReadFile(filepath.Join(common.Config.CacheFilePath, id, filename))
+	loadedImage, err := ioutil.ReadFile(filepath.Join(common.Config.CachePath, id, filename))
 	if err != nil && common.Config.Debug {
 		fmt.Println("getFileFromCache,file not found:" + filename)
 	}

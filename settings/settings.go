@@ -21,9 +21,11 @@ type ServerSettings struct {
 	Password             string          `json:"-" comment:"访问限制：密码。需要设置用户名。"`
 	CertFile             string          `json:"-" comment:"Https证书，同时设置KeyFile则启用HTTPS协议"`
 	KeyFile              string          `json:"-" comment:"Https证书，同时设置CertFile则启用HTTPS协议"`
-	CacheFileEnable      bool            `json:"-" comment:"是否保存web图片缓存，可以加快二次读取，但会占用硬盘空间"`
-	CacheFilePath        string          `json:"-" comment:"web图片缓存存储位置，默认系统临时文件夹"`
-	CacheFileClean       bool            `json:"-" comment:"退出程序的时候，清理web图片缓存"`
+	CacheEnable          bool            `json:"-" comment:"是否保存web图片缓存，可以加快二次读取，但会占用硬盘空间"`
+	CachePath            string          `json:"-" comment:"web图片缓存存储位置，默认系统临时文件夹"`
+	CacheClean           bool            `json:"-" comment:"退出程序的时候，清理web图片缓存"`
+	EnableUpload         bool            `json:"-" comment:"启用那个文件撒上传功能"`
+	UploadPath           string          `json:"-" comment:"上传文件的存储位置，默认在当前执行目录下创建 ComigoUpload 文件夹"`
 	EnableDatabase       bool            `json:"-" comment:"启用本地数据库，保存扫描到的书籍数据"`
 	ClearDatabase        bool            `json:"-" comment:"启用本地数据库时，扫描完成后，清除不存在的书籍"`
 	ExcludeFileOrFolders []string        `json:"-" comment:"需要排除的文件或文件夹"`

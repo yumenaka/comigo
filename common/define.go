@@ -30,14 +30,16 @@ var (
 	ReadingBook *book.Book
 	Srv         *http.Server
 	Config      = settings.ServerSettings{
-		Port:            1234,
-		Host:            "",
-		StoresPath:      []string{},
-		CacheFileEnable: true,
-		CacheFilePath:   "",
-		CacheFileClean:  true,
-		EnableDatabase:  false,
-		ClearDatabase:   true,
+		Port:           1234,
+		Host:           "",
+		StoresPath:     []string{},
+		CacheEnable:    true,
+		CachePath:      "",
+		CacheClean:     true,
+		UploadPath:     "",
+		EnableUpload:   true,
+		EnableDatabase: false,
+		ClearDatabase:  true,
 		//DatabaseFilePath:     "",
 		OpenBrowser:          true,
 		DisableLAN:           false,
@@ -74,15 +76,15 @@ var (
 // SetTempDir 设置临时文件夹，退出时会被清理
 func SetTempDir() {
 	//手动设置的临时文件夹
-	if Config.CacheFilePath != "" && tools.ChickExists(Config.CacheFilePath) && tools.ChickIsDir(Config.CacheFilePath) {
-		Config.CacheFilePath = path.Join(Config.CacheFilePath)
+	if Config.CachePath != "" && tools.ChickExists(Config.CachePath) && tools.ChickIsDir(Config.CachePath) {
+		Config.CachePath = path.Join(Config.CachePath)
 	} else {
-		Config.CacheFilePath = path.Join(os.TempDir(), "comigo_cache") //直接使用系统文件夹
+		Config.CachePath = path.Join(os.TempDir(), "comigo_cache") //直接使用系统文件夹
 	}
-	err := os.MkdirAll(Config.CacheFilePath, os.ModePerm)
+	err := os.MkdirAll(Config.CachePath, os.ModePerm)
 	if err != nil {
 		println(locale.GetString("temp_folder_error"))
 	} else {
-		fmt.Println(locale.GetString("temp_folder_path") + Config.CacheFilePath)
+		fmt.Println(locale.GetString("temp_folder_path") + Config.CachePath)
 	}
 }
