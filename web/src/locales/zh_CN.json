@@ -77,5 +77,6 @@
   "DownloadWindowsRegFile": "右键注册文件下载",
   "number_of_online_books": "在线书籍数量：",
   "back_to_bookshelf": "返回书架界面",
-  "no_support_upload_file": "欢迎光临，但上传文件功能被管理员关闭了"
+  "no_support_upload_file": "欢迎光临，上传文件功能被管理员关闭了",
+  "please_enable_upload": "请启用服务器的上传支持"
 }
