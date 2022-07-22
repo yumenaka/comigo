@@ -115,3 +115,5 @@ REG_FILE_HINT="windowシステムはこのファイルをインポートして�
 ENABLE_FILE_UPLOAD="ファイルのアップロードを有効にする"
 UPLOAD_PATH="アップロードされたファイルの保存先"
 UPLOAD_DISABLE_HINT="ファイルのアップロード機能が無効になっている"
+WEBSOCKET_ERROR="websocket エラー: "
+WEBSOCKET_MESSAGES="WebSocketメッセージ:"
