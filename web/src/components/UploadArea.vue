@@ -16,7 +16,8 @@
       <n-upload-dragger>
         <div style="margin-bottom: 12px">
           <n-icon size="48" :depth="3">
-            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512">
+            <svg v-if="this.$store.state.server_status.SupportUploadFile" xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512">
               <path
                 d="M320 367.79h76c55 0 100-29.21 100-83.6s-53-81.47-96-83.6c-8.89-85.06-71-136.8-144-136.8c-69 0-113.44 45.79-128 91.2c-60 5.7-112 43.88-112 106.4s54 106.4 120 106.4h56"
                 fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32">
@@ -26,12 +27,25 @@
               <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"
                 d="M256 448.21V207.79"></path>
             </svg>
+
+            <svg v-if="!this.$store.state.server_status.SupportUploadFile" xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24">
+              <path
+                d="M19 19H5V5h14v14zM3 3v18h18V3H3zm14 12.59L15.59 17L12 13.41L8.41 17L7 15.59L10.59 12L7 8.41L8.41 7L12 10.59L15.59 7L17 8.41L13.41 12L17 15.59z"
+                fill="currentColor"></path>
+            </svg>
+
           </n-icon>
         </div>
-        <n-text style="font-size: 16px">
+        <n-text v-if="this.$store.state.server_status.SupportUploadFile" style="font-size: 16px">
           {{ this.$t('drop_to_upload') }}
         </n-text>
-        <n-p depth="3" style="margin: 8px 0 0 0">
+
+        <n-text v-if="!this.$store.state.server_status.SupportUploadFile" style="font-size: 16px">
+          {{ this.$t('please_enable_upload')  }}
+        </n-text>
+
+        <n-p  depth="3" style="margin: 8px 0 0 0">
           {{ this.$t('uploaded_folder_hint') }}
         </n-p>
       </n-upload-dragger>
@@ -86,11 +100,13 @@ export default defineComponent({
   // unmounted: 当指令与元素解除绑定且父组件已卸载时，只调用一次。
   created() {
     this.beforeBookNum = this.$store.state.server_status.NumberOfBooks;
+    this.$store.dispatch("syncSeverStatusDataAction");
   },
   //挂载前
   beforeMount() {
   },
   onMounted() {
+
   },
   //卸载前
   beforeUnmount() {
@@ -110,7 +126,7 @@ export default defineComponent({
       this.message.success(file.name);
       //每次上传完成后，触发轮询的次数
       let minTryNum = 4;
-      let StartNum =this.$store.state.server_status.NumberOfBooks;
+      let StartNum = this.$store.state.server_status.NumberOfBooks;
       const pollTimer = setInterval(() => {
         //服务器拉取最新状态，看是否新加了书籍
         this.$store.dispatch("syncSeverStatusDataAction");
