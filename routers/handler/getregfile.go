@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"runtime"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -13,7 +14,10 @@ import (
 
 // GetRegFIleHandler 下载服务器配置
 func GetRegFIleHandler(c *gin.Context) {
-
+	if runtime.GOOS != "windows" {
+		fmt.Println("Now system not windows,can't generate reg file.")
+		return
+	}
 	// Windows特定文件添加右键菜单
 	// 参考资料：https://blog.csdn.net/yang382197207/article/details/80079052
 

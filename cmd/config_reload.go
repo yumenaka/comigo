@@ -19,7 +19,6 @@ import (
 func configReloadHandler(e fsnotify.Event) {
 	//打印配置文件路径与触发事件
 	fmt.Printf("配置文件改变，Comigo将在5秒后重启:%s Op:%s\n", e.Name, e.Op)
-
 	//重新读取改变后的配置文件
 	if err := viperInstance.ReadInConfig(); err != nil {
 		if common.ConfigFile == "" && common.Config.Debug {
@@ -40,12 +39,14 @@ func configReloadHandler(e fsnotify.Event) {
 		log.Fatal("Server forced to shutdown: ", err)
 	}
 	<-ctx.Done()
-	//3、扫描配置文件指定的的书籍库
+	//3、扫描配置文件指定的书籍库
 	ScanStorePathInConfig()
 	//4，保存扫描结果到数据库
 	SaveResultsToDatabase()
 	//5、通过“可执行文件名”设置部分默认参数,目前不生效
 	common.Config.SetByExecutableFilename()
+	//重新设置文件下载链接
+	routers.SetDownloadLink()
 	//重启 web 服务器
 	routers.StartWebServer()
 }

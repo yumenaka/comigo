@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/yumenaka/comi/routers/handler"
 	"io/ioutil"
 	"os"
 	"path"
@@ -87,11 +88,19 @@ func init() {
 	//sketch模式的倒计时秒数
 	//rootCmd.PersistentFlags().IntVar(&common.Config.SketchCountSeconds, "sketch_count_seconds", 90, locale.GetString("SKETCH_COUNT_SECONDS"))
 
-	rootCmd.PersistentFlags().BoolVar(&common.Config.CacheFileEnable, "cache-enable", true, locale.GetString("CACHE_FILE_ENABLE"))
+	rootCmd.PersistentFlags().BoolVar(&common.Config.CacheEnable, "enable-cache", true, locale.GetString("CACHE_FILE_ENABLE"))
 	//web图片缓存路径
-	rootCmd.PersistentFlags().StringVar(&common.Config.CacheFilePath, "cache-path", "", locale.GetString("CACHE_FILE_PATH"))
+	rootCmd.PersistentFlags().StringVar(&common.Config.CachePath, "cache-path", "", locale.GetString("CACHE_FILE_PATH"))
 	//退出时清除临时文件
-	rootCmd.PersistentFlags().BoolVar(&common.Config.CacheFileClean, "cache-clean", true, locale.GetString("CACHE_FILE_CLEAN"))
+	rootCmd.PersistentFlags().BoolVar(&common.Config.CacheClean, "cache-clean", true, locale.GetString("CACHE_FILE_CLEAN"))
+
+	//启用文件上传功能
+	rootCmd.PersistentFlags().BoolVar(&common.Config.EnableUpload, "enable-upload", true, locale.GetString("ENABLE_FILE_UPLOAD"))
+	//上传文件的保存路径
+	rootCmd.PersistentFlags().StringVar(&common.Config.UploadPath, "upload-path", "", locale.GetString("UPLOAD_PATH"))
+	handler.UploadPath = &common.Config.UploadPath
+	handler.EnableUpload = &common.Config.EnableUpload
+
 	//手动指定zip文件编码 gbk、shiftjis……
 	rootCmd.PersistentFlags().StringVar(&common.Config.ZipFileTextEncoding, "zip-encode", "gbk", locale.GetString("ZIP_ENCODE"))
 	////访问密码，还没做
@@ -151,7 +160,7 @@ func init() {
 			common.Config.EnableDatabase = true
 			common.Config.OpenBrowser = false
 			common.Config.StoresPath = []string{"C:\\test\\Comic", "D:\\some_path\\book", "/home/username/download"}
-			common.Config.CacheFilePath = ".comigo"
+			common.Config.CachePath = ".comigo"
 			bytes, err := toml.Marshal(common.Config)
 			if err != nil {
 				fmt.Println("toml.Marshal Error")
@@ -177,10 +186,9 @@ var rootCmd = &cobra.Command{
 	Use:     locale.GetString("comigo_use"),
 	Short:   locale.GetString("short_description"),
 	Example: locale.GetString("comigo_example"),
-	Version: locale.GetString("comigo_version"),
+	Version: common.Version,
 	Long:    locale.GetString("long_description"),
 	Run: func(cmd *cobra.Command, args []string) {
-
 		//解析命令，扫描文件
 		initBookStores(args)
 		//设置临时文件夹
@@ -188,8 +196,9 @@ var rootCmd = &cobra.Command{
 		//设置书籍API
 		routers.StartWebServer()
 		//退出时清理临时文件
-		//common.SetupCloseHander()
-		routers.SetShutdownHandler()
+		//扫描默认上传文件夹
+		ReScanUploadPath()
+		SetShutdownHandler()
 		return
 	},
 }

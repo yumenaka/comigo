@@ -25,22 +25,37 @@ func waitRescanMessages() {
 		// Send it out to every client that is currently connected
 		switch msg {
 		case "ComigoUpload":
+			fmt.Println("扫描上传文件夹：", msg)
+			ReScanUploadPath()
+		case "SomePath":
 			fmt.Println("收到重新扫描消息：", msg)
-			ReScanUploadPath(msg)
+			ReScanPath(msg)
 		default:
 			continue
 		}
 	}
 }
 
-//ReScanUploadPath 重新扫描上传目录
-func ReScanUploadPath(p string) {
+//ReScanUploadPath 重新扫描上传目录,因为需要设置下载路径，gin 初始化后才能执行
+func ReScanUploadPath() {
+	//没启用上传，则不扫描
+	if !common.Config.EnableUpload {
+		return
+	}
+	uploadPath := "ComigoUpload"
+	if common.Config.UploadPath != "" {
+		uploadPath = common.Config.UploadPath
+	}
+	ReScanPath(uploadPath)
+}
+
+func ReScanPath(path string) {
 	//扫描上传目录的文件
-	addList, err := common.ScanAndGetBookList(p, databaseBookList)
+	addList, err := common.ScanAndGetBookList(path, databaseBookList)
 	if err != nil {
-		fmt.Println(locale.GetString("scan_error"), p)
+		fmt.Println(locale.GetString("scan_error"), path)
 	} else {
-		common.AddBooksToStore(addList, p)
+		common.AddBooksToStore(addList, path)
 	}
 	//保存扫描结果到数据库
 	SaveResultsToDatabase()

@@ -1,7 +1,6 @@
 package routers
 
 import (
-	"context"
 	"embed"
 	"fmt"
 	"html/template"
@@ -10,10 +9,8 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
-	"os/signal"
 	"strconv"
 	"strings"
-	"syscall"
 	"time"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
@@ -366,7 +363,7 @@ func setFrpClient() {
 		r := rand.New(rand.NewSource(time.Now().UnixNano()))
 		common.Config.FrpConfig.RemotePort = 50000 + r.Intn(10000)
 	}
-	frpcError := plugin.StartFrpC(common.Config.CacheFilePath)
+	frpcError := plugin.StartFrpC(common.Config.CachePath)
 	if frpcError != nil {
 		fmt.Println(locale.GetString("frpc_server_error"), frpcError.Error())
 	} else {
@@ -434,43 +431,14 @@ func StartGinEngine(engine *gin.Engine) {
 	}()
 }
 
-//SetShutdownHandler TODO:退出时清理临时文件的函数
-func SetShutdownHandler() {
-	//优雅地停止或重启： https://github.com/gin-gonic/examples/blob/master/graceful-shutdown/graceful-shutdown/notify-with-context/server.go
-	// 创建侦听来自操作系统的中断信号的上下文。
-	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGHUP)
-	defer stop()
-	// Listen for the interrupt signal.
-	//监听中断信号。
-	<-ctx.Done()
-	//恢复中断信号的默认行为并通知用户关机。
-	stop()
-	log.Println(locale.GetString("ShutdownHint"))
-	//清理临时文件
-	if common.Config.CacheFileClean {
-		fmt.Println("\r" + locale.GetString("start_clear_file") + " CacheFilePath:" + common.Config.CacheFilePath)
-		book.ClearTempFilesALL(common.Config.Debug, common.Config.CacheFilePath)
-		fmt.Println(locale.GetString("clear_temp_file_completed"))
-	}
-	// 上下文用于通知服务器它有 5 秒的时间来完成它当前正在处理的请求
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	if err := common.Srv.Shutdown(ctx); err != nil {
-		//fmt.Println("Comigo Server forced to shutdown: ", err)
-		//time.Sleep(3 * time.Second)
-		log.Fatal("Comigo Server forced to shutdown: ", err)
-	}
-	log.Println("Comigo Server exit.")
-}
-
 ////4、setWebpServer TODO：新的webp模式：https://docs.webp.sh/usage/remote-backend/
 //func setWebpServer(engine *gin.Engine) {
 //	//webp反向代理
 //	if common.Config.EnableWebpServer {
-//		webpError := common.StartWebPServer(common.CacheFilePath+"/webp_config.json", common.ReadingBook.ExtractPath, common.CacheFilePath+"/webp", common.Config.Port+1)
+//		webpError := common.StartWebPServer(common.CachePath+"/webp_config.json", common.ReadingBook.ExtractPath, common.CachePath+"/webp", common.Config.Port+1)
 //		if webpError != nil {
 //			fmt.Println(locale.GetString("webp_server_error"), webpError.Error())
-//			//engine.Static("/cache", common.CacheFilePath)
+//			//engine.Static("/cache", common.CachePath)
 //
 //		} else {
 //			fmt.Println(locale.GetString("webp_server_start"))
@@ -484,7 +452,7 @@ func SetShutdownHandler() {
 //		if common.ReadingBook.IsDir {
 //			engine.Static("/cache/"+common.ReadingBook.BookID, common.ReadingBook.GetFilePath())
 //		} else {
-//			engine.Static("/cache", common.CacheFilePath)
+//			engine.Static("/cache", common.CachePath)
 //		}
 //	}
 //}

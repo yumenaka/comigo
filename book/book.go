@@ -309,7 +309,7 @@ func GetAllBookInfoList(sortBy string) (*BookInfoList, error) {
 		infoList.SortBooks(sortBy)
 		return &infoList, nil
 	}
-	return nil, errors.New("can not found bookshelf")
+	return nil, errors.New("error:can not found bookshelf. GetAllBookInfoList")
 }
 
 func GetAllBookList() []*Book {
@@ -343,7 +343,7 @@ func GetBookInfoListByDepth(depth int, sortBy string) (*BookInfoList, error) {
 		infoList.SortBooks(sortBy)
 		return &infoList, nil
 	}
-	return nil, errors.New("can not found bookshelf")
+	return nil, errors.New("error:can not found bookshelf. GetBookInfoListByDepth")
 }
 
 func GetBookInfoListByMaxDepth(depth int, sortBy string) (*BookInfoList, error) {
@@ -368,7 +368,7 @@ func GetBookInfoListByMaxDepth(depth int, sortBy string) (*BookInfoList, error) 
 		infoList.SortBooks(sortBy)
 		return &infoList, nil
 	}
-	return nil, errors.New("can not found bookshelf")
+	return nil, errors.New("error:can not found bookshelf. GetBookInfoListByMaxDepth")
 }
 
 func GetBookInfoListByBookGroupBookID(BookID string, sortBy string) (*BookInfoList, error) {

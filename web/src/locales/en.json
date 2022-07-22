@@ -71,10 +71,11 @@
   "re_sort_book": "Resort Book",
   "no_book_found_hint": "No book found, try uploading a file?",
   "drop_to_upload": "Click or drag files to this area to upload",
-  "uploaded_folder_hint": "The file will be uploaded to the ComigoUpload folder in the executive directory",
+  "uploaded_folder_hint": "Files are uploaded by default to the ComigoUpload folder in the executive directory",
   "scanned_hint": "Scan a total of XX books, and watch it immediately?",
   "refresh_page": "Refresh page",
   "DownloadWindowsRegFile": "WindowsRegFileDownload",
   "number_of_online_books": "Number of online books:",
-  "back_to_bookshelf": "Back to bookshelf "
+  "back_to_bookshelf": "Back to bookshelf ",
+  "no_support_upload_file": "Although coming here, the server's upload file function was turned off by the administrator"
 }
