@@ -115,3 +115,5 @@ REG_FILE_HINT="window double-click to import this file and you can register Comi
 ENABLE_FILE_UPLOAD="Enable file upload"
 UPLOAD_PATH="Save path for uploaded files"
 UPLOAD_DISABLE_HINT="Upload file feature has been disabled"
+WEBSOCKET_ERROR="websocket error: "
+WEBSOCKET_MESSAGES="websocket messages:"

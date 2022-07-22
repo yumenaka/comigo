@@ -87,7 +87,7 @@ const store = createStore({
       state.socket.heartBeatTimer = setInterval(() => {
         var date_json = new Date( new Date()).toJSON();
         var date_str = new Date(+new Date(date_json) + 8 * 3600 * 1000).toISOString().replace(/T/g, ' ').replace(/\.[\d]{3}Z/, '') 
-        const detail = "【Websockets】心跳消息。"+ date_str;
+        const detail = "【Websockets】heart Beat。"+ date_str;
         state.socket.isConnected &&
             main.config.globalProperties.$socket.sendObj({
             type:"heartbeat",

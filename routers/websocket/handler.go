@@ -2,6 +2,7 @@ package websocket
 
 import (
 	"fmt"
+	"github.com/yumenaka/comi/locale"
 	"log"
 	"net/http"
 
@@ -91,7 +92,7 @@ func WsHandler(c *gin.Context) {
 		err = wsConn.ReadJSON(&msg)
 		if err != nil {
 			//fmt.Println()
-			log.Printf("websocket服务器错误: %v", err)
+			log.Printf(locale.GetString("WEBSOCKET_ERROR")+"%v", err)
 			//如果从 socket 中读取数据有误，我们假设客户端已经因为某种原因断开。我们记录错误并从全局的 “clients” 映射表里删除该客户端，这样一来，我们不会继续尝试与其通信。
 			delete(clients, wsConn)
 			break
