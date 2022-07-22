@@ -25,7 +25,7 @@
       <div v-if="this.showTitle"
         class="absolute inset-x-0 bottom-0 h-1/4 bg-gray-100 bg-opacity-80 font-semibold border-blue-800 rounded-b">
         <!-- 如果把链接的 target 属性设置为 "_blank"，该链接会在新窗口中打开。 -->
-        <span class="absolute inset-x-0  font-bold bottom-0 align-middle">{{
+        <span class="absolute inset-x-0  font-bold top-0 p-1 align-middle">{{
             this.shortTitle
         }}</span>
       </div>
@@ -42,7 +42,7 @@ import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "BookCover",
-  props: ["title", "image_src", "id", "readerMode", "showTitle", "childBookNum", "openURL", "a_target"],
+  props: ["title", "image_src", "id", "readerMode", "showTitle", "childBookNum", "openURL", "a_target", "simplifyTitle"],
   components: {
     // NCard,
     // NEllipsis,
@@ -53,10 +53,37 @@ export default defineComponent({
   },
   computed: {
     shortTitle() {
-      if (this.title.length <= 17) {
-        return this.title;
+      let short_title = this.title
+      //使用 JavaScript replace() 方法替换掉一些可省略的字符串
+      if (this.simplifyTitle) {
+        // 中文：/[\u4e00-\u9fa5]/
+        // 日文：/[\u0800-\u4e00]/
+        // 韩文：/[\uac00-\ud7ff]/
+        // 空格：[\s]
+
+
+        //删除左半部分：任意中日韩字符或空格，g表示多次匹配、不限次数
+        const reg = /[\[\(（【][A-Za-z0-9_\-\s+\u4e00-\u9fa5\u0800-\u4e00\uac00-\ud7ff]+/g;
+        // const reg =  /[\]）】\)][\]）】\)]/;
+        short_title = short_title.replace(reg, "");
+        //删除右半部分
+        const reg2 = /[\]）】\)]/g;
+        short_title = short_title.replace(reg2, "");
+        // //去除所有空格
+        // short_title = short_title.replace(/[\s]/g, "");
+
+        //去除开头的空格
+        short_title = short_title.replace(/^[\s]/, "");
+
+        //所有特殊字符
+        const reg0 = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]");
+        short_title = short_title.replace(reg0, "");
       }
-      return `${this.title.substr(0, 17)}…`;
+
+      if (short_title.length <= 15) {
+        return short_title;
+      }
+      return `${short_title.substr(0, 15)}…`;
     },
   },
   data() {

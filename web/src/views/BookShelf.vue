@@ -1,8 +1,9 @@
 <template>
     <div class="BookShelf w-full h-screen flex flex-col">
         <Header class="flex-none h-12" :bookIsFolder="false" :headerTitle="this.bookShelfTitle"
-            :showReturnIcon="this.headerShowReturnIcon" :showSettingsIcon="true" :bookID="this.bookshelf ? this.bookshelf[0].id : 'null'"
-            :setDownLoadLink="false" @drawerActivate="this.drawerActivate">
+            :showReturnIcon="this.headerShowReturnIcon" :showSettingsIcon="true"
+            :bookID="this.bookshelf ? this.bookshelf[0].id : 'null'" :setDownLoadLink="false"
+            @drawerActivate="this.drawerActivate">
         </Header>
 
         <!-- 渲染书架部分 有书的时候显示书  没有的时候显示上传控件-->
@@ -16,8 +17,8 @@
             <!-- 有书的时候显示书 -->
             <div class="flex flex-row flex-wrap justify-center min-h-48">
                 <BookCard v-for="(book_info, key) in this.bookshelf" :key="key" :title="book_info.name"
-                    :id="book_info.id" :image_src="book_info.cover.url" :readerMode="this.readerMode"
-                    :showTitle="this.bookCardShowTitleFlag"
+                    :simplifyTitle="this.simplifyTitle" :id="book_info.id" :image_src="book_info.cover.url"
+                    :readerMode="this.readerMode" :showTitle="this.bookCardShowTitleFlag"
                     :childBookNum="book_info.child_book_num ? 'x' + book_info.child_book_num : ''"
                     :openURL="getBookCardOpenURL(book_info.id, book_info.book_type, book_info.name)"
                     :a_target="getBookCardTarget(book_info.book_type)">
@@ -54,6 +55,14 @@
                 <template #checked>{{ $t('show_book_titles') }}</template>
                 <template #unchecked>{{ $t('show_book_titles') }}</template>
             </n-switch>
+
+            <!-- 开关：简化书名 -->
+            <n-switch size="large" v-model:value="this.simplifyTitle" @update:value="setSimplifyTitle">
+                <template #checked>{{ $t('simplify_book_titles') }}</template>
+                <template #unchecked>{{ $t('simplify_book_titles') }}</template>
+            </n-switch>
+
+
 
             <!-- 页面重新排序 -->
             <n-select :placeholder='this.$t("re_sort_book")' @update:value="this.onResort" :options="options" />
@@ -141,6 +150,7 @@ export default defineComponent({
     },
     data() {
         return {
+            simplifyTitle: true,//简化显示标题
             resort_hint_key: "filename",//书籍的排序方式。可以按照文件名、修改时间、文件大小排序（或反向排序）
             options: [
                 {
@@ -257,6 +267,14 @@ export default defineComponent({
         } else if (localStorage.getItem("BookCardShowTitleFlag") === "false") {
             this.bookCardShowTitleFlag = false;
         }
+
+        // 简化标题
+        if (localStorage.getItem("SimplifyTitle") === "true") {
+            this.simplifyTitle = true;
+        } else if (localStorage.getItem("SimplifyTitle") === "false") {
+            this.simplifyTitle = false;
+        }
+
 
         // 当前颜色
         if (localStorage.getItem("BackgroundColor") != null) {
@@ -419,6 +437,13 @@ export default defineComponent({
             localStorage.setItem("BookCardShowTitleFlag", value);
             // console.log("成功保存设置: BookCardShowTitleFlag=" + localStorage.getItem("BookCardShowTitleFlag"));
         },
+
+        // 书籍卡片是否显示文字标题
+        setSimplifyTitle(value) {
+            this.simplifyTitle = value;
+            localStorage.setItem("SimplifyTitle", value);
+        },
+
         // 初始化或者路由变化时,更新本地BookShelf相关数据
         getBookShelfData() {
             if (this.$route.params.group_id) {
@@ -442,7 +467,7 @@ export default defineComponent({
                 //没有的时候，就按照本地的存储值或默认值排序
                 sort_image_by_str = "&sort_by=" + this.resort_hint_key
             }
-            let _this=this
+            let _this = this
             axios
                 .get("getlist?max_depth=1" + sort_image_by_str)
                 .then((response) => {
@@ -498,7 +523,7 @@ export default defineComponent({
             if (this.$route.params.id !== undefined) {//不是null而是undefined
                 return;
             }
-            if(this.bookshelf === null){
+            if (this.bookshelf === null) {
                 return
             }
 

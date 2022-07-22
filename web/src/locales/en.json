@@ -78,5 +78,6 @@
   "number_of_online_books": "Number of online books:",
   "back_to_bookshelf": "Back to bookshelf ",
   "no_support_upload_file": "Although coming here, the server's upload file function was turned off by the administrator",
-  "please_enable_upload": "Please enable server upload file support"
+  "please_enable_upload": "Please enable server upload file support",
+  "simplify_book_titles": "Simplify Title"
 }
