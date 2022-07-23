@@ -75,6 +75,7 @@ const (
 	TypeBooksGroup  SupportFileType = "book_group"
 	TypeCbz         SupportFileType = ".cbz"
 	TypeCbr         SupportFileType = ".cbr"
+	TypeTar         SupportFileType = ".tar"
 	TypeEpub        SupportFileType = ".epub"
 	TypePDF         SupportFileType = ".pdf"
 	TypeVideo       SupportFileType = "video"
@@ -175,6 +176,8 @@ func GetBookTypeByFilename(filename string) SupportFileType {
 		return TypeCbr
 	case ".epub":
 		return TypeEpub
+	case ".tar":
+		return TypeTar
 	case ".pdf":
 		return TypePDF
 	case ".mp4", ".m4v", ".flv", ".avi", ".webm":
