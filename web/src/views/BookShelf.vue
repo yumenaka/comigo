@@ -246,6 +246,8 @@ export default defineComponent({
     created() {
         //监听滚动，返回顶部按钮用
         window.addEventListener("scroll", this.onScroll);
+        //初始化 this.$store.state.server_status.Description
+        this.$store.dispatch("syncSeverStatusDataAction");
         // 初始化默认值,读取出来的都是字符串,不要直接用
         //书籍排序方式。可以按照文件名、修改时间、文件大小排序（或反向排序）
         if (localStorage.getItem("ResortKey_BookShelf") !== null) {
@@ -326,11 +328,11 @@ export default defineComponent({
         },
         //查看服务器是否windows，来决定显示不显示reg文件下载按钮
         remoteIsWindows() {
-            if (!this.$store.state.server_status.Description) {
+            if (!this.$store.state.server_status.OSInfo.description) {
                 return false
             }
-            // console.dir(this.$store.state.server_status.Description);
-            return this.$store.state.server_status.Description.indexOf("windows") !== -1
+            // console.dir(this.$store.state.server_status);
+            return this.$store.state.server_status.OSInfo.description.indexOf("windows") !== -1
         },
         //根据文件名、修改时间、文件大小等参数重新排序
         onResort(key) {
