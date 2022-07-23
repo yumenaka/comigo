@@ -324,7 +324,7 @@ func setWebAPI(engine *gin.Engine) {
 		c.Redirect(http.StatusMovedPermanently, "http://www.google.com/")
 	})
 	//初始化websocket
-	websocket.WsDebug = common.Config.Debug
+	websocket.WsDebug = &common.Config.Debug
 	api.GET("/ws", websocket.WsHandler)
 	SetDownloadLink()
 }

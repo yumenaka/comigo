@@ -19,7 +19,7 @@
                 <BookCard v-for="(book_info, key) in this.bookshelf" :key="key" :title="book_info.name"
                     :simplifyTitle="this.simplifyTitle" :id="book_info.id" :image_src="book_info.cover.url"
                     :readerMode="this.readerMode" :showTitle="this.bookCardShowTitleFlag"
-                    :childBookNum="book_info.child_book_num ? 'x' + book_info.child_book_num : ''"
+                    :childBookNum="book_info.child_book_num ? 'x' + book_info.child_book_num : book_info.book_type==='dir'?'dir':''"
                     :openURL="getBookCardOpenURL(book_info.id, book_info.book_type, book_info.name)"
                     :a_target="getBookCardTarget(book_info.book_type)">
                 </BookCard>
@@ -100,10 +100,9 @@ export default defineComponent({
     components: {
         Header, // 自定义页头
         Drawer, // 自定义抽屉
-        BookCard, // 书本
+        BookCard,//自定义书本
         Bottom, // 自定义页尾
         NButton,//按钮,来自:https://www.naiveui.com/zh-CN/os-theme/components/button
-        // NSpace,
         NSwitch,
         // NDivider, // 分割线  https://www.naiveui.com/zh-CN/os-theme/components/divider
         NColorPicker,//颜色选择器 https://www.naiveui.com/zh-CN/os-theme/components/color-picker
@@ -163,27 +162,27 @@ export default defineComponent({
             options: [
                 {
                     label: this.$t('sort_by_filename'),
-                    key: "filename",
+                    value: "filename",
                 },
                 {
                     label: this.$t('sort_by_modify_time'),
-                    key: "modify_time"
+                    value: "modify_time"
                 },
                 {
                     label: this.$t('sort_by_filesize'),
-                    key: "filesize"
+                    value: "filesize"
                 },
                 {
                     label: this.$t('sort_by_filename') + this.$t('sort_reverse'),
-                    key: "filename_reverse",
+                    value: "filename_reverse",
                 },
                 {
                     label: this.$t('sort_by_modify_time') + this.$t('sort_reverse'),
-                    key: "modify_time_reverse"
+                    value: "modify_time_reverse"
                 },
                 {
                     label: this.$t('sort_by_filesize') + this.$t('sort_reverse'),
-                    key: "filesize_reverse"
+                    value: "filesize_reverse"
                 },
             ],
             readerMode: "scroll",

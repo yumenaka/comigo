@@ -97,7 +97,7 @@ func WsHandler(c *gin.Context) {
 			delete(clients, wsConn)
 			break
 		} else {
-			if WsDebug {
+			if *WsDebug {
 				fmt.Printf("websocket服务器收到: %v\n", msg)
 			}
 			msgWithClientID := MessageWithClientID{Msg: msg, ClientID: clientID}
@@ -124,7 +124,7 @@ func handleMessages() {
 			case "scroll_mode_sync_page":
 				handSyncPageMessageToScrollMode(client, msgWithClientID.Msg, msgWithClientID.ClientID)
 			default:
-				handDefaultMessage(client, msgWithClientID.Msg, msgWithClientID.ClientID)
+				//handDefaultMessage(client, msgWithClientID.Msg, msgWithClientID.ClientID)
 			}
 		}
 	}

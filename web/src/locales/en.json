@@ -55,7 +55,7 @@
   "sort_reverse": "(Reverse)",
   "fullscreen": "Fullscreen",
   "sort_by_default": "default sort",
-  "sync_page": "Sync Page",
+  "sync_page": "Remote Page Sync ",
   "success_fullScreen": "Success Full Screen",
   "not_support_fullscreen": "This browser does not support full screen",
   "exit_fullScreen": "Exit fullscreen",

@@ -89,11 +89,6 @@ export default defineComponent({
       if (localValue !== null) {
         return localValue;
       }
-      //不管服务器设置，完全按照本地值来
-      // if (this.setting.template) {
-      //   localStorage.setItem("nowTemplate", this.setting.template)
-      //   return this.setting.template;
-      // }
       return "scroll";
     },
   },
@@ -101,19 +96,17 @@ export default defineComponent({
 </script>
 
 <style>
-#app {
+.app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  /* 整体颜色，做成用户设定？ */
-  /* background-color: #f6f7eb; */
   align-items: center;
 }
 
 /* 覆盖8px的浏览器默认值 */
 * {
-  /* 外边距，不指定的话，浏览器默认设置成8px */
+  /* 外边距，如果不指定，浏览器默认设置成8px 造成一些现实问题 */
   margin: 0px;
   /* 内边框 */
   padding: 0px;

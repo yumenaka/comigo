@@ -10,7 +10,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var WsDebug = true
+var WsDebug *bool
 
 //默认的处理方式：原样返回
 func handDefaultMessage(client *websocket.Conn, msg Message, clientID string) {
@@ -68,7 +68,7 @@ func handSyncPageMessageToFlipMode(client *websocket.Conn, msg Message, clientID
 		log.Printf("handSyncPage_ToFlipode error: %v", err)
 		return
 	}
-	if WsDebug {
+	if *WsDebug {
 		fmt.Println(" SyncPage message toFlipMode:", data, clientID)
 	}
 	//验证收到的数据
@@ -112,7 +112,7 @@ func handSyncPageMessageToScrollMode(client *websocket.Conn, msg Message, client
 		log.Printf("handSyncPage_ToFlipode error: %v", err)
 		return
 	}
-	if WsDebug {
+	if *WsDebug {
 		fmt.Println(" SyncPage message to ScrollMode:", data, clientID)
 	}
 	if data.BookID == "" || data.NowPageNum < 0 || data.NowPageNum > math.MaxInt || data.NowPageNumPercent > 1 {

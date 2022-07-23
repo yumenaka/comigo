@@ -1,5 +1,5 @@
 <template>
-	<div id="ScrollMode" class="manga">
+	<div id="ScrollMode" class="manga" @mouseenter="onMouseEnter" @mouseleave="onMouseLeave">
 		<Header :setDownLoadLink="this.needDownloadLink()" :headerTitle="this.book.name" :bookID="this.book.id"
 			:showReturnIcon="true" :showSettingsIcon="true" v-bind:style="{ background: model.interfaceColor }"
 			@drawerActivate="this.drawerActivate">
@@ -10,20 +10,20 @@
 			size="large">{{ $t('load_all_pages') }}</button>
 		<!-- 渲染漫画部分 -->
 		<div class="main_manga" v-for="(image, n) in this.localImages" :key="image.url" @click="onMouseClick($event)"
-			@mousemove="onMouseMove" @mouseleave="onMouseLeave">
+			@mousemove="onMouseMove">
 			<ImageScroll :image_url="this.imageParametersString(image.url)" :sPWL="this.sPWL" :dPWL="this.dPWL"
-				:sPWP="this.sPWP" :dPWP="this.dPWP" :pageNum="n + this.startLoadPageNum"
+				:sPWP="this.sPWP" :dPWP="this.dPWP" :MyPageNum="n + this.startLoadPageNum" :nowPageNum="this.nowPageNum"
 				:all_page_num="this.book.all_page_num" :book_id="this.book.id"
 				:showPageNumFlag_ScrollMode="this.showPageNumFlag_ScrollMode" :syncPageByWS="this.syncPageByWS"
 				:id="'JUMP_ID:' + (n + this.startLoadPageNum)" :startLoadPageNum="this.startLoadPageNum"
 				:endLoadPageNum="this.endLoadPageNum" :autoScrolling="this.autoScrolling"
-				@refreshNowPageNum="refreshNowPageNum">
+				:userControlling="this.userControlling" @refreshNowPageNum="refreshNowPageNum">
 			</ImageScroll>
 		</div>
 
 		<Observer @loadNextBlock="loadNextBlock" />
 		<!-- 返回顶部的圆形按钮，向上滑动的时候出现 -->
-		<n-back-top class="bg-blue-200"  :show="showBackTopFlag" type="info" :right="20" :bottom="20" />
+		<n-back-top class="bg-blue-200" :show="showBackTopFlag" type="info" :right="20" :bottom="20" />
 		<!-- 底部最下面的返回顶部按钮 -->
 		<button class="w-24 h-12 m-2 bg-blue-300 text-gray-900 hover:bg-blue-500 rounded" @click="scrollToTop(90);"
 			size="large">{{ $t('back-to-top') }}</button>
@@ -31,7 +31,6 @@
 		<Bottom v-bind:style="{ background: model.interfaceColor }"
 			:softVersion="this.$store.state.server_status.ServerName ? this.$store.state.server_status.ServerName : 'Comigo'">
 		</Bottom>
-
 
 		<Drawer :initDrawerActive="this.drawerActive" :initDrawerPlacement="this.drawerPlacement"
 			@saveConfig="this.saveConfigToLocalStorage" @startSketch="this.startSketchMode"
@@ -41,14 +40,11 @@
 			<!-- 选择：切换页面模式 -->
 			<n-button @click="changeReaderModeToFlipMode">{{ $t('switch_to_flip_mode') }}</n-button>
 
-			<!-- <n-dropdown trigger="hover" :options="options" @select="onResort">
-				<n-button>{{ this.getSortHintText(this.resort_hint_key) }}</n-button>
-			</n-dropdown> -->
-
 			<!-- 页面重新排序 -->
 			<n-select :placeholder='this.$t("re_sort_page")' @update:value="this.onResort" :options="options" />
-
-			<!-- 同步页数 -->
+			<!-- 空白行-->
+			<!-- <p> &nbsp;</p> -->
+			<!-- 同步翻页 -->
 			<n-switch size="large" v-model:value="this.syncPageByWS" @update:value="this.setSyncPageByWS">
 				<template #checked>{{ $t("sync_page") }}</template>
 				<template #unchecked>{{ $t("sync_page") }}</template>
@@ -172,16 +168,8 @@ export default defineComponent({
 		NBackTop,//回到顶部按钮,来自:https://www.naiveui.com/zh-CN/os-theme/components/back-top
 		NSlider,//滑动选择  Slider https://www.naiveui.com/zh-CN/os-theme/components/slider
 		NSwitch,//开关   https://www.naiveui.com/zh-CN/os-theme/components/switch
-		// NLayout,//布局 https://www.naiveui.com/zh-CN/os-theme/components/layout
-		// NLayoutSider,
-		// NLayoutContent,
-		// NPageHeader,//页头 https://www.naiveui.com/zh-CN/os-theme/components/page-header
-		// NAvatar, //头像 https://www.naiveui.com/zh-CN/os-theme/components/avatar
 		NInputNumber,//数字输入 https://www.naiveui.com/zh-CN/os-theme/components/input-number
-		// NDivider,//分割线  https://www.naiveui.com/zh-CN/os-theme/components/divider
-		// NColorPicker,
 		NButton,//按钮，来自:https://www.naiveui.com/zh-CN/os-theme/components/button
-		// NDropdown,//下拉菜单 https://www.naiveui.com/zh-CN/os-theme/components/dropdown
 		NSelect,
 	},
 	// setup在创建组件前执行，因此没有this
@@ -262,28 +250,25 @@ export default defineComponent({
 				}
 				return style
 			},
-			//滑动选择用建议值
-			marks: {
-				30: '25%',
-				50: '50%',
-				75: '75%',
-				95: '95%',
-			},
 		}
 	},
 	data() {
 		return {
+			debug: false,
+			//加载页面相关
 			nowPageNum: 1,//当前页数,从1开始,,不是数组下标,在pages.images数组当中用的时候需要-1
 			startLoadPageNum: 1,//开始加载的页数,从1开始,不是数组下标,在pages.images数组当中用的时候需要-1
 			StartFromBreakpoint: false,
 			loadPageLimit: 20,//一次最多载入的漫画张数，默认为20.
 			endLoadPageNum: 20,//载入漫画的最后一页，默认为20.
-			syncPageByWS: true,//是否通过websocket同步翻页
 			saveNowPageNumFlag: true,//是否（在本地存储里面）保存与恢复页数
 			firstloadComplete: true,//首次加载是否完成
-			autoScrolling: false,//是否正在自动翻页，为真的时候，不发送WS消息
 			localImages: null,
 			nowLoading: true,//是否正在加载，延迟执行操作、隐藏按钮用
+			//ws翻页相关
+			syncPageByWS: true,//是否通过websocket同步翻页
+			userControlling: false,//用户是否正在操控，操控的时候不接收、也不发送WS翻页消息
+			autoScrolling: false,//是否正在自动翻页，为真的时候，不发送WS消息
 			book: {
 				name: "loading",
 				id: "abcde",
@@ -359,8 +344,7 @@ export default defineComponent({
 			imageMaxWidth: 10,
 			//屏幕宽横比,inLandscapeMode的判断依据
 			aspectRatio: 1.2,
-			//状态驱动的动态 CSS
-			// https://v3.cn.vuejs.org/api/sfc-style.html#%E7%8A%B6%E6%80%81%E9%A9%B1%E5%8A%A8%E7%9A%84%E5%8A%A8%E6%80%81-css
+			//状态驱动的动态 CSS https://v3.cn.vuejs.org/api/sfc-style.html#%E7%8A%B6%E6%80%81%E9%A9%B1%E5%8A%A8%E7%9A%84%E5%8A%A8%E6%80%81-css
 			//图片宽度的单位,是否使用百分比
 			imageWidth_usePercentFlag: false,
 			//横屏(Landscape)状态的漫画页宽度,百分比
@@ -440,8 +424,8 @@ export default defineComponent({
 		//文档视图调整大小时会触发 resize 事件。 https://developer.mozilla.org/zh-CN/docs/Web/API/Window/resize_event
 		window.addEventListener("resize", this.onResize);
 		this.imageMaxWidth = window.innerWidth;
-		//根据本地存储初始化默认值,读取出来的是字符串,不要直接用
 
+		//根据本地存储初始化默认值,读取出来的是字符串,不要直接用
 		//是否通过websocket同步页数
 		if (localStorage.getItem("SyncPageByWS") === "true") {
 			this.syncPageByWS = true;
@@ -455,7 +439,6 @@ export default defineComponent({
 		} else if (localStorage.getItem("showHeaderFlag") === "false") {
 			this.showHeaderFlag = false;
 		}
-		//console.log("读取设置并初始化: showHeaderFlag=" + this.showHeaderFlag);
 
 		//是否显示页数
 		if (localStorage.getItem("showPageNumFlag_ScrollMode") === "true") {
@@ -553,14 +536,12 @@ export default defineComponent({
 	beforeMount() {
 	},
 	onMounted() {
-		//console.log('mounted in the composition api!')
 		this.isLandscapeMode = this.inLandscapeModeCheck();
 		this.isPortraitMode = !this.inLandscapeModeCheck();
 		// https://v3.cn.vuejs.org/api/options-lifecycle-hooks.html#beforemount
 		this.$nextTick(function () {
 			//视图渲染之后运行的代码
 		})
-
 	},
 	//卸载前
 	beforeUnmount() {
@@ -571,6 +552,9 @@ export default defineComponent({
 	methods: {
 		//接收服务器发来的websocket消息，做各种反应（翻页、提示信息）
 		handlePacket(data) {
+			if (!this.debug) {
+				return;
+			}
 			if (!this.syncPageByWS) {
 				return;
 			}
@@ -579,24 +563,95 @@ export default defineComponent({
 			if (msg.type === "heartbeat") {
 				return;
 			}
+			//用户正在操作，不对翻页消息作反应。
+			if (this.userControlling) {
+				console.log("handlePacket:Return,Becase User Controlling");
+				return;
+			}
 			var localUserID = this.$store.userID;
 			//确保服务器发来翻页信息，来自于另一个用户
-			if (msg.user_id == localUserID) {
+			if (msg.user_id === localUserID) {
 				console.log(this.$store.userID + "接收到Message:msg.user_id=" + msg.user_id);
 				return;
 			}
+
 			if (msg.type === "scroll_mode_sync_page") {
+				// console.log("自动翻页 msg：", msg);
 				const syncData = JSON.parse(msg.data_string);
-				//正在读的是同一本书就翻页。
-				if (syncData.book_id === this.book.id && syncData.now_page_num !== this.nowPageNum) {
-					console.log("自动翻页 msg:", msg);
-					this.toPage(syncData);
+				if (syncData.book_id !== this.book.id) {
+					console.log("虽然有翻页信息，但" + syncData.book_id + "≠" + this.book.id);
+					return;
 				}
+				// console.log("自动翻页 syncData：", syncData);
+				// this.toPage(syncData);
+			}
+
+			// if (msg.type === "flip_mode_sync_page") {
+			// 	// console.log("自动翻页 msg：", msg);
+			// 	const syncData = JSON.parse(msg.data_string);
+			// 	if (syncData.book_id !== this.book.id) {
+			// 		console.log("虽然有翻页信息，但" + syncData.book_id + "≠" + this.book.id);
+			// 		return;
+			// 	}
+			// 	// console.log("自动翻页 syncData：", syncData);
+			// 	// this.toPage(syncData);
+			// }
+
+			// //服务器发来翻页信息，来自于另一个用户才做反应
+			// if (msg.type === "flip_mode_sync_page") {
+			// 	const syncData = JSON.parse(msg.data_string);
+			// 	//正在读的是同一本书、就翻页。
+			// 	if (syncData.book_id === this.book.id && syncData.now_page_num !== this.nowPageNum) {
+			// 		this.toPageSimple(syncData);
+			// 	}
+			// }
+		},
+
+		toPageSimple(syncData) {
+			//用户正在操作，不对翻页消息作反应。
+			if (this.userControlling) {
+				console.log("toPage:Return,Becase User Controlling");
+				return;
+			}
+			if (this.nowPageNum === syncData.now_page_num) {
+				console.log("别着急，等一会再翻页 this.nowPageNum=" + this.nowPageNum);
+				return;
+			}
+			//如果已经翻到很后面了，强制加载后续页
+			if (this.endLoadPageNum < syncData.now_page_num) {
+				this.endLoadPageNum < syncData.now_page_num
+			}
+			if (this.startLoadPageNum > syncData.now_page_num) {
+				this.startLoadPageNum = syncData.now_page_num
+				this.loadNextBlock();
+			}
+			//获取目标元素
+			let element = document.getElementById("JUMP_ID:" + syncData.now_page_num);
+			if (element) {
+				// console.log("找到：", element);
+				this.nowPageNum = syncData.now_page_num;
+				if (this.endLoadPageNum <= this.nowPageNum) {
+					this.loadNextBlock();
+				}
+				//Element 接口的 scrollIntoView() 方法会滚动元素的父容器，使被调用 scrollIntoView() 的元素对用户可见。
+				//https://developer.mozilla.org/zh-CN/docs/Web/API/Element/scrollIntoView
+				element.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" });
+			} else {
+				console.log("element：", element);
 			}
 		},
 
 		//滚动跳转到指定页数
-		toPage: function (syncData) {
+		toPage(syncData) {
+			//用户正在操作，不对翻页消息作反应。
+			if (this.userControlling) {
+				console.log("toPage:Return,Becase User Controlling");
+				return;
+			}
+			if (this.nowPageNum === syncData.now_page_num) {
+				console.log("别着急，等一会再翻页 this.nowPageNum=" + this.nowPageNum);
+				return;
+			}
 			if (syncData.now_page_num <= this.book.all_page_num && syncData.now_page_num >= 1) {
 				this.nowPageNum = syncData.now_page_num;
 				this.startLoadPageNum = syncData.start_load_page_num;
@@ -605,25 +660,39 @@ export default defineComponent({
 			this.loadPages();
 			// 前端页面滚动到某个位置的方式
 			//获取目标元素
-			let element = document.getElementById("JUMP_ID:" + this.nowPageNum);
-			if (!element) {
+			let element = document.getElementById("JUMP_ID:" + syncData.now_page_num);
+			if (element === null) {
 				console.log("没找到：", element);
 				this.loadNextBlock();
-				element = document.getElementById("JUMP_ID:" + this.nowPageNum);
+				element = document.getElementById("JUMP_ID:" + syncData.now_page_num);
 			}
 			//元素方法调用
 			// https://blog.csdn.net/weixin_41804429/article/details/102954146
 			// https://developer.mozilla.org/zh-CN/docs/Web/API/Element/scrollIntoView
-			var height = element.offsetTop + syncData.now_page_num_percent * element.clientHeight;
+
 			if (element) {
+				// Element.getBoundingClientRect()
+				// https://developer.mozilla.org/zh-CN/docs/Web/API/Element/getBoundingClientRect
+				//获取元素距离页面顶部的距离+额外的滚动距离
+				var height = element.getBoundingClientRect().top + window.scrollY;
+				var plusHeight = syncData.now_page_num_percent * element.clientHeight;
+				var toHeight = height + plusHeight;
+				// console.log("height=" + height, "plusHeight=" + plusHeight,"toHeight="+toHeight);
 				this.autoScrolling = true;
+				let _this = this;
 				var scrollInterval = setInterval(function () {
-					if (window.scrollY !== 0) {
-						window.scrollBy(0, height);
+					if (window.scrollY !== toHeight) {
+						console.log("height=" + height, "plusHeight=" + plusHeight, "toHeight=" + toHeight);
+						// 此处不能用window.scrollBy 在窗口中按指定的偏移量滚动文档。
+						// Window.scroll() 滚动窗口至文档中的特定位置。 https://developer.mozilla.org/zh-CN/docs/Web/API/Window/scroll
+						window.scroll(0, toHeight);
 					}
 					else {
 						clearInterval(scrollInterval);
-						this.autoScrolling = false;
+						_this.autoScrolling = false;
+					}
+					if (this.userControlling) {
+						clearInterval(scrollInterval);
 					}
 				}, 1000);
 			}
@@ -697,7 +766,7 @@ export default defineComponent({
 
 		//滑动页面、停止滚动的时候保存页数
 		saveLocalBookMark(value) {
-			if (this.saveNowPageNumFlag&&(!this.nowLoading)) {
+			if (this.saveNowPageNumFlag && (!this.nowLoading)) {
 				localStorage.setItem("nowPageNum" + this.book.id, value);
 				// console.log("save nowPageNum:"+value);
 			}
@@ -710,13 +779,13 @@ export default defineComponent({
 			}
 			let localValue = localStorage.getItem("nowPageNum" + this.book.id);
 			if (localValue === null) {
-				console.log("未发现本地书签:" + "nowPageNum = " + this.nowPageNum);
+				console.log("未发现本地书签");
 			}
 			let saveNum = Number(localValue);
 			if (isNaN(saveNum)) {
 				console.log("本地书签错误,localValue = " + localValue);
 			}
-			console.log("this.loadLocalBookMark() localValue:"+localValue);
+			console.log("Local BookMark Value:" + localValue);
 			//至少读到第三页才开始提醒中途加载
 			if (saveNum >= 3) {
 				this.nowPageNum = saveNum;
@@ -724,7 +793,7 @@ export default defineComponent({
 				this.loadBookMarkDialog();
 				console.log("成功读取页数" + saveNum);
 				return
-			}				
+			}
 			this.startLoadPageNum = 1;
 			this.loadNextBlock();
 		},
@@ -915,6 +984,27 @@ export default defineComponent({
 				this.showBackTopFlag = ((scrollTop > 400) && !this.scrollDownFlag);
 			}
 		},
+		//Vue鼠标事件和键盘事件、以及触屏事件 http://www.zhuanbike.com/thread-288.htm
+		// 只有进入绑定该事件的元素才会触发事件,也就是不会冒泡。其对应的离开事件mouseleave
+		onMouseEnter() {
+			//进入控制模式是立刻出发
+			this.userControlling = true;
+			console.log("MouseEnter User Controlling =" + this.userControlling);
+
+		},
+		onMouseLeave(e) {
+			// this.userControlling = false;
+			// console.log("MouseLeave User Controlling =" + this.userControlling);
+			//退出控制模式、延迟2秒执行
+			let _this = this;
+			setTimeout(function () {
+				_this.userControlling = true;
+				console.log("User Controlling=" + _this.userControlling);
+			}, 500);
+			//离开区域的时候,清空鼠标样式
+			e.currentTarget.style.cursor = '';
+
+		},
 		//获取鼠标位置,决定是否打开设置面板
 		onMouseClick(e) {
 			this.clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
@@ -944,7 +1034,6 @@ export default defineComponent({
 			if (inSetArea) {
 				this.drawerActivate('right')
 			}
-
 			// console.log("window.innerWidth=", window.innerWidth, "window.innerHeight=", window.innerHeight);
 			// console.log("MinX=", MinX, "MaxX=", MaxX);
 			// console.log("MinY=", MinY, "MaxY=", MaxY);
@@ -981,15 +1070,11 @@ export default defineComponent({
 			} else {
 				e.currentTarget.style.cursor = '';
 			}
-
-			//获取元素,统计页数
+			//获取元素,统计页数?
 			// let offsetWidth = e.currentTarget.offsetWidth;
 			// let offsetHeight = e.currentTarget.offsetHeight;
 		},
-		onMouseLeave(e) {
-			//离开区域的时候,清空鼠标样式
-			e.currentTarget.style.cursor = '';
-		},
+
 
 		scrollToTop(scrollDuration) {
 			let scrollStep = -window.scrollY / (scrollDuration / 15),

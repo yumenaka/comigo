@@ -55,7 +55,7 @@
   "sort_reverse": "（逆）",
   "fullscreen": "フルスクリーン",
   "sort_by_default": "圧縮順序",
-  "sync_page": "ページ同期",
+  "sync_page": "リモートページ同期",
   "success_fullScreen": "フルスクリーン成功",
   "not_support_fullscreen": "このブラウザはフルスクリーンに対応していません",
   "exit_fullScreen": "フルスクリーンを終了",
