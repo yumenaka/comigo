@@ -54,38 +54,22 @@ export default defineComponent({
   computed: {
     shortTitle() {
       let short_title = this.title
-      //使用 JavaScript replace() 方法替换掉一些可省略的字符串
+      //使用 JavaScript replace() 方法替换掉一些字符串
       if (this.simplifyTitle) {
-        // 中文：/[\u4e00-\u9fa5]/
-        // 日文：/[\u0800-\u4e00]/
-        // 韩文：/[\uac00-\ud7ff]/
-        // 空格：[\s]
-
-        //删除左半部分：任意中日韩字符或空格，g表示多次匹配、不限次数
-        const reg = /[\[\(（【][A-Za-z0-9_\-×\s+\u4e00-\u9fa5\u0800-\u4e00\uac00-\ud7ff]+/g;
-        // const reg =  /[\]）】\)][\]）】\)]/;
-        short_title = short_title.replace(reg, "");
-        //删除右半部分
-        const reg2 = /[\]）】\)]/g;
-        short_title = short_title.replace(reg2, "");
-
-        //去除开头的空格
-        short_title = short_title.replace(/^[\s]/, "");
-        //去除.zip .rar
-        short_title = short_title.replace(/.zip/, "");
-        short_title = short_title.replace(/.rar/, "");
-
-        //去除网址（没必要，因为网址含有特殊字符、不能当文件名）
-        // const regDomain = /^(?=^.{3,255}$)(http(s)?:\/\/)?(www\.)?[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+(:\d+)*(\/\w+\.\w+)*$/;
-        // short_title = short_title.replace(regDomain, "");
-
-        // //去除域名（误伤太多,同时用法似乎也不对）
-        // short_title = short_title.replace(/^(?=^.{3,255}$)[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+$/, ""); 
-
-        //所有空格
-        // short_title = short_title.replace(/[\s]/g, "");
-        //所有特殊字符
-        //const reg0 = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]");
+        //中：/[\u4e00-\u9fa5]/  日：/[\u0800-\u4e00]/  韩：/[\uac00-\ud7ff]/  空格：[\s]
+        //左半部分：任意中日韩字符或空格，g表示多次匹配、不限次数
+        short_title = short_title.replace(/[\\[\\(（【][A-Za-z0-9_\-×\s+\u4e00-\u9fa5\u0800-\u4e00\uac00-\ud7ff]+/g, "");
+        //右半部分
+        short_title = short_title.replace(/[\]）】\\)]/g, "");
+        //.zip .rar 等文件名
+        short_title = short_title.replace(/.(zip|rar|cbr|cbz|tar|pdf|mp3|mp4|flv|webm|gif|png|jpg|jpeg|webp|svg|psd|bmp|tif)/, "");
+        //域名（误伤多?）   参考了正则大全（https://any86.github.io/any-rule/）的网址(URL)
+        const domain_reg = /^(((ht|f)tps?):\/\/)?([^!@#$%^&*?.\s-]([^!@#$%^&*?.\s]{0,63}[^!@#$%^&*?.\s])?\.)+[a-zA-Z]{2,6}\/?/g;
+        short_title = short_title.replace(domain_reg, "");
+        //开头的空格
+        short_title = short_title.replace(/^[\s]/g, "");
+        //开头的特殊字符
+        short_title = short_title.replace(/^[\\-`~!@#$^&*()=|{}':;'@#￥……&*（）——|{}‘；：”“'。，、？]/, "");
       }
 
       if (short_title.length <= 15) {
