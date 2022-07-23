@@ -23,7 +23,7 @@
 
 		<Observer @loadNextBlock="loadNextBlock" />
 		<!-- 返回顶部的圆形按钮，向上滑动的时候出现 -->
-		<n-back-top :show="showBackTopFlag" type="info" color="#8a2be2" :right="20" :bottom="20" />
+		<n-back-top class="bg-blue-200"  :show="showBackTopFlag" type="info" :right="20" :bottom="20" />
 		<!-- 底部最下面的返回顶部按钮 -->
 		<button class="w-24 h-12 m-2 bg-blue-300 text-gray-900 hover:bg-blue-500 rounded" @click="scrollToTop(90);"
 			size="large">{{ $t('back-to-top') }}</button>
@@ -170,12 +170,6 @@ export default defineComponent({
 		Observer,//Observer组件,下拉刷新用
 		ImageScroll,//漫画页，包含Observer组，获取当前页用
 		NBackTop,//回到顶部按钮,来自:https://www.naiveui.com/zh-CN/os-theme/components/back-top
-		// NDrawer,//抽屉,可以从上下左右4个方向冒出. https://www.naiveui.com/zh-CN/os-theme/components/drawer
-		// NDrawerContent,//抽屉内容
-		// NSpace,//间距 https://www.naiveui.com/zh-CN/os-theme/components/space
-		// NRadio,//单选  https://www.naiveui.com/zh-CN/os-theme/components/radio
-		// NRadioButton,//单选  用按钮显得更优雅一点
-		// NRadioGroup,
 		NSlider,//滑动选择  Slider https://www.naiveui.com/zh-CN/os-theme/components/slider
 		NSwitch,//开关   https://www.naiveui.com/zh-CN/os-theme/components/switch
 		// NLayout,//布局 https://www.naiveui.com/zh-CN/os-theme/components/layout
@@ -573,8 +567,6 @@ export default defineComponent({
 		//组件销毁前,销毁监听事件
 		window.removeEventListener("scroll", this.onScroll);
 		window.removeEventListener('resize', this.onResize);
-		// 组件被销毁时清理观察者,不做的话会造成内存泄漏，因为事件监听器不会被清除。
-		// this.observer.disconnect();//停止观察所有元素
 	},
 	methods: {
 		//接收服务器发来的websocket消息，做各种反应（翻页、提示信息）
@@ -718,13 +710,11 @@ export default defineComponent({
 			}
 			let localValue = localStorage.getItem("nowPageNum" + this.book.id);
 			if (localValue === null) {
-				console.log("本队存储里没找到:" + "nowPageNum = " + this.nowPageNum);
-				return
+				console.log("未发现本地书签:" + "nowPageNum = " + this.nowPageNum);
 			}
 			let saveNum = Number(localValue);
 			if (isNaN(saveNum)) {
-				console.log("读取页数失败,this.nowPageNum = " + this.nowPageNum);
-				return
+				console.log("本地书签错误,localValue = " + localValue);
 			}
 			console.log("this.loadLocalBookMark() localValue:"+localValue);
 			//至少读到第三页才开始提醒中途加载
@@ -733,7 +723,10 @@ export default defineComponent({
 				this.startLoadPageNum = 1;
 				this.loadBookMarkDialog();
 				console.log("成功读取页数" + saveNum);
-			}
+				return
+			}				
+			this.startLoadPageNum = 1;
+			this.loadNextBlock();
 		},
 		//页面排序相关
 		onResort(key) {
@@ -915,11 +908,9 @@ export default defineComponent({
 			let scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
 			this.scrollDownFlag = scrollTop > this.scrollTopSave;
 			//防手抖,小于一定数值状态就不变 Math.abs()会导致报错
-			// let step = Math.abs(this.scrollTopSave - scrollTop);
 			let step = this.scrollTopSave - scrollTop;
 			// console.log("this.scrollDownFlag:",this.scrollDownFlag,"scrollTop:",scrollTop,"step:", step);
 			this.scrollTopSave = scrollTop
-			// this.showBackTopFlag=true
 			if (step < -5 || step > 5) {
 				this.showBackTopFlag = ((scrollTop > 400) && !this.scrollDownFlag);
 			}
@@ -1068,7 +1059,6 @@ export default defineComponent({
 /* https://developer.mozilla.org/zh-CN/docs/Web/CSS/object-fit */
 .manga img {
 	margin: auto;
-	/* object-fit: scale-down; */
 	padding: 3px 0px;
 	border-radius: 7px;
 	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
@@ -1076,7 +1066,6 @@ export default defineComponent({
 
 .manga canvas {
 	margin: auto;
-	/* object-fit: scale-down; */
 	padding: 3px 0px;
 	border-radius: 7px;
 	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);

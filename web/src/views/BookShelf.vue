@@ -25,6 +25,9 @@
                 </BookCard>
             </div>
         </div>
+        <!-- 返回顶部的圆形按钮，向上滑动的时候出现 -->
+        <n-back-top class="bg-blue-200" :show="showBackTopFlag" type="info" :right="20" :bottom="20" />
+
         <Bottom class="flex-none h-12" :softVersion="
             this.$store.state.server_status.ServerName
                 ? this.$store.state.server_status.ServerName
@@ -62,8 +65,6 @@
                 <template #unchecked>{{ $t('simplify_book_titles') }}</template>
             </n-switch>
 
-
-
             <!-- 页面重新排序 -->
             <n-select :placeholder='this.$t("re_sort_book")' @update:value="this.onResort" :options="options" />
             <p> &nbsp;</p>
@@ -72,7 +73,7 @@
                 <n-button>{{ $t('DownloadSampleConfigFile') }}</n-button>
             </a>
             <!-- 下载windows reg文件的按钮 -->
-            <a v-if="this.remoteIsWindows" href="api/comigo.reg" target="_blank">
+            <a v-if="this.remoteIsWindows()" href="api/comigo.reg" target="_blank">
                 <n-button>{{ $t('DownloadWindowsRegFile') }}</n-button>
             </a>
         </Drawer>
@@ -83,7 +84,7 @@
 // 直接导入组件并使用它。这种情况下,只有导入的组件才会被打包。
 // Firefox插件Textarea Cache 报错：源映射错误：Error: NetworkError when attempting to fetch resource.
 // Firefox插件Video DownloadHelper报错:已不赞成使用 CanvasRenderingContext2D 中的 drawWindow 方法
-import { NColorPicker, NSwitch, NButton, NSelect, } from "naive-ui";
+import { NColorPicker, NSwitch, NButton, NSelect, NBackTop, } from "naive-ui";
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
 import BookCard from "@/components/BookCard.vue";
@@ -108,6 +109,7 @@ export default defineComponent({
         NColorPicker,//颜色选择器 https://www.naiveui.com/zh-CN/os-theme/components/color-picker
         // NDropdown,//下拉菜单 https://www.naiveui.com/zh-CN/os-theme/components/dropdown
         NSelect,
+        NBackTop,//回到顶部按钮,来自:https://www.naiveui.com/zh-CN/os-theme/components/back-top
     },
     setup() {
         // 此处不能使用this
@@ -151,6 +153,12 @@ export default defineComponent({
     data() {
         return {
             simplifyTitle: true,//简化显示标题
+            //是否显示回到顶部按钮
+            showBackTopFlag: false,
+            //是否正在向下滚动
+            scrollDownFlag: false,
+            //存储现在滚动的位置
+            scrollTopSave: 0,
             resort_hint_key: "filename",//书籍的排序方式。可以按照文件名、修改时间、文件大小排序（或反向排序）
             options: [
                 {
@@ -237,6 +245,8 @@ export default defineComponent({
     // beforeUnmount: 当指令与在绑定元素父组件卸载之前时,只调用一次。
     // unmounted: 当指令与元素解除绑定且父组件已卸载时,只调用一次。
     created() {
+        //监听滚动，返回顶部按钮用
+        window.addEventListener("scroll", this.onScroll);
         // 初始化默认值,读取出来的都是字符串,不要直接用
         //书籍排序方式。可以按照文件名、修改时间、文件大小排序（或反向排序）
         if (localStorage.getItem("ResortKey_BookShelf") !== null) {
@@ -275,7 +285,6 @@ export default defineComponent({
             this.simplifyTitle = false;
         }
 
-
         // 当前颜色
         if (localStorage.getItem("BackgroundColor") != null) {
             this.model.backgroundColor = localStorage.getItem("BackgroundColor");
@@ -299,13 +308,29 @@ export default defineComponent({
     },
 
     // 卸载前
-    beforeUnmount() { },
+    beforeUnmount() {
+        //组件销毁前,销毁监听事件
+        window.removeEventListener("scroll", this.onScroll);
+    },
     methods: {
+        //页面滚动的时候,改变返回顶部按钮的显隐
+        onScroll() {
+            let scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+            this.scrollDownFlag = scrollTop > this.scrollTopSave;
+            //防手抖,小于一定数值状态就不变 Math.abs()会导致报错
+            let step = this.scrollTopSave - scrollTop;
+            // console.log("this.scrollDownFlag:",this.scrollDownFlag,"scrollTop:",scrollTop,"step:", step);
+            this.scrollTopSave = scrollTop
+            if (step < -5 || step > 5) {
+                this.showBackTopFlag = ((scrollTop > 400) && !this.scrollDownFlag);
+            }
+        },
+        //查看服务器是否windows，来决定显示不显示reg文件下载按钮
         remoteIsWindows() {
-            if (!this.$store.state.server_status) {
+            if (!this.$store.state.server_status.Description) {
                 return false
             }
-            console.dir(this.$store.state.server_status.Description);
+            // console.dir(this.$store.state.server_status.Description);
             return this.$store.state.server_status.Description.indexOf("windows") !== -1
         },
         //根据文件名、修改时间、文件大小等参数重新排序
