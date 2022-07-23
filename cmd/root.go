@@ -196,8 +196,6 @@ var rootCmd = &cobra.Command{
 		//设置书籍API
 		routers.StartWebServer()
 		//退出时清理临时文件
-		//扫描默认上传文件夹
-		ReScanUploadPath()
 		SetShutdownHandler()
 		return
 	},
@@ -220,9 +218,11 @@ func initBookStores(args []string) {
 	ScanDefaultPath(args)
 	//3、扫描配置文件指定的书籍库
 	ScanStorePathInConfig()
-	//4，保存扫描结果到数据库
+	//4、扫描默认上传文件夹
+	ReScanUploadPath()
+	//5、保存扫描结果到数据库
 	SaveResultsToDatabase()
-	//5、通过“可执行文件名”设置部分默认参数,目前不生效
+	//6、通过“可执行文件名”设置部分默认参数,目前不生效
 	common.Config.SetByExecutableFilename()
 }
 

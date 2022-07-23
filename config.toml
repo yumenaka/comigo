@@ -44,7 +44,7 @@ TimeoutLimitForScan = 0
 # 打印所有可能阅读链接的二维码
 PrintAllIP = false
 # 开启Debug模式
-Debug = false
+Debug = true
 # 记录Log到本地文件
 LogToFile = false
 # Log保存的位置

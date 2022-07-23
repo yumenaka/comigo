@@ -27,6 +27,10 @@ func waitRescanMessages() {
 		case "ComigoUpload":
 			fmt.Println("扫描上传文件夹：", msg)
 			ReScanUploadPath()
+			//保存扫描结果到数据库
+			SaveResultsToDatabase()
+			//重新设置文件下载链接
+			routers.SetDownloadLink()
 		case "SomePath":
 			fmt.Println("收到重新扫描消息：", msg)
 			ReScanPath(msg)
@@ -57,8 +61,4 @@ func ReScanPath(path string) {
 	} else {
 		common.AddBooksToStore(addList, path)
 	}
-	//保存扫描结果到数据库
-	SaveResultsToDatabase()
-	//重新设置文件下载链接
-	routers.SetDownloadLink()
 }

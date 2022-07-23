@@ -15,7 +15,7 @@ Multiple parameters:
   comi -p 2345  --host exsample.com test.zip
 """
 init_locale = "The default language is  English."
-scan_error = "Scan error, execute directory:"
+scan_error = "Scan error,directory:"
 book_not_found = "No books to read are found, the program exits."
 can_not_init_book = "Unable to initialize book."
 port_busy = "The port is occupied, try a random port:"

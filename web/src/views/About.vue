@@ -1,83 +1,95 @@
-
-
 <template>
-  <div id="about">
-    <h1>This is an about page</h1>
-  </div>
+    <div class="w-full h-screen flex flex-col">
+        <Header class="header flex-none h-12" :bookIsFolder="false" :headerTitle="this.getUploadTitile()"
+            :showReturnIcon="true" :showSettingsIcon="false"  :bookID='null' :setDownLoadLink="false">
+        </Header>
+        <!-- 渲染书架部分 有书的时候显示书  没有的时候显示上传控件-->
+        <!-- Flex Grow 控制 flex 项目放大的功能类 https://www.tailwindcss.cn/docs/flex-grow -->
+        <!-- 上传控件 -->
+        <div class="mian_area flex-grow">
+        </div>
+        <Bottom class="bottom flex-none h-12" :softVersion="
+            this.$store.state.server_status.ServerName
+                ? this.$store.state.server_status.ServerName
+                : 'Comigo'
+        "></Bottom>
+    </div>
 </template>
 
 <script>
-import { defineComponent, reactive } from 'vue'
-import { useCookies } from "vue3-cookies";// https://github.com/KanHarI/vue3-cookies
+import Header from "@/components/Header.vue";
+import Bottom from "@/components/Bottom.vue";
 
+import { defineComponent, reactive } from "vue";
 export default defineComponent({
-  name: "AboutPage",
-  props: ['readMode'],
-  emits: ["setSome"],
-  components: {
-  },
-  setup() {
-    //此处不能使用this
-    const { cookies } = useCookies();
-    //背景颜色，颜色选择器用
-    const model = reactive({
-      color: "#E0D9CD",
-      colorHeader: "#d1c9c1",
-    });
-    //单选按钮绑定的数值
-    // const checkedValueRef = ref(null)
-    return {
-      cookies,
-      //背景色
-      model,
-    }
-  },
-  data() {
-    return {
-      readerMode: "",
-    };
-  },
-  //Vue3生命周期:  https://v3.cn.vuejs.org/api/options-lifecycle-hooks.html#beforecreate
-  // created : 在绑定元素的属性或事件监听器被应用之前调用。
-  // beforeMount : 指令第一次绑定到元素并且在挂载父组件之前调用。
-  // mounted : 在绑定元素的父组件被挂载后调用。
-  // beforeUpdate: 在更新包含组件的 VNode 之前调用。。
-  // updated: 在包含组件的 VNode 及其子组件的 VNode 更新后调用。
-  // beforeUnmount: 当指令与在绑定元素父组件卸载之前时，只调用一次。
-  // unmounted: 当指令与元素解除绑定且父组件已卸载时，只调用一次。
-  created() {
-  },
-  //挂载前
-  beforeMount() {
-  },
-  onMounted() {
-    // https://v3.cn.vuejs.org/api/options-lifecycle-hooks.html#beforemount
-    this.$nextTick(function () {
-      //视图渲染之后运行的代码
-    })
-  },
-  //卸载前
-  beforeUnmount() {
-
-  },
-  methods: {
-    onOpenBook() {
+    name: "AboutPage",
+    props: ['readMode'],
+    emits: ["setSome"],
+    components: {
+        Header, // 自定义页头
+        Bottom, // 自定义页尾
     },
-    computed: {
-    }
-  },
+    setup() {
+        // 背景颜色,颜色选择器用  // 此处不能使用this
+        const model = reactive({
+            interfaceColor: "#F5F5E4",
+            backgroundColor: "#E0D9CD",
+        });
+        return {
+            model,
+        };
+    },
+
+    data() {
+        return {
+            book_num: 0,
+            drawerActive: false,
+            drawerPlacement: "right",
+            PageTitle: "",
+        };
+    },
+    created() {
+        // 当前颜色
+        if (localStorage.getItem("BackgroundColor") != null) {
+            this.model.backgroundColor = localStorage.getItem("BackgroundColor");
+        }
+        if (localStorage.getItem("InterfaceColor") != null) {
+            this.model.interfaceColor = localStorage.getItem("InterfaceColor");
+        }
+    },
+    methods: {
+        getUploadTitile() {
+            //如果没有一本书
+            if (this.$store.state.server_status.SupportUploadFile === false) {
+                return this.$t('no_support_upload_file');
+            }
+            //如果没有一本书
+            if (this.$store.state.server_status.NumberOfBooks === 0) {
+                return this.$t('no_book_found_hint');
+            }
+            return this.$t('number_of_online_books') + this.$store.state.server_status.NumberOfBooks;
+        },
+        remoteIsWindows() {
+            if (!this.$store.state.server_status) {
+                return false
+            }
+            console.dir(this.$store.state.server_status.Description);
+            return this.$store.state.server_status.Description.indexOf("windows") !== -1
+        },
+    },
 });
 </script>
 
 <style scoped>
-#about {
-  padding-bottom: 20px;
-  padding-left: 20px;
-  padding-right: 20px;
-  padding-top: 20px;
-  max-width: 100%;
-  min-height: 93vh;
-  height: 93vh;
-  background: v-bind("model.color");
+.header {
+    background: v-bind("model.interfaceColor");
+}
+
+.bottom {
+    background: v-bind("model.interfaceColor");
+}
+
+.mian_area {
+    background: v-bind("model.backgroundColor");
 }
 </style>
