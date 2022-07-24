@@ -39,7 +39,7 @@ func GetRegFIleHandler(c *gin.Context) {
 [HKEY_CLASSES_ROOT\*\shell\ComiGo\command]
 @="\"C:\\Users\\%USERNAME%\\Desktop\\comi.exe\"  \"%1\""
 
-;HKEY_CLASSES_ROOT\Directory\Background：系统文件夹空白处的右键菜单 
+;HKEY_CLASSES_ROOT\Directory\Background：文件夹空白处右键的菜单 
 [HKEY_CLASSES_ROOT\Directory\Background\shell\ComiGo]
 "Icon"="C:\\Users\\%USERNAME%\\Desktop\\comi.exe,0"
 @="ComiGo Here"

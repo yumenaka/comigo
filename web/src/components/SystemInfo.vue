@@ -4,13 +4,13 @@
   <div id="SystemInfo" class="w-4/6">
     <n-space vertical>
       <p>CPU:</p>
-      <n-progress type="circle" :percentage="cpu_percentage" />
+      <n-progress type="circle" :percentage="parseFloat(this.cpu_percentage)" />
       <p>{{ this.$store.state.server_status.OSInfo.cpu_num_physical }}Core
         {{ this.$store.state.server_status.OSInfo.cpu_num_logical_total }}Thread</p>
       <n-divider></n-divider>
 
       <p>RAM:</p>
-      <n-progress type="circle" :percentage="ram_percentage" />
+      <n-progress type="circle" :percentage="parseFloat(this.ram_percentage)" color="#ffaa66"  />
       <p>{{ (this.$store.state.server_status.OSInfo.memory_total*(this.$store.state.server_status.OSInfo.memory_used_percent/100)/ (1024 * 1024 * 1024)).toFixed(2) }}GB/{{ (this.$store.state.server_status.OSInfo.memory_total / (1024 * 1024 * 1024)).toFixed(2) }}GB</p>
       <n-divider></n-divider>
 
@@ -25,7 +25,7 @@
 </template>
 
 <script>
-import { NProgress, useMessage, NSpace, NDivider, } from "naive-ui";
+import { NProgress, useMessage, NSpace, NDivider,} from "naive-ui";
 import { defineComponent, ref } from 'vue'
 export default defineComponent({
   name: "AboutPage",
@@ -50,6 +50,8 @@ export default defineComponent({
     return {
       readerMode: "",
       upLoadHint: "",
+      // cpu_percentage: 0.01,
+      // ram_percentage: 0.01,
     };
   },
   created() {
