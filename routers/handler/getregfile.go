@@ -32,11 +32,11 @@ func GetRegFIleHandler(c *gin.Context) {
 	//最后要以一个换行结束，为了保证汉字正常，最好用ANSI编码
 	var regText = `Windows Registry Editor Version 5.00
 
-[HKEY_CLASSES_ROOT\*\shell\ComiGo]
+[HKEY_CLASSES_ROOT\AllFilesystemObjects\shell\ComiGo]
 @="ComiGo"
 "Icon"="C:\\Users\\%USERNAME%\\Desktop\\comi.exe,0"
 
-[HKEY_CLASSES_ROOT\*\shell\ComiGo\command]
+[HKEY_CLASSES_ROOT\AllFilesystemObjects\shell\ComiGo\command]
 @="\"C:\\Users\\%USERNAME%\\Desktop\\comi.exe\"  \"%1\""
 
 ;HKEY_CLASSES_ROOT\Directory\Background：文件夹空白处右键的菜单 
