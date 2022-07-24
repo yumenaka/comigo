@@ -394,6 +394,12 @@ export default defineComponent({
 			.then((response) => {
 				//请求接口成功的逻辑
 				this.book = response.data;
+				//确定一开始要加载多少页
+				if (this.loadPageLimit <= this.book.all_page_num) {
+					this.endLoadPageNum = this.loadPageLimit;
+				} else {
+					this.endLoadPageNum = this.book.all_page_num;
+				}
 				this.loadPages();
 				// 询问用户是否从中间开始加载，延迟1.5秒执行
 				setTimeout(function () {
