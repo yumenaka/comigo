@@ -196,7 +196,7 @@ export default defineComponent({
                     name: "loading",
                     all_page_num: 1,
                     id: "12345",
-                    book_type: "dir",
+                    book_type: ".zip",
                     parent_folder: "",
                     depth: 1,
                     pages: [

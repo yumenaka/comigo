@@ -389,7 +389,7 @@ export default defineComponent({
         name: "loading",
         id: "loading",
         all_page_num: 2,
-        book_type: "dir",
+        book_type: ".zip",
         pages: {
           sort_by: "",
           images: [

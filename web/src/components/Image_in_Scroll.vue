@@ -78,7 +78,7 @@ export default {
                     //     this.sendNowPageToFlipMode(this.MyPageNum-1);
                     // }
                     this.sendNowPageToFlipMode(this.MyPageNum);
-                    console.dir(entry.boundingClientRect);
+                    // console.dir(entry.boundingClientRect);
                 }
             }
             //发送给卷轴模式的消息，测试中。目前效果非常emmm……
