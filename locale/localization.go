@@ -89,7 +89,11 @@ func init() {
 
 	bundle.MustParseMessageFileBytes(jpBytes, "ja-jp.toml")
 
-	lang, _ := getLocale()
+	lang, err := getLocale()
+	if err != nil {
+		Localizer = i18n.NewLocalizer(bundle, "en-US")
+		return
+	}
 	//fmt.Printf("OK: language=%s, locale=%s\n", lang, loc)
 	switch lang {
 	case "zh":
