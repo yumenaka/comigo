@@ -40,7 +40,10 @@ func getLocale() (string, string) {
 			langLocRaw := strings.TrimSpace(string(output))
 			langLoc := strings.Split(langLocRaw, "-")
 			lang := langLoc[0]
-			loc := langLoc[1]
+			loc := lang
+			if len(langLoc) > 1 {
+				loc = langLoc[1]
+			}
 			return lang, loc
 		}
 	case "darwin":
@@ -51,7 +54,10 @@ func getLocale() (string, string) {
 			langLocRaw := strings.TrimSpace(string(output))
 			langLoc := strings.Split(langLocRaw, "_")
 			lang := langLoc[0]
-			loc := langLoc[1]
+			loc := lang
+			if len(langLoc) > 1 {
+				loc = langLoc[1]
+			}
 			return lang, loc
 		}
 	case "linux":
@@ -61,7 +67,10 @@ func getLocale() (string, string) {
 			langLocRaw = strings.Split(envlang, ".")[0]
 			langLoc := strings.Split(langLocRaw, "_")
 			lang := langLoc[0]
-			loc := langLoc[1]
+			loc := lang
+			if len(langLoc) > 1 {
+				loc = langLoc[1]
+			}
 			return lang, loc
 		}
 	}
@@ -89,11 +98,7 @@ func init() {
 
 	bundle.MustParseMessageFileBytes(jpBytes, "ja-jp.toml")
 
-	lang, err := getLocale()
-	if err != nil {
-		Localizer = i18n.NewLocalizer(bundle, "en-US")
-		return
-	}
+	lang, _ := getLocale()
 	//fmt.Printf("OK: language=%s, locale=%s\n", lang, loc)
 	switch lang {
 	case "zh":
