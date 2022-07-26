@@ -51,16 +51,16 @@ func GetSystemStatus() SystemStatus {
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		p := 0.0
-		if len(CPUUsedPercent) > 1 {
-			for _, value := range CPUUsedPercent {
-				p += value
-			}
-			p = p / float64(len(CPUUsedPercent))
-		} else if len(CPUUsedPercent) == 1 {
-			p = CPUUsedPercent[0]
-		}
-		sys.CPUUsedPercent = p
+		//p := 0.0
+		//if len(CPUUsedPercent) > 1 {
+		//	for _, value := range CPUUsedPercent {
+		//		p += value
+		//	}
+		//	p = p / float64(len(CPUUsedPercent))
+		//} else if len(CPUUsedPercent) == 1 {
+		//	p = CPUUsedPercent[0]
+		//}
+		sys.CPUUsedPercent = CPUUsedPercent[0]
 	}
 	v, err := mem.VirtualMemory()
 	if err != nil {
