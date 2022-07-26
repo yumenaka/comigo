@@ -29,7 +29,7 @@
           <!-- 简单拼合双页,不管单双页什么的 -->
           <img v-if="
             !this.autoDoublePageModeFlag &&
-            this.simpleDoublePageModeFlag &&
+            this.doublePageModeFlag &&
             this.nowPageNum < this.book.all_page_num
           " v-bind:src="
   this.imageParametersString(book.pages.images[nowPageNum].url)
@@ -160,10 +160,10 @@
       </n-switch>
 
       <!-- 合并双页 -->
-      <n-switch size="large" v-model:value="this.simpleDoublePageModeFlag"
+      <n-switch size="large" v-model:value="this.doublePageModeFlag" :rail-style="railStyle"
         @update:value="this.setSimpleDoublePage_FlipMode">
-        <template #checked>{{ $t("simpleDoublePage") }}</template>
-        <template #unchecked>{{ $t("simpleDoublePage") }}</template>
+        <template #checked>{{ $t("DoublePageMode") }}</template>
+        <template #unchecked>{{ $t("SinglePageMode") }}</template>
       </n-switch>
 
       <!-- 自动切边 -->
@@ -217,7 +217,7 @@
         @update:value="this.setAutoDoublePage_FlipMode">
         <template #checked>{{ $t('autoDoublePage') }}</template>
         <template #unchecked>{{ $t('autoDoublePage') }}</template>
-      </n-switch> -->
+      </n-switch>  -->
     </Drawer>
   </div>
 </template>
@@ -420,7 +420,7 @@ export default defineComponent({
       //是否是右半屏翻页（从右到左）?日本漫画从左到右(false)
       rightToLeftFlag: false,
       //简单拼合双叶
-      simpleDoublePageModeFlag: false,
+      doublePageModeFlag: false,
       //自动拼合双叶,效果不太好
       autoDoublePageModeFlag: false,
       //是否保存当前页数
@@ -506,10 +506,10 @@ export default defineComponent({
       this.rightToLeftFlag = false;
     }
     //简单合并单页
-    if (localStorage.getItem("simpleDoublePageModeFlag") === "true") {
-      this.simpleDoublePageModeFlag = true;
-    } else if (localStorage.getItem("simpleDoublePageModeFlag") === "false") {
-      this.simpleDoublePageModeFlag = false;
+    if (localStorage.getItem("doublePageModeFlag") === "true") {
+      this.doublePageModeFlag = true;
+    } else if (localStorage.getItem("doublePageModeFlag") === "false") {
+      this.doublePageModeFlag = false;
     }
     //自动合并单页
     if (localStorage.getItem("autoDoublePageModeFlag") === "true") {
@@ -642,7 +642,7 @@ export default defineComponent({
         if (syncData.book_id === this.book.id && syncData.now_page_num !== this.nowPageNum) {
           // console.log(syncData);
           //如果是合并双页的状态，那么页数差距必须大于1才翻页
-          if (this.simpleDoublePageModeFlag && (syncData.now_page_num - this.nowPageNum === 1 || syncData.now_page_num - this.nowPageNum === -1)) {
+          if (this.doublePageModeFlag && (syncData.now_page_num - this.nowPageNum === 1 || syncData.now_page_num - this.nowPageNum === -1)) {
             return
           }
           this.toPage(syncData.now_page_num, false);
@@ -660,7 +660,7 @@ export default defineComponent({
       const data = {
         book_id: this.book.id,
         now_page_num: this.nowPageNum,
-        need_double_page_mode: this.simpleDoublePageModeFlag,
+        need_double_page_mode: this.doublePageModeFlag,
       };
       // console.log("this.$store.userID: " + this.$store.state.userID)
       const newMsg = {
@@ -881,8 +881,8 @@ export default defineComponent({
       );
       localStorage.setItem("rightToLeftFlag", this.rightToLeftFlag);
       localStorage.setItem(
-        "simpleDoublePageModeFlag",
-        this.simpleDoublePageModeFlag
+        "doublePageModeFlag",
+        this.doublePageModeFlag
       );
       localStorage.setItem(
         "autoDoublePageModeFlag",
@@ -1054,7 +1054,7 @@ export default defineComponent({
     },
     toNextPage() {
       //简单合并模式
-      if (this.simpleDoublePageModeFlag) {
+      if (this.doublePageModeFlag) {
         if (this.nowPageNum < this.book.all_page_num - 1) {
           this.flipPage(2);
           return;
@@ -1087,7 +1087,7 @@ export default defineComponent({
       }
 
       //简单合并模式
-      if (this.simpleDoublePageModeFlag) {
+      if (this.doublePageModeFlag) {
         if (this.nowPageNum - 2 > 0) {
           this.flipPage(-2);
           return;
@@ -1358,7 +1358,7 @@ export default defineComponent({
       console.log("value:" + value);
       this.autoDoublePageModeFlag = value;
       if (value === true) {
-        this.simpleDoublePageModeFlag = false;
+        this.doublePageModeFlag = false;
       }
       localStorage.setItem("autoDoublePageModeFlag", (value === true) ? "true" : "false");
       // console.log(
@@ -1369,14 +1369,14 @@ export default defineComponent({
 
     setSimpleDoublePage_FlipMode(value) {
       console.log("value:" + value);
-      this.simpleDoublePageModeFlag = value;
+      this.doublePageModeFlag = value;
       if (value === true) {
         this.autoDoublePageModeFlag = false;
       }
-      localStorage.setItem("simpleDoublePageModeFlag", (value === true) ? "true" : "false");
+      localStorage.setItem("doublePageModeFlag", (value === true) ? "true" : "false");
       // console.log(
-      //   "cookie设置完毕: simpleDoublePageModeFlag=" +
-      //   localStorage.getItem("simpleDoublePageModeFlag")
+      //   "cookie设置完毕: doublePageModeFlag=" +
+      //   localStorage.getItem("doublePageModeFlag")
       // );
     },
   },
