@@ -331,6 +331,9 @@ export default defineComponent({
             if (!this.$store.state.server_status.OSInfo.description) {
                 return false
             }
+            if (!this.$store.state.server_status.OSInfo) {
+                return false
+            }
             // console.dir(this.$store.state.server_status);
             return this.$store.state.server_status.OSInfo.description.indexOf("windows") !== -1
         },

@@ -30,7 +30,6 @@
   "pageTurningSeconds": "间隔:",
   "startSketchMessage": "开始倒计时速写，祝你心情愉快。",
   "goodjob_and_byebye": "做得不错，再见~",
-  "simpleDoublePage": "合并双页",
   "autoDoublePage": "合并双页（beta）",
   "original_image": "显示原图",
   "gray_image": "黑白化",
@@ -79,5 +78,7 @@
   "back_to_bookshelf": "返回书架界面",
   "no_support_upload_file": "欢迎光临，上传文件功能被管理员关闭了",
   "please_enable_upload": "请启用服务器的上传支持",
-  "simplify_book_titles": "简化书名"
+  "simplify_book_titles": "简化书名",
+  "DoublePageMode": "双页模式",
+  "SinglePageMode": "单页模式"
 }
