@@ -30,7 +30,6 @@
   "pageTurningSeconds": "ページをめくる秒数:",
   "startSketchMessage": "クロッキーが始まりました、良い一日を。",
   "goodjob_and_byebye": "お疲れ様でした、バイバイ。",
-  "simpleDoublePage": "ページ合併",
   "autoDoublePage": "ページ合併(beta)",
   "gray_image": "モノクロ化",
   "image_width_limit": "サイズ（幅）を制限",
@@ -79,5 +78,7 @@
   "back_to_bookshelf": "本棚画面に戻る",
   "no_support_upload_file": "いらっしゃいますが、ファイルアップロード機能は管理者によりOFFにされています",
   "please_enable_upload": "サーバーのアップロード機能を有効にしてください",
-  "simplify_book_titles": "タイトルの簡略化"
+  "simplify_book_titles": "タイトルの簡略化",
+  "DoublePageMode": "ダブルページ",
+  "SinglePageMode": "シングルページ"
 }

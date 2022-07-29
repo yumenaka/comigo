@@ -30,7 +30,6 @@
   "pageTurningSeconds": "interval: ",
   "startSketchMessage": "The countdown begins, Have a nice day.",
   "goodjob_and_byebye": "Goodjob,bye.",
-  "simpleDoublePage": "DoublePage",
   "autoDoublePage": "DoublePage(beta)",
   "gray_image": "gray image",
   "image_width_limit": "Limit size (width)",
@@ -79,5 +78,7 @@
   "back_to_bookshelf": "Back to bookshelf ",
   "no_support_upload_file": "Although coming here, the server's upload file function was turned off by the administrator",
   "please_enable_upload": "Please enable server upload file support",
-  "simplify_book_titles": "Simplify Title"
+  "simplify_book_titles": "Simplify Title",
+  "DoublePageMode": "DoublePage",
+  "SinglePageMode": "SinglePage"
 }
