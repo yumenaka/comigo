@@ -13,10 +13,10 @@
       <n-space vertical>
         <slot></slot>
         <n-button v-if="sketching === false && inBookShelf === false" @click="startSketchMode">{{
-            $t('startSketchMode')
+        $t('startSketchMode')
         }}</n-button>
         <n-button v-if="sketching === true && inBookShelf === false" @click="stopSketchMode">{{
-            $t('stopSketchMode')
+        $t('stopSketchMode')
         }}</n-button>
         <!-- <n-divider /> -->
         <span>{{ $t('scan_qrcode') }}</span>
@@ -32,8 +32,8 @@
       <!-- 抽屉：自定义底部 -->
       <template #footer>
         <n-button @click="onFullSreen">{{ $t('fullscreen') }}</n-button>
-        <n-select placeholder="{{ $t('select-language') }}" v-model:value="$i18n.locale"
-          :options="languageOptions" @update:value="OnChangeLanguage" />
+        <n-select placeholder="{{ $t('select-language') }}" v-model:value="$i18n.locale" :options="languageOptions"
+          @update:value="OnChangeLanguage" />
       </template>
     </n-drawer-content>
   </n-drawer>
@@ -136,11 +136,11 @@ export default defineComponent({
       //切换全屏状态
       screenfull.toggle()
     },
-    OnChangeLanguage(value:string) {
+    OnChangeLanguage(value: string) {
       this.cookies.set("userLanguageSetting", value);
     },
     // 关闭抽屉时，保存设置到cookies
-    saveConfigToCookie(show:boolean) {
+    saveConfigToCookie(show: boolean) {
       if (show == false) {
         this.$emit('closeDrawer');
         this.$emit('saveConfig');

@@ -71,7 +71,7 @@ import Qrcode from "@/components/Qrcode.vue";
 import screenfull from 'screenfull'
 export default defineComponent({
   name: "ComigoHeader",
-  props: ['setDownLoadLink', 'headerTitle', 'bookID', 'showReturnIcon','showSettingsIcon',],
+  props: ['setDownLoadLink', 'headerTitle', 'bookID', 'showReturnIcon', 'showSettingsIcon',],
   emits: ['drawerActivate'],
   components: {
     NIcon,
@@ -135,7 +135,7 @@ export default defineComponent({
     },
 
     //点击主页图标的时候，回到主页
-    onClickSettingIcon(place:string) {
+    onClickSettingIcon(place: string) {
       this.$emit("drawerActivate", place);
     },
 
