@@ -17,10 +17,19 @@
             <div class="flex flex-row flex-wrap justify-center min-h-48">
                 <BookCard v-for="(book_info, key) in bookshelf" :key="key" :title="book_info.name"
                     :simplifyTitle="simplifyTitle" :id="book_info.id" :image_src="book_info.cover.url"
-                    :readerMode="readerMode" :showTitle="bookCardShowTitleFlag"
-                    :childBookNum="book_info.child_book_num > 0  ? 'x' + book_info.child_book_num: book_info.book_type==='dir'?'dir':''"
-                    :openURL="getBookCardOpenURL(book_info.id, book_info.book_type, book_info.name)"
-                    :a_target="getBookCardTarget(book_info.book_type)">
+                    :readerMode="readerMode" :showTitle="bookCardShowTitleFlag" :childBookNum="
+                      book_info.child_book_num > 0
+                        ? 'x' + book_info.child_book_num
+                        : book_info.book_type === 'dir'
+                        ? 'dir'
+                        : ''
+                    " :openURL="
+            getBookCardOpenURL(
+              book_info.id,
+              book_info.book_type,
+              book_info.name
+            )
+          " :a_target="getBookCardTarget(book_info.book_type)">
                 </BookCard>
             </div>
         </div>
@@ -28,16 +37,15 @@
         <n-back-top class="bg-blue-200" :show="showBackTopFlag" type="info" :right="20" :bottom="20" />
 
         <Bottom class="flex-none h-12" :softVersion="
-            $store.state.server_status.ServerName
-                ? $store.state.server_status.ServerName
-                : 'Comigo'
+          $store.state.server_status.ServerName
+            ? $store.state.server_status.ServerName
+            : 'Comigo'
         "></Bottom>
         <Drawer :initDrawerActive="drawerActive" :initDrawerPlacement="drawerPlacement" @saveConfig="saveConfigToLocal"
             @startSketch="startSketchMode" @closeDrawer="drawerDeactivate" @setRM="OnSetReaderMode"
             :readerMode="readerMode" :sketching="false" :inBookShelf="true">
-
             <!-- 设置颜色 -->
-            <span>{{ $t('setInterfaceColor') }}</span>
+            <span>{{ $t("setInterfaceColor") }}</span>
             <n-color-picker v-model:value="model.interfaceColor" :modes="['hex']" :show-alpha="false"
                 @update:value="onInterfaceColorChange" />
             <span>{{ $t("setBackColor") }}</span>
@@ -47,32 +55,32 @@
             <!-- 开关：下拉阅读 -->
             <n-switch size="large" :rail-style="railStyle" v-model:value="readerModeIsScroll"
                 @update:value="setReaderModeIsScroll">
-                <template #checked>{{ $t('scroll_mode') }}</template>
-                <template #unchecked>{{ $t('flip_mode') }}</template>
+                <template #checked>{{ $t("scroll_mode") }}</template>
+                <template #unchecked>{{ $t("flip_mode") }}</template>
             </n-switch>
 
             <!-- 开关：显示书名 -->
             <n-switch size="large" v-model:value="bookCardShowTitleFlag" @update:value="setBookCardShowTitleFlag">
-                <template #checked>{{ $t('show_book_titles') }}</template>
-                <template #unchecked>{{ $t('show_book_titles') }}</template>
+                <template #checked>{{ $t("show_book_titles") }}</template>
+                <template #unchecked>{{ $t("show_book_titles") }}</template>
             </n-switch>
 
             <!-- 开关：简化书名 -->
             <n-switch size="large" v-model:value="simplifyTitle" @update:value="setSimplifyTitle">
-                <template #checked>{{ $t('simplify_book_titles') }}</template>
-                <template #unchecked>{{ $t('simplify_book_titles') }}</template>
+                <template #checked>{{ $t("simplify_book_titles") }}</template>
+                <template #unchecked>{{ $t("simplify_book_titles") }}</template>
             </n-switch>
 
             <!-- 页面重新排序 -->
-            <n-select :placeholder='$t("re_sort_book")' @update:value="onResort" :options="options" />
-            <p> &nbsp;</p>
+            <n-select :placeholder="$t('re_sort_book')" @update:value="onResort" :options="options" />
+            <p>&nbsp;</p>
             <!-- 下载示例配置文件的按钮 -->
             <a href="/api/config.toml" target="_blank">
-                <n-button>{{ $t('DownloadSampleConfigFile') }}</n-button>
+                <n-button>{{ $t("DownloadSampleConfigFile") }}</n-button>
             </a>
             <!-- 下载windows reg文件的按钮 -->
             <a v-if="remoteIsWindows()" href="api/comigo.reg" target="_blank">
-                <n-button>{{ $t('DownloadWindowsRegFile') }}</n-button>
+                <n-button>{{ $t("DownloadWindowsRegFile") }}</n-button>
             </a>
         </Drawer>
     </div>
@@ -82,7 +90,7 @@
 // 直接导入组件并使用它。这种情况下,只有导入的组件才会被打包。
 // Firefox插件Textarea Cache 报错：源映射错误：Error: NetworkError when attempting to fetch resource.
 // Firefox插件Video DownloadHelper报错:已不赞成使用 CanvasRenderingContext2D 中的 drawWindow 方法
-import { NColorPicker, NSwitch, NButton, NSelect, NBackTop, } from "naive-ui";
+import { NColorPicker, NSwitch, NButton, NSelect, NBackTop } from "naive-ui";
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
 import BookCard from "@/components/BookCard.vue";
@@ -98,15 +106,15 @@ export default defineComponent({
     components: {
         Header, // 自定义页头
         Drawer, // 自定义抽屉
-        BookCard,//自定义书本
+        BookCard, //自定义书本
         Bottom, // 自定义页尾
-        NButton,//按钮,来自:https://www.naiveui.com/zh-CN/os-theme/components/button
+        NButton, //按钮,来自:https://www.naiveui.com/zh-CN/os-theme/components/button
         NSwitch,
         // NDivider, // 分割线  https://www.naiveui.com/zh-CN/os-theme/components/divider
-        NColorPicker,//颜色选择器 https://www.naiveui.com/zh-CN/os-theme/components/color-picker
+        NColorPicker, //颜色选择器 https://www.naiveui.com/zh-CN/os-theme/components/color-picker
         // NDropdown,//下拉菜单 https://www.naiveui.com/zh-CN/os-theme/components/dropdown
         NSelect,
-        NBackTop,//回到顶部按钮,来自:https://www.naiveui.com/zh-CN/os-theme/components/back-top
+        NBackTop, //回到顶部按钮,来自:https://www.naiveui.com/zh-CN/os-theme/components/back-top
     },
     setup() {
         // 此处不能使用this
@@ -125,24 +133,24 @@ export default defineComponent({
             // 开关的颜色
             railStyle: ({
                 focused,
-                checked
+                checked,
             }: {
-                focused: boolean
-                checked: boolean
+                focused: boolean;
+                checked: boolean;
             }) => {
-                const style: CSSProperties = {}
+                const style: CSSProperties = {};
                 if (checked) {
-                    style.background = '#d03050'
+                    style.background = "#d03050";
                     if (focused) {
-                        style.boxShadow = '0 0 0 2px #d0305040'
+                        style.boxShadow = "0 0 0 2px #d0305040";
                     }
                 } else {
-                    style.background = '#2080f0'
+                    style.background = "#2080f0";
                     if (focused) {
-                        style.boxShadow = '0 0 0 2px #2080f040'
+                        style.boxShadow = "0 0 0 2px #2080f040";
                     }
                 }
-                return style
+                return style;
             },
 
             // 滑动选择用建议值
@@ -156,38 +164,38 @@ export default defineComponent({
     },
     data() {
         return {
-            simplifyTitle: true,//简化显示标题
+            simplifyTitle: true, //简化显示标题
             //是否显示回到顶部按钮
             showBackTopFlag: false,
             //是否正在向下滚动
             scrollDownFlag: false,
             //存储现在滚动的位置
             scrollTopSave: 0,
-            resort_hint_key: "filename",//书籍的排序方式。可以按照文件名、修改时间、文件大小排序（或反向排序）
+            resort_hint_key: "filename", //书籍的排序方式。可以按照文件名、修改时间、文件大小排序（或反向排序）
             options: [
                 {
-                    label: this.$t('sort_by_filename'),
+                    label: this.$t("sort_by_filename"),
                     value: "filename",
                 },
                 {
-                    label: this.$t('sort_by_modify_time'),
-                    value: "modify_time"
+                    label: this.$t("sort_by_modify_time"),
+                    value: "modify_time",
                 },
                 {
-                    label: this.$t('sort_by_filesize'),
-                    value: "filesize"
+                    label: this.$t("sort_by_filesize"),
+                    value: "filesize",
                 },
                 {
-                    label: this.$t('sort_by_filename') + this.$t('sort_reverse'),
+                    label: this.$t("sort_by_filename") + this.$t("sort_reverse"),
                     value: "filename_reverse",
                 },
                 {
-                    label: this.$t('sort_by_modify_time') + this.$t('sort_reverse'),
-                    value: "modify_time_reverse"
+                    label: this.$t("sort_by_modify_time") + this.$t("sort_reverse"),
+                    value: "modify_time_reverse",
                 },
                 {
-                    label: this.$t('sort_by_filesize') + this.$t('sort_reverse'),
-                    value: "filesize_reverse"
+                    label: this.$t("sort_by_filesize") + this.$t("sort_reverse"),
+                    value: "filesize_reverse",
                 },
             ],
             readerMode: "scroll",
@@ -254,9 +262,9 @@ export default defineComponent({
         window.addEventListener("scroll", this.onScroll);
         // 初始化默认值,读取出来的都是字符串,不要直接用
         //书籍排序方式。可以按照文件名、修改时间、文件大小排序（或反向排序）
-        const tempResortKey_BookShelf = localStorage.getItem("ResortKey_BookShelf")
-        if (typeof (tempResortKey_BookShelf) === 'string') {
-            this.resort_hint_key = tempResortKey_BookShelf
+        const tempResortKey_BookShelf = localStorage.getItem("ResortKey_BookShelf");
+        if (typeof tempResortKey_BookShelf === "string") {
+            this.resort_hint_key = tempResortKey_BookShelf;
         }
         // 从服务器上拉取书架信息
         this.getBookShelfData();
@@ -293,13 +301,13 @@ export default defineComponent({
 
         // 当前颜色
 
-        let tempBackgroundColor = localStorage.getItem("BackgroundColor")
-        if (typeof (tempBackgroundColor) === 'string') {
+        let tempBackgroundColor = localStorage.getItem("BackgroundColor");
+        if (typeof tempBackgroundColor === "string") {
             this.model.backgroundColor = tempBackgroundColor;
         }
 
-        let tempInterfaceColor = localStorage.getItem("InterfaceColor")
-        if (typeof (tempInterfaceColor) === 'string') {
+        let tempInterfaceColor = localStorage.getItem("InterfaceColor");
+        if (typeof tempInterfaceColor === "string") {
             this.model.interfaceColor = tempInterfaceColor;
         }
     },
@@ -327,47 +335,63 @@ export default defineComponent({
     methods: {
         //页面滚动的时候,改变返回顶部按钮的显隐
         onScroll() {
-            let scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+            let scrollTop =
+                document.documentElement.scrollTop || document.body.scrollTop;
             this.scrollDownFlag = scrollTop > this.scrollTopSave;
             //防手抖,小于一定数值状态就不变 Math.abs()会导致报错
             let step = this.scrollTopSave - scrollTop;
             // console.log("this.scrollDownFlag:",this.scrollDownFlag,"scrollTop:",scrollTop,"step:", step);
-            this.scrollTopSave = scrollTop
+            this.scrollTopSave = scrollTop;
             if (step < -5 || step > 5) {
-                this.showBackTopFlag = ((scrollTop > 400) && !this.scrollDownFlag);
+                this.showBackTopFlag = scrollTop > 400 && !this.scrollDownFlag;
             }
         },
         //查看服务器是否windows，来决定显示不显示reg文件下载按钮
         remoteIsWindows() {
             if (!this.$store.state.server_status.OSInfo.description) {
-                return false
+                return false;
             }
             if (!this.$store.state.server_status.OSInfo) {
-                return false
+                return false;
             }
             // console.dir(this.$store.state.server_status);
-            return this.$store.state.server_status.OSInfo.description.indexOf("windows") !== -1
+            return (
+                this.$store.state.server_status.OSInfo.description.indexOf(
+                    "windows"
+                ) !== -1
+            );
         },
         //根据文件名、修改时间、文件大小等参数重新排序
         onResort(key: string) {
-            this.resort_hint_key = key
-            localStorage.setItem("ResortKey_BookShelf", key)
+            this.resort_hint_key = key;
+            localStorage.setItem("ResortKey_BookShelf", key);
             if (this.$route.params.group_id) {
-                console.log("onResort  bookID：" + this.$route.params.group_id + ", key:" + key)
+                console.log(
+                    "onResort  bookID：" + this.$route.params.group_id + ", key:" + key
+                );
                 this.$router.push({
                     name: "ChildBookShelf",
                     params: { group_id: this.$route.params.group_id },
                     replace: true,
-                    query: { sort_by: key }
+                    query: { sort_by: key },
                 });
             } else {
-                console.log("onResort  key：" + key)
-                this.$router.push({ name: "BookShelf", replace: true, query: { sort_by: key } })
+                console.log("onResort  key：" + key);
+                this.$router.push({
+                    name: "BookShelf",
+                    replace: true,
+                    query: { sort_by: key },
+                });
             }
         },
 
         getBookCardTarget(bookType: string) {
-            if (bookType === ".pdf" || bookType === "video" || bookType === "audio" || bookType === "unknown") {
+            if (
+                bookType === ".pdf" ||
+                bookType === "video" ||
+                bookType === "audio" ||
+                bookType === "unknown"
+            ) {
                 return "_blank";
             }
             // if (this.readerMode == "flip" || this.readerMode == "sketch" || this.readerMode == "scroll") {
@@ -381,15 +405,20 @@ export default defineComponent({
             if (bookType === "book_group") {
                 return "/#/child_shelf/" + bookID + "/";
             }
-            if (bookType === ".pdf" || bookType === "video" || bookType === "audio" || bookType === "unknown") {
+            if (
+                bookType === ".pdf" ||
+                bookType === "video" ||
+                bookType === "audio" ||
+                bookType === "unknown"
+            ) {
                 return "/api/raw/" + bookID + "/" + bookName;
             }
             if (this.readerMode === "flip" || this.readerMode === "sketch") {
-                return "/#/flip/" + bookID
+                return "/#/flip/" + bookID;
             }
             if (this.readerMode === "scroll") {
                 // 命名路由,并加上参数,让路由建立 url
-                return "/#/scroll/" + bookID
+                return "/#/scroll/" + bookID;
             }
         },
 
@@ -404,17 +433,26 @@ export default defineComponent({
                 });
                 return;
             }
-            if (bookType === ".pdf" || bookType === ".mp4" || bookType === "video" || bookType === "audio" || bookType === "unknown") {
+            if (
+                bookType === ".pdf" ||
+                bookType === ".mp4" ||
+                bookType === "video" ||
+                bookType === "audio" ||
+                bookType === "unknown"
+            ) {
                 //打开新的标签页,跳转到浏览器自带的打开功能
                 // Window open() 方法 https://www.runoob.com/jsref/met-win-open.html
                 axios
                     .get("/getbook?id=" + bookID)
-                    .then((response) => (window.open('api/raw/' + bookID + '/' + response.data.name, '_blank')))// _blank - URL加载到一个新的窗口。默认值
-                    .finally(
-                        () => {
-                            console.log("成功刷新书籍数据,书籍ID:" + bookID);
-                        }
-                    );
+                    .then((response) =>
+                        window.open(
+                            "api/raw/" + bookID + "/" + response.data.name,
+                            "_blank"
+                        )
+                    ) // _blank - URL加载到一个新的窗口。默认值
+                    .finally(() => {
+                        console.log("成功刷新书籍数据,书籍ID:" + bookID);
+                    });
                 return;
             }
             if (this.readerMode === "flip" || this.readerMode === "sketch") {
@@ -480,39 +518,38 @@ export default defineComponent({
         getBookShelfData() {
             if (this.$route.params.group_id) {
                 // console.log("BookShelf getBookShelfData!  this.$route.params.id" + this.$route.params.id)
-                this.headerShowReturnIcon = true
-                const temp_id = this.$route.params.group_id
-                if (typeof (temp_id) === "string") {
-                    this.getBooksGroupByBookID(temp_id)
+                this.headerShowReturnIcon = true;
+                const temp_id = this.$route.params.group_id;
+                if (typeof temp_id === "string") {
+                    this.getBooksGroupByBookID(temp_id);
                 }
-
             } else {
-                this.initBookShelf()
-                this.headerShowReturnIcon = false
+                this.initBookShelf();
+                this.headerShowReturnIcon = false;
             }
         },
 
         // 获取所有书籍信息
         initBookShelf() {
             //根据文件名、修改时间、文件大小等要素排序的参数
-            var sort_image_by_str = ""
+            var sort_image_by_str = "";
             if (this.$route.query.sort_by) {
                 //有路由查询参数的时候，按照路由里的查询参数排序
-                sort_image_by_str = "&sort_by=" + this.$route.query.sort_by
+                sort_image_by_str = "&sort_by=" + this.$route.query.sort_by;
             } else if (this.resort_hint_key !== "") {
                 //没有的时候，就按照本地的存储值或默认值排序
-                sort_image_by_str = "&sort_by=" + this.resort_hint_key
+                sort_image_by_str = "&sort_by=" + this.resort_hint_key;
             }
-            let _this = this
+            let _this = this;
             axios
                 .get("getlist?max_depth=1" + sort_image_by_str)
                 .then((response) => {
                     if (response.data !== "") {
                         this.bookshelf = response.data;
                     } else {
-                        this.bookShelfTitle = _this.$t('no_book_found_hint');
+                        this.bookShelfTitle = _this.$t("no_book_found_hint");
                         this.$router.push({
-                            name: "UploadPage"
+                            name: "UploadPage",
                         });
                         // console.dir(response);
                         // console.dir(response.data);
@@ -527,13 +564,13 @@ export default defineComponent({
         getBooksGroupByBookID(group_id: string) {
             console.log("getBooksGroupByBookID bookID:" + group_id);
             //排序参数（文件名、修改时间、文件大小等）
-            var sort_image_by_str = ""
+            var sort_image_by_str = "";
             if (this.$route.query.sort_by) {
                 //有路由查询参数的时候，按照路由里的查询参数排序
-                sort_image_by_str = "&sort_by=" + this.$route.query.sort_by
+                sort_image_by_str = "&sort_by=" + this.$route.query.sort_by;
             } else if (this.resort_hint_key !== "") {
                 //没有的时候，就按照本地的存储值或默认值排序
-                sort_image_by_str = "&sort_by=" + this.resort_hint_key
+                sort_image_by_str = "&sort_by=" + this.resort_hint_key;
             }
             axios
                 .get("getlist?book_group_book_id=" + group_id + sort_image_by_str)
@@ -554,11 +591,12 @@ export default defineComponent({
         setBookShelfTitle() {
             // console.log(this.$route.params.id);
             // 路由里面有id这个参数、也就是处于scroll或filp模式，正在阅读某本书的时候,不需要设置书架名
-            if (this.$route.params.id !== undefined) {//不是null而是undefined
+            if (this.$route.params.id !== undefined) {
+                //不是null而是undefined
                 return;
             }
             if (this.bookshelf === null) {
-                return
+                return;
             }
 
             // // 设置当前深度,这个值目前没用到
