@@ -228,7 +228,7 @@ import { useCookies } from "vue3-cookies";
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
 // import Bottom from "@/components/Bottom.vue";
-import { defineComponent, reactive } from "vue";
+import { defineComponent, reactive,getCurrentInstance } from "vue";
 // 直接导入组件并使用它。这种情况下,只有导入的组件才会被打包。
 import {
   NDivider,
@@ -260,6 +260,8 @@ export default defineComponent({
   },
   setup() {
     const { cookies } = useCookies();
+    const app = getCurrentInstance();
+    const socket = app.proxy.$socket;
     //背景颜色,颜色选择器用
     const model = reactive({
       backgroundColor: "#E0D9CD",
@@ -672,6 +674,7 @@ export default defineComponent({
         data_string: JSON.stringify(data),
       };
       // 配置为了json，可调用sendObj方法来发送数据
+      console.dir(this.$socket)
       this.$socket.sendObj(newMsg);
       console.log("send:", newMsg);
     },
