@@ -1,23 +1,23 @@
 <template>
 	<div id="ScrollMode" class="manga" @mouseenter="onMouseEnter" @mouseleave="onMouseLeave">
-		<Header :setDownLoadLink="this.needDownloadLink()" :headerTitle="this.book.name" :bookID="this.book.id"
+		<Header :setDownLoadLink="needDownloadLink()" :headerTitle="book.name" :bookID="book.id"
 			:showReturnIcon="true" :showSettingsIcon="true" v-bind:style="{ background: model.interfaceColor }"
-			@drawerActivate="this.drawerActivate">
+			@drawerActivate="drawerActivate">
 		</Header>
 		<!-- 顶部的加载全部页面顶部按钮 -->
-		<button v-if="((this.startLoadPageNum > 1) && (this.nowLoading === false))"
-			class="w-24 h-12 m-2 bg-blue-300 text-gray-900 hover:bg-blue-500 rounded" @click="this.loadAllPage"
+		<button v-if="((startLoadPageNum > 1) && (nowLoading === false))"
+			class="w-24 h-12 m-2 bg-blue-300 text-gray-900 hover:bg-blue-500 rounded" @click="loadAllPage"
 			size="large">{{ $t('load_all_pages') }}</button>
 		<!-- 渲染漫画部分 -->
-		<div class="main_manga" v-for="(image, n) in this.localImages" :key="image.url" @click="onMouseClick($event)"
+		<div class="main_manga" v-for="(single_image, n) in localImages" :key="single_image.url" @click="onMouseClick($event)"
 			@mousemove="onMouseMove">
-			<ImageScroll :image_url="this.imageParametersString(image.url)" :sPWL="this.sPWL" :dPWL="this.dPWL"
-				:sPWP="this.sPWP" :dPWP="this.dPWP" :MyPageNum="n + this.startLoadPageNum" :nowPageNum="this.nowPageNum"
-				:all_page_num="this.book.all_page_num" :book_id="this.book.id"
-				:showPageNumFlag_ScrollMode="this.showPageNumFlag_ScrollMode" :syncPageByWS="this.syncPageByWS"
-				:id="'JUMP_ID:' + (n + this.startLoadPageNum)" :startLoadPageNum="this.startLoadPageNum"
-				:endLoadPageNum="this.endLoadPageNum" :autoScrolling="this.autoScrolling"
-				:userControlling="this.userControlling" @refreshNowPageNum="refreshNowPageNum">
+			<ImageScroll :image_url="imageParametersString(single_image.url)" :sPWL="sPWL" :dPWL="dPWL"
+				:sPWP="sPWP" :dPWP="dPWP" :MyPageNum="n + startLoadPageNum" :nowPageNum="nowPageNum"
+				:all_page_num="book.all_page_num" :book_id="book.id"
+				:showPageNumFlag_ScrollMode="showPageNumFlag_ScrollMode" :syncPageByWS="syncPageByWS"
+				:id="'JUMP_ID:' + (n + startLoadPageNum)" :startLoadPageNum="startLoadPageNum"
+				:endLoadPageNum="endLoadPageNum" :autoScrolling="autoScrolling"
+				:userControlling="userControlling" @refreshNowPageNum="refreshNowPageNum">
 			</ImageScroll>
 		</div>
 
@@ -29,113 +29,113 @@
 			size="large">{{ $t('back-to-top') }}</button>
 
 		<Bottom v-bind:style="{ background: model.interfaceColor }"
-			:softVersion="this.$store.state.server_status.ServerName ? this.$store.state.server_status.ServerName : 'Comigo'">
+			:softVersion="$store.state.server_status.ServerName ? $store.state.server_status.ServerName : 'Comigo'">
 		</Bottom>
 
-		<Drawer :initDrawerActive="this.drawerActive" :initDrawerPlacement="this.drawerPlacement"
-			@saveConfig="this.saveConfigToLocalStorage" @startSketch="this.startSketchMode"
-			@closeDrawer="this.drawerDeactivate" @setT="this.OnSetTemplate" :readerMode="this.readerMode"
+		<Drawer :initDrawerActive="drawerActive" :initDrawerPlacement="drawerPlacement"
+			@saveConfig="saveConfigToLocalStorage" @startSketch="startSketchMode"
+			@closeDrawer="drawerDeactivate" @setT="OnSetTemplate" :readerMode="readerMode"
 			:inBookShelf="false" :sketching="false">
 
 			<!-- 选择：切换页面模式 -->
 			<n-button @click="changeReaderModeToFlipMode">{{ $t('switch_to_flip_mode') }}</n-button>
 
 			<!-- 页面重新排序 -->
-			<n-select :placeholder='this.$t("re_sort_page")' @update:value="this.onResort" :options="options" />
+			<n-select :placeholder='$t("re_sort_page")' @update:value="onResort" :options="options" />
 			<!-- 空白行-->
 			<!-- <p> &nbsp;</p> -->
 			<!-- 同步翻页 -->
-			<n-switch size="large" v-model:value="this.syncPageByWS" @update:value="this.setSyncPageByWS">
+			<n-switch size="large" v-model:value="syncPageByWS" @update:value="setSyncPageByWS">
 				<template #checked>{{ $t("sync_page") }}</template>
 				<template #unchecked>{{ $t("sync_page") }}</template>
 			</n-switch>
 			<!-- 保存页数 -->
-			<n-switch size="large" v-model:value="this.saveNowPageNumFlag" @update:value="this.setSavePageNumFlag">
+			<n-switch size="large" v-model:value="saveNowPageNumFlag" @update:value="setSavePageNumFlag">
 				<template #checked>{{ $t("savePageNum") }}</template>
 				<template #unchecked>{{ $t("savePageNum") }}</template>
 			</n-switch>
 
 			<!-- 显示页数 -->
-			<n-switch size="large" v-model:value="this.showPageNumFlag_ScrollMode" @update:value="setShowPageNumChange">
+			<n-switch size="large" v-model:value="showPageNumFlag_ScrollMode" @update:value="setShowPageNumChange">
 				<template #checked>{{ $t('showPageNum') }}</template>
 				<template #unchecked>{{ $t('showPageNum') }}</template>
 			</n-switch>
 
 			<!-- 开关：横屏状态下,宽度单位是百分比还是固定值 -->
-			<n-switch size="large" v-model:value="this.imageWidth_usePercentFlag" :rail-style="railStyle"
-				@update:value="this.setImageWidthUsePercentFlag">
+			<n-switch size="large" v-model:value="imageWidth_usePercentFlag" :rail-style="railStyle"
+				@update:value="setImageWidthUsePercentFlag">
 				<template #checked>{{ $t('width_usePercent') }}</template>
 				<template #unchecked>{{ $t('width_useFixedValue') }}</template>
 			</n-switch>
 
 			<!-- 单页-漫画宽度-使用百分比 -->
 			<!-- 数字输入% -->
-			<n-input-number v-if="this.imageWidth_usePercentFlag" size="small" :show-button="false"
-				v-model:value="this.singlePageWidth_Percent" :max="100" :min="10" :update-value-on-input="false">
+			<n-input-number v-if="imageWidth_usePercentFlag" size="small" :show-button="false"
+				v-model:value="singlePageWidth_Percent" :max="100" :min="10" :update-value-on-input="false">
 				<template #prefix>{{ $t('singlePageWidth') }}</template>
 				<template #suffix>%</template>
 			</n-input-number>
 
 			<!-- 滑动选择% -->
-			<n-slider v-if="this.imageWidth_usePercentFlag" v-model:value="this.singlePageWidth_Percent" :step="1"
+			<n-slider v-if="imageWidth_usePercentFlag" v-model:value="singlePageWidth_Percent" :step="1"
 				:max="100" :min="10" :format-tooltip="value => `${value}%`" />
 
 			<!-- 开页-漫画宽度-使用百分比  -->
 			<!-- 数字输入% -->
-			<n-input-number v-if="this.imageWidth_usePercentFlag" size="small" :show-button="false"
-				v-model:value="this.doublePageWidth_Percent" :max="100" :min="10" :update-value-on-input="false">
+			<n-input-number v-if="imageWidth_usePercentFlag" size="small" :show-button="false"
+				v-model:value="doublePageWidth_Percent" :max="100" :min="10" :update-value-on-input="false">
 				<template #prefix>{{ $t('doublePageWidth') }}</template>
 				<template #suffix>%</template>
 			</n-input-number>
 			<!-- 滑动选择% -->
-			<n-slider v-if="this.imageWidth_usePercentFlag" v-model:value="this.doublePageWidth_Percent" :step="1"
+			<n-slider v-if="imageWidth_usePercentFlag" v-model:value="doublePageWidth_Percent" :step="1"
 				:max="100" :min="10" :format-tooltip="value => `${value}%`" />
 
 			<!-- 单页-漫画宽度-使用固定值PX -->
 			<!-- 数字输入框 -->
-			<n-input-number v-if="!this.imageWidth_usePercentFlag" size="small" :show-button="false"
-				v-model:value="this.singlePageWidth_PX" :min="50" :update-value-on-input="false">
+			<n-input-number v-if="!imageWidth_usePercentFlag" size="small" :show-button="false"
+				v-model:value="singlePageWidth_PX" :min="50" :update-value-on-input="false">
 				<template #prefix>{{ $t('singlePageWidth') }}</template>
 				<template #suffix>px</template>
 			</n-input-number>
 
 			<!-- 滑动选择PX -->
-			<n-slider v-if="!this.imageWidth_usePercentFlag" v-model:value="this.singlePageWidth_PX" :step="10"
+			<n-slider v-if="!imageWidth_usePercentFlag" v-model:value="singlePageWidth_PX" :step="10"
 				:max="1600" :min="50" :format-tooltip="value => `${value}px`" />
 
 			<!-- 数字输入框 -->
-			<n-input-number v-if="!this.imageWidth_usePercentFlag" size="small" :show-button="false"
-				v-model:value="this.doublePageWidth_PX" :min="50" :update-value-on-input="false">
+			<n-input-number v-if="!imageWidth_usePercentFlag" size="small" :show-button="false"
+				v-model:value="doublePageWidth_PX" :min="50" :update-value-on-input="false">
 				<template #prefix>{{ $t('doublePageWidth') }}</template>
 				<template #suffix>px</template>
 			</n-input-number>
 
 			<!-- 滑动选择PX -->
-			<n-slider v-if="!this.imageWidth_usePercentFlag" v-model:value="this.doublePageWidth_PX" :step="10"
+			<n-slider v-if="!imageWidth_usePercentFlag" v-model:value="doublePageWidth_PX" :step="10"
 				:max="1600" :min="50" :format-tooltip="value => `${value}px`" />
 
 			<!-- 开关：自动切边 -->
-			<n-switch size="large" v-model:value="this.imageParameters.do_auto_crop"
+			<n-switch size="large" v-model:value="imageParameters.do_auto_crop"
 				@update:value="setImageParameters_DoAutoCrop">
 				<template #checked>{{ $t('auto_crop') }}</template>
 				<template #unchecked>{{ $t('auto_crop') }}</template>
 			</n-switch>
 			<!-- 切白边阈值 -->
-			<n-input-number :show-button="false" v-if="this.imageParameters.do_auto_crop"
-				v-model:value="this.imageParameters.auto_crop_num" @update:value="setImageParameters_AutoCropNum"
+			<!-- <n-input-number :show-button="false" v-if="imageParameters.do_auto_crop"
+				v-model:value="imageParameters.auto_crop_num" @update:value="setImageParameters_AutoCropNum"
 				:max="10" :min="0">
 				<template #prefix>{{ $t('energy_threshold') }}</template>
-			</n-input-number>
+			</n-input-number> -->
 
 			<!-- 开关：压缩图片 -->
-			<n-switch size="large" :rail-style="railStyle" v-model:value="this.imageParameters.do_auto_resize"
+			<n-switch size="large" :rail-style="railStyle" v-model:value="imageParameters.do_auto_resize"
 				@update:value="setImageParameters_DoAutoResize">
 				<template #checked>{{ $t('image_width_limit') }}</template>
 				<template #unchecked>{{ $t('raw_resolution') }}</template>
 			</n-switch>
 			<!-- 压缩图片参数：数字输入框 -->
-			<n-input-number v-if="this.imageParameters.do_auto_resize" size="small" :show-button="false"
-				v-model:value="this.imageParameters.resize_max_width" :min="100">
+			<n-input-number v-if="imageParameters.do_auto_resize" size="small" :show-button="false"
+				v-model:value="imageParameters.resize_max_width" :min="100">
 				<template #prefix>{{ $t('max_width') }}</template>
 				<template #suffix>px</template>
 			</n-input-number>
@@ -143,7 +143,7 @@
 	</div>
 </template>
 
-<script>
+<script lang="ts">
 // 直接导入组件并使用它。这种情况下,只有导入的组件才会被打包。
 import { NBackTop, NSlider, NSwitch, NInputNumber, NButton, useMessage, useDialog, NSelect, } from 'naive-ui'
 import Header from "@/components/Header.vue";
@@ -151,7 +151,7 @@ import Drawer from "@/components/Drawer.vue";
 import Bottom from "@/components/Bottom.vue";
 import Observer from "@/components/Observer_in_Scroll.vue";
 import ImageScroll from "@/components/Image_in_Scroll.vue";
-import { defineComponent, reactive } from 'vue'
+import { CSSProperties,defineComponent, reactive } from 'vue'
 // import { useCookies } from "vue3-cookies";// https://github.com/KanHarI/vue3-cookies
 import axios from "axios";
 
@@ -207,7 +207,7 @@ export default defineComponent({
 			message,
 			dialog,
 			imageParameters,//获取图片所用参数
-			imageParametersString: (source_url) => {
+			imageParametersString: (source_url: string) => {
 				// console.log("source_url:" + source_url)
 				if (source_url.substr(0, 12) == "api/getfile?") {
 					//当前URL
@@ -235,21 +235,28 @@ export default defineComponent({
 				}
 			},
 			//开关的颜色
-			railStyle: ({ focused, checked }) => {
-				const style = {}
-				if (checked) {
-					style.background = '#d03050'
-					if (focused) {
-						style.boxShadow = '0 0 0 2px #d0305040'
-					}
-				} else {
-					style.background = '#2080f0'
-					if (focused) {
-						style.boxShadow = '0 0 0 2px #2080f040'
-					}
-				}
-				return style
-			},
+  			// 开关的颜色
+  			railStyle: ({
+                focused,
+                checked
+            }: {
+                focused: boolean
+                checked: boolean
+            }) => {
+                const style: CSSProperties = {}
+                if (checked) {
+                    style.background = '#d03050'
+                if (focused) {
+                    style.boxShadow = '0 0 0 2px #d0305040'
+                }
+                } else {
+                    style.background = '#2080f0'
+                if (focused) {
+                    style.boxShadow = '0 0 0 2px #2080f040'
+                }
+            }
+            return style
+            },
 		}
 	},
 	data() {
@@ -263,7 +270,16 @@ export default defineComponent({
 			endLoadPageNum: 20,//载入漫画的最后一页，默认为20.
 			saveNowPageNumFlag: true,//是否（在本地存储里面）保存与恢复页数
 			firstloadComplete: true,//首次加载是否完成
-			localImages: null,
+			localImages: [
+				{
+					filename:"",
+					url:""
+				},				
+				{
+					filename:"",
+					url:""
+				}
+			],
 			nowLoading: true,//是否正在加载，延迟执行操作、隐藏按钮用
 			//ws翻页相关
 			syncPageByWS: true,//是否通过websocket同步翻页
@@ -278,13 +294,11 @@ export default defineComponent({
 					sort_by: "",
 					images: [
 						{
-							height: 500,
-							width: 449,
+							filename: "001",
 							url: "/images/loading.gif",
 						},
 						{
-							height: 500,
-							width: 449,
+							filename: "002",
 							url: "/images/loading.gif",
 						},
 					],
@@ -368,7 +382,7 @@ export default defineComponent({
 	// unmounted: 当指令与元素解除绑定且父组件已卸载时,只调用一次。
 	created() {
 		// 消息监听，即接收websocket服务端推送的消息. optionsAPI用法
-		this.$options.sockets.onmessage = (data) => this.handlePacket(data);
+		this.$options.sockets.onmessage = (data: any) => this.handlePacket(data);
 		//根据文件名、修改时间、文件大小等要素排序的参数
 		let sort_image_by_str = "";
 		if (this.$route.query.sort_by) {
@@ -416,12 +430,12 @@ export default defineComponent({
 		//监听路由参数的变化,刷新本地的Book数据
 		this.$watch(
 			() => this.$route.params.id,
-			(id) => {
+			(id: string) => {
 				if (id) {
 					axios
 						.get("/getbook?id=" + this.$route.params.id + sort_image_by_str)
 						.then((response) => (this.book = response.data))
-						.finally(console.log("路由参数改变,书籍ID:" + id));
+						.finally(()=>console.log("路由参数改变,书籍ID:" + id));
 				}
 			}
 		);
@@ -485,11 +499,13 @@ export default defineComponent({
 			}
 		}
 		//当前颜色
-		if (localStorage.getItem("BackgroundColor") != null) {
-			this.model.backgroundColor = localStorage.getItem("BackgroundColor");
+		const tempBackgroundColor=localStorage.getItem("BackgroundColor") 
+		if (typeof(tempBackgroundColor)==='string') {
+			this.model.backgroundColor = tempBackgroundColor;
 		}
-		if (localStorage.getItem("InterfaceColor") != null) {
-			this.model.interfaceColor = localStorage.getItem("InterfaceColor");
+		const tempInterfaceColor=localStorage.getItem("InterfaceColor")
+		if (typeof(tempInterfaceColor)==='string') {
+			this.model.interfaceColor = tempInterfaceColor
 		}
 
 		//宽度是否使用百分比
@@ -557,7 +573,7 @@ export default defineComponent({
 	},
 	methods: {
 		//接收服务器发来的websocket消息，做各种反应（翻页、提示信息）
-		handlePacket(data) {
+		handlePacket(data: { data: string; }) {
 			if (!this.debug) {
 				return;
 			}
@@ -613,7 +629,7 @@ export default defineComponent({
 			// }
 		},
 
-		toPageSimple(syncData) {
+		toPageSimple(syncData: any) {
 			//用户正在操作，不对翻页消息作反应。
 			if (this.userControlling) {
 				console.log("toPage:Return,Becase User Controlling");
@@ -648,7 +664,7 @@ export default defineComponent({
 		},
 
 		//滚动跳转到指定页数
-		toPage(syncData) {
+		toPage(syncData:any) {
 			//用户正在操作，不对翻页消息作反应。
 			if (this.userControlling) {
 				console.log("toPage:Return,Becase User Controlling");
@@ -697,7 +713,7 @@ export default defineComponent({
 						clearInterval(scrollInterval);
 						_this.autoScrolling = false;
 					}
-					if (this.userControlling) {
+					if (_this.userControlling) {
 						clearInterval(scrollInterval);
 					}
 				}, 1000);
@@ -709,7 +725,7 @@ export default defineComponent({
 		loadBookMarkDialog() {
 			this.dialog.warning({
 				title: this.$t('found_read_history'),
-				content: this.$t('load_from_interrupt').replace("XX", this.nowPageNum),
+				content: this.$t('load_from_interrupt').replace("XX", this.nowPageNum.toString()),
 				positiveText: this.$t('from_interrupt'),
 				negativeText: this.$t('starting_from_beginning'),
 				onPositiveClick: () => {
@@ -754,11 +770,11 @@ export default defineComponent({
 				this.endLoadPageNum = this.book.all_page_num;
 			}
 			// console.log("loadNextBlock");
-			this.loadPages(true);
+			this.loadPages();
 		},
 		//监听子组件事件: https://v3.cn.vuejs.org/guide/component-basics.html#%E7%9B%91%E5%90%AC%E5%AD%90%E7%BB%84%E4%BB%B6%E4%BA%8B%E4%BB%B6
 		//滚动页面的时候刷新页数
-		refreshNowPageNum(n) {
+		refreshNowPageNum(n:number) {
 			// console.log("refreshNowPageNum:"+n);
 			// console.log("this.nowLoading:"+this.nowLoading);
 			if (this.nowLoading) {
@@ -771,9 +787,9 @@ export default defineComponent({
 		},
 
 		//滑动页面、停止滚动的时候保存页数
-		saveLocalBookMark(value) {
+		saveLocalBookMark(value:number) {
 			if (this.saveNowPageNumFlag && (!this.nowLoading)) {
-				localStorage.setItem("nowPageNum" + this.book.id, value);
+				localStorage.setItem("nowPageNum" + this.book.id, value.toString());
 				// console.log("save nowPageNum:"+value);
 			}
 		},
@@ -804,7 +820,7 @@ export default defineComponent({
 			this.loadNextBlock();
 		},
 		//页面排序相关
-		onResort(key) {
+		onResort(key: string) {
 			axios
 				.get("/getbook?id=" + this.$route.params.id + "&sort_by=" + key)
 				.then((response) => (this.book = response.data))
@@ -821,7 +837,7 @@ export default defineComponent({
 		},
 
 		//返回“重新排序”选择菜单的文字提示
-		getSortHintText(key) {
+		getSortHintText(key:string) {
 			switch (key) {
 				case "filename": return this.$t('sort_by_filename');
 				case "modify_time": return this.$t('sort_by_modify_time');
@@ -844,7 +860,7 @@ export default defineComponent({
 			return this.book.book_type !== "dir"
 		},
 		//打开抽屉
-		drawerActivate(place) {
+		drawerActivate(place:string) {
 			this.drawerActive = true
 			this.drawerPlacement = place
 		},
@@ -858,10 +874,10 @@ export default defineComponent({
 			this.$router.push({ name: "FlipMode", replace: true, params: { id: this.$route.params.id } });
 		},
 		//接收Draw的参数,继续往父组件传
-		OnSetTemplate(value) {
+		OnSetTemplate(value:string) {
 			this.$emit("setTemplate", value);
 		},
-		onBackgroundColorChange(value) {
+		onBackgroundColorChange(value:string) {
 			this.model.backgroundColor = value
 			localStorage.setItem("BackgroundColor", value);
 		},
@@ -869,92 +885,92 @@ export default defineComponent({
 		//如果在一个组件上使用了 v-model:xxx,应该使用 @update:xxx  https://www.naiveui.com/zh-CN/os-theme/docs/common-issues
 		saveConfigToLocalStorage() {
 			// 储存配置
-			localStorage.setItem("nowPageNum" + this.book.id, this.nowPageNum);
-			localStorage.setItem("SyncPageFlag", this.syncPageByWS);
-			localStorage.setItem("showHeaderFlag", this.showHeaderFlag);
-			localStorage.setItem("showPageNumFlag_ScrollMode", this.showPageNumFlag_ScrollMode);
-			localStorage.setItem("imageWidth_usePercentFlag", this.imageWidth_usePercentFlag);
-			localStorage.setItem("singlePageWidth_Percent", this.singlePageWidth_Percent);
-			localStorage.setItem("doublePageWidth_Percent", this.doublePageWidth_Percent);
-			localStorage.setItem("singlePageWidth_PX", this.singlePageWidth_PX);
-			localStorage.setItem("doublePageWidth_PX", this.doublePageWidth_PX);
+			localStorage.setItem("nowPageNum" + this.book.id, this.nowPageNum.toString());
+			localStorage.setItem("SyncPageFlag", this.syncPageByWS?"true":"false");
+			localStorage.setItem("showHeaderFlag", this.showHeaderFlag?"true":"false");
+			localStorage.setItem("showPageNumFlag_ScrollMode", this.showPageNumFlag_ScrollMode?"true":"false");
+			localStorage.setItem("imageWidth_usePercentFlag", this.imageWidth_usePercentFlag?"true":"false");
+			localStorage.setItem("singlePageWidth_Percent", this.singlePageWidth_Percent?"true":"false");
+			localStorage.setItem("doublePageWidth_Percent", this.doublePageWidth_Percent?"true":"false");
+			localStorage.setItem("singlePageWidth_PX", this.singlePageWidth_PX?"true":"false");
+			localStorage.setItem("doublePageWidth_PX", this.doublePageWidth_PX?"true":"false");
 			localStorage.setItem("BackgroundColor", this.model.backgroundColor);
 			//set对有setXXXChange函数的来说有些多余,但没有set函数的话就有必要了
-			localStorage.setItem("ImageParameters_DoAutoCrop", this.imageParameters.do_auto_crop);
-			localStorage.setItem("ImageParametersResizeMaxWidth", this.imageParameters.resize_max_width);
+			localStorage.setItem("ImageParameters_DoAutoCrop", this.imageParameters.do_auto_crop?"true":"false");
+			localStorage.setItem("ImageParametersResizeMaxWidth", this.imageParameters.resize_max_width.toString());
 		},
-		setSyncPageByWS(value) {
+		setSyncPageByWS(value:boolean) {
 			console.log("value:" + value);
 			this.syncPageByWS = value;
-			localStorage.setItem("SyncPageFlag", value);
+			localStorage.setItem("SyncPageFlag", value?"true":"false");
 			console.log(
 				"设置完毕: SyncPageFlag=" +
 				localStorage.getItem("SyncPageByWS")
 			);
 		},
-		setShowHeaderChange(value) {
+		setShowHeaderChange(value:boolean) {
 			// console.log("value:" + value);
 			this.showHeaderFlag = value;
-			localStorage.setItem("showHeaderFlag", value);
+			localStorage.setItem("showHeaderFlag", value?"true":"false");
 			// console.log("成功保存设置: showHeaderFlag=" + localStorage.getItem("showHeaderFlag"));
 		},
-		setShowPageNumChange(value) {
+		setShowPageNumChange(value:boolean) {
 			// console.log("value:" + value);
 			this.showPageNumFlag_ScrollMode = value;
-			localStorage.setItem("showPageNumFlag_ScrollMode", value);
+			localStorage.setItem("showPageNumFlag_ScrollMode", value?"true":"false");
 			// console.log("成功保存设置: showPageNumFlag_ScrollMode=" + localStorage.getItem("showPageNumFlag_ScrollMode"));
 		},
 		//图片处理相关
 		//黑白化参数
-		setImageParameters_Gray(value) {
+		setImageParameters_Gray(value:boolean) {
 			// console.log("value:" + value);
 			this.imageParameters.gray = value;
-			localStorage.setItem("ImageParameters_Gray", value);
+			localStorage.setItem("ImageParameters_Gray", value?"true":"false");
 			// console.log("成功保存设置: ImageParameters_Gray=" + localStorage.getItem("ImageParameters_Gray"));
 		},
 		//缩放图片大小的参数
-		setImageParameters_DoAutoResize(value) {
+		setImageParameters_DoAutoResize(value:boolean) {
 			this.imageParameters.do_auto_resize = value;
-			localStorage.setItem("ImageParameters_DoAutoResize", value);
+			localStorage.setItem("ImageParameters_DoAutoResize", value?"true":"false");
 			// console.log("成功保存设置: ImageParameters_DoAutoResize=" + localStorage.getItem("ImageParameters_DoAutoResize"));
 		},
 		//设置是否切白边
-		setImageParameters_DoAutoCrop(value) {
+		setImageParameters_DoAutoCrop(value:boolean) {
 			this.imageParameters.do_auto_crop = value;
-			localStorage.setItem("ImageParameters_DoAutoCrop", this.imageParameters.do_auto_crop);
+			localStorage.setItem("ImageParameters_DoAutoCrop", this.imageParameters.do_auto_crop?"true":"false");
 			// console.log("成功保存设置: ImageParameters_DoAutoCrop=" + localStorage.getItem("ImageParameters_DoAutoCrop"));
 		},
 		//切白边参数
-		setImageParameters_AutoCropNum(value) {
+		setImageParameters_AutoCropNum(value: number) {
 			this.imageParameters.auto_crop_num = value;
-			localStorage.setItem("ImageParameters_AutoCropNum", this.imageParameters.auto_crop_num);
+			localStorage.setItem("ImageParameters_AutoCropNum", this.imageParameters.auto_crop_num.toString());
 		},
 
-		setImageWidthUsePercentFlag(value) {
+		setImageWidthUsePercentFlag(value: boolean) {
 			console.log("value:" + value);
 			this.imageWidth_usePercentFlag = value;
-			localStorage.setItem("imageWidth_usePercentFlag", value);
+			localStorage.setItem("imageWidth_usePercentFlag", value?"true":"false");
 			// console.log("成功保存设置: imageWidth_usePercentFlag=" + this.imageWidth_usePercentFlag);
 		},
 
-		setSavePageNumFlag(value) {
+		setSavePageNumFlag(value:boolean) {
 			console.log("value:" + value);
 			this.saveNowPageNumFlag = value;
-			localStorage.setItem("saveNowPageNumFlag", value);
+			localStorage.setItem("saveNowPageNumFlag", value?"true":"false");
 			console.log(
 				"cookie设置完毕: saveNowPageNumFlag=" +
 				localStorage.getItem("saveNowPageNumFlag")
 			);
 		},
 
-		setDebugModeFlag(value) {
+		setDebugModeFlag(value:boolean) {
 			console.log("value:" + value);
 			this.debugModeFlag = value;
-			//关闭Debug模式的时候顺便也关上“自动合并单双页”的功能（因为还有BUG）
-			if (value === false) {
-				this.autoDoublePageModeFlag = false;
-			}
-			localStorage.setItem("debugModeFlag", value);
+			// //关闭Debug模式的时候顺便也关上“自动合并单双页”的功能（因为还有BUG）
+			// if (value === false) {
+			// 	this.autoDoublePageModeFlag = false;
+			// }
+			localStorage.setItem("debugModeFlag", value?"true":"false");
 			console.log(
 				"cookie设置完毕: debugModeFlag=" + localStorage.getItem("debugModeFlag")
 			);
@@ -998,7 +1014,7 @@ export default defineComponent({
 			console.log("MouseEnter User Controlling =" + this.userControlling);
 
 		},
-		onMouseLeave(e) {
+		onMouseLeave(e:any) {
 			// this.userControlling = false;
 			// console.log("MouseLeave User Controlling =" + this.userControlling);
 			//退出控制模式、延迟2秒执行
@@ -1012,7 +1028,7 @@ export default defineComponent({
 
 		},
 		//获取鼠标位置,决定是否打开设置面板
-		onMouseClick(e) {
+		onMouseClick(e:any) {
 			this.clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
 			this.clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离,单位为px）
 			//浏览器的视口,不包括工具栏和滚动条:
@@ -1046,7 +1062,7 @@ export default defineComponent({
 			// console.log("x=", e.x, "y=", e.y);
 		},
 
-		onMouseMove(e) {
+		onMouseMove(e:any) {
 			this.clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
 			this.clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离,单位为px）
 			//浏览器的视口,不包括工具栏和滚动条:
@@ -1082,7 +1098,7 @@ export default defineComponent({
 		},
 
 
-		scrollToTop(scrollDuration) {
+		scrollToTop(scrollDuration:number) {
 			let scrollStep = -window.scrollY / (scrollDuration / 15),
 				scrollInterval = setInterval(function () {
 					if (window.scrollY !== 0) {

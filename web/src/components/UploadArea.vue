@@ -11,12 +11,12 @@
   <!-- directory-dnd:是否支持目录拖拽上传 -->
   <!-- max:限制上传文件数量 :max="10" -->
   <div id="UploadFile" class="">
-    <n-upload color="#ff69b4" multiple directory-dnd :show-remove-button="false" :action="this.actionUrl()"
-      @finish="this.onFinishUpload">
+    <n-upload color="#ff69b4" multiple directory-dnd :show-remove-button="false" :action="actionUrl()"
+      @finish="onFinishUpload">
       <n-upload-dragger>
         <div style="margin-bottom: 12px">
           <n-icon size="48" :depth="3">
-            <svg v-if="this.$store.state.server_status.SupportUploadFile" xmlns="http://www.w3.org/2000/svg"
+            <svg v-if="$store.state.server_status.SupportUploadFile" xmlns="http://www.w3.org/2000/svg"
               xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512">
               <path
                 d="M320 367.79h76c55 0 100-29.21 100-83.6s-53-81.47-96-83.6c-8.89-85.06-71-136.8-144-136.8c-69 0-113.44 45.79-128 91.2c-60 5.7-112 43.88-112 106.4s54 106.4 120 106.4h56"
@@ -28,7 +28,7 @@
                 d="M256 448.21V207.79"></path>
             </svg>
 
-            <svg v-if="!this.$store.state.server_status.SupportUploadFile" xmlns="http://www.w3.org/2000/svg"
+            <svg v-if="!$store.state.server_status.SupportUploadFile" xmlns="http://www.w3.org/2000/svg"
               xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24">
               <path
                 d="M19 19H5V5h14v14zM3 3v18h18V3H3zm14 12.59L15.59 17L12 13.41L8.41 17L7 15.59L10.59 12L7 8.41L8.41 7L12 10.59L15.59 7L17 8.41L13.41 12L17 15.59z"
@@ -37,32 +37,32 @@
 
           </n-icon>
         </div>
-        <n-text v-if="this.$store.state.server_status.SupportUploadFile" style="font-size: 16px">
-          {{ this.$t('drop_to_upload') }}
+        <n-text v-if="$store.state.server_status.SupportUploadFile" style="font-size: 16px">
+          {{ $t('drop_to_upload') }}
         </n-text>
 
-        <n-text v-if="!this.$store.state.server_status.SupportUploadFile" style="font-size: 16px">
-          {{ this.$t('please_enable_upload')  }}
+        <n-text v-if="!$store.state.server_status.SupportUploadFile" style="font-size: 16px">
+          {{ $t('please_enable_upload')  }}
         </n-text>
 
         <n-p  depth="3" style="margin: 8px 0 0 0">
-          {{ this.$t('uploaded_folder_hint') }}
+          {{ $t('uploaded_folder_hint') }}
         </n-p>
       </n-upload-dragger>
     </n-upload>
     <!-- 上传完毕提示 -->
-    <!-- <n-p v-if="this.$store.state.server_status.NumberOfBooks > 0" depth="3" style="margin: 8px 0 0 0">
-      {{ this.$t('scanned_hint').replace("XX", (this.$store.state.server_status.NumberOfBooks - this.beforeBookNum)) }}
+    <!-- <n-p v-if="$store.state.server_status.NumberOfBooks > 0" depth="3" style="margin: 8px 0 0 0">
+      {{ $t('scanned_hint').replace("XX", ($store.state.server_status.NumberOfBooks - beforeBookNum)) }}
     </n-p> -->
     <!-- 上传完毕按钮 -->
-    <n-button class="w-22 h-12" color="#ff69b4" v-if="this.$store.state.server_status.NumberOfBooks > 0"
-      @click="this.onBackToBookShelf">{{
+    <n-button class="w-22 h-12" color="#ff69b4" v-if="$store.state.server_status.NumberOfBooks > 0"
+      @click="onBackToBookShelf">{{
           $t('back_to_bookshelf')
       }}</n-button>
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { NUpload, NUploadDragger, NText, NP, NIcon, NButton, useMessage } from "naive-ui";
 import { defineComponent } from 'vue'
 export default defineComponent({
@@ -121,7 +121,7 @@ export default defineComponent({
       location.reload();
     },
     //上传结束的回调
-    onFinishUpload({ file }) {
+    onFinishUpload({file}:any) {
       // console.log(file);
       this.message.success(file.name);
       //每次上传完成后，触发轮询的次数

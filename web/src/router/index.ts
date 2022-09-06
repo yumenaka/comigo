@@ -14,7 +14,6 @@ import NotFound from '@/views/NotFound404.vue'
 // import PDFView from '@/views/PDFView.vue'
 import UploadPage from '@/views/UploadPage.vue'
 
-
 //link like: https://localhost/#/scroll/4ZaZc
 
 const routes = [
@@ -23,25 +22,25 @@ const routes = [
     path: '/',
     component: BookShelf,
     name: 'BookShelf',
-    props: route => ({ query: route.query.sort_by }),
+    props: (route: { query: { sort_by: any } }) => ({ query: route.query.sort_by }),
   },
   {
     path: '/child_shelf/:group_id',
     component: BookShelf,
     name: 'ChildBookShelf',
-    props: route => ({ query: route.query.sort_by }),
+    props: (route: { query: { sort_by: any } }) => ({ query: route.query.sort_by }),
   },
   {
     path: '/scroll/:id',
     component: ScrollMode,
     name: 'ScrollMode',
-    props: route => ({ query: route.query.sort_by }),
+    props: (route: { query: { sort_by: any } }) => ({ query: route.query.sort_by }),
   },
   {
     path: '/flip/:id',
     component: FlipMode,
     name: 'FlipMode',
-    props: route => ({ query: route.query.sort_by }),
+    props: (route: { query: { sort_by: any } }) => ({ query: route.query.sort_by }),
   },
   {
     path: '/upload',

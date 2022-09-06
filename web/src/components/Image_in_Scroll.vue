@@ -106,7 +106,7 @@ export default {
         //发消息,针对翻页模式
         sendNowPageToFlipMode(toPageNum) {
             //socket未初始化的时候不发送
-            if (this.$socket.readyState !== 1) {
+            if (!this.$store.state.socket.isConnected) {
                 return
             }
             const flip_data = {
