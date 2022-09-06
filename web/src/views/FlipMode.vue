@@ -7,11 +7,11 @@
     <!-- 不透明度：opacity-70 https://www.tailwindcss.cn/docs/opacity -->
     <!-- Vue组建过渡：https://v3.cn.vuejs.org/guide/transitions-enterleave.html#%E5%8D%95%E5%85%83%E7%B4%A0-%E7%BB%84%E4%BB%B6%E7%9A%84%E8%BF%87%E6%B8%A1= -->
     <transition name="header-bottom">
-      <Header v-if="this.showHeaderFlag_FlipMode" class="mx-auto w-full opacity-80"
-        v-bind:class="{ 'fixed': this.hideToolbar, absolute: this.hideToolbar, 'top-0': this.hideToolbar }"
-        v-bind:style="{ background: model.interfaceColor }" :setDownLoadLink="this.needDownloadLink()"
-        :headerTitle="book.name" :bookID="this.book.id" :showReturnIcon="true" :showSettingsIcon="true"
-        @drawerActivate="this.drawerActivate">
+      <Header v-if="showHeaderFlag_FlipMode" class="mx-auto w-full opacity-80"
+        v-bind:class="{ 'fixed': hideToolbar, absolute: hideToolbar, 'top-0': hideToolbar }"
+        v-bind:style="{ background: model.interfaceColor }" :setDownLoadLink="needDownloadLink()"
+        :headerTitle="book.name" :bookID="book.id" :showReturnIcon="true" :showSettingsIcon="true"
+        @drawerActivate="drawerActivate">
       </Header>
     </transition>
 
@@ -23,26 +23,26 @@
         <div class="manga_area_img_div">
           <!-- 非自动拼合模式最简单,直接显示一张图 -->
           <img class="w-auto h-auto" v-bind:src="
-            this.imageParametersString(book.pages.images[nowPageNum - 1].url)
-          " v-bind:alt="nowPageNum" />
+            imageParametersString(book.pages.images[nowPageNum - 1].url)
+          " v-bind:alt="nowPageNum.toString()" />
 
           <!-- 简单拼合双页,不管单双页什么的 -->
           <img v-if="
-            !this.autoDoublePageModeFlag &&
-            this.doublePageModeFlag &&
-            this.nowPageNum < this.book.all_page_num
+            !autoDoublePageModeFlag &&
+            doublePageModeFlag &&
+            nowPageNum < book.all_page_num
           " v-bind:src="
-  this.imageParametersString(book.pages.images[nowPageNum].url)
-" v-bind:alt="nowPageNum + 1" />
+  imageParametersString(book.pages.images[nowPageNum].url)
+" v-bind:alt="(nowPageNum + 1).toString()" />
 
           <!-- 自动拼合模式当前页,如果开启自动拼合,右边可能显示拼合页 -->
           <img v-if="
-            this.autoDoublePageModeFlag &&
-            this.nowPageNum < this.book.all_page_num &&
-            this.nowAndNextPageIsSingle()
+            autoDoublePageModeFlag &&
+            nowPageNum < book.all_page_num &&
+            nowAndNextPageIsSingle()
           " v-bind:src="
-  this.imageParametersString(book.pages.images[nowPageNum].url)
-" v-bind:alt="nowPageNum + 1" />
+  imageParametersString(book.pages.images[nowPageNum].url)
+" v-bind:alt="(nowPageNum + 1).toString()" />
         </div>
       </div>
     </div>
@@ -58,8 +58,8 @@
         absolute
         bottom-0
         fixed
-      " v-bind:class="{ 'text-2xl': this.sketchModeFlag, 'text-lg': (!this.sketchModeFlag) }"
-      v-if="this.showPageHintFlag_FlipMode">
+      " v-bind:class="{ 'text-2xl': sketchModeFlag, 'text-lg': (!sketchModeFlag) }"
+      v-if="showPageHintFlag_FlipMode">
       {{ pageNumOrSketchHint }}
     </div>
 
@@ -72,11 +72,11 @@
       <!-- 控制 flex 和 grid 项目如何沿着容器的主轴定位:https://www.tailwindcss.cn/docs/justify-content -->
       <!-- Tailwind 的容器不会自动居中，也没有任何内置的水平方向的内边距。要使一个容器居中，使用 mx-auto 功能类： -->
       <!-- absolute bottom-0  -->
-      <!-- v-bind:class="{ absolute: this.hideToolbar, 'bottom-0': this.hideToolbar, 'fixed': this.hideToolbar, 'flex': !this.hideToolbar}" -->
+      <!-- v-bind:class="{ absolute: hideToolbar, 'bottom-0': hideToolbar, 'fixed': hideToolbar, 'flex': !hideToolbar}" -->
 
       <div class="m-0 w-full h-10 opacity-80 overflow-hidden"
-        v-bind:class="{ absolute: this.hideToolbar, 'bottom-0': this.hideToolbar, 'flex': (!this.hideToolbar) }"
-        v-if="this.showFooterFlag_FlipMode">
+        v-bind:class="{ absolute: hideToolbar, 'bottom-0': hideToolbar, 'flex': (!hideToolbar) }"
+        v-if="showFooterFlag_FlipMode">
         <div class="
           bg-yellow-400
           flex flex-row
@@ -96,11 +96,11 @@
             w-5/6
             px-4
             h-full
-          " v-if="!this.rightToLeftFlag">
-            <span class="right">{{ this.book.all_page_num }}</span>
-            <n-slider class="w-10/11" reverse v-model:value="nowPageNum" :max="this.book.all_page_num" :min="1"
-              :step="1" :format-tooltip="(value) => `${value}`" @update:value="this.saveLocalBookMark" />
-            <span class="left">{{ this.nowPageNum }}</span>
+          " v-if="!rightToLeftFlag">
+            <span class="right">{{ book.all_page_num }}</span>
+            <n-slider class="w-10/11" reverse v-model:value="nowPageNum" :max="book.all_page_num" :min="1"
+              :step="1" :format-tooltip="(value) => `${value}`" @update:value="saveLocalBookMark" />
+            <span class="left">{{ nowPageNum }}</span>
           </div>
 
           <!-- 底部滑动条，美漫模式 -->
@@ -114,21 +114,21 @@
             w-5/6
             px-4
             h-full
-          " v-if="this.rightToLeftFlag">
-            <span class="right">{{ this.nowPageNum }}</span>
-            <n-slider class="bg-yellow-300" v-model:value="nowPageNum" :max="this.book.all_page_num" :min="1" :step="1"
-              :format-tooltip="(value) => `${value}`" @update:value="this.saveLocalBookMark" />
-            <span class="left">{{ this.book.all_page_num }}</span>
+          " v-if="rightToLeftFlag">
+            <span class="right">{{ nowPageNum }}</span>
+            <n-slider class="bg-yellow-300" v-model:value="nowPageNum" :max="book.all_page_num" :min="1" :step="1"
+              :format-tooltip="(value) => `${value}`" @update:value="saveLocalBookMark" />
+            <span class="left">{{ book.all_page_num }}</span>
           </div>
         </div>
       </div>
     </transition>
 
     <!-- 设置抽屉,一开始隐藏 -->
-    <Drawer :initDrawerActive="this.drawerActive" :initDrawerPlacement="this.drawerPlacement"
-      @saveConfig="this.saveConfigToLocal" @startSketch="this.startSketchMode" @stopSketch="this.stopSketchMode"
-      @closeDrawer="this.drawerDeactivate" :readerMode="this.readerMode" :inBookShelf="false"
-      :sketching="this.sketchModeFlag">
+    <Drawer :initDrawerActive="drawerActive" :initDrawerPlacement="drawerPlacement"
+      @saveConfig="saveConfigToLocal" @startSketch="startSketchMode" @stopSketch="stopSketchMode"
+      @closeDrawer="drawerDeactivate" :readerMode="readerMode" :inBookShelf="false"
+      :sketching="sketchModeFlag">
 
       <!-- 选择：切换页面模式 -->
       <n-button @click="changeReaderModeToScrollMode">{{
@@ -137,84 +137,84 @@
       </n-button>
 
       <!-- 页面重新排序 -->
-      <n-select :placeholder='this.$t("re_sort_page")' @update:value="this.onResort" :options="options" />
+      <n-select :placeholder='$t("re_sort_page")' @update:value="onResort" :options="options" />
       <!-- 空白行-->
       <!-- <p> &nbsp;</p> -->
 
       <!-- websocket同步 -->
-      <n-switch size="large" v-model:value="this.syncPageByWS" @update:value="this.setSyncPageByWS">
+      <n-switch size="large" v-model:value="syncPageByWS" @update:value="setSyncPageByWS">
         <template #checked>{{ $t("sync_page") }}</template>
         <template #unchecked>{{ $t("sync_page") }}</template>
       </n-switch>
 
       <!-- 显示当前页数 -->
-      <n-switch size="large" v-model:value="this.showPageHintFlag_FlipMode" @update:value="setShowPageNumChange">
+      <n-switch size="large" v-model:value="showPageHintFlag_FlipMode" @update:value="setShowPageNumChange">
         <template #checked>{{ $t("showPageNum") }}</template>
         <template #unchecked>{{ $t("showPageNum") }}</template>
       </n-switch>
 
       <!-- 保存阅读的页数 -->
-      <n-switch size="large" v-model:value="this.saveNowPageNumFlag" @update:value="this.setSavePageNumFlag">
+      <n-switch size="large" v-model:value="saveNowPageNumFlag" @update:value="setSavePageNumFlag">
         <template #checked>{{ $t("savePageNum") }}</template>
         <template #unchecked>{{ $t("savePageNum") }}</template>
       </n-switch>
 
       <!-- 合并双页 -->
-      <n-switch size="large" v-model:value="this.doublePageModeFlag" :rail-style="railStyle"
-        @update:value="this.setSimpleDoublePage_FlipMode">
+      <n-switch size="large" v-model:value="doublePageModeFlag" :rail-style="railStyle"
+        @update:value="setSimpleDoublePage_FlipMode">
         <template #checked>{{ $t("DoublePageMode") }}</template>
         <template #unchecked>{{ $t("SinglePageMode") }}</template>
       </n-switch>
 
       <!-- 自动切边 -->
-      <n-switch size="large" v-model:value="this.imageParameters.do_auto_crop"
+      <n-switch size="large" v-model:value="imageParameters.do_auto_crop"
         @update:value="setImageParameters_DoAutoCrop">
         <template #checked>{{ $t("auto_crop") }}</template>
         <template #unchecked>{{ $t("auto_crop") }}</template>
       </n-switch>
-      <!-- 切白边阈值 -->
-      <n-input-number :show-button="false" v-if="this.imageParameters.do_auto_crop"
-        v-model:value="this.imageParameters.auto_crop_num" @update:value="setImageParameters_AutoCropNum" :max="10"
+      <!-- TODO:@update:value="setImageParameters_AutoCropNum"  语法错误？  切白边阈值 -->
+      <n-input-number :show-button="false" v-if="imageParameters.do_auto_crop"
+        v-model:value="imageParameters.auto_crop_num"  :max="10"
         :min="0">
         <template #prefix>{{ $t("energy_threshold") }}</template>
       </n-input-number>
 
       <!-- 翻页模式,默认右开本（日漫）-->
-      <n-switch size="large" v-model:value="this.rightToLeftFlag" :rail-style="railStyle"
-        @update:value="this.setFlipScreenFlag">
+      <n-switch size="large" v-model:value="rightToLeftFlag" :rail-style="railStyle"
+        @update:value="setFlipScreenFlag">
         <template #checked>{{ $t("leftScreenToNext") }}</template>
         <template #unchecked>{{ $t("rightScreenToNext") }}</template>
       </n-switch>
 
       <!-- 自动隐藏工具栏 -->
-      <n-switch size="large" v-model:value="this.hideToolbar" @update:value="this.setHideToolbar">
+      <n-switch size="large" v-model:value="hideToolbar" @update:value="setHideToolbar">
         <template #checked>{{ $t('auto_hide_toolbar') }}</template>
         <template #unchecked>{{ $t('auto_hide_toolbar') }}</template>
       </n-switch>
 
 
       <!-- 分割线 -->
-      <n-divider v-if="this.readerMode === 'sketch'" />
+      <n-divider v-if="readerMode === 'sketch'" />
       <!-- 自动翻页秒数 -->
       <!-- 数字输入% -->
-      <n-input-number v-if="this.readerMode === 'sketch'" size="small" :show-button="false"
-        v-model:value="this.sketchFlipSecond" :max="65535" :min="1" :update-value-on-input="false"
-        @update:value="this.resetSketchSecondCount">
+      <n-input-number v-if="readerMode === 'sketch'" size="small" :show-button="false"
+        v-model:value="sketchFlipSecond" :max="65535" :min="1" :update-value-on-input="false"
+        @update:value="resetSketchSecondCount">
         <template #prefix>{{ $t("pageTurningSeconds") }}</template>
         <template #suffix>{{ $t("second") }}</template>
       </n-input-number>
       <!-- 滑动选择% -->
-      <n-slider v-if="this.readerMode === 'sketch'" v-model:value="this.sketchFlipSecond" :step="1" :max="120" :min="1"
-        :marks="marks" :format-tooltip="(value) => `${value}s`" @update:value="this.resetSketchSecondCount" />
+      <n-slider v-if="readerMode === 'sketch'" v-model:value="sketchFlipSecond" :step="1" :max="120" :min="1"
+        :marks="marks" :format-tooltip="(value) => `${value}s`" @update:value="resetSketchSecondCount" />
 
       <!-- Debug,开启一些不稳定功能 -->
-      <!-- <n-switch size="large" v-model:value="this.debugModeFlag" @update:value="this.setDebugModeFlag">
+      <!-- <n-switch size="large" v-model:value="debugModeFlag" @update:value="setDebugModeFlag">
         <template #checked>{{ $t("debugMode") }}</template>
         <template #unchecked>{{ $t("debugMode") }}</template>
       </n-switch>
 
-      <n-switch v-if="this.debugModeFlag" size="large" v-model:value="this.autoDoublePageModeFlag"
-        @update:value="this.setAutoDoublePage_FlipMode">
+      <n-switch v-if="debugModeFlag" size="large" v-model:value="autoDoublePageModeFlag"
+        @update:value="setAutoDoublePage_FlipMode">
         <template #checked>{{ $t('autoDoublePage') }}</template>
         <template #unchecked>{{ $t('autoDoublePage') }}</template>
       </n-switch>  -->
@@ -222,13 +222,13 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { useCookies } from "vue3-cookies";
 // 自定义组件
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
 // import Bottom from "@/components/Bottom.vue";
-import { defineComponent, reactive } from "vue";
+import { defineComponent, reactive,getCurrentInstance,CSSProperties } from "vue";
 // 直接导入组件并使用它。这种情况下,只有导入的组件才会被打包。
 import {
   NDivider,
@@ -260,6 +260,7 @@ export default defineComponent({
   },
   setup() {
     const { cookies } = useCookies();
+    const app = getCurrentInstance();
     //背景颜色,颜色选择器用
     const model = reactive({
       backgroundColor: "#E0D9CD",
@@ -285,7 +286,7 @@ export default defineComponent({
       model,
       cookies,
       imageParameters, //获取图片所用的参数
-      imageParametersString: (source_url) => {
+      imageParametersString: (source_url: string) => {
         // var temp =
         if (source_url.substr(0, 12) === "api/getfile?") {
           //当前URL
@@ -329,21 +330,27 @@ export default defineComponent({
           return source_url;
         }
       },
-      //开关的颜色
-      railStyle: ({ focused, checked }) => {
-        const style = {};
-        if (checked) {
-          style.background = "#18a058";
+      //开关颜色
+      railStyle: ({
+            focused,
+            checked
+      }: {
+            focused: boolean
+            checked: boolean
+      }) => {
+          const style: CSSProperties = {}
+          if (checked) {
+              style.background = '#d03050'
+              if (focused) {
+                  style.boxShadow = '0 0 0 2px #d0305040'
+              }
+          } else {
+          style.background = '#2080f0'
           if (focused) {
-            style.boxShadow = "0 0 0 2px #d0305040";
+              style.boxShadow = '0 0 0 2px #2080f040'
           }
-        } else {
-          style.background = "#2080f0";
-          if (focused) {
-            style.boxShadow = "0 0 0 2px #2080f040";
-          }
-        }
-        return style;
+      }
+          return style
       },
       //滑动秒数建议值
       marks: {
@@ -357,6 +364,7 @@ export default defineComponent({
   data() {
     return {
       //自动隐藏工具条
+      interval:0,
       hideToolbar: false,
       resort_hint_key: "resort",
       options: [
@@ -442,7 +450,7 @@ export default defineComponent({
   //在选项API中使用 Vue 生命周期钩子：
   created() {
     // 消息监听，即接收websocket服务端推送的消息. optionsAPI用法
-    this.$options.sockets.onmessage = (data) => this.handlePacket(data);
+    this.$options.sockets.onmessage = (data: any) => this.handlePacket(data);
 
     //根据文件名、修改时间、文件大小等要素排序的参数
     let sort_image_by_str = "";
@@ -462,12 +470,12 @@ export default defineComponent({
     //监听路由参数的变化,刷新本地的Book数据
     this.$watch(
       () => this.$route.params.id,
-      (id) => {
+      (id: string) => {
         // console.log(id)
         axios
           .get("/getbook?id=" + this.$route.params.id + sort_image_by_str)
           .then((response) => (this.book = response.data))
-          .finally(console.log("路由参数改变,书籍ID:" + id));
+          .finally(()=>console.log("路由参数改变,书籍ID:" + id));
       }
     );
     //初始化默认值
@@ -518,15 +526,18 @@ export default defineComponent({
       this.autoDoublePageModeFlag = false;
     }
     //当前背景色
-    if (localStorage.getItem("BackgroundColor") != null) {
-      this.model.backgroundColor = localStorage.getItem("BackgroundColor");
+    const tempBackgroundColor=localStorage.getItem("BackgroundColor")
+    if ( typeof(tempBackgroundColor)==='string') {
+      this.model.backgroundColor = tempBackgroundColor
     }
-    if (localStorage.getItem("InterfaceColor") != null) {
-      this.model.interfaceColor = localStorage.getItem("InterfaceColor");
+    const tempInterfaceColor=localStorage.getItem("InterfaceColor")
+    if (typeof(tempInterfaceColor)==='string') {
+      this.model.interfaceColor = tempInterfaceColor
     }
     //倒计时秒数
-    if (localStorage.getItem("sketchFlipSecond") != null) {
-      let saveNum = Number(localStorage.getItem("sketchFlipSecond"));
+    const tempsketchFlipSecond=localStorage.getItem("sketchFlipSecond")
+    if (typeof(tempsketchFlipSecond)==='string') {
+      let saveNum = Number(tempsketchFlipSecond);
       if (!isNaN(saveNum)) {
         this.sketchFlipSecond = saveNum;
       }
@@ -619,7 +630,7 @@ export default defineComponent({
   },
   methods: {
     //接收服务器发来的websocket消息，做各种反应（翻页、提示信息）
-    handlePacket(data) {
+    handlePacket(data: { data: string; }) {
       if (this.syncPageByWS === false) {
         return;
       }
@@ -672,17 +683,18 @@ export default defineComponent({
         data_string: JSON.stringify(data),
       };
       // 配置为了json，可调用sendObj方法来发送数据
+      // console.dir(this.$socket)
       this.$socket.sendObj(newMsg);
       console.log("send:", newMsg);
     },
 
     // 辅助函数，用于从 Gravatar 获取头像。URL 的最后一段需要用户的 email 地址的 MD5 编码。
-    gravatarURL: function (email) {
+    gravatarURL: function (email: md5.message) {
       return "http://www.gravatar.com/avatar/" + md5(email);
     },
 
     //页面排序相关
-    onResort(key) {
+    onResort(key: string) {
       this.resort_hint_key = key;
       axios
         .get("/getbook?id=" + this.$route.params.id + "&sort_by=" + key)
@@ -706,20 +718,20 @@ export default defineComponent({
     },
     //图片处理相关
     //黑白化参数
-    setImageParameters_Gray(value) {
+    setImageParameters_Gray(value: boolean) {
       // console.log("value:" + value);
       this.imageParameters.gray = value;
-      localStorage.setItem("ImageParameters_Gray", value);
+      localStorage.setItem("ImageParameters_Gray", value?"true":"false");
       // console.log("成功保存设置: ImageParameters_Gray=" + localStorage.getItem("ImageParameters_Gray"));
     },
     //缩放图片大小的参数
-    setImageParameters_DoAutoResize(value) {
+    setImageParameters_DoAutoResize(value: boolean) {
       this.imageParameters.do_auto_resize = value;
-      localStorage.setItem("ImageParameters_DoAutoResize", value);
+      localStorage.setItem("ImageParameters_DoAutoResize", value?"true":"false");
       // console.log("成功保存设置: ImageParameters_DoAutoResize=" + localStorage.getItem("ImageParameters_DoAutoResize"));
     },
     //设置是否切白边
-    setImageParameters_DoAutoCrop(value) {
+    setImageParameters_DoAutoCrop(value: boolean) {
       this.imageParameters.do_auto_crop = value;
       localStorage.setItem(
         "ImageParameters_DoAutoCrop",
@@ -728,11 +740,11 @@ export default defineComponent({
       // console.log("成功保存设置: ImageParameters_DoAutoCrop=" + localStorage.getItem("ImageParameters_DoAutoCrop"));
     },
     //切白边参数
-    setImageParameters_AutoCropNum(value) {
+    setImageParameters_AutoCropNum(value: number) {
       this.imageParameters.auto_crop_num = value;
       localStorage.setItem(
         "ImageParameters_AutoCropNum",
-        this.imageParameters.auto_crop_num ? "true" : "false"
+        this.imageParameters.auto_crop_num.toString()
       );
     },
     //切换到卷轴模式
@@ -751,17 +763,17 @@ export default defineComponent({
     },
     // 分析单双页用
     nowAndNextPageIsSingle() {
-      this.nowPageIsDouble = this.checkImageIsDoublePage_byPageNum(
+      let nowPageIsDouble = this.checkImageIsDoublePage_byPageNum(
         this.nowPageNum
       );
-      this.nextPageIsDouble = this.checkImageIsDoublePage_byPageNum(
+      let nextPageIsDouble = this.checkImageIsDoublePage_byPageNum(
         this.nowPageNum + 1
       );
-      if (this.nowPageIsDouble || this.nextPageIsDouble) {
-        this.nowAndNextPageIsSingleFlag = false;
+      if (nowPageIsDouble || nextPageIsDouble) {
+        // this.nowAndNextPageIsSingleFlag = false;
         return false;
       } else {
-        this.nowAndNextPageIsSingleFlag = false;
+        // this.nowAndNextPageIsSingleFlag = false;
         return true;
       }
     },
@@ -785,7 +797,7 @@ export default defineComponent({
     },
     // // 设置当前模板-接收Drawer的参数,继续往父组件传
     // 改变阅读模式
-    OnSetTemplate(value) {
+    OnSetTemplate(value: string) {
       if (value === "scroll") {
         console.log("跳转到卷轴阅读模式");
       } else if (this.readerMode === "scroll" || this.readerMode === "sketch") {
@@ -794,7 +806,7 @@ export default defineComponent({
       }
     },
     //打开抽屉
-    drawerActivate(place) {
+    drawerActivate(place: string) {
       this.drawerActive = true;
       this.drawerPlacement = place;
       //打开抽屉时，触发工具条显隐
@@ -865,33 +877,33 @@ export default defineComponent({
     },
     // 关闭抽屉时,保存设置到cookies
     saveConfigToLocal() {
-      localStorage.setItem("SyncPageFlag", this.syncPageByWS);
-      localStorage.setItem("debugModeFlag", this.debugModeFlag);
+      localStorage.setItem("SyncPageFlag", this.syncPageByWS?"true":"false");
+      localStorage.setItem("debugModeFlag", this.debugModeFlag?"true":"false");
       localStorage.setItem(
         "showHeaderFlag_FlipMode",
-        this.showHeaderFlag_FlipMode
+        this.showHeaderFlag_FlipMode?"true":"false"
       );
       localStorage.setItem(
         "showFooterFlag_FlipMode",
-        this.showFooterFlag_FlipMode
+        this.showFooterFlag_FlipMode?"true":"false"
       );
       localStorage.setItem(
         "showPageHintFlag_FlipMode",
-        this.showPageHintFlag_FlipMode
+        this.showPageHintFlag_FlipMode?"true":"false"
       );
-      localStorage.setItem("rightToLeftFlag", this.rightToLeftFlag);
+      localStorage.setItem("rightToLeftFlag", this.rightToLeftFlag?"true":"false");
       localStorage.setItem(
         "doublePageModeFlag",
-        this.doublePageModeFlag
+        this.doublePageModeFlag?"true":"false"
       );
       localStorage.setItem(
         "autoDoublePageModeFlag",
-        this.autoDoublePageModeFlag
+        this.autoDoublePageModeFlag?"true":"false"
       );
-      localStorage.setItem("saveNowPageNumFlag", this.saveNowPageNumFlag);
-      localStorage.setItem("nowPageNum" + this.book.id, this.nowPageNum);
+      localStorage.setItem("saveNowPageNumFlag", this.saveNowPageNumFlag?"true":"false");
+      localStorage.setItem("nowPageNum" + this.book.id, this.nowPageNum.toString());
       localStorage.setItem("BackgroundColor", this.model.backgroundColor);
-      localStorage.setItem("sketchFlipSecond", this.sketchFlipSecond);
+      localStorage.setItem("sketchFlipSecond", this.sketchFlipSecond.toString());
       //set对有setXXXChange函数的来说有些多余,但没有set函数的话就有必要了
       localStorage.setItem(
         "ImageParameters_DoAutoCrop",
@@ -910,12 +922,12 @@ export default defineComponent({
     onMouseEnter() {
       
     },
-    onMouseLeave(e) {
+    onMouseLeave(e: any) {
       //离开区域的时候,清空鼠标样式
       e.currentTarget.style.cursor = "";
     },
     //事件修饰符: https://v3.cn.vuejs.org/guide/events.html#%E4%BA%8B%E4%BB%B6%E4%BF%AE%E9%A5%B0%E7%AC%A6
-    onMouseMove(e) {
+    onMouseMove(e:any) {
       // // offsetX/Y获取到是触发点相对被触发dom的左上角距离
       // let offsetX = e.offsetX;
       // let offsetY = e.offsetY;
@@ -1010,7 +1022,7 @@ export default defineComponent({
     },
 
     //根据鼠标点击事件的位置,决定是左右翻页还是打开设置
-    onMouseClick(e) {
+    onMouseClick(e:any) {
       let clickX = e.x; //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
       let clickY = e.y; //获取鼠标的Y坐标（鼠标与屏幕顶部的距离,单位为px）
       //浏览器的可视区域宽高,不包括工具栏和滚动条:
@@ -1124,7 +1136,7 @@ export default defineComponent({
     },
 
     //给一个页数,然后判断自动双页模式下,是否应该预读并合并显示下一页
-    checkMergedStatus_ByPageNum(pageNum) {
+    checkMergedStatus_ByPageNum(pageNum:number) {
       //如果没有开启自动双页模式,当然不需要
       if (!this.autoDoublePageModeFlag) {
         return false;
@@ -1150,18 +1162,18 @@ export default defineComponent({
       //如果下一张漫画是开页,显然也没法合并
       return !(now_page_is_double_page || next_page_is_double_page);
     },
-    checkImageIsDoublePage_byPageNum(pageNum) {
+    checkImageIsDoublePage_byPageNum(pageNum:number) {
       //如果传进了错误值
       if (pageNum <= 0 || pageNum > this.book.all_page_num) {
         console.log("Error checkImageIsDoublePage_byPageNum:" + pageNum);
-        return;
-      }
-      if (this.book.pages.images[pageNum - 1].image_type === "SinglePage") {
         return false;
       }
-      if (this.book.pages.images[pageNum - 1].image_type === "DoublePage") {
-        return true;
-      }
+      // if (this.book.pages.images[pageNum - 1].image_type === "SinglePage") {
+      //   return false;
+      // }
+      // if (this.book.pages.images[pageNum - 1].image_type === "DoublePage") {
+      //   return true;
+      // }
       let image = new Image();
       let temp_flag = false; //返回结果用
       image.src = this.book.pages.images[pageNum - 1].url;
@@ -1195,7 +1207,7 @@ export default defineComponent({
     },
 
     //翻页,其实不限页数
-    flipPage: function (num) {
+    flipPage: function (num:number) {
       if (
         this.nowPageNum + num <= this.book.all_page_num &&
         this.nowPageNum + num >= 1
@@ -1213,9 +1225,9 @@ export default defineComponent({
       this.saveLocalBookMark(this.nowPageNum);
     },
     //拖动进度条,或翻页的时候保存页数
-    saveLocalBookMark(value, sendWSMessage = true) {
+    saveLocalBookMark(value:number, sendWSMessage = true) {
       if (this.saveNowPageNumFlag) {
-        localStorage.setItem("nowPageNum" + this.book.id, value);
+        localStorage.setItem("nowPageNum" + this.book.id, value.toString());
       }
       //发送翻页消息到服务器
       if (sendWSMessage && this.syncPageByWS) {
@@ -1223,7 +1235,7 @@ export default defineComponent({
       }
     },
     //跳转到指定页数
-    toPage: function (num, sendWSMessage = true) {
+    toPage: function (num:number, sendWSMessage = true) {
       if (num <= this.book.all_page_num && num >= 1) {
         this.nowPageNum = num;
       }
@@ -1232,7 +1244,7 @@ export default defineComponent({
     },
 
     // 键盘事件
-    handleKeyup(event) {
+    handleKeyup(event:any) {
       //错误:(815, 49) 不允许从实参中引用 'caller' 和 'callee'
       const e = event || window.event;
       if (!e) return;
@@ -1272,112 +1284,88 @@ export default defineComponent({
       // console.log(e.key);
     },
 
-    setShowHeaderChange(value) {
+    setShowHeaderChange(value: boolean) {
       console.log("value:" + value);
       this.showHeaderFlag_FlipMode = value;
-      localStorage.setItem("showHeaderFlag_FlipMode", (value === true) ? "true" : "false");
+      localStorage.setItem("showHeaderFlag_FlipMode", value ? "true" : "false");
       // console.log(
       //   "cookie设置完毕: showHeaderFlag_FlipMode=" +
       //   localStorage.getItem("showHeaderFlag_FlipMode")
       // );
     },
-    setShowFooterFlagChange(value) {
+    setShowFooterFlagChange(value:boolean) {
       console.log("value:" + value);
       this.showFooterFlag_FlipMode = value;
-      localStorage.setItem("showFooterFlag_FlipMode", (value === true) ? "true" : "false");
+      localStorage.setItem("showFooterFlag_FlipMode", value? "true" : "false");
       // console.log(
       //   "cookie设置完毕: showFooterFlag_FlipMode=" +
       //   localStorage.getItem("showFooterFlag_FlipMode")
       // );
     },
 
-    setShowPageNumChange(value) {
+    setShowPageNumChange(value : boolean) {
       console.log("value:" + value);
       this.showPageHintFlag_FlipMode = value;
-      localStorage.setItem("showPageHintFlag_FlipMode", (value === true) ? "true" : "false");
-      // console.log(
-      //   "cookie设置完毕: showPageHintFlag_FlipMode=" +
-      //   localStorage.getItem("showPageHintFlag_FlipMode")
-      // );
+      localStorage.setItem("showPageHintFlag_FlipMode", value? "true" : "false");
     },
 
-    setFlipScreenFlag(value) {
+    setFlipScreenFlag(value:boolean) {
       console.log("value:" + value);
       this.rightToLeftFlag = value;
-      localStorage.setItem("rightToLeftFlag", (value === true) ? "true" : "false");
-      // console.log(
-      //   "cookie设置完毕: rightToLeftFlag=" +
-      //   localStorage.getItem("rightToLeftFlag")
-      // );
+      localStorage.setItem("rightToLeftFlag", value? "true" : "false");
     },
 
-    setHideToolbar(value) {
+    setHideToolbar(value:boolean) {
       console.log("value:" + value);
       this.hideToolbar = value;
-      localStorage.setItem("HideToolbar", (value === true) ? "true" : "false");
+      localStorage.setItem("HideToolbar", value  ? "true" : "false");
       // console.log(
       //   "cookie设置完毕: HideToolbar=" +
       //   localStorage.getItem("HideToolbar")
       // );
     },
 
-    setSyncPageByWS(value) {
+    setSyncPageByWS(value:boolean) {
       console.log("value:" + value);
       this.syncPageByWS = value;
-      localStorage.setItem("SyncPageFlag", (value === true) ? "true" : "false");
-      // console.log(
-      //   "cookie设置完毕: SyncPageByWS=" +
-      //   localStorage.getItem("SyncPageByWS")
-      // );
+      localStorage.setItem("SyncPageFlag", value? "true" : "false");
     },
 
-    setSavePageNumFlag(value) {
+    setSavePageNumFlag(value:boolean) {
       console.log("value:" + value);
       this.saveNowPageNumFlag = value;
-      localStorage.setItem("saveNowPageNumFlag", (value === true) ? "true" : "false");
-      // console.log(
-      //   "cookie设置完毕: saveNowPageNumFlag=" +
-      //   localStorage.getItem("saveNowPageNumFlag")
-      // );
+      localStorage.setItem("saveNowPageNumFlag", value ? "true" : "false");
     },
 
-    setDebugModeFlag(value) {
+    setDebugModeFlag(value:boolean) {
       console.log("value:" + value);
       this.debugModeFlag = value;
       //关闭Debug模式的时候顺便也关上“自动合并单双页”的功能（因为还有BUG）
       if (value === false) {
         this.autoDoublePageModeFlag = false;
       }
-      localStorage.setItem("debugModeFlag", (value === true) ? "true" : "false");
+      localStorage.setItem("debugModeFlag", value ? "true" : "false");
       // console.log(
       //   "cookie设置完毕: debugModeFlag=" + localStorage.getItem("debugModeFlag")
       // );
     },
 
-    setAutoDoublePage_FlipMode(value) {
+    setAutoDoublePage_FlipMode(value:boolean) {
       console.log("value:" + value);
       this.autoDoublePageModeFlag = value;
       if (value === true) {
         this.doublePageModeFlag = false;
       }
-      localStorage.setItem("autoDoublePageModeFlag", (value === true) ? "true" : "false");
-      // console.log(
-      //   "cookie设置完毕: autoDoublePageModeFlag=" +
-      //   localStorage.getItem("autoDoublePageModeFlag")
-      // );
+      localStorage.setItem("autoDoublePageModeFlag", value? "true" : "false");
     },
 
-    setSimpleDoublePage_FlipMode(value) {
+    setSimpleDoublePage_FlipMode(value:boolean) {
       console.log("value:" + value);
       this.doublePageModeFlag = value;
       if (value === true) {
         this.autoDoublePageModeFlag = false;
       }
-      localStorage.setItem("doublePageModeFlag", (value === true) ? "true" : "false");
-      // console.log(
-      //   "cookie设置完毕: doublePageModeFlag=" +
-      //   localStorage.getItem("doublePageModeFlag")
-      // );
+      localStorage.setItem("doublePageModeFlag", value? "true" : "false");
     },
   },
 
@@ -1386,7 +1374,7 @@ export default defineComponent({
     pageNumOrSketchHint() {
       if (this.sketchModeFlag) {
         let nowSecond = (this.sketchSecondCount % this.sketchFlipSecond) + 1;
-        let donePage = parseInt(this.sketchSecondCount / this.sketchFlipSecond);
+        let donePage = this.sketchSecondCount / this.sketchFlipSecond;
         let totalMinutes = (this.sketchSecondCount + 1) / 60;
         //计算几小时几分
         let MinutesAndHourString = "";
@@ -1395,9 +1383,9 @@ export default defineComponent({
           MinutesAndHourString = totalMinutes + this.$t("minute");
         } else {
           MinutesAndHourString =
-            parseInt(totalMinutes / 60) +
+            (totalMinutes / 60).toString() +
             this.$t("hour") +
-            parseInt(totalMinutes % 60) +
+            (totalMinutes % 60).toString() +
             this.$t("minute");
         }
         let AllTimeString =

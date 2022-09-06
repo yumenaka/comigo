@@ -1,8 +1,8 @@
 <template>
     <div class="UploadPage w-full h-screen flex flex-col">
-        <Header class="header flex-none h-12" :bookIsFolder="false" :headerTitle="this.getUploadTitile()"
+        <Header class="header flex-none h-12" :bookIsFolder="false" :headerTitle="getUploadTitile()"
             :showReturnIcon="true" :showSettingsIcon="true" :bookID='null' :setDownLoadLink="false"
-            @drawerActivate="this.drawerActivate">
+            @drawerActivate="drawerActivate">
         </Header>
         <!-- 渲染书架部分 有书的时候显示书  没有的时候显示上传控件-->
         <!-- Flex Grow 控制 flex 项目放大的功能类 https://www.tailwindcss.cn/docs/flex-grow -->
@@ -14,14 +14,14 @@
         </div>
 
         <Bottom class="bottom flex-none h-12" :softVersion="
-            this.$store.state.server_status.ServerName
-                ? this.$store.state.server_status.ServerName
+            $store.state.server_status.ServerName
+                ? $store.state.server_status.ServerName
                 : 'Comigo'
         "></Bottom>
 
-        <Drawer :initDrawerActive="this.drawerActive" :initDrawerPlacement="this.drawerPlacement"
-            @closeDrawer="this.drawerDeactivate" :sketching="false" :inBookShelf="true">
-            <SystemInfo :showSystemInfo="this.drawerActive"    >
+        <Drawer :initDrawerActive="drawerActive" :initDrawerPlacement="drawerPlacement"
+            @closeDrawer="drawerDeactivate" :sketching="false" :inBookShelf="true">
+            <SystemInfo :showSystemInfo="drawerActive"    >
             </SystemInfo>
         </Drawer>
 
@@ -29,7 +29,7 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
 import Header from "@/components/Header.vue";
 import Bottom from "@/components/Bottom.vue";
 import UploadFile from "@/components/UploadArea.vue";
@@ -66,16 +66,18 @@ export default defineComponent({
     },
     created() {
         // 当前颜色
-        if (localStorage.getItem("BackgroundColor") != null) {
-            this.model.backgroundColor = localStorage.getItem("BackgroundColor");
+        const tempBackgroundColor= localStorage.getItem("BackgroundColor") 
+        if (typeof(tempBackgroundColor)=== 'string') {
+            this.model.backgroundColor = tempBackgroundColor;
         }
-        if (localStorage.getItem("InterfaceColor") != null) {
-            this.model.interfaceColor = localStorage.getItem("InterfaceColor");
+        const tempInterfaceColor = localStorage.getItem("tempInterfaceColor") 
+        if (typeof(tempInterfaceColor)=== 'string') {
+            this.model.interfaceColor = tempInterfaceColor
         }
     },
     methods: {
         // 打开抽屉
-        drawerActivate(place) {
+        drawerActivate(place:string) {
             this.drawerActive = true;
             this.drawerPlacement = place;
         },

@@ -30,7 +30,7 @@
       <span class="text-lg" v-if="!setDownLoadLink">{{ headerTitle }}</span>
       <!-- 标题，可下载压缩包 -->
       <span class="text-lg text-blue-700 text-opacity-100  hover:underline">
-        <a v-if="this.setDownLoadLink" :href="'api/raw/' + bookID + '/' + headerTitle">{{ headerTitle }}</a>
+        <a v-if="setDownLoadLink" :href="'api/raw/' + bookID + '/' + headerTitle">{{ headerTitle }}</a>
       </span>
     </div>
     <!-- slot，用来插入自定义组件。但是目前没需求 -->
@@ -55,14 +55,14 @@
         </g>
       </svg>
       <!-- 右边的设置图标,点击屏幕中央也可以打开  可自定义方向 -->
-      <n-icon v-if="showSettingsIcon" class="w-10" size="40" @click="this.onClickSettingIcon('right')">
+      <n-icon v-if="showSettingsIcon" class="w-10" size="40" @click="onClickSettingIcon('right')">
         <settings-outline />
       </n-icon>
     </div>
   </header>
 </template>
 
-<script>
+<script lang="ts">
 import { useCookies } from "vue3-cookies";
 import { NIcon, useMessage, } from 'naive-ui'
 import { ReturnUpBack, SettingsOutline } from '@vicons/ionicons5'
@@ -135,7 +135,7 @@ export default defineComponent({
     },
 
     //点击主页图标的时候，回到主页
-    onClickSettingIcon(place) {
+    onClickSettingIcon(place:string) {
       this.$emit("drawerActivate", place);
     },
 

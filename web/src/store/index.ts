@@ -4,8 +4,9 @@ import main from "../main";
 
 //生成一个随机ID
 var tempUserID="Comigo_"+Math.floor(Math.random()*100000); //可均衡获取 0 到 99999 的随机整数。
-if (localStorage.getItem("ComigoTempUserID") != null) {
-  tempUserID = localStorage.getItem("ComigoTempUserID");
+var  temp = localStorage.getItem("ComigoTempUserID")
+if (typeof temp === 'string'){
+  tempUserID = temp
 }else{
   localStorage.setItem("ComigoTempUserID",tempUserID)
 }
@@ -200,9 +201,9 @@ const store = createStore({
     bookshelf: (state) => {
       return state.bookshelf;
     },
-    setting: (state) => {
-      return state.setting;
-    },
+    // setting: (state) => {
+    //   return state.setting;
+    // },
     message: (state) => {
       return state.message;
     },

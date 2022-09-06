@@ -1,6 +1,6 @@
 <template>
     <div class="w-full h-screen flex flex-col">
-        <Header class="header flex-none h-12" :bookIsFolder="false" :headerTitle="this.getUploadTitile()"
+        <Header class="header flex-none h-12" :bookIsFolder="false" :headerTitle="getUploadTitile()"
             :showReturnIcon="true" :showSettingsIcon="false"  :bookID='null' :setDownLoadLink="false">
         </Header>
         <!-- 渲染书架部分 有书的时候显示书  没有的时候显示上传控件-->
@@ -9,14 +9,14 @@
         <div class="mian_area flex-grow">
         </div>
         <Bottom class="bottom flex-none h-12" :softVersion="
-            this.$store.state.server_status.ServerName
-                ? this.$store.state.server_status.ServerName
+            $store.state.server_status.ServerName
+                ? $store.state.server_status.ServerName
                 : 'Comigo'
         "></Bottom>
     </div>
 </template>
 
-<script>
+<script lang="ts">
 import Header from "@/components/Header.vue";
 import Bottom from "@/components/Bottom.vue";
 
@@ -50,11 +50,13 @@ export default defineComponent({
     },
     created() {
         // 当前颜色
-        if (localStorage.getItem("BackgroundColor") != null) {
-            this.model.backgroundColor = localStorage.getItem("BackgroundColor");
+        const tempBackgroundColor =localStorage.getItem("BackgroundColor") 
+        if (typeof(tempBackgroundColor)==='string') {
+            this.model.backgroundColor = tempBackgroundColor
         }
-        if (localStorage.getItem("InterfaceColor") != null) {
-            this.model.interfaceColor = localStorage.getItem("InterfaceColor");
+        const tempInterfaceColor =localStorage.getItem("InterfaceColor") 
+        if (typeof(tempInterfaceColor)==='string') {
+            this.model.interfaceColor = tempInterfaceColor
         }
     },
     methods: {
