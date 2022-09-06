@@ -5,7 +5,7 @@ import vueJsx from "@vitejs/plugin-vue-jsx";
 import envCompatible from "vite-plugin-env-compatible";
 //vite-plugin-html:一个针对 index.html，提供压缩和基于 ejs 模板功能的 vite 插件。通过搭配 .env 文件，可以在开发或构建项目时，对 index.html 注入动态数据，例如替换网站标题。
 //Vite 应用的 title 默认是写死的，如需要替换成实际的 title 值需要安装 vite-plugin-html 插件，然后通过 ejs 模板注入变量。 https://juejin.cn/post/6988704825450397709
-import { injectHtml } from "vite-plugin-html";
+// import { createHtmlPlugin } from 'vite-plugin-html'
 import { viteCommonjs } from "@originjs/vite-plugin-commonjs";
 //旧版浏览器支持插件，自动生成旧版块和相应的ES语言功能polyfills。需要安装 npm add -D terser
 import legacy from "@vitejs/plugin-legacy";
@@ -38,7 +38,7 @@ export default defineConfig({
     vueJsx(),
     viteCommonjs(),
     envCompatible(),
-    injectHtml(),
+    // injectHtml(),
     legacy({
       targets: ["defaults", "not IE 11"],
     }),
