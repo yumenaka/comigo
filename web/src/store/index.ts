@@ -1,14 +1,14 @@
-import { createStore } from 'vuex'
-import axios from 'axios'
+import { createStore } from "vuex";
+import axios from "axios";
 import main from "../main";
 
 //生成一个随机ID
-var tempUserID="Comigo_"+Math.floor(Math.random()*100000); //可均衡获取 0 到 99999 的随机整数。
-var  temp = localStorage.getItem("ComigoTempUserID")
-if (typeof temp === 'string'){
-  tempUserID = temp
-}else{
-  localStorage.setItem("ComigoTempUserID",tempUserID)
+var tempUserID = "Comigo_" + Math.floor(Math.random() * 100000); //可均衡获取 0 到 99999 的随机整数。
+var temp = localStorage.getItem("ComigoTempUserID");
+if (typeof temp === "string") {
+  tempUserID = temp;
+} else {
+  localStorage.setItem("ComigoTempUserID", tempUserID);
 }
 
 const store = createStore({
@@ -33,17 +33,19 @@ const store = createStore({
         },
       ],
     },
-    bookshelf: [{
-      name: "loading",
-      all_page_num: 1,
-      pages: [
-        {
-          height: 500,
-          width: 449,
-          url: "/images/loading.gif",
-        },
-      ],
-    }],
+    bookshelf: [
+      {
+        name: "loading",
+        all_page_num: 1,
+        pages: [
+          {
+            height: 500,
+            width: 449,
+            url: "/images/loading.gif",
+          },
+        ],
+      },
+    ],
     server_status: {
       template: "scroll",
       sketch_count_seconds: 30,
@@ -73,10 +75,10 @@ const store = createStore({
       // 重新连接错误
       reconnectError: false,
       // 心跳消息发送时间
-      heartBeatInterval: 50000,//50000（50秒）一次的信条消息。为了测试，有时会把间隔改小一点
+      heartBeatInterval: 50000, //50000（50秒）一次的信条消息。为了测试，有时会把间隔改小一点
       // 心跳定时器
-      heartBeatTimer: 0
-    }
+      heartBeatTimer: 0,
+    },
   },
   //mutaitions改变 只能执行同步操作。不能直接调用。需要使用 store.commit('函数名') 方法
   mutations: {
@@ -86,20 +88,28 @@ const store = createStore({
       state.socket.isConnected = true;
       // 连接成功时启动定时发送心跳消息，避免被服务器断开连接
       state.socket.heartBeatTimer = setInterval(() => {
-        var date_json = new Date( new Date()).toJSON();
-        var date_str = new Date(+new Date(date_json) + 8 * 3600 * 1000).toISOString().replace(/T/g, ' ').replace(/\.[\d]{3}Z/, '') 
-        const detail = "【Websockets】heart Beat。"+ date_str;
+        var date_json = new Date(new Date()).toJSON();
+        var date_str = new Date(+new Date(date_json) + 8 * 3600 * 1000)
+          .toISOString()
+          .replace(/T/g, " ")
+          .replace(/\.[\d]{3}Z/, "");
+        const detail = "【Websockets】heart Beat。" + date_str;
         state.socket.isConnected &&
-            main.config.globalProperties.$socket.sendObj({
-            type:"heartbeat",
+          main.config.globalProperties.$socket.sendObj({
+            type: "heartbeat",
             status_code: 200,
             user_id: state.userID,
             token: state.token,
-            detail: detail
+            detail: detail,
           });
       }, state.socket.heartBeatInterval);
-      console.log("临时客户端ID：",state.userID);
-      console.log("【Websockets】连接建立。 " +  new Date().toLocaleDateString().replace(/\//g,"-")+" "+new Date().toTimeString().substr(0,8));
+      console.log("临时客户端ID：", state.userID);
+      console.log(
+        "【Websockets】连接建立。 " +
+          new Date().toLocaleDateString().replace(/\//g, "-") +
+          " " +
+          new Date().toTimeString().substr(0, 8)
+      );
     },
     // 连接关闭
     SOCKET_ONCLOSE(state, event) {
@@ -150,12 +160,13 @@ const store = createStore({
     },
     //拉取远程设定数据
     async syncSeverStatusDataAction(context) {
-      const msg = await axios.get("getstatus").then(
-        (res) => res.data,
-        () => ""
-      ).finally(() => {
-
-      });
+      const msg = await axios
+        .get("getstatus")
+        .then(
+          (res) => res.data,
+          () => ""
+        )
+        .finally(() => {});
       const payload = {
         message: msg,
       };
@@ -208,7 +219,6 @@ const store = createStore({
       return state.message;
     },
   },
-  modules: {
-  }
-})
-export default store
+  modules: {},
+});
+export default store;

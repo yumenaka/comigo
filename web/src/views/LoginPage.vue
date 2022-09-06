@@ -1,7 +1,7 @@
 <template>
     <div class="w-full h-screen flex flex-col">
         <Header class="header flex-none h-12" :bookIsFolder="false" :headerTitle="getUploadTitile()"
-            :showReturnIcon="true" :showSettingsIcon="false"  :bookID='null' :setDownLoadLink="false">
+            :showReturnIcon="true" :showSettingsIcon="false" :bookID='null' :setDownLoadLink="false">
         </Header>
         <!-- 渲染书架部分 有书的时候显示书  没有的时候显示上传控件-->
         <!-- Flex Grow 控制 flex 项目放大的功能类 https://www.tailwindcss.cn/docs/flex-grow -->
@@ -50,12 +50,12 @@ export default defineComponent({
     },
     created() {
         // 当前颜色
-        const tempBackgroundColor=localStorage.getItem("BackgroundColor") 
-        if (typeof(tempBackgroundColor)==='string') {
+        const tempBackgroundColor = localStorage.getItem("BackgroundColor")
+        if (typeof (tempBackgroundColor) === 'string') {
             this.model.backgroundColor = tempBackgroundColor
         }
-        const tempInterfaceColor=localStorage.getItem("InterfaceColor") 
-        if (typeof(tempInterfaceColor)==='string') {
+        const tempInterfaceColor = localStorage.getItem("InterfaceColor")
+        if (typeof (tempInterfaceColor) === 'string') {
             this.model.interfaceColor = tempInterfaceColor
         }
     },

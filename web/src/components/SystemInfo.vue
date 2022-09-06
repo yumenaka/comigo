@@ -10,8 +10,10 @@
       <n-divider></n-divider>
 
       <p>RAM:</p>
-      <n-progress type="circle" :percentage="parseFloat(ram_percentage.toString())" color="#ffaa66"  />
-      <p>{{ ($store.state.server_status.OSInfo.memory_total*($store.state.server_status.OSInfo.memory_used_percent/100)/ (1024 * 1024 * 1024)).toFixed(2) }}GB/{{ ($store.state.server_status.OSInfo.memory_total / (1024 * 1024 * 1024)).toFixed(2) }}GB</p>
+      <n-progress type="circle" :percentage="parseFloat(ram_percentage.toString())" color="#ffaa66" />
+      <p>{{ ($store.state.server_status.OSInfo.memory_total*($store.state.server_status.OSInfo.memory_used_percent/100)/
+      (1024 * 1024 * 1024)).toFixed(2) }}GB/{{ ($store.state.server_status.OSInfo.memory_total / (1024 * 1024 *
+        1024)).toFixed(2) }}GB</p>
       <n-divider></n-divider>
 
       <p>Books:{{ $store.state.server_status.NumberOfBooks }}</p>
@@ -25,7 +27,7 @@
 </template>
 
 <script lang="ts">
-import { NProgress, useMessage, NSpace, NDivider,} from "naive-ui";
+import { NProgress, useMessage, NSpace, NDivider, } from "naive-ui";
 import { defineComponent, ref } from 'vue'
 export default defineComponent({
   name: "AboutPage",

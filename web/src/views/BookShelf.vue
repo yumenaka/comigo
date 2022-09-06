@@ -2,8 +2,7 @@
     <div class="BookShelf w-full h-screen flex flex-col">
         <Header class="flex-none h-12" :bookIsFolder="false" :headerTitle="bookShelfTitle"
             :showReturnIcon="headerShowReturnIcon" :showSettingsIcon="true"
-            :bookID="bookshelf ? bookshelf[0].id : 'null'" :setDownLoadLink="false"
-            @drawerActivate="drawerActivate">
+            :bookID="bookshelf ? bookshelf[0].id : 'null'" :setDownLoadLink="false" @drawerActivate="drawerActivate">
         </Header>
 
         <!-- 渲染书架部分 有书的时候显示书  没有的时候显示上传控件-->
@@ -33,10 +32,9 @@
                 ? $store.state.server_status.ServerName
                 : 'Comigo'
         "></Bottom>
-        <Drawer :initDrawerActive="drawerActive" :initDrawerPlacement="drawerPlacement"
-            @saveConfig="saveConfigToLocal" @startSketch="startSketchMode"
-            @closeDrawer="drawerDeactivate" @setRM="OnSetReaderMode" :readerMode="readerMode"
-            :sketching="false" :inBookShelf="true">
+        <Drawer :initDrawerActive="drawerActive" :initDrawerPlacement="drawerPlacement" @saveConfig="saveConfigToLocal"
+            @startSketch="startSketchMode" @closeDrawer="drawerDeactivate" @setRM="OnSetReaderMode"
+            :readerMode="readerMode" :sketching="false" :inBookShelf="true">
 
             <!-- 设置颜色 -->
             <span>{{ $t('setInterfaceColor') }}</span>
@@ -135,18 +133,18 @@ export default defineComponent({
                 const style: CSSProperties = {}
                 if (checked) {
                     style.background = '#d03050'
-                if (focused) {
-                    style.boxShadow = '0 0 0 2px #d0305040'
-                }
+                    if (focused) {
+                        style.boxShadow = '0 0 0 2px #d0305040'
+                    }
                 } else {
                     style.background = '#2080f0'
-                if (focused) {
-                    style.boxShadow = '0 0 0 2px #2080f040'
+                    if (focused) {
+                        style.boxShadow = '0 0 0 2px #2080f040'
+                    }
                 }
-            }
-            return style
+                return style
             },
-            
+
             // 滑动选择用建议值
             marks: {
                 30: "25%",
@@ -206,7 +204,7 @@ export default defineComponent({
                     book_type: ".zip",
                     parent_folder: "",
                     depth: 1,
-                    child_book_num:0,
+                    child_book_num: 0,
                     pages: [
                         {
                             height: 500,
@@ -253,11 +251,11 @@ export default defineComponent({
     // unmounted: 当指令与元素解除绑定且父组件已卸载时,只调用一次。
     created() {
         //监听滚动，返回顶部按钮用
-        window.addEventListener("scroll", this.onScroll);  
+        window.addEventListener("scroll", this.onScroll);
         // 初始化默认值,读取出来的都是字符串,不要直接用
         //书籍排序方式。可以按照文件名、修改时间、文件大小排序（或反向排序）
-        const tempResortKey_BookShelf=localStorage.getItem("ResortKey_BookShelf") 
-        if (typeof(tempResortKey_BookShelf)=== 'string') {
+        const tempResortKey_BookShelf = localStorage.getItem("ResortKey_BookShelf")
+        if (typeof (tempResortKey_BookShelf) === 'string') {
             this.resort_hint_key = tempResortKey_BookShelf
         }
         // 从服务器上拉取书架信息
@@ -295,18 +293,18 @@ export default defineComponent({
 
         // 当前颜色
 
-        let tempBackgroundColor=localStorage.getItem("BackgroundColor")
-        if (typeof(tempBackgroundColor)==='string'){
+        let tempBackgroundColor = localStorage.getItem("BackgroundColor")
+        if (typeof (tempBackgroundColor) === 'string') {
             this.model.backgroundColor = tempBackgroundColor;
         }
 
-        let tempInterfaceColor=localStorage.getItem("InterfaceColor")
-        if (typeof(tempInterfaceColor)==='string'){
+        let tempInterfaceColor = localStorage.getItem("InterfaceColor")
+        if (typeof (tempInterfaceColor) === 'string') {
             this.model.interfaceColor = tempInterfaceColor;
         }
     },
     // 挂载前
-    beforeMount() { 
+    beforeMount() {
         // this.$store.dispatch("syncSeverStatusDataAction");
     },
     // 在绑定元素的父组件被挂载后调用。
@@ -444,7 +442,7 @@ export default defineComponent({
         },
 
         // 切换下拉、翻页阅读模式
-        setReaderModeIsScroll(value:boolean) {
+        setReaderModeIsScroll(value: boolean) {
             this.readerModeIsScroll = value;
             if (this.readerModeIsScroll === true) {
                 this.readerMode = "scroll";
@@ -453,10 +451,10 @@ export default defineComponent({
                 this.readerMode = "flip";
                 localStorage.setItem("ReaderMode", "flip");
             }
-            localStorage.setItem("ReaderModeIsScroll", value?"true":"false");
+            localStorage.setItem("ReaderModeIsScroll", value ? "true" : "false");
         },
         // 设置背景色的时候
-        onBackgroundColorChange(value:string) {
+        onBackgroundColorChange(value: string) {
             this.model.backgroundColor = value;
             localStorage.setItem("BackgroundColor", value);
         },
@@ -468,14 +466,14 @@ export default defineComponent({
         // 书籍卡片是否显示文字标题
         setBookCardShowTitleFlag(value: boolean) {
             this.bookCardShowTitleFlag = value;
-            localStorage.setItem("BookCardShowTitleFlag", value?"true":"false");
+            localStorage.setItem("BookCardShowTitleFlag", value ? "true" : "false");
             // console.log("成功保存设置: BookCardShowTitleFlag=" + localStorage.getItem("BookCardShowTitleFlag"));
         },
 
         // 书籍卡片是否显示文字标题
-        setSimplifyTitle(value:boolean) {
+        setSimplifyTitle(value: boolean) {
             this.simplifyTitle = value;
-            localStorage.setItem("SimplifyTitle", value?"true":"false");
+            localStorage.setItem("SimplifyTitle", value ? "true" : "false");
         },
 
         // 初始化或者路由变化时,更新本地BookShelf相关数据
@@ -483,11 +481,11 @@ export default defineComponent({
             if (this.$route.params.group_id) {
                 // console.log("BookShelf getBookShelfData!  this.$route.params.id" + this.$route.params.id)
                 this.headerShowReturnIcon = true
-                const temp_id=this.$route.params.group_id
-                if (typeof(temp_id)==="string"){
+                const temp_id = this.$route.params.group_id
+                if (typeof (temp_id) === "string") {
                     this.getBooksGroupByBookID(temp_id)
                 }
-                
+
             } else {
                 this.initBookShelf()
                 this.headerShowReturnIcon = false
@@ -526,7 +524,7 @@ export default defineComponent({
                 });
         },
         // 根据路由参数获取特定书籍组
-        getBooksGroupByBookID(group_id:string) {
+        getBooksGroupByBookID(group_id: string) {
             console.log("getBooksGroupByBookID bookID:" + group_id);
             //排序参数（文件名、修改时间、文件大小等）
             var sort_image_by_str = ""

@@ -19,9 +19,9 @@
                 : 'Comigo'
         "></Bottom>
 
-        <Drawer :initDrawerActive="drawerActive" :initDrawerPlacement="drawerPlacement"
-            @closeDrawer="drawerDeactivate" :sketching="false" :inBookShelf="true">
-            <SystemInfo :showSystemInfo="drawerActive"    >
+        <Drawer :initDrawerActive="drawerActive" :initDrawerPlacement="drawerPlacement" @closeDrawer="drawerDeactivate"
+            :sketching="false" :inBookShelf="true">
+            <SystemInfo :showSystemInfo="drawerActive">
             </SystemInfo>
         </Drawer>
 
@@ -66,18 +66,18 @@ export default defineComponent({
     },
     created() {
         // 当前颜色
-        const tempBackgroundColor= localStorage.getItem("BackgroundColor") 
-        if (typeof(tempBackgroundColor)=== 'string') {
+        const tempBackgroundColor = localStorage.getItem("BackgroundColor")
+        if (typeof (tempBackgroundColor) === 'string') {
             this.model.backgroundColor = tempBackgroundColor;
         }
-        const tempInterfaceColor = localStorage.getItem("tempInterfaceColor") 
-        if (typeof(tempInterfaceColor)=== 'string') {
+        const tempInterfaceColor = localStorage.getItem("tempInterfaceColor")
+        if (typeof (tempInterfaceColor) === 'string') {
             this.model.interfaceColor = tempInterfaceColor
         }
     },
     methods: {
         // 打开抽屉
-        drawerActivate(place:string) {
+        drawerActivate(place: string) {
             this.drawerActive = true;
             this.drawerPlacement = place;
         },

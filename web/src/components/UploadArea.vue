@@ -42,10 +42,10 @@
         </n-text>
 
         <n-text v-if="!$store.state.server_status.SupportUploadFile" style="font-size: 16px">
-          {{ $t('please_enable_upload')  }}
+          {{ $t('please_enable_upload') }}
         </n-text>
 
-        <n-p  depth="3" style="margin: 8px 0 0 0">
+        <n-p depth="3" style="margin: 8px 0 0 0">
           {{ $t('uploaded_folder_hint') }}
         </n-p>
       </n-upload-dragger>
@@ -57,7 +57,7 @@
     <!-- 上传完毕按钮 -->
     <n-button class="w-22 h-12" color="#ff69b4" v-if="$store.state.server_status.NumberOfBooks > 0"
       @click="onBackToBookShelf">{{
-          $t('back_to_bookshelf')
+      $t('back_to_bookshelf')
       }}</n-button>
   </div>
 </template>
@@ -121,7 +121,7 @@ export default defineComponent({
       location.reload();
     },
     //上传结束的回调
-    onFinishUpload({file}:any) {
+    onFinishUpload({ file }: any) {
       // console.log(file);
       this.message.success(file.name);
       //每次上传完成后，触发轮询的次数

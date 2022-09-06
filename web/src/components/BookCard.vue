@@ -26,7 +26,7 @@
         class="absolute inset-x-0 bottom-0 h-1/4 bg-gray-100 bg-opacity-80 font-semibold border-blue-800 rounded-b">
         <!-- 如果把链接的 target 属性设置为 "_blank"，该链接会在新窗口中打开。 -->
         <span class="absolute inset-x-0  font-bold top-0 p-1 align-middle">{{
-            shortTitle
+        shortTitle
         }}</span>
       </div>
     </div>
@@ -52,7 +52,7 @@ export default defineComponent({
     return { cookies };
   },
   computed: {
-    shortTitle() :string{
+    shortTitle(): string {
       let short_title = this.title
       //使用 JavaScript replace() 方法替换掉一些字符串
       if (this.simplifyTitle) {
