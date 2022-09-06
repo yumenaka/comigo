@@ -33,16 +33,16 @@ app.use(VueLazyLoad, {
     attempt: 3,//尝试加载图片数量，默认3
     observerOptions: { rootMargin: '200px', threshold: 0.1 },
     lifecycle: {
-        loading: (el) => {
+        loading: (el:any) => {
             el.setAttribute("class", "LoadingImage");
             // console.log("loading", el);
         },
-        error: (el) => {
+        error: (el:any) => {
             el.setAttribute("class", "ErrorImage");
             // console.log("error", el);
         },
         //可以在这里插入判断分辨率的函数
-        loaded: (el) => {
+        loaded: (el:any) => {
             let image = new Image();
             image.src = el.src;
             // 图片是否完全加载完成。
