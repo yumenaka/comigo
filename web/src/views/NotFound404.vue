@@ -6,7 +6,7 @@
     </n-result>
 </template>
 
-<script>
+<script lang="ts">
 // 直接导入组件并使用它。这种情况下，只有导入的组件才会被打包。
 import { NButton, NResult } from 'naive-ui'
 import { useCookies } from "vue3-cookies";
