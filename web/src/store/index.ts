@@ -1,6 +1,22 @@
-import { createStore } from "vuex";
+import { createStore, useStore as baseUseStore, Store  } from "vuex";
 import axios from "axios";
 import main from "../main";
+import { InjectionKey } from 'vue'
+
+// Vuex TypeScript 支持 
+
+
+// 为 store state 声明类型
+export interface State {
+  count: number
+}
+// 定义 injection key
+export const key: InjectionKey<Store<State>> = Symbol()
+// 定义自己的 `useStore` 组合式函数
+export function useStore () {
+  return baseUseStore(key)
+}
+
 
 //生成一个随机ID
 var tempUserID = "Comigo_" + Math.floor(Math.random() * 100000); //可均衡获取 0 到 99999 的随机整数。
@@ -118,7 +134,7 @@ const store = createStore({
       clearInterval(state.socket.heartBeatTimer);
       state.socket.heartBeatTimer = 0;
       console.log("【Websockets】连接已断开: " + new Date());
-      console.log(event);
+      // console.log(event);
     },
     // 发生错误
     SOCKET_ONERROR(state, event) {
@@ -212,9 +228,6 @@ const store = createStore({
     bookshelf: (state) => {
       return state.bookshelf;
     },
-    // setting: (state) => {
-    //   return state.setting;
-    // },
     message: (state) => {
       return state.message;
     },

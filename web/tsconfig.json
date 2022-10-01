@@ -2,6 +2,8 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "esnext",
+    "isolatedModules": true,
+    //获得对组件选项中 this 的类型检查。否则 this 会被认为是 any
     "strict": true,
     "jsx": "preserve",
     "moduleResolution": "node",
@@ -18,6 +20,7 @@
     "types": [
       "webpack-env"
     ],
+    //路径解析别名
     "paths": {
       "@/*": [
         "src/*"

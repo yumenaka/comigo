@@ -5,12 +5,12 @@ import { ComponentCustomProperties } from "@/vue";
 import Store from "@/store"; //VueX
 
 declare module "@vue/runtime-core" {
-  // declare your own store states
+  // 声明自己的 store state
   interface State {
-    orbital;
+    count: number
   }
 
-  // provide typings for `this.$store`
+  // 为 `this.$store` 提供类型声明
   interface ComponentCustomProperties {
     $store: Store<State>;
   }
