@@ -16,6 +16,7 @@ axios.defaults.baseURL = "/api"
 const app = createApp(App);
 app.use(i18n)
 app.use(VueAxios, axios);
+// 传入 injection key
 app.use(store);
 app.use(router);
 

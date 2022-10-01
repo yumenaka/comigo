@@ -55,7 +55,6 @@
         h-auto
         w-full
         opacity-70
-        absolute
         bottom-0
         fixed
       " v-bind:class="{ 'text-2xl': sketchModeFlag, 'text-lg': (!sketchModeFlag) }" v-if="showPageHintFlag_FlipMode">
@@ -223,6 +222,8 @@ import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
 // import Bottom from "@/components/Bottom.vue";
 import { defineComponent, reactive, getCurrentInstance, CSSProperties } from "vue";
+import { useStore } from '@/store'
+import {useRoute, useRouter} from 'vue-router'
 // 直接导入组件并使用它。这种情况下,只有导入的组件才会被打包。
 import {
   NDivider,
@@ -255,6 +256,8 @@ export default defineComponent({
   setup() {
     const { cookies } = useCookies();
     const app = getCurrentInstance();
+    const store = useStore()
+    const router = useRouter() 
     //背景颜色,颜色选择器用
     const model = reactive({
       backgroundColor: "#E0D9CD",
@@ -688,7 +691,7 @@ export default defineComponent({
     },
 
     //页面排序相关
-    onResort(key: string) {
+    onResort(key: string)  {
       this.resort_hint_key = key;
       axios
         .get("/getbook?id=" + this.$route.params.id + "&sort_by=" + key)
@@ -1376,6 +1379,7 @@ export default defineComponent({
         if (totalMinutes / 60 === 0) {
           MinutesAndHourString = totalMinutes + this.$t("minute");
         } else {
+          // @ts-ignore
           MinutesAndHourString =
             (totalMinutes / 60).toString() +
             this.$t("hour") +
@@ -1387,8 +1391,10 @@ export default defineComponent({
           ((this.sketchSecondCount + 1) % 60) +
           this.$t("second");
         return (
+          // @ts-ignore
           this.$t("now_is") +
           nowSecond +
+          // @ts-ignore
           this.$t("second") +
           "  " +
           this.$t("totalTime") +
