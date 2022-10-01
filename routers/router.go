@@ -4,8 +4,8 @@ import (
 	"embed"
 	"fmt"
 	"html/template"
+	"io"
 	"io/fs"
-	"io/ioutil"
 	"log"
 	"math/rand"
 	"net/http"
@@ -22,11 +22,13 @@ import (
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/plugin"
 	"github.com/yumenaka/comi/routers/handler"
+	"github.com/yumenaka/comi/routers/token"
 	"github.com/yumenaka/comi/routers/websocket"
 	"github.com/yumenaka/comi/tools"
 )
 
 // TemplateString 模板文件
+//
 //go:embed static/index.html
 var TemplateString string
 
@@ -39,30 +41,7 @@ var staticAssetFS embed.FS
 //go:embed  static/images
 var staticImageFS embed.FS
 
-//gin-jwt相关 https://github.com/appleboy/gin-jwt
-type login struct {
-	Username string `form:"username" json:"username" binding:"required"`
-	Password string `form:"password" json:"password" binding:"required"`
-}
-
-var identityKey = "id"
-
-func helloHandler(c *gin.Context) {
-	claims := jwt.ExtractClaims(c)
-	user, _ := c.Get(identityKey)
-	c.JSON(200, gin.H{
-		"userID":   claims[identityKey],
-		"userName": user.(*User).UserName,
-		"text":     "Hello World.",
-	})
-}
-
-// User demo
-type User struct {
-	UserName  string
-	FirstName string
-	LastName  string
-}
+// gin-jwt相关 https://github.com/appleboy/gin-jwt
 
 // StartWebServer 启动web服务
 func StartWebServer() {
@@ -74,108 +53,6 @@ func StartWebServer() {
 	//engine.Use(gin.Recovery())
 	////Logger() 以默认配置创建日志中间件，将所有请求信息按指定格式打印到标准输出。 gin.Default()已经默认启用了这个中间件
 	//engine.Use(gin.Logger())
-
-	//TODO：登录、认证、鉴权etc //授权有些问题，会导致audio.png报401错误，暂时注释掉
-	//// the jwt middleware
-	//authMiddleware, err := jwt.New(&jwt.GinJWTMiddleware{
-	//	Realm:       "test zone",
-	//	Key:         []byte("secret key"),
-	//	Timeout:     time.Hour,
-	//	MaxRefresh:  time.Hour,
-	//	IdentityKey: identityKey,
-	//	PayloadFunc: func(data interface{}) jwt.MapClaims {
-	//		if v, ok := data.(*User); ok {
-	//			return jwt.MapClaims{
-	//				identityKey: v.UserName,
-	//			}
-	//		}
-	//		return jwt.MapClaims{}
-	//	},
-	//	IdentityHandler: func(c *gin.Context) interface{} {
-	//		claims := jwt.ExtractClaims(c)
-	//		return &User{
-	//			UserName: claims[identityKey].(string),
-	//		}
-	//	},
-	//	Authenticator: func(c *gin.Context) (interface{}, error) {
-	//		var loginVals login
-	//		if err := c.ShouldBind(&loginVals); err != nil {
-	//			return "", jwt.ErrMissingLoginValues
-	//		}
-	//		userID := loginVals.Username
-	//		password := loginVals.Password
-	//
-	//		if (userID == "admin" && password == "admin") || (userID == "test" && password == "test") {
-	//			return &User{
-	//				UserName:  userID,
-	//				LastName:  "Bo-Yi",
-	//				FirstName: "Wu",
-	//			}, nil
-	//		}
-	//
-	//		return nil, jwt.ErrFailedAuthentication
-	//	},
-	//	Authorizator: func(data interface{}, c *gin.Context) bool {
-	//		if v, ok := data.(*User); ok && v.UserName == "admin" {
-	//			return true
-	//		}
-	//
-	//		return false
-	//	},
-	//	Unauthorized: func(c *gin.Context, code int, message string) {
-	//		c.JSON(code, gin.H{
-	//			"code":    code,
-	//			"message": message,
-	//		})
-	//	},
-	//	// TokenLookup is a string in the form of "<source>:<name>" that is used
-	//	// to extract token from the request.
-	//	// Optional. Default value "header:Authorization".
-	//	// Possible values:
-	//	// - "header:<name>"
-	//	// - "query:<name>"
-	//	// - "cookie:<name>"
-	//	// - "param:<name>"
-	//	TokenLookup: "header: Authorization, query: token, cookie: jwt",
-	//	// TokenLookup: "query:token",
-	//	// TokenLookup: "cookie:token",
-	//
-	//	// TokenHeadName is a string in the header. Default value is "Bearer"
-	//	TokenHeadName: "Bearer",
-	//
-	//	// TimeFunc provides the current time. You can override it to use another time value. This is useful for testing or if your server uses a different time zone than your tokens.
-	//	TimeFunc: time.Now,
-	//})
-	//
-	//if err != nil {
-	//	time.Sleep(3 * time.Second)
-	//	log.Fatal("JWT Error:" + err.Error())
-	//}
-	//
-	//// When you use jwt.New(), the function is already automatically called for checking,
-	//// which means you don't need to call it again.
-	//errInit := authMiddleware.MiddlewareInit()
-	//
-	//if errInit != nil {
-	//	time.Sleep(3 * time.Second)
-	//	log.Fatal("authMiddleware.MiddlewareInit() Error:" + errInit.Error())
-	//}
-	//
-	//engine.POST("/login", authMiddleware.LoginHandler)
-	//
-	//engine.NoRoute(authMiddleware.MiddlewareFunc(), func(c *gin.Context) {
-	//	claims := jwt.ExtractClaims(c)
-	//	log.Printf("NoRoute claims: %#v\n", claims)
-	//	c.JSON(404, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
-	//})
-	//
-	//auth := engine.Group("/auth")
-	//// Refresh time can be longer than token timeout
-	//auth.GET("/refresh_token", authMiddleware.RefreshHandler)
-	//auth.Use(authMiddleware.MiddlewareFunc())
-	//{
-	//	auth.GET("/hello", helloHandler)
-	//}
 
 	//1、setStaticFiles
 	setStaticFiles(engine)
@@ -193,7 +70,7 @@ func StartWebServer() {
 	StartGinEngine(engine)
 }
 
-//1、设置静态文件
+// 1、设置静态文件
 func setStaticFiles(engine *gin.Engine) {
 	//使用自定义的模板引擎，命名为"template-data"，为了与VUE兼容，把左右分隔符自定义为 [[ ]]
 	tmpl := template.Must(template.New("template-data").Delims("[[", "]]").Parse(TemplateString))
@@ -205,7 +82,7 @@ func setStaticFiles(engine *gin.Engine) {
 		// 中间件，输出 log 到文件
 		engine.Use(tools.LoggerToFile(common.Config.LogFilePath, common.Config.LogFileName))
 		//禁止控制台输出
-		gin.DefaultWriter = ioutil.Discard
+		gin.DefaultWriter = io.Discard
 	}
 	//自定义分隔符，避免与vue.js冲突
 	engine.Delims("[[", "]]")
@@ -238,67 +115,92 @@ func setStaticFiles(engine *gin.Engine) {
 	})
 }
 
-type Login struct {
-	User     string `form:"username" json:"user" uri:"user" xml:"user"  binding:"required"`
-	Password string `form:"password" json:"password" uri:"password" xml:"password" binding:"required"`
-}
-
 // 简单的路由组: api,方便管理部分相同的URL
 var api *gin.RouterGroup
 
-//2、设置获取书籍信息、图片文件的 API
+// 2、设置获取书籍信息、图片文件的 API
 func setWebAPI(engine *gin.Engine) {
 	////TODO：处理登陆 https://www.chaindesk.cn/witbook/19/329
 	////TODO：实现第三方认证，可参考 https://darjun.github.io/2021/07/26/godailylib/goth/
-	//engine.POST("/login", func(c *gin.Context) {
-	//	RememberPassword := c.DefaultPostForm("RememberPassword", "true") //可设置默认值
-	//	username := c.PostForm("username")
-	//	password := c.PostForm("password")
-	//	//bookList := c.PostFormMap("book_list")
-	//	//bookList := c.QueryArray("book_list")
-	//	bookList := c.PostFormArray("book_list")
-	//	c.String(http.StatusOK, fmt.Sprintf("RememberPassword is %s, username is %s, password is %s,hobby is %v", RememberPassword, username, password, bookList))
-	//})
 
-	//1.binding JSON
-	// Example for binding JSON ({"user": "admin", "password": "comigo"})
-	engine.POST("/loginJSON", func(c *gin.Context) {
-		var json Login
-		//其实就是将request中的Body中的数据按照JSON格式解析到json变量中
-		if err := c.ShouldBindJSON(&json); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-		if json.User != "admin" || json.Password != "comigo" {
-			c.JSON(http.StatusUnauthorized, gin.H{"status": "unauthorized"})
-			return
-		}
-		c.JSON(http.StatusOK, gin.H{"status": "you are logged in"})
-	})
+	////简单http认证
+	//enableAuth := common.Config.UserName != "" && common.Config.Password != ""
+	//if enableAuth {
+	//	//api = engine.Group("/api", gin.BasicAuth(gin.Accounts{
+	//	//	common.Config.UserName: common.Config.Password,
+	//	//}))
+	//}
+	api = engine.Group("/api")
 
-	//简单http认证
-	enableAuth := common.Config.UserName != "" && common.Config.Password != ""
-	if enableAuth {
-		// 路由组：https://learnku.com/docs/gin-gonic/1.7/examples-grouping-routes/11399
-		//使用 BasicAuth 中间件  https://learnku.com/docs/gin-gonic/1.7/examples-using-basicauth-middleware/11377
-		api = engine.Group("/api", gin.BasicAuth(gin.Accounts{
-			common.Config.UserName: common.Config.Password,
-		}))
-	} else {
-		api = engine.Group("/api")
+	// jwt登录、认证、鉴权etc
+	// https://github.com/appleboy/gin-jwt
+	// https://juejin.cn/post/7042520107976753165
+
+	//使用gin+jwt实现身份验证功能： https://blog.firerain.me/article/18
+
+	//创建中间件的结构体 jwt.GinJWTMiddleware
+	ginJWTMiddleware := &jwt.GinJWTMiddleware{
+		Realm:            "test zone",                                             //标识
+		SigningAlgorithm: "HS256",                                                 //加密算法
+		Key:              []byte(common.Config.UserName + common.Config.Password), //密钥
+		Timeout:          time.Hour,                                               //过期时间
+		MaxRefresh:       time.Hour,                                               //刷新最大延长时间
+		IdentityKey:      "id",                                                    //指定cookie的id
+		Authenticator:    token.Authenticator,                                     //登录验证函数
+		Authorizator:     token.Authorizator,                                      //登录后权限验证函数
+		//错误时响应
+		Unauthorized: func(c *gin.Context, code int, message string) {
+			fmt.Println(code)
+			fmt.Println(message)
+			c.JSON(code, gin.H{
+				"code":    code,
+				"message": message,
+			})
+		},
+		//定义登录成功后用户名储存以及传递用户名到 Authorizator
+		IdentityHandler: func(c *gin.Context) interface{} {
+			claims := jwt.ExtractClaims(c)
+			return claims["username"]
+		},
+		//负载，定义返回jwt中的payload数据
+		PayloadFunc: func(data interface{}) jwt.MapClaims {
+			if user, ok := data.(token.User); ok {
+				return jwt.MapClaims{"username": user.Username}
+			}
+			return jwt.MapClaims{}
+		},
+		// 指定从哪里获取token 其格式为："<source>:<name>" 如有多个，用逗号隔开
+		TokenLookup:   "header: Authorization, query: token, cookie: jwt",
+		TokenHeadName: "Bearer",
+		TimeFunc:      time.Now,
 	}
+	// 创建 jwt 中间件
+	jwtMiddleware, _ := jwt.New(ginJWTMiddleware)
+
+	api = engine.Group("/api")
+
+	// 登录 api ，直接用 jwtMiddleware 中的 `LoginHandler`
+	api.POST("/login", jwtMiddleware.LoginHandler)
+	//退出登录
+	api.POST("/logout", jwtMiddleware.LogoutHandler)
+	// 刷新 token ，延长token的有效期
+	api.GET("/refresh_token", jwtMiddleware.RefreshHandler)
 
 	//处理表单 https://www.chaindesk.cn/witbook/19/329
 	api.POST("/form", func(c *gin.Context) {
 		t := c.DefaultPostForm("template", "scroll") //可设置默认值
 		username := c.PostForm("username")
 		password := c.PostForm("password")
-
 		//bookList := c.PostFormMap("book_list")
 		//bookList := c.QueryArray("book_list")
 		bookList := c.PostFormArray("book_list")
 		c.String(http.StatusOK, fmt.Sprintf("template is %s, username is %s, password is %s,hobby is %v", t, username, password, bookList))
 	})
+	//通过URL字符串参数获取特定文件
+	//api 需要验证的时候需要使用 jwtMiddleware.MiddlewareFunc() 中间件
+	//api.GET("/getfile", ginJWTMiddleware.MiddlewareFunc(), handler.GetFileHandler)
+
+	api.GET("/getfile", handler.GetFileHandler)
 
 	//文件上传
 	api.POST("/upload", handler.UploadHandler)
@@ -308,8 +210,7 @@ func setWebAPI(engine *gin.Engine) {
 	api.GET("/getlist", handler.GetBookListHandler)
 	//通过URL字符串参数查询书籍信息
 	api.GET("/getbook", handler.GetBookHandler)
-	//通过URL字符串参数获取特定文件
-	api.GET("/getfile", handler.GetFileHandler)
+
 	////通过URL字符串参数PDF文件里的图片，效率太低，注释掉
 	//api.GET("/get_pdf_image", handler.GetPdfImageHandler)
 	//通过链接下载示例配置
@@ -321,7 +222,7 @@ func setWebAPI(engine *gin.Engine) {
 	//301重定向跳转示例
 	api.GET("/redirect", func(c *gin.Context) {
 		//支持内部和外部的重定向
-		c.Redirect(http.StatusMovedPermanently, "http://www.google.com/")
+		c.Redirect(http.StatusMovedPermanently, "https://www.google.com/")
 	})
 	//初始化websocket
 	websocket.WsDebug = &common.Config.Debug
@@ -329,7 +230,7 @@ func setWebAPI(engine *gin.Engine) {
 	SetDownloadLink()
 }
 
-//3、选择服务端口
+// 3、选择服务端口
 func setPort() {
 	//检测端口
 	if !tools.CheckPort(common.Config.Port) {
@@ -350,7 +251,7 @@ func setPort() {
 	}
 }
 
-//5、setFrpClient
+// 5、setFrpClient
 func setFrpClient() {
 	//frp服务
 	if !common.Config.EnableFrpcServer {
@@ -372,7 +273,7 @@ func setFrpClient() {
 
 }
 
-//6、printCMDMessage
+// 6、printCMDMessage
 func printCMDMessage() {
 	//cmd打印链接二维码.如果只有一本书，就直接打开那本书.
 	etcStr := ""

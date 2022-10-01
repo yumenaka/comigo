@@ -48,16 +48,17 @@
     </div>
     <!-- 页数、倒计时文字提示 -->
     <!-- Top / Right / Bottom / Left :用于控制定位元素的位置的功能类。https://www.tailwindcss.cn/docs/top-right-bottom-left -->
+    <!-- 文字描边效果CSS参考了：https://www.zhangxinxu.com/wordpress/2017/06/webkit-text-stroke-css-text-shadow/ -->
     <div class="
         font-sans
-        text-blue-700 text-opacity-90
-        shadow-lg shadow-blue-500/50
+        text-black
         h-auto
         w-full
-        opacity-70
         bottom-0
         fixed
-      " v-bind:class="{ 'text-2xl': sketchModeFlag, 'text-lg': (!sketchModeFlag) }" v-if="showPageHintFlag_FlipMode">
+      " v-bind:class="{ 'text-2xl': sketchModeFlag, 'text-lg': (!sketchModeFlag) }" 
+      style="text-shadow: 0 1px yellow, 1px 0 yellow, -1px 0 yellow, 0 -1px yellow;"
+      v-if="showPageHintFlag_FlipMode"     >
       {{ pageNumOrSketchHint }}
     </div>
 
@@ -1370,31 +1371,28 @@ export default defineComponent({
     //页数或素描模式的提示
     pageNumOrSketchHint() {
       if (this.sketchModeFlag) {
-        let nowSecond = (this.sketchSecondCount % this.sketchFlipSecond) + 1;
-        let donePage = this.sketchSecondCount / this.sketchFlipSecond;
+        let nowSecond = ((this.sketchSecondCount % this.sketchFlipSecond) + 1).toFixed();
+        let donePage = (this.sketchSecondCount / this.sketchFlipSecond).toFixed();
         let totalMinutes = (this.sketchSecondCount + 1) / 60;
         //计算几小时几分
         let MinutesAndHourString = "";
         //如果不满意1小时,就不显示小时
-        if (totalMinutes / 60 === 0) {
-          MinutesAndHourString = totalMinutes + this.$t("minute");
+        if (this.sketchSecondCount  < 3600) {
+          MinutesAndHourString = totalMinutes.toFixed() + this.$t("minute");
         } else {
-          // @ts-ignore
           MinutesAndHourString =
-            (totalMinutes / 60).toString() +
+            (totalMinutes / 60).toFixed().toString() +
             this.$t("hour") +
-            (totalMinutes % 60).toString() +
+            (totalMinutes % 60).toFixed().toString() +
             this.$t("minute");
         }
         let AllTimeString =
           MinutesAndHourString +
-          ((this.sketchSecondCount + 1) % 60) +
+          ((this.sketchSecondCount + 1) % 60).toFixed() +
           this.$t("second");
         return (
-          // @ts-ignore
           this.$t("now_is") +
           nowSecond +
-          // @ts-ignore
           this.$t("second") +
           "  " +
           this.$t("totalTime") +
