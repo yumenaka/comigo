@@ -16,7 +16,7 @@ DefaultMode = 'scroll'
 # 访问限制：用户名。需要设置密码
 UserName = 'admin'
 # 访问限制：密码。需要设置用户名。
-Password = ''
+Password = 'test'
 # Https证书，同时设置KeyFile则启用HTTPS协议
 CertFile = ''
 # Https证书，同时设置CertFile则启用HTTPS协议
@@ -44,7 +44,7 @@ TimeoutLimitForScan = 0
 # 打印所有可能阅读链接的二维码
 PrintAllIP = false
 # 开启Debug模式
-Debug = true
+Debug = false
 # 记录Log到本地文件
 LogToFile = false
 # Log保存的位置
