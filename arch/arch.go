@@ -1,15 +1,16 @@
 package arch
 
 import (
-	"archive/zip"
 	"context"
 	"errors"
 	"fmt"
+	"github.com/klauspost/compress/zip"
 	"io/fs"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sync"
+	"time"
 
 	"github.com/yumenaka/archiver/v4"
 )
@@ -29,7 +30,7 @@ import (
 //	continueOnError = true
 //}
 
-//使用sync.Map代替map，保证并发情况下的读写安全
+// 使用sync.Map代替map，保证并发情况下的读写安全
 var mapBookFS sync.Map
 
 // ScanNonUTF8Zip 扫描文件，初始化书籍用
@@ -130,7 +131,7 @@ func UnArchiveRar(filePath string, extractPath string) error {
 	return nil
 }
 
-//解压文件的函数
+// 解压文件的函数
 func extractFileHandler(ctx context.Context, f archiver.File) error {
 	extractPath := ""
 	if e, ok := ctx.Value("extractPath").(string); ok {
@@ -175,8 +176,8 @@ func extractFileHandler(ctx context.Context, f archiver.File) error {
 }
 
 // GetSingleFile  获取单个文件
-//TODO:大文件需要针对性优化，可能需要保持打开状态、或通过持久化的虚拟文件系统获取
-//TODO:可选择文件缓存功能，一旦解压，下次直接读缓存文件
+// TODO:大文件需要针对性优化，可能需要保持打开状态、或通过持久化的虚拟文件系统获取
+// TODO:可选择文件缓存功能，一旦解压，下次直接读缓存文件
 func GetSingleFile(filePath string, NameInArchive string, textEncoding string) ([]byte, error) {
 	//必须传值
 	if NameInArchive == "" {
@@ -223,8 +224,12 @@ func GetSingleFile(filePath string, NameInArchive string, textEncoding string) (
 	if fsOK {
 		fsys = fsysAny.(fs.FS)
 	} else {
-		//从来没保存过这个文件系统
-		temp, errFS := archiver.FileSystem(filePath)
+		//archiver.FileSystem可以配合ctx了，加个默认超时时间
+		const shortDuration = 10 * 1000 * time.Millisecond //超时时间，10秒
+		ctx, cancel := context.WithTimeout(context.Background(), shortDuration)
+		defer cancel()
+		//如果从来没保存过这个文件系统
+		temp, errFS := archiver.FileSystem(ctx, filePath)
 		if errFS == nil {
 			//将文件系统加入到sync.Map
 			mapBookFS.Store(filePath, temp) //因为被gin并发调用，需要考虑并发读写问题
@@ -293,7 +298,7 @@ func GetSingleFile(filePath string, NameInArchive string, textEncoding string) (
 	return nil, errors.New("2,not Found " + NameInArchive + " in " + filePath)
 }
 
-//判断文件夹或文件是否存在
+// 判断文件夹或文件是否存在
 func isExist(path string) bool {
 	_, err := os.Stat(path)
 	if err != nil {
@@ -309,7 +314,7 @@ func isExist(path string) bool {
 	return true
 }
 
-//获取绝对路径
+// 获取绝对路径
 func getAbsPath(path string) string {
 	abs, err := filepath.Abs(path)
 	if err != nil {

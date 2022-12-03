@@ -1,9 +1,10 @@
 package common
 
 import (
-	"archive/zip"
+	"context"
 	"errors"
 	"fmt"
+	"github.com/klauspost/compress/zip"
 	"io/fs"
 	"io/ioutil"
 	"net/url"
@@ -194,7 +195,11 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*book.Book, 
 		newBook.Cover = book.ImageInfo{NameInArchive: "unknown.png", Url: "/images/unknown.png"}
 	//其他类型的压缩文件或文件夹
 	default:
-		fsys, err := archiver.FileSystem(filePath)
+		//archiver.FileSystem可以配合ctx了，加个默认超时时间
+		const shortDuration = 10 * 1000 * time.Millisecond //超时时间，10秒
+		ctx, cancel := context.WithTimeout(context.Background(), shortDuration)
+		defer cancel()
+		fsys, err := archiver.FileSystem(ctx, filePath)
 		if err != nil {
 			return nil, err
 		}
@@ -255,7 +260,7 @@ func scanNonUTF8ZipFile(filePath string, b *book.Book) error {
 	return err
 }
 
-//手动写的递归查找，功能与fs.WalkDir()相同。发现一个Archiver/V4的BUG：zip文件的虚拟文件系统，找不到正确的多级文件夹？
+// 手动写的递归查找，功能与fs.WalkDir()相同。发现一个Archiver/V4的BUG：zip文件的虚拟文件系统，找不到正确的多级文件夹？
 // https://books.studygolang.com/The-Golang-Standard-Library-by-Example/chapter06/06.3.html
 func walkUTF8ZipFs(fsys fs.FS, parent, base string, b *book.Book) error {
 	//fmt.Println("parent:" + parent + " base:" + base)
