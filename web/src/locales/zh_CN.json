@@ -80,5 +80,6 @@
   "please_enable_upload": "请启用服务器的上传支持",
   "simplify_book_titles": "简化书名",
   "DoublePageMode": "双页模式",
-  "SinglePageMode": "单页模式"
+  "SinglePageMode": "单页模式",
+  "marginOnScrollMode": "页面间隙:"
 }

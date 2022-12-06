@@ -14,7 +14,7 @@
 // https://www.w3cplus.com/vue/build-an-infinite-scroll-component-using-intersection-observer-api.html 
 // https://vueschool.io/articles/vuejs-tutorials/build-an-infinite-scroll-component-using-intersection-observer-api/
 export default {
-    props: ['options', "syncPageByWS", 'userControlling', 'book_id', 'image_url', 'MyPageNum', 'nowPageNum', 'all_page_num', "showPageNumFlag_ScrollMode", "sPWL", "dPWL", "sPWP", "dPWP", "startLoadPageNum", "endLoadPageNum", "autoScrolling"],
+    props: ['options', "syncPageByWS", 'userControlling', 'book_id', 'image_url', 'MyPageNum', 'nowPageNum', 'all_page_num', "showPageNumFlag_ScrollMode", "sPWL", "dPWL", "sPWP", "dPWP", "startLoadPageNum", "endLoadPageNum", "autoScrolling", "margin"],
     emits: ['refreshNowPageNum'],
     data: () => ({
         observer: null,
@@ -36,9 +36,9 @@ export default {
             //判断当前是正在进入视窗，还是正在离开视窗。后续优化用。
             if (this.isIntersectingSave < entry.intersectionRatio) {
                 this.leaveing = false;
-            }else if (this.isIntersectingSave === entry.intersectionRatio) {
+            } else if (this.isIntersectingSave === entry.intersectionRatio) {
                 this.leaveing = false;
-            }else{
+            } else {
                 this.leaveing = true;
             }
             this.intersectionRatioSave = entry.intersectionRatio;
@@ -49,7 +49,7 @@ export default {
 
             // 翻页判断2：以底部为准：从下往上，进入viewport的时候才改变页数
             // let isCross=entry.boundingClientRect.bottom >= entry.target.clientHeight;
-            
+
             //如果没交叉（不可见），或不满足发送信息的条件，发送数清零。滚动到满足条件时，可再次发送消息
             if ((!entry.isIntersecting) || (!isCross)) {//isIntersecting：被监视对象与root是否交叉。
                 this.flipModeMessageNumCount = 0;
@@ -166,21 +166,19 @@ export default {
 
 <style scoped>
 /* https://developer.mozilla.org/zh-CN/docs/Web/CSS/object-fit */
-.manga img {
+img {
     margin: auto;
     /* object-fit: scale-down; */
-    padding: 3px 0px;
-    border-radius: 7px;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    /* margin-top: v-bind(margin+'px'); */
+    margin-bottom: v-bind(margin+'px');
+    /* padding-bottom: 30px; */
+    /* border-radius: 3px; */
+    /* 任意数量的阴影，用逗号分隔 如果元素同时设置了 border-radius属性，那么阴影也会有圆角效果。*/
+    /* 属性可设置的值包括阴影的 X 轴偏移量、Y 轴偏移量、模糊半径、扩散半径和颜色。 */
+    /* box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); */
+    box-shadow: 0px 6px 3px 0px rgba(0, 0, 0, 0.19);
 }
 
-.manga canvas {
-    margin: auto;
-    /* object-fit: scale-down; */
-    padding: 3px 0px;
-    border-radius: 7px;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-}
 
 .page_hint {
     /* 文字颜色 */

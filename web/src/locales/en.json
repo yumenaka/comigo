@@ -80,5 +80,6 @@
   "please_enable_upload": "Please enable server upload file support",
   "simplify_book_titles": "Simplify Title",
   "DoublePageMode": "DoublePage",
-  "SinglePageMode": "SinglePage"
+  "SinglePageMode": "SinglePage",
+  "marginOnScrollMode": "margin bottom:"
 }
