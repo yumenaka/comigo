@@ -17,7 +17,7 @@
 				:showPageNumFlag_ScrollMode="showPageNumFlag_ScrollMode" :syncPageByWS="syncPageByWS"
 				:id="'JUMP_ID:' + (n + startLoadPageNum)" :startLoadPageNum="startLoadPageNum"
 				:endLoadPageNum="endLoadPageNum" :autoScrolling="autoScrolling" :userControlling="userControlling"
-				@refreshNowPageNum="refreshNowPageNum">
+				:margin="marginOnScrollMode" @refreshNowPageNum="refreshNowPageNum">
 			</ImageScroll>
 		</div>
 
@@ -112,6 +112,15 @@
 			<!-- 滑动选择PX -->
 			<n-slider v-if="!imageWidth_usePercentFlag" v-model:value="doublePageWidth_PX" :step="10" :max="1600"
 				:min="50" :format-tooltip="value => `${value}px`" />
+
+			<!-- 页面间隙px -->
+			<n-input-number v-if="!imageWidth_usePercentFlag" size="small" :show-button="false"
+				v-model:value="marginOnScrollMode" :min="0" :update-value-on-input="false">
+				<template #prefix>{{ $t('marginOnScrollMode') }}</template>
+				<template #suffix>px</template>
+			</n-input-number>
+			<n-slider v-model:value="marginOnScrollMode" :step="1" :max="100" :min="0"
+				:format-tooltip="value => `${value}px`" />
 
 			<!-- 开关：自动切边 -->
 			<n-switch size="large" v-model:value="imageParameters.do_auto_crop"
@@ -369,6 +378,7 @@ export default defineComponent({
 			//可见范围宽高的具体值
 			clientWidth: 0,
 			clientHeight: 0,
+			marginOnScrollMode: 20,//下拉模式下，漫画页面的底部间距
 		};
 	},
 	//Vue3生命周期:  https://v3.cn.vuejs.org/api/options-lifecycle-hooks.html#beforecreate
@@ -497,6 +507,15 @@ export default defineComponent({
 				this.doublePageWidth_PX = saveNum;
 			}
 		}
+
+		//	漫画底部页边距
+		if (localStorage.getItem("marginOnScrollMode") != null) {
+			let saveNum = Number(localStorage.getItem("marginOnScrollMode"));
+			if (!isNaN(saveNum)) {
+				this.marginOnScrollMode = saveNum;
+			}
+		}
+
 		//当前颜色
 		const tempBackgroundColor = localStorage.getItem("BackgroundColor")
 		if (typeof (tempBackgroundColor) === 'string') {
@@ -897,6 +916,7 @@ export default defineComponent({
 			//set对有setXXXChange函数的来说有些多余,但没有set函数的话就有必要了
 			localStorage.setItem("ImageParameters_DoAutoCrop", this.imageParameters.do_auto_crop ? "true" : "false");
 			localStorage.setItem("ImageParametersResizeMaxWidth", this.imageParameters.resize_max_width.toString());
+			localStorage.setItem("marginOnScrollMode", this.marginOnScrollMode.toString());
 		},
 		setSyncPageByWS(value: boolean) {
 			console.log("value:" + value);
@@ -1160,20 +1180,5 @@ export default defineComponent({
 .manga {
 	max-width: 100%;
 	background: v-bind("model.backgroundColor");
-}
-
-/* https://developer.mozilla.org/zh-CN/docs/Web/CSS/object-fit */
-.manga img {
-	margin: auto;
-	padding: 3px 0px;
-	border-radius: 7px;
-	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-}
-
-.manga canvas {
-	margin: auto;
-	padding: 3px 0px;
-	border-radius: 7px;
-	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 </style>
