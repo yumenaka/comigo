@@ -14,21 +14,6 @@ import (
 	"sync"
 )
 
-//var (
-//	compressionLevel       int
-//	overwriteExisting      bool
-//	mkdirAll               bool
-//	selectiveCompression   bool
-//	implicitTopLevelFolder bool
-//	continueOnError        bool
-//)
-//
-//func init() {
-//	mkdirAll = true
-//	overwriteExisting = false
-//	continueOnError = true
-//}
-
 // 使用sync.Map代替map，保证并发情况下的读写安全
 var mapBookFS sync.Map
 
@@ -223,7 +208,7 @@ func GetSingleFile(filePath string, NameInArchive string, textEncoding string) (
 	if fsOK {
 		fsys = fsysAny.(fs.FS)
 	} else {
-		//会引发500错误，原因未弄清
+		//会引发500错误，原因似乎是10秒后的timeout？
 		////archiver.FileSystem可以配合ctx了，加个默认超时时间
 		//const shortDuration = 10 * 1000 * time.Millisecond //超时时间，10秒
 		//ctx, cancel := context.WithTimeout(context.Background(), shortDuration)

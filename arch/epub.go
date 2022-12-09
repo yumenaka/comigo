@@ -57,7 +57,7 @@ func getDataFromEpub(epubPath string, needFile string) (data []byte, err error) 
 	return nil, errors.New("getDataFromEpub Error. epubPath:" + epubPath + "  needFile:" + needFile)
 }
 
-// Container 定义结构体映射xml结构 was generated 2022-12-09 00:41:31 by https://xml-to-go.github.io/ in Ukraine.
+// Container 定义结构体、映射xml结构 was generated 2022-12-09 00:41:31 by https://xml-to-go.github.io/ in Ukraine.
 type Container struct {
 	XMLName   xml.Name `xml:"container"`
 	Text      string   `xml:",chardata"`
@@ -73,7 +73,8 @@ type Container struct {
 	} `xml:"rootfiles"`
 }
 
-// Package was generated 2022-12-09 00:47:41 by https://xml-to-go.github.io/ in Ukraine.
+// Package 定义结构体、映射OPF文件（xml）结构用。
+// was generated 2022-12-09 00:47:41 by https://xml-to-go.github.io/ in Ukraine.
 type Package struct {
 	XMLName          xml.Name `xml:"package"`
 	Text             string   `xml:",chardata"`
@@ -131,6 +132,7 @@ type Package struct {
 	} `xml:"guide"`
 }
 
+// 获取OPF文件的路径
 func getOPFPath(epubPath string) (opfPath string, err error) {
 	//byte, err := os.ReadFile(ContainerXMLPath)
 	//if err != nil {
@@ -264,4 +266,43 @@ func GetImageListFromEpubFile(epubPath string) (imageList []string, err error) {
 		//fmt.Println(src)
 	}
 	return imageList, err
+}
+
+type EpubMetadata struct {
+	Title     string `xml:"title"`
+	Language  string `xml:"language"`
+	Creator   string `xml:"creator"`
+	Publisher string `xml:"publisher"`
+	Date      string `xml:"date"`
+	Rights    string `xml:"rights"`
+	Series    string `xml:"series"`
+}
+
+// GetEpubMetadata 根据Epub信息，获取书籍详情
+func GetEpubMetadata(epubPath string) (metadata EpubMetadata, err error) {
+	pack := new(Package)
+	opfPath, err := getOPFPath(epubPath)
+	if err != nil {
+		fmt.Println("getOPFPath Error:", err)
+		return
+	}
+	b, err := getDataFromEpub(epubPath, opfPath)
+	if err != nil {
+		fmt.Println("getDataFromEpub Error:", err)
+		return
+	}
+	err = xml.Unmarshal(b, pack)
+	if err != nil {
+		fmt.Println("XML Unmarshal Error:", err)
+		return
+	}
+	return EpubMetadata{
+		Title:     pack.Metadata.Title,
+		Language:  pack.Metadata.Language,
+		Creator:   pack.Metadata.Creator,
+		Publisher: pack.Metadata.Publisher,
+		Date:      pack.Metadata.Date,
+		Rights:    pack.Metadata.Rights,
+		Series:    pack.Metadata.Series,
+	}, nil
 }
