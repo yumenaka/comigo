@@ -76,7 +76,6 @@ func ScanAndGetBookList(storePath string, databaseBookList []*book.Book) (newBoo
 		if fileInfo == nil {
 			return err
 		}
-
 		//如果不是文件夹
 		if !fileInfo.IsDir() {
 			if !Config.IsSupportArchiver(walkPath) {
@@ -90,7 +89,6 @@ func ScanAndGetBookList(storePath string, databaseBookList []*book.Book) (newBoo
 			}
 			newBookList = append(newBookList, getBook)
 		}
-
 		//如果是文件夹
 		if fileInfo.IsDir() {
 			//得到书籍文件数据
@@ -182,7 +180,14 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*book.Book, 
 				fmt.Println(err)
 			} else {
 				newBook.SortPagesByImageList(imageList)
-				fmt.Println(newBook)
+			}
+			//根据metadata，改写书籍信息
+			metaData, err := arch.GetEpubMetadata(newBook.FilePath)
+			if err != nil {
+				fmt.Println(err)
+			} else {
+				newBook.Author[0] = metaData.Creator
+				newBook.Press = metaData.Publisher
 			}
 		}
 	//TODO:服务器解压速度太慢，网页用PDF.js解析？
