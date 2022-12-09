@@ -3,6 +3,8 @@ package routers
 import (
 	"embed"
 	"fmt"
+	jwt "github.com/appleboy/gin-jwt/v2"
+	"github.com/yumenaka/comi/routers/token"
 	"html/template"
 	"io"
 	"io/fs"
@@ -13,7 +15,6 @@ import (
 	"strings"
 	"time"
 
-	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 	"github.com/sanity-io/litter"
 
@@ -22,7 +23,6 @@ import (
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/plugin"
 	"github.com/yumenaka/comi/routers/handler"
-	"github.com/yumenaka/comi/routers/token"
 	"github.com/yumenaka/comi/routers/websocket"
 	"github.com/yumenaka/comi/tools"
 )

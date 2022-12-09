@@ -372,13 +372,13 @@ export default defineComponent({
 			//横屏(Landscape)状态的漫画页宽度,百分比
 			singlePageWidth_Percent: 50,
 			doublePageWidth_Percent: 95,
-			//横屏(Landscape)状态的漫画页宽度,PX
+			//横屏(Landscape)状态的漫画页宽度。px。
 			singlePageWidth_PX: 720,
 			doublePageWidth_PX: 1080,
 			//可见范围宽高的具体值
 			clientWidth: 0,
 			clientHeight: 0,
-			marginOnScrollMode: 20,//下拉模式下，漫画页面的底部间距
+			marginOnScrollMode: 10,//下拉模式下，漫画页面的底部间距。px。
 		};
 	},
 	//Vue3生命周期:  https://v3.cn.vuejs.org/api/options-lifecycle-hooks.html#beforecreate

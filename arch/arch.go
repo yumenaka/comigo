@@ -5,14 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"github.com/klauspost/compress/zip"
+	"github.com/yumenaka/archiver/v4"
+	"io"
 	"io/fs"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sync"
-	"time"
-
-	"github.com/yumenaka/archiver/v4"
 )
 
 //var (
@@ -207,8 +206,8 @@ func GetSingleFile(filePath string, NameInArchive string, textEncoding string) (
 			if err != nil {
 				fmt.Println(err)
 			}
-			defer file.Close()
-			content, err := ioutil.ReadAll(file)
+			//defer file.Close()
+			content, err := io.ReadAll(file)
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -224,12 +223,14 @@ func GetSingleFile(filePath string, NameInArchive string, textEncoding string) (
 	if fsOK {
 		fsys = fsysAny.(fs.FS)
 	} else {
-		//archiver.FileSystem可以配合ctx了，加个默认超时时间
-		const shortDuration = 10 * 1000 * time.Millisecond //超时时间，10秒
-		ctx, cancel := context.WithTimeout(context.Background(), shortDuration)
-		defer cancel()
+		//会引发500错误，原因未弄清
+		////archiver.FileSystem可以配合ctx了，加个默认超时时间
+		//const shortDuration = 10 * 1000 * time.Millisecond //超时时间，10秒
+		//ctx, cancel := context.WithTimeout(context.Background(), shortDuration)
+		//defer cancel()
+
 		//如果从来没保存过这个文件系统
-		temp, errFS := archiver.FileSystem(ctx, filePath)
+		temp, errFS := archiver.FileSystem(context.Background(), filePath)
 		if errFS == nil {
 			//将文件系统加入到sync.Map
 			mapBookFS.Store(filePath, temp) //因为被gin并发调用，需要考虑并发读写问题
@@ -240,13 +241,13 @@ func GetSingleFile(filePath string, NameInArchive string, textEncoding string) (
 	}
 
 	//通过虚拟文件系统打开特定文件
-	f, errFSOpen := fsys.Open(NameInArchive)
+	fileInRarFS, errFSOpen := fsys.Open(NameInArchive)
 	if errFSOpen != nil {
 		fmt.Println(errFSOpen)
 	}
-	defer f.Close()
+	//defer fileInRarFS.Close()
 	if errFSOpen == nil {
-		content, err := ioutil.ReadAll(f)
+		content, err := io.ReadAll(fileInRarFS)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -261,12 +262,12 @@ func GetSingleFile(filePath string, NameInArchive string, textEncoding string) (
 		ctx := context.Background()
 		err := ex.Extract(ctx, sourceArchive, []string{NameInArchive}, func(ctx context.Context, f archiver.File) error {
 			// 取得特定压缩文件
-			file, err := f.Open()
+			fileInRar, err := f.Open()
 			if err != nil {
 				fmt.Println(err)
 			}
-			defer file.Close()
-			content, err := ioutil.ReadAll(file)
+			defer fileInRar.Close()
+			content, err := io.ReadAll(fileInRar)
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -286,7 +287,7 @@ func GetSingleFile(filePath string, NameInArchive string, textEncoding string) (
 				fmt.Println(err)
 			}
 			defer file.Close()
-			content, err := ioutil.ReadAll(file)
+			content, err := io.ReadAll(file)
 			if err != nil {
 				fmt.Println(err)
 			}

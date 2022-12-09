@@ -45,7 +45,7 @@ var (
 		DisableLAN:           false,
 		DefaultMode:          "scroll",
 		LogToFile:            false,
-		MaxDepth:             3,
+		MaxDepth:             4,
 		MinImageNum:          3,
 		ZipFileTextEncoding:  "",
 		EnableFrpcServer:     false,

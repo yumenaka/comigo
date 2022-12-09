@@ -42,7 +42,7 @@ type ServerSettings struct {
 	GenerateConfig       bool            `toml:"-" comment:"生成示例配置文件的标志"`
 	EnableFrpcServer     bool            `json:"-" comment:"后台启动FrpClient"`
 	FrpConfig            FrpClientConfig `json:"-" comment:"FrpClient设置"`
-	GenerateMetaData     bool            `json:"-" toml:"-" comment:"生成书籍元数据（TODO）"`
+	GenerateMetaData     bool            `json:"-" toml:"-" comment:"生成书籍元数据"`
 	//EnableWebpServer       bool             `json:"enable_webp_server"`
 	//SketchCountSeconds     int              `json:"sketch_count_seconds"`
 	//WebpConfig             WebPServerConfig `json:"-"  comment:" WebPServer设置"`
@@ -50,7 +50,7 @@ type ServerSettings struct {
 	//DatabaseFilePath     string          `json:"-" comment:"数据库文件存储位置，默认当前目录"`
 }
 
-//FrpClientConfig frp客户端配置
+// FrpClientConfig frp客户端配置
 type FrpClientConfig struct {
 	FrpcCommand      string `comment:"手动设定frpc可执行程序的路径,默认为frpc"`
 	ServerAddr       string
@@ -61,7 +61,7 @@ type FrpClientConfig struct {
 	RandomRemotePort bool
 }
 
-//WebPServerConfig  WebPServer服务端配置
+// WebPServerConfig  WebPServer服务端配置
 type WebPServerConfig struct {
 	WebpCommand  string
 	HOST         string
@@ -72,11 +72,10 @@ type WebPServerConfig struct {
 	ExhaustPath  string   `json:"EXHAUST_PATH"`
 }
 
-// 判断压缩包内的文件是否需要展示（是图片或媒体文件）
+// IsSupportMedia 判断压缩包内的文件是否需要展示（包括图片、音频、视频、PDF在内的媒体文件）
 func (config *ServerSettings) IsSupportMedia(checkPath string) bool {
 	for _, ex := range config.SupportMediaType {
-		//strings.ToLower():某些文件会用大写文件名
-		suffix := strings.ToLower(path.Ext(checkPath))
+		suffix := strings.ToLower(path.Ext(checkPath)) //strings.ToLower():某些文件会用大写文件名
 		if ex == suffix {
 			return true
 		}
