@@ -67,7 +67,7 @@ type Book struct {
 
 type SupportFileType string
 
-//书籍类型
+// 书籍类型
 const (
 	TypeDir         SupportFileType = "dir"
 	TypeZip         SupportFileType = ".zip"
@@ -83,7 +83,7 @@ const (
 	TypeUnknownFile SupportFileType = "unknown"
 )
 
-//ImageInfo 单张书页
+// ImageInfo 单张书页
 type ImageInfo struct {
 	PageNum           int       `json:"-"`        //这个字段不解析
 	NameInArchive     string    `json:"filename"` //用于解压的压缩文件内文件路径，或图片名，为了适应特殊字符，经过一次转义
@@ -101,7 +101,7 @@ func NewImageInfo(pageNum int, nameInArchive string, url string, fileSize int64)
 	return &ImageInfo{PageNum: pageNum, NameInArchive: nameInArchive, Url: url, FileSize: fileSize}
 }
 
-//New  初始化Book，设置文件路径、书名、BookID等等
+// New  初始化Book，设置文件路径、书名、BookID等等
 func New(filePath string, modified time.Time, fileSize int64, storePath string, depth int, bookType SupportFileType) (*Book, error) {
 	//查看内存中是否已经有了这本书,有了就报错，让调用者跳过
 	for _, realBook := range mapBooks {
@@ -150,7 +150,7 @@ func New(filePath string, modified time.Time, fileSize int64, storePath string, 
 	return &b, nil
 }
 
-//初始化Book时，设置FilePath
+// 初始化Book时，设置FilePath
 func (b *Book) setFilePath(path string) {
 	fileAbaPath, err := filepath.Abs(path)
 	if err != nil {
@@ -162,7 +162,7 @@ func (b *Book) setFilePath(path string) {
 	}
 }
 
-//GetBookTypeByFilename 初始化Book时，取得BookType
+// GetBookTypeByFilename 初始化Book时，取得BookType
 func GetBookTypeByFilename(filename string) SupportFileType {
 	//获取文件后缀
 	switch strings.ToLower(path.Ext(filename)) {
@@ -229,12 +229,12 @@ func (b *Book) setName(filePath string) {
 	}
 }
 
-//初始化Book时，设置页数
+// 初始化Book时，设置页数
 func (b *Book) setPageNum() {
 	b.AllPageNum = len(b.Pages.Images)
 }
 
-//初始化Book时， 设置封面信息
+// 初始化Book时， 设置封面信息
 func (b *Book) setClover() {
 	if len(b.Pages.Images) >= 1 {
 		b.Cover = b.Pages.Images[0]
@@ -392,8 +392,6 @@ func GetBookInfoListByBookGroupBookID(BookID string, sortBy string) (*BookInfoLi
 }
 
 // GetBookByID 获取特定书籍，复制一份数据
-//TODO: 只获取、不改变原始数据。
-//TODO: 根据压缩包原始顺序、时间、文件名排序
 func GetBookByID(id string, sortBy string) (*Book, error) {
 	//根据id查找
 	b, ok := mapBooks[id]
@@ -412,8 +410,6 @@ func GetBookByID(id string, sortBy string) (*Book, error) {
 }
 
 // GetBookByAuthor 获取同一作者的书籍。
-// TODO: 只获取、不改变原始数据。
-// TODO: 根据压缩包原始顺序、时间、文件名排序
 func GetBookByAuthor(author string, sortBy string) ([]*Book, error) {
 	var bookList []*Book
 	for _, b := range mapBooks {
@@ -458,7 +454,7 @@ func (s AllPageInfo) Less(i, j int) (less bool) {
 		return !(s.Images[i].FileSize < s.Images[j].FileSize)
 	case "modify_time_reverse": //根据修改时间(反向)
 		return !s.Images[i].ModeTime.Before(s.Images[j].ModeTime) // Images[i] 的修改时间，是否比 Images[j] 晚
-	default: //默认根据文件名(第三方库、自然语言字符串)
+	default: //默认根据文件名
 		return tools.Compare(s.Images[i].NameInArchive, s.Images[j].NameInArchive)
 	}
 }
@@ -469,11 +465,51 @@ func (s AllPageInfo) Swap(i, j int) {
 
 // SortPages 上面三个函数定义好了，终于可以使用sort包排序了
 func (b *Book) SortPages(s string) {
+	if b.Type == TypeEpub && s == "default" {
+		return
+	}
 	if s != "" {
 		b.Pages.SortBy = s
 		sort.Sort(b.Pages)
 		//fmt.Println("sort_by:" + s)
 	}
+	b.setClover() //重新排序后重新设置封面
+}
+
+// 根据一个既定的文件列表，重新对页面排序。用于epub文件。
+func (b *Book) SortPagesByImageList(imageList []string) {
+	if len(imageList) == 0 {
+		return
+	}
+	imageInfos := b.Pages.Images
+	//如果在有序表中，按照有序表的顺序重排
+	var reSortList []ImageInfo
+	for i := 0; i < len(imageList); i++ {
+		checkSrc := imageList[i]
+		for j := 0; j < len(imageInfos); j++ {
+			if imageInfos[j].NameInArchive == checkSrc {
+				reSortList = append(reSortList, imageInfos[j])
+			}
+		}
+	}
+	if len(reSortList) == 0 {
+		fmt.Println("can not resort by epub metadata!")
+		return
+	}
+	//不在表中的话，就不改变顺序，并加在有序表的后面
+	for i := 0; i < len(imageInfos); i++ {
+		checkName := imageInfos[i].NameInArchive
+		find := false
+		for j := 0; j < len(imageList); j++ {
+			if imageList[j] == checkName {
+				find = true
+			}
+		}
+		if !find {
+			reSortList = append(reSortList, imageInfos[i])
+		}
+	}
+	b.Pages.Images = reSortList
 	b.setClover() //重新排序后重新设置封面
 }
 
@@ -606,7 +642,7 @@ func (b *Book) ScanAllImageGo() {
 	log.Println(locale.GetString("check_image_completed"))
 }
 
-//analyzePageImages 解析漫画的分辨率与blurhash
+// analyzePageImages 解析漫画的分辨率与blurhash
 func analyzePageImages(p *ImageInfo, bookPath string) {
 	err := p.analyzeImage(bookPath)
 	//log.Println(locale.GetString("check_image_ing"), p.RealImageFilePATH)

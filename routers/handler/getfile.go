@@ -29,7 +29,7 @@ import (
 // 相关参数：
 // id：书籍的ID，必须项目       							&id=2B17a
 // filename:获取的文件名，必须项目   							&filename=01.jpg
-////可选参数：
+// //可选参数：
 // resize_width:指定宽度，缩放图片  							&resize_width=300
 // resize_height:指定高度，缩放图片 							&resize_height=300
 // thumbnail_mode:缩略图模式，同时指定宽高的时候要不要剪切图片		&thumbnail_mode=true
@@ -74,21 +74,21 @@ func GetFileHandler(c *gin.Context) {
 			fmt.Println(err)
 		}
 	}
-	//如果是一般压缩文件
+	//如果是一般压缩文件，如zip、rar。epub
 	if !bookByID.NonUTF8Zip && bookByID.Type != book.TypeDir && bookByID.Type != book.TypePDF {
 		imgData, err = arch.GetSingleFile(bookPath, needFile, "")
 		if err != nil {
 			fmt.Println(err)
 		}
 	}
-	//如果是本地文件夹
+	//如果是PDF
 	if bookByID.Type == book.TypePDF {
 
 	}
 	//如果是本地文件夹
 	if bookByID.Type == book.TypeDir {
 		//直接读取磁盘文件
-		imgData, err = ioutil.ReadFile(filepath.Join(bookPath, needFile))
+		imgData, err = os.ReadFile(filepath.Join(bookPath, needFile))
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -219,19 +219,19 @@ func GetFileHandler(c *gin.Context) {
 	}
 }
 
-//储存文件信息的key
+// 储存文件信息的key
 type cacheKey struct {
 	bookID      string
 	queryString string
 }
 
-//SyncMap 有读写锁的map
+// SyncMap 有读写锁的map
 type SyncMap struct {
 	sync.RWMutex                       // map不是并发安全的 , 当有多个并发的goroutine读写同一个map时会出现panic错误(fatal error: concurrent map writes)
 	mapContentType map[cacheKey]string //需要一个Map保存ContentType
 }
 
-//读写锁
+// 读写锁
 func (l *SyncMap) readMap(key cacheKey) (string, bool) {
 	l.RLock()
 	value, ok := l.mapContentType[key]
@@ -239,21 +239,21 @@ func (l *SyncMap) readMap(key cacheKey) (string, bool) {
 	return value, ok
 }
 
-//读写锁
+// 读写锁
 func (l *SyncMap) writeMap(key cacheKey, value string) {
 	l.Lock()
 	l.mapContentType[key] = value
 	l.Unlock()
 }
 
-//SyncMap 有读写锁的map.除此之外，还可以使用channel，或sync.map保证map的并发安全
+// SyncMap 有读写锁的map.除此之外，还可以使用channel，或sync.map保证map的并发安全
 var sMap SyncMap
 
 func init() {
 	sMap.mapContentType = make(map[cacheKey]string)
 }
 
-//读取过一次的文件，就保存到硬盘上加快读取
+// 读取过一次的文件，就保存到硬盘上加快读取
 func saveFileToCache(id string, filename string, data []byte, query url.Values, contentType string, isCover bool) error {
 	err := os.MkdirAll(filepath.Join(common.Config.CachePath, id), os.ModePerm)
 	if err != nil {
@@ -276,7 +276,7 @@ func saveFileToCache(id string, filename string, data []byte, query url.Values, 
 	return err
 }
 
-//根据query生成一个key string，用到两个第三方库
+// 根据query生成一个key string，用到两个第三方库
 func getQueryStringKey(query url.Values) string {
 	//因为map没有排序，相同参数每次形成的string都不一样,所以需要第三方库，建立一个有序map。
 	//OrderedMap按照插入顺序排序迭代，所以插入的时候也要保证顺序
@@ -312,7 +312,7 @@ func getQueryStringKey(query url.Values) string {
 	return queryString
 }
 
-//读取缓存，加快第二次访问的速度
+// 读取缓存，加快第二次访问的速度
 func getFileFromCache(id string, filename string, query url.Values, isCover bool) ([]byte, string, error) {
 	//将query转换为字符串，后面用来当key
 	qS := getQueryStringKey(query)

@@ -23,6 +23,7 @@ import (
 	"github.com/yumenaka/comi/locale"
 )
 
+// AddBooksToStore 添加一组书到书库
 func AddBooksToStore(bookList []*book.Book, path string) {
 	err := book.AddBooks(bookList, path, Config.MinImageNum)
 	if err != nil {
@@ -34,7 +35,7 @@ func AddBooksToStore(bookList []*book.Book, path string) {
 	}
 }
 
-// ScanAndGetBookList 扫描一个路径，并返回书籍列表
+// ScanAndGetBookList 扫描路径，取得路径里的书籍
 func ScanAndGetBookList(storePath string, databaseBookList []*book.Book) (newBookList []*book.Book, err error) {
 	storePathAbs, err := filepath.Abs(storePath)
 	if err != nil {
@@ -47,7 +48,7 @@ func ScanAndGetBookList(storePath string, databaseBookList []*book.Book) (newBoo
 		for _, p := range databaseBookList {
 			AbsW, err := filepath.Abs(walkPath) //取得绝对路径
 			if err != nil {
-				//因为权限问题，无法的情况下，用相对路径
+				//无法取得的情况下，用相对路径
 				fmt.Println(err, AbsW)
 			}
 			if walkPath == p.FilePath || AbsW == p.FilePath {
@@ -133,7 +134,6 @@ func scanDirGetBook(dirPath string, storePath string, depth int) (*book.Book, er
 			newBook.Pages.Images = append(newBook.Pages.Images, book.ImageInfo{RealImageFilePATH: strAbsPath, FileSize: file.Size(), ModeTime: file.ModTime(), NameInArchive: file.Name(), Url: TempURL})
 		}
 	}
-
 	//不管页数，直接返回：在添加到书库时判断页数
 	return newBook, err
 }
@@ -174,6 +174,16 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*book.Book, 
 			}
 			//忽略 fs.PathError 并换个方式扫描
 			err = scanNonUTF8ZipFile(filePath, newBook)
+		}
+		//epub文件，需要根据 META-INF/container.xml 里面定义的rootfile （.opf文件）来重新排序
+		if newBook.Type == book.TypeEpub {
+			imageList, err := arch.GetImageListFromEpubFile(newBook.FilePath)
+			if err != nil {
+				fmt.Println(err)
+			} else {
+				newBook.SortPagesByImageList(imageList)
+				fmt.Println(newBook)
+			}
 		}
 	//TODO:服务器解压速度太慢，网页用PDF.js解析？
 	case book.TypePDF:
@@ -263,6 +273,7 @@ func scanNonUTF8ZipFile(filePath string, b *book.Book) error {
 // 手动写的递归查找，功能与fs.WalkDir()相同。发现一个Archiver/V4的BUG：zip文件的虚拟文件系统，找不到正确的多级文件夹？
 // https://books.studygolang.com/The-Golang-Standard-Library-by-Example/chapter06/06.3.html
 func walkUTF8ZipFs(fsys fs.FS, parent, base string, b *book.Book) error {
+	//一般zip文件的处理流程
 	//fmt.Println("parent:" + parent + " base:" + base)
 	dirName := path.Join(parent, base)
 	dirEntries, err := fs.ReadDir(fsys, dirName)
