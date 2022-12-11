@@ -46,7 +46,7 @@ md5SumThemAll:
 # 换行用TAB而不是空格
 #64位Windows	$(NAME)_$(VERSION)_$@   
 Windows_x86_64:
-	go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo # Window icon Need
+	go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo # Window icon Need
 	unset GOBIN #go: cannot install cross-compiled binaries when GOBIN is set
 	GOARCH=amd64 GOOS=windows go generate #go: cannot install cross-compiled binaries when GOBIN is set
 	GOARCH=amd64 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME).exe 
@@ -56,7 +56,7 @@ Windows_x86_64:
 
 #32位Windows	
 Windows_i386:
-	go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo # Window icon Need
+	go instll github.com/josephspurrier/goversioninfo/cmd/goversioninfo # Window icon Need
 	unset GOBIN #go: cannot install cross-compiled binaries when GOBIN is set
 	GOARCH=386 GOOS=windows go generate
 	GOARCH=386 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME).exe 
