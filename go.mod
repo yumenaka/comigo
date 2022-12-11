@@ -42,6 +42,7 @@ require (
 	ariga.io/atlas v0.8.3 // indirect
 	github.com/VividCortex/ewma v1.2.0 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
+	github.com/akavel/rsrc v0.10.2 // indirect
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/bodgit/plumbing v1.3.0 // indirect
@@ -65,6 +66,7 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.15.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/josephspurrier/goversioninfo v1.4.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/klauspost/pgzip v1.2.5 // indirect
