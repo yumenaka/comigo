@@ -439,7 +439,7 @@ export default defineComponent({
 		//监听路由参数的变化,刷新本地的Book数据
 		this.$watch(
 			() => this.$route.params.id,
-			(id: string) => {
+			(id: any) => {
 				if (id) {
 					axios
 						.get("/getbook?id=" + this.$route.params.id + sort_image_by_str)

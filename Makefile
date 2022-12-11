@@ -1,10 +1,8 @@
 # Makefile for cross-compilation
-
-
 # Window icon Need：go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo
 
-# make all VERSION=v0.8.9
-# make md5SumThemAll VERSION=v0.8.9
+# make all VERSION=v0.9.0
+# make md5SumThemAll VERSION=v0.9.0
 # mingw32-make all VERSION=v0.8.9
 # rm  resource.syso && make  Linux-armv8   VERSION=v0.8.9
 # make Windows_i386  VERSION=v0.8.9
@@ -45,10 +43,12 @@ md5SumThemAll:
 
 
 # upx可能导致报毒，取消windows平台的upx压缩
-
+# 换行用TAB而不是空格
 #64位Windows	$(NAME)_$(VERSION)_$@   
 Windows_x86_64:
-	go generate
+	go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo # Window icon Need
+	unset GOBIN #go: cannot install cross-compiled binaries when GOBIN is set
+	GOARCH=amd64 GOOS=windows go generate #go: cannot install cross-compiled binaries when GOBIN is set
 	GOARCH=amd64 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME).exe 
 	zip -m -r -j -9 $(BINDIR)/$(NAME)_$(VERSION)_$@.zip $(BINDIR)/$(NAME)_$(VERSION)_$@
 	rmdir $(BINDIR)/$(NAME)_$(VERSION)_$@
@@ -56,7 +56,9 @@ Windows_x86_64:
 
 #32位Windows	
 Windows_i386:
-	go generate
+	go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo # Window icon Need
+	unset GOBIN #go: cannot install cross-compiled binaries when GOBIN is set
+	GOARCH=386 GOOS=windows go generate
 	GOARCH=386 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME).exe 
 	zip -m -r -j -9 $(BINDIR)/$(NAME)_$(VERSION)_$@.zip $(BINDIR)/$(NAME)_$(VERSION)_$@
 	rmdir $(BINDIR)/$(NAME)_$(VERSION)_$@
