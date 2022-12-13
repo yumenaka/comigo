@@ -14,6 +14,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"regexp"
 	"runtime"
 	"strconv"
@@ -28,6 +29,14 @@ import (
 
 	"github.com/yumenaka/comi/locale"
 )
+
+// 取得无后缀的文件名
+func GetMainName(filename string) string {
+	base := filepath.Base(filename)
+	ext := filepath.Ext(filename)
+	main := strings.TrimSuffix(base, ext)
+	return main
+}
 
 // GetFreePort 获取一个空闲可用的端口号
 func GetFreePort() (int, error) {
@@ -328,7 +337,7 @@ func GetContentTypeByFileName(fileName string) (contentType string) {
 }
 
 // DetectUTF8 检测 s 是否为有效的 UTF-8 字符串，以及该字符串是否必须被视为 UTF-8 编码（即，不兼容CP-437、ASCII 或任何其他常见编码）。
-//来自： go\src\archive\zip\reader.go
+// 来自： go\src\archive\zip\reader.go
 func DetectUTF8(s string) (valid, require bool) {
 	for i := 0; i < len(s); {
 		r, size := utf8.DecodeRuneInString(s[i:])
@@ -562,7 +571,7 @@ func MD5file(fName string) string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-//从字符串中提取数字,如果有几个数字，就简单地加起来
+// 从字符串中提取数字,如果有几个数字，就简单地加起来
 func getNumberFromString(s string) (int, error) {
 	var err error
 	num := 0
@@ -589,7 +598,7 @@ func getNumberFromString(s string) (int, error) {
 	return num, err
 }
 
-//检测字符串中是否有关键字
+// 检测字符串中是否有关键字
 func haveKeyWord(checkString string, list []string) bool {
 	//转换为小写，使Sketch、DOUBLE也生效
 	checkString = strings.ToLower(checkString)

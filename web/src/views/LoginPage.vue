@@ -1,24 +1,29 @@
 <template>
     <div class="w-full h-screen flex flex-col">
-        <Header class="header flex-none h-12" :bookIsFolder="false" :headerTitle="this.getUploadTitile()"
-            :showReturnIcon="true" :showSettingsIcon="false"  :bookID='null' :setDownLoadLink="false">
+        <Header class="header flex-none h-12" :bookIsFolder="false" :headerTitle="getUploadTitile()"
+            :showReturnIcon="true" :showSettingsIcon="false" :bookID='null' :setDownLoadLink="false">
         </Header>
-        <!-- 渲染书架部分 有书的时候显示书  没有的时候显示上传控件-->
-        <!-- Flex Grow 控制 flex 项目放大的功能类 https://www.tailwindcss.cn/docs/flex-grow -->
-        <!-- 上传控件 -->
+        <!-- 可悬浮  hoverable-->
+        <n-card title="注册" hoverable>
+            卡片内容
+        </n-card>
         <div class="mian_area flex-grow">
         </div>
         <Bottom class="bottom flex-none h-12" :softVersion="
-            this.$store.state.server_status.ServerName
-                ? this.$store.state.server_status.ServerName
+            $store.state.server_status.ServerName
+                ? $store.state.server_status.ServerName
                 : 'Comigo'
         "></Bottom>
     </div>
 </template>
 
-<script>
+<script lang="ts">
 import Header from "@/components/Header.vue";
 import Bottom from "@/components/Bottom.vue";
+import {
+    NCard,
+    NForm,
+} from "naive-ui";
 
 import { defineComponent, reactive } from "vue";
 export default defineComponent({
@@ -28,6 +33,8 @@ export default defineComponent({
     components: {
         Header, // 自定义页头
         Bottom, // 自定义页尾
+        NCard,// https://www.naiveui.com/zh-CN/os-theme/components/card
+        NForm,// https://www.naiveui.com/zh-CN/os-theme/components/form
     },
     setup() {
         // 背景颜色,颜色选择器用  // 此处不能使用this
@@ -50,11 +57,13 @@ export default defineComponent({
     },
     created() {
         // 当前颜色
-        if (localStorage.getItem("BackgroundColor") != null) {
-            this.model.backgroundColor = localStorage.getItem("BackgroundColor");
+        const tempBackgroundColor = localStorage.getItem("BackgroundColor")
+        if (typeof (tempBackgroundColor) === 'string') {
+            this.model.backgroundColor = tempBackgroundColor
         }
-        if (localStorage.getItem("InterfaceColor") != null) {
-            this.model.interfaceColor = localStorage.getItem("InterfaceColor");
+        const tempInterfaceColor = localStorage.getItem("InterfaceColor")
+        if (typeof (tempInterfaceColor) === 'string') {
+            this.model.interfaceColor = tempInterfaceColor
         }
     },
     methods: {

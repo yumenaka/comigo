@@ -12,11 +12,11 @@
       <!-- 父组件在此处插入自定义内容 -->
       <n-space vertical>
         <slot></slot>
-        <n-button v-if="this.sketching === false && this.inBookShelf === false" @click="startSketchMode">{{
-            $t('startSketchMode')
+        <n-button v-if="sketching === false && inBookShelf === false" @click="startSketchMode">{{
+        $t('startSketchMode')
         }}</n-button>
-        <n-button v-if="this.sketching === true && this.inBookShelf === false" @click="stopSketchMode">{{
-            $t('stopSketchMode')
+        <n-button v-if="sketching === true && inBookShelf === false" @click="stopSketchMode">{{
+        $t('stopSketchMode')
         }}</n-button>
         <!-- <n-divider /> -->
         <span>{{ $t('scan_qrcode') }}</span>
@@ -32,13 +32,13 @@
       <!-- 抽屉：自定义底部 -->
       <template #footer>
         <n-button @click="onFullSreen">{{ $t('fullscreen') }}</n-button>
-        <n-select placeholder="{{ $t('select-language') }}" v-model:value="this.$i18n.locale"
-          :options="this.languageOptions" @update:value="OnChangeLanguage" />
+        <n-select placeholder="{{ $t('select-language') }}" v-model:value="$i18n.locale" :options="languageOptions"
+          @update:value="OnChangeLanguage" />
       </template>
     </n-drawer-content>
   </n-drawer>
 </template>
-<script>
+<script lang="ts">
 import screenfull from 'screenfull'
 import { useCookies } from "vue3-cookies";
 import { NDrawer, NDrawerContent, NButton, NSelect, NPopconfirm, useMessage, NSpace, } from 'naive-ui'
@@ -108,7 +108,7 @@ export default defineComponent({
     if (lang) {
       this.$i18n.locale = lang;
     }
-    this.readModeLocal = this.readMode;
+    this.readModeLocal = this.readerMode;
   },
   computed: {
     drawerActive() {
@@ -136,11 +136,11 @@ export default defineComponent({
       //切换全屏状态
       screenfull.toggle()
     },
-    OnChangeLanguage(value) {
+    OnChangeLanguage(value: string) {
       this.cookies.set("userLanguageSetting", value);
     },
     // 关闭抽屉时，保存设置到cookies
-    saveConfigToCookie(show) {
+    saveConfigToCookie(show: boolean) {
       if (show == false) {
         this.$emit('closeDrawer');
         this.$emit('saveConfig');

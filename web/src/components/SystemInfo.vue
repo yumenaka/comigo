@@ -4,28 +4,30 @@
   <div id="SystemInfo" class="w-4/6">
     <n-space vertical>
       <p>CPU:</p>
-      <n-progress type="circle" :percentage="parseFloat(this.cpu_percentage)" />
-      <p>{{ this.$store.state.server_status.OSInfo.cpu_num_physical }}Core
-        {{ this.$store.state.server_status.OSInfo.cpu_num_logical_total }}Thread</p>
+      <n-progress type="circle" :percentage="parseFloat(cpu_percentage.toString())" />
+      <p>{{ $store.state.server_status.OSInfo.cpu_num_physical }}Core
+        {{ $store.state.server_status.OSInfo.cpu_num_logical_total }}Thread</p>
       <n-divider></n-divider>
 
       <p>RAM:</p>
-      <n-progress type="circle" :percentage="parseFloat(this.ram_percentage)" color="#ffaa66"  />
-      <p>{{ (this.$store.state.server_status.OSInfo.memory_total*(this.$store.state.server_status.OSInfo.memory_used_percent/100)/ (1024 * 1024 * 1024)).toFixed(2) }}GB/{{ (this.$store.state.server_status.OSInfo.memory_total / (1024 * 1024 * 1024)).toFixed(2) }}GB</p>
+      <n-progress type="circle" :percentage="parseFloat(ram_percentage.toString())" color="#ffaa66" />
+      <p>{{ ($store.state.server_status.OSInfo.memory_total*($store.state.server_status.OSInfo.memory_used_percent/100)/
+      (1024 * 1024 * 1024)).toFixed(2) }}GB/{{ ($store.state.server_status.OSInfo.memory_total / (1024 * 1024 *
+        1024)).toFixed(2) }}GB</p>
       <n-divider></n-divider>
 
-      <p>Books:{{ this.$store.state.server_status.NumberOfBooks }}</p>
-      <p>Upload:{{ this.$store.state.server_status.SupportUploadFile }}</p>
-      <!-- <p>Devices:{{ this.$store.state.server_status.NumberOfOnLineDevices }}</p> -->
-      <!-- <p>cpu_num_physical:{{this.$store.state.server_status.OSInfo.cpu_num_physical}}</p>
-      <p>cpu_num_logical_total:{{this.$store.state.server_status.OSInfo.cpu_num_logical_total}}</p> -->
+      <p>Books:{{ $store.state.server_status.NumberOfBooks }}</p>
+      <p>Upload:{{ $store.state.server_status.SupportUploadFile }}</p>
+      <!-- <p>Devices:{{ $store.state.server_status.NumberOfOnLineDevices }}</p> -->
+      <!-- <p>cpu_num_physical:{{$store.state.server_status.OSInfo.cpu_num_physical}}</p>
+      <p>cpu_num_logical_total:{{$store.state.server_status.OSInfo.cpu_num_logical_total}}</p> -->
 
     </n-space>
   </div>
 </template>
 
-<script>
-import { NProgress, useMessage, NSpace, NDivider,} from "naive-ui";
+<script lang="ts">
+import { NProgress, useMessage, NSpace, NDivider, } from "naive-ui";
 import { defineComponent, ref } from 'vue'
 export default defineComponent({
   name: "AboutPage",
@@ -55,7 +57,7 @@ export default defineComponent({
     };
   },
   created() {
-    this.beforeBookNum = this.$store.state.server_status.NumberOfBooks;
+    // this.beforeBookNum = this.$store.state.server_status.NumberOfBooks;
     this.$store.dispatch("syncSeverStatusDataAction");
     this.showStatus();
   },

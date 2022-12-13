@@ -1,8 +1,6 @@
 # comigo-webUI
 
-
-
-### 目前已经迁移到了vite
+## 目前已经迁移到了vite
 
 ````bash
 # 初始化
@@ -34,29 +32,27 @@ export NODE_OPTIONS=--openssl-legacy-provider
 $Env:NODE_OPTIONS = "--openssl-legacy-provider"
 ````
 
-### 
-
 ## Project setup
 
-```
+```bash
 yarn install
 ```
 
 ### Compiles and hot-reloads for development
 
-```
+```bash  
 yarn serve
 ```
 
 ### Compiles and minifies for production
 
-```
+```bash
 yarn build
 ```
 
 ### Lints and fixes files
 
-```
+```bash
 yarn lint
 ```
 
@@ -65,4 +61,3 @@ yarn lint
 ````bash
 yarn upgrade-interactive --latest
 ````
-

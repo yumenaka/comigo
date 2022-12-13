@@ -16,6 +16,7 @@ axios.defaults.baseURL = "/api"
 const app = createApp(App);
 app.use(i18n)
 app.use(VueAxios, axios);
+// 传入 injection key
 app.use(store);
 app.use(router);
 
@@ -33,16 +34,16 @@ app.use(VueLazyLoad, {
     attempt: 3,//尝试加载图片数量，默认3
     observerOptions: { rootMargin: '200px', threshold: 0.1 },
     lifecycle: {
-        loading: (el) => {
+        loading: (el: any) => {
             el.setAttribute("class", "LoadingImage");
             // console.log("loading", el);
         },
-        error: (el) => {
+        error: (el: any) => {
             el.setAttribute("class", "ErrorImage");
             // console.log("error", el);
         },
         //可以在这里插入判断分辨率的函数
-        loaded: (el) => {
+        loaded: (el: any) => {
             let image = new Image();
             image.src = el.src;
             // 图片是否完全加载完成。
@@ -66,20 +67,21 @@ app.use(VueLazyLoad, {
 // 使用VueNativeSock插件，并进行相关配置
 // 参考https://github.com/likaia/vue-native-websocket-vue3
 var protocol = 'ws://'
-if (window.location.protocol === "https") {
+// console.log(window.location.protocol)
+if (window.location.protocol === "https:") {
     protocol = 'wss://'
 }
 var ws_url = protocol + window.location.host + '/api/ws';
 app.use(
     VueNativeSock,
-    ws_url + `/${localStorage.getItem("userID")}`,
+    ws_url,
     {
         // 启用Vuex集成
         store: store,
         // 数据发送/接收使用使用json
         format: "json",
         // 开启手动调用 connect() 连接服务器
-        connectManually: true,
+        connectManually: false,
         // 开启自动重连
         reconnection: true,
         // 尝试重连的次数

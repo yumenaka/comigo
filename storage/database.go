@@ -1,6 +1,6 @@
 //go:build !(windows && 386)
 
-//上面这一句“条件编译”的约束，go:build 是1.18以后的推荐语法
+// Package storage 编译条件的注释和 package 语句之间一定要隔一行，不然无法识别编译条件。go:build 是1.18以后“条件编译”的推荐语法。
 package storage
 
 import (
@@ -27,8 +27,8 @@ import (
 // Go製CGOフリーなSQLiteドライバーでentを使う
 // https://zenn.dev/nobonobo/articles/e9f17d183c19f6
 
-//数据库为sqlite3
-//查看工具：SQLiteStudio https://github.com/pawelsalawa/sqlitestudio/releases
+// 数据库为sqlite3
+// 查看工具：SQLiteStudio https://github.com/pawelsalawa/sqlitestudio/releases
 // 查看工具： DB Browser for SQLite  https://sqlitebrowser.org/dl/
 type sqliteDriver struct {
 	*sqlite.Driver
@@ -52,7 +52,7 @@ func (d sqliteDriver) Open(name string) (driver.Conn, error) {
 	return conn, nil
 }
 
-//注册 sqlite
+// 注册 sqlite
 func init() {
 	sql.Register("sqlite3", sqliteDriver{Driver: &sqlite.Driver{}})
 }
