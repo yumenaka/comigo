@@ -13,7 +13,7 @@ type Bookstores struct {
 	SortBy        string
 }
 
-//GenerateBookGroup 生成书籍组
+// GenerateBookGroup 生成书籍组
 func (bs *Bookstores) GenerateBookGroup() error {
 	for _, single := range bs.mapBookstores {
 		err := single.initBookGroupMap()
@@ -73,15 +73,11 @@ func (s *singleBookstore) initBookGroupMap() error {
 			}
 			//初始化ChildBook
 			//然后把同一parent的书，都加进某个书籍组
-			setCover := true //封面只设置一次
 			newBook.ChildBook = make(map[string]*Book)
 			for i, bookInList := range sameParentBookList {
-				//顺便设置一下封面，只设置一次
-				if setCover {
-					setCover = false
-					newBook.Cover = bookInList.Cover //
-				}
+				newBook.Cover = bookInList.Cover //
 				newBook.ChildBook[bookInList.BookID] = &sameParentBookList[i]
+				break //用第一本书的封面，当这一组书的封面。所以执行第一次之后就跳出。
 			}
 			newBook.ChildBookNum = len(newBook.ChildBook)
 			//如果书籍组的子书籍数量大于等于1，且从来没有添加过，将书籍组加到上一层

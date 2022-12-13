@@ -42,6 +42,8 @@ func getChildInfoMap(ChildBookMap map[string]*Book) (ChildInfoMap map[string]*Bo
 
 // NewBookInfo BookInfo的模拟构造函数
 func NewBookInfo(b *Book) *BookInfo {
+	//需要单独先执行这个，来设定封面
+	allPageNum := b.GetAllPageNum()
 	return &BookInfo{
 		Name:         b.Name,
 		Author:       b.Author,
@@ -49,7 +51,7 @@ func NewBookInfo(b *Book) *BookInfo {
 		ISBN:         b.ISBN,
 		FilePath:     b.GetFilePath(),
 		ExtractPath:  b.ExtractPath,
-		AllPageNum:   b.GetAllPageNum(),
+		AllPageNum:   allPageNum,
 		Type:         b.Type,
 		ChildBookNum: b.ChildBookNum,
 		ChildBook:    getChildInfoMap(b.ChildBook),

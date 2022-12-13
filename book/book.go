@@ -567,7 +567,7 @@ func (b *Book) GetBookID() string {
 	return b.BookID
 }
 
-// GetBookID  根据路径的MD5，生成书籍ID
+// GetAuthor  获取作者信息
 func (b *Book) GetAuthor() string {
 	//防止未初始化，最好不要用到
 	if len(b.Author) == 0 {
@@ -577,9 +577,7 @@ func (b *Book) GetAuthor() string {
 }
 
 func (b *Book) GetAllPageNum() int {
-	if b.Cover.Url == "" {
-		b.setClover()
-	}
+	b.setClover()
 	if !b.InitComplete {
 		//设置页数
 		b.setPageNum()
@@ -603,7 +601,7 @@ func (b *Book) ScanAllImage() {
 	bar := pb.StartNew(b.GetAllPageNum())
 	tmpl := `{{ red "With funcs:" }} {{ bar . "<" "-" (cycle . "↖" "↗" "↘" "↙" ) "." ">"}} {{speed . | rndcolor }} {{percent .}} {{string . "my_green_string" | green}} {{string . "my_blue_string" | blue}}`
 	bar.SetTemplateString(tmpl)
-	for i := 0; i < len(b.Pages.Images); i++ { //此处不能用range，因为需要修改
+	for i := 0; i < len(b.Pages.Images); i++ { //此处不能用range，因为会修改b.Pages.Images本身
 		analyzePageImages(&b.Pages.Images[i], b.FilePath)
 		//进度条计数
 		bar.Increment()
@@ -622,7 +620,7 @@ func (b *Book) ScanAllImageGo() {
 	count := 0
 	// Console progress bar
 	bar := pb.StartNew(b.GetAllPageNum())
-	for i := 0; i < len(b.Pages.Images); i++ { //此处不能用range，因为需要修改
+	for i := 0; i < len(b.Pages.Images); i++ { //此处不能用range，因为会修改b.Pages.Images本身
 		//wg.Add(1)
 		count++
 		ii := i

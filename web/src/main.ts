@@ -67,7 +67,7 @@ app.use(VueLazyLoad, {
 // 使用VueNativeSock插件，并进行相关配置
 // 参考https://github.com/likaia/vue-native-websocket-vue3
 var protocol = 'ws://'
-console.log(window.location.protocol)
+// console.log(window.location.protocol)
 if (window.location.protocol === "https:") {
     protocol = 'wss://'
 }

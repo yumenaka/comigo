@@ -132,6 +132,7 @@ func scanDirGetBook(dirPath string, storePath string, depth int) (*book.Book, er
 			newBook.Pages.Images = append(newBook.Pages.Images, book.ImageInfo{RealImageFilePATH: strAbsPath, FileSize: file.Size(), ModeTime: file.ModTime(), NameInArchive: file.Name(), Url: TempURL})
 		}
 	}
+	newBook.SortPages("default")
 	//不管页数，直接返回：在添加到书库时判断页数
 	return newBook, err
 }
@@ -253,6 +254,7 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*book.Book, 
 		})
 	}
 	//不管页数，直接返回：在添加到书库时判断页数
+	newBook.SortPages("default")
 	return newBook, err
 }
 
@@ -272,6 +274,7 @@ func scanNonUTF8ZipFile(filePath string, b *book.Book) error {
 			logrus.Debugf(locale.GetString("unsupported_file_type") + f.Name)
 		}
 	}
+	b.SortPages("default")
 	return err
 }
 
@@ -309,5 +312,6 @@ func walkUTF8ZipFs(fsys fs.FS, parent, base string, b *book.Book) error {
 			b.Pages.Images = append(b.Pages.Images, book.ImageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: inArchiveName, Url: TempURL})
 		}
 	}
+	b.SortPages("default")
 	return err
 }
