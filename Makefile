@@ -15,6 +15,9 @@ SKETCH_NAME=sketch_66seconds
 OS := $(shell uname)
 BINDIR := ./bin
 MD5_TEXTFILE := $(BINDIR)/md5Sums.txt
+#go: cannot install cross-compiled binaries when GOBIN is set
+GOBIN :=""
+
 
 MAIN_FILE_DIR := ./
 # -ldflags 指定编译参数。-s 去掉符号信息。 -w去掉调试信息。
@@ -47,7 +50,6 @@ md5SumThemAll:
 #64位Windows	$(NAME)_$(VERSION)_$@   
 Windows_x86_64:
 	go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo # Window icon Need
-	unset GOBIN #go: cannot install cross-compiled binaries when GOBIN is set
 	GOARCH=amd64 GOOS=windows go generate #go: cannot install cross-compiled binaries when GOBIN is set
 	GOARCH=amd64 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME).exe 
 	zip -m -r -j -9 $(BINDIR)/$(NAME)_$(VERSION)_$@.zip $(BINDIR)/$(NAME)_$(VERSION)_$@
@@ -56,8 +58,7 @@ Windows_x86_64:
 
 #32位Windows	
 Windows_i386:
-	go instll github.com/josephspurrier/goversioninfo/cmd/goversioninfo # Window icon Need
-	unset GOBIN #go: cannot install cross-compiled binaries when GOBIN is set
+	go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo # Window icon Need
 	GOARCH=386 GOOS=windows go generate
 	GOARCH=386 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME).exe 
 	zip -m -r -j -9 $(BINDIR)/$(NAME)_$(VERSION)_$@.zip $(BINDIR)/$(NAME)_$(VERSION)_$@
