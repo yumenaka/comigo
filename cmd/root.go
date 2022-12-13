@@ -19,8 +19,6 @@ import (
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/routers"
 	"github.com/yumenaka/comi/storage"
-
-	_ "modernc.org/sqlite" //仅运行init函数
 )
 
 var viperInstance *viper.Viper
@@ -202,7 +200,7 @@ var rootCmd = &cobra.Command{
 }
 var databaseBookList []*book.Book
 
-//initBookStores 解析命令,扫描书库
+// initBookStores 解析命令,扫描书库
 func initBookStores(args []string) {
 	//初始化数据库
 	if common.Config.EnableDatabase {
@@ -226,7 +224,7 @@ func initBookStores(args []string) {
 	common.Config.SetByExecutableFilename()
 }
 
-//ScanDefaultPath 2、搜索基本路径，来自程序启动时的参数
+// ScanDefaultPath 2、搜索基本路径，来自程序启动时的参数
 func ScanDefaultPath(args []string) {
 	//决定如何扫描，扫描哪个路径
 	//没有指定路径或文件的情况下
@@ -251,7 +249,7 @@ func ScanDefaultPath(args []string) {
 	}
 }
 
-//ScanStorePathInConfig 3、扫描配置文件指定的的书籍库
+// ScanStorePathInConfig 3、扫描配置文件指定的的书籍库
 func ScanStorePathInConfig() {
 	if len(common.Config.StoresPath) > 0 {
 		for _, p := range common.Config.StoresPath {
@@ -265,7 +263,7 @@ func ScanStorePathInConfig() {
 	}
 }
 
-//SaveResultsToDatabase 4，保存扫描结果到数据库，并清理不存在的书籍
+// SaveResultsToDatabase 4，保存扫描结果到数据库，并清理不存在的书籍
 func SaveResultsToDatabase() {
 	if common.Config.EnableDatabase {
 		AllBook := book.GetAllBookList()

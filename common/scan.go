@@ -1,9 +1,10 @@
 package common
 
 import (
-	"archive/zip"
+	"context"
 	"errors"
 	"fmt"
+	"github.com/klauspost/compress/zip"
 	"io/fs"
 	"io/ioutil"
 	"net/url"
@@ -22,6 +23,7 @@ import (
 	"github.com/yumenaka/comi/locale"
 )
 
+// AddBooksToStore 添加一组书到书库
 func AddBooksToStore(bookList []*book.Book, path string) {
 	err := book.AddBooks(bookList, path, Config.MinImageNum)
 	if err != nil {
@@ -33,7 +35,7 @@ func AddBooksToStore(bookList []*book.Book, path string) {
 	}
 }
 
-// ScanAndGetBookList 扫描一个路径，并返回书籍列表
+// ScanAndGetBookList 扫描路径，取得路径里的书籍
 func ScanAndGetBookList(storePath string, databaseBookList []*book.Book) (newBookList []*book.Book, err error) {
 	storePathAbs, err := filepath.Abs(storePath)
 	if err != nil {
@@ -46,7 +48,7 @@ func ScanAndGetBookList(storePath string, databaseBookList []*book.Book) (newBoo
 		for _, p := range databaseBookList {
 			AbsW, err := filepath.Abs(walkPath) //取得绝对路径
 			if err != nil {
-				//因为权限问题，无法的情况下，用相对路径
+				//无法取得的情况下，用相对路径
 				fmt.Println(err, AbsW)
 			}
 			if walkPath == p.FilePath || AbsW == p.FilePath {
@@ -74,7 +76,6 @@ func ScanAndGetBookList(storePath string, databaseBookList []*book.Book) (newBoo
 		if fileInfo == nil {
 			return err
 		}
-
 		//如果不是文件夹
 		if !fileInfo.IsDir() {
 			if !Config.IsSupportArchiver(walkPath) {
@@ -88,7 +89,6 @@ func ScanAndGetBookList(storePath string, databaseBookList []*book.Book) (newBoo
 			}
 			newBookList = append(newBookList, getBook)
 		}
-
 		//如果是文件夹
 		if fileInfo.IsDir() {
 			//得到书籍文件数据
@@ -132,7 +132,7 @@ func scanDirGetBook(dirPath string, storePath string, depth int) (*book.Book, er
 			newBook.Pages.Images = append(newBook.Pages.Images, book.ImageInfo{RealImageFilePATH: strAbsPath, FileSize: file.Size(), ModeTime: file.ModTime(), NameInArchive: file.Name(), Url: TempURL})
 		}
 	}
-
+	newBook.SortPages("default")
 	//不管页数，直接返回：在添加到书库时判断页数
 	return newBook, err
 }
@@ -174,6 +174,23 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*book.Book, 
 			//忽略 fs.PathError 并换个方式扫描
 			err = scanNonUTF8ZipFile(filePath, newBook)
 		}
+		//epub文件，需要根据 META-INF/container.xml 里面定义的rootfile （.opf文件）来重新排序
+		if newBook.Type == book.TypeEpub {
+			imageList, err := arch.GetImageListFromEpubFile(newBook.FilePath)
+			if err != nil {
+				fmt.Println(err)
+			} else {
+				newBook.SortPagesByImageList(imageList)
+			}
+			//根据metadata，改写书籍信息
+			metaData, err := arch.GetEpubMetadata(newBook.FilePath)
+			if err != nil {
+				fmt.Println(err)
+			} else {
+				newBook.Author[0] = metaData.Creator
+				newBook.Press = metaData.Publisher
+			}
+		}
 	//TODO:服务器解压速度太慢，网页用PDF.js解析？
 	case book.TypePDF:
 		newBook.AllPageNum = 1
@@ -194,7 +211,11 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*book.Book, 
 		newBook.Cover = book.ImageInfo{NameInArchive: "unknown.png", Url: "/images/unknown.png"}
 	//其他类型的压缩文件或文件夹
 	default:
-		fsys, err := archiver.FileSystem(filePath)
+		//archiver.FileSystem可以配合ctx了，加个默认超时时间
+		const shortDuration = 10 * 1000 * time.Millisecond //超时时间，10秒
+		ctx, cancel := context.WithTimeout(context.Background(), shortDuration)
+		defer cancel()
+		fsys, err := archiver.FileSystem(ctx, filePath)
 		if err != nil {
 			return nil, err
 		}
@@ -233,6 +254,7 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*book.Book, 
 		})
 	}
 	//不管页数，直接返回：在添加到书库时判断页数
+	newBook.SortPages("default")
 	return newBook, err
 }
 
@@ -252,12 +274,14 @@ func scanNonUTF8ZipFile(filePath string, b *book.Book) error {
 			logrus.Debugf(locale.GetString("unsupported_file_type") + f.Name)
 		}
 	}
+	b.SortPages("default")
 	return err
 }
 
-//手动写的递归查找，功能与fs.WalkDir()相同。发现一个Archiver/V4的BUG：zip文件的虚拟文件系统，找不到正确的多级文件夹？
+// 手动写的递归查找，功能与fs.WalkDir()相同。发现一个Archiver/V4的BUG：zip文件的虚拟文件系统，找不到正确的多级文件夹？
 // https://books.studygolang.com/The-Golang-Standard-Library-by-Example/chapter06/06.3.html
 func walkUTF8ZipFs(fsys fs.FS, parent, base string, b *book.Book) error {
+	//一般zip文件的处理流程
 	//fmt.Println("parent:" + parent + " base:" + base)
 	dirName := path.Join(parent, base)
 	dirEntries, err := fs.ReadDir(fsys, dirName)
@@ -288,5 +312,6 @@ func walkUTF8ZipFs(fsys fs.FS, parent, base string, b *book.Book) error {
 			b.Pages.Images = append(b.Pages.Images, book.ImageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: inArchiveName, Url: TempURL})
 		}
 	}
+	b.SortPages("default")
 	return err
 }

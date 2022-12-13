@@ -1,10 +1,8 @@
 <template>
   <div class="bottom text-gray-900 h-12 py-4 space-x-2 text-base content-center">
     <span class="text-base">Power by</span>
-    <a
-      href="https://github.com/yumenaka/comi/releases"
-      class="text-blue-700 hover:underline font-semibold"
-    >{{ softVersion }}</a>
+    <a href="https://github.com/yumenaka/comi/releases" class="text-blue-700 hover:underline font-semibold">{{
+    softVersion }}</a>
     <!-- <span>
       <a
         href="https://www.yumenaka.net"
@@ -15,7 +13,7 @@
   </div>
 </template>
 
-<script>
+<script lang ="ts">
 import { defineComponent } from 'vue'
 export default defineComponent({
   name: "ComigoBottom",

@@ -26,7 +26,7 @@ func init() {
 
 var (
 	ConfigFile  = "" //yaml设置文件路径，数据库文件(comigo.db)在同一个文件夹。
-	Version     = "v0.8.9"
+	Version     = "v0.9.0"
 	ReadingBook *book.Book
 	Srv         *http.Server
 	Config      = settings.ServerSettings{
@@ -45,7 +45,7 @@ var (
 		DisableLAN:           false,
 		DefaultMode:          "scroll",
 		LogToFile:            false,
-		MaxDepth:             3,
+		MaxDepth:             4,
 		MinImageNum:          3,
 		ZipFileTextEncoding:  "",
 		EnableFrpcServer:     false,
