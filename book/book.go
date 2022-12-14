@@ -108,11 +108,11 @@ func New(filePath string, modified time.Time, fileSize int64, storePath string, 
 		fileAbaPath, err := filepath.Abs(filePath)
 		if err != nil {
 			fmt.Println(err, fileAbaPath)
-			if realBook.FilePath == filePath && realBook.ParentFolder == storePath {
+			if realBook.FilePath == filePath && realBook.ParentFolder == storePath && realBook.Type == bookType {
 				return nil, errors.New("Duplicate books:" + filePath)
 			}
 		} else {
-			if realBook.FilePath == fileAbaPath {
+			if realBook.FilePath == fileAbaPath && realBook.Type == bookType {
 				return nil, errors.New("Duplicate books:" + fileAbaPath)
 			}
 		}
