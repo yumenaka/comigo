@@ -73,12 +73,10 @@ func (s *singleBookstore) initBookGroupMap() error {
 			}
 			//初始化ChildBook
 			//然后把同一parent的书，都加进某个书籍组
-			setCover := true //封面只设置一次
 			newBook.ChildBook = make(map[string]*Book)
 			for i, bookInList := range sameParentBookList {
 				//顺便设置一下封面，只设置一次
-				if setCover {
-					setCover = false
+				if i == 0 {
 					newBook.Cover = bookInList.Cover //
 				}
 				newBook.ChildBook[bookInList.BookID] = &sameParentBookList[i]

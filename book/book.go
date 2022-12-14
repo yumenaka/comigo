@@ -493,7 +493,7 @@ func (b *Book) SortPagesByImageList(imageList []string) {
 		}
 	}
 	if len(reSortList) == 0 {
-		fmt.Println("can not resort by epub metadata!")
+		fmt.Println(locale.GetString("EPUB_CANNOT_RESORT") + b.FilePath)
 		return
 	}
 	//不在表中的话，就不改变顺序，并加在有序表的后面

@@ -26,7 +26,7 @@
         class="absolute inset-x-0 bottom-0 h-1/4 bg-gray-100 bg-opacity-80 font-semibold border-blue-800 rounded-b">
         <!-- 如果把链接的 target 属性设置为 "_blank"，该链接会在新窗口中打开。 -->
         <span class="absolute inset-x-0  font-bold top-0 p-1 align-middle">{{
-        shortTitle
+            shortTitle
         }}</span>
       </div>
     </div>
@@ -70,6 +70,10 @@ export default defineComponent({
         short_title = short_title.replace(/^[\s]/g, "");
         //开头的特殊字符
         short_title = short_title.replace(/^[\\\-`~!@#$^&*()=|{}':;'@#￥……&*（）——|{}‘；：”“'。，、？]/, "");
+      }
+      //删减到空字符串，就不删减了
+      if (short_title.length == 0) {
+        return this.title;
       }
 
       if (short_title.length <= 15) {
@@ -124,4 +128,5 @@ export default defineComponent({
 </script>
 //自定义样式
 <style scoped>
+
 </style>

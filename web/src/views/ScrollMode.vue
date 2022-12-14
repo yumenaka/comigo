@@ -908,10 +908,10 @@ export default defineComponent({
 			localStorage.setItem("showHeaderFlag", this.showHeaderFlag ? "true" : "false");
 			localStorage.setItem("showPageNumFlag_ScrollMode", this.showPageNumFlag_ScrollMode ? "true" : "false");
 			localStorage.setItem("imageWidth_usePercentFlag", this.imageWidth_usePercentFlag ? "true" : "false");
-			localStorage.setItem("singlePageWidth_Percent", this.singlePageWidth_Percent ? "true" : "false");
-			localStorage.setItem("doublePageWidth_Percent", this.doublePageWidth_Percent ? "true" : "false");
-			localStorage.setItem("singlePageWidth_PX", this.singlePageWidth_PX ? "true" : "false");
-			localStorage.setItem("doublePageWidth_PX", this.doublePageWidth_PX ? "true" : "false");
+			localStorage.setItem("singlePageWidth_Percent", this.singlePageWidth_Percent.toString());
+			localStorage.setItem("doublePageWidth_Percent", this.doublePageWidth_Percent.toString());
+			localStorage.setItem("singlePageWidth_PX", this.singlePageWidth_PX.toString());
+			localStorage.setItem("doublePageWidth_PX", this.doublePageWidth_PX.toString());
 			localStorage.setItem("BackgroundColor", this.model.backgroundColor);
 			//set对有setXXXChange函数的来说有些多余,但没有set函数的话就有必要了
 			localStorage.setItem("ImageParameters_DoAutoCrop", this.imageParameters.do_auto_crop ? "true" : "false");
