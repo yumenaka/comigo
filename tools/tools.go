@@ -514,8 +514,8 @@ func GetOutboundIP() net.IP {
 //	return macAddrList
 //}
 
-// ChickExists 判断所给路径文件或文件夹是否存在
-func ChickExists(path string) bool {
+// CheckExists 判断所给路径文件或文件夹是否存在
+func CheckExists(path string) bool {
 	_, err := os.Stat(path) //os.Stat获取文件信息
 	if err != nil {
 		if os.IsExist(err) {
