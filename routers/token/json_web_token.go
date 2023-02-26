@@ -13,7 +13,7 @@ type User struct {
 	Password string `json:"password" binding:"required"`
 }
 
-// Authenticator 登录验证函数,在这里写登录验证逻辑
+// Authenticator 认证器：登录验证函数,在这里写登录验证逻辑
 func Authenticator(c *gin.Context) (interface{}, error) {
 	user := User{}
 	if err := c.ShouldBind(&user); err != nil {

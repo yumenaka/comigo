@@ -13,6 +13,7 @@ import BookShelf from "@/views/BookShelf.vue";
 import NotFound from "@/views/NotFound404.vue";
 // import PDFView from '@/views/PDFView.vue'
 import UploadPage from "@/views/UploadPage.vue";
+import LoginPage from "@/views/LoginPage.vue";
 
 //link like: https://localhost/#/scroll/4ZaZc
 
@@ -54,6 +55,11 @@ const routes = [
     path: "/upload",
     component: UploadPage,
     name: "UploadPage",
+  },
+  {
+    path: "/login",
+    component: LoginPage,
+    name: "LoginPage",
   },
   {
     path: "/about",
