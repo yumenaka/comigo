@@ -137,18 +137,19 @@ func setWebAPI(engine *gin.Engine) {
 	// https://juejin.cn/post/7042520107976753165
 
 	//使用gin+jwt实现身份验证功能： https://blog.firerain.me/article/18
+	// gin-jwt 的使用简单，配置下中间件,然后在需要验证的api中用此中间件就行了
 
-	//创建中间件的结构体 jwt.GinJWTMiddleware
+	//中间件配置。创建中间件的结构体 jwt.GinJWTMiddleware。
 	ginJWTMiddleware := &jwt.GinJWTMiddleware{
 		Realm:            "test zone",                                             //标识
 		SigningAlgorithm: "HS256",                                                 //加密算法
-		Key:              []byte(common.Config.UserName + common.Config.Password), //密钥
-		Timeout:          time.Hour,                                               //过期时间
-		MaxRefresh:       time.Hour,                                               //刷新最大延长时间
+		Key:              []byte(common.Config.UserName + common.Config.Password), //JWT服务端密钥，需要确保别人不知道
+		Timeout:          time.Hour,                                               //jwt过期时间
+		MaxRefresh:       time.Hour,                                               //刷新的时候，最大能延长多少时间
 		IdentityKey:      "id",                                                    //指定cookie的id
-		Authenticator:    token.Authenticator,                                     //登录验证函数
-		Authorizator:     token.Authorizator,                                      //登录后权限验证函数
-		//错误时响应
+		Authenticator:    token.Authenticator,                                     //认证器：在登录接口中使用的验证方法，返回验证成功后的用户对象。
+		Authorizator:     token.Authorizator,                                      //授权者：登录后验证传入的 token 方法，可在此处写权限验证逻辑
+		//验证失败后的函数调用，可用于自定义返回的 JSON 格式之类
 		Unauthorized: func(c *gin.Context, code int, message string) {
 			fmt.Println(code)
 			fmt.Println(message)
@@ -162,15 +163,20 @@ func setWebAPI(engine *gin.Engine) {
 			claims := jwt.ExtractClaims(c)
 			return claims["username"]
 		},
-		//负载，定义返回jwt中的payload数据
+		//添加额外业务相关的信息
 		PayloadFunc: func(data interface{}) jwt.MapClaims {
 			if user, ok := data.(token.User); ok {
 				return jwt.MapClaims{"username": user.Username}
 			}
 			return jwt.MapClaims{}
 		},
-		// 指定从哪里获取token 其格式为："<source>:<name>" 如有多个，用逗号隔开
-		TokenLookup:   "header: Authorization, query: token, cookie: jwt",
+		// 指定从哪里获取token 其格式为："<source>:<name>" 如有多个，用逗号隔开，可用的值：
+		//    "header:<name>"
+		//    "query:<name>"
+		//    "cookie:<name>"
+		// 默认值 header:Authorization
+		TokenLookup: "header: Authorization, query: token, cookie: jwt",
+		//Header 中 token 的头部字段，默认值 Bearer
 		TokenHeadName: "Bearer",
 		TimeFunc:      time.Now,
 	}
@@ -196,12 +202,15 @@ func setWebAPI(engine *gin.Engine) {
 		bookList := c.PostFormArray("book_list")
 		c.String(http.StatusOK, fmt.Sprintf("template is %s, username is %s, password is %s,hobby is %v", t, username, password, bookList))
 	})
+
+	// 在需要验证的api中用jwt中间件
 	//通过URL字符串参数获取特定文件
-	//api 需要验证的时候需要使用 jwtMiddleware.MiddlewareFunc() 中间件
-	//api.GET("/getfile", ginJWTMiddleware.MiddlewareFunc(), handler.GetFileHandler)
-
-	api.GET("/getfile", handler.GetFileHandler)
-
+	if common.Config.Debug {
+		api.GET("/getfile", ginJWTMiddleware.MiddlewareFunc(), handler.GetFileHandler)
+	} else {
+		api.GET("/getfile", handler.GetFileHandler)
+	}
+	
 	//文件上传
 	api.POST("/upload", handler.UploadHandler)
 	//web端需要的服务器状态，包括标题、机器状态等
