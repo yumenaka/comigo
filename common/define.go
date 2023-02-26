@@ -76,7 +76,7 @@ var (
 // SetTempDir 设置临时文件夹，退出时会被清理
 func SetTempDir() {
 	//手动设置的临时文件夹
-	if Config.CachePath != "" && tools.ChickExists(Config.CachePath) && tools.ChickIsDir(Config.CachePath) {
+	if Config.CachePath != "" && tools.CheckExists(Config.CachePath) && tools.ChickIsDir(Config.CachePath) {
 		Config.CachePath = path.Join(Config.CachePath)
 	} else {
 		Config.CachePath = path.Join(os.TempDir(), "comigo_cache") //直接使用系统文件夹

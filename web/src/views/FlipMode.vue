@@ -32,8 +32,8 @@
             doublePageModeFlag &&
             nowPageNum < book.all_page_num
           " v-bind:src="
-            imageParametersString(book.pages.images[nowPageNum].url)
-          " v-bind:alt="(nowPageNum + 1).toString()" />
+  imageParametersString(book.pages.images[nowPageNum].url)
+" v-bind:alt="(nowPageNum + 1).toString()" />
 
           <!-- 自动拼合模式当前页,如果开启自动拼合,右边可能显示拼合页 -->
           <img v-if="
@@ -41,8 +41,8 @@
             nowPageNum < book.all_page_num &&
             nowAndNextPageIsSingle()
           " v-bind:src="
-            imageParametersString(book.pages.images[nowPageNum].url)
-          " v-bind:alt="(nowPageNum + 1).toString()" />
+  imageParametersString(book.pages.images[nowPageNum].url)
+" v-bind:alt="(nowPageNum + 1).toString()" />
         </div>
       </div>
     </div>
@@ -56,9 +56,8 @@
         w-full
         bottom-0
         fixed
-      " v-bind:class="{ 'text-2xl': sketchModeFlag, 'text-lg': (!sketchModeFlag) }" 
-      style="text-shadow: 0 1px yellow, 1px 0 yellow, -1px 0 yellow, 0 -1px yellow;"
-      v-if="showPageHintFlag_FlipMode"     >
+      " v-bind:class="{ 'text-2xl': sketchModeFlag, 'text-lg': (!sketchModeFlag) }"
+      style="text-shadow: 0 1px yellow, 1px 0 yellow, -1px 0 yellow, 0 -1px yellow;" v-if="showPageHintFlag_FlipMode">
       {{ pageNumOrSketchHint }}
     </div>
 
@@ -130,7 +129,7 @@
 
       <!-- 选择：切换页面模式 -->
       <n-button @click="changeReaderModeToScrollMode">{{
-      $t("switch_to_scrolling_mode")
+          $t("switch_to_scrolling_mode")
       }}
       </n-button>
 
@@ -224,7 +223,7 @@ import Drawer from "@/components/Drawer.vue";
 // import Bottom from "@/components/Bottom.vue";
 import { defineComponent, reactive, getCurrentInstance, CSSProperties } from "vue";
 import { useStore } from '@/store'
-import {useRoute, useRouter} from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 // 直接导入组件并使用它。这种情况下,只有导入的组件才会被打包。
 import {
   NDivider,
@@ -258,7 +257,7 @@ export default defineComponent({
     const { cookies } = useCookies();
     const app = getCurrentInstance();
     const store = useStore()
-    const router = useRouter() 
+    const router = useRouter()
     //背景颜色,颜色选择器用
     const model = reactive({
       backgroundColor: "#E0D9CD",
@@ -468,7 +467,7 @@ export default defineComponent({
     //监听路由参数的变化,刷新本地的Book数据
     this.$watch(
       () => this.$route.params.id,
-      (id: string) => {
+      (id: any) => {
         // console.log(id)
         axios
           .get("/getbook?id=" + this.$route.params.id + sort_image_by_str)
@@ -692,7 +691,7 @@ export default defineComponent({
     },
 
     //页面排序相关
-    onResort(key: string)  {
+    onResort(key: string) {
       this.resort_hint_key = key;
       axios
         .get("/getbook?id=" + this.$route.params.id + "&sort_by=" + key)
@@ -909,7 +908,7 @@ export default defineComponent({
       );
       localStorage.setItem(
         "ImageParametersResizeMaxWidth",
-        this.imageParameters.resize_max_width ? "true" : "false"
+        this.imageParameters.resize_max_width.toString()
       );
     },
     //HTML DOM 事件 https://www.runoob.com/jsref/dom-obj-event.html
@@ -1377,7 +1376,7 @@ export default defineComponent({
         //计算几小时几分
         let MinutesAndHourString = "";
         //如果不满意1小时,就不显示小时
-        if (this.sketchSecondCount  < 3600) {
+        if (this.sketchSecondCount < 3600) {
           MinutesAndHourString = totalMinutes.toFixed() + this.$t("minute");
         } else {
           MinutesAndHourString =
