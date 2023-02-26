@@ -8,7 +8,7 @@
 [English](https://github.com/yumenaka/comi/blob/master/README_EN.md)   [日本語](https://github.com/yumenaka/comi/blob/master/README_JP.md)
 
 ### Features：  
-1. 支持Windows、Linux、MacOS命令行调用，支持卷轴、下拉、翻页等多种模式。
+1. 支持Windows、Linux、MacOS。支持卷轴、下拉、翻页等多种模式。
 2. 支持图片文件夹与.rar、.zip、.tar、.cbz、.cbr、.epub压缩包。
 3. 局域网的手机或平板设备，可扫描二维码阅读。  
 4. windows支持拖拽压缩包到comi.exe（或快捷方式）上打开。
@@ -24,13 +24,20 @@ comi --help
 ```
 
 ### TODO：
-- [ ] 引入多文件机制
-- [ ] 网页端：简易书架
-- [ ] 优化打开速度，压缩包后台解压
+- [x] 引入多文件机制
+- [x] 网页端：简易书架
+- [x] 优化打开速度
+- [x] 支持插件，可整合frp与webpserver
+- [x] 网页端：分享功能
+- [x] 网页端：网页判断分辨率，去除服务器分析步骤
+- [x] 网页端：显示QRCode
+- [x] 网页端：设定展现效果
+- [x] 网页端：自定义页面样式，与保存设置
+- [x] 网页端：浏览器快捷键
+- [x] 网页端：HTTPS加密
+- [x] 网页端：显示服务器信息
 - [ ] 固实压缩文件（7z）
-- [ ] 扫描文件夹，生成书单或书架
-- [ ] 浏览器JS：[PDF.js](https://github.com/mozilla/pdf.js) [epub.js](https://github.com/futurepress/epub.js/) [jszip](https://stuk.github.io/jszip/)
-- [ ] websocket通信（[参考](https://github.com/Unrud/remote-touchpad)）
+- [x] websocket通信（[参考](https://github.com/Unrud/remote-touchpad)）
 - [ ] 访问权限设置，账号系统
 - [ ] 程序log，阅读历史
 - [ ] 子命令，download rar2zip 
@@ -41,28 +48,17 @@ comi --help
 - [ ] 支持rar压缩包密码
 - [ ] 更准确的文件类型判断
 - [ ] 命令行交互
-- [ ] 支持中间件，可整合frp与webpserver
-- [ ] 网页端：分享功能
-- [x] 网页端：网页判断分辨率，去除服务器分析步骤
-- [ ] 网页端：显示QRCode
-- [ ] 网页端：配合后台解压，更新本地数据
-- [x] 网页端：设定展现效果
-- [x] 网页端：自定义页面样式，与保存设置
-- [x] 网页端：浏览器快捷键
-- [ ] 网页端：HTTPS加密
-- [ ] 网页端：显示服务器信息
 - [ ] 阅读历史记录与统计
-- [ ] 新一代图片格式支持（heic）
-- [ ] 图片自动裁边，分割、拼接单双页。
+- [x] 新一代图片格式支持（heic）
+- [x] 图片自动裁边，分割、拼接单双页。
 - [ ] 第三方调用API
 - [ ] 挂载smb、webdav虚拟文件系统？
-- [ ] CPU、内存占用、状态监控
-- [ ] 文件管理与书库
-- [ ] 支持HTTPS
+- [x] CPU、内存占用、状态监控
+- [ ] 文件管理
 - [ ] 更新提示
 - [ ] 用户系统、访问密码，流量限制等
 - [ ] 移动客户端（Android，iOS）
-- [ ] 跨平台gui界面（[gio](https://gioui.org/) flutter？）
+- [ ] 跨平台GUI（[gio](https://gioui.org/) flutter？）
 
 ### Special Thanks：
 [mholt](https://github.com/mholt)  、[spf13](https://github.com/spf13)  [disintegration](https://github.com/disintegration)   、 [Baozisoftware ](https://github.com/Baozisoftware) 、 [markbates](github.com/markbates/pkger)  and more。

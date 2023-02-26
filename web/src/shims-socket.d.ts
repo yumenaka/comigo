@@ -6,9 +6,16 @@
 
 import { ComponentCustomProperties } from 'vue'
 import { WebSocket } from 'vue-native-websocket-vue3'
+import { websocketOpts } from 'vue-native-websocket-vue3/dist/lib/type/pluginsType.d';
+
+declare module 'vue-native-websocket-vue3';
 
 declare module '@vue/runtime-core' {
     interface ComponentCustomProperties {
-        $socket : typeof WebSocket
+        // $socket: any
+        $connect: (url: string, opts?: websocketOpts) => void;
+        $disconnect: () => void;
+        $socket: WebSocket;
     }
 }
+

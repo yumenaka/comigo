@@ -75,9 +75,11 @@ func (s *singleBookstore) initBookGroupMap() error {
 			//然后把同一parent的书，都加进某个书籍组
 			newBook.ChildBook = make(map[string]*Book)
 			for i, bookInList := range sameParentBookList {
-				newBook.Cover = bookInList.Cover //
+				//顺便设置一下封面，只设置一次
+				if i == 0 {
+					newBook.Cover = bookInList.Cover //
+				}
 				newBook.ChildBook[bookInList.BookID] = &sameParentBookList[i]
-				break //用第一本书的封面，当这一组书的封面。所以执行第一次之后就跳出。
 			}
 			newBook.ChildBookNum = len(newBook.ChildBook)
 			//如果书籍组的子书籍数量大于等于1，且从来没有添加过，将书籍组加到上一层

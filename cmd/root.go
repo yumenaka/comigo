@@ -232,7 +232,7 @@ func ScanDefaultPath(args []string) {
 		cmdPath := path.Dir(os.Args[0]) //扫描程序执行的路径
 		addList, err := common.ScanAndGetBookList(cmdPath, databaseBookList)
 		if err != nil {
-			fmt.Println(locale.GetString("scan_error"), cmdPath)
+			fmt.Println(locale.GetString("scan_error"), cmdPath, err)
 		} else {
 			common.AddBooksToStore(addList, cmdPath)
 		}
@@ -241,7 +241,7 @@ func ScanDefaultPath(args []string) {
 		for _, p := range args {
 			addList, err := common.ScanAndGetBookList(p, databaseBookList)
 			if err != nil {
-				fmt.Println(locale.GetString("scan_error"), p)
+				fmt.Println(locale.GetString("scan_error"), p, err)
 			} else {
 				common.AddBooksToStore(addList, p)
 			}
@@ -255,7 +255,7 @@ func ScanStorePathInConfig() {
 		for _, p := range common.Config.StoresPath {
 			addList, err := common.ScanAndGetBookList(p, databaseBookList)
 			if err != nil {
-				fmt.Println(locale.GetString("scan_error"), p)
+				fmt.Println(locale.GetString("scan_error"), p, err)
 			} else {
 				common.AddBooksToStore(addList, p)
 			}

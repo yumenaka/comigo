@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/klauspost/compress/zip"
+	"github.com/yumenaka/comi/tools"
 	"io/fs"
 	"io/ioutil"
 	"net/url"
@@ -37,11 +38,16 @@ func AddBooksToStore(bookList []*book.Book, path string) {
 
 // ScanAndGetBookList 扫描路径，取得路径里的书籍
 func ScanAndGetBookList(storePath string, databaseBookList []*book.Book) (newBookList []*book.Book, err error) {
+	//路径不存在的Error，不过目前并不会打印出来
+	if !tools.PathExists(storePath) {
+		return nil, errors.New(locale.GetString("PATH_NOT_EXIST"))
+	}
 	storePathAbs, err := filepath.Abs(storePath)
 	if err != nil {
 		storePathAbs = storePath
 		fmt.Println(err)
 	}
+	fmt.Println(locale.GetString("SCAN_START_HINT") + storePathAbs)
 	err = filepath.Walk(storePathAbs, func(walkPath string, fileInfo os.FileInfo, err error) error {
 		//是否需要跳过
 		skip := false
@@ -49,6 +55,7 @@ func ScanAndGetBookList(storePath string, databaseBookList []*book.Book) (newBoo
 			AbsW, err := filepath.Abs(walkPath) //取得绝对路径
 			if err != nil {
 				//无法取得的情况下，用相对路径
+				AbsW = walkPath
 				fmt.Println(err, AbsW)
 			}
 			if walkPath == p.FilePath || AbsW == p.FilePath {
@@ -102,6 +109,9 @@ func ScanAndGetBookList(storePath string, databaseBookList []*book.Book) (newBoo
 		return nil
 	})
 	//所有可用书籍，包括压缩包与文件夹
+	if len(newBookList) > 0 {
+		fmt.Printf(locale.GetString("FOUND_IN_PATH"), len(newBookList), storePathAbs)
+	}
 	return newBookList, err
 }
 
@@ -161,15 +171,14 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*book.Book, 
 		//使用Archiver的虚拟文件系统，无法处理非UTF-8编码
 		fsys, zipErr := zip.OpenReader(filePath)
 		if zipErr != nil {
-			fmt.Println(zipErr)
-			return nil, errors.New("not a valid zip file:" + filePath)
+			//fmt.Println(zipErr)
+			return nil, errors.New(locale.GetString("NOT_A_VALID_ZIP_FILE") + filePath)
 		}
 		err = walkUTF8ZipFs(fsys, "", ".", newBook)
 		//如果扫描ZIP文件的时候遇到了 fs.PathError ，则扫描到NonUTF-8 ZIP文件，需要特殊处理
 		if _, ok := err.(*fs.PathError); ok {
 			if Config.Debug {
-				fmt.Println("NonUTF-8 ZIP:" + filePath)
-				fmt.Println("  Error:" + err.Error())
+				fmt.Println("NonUTF-8 ZIP:" + filePath + "  Error:" + err.Error())
 			}
 			//忽略 fs.PathError 并换个方式扫描
 			err = scanNonUTF8ZipFile(filePath, newBook)

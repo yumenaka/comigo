@@ -108,11 +108,11 @@ func New(filePath string, modified time.Time, fileSize int64, storePath string, 
 		fileAbaPath, err := filepath.Abs(filePath)
 		if err != nil {
 			fmt.Println(err, fileAbaPath)
-			if realBook.FilePath == filePath && realBook.ParentFolder == storePath {
+			if realBook.FilePath == filePath && realBook.ParentFolder == storePath && realBook.Type == bookType {
 				return nil, errors.New("Duplicate books:" + filePath)
 			}
 		} else {
-			if realBook.FilePath == fileAbaPath {
+			if realBook.FilePath == fileAbaPath && realBook.Type == bookType {
 				return nil, errors.New("Duplicate books:" + fileAbaPath)
 			}
 		}
@@ -493,7 +493,7 @@ func (b *Book) SortPagesByImageList(imageList []string) {
 		}
 	}
 	if len(reSortList) == 0 {
-		fmt.Println("can not resort by epub metadata!")
+		fmt.Println(locale.GetString("EPUB_CANNOT_RESORT") + b.FilePath)
 		return
 	}
 	//不在表中的话，就不改变顺序，并加在有序表的后面

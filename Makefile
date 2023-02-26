@@ -16,8 +16,7 @@ OS := $(shell uname)
 BINDIR := ./bin
 MD5_TEXTFILE := $(BINDIR)/md5Sums.txt
 #go: cannot install cross-compiled binaries when GOBIN is set
-GOBIN :=""
-
+unexport GOBIN
 
 MAIN_FILE_DIR := ./
 # -ldflags 指定编译参数。-s 去掉符号信息。 -w去掉调试信息。

@@ -85,13 +85,23 @@ func (s BookInfoList) Less(i, j int) (less bool) {
 	case "filename":
 		return tools.Compare(s.BookInfos[i].Name, s.BookInfos[j].Name) //(使用了第三方库、比较自然语言字符串)
 	case "filesize":
-		//如果一样大（可能是大小默认为0的文件夹），先比较子书籍数量
-		if s.BookInfos[i].FileSize == s.BookInfos[j].FileSize && s.BookInfos[i].ChildBookNum != s.BookInfos[j].ChildBookNum {
-			return !(s.BookInfos[i].ChildBookNum < s.BookInfos[j].ChildBookNum) //
+		//两本之中有一本是书籍组。同样是书籍组，比较子书籍数。
+		if s.BookInfos[i].Type == TypeBooksGroup || s.BookInfos[j].Type == TypeBooksGroup {
+			if s.BookInfos[i].Type == TypeBooksGroup && s.BookInfos[j].Type == TypeBooksGroup {
+				return s.BookInfos[i].ChildBookNum > s.BookInfos[j].ChildBookNum
+			}
+			if s.BookInfos[i].Type != TypeBooksGroup || s.BookInfos[j].Type != TypeBooksGroup {
+				return s.BookInfos[i].Type == TypeBooksGroup
+			}
 		}
-		//子书籍数量也一样，就比较书名（免得结果都不一样）
-		if s.BookInfos[i].FileSize == s.BookInfos[j].FileSize && s.BookInfos[i].ChildBookNum == s.BookInfos[j].ChildBookNum {
-			return !tools.Compare(s.BookInfos[i].Name, s.BookInfos[j].Name) //
+		//两本之中有一本是文件夹。同样是文件夹，比较页数。
+		if s.BookInfos[i].Type == TypeDir || s.BookInfos[j].Type == TypeDir {
+			if s.BookInfos[i].Type == TypeDir && s.BookInfos[j].Type == TypeDir {
+				return s.BookInfos[i].AllPageNum > s.BookInfos[j].AllPageNum
+			}
+			if s.BookInfos[i].Type != TypeDir || s.BookInfos[j].Type != TypeDir {
+				return s.BookInfos[i].Type == TypeDir
+			}
 		}
 		//一般情况，比较文件大小
 		return !tools.Compare(strconv.Itoa(int(s.BookInfos[i].FileSize)), strconv.Itoa(int(s.BookInfos[j].FileSize)))
@@ -103,13 +113,23 @@ func (s BookInfoList) Less(i, j int) (less bool) {
 	case "filename_reverse":
 		return !tools.Compare(s.BookInfos[i].Name, s.BookInfos[j].Name) //(使用了第三方库、比较自然语言字符串)
 	case "filesize_reverse":
-		//如果一样大（很可能是大小默认为0的文件夹），先比较子书籍数量
-		if s.BookInfos[i].FileSize == s.BookInfos[j].FileSize && s.BookInfos[i].ChildBookNum != s.BookInfos[j].ChildBookNum {
-			return s.BookInfos[i].ChildBookNum < s.BookInfos[j].ChildBookNum //
+		//两本之中有一本是书籍组。同样是书籍组，比较子书籍数。
+		if s.BookInfos[i].Type == TypeBooksGroup || s.BookInfos[j].Type == TypeBooksGroup {
+			if s.BookInfos[i].Type == TypeBooksGroup && s.BookInfos[j].Type == TypeBooksGroup {
+				return !(s.BookInfos[i].ChildBookNum > s.BookInfos[j].ChildBookNum)
+			}
+			if s.BookInfos[i].Type != TypeBooksGroup || s.BookInfos[j].Type != TypeBooksGroup {
+				return !(s.BookInfos[i].Type == TypeBooksGroup)
+			}
 		}
-		//子书籍数量也一样的话，就比较书名（免得结果都不一样）
-		if s.BookInfos[i].FileSize == s.BookInfos[j].FileSize && s.BookInfos[i].ChildBookNum == s.BookInfos[j].ChildBookNum {
-			return tools.Compare(s.BookInfos[i].Name, s.BookInfos[j].Name) //
+		//两本之中有一本是文件夹。同样是文件夹，比较页数。
+		if s.BookInfos[i].Type == TypeDir || s.BookInfos[j].Type == TypeDir {
+			if s.BookInfos[i].Type == TypeDir && s.BookInfos[j].Type == TypeDir {
+				return !(s.BookInfos[i].AllPageNum > s.BookInfos[j].AllPageNum)
+			}
+			if s.BookInfos[i].Type != TypeDir || s.BookInfos[j].Type != TypeDir {
+				return !(s.BookInfos[i].Type == TypeDir)
+			}
 		}
 		//一般情况，比较文件大小
 		return tools.Compare(strconv.Itoa(int(s.BookInfos[i].FileSize)), strconv.Itoa(int(s.BookInfos[j].FileSize)))
