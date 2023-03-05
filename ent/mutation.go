@@ -9,12 +9,12 @@ import (
 	"sync"
 	"time"
 
+	"entgo.io/ent"
+	"entgo.io/ent/dialect/sql"
 	"github.com/yumenaka/comi/ent/book"
 	"github.com/yumenaka/comi/ent/predicate"
 	"github.com/yumenaka/comi/ent/singlepageinfo"
 	"github.com/yumenaka/comi/ent/user"
-
-	"entgo.io/ent"
 )
 
 const (
@@ -39,6 +39,8 @@ type BookMutation struct {
 	id                *int
 	_Name             *string
 	_BookID           *string
+	_Owner            *int
+	add_Owner         *int
 	_FilePath         *string
 	_BookStorePath    *string
 	_Type             *string
@@ -241,6 +243,62 @@ func (m *BookMutation) OldBookID(ctx context.Context) (v string, err error) {
 // ResetBookID resets all changes to the "BookID" field.
 func (m *BookMutation) ResetBookID() {
 	m._BookID = nil
+}
+
+// SetOwner sets the "Owner" field.
+func (m *BookMutation) SetOwner(i int) {
+	m._Owner = &i
+	m.add_Owner = nil
+}
+
+// Owner returns the value of the "Owner" field in the mutation.
+func (m *BookMutation) Owner() (r int, exists bool) {
+	v := m._Owner
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOwner returns the old "Owner" field's value of the Book entity.
+// If the Book object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BookMutation) OldOwner(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOwner is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOwner requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOwner: %w", err)
+	}
+	return oldValue.Owner, nil
+}
+
+// AddOwner adds i to the "Owner" field.
+func (m *BookMutation) AddOwner(i int) {
+	if m.add_Owner != nil {
+		*m.add_Owner += i
+	} else {
+		m.add_Owner = &i
+	}
+}
+
+// AddedOwner returns the value that was added to the "Owner" field in this mutation.
+func (m *BookMutation) AddedOwner() (r int, exists bool) {
+	v := m.add_Owner
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetOwner resets all changes to the "Owner" field.
+func (m *BookMutation) ResetOwner() {
+	m._Owner = nil
+	m.add_Owner = nil
 }
 
 // SetFilePath sets the "FilePath" field.
@@ -1106,9 +1164,24 @@ func (m *BookMutation) Where(ps ...predicate.Book) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the BookMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *BookMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Book, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *BookMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *BookMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (Book).
@@ -1120,12 +1193,15 @@ func (m *BookMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *BookMutation) Fields() []string {
-	fields := make([]string, 0, 21)
+	fields := make([]string, 0, 22)
 	if m._Name != nil {
 		fields = append(fields, book.FieldName)
 	}
 	if m._BookID != nil {
 		fields = append(fields, book.FieldBookID)
+	}
+	if m._Owner != nil {
+		fields = append(fields, book.FieldOwner)
 	}
 	if m._FilePath != nil {
 		fields = append(fields, book.FieldFilePath)
@@ -1196,6 +1272,8 @@ func (m *BookMutation) Field(name string) (ent.Value, bool) {
 		return m.Name()
 	case book.FieldBookID:
 		return m.BookID()
+	case book.FieldOwner:
+		return m.Owner()
 	case book.FieldFilePath:
 		return m.FilePath()
 	case book.FieldBookStorePath:
@@ -1247,6 +1325,8 @@ func (m *BookMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldName(ctx)
 	case book.FieldBookID:
 		return m.OldBookID(ctx)
+	case book.FieldOwner:
+		return m.OldOwner(ctx)
 	case book.FieldFilePath:
 		return m.OldFilePath(ctx)
 	case book.FieldBookStorePath:
@@ -1307,6 +1387,13 @@ func (m *BookMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetBookID(v)
+		return nil
+	case book.FieldOwner:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOwner(v)
 		return nil
 	case book.FieldFilePath:
 		v, ok := value.(string)
@@ -1449,6 +1536,9 @@ func (m *BookMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *BookMutation) AddedFields() []string {
 	var fields []string
+	if m.add_Owner != nil {
+		fields = append(fields, book.FieldOwner)
+	}
 	if m.add_ChildBookNum != nil {
 		fields = append(fields, book.FieldChildBookNum)
 	}
@@ -1475,6 +1565,8 @@ func (m *BookMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *BookMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
+	case book.FieldOwner:
+		return m.AddedOwner()
 	case book.FieldChildBookNum:
 		return m.AddedChildBookNum()
 	case book.FieldDepth:
@@ -1496,6 +1588,13 @@ func (m *BookMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *BookMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case book.FieldOwner:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddOwner(v)
+		return nil
 	case book.FieldChildBookNum:
 		v, ok := value.(int)
 		if !ok {
@@ -1570,6 +1669,9 @@ func (m *BookMutation) ResetField(name string) error {
 		return nil
 	case book.FieldBookID:
 		m.ResetBookID()
+		return nil
+	case book.FieldOwner:
+		m.ResetOwner()
 		return nil
 	case book.FieldFilePath:
 		m.ResetFilePath()
@@ -2322,9 +2424,24 @@ func (m *SinglePageInfoMutation) Where(ps ...predicate.SinglePageInfo) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the SinglePageInfoMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *SinglePageInfoMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.SinglePageInfo, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *SinglePageInfoMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *SinglePageInfoMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (SinglePageInfo).
@@ -2712,6 +2829,7 @@ type UserMutation struct {
 	created_at    *time.Time
 	username      *string
 	password      *string
+	last_login    *time.Time
 	age           *int
 	addage        *int
 	clearedFields map[string]struct{}
@@ -2962,6 +3080,42 @@ func (m *UserMutation) ResetPassword() {
 	m.password = nil
 }
 
+// SetLastLogin sets the "last_login" field.
+func (m *UserMutation) SetLastLogin(t time.Time) {
+	m.last_login = &t
+}
+
+// LastLogin returns the value of the "last_login" field in the mutation.
+func (m *UserMutation) LastLogin() (r time.Time, exists bool) {
+	v := m.last_login
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastLogin returns the old "last_login" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldLastLogin(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastLogin is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastLogin requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastLogin: %w", err)
+	}
+	return oldValue.LastLogin, nil
+}
+
+// ResetLastLogin resets all changes to the "last_login" field.
+func (m *UserMutation) ResetLastLogin() {
+	m.last_login = nil
+}
+
 // SetAge sets the "age" field.
 func (m *UserMutation) SetAge(i int) {
 	m.age = &i
@@ -3023,9 +3177,24 @@ func (m *UserMutation) Where(ps ...predicate.User) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the UserMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *UserMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.User, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *UserMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *UserMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (User).
@@ -3037,7 +3206,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.name != nil {
 		fields = append(fields, user.FieldName)
 	}
@@ -3049,6 +3218,9 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.password != nil {
 		fields = append(fields, user.FieldPassword)
+	}
+	if m.last_login != nil {
+		fields = append(fields, user.FieldLastLogin)
 	}
 	if m.age != nil {
 		fields = append(fields, user.FieldAge)
@@ -3069,6 +3241,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Username()
 	case user.FieldPassword:
 		return m.Password()
+	case user.FieldLastLogin:
+		return m.LastLogin()
 	case user.FieldAge:
 		return m.Age()
 	}
@@ -3088,6 +3262,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldUsername(ctx)
 	case user.FieldPassword:
 		return m.OldPassword(ctx)
+	case user.FieldLastLogin:
+		return m.OldLastLogin(ctx)
 	case user.FieldAge:
 		return m.OldAge(ctx)
 	}
@@ -3126,6 +3302,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPassword(v)
+		return nil
+	case user.FieldLastLogin:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastLogin(v)
 		return nil
 	case user.FieldAge:
 		v, ok := value.(int)
@@ -3209,6 +3392,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldPassword:
 		m.ResetPassword()
+		return nil
+	case user.FieldLastLogin:
+		m.ResetLastLogin()
 		return nil
 	case user.FieldAge:
 		m.ResetAge()

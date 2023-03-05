@@ -15,11 +15,10 @@ type BookFunc func(context.Context, *ent.BookMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
 func (f BookFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.BookMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BookMutation", m)
+	if mv, ok := m.(*ent.BookMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BookMutation", m)
 }
 
 // The SinglePageInfoFunc type is an adapter to allow the use of ordinary
@@ -28,11 +27,10 @@ type SinglePageInfoFunc func(context.Context, *ent.SinglePageInfoMutation) (ent.
 
 // Mutate calls f(ctx, m).
 func (f SinglePageInfoFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.SinglePageInfoMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SinglePageInfoMutation", m)
+	if mv, ok := m.(*ent.SinglePageInfoMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SinglePageInfoMutation", m)
 }
 
 // The UserFunc type is an adapter to allow the use of ordinary
@@ -41,11 +39,10 @@ type UserFunc func(context.Context, *ent.UserMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
 func (f UserFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.UserMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserMutation", m)
+	if mv, ok := m.(*ent.UserMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserMutation", m)
 }
 
 // Condition is a hook condition function.

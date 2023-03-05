@@ -13,7 +13,7 @@ type Book struct {
 	ent.Schema
 }
 
-//每次添加或修改 fields 和 edges后, 你都需要生成新的实体. 在项目的根目录执行 ent generate或直接执行 go generate ./ent 命令重新生成资源文件
+// Fields 每次添加或修改 fields 和 edges后, 你都需要生成新的实体. 在项目的根目录执行 ent generate或直接执行 go generate ./ent 命令重新生成资源文件
 // Fields of the Book.
 func (Book) Fields() []ent.Field {
 	return []ent.Field{
@@ -22,6 +22,8 @@ func (Book) Fields() []ent.Field {
 			Comment("书名"),
 		field.String("BookID").
 			Unique().Comment("书籍ID"), //字段可以使用 Unique 方法定义为唯一字段。 注意：唯一字段不能有默认值。
+		field.Int("Owner").
+			Comment("拥有者"),
 		field.String("FilePath").Comment("文件路径"),
 		field.String("BookStorePath").Comment("书库路径"),
 		field.String("Type").Comment("书籍类型"),
@@ -51,6 +53,6 @@ func (Book) Fields() []ent.Field {
 // Edges of the Book.
 func (Book) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("PageInfos", SinglePageInfo.Type),
+		edge.To("PageInfos", SinglePageInfo.Type), //Type是一种虚拟方法，用于Edge(关系)声明。
 	}
 }

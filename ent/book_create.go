@@ -33,6 +33,12 @@ func (bc *BookCreate) SetBookID(s string) *BookCreate {
 	return bc
 }
 
+// SetOwner sets the "Owner" field.
+func (bc *BookCreate) SetOwner(i int) *BookCreate {
+	bc.mutation.SetOwner(i)
+	return bc
+}
+
 // SetFilePath sets the "FilePath" field.
 func (bc *BookCreate) SetFilePath(s string) *BookCreate {
 	bc.mutation.SetFilePath(s)
@@ -177,50 +183,8 @@ func (bc *BookCreate) Mutation() *BookMutation {
 
 // Save creates the Book in the database.
 func (bc *BookCreate) Save(ctx context.Context) (*Book, error) {
-	var (
-		err  error
-		node *Book
-	)
 	bc.defaults()
-	if len(bc.hooks) == 0 {
-		if err = bc.check(); err != nil {
-			return nil, err
-		}
-		node, err = bc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*BookMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = bc.check(); err != nil {
-				return nil, err
-			}
-			bc.mutation = mutation
-			if node, err = bc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(bc.hooks) - 1; i >= 0; i-- {
-			if bc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = bc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, bc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Book)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from BookMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Book, BookMutation](ctx, bc.sqlSave, bc.mutation, bc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -265,6 +229,9 @@ func (bc *BookCreate) check() error {
 	}
 	if _, ok := bc.mutation.BookID(); !ok {
 		return &ValidationError{Name: "BookID", err: errors.New(`ent: missing required field "Book.BookID"`)}
+	}
+	if _, ok := bc.mutation.Owner(); !ok {
+		return &ValidationError{Name: "Owner", err: errors.New(`ent: missing required field "Book.Owner"`)}
 	}
 	if _, ok := bc.mutation.FilePath(); !ok {
 		return &ValidationError{Name: "FilePath", err: errors.New(`ent: missing required field "Book.FilePath"`)}
@@ -342,6 +309,9 @@ func (bc *BookCreate) check() error {
 }
 
 func (bc *BookCreate) sqlSave(ctx context.Context) (*Book, error) {
+	if err := bc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := bc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, bc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -351,19 +321,15 @@ func (bc *BookCreate) sqlSave(ctx context.Context) (*Book, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
+	bc.mutation.id = &_node.ID
+	bc.mutation.done = true
 	return _node, nil
 }
 
 func (bc *BookCreate) createSpec() (*Book, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Book{config: bc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: book.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: book.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(book.Table, sqlgraph.NewFieldSpec(book.FieldID, field.TypeInt))
 	)
 	if value, ok := bc.mutation.Name(); ok {
 		_spec.SetField(book.FieldName, field.TypeString, value)
@@ -372,6 +338,10 @@ func (bc *BookCreate) createSpec() (*Book, *sqlgraph.CreateSpec) {
 	if value, ok := bc.mutation.BookID(); ok {
 		_spec.SetField(book.FieldBookID, field.TypeString, value)
 		_node.BookID = value
+	}
+	if value, ok := bc.mutation.Owner(); ok {
+		_spec.SetField(book.FieldOwner, field.TypeInt, value)
+		_node.Owner = value
 	}
 	if value, ok := bc.mutation.FilePath(); ok {
 		_spec.SetField(book.FieldFilePath, field.TypeString, value)

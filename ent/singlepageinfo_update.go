@@ -137,34 +137,7 @@ func (spiu *SinglePageInfoUpdate) Mutation() *SinglePageInfoMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (spiu *SinglePageInfoUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(spiu.hooks) == 0 {
-		affected, err = spiu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*SinglePageInfoMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			spiu.mutation = mutation
-			affected, err = spiu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(spiu.hooks) - 1; i >= 0; i-- {
-			if spiu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = spiu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, spiu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, SinglePageInfoMutation](ctx, spiu.sqlSave, spiu.mutation, spiu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -190,16 +163,7 @@ func (spiu *SinglePageInfoUpdate) ExecX(ctx context.Context) {
 }
 
 func (spiu *SinglePageInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   singlepageinfo.Table,
-			Columns: singlepageinfo.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: singlepageinfo.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(singlepageinfo.Table, singlepageinfo.Columns, sqlgraph.NewFieldSpec(singlepageinfo.FieldID, field.TypeInt))
 	if ps := spiu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -260,6 +224,7 @@ func (spiu *SinglePageInfoUpdate) sqlSave(ctx context.Context) (n int, err error
 		}
 		return 0, err
 	}
+	spiu.mutation.done = true
 	return n, nil
 }
 
@@ -378,6 +343,12 @@ func (spiuo *SinglePageInfoUpdateOne) Mutation() *SinglePageInfoMutation {
 	return spiuo.mutation
 }
 
+// Where appends a list predicates to the SinglePageInfoUpdate builder.
+func (spiuo *SinglePageInfoUpdateOne) Where(ps ...predicate.SinglePageInfo) *SinglePageInfoUpdateOne {
+	spiuo.mutation.Where(ps...)
+	return spiuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (spiuo *SinglePageInfoUpdateOne) Select(field string, fields ...string) *SinglePageInfoUpdateOne {
@@ -387,40 +358,7 @@ func (spiuo *SinglePageInfoUpdateOne) Select(field string, fields ...string) *Si
 
 // Save executes the query and returns the updated SinglePageInfo entity.
 func (spiuo *SinglePageInfoUpdateOne) Save(ctx context.Context) (*SinglePageInfo, error) {
-	var (
-		err  error
-		node *SinglePageInfo
-	)
-	if len(spiuo.hooks) == 0 {
-		node, err = spiuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*SinglePageInfoMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			spiuo.mutation = mutation
-			node, err = spiuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(spiuo.hooks) - 1; i >= 0; i-- {
-			if spiuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = spiuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, spiuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*SinglePageInfo)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from SinglePageInfoMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*SinglePageInfo, SinglePageInfoMutation](ctx, spiuo.sqlSave, spiuo.mutation, spiuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -446,16 +384,7 @@ func (spiuo *SinglePageInfoUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (spiuo *SinglePageInfoUpdateOne) sqlSave(ctx context.Context) (_node *SinglePageInfo, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   singlepageinfo.Table,
-			Columns: singlepageinfo.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: singlepageinfo.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(singlepageinfo.Table, singlepageinfo.Columns, sqlgraph.NewFieldSpec(singlepageinfo.FieldID, field.TypeInt))
 	id, ok := spiuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "SinglePageInfo.id" for update`)}
@@ -536,5 +465,6 @@ func (spiuo *SinglePageInfoUpdateOne) sqlSave(ctx context.Context) (_node *Singl
 		}
 		return nil, err
 	}
+	spiuo.mutation.done = true
 	return _node, nil
 }

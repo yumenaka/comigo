@@ -1,14 +1,7 @@
 <template>
   <div class="w-full h-screen flex flex-col">
-    <Header
-      class="header flex-none h-12"
-      :bookIsFolder="false"
-      :headerTitle="getUploadTitile()"
-      :showReturnIcon="true"
-      :showSettingsIcon="false"
-      :bookID="null"
-      :setDownLoadLink="false"
-    >
+    <Header class="header flex-none h-12" :bookIsFolder="false" :headerTitle="getUploadTitile()" :showReturnIcon="true"
+      :showSettingsIcon="false" :bookID="null" :setDownLoadLink="false">
     </Header>
     <!-- 可悬浮  hoverable-->
     <!-- <n-card title="注册" hoverable> 卡片内容 </n-card> -->
@@ -16,41 +9,18 @@
     <!-- 原生输入表单的文档：https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/input -->
 
     <div class="mian_area flex-grow">
-      <form action="/api/form" method="post" class="form-example">
-        <div class="form-example">
-          <label for="username">Enter your name: </label>
-          <input
-            type="text"
-            name="username"
-            id="username"
-            value="admin"
-            required
-          />
-        </div>
-        <div class="form-example">
-          <label for="password">Enter your password: </label>
-          <input
-            type="password"
-            name="password"
-            id="password"
-            value="admin"
-            required
-          />
-        </div>
-        <div class="form-example">
-          <input type="submit" value="Subscribe!" />
-        </div>
-      </form>
+      <!-- @submit.prevent   .prevent 表示提交以后不刷新页面，prevent是preventDefault,阻止标签默认行为，有些标签有默认行为，例如a标签的跳转链接属性href等。 -->
+
+      <input type="text" v-model="username" placeholder="Username" required />
+      <input type="password" v-model="password" placeholder="Password" required />
+      <button @click="login">Login</button>
     </div>
 
-    <Bottom
-      class="bottom flex-none h-12"
-      :softVersion="
-        $store.state.server_status.ServerName
-          ? $store.state.server_status.ServerName
-          : 'Comigo'
-      "
-    ></Bottom>
+    <Bottom class="bottom flex-none h-12" :softVersion="
+      $store.state.server_status.ServerName
+        ? $store.state.server_status.ServerName
+        : 'Comigo'
+    "></Bottom>
   </div>
 </template>
 
@@ -58,8 +28,9 @@
 import Header from "@/components/Header.vue";
 import Bottom from "@/components/Bottom.vue";
 import { NCard, NForm } from "naive-ui";
-
 import { defineComponent, reactive } from "vue";
+import axios from "axios";
+
 export default defineComponent({
   name: "LoginPage",
   props: ["readMode"],
@@ -87,6 +58,8 @@ export default defineComponent({
       drawerActive: false,
       drawerPlacement: "right",
       PageTitle: "",
+      username: "",
+      password: "",
     };
   },
   created() {
@@ -101,6 +74,43 @@ export default defineComponent({
     }
   },
   methods: {
+    logout() {
+      console.log("logout");
+      axios.post("/logout", {
+        username: "admin",
+        password: this.password,
+      })
+        .then(resp => {
+          //登录成功后的操作,例如跳转页面
+          if (resp.data.code === 0) {
+            console.log(resp.data.user)
+            this.$router.replace('/')
+          } else {
+            console.log(resp.data.msg)
+          }
+        })
+        //登录失败时的操作
+        .catch(failResponse => { })
+    },
+    login() {
+      console.log("Login Username:" + this.username)
+      console.log("Login Password:" + this.password)
+      axios.post("/login", {
+        username: "admin",
+        password: this.password,
+      })
+        .then(resp => {
+          //登录成功后的操作,例如跳转页面
+          if (resp.data.code === 0) {
+            console.log(resp.data.user)
+            this.$router.replace('/')
+          } else {
+            console.log(resp.data.msg)
+          }
+        })
+        //登录失败时的操作
+        .catch(failResponse => { })
+    },
     getUploadTitile() {
       //如果没有一本书
       if (this.$store.state.server_status.SupportUploadFile === false) {

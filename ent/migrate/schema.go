@@ -13,6 +13,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString, Size: 1024},
 		{Name: "book_id", Type: field.TypeString, Unique: true},
+		{Name: "owner", Type: field.TypeInt},
 		{Name: "file_path", Type: field.TypeString},
 		{Name: "book_store_path", Type: field.TypeString},
 		{Name: "type", Type: field.TypeString},
@@ -76,6 +77,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "username", Type: field.TypeString, Unique: true, Size: 50},
 		{Name: "password", Type: field.TypeString},
+		{Name: "last_login", Type: field.TypeTime},
 		{Name: "age", Type: field.TypeInt},
 	}
 	// UsersTable holds the schema information for the "users" table.

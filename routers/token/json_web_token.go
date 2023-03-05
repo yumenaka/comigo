@@ -1,6 +1,9 @@
 package token
 
 import (
+	"fmt"
+	"github.com/yumenaka/comi/common"
+	"net/http"
 	"strings"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
@@ -15,14 +18,27 @@ type User struct {
 
 // Authenticator 认证器：登录验证函数,在这里写登录验证逻辑
 func Authenticator(c *gin.Context) (interface{}, error) {
-	user := User{}
-	if err := c.ShouldBind(&user); err != nil {
-		return "", jwt.ErrMissingLoginValues
+	username := c.PostForm("username")
+	password := c.PostForm("password")
+	if username == common.Config.UserName && password == common.Config.Password {
+		c.String(http.StatusOK, fmt.Sprintf("username is %s, password is %s,Config is %v", username, password, common.Config))
+		return nil, nil
+	} else {
+		fmt.Println(fmt.Sprintf("username is %s, password is %s", common.Config.UserName, common.Config.Password))
+		fmt.Println(fmt.Sprintf("false username is %s, password is %s", username, password))
+		c.String(http.StatusOK, " username or password is wrong.")
+		return nil, jwt.ErrFailedAuthentication
 	}
-	if user.Username == "admin" && user.Password == "admin" {
-		return user, nil
-	}
-	return nil, jwt.ErrFailedAuthentication
+
+	//user := User{}
+	//if err := c.ShouldBind(&user); err != nil {
+	//	return "", jwt.ErrMissingLoginValues
+	//}
+	//
+	//if user.Username == "admin" && user.Password == "admin" {
+	//	return user, nil
+	//}
+	//return nil, jwt.ErrFailedAuthentication
 }
 
 // Authorizator 登录后权限验证函数 //当用户通过token请求受限接口时，会经过这段逻辑

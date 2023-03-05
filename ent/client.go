@@ -10,13 +10,13 @@ import (
 
 	"github.com/yumenaka/comi/ent/migrate"
 
-	"github.com/yumenaka/comi/ent/book"
-	"github.com/yumenaka/comi/ent/singlepageinfo"
-	"github.com/yumenaka/comi/ent/user"
-
+	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/yumenaka/comi/ent/book"
+	"github.com/yumenaka/comi/ent/singlepageinfo"
+	"github.com/yumenaka/comi/ent/user"
 )
 
 // Client is the client that holds all ent builders.
@@ -34,7 +34,7 @@ type Client struct {
 
 // NewClient creates a new client configured with the given options.
 func NewClient(opts ...Option) *Client {
-	cfg := config{log: log.Println, hooks: &hooks{}}
+	cfg := config{log: log.Println, hooks: &hooks{}, inters: &inters{}}
 	cfg.options(opts...)
 	client := &Client{config: cfg}
 	client.init()
@@ -46,6 +46,55 @@ func (c *Client) init() {
 	c.Book = NewBookClient(c.config)
 	c.SinglePageInfo = NewSinglePageInfoClient(c.config)
 	c.User = NewUserClient(c.config)
+}
+
+type (
+	// config is the configuration for the client and its builder.
+	config struct {
+		// driver used for executing database requests.
+		driver dialect.Driver
+		// debug enable a debug logging.
+		debug bool
+		// log used for logging on debug mode.
+		log func(...any)
+		// hooks to execute on mutations.
+		hooks *hooks
+		// interceptors to execute on queries.
+		inters *inters
+	}
+	// Option function to configure the client.
+	Option func(*config)
+)
+
+// options applies the options on the config object.
+func (c *config) options(opts ...Option) {
+	for _, opt := range opts {
+		opt(c)
+	}
+	if c.debug {
+		c.driver = dialect.Debug(c.driver, c.log)
+	}
+}
+
+// Debug enables debug logging on the ent.Driver.
+func Debug() Option {
+	return func(c *config) {
+		c.debug = true
+	}
+}
+
+// Log sets the logging function for debug mode.
+func Log(fn func(...any)) Option {
+	return func(c *config) {
+		c.log = fn
+	}
+}
+
+// Driver configures the client driver.
+func Driver(driver dialect.Driver) Option {
+	return func(c *config) {
+		c.driver = driver
+	}
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -137,6 +186,28 @@ func (c *Client) Use(hooks ...Hook) {
 	c.User.Use(hooks...)
 }
 
+// Intercept adds the query interceptors to all the entity clients.
+// In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
+func (c *Client) Intercept(interceptors ...Interceptor) {
+	c.Book.Intercept(interceptors...)
+	c.SinglePageInfo.Intercept(interceptors...)
+	c.User.Intercept(interceptors...)
+}
+
+// Mutate implements the ent.Mutator interface.
+func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
+	switch m := m.(type) {
+	case *BookMutation:
+		return c.Book.mutate(ctx, m)
+	case *SinglePageInfoMutation:
+		return c.SinglePageInfo.mutate(ctx, m)
+	case *UserMutation:
+		return c.User.mutate(ctx, m)
+	default:
+		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
 // BookClient is a client for the Book schema.
 type BookClient struct {
 	config
@@ -151,6 +222,12 @@ func NewBookClient(c config) *BookClient {
 // A call to `Use(f, g, h)` equals to `book.Hooks(f(g(h())))`.
 func (c *BookClient) Use(hooks ...Hook) {
 	c.hooks.Book = append(c.hooks.Book, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `book.Intercept(f(g(h())))`.
+func (c *BookClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Book = append(c.inters.Book, interceptors...)
 }
 
 // Create returns a builder for creating a Book entity.
@@ -205,6 +282,8 @@ func (c *BookClient) DeleteOneID(id int) *BookDeleteOne {
 func (c *BookClient) Query() *BookQuery {
 	return &BookQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeBook},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -224,7 +303,7 @@ func (c *BookClient) GetX(ctx context.Context, id int) *Book {
 
 // QueryPageInfos queries the PageInfos edge of a Book.
 func (c *BookClient) QueryPageInfos(b *Book) *SinglePageInfoQuery {
-	query := &SinglePageInfoQuery{config: c.config}
+	query := (&SinglePageInfoClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := b.ID
 		step := sqlgraph.NewStep(
@@ -243,6 +322,26 @@ func (c *BookClient) Hooks() []Hook {
 	return c.hooks.Book
 }
 
+// Interceptors returns the client interceptors.
+func (c *BookClient) Interceptors() []Interceptor {
+	return c.inters.Book
+}
+
+func (c *BookClient) mutate(ctx context.Context, m *BookMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&BookCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&BookUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&BookUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&BookDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Book mutation op: %q", m.Op())
+	}
+}
+
 // SinglePageInfoClient is a client for the SinglePageInfo schema.
 type SinglePageInfoClient struct {
 	config
@@ -257,6 +356,12 @@ func NewSinglePageInfoClient(c config) *SinglePageInfoClient {
 // A call to `Use(f, g, h)` equals to `singlepageinfo.Hooks(f(g(h())))`.
 func (c *SinglePageInfoClient) Use(hooks ...Hook) {
 	c.hooks.SinglePageInfo = append(c.hooks.SinglePageInfo, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `singlepageinfo.Intercept(f(g(h())))`.
+func (c *SinglePageInfoClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SinglePageInfo = append(c.inters.SinglePageInfo, interceptors...)
 }
 
 // Create returns a builder for creating a SinglePageInfo entity.
@@ -311,6 +416,8 @@ func (c *SinglePageInfoClient) DeleteOneID(id int) *SinglePageInfoDeleteOne {
 func (c *SinglePageInfoClient) Query() *SinglePageInfoQuery {
 	return &SinglePageInfoQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeSinglePageInfo},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -333,6 +440,26 @@ func (c *SinglePageInfoClient) Hooks() []Hook {
 	return c.hooks.SinglePageInfo
 }
 
+// Interceptors returns the client interceptors.
+func (c *SinglePageInfoClient) Interceptors() []Interceptor {
+	return c.inters.SinglePageInfo
+}
+
+func (c *SinglePageInfoClient) mutate(ctx context.Context, m *SinglePageInfoMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SinglePageInfoCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SinglePageInfoUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SinglePageInfoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SinglePageInfoDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SinglePageInfo mutation op: %q", m.Op())
+	}
+}
+
 // UserClient is a client for the User schema.
 type UserClient struct {
 	config
@@ -347,6 +474,12 @@ func NewUserClient(c config) *UserClient {
 // A call to `Use(f, g, h)` equals to `user.Hooks(f(g(h())))`.
 func (c *UserClient) Use(hooks ...Hook) {
 	c.hooks.User = append(c.hooks.User, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `user.Intercept(f(g(h())))`.
+func (c *UserClient) Intercept(interceptors ...Interceptor) {
+	c.inters.User = append(c.inters.User, interceptors...)
 }
 
 // Create returns a builder for creating a User entity.
@@ -401,6 +534,8 @@ func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 func (c *UserClient) Query() *UserQuery {
 	return &UserQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeUser},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -422,3 +557,33 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
 }
+
+// Interceptors returns the client interceptors.
+func (c *UserClient) Interceptors() []Interceptor {
+	return c.inters.User
+}
+
+func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&UserCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&UserUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&UserDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown User mutation op: %q", m.Op())
+	}
+}
+
+// hooks and interceptors per client, for fast access.
+type (
+	hooks struct {
+		Book, SinglePageInfo, User []ent.Hook
+	}
+	inters struct {
+		Book, SinglePageInfo, User []ent.Interceptor
+	}
+)

@@ -17,11 +17,9 @@ import (
 // SinglePageInfoQuery is the builder for querying SinglePageInfo entities.
 type SinglePageInfoQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
+	ctx        *QueryContext
 	order      []OrderFunc
-	fields     []string
+	inters     []Interceptor
 	predicates []predicate.SinglePageInfo
 	withFKs    bool
 	// intermediate query (i.e. traversal path).
@@ -35,26 +33,26 @@ func (spiq *SinglePageInfoQuery) Where(ps ...predicate.SinglePageInfo) *SinglePa
 	return spiq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (spiq *SinglePageInfoQuery) Limit(limit int) *SinglePageInfoQuery {
-	spiq.limit = &limit
+	spiq.ctx.Limit = &limit
 	return spiq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (spiq *SinglePageInfoQuery) Offset(offset int) *SinglePageInfoQuery {
-	spiq.offset = &offset
+	spiq.ctx.Offset = &offset
 	return spiq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (spiq *SinglePageInfoQuery) Unique(unique bool) *SinglePageInfoQuery {
-	spiq.unique = &unique
+	spiq.ctx.Unique = &unique
 	return spiq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (spiq *SinglePageInfoQuery) Order(o ...OrderFunc) *SinglePageInfoQuery {
 	spiq.order = append(spiq.order, o...)
 	return spiq
@@ -63,7 +61,7 @@ func (spiq *SinglePageInfoQuery) Order(o ...OrderFunc) *SinglePageInfoQuery {
 // First returns the first SinglePageInfo entity from the query.
 // Returns a *NotFoundError when no SinglePageInfo was found.
 func (spiq *SinglePageInfoQuery) First(ctx context.Context) (*SinglePageInfo, error) {
-	nodes, err := spiq.Limit(1).All(ctx)
+	nodes, err := spiq.Limit(1).All(setContextOp(ctx, spiq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +84,7 @@ func (spiq *SinglePageInfoQuery) FirstX(ctx context.Context) *SinglePageInfo {
 // Returns a *NotFoundError when no SinglePageInfo ID was found.
 func (spiq *SinglePageInfoQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = spiq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = spiq.Limit(1).IDs(setContextOp(ctx, spiq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -109,7 +107,7 @@ func (spiq *SinglePageInfoQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one SinglePageInfo entity is found.
 // Returns a *NotFoundError when no SinglePageInfo entities are found.
 func (spiq *SinglePageInfoQuery) Only(ctx context.Context) (*SinglePageInfo, error) {
-	nodes, err := spiq.Limit(2).All(ctx)
+	nodes, err := spiq.Limit(2).All(setContextOp(ctx, spiq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -137,7 +135,7 @@ func (spiq *SinglePageInfoQuery) OnlyX(ctx context.Context) *SinglePageInfo {
 // Returns a *NotFoundError when no entities are found.
 func (spiq *SinglePageInfoQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = spiq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = spiq.Limit(2).IDs(setContextOp(ctx, spiq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -162,10 +160,12 @@ func (spiq *SinglePageInfoQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of SinglePageInfos.
 func (spiq *SinglePageInfoQuery) All(ctx context.Context) ([]*SinglePageInfo, error) {
+	ctx = setContextOp(ctx, spiq.ctx, "All")
 	if err := spiq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return spiq.sqlAll(ctx)
+	qr := querierAll[[]*SinglePageInfo, *SinglePageInfoQuery]()
+	return withInterceptors[[]*SinglePageInfo](ctx, spiq, qr, spiq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -178,9 +178,12 @@ func (spiq *SinglePageInfoQuery) AllX(ctx context.Context) []*SinglePageInfo {
 }
 
 // IDs executes the query and returns a list of SinglePageInfo IDs.
-func (spiq *SinglePageInfoQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
-	if err := spiq.Select(singlepageinfo.FieldID).Scan(ctx, &ids); err != nil {
+func (spiq *SinglePageInfoQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if spiq.ctx.Unique == nil && spiq.path != nil {
+		spiq.Unique(true)
+	}
+	ctx = setContextOp(ctx, spiq.ctx, "IDs")
+	if err = spiq.Select(singlepageinfo.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -197,10 +200,11 @@ func (spiq *SinglePageInfoQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (spiq *SinglePageInfoQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, spiq.ctx, "Count")
 	if err := spiq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return spiq.sqlCount(ctx)
+	return withInterceptors[int](ctx, spiq, querierCount[*SinglePageInfoQuery](), spiq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -214,10 +218,15 @@ func (spiq *SinglePageInfoQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (spiq *SinglePageInfoQuery) Exist(ctx context.Context) (bool, error) {
-	if err := spiq.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, spiq.ctx, "Exist")
+	switch _, err := spiq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return spiq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -237,14 +246,13 @@ func (spiq *SinglePageInfoQuery) Clone() *SinglePageInfoQuery {
 	}
 	return &SinglePageInfoQuery{
 		config:     spiq.config,
-		limit:      spiq.limit,
-		offset:     spiq.offset,
+		ctx:        spiq.ctx.Clone(),
 		order:      append([]OrderFunc{}, spiq.order...),
+		inters:     append([]Interceptor{}, spiq.inters...),
 		predicates: append([]predicate.SinglePageInfo{}, spiq.predicates...),
 		// clone intermediate query.
-		sql:    spiq.sql.Clone(),
-		path:   spiq.path,
-		unique: spiq.unique,
+		sql:  spiq.sql.Clone(),
+		path: spiq.path,
 	}
 }
 
@@ -263,16 +271,11 @@ func (spiq *SinglePageInfoQuery) Clone() *SinglePageInfoQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (spiq *SinglePageInfoQuery) GroupBy(field string, fields ...string) *SinglePageInfoGroupBy {
-	grbuild := &SinglePageInfoGroupBy{config: spiq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := spiq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return spiq.sqlQuery(ctx), nil
-	}
+	spiq.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &SinglePageInfoGroupBy{build: spiq}
+	grbuild.flds = &spiq.ctx.Fields
 	grbuild.label = singlepageinfo.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -289,11 +292,11 @@ func (spiq *SinglePageInfoQuery) GroupBy(field string, fields ...string) *Single
 //		Select(singlepageinfo.FieldBookID).
 //		Scan(ctx, &v)
 func (spiq *SinglePageInfoQuery) Select(fields ...string) *SinglePageInfoSelect {
-	spiq.fields = append(spiq.fields, fields...)
-	selbuild := &SinglePageInfoSelect{SinglePageInfoQuery: spiq}
-	selbuild.label = singlepageinfo.Label
-	selbuild.flds, selbuild.scan = &spiq.fields, selbuild.Scan
-	return selbuild
+	spiq.ctx.Fields = append(spiq.ctx.Fields, fields...)
+	sbuild := &SinglePageInfoSelect{SinglePageInfoQuery: spiq}
+	sbuild.label = singlepageinfo.Label
+	sbuild.flds, sbuild.scan = &spiq.ctx.Fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a SinglePageInfoSelect configured with the given aggregations.
@@ -302,7 +305,17 @@ func (spiq *SinglePageInfoQuery) Aggregate(fns ...AggregateFunc) *SinglePageInfo
 }
 
 func (spiq *SinglePageInfoQuery) prepareQuery(ctx context.Context) error {
-	for _, f := range spiq.fields {
+	for _, inter := range spiq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, spiq); err != nil {
+				return err
+			}
+		}
+	}
+	for _, f := range spiq.ctx.Fields {
 		if !singlepageinfo.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -348,41 +361,22 @@ func (spiq *SinglePageInfoQuery) sqlAll(ctx context.Context, hooks ...queryHook)
 
 func (spiq *SinglePageInfoQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := spiq.querySpec()
-	_spec.Node.Columns = spiq.fields
-	if len(spiq.fields) > 0 {
-		_spec.Unique = spiq.unique != nil && *spiq.unique
+	_spec.Node.Columns = spiq.ctx.Fields
+	if len(spiq.ctx.Fields) > 0 {
+		_spec.Unique = spiq.ctx.Unique != nil && *spiq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, spiq.driver, _spec)
 }
 
-func (spiq *SinglePageInfoQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := spiq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
-}
-
 func (spiq *SinglePageInfoQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   singlepageinfo.Table,
-			Columns: singlepageinfo.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: singlepageinfo.FieldID,
-			},
-		},
-		From:   spiq.sql,
-		Unique: true,
-	}
-	if unique := spiq.unique; unique != nil {
+	_spec := sqlgraph.NewQuerySpec(singlepageinfo.Table, singlepageinfo.Columns, sqlgraph.NewFieldSpec(singlepageinfo.FieldID, field.TypeInt))
+	_spec.From = spiq.sql
+	if unique := spiq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if spiq.path != nil {
+		_spec.Unique = true
 	}
-	if fields := spiq.fields; len(fields) > 0 {
+	if fields := spiq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, singlepageinfo.FieldID)
 		for i := range fields {
@@ -398,10 +392,10 @@ func (spiq *SinglePageInfoQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := spiq.limit; limit != nil {
+	if limit := spiq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := spiq.offset; offset != nil {
+	if offset := spiq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := spiq.order; len(ps) > 0 {
@@ -417,7 +411,7 @@ func (spiq *SinglePageInfoQuery) querySpec() *sqlgraph.QuerySpec {
 func (spiq *SinglePageInfoQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(spiq.driver.Dialect())
 	t1 := builder.Table(singlepageinfo.Table)
-	columns := spiq.fields
+	columns := spiq.ctx.Fields
 	if len(columns) == 0 {
 		columns = singlepageinfo.Columns
 	}
@@ -426,7 +420,7 @@ func (spiq *SinglePageInfoQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = spiq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if spiq.unique != nil && *spiq.unique {
+	if spiq.ctx.Unique != nil && *spiq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range spiq.predicates {
@@ -435,12 +429,12 @@ func (spiq *SinglePageInfoQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range spiq.order {
 		p(selector)
 	}
-	if offset := spiq.offset; offset != nil {
+	if offset := spiq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := spiq.limit; limit != nil {
+	if limit := spiq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -448,13 +442,8 @@ func (spiq *SinglePageInfoQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // SinglePageInfoGroupBy is the group-by builder for SinglePageInfo entities.
 type SinglePageInfoGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *SinglePageInfoQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -463,58 +452,46 @@ func (spigb *SinglePageInfoGroupBy) Aggregate(fns ...AggregateFunc) *SinglePageI
 	return spigb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (spigb *SinglePageInfoGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := spigb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, spigb.build.ctx, "GroupBy")
+	if err := spigb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	spigb.sql = query
-	return spigb.sqlScan(ctx, v)
+	return scanWithInterceptors[*SinglePageInfoQuery, *SinglePageInfoGroupBy](ctx, spigb.build, spigb, spigb.build.inters, v)
 }
 
-func (spigb *SinglePageInfoGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range spigb.fields {
-		if !singlepageinfo.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (spigb *SinglePageInfoGroupBy) sqlScan(ctx context.Context, root *SinglePageInfoQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(spigb.fns))
+	for _, fn := range spigb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := spigb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*spigb.flds)+len(spigb.fns))
+		for _, f := range *spigb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*spigb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := spigb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := spigb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (spigb *SinglePageInfoGroupBy) sqlQuery() *sql.Selector {
-	selector := spigb.sql.Select()
-	aggregation := make([]string, 0, len(spigb.fns))
-	for _, fn := range spigb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(spigb.fields)+len(spigb.fns))
-		for _, f := range spigb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(spigb.fields...)...)
-}
-
 // SinglePageInfoSelect is the builder for selecting fields of SinglePageInfo entities.
 type SinglePageInfoSelect struct {
 	*SinglePageInfoQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -525,26 +502,27 @@ func (spis *SinglePageInfoSelect) Aggregate(fns ...AggregateFunc) *SinglePageInf
 
 // Scan applies the selector query and scans the result into the given value.
 func (spis *SinglePageInfoSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, spis.ctx, "Select")
 	if err := spis.prepareQuery(ctx); err != nil {
 		return err
 	}
-	spis.sql = spis.SinglePageInfoQuery.sqlQuery(ctx)
-	return spis.sqlScan(ctx, v)
+	return scanWithInterceptors[*SinglePageInfoQuery, *SinglePageInfoSelect](ctx, spis.SinglePageInfoQuery, spis, spis.inters, v)
 }
 
-func (spis *SinglePageInfoSelect) sqlScan(ctx context.Context, v any) error {
+func (spis *SinglePageInfoSelect) sqlScan(ctx context.Context, root *SinglePageInfoQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(spis.fns))
 	for _, fn := range spis.fns {
-		aggregation = append(aggregation, fn(spis.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*spis.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		spis.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		spis.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := spis.sql.Query()
+	query, args := selector.Query()
 	if err := spis.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

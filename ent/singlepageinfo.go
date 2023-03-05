@@ -157,7 +157,7 @@ func (spi *SinglePageInfo) assignValues(columns []string, values []any) error {
 // Note that you need to call SinglePageInfo.Unwrap() before calling this method if this SinglePageInfo
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (spi *SinglePageInfo) Update() *SinglePageInfoUpdateOne {
-	return (&SinglePageInfoClient{config: spi.config}).UpdateOne(spi)
+	return NewSinglePageInfoClient(spi.config).UpdateOne(spi)
 }
 
 // Unwrap unwraps the SinglePageInfo entity that was returned from a transaction after it was closed,
@@ -214,9 +214,3 @@ func (spi *SinglePageInfo) String() string {
 
 // SinglePageInfos is a parsable slice of SinglePageInfo.
 type SinglePageInfos []*SinglePageInfo
-
-func (spi SinglePageInfos) config(cfg config) {
-	for _i := range spi {
-		spi[_i].config = cfg
-	}
-}

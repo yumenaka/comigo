@@ -19,6 +19,8 @@ const (
 	FieldUsername = "username"
 	// FieldPassword holds the string denoting the password field in the database.
 	FieldPassword = "password"
+	// FieldLastLogin holds the string denoting the last_login field in the database.
+	FieldLastLogin = "last_login"
 	// FieldAge holds the string denoting the age field in the database.
 	FieldAge = "age"
 	// Table holds the table name of the user in the database.
@@ -32,6 +34,7 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUsername,
 	FieldPassword,
+	FieldLastLogin,
 	FieldAge,
 }
 
@@ -52,6 +55,8 @@ var (
 	DefaultCreatedAt func() time.Time
 	// UsernameValidator is a validator for the "username" field. It is called by the builders before save.
 	UsernameValidator func(string) error
+	// DefaultLastLogin holds the default value on creation for the "last_login" field.
+	DefaultLastLogin func() time.Time
 	// AgeValidator is a validator for the "age" field. It is called by the builders before save.
 	AgeValidator func(int) error
 )

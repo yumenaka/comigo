@@ -186,21 +186,27 @@ func setWebAPI(engine *gin.Engine) {
 	api = engine.Group("/api")
 
 	// 登录 api ，直接用 jwtMiddleware 中的 `LoginHandler`
+	//这个函数中，会执行上面设置的token.Authenticator来验证用户权限，如果通过就会返回token。
 	api.POST("/login", jwtMiddleware.LoginHandler)
-	//退出登录
+	//退出登录，会将用户的cookie中的token删除。
 	api.POST("/logout", jwtMiddleware.LogoutHandler)
 	// 刷新 token ，延长token的有效期
 	api.GET("/refresh_token", jwtMiddleware.RefreshHandler)
 
-	//处理表单 https://www.chaindesk.cn/witbook/19/329
+	//简单的表单处理
 	api.POST("/form", func(c *gin.Context) {
 		t := c.DefaultPostForm("template", "scroll") //可设置默认值
 		username := c.PostForm("username")
 		password := c.PostForm("password")
 		//bookList := c.PostFormMap("book_list")
 		//bookList := c.QueryArray("book_list")
-		bookList := c.PostFormArray("book_list")
-		c.String(http.StatusOK, fmt.Sprintf("template is %s, username is %s, password is %s,hobby is %v", t, username, password, bookList))
+		//bookList := c.PostFormArray("book_list")
+		if username == common.Config.UserName && password == common.Config.Password {
+			c.String(http.StatusOK, fmt.Sprintf("template is %s, username is %s, password is %s,Config is %v", t, username, password, common.Config))
+		} else {
+			fmt.Println(fmt.Sprintf("template is %s, username is %s, password is %s,Config is %v", t, common.Config.UserName, common.Config.Password))
+			c.String(http.StatusOK, " username or password is wrong.")
+		}
 	})
 
 	// 在需要验证的api中用jwt中间件
@@ -210,7 +216,7 @@ func setWebAPI(engine *gin.Engine) {
 	} else {
 		api.GET("/getfile", handler.GetFileHandler)
 	}
-	
+
 	//文件上传
 	api.POST("/upload", handler.UploadHandler)
 	//web端需要的服务器状态，包括标题、机器状态等
