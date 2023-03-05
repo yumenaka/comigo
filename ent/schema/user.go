@@ -24,6 +24,8 @@ func (User) Fields() []ent.Field {
 			MaxLen(50). //限制长度
 			Unique(),   //字段可以使用 Unique 方法定义为唯一字段。 注意：唯一字段不能有默认值。
 		field.String("password").Comment("登录密码"),
+		field.Time("last_login").
+			Default(time.Now).Comment("最后登录时间"),
 		field.Int("age").
 			Positive(), //只能取正数
 	}

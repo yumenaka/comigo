@@ -20,6 +20,8 @@ type Book struct {
 	Name string `json:"Name,omitempty"`
 	// 书籍ID
 	BookID string `json:"BookID,omitempty"`
+	// 拥有者
+	Owner int `json:"Owner,omitempty"`
 	// 文件路径
 	FilePath string `json:"FilePath,omitempty"`
 	// 书库路径
@@ -90,7 +92,7 @@ func (*Book) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case book.FieldReadPercent:
 			values[i] = new(sql.NullFloat64)
-		case book.FieldID, book.FieldChildBookNum, book.FieldDepth, book.FieldAllPageNum, book.FieldFileSize, book.FieldExtractNum:
+		case book.FieldID, book.FieldOwner, book.FieldChildBookNum, book.FieldDepth, book.FieldAllPageNum, book.FieldFileSize, book.FieldExtractNum:
 			values[i] = new(sql.NullInt64)
 		case book.FieldName, book.FieldBookID, book.FieldFilePath, book.FieldBookStorePath, book.FieldType, book.FieldParentFolder, book.FieldAuthors, book.FieldISBN, book.FieldPress, book.FieldPublishedAt, book.FieldExtractPath, book.FieldZipTextEncoding:
 			values[i] = new(sql.NullString)
@@ -128,6 +130,12 @@ func (b *Book) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field BookID", values[i])
 			} else if value.Valid {
 				b.BookID = value.String
+			}
+		case book.FieldOwner:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field Owner", values[i])
+			} else if value.Valid {
+				b.Owner = int(value.Int64)
 			}
 		case book.FieldFilePath:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -250,14 +258,14 @@ func (b *Book) assignValues(columns []string, values []any) error {
 
 // QueryPageInfos queries the "PageInfos" edge of the Book entity.
 func (b *Book) QueryPageInfos() *SinglePageInfoQuery {
-	return (&BookClient{config: b.config}).QueryPageInfos(b)
+	return NewBookClient(b.config).QueryPageInfos(b)
 }
 
 // Update returns a builder for updating this Book.
 // Note that you need to call Book.Unwrap() before calling this method if this Book
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (b *Book) Update() *BookUpdateOne {
-	return (&BookClient{config: b.config}).UpdateOne(b)
+	return NewBookClient(b.config).UpdateOne(b)
 }
 
 // Unwrap unwraps the Book entity that was returned from a transaction after it was closed,
@@ -281,6 +289,9 @@ func (b *Book) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("BookID=")
 	builder.WriteString(b.BookID)
+	builder.WriteString(", ")
+	builder.WriteString("Owner=")
+	builder.WriteString(fmt.Sprintf("%v", b.Owner))
 	builder.WriteString(", ")
 	builder.WriteString("FilePath=")
 	builder.WriteString(b.FilePath)
@@ -344,9 +355,3 @@ func (b *Book) String() string {
 
 // Books is a parsable slice of Book.
 type Books []*Book
-
-func (b Books) config(cfg config) {
-	for _i := range b {
-		b[_i].config = cfg
-	}
-}

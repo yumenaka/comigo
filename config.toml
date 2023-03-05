@@ -16,7 +16,7 @@ DefaultMode = 'scroll'
 # 访问限制：用户名。需要设置密码
 UserName = 'admin'
 # 访问限制：密码。需要设置用户名。
-Password = 'test'
+Password = 'admin'
 # Https证书，同时设置KeyFile则启用HTTPS协议
 CertFile = ''
 # Https证书，同时设置CertFile则启用HTTPS协议

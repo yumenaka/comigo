@@ -41,6 +41,19 @@ func (bu *BookUpdate) SetBookID(s string) *BookUpdate {
 	return bu
 }
 
+// SetOwner sets the "Owner" field.
+func (bu *BookUpdate) SetOwner(i int) *BookUpdate {
+	bu.mutation.ResetOwner()
+	bu.mutation.SetOwner(i)
+	return bu
+}
+
+// AddOwner adds i to the "Owner" field.
+func (bu *BookUpdate) AddOwner(i int) *BookUpdate {
+	bu.mutation.AddOwner(i)
+	return bu
+}
+
 // SetFilePath sets the "FilePath" field.
 func (bu *BookUpdate) SetFilePath(s string) *BookUpdate {
 	bu.mutation.SetFilePath(s)
@@ -248,40 +261,7 @@ func (bu *BookUpdate) RemovePageInfos(s ...*SinglePageInfo) *BookUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (bu *BookUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(bu.hooks) == 0 {
-		if err = bu.check(); err != nil {
-			return 0, err
-		}
-		affected, err = bu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*BookMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = bu.check(); err != nil {
-				return 0, err
-			}
-			bu.mutation = mutation
-			affected, err = bu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(bu.hooks) - 1; i >= 0; i-- {
-			if bu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = bu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, bu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, BookMutation](ctx, bu.sqlSave, bu.mutation, bu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -332,16 +312,10 @@ func (bu *BookUpdate) check() error {
 }
 
 func (bu *BookUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   book.Table,
-			Columns: book.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: book.FieldID,
-			},
-		},
+	if err := bu.check(); err != nil {
+		return n, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(book.Table, book.Columns, sqlgraph.NewFieldSpec(book.FieldID, field.TypeInt))
 	if ps := bu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -354,6 +328,12 @@ func (bu *BookUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := bu.mutation.BookID(); ok {
 		_spec.SetField(book.FieldBookID, field.TypeString, value)
+	}
+	if value, ok := bu.mutation.Owner(); ok {
+		_spec.SetField(book.FieldOwner, field.TypeInt, value)
+	}
+	if value, ok := bu.mutation.AddedOwner(); ok {
+		_spec.AddField(book.FieldOwner, field.TypeInt, value)
 	}
 	if value, ok := bu.mutation.FilePath(); ok {
 		_spec.SetField(book.FieldFilePath, field.TypeString, value)
@@ -492,6 +472,7 @@ func (bu *BookUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	bu.mutation.done = true
 	return n, nil
 }
 
@@ -512,6 +493,19 @@ func (buo *BookUpdateOne) SetName(s string) *BookUpdateOne {
 // SetBookID sets the "BookID" field.
 func (buo *BookUpdateOne) SetBookID(s string) *BookUpdateOne {
 	buo.mutation.SetBookID(s)
+	return buo
+}
+
+// SetOwner sets the "Owner" field.
+func (buo *BookUpdateOne) SetOwner(i int) *BookUpdateOne {
+	buo.mutation.ResetOwner()
+	buo.mutation.SetOwner(i)
+	return buo
+}
+
+// AddOwner adds i to the "Owner" field.
+func (buo *BookUpdateOne) AddOwner(i int) *BookUpdateOne {
+	buo.mutation.AddOwner(i)
 	return buo
 }
 
@@ -720,6 +714,12 @@ func (buo *BookUpdateOne) RemovePageInfos(s ...*SinglePageInfo) *BookUpdateOne {
 	return buo.RemovePageInfoIDs(ids...)
 }
 
+// Where appends a list predicates to the BookUpdate builder.
+func (buo *BookUpdateOne) Where(ps ...predicate.Book) *BookUpdateOne {
+	buo.mutation.Where(ps...)
+	return buo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (buo *BookUpdateOne) Select(field string, fields ...string) *BookUpdateOne {
@@ -729,46 +729,7 @@ func (buo *BookUpdateOne) Select(field string, fields ...string) *BookUpdateOne 
 
 // Save executes the query and returns the updated Book entity.
 func (buo *BookUpdateOne) Save(ctx context.Context) (*Book, error) {
-	var (
-		err  error
-		node *Book
-	)
-	if len(buo.hooks) == 0 {
-		if err = buo.check(); err != nil {
-			return nil, err
-		}
-		node, err = buo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*BookMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = buo.check(); err != nil {
-				return nil, err
-			}
-			buo.mutation = mutation
-			node, err = buo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(buo.hooks) - 1; i >= 0; i-- {
-			if buo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = buo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, buo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Book)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from BookMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Book, BookMutation](ctx, buo.sqlSave, buo.mutation, buo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -819,16 +780,10 @@ func (buo *BookUpdateOne) check() error {
 }
 
 func (buo *BookUpdateOne) sqlSave(ctx context.Context) (_node *Book, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   book.Table,
-			Columns: book.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: book.FieldID,
-			},
-		},
+	if err := buo.check(); err != nil {
+		return _node, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(book.Table, book.Columns, sqlgraph.NewFieldSpec(book.FieldID, field.TypeInt))
 	id, ok := buo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Book.id" for update`)}
@@ -858,6 +813,12 @@ func (buo *BookUpdateOne) sqlSave(ctx context.Context) (_node *Book, err error) 
 	}
 	if value, ok := buo.mutation.BookID(); ok {
 		_spec.SetField(book.FieldBookID, field.TypeString, value)
+	}
+	if value, ok := buo.mutation.Owner(); ok {
+		_spec.SetField(book.FieldOwner, field.TypeInt, value)
+	}
+	if value, ok := buo.mutation.AddedOwner(); ok {
+		_spec.AddField(book.FieldOwner, field.TypeInt, value)
 	}
 	if value, ok := buo.mutation.FilePath(); ok {
 		_spec.SetField(book.FieldFilePath, field.TypeString, value)
@@ -999,5 +960,6 @@ func (buo *BookUpdateOne) sqlSave(ctx context.Context) (_node *Book, err error) 
 		}
 		return nil, err
 	}
+	buo.mutation.done = true
 	return _node, nil
 }

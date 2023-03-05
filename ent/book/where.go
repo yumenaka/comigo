@@ -12,1884 +12,1277 @@ import (
 
 // ID filters vertices based on their ID field.
 func ID(id int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Book(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Book(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldID), id))
-	})
+	return predicate.Book(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.In(s.C(FieldID), v...))
-	})
+	return predicate.Book(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.NotIn(s.C(FieldID), v...))
-	})
+	return predicate.Book(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldID), id))
-	})
+	return predicate.Book(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldID), id))
-	})
+	return predicate.Book(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldID), id))
-	})
+	return predicate.Book(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldID), id))
-	})
+	return predicate.Book(sql.FieldLTE(FieldID, id))
 }
 
 // Name applies equality check predicate on the "Name" field. It's identical to NameEQ.
 func Name(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldName), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldName, v))
 }
 
 // BookID applies equality check predicate on the "BookID" field. It's identical to BookIDEQ.
 func BookID(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldBookID), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldBookID, v))
+}
+
+// Owner applies equality check predicate on the "Owner" field. It's identical to OwnerEQ.
+func Owner(v int) predicate.Book {
+	return predicate.Book(sql.FieldEQ(FieldOwner, v))
 }
 
 // FilePath applies equality check predicate on the "FilePath" field. It's identical to FilePathEQ.
 func FilePath(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldFilePath), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldFilePath, v))
 }
 
 // BookStorePath applies equality check predicate on the "BookStorePath" field. It's identical to BookStorePathEQ.
 func BookStorePath(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldBookStorePath), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldBookStorePath, v))
 }
 
 // Type applies equality check predicate on the "Type" field. It's identical to TypeEQ.
 func Type(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldType), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldType, v))
 }
 
 // ChildBookNum applies equality check predicate on the "ChildBookNum" field. It's identical to ChildBookNumEQ.
 func ChildBookNum(v int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldChildBookNum), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldChildBookNum, v))
 }
 
 // Depth applies equality check predicate on the "Depth" field. It's identical to DepthEQ.
 func Depth(v int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldDepth), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldDepth, v))
 }
 
 // ParentFolder applies equality check predicate on the "ParentFolder" field. It's identical to ParentFolderEQ.
 func ParentFolder(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldParentFolder), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldParentFolder, v))
 }
 
 // AllPageNum applies equality check predicate on the "AllPageNum" field. It's identical to AllPageNumEQ.
 func AllPageNum(v int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldAllPageNum), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldAllPageNum, v))
 }
 
 // FileSize applies equality check predicate on the "FileSize" field. It's identical to FileSizeEQ.
 func FileSize(v int64) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldFileSize), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldFileSize, v))
 }
 
 // Authors applies equality check predicate on the "Authors" field. It's identical to AuthorsEQ.
 func Authors(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldAuthors), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldAuthors, v))
 }
 
 // ISBN applies equality check predicate on the "ISBN" field. It's identical to ISBNEQ.
 func ISBN(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldISBN), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldISBN, v))
 }
 
 // Press applies equality check predicate on the "Press" field. It's identical to PressEQ.
 func Press(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPress), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldPress, v))
 }
 
 // PublishedAt applies equality check predicate on the "PublishedAt" field. It's identical to PublishedAtEQ.
 func PublishedAt(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPublishedAt), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldPublishedAt, v))
 }
 
 // ExtractPath applies equality check predicate on the "ExtractPath" field. It's identical to ExtractPathEQ.
 func ExtractPath(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldExtractPath), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldExtractPath, v))
 }
 
 // Modified applies equality check predicate on the "Modified" field. It's identical to ModifiedEQ.
 func Modified(v time.Time) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldModified), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldModified, v))
 }
 
 // ExtractNum applies equality check predicate on the "ExtractNum" field. It's identical to ExtractNumEQ.
 func ExtractNum(v int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldExtractNum), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldExtractNum, v))
 }
 
 // InitComplete applies equality check predicate on the "InitComplete" field. It's identical to InitCompleteEQ.
 func InitComplete(v bool) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldInitComplete), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldInitComplete, v))
 }
 
 // ReadPercent applies equality check predicate on the "ReadPercent" field. It's identical to ReadPercentEQ.
 func ReadPercent(v float64) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldReadPercent), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldReadPercent, v))
 }
 
 // NonUTF8Zip applies equality check predicate on the "NonUTF8Zip" field. It's identical to NonUTF8ZipEQ.
 func NonUTF8Zip(v bool) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldNonUTF8Zip), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldNonUTF8Zip, v))
 }
 
 // ZipTextEncoding applies equality check predicate on the "ZipTextEncoding" field. It's identical to ZipTextEncodingEQ.
 func ZipTextEncoding(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldZipTextEncoding), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldZipTextEncoding, v))
 }
 
 // NameEQ applies the EQ predicate on the "Name" field.
 func NameEQ(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldName), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldName, v))
 }
 
 // NameNEQ applies the NEQ predicate on the "Name" field.
 func NameNEQ(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldName), v))
-	})
+	return predicate.Book(sql.FieldNEQ(FieldName, v))
 }
 
 // NameIn applies the In predicate on the "Name" field.
 func NameIn(vs ...string) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldName), v...))
-	})
+	return predicate.Book(sql.FieldIn(FieldName, vs...))
 }
 
 // NameNotIn applies the NotIn predicate on the "Name" field.
 func NameNotIn(vs ...string) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldName), v...))
-	})
+	return predicate.Book(sql.FieldNotIn(FieldName, vs...))
 }
 
 // NameGT applies the GT predicate on the "Name" field.
 func NameGT(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldName), v))
-	})
+	return predicate.Book(sql.FieldGT(FieldName, v))
 }
 
 // NameGTE applies the GTE predicate on the "Name" field.
 func NameGTE(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldName), v))
-	})
+	return predicate.Book(sql.FieldGTE(FieldName, v))
 }
 
 // NameLT applies the LT predicate on the "Name" field.
 func NameLT(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldName), v))
-	})
+	return predicate.Book(sql.FieldLT(FieldName, v))
 }
 
 // NameLTE applies the LTE predicate on the "Name" field.
 func NameLTE(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldName), v))
-	})
+	return predicate.Book(sql.FieldLTE(FieldName, v))
 }
 
 // NameContains applies the Contains predicate on the "Name" field.
 func NameContains(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldName), v))
-	})
+	return predicate.Book(sql.FieldContains(FieldName, v))
 }
 
 // NameHasPrefix applies the HasPrefix predicate on the "Name" field.
 func NameHasPrefix(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldName), v))
-	})
+	return predicate.Book(sql.FieldHasPrefix(FieldName, v))
 }
 
 // NameHasSuffix applies the HasSuffix predicate on the "Name" field.
 func NameHasSuffix(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldName), v))
-	})
+	return predicate.Book(sql.FieldHasSuffix(FieldName, v))
 }
 
 // NameEqualFold applies the EqualFold predicate on the "Name" field.
 func NameEqualFold(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldName), v))
-	})
+	return predicate.Book(sql.FieldEqualFold(FieldName, v))
 }
 
 // NameContainsFold applies the ContainsFold predicate on the "Name" field.
 func NameContainsFold(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldName), v))
-	})
+	return predicate.Book(sql.FieldContainsFold(FieldName, v))
 }
 
 // BookIDEQ applies the EQ predicate on the "BookID" field.
 func BookIDEQ(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldBookID), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldBookID, v))
 }
 
 // BookIDNEQ applies the NEQ predicate on the "BookID" field.
 func BookIDNEQ(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldBookID), v))
-	})
+	return predicate.Book(sql.FieldNEQ(FieldBookID, v))
 }
 
 // BookIDIn applies the In predicate on the "BookID" field.
 func BookIDIn(vs ...string) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldBookID), v...))
-	})
+	return predicate.Book(sql.FieldIn(FieldBookID, vs...))
 }
 
 // BookIDNotIn applies the NotIn predicate on the "BookID" field.
 func BookIDNotIn(vs ...string) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldBookID), v...))
-	})
+	return predicate.Book(sql.FieldNotIn(FieldBookID, vs...))
 }
 
 // BookIDGT applies the GT predicate on the "BookID" field.
 func BookIDGT(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldBookID), v))
-	})
+	return predicate.Book(sql.FieldGT(FieldBookID, v))
 }
 
 // BookIDGTE applies the GTE predicate on the "BookID" field.
 func BookIDGTE(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldBookID), v))
-	})
+	return predicate.Book(sql.FieldGTE(FieldBookID, v))
 }
 
 // BookIDLT applies the LT predicate on the "BookID" field.
 func BookIDLT(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldBookID), v))
-	})
+	return predicate.Book(sql.FieldLT(FieldBookID, v))
 }
 
 // BookIDLTE applies the LTE predicate on the "BookID" field.
 func BookIDLTE(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldBookID), v))
-	})
+	return predicate.Book(sql.FieldLTE(FieldBookID, v))
 }
 
 // BookIDContains applies the Contains predicate on the "BookID" field.
 func BookIDContains(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldBookID), v))
-	})
+	return predicate.Book(sql.FieldContains(FieldBookID, v))
 }
 
 // BookIDHasPrefix applies the HasPrefix predicate on the "BookID" field.
 func BookIDHasPrefix(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldBookID), v))
-	})
+	return predicate.Book(sql.FieldHasPrefix(FieldBookID, v))
 }
 
 // BookIDHasSuffix applies the HasSuffix predicate on the "BookID" field.
 func BookIDHasSuffix(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldBookID), v))
-	})
+	return predicate.Book(sql.FieldHasSuffix(FieldBookID, v))
 }
 
 // BookIDEqualFold applies the EqualFold predicate on the "BookID" field.
 func BookIDEqualFold(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldBookID), v))
-	})
+	return predicate.Book(sql.FieldEqualFold(FieldBookID, v))
 }
 
 // BookIDContainsFold applies the ContainsFold predicate on the "BookID" field.
 func BookIDContainsFold(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldBookID), v))
-	})
+	return predicate.Book(sql.FieldContainsFold(FieldBookID, v))
+}
+
+// OwnerEQ applies the EQ predicate on the "Owner" field.
+func OwnerEQ(v int) predicate.Book {
+	return predicate.Book(sql.FieldEQ(FieldOwner, v))
+}
+
+// OwnerNEQ applies the NEQ predicate on the "Owner" field.
+func OwnerNEQ(v int) predicate.Book {
+	return predicate.Book(sql.FieldNEQ(FieldOwner, v))
+}
+
+// OwnerIn applies the In predicate on the "Owner" field.
+func OwnerIn(vs ...int) predicate.Book {
+	return predicate.Book(sql.FieldIn(FieldOwner, vs...))
+}
+
+// OwnerNotIn applies the NotIn predicate on the "Owner" field.
+func OwnerNotIn(vs ...int) predicate.Book {
+	return predicate.Book(sql.FieldNotIn(FieldOwner, vs...))
+}
+
+// OwnerGT applies the GT predicate on the "Owner" field.
+func OwnerGT(v int) predicate.Book {
+	return predicate.Book(sql.FieldGT(FieldOwner, v))
+}
+
+// OwnerGTE applies the GTE predicate on the "Owner" field.
+func OwnerGTE(v int) predicate.Book {
+	return predicate.Book(sql.FieldGTE(FieldOwner, v))
+}
+
+// OwnerLT applies the LT predicate on the "Owner" field.
+func OwnerLT(v int) predicate.Book {
+	return predicate.Book(sql.FieldLT(FieldOwner, v))
+}
+
+// OwnerLTE applies the LTE predicate on the "Owner" field.
+func OwnerLTE(v int) predicate.Book {
+	return predicate.Book(sql.FieldLTE(FieldOwner, v))
 }
 
 // FilePathEQ applies the EQ predicate on the "FilePath" field.
 func FilePathEQ(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldFilePath), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldFilePath, v))
 }
 
 // FilePathNEQ applies the NEQ predicate on the "FilePath" field.
 func FilePathNEQ(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldFilePath), v))
-	})
+	return predicate.Book(sql.FieldNEQ(FieldFilePath, v))
 }
 
 // FilePathIn applies the In predicate on the "FilePath" field.
 func FilePathIn(vs ...string) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldFilePath), v...))
-	})
+	return predicate.Book(sql.FieldIn(FieldFilePath, vs...))
 }
 
 // FilePathNotIn applies the NotIn predicate on the "FilePath" field.
 func FilePathNotIn(vs ...string) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldFilePath), v...))
-	})
+	return predicate.Book(sql.FieldNotIn(FieldFilePath, vs...))
 }
 
 // FilePathGT applies the GT predicate on the "FilePath" field.
 func FilePathGT(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldFilePath), v))
-	})
+	return predicate.Book(sql.FieldGT(FieldFilePath, v))
 }
 
 // FilePathGTE applies the GTE predicate on the "FilePath" field.
 func FilePathGTE(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldFilePath), v))
-	})
+	return predicate.Book(sql.FieldGTE(FieldFilePath, v))
 }
 
 // FilePathLT applies the LT predicate on the "FilePath" field.
 func FilePathLT(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldFilePath), v))
-	})
+	return predicate.Book(sql.FieldLT(FieldFilePath, v))
 }
 
 // FilePathLTE applies the LTE predicate on the "FilePath" field.
 func FilePathLTE(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldFilePath), v))
-	})
+	return predicate.Book(sql.FieldLTE(FieldFilePath, v))
 }
 
 // FilePathContains applies the Contains predicate on the "FilePath" field.
 func FilePathContains(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldFilePath), v))
-	})
+	return predicate.Book(sql.FieldContains(FieldFilePath, v))
 }
 
 // FilePathHasPrefix applies the HasPrefix predicate on the "FilePath" field.
 func FilePathHasPrefix(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldFilePath), v))
-	})
+	return predicate.Book(sql.FieldHasPrefix(FieldFilePath, v))
 }
 
 // FilePathHasSuffix applies the HasSuffix predicate on the "FilePath" field.
 func FilePathHasSuffix(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldFilePath), v))
-	})
+	return predicate.Book(sql.FieldHasSuffix(FieldFilePath, v))
 }
 
 // FilePathEqualFold applies the EqualFold predicate on the "FilePath" field.
 func FilePathEqualFold(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldFilePath), v))
-	})
+	return predicate.Book(sql.FieldEqualFold(FieldFilePath, v))
 }
 
 // FilePathContainsFold applies the ContainsFold predicate on the "FilePath" field.
 func FilePathContainsFold(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldFilePath), v))
-	})
+	return predicate.Book(sql.FieldContainsFold(FieldFilePath, v))
 }
 
 // BookStorePathEQ applies the EQ predicate on the "BookStorePath" field.
 func BookStorePathEQ(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldBookStorePath), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldBookStorePath, v))
 }
 
 // BookStorePathNEQ applies the NEQ predicate on the "BookStorePath" field.
 func BookStorePathNEQ(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldBookStorePath), v))
-	})
+	return predicate.Book(sql.FieldNEQ(FieldBookStorePath, v))
 }
 
 // BookStorePathIn applies the In predicate on the "BookStorePath" field.
 func BookStorePathIn(vs ...string) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldBookStorePath), v...))
-	})
+	return predicate.Book(sql.FieldIn(FieldBookStorePath, vs...))
 }
 
 // BookStorePathNotIn applies the NotIn predicate on the "BookStorePath" field.
 func BookStorePathNotIn(vs ...string) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldBookStorePath), v...))
-	})
+	return predicate.Book(sql.FieldNotIn(FieldBookStorePath, vs...))
 }
 
 // BookStorePathGT applies the GT predicate on the "BookStorePath" field.
 func BookStorePathGT(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldBookStorePath), v))
-	})
+	return predicate.Book(sql.FieldGT(FieldBookStorePath, v))
 }
 
 // BookStorePathGTE applies the GTE predicate on the "BookStorePath" field.
 func BookStorePathGTE(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldBookStorePath), v))
-	})
+	return predicate.Book(sql.FieldGTE(FieldBookStorePath, v))
 }
 
 // BookStorePathLT applies the LT predicate on the "BookStorePath" field.
 func BookStorePathLT(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldBookStorePath), v))
-	})
+	return predicate.Book(sql.FieldLT(FieldBookStorePath, v))
 }
 
 // BookStorePathLTE applies the LTE predicate on the "BookStorePath" field.
 func BookStorePathLTE(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldBookStorePath), v))
-	})
+	return predicate.Book(sql.FieldLTE(FieldBookStorePath, v))
 }
 
 // BookStorePathContains applies the Contains predicate on the "BookStorePath" field.
 func BookStorePathContains(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldBookStorePath), v))
-	})
+	return predicate.Book(sql.FieldContains(FieldBookStorePath, v))
 }
 
 // BookStorePathHasPrefix applies the HasPrefix predicate on the "BookStorePath" field.
 func BookStorePathHasPrefix(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldBookStorePath), v))
-	})
+	return predicate.Book(sql.FieldHasPrefix(FieldBookStorePath, v))
 }
 
 // BookStorePathHasSuffix applies the HasSuffix predicate on the "BookStorePath" field.
 func BookStorePathHasSuffix(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldBookStorePath), v))
-	})
+	return predicate.Book(sql.FieldHasSuffix(FieldBookStorePath, v))
 }
 
 // BookStorePathEqualFold applies the EqualFold predicate on the "BookStorePath" field.
 func BookStorePathEqualFold(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldBookStorePath), v))
-	})
+	return predicate.Book(sql.FieldEqualFold(FieldBookStorePath, v))
 }
 
 // BookStorePathContainsFold applies the ContainsFold predicate on the "BookStorePath" field.
 func BookStorePathContainsFold(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldBookStorePath), v))
-	})
+	return predicate.Book(sql.FieldContainsFold(FieldBookStorePath, v))
 }
 
 // TypeEQ applies the EQ predicate on the "Type" field.
 func TypeEQ(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldType), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldType, v))
 }
 
 // TypeNEQ applies the NEQ predicate on the "Type" field.
 func TypeNEQ(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldType), v))
-	})
+	return predicate.Book(sql.FieldNEQ(FieldType, v))
 }
 
 // TypeIn applies the In predicate on the "Type" field.
 func TypeIn(vs ...string) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldType), v...))
-	})
+	return predicate.Book(sql.FieldIn(FieldType, vs...))
 }
 
 // TypeNotIn applies the NotIn predicate on the "Type" field.
 func TypeNotIn(vs ...string) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldType), v...))
-	})
+	return predicate.Book(sql.FieldNotIn(FieldType, vs...))
 }
 
 // TypeGT applies the GT predicate on the "Type" field.
 func TypeGT(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldType), v))
-	})
+	return predicate.Book(sql.FieldGT(FieldType, v))
 }
 
 // TypeGTE applies the GTE predicate on the "Type" field.
 func TypeGTE(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldType), v))
-	})
+	return predicate.Book(sql.FieldGTE(FieldType, v))
 }
 
 // TypeLT applies the LT predicate on the "Type" field.
 func TypeLT(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldType), v))
-	})
+	return predicate.Book(sql.FieldLT(FieldType, v))
 }
 
 // TypeLTE applies the LTE predicate on the "Type" field.
 func TypeLTE(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldType), v))
-	})
+	return predicate.Book(sql.FieldLTE(FieldType, v))
 }
 
 // TypeContains applies the Contains predicate on the "Type" field.
 func TypeContains(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldType), v))
-	})
+	return predicate.Book(sql.FieldContains(FieldType, v))
 }
 
 // TypeHasPrefix applies the HasPrefix predicate on the "Type" field.
 func TypeHasPrefix(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldType), v))
-	})
+	return predicate.Book(sql.FieldHasPrefix(FieldType, v))
 }
 
 // TypeHasSuffix applies the HasSuffix predicate on the "Type" field.
 func TypeHasSuffix(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldType), v))
-	})
+	return predicate.Book(sql.FieldHasSuffix(FieldType, v))
 }
 
 // TypeEqualFold applies the EqualFold predicate on the "Type" field.
 func TypeEqualFold(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldType), v))
-	})
+	return predicate.Book(sql.FieldEqualFold(FieldType, v))
 }
 
 // TypeContainsFold applies the ContainsFold predicate on the "Type" field.
 func TypeContainsFold(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldType), v))
-	})
+	return predicate.Book(sql.FieldContainsFold(FieldType, v))
 }
 
 // ChildBookNumEQ applies the EQ predicate on the "ChildBookNum" field.
 func ChildBookNumEQ(v int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldChildBookNum), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldChildBookNum, v))
 }
 
 // ChildBookNumNEQ applies the NEQ predicate on the "ChildBookNum" field.
 func ChildBookNumNEQ(v int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldChildBookNum), v))
-	})
+	return predicate.Book(sql.FieldNEQ(FieldChildBookNum, v))
 }
 
 // ChildBookNumIn applies the In predicate on the "ChildBookNum" field.
 func ChildBookNumIn(vs ...int) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldChildBookNum), v...))
-	})
+	return predicate.Book(sql.FieldIn(FieldChildBookNum, vs...))
 }
 
 // ChildBookNumNotIn applies the NotIn predicate on the "ChildBookNum" field.
 func ChildBookNumNotIn(vs ...int) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldChildBookNum), v...))
-	})
+	return predicate.Book(sql.FieldNotIn(FieldChildBookNum, vs...))
 }
 
 // ChildBookNumGT applies the GT predicate on the "ChildBookNum" field.
 func ChildBookNumGT(v int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldChildBookNum), v))
-	})
+	return predicate.Book(sql.FieldGT(FieldChildBookNum, v))
 }
 
 // ChildBookNumGTE applies the GTE predicate on the "ChildBookNum" field.
 func ChildBookNumGTE(v int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldChildBookNum), v))
-	})
+	return predicate.Book(sql.FieldGTE(FieldChildBookNum, v))
 }
 
 // ChildBookNumLT applies the LT predicate on the "ChildBookNum" field.
 func ChildBookNumLT(v int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldChildBookNum), v))
-	})
+	return predicate.Book(sql.FieldLT(FieldChildBookNum, v))
 }
 
 // ChildBookNumLTE applies the LTE predicate on the "ChildBookNum" field.
 func ChildBookNumLTE(v int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldChildBookNum), v))
-	})
+	return predicate.Book(sql.FieldLTE(FieldChildBookNum, v))
 }
 
 // DepthEQ applies the EQ predicate on the "Depth" field.
 func DepthEQ(v int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldDepth), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldDepth, v))
 }
 
 // DepthNEQ applies the NEQ predicate on the "Depth" field.
 func DepthNEQ(v int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldDepth), v))
-	})
+	return predicate.Book(sql.FieldNEQ(FieldDepth, v))
 }
 
 // DepthIn applies the In predicate on the "Depth" field.
 func DepthIn(vs ...int) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldDepth), v...))
-	})
+	return predicate.Book(sql.FieldIn(FieldDepth, vs...))
 }
 
 // DepthNotIn applies the NotIn predicate on the "Depth" field.
 func DepthNotIn(vs ...int) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldDepth), v...))
-	})
+	return predicate.Book(sql.FieldNotIn(FieldDepth, vs...))
 }
 
 // DepthGT applies the GT predicate on the "Depth" field.
 func DepthGT(v int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldDepth), v))
-	})
+	return predicate.Book(sql.FieldGT(FieldDepth, v))
 }
 
 // DepthGTE applies the GTE predicate on the "Depth" field.
 func DepthGTE(v int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldDepth), v))
-	})
+	return predicate.Book(sql.FieldGTE(FieldDepth, v))
 }
 
 // DepthLT applies the LT predicate on the "Depth" field.
 func DepthLT(v int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldDepth), v))
-	})
+	return predicate.Book(sql.FieldLT(FieldDepth, v))
 }
 
 // DepthLTE applies the LTE predicate on the "Depth" field.
 func DepthLTE(v int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldDepth), v))
-	})
+	return predicate.Book(sql.FieldLTE(FieldDepth, v))
 }
 
 // ParentFolderEQ applies the EQ predicate on the "ParentFolder" field.
 func ParentFolderEQ(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldParentFolder), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldParentFolder, v))
 }
 
 // ParentFolderNEQ applies the NEQ predicate on the "ParentFolder" field.
 func ParentFolderNEQ(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldParentFolder), v))
-	})
+	return predicate.Book(sql.FieldNEQ(FieldParentFolder, v))
 }
 
 // ParentFolderIn applies the In predicate on the "ParentFolder" field.
 func ParentFolderIn(vs ...string) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldParentFolder), v...))
-	})
+	return predicate.Book(sql.FieldIn(FieldParentFolder, vs...))
 }
 
 // ParentFolderNotIn applies the NotIn predicate on the "ParentFolder" field.
 func ParentFolderNotIn(vs ...string) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldParentFolder), v...))
-	})
+	return predicate.Book(sql.FieldNotIn(FieldParentFolder, vs...))
 }
 
 // ParentFolderGT applies the GT predicate on the "ParentFolder" field.
 func ParentFolderGT(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldParentFolder), v))
-	})
+	return predicate.Book(sql.FieldGT(FieldParentFolder, v))
 }
 
 // ParentFolderGTE applies the GTE predicate on the "ParentFolder" field.
 func ParentFolderGTE(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldParentFolder), v))
-	})
+	return predicate.Book(sql.FieldGTE(FieldParentFolder, v))
 }
 
 // ParentFolderLT applies the LT predicate on the "ParentFolder" field.
 func ParentFolderLT(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldParentFolder), v))
-	})
+	return predicate.Book(sql.FieldLT(FieldParentFolder, v))
 }
 
 // ParentFolderLTE applies the LTE predicate on the "ParentFolder" field.
 func ParentFolderLTE(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldParentFolder), v))
-	})
+	return predicate.Book(sql.FieldLTE(FieldParentFolder, v))
 }
 
 // ParentFolderContains applies the Contains predicate on the "ParentFolder" field.
 func ParentFolderContains(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldParentFolder), v))
-	})
+	return predicate.Book(sql.FieldContains(FieldParentFolder, v))
 }
 
 // ParentFolderHasPrefix applies the HasPrefix predicate on the "ParentFolder" field.
 func ParentFolderHasPrefix(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldParentFolder), v))
-	})
+	return predicate.Book(sql.FieldHasPrefix(FieldParentFolder, v))
 }
 
 // ParentFolderHasSuffix applies the HasSuffix predicate on the "ParentFolder" field.
 func ParentFolderHasSuffix(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldParentFolder), v))
-	})
+	return predicate.Book(sql.FieldHasSuffix(FieldParentFolder, v))
 }
 
 // ParentFolderEqualFold applies the EqualFold predicate on the "ParentFolder" field.
 func ParentFolderEqualFold(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldParentFolder), v))
-	})
+	return predicate.Book(sql.FieldEqualFold(FieldParentFolder, v))
 }
 
 // ParentFolderContainsFold applies the ContainsFold predicate on the "ParentFolder" field.
 func ParentFolderContainsFold(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldParentFolder), v))
-	})
+	return predicate.Book(sql.FieldContainsFold(FieldParentFolder, v))
 }
 
 // AllPageNumEQ applies the EQ predicate on the "AllPageNum" field.
 func AllPageNumEQ(v int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldAllPageNum), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldAllPageNum, v))
 }
 
 // AllPageNumNEQ applies the NEQ predicate on the "AllPageNum" field.
 func AllPageNumNEQ(v int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldAllPageNum), v))
-	})
+	return predicate.Book(sql.FieldNEQ(FieldAllPageNum, v))
 }
 
 // AllPageNumIn applies the In predicate on the "AllPageNum" field.
 func AllPageNumIn(vs ...int) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldAllPageNum), v...))
-	})
+	return predicate.Book(sql.FieldIn(FieldAllPageNum, vs...))
 }
 
 // AllPageNumNotIn applies the NotIn predicate on the "AllPageNum" field.
 func AllPageNumNotIn(vs ...int) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldAllPageNum), v...))
-	})
+	return predicate.Book(sql.FieldNotIn(FieldAllPageNum, vs...))
 }
 
 // AllPageNumGT applies the GT predicate on the "AllPageNum" field.
 func AllPageNumGT(v int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldAllPageNum), v))
-	})
+	return predicate.Book(sql.FieldGT(FieldAllPageNum, v))
 }
 
 // AllPageNumGTE applies the GTE predicate on the "AllPageNum" field.
 func AllPageNumGTE(v int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldAllPageNum), v))
-	})
+	return predicate.Book(sql.FieldGTE(FieldAllPageNum, v))
 }
 
 // AllPageNumLT applies the LT predicate on the "AllPageNum" field.
 func AllPageNumLT(v int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldAllPageNum), v))
-	})
+	return predicate.Book(sql.FieldLT(FieldAllPageNum, v))
 }
 
 // AllPageNumLTE applies the LTE predicate on the "AllPageNum" field.
 func AllPageNumLTE(v int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldAllPageNum), v))
-	})
+	return predicate.Book(sql.FieldLTE(FieldAllPageNum, v))
 }
 
 // FileSizeEQ applies the EQ predicate on the "FileSize" field.
 func FileSizeEQ(v int64) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldFileSize), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldFileSize, v))
 }
 
 // FileSizeNEQ applies the NEQ predicate on the "FileSize" field.
 func FileSizeNEQ(v int64) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldFileSize), v))
-	})
+	return predicate.Book(sql.FieldNEQ(FieldFileSize, v))
 }
 
 // FileSizeIn applies the In predicate on the "FileSize" field.
 func FileSizeIn(vs ...int64) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldFileSize), v...))
-	})
+	return predicate.Book(sql.FieldIn(FieldFileSize, vs...))
 }
 
 // FileSizeNotIn applies the NotIn predicate on the "FileSize" field.
 func FileSizeNotIn(vs ...int64) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldFileSize), v...))
-	})
+	return predicate.Book(sql.FieldNotIn(FieldFileSize, vs...))
 }
 
 // FileSizeGT applies the GT predicate on the "FileSize" field.
 func FileSizeGT(v int64) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldFileSize), v))
-	})
+	return predicate.Book(sql.FieldGT(FieldFileSize, v))
 }
 
 // FileSizeGTE applies the GTE predicate on the "FileSize" field.
 func FileSizeGTE(v int64) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldFileSize), v))
-	})
+	return predicate.Book(sql.FieldGTE(FieldFileSize, v))
 }
 
 // FileSizeLT applies the LT predicate on the "FileSize" field.
 func FileSizeLT(v int64) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldFileSize), v))
-	})
+	return predicate.Book(sql.FieldLT(FieldFileSize, v))
 }
 
 // FileSizeLTE applies the LTE predicate on the "FileSize" field.
 func FileSizeLTE(v int64) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldFileSize), v))
-	})
+	return predicate.Book(sql.FieldLTE(FieldFileSize, v))
 }
 
 // AuthorsEQ applies the EQ predicate on the "Authors" field.
 func AuthorsEQ(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldAuthors), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldAuthors, v))
 }
 
 // AuthorsNEQ applies the NEQ predicate on the "Authors" field.
 func AuthorsNEQ(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldAuthors), v))
-	})
+	return predicate.Book(sql.FieldNEQ(FieldAuthors, v))
 }
 
 // AuthorsIn applies the In predicate on the "Authors" field.
 func AuthorsIn(vs ...string) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldAuthors), v...))
-	})
+	return predicate.Book(sql.FieldIn(FieldAuthors, vs...))
 }
 
 // AuthorsNotIn applies the NotIn predicate on the "Authors" field.
 func AuthorsNotIn(vs ...string) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldAuthors), v...))
-	})
+	return predicate.Book(sql.FieldNotIn(FieldAuthors, vs...))
 }
 
 // AuthorsGT applies the GT predicate on the "Authors" field.
 func AuthorsGT(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldAuthors), v))
-	})
+	return predicate.Book(sql.FieldGT(FieldAuthors, v))
 }
 
 // AuthorsGTE applies the GTE predicate on the "Authors" field.
 func AuthorsGTE(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldAuthors), v))
-	})
+	return predicate.Book(sql.FieldGTE(FieldAuthors, v))
 }
 
 // AuthorsLT applies the LT predicate on the "Authors" field.
 func AuthorsLT(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldAuthors), v))
-	})
+	return predicate.Book(sql.FieldLT(FieldAuthors, v))
 }
 
 // AuthorsLTE applies the LTE predicate on the "Authors" field.
 func AuthorsLTE(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldAuthors), v))
-	})
+	return predicate.Book(sql.FieldLTE(FieldAuthors, v))
 }
 
 // AuthorsContains applies the Contains predicate on the "Authors" field.
 func AuthorsContains(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldAuthors), v))
-	})
+	return predicate.Book(sql.FieldContains(FieldAuthors, v))
 }
 
 // AuthorsHasPrefix applies the HasPrefix predicate on the "Authors" field.
 func AuthorsHasPrefix(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldAuthors), v))
-	})
+	return predicate.Book(sql.FieldHasPrefix(FieldAuthors, v))
 }
 
 // AuthorsHasSuffix applies the HasSuffix predicate on the "Authors" field.
 func AuthorsHasSuffix(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldAuthors), v))
-	})
+	return predicate.Book(sql.FieldHasSuffix(FieldAuthors, v))
 }
 
 // AuthorsEqualFold applies the EqualFold predicate on the "Authors" field.
 func AuthorsEqualFold(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldAuthors), v))
-	})
+	return predicate.Book(sql.FieldEqualFold(FieldAuthors, v))
 }
 
 // AuthorsContainsFold applies the ContainsFold predicate on the "Authors" field.
 func AuthorsContainsFold(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldAuthors), v))
-	})
+	return predicate.Book(sql.FieldContainsFold(FieldAuthors, v))
 }
 
 // ISBNEQ applies the EQ predicate on the "ISBN" field.
 func ISBNEQ(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldISBN), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldISBN, v))
 }
 
 // ISBNNEQ applies the NEQ predicate on the "ISBN" field.
 func ISBNNEQ(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldISBN), v))
-	})
+	return predicate.Book(sql.FieldNEQ(FieldISBN, v))
 }
 
 // ISBNIn applies the In predicate on the "ISBN" field.
 func ISBNIn(vs ...string) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldISBN), v...))
-	})
+	return predicate.Book(sql.FieldIn(FieldISBN, vs...))
 }
 
 // ISBNNotIn applies the NotIn predicate on the "ISBN" field.
 func ISBNNotIn(vs ...string) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldISBN), v...))
-	})
+	return predicate.Book(sql.FieldNotIn(FieldISBN, vs...))
 }
 
 // ISBNGT applies the GT predicate on the "ISBN" field.
 func ISBNGT(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldISBN), v))
-	})
+	return predicate.Book(sql.FieldGT(FieldISBN, v))
 }
 
 // ISBNGTE applies the GTE predicate on the "ISBN" field.
 func ISBNGTE(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldISBN), v))
-	})
+	return predicate.Book(sql.FieldGTE(FieldISBN, v))
 }
 
 // ISBNLT applies the LT predicate on the "ISBN" field.
 func ISBNLT(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldISBN), v))
-	})
+	return predicate.Book(sql.FieldLT(FieldISBN, v))
 }
 
 // ISBNLTE applies the LTE predicate on the "ISBN" field.
 func ISBNLTE(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldISBN), v))
-	})
+	return predicate.Book(sql.FieldLTE(FieldISBN, v))
 }
 
 // ISBNContains applies the Contains predicate on the "ISBN" field.
 func ISBNContains(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldISBN), v))
-	})
+	return predicate.Book(sql.FieldContains(FieldISBN, v))
 }
 
 // ISBNHasPrefix applies the HasPrefix predicate on the "ISBN" field.
 func ISBNHasPrefix(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldISBN), v))
-	})
+	return predicate.Book(sql.FieldHasPrefix(FieldISBN, v))
 }
 
 // ISBNHasSuffix applies the HasSuffix predicate on the "ISBN" field.
 func ISBNHasSuffix(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldISBN), v))
-	})
+	return predicate.Book(sql.FieldHasSuffix(FieldISBN, v))
 }
 
 // ISBNEqualFold applies the EqualFold predicate on the "ISBN" field.
 func ISBNEqualFold(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldISBN), v))
-	})
+	return predicate.Book(sql.FieldEqualFold(FieldISBN, v))
 }
 
 // ISBNContainsFold applies the ContainsFold predicate on the "ISBN" field.
 func ISBNContainsFold(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldISBN), v))
-	})
+	return predicate.Book(sql.FieldContainsFold(FieldISBN, v))
 }
 
 // PressEQ applies the EQ predicate on the "Press" field.
 func PressEQ(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPress), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldPress, v))
 }
 
 // PressNEQ applies the NEQ predicate on the "Press" field.
 func PressNEQ(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldPress), v))
-	})
+	return predicate.Book(sql.FieldNEQ(FieldPress, v))
 }
 
 // PressIn applies the In predicate on the "Press" field.
 func PressIn(vs ...string) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldPress), v...))
-	})
+	return predicate.Book(sql.FieldIn(FieldPress, vs...))
 }
 
 // PressNotIn applies the NotIn predicate on the "Press" field.
 func PressNotIn(vs ...string) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldPress), v...))
-	})
+	return predicate.Book(sql.FieldNotIn(FieldPress, vs...))
 }
 
 // PressGT applies the GT predicate on the "Press" field.
 func PressGT(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldPress), v))
-	})
+	return predicate.Book(sql.FieldGT(FieldPress, v))
 }
 
 // PressGTE applies the GTE predicate on the "Press" field.
 func PressGTE(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldPress), v))
-	})
+	return predicate.Book(sql.FieldGTE(FieldPress, v))
 }
 
 // PressLT applies the LT predicate on the "Press" field.
 func PressLT(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldPress), v))
-	})
+	return predicate.Book(sql.FieldLT(FieldPress, v))
 }
 
 // PressLTE applies the LTE predicate on the "Press" field.
 func PressLTE(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldPress), v))
-	})
+	return predicate.Book(sql.FieldLTE(FieldPress, v))
 }
 
 // PressContains applies the Contains predicate on the "Press" field.
 func PressContains(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldPress), v))
-	})
+	return predicate.Book(sql.FieldContains(FieldPress, v))
 }
 
 // PressHasPrefix applies the HasPrefix predicate on the "Press" field.
 func PressHasPrefix(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldPress), v))
-	})
+	return predicate.Book(sql.FieldHasPrefix(FieldPress, v))
 }
 
 // PressHasSuffix applies the HasSuffix predicate on the "Press" field.
 func PressHasSuffix(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldPress), v))
-	})
+	return predicate.Book(sql.FieldHasSuffix(FieldPress, v))
 }
 
 // PressEqualFold applies the EqualFold predicate on the "Press" field.
 func PressEqualFold(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldPress), v))
-	})
+	return predicate.Book(sql.FieldEqualFold(FieldPress, v))
 }
 
 // PressContainsFold applies the ContainsFold predicate on the "Press" field.
 func PressContainsFold(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldPress), v))
-	})
+	return predicate.Book(sql.FieldContainsFold(FieldPress, v))
 }
 
 // PublishedAtEQ applies the EQ predicate on the "PublishedAt" field.
 func PublishedAtEQ(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPublishedAt), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldPublishedAt, v))
 }
 
 // PublishedAtNEQ applies the NEQ predicate on the "PublishedAt" field.
 func PublishedAtNEQ(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldPublishedAt), v))
-	})
+	return predicate.Book(sql.FieldNEQ(FieldPublishedAt, v))
 }
 
 // PublishedAtIn applies the In predicate on the "PublishedAt" field.
 func PublishedAtIn(vs ...string) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldPublishedAt), v...))
-	})
+	return predicate.Book(sql.FieldIn(FieldPublishedAt, vs...))
 }
 
 // PublishedAtNotIn applies the NotIn predicate on the "PublishedAt" field.
 func PublishedAtNotIn(vs ...string) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldPublishedAt), v...))
-	})
+	return predicate.Book(sql.FieldNotIn(FieldPublishedAt, vs...))
 }
 
 // PublishedAtGT applies the GT predicate on the "PublishedAt" field.
 func PublishedAtGT(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldPublishedAt), v))
-	})
+	return predicate.Book(sql.FieldGT(FieldPublishedAt, v))
 }
 
 // PublishedAtGTE applies the GTE predicate on the "PublishedAt" field.
 func PublishedAtGTE(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldPublishedAt), v))
-	})
+	return predicate.Book(sql.FieldGTE(FieldPublishedAt, v))
 }
 
 // PublishedAtLT applies the LT predicate on the "PublishedAt" field.
 func PublishedAtLT(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldPublishedAt), v))
-	})
+	return predicate.Book(sql.FieldLT(FieldPublishedAt, v))
 }
 
 // PublishedAtLTE applies the LTE predicate on the "PublishedAt" field.
 func PublishedAtLTE(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldPublishedAt), v))
-	})
+	return predicate.Book(sql.FieldLTE(FieldPublishedAt, v))
 }
 
 // PublishedAtContains applies the Contains predicate on the "PublishedAt" field.
 func PublishedAtContains(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldPublishedAt), v))
-	})
+	return predicate.Book(sql.FieldContains(FieldPublishedAt, v))
 }
 
 // PublishedAtHasPrefix applies the HasPrefix predicate on the "PublishedAt" field.
 func PublishedAtHasPrefix(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldPublishedAt), v))
-	})
+	return predicate.Book(sql.FieldHasPrefix(FieldPublishedAt, v))
 }
 
 // PublishedAtHasSuffix applies the HasSuffix predicate on the "PublishedAt" field.
 func PublishedAtHasSuffix(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldPublishedAt), v))
-	})
+	return predicate.Book(sql.FieldHasSuffix(FieldPublishedAt, v))
 }
 
 // PublishedAtEqualFold applies the EqualFold predicate on the "PublishedAt" field.
 func PublishedAtEqualFold(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldPublishedAt), v))
-	})
+	return predicate.Book(sql.FieldEqualFold(FieldPublishedAt, v))
 }
 
 // PublishedAtContainsFold applies the ContainsFold predicate on the "PublishedAt" field.
 func PublishedAtContainsFold(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldPublishedAt), v))
-	})
+	return predicate.Book(sql.FieldContainsFold(FieldPublishedAt, v))
 }
 
 // ExtractPathEQ applies the EQ predicate on the "ExtractPath" field.
 func ExtractPathEQ(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldExtractPath), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldExtractPath, v))
 }
 
 // ExtractPathNEQ applies the NEQ predicate on the "ExtractPath" field.
 func ExtractPathNEQ(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldExtractPath), v))
-	})
+	return predicate.Book(sql.FieldNEQ(FieldExtractPath, v))
 }
 
 // ExtractPathIn applies the In predicate on the "ExtractPath" field.
 func ExtractPathIn(vs ...string) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldExtractPath), v...))
-	})
+	return predicate.Book(sql.FieldIn(FieldExtractPath, vs...))
 }
 
 // ExtractPathNotIn applies the NotIn predicate on the "ExtractPath" field.
 func ExtractPathNotIn(vs ...string) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldExtractPath), v...))
-	})
+	return predicate.Book(sql.FieldNotIn(FieldExtractPath, vs...))
 }
 
 // ExtractPathGT applies the GT predicate on the "ExtractPath" field.
 func ExtractPathGT(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldExtractPath), v))
-	})
+	return predicate.Book(sql.FieldGT(FieldExtractPath, v))
 }
 
 // ExtractPathGTE applies the GTE predicate on the "ExtractPath" field.
 func ExtractPathGTE(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldExtractPath), v))
-	})
+	return predicate.Book(sql.FieldGTE(FieldExtractPath, v))
 }
 
 // ExtractPathLT applies the LT predicate on the "ExtractPath" field.
 func ExtractPathLT(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldExtractPath), v))
-	})
+	return predicate.Book(sql.FieldLT(FieldExtractPath, v))
 }
 
 // ExtractPathLTE applies the LTE predicate on the "ExtractPath" field.
 func ExtractPathLTE(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldExtractPath), v))
-	})
+	return predicate.Book(sql.FieldLTE(FieldExtractPath, v))
 }
 
 // ExtractPathContains applies the Contains predicate on the "ExtractPath" field.
 func ExtractPathContains(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldExtractPath), v))
-	})
+	return predicate.Book(sql.FieldContains(FieldExtractPath, v))
 }
 
 // ExtractPathHasPrefix applies the HasPrefix predicate on the "ExtractPath" field.
 func ExtractPathHasPrefix(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldExtractPath), v))
-	})
+	return predicate.Book(sql.FieldHasPrefix(FieldExtractPath, v))
 }
 
 // ExtractPathHasSuffix applies the HasSuffix predicate on the "ExtractPath" field.
 func ExtractPathHasSuffix(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldExtractPath), v))
-	})
+	return predicate.Book(sql.FieldHasSuffix(FieldExtractPath, v))
 }
 
 // ExtractPathEqualFold applies the EqualFold predicate on the "ExtractPath" field.
 func ExtractPathEqualFold(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldExtractPath), v))
-	})
+	return predicate.Book(sql.FieldEqualFold(FieldExtractPath, v))
 }
 
 // ExtractPathContainsFold applies the ContainsFold predicate on the "ExtractPath" field.
 func ExtractPathContainsFold(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldExtractPath), v))
-	})
+	return predicate.Book(sql.FieldContainsFold(FieldExtractPath, v))
 }
 
 // ModifiedEQ applies the EQ predicate on the "Modified" field.
 func ModifiedEQ(v time.Time) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldModified), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldModified, v))
 }
 
 // ModifiedNEQ applies the NEQ predicate on the "Modified" field.
 func ModifiedNEQ(v time.Time) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldModified), v))
-	})
+	return predicate.Book(sql.FieldNEQ(FieldModified, v))
 }
 
 // ModifiedIn applies the In predicate on the "Modified" field.
 func ModifiedIn(vs ...time.Time) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldModified), v...))
-	})
+	return predicate.Book(sql.FieldIn(FieldModified, vs...))
 }
 
 // ModifiedNotIn applies the NotIn predicate on the "Modified" field.
 func ModifiedNotIn(vs ...time.Time) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldModified), v...))
-	})
+	return predicate.Book(sql.FieldNotIn(FieldModified, vs...))
 }
 
 // ModifiedGT applies the GT predicate on the "Modified" field.
 func ModifiedGT(v time.Time) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldModified), v))
-	})
+	return predicate.Book(sql.FieldGT(FieldModified, v))
 }
 
 // ModifiedGTE applies the GTE predicate on the "Modified" field.
 func ModifiedGTE(v time.Time) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldModified), v))
-	})
+	return predicate.Book(sql.FieldGTE(FieldModified, v))
 }
 
 // ModifiedLT applies the LT predicate on the "Modified" field.
 func ModifiedLT(v time.Time) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldModified), v))
-	})
+	return predicate.Book(sql.FieldLT(FieldModified, v))
 }
 
 // ModifiedLTE applies the LTE predicate on the "Modified" field.
 func ModifiedLTE(v time.Time) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldModified), v))
-	})
+	return predicate.Book(sql.FieldLTE(FieldModified, v))
 }
 
 // ExtractNumEQ applies the EQ predicate on the "ExtractNum" field.
 func ExtractNumEQ(v int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldExtractNum), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldExtractNum, v))
 }
 
 // ExtractNumNEQ applies the NEQ predicate on the "ExtractNum" field.
 func ExtractNumNEQ(v int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldExtractNum), v))
-	})
+	return predicate.Book(sql.FieldNEQ(FieldExtractNum, v))
 }
 
 // ExtractNumIn applies the In predicate on the "ExtractNum" field.
 func ExtractNumIn(vs ...int) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldExtractNum), v...))
-	})
+	return predicate.Book(sql.FieldIn(FieldExtractNum, vs...))
 }
 
 // ExtractNumNotIn applies the NotIn predicate on the "ExtractNum" field.
 func ExtractNumNotIn(vs ...int) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldExtractNum), v...))
-	})
+	return predicate.Book(sql.FieldNotIn(FieldExtractNum, vs...))
 }
 
 // ExtractNumGT applies the GT predicate on the "ExtractNum" field.
 func ExtractNumGT(v int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldExtractNum), v))
-	})
+	return predicate.Book(sql.FieldGT(FieldExtractNum, v))
 }
 
 // ExtractNumGTE applies the GTE predicate on the "ExtractNum" field.
 func ExtractNumGTE(v int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldExtractNum), v))
-	})
+	return predicate.Book(sql.FieldGTE(FieldExtractNum, v))
 }
 
 // ExtractNumLT applies the LT predicate on the "ExtractNum" field.
 func ExtractNumLT(v int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldExtractNum), v))
-	})
+	return predicate.Book(sql.FieldLT(FieldExtractNum, v))
 }
 
 // ExtractNumLTE applies the LTE predicate on the "ExtractNum" field.
 func ExtractNumLTE(v int) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldExtractNum), v))
-	})
+	return predicate.Book(sql.FieldLTE(FieldExtractNum, v))
 }
 
 // InitCompleteEQ applies the EQ predicate on the "InitComplete" field.
 func InitCompleteEQ(v bool) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldInitComplete), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldInitComplete, v))
 }
 
 // InitCompleteNEQ applies the NEQ predicate on the "InitComplete" field.
 func InitCompleteNEQ(v bool) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldInitComplete), v))
-	})
+	return predicate.Book(sql.FieldNEQ(FieldInitComplete, v))
 }
 
 // ReadPercentEQ applies the EQ predicate on the "ReadPercent" field.
 func ReadPercentEQ(v float64) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldReadPercent), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldReadPercent, v))
 }
 
 // ReadPercentNEQ applies the NEQ predicate on the "ReadPercent" field.
 func ReadPercentNEQ(v float64) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldReadPercent), v))
-	})
+	return predicate.Book(sql.FieldNEQ(FieldReadPercent, v))
 }
 
 // ReadPercentIn applies the In predicate on the "ReadPercent" field.
 func ReadPercentIn(vs ...float64) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldReadPercent), v...))
-	})
+	return predicate.Book(sql.FieldIn(FieldReadPercent, vs...))
 }
 
 // ReadPercentNotIn applies the NotIn predicate on the "ReadPercent" field.
 func ReadPercentNotIn(vs ...float64) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldReadPercent), v...))
-	})
+	return predicate.Book(sql.FieldNotIn(FieldReadPercent, vs...))
 }
 
 // ReadPercentGT applies the GT predicate on the "ReadPercent" field.
 func ReadPercentGT(v float64) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldReadPercent), v))
-	})
+	return predicate.Book(sql.FieldGT(FieldReadPercent, v))
 }
 
 // ReadPercentGTE applies the GTE predicate on the "ReadPercent" field.
 func ReadPercentGTE(v float64) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldReadPercent), v))
-	})
+	return predicate.Book(sql.FieldGTE(FieldReadPercent, v))
 }
 
 // ReadPercentLT applies the LT predicate on the "ReadPercent" field.
 func ReadPercentLT(v float64) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldReadPercent), v))
-	})
+	return predicate.Book(sql.FieldLT(FieldReadPercent, v))
 }
 
 // ReadPercentLTE applies the LTE predicate on the "ReadPercent" field.
 func ReadPercentLTE(v float64) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldReadPercent), v))
-	})
+	return predicate.Book(sql.FieldLTE(FieldReadPercent, v))
 }
 
 // NonUTF8ZipEQ applies the EQ predicate on the "NonUTF8Zip" field.
 func NonUTF8ZipEQ(v bool) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldNonUTF8Zip), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldNonUTF8Zip, v))
 }
 
 // NonUTF8ZipNEQ applies the NEQ predicate on the "NonUTF8Zip" field.
 func NonUTF8ZipNEQ(v bool) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldNonUTF8Zip), v))
-	})
+	return predicate.Book(sql.FieldNEQ(FieldNonUTF8Zip, v))
 }
 
 // ZipTextEncodingEQ applies the EQ predicate on the "ZipTextEncoding" field.
 func ZipTextEncodingEQ(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldZipTextEncoding), v))
-	})
+	return predicate.Book(sql.FieldEQ(FieldZipTextEncoding, v))
 }
 
 // ZipTextEncodingNEQ applies the NEQ predicate on the "ZipTextEncoding" field.
 func ZipTextEncodingNEQ(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldZipTextEncoding), v))
-	})
+	return predicate.Book(sql.FieldNEQ(FieldZipTextEncoding, v))
 }
 
 // ZipTextEncodingIn applies the In predicate on the "ZipTextEncoding" field.
 func ZipTextEncodingIn(vs ...string) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldZipTextEncoding), v...))
-	})
+	return predicate.Book(sql.FieldIn(FieldZipTextEncoding, vs...))
 }
 
 // ZipTextEncodingNotIn applies the NotIn predicate on the "ZipTextEncoding" field.
 func ZipTextEncodingNotIn(vs ...string) predicate.Book {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldZipTextEncoding), v...))
-	})
+	return predicate.Book(sql.FieldNotIn(FieldZipTextEncoding, vs...))
 }
 
 // ZipTextEncodingGT applies the GT predicate on the "ZipTextEncoding" field.
 func ZipTextEncodingGT(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldZipTextEncoding), v))
-	})
+	return predicate.Book(sql.FieldGT(FieldZipTextEncoding, v))
 }
 
 // ZipTextEncodingGTE applies the GTE predicate on the "ZipTextEncoding" field.
 func ZipTextEncodingGTE(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldZipTextEncoding), v))
-	})
+	return predicate.Book(sql.FieldGTE(FieldZipTextEncoding, v))
 }
 
 // ZipTextEncodingLT applies the LT predicate on the "ZipTextEncoding" field.
 func ZipTextEncodingLT(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldZipTextEncoding), v))
-	})
+	return predicate.Book(sql.FieldLT(FieldZipTextEncoding, v))
 }
 
 // ZipTextEncodingLTE applies the LTE predicate on the "ZipTextEncoding" field.
 func ZipTextEncodingLTE(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldZipTextEncoding), v))
-	})
+	return predicate.Book(sql.FieldLTE(FieldZipTextEncoding, v))
 }
 
 // ZipTextEncodingContains applies the Contains predicate on the "ZipTextEncoding" field.
 func ZipTextEncodingContains(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldZipTextEncoding), v))
-	})
+	return predicate.Book(sql.FieldContains(FieldZipTextEncoding, v))
 }
 
 // ZipTextEncodingHasPrefix applies the HasPrefix predicate on the "ZipTextEncoding" field.
 func ZipTextEncodingHasPrefix(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldZipTextEncoding), v))
-	})
+	return predicate.Book(sql.FieldHasPrefix(FieldZipTextEncoding, v))
 }
 
 // ZipTextEncodingHasSuffix applies the HasSuffix predicate on the "ZipTextEncoding" field.
 func ZipTextEncodingHasSuffix(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldZipTextEncoding), v))
-	})
+	return predicate.Book(sql.FieldHasSuffix(FieldZipTextEncoding, v))
 }
 
 // ZipTextEncodingEqualFold applies the EqualFold predicate on the "ZipTextEncoding" field.
 func ZipTextEncodingEqualFold(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldZipTextEncoding), v))
-	})
+	return predicate.Book(sql.FieldEqualFold(FieldZipTextEncoding, v))
 }
 
 // ZipTextEncodingContainsFold applies the ContainsFold predicate on the "ZipTextEncoding" field.
 func ZipTextEncodingContainsFold(v string) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldZipTextEncoding), v))
-	})
+	return predicate.Book(sql.FieldContainsFold(FieldZipTextEncoding, v))
 }
 
 // HasPageInfos applies the HasEdge predicate on the "PageInfos" edge.
@@ -1897,7 +1290,6 @@ func HasPageInfos() predicate.Book {
 	return predicate.Book(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(PageInfosTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, PageInfosTable, PageInfosColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

@@ -101,50 +101,8 @@ func (spic *SinglePageInfoCreate) Mutation() *SinglePageInfoMutation {
 
 // Save creates the SinglePageInfo in the database.
 func (spic *SinglePageInfoCreate) Save(ctx context.Context) (*SinglePageInfo, error) {
-	var (
-		err  error
-		node *SinglePageInfo
-	)
 	spic.defaults()
-	if len(spic.hooks) == 0 {
-		if err = spic.check(); err != nil {
-			return nil, err
-		}
-		node, err = spic.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*SinglePageInfoMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = spic.check(); err != nil {
-				return nil, err
-			}
-			spic.mutation = mutation
-			if node, err = spic.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(spic.hooks) - 1; i >= 0; i-- {
-			if spic.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = spic.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, spic.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*SinglePageInfo)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from SinglePageInfoMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*SinglePageInfo, SinglePageInfoMutation](ctx, spic.sqlSave, spic.mutation, spic.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -216,6 +174,9 @@ func (spic *SinglePageInfoCreate) check() error {
 }
 
 func (spic *SinglePageInfoCreate) sqlSave(ctx context.Context) (*SinglePageInfo, error) {
+	if err := spic.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := spic.createSpec()
 	if err := sqlgraph.CreateNode(ctx, spic.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -225,19 +186,15 @@ func (spic *SinglePageInfoCreate) sqlSave(ctx context.Context) (*SinglePageInfo,
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
+	spic.mutation.id = &_node.ID
+	spic.mutation.done = true
 	return _node, nil
 }
 
 func (spic *SinglePageInfoCreate) createSpec() (*SinglePageInfo, *sqlgraph.CreateSpec) {
 	var (
 		_node = &SinglePageInfo{config: spic.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: singlepageinfo.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: singlepageinfo.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(singlepageinfo.Table, sqlgraph.NewFieldSpec(singlepageinfo.FieldID, field.TypeInt))
 	)
 	if value, ok := spic.mutation.BookID(); ok {
 		_spec.SetField(singlepageinfo.FieldBookID, field.TypeString, value)

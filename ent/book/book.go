@@ -15,6 +15,8 @@ const (
 	FieldName = "name"
 	// FieldBookID holds the string denoting the bookid field in the database.
 	FieldBookID = "book_id"
+	// FieldOwner holds the string denoting the owner field in the database.
+	FieldOwner = "owner"
 	// FieldFilePath holds the string denoting the filepath field in the database.
 	FieldFilePath = "file_path"
 	// FieldBookStorePath holds the string denoting the bookstorepath field in the database.
@@ -71,6 +73,7 @@ var Columns = []string{
 	FieldID,
 	FieldName,
 	FieldBookID,
+	FieldOwner,
 	FieldFilePath,
 	FieldBookStorePath,
 	FieldType,
