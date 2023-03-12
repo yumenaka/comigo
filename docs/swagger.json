@@ -1,0 +1,11 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "IvanApi Service 描述",
+        "title": "IvanApi Swagger 标题",
+        "contact": {},
+        "version": "1.0 版本"
+    },
+    "basePath": "/api/v1  基础路径",
+    "paths": {}
+}

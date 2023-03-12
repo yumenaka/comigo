@@ -43,6 +43,10 @@ var staticImageFS embed.FS
 
 // gin-jwt相关 https://github.com/appleboy/gin-jwt
 
+// 声明swagHandler，该参数不为空时才加入路由，以减少包体积
+// 通过go build -tags "doc"来打包带文档的包，直接go build来打包不带文档的包
+var swagHandler gin.HandlerFunc
+
 // StartWebServer 启动web服务
 func StartWebServer() {
 	//设置 gin
@@ -84,6 +88,7 @@ func setStaticFiles(engine *gin.Engine) {
 		//禁止控制台输出
 		gin.DefaultWriter = io.Discard
 	}
+
 	//自定义分隔符，避免与vue.js冲突
 	engine.Delims("[[", "]]")
 	//https://stackoverflow.com/questions/66248258/serve-embedded-filesystem-from-root-path-of-url
@@ -97,8 +102,15 @@ func setStaticFiles(engine *gin.Engine) {
 		fmt.Println(errStaticImageFS)
 	}
 	engine.StaticFS("/images/", http.FS(imagesEmbedFS))
-	//单独一张静态图片
-	//singleStaticFiles(engine, "/favicon.ico", "static/images/favicon.ico", "image/x-icon")
+	// Example godoc
+	// @Summary  example
+	// @Schemes
+	// @Description get file
+	// @Tags example
+	// @Accept json
+	// @Produce json
+	// @Success 200 {string} favicon.ico
+	// @Router /favicon.ico [get]
 	engine.GET("/favicon.ico", func(c *gin.Context) {
 		file, _ := staticFS.ReadFile("static/images/favicon.ico")
 		c.Data(
@@ -243,6 +255,11 @@ func setWebAPI(engine *gin.Engine) {
 	websocket.WsDebug = &common.Config.Debug
 	api.GET("/ws", websocket.WsHandler)
 	SetDownloadLink()
+
+	// swagger 自动生成文档用
+	if swagHandler != nil {
+		engine.GET("/swagger/*any", swagHandler)
+	}
 }
 
 // 3、选择服务端口
