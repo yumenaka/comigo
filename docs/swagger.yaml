@@ -1,0 +1,8 @@
+basePath: /api/v1  基础路径
+info:
+  contact: {}
+  description: IvanApi Service 描述
+  title: IvanApi Swagger 标题
+  version: 1.0 版本
+paths: {}
+swagger: "2.0"
