@@ -102,15 +102,7 @@ func setStaticFiles(engine *gin.Engine) {
 		fmt.Println(errStaticImageFS)
 	}
 	engine.StaticFS("/images/", http.FS(imagesEmbedFS))
-	// Example godoc
-	// @Summary  example
-	// @Schemes
-	// @Description get file
-	// @Tags example
-	// @Accept json
-	// @Produce json
-	// @Success 200 {string} favicon.ico
-	// @Router /favicon.ico [get]
+
 	engine.GET("/favicon.ico", func(c *gin.Context) {
 		file, _ := staticFS.ReadFile("static/images/favicon.ico")
 		c.Data(
@@ -156,8 +148,8 @@ func setWebAPI(engine *gin.Engine) {
 		Realm:            "test zone",                                             //标识
 		SigningAlgorithm: "HS256",                                                 //加密算法
 		Key:              []byte(common.Config.UserName + common.Config.Password), //JWT服务端密钥，需要确保别人不知道
-		Timeout:          time.Hour,                                               //jwt过期时间
-		MaxRefresh:       time.Hour,                                               //刷新的时候，最大能延长多少时间
+		Timeout:          time.Hour * 24,                                          //jwt过期时间
+		MaxRefresh:       time.Hour * 24 * 7,                                      //刷新的时候，最大能延长多少时间
 		IdentityKey:      "id",                                                    //指定cookie的id
 		Authenticator:    token.Authenticator,                                     //认证器：在登录接口中使用的验证方法，返回验证成功后的用户对象。
 		Authorizator:     token.Authorizator,                                      //授权者：登录后验证传入的 token 方法，可在此处写权限验证逻辑

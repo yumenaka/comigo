@@ -61,8 +61,8 @@ type Book struct {
 	ExtractNum      int              `json:"-"`              //json不解析，启用可改为`json:"extract_num"`
 	InitComplete    bool             `json:"-"`              //json不解析，启用可改为`json:"extract_complete"`
 	ReadPercent     float64          `json:"-"`              //json不解析，启用可改为`json:"read_percent"`
-	NonUTF8Zip      bool             `json:"-"`              //json不解析，启用可改为    `json:"non_utf8_zip"`
-	ZipTextEncoding string           `json:"-"`              //json不解析，启用可改为   `json:"zip_text_encoding"`
+	NonUTF8Zip      bool             `json:"-"`              //json不解析，启用可改为`json:"non_utf8_zip"`
+	ZipTextEncoding string           `json:"-"`              //json不解析，启用可改为`json:"zip_text_encoding"`
 }
 
 type SupportFileType string
@@ -89,8 +89,8 @@ type ImageInfo struct {
 	NameInArchive     string    `json:"filename"` //用于解压的压缩文件内文件路径，或图片名，为了适应特殊字符，经过一次转义
 	Url               string    `json:"url"`      //远程用户读取图片的URL，为了适应特殊字符，经过一次转义
 	Blurhash          string    `json:"-"`        //`json:"blurhash"` //blurhash占位符。需要扫描图片生成（tools.GetImageDataBlurHash）
-	Height            int       `json:"-"`        //暂时用不着 这个字段不解析`json:"height"`   //blurhash用，图片的高
-	Width             int       `json:"-"`        //暂时用不着 这个字段不解析`json:"width"`    //blurhash用，图片的宽
+	Height            int       `json:"-"`        //暂时用不着 这个字段不解析`json:"height"`   //blurhash用，图片高
+	Width             int       `json:"-"`        //暂时用不着 这个字段不解析`json:"width"`    //blurhash用，图片宽
 	ModeTime          time.Time `json:"-"`        //这个字段不解析
 	FileSize          int64     `json:"-"`        //这个字段不解析
 	RealImageFilePATH string    `json:"-"`        //这个字段不解析  书籍为文件夹的时候，实际图片的路径

@@ -9,7 +9,8 @@ import envCompatible from "vite-plugin-env-compatible";
 import { viteCommonjs } from "@originjs/vite-plugin-commonjs";
 //旧版浏览器支持插件，自动生成旧版块和相应的ES语言功能polyfills。需要安装 npm add -D terser
 import legacy from "@vitejs/plugin-legacy";
-
+// VueDevtools():  https://v2ex.com/t/939478#reply9
+import VueDevtools from 'vite-plugin-vue-devtools'
 // https://vitejs.dev/config/
 export default defineConfig({
   // 静态资源基础路径 base: './' || '',
@@ -39,6 +40,7 @@ export default defineConfig({
     viteCommonjs(),
     envCompatible(),
     // injectHtml(),
+    VueDevtools(),
     legacy({
       targets: ["defaults", "not IE 11"],
     }),
