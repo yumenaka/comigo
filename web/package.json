@@ -8,8 +8,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@vitejs/plugin-legacy": "^3.0.1",
-    "@vueuse/core": "^9.6.0",
+    "@vitejs/plugin-legacy": "^4.0.3",
+    "@vueuse/core": "^10.1.2",
     "axios": "^1.4.0",
     "core-js": "^3.30.2",
     "js-md5": "^0.7.3",
@@ -29,7 +29,7 @@
     "@babel/core": "^7.20.5",
     "@babel/eslint-parser": "^7.21.8",
     "@originjs/vite-plugin-commonjs": "^1.0.1",
-    "@types/js-md5": "^0.4.3",
+    "@types/js-md5": "^0.7.0",
     "@types/vue-i18n": "^7.0.0",
     "@vicons/ionicons5": "^0.12.0",
     "@vitejs/plugin-vue": "^4.2.3",
@@ -45,7 +45,7 @@
     "postcss": "^8.4.23",
     "tailwindcss": "^3.3.2",
     "terser": "^5.17.3",
-    "typescript": "~4.9.4",
+    "typescript": "~5.0.4",
     "vite": "^4.3.5",
     "vite-plugin-env-compatible": "^1.1.1",
     "vite-plugin-html": "3.2.0",

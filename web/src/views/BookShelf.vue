@@ -1,8 +1,8 @@
 <template>
     <div class="BookShelf w-full h-screen flex flex-col">
         <Header class="flex-none h-12" :bookIsFolder="false" :headerTitle="bookShelfTitle"
-            :showReturnIcon="headerShowReturnIcon" :showSettingsIcon="true"
-            :bookID="bookshelf ? bookshelf[0].id : 'null'" :setDownLoadLink="false" @drawerActivate="drawerActivate">
+            :showReturnIcon="headerShowReturnIcon" :showSettingsIcon="true" :bookID="bookshelf ? bookshelf[0].id : 'null'"
+            :setDownLoadLink="false" @drawerActivate="drawerActivate" @onResort="onResort">
         </Header>
 
         <!-- 渲染书架部分 有书的时候显示书  没有的时候显示上传控件-->
@@ -17,33 +17,30 @@
             <div class="flex flex-row flex-wrap justify-center min-h-48">
                 <BookCard v-for="(book_info, key) in bookshelf" :key="key" :title="book_info.name"
                     :simplifyTitle="simplifyTitle" :id="book_info.id" :image_src="book_info.cover.url"
-                    :readerMode="readerMode" :showTitle="bookCardShowTitleFlag" :childBookNum="
-                      book_info.child_book_num > 0
+                    :readerMode="readerMode" :showTitle="bookCardShowTitleFlag" :childBookNum="book_info.child_book_num > 0
                         ? 'x' + book_info.child_book_num
                         : book_info.book_type === 'dir'
-                        ? 'dir'
-                        : ''
-                    " :openURL="
-            getBookCardOpenURL(
-              book_info.id,
-              book_info.book_type,
-              book_info.name
-            )
-          " :a_target="getBookCardTarget(book_info.book_type)">
+                            ? 'dir'
+                            : ''
+                        " :openURL="getBookCardOpenURL(
+        book_info.id,
+        book_info.book_type,
+        book_info.name
+    )
+        " :a_target="getBookCardTarget(book_info.book_type)">
                 </BookCard>
             </div>
         </div>
         <!-- 返回顶部的圆形按钮，向上滑动的时候出现 -->
         <n-back-top class="bg-blue-200" :show="showBackTopFlag" type="info" :right="20" :bottom="20" />
 
-        <Bottom class="flex-none h-12" :softVersion="
-          $store.state.server_status.ServerName
+        <Bottom class="flex-none h-12" :softVersion="$store.state.server_status.ServerName
             ? $store.state.server_status.ServerName
             : 'Comigo'
-        "></Bottom>
+            "></Bottom>
         <Drawer :initDrawerActive="drawerActive" :initDrawerPlacement="drawerPlacement" @saveConfig="saveConfigToLocal"
-            @startSketch="startSketchMode" @closeDrawer="drawerDeactivate" @setRM="OnSetReaderMode"
-            :readerMode="readerMode" :sketching="false" :inBookShelf="true">
+            @startSketch="startSketchMode" @closeDrawer="drawerDeactivate" @setRM="OnSetReaderMode" :readerMode="readerMode"
+            :sketching="false" :inBookShelf="true">
             <!-- 设置颜色 -->
             <span>{{ $t("setInterfaceColor") }}</span>
             <n-color-picker v-model:value="model.interfaceColor" :modes="['hex']" :show-alpha="false"
@@ -71,9 +68,9 @@
                 <template #unchecked>{{ $t("simplify_book_titles") }}</template>
             </n-switch>
 
-            <!-- 页面重新排序 -->
+            <!-- 页面重新排序
             <n-select :placeholder="$t('re_sort_book')" @update:value="onResort" :options="options" />
-            <p>&nbsp;</p>
+            <p>&nbsp;</p> -->
             <!-- 下载示例配置文件的按钮 -->
             <a href="/api/config.toml" target="_blank">
                 <n-button>{{ $t("DownloadSampleConfigFile") }}</n-button>
@@ -90,12 +87,12 @@
 // 直接导入组件并使用它。这种情况下,只有导入的组件才会被打包。
 // Firefox插件Textarea Cache 报错：源映射错误：Error: NetworkError when attempting to fetch resource.
 // Firefox插件Video DownloadHelper报错:已不赞成使用 CanvasRenderingContext2D 中的 drawWindow 方法
-import { NColorPicker, NSwitch, NButton, NSelect, NBackTop } from "naive-ui";
+import { NColorPicker, NSwitch, NButton, NSelect, NBackTop,NIcon } from "naive-ui";
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
 import BookCard from "@/components/BookCard.vue";
 import Bottom from "@/components/Bottom.vue";
-import { CSSProperties, defineComponent, reactive } from "vue";
+import { h,CSSProperties, defineComponent, reactive } from "vue";
 import { useCookies } from "vue3-cookies"; // https://github.com/KanHarI/vue3-cookies
 import axios from "axios";
 
@@ -172,32 +169,32 @@ export default defineComponent({
             //存储现在滚动的位置
             scrollTopSave: 0,
             resort_hint_key: "filename", //书籍的排序方式。可以按照文件名、修改时间、文件大小排序（或反向排序）
-            options: [
-                {
-                    label: this.$t("sort_by_filename"),
-                    value: "filename",
-                },
-                {
-                    label: this.$t("sort_by_modify_time"),
-                    value: "modify_time",
-                },
-                {
-                    label: this.$t("sort_by_filesize"),
-                    value: "filesize",
-                },
-                {
-                    label: this.$t("sort_by_filename") + this.$t("sort_reverse"),
-                    value: "filename_reverse",
-                },
-                {
-                    label: this.$t("sort_by_modify_time") + this.$t("sort_reverse"),
-                    value: "modify_time_reverse",
-                },
-                {
-                    label: this.$t("sort_by_filesize") + this.$t("sort_reverse"),
-                    value: "filesize_reverse",
-                },
-            ],
+            // options: [
+            //     {
+            //         label: this.$t("sort_by_filename"),
+            //         value: "filename",
+            //     },
+            //     {
+            //         label: this.$t("sort_by_modify_time"),
+            //         value: "modify_time",
+            //     },
+            //     {
+            //         label: this.$t("sort_by_filesize"),
+            //         value: "filesize",
+            //     },
+            //     {
+            //         label: this.$t("sort_by_filename") + this.$t("sort_reverse"),
+            //         value: "filename_reverse",
+            //     },
+            //     {
+            //         label: this.$t("sort_by_modify_time") + this.$t("sort_reverse"),
+            //         value: "modify_time_reverse",
+            //     },
+            //     {
+            //         label: this.$t("sort_by_filesize") + this.$t("sort_reverse"),
+            //         value: "filesize_reverse",
+            //     },
+            // ],
             readerMode: "scroll",
             readerModeIsScroll: true,
             bookShelfTitle: "Loading",
@@ -262,9 +259,9 @@ export default defineComponent({
         window.addEventListener("scroll", this.onScroll);
         // 初始化默认值,读取出来的都是字符串,不要直接用
         //书籍排序方式。可以按照文件名、修改时间、文件大小排序（或反向排序）
-        const tempResortKey_BookShelf = localStorage.getItem("ResortKey_BookShelf");
-        if (typeof tempResortKey_BookShelf === "string") {
-            this.resort_hint_key = tempResortKey_BookShelf;
+        const tempBookShelf_SortBy = localStorage.getItem("BookShelf_SortBy");
+        if (typeof tempBookShelf_SortBy === "string") {
+            this.resort_hint_key = tempBookShelf_SortBy;
         }
         // 从服务器上拉取书架信息
         this.getBookShelfData();
@@ -364,7 +361,7 @@ export default defineComponent({
         //根据文件名、修改时间、文件大小等参数重新排序
         onResort(key: string) {
             this.resort_hint_key = key;
-            localStorage.setItem("ResortKey_BookShelf", key);
+            localStorage.setItem("BookShelf_SortBy", key);
             if (this.$route.params.group_id) {
                 console.log(
                     "onResort  bookID：" + this.$route.params.group_id + ", key:" + key
