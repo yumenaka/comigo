@@ -3,7 +3,6 @@ package routers
 import (
 	"embed"
 	"fmt"
-	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/yumenaka/comi/routers/token"
 	"html/template"
 	"io"
@@ -126,117 +125,43 @@ var api *gin.RouterGroup
 func setWebAPI(engine *gin.Engine) {
 	////TODO：处理登陆 https://www.chaindesk.cn/witbook/19/329
 	////TODO：实现第三方认证，可参考 https://darjun.github.io/2021/07/26/godailylib/goth/
-
-	////简单http认证
-	//enableAuth := common.Config.UserName != "" && common.Config.Password != ""
-	//if enableAuth {
-	//	//api = engine.Group("/api", gin.BasicAuth(gin.Accounts{
-	//	//	common.Config.UserName: common.Config.Password,
-	//	//}))
-	//}
 	api = engine.Group("/api")
 
-	// jwt登录、认证、鉴权etc
-	// https://github.com/appleboy/gin-jwt
-	// https://juejin.cn/post/7042520107976753165
-
-	//使用gin+jwt实现身份验证功能： https://blog.firerain.me/article/18
-	// gin-jwt 的使用简单，配置下中间件,然后在需要验证的api中用此中间件就行了
-
-	//中间件配置。创建中间件的结构体 jwt.GinJWTMiddleware。
-	ginJWTMiddleware := &jwt.GinJWTMiddleware{
-		Realm:            "test zone",                                             //标识
-		SigningAlgorithm: "HS256",                                                 //加密算法
-		Key:              []byte(common.Config.UserName + common.Config.Password), //JWT服务端密钥，需要确保别人不知道
-		Timeout:          time.Hour * 24,                                          //jwt过期时间
-		MaxRefresh:       time.Hour * 24 * 7,                                      //刷新的时候，最大能延长多少时间
-		IdentityKey:      "id",                                                    //指定cookie的id
-		Authenticator:    token.Authenticator,                                     //认证器：在登录接口中使用的验证方法，返回验证成功后的用户对象。
-		Authorizator:     token.Authorizator,                                      //授权者：登录后验证传入的 token 方法，可在此处写权限验证逻辑
-		//验证失败后的函数调用，可用于自定义返回的 JSON 格式之类
-		Unauthorized: func(c *gin.Context, code int, message string) {
-			fmt.Println(code)
-			fmt.Println(message)
-			c.JSON(code, gin.H{
-				"code":    code,
-				"message": message,
-			})
-		},
-		//定义登录成功后用户名储存以及传递用户名到 Authorizator
-		IdentityHandler: func(c *gin.Context) interface{} {
-			claims := jwt.ExtractClaims(c)
-			return claims["username"]
-		},
-		//添加额外业务相关的信息
-		PayloadFunc: func(data interface{}) jwt.MapClaims {
-			if user, ok := data.(token.User); ok {
-				return jwt.MapClaims{"username": user.Username}
-			}
-			return jwt.MapClaims{}
-		},
-		// 指定从哪里获取token 其格式为："<source>:<name>" 如有多个，用逗号隔开，可用的值：
-		//    "header:<name>"
-		//    "query:<name>"
-		//    "cookie:<name>"
-		// 默认值 header:Authorization
-		TokenLookup: "header: Authorization, query: token, cookie: jwt",
-		//Header 中 token 的头部字段，默认值 Bearer
-		TokenHeadName: "Bearer",
-		TimeFunc:      time.Now,
-	}
 	// 创建 jwt 中间件
-	jwtMiddleware, _ := jwt.New(ginJWTMiddleware)
-
-	api = engine.Group("/api")
+	jwtMiddleware, err := token.NewJwtMiddleware()
+	if err != nil {
+		fmt.Println("JWT Error:" + err.Error())
+		return
+	}
 
 	// 登录 api ，直接用 jwtMiddleware 中的 `LoginHandler`
-	//这个函数中，会执行上面设置的token.Authenticator来验证用户权限，如果通过就会返回token。
+	//这个函数中，会执行NewJwtMiddleware()中设置的Authenticator来验证用户权限，如果通过会返回token。
 	api.POST("/login", jwtMiddleware.LoginHandler)
 	//退出登录，会将用户的cookie中的token删除。
 	api.POST("/logout", jwtMiddleware.LogoutHandler)
 	// 刷新 token ，延长token的有效期
 	api.GET("/refresh_token", jwtMiddleware.RefreshHandler)
 
-	//简单的表单处理
-	api.POST("/form", func(c *gin.Context) {
-		t := c.DefaultPostForm("template", "scroll") //可设置默认值
-		username := c.PostForm("username")
-		password := c.PostForm("password")
-		//bookList := c.PostFormMap("book_list")
-		//bookList := c.QueryArray("book_list")
-		//bookList := c.PostFormArray("book_list")
-		if username == common.Config.UserName && password == common.Config.Password {
-			c.String(http.StatusOK, fmt.Sprintf("template is %s, username is %s, password is %s,Config is %v", t, username, password, common.Config))
-		} else {
-			fmt.Println(fmt.Sprintf("template is %s, username is %s, password is %s,Config is %v", t, common.Config.UserName, common.Config.Password))
-			c.String(http.StatusOK, " username or password is wrong.")
-		}
-	})
-
 	// 在需要验证的api中用jwt中间件
 	//通过URL字符串参数获取特定文件
-	if common.Config.Debug {
-		api.GET("/getfile", ginJWTMiddleware.MiddlewareFunc(), handler.GetFileHandler)
-	} else {
-		api.GET("/getfile", handler.GetFileHandler)
-	}
+	api.GET("/getfile", jwtMiddleware.MiddlewareFunc(), handler.GetFileHandler)
 
 	//文件上传
-	api.POST("/upload", handler.UploadHandler)
+	api.POST("/upload", jwtMiddleware.MiddlewareFunc(), handler.UploadHandler)
 	//web端需要的服务器状态，包括标题、机器状态等
-	api.GET("/getstatus", handler.ServerStatusHandler)
+	api.GET("/getstatus", jwtMiddleware.MiddlewareFunc(), handler.ServerStatusHandler)
 	//获取书架信息，不包含每页信息
-	api.GET("/getlist", handler.GetBookListHandler)
+	api.GET("/getlist", jwtMiddleware.MiddlewareFunc(), handler.GetBookListHandler)
 	//通过URL字符串参数查询书籍信息
-	api.GET("/getbook", handler.GetBookHandler)
+	api.GET("/getbook", jwtMiddleware.MiddlewareFunc(), handler.GetBookHandler)
 
 	////通过URL字符串参数PDF文件里的图片，效率太低，注释掉
 	//api.GET("/get_pdf_image", handler.GetPdfImageHandler)
 	//通过链接下载示例配置
 	api.GET("/config.toml", handler.GetConfigHandler)
-	//通过链接下载示例配置
-	api.GET("/comigo.reg", handler.GetRegFIleHandler)
-	//通过链接下载示例配置
+	//通过链接下载reg配置
+	api.GET("/comigo.reg", jwtMiddleware.MiddlewareFunc(), handler.GetRegFIleHandler)
+	//通过链接下载qrcode
 	api.GET("/qrcode.png", handler.GetQrcodeHandler)
 	//301重定向跳转示例
 	api.GET("/redirect", func(c *gin.Context) {
@@ -247,7 +172,6 @@ func setWebAPI(engine *gin.Engine) {
 	websocket.WsDebug = &common.Config.Debug
 	api.GET("/ws", websocket.WsHandler)
 	SetDownloadLink()
-
 	// swagger 自动生成文档用
 	if swagHandler != nil {
 		engine.GET("/swagger/*any", swagHandler)

@@ -9,9 +9,8 @@
     <transition name="header-bottom">
       <Header v-if="showHeaderFlag_FlipMode" class="mx-auto w-full opacity-80"
         v-bind:class="{ 'fixed': hideToolbar, absolute: hideToolbar, 'top-0': hideToolbar }"
-        v-bind:style="{ background: model.interfaceColor }" :setDownLoadLink="needDownloadLink()"
-        :headerTitle="book.name" :bookID="book.id" :showReturnIcon="true" :showSettingsIcon="true"
-        @drawerActivate="drawerActivate">
+        v-bind:style="{ background: model.interfaceColor }" :setDownLoadLink="needDownloadLink()" :headerTitle="book.name"
+        :bookID="book.id" :showReturnIcon="true" :showSettingsIcon="true" @drawerActivate="drawerActivate">
       </Header>
     </transition>
 
@@ -22,27 +21,22 @@
         @mouseleave.stop="onMouseLeave">
         <div class="manga_area_img_div">
           <!-- 非自动拼合模式最简单,直接显示一张图 -->
-          <img class="w-auto h-auto" v-bind:src="
-            imageParametersString(book.pages.images[nowPageNum - 1].url)
-          " v-bind:alt="nowPageNum.toString()" />
+          <img class="w-auto h-auto" v-bind:src="imageParametersString(book.pages.images[nowPageNum - 1].url)
+            " v-bind:alt="nowPageNum.toString()" />
 
           <!-- 简单拼合双页,不管单双页什么的 -->
-          <img v-if="
-            !autoDoublePageModeFlag &&
+          <img v-if="!autoDoublePageModeFlag &&
             doublePageModeFlag &&
             nowPageNum < book.all_page_num
-          " v-bind:src="
-  imageParametersString(book.pages.images[nowPageNum].url)
-" v-bind:alt="(nowPageNum + 1).toString()" />
+            " v-bind:src="imageParametersString(book.pages.images[nowPageNum].url)
+    " v-bind:alt="(nowPageNum + 1).toString()" />
 
           <!-- 自动拼合模式当前页,如果开启自动拼合,右边可能显示拼合页 -->
-          <img v-if="
-            autoDoublePageModeFlag &&
+          <img v-if="autoDoublePageModeFlag &&
             nowPageNum < book.all_page_num &&
             nowAndNextPageIsSingle()
-          " v-bind:src="
-  imageParametersString(book.pages.images[nowPageNum].url)
-" v-bind:alt="(nowPageNum + 1).toString()" />
+            " v-bind:src="imageParametersString(book.pages.images[nowPageNum].url)
+    " v-bind:alt="(nowPageNum + 1).toString()" />
         </div>
       </div>
     </div>
@@ -97,7 +91,7 @@
           " v-if="!rightToLeftFlag">
             <span class="right">{{ book.all_page_num }}</span>
             <n-slider class="w-10/11" reverse v-model:value="nowPageNum" :max="book.all_page_num" :min="1" :step="1"
-              :format-tooltip="(value) => `${value}`" @update:value="saveLocalBookMark" />
+              :format-tooltip="(value: any) => `${value}`" @update:value="saveLocalBookMark" />
             <span class="left">{{ nowPageNum }}</span>
           </div>
 
@@ -115,7 +109,7 @@
           " v-if="rightToLeftFlag">
             <span class="right">{{ nowPageNum }}</span>
             <n-slider class="bg-yellow-300" v-model:value="nowPageNum" :max="book.all_page_num" :min="1" :step="1"
-              :format-tooltip="(value) => `${value}`" @update:value="saveLocalBookMark" />
+              :format-tooltip="(value: any) => `${value}`" @update:value="saveLocalBookMark" />
             <span class="left">{{ book.all_page_num }}</span>
           </div>
         </div>
@@ -124,12 +118,12 @@
 
     <!-- 设置抽屉,一开始隐藏 -->
     <Drawer :initDrawerActive="drawerActive" :initDrawerPlacement="drawerPlacement" @saveConfig="saveConfigToLocal"
-      @startSketch="startSketchMode" @stopSketch="stopSketchMode" @closeDrawer="drawerDeactivate"
-      :readerMode="readerMode" :inBookShelf="false" :sketching="sketchModeFlag">
+      @startSketch="startSketchMode" @stopSketch="stopSketchMode" @closeDrawer="drawerDeactivate" :readerMode="readerMode"
+      :inBookShelf="false" :sketching="sketchModeFlag">
 
       <!-- 选择：切换页面模式 -->
       <n-button @click="changeReaderModeToScrollMode">{{
-          $t("switch_to_scrolling_mode")
+        $t("switch_to_scrolling_mode")
       }}
       </n-button>
 
@@ -198,7 +192,7 @@
       </n-input-number>
       <!-- 滑动选择% -->
       <n-slider v-if="readerMode === 'sketch'" v-model:value="sketchFlipSecond" :step="1" :max="120" :min="1"
-        :marks="marks" :format-tooltip="(value) => `${value}s`" @update:value="resetSketchSecondCount" />
+        :marks="marks" :format-tooltip="(value: any) => `${value}s`" @update:value="resetSketchSecondCount" />
 
       <!-- Debug,开启一些不稳定功能 -->
       <!-- <n-switch size="large" v-model:value="debugModeFlag" @update:value="setDebugModeFlag">
@@ -459,6 +453,12 @@ export default defineComponent({
     axios
       .get("/getbook?id=" + this.$route.params.id + sort_image_by_str)
       .then((response) => (this.book = response.data))
+      .catch((error) => {
+        console.log(error);
+        this.$router.push({
+          name: "LoginPage",
+        });
+      })
       .finally(() => {
         document.title = this.book.name;
         console.log("成功获取书籍数据,书籍ID:" + this.$route.params.id);
@@ -472,6 +472,12 @@ export default defineComponent({
         axios
           .get("/getbook?id=" + this.$route.params.id + sort_image_by_str)
           .then((response) => (this.book = response.data))
+          .catch((error) => {
+                    console.log(error);
+                    this.$router.push({
+                        name: "LoginPage",
+                    });
+                })
           .finally(() => console.log("路由参数改变,书籍ID:" + id));
       }
     );

@@ -77,7 +77,7 @@
 
 			<!-- 滑动选择% -->
 			<n-slider v-if="imageWidth_usePercentFlag" v-model:value="singlePageWidth_Percent" :step="1" :max="100"
-				:min="10" :format-tooltip="value => `${value}%`" />
+				:min="10" :format-tooltip="(value: any) => `${value}%`" />
 
 			<!-- 开页-漫画宽度-使用百分比  -->
 			<!-- 数字输入% -->
@@ -88,7 +88,7 @@
 			</n-input-number>
 			<!-- 滑动选择% -->
 			<n-slider v-if="imageWidth_usePercentFlag" v-model:value="doublePageWidth_Percent" :step="1" :max="100"
-				:min="10" :format-tooltip="value => `${value}%`" />
+				:min="10" :format-tooltip="(value: number) => `${value}%`" />
 
 			<!-- 单页-漫画宽度-使用固定值PX -->
 			<!-- 数字输入框 -->
@@ -100,7 +100,7 @@
 
 			<!-- 滑动选择PX -->
 			<n-slider v-if="!imageWidth_usePercentFlag" v-model:value="singlePageWidth_PX" :step="10" :max="1600"
-				:min="50" :format-tooltip="value => `${value}px`" />
+				:min="50" :format-tooltip="(value: any) => `${value}px`" />
 
 			<!-- 数字输入框 -->
 			<n-input-number v-if="!imageWidth_usePercentFlag" size="small" :show-button="false"
@@ -111,7 +111,7 @@
 
 			<!-- 滑动选择PX -->
 			<n-slider v-if="!imageWidth_usePercentFlag" v-model:value="doublePageWidth_PX" :step="10" :max="1600"
-				:min="50" :format-tooltip="value => `${value}px`" />
+				:min="50" :format-tooltip="(value: any) => `${value}px`" />
 
 			<!-- 页面间隙px -->
 			<n-input-number v-if="!imageWidth_usePercentFlag" size="small" :show-button="false"
@@ -120,7 +120,7 @@
 				<template #suffix>px</template>
 			</n-input-number>
 			<n-slider v-model:value="marginOnScrollMode" :step="1" :max="100" :min="0"
-				:format-tooltip="value => `${value}px`" />
+				:format-tooltip="(value: any) => `${value}px`" />
 
 			<!-- 开关：自动切边 -->
 			<n-switch size="large" v-model:value="imageParameters.do_auto_crop"
@@ -429,7 +429,12 @@ export default defineComponent({
 					_this.loadLocalBookMark();
 					_this.nowLoading = false;
 				}, 1500);
-			})
+			}).catch((error) => {
+                    console.log(error);
+                    this.$router.push({
+                        name: "LoginPage",
+                    });
+                })
 			.finally(
 				() => {
 					document.title = this.book.name;

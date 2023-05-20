@@ -81,5 +81,6 @@
   "simplify_book_titles": "简化书名",
   "DoublePageMode": "双页模式",
   "SinglePageMode": "单页模式",
-  "marginOnScrollMode": "页面间隙:"
+  "marginOnScrollMode": "页面间隙:",
+  "login_success_hint": "登录成功，3秒后跳转到首页"
 }
