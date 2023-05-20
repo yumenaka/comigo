@@ -75,7 +75,7 @@
 <script lang="ts">
 import { useCookies } from "vue3-cookies";
 import { NIcon, NDropdown, useMessage, } from 'naive-ui'
-import { ReturnUpBack, SettingsOutline, Grid, List, Filter } from '@vicons/ionicons5'
+import { ReturnUpBack, SettingsOutline, Grid, List, Filter,Text } from '@vicons/ionicons5'
 import { h, defineComponent } from 'vue'
 import Qrcode from "@/components/Qrcode.vue";
 import screenfull from 'screenfull'
@@ -86,11 +86,12 @@ export default defineComponent({
   components: {
     NDropdown,//下拉菜单 https://www.naiveui.com/zh-CN/os-theme/components/dropdown
     NIcon,
-    // BookOutline,//图标,来自 https://www.xicons.org/#/   需要安装（npm i -D @vicons/ionicons5）与导入
+    //图标,来自 https://www.xicons.org/#/   需要安装（npm i -D @vicons/ionicons5）与导入
     ReturnUpBack,
     Grid,
     List,
     Filter,
+    Text,
     SettingsOutline, //图标,来自 https://www.xicons.org/#/   需要安装（npm i -D @vicons/ionicons5）
     Qrcode,//https://github.com/scopewu/qrcode.vue
   },
@@ -122,6 +123,15 @@ export default defineComponent({
             })
           },
           key: "list"
+        },
+        {
+          label: '文字模式',
+          icon() {
+            return h(NIcon, null, {
+              default: () => h(Text)
+            })
+          },
+          key: "text"
         },
         {
           type: 'divider',

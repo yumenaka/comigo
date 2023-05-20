@@ -169,32 +169,6 @@ export default defineComponent({
             //存储现在滚动的位置
             scrollTopSave: 0,
             resort_hint_key: "filename", //书籍的排序方式。可以按照文件名、修改时间、文件大小排序（或反向排序）
-            // options: [
-            //     {
-            //         label: this.$t("sort_by_filename"),
-            //         value: "filename",
-            //     },
-            //     {
-            //         label: this.$t("sort_by_modify_time"),
-            //         value: "modify_time",
-            //     },
-            //     {
-            //         label: this.$t("sort_by_filesize"),
-            //         value: "filesize",
-            //     },
-            //     {
-            //         label: this.$t("sort_by_filename") + this.$t("sort_reverse"),
-            //         value: "filename_reverse",
-            //     },
-            //     {
-            //         label: this.$t("sort_by_modify_time") + this.$t("sort_reverse"),
-            //         value: "modify_time_reverse",
-            //     },
-            //     {
-            //         label: this.$t("sort_by_filesize") + this.$t("sort_reverse"),
-            //         value: "filesize_reverse",
-            //     },
-            // ],
             readerMode: "scroll",
             readerModeIsScroll: true,
             bookShelfTitle: "Loading",
@@ -541,6 +515,8 @@ export default defineComponent({
             axios
                 .get("getlist?max_depth=1" + sort_image_by_str)
                 .then((response) => {
+                    console.debug(response);
+                    console.debug(response.status);
                     if (response.data !== "") {
                         this.bookshelf = response.data;
                     } else {
@@ -552,6 +528,11 @@ export default defineComponent({
                         // console.dir(response.data);
                         // console.dir(this.bookshelf);
                     }
+                }).catch((error) => {
+                    console.log(error);
+                    this.$router.push({
+                        name: "LoginPage",
+                    });
                 })
                 .finally(() => {
                     this.setBookShelfTitle();
