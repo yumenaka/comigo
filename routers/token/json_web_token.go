@@ -16,10 +16,11 @@ func NewJwtMiddleware() (*jwt.GinJWTMiddleware, error) {
 		Realm:            "comigo server",                                         //标识
 		SigningAlgorithm: "HS256",                                                 //加密算法
 		Key:              []byte(common.Config.UserName + common.Config.Password), //JWT服务端密钥，需要确保别人不知道
-		Timeout:          time.Second * 60,                                        //jwt过期时间
-		MaxRefresh:       time.Second * 60,                                        //刷新的时候，最大能延长多少时间
-		IdentityKey:      "id",                                                    //指定cookie的id
-		Authenticator:    Authenticator,                                           //认证器：根据登录信息进行用户认证。须返回用户数据作为用户标识符，它将被存储在Claim Array中。// 必须
+		//time.Duration类型 不能直接和 int类型相乘，需要先将变量转换为time.Duration类型
+		Timeout:       time.Minute * time.Duration(common.Config.Timeout), //jwt过期时间
+		MaxRefresh:    time.Minute * time.Duration(common.Config.Timeout), //刷新时，最大能延长多少时间
+		IdentityKey:   "id",                                               //指定cookie的id
+		Authenticator: Authenticator,                                      //认证器：根据登录信息进行用户认证。须返回用户数据作为用户标识符，它将被存储在Claim Array中。// 必须
 		//Authorizator:     Authorizator,                                            //授权者： 应执行已验证用户授权的回调函数。	// 可选，默认为成功。
 		SendCookie: true, //是否发送cookie
 		//验证失败后的函数调用，可用于自定义返回的 JSON 格式之类
