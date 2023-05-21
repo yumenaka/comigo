@@ -29,6 +29,7 @@ func init() {
 	//简单认证
 	rootCmd.PersistentFlags().StringVarP(&common.Config.UserName, "username", "u", "admin", "用户名")
 	rootCmd.PersistentFlags().StringVarP(&common.Config.Password, "password", "k", "admin", "密码")
+	rootCmd.PersistentFlags().IntVarP(&common.Config.Timeout, "timeout", "t", 60, "过期时间(分钟)")
 	//TLS设定
 	rootCmd.PersistentFlags().StringVar(&common.Config.CertFile, "cert", "", "tls CertFile")
 	rootCmd.PersistentFlags().StringVar(&common.Config.KeyFile, "key", "", "tls KeyFile")

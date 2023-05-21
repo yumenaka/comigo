@@ -43,7 +43,7 @@ var staticImageFS embed.FS
 // gin-jwt相关 https://github.com/appleboy/gin-jwt
 
 // 声明swagHandler，该参数不为空时才加入路由，以减少包体积
-// 通过go build -tags "doc"来打包带文档的包，直接go build来打包不带文档的包
+// 通过go build -tags "doc"来打包带文档的包，直接go build打包不带文档的包
 var swagHandler gin.HandlerFunc
 
 // StartWebServer 启动web服务
@@ -123,7 +123,7 @@ var api *gin.RouterGroup
 
 // 2、设置获取书籍信息、图片文件的 API
 func setWebAPI(engine *gin.Engine) {
-	////TODO：处理登陆 https://www.chaindesk.cn/witbook/19/329
+
 	////TODO：实现第三方认证，可参考 https://darjun.github.io/2021/07/26/godailylib/goth/
 	api = engine.Group("/api")
 

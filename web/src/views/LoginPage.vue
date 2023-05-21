@@ -1,41 +1,31 @@
 <template>
-  <div class="w-full h-screen flex flex-col">
-    <!-- <Header class="header flex-none h-12" :bookIsFolder="false" :headerTitle="getUploadTitile()" :showReturnIcon="true"
-      :showSettingsIcon="false" :bookID="null" :setDownLoadLink="false">
-    </Header> -->
-    <!-- 可悬浮  hoverable-->
-    <!-- <n-card title="注册" hoverable> 卡片内容 </n-card> -->
-    <!-- 原生Form的文档： https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/form -->
-    <!-- 原生输入表单的文档：https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/input -->
+  <n-modal :show="showModal">
+    <n-card style="width: 600px" title="登录成功" size="huge" :bordered="false" role="dialog" aria-modal="true">
+      {{ timeout / 1000 }} 秒后返回
+    </n-card>
+  </n-modal>
 
-    <n-modal :show="showModal">
-      <n-card style="width: 600px" title="登录成功" size="huge" :bordered="false" role="dialog" aria-modal="true">
-        倒计时 {{ timeout / 1000 }} 秒
-      </n-card>
-    </n-modal>
-
-    <div class="mian_area flex-grow">
-      <!-- @submit.prevent   .prevent 表示提交以后不刷新页面，prevent是preventDefault,阻止标签默认行为，有些标签有默认行为，例如a标签的跳转链接属性href等。 -->
-
-      <input type="text" v-model="username" placeholder="Username" required />
-      <input type="password" v-model="password" placeholder="Password" required />
-      <button @click="login">Login</button>
+  <div class="flex flex-col w-screen h-screen  bg-gray-50 items-center justify-center ">
+    
+    <div class="bg-gray-50 my-10 w-80 h-48 flex-grow">
+      <h2 class="text-2xl md:text-4xl font-bold text-indigo-900">用户登录</h2>
+      <n-input class="h-10 my-3" type="text" v-model="username"  placeholder="请输入用户名" required />
+      <n-input class="h-10 my-3" type="password" v-model="password"  placeholder="请输入密码" required />
+      <n-button class="h-10 w-80ad my-3" @click="login">Login</n-button>
     </div>
-
-    <Bottom class="bottom flex-none h-12" :softVersion="$store.state.server_status.ServerName
-      ? $store.state.server_status.ServerName
-      : 'Comigo'
-      "></Bottom>
   </div>
+
 </template>
 
 <script lang="ts">
 import Header from "@/components/Header.vue";
 import Bottom from "@/components/Bottom.vue";
-import { NCard, NForm, NModal } from "naive-ui";
-import { ref, defineComponent, reactive,  } from "vue";
-// import { useRouter } from 'vue-router';
+import { NCard, NForm, NFormItem, NInput, NModal, NButton } from "naive-ui";
+import { ref, defineComponent, reactive, } from "vue";
+import { useRoute, useRouter } from 'vue-router';
 import axios from "axios";
+import { PersonOutline, LockClosedOutline } from '@vicons/ionicons5'
+
 
 export default defineComponent({
   name: "LoginPage",
@@ -47,6 +37,9 @@ export default defineComponent({
     NCard, // https://www.naiveui.com/zh-CN/os-theme/components/card
     NForm, // https://www.naiveui.com/zh-CN/os-theme/components/form
     NModal,// https://www.naiveui.com/zh-CN/os-theme/components/modal
+    NButton,// https://www.naiveui.com/zh-CN/os-theme/components/button
+    NFormItem,
+    NInput,
   },
   setup() {
     // 背景颜色,颜色选择器用  // 此处不能使用this
@@ -57,17 +50,18 @@ export default defineComponent({
     const showModalRef = ref(false)
     const timeoutRef = ref(3000)
     // router オブジェクトを取得
-    // const router = useRouter();
+    const router = useRouter();
+    const route = useRoute();
     const countdown = () => {
       if (timeoutRef.value <= 0) {
         showModalRef.value = false
-        // document.referrer 属性会返回上一页的 URL，然后将其传递给 window.location.replace() 方法，页面会被替换成上一页并重新加载。
-        // 如果需要保留历史记录，可以使用 window.history.back() 方法来返回上一页，但这种方法不会刷新页面。
-        window.location.replace(document.referrer);
+        // 登录成功后，获取query中的redirect属性，然后跳转到这个地址
+        window.location.replace(route.query.redirect?.toString() || '/')
         // router.push({
         //   name: "BookShelf",
         // });
       } else {
+        console.log(document.referrer);
         timeoutRef.value -= 1000
         setTimeout(countdown, 1000)
       }
@@ -75,7 +69,7 @@ export default defineComponent({
 
     const backPage = () => {
       showModalRef.value = true
-      timeoutRef.value = 6000
+      timeoutRef.value = 3000
       countdown()
     }
 
@@ -116,7 +110,7 @@ export default defineComponent({
         password: this.password,
       })
         .then(resp => {
-          //退出登录成功后的操作,例如跳转页面
+          //退出登录成功后的操作
           if (resp.data.code === 200) {
             console.log(resp.data.user)
             this.$router.replace('/');

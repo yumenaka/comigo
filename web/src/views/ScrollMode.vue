@@ -430,9 +430,10 @@ export default defineComponent({
 					_this.nowLoading = false;
 				}, 1500);
 			}).catch((error) => {
-                    console.log(error);
+                    // console.log(error);
                     this.$router.push({
                         name: "LoginPage",
+                        query: {redirect: window.location.href} 
                     });
                 })
 			.finally(

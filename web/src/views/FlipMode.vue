@@ -454,9 +454,10 @@ export default defineComponent({
       .get("/getbook?id=" + this.$route.params.id + sort_image_by_str)
       .then((response) => (this.book = response.data))
       .catch((error) => {
-        console.log(error);
+        // console.log(error);
         this.$router.push({
           name: "LoginPage",
+          query: { redirect: window.location.href }
         });
       })
       .finally(() => {
@@ -473,11 +474,11 @@ export default defineComponent({
           .get("/getbook?id=" + this.$route.params.id + sort_image_by_str)
           .then((response) => (this.book = response.data))
           .catch((error) => {
-                    console.log(error);
-                    this.$router.push({
-                        name: "LoginPage",
-                    });
-                })
+            console.log(error);
+            this.$router.push({
+              name: "LoginPage",
+            });
+          })
           .finally(() => console.log("路由参数改变,书籍ID:" + id));
       }
     );
