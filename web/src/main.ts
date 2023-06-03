@@ -3,40 +3,33 @@ import VueAxios from "vue-axios";
 import axios from "axios";
 import App from "@/App.vue";
 import router from "@/router"; //vue-router
-import store from "@/store"; //VueX
-// import VueCookies from "vue3-cookies";
+//新状态管理库，用来代替vuex
+import { createPinia } from 'pinia'
+// // useSocketStore为pinia的socket配置文件
+// import { useSocketStoreWithOut } from './store/useSocketStore';
+// const store = useSocketStoreWithOut();
+//VueX
+import store from "@/store"; 
+// Tailwind CSS
+import "./index.css";
 import VueLazyLoad from "vue3-lazyload";
 import i18n from "@/locales";
 import VueNativeSock from "vue-native-websocket-vue3";
 
-// 后端改成 /api/book/:id的形式
+// 后端调用统一为/api/book/:id的形式
 axios.defaults.baseURL = "/api";
 
-// axios 全局配置拦截器  每次向后端请求携带 头信息 Authorization。不知为什么不起作用，目前是cookie验证。
-axios.interceptors.request.use(
-    (config) => {
-        if (sessionStorage.JWT_TOKEN) {
-            // 判断是否存在token，如果存在的话，则每个http header都加上token
-            config.headers.Authorization = "Bearer "+`${sessionStorage.JWT_TOKEN}`;
-            // document.cookie= "id:"+`${sessionStorage.JWT_TOKEN}`;
-        }
-        return config;
-    },
-    (err) => {
-        return Promise.reject(err);
-    }
-);
-
-// createApp(App).use(store).use(router).use(VueAxios,axios).mount('#app')
 const app = createApp(App);
 app.use(i18n);
 app.use(VueAxios, axios);
 // 传入 injection key
+//VueX
 app.use(store);
+//新状态管理库Pinia，用来代替vuex
+app.use(createPinia())
 app.use(router);
 
-// Tailwind CSS
-import "./index.css";
+
 
 // vue3-lazyload
 // https://github.com/murongg/vue3-lazyload
@@ -78,6 +71,7 @@ app.use(VueLazyLoad, {
         },
     },
 });
+
 
 // 使用VueNativeSock插件，并进行相关配置
 // 参考https://github.com/likaia/vue-native-websocket-vue3
