@@ -81,5 +81,8 @@
   "simplify_book_titles": "Simplify Title",
   "DoublePageMode": "DoublePage",
   "SinglePageMode": "SinglePage",
-  "marginOnScrollMode": "margin bottom:"
+  "marginOnScrollMode": "margin bottom:",
+  "login_success_hint": "Login successfully, return to previous page",
+  "server_setting": "comigo server setting",
+  "logout": "logout"
 }

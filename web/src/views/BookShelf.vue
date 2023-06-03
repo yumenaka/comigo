@@ -271,7 +271,6 @@ export default defineComponent({
         }
 
         // 当前颜色
-
         let tempBackgroundColor = localStorage.getItem("BackgroundColor");
         if (typeof tempBackgroundColor === "string") {
             this.model.backgroundColor = tempBackgroundColor;

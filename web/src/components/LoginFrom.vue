@@ -3,7 +3,7 @@
         <!-- @submit.prevent   .prevent 表示提交以后不刷新页面，prevent是preventDefault,阻止标签默认行为，有些标签有默认行为，例如a标签的跳转链接属性href等。 -->
         <form @submit.prevent="submit">
             <input type="text" v-model="username" placeholder="Username" required />
-            <input type="password" v-model="password" placeholder="Password" required />
+            <input type="password" v-model="password" onkeydown='if(event.keyCode==13){gosubmit();}' volarvolar placeholder="Password" required />
             <button type="submit">Login</button>
         </form>
     </div>

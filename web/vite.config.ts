@@ -53,7 +53,7 @@ export default defineConfig({
     //https://zxuqian.cn/vite-proxy-config/
     proxy: {
       //正则表达式：https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Regular_Expressions
-      "^/api/(getstatus|getlist|getbook|getfile|config.toml|comigo.reg|qrcode.png|redirect|upload|form|raw|login|form).*":
+      "^/api/(getstatus|getlist|getbook|getfile|config.toml|comigo.reg|qrcode.png|redirect|upload|form|raw|login|logout|form).*":
         {
           target: "http://127.0.0.1:1234/",
           // 允许跨域:是否改写 origin，设置为 true 之后，就会把请求 API header 中的 origin，改成跟 target 里边的域名一样

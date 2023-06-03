@@ -28,7 +28,8 @@
         </template>
         {{ $t('do_you_reset_all_settings') }}
       </n-popconfirm>
-
+      <n-button class="my-2">{{ $t('server_setting') }}</n-button>
+      <n-button class="my-2" @click="logout">{{ $t('logout') }}</n-button>
       <!-- 抽屉：自定义底部 -->
       <template #footer>
         <n-button @click="onFullSreen">{{ $t('fullscreen') }}</n-button>
@@ -119,6 +120,24 @@ export default defineComponent({
     },
   },
   methods: {
+    logout() {
+      console.log("logout");
+      this.axios.post("/logout",)
+        .then(resp => {
+          //退出登录成功后的操作
+          if (resp.data.code === 200) {
+            console.log(resp.data.user)
+            this.$router.replace('/');
+          } else {
+            console.log(resp.data.msg)
+          }
+          //刷新网页
+          location.reload();
+        })
+        .catch(failResponse => { })//失败时的操作
+    },
+
+
     //进入全屏，由screenfull实现 https://github.com/sindresorhus/screenfull
     //全屏 API： https://developer.mozilla.org/zh-CN/docs/Web/API/Fullscreen_API
     onFullSreen() {

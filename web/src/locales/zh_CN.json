@@ -82,5 +82,7 @@
   "DoublePageMode": "双页模式",
   "SinglePageMode": "单页模式",
   "marginOnScrollMode": "页面间隙:",
-  "login_success_hint": "登录成功，3秒后跳转到首页"
+  "login_success_hint": "登录成功，返回原页面",
+  "server_setting": "comigo服务器设定",
+  "logout": "退出登录"
 }
