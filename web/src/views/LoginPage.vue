@@ -1,20 +1,20 @@
 <template>
   <n-modal :show="showModal">
     <n-card style="width: 600px" title="登录成功" size="huge" :bordered="false" role="dialog" aria-modal="true">
-      {{ timeout / 1000 }} 秒后返回
+      返回
     </n-card>
   </n-modal>
 
   <div class="flex flex-col w-screen h-screen  bg-gray-50 items-center justify-center ">
-    
+
     <div class="bg-gray-50 my-10 w-80 h-48 flex-grow">
       <h2 class="text-2xl md:text-4xl font-bold text-indigo-900">用户登录</h2>
-      <n-input class="h-10 my-3" type="text" v-model="username"  placeholder="请输入用户名" required />
-      <n-input class="h-10 my-3" type="password" v-model="password"  placeholder="请输入密码" required />
+      <n-input class="h-10 my-3" type="text" v-model="username" placeholder="请输入用户名" required />
+      <n-input class="h-10 my-3" type="password" v-model="password" placeholder="请输入密码" required
+        @keydown.enter.native="inputEnter" />
       <n-button class="h-10 w-80ad my-3" @click="login">Login</n-button>
     </div>
   </div>
-
 </template>
 
 <script lang="ts">
@@ -48,7 +48,7 @@ export default defineComponent({
       backgroundColor: "#E0D9CD",
     });
     const showModalRef = ref(false)
-    const timeoutRef = ref(3000)
+    const timeoutRef = ref(1000)
     // router オブジェクトを取得
     const router = useRouter();
     const route = useRoute();
@@ -119,6 +119,9 @@ export default defineComponent({
           }
         })
         .catch(failResponse => { })//失败时的操作
+    },
+    inputEnter(e: any) {
+      this.login(e);
     },
     login(e: any) {
       e.preventDefault() //阻止浏览器默认行为

@@ -1,5 +1,5 @@
-# Comigo设置(config.toml)，放在执行目录中，或$HOME/.config/comigo/下。可用“comi --generate-config”生成本文件
-# # 网页端口
+# Comigo设置文件(config.toml)，放在执行目录中，或$HOME/.config/comigo/下。可用“comi --generate-config”生成本文件
+# 网页端口
 Port = 1234
 # 自定义二维码显示的主机名
 Host = ''
@@ -17,16 +17,22 @@ DefaultMode = 'scroll'
 UserName = 'admin'
 # 访问限制：密码。需要设置用户名。
 Password = 'admin'
+# cookie过期时间。单位为分钟。默认180分钟
+Timeout = 180
 # Https证书，同时设置KeyFile则启用HTTPS协议
 CertFile = ''
 # Https证书，同时设置CertFile则启用HTTPS协议
 KeyFile = ''
 # 是否保存web图片缓存，可以加快二次读取，但会占用硬盘空间
-CacheFileEnable = true
+CacheEnable = true
 # web图片缓存存储位置，默认系统临时文件夹
-CacheFilePath = '.comigo'
+CachePath = '.comigo'
 # 退出程序的时候，清理web图片缓存
-CacheFileClean = true
+CacheClean = true
+# 启用那个文件撒上传功能
+EnableUpload = true
+# 上传文件的存储位置，默认在当前执行目录下创建 ComigoUpload 文件夹
+UploadPath = ''
 # 启用本地数据库，保存扫描到的书籍数据
 EnableDatabase = false
 # 启用本地数据库时，扫描完成后，清除不存在的书籍
@@ -55,6 +61,7 @@ LogFileName = 'comigo.log'
 ZipFileTextEncoding = 'gbk'
 # 后台启动FrpClient
 EnableFrpcServer = false
+
 # FrpClient设置
 [FrpConfig]
 # 手动设定frpc可执行程序的路径,默认为frpc
@@ -65,4 +72,3 @@ Token = 'token_secret_sample'
 FrpType = 'tcp'
 RemotePort = 50000
 RandomRemotePort = true
-

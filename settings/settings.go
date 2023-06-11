@@ -19,7 +19,7 @@ type ServerSettings struct {
 	DefaultMode          string          `json:"default_mode" comment:"默认阅读模式，默认为空，可以设置为scroll或flip"`
 	UserName             string          `json:"-" comment:"访问限制：用户名。需要设置密码"`
 	Password             string          `json:"-" comment:"访问限制：密码。需要设置用户名。"`
-	Timeout              int             `json:"-" comment:"cookie过期时间。单位为分钟。默认60分钟"`
+	Timeout              int             `json:"-" comment:"cookie过期时间。单位为分钟。默认180分钟"`
 	CertFile             string          `json:"-" comment:"Https证书，同时设置KeyFile则启用HTTPS协议"`
 	KeyFile              string          `json:"-" comment:"Https证书，同时设置CertFile则启用HTTPS协议"`
 	CacheEnable          bool            `json:"-" comment:"是否保存web图片缓存，可以加快二次读取，但会占用硬盘空间"`

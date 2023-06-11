@@ -318,6 +318,13 @@ export default defineComponent({
         },
         //查看服务器是否windows，来决定显示不显示reg文件下载按钮
         remoteIsWindows() {
+            // 非空判断
+            if (!this.$store.state.server_status) {
+                return false;
+            }
+            if (!this.$store.state.server_status.OSInfo) {
+                return false;
+            }
             if (!this.$store.state.server_status.OSInfo.description) {
                 return false;
             }
