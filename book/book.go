@@ -29,9 +29,10 @@ import (
 )
 
 var (
-	mapBooks      = make(map[string]*Book) //实际存在的书，通过扫描生成
-	mapBookGroups = make(map[string]*Book) //通过分析路径与深度生成的书组
-	Stores        = Bookstores{
+	status         = make(chan int, 1)
+	mapBooks       = make(map[string]*Book) //实际存在的书，通过扫描生成
+	mapBookFolders = make(map[string]*Book) //通过分析路径与深度生成的书组
+	Stores         = Bookstores{
 		mapBookstores: make(map[string]*singleBookstore),
 		SortBy:        "name",
 	}
@@ -117,15 +118,15 @@ func New(filePath string, modified time.Time, fileSize int64, storePath string, 
 			}
 		}
 	}
-	for _, groupBook := range mapBookGroups {
+	for _, boolFolder := range mapBookFolders {
 		fileAbaPath, err := filepath.Abs(filePath)
 		if err != nil {
 			fmt.Println(err, fileAbaPath)
-			if groupBook.FilePath == filePath && groupBook.ParentFolder == storePath {
+			if boolFolder.FilePath == filePath && boolFolder.ParentFolder == storePath {
 				return nil, errors.New("Duplicate books:" + filePath)
 			}
 		} else {
-			if groupBook.FilePath == fileAbaPath {
+			if boolFolder.FilePath == fileAbaPath {
 				return nil, errors.New("Duplicate books:" + fileAbaPath)
 			}
 		}
@@ -376,7 +377,7 @@ func GetBookInfoListByMaxDepth(depth int, sortBy string) (*BookInfoList, error) 
 
 func GetBookInfoListByBookGroupBookID(BookID string, sortBy string) (*BookInfoList, error) {
 	var infoList BookInfoList
-	book := mapBookGroups[BookID]
+	book := mapBookFolders[BookID]
 	if book != nil {
 		//首先加上所有真实的书籍
 		for _, b := range book.ChildBook {
@@ -544,7 +545,7 @@ func getShortBookID(fullID string, minLength int) string {
 				canUse = false
 			}
 		}
-		for key := range mapBookGroups {
+		for key := range mapBookFolders {
 			if strings.HasPrefix(key, fullID[0:i]) {
 				canUse = false
 			}
