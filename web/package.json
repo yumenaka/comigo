@@ -11,7 +11,7 @@
     "@vitejs/plugin-legacy": "^4.0.4",
     "@vueuse/core": "^10.1.2",
     "axios": "^1.4.0",
-    "core-js": "^3.30.2",
+    "core-js": "^3.31.0",
     "js-md5": "^0.7.3",
     "pinia": "^2.1.3",
     "screenfull": "^6.0.2",
@@ -27,8 +27,8 @@
     "vuex": "^4.1.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.22.1",
-    "@babel/eslint-parser": "^7.21.8",
+    "@babel/core": "^7.22.5",
+    "@babel/eslint-parser": "^7.22.5",
     "@originjs/vite-plugin-commonjs": "^1.0.1",
     "@types/js-md5": "^0.7.0",
     "@types/vue-i18n": "^7.0.0",
@@ -45,11 +45,11 @@
     "naive-ui": "^2.34.4",
     "postcss": "^8.4.24",
     "tailwindcss": "^3.3.2",
-    "terser": "^5.17.7",
+    "terser": "^5.18.0",
     "typescript": "~5.1.3",
     "vite": "^4.3.9",
     "vite-plugin-env-compatible": "^1.1.1",
     "vite-plugin-html": "3.2.0",
-    "vite-plugin-vue-devtools": "^0.0.22"
+    "vite-plugin-vue-devtools": "^0.2.0"
   }
 }

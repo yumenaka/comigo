@@ -1,14 +1,7 @@
 <template>
-  <!-- class='w-28 md:w-33 lg:w-48'   Width of 28 by default, 32 on medium screens, and 48 on large screens -->
+ 
   <!-- 响应式设计：https://www.tailwindcss.cn/docs/responsive-design -->
-  <!-- sm<640px  md<768px lg<1024px  lg<1280px 2xl<1536px-->
-  <!-- 宽，只有一些典型值：https://www.tailwindcss.cn/docs/width  -->
-  <!-- 高，只有一些典型值：https://www.tailwindcss.cn/docs/height -->
-  <!-- 什么是REM：https://www.runoob.com/w3cnote/px-em-rem-different.html -->
-  <!-- 边框圆角 rounded-xl：https://www.tailwindcss.cn/docs/border-radius -->
-  <!-- 盒阴影 shadow: https://www.tailwindcss.cn/docs/box-shadow -->
-  <!-- 外边距 m-x m-y  https://www.tailwindcss.cn/docs/margin -->
-  <!-- 字体粗细： https://www.tailwindcss.cn/docs/font-weight -->
+
   <a :href="openURL" :target="a_target">
     <div
       class="relative w-32 h-44 mx-4 my-4 bg-gray-200 rounded shadow-xl hover:shadow-2xl ring-1 ring-gray-400 hover:ring hover:ring-blue-500 .bg-top bg-cover"
@@ -41,8 +34,8 @@ import { useCookies } from "vue3-cookies";
 import { defineComponent } from "vue";
 
 export default defineComponent({
-  name: "BookCard",
-  props: ["title", "image_src", "id", "readerMode", "showTitle", "childBookNum", "openURL", "a_target", "simplifyTitle"],
+  name: "BookCover",
+  props: ["bookCardMode","title", "image_src", "id", "readerMode", "showTitle", "childBookNum", "openURL", "a_target", "simplifyTitle"],
   components: {
     // NCard,
     // NEllipsis,

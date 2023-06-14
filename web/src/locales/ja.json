@@ -48,9 +48,9 @@
   "DownloadSampleConfigFile": "設定ファイルのダウンロード",
   "select-language": "言語を選択する",
   "scan_qrcode": "QRコード：",
-  "sort_by_filename": "ファイル名",
-  "sort_by_filesize": "ファイルサイズ",
-  "sort_by_modify_time": "更新日時",
+  "sort_by_filename": "ファイル名(a-z)",
+  "sort_by_filesize": "ファイルサイズ(大きい->小さい)",
+  "sort_by_modify_time": "更新日時（古い->新しい）",
   "sort_reverse": "（逆）",
   "fullscreen": "フルスクリーン",
   "sort_by_default": "圧縮順序",
@@ -84,5 +84,8 @@
   "marginOnScrollMode": "ページ ギャップ:",
   "login_success_hint": "ログイン成功、前ページに戻る",
   "server_setting": "comigo サーバー設定",
-  "logout": "ログアウト"
+  "logout": "ログアウト",
+  "sort_by_filename_reverse": "ファイル名(z-a)",
+  "sort_by_modify_time_reverse": "更新日時（新しい->古い）",
+  "sort_by_filesize_reverse": "ファイルサイズ(小さい->大きい)"
 }
