@@ -71,11 +71,6 @@ export default defineComponent({
         //开头的特殊字符
         short_title = short_title.replace(/^[\\\-`~!@#$^&*()=|{}':;'@#￥……&*（）——|{}‘；：”“'。，、？]/, "");
       }
-      //删减到空字符串，就不删减了
-      if (short_title.length == 0) {
-        return this.title;
-      }
-
       if (short_title.length <= 15) {
         return short_title;
       }

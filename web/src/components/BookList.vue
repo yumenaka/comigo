@@ -1,30 +1,27 @@
 <template>
- 
   <!-- 响应式设计：https://www.tailwindcss.cn/docs/responsive-design -->
+  <!-- 文本对齐:       https://www.tailwindcss.cn/docs/text-align -->
+  <!-- 定位:          https://www.tailwindcss.cn/docs/top-right-bottom-left -->
+  <!-- 背景色:        https://www.tailwindcss.cn/docs/background-color -->
+  <!-- 背景色不透明度: https://www.tailwindcss.cn/docs/background-opacity -->
+  <!-- 文本溢出：      https://www.tailwindcss.cn/docs/text-overflow -->
+  <!-- 字体粗细：     https://www.tailwindcss.cn/docs/font-weight -->
 
-  <a :href="openURL" :target="a_target">
+  <a class="flex flex-row justify-between w-11/12 max-w-md  rounded shadow-xl hover:shadow-2xl ring-1 ring-gray-400 hover:ring hover:ring-blue-500"
+    :href="openURL" :target="a_target">
     <div
-      class="relative w-32 h-44 mx-4 my-4 bg-gray-200 rounded shadow-xl hover:shadow-2xl ring-1 ring-gray-400 hover:ring hover:ring-blue-500 .bg-top bg-cover"
+      class="w-1/3 h-44 mx-4 my-4 bg-gray-200 rounded shadow-xl hover:shadow-2xl ring-1 ring-gray-400 hover:ring hover:ring-blue-500 .bg-top bg-cover"
       :style="getBackgroundImageStyle()">
       <div v-if="childBookNum != ''" class="absolute inset-x-0 top-0 text-right">
         <span class="text-2xl text-yellow-500 font-black text-shadow">{{ childBookNum }}</span>
       </div>
-      <!-- 文本对齐:       https://www.tailwindcss.cn/docs/text-align -->
-      <!-- 定位:          https://www.tailwindcss.cn/docs/top-right-bottom-left -->
-      <!-- 背景色:        https://www.tailwindcss.cn/docs/background-color -->
-      <!-- 背景色不透明度: https://www.tailwindcss.cn/docs/background-opacity -->
-      <!-- 文本溢出：      https://www.tailwindcss.cn/docs/text-overflow -->
-      <!-- 字体粗细：     https://www.tailwindcss.cn/docs/font-weight -->
-      <div v-if="showTitle"
-        class="absolute inset-x-0 bottom-0 h-1/4 bg-gray-100 bg-opacity-80 font-semibold border-blue-800 rounded-b">
-        <!-- 如果把链接的 target 属性设置为 "_blank"，该链接会在新窗口中打开。 -->
-        <span class="absolute inset-x-0  font-bold top-0 p-1 align-middle">{{
-            shortTitle
-        }}</span>
-      </div>
     </div>
-  </a>
+    <!-- 如果把链接的 target 属性设置为 "_blank"，该链接会在新窗口中打开。 -->
+    <div class="w-2/3 flex flex-col   top-0 p-4 align-middle  border-blue-800 rounded-b">
+      <div class="font-bold text-xl">{{  shortTitle }}</div>
+    </div>
 
+  </a>
 </template>
 
 <script lang="ts">
@@ -35,7 +32,7 @@ import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "BookCover",
-  props: ["bookCardMode","title", "image_src", "id", "readerMode", "showTitle", "childBookNum", "openURL", "a_target", "simplifyTitle"],
+  props: ["bookCardMode", "title", "image_src", "id", "readerMode", "showTitle", "childBookNum", "openURL", "a_target", "simplifyTitle"],
   components: {
     // NCard,
     // NEllipsis,
@@ -64,11 +61,6 @@ export default defineComponent({
         //开头的特殊字符
         short_title = short_title.replace(/^[\\\-`~!@#$^&*()=|{}':;'@#￥……&*（）——|{}‘；：”“'。，、？]/, "");
       }
-      //删减到空字符串，就不删减了
-      if (short_title.length == 0) {
-        return this.title;
-      }
-
       if (short_title.length <= 15) {
         return short_title;
       }
@@ -120,6 +112,4 @@ export default defineComponent({
 });
 </script>
 //自定义样式
-<style scoped>
-
-</style>
+<style scoped></style>
