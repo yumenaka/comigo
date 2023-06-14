@@ -77,63 +77,63 @@ Windows_arm64:
 #Linux-armv5,GOARM=5：使用软件浮点；当 CPU 没有 VFP 协处理器时
 Linux-armv5:
 	GOARCH=arm GOOS=linux GOARM=5 $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME) 
-ifdef UPX
-	upx -9 $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME)
-endif
+#ifdef UPX
+#	upx -9 $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME)
+#endif
 	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME)
 	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
 
 #Linux-armv6 RaspberryPi1,2,zero,GOARM=6：仅使用 VFPv1；交叉编译时默认；通常是 ARM11 或更好的内核（也支持 VFPv2 或更好的内核）
 Linux-armv6:
 	GOARCH=arm GOOS=linux GOARM=6 $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME) 
-ifdef UPX
-	upx -9 $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME)
-endif
+#ifdef UPX
+#	upx -9 $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME)
+#endif
 	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME)
 	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
 
 #Linux-armv7，RaspberryPi3 官方32位armv7l系统。GOARM=7：使用 VFPv3；通常是 Cortex-A 内核.
 Linux-armv7:
 	GOARCH=arm GOOS=linux GOARM=7 $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME) 
-ifdef UPX
-	upx -9 $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME)
-endif
+#ifdef UPX
+#	upx -9 $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME)
+#endif
 	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME)
 	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
 
 #linux，64位arm
 Linux-armv8:
 	GOARCH=arm64 GOOS=linux $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME) 
-ifdef UPX
-	upx -9 $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME)
-endif
+#ifdef UPX
+#	upx -9 $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME)
+#endif
 	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME)
 	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
 
 #Linux，x86_64
 Linux_x86_64:
 	GOARCH=amd64 GOOS=linux $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME) 
-ifdef UPX
-	upx -9 $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME)
-endif
+#ifdef UPX
+#	upx -9 $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME)
+#endif
 	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME)
 	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
 
 #Linux，i386
 Linux_i386:
 	GOARCH=386 GOOS=linux $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME) 
-ifdef UPX
-	upx -9 $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME)
-endif
+#ifdef UPX
+#	upx -9 $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME)
+#endif
 	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME)
 	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
 
 #MACOS x86_64
 MacOS_x86_64:
 	GOARCH=amd64 GOOS=darwin $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME)
-ifdef UPX
-	upx -9 $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME)
-endif
+#ifdef UPX
+#	upx -9 $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME)
+#endif
 	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME)
 	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
 	

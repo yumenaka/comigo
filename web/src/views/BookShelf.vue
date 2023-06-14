@@ -6,8 +6,10 @@
         </Header>
 
         <!-- 渲染书架部分 有书的时候显示书  没有的时候显示上传控件-->
+
+
         <!-- Flex Grow 控制 flex 项目放大的功能类 https://www.tailwindcss.cn/docs/flex-grow -->
-        <div class="bookshelf flex-grow">
+        <div v-if="bookCardMode == 'gird'" class="bookshelf flex-grow">
             <!-- 使用tailwindcss提供的flex布局： -->
             <!-- flex-row：https://www.tailwindcss.cn/docs/flex-direction -->
             <!-- 使用 flex-wrap 允许 flex 项目换行 https://www.tailwindcss.cn/docs/flex-wrap -->
@@ -16,8 +18,9 @@
             <!-- 有书的时候显示书 -->
             <div class="flex flex-row flex-wrap justify-center min-h-48">
                 <BookCard v-for="(book_info, key) in bookshelf" :key="key" :title="book_info.name"
-                    :simplifyTitle="simplifyTitle" :id="book_info.id" :image_src="book_info.cover.url"
-                    :readerMode="readerMode" :showTitle="bookCardShowTitleFlag" :childBookNum="book_info.child_book_num > 0
+                    :bookCardMode="bookCardMode" :simplifyTitle="simplifyTitle" :id="book_info.id"
+                    :image_src="book_info.cover.url" :readerMode="readerMode" :showTitle="bookCardShowTitleFlag"
+                    :childBookNum="book_info.child_book_num > 0
                         ? 'x' + book_info.child_book_num
                         : book_info.book_type === 'dir'
                             ? 'dir'
@@ -31,6 +34,44 @@
                 </BookCard>
             </div>
         </div>
+
+
+
+        <div v-if="bookCardMode == 'list'" class="bookshelf flex-grow">
+            <div class="flex flex-col justify-center items-center">
+                <BookList v-for="(book_info, key) in bookshelf" :key="key" :title="book_info.name"
+                    :simplifyTitle="simplifyTitle" :id="book_info.id" :image_src="book_info.cover.url"
+                    :readerMode="readerMode" :showTitle="bookCardShowTitleFlag" :childBookNum="book_info.child_book_num > 0
+                        ? 'x' + book_info.child_book_num
+                        : book_info.book_type === 'dir'
+                            ? 'dir'
+                            : ''
+                        " :openURL="getBookCardOpenURL(
+        book_info.id,
+        book_info.book_type,
+        book_info.name
+    )
+        " :a_target="getBookCardTarget(book_info.book_type)">
+                </BookList>
+            </div>
+        </div>
+
+
+
+        <div v-if="bookCardMode == 'text'" class="bookshelf flex-grow">
+            <div class="flex flex-row flex-wrap justify-center min-h-48">
+                <BookText v-for="(book_info, key) in bookshelf" :key="key" :title="book_info.name"
+                    :simplifyTitle="simplifyTitle" :openURL="getBookCardOpenURL(
+                        book_info.id,
+                        book_info.book_type,
+                        book_info.name
+                    )
+                        "></BookText>
+            </div>
+        </div>
+
+
+
         <!-- 返回顶部的圆形按钮，向上滑动的时候出现 -->
         <n-back-top class="bg-blue-200" :show="showBackTopFlag" type="info" :right="20" :bottom="20" />
 
@@ -91,6 +132,8 @@ import { NColorPicker, NSwitch, NButton, NSelect, NBackTop, NIcon } from "naive-
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
 import BookCard from "@/components/BookCard.vue";
+import BookList from "@/components/BookList.vue";
+import BookText from "@/components/BookText.vue";
 import Bottom from "@/components/Bottom.vue";
 import { h, CSSProperties, defineComponent, reactive } from "vue";
 import { useCookies } from "vue3-cookies"; // https://github.com/KanHarI/vue3-cookies
@@ -104,6 +147,8 @@ export default defineComponent({
         Header, // 自定义页头
         Drawer, // 自定义抽屉
         BookCard, //自定义书本
+        BookList,
+        BookText,
         Bottom, // 自定义页尾
         NButton, //按钮,来自:https://www.naiveui.com/zh-CN/os-theme/components/button
         NSwitch,
@@ -161,6 +206,7 @@ export default defineComponent({
     },
     data() {
         return {
+            bookCardMode: "gird",//gird,list,text
             simplifyTitle: true, //简化显示标题
             //是否显示回到顶部按钮
             showBackTopFlag: false,
@@ -340,6 +386,12 @@ export default defineComponent({
         },
         //根据文件名、修改时间、文件大小等参数重新排序
         onResort(key: string) {
+
+            if (key === "gird" || key === "list" || key === "text") {
+                this.bookCardMode = key;
+                return;
+            }
+
             this.resort_hint_key = key;
             localStorage.setItem("BookShelf_SortBy", key);
             if (this.$route.params.group_id) {
@@ -521,8 +573,8 @@ export default defineComponent({
             axios
                 .get("getlist?max_depth=1" + sort_image_by_str)
                 .then((response) => {
-                    console.debug(response);
-                    console.debug(response.status);
+                    // console.debug(response);
+                    // console.debug(response.status);
                     if (response.data !== "") {
                         this.bookshelf = response.data;
                     } else {

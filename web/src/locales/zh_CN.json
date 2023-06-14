@@ -48,9 +48,9 @@
   "DownloadSampleConfigFile": "下载示例配置文件",
   "select-language": "选择语言",
   "scan_qrcode": "扫码阅读：",
-  "sort_by_filename": "文件名",
-  "sort_by_filesize": "文件大小",
-  "sort_by_modify_time": "修改时间",
+  "sort_by_filename": "文件名(a-z)",
+  "sort_by_filesize": "文件大小(从大到小)",
+  "sort_by_modify_time": "修改时间(从旧到新)",
   "sort_by_default": "保持原样",
   "sort_reverse": "（反向）",
   "fullscreen": "切换全屏",
@@ -84,5 +84,8 @@
   "marginOnScrollMode": "页面间隙:",
   "login_success_hint": "登录成功，返回原页面",
   "server_setting": "comigo服务器设定",
-  "logout": "退出登录"
+  "logout": "退出登录",
+  "sort_by_filename_reverse": "文件名(z-a)",
+  "sort_by_modify_time_reverse": "修改时间(从新到旧)",
+  "sort_by_filesize_reverse": "文件大小(从小到大)"
 }

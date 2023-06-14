@@ -48,9 +48,9 @@
   "select-language": "Select Language",
   "DownloadSampleConfigFile": "Download sample config ",
   "scan_qrcode": "QRCode:",
-  "sort_by_filename": "Filename",
-  "sort_by_filesize": "Filesize",
-  "sort_by_modify_time": "Modify Time",
+  "sort_by_filename": "Filename(a-z)",
+  "sort_by_filesize": "Filesize(Large to Small)",
+  "sort_by_modify_time": "Modify Time（Old to New）",
   "sort_reverse": "(Reverse)",
   "fullscreen": "Fullscreen",
   "sort_by_default": "default sort",
@@ -84,5 +84,8 @@
   "marginOnScrollMode": "margin bottom:",
   "login_success_hint": "Login successfully, return to previous page",
   "server_setting": "comigo server setting",
-  "logout": "logout"
+  "logout": "logout",
+  "sort_by_filename_reverse": "Filename(z-a)",
+  "sort_by_modify_time_reverse": "Modify Time（Newto Old）",
+  "sort_by_filesize_reverse": "Filesize(Small to Large)"
 }
