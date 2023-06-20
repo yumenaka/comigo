@@ -153,4 +153,3 @@ require (
 //清理mod缓存
 // go clean -modcache
 
-replace github.com/yumenaka/archiver/v4 v4.0.0-alpha.1.0.20221203043821-726a0d696b0e => github.com/yumenaka/archiver/v4 v4.0.0-alpha.1.0.20230603040310-e2d8e05e845f
