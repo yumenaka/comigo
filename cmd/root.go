@@ -18,7 +18,6 @@ import (
 	"github.com/yumenaka/comi/common"
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/routers"
-	"github.com/yumenaka/comi/storage"
 )
 
 var viperInstance *viper.Viper
@@ -200,94 +199,6 @@ var rootCmd = &cobra.Command{
 	},
 }
 var databaseBookList []*book.Book
-
-// initBookStores 解析命令,扫描书库
-func initBookStores(args []string) {
-	//初始化数据库
-	if common.Config.EnableDatabase {
-		//从数据库里面读取书籍信息，持久化
-		storage.InitDatabase(common.ConfigFile)
-		var dataErr error
-		databaseBookList, dataErr = storage.GetArchiveBookFromDatabase()
-		if dataErr != nil {
-			fmt.Println(dataErr)
-		}
-	}
-	//2、搜索基本路径，来自程序启动时的参数
-	ScanDefaultPath(args)
-	//3、扫描配置文件指定的书籍库
-	ScanStorePathInConfig()
-	//4、扫描默认上传文件夹
-	ReScanUploadPath()
-	//5、保存扫描结果到数据库
-	SaveResultsToDatabase()
-	//6、通过“可执行文件名”设置部分默认参数,目前不生效
-	common.Config.SetByExecutableFilename()
-}
-
-// ScanDefaultPath 2、搜索基本路径，来自程序启动时的参数
-func ScanDefaultPath(args []string) {
-	//决定如何扫描，扫描哪个路径
-	//没有指定路径或文件的情况下
-	if len(args) == 0 {
-		cmdPath := path.Dir(os.Args[0]) //扫描程序执行的路径
-		addList, err := common.ScanAndGetBookList(cmdPath, databaseBookList)
-		if err != nil {
-			fmt.Println(locale.GetString("scan_error"), cmdPath, err)
-		} else {
-			common.AddBooksToStore(addList, cmdPath)
-		}
-	} else {
-		//指定了多个参数的话，都扫描一遍
-		for _, p := range args {
-			addList, err := common.ScanAndGetBookList(p, databaseBookList)
-			if err != nil {
-				fmt.Println(locale.GetString("scan_error"), p, err)
-			} else {
-				common.AddBooksToStore(addList, p)
-			}
-		}
-	}
-}
-
-// ScanStorePathInConfig 3、扫描配置文件指定的的书籍库
-func ScanStorePathInConfig() {
-	if len(common.Config.StoresPath) > 0 {
-		for _, p := range common.Config.StoresPath {
-			addList, err := common.ScanAndGetBookList(p, databaseBookList)
-			if err != nil {
-				fmt.Println(locale.GetString("scan_error"), p, err)
-			} else {
-				common.AddBooksToStore(addList, p)
-			}
-		}
-	}
-}
-
-// SaveResultsToDatabase 4，保存扫描结果到数据库，并清理不存在的书籍
-func SaveResultsToDatabase() {
-	if common.Config.EnableDatabase {
-		AllBook := book.GetAllBookList()
-		//设置清理数据库的时候，是否清理没扫描到的书籍信息
-		if common.Config.ClearDatabase {
-			for _, checkBook := range databaseBookList {
-				needClear := true //这条数据是否需要清理
-				for _, b := range AllBook {
-					if b.BookID == checkBook.BookID {
-						needClear = false //如果扫到了这本书,就不清理相关数据
-					}
-				}
-				if needClear {
-					storage.ClearBookData(checkBook, common.Config.Debug)
-				}
-			}
-		}
-		saveErr := storage.SaveBookListToDatabase(AllBook)
-		if saveErr != nil {
-			fmt.Println(saveErr)
-		}
-	}
-}
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
