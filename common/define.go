@@ -1,28 +1,10 @@
 package common
 
 import (
-	"fmt"
-	"net/http"
-	"os"
-	"path"
-
-	"github.com/mitchellh/go-homedir" //不使用 cgo 获取用户主目录的第三方库，支持交叉编译
-
 	"github.com/yumenaka/comi/book"
-	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/settings"
-	"github.com/yumenaka/comi/tools"
+	"net/http"
 )
-
-func init() {
-	// Find home directory.
-	home, err := homedir.Dir()
-	if err != nil {
-		fmt.Println(err)
-	}
-	Config.LogFilePath = home
-	Config.LogFileName = "comigo.log"
-}
 
 var (
 	ConfigFile  = "" //yaml设置文件路径，数据库文件(comigo.db)在同一个文件夹。
@@ -74,19 +56,3 @@ var (
 		//},
 	}
 )
-
-// SetTempDir 设置临时文件夹，退出时会被清理
-func SetTempDir() {
-	//手动设置的临时文件夹
-	if Config.CachePath != "" && tools.CheckExists(Config.CachePath) && tools.ChickIsDir(Config.CachePath) {
-		Config.CachePath = path.Join(Config.CachePath)
-	} else {
-		Config.CachePath = path.Join(os.TempDir(), "comigo_cache") //直接使用系统文件夹
-	}
-	err := os.MkdirAll(Config.CachePath, os.ModePerm)
-	if err != nil {
-		println(locale.GetString("temp_folder_error"))
-	} else {
-		fmt.Println(locale.GetString("temp_folder_path") + Config.CachePath)
-	}
-}
