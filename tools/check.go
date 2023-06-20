@@ -3,10 +3,12 @@ package tools
 //https://github.com/gookit/goutil/blob/master/fsutil/check.go
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"path"
+	"path/filepath"
 )
 
 // perm for create dir or file
@@ -29,6 +31,31 @@ var (
 	FileExist = IsFile
 	PathExist = PathExists
 )
+
+// 判断文件夹或文件是否存在
+func IsExist(path string) bool {
+	_, err := os.Stat(path)
+	if err != nil {
+		if os.IsExist(err) {
+			return true
+		}
+		if os.IsNotExist(err) {
+			return false
+		}
+		fmt.Println(err)
+		return false
+	}
+	return true
+}
+
+// 获取绝对路径
+func GetAbsPath(path string) string {
+	abs, err := filepath.Abs(path)
+	if err != nil {
+		abs = path
+	}
+	return abs
+}
 
 // PathExists reports whether the named file or directory exists.
 func PathExists(path string) bool {

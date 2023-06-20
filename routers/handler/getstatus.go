@@ -23,6 +23,31 @@ type ServerStatus struct {
 	OSInfo                tools.SystemStatus //系统信息
 }
 
+func PublicServerInfoHandler(c *gin.Context) {
+	serverName := "Comigo " + common.Version
+	//取得本机的首选出站IP
+	OutIP := tools.GetOutboundIP().String()
+	host := ""
+	if common.Config.Host == "" {
+		host = OutIP
+	} else {
+		host = common.Config.Host
+	}
+
+	var serverStatus = ServerStatus{
+		ServerName:        serverName,
+		ServerHost:        host,
+		ServerPort:        common.Config.Port,
+		SupportUploadFile: common.Config.EnableUpload,
+		//NumberOfBooks:         book.GetBooksNumber(),
+		//NumberOfOnLineUser:    1,
+		//NumberOfOnLineDevices: 1,
+		//ClientIP:              c.ClientIP(),
+		//OSInfo:                tools.GetSystemStatus(),
+	}
+	c.PureJSON(http.StatusOK, serverStatus)
+}
+
 func ServerStatusHandler(c *gin.Context) {
 	serverName := "Comigo " + common.Version
 	//取得本机的首选出站IP

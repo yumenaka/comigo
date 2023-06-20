@@ -37,8 +37,10 @@ func setWebAPI(engine *gin.Engine) {
 
 	//文件上传
 	api.POST("/upload", jwtMiddleware.MiddlewareFunc(), handler.UploadHandler)
-	//web端需要的服务器状态，包括标题、机器状态等
-	api.GET("/getstatus", jwtMiddleware.MiddlewareFunc(), handler.ServerStatusHandler)
+	//web端公开的服务器状态，包括标题、端口等
+	api.GET("/getstatus", handler.PublicServerInfoHandler)
+	//登录后才能查看的服务器状态，包括标题、机器状态等
+	api.GET("/get-secret-status", jwtMiddleware.MiddlewareFunc(), handler.ServerStatusHandler)
 	//获取书架信息，不包含每页信息
 	api.GET("/getlist", jwtMiddleware.MiddlewareFunc(), handler.GetBookListHandler)
 	//通过URL字符串参数查询书籍信息
