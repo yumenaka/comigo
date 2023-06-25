@@ -16,6 +16,9 @@
 ### 安装：
 在 [Releases页面](https://github.com/yumenaka/comi/releases ) ，下载最新版文件。
 
+bash <(curl -s https://raw.githubusercontent.com/yumenaka/comi/main/get_comigo.sh)
+go install github.com/yumenaka/comi@latest
+
 ### 用法：
 ```
 comi [flags] file_or_dir

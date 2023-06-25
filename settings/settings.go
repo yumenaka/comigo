@@ -127,38 +127,4 @@ func (config *ServerSettings) SetByExecutableFilename() {
 	if config.Debug {
 		fmt.Println("ExtFileName =", ExtFileName)
 	}
-
-	////如果执行文件名包含 scroll 等关键字，选择卷轴模板
-	//if haveKeyWord(ExtFileName, []string{"scroll", "スクロール", "默认", "下拉", "卷轴"}) {
-	//	config.Template = "scroll"
-	//}
-	////如果执行文件名包含 sketch 等关键字，选择速写模板
-	//if haveKeyWord(ExtFileName, []string{"sketch", "croquis", "クロッキー", "素描", "速写"}) {
-	//	config.Template = "sketch"
-	//}
-	////根据文件名设定倒计时秒数,不管默认是不是sketch模式
-	//Seconds, err := getNumberFromString(ExtFileName)
-	//if err != nil {
-	//	if config.Template == "sketch" {
-	//		//fmt.Println(Seconds)
-	//	}
-	//} else {
-	//	config.SketchCountSeconds = Seconds
-	//}
-	////如果执行文件名包含 single 等关键字，选择 flip分页漫画模板
-	//if haveKeyWord(ExtFileName, []string{"flip", "翻页", "めく"}) {
-	//	config.Template = "flip"
-	//}
-	////选择模式以后，打印提示
-	//switch config.Template {
-	//case "scroll":
-	//	fmt.Println(locale.GetString("scroll_template"))
-	//case "flip":
-	//	fmt.Println(locale.GetString("single_page_template"))
-	//case "sketch":
-	//	fmt.Println(locale.GetString("sketch_template"))
-	//	//速写倒计时秒数
-	//	fmt.Println(locale.GetString("SKETCH_COUNT_SECONDS"), config.SketchCountSeconds)
-	//default:
-	//}
 }

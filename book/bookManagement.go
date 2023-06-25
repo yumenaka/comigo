@@ -1,5 +1,6 @@
 package book
 
+//https://cloudsmith.co.jp/blog/backend/go/2021/08/1847845.html
 //package bookManagement
 
 //type BookDatabase struct{}
