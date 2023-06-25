@@ -17,7 +17,7 @@
             <!-- justify-center：让项目沿着容器主轴的中心点对齐 https://www.tailwindcss.cn/docs/justify-content -->
             <!-- 有书的时候显示书 -->
             <div class="flex flex-row flex-wrap justify-center min-h-48">
-                <BookCard v-for="(book_info, key) in bookshelf" :key="key" :title="book_info.name"
+                <BookCard v-for="(book_info, key) in bookshelf" :key="key" :title="book_info.name" :book_info="book_info"
                     :bookCardMode="bookCardMode" :simplifyTitle="simplifyTitle" :id="book_info.id"
                     :image_src="book_info.cover.url" :readerMode="readerMode" :showTitle="bookCardShowTitleFlag"
                     :childBookNum="book_info.child_book_num > 0
@@ -36,26 +36,12 @@
         </div>
 
 
-
-        <div v-if="bookCardMode == 'list'" class="bookshelf flex-grow">
-            <div class="flex flex-col justify-center items-center">
-                <BookList v-for="(book_info, key) in bookshelf" :key="key" :title="book_info.name"
-                    :simplifyTitle="simplifyTitle" :id="book_info.id" :image_src="book_info.cover.url"
-                    :readerMode="readerMode" :showTitle="bookCardShowTitleFlag" :childBookNum="book_info.child_book_num > 0
-                        ? 'x' + book_info.child_book_num
-                        : book_info.book_type === 'dir'
-                            ? 'dir'
-                            : ''
-                        " :openURL="getBookCardOpenURL(
-        book_info.id,
-        book_info.book_type,
-        book_info.name
-    )
-        " :a_target="getBookCardTarget(book_info.book_type)">
+        <div v-if="bookCardMode == 'list'" class="bookshelf flex-grow flex flex-col justify-center items-center">
+                <BookList v-for="(book_info, key) in bookshelf" :key="key" :book_info="book_info"
+                    :simplifyTitle="simplifyTitle"  :image_src="book_info.cover.url" :showTitle="bookCardShowTitleFlag"
+                    :readerMode="readerMode">
                 </BookList>
-            </div>
         </div>
-
 
 
         <div v-if="bookCardMode == 'text'" class="bookshelf flex-grow">
@@ -69,8 +55,6 @@
                         "></BookText>
             </div>
         </div>
-
-
 
         <!-- 返回顶部的圆形按钮，向上滑动的时候出现 -->
         <n-back-top class="bg-blue-200" :show="showBackTopFlag" type="info" :right="20" :bottom="20" />
@@ -206,7 +190,7 @@ export default defineComponent({
     },
     data() {
         return {
-            bookCardMode: "list",//gird,list,text
+            bookCardMode: "gird",//gird,list,text
             simplifyTitle: true, //简化显示标题
             //是否显示回到顶部按钮
             showBackTopFlag: false,
