@@ -190,7 +190,7 @@ export default defineComponent({
     },
     data() {
         return {
-            bookCardMode: "gird",//gird,list,text
+            bookCardMode: "list",//gird,list,text
             simplifyTitle: true, //简化显示标题
             //是否显示回到顶部按钮
             showBackTopFlag: false,
@@ -310,6 +310,12 @@ export default defineComponent({
         if (typeof tempInterfaceColor === "string") {
             this.model.interfaceColor = tempInterfaceColor;
         }
+
+
+        let tempBookCardMode = localStorage.getItem("bookCardMode");
+        if (typeof tempBookCardMode === "string") {
+            this.bookCardMode = tempBookCardMode;
+        }
     },
     // 挂载前
     beforeMount() {
@@ -373,6 +379,7 @@ export default defineComponent({
 
             if (key === "gird" || key === "list" || key === "text") {
                 this.bookCardMode = key;
+                localStorage.setItem("bookCardMode",this.bookCardMode);
                 return;
             }
 

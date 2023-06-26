@@ -26,9 +26,9 @@ func init() {
 	cobra.MousetrapHelpText = ""       //屏蔽鼠标提示，支持拖拽、双击运行
 	cobra.MousetrapDisplayDuration = 5 //"这是命令行程序"的提醒表示时间
 	//jwt认证，tls证书
-	rootCmd.PersistentFlags().StringVarP(&common.Config.UserName, "username", "u", "admin", locale.GetString("USERNAME"))
-	rootCmd.PersistentFlags().StringVarP(&common.Config.Password, "password", "k", "admin", locale.GetString("PASSWORD"))
-	rootCmd.PersistentFlags().IntVarP(&common.Config.Timeout, "timeout", "t", 180, locale.GetString("TIMEOUT"))
+	rootCmd.PersistentFlags().StringVarP(&common.Config.UserName, "username", "u", "", locale.GetString("USERNAME"))
+	rootCmd.PersistentFlags().StringVarP(&common.Config.Password, "password", "k", "", locale.GetString("PASSWORD"))
+	rootCmd.PersistentFlags().IntVarP(&common.Config.Timeout, "timeout", "t", 65535, locale.GetString("TIMEOUT"))
 	//TLS设定
 	rootCmd.PersistentFlags().StringVar(&common.Config.CertFile, "tls-cert-file", "", locale.GetString("TLS_CERT_FILE"))              //--tls-cert-file
 	rootCmd.PersistentFlags().StringVar(&common.Config.KeyFile, "tls-private-key-file", "", locale.GetString("TLS_PRIVATE_KEY_FILE")) //--tls-private-key-file
