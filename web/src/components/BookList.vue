@@ -5,10 +5,13 @@
       class="bg-top bg-cover w-32 h-44 mx-4 my-4 bg-gray-200 rounded shadow-xl hover:shadow-2xl ring-1 ring-gray-400 hover:ring hover:ring-blue-500 "
       :style="setBackgroundImage()">
     </div>
-    <div class="w-2/3 flex flex-col   top-0 p-4 align-middle  border-blue-800 rounded-b">
+    <div class="w-2/3 flex flex-col flex-grow  top-0 p-4 align-middle  border-blue-800 rounded-b">
       <div class="font-bold text-xl">{{ shortTitle }}</div>
-      <div v-if="book_info.child_book_num > 0" class="text-2xl font-black">{{
-        bookNumHint
+      <div v-if="book_info.child_book_num > 0" class="text-xl font-black">{{
+        bookNumHint 
+      }}</div>
+      <div v-if="book_info.child_book_num > 0" class="text-xl font-black">{{
+        book_info.file_size 
       }}</div>
     </div>
 

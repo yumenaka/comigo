@@ -76,6 +76,9 @@ func Authenticator(c *gin.Context) (interface{}, error) {
 		return "", jwt.ErrMissingLoginValues
 	}
 	fmt.Printf("username is %s, password is %s,Config is %s@%s\",", user.Username, user.Password, common.Config.UserName, common.Config.Password)
+	if "" == common.Config.UserName || "" == common.Config.Password {
+		return user, nil
+	}
 	//登录验证函数,打印用户信息和错误信息
 	if user.Username == common.Config.UserName && user.Password == common.Config.Password {
 		return user, nil
