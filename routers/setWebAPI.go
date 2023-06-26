@@ -14,21 +14,7 @@ func setWebAPI(engine *gin.Engine) {
 
 	////TODO：实现第三方认证，可参考 https://darjun.github.io/2021/07/26/godailylib/goth/
 	api = engine.Group("/api")
-
-	// 创建 jwt 中间件
-	jwtMiddleware, err := token.NewJwtMiddleware()
-	if err != nil {
-		fmt.Println("JWT Error:" + err.Error())
-	}
-
-	// 登录 api ，直接用 jwtMiddleware 中的 `LoginHandler`
-	//这个函数中，会执行NewJwtMiddleware()中设置的Authenticator来验证用户权限，如果通过会返回token。
-	api.POST("/login", jwtMiddleware.LoginHandler)
-	//退出登录，会将用户的cookie中的token删除。
-	api.POST("/logout", jwtMiddleware.LogoutHandler)
-	// 刷新 token ，延长token的有效期
-	api.GET("/refresh_token", jwtMiddleware.RefreshHandler)
-
+	//如果没有设置用户名和密码，则不需要验证
 	if common.Config.UserName == "" || common.Config.Password == "" {
 		// 在需要验证的api中用jwt中间件
 		//通过URL字符串参数获取特定文件
@@ -44,6 +30,19 @@ func setWebAPI(engine *gin.Engine) {
 		//通过链接下载reg配置
 		api.GET("/comigo.reg", handler.GetRegFIleHandler)
 	} else {
+		// 创建 jwt 中间件
+		jwtMiddleware, err := token.NewJwtMiddleware()
+		if err != nil {
+			fmt.Println("JWT Error:" + err.Error())
+		}
+		// 登录 api ，直接用 jwtMiddleware 中的 `LoginHandler`
+		//这个函数中，会执行NewJwtMiddleware()中设置的Authenticator来验证用户权限，如果通过会返回token。
+		api.POST("/login", jwtMiddleware.LoginHandler)
+		//退出登录，会将用户的cookie中的token删除。
+		api.POST("/logout", jwtMiddleware.LogoutHandler)
+		// 刷新 token ，延长token的有效期
+		api.GET("/refresh_token", jwtMiddleware.RefreshHandler)
+
 		// 在需要验证的api中用jwt中间件
 		//通过URL字符串参数获取特定文件
 		api.GET("/getfile", jwtMiddleware.MiddlewareFunc(), handler.GetFileHandler)

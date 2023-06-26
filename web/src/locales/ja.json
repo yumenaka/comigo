@@ -87,5 +87,9 @@
   "logout": "ログアウト",
   "sort_by_filename_reverse": "ファイル名(z-a)",
   "sort_by_modify_time_reverse": "更新日時（新しい->古い）",
-  "sort_by_filesize_reverse": "ファイルサイズ(小さい->大きい)"
+  "sort_by_filesize_reverse": "ファイルサイズ(小さい->大きい)",
+  "author": "作者:{0}",
+  "allpagenum": "総ページ数:{0}",
+  "filesize": "ファイルサイズ:{0}",
+  "childbookhint": "フォルダーには{0}冊の本が入っている"
 }

@@ -87,5 +87,9 @@
   "logout": "logout",
   "sort_by_filename_reverse": "Filename(z-a)",
   "sort_by_modify_time_reverse": "Modify Time（Newto Old）",
-  "sort_by_filesize_reverse": "Filesize(Small to Large)"
+  "sort_by_filesize_reverse": "Filesize(Small to Large)",
+  "author": "Author:{0}",
+  "allpagenum": "Total pages: {0}",
+  "filesize": "File size:{0}",
+  "childbookhint": "{0}books in the folder"
 }
