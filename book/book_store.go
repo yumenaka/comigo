@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"path/filepath"
 	"time"
+
+	"github.com/yumenaka/comi/tools"
 )
 
 // Bookstores 本地总书库，扫描后生成。可以有多个子书库。
@@ -98,6 +100,7 @@ func (s *singleBookstore) initBookGroupMap() error {
 				continue
 			}
 			depthBooksMap[depth-1] = append(depthBooksMap[depth-1], *newBook)
+			newBook.Author, _ = tools.GetAuthor(newBook.Name)
 			//将这本书加到子书库的BookGroup表（Images.BookGroupMap）里面去
 			s.BookGroupMap[newBook.BookID] = newBook
 			//将这本书加到BookGroup总表（mapBookFolders）里面去

@@ -7,9 +7,9 @@
     </div>
     <div class="w-2/3 flex flex-col my-2 top-0 p-4 border-blue-800 rounded-b">
       <div class="w-full my-1 text-xl text-left font-bold ">{{ book_info.name }}</div>
-      <div class="w-full my-1 text-xl text-left">作者:{{ book_info.author }}</div>
-      <div class="w-full my-1 text-xl text-left">文件大小:{{ fileSizeString }}</div>
-      <div class="w-full my-1 text-xl text-left">总页数:{{ book_info.all_page_num }}</div>
+      <div class="w-full my-1 text-xl text-left" v-if="book_info.author!==''">作者:{{ book_info.author }}</div>
+      <div class="w-full my-1 text-xl text-left" v-if="!isBookGroup&&!isDirBook">大小:{{ fileSizeString }}</div>
+      <div class="w-full my-1 text-xl text-left"  v-if="!isBookGroup">总页数:{{ book_info.all_page_num }}</div>
       <div class="w-full my-1 text-xl text-left" v-if="book_info.child_book_num > 0">{{ bookNumHint }}</div>
     </div>
   </a>
@@ -31,6 +31,12 @@ export default defineComponent({
     return { cookies };
   },
   computed: {
+    isBookGroup() {
+      return this.book_info.book_type==='book_group'
+    },
+    isDirBook() {
+      return this.book_info.book_type==='dir'
+    },
     getTarget() {
       let bookType = this.book_info.book_type;
       if (
