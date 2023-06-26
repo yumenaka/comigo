@@ -52,7 +52,7 @@ type Book struct {
 	FileSize        int64            `json:"file_size"`          //storm:"index" 索引字段
 	Cover           ImageInfo        `json:"cover"`              //storm:"inline" 内联字段，结构体嵌套时使用
 	Pages           AllPageInfo      `json:"pages"`              //storm:"inline" 内联字段，结构体嵌套时使用
-	Author          []string         `json:"author"`             //作者
+	Author          string           `json:"author"`             //作者
 	Modified        time.Time        `json:"modified_time"`      //最后修改时间
 	ReadPercent     float64          `json:"read_percent"`       //阅读进度
 	ISBN            string           `json:"-"`                  //json不解析，启用可改为`json:"isbn"`
@@ -132,7 +132,7 @@ func New(filePath string, modified time.Time, fileSize int64, storePath string, 
 	}
 	//初始化书籍
 	var b = Book{
-		Author:        []string{""},
+		Author:        "",
 		Modified:      modified,
 		FileSize:      fileSize,
 		InitComplete:  false,
@@ -141,9 +141,11 @@ func New(filePath string, modified time.Time, fileSize int64, storePath string, 
 		Type:          bookType,
 	}
 	//设置属性：
+
 	//FilePath，转换为绝对路径
 	b.setFilePath(filePath)
 	b.setName(filePath)
+	b.Author, _ = tools.GetAuthor(b.Name)
 	//设置属性：父文件夹
 	b.setParentFolder(filePath)
 	b.setBookID()
@@ -413,10 +415,8 @@ func GetBookByID(id string, sortBy string) (*Book, error) {
 func GetBookByAuthor(author string, sortBy string) ([]*Book, error) {
 	var bookList []*Book
 	for _, b := range mapBooks {
-		if len(b.Author) == 0 {
-			continue
-		}
-		if b.Author[0] == author {
+
+		if b.Author == author {
 			b.SortPages(sortBy)
 			bookList = append(bookList, b)
 		}
@@ -569,11 +569,7 @@ func (b *Book) GetBookID() string {
 
 // GetAuthor  获取作者信息
 func (b *Book) GetAuthor() string {
-	//防止未初始化，最好不要用到
-	if len(b.Author) == 0 {
-		return ""
-	}
-	return b.Author[0]
+	return b.Author
 }
 
 func (b *Book) GetAllPageNum() int {

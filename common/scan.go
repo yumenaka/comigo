@@ -196,7 +196,7 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*book.Book, 
 			if err != nil {
 				fmt.Println(err)
 			} else {
-				newBook.Author[0] = metaData.Creator
+				newBook.Author = metaData.Creator
 				newBook.Press = metaData.Publisher
 			}
 		}

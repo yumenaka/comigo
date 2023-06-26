@@ -8,7 +8,7 @@ import (
 	"github.com/yumenaka/comi/tools"
 )
 
-// BookInfo 与Book唯一的区别是没有AllPageInfo,而是封面图URL
+// BookInfo 与Book唯一的区别是没有AllPageInfo,而是封面图URL 减小 json文件的大小
 type BookInfo struct {
 	Name            string               `json:"name"`           //书名
 	BookID          string               `json:"id"`             //根据FilePath计算
@@ -19,7 +19,7 @@ type BookInfo struct {
 	AllPageNum      int                  `json:"all_page_num"`   //所有页数
 	Cover           ImageInfo            `json:"cover"`          //封面图
 	ParentFolder    string               `json:"parent_folder"`  //所在父文件夹
-	Author          []string             `json:"author"`         //作者
+	Author          string               `json:"author"`         //作者
 	ISBN            string               `json:"-"`              //暂时用不着 这个字段不解析 `json:"isbn"`
 	FilePath        string               `json:"-"`              //这个字段不解析
 	ExtractPath     string               `json:"-"`              //这个字段不解析
@@ -108,7 +108,7 @@ func (s BookInfoList) Less(i, j int) (less bool) {
 	case "modify_time":
 		return !tools.Compare(s.BookInfos[i].Modified.String(), s.BookInfos[j].Modified.String())
 	case "author":
-		return tools.Compare(s.BookInfos[i].Author[0], s.BookInfos[j].Author[0])
+		return tools.Compare(s.BookInfos[i].Author, s.BookInfos[j].Author)
 	//如何定义 Images[i] < Images[j] 反向
 	case "filename_reverse":
 		return !tools.Compare(s.BookInfos[i].Name, s.BookInfos[j].Name) //(使用了第三方库、比较自然语言字符串)
@@ -136,7 +136,7 @@ func (s BookInfoList) Less(i, j int) (less bool) {
 	case "modify_time_reverse":
 		return tools.Compare(s.BookInfos[i].Modified.String(), s.BookInfos[j].Modified.String())
 	case "author_reverse":
-		return !tools.Compare(s.BookInfos[i].Author[0], s.BookInfos[j].Author[0])
+		return !tools.Compare(s.BookInfos[i].Author, s.BookInfos[j].Author)
 	default:
 		return tools.Compare(s.BookInfos[i].Name, s.BookInfos[j].Name)
 	}
