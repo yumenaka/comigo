@@ -1,5 +1,5 @@
 <template>
-  <a class="m-2 bg-slate-300 text-lg" :href="openURL" :target="a_target">{{ shortTitle }}</a>
+  <a class="m-2 bg-slate-300 text-lg" :href="getBookURL()" :target="getTarget">{{ shortTitle }}</a>
 </template>
 
 <script lang="ts">
@@ -8,15 +8,27 @@ import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "BookText",
-  props: ["bookCardMode", "title", "image_src", "id", "readerMode", "showTitle", "childBookNum", "openURL", "a_target", "simplifyTitle"],
+  props: ["book_info","bookCardMode",  "readerMode", "simplifyTitle"],
   components: {
   },
   setup() {
     return {};
   },
   computed: {
+    getTarget() {
+      let bookType = this.book_info.book_type;
+      if (
+        bookType === ".pdf" ||
+        bookType === "video" ||
+        bookType === "audio" ||
+        bookType === "unknown"
+      ) {
+        return "_blank";
+      }
+      return "_self";
+    },
     shortTitle(): string {
-      let short_title = this.title
+      let short_title = this.book_info.name
       //使用 JavaScript replace() 方法替换掉一些字符串
       if (this.simplifyTitle) {
         //中：/[\u4e00-\u9fa5]/  日：/[\u0800-\u4e00]/  韩：/[\uac00-\ud7ff]/  空格：[\s]
@@ -34,10 +46,7 @@ export default defineComponent({
         //开头的特殊字符
         short_title = short_title.replace(/^[\\\-`~!@#$^&*()=|{}':;'@#￥……&*（）——|{}‘；：”“'。，、？]/, "");
       }
-      if (short_title.length <= 15) {
-        return short_title;
-      }
-      return `${short_title.substr(0, 15)}…`;
+      return short_title;
     },
   },
   data() {
@@ -46,6 +55,30 @@ export default defineComponent({
     };
   },
   methods: {
+    getBookURL() {
+      let bookID = this.book_info.id;
+      let bookType = this.book_info.book_type;
+      let bookName = this.book_info.name;
+      console.log("getBookURL  bookID：" + bookID + " bookType：" + bookType);
+      if (bookType === "book_group") {
+        return "/#/child_shelf/" + bookID + "/";
+      }
+      if (
+        bookType === ".pdf" ||
+        bookType === "video" ||
+        bookType === "audio" ||
+        bookType === "unknown"
+      ) {
+        return "/api/raw/" + bookID + "/" + bookName;
+      }
+      if (this.readerMode === "flip" || this.readerMode === "sketch") {
+        return "/#/flip/" + bookID;
+      }
+      if (this.readerMode === "scroll") {
+        // 命名路由,并加上参数,让路由建立 url
+        return "/#/scroll/" + bookID;
+      }
+    },
   },
 });
 </script>

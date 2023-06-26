@@ -21,7 +21,7 @@
       </n-icon>
 
       <!-- 列表图标 -->
-      <n-dropdown trigger="hover" :options="options" @select="onSelect">
+      <n-dropdown v-if="showReSortIcon"  trigger="hover" :options="options" @select="onSelect">
         <n-icon class="w-10" size="40">
           <Filter />
         </n-icon>
@@ -81,7 +81,7 @@ import Qrcode from "@/components/Qrcode.vue";
 import screenfull from 'screenfull'
 export default defineComponent({
   name: "ComigoHeader",
-  props: ['setDownLoadLink', 'headerTitle', 'bookID', 'showReturnIcon', 'showSettingsIcon',],
+  props: ['setDownLoadLink', 'headerTitle', 'bookID', 'showReturnIcon', 'showSettingsIcon','showReSortIcon'],
   emits: ['drawerActivate', 'onResort'],
   components: {
     NDropdown,//下拉菜单 https://www.naiveui.com/zh-CN/os-theme/components/dropdown

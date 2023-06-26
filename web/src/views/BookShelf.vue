@@ -1,6 +1,6 @@
 <template>
     <div class="BookShelf w-full h-screen flex flex-col">
-        <Header class="flex-none h-12" :bookIsFolder="false" :headerTitle="bookShelfTitle"
+        <Header class="flex-none h-12" :bookIsFolder="false" :headerTitle="bookShelfTitle" :showReSortIcon="true"
             :showReturnIcon="headerShowReturnIcon" :showSettingsIcon="true" :bookID="bookshelf ? bookshelf[0].id : 'null'"
             :setDownLoadLink="false" @drawerActivate="drawerActivate" @onResort="onResort">
         </Header>
@@ -17,20 +17,8 @@
             <!-- justify-center：让项目沿着容器主轴的中心点对齐 https://www.tailwindcss.cn/docs/justify-content -->
             <!-- 有书的时候显示书 -->
             <div class="flex flex-row flex-wrap justify-center min-h-48">
-                <BookCard v-for="(book_info, key) in bookshelf" :key="key" :title="book_info.name" :book_info="book_info"
-                    :bookCardMode="bookCardMode" :simplifyTitle="simplifyTitle" :id="book_info.id"
-                    :image_src="book_info.cover.url" :readerMode="readerMode" :showTitle="bookCardShowTitleFlag"
-                    :childBookNum="book_info.child_book_num > 0
-                        ? 'x' + book_info.child_book_num
-                        : book_info.book_type === 'dir'
-                            ? 'dir'
-                            : ''
-                        " :openURL="getBookCardOpenURL(
-        book_info.id,
-        book_info.book_type,
-        book_info.name
-    )
-        " :a_target="getBookCardTarget(book_info.book_type)">
+                <BookCard v-for="(book_info, key) in bookshelf" :key="key" :book_info="book_info"
+                    :bookCardMode="bookCardMode" :simplifyTitle="simplifyTitle"  :readerMode="readerMode" :showTitle="bookCardShowTitleFlag">
                 </BookCard>
             </div>
         </div>
@@ -38,7 +26,7 @@
 
         <div v-if="bookCardMode == 'list'" class="bookshelf flex-grow flex flex-col justify-center items-center">
                 <BookList v-for="(book_info, key) in bookshelf" :key="key" :book_info="book_info"
-                    :simplifyTitle="simplifyTitle"  :image_src="book_info.cover.url" :showTitle="bookCardShowTitleFlag"
+                    :simplifyTitle="simplifyTitle"   :showTitle="bookCardShowTitleFlag"
                     :readerMode="readerMode">
                 </BookList>
         </div>
@@ -46,13 +34,7 @@
 
         <div v-if="bookCardMode == 'text'" class="bookshelf flex-grow">
             <div class="flex flex-row flex-wrap justify-center min-h-48">
-                <BookText v-for="(book_info, key) in bookshelf" :key="key" :title="book_info.name"
-                    :simplifyTitle="simplifyTitle" :openURL="getBookCardOpenURL(
-                        book_info.id,
-                        book_info.book_type,
-                        book_info.name
-                    )
-                        "></BookText>
+                <BookText v-for="(book_info, key) in bookshelf" :key="key" :book_info="book_info" :readerMode="readerMode"></BookText>
             </div>
         </div>
 
@@ -323,8 +305,7 @@ export default defineComponent({
     },
     // 在绑定元素的父组件被挂载后调用。
     mounted() {
-        // this.bookshelf.lenth != 1 &&
-        // console.log('mounted in the composition api!')
+
         this.isLandscapeMode = this.inLandscapeModeCheck();
         this.isPortraitMode = !this.inLandscapeModeCheck();
         // https://v3.cn.vuejs.org/api/options-lifecycle-hooks.html#beforemount
@@ -403,21 +384,6 @@ export default defineComponent({
                     query: { sort_by: key },
                 });
             }
-        },
-
-        getBookCardTarget(bookType: string) {
-            if (
-                bookType === ".pdf" ||
-                bookType === "video" ||
-                bookType === "audio" ||
-                bookType === "unknown"
-            ) {
-                return "_blank";
-            }
-            // if (this.readerMode == "flip" || this.readerMode == "sketch" || this.readerMode == "scroll") {
-            //     return "_self";
-            // }
-            return "_self";
         },
 
         getBookCardOpenURL(bookID: string, bookType: string, bookName: string) {
@@ -624,7 +590,7 @@ export default defineComponent({
         // 设置书架名
         setBookShelfTitle() {
             // console.log(this.$route.params.id);
-            // 路由里面有id这个参数、也就是处于scroll或filp模式，正在阅读某本书的时候,不需要设置书架名
+            // 路由里面有id这个参数、也就是处于scroll或flip模式，正在阅读某本书的时候,不需要设置书架名
             if (this.$route.params.id !== undefined) {
                 //不是null而是undefined
                 return;

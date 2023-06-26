@@ -101,8 +101,6 @@ func init() {
 
 	//手动指定zip文件编码 gbk、shiftjis……
 	rootCmd.PersistentFlags().StringVar(&common.Config.ZipFileTextEncoding, "zip-encode", "gbk", locale.GetString("ZIP_ENCODE"))
-	////访问密码，还没做
-	//	rootCmd.PersistentFlags().StringVar(&common.Config.Auth, "auth", "user:comigo", locale.GetString("AUTH"))
 	//尚未写完的功能
 	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFileName, "log_name", "comigo", "log文件名")
 	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFilePath, "log_path", "~", "log文件位置")

@@ -22,7 +22,6 @@ import (
 	"github.com/disintegration/imaging"
 	"github.com/jxskiss/base62"
 	"github.com/xxjwxc/gowp/workpool"
-
 	"github.com/yumenaka/comi/arch"
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/tools"
@@ -40,32 +39,30 @@ var (
 
 // Book 定义书籍，BooID不应该重复，根据文件路径生成
 type Book struct {
-	Name          string           `json:"name"` //书名
-	BookID        string           `json:"id"`   //根据FilePath+BookType+修改时间+filesize等等计算，bookID应该唯一
-	FilePath      string           `json:"-" storm:"filepath"`
-	BookStorePath string           `json:"-"   `           //在哪个子书库
-	Type          SupportFileType  `json:"book_type"`      //可以是书籍组(book_group)、文件夹(dir)、文件后缀( .zip .rar .pdf .mp4)等
-	ChildBookNum  int              `json:"child_book_num"` //子书籍的数量
-	ChildBook     map[string]*Book `json:"child_book" `    //key：BookID
-	Depth         int              `json:"depth"`          //文件深度
-	ParentFolder  string           `json:"parent_folder"`  //所在父文件夹
-	AllPageNum    int              `json:"all_page_num"`   //storm:"index" 索引字段
-	FileSize      int64            `json:"file_size"`      //storm:"index" 索引字段
-	Cover         ImageInfo        `json:"cover"`          //storm:"inline" 内联字段，结构体嵌套时使用
-	Pages         AllPageInfo      `json:"pages"`          //storm:"inline" 内联字段，结构体嵌套时使用
-	Author        []string         `json:"author"`         //作者
-	Modified      time.Time        `json:"modified_time"`  //最后修改时间
-	ReadPercent   float64          `json:"read_percent"`   //阅读进度
-	ISBN          string           `json:"-"`              //json不解析，启用可改为`json:"isbn"`
-	Press         string           `json:"-"`              //json不解析，启用可改为`json:"press"`        //出版社
-	PublishedAt   string           `json:"-"`              //json不解析，启用可改为`json:"published_at"` //出版日期
-	ExtractPath   string           `json:"-"`              //json不解析
-
-	ExtractNum   int  `json:"-"` //json不解析，启用可改为`json:"extract_num"`
-	InitComplete bool `json:"-"` //json不解析，启用可改为`json:"extract_complete"`
-
-	NonUTF8Zip      bool   `json:"-"` //json不解析，启用可改为`json:"non_utf8_zip"`
-	ZipTextEncoding string `json:"-"` //json不解析，启用可改为`json:"zip_text_encoding"`
+	Name            string           `json:"name"`               //书名
+	BookID          string           `json:"id"`                 //根据FilePath+BookType+修改时间+filesize等等计算，bookID应该唯一
+	FilePath        string           `json:"-" storm:"filepath"` //文件路径
+	BookStorePath   string           `json:"-"   `               //在哪个子书库
+	Type            SupportFileType  `json:"book_type"`          //可以是书籍组(book_group)、文件夹(dir)、文件后缀( .zip .rar .pdf .mp4)等
+	ChildBookNum    int              `json:"child_book_num"`     //子书籍的数量
+	ChildBook       map[string]*Book `json:"child_book" `        //key：BookID
+	Depth           int              `json:"depth"`              //文件深度
+	ParentFolder    string           `json:"parent_folder"`      //所在父文件夹
+	AllPageNum      int              `json:"all_page_num"`       //storm:"index" 索引字段
+	FileSize        int64            `json:"file_size"`          //storm:"index" 索引字段
+	Cover           ImageInfo        `json:"cover"`              //storm:"inline" 内联字段，结构体嵌套时使用
+	Pages           AllPageInfo      `json:"pages"`              //storm:"inline" 内联字段，结构体嵌套时使用
+	Author          []string         `json:"author"`             //作者
+	Modified        time.Time        `json:"modified_time"`      //最后修改时间
+	ReadPercent     float64          `json:"read_percent"`       //阅读进度
+	ISBN            string           `json:"-"`                  //json不解析，启用可改为`json:"isbn"`
+	Press           string           `json:"-"`                  //json不解析，启用可改为`json:"press"`        //出版社
+	PublishedAt     string           `json:"-"`                  //json不解析，启用可改为`json:"published_at"` //出版日期
+	ExtractPath     string           `json:"-"`                  //json不解析
+	ExtractNum      int              `json:"-"`                  //json不解析，启用可改为`json:"extract_num"`
+	InitComplete    bool             `json:"-"`                  //json不解析，启用可改为`json:"extract_complete"`
+	NonUTF8Zip      bool             `json:"-"`                  //json不解析，启用可改为`json:"non_utf8_zip"`
+	ZipTextEncoding string           `json:"-"`                  //json不解析，启用可改为`json:"zip_text_encoding"`
 }
 
 type SupportFileType string
