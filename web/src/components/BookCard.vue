@@ -2,20 +2,18 @@
   <!-- class='w-28 md:w-33 lg:w-48'   Width of 28 by default, 32 on medium screens, and 48 on large screens -->
   <!-- 响应式设计：https://www.tailwindcss.cn/docs/responsive-design -->
   <!-- sm<640px  md<768px lg<1024px  lg<1280px 2xl<1536px-->
-  <a :href="getBookCardURL()">
-    <div
-      class="relative w-32 h-44 mx-4 my-4 bg-gray-200 rounded shadow-xl hover:shadow-2xl ring-1 ring-gray-400 hover:ring hover:ring-blue-500 .bg-top bg-cover"
-      :style="setBackgroundImage()">
-      <div v-if="childBookNum != ''" class="absolute inset-x-0 top-0 text-right">
-        <span class="text-2xl text-yellow-500 font-black text-shadow">{{ childBookNum }}</span>
-      </div>
-      <div v-if="showTitle"
-        class="absolute inset-x-0 bottom-0 h-1/4 bg-gray-100 bg-opacity-80 font-semibold border-blue-800 rounded-b">
-        <!-- 如果把链接的 target 属性设置为 "_blank"，该链接会在新窗口中打开。 -->
-        <span class="absolute inset-x-0  font-bold top-0 p-1 align-middle">{{
-          shortTitle
-        }}</span>
-      </div>
+  <a :href="getBookURL()" :target="getTarget"
+    class="relative w-32 h-44 mx-4 my-4 bg-gray-200 rounded shadow-xl hover:shadow-2xl ring-1 ring-gray-400 hover:ring hover:ring-blue-500 bg-top bg-cover"
+    :style="setBackgroundImage()">
+    <div v-if="childBookNum != ''" class="absolute inset-x-0 top-0 text-right">
+      <span class="text-2xl text-yellow-500 font-black text-shadow">{{ childBookNum }}</span>
+    </div>
+    <div v-if="showTitle"
+      class="absolute inset-x-0 bottom-0 h-1/4 bg-gray-100 bg-opacity-80 font-semibold border-blue-800 rounded-b">
+      <!-- 如果把链接的 target 属性设置为 "_blank"，该链接会在新窗口中打开。 -->
+      <span class="absolute inset-x-0  font-bold top-0 p-1 align-middle">{{
+        shortTitle
+      }}</span>
     </div>
   </a>
 </template>
@@ -28,7 +26,7 @@ import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "BookCard",
-  props: ["book_info", "readerMode", "showTitle",  "simplifyTitle"],
+  props: ["book_info", "readerMode", "showTitle", "simplifyTitle"],
   components: {
   },
   setup() {
@@ -36,6 +34,18 @@ export default defineComponent({
     return { cookies };
   },
   computed: {
+    getTarget() {
+      let bookType = this.book_info.book_type;
+      if (
+        bookType === ".pdf" ||
+        bookType === "video" ||
+        bookType === "audio" ||
+        bookType === "unknown"
+      ) {
+        return "_blank";
+      }
+      return "_self";
+    },
     childBookNum(): string {
       if (this.book_info.book_type === 'dir') {
         return 'dir'
@@ -76,7 +86,7 @@ export default defineComponent({
     };
   },
   methods: {
-    getBookCardURL() {
+    getBookURL() {
       let bookID = this.book_info.id;
       let bookType = this.book_info.book_type;
       let bookName = this.book_info.name;
@@ -116,24 +126,6 @@ export default defineComponent({
         return `${this.book_info.cover.url}&resize_width=256&resize_height=360&thumbnail_mode=true`;
       }
       return this.book_info.cover.url;
-    },
-    // 自己构建一个<a>链接，后来发现不如可以直接用router-link与命名路由
-    getHref() {
-      // 当前URL
-      const url = document.location.toString();
-      // 按照“/”分割字符串
-      const arrUrl = url.split("/");
-      // 拼一个完整的图片URL
-      if (this.readerMode === "flip") {
-        const new_url = `${arrUrl[0]}//${arrUrl[2]}/#` + `f/${this.id}`;
-        console.log(new_url);
-        return new_url;
-      }
-      if (this.readerMode === "scroll") {
-        const new_url = `${arrUrl[0]}//${arrUrl[2]}/#` + `s/${this.id}`;
-        console.log(new_url);
-        return new_url;
-      }
     },
   },
 });
