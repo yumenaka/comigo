@@ -87,5 +87,9 @@
   "logout": "退出登录",
   "sort_by_filename_reverse": "文件名(z-a)",
   "sort_by_modify_time_reverse": "修改时间(从新到旧)",
-  "sort_by_filesize_reverse": "文件大小(从小到大)"
+  "sort_by_filesize_reverse": "文件大小(从小到大)",
+  "author": "作者:{0}",
+  "allpagenum": "总页数:{0}",
+  "filesize": "大小:{0}",
+  "childbookhint": "文件夹内有{0}本书"
 }
