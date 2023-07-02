@@ -33,7 +33,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&common.Config.CertFile, "tls-cert-file", "", locale.GetString("TLS_CERT_FILE"))              //--tls-cert-file
 	rootCmd.PersistentFlags().StringVar(&common.Config.KeyFile, "tls-private-key-file", "", locale.GetString("TLS_PRIVATE_KEY_FILE")) //--tls-private-key-file
 	//指定配置文件
-	rootCmd.PersistentFlags().StringVarP(&common.ConfigFile, "config", "c", "", locale.GetString("CONFIG"))
+	rootCmd.PersistentFlags().StringVarP(&common.ConfigFilePath, "config", "c", "", locale.GetString("CONFIG"))
 	//在当前目录生成示例配置文件
 	rootCmd.PersistentFlags().BoolVar(&common.Config.GenerateConfig, "generate-config", false, locale.GetString("GenerateConfig"))
 	//启用数据库，保存扫描数据
@@ -133,14 +133,14 @@ func init() {
 
 		// 读取设定文件
 		if err := viperInstance.ReadInConfig(); err != nil {
-			if common.ConfigFile == "" && common.Config.Debug {
+			if common.ConfigFilePath == "" && common.Config.Debug {
 				fmt.Println(err)
 			}
 		} else {
 			//获取当前使用的配置文件路径
 			//https://github.com/spf13/viper/issues/89
-			common.ConfigFile = viperInstance.ConfigFileUsed()
-			fmt.Println(locale.GetString("FoundConfigFile") + common.ConfigFile)
+			common.ConfigFilePath = viperInstance.ConfigFileUsed()
+			fmt.Println(locale.GetString("FoundConfigFile") + common.ConfigFilePath)
 		}
 
 		// 把设定文件的内容，解析到构造体里面。

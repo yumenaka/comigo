@@ -7,22 +7,21 @@ import (
 )
 
 var (
-	ConfigFile  = "" //yaml设置文件路径，数据库文件(comigo.db)在同一个文件夹。
-	Version     = "v0.9.2.1"
-	ReadingBook *book.Book
-	Srv         *http.Server
-	Config      = settings.ServerSettings{
-		Port:           1234,
-		Host:           "",
-		StoresPath:     []string{},
-		CacheEnable:    true,
-		CachePath:      "",
-		CacheClean:     true,
-		UploadPath:     "",
-		EnableUpload:   true,
-		EnableDatabase: false,
-		ClearDatabase:  true,
-		//DatabaseFilePath:     "",
+	ConfigFilePath = "" //yaml设置文件路径，数据库文件(comigo.db)在同一个文件夹。
+	Version        = "v0.9.3"
+	ReadingBook    *book.Book
+	Srv            *http.Server
+	Config         = settings.ServerSettings{
+		Port:                 1234,
+		Host:                 "",
+		StoresPath:           []string{},
+		CacheEnable:          true,
+		CachePath:            "",
+		CacheClean:           true,
+		UploadPath:           "",
+		EnableUpload:         true,
+		EnableDatabase:       false,
+		ClearDatabase:        true,
 		OpenBrowser:          true,
 		DisableLAN:           false,
 		DefaultMode:          "scroll",
@@ -54,5 +53,6 @@ var (
 		//	AllowedTypes: []string{".jpg", ".jpeg", ".JPEG", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".bmp"},
 		//	ExhaustPath:  "",
 		//},
+		//DatabaseFilePath:     "",
 	}
 )

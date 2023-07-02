@@ -11,7 +11,7 @@ func initBookStores(args []string) {
 	//初始化数据库
 	if common.Config.EnableDatabase {
 		//从数据库里面读取书籍信息，持久化
-		storage.InitDatabase(common.ConfigFile)
+		storage.InitDatabase(common.ConfigFilePath)
 		var dataErr error
 		databaseBookList, dataErr = storage.GetArchiveBookFromDatabase()
 		if dataErr != nil {

@@ -10,26 +10,28 @@ import (
 
 // BookInfo 与Book唯一的区别是没有AllPageInfo,而是封面图URL 减小 json文件的大小
 type BookInfo struct {
-	Name            string               `json:"name"`           //书名
-	BookID          string               `json:"id"`             //根据FilePath计算
-	Type            SupportFileType      `json:"book_type"`      //书籍类型
-	Depth           int                  `json:"depth"`          //书籍深度
-	ChildBookNum    int                  `json:"child_book_num"` //子书籍的数量
-	ChildBook       map[string]*BookInfo `json:"child_book"`     //子书籍的信息
-	AllPageNum      int                  `json:"all_page_num"`   //所有页数
-	Cover           ImageInfo            `json:"cover"`          //封面图
-	ParentFolder    string               `json:"parent_folder"`  //所在父文件夹
-	Author          string               `json:"author"`         //作者
-	ISBN            string               `json:"-"`              //暂时用不着 这个字段不解析 `json:"isbn"`
-	FilePath        string               `json:"-"`              //这个字段不解析
-	ExtractPath     string               `json:"-"`              //这个字段不解析
-	FileSize        int64                `json:"file_size"`      //文件大小
-	Modified        time.Time            `json:"modified_time"`  //修改时间
-	ExtractNum      int                  `json:"-"`              //暂时用不着 这个字段不解析 `json:"extract_num"`
-	InitComplete    bool                 `json:"-"`              //暂时用不着 这个字段不解析 `json:"extract_complete"`
-	ReadPercent     float64              `json:"-"`              //暂不解析，启用可改为`json:"read_percent"`
-	NonUTF8Zip      bool                 `json:"-"`              //暂时用不着 这个字段不解析 `json:"non_utf_8_zip"`
-	ZipTextEncoding string               `json:"-"`              //暂时用不着 这个字段不解析 `json:"zip_text_encoding"`
+	Name            string          `json:"name"`           //书名
+	BookID          string          `json:"id"`             //根据FilePath生成的唯一ID
+	BookStorePath   string          `json:"-"   `           //在哪个子书库
+	Type            SupportFileType `json:"book_type"`      //书籍类型
+	Depth           int             `json:"depth"`          //书籍深度
+	ChildBookNum    int             `json:"child_book_num"` //子书籍数量
+	AllPageNum      int             `json:"all_page_num"`   //总页数
+	Cover           ImageInfo       `json:"cover"`          //封面图
+	ParentFolder    string          `json:"parent_folder"`  //父文件夹
+	Author          string          `json:"author"`         //作者
+	ISBN            string          `json:"isbn"`           //ISBN
+	Press           string          `json:"press"`          //出版社
+	PublishedAt     string          `json:"published_at"`   //出版日期
+	FilePath        string          `json:"-"`              //文件绝对路径，json不解析
+	FileSize        int64           `json:"file_size"`      //文件大小
+	Modified        time.Time       `json:"modified_time"`  //修改时间
+	ExtractPath     string          `json:"-"`              //解压路径，7z用，json不解析
+	ExtractNum      int             `json:"-"`              //文件解压数    extract_num
+	InitComplete    bool            `json:"-"`              //是否解压完成  extract_complete
+	ReadPercent     float64         `json:"read_percent"`   //阅读进度
+	NonUTF8Zip      bool            `json:"-"`              //是否为特殊编码zip
+	ZipTextEncoding string          `json:"-"`              //zip文件编码
 }
 
 func getChildInfoMap(ChildBookMap map[string]*Book) (ChildInfoMap map[string]*BookInfo) {
@@ -54,7 +56,6 @@ func NewBookInfo(b *Book) *BookInfo {
 		AllPageNum:   allPageNum,
 		Type:         b.Type,
 		ChildBookNum: b.ChildBookNum,
-		ChildBook:    getChildInfoMap(b.ChildBook),
 		FileSize:     b.FileSize,
 		Modified:     b.Modified,
 		BookID:       b.BookID,
