@@ -15,13 +15,13 @@ import (
 
 //Go 每日一库之 fsnotify  https://darjun.github.io/2020/01/19/godailylib/fsnotify/
 
-//优雅地重启或停止  https://learnku.com/docs/gin-gonic/1.7/examples-graceful-restart-or-stop/11376
+// 优雅地重启或停止  https://learnku.com/docs/gin-gonic/1.7/examples-graceful-restart-or-stop/11376
 func configReloadHandler(e fsnotify.Event) {
 	//打印配置文件路径与触发事件
 	fmt.Printf("配置文件改变，Comigo将在5秒后重启:%s Op:%s\n", e.Name, e.Op)
 	//重新读取改变后的配置文件
 	if err := viperInstance.ReadInConfig(); err != nil {
-		if common.ConfigFile == "" && common.Config.Debug {
+		if common.ConfigFilePath == "" && common.Config.Debug {
 			fmt.Println(err)
 		}
 	}

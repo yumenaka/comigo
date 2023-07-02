@@ -179,26 +179,26 @@ func SaveBookToDatabase(save *comigoBook.Book) error {
 	ctx := context.Background()
 	b, err := client.Book.
 		Create().
-		SetName(save.Name).
-		SetBookID(save.BookID).
-		SetFilePath(save.FilePath).
-		SetBookStorePath(save.BookStorePath).
-		SetChildBookNum(save.ChildBookNum).
-		SetType(string(save.Type)).
-		SetDepth(save.Depth).
-		SetParentFolder(save.ParentFolder).
-		SetAllPageNum(save.AllPageNum).
-		SetFileSize(save.FileSize).
+		SetName(save.BookInfo.Name).
+		SetBookID(save.BookInfo.BookID).
+		SetFilePath(save.BookInfo.FilePath).
+		SetBookStorePath(save.BookInfo.BookStorePath).
+		SetChildBookNum(save.BookInfo.ChildBookNum).
+		SetType(string(save.BookInfo.Type)).
+		SetDepth(save.BookInfo.Depth).
+		SetParentFolder(save.BookInfo.ParentFolder).
+		SetAllPageNum(save.BookInfo.AllPageNum).
+		SetFileSize(save.BookInfo.FileSize).
 		SetAuthors(save.GetAuthor()).
-		SetISBN(save.ISBN).
-		SetPress(save.Press).
-		SetPublishedAt(save.PublishedAt).
-		SetExtractPath(save.ExtractPath).
-		SetInitComplete(save.InitComplete).
-		SetReadPercent(save.ReadPercent).
-		SetNonUTF8Zip(save.NonUTF8Zip).
-		SetZipTextEncoding(save.ZipTextEncoding).
-		SetExtractNum(save.ExtractNum).
+		SetISBN(save.BookInfo.ISBN).
+		SetPress(save.BookInfo.Press).
+		SetPublishedAt(save.BookInfo.PublishedAt).
+		SetExtractPath(save.BookInfo.ExtractPath).
+		SetInitComplete(save.BookInfo.InitComplete).
+		SetReadPercent(save.BookInfo.ReadPercent).
+		SetNonUTF8Zip(save.BookInfo.NonUTF8Zip).
+		SetZipTextEncoding(save.BookInfo.ZipTextEncoding).
+		SetExtractNum(save.BookInfo.ExtractNum).
 		Save(ctx) // 创建并返回 //还有一个SaveX(ctx)，和 Save() 不一样， SaveX 在出错时 panic。
 	if err != nil {
 		//log.Fatalf("failed creating book: %v", err)
@@ -245,25 +245,27 @@ func GetBookFromDatabase(filepath string) (*comigoBook.Book, error) {
 	}
 	temp := books[0]
 	b := comigoBook.Book{
-		Name:            temp.Name,
-		BookID:          temp.BookID,
-		FilePath:        temp.FilePath,
-		BookStorePath:   temp.BookStorePath,
-		ChildBookNum:    temp.ChildBookNum,
-		Depth:           temp.Depth,
-		ParentFolder:    temp.ParentFolder,
-		AllPageNum:      temp.AllPageNum,
-		FileSize:        temp.FileSize,
-		ISBN:            temp.ISBN,
-		Press:           temp.Press,
-		PublishedAt:     temp.PublishedAt,
-		ExtractPath:     temp.ExtractPath,
-		Modified:        temp.Modified,
-		ExtractNum:      temp.ExtractNum,
-		InitComplete:    temp.InitComplete,
-		ReadPercent:     temp.ReadPercent,
-		NonUTF8Zip:      temp.NonUTF8Zip,
-		ZipTextEncoding: temp.ZipTextEncoding,
+		BookInfo: comigoBook.BookInfo{
+			Name:            temp.Name,
+			BookID:          temp.BookID,
+			FilePath:        temp.FilePath,
+			BookStorePath:   temp.BookStorePath,
+			ChildBookNum:    temp.ChildBookNum,
+			Depth:           temp.Depth,
+			ParentFolder:    temp.ParentFolder,
+			AllPageNum:      temp.AllPageNum,
+			FileSize:        temp.FileSize,
+			ISBN:            temp.ISBN,
+			Press:           temp.Press,
+			PublishedAt:     temp.PublishedAt,
+			ExtractPath:     temp.ExtractPath,
+			Modified:        temp.Modified,
+			ExtractNum:      temp.ExtractNum,
+			InitComplete:    temp.InitComplete,
+			ReadPercent:     temp.ReadPercent,
+			NonUTF8Zip:      temp.NonUTF8Zip,
+			ZipTextEncoding: temp.ZipTextEncoding,
+		},
 	}
 	b.Type = comigoBook.GetBookTypeByFilename(temp.FilePath)
 	//查询数据库里的封面与页面信息
@@ -311,25 +313,27 @@ func GetArchiveBookFromDatabase() (list []*comigoBook.Book, err error) {
 	}
 	for _, temp := range books {
 		b := comigoBook.Book{
-			Name:            temp.Name,
-			BookID:          temp.BookID,
-			FilePath:        temp.FilePath,
-			BookStorePath:   temp.BookStorePath,
-			ChildBookNum:    temp.ChildBookNum,
-			Depth:           temp.Depth,
-			ParentFolder:    temp.ParentFolder,
-			AllPageNum:      temp.AllPageNum,
-			FileSize:        temp.FileSize,
-			ISBN:            temp.ISBN,
-			Press:           temp.Press,
-			PublishedAt:     temp.PublishedAt,
-			ExtractPath:     temp.ExtractPath,
-			Modified:        temp.Modified,
-			ExtractNum:      temp.ExtractNum,
-			InitComplete:    temp.InitComplete,
-			ReadPercent:     temp.ReadPercent,
-			NonUTF8Zip:      temp.NonUTF8Zip,
-			ZipTextEncoding: temp.ZipTextEncoding,
+			BookInfo: comigoBook.BookInfo{
+				Name:            temp.Name,
+				BookID:          temp.BookID,
+				FilePath:        temp.FilePath,
+				BookStorePath:   temp.BookStorePath,
+				ChildBookNum:    temp.ChildBookNum,
+				Depth:           temp.Depth,
+				ParentFolder:    temp.ParentFolder,
+				AllPageNum:      temp.AllPageNum,
+				FileSize:        temp.FileSize,
+				ISBN:            temp.ISBN,
+				Press:           temp.Press,
+				PublishedAt:     temp.PublishedAt,
+				ExtractPath:     temp.ExtractPath,
+				Modified:        temp.Modified,
+				ExtractNum:      temp.ExtractNum,
+				InitComplete:    temp.InitComplete,
+				ReadPercent:     temp.ReadPercent,
+				NonUTF8Zip:      temp.NonUTF8Zip,
+				ZipTextEncoding: temp.ZipTextEncoding,
+			},
 		}
 		b.Type = comigoBook.GetBookTypeByFilename(temp.FilePath)
 		if b.ChildBookNum > 0 {
