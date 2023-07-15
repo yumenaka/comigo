@@ -1,17 +1,17 @@
 #!/bin/bash
 
 # 一键安装脚本
-#bash <(curl -s https://raw.githubusercontent.com/yumenaka/comi/main/get_comigo.sh)
+#bash <(curl -s https://raw.githubusercontent.com/yumenaka/comi/master/get_comigo.sh)
 
 if command -v curl &> /dev/null; then
-#    echo "curl命令已安装"
+    echo "check curl"
 else
     echo "curl not found"
     exit 1
 fi
 
 if command -v tar &> /dev/null; then
-#    echo "tar命令已安装"
+    echo "check tar"
 else
     echo "tar not found"
     exit 1
