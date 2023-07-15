@@ -14,11 +14,16 @@
 4. windows支持拖拽压缩包到comi.exe（或快捷方式）上打开。
 5. frp转发、webp-server压缩等扩展功能
 ### 安装：
-在 [Releases页面](https://github.com/yumenaka/comi/releases ) ，下载最新版文件。
-
+1. 手动下载
+在 [Releases页面](https://github.com/yumenaka/comi/releases ) ，下载最新版文件，放到系统PATH。
+2. Linux MacOS 一键安装脚本  
+```bash
+# 需要curl与tar，文件将安装到/usr/local/bin/ 
 bash <(curl -s https://raw.githubusercontent.com/yumenaka/comi/main/get_comigo.sh)
-go install github.com/yumenaka/comi@latest
 
+#  如果你设置了golang环境，也可以这样安装：
+go install github.com/yumenaka/comi@latest
+```
 ### 用法：
 ```
 comi [flags] file_or_dir
