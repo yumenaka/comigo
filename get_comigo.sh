@@ -21,24 +21,32 @@ fi
 latest_tag=$(curl --silent "https://api.github.com/repos/yumenaka/comi/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
 
 # 根据操作系统和处理器架构，选择文件下载
+# 根据操作系统和处理器架构，选择文件下载
 if [[ "$(uname -s)" == "Linux" ]]; then
   if [[ "$(uname -m)" == "x86_64" ]]; then
     file_name="comi_${latest_tag}_Linux_x86_64.tar.gz" # x86 64位
   elif [[ "$(uname -m)" == "armv7l" ]]; then
     file_name="comi_${latest_tag}_Linux-armv7.tar.gz"  # ARM 32位
-  else [[  $(uname -m) == "arm64" || $(uname -m) == "aarch64" ]]; then
+  elif [[ "$(uname -m)" == "arm64" || "$(uname -m)" == "aarch64" ]]; then
     file_name="comi_${latest_tag}_Linux-armv8.tar.gz"   # ARM 64位
+  else
+    echo "Unsupported architecture: $(uname -m)"
+    exit 1
   fi
 elif [[ "$(uname -s)" == "Darwin" ]]; then
   if [[ "$(uname -m)" == "x86_64" ]]; then
     file_name="comi_${latest_tag}_MacOS_x86_64.tar.gz" # MacOS x86 64位
-  else
+  elif [[ "$(uname -m)" == "arm64" ]]; then
     file_name="comi_${latest_tag}_MacOS_arm64.tar.gz" # MacOS ARM 64位
+  else
+    echo "Unsupported architecture: $(uname -m)"
+    exit 1
   fi
 else
-  echo "Unsupported platform: $(uname -s) $(uname -m)"
+  echo "Unsupported platform: $(uname -s)"
   exit 1
 fi
+
 
 # 下载文件并解压
 url="https://github.com/yumenaka/comi/releases/download/${latest_tag}/${file_name}"
@@ -50,7 +58,7 @@ rm $file_name
 
 # 添加执行权限并移动到 bin 目录
 chmod +x comi
-mv comi /usr/local/bin/
+sudo mv comi /usr/local/bin/
 
 # 获取系统语言
 system_language=$(locale | grep -oP 'LANG=\K\w+')
