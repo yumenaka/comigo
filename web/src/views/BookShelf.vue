@@ -172,7 +172,7 @@ export default defineComponent({
     },
     data() {
         return {
-            bookCardMode: "list",//gird,list,text
+            bookCardMode: "gird",//gird,list,text
             simplifyTitle: true, //简化显示标题
             //是否显示回到顶部按钮
             showBackTopFlag: false,
