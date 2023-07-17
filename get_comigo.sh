@@ -20,8 +20,7 @@ fi
 # 最新版本tag
 latest_tag=$(curl --silent "https://api.github.com/repos/yumenaka/comi/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
 
-# 根据操作系统和处理器架构，选择文件下载
-# 根据操作系统和处理器架构，选择文件下载
+# 根据操作系统和处理器架构，选择下载文件
 if [[ "$(uname -s)" == "Linux" ]]; then
   if [[ "$(uname -m)" == "x86_64" ]]; then
     file_name="comi_${latest_tag}_Linux_x86_64.tar.gz" # x86 64位
@@ -46,7 +45,6 @@ else
   echo "Unsupported platform: $(uname -s)"
   exit 1
 fi
-
 
 # 下载文件并解压
 url="https://github.com/yumenaka/comi/releases/download/${latest_tag}/${file_name}"
