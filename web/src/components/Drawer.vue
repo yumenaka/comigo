@@ -28,7 +28,7 @@
         </template>
         {{ $t('do_you_reset_all_settings') }}
       </n-popconfirm>
-      <n-button class="my-2">{{ $t('server_setting') }}</n-button>
+      <!-- <n-button class="my-2">{{ $t('server_setting') }}</n-button> -->
       <n-button class="my-2" @click="logout">{{ $t('logout') }}</n-button>
       <!-- 抽屉：自定义底部 -->
       <template #footer>

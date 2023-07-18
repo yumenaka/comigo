@@ -133,7 +133,8 @@ func New(filePath string, modified time.Time, fileSize int64, storePath string, 
 	}
 	//初始化书籍
 	var b = Book{
-		BookInfo: BookInfo{Author: "",
+		BookInfo: BookInfo{
+			Author:        "",
 			Modified:      modified,
 			FileSize:      fileSize,
 			InitComplete:  false,

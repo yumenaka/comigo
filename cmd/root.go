@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"github.com/yumenaka/comi/routers/handler"
-	"io/ioutil"
 	"os"
 	"path"
 	"runtime"
@@ -163,7 +162,7 @@ func init() {
 			}
 			//在命令行打印
 			fmt.Println(string(bytes))
-			err = ioutil.WriteFile("config.toml", bytes, 0644)
+			err = os.WriteFile("config.toml", bytes, 0644)
 			if err != nil {
 				panic(err)
 			}
