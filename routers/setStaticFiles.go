@@ -3,6 +3,7 @@ package routers
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/tools"
 	"html/template"
 	"io"
@@ -63,8 +64,6 @@ func setStaticFiles(engine *gin.Engine) {
 		gin.DefaultWriter = io.Discard
 	}
 
-	//自定义分隔符，避免与vue.js冲突
-	engine.Delims("[[", "]]")
 	//https://stackoverflow.com/questions/66248258/serve-embedded-filesystem-from-root-path-of-url
 	assetsEmbedFS, err := fs.Sub(staticAssetFS, "static/assets")
 	if err != nil {
@@ -88,7 +87,7 @@ func setStaticFiles(engine *gin.Engine) {
 	//解析模板到HTML
 	engine.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "template-data", gin.H{
-			"title": "Comigo 漫画阅读器 " + common.Version, //页面标题
+			"title": locale.GetString("HTML_TITLE") + common.Version, //页面标题
 		})
 	})
 }

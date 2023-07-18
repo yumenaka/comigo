@@ -3,10 +3,9 @@ package book
 import (
 	"errors"
 	"fmt"
-	"path/filepath"
-	"time"
-
 	"github.com/yumenaka/comi/tools"
+	"os"
+	"path/filepath"
 )
 
 // Bookstores 本地总书库，扫描后生成。可以有多个子书库。
@@ -62,8 +61,16 @@ func (s *singleBookstore) initBookGroupMap() error {
 		}
 		//循环parentMap，把有相同parent的书创建为一个书组
 		for parent, sameParentBookList := range parentTempMap {
-			//新建一本书 //类型是书籍组
-			newBook, err := New(filepath.Dir(sameParentBookList[0].FilePath), time.Now(), 0, s.StorePath, depth-1, TypeBooksGroup)
+			//新建一本书,类型是书籍组
+
+			// 获取文件夹信息
+			pathInfo, err := os.Stat(sameParentBookList[0].FilePath)
+			if err != nil {
+				return err
+			}
+			// 获取修改时间
+			modTime := pathInfo.ModTime()
+			newBook, err := New(filepath.Dir(sameParentBookList[0].FilePath), modTime, 0, s.StorePath, depth-1, TypeBooksGroup)
 			if err != nil {
 				fmt.Println(err)
 				continue
