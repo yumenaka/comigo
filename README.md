@@ -19,7 +19,7 @@
 2. Linux MacOS 一键安装脚本  
 ```bash
 # 需要curl与tar，文件将安装到/usr/local/bin/ 
-bash <(curl -s https://raw.githubusercontent.com/yumenaka/comi/main/get_comigo.sh)
+bash <(curl -s https://raw.githubusercontent.com/yumenaka/comi/master/get_comigo.sh)
 
 #  如果你设置了golang环境，也可以这样安装：
 go install github.com/yumenaka/comi@latest
