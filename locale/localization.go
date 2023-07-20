@@ -91,11 +91,8 @@ func getLocale() (string, string) {
 func init() {
 	bundle := i18n.NewBundle(language.English)
 	bundle.RegisterUnmarshalFunc("toml", toml.Unmarshal)
-
 	bundle.MustParseMessageFileBytes(enBytes, "en-us.toml")
-
 	bundle.MustParseMessageFileBytes(cnBytes, "zh-cn.toml")
-
 	bundle.MustParseMessageFileBytes(jpBytes, "ja-jp.toml")
 
 	lang, _ := getLocale()
@@ -110,7 +107,6 @@ func init() {
 	default:
 		Localizer = i18n.NewLocalizer(bundle, "en-US")
 	}
-	//fmt.Println(GetString("init_locale"))
 }
 
 func GetString(id string) string {

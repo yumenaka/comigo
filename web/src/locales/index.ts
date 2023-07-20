@@ -28,4 +28,5 @@ const i18n = createI18n<[MessageSchema], "en" | "ja" | "zh">({
     zh: cnLocale,
   },
 });
+
 export default i18n;

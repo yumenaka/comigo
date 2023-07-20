@@ -19,7 +19,7 @@ import (
 	"github.com/yumenaka/comi/routers"
 )
 
-var viperInstance *viper.Viper
+var runtimeViper *viper.Viper
 
 func init() {
 	cobra.MousetrapHelpText = ""       //屏蔽鼠标提示，支持拖拽、双击运行
@@ -103,18 +103,18 @@ func init() {
 	//尚未写完的功能
 	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFileName, "log_name", "comigo", "log文件名")
 	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFilePath, "log_path", "~", "log文件位置")
-	//rootCmd.PersistentFlags().BoolVarP(&common.PrintVersion, "version", "viperInstance", false, "输出版本号")
+	//rootCmd.PersistentFlags().BoolVarP(&common.PrintVersion, "version", "runtimeViper", false, "输出版本号")
 	//cobra & viper sample:https://qiita.com/nirasan/items/cc2ab5bc2889401fe596
 	// rootCmd.Run() 运行前的初始化定义。
 	// 运行前后顺序：rootCmd.Execute → 命令行参数的处理 → cobra.OnInitialize → rootCmd.Run、
 	// 于是可以通过CMD读取配置文件、按照配置文件的设定值执行。不一致的时候，配置文件优先于CMD参数
 	//cobra.OnInitialize(initConfig)
 	cobra.OnInitialize(func() {
-		viperInstance = viper.New()
+		runtimeViper = viper.New()
 		//自动读取环境变量，改写对应值
-		viperInstance.AutomaticEnv()
+		runtimeViper.AutomaticEnv()
 		//设置环境变量的前缀，将 PORT变为 COMI_PORT
-		viperInstance.SetEnvPrefix("comi")
+		runtimeViper.SetEnvPrefix("comi")
 		home, err := homedir.Dir()
 		if err != nil {
 			fmt.Println(err)
@@ -123,27 +123,26 @@ func init() {
 		}
 		//需要在home目录下面搜索配置文件
 		homeConfigPath := path.Join(home, ".config/comigo")
-		viperInstance.AddConfigPath(homeConfigPath)
+		runtimeViper.AddConfigPath(homeConfigPath)
 		// 当前执行目录
 		nowPath, _ := os.Getwd()
-		viperInstance.AddConfigPath(nowPath)
-		viperInstance.SetConfigType("toml")
-		viperInstance.SetConfigName("config.toml")
-
+		runtimeViper.AddConfigPath(nowPath)
+		runtimeViper.SetConfigType("toml")
+		runtimeViper.SetConfigName("config.toml")
 		// 读取设定文件
-		if err := viperInstance.ReadInConfig(); err != nil {
+		if err := runtimeViper.ReadInConfig(); err != nil {
 			if common.ConfigFilePath == "" && common.Config.Debug {
 				fmt.Println(err)
 			}
 		} else {
 			//获取当前使用的配置文件路径
 			//https://github.com/spf13/viper/issues/89
-			common.ConfigFilePath = viperInstance.ConfigFileUsed()
+			common.ConfigFilePath = runtimeViper.ConfigFileUsed()
 			fmt.Println(locale.GetString("FoundConfigFile") + common.ConfigFilePath)
 		}
 
 		// 把设定文件的内容，解析到构造体里面。
-		if err := viperInstance.Unmarshal(&common.Config); err != nil {
+		if err := runtimeViper.Unmarshal(&common.Config); err != nil {
 			fmt.Println(err)
 			time.Sleep(3 * time.Second)
 			os.Exit(1)
@@ -170,9 +169,9 @@ func init() {
 			os.Exit(0)
 		}
 		//监听文件修改
-		viperInstance.WatchConfig()
+		runtimeViper.WatchConfig()
 		//文件修改时，执行重载设置、服务重启的函数
-		viperInstance.OnConfigChange(configReloadHandler)
+		runtimeViper.OnConfigChange(configReloadHandler)
 	})
 }
 
@@ -188,6 +187,8 @@ var rootCmd = &cobra.Command{
 		initBookStores(args)
 		//设置临时文件夹
 		common.SetTempDir()
+		//CheckWebPort
+		routers.CheckWebPort()
 		//设置书籍API
 		routers.StartWebServer()
 		//退出时清理临时文件

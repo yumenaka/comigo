@@ -98,5 +98,6 @@ app.use(VueNativeSock, ws_url, {
 
 app.mount("#app"); // look index.html:  <div id="app"></div>
 
+// export：https://developer.mozilla.org/zh-CN/docs/web/javascript/reference/statements/export
 //store的websockets需要导入main，所以要有这一句，参考： https://github.com/likaia/chat-system/blob/master/src/main.ts
 export default app;

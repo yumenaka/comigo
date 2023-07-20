@@ -11,7 +11,7 @@ import (
 )
 
 // 3、选择服务端口
-func setPort() {
+func CheckWebPort() {
 	//检测端口
 	if !tools.CheckPort(common.Config.Port) {
 		//获取一个空闲可用的系统端口号

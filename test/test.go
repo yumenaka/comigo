@@ -18,6 +18,7 @@ import (
 	"github.com/disintegration/imaging"
 	"github.com/yumenaka/archiver/v4"
 	"modernc.org/sqlite"
+
 	//_ "modernc.org/sqlite"// //_操作其实只是引入该包。当导入一个包时，它所有的init()函数就会被执行，但有些时候并非真的需要使用这些包，仅仅是希望它的init()函数被执 行而已。这个时候就可以使用_操作引用该包了。匿名导入的包与其他方式导入包一样会让导入包编译到可执行文件中。
 
 	"github.com/yumenaka/comi/ent"
@@ -27,7 +28,7 @@ import (
 // Go製CGOフリーなSQLiteドライバーでentを使う
 // https://zenn.dev/nobonobo/articles/e9f17d183c19f6
 
-//初始化数据库为sqlite3
+// 初始化数据库为sqlite3
 type sqliteDriver struct {
 	*sqlite.Driver
 }
@@ -51,16 +52,15 @@ func init() {
 	sql.Register("sqlite3", sqliteDriver{Driver: &sqlite.Driver{}})
 }
 
-func main() {
-	testDatabase()
-}
+// func main() {
+// 	testDatabase()
+// }
 
 func testDatabase() {
-
-	//链接或创建数据库
+	// 链接或创建数据库
 	var entOptions []ent.Option
 	entOptions = append(entOptions, ent.Debug())
-	//连接器
+	// 连接器
 	client, err := ent.Open(dialect.SQLite, "file:comigo.sqlite?cache=shared", entOptions...)
 	if err != nil {
 		log.Fatalf("failed opening connection to sqlite: %v", err)
@@ -70,13 +70,13 @@ func testDatabase() {
 	if err := client.Schema.Create(context.Background()); err != nil {
 		log.Fatalf("failed creating schema resources: %v", err)
 	}
-	//弄个随机数、为那些不能重复的字段加个随机后缀
+	// 弄个随机数、为那些不能重复的字段加个随机后缀
 	r := rand.New(rand.NewSource(time.Now().Unix()))
 	randString := strconv.Itoa(r.Intn(100000))
 
-	//如何增删查改： https://entgo.io/zh/docs/crud
+	// 如何增删查改： https://entgo.io/zh/docs/crud
 
-	//插入一个User
+	// 插入一个User
 	ctx := context.Background()
 	u, err := client.User.
 		Create().
@@ -90,7 +90,7 @@ func testDatabase() {
 	}
 	log.Println("user was created: ", u)
 
-	//插入一本书
+	// 插入一本书
 	b, err := client.Book.
 		Create().
 		SetName("Test Book Name" + randString).
@@ -132,7 +132,7 @@ func testPDF() {
 }
 
 func ImageResize() {
-	//读取本地文件，本地文件尺寸300*400
+	// 读取本地文件，本地文件尺寸300*400
 	imgData, _ := ioutil.ReadFile("d:/1.jpg")
 	buf := bytes.NewBuffer(imgData)
 	image, err := imaging.Decode(buf)
@@ -140,7 +140,7 @@ func ImageResize() {
 		fmt.Println(err)
 		return
 	}
-	//生成缩略图，尺寸150*200，并保持到为文件2.jpg
+	// 生成缩略图，尺寸150*200，并保持到为文件2.jpg
 	image = imaging.Resize(image, 150, 200, imaging.Lanczos)
 	err = imaging.Save(image, "d:/2.jpg")
 	if err != nil {
@@ -151,27 +151,27 @@ func ImageResize() {
 // UnArchiveZip 一次性解压zip文件
 func UnArchiveZip(filePath string, extractPath string, textEncoding string) error {
 	extractPath = getAbsPath(extractPath)
-	//如果解压路径不存在，创建路径
+	// 如果解压路径不存在，创建路径
 	err := os.MkdirAll(extractPath, os.ModePerm)
 	if err != nil {
 		fmt.Println(err)
 	}
-	//打开文件，只读模式
-	file, err := os.OpenFile(filePath, os.O_RDONLY, 0400) //Use mode 0400 for a read-only // file and 0600 for a readable+writable file.
+	// 打开文件，只读模式
+	file, err := os.OpenFile(filePath, os.O_RDONLY, 0o400) // Use mode 0400 for a read-only // file and 0600 for a readable+writable file.
 	if err != nil {
 		fmt.Println(err)
 	}
 	defer file.Close()
-	//是否是压缩包
+	// 是否是压缩包
 	format, _, err := archiver.Identify(filePath, file)
 	if err != nil {
 		return err
 	}
-	//如果是zip
+	// 如果是zip
 	if ex, ok := format.(archiver.Zip); ok {
 		ex.TextEncoding = textEncoding // “”  "shiftjis" "gbk"
 		ctx := context.Background()
-		//WithValue返回parent的一个副本，该副本保存了传入的key/value，而调用Context接口的Value(key)方法就可以得到val。注意在同一个context中设置key/value，若key相同，值会被覆盖。
+		// WithValue返回parent的一个副本，该副本保存了传入的key/value，而调用Context接口的Value(key)方法就可以得到val。注意在同一个context中设置key/value，若key相同，值会被覆盖。
 		ctx = context.WithValue(ctx, "extractPath", extractPath)
 		_, err := ex.LsAllFile(ctx, file, extractFileHandler)
 		if err != nil {
@@ -215,7 +215,7 @@ func UnArchiveZip(filePath string, extractPath string, textEncoding string) erro
 //	return nil
 //}
 
-//解压文件的函数
+// 解压文件的函数
 func extractFileHandler(ctx context.Context, f archiver.File) error {
 	extractPath := ""
 	if e, ok := ctx.Value("extractPath").(string); ok {
@@ -227,7 +227,7 @@ func extractFileHandler(ctx context.Context, f archiver.File) error {
 		fmt.Println(err)
 	}
 	defer file.Close()
-	//如果是文件夹，直接创建文件夹
+	// 如果是文件夹，直接创建文件夹
 	if f.IsDir() {
 		err = os.MkdirAll(filepath.Join(extractPath, f.NameInArchive), os.ModePerm)
 		if err != nil {
@@ -235,9 +235,9 @@ func extractFileHandler(ctx context.Context, f archiver.File) error {
 		}
 		return err
 	}
-	//如果是一般文件，将文件写入磁盘
+	// 如果是一般文件，将文件写入磁盘
 	writeFilePath := filepath.Join(extractPath, f.NameInArchive)
-	//写文件前，如果对应文件夹不存在，就创建对应文件夹
+	// 写文件前，如果对应文件夹不存在，就创建对应文件夹
 	checkDir := filepath.Dir(writeFilePath)
 	if !isExist(checkDir) {
 		err = os.MkdirAll(checkDir, os.ModePerm)
@@ -246,20 +246,20 @@ func extractFileHandler(ctx context.Context, f archiver.File) error {
 		}
 		return err
 	}
-	//具体内容
+	// 具体内容
 	content, err := ioutil.ReadAll(file)
 	if err != nil {
 		fmt.Println(err)
 	}
-	//写入文件
-	err = ioutil.WriteFile(writeFilePath, content, 0644)
+	// 写入文件
+	err = ioutil.WriteFile(writeFilePath, content, 0o644)
 	if err != nil {
 		fmt.Println(err)
 	}
 	return err
 }
 
-//判断文件夹或文件是否存在
+// 判断文件夹或文件是否存在
 func isExist(path string) bool {
 	_, err := os.Stat(path)
 	if err != nil {
@@ -275,7 +275,7 @@ func isExist(path string) bool {
 	return true
 }
 
-//获取绝对路径
+// 获取绝对路径
 func getAbsPath(path string) string {
 	abs, err := filepath.Abs(path)
 	if err != nil {
