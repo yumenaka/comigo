@@ -5,14 +5,13 @@
     </n-card>
   </n-modal>
 
-  <div class="flex flex-col w-screen h-screen  bg-gray-50 items-center justify-center ">
-
-    <div class="bg-gray-50 my-10 w-80 h-48 flex-grow">
-      <h2 class="text-2xl md:text-4xl font-bold text-indigo-900">用户登录</h2>
-      <n-input class="h-10 my-3" type="text" v-model="username" placeholder="请输入用户名" required />
-      <n-input class="h-10 my-3" type="password" v-model="password" placeholder="请输入密码" required
-        @keydown.enter.native="inputEnter" />
-      <n-button class="h-10 w-80ad my-3" @click="login">Login</n-button>
+  <div class="flex flex-col w-screen h-screen  bg-gray-50  items-center justify-center ">
+    <div class="w-100 h-70 p-8 flex flex-col items-center bg-gray-300 rounded-lg border border-gray-800">
+      <h2 class="text-2xl md:text-3xl font-bold text-indigo-900">登录</h2>
+      <n-input class="h-10 my-3 w-9/4" type="text" v-model:value="username" placeholder="请输入用户名" required />
+      <n-input class="h-10 my-3 w-9/12" type="password" v-model:value="password" placeholder="请输入密码" required
+        @keydown.enter.native="login" />
+      <n-button class="h-10 w-3/4 my-3  rounded-lg" type="primary" @click="login">Login</n-button>
     </div>
   </div>
 </template>
@@ -20,9 +19,9 @@
 <script lang="ts">
 import Header from "@/components/Header.vue";
 import Bottom from "@/components/Bottom.vue";
-import { NCard, NForm, NFormItem, NInput, NModal, NButton } from "naive-ui";
+import { NCard, NForm, NFormItem, NInput, NModal, NButton, useMessage, useDialog } from "naive-ui";
 import { ref, defineComponent, reactive, } from "vue";
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute, } from 'vue-router';
 import axios from "axios";
 import { PersonOutline, LockClosedOutline } from '@vicons/ionicons5'
 
@@ -39,7 +38,7 @@ export default defineComponent({
     NModal,// https://www.naiveui.com/zh-CN/os-theme/components/modal
     NButton,// https://www.naiveui.com/zh-CN/os-theme/components/button
     NFormItem,
-    NInput,
+    NInput,// https://www.naiveui.com/zh-CN/os-theme/components/input
   },
   setup() {
     // 背景颜色,颜色选择器用  // 此处不能使用this
@@ -50,8 +49,9 @@ export default defineComponent({
     const showModalRef = ref(false)
     const timeoutRef = ref(1000)
     // router オブジェクトを取得
-    const router = useRouter();
     const route = useRoute();
+    const message = useMessage()
+    const dialog = useDialog()
     const countdown = () => {
       if (timeoutRef.value <= 0) {
         showModalRef.value = false
@@ -77,7 +77,43 @@ export default defineComponent({
       model,
       showModal: showModalRef,
       timeout: timeoutRef,
-      backPage
+      backPage,
+      dialog,
+      handleConfirm() {
+        dialog.warning({
+          title: '警告',
+          content: '格式错误，请检查输入',
+          positiveText: '确定',
+          // negativeText: '不确定',
+          onPositiveClick: () => {
+            message.success('OK')
+          },
+          // onNegativeClick: () => {
+          //   message.error('不确定')
+          // }
+        })
+      },
+      handleSuccess() {
+        dialog.success({
+          title: '成功登录',
+          content: '成功登录，返回原页面',
+          positiveText: 'OK',
+          onPositiveClick: () => {
+            message.success('成功登录')//message
+          }
+        })
+      },
+      handleError() {
+        console.log(dialog)
+        dialog.error({
+          title: '错误',
+          content: '用户名或密码错误',
+          positiveText: '确认',
+          onPositiveClick: () => {
+            // message.success('用户名或密码错误')
+          }
+        })
+      },
     };
   },
 
@@ -87,8 +123,8 @@ export default defineComponent({
       drawerActive: false,
       drawerPlacement: "right",
       PageTitle: "",
-      username: "admin",
-      password: "admin",
+      username: "",
+      password: "",
     };
   },
   created() {
@@ -103,124 +139,25 @@ export default defineComponent({
     }
   },
   methods: {
-    logout() {
-      console.log("logout");
-      axios.post("/logout", {
-        username: this.username,
-        password: this.password,
-      })
-        .then(resp => {
-          //退出登录成功后的操作
-          if (resp.data.code === 200) {
-            console.log(resp.data.user)
-            this.$router.replace('/');
-          } else {
-            console.log(resp.data.msg)
-          }
-        })
-        .catch(failResponse => { })//失败时的操作
-    },
-    inputEnter(e: any) {
-      this.login(e);
-    },
     login(e: any) {
       e.preventDefault() //阻止浏览器默认行为
-      console.log("Login Username:" + this.username)
-      console.log("Login Password:" + this.password)
-
       axios.post("/login", {
         username: this.username,
         password: this.password,
-      }).then(resp => {
-        //登录成功后的操作,例如跳转页面
-        console.log(resp.data.code)
-        if (resp.data.code === 200) {
-          console.log(resp.data.token);
-          sessionStorage.setItem('JWT_TOKEN', resp.data.token)
-          this.backPage();
-
-          // 头信息 Authorization。不知为什么不起作用，目前是cookie验证。
-          const myHeaders = new Headers();
-          myHeaders.append('Authorization', "Bearer " + resp.data.token);
-
-          //手动测试接口：
-          // fetch('/api/getlist?max_depth=1&sort_by=modify_time', {
-          //   method: 'GET',
-          //   headers: myHeaders
-          // }).then(function (data) {
-          //   console.log(data);
-          // })
-
-        } else {
-          //登录失败时的操作
-          console.log(resp.data)
-        }
-
       })
-        .catch(failResponse => {
+        .then((response) => {
+          // 登录成功
+          const respData: any = response.data;
+          console.log(respData.token);
+          sessionStorage.setItem('JWT_TOKEN', respData.token);
+          this.backPage();
         })
-
-      // // JSON Obj
-      // var userObj = {
-      //   username: this.username,
-      //   password: this.username,
-      // };
-      // // Obj to string
-      // var body_data = JSON.stringify(userObj);
-      // fetch('/api/login', {
-      //   method: 'post',
-      //   body: body_data,
-      //   headers: {
-      //     'Content-Type': 'application/json'
-      //   }
-      // }).then(function (data) {
-      //   console.log(data);
-      //   console.log(data.data.token);
-      //   //将返回的结果保存在 sessionStorage 中
-      //   sessionStorage.setItem('JWT_TOKEN', data.data.token);
-
-      //   return data.text();
-      // }).then(function (data) {
-      //   console.log(data);
-      // })
-    },
-    getUploadTitile() {
-      //如果没有一本书
-      if (this.$store.state.server_status.SupportUploadFile === false) {
-        return this.$t("no_support_upload_file");
-      }
-      //如果没有一本书
-      if (this.$store.state.server_status.NumberOfBooks === 0) {
-        return this.$t("no_book_found_hint");
-      }
-      return (
-        this.$t("number_of_online_books") +
-        this.$store.state.server_status.NumberOfBooks
-      );
-    },
-    remoteIsWindows() {
-      if (!this.$store.state.server_status) {
-        return false;
-      }
-      console.dir(this.$store.state.server_status.Description);
-      return (
-        this.$store.state.server_status.Description.indexOf("windows") !== -1
-      );
+        .catch((error) => {
+          // 登录请求失败
+          this.handleError();
+        });
     },
   },
 });
 </script>
 
-<style scoped>
-.header {
-  background: v-bind("model.interfaceColor");
-}
-
-.bottom {
-  background: v-bind("model.interfaceColor");
-}
-
-.mian_area {
-  background: v-bind("model.backgroundColor");
-}
-</style>

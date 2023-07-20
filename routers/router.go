@@ -43,15 +43,13 @@ func StartWebServer() {
 	setStaticFiles(engine)
 	//2、setWebAPI
 	setWebAPI(engine)
-	//3、setPort
-	setPort()
-	//4、setWebpServer
+	//3、setWebpServer
 	//setWebpServer(engine)
-	//5、setFrpClient
+	//4、setFrpClient
 	setFrpClient()
-	//6、printQRCodeInCMD
+	//5、printQRCodeInCMD
 	printQRCodeInCMD()
-	//7、StartGinEngine 监听并启动web服务
+	//6、StartGinEngine 监听并启动web服务
 	StartGinEngine(engine)
 }
 

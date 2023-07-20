@@ -10,12 +10,12 @@ import (
 
 // ServerSettings 服务器设置(config.toml)，配置文件放在被扫描的根目录中，或$HOME/config/comigo.可以用“comi --generate-config”生成本示例文件
 type ServerSettings struct {
-	Port                 int             `json:"port" comment:"Comigo设置文件(config.toml)，放在执行目录中，或$HOME/.config/comigo/下。可用“comi --generate-config”生成本文件\n网页端口"`
+	Port                 int             `json:"port" comment:"Comigo设置文件(config.toml)，放在执行目录中，或$HOME/.config/comigo/下。可用“comi --generate-config”生成本文件\n网页服务端口，此项配置不支持热重载"`
 	Host                 string          `json:"host" comment:"自定义二维码显示的主机名"`
 	StoresPath           []string        `json:"-"    comment:"设置默认扫描的书库文件夹"`
 	MaxDepth             int             `json:"-" comment:"最大扫描深度"`
 	OpenBrowser          bool            `json:"-" comment:"是否同时打开浏览器，windows默认true，其他默认false"`
-	DisableLAN           bool            `json:"-" comment:"只在本机localhost提供服务，不对外共享"`
+	DisableLAN           bool            `json:"-" comment:"只在本机localhost提供服务，不对外共享，此项配置不支持热重载"`
 	DefaultMode          string          `json:"default_mode" comment:"默认阅读模式，默认为空，可以设置为scroll或flip"`
 	UserName             string          `json:"-" comment:"访问限制：用户名。需要设置密码"`
 	Password             string          `json:"-" comment:"访问限制：密码。需要设置用户名。"`
@@ -25,7 +25,7 @@ type ServerSettings struct {
 	CacheEnable          bool            `json:"-" comment:"是否保存web图片缓存，可以加快二次读取，但会占用硬盘空间"`
 	CachePath            string          `json:"-" comment:"web图片缓存存储位置，默认系统临时文件夹"`
 	CacheClean           bool            `json:"-" comment:"退出程序的时候，清理web图片缓存"`
-	EnableUpload         bool            `json:"-" comment:"启用那个文件撒上传功能"`
+	EnableUpload         bool            `json:"-" comment:"启用文件上传功能"`
 	UploadPath           string          `json:"-" comment:"上传文件的存储位置，默认在当前执行目录下创建 ComigoUpload 文件夹"`
 	EnableDatabase       bool            `json:"-" comment:"启用本地数据库，保存扫描到的书籍数据"`
 	ClearDatabase        bool            `json:"-" comment:"启用本地数据库时，扫描完成后，清除不存在的书籍"`
@@ -37,7 +37,7 @@ type ServerSettings struct {
 	PrintAllIP           bool            `json:"-" comment:"打印所有可能阅读链接的二维码"`
 	Debug                bool            `json:"-" comment:"开启Debug模式"`
 	LogToFile            bool            `json:"-" comment:"记录Log到本地文件"`
-	LogFilePath          string          `json:"-" comment:"Log保存的位置"`
+	LogFilePath          string          `json:"-" comment:"Log保存位置"`
 	LogFileName          string          `json:"-" comment:"Log文件名"`
 	ZipFileTextEncoding  string          `json:"-" comment:"非utf-8编码的ZIP文件，尝试用什么编码解析，默认GBK"`
 	GenerateConfig       bool            `toml:"-" comment:"生成示例配置文件的标志"`
