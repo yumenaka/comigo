@@ -1,23 +1,8 @@
 package routers
 
 import (
-	"embed"
 	"github.com/gin-gonic/gin"
 )
-
-// TemplateString 模板文件
-//
-//go:embed static/index.html
-var TemplateString string
-
-//go:embed  static
-var staticFS embed.FS
-
-//go:embed  static/assets
-var staticAssetFS embed.FS
-
-//go:embed  static/images
-var staticImageFS embed.FS
 
 // gin-jwt相关 https://github.com/appleboy/gin-jwt
 

@@ -1,3 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .page-container {
+    @apply h-[100vh] bg-indigo-900 flex items-center justify-center;
+  }
+  .logo-style {
+    @apply h-72 w-72 transition hover:animate-spin cursor-pointer;
+  }
+  .title {
+    @apply text-white text-center text-2xl sm:text-5xl;
+  }
+}
+
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
