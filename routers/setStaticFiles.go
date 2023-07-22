@@ -1,6 +1,7 @@
 package routers
 
 import (
+	"embed"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comi/locale"
@@ -13,6 +14,23 @@ import (
 	"github.com/yumenaka/comi/book"
 	"github.com/yumenaka/comi/common"
 )
+
+// TemplateString 模板文件
+//
+//go:embed static/index.html
+var TemplateString string
+
+//go:embed  static
+var staticFS embed.FS
+
+//go:embed  static/assets
+var staticAssetFS embed.FS
+
+//go:embed  static/images
+var staticImageFS embed.FS
+
+//go:embed  admin
+var adminFS embed.FS
 
 // 用来防止重复注册的URL表，key是bookID，值是StaticURL
 var staticUrlMap = make(map[string]string)
@@ -84,6 +102,13 @@ func setStaticFiles(engine *gin.Engine) {
 			file,
 		)
 	})
+	//用react写的后台界面：
+	adminEmbedFS, errAdminFS := fs.Sub(adminFS, "admin")
+	if errAdminFS != nil {
+		fmt.Println(errAdminFS)
+	}
+	engine.StaticFS("/admin/", http.FS(adminEmbedFS))
+
 	//解析模板到HTML
 	engine.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "template-data", gin.H{
