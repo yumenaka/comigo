@@ -29,6 +29,10 @@ func UpdateConfigHandler(c *gin.Context) {
 	}
 	// Update the server settings with the new values
 	common.Config = newSettings
+	//扫描配置文件指定的书籍库
+	common.ScanStorePathInConfig()
+	//TODO:保存扫描结果到数据库
+	common.SaveResultsToDatabase()
 	// Respond with a success message
 	c.JSON(http.StatusOK, gin.H{"message": "Server settings updated successfully"})
 }
@@ -37,7 +41,6 @@ func UpdateConfigHandler(c *gin.Context) {
 func GetTomlConfigHandler(c *gin.Context) {
 	//golang结构体默认深拷贝（但是基本类型浅拷贝）
 	tempConfig := common.Config
-	tempConfig.GenerateConfig = false
 	tempConfig.LogFilePath = ""
 	common.Config.OpenBrowser = false
 	common.Config.EnableDatabase = true

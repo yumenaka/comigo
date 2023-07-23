@@ -9,6 +9,7 @@ import (
 var (
 	ConfigFilePath = "" //yaml设置文件路径，数据库文件(comigo.db)在同一个文件夹。
 	Version        = "v0.9.4"
+	GenerateConfig = false
 	ReadingBook    *book.Book
 	Srv            *http.Server
 	Config         = settings.ServerSettings{
@@ -56,3 +57,5 @@ var (
 		//DatabaseFilePath:     "",
 	}
 )
+
+var DatabaseBookList []*book.Book

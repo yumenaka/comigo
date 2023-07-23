@@ -28,7 +28,7 @@ func waitRescanMessages() {
 			fmt.Println("扫描上传文件夹：", msg)
 			ReScanUploadPath()
 			//保存扫描结果到数据库
-			SaveResultsToDatabase()
+			common.SaveResultsToDatabase()
 			//重新设置文件下载链接
 			routers.SetDownloadLink()
 		case "SomePath":
@@ -55,7 +55,7 @@ func ReScanUploadPath() {
 
 func ReScanPath(path string) {
 	//扫描上传目录的文件
-	addList, err := common.ScanAndGetBookList(path, databaseBookList)
+	addList, err := common.ScanAndGetBookList(path, common.DatabaseBookList)
 	if err != nil {
 		fmt.Println(locale.GetString("scan_error"), path, err)
 	} else {
