@@ -13,7 +13,7 @@ func initBookStores(args []string) {
 		//从数据库里面读取书籍信息，持久化
 		storage.InitDatabase(common.ConfigFilePath)
 		var dataErr error
-		databaseBookList, dataErr = storage.GetArchiveBookFromDatabase()
+		common.DatabaseBookList, dataErr = storage.GetArchiveBookFromDatabase()
 		if dataErr != nil {
 			fmt.Println(dataErr)
 		}
@@ -21,11 +21,11 @@ func initBookStores(args []string) {
 	//2、搜索基本路径，来自程序启动时的参数
 	ScanDefaultPath(args)
 	//3、扫描配置文件指定的书籍库
-	ScanStorePathInConfig()
+	common.ScanStorePathInConfig()
 	//4、扫描默认上传文件夹
 	ReScanUploadPath()
 	//5、保存扫描结果到数据库
-	SaveResultsToDatabase()
+	common.SaveResultsToDatabase()
 	//6、通过“可执行文件名”设置部分默认参数,目前不生效
 	common.Config.SetByExecutableFilename()
 }

@@ -14,7 +14,7 @@ func ScanDefaultPath(args []string) {
 	//没有指定路径或文件的情况下
 	if len(args) == 0 {
 		cmdPath := path.Dir(os.Args[0]) //扫描程序执行的路径
-		addList, err := common.ScanAndGetBookList(cmdPath, databaseBookList)
+		addList, err := common.ScanAndGetBookList(cmdPath, common.DatabaseBookList)
 		if err != nil {
 			fmt.Println(locale.GetString("scan_error"), cmdPath, err)
 		} else {
@@ -23,7 +23,7 @@ func ScanDefaultPath(args []string) {
 	} else {
 		//指定了多个参数的话，都扫描一遍
 		for _, p := range args {
-			addList, err := common.ScanAndGetBookList(p, databaseBookList)
+			addList, err := common.ScanAndGetBookList(p, common.DatabaseBookList)
 			if err != nil {
 				fmt.Println(locale.GetString("scan_error"), p, err)
 			} else {

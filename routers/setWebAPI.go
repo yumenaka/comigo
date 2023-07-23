@@ -11,8 +11,7 @@ import (
 
 // 2、设置获取书籍信息、图片文件的 API
 func setWebAPI(engine *gin.Engine) {
-
-	////TODO：实现第三方认证，可参考 https://darjun.github.io/2021/07/26/godailylib/goth/
+	////TODO：第三方认证，可参考 https://darjun.github.io/2021/07/26/godailylib/goth/
 	api = engine.Group("/api")
 	//如果没有设置用户名和密码，则不需要验证
 	if common.Config.UserName == "" || common.Config.Password == "" {
@@ -22,7 +21,7 @@ func setWebAPI(engine *gin.Engine) {
 		//文件上传
 		api.POST("/upload", handler.UploadHandler)
 		//登录后才能查看的服务器状态，包括标题、机器状态等
-		api.GET("/get-secret-status", handler.ServerStatusHandler)
+		api.GET("/get_status_all", handler.GetStatusAllHandler)
 		//获取书架信息，不包含每页信息
 		api.GET("/getlist", handler.GetBookListHandler)
 		//通过URL字符串参数查询书籍信息
@@ -55,7 +54,7 @@ func setWebAPI(engine *gin.Engine) {
 		//文件上传
 		api.POST("/upload", jwtMiddleware.MiddlewareFunc(), handler.UploadHandler)
 		//登录后才能查看的服务器状态，包括标题、机器状态等
-		api.GET("/get-secret-status", jwtMiddleware.MiddlewareFunc(), handler.ServerStatusHandler)
+		api.GET("/get_status_all", jwtMiddleware.MiddlewareFunc(), handler.GetStatusAllHandler)
 		//获取书架信息，不包含每页信息
 		api.GET("/getlist", jwtMiddleware.MiddlewareFunc(), handler.GetBookListHandler)
 		//通过URL字符串参数查询书籍信息

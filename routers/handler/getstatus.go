@@ -12,20 +12,20 @@ import (
 
 // ServerStatus 服务器当前状况
 type ServerStatus struct {
-	ServerName            string //服务器描述
-	ServerHost            string
-	ServerPort            int
-	NumberOfBooks         int //当前拥有的书籍总数
-	NumberOfOnLineUser    int //TODO：在线用户数
-	NumberOfOnLineDevices int //TODO：在线设备数
-	SupportUploadFile     bool
+	ServerName            string             //服务器描述
+	ServerHost            string             //
+	ServerPort            int                //
+	NumberOfBooks         int                //当前拥有的书籍总数
+	NumberOfOnLineUser    int                //TODO：在线用户数
+	NumberOfOnLineDevices int                //TODO：在线设备数
+	SupportUploadFile     bool               //
 	ClientIP              string             //客户端IP
 	OSInfo                tools.SystemStatus //系统信息
 }
 
 func PublicServerInfoHandler(c *gin.Context) {
 	serverName := "Comigo " + common.Version
-	//取得本机的首选出站IP
+	//本机首选出站IP
 	OutIP := tools.GetOutboundIP().String()
 	host := ""
 	if common.Config.Host == "" {
@@ -33,24 +33,18 @@ func PublicServerInfoHandler(c *gin.Context) {
 	} else {
 		host = common.Config.Host
 	}
-
 	var serverStatus = ServerStatus{
 		ServerName:        serverName,
 		ServerHost:        host,
 		ServerPort:        common.Config.Port,
 		SupportUploadFile: common.Config.EnableUpload,
-		//NumberOfBooks:         book.GetBooksNumber(),
-		//NumberOfOnLineUser:    1,
-		//NumberOfOnLineDevices: 1,
-		//ClientIP:              c.ClientIP(),
-		//OSInfo:                tools.GetSystemStatus(),
 	}
 	c.PureJSON(http.StatusOK, serverStatus)
 }
 
-func ServerStatusHandler(c *gin.Context) {
+func GetStatusAllHandler(c *gin.Context) {
 	serverName := "Comigo " + common.Version
-	//取得本机的首选出站IP
+	//本机首选出站IP
 	OutIP := tools.GetOutboundIP().String()
 	host := ""
 	if common.Config.Host == "" {
@@ -58,7 +52,6 @@ func ServerStatusHandler(c *gin.Context) {
 	} else {
 		host = common.Config.Host
 	}
-
 	var serverStatus = ServerStatus{
 		ServerName:            serverName,
 		ServerHost:            host,

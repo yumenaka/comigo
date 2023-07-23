@@ -13,7 +13,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/yumenaka/comi/book"
 	"github.com/yumenaka/comi/common"
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/routers"
@@ -34,7 +33,7 @@ func init() {
 	//指定配置文件
 	rootCmd.PersistentFlags().StringVarP(&common.ConfigFilePath, "config", "c", "", locale.GetString("CONFIG"))
 	//在当前目录生成示例配置文件
-	rootCmd.PersistentFlags().BoolVar(&common.Config.GenerateConfig, "generate-config", false, locale.GetString("GenerateConfig"))
+	rootCmd.PersistentFlags().BoolVar(&common.GenerateConfig, "generate-config", false, locale.GetString("GenerateConfig"))
 	//启用数据库，保存扫描数据
 	rootCmd.PersistentFlags().BoolVarP(&common.Config.EnableDatabase, "enable-database", "e", false, locale.GetString("EnableDatabase"))
 	//服务端口
@@ -148,8 +147,7 @@ func init() {
 			os.Exit(1)
 		}
 		//保存配置示例並退出
-		if common.Config.GenerateConfig {
-			common.Config.GenerateConfig = false
+		if common.GenerateConfig {
 			common.Config.LogFilePath = ""
 			common.Config.EnableDatabase = true
 			common.Config.OpenBrowser = false
@@ -196,7 +194,6 @@ var rootCmd = &cobra.Command{
 		return
 	},
 }
-var databaseBookList []*book.Book
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.

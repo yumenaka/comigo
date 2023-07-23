@@ -12,7 +12,7 @@ import (
 type ServerSettings struct {
 	Port                 int             `json:"Port" comment:"Comigo设置文件(config.toml)，放在执行目录中，或$HOME/.config/comigo/下。可用“comi --generate-config”生成本文件\n网页服务端口，此项配置不支持热重载"`
 	Host                 string          `json:"Host" comment:"自定义二维码显示的主机名"`
-	StoresPath           []string        `json:"StoresPath"    comment:"设置默认扫描的书库文件夹"`
+	StoresPath           []string        `json:"StoresPath" comment:"设置默认扫描的书库文件夹"`
 	MaxDepth             int             `json:"MaxDepth" comment:"最大扫描深度"`
 	OpenBrowser          bool            `json:"OpenBrowser" comment:"是否同时打开浏览器，windows默认true，其他默认false"`
 	DisableLAN           bool            `json:"DisableLAN" comment:"只在本机localhost提供服务，不对外共享，此项配置不支持热重载"`
@@ -40,15 +40,14 @@ type ServerSettings struct {
 	LogFilePath          string          `json:"LogFilePath" comment:"Log保存位置"`
 	LogFileName          string          `json:"LogFileName" comment:"Log文件名"`
 	ZipFileTextEncoding  string          `json:"ZipFileTextEncoding" comment:"非utf-8编码的ZIP文件，尝试用什么编码解析，默认GBK"`
-	GenerateConfig       bool            `json:"-" toml:"-" comment:"生成示例配置文件的标志"`
 	EnableFrpcServer     bool            `json:"EnableFrpcServer" comment:"后台启动FrpClient"`
 	FrpConfig            FrpClientConfig `json:"FrpConfig" comment:"FrpClient设置"`
-	GenerateMetaData     bool            `json:"GenerateMetaData" toml:"-" comment:"生成书籍元数据"`
-	//EnableWebpServer       bool             `json:"enable_webp_server"`
-	//SketchCountSeconds     int              `json:"sketch_count_seconds"`
-	//WebpConfig             WebPServerConfig `json:"-"  comment:" WebPServer设置"`
-	//Template               string           `json:"-"`
-	//DatabaseFilePath     string          `json:"-" comment:"数据库文件存储位置，默认当前目录"`
+	GenerateMetaData     bool            `json:"GenerateMetaData" toml:"GenerateMetaData" comment:"生成书籍元数据"`
+	//EnableWebpServer     bool             `json:"enable_webp_server"`
+	//SketchCountSeconds   int              `json:"sketch_count_seconds"`
+	//WebpConfig           WebPServerConfig `json:"-"  comment:" WebPServer设置"`
+	//Template             string           `json:"-"`
+	//DatabaseFilePath     string           `json:"-" comment:"数据库文件存储位置，默认当前目录"`
 }
 
 // FrpClientConfig frp客户端配置
@@ -67,10 +66,10 @@ type WebPServerConfig struct {
 	WebpCommand  string
 	HOST         string
 	PORT         string
-	ImgPath      string `json:"IMG_PATH"`
+	ImgPath      string
 	QUALITY      int
-	AllowedTypes []string `json:"ALLOWED_TYPES"`
-	ExhaustPath  string   `json:"EXHAUST_PATH"`
+	AllowedTypes []string
+	ExhaustPath  string
 }
 
 // IsSupportMedia 判断压缩包内的文件是否需要展示（包括图片、音频、视频、PDF在内的媒体文件）

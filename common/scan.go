@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/yumenaka/comi/storage"
 	"io/fs"
 	"io/ioutil"
 	"net/url"
@@ -25,6 +26,45 @@ import (
 	"github.com/yumenaka/comi/locale"
 )
 
+// ScanStorePathInConfig 3、扫描配置文件指定的的书籍库
+func ScanStorePathInConfig() {
+	if len(Config.StoresPath) > 0 {
+		for _, p := range Config.StoresPath {
+			addList, err := ScanAndGetBookList(p, DatabaseBookList)
+			if err != nil {
+				fmt.Println(locale.GetString("scan_error"), p, err)
+			} else {
+				AddBooksToStore(addList, p)
+			}
+		}
+	}
+}
+
+// SaveResultsToDatabase 4，保存扫描结果到数据库，并清理不存在的书籍
+func SaveResultsToDatabase() {
+	if Config.EnableDatabase {
+		AllBook := book.GetAllBookList()
+		//设置清理数据库的时候，是否清理没扫描到的书籍信息
+		if Config.ClearDatabase {
+			for _, checkBook := range DatabaseBookList {
+				needClear := true //这条数据是否需要清理
+				for _, b := range AllBook {
+					if b.BookID == checkBook.BookID {
+						needClear = false //如果扫到了这本书,就不清理相关数据
+					}
+				}
+				if needClear {
+					storage.ClearBookData(checkBook, Config.Debug)
+				}
+			}
+		}
+		saveErr := storage.SaveBookListToDatabase(AllBook)
+		if saveErr != nil {
+			fmt.Println(saveErr)
+		}
+	}
+}
+
 // AddBooksToStore 添加一组书到书库
 func AddBooksToStore(bookList []*book.Book, path string) {
 	err := book.AddBooks(bookList, path, Config.MinImageNum)
@@ -38,7 +78,7 @@ func AddBooksToStore(bookList []*book.Book, path string) {
 }
 
 // ScanAndGetBookList 扫描路径，取得路径里的书籍
-func ScanAndGetBookList(storePath string, databaseBookList []*book.Book) (newBookList []*book.Book, err error) {
+func ScanAndGetBookList(storePath string, DatabaseBookList []*book.Book) (newBookList []*book.Book, err error) {
 	// 路径不存在的Error，不过目前并不会打印出来
 	if !tools.PathExists(storePath) {
 		return nil, errors.New(locale.GetString("PATH_NOT_EXIST"))
@@ -52,7 +92,7 @@ func ScanAndGetBookList(storePath string, databaseBookList []*book.Book) (newBoo
 	err = filepath.Walk(storePathAbs, func(walkPath string, fileInfo os.FileInfo, err error) error {
 		// 是否需要跳过
 		skip := false
-		for _, p := range databaseBookList {
+		for _, p := range DatabaseBookList {
 			AbsW, err := filepath.Abs(walkPath) // 取得绝对路径
 			if err != nil {
 				// 无法取得的情况下，用相对路径
