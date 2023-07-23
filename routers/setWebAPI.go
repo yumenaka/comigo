@@ -29,6 +29,12 @@ func setWebAPI(engine *gin.Engine) {
 		api.GET("/getbook", handler.GetBookHandler)
 		//通过链接下载reg配置
 		api.GET("/comigo.reg", handler.GetRegFIleHandler)
+		//通过链接下载toml格式的示例配置
+		api.GET("/config.toml", handler.GetTomlConfigHandler)
+		//获取json格式的当前配置
+		api.GET("/config.json", handler.GetJsonConfigHandler)
+		//修改服务器配置(post json)
+		api.POST("/update_config", handler.UpdateConfigHandler)
 	} else {
 		// 创建 jwt 中间件
 		jwtMiddleware, err := token.NewJwtMiddleware()
@@ -56,14 +62,19 @@ func setWebAPI(engine *gin.Engine) {
 		api.GET("/getbook", jwtMiddleware.MiddlewareFunc(), handler.GetBookHandler)
 		//通过链接下载reg配置
 		api.GET("/comigo.reg", jwtMiddleware.MiddlewareFunc(), handler.GetRegFIleHandler)
+		//通过链接下载示例配置
+		api.GET("/config.toml", jwtMiddleware.MiddlewareFunc(), handler.GetTomlConfigHandler)
+		//获取json格式的当前配置
+		api.GET("/config.json", jwtMiddleware.MiddlewareFunc(), handler.GetJsonConfigHandler)
+		//修改服务器配置(post json)
+		api.POST("/update_config", jwtMiddleware.MiddlewareFunc(), handler.UpdateConfigHandler)
 	}
 
 	//web端公开的服务器状态，包括标题、端口等
 	api.GET("/getstatus", handler.PublicServerInfoHandler)
 	////通过URL字符串参数PDF文件里的图片，效率太低，注释掉
 	//api.GET("/get_pdf_image", handler.GetPdfImageHandler)
-	//通过链接下载示例配置
-	api.GET("/config.toml", handler.GetConfigHandler)
+
 	//通过链接下载qrcode
 	api.GET("/qrcode.png", handler.GetQrcodeHandler)
 	////301重定向跳转示例
