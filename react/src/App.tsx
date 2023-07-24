@@ -1,13 +1,14 @@
-import reactLogo from "./assets/react.svg";
+// import reactLogo from "./assets/react.svg";
 import "./App.css";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 type Config = {
   Port: number;
   Host: string;
   StoresPath: [];
-  MaxDepth: number;
+  MaxScanDepth: number;
   OpenBrowser: boolean;
   DisableLAN: boolean;
   DefaultMode: string;
@@ -16,9 +17,9 @@ type Config = {
   Timeout: number;
   CertFile: string;
   KeyFile: string;
-  CacheEnable: boolean;
+  EnableLocalCache: boolean;
   CachePath: string;
-  CacheClean: boolean;
+  ClearCacheExit: boolean;
   EnableUpload: boolean;
   UploadPath: string;
   EnableDatabase: boolean;
@@ -48,9 +49,8 @@ type Config = {
 };
 
 function App() {
-  const [count, setCount] = useState(0);
-
   const baseURL = "/api";
+  const { t, i18n } = useTranslation();
   const [config, setConfig] = useState<Config | null>(null);
 
   useEffect(() => {
@@ -68,18 +68,45 @@ function App() {
 
   return (
     <>
-      <div>
-        <a
-          className="flex flex-row justify-center items-center w-full"
-          href="https://react.dev"
-          target="_blank"
-        >
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <h1>admin</h1>
+      <div className="card">
+        {t("Port")} : {config?.Port} <br />
+        {t("Host")} : {config?.Host} <br />
+        {t("StoresPath")} : {config?.StoresPath} <br />
+        {t("MaxScanDepth")} : {config?.MaxScanDepth} <br />
+        {t("OpenBrowser")} : {config?.OpenBrowser ? "true" : "false"} <br />
+        {t("DisableLAN")} : {config?.DisableLAN ? "true" : "false"} <br />
+        {t("Username")} : {config?.UserName} <br />
+        {t("Password")} : {config?.Password} <br />
+        {t("Timeout")} : {config?.Timeout} <br />
+        {t("CertFile")} : {config?.CertFile} <br />
+        {t("KeyFile")} : {config?.KeyFile} <br />
+        {t("EnableLocalCache")} : {config?.EnableLocalCache ? "true" : "false"}{" "} <br />
+        {t("CachePath")} : {config?.CachePath} <br />
+        {t("ClearCacheExit")} : {config?.ClearCacheExit} <br />
+        {t("EnableUpload")} : {config?.EnableUpload ? "true" : "false"} <br />
+        {t("UploadPath")} : {config?.UploadPath} <br />
+        {t("EnableDatabase")} : {config?.EnableDatabase} <br />
+        {t("ClearDatabaseWhenExit")} :{" "}
+        {config?.ClearDatabase ? "true" : "false"} <br />
+        {t("ExcludePath")} : {config?.ExcludeFileOrFolders} <br />
+        {t("SupportedImageFileExtensions")} : {config?.SupportMediaType} <br />
+        {t("SupportedBookFileExtensions")} : {config?.SupportFileType} <br />
+        {t("MinImageCountInBook")} : {config?.MinImageNum} <br />
+        {t("TimeoutLimitForScan")} : {config?.TimeoutLimitForScan} <br />
+        {t("PrintAllPossibleQRCode")} : {config?.PrintAllIP ? "true" : "false"}{" "}
+        <br />
+        {t("EnableDebugMode")} : {config?.Debug ? "true" : "false"} <br />
+        {t("LogToFile")} : {config?.LogToFile} <br />
+        {t("LogFilePath")} : {config?.LogFilePath} <br />
+        {t("LogFileName")} : {config?.LogFileName} <br />
+        {t("ZipFileTextEncoding")} : {config?.ZipFileTextEncoding} <br />
+        {t("StartFrpClientInBackground")} :{" "}
+        {config?.EnableFrpcServer ? "true" : "false"} <br />
+        {t("GenerateBookMetadata")} :{" "}
+        {config?.GenerateMetaData ? "true" : "false"} <br />
+        {/* {t("FrpClientConfig")} : {config?.FrpConfig} */}
       </div>
-      <h1>React</h1>
-
-      <div className="card">Now port is {config?.Port}</div>
     </>
   );
 }

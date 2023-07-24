@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-//SetShutdownHandler TODO:退出时清理临时文件的函数
+// SetShutdownHandler TODO:退出时清理临时文件的函数
 func SetShutdownHandler() {
 	//优雅地停止或重启： https://github.com/gin-gonic/examples/blob/master/graceful-shutdown/graceful-shutdown/notify-with-context/server.go
 	// 创建侦听来自操作系统的中断信号的上下文。
@@ -25,7 +25,7 @@ func SetShutdownHandler() {
 	stop()
 	log.Println(locale.GetString("ShutdownHint"))
 	//清理临时文件
-	if common.Config.CacheClean {
+	if common.Config.ClearCacheExit {
 		fmt.Println("\r" + locale.GetString("start_clear_file") + " CachePath:" + common.Config.CachePath)
 		book.ClearTempFilesALL(common.Config.Debug, common.Config.CachePath)
 		fmt.Println(locale.GetString("clear_temp_file_completed"))

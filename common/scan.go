@@ -113,8 +113,8 @@ func ScanAndGetBookList(storePath string, DatabaseBookList []*book.Book) (newBoo
 		if runtime.GOOS == "windows" {
 			depth = strings.Count(walkPath, "\\") - strings.Count(storePathAbs, "\\")
 		}
-		if depth > Config.MaxDepth {
-			fmt.Printf(locale.GetString("ExceedsMaximumDepth")+" %d，base：%s scan: %s:\n", Config.MaxDepth, storePathAbs, walkPath)
+		if depth > Config.MaxScanDepth {
+			fmt.Printf(locale.GetString("ExceedsMaximumDepth")+" %d，base：%s scan: %s:\n", Config.MaxScanDepth, storePathAbs, walkPath)
 			return filepath.SkipDir // 当WalkFunc的返回值是filepath.SkipDir时，Walk将会跳过这个目录，照常执行下一个文件。
 		}
 		if Config.IsSkipDir(walkPath) {

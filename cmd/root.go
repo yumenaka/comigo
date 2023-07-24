@@ -50,7 +50,7 @@ func init() {
 	//不对局域网开放
 	rootCmd.PersistentFlags().BoolVarP(&common.Config.DisableLAN, "disable-lan", "d", false, locale.GetString("DISABLE_LAN"))
 	//文件搜索深度
-	rootCmd.PersistentFlags().IntVarP(&common.Config.MaxDepth, "max-depth", "m", 3, locale.GetString("MAX_DEPTH"))
+	rootCmd.PersistentFlags().IntVarP(&common.Config.MaxScanDepth, "max-depth", "m", 3, locale.GetString("MAX_DEPTH"))
 	////服务器解析书籍元数据，如果生成blurhash，需要消耗大量资源
 	rootCmd.PersistentFlags().BoolVar(&common.Config.GenerateMetaData, "generate-metadata", false, locale.GetString("GENERATE_METADATA"))
 	//打印所有可用网卡ip
@@ -84,11 +84,11 @@ func init() {
 	//sketch模式的倒计时秒数
 	//rootCmd.PersistentFlags().IntVar(&common.Config.SketchCountSeconds, "sketch_count_seconds", 90, locale.GetString("SKETCH_COUNT_SECONDS"))
 
-	rootCmd.PersistentFlags().BoolVar(&common.Config.CacheEnable, "enable-cache", true, locale.GetString("CACHE_FILE_ENABLE"))
+	rootCmd.PersistentFlags().BoolVar(&common.Config.EnableLocalCache, "enable-cache", true, locale.GetString("CACHE_FILE_ENABLE"))
 	//web图片缓存路径
 	rootCmd.PersistentFlags().StringVar(&common.Config.CachePath, "cache-path", "", locale.GetString("CACHE_FILE_PATH"))
 	//退出时清除临时文件
-	rootCmd.PersistentFlags().BoolVar(&common.Config.CacheClean, "cache-clean", true, locale.GetString("CACHE_FILE_CLEAN"))
+	rootCmd.PersistentFlags().BoolVar(&common.Config.ClearCacheExit, "cache-clean", true, locale.GetString("CACHE_FILE_CLEAN"))
 
 	//启用文件上传功能
 	rootCmd.PersistentFlags().BoolVar(&common.Config.EnableUpload, "enable-upload", true, locale.GetString("ENABLE_FILE_UPLOAD"))
