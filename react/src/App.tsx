@@ -68,7 +68,7 @@ function App() {
 
   return (
     <>
-      <h1>admin</h1>
+      <h2>admin</h2>
       <div className="card">
         {t("Port")} : {config?.Port} <br />
         {t("Host")} : {config?.Host} <br />
@@ -81,7 +81,8 @@ function App() {
         {t("Timeout")} : {config?.Timeout} <br />
         {t("CertFile")} : {config?.CertFile} <br />
         {t("KeyFile")} : {config?.KeyFile} <br />
-        {t("EnableLocalCache")} : {config?.EnableLocalCache ? "true" : "false"}{" "} <br />
+        {t("EnableLocalCache")} : {config?.EnableLocalCache ? "true" : "false"}{" "}
+        <br />
         {t("CachePath")} : {config?.CachePath} <br />
         {t("ClearCacheExit")} : {config?.ClearCacheExit} <br />
         {t("EnableUpload")} : {config?.EnableUpload ? "true" : "false"} <br />
