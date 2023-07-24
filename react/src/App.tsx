@@ -68,45 +68,105 @@ function App() {
 
   return (
     <>
-      <h2>admin</h2>
-      <div className="card">
-        {t("Port")} : {config?.Port} <br />
-        {t("Host")} : {config?.Host} <br />
-        {t("StoresPath")} : {config?.StoresPath} <br />
-        {t("MaxScanDepth")} : {config?.MaxScanDepth} <br />
-        {t("OpenBrowser")} : {config?.OpenBrowser ? "true" : "false"} <br />
-        {t("DisableLAN")} : {config?.DisableLAN ? "true" : "false"} <br />
-        {t("Username")} : {config?.UserName} <br />
-        {t("Password")} : {config?.Password} <br />
-        {t("Timeout")} : {config?.Timeout} <br />
-        {t("CertFile")} : {config?.CertFile} <br />
-        {t("KeyFile")} : {config?.KeyFile} <br />
-        {t("EnableLocalCache")} : {config?.EnableLocalCache ? "true" : "false"}{" "}
-        <br />
-        {t("CachePath")} : {config?.CachePath} <br />
-        {t("ClearCacheExit")} : {config?.ClearCacheExit} <br />
-        {t("EnableUpload")} : {config?.EnableUpload ? "true" : "false"} <br />
-        {t("UploadPath")} : {config?.UploadPath} <br />
-        {t("EnableDatabase")} : {config?.EnableDatabase} <br />
-        {t("ClearDatabaseWhenExit")} :{" "}
-        {config?.ClearDatabase ? "true" : "false"} <br />
-        {t("ExcludePath")} : {config?.ExcludeFileOrFolders} <br />
-        {t("SupportedImageFileExtensions")} : {config?.SupportMediaType} <br />
-        {t("SupportedBookFileExtensions")} : {config?.SupportFileType} <br />
-        {t("MinImageCountInBook")} : {config?.MinImageNum} <br />
-        {t("TimeoutLimitForScan")} : {config?.TimeoutLimitForScan} <br />
-        {t("PrintAllPossibleQRCode")} : {config?.PrintAllIP ? "true" : "false"}{" "}
-        <br />
-        {t("EnableDebugMode")} : {config?.Debug ? "true" : "false"} <br />
-        {t("LogToFile")} : {config?.LogToFile} <br />
-        {t("LogFilePath")} : {config?.LogFilePath} <br />
-        {t("LogFileName")} : {config?.LogFileName} <br />
-        {t("ZipFileTextEncoding")} : {config?.ZipFileTextEncoding} <br />
-        {t("StartFrpClientInBackground")} :{" "}
-        {config?.EnableFrpcServer ? "true" : "false"} <br />
-        {t("GenerateBookMetadata")} :{" "}
-        {config?.GenerateMetaData ? "true" : "false"} <br />
-        {/* {t("FrpClientConfig")} : {config?.FrpConfig} */}
+      <h2 className="text-lg font-semibold">admin</h2>
+      <div className="card flex flex-col bg-slate-300 justify-center">
+        <p>
+          {t("Port")}: {config?.Port}
+        </p>
+        <p>
+          {t("Host")}: {config?.Host}
+        </p>
+        <p>
+          {t("StoresPath")}: {config?.StoresPath}
+        </p>
+        <p>
+          {t("MaxScanDepth")}: {config?.MaxScanDepth}
+        </p>
+        <p>
+          {t("OpenBrowser")}: {config?.OpenBrowser ? "true" : "false"}
+        </p>
+        <p>
+          {t("DisableLAN")}: {config?.DisableLAN ? "true" : "false"}
+        </p>
+        <p>
+          {t("Username")}: {config?.UserName}
+        </p>
+        <p>
+          {t("Password")}: {config?.Password}
+        </p>
+        <p>
+          {t("Timeout")}: {config?.Timeout}
+        </p>
+        <p>
+          {t("CertFile")}: {config?.CertFile}
+        </p>
+        <p>
+          {t("KeyFile")}: {config?.KeyFile}
+        </p>
+        <p>
+          {t("EnableLocalCache")}: {config?.EnableLocalCache ? "true" : "false"}
+        </p>
+        <p>
+          {t("CachePath")}: {config?.CachePath}
+        </p>
+        <p>
+          {t("ClearCacheExit")}: {config?.ClearCacheExit}
+        </p>
+        <p>
+          {t("EnableUpload")}: {config?.EnableUpload ? "true" : "false"}
+        </p>
+        <p>
+          {t("UploadPath")}: {config?.UploadPath}
+        </p>
+        <p>
+          {t("EnableDatabase")}: {config?.EnableDatabase}
+        </p>
+        <p>
+          {t("ClearDatabaseWhenExit")}:{" "}
+          {config?.ClearDatabase ? "true" : "false"}
+        </p>
+        <p>
+          {t("ExcludePath")}: {config?.ExcludeFileOrFolders}
+        </p>
+        <p>
+          {t("SupportedImageFileExtensions")}: {config?.SupportMediaType}
+        </p>
+        <p>
+          {t("SupportedBookFileExtensions")}: {config?.SupportFileType}
+        </p>
+        <p>
+          {t("MinImageCountInBook")}: {config?.MinImageNum}
+        </p>
+        <p>
+          {t("TimeoutLimitForScan")}: {config?.TimeoutLimitForScan}
+        </p>
+        <p>
+          {t("PrintAllPossibleQRCode")}: {config?.PrintAllIP ? "true" : "false"}
+        </p>
+        <p>
+          {t("EnableDebugMode")}: {config?.Debug ? "true" : "false"}
+        </p>
+        <p>
+          {t("LogToFile")}: {config?.LogToFile}
+        </p>
+        <p>
+          {t("LogFilePath")}: {config?.LogFilePath}
+        </p>
+        <p>
+          {t("LogFileName")}: {config?.LogFileName}
+        </p>
+        <p>
+          {t("ZipFileTextEncoding")}: {config?.ZipFileTextEncoding}
+        </p>
+        <p>
+          {t("StartFrpClientInBackground")}:{" "}
+          {config?.EnableFrpcServer ? "true" : "false"}
+        </p>
+        <p>
+          {t("GenerateBookMetadata")}:{" "}
+          {config?.GenerateMetaData ? "true" : "false"}
+        </p>
+        {/* {t("FrpClientConfig")}: {config?.FrpConfig} */}
       </div>
     </>
   );
