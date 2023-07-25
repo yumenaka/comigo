@@ -3,6 +3,7 @@ import "./App.css";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useForm } from "react-hook-form";
 
 type Config = {
   Port: number;
@@ -53,6 +54,10 @@ function App() {
   const { t, i18n } = useTranslation();
   const [config, setConfig] = useState<Config | null>(null);
 
+  const { register, handleSubmit } = useForm();
+
+  const onSubmit = (data) => console.log(data);
+
   useEffect(() => {
     axios
       .get<Config>(`${baseURL}/config.json`)
@@ -69,15 +74,21 @@ function App() {
   return (
     <>
       <h2 className="text-lg font-semibold">admin</h2>
-      <div className="card flex flex-col bg-slate-300 justify-center">
-        <p>
-          {t("Port")}: {config?.Port}
-        </p>
+
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="card flex flex-col bg-slate-300 justify-center"
+      >
+        <button type="submit">ログイン</button>
+        <div className="w-full flex flex-row bg-blue-300 justify-center items-center">
+          <label htmlFor="Port">{t("Port")}:</label>
+          <input id="Port" {...register("config.Port")} value={config?.Port} />
+        </div>
         <p>
           {t("Host")}: {config?.Host}
         </p>
         <p>
-          {t("StoresPath")}: {config?.StoresPath}
+          ß{t("StoresPath")}: {config?.StoresPath}
         </p>
         <p>
           {t("MaxScanDepth")}: {config?.MaxScanDepth}
@@ -167,7 +178,7 @@ function App() {
           {config?.GenerateMetaData ? "true" : "false"}
         </p>
         {/* {t("FrpClientConfig")}: {config?.FrpConfig} */}
-      </div>
+      </form>
     </>
   );
 }
