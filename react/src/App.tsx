@@ -4,59 +4,17 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
-
-type Config = {
-  Port: number;
-  Host: string;
-  StoresPath: [];
-  MaxScanDepth: number;
-  OpenBrowser: boolean;
-  DisableLAN: boolean;
-  DefaultMode: string;
-  UserName: string;
-  Password: string;
-  Timeout: number;
-  CertFile: string;
-  KeyFile: string;
-  EnableLocalCache: boolean;
-  CachePath: string;
-  ClearCacheExit: boolean;
-  EnableUpload: boolean;
-  UploadPath: string;
-  EnableDatabase: boolean;
-  ClearDatabase: boolean;
-  ExcludeFileOrFolders: [];
-  SupportMediaType: [];
-  SupportFileType: [];
-  MinImageNum: number;
-  TimeoutLimitForScan: number;
-  PrintAllIP: boolean;
-  Debug: boolean;
-  LogToFile: boolean;
-  LogFilePath: string;
-  LogFileName: string;
-  ZipFileTextEncoding: string;
-  EnableFrpcServer: boolean;
-  FrpConfig: {
-    FrpcCommand: string;
-    ServerAddr: string;
-    ServerPort: number;
-    Token: string;
-    FrpType: string;
-    RemotePort: number;
-    RandomRemotePort: boolean;
-  };
-  GenerateMetaData: boolean;
-};
+import Title from "./components/Title";
+import Config from "./types/Config";
 
 function App() {
   const baseURL = "/api";
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [config, setConfig] = useState<Config | null>(null);
 
   const { register, handleSubmit } = useForm();
 
-  const onSubmit = (data) => console.log(data);
+  const onSubmit = (data: any) => console.log(data);
 
   useEffect(() => {
     axios
@@ -70,9 +28,19 @@ function App() {
   }, []);
 
   console.log(config);
-
+  // React 通过  onChage 监听事件 实现数据的动态录入
+  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (config !== null) {
+      setConfig({
+        ...config,
+        Port: Number(e.target.value),
+      });
+    }
+  };
+  //React 使用 value 或者 defaultValue 在 input 框中呈现内容
   return (
     <>
+      <Title />
       <h2 className="text-lg font-semibold">admin</h2>
 
       <form
@@ -82,13 +50,18 @@ function App() {
         <button type="submit">ログイン</button>
         <div className="w-full flex flex-row bg-blue-300 justify-center items-center">
           <label htmlFor="Port">{t("Port")}:</label>
-          <input id="Port" {...register("config.Port")} value={config?.Port} />
+          <input
+            id="Port"
+            {...register("config.Port")}
+            value={config?.Port}
+            onChange={onChange}
+          />
         </div>
         <p>
           {t("Host")}: {config?.Host}
         </p>
         <p>
-          ß{t("StoresPath")}: {config?.StoresPath}
+          {t("StoresPath")}: {config?.StoresPath}
         </p>
         <p>
           {t("MaxScanDepth")}: {config?.MaxScanDepth}
