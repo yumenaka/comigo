@@ -1,3 +1,4 @@
+// 取得したいデータの型を定義する
 type Config = {
   Port: number;
   Host: string;
