@@ -118,12 +118,20 @@ func init() {
 		if err != nil {
 			fmt.Println(err)
 			time.Sleep(3 * time.Second)
-			os.Exit(1)
 		}
 		//需要在home目录下面搜索配置文件
 		homeConfigPath := path.Join(home, ".config/comigo")
 		runtimeViper.AddConfigPath(homeConfigPath)
 		// 当前执行目录
+		// 获取程序自身的可执行文件路径
+		// https://stackoverflow.com/questions/18537257/how-to-get-the-directory-of-the-currently-running-file
+		// 警告：无法保证路径仍指向正确的可执行文件。
+		//如果使用符号链接启动进程，则根据操作系统，结果可能是符号链接或它指向的路径。如果需要稳定的结果， path/filepath.EvalSymlinks 可能会有所帮助。
+		executablePath, err := os.Executable()
+		if err != nil {
+			fmt.Println("无法获取程序路径:", err)
+		}
+		runtimeViper.AddConfigPath(executablePath)
 		nowPath, _ := os.Getwd()
 		runtimeViper.AddConfigPath(nowPath)
 		runtimeViper.SetConfigType("toml")
