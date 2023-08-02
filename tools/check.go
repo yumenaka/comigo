@@ -32,7 +32,7 @@ var (
 	PathExist = PathExists
 )
 
-// 判断文件夹或文件是否存在
+// IsExist 判断文件夹或文件是否存在
 func IsExist(path string) bool {
 	_, err := os.Stat(path)
 	if err != nil {
@@ -48,7 +48,7 @@ func IsExist(path string) bool {
 	return true
 }
 
-// 获取绝对路径
+// GetAbsPath 获取绝对路径
 func GetAbsPath(path string) string {
 	abs, err := filepath.Abs(path)
 	if err != nil {

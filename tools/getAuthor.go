@@ -22,22 +22,22 @@ func GetAuthor(input string) (string, bool) {
 		'〖': '〗',
 	}
 
-	for open, close := range pairs {
+	for open, closed := range pairs {
 		if strings.HasPrefix(input, string(open)) {
-			closeIndex := strings.IndexRune(input, close)
+			closeIndex := strings.IndexRune(input, closed)
 			if closeIndex != -1 {
 				return input[1:closeIndex], true
 			}
 		}
 	}
 
-	pairs_error := map[rune]rune{
+	pairsError := map[rune]rune{
 		'[': '］', //半角——全角
 		'［': ']', //全角——半角
 	}
-	for open, close := range pairs_error {
+	for open, closed := range pairsError {
 		if strings.HasPrefix(input, string(open)) {
-			closeIndex := strings.IndexRune(input, close)
+			closeIndex := strings.IndexRune(input, closed)
 			if closeIndex != -1 {
 				return input[1:closeIndex], true
 			}

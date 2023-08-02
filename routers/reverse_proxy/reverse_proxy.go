@@ -1,7 +1,8 @@
 package reverse_proxy
 
 import (
-	"io/ioutil"
+	"fmt"
+	"io"
 	"net/http"
 	"strings"
 
@@ -27,8 +28,13 @@ func ReverseProxyHandle(path string, option ReverseProxyOptions) gin.HandlerFunc
 			}
 			req.Header = ctx.Request.Header
 			resp, err := client.Do(req)
-			defer resp.Body.Close()
-			body, err := ioutil.ReadAll(resp.Body)
+			defer func(Body io.ReadCloser) {
+				err := Body.Close()
+				if err != nil {
+					fmt.Println("Body.Close() Error:", err)
+				}
+			}(resp.Body)
+			body, err := io.ReadAll(resp.Body)
 			for key, value := range resp.Header {
 				if len(value) == 1 {
 					ctx.Writer.Header().Add(key, value[0])

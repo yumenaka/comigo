@@ -3,7 +3,6 @@ package handler
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -265,7 +264,7 @@ func saveFileToCache(id string, filename string, data []byte, query url.Values, 
 	if isCover {
 		filename = "comigo_cover" + path.Ext(filename)
 	}
-	err = ioutil.WriteFile(filepath.Join(common.Config.CachePath, id, filename), data, 0644)
+	err = os.WriteFile(filepath.Join(common.Config.CachePath, id, filename), data, 0644)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -330,7 +329,7 @@ func getFileFromCache(id string, filename string, query url.Values, isCover bool
 	if isCover {
 		filename = "comigo_cover" + path.Ext(filename)
 	}
-	loadedImage, err := ioutil.ReadFile(filepath.Join(common.Config.CachePath, id, filename))
+	loadedImage, err := os.ReadFile(filepath.Join(common.Config.CachePath, id, filename))
 	if err != nil && common.Config.Debug {
 		fmt.Println("getFileFromCache,file not found:" + filename)
 	}

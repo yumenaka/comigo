@@ -94,7 +94,7 @@ func (config *ServerSettings) IsSupportArchiver(checkPath string) bool {
 	return false
 }
 
-// CheckPathSkip 检查路径是否应该跳过（排除文件，文件夹列表）。
+// IsSkipDir  检查路径是否应该跳过（排除文件，文件夹列表）。
 func (config *ServerSettings) IsSkipDir(path string) bool {
 	for _, substr := range config.ExcludeFileOrFolders {
 		if strings.HasSuffix(path, substr) {

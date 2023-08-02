@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-// 3、选择服务端口
+// CheckWebPort 3、选择服务端口
 func CheckWebPort() {
 	//检测端口
 	if !tools.CheckPort(common.Config.Port) {

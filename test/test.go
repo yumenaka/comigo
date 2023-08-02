@@ -6,7 +6,7 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"math/rand"
 	"os"
@@ -42,7 +42,10 @@ func (d sqliteDriver) Open(name string) (driver.Conn, error) {
 		Exec(stmt string, args []driver.Value) (driver.Result, error)
 	})
 	if _, err := c.Exec("PRAGMA foreign_keys = on;", nil); err != nil {
-		conn.Close()
+		err := conn.Close()
+		if err != nil {
+			return nil, err
+		}
 		return nil, fmt.Errorf("failed to enable enable foreign keys: %w", err)
 	}
 	return conn, nil
@@ -65,7 +68,12 @@ func testDatabase() {
 	if err != nil {
 		log.Fatalf("failed opening connection to sqlite: %v", err)
 	}
-	defer client.Close()
+	defer func(client *ent.Client) {
+		err := client.Close()
+		if err != nil {
+			log.Fatalf("failed closing connection to sqlite: %v", err)
+		}
+	}(client)
 
 	if err := client.Schema.Create(context.Background()); err != nil {
 		log.Fatalf("failed creating schema resources: %v", err)
@@ -133,7 +141,7 @@ func testPDF() {
 
 func ImageResize() {
 	// 读取本地文件，本地文件尺寸300*400
-	imgData, _ := ioutil.ReadFile("d:/1.jpg")
+	imgData, _ := os.ReadFile("d:/1.jpg")
 	buf := bytes.NewBuffer(imgData)
 	image, err := imaging.Decode(buf)
 	if err != nil {
@@ -161,7 +169,12 @@ func UnArchiveZip(filePath string, extractPath string, textEncoding string) erro
 	if err != nil {
 		fmt.Println(err)
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(file)
 	// 是否是压缩包
 	format, _, err := archiver.Identify(filePath, file)
 	if err != nil {
@@ -226,7 +239,12 @@ func extractFileHandler(ctx context.Context, f archiver.File) error {
 	if err != nil {
 		fmt.Println(err)
 	}
-	defer file.Close()
+	defer func(file io.ReadCloser) {
+		err := file.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(file)
 	// 如果是文件夹，直接创建文件夹
 	if f.IsDir() {
 		err = os.MkdirAll(filepath.Join(extractPath, f.NameInArchive), os.ModePerm)
@@ -247,12 +265,12 @@ func extractFileHandler(ctx context.Context, f archiver.File) error {
 		return err
 	}
 	// 具体内容
-	content, err := ioutil.ReadAll(file)
+	content, err := io.ReadAll(file)
 	if err != nil {
 		fmt.Println(err)
 	}
 	// 写入文件
-	err = ioutil.WriteFile(writeFilePath, content, 0o644)
+	err = os.WriteFile(writeFilePath, content, 0o644)
 	if err != nil {
 		fmt.Println(err)
 	}

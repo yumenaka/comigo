@@ -19,7 +19,7 @@ import (
 	"github.com/yumenaka/comi/tools"
 
 	"github.com/sirupsen/logrus"
-	archiver "github.com/yumenaka/archiver/v4"
+	"github.com/yumenaka/archiver/v4"
 
 	"github.com/yumenaka/comi/arch"
 	"github.com/yumenaka/comi/book"
@@ -195,7 +195,12 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*book.Book, 
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+	}(file)
 	FileInfo, err := file.Stat()
 	if err != nil {
 		fmt.Println(err.Error())
@@ -217,7 +222,8 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*book.Book, 
 		}
 		err = walkUTF8ZipFs(fsys, "", ".", newBook)
 		// 如果扫描ZIP文件的时候遇到了 fs.PathError ，则扫描到NonUTF-8 ZIP文件，需要特殊处理
-		if _, ok := err.(*fs.PathError); ok {
+		var pathError *fs.PathError
+		if errors.As(err, &pathError) {
 			if Config.Debug {
 				fmt.Println("NonUTF-8 ZIP:" + filePath + "  Error:" + err.Error())
 			}
@@ -269,7 +275,7 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*book.Book, 
 		if err != nil {
 			return nil, err
 		}
-		fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
+		err = fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
 			if Config.IsSkipDir(path) {
 				fmt.Println("Skip Scan:" + path)
 				return fs.SkipDir
@@ -302,6 +308,9 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*book.Book, 
 			}
 			return nil
 		})
+		if err != nil {
+			return nil, err
+		}
 	}
 	// 不管页数，直接返回：在添加到书库时判断页数
 	newBook.SortPages("default")

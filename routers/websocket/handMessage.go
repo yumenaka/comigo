@@ -12,37 +12,46 @@ import (
 
 var WsDebug *bool
 
-//默认的处理方式：原样返回
+// 默认的处理方式：原样返回
 func handDefaultMessage(client *websocket.Conn, msg Message, clientID string) {
 	err := client.WriteJSON(msg)
 	if err != nil {
 		log.Printf("error: %v", err)
 		//如果写入 Websocket 时出现错误，关闭连接，并将其从“clients” 映射中删除。
-		client.Close()
+		err := client.Close()
+		if err != nil {
+			return
+		}
 		delete(clients, client)
 	}
 }
 
-//处理乒乓信息
+// 处理乒乓信息
 func handPingMessage(client *websocket.Conn, msg Message, clientID string) {
 	msg.Detail = "pong!"
 	err := client.WriteJSON(msg)
 	if err != nil {
 		log.Printf("error: %v", err)
 		//如果写入 Websocket 时出现错误，关闭连接，并将其从“clients” 映射中删除。
-		client.Close()
+		err := client.Close()
+		if err != nil {
+			return
+		}
 		delete(clients, client)
 	}
 }
 
-//处理心跳信息
+// 处理心跳信息
 func handHeartbeatMessage(client *websocket.Conn, msg Message, clientID string) {
 	msg.Detail = " 服务器收到心跳消息。" + time.Now().Format("2006.01.02 15:04:05")
 	err := client.WriteJSON(msg)
 	if err != nil {
 		log.Printf("error: %v", err)
 		//如果写入 Websocket 时出现错误，关闭连接，并将其从“clients” 映射中删除。
-		client.Close()
+		err := client.Close()
+		if err != nil {
+			return
+		}
 		delete(clients, client)
 	}
 }
@@ -54,7 +63,10 @@ func handSyncPageMessageToFlipMode(client *websocket.Conn, msg Message, clientID
 	if err != nil {
 		log.Printf("handSyncPage_ToFlipode error: %v", err)
 		//如果写入 Websocket 时出现错误，关闭连接，并将其从“clients” 映射中删除。
-		client.Close()
+		err := client.Close()
+		if err != nil {
+			return
+		}
 		delete(clients, client)
 	}
 	// Message 定义一个对象来管理消息，反引号包含的文本是 Go 在对象和 JSON 之间进行序列化和反序列化时需要的元数据。
@@ -77,7 +89,7 @@ func handSyncPageMessageToFlipMode(client *websocket.Conn, msg Message, clientID
 		return
 	}
 	//向所有其他在线客户端发送翻页信息
-	for c, _ := range clients {
+	for c := range clients {
 		//if id == clientID {
 		//	log.Printf("跳过一个客户端 clientID: %v", id)
 		//	continue
@@ -85,7 +97,10 @@ func handSyncPageMessageToFlipMode(client *websocket.Conn, msg Message, clientID
 		err := c.WriteJSON(msg)
 		if err != nil {
 			log.Printf("error: %v", err)
-			c.Close()
+			err := c.Close()
+			if err != nil {
+				return
+			}
 			delete(clients, c)
 		}
 	}
@@ -97,7 +112,10 @@ func handSyncPageMessageToScrollMode(client *websocket.Conn, msg Message, client
 	err := client.WriteJSON(msg)
 	if err != nil {
 		log.Printf("handSyncPage_ToFlipode error: %v", err)
-		client.Close()
+		err := client.Close()
+		if err != nil {
+			return
+		}
 		delete(clients, client)
 	}
 	type syncData struct {
@@ -120,7 +138,7 @@ func handSyncPageMessageToScrollMode(client *websocket.Conn, msg Message, client
 		return
 	}
 	//向所有其他在线客户端发送翻页信息
-	for c, _ := range clients {
+	for c := range clients {
 		//if id == clientID {
 		//	log.Printf("跳过一个客户端 clientID: %v", id)
 		//	continue
@@ -128,7 +146,10 @@ func handSyncPageMessageToScrollMode(client *websocket.Conn, msg Message, client
 		err := c.WriteJSON(msg)
 		if err != nil {
 			log.Printf("error: %v", err)
-			c.Close()
+			err := c.Close()
+			if err != nil {
+				return
+			}
 			delete(clients, c)
 		}
 	}

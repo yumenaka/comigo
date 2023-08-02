@@ -21,7 +21,12 @@ func UnArchiveZip(filePath string, extractPath string, textEncoding string) erro
 	if err != nil {
 		fmt.Println(err)
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(file)
 	//是否是压缩包
 	format, _, err := archiver.Identify(filePath, file)
 	if err != nil {

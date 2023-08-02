@@ -1,7 +1,7 @@
 <!-- Observer.vue Observer组件,下拉刷新用 -->
 <template>
     <div class="manga">
-        <img v-lazy="this.image_url" />
+        <img alt="" v-lazy="this.image_url" />
         <div class="page_hint" v-if="this.showPageNumFlag_ScrollMode">{{ this.MyPageNum }}/{{
                 this.all_page_num
         }}</div>

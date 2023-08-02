@@ -22,7 +22,7 @@ type Message struct {
 	Type       string `json:"type"`
 	StatusCode int    `json:"status_code"` //参考http状态码： https://zh.wikipedia.org/zh-hans/HTTP%E7%8A%B6%E6%80%81%E7%A0%81
 	UserID     string `json:"user_id"`
-	token      string `json:"token"` //认证用
+	Token      string `json:"Token"` //认证用
 	Detail     string `json:"detail"`
 	DataString string `json:"data_string"` //附加的json字符串数据，服务器根据情况解析
 }
@@ -31,7 +31,7 @@ type MessageWithClientID struct {
 	ClientID string
 }
 
-//创建一个 upGrader 的实例。这只是一个对象，它具备一些方法，这些方法可以获取一个普通 HTTP 链接然后将其升级成一个 WebSocket
+// 创建一个 upGrader 的实例。这只是一个对象，它具备一些方法，这些方法可以获取一个普通 HTTP 链接然后将其升级成一个 WebSocket
 var upGrader = websocket.Upgrader{
 	//ReadBufferSize:  4096,//读缓存区大小 单位是 bytes，依需求設定（设为 0，则不限制大小）
 	//WriteBufferSize: 1024,// 写缓存区大小 同上
@@ -52,15 +52,15 @@ var upGrader = websocket.Upgrader{
 	},
 }
 
-//map 映射，其键对应是一个指向 WebSocket 的指针，
-//其值是一个int值。我们实际上并不需要这个值，但使用的映射数据结构需要有一个映射值，这样做更容易添加和删除单项。
+// map 映射，其键对应是一个指向 WebSocket 的指针，
+// 其值是一个int值。我们实际上并不需要这个值，但使用的映射数据结构需要有一个映射值，这样做更容易添加和删除单项。
 var clients = make(map[*websocket.Conn]string) // connected clients
 
-//用于由客户端发送消息的队列，扮演通道的角色。后面定义了一个 goroutine 来从这个通道读取新消息，然后将它们发送给其它连接到服务器的客户端。
+// 用于由客户端发送消息的队列，扮演通道的角色。后面定义了一个 goroutine 来从这个通道读取新消息，然后将它们发送给其它连接到服务器的客户端。
 var broadcast = make(chan MessageWithClientID) // broadcast channel
 
 // WsHandler
-//路由是 "/ws",即 ws://127.0.0.1:1234/api/ws
+// 路由是 "/ws",即 ws://127.0.0.1:1234/api/ws
 func WsHandler(c *gin.Context) {
 	//Upgrade 函数将 http get请求升级到 WebSocket 协议。
 	//   responseHeader包含在对客户端升级请求的响应中。
@@ -107,7 +107,7 @@ func WsHandler(c *gin.Context) {
 	}
 }
 
-//一个简单循环，从“broadcast”中连续读取数据，然后通过各自的 WebSocket 连接将消息传播到客户端。
+// 一个简单循环，从“broadcast”中连续读取数据，然后通过各自的 WebSocket 连接将消息传播到客户端。
 func handleMessages() {
 	for {
 		// Grab the next message from the broadcast channel

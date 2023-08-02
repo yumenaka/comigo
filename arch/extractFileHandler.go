@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/yumenaka/archiver/v4"
 	"github.com/yumenaka/comi/tools"
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
 )
@@ -21,7 +21,12 @@ func extractFileHandler(ctx context.Context, f archiver.File) error {
 	if err != nil {
 		fmt.Println(err)
 	}
-	defer file.Close()
+	defer func(file io.ReadCloser) {
+		err := file.Close()
+		if err != nil {
+			fmt.Println("file.Close() Error:", err)
+		}
+	}(file)
 	//如果是文件夹，直接创建文件夹
 	if f.IsDir() {
 		err = os.MkdirAll(filepath.Join(extractPath, f.NameInArchive), os.ModePerm)
@@ -42,12 +47,12 @@ func extractFileHandler(ctx context.Context, f archiver.File) error {
 		return err
 	}
 	//具体内容
-	content, err := ioutil.ReadAll(file)
+	content, err := io.ReadAll(file)
 	if err != nil {
 		fmt.Println(err)
 	}
 	//写入文件
-	err = ioutil.WriteFile(writeFilePath, content, 0644)
+	err = os.WriteFile(writeFilePath, content, 0644)
 	if err != nil {
 		fmt.Println(err)
 	}

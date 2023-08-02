@@ -30,7 +30,7 @@ import (
 	"github.com/yumenaka/comi/locale"
 )
 
-// 取得无后缀的文件名
+// GetMainName 取得无后缀的文件名
 func GetMainName(filename string) string {
 	base := filepath.Base(filename)
 	ext := filepath.Ext(filename)
@@ -49,7 +49,12 @@ func GetFreePort() (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	defer l.Close()
+	defer func(l *net.TCPListener) {
+		err := l.Close()
+		if err != nil {
+			log.Println(err)
+		}
+	}(l)
 	return l.Addr().(*net.TCPAddr).Port, nil
 }
 

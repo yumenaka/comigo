@@ -21,7 +21,7 @@ func init() {
 // 除了设置头像以外，也可以做上传文件并阅读功能
 // Set a lower memory limit for multipart forms (default is 32 MiB)
 
-// engine.MaxMultipartMemory = 60 << 20  // 60 MiB  只限制程序在上传文件时可以使用多少内存，而是不限制上传文件的大小。(default is 32 MiB)
+// UploadHandler engine.MaxMultipartMemory = 60 << 20  // 60 MiB  只限制程序在上传文件时可以使用多少内存，而是不限制上传文件的大小。(default is 32 MiB)
 func UploadHandler(c *gin.Context) {
 	if !*EnableUpload {
 		fmt.Println(locale.GetString("UPLOAD_DISABLE_HINT"))
