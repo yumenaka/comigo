@@ -41,7 +41,6 @@ archiver
 bin
 comic
 .config
-.comigo
 test
 test2
 *md5Sums.txt

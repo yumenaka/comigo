@@ -4,7 +4,6 @@ package tools
 import (
 	"errors"
 	"io"
-	"io/ioutil"
 	"strings"
 
 	"golang.org/x/text/encoding"
@@ -68,7 +67,7 @@ func GuessText(unknowString string) (string, error) {
 	}
 }
 
-func Shiftjis_to_UTF8(unknowString string) (string, error) {
+func ShiftjisToUtf8(unknowString string) (string, error) {
 	utfString, err := japanese.ShiftJIS.NewDecoder().Bytes([]byte(unknowString)) //将ShiftJIS转换为utf-8
 	return string(utfString), err
 }
@@ -78,18 +77,18 @@ func GbkToUtf8(unknowString string) (string, error) {
 	return string(utfString), err
 }
 
-// Convert a string encoding from UTF-8 to ShiftJIS
+// ToShiftJIS Convert a string encoding from UTF-8 to ShiftJIS
 func ToShiftJIS(str string) (string, error) {
 	return transformEncoding(strings.NewReader(str), japanese.ShiftJIS.NewEncoder())
 }
 
-// Convert a string encoding from UTF-8 to ShiftJIS
+// ToGBK Convert a string encoding from UTF-8 to ShiftJIS
 func ToGBK(str string) (string, error) {
 	return transformEncoding(strings.NewReader(str), simplifiedchinese.GBK.NewEncoder())
 }
 
 func transformEncoding(rawReader io.Reader, trans transform.Transformer) (string, error) {
-	ret, err := ioutil.ReadAll(transform.NewReader(rawReader, trans))
+	ret, err := io.ReadAll(transform.NewReader(rawReader, trans))
 	if err == nil {
 		return string(ret), nil
 	} else {
@@ -132,7 +131,7 @@ func Decode(in []byte, charset string) ([]byte, error) {
 	if enc, ok := GetEncoding(charset); ok {
 		return enc.NewDecoder().Bytes(in)
 	}
-	return nil, errors.New("charset not found!")
+	return nil, errors.New("charset not found")
 }
 
 func DecodeFileName(headerName string, ZipFilenameEncoding string) string {

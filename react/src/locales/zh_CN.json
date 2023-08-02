@@ -123,5 +123,7 @@
   "author": "作者:{0}",
   "allpagenum": "总页数:{0}",
   "filesize": "大小:{0}",
-  "childbookhint": "文件夹内有{0}本书"
+  "childbookhint": "文件夹内有{0}本书",
+  "GenerateMetaData": "生成元数据",
+  "EnableFrpc": "EnableFrpc"
 }

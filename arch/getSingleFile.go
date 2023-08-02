@@ -23,7 +23,12 @@ func GetSingleFile(filePath string, NameInArchive string, textEncoding string) (
 	if err != nil {
 		fmt.Println(err)
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			fmt.Println("file.Close() Error:", err)
+		}
+	}(file)
 	//是否是压缩包
 	format, sourceArchive, err := archiver.Identify(filePath, file)
 	if err != nil {
@@ -102,7 +107,12 @@ func GetSingleFile(filePath string, NameInArchive string, textEncoding string) (
 			if err != nil {
 				fmt.Println(err)
 			}
-			defer fileInRar.Close()
+			defer func(fileInRar io.ReadCloser) {
+				err := fileInRar.Close()
+				if err != nil {
+					fmt.Println("fileInRar.Close() Error:", err)
+				}
+			}(fileInRar)
 			content, err := io.ReadAll(fileInRar)
 			if err != nil {
 				fmt.Println(err)
@@ -122,7 +132,12 @@ func GetSingleFile(filePath string, NameInArchive string, textEncoding string) (
 			if err != nil {
 				fmt.Println(err)
 			}
-			defer file.Close()
+			defer func(file io.ReadCloser) {
+				err := file.Close()
+				if err != nil {
+					fmt.Println("file.Close() Error:", err)
+				}
+			}(file)
 			content, err := io.ReadAll(file)
 			if err != nil {
 				fmt.Println(err)

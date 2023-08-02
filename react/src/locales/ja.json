@@ -123,5 +123,7 @@
   "author": "作者:{0}",
   "allpagenum": "総ページ数:{0}",
   "filesize": "ファイルサイズ:{0}",
-  "childbookhint": "フォルダーには{0}冊の本が入っている"
+  "childbookhint": "フォルダーには{0}冊の本が入っている",
+  "GenerateMetaData": "メタデータ生成",
+  "EnableFrpc": "EnableFrpc"
 }

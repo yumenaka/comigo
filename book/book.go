@@ -28,7 +28,6 @@ import (
 )
 
 var (
-	status         = make(chan int, 1)
 	mapBooks       = make(map[string]*Book) //实际存在的书，通过扫描生成
 	mapBookFolders = make(map[string]*Book) //通过分析路径与深度生成的书组
 	Stores         = Bookstores{
@@ -428,7 +427,6 @@ func GetBookByAuthor(author string, sortBy string) ([]*Book, error) {
 	return nil, errors.New("can not found book,author=" + author)
 }
 
-// AllPageInfo
 type AllPageInfo struct {
 	Images []ImageInfo `json:"images"`
 	SortBy string      `json:"sort_by"`
@@ -477,7 +475,7 @@ func (b *Book) SortPages(s string) {
 	b.setClover() //重新排序后重新设置封面
 }
 
-// 根据一个既定的文件列表，重新对页面排序。用于epub文件。
+// SortPagesByImageList 根据一个既定的文件列表，重新对页面排序。用于epub文件。
 func (b *Book) SortPagesByImageList(imageList []string) {
 	if len(imageList) == 0 {
 		return

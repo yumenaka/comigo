@@ -88,7 +88,6 @@ func Authenticator(c *gin.Context) (interface{}, error) {
 	return nil, jwt.ErrFailedAuthentication
 }
 
-// Authorizator
 func Authorizator(data interface{}, c *gin.Context) bool {
 	if v, ok := data.(*User); ok {
 		fmt.Println(v)

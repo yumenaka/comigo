@@ -1,6 +1,7 @@
 package routers
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comi/common"
 	"log"
@@ -27,14 +28,14 @@ func StartGinEngine(engine *gin.Engine) {
 	go func() {
 		// 监听并启动服务(TLS)
 		if enableTls {
-			if err := common.Srv.ListenAndServeTLS(common.Config.CertFile, common.Config.KeyFile); err != nil && err != http.ErrServerClosed {
+			if err := common.Srv.ListenAndServeTLS(common.Config.CertFile, common.Config.KeyFile); err != nil && !errors.Is(err, http.ErrServerClosed) {
 				time.Sleep(3 * time.Second)
 				log.Fatalf("listen: %s\n", err)
 			}
 		}
 		if !enableTls {
 			// 监听并启动服务(HTTP)
-			if err := common.Srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			if err := common.Srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 				time.Sleep(3 * time.Second)
 				log.Fatalf("listen: %s\n", err)
 			}

@@ -55,7 +55,8 @@ function App() {
   });
 
   function onSubmit(data) {
-    return console.log(data);
+    console.log(config);
+    return config;
   }
 
   useEffect(() => {
@@ -69,7 +70,7 @@ function App() {
       });
   }, []);
 
-  console.log(config);
+  //console.log(config);
   // React 通过  onChange 监听事件 实现数据的动态录入
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -79,7 +80,6 @@ function App() {
   return (
     <>
       <Title />
-      <h2 className="text-lg font-semibold">admin</h2>
 
       <form
         onSubmit={handleSubmit(onSubmit)}
@@ -97,7 +97,7 @@ function App() {
           </label>
           <input
             className="rounded ml-2 px-1"
-            {...register("Port", { required: true, min: 0, max: 65535 })}
+            {...register("Port", { min: 0, max: 65535 })}
             id="Port"
             type="number"
             value={config?.Port}
@@ -680,7 +680,7 @@ function App() {
 
         <div className="flex flex-row w-96 m-1 p-2 pl-8 font-semibold rounded-md shadow-md bg-yellow-300 justify-left items-center">
           <div className="w-32 border border-black rounded-md">
-            {t("EnableFrpcServer")}
+            {t("EnableFrpc")}
           </div>
           <input
             type="radio"

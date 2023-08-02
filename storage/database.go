@@ -97,7 +97,7 @@ func CloseDatabase() {
 	}
 }
 
-// DeleteAllBookInDatabase  清空数据库的Book与SinglePageInfo表
+// ClearBookData   清空数据库的Book与SinglePageInfo表
 // 后台并发执行，所以不能保证结果如预期，不用这个函数。
 func ClearBookData(clearBook *comigoBook.Book, debug bool) {
 	//如何增删查改： https://entgo.io/zh/docs/crud

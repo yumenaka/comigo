@@ -26,7 +26,12 @@ func getDataFromEpub(epubPath string, needFile string) (data []byte, err error) 
 	if err != nil {
 		return
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			fmt.Println("file.Close() Error:", err)
+		}
+	}(file)
 	//是否是压缩包
 	format, _, err := archiver.Identify(epubPath, file)
 	if err != nil {
@@ -44,7 +49,12 @@ func getDataFromEpub(epubPath string, needFile string) (data []byte, err error) 
 			if err != nil {
 				return err
 			}
-			defer file.Close()
+			defer func(file io.ReadCloser) {
+				err := file.Close()
+				if err != nil {
+					fmt.Println("file.Close() Error:", err)
+				}
+			}(file)
 			content, err := io.ReadAll(file)
 			if err != nil {
 				return err
@@ -134,17 +144,17 @@ type Package struct {
 
 // 获取OPF文件的路径
 func getOPFPath(epubPath string) (opfPath string, err error) {
-	//byte, err := os.ReadFile(ContainerXMLPath)
+	//data, err := os.ReadFile(ContainerXMLPath)
 	//if err != nil {
 	//	fmt.Println("ReadFile Error:", err)
 	//}
-	byte, err := getDataFromEpub(epubPath, "META-INF/container.xml")
+	data, err := getDataFromEpub(epubPath, "META-INF/container.xml")
 	if err != nil {
 		fmt.Println(err)
 		return "", errors.New("getOPFPath Error epubPath:" + epubPath)
 	}
 	con := new(Container)
-	err = xml.Unmarshal(byte, con)
+	err = xml.Unmarshal(data, con)
 	if err != nil {
 		fmt.Println("XML Unmarshal Error:", err)
 	}

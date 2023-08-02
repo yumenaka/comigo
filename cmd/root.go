@@ -113,7 +113,7 @@ func init() {
 		//自动读取环境变量，改写对应值
 		runtimeViper.AutomaticEnv()
 		//设置环境变量的前缀，将 PORT变为 COMI_PORT
-		runtimeViper.SetEnvPrefix("comi")
+		runtimeViper.SetEnvPrefix("COMI")
 		home, err := homedir.Dir()
 		if err != nil {
 			fmt.Println(err)
@@ -125,14 +125,17 @@ func init() {
 		// 当前执行目录
 		// 获取程序自身的可执行文件路径
 		// https://stackoverflow.com/questions/18537257/how-to-get-the-directory-of-the-currently-running-file
-		// 警告：无法保证路径仍指向正确的可执行文件。
+		// 警告：无法保证路径仍指向正确的程序文件。
 		//如果使用符号链接启动进程，则根据操作系统，结果可能是符号链接或它指向的路径。如果需要稳定的结果， path/filepath.EvalSymlinks 可能会有所帮助。
 		executablePath, err := os.Executable()
 		if err != nil {
 			fmt.Println("无法获取程序路径:", err)
 		}
 		runtimeViper.AddConfigPath(executablePath)
-		nowPath, _ := os.Getwd()
+		nowPath, err := os.Getwd()
+		if err != nil {
+			fmt.Println("无法获取当前目录:", err)
+		}
 		runtimeViper.AddConfigPath(nowPath)
 		runtimeViper.SetConfigType("toml")
 		runtimeViper.SetConfigName("config.toml")

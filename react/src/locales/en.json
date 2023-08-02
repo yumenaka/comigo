@@ -123,5 +123,7 @@
   "author": "Author:{0}",
   "allpagenum": "Total pages: {0}",
   "filesize": "File size:{0}",
-  "childbookhint": "{0}books in the folder"
+  "childbookhint": "{0}books in the folder",
+  "GenerateMetaData": "GenerateMetaData",
+  "EnableFrpc": "EnableFrpc"
 }
