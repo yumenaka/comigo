@@ -7,9 +7,9 @@
     </div>
     <div class="w-2/3 flex flex-col my-2 top-0 p-4 border-blue-800 rounded-b">
       <div class="w-full my-1 text-xl text-left font-bold ">{{ book_info.name }}</div>
-      <div class="w-full my-1 text-xl text-left" v-if="book_info.author!==''">{{ $t('author') }}{{[book_info.author]}}</div>
-      <div class="w-full my-1 text-xl text-left" v-if="!isBookGroup&&!isDirBook">{{ $t('filesize') }}{{fileSizeString}}</div>
-      <div class="w-full my-1 text-xl text-left"  v-if="!isBookGroup">{{ $t('allpagenum') }}{{book_info.all_page_num}}</div>
+      <div class="w-full my-1 text-xl text-left" v-if="book_info.author!==''">{{ $t('author', [book_info.author]) }}</div>
+      <div class="w-full my-1 text-xl text-left" v-if="!isBookGroup&&!isDirBook">{{ $t('filesize', [fileSizeString]) }}</div>
+      <div class="w-full my-1 text-xl text-left"  v-if="!isBookGroup">{{ $t('allpagenum', [book_info.all_page_num]) }}</div>
       <div class="w-full my-1 text-xl text-left" v-if="book_info.child_book_num > 0">{{ bookNumHint }}</div>
     </div>
   </a>
