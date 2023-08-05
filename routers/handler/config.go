@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"github.com/yumenaka/comi/settings"
+	"io"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -22,6 +23,17 @@ func GetJsonConfigHandler(c *gin.Context) {
 // UpdateConfigHandler 修改服务器配置(post json)
 func UpdateConfigHandler(c *gin.Context) {
 	var newSettings settings.ServerSettings
+	// 读取请求体中的JSON数据
+	body, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		c.JSON(400, gin.H{"error": "Failed to read request body"})
+		return
+	}
+	// 将JSON数据转换为字符串
+	jsonString := string(body)
+	// 打印JSON字符串
+	fmt.Println(jsonString)
+
 	// Bind the JSON data from the request body into the newSettings variable
 	if err := c.BindJSON(&newSettings); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse JSON data"})

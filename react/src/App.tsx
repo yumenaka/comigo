@@ -8,11 +8,25 @@ import { useForm } from "react-hook-form";
 import Title from "./components/Title";
 import Config from "./types/Config";
 
+
 function App() {
   const baseURL = "/api";
   const { t } = useTranslation();
+  // nullは型に含めず、useStateの初期値が決まらないという場合には、型アサーションで逃げる手もあります。 https://qiita.com/FumioNonaka/items/4361d1cdf34ffb5a5338
+  // ただし、型アサーションはTypeScriptに値({})の型を偽っているだけだ、ということにご注意ください。状態変数(Config)の値を正しく扱うことは、コードの書き手に委ねられるのです。
+  //誤ればランタイムエラーになってしまうかもしれません。
   const [config, setConfig] = useState<Config>({} as Config);
 
+  //不使用react-hook-form的话，一般的handleSubmit函数如下：
+  // const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault();
+  //   console.log({
+  //     email,
+  //     password,
+  //   });
+  // };
+
+  // 使用react-hook-form的话，handleSubmit函数如下：
   const {
     register,
     handleSubmit,
@@ -54,9 +68,22 @@ function App() {
     },
   });
 
-  function onSubmit(data) {
-    console.log(config);
-    return config;
+  const sendDataToBackend = async (data: Config) => {
+    console.log("sendDataToBackend:", data);
+    try {
+      const response = await axios.post('/api/update_config', data);
+      console.log('Data sent successfully:', response.data);
+      // 可以在此处进行其他操作，例如更新状态或显示成功消息等
+    } catch (error) {
+      console.error('Error sending data:', error);
+      // 可以在此处处理错误，例如显示错误消息等
+    }
+  };
+
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    console.log(e);
+    // sendDataToBackend(config);
   }
 
   useEffect(() => {
@@ -72,8 +99,15 @@ function App() {
 
   //console.log(config);
   // React 通过  onChange 监听事件 实现数据的动态录入
+  // html的属性props的类型
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    console.log("OnChange:", name, value);
+    // 在HTML中，属性的类型是字符串。所以，我们需要将字符串转换为布尔值。
+    if (value === "true" || value === "false") {
+      setConfig({ ...config, [name]: value === "true" });
+      return;
+    }
     setConfig({ ...config, [name]: value });
   };
   //React 使用 value 或者 defaultValue 在 input 框中呈现内容
@@ -82,7 +116,7 @@ function App() {
       <Title />
 
       <form
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={onSubmit}
         className="card flex flex-col bg-slate-300 justify-center items-center"
       >
         <button
@@ -100,7 +134,7 @@ function App() {
             {...register("Port", { min: 0, max: 65535 })}
             id="Port"
             type="number"
-            value={config?.Port}
+            value={config.Port}
             onChange={onChange}
             placeholder="Port"
           />
@@ -118,7 +152,7 @@ function App() {
             {...register("Host")}
             id="Host"
             type="text"
-            value={config?.Host}
+            value={config.Host}
             onChange={onChange}
             placeholder="Host"
           />
@@ -137,7 +171,7 @@ function App() {
             {...register("StoresPath")}
             id="StoresPath"
             type="text"
-            value={config?.StoresPath}
+            value={config.StoresPath}
             onChange={onChange}
             placeholder="StoresPath"
           />
@@ -156,7 +190,7 @@ function App() {
             {...register("MaxScanDepth")}
             id="MaxScanDepth"
             type="numbers"
-            value={config?.MaxScanDepth}
+            value={config.MaxScanDepth}
             onChange={onChange}
             placeholder="MaxScanDepth"
           />
@@ -167,18 +201,22 @@ function App() {
           <div className="w-32 border border-black rounded-md">
             {t("OpenBrowser")}
           </div>
+
           <input
             type="radio"
             id="OpenBrowserTrue"
-            name="OpenBrowser"
-            value={config?.OpenBrowser ? "true" : "false"}
+            value={config.OpenBrowser ? "true" : "false"}
+            {...register("OpenBrowser")}
+            onChange={onChange}
           />
           <label htmlFor="OpenBrowserTrue">是</label>
           <input
             type="radio"
             id="OpenBrowserFalse"
-            name="OpenBrowser"
-            value={!config?.OpenBrowser ? "true" : "false"}
+            value={!config.OpenBrowser ? "true" : "false"}
+            checked={config.OpenBrowser === false}
+
+            {...register("OpenBrowser", { required: true })}
           />
           <label htmlFor="OpenBrowserFalse">否</label>
         </div>
@@ -191,14 +229,14 @@ function App() {
             type="radio"
             id="DisableLANTrue"
             name="DisableLAN"
-            value={config?.DisableLAN ? "true" : "false"}
+            value={config.DisableLAN ? "true" : "false"}
           />
           <label htmlFor="DisableLANTrue">是</label>
           <input
             type="radio"
             id="DisableLANFalse"
             name="DisableLAN"
-            value={!config?.DisableLAN ? "true" : "false"}
+            value={!config.DisableLAN ? "true" : "false"}
           />
           <label htmlFor="DisableLANFalse">否</label>
         </div>
@@ -215,7 +253,7 @@ function App() {
             {...register("UserName")}
             id="UserName"
             type="text"
-            value={config?.UserName}
+            value={config.UserName}
             onChange={onChange}
             placeholder="UserName"
           />
@@ -234,7 +272,7 @@ function App() {
             {...register("Password")}
             id="Password"
             type="text"
-            value={config?.Password}
+            value={config.Password}
             onChange={onChange}
             placeholder="Password"
           />
@@ -253,7 +291,7 @@ function App() {
             {...register("Timeout")}
             id="Timeout"
             type="numbers"
-            value={config?.Timeout}
+            value={config.Timeout}
             onChange={onChange}
             placeholder="Timeout"
           />
@@ -272,7 +310,7 @@ function App() {
             {...register("CertFile")}
             id="CertFile"
             type="text"
-            value={config?.CertFile}
+            value={config.CertFile}
             onChange={onChange}
             placeholder="CertFile"
           />
@@ -291,7 +329,7 @@ function App() {
             {...register("KeyFile")}
             id="KeyFile"
             type="text"
-            value={config?.KeyFile}
+            value={config.KeyFile}
             onChange={onChange}
             placeholder="KeyFile"
           />
@@ -306,14 +344,14 @@ function App() {
             type="radio"
             id="ClearCacheExitTrue"
             name="ClearCacheExit"
-            value={config?.ClearCacheExit ? "true" : "false"}
+            value={config.ClearCacheExit ? "true" : "false"}
           />
           <label htmlFor="ClearCacheExitTrue">是</label>
           <input
             type="radio"
             id="ClearCacheExitFalse"
             name="ClearCacheExit"
-            value={!config?.ClearCacheExit ? "true" : "false"}
+            value={!config.ClearCacheExit ? "true" : "false"}
           />
           <label htmlFor="ClearCacheExitFalse">否</label>
         </div>
@@ -330,31 +368,11 @@ function App() {
             {...register("CachePath")}
             id="CachePath"
             type="text"
-            value={config?.CachePath}
+            value={config.CachePath}
             onChange={onChange}
             placeholder="CachePath"
           />
           <div className="bg-red-600">{errors.CachePath && <div></div>}</div>
-        </div>
-
-        <div className="flex flex-row w-96 m-1 p-2 pl-8 font-semibold rounded-md shadow-md bg-yellow-300 justify-left items-center">
-          <div className="w-32 border border-black rounded-md">
-            {t("EnableLocalCache")}
-          </div>
-          <input
-            type="radio"
-            id="EnableLocalCacheTrue"
-            name="EnableLocalCache"
-            value={config?.EnableLocalCache ? "true" : "false"}
-          />
-          <label htmlFor="EnableLocalCacheTrue">是</label>
-          <input
-            type="radio"
-            id="EnableLocalCacheFalse"
-            name="EnableLocalCache"
-            value={!config?.EnableLocalCache ? "true" : "false"}
-          />
-          <label htmlFor="EnableLocalCacheFalse">否</label>
         </div>
 
         <div className="flex flex-row w-96 m-1 p-2 pl-8 font-semibold rounded-md shadow-md bg-yellow-300 justify-left items-center">
@@ -365,14 +383,14 @@ function App() {
             type="radio"
             id="ClearCacheExitTrue"
             name="ClearCacheExit"
-            value={config?.ClearCacheExit ? "true" : "false"}
+            value={config.ClearCacheExit ? "true" : "false"}
           />
           <label htmlFor="ClearCacheExitTrue">是</label>
           <input
             type="radio"
             id="ClearCacheExitFalse"
             name="ClearCacheExit"
-            value={!config?.ClearCacheExit ? "true" : "false"}
+            value={!config.ClearCacheExit ? "true" : "false"}
           />
           <label htmlFor="ClearCacheExitFalse">否</label>
         </div>
@@ -385,14 +403,14 @@ function App() {
             type="radio"
             id="EnableUploadTrue"
             name="EnableUpload"
-            value={config?.EnableUpload ? "true" : "false"}
+            value={config.EnableUpload ? "true" : "false"}
           />
           <label htmlFor="EnableUploadTrue">是</label>
           <input
             type="radio"
             id="EnableUploadFalse"
             name="EnableUpload"
-            value={!config?.EnableUpload ? "true" : "false"}
+            value={!config.EnableUpload ? "true" : "false"}
           />
           <label htmlFor="EnableUploadFalse">否</label>
         </div>
@@ -409,7 +427,7 @@ function App() {
             {...register("UploadPath")}
             id="UploadPath"
             type="text"
-            value={config?.UploadPath}
+            value={config.UploadPath}
             onChange={onChange}
             placeholder="UploadPath"
           />
@@ -424,14 +442,14 @@ function App() {
             type="radio"
             id="EnableDatabaseTrue"
             name="EnableDatabase"
-            value={config?.EnableDatabase ? "true" : "false"}
+            value={config.EnableDatabase ? "true" : "false"}
           />
           <label htmlFor="EnableDatabaseTrue">是</label>
           <input
             type="radio"
             id="EnableDatabaseFalse"
             name="EnableDatabase"
-            value={!config?.EnableDatabase ? "true" : "false"}
+            value={!config.EnableDatabase ? "true" : "false"}
           />
           <label htmlFor="EnableDatabaseFalse">否</label>
         </div>
@@ -444,14 +462,14 @@ function App() {
             type="radio"
             id="ClearDatabaseTrue"
             name="ClearDatabase"
-            value={config?.ClearDatabase ? "true" : "false"}
+            value={config.ClearDatabase ? "true" : "false"}
           />
           <label htmlFor="ClearDatabaseTrue">是</label>
           <input
             type="radio"
             id="ClearDatabaseFalse"
             name="ClearDatabase"
-            value={!config?.ClearDatabase ? "true" : "false"}
+            value={!config.ClearDatabase ? "true" : "false"}
           />
           <label htmlFor="ClearDatabaseFalse">否</label>
         </div>
@@ -468,7 +486,7 @@ function App() {
             {...register("ExcludeFileOrFolders")}
             id="ExcludeFileOrFolders"
             type="text"
-            value={config?.ExcludeFileOrFolders}
+            value={config.ExcludeFileOrFolders}
             onChange={onChange}
             placeholder="ExcludeFileOrFolders"
           />
@@ -489,7 +507,7 @@ function App() {
             {...register("SupportMediaType")}
             id="SupportMediaType"
             type="text"
-            value={config?.SupportMediaType}
+            value={config.SupportMediaType}
             onChange={onChange}
             placeholder="SupportMediaType"
           />
@@ -510,7 +528,7 @@ function App() {
             {...register("SupportFileType")}
             id="SupportFileType"
             type="text"
-            value={config?.SupportFileType}
+            value={config.SupportFileType}
             onChange={onChange}
             placeholder="SupportFileType"
           />
@@ -531,7 +549,7 @@ function App() {
             {...register("MinImageNum")}
             id="MinImageNum"
             type="numbers"
-            value={config?.MinImageNum}
+            value={config.MinImageNum}
             onChange={onChange}
             placeholder="MinImageNum"
           />
@@ -550,7 +568,7 @@ function App() {
             {...register("TimeoutLimitForScan")}
             id="TimeoutLimitForScan"
             type="numbers"
-            value={config?.TimeoutLimitForScan}
+            value={config.TimeoutLimitForScan}
             onChange={onChange}
             placeholder="TimeoutLimitForScan"
           />
@@ -567,14 +585,14 @@ function App() {
             type="radio"
             id="PrintAllIPTrue"
             name="PrintAllIP"
-            value={config?.PrintAllIP ? "true" : "false"}
+            value={config.PrintAllIP ? "true" : "false"}
           />
           <label htmlFor="PrintAllIPTrue">是</label>
           <input
             type="radio"
             id="PrintAllIPFalse"
             name="PrintAllIP"
-            value={!config?.PrintAllIP ? "true" : "false"}
+            value={!config.PrintAllIP ? "true" : "false"}
           />
           <label htmlFor="PrintAllIPFalse">否</label>
         </div>
@@ -587,14 +605,14 @@ function App() {
             type="radio"
             id="DebugTrue"
             name="Debug"
-            value={config?.Debug ? "true" : "false"}
+            value={config.Debug ? "true" : "false"}
           />
           <label htmlFor="DebugTrue">是</label>
           <input
             type="radio"
             id="DebugFalse"
             name="Debug"
-            value={!config?.Debug ? "true" : "false"}
+            value={!config.Debug ? "true" : "false"}
           />
           <label htmlFor="DebugFalse">否</label>
         </div>
@@ -607,14 +625,14 @@ function App() {
             type="radio"
             id="LogToFileTrue"
             name="LogToFile"
-            value={config?.LogToFile ? "true" : "false"}
+            value={config.LogToFile ? "true" : "false"}
           />
           <label htmlFor="LogToFileTrue">是</label>
           <input
             type="radio"
             id="LogToFileFalse"
             name="LogToFile"
-            value={!config?.LogToFile ? "true" : "false"}
+            value={!config.LogToFile ? "true" : "false"}
           />
           <label htmlFor="LogToFileFalse">否</label>
         </div>
@@ -631,7 +649,7 @@ function App() {
             {...register("LogFilePath")}
             id="LogFilePath"
             type="text"
-            value={config?.LogFilePath}
+            value={config.LogFilePath}
             onChange={onChange}
             placeholder="LogFilePath"
           />
@@ -650,7 +668,7 @@ function App() {
             {...register("LogFileName")}
             id="LogFileName"
             type="text"
-            value={config?.LogFileName}
+            value={config.LogFileName}
             onChange={onChange}
             placeholder="LogFileName"
           />
@@ -669,7 +687,7 @@ function App() {
             {...register("ZipFileTextEncoding")}
             id="ZipFileTextEncoding"
             type="text"
-            value={config?.ZipFileTextEncoding}
+            value={config.ZipFileTextEncoding}
             onChange={onChange}
             placeholder="ZipFileTextEncoding"
           />
@@ -686,14 +704,14 @@ function App() {
             type="radio"
             id="EnableFrpcServerTrue"
             name="EnableFrpcServer"
-            value={config?.EnableFrpcServer ? "true" : "false"}
+            value={config.EnableFrpcServer ? "true" : "false"}
           />
           <label htmlFor="EnableFrpcServerTrue">是</label>
           <input
             type="radio"
             id="EnableFrpcServerFalse"
             name="EnableFrpcServer"
-            value={!config?.EnableFrpcServer ? "true" : "false"}
+            value={!config.EnableFrpcServer ? "true" : "false"}
           />
           <label htmlFor="EnableFrpcServerFalse">否</label>
         </div>
@@ -706,19 +724,19 @@ function App() {
             type="radio"
             id="GenerateMetaDataTrue"
             name="GenerateMetaData"
-            value={config?.GenerateMetaData ? "true" : "false"}
+            value={config.GenerateMetaData ? "true" : "false"}
           />
           <label htmlFor="GenerateMetaDataTrue">是</label>
           <input
             type="radio"
             id="GenerateMetaDataFalse"
             name="GenerateMetaData"
-            value={!config?.GenerateMetaData ? "true" : "false"}
+            value={!config.GenerateMetaData ? "true" : "false"}
           />
           <label htmlFor="GenerateMetaDataFalse">否</label>
         </div>
 
-        {/* {t("FrpClientConfig")}: {config?.FrpConfig} */}
+        {/* {t("FrpClientConfig")}: {config.FrpConfig} */}
       </form>
     </>
   );
