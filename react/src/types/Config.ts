@@ -1,5 +1,6 @@
 // 取得したいデータの型を定義する
-type Config = {
+//http://note.alvinhtml.com/web/typescript.html
+interface Config {
   Port: number;
   Host: string;
   StoresPath: [];
@@ -41,6 +42,6 @@ type Config = {
     RandomRemotePort: boolean;
   };
   GenerateMetaData: boolean;
-};
+}
 
 export default Config;
