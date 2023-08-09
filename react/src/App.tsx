@@ -7,7 +7,8 @@ import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import Title from "./components/Title";
 import Config from "./types/Config";
-
+// https://headlessui.com/react/switch
+import { Switch } from '@headlessui/react'
 
 function App() {
   const baseURL = "/api";
@@ -110,6 +111,14 @@ function App() {
     }
     setConfig({ ...config, [name]: value });
   };
+
+  const onChangeOpenBrowser = (checked: boolean) => {
+    console.log("OnChangeOpenBrowser:", checked);
+    setConfig({ ...config, ['OpenBrowser']: checked });
+  };
+
+
+
   //React 使用 value 或者 defaultValue 在 input 框中呈现内容
   return (
     <>
@@ -202,23 +211,17 @@ function App() {
             {t("OpenBrowser")}
           </div>
 
-          <input
-            type="radio"
-            id="OpenBrowserTrue"
-            value={config.OpenBrowser ? "true" : "false"}
-            {...register("OpenBrowser")}
-            onChange={onChange}
-          />
-          <label htmlFor="OpenBrowserTrue">是</label>
-          <input
-            type="radio"
-            id="OpenBrowserFalse"
-            value={!config.OpenBrowser ? "true" : "false"}
-            checked={config.OpenBrowser === false}
+          <Switch className={`${config.OpenBrowser ? 'bg-blue-500' : 'bg-gray-400'}
+           px-1.5 py-0 m-0  relative inline-flex h-[30px] w-[76px] shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2  focus-visible:ring-white focus-visible:ring-opacity-75`}
+            checked={config.OpenBrowser} onChange={onChangeOpenBrowser} name="OpenBrowser">
+            <span className="sr-only">Use setting</span>
+            <span
+              aria-hidden="true"
+              className={`${config.OpenBrowser ? 'translate-x-9' : 'translate-x-0'}
+            pointer-events-none inline-block h-[25px] w-[25px] transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out`}
+            />
 
-            {...register("OpenBrowser", { required: true })}
-          />
-          <label htmlFor="OpenBrowserFalse">否</label>
+          </Switch>
         </div>
 
         <div className="flex flex-row w-96 m-1 p-2 pl-8 font-semibold rounded-md shadow-md bg-yellow-300 justify-left items-center">
