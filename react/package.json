@@ -11,6 +11,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@headlessui/react": "^1.7.16",
+    "@headlessui/tailwindcss": "^0.2.0",
     "axios": "^1.4.0",
     "i18next": "^23.2.11",
     "i18next-browser-languagedetector": "^7.1.0",
