@@ -156,6 +156,13 @@
         <template #checked>{{ $t("DoublePageMode") }}</template>
         <template #unchecked>{{ $t("SinglePageMode") }}</template>
       </n-switch>
+      
+      <!-- 更改跨页匹配 -->
+      <n-button @click="FlipOddEvenPage" v-if="doublePageModeFlag" :title="$t('如果跨页内容不匹配，可以尝试点击修正')">{{
+        $t("Flip_odd_even_page")
+      }}
+      </n-button>
+
 
       <!-- 自动切边 -->
       <n-switch size="large" v-model:value="imageParameters.do_auto_crop" @update:value="setImageParameters_DoAutoCrop">
@@ -760,6 +767,12 @@ export default defineComponent({
         replace: true,
         params: { id: this.$route.params.id },
       });
+    },
+    FlipOddEvenPage() {
+      if (this.nowPageNum % 2 == 0)
+        this.flipPage(-1)
+      else
+        this.flipPage(1);
     },
     //判断这本书是否需要提供原始压缩包下载
     needDownloadLink() {
