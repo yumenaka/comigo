@@ -19,8 +19,6 @@ function App() {
   //誤ればランタイムエラーになってしまうかもしれません。
   const [config, setConfig] = useState<Config>({} as Config);
 
-
-
   // 使用react-hook-form的话，handleSubmit函数如下：
   const {
     register,
@@ -66,11 +64,11 @@ function App() {
   const sendDataToBackend = async (data: Config) => {
     console.log("sendDataToBackend:", data);
     try {
-      const response = await axios.post('/api/update_config', data);
-      console.log('Data sent successfully:', response.data);
+      const response = await axios.post("/api/update_config", data);
+      console.log("Data sent successfully:", response.data);
       // 可以在此处进行其他操作，例如更新状态或显示成功消息等
     } catch (error) {
-      console.error('Error sending data:', error);
+      console.error("Error sending data:", error);
       // 可以在此处处理错误，例如显示错误消息等
     }
   };
@@ -78,7 +76,16 @@ function App() {
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log(e);
-  }
+    sendDataToBackend(config)
+      .then(() => {
+        console.log("Data sent successfully");
+        // 可以在此处进行其他操作，例如更新状态或显示成功消息等
+      })
+      .catch((error) => {
+        console.error("Error sending data:", error);
+        // 可以在此处处理错误，例如显示错误消息等
+      });
+  };
 
   useEffect(() => {
     axios
@@ -106,7 +113,6 @@ function App() {
     setConfig({ ...config, [boolValueName]: checked });
   };
 
-
   //React 使用 value 或者 defaultValue 在 input 框中呈现内容
   return (
     <>
@@ -123,33 +129,123 @@ function App() {
           submit
         </button>
 
-        <InputWithLabel label={t("Port")} name={"Port"} type={"number"} value={config.Port} onChange={onChange} placeholder={"Port"}   ></InputWithLabel>
+        <InputWithLabel
+          label={t("Port")}
+          name={"Port"}
+          type={"number"}
+          value={config.Port}
+          onChange={onChange}
+          placeholder={"Port"}
+        ></InputWithLabel>
 
-        <InputWithLabel label={t("Host")} name={"Host"} type={"text"} value={config.Host} onChange={onChange} placeholder={"Host"}></InputWithLabel>
+        <InputWithLabel
+          label={t("Host")}
+          name={"Host"}
+          type={"text"}
+          value={config.Host}
+          onChange={onChange}
+          placeholder={"Host"}
+        ></InputWithLabel>
 
-        <InputWithLabel label={t("StoresPath")} name={"StoresPath"} type={"text"} value={config.StoresPath} onChange={onChange} placeholder={"StoresPath"}></InputWithLabel>
+        <InputWithLabel
+          label={t("StoresPath")}
+          name={"StoresPath"}
+          type={"text"}
+          value={config.StoresPath}
+          onChange={onChange}
+          placeholder={"StoresPath"}
+        ></InputWithLabel>
 
-        <InputWithLabel label={t("MaxScanDepth")} name={"MaxScanDepth"} type={"number"} value={config.MaxScanDepth} onChange={onChange} placeholder={"MaxScanDepth"}></InputWithLabel>
+        <InputWithLabel
+          label={t("MaxScanDepth")}
+          name={"MaxScanDepth"}
+          type={"number"}
+          value={config.MaxScanDepth}
+          onChange={onChange}
+          placeholder={"MaxScanDepth"}
+        ></InputWithLabel>
 
-        <BoolSwitch label={t("OpenBrowser")} name={"OpenBrowser"} boolValue={config.OpenBrowser} setBoolConfig={setBoolConfig} ></BoolSwitch>
+        <BoolSwitch
+          label={t("OpenBrowser")}
+          name={"OpenBrowser"}
+          boolValue={config.OpenBrowser}
+          setBoolConfig={setBoolConfig}
+        ></BoolSwitch>
 
-        <BoolSwitch name={"DisableLAN"} label={t("DisableLAN")} boolValue={config.DisableLAN} setBoolConfig={setBoolConfig} ></BoolSwitch>
+        <BoolSwitch
+          name={"DisableLAN"}
+          label={t("DisableLAN")}
+          boolValue={config.DisableLAN}
+          setBoolConfig={setBoolConfig}
+        ></BoolSwitch>
 
-        <InputWithLabel label={t("Username")} name={"UserName"} type={"text"} value={config.UserName} onChange={onChange} placeholder={"UserName"}></InputWithLabel>
+        <InputWithLabel
+          label={t("Username")}
+          name={"UserName"}
+          type={"text"}
+          value={config.UserName}
+          onChange={onChange}
+          placeholder={"UserName"}
+        ></InputWithLabel>
 
-        <InputWithLabel label={t("Password")} name={"Password"} type={"text"} value={config.Password} onChange={onChange} placeholder={"Password"} ></InputWithLabel>
+        <InputWithLabel
+          label={t("Password")}
+          name={"Password"}
+          type={"text"}
+          value={config.Password}
+          onChange={onChange}
+          placeholder={"Password"}
+        ></InputWithLabel>
 
-        <InputWithLabel label={t("Timeout")} name={"Timeout"} type={"number"} value={config.Timeout} onChange={onChange} placeholder={"Timeout"} ></InputWithLabel>
+        <InputWithLabel
+          label={t("Timeout")}
+          name={"Timeout"}
+          type={"number"}
+          value={config.Timeout}
+          onChange={onChange}
+          placeholder={"Timeout"}
+        ></InputWithLabel>
 
-        <InputWithLabel label={t("CertFile")} name={"CertFile"} type={"text"} value={config.CertFile} onChange={onChange} placeholder={"CertFile"} ></InputWithLabel>
+        <InputWithLabel
+          label={t("CertFile")}
+          name={"CertFile"}
+          type={"text"}
+          value={config.CertFile}
+          onChange={onChange}
+          placeholder={"CertFile"}
+        ></InputWithLabel>
 
-        <InputWithLabel label={t("KeyFile")} name={"KeyFile"} type={"text"} value={config.KeyFile} onChange={onChange} placeholder={"KeyFile"} ></InputWithLabel>
+        <InputWithLabel
+          label={t("KeyFile")}
+          name={"KeyFile"}
+          type={"text"}
+          value={config.KeyFile}
+          onChange={onChange}
+          placeholder={"KeyFile"}
+        ></InputWithLabel>
 
-        <BoolSwitch name={"ClearCacheExit"} label={t("ClearCacheExit")} boolValue={config.ClearCacheExit} setBoolConfig={setBoolConfig} ></BoolSwitch>
+        <BoolSwitch
+          name={"ClearCacheExit"}
+          label={t("ClearCacheExit")}
+          boolValue={config.ClearCacheExit}
+          setBoolConfig={setBoolConfig}
+        ></BoolSwitch>
 
-        <InputWithLabel label={t("CachePath")} name={"CachePath"} type={"text"} value={config.CachePath} onChange={onChange} placeholder={"CachePath"}></InputWithLabel>
+        <InputWithLabel
+          label={t("CachePath")}
+          name={"CachePath"}
+          type={"text"}
+          value={config.CachePath}
+          onChange={onChange}
+          placeholder={"CachePath"}
+        ></InputWithLabel>
 
-        <BoolSwitch name={"EnableUpload"} label={t("EnableUpload")} boolValue={config.EnableUpload} setBoolConfig={setBoolConfig} ></BoolSwitch>
+        <BoolSwitch
+          name={"EnableUpload"}
+          label={t("EnableUpload")}
+          boolValue={config.EnableUpload}
+          setBoolConfig={setBoolConfig}
+        ></BoolSwitch>
 
         <InputWithLabel
           label={t("UploadPath")}
@@ -187,8 +283,6 @@ function App() {
           placeholder={"SupportFileType"}
         />
 
-
-
         <InputWithLabel
           label={t("MinImageCountInBook")}
           name={"MinImageNum"}
@@ -196,7 +290,6 @@ function App() {
           value={config.MinImageNum}
           onChange={onChange}
           placeholder={"MinImageNum"}
-
         ></InputWithLabel>
 
         <InputWithLabel
@@ -208,16 +301,40 @@ function App() {
           placeholder={"TimeoutLimitForScan"}
         />
 
+        <BoolSwitch
+          name={"PrintAllIP"}
+          label={t("PrintAllPossibleQRCode")}
+          boolValue={config.PrintAllIP}
+          setBoolConfig={setBoolConfig}
+        ></BoolSwitch>
 
-        <BoolSwitch name={"PrintAllIP"} label={t("PrintAllPossibleQRCode")} boolValue={config.PrintAllIP} setBoolConfig={setBoolConfig} ></BoolSwitch>
+        <BoolSwitch
+          name={"EnableDatabase"}
+          label={t("EnableDatabase")}
+          boolValue={config.EnableDatabase}
+          setBoolConfig={setBoolConfig}
+        ></BoolSwitch>
 
-        <BoolSwitch name={"EnableDatabase"} label={t("EnableDatabase")} boolValue={config.EnableDatabase} setBoolConfig={setBoolConfig} ></BoolSwitch>
+        <BoolSwitch
+          name={"ClearDatabase"}
+          label={t("ClearDatabaseWhenExit")}
+          boolValue={config.ClearDatabase}
+          setBoolConfig={setBoolConfig}
+        ></BoolSwitch>
 
-        <BoolSwitch name={"ClearDatabase"} label={t("ClearDatabaseWhenExit")} boolValue={config.ClearDatabase} setBoolConfig={setBoolConfig} ></BoolSwitch>
+        <BoolSwitch
+          name={"Debug"}
+          label={t("EnableDebugMode")}
+          boolValue={config.Debug}
+          setBoolConfig={setBoolConfig}
+        ></BoolSwitch>
 
-        <BoolSwitch name={"Debug"} label={t("EnableDebugMode")} boolValue={config.Debug} setBoolConfig={setBoolConfig} ></BoolSwitch>
-
-        <BoolSwitch name={"LogToFile"} label={t("LogToFile")} boolValue={config.LogToFile} setBoolConfig={setBoolConfig} ></BoolSwitch>
+        <BoolSwitch
+          name={"LogToFile"}
+          label={t("LogToFile")}
+          boolValue={config.LogToFile}
+          setBoolConfig={setBoolConfig}
+        ></BoolSwitch>
 
         <InputWithLabel
           label={t("LogFilePath")}
@@ -246,10 +363,19 @@ function App() {
           placeholder={"ZipFileTextEncoding"}
         />
 
-        <BoolSwitch name={"EnableFrpcServer"} label={t("EnableFrpc")} boolValue={config.EnableFrpcServer} setBoolConfig={setBoolConfig} ></BoolSwitch>
+        <BoolSwitch
+          name={"EnableFrpcServer"}
+          label={t("EnableFrpc")}
+          boolValue={config.EnableFrpcServer}
+          setBoolConfig={setBoolConfig}
+        ></BoolSwitch>
 
-        <BoolSwitch name={"GenerateMetaData"} label={t("GenerateMetaData")} boolValue={config.GenerateMetaData} setBoolConfig={setBoolConfig} ></BoolSwitch>
-
+        <BoolSwitch
+          name={"GenerateMetaData"}
+          label={t("GenerateMetaData")}
+          boolValue={config.GenerateMetaData}
+          setBoolConfig={setBoolConfig}
+        ></BoolSwitch>
       </form>
     </>
   );
