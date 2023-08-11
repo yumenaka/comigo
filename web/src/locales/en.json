@@ -81,6 +81,8 @@
   "simplify_book_titles": "Simplify Title",
   "DoublePageMode": "DoublePage",
   "SinglePageMode": "SinglePage",
+  "Flip_odd_even_page": "Flip odd even page",
+  "如果跨页内容不匹配，可以尝试点击修正": "Try to click here if double pages didn't match at joint.",
   "marginOnScrollMode": "margin bottom:",
   "login_success_hint": "Login successfully, return to previous page",
   "server_setting": "comigo server setting",
