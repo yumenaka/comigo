@@ -2,7 +2,12 @@
   <div class="app">
     <n-dialog-provider>
       <n-message-provider>
-        <router-view></router-view> <!-- 路由出口 路由匹配到的组件将渲染在这里 -->
+        <router-view v-slot="{Component}">
+          <keep-alive>
+          <component :is="Component" v-if="$route.meta.keepAlive" :key="$route.name" />
+          </keep-alive>
+          <component :is="Component" v-if="!$route.meta.keepAlive" :key="$route.name" />
+        </router-view> <!-- 路由出口 路由匹配到的组件将渲染在这里 -->
       </n-message-provider>
     </n-dialog-provider>
   </div>

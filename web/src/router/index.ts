@@ -23,6 +23,9 @@ const routes = [
     path: "/",
     component: BookShelf,
     name: "BookShelf",
+    meta: {
+      keepAlive: true
+    },
     props: (route: { query: { sort_by: any } }) => ({
       query: route.query.sort_by,
     }),
@@ -34,6 +37,9 @@ const routes = [
     props: (route: { query: { sort_by: any } }) => ({
       query: route.query.sort_by,
     }),
+    meta: {
+      keepAlive: true
+    }
   },
   {
     path: "/scroll/:id",
@@ -79,6 +85,15 @@ const router = createRouter({
   // 由于这部分 URL 从未被发送到服务器，所以它不需要在服务器层面上进行任何特殊处理。
   history: createWebHashHistory(),
   routes,
+  scrollBehavior(to, from, savedPosition) {
+    debugger
+    // 如果有记录页面的滚动行为
+    if (savedPosition) {
+      return savedPosition
+    } else {
+      return { top: 0 }
+    }
+  }
 });
 
 export default router;
