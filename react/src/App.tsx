@@ -1,10 +1,10 @@
 // import reactLogo from "./assets/react.svg";
 import "./App.css";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 // TypeScript環境でReact Hook Formのフォーム作成の基礎を学ぶ  https://reffect.co.jp/react/react-hook-form-ts/
-import { useForm } from "react-hook-form";
+// import { useForm } from "react-hook-form";
 import Title from "./components/Title";
 import Config from "./types/Config";
 import InputWithLabel from "./components/InputWithLabel";
@@ -19,74 +19,63 @@ function App() {
   //誤ればランタイムエラーになってしまうかもしれません。
   const [config, setConfig] = useState<Config>({} as Config);
 
-  // 使用react-hook-form的话，handleSubmit函数如下：
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
-    defaultValues: {
-      Port: config.Port,
-      Host: config.Host,
-      StoresPath: config.StoresPath,
-      MaxScanDepth: config.MaxScanDepth,
-      OpenBrowser: config.OpenBrowser,
-      DisableLAN: config.DisableLAN,
-      UserName: config.UserName,
-      Password: config.Password,
-      Timeout: config.Timeout,
-      CertFile: config.CertFile,
-      KeyFile: config.KeyFile,
-      EnableLocalCache: config.EnableLocalCache,
-      CachePath: config.CachePath,
-      ClearCacheExit: config.ClearCacheExit,
-      EnableUpload: config.EnableUpload,
-      UploadPath: config.UploadPath,
-      EnableDatabase: config.EnableDatabase,
-      ClearDatabase: config.ClearDatabase,
-      ExcludeFileOrFolders: config.ExcludeFileOrFolders,
-      SupportMediaType: config.SupportMediaType,
-      SupportFileType: config.SupportFileType,
-      MinImageNum: config.MinImageNum,
-      TimeoutLimitForScan: config.TimeoutLimitForScan,
-      PrintAllIP: config.PrintAllIP,
-      Debug: config.Debug,
-      LogToFile: config.LogToFile,
-      LogFilePath: config.LogFilePath,
-      LogFileName: config.LogFileName,
-      ZipFileTextEncoding: config.ZipFileTextEncoding,
-      EnableFrpcServer: config.EnableFrpcServer,
-      FrpConfig: config.FrpConfig,
-      GenerateMetaData: config.GenerateMetaData,
-    },
-  });
-
-  const sendDataToBackend = async (data: Config) => {
-    console.log("sendDataToBackend:", data);
-    try {
-      const response = await axios.post("/api/update_config", data);
-      console.log("Data sent successfully:", response.data);
-      // 可以在此处进行其他操作，例如更新状态或显示成功消息等
-    } catch (error) {
-      console.error("Error sending data:", error);
-      // 可以在此处处理错误，例如显示错误消息等
-    }
-  };
+  // // 使用react-hook-form的话，handleSubmit函数如下：
+  // const {
+  //   register,
+  //   handleSubmit,
+  //   formState: { errors },
+  // } = useForm({
+  //   defaultValues: {
+  //     Port: config.Port,
+  //     Host: config.Host,
+  //     StoresPath: config.StoresPath,
+  //     MaxScanDepth: config.MaxScanDepth,
+  //     OpenBrowser: config.OpenBrowser,
+  //     DisableLAN: config.DisableLAN,
+  //     UserName: config.UserName,
+  //     Password: config.Password,
+  //     Timeout: config.Timeout,
+  //     CertFile: config.CertFile,
+  //     KeyFile: config.KeyFile,
+  //     EnableLocalCache: config.EnableLocalCache,
+  //     CachePath: config.CachePath,
+  //     ClearCacheExit: config.ClearCacheExit,
+  //     EnableUpload: config.EnableUpload,
+  //     UploadPath: config.UploadPath,
+  //     EnableDatabase: config.EnableDatabase,
+  //     ClearDatabase: config.ClearDatabase,
+  //     ExcludeFileOrFolders: config.ExcludeFileOrFolders,
+  //     SupportMediaType: config.SupportMediaType,
+  //     SupportFileType: config.SupportFileType,
+  //     MinImageNum: config.MinImageNum,
+  //     TimeoutLimitForScan: config.TimeoutLimitForScan,
+  //     PrintAllIP: config.PrintAllIP,
+  //     Debug: config.Debug,
+  //     LogToFile: config.LogToFile,
+  //     LogFilePath: config.LogFilePath,
+  //     LogFileName: config.LogFileName,
+  //     ZipFileTextEncoding: config.ZipFileTextEncoding,
+  //     EnableFrpcServer: config.EnableFrpcServer,
+  //     FrpConfig: config.FrpConfig,
+  //     GenerateMetaData: config.GenerateMetaData,
+  //   },
+  // });
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log(e);
-    sendDataToBackend(config)
-      .then(() => {
-        console.log("Data sent successfully");
-        // 可以在此处进行其他操作，例如更新状态或显示成功消息等
-      })
+    axios.post("/api/update_config", config).then(() => {
+      console.log("Data sent successfully");
+      // 可以在此处进行其他操作，例如更新状态或显示成功消息等
+    })
       .catch((error) => {
         console.error("Error sending data:", error);
         // 可以在此处处理错误，例如显示错误消息等
       });
   };
-
+  // useEffect 用于在函数组件中执行副作用操作，例如数据获取、订阅、手动修改DOM等。
+  // 通过传递第二个参数，你可以告诉 React 仅在某些值改变的时候才执行 effect。
+  // 传递空数组([])作为第二个参数，effect 内部的 props 和 state 就会一直持有其初始值。也就是只在渲染的时候执行一次。
   useEffect(() => {
     axios
       .get<Config>(`${baseURL}/config.json`)
@@ -107,10 +96,9 @@ function App() {
     setConfig({ ...config, [name]: value });
   };
 
-  const setBoolConfig = (checked: boolean, boolValueName: string) => {
-    // console.log("OnChange" + boolValueName, checked);
-
-    setConfig({ ...config, [boolValueName]: checked });
+  const setBoolValue = (value: boolean, valueName: string) => {
+    console.log("OnChange" + valueName, value);
+    setConfig({ ...config, [valueName]: value });
   };
 
   //React 使用 value 或者 defaultValue 在 input 框中呈现内容
@@ -169,14 +157,14 @@ function App() {
           label={t("OpenBrowser")}
           name={"OpenBrowser"}
           boolValue={config.OpenBrowser}
-          setBoolConfig={setBoolConfig}
+          setBoolValue={setBoolValue}
         ></BoolSwitch>
 
         <BoolSwitch
           name={"DisableLAN"}
           label={t("DisableLAN")}
           boolValue={config.DisableLAN}
-          setBoolConfig={setBoolConfig}
+          setBoolValue={setBoolValue}
         ></BoolSwitch>
 
         <InputWithLabel
@@ -228,7 +216,7 @@ function App() {
           name={"ClearCacheExit"}
           label={t("ClearCacheExit")}
           boolValue={config.ClearCacheExit}
-          setBoolConfig={setBoolConfig}
+          setBoolValue={setBoolValue}
         ></BoolSwitch>
 
         <InputWithLabel
@@ -244,7 +232,7 @@ function App() {
           name={"EnableUpload"}
           label={t("EnableUpload")}
           boolValue={config.EnableUpload}
-          setBoolConfig={setBoolConfig}
+          setBoolValue={setBoolValue}
         ></BoolSwitch>
 
         <InputWithLabel
@@ -305,35 +293,35 @@ function App() {
           name={"PrintAllIP"}
           label={t("PrintAllPossibleQRCode")}
           boolValue={config.PrintAllIP}
-          setBoolConfig={setBoolConfig}
+          setBoolValue={setBoolValue}
         ></BoolSwitch>
 
         <BoolSwitch
           name={"EnableDatabase"}
           label={t("EnableDatabase")}
           boolValue={config.EnableDatabase}
-          setBoolConfig={setBoolConfig}
+          setBoolValue={setBoolValue}
         ></BoolSwitch>
 
         <BoolSwitch
           name={"ClearDatabase"}
           label={t("ClearDatabaseWhenExit")}
           boolValue={config.ClearDatabase}
-          setBoolConfig={setBoolConfig}
+          setBoolValue={setBoolValue}
         ></BoolSwitch>
 
         <BoolSwitch
           name={"Debug"}
           label={t("EnableDebugMode")}
           boolValue={config.Debug}
-          setBoolConfig={setBoolConfig}
+          setBoolValue={setBoolValue}
         ></BoolSwitch>
 
         <BoolSwitch
           name={"LogToFile"}
           label={t("LogToFile")}
           boolValue={config.LogToFile}
-          setBoolConfig={setBoolConfig}
+          setBoolValue={setBoolValue}
         ></BoolSwitch>
 
         <InputWithLabel
@@ -367,14 +355,14 @@ function App() {
           name={"EnableFrpcServer"}
           label={t("EnableFrpc")}
           boolValue={config.EnableFrpcServer}
-          setBoolConfig={setBoolConfig}
+          setBoolValue={setBoolValue}
         ></BoolSwitch>
 
         <BoolSwitch
           name={"GenerateMetaData"}
           label={t("GenerateMetaData")}
           boolValue={config.GenerateMetaData}
-          setBoolConfig={setBoolConfig}
+          setBoolValue={setBoolValue}
         ></BoolSwitch>
       </form>
     </>
