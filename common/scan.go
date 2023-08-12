@@ -27,21 +27,23 @@ import (
 )
 
 // ScanStorePathInConfig 3、扫描配置文件指定的的书籍库
-func ScanStorePathInConfig() {
+func ScanStorePathInConfig() error {
 	if len(Config.StoresPath) > 0 {
 		for _, p := range Config.StoresPath {
 			addList, err := ScanAndGetBookList(p, DatabaseBookList)
 			if err != nil {
 				fmt.Println(locale.GetString("scan_error"), p, err)
+				return err
 			} else {
 				AddBooksToStore(addList, p)
 			}
 		}
 	}
+	return nil
 }
 
 // SaveResultsToDatabase 4，保存扫描结果到数据库，并清理不存在的书籍
-func SaveResultsToDatabase() {
+func SaveResultsToDatabase() error {
 	if Config.EnableDatabase {
 		AllBook := book.GetAllBookList()
 		//设置清理数据库的时候，是否清理没扫描到的书籍信息
@@ -61,8 +63,10 @@ func SaveResultsToDatabase() {
 		saveErr := storage.SaveBookListToDatabase(AllBook)
 		if saveErr != nil {
 			fmt.Println(saveErr)
+			return saveErr
 		}
 	}
+	return nil
 }
 
 // AddBooksToStore 添加一组书到书库

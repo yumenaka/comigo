@@ -8,6 +8,7 @@ interface Props {
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     placeholder: string;
     error?: string;
+    register?: any;
 }
 
 const InputWithLabel: React.FC<Props> = ({
