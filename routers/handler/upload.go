@@ -29,7 +29,7 @@ func UploadHandler(c *gin.Context) {
 	}
 	//fmt.Println("EnableUpload:", *EnableUpload)
 	//默认的上传路径
-	path := "ComigoUpload"
+	path := "upload"
 	//如果设置过上传路径
 	if *UploadPath != "" {
 		path = *UploadPath
@@ -63,7 +63,7 @@ func UploadHandler(c *gin.Context) {
 	  _, err = io.Copy(out, file)
 	*/
 	c.String(http.StatusOK, fmt.Sprintf("'%s' uploaded!", file.Filename))
-	*LocalRescanBroadcast <- "ComigoUpload"
+	*LocalRescanBroadcast <- "upload"
 
 	// 上传多个文件，未调通，示例：
 	//https://github.com/gin-gonic/examples/blob/master/upload-file/multiple/main.go
@@ -82,6 +82,6 @@ func UploadHandler(c *gin.Context) {
 	//	}
 	//}
 	//c.String(http.StatusOK, "Uploaded successfully %d files", len(files))
-	//*LocalRescanBroadcast <- "ComigoUpload"
+	//*LocalRescanBroadcast <- "upload"
 
 }

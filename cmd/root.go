@@ -5,6 +5,7 @@ import (
 	"github.com/yumenaka/comi/routers/handler"
 	"os"
 	"path"
+	"path/filepath"
 	"runtime"
 	"time"
 
@@ -94,8 +95,15 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&common.Config.EnableUpload, "enable-upload", true, locale.GetString("ENABLE_FILE_UPLOAD"))
 	//上传文件的保存路径
 	rootCmd.PersistentFlags().StringVar(&common.Config.UploadPath, "upload-path", "", locale.GetString("UPLOAD_PATH"))
-	handler.UploadPath = &common.Config.UploadPath
+	if common.Config.EnableUpload && common.Config.UploadPath == "" {
+		//获取当前目录
+		dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+		if err != nil {
+			common.Config.UploadPath = path.Join(dir, "upload")
+		}
+	}
 	handler.EnableUpload = &common.Config.EnableUpload
+	handler.UploadPath = &common.Config.UploadPath
 
 	//手动指定zip文件编码 gbk、shiftjis……
 	rootCmd.PersistentFlags().StringVar(&common.Config.ZipFileTextEncoding, "zip-encode", "gbk", locale.GetString("ZIP_ENCODE"))

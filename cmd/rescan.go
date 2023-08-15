@@ -24,7 +24,7 @@ func waitRescanMessages() {
 		msg := <-rescanBroadcast //广播频道
 		// Send it out to every client that is currently connected
 		switch msg {
-		case "ComigoUpload":
+		case "upload":
 			fmt.Println("扫描上传文件夹：", msg)
 			ReScanUploadPath()
 			//保存扫描结果到数据库
@@ -46,7 +46,7 @@ func ReScanUploadPath() {
 	if !common.Config.EnableUpload {
 		return
 	}
-	uploadPath := "ComigoUpload"
+	uploadPath := "upload"
 	if common.Config.UploadPath != "" {
 		uploadPath = common.Config.UploadPath
 	}
