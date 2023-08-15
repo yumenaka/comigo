@@ -18,12 +18,12 @@
   "EnableDatabase": "データベースを有効にする",
   "ClearDatabaseWhenExit": "終了時にデータベースをクリア",
   "ExcludePath": "除外パス",
-  "SupportedImageFileExtensions": "サポート画像ファイル",
-  "SupportedBookFileExtensions": "サポート書籍ファイル",
-  "MinImageCountInBook": "書籍内の最小画像数",
+  "SupportMediaType": "サポート画像ファイル",
+  "SupportFileType": "サポート書籍ファイル",
+  "MinImageNum": "書籍内の最小画像数",
   "TimeoutLimitForScan": "スキャンタイムアウト",
   "PrintAllPossibleQRCode": "More QRコード",
-  "EnableDebugMode": "デバッグモードを有効にする",
+  "Debug": "デバッグモードを有効にする",
   "LogToFile": "ログを記録する",
   "LogFilePath": "ログファイルパス",
   "LogFileName": "ログファイル名",
@@ -125,5 +125,5 @@
   "filesize": "ファイルサイズ:{0}",
   "childbookhint": "フォルダーには{0}冊の本が入っている",
   "GenerateMetaData": "メタデータ生成",
-  "EnableFrpc": "EnableFrpc"
+  "EnableFrpcServer": "EnableFrpcServer"
 }

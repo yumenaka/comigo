@@ -32,7 +32,7 @@ function App() {
   //     MaxScanDepth: config.MaxScanDepth,
   //     OpenBrowser: config.OpenBrowser,
   //     DisableLAN: config.DisableLAN,
-  //     UserName: config.UserName,
+  //     Username: config.Username,
   //     Password: config.Password,
   //     Timeout: config.Timeout,
   //     CertFile: config.CertFile,
@@ -43,13 +43,13 @@ function App() {
   //     EnableUpload: config.EnableUpload,
   //     UploadPath: config.UploadPath,
   //     EnableDatabase: config.EnableDatabase,
-  //     ClearDatabase: config.ClearDatabase,
-  //     ExcludeFileOrFolders: config.ExcludeFileOrFolders,
+  //     ClearDatabaseWhenExit: config.ClearDatabaseWhenExit,
+  //     ExcludePath: config.ExcludePath,
   //     SupportMediaType: config.SupportMediaType,
   //     SupportFileType: config.SupportFileType,
   //     MinImageNum: config.MinImageNum,
   //     TimeoutLimitForScan: config.TimeoutLimitForScan,
-  //     PrintAllIP: config.PrintAllIP,
+  //     PrintAllPossibleQRCode: config.PrintAllPossibleQRCode,
   //     Debug: config.Debug,
   //     LogToFile: config.LogToFile,
   //     LogFilePath: config.LogFilePath,
@@ -169,11 +169,11 @@ function App() {
 
         <InputWithLabel
           label={t("Username")}
-          name={"UserName"}
+          name={"Username"}
           type={"text"}
-          value={config.UserName}
+          value={config.Username}
           onChange={onChange}
-          placeholder={"UserName"}
+          placeholder={"Username"}
         ></InputWithLabel>
 
         <InputWithLabel
@@ -246,15 +246,15 @@ function App() {
 
         <InputWithLabel
           label={t("ExcludePath")}
-          name={"ExcludeFileOrFolders"}
+          name={"ExcludePath"}
           type={"text"}
-          value={config.ExcludeFileOrFolders}
+          value={config.ExcludePath}
           onChange={onChange}
-          placeholder={"ExcludeFileOrFolders"}
+          placeholder={"ExcludePath"}
         />
 
         <InputWithLabel
-          label={t("SupportedImageFileExtensions")}
+          label={t("SupportMediaType")}
           name={"SupportMediaType"}
           type={"text"}
           value={config.SupportMediaType}
@@ -263,7 +263,7 @@ function App() {
         />
 
         <InputWithLabel
-          label={t("SupportedBookFileExtensions")}
+          label={t("SupportFileType")}
           name={"SupportFileType"}
           type={"text"}
           value={config.SupportFileType}
@@ -272,7 +272,7 @@ function App() {
         />
 
         <InputWithLabel
-          label={t("MinImageCountInBook")}
+          label={t("MinImageNum")}
           name={"MinImageNum"}
           type={"number"}
           value={config.MinImageNum}
@@ -290,9 +290,9 @@ function App() {
         />
 
         <BoolSwitch
-          name={"PrintAllIP"}
+          name={"PrintAllPossibleQRCode"}
           label={t("PrintAllPossibleQRCode")}
-          boolValue={config.PrintAllIP}
+          boolValue={config.PrintAllPossibleQRCode}
           setBoolValue={setBoolValue}
         ></BoolSwitch>
 
@@ -304,15 +304,15 @@ function App() {
         ></BoolSwitch>
 
         <BoolSwitch
-          name={"ClearDatabase"}
+          name={"ClearDatabaseWhenExit"}
           label={t("ClearDatabaseWhenExit")}
-          boolValue={config.ClearDatabase}
+          boolValue={config.ClearDatabaseWhenExit}
           setBoolValue={setBoolValue}
         ></BoolSwitch>
 
         <BoolSwitch
           name={"Debug"}
-          label={t("EnableDebugMode")}
+          label={t("Debug")}
           boolValue={config.Debug}
           setBoolValue={setBoolValue}
         ></BoolSwitch>
@@ -326,7 +326,7 @@ function App() {
 
         <InputWithLabel
           label={t("LogFilePath")}
-          name={"TimeoutLimitForScan"}
+          name={"LogFilePath"}
           type={"text"}
           value={config.LogFilePath}
           onChange={onChange}
@@ -353,7 +353,7 @@ function App() {
 
         <BoolSwitch
           name={"EnableFrpcServer"}
-          label={t("EnableFrpc")}
+          label={t("EnableFrpcServer")}
           boolValue={config.EnableFrpcServer}
           setBoolValue={setBoolValue}
         ></BoolSwitch>

@@ -18,12 +18,12 @@
   "EnableDatabase": "启用数据库",
   "ClearDatabaseWhenExit": "清除数据库书籍",
   "ExcludePath": "排除路径",
-  "SupportedImageFileExtensions": "支持的图片文件",
-  "SupportedBookFileExtensions": "支持的压缩包",
-  "MinImageCountInBook": "最小图片数",
+  "SupportMediaType": "支持的图片文件",
+  "SupportFileType": "支持的压缩包",
+  "MinImageNum": "最小图片数",
   "TimeoutLimitForScan": "扫描超时",
   "PrintAllPossibleQRCode": "更多二维码",
-  "EnableDebugMode": "开启Debug模式",
+  "Debug": "开启Debug模式",
   "LogToFile": "记录Log到本地",
   "LogFilePath": "Log保存位置",
   "LogFileName": "Log文件名",
@@ -125,5 +125,5 @@
   "filesize": "大小:{0}",
   "childbookhint": "文件夹内有{0}本书",
   "GenerateMetaData": "生成元数据",
-  "EnableFrpc": "EnableFrpc"
+  "EnableFrpcServer": "EnableFrpcServer"
 }

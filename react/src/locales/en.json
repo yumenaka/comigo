@@ -18,12 +18,12 @@
   "EnableDatabase": "Enable Database",
   "ClearDatabaseWhenExit": "Clear Database When Exit",
   "ExcludePath": "Exclude Path",
-  "SupportedImageFileExtensions": "Supported Image",
-  "SupportedBookFileExtensions": "Supported File",
-  "MinImageCountInBook": "Min Image Count In Book",
+  "SupportMediaType": "Supported Image",
+  "SupportFileType": "Supported File",
+  "MinImageNum": "Min Image Count In Book",
   "TimeoutLimitForScan": "Scan Timeout",
   "PrintAllPossibleQRCode": "More QRCode",
-  "EnableDebugMode": "Enable Debug Mode",
+  "Debug": "Enable Debug Mode",
   "LogToFile": "Log To File",
   "LogFilePath": "Log File Path",
   "LogFileName": "Log File Name",
@@ -125,5 +125,5 @@
   "filesize": "File size:{0}",
   "childbookhint": "{0}books in the folder",
   "GenerateMetaData": "GenerateMetaData",
-  "EnableFrpc": "EnableFrpc"
+  "EnableFrpcServer": "EnableFrpcServer"
 }
