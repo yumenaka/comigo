@@ -24,7 +24,7 @@ func init() {
 	cobra.MousetrapHelpText = ""       //屏蔽鼠标提示，支持拖拽、双击运行
 	cobra.MousetrapDisplayDuration = 5 //"这是命令行程序"的提醒表示时间
 	//jwt认证，tls证书
-	rootCmd.PersistentFlags().StringVarP(&common.Config.UserName, "username", "u", "", locale.GetString("USERNAME"))
+	rootCmd.PersistentFlags().StringVarP(&common.Config.Username, "username", "u", "", locale.GetString("USERNAME"))
 	rootCmd.PersistentFlags().StringVarP(&common.Config.Password, "password", "k", "", locale.GetString("PASSWORD"))
 	rootCmd.PersistentFlags().IntVarP(&common.Config.Timeout, "timeout", "t", 65535, locale.GetString("TIMEOUT"))
 	//TLS设定
@@ -54,7 +54,7 @@ func init() {
 	////服务器解析书籍元数据，如果生成blurhash，需要消耗大量资源
 	rootCmd.PersistentFlags().BoolVar(&common.Config.GenerateMetaData, "generate-metadata", false, locale.GetString("GENERATE_METADATA"))
 	//打印所有可用网卡ip
-	rootCmd.PersistentFlags().BoolVar(&common.Config.PrintAllIP, "print-all", false, locale.GetString("PRINT_ALL_IP"))
+	rootCmd.PersistentFlags().BoolVar(&common.Config.PrintAllPossibleQRCode, "print-all", false, locale.GetString("PRINT_ALL_IP"))
 	//至少有几张图片，才认定为漫画压缩包
 	rootCmd.PersistentFlags().IntVar(&common.Config.MinImageNum, "min-image-num", 1, locale.GetString("MIN_MEDIA_NUM"))
 	////webp相关 拆分成子命令？

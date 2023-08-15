@@ -10,39 +10,39 @@ import (
 
 // ServerSettings 服务器设置(config.toml)，配置文件放在被扫描的根目录中，或$HOME/config/comigo.可以用“comi --generate-config”生成本示例文件
 type ServerSettings struct {
-	Port                 int             `json:"Port" comment:"Comigo设置文件(config.toml)，放在执行目录中，或$HOME/.config/comigo/下。可用“comi --generate-config”生成本文件\n网页服务端口，此项配置不支持热重载"`
-	Host                 string          `json:"Host" comment:"自定义二维码显示的主机名"`
-	StoresPath           []string        `json:"StoresPath" comment:"设置默认扫描的书库文件夹"`
-	MaxScanDepth         int             `json:"MaxScanDepth" comment:"最大扫描深度"`
-	OpenBrowser          bool            `json:"OpenBrowser" comment:"是否同时打开浏览器，windows默认true，其他默认false"`
-	DisableLAN           bool            `json:"DisableLAN" comment:"只在本机localhost提供服务，不对外共享，此项配置不支持热重载"`
-	DefaultMode          string          `json:"DefaultMode" comment:"默认阅读模式，默认为空，可以设置为scroll或flip"`
-	UserName             string          `json:"UserName" comment:"访问限制：用户名。需要设置密码"`
-	Password             string          `json:"Password" comment:"访问限制：密码。需要设置用户名。"`
-	Timeout              int             `json:"Timeout" comment:"cookie过期时间。单位为分钟。默认180分钟"`
-	CertFile             string          `json:"CertFile" comment:"Https证书，同时设置KeyFile则启用HTTPS协议"`
-	KeyFile              string          `json:"KeyFile" comment:"Https证书，同时设置CertFile则启用HTTPS协议"`
-	EnableLocalCache     bool            `json:"EnableLocalCache" comment:"开启本地图片缓存，可以加快二次读取，但会占用硬盘空间"`
-	CachePath            string          `json:"CachePath" comment:"开启本地图片缓存位置，默认系统临时文件夹"`
-	ClearCacheExit       bool            `json:"ClearCacheExit" comment:"退出程序的时候，清理web图片缓存"`
-	EnableUpload         bool            `json:"EnableUpload" comment:"启用文件上传功能"`
-	UploadPath           string          `json:"UploadPath" comment:"上传文件的存储位置，默认在当前执行目录下创建 ComigoUpload 文件夹"`
-	EnableDatabase       bool            `json:"EnableDatabase" comment:"启用本地数据库，保存扫描到的书籍数据"`
-	ClearDatabase        bool            `json:"ClearDatabase" comment:"启用本地数据库时，扫描完成后，清除不存在的书籍"`
-	ExcludeFileOrFolders []string        `json:"ExcludeFileOrFolders" comment:"需要排除的文件或文件夹"`
-	SupportMediaType     []string        `json:"SupportMediaType" comment:"支持的图片文件后缀"`
-	SupportFileType      []string        `json:"SupportFileType" comment:"支持的书籍压缩包后缀"`
-	MinImageNum          int             `json:"MinImageNum" comment:"压缩包或文件夹内，至少有几张图片，才算作书籍"`
-	TimeoutLimitForScan  int             `json:"TimeoutLimitForScan" comment:"扫描文件时，超过几秒钟，就放弃扫描这个文件，避免卡在特殊文件上"`
-	PrintAllIP           bool            `json:"PrintAllIP" comment:"打印所有可能的阅读链接二维码"`
-	Debug                bool            `json:"Debug" comment:"开启Debug模式"`
-	LogToFile            bool            `json:"LogToFile" comment:"记录Log到本地文件"`
-	LogFilePath          string          `json:"LogFilePath" comment:"Log文件位置"`
-	LogFileName          string          `json:"LogFileName" comment:"Log文件名"`
-	ZipFileTextEncoding  string          `json:"ZipFileTextEncoding" comment:"非utf-8编码的ZIP文件，尝试用什么编码解析，默认GBK"`
-	EnableFrpcServer     bool            `json:"EnableFrpcServer" comment:"后台启动FrpClient"`
-	FrpConfig            FrpClientConfig `json:"FrpConfig" comment:"FrpClient设置"`
-	GenerateMetaData     bool            `json:"GenerateMetaData" toml:"GenerateMetaData" comment:"生成书籍元数据"`
+	Port                   int             `json:"Port" comment:"Comigo设置文件(config.toml)，放在执行目录中，或$HOME/.config/comigo/下。可用“comi --generate-config”生成本文件\n网页服务端口，此项配置不支持热重载"`
+	Host                   string          `json:"Host" comment:"自定义二维码显示的主机名"`
+	StoresPath             []string        `json:"StoresPath" comment:"设置默认扫描的书库文件夹"`
+	MaxScanDepth           int             `json:"MaxScanDepth" comment:"最大扫描深度"`
+	OpenBrowser            bool            `json:"OpenBrowser" comment:"是否同时打开浏览器，windows默认true，其他默认false"`
+	DisableLAN             bool            `json:"DisableLAN" comment:"只在本机localhost提供服务，不对外共享，此项配置不支持热重载"`
+	DefaultMode            string          `json:"DefaultMode" comment:"默认阅读模式，默认为空，可以设置为scroll或flip"`
+	Username               string          `json:"Username" comment:"访问限制：用户名。需要设置密码"`
+	Password               string          `json:"Password" comment:"访问限制：密码。需要设置用户名。"`
+	Timeout                int             `json:"Timeout" comment:"cookie过期时间。单位为分钟。默认180分钟"`
+	CertFile               string          `json:"CertFile" comment:"Https证书，同时设置KeyFile则启用HTTPS协议"`
+	KeyFile                string          `json:"KeyFile" comment:"Https证书，同时设置CertFile则启用HTTPS协议"`
+	EnableLocalCache       bool            `json:"EnableLocalCache" comment:"开启本地图片缓存，可以加快二次读取，但会占用硬盘空间"`
+	CachePath              string          `json:"CachePath" comment:"开启本地图片缓存位置，默认系统临时文件夹"`
+	ClearCacheExit         bool            `json:"ClearCacheExit" comment:"退出程序的时候，清理web图片缓存"`
+	EnableUpload           bool            `json:"EnableUpload" comment:"启用文件上传功能"`
+	UploadPath             string          `json:"UploadPath" comment:"上传文件的存储位置，默认在当前执行目录下创建 ComigoUpload 文件夹"`
+	EnableDatabase         bool            `json:"EnableDatabase" comment:"启用本地数据库，保存扫描到的书籍数据"`
+	ClearDatabaseWhenExit  bool            `json:"ClearDatabaseWhenExit" comment:"启用本地数据库时，扫描完成后，清除不存在的书籍"`
+	ExcludePath            []string        `json:"ExcludePath" comment:"需要排除的文件或文件夹"`
+	SupportMediaType       []string        `json:"SupportMediaType" comment:"支持的图片文件后缀"`
+	SupportFileType        []string        `json:"SupportFileType" comment:"支持的书籍压缩包后缀"`
+	MinImageNum            int             `json:"MinImageNum" comment:"压缩包或文件夹内，至少有几张图片，才算作书籍"`
+	TimeoutLimitForScan    int             `json:"TimeoutLimitForScan" comment:"扫描文件时，超过几秒钟，就放弃扫描这个文件，避免卡在特殊文件上"`
+	PrintAllPossibleQRCode bool            `json:"PrintAllPossibleQRCode" comment:"打印所有可能的阅读链接二维码"`
+	Debug                  bool            `json:"Debug" comment:"开启Debug模式"`
+	LogToFile              bool            `json:"LogToFile" comment:"记录Log到本地文件"`
+	LogFilePath            string          `json:"LogFilePath" comment:"Log文件位置"`
+	LogFileName            string          `json:"LogFileName" comment:"Log文件名"`
+	ZipFileTextEncoding    string          `json:"ZipFileTextEncoding" comment:"非utf-8编码的ZIP文件，尝试用什么编码解析，默认GBK"`
+	EnableFrpcServer       bool            `json:"EnableFrpcServer" comment:"后台启动FrpClient"`
+	FrpConfig              FrpClientConfig `json:"FrpConfig" comment:"FrpClient设置"`
+	GenerateMetaData       bool            `json:"GenerateMetaData" toml:"GenerateMetaData" comment:"生成书籍元数据"`
 	//EnableWebpServer     bool             `json:"enable_webp_server"`
 	//SketchCountSeconds   int              `json:"sketch_count_seconds"`
 	//WebpConfig           WebPServerConfig `json:"-"  comment:" WebPServer设置"`
@@ -96,7 +96,7 @@ func (config *ServerSettings) IsSupportArchiver(checkPath string) bool {
 
 // IsSkipDir  检查路径是否应该跳过（排除文件，文件夹列表）。
 func (config *ServerSettings) IsSkipDir(path string) bool {
-	for _, substr := range config.ExcludeFileOrFolders {
+	for _, substr := range config.ExcludePath {
 		if strings.HasSuffix(path, substr) {
 			return true
 		}

@@ -47,7 +47,7 @@ func SaveResultsToDatabase() error {
 	if Config.EnableDatabase {
 		AllBook := book.GetAllBookList()
 		//设置清理数据库的时候，是否清理没扫描到的书籍信息
-		if Config.ClearDatabase {
+		if Config.ClearDatabaseWhenExit {
 			for _, checkBook := range DatabaseBookList {
 				needClear := true //这条数据是否需要清理
 				for _, b := range AllBook {

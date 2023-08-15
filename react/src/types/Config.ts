@@ -8,7 +8,7 @@ interface Config {
   OpenBrowser: boolean;
   DisableLAN: boolean;
   DefaultMode: string;
-  UserName: string;
+  Username: string;
   Password: string;
   Timeout: number;
   CertFile: string;
@@ -19,13 +19,13 @@ interface Config {
   EnableUpload: boolean;
   UploadPath: string;
   EnableDatabase: boolean;
-  ClearDatabase: boolean;
-  ExcludeFileOrFolders: [];
+  ClearDatabaseWhenExit: boolean;
+  ExcludePath: [];
   SupportMediaType: [];
   SupportFileType: [];
   MinImageNum: number;
   TimeoutLimitForScan: number;
-  PrintAllIP: boolean;
+  PrintAllPossibleQRCode: boolean;
   Debug: boolean;
   LogToFile: boolean;
   LogFilePath: string;

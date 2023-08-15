@@ -89,7 +89,7 @@ func testDatabase() {
 	u, err := client.User.
 		Create().
 		SetAge(32).
-		SetUsername("test UserName" + randString).
+		SetUsername("test Username" + randString).
 		SetPassword("12345").
 		SetName("Test Admin" + randString).
 		Save(ctx)

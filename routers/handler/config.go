@@ -67,7 +67,7 @@ func GetTomlConfigHandler(c *gin.Context) {
 	common.Config.OpenBrowser = false
 	common.Config.EnableDatabase = true
 	tempConfig.StoresPath = []string{"C:\\test\\Comic", "D:\\some_path\\book", "/home/user/download"}
-	tempConfig.UserName = "admin"
+	tempConfig.Username = "admin"
 	tempConfig.Password = "admin"
 	bytes, err := toml.Marshal(tempConfig)
 	if err != nil {

@@ -15,7 +15,7 @@ func NewJwtMiddleware() (*jwt.GinJWTMiddleware, error) {
 	jwtMiddleware, err := jwt.New(&jwt.GinJWTMiddleware{
 		Realm:            "comigo server",                                         //标识
 		SigningAlgorithm: "HS256",                                                 //加密算法
-		Key:              []byte(common.Config.UserName + common.Config.Password), //JWT服务端密钥，需要确保别人不知道
+		Key:              []byte(common.Config.Username + common.Config.Password), //JWT服务端密钥，需要确保别人不知道
 		//time.Duration类型 不能直接和 int类型相乘，需要先将变量转换为time.Duration类型
 		Timeout:       time.Minute * time.Duration(common.Config.Timeout), //jwt过期时间
 		MaxRefresh:    time.Minute * time.Duration(common.Config.Timeout), //刷新时，最大能延长多少时间
@@ -75,12 +75,12 @@ func Authenticator(c *gin.Context) (interface{}, error) {
 	if err := c.ShouldBind(&user); err != nil {
 		return "", jwt.ErrMissingLoginValues
 	}
-	fmt.Printf("username is %s, password is %s,Config is %s@%s\",", user.Username, user.Password, common.Config.UserName, common.Config.Password)
-	if "" == common.Config.UserName || "" == common.Config.Password {
+	fmt.Printf("username is %s, password is %s,Config is %s@%s\",", user.Username, user.Password, common.Config.Username, common.Config.Password)
+	if "" == common.Config.Username || "" == common.Config.Password {
 		return user, nil
 	}
 	//登录验证函数,打印用户信息和错误信息
-	if user.Username == common.Config.UserName && user.Password == common.Config.Password {
+	if user.Username == common.Config.Username && user.Password == common.Config.Password {
 		return user, nil
 	}
 	//解决跨域问题

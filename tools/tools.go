@@ -364,7 +364,7 @@ func DetectUTF8(s string) (valid, require bool) {
 }
 
 // PrintAllReaderURL 打印阅读链接
-func PrintAllReaderURL(Port int, OpenBrowserFlag bool, EnableFrpcServer bool, PrintAllIP bool, ServerHost string, ServerAddr string, FrpRemotePort int, DisableLAN bool, enableTls bool, etcStr string) {
+func PrintAllReaderURL(Port int, OpenBrowserFlag bool, EnableFrpcServer bool, PrintAllPossibleQRCode bool, ServerHost string, ServerAddr string, FrpRemotePort int, DisableLAN bool, enableTls bool, etcStr string) {
 	protocol := "http://"
 	if enableTls {
 		protocol = "https://"
@@ -380,11 +380,11 @@ func PrintAllReaderURL(Port int, OpenBrowserFlag bool, EnableFrpcServer bool, Pr
 		}
 	}
 	if !DisableLAN {
-		printURLAndQRCode(Port, EnableFrpcServer, PrintAllIP, ServerHost, ServerAddr, FrpRemotePort, protocol, etcStr)
+		printURLAndQRCode(Port, EnableFrpcServer, PrintAllPossibleQRCode, ServerHost, ServerAddr, FrpRemotePort, protocol, etcStr)
 	}
 }
 
-func printURLAndQRCode(port int, EnableFrpcServer bool, PrintAllIP bool, ServerHost string, ServerAddr string, FrpRemotePort int, protocol string, etcStr string) {
+func printURLAndQRCode(port int, EnableFrpcServer bool, PrintAllPossibleQRCode bool, ServerHost string, ServerAddr string, FrpRemotePort int, protocol string, etcStr string) {
 	//启用Frp的时候
 	if EnableFrpcServer {
 		readURL := protocol + ServerAddr + ":" + strconv.Itoa(FrpRemotePort) + etcStr
@@ -398,7 +398,7 @@ func printURLAndQRCode(port int, EnableFrpcServer bool, PrintAllIP bool, ServerH
 		return
 	}
 	//打印所有可用网卡IP
-	if PrintAllIP {
+	if PrintAllPossibleQRCode {
 		IPList, err := GetIPList()
 		if err != nil {
 			fmt.Printf(locale.GetString("get_ip_error")+" %v", err)
