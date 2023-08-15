@@ -102,7 +102,7 @@
   "re_sort_book": "Resort Book",
   "no_book_found_hint": "No book found, try uploading a file?",
   "drop_to_upload": "Click or drag files to this area to upload",
-  "uploaded_folder_hint": "Files are uploaded by default to the ComigoUpload folder in the executive directory",
+  "uploaded_folder_hint": "Files are uploaded by default to the upload folder in the executive directory",
   "scanned_hint": "Scan a total of XX books, and watch it immediately?",
   "refresh_page": "Refresh page",
   "DownloadWindowsRegFile": "WindowsRegFileDownload",

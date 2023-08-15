@@ -26,7 +26,7 @@ type ServerSettings struct {
 	CachePath              string          `json:"CachePath" comment:"开启本地图片缓存位置，默认系统临时文件夹"`
 	ClearCacheExit         bool            `json:"ClearCacheExit" comment:"退出程序的时候，清理web图片缓存"`
 	EnableUpload           bool            `json:"EnableUpload" comment:"启用文件上传功能"`
-	UploadPath             string          `json:"UploadPath" comment:"上传文件的存储位置，默认在当前执行目录下创建 ComigoUpload 文件夹"`
+	UploadPath             string          `json:"UploadPath" comment:"上传文件存储位置，默认在当前执行目录下创建 upload 文件夹"`
 	EnableDatabase         bool            `json:"EnableDatabase" comment:"启用本地数据库，保存扫描到的书籍数据"`
 	ClearDatabaseWhenExit  bool            `json:"ClearDatabaseWhenExit" comment:"启用本地数据库时，扫描完成后，清除不存在的书籍"`
 	ExcludePath            []string        `json:"ExcludePath" comment:"需要排除的文件或文件夹"`
