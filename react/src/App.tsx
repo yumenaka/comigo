@@ -10,47 +10,30 @@ import Config from "./types/Config";
 import InputWithLabel from "./components/InputWithLabel";
 
 import BoolSwitch from "./components/BoolSwitch";
-
-
-type Action = { 
-  type: "downloadConfig"|"boolConfig" | "stringConfig" | "numberConfig"| "arrayConfig", 
-  name: string, 
-  value: boolean | string | number | string[] ,
-  config: Config
-};
+import { configReducer, defaultConfig } from "./reducers/configReducer";
 
 function App() {
   const baseURL = "/api";
   const { t } = useTranslation();
   // nullは型に含めず、useStateの初期値が決まらないという場合には、型アサーションで逃げる手もあります。 https://qiita.com/FumioNonaka/items/4361d1cdf34ffb5a5338
-  // ただし、型アサーションはTypeScriptに値({})の型を偽っているだけだ、ということにご注意ください。状態変数(Config)の値を正しく扱うことは、コードの書き手に委ねられるのです。
-  //誤ればランタイムエラーになってしまうかもしれません。
-  // const [config, setConfig] = useState<Config>({} as Config);
-
-  const [config, dispatch] = useReducer(configReducer,{} as Config);
+  const [config, dispatch] = useReducer(configReducer, defaultConfig);
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    //update_config or post_config ...
     axios.post("/api/post_config", config).then((response) => {
       console.log("Data sent successfully");
       //axios默认解析Json，所以 response.data 就是解析后的object
       console.info(response.data);
-      // 可以在此处进行其他操作，例如更新状态或显示成功消息等
     })
       .catch((error) => {
         console.error("Error sending data:", error);
-        // 可以在此处处理错误，例如显示错误消息等
       });
   };
   // useEffect 用于在函数组件中执行副作用操作，例如数据获取、订阅、手动修改DOM等。
-  // 通过传递第二个参数，你可以告诉 React 仅在某些值改变的时候才执行 effect。
-  // 传递空数组([])作为第二个参数，effect 内部的 props 和 state 就会一直持有其初始值。也就是只在渲染的时候执行一次。
   useEffect(() => {
     axios
       .get<Config>(`${baseURL}/config.json`)
       .then((response) => {
-        //setConfig(response.data);
         dispatch({
           type: 'downloadConfig',
           name: "",
@@ -61,32 +44,13 @@ function App() {
       .catch((error) => {
         console.error(error);
       });
+    // 通过传递第二个参数，你可以告诉 React 仅在某些值改变的时候才执行 effect。
+    // 传递空数组([])作为第二个参数，effect 内部的 props 和 state 就会一直持有其初始值。也就是只在渲染的时候执行一次。
   }, []);
 
-  function configReducer(c: Config, action: Action) {
-    switch (action.type) {
-      case "downloadConfig":
-        return { ...action.config };
-      case "boolConfig":
-        return { ...c, [action.name]: action.value };
-      case "stringConfig":
-        return { ...c, [action.name]: action.value };
-      case "numberConfig":
-        return { ...c, [action.name]: action.value };
-      case "arrayConfig":
-          return { ...c, [action.name]: action.value };
-      default:
-        console.log(action);
-        throw new Error();
-    }
-  }
 
 
-
-
-  //console.log(config);
   // React 通过  onChange 监听事件 实现数据的动态录入
-  // html的属性props的类型
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     console.log(typeof value);
@@ -100,7 +64,7 @@ function App() {
   };
 
   const setBoolValue = (value: boolean, valueName: string) => {
-    console.log("OnChange" + valueName, value);
+    console.log("setBoolValue" + valueName, value);
     dispatch({
       type: 'boolConfig',
       name: valueName,
@@ -109,12 +73,10 @@ function App() {
     });
   };
 
-
-  //React 使用 value 或者 defaultValue 在 input 框中呈现内容
+  
   return (
     <>
       <Title />
-
       <form
         onSubmit={onSubmit}
         className="card flex flex-col bg-slate-300 justify-center items-center"
@@ -125,7 +87,8 @@ function App() {
         >
           submit
         </button>
-
+        {/* React 使用 value 或者 defaultValue 在 input 框中呈现内容 */}
+        
         <InputWithLabel
           label={t("Port")}
           name={"Port"}
@@ -379,46 +342,3 @@ function App() {
 }
 
 export default App;
-
-
-  // // 使用react-hook-form的话，handleSubmit函数如下：
-  // const {
-  //   register,
-  //   handleSubmit,
-  //   formState: { errors },
-  // } = useForm({
-  //   defaultValues: {
-  //     Port: config.Port,
-  //     Host: config.Host,
-  //     StoresPath: config.StoresPath,
-  //     MaxScanDepth: config.MaxScanDepth,
-  //     OpenBrowser: config.OpenBrowser,
-  //     DisableLAN: config.DisableLAN,
-  //     Username: config.Username,
-  //     Password: config.Password,
-  //     Timeout: config.Timeout,
-  //     CertFile: config.CertFile,
-  //     KeyFile: config.KeyFile,
-  //     EnableLocalCache: config.EnableLocalCache,
-  //     CachePath: config.CachePath,
-  //     ClearCacheExit: config.ClearCacheExit,
-  //     EnableUpload: config.EnableUpload,
-  //     UploadPath: config.UploadPath,
-  //     EnableDatabase: config.EnableDatabase,
-  //     ClearDatabaseWhenExit: config.ClearDatabaseWhenExit,
-  //     ExcludePath: config.ExcludePath,
-  //     SupportMediaType: config.SupportMediaType,
-  //     SupportFileType: config.SupportFileType,
-  //     MinImageNum: config.MinImageNum,
-  //     TimeoutLimitForScan: config.TimeoutLimitForScan,
-  //     PrintAllPossibleQRCode: config.PrintAllPossibleQRCode,
-  //     Debug: config.Debug,
-  //     LogToFile: config.LogToFile,
-  //     LogFilePath: config.LogFilePath,
-  //     LogFileName: config.LogFileName,
-  //     ZipFileTextEncoding: config.ZipFileTextEncoding,
-  //     EnableFrpcServer: config.EnableFrpcServer,
-  //     FrpConfig: config.FrpConfig,
-  //     GenerateMetaData: config.GenerateMetaData,
-  //   },
-  // });
