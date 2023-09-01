@@ -1,7 +1,7 @@
 // import reactLogo from "./assets/react.svg";
 import "./App.css";
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useReducer } from "react";
 import { useTranslation } from "react-i18next";
 // TypeScript環境でReact Hook Formのフォーム作成の基礎を学ぶ  https://reffect.co.jp/react/react-hook-form-ts/
 // import { useForm } from "react-hook-form";
@@ -11,61 +11,31 @@ import InputWithLabel from "./components/InputWithLabel";
 
 import BoolSwitch from "./components/BoolSwitch";
 
+
+type Action = { 
+  type: "downloadConfig"|"boolConfig" | "stringConfig" | "numberConfig"| "arrayConfig", 
+  name: string, 
+  value: boolean | string | number | string[] ,
+  config: Config
+};
+
 function App() {
   const baseURL = "/api";
   const { t } = useTranslation();
   // nullは型に含めず、useStateの初期値が決まらないという場合には、型アサーションで逃げる手もあります。 https://qiita.com/FumioNonaka/items/4361d1cdf34ffb5a5338
   // ただし、型アサーションはTypeScriptに値({})の型を偽っているだけだ、ということにご注意ください。状態変数(Config)の値を正しく扱うことは、コードの書き手に委ねられるのです。
   //誤ればランタイムエラーになってしまうかもしれません。
-  const [config, setConfig] = useState<Config>({} as Config);
+  // const [config, setConfig] = useState<Config>({} as Config);
 
-  // // 使用react-hook-form的话，handleSubmit函数如下：
-  // const {
-  //   register,
-  //   handleSubmit,
-  //   formState: { errors },
-  // } = useForm({
-  //   defaultValues: {
-  //     Port: config.Port,
-  //     Host: config.Host,
-  //     StoresPath: config.StoresPath,
-  //     MaxScanDepth: config.MaxScanDepth,
-  //     OpenBrowser: config.OpenBrowser,
-  //     DisableLAN: config.DisableLAN,
-  //     Username: config.Username,
-  //     Password: config.Password,
-  //     Timeout: config.Timeout,
-  //     CertFile: config.CertFile,
-  //     KeyFile: config.KeyFile,
-  //     EnableLocalCache: config.EnableLocalCache,
-  //     CachePath: config.CachePath,
-  //     ClearCacheExit: config.ClearCacheExit,
-  //     EnableUpload: config.EnableUpload,
-  //     UploadPath: config.UploadPath,
-  //     EnableDatabase: config.EnableDatabase,
-  //     ClearDatabaseWhenExit: config.ClearDatabaseWhenExit,
-  //     ExcludePath: config.ExcludePath,
-  //     SupportMediaType: config.SupportMediaType,
-  //     SupportFileType: config.SupportFileType,
-  //     MinImageNum: config.MinImageNum,
-  //     TimeoutLimitForScan: config.TimeoutLimitForScan,
-  //     PrintAllPossibleQRCode: config.PrintAllPossibleQRCode,
-  //     Debug: config.Debug,
-  //     LogToFile: config.LogToFile,
-  //     LogFilePath: config.LogFilePath,
-  //     LogFileName: config.LogFileName,
-  //     ZipFileTextEncoding: config.ZipFileTextEncoding,
-  //     EnableFrpcServer: config.EnableFrpcServer,
-  //     FrpConfig: config.FrpConfig,
-  //     GenerateMetaData: config.GenerateMetaData,
-  //   },
-  // });
+  const [config, dispatch] = useReducer(configReducer,{} as Config);
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(e);
-    axios.post("/api/update_config", config).then(() => {
+    //update_config or post_config ...
+    axios.post("/api/post_config", config).then((response) => {
       console.log("Data sent successfully");
+      //axios默认解析Json，所以 response.data 就是解析后的object
+      console.info(response.data);
       // 可以在此处进行其他操作，例如更新状态或显示成功消息等
     })
       .catch((error) => {
@@ -80,12 +50,39 @@ function App() {
     axios
       .get<Config>(`${baseURL}/config.json`)
       .then((response) => {
-        setConfig(response.data);
+        //setConfig(response.data);
+        dispatch({
+          type: 'downloadConfig',
+          name: "",
+          value: "",
+          config: response.data
+        });
       })
       .catch((error) => {
         console.error(error);
       });
   }, []);
+
+  function configReducer(c: Config, action: Action) {
+    switch (action.type) {
+      case "downloadConfig":
+        return { ...action.config };
+      case "boolConfig":
+        return { ...c, [action.name]: action.value };
+      case "stringConfig":
+        return { ...c, [action.name]: action.value };
+      case "numberConfig":
+        return { ...c, [action.name]: action.value };
+      case "arrayConfig":
+          return { ...c, [action.name]: action.value };
+      default:
+        console.log(action);
+        throw new Error();
+    }
+  }
+
+
+
 
   //console.log(config);
   // React 通过  onChange 监听事件 实现数据的动态录入
@@ -93,13 +90,25 @@ function App() {
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     console.log(typeof value);
-    setConfig({ ...config, [name]: value });
+    //setConfig({ ...config, [name]: value });
+    dispatch({
+      type: 'boolConfig',
+      name: name,
+      value: value,
+      config: config
+    });
   };
 
   const setBoolValue = (value: boolean, valueName: string) => {
     console.log("OnChange" + valueName, value);
-    setConfig({ ...config, [valueName]: value });
+    dispatch({
+      type: 'boolConfig',
+      name: valueName,
+      value: value,
+      config: config
+    });
   };
+
 
   //React 使用 value 或者 defaultValue 在 input 框中呈现内容
   return (
@@ -370,3 +379,46 @@ function App() {
 }
 
 export default App;
+
+
+  // // 使用react-hook-form的话，handleSubmit函数如下：
+  // const {
+  //   register,
+  //   handleSubmit,
+  //   formState: { errors },
+  // } = useForm({
+  //   defaultValues: {
+  //     Port: config.Port,
+  //     Host: config.Host,
+  //     StoresPath: config.StoresPath,
+  //     MaxScanDepth: config.MaxScanDepth,
+  //     OpenBrowser: config.OpenBrowser,
+  //     DisableLAN: config.DisableLAN,
+  //     Username: config.Username,
+  //     Password: config.Password,
+  //     Timeout: config.Timeout,
+  //     CertFile: config.CertFile,
+  //     KeyFile: config.KeyFile,
+  //     EnableLocalCache: config.EnableLocalCache,
+  //     CachePath: config.CachePath,
+  //     ClearCacheExit: config.ClearCacheExit,
+  //     EnableUpload: config.EnableUpload,
+  //     UploadPath: config.UploadPath,
+  //     EnableDatabase: config.EnableDatabase,
+  //     ClearDatabaseWhenExit: config.ClearDatabaseWhenExit,
+  //     ExcludePath: config.ExcludePath,
+  //     SupportMediaType: config.SupportMediaType,
+  //     SupportFileType: config.SupportFileType,
+  //     MinImageNum: config.MinImageNum,
+  //     TimeoutLimitForScan: config.TimeoutLimitForScan,
+  //     PrintAllPossibleQRCode: config.PrintAllPossibleQRCode,
+  //     Debug: config.Debug,
+  //     LogToFile: config.LogToFile,
+  //     LogFilePath: config.LogFilePath,
+  //     LogFileName: config.LogFileName,
+  //     ZipFileTextEncoding: config.ZipFileTextEncoding,
+  //     EnableFrpcServer: config.EnableFrpcServer,
+  //     FrpConfig: config.FrpConfig,
+  //     GenerateMetaData: config.GenerateMetaData,
+  //   },
+  // });
