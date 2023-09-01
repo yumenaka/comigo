@@ -28,6 +28,8 @@ func StartWebServer() {
 	setStaticFiles(engine)
 	//2、setWebAPI
 	setWebAPI(engine)
+	//TODO：Go中调用外部命令的几种姿势 https://darjun.github.io/2022/11/01/godailylib/osexec/
+	//优化的时候可以参考
 	//3、setWebpServer
 	//setWebpServer(engine)
 	//4、setFrpClient
