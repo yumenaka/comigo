@@ -18,7 +18,7 @@ function App() {
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    axios.post("/api/post_config", config).then((response) => {
+    axios.post("/api/update_config", config).then((response) => {
       console.log("Data sent successfully");
       //axios默认解析Json，所以 response.data 就是解析后的object
       console.info(response.data);

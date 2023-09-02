@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/yumenaka/comi/storage"
 	"io/fs"
-	"io/ioutil"
 	"net/url"
 	"os"
 	"path"
@@ -164,12 +163,20 @@ func scanDirGetBook(dirPath string, storePath string, depth int) (*book.Book, er
 	if err != nil {
 		return nil, err
 	}
-	// 目录中的文件和子目录
-	files, err := ioutil.ReadDir(dirPath)
+	//// 获取目录中的文件和子目录的详细信息
+	entries, err := os.ReadDir(dirPath)
 	if err != nil {
 		return nil, err
 	}
-	for _, file := range files {
+	infos := make([]fs.FileInfo, 0, len(entries))
+	for _, entry := range entries {
+		info, err := entry.Info()
+		if err != nil {
+			return nil, err
+		}
+		infos = append(infos, info)
+	}
+	for _, file := range infos {
 		// 跳过子目录, 只搜寻目录中的文件
 		if file.IsDir() {
 			continue
@@ -179,14 +186,13 @@ func scanDirGetBook(dirPath string, storePath string, depth int) (*book.Book, er
 		if errPath != nil {
 			fmt.Println(errPath)
 		}
-		// fmt.Println(strAbsPath)
 		if Config.IsSupportMedia(file.Name()) {
 			TempURL := "api/getfile?id=" + newBook.BookID + "&filename=" + url.QueryEscape(file.Name())
 			newBook.Pages.Images = append(newBook.Pages.Images, book.ImageInfo{RealImageFilePATH: strAbsPath, FileSize: file.Size(), ModeTime: file.ModTime(), NameInArchive: file.Name(), Url: TempURL})
 		}
 	}
 	newBook.SortPages("default")
-	// 不管页数，直接返回：在添加到书库时判断页数
+	// 在添加到书库时判断页数
 	return newBook, err
 }
 

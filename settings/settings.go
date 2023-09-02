@@ -2,14 +2,15 @@ package settings
 
 import (
 	"fmt"
+	"github.com/tidwall/gjson"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
 )
 
-// ServerSettings 服务器设置(config.toml)，配置文件放在被扫描的根目录中，或$HOME/config/comigo.可以用“comi --generate-config”生成本示例文件
-type ServerSettings struct {
+// ServerConfig 服务器设置(config.toml)，配置文件放在被扫描的根目录中，或$HOME/config/comigo.可以用“comi --generate-config”生成本示例文件
+type ServerConfig struct {
 	Port                   int             `json:"Port" comment:"Comigo设置文件(config.toml)，放在执行目录中，或$HOME/.config/comigo/下。可用“comi --generate-config”生成本文件\n网页服务端口，此项配置不支持热重载"`
 	Host                   string          `json:"Host" comment:"自定义二维码显示的主机名"`
 	StoresPath             []string        `json:"StoresPath" comment:"设置默认扫描的书库文件夹"`
@@ -45,7 +46,128 @@ type ServerSettings struct {
 	GenerateMetaData       bool            `json:"GenerateMetaData" toml:"GenerateMetaData" comment:"生成书籍元数据"`
 	//EnableWebpServer     bool             `json:"enable_webp_server"`
 	//WebpConfig           WebPServerConfig `json:"-"  comment:" WebPServer设置"`
-	//DatabaseFilePath     string           `json:"-" comment:"数据库文件存储位置，默认当前目录"`
+	//DatabaseFilePath     string           `json:"-" comment:"数据库文件存储位置，默认config目录"`
+}
+
+func UpdateConfig(oldConfig ServerConfig, jsonString string) (newConfig ServerConfig, err error) {
+	newConfig = oldConfig
+	Port := gjson.Get(jsonString, "Port")
+	if Port.Exists() {
+		newConfig.Port = int(Port.Int())
+	}
+	Host := gjson.Get(jsonString, "Host")
+	if Host.Exists() {
+		newConfig.Host = Host.String()
+	}
+	StoresPath := gjson.Get(jsonString, "StoresPath")
+	if StoresPath.Exists() {
+		newConfig.StoresPath = strings.Split(StoresPath.String(), ",")
+	}
+	EnableLocalCache := gjson.Get(jsonString, "EnableLocalCache")
+	if EnableLocalCache.Exists() {
+		newConfig.EnableLocalCache = EnableLocalCache.Bool()
+	}
+	CachePath := gjson.Get(jsonString, "CachePath")
+	if CachePath.Exists() {
+		newConfig.CachePath = CachePath.String()
+	}
+	ClearCacheExit := gjson.Get(jsonString, "ClearCacheExit")
+	if ClearCacheExit.Exists() {
+		newConfig.ClearCacheExit = ClearCacheExit.Bool()
+	}
+	UploadPath := gjson.Get(jsonString, "UploadPath")
+	if UploadPath.Exists() {
+		newConfig.UploadPath = UploadPath.String()
+	}
+	EnableUpload := gjson.Get(jsonString, "EnableUpload")
+	if EnableUpload.Exists() {
+		newConfig.EnableUpload = EnableUpload.Bool()
+	}
+	EnableDatabase := gjson.Get(jsonString, "EnableDatabase")
+	if EnableDatabase.Exists() {
+		newConfig.EnableDatabase = EnableDatabase.Bool()
+	}
+	ClearDatabaseWhenExit := gjson.Get(jsonString, "ClearDatabaseWhenExit")
+	if ClearDatabaseWhenExit.Exists() {
+		newConfig.ClearDatabaseWhenExit = ClearDatabaseWhenExit.Bool()
+	}
+	OpenBrowser := gjson.Get(jsonString, "OpenBrowser")
+	if OpenBrowser.Exists() {
+		newConfig.OpenBrowser = OpenBrowser.Bool()
+	}
+	DisableLAN := gjson.Get(jsonString, "DisableLAN")
+	if DisableLAN.Exists() {
+		newConfig.DisableLAN = DisableLAN.Bool()
+	}
+	DefaultMode := gjson.Get(jsonString, "DefaultMode")
+	if DefaultMode.Exists() {
+		newConfig.DefaultMode = DefaultMode.String()
+	}
+	LogToFile := gjson.Get(jsonString, "LogToFile")
+	if LogToFile.Exists() {
+		newConfig.LogToFile = LogToFile.Bool()
+	}
+	MaxScanDepth := gjson.Get(jsonString, "MaxScanDepth")
+	if MaxScanDepth.Exists() {
+		newConfig.MaxScanDepth = int(MaxScanDepth.Int())
+	}
+	MinImageNum := gjson.Get(jsonString, "MinImageNum")
+	if MinImageNum.Exists() {
+		newConfig.MinImageNum = int(MinImageNum.Int())
+	}
+	ZipFileTextEncoding := gjson.Get(jsonString, "ZipFileTextEncoding")
+	if ZipFileTextEncoding.Exists() {
+		newConfig.ZipFileTextEncoding = ZipFileTextEncoding.String()
+	}
+	ExcludePath := gjson.Get(jsonString, "ExcludePath")
+	if ExcludePath.Exists() {
+		newConfig.ExcludePath = strings.Split(ExcludePath.String(), ",")
+	}
+	SupportMediaType := gjson.Get(jsonString, "SupportMediaType")
+	if SupportMediaType.Exists() {
+		newConfig.SupportMediaType = strings.Split(SupportMediaType.String(), ",")
+	}
+	SupportFileType := gjson.Get(jsonString, "SupportFileType")
+	if SupportFileType.Exists() {
+		newConfig.SupportFileType = strings.Split(SupportFileType.String(), ",")
+	}
+	TimeoutLimitForScan := gjson.Get(jsonString, "TimeoutLimitForScan")
+	if TimeoutLimitForScan.Exists() {
+		newConfig.TimeoutLimitForScan = int(TimeoutLimitForScan.Int())
+	}
+	PrintAllPossibleQRCode := gjson.Get(jsonString, "PrintAllPossibleQRCode")
+	if PrintAllPossibleQRCode.Exists() {
+		newConfig.PrintAllPossibleQRCode = PrintAllPossibleQRCode.Bool()
+	}
+	Debug := gjson.Get(jsonString, "Debug")
+	if Debug.Exists() {
+		newConfig.Debug = Debug.Bool()
+	}
+	Username := gjson.Get(jsonString, "Username")
+	if Username.Exists() {
+		newConfig.Username = Username.String()
+	}
+	Password := gjson.Get(jsonString, "Password")
+	if Password.Exists() {
+		newConfig.Password = Password.String()
+	}
+	Timeout := gjson.Get(jsonString, "Timeout")
+	if Timeout.Exists() {
+		newConfig.Timeout = int(Timeout.Int())
+	}
+	EnableFrpcServer := gjson.Get(jsonString, "EnableFrpcServer")
+	if EnableFrpcServer.Exists() {
+		newConfig.EnableFrpcServer = EnableFrpcServer.Bool()
+	}
+	FrpConfig := gjson.Get(jsonString, "FrpConfig")
+	if FrpConfig.Exists() {
+		//newConfig.FrpConfig = strings.Split(FrpConfig.String(), ",")
+	}
+	GenerateMetaData := gjson.Get(jsonString, "GenerateMetaData")
+	if GenerateMetaData.Exists() {
+		newConfig.GenerateMetaData = GenerateMetaData.Bool()
+	}
+	return newConfig, nil
 }
 
 // FrpClientConfig frp客户端配置
@@ -71,7 +193,7 @@ type WebPServerConfig struct {
 }
 
 // IsSupportMedia 判断压缩包内的文件是否需要展示（包括图片、音频、视频、PDF在内的媒体文件）
-func (config *ServerSettings) IsSupportMedia(checkPath string) bool {
+func (config *ServerConfig) IsSupportMedia(checkPath string) bool {
 	for _, ex := range config.SupportMediaType {
 		suffix := strings.ToLower(path.Ext(checkPath)) //strings.ToLower():某些文件会用大写文件名
 		if ex == suffix {
@@ -82,7 +204,7 @@ func (config *ServerSettings) IsSupportMedia(checkPath string) bool {
 }
 
 // IsSupportArchiver 是否是支持的压缩文件
-func (config *ServerSettings) IsSupportArchiver(checkPath string) bool {
+func (config *ServerConfig) IsSupportArchiver(checkPath string) bool {
 	for _, ex := range config.SupportFileType {
 		suffix := path.Ext(checkPath)
 		if ex == suffix {
@@ -93,7 +215,7 @@ func (config *ServerSettings) IsSupportArchiver(checkPath string) bool {
 }
 
 // IsSkipDir  检查路径是否应该跳过（排除文件，文件夹列表）。
-func (config *ServerSettings) IsSkipDir(path string) bool {
+func (config *ServerConfig) IsSkipDir(path string) bool {
 	for _, substr := range config.ExcludePath {
 		if strings.HasSuffix(path, substr) {
 			return true
@@ -103,7 +225,7 @@ func (config *ServerSettings) IsSkipDir(path string) bool {
 }
 
 // SetByExecutableFilename 通过执行文件名设置默认网页模板参数
-func (config *ServerSettings) SetByExecutableFilename() {
+func (config *ServerConfig) SetByExecutableFilename() {
 	// 当前执行目录
 	//targetPath, _ := os.Getwd()
 	//fmt.Println(locale.GetString("target_path"), targetPath)

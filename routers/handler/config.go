@@ -2,16 +2,14 @@ package handler
 
 import (
 	"fmt"
-	"github.com/tidwall/gjson"
+	"github.com/gin-gonic/gin"
+	"github.com/pelletier/go-toml/v2"
+	"github.com/yumenaka/comi/common"
 	"github.com/yumenaka/comi/settings"
 	"io"
 	"log"
 	"net/http"
-
-	"github.com/gin-gonic/gin"
-	"github.com/pelletier/go-toml/v2"
-
-	"github.com/yumenaka/comi/common"
+	"reflect"
 )
 
 // GetJsonConfigHandler 获取json格式的当前配置
@@ -22,54 +20,8 @@ func GetJsonConfigHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, tempConfig)
 }
 
-// PostConfigHandler 修改服务器配置(post json)
-func PostConfigHandler(c *gin.Context) {
-	var newSettings settings.ServerSettings
-	// 读取请求体中的JSON数据
-	body, err := io.ReadAll(c.Request.Body)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to read request body"})
-		return
-	}
-	// 将JSON数据转换为字符串并打印
-	jsonString := string(body)
-	fmt.Printf("Received JSON data: %s", jsonString)
-
-	//Port := gjson.Get(jsonString, "Port")
-	//fmt.Printf(Port.String())
-	//c.JSON(http.StatusOK, gin.H{"message": Port.String()})
-	//return
-
-	// 解析JSON数据并更新服务器配置
-	if err := c.ShouldBindJSON(&newSettings); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse JSON data"})
-		return
-	}
-	common.Config = newSettings
-	c.JSON(http.StatusOK, gin.H{"message": "Settings updated successfully", "currentSettings": common.Config})
-
-	// 扫描配置文件指定的书籍库
-	if err := common.ScanStorePath(); err != nil {
-		log.Printf("Failed to scan store path: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan store path"})
-		return
-	}
-
-	if common.Config.EnableDatabase {
-		// 保存扫描结果到数据库
-		if err := common.SaveResultsToDatabase(); err != nil {
-			log.Printf("Failed to save results to database: %v", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save results to database"})
-			return
-		}
-	}
-	// 返回成功消息
-	c.JSON(http.StatusOK, gin.H{"message": "Server settings updated successfully"})
-}
-
 // UpdateConfigHandler 修改服务器配置(post json)
 func UpdateConfigHandler(c *gin.Context) {
-	var newSettings settings.ServerSettings
 	// 读取请求体中的JSON数据
 	body, err := io.ReadAll(c.Request.Body)
 	if err != nil {
@@ -78,34 +30,28 @@ func UpdateConfigHandler(c *gin.Context) {
 	}
 	// 将JSON数据转换为字符串并打印
 	jsonString := string(body)
-	fmt.Printf("Received JSON data: %s", jsonString)
-
-	Port := gjson.Get(jsonString, "Port")
-	println(Port.String())
+	//fmt.Printf("Received JSON data: %s", jsonString)
 
 	// 解析JSON数据并更新服务器配置
-	if err := c.BindJSON(&newSettings); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse JSON data"})
+	newConfig, err := settings.UpdateConfig(common.Config, jsonString)
+	if err != nil {
+		fmt.Println(err.Error())
+		c.JSON(http.StatusMethodNotAllowed, gin.H{"error": "Failed to parse JSON data"})
 		return
 	}
-	common.Config = newSettings
-
-	// 扫描配置文件指定的书籍库
-	if err := common.ScanStorePath(); err != nil {
-		log.Printf("Failed to scan store path: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan store path"})
-		return
-	}
-
-	if common.Config.EnableDatabase {
-		// 保存扫描结果到数据库
-		if err := common.SaveResultsToDatabase(); err != nil {
-			log.Printf("Failed to save results to database: %v", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save results to database"})
-			return
+	if !reflect.DeepEqual(common.Config.StoresPath, newConfig.StoresPath) {
+		if err := common.ScanStorePath(); err != nil {
+			log.Printf("Failed to scan store path: %v", err)
+		}
+		// 扫描配置文件指定的书籍库
+		if common.Config.EnableDatabase {
+			// 保存扫描结果到数据库
+			if err := common.SaveResultsToDatabase(); err != nil {
+				log.Printf("Failed to save results to database: %v", err)
+			}
 		}
 	}
-
+	common.Config = newConfig
 	// 返回成功消息
 	c.JSON(http.StatusOK, gin.H{"message": "Server settings updated successfully"})
 }
