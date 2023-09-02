@@ -24,8 +24,9 @@ func initBookStores(args []string) {
 	}
 	//2、添加CMD路径，默认上传文件夹到书库
 	AddPathToStore(args)
+
 	//3、扫描书库
-	err := common.ScanStorePathInConfig()
+	err := common.ScanStorePath()
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -38,6 +39,7 @@ func initBookStores(args []string) {
 			return
 		}
 	}
+
 	//5、通过“可执行文件名”设置部分默认参数,目前不生效
 	common.Config.SetByExecutableFilename()
 }

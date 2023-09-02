@@ -28,7 +28,12 @@ func waitRescanMessages() {
 			fmt.Println("扫描上传文件夹：", msg)
 			ReScanUploadPath()
 			//保存扫描结果到数据库
-			common.SaveResultsToDatabase()
+			if common.Config.EnableDatabase {
+				err := common.SaveResultsToDatabase()
+				if err != nil {
+					return
+				}
+			}
 			//重新设置文件下载链接
 			routers.SetDownloadLink()
 		case "SomePath":

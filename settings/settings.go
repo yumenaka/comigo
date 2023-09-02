@@ -44,9 +44,7 @@ type ServerSettings struct {
 	FrpConfig              FrpClientConfig `json:"FrpConfig" comment:"FrpClient设置"`
 	GenerateMetaData       bool            `json:"GenerateMetaData" toml:"GenerateMetaData" comment:"生成书籍元数据"`
 	//EnableWebpServer     bool             `json:"enable_webp_server"`
-	//SketchCountSeconds   int              `json:"sketch_count_seconds"`
 	//WebpConfig           WebPServerConfig `json:"-"  comment:" WebPServer设置"`
-	//Template             string           `json:"-"`
 	//DatabaseFilePath     string           `json:"-" comment:"数据库文件存储位置，默认当前目录"`
 }
 

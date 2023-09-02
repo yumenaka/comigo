@@ -28,7 +28,21 @@ func printQRCodeInCMD() {
 		}
 	}
 	enableTls := common.Config.CertFile != "" && common.Config.KeyFile != ""
-	tools.PrintAllReaderURL(common.Config.Port, common.Config.OpenBrowser, common.Config.EnableFrpcServer, common.Config.PrintAllPossibleQRCode, common.Config.Host, common.Config.FrpConfig.ServerAddr, common.Config.FrpConfig.RemotePort, common.Config.DisableLAN, enableTls, etcStr)
+	OutIP := common.Config.Host
+	if common.Config.Host == "OutboundIP" {
+		OutIP = tools.GetOutboundIP().String()
+	}
+	tools.PrintAllReaderURL(
+		common.Config.Port,
+		common.Config.OpenBrowser,
+		common.Config.EnableFrpcServer,
+		common.Config.PrintAllPossibleQRCode,
+		OutIP,
+		common.Config.FrpConfig.ServerAddr,
+		common.Config.FrpConfig.RemotePort,
+		common.Config.DisableLAN,
+		enableTls,
+		etcStr)
 	//打印配置，调试用
 	if common.Config.Debug {
 		litter.Dump(common.Config)

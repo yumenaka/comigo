@@ -33,9 +33,15 @@ func configReloadHandler(e fsnotify.Event) {
 		os.Exit(1)
 	}
 	//3、扫描配置文件指定的书籍库
-	common.ScanStorePathInConfig()
+	common.ScanStorePath()
 	//4，保存扫描结果到数据库
-	common.SaveResultsToDatabase()
+	if common.Config.EnableDatabase {
+		err := common.SaveResultsToDatabase()
+		if err != nil {
+			return
+		}
+	}
+
 	//5、通过“可执行文件名”设置部分默认参数,目前不生效
 	common.Config.SetByExecutableFilename()
 	//重新设置文件下载链接
