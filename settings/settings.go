@@ -61,7 +61,13 @@ func UpdateConfig(oldConfig ServerConfig, jsonString string) (newConfig ServerCo
 	}
 	StoresPath := gjson.Get(jsonString, "StoresPath")
 	if StoresPath.Exists() {
-		newConfig.StoresPath = strings.Split(StoresPath.String(), ",")
+		// 将字符串解析为字符串切片
+		arr, err := parseString(StoresPath.String())
+		if err != nil {
+			fmt.Println("Failed to parse string:", err)
+			return newConfig, err
+		}
+		newConfig.StoresPath = arr
 	}
 	EnableLocalCache := gjson.Get(jsonString, "EnableLocalCache")
 	if EnableLocalCache.Exists() {
@@ -121,15 +127,33 @@ func UpdateConfig(oldConfig ServerConfig, jsonString string) (newConfig ServerCo
 	}
 	ExcludePath := gjson.Get(jsonString, "ExcludePath")
 	if ExcludePath.Exists() {
-		newConfig.ExcludePath = strings.Split(ExcludePath.String(), ",")
+		// 将字符串解析为字符串切片
+		arr, err := parseString(ExcludePath.String())
+		if err != nil {
+			fmt.Println("Failed to parse string:", err)
+			return newConfig, err
+		}
+		newConfig.ExcludePath = arr
 	}
 	SupportMediaType := gjson.Get(jsonString, "SupportMediaType")
 	if SupportMediaType.Exists() {
-		newConfig.SupportMediaType = strings.Split(SupportMediaType.String(), ",")
+		// 将字符串解析为字符串切片
+		arr, err := parseString(SupportMediaType.String())
+		if err != nil {
+			fmt.Println("Failed to parse string:", err)
+			return newConfig, err
+		}
+		newConfig.SupportMediaType = arr
 	}
 	SupportFileType := gjson.Get(jsonString, "SupportFileType")
 	if SupportFileType.Exists() {
-		newConfig.SupportFileType = strings.Split(SupportFileType.String(), ",")
+		// 将字符串解析为字符串切片
+		arr, err := parseString(SupportFileType.String())
+		if err != nil {
+			fmt.Println("Failed to parse string:", err)
+			return newConfig, err
+		}
+		newConfig.SupportFileType = arr
 	}
 	TimeoutLimitForScan := gjson.Get(jsonString, "TimeoutLimitForScan")
 	if TimeoutLimitForScan.Exists() {
@@ -168,6 +192,19 @@ func UpdateConfig(oldConfig ServerConfig, jsonString string) (newConfig ServerCo
 		newConfig.GenerateMetaData = GenerateMetaData.Bool()
 	}
 	return newConfig, nil
+}
+
+// 将字符串解析为字符串切片
+func parseString(str string) ([]string, error) {
+	//var arr []string
+	//fmt.Println("str =", str)
+	//err := json.Unmarshal([]byte(str), &arr)
+	//if err != nil {
+	//	return nil, err
+	//}
+
+	arr := strings.Split(str, ",")
+	return arr, nil
 }
 
 // FrpClientConfig frp客户端配置
