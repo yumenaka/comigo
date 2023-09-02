@@ -32,7 +32,6 @@ func ScanStorePath() error {
 			addList, err := ScanAndGetBookList(p, DatabaseBookList)
 			if err != nil {
 				fmt.Println(locale.GetString("scan_error"), p, err)
-				return err
 			} else {
 				AddBooksToStore(addList, p)
 			}

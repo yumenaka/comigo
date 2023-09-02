@@ -39,13 +39,16 @@ func UpdateConfigHandler(c *gin.Context) {
 		c.JSON(http.StatusMethodNotAllowed, gin.H{"error": "Failed to parse JSON data"})
 		return
 	}
+
 	if !reflect.DeepEqual(common.Config.StoresPath, newConfig.StoresPath) {
+		common.Config.StoresPath = newConfig.StoresPath
+		// 扫描配置文件指定的书籍库
 		if err := common.ScanStorePath(); err != nil {
 			log.Printf("Failed to scan store path: %v", err)
 		}
-		// 扫描配置文件指定的书籍库
+
+		// 保存扫描结果到数据库
 		if common.Config.EnableDatabase {
-			// 保存扫描结果到数据库
 			if err := common.SaveResultsToDatabase(); err != nil {
 				log.Printf("Failed to save results to database: %v", err)
 			}
