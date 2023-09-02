@@ -12,7 +12,7 @@ var (
 	GenerateConfig = false
 	ReadingBook    *book.Book
 	Srv            *http.Server
-	Config         = settings.ServerSettings{
+	Config         = settings.ServerConfig{
 		Port:                  1234,
 		Host:                  "",
 		StoresPath:            []string{},

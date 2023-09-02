@@ -33,8 +33,6 @@ func setWebAPI(engine *gin.Engine) {
 		//获取json格式的当前配置
 		api.GET("/config.json", handler.GetJsonConfigHandler)
 		//修改服务器配置(post json)
-		api.POST("/post_config", handler.PostConfigHandler)
-		//修改服务器配置(post json)
 		api.POST("/update_config", handler.UpdateConfigHandler)
 	} else {
 		// 创建 jwt 中间件
@@ -68,8 +66,6 @@ func setWebAPI(engine *gin.Engine) {
 		//获取json格式的当前配置
 		api.GET("/config.json", jwtMiddleware.MiddlewareFunc(), handler.GetJsonConfigHandler)
 
-		//修改服务器配置(post json)
-		api.POST("/post_config", jwtMiddleware.MiddlewareFunc(), handler.PostConfigHandler)
 		//修改服务器配置(post json)
 		api.POST("/update_config", jwtMiddleware.MiddlewareFunc(), handler.UpdateConfigHandler)
 	}
