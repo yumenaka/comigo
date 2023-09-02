@@ -100,7 +100,7 @@ export default defineComponent({
         bookType === "audio" ||
         bookType === "unknown"
       ) {
-        return "/api/raw/" + bookID + "/" + bookName;
+        return "/api/raw/" + bookID + "/" + encodeURIComponent(bookName);
       }
       if (this.readerMode === "flip" || this.readerMode === "sketch") {
         return "/#/flip/" + bookID;

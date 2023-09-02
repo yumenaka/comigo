@@ -11,8 +11,8 @@ type PropsType = {
 const BoolSwitch = (props: PropsType) => {
     const { name, label: nameText, boolValue, setBoolValue } = props
 
-    const onChange = (checked: boolean) => {
-        setBoolValue(checked, name)
+    const onChange = () => {
+        setBoolValue(!boolValue, name)
     }
 
     return (

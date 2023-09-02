@@ -39,7 +39,7 @@
       <span class="text-lg" v-if="!setDownLoadLink">{{ headerTitle }}</span>
       <!-- 标题，可下载压缩包 -->
       <span class="text-lg text-blue-700 text-opacity-100  hover:underline">
-        <a v-if="setDownLoadLink" :href="'api/raw/' + bookID + '/' + headerTitle">{{ headerTitle }}</a>
+        <a v-if="setDownLoadLink" :href="'api/raw/' + bookID + '/' + encodeURIComponent(headerTitle)">{{ headerTitle }}</a>
       </span>
     </div>
     <!-- slot，用来插入自定义组件。但是目前没需求 -->

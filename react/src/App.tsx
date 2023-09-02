@@ -81,7 +81,7 @@ function App() {
           type="submit"
           className="w-32 font-semibold bg-green-400 justify-center items-center m-1"
         >
-          submit
+          保存设置
         </button>
         {/* React 使用 value 或者 defaultValue 在 input 框中呈现内容 */}
 
