@@ -59,9 +59,9 @@ func init() {
 
 var client *ent.Client
 
-func InitDatabase(configFilePath string) {
+func InitDatabase(configFilePath string) error {
 	if client != nil {
-		return
+		return fmt.Errorf("database already initialized")
 	}
 	//链接或创建数据库
 	var entOptions []ent.Option
@@ -78,16 +78,17 @@ func InitDatabase(configFilePath string) {
 	fmt.Println(locale.GetString("InitDatabase") + dataSourceName)
 	client, err = ent.Open(dialect.SQLite, dataSourceName, entOptions...)
 	if err != nil {
-		fmt.Printf("failed opening connection to sqlite: %v", err)
+		return fmt.Errorf("failed opening connection to sqlite: %v", err)
 		//time.Sleep(3 * time.Second)
 		//log.Fatalf("failed opening connection to sqlite: %v", err)
 	}
 	//defer client.Close()
 	if err := client.Schema.Create(context.Background()); err != nil {
-		fmt.Printf("failed creating schema resources: %v", err)
+		return fmt.Errorf("failed creating schema resources: %v", err)
 		//time.Sleep(3 * time.Second)
 		//log.Fatalf("failed creating schema resources: %v", err)
 	}
+	return nil
 }
 
 func CloseDatabase() {

@@ -25,7 +25,7 @@ func init() {
 	cobra.MousetrapHelpText = ""       //屏蔽鼠标提示，支持拖拽、双击运行
 	cobra.MousetrapDisplayDuration = 5 //"这是命令行程序"的提醒表示时间
 	//jwt认证，tls证书
-	rootCmd.PersistentFlags().StringVarP(&common.Config.Username, "username", "u", "", locale.GetString("USERNAME"))
+	rootCmd.PersistentFlags().StringVarP(&common.Config.Username, "username", "u", "comigo", locale.GetString("USERNAME"))
 	rootCmd.PersistentFlags().StringVarP(&common.Config.Password, "password", "k", "", locale.GetString("PASSWORD"))
 	rootCmd.PersistentFlags().IntVarP(&common.Config.Timeout, "timeout", "t", 65535, locale.GetString("TIMEOUT"))
 	//TLS设定
@@ -40,7 +40,7 @@ func init() {
 	//服务端口
 	rootCmd.PersistentFlags().IntVarP(&common.Config.Port, "port", "p", 1234, locale.GetString("PORT"))
 	//本地Host
-	rootCmd.PersistentFlags().StringVar(&common.Config.Host, "host", "", locale.GetString("LOCAL_HOST"))
+	rootCmd.PersistentFlags().StringVar(&common.Config.Host, "host", "OutboundIP", locale.GetString("LOCAL_HOST"))
 	//DEBUG
 	rootCmd.PersistentFlags().BoolVar(&common.Config.Debug, "debug", false, locale.GetString("DEBUG_MODE"))
 	//打开浏览器
