@@ -31,10 +31,10 @@ export function configReducer(c: Config, action: Action) {
 }
 
 export const defaultConfig:Config={
-    Port: 8080,
+    Port: 1234,
     Host: "",
     StoresPath: [],
-    MaxScanDepth: 10,
+    MaxScanDepth: 3,
     OpenBrowser: true,
     DisableLAN: false,
     DefaultMode: "all",
@@ -66,6 +66,10 @@ export const defaultConfig:Config={
         FrpcCommand: "",
         ServerAddr: "",
         ServerPort: 0,
+        Token: "",
+        FrpType: "",
+        RemotePort: 0,
+        RandomRemotePort: false
     },
     GenerateMetaData: false,
 }

@@ -1,5 +1,3 @@
-// import reactLogo from "./assets/react.svg";
-import "./App.css";
 import axios from "axios";
 import React, { useEffect, useReducer } from "react";
 import { useTranslation } from "react-i18next";
@@ -48,8 +46,6 @@ function App() {
     // 传递空数组([])作为第二个参数，effect 内部的 props 和 state 就会一直持有其初始值。也就是只在渲染的时候执行一次。
   }, []);
 
-
-
   // React 通过  onChange 监听事件 实现数据的动态录入
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -79,7 +75,7 @@ function App() {
       <Title />
       <form
         onSubmit={onSubmit}
-        className="card flex flex-col bg-slate-300 justify-center items-center"
+        className="card w-full flex flex-col bg-slate-300 justify-center items-center"
       >
         <button
           type="submit"
@@ -88,7 +84,7 @@ function App() {
           submit
         </button>
         {/* React 使用 value 或者 defaultValue 在 input 框中呈现内容 */}
-        
+
         <InputWithLabel
           label={t("Port")}
           name={"Port"}
