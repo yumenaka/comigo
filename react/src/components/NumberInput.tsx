@@ -15,15 +15,12 @@ const NumberInput = (props: PropsType) => {
             </label>
             <input
                 className="rounded ml-2 px-1"
-                {...register("Port", { min: 0, max: 65535 })}
                 id="Port"
                 type="number"
-                value={config.Port}
-                onChange={onChange}
                 placeholder="Port"
             />
             <div className="bg-red-600">
-                {errors.Port && <div>入力が必須の項目です(0~65535)</div>}
+                {/* {errors.Port && <div>入力が必須の項目です(0~65535)</div>} */}
             </div>
         </div>
     );

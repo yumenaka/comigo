@@ -69,7 +69,7 @@ function App() {
     });
   };
 
-  
+
   return (
     <>
       <Title />
@@ -203,14 +203,15 @@ function App() {
           setBoolValue={setBoolValue}
         ></BoolSwitch>
 
-        <InputWithLabel
+        {config.EnableUpload && <InputWithLabel
           label={t("UploadPath")}
           name={"UploadPath"}
           type={"text"}
           value={config.UploadPath}
           onChange={onChange}
           placeholder={"UploadPath"}
-        />
+        />}
+
 
         <InputWithLabel
           label={t("ExcludePath")}
@@ -271,12 +272,13 @@ function App() {
           setBoolValue={setBoolValue}
         ></BoolSwitch>
 
-        <BoolSwitch
+        {config.EnableDatabase && <BoolSwitch
           name={"ClearDatabaseWhenExit"}
           label={t("ClearDatabaseWhenExit")}
           boolValue={config.ClearDatabaseWhenExit}
           setBoolValue={setBoolValue}
-        ></BoolSwitch>
+        ></BoolSwitch>}
+
 
         <BoolSwitch
           name={"Debug"}
@@ -292,24 +294,27 @@ function App() {
           setBoolValue={setBoolValue}
         ></BoolSwitch>
 
-        <InputWithLabel
-          label={t("LogFilePath")}
-          name={"LogFilePath"}
-          type={"text"}
-          value={config.LogFilePath}
-          onChange={onChange}
-          placeholder={"LogFilePath"}
-        />
 
-        <InputWithLabel
-          label={t("LogFileName")}
-          name={"LogFileName"}
-          type={"text"}
-          value={config.LogFileName}
-          onChange={onChange}
-          placeholder={"LogFileName"}
-        />
+        {config.LogToFile &&
+          <InputWithLabel
+            label={t("LogFilePath")}
+            name={"LogFilePath"}
+            type={"text"}
+            value={config.LogFilePath}
+            onChange={onChange}
+            placeholder={"LogFilePath"}
+          />}
 
+        {config.LogToFile &&
+          <InputWithLabel
+            label={t("LogFileName")}
+            name={"LogFileName"}
+            type={"text"}
+            value={config.LogFileName}
+            onChange={onChange}
+            placeholder={"LogFileName"}
+          />
+        }
         <InputWithLabel
           label={t("ZipFileTextEncoding")}
           name={"ZipFileTextEncoding"}

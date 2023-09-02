@@ -26,8 +26,8 @@ import (
 	"github.com/yumenaka/comi/locale"
 )
 
-// ScanStorePathInConfig 3、扫描配置文件指定的的书籍库
-func ScanStorePathInConfig() error {
+// ScanStorePath 3、扫描配置文件指定的的书籍库
+func ScanStorePath() error {
 	if len(Config.StoresPath) > 0 {
 		for _, p := range Config.StoresPath {
 			addList, err := ScanAndGetBookList(p, DatabaseBookList)
@@ -44,27 +44,25 @@ func ScanStorePathInConfig() error {
 
 // SaveResultsToDatabase 4，保存扫描结果到数据库，并清理不存在的书籍
 func SaveResultsToDatabase() error {
-	if Config.EnableDatabase {
-		AllBook := book.GetAllBookList()
-		//设置清理数据库的时候，是否清理没扫描到的书籍信息
-		if Config.ClearDatabaseWhenExit {
-			for _, checkBook := range DatabaseBookList {
-				needClear := true //这条数据是否需要清理
-				for _, b := range AllBook {
-					if b.BookID == checkBook.BookID {
-						needClear = false //如果扫到了这本书,就不清理相关数据
-					}
-				}
-				if needClear {
-					storage.ClearBookData(checkBook, Config.Debug)
+	AllBook := book.GetAllBookList()
+	//设置清理数据库的时候，是否清理没扫描到的书籍信息
+	if Config.ClearDatabaseWhenExit {
+		for _, checkBook := range DatabaseBookList {
+			needClear := true //这条数据是否需要清理
+			for _, b := range AllBook {
+				if b.BookID == checkBook.BookID {
+					needClear = false //如果扫到了这本书,就不清理相关数据
 				}
 			}
+			if needClear {
+				storage.ClearBookData(checkBook, Config.Debug)
+			}
 		}
-		saveErr := storage.SaveBookListToDatabase(AllBook)
-		if saveErr != nil {
-			fmt.Println(saveErr)
-			return saveErr
-		}
+	}
+	saveErr := storage.SaveBookListToDatabase(AllBook)
+	if saveErr != nil {
+		fmt.Println(saveErr)
+		return saveErr
 	}
 	return nil
 }

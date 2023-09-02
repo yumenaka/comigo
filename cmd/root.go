@@ -130,19 +130,27 @@ func init() {
 		//需要在home目录下面搜索配置文件
 		homeConfigPath := path.Join(home, ".config/comigo")
 		runtimeViper.AddConfigPath(homeConfigPath)
-		// 当前执行目录
-		// 获取程序自身的可执行文件路径
-		// https://stackoverflow.com/questions/18537257/how-to-get-the-directory-of-the-currently-running-file
-		// 警告：无法保证路径仍指向正确的程序文件。
-		//如果使用符号链接启动进程，则根据操作系统，结果可能是符号链接或它指向的路径。如果需要稳定的结果， path/filepath.EvalSymlinks 可能会有所帮助。
+
+		// 获取可执行程序自身的文件路径
 		executablePath, err := os.Executable()
 		if err != nil {
 			fmt.Println("无法获取程序路径:", err)
+			return
 		}
-		runtimeViper.AddConfigPath(executablePath)
+
+		// 将可执行程序自身的文件路径转换为绝对路径
+		absPath, err := filepath.Abs(executablePath)
+		if err != nil {
+			fmt.Println("Failed to get absolute path:", err)
+			return
+		}
+		fmt.Println("Executable path:", absPath)
+		runtimeViper.AddConfigPath(absPath)
+
+		// 当前执行目录
 		nowPath, err := os.Getwd()
 		if err != nil {
-			fmt.Println("无法获取当前目录:", err)
+			fmt.Println("无法获取程序执行目录:", err)
 		}
 		runtimeViper.AddConfigPath(nowPath)
 		runtimeViper.SetConfigType("toml")
