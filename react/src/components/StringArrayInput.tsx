@@ -1,10 +1,10 @@
 import React from "react";
-import useArray from "../tools/useArray"
+
 interface Props {
     label: string;
     name: string;
     type: string;
-    value: string;
+    value: string[];
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     placeholder: string;
     error?: string;
@@ -21,34 +21,28 @@ const StringArrayInput: React.FC<Props> = ({
     error,
 }) => {
 
-    const arr = value.split(",")
-    const { array, set, push, remove, filter, update, clear } = useArray(arr)
+    // const { array, push, remove} = useArray(value)
+    // console.log(value)
+    // console.log(array)
 
     return (
-        <div className="flex flex-row w-2/3 m-1 p-2 pl-8 font-semibold rounded-md shadow-md bg-yellow-300 justify-start items-center">
-
+        <div
+            className="flex flex-row w-2/3 m-1 p-2 pl-8 font-semibold rounded-md shadow-md bg-yellow-300 justify-start items-center">
             <label htmlFor={name} className="w-32 border border-black rounded-md">
                 {label}:
             </label>
-            <div>{array.join(", ")}</div>
-            <button onClick={() => push("7")}>Add 7</button>
-            <button onClick={() => update(1, "9")}>Change Second Element To 9</button>
-            <button onClick={() => remove(1)}>Remove Second Element</button>
-            <button onClick={() => filter(n => n === "3")}>
-                Keep Numbers Less Than 4
-            </button>
-            <button onClick={() => set(["1", "2"])}>Set To 1, 2</button>
-            <button onClick={clear}>Clear</button>
-
-            <input
-                className="rounded ml-4 px-1 w-11/12"
-                id={name}
-                name={name}
-                type={type}
-                value={value}
-                onChange={onChange}
-                placeholder={placeholder}
-            />
+            <div className="flex flex-row mx-4">
+                {/* {value.toString()} */}
+                {value.map((item, index) => (
+                    <div key={index} className="flex flex-row  p-1 m-2  items-center rounded-2xl bg-gray-200 px-8 py-3 text-sm font-medium text-black">
+                        {item}
+                        <div
+                            className="mx-2 h-6 w-6 rounded-2xl bg-red-700 text-center py-0.5 text-white transition hover:scale-140 hover:shadow-xl focus:outline-none focus:ring active:bg-red-500">
+                            X
+                        </div>
+                    </div>
+                ))}
+            </div>
             <div className="bg-red-600">{error && <div>{error}</div>}</div>
         </div>
     );

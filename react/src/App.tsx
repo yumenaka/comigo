@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import Title from "./components/Title";
 import Config from "./types/Config";
 import InputWithLabel from "./components/InputWithLabel";
+import StringArrayInput from "./components/StringArrayInput";
 
 import BoolSwitch from "./components/BoolSwitch";
 import { configReducer, defaultConfig } from "./reducers/configReducer";
@@ -50,7 +51,6 @@ function App() {
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     console.log(typeof value);
-    //setConfig({ ...config, [name]: value });
     dispatch({
       type: 'boolConfig',
       name: name,
@@ -79,7 +79,7 @@ function App() {
       >
         <button
           type="submit"
-          className="w-32 font-semibold bg-green-400 justify-center items-center m-1"
+          className="m-2 inline-block rounded bg-indigo-600 px-8 py-3 text-sm font-medium text-white transition hover:scale-110 hover:shadow-xl focus:outline-none focus:ring active:bg-indigo-500"
         >
           保存设置
         </button>
@@ -103,14 +103,14 @@ function App() {
           placeholder={"Host"}
         ></InputWithLabel>
 
-        <InputWithLabel
+        <StringArrayInput
           label={t("StoresPath")}
           name={"StoresPath"}
           type={"text"}
           value={config.StoresPath}
           onChange={onChange}
           placeholder={"StoresPath"}
-        ></InputWithLabel>
+        ></StringArrayInput>
 
         <InputWithLabel
           label={t("MaxScanDepth")}

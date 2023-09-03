@@ -15,6 +15,7 @@ type Action = {
 export function configReducer(c: Config, action: Action) {
     switch (action.type) {
         case "downloadConfig":
+            // console.log(action);
             return { ...action.config };
         case "boolConfig":
             return { ...c, [action.name]: action.value };
