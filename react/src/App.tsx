@@ -47,12 +47,23 @@ function App() {
     // 传递空数组([])作为第二个参数，effect 内部的 props 和 state 就会一直持有其初始值。也就是只在渲染的时候执行一次。
   }, []);
 
-  // React 通过  onChange 监听事件 实现数据的动态录入
-  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //  监听事件 实现数据的动态录入
+  const setStringValue = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     console.log(typeof value);
     dispatch({
-      type: 'boolConfig',
+      type: 'stringConfig',
+      name: name,
+      value: value,
+      config: config
+    });
+  };
+
+  const setNumberValue = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    console.log(typeof value);
+    dispatch({
+      type: 'numberConfig',
       name: name,
       value: value,
       config: config
@@ -69,7 +80,7 @@ function App() {
     });
   };
 
-  const setStringArray = (valueName:string, value:string[]) => {
+  const setStringArray = (valueName: string, value: string[]) => {
     dispatch({
       type: 'boolConfig',
       name: valueName,
@@ -84,7 +95,7 @@ function App() {
       <Title />
       <form
         onSubmit={onSubmit}
-        className="card w-full flex flex-col bg-slate-300 justify-center items-center"
+        className="card w-full flex flex-col justify-center items-center"
       >
         <button
           type="submit"
@@ -99,7 +110,7 @@ function App() {
           name={"Port"}
           type={"number"}
           value={config.Port}
-          onChange={onChange}
+          onChange={setNumberValue}
           placeholder={"Port"}
         ></InputWithLabel>
 
@@ -108,7 +119,7 @@ function App() {
           name={"Host"}
           type={"text"}
           value={config.Host}
-          onChange={onChange}
+          onChange={setStringValue}
           placeholder={"Host"}
         ></InputWithLabel>
 
@@ -119,12 +130,33 @@ function App() {
           setStringArray={setStringArray}
         ></StringArrayInput>
 
+        <StringArrayInput
+          label={t("ExcludePath")}
+          name={"ExcludePath"}
+          value={config.ExcludePath}
+          setStringArray={setStringArray}
+        ></StringArrayInput>
+
+        <StringArrayInput
+          label={t("SupportMediaType")}
+          name={"SupportMediaType"}
+          value={config.SupportMediaType}
+          setStringArray={setStringArray}
+        ></StringArrayInput>
+
+        <StringArrayInput
+          label={t("SupportFileType")}
+          name={"SupportFileType"}
+          value={config.SupportFileType}
+          setStringArray={setStringArray}
+        ></StringArrayInput>
+
         <InputWithLabel
           label={t("MaxScanDepth")}
           name={"MaxScanDepth"}
           type={"number"}
           value={config.MaxScanDepth}
-          onChange={onChange}
+          onChange={setNumberValue}
           placeholder={"MaxScanDepth"}
         ></InputWithLabel>
 
@@ -142,50 +174,64 @@ function App() {
           setBoolValue={setBoolValue}
         ></BoolSwitch>
 
-        <InputWithLabel
+        <BoolSwitch
+          name={"EnableLogin"}
+          label={t("EnableLogin")}
+          boolValue={config.EnableLogin}
+          setBoolValue={setBoolValue}
+        ></BoolSwitch>
+
+        {config.EnableLogin && <InputWithLabel
           label={t("Username")}
           name={"Username"}
           type={"text"}
           value={config.Username}
-          onChange={onChange}
+          onChange={setStringValue}
           placeholder={"Username"}
-        ></InputWithLabel>
+        ></InputWithLabel>}
 
-        <InputWithLabel
+        {config.EnableLogin && <InputWithLabel
           label={t("Password")}
           name={"Password"}
           type={"text"}
           value={config.Password}
-          onChange={onChange}
+          onChange={setStringValue}
           placeholder={"Password"}
-        ></InputWithLabel>
+        ></InputWithLabel>}
 
         <InputWithLabel
           label={t("Timeout")}
           name={"Timeout"}
           type={"number"}
           value={config.Timeout}
-          onChange={onChange}
+          onChange={setNumberValue}
           placeholder={"Timeout"}
         ></InputWithLabel>
 
-        <InputWithLabel
+        <BoolSwitch
+          name={"EnableTLS"}
+          label={t("EnableTLS")}
+          boolValue={config.EnableTLS}
+          setBoolValue={setBoolValue}
+        ></BoolSwitch>
+
+        {config.EnableTLS && <InputWithLabel
           label={t("CertFile")}
           name={"CertFile"}
           type={"text"}
           value={config.CertFile}
-          onChange={onChange}
+          onChange={setStringValue}
           placeholder={"CertFile"}
-        ></InputWithLabel>
+        ></InputWithLabel>}
 
-        <InputWithLabel
+        {config.EnableTLS && <InputWithLabel
           label={t("KeyFile")}
           name={"KeyFile"}
           type={"text"}
           value={config.KeyFile}
-          onChange={onChange}
+          onChange={setStringValue}
           placeholder={"KeyFile"}
-        ></InputWithLabel>
+        ></InputWithLabel>}
 
         <BoolSwitch
           name={"ClearCacheExit"}
@@ -199,7 +245,7 @@ function App() {
           name={"CachePath"}
           type={"text"}
           value={config.CachePath}
-          onChange={onChange}
+          onChange={setStringValue}
           placeholder={"CachePath"}
         ></InputWithLabel>
 
@@ -215,44 +261,18 @@ function App() {
           name={"UploadPath"}
           type={"text"}
           value={config.UploadPath}
-          onChange={onChange}
+          onChange={setStringValue}
           placeholder={"UploadPath"}
         />}
 
 
-        <InputWithLabel
-          label={t("ExcludePath")}
-          name={"ExcludePath"}
-          type={"text"}
-          value={config.ExcludePath}
-          onChange={onChange}
-          placeholder={"ExcludePath"}
-        />
-
-        <InputWithLabel
-          label={t("SupportMediaType")}
-          name={"SupportMediaType"}
-          type={"text"}
-          value={config.SupportMediaType}
-          onChange={onChange}
-          placeholder={"SupportMediaType"}
-        />
-
-        <InputWithLabel
-          label={t("SupportFileType")}
-          name={"SupportFileType"}
-          type={"text"}
-          value={config.SupportFileType}
-          onChange={onChange}
-          placeholder={"SupportFileType"}
-        />
 
         <InputWithLabel
           label={t("MinImageNum")}
           name={"MinImageNum"}
           type={"number"}
           value={config.MinImageNum}
-          onChange={onChange}
+          onChange={setNumberValue}
           placeholder={"MinImageNum"}
         ></InputWithLabel>
 
@@ -261,7 +281,7 @@ function App() {
           name={"TimeoutLimitForScan"}
           type={"numbers"}
           value={config.TimeoutLimitForScan}
-          onChange={onChange}
+          onChange={setNumberValue}
           placeholder={"TimeoutLimitForScan"}
         />
 
@@ -301,14 +321,13 @@ function App() {
           setBoolValue={setBoolValue}
         ></BoolSwitch>
 
-
         {config.LogToFile &&
           <InputWithLabel
             label={t("LogFilePath")}
             name={"LogFilePath"}
             type={"text"}
             value={config.LogFilePath}
-            onChange={onChange}
+            onChange={setStringValue}
             placeholder={"LogFilePath"}
           />}
 
@@ -318,7 +337,7 @@ function App() {
             name={"LogFileName"}
             type={"text"}
             value={config.LogFileName}
-            onChange={onChange}
+            onChange={setStringValue}
             placeholder={"LogFileName"}
           />
         }
@@ -327,7 +346,7 @@ function App() {
           name={"ZipFileTextEncoding"}
           type={"text"}
           value={config.ZipFileTextEncoding}
-          onChange={onChange}
+          onChange={setStringValue}
           placeholder={"ZipFileTextEncoding"}
         />
 

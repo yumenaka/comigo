@@ -24,25 +24,38 @@ var runtimeViper *viper.Viper
 func init() {
 	cobra.MousetrapHelpText = ""       //屏蔽鼠标提示，支持拖拽、双击运行
 	cobra.MousetrapDisplayDuration = 5 //"这是命令行程序"的提醒表示时间
-	//jwt认证，tls证书
+	//登陆用户名、密码
+	rootCmd.PersistentFlags().BoolVar(&common.Config.EnableLogin, "login", false, locale.GetString("ENABLE_LOGIN"))
 	rootCmd.PersistentFlags().StringVarP(&common.Config.Username, "username", "u", "comigo", locale.GetString("USERNAME"))
 	rootCmd.PersistentFlags().StringVarP(&common.Config.Password, "password", "k", "", locale.GetString("PASSWORD"))
 	rootCmd.PersistentFlags().IntVarP(&common.Config.Timeout, "timeout", "t", 65535, locale.GetString("TIMEOUT"))
 	//TLS设定
-	rootCmd.PersistentFlags().StringVar(&common.Config.CertFile, "tls-cert-file", "", locale.GetString("TLS_CERT_FILE"))              //--tls-cert-file
-	rootCmd.PersistentFlags().StringVar(&common.Config.KeyFile, "tls-private-key-file", "", locale.GetString("TLS_PRIVATE_KEY_FILE")) //--tls-private-key-file
+	rootCmd.PersistentFlags().BoolVar(&common.Config.EnableTLS, "tls", false, locale.GetString("TLS_ENABLE"))
+	rootCmd.PersistentFlags().StringVar(&common.Config.CertFile, "tls-crt", "", locale.GetString("TLS_CRT"))
+	rootCmd.PersistentFlags().StringVar(&common.Config.KeyFile, "tls-key", "", locale.GetString("TLS_KEY"))
 	//指定配置文件
 	rootCmd.PersistentFlags().StringVarP(&common.ConfigFilePath, "config", "c", "", locale.GetString("CONFIG"))
 	//在当前目录生成示例配置文件
 	rootCmd.PersistentFlags().BoolVar(&common.GenerateConfig, "generate-config", false, locale.GetString("GenerateConfig"))
 	//启用数据库，保存扫描数据
-	rootCmd.PersistentFlags().BoolVarP(&common.Config.EnableDatabase, "enable-database", "e", false, locale.GetString("EnableDatabase"))
+	rootCmd.PersistentFlags().BoolVarP(&common.Config.EnableDatabase, "database", "e", false, locale.GetString("EnableDatabase"))
 	//服务端口
 	rootCmd.PersistentFlags().IntVarP(&common.Config.Port, "port", "p", 1234, locale.GetString("PORT"))
 	//本地Host
-	rootCmd.PersistentFlags().StringVar(&common.Config.Host, "host", "OutboundIP", locale.GetString("LOCAL_HOST"))
+	rootCmd.PersistentFlags().StringVar(&common.Config.Host, "host", "DefaultHost", locale.GetString("LOCAL_HOST"))
 	//DEBUG
 	rootCmd.PersistentFlags().BoolVar(&common.Config.Debug, "debug", false, locale.GetString("DEBUG_MODE"))
+	//启用文件上传功能
+	rootCmd.PersistentFlags().BoolVar(&common.Config.EnableUpload, "enable-upload", true, locale.GetString("ENABLE_FILE_UPLOAD"))
+	//上传文件的保存路径
+	rootCmd.PersistentFlags().StringVar(&common.Config.UploadPath, "upload-path", "", locale.GetString("UPLOAD_PATH"))
+	if common.Config.EnableUpload && common.Config.UploadPath == "" {
+		//获取当前目录
+		dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+		if err != nil {
+			common.Config.UploadPath = path.Join(dir, "upload")
+		}
+	}
 	//打开浏览器
 	rootCmd.PersistentFlags().BoolVarP(&common.Config.OpenBrowser, "open-browser", "o", false, locale.GetString("OPEN_BROWSER"))
 	if runtime.GOOS == "windows" {
@@ -57,7 +70,7 @@ func init() {
 	//打印所有可用网卡ip
 	rootCmd.PersistentFlags().BoolVar(&common.Config.PrintAllPossibleQRCode, "print-all", false, locale.GetString("PRINT_ALL_IP"))
 	//至少有几张图片，才认定为漫画压缩包
-	rootCmd.PersistentFlags().IntVar(&common.Config.MinImageNum, "min-image-num", 1, locale.GetString("MIN_MEDIA_NUM"))
+	rootCmd.PersistentFlags().IntVar(&common.Config.MinImageNum, "min-image", 1, locale.GetString("MIN_MEDIA_NUM"))
 	////webp相关 拆分成子命令？
 	//启用webp传输
 	//rootCmd.PersistentFlags().BoolVarP(&common.Config.EnableWebpServer, "webp", "w", false, locale.GetString("ENABLE_WEBP"))
@@ -82,26 +95,13 @@ func init() {
 	rootCmd.PersistentFlags().IntVar(&common.Config.FrpConfig.RemotePort, "frps-remote-port", 50000, locale.GetString("FRP_REMOTE_PORT"))
 	//输出log文件
 	rootCmd.PersistentFlags().BoolVar(&common.Config.LogToFile, "log", false, locale.GetString("LOG_TO_FILE"))
-	//sketch模式的倒计时秒数
-	//rootCmd.PersistentFlags().IntVar(&common.Config.SketchCountSeconds, "sketch_count_seconds", 90, locale.GetString("SKETCH_COUNT_SECONDS"))
-
-	rootCmd.PersistentFlags().BoolVar(&common.Config.EnableLocalCache, "enable-cache", true, locale.GetString("CACHE_FILE_ENABLE"))
-	//web图片缓存路径
+	//web图片缓存
+	rootCmd.PersistentFlags().BoolVar(&common.Config.UseCache, "use-cache", true, locale.GetString("CACHE_FILE_ENABLE"))
+	//图片缓存路径
 	rootCmd.PersistentFlags().StringVar(&common.Config.CachePath, "cache-path", "", locale.GetString("CACHE_FILE_PATH"))
-	//退出时清除临时文件
+	//退出时清除缓存
 	rootCmd.PersistentFlags().BoolVar(&common.Config.ClearCacheExit, "cache-clean", true, locale.GetString("CACHE_FILE_CLEAN"))
 
-	//启用文件上传功能
-	rootCmd.PersistentFlags().BoolVar(&common.Config.EnableUpload, "enable-upload", true, locale.GetString("ENABLE_FILE_UPLOAD"))
-	//上传文件的保存路径
-	rootCmd.PersistentFlags().StringVar(&common.Config.UploadPath, "upload-path", "", locale.GetString("UPLOAD_PATH"))
-	if common.Config.EnableUpload && common.Config.UploadPath == "" {
-		//获取当前目录
-		dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
-		if err != nil {
-			common.Config.UploadPath = path.Join(dir, "upload")
-		}
-	}
 	handler.EnableUpload = &common.Config.EnableUpload
 	handler.UploadPath = &common.Config.UploadPath
 

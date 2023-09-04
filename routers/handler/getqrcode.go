@@ -33,7 +33,7 @@ func GetQrcodeHandler(c *gin.Context) {
 	}
 	//取得本机的首选出站IP
 	OutIP := tools.GetOutboundIP().String()
-	if common.Config.Host == "OutboundIP" {
+	if common.Config.Host == "DefaultHost" {
 		var png []byte
 		readURL := protocol + OutIP + ":" + strconv.Itoa(common.Config.Port)
 		png, err := qrcode.Encode(readURL, qrcode.Medium, 256)
