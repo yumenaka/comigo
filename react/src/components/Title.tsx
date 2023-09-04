@@ -1,7 +1,7 @@
 const Title = () => {
   return (
     <div>
-      <h1>Setting Center</h1>
+      <h1 className="m-4 text-zinc-900 font-sans font-semibold text-3xl">Setting Center</h1>
     </div>
   );
 };
