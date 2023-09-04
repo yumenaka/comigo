@@ -69,6 +69,15 @@ function App() {
     });
   };
 
+  const setStringArray = (valueName:string, value:string[]) => {
+    dispatch({
+      type: 'boolConfig',
+      name: valueName,
+      value: value,
+      config: config
+    });
+  };
+
 
   return (
     <>
@@ -106,10 +115,8 @@ function App() {
         <StringArrayInput
           label={t("StoresPath")}
           name={"StoresPath"}
-          type={"text"}
           value={config.StoresPath}
-          onChange={onChange}
-          placeholder={"StoresPath"}
+          setStringArray={setStringArray}
         ></StringArrayInput>
 
         <InputWithLabel
