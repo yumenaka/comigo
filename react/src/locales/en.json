@@ -10,7 +10,7 @@
   "Timeout": "Timeout",
   "CertFile": "CertFile",
   "KeyFile": "KeyFile",
-  "EnableLocalCache": "Enable Local Cache",
+  "UseCache": "Enable Local Cache",
   "CachePath": "Cache Path",
   "ClearCacheExit": "Clear Cache When Exit",
   "EnableUpload": "Enable Upload",
@@ -125,5 +125,7 @@
   "filesize": "File size:{0}",
   "childbookhint": "{0}books in the folder",
   "GenerateMetaData": "GenerateMetaData",
-  "EnableFrpcServer": "EnableFrpcServer"
+  "EnableFrpcServer": "EnableFrpcServer",
+  "EnableTLS": "EnableTLS",
+  "EnableLogin": "Enable Login"
 }

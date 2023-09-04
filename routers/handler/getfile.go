@@ -49,7 +49,7 @@ func GetFileHandler(c *gin.Context) {
 	}
 	noCache := c.DefaultQuery("no-cache", "false")
 	//如果启用了本地缓存
-	if common.Config.EnableLocalCache && noCache == "false" {
+	if common.Config.UseCache && noCache == "false" {
 		//获取所有的参数键值对
 		query := c.Request.URL.Query()
 		//如果有缓存，直接读取本地获取缓存文件并返回
@@ -205,7 +205,7 @@ func GetFileHandler(c *gin.Context) {
 			contentType = tools.GetContentTypeByFileName(".jpg")
 		}
 		//如果启用了本地缓存
-		if common.Config.EnableLocalCache && noCache == "false" {
+		if common.Config.UseCache && noCache == "false" {
 			//获取所有的参数键值对
 			query := c.Request.URL.Query()
 			//缓存文件到本地，避免重复解压

@@ -8,12 +8,14 @@ interface Config {
   OpenBrowser: boolean;
   DisableLAN: boolean;
   DefaultMode: string;
+  EnableLogin: boolean;
   Username: string;
   Password: string;
   Timeout: number;
+  EnableTLS: boolean;
   CertFile: string;
   KeyFile: string;
-  EnableLocalCache: boolean;
+  UseCache: boolean;
   CachePath: string;
   ClearCacheExit: boolean;
   EnableUpload: boolean;
