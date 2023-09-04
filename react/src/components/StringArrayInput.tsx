@@ -3,27 +3,28 @@ import React from "react";
 interface Props {
     label: string;
     name: string;
-    type: string;
     value: string[];
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    placeholder: string;
+    setStringArray: (name: string, value:string[]) => void;
     error?: string;
-    register?: any;
+    // register?: any;
 }
 
 const StringArrayInput: React.FC<Props> = ({
     label,
     name,
-    type,
     value,
-    onChange,
-    placeholder,
+    setStringArray,
     error,
 }) => {
 
-    // const { array, push, remove} = useArray(value)
-    // console.log(value)
-    // console.log(array)
+
+    function push(element: string): void {
+        setStringArray(name, [...value, element])
+    }
+
+    function remove(index: number): void {
+        setStringArray(name, [...value.slice(0, index), ...value.slice(index + 1)])
+    }
 
     return (
         <div
@@ -36,13 +37,20 @@ const StringArrayInput: React.FC<Props> = ({
                 {value.map((item, index) => (
                     <div key={index} className="flex flex-row  p-1 m-2  items-center rounded-2xl bg-gray-200 px-8 py-3 text-sm font-medium text-black">
                         {item}
-                        <div
+                        <div onClick={() => remove(index)}
                             className="mx-2 h-6 w-6 rounded-2xl bg-red-700 text-center py-0.5 text-white transition hover:scale-140 hover:shadow-xl focus:outline-none focus:ring active:bg-red-500">
                             X
                         </div>
                     </div>
                 ))}
             </div>
+            <input className="border border-black rounded-md" type="text" name={name} id={name} placeholder="Add new item" onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                    push(e.currentTarget.value)
+                    e.currentTarget.value = ''
+                }
+            }}
+            ></input>
             <div className="bg-red-600">{error && <div>{error}</div>}</div>
         </div>
     );
