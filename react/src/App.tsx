@@ -3,7 +3,7 @@ import React, { useEffect, useReducer } from "react";
 import { useTranslation } from "react-i18next";
 // TypeScript環境でReact Hook Formのフォーム作成の基礎を学ぶ  https://reffect.co.jp/react/react-hook-form-ts/
 // import { useForm } from "react-hook-form";
-import Title from "./components/Title";
+import Contained from "./components/Contained";
 import Config from "./types/Config";
 import InputWithLabel from "./components/InputWithLabel";
 import StringArrayInput from "./components/StringArrayInput";
@@ -92,7 +92,7 @@ function App() {
 
   return (
     <>
-      <Title />
+      <Contained />
       <form
         onSubmit={onSubmit}
         className="card w-full flex flex-col justify-center items-center"

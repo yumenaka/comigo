@@ -1,6 +1,7 @@
 package settings
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/tidwall/gjson"
 	"os"
@@ -198,14 +199,13 @@ func UpdateConfig(oldConfig ServerConfig, jsonString string) (newConfig ServerCo
 
 // 将字符串解析为字符串切片
 func parseString(str string) ([]string, error) {
-	//var arr []string
-	//fmt.Println("str =", str)
-	//err := json.Unmarshal([]byte(str), &arr)
-	//if err != nil {
-	//	return nil, err
-	//}
-
-	arr := strings.Split(str, ",")
+	var arr []string
+	fmt.Println("str =", str)
+	err := json.Unmarshal([]byte(str), &arr)
+	if err != nil {
+		return nil, err
+	}
+	//arr := strings.Split(str, ",")
 	return arr, nil
 }
 

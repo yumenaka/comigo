@@ -45,10 +45,9 @@ func PublicServerInfoHandler(c *gin.Context) {
 func GetStatusAllHandler(c *gin.Context) {
 	serverName := "Comigo " + common.Version
 	//本机首选出站IP
-	DefaultHost := tools.GetOutboundIP().String()
 	host := ""
 	if common.Config.Host == "DefaultHost" {
-		host = DefaultHost
+		host = tools.GetOutboundIP().String()
 	} else {
 		host = common.Config.Host
 	}
