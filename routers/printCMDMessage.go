@@ -29,7 +29,7 @@ func printQRCodeInCMD() {
 	}
 	enableTls := common.Config.CertFile != "" && common.Config.KeyFile != ""
 	OutIP := common.Config.Host
-	if common.Config.Host == "OutboundIP" {
+	if common.Config.Host == "DefaultHost" {
 		OutIP = tools.GetOutboundIP().String()
 	}
 	tools.PrintAllReaderURL(

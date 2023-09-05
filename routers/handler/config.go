@@ -53,6 +53,8 @@ func UpdateConfigHandler(c *gin.Context) {
 				log.Printf("Failed to save results to database: %v", err)
 			}
 		}
+	} else {
+		fmt.Println("common.Config.StoresPath == newConfig.StoresPath,skip scan store path")
 	}
 	common.Config = newConfig
 	// 返回成功消息
