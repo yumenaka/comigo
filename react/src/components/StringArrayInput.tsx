@@ -16,7 +16,6 @@ const StringArrayInput: React.FC<Props> = ({
     setStringArray,
     error,
 }) => {
-
     function push(element: string): void {
         setStringArray(name, [...value, element])
     }
