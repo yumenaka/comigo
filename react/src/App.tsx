@@ -14,7 +14,7 @@ import { configReducer, defaultConfig } from "./reducers/configReducer";
 function App() {
   const baseURL = "/api";
   const { t } = useTranslation();
-  const [show, setShow] = useState("internet")
+  const [show, setShow] = useState("bookstore")
   // nullは型に含めず、useStateの初期値が決まらないという場合には、型アサーションで逃げる手もあります。 https://qiita.com/FumioNonaka/items/4361d1cdf34ffb5a5338
   const [config, dispatch] = useReducer(configReducer, defaultConfig);
 
@@ -97,17 +97,11 @@ function App() {
         onSubmit={onSubmit}
         className="card w-full flex flex-col justify-center items-center"
       >
-        <button
-          type="submit"
-          className="m-2 inline-block rounded bg-indigo-600 px-8 py-3 text-sm font-medium text-white transition hover:scale-110 hover:shadow-xl focus:outline-none focus:ring active:bg-indigo-500"
-        >
-          保存设置
-        </button>
-
         {show === "bookstore" &&
           <>
             <StringArrayInput
               label={t("StoresPath")}
+              fieldDescription="书库文件夹，支持绝对目录与相对目录。相对目录以当前执行目录为基准"
               name={"StoresPath"}
               value={config.StoresPath}
               setStringArray={setStringArray}
@@ -115,6 +109,7 @@ function App() {
 
             <InputWithLabel
               label={t("MaxScanDepth")}
+              fieldDescription="最大扫描深度。超过深度的文件不会被扫描。当前执行目录为基准。"
               name={"MaxScanDepth"}
               type={"number"}
               value={config.MaxScanDepth}
@@ -124,6 +119,7 @@ function App() {
 
             <BoolSwitch
               label={t("OpenBrowser")}
+              fieldDescription="扫描完成后，是否同时打开浏览器。windows默认true，其他平台默认false。"
               name={"OpenBrowser"}
               boolValue={config.OpenBrowser}
               setBoolValue={setBoolValue}
@@ -132,12 +128,14 @@ function App() {
             <BoolSwitch
               name={"ClearCacheExit"}
               label={t("ClearCacheExit")}
+              fieldDescription="退出程序的时候，清理web图片缓存。"
               boolValue={config.ClearCacheExit}
               setBoolValue={setBoolValue}
             ></BoolSwitch>
 
             <InputWithLabel
               label={t("CachePath")}
+              fieldDescription="本地图片缓存位置，默认系统临时文件夹。"
               name={"CachePath"}
               type={"text"}
               value={config.CachePath}
@@ -148,12 +146,14 @@ function App() {
             <BoolSwitch
               name={"EnableUpload"}
               label={t("EnableUpload")}
+              fieldDescription="启用上传功能。"
               boolValue={config.EnableUpload}
               setBoolValue={setBoolValue}
             ></BoolSwitch>
 
             {config.EnableUpload && <InputWithLabel
               label={t("UploadPath")}
+              fieldDescription="上传文件存储位置，默认在当前执行目录下创建 upload 文件夹。"
               name={"UploadPath"}
               type={"text"}
               value={config.UploadPath}
@@ -163,6 +163,7 @@ function App() {
 
             <InputWithLabel
               label={t("MinImageNum")}
+              fieldDescription="压缩包或文件夹内至少有几张图片，才算作书籍。"
               name={"MinImageNum"}
               type={"number"}
               value={config.MinImageNum}
@@ -172,6 +173,7 @@ function App() {
 
             <InputWithLabel
               label={t("TimeoutLimitForScan")}
+              fieldDescription="扫描文件时，超过几秒钟，就放弃扫描这个文件，避免卡在过大文件上。"
               name={"TimeoutLimitForScan"}
               type={"numbers"}
               value={config.TimeoutLimitForScan}
@@ -181,6 +183,7 @@ function App() {
 
             <InputWithLabel
               label={t("ZipFileTextEncoding")}
+              fieldDescription="非utf-8编码的ZIP文件，尝试用什么编码解析，默认GBK。"
               name={"ZipFileTextEncoding"}
               type={"text"}
               value={config.ZipFileTextEncoding}
@@ -191,12 +194,14 @@ function App() {
             <BoolSwitch
               name={"GenerateMetaData"}
               label={t("GenerateMetaData")}
+              fieldDescription="生成书籍元数据。"
               boolValue={config.GenerateMetaData}
               setBoolValue={setBoolValue}
             ></BoolSwitch>
 
             <StringArrayInput
               label={t("ExcludePath")}
+              fieldDescription=""
               name={"ExcludePath"}
               value={config.ExcludePath}
               setStringArray={setStringArray}
@@ -204,6 +209,7 @@ function App() {
 
             <StringArrayInput
               label={t("SupportMediaType")}
+              fieldDescription=""
               name={"SupportMediaType"}
               value={config.SupportMediaType}
               setStringArray={setStringArray}
@@ -211,6 +217,7 @@ function App() {
 
             <StringArrayInput
               label={t("SupportFileType")}
+              fieldDescription=""
               name={"SupportFileType"}
               value={config.SupportFileType}
               setStringArray={setStringArray}
@@ -222,6 +229,7 @@ function App() {
           <>
             <InputWithLabel
               label={t("Port")}
+              fieldDescription=""
               name={"Port"}
               type={"number"}
               value={config.Port}
@@ -231,6 +239,7 @@ function App() {
 
             <InputWithLabel
               label={t("Host")}
+              fieldDescription=""
               name={"Host"}
               type={"text"}
               value={config.Host}
@@ -241,6 +250,7 @@ function App() {
             <BoolSwitch
               name={"DisableLAN"}
               label={t("DisableLAN")}
+              fieldDescription=""
               boolValue={config.DisableLAN}
               setBoolValue={setBoolValue}
             ></BoolSwitch>
@@ -248,12 +258,14 @@ function App() {
             <BoolSwitch
               name={"EnableLogin"}
               label={t("EnableLogin")}
+              fieldDescription=""
               boolValue={config.EnableLogin}
               setBoolValue={setBoolValue}
             ></BoolSwitch>
 
             {config.EnableLogin && <InputWithLabel
               label={t("Username")}
+              fieldDescription=""
               name={"Username"}
               type={"text"}
               value={config.Username}
@@ -263,6 +275,7 @@ function App() {
 
             {config.EnableLogin && <InputWithLabel
               label={t("Password")}
+              fieldDescription=""
               name={"Password"}
               type={"text"}
               value={config.Password}
@@ -272,6 +285,7 @@ function App() {
 
             <InputWithLabel
               label={t("Timeout")}
+              fieldDescription=""
               name={"Timeout"}
               type={"number"}
               value={config.Timeout}
@@ -282,12 +296,14 @@ function App() {
             <BoolSwitch
               name={"EnableTLS"}
               label={t("EnableTLS")}
+              fieldDescription=""
               boolValue={config.EnableTLS}
               setBoolValue={setBoolValue}
             ></BoolSwitch>
 
             {config.EnableTLS && <InputWithLabel
               label={t("CertFile")}
+              fieldDescription=""
               name={"CertFile"}
               type={"text"}
               value={config.CertFile}
@@ -297,6 +313,7 @@ function App() {
 
             {config.EnableTLS && <InputWithLabel
               label={t("KeyFile")}
+              fieldDescription=""
               name={"KeyFile"}
               type={"text"}
               value={config.KeyFile}
@@ -312,6 +329,7 @@ function App() {
             <BoolSwitch
               name={"EnableDatabase"}
               label={t("EnableDatabase")}
+              fieldDescription=""
               boolValue={config.EnableDatabase}
               setBoolValue={setBoolValue}
             ></BoolSwitch>
@@ -319,6 +337,7 @@ function App() {
             {config.EnableDatabase && <BoolSwitch
               name={"ClearDatabaseWhenExit"}
               label={t("ClearDatabaseWhenExit")}
+              fieldDescription=""
               boolValue={config.ClearDatabaseWhenExit}
               setBoolValue={setBoolValue}
             ></BoolSwitch>}
@@ -326,6 +345,7 @@ function App() {
             <BoolSwitch
               name={"Debug"}
               label={t("Debug")}
+              fieldDescription=""
               boolValue={config.Debug}
               setBoolValue={setBoolValue}
             ></BoolSwitch>
@@ -333,6 +353,7 @@ function App() {
             <BoolSwitch
               name={"LogToFile"}
               label={t("LogToFile")}
+              fieldDescription=""
               boolValue={config.LogToFile}
               setBoolValue={setBoolValue}
             ></BoolSwitch>
@@ -340,6 +361,7 @@ function App() {
             {config.LogToFile &&
               <InputWithLabel
                 label={t("LogFilePath")}
+                fieldDescription=""
                 name={"LogFilePath"}
                 type={"text"}
                 value={config.LogFilePath}
@@ -350,6 +372,7 @@ function App() {
             {config.LogToFile &&
               <InputWithLabel
                 label={t("LogFileName")}
+                fieldDescription=""
                 name={"LogFileName"}
                 type={"text"}
                 value={config.LogFileName}
@@ -361,14 +384,20 @@ function App() {
             <BoolSwitch
               name={"EnableFrpcServer"}
               label={t("EnableFrpcServer")}
+              fieldDescription=""
               boolValue={config.EnableFrpcServer}
               setBoolValue={setBoolValue}
             ></BoolSwitch>
-
           </>
         }
 
       </form>
+      <button
+          type="submit"
+          className="m-2 inline-block rounded-2xl bg-indigo-600 px-8 py-3 text-sm font-medium text-white transition hover:scale-110 hover:shadow-xl focus:outline-none focus:ring active:bg-indigo-500"
+        >
+          保存设置
+        </button>
     </>
   );
 }
