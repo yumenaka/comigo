@@ -2,6 +2,7 @@ import React from "react";
 
 interface Props {
     label: string;
+    fieldDescription: string;
     name: string;
     value: string[];
     setStringArray: (name: string, value: string[]) => void;
@@ -11,6 +12,7 @@ interface Props {
 
 const StringArrayInput: React.FC<Props> = ({
     label,
+    fieldDescription,
     name,
     value,
     setStringArray,
@@ -40,14 +42,14 @@ const StringArrayInput: React.FC<Props> = ({
 
     return (
         <div
-            className="m-1  w-2/3  flex flex-col font-semibold rounded-md shadow-md bg-yellow-100 justify-start items-left">
+            className="m-1  w-2/3  flex flex-col font-semibold rounded-md shadow-md bg-blue-100 justify-start items-left">
             <label className="ml-4 py-1 w-32" htmlFor={name}>
                 {label}:
             </label>
-            <div className="ml-4 py-1 w-3/4 flex flex-row flex-wrap">
+            <div className="ml-2 py-1 w-3/4 flex flex-row flex-wrap">
                 {/* {value.toString()} */}
                 {value.map((item, index) => (
-                    <div key={index} className="px-2 py-1 m-1 flex flex-row items-center rounded-2xl bg-gray-200  text-sm font-medium text-black">
+                    <div key={index} className="px-2 py-1 m-1 flex flex-row items-center rounded-2xl bg-blue-300  text-sm font-medium text-black">
                         {item}
                         {/* https://www.xicons.org/#/ */}
                         <svg onClick={() => remove(index)}
@@ -75,6 +77,7 @@ const StringArrayInput: React.FC<Props> = ({
                 </div>
             </div>
 
+            <div className="ml-4 py-1 w-3/4 text-xs text-gray-500">{fieldDescription}</div>
             <div className="bg-red-600">{error && <div>{error}</div>}</div>
         </div>
     );

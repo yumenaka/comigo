@@ -14,13 +14,13 @@ import (
 type ServerConfig struct {
 	Port                   int             `json:"Port" comment:"Comigo设置文件(config.toml)，放在执行目录中，或$HOME/.config/comigo/下。可用“comi --generate-config”生成本文件\n网页服务端口，此项配置不支持热重载"`
 	Host                   string          `json:"Host" comment:"自定义二维码显示的主机名"`
-	StoresPath             []string        `json:"StoresPath" comment:"设置默认扫描的书库文件夹"`
+	StoresPath             []string        `json:"StoresPath" comment:"默认扫描的书库文件夹"`
 	ExcludePath            []string        `json:"ExcludePath" comment:"需要排除的文件或文件夹"`
 	SupportMediaType       []string        `json:"SupportMediaType" comment:"支持的图片文件后缀"`
 	SupportFileType        []string        `json:"SupportFileType" comment:"支持的书籍压缩包后缀"`
 	MinImageNum            int             `json:"MinImageNum" comment:"压缩包或文件夹内，至少有几张图片，才算作书籍"`
 	TimeoutLimitForScan    int             `json:"TimeoutLimitForScan" comment:"扫描文件时，超过几秒钟，就放弃扫描这个文件，避免卡在特殊文件上"`
-	EnableUpload           bool            `json:"EnableUpload" comment:"启用文件上传功能"`
+	EnableUpload           bool            `json:"EnableUpload" comment:"启用上传功能"`
 	UploadPath             string          `json:"UploadPath" comment:"上传文件存储位置，默认在当前执行目录下创建 upload 文件夹"`
 	MaxScanDepth           int             `json:"MaxScanDepth" comment:"最大扫描深度"`
 	ZipFileTextEncoding    string          `json:"ZipFileTextEncoding" comment:"非utf-8编码的ZIP文件，尝试用什么编码解析，默认GBK"`
@@ -37,7 +37,7 @@ type ServerConfig struct {
 	CertFile               string          `json:"CertFile" comment:"TLS/SSL 证书文件路径 (default: "~/.config/.comigo/cert.crt")"`
 	KeyFile                string          `json:"KeyFile" comment:"TLS/SSL key file path (default: "~/.config/.comigo/key.key")"`
 	UseCache               bool            `json:"UseCache" comment:"开启本地图片缓存，可以加快二次读取，但会占用硬盘空间"`
-	CachePath              string          `json:"CachePath" comment:"开启本地图片缓存位置，默认系统临时文件夹"`
+	CachePath              string          `json:"CachePath" comment:"本地图片缓存位置，默认系统临时文件夹"`
 	ClearCacheExit         bool            `json:"ClearCacheExit" comment:"退出程序的时候，清理web图片缓存"`
 	EnableDatabase         bool            `json:"EnableDatabase" comment:"启用本地数据库，保存扫描到的书籍数据"`
 	ClearDatabaseWhenExit  bool            `json:"ClearDatabaseWhenExit" comment:"启用本地数据库时，扫描完成后，清除不存在的书籍"`

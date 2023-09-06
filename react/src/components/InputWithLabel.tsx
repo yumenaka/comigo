@@ -1,7 +1,8 @@
 import React from "react";
 
-interface Props {
+interface InputWithLabelProps {
     label: string;
+    fieldDescription: string;
     name: string;
     type: string;
     value: string | number | [];
@@ -11,17 +12,26 @@ interface Props {
     // register?: any;
 }
 
-const InputWithLabel: React.FC<Props> = ({
+
+
+const InputWithLabel = ({
     label,
+    fieldDescription,
     name,
     type,
     value,
     onChange,
     placeholder,
     error,
-}) => {
+}: InputWithLabelProps) => {
+
+    // const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    //     event.preventDefault();
+    //     console.log("Form submitted!");
+    // };
+
     return (
-        <div className="m-2 py-2 px-4 flex flex-col w-2/3  font-semibold rounded-md shadow-md bg-yellow-100 justify-start items-left">
+        <div className="m-2 py-2 px-4 flex flex-col w-2/3  font-semibold rounded-md shadow-md bg-blue-100 justify-start items-left">
             <label htmlFor={name} className="w-64">
                 {label}:
             </label>
@@ -33,7 +43,9 @@ const InputWithLabel: React.FC<Props> = ({
                 value={value}
                 onChange={onChange}
                 placeholder={placeholder}
+                // onBlur={handleSubmit} // 使用 onBlur 事件来监听输入框的失去焦点事件
             />
+            <div className="py-1 w-3/4 text-xs text-gray-500">{fieldDescription}</div>
             <div className="bg-red-600">{error && <div>{error}</div>}</div>
         </div>
     );
