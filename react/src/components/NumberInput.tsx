@@ -9,12 +9,12 @@ type PropsType = {
 
 const NumberInput = (props: PropsType) => {
     return (
-        <div className="flex flex-row w-2/3 m-1 p-2 pl-8 font-semibold rounded-md shadow-md bg-blue-100 justify-start items-center">
+        <div className="w-full m-1 p-2 flex flex-row font-semibold rounded-md shadow-md bg-blue-100 justify-start items-center">
             <label htmlFor="Port" className="w-32 border border-black rounded-md">
                 {props.nameText}:
             </label>
             <input
-                className="rounded ml-2 px-1"
+                className="px-1 w-32 rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm"
                 id="Port"
                 type="number"
                 placeholder="Port"
