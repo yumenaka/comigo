@@ -97,7 +97,6 @@ function App() {
         onSubmit={onSubmit}
         className="card w-3/5 min-w-[24rem] flex flex-col justify-center items-center"
       >
-    
         {show === "bookstore" &&
           <>
             <StringArrayInput
@@ -391,7 +390,6 @@ function App() {
             ></BoolSwitch>
           </>
         }
-
       </form>
       <button
           type="submit"
