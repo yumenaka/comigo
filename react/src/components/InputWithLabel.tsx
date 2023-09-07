@@ -31,12 +31,12 @@ const InputWithLabel = ({
     // };
 
     return (
-        <div className="m-2 py-2 px-4 flex flex-col w-2/3  font-semibold rounded-md shadow-md bg-blue-100 justify-start items-left">
+        <div className="w-full m-1 p-2 flex flex-col font-semibold rounded-md shadow-md bg-blue-100 justify-start items-left">
             <label htmlFor={name} className="w-64">
                 {label}:
             </label>
             <input
-                className="h-8  px-1 w-24 border border-black rounded-md shadow-sm sm:text-sm"
+                className="px-1 w-32 rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm"
                 id={name}
                 name={name}
                 type={type}

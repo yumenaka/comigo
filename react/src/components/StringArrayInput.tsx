@@ -42,14 +42,14 @@ const StringArrayInput: React.FC<Props> = ({
 
     return (
         <div
-            className="m-1  w-2/3  flex flex-col font-semibold rounded-md shadow-md bg-blue-100 justify-start items-left">
-            <label className="ml-4 py-1 w-32" htmlFor={name}>
+            className="w-full m-1 p-2 flex flex-col font-semibold rounded-md shadow-md bg-blue-100 justify-start items-left">
+            <label className="py-0 w-32" htmlFor={name}>
                 {label}:
             </label>
-            <div className="ml-2 py-1 w-3/4 flex flex-row flex-wrap">
+            <div className="py-1 w-3/4 flex flex-row flex-wrap">
                 {/* {value.toString()} */}
                 {value.map((item, index) => (
-                    <div key={index} className="px-2 py-1 m-1 flex flex-row items-center rounded-2xl bg-blue-300  text-sm font-medium text-black">
+                    <div key={index} className="p-2  m-1 flex flex-row items-center rounded-2xl bg-blue-300  text-sm font-medium text-black">
                         {item}
                         {/* https://www.xicons.org/#/ */}
                         <svg onClick={() => remove(index)}
@@ -64,7 +64,7 @@ const StringArrayInput: React.FC<Props> = ({
                         type="text"
                         id="Search"
                         placeholder="Add new..."
-                        className="w-full rounded-md border-gray-200 py-2.5 pe-10 shadow-sm sm:text-sm"
+                        className="w-full rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm"
                         onKeyDown={onEnter}
                     ></input>
 
@@ -77,7 +77,7 @@ const StringArrayInput: React.FC<Props> = ({
                 </div>
             </div>
 
-            <div className="ml-4 py-1 w-3/4 text-xs text-gray-500">{fieldDescription}</div>
+            <div className="ml-2 py-1 w-3/4 text-xs text-gray-500">{fieldDescription}</div>
             <div className="bg-red-600">{error && <div>{error}</div>}</div>
         </div>
     );

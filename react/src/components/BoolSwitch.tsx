@@ -17,7 +17,7 @@ const BoolSwitch = (props: PropsType) => {
     }
 
     return (
-        <div className="w-2/3 m-1 p-2 pl-4 flex flex-col  font-semibold rounded-md shadow-md bg-blue-100 justify-left items-left">
+        <div className="w-full m-1 p-2 flex flex-col font-semibold rounded-md shadow-md bg-blue-100 justify-left items-left">
             <div className="w-32">{nameText}</div>
             <Switch
                 className={`${boolValue ? 'bg-blue-500' : 'bg-gray-400'}

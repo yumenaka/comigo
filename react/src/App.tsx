@@ -95,8 +95,9 @@ function App() {
       <Contained show={show} setShow={setShow} />
       <form
         onSubmit={onSubmit}
-        className="card w-full flex flex-col justify-center items-center"
+        className="card w-3/5 min-w-[24rem] flex flex-col justify-center items-center"
       >
+    
         {show === "bookstore" &&
           <>
             <StringArrayInput
@@ -153,7 +154,7 @@ function App() {
 
             {config.EnableUpload && <InputWithLabel
               label={t("UploadPath")}
-              fieldDescription="上传文件存储位置，默认在当前执行目录下创建 upload 文件夹。"
+              fieldDescription="自定义上传文件存储位置，默认在当前执行目录下创建 upload 文件夹。"
               name={"UploadPath"}
               type={"text"}
               value={config.UploadPath}
@@ -183,7 +184,7 @@ function App() {
 
             <InputWithLabel
               label={t("ZipFileTextEncoding")}
-              fieldDescription="非utf-8编码的ZIP文件，尝试用什么编码解析，默认GBK。"
+              fieldDescription="非utf-8编码ZIP文件，尝试用什么编码解析。默认GBK。"
               name={"ZipFileTextEncoding"}
               type={"text"}
               value={config.ZipFileTextEncoding}
@@ -194,14 +195,14 @@ function App() {
             <BoolSwitch
               name={"GenerateMetaData"}
               label={t("GenerateMetaData")}
-              fieldDescription="生成书籍元数据。"
+              fieldDescription="生成书籍元数据。当前未生效。"
               boolValue={config.GenerateMetaData}
               setBoolValue={setBoolValue}
             ></BoolSwitch>
 
             <StringArrayInput
               label={t("ExcludePath")}
-              fieldDescription=""
+              fieldDescription="扫描书籍的时候，需要排除的文件或文件夹的名字"
               name={"ExcludePath"}
               value={config.ExcludePath}
               setStringArray={setStringArray}
@@ -209,7 +210,7 @@ function App() {
 
             <StringArrayInput
               label={t("SupportMediaType")}
-              fieldDescription=""
+              fieldDescription="扫描压缩包时，用于统计图片数量的图片文件后缀"
               name={"SupportMediaType"}
               value={config.SupportMediaType}
               setStringArray={setStringArray}
@@ -217,7 +218,7 @@ function App() {
 
             <StringArrayInput
               label={t("SupportFileType")}
-              fieldDescription=""
+              fieldDescription="扫描文件时，用于决定跳过，还是算作书籍处理的文件后缀"
               name={"SupportFileType"}
               value={config.SupportFileType}
               setStringArray={setStringArray}
@@ -229,7 +230,7 @@ function App() {
           <>
             <InputWithLabel
               label={t("Port")}
-              fieldDescription=""
+              fieldDescription="网页服务端口，此项配置不支持热重载"
               name={"Port"}
               type={"number"}
               value={config.Port}
@@ -239,7 +240,7 @@ function App() {
 
             <InputWithLabel
               label={t("Host")}
-              fieldDescription=""
+              fieldDescription="自定义二维码显示的主机名。默认为网卡IP。"
               name={"Host"}
               type={"text"}
               value={config.Host}
@@ -250,7 +251,7 @@ function App() {
             <BoolSwitch
               name={"DisableLAN"}
               label={t("DisableLAN")}
-              fieldDescription=""
+              fieldDescription="只在本机提供阅读服务，不对外共享，此项配置不支持热重载"
               boolValue={config.DisableLAN}
               setBoolValue={setBoolValue}
             ></BoolSwitch>
@@ -258,14 +259,14 @@ function App() {
             <BoolSwitch
               name={"EnableLogin"}
               label={t("EnableLogin")}
-              fieldDescription=""
+              fieldDescription="是否启用登录。默认不需要登陆。此项配置不支持热重载。"
               boolValue={config.EnableLogin}
               setBoolValue={setBoolValue}
             ></BoolSwitch>
 
             {config.EnableLogin && <InputWithLabel
               label={t("Username")}
-              fieldDescription=""
+              fieldDescription="启用登陆后，登录界面需要的用户名。"
               name={"Username"}
               type={"text"}
               value={config.Username}
@@ -275,7 +276,7 @@ function App() {
 
             {config.EnableLogin && <InputWithLabel
               label={t("Password")}
-              fieldDescription=""
+              fieldDescription="启用登陆后，登录界面需要的密码。"
               name={"Password"}
               type={"text"}
               value={config.Password}
@@ -285,7 +286,7 @@ function App() {
 
             <InputWithLabel
               label={t("Timeout")}
-              fieldDescription=""
+              fieldDescription="启用登陆后，cookie过期的时间。单位为分钟。默认180分钟后过期。"
               name={"Timeout"}
               type={"number"}
               value={config.Timeout}
@@ -296,14 +297,14 @@ function App() {
             <BoolSwitch
               name={"EnableTLS"}
               label={t("EnableTLS")}
-              fieldDescription=""
+              fieldDescription="是否启用HTTPS协议。需要设置证书于key文件。"
               boolValue={config.EnableTLS}
               setBoolValue={setBoolValue}
             ></BoolSwitch>
 
             {config.EnableTLS && <InputWithLabel
               label={t("CertFile")}
-              fieldDescription=""
+              fieldDescription='TLS/SSL 证书文件路径 (default: 、"~/.config/.comigo/cert.crt")'
               name={"CertFile"}
               type={"text"}
               value={config.CertFile}
@@ -313,7 +314,7 @@ function App() {
 
             {config.EnableTLS && <InputWithLabel
               label={t("KeyFile")}
-              fieldDescription=""
+              fieldDescription='TLS/SSL key文件路径 (default: "~/.config/.comigo/key.key")'
               name={"KeyFile"}
               type={"text"}
               value={config.KeyFile}
@@ -329,7 +330,7 @@ function App() {
             <BoolSwitch
               name={"EnableDatabase"}
               label={t("EnableDatabase")}
-              fieldDescription=""
+              fieldDescription="启用本地数据库，保存扫描到的书籍数据。此项配置不支持热重载。"
               boolValue={config.EnableDatabase}
               setBoolValue={setBoolValue}
             ></BoolSwitch>
@@ -337,7 +338,7 @@ function App() {
             {config.EnableDatabase && <BoolSwitch
               name={"ClearDatabaseWhenExit"}
               label={t("ClearDatabaseWhenExit")}
-              fieldDescription=""
+              fieldDescription="启用本地数据库时，扫描完成后，清除不存在的书籍。"
               boolValue={config.ClearDatabaseWhenExit}
               setBoolValue={setBoolValue}
             ></BoolSwitch>}
@@ -353,7 +354,7 @@ function App() {
             <BoolSwitch
               name={"LogToFile"}
               label={t("LogToFile")}
-              fieldDescription=""
+              fieldDescription="是否保存程序Log到本地文件。默认不保存。"
               boolValue={config.LogToFile}
               setBoolValue={setBoolValue}
             ></BoolSwitch>
@@ -361,7 +362,7 @@ function App() {
             {config.LogToFile &&
               <InputWithLabel
                 label={t("LogFilePath")}
-                fieldDescription=""
+                fieldDescription="Log文件的保存位置"
                 name={"LogFilePath"}
                 type={"text"}
                 value={config.LogFilePath}
@@ -372,7 +373,7 @@ function App() {
             {config.LogToFile &&
               <InputWithLabel
                 label={t("LogFileName")}
-                fieldDescription=""
+                fieldDescription="Log文件名"
                 name={"LogFileName"}
                 type={"text"}
                 value={config.LogFileName}
@@ -384,7 +385,7 @@ function App() {
             <BoolSwitch
               name={"EnableFrpcServer"}
               label={t("EnableFrpcServer")}
-              fieldDescription=""
+              fieldDescription="后台启动FrpClient。"
               boolValue={config.EnableFrpcServer}
               setBoolValue={setBoolValue}
             ></BoolSwitch>
