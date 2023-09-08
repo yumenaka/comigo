@@ -102,6 +102,8 @@ func UpdateConfig(oldConfig ServerConfig, jsonString string) (newConfig ServerCo
 	}
 	OpenBrowser := gjson.Get(jsonString, "OpenBrowser")
 	if OpenBrowser.Exists() {
+		//fmt.Println("jsonString:" + jsonString)
+		//fmt.Println(OpenBrowser.Bool())
 		newConfig.OpenBrowser = OpenBrowser.Bool()
 	}
 	DisableLAN := gjson.Get(jsonString, "DisableLAN")
@@ -182,14 +184,7 @@ func UpdateConfig(oldConfig ServerConfig, jsonString string) (newConfig ServerCo
 	if Timeout.Exists() {
 		newConfig.Timeout = int(Timeout.Int())
 	}
-	EnableFrpcServer := gjson.Get(jsonString, "EnableFrpcServer")
-	if EnableFrpcServer.Exists() {
-		newConfig.EnableFrpcServer = EnableFrpcServer.Bool()
-	}
-	FrpConfig := gjson.Get(jsonString, "FrpConfig")
-	if FrpConfig.Exists() {
-		//newConfig.FrpConfig = strings.Split(FrpConfig.String(), ",")
-	}
+
 	GenerateMetaData := gjson.Get(jsonString, "GenerateMetaData")
 	if GenerateMetaData.Exists() {
 		newConfig.GenerateMetaData = GenerateMetaData.Bool()

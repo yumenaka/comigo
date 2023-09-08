@@ -15,7 +15,6 @@ type Action = {
 export function configReducer(c: Config, action: Action) {
     switch (action.type) {
         case "downloadConfig":
-            // console.log(action);
             return { ...action.config };
         case "boolConfig":
             return { ...c, [action.name]: action.value };
@@ -64,15 +63,5 @@ export const defaultConfig:Config={
     LogFilePath: "",
     LogFileName: "",
     ZipFileTextEncoding: "utf-8",
-    EnableFrpcServer: false,
-    FrpConfig: {
-        FrpcCommand: "",
-        ServerAddr: "",
-        ServerPort: 0,
-        Token: "",
-        FrpType: "",
-        RemotePort: 0,
-        RandomRemotePort: false
-    },
     GenerateMetaData: false,
 }

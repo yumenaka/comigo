@@ -36,16 +36,16 @@ var (
 		DisableLAN:            false,
 		DefaultMode:           "scroll",
 		LogToFile:             false,
-		EnableFrpcServer:      false,
-		FrpConfig: settings.FrpClientConfig{
-			FrpcCommand:      "frpc",
-			ServerAddr:       "localhost", //server_addr
-			ServerPort:       7000,        //server_port
-			Token:            "&&%%!2356",
-			FrpType:          "tcp",
-			RemotePort:       50000, //remote_port
-			RandomRemotePort: true,
-		},
+		//EnableFrpcServer:      false,
+		//FrpConfig: settings.FrpClientConfig{
+		//	FrpcCommand:      "frpc",
+		//	ServerAddr:       "localhost", //server_addr
+		//	ServerPort:       7000,        //server_port
+		//	Token:            "&&%%!2356",
+		//	FrpType:          "tcp",
+		//	RemotePort:       50000, //remote_port
+		//	RandomRemotePort: true,
+		//},
 		//WebpConfig: WebPServerConfig{
 		//	WebpCommand:  "webp-server",
 		//	HOST:         "127.0.0.1",

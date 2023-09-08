@@ -364,33 +364,24 @@ func DetectUTF8(s string) (valid, require bool) {
 }
 
 // PrintAllReaderURL 打印阅读链接
-func PrintAllReaderURL(Port int, OpenBrowserFlag bool, EnableFrpcServer bool, PrintAllPossibleQRCode bool, ServerHost string, ServerAddr string, FrpRemotePort int, DisableLAN bool, enableTls bool, etcStr string) {
+func PrintAllReaderURL(Port int, OpenBrowserFlag bool, PrintAllPossibleQRCode bool, ServerHost string, DisableLAN bool, enableTls bool, etcStr string) {
 	protocol := "http://"
 	if enableTls {
 		protocol = "https://"
 	}
 	localURL := protocol + "127.0.0.1:" + strconv.Itoa(Port) + etcStr
 	fmt.Println(locale.GetString("local_reading") + localURL + etcStr)
-	//PrintQRCode(localURL)
 	//打开浏览器
 	if OpenBrowserFlag {
 		OpenBrowser(protocol + "127.0.0.1:" + strconv.Itoa(Port) + etcStr)
-		if EnableFrpcServer {
-			OpenBrowser(protocol + ServerAddr + ":" + strconv.Itoa(FrpRemotePort) + etcStr)
-		}
 	}
 	if !DisableLAN {
-		printURLAndQRCode(Port, EnableFrpcServer, PrintAllPossibleQRCode, ServerHost, ServerAddr, FrpRemotePort, protocol, etcStr)
+		printURLAndQRCode(Port, PrintAllPossibleQRCode, ServerHost, protocol, etcStr)
 	}
 }
 
-func printURLAndQRCode(port int, EnableFrpcServer bool, PrintAllPossibleQRCode bool, ServerHost string, ServerAddr string, FrpRemotePort int, protocol string, etcStr string) {
-	//启用Frp的时候
-	if EnableFrpcServer {
-		readURL := protocol + ServerAddr + ":" + strconv.Itoa(FrpRemotePort) + etcStr
-		fmt.Println(locale.GetString("frp_reading_url_is") + readURL)
-		PrintQRCode(readURL)
-	}
+func printURLAndQRCode(port int, PrintAllPossibleQRCode bool, ServerHost string, protocol string, etcStr string) {
+
 	if ServerHost != "" {
 		readURL := protocol + ServerHost + ":" + strconv.Itoa(port) + etcStr
 		fmt.Println(locale.GetString("reading_url_maybe") + readURL)

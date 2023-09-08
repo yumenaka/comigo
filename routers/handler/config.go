@@ -6,10 +6,12 @@ import (
 	"github.com/pelletier/go-toml/v2"
 	"github.com/yumenaka/comi/common"
 	"github.com/yumenaka/comi/settings"
+	"github.com/yumenaka/comi/tools"
 	"io"
 	"log"
 	"net/http"
 	"reflect"
+	"strconv"
 )
 
 // GetJsonConfigHandler 获取json格式的当前配置
@@ -38,6 +40,15 @@ func UpdateConfigHandler(c *gin.Context) {
 		fmt.Println(err.Error())
 		c.JSON(http.StatusMethodNotAllowed, gin.H{"error": "Failed to parse JSON data"})
 		return
+	}
+	fmt.Printf("newConfig.OpenBrowser %t common.Config.OpenBrowser %t \n", newConfig.OpenBrowser, common.Config.OpenBrowser)
+	if (newConfig.OpenBrowser == false) && (common.Config.OpenBrowser == true) {
+		//fmt.Printf("newConfig.OpenBrowser %t common.Config.OpenBrowser %t \n", newConfig.OpenBrowser, common.Config.OpenBrowser)
+		protocol := "http://"
+		if newConfig.EnableTLS {
+			protocol = "https://"
+		}
+		tools.OpenBrowser(protocol + "127.0.0.1:" + strconv.Itoa(newConfig.Port))
 	}
 
 	if !reflect.DeepEqual(common.Config.StoresPath, newConfig.StoresPath) {
