@@ -33,7 +33,7 @@ func StartWebServer() {
 	//3、setWebpServer
 	//setWebpServer(engine)
 	//4、setFrpClient
-	setFrpClient()
+	//setFrpClient()
 	//5、printQRCodeInCMD
 	printQRCodeInCMD()
 	//6、StartGinEngine 监听并启动web服务

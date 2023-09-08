@@ -15,7 +15,6 @@ function App() {
   const baseURL = "/api";
   const { t } = useTranslation();
   const [show, setShow] = useState("bookstore")
-  // nullは型に含めず、useStateの初期値が決まらないという場合には、型アサーションで逃げる手もあります。 https://qiita.com/FumioNonaka/items/4361d1cdf34ffb5a5338
   const [config, dispatch] = useReducer(configReducer, defaultConfig);
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -57,17 +56,19 @@ function App() {
       value: value,
       config: config
     });
+    autoSubmit();
   };
 
   const setNumberValue = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    console.log(typeof value);
+    // console.log(typeof value);
     dispatch({
       type: 'numberConfig',
       name: name,
       value: value,
       config: config
     });
+    autoSubmit();
   };
 
   const setBoolValue = (value: boolean, valueName: string) => {
@@ -78,6 +79,7 @@ function App() {
       value: value,
       config: config
     });
+    autoSubmit();
   };
 
   const setStringArray = (valueName: string, value: string[]) => {
@@ -87,8 +89,18 @@ function App() {
       value: value,
       config: config
     });
+    autoSubmit();
   };
 
+  const autoSubmit = () => {
+    axios.post("/api/update_config", config).then((response) => {
+      console.log("Data sent successfully");
+      console.info(response.data);//axios默认解析Json，所以 response.data 就是解析后的object
+    })
+      .catch((error) => {
+        console.error("Error sending data:", error);
+      });
+  };
 
   return (
     <>
@@ -124,24 +136,6 @@ function App() {
               boolValue={config.OpenBrowser}
               setBoolValue={setBoolValue}
             ></BoolSwitch>
-
-            <BoolSwitch
-              name={"ClearCacheExit"}
-              label={t("ClearCacheExit")}
-              fieldDescription="退出程序的时候，清理web图片缓存。"
-              boolValue={config.ClearCacheExit}
-              setBoolValue={setBoolValue}
-            ></BoolSwitch>
-
-            <InputWithLabel
-              label={t("CachePath")}
-              fieldDescription="本地图片缓存位置，默认系统临时文件夹。"
-              name={"CachePath"}
-              type={"text"}
-              value={config.CachePath}
-              onChange={setStringValue}
-              placeholder={"CachePath"}
-            ></InputWithLabel>
 
             <BoolSwitch
               name={"EnableUpload"}
@@ -190,14 +184,6 @@ function App() {
               onChange={setStringValue}
               placeholder={"ZipFileTextEncoding"}
             />
-
-            <BoolSwitch
-              name={"GenerateMetaData"}
-              label={t("GenerateMetaData")}
-              fieldDescription="生成书籍元数据。当前未生效。"
-              boolValue={config.GenerateMetaData}
-              setBoolValue={setBoolValue}
-            ></BoolSwitch>
 
             <StringArrayInput
               label={t("ExcludePath")}
@@ -382,21 +368,39 @@ function App() {
             }
 
             <BoolSwitch
-              name={"EnableFrpcServer"}
-              label={t("EnableFrpcServer")}
-              fieldDescription="后台启动FrpClient。"
-              boolValue={config.EnableFrpcServer}
+              name={"GenerateMetaData"}
+              label={t("GenerateMetaData")}
+              fieldDescription="生成书籍元数据。当前未生效。"
+              boolValue={config.GenerateMetaData}
               setBoolValue={setBoolValue}
             ></BoolSwitch>
+
+            <BoolSwitch
+              name={"ClearCacheExit"}
+              label={t("ClearCacheExit")}
+              fieldDescription="退出程序的时候，清理web图片缓存。"
+              boolValue={config.ClearCacheExit}
+              setBoolValue={setBoolValue}
+            ></BoolSwitch>
+
+            <InputWithLabel
+              label={t("CachePath")}
+              fieldDescription="本地图片缓存位置，默认系统临时文件夹。"
+              name={"CachePath"}
+              type={"text"}
+              value={config.CachePath}
+              onChange={setStringValue}
+              placeholder={"CachePath"}
+            ></InputWithLabel>
           </>
         }
       </form>
       <button
-          type="submit"
-          className="m-2 inline-block rounded-2xl bg-indigo-600 px-8 py-3 text-sm font-medium text-white transition hover:scale-110 hover:shadow-xl focus:outline-none focus:ring active:bg-indigo-500"
-        >
-          保存设置
-        </button>
+        type="submit"
+        className="m-2 inline-block rounded-2xl bg-indigo-600 px-8 py-3 text-sm font-medium text-white transition hover:scale-110 hover:shadow-xl focus:outline-none focus:ring active:bg-indigo-500"
+      >
+        保存设置
+      </button>
     </>
   );
 }

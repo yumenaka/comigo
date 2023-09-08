@@ -1,4 +1,3 @@
-import { Switch } from '@headlessui/react'
 
 
 type PropsType = {
@@ -10,28 +9,26 @@ type PropsType = {
 }
 
 const BoolSwitch = (props: PropsType) => {
-    const { name, label: nameText,fieldDescription, boolValue, setBoolValue } = props
-
+    const { name, label: nameText, fieldDescription, boolValue, setBoolValue } = props
     const onChange = () => {
         setBoolValue(!boolValue, name)
     }
-
     return (
         <div className="w-full m-1 p-2 flex flex-col font-semibold rounded-md shadow-md bg-blue-100 justify-left items-left">
             <div className="w-32">{nameText}</div>
-            <Switch
-                className={`${boolValue ? 'bg-blue-500' : 'bg-gray-400'}
-                    px-1.5 py-0 relative inline-flex h-[30px] w-[76px] shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75`}
-                onChange={onChange}
-                name={name}
-            >
-                <span className="sr-only">Use setting</span>
+
+            <label htmlFor="AcceptConditions" className="relative h-8 w-14 cursor-pointer">
+                <input type="checkbox"  checked={boolValue}  id="AcceptConditions" className="peer sr-only" onChange={onChange} />
+
                 <span
-                    aria-hidden="true"
-                    className={`${boolValue ? 'translate-x-9' : 'translate-x-0'}
-                        pointer-events-none inline-block h-[25px] w-[25px] transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out`}
-                />
-            </Switch>
+                    className="absolute inset-0 rounded-full bg-gray-300 transition peer-checked:bg-green-500"
+                ></span>
+
+                <span
+                    className="absolute inset-y-0 start-0 m-1 h-6 w-6 rounded-full bg-white transition-all peer-checked:start-6"
+                ></span>
+            </label>
+
             <div className="py-1 w-3/4 text-xs text-gray-500">{fieldDescription}</div>
         </div>
     )

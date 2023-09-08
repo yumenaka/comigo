@@ -78,21 +78,7 @@ func init() {
 	//rootCmd.PersistentFlags().StringVar(&common.Config.WebpConfig.WebpCommand, "webp-command", "webp-server", locale.GetString("WEBP_COMMAND"))
 	//webp压缩质量
 	//rootCmd.PersistentFlags().IntVarP(&common.Config.WebpConfig.QUALITY, "webp-quality", "q", 85, locale.GetString("WEBP_QUALITY"))
-	////Frpc相关  拆分成子命令？
-	//frp反向代理
-	rootCmd.PersistentFlags().BoolVarP(&common.Config.EnableFrpcServer, "frpc", "f", false, locale.GetString("ENABLE_FRPC"))
-	//frps_addr
-	rootCmd.PersistentFlags().StringVar(&common.Config.FrpConfig.ServerAddr, "frps-addr", "frps.example.com", locale.GetString("FRP_SERVER_ADDR"))
-	//frps server_port
-	rootCmd.PersistentFlags().IntVar(&common.Config.FrpConfig.ServerPort, "frps-port", 7000, locale.GetString("FRP_SERVER_PORT"))
-	//frp token
-	rootCmd.PersistentFlags().StringVar(&common.Config.FrpConfig.Token, "token", "token_secret_sample", locale.GetString("FRP_TOKEN"))
-	//frpc命令,或frpc可执行文件路径
-	rootCmd.PersistentFlags().StringVar(&common.Config.FrpConfig.FrpcCommand, "frpc-command", "frpc", locale.GetString("FRP_COMMAND"))
-	//frpc random remote_port
-	rootCmd.PersistentFlags().BoolVar(&common.Config.FrpConfig.RandomRemotePort, "frps-random-remote", true, locale.GetString("FRP_RANDOM_REMOTE_PORT"))
-	//frpc remote_port
-	rootCmd.PersistentFlags().IntVar(&common.Config.FrpConfig.RemotePort, "frps-remote-port", 50000, locale.GetString("FRP_REMOTE_PORT"))
+
 	//输出log文件
 	rootCmd.PersistentFlags().BoolVar(&common.Config.LogToFile, "log", false, locale.GetString("LOG_TO_FILE"))
 	//web图片缓存
@@ -107,10 +93,7 @@ func init() {
 
 	//手动指定zip文件编码 gbk、shiftjis……
 	rootCmd.PersistentFlags().StringVar(&common.Config.ZipFileTextEncoding, "zip-encode", "gbk", locale.GetString("ZIP_ENCODE"))
-	//尚未写完的功能
-	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFileName, "log_name", "comigo", "log文件名")
-	//rootCmd.PersistentFlags().StringVar(&common.Config.LogFilePath, "log_path", "~", "log文件位置")
-	//rootCmd.PersistentFlags().BoolVarP(&common.PrintVersion, "version", "runtimeViper", false, "输出版本号")
+
 	//cobra & viper sample:https://qiita.com/nirasan/items/cc2ab5bc2889401fe596
 	// rootCmd.Run() 运行前的初始化定义。
 	// 运行前后顺序：rootCmd.Execute → 命令行参数的处理 → cobra.OnInitialize → rootCmd.Run、

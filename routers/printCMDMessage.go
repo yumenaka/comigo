@@ -35,11 +35,8 @@ func printQRCodeInCMD() {
 	tools.PrintAllReaderURL(
 		common.Config.Port,
 		common.Config.OpenBrowser,
-		common.Config.EnableFrpcServer,
 		common.Config.PrintAllPossibleQRCode,
 		OutIP,
-		common.Config.FrpConfig.ServerAddr,
-		common.Config.FrpConfig.RemotePort,
 		common.Config.DisableLAN,
 		enableTls,
 		etcStr)

@@ -36,7 +36,7 @@ const InputWithLabel = ({
                 {label}:
             </label>
             <input
-                className="px-1 w-32 rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm"
+                className="px-1 w-64 rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm"
                 id={name}
                 name={name}
                 type={type}
