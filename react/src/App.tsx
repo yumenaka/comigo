@@ -97,7 +97,7 @@ function App() {
   };
 
   return (
-    <div className={`w-full h-full flex flex-col justify-center items-center  ${BackgroundColor} `} >
+    <div className={`w-full h-full min-h-screen flex flex-col justify-start items-center ${BackgroundColor} bg-primary`} >
       <Contained show={show} setShow={setShow} />
       <div
         className={`card w-3/5 min-w-[24rem] flex flex-col justify-center items-center`} 

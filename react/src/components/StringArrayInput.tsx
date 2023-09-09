@@ -44,20 +44,20 @@ const StringArrayInput: React.FC<Props> = ({
         // 当前颜色
         const tempInterfaceColor = localStorage.getItem("InterfaceColor");
         if (tempInterfaceColor !== null) {
-            setInterfaceColor(tempInterfaceColor)
+            setInterfaceColor("bg-["+tempInterfaceColor+"]")
         }
     }, []);
 
     return (
         <div
-            className={`w-full m-1 p-2 flex flex-col font-semibold rounded-md shadow-md bg-blue-100 justify-start items-left ${InterfaceColor}`}>
+            className={`w-full m-1 p-2 flex flex-col font-semibold rounded-md shadow-md justify-start items-left  ${InterfaceColor}`}>
             <label className="py-0 w-32" htmlFor={name}>
                 {label}:
             </label>
             <div className="py-1 w-3/4 flex flex-row flex-wrap">
                 {/* {value.toString()} */}
                 {value.map((item, index) => (
-                    <div key={index} className="p-2  m-1 flex flex-row items-center rounded-2xl bg-blue-300  text-sm font-medium text-black">
+                    <div key={index} className="p-2  m-1 flex flex-row items-center rounded-2xl bg-blue-300 text-sm font-medium text-black">
                         {item}
                         {/* https://www.xicons.org/#/ */}
                         <svg onClick={() => remove(index)}
