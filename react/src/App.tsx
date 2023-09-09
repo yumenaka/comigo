@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 // import { useForm } from "react-hook-form";
 import Contained from "./components/Contained";
 import Config from "./types/Config";
-import StringInput from "./components/StringInput";
+import NormalInput from "./components/NormalInput";
 import StringArrayInput from "./components/StringArrayInput";
 import BoolSwitch from "./components/BoolInput";
 import { useState } from "react";
@@ -124,7 +124,7 @@ function App() {
               setStringArray={setStringArray}
             ></StringArrayInput>
 
-            <StringInput
+            <NormalInput
               label={t("MaxScanDepth")}
               fieldDescription="最大扫描深度。超过深度的文件不会被扫描。当前执行目录为基准。"
               name={"MaxScanDepth"}
@@ -133,9 +133,9 @@ function App() {
               InterfaceColor={InterfaceColor}
               onChange={setNumberValue}
               placeholder={"MaxScanDepth"}
-            ></StringInput>
+            ></NormalInput>
 
-            {config.EnableUpload && <StringInput
+            {config.EnableUpload && <NormalInput
               label={t("UploadPath")}
               fieldDescription="自定义上传文件存储位置，默认在当前执行目录下创建 upload 文件夹。"
               name={"UploadPath"}
@@ -146,7 +146,7 @@ function App() {
               placeholder={"UploadPath"}
             />}
 
-            <StringInput
+            <NormalInput
               label={t("MinImageNum")}
               fieldDescription="压缩包或文件夹内至少有几张图片，才算作书籍。"
               name={"MinImageNum"}
@@ -155,20 +155,20 @@ function App() {
               InterfaceColor={InterfaceColor}
               onChange={setNumberValue}
               placeholder={"MinImageNum"}
-            ></StringInput>
+            ></NormalInput>
 
-            <StringInput
+            <NormalInput
               label={t("TimeoutLimitForScan")}
               fieldDescription="扫描文件时，超过几秒钟，就放弃扫描这个文件，避免卡在过大文件上。"
               name={"TimeoutLimitForScan"}
-              type={"numbers"}
+              type={"number"}
               value={config.TimeoutLimitForScan}
               InterfaceColor={InterfaceColor}
               onChange={setNumberValue}
               placeholder={"TimeoutLimitForScan"}
             />
 
-            <StringInput
+            <NormalInput
               label={t("ZipFileTextEncoding")}
               fieldDescription="非utf-8编码ZIP文件，尝试用什么编码解析。默认GBK。"
               name={"ZipFileTextEncoding"}
@@ -210,7 +210,7 @@ function App() {
 
         {show === "internet" &&
           <>
-            <StringInput
+            <NormalInput
               label={t("Port")}
               fieldDescription="网页服务端口，此项配置不支持热重载"
               name={"Port"}
@@ -219,9 +219,9 @@ function App() {
               InterfaceColor={InterfaceColor}
               onChange={setNumberValue}
               placeholder={"Port"}
-            ></StringInput>
+            ></NormalInput>
 
-            <StringInput
+            <NormalInput
               label={t("Host")}
               fieldDescription="自定义二维码显示的主机名。默认为网卡IP。"
               name={"Host"}
@@ -230,7 +230,7 @@ function App() {
               InterfaceColor={InterfaceColor}
               onChange={setStringValue}
               placeholder={"Host"}
-            ></StringInput>
+            ></NormalInput>
 
             <BoolSwitch
               name={"DisableLAN"}
@@ -250,7 +250,7 @@ function App() {
               setBoolValue={setBoolValue}
             ></BoolSwitch>
 
-            {config.EnableLogin && <StringInput
+            {config.EnableLogin && <NormalInput
               label={t("Username")}
               fieldDescription="启用登陆后，登录界面需要的用户名。"
               name={"Username"}
@@ -259,9 +259,9 @@ function App() {
               InterfaceColor={InterfaceColor}
               onChange={setStringValue}
               placeholder={"Username"}
-            ></StringInput>}
+            ></NormalInput>}
 
-            {config.EnableLogin && <StringInput
+            {config.EnableLogin && <NormalInput
               label={t("Password")}
               fieldDescription="启用登陆后，登录界面需要的密码。"
               name={"Password"}
@@ -270,9 +270,9 @@ function App() {
               InterfaceColor={InterfaceColor}
               onChange={setStringValue}
               placeholder={"Password"}
-            ></StringInput>}
+            ></NormalInput>}
 
-            <StringInput
+            <NormalInput
               label={t("Timeout")}
               fieldDescription="启用登陆后，cookie过期的时间。单位为分钟。默认180分钟后过期。"
               name={"Timeout"}
@@ -281,7 +281,7 @@ function App() {
               InterfaceColor={InterfaceColor}
               onChange={setNumberValue}
               placeholder={"Timeout"}
-            ></StringInput>
+            ></NormalInput>
 
             <BoolSwitch
               name={"EnableTLS"}
@@ -292,7 +292,7 @@ function App() {
               setBoolValue={setBoolValue}
             ></BoolSwitch>
 
-            {config.EnableTLS && <StringInput
+            {config.EnableTLS && <NormalInput
               label={t("CertFile")}
               fieldDescription='TLS/SSL 证书文件路径 (default: 、"~/.config/.comigo/cert.crt")'
               name={"CertFile"}
@@ -301,9 +301,9 @@ function App() {
               InterfaceColor={InterfaceColor}
               onChange={setStringValue}
               placeholder={"CertFile"}
-            ></StringInput>}
+            ></NormalInput>}
 
-            {config.EnableTLS && <StringInput
+            {config.EnableTLS && <NormalInput
               label={t("KeyFile")}
               fieldDescription='TLS/SSL key文件路径 (default: "~/.config/.comigo/key.key")'
               name={"KeyFile"}
@@ -312,7 +312,7 @@ function App() {
               InterfaceColor={InterfaceColor}
               onChange={setStringValue}
               placeholder={"KeyFile"}
-            ></StringInput>}
+            ></NormalInput>}
 
           </>
         }
@@ -356,7 +356,7 @@ function App() {
             ></BoolSwitch>
 
             {config.LogToFile &&
-              <StringInput
+              <NormalInput
                 label={t("LogFilePath")}
                 fieldDescription="Log文件的保存位置"
                 name={"LogFilePath"}
@@ -368,7 +368,7 @@ function App() {
               />}
 
             {config.LogToFile &&
-              <StringInput
+              <NormalInput
                 label={t("LogFileName")}
                 fieldDescription="Log文件名"
                 name={"LogFileName"}
@@ -398,7 +398,7 @@ function App() {
               setBoolValue={setBoolValue}
             ></BoolSwitch>
 
-            <StringInput
+            <NormalInput
               label={t("CachePath")}
               fieldDescription="本地图片缓存位置，默认系统临时文件夹。"
               name={"CachePath"}
@@ -407,7 +407,7 @@ function App() {
               InterfaceColor={InterfaceColor}
               onChange={setStringValue}
               placeholder={"CachePath"}
-            ></StringInput>
+            ></NormalInput>
           </>
         }
       </div>
