@@ -16,19 +16,8 @@ function App() {
   const { t } = useTranslation();
   const [show, setShow] = useState("bookstore")
   const [config, dispatch] = useReducer(configReducer, defaultConfig);
-
-  // const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
-  //   axios.post("/api/config_update", config).then((response) => {
-  //     console.log("Data sent successfully");
-  //     console.info(response.data);//axios默认解析Json，所以 response.data 就是解析后的object
-  //   })
-  //     .catch((error) => {
-  //       console.error("Error sending data:", error);
-  //     });
-  // };
-
-  const [BackgroundColor, setBackgroundColor] = useState("bg-[#e0d9cd]")  
+  const [BackgroundColor, setBackgroundColor] = useState("bg-[#e0d9cd]")
+  const [InterfaceColor, setInterfaceColor] = useState("bg-[#F5F5E4]")
 
   // useEffect 用于在函数组件中执行副作用操作，例如数据获取、订阅、手动修改DOM等。
   // 通过传递第二个参数，你可以告诉 React 仅在某些值改变的时候才执行 effect。
@@ -39,8 +28,12 @@ function App() {
     if (tempBackgroundColor !== null) {
       setBackgroundColor(tempBackgroundColor)
     }
-  
-
+    // 当前颜色
+    const tempInterfaceColor = localStorage.getItem("InterfaceColor");
+    if (tempInterfaceColor !== null) {
+      setInterfaceColor("bg-[" + tempInterfaceColor + "]")
+    }
+    // 从后端获取配置文件
     axios
       .get<Config>(`${baseURL}/config.json`)
       .then((response) => {
@@ -56,7 +49,7 @@ function App() {
       });
   }, []);
 
-  //  监听事件 实现数据的动态录入
+  //配置文件修改后，保存到后端
   const setStringValue = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     dispatch({
@@ -98,9 +91,9 @@ function App() {
 
   return (
     <div className={`w-full h-full min-h-screen flex flex-col justify-start items-center ${BackgroundColor} bg-primary`} >
-      <Contained show={show} setShow={setShow} />
+      <Contained show={show} setShow={setShow} InterfaceColor={InterfaceColor} />
       <div
-        className={`card w-3/5 min-w-[24rem] flex flex-col justify-center items-center`} 
+        className={`card w-3/5 min-w-[24rem] flex flex-col justify-center items-center`}
       >
         {show === "bookstore" &&
           <>
@@ -109,6 +102,7 @@ function App() {
               fieldDescription="扫描完成后，是否同时打开浏览器。windows默认true，其他平台默认false。"
               name={"OpenBrowser"}
               boolValue={config.OpenBrowser}
+              InterfaceColor={InterfaceColor}
               setBoolValue={setBoolValue}
             ></BoolSwitch>
 
@@ -117,6 +111,7 @@ function App() {
               name={"EnableUpload"}
               fieldDescription="启用上传功能。"
               boolValue={config.EnableUpload}
+              InterfaceColor={InterfaceColor}
               setBoolValue={setBoolValue}
             ></BoolSwitch>
 
@@ -125,6 +120,7 @@ function App() {
               fieldDescription="书库文件夹，支持绝对目录与相对目录。相对目录以当前执行目录为基准"
               name={"StoresPath"}
               value={config.StoresPath}
+              InterfaceColor={InterfaceColor}
               setStringArray={setStringArray}
             ></StringArrayInput>
 
@@ -134,6 +130,7 @@ function App() {
               name={"MaxScanDepth"}
               type={"number"}
               value={config.MaxScanDepth}
+              InterfaceColor={InterfaceColor}
               onChange={setNumberValue}
               placeholder={"MaxScanDepth"}
             ></StringInput>
@@ -144,6 +141,7 @@ function App() {
               name={"UploadPath"}
               type={"text"}
               value={config.UploadPath}
+              InterfaceColor={InterfaceColor}
               onChange={setStringValue}
               placeholder={"UploadPath"}
             />}
@@ -154,6 +152,7 @@ function App() {
               name={"MinImageNum"}
               type={"number"}
               value={config.MinImageNum}
+              InterfaceColor={InterfaceColor}
               onChange={setNumberValue}
               placeholder={"MinImageNum"}
             ></StringInput>
@@ -164,6 +163,7 @@ function App() {
               name={"TimeoutLimitForScan"}
               type={"numbers"}
               value={config.TimeoutLimitForScan}
+              InterfaceColor={InterfaceColor}
               onChange={setNumberValue}
               placeholder={"TimeoutLimitForScan"}
             />
@@ -174,6 +174,7 @@ function App() {
               name={"ZipFileTextEncoding"}
               type={"text"}
               value={config.ZipFileTextEncoding}
+              InterfaceColor={InterfaceColor}
               onChange={setStringValue}
               placeholder={"ZipFileTextEncoding"}
             />
@@ -183,6 +184,7 @@ function App() {
               fieldDescription="扫描书籍的时候，需要排除的文件或文件夹的名字"
               name={"ExcludePath"}
               value={config.ExcludePath}
+              InterfaceColor={InterfaceColor}
               setStringArray={setStringArray}
             ></StringArrayInput>
 
@@ -191,6 +193,7 @@ function App() {
               fieldDescription="扫描压缩包时，用于统计图片数量的图片文件后缀"
               name={"SupportMediaType"}
               value={config.SupportMediaType}
+              InterfaceColor={InterfaceColor}
               setStringArray={setStringArray}
             ></StringArrayInput>
 
@@ -199,6 +202,7 @@ function App() {
               fieldDescription="扫描文件时，用于决定跳过，还是算作书籍处理的文件后缀"
               name={"SupportFileType"}
               value={config.SupportFileType}
+              InterfaceColor={InterfaceColor}
               setStringArray={setStringArray}
             ></StringArrayInput>
           </>
@@ -212,6 +216,7 @@ function App() {
               name={"Port"}
               type={"number"}
               value={config.Port}
+              InterfaceColor={InterfaceColor}
               onChange={setNumberValue}
               placeholder={"Port"}
             ></StringInput>
@@ -222,6 +227,7 @@ function App() {
               name={"Host"}
               type={"text"}
               value={config.Host}
+              InterfaceColor={InterfaceColor}
               onChange={setStringValue}
               placeholder={"Host"}
             ></StringInput>
@@ -231,6 +237,7 @@ function App() {
               label={t("DisableLAN")}
               fieldDescription="只在本机提供阅读服务，不对外共享，此项配置不支持热重载"
               boolValue={config.DisableLAN}
+              InterfaceColor={InterfaceColor}
               setBoolValue={setBoolValue}
             ></BoolSwitch>
 
@@ -239,6 +246,7 @@ function App() {
               label={t("EnableLogin")}
               fieldDescription="是否启用登录。默认不需要登陆。此项配置不支持热重载。"
               boolValue={config.EnableLogin}
+              InterfaceColor={InterfaceColor}
               setBoolValue={setBoolValue}
             ></BoolSwitch>
 
@@ -248,6 +256,7 @@ function App() {
               name={"Username"}
               type={"text"}
               value={config.Username}
+              InterfaceColor={InterfaceColor}
               onChange={setStringValue}
               placeholder={"Username"}
             ></StringInput>}
@@ -258,6 +267,7 @@ function App() {
               name={"Password"}
               type={"text"}
               value={config.Password}
+              InterfaceColor={InterfaceColor}
               onChange={setStringValue}
               placeholder={"Password"}
             ></StringInput>}
@@ -268,6 +278,7 @@ function App() {
               name={"Timeout"}
               type={"number"}
               value={config.Timeout}
+              InterfaceColor={InterfaceColor}
               onChange={setNumberValue}
               placeholder={"Timeout"}
             ></StringInput>
@@ -277,6 +288,7 @@ function App() {
               label={t("EnableTLS")}
               fieldDescription="是否启用HTTPS协议。需要设置证书于key文件。"
               boolValue={config.EnableTLS}
+              InterfaceColor={InterfaceColor}
               setBoolValue={setBoolValue}
             ></BoolSwitch>
 
@@ -286,6 +298,7 @@ function App() {
               name={"CertFile"}
               type={"text"}
               value={config.CertFile}
+              InterfaceColor={InterfaceColor}
               onChange={setStringValue}
               placeholder={"CertFile"}
             ></StringInput>}
@@ -296,6 +309,7 @@ function App() {
               name={"KeyFile"}
               type={"text"}
               value={config.KeyFile}
+              InterfaceColor={InterfaceColor}
               onChange={setStringValue}
               placeholder={"KeyFile"}
             ></StringInput>}
@@ -310,6 +324,7 @@ function App() {
               label={t("EnableDatabase")}
               fieldDescription="启用本地数据库，保存扫描到的书籍数据。此项配置不支持热重载。"
               boolValue={config.EnableDatabase}
+              InterfaceColor={InterfaceColor}
               setBoolValue={setBoolValue}
             ></BoolSwitch>
 
@@ -318,6 +333,7 @@ function App() {
               label={t("ClearDatabaseWhenExit")}
               fieldDescription="启用本地数据库时，扫描完成后，清除不存在的书籍。"
               boolValue={config.ClearDatabaseWhenExit}
+              InterfaceColor={InterfaceColor}
               setBoolValue={setBoolValue}
             ></BoolSwitch>}
 
@@ -326,6 +342,7 @@ function App() {
               label={t("Debug")}
               fieldDescription=""
               boolValue={config.Debug}
+              InterfaceColor={InterfaceColor}
               setBoolValue={setBoolValue}
             ></BoolSwitch>
 
@@ -334,6 +351,7 @@ function App() {
               label={t("LogToFile")}
               fieldDescription="是否保存程序Log到本地文件。默认不保存。"
               boolValue={config.LogToFile}
+              InterfaceColor={InterfaceColor}
               setBoolValue={setBoolValue}
             ></BoolSwitch>
 
@@ -344,6 +362,7 @@ function App() {
                 name={"LogFilePath"}
                 type={"text"}
                 value={config.LogFilePath}
+                InterfaceColor={InterfaceColor}
                 onChange={setStringValue}
                 placeholder={"LogFilePath"}
               />}
@@ -355,6 +374,7 @@ function App() {
                 name={"LogFileName"}
                 type={"text"}
                 value={config.LogFileName}
+                InterfaceColor={InterfaceColor}
                 onChange={setStringValue}
                 placeholder={"LogFileName"}
               />
@@ -365,6 +385,7 @@ function App() {
               label={t("GenerateMetaData")}
               fieldDescription="生成书籍元数据。当前未生效。"
               boolValue={config.GenerateMetaData}
+              InterfaceColor={InterfaceColor}
               setBoolValue={setBoolValue}
             ></BoolSwitch>
 
@@ -373,6 +394,7 @@ function App() {
               label={t("ClearCacheExit")}
               fieldDescription="退出程序的时候，清理web图片缓存。"
               boolValue={config.ClearCacheExit}
+              InterfaceColor={InterfaceColor}
               setBoolValue={setBoolValue}
             ></BoolSwitch>
 
@@ -382,6 +404,7 @@ function App() {
               name={"CachePath"}
               type={"text"}
               value={config.CachePath}
+              InterfaceColor={InterfaceColor}
               onChange={setStringValue}
               placeholder={"CachePath"}
             ></StringInput>
@@ -389,7 +412,6 @@ function App() {
         }
       </div>
       {/* 返回主页的按钮 */}
-
       <a
         className="fixed top-4 left-4 inline-block rounded-full border bg-white border-indigo-600 p-3 text-indigo-600 hover:bg-indigo-600 hover:text-white focus:outline-none focus:ring active:bg-indigo-500"
         href="/"
@@ -399,7 +421,6 @@ function App() {
           <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
         </svg>
       </a>
-
     </div>
   );
 }

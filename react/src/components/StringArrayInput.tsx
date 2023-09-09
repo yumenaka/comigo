@@ -1,5 +1,5 @@
 import React from "react";
-import { useEffect, useState } from "react";
+
 interface Props {
     label: string;
     fieldDescription: string;
@@ -8,6 +8,7 @@ interface Props {
     setStringArray: (name: string, value: string[]) => void;
     error?: string;
     // register?: any;
+    InterfaceColor?: string;
 }
 
 const StringArrayInput: React.FC<Props> = ({
@@ -17,6 +18,7 @@ const StringArrayInput: React.FC<Props> = ({
     value,
     setStringArray,
     error,
+    InterfaceColor,
 }) => {
     function push(element: string): void {
         setStringArray(name, [...value, element])
@@ -39,14 +41,6 @@ const StringArrayInput: React.FC<Props> = ({
             input.value = ''
         }
     }
-    const [InterfaceColor, setInterfaceColor] = useState("bg-[#F5F5E4]")
-    useEffect(() => {
-        // 当前颜色
-        const tempInterfaceColor = localStorage.getItem("InterfaceColor");
-        if (tempInterfaceColor !== null) {
-            setInterfaceColor("bg-["+tempInterfaceColor+"]")
-        }
-    }, []);
 
     return (
         <div

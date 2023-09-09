@@ -1,5 +1,4 @@
 import React from "react";
-import { useEffect, useState } from "react";
 interface StringInputProps {
     label: string;
     fieldDescription: string;
@@ -9,6 +8,7 @@ interface StringInputProps {
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     placeholder: string;
     error?: string;
+    InterfaceColor?: string;
     // register?: any;
 }
 
@@ -23,16 +23,9 @@ const StringInput = ({
     onChange,
     placeholder,
     error,
+    InterfaceColor,
 }: StringInputProps) => {
 
-    const [InterfaceColor, setInterfaceColor] = useState("bg-[#F5F5E4]")
-    useEffect(() => {
-        // 当前颜色
-        const tempInterfaceColor = localStorage.getItem("InterfaceColor");
-        if (tempInterfaceColor !== null) {
-            setInterfaceColor("bg-["+tempInterfaceColor+"]")
-        }
-    }, []);
 
     return (
         <div className={`w-full m-1 p-2 flex flex-col font-semibold rounded-md shadow-md  justify-start items-left ${InterfaceColor}`}>
