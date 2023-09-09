@@ -16,8 +16,8 @@ function App() {
   const { t } = useTranslation();
   const [show, setShow] = useState("bookstore")
   const [config, dispatch] = useReducer(configReducer, defaultConfig);
-  const [BackgroundColor, setBackgroundColor] = useState("bg-[#e0d9cd]")
-  const [InterfaceColor, setInterfaceColor] = useState("bg-[#F5F5E4]")
+  const [BackgroundColor, setBackgroundColor] = useState("#e0d9cd")
+  const [InterfaceColor, setInterfaceColor] = useState("#F5F5E4")
 
   // useEffect 用于在函数组件中执行副作用操作，例如数据获取、订阅、手动修改DOM等。
   // 通过传递第二个参数，你可以告诉 React 仅在某些值改变的时候才执行 effect。
@@ -26,12 +26,14 @@ function App() {
     // 当前颜色
     const tempBackgroundColor = localStorage.getItem("BackgroundColor");
     if (tempBackgroundColor !== null) {
+      console.log("tempBackgroundColor", tempBackgroundColor)
       setBackgroundColor(tempBackgroundColor)
     }
     // 当前颜色
     const tempInterfaceColor = localStorage.getItem("InterfaceColor");
     if (tempInterfaceColor !== null) {
-      setInterfaceColor("bg-[" + tempInterfaceColor + "]")
+      console.log("tempInterfaceColor", tempInterfaceColor)
+      setInterfaceColor(tempInterfaceColor)
     }
     // 从后端获取配置文件
     axios
@@ -90,8 +92,12 @@ function App() {
   };
 
   return (
-    <div className={`w-full h-full min-h-screen flex flex-col justify-start items-center ${BackgroundColor} bg-primary`} >
-      <Contained show={show} setShow={setShow} InterfaceColor={InterfaceColor} />
+    <div
+      style={{
+        backgroundColor: BackgroundColor, // 绑定样式
+      }}
+      className={`w-full h-full min-h-screen flex flex-col justify-start items-center`} >
+      <Contained show={show} setShow={setShow} BackgroundColor={BackgroundColor} />
       <div
         className={`card w-3/5 min-w-[24rem] flex flex-col justify-center items-center`}
       >

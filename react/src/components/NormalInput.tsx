@@ -25,7 +25,11 @@ const NormalInput = ({
 }: Props) => {
 
     return (
-        <div className={`w-full m-1 p-2 flex flex-col font-semibold rounded-md shadow-md  justify-start items-left ${InterfaceColor}`}>
+        <div
+        style={{
+            backgroundColor: InterfaceColor, // 绑定样式
+        }} 
+        className={`w-full m-1 p-2 flex flex-col font-semibold rounded-md shadow-md  justify-start items-left`}>
             <label htmlFor={name} className="w-64">
                 {label}:
             </label>
