@@ -5,20 +5,21 @@ type PropsType = {
     label: string
     fieldDescription: string;
     boolValue: boolean
-    setBoolValue: (checked: boolean, valueName: string) => void
+    setBoolValue: (valueName: string,checked: boolean) => void
 }
 
 const BoolSwitch = (props: PropsType) => {
-    const { name, label: nameText, fieldDescription, boolValue, setBoolValue } = props
-    const onChange = () => {
-        setBoolValue(!boolValue, name)
+    const { name: valueName, label, fieldDescription, boolValue, setBoolValue } = props
+    const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        console.log(valueName,event.target.checked)
+        setBoolValue(valueName, event.target.checked)
     }
     return (
         <div className="w-full m-1 p-2 flex flex-col font-semibold rounded-md shadow-md bg-blue-100 justify-left items-left">
-            <div className="w-32">{nameText}</div>
+            <div className="w-32">{label}</div>
 
-            <label htmlFor="AcceptConditions" className="relative h-8 w-14 cursor-pointer">
-                <input type="checkbox"  checked={boolValue}  id="AcceptConditions" className="peer sr-only" onChange={onChange} />
+            <label htmlFor={valueName} className="relative h-8 w-14 cursor-pointer">
+                <input type="checkbox"  checked={boolValue}  id={valueName} className="peer sr-only" onChange={handleCheckboxChange} />
 
                 <span
                     className="absolute inset-0 rounded-full bg-gray-300 transition peer-checked:bg-green-500"

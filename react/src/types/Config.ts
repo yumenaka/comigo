@@ -33,16 +33,6 @@ interface Config {
   LogFilePath: string;
   LogFileName: string;
   ZipFileTextEncoding: string;
-  EnableFrpcServer: boolean;
-  FrpConfig: {
-    FrpcCommand: string;
-    ServerAddr: string;
-    ServerPort: number;
-    Token: string;
-    FrpType: string;
-    RemotePort: number;
-    RandomRemotePort: boolean;
-  };
   GenerateMetaData: boolean;
 }
 
