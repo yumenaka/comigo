@@ -15,7 +15,7 @@ const Contained: React.FC<Props> = ({
     // 当前颜色
     const tempInterfaceColor = localStorage.getItem("InterfaceColor");
     if (tempInterfaceColor !== null) {
-      setInterfaceColor(tempInterfaceColor)
+      setInterfaceColor("bg-["+tempInterfaceColor+"]")
     }
   }, []);
   return (

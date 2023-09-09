@@ -2,6 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
+/* https://cloud.tencent.com/developer/article/1967312 */
+@layer base {
+  .theme-light {
+    --color-base: theme('colors.white');
+    --color-text-base: theme('colors.black');
+    --color-off-base: theme('colors.gray.50');
+    --color-text-muted: theme('colors.gray.600');
+    --color-text-muted-hover: theme('colors.gray.500');
+    --color-primary: theme('colors.blue.600');
+    --color-secondary: theme('colors.blue.300');
+  }
+
+  .theme-dark {
+    --color-base: theme('colors.gray.900');
+    --color-text-base: theme('colors.gray.100');
+    --color-off-base: theme('colors.gray.800');
+    --color-text-muted: theme('colors.gray.300');
+    --color-text-muted-hover: theme('colors.gray.200');
+    --color-primary: theme('colors.blue.500');
+    --color-secondary: theme('colors.blue.200');
+  }
+}
+
 #root {
   display: flex;
   flex-direction: column;
