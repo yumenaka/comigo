@@ -32,7 +32,7 @@ func UpdateConfigHandler(c *gin.Context) {
 	}
 	// 将JSON数据转换为字符串并打印
 	jsonString := string(body)
-	fmt.Printf("Received JSON data: %s", jsonString)
+	fmt.Printf("Received JSON data: %s \n", jsonString)
 
 	// 解析JSON数据并更新服务器配置
 	newConfig, err := settings.UpdateConfig(common.Config, jsonString)
@@ -85,14 +85,16 @@ func UpdateConfigHandler(c *gin.Context) {
 		if err := common.ScanStorePath(reScanFile); err != nil {
 			log.Printf("Failed to scan store path: %v", err)
 		}
-		// 保存扫描结果到数据库
+		// 保存扫描结果到数据库 //TODO:这里有问题，启用数据库会报错
 		if common.Config.EnableDatabase {
 			if err := common.SaveResultsToDatabase(); err != nil {
 				log.Printf("Failed to save results to database: %v", err)
 			}
 		}
 	} else {
-		fmt.Println("common.Config.StoresPath == newConfig.StoresPath,skip scan store path")
+		if common.Config.Debug {
+			fmt.Println("common.Config.StoresPath == newConfig.StoresPath,skip scan store path")
+		}
 	}
 	common.Config = newConfig
 	// 返回成功消息
