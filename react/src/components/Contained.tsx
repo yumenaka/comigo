@@ -1,23 +1,17 @@
-import { useEffect, useState } from "react";
 import React from "react";
 
 interface Props {
   show: string;
   setShow: (value: string) => void;
+  InterfaceColor: string;
 }
 
 const Contained: React.FC<Props> = ({
   show,
   setShow,
+  InterfaceColor,
 }) => {
-  const [InterfaceColor, setInterfaceColor] = useState("bg-[#F5F5E4]")
-  useEffect(() => {
-    // 当前颜色
-    const tempInterfaceColor = localStorage.getItem("InterfaceColor");
-    if (tempInterfaceColor !== null) {
-      setInterfaceColor("bg-["+tempInterfaceColor+"]")
-    }
-  }, []);
+
   return (
     <div className={`w-72 m-1 p-1 justify-center inline-flex rounded-lg border border-gray-100 bg-gray-100  ${InterfaceColor}`}>
       <button

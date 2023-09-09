@@ -1,23 +1,17 @@
-import { useEffect, useState } from "react";
+
 
 type PropsType = {
     name: string
     nameText: string
     BoolValue: boolean
+    InterfaceColor: string
     onChange: (checked: boolean) => void;
 }
 
 const NumberInput = (props: PropsType) => {
-    const [InterfaceColor, setInterfaceColor] = useState("bg-[#F5F5E4]")
-    useEffect(() => {
-        // 当前颜色
-        const tempInterfaceColor = localStorage.getItem("InterfaceColor");
-        if (tempInterfaceColor !== null) {
-            setInterfaceColor("bg-["+tempInterfaceColor+"]")
-        }
-    }, []);
+
     return (
-        <div className={`w-full m-1 p-2 flex flex-row font-semibold rounded-md shadow-md justify-start items-center ${InterfaceColor}`}>
+        <div className={`w-full m-1 p-2 flex flex-row font-semibold rounded-md shadow-md justify-start items-center ${props.InterfaceColor}`}>
             <label htmlFor="Port" className="w-32 border border-black rounded-md">
                 {props.nameText}:
             </label>

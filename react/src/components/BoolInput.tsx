@@ -1,27 +1,20 @@
-import { useEffect, useState } from "react";
 
 type PropsType = {
     name: string
     label: string
-    fieldDescription: string;
+    fieldDescription: string
     boolValue: boolean
+    InterfaceColor: string
     setBoolValue: (valueName: string, checked: boolean) => void
 }
 
 const BoolSwitch = (props: PropsType) => {
-    const { name: valueName, label, fieldDescription, boolValue, setBoolValue } = props
+    const { name: valueName, label, fieldDescription, boolValue,InterfaceColor, setBoolValue } = props
     const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         console.log(valueName, event.target.checked)
         setBoolValue(valueName, event.target.checked)
     }
-    const [InterfaceColor, setInterfaceColor] = useState("bg-[#F5F5E4]")
-    useEffect(() => {
-        // 当前颜色
-        const tempInterfaceColor = localStorage.getItem("InterfaceColor");
-        if (tempInterfaceColor !== null) {
-            setInterfaceColor("bg-["+tempInterfaceColor+"]")
-        }
-    }, []);
+
     return (
         <div className={`w-full m-1 p-2 flex flex-col font-semibold rounded-md shadow-md justify-left items-left ${InterfaceColor}`}>
             <div className="w-32">{label}</div>
