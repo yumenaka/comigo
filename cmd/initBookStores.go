@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/yumenaka/comi/common"
 	"github.com/yumenaka/comi/storage"
+	"log"
 )
 
 // initBookStores 解析命令,扫描书库
@@ -28,14 +29,14 @@ func initBookStores(args []string) {
 	//3、扫描书库
 	err := common.ScanStorePath(true)
 	if err != nil {
-		fmt.Println(err)
+		log.Printf("Failed to scan store path: %v", err)
 	}
 
 	//4、保存扫描结果到数据库
 	if common.Config.EnableDatabase {
 		err = common.SaveResultsToDatabase()
 		if err != nil {
-			fmt.Println(err)
+			log.Printf("Failed SaveResultsToDatabase: %v", err)
 			return
 		}
 	}

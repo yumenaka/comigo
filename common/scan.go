@@ -4,7 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/klauspost/compress/zip"
+	"github.com/sirupsen/logrus"
+	"github.com/yumenaka/archiver/v4"
+	"github.com/yumenaka/comi/arch"
+	"github.com/yumenaka/comi/book"
+	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/storage"
+	"github.com/yumenaka/comi/tools"
 	"io/fs"
 	"net/url"
 	"os"
@@ -13,16 +20,6 @@ import (
 	"runtime"
 	"strings"
 	"time"
-
-	"github.com/klauspost/compress/zip"
-	"github.com/yumenaka/comi/tools"
-
-	"github.com/sirupsen/logrus"
-	"github.com/yumenaka/archiver/v4"
-
-	"github.com/yumenaka/comi/arch"
-	"github.com/yumenaka/comi/book"
-	"github.com/yumenaka/comi/locale"
 )
 
 // ScanStorePath 3、扫描配置文件指定的的书籍库
@@ -32,6 +29,7 @@ func ScanStorePath(reScanFile bool) error {
 			addList, err := ScanAndGetBookList(p, reScanFile, RamBookList)
 			if err != nil {
 				fmt.Println(locale.GetString("scan_error"), p, err)
+				return err
 			} else {
 				AddBooksToStore(addList, p)
 			}
