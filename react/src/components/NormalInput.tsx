@@ -1,5 +1,5 @@
 import React from "react";
-interface StringInputProps {
+interface Props {
     label: string;
     fieldDescription: string;
     name: string;
@@ -12,9 +12,7 @@ interface StringInputProps {
     // register?: any;
 }
 
-
-
-const StringInput = ({
+const NormalInput = ({
     label,
     fieldDescription,
     name,
@@ -24,8 +22,7 @@ const StringInput = ({
     placeholder,
     error,
     InterfaceColor,
-}: StringInputProps) => {
-
+}: Props) => {
 
     return (
         <div className={`w-full m-1 p-2 flex flex-col font-semibold rounded-md shadow-md  justify-start items-left ${InterfaceColor}`}>
@@ -48,4 +45,4 @@ const StringInput = ({
     );
 };
 
-export default StringInput;
+export default NormalInput;
