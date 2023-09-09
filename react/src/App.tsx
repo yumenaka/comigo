@@ -49,14 +49,13 @@ function App() {
   //  监听事件 实现数据的动态录入
   const setStringValue = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    console.log(typeof value);
+    // console.log(typeof value);
     dispatch({
       type: 'stringConfig',
       name: name,
       value: value,
       config: config
     });
-    autoSubmit();
   };
 
   const setNumberValue = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,7 +67,6 @@ function App() {
       value: value,
       config: config
     });
-    autoSubmit();
   };
 
   const setBoolValue = ( name: string,value: boolean) => {
@@ -79,7 +77,6 @@ function App() {
       value: value,
       config: config
     });
-    autoSubmit();
   };
 
   const setStringArray = (valueName: string, value: string[]) => {
@@ -89,17 +86,6 @@ function App() {
       value: value,
       config: config
     });
-    autoSubmit();
-  };
-
-  const autoSubmit = () => {
-    axios.post("/api/update_config", config).then((response) => {
-      console.log("Data sent successfully");
-      console.info(response.data);//axios默认解析Json，所以 response.data 就是解析后的object
-    })
-      .catch((error) => {
-        console.error("Error sending data:", error);
-      });
   };
 
   return (
@@ -395,12 +381,6 @@ function App() {
           </>
         }
       </form>
-      <button
-        type="submit"
-        className="m-2 inline-block rounded-2xl bg-indigo-600 px-8 py-3 text-sm font-medium text-white transition hover:scale-110 hover:shadow-xl focus:outline-none focus:ring active:bg-indigo-500"
-      >
-        保存设置
-      </button>
     </>
   );
 }
