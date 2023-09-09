@@ -29,7 +29,7 @@ const NormalInput = ({
         style={{
             backgroundColor: InterfaceColor, // 绑定样式
         }} 
-        className={`w-full m-1 p-2 flex flex-col font-semibold rounded-md shadow-md  justify-start items-left`}>
+        className={`w-full m-1 p-2 flex flex-col shadow-md hover:shadow-2xl font-semibold rounded-md justify-start items-left`}>
             <label htmlFor={name} className="w-64">
                 {label}:
             </label>

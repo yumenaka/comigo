@@ -97,9 +97,15 @@ function App() {
         backgroundColor: BackgroundColor, // 绑定样式
       }}
       className={`w-full h-full min-h-screen flex flex-col justify-start items-center`} >
-      <Contained show={show} setShow={setShow} BackgroundColor={BackgroundColor} />
+      {/* 顶部标题 */}
+      <div className="w-full h-16 mb-1 rounded shadow flex flex-row justify-center items-center" style={{
+        backgroundColor: InterfaceColor, // 绑定样式
+      }}>
+        <Contained show={show} setShow={setShow} BackgroundColor={BackgroundColor} />
+      </div>
+
       <div
-        className={`card w-3/5 min-w-[24rem] flex flex-col justify-center items-center`}
+        className={`main-area w-3/5 min-w-[24rem] flex flex-col justify-center items-center`}
       >
         {show === "bookstore" &&
           <>
@@ -419,7 +425,7 @@ function App() {
       </div>
       {/* 返回主页的按钮 */}
       <a
-        className="fixed top-4 left-4 inline-block rounded-full border bg-white border-indigo-600 p-3 text-indigo-600 hover:bg-indigo-600 hover:text-white focus:outline-none focus:ring active:bg-indigo-500"
+        className="fixed top-2 left-2 inline-block rounded-full border bg-white border-indigo-600 p-3 text-indigo-600 hover:bg-indigo-600 hover:text-white focus:outline-none focus:ring active:bg-indigo-500"
         href="/"
       >
         <span className="sr-only"> Download </span>
@@ -427,6 +433,13 @@ function App() {
           <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
         </svg>
       </a>
+
+      {/* 底部提示 */}
+      <div className="w-full mt-auto flex flex-col justify-center items-center text-gray-900 h-12 py-4 space-x-2 text-base content-center" style={{
+        backgroundColor: InterfaceColor, // 绑定样式
+      }}>
+        <a href="https://github.com/yumenaka/comi/releases" className="text-blue-700 hover:underline font-semibold"> Power by Comigo</a>
+      </div>
     </div>
   );
 }
