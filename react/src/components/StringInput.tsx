@@ -1,6 +1,6 @@
 import React from "react";
 
-interface InputWithLabelProps {
+interface StringInputProps {
     label: string;
     fieldDescription: string;
     name: string;
@@ -14,7 +14,7 @@ interface InputWithLabelProps {
 
 
 
-const InputWithLabel = ({
+const StringInput = ({
     label,
     fieldDescription,
     name,
@@ -23,7 +23,7 @@ const InputWithLabel = ({
     onChange,
     placeholder,
     error,
-}: InputWithLabelProps) => {
+}: StringInputProps) => {
 
     // const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     //     event.preventDefault();
@@ -51,4 +51,4 @@ const InputWithLabel = ({
     );
 };
 
-export default InputWithLabel;
+export default StringInput;
