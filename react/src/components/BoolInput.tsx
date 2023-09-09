@@ -20,7 +20,7 @@ const BoolSwitch = (props: PropsType) => {
             style={{
                 backgroundColor: InterfaceColor, // 绑定样式
             }}
-            className={`w-full m-1 p-2 flex flex-col font-semibold rounded-md shadow-md justify-left items-left`}>
+            className={`w-full m-1 p-2 flex flex-col shadow-md hover:shadow-2xl font-semibold rounded-md  justify-left items-left`}>
             <div className="w-32">{label}</div>
             <label htmlFor={valueName} className="relative h-8 w-14 cursor-pointer">
                 <input type="checkbox" checked={boolValue} id={valueName} className="peer sr-only" onChange={handleCheckboxChange} />
