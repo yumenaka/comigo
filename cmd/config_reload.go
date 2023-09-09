@@ -3,14 +3,12 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"github.com/fsnotify/fsnotify"
+	"github.com/yumenaka/comi/common"
 	"github.com/yumenaka/comi/routers"
 	"log"
 	"os"
 	"time"
-
-	"github.com/fsnotify/fsnotify"
-
-	"github.com/yumenaka/comi/common"
 )
 
 //Go 每日一库之 fsnotify  https://darjun.github.io/2020/01/19/godailylib/fsnotify/
@@ -33,7 +31,10 @@ func configReloadHandler(e fsnotify.Event) {
 		os.Exit(1)
 	}
 	//3、扫描配置文件指定的书籍库
-	common.ScanStorePath(true)
+	err := common.ScanStorePath(true)
+	if err != nil {
+		log.Printf("Failed to scan store path: %v", err)
+	}
 	//4，保存扫描结果到数据库
 	if common.Config.EnableDatabase {
 		err := common.SaveResultsToDatabase()
@@ -41,7 +42,6 @@ func configReloadHandler(e fsnotify.Event) {
 			return
 		}
 	}
-
 	//5、通过“可执行文件名”设置部分默认参数,目前不生效
 	common.Config.SetByExecutableFilename()
 	//重新设置文件下载链接

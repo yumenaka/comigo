@@ -1,11 +1,10 @@
 package book
 
 import (
+	"github.com/yumenaka/comi/tools"
 	"sort"
 	"strconv"
 	"time"
-
-	"github.com/yumenaka/comi/tools"
 )
 
 // BookInfo 与Book唯一的区别是没有AllPageInfo,而是封面图URL 减小 json文件的大小

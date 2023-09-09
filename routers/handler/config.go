@@ -41,7 +41,15 @@ func UpdateConfigHandler(c *gin.Context) {
 		c.JSON(http.StatusMethodNotAllowed, gin.H{"error": "Failed to parse JSON data"})
 		return
 	}
-	if (newConfig.OpenBrowser == true) && (common.Config.OpenBrowser == false) {
+	BeforeConfigUpdate(&common.Config, &newConfig)
+
+	// 返回成功消息
+	c.JSON(http.StatusOK, gin.H{"message": "Server settings updated successfully"})
+}
+
+// 根据配置的变化，判断是否需要打开浏览器重新扫描等
+func BeforeConfigUpdate(oldConfig *settings.ServerConfig, newConfig *settings.ServerConfig) {
+	if (newConfig.OpenBrowser == true) && (oldConfig.OpenBrowser == false) {
 		protocol := "http://"
 		if newConfig.EnableTLS {
 			protocol = "https://"
@@ -50,35 +58,35 @@ func UpdateConfigHandler(c *gin.Context) {
 	}
 	needScan := false
 	reScanFile := false
-	if !reflect.DeepEqual(common.Config.StoresPath, newConfig.StoresPath) {
+	if !reflect.DeepEqual(oldConfig.StoresPath, newConfig.StoresPath) {
 		needScan = true
-		common.Config.StoresPath = newConfig.StoresPath
+		oldConfig.StoresPath = newConfig.StoresPath
 	}
-	if common.Config.MaxScanDepth != newConfig.MaxScanDepth {
+	if oldConfig.MaxScanDepth != newConfig.MaxScanDepth {
 		needScan = true
-		common.Config.MaxScanDepth = newConfig.MaxScanDepth
+		oldConfig.MaxScanDepth = newConfig.MaxScanDepth
 	}
-	if !reflect.DeepEqual(common.Config.SupportMediaType, newConfig.SupportMediaType) {
+	if !reflect.DeepEqual(oldConfig.SupportMediaType, newConfig.SupportMediaType) {
 		needScan = true
 		reScanFile = true
-		common.Config.SupportMediaType = newConfig.SupportMediaType
+		oldConfig.SupportMediaType = newConfig.SupportMediaType
 	}
-	if !reflect.DeepEqual(common.Config.SupportFileType, newConfig.SupportFileType) {
+	if !reflect.DeepEqual(oldConfig.SupportFileType, newConfig.SupportFileType) {
 		needScan = true
-		common.Config.SupportFileType = newConfig.SupportFileType
+		oldConfig.SupportFileType = newConfig.SupportFileType
 	}
-	if common.Config.MinImageNum != newConfig.MinImageNum {
+	if oldConfig.MinImageNum != newConfig.MinImageNum {
 		needScan = true
 		reScanFile = true
-		common.Config.MinImageNum = newConfig.MinImageNum
+		oldConfig.MinImageNum = newConfig.MinImageNum
 	}
-	if !reflect.DeepEqual(common.Config.ExcludePath, newConfig.ExcludePath) {
+	if !reflect.DeepEqual(oldConfig.ExcludePath, newConfig.ExcludePath) {
 		needScan = true
-		common.Config.ExcludePath = newConfig.ExcludePath
+		oldConfig.ExcludePath = newConfig.ExcludePath
 	}
-	if common.Config.EnableDatabase != newConfig.EnableDatabase {
+	if oldConfig.EnableDatabase != newConfig.EnableDatabase {
 		needScan = true
-		common.Config.EnableDatabase = newConfig.EnableDatabase
+		oldConfig.EnableDatabase = newConfig.EnableDatabase
 	}
 	if needScan {
 		// 扫描配置文件指定的书籍库
@@ -86,19 +94,17 @@ func UpdateConfigHandler(c *gin.Context) {
 			log.Printf("Failed to scan store path: %v", err)
 		}
 		// 保存扫描结果到数据库 //TODO:这里有问题，启用数据库会报错
-		if common.Config.EnableDatabase {
+		if oldConfig.EnableDatabase {
 			if err := common.SaveResultsToDatabase(); err != nil {
 				log.Printf("Failed to save results to database: %v", err)
 			}
 		}
 	} else {
-		if common.Config.Debug {
-			fmt.Println("common.Config.StoresPath == newConfig.StoresPath,skip scan store path")
+		if oldConfig.Debug {
+			log.Printf("oldConfig.StoresPath == newConfig.StoresPath,skip scan store path")
 		}
 	}
-	common.Config = newConfig
-	// 返回成功消息
-	c.JSON(http.StatusOK, gin.H{"message": "Server settings updated successfully"})
+	oldConfig = newConfig
 }
 
 // GetTomlConfigHandler 下载服务器配置(toml)

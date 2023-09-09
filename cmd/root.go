@@ -2,21 +2,19 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/mitchellh/go-homedir"
+	"github.com/pelletier/go-toml/v2"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"github.com/yumenaka/comi/common"
+	"github.com/yumenaka/comi/locale"
+	"github.com/yumenaka/comi/routers"
 	"github.com/yumenaka/comi/routers/handler"
 	"os"
 	"path"
 	"path/filepath"
 	"runtime"
 	"time"
-
-	"github.com/mitchellh/go-homedir"
-	"github.com/pelletier/go-toml/v2"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-
-	"github.com/yumenaka/comi/common"
-	"github.com/yumenaka/comi/locale"
-	"github.com/yumenaka/comi/routers"
 )
 
 var runtimeViper *viper.Viper
