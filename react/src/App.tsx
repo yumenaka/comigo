@@ -71,11 +71,11 @@ function App() {
     autoSubmit();
   };
 
-  const setBoolValue = (value: boolean, valueName: string) => {
-    console.log("setBoolValue" + valueName, value);
+  const setBoolValue = ( name: string,value: boolean) => {
+    console.log("setBoolValue " + name, value);
     dispatch({
       type: 'boolConfig',
-      name: valueName,
+      name: name,
       value: value,
       config: config
     });
@@ -111,6 +111,22 @@ function App() {
       >
         {show === "bookstore" &&
           <>
+            <BoolSwitch
+              label={t("OpenBrowser")}
+              fieldDescription="扫描完成后，是否同时打开浏览器。windows默认true，其他平台默认false。"
+              name={"OpenBrowser"}
+              boolValue={config.OpenBrowser}
+              setBoolValue={setBoolValue}
+            ></BoolSwitch>
+
+            <BoolSwitch
+              label={t("EnableUpload")}
+              name={"EnableUpload"}
+              fieldDescription="启用上传功能。"
+              boolValue={config.EnableUpload}
+              setBoolValue={setBoolValue}
+            ></BoolSwitch>
+
             <StringArrayInput
               label={t("StoresPath")}
               fieldDescription="书库文件夹，支持绝对目录与相对目录。相对目录以当前执行目录为基准"
@@ -128,22 +144,6 @@ function App() {
               onChange={setNumberValue}
               placeholder={"MaxScanDepth"}
             ></InputWithLabel>
-
-            <BoolSwitch
-              label={t("OpenBrowser")}
-              fieldDescription="扫描完成后，是否同时打开浏览器。windows默认true，其他平台默认false。"
-              name={"OpenBrowser"}
-              boolValue={config.OpenBrowser}
-              setBoolValue={setBoolValue}
-            ></BoolSwitch>
-
-            <BoolSwitch
-              name={"EnableUpload"}
-              label={t("EnableUpload")}
-              fieldDescription="启用上传功能。"
-              boolValue={config.EnableUpload}
-              setBoolValue={setBoolValue}
-            ></BoolSwitch>
 
             {config.EnableUpload && <InputWithLabel
               label={t("UploadPath")}
