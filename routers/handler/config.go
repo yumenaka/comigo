@@ -6,10 +6,12 @@ import (
 	"github.com/pelletier/go-toml/v2"
 	"github.com/yumenaka/comi/common"
 	"github.com/yumenaka/comi/settings"
+	"github.com/yumenaka/comi/tools"
 	"io"
 	"log"
 	"net/http"
 	"reflect"
+	"strconv"
 )
 
 // GetJsonConfigHandler 获取json格式的当前配置
@@ -30,7 +32,7 @@ func UpdateConfigHandler(c *gin.Context) {
 	}
 	// 将JSON数据转换为字符串并打印
 	jsonString := string(body)
-	//fmt.Printf("Received JSON data: %s", jsonString)
+	fmt.Printf("Received JSON data: %s", jsonString)
 
 	// 解析JSON数据并更新服务器配置
 	newConfig, err := settings.UpdateConfig(common.Config, jsonString)
@@ -39,16 +41,13 @@ func UpdateConfigHandler(c *gin.Context) {
 		c.JSON(http.StatusMethodNotAllowed, gin.H{"error": "Failed to parse JSON data"})
 		return
 	}
-	fmt.Printf("newConfig.OpenBrowser %t common.Config.OpenBrowser %t \n", newConfig.OpenBrowser, common.Config.OpenBrowser)
 	if (newConfig.OpenBrowser == true) && (common.Config.OpenBrowser == false) {
-		fmt.Printf("OpenBrowser！！！newConfig.OpenBrowser %t common.Config.OpenBrowser %t \n", newConfig.OpenBrowser, common.Config.OpenBrowser)
-		//protocol := "http://"
-		//if newConfig.EnableTLS {
-		//	protocol = "https://"
-		//}
-		//tools.OpenBrowser(protocol + "127.0.0.1:" + strconv.Itoa(newConfig.Port))
+		protocol := "http://"
+		if newConfig.EnableTLS {
+			protocol = "https://"
+		}
+		tools.OpenBrowser(protocol + "127.0.0.1:" + strconv.Itoa(newConfig.Port))
 	}
-
 	if !reflect.DeepEqual(common.Config.StoresPath, newConfig.StoresPath) {
 		common.Config.StoresPath = newConfig.StoresPath
 		// 扫描配置文件指定的书籍库

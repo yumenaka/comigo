@@ -102,8 +102,6 @@ func UpdateConfig(oldConfig ServerConfig, jsonString string) (newConfig ServerCo
 	}
 	OpenBrowser := gjson.Get(jsonString, "OpenBrowser")
 	if OpenBrowser.Exists() {
-		//fmt.Println("jsonString:" + jsonString)
-		//fmt.Println(OpenBrowser.Bool())
 		newConfig.OpenBrowser = OpenBrowser.Bool()
 	}
 	DisableLAN := gjson.Get(jsonString, "DisableLAN")
@@ -195,7 +193,7 @@ func UpdateConfig(oldConfig ServerConfig, jsonString string) (newConfig ServerCo
 // 将字符串解析为字符串切片
 func parseString(str string) ([]string, error) {
 	var arr []string
-	fmt.Println("str =", str)
+	//fmt.Println("str =", str)
 	err := json.Unmarshal([]byte(str), &arr)
 	if err != nil {
 		return nil, err
