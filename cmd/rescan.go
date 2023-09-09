@@ -38,7 +38,7 @@ func waitRescanMessages() {
 			routers.SetDownloadLink()
 		case "SomePath":
 			fmt.Println("收到重新扫描消息：", msg)
-			ReScanPath(msg)
+			ReScanPath(msg, false)
 		default:
 			continue
 		}
@@ -59,12 +59,12 @@ func ReScanUploadPath() {
 	if common.Config.UploadPath != "" {
 		uploadPath = common.Config.UploadPath
 	}
-	ReScanPath(uploadPath)
+	ReScanPath(uploadPath, false)
 }
 
-func ReScanPath(path string) {
+func ReScanPath(path string, reScanFile bool) {
 	//扫描上传目录的文件
-	addList, err := common.ScanAndGetBookList(path, common.DatabaseBookList)
+	addList, err := common.ScanAndGetBookList(path, reScanFile, common.RamBookList)
 	if err != nil {
 		fmt.Println(locale.GetString("scan_error"), path, err)
 	} else {

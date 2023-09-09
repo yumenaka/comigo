@@ -20,13 +20,13 @@ func initBookStores(args []string) {
 			fmt.Println(err)
 			return
 		}
-		common.DatabaseBookList = books
+		common.RamBookList = books
 	}
 	//2、添加CMD路径，默认上传文件夹到书库
 	AddPathToStore(args)
 
 	//3、扫描书库
-	err := common.ScanStorePath()
+	err := common.ScanStorePath(true)
 	if err != nil {
 		fmt.Println(err)
 	}
