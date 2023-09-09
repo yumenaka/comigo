@@ -26,10 +26,10 @@ import (
 )
 
 // ScanStorePath 3、扫描配置文件指定的的书籍库
-func ScanStorePath() error {
+func ScanStorePath(reScanFile bool) error {
 	if len(Config.StoresPath) > 0 {
 		for _, p := range Config.StoresPath {
-			addList, err := ScanAndGetBookList(p, DatabaseBookList)
+			addList, err := ScanAndGetBookList(p, reScanFile, RamBookList)
 			if err != nil {
 				fmt.Println(locale.GetString("scan_error"), p, err)
 			} else {
@@ -45,7 +45,7 @@ func SaveResultsToDatabase() error {
 	AllBook := book.GetAllBookList()
 	//设置清理数据库的时候，是否清理没扫描到的书籍信息
 	if Config.ClearDatabaseWhenExit {
-		for _, checkBook := range DatabaseBookList {
+		for _, checkBook := range RamBookList {
 			needClear := true //这条数据是否需要清理
 			for _, b := range AllBook {
 				if b.BookID == checkBook.BookID {
@@ -78,7 +78,7 @@ func AddBooksToStore(bookList []*book.Book, path string) {
 }
 
 // ScanAndGetBookList 扫描路径，取得路径里的书籍
-func ScanAndGetBookList(storePath string, DatabaseBookList []*book.Book) (newBookList []*book.Book, err error) {
+func ScanAndGetBookList(storePath string, reScanFile bool, RamBookList []*book.Book) (newBookList []*book.Book, err error) {
 	// 路径不存在的Error，不过目前并不会打印出来
 	if !tools.PathExists(storePath) {
 		return nil, errors.New(locale.GetString("PATH_NOT_EXIST"))
@@ -92,17 +92,21 @@ func ScanAndGetBookList(storePath string, DatabaseBookList []*book.Book) (newBoo
 	err = filepath.Walk(storePathAbs, func(walkPath string, fileInfo os.FileInfo, err error) error {
 		// 是否需要跳过
 		skip := false
-		for _, p := range DatabaseBookList {
-			AbsW, err := filepath.Abs(walkPath) // 取得绝对路径
-			if err != nil {
-				// 无法取得的情况下，用相对路径
-				AbsW = walkPath
-				fmt.Println(err, AbsW)
+		if !reScanFile {
+			for _, p := range RamBookList {
+				AbsW, err := filepath.Abs(walkPath) // 取得绝对路径
+				if err != nil {
+					// 无法取得的情况下，用相对路径
+					AbsW = walkPath
+					fmt.Println(err, AbsW)
+				}
+				if walkPath == p.FilePath || AbsW == p.FilePath {
+					skip = true
+					newBookList = append(newBookList, p)
+				}
 			}
-			if walkPath == p.FilePath || AbsW == p.FilePath {
-				skip = true
-				newBookList = append(newBookList, p)
-			}
+		} else {
+			skip = false
 		}
 		if skip {
 			fmt.Println(locale.GetString("FoundInDatabase") + walkPath)

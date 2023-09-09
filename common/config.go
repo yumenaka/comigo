@@ -59,4 +59,4 @@ var (
 	}
 )
 
-var DatabaseBookList []*book.Book
+var RamBookList []*book.Book

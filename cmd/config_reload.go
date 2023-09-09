@@ -33,7 +33,7 @@ func configReloadHandler(e fsnotify.Event) {
 		os.Exit(1)
 	}
 	//3、扫描配置文件指定的书籍库
-	common.ScanStorePath()
+	common.ScanStorePath(true)
 	//4，保存扫描结果到数据库
 	if common.Config.EnableDatabase {
 		err := common.SaveResultsToDatabase()

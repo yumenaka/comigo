@@ -48,13 +48,43 @@ func UpdateConfigHandler(c *gin.Context) {
 		}
 		tools.OpenBrowser(protocol + "127.0.0.1:" + strconv.Itoa(newConfig.Port))
 	}
+	needScan := false
+	reScanFile := false
 	if !reflect.DeepEqual(common.Config.StoresPath, newConfig.StoresPath) {
+		needScan = true
 		common.Config.StoresPath = newConfig.StoresPath
+	}
+	if common.Config.MaxScanDepth != newConfig.MaxScanDepth {
+		needScan = true
+		common.Config.MaxScanDepth = newConfig.MaxScanDepth
+	}
+	if !reflect.DeepEqual(common.Config.SupportMediaType, newConfig.SupportMediaType) {
+		needScan = true
+		reScanFile = true
+		common.Config.SupportMediaType = newConfig.SupportMediaType
+	}
+	if !reflect.DeepEqual(common.Config.SupportFileType, newConfig.SupportFileType) {
+		needScan = true
+		common.Config.SupportFileType = newConfig.SupportFileType
+	}
+	if common.Config.MinImageNum != newConfig.MinImageNum {
+		needScan = true
+		reScanFile = true
+		common.Config.MinImageNum = newConfig.MinImageNum
+	}
+	if !reflect.DeepEqual(common.Config.ExcludePath, newConfig.ExcludePath) {
+		needScan = true
+		common.Config.ExcludePath = newConfig.ExcludePath
+	}
+	if common.Config.EnableDatabase != newConfig.EnableDatabase {
+		needScan = true
+		common.Config.EnableDatabase = newConfig.EnableDatabase
+	}
+	if needScan {
 		// 扫描配置文件指定的书籍库
-		if err := common.ScanStorePath(); err != nil {
+		if err := common.ScanStorePath(reScanFile); err != nil {
 			log.Printf("Failed to scan store path: %v", err)
 		}
-
 		// 保存扫描结果到数据库
 		if common.Config.EnableDatabase {
 			if err := common.SaveResultsToDatabase(); err != nil {
