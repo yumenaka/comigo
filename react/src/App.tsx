@@ -5,9 +5,9 @@ import { useTranslation } from "react-i18next";
 // import { useForm } from "react-hook-form";
 import Contained from "./components/Contained";
 import Config from "./types/Config";
-import InputWithLabel from "./components/InputWithLabel";
+import StringInput from "./components/StringInput";
 import StringArrayInput from "./components/StringArrayInput";
-import BoolSwitch from "./components/BoolSwitch";
+import BoolSwitch from "./components/BoolInput";
 import { useState } from "react";
 import { configReducer, defaultConfig } from "./reducers/configReducer";
 
@@ -49,7 +49,6 @@ function App() {
   //  监听事件 实现数据的动态录入
   const setStringValue = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    // console.log(typeof value);
     dispatch({
       type: 'stringConfig',
       name: name,
@@ -60,7 +59,6 @@ function App() {
 
   const setNumberValue = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    // console.log(typeof value);
     dispatch({
       type: 'numberConfig',
       name: name,
@@ -69,7 +67,7 @@ function App() {
     });
   };
 
-  const setBoolValue = ( name: string,value: boolean) => {
+  const setBoolValue = (name: string, value: boolean) => {
     console.log("setBoolValue " + name, value);
     dispatch({
       type: 'boolConfig',
@@ -121,7 +119,7 @@ function App() {
               setStringArray={setStringArray}
             ></StringArrayInput>
 
-            <InputWithLabel
+            <StringInput
               label={t("MaxScanDepth")}
               fieldDescription="最大扫描深度。超过深度的文件不会被扫描。当前执行目录为基准。"
               name={"MaxScanDepth"}
@@ -129,9 +127,9 @@ function App() {
               value={config.MaxScanDepth}
               onChange={setNumberValue}
               placeholder={"MaxScanDepth"}
-            ></InputWithLabel>
+            ></StringInput>
 
-            {config.EnableUpload && <InputWithLabel
+            {config.EnableUpload && <StringInput
               label={t("UploadPath")}
               fieldDescription="自定义上传文件存储位置，默认在当前执行目录下创建 upload 文件夹。"
               name={"UploadPath"}
@@ -141,7 +139,7 @@ function App() {
               placeholder={"UploadPath"}
             />}
 
-            <InputWithLabel
+            <StringInput
               label={t("MinImageNum")}
               fieldDescription="压缩包或文件夹内至少有几张图片，才算作书籍。"
               name={"MinImageNum"}
@@ -149,9 +147,9 @@ function App() {
               value={config.MinImageNum}
               onChange={setNumberValue}
               placeholder={"MinImageNum"}
-            ></InputWithLabel>
+            ></StringInput>
 
-            <InputWithLabel
+            <StringInput
               label={t("TimeoutLimitForScan")}
               fieldDescription="扫描文件时，超过几秒钟，就放弃扫描这个文件，避免卡在过大文件上。"
               name={"TimeoutLimitForScan"}
@@ -161,7 +159,7 @@ function App() {
               placeholder={"TimeoutLimitForScan"}
             />
 
-            <InputWithLabel
+            <StringInput
               label={t("ZipFileTextEncoding")}
               fieldDescription="非utf-8编码ZIP文件，尝试用什么编码解析。默认GBK。"
               name={"ZipFileTextEncoding"}
@@ -199,7 +197,7 @@ function App() {
 
         {show === "internet" &&
           <>
-            <InputWithLabel
+            <StringInput
               label={t("Port")}
               fieldDescription="网页服务端口，此项配置不支持热重载"
               name={"Port"}
@@ -207,9 +205,9 @@ function App() {
               value={config.Port}
               onChange={setNumberValue}
               placeholder={"Port"}
-            ></InputWithLabel>
+            ></StringInput>
 
-            <InputWithLabel
+            <StringInput
               label={t("Host")}
               fieldDescription="自定义二维码显示的主机名。默认为网卡IP。"
               name={"Host"}
@@ -217,7 +215,7 @@ function App() {
               value={config.Host}
               onChange={setStringValue}
               placeholder={"Host"}
-            ></InputWithLabel>
+            ></StringInput>
 
             <BoolSwitch
               name={"DisableLAN"}
@@ -235,7 +233,7 @@ function App() {
               setBoolValue={setBoolValue}
             ></BoolSwitch>
 
-            {config.EnableLogin && <InputWithLabel
+            {config.EnableLogin && <StringInput
               label={t("Username")}
               fieldDescription="启用登陆后，登录界面需要的用户名。"
               name={"Username"}
@@ -243,9 +241,9 @@ function App() {
               value={config.Username}
               onChange={setStringValue}
               placeholder={"Username"}
-            ></InputWithLabel>}
+            ></StringInput>}
 
-            {config.EnableLogin && <InputWithLabel
+            {config.EnableLogin && <StringInput
               label={t("Password")}
               fieldDescription="启用登陆后，登录界面需要的密码。"
               name={"Password"}
@@ -253,9 +251,9 @@ function App() {
               value={config.Password}
               onChange={setStringValue}
               placeholder={"Password"}
-            ></InputWithLabel>}
+            ></StringInput>}
 
-            <InputWithLabel
+            <StringInput
               label={t("Timeout")}
               fieldDescription="启用登陆后，cookie过期的时间。单位为分钟。默认180分钟后过期。"
               name={"Timeout"}
@@ -263,7 +261,7 @@ function App() {
               value={config.Timeout}
               onChange={setNumberValue}
               placeholder={"Timeout"}
-            ></InputWithLabel>
+            ></StringInput>
 
             <BoolSwitch
               name={"EnableTLS"}
@@ -273,7 +271,7 @@ function App() {
               setBoolValue={setBoolValue}
             ></BoolSwitch>
 
-            {config.EnableTLS && <InputWithLabel
+            {config.EnableTLS && <StringInput
               label={t("CertFile")}
               fieldDescription='TLS/SSL 证书文件路径 (default: 、"~/.config/.comigo/cert.crt")'
               name={"CertFile"}
@@ -281,9 +279,9 @@ function App() {
               value={config.CertFile}
               onChange={setStringValue}
               placeholder={"CertFile"}
-            ></InputWithLabel>}
+            ></StringInput>}
 
-            {config.EnableTLS && <InputWithLabel
+            {config.EnableTLS && <StringInput
               label={t("KeyFile")}
               fieldDescription='TLS/SSL key文件路径 (default: "~/.config/.comigo/key.key")'
               name={"KeyFile"}
@@ -291,7 +289,7 @@ function App() {
               value={config.KeyFile}
               onChange={setStringValue}
               placeholder={"KeyFile"}
-            ></InputWithLabel>}
+            ></StringInput>}
 
           </>
         }
@@ -331,7 +329,7 @@ function App() {
             ></BoolSwitch>
 
             {config.LogToFile &&
-              <InputWithLabel
+              <StringInput
                 label={t("LogFilePath")}
                 fieldDescription="Log文件的保存位置"
                 name={"LogFilePath"}
@@ -342,7 +340,7 @@ function App() {
               />}
 
             {config.LogToFile &&
-              <InputWithLabel
+              <StringInput
                 label={t("LogFileName")}
                 fieldDescription="Log文件名"
                 name={"LogFileName"}
@@ -369,7 +367,7 @@ function App() {
               setBoolValue={setBoolValue}
             ></BoolSwitch>
 
-            <InputWithLabel
+            <StringInput
               label={t("CachePath")}
               fieldDescription="本地图片缓存位置，默认系统临时文件夹。"
               name={"CachePath"}
@@ -377,10 +375,22 @@ function App() {
               value={config.CachePath}
               onChange={setStringValue}
               placeholder={"CachePath"}
-            ></InputWithLabel>
+            ></StringInput>
           </>
         }
       </form>
+      {/* 返回主页的按钮 */}
+
+      <a
+        className="fixed bottom-4 right-4 inline-block rounded-full border bg-white border-indigo-600 p-3 text-indigo-600 hover:bg-indigo-600 hover:text-white focus:outline-none focus:ring active:bg-indigo-500"
+        href="/"
+      >
+        <span className="sr-only"> Download </span>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+        </svg>
+      </a>
+
     </>
   );
 }
