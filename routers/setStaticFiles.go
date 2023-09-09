@@ -107,7 +107,7 @@ func setStaticFiles(engine *gin.Engine) {
 	if errAdminFS != nil {
 		fmt.Println(errAdminFS)
 	}
-	engine.StaticFS("/admin/", http.FS(adminEmbedFS))
+	engine.StaticFS("/admin", http.FS(adminEmbedFS))
 
 	//解析模板到HTML
 	engine.GET("/", func(c *gin.Context) {

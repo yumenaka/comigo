@@ -18,7 +18,7 @@ export function configReducer(c: Config, action: Action) {
             return { ...action.config };
         case "boolConfig":
             axios
-                .post("/api/update_config", { [action.name]: action.value })
+                .post("/api/config_update", { [action.name]: action.value })
                 .then((response) => {
                     console.log("Data sent successfully");
                     console.info(response.data); //axios默认解析Json，所以 response.data 就是解析后的object
@@ -29,7 +29,7 @@ export function configReducer(c: Config, action: Action) {
             return { ...c, [action.name]: action.value };
         case "stringConfig":
             axios
-                .post("/api/update_config", { [action.name]: action.value })
+                .post("/api/config_update", { [action.name]: action.value })
                 .then((response) => {
                     console.log("Data sent successfully");
                     console.info(response.data); //axios默认解析Json，所以 response.data 就是解析后的object
@@ -40,7 +40,7 @@ export function configReducer(c: Config, action: Action) {
             return { ...c, [action.name]: action.value };
         case "numberConfig":
             axios
-                .post("/api/update_config", { [action.name]: action.value })
+                .post("/api/config_update", { [action.name]: action.value })
                 .then((response) => {
                     console.log("Data sent successfully");
                     console.info(response.data); //axios默认解析Json，所以 response.data 就是解析后的object
@@ -51,7 +51,7 @@ export function configReducer(c: Config, action: Action) {
             return { ...c, [action.name]: action.value };
         case "arrayConfig":
             axios
-                .post("/api/update_config", { [action.name]: action.value })
+                .post("/api/config_update", { [action.name]: action.value })
                 .then((response) => {
                     console.log("Data sent successfully");
                     console.info(response.data); //axios默认解析Json，所以 response.data 就是解析后的object

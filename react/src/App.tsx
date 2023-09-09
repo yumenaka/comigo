@@ -17,20 +17,30 @@ function App() {
   const [show, setShow] = useState("bookstore")
   const [config, dispatch] = useReducer(configReducer, defaultConfig);
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    axios.post("/api/update_config", config).then((response) => {
-      console.log("Data sent successfully");
-      console.info(response.data);//axios默认解析Json，所以 response.data 就是解析后的object
-    })
-      .catch((error) => {
-        console.error("Error sending data:", error);
-      });
-  };
+  // const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault();
+  //   axios.post("/api/config_update", config).then((response) => {
+  //     console.log("Data sent successfully");
+  //     console.info(response.data);//axios默认解析Json，所以 response.data 就是解析后的object
+  //   })
+  //     .catch((error) => {
+  //       console.error("Error sending data:", error);
+  //     });
+  // };
+
+  const [BackgroundColor, setBackgroundColor] = useState("bg-[#e0d9cd]")  
+
   // useEffect 用于在函数组件中执行副作用操作，例如数据获取、订阅、手动修改DOM等。
   // 通过传递第二个参数，你可以告诉 React 仅在某些值改变的时候才执行 effect。
   // 传递空数组([])作为第二个参数，effect 内部的 props 和 state 就会一直持有其初始值。也就是只在渲染的时候执行一次。
   useEffect(() => {
+    // 当前颜色
+    const tempBackgroundColor = localStorage.getItem("BackgroundColor");
+    if (tempBackgroundColor !== null) {
+      setBackgroundColor(tempBackgroundColor)
+    }
+  
+
     axios
       .get<Config>(`${baseURL}/config.json`)
       .then((response) => {
@@ -87,11 +97,10 @@ function App() {
   };
 
   return (
-    <>
+    <div className={`w-full h-full flex flex-col justify-center items-center  ${BackgroundColor} `} >
       <Contained show={show} setShow={setShow} />
-      <form
-        onSubmit={onSubmit}
-        className="card w-3/5 min-w-[24rem] flex flex-col justify-center items-center"
+      <div
+        className={`card w-3/5 min-w-[24rem] flex flex-col justify-center items-center`} 
       >
         {show === "bookstore" &&
           <>
@@ -378,11 +387,11 @@ function App() {
             ></StringInput>
           </>
         }
-      </form>
+      </div>
       {/* 返回主页的按钮 */}
 
       <a
-        className="fixed bottom-4 right-4 inline-block rounded-full border bg-white border-indigo-600 p-3 text-indigo-600 hover:bg-indigo-600 hover:text-white focus:outline-none focus:ring active:bg-indigo-500"
+        className="fixed top-4 left-4 inline-block rounded-full border bg-white border-indigo-600 p-3 text-indigo-600 hover:bg-indigo-600 hover:text-white focus:outline-none focus:ring active:bg-indigo-500"
         href="/"
       >
         <span className="sr-only"> Download </span>
@@ -391,7 +400,7 @@ function App() {
         </svg>
       </a>
 
-    </>
+    </div>
   );
 }
 

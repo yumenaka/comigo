@@ -1,5 +1,5 @@
 import React from "react";
-
+import { useEffect, useState } from "react";
 interface StringInputProps {
     label: string;
     fieldDescription: string;
@@ -25,13 +25,17 @@ const StringInput = ({
     error,
 }: StringInputProps) => {
 
-    // const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    //     event.preventDefault();
-    //     console.log("Form submitted!");
-    // };
+    const [InterfaceColor, setInterfaceColor] = useState("bg-[#F5F5E4]")
+    useEffect(() => {
+        // 当前颜色
+        const tempInterfaceColor = localStorage.getItem("InterfaceColor");
+        if (tempInterfaceColor !== null) {
+            setInterfaceColor(tempInterfaceColor)
+        }
+    }, []);
 
     return (
-        <div className="w-full m-1 p-2 flex flex-col font-semibold rounded-md shadow-md bg-blue-100 justify-start items-left">
+        <div className={`w-full m-1 p-2 flex flex-col font-semibold rounded-md shadow-md bg-blue-100 justify-start items-left ${InterfaceColor}`}>
             <label htmlFor={name} className="w-64">
                 {label}:
             </label>

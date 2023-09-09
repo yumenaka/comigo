@@ -3,12 +3,20 @@
   <!-- 内边距： p-4 https://www.tailwindcss.cn/docs/padding  p-0 m-0  -->
   <header class="header p-1 h-12 w-full flex justify-between content-center">
     <div> <!-- 返回箭头,点击返回上一页 -->
-      <n-icon class="p-0 m-0" v-if="showReturnIcon" size="40" @click="onClickReturnIcon()">
+      <n-icon class="p-0 mx-1 my-0" v-if="showReturnIcon" size="40" @click="onClickReturnIcon()">
         <return-up-back />
       </n-icon>
 
+      <!-- 服务器设置 -->
+      <n-icon  class="p-0 mx-1 my-0" v-if="!showReturnIcon" @click="ToAdminPage()" size="40">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+          class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z" />
+        </svg>
+      </n-icon>
       <!-- 上传按钮，点击进入上传页面 -->
-      <n-icon class="p-0 m-0" v-if="!showReturnIcon" @click="gotoUploadPage()" size="40">
+      <n-icon class="p-0 mx-1 my-0" v-if="!showReturnIcon" @click="gotoUploadPage()" size="40">
         <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512">
           <path
             d="M320 367.79h76c55 0 100-29.21 100-83.6s-53-81.47-96-83.6c-8.89-85.06-71-136.8-144-136.8c-69 0-113.44 45.79-128 91.2c-60 5.7-112 43.88-112 106.4s54 106.4 120 106.4h56"
@@ -21,7 +29,7 @@
       </n-icon>
 
       <!-- 列表图标 -->
-      <n-dropdown v-if="showReSortIcon"  trigger="hover" :options="options" @select="onSelect">
+      <n-dropdown v-if="showReSortIcon" trigger="hover" :options="options" @select="onSelect">
         <n-icon class="w-10" size="40">
           <Filter />
         </n-icon>
@@ -39,7 +47,8 @@
       <span class="text-lg" v-if="!setDownLoadLink">{{ headerTitle }}</span>
       <!-- 标题，可下载压缩包 -->
       <span class="text-lg text-blue-700 text-opacity-100  hover:underline">
-        <a v-if="setDownLoadLink" :href="'api/raw/' + bookID + '/' + encodeURIComponent(headerTitle)">{{ headerTitle }}</a>
+        <a v-if="setDownLoadLink" :href="'api/raw/' + bookID + '/' + encodeURIComponent(headerTitle)">{{ headerTitle
+        }}</a>
       </span>
     </div>
     <!-- slot，用来插入自定义组件。但是目前没需求 -->
@@ -75,13 +84,13 @@
 <script lang="ts">
 import { useCookies } from "vue3-cookies";
 import { NIcon, NDropdown, useMessage, } from 'naive-ui'
-import { ReturnUpBack, SettingsOutline, Grid, List, Filter,Text } from '@vicons/ionicons5'
+import { ReturnUpBack, SettingsOutline, Grid, List, Filter, Text } from '@vicons/ionicons5'
 import { h, defineComponent } from 'vue'
 import Qrcode from "@/components/Qrcode.vue";
 import screenfull from 'screenfull'
 export default defineComponent({
   name: "ComigoHeader",
-  props: ['setDownLoadLink', 'headerTitle', 'bookID', 'showReturnIcon', 'showSettingsIcon','showReSortIcon'],
+  props: ['setDownLoadLink', 'headerTitle', 'bookID', 'showReturnIcon', 'showSettingsIcon', 'showReSortIcon'],
   emits: ['drawerActivate', 'onResort'],
   components: {
     NDropdown,//下拉菜单 https://www.naiveui.com/zh-CN/os-theme/components/dropdown
@@ -212,6 +221,9 @@ export default defineComponent({
       this.$router.push({
         name: "UploadPage"
       });
+    },
+    ToAdminPage() {
+      location.href = "/admin";
     },
 
     //点击主页图标的时候，回到主页
