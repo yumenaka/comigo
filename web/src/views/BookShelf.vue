@@ -41,7 +41,7 @@
         <!-- 返回顶部的圆形按钮，向上滑动的时候出现 -->
         <n-back-top class="bg-blue-200" :show="showBackTopFlag" type="info" :right="20" :bottom="20" />
 
-        <Bottom class="flex-none h-12" :softVersion="$store.state.server_status.ServerName
+        <Bottom class="flex-none h-12" :ServerName="$store.state.server_status.ServerName
             ? $store.state.server_status.ServerName
             : 'Comigo'
             "></Bottom>

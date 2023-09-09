@@ -1,5 +1,5 @@
 import React from "react";
-
+import { useEffect, useState } from "react";
 interface Props {
     label: string;
     fieldDescription: string;
@@ -39,10 +39,18 @@ const StringArrayInput: React.FC<Props> = ({
             input.value = ''
         }
     }
+    const [InterfaceColor, setInterfaceColor] = useState("bg-[#F5F5E4]")
+    useEffect(() => {
+        // 当前颜色
+        const tempInterfaceColor = localStorage.getItem("InterfaceColor");
+        if (tempInterfaceColor !== null) {
+            setInterfaceColor(tempInterfaceColor)
+        }
+    }, []);
 
     return (
         <div
-            className="w-full m-1 p-2 flex flex-col font-semibold rounded-md shadow-md bg-blue-100 justify-start items-left">
+            className={`w-full m-1 p-2 flex flex-col font-semibold rounded-md shadow-md bg-blue-100 justify-start items-left ${InterfaceColor}`}>
             <label className="py-0 w-32" htmlFor={name}>
                 {label}:
             </label>

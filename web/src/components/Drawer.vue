@@ -13,10 +13,10 @@
       <n-space vertical>
         <slot></slot>
         <n-button v-if="sketching === false && inBookShelf === false" @click="startSketchMode">{{
-        $t('startSketchMode')
+          $t('startSketchMode')
         }}</n-button>
         <n-button v-if="sketching === true && inBookShelf === false" @click="stopSketchMode">{{
-        $t('stopSketchMode')
+          $t('stopSketchMode')
         }}</n-button>
         <!-- <n-divider /> -->
         <span>{{ $t('scan_qrcode') }}</span>
@@ -28,11 +28,7 @@
         </template>
         {{ $t('do_you_reset_all_settings') }}
       </n-popconfirm>
-       <n-button
-           tag="a"
-           href="/admin"
-           target="_blank"
-           class="my-2">{{ $t('server_setting') }}</n-button>
+      <!-- <n-button tag="a" href="/admin" target="_blank" class="my-2">{{ $t('server_setting') }}</n-button> -->
       <n-button class="my-2" @click="logout">{{ $t('logout') }}</n-button>
       <!-- 抽屉：自定义底部 -->
       <template #footer>
@@ -193,8 +189,7 @@ export default defineComponent({
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-</style>
+<style scoped></style>
 
 
 

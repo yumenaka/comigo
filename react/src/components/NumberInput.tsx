@@ -1,4 +1,4 @@
-
+import { useEffect, useState } from "react";
 
 type PropsType = {
     name: string
@@ -8,8 +8,16 @@ type PropsType = {
 }
 
 const NumberInput = (props: PropsType) => {
+    const [InterfaceColor, setInterfaceColor] = useState("bg-[#F5F5E4]")
+    useEffect(() => {
+        // 当前颜色
+        const tempInterfaceColor = localStorage.getItem("InterfaceColor");
+        if (tempInterfaceColor !== null) {
+            setInterfaceColor(tempInterfaceColor)
+        }
+    }, []);
     return (
-        <div className="w-full m-1 p-2 flex flex-row font-semibold rounded-md shadow-md bg-blue-100 justify-start items-center">
+        <div className={`w-full m-1 p-2 flex flex-row font-semibold rounded-md shadow-md justify-start items-center ${InterfaceColor}`}>
             <label htmlFor="Port" className="w-32 border border-black rounded-md">
                 {props.nameText}:
             </label>
