@@ -3,17 +3,21 @@ import React from "react";
 interface Props {
   show: string;
   setShow: (value: string) => void;
-  InterfaceColor: string;
+  BackgroundColor: string;
 }
 
 const Contained: React.FC<Props> = ({
   show,
   setShow,
-  InterfaceColor,
+  BackgroundColor,
 }) => {
 
   return (
-    <div className={`w-72 m-1 p-1 justify-center inline-flex rounded-lg border border-gray-100 bg-gray-100  ${InterfaceColor}`}>
+    <div
+      style={{
+        backgroundColor: BackgroundColor, // 绑定样式
+      }}
+      className={`w-72 m-1 p-1 justify-center inline-flex rounded-lg border border-gray-100 bg-gray-100 `}>
       <button
         className={`${show === "bookstore" ? " bg-white text-blue-500" : "text-gray-500 hover:text-gray-700"} inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm shadow-sm focus:relative `}
         onClick={() => setShow("bookstore")}

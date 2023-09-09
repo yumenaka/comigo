@@ -9,14 +9,18 @@ type PropsType = {
 }
 
 const BoolSwitch = (props: PropsType) => {
-    const { name: valueName, label, fieldDescription, boolValue,InterfaceColor, setBoolValue } = props
+    const { name: valueName, label, fieldDescription, boolValue, InterfaceColor, setBoolValue } = props
     const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         console.log(valueName, event.target.checked)
         setBoolValue(valueName, event.target.checked)
     }
 
     return (
-        <div className={`w-full m-1 p-2 flex flex-col font-semibold rounded-md shadow-md justify-left items-left ${InterfaceColor}`}>
+        <div
+            style={{
+                backgroundColor: InterfaceColor, // 绑定样式
+            }}
+            className={`w-full m-1 p-2 flex flex-col font-semibold rounded-md shadow-md justify-left items-left`}>
             <div className="w-32">{label}</div>
             <label htmlFor={valueName} className="relative h-8 w-14 cursor-pointer">
                 <input type="checkbox" checked={boolValue} id={valueName} className="peer sr-only" onChange={handleCheckboxChange} />

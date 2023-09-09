@@ -44,7 +44,10 @@ const StringArrayInput: React.FC<Props> = ({
 
     return (
         <div
-            className={`w-full m-1 p-2 flex flex-col font-semibold rounded-md shadow-md justify-start items-left  ${InterfaceColor}`}>
+            style={{
+                backgroundColor: InterfaceColor, // 绑定样式
+            }}
+            className={`w-full m-1 p-2 flex flex-col font-semibold rounded-md shadow-md justify-start items-left`}>
             <label className="py-0 w-32" htmlFor={name}>
                 {label}:
             </label>
