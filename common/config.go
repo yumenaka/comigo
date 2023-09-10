@@ -1,18 +1,22 @@
 package common
 
 import (
+	"fmt"
+	"github.com/mitchellh/go-homedir"
+	"github.com/pelletier/go-toml/v2"
 	"github.com/yumenaka/comi/book"
 	"github.com/yumenaka/comi/settings"
 	"net/http"
+	"os"
+	"path"
 )
 
+var RamBookList []*book.Book
 var (
-	ConfigFilePath = "" //yaml设置文件路径，数据库文件(comigo.db)在同一个文件夹。
-	Version        = "v0.9.5"
-	GenerateConfig = false
-	ReadingBook    *book.Book
-	Srv            *http.Server
-	Config         = settings.ServerConfig{
+	Version     = "v0.9.5"
+	ReadingBook *book.Book
+	Srv         *http.Server
+	Config      = settings.ServerConfig{
 		Port:                  1234,
 		Host:                  "DefaultHost",
 		StoresPath:            []string{},
@@ -36,7 +40,56 @@ var (
 		DisableLAN:            false,
 		DefaultMode:           "scroll",
 		LogToFile:             false,
+		ConfigSaveTo:          "RAM",
+		ConfigFileUsed:        "",
 	}
 )
 
-var RamBookList []*book.Book
+func SaveConfig() {
+	//保存配置
+	if Config.ConfigSaveTo == "RAM" {
+		fmt.Println("Config Save To RAM")
+		return
+	}
+	bytes, err := toml.Marshal(Config)
+	if err != nil {
+		fmt.Println("toml.Marshal Error")
+		return
+	}
+	//在命令行打印
+	fmt.Println("Config Save To " + Config.ConfigSaveTo)
+	//fmt.Printf("Config: %s \n", string(bytes))
+	//保存到文件
+	if Config.ConfigSaveTo == "HomeDir" {
+		home, err := homedir.Dir()
+		if err != nil {
+			fmt.Printf("homedir.Dir Error: %s \n", err)
+		}
+		// 创建目录
+		err = os.MkdirAll(path.Join(home, ".config/comigo/"), os.ModePerm)
+		if err != nil {
+			panic(err)
+		}
+		err = os.WriteFile(path.Join(home, ".config/comigo/config.toml"), bytes, 0644)
+		if err != nil {
+			fmt.Printf("os.WriteFile Error: %s \n", err)
+		}
+	}
+	if Config.ConfigSaveTo == "NowDir" {
+		err = os.WriteFile("config.toml", bytes, 0644)
+		if err != nil {
+			fmt.Printf("os.WriteFile Error: %s \n", err)
+		}
+	}
+	if Config.ConfigSaveTo == "ProgramDir" {
+		// 获取可执行程序自身的文件路径
+		executablePath, err := os.Executable()
+		if err != nil {
+			fmt.Printf("os.Executable Error: %s \n", err)
+		}
+		err = os.WriteFile(path.Join(executablePath, "config.toml"), bytes, 0644)
+		if err != nil {
+			fmt.Printf("os.WriteFile Error: %s \n", err)
+		}
+	}
+}

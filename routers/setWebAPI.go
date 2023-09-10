@@ -32,8 +32,10 @@ func setWebAPI(engine *gin.Engine) {
 		api.GET("/config.toml", handler.GetConfigTomlHandler)
 		//获取json格式的当前配置
 		api.GET("/config.json", handler.GetConfigJsonHandler)
-		//修改服务器配置(post json)
+		//修改服务器配置
 		api.POST("/config_update", handler.ConfigUpdateHandler)
+		//保存服务器配置
+		api.POST("/config_save", handler.ConfigSaveHandler)
 	} else {
 		// 创建 jwt 中间件
 		jwtMiddleware, err := token.NewJwtMiddleware()
@@ -47,7 +49,6 @@ func setWebAPI(engine *gin.Engine) {
 		api.POST("/logout", jwtMiddleware.LogoutHandler)
 		// 刷新 token ，延长token的有效期
 		api.GET("/refresh_token", jwtMiddleware.RefreshHandler)
-
 		// 在需要验证的api中用jwt中间件
 		//通过URL字符串参数获取特定文件
 		api.GET("/getfile", jwtMiddleware.MiddlewareFunc(), handler.GetFileHandler)
@@ -67,6 +68,8 @@ func setWebAPI(engine *gin.Engine) {
 		api.GET("/config.json", jwtMiddleware.MiddlewareFunc(), handler.GetConfigJsonHandler)
 		//修改服务器配置
 		api.POST("/config_update", jwtMiddleware.MiddlewareFunc(), handler.ConfigUpdateHandler)
+		//保存服务器配置
+		api.POST("/config_save", jwtMiddleware.MiddlewareFunc(), handler.ConfigSaveHandler)
 	}
 
 	//web端公开的服务器状态，包括标题、端口等

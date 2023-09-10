@@ -40,6 +40,10 @@ func ConfigUpdateHandler(c *gin.Context) {
 
 // BeforeConfigUpdate 根据配置的变化，判断是否需要打开浏览器重新扫描等
 func BeforeConfigUpdate(oldConfig *settings.ServerConfig, newConfig *settings.ServerConfig) {
+	if oldConfig.ConfigSaveTo != newConfig.ConfigSaveTo {
+		oldConfig.ConfigSaveTo = newConfig.ConfigSaveTo
+		common.SaveConfig()
+	}
 	if (newConfig.OpenBrowser == true) && (oldConfig.OpenBrowser == false) {
 		protocol := "http://"
 		if newConfig.EnableTLS {

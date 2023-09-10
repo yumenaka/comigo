@@ -17,11 +17,12 @@ const SelectConfig = (props: PropsType) => {
     };
 
     return (
-        <div style={{
+        <div
+        className="w-full m-1 p-2 flex flex-col shadow-md hover:shadow-2xl font-semibold rounded-md  justify-left items-left"
+        style={{
             backgroundColor: InterfaceColor, // 绑定样式
         }}>
-            <div className="w-32">{label}</div>
-            <label htmlFor="HeadlineAct" className="w-32 block text-sm font-medium text-gray-900">
+            <label htmlFor={valueName} className="py-0 w-32">
                 {label}
             </label>
             <select
@@ -32,7 +33,6 @@ const SelectConfig = (props: PropsType) => {
                 className="mt-1.5 w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm"
             >
                 {/* 使用 option 元素来定义选项 */}
-                <option value="">Please select</option>
                 {optionalValue.map((option, index) => (
                     <option key={index} value={option}>{option}</option>
                 ))}

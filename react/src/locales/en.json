@@ -128,5 +128,5 @@
   "EnableFrpcServer": "EnableFrpcServer",
   "EnableTLS": "EnableTLS",
   "EnableLogin": "Enable Login",
-  "ConfigLocation": "Config File Location"
+  "ConfigSaveTo": "Config File Location"
 }

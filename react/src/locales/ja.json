@@ -128,5 +128,5 @@
   "uploaded_folder_hint": "デフォルトでは、ファイルは実行ディレクトリ内のアップロード フォルダーにアップロードされます。",
   "width_useFixedValue": "幅: 固定値 px",
   "width_usePercent": "幅：％",
-  "ConfigLocation": "Config File Location"
+  "ConfigSaveTo": "Config File Location"
 }

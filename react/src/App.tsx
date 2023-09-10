@@ -52,9 +52,9 @@ function App() {
       });
   }, []);
 
-  //配置文件修改后，保存到后端
-  const setStringValue = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+
+  const setStringValueFunc = (name: string, value: string) => {
+    console.log("setStringValue " + name, value);
     dispatch({
       type: 'stringConfig',
       name: name,
@@ -62,6 +62,14 @@ function App() {
       config: config
     });
   };
+
+  //配置文件修改后，保存到后端
+  const setStringValue = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setStringValueFunc(name, value);
+  };
+
+
 
   const setNumberValue = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -77,16 +85,6 @@ function App() {
     console.log("setBoolValue " + name, value);
     dispatch({
       type: 'boolConfig',
-      name: name,
-      value: value,
-      config: config
-    });
-  };
-
-  const setStringValueFunc = (name: string, value: string) => {
-    console.log("setStringValue " + name, value);
-    dispatch({
-      type: 'stringConfig',
       name: name,
       value: value,
       config: config
@@ -120,17 +118,6 @@ function App() {
       >
         {show === "bookstore" &&
           <>
-
-            <SelectConfig
-              label={t("ConfigLocation")}
-              fieldDescription="配置文件保存位置 Configuration file save location"
-              name={"Language"}
-              value={config.ConfigLocation}
-              optionalValue={["HomeDir", "NowDir","ProgramDir","CustomDir"]}
-              InterfaceColor={InterfaceColor}
-              setSelectedOption={setStringValueFunc}
-            ></SelectConfig>
-
             <BoolConfig
               label={t("OpenBrowser")}
               fieldDescription="扫描完成后，是否同时打开浏览器。windows默认true，其他平台默认false。"
@@ -353,6 +340,16 @@ function App() {
 
         {show === "other" &&
           <>
+            <SelectConfig
+              label={t("ConfigSaveTo")}
+              fieldDescription="配置文件的默认保存位置，可选值：RAM、HomeDir、NowDir、ProgramDir）"
+              name={"ConfigSaveTo"}
+              value={config.ConfigSaveTo}
+              optionalValue={["RAM", "HomeDir", "NowDir", "ProgramDir"]}
+              InterfaceColor={InterfaceColor}
+              setSelectedOption={setStringValueFunc}
+            ></SelectConfig>
+
             <BoolConfig
               name={"EnableDatabase"}
               label={t("EnableDatabase")}
