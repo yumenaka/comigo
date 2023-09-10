@@ -20,7 +20,7 @@ func configReloadHandler(e fsnotify.Event) {
 	fmt.Printf("配置文件改变，Comigo重启:%s Op:%s\n", e.Name, e.Op)
 	//重新读取改变后的配置文件
 	if err := runtimeViper.ReadInConfig(); err != nil {
-		if common.ConfigFilePath == "" && common.Config.Debug {
+		if common.Config.ConfigFileUsed == "" && common.Config.Debug {
 			fmt.Println(err)
 		}
 	}

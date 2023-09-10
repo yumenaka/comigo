@@ -12,7 +12,7 @@ func initBookStores(args []string) {
 	//1. 初始化数据库
 	if common.Config.EnableDatabase {
 		// 从数据库中读取书籍信息并持久化
-		if err := storage.InitDatabase(common.ConfigFilePath); err != nil {
+		if err := storage.InitDatabase(common.Config.ConfigFileUsed); err != nil {
 			fmt.Println(err)
 			return
 		}

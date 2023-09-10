@@ -10,9 +10,11 @@ import (
 	"strings"
 )
 
-// ServerConfig 服务器设置(config.toml)，配置文件放在被扫描的根目录中，或$HOME/config/comigo.可以用“comi --generate-config”生成本示例文件
+// ServerConfig 服务器设置(config.toml)
 type ServerConfig struct {
-	Port                   int      `json:"Port" comment:"Comigo设置文件(config.toml)，放在执行目录中，或$HOME/.config/comigo/下。可用“comi --generate-config”生成本文件\n网页服务端口，此项配置不支持热重载"`
+	Port                   int      `json:"Port" comment:"Comigo设置文件(config.toml)，放在默认保存目录中。可选值：RAM（不保存）、HomeDir（$HOME/.config/comigo/config.toml）、NowDir（当前执行目录）、ProgramDir（程序所在目录）下。可用“comi --config-save”生成本文件\n网页服务端口，此项配置不支持热重载"`
+	ConfigSaveTo           string   `json:"ConfigSaveTo" comment:"配置文件的默认保存位置，可选值：RAM（不保存）、HomeDir（$HOME/.config/comigo/）、NowDir（当前执行目录）、ProgramDir（程序所在目录）"`
+	ConfigFileUsed         string   `json:"-" toml:"-" comment:"当前生效的yaml设置文件路径，数据库文件(comigo.db)在同一个文件夹"`
 	Host                   string   `json:"Host" comment:"自定义二维码显示的主机名"`
 	StoresPath             []string `json:"StoresPath" comment:"默认扫描的书库文件夹"`
 	ExcludePath            []string `json:"ExcludePath" comment:"扫描书籍的时候，需要排除的文件或文件夹的名字"`
@@ -29,7 +31,7 @@ type ServerConfig struct {
 	OpenBrowser            bool     `json:"OpenBrowser" comment:"是否同时打开浏览器，windows默认true，其他默认false"`
 	DisableLAN             bool     `json:"DisableLAN" comment:"只在本机提供阅读服务，不对外共享，此项配置不支持热重载"`
 	DefaultMode            string   `json:"DefaultMode" comment:"默认阅读模式，默认为空，可以设置为scroll或flip"`
-	EnableLogin            bool     `json:"EnableTLS" comment:"是否启用登录。默认不需要登陆。此项配置不支持热重载。"`
+	EnableLogin            bool     `json:"EnableLogin" comment:"是否启用登录。默认不需要登陆。此项配置不支持热重载。"`
 	Username               string   `json:"Username" comment:"启用登陆后，登录界面需要的用户名。"`
 	Password               string   `json:"Password" comment:"启用登陆后，登录界面需要的密码。"`
 	Timeout                int      `json:"Timeout" comment:"启用登陆后，cookie过期的时间。单位为分钟。默认180分钟后过期。"`
@@ -45,6 +47,7 @@ type ServerConfig struct {
 	LogFilePath            string   `json:"LogFilePath" comment:"Log文件的保存位置"`
 	LogFileName            string   `json:"LogFileName" comment:"Log文件名"`
 	GenerateMetaData       bool     `json:"GenerateMetaData" toml:"GenerateMetaData" comment:"生成书籍元数据"`
+
 	//EnableWebpServer     bool             `json:"enable_webp_server"`
 	//WebpConfig           WebPServerConfig `json:"-"  comment:" WebPServer设置"`
 	//DatabaseFilePath     string           `json:"-" comment:"数据库文件存储位置，默认config目录"`
@@ -180,10 +183,13 @@ func UpdateConfig(oldConfig ServerConfig, jsonString string) (newConfig ServerCo
 	if Timeout.Exists() {
 		newConfig.Timeout = int(Timeout.Int())
 	}
-
 	GenerateMetaData := gjson.Get(jsonString, "GenerateMetaData")
 	if GenerateMetaData.Exists() {
 		newConfig.GenerateMetaData = GenerateMetaData.Bool()
+	}
+	ConfigSaveTo := gjson.Get(jsonString, "ConfigSaveTo")
+	if ConfigSaveTo.Exists() {
+		newConfig.ConfigSaveTo = ConfigSaveTo.String()
 	}
 	return newConfig, nil
 }

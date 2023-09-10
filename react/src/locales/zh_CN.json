@@ -128,5 +128,5 @@
   "EnableFrpcServer": "EnableFrpcServer",
   "EnableTLS": "EnableTLS",
   "EnableLogin": "启用登陆",
-  "ConfigLocation": "配置保存路径"
+  "ConfigSaveTo": "配置默认保存路径"
 }

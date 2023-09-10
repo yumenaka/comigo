@@ -34,7 +34,7 @@ interface Config {
   LogFileName: string;
   ZipFileTextEncoding: string;
   GenerateMetaData: boolean;
-  ConfigLocation: string;
+  ConfigSaveTo: string;
 }
 
 export default Config;

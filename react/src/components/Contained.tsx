@@ -43,7 +43,7 @@ const Contained: React.FC<Props> = ({
         className={`${show === "other" ? " bg-white text-blue-500" : "text-gray-500 hover:text-gray-700"} inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm shadow-sm font-semibold focus:relative `}
         onClick={() => setShow("other")}
       >
-        <svg className="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4l3 3L6.65 19.35a1.5 1.5 0 0 1-3-3L16 4"></path><path d="M10 10h6"></path><path d="M19 15l1.5 1.6a2 2 0 1 1-3 0L19 15"></path></g></svg>
+        <svg className="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 4l3 3L6.65 19.35a1.5 1.5 0 0 1-3-3L16 4"></path><path d="M10 10h6"></path><path d="M19 15l1.5 1.6a2 2 0 1 1-3 0L19 15"></path></g></svg>
         实验
       </button>
     </div>
