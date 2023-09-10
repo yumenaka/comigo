@@ -100,4 +100,5 @@ export const defaultConfig: Config = {
     LogFileName: "",
     ZipFileTextEncoding: "utf-8",
     GenerateMetaData: false,
+    ConfigLocation: "",
 };

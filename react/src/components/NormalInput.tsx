@@ -12,7 +12,7 @@ interface Props {
     // register?: any;
 }
 
-const NormalInput = ({
+const NormalConfig = ({
     label,
     fieldDescription,
     name,
@@ -49,4 +49,4 @@ const NormalInput = ({
     );
 };
 
-export default NormalInput;
+export default NormalConfig;

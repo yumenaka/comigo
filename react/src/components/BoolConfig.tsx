@@ -8,7 +8,7 @@ type PropsType = {
     setBoolValue: (valueName: string, checked: boolean) => void
 }
 
-const BoolSwitch = (props: PropsType) => {
+const BoolConfig = (props: PropsType) => {
     const { name: valueName, label, fieldDescription, boolValue, InterfaceColor, setBoolValue } = props
     const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         console.log(valueName, event.target.checked)
@@ -36,4 +36,4 @@ const BoolSwitch = (props: PropsType) => {
     )
 }
 
-export default BoolSwitch
+export default BoolConfig
