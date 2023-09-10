@@ -5,11 +5,12 @@ import { useTranslation } from "react-i18next";
 // import { useForm } from "react-hook-form";
 import Contained from "./components/Contained";
 import Config from "./types/Config";
-import NormalInput from "./components/NormalInput";
-import StringArrayInput from "./components/StringArrayInput";
-import BoolSwitch from "./components/BoolInput";
+import NormalConfig from "./components/NormalInput";
+import ArrayConfig from "./components/ArrayConfig";
+import BoolConfig from "./components/BoolConfig";
 import { useState } from "react";
 import { configReducer, defaultConfig } from "./reducers/configReducer";
+import SelectConfig from "./components/SelectConfig";
 
 function App() {
   const baseURL = "/api";
@@ -82,6 +83,16 @@ function App() {
     });
   };
 
+  const setStringValueFunc = (name: string, value: string) => {
+    console.log("setStringValue " + name, value);
+    dispatch({
+      type: 'stringConfig',
+      name: name,
+      value: value,
+      config: config
+    });
+  };
+
   const setStringArray = (valueName: string, value: string[]) => {
     dispatch({
       type: 'boolConfig',
@@ -109,34 +120,36 @@ function App() {
       >
         {show === "bookstore" &&
           <>
-            <BoolSwitch
+
+            <SelectConfig
+              label={t("ConfigLocation")}
+              fieldDescription="配置文件保存位置 Configuration file save location"
+              name={"Language"}
+              value={config.ConfigLocation}
+              optionalValue={["HomeDir", "NowDir","ProgramDir","CustomDir"]}
+              InterfaceColor={InterfaceColor}
+              setSelectedOption={setStringValueFunc}
+            ></SelectConfig>
+
+            <BoolConfig
               label={t("OpenBrowser")}
               fieldDescription="扫描完成后，是否同时打开浏览器。windows默认true，其他平台默认false。"
               name={"OpenBrowser"}
               boolValue={config.OpenBrowser}
               InterfaceColor={InterfaceColor}
               setBoolValue={setBoolValue}
-            ></BoolSwitch>
+            ></BoolConfig>
 
-            <BoolSwitch
-              label={t("EnableUpload")}
-              name={"EnableUpload"}
-              fieldDescription="启用上传功能。"
-              boolValue={config.EnableUpload}
-              InterfaceColor={InterfaceColor}
-              setBoolValue={setBoolValue}
-            ></BoolSwitch>
-
-            <StringArrayInput
+            <ArrayConfig
               label={t("StoresPath")}
               fieldDescription="书库文件夹，支持绝对目录与相对目录。相对目录以当前执行目录为基准"
               name={"StoresPath"}
               value={config.StoresPath}
               InterfaceColor={InterfaceColor}
               setStringArray={setStringArray}
-            ></StringArrayInput>
+            ></ArrayConfig>
 
-            <NormalInput
+            <NormalConfig
               label={t("MaxScanDepth")}
               fieldDescription="最大扫描深度。超过深度的文件不会被扫描。当前执行目录为基准。"
               name={"MaxScanDepth"}
@@ -145,20 +158,9 @@ function App() {
               InterfaceColor={InterfaceColor}
               onChange={setNumberValue}
               placeholder={"MaxScanDepth"}
-            ></NormalInput>
+            ></NormalConfig>
 
-            {config.EnableUpload && <NormalInput
-              label={t("UploadPath")}
-              fieldDescription="自定义上传文件存储位置，默认在当前执行目录下创建 upload 文件夹。"
-              name={"UploadPath"}
-              type={"text"}
-              value={config.UploadPath}
-              InterfaceColor={InterfaceColor}
-              onChange={setStringValue}
-              placeholder={"UploadPath"}
-            />}
-
-            <NormalInput
+            <NormalConfig
               label={t("MinImageNum")}
               fieldDescription="压缩包或文件夹内至少有几张图片，才算作书籍。"
               name={"MinImageNum"}
@@ -167,9 +169,9 @@ function App() {
               InterfaceColor={InterfaceColor}
               onChange={setNumberValue}
               placeholder={"MinImageNum"}
-            ></NormalInput>
+            ></NormalConfig>
 
-            <NormalInput
+            <NormalConfig
               label={t("TimeoutLimitForScan")}
               fieldDescription="扫描文件时，超过几秒钟，就放弃扫描这个文件，避免卡在过大文件上。"
               name={"TimeoutLimitForScan"}
@@ -180,7 +182,27 @@ function App() {
               placeholder={"TimeoutLimitForScan"}
             />
 
-            <NormalInput
+            <BoolConfig
+              label={t("EnableUpload")}
+              name={"EnableUpload"}
+              fieldDescription="启用上传功能。"
+              boolValue={config.EnableUpload}
+              InterfaceColor={InterfaceColor}
+              setBoolValue={setBoolValue}
+            ></BoolConfig>
+
+            {config.EnableUpload && <NormalConfig
+              label={t("UploadPath")}
+              fieldDescription="自定义上传文件存储位置，默认在当前执行目录下创建 upload 文件夹。"
+              name={"UploadPath"}
+              type={"text"}
+              value={config.UploadPath}
+              InterfaceColor={InterfaceColor}
+              onChange={setStringValue}
+              placeholder={"UploadPath"}
+            />}
+
+            <NormalConfig
               label={t("ZipFileTextEncoding")}
               fieldDescription="非utf-8编码ZIP文件，尝试用什么编码解析。默认GBK。"
               name={"ZipFileTextEncoding"}
@@ -191,38 +213,38 @@ function App() {
               placeholder={"ZipFileTextEncoding"}
             />
 
-            <StringArrayInput
+            <ArrayConfig
               label={t("ExcludePath")}
               fieldDescription="扫描书籍的时候，需要排除的文件或文件夹的名字"
               name={"ExcludePath"}
               value={config.ExcludePath}
               InterfaceColor={InterfaceColor}
               setStringArray={setStringArray}
-            ></StringArrayInput>
+            ></ArrayConfig>
 
-            <StringArrayInput
+            <ArrayConfig
               label={t("SupportMediaType")}
               fieldDescription="扫描压缩包时，用于统计图片数量的图片文件后缀"
               name={"SupportMediaType"}
               value={config.SupportMediaType}
               InterfaceColor={InterfaceColor}
               setStringArray={setStringArray}
-            ></StringArrayInput>
+            ></ArrayConfig>
 
-            <StringArrayInput
+            <ArrayConfig
               label={t("SupportFileType")}
               fieldDescription="扫描文件时，用于决定跳过，还是算作书籍处理的文件后缀"
               name={"SupportFileType"}
               value={config.SupportFileType}
               InterfaceColor={InterfaceColor}
               setStringArray={setStringArray}
-            ></StringArrayInput>
+            ></ArrayConfig>
           </>
         }
 
         {show === "internet" &&
           <>
-            <NormalInput
+            <NormalConfig
               label={t("Port")}
               fieldDescription="网页服务端口，此项配置不支持热重载"
               name={"Port"}
@@ -231,9 +253,9 @@ function App() {
               InterfaceColor={InterfaceColor}
               onChange={setNumberValue}
               placeholder={"Port"}
-            ></NormalInput>
+            ></NormalConfig>
 
-            <NormalInput
+            <NormalConfig
               label={t("Host")}
               fieldDescription="自定义二维码显示的主机名。默认为网卡IP。"
               name={"Host"}
@@ -242,27 +264,27 @@ function App() {
               InterfaceColor={InterfaceColor}
               onChange={setStringValue}
               placeholder={"Host"}
-            ></NormalInput>
+            ></NormalConfig>
 
-            <BoolSwitch
+            <BoolConfig
               name={"DisableLAN"}
               label={t("DisableLAN")}
               fieldDescription="只在本机提供阅读服务，不对外共享，此项配置不支持热重载"
               boolValue={config.DisableLAN}
               InterfaceColor={InterfaceColor}
               setBoolValue={setBoolValue}
-            ></BoolSwitch>
+            ></BoolConfig>
 
-            <BoolSwitch
+            <BoolConfig
               name={"EnableLogin"}
               label={t("EnableLogin")}
               fieldDescription="是否启用登录。默认不需要登陆。此项配置不支持热重载。"
               boolValue={config.EnableLogin}
               InterfaceColor={InterfaceColor}
               setBoolValue={setBoolValue}
-            ></BoolSwitch>
+            ></BoolConfig>
 
-            {config.EnableLogin && <NormalInput
+            {config.EnableLogin && <NormalConfig
               label={t("Username")}
               fieldDescription="启用登陆后，登录界面需要的用户名。"
               name={"Username"}
@@ -271,9 +293,9 @@ function App() {
               InterfaceColor={InterfaceColor}
               onChange={setStringValue}
               placeholder={"Username"}
-            ></NormalInput>}
+            ></NormalConfig>}
 
-            {config.EnableLogin && <NormalInput
+            {config.EnableLogin && <NormalConfig
               label={t("Password")}
               fieldDescription="启用登陆后，登录界面需要的密码。"
               name={"Password"}
@@ -282,9 +304,9 @@ function App() {
               InterfaceColor={InterfaceColor}
               onChange={setStringValue}
               placeholder={"Password"}
-            ></NormalInput>}
+            ></NormalConfig>}
 
-            <NormalInput
+            <NormalConfig
               label={t("Timeout")}
               fieldDescription="启用登陆后，cookie过期的时间。单位为分钟。默认180分钟后过期。"
               name={"Timeout"}
@@ -293,18 +315,18 @@ function App() {
               InterfaceColor={InterfaceColor}
               onChange={setNumberValue}
               placeholder={"Timeout"}
-            ></NormalInput>
+            ></NormalConfig>
 
-            <BoolSwitch
+            <BoolConfig
               name={"EnableTLS"}
               label={t("EnableTLS")}
               fieldDescription="是否启用HTTPS协议。需要设置证书于key文件。"
               boolValue={config.EnableTLS}
               InterfaceColor={InterfaceColor}
               setBoolValue={setBoolValue}
-            ></BoolSwitch>
+            ></BoolConfig>
 
-            {config.EnableTLS && <NormalInput
+            {config.EnableTLS && <NormalConfig
               label={t("CertFile")}
               fieldDescription='TLS/SSL 证书文件路径 (default: 、"~/.config/.comigo/cert.crt")'
               name={"CertFile"}
@@ -313,9 +335,9 @@ function App() {
               InterfaceColor={InterfaceColor}
               onChange={setStringValue}
               placeholder={"CertFile"}
-            ></NormalInput>}
+            ></NormalConfig>}
 
-            {config.EnableTLS && <NormalInput
+            {config.EnableTLS && <NormalConfig
               label={t("KeyFile")}
               fieldDescription='TLS/SSL key文件路径 (default: "~/.config/.comigo/key.key")'
               name={"KeyFile"}
@@ -324,51 +346,51 @@ function App() {
               InterfaceColor={InterfaceColor}
               onChange={setStringValue}
               placeholder={"KeyFile"}
-            ></NormalInput>}
+            ></NormalConfig>}
 
           </>
         }
 
         {show === "other" &&
           <>
-            <BoolSwitch
+            <BoolConfig
               name={"EnableDatabase"}
               label={t("EnableDatabase")}
               fieldDescription="启用本地数据库，保存扫描到的书籍数据。此项配置不支持热重载。"
               boolValue={config.EnableDatabase}
               InterfaceColor={InterfaceColor}
               setBoolValue={setBoolValue}
-            ></BoolSwitch>
+            ></BoolConfig>
 
-            {config.EnableDatabase && <BoolSwitch
+            {config.EnableDatabase && <BoolConfig
               name={"ClearDatabaseWhenExit"}
               label={t("ClearDatabaseWhenExit")}
               fieldDescription="启用本地数据库时，扫描完成后，清除不存在的书籍。"
               boolValue={config.ClearDatabaseWhenExit}
               InterfaceColor={InterfaceColor}
               setBoolValue={setBoolValue}
-            ></BoolSwitch>}
+            ></BoolConfig>}
 
-            <BoolSwitch
+            <BoolConfig
               name={"Debug"}
               label={t("Debug")}
               fieldDescription=""
               boolValue={config.Debug}
               InterfaceColor={InterfaceColor}
               setBoolValue={setBoolValue}
-            ></BoolSwitch>
+            ></BoolConfig>
 
-            <BoolSwitch
+            <BoolConfig
               name={"LogToFile"}
               label={t("LogToFile")}
               fieldDescription="是否保存程序Log到本地文件。默认不保存。"
               boolValue={config.LogToFile}
               InterfaceColor={InterfaceColor}
               setBoolValue={setBoolValue}
-            ></BoolSwitch>
+            ></BoolConfig>
 
             {config.LogToFile &&
-              <NormalInput
+              <NormalConfig
                 label={t("LogFilePath")}
                 fieldDescription="Log文件的保存位置"
                 name={"LogFilePath"}
@@ -380,7 +402,7 @@ function App() {
               />}
 
             {config.LogToFile &&
-              <NormalInput
+              <NormalConfig
                 label={t("LogFileName")}
                 fieldDescription="Log文件名"
                 name={"LogFileName"}
@@ -392,25 +414,25 @@ function App() {
               />
             }
 
-            <BoolSwitch
+            <BoolConfig
               name={"GenerateMetaData"}
               label={t("GenerateMetaData")}
               fieldDescription="生成书籍元数据。当前未生效。"
               boolValue={config.GenerateMetaData}
               InterfaceColor={InterfaceColor}
               setBoolValue={setBoolValue}
-            ></BoolSwitch>
+            ></BoolConfig>
 
-            <BoolSwitch
+            <BoolConfig
               name={"ClearCacheExit"}
               label={t("ClearCacheExit")}
               fieldDescription="退出程序的时候，清理web图片缓存。"
               boolValue={config.ClearCacheExit}
               InterfaceColor={InterfaceColor}
               setBoolValue={setBoolValue}
-            ></BoolSwitch>
+            ></BoolConfig>
 
-            <NormalInput
+            <NormalConfig
               label={t("CachePath")}
               fieldDescription="本地图片缓存位置，默认系统临时文件夹。"
               name={"CachePath"}
@@ -419,13 +441,13 @@ function App() {
               InterfaceColor={InterfaceColor}
               onChange={setStringValue}
               placeholder={"CachePath"}
-            ></NormalInput>
+            ></NormalConfig>
           </>
         }
       </div>
       {/* 返回主页的按钮 */}
       <a
-        className="fixed top-2 left-2 inline-block rounded-full border bg-white border-indigo-600 p-3 text-indigo-600 hover:bg-indigo-600 hover:text-white focus:outline-none focus:ring active:bg-indigo-500"
+        className="fixed top-2 left-2 inline-block rounded-full border  shadow-md hover:shadow-2xl bg-white border-indigo-600 p-3 text-indigo-600 hover:bg-indigo-600 hover:text-white focus:outline-none focus:ring active:bg-indigo-500"
         href="/"
       >
         <span className="sr-only"> Download </span>
@@ -438,7 +460,7 @@ function App() {
       <div className="w-full mt-auto flex flex-col justify-center items-center text-gray-900 h-12 py-4 space-x-2 text-base content-center" style={{
         backgroundColor: InterfaceColor, // 绑定样式
       }}>
-        <a href="https://github.com/yumenaka/comi/releases" className="text-blue-700 hover:underline font-semibold"> Power by Comigo</a>
+        <a href="https://github.com/yumenaka/comi/releases" className="text-blue-700 hover:underline font-bold"> Power by Comigo</a>
       </div>
     </div>
   );

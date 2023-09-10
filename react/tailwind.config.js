@@ -12,8 +12,7 @@ export default {
     },
   },
   plugins: [
-    require('@tailwindcss/forms'),
-    require('@headlessui/tailwindcss')
+    require('@tailwindcss/forms')
   ],
 }
 

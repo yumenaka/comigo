@@ -127,5 +127,6 @@
   "GenerateMetaData": "GenerateMetaData",
   "EnableFrpcServer": "EnableFrpcServer",
   "EnableTLS": "EnableTLS",
-  "EnableLogin": "Enable Login"
+  "EnableLogin": "Enable Login",
+  "ConfigLocation": "Config File Location"
 }

@@ -11,7 +11,7 @@ interface Props {
     InterfaceColor?: string;
 }
 
-const StringArrayInput: React.FC<Props> = ({
+const ArrayConfig: React.FC<Props> = ({
     label,
     fieldDescription,
     name,
@@ -88,4 +88,4 @@ const StringArrayInput: React.FC<Props> = ({
     );
 };
 
-export default StringArrayInput;
+export default ArrayConfig;
