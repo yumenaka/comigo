@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useEffect, useReducer } from "react";
+import React, { useReducer } from "react";
 import { useTranslation } from "react-i18next";
 // TypeScript環境でReact Hook Formのフォーム作成の基礎を学ぶ  https://reffect.co.jp/react/react-hook-form-ts/
 // import { useForm } from "react-hook-form";
@@ -11,6 +11,10 @@ import BoolConfig from "./components/BoolConfig";
 import { useState } from "react";
 import { configReducer, defaultConfig } from "./reducers/configReducer";
 import SelectConfig from "./components/SelectConfig";
+//https://github.com/zenghongtu/react-use-chinese/blob/master/README.md
+// https://streamich.github.io/react-use/?path=%2Fstory%2Fside-effects-usecookie--docs
+import { useEffectOnce } from 'react-use';
+import DialogModal from "./components/DialogModal";
 
 function App() {
   const baseURL = "/api";
@@ -23,7 +27,7 @@ function App() {
   // useEffect 用于在函数组件中执行副作用操作，例如数据获取、订阅、手动修改DOM等。
   // 通过传递第二个参数，你可以告诉 React 仅在某些值改变的时候才执行 effect。
   // 传递空数组([])作为第二个参数，effect 内部的 props 和 state 就会一直持有其初始值。也就是只在渲染的时候执行一次。
-  useEffect(() => {
+  useEffectOnce(() => {
     // 当前颜色
     const tempBackgroundColor = localStorage.getItem("BackgroundColor");
     if (tempBackgroundColor !== null) {
@@ -50,7 +54,7 @@ function App() {
       .catch((error) => {
         console.error(error);
       });
-  }, []);
+  });
 
 
   const setStringValueFunc = (name: string, value: string) => {
@@ -68,8 +72,6 @@ function App() {
     const { name, value } = e.target;
     setStringValueFunc(name, value);
   };
-
-
 
   const setNumberValue = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -100,17 +102,40 @@ function App() {
     });
   };
 
+  const [isOpenModel, setIsOpenModel] = useState(true)
+  const [dialogMessage, setDialogMessage] = useState("")
+ function openDialogClick() {
+  openDialogModal("打开model")
+  }
+
+  function openDialogModal(message:string) {
+    setIsOpenModel(true)
+    setDialogMessage(message)
+  }
+
   return (
     <div
       style={{
         backgroundColor: BackgroundColor, // 绑定样式
       }}
       className={`w-full h-full min-h-screen flex flex-col justify-start items-center`} >
+
+      <div className="fixed inset-0 flex items-center justify-center">
+        <button
+          type="button"
+          onClick={openDialogClick}
+          className="rounded-md bg-black bg-opacity-20 px-4 py-2 text-sm font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
+        >
+          打开model
+        </button>
+      </div>
+      <DialogModal message={dialogMessage} isOpenModel={isOpenModel} setIsOpenModel={setIsOpenModel} InterfaceColor={InterfaceColor} />
+
       {/* 顶部标题 */}
       <div className="w-full h-16 mb-1 rounded shadow flex flex-row justify-center items-center" style={{
         backgroundColor: InterfaceColor, // 绑定样式
       }}>
-        <Contained show={show} setShow={setShow} BackgroundColor={BackgroundColor} />
+        <Contained show={show} setShow={setShow} InterfaceColor={InterfaceColor} />
       </div>
 
       <div
@@ -125,6 +150,7 @@ function App() {
               boolValue={config.OpenBrowser}
               InterfaceColor={InterfaceColor}
               setBoolValue={setBoolValue}
+
             ></BoolConfig>
 
             <ArrayConfig

@@ -3,19 +3,19 @@ import React from "react";
 interface Props {
   show: string;
   setShow: (value: string) => void;
-  BackgroundColor: string;
+  InterfaceColor: string;
 }
 
 const Contained: React.FC<Props> = ({
   show,
   setShow,
-  BackgroundColor,
+  InterfaceColor,
 }) => {
 
   return (
     <div
       style={{
-        backgroundColor: BackgroundColor, // 绑定样式
+        backgroundColor: InterfaceColor, // 绑定样式
       }}
       className={`w-72 m-1 p-1 justify-center inline-flex rounded-lg shadow hover:shadow-xl border border-gray-100 bg-gray-100 `}>
       <button
