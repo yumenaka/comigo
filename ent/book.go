@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/yumenaka/comi/ent/book"
 )
@@ -62,7 +63,8 @@ type Book struct {
 	ZipTextEncoding string `json:"ZipTextEncoding,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the BookQuery when eager-loading is set.
-	Edges BookEdges `json:"edges"`
+	Edges        BookEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // BookEdges holds the relations/edges for other nodes in the graph.
@@ -99,7 +101,7 @@ func (*Book) scanValues(columns []string) ([]any, error) {
 		case book.FieldModified:
 			values[i] = new(sql.NullTime)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Book", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -251,9 +253,17 @@ func (b *Book) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				b.ZipTextEncoding = value.String
 			}
+		default:
+			b.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Book.
+// This includes values selected through modifiers, order, etc.
+func (b *Book) Value(name string) (ent.Value, error) {
+	return b.selectValues.Get(name)
 }
 
 // QueryPageInfos queries the "PageInfos" edge of the Book entity.

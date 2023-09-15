@@ -72,7 +72,7 @@ func InitDatabase(configFilePath string) error {
 	dataSourceName := "file:comigo.sqlite?cache=shared"
 	//如果有配置文件的话，数据库文件，就在同一文件夹内
 	if configFilePath != "" {
-		configDir := filepath.Dir(configFilePath) //不能用path.Dir()，那个函数windows返回 "."
+		configDir := filepath.Dir(configFilePath) //不能用path.Dir()，因为windows返回 "."
 		dataSourceName = "file:" + path.Join(configDir, "comigo.sqlite") + "?cache=shared"
 	}
 	fmt.Println(locale.GetString("InitDatabase") + dataSourceName)

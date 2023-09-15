@@ -261,7 +261,7 @@ func (bu *BookUpdate) RemovePageInfos(s ...*SinglePageInfo) *BookUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (bu *BookUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, BookMutation](ctx, bu.sqlSave, bu.mutation, bu.hooks)
+	return withHooks(ctx, bu.sqlSave, bu.mutation, bu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -418,10 +418,7 @@ func (bu *BookUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{book.PageInfosColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: singlepageinfo.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(singlepageinfo.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -434,10 +431,7 @@ func (bu *BookUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{book.PageInfosColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: singlepageinfo.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(singlepageinfo.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -453,10 +447,7 @@ func (bu *BookUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{book.PageInfosColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: singlepageinfo.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(singlepageinfo.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -729,7 +720,7 @@ func (buo *BookUpdateOne) Select(field string, fields ...string) *BookUpdateOne 
 
 // Save executes the query and returns the updated Book entity.
 func (buo *BookUpdateOne) Save(ctx context.Context) (*Book, error) {
-	return withHooks[*Book, BookMutation](ctx, buo.sqlSave, buo.mutation, buo.hooks)
+	return withHooks(ctx, buo.sqlSave, buo.mutation, buo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -903,10 +894,7 @@ func (buo *BookUpdateOne) sqlSave(ctx context.Context) (_node *Book, err error) 
 			Columns: []string{book.PageInfosColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: singlepageinfo.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(singlepageinfo.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -919,10 +907,7 @@ func (buo *BookUpdateOne) sqlSave(ctx context.Context) (_node *Book, err error) 
 			Columns: []string{book.PageInfosColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: singlepageinfo.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(singlepageinfo.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -938,10 +923,7 @@ func (buo *BookUpdateOne) sqlSave(ctx context.Context) (_node *Book, err error) 
 			Columns: []string{book.PageInfosColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: singlepageinfo.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(singlepageinfo.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

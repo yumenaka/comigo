@@ -1299,11 +1299,7 @@ func HasPageInfos() predicate.Book {
 // HasPageInfosWith applies the HasEdge predicate on the "PageInfos" edge with a given conditions (other predicates).
 func HasPageInfosWith(preds ...predicate.SinglePageInfo) predicate.Book {
 	return predicate.Book(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(PageInfosInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, PageInfosTable, PageInfosColumn),
-		)
+		step := newPageInfosStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

@@ -20,7 +20,7 @@ import (
 type BookQuery struct {
 	config
 	ctx           *QueryContext
-	order         []OrderFunc
+	order         []book.OrderOption
 	inters        []Interceptor
 	predicates    []predicate.Book
 	withPageInfos *SinglePageInfoQuery
@@ -55,7 +55,7 @@ func (bq *BookQuery) Unique(unique bool) *BookQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (bq *BookQuery) Order(o ...OrderFunc) *BookQuery {
+func (bq *BookQuery) Order(o ...book.OrderOption) *BookQuery {
 	bq.order = append(bq.order, o...)
 	return bq
 }
@@ -271,7 +271,7 @@ func (bq *BookQuery) Clone() *BookQuery {
 	return &BookQuery{
 		config:        bq.config,
 		ctx:           bq.ctx.Clone(),
-		order:         append([]OrderFunc{}, bq.order...),
+		order:         append([]book.OrderOption{}, bq.order...),
 		inters:        append([]Interceptor{}, bq.inters...),
 		predicates:    append([]predicate.Book{}, bq.predicates...),
 		withPageInfos: bq.withPageInfos.Clone(),
@@ -414,7 +414,7 @@ func (bq *BookQuery) loadPageInfos(ctx context.Context, query *SinglePageInfoQue
 	}
 	query.withFKs = true
 	query.Where(predicate.SinglePageInfo(func(s *sql.Selector) {
-		s.Where(sql.InValues(book.PageInfosColumn, fks...))
+		s.Where(sql.InValues(s.C(book.PageInfosColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -427,7 +427,7 @@ func (bq *BookQuery) loadPageInfos(ctx context.Context, query *SinglePageInfoQue
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "book_page_infos" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "book_page_infos" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
