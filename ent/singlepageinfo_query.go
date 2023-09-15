@@ -18,7 +18,7 @@ import (
 type SinglePageInfoQuery struct {
 	config
 	ctx        *QueryContext
-	order      []OrderFunc
+	order      []singlepageinfo.OrderOption
 	inters     []Interceptor
 	predicates []predicate.SinglePageInfo
 	withFKs    bool
@@ -53,7 +53,7 @@ func (spiq *SinglePageInfoQuery) Unique(unique bool) *SinglePageInfoQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (spiq *SinglePageInfoQuery) Order(o ...OrderFunc) *SinglePageInfoQuery {
+func (spiq *SinglePageInfoQuery) Order(o ...singlepageinfo.OrderOption) *SinglePageInfoQuery {
 	spiq.order = append(spiq.order, o...)
 	return spiq
 }
@@ -247,7 +247,7 @@ func (spiq *SinglePageInfoQuery) Clone() *SinglePageInfoQuery {
 	return &SinglePageInfoQuery{
 		config:     spiq.config,
 		ctx:        spiq.ctx.Clone(),
-		order:      append([]OrderFunc{}, spiq.order...),
+		order:      append([]singlepageinfo.OrderOption{}, spiq.order...),
 		inters:     append([]Interceptor{}, spiq.inters...),
 		predicates: append([]predicate.SinglePageInfo{}, spiq.predicates...),
 		// clone intermediate query.

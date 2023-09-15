@@ -102,7 +102,7 @@ func (spic *SinglePageInfoCreate) Mutation() *SinglePageInfoMutation {
 // Save creates the SinglePageInfo in the database.
 func (spic *SinglePageInfoCreate) Save(ctx context.Context) (*SinglePageInfo, error) {
 	spic.defaults()
-	return withHooks[*SinglePageInfo, SinglePageInfoMutation](ctx, spic.sqlSave, spic.mutation, spic.hooks)
+	return withHooks(ctx, spic.sqlSave, spic.mutation, spic.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -267,8 +267,8 @@ func (spicb *SinglePageInfoCreateBulk) Save(ctx context.Context) ([]*SinglePageI
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, spicb.builders[i+1].mutation)
 				} else {

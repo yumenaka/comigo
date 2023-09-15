@@ -40,6 +40,10 @@ func ScanStorePath(reScanFile bool) error {
 
 // SaveResultsToDatabase 4，保存扫描结果到数据库，并清理不存在的书籍
 func SaveResultsToDatabase() error {
+	err := storage.InitDatabase(Config.ConfigFileUsed)
+	if err != nil {
+		return err
+	}
 	AllBook := book.GetAllBookList()
 	//设置清理数据库的时候，是否清理没扫描到的书籍信息
 	if Config.ClearDatabaseWhenExit {

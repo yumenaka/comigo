@@ -10,11 +10,11 @@ import ArrayConfig from "./components/ArrayConfig";
 import BoolConfig from "./components/BoolConfig";
 import { useState } from "react";
 import { configReducer, defaultConfig } from "./reducers/configReducer";
-import SelectConfig from "./components/SelectConfig";
+// import SelectConfig from "./components/SelectConfig";
 //https://github.com/zenghongtu/react-use-chinese/blob/master/README.md
 // https://streamich.github.io/react-use/?path=%2Fstory%2Fside-effects-usecookie--docs
 import { useEffectOnce } from 'react-use';
-import DialogModal from "./components/DialogModal";
+// import DialogModal from "./components/DialogModal";
 
 function App() {
   const baseURL = "/api";
@@ -102,16 +102,16 @@ function App() {
     });
   };
 
-  const [isOpenModel, setIsOpenModel] = useState(true)
-  const [dialogMessage, setDialogMessage] = useState("")
- function openDialogClick() {
-  openDialogModal("打开model")
-  }
+  //   const [isOpenModel, setIsOpenModel] = useState(true)
+  //   const [dialogMessage, setDialogMessage] = useState("")
+  //  function openDialogClick() {
+  //   openDialogModal("打开model")
+  //   }
 
-  function openDialogModal(message:string) {
-    setIsOpenModel(true)
-    setDialogMessage(message)
-  }
+  //   function openDialogModal(message:string) {
+  //     setIsOpenModel(true)
+  //     setDialogMessage(message)
+  //   }
 
   return (
     <div
@@ -120,7 +120,7 @@ function App() {
       }}
       className={`w-full h-full min-h-screen flex flex-col justify-start items-center`} >
 
-      <div className="fixed inset-0 flex items-center justify-center">
+      {/* <div className="fixed inset-0 flex items-center justify-center">
         <button
           type="button"
           onClick={openDialogClick}
@@ -129,7 +129,7 @@ function App() {
           打开model
         </button>
       </div>
-      <DialogModal message={dialogMessage} isOpenModel={isOpenModel} setIsOpenModel={setIsOpenModel} InterfaceColor={InterfaceColor} />
+      <DialogModal message={dialogMessage} isOpenModel={isOpenModel} setIsOpenModel={setIsOpenModel} InterfaceColor={InterfaceColor} /> */}
 
       {/* 顶部标题 */}
       <div className="w-full h-16 mb-1 rounded shadow flex flex-row justify-center items-center" style={{
@@ -366,7 +366,12 @@ function App() {
 
         {show === "other" &&
           <>
-            <SelectConfig
+            <div style={{ backgroundColor: InterfaceColor, }}// 绑定样式 
+              className={`w-full m-1 p-2 flex flex-col shadow-md hover:shadow-2xl font-semibold rounded-md  justify-left items-left`}>
+              还未完成的功能，开发与调整中。
+            </div>
+
+            {/* <SelectConfig
               label={t("ConfigSaveTo")}
               fieldDescription="配置文件的默认保存位置，可选值：RAM、HomeDir、NowDir、ProgramDir）"
               name={"ConfigSaveTo"}
@@ -374,7 +379,7 @@ function App() {
               optionalValue={["RAM", "HomeDir", "NowDir", "ProgramDir"]}
               InterfaceColor={InterfaceColor}
               setSelectedOption={setStringValueFunc}
-            ></SelectConfig>
+            ></SelectConfig> */}
 
             <BoolConfig
               name={"EnableDatabase"}

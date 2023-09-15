@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/yumenaka/comi/ent/singlepageinfo"
 )
@@ -39,6 +40,7 @@ type SinglePageInfo struct {
 	// ImgType holds the value of the "ImgType" field.
 	ImgType         string `json:"ImgType,omitempty"`
 	book_page_infos *int
+	selectValues    sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -55,7 +57,7 @@ func (*SinglePageInfo) scanValues(columns []string) ([]any, error) {
 		case singlepageinfo.ForeignKeys[0]: // book_page_infos
 			values[i] = new(sql.NullInt64)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type SinglePageInfo", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -148,9 +150,17 @@ func (spi *SinglePageInfo) assignValues(columns []string, values []any) error {
 				spi.book_page_infos = new(int)
 				*spi.book_page_infos = int(value.Int64)
 			}
+		default:
+			spi.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the SinglePageInfo.
+// This includes values selected through modifiers, order, etc.
+func (spi *SinglePageInfo) Value(name string) (ent.Value, error) {
+	return spi.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this SinglePageInfo.

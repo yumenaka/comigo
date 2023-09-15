@@ -27,7 +27,7 @@ func (spid *SinglePageInfoDelete) Where(ps ...predicate.SinglePageInfo) *SingleP
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (spid *SinglePageInfoDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, SinglePageInfoMutation](ctx, spid.sqlExec, spid.mutation, spid.hooks)
+	return withHooks(ctx, spid.sqlExec, spid.mutation, spid.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

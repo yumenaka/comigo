@@ -137,7 +137,7 @@ func (spiu *SinglePageInfoUpdate) Mutation() *SinglePageInfoMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (spiu *SinglePageInfoUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, SinglePageInfoMutation](ctx, spiu.sqlSave, spiu.mutation, spiu.hooks)
+	return withHooks(ctx, spiu.sqlSave, spiu.mutation, spiu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -358,7 +358,7 @@ func (spiuo *SinglePageInfoUpdateOne) Select(field string, fields ...string) *Si
 
 // Save executes the query and returns the updated SinglePageInfo entity.
 func (spiuo *SinglePageInfoUpdateOne) Save(ctx context.Context) (*SinglePageInfo, error) {
-	return withHooks[*SinglePageInfo, SinglePageInfoMutation](ctx, spiuo.sqlSave, spiuo.mutation, spiuo.hooks)
+	return withHooks(ctx, spiuo.sqlSave, spiuo.mutation, spiuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

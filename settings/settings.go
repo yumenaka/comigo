@@ -13,7 +13,7 @@ import (
 // ServerConfig 服务器设置(config.toml)
 type ServerConfig struct {
 	Port                   int      `json:"Port" comment:"Comigo设置文件(config.toml)，放在默认保存目录中。可选值：RAM（不保存）、HomeDir（$HOME/.config/comigo/config.toml）、NowDir（当前执行目录）、ProgramDir（程序所在目录）下。可用“comi --config-save”生成本文件\n网页服务端口，此项配置不支持热重载"`
-	ConfigSaveTo           string   `json:"ConfigSaveTo" comment:"配置文件的默认保存位置，可选值：RAM（不保存）、HomeDir（$HOME/.config/comigo/）、NowDir（当前执行目录）、ProgramDir（程序所在目录）"`
+	ConfigSaveTo           string   `json:"ConfigSaveTo" toml:"-" comment:"配置文件的默认保存位置，可选值：RAM（不保存）、HomeDir（$HOME/.config/comigo/）、NowDir（当前执行目录）、ProgramDir（程序所在目录）"`
 	ConfigFileUsed         string   `json:"-" toml:"-" comment:"当前生效的yaml设置文件路径，数据库文件(comigo.db)在同一个文件夹"`
 	Host                   string   `json:"Host" comment:"自定义二维码显示的主机名"`
 	StoresPath             []string `json:"StoresPath" comment:"默认扫描的书库文件夹"`

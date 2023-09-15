@@ -184,7 +184,7 @@ func (bc *BookCreate) Mutation() *BookMutation {
 // Save creates the Book in the database.
 func (bc *BookCreate) Save(ctx context.Context) (*Book, error) {
 	bc.defaults()
-	return withHooks[*Book, BookMutation](ctx, bc.sqlSave, bc.mutation, bc.hooks)
+	return withHooks(ctx, bc.sqlSave, bc.mutation, bc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -427,10 +427,7 @@ func (bc *BookCreate) createSpec() (*Book, *sqlgraph.CreateSpec) {
 			Columns: []string{book.PageInfosColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: singlepageinfo.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(singlepageinfo.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -465,8 +462,8 @@ func (bcb *BookCreateBulk) Save(ctx context.Context) ([]*Book, error) {
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, bcb.builders[i+1].mutation)
 				} else {

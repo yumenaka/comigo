@@ -42,7 +42,7 @@ func ConfigUpdateHandler(c *gin.Context) {
 func BeforeConfigUpdate(oldConfig *settings.ServerConfig, newConfig *settings.ServerConfig) {
 	if oldConfig.ConfigSaveTo != newConfig.ConfigSaveTo {
 		oldConfig.ConfigSaveTo = newConfig.ConfigSaveTo
-		common.SaveConfig()
+		//common.SaveConfig()
 	}
 	if (newConfig.OpenBrowser == true) && (oldConfig.OpenBrowser == false) {
 		protocol := "http://"

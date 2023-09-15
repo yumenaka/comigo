@@ -4,6 +4,8 @@ package singlepageinfo
 
 import (
 	"time"
+
+	"entgo.io/ent/dialect/sql"
 )
 
 const (
@@ -78,3 +80,66 @@ var (
 	// DefaultModeTime holds the default value on creation for the "ModeTime" field.
 	DefaultModeTime func() time.Time
 )
+
+// OrderOption defines the ordering options for the SinglePageInfo queries.
+type OrderOption func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByBookID orders the results by the BookID field.
+func ByBookID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBookID, opts...).ToFunc()
+}
+
+// ByPageNum orders the results by the PageNum field.
+func ByPageNum(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPageNum, opts...).ToFunc()
+}
+
+// ByNameInArchive orders the results by the NameInArchive field.
+func ByNameInArchive(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldNameInArchive, opts...).ToFunc()
+}
+
+// ByURL orders the results by the Url field.
+func ByURL(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldURL, opts...).ToFunc()
+}
+
+// ByBlurHash orders the results by the BlurHash field.
+func ByBlurHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBlurHash, opts...).ToFunc()
+}
+
+// ByHeight orders the results by the Height field.
+func ByHeight(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHeight, opts...).ToFunc()
+}
+
+// ByWidth orders the results by the Width field.
+func ByWidth(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWidth, opts...).ToFunc()
+}
+
+// ByModeTime orders the results by the ModeTime field.
+func ByModeTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldModeTime, opts...).ToFunc()
+}
+
+// ByFileSize orders the results by the FileSize field.
+func ByFileSize(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldFileSize, opts...).ToFunc()
+}
+
+// ByRealImageFilePATH orders the results by the RealImageFilePATH field.
+func ByRealImageFilePATH(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRealImageFilePATH, opts...).ToFunc()
+}
+
+// ByImgType orders the results by the ImgType field.
+func ByImgType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldImgType, opts...).ToFunc()
+}

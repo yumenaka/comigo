@@ -19,14 +19,14 @@ func initBookStores(args []string) {
 		books, err := storage.GetArchiveBookFromDatabase()
 		if err != nil {
 			fmt.Println(err)
-			return
+		} else {
+			common.RamBookList = books
 		}
-		common.RamBookList = books
 	}
-	//2、添加CMD路径，默认上传文件夹到书库
+	//2、设置默认书库路径：扫描CMD指定的路径，如果开启上传，额外增加上传文件夹到默认书库路径
 	AddPathToStore(args)
 
-	//3、扫描书库
+	//3、扫描配置文件里面的书库路径
 	err := common.ScanStorePath(true)
 	if err != nil {
 		log.Printf("Failed to scan store path: %v", err)
