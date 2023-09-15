@@ -9,8 +9,9 @@ import (
 	comigoBook "github.com/yumenaka/comi/book"
 )
 
-func InitDatabase(configFilePath string) {
+func InitDatabase(configFilePath string) error {
 	fmt.Println("Not Support DateBase")
+	return nil
 }
 
 func CloseDatabase() {
