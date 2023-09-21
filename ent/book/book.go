@@ -111,6 +111,8 @@ func ValidColumn(column string) bool {
 var (
 	// NameValidator is a validator for the "Name" field. It is called by the builders before save.
 	NameValidator func(string) error
+	// DefaultOwner holds the default value on creation for the "Owner" field.
+	DefaultOwner string
 	// ChildBookNumValidator is a validator for the "ChildBookNum" field. It is called by the builders before save.
 	ChildBookNumValidator func(int) error
 	// DepthValidator is a validator for the "Depth" field. It is called by the builders before save.

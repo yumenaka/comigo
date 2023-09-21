@@ -39,8 +39,7 @@ type BookMutation struct {
 	id                *int
 	_Name             *string
 	_BookID           *string
-	_Owner            *int
-	add_Owner         *int
+	_Owner            *string
 	_FilePath         *string
 	_BookStorePath    *string
 	_Type             *string
@@ -246,13 +245,12 @@ func (m *BookMutation) ResetBookID() {
 }
 
 // SetOwner sets the "Owner" field.
-func (m *BookMutation) SetOwner(i int) {
-	m._Owner = &i
-	m.add_Owner = nil
+func (m *BookMutation) SetOwner(s string) {
+	m._Owner = &s
 }
 
 // Owner returns the value of the "Owner" field in the mutation.
-func (m *BookMutation) Owner() (r int, exists bool) {
+func (m *BookMutation) Owner() (r string, exists bool) {
 	v := m._Owner
 	if v == nil {
 		return
@@ -263,7 +261,7 @@ func (m *BookMutation) Owner() (r int, exists bool) {
 // OldOwner returns the old "Owner" field's value of the Book entity.
 // If the Book object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *BookMutation) OldOwner(ctx context.Context) (v int, err error) {
+func (m *BookMutation) OldOwner(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldOwner is only allowed on UpdateOne operations")
 	}
@@ -277,28 +275,9 @@ func (m *BookMutation) OldOwner(ctx context.Context) (v int, err error) {
 	return oldValue.Owner, nil
 }
 
-// AddOwner adds i to the "Owner" field.
-func (m *BookMutation) AddOwner(i int) {
-	if m.add_Owner != nil {
-		*m.add_Owner += i
-	} else {
-		m.add_Owner = &i
-	}
-}
-
-// AddedOwner returns the value that was added to the "Owner" field in this mutation.
-func (m *BookMutation) AddedOwner() (r int, exists bool) {
-	v := m.add_Owner
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
 // ResetOwner resets all changes to the "Owner" field.
 func (m *BookMutation) ResetOwner() {
 	m._Owner = nil
-	m.add_Owner = nil
 }
 
 // SetFilePath sets the "FilePath" field.
@@ -1389,7 +1368,7 @@ func (m *BookMutation) SetField(name string, value ent.Value) error {
 		m.SetBookID(v)
 		return nil
 	case book.FieldOwner:
-		v, ok := value.(int)
+		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -1536,9 +1515,6 @@ func (m *BookMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *BookMutation) AddedFields() []string {
 	var fields []string
-	if m.add_Owner != nil {
-		fields = append(fields, book.FieldOwner)
-	}
 	if m.add_ChildBookNum != nil {
 		fields = append(fields, book.FieldChildBookNum)
 	}
@@ -1565,8 +1541,6 @@ func (m *BookMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *BookMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
-	case book.FieldOwner:
-		return m.AddedOwner()
 	case book.FieldChildBookNum:
 		return m.AddedChildBookNum()
 	case book.FieldDepth:
@@ -1588,13 +1562,6 @@ func (m *BookMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *BookMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case book.FieldOwner:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddOwner(v)
-		return nil
 	case book.FieldChildBookNum:
 		v, ok := value.(int)
 		if !ok {

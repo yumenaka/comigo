@@ -60,8 +60,10 @@ func init() {
 var client *ent.Client
 
 func InitDatabase(configFilePath string) error {
+
 	if client != nil {
-		return fmt.Errorf("database already initialized")
+		fmt.Println("database already initialized")
+		return nil
 	}
 	//链接或创建数据库
 	var entOptions []ent.Option
@@ -182,6 +184,7 @@ func SaveBookToDatabase(save *comigoBook.Book) error {
 		Create().
 		SetName(save.BookInfo.Name).
 		SetBookID(save.BookInfo.BookID).
+		SetOwner("").
 		SetFilePath(save.BookInfo.FilePath).
 		SetBookStorePath(save.BookInfo.BookStorePath).
 		SetChildBookNum(save.BookInfo.ChildBookNum).

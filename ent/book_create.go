@@ -34,8 +34,16 @@ func (bc *BookCreate) SetBookID(s string) *BookCreate {
 }
 
 // SetOwner sets the "Owner" field.
-func (bc *BookCreate) SetOwner(i int) *BookCreate {
-	bc.mutation.SetOwner(i)
+func (bc *BookCreate) SetOwner(s string) *BookCreate {
+	bc.mutation.SetOwner(s)
+	return bc
+}
+
+// SetNillableOwner sets the "Owner" field if the given value is not nil.
+func (bc *BookCreate) SetNillableOwner(s *string) *BookCreate {
+	if s != nil {
+		bc.SetOwner(*s)
+	}
 	return bc
 }
 
@@ -211,6 +219,10 @@ func (bc *BookCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (bc *BookCreate) defaults() {
+	if _, ok := bc.mutation.Owner(); !ok {
+		v := book.DefaultOwner
+		bc.mutation.SetOwner(v)
+	}
 	if _, ok := bc.mutation.Modified(); !ok {
 		v := book.DefaultModified()
 		bc.mutation.SetModified(v)
@@ -340,7 +352,7 @@ func (bc *BookCreate) createSpec() (*Book, *sqlgraph.CreateSpec) {
 		_node.BookID = value
 	}
 	if value, ok := bc.mutation.Owner(); ok {
-		_spec.SetField(book.FieldOwner, field.TypeInt, value)
+		_spec.SetField(book.FieldOwner, field.TypeString, value)
 		_node.Owner = value
 	}
 	if value, ok := bc.mutation.FilePath(); ok {
@@ -441,11 +453,15 @@ func (bc *BookCreate) createSpec() (*Book, *sqlgraph.CreateSpec) {
 // BookCreateBulk is the builder for creating many Book entities in bulk.
 type BookCreateBulk struct {
 	config
+	err      error
 	builders []*BookCreate
 }
 
 // Save creates the Book entities in the database.
 func (bcb *BookCreateBulk) Save(ctx context.Context) ([]*Book, error) {
+	if bcb.err != nil {
+		return nil, bcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(bcb.builders))
 	nodes := make([]*Book, len(bcb.builders))
 	mutators := make([]Mutator, len(bcb.builders))

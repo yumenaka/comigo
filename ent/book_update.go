@@ -42,15 +42,16 @@ func (bu *BookUpdate) SetBookID(s string) *BookUpdate {
 }
 
 // SetOwner sets the "Owner" field.
-func (bu *BookUpdate) SetOwner(i int) *BookUpdate {
-	bu.mutation.ResetOwner()
-	bu.mutation.SetOwner(i)
+func (bu *BookUpdate) SetOwner(s string) *BookUpdate {
+	bu.mutation.SetOwner(s)
 	return bu
 }
 
-// AddOwner adds i to the "Owner" field.
-func (bu *BookUpdate) AddOwner(i int) *BookUpdate {
-	bu.mutation.AddOwner(i)
+// SetNillableOwner sets the "Owner" field if the given value is not nil.
+func (bu *BookUpdate) SetNillableOwner(s *string) *BookUpdate {
+	if s != nil {
+		bu.SetOwner(*s)
+	}
 	return bu
 }
 
@@ -330,10 +331,7 @@ func (bu *BookUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.SetField(book.FieldBookID, field.TypeString, value)
 	}
 	if value, ok := bu.mutation.Owner(); ok {
-		_spec.SetField(book.FieldOwner, field.TypeInt, value)
-	}
-	if value, ok := bu.mutation.AddedOwner(); ok {
-		_spec.AddField(book.FieldOwner, field.TypeInt, value)
+		_spec.SetField(book.FieldOwner, field.TypeString, value)
 	}
 	if value, ok := bu.mutation.FilePath(); ok {
 		_spec.SetField(book.FieldFilePath, field.TypeString, value)
@@ -488,15 +486,16 @@ func (buo *BookUpdateOne) SetBookID(s string) *BookUpdateOne {
 }
 
 // SetOwner sets the "Owner" field.
-func (buo *BookUpdateOne) SetOwner(i int) *BookUpdateOne {
-	buo.mutation.ResetOwner()
-	buo.mutation.SetOwner(i)
+func (buo *BookUpdateOne) SetOwner(s string) *BookUpdateOne {
+	buo.mutation.SetOwner(s)
 	return buo
 }
 
-// AddOwner adds i to the "Owner" field.
-func (buo *BookUpdateOne) AddOwner(i int) *BookUpdateOne {
-	buo.mutation.AddOwner(i)
+// SetNillableOwner sets the "Owner" field if the given value is not nil.
+func (buo *BookUpdateOne) SetNillableOwner(s *string) *BookUpdateOne {
+	if s != nil {
+		buo.SetOwner(*s)
+	}
 	return buo
 }
 
@@ -806,10 +805,7 @@ func (buo *BookUpdateOne) sqlSave(ctx context.Context) (_node *Book, err error) 
 		_spec.SetField(book.FieldBookID, field.TypeString, value)
 	}
 	if value, ok := buo.mutation.Owner(); ok {
-		_spec.SetField(book.FieldOwner, field.TypeInt, value)
-	}
-	if value, ok := buo.mutation.AddedOwner(); ok {
-		_spec.AddField(book.FieldOwner, field.TypeInt, value)
+		_spec.SetField(book.FieldOwner, field.TypeString, value)
 	}
 	if value, ok := buo.mutation.FilePath(); ok {
 		_spec.SetField(book.FieldFilePath, field.TypeString, value)
