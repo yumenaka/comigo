@@ -246,11 +246,15 @@ func (spic *SinglePageInfoCreate) createSpec() (*SinglePageInfo, *sqlgraph.Creat
 // SinglePageInfoCreateBulk is the builder for creating many SinglePageInfo entities in bulk.
 type SinglePageInfoCreateBulk struct {
 	config
+	err      error
 	builders []*SinglePageInfoCreate
 }
 
 // Save creates the SinglePageInfo entities in the database.
 func (spicb *SinglePageInfoCreateBulk) Save(ctx context.Context) ([]*SinglePageInfo, error) {
+	if spicb.err != nil {
+		return nil, spicb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(spicb.builders))
 	nodes := make([]*SinglePageInfo, len(spicb.builders))
 	mutators := make([]Mutator, len(spicb.builders))

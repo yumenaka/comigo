@@ -21,6 +21,10 @@ func init() {
 	bookDescName := bookFields[0].Descriptor()
 	// book.NameValidator is a validator for the "Name" field. It is called by the builders before save.
 	book.NameValidator = bookDescName.Validators[0].(func(string) error)
+	// bookDescOwner is the schema descriptor for Owner field.
+	bookDescOwner := bookFields[2].Descriptor()
+	// book.DefaultOwner holds the default value on creation for the Owner field.
+	book.DefaultOwner = bookDescOwner.Default.(string)
 	// bookDescChildBookNum is the schema descriptor for ChildBookNum field.
 	bookDescChildBookNum := bookFields[6].Descriptor()
 	// book.ChildBookNumValidator is a validator for the "ChildBookNum" field. It is called by the builders before save.

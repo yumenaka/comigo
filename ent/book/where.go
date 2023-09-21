@@ -66,7 +66,7 @@ func BookID(v string) predicate.Book {
 }
 
 // Owner applies equality check predicate on the "Owner" field. It's identical to OwnerEQ.
-func Owner(v int) predicate.Book {
+func Owner(v string) predicate.Book {
 	return predicate.Book(sql.FieldEQ(FieldOwner, v))
 }
 
@@ -296,43 +296,68 @@ func BookIDContainsFold(v string) predicate.Book {
 }
 
 // OwnerEQ applies the EQ predicate on the "Owner" field.
-func OwnerEQ(v int) predicate.Book {
+func OwnerEQ(v string) predicate.Book {
 	return predicate.Book(sql.FieldEQ(FieldOwner, v))
 }
 
 // OwnerNEQ applies the NEQ predicate on the "Owner" field.
-func OwnerNEQ(v int) predicate.Book {
+func OwnerNEQ(v string) predicate.Book {
 	return predicate.Book(sql.FieldNEQ(FieldOwner, v))
 }
 
 // OwnerIn applies the In predicate on the "Owner" field.
-func OwnerIn(vs ...int) predicate.Book {
+func OwnerIn(vs ...string) predicate.Book {
 	return predicate.Book(sql.FieldIn(FieldOwner, vs...))
 }
 
 // OwnerNotIn applies the NotIn predicate on the "Owner" field.
-func OwnerNotIn(vs ...int) predicate.Book {
+func OwnerNotIn(vs ...string) predicate.Book {
 	return predicate.Book(sql.FieldNotIn(FieldOwner, vs...))
 }
 
 // OwnerGT applies the GT predicate on the "Owner" field.
-func OwnerGT(v int) predicate.Book {
+func OwnerGT(v string) predicate.Book {
 	return predicate.Book(sql.FieldGT(FieldOwner, v))
 }
 
 // OwnerGTE applies the GTE predicate on the "Owner" field.
-func OwnerGTE(v int) predicate.Book {
+func OwnerGTE(v string) predicate.Book {
 	return predicate.Book(sql.FieldGTE(FieldOwner, v))
 }
 
 // OwnerLT applies the LT predicate on the "Owner" field.
-func OwnerLT(v int) predicate.Book {
+func OwnerLT(v string) predicate.Book {
 	return predicate.Book(sql.FieldLT(FieldOwner, v))
 }
 
 // OwnerLTE applies the LTE predicate on the "Owner" field.
-func OwnerLTE(v int) predicate.Book {
+func OwnerLTE(v string) predicate.Book {
 	return predicate.Book(sql.FieldLTE(FieldOwner, v))
+}
+
+// OwnerContains applies the Contains predicate on the "Owner" field.
+func OwnerContains(v string) predicate.Book {
+	return predicate.Book(sql.FieldContains(FieldOwner, v))
+}
+
+// OwnerHasPrefix applies the HasPrefix predicate on the "Owner" field.
+func OwnerHasPrefix(v string) predicate.Book {
+	return predicate.Book(sql.FieldHasPrefix(FieldOwner, v))
+}
+
+// OwnerHasSuffix applies the HasSuffix predicate on the "Owner" field.
+func OwnerHasSuffix(v string) predicate.Book {
+	return predicate.Book(sql.FieldHasSuffix(FieldOwner, v))
+}
+
+// OwnerEqualFold applies the EqualFold predicate on the "Owner" field.
+func OwnerEqualFold(v string) predicate.Book {
+	return predicate.Book(sql.FieldEqualFold(FieldOwner, v))
+}
+
+// OwnerContainsFold applies the ContainsFold predicate on the "Owner" field.
+func OwnerContainsFold(v string) predicate.Book {
+	return predicate.Book(sql.FieldContainsFold(FieldOwner, v))
 }
 
 // FilePathEQ applies the EQ predicate on the "FilePath" field.
@@ -1310,32 +1335,15 @@ func HasPageInfosWith(preds ...predicate.SinglePageInfo) predicate.Book {
 
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Book) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s1 := s.Clone().SetP(nil)
-		for _, p := range predicates {
-			p(s1)
-		}
-		s.Where(s1.P())
-	})
+	return predicate.Book(sql.AndPredicates(predicates...))
 }
 
 // Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.Book) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		s1 := s.Clone().SetP(nil)
-		for i, p := range predicates {
-			if i > 0 {
-				s1.Or()
-			}
-			p(s1)
-		}
-		s.Where(s1.P())
-	})
+	return predicate.Book(sql.OrPredicates(predicates...))
 }
 
 // Not applies the not operator on the given predicate.
 func Not(p predicate.Book) predicate.Book {
-	return predicate.Book(func(s *sql.Selector) {
-		p(s.Not())
-	})
+	return predicate.Book(sql.NotPredicates(p))
 }

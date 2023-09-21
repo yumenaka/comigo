@@ -22,7 +22,8 @@ func (Book) Fields() []ent.Field {
 			Comment("书名"),
 		field.String("BookID").
 			Unique().Comment("书籍ID"), //字段可以使用 Unique 方法定义为唯一字段。 注意：唯一字段不能有默认值。
-		field.Int("Owner").
+		field.String("Owner").
+			Default("admin").
 			Comment("拥有者"),
 		field.String("FilePath").Comment("文件路径"),
 		field.String("BookStorePath").Comment("书库路径"),
