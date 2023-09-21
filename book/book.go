@@ -525,7 +525,7 @@ func (b *Book) setBookID() {
 	}
 	tempStr := b.FilePath + strconv.Itoa(b.ChildBookNum) + strconv.Itoa(int(b.FileSize)) + string(b.Type) + b.Modified.String()
 	b62 := base62.EncodeToString([]byte(md5string(tempStr)))
-	b.BookID = getShortBookID(b62, 5)
+	b.BookID = getShortBookID(b62, 7)
 }
 
 func getShortBookID(fullID string, minLength int) string {
