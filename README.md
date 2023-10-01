@@ -12,7 +12,7 @@
 2. 支持图片文件夹与.rar、.zip、.tar、.cbz、.cbr、.epub压缩包。
 3. 局域网的手机或平板设备，可扫描二维码阅读。  
 4. windows支持拖拽压缩包到comi.exe（或快捷方式）上打开。
-5. frp转发、webp-server压缩等扩展功能
+
 ### 安装：
 1. 手动下载
 在 [Releases页面](https://github.com/yumenaka/comi/releases ) ，下载最新版文件，放到系统PATH。
@@ -39,6 +39,7 @@ comi --help
 - [x] 网页端：分享功能
 - [x] 网页端：显示QRCode
 - [x] 网页端：多种展示模式
+- [x] 网页端：服务器设置
 - [ ] 网页端：浏览器快捷键
 - [x] 网页端：HTTPS加密
 - [x] 网页端：显示服务器信息
@@ -60,14 +61,14 @@ comi --help
 - [ ] 阅读历史与统计
 - [x] 新一代图片格式支持（heic）
 - [x] 图片自动裁边，分割、拼接单双页。
-- [ ] 第三方调用API
-- [ ] 挂载smb、webdav虚拟文件系统
+- [ ] 调用第三方API
+- [ ] 挂载smb、webdav
 - [x] CPU、内存占用、状态监控
 - [ ] 文件管理
 - [ ] 更新提示
 - [ ] 用户系统、访问密码，流量限制等
 - [ ] 移动客户端（Android，iOS）
-- [ ] 跨平台GUI（[gio](https://gioui.org/) flutter？）
+- [ ] 跨平台GUI（react naitive or flutter？）
 
 ### Special Thanks：
 [mholt](https://github.com/mholt)  、[spf13](https://github.com/spf13)  [disintegration](https://github.com/disintegration)   、 [Baozisoftware ](https://github.com/Baozisoftware) 、 [markbates](github.com/markbates/pkger)  and more。

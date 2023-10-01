@@ -62,7 +62,6 @@ func (s *singleBookstore) initBookGroupMap() error {
 		//循环parentMap，把有相同parent的书创建为一个书组
 		for parent, sameParentBookList := range parentTempMap {
 			//新建一本书,类型是书籍组
-
 			// 获取文件夹信息
 			pathInfo, err := os.Stat(sameParentBookList[0].FilePath)
 			if err != nil {
