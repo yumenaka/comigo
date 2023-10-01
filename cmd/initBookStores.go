@@ -2,9 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/yumenaka/comi/book"
 	"github.com/yumenaka/comi/common"
 	"github.com/yumenaka/comi/storage"
 	"log"
+	"strconv"
 )
 
 // initBookStores 解析命令,扫描书库
@@ -14,13 +16,17 @@ func initBookStores(args []string) {
 		// 从数据库中读取书籍信息并持久化
 		if err := storage.InitDatabase(common.Config.ConfigFileUsed); err != nil {
 			fmt.Println(err)
-			return
 		}
 		books, err := storage.GetArchiveBookFromDatabase()
 		if err != nil {
 			fmt.Println(err)
 		} else {
-			common.RamBookList = books
+			err := book.RestoreDatabaseBooks(books)
+			if err != nil {
+				fmt.Println(err)
+			} else {
+				fmt.Println("从数据库中读取书籍信息,持久化成功:" + strconv.Itoa(len(books)))
+			}
 		}
 	}
 	//2、设置默认书库路径：扫描CMD指定的路径，如果开启上传，额外增加上传文件夹到默认书库路径

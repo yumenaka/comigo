@@ -26,7 +26,7 @@ import (
 func ScanStorePath(reScanFile bool) error {
 	if len(Config.StoresPath) > 0 {
 		for _, p := range Config.StoresPath {
-			addList, err := ScanAndGetBookList(p, reScanFile, RamBookList)
+			addList, err := ScanAndGetBookList(p, reScanFile)
 			if err != nil {
 				fmt.Println(locale.GetString("scan_error"), p, err)
 				return err
@@ -47,16 +47,8 @@ func SaveResultsToDatabase() error {
 	AllBook := book.GetAllBookList()
 	//设置清理数据库的时候，是否清理没扫描到的书籍信息
 	if Config.ClearDatabaseWhenExit {
-		for _, checkBook := range RamBookList {
-			needClear := true //这条数据是否需要清理
-			for _, b := range AllBook {
-				if b.BookID == checkBook.BookID {
-					needClear = false //如果扫到了这本书,就不清理相关数据
-				}
-			}
-			if needClear {
-				storage.ClearBookData(checkBook, Config.Debug)
-			}
+		for _, b := range AllBook {
+			storage.ClearBookData(b, Config.Debug)
 		}
 	}
 	saveErr := storage.SaveBookListToDatabase(AllBook)
@@ -68,10 +60,10 @@ func SaveResultsToDatabase() error {
 }
 
 // AddBooksToStore 添加一组书到书库
-func AddBooksToStore(bookList []*book.Book, path string) {
-	err := book.AddBooks(bookList, path, Config.MinImageNum)
+func AddBooksToStore(bookList []*book.Book, basePath string) {
+	err := book.AddBooks(bookList, basePath, Config.MinImageNum)
 	if err != nil {
-		fmt.Println(locale.GetString("AddBook_error"), path)
+		fmt.Println(locale.GetString("AddBook_error"), basePath)
 	}
 	// 然后生成对应的虚拟书籍组
 	if err := book.Stores.GenerateBookGroup(); err != nil {
@@ -80,7 +72,7 @@ func AddBooksToStore(bookList []*book.Book, path string) {
 }
 
 // ScanAndGetBookList 扫描路径，取得路径里的书籍
-func ScanAndGetBookList(storePath string, reScanFile bool, RamBookList []*book.Book) (newBookList []*book.Book, err error) {
+func ScanAndGetBookList(storePath string, reScanFile bool) (newBookList []*book.Book, err error) {
 	// 路径不存在的Error，不过目前并不会打印出来
 	if !tools.PathExists(storePath) {
 		return nil, errors.New(locale.GetString("PATH_NOT_EXIST"))

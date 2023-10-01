@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useReducer } from "react";
+import React, { useReducer} from "react";
 import { useTranslation } from "react-i18next";
 // TypeScript環境でReact Hook Formのフォーム作成の基礎を学ぶ  https://reffect.co.jp/react/react-hook-form-ts/
 // import { useForm } from "react-hook-form";
@@ -15,19 +15,43 @@ import { configReducer, defaultConfig } from "./reducers/configReducer";
 // https://streamich.github.io/react-use/?path=%2Fstory%2Fside-effects-usecookie--docs
 import { useEffectOnce } from 'react-use';
 // import DialogModal from "./components/DialogModal";
+import Cookies from 'js-cookie';
+
 
 function App() {
   const baseURL = "/api";
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  // const [lang, setLang] = useState('ja');
   const [show, setShow] = useState("bookstore")
   const [config, dispatch] = useReducer(configReducer, defaultConfig);
   const [BackgroundColor, setBackgroundColor] = useState("#e0d9cd")
   const [InterfaceColor, setInterfaceColor] = useState("#F5F5E4")
 
+  // useEffect(() => {
+  //   i18n.changeLanguage(lang).then(() => {
+  //     console.log("i18n.changeLanguage", lang);
+  //   }).catch((err) => {
+  //     console.log("i18n.changeLanguage", err)
+  //   });
+  // }, [lang, i18n]);
+
   // useEffect 用于在函数组件中执行副作用操作，例如数据获取、订阅、手动修改DOM等。
   // 通过传递第二个参数，你可以告诉 React 仅在某些值改变的时候才执行 effect。
   // 传递空数组([])作为第二个参数，effect 内部的 props 和 state 就会一直持有其初始值。也就是只在渲染的时候执行一次。
   useEffectOnce(() => {
+    // document.cookie="userLanguageSetting=jp"  
+    // document.cookie="userLanguageSetting=zh"
+    // document.cookie="userLanguageSetting=en"
+    const lang = Cookies.get("userLanguageSetting");
+    if (lang) {
+      i18n.changeLanguage(lang).then(() => {
+        console.log("i18n.changeLanguage", lang);
+      }).catch((err) => {
+        console.log("i18n.changeLanguage", err)
+      });
+    }
+
+
     // 当前颜色
     const tempBackgroundColor = localStorage.getItem("BackgroundColor");
     if (tempBackgroundColor !== null) {
@@ -143,9 +167,12 @@ function App() {
       >
         {show === "bookstore" &&
           <>
+
+          {/* <button className="h-15 w-full" onClick={() => setLang(lang === 'en' ? 'ja' : 'en')}>切换语言</button> */}
+
             <BoolConfig
               label={t("OpenBrowser")}
-              fieldDescription="扫描完成后，是否同时打开浏览器。windows默认true，其他平台默认false。"
+              fieldDescription="扫描完成后，是否同时打开浏览器。windows默认true，其他平台默认false。???"
               name={"OpenBrowser"}
               boolValue={config.OpenBrowser}
               InterfaceColor={InterfaceColor}
@@ -370,6 +397,9 @@ function App() {
               className={`w-full m-1 p-2 flex flex-col shadow-md hover:shadow-2xl font-semibold rounded-md  justify-left items-left`}>
               还未完成的功能，开发与调整中。
             </div>
+
+
+
 
             {/* <SelectConfig
               label={t("ConfigSaveTo")}

@@ -60,9 +60,8 @@ func init() {
 var client *ent.Client
 
 func InitDatabase(configFilePath string) error {
-
 	if client != nil {
-		fmt.Println("database already initialized")
+		//fmt.Println("database already initialized")
 		return nil
 	}
 	//链接或创建数据库

@@ -78,7 +78,6 @@ export default defineComponent({
       handleNegativeClick() {
         // message.info("并不");
       },
-
       cookies,
       languageOptions: [
         {
@@ -105,7 +104,7 @@ export default defineComponent({
   },
   //挂载前
   beforeMount() {
-    var lang = this.cookies.get("userLanguageSetting");
+    let lang = this.cookies.get("userLanguageSetting");
     if (lang) {
       this.$i18n.locale = lang;
     }
@@ -134,7 +133,7 @@ export default defineComponent({
           //刷新网页
           location.reload();
         })
-        .catch(failResponse => { })//失败时的操作
+        .catch(failResponse => { console.log(failResponse)})//失败时的操作
     },
 
 
@@ -160,7 +159,7 @@ export default defineComponent({
     },
     // 关闭抽屉时，保存设置到cookies
     saveConfigToCookie(show: boolean) {
-      if (show == false) {
+      if (!show) {
         this.$emit('closeDrawer');
         this.$emit('saveConfig');
       }
