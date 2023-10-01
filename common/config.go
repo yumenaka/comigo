@@ -13,10 +13,9 @@ import (
 
 var RamBookList []*book.Book
 var (
-	Version     = "v0.9.5"
-	ReadingBook *book.Book
-	Srv         *http.Server
-	Config      = settings.ServerConfig{
+	Version = "v0.9.5"
+	Srv     *http.Server
+	Config  = settings.ServerConfig{
 		Port:                  1234,
 		Host:                  "DefaultHost",
 		StoresPath:            []string{},
