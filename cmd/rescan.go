@@ -63,7 +63,7 @@ func ReScanUploadPath() {
 
 func ReScanPath(path string, reScanFile bool) {
 	//扫描上传目录的文件
-	addList, err := common.ScanAndGetBookList(path, reScanFile, common.RamBookList)
+	addList, err := common.ScanAndGetBookList(path, reScanFile)
 	if err != nil {
 		fmt.Println(locale.GetString("scan_error"), path, err)
 	} else {

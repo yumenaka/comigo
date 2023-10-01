@@ -28,7 +28,7 @@ import (
 
 var (
 	mapBooks       = make(map[string]*Book) //实际存在的书，通过扫描生成
-	mapBookFolders = make(map[string]*Book) //通过分析路径与深度生成的书组
+	mapBookFolders = make(map[string]*Book) //通过分析路径与深度生成的书组。不备份，也不存储到数据库。key是BookID
 	Stores         = Bookstores{
 		mapBookstores: make(map[string]*singleBookstore),
 		SortBy:        "name",
@@ -100,34 +100,30 @@ func NewImageInfo(pageNum int, nameInArchive string, url string, fileSize int64)
 	return &ImageInfo{PageNum: pageNum, NameInArchive: nameInArchive, Url: url, FileSize: fileSize}
 }
 
-// New  初始化Book，设置文件路径、书名、BookID等等
-func New(filePath string, modified time.Time, fileSize int64, storePath string, depth int, bookType SupportFileType) (*Book, error) {
-	//查看内存中是否已经有了这本书,有了就报错，让调用者跳过
+// 查看内存中是否已经有了这本书,有了就报错，让调用者跳过
+func CheckBookExist(filePath string, bookType SupportFileType, storePath string) bool {
+	//实际存在的书，通过扫描生成
 	for _, realBook := range mapBooks {
 		fileAbaPath, err := filepath.Abs(filePath)
 		if err != nil {
 			fmt.Println(err, fileAbaPath)
 			if realBook.FilePath == filePath && realBook.ParentFolder == storePath && realBook.Type == bookType {
-				return nil, errors.New("Duplicate books:" + filePath)
+				return true
 			}
 		} else {
+			//fmt.Println(err, fileAbaPath)
 			if realBook.FilePath == fileAbaPath && realBook.Type == bookType {
-				return nil, errors.New("Duplicate books:" + fileAbaPath)
+				return true
 			}
 		}
 	}
-	for _, boolFolder := range mapBookFolders {
-		fileAbaPath, err := filepath.Abs(filePath)
-		if err != nil {
-			fmt.Println(err, fileAbaPath)
-			if boolFolder.FilePath == filePath && boolFolder.ParentFolder == storePath {
-				return nil, errors.New("Duplicate books:" + filePath)
-			}
-		} else {
-			if boolFolder.FilePath == fileAbaPath {
-				return nil, errors.New("Duplicate books:" + fileAbaPath)
-			}
-		}
+	return false
+}
+
+// New  初始化Book，设置文件路径、书名、BookID等等
+func New(filePath string, modified time.Time, fileSize int64, storePath string, depth int, bookType SupportFileType) (*Book, error) {
+	if CheckBookExist(filePath, bookType, storePath) {
+		return nil, errors.New("skip:" + filePath)
 	}
 	//初始化书籍
 	var b = Book{
@@ -251,6 +247,18 @@ func AddBooks(list []*Book, basePath string, minPageNum int) (err error) {
 		err = AddBook(b, basePath, minPageNum)
 		if err != nil {
 			return err
+		}
+	}
+	return err
+}
+
+// RestoreDatabaseBooks 从数据库中读取的书籍信息，放到内存中
+func RestoreDatabaseBooks(list []*Book) (err error) {
+	for _, b := range list {
+		if b.Type != TypeBooksGroup {
+			mapBooks[b.BookID] = b
+		} else {
+			mapBookFolders[b.BookID] = b
 		}
 	}
 	return err
@@ -523,8 +531,8 @@ func (b *Book) setBookID() {
 	if err != nil {
 		fmt.Println(err, fileAbaPath)
 	}
-	tempStr := b.FilePath + strconv.Itoa(b.ChildBookNum) + strconv.Itoa(int(b.FileSize)) + string(b.Type) + b.Modified.String()
-	b62 := base62.EncodeToString([]byte(md5string(tempStr)))
+	tempStr := b.FilePath + strconv.Itoa(b.ChildBookNum) + strconv.Itoa(int(b.FileSize)) + string(b.Type)
+	b62 := base62.EncodeToString([]byte(md5string(md5string(tempStr) + b.Modified.String())))
 	b.BookID = getShortBookID(b62, 7)
 }
 
@@ -533,26 +541,32 @@ func getShortBookID(fullID string, minLength int) string {
 		fmt.Println("can not short ID:" + fullID)
 		return fullID
 	}
-	shortID := fullID
-	//最短为5位，最长等于全长
-	for i := minLength; i <= len(fullID); i++ {
-		canUse := true
-		for key := range mapBooks {
-			if strings.HasPrefix(key, fullID[0:i]) {
-				canUse = false
+	shortID := fullID[0:minLength]
+	notFound := true
+	add := 0
+	pass := false
+	for notFound {
+		pass = true
+		for _, book := range mapBooks {
+			if shortID == book.BookID {
+				add++
+				shortID = fullID[0 : minLength+add]
+				pass = false
 			}
 		}
-		for key := range mapBookFolders {
-			if strings.HasPrefix(key, fullID[0:i]) {
-				canUse = false
+		for _, book := range mapBookFolders {
+			if shortID == book.BookID {
+				add++
+				shortID = fullID[0 : minLength+add]
+				pass = false
 			}
 		}
-		if canUse {
-			shortID = fullID[0:i]
-			break
+		if pass {
+			notFound = false
+			return shortID
 		}
 	}
-	return shortID
+	return fullID
 }
 
 // GetBookID  根据路径的MD5，生成书籍ID
