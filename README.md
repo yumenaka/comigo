@@ -14,9 +14,9 @@
 4. windows支持拖拽压缩包到comi.exe（或快捷方式）上打开。
 
 ### 安装：
-1. 手动下载
+手动下载  
 在 [Releases页面](https://github.com/yumenaka/comi/releases ) ，下载最新版文件，放到系统PATH。
-2. Linux MacOS 一键安装脚本  
+Linux MacOS 一键安装脚本  
 ```bash
 # 需要curl与tar，文件将安装到/usr/local/bin/ 
 bash <(curl -s https://raw.githubusercontent.com/yumenaka/comi/master/get_comigo.sh)

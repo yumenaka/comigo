@@ -3,6 +3,20 @@ https://github.com/ent/ent/blob/master/README_zh.md
 文档：
 https://entgo.io/zh/docs/tutorial-setup/
 
+
+Supported platforms and architectures
+https://pkg.go.dev/modernc.org/sqlite#hdr-Supported_platforms_and_architectures
+https://modern-c.appspot.com/-/builder/?importpath=modernc.org%2fsqlite
+主要平台里面，也就windows 386不支持。
+
+Adds support for Go fs.FS based SQLite virtual filesystems, see function New in modernc.org/sqlite/vfs and/or TestVFS in all_test.go
+添加对 Go fs 的支持。基于 FS 的 SQLite 虚拟文件系统，请参阅函数 modernc.org/sqlite/vfs 中的新功能和/或 all_test.go 中的 TestVFS
+
+https://gitlab.com/cznic/sqlite/-/blob/master/all_test.go
+大约在2487行，搜索TestVFS，有示例代码。似乎可以内嵌数据库文件？可以存储默认配置，但无法保存的话，实际也没太大用处？
+
+
+
 ent是一个简单而又功能强大的Go语言实体框架，ent易于构建和维护应用程序与大数据模型。
 图就是代码 - 将任何数据库表建模为Go对象。
 轻松地遍历任何图形 - 可以轻松地运行查询、聚合和遍历任何图形结构。
