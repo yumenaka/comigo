@@ -30,7 +30,7 @@ func initBookStores(args []string) {
 		}
 	}
 	//2、设置默认书库路径：扫描CMD指定的路径，如果开启上传，额外增加上传文件夹到默认书库路径
-	AddPathToStore(args)
+	initStorePath(args)
 
 	//3、扫描配置文件里面的书库路径
 	err := common.ScanStorePath(true)

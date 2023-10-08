@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comi/common"
-	"github.com/yumenaka/comi/settings"
+	"github.com/yumenaka/comi/types"
 	"github.com/yumenaka/comi/util"
 	"io"
 	"log"
@@ -26,7 +26,7 @@ func HandlerConfigUpdate(c *gin.Context) {
 	fmt.Printf("Received JSON data: %s \n", jsonString)
 
 	// 解析JSON数据并更新服务器配置
-	newConfig, err := settings.UpdateConfig(common.Config, jsonString)
+	newConfig, err := types.UpdateConfig(common.Config, jsonString)
 	if err != nil {
 		fmt.Println(err.Error())
 		c.JSON(http.StatusMethodNotAllowed, gin.H{"error": "Failed to parse JSON data"})
@@ -39,7 +39,7 @@ func HandlerConfigUpdate(c *gin.Context) {
 }
 
 // BeforeConfigUpdate 根据配置的变化，判断是否需要打开浏览器重新扫描等
-func BeforeConfigUpdate(oldConfig *settings.ServerConfig, newConfig *settings.ServerConfig) {
+func BeforeConfigUpdate(oldConfig *types.ServerConfig, newConfig *types.ServerConfig) {
 	if oldConfig.ConfigSaveTo != newConfig.ConfigSaveTo {
 		oldConfig.ConfigSaveTo = newConfig.ConfigSaveTo
 		//common.SaveConfig()
