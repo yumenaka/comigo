@@ -3,7 +3,7 @@ package routers
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comi/common"
+	"github.com/yumenaka/comi/config"
 	"log"
 	"net/http"
 	"strconv"
@@ -14,13 +14,13 @@ import (
 func startEngine(engine *gin.Engine) {
 	//是否对外服务
 	webHost := ":"
-	if common.Config.DisableLAN {
+	if config.Config.DisableLAN {
 		webHost = "localhost:"
 	}
 	//是否启用TLS
-	enableTls := common.Config.CertFile != "" && common.Config.KeyFile != ""
-	common.Srv = &http.Server{
-		Addr:    webHost + strconv.Itoa(common.Config.Port),
+	enableTls := config.Config.CertFile != "" && config.Config.KeyFile != ""
+	config.Srv = &http.Server{
+		Addr:    webHost + strconv.Itoa(config.Config.Port),
 		Handler: engine,
 	}
 
@@ -28,14 +28,14 @@ func startEngine(engine *gin.Engine) {
 	go func() {
 		// 监听并启动服务(TLS)
 		if enableTls {
-			if err := common.Srv.ListenAndServeTLS(common.Config.CertFile, common.Config.KeyFile); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			if err := config.Srv.ListenAndServeTLS(config.Config.CertFile, config.Config.KeyFile); err != nil && !errors.Is(err, http.ErrServerClosed) {
 				time.Sleep(3 * time.Second)
 				log.Fatalf("listen: %s\n", err)
 			}
 		}
 		if !enableTls {
 			// 监听并启动服务(HTTP)
-			if err := common.Srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			if err := config.Srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 				time.Sleep(3 * time.Second)
 				log.Fatalf("listen: %s\n", err)
 			}

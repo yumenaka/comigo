@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/yumenaka/comi/common"
+	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/routers"
 	"github.com/yumenaka/comi/routers/handlers"
@@ -27,8 +27,8 @@ func waitRescanMessages() {
 			fmt.Println("扫描上传文件夹：", msg)
 			ReScanUploadPath()
 			//保存扫描结果到数据库
-			if common.Config.EnableDatabase {
-				err := common.SaveResultsToDatabase()
+			if config.Config.EnableDatabase {
+				err := config.SaveResultsToDatabase()
 				if err != nil {
 					return
 				}
@@ -47,22 +47,22 @@ func waitRescanMessages() {
 // ReScanUploadPath 重新扫描上传目录,因为需要设置下载路径，gin 初始化后才能执行
 func ReScanUploadPath() {
 	//没启用上传，则不扫描
-	if !common.Config.EnableUpload {
+	if !config.Config.EnableUpload {
 		return
 	}
 	uploadPath := "upload"
-	if common.Config.UploadPath != "" {
-		uploadPath = common.Config.UploadPath
+	if config.Config.UploadPath != "" {
+		uploadPath = config.Config.UploadPath
 	}
 	ReScanPath(uploadPath, false)
 }
 
 func ReScanPath(path string, reScanFile bool) {
 	//扫描上传目录的文件
-	addList, err := common.ScanAndGetBookList(path, reScanFile)
+	addList, err := config.ScanAndGetBookList(path, reScanFile)
 	if err != nil {
 		fmt.Println(locale.GetString("scan_error"), path, err)
 	} else {
-		common.AddBooksToStore(addList, path)
+		config.AddBooksToStore(addList, path)
 	}
 }

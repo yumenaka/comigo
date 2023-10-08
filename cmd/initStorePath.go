@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/yumenaka/comi/common"
+	"github.com/yumenaka/comi/config"
 	"os"
 	"path"
 )
@@ -14,22 +14,22 @@ func initStorePath(args []string) {
 		fmt.Println("Failed to get working directory:", err)
 	}
 	fmt.Println("Working directory:", wd)
-	common.Config.StoresPath = append(common.Config.StoresPath, wd)
+	config.Config.StoresPath = append(config.Config.StoresPath, wd)
 
 	//没指定路径或文件的情况下
 	if len(args) != 0 {
 		//指定了多个参数的话，都扫描一遍
 		for _, arg := range args {
-			common.Config.StoresPath = append(common.Config.StoresPath, arg)
+			config.Config.StoresPath = append(config.Config.StoresPath, arg)
 		}
 	}
 
 	//启用上传，则添加upload目录
-	if common.Config.EnableUpload {
-		if common.Config.UploadPath != "" {
-			common.Config.StoresPath = append(common.Config.StoresPath, common.Config.UploadPath)
+	if config.Config.EnableUpload {
+		if config.Config.UploadPath != "" {
+			config.Config.StoresPath = append(config.Config.StoresPath, config.Config.UploadPath)
 		} else {
-			common.Config.StoresPath = append(common.Config.StoresPath, path.Join(wd, "upload"))
+			config.Config.StoresPath = append(config.Config.StoresPath, path.Join(wd, "upload"))
 		}
 	}
 }

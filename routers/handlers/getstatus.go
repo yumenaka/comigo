@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/yumenaka/comi/common"
+	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/types"
 	"github.com/yumenaka/comi/util"
 )
@@ -24,38 +24,38 @@ type ServerStatus struct {
 }
 
 func PublicServerInfoHandler(c *gin.Context) {
-	serverName := "Comigo " + common.Version
+	serverName := "Comigo " + config.Version
 	//本机首选出站IP
 	OutIP := util.GetOutboundIP().String()
 	host := ""
-	if common.Config.Host == "DefaultHost" {
+	if config.Config.Host == "DefaultHost" {
 		host = OutIP
 	} else {
-		host = common.Config.Host
+		host = config.Config.Host
 	}
 	var serverStatus = ServerStatus{
 		ServerName:        serverName,
 		ServerHost:        host,
-		ServerPort:        common.Config.Port,
-		SupportUploadFile: common.Config.EnableUpload,
+		ServerPort:        config.Config.Port,
+		SupportUploadFile: config.Config.EnableUpload,
 	}
 	c.PureJSON(http.StatusOK, serverStatus)
 }
 
 func HandlerGetStatusAll(c *gin.Context) {
-	serverName := "Comigo " + common.Version
+	serverName := "Comigo " + config.Version
 	//本机首选出站IP
 	host := ""
-	if common.Config.Host == "DefaultHost" {
+	if config.Config.Host == "DefaultHost" {
 		host = util.GetOutboundIP().String()
 	} else {
-		host = common.Config.Host
+		host = config.Config.Host
 	}
 	var serverStatus = ServerStatus{
 		ServerName:            serverName,
 		ServerHost:            host,
-		ServerPort:            common.Config.Port,
-		SupportUploadFile:     common.Config.EnableUpload,
+		ServerPort:            config.Config.Port,
+		SupportUploadFile:     config.Config.EnableUpload,
 		NumberOfBooks:         types.GetBooksNumber(),
 		NumberOfOnLineUser:    1,
 		NumberOfOnLineDevices: 1,

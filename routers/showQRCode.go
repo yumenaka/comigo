@@ -3,7 +3,7 @@ package routers
 import (
 	"fmt"
 	"github.com/sanity-io/litter"
-	"github.com/yumenaka/comi/common"
+	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/types"
 	"github.com/yumenaka/comi/util"
@@ -22,26 +22,26 @@ func showQRCode() {
 		if len(bookList.BookInfos) == 1 {
 			etcStr = "/#/scroll/" + bookList.BookInfos[0].BookID
 		}
-		if common.Config.DefaultMode != "" {
-			etcStr = "/#/" + strings.ToLower(common.Config.DefaultMode) + "/" + bookList.BookInfos[0].BookID
+		if config.Config.DefaultMode != "" {
+			etcStr = "/#/" + strings.ToLower(config.Config.DefaultMode) + "/" + bookList.BookInfos[0].BookID
 		}
 	}
-	enableTls := common.Config.CertFile != "" && common.Config.KeyFile != ""
-	OutIP := common.Config.Host
-	if common.Config.Host == "DefaultHost" {
+	enableTls := config.Config.CertFile != "" && config.Config.KeyFile != ""
+	OutIP := config.Config.Host
+	if config.Config.Host == "DefaultHost" {
 		OutIP = util.GetOutboundIP().String()
 	}
 	util.PrintAllReaderURL(
-		common.Config.Port,
-		common.Config.OpenBrowser,
-		common.Config.PrintAllPossibleQRCode,
+		config.Config.Port,
+		config.Config.OpenBrowser,
+		config.Config.PrintAllPossibleQRCode,
 		OutIP,
-		common.Config.DisableLAN,
+		config.Config.DisableLAN,
 		enableTls,
 		etcStr)
 	//打印配置，调试用
-	if common.Config.Debug {
-		litter.Dump(common.Config)
+	if config.Config.Debug {
+		litter.Dump(config.Config)
 	}
 	fmt.Println(locale.GetString("ctrl_c_hint"))
 }

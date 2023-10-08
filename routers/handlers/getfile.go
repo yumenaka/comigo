@@ -17,7 +17,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/yumenaka/comi/arch"
-	"github.com/yumenaka/comi/common"
+	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/types"
 	"github.com/yumenaka/comi/util"
@@ -49,7 +49,7 @@ func HandlerGetFile(c *gin.Context) {
 	}
 	noCache := c.DefaultQuery("no-cache", "false")
 	//如果启用了本地缓存
-	if common.Config.UseCache && noCache == "false" {
+	if config.Config.UseCache && noCache == "false" {
 		//获取所有的参数键值对
 		query := c.Request.URL.Query()
 		//如果有缓存，直接读取本地获取缓存文件并返回
@@ -205,7 +205,7 @@ func HandlerGetFile(c *gin.Context) {
 			contentType = util.GetContentTypeByFileName(".jpg")
 		}
 		//如果启用了本地缓存
-		if common.Config.UseCache && noCache == "false" {
+		if config.Config.UseCache && noCache == "false" {
 			//获取所有的参数键值对
 			query := c.Request.URL.Query()
 			//缓存文件到本地，避免重复解压
@@ -254,7 +254,7 @@ func init() {
 
 // 读取过一次的文件，就保存到硬盘上加快读取
 func saveFileToCache(id string, filename string, data []byte, query url.Values, contentType string, isCover bool) error {
-	err := os.MkdirAll(filepath.Join(common.Config.CachePath, id), os.ModePerm)
+	err := os.MkdirAll(filepath.Join(config.Config.CachePath, id), os.ModePerm)
 	if err != nil {
 		println(locale.GetString("saveFileToCache_error"))
 	}
@@ -264,7 +264,7 @@ func saveFileToCache(id string, filename string, data []byte, query url.Values, 
 	if isCover {
 		filename = "comigo_cover" + path.Ext(filename)
 	}
-	err = os.WriteFile(filepath.Join(common.Config.CachePath, id, filename), data, 0644)
+	err = os.WriteFile(filepath.Join(config.Config.CachePath, id, filename), data, 0644)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -318,7 +318,7 @@ func getFileFromCache(id string, filename string, query url.Values, isCover bool
 	key := cacheKey{bookID: id, queryString: qS}
 	contentType, ok := sMap.readMap(key)
 	if !ok {
-		if common.Config.Debug {
+		if config.Config.Debug {
 			return nil, contentType, errors.New("getFileFromCache key not found")
 		}
 		return nil, contentType, nil
@@ -329,8 +329,8 @@ func getFileFromCache(id string, filename string, query url.Values, isCover bool
 	if isCover {
 		filename = "comigo_cover" + path.Ext(filename)
 	}
-	loadedImage, err := os.ReadFile(filepath.Join(common.Config.CachePath, id, filename))
-	if err != nil && common.Config.Debug {
+	loadedImage, err := os.ReadFile(filepath.Join(config.Config.CachePath, id, filename))
+	if err != nil && config.Config.Debug {
 		fmt.Println("getFileFromCache,file not found:" + filename)
 	}
 	return loadedImage, contentType, err

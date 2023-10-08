@@ -11,7 +11,7 @@ import (
 	"io/fs"
 	"net/http"
 
-	"github.com/yumenaka/comi/common"
+	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/types"
 )
 
@@ -53,7 +53,7 @@ func SetDownloadLink() {
 					//staticUrl := "/raw/" + info.BookID + "/" + url.QueryEscape(info.Name)
 					staticUrl := "/raw/" + info.BookID + "/" + info.Name
 					if checkUrlRegistered(info.BookID) {
-						if common.Config.Debug {
+						if config.Config.Debug {
 							fmt.Println("路径已注册：", info)
 						}
 						continue
@@ -73,11 +73,11 @@ func setWebFile(engine *gin.Engine) {
 	tmpl := template.Must(template.New("template-data").Delims("[[", "]]").Parse(TemplateString))
 	//使用模板
 	engine.SetHTMLTemplate(tmpl)
-	if common.Config.LogToFile {
+	if config.Config.LogToFile {
 		// 关闭 log 打印的字体颜色。输出到文件不需要颜色
 		//gin.DisableConsoleColor()
 		// 中间件，输出 log 到文件
-		engine.Use(util.LoggerToFile(common.Config.LogFilePath, common.Config.LogFileName))
+		engine.Use(util.LoggerToFile(config.Config.LogFilePath, config.Config.LogFileName))
 		//禁止控制台输出
 		gin.DefaultWriter = io.Discard
 	}
@@ -112,7 +112,7 @@ func setWebFile(engine *gin.Engine) {
 	//解析模板到HTML
 	engine.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "template-data", gin.H{
-			"title": locale.GetString("HTML_TITLE") + common.Version, //页面标题
+			"title": locale.GetString("HTML_TITLE") + config.Version, //页面标题
 		})
 	})
 }

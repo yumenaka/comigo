@@ -3,7 +3,7 @@ package routers
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comi/common"
+	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/routers/handlers"
 	"github.com/yumenaka/comi/routers/token"
 	"github.com/yumenaka/comi/routers/websocket"
@@ -14,7 +14,7 @@ func setWebAPI(engine *gin.Engine) {
 	////TODO：第三方认证，可参考 https://darjun.github.io/2021/07/26/godailylib/goth/
 	api = engine.Group("/api")
 	//如果没有设置用户名和密码，则不需要验证
-	if common.Config.Password == "" {
+	if config.Config.Password == "" {
 		// 在需要验证的api中用jwt中间件
 		//通过URL字符串参数获取特定文件
 		api.GET("/getfile", handlers.HandlerGetFile)
@@ -81,7 +81,7 @@ func setWebAPI(engine *gin.Engine) {
 	api.GET("/qrcode.png", handlers.GetQrcodeHandler)
 
 	//初始化websocket
-	websocket.WsDebug = &common.Config.Debug
+	websocket.WsDebug = &config.Config.Debug
 	api.GET("/ws", websocket.WsHandler)
 	SetDownloadLink()
 	// swagger 自动生成文档用
