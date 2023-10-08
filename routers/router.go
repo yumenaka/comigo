@@ -24,8 +24,8 @@ func StartWebServer() {
 	////Logger() 以默认配置创建日志中间件，将所有请求信息按指定格式打印到标准输出。 gin.Default()已经默认启用了这个中间件
 	//engine.Use(gin.Logger())
 
-	//1、setWebFile
-	setWebFile(engine)
+	//1、embedFile
+	embedFile(engine)
 	//2、setWebAPI
 	setWebAPI(engine)
 	//TODO：Go中调用外部命令的几种姿势 https://darjun.github.io/2022/11/01/godailylib/osexec/

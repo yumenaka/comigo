@@ -68,7 +68,7 @@ func SetDownloadLink() {
 }
 
 // 1、设置web文件
-func setWebFile(engine *gin.Engine) {
+func embedFile(engine *gin.Engine) {
 	//使用自定义的模板引擎，命名为"template-data"，为了与VUE兼容，把左右分隔符自定义为 [[ ]]
 	tmpl := template.Must(template.New("template-data").Delims("[[", "]]").Parse(TemplateString))
 	//使用模板
