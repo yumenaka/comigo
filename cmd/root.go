@@ -175,8 +175,8 @@ var rootCmd = &cobra.Command{
 	},
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
+// Execute 执行将所有子命令添加到根命令并适当设置标志。
+// 这是由 main.main() 调用的。 rootCmd 只需要执行一次。
 func Execute() {
 	//执行命令
 	if err := rootCmd.Execute(); err != nil {

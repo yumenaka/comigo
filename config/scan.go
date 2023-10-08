@@ -87,7 +87,7 @@ func ScanAndGetBookList(storePath string, reScanFile bool) (newBookList []*types
 		// 是否需要跳过
 		skip := false
 		if !reScanFile {
-			for _, p := range RamBookList {
+			for _, p := range types.GetAllBookList() {
 				AbsW, err := filepath.Abs(walkPath) // 取得绝对路径
 				if err != nil {
 					// 无法取得的情况下，用相对路径

@@ -47,10 +47,6 @@ type ServerConfig struct {
 	LogFilePath            string   `json:"LogFilePath" comment:"Log文件的保存位置"`
 	LogFileName            string   `json:"LogFileName" comment:"Log文件名"`
 	GenerateMetaData       bool     `json:"GenerateMetaData" toml:"GenerateMetaData" comment:"生成书籍元数据"`
-
-	//EnableWebpServer     bool             `json:"enable_webp_server"`
-	//WebpConfig           WebPServerConfig `json:"-"  comment:" WebPServer设置"`
-	//DatabaseFilePath     string           `json:"-" comment:"数据库文件存储位置，默认config目录"`
 }
 
 func UpdateConfig(oldConfig ServerConfig, jsonString string) (newConfig ServerConfig, err error) {
@@ -197,12 +193,10 @@ func UpdateConfig(oldConfig ServerConfig, jsonString string) (newConfig ServerCo
 // 将字符串解析为字符串切片
 func parseString(str string) ([]string, error) {
 	var arr []string
-	//fmt.Println("str =", str)
 	err := json.Unmarshal([]byte(str), &arr)
 	if err != nil {
 		return nil, err
 	}
-	//arr := strings.Split(str, ",")
 	return arr, nil
 }
 

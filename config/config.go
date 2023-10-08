@@ -10,7 +10,6 @@ import (
 	"path"
 )
 
-var RamBookList []*types.Book
 var (
 	Version = "v0.9.5"
 	Srv     *http.Server
