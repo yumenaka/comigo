@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/yumenaka/comi/common"
 	"github.com/yumenaka/comi/locale"
-	"github.com/yumenaka/comi/tools"
+	"github.com/yumenaka/comi/util"
 	"math/rand"
 	"strconv"
 	"time"
@@ -13,9 +13,9 @@ import (
 // CheckWebPort 3、选择服务端口
 func CheckWebPort() {
 	//检测端口
-	if !tools.CheckPort(common.Config.Port) {
+	if !util.CheckPort(common.Config.Port) {
 		//获取一个空闲可用的系统端口号
-		port, err := tools.GetFreePort()
+		port, err := util.GetFreePort()
 		if err != nil {
 			fmt.Println(err)
 			r := rand.New(rand.NewSource(time.Now().UnixNano()))

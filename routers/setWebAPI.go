@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comi/common"
-	"github.com/yumenaka/comi/routers/handler"
+	"github.com/yumenaka/comi/routers/handlers"
 	"github.com/yumenaka/comi/routers/token"
 	"github.com/yumenaka/comi/routers/websocket"
 )
@@ -17,25 +17,25 @@ func setWebAPI(engine *gin.Engine) {
 	if common.Config.Password == "" {
 		// 在需要验证的api中用jwt中间件
 		//通过URL字符串参数获取特定文件
-		api.GET("/getfile", handler.GetFileHandler)
+		api.GET("/getfile", handlers.HandlerGetFile)
 		//文件上传
-		api.POST("/upload", handler.UploadHandler)
+		api.POST("/upload", handlers.HandlerUpload)
 		//登录后才能查看的服务器状态，包括标题、机器状态等
-		api.GET("/get_status_all", handler.GetStatusAllHandler)
+		api.GET("/get_status_all", handlers.HandlerGetStatusAll)
 		//获取书架信息，不包含每页信息
-		api.GET("/getlist", handler.GetBookListHandler)
+		api.GET("/getlist", handlers.HandlerGetBookList)
 		//通过URL字符串参数查询书籍信息
-		api.GET("/getbook", handler.GetBookHandler)
+		api.GET("/getbook", handlers.HandlerGetBook)
 		//通过链接下载reg配置
-		api.GET("/comigo.reg", handler.GetRegFIleHandler)
+		api.GET("/comigo.reg", handlers.HandlerGetRegFile)
 		//通过链接下载toml格式的示例配置
-		api.GET("/config.toml", handler.GetConfigTomlHandler)
+		api.GET("/config.toml", handlers.HandlerGetConfigToml)
 		//获取json格式的当前配置
-		api.GET("/config.json", handler.GetConfigJsonHandler)
+		api.GET("/config.json", handlers.HandlerGetConfigJson)
 		//修改服务器配置
-		api.POST("/config_update", handler.ConfigUpdateHandler)
+		api.POST("/config_update", handlers.HandlerConfigUpdate)
 		//保存服务器配置
-		api.POST("/config_save", handler.ConfigSaveHandler)
+		api.POST("/config_save", handlers.HandlerConfigSave)
 	} else {
 		// 创建 jwt 中间件
 		jwtMiddleware, err := token.NewJwtMiddleware()
@@ -51,34 +51,34 @@ func setWebAPI(engine *gin.Engine) {
 		api.GET("/refresh_token", jwtMiddleware.RefreshHandler)
 		// 在需要验证的api中用jwt中间件
 		//通过URL字符串参数获取特定文件
-		api.GET("/getfile", jwtMiddleware.MiddlewareFunc(), handler.GetFileHandler)
+		api.GET("/getfile", jwtMiddleware.MiddlewareFunc(), handlers.HandlerGetFile)
 		//文件上传
-		api.POST("/upload", jwtMiddleware.MiddlewareFunc(), handler.UploadHandler)
+		api.POST("/upload", jwtMiddleware.MiddlewareFunc(), handlers.HandlerUpload)
 		//登录后才能查看的服务器状态，包括标题、机器状态等
-		api.GET("/get_status_all", jwtMiddleware.MiddlewareFunc(), handler.GetStatusAllHandler)
+		api.GET("/get_status_all", jwtMiddleware.MiddlewareFunc(), handlers.HandlerGetStatusAll)
 		//获取书架信息，不包含每页信息
-		api.GET("/getlist", jwtMiddleware.MiddlewareFunc(), handler.GetBookListHandler)
+		api.GET("/getlist", jwtMiddleware.MiddlewareFunc(), handlers.HandlerGetBookList)
 		//通过URL字符串参数查询书籍信息
-		api.GET("/getbook", jwtMiddleware.MiddlewareFunc(), handler.GetBookHandler)
+		api.GET("/getbook", jwtMiddleware.MiddlewareFunc(), handlers.HandlerGetBook)
 		//通过链接下载reg配置
-		api.GET("/comigo.reg", jwtMiddleware.MiddlewareFunc(), handler.GetRegFIleHandler)
+		api.GET("/comigo.reg", jwtMiddleware.MiddlewareFunc(), handlers.HandlerGetRegFile)
 		//通过链接下载示例配置
-		api.GET("/config.toml", jwtMiddleware.MiddlewareFunc(), handler.GetConfigTomlHandler)
+		api.GET("/config.toml", jwtMiddleware.MiddlewareFunc(), handlers.HandlerGetConfigToml)
 		//获取json格式的当前配置
-		api.GET("/config.json", jwtMiddleware.MiddlewareFunc(), handler.GetConfigJsonHandler)
+		api.GET("/config.json", jwtMiddleware.MiddlewareFunc(), handlers.HandlerGetConfigJson)
 		//修改服务器配置
-		api.POST("/config_update", jwtMiddleware.MiddlewareFunc(), handler.ConfigUpdateHandler)
+		api.POST("/config_update", jwtMiddleware.MiddlewareFunc(), handlers.HandlerConfigUpdate)
 		//保存服务器配置
-		api.POST("/config_save", jwtMiddleware.MiddlewareFunc(), handler.ConfigSaveHandler)
+		api.POST("/config_save", jwtMiddleware.MiddlewareFunc(), handlers.HandlerConfigSave)
 	}
 
 	//web端公开的服务器状态，包括标题、端口等
-	api.GET("/getstatus", handler.PublicServerInfoHandler)
+	api.GET("/getstatus", handlers.PublicServerInfoHandler)
 	////通过URL字符串参数PDF文件里的图片，效率太低，注释掉
 	//api.GET("/get_pdf_image", handler.GetPdfImageHandler)
 
 	//通过链接下载qrcode
-	api.GET("/qrcode.png", handler.GetQrcodeHandler)
+	api.GET("/qrcode.png", handlers.GetQrcodeHandler)
 
 	//初始化websocket
 	websocket.WsDebug = &common.Config.Debug

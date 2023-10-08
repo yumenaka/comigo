@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/yumenaka/comi/book"
 	"github.com/yumenaka/comi/common"
 	"github.com/yumenaka/comi/storage"
+	"github.com/yumenaka/comi/types"
 	"log"
 	"strconv"
 )
@@ -21,7 +21,7 @@ func initBookStores(args []string) {
 		if err != nil {
 			fmt.Println(err)
 		} else {
-			err := book.RestoreDatabaseBooks(books)
+			err := types.RestoreDatabaseBooks(books)
 			if err != nil {
 				fmt.Println(err)
 			} else {

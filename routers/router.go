@@ -24,20 +24,15 @@ func StartWebServer() {
 	////Logger() 以默认配置创建日志中间件，将所有请求信息按指定格式打印到标准输出。 gin.Default()已经默认启用了这个中间件
 	//engine.Use(gin.Logger())
 
-	//1、setStaticFiles
-	setStaticFiles(engine)
+	//1、setWebFile
+	setWebFile(engine)
 	//2、setWebAPI
 	setWebAPI(engine)
 	//TODO：Go中调用外部命令的几种姿势 https://darjun.github.io/2022/11/01/godailylib/osexec/
-	//优化的时候可以参考
-	//3、setWebpServer
-	//setWebpServer(engine)
-	//4、setFrpClient
-	//setFrpClient()
-	//5、printQRCodeInCMD
-	printQRCodeInCMD()
-	//6、StartGinEngine 监听并启动web服务
-	StartGinEngine(engine)
+	//3、showQRCode
+	showQRCode()
+	//4、startEngine 监听并启动web服务
+	startEngine(engine)
 }
 
 //// 静态文件服务 单独设定某个文件

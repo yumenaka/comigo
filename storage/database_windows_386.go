@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 
-	comigoBook "github.com/yumenaka/comi/book"
+	comigoBook "github.com/yumenaka/comi/types"
 )
 
 func InitDatabase(configFilePath string) error {

@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"github.com/mitchellh/go-homedir"
 	"github.com/pelletier/go-toml/v2"
-	"github.com/yumenaka/comi/book"
 	"github.com/yumenaka/comi/settings"
+	"github.com/yumenaka/comi/types"
 	"net/http"
 	"os"
 	"path"
 )
 
-var RamBookList []*book.Book
+var RamBookList []*types.Book
 var (
 	Version = "v0.9.5"
 	Srv     *http.Server

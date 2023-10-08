@@ -8,10 +8,10 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/yumenaka/archiver/v4"
 	"github.com/yumenaka/comi/arch"
-	"github.com/yumenaka/comi/book"
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/storage"
-	"github.com/yumenaka/comi/tools"
+	"github.com/yumenaka/comi/types"
+	"github.com/yumenaka/comi/util"
 	"io/fs"
 	"net/url"
 	"os"
@@ -44,7 +44,7 @@ func SaveResultsToDatabase() error {
 	if err != nil {
 		return err
 	}
-	AllBook := book.GetAllBookList()
+	AllBook := types.GetAllBookList()
 	//设置清理数据库的时候，是否清理没扫描到的书籍信息
 	if Config.ClearDatabaseWhenExit {
 		for _, b := range AllBook {
@@ -60,21 +60,21 @@ func SaveResultsToDatabase() error {
 }
 
 // AddBooksToStore 添加一组书到书库
-func AddBooksToStore(bookList []*book.Book, basePath string) {
-	err := book.AddBooks(bookList, basePath, Config.MinImageNum)
+func AddBooksToStore(bookList []*types.Book, basePath string) {
+	err := types.AddBooks(bookList, basePath, Config.MinImageNum)
 	if err != nil {
 		fmt.Println(locale.GetString("AddBook_error"), basePath)
 	}
 	// 然后生成对应的虚拟书籍组
-	if err := book.Stores.GenerateBookGroup(); err != nil {
+	if err := types.Stores.GenerateBookGroup(); err != nil {
 		fmt.Println(err)
 	}
 }
 
 // ScanAndGetBookList 扫描路径，取得路径里的书籍
-func ScanAndGetBookList(storePath string, reScanFile bool) (newBookList []*book.Book, err error) {
+func ScanAndGetBookList(storePath string, reScanFile bool) (newBookList []*types.Book, err error) {
 	// 路径不存在的Error，不过目前并不会打印出来
-	if !tools.PathExists(storePath) {
+	if !util.PathExists(storePath) {
 		return nil, errors.New(locale.GetString("PATH_NOT_EXIST"))
 	}
 	storePathAbs, err := filepath.Abs(storePath)
@@ -154,9 +154,9 @@ func ScanAndGetBookList(storePath string, reScanFile bool) (newBookList []*book.
 	return newBookList, err
 }
 
-func scanDirGetBook(dirPath string, storePath string, depth int) (*book.Book, error) {
+func scanDirGetBook(dirPath string, storePath string, depth int) (*types.Book, error) {
 	// 初始化，生成UUID
-	newBook, err := book.New(dirPath, time.Now(), 0, storePath, depth, book.TypeDir)
+	newBook, err := types.New(dirPath, time.Now(), 0, storePath, depth, types.TypeDir)
 	if err != nil {
 		return nil, err
 	}
@@ -185,7 +185,7 @@ func scanDirGetBook(dirPath string, storePath string, depth int) (*book.Book, er
 		}
 		if Config.IsSupportMedia(file.Name()) {
 			TempURL := "api/getfile?id=" + newBook.BookID + "&filename=" + url.QueryEscape(file.Name())
-			newBook.Pages.Images = append(newBook.Pages.Images, book.ImageInfo{RealImageFilePATH: strAbsPath, FileSize: file.Size(), ModeTime: file.ModTime(), NameInArchive: file.Name(), Url: TempURL})
+			newBook.Pages.Images = append(newBook.Pages.Images, types.ImageInfo{RealImageFilePATH: strAbsPath, FileSize: file.Size(), ModeTime: file.ModTime(), NameInArchive: file.Name(), Url: TempURL})
 		}
 	}
 	newBook.SortPages("default")
@@ -194,7 +194,7 @@ func scanDirGetBook(dirPath string, storePath string, depth int) (*book.Book, er
 }
 
 // 扫描一个路径，并返回对应书籍
-func scanFileGetBook(filePath string, storePath string, depth int) (*book.Book, error) {
+func scanFileGetBook(filePath string, storePath string, depth int) (*types.Book, error) {
 	// 打开文件
 	file, err := os.OpenFile(filePath, os.O_RDONLY, 0o400) // Use mode 0400 for a read-only // file and 0600 for a readable+writable file.
 	if err != nil {
@@ -211,14 +211,14 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*book.Book, 
 		fmt.Println(err.Error())
 	}
 	// 初始化一本书，设置文件路径等等
-	newBook, err := book.New(filePath, FileInfo.ModTime(), FileInfo.Size(), storePath, depth, book.GetBookTypeByFilename(filePath))
+	newBook, err := types.New(filePath, FileInfo.ModTime(), FileInfo.Size(), storePath, depth, types.GetBookTypeByFilename(filePath))
 	if err != nil {
 		return nil, err
 	}
 	// 根据文件类型，走不同的初始化流程
 	switch newBook.Type {
 	// 为解决archiver/v4的BUG “zip文件无法读取2级目录” 单独处理zip文件
-	case book.TypeZip, book.TypeCbz, book.TypeEpub:
+	case types.TypeZip, types.TypeCbz, types.TypeEpub:
 		// 使用Archiver的虚拟文件系统，无法处理非UTF-8编码
 		fsys, zipErr := zip.OpenReader(filePath)
 		if zipErr != nil {
@@ -236,7 +236,7 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*book.Book, 
 			err = scanNonUTF8ZipFile(filePath, newBook)
 		}
 		// epub文件，需要根据 META-INF/container.xml 里面定义的rootfile （.opf文件）来重新排序
-		if newBook.Type == book.TypeEpub {
+		if newBook.Type == types.TypeEpub {
 			imageList, err := arch.GetImageListFromEpubFile(newBook.FilePath)
 			if err != nil {
 				fmt.Println(err)
@@ -253,23 +253,23 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*book.Book, 
 			}
 		}
 	// TODO:服务器解压速度太慢，网页用PDF.js解析？
-	case book.TypePDF:
+	case types.TypePDF:
 		newBook.AllPageNum = 1
 		newBook.InitComplete = true
-		newBook.Cover = book.ImageInfo{RealImageFilePATH: "", FileSize: FileInfo.Size(), ModeTime: FileInfo.ModTime(), NameInArchive: "", Url: "/images/pdf.png"}
+		newBook.Cover = types.ImageInfo{RealImageFilePATH: "", FileSize: FileInfo.Size(), ModeTime: FileInfo.ModTime(), NameInArchive: "", Url: "/images/pdf.png"}
 	// TODO：简单的网页播放器
-	case book.TypeVideo:
+	case types.TypeVideo:
 		newBook.AllPageNum = 1
 		newBook.InitComplete = true
-		newBook.Cover = book.ImageInfo{NameInArchive: "video.png", Url: "/images/video.png"}
-	case book.TypeAudio:
+		newBook.Cover = types.ImageInfo{NameInArchive: "video.png", Url: "/images/video.png"}
+	case types.TypeAudio:
 		newBook.AllPageNum = 1
 		newBook.InitComplete = true
-		newBook.Cover = book.ImageInfo{NameInArchive: "audio.png", Url: "/images/audio.png"}
-	case book.TypeUnknownFile:
+		newBook.Cover = types.ImageInfo{NameInArchive: "audio.png", Url: "/images/audio.png"}
+	case types.TypeUnknownFile:
 		newBook.AllPageNum = 1
 		newBook.InitComplete = true
-		newBook.Cover = book.ImageInfo{NameInArchive: "unknown.png", Url: "/images/unknown.png"}
+		newBook.Cover = types.ImageInfo{NameInArchive: "unknown.png", Url: "/images/unknown.png"}
 	// 其他类型的压缩文件或文件夹
 	default:
 		// archiver.FileSystem可以配合ctx了，加个默认超时时间
@@ -296,19 +296,19 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*book.Book, 
 				u, ok := f.(archiver.File) // f.Name不包含路径信息.需要转换一下
 				if !ok {
 					// 如果是文件夹+图片
-					newBook.Type = book.TypeDir
+					newBook.Type = types.TypeDir
 					////用Archiver的虚拟文件系统提供图片文件，理论上现在不应该用到
 					//newBook.Pages = append(newBook.Pages, ImageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: "", Url: "/cache/" + newBook.BookID + "/" + url.QueryEscape(path)})
 					//实验：用getfile接口提供文件服务
 					TempURL := "api/getfile?id=" + newBook.BookID + "&filename=" + url.QueryEscape(path)
-					newBook.Pages.Images = append(newBook.Pages.Images, book.ImageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: "", Url: TempURL})
+					newBook.Pages.Images = append(newBook.Pages.Images, types.ImageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: "", Url: TempURL})
 					// fmt.Println(locale.GetString("unsupported_extract")+" %s", f)
 				} else {
 					// 替换特殊字符的时候，额外将“+替换成"%2b"，因为gin会将+解析为空格。
 					TempURL := "api/getfile?id=" + newBook.BookID + "&filename=" + url.QueryEscape(u.NameInArchive)
 					// 不替换特殊字符
 					// TempURL := "api/getfile?id=" + newBook.BookID + "&filename=" + u.NameInArchive
-					newBook.Pages.Images = append(newBook.Pages.Images, book.ImageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: u.NameInArchive, Url: TempURL})
+					newBook.Pages.Images = append(newBook.Pages.Images, types.ImageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: u.NameInArchive, Url: TempURL})
 				}
 			}
 			return nil
@@ -322,7 +322,7 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*book.Book, 
 	return newBook, err
 }
 
-func scanNonUTF8ZipFile(filePath string, b *book.Book) error {
+func scanNonUTF8ZipFile(filePath string, b *types.Book) error {
 	b.NonUTF8Zip = true
 	reader, err := arch.ScanNonUTF8Zip(filePath, Config.ZipFileTextEncoding)
 	if err != nil {
@@ -333,7 +333,7 @@ func scanNonUTF8ZipFile(filePath string, b *book.Book) error {
 			// 如果是压缩文件
 			// 替换特殊字符的时候，额外将“+替换成"%2b"，因为gin会将+解析为空格。
 			TempURL := "api/getfile?id=" + b.BookID + "&filename=" + url.QueryEscape(f.Name)
-			b.Pages.Images = append(b.Pages.Images, book.ImageInfo{RealImageFilePATH: "", FileSize: f.FileInfo().Size(), ModeTime: f.FileInfo().ModTime(), NameInArchive: f.Name, Url: TempURL})
+			b.Pages.Images = append(b.Pages.Images, types.ImageInfo{RealImageFilePATH: "", FileSize: f.FileInfo().Size(), ModeTime: f.FileInfo().ModTime(), NameInArchive: f.Name, Url: TempURL})
 		} else {
 			logrus.Debugf(locale.GetString("unsupported_file_type") + f.Name)
 		}
@@ -344,7 +344,7 @@ func scanNonUTF8ZipFile(filePath string, b *book.Book) error {
 
 // 手动写的递归查找，功能与fs.WalkDir()相同。发现一个Archiver/V4的BUG：zip文件的虚拟文件系统，找不到正确的多级文件夹？
 // https://books.studygolang.com/The-Golang-Standard-Library-by-Example/chapter06/06.3.html
-func walkUTF8ZipFs(fsys fs.FS, parent, base string, b *book.Book) error {
+func walkUTF8ZipFs(fsys fs.FS, parent, base string, b *types.Book) error {
 	// 一般zip文件的处理流程
 	// fmt.Println("parent:" + parent + " base:" + base)
 	dirName := path.Join(parent, base)
@@ -373,7 +373,7 @@ func walkUTF8ZipFs(fsys fs.FS, parent, base string, b *book.Book) error {
 			inArchiveName := path.Join(parent, f.Name())
 			TempURL := "api/getfile?id=" + b.BookID + "&filename=" + url.QueryEscape(inArchiveName)
 			// 替换特殊字符的时候,不要用url.PathEscape()，PathEscape不会把“+“替换成"%2b"，会导致BUG，让gin会将+解析为空格。
-			b.Pages.Images = append(b.Pages.Images, book.ImageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: inArchiveName, Url: TempURL})
+			b.Pages.Images = append(b.Pages.Images, types.ImageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: inArchiveName, Url: TempURL})
 		}
 	}
 	b.SortPages("default")

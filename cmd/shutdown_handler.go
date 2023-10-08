@@ -3,9 +3,9 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"github.com/yumenaka/comi/book"
 	"github.com/yumenaka/comi/common"
 	"github.com/yumenaka/comi/locale"
+	"github.com/yumenaka/comi/types"
 	"log"
 	"os/signal"
 	"syscall"
@@ -27,7 +27,7 @@ func SetShutdownHandler() {
 	//清理临时文件
 	if common.Config.ClearCacheExit {
 		fmt.Println("\r" + locale.GetString("start_clear_file") + " CachePath:" + common.Config.CachePath)
-		book.ClearTempFilesALL(common.Config.Debug, common.Config.CachePath)
+		types.ClearTempFilesALL(common.Config.Debug, common.Config.CachePath)
 		fmt.Println(locale.GetString("clear_temp_file_completed"))
 	}
 	// 上下文用于通知服务器它有 5 秒的时间来完成它当前正在处理的请求

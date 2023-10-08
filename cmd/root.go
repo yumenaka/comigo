@@ -8,7 +8,7 @@ import (
 	"github.com/yumenaka/comi/common"
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/routers"
-	"github.com/yumenaka/comi/routers/handler"
+	"github.com/yumenaka/comi/routers/handlers"
 	"os"
 	"path"
 	"path/filepath"
@@ -77,8 +77,8 @@ func init() {
 	//退出时清除缓存
 	rootCmd.PersistentFlags().BoolVar(&common.Config.ClearCacheExit, "cache-clean", true, locale.GetString("CACHE_FILE_CLEAN"))
 
-	handler.EnableUpload = &common.Config.EnableUpload
-	handler.UploadPath = &common.Config.UploadPath
+	handlers.EnableUpload = &common.Config.EnableUpload
+	handlers.UploadPath = &common.Config.UploadPath
 
 	//手动指定zip文件编码 gbk、shiftjis……
 	rootCmd.PersistentFlags().StringVar(&common.Config.ZipFileTextEncoding, "zip-encode", "gbk", locale.GetString("ZIP_ENCODE"))

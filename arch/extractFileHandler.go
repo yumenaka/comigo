@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/yumenaka/archiver/v4"
-	"github.com/yumenaka/comi/tools"
+	"github.com/yumenaka/comi/util"
 	"io"
 	"os"
 	"path/filepath"
@@ -39,7 +39,7 @@ func extractFileHandler(ctx context.Context, f archiver.File) error {
 	writeFilePath := filepath.Join(extractPath, f.NameInArchive)
 	//写文件前，如果对应文件夹不存在，就创建对应文件夹
 	checkDir := filepath.Dir(writeFilePath)
-	if !tools.IsExist(checkDir) {
+	if !util.IsExist(checkDir) {
 		err = os.MkdirAll(checkDir, os.ModePerm)
 		if err != nil {
 			fmt.Println(err)

@@ -3,7 +3,7 @@ package common
 import (
 	"fmt"
 	"github.com/yumenaka/comi/locale"
-	"github.com/yumenaka/comi/tools"
+	"github.com/yumenaka/comi/util"
 	"os"
 	"path"
 )
@@ -11,7 +11,7 @@ import (
 // SetTempDir 设置临时文件夹，退出时会被清理
 func SetTempDir() {
 	//手动设置的临时文件夹
-	if Config.CachePath != "" && tools.CheckExists(Config.CachePath) && tools.ChickIsDir(Config.CachePath) {
+	if Config.CachePath != "" && util.CheckExists(Config.CachePath) && util.ChickIsDir(Config.CachePath) {
 		Config.CachePath = path.Join(Config.CachePath)
 	} else {
 		Config.CachePath = path.Join(os.TempDir(), "comigo_cache") //直接使用系统文件夹
