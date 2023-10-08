@@ -7,8 +7,8 @@ import (
 	"path"
 )
 
-// AddPathToStore 添加默认扫描路径
-func AddPathToStore(args []string) {
+// initStorePath 添加默认扫描路径
+func initStorePath(args []string) {
 	wd, err := os.Getwd()
 	if err != nil {
 		fmt.Println("Failed to get working directory:", err)

@@ -149,7 +149,7 @@ func init() {
 		//监听文件修改
 		runtimeViper.WatchConfig()
 		//文件修改时，执行重载设置、服务重启的函数
-		runtimeViper.OnConfigChange(configReloadHandler)
+		runtimeViper.OnConfigChange(handlerConfigReload)
 	})
 }
 

@@ -44,10 +44,6 @@ func waitRescanMessages() {
 	}
 }
 
-func AddUploadPathToStore() {
-
-}
-
 // ReScanUploadPath 重新扫描上传目录,因为需要设置下载路径，gin 初始化后才能执行
 func ReScanUploadPath() {
 	//没启用上传，则不扫描
