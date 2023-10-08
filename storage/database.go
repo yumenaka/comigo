@@ -16,11 +16,11 @@ import (
 	"entgo.io/ent/dialect"
 	"modernc.org/sqlite"
 
-	comigoBook "github.com/yumenaka/comi/book"
 	"github.com/yumenaka/comi/ent"
 	"github.com/yumenaka/comi/ent/book"
 	"github.com/yumenaka/comi/ent/singlepageinfo"
 	"github.com/yumenaka/comi/locale"
+	comigoBook "github.com/yumenaka/comi/types"
 )
 
 // 参考：

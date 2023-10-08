@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 	"github.com/yumenaka/archiver/v4"
-	"github.com/yumenaka/comi/tools"
+	"github.com/yumenaka/comi/util"
 	"os"
 )
 
 // UnArchiveRar  一次性解压rar文件
 func UnArchiveRar(filePath string, extractPath string) error {
-	extractPath = tools.GetAbsPath(extractPath)
+	extractPath = util.GetAbsPath(extractPath)
 	//如果解压路径不存在，创建路径
 	err := os.MkdirAll(extractPath, os.ModePerm)
 	if err != nil {
@@ -41,7 +41,7 @@ func UnArchiveRar(filePath string, extractPath string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Println("rar文件解压完成：" + tools.GetAbsPath(filePath) + " 解压到：" + tools.GetAbsPath(extractPath))
+		fmt.Println("rar文件解压完成：" + util.GetAbsPath(filePath) + " 解压到：" + util.GetAbsPath(extractPath))
 	}
 	return nil
 }

@@ -1,0 +1,66 @@
+package handlers
+
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+
+	"github.com/yumenaka/comi/common"
+	"github.com/yumenaka/comi/types"
+	"github.com/yumenaka/comi/util"
+)
+
+// ServerStatus 服务器当前状况
+type ServerStatus struct {
+	ServerName            string            //服务器描述
+	ServerHost            string            //
+	ServerPort            int               //
+	NumberOfBooks         int               //当前拥有的书籍总数
+	NumberOfOnLineUser    int               //TODO：在线用户数
+	NumberOfOnLineDevices int               //TODO：在线设备数
+	SupportUploadFile     bool              //
+	ClientIP              string            //客户端IP
+	OSInfo                util.SystemStatus //系统信息
+}
+
+func PublicServerInfoHandler(c *gin.Context) {
+	serverName := "Comigo " + common.Version
+	//本机首选出站IP
+	OutIP := util.GetOutboundIP().String()
+	host := ""
+	if common.Config.Host == "DefaultHost" {
+		host = OutIP
+	} else {
+		host = common.Config.Host
+	}
+	var serverStatus = ServerStatus{
+		ServerName:        serverName,
+		ServerHost:        host,
+		ServerPort:        common.Config.Port,
+		SupportUploadFile: common.Config.EnableUpload,
+	}
+	c.PureJSON(http.StatusOK, serverStatus)
+}
+
+func HandlerGetStatusAll(c *gin.Context) {
+	serverName := "Comigo " + common.Version
+	//本机首选出站IP
+	host := ""
+	if common.Config.Host == "DefaultHost" {
+		host = util.GetOutboundIP().String()
+	} else {
+		host = common.Config.Host
+	}
+	var serverStatus = ServerStatus{
+		ServerName:            serverName,
+		ServerHost:            host,
+		ServerPort:            common.Config.Port,
+		SupportUploadFile:     common.Config.EnableUpload,
+		NumberOfBooks:         types.GetBooksNumber(),
+		NumberOfOnLineUser:    1,
+		NumberOfOnLineDevices: 1,
+		ClientIP:              c.ClientIP(),
+		OSInfo:                util.GetSystemStatus(),
+	}
+	c.PureJSON(http.StatusOK, serverStatus)
+}
