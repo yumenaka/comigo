@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/yumenaka/comi/common"
+	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/storage"
 	"github.com/yumenaka/comi/types"
 	"log"
@@ -12,9 +12,9 @@ import (
 // initBookStores 解析命令,扫描书库
 func initBookStores(args []string) {
 	//1. 初始化数据库
-	if common.Config.EnableDatabase {
+	if config.Config.EnableDatabase {
 		// 从数据库中读取书籍信息并持久化
-		if err := storage.InitDatabase(common.Config.ConfigFileUsed); err != nil {
+		if err := storage.InitDatabase(config.Config.ConfigFileUsed); err != nil {
 			fmt.Println(err)
 		}
 		books, err := storage.GetArchiveBookFromDatabase()
@@ -33,14 +33,14 @@ func initBookStores(args []string) {
 	initStorePath(args)
 
 	//3、扫描配置文件里面的书库路径
-	err := common.ScanStorePath(true)
+	err := config.ScanStorePath(true)
 	if err != nil {
 		log.Printf("Failed to scan store path: %v", err)
 	}
 
 	//4、保存扫描结果到数据库
-	if common.Config.EnableDatabase {
-		err = common.SaveResultsToDatabase()
+	if config.Config.EnableDatabase {
+		err = config.SaveResultsToDatabase()
 		if err != nil {
 			log.Printf("Failed SaveResultsToDatabase: %v", err)
 			return
@@ -48,5 +48,5 @@ func initBookStores(args []string) {
 	}
 
 	//5、通过“可执行文件名”设置部分默认参数,目前不生效
-	common.Config.SetByExecutableFilename()
+	config.Config.SetByExecutableFilename()
 }

@@ -3,7 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"github.com/yumenaka/comi/common"
+	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/types"
 	"log"
@@ -25,15 +25,15 @@ func SetShutdownHandler() {
 	stop()
 	log.Println(locale.GetString("ShutdownHint"))
 	//清理临时文件
-	if common.Config.ClearCacheExit {
-		fmt.Println("\r" + locale.GetString("start_clear_file") + " CachePath:" + common.Config.CachePath)
-		types.ClearTempFilesALL(common.Config.Debug, common.Config.CachePath)
+	if config.Config.ClearCacheExit {
+		fmt.Println("\r" + locale.GetString("start_clear_file") + " CachePath:" + config.Config.CachePath)
+		types.ClearTempFilesALL(config.Config.Debug, config.Config.CachePath)
 		fmt.Println(locale.GetString("clear_temp_file_completed"))
 	}
 	// 上下文用于通知服务器它有 5 秒的时间来完成它当前正在处理的请求
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	if err := common.Srv.Shutdown(ctx); err != nil {
+	if err := config.Srv.Shutdown(ctx); err != nil {
 		//fmt.Println("Comigo Server forced to shutdown: ", err)
 		//time.Sleep(3 * time.Second)
 		log.Fatal("Comigo Server forced to shutdown: ", err)

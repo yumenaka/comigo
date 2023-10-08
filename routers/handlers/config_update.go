@@ -3,7 +3,7 @@ package handlers
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comi/common"
+	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/types"
 	"github.com/yumenaka/comi/util"
 	"io"
@@ -26,13 +26,13 @@ func HandlerConfigUpdate(c *gin.Context) {
 	fmt.Printf("Received JSON data: %s \n", jsonString)
 
 	// 解析JSON数据并更新服务器配置
-	newConfig, err := types.UpdateConfig(common.Config, jsonString)
+	newConfig, err := types.UpdateConfig(config.Config, jsonString)
 	if err != nil {
 		fmt.Println(err.Error())
 		c.JSON(http.StatusMethodNotAllowed, gin.H{"error": "Failed to parse JSON data"})
 		return
 	}
-	BeforeConfigUpdate(&common.Config, &newConfig)
+	BeforeConfigUpdate(&config.Config, &newConfig)
 
 	// 返回成功消息
 	c.JSON(http.StatusOK, gin.H{"message": "Server settings updated successfully"})
@@ -85,12 +85,12 @@ func BeforeConfigUpdate(oldConfig *types.ServerConfig, newConfig *types.ServerCo
 	}
 	if needScan {
 		// 扫描配置文件指定的书籍库
-		if err := common.ScanStorePath(reScanFile); err != nil {
+		if err := config.ScanStorePath(reScanFile); err != nil {
 			log.Printf("Failed to scan store path: %v", err)
 		}
 		// 保存扫描结果到数据库 //TODO:这里有问题，启用数据库会报错
 		if oldConfig.EnableDatabase {
-			if err := common.SaveResultsToDatabase(); err != nil {
+			if err := config.SaveResultsToDatabase(); err != nil {
 				log.Printf("Failed to save results to database: %v", err)
 			}
 		}

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/tidwall/gjson"
-	"github.com/yumenaka/comi/common"
+	"github.com/yumenaka/comi/config"
 	"io"
 	"net/http"
 )
@@ -22,8 +22,8 @@ func HandlerConfigSave(c *gin.Context) {
 	fmt.Printf("Received JSON data: %s \n", jsonString)
 	ConfigSaveTo := gjson.Get(jsonString, "ConfigSaveTo")
 	if ConfigSaveTo.Exists() {
-		common.Config.ConfigSaveTo = ConfigSaveTo.String()
-		common.SaveConfig()
+		config.Config.ConfigSaveTo = ConfigSaveTo.String()
+		config.SaveConfig()
 		// 返回成功消息
 		c.JSON(http.StatusOK, gin.H{"message": "Config yaml save successfully"})
 	} else {

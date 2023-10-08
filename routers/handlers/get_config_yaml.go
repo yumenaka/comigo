@@ -4,17 +4,17 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/pelletier/go-toml/v2"
-	"github.com/yumenaka/comi/common"
+	"github.com/yumenaka/comi/config"
 	"net/http"
 )
 
 // HandlerGetConfigToml 下载服务器配置(toml)
 func HandlerGetConfigToml(c *gin.Context) {
 	//golang结构体默认深拷贝（但是基本类型浅拷贝）
-	tempConfig := common.Config
+	tempConfig := config.Config
 	tempConfig.LogFilePath = ""
-	common.Config.OpenBrowser = false
-	common.Config.EnableDatabase = true
+	config.Config.OpenBrowser = false
+	config.Config.EnableDatabase = true
 	tempConfig.StoresPath = []string{"C:\\test\\Comic", "D:\\some_path\\book", "/home/user/download"}
 	tempConfig.Username = "comigo"
 	tempConfig.Password = ""

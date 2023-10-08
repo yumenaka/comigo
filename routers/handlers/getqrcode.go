@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/skip2/go-qrcode"
 
-	"github.com/yumenaka/comi/common"
+	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/util"
 )
 
@@ -26,16 +26,16 @@ func GetQrcodeHandler(c *gin.Context) {
 	}
 
 	//cmd打印链接二维码
-	enableTls := common.Config.CertFile != "" && common.Config.KeyFile != ""
+	enableTls := config.Config.CertFile != "" && config.Config.KeyFile != ""
 	protocol := "http://"
 	if enableTls {
 		protocol = "https://"
 	}
 	//取得本机的首选出站IP
 	OutIP := util.GetOutboundIP().String()
-	if common.Config.Host == "DefaultHost" {
+	if config.Config.Host == "DefaultHost" {
 		var png []byte
-		readURL := protocol + OutIP + ":" + strconv.Itoa(common.Config.Port)
+		readURL := protocol + OutIP + ":" + strconv.Itoa(config.Config.Port)
 		png, err := qrcode.Encode(readURL, qrcode.Medium, 256)
 		if err != nil {
 			fmt.Println(err)
@@ -43,7 +43,7 @@ func GetQrcodeHandler(c *gin.Context) {
 		c.Data(http.StatusOK, "image/png", png)
 	} else {
 		var png []byte
-		readURL := protocol + common.Config.Host + ":" + strconv.Itoa(common.Config.Port)
+		readURL := protocol + config.Config.Host + ":" + strconv.Itoa(config.Config.Port)
 		png, err := qrcode.Encode(readURL, qrcode.Medium, 256)
 		if err != nil {
 			fmt.Println(err)
