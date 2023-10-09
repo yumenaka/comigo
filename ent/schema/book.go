@@ -13,7 +13,7 @@ type Book struct {
 	ent.Schema
 }
 
-// Fields 每次添加或修改 fields 和 edges后, 你都需要生成新的实体. 在项目的根目录执行 ent generate或直接执行 go generate ./ent 命令重新生成资源文件
+// Fields 每次添加或修改 fields 和 edges后, 都需要在项目的根目录执行 go generate ./ent 命令重新生成文件
 // Fields of the Book.
 func (Book) Fields() []ent.Field {
 	return []ent.Field{

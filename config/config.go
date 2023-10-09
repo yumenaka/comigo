@@ -37,27 +37,21 @@ var (
 		DisableLAN:            false,
 		DefaultMode:           "scroll",
 		LogToFile:             false,
-		ConfigSaveTo:          "RAM",
-		ConfigFileUsed:        "",
+		ConfigPath:            "",
 	}
 )
 
-func SaveConfig() {
+func SaveConfig(SaveTo string) {
 	//保存配置
-	if Config.ConfigSaveTo == "RAM" {
-		fmt.Println("Config Save To RAM")
-		return
-	}
 	bytes, err := toml.Marshal(Config)
 	if err != nil {
 		fmt.Println("toml.Marshal Error")
 		return
 	}
 	//在命令行打印
-	fmt.Println("Config Save To " + Config.ConfigSaveTo)
-	//fmt.Printf("Config: %s \n", string(bytes))
+	fmt.Println("Config Save To " + SaveTo)
 	//保存到文件
-	if Config.ConfigSaveTo == "HomeDir" {
+	if SaveTo == "HomeDir" {
 		home, err := homedir.Dir()
 		if err != nil {
 			fmt.Printf("homedir.Dir Error: %s \n", err)
@@ -72,13 +66,13 @@ func SaveConfig() {
 			fmt.Printf("os.WriteFile Error: %s \n", err)
 		}
 	}
-	if Config.ConfigSaveTo == "NowDir" {
+	if SaveTo == "NowDir" {
 		err = os.WriteFile("config.toml", bytes, 0644)
 		if err != nil {
 			fmt.Printf("os.WriteFile Error: %s \n", err)
 		}
 	}
-	if Config.ConfigSaveTo == "ProgramDir" {
+	if SaveTo == "ProgramDir" {
 		// 获取可执行程序自身的文件路径
 		executablePath, err := os.Executable()
 		if err != nil {

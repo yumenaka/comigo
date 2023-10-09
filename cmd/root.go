@@ -31,9 +31,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&config.Config.CertFile, "tls-crt", "", locale.GetString("TLS_CRT"))
 	rootCmd.PersistentFlags().StringVar(&config.Config.KeyFile, "tls-key", "", locale.GetString("TLS_KEY"))
 	//指定配置文件
-	rootCmd.PersistentFlags().StringVarP(&config.Config.ConfigFileUsed, "config", "c", "", locale.GetString("CONFIG"))
-	//在当前目录生成示例配置文件
-	rootCmd.PersistentFlags().StringVar(&config.Config.ConfigSaveTo, "config-save", "RAM", locale.GetString("ConfigSaveTo"))
+	rootCmd.PersistentFlags().StringVarP(&config.Config.ConfigPath, "config", "c", "", locale.GetString("CONFIG"))
 	//启用数据库，保存扫描数据
 	rootCmd.PersistentFlags().BoolVarP(&config.Config.EnableDatabase, "database", "e", false, locale.GetString("EnableDatabase"))
 	//服务端口
@@ -129,14 +127,14 @@ func init() {
 		runtimeViper.SetConfigName("config.toml")
 		// 读取设定文件
 		if err := runtimeViper.ReadInConfig(); err != nil {
-			if config.Config.ConfigFileUsed == "" && config.Config.Debug {
+			if config.Config.ConfigPath == "" && config.Config.Debug {
 				fmt.Println(err)
 			}
 		} else {
 			//获取当前使用的配置文件路径
 			//https://github.com/spf13/viper/issues/89
-			config.Config.ConfigFileUsed = runtimeViper.ConfigFileUsed()
-			fmt.Println(locale.GetString("FoundConfigFile") + config.Config.ConfigFileUsed)
+			config.Config.ConfigPath = runtimeViper.ConfigFileUsed()
+			fmt.Println(locale.GetString("FoundConfigFile") + config.Config.ConfigPath)
 		}
 
 		// 把设定文件的内容，解析到构造体里面。
@@ -145,7 +143,6 @@ func init() {
 			time.Sleep(3 * time.Second)
 			os.Exit(1)
 		}
-		config.SaveConfig()
 		//监听文件修改
 		runtimeViper.WatchConfig()
 		//文件修改时，执行重载设置、服务重启的函数
