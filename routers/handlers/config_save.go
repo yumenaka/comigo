@@ -21,9 +21,8 @@ func HandlerConfigSave(c *gin.Context) {
 	jsonString := string(body)
 	fmt.Printf("Received JSON data: %s \n", jsonString)
 	ConfigSaveTo := gjson.Get(jsonString, "ConfigSaveTo")
-	if ConfigSaveTo.Exists() {
-		config.Config.ConfigSaveTo = ConfigSaveTo.String()
-		config.SaveConfig()
+	if ConfigSaveTo.Exists() && (ConfigSaveTo.String() == "NowDir" || ConfigSaveTo.String() == "HomeDir" || ConfigSaveTo.String() == "ProgramDir") {
+		config.SaveConfig("NowDir")
 		// 返回成功消息
 		c.JSON(http.StatusOK, gin.H{"message": "Config yaml save successfully"})
 	} else {

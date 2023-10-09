@@ -13,8 +13,7 @@ import (
 // ServerConfig 服务器设置(config.toml)
 type ServerConfig struct {
 	Port                   int      `json:"Port" comment:"Comigo设置文件(config.toml)，放在默认保存目录中。可选值：RAM（不保存）、HomeDir（$HOME/.config/comigo/config.toml）、NowDir（当前执行目录）、ProgramDir（程序所在目录）下。可用“comi --config-save”生成本文件\n网页服务端口，此项配置不支持热重载"`
-	ConfigSaveTo           string   `json:"ConfigSaveTo" toml:"-" comment:"配置文件的默认保存位置，可选值：RAM（不保存）、HomeDir（$HOME/.config/comigo/）、NowDir（当前执行目录）、ProgramDir（程序所在目录）"`
-	ConfigFileUsed         string   `json:"-" toml:"-" comment:"当前生效的yaml设置文件路径，数据库文件(comigo.db)在同一个文件夹"`
+	ConfigPath             string   `json:"-" toml:"-" comment:"当前生效的yaml设置文件路径，数据库文件(comigo.db)在同一个文件夹"`
 	Host                   string   `json:"Host" comment:"自定义二维码显示的主机名"`
 	StoresPath             []string `json:"StoresPath" comment:"默认扫描的书库文件夹"`
 	ExcludePath            []string `json:"ExcludePath" comment:"扫描书籍的时候，需要排除的文件或文件夹的名字"`
@@ -183,10 +182,7 @@ func UpdateConfig(oldConfig ServerConfig, jsonString string) (newConfig ServerCo
 	if GenerateMetaData.Exists() {
 		newConfig.GenerateMetaData = GenerateMetaData.Bool()
 	}
-	ConfigSaveTo := gjson.Get(jsonString, "ConfigSaveTo")
-	if ConfigSaveTo.Exists() {
-		newConfig.ConfigSaveTo = ConfigSaveTo.String()
-	}
+
 	return newConfig, nil
 }
 
@@ -223,8 +219,8 @@ type WebPServerConfig struct {
 }
 
 // IsSupportMedia 判断压缩包内的文件是否需要展示（包括图片、音频、视频、PDF在内的媒体文件）
-func (config *ServerConfig) IsSupportMedia(checkPath string) bool {
-	for _, ex := range config.SupportMediaType {
+func (c *ServerConfig) IsSupportMedia(checkPath string) bool {
+	for _, ex := range c.SupportMediaType {
 		suffix := strings.ToLower(path.Ext(checkPath)) //strings.ToLower():某些文件会用大写文件名
 		if ex == suffix {
 			return true
@@ -234,8 +230,8 @@ func (config *ServerConfig) IsSupportMedia(checkPath string) bool {
 }
 
 // IsSupportArchiver 是否是支持的压缩文件
-func (config *ServerConfig) IsSupportArchiver(checkPath string) bool {
-	for _, ex := range config.SupportFileType {
+func (c *ServerConfig) IsSupportArchiver(checkPath string) bool {
+	for _, ex := range c.SupportFileType {
 		suffix := path.Ext(checkPath)
 		if ex == suffix {
 			return true
@@ -245,8 +241,8 @@ func (config *ServerConfig) IsSupportArchiver(checkPath string) bool {
 }
 
 // IsSkipDir  检查路径是否应该跳过（排除文件，文件夹列表）。
-func (config *ServerConfig) IsSkipDir(path string) bool {
-	for _, substr := range config.ExcludePath {
+func (c *ServerConfig) IsSkipDir(path string) bool {
+	for _, substr := range c.ExcludePath {
 		if strings.HasSuffix(path, substr) {
 			return true
 		}
@@ -255,7 +251,7 @@ func (config *ServerConfig) IsSkipDir(path string) bool {
 }
 
 // SetByExecutableFilename 通过执行文件名设置默认网页模板参数
-func (config *ServerConfig) SetByExecutableFilename() {
+func (c *ServerConfig) SetByExecutableFilename() {
 	// 当前执行目录
 	//targetPath, _ := os.Getwd()
 	//fmt.Println(locale.GetString("target_path"), targetPath)
@@ -273,7 +269,7 @@ func (config *ServerConfig) SetByExecutableFilename() {
 	extPath := filepath.Dir(ex)
 	//fmt.Println("extPath =",extPath)
 	ExtFileName := strings.TrimPrefix(filenameWithOutSuffix, extPath)
-	if config.Debug {
+	if c.Debug {
 		fmt.Println("ExtFileName =", ExtFileName)
 	}
 }
