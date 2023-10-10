@@ -80,6 +80,11 @@ func NewImageInfo(pageNum int, nameInArchive string, url string, fileSize int64)
 
 // 查看内存中是否已经有了这本书,有了就报错，让调用者跳过
 func CheckBookExist(filePath string, bookType SupportFileType, storePath string) bool {
+	//如果是文件夹，就不用检查了
+	if bookType == TypeDir || bookType == TypeBooksGroup {
+		return false
+	}
+
 	//实际存在的书，通过扫描生成
 	for _, realBook := range mapBooks {
 		fileAbaPath, err := filepath.Abs(filePath)
@@ -89,7 +94,6 @@ func CheckBookExist(filePath string, bookType SupportFileType, storePath string)
 				return true
 			}
 		} else {
-			//fmt.Println(err, fileAbaPath)
 			if realBook.FilePath == fileAbaPath && realBook.Type == bookType {
 				return true
 			}
@@ -100,9 +104,9 @@ func CheckBookExist(filePath string, bookType SupportFileType, storePath string)
 
 // New  初始化Book，设置文件路径、书名、BookID等等
 func New(filePath string, modified time.Time, fileSize int64, storePath string, depth int, bookType SupportFileType) (*Book, error) {
-	if CheckBookExist(filePath, bookType, storePath) {
-		return nil, errors.New("skip:" + filePath)
-	}
+	//if CheckBookExist(filePath, bookType, storePath) {
+	//	return nil, errors.New("skip:" + filePath)
+	//}
 	//初始化书籍
 	var b = Book{
 		BookInfo: BookInfo{

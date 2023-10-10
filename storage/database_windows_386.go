@@ -50,7 +50,7 @@ func GetBookFromDatabase(filepath string) (*comigoBook.Book, error) {
 	return nil, errors.New("Not Support DateBase")
 }
 
-// GetArchiveBookFromDatabase  根据文件路径，从数据库查询书的详细信息,避免重复扫描压缩包。//忽略文件夹型的书籍
+// GetBooksFromDatabase  根据文件路径，从数据库查询书的详细信息,避免重复扫描压缩包。//忽略文件夹型的书籍
 func GetArchiveBookFromDatabase() (list []*comigoBook.Book, err error) {
 	return nil, errors.New("Not Support DateBase")
 }
@@ -61,7 +61,7 @@ func CleanDatabaseByLocalData() {
 }
 
 //func InitMapBooksByDatabase() {
-//	tempMap, err := GetArchiveBookFromDatabase()
+//	tempMap, err := GetBooksFromDatabase()
 //	if err != nil {
 //		mapBooks = tempMap
 //	}

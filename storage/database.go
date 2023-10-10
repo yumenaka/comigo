@@ -253,6 +253,7 @@ func GetBookFromDatabase(filepath string) (*comigoBook.Book, error) {
 			BookID:          temp.BookID,
 			FilePath:        temp.FilePath,
 			BookStorePath:   temp.BookStorePath,
+			Type:            comigoBook.SupportFileType(temp.Type),
 			ChildBookNum:    temp.ChildBookNum,
 			Depth:           temp.Depth,
 			ParentFolder:    temp.ParentFolder,
@@ -270,7 +271,7 @@ func GetBookFromDatabase(filepath string) (*comigoBook.Book, error) {
 			ZipTextEncoding: temp.ZipTextEncoding,
 		},
 	}
-	b.Type = comigoBook.GetBookTypeByFilename(temp.FilePath)
+
 	//查询数据库里的封面与页面信息
 	//https://entgo.io/zh/docs/crud
 	pages, err := client.SinglePageInfo. // UserClient.
@@ -301,8 +302,8 @@ func GetBookFromDatabase(filepath string) (*comigoBook.Book, error) {
 	return &b, err
 }
 
-// GetArchiveBookFromDatabase  根据文件路径，从数据库查询书的详细信息,避免重复扫描压缩包。//忽略文件夹型的书籍
-func GetArchiveBookFromDatabase() (list []*comigoBook.Book, err error) {
+// GetBooksFromDatabase  根据文件路径，从数据库查询书的详细信息,避免重复扫描压缩包。//忽略文件夹型的书籍
+func GetBooksFromDatabase() (list []*comigoBook.Book, err error) {
 	ctx := context.Background()
 	books, err := client.Book. // UserClient.
 					Query(). // 用户查询生成器。
@@ -321,6 +322,7 @@ func GetArchiveBookFromDatabase() (list []*comigoBook.Book, err error) {
 				BookID:          temp.BookID,
 				FilePath:        temp.FilePath,
 				BookStorePath:   temp.BookStorePath,
+				Type:            comigoBook.SupportFileType(temp.Type),
 				ChildBookNum:    temp.ChildBookNum,
 				Depth:           temp.Depth,
 				ParentFolder:    temp.ParentFolder,
@@ -337,10 +339,6 @@ func GetArchiveBookFromDatabase() (list []*comigoBook.Book, err error) {
 				NonUTF8Zip:      temp.NonUTF8Zip,
 				ZipTextEncoding: temp.ZipTextEncoding,
 			},
-		}
-		b.Type = comigoBook.GetBookTypeByFilename(temp.FilePath)
-		if b.ChildBookNum > 0 {
-			b.Type = comigoBook.TypeBooksGroup
 		}
 		//查询数据库里的封面与页面信息
 		//https://entgo.io/zh/docs/crud
@@ -391,7 +389,7 @@ func CleanDatabaseByLocalData() {
 }
 
 //func InitMapBooksByDatabase() {
-//	tempMap, err := GetArchiveBookFromDatabase()
+//	tempMap, err := GetBooksFromDatabase()
 //	if err != nil {
 //		mapBooks = tempMap
 //	}
