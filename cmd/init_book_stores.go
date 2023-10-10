@@ -55,7 +55,7 @@ func initBookStores(args []string) {
 
 	//4、保存扫描结果到数据库
 	if config.Config.EnableDatabase {
-		err = scan.SaveResultsToDatabase(config.Config.UploadPath, config.Config.ClearDatabaseWhenExit, config.Config.Debug)
+		err = scan.SaveResultsToDatabase(config.Config.ConfigPath, config.Config.ClearDatabaseWhenExit)
 		if err != nil {
 			log.Printf("Failed SaveResultsToDatabase: %v", err)
 			return

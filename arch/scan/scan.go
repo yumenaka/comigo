@@ -116,7 +116,7 @@ func ScanStorePath(scanConfig ScanOption) error {
 }
 
 // SaveResultsToDatabase 4，保存扫描结果到数据库，并清理不存在的书籍
-func SaveResultsToDatabase(ConfigPath string, ClearDatabaseWhenExit bool, Debug bool) error {
+func SaveResultsToDatabase(ConfigPath string, ClearDatabaseWhenExit bool) error {
 	err := storage.InitDatabase(ConfigPath)
 	if err != nil {
 		return err
@@ -125,7 +125,7 @@ func SaveResultsToDatabase(ConfigPath string, ClearDatabaseWhenExit bool, Debug 
 	//设置清理数据库的时候，是否清理没扫描到的书籍信息
 	if ClearDatabaseWhenExit {
 		for _, b := range AllBook {
-			storage.ClearBookData(b, Debug)
+			storage.ClearBookData(b)
 		}
 	}
 	saveErr := storage.SaveBookListToDatabase(AllBook)

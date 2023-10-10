@@ -100,7 +100,7 @@ func BeforeConfigUpdate(oldConfig *types.ServerConfig, newConfig *types.ServerCo
 		}
 		// 保存扫描结果到数据库 //TODO:这里有问题，启用数据库会报错
 		if oldConfig.EnableDatabase {
-			if err := scan.SaveResultsToDatabase(config.Config.UploadPath, config.Config.ClearDatabaseWhenExit, config.Config.Debug); err != nil {
+			if err := scan.SaveResultsToDatabase(config.Config.ConfigPath, config.Config.ClearDatabaseWhenExit); err != nil {
 				log.Printf("Failed to save results to database: %v", err)
 			}
 		}

@@ -101,7 +101,7 @@ func CloseDatabase() {
 
 // ClearBookData   清空数据库的Book与SinglePageInfo表
 // 后台并发执行，所以不能保证结果如预期，不用这个函数。
-func ClearBookData(clearBook *comigoBook.Book, debug bool) {
+func ClearBookData(clearBook *comigoBook.Book) {
 	//如何增删查改： https://entgo.io/zh/docs/crud
 	ctx := context.Background()
 	_, err := client.Book.
@@ -111,9 +111,9 @@ func ClearBookData(clearBook *comigoBook.Book, debug bool) {
 	if err != nil {
 		fmt.Println("ClearBookData Book:" + err.Error())
 	}
-	if debug {
-		fmt.Println("Clear Book ：" + clearBook.Name)
-	}
+
+	fmt.Println("Clear Book ：" + clearBook.Name)
+
 	deletePageInfoNum, err := client.SinglePageInfo.
 		Delete().
 		Where(singlepageinfo.BookIDEQ(clearBook.BookID)).
@@ -121,9 +121,9 @@ func ClearBookData(clearBook *comigoBook.Book, debug bool) {
 	if err != nil {
 		fmt.Println("ClearBookData SinglePageInfo:" + err.Error())
 	}
-	if debug {
-		fmt.Println("Clear SinglePageInfo Num：" + strconv.Itoa(deletePageInfoNum))
-	}
+
+	fmt.Println("Clear SinglePageInfo Num：" + strconv.Itoa(deletePageInfoNum))
+
 }
 
 // DeleteAllBookInDatabase  清空数据库的Book与SinglePageInfo表
