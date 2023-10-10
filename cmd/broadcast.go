@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/yumenaka/comi/arch/scan"
 	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/routers"
@@ -28,7 +29,7 @@ func waitRescanMessages() {
 			ReScanUploadPath()
 			//保存扫描结果到数据库
 			if config.Config.EnableDatabase {
-				err := config.SaveResultsToDatabase()
+				err := scan.SaveResultsToDatabase(config.Config.UploadPath, config.Config.ClearDatabaseWhenExit, config.Config.Debug)
 				if err != nil {
 					return
 				}
@@ -59,10 +60,24 @@ func ReScanUploadPath() {
 
 func ReScanPath(path string, reScanFile bool) {
 	//扫描上传目录的文件
-	addList, err := config.ScanAndGetBookList(path, reScanFile)
+	sConfig := scan.NewScanConfig(
+		reScanFile,
+		config.Config.StoresPath,
+		config.Config.MaxScanDepth,
+		config.Config.MinImageNum,
+		config.Config.TimeoutLimitForScan,
+		config.Config.ExcludePath,
+		config.Config.SupportMediaType,
+		config.Config.SupportFileType,
+		config.Config.ZipFileTextEncoding,
+		config.Config.EnableDatabase,
+		config.Config.ClearDatabaseWhenExit,
+		config.Config.Debug,
+	)
+	addList, err := scan.ScanAndGetBookList(path, sConfig)
 	if err != nil {
 		fmt.Println(locale.GetString("scan_error"), path, err)
 	} else {
-		config.AddBooksToStore(addList, path)
+		scan.AddBooksToStore(addList, path, config.Config.MinImageNum)
 	}
 }

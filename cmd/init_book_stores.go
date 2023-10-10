@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/yumenaka/comi/arch/scan"
 	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/storage"
 	"github.com/yumenaka/comi/types"
@@ -17,7 +18,7 @@ func initBookStores(args []string) {
 		if err := storage.InitDatabase(config.Config.ConfigPath); err != nil {
 			fmt.Println(err)
 		}
-		books, err := storage.GetArchiveBookFromDatabase()
+		books, err := storage.GetBooksFromDatabase()
 		if err != nil {
 			fmt.Println(err)
 		} else {
@@ -33,14 +34,28 @@ func initBookStores(args []string) {
 	initStorePath(args)
 
 	//3、扫描配置文件里面的书库路径
-	err := config.ScanStorePath(true)
+	sConfig := scan.NewScanConfig(
+		true,
+		config.Config.StoresPath,
+		config.Config.MaxScanDepth,
+		config.Config.MinImageNum,
+		config.Config.TimeoutLimitForScan,
+		config.Config.ExcludePath,
+		config.Config.SupportMediaType,
+		config.Config.SupportFileType,
+		config.Config.ZipFileTextEncoding,
+		config.Config.EnableDatabase,
+		config.Config.ClearDatabaseWhenExit,
+		config.Config.Debug,
+	)
+	err := scan.ScanStorePath(sConfig)
 	if err != nil {
 		log.Printf("Failed to scan store path: %v", err)
 	}
 
 	//4、保存扫描结果到数据库
 	if config.Config.EnableDatabase {
-		err = config.SaveResultsToDatabase()
+		err = scan.SaveResultsToDatabase(config.Config.UploadPath, config.Config.ClearDatabaseWhenExit, config.Config.Debug)
 		if err != nil {
 			log.Printf("Failed SaveResultsToDatabase: %v", err)
 			return

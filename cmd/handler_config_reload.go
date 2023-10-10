@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/fsnotify/fsnotify"
+	"github.com/yumenaka/comi/arch/scan"
 	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/routers"
 	"log"
@@ -31,13 +32,27 @@ func handlerConfigReload(e fsnotify.Event) {
 		os.Exit(1)
 	}
 	//3、扫描配置文件指定的书籍库
-	err := config.ScanStorePath(true)
+	sConfig := scan.NewScanConfig(
+		true,
+		config.Config.StoresPath,
+		config.Config.MaxScanDepth,
+		config.Config.MinImageNum,
+		config.Config.TimeoutLimitForScan,
+		config.Config.ExcludePath,
+		config.Config.SupportMediaType,
+		config.Config.SupportFileType,
+		config.Config.ZipFileTextEncoding,
+		config.Config.EnableDatabase,
+		config.Config.ClearDatabaseWhenExit,
+		config.Config.Debug,
+	)
+	err := scan.ScanStorePath(sConfig)
 	if err != nil {
 		log.Printf("Failed to scan store path: %v", err)
 	}
 	//4，保存扫描结果到数据库
 	if config.Config.EnableDatabase {
-		err := config.SaveResultsToDatabase()
+		err := scan.SaveResultsToDatabase(config.Config.UploadPath, config.Config.ClearDatabaseWhenExit, config.Config.Debug)
 		if err != nil {
 			return
 		}

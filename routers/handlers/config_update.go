@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/yumenaka/comi/arch/scan"
 	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/types"
 	"github.com/yumenaka/comi/util"
@@ -80,13 +81,26 @@ func BeforeConfigUpdate(oldConfig *types.ServerConfig, newConfig *types.ServerCo
 		oldConfig.EnableDatabase = newConfig.EnableDatabase
 	}
 	if needScan {
-		// 扫描配置文件指定的书籍库
-		if err := config.ScanStorePath(reScanFile); err != nil {
+		sConfig := scan.NewScanConfig(
+			reScanFile,
+			newConfig.StoresPath,
+			newConfig.MaxScanDepth,
+			newConfig.MinImageNum,
+			newConfig.TimeoutLimitForScan,
+			newConfig.ExcludePath,
+			newConfig.SupportMediaType,
+			newConfig.SupportFileType,
+			newConfig.ZipFileTextEncoding,
+			newConfig.EnableDatabase,
+			newConfig.ClearDatabaseWhenExit,
+			newConfig.Debug,
+		)
+		if err := scan.ScanStorePath(sConfig); err != nil {
 			log.Printf("Failed to scan store path: %v", err)
 		}
 		// 保存扫描结果到数据库 //TODO:这里有问题，启用数据库会报错
 		if oldConfig.EnableDatabase {
-			if err := config.SaveResultsToDatabase(); err != nil {
+			if err := scan.SaveResultsToDatabase(config.Config.UploadPath, config.Config.ClearDatabaseWhenExit, config.Config.Debug); err != nil {
 				log.Printf("Failed to save results to database: %v", err)
 			}
 		}
