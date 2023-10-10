@@ -81,7 +81,7 @@ func BeforeConfigUpdate(oldConfig *types.ServerConfig, newConfig *types.ServerCo
 		oldConfig.EnableDatabase = newConfig.EnableDatabase
 	}
 	if needScan {
-		sConfig := scan.NewScanConfig(
+		option := scan.NewScanOption(
 			reScanFile,
 			newConfig.StoresPath,
 			newConfig.MaxScanDepth,
@@ -95,7 +95,7 @@ func BeforeConfigUpdate(oldConfig *types.ServerConfig, newConfig *types.ServerCo
 			newConfig.ClearDatabaseWhenExit,
 			newConfig.Debug,
 		)
-		if err := scan.ScanStorePath(sConfig); err != nil {
+		if err := scan.ScanStorePath(option); err != nil {
 			log.Printf("Failed to scan store path: %v", err)
 		}
 		// 保存扫描结果到数据库 //TODO:这里有问题，启用数据库会报错

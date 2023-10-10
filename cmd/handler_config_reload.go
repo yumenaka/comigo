@@ -32,7 +32,7 @@ func handlerConfigReload(e fsnotify.Event) {
 		os.Exit(1)
 	}
 	//3、扫描配置文件指定的书籍库
-	sConfig := scan.NewScanConfig(
+	option := scan.NewScanOption(
 		true,
 		config.Config.StoresPath,
 		config.Config.MaxScanDepth,
@@ -46,7 +46,7 @@ func handlerConfigReload(e fsnotify.Event) {
 		config.Config.ClearDatabaseWhenExit,
 		config.Config.Debug,
 	)
-	err := scan.ScanStorePath(sConfig)
+	err := scan.ScanStorePath(option)
 	if err != nil {
 		log.Printf("Failed to scan store path: %v", err)
 	}
