@@ -1,4 +1,4 @@
-package config
+package scan
 
 import (
 	"testing"

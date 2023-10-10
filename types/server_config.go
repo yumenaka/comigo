@@ -218,38 +218,6 @@ type WebPServerConfig struct {
 	ExhaustPath  string
 }
 
-// IsSupportMedia 判断压缩包内的文件是否需要展示（包括图片、音频、视频、PDF在内的媒体文件）
-func (c *ServerConfig) IsSupportMedia(checkPath string) bool {
-	for _, ex := range c.SupportMediaType {
-		suffix := strings.ToLower(path.Ext(checkPath)) //strings.ToLower():某些文件会用大写文件名
-		if ex == suffix {
-			return true
-		}
-	}
-	return false
-}
-
-// IsSupportArchiver 是否是支持的压缩文件
-func (c *ServerConfig) IsSupportArchiver(checkPath string) bool {
-	for _, ex := range c.SupportFileType {
-		suffix := path.Ext(checkPath)
-		if ex == suffix {
-			return true
-		}
-	}
-	return false
-}
-
-// IsSkipDir  检查路径是否应该跳过（排除文件，文件夹列表）。
-func (c *ServerConfig) IsSkipDir(path string) bool {
-	for _, substr := range c.ExcludePath {
-		if strings.HasSuffix(path, substr) {
-			return true
-		}
-	}
-	return false
-}
-
 // SetByExecutableFilename 通过执行文件名设置默认网页模板参数
 func (c *ServerConfig) SetByExecutableFilename() {
 	// 当前执行目录
