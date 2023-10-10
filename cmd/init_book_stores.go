@@ -34,7 +34,7 @@ func initBookStores(args []string) {
 	initStorePath(args)
 
 	//3、扫描配置文件里面的书库路径
-	sConfig := scan.NewScanConfig(
+	option := scan.NewScanOption(
 		true,
 		config.Config.StoresPath,
 		config.Config.MaxScanDepth,
@@ -48,7 +48,7 @@ func initBookStores(args []string) {
 		config.Config.ClearDatabaseWhenExit,
 		config.Config.Debug,
 	)
-	err := scan.ScanStorePath(sConfig)
+	err := scan.ScanStorePath(option)
 	if err != nil {
 		log.Printf("Failed to scan store path: %v", err)
 	}

@@ -60,7 +60,7 @@ func ReScanUploadPath() {
 
 func ReScanPath(path string, reScanFile bool) {
 	//扫描上传目录的文件
-	sConfig := scan.NewScanConfig(
+	option := scan.NewScanOption(
 		reScanFile,
 		config.Config.StoresPath,
 		config.Config.MaxScanDepth,
@@ -74,7 +74,7 @@ func ReScanPath(path string, reScanFile bool) {
 		config.Config.ClearDatabaseWhenExit,
 		config.Config.Debug,
 	)
-	addList, err := scan.ScanAndGetBookList(path, sConfig)
+	addList, err := scan.ScanAndGetBookList(path, option)
 	if err != nil {
 		fmt.Println(locale.GetString("scan_error"), path, err)
 	} else {
