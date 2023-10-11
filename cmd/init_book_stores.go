@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/yumenaka/comi/arch/scan"
 	"github.com/yumenaka/comi/config"
-	"github.com/yumenaka/comi/storage"
+	"github.com/yumenaka/comi/database"
 	"github.com/yumenaka/comi/types"
 	"log"
 	"strconv"
@@ -15,10 +15,10 @@ func initBookStores(args []string) {
 	//1. 初始化数据库
 	if config.Config.EnableDatabase {
 		// 从数据库中读取书籍信息并持久化
-		if err := storage.InitDatabase(config.Config.ConfigPath); err != nil {
+		if err := database.InitDatabase(config.Config.ConfigPath); err != nil {
 			fmt.Println(err)
 		}
-		books, err := storage.GetBooksFromDatabase()
+		books, err := database.GetBooksFromDatabase()
 		if err != nil {
 			fmt.Println(err)
 		} else {

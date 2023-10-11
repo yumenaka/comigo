@@ -315,7 +315,7 @@ func GetAllBookList() []*Book {
 
 func GetArchiveBooks() []*Book {
 	var list []*Book
-	//加上所有真实书籍
+	//所有真实书籍
 	for _, b := range mapBooks {
 		if b.Type == TypeZip || b.Type == TypeRar || b.Type == TypeCbz || b.Type == TypeCbr || b.Type == TypeTar || b.Type == TypeEpub {
 			list = append(list, b)

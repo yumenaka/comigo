@@ -8,8 +8,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/yumenaka/archiver/v4"
 	"github.com/yumenaka/comi/arch"
+	"github.com/yumenaka/comi/database"
 	"github.com/yumenaka/comi/locale"
-	"github.com/yumenaka/comi/storage"
 	"github.com/yumenaka/comi/types"
 	"github.com/yumenaka/comi/util"
 	"io/fs"
@@ -117,11 +117,11 @@ func ScanStorePath(scanConfig Option) error {
 
 // SaveResultsToDatabase 4，保存扫描结果到数据库，并清理不存在的书籍
 func SaveResultsToDatabase(ConfigPath string, ClearDatabaseWhenExit bool) error {
-	err := storage.InitDatabase(ConfigPath)
+	err := database.InitDatabase(ConfigPath)
 	if err != nil {
 		return err
 	}
-	saveErr := storage.SaveBookListToDatabase(types.GetArchiveBooks())
+	saveErr := database.SaveBookListToDatabase(types.GetArchiveBooks())
 	if saveErr != nil {
 		fmt.Println(saveErr)
 		return saveErr
@@ -132,7 +132,7 @@ func SaveResultsToDatabase(ConfigPath string, ClearDatabaseWhenExit bool) error 
 func ClearDatabaseWhenExit(ConfigPath string) {
 	AllBook := types.GetAllBookList()
 	for _, b := range AllBook {
-		storage.ClearBookData(b)
+		database.ClearBookData(b)
 	}
 }
 
