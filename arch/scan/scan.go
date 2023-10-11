@@ -22,7 +22,7 @@ import (
 	"time"
 )
 
-type ScanOption struct {
+type Option struct {
 	ReScanFile            bool     // 是否重新扫描文件
 	StoresPath            []string // 书库路径
 	MaxScanDepth          int      // 扫描深度
@@ -50,8 +50,8 @@ func NewScanOption(
 	enableDatabase bool,
 	clearDatabaseWhenExit bool,
 	debug bool,
-) ScanOption {
-	return ScanOption{
+) Option {
+	return Option{
 		ReScanFile:            reScanFile,
 		StoresPath:            storesPath,
 		MaxScanDepth:          maxScanDepth,
@@ -68,7 +68,7 @@ func NewScanOption(
 }
 
 // IsSupportMedia 判断压缩包内的文件是否需要展示（包括图片、音频、视频、PDF在内的媒体文件）
-func (o *ScanOption) IsSupportMedia(checkPath string) bool {
+func (o *Option) IsSupportMedia(checkPath string) bool {
 	for _, ex := range o.SupportMediaType {
 		suffix := strings.ToLower(path.Ext(checkPath)) //strings.ToLower():某些文件会用大写文件名
 		if ex == suffix {
@@ -79,7 +79,7 @@ func (o *ScanOption) IsSupportMedia(checkPath string) bool {
 }
 
 // IsSupportArchiver 是否是支持的压缩文件
-func (o *ScanOption) IsSupportArchiver(checkPath string) bool {
+func (o *Option) IsSupportArchiver(checkPath string) bool {
 	for _, ex := range o.SupportFileType {
 		suffix := path.Ext(checkPath)
 		if ex == suffix {
@@ -90,7 +90,7 @@ func (o *ScanOption) IsSupportArchiver(checkPath string) bool {
 }
 
 // IsSkipDir  检查路径是否应该跳过（排除文件，文件夹列表）。
-func (o *ScanOption) IsSkipDir(path string) bool {
+func (o *Option) IsSkipDir(path string) bool {
 	for _, substr := range o.ExcludePath {
 		if strings.HasSuffix(path, substr) {
 			return true
@@ -100,7 +100,7 @@ func (o *ScanOption) IsSkipDir(path string) bool {
 }
 
 // ScanStorePath 3、扫描配置文件指定的的书籍库
-func ScanStorePath(scanConfig ScanOption) error {
+func ScanStorePath(scanConfig Option) error {
 	if len(scanConfig.StoresPath) > 0 {
 		for _, p := range scanConfig.StoresPath {
 			addList, err := ScanAndGetBookList(p, scanConfig)
@@ -121,19 +121,19 @@ func SaveResultsToDatabase(ConfigPath string, ClearDatabaseWhenExit bool) error 
 	if err != nil {
 		return err
 	}
-	AllBook := types.GetAllBookList()
-	//设置清理数据库的时候，是否清理没扫描到的书籍信息
-	if ClearDatabaseWhenExit {
-		for _, b := range AllBook {
-			storage.ClearBookData(b)
-		}
-	}
-	saveErr := storage.SaveBookListToDatabase(AllBook)
+	saveErr := storage.SaveBookListToDatabase(types.GetArchiveBooks())
 	if saveErr != nil {
 		fmt.Println(saveErr)
 		return saveErr
 	}
 	return nil
+}
+
+func ClearDatabaseWhenExit(ConfigPath string) {
+	AllBook := types.GetAllBookList()
+	for _, b := range AllBook {
+		storage.ClearBookData(b)
+	}
 }
 
 // AddBooksToStore 添加一组书到书库
@@ -149,7 +149,7 @@ func AddBooksToStore(bookList []*types.Book, basePath string, MinImageNum int) {
 }
 
 // ScanAndGetBookList 扫描路径，取得路径里的书籍
-func ScanAndGetBookList(storePath string, scanOption ScanOption) (newBookList []*types.Book, err error) {
+func ScanAndGetBookList(storePath string, scanOption Option) (newBookList []*types.Book, err error) {
 	// 路径不存在的Error，不过目前并不会打印出来
 	if !util.PathExists(storePath) {
 		return nil, errors.New(locale.GetString("PATH_NOT_EXIST"))
@@ -161,10 +161,8 @@ func ScanAndGetBookList(storePath string, scanOption ScanOption) (newBookList []
 	}
 	fmt.Println(locale.GetString("SCAN_START_HINT") + storePathAbs)
 	err = filepath.Walk(storePathAbs, func(walkPath string, fileInfo os.FileInfo, err error) error {
-		// 是否需要跳过
-		skip := false
 		if !scanOption.ReScanFile {
-			for _, p := range types.GetAllBookList() {
+			for _, p := range types.GetArchiveBooks() {
 				AbsW, err := filepath.Abs(walkPath) // 取得绝对路径
 				if err != nil {
 					// 无法取得的情况下，用相对路径
@@ -172,16 +170,11 @@ func ScanAndGetBookList(storePath string, scanOption ScanOption) (newBookList []
 					fmt.Println(err, AbsW)
 				}
 				if walkPath == p.FilePath || AbsW == p.FilePath {
-					skip = true
-					newBookList = append(newBookList, p)
+					//跳过已经在数据库里面的文件
+					fmt.Println(locale.GetString("FoundInDatabase") + walkPath)
+					return nil
 				}
 			}
-		} else {
-			skip = false
-		}
-		if skip {
-			fmt.Println(locale.GetString("FoundInDatabase") + walkPath)
-			return nil
 		}
 		// 路径深度
 		depth := strings.Count(walkPath, "/") - strings.Count(storePathAbs, "/")
@@ -231,7 +224,7 @@ func ScanAndGetBookList(storePath string, scanOption ScanOption) (newBookList []
 	return newBookList, err
 }
 
-func scanDirGetBook(dirPath string, storePath string, depth int, scanOption ScanOption) (*types.Book, error) {
+func scanDirGetBook(dirPath string, storePath string, depth int, scanOption Option) (*types.Book, error) {
 	// 初始化，生成UUID
 	newBook, err := types.New(dirPath, time.Now(), 0, storePath, depth, types.TypeDir)
 	if err != nil {
@@ -271,7 +264,7 @@ func scanDirGetBook(dirPath string, storePath string, depth int, scanOption Scan
 }
 
 // 扫描一个路径，并返回对应书籍
-func scanFileGetBook(filePath string, storePath string, depth int, scanOption ScanOption) (*types.Book, error) {
+func scanFileGetBook(filePath string, storePath string, depth int, scanOption Option) (*types.Book, error) {
 	// 打开文件
 	file, err := os.OpenFile(filePath, os.O_RDONLY, 0o400) // Use mode 0400 for a read-only // file and 0600 for a readable+writable file.
 	if err != nil {
@@ -399,7 +392,7 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Sc
 	return newBook, err
 }
 
-func scanNonUTF8ZipFile(filePath string, b *types.Book, scanOption ScanOption) error {
+func scanNonUTF8ZipFile(filePath string, b *types.Book, scanOption Option) error {
 	b.NonUTF8Zip = true
 	reader, err := arch.ScanNonUTF8Zip(filePath, scanOption.ZipFileTextEncoding)
 	if err != nil {
@@ -421,7 +414,7 @@ func scanNonUTF8ZipFile(filePath string, b *types.Book, scanOption ScanOption) e
 
 // 手动写的递归查找，功能与fs.WalkDir()相同。发现一个Archiver/V4的BUG：zip文件的虚拟文件系统，找不到正确的多级文件夹？
 // https://books.studygolang.com/The-Golang-Standard-Library-by-Example/chapter06/06.3.html
-func walkUTF8ZipFs(fsys fs.FS, parent, base string, b *types.Book, scanOption ScanOption) error {
+func walkUTF8ZipFs(fsys fs.FS, parent, base string, b *types.Book, scanOption Option) error {
 	// 一般zip文件的处理流程
 	// fmt.Println("parent:" + parent + " base:" + base)
 	dirName := path.Join(parent, base)
