@@ -1,6 +1,6 @@
 //go:build windows && 386
 
-package storage
+package database
 
 import (
 	"errors"
