@@ -78,7 +78,7 @@ func NewImageInfo(pageNum int, nameInArchive string, url string, fileSize int64)
 	return &ImageInfo{PageNum: pageNum, NameInArchive: nameInArchive, Url: url, FileSize: fileSize}
 }
 
-// 查看内存中是否已经有了这本书,有了就报错，让调用者跳过
+// CheckBookExist 查看内存中是否已经有了这本书,有了就报错，让调用者跳过
 func CheckBookExist(filePath string, bookType SupportFileType, storePath string) bool {
 	//如果是文件夹，就不用检查了
 	if bookType == TypeDir || bookType == TypeBooksGroup {
@@ -104,9 +104,9 @@ func CheckBookExist(filePath string, bookType SupportFileType, storePath string)
 
 // New  初始化Book，设置文件路径、书名、BookID等等
 func New(filePath string, modified time.Time, fileSize int64, storePath string, depth int, bookType SupportFileType) (*Book, error) {
-	//if CheckBookExist(filePath, bookType, storePath) {
-	//	return nil, errors.New("skip:" + filePath)
-	//}
+	if CheckBookExist(filePath, bookType, storePath) {
+		return nil, errors.New("skip:" + filePath)
+	}
 	//初始化书籍
 	var b = Book{
 		BookInfo: BookInfo{
@@ -237,10 +237,8 @@ func AddBooks(list []*Book, basePath string, minPageNum int) (err error) {
 // RestoreDatabaseBooks 从数据库中读取的书籍信息，放到内存中
 func RestoreDatabaseBooks(list []*Book) (err error) {
 	for _, b := range list {
-		if b.Type != TypeBooksGroup {
+		if b.Type == TypeZip || b.Type == TypeRar || b.Type == TypeCbz || b.Type == TypeCbr || b.Type == TypeTar || b.Type == TypeEpub {
 			mapBooks[b.BookID] = b
-		} else {
-			mapBookFolders[b.BookID] = b
 		}
 	}
 	return err
@@ -311,6 +309,17 @@ func GetAllBookList() []*Book {
 	//加上所有真实书籍
 	for _, b := range mapBooks {
 		list = append(list, b)
+	}
+	return list
+}
+
+func GetArchiveBooks() []*Book {
+	var list []*Book
+	//加上所有真实书籍
+	for _, b := range mapBooks {
+		if b.Type == TypeZip || b.Type == TypeRar || b.Type == TypeCbz || b.Type == TypeCbr || b.Type == TypeTar || b.Type == TypeEpub {
+			list = append(list, b)
+		}
 	}
 	return list
 }
