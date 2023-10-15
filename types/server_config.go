@@ -3,11 +3,12 @@ package types
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/tidwall/gjson"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/tidwall/gjson"
 )
 
 // ServerConfig 服务器设置(config.toml)

@@ -4,10 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/yumenaka/archiver/v4"
 	"io"
 	"io/fs"
 	"os"
+
+	"github.com/yumenaka/archiver/v4"
 )
 
 // GetSingleFile  获取单个文件

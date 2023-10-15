@@ -3,11 +3,12 @@ package arch
 import (
 	"context"
 	"fmt"
-	"github.com/yumenaka/archiver/v4"
-	"github.com/yumenaka/comi/util"
 	"io"
 	"os"
 	"path/filepath"
+
+	"github.com/yumenaka/archiver/v4"
+	"github.com/yumenaka/comi/util"
 )
 
 // 解压文件的函数

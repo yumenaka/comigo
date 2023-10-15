@@ -2,9 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/yumenaka/comi/config"
 	"os"
 	"path"
+
+	"github.com/yumenaka/comi/config"
 )
 
 // initStorePath 添加默认扫描路径

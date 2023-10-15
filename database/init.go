@@ -6,13 +6,14 @@ import (
 	"context"
 	"database/sql"
 	"database/sql/driver"
-	"entgo.io/ent/dialect"
 	"fmt"
+	"path"
+	"path/filepath"
+
+	"entgo.io/ent/dialect"
 	"github.com/yumenaka/comi/ent"
 	"github.com/yumenaka/comi/locale"
 	"modernc.org/sqlite"
-	"path"
-	"path/filepath"
 )
 
 // 参考：

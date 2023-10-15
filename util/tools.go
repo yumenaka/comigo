@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	qrcodeTerminal "github.com/Baozisoftware/qrcode-terminal-go"
 	"image"
 	"image/draw"
 	"io"
@@ -22,7 +23,6 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/Baozisoftware/qrcode-terminal-go"
 	"github.com/bbrks/go-blurhash"
 	"github.com/disintegration/imaging"
 	"github.com/mandykoh/autocrop"

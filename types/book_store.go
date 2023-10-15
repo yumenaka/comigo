@@ -3,9 +3,10 @@ package types
 import (
 	"errors"
 	"fmt"
-	"github.com/yumenaka/comi/util"
 	"os"
 	"path/filepath"
+
+	"github.com/yumenaka/comi/util"
 )
 
 // Bookstores 本地总书库，扫描后生成。可以有多个子书库。
