@@ -2,12 +2,13 @@ package routers
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/sanity-io/litter"
 	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/types"
 	"github.com/yumenaka/comi/util"
-	"strings"
 )
 
 func showQRCode() {

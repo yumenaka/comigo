@@ -2,12 +2,13 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+	"strconv"
+
 	"github.com/yumenaka/comi/arch/scan"
 	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/database"
 	"github.com/yumenaka/comi/types"
-	"log"
-	"strconv"
 )
 
 // initBookStores 解析命令,扫描书库

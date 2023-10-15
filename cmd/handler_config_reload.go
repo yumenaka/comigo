@@ -3,13 +3,14 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"log"
+	"os"
+	"time"
+
 	"github.com/fsnotify/fsnotify"
 	"github.com/yumenaka/comi/arch/scan"
 	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/routers"
-	"log"
-	"os"
-	"time"
 )
 
 //Go 每日一库之 fsnotify  https://darjun.github.io/2020/01/19/godailylib/fsnotify/

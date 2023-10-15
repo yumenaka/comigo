@@ -3,9 +3,10 @@ package arch
 import (
 	"context"
 	"fmt"
+	"os"
+
 	"github.com/yumenaka/archiver/v4"
 	"github.com/yumenaka/comi/util"
-	"os"
 )
 
 // UnArchiveRar  一次性解压rar文件

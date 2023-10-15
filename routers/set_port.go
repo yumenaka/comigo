@@ -2,12 +2,13 @@ package routers
 
 import (
 	"fmt"
-	"github.com/yumenaka/comi/config"
-	"github.com/yumenaka/comi/locale"
-	"github.com/yumenaka/comi/util"
 	"math/rand"
 	"strconv"
 	"time"
+
+	"github.com/yumenaka/comi/config"
+	"github.com/yumenaka/comi/locale"
+	"github.com/yumenaka/comi/util"
 )
 
 // CheckWebPort 3、选择服务端口

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/yumenaka/comi/arch/scan"
 	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/locale"

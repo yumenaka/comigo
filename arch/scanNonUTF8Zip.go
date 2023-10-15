@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
+
 	"github.com/klauspost/compress/zip"
 	"github.com/yumenaka/archiver/v4"
-	"os"
 )
 
 // ScanNonUTF8Zip 扫描文件，初始化书籍用

@@ -6,14 +6,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/bbrks/go-blurhash"
-	"github.com/cheggaaa/pb/v3"
-	"github.com/disintegration/imaging"
-	"github.com/jxskiss/base62"
-	"github.com/xxjwxc/gowp/workpool"
-	"github.com/yumenaka/comi/arch"
-	"github.com/yumenaka/comi/locale"
-	"github.com/yumenaka/comi/util"
 	"image"
 	"log"
 	"math/rand"
@@ -24,6 +16,15 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/bbrks/go-blurhash"
+	"github.com/cheggaaa/pb/v3"
+	"github.com/disintegration/imaging"
+	"github.com/jxskiss/base62"
+	"github.com/xxjwxc/gowp/workpool"
+	"github.com/yumenaka/comi/arch"
+	"github.com/yumenaka/comi/locale"
+	"github.com/yumenaka/comi/util"
 )
 
 var (

@@ -3,13 +3,14 @@ package routers
 import (
 	"embed"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comi/locale"
-	"github.com/yumenaka/comi/util"
 	"html/template"
 	"io"
 	"io/fs"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/yumenaka/comi/locale"
+	"github.com/yumenaka/comi/util"
 
 	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/types"
