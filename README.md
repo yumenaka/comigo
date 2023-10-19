@@ -1,7 +1,12 @@
-<h2 align="center">
-  <img src="https://raw.githubusercontent.com/yumenaka/comi/master/icon.ico" alt="ComiGo: 简单粗暴的漫画阅读器" width="200">
-  <br>ComiGo: 简单粗暴的漫画阅读器<br>
-</h2>
+<div align="center">
+
+# ComiGo: 简单粗暴的漫画阅读器 
+[![Go Report](https://goreportcard.com/badge/github.com/yumenaka/comi?style=flat-square)](https://goreportcard.com/report/github.com/yumenaka/comi)
+[![License](https://img.shields.io/github/license/yumenaka/comi?style=flat-square&color=blue)](https://github.com/yumenaka/comi/blob/main/LICENSE)
+
+[//]: # ([![Downloads]&#40;https://img.shields.io/github/downloads/yumenaka/comi/total?style=flat-square&color=success&#41;]&#40;https://github.com/yumenaka/comi/releases&#41;)
+[//]: # (<img src="https://raw.githubusercontent.com/yumenaka/comi/master/icon.ico" alt="ComiGo: 简单粗暴的漫画阅读器" width="200">)
+</div>
 
 ![Windows示例](https://www.yumenaka.net/wp-content/uploads/2020/08/sample.gif "Windows示例")
 
@@ -44,7 +49,7 @@ comi --help
 - [x] 网页端：HTTPS加密
 - [x] 网页端：显示服务器信息
 - [ ] 网页端：上一章、下一章
-- [ ] web shell like ttyd
+- [ ] shell 互动（https://github.com/rivo/tview ）
 - [x] websocket通信（[参考](https://github.com/Unrud/remote-touchpad)）
 - [x] 访问权限设置，账号系统
 - [x] log记录

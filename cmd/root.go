@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/yumenaka/comi/logger"
 	"os"
 	"path"
 	"path/filepath"
@@ -115,7 +116,7 @@ func init() {
 			fmt.Println("Failed to get absolute path:", err)
 			return
 		}
-		fmt.Println("Executable path:", absPath)
+		logger.Log.Info("Executable path:", absPath)
 		runtimeViper.AddConfigPath(absPath)
 
 		// 当前执行目录

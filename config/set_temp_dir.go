@@ -1,7 +1,7 @@
 package config
 
 import (
-	"fmt"
+	"github.com/yumenaka/comi/logger"
 	"os"
 	"path"
 
@@ -19,8 +19,8 @@ func SetTempDir() {
 	}
 	err := os.MkdirAll(Config.CachePath, os.ModePerm)
 	if err != nil {
-		println(locale.GetString("temp_folder_error"))
+		logger.Log.Info(locale.GetString("temp_folder_error"))
 	} else {
-		fmt.Println(locale.GetString("temp_folder_path") + Config.CachePath)
+		logger.Log.Info(locale.GetString("temp_folder_path") + Config.CachePath)
 	}
 }

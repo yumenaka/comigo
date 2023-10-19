@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"github.com/yumenaka/comi/logger"
 	"log"
 	"os"
 	"time"
@@ -49,7 +50,7 @@ func handlerConfigReload(e fsnotify.Event) {
 	)
 	err := scan.ScanStorePath(option)
 	if err != nil {
-		log.Printf("Failed to scan store path: %v", err)
+		logger.Log.Infof("Failed to scan store path: %v", err)
 	}
 	//4，保存扫描结果到数据库
 	if config.Config.EnableDatabase {

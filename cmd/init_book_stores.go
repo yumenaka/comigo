@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"log"
+	"github.com/yumenaka/comi/logger"
 	"strconv"
 
 	"github.com/yumenaka/comi/arch/scan"
@@ -51,14 +51,14 @@ func initBookStores(args []string) {
 	)
 	err := scan.ScanStorePath(option)
 	if err != nil {
-		log.Printf("Failed to scan store path: %v", err)
+		logger.Log.Infof("Failed to scan store path: %v", err)
 	}
 
 	//4、保存扫描结果到数据库
 	if config.Config.EnableDatabase {
 		err = scan.SaveResultsToDatabase(config.Config.ConfigPath, config.Config.ClearDatabaseWhenExit)
 		if err != nil {
-			log.Printf("Failed SaveResultsToDatabase: %v", err)
+			logger.Log.Infof("Failed SaveResultsToDatabase: %v", err)
 			return
 		}
 	}

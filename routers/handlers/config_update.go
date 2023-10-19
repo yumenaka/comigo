@@ -2,16 +2,17 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comi/arch/scan"
-	"github.com/yumenaka/comi/config"
-	"github.com/yumenaka/comi/types"
-	"github.com/yumenaka/comi/util"
 	"io"
-	"log"
 	"net/http"
 	"reflect"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"github.com/yumenaka/comi/arch/scan"
+	"github.com/yumenaka/comi/config"
+	"github.com/yumenaka/comi/logger"
+	"github.com/yumenaka/comi/types"
+	"github.com/yumenaka/comi/util"
 )
 
 // HandlerConfigUpdate 修改服务器配置(post json)
@@ -96,17 +97,17 @@ func BeforeConfigUpdate(oldConfig *types.ServerConfig, newConfig *types.ServerCo
 			newConfig.Debug,
 		)
 		if err := scan.ScanStorePath(option); err != nil {
-			log.Printf("Failed to scan store path: %v", err)
+			logger.Log.Infof("Failed to scan store path: %v", err)
 		}
 		// 保存扫描结果到数据库 //TODO:这里有问题，启用数据库会报错
 		if oldConfig.EnableDatabase {
 			if err := scan.SaveResultsToDatabase(config.Config.ConfigPath, config.Config.ClearDatabaseWhenExit); err != nil {
-				log.Printf("Failed to save results to database: %v", err)
+				logger.Log.Infof("Failed to save results to database: %v", err)
 			}
 		}
 	} else {
 		if oldConfig.Debug {
-			log.Printf("oldConfig.StoresPath == newConfig.StoresPath,skip scan store path")
+			logger.Log.Infof("oldConfig.StoresPath == newConfig.StoresPath,skip scan store path")
 		}
 	}
 	oldConfig = newConfig

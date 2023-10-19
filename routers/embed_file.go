@@ -3,16 +3,15 @@ package routers
 import (
 	"embed"
 	"fmt"
+	"github.com/yumenaka/comi/logger"
 	"html/template"
 	"io"
 	"io/fs"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comi/locale"
-	"github.com/yumenaka/comi/util"
-
 	"github.com/yumenaka/comi/config"
+	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/types"
 )
 
@@ -76,12 +75,12 @@ func embedFile(engine *gin.Engine) {
 	engine.SetHTMLTemplate(tmpl)
 	if config.Config.LogToFile {
 		// 关闭 log 打印的字体颜色。输出到文件不需要颜色
-		//gin.DisableConsoleColor()
-		// 中间件，输出 log 到文件
-		engine.Use(util.LoggerToFile(config.Config.LogFilePath, config.Config.LogFileName))
+		gin.DisableConsoleColor()
 		//禁止控制台输出
 		gin.DefaultWriter = io.Discard
 	}
+	// 中间件，输出 log 到文件
+	engine.Use(logger.HandlerLog(config.Config.LogToFile, config.Config.LogFilePath, config.Config.LogFileName))
 
 	//https://stackoverflow.com/questions/66248258/serve-embedded-filesystem-from-root-path-of-url
 	assetsEmbedFS, err := fs.Sub(staticAssetFS, "static/assets")
