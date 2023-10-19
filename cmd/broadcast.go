@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/yumenaka/comi/logger"
 
 	"github.com/yumenaka/comi/arch/scan"
 	"github.com/yumenaka/comi/config"
@@ -77,7 +78,7 @@ func ReScanPath(path string, reScanFile bool) {
 	)
 	addList, err := scan.ScanAndGetBookList(path, option)
 	if err != nil {
-		fmt.Println(locale.GetString("scan_error"), path, err)
+		logger.Log.Info(locale.GetString("scan_error"), path, err)
 	} else {
 		scan.AddBooksToStore(addList, path, config.Config.MinImageNum)
 	}

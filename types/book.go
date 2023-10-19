@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/yumenaka/comi/logger"
 	"image"
 	"log"
 	"math/rand"
@@ -491,7 +492,7 @@ func (b *Book) SortPagesByImageList(imageList []string) {
 		}
 	}
 	if len(reSortList) == 0 {
-		fmt.Println(locale.GetString("EPUB_CANNOT_RESORT") + b.FilePath)
+		logger.Log.Info(locale.GetString("EPUB_CANNOT_RESORT"), b.FilePath)
 		return
 	}
 	//不在表中的话，就不改变顺序，并加在有序表的后面

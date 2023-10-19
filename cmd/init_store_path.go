@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/yumenaka/comi/logger"
 	"os"
 	"path"
 
@@ -14,7 +15,7 @@ func initStorePath(args []string) {
 	if err != nil {
 		fmt.Println("Failed to get working directory:", err)
 	}
-	fmt.Println("Working directory:", wd)
+	logger.Log.Info("Working directory:", wd)
 	config.Config.StoresPath = append(config.Config.StoresPath, wd)
 
 	//没指定路径或文件的情况下

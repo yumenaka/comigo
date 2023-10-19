@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/sirupsen/logrus"
+	"github.com/yumenaka/comi/logger"
 	"io/fs"
 	"net/url"
 	"os"
@@ -14,7 +16,6 @@ import (
 	"time"
 
 	"github.com/klauspost/compress/zip"
-	"github.com/sirupsen/logrus"
 	"github.com/yumenaka/archiver/v4"
 	"github.com/yumenaka/comi/arch"
 	"github.com/yumenaka/comi/database"
@@ -106,7 +107,7 @@ func ScanStorePath(scanConfig Option) error {
 		for _, p := range scanConfig.StoresPath {
 			addList, err := ScanAndGetBookList(p, scanConfig)
 			if err != nil {
-				fmt.Println(locale.GetString("scan_error"), p, err)
+				logger.Log.Info(locale.GetString("scan_error"), p, err)
 				return err
 			} else {
 				AddBooksToStore(addList, p, scanConfig.MinImageNum)
@@ -160,7 +161,7 @@ func ScanAndGetBookList(storePath string, scanOption Option) (newBookList []*typ
 		storePathAbs = storePath
 		fmt.Println(err)
 	}
-	fmt.Println(locale.GetString("SCAN_START_HINT") + storePathAbs)
+	logger.Log.Info(locale.GetString("SCAN_START_HINT") + storePathAbs)
 	err = filepath.Walk(storePathAbs, func(walkPath string, fileInfo os.FileInfo, err error) error {
 		if !scanOption.ReScanFile {
 			for _, p := range types.GetArchiveBooks() {
@@ -172,7 +173,7 @@ func ScanAndGetBookList(storePath string, scanOption Option) (newBookList []*typ
 				}
 				if walkPath == p.FilePath || AbsW == p.FilePath {
 					//跳过已经在数据库里面的文件
-					fmt.Println(locale.GetString("FoundInDatabase") + walkPath)
+					logger.Log.Info(locale.GetString("FoundInDatabase"), walkPath)
 					return nil
 				}
 			}
@@ -183,11 +184,11 @@ func ScanAndGetBookList(storePath string, scanOption Option) (newBookList []*typ
 			depth = strings.Count(walkPath, "\\") - strings.Count(storePathAbs, "\\")
 		}
 		if depth > scanOption.MaxScanDepth {
-			fmt.Printf(locale.GetString("ExceedsMaximumDepth")+" %d，base：%s scan: %s:\n", scanOption.MaxScanDepth, storePathAbs, walkPath)
+			logger.Log.Infof(locale.GetString("ExceedsMaximumDepth")+" %d，base：%s scan: %s:\n", scanOption.MaxScanDepth, storePathAbs, walkPath)
 			return filepath.SkipDir // 当WalkFunc的返回值是filepath.SkipDir时，Walk将会跳过这个目录，照常执行下一个文件。
 		}
 		if scanOption.IsSkipDir(walkPath) {
-			fmt.Println(locale.GetString("SkipPath") + walkPath)
+			logger.Log.Infof(locale.GetString("SkipPath"), walkPath)
 			return filepath.SkipDir
 		}
 		if fileInfo == nil {
@@ -220,7 +221,7 @@ func ScanAndGetBookList(storePath string, scanOption Option) (newBookList []*typ
 	})
 	// 所有可用书籍，包括压缩包与文件夹
 	if len(newBookList) > 0 {
-		fmt.Printf(locale.GetString("FOUND_IN_PATH"), len(newBookList), storePathAbs)
+		logger.Log.Infof(locale.GetString("FOUND_IN_PATH"), len(newBookList), storePathAbs)
 	}
 	return newBookList, err
 }
@@ -353,7 +354,7 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 		}
 		err = fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
 			if scanOption.IsSkipDir(path) {
-				fmt.Println("Skip Scan:" + path)
+				logger.Log.Info("Skip Scan:", path)
 				return fs.SkipDir
 			}
 			f, errInfo := d.Info()
@@ -362,7 +363,9 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 				return fs.SkipDir
 			}
 			if !scanOption.IsSupportMedia(path) {
-				logrus.Debugf(locale.GetString("unsupported_file_type") + path)
+				logger.Log.WithFields(logrus.Fields{
+					"filepath": path,
+				}).Debug(locale.GetString("unsupported_file_type"))
 			} else {
 				u, ok := f.(archiver.File) // f.Name不包含路径信息.需要转换一下
 				if !ok {
@@ -406,7 +409,9 @@ func scanNonUTF8ZipFile(filePath string, b *types.Book, scanOption Option) error
 			TempURL := "api/getfile?id=" + b.BookID + "&filename=" + url.QueryEscape(f.Name)
 			b.Pages.Images = append(b.Pages.Images, types.ImageInfo{RealImageFilePATH: "", FileSize: f.FileInfo().Size(), ModeTime: f.FileInfo().ModTime(), NameInArchive: f.Name, Url: TempURL})
 		} else {
-			logrus.Debugf(locale.GetString("unsupported_file_type") + f.Name)
+			logger.Log.WithFields(logrus.Fields{
+				"filename": f.Name,
+			}).Debug(locale.GetString("unsupported_file_type"))
 		}
 	}
 	b.SortPages("default")
@@ -439,7 +444,9 @@ func walkUTF8ZipFs(fsys fs.FS, parent, base string, b *types.Book, scanOption Op
 			joinPath := path.Join(parent, name)
 			err = walkUTF8ZipFs(fsys, joinPath, base, b, scanOption)
 		} else if !scanOption.IsSupportMedia(name) {
-			logrus.Debugf(locale.GetString("unsupported_file_type") + name)
+			logger.Log.WithFields(logrus.Fields{
+				"filename": name,
+			}).Debug(locale.GetString("unsupported_file_type"))
 		} else {
 			inArchiveName := path.Join(parent, f.Name())
 			TempURL := "api/getfile?id=" + b.BookID + "&filename=" + url.QueryEscape(inArchiveName)
