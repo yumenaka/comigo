@@ -362,9 +362,7 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 				return fs.SkipDir
 			}
 			if !scanOption.IsSupportMedia(path) {
-				logger.Log.WithFields(logrus.Fields{
-					"filepath": path,
-				}).Debug(locale.GetString("unsupported_file_type"))
+				logger.DebugWithFields(logrus.Fields{"filepath": path}, locale.GetString("unsupported_file_type"))
 			} else {
 				u, ok := f.(archiver.File) // f.Name不包含路径信息.需要转换一下
 				if !ok {
@@ -408,9 +406,7 @@ func scanNonUTF8ZipFile(filePath string, b *types.Book, scanOption Option) error
 			TempURL := "api/getfile?id=" + b.BookID + "&filename=" + url.QueryEscape(f.Name)
 			b.Pages.Images = append(b.Pages.Images, types.ImageInfo{RealImageFilePATH: "", FileSize: f.FileInfo().Size(), ModeTime: f.FileInfo().ModTime(), NameInArchive: f.Name, Url: TempURL})
 		} else {
-			logger.Log.WithFields(logrus.Fields{
-				"filename": f.Name,
-			}).Debug(locale.GetString("unsupported_file_type"))
+			logger.DebugWithFields(logrus.Fields{"filename": f.Name}, locale.GetString("unsupported_file_type"))
 		}
 	}
 	b.SortPages("default")
@@ -443,9 +439,7 @@ func walkUTF8ZipFs(fsys fs.FS, parent, base string, b *types.Book, scanOption Op
 			joinPath := path.Join(parent, name)
 			err = walkUTF8ZipFs(fsys, joinPath, base, b, scanOption)
 		} else if !scanOption.IsSupportMedia(name) {
-			logger.Log.WithFields(logrus.Fields{
-				"filename": name,
-			}).Debug(locale.GetString("unsupported_file_type"))
+			logger.DebugWithFields(logrus.Fields{"filename": name}, locale.GetString("unsupported_file_type"))
 		} else {
 			inArchiveName := path.Join(parent, f.Name())
 			TempURL := "api/getfile?id=" + b.BookID + "&filename=" + url.QueryEscape(inArchiveName)
