@@ -5,6 +5,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	qrcodeTerminal "github.com/Baozisoftware/qrcode-terminal-go"
 	"github.com/yumenaka/comi/logger"
 	"image"
@@ -370,7 +371,7 @@ func PrintAllReaderURL(Port int, OpenBrowserFlag bool, PrintAllPossibleQRCode bo
 		protocol = "https://"
 	}
 	localURL := protocol + "127.0.0.1:" + strconv.Itoa(Port) + etcStr
-	logger.Info(locale.GetString("local_reading") + localURL + etcStr)
+	fmt.Println(locale.GetString("local_reading") + localURL + etcStr)
 	//打开浏览器
 	if OpenBrowserFlag {
 		OpenBrowser(protocol + "127.0.0.1:" + strconv.Itoa(Port) + etcStr)
@@ -384,7 +385,7 @@ func printURLAndQRCode(port int, PrintAllPossibleQRCode bool, ServerHost string,
 
 	if ServerHost != "" {
 		readURL := protocol + ServerHost + ":" + strconv.Itoa(port) + etcStr
-		logger.Info(locale.GetString("reading_url_maybe") + readURL)
+		fmt.Println(locale.GetString("reading_url_maybe") + readURL)
 		PrintQRCode(readURL)
 		return
 	}
@@ -396,14 +397,14 @@ func printURLAndQRCode(port int, PrintAllPossibleQRCode bool, ServerHost string,
 		}
 		for _, IP := range IPList {
 			readURL := protocol + IP + ":" + strconv.Itoa(port) + etcStr
-			logger.Info(locale.GetString("reading_url_maybe") + readURL)
+			fmt.Println(locale.GetString("reading_url_maybe") + readURL)
 			PrintQRCode(readURL)
 		}
 	} else {
 		//只打印本机的首选出站IP
 		OutIP := GetOutboundIP().String()
 		readURL := protocol + OutIP + ":" + strconv.Itoa(port) + etcStr
-		logger.Info(locale.GetString("reading_url_maybe") + readURL)
+		fmt.Println(locale.GetString("reading_url_maybe") + readURL)
 		PrintQRCode(readURL)
 	}
 }
