@@ -2,7 +2,7 @@ package types
 
 import (
 	"errors"
-	"fmt"
+	"github.com/yumenaka/comi/logger"
 	"os"
 	"path/filepath"
 
@@ -72,13 +72,13 @@ func (s *singleBookstore) initBookGroupMap() error {
 			modTime := pathInfo.ModTime()
 			newBook, err := New(filepath.Dir(sameParentBookList[0].FilePath), modTime, 0, s.StorePath, depth-1, TypeBooksGroup)
 			if err != nil {
-				fmt.Println(err)
+				logger.Info(err)
 				continue
 			}
 			//名字应该设置成parent
 			if newBook.Name != parent {
 				newBook.Name = parent
-				//fmt.Printf("newBook.Name!=parent!?")
+				//logger.Infof("newBook.Name!=parent!?")
 			}
 			//初始化ChildBook
 			//然后把同一parent的书，都加进某个书籍组
@@ -113,7 +113,7 @@ func (s *singleBookstore) initBookGroupMap() error {
 			//将这本书加到BookGroup总表（mapBookFolders）里面去
 			mapBookFolders[newBook.BookID] = newBook
 			//fmt.Print("生成book_group：")
-			//fmt.Println(newBook)
+			//logger.Info(newBook)
 		}
 	}
 	return nil

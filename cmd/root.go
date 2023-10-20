@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-	"github.com/yumenaka/comi/logger"
 	"os"
 	"path"
 	"path/filepath"
@@ -14,6 +12,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/locale"
+	"github.com/yumenaka/comi/logger"
 	"github.com/yumenaka/comi/routers"
 	"github.com/yumenaka/comi/routers/handlers"
 )
@@ -96,7 +95,7 @@ func init() {
 		runtimeViper.SetEnvPrefix("COMI")
 		home, err := homedir.Dir()
 		if err != nil {
-			fmt.Println(err)
+			logger.Info(err)
 			time.Sleep(3 * time.Second)
 		}
 		//需要在home目录下面搜索配置文件
@@ -106,23 +105,23 @@ func init() {
 		// 获取可执行程序自身的文件路径
 		executablePath, err := os.Executable()
 		if err != nil {
-			fmt.Println("无法获取程序路径:", err)
+			logger.Info("无法获取程序路径:", err)
 			return
 		}
 
 		// 将可执行程序自身的文件路径转换为绝对路径
 		absPath, err := filepath.Abs(executablePath)
 		if err != nil {
-			fmt.Println("Failed to get absolute path:", err)
+			logger.Info("Failed to get absolute path:", err)
 			return
 		}
-		logger.Log.Info("Executable path:", absPath)
+		logger.Info("Executable path:", absPath)
 		runtimeViper.AddConfigPath(absPath)
 
 		// 当前执行目录
 		nowPath, err := os.Getwd()
 		if err != nil {
-			fmt.Println("无法获取程序执行目录:", err)
+			logger.Info("无法获取程序执行目录:", err)
 		}
 		runtimeViper.AddConfigPath(nowPath)
 		runtimeViper.SetConfigType("toml")
@@ -130,18 +129,18 @@ func init() {
 		// 读取设定文件
 		if err := runtimeViper.ReadInConfig(); err != nil {
 			if config.Config.ConfigPath == "" && config.Config.Debug {
-				fmt.Println(err)
+				logger.Info(err)
 			}
 		} else {
 			//获取当前使用的配置文件路径
 			//https://github.com/spf13/viper/issues/89
 			config.Config.ConfigPath = runtimeViper.ConfigFileUsed()
-			fmt.Println(locale.GetString("FoundConfigFile") + config.Config.ConfigPath)
+			logger.Info(locale.GetString("FoundConfigFile") + config.Config.ConfigPath)
 		}
 
 		// 把设定文件的内容，解析到构造体里面。
 		if err := runtimeViper.Unmarshal(&config.Config); err != nil {
-			fmt.Println(err)
+			logger.Info(err)
 			time.Sleep(3 * time.Second)
 			os.Exit(1)
 		}
@@ -179,7 +178,7 @@ var rootCmd = &cobra.Command{
 func Execute() {
 	//执行命令
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
+		logger.Info(err)
 		time.Sleep(3 * time.Second)
 		os.Exit(1)
 	}

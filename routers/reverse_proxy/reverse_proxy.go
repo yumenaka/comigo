@@ -1,7 +1,7 @@
 package reverse_proxy
 
 import (
-	"fmt"
+	"github.com/yumenaka/comi/logger"
 	"io"
 	"net/http"
 	"strings"
@@ -31,7 +31,7 @@ func ReverseProxyHandle(path string, option ReverseProxyOptions) gin.HandlerFunc
 			defer func(Body io.ReadCloser) {
 				err := Body.Close()
 				if err != nil {
-					fmt.Println("Body.Close() Error:", err)
+					logger.Info("Body.Close() Error:", err)
 				}
 			}(resp.Body)
 			body, err := io.ReadAll(resp.Body)

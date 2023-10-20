@@ -32,7 +32,7 @@ package arch
 //	//打开PDF文件
 //	file, err := os.Open(pdfFileName)
 //	if err != nil {
-//		fmt.Println(err)
+//		logger.Info(err)
 //	}
 //	defer file.Close()
 //
@@ -42,11 +42,11 @@ package arch
 //	////api.ExtractImagesRaw(） 只能导出图片，无法输出文档
 //	//imageList, err := api.ExtractImagesRaw(file, []string{strconv.Itoa(pageNum)}, pdfSetting)
 //	//if err != nil {
-//	//	fmt.Println(err)
+//	//	logger.Info(err)
 //	//}
 //	//imageOut, err := imaging.Decode(imageList[0])
 //	//if err != nil {
-//	//	fmt.Println(err)
+//	//	logger.Info(err)
 //	//	return nil, errors.New("imaging.Decode() Error")
 //	//}
 //	//buffer := &bytes.Buffer{}
@@ -59,7 +59,7 @@ package arch
 //	buffer := &bytes.Buffer{}
 //	err = api.ExtractImages(file, []string{strconv.Itoa(pageNum)}, digestImage(buffer), pdfSetting)
 //	if err != nil {
-//		fmt.Println(err)
+//		logger.Info(err)
 //	}
 //	//参考：https://github.com/pdfcpu/pdfcpu/issues/45
 //	// https://github.com/pdfcpu/pdfcpu/issues/351
@@ -67,7 +67,7 @@ package arch
 //	//虽然可以引用mupdf。但这会导致导入C代码，破坏跨平台兼容性。
 //	//或许可以调用imagemagick，曲线救国？
 //
-//	fmt.Println(time.Now().Sub(start))
+//	logger.Info(time.Now().Sub(start))
 //	return buffer.Bytes(), nil
 //}
 //
@@ -76,7 +76,7 @@ package arch
 //	return func(img pdfcpu.Image, singleImgPerPage bool, maxPageDigits int) error {
 //		imageOut, err := imaging.Decode(img)
 //		if err != nil {
-//			fmt.Println(err)
+//			logger.Info(err)
 //			return errors.New("imaging.Decode() Error")
 //		}
 //		err = jpeg.Encode(buff, imageOut, &jpeg.Options{Quality: 75})
@@ -92,25 +92,25 @@ package arch
 //	//打开PDF文件
 //	file, err := os.Open(pdfFile)
 //	if err != nil {
-//		fmt.Println(err)
+//		logger.Info(err)
 //	}
 //	defer file.Close()
 //
 //	imageList, err := api.ExtractImagesRaw(file, []string{strconv.Itoa(pageNum)}, pdfcpu.NewDefaultConfiguration())
 //	if err != nil {
-//		fmt.Println(err)
+//		logger.Info(err)
 //	}
 //	imageOut, err := imaging.Decode(imageList[0])
 //	if err != nil {
-//		fmt.Println(err)
+//		logger.Info(err)
 //		return
 //	}
 //	//保存文件
 //	err = imaging.Save(imageOut, "test/"+strconv.Itoa(pageNum)+".jpg")
 //	if err != nil {
-//		fmt.Println(err)
+//		logger.Info(err)
 //	}
-//	fmt.Println(time.Now().Sub(start))
+//	logger.Info(time.Now().Sub(start))
 //}
 //
 ////PDF页面分辨率
@@ -141,12 +141,12 @@ package arch
 //	//打开PDF文件
 //	file, err := os.Open(pdfFile)
 //	if err != nil {
-//		fmt.Println(err)
+//		logger.Info(err)
 //	}
 //	defer file.Close()
 //	pageCount, err := CountPagesOfPDF("01.pdf")
 //	if err != nil {
-//		fmt.Println(err)
+//		logger.Info(err)
 //	}
 //	list := []string{}
 //	for i := 0; i < pageCount; i++ {
@@ -154,18 +154,18 @@ package arch
 //	}
 //	imageList, err := api.ExtractImagesRaw(file, list, pdfcpu.NewDefaultConfiguration())
 //	if err != nil {
-//		fmt.Println(err)
+//		logger.Info(err)
 //	}
 //	for k, i := range imageList {
 //		imageOut, err := imaging.Decode(i)
 //		if err != nil {
-//			fmt.Println(err)
+//			logger.Info(err)
 //			return
 //		}
 //		//保存文件
 //		err = imaging.Save(imageOut, "test/"+strconv.Itoa(k+1)+".jpg")
 //		if err != nil {
-//			fmt.Println(err)
+//			logger.Info(err)
 //		}
 //	}
 //}

@@ -82,8 +82,8 @@ func getLocale() (string, string) {
 //	if runtime.GOOS == "windows" {
 //		cmd = exec.Command("CMD", "/C", "chcp.com", "65001")
 //		if err := cmd.Start(); err != nil {
-//			fmt.Println("设置Windows活动代码页失败")
-//			fmt.Println(err.Error())
+//			logger.Info("设置Windows活动代码页失败")
+//			logger.Info(err.Error())
 //		}
 //	}
 //}
@@ -96,7 +96,7 @@ func init() {
 	bundle.MustParseMessageFileBytes(jpBytes, "ja-jp.toml")
 
 	lang, _ := getLocale()
-	//fmt.Printf("OK: language=%s, locale=%s\n", lang, loc)
+	//logger.Infof("OK: language=%s, locale=%s\n", lang, loc)
 	switch lang {
 	case "zh":
 		Localizer = i18n.NewLocalizer(bundle, "zh-CN")

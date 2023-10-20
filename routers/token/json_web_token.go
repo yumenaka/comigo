@@ -1,8 +1,8 @@
 package token
 
 import (
-	"fmt"
 	"github.com/yumenaka/comi/config"
+	"github.com/yumenaka/comi/logger"
 	"time"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
@@ -25,8 +25,8 @@ func NewJwtMiddleware() (*jwt.GinJWTMiddleware, error) {
 		SendCookie: true, //是否发送cookie
 		//验证失败后的函数调用，可用于自定义返回的 JSON 格式之类
 		Unauthorized: func(c *gin.Context, code int, message string) {
-			fmt.Println(code)
-			fmt.Println(message)
+			logger.Info(code)
+			logger.Info(message)
 			c.JSON(code, gin.H{
 				"code Unauthorized":    code,
 				"message Unauthorized": message,
@@ -75,7 +75,7 @@ func Authenticator(c *gin.Context) (interface{}, error) {
 	if err := c.ShouldBind(&user); err != nil {
 		return "", jwt.ErrMissingLoginValues
 	}
-	fmt.Printf("username is %s, password is %s,Config is %s@%s\",", user.Username, user.Password, config.Config.Username, config.Config.Password)
+	logger.Infof("username is %s, password is %s,Config is %s@%s\",", user.Username, user.Password, config.Config.Username, config.Config.Password)
 	if config.Config.Password == "" {
 		return user, nil
 	}
@@ -90,7 +90,7 @@ func Authenticator(c *gin.Context) (interface{}, error) {
 
 func Authorizator(data interface{}, c *gin.Context) bool {
 	if v, ok := data.(*User); ok {
-		fmt.Println(v)
+		logger.Info(v)
 		return true
 	}
 	return false

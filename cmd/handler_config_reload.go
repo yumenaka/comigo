@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"github.com/yumenaka/comi/logger"
 	"log"
 	"os"
@@ -20,16 +19,16 @@ import (
 // 优雅地重启或停止  https://learnku.com/docs/gin-gonic/1.7/examples-graceful-restart-or-stop/11376
 func handlerConfigReload(e fsnotify.Event) {
 	//打印配置文件路径与触发事件
-	fmt.Printf("配置文件改变，Comigo重启:%s Op:%s\n", e.Name, e.Op)
+	logger.Infof("配置文件改变，Comigo重启:%s Op:%s\n", e.Name, e.Op)
 	//重新读取改变后的配置文件
 	if err := runtimeViper.ReadInConfig(); err != nil {
 		if config.Config.ConfigPath == "" && config.Config.Debug {
-			fmt.Println(err)
+			logger.Info(err)
 		}
 	}
 	// 把设定文件的内容，解析到构造体里面。
 	if err := runtimeViper.Unmarshal(&config.Config); err != nil {
-		fmt.Println(err)
+		logger.Info(err)
 		time.Sleep(3 * time.Second)
 		os.Exit(1)
 	}
@@ -50,7 +49,7 @@ func handlerConfigReload(e fsnotify.Event) {
 	)
 	err := scan.ScanStorePath(option)
 	if err != nil {
-		logger.Log.Infof("Failed to scan store path: %v", err)
+		logger.Infof("Failed to scan store path: %v", err)
 	}
 	//4，保存扫描结果到数据库
 	if config.Config.EnableDatabase {

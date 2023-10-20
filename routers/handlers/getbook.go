@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"fmt"
+	"github.com/yumenaka/comi/logger"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -23,7 +23,7 @@ func HandlerGetBook(c *gin.Context) {
 		//TODO: 根据压缩包原始顺序、时间、文件名排序
 		bookList, err := types.GetBookByAuthor(author, sortBy)
 		if err != nil {
-			fmt.Println(err)
+			logger.Info(err)
 		} else {
 			c.PureJSON(http.StatusOK, bookList)
 		}
@@ -33,7 +33,7 @@ func HandlerGetBook(c *gin.Context) {
 		//TODO: 根据压缩包原始顺序、时间、文件名排序
 		b, err := types.GetBookByID(id, sortBy)
 		if err != nil {
-			fmt.Println(err)
+			logger.Info(err)
 		} else {
 			c.PureJSON(http.StatusOK, b)
 		}

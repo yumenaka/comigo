@@ -1,10 +1,10 @@
 package handlers
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/tidwall/gjson"
 	"github.com/yumenaka/comi/config"
+	"github.com/yumenaka/comi/logger"
 	"io"
 	"net/http"
 )
@@ -19,7 +19,7 @@ func HandlerConfigSave(c *gin.Context) {
 	}
 	// 将JSON数据转换为字符串并打印
 	jsonString := string(body)
-	fmt.Printf("Received JSON data: %s \n", jsonString)
+	logger.Infof("Received JSON data: %s \n", jsonString)
 	ConfigSaveTo := gjson.Get(jsonString, "ConfigSaveTo")
 	if ConfigSaveTo.Exists() && (ConfigSaveTo.String() == "NowDir" || ConfigSaveTo.String() == "HomeDir" || ConfigSaveTo.String() == "ProgramDir") {
 		config.SaveConfig("NowDir")

@@ -4,9 +4,9 @@
 package main
 
 import (
-	"fmt"
 	"github.com/rivo/tview"
 	"github.com/yumenaka/comi/cmd"
+	"github.com/yumenaka/comi/logger"
 )
 
 // tview sample
@@ -31,6 +31,6 @@ func main() {
 	app = tview.NewApplication().SetRoot(box, true)
 	go cmd.Execute()
 	if err := app.Run(); err != nil {
-		fmt.Printf("Error running application: %s\n", err)
+		logger.Infof("Error running application: %s\n", err)
 	}
 }

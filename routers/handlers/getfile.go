@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
+	"github.com/yumenaka/comi/logger"
 	"net/http"
 	"net/url"
 	"os"
@@ -61,23 +61,23 @@ func HandlerGetFile(c *gin.Context) {
 	}
 	bookByID, err := types.GetBookByID(id, "")
 	if err != nil {
-		fmt.Println(err)
+		logger.Info(err)
 	}
 	bookPath := bookByID.GetFilePath()
-	//fmt.Println(bookPath)
+	//logger.Info(bookPath)
 	var imgData []byte
 	//如果是特殊编码的ZIP文件
 	if bookByID.NonUTF8Zip && bookByID.Type != types.TypeDir {
 		imgData, err = arch.GetSingleFile(bookPath, needFile, "gbk")
 		if err != nil {
-			fmt.Println(err)
+			logger.Info(err)
 		}
 	}
 	//如果是一般压缩文件，如zip、rar。epub
 	if !bookByID.NonUTF8Zip && bookByID.Type != types.TypeDir && bookByID.Type != types.TypePDF {
 		imgData, err = arch.GetSingleFile(bookPath, needFile, "")
 		if err != nil {
-			fmt.Println(err)
+			logger.Info(err)
 		}
 	}
 	//如果是PDF
@@ -89,7 +89,7 @@ func HandlerGetFile(c *gin.Context) {
 		//直接读取磁盘文件
 		imgData, err = os.ReadFile(filepath.Join(bookPath, needFile))
 		if err != nil {
-			fmt.Println(err)
+			logger.Info(err)
 		}
 	}
 	//默认的媒体类型，默认值根据文件后缀设定。
@@ -110,12 +110,12 @@ func HandlerGetFile(c *gin.Context) {
 		//读取图片Resize用的resizeWidth
 		resizeWidth, errX := strconv.Atoi(c.DefaultQuery("resize_width", "0"))
 		if errX != nil {
-			fmt.Println(errX)
+			logger.Info(errX)
 		}
 		//读取图片Resize用的resizeHeight
 		resizeHeight, errY := strconv.Atoi(c.DefaultQuery("resize_height", "0"))
 		if errY != nil {
-			fmt.Println(errY)
+			logger.Info(errY)
 		}
 		//图片Resize, 按照固定的width height缩放
 		if errX == nil && errY == nil && resizeWidth > 0 && resizeHeight > 0 {
@@ -141,12 +141,12 @@ func HandlerGetFile(c *gin.Context) {
 		//图片Resize, 按照 maxWidth 限制大小
 		resizeMaxWidth, errMX := strconv.Atoi(c.DefaultQuery("resize_max_width", "0"))
 		if errMX != nil {
-			fmt.Println(errMX)
+			logger.Info(errMX)
 		}
 		if errMX == nil && resizeMaxWidth > 0 {
 			tempData, limitErr := util.ImageResizeByMaxWidth(imgData, resizeMaxWidth)
 			if limitErr != nil {
-				fmt.Println(limitErr)
+				logger.Info(limitErr)
 			} else {
 				imgData = tempData
 				contentType = util.GetContentTypeByFileName(".jpg")
@@ -155,12 +155,12 @@ func HandlerGetFile(c *gin.Context) {
 		//图片Resize, 按照 MaxHeight 限制大小
 		resizeMaxHeight, errMY := strconv.Atoi(c.DefaultQuery("resize_max_height", "0"))
 		if errMY != nil {
-			fmt.Println(errMY)
+			logger.Info(errMY)
 		}
 		if errMY == nil && resizeMaxHeight > 0 {
 			tempData, limitErr := util.ImageResizeByMaxHeight(imgData, resizeMaxHeight)
 			if limitErr != nil {
-				fmt.Println(limitErr)
+				logger.Info(limitErr)
 			} else {
 				imgData = tempData
 				contentType = util.GetContentTypeByFileName(".jpg")
@@ -169,7 +169,7 @@ func HandlerGetFile(c *gin.Context) {
 		//自动切白边参数
 		autoCrop, errCrop := strconv.Atoi(c.DefaultQuery("auto_crop", "-1"))
 		if errCrop != nil {
-			fmt.Println(errCrop)
+			logger.Info(errCrop)
 		}
 
 		if errCrop == nil && autoCrop > 0 && autoCrop <= 100 {
@@ -181,7 +181,7 @@ func HandlerGetFile(c *gin.Context) {
 		//获取对应图片的blurhash字符串并返回，不是图片
 		blurhash, blurErr := strconv.Atoi(c.DefaultQuery("blurhash", "0"))
 		if blurErr != nil {
-			fmt.Println(blurErr)
+			logger.Info(blurErr)
 		}
 		if gray == "true" {
 			imgData = util.ImageGray(imgData)
@@ -197,7 +197,7 @@ func HandlerGetFile(c *gin.Context) {
 		//返回图片的blurhash图
 		blurhashImage, blurImageErr := strconv.Atoi(c.DefaultQuery("blurhash_image", "0"))
 		if blurImageErr != nil {
-			fmt.Println(blurImageErr)
+			logger.Info(blurImageErr)
 		}
 		//虽然blurhash components 理论上最大可以设到9，但反应速度太慢，毫无实用性、建议为1（最大为2）
 		if blurhashImage >= 1 && blurhashImage <= 2 && blurErr == nil {
@@ -211,7 +211,7 @@ func HandlerGetFile(c *gin.Context) {
 			//缓存文件到本地，避免重复解压
 			errSave := saveFileToCache(id, needFile, imgData, query, contentType, c.DefaultQuery("thumbnail_mode", "false") == "true")
 			if errSave != nil {
-				fmt.Println(errSave)
+				logger.Info(errSave)
 			}
 		}
 		c.Data(http.StatusOK, contentType, imgData)
@@ -266,7 +266,7 @@ func saveFileToCache(id string, filename string, data []byte, query url.Values, 
 	}
 	err = os.WriteFile(filepath.Join(config.Config.CachePath, id, filename), data, 0644)
 	if err != nil {
-		fmt.Println(err)
+		logger.Info(err)
 	}
 	qS := getQueryStringKey(query)
 	key := cacheKey{bookID: id, queryString: qS}
@@ -307,7 +307,7 @@ func getQueryStringKey(query url.Values) string {
 			}
 		}
 	}
-	//fmt.Println("queryString:" + queryString)
+	//logger.Info("queryString:" + queryString)
 	return queryString
 }
 
@@ -331,7 +331,7 @@ func getFileFromCache(id string, filename string, query url.Values, isCover bool
 	}
 	loadedImage, err := os.ReadFile(filepath.Join(config.Config.CachePath, id, filename))
 	if err != nil && config.Config.Debug {
-		fmt.Println("getFileFromCache,file not found:" + filename)
+		logger.Info("getFileFromCache,file not found:" + filename)
 	}
 	return loadedImage, contentType, err
 }

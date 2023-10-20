@@ -1,12 +1,10 @@
 package cmd
 
 import (
-	"fmt"
-	"github.com/yumenaka/comi/logger"
-
 	"github.com/yumenaka/comi/arch/scan"
 	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/locale"
+	"github.com/yumenaka/comi/logger"
 	"github.com/yumenaka/comi/routers"
 	"github.com/yumenaka/comi/routers/handlers"
 )
@@ -27,7 +25,7 @@ func waitRescanMessages() {
 		// Send it out to every client that is currently connected
 		switch msg {
 		case "upload":
-			fmt.Println("扫描上传文件夹：", msg)
+			logger.Info("扫描上传文件夹：", msg)
 			ReScanUploadPath()
 			//保存扫描结果到数据库
 			if config.Config.EnableDatabase {
@@ -39,7 +37,7 @@ func waitRescanMessages() {
 			//重新设置文件下载链接
 			routers.SetDownloadLink()
 		case "SomePath":
-			fmt.Println("收到重新扫描消息：", msg)
+			logger.Info("收到重新扫描消息：", msg)
 			ReScanPath(msg, false)
 		default:
 			continue
@@ -78,7 +76,7 @@ func ReScanPath(path string, reScanFile bool) {
 	)
 	addList, err := scan.ScanAndGetBookList(path, option)
 	if err != nil {
-		logger.Log.Info(locale.GetString("scan_error"), path, err)
+		logger.Info(locale.GetString("scan_error"), path, err)
 	} else {
 		scan.AddBooksToStore(addList, path, config.Config.MinImageNum)
 	}

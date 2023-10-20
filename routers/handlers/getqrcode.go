@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"fmt"
+	"github.com/yumenaka/comi/logger"
 	"net/http"
 	"strconv"
 
@@ -19,7 +19,7 @@ func GetQrcodeHandler(c *gin.Context) {
 	if qrcodeStr != "" {
 		png, err := qrcode.Encode(qrcodeStr, qrcode.Medium, 256)
 		if err != nil {
-			fmt.Println(err)
+			logger.Info(err)
 		}
 		c.Data(http.StatusOK, "image/png", png)
 		return
@@ -38,7 +38,7 @@ func GetQrcodeHandler(c *gin.Context) {
 		readURL := protocol + OutIP + ":" + strconv.Itoa(config.Config.Port)
 		png, err := qrcode.Encode(readURL, qrcode.Medium, 256)
 		if err != nil {
-			fmt.Println(err)
+			logger.Info(err)
 		}
 		c.Data(http.StatusOK, "image/png", png)
 	} else {
@@ -46,7 +46,7 @@ func GetQrcodeHandler(c *gin.Context) {
 		readURL := protocol + config.Config.Host + ":" + strconv.Itoa(config.Config.Port)
 		png, err := qrcode.Encode(readURL, qrcode.Medium, 256)
 		if err != nil {
-			fmt.Println(err)
+			logger.Info(err)
 		}
 		c.Data(http.StatusOK, "image/png", png)
 	}

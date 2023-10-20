@@ -1,7 +1,7 @@
 package util
 
 import (
-	"fmt"
+	"github.com/yumenaka/comi/logger"
 	"runtime"
 
 	"github.com/shirou/gopsutil/v3/cpu"
@@ -37,19 +37,19 @@ func GetSystemStatus() SystemStatus {
 	//获取物理和逻辑核数,以及CPU、内存整体使用率
 	CPUNumLogical, err := cpu.Counts(true)
 	if err != nil {
-		fmt.Println(err)
+		logger.Info(err)
 	} else {
 		sys.CPUNumLogical = CPUNumLogical
 	}
 	CPUNumPhysical, err := cpu.Counts(false)
 	if err != nil {
-		fmt.Println(err)
+		logger.Info(err)
 	} else {
 		sys.CPUNumPhysical = CPUNumPhysical
 	}
 	CPUUsedPercent, err := cpu.Percent(0, false)
 	if err != nil {
-		fmt.Println(err)
+		logger.Info(err)
 	} else {
 		//p := 0.0
 		//if len(CPUUsedPercent) > 1 {
@@ -64,20 +64,20 @@ func GetSystemStatus() SystemStatus {
 	}
 	v, err := mem.VirtualMemory()
 	if err != nil {
-		fmt.Println(err)
+		logger.Info(err)
 	} else {
 		sys.MemoryTotal = v.Total
 		sys.MemoryFree = v.Free
 		sys.MemoryUsedPercent = v.UsedPercent
 	}
 	//// almost every return value is a struct
-	//fmt.Printf("Total: %v, Free:%v, UsedPercent:%f%%\n", v.Total, v.Free, v.UsedPercent)
+	//logger.Infof("Total: %v, Free:%v, UsedPercent:%f%%\n", v.Total, v.Free, v.UsedPercent)
 	//// convert to JSON. String() is also implemented
-	//fmt.Println(v)
+	//logger.Info(v)
 
 	//hostname, err := os.Hostname()
 	//if err == nil {
-	//	fmt.Println(hostname)
+	//	logger.Info(hostname)
 	//}
 
 	return sys

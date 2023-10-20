@@ -40,14 +40,14 @@ package handlers
 //	}
 //	bookByID, err := book.GetBookByID(id, false)
 //	if err != nil {
-//		fmt.Println(err)
+//		logger.Info(err)
 //	}
 //	//如果不是PDF文件
 //	if bookByID.Type != book.TypePDF {
 //		return
 //	}
 //	bookPath := bookByID.GetFilePath()
-//	//fmt.Println(bookPath)
+//	//logger.Info(bookPath)
 //
 //	//将1.jpg转换为1
 //	pageNum, err := strconv.Atoi(strings.TrimSuffix(needFile, ".jpg"))
@@ -60,7 +60,7 @@ package handlers
 //	if bookByID.Type == book.TypePDF {
 //		imgData, err = arch.GetImageFromPDF(bookPath, pageNum)
 //		if err != nil {
-//			fmt.Println(err)
+//			logger.Info(err)
 //		}
 //	}
 //	//如果启用了本地缓存
@@ -70,7 +70,7 @@ package handlers
 //		//缓存文件到本地，避免重复解压
 //		errSave := saveFileToCache(id, needFile, imgData, query, "image/jpeg", c.DefaultQuery("thumbnail_mode", "false") == "true")
 //		if errSave != nil {
-//			fmt.Println(errSave)
+//			logger.Info(errSave)
 //		}
 //	}
 //	c.Data(http.StatusOK, "image/jpeg", imgData)

@@ -59,7 +59,7 @@ func StartWebServer() {
 //	if (ext == ".zip" || ext == ".epub" || ext == ".cbz") && !book.NonUTF8Zip {
 //		fsys, zipErr := zip.OpenReader(book.GetFilePath())
 //		if zipErr != nil {
-//			fmt.Println(zipErr)
+//			logger.Info(zipErr)
 //		}
 //		httpFS := http.FS(fsys)
 //		if book.IsDir {
@@ -72,7 +72,7 @@ func StartWebServer() {
 //		fsys, err := archiver.FileSystem(book.GetFilePath())
 //		httpFS := http.FS(fsys)
 //		if err != nil {
-//			fmt.Println(err)
+//			logger.Info(err)
 //		}
 //		if book.IsDir {
 //			engine.Static("/cache/"+book.BookID, book.GetFilePath())

@@ -12,6 +12,6 @@ func TestScanAndGetBookList(t *testing.T) {
 	// if len(bookList) != 4 {
 	// 	t.Errorf("书籍数量不正确" + strconv.Itoa(len(bookList)))
 	// }
-	// fmt.Println(len(bookList))
+	// logger.Info(len(bookList))
 	// t.Log("hello world")
 }

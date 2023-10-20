@@ -2,7 +2,6 @@ package routers
 
 import (
 	"embed"
-	"fmt"
 	"github.com/yumenaka/comi/logger"
 	"html/template"
 	"io"
@@ -45,7 +44,7 @@ func SetDownloadLink() {
 	if types.GetBooksNumber() >= 1 {
 		allBook, err := types.GetAllBookInfoList("name")
 		if err != nil {
-			fmt.Println("设置文件下载失败")
+			logger.Info("设置文件下载失败")
 		} else {
 			for _, info := range allBook.BookInfos {
 				//下载文件
@@ -54,7 +53,7 @@ func SetDownloadLink() {
 					staticUrl := "/raw/" + info.BookID + "/" + info.Name
 					if checkUrlRegistered(info.BookID) {
 						if config.Config.Debug {
-							fmt.Println("路径已注册：", info)
+							logger.Info("路径已注册：", info)
 						}
 						continue
 					} else {
@@ -85,12 +84,12 @@ func embedFile(engine *gin.Engine) {
 	//https://stackoverflow.com/questions/66248258/serve-embedded-filesystem-from-root-path-of-url
 	assetsEmbedFS, err := fs.Sub(staticAssetFS, "static/assets")
 	if err != nil {
-		fmt.Println(err)
+		logger.Info(err)
 	}
 	engine.StaticFS("/assets/", http.FS(assetsEmbedFS))
 	imagesEmbedFS, errStaticImageFS := fs.Sub(staticImageFS, "static/images")
 	if errStaticImageFS != nil {
-		fmt.Println(errStaticImageFS)
+		logger.Info(errStaticImageFS)
 	}
 	engine.StaticFS("/images/", http.FS(imagesEmbedFS))
 
@@ -105,7 +104,7 @@ func embedFile(engine *gin.Engine) {
 	//用react写的后台界面：
 	adminEmbedFS, errAdminFS := fs.Sub(adminFS, "admin")
 	if errAdminFS != nil {
-		fmt.Println(errAdminFS)
+		logger.Info(errAdminFS)
 	}
 	engine.StaticFS("/admin", http.FS(adminEmbedFS))
 
