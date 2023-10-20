@@ -2,7 +2,7 @@ package types
 
 import (
 	"encoding/json"
-	"fmt"
+	"github.com/yumenaka/comi/logger"
 	"os"
 	"path"
 	"path/filepath"
@@ -64,7 +64,7 @@ func UpdateConfig(oldConfig ServerConfig, jsonString string) (newConfig ServerCo
 		// 将字符串解析为字符串切片
 		arr, err := parseString(StoresPath.String())
 		if err != nil {
-			fmt.Println("Failed to parse string:", err)
+			logger.Info("Failed to parse string:", err)
 			return newConfig, err
 		}
 		newConfig.StoresPath = arr
@@ -130,7 +130,7 @@ func UpdateConfig(oldConfig ServerConfig, jsonString string) (newConfig ServerCo
 		// 将字符串解析为字符串切片
 		arr, err := parseString(ExcludePath.String())
 		if err != nil {
-			fmt.Println("Failed to parse string:", err)
+			logger.Info("Failed to parse string:", err)
 			return newConfig, err
 		}
 		newConfig.ExcludePath = arr
@@ -140,7 +140,7 @@ func UpdateConfig(oldConfig ServerConfig, jsonString string) (newConfig ServerCo
 		// 将字符串解析为字符串切片
 		arr, err := parseString(SupportMediaType.String())
 		if err != nil {
-			fmt.Println("Failed to parse string:", err)
+			logger.Info("Failed to parse string:", err)
 			return newConfig, err
 		}
 		newConfig.SupportMediaType = arr
@@ -150,7 +150,7 @@ func UpdateConfig(oldConfig ServerConfig, jsonString string) (newConfig ServerCo
 		// 将字符串解析为字符串切片
 		arr, err := parseString(SupportFileType.String())
 		if err != nil {
-			fmt.Println("Failed to parse string:", err)
+			logger.Info("Failed to parse string:", err)
 			return newConfig, err
 		}
 		newConfig.SupportFileType = arr
@@ -223,22 +223,22 @@ type WebPServerConfig struct {
 func (c *ServerConfig) SetByExecutableFilename() {
 	// 当前执行目录
 	//targetPath, _ := os.Getwd()
-	//fmt.Println(locale.GetString("target_path"), targetPath)
+	//logger.Info(locale.GetString("target_path"), targetPath)
 	// 带后缀的执行文件名 comi.exe  sketch.exe
 	filenameWithSuffix := path.Base(os.Args[0])
 	// 执行文件名后缀
 	fileSuffix := path.Ext(filenameWithSuffix)
 	// 去掉后缀后的执行文件名
 	filenameWithOutSuffix := strings.TrimSuffix(filenameWithSuffix, fileSuffix)
-	//fmt.Println("filenameWithOutSuffix =", filenameWithOutSuffix)
+	//logger.Info("filenameWithOutSuffix =", filenameWithOutSuffix)
 	ex, err := os.Executable()
 	if err != nil {
-		fmt.Println(err)
+		logger.Info(err)
 	}
 	extPath := filepath.Dir(ex)
-	//fmt.Println("extPath =",extPath)
+	//logger.Info("extPath =",extPath)
 	ExtFileName := strings.TrimPrefix(filenameWithOutSuffix, extPath)
 	if c.Debug {
-		fmt.Println("ExtFileName =", ExtFileName)
+		logger.Info("ExtFileName =", ExtFileName)
 	}
 }

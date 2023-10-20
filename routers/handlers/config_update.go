@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"reflect"
@@ -25,12 +24,12 @@ func HandlerConfigUpdate(c *gin.Context) {
 	}
 	// 将JSON数据转换为字符串并打印
 	jsonString := string(body)
-	fmt.Printf("Received JSON data: %s \n", jsonString)
+	logger.Infof("Received JSON data: %s \n", jsonString)
 
 	// 解析JSON数据并更新服务器配置
 	newConfig, err := types.UpdateConfig(config.Config, jsonString)
 	if err != nil {
-		fmt.Println(err.Error())
+		logger.Info(err.Error())
 		c.JSON(http.StatusMethodNotAllowed, gin.H{"error": "Failed to parse JSON data"})
 		return
 	}
@@ -97,17 +96,17 @@ func BeforeConfigUpdate(oldConfig *types.ServerConfig, newConfig *types.ServerCo
 			newConfig.Debug,
 		)
 		if err := scan.ScanStorePath(option); err != nil {
-			logger.Log.Infof("Failed to scan store path: %v", err)
+			logger.Infof("Failed to scan store path: %v", err)
 		}
 		// 保存扫描结果到数据库 //TODO:这里有问题，启用数据库会报错
 		if oldConfig.EnableDatabase {
 			if err := scan.SaveResultsToDatabase(config.Config.ConfigPath, config.Config.ClearDatabaseWhenExit); err != nil {
-				logger.Log.Infof("Failed to save results to database: %v", err)
+				logger.Infof("Failed to save results to database: %v", err)
 			}
 		}
 	} else {
 		if oldConfig.Debug {
-			logger.Log.Infof("oldConfig.StoresPath == newConfig.StoresPath,skip scan store path")
+			logger.Infof("oldConfig.StoresPath == newConfig.StoresPath,skip scan store path")
 		}
 	}
 	oldConfig = newConfig

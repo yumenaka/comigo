@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/yumenaka/comi/logger"
 	"strconv"
 
@@ -17,17 +16,17 @@ func initBookStores(args []string) {
 	if config.Config.EnableDatabase {
 		// 从数据库中读取书籍信息并持久化
 		if err := database.InitDatabase(config.Config.ConfigPath); err != nil {
-			fmt.Println(err)
+			logger.Info(err)
 		}
 		books, err := database.GetBooksFromDatabase()
 		if err != nil {
-			fmt.Println(err)
+			logger.Info(err)
 		} else {
 			err := types.RestoreDatabaseBooks(books)
 			if err != nil {
-				fmt.Println(err)
+				logger.Info(err)
 			} else {
-				fmt.Println("从数据库中读取书籍信息,持久化成功:" + strconv.Itoa(len(books)))
+				logger.Info("从数据库中读取书籍信息,持久化成功:" + strconv.Itoa(len(books)))
 			}
 		}
 	}
@@ -51,14 +50,14 @@ func initBookStores(args []string) {
 	)
 	err := scan.ScanStorePath(option)
 	if err != nil {
-		logger.Log.Infof("Failed to scan store path: %v", err)
+		logger.Infof("Failed to scan store path: %v", err)
 	}
 
 	//4、保存扫描结果到数据库
 	if config.Config.EnableDatabase {
 		err = scan.SaveResultsToDatabase(config.Config.ConfigPath, config.Config.ClearDatabaseWhenExit)
 		if err != nil {
-			logger.Log.Infof("Failed SaveResultsToDatabase: %v", err)
+			logger.Infof("Failed SaveResultsToDatabase: %v", err)
 			return
 		}
 	}

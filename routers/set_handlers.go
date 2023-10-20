@@ -1,10 +1,9 @@
 package routers
 
 import (
-	"fmt"
-
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comi/config"
+	"github.com/yumenaka/comi/logger"
 	"github.com/yumenaka/comi/routers/handlers"
 	"github.com/yumenaka/comi/routers/token"
 	"github.com/yumenaka/comi/routers/websocket"
@@ -41,7 +40,7 @@ func setWebAPI(engine *gin.Engine) {
 		// 创建 jwt 中间件
 		jwtMiddleware, err := token.NewJwtMiddleware()
 		if err != nil {
-			fmt.Println("JWT Error:" + err.Error())
+			logger.Info("JWT Error:" + err.Error())
 		}
 		// 登录 api ，直接用 jwtMiddleware 中的 `LoginHandler`
 		//这个函数中，会执行NewJwtMiddleware()中设置的Authenticator来验证用户权限，如果通过会返回token。

@@ -5,7 +5,6 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	qrcodeTerminal "github.com/Baozisoftware/qrcode-terminal-go"
 	"github.com/yumenaka/comi/logger"
 	"image"
@@ -74,7 +73,7 @@ func GetFreePort() (int, error) {
 //		FromLanguages(languages...).
 //		Build()
 //	if language, exists := detector.DetectLanguageOf("languages are awesome"); exists {
-//		fmt.Println(language)
+//		logger.Info(language)
 //		return language
 //	}
 //	return ""
@@ -86,16 +85,16 @@ func GetImageDataBlurHash(loadedImage []byte, components int) string {
 	buf := bytes.NewBuffer(loadedImage)
 	imageData, err := imaging.Decode(buf)
 	if err != nil {
-		fmt.Println(err)
+		logger.Info(err)
 		return "error blurhash!"
 	}
 	str, err := blurhash.Encode(components, components, imageData)
 	if err != nil {
 		// Handle errors
-		fmt.Println(err)
+		logger.Info(err)
 		return "error blurhash!"
 	}
-	fmt.Printf("Hash: %s\n", str)
+	logger.Infof("Hash: %s\n", str)
 	return str
 }
 
@@ -105,17 +104,17 @@ func GetImageDataBlurHashImage(loadedImage []byte, components int) []byte {
 	buf := bytes.NewBuffer(loadedImage)
 	imageData, err := imaging.Decode(buf)
 	if err != nil {
-		fmt.Println(err)
+		logger.Info(err)
 	}
 	str, err := blurhash.Encode(components, components, imageData)
 	if err != nil {
-		fmt.Println(err)
+		logger.Info(err)
 	}
 	// Generate an imageData for a given BlurHash
 	// Punch specifies the contrasts and defaults to 1
 	img, err := blurhash.Decode(str, imageData.Bounds().Dx(), imageData.Bounds().Dy(), 1)
 	if err != nil {
-		fmt.Println(err)
+		logger.Info(err)
 	}
 	buf2 := &bytes.Buffer{}
 	//将图片编码成jpeg
@@ -131,7 +130,7 @@ func ImageResizeByWidth(loadedImage []byte, width int) []byte {
 	buf := bytes.NewBuffer(loadedImage)
 	decode, err := imaging.Decode(buf)
 	if err != nil {
-		fmt.Println(err)
+		logger.Info(err)
 		return loadedImage
 	}
 	sourceWidth := decode.Bounds().Dx()
@@ -153,7 +152,7 @@ func ImageResizeByMaxWidth(loadedImage []byte, maxWidth int) ([]byte, error) {
 	buf := bytes.NewBuffer(loadedImage)
 	decode, err := imaging.Decode(buf)
 	if err != nil {
-		fmt.Println(err)
+		logger.Info(err)
 		return nil, errors.New("imaging.Decode() Error")
 	}
 	sourceWidth := decode.Bounds().Dx()
@@ -178,7 +177,7 @@ func ImageResizeByMaxHeight(loadedImage []byte, maxHeight int) ([]byte, error) {
 	buf := bytes.NewBuffer(loadedImage)
 	decode, err := imaging.Decode(buf)
 	if err != nil {
-		fmt.Println(err)
+		logger.Info(err)
 		return nil, errors.New("imaging.Decode() Error")
 	}
 	sourceHeight := decode.Bounds().Dy()
@@ -202,7 +201,7 @@ func ImageResizeByHeight(loadedImage []byte, height int) []byte {
 	buf := bytes.NewBuffer(loadedImage)
 	decode, err := imaging.Decode(buf)
 	if err != nil {
-		fmt.Println(err)
+		logger.Info(err)
 		return loadedImage
 	}
 	sourceHeight := decode.Bounds().Dy()
@@ -224,7 +223,7 @@ func ImageResize(loadedImage []byte, width int, height int) []byte {
 	buf := bytes.NewBuffer(loadedImage)
 	decode, err := imaging.Decode(buf)
 	if err != nil {
-		fmt.Println(err)
+		logger.Info(err)
 		return loadedImage
 	}
 	//生成缩略图，尺寸width*height
@@ -243,7 +242,7 @@ func ImageThumbnail(loadedImage []byte, width int, height int) []byte {
 	buf := bytes.NewBuffer(loadedImage)
 	imageData, err := imaging.Decode(buf)
 	if err != nil {
-		fmt.Println(err)
+		logger.Info(err)
 		return loadedImage
 	}
 	//生成缩略图，尺寸width*height
@@ -264,7 +263,7 @@ func ImageAutoCrop(loadedImage []byte, energyThreshold float32) []byte {
 	buf := bytes.NewBuffer(loadedImage)
 	img, err := imaging.Decode(buf)
 	if err != nil {
-		logger.Log.Info(err)
+		logger.Info(err)
 		return loadedImage
 	}
 	//使用 BoundsForThreshold 查找图像的自动裁剪边界
@@ -291,7 +290,7 @@ func ImageGray(loadedImage []byte) []byte {
 	buf := bytes.NewBuffer(loadedImage)
 	img, err := imaging.Decode(buf)
 	if err != nil {
-		logger.Log.Info(err)
+		logger.Info(err)
 		return loadedImage
 	}
 	result := imaging.Grayscale(img)
@@ -371,7 +370,7 @@ func PrintAllReaderURL(Port int, OpenBrowserFlag bool, PrintAllPossibleQRCode bo
 		protocol = "https://"
 	}
 	localURL := protocol + "127.0.0.1:" + strconv.Itoa(Port) + etcStr
-	logger.Log.Info(locale.GetString("local_reading") + localURL + etcStr)
+	logger.Info(locale.GetString("local_reading") + localURL + etcStr)
 	//打开浏览器
 	if OpenBrowserFlag {
 		OpenBrowser(protocol + "127.0.0.1:" + strconv.Itoa(Port) + etcStr)
@@ -385,7 +384,7 @@ func printURLAndQRCode(port int, PrintAllPossibleQRCode bool, ServerHost string,
 
 	if ServerHost != "" {
 		readURL := protocol + ServerHost + ":" + strconv.Itoa(port) + etcStr
-		logger.Log.Info(locale.GetString("reading_url_maybe") + readURL)
+		logger.Info(locale.GetString("reading_url_maybe") + readURL)
 		PrintQRCode(readURL)
 		return
 	}
@@ -393,18 +392,18 @@ func printURLAndQRCode(port int, PrintAllPossibleQRCode bool, ServerHost string,
 	if PrintAllPossibleQRCode {
 		IPList, err := GetIPList()
 		if err != nil {
-			logger.Log.Infof(locale.GetString("get_ip_error")+" %v", err)
+			logger.Infof(locale.GetString("get_ip_error")+" %v", err)
 		}
 		for _, IP := range IPList {
 			readURL := protocol + IP + ":" + strconv.Itoa(port) + etcStr
-			logger.Log.Info(locale.GetString("reading_url_maybe") + readURL)
+			logger.Info(locale.GetString("reading_url_maybe") + readURL)
 			PrintQRCode(readURL)
 		}
 	} else {
 		//只打印本机的首选出站IP
 		OutIP := GetOutboundIP().String()
 		readURL := protocol + OutIP + ":" + strconv.Itoa(port) + etcStr
-		logger.Log.Info(locale.GetString("reading_url_maybe") + readURL)
+		logger.Info(locale.GetString("reading_url_maybe") + readURL)
 		PrintQRCode(readURL)
 	}
 }
@@ -418,17 +417,15 @@ func PrintQRCode(text string) {
 func CheckPort(port int) bool {
 	ln, err := net.Listen("tcp", ":"+strconv.Itoa(port))
 	if err != nil {
-		_, err := fmt.Println(os.Stderr, locale.GetString("cannot_listen"), port, err)
-		if err != nil {
-			return false
-		}
+		logger.Info(os.Stderr, locale.GetString("cannot_listen"), port, err)
 		return false
 	}
 	err = ln.Close()
 	if err != nil {
-		fmt.Println(locale.GetString("check_pork_error") + strconv.Itoa(port))
+		logger.Info(locale.GetString("check_pork_error") + strconv.Itoa(port))
+		return false
 	}
-	//fmt.Printf("TCP Port %q is available", port)
+	//logger.Infof("TCP Port %q is available", port)
 	return true
 }
 
@@ -447,7 +444,7 @@ func GetIPList() (IPList []string, err error) {
 		}
 		addrs, err := i.Addrs()
 		if err != nil {
-			fmt.Printf(locale.GetString("get_ip_error")+"%v", err)
+			logger.Info(locale.GetString("get_ip_error")+"%v", err)
 			return nil, err
 		}
 		for _, addr := range addrs {
@@ -492,7 +489,7 @@ func GetOutboundIP() net.IP {
 //func GetMacAddrList() (macAddrList []string) {
 //	netInterfaces, err := net.Interfaces()
 //	if err != nil {
-//		fmt.Printf(locale.GetString("check_mac_error")+": %v", err)
+//		logger.Infof(locale.GetString("check_mac_error")+": %v", err)
 //		return macAddrList
 //	}
 //	//for _, netInterface := range netInterfaces {
@@ -538,14 +535,14 @@ func OpenBrowser(uri string) {
 	if runtime.GOOS == "windows" {
 		cmd = exec.Command("CMD", "/C", "start", uri)
 		if err := cmd.Start(); err != nil {
-			fmt.Println(locale.GetString("open_browser_error"))
-			fmt.Println(err.Error())
+			logger.Info(locale.GetString("open_browser_error"))
+			logger.Info(err.Error())
 		}
 	} else if runtime.GOOS == "darwin" {
 		cmd = exec.Command("open", uri)
 		if err := cmd.Start(); err != nil {
-			fmt.Println(locale.GetString("open_browser_error"))
-			fmt.Println(err.Error())
+			logger.Info(locale.GetString("open_browser_error"))
+			logger.Info(err.Error())
 		}
 	} else if runtime.GOOS == "linux" {
 		cmd = exec.Command("xdg-open", uri)
@@ -556,13 +553,13 @@ func OpenBrowser(uri string) {
 func MD5file(fName string) string {
 	f, e := os.Open(fName)
 	if e != nil {
-		fmt.Println(e)
+		logger.Info(e)
 		//log.Fatal(e)
 	}
 	h := md5.New()
 	_, e = io.Copy(h, f)
 	if e != nil {
-		fmt.Println(e)
+		logger.Info(e)
 		//log.Fatal(e)
 	}
 	return hex.EncodeToString(h.Sum(nil))
@@ -581,13 +578,13 @@ func getNumberFromString(s string) (int, error) {
 			for _, v := range value {
 				temp, errTemp := strconv.Atoi(v)
 				if errTemp != nil {
-					fmt.Println("error num value:" + v)
+					logger.Info("error num value:" + v)
 				} else {
 					num = num + temp
 				}
 			}
 		}
-		//fmt.Println("get Number:",num," form string:",s,"numbers[]=",numbers)
+		//logger.Info("get Number:",num," form string:",s,"numbers[]=",numbers)
 	} else {
 		err = errors.New("number not found")
 		return 0, err

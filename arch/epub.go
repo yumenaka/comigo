@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/xml"
 	"errors"
-	"fmt"
+	"github.com/yumenaka/comi/logger"
 	"io"
 	"net/url"
 	"os"
@@ -30,7 +30,7 @@ func getDataFromEpub(epubPath string, needFile string) (data []byte, err error) 
 	defer func(file *os.File) {
 		err := file.Close()
 		if err != nil {
-			fmt.Println("file.Close() Error:", err)
+			logger.Info("file.Close() Error:", err)
 		}
 	}(file)
 	//是否是压缩包
@@ -53,7 +53,7 @@ func getDataFromEpub(epubPath string, needFile string) (data []byte, err error) 
 			defer func(file io.ReadCloser) {
 				err := file.Close()
 				if err != nil {
-					fmt.Println("file.Close() Error:", err)
+					logger.Info("file.Close() Error:", err)
 				}
 			}(file)
 			content, err := io.ReadAll(file)
@@ -147,17 +147,17 @@ type Package struct {
 func getOPFPath(epubPath string) (opfPath string, err error) {
 	//data, err := os.ReadFile(ContainerXMLPath)
 	//if err != nil {
-	//	fmt.Println("ReadFile Error:", err)
+	//	logger.Info("ReadFile Error:", err)
 	//}
 	data, err := getDataFromEpub(epubPath, "META-INF/container.xml")
 	if err != nil {
-		fmt.Println(err)
+		logger.Info(err)
 		return "", errors.New("getOPFPath Error epubPath:" + epubPath)
 	}
 	con := new(Container)
 	err = xml.Unmarshal(data, con)
 	if err != nil {
-		fmt.Println("XML Unmarshal Error:", err)
+		logger.Info("XML Unmarshal Error:", err)
 	}
 	opfPath = con.Rootfiles.Rootfile.FullPath
 	return
@@ -173,7 +173,7 @@ func findAttrValue(r io.Reader, imgKey string) (value string) {
 			if tokenizer.Err() == io.EOF {
 				return
 			}
-			fmt.Printf("Error: %v", tokenizer.Err())
+			logger.Infof("Error: %v", tokenizer.Err())
 			return
 		}
 		tagName, _ := tokenizer.TagName()
@@ -234,17 +234,17 @@ func GetImageListFromEpubFile(epubPath string) (imageList []string, err error) {
 	pack := new(Package)
 	opfPath, err := getOPFPath(epubPath)
 	if err != nil {
-		fmt.Println("getOPFPath Error:", err)
+		logger.Info("getOPFPath Error:", err)
 		return
 	}
 	b, err := getDataFromEpub(epubPath, opfPath)
 	if err != nil {
-		fmt.Println("getDataFromEpub Error:", err)
+		logger.Info("getDataFromEpub Error:", err)
 		return
 	}
 	err = xml.Unmarshal(b, pack)
 	if err != nil {
-		fmt.Println("XML Unmarshal Error:", err)
+		logger.Info("XML Unmarshal Error:", err)
 		return
 	}
 	//顺序信息
@@ -267,14 +267,14 @@ func GetImageListFromEpubFile(epubPath string) (imageList []string, err error) {
 	for i := 0; i < len(htmlList); i++ {
 		data, err := getDataFromEpub(epubPath, htmlList[i])
 		if err != nil {
-			fmt.Println(err)
+			logger.Info(err)
 			continue
 		}
 		reader := bytes.NewReader(data)
 		tempSrc := findAttrValue(reader, "src")
 		src := absUrl(tempSrc, htmlList[i])
 		imageList = append(imageList, src)
-		//fmt.Println(src)
+		//logger.Info(src)
 	}
 	return imageList, err
 }
@@ -294,17 +294,17 @@ func GetEpubMetadata(epubPath string) (metadata EpubMetadata, err error) {
 	pack := new(Package)
 	opfPath, err := getOPFPath(epubPath)
 	if err != nil {
-		fmt.Println("getOPFPath Error:", err)
+		logger.Info("getOPFPath Error:", err)
 		return
 	}
 	b, err := getDataFromEpub(epubPath, opfPath)
 	if err != nil {
-		fmt.Println("getDataFromEpub Error:", err)
+		logger.Info("getDataFromEpub Error:", err)
 		return
 	}
 	err = xml.Unmarshal(b, pack)
 	if err != nil {
-		fmt.Println("XML Unmarshal Error:", err)
+		logger.Info("XML Unmarshal Error:", err)
 		return
 	}
 	return EpubMetadata{

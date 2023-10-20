@@ -5,7 +5,6 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"github.com/yumenaka/comi/logger"
 	"image"
 	"log"
@@ -91,7 +90,7 @@ func CheckBookExist(filePath string, bookType SupportFileType, storePath string)
 	for _, realBook := range mapBooks {
 		fileAbaPath, err := filepath.Abs(filePath)
 		if err != nil {
-			fmt.Println(err, fileAbaPath)
+			logger.Info(err, fileAbaPath)
 			if realBook.FilePath == filePath && realBook.ParentFolder == storePath && realBook.Type == bookType {
 				return true
 			}
@@ -136,7 +135,7 @@ func (b *Book) setFilePath(path string) {
 	fileAbaPath, err := filepath.Abs(path)
 	if err != nil {
 		//因为权限问题，无法取得绝对路径的情况下，用相对路径
-		fmt.Println(err, fileAbaPath)
+		logger.Info(err, fileAbaPath)
 		b.FilePath = path
 	} else {
 		b.FilePath = fileAbaPath
@@ -258,7 +257,7 @@ func AddBook(b *Book, basePath string, minPageNum int) error {
 	}
 	if _, ok := Stores.mapBookstores[basePath]; !ok {
 		if err := Stores.NewSingleBookstore(basePath); err != nil {
-			fmt.Println(err)
+			logger.Info(err)
 		}
 	}
 	mapBooks[b.BookID] = b
@@ -470,7 +469,7 @@ func (b *Book) SortPages(s string) {
 	if s != "" {
 		b.Pages.SortBy = s
 		sort.Sort(b.Pages)
-		//fmt.Println("sort_by:" + s)
+		//logger.Info("sort_by:" + s)
 	}
 	b.setClover() //重新排序后重新设置封面
 }
@@ -492,7 +491,7 @@ func (b *Book) SortPagesByImageList(imageList []string) {
 		}
 	}
 	if len(reSortList) == 0 {
-		logger.Log.Info(locale.GetString("EPUB_CANNOT_RESORT"), b.FilePath)
+		logger.Info(locale.GetString("EPUB_CANNOT_RESORT"), b.FilePath)
 		return
 	}
 	//不在表中的话，就不改变顺序，并加在有序表的后面
@@ -519,10 +518,10 @@ func md5string(s string) string {
 
 // setBookID  根据路径的MD5，生成书籍ID。初始化时调用。
 func (b *Book) setBookID() {
-	//fmt.Println("文件绝对路径："+fileAbaPath, "路径的md5："+md5string(fileAbaPath))
+	//logger.Info("文件绝对路径："+fileAbaPath, "路径的md5："+md5string(fileAbaPath))
 	fileAbaPath, err := filepath.Abs(b.FilePath)
 	if err != nil {
-		fmt.Println(err, fileAbaPath)
+		logger.Info(err, fileAbaPath)
 	}
 	tempStr := b.FilePath + strconv.Itoa(b.ChildBookNum) + strconv.Itoa(int(b.FileSize)) + string(b.Type) + b.ParentFolder + b.BookStorePath
 	b62 := base62.EncodeToString([]byte(md5string(md5string(tempStr))))
@@ -531,7 +530,7 @@ func (b *Book) setBookID() {
 
 func getShortBookID(fullID string, minLength int) string {
 	if len(fullID) <= minLength {
-		fmt.Println("can not short ID:" + fullID)
+		logger.Info("can not short ID:" + fullID)
 		return fullID
 	}
 	shortID := fullID[0:minLength]
@@ -566,7 +565,7 @@ func getShortBookID(fullID string, minLength int) string {
 func (b *Book) GetBookID() string {
 	//防止未初始化，最好不要用到
 	if b.BookID == "" {
-		fmt.Println("BookID未初始化，一定是哪里写错了")
+		logger.Info("BookID未初始化，一定是哪里写错了")
 		b.setBookID()
 	}
 	return b.BookID
@@ -666,7 +665,7 @@ func (i *ImageInfo) analyzeImage(bookPath string) (err error) {
 
 	imgData, err := arch.GetSingleFile(bookPath, i.NameInArchive, "gbk")
 	if err != nil {
-		fmt.Println(err)
+		logger.Info(err)
 	}
 	buf := bytes.NewBuffer(imgData)
 	img, err = imaging.Decode(buf)
@@ -688,7 +687,7 @@ func (i *ImageInfo) analyzeImage(bookPath string) (err error) {
 
 // ClearTempFilesALL web加载时保存的临时图片，在在退出后清理
 func ClearTempFilesALL(debug bool, cacheFilePath string) {
-	//fmt.Println(locale.GetString("clear_temp_file_start"))
+	//logger.Info(locale.GetString("clear_temp_file_start"))
 	for _, tempBook := range mapBooks {
 		clearTempFilesOne(debug, cacheFilePath, tempBook)
 	}
@@ -696,7 +695,7 @@ func ClearTempFilesALL(debug bool, cacheFilePath string) {
 
 // 清空某一本压缩漫画的解压缓存
 func clearTempFilesOne(debug bool, cacheFilePath string, book *Book) {
-	//fmt.Println(locale.GetString("clear_temp_file_start"))
+	//logger.Info(locale.GetString("clear_temp_file_start"))
 	haveThisBook := false
 	for _, tempBook := range mapBooks {
 		if tempBook.GetBookID() == book.GetBookID() {
@@ -707,10 +706,10 @@ func clearTempFilesOne(debug bool, cacheFilePath string, book *Book) {
 		cachePath := path.Join(cacheFilePath, book.GetBookID())
 		err := os.RemoveAll(cachePath)
 		if err != nil {
-			fmt.Println(locale.GetString("clear_temp_file_error") + cachePath)
+			logger.Info(locale.GetString("clear_temp_file_error") + cachePath)
 		} else {
 			if debug {
-				fmt.Println(locale.GetString("clear_temp_file_completed") + cachePath)
+				logger.Info(locale.GetString("clear_temp_file_completed") + cachePath)
 			}
 		}
 	}

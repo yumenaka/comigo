@@ -2,7 +2,7 @@ package websocket
 
 import (
 	"encoding/json"
-	"fmt"
+	"github.com/yumenaka/comi/logger"
 	"log"
 	"math"
 	"time"
@@ -81,7 +81,7 @@ func handSyncPageMessageToFlipMode(client *websocket.Conn, msg Message, clientID
 		return
 	}
 	if *WsDebug {
-		fmt.Println(" SyncPage message toFlipMode:", data, clientID)
+		logger.Info(" SyncPage message toFlipMode:", data, clientID)
 	}
 	//验证收到的数据
 	if data.BookID == "" || data.NowPageNum < 0 || data.NowPageNum > math.MaxInt {
@@ -131,7 +131,7 @@ func handSyncPageMessageToScrollMode(client *websocket.Conn, msg Message, client
 		return
 	}
 	if *WsDebug {
-		fmt.Println(" SyncPage message to ScrollMode:", data, clientID)
+		logger.Info(" SyncPage message to ScrollMode:", data, clientID)
 	}
 	if data.BookID == "" || data.NowPageNum < 0 || data.NowPageNum > math.MaxInt || data.NowPageNumPercent > 1 {
 		log.Printf("handSyncPage_ToFlipode data error: %v", data)

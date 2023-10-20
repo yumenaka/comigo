@@ -10,18 +10,18 @@ import (
 )
 
 func InitDatabase(configFilePath string) error {
-	fmt.Println("Not Support DateBase")
+	logger.Info("Not Support DateBase")
 	return nil
 }
 
 func CloseDatabase() {
-	fmt.Println("Not Support DateBase")
+	logger.Info("Not Support DateBase")
 }
 
 // DeleteAllBookInDatabase  清空数据库的Book与SinglePageInfo表
 // 后台并发执行，所以不能保证结果如预期，不用这个函数。
 func ClearBookData(clearBook *mainTypes.Book) {
-	fmt.Println("Not Support DateBase")
+	logger.Info("Not Support DateBase")
 }
 
 func GetBooksFromDatabase() (list []*mainTypes.Book, err error) {
@@ -31,12 +31,12 @@ func GetBooksFromDatabase() (list []*mainTypes.Book, err error) {
 // DeleteAllBookInDatabase  清空数据库的Book与SinglePageInfo表
 // 后台并发执行，不能保证结果如预期，不用这个函数。
 func DeleteAllBookInDatabase(debug bool) {
-	fmt.Println("Not Support DateBase")
+	logger.Info("Not Support DateBase")
 }
 
 // SaveAllBookToDatabase 将Map里面的书籍信息，全部保存到本地数据库中
 func SaveAllBookToDatabase(databaseFilePath string, m map[string]*mainTypes.Book) {
-	fmt.Println("Not Support DateBase")
+	logger.Info("Not Support DateBase")
 }
 
 // SaveBookListToDatabase  向数据库中插入一组书
@@ -61,7 +61,7 @@ func GetArchiveBookFromDatabase() (list []*mainTypes.Book, err error) {
 
 // CleanDatabaseByLocalData 根据扫描完成的书籍数据，清理本地数据库当中不存在的书籍
 func CleanDatabaseByLocalData() {
-	fmt.Println("Not Support DateBase")
+	logger.Info("Not Support DateBase")
 }
 
 //func InitMapBooksByDatabase() {

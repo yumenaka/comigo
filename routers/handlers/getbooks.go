@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"fmt"
+	"github.com/yumenaka/comi/logger"
 	"net/http"
 	"strconv"
 
@@ -26,7 +26,7 @@ func HandlerGetBookList(c *gin.Context) {
 	if err == nil {
 		bookInfoList, err := types.GetBookInfoListByMaxDepth(maxDepth, sortBy)
 		if err != nil {
-			fmt.Println(err)
+			logger.Info(err)
 			return
 		}
 		bookInfoList.SortBooks(sortBy)
@@ -38,7 +38,7 @@ func HandlerGetBookList(c *gin.Context) {
 	if bookGroupId != "" {
 		bookInfoList, err := types.GetBookInfoListByBookGroupBookID(bookGroupId, sortBy)
 		if err != nil {
-			fmt.Println(err)
+			logger.Info(err)
 		}
 		bookInfoList.SortBooks(sortBy)
 		c.PureJSON(http.StatusOK, bookInfoList.BookInfos)
@@ -51,7 +51,7 @@ func HandlerGetBookList(c *gin.Context) {
 	if err == nil {
 		bookInfoList, err := types.GetBookInfoListByDepth(depth, sortBy)
 		if err != nil {
-			fmt.Println(err)
+			logger.Info(err)
 		} else {
 			bookInfoList.SortBooks(sortBy)
 			c.PureJSON(http.StatusOK, bookInfoList.BookInfos)

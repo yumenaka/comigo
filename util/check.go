@@ -3,7 +3,8 @@ package util
 //https://github.com/gookit/goutil/blob/master/fsutil/check.go
 import (
 	"bytes"
-	"fmt"
+	"github.com/yumenaka/comi/logger"
+
 	"io"
 	"net/http"
 	"os"
@@ -42,7 +43,7 @@ func IsExist(path string) bool {
 		if os.IsNotExist(err) {
 			return false
 		}
-		fmt.Println(err)
+		logger.Info(err)
 		return false
 	}
 	return true

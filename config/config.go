@@ -1,7 +1,7 @@
 package config
 
 import (
-	"fmt"
+	"github.com/yumenaka/comi/logger"
 	"net/http"
 	"os"
 	"path"
@@ -46,16 +46,16 @@ func SaveConfig(SaveTo string) {
 	//保存配置
 	bytes, err := toml.Marshal(Config)
 	if err != nil {
-		fmt.Println("toml.Marshal Error")
+		logger.Info("toml.Marshal Error")
 		return
 	}
 	//在命令行打印
-	fmt.Println("Config Save To " + SaveTo)
+	logger.Info("Config Save To " + SaveTo)
 	//保存到文件
 	if SaveTo == "HomeDir" {
 		home, err := homedir.Dir()
 		if err != nil {
-			fmt.Printf("homedir.Dir Error: %s \n", err)
+			logger.Infof("homedir.Dir Error: %s \n", err)
 		}
 		// 创建目录
 		err = os.MkdirAll(path.Join(home, ".config/comigo/"), os.ModePerm)
@@ -64,24 +64,24 @@ func SaveConfig(SaveTo string) {
 		}
 		err = os.WriteFile(path.Join(home, ".config/comigo/config.toml"), bytes, 0644)
 		if err != nil {
-			fmt.Printf("os.WriteFile Error: %s \n", err)
+			logger.Infof("os.WriteFile Error: %s \n", err)
 		}
 	}
 	if SaveTo == "NowDir" {
 		err = os.WriteFile("config.toml", bytes, 0644)
 		if err != nil {
-			fmt.Printf("os.WriteFile Error: %s \n", err)
+			logger.Infof("os.WriteFile Error: %s \n", err)
 		}
 	}
 	if SaveTo == "ProgramDir" {
 		// 获取可执行程序自身的文件路径
 		executablePath, err := os.Executable()
 		if err != nil {
-			fmt.Printf("os.Executable Error: %s \n", err)
+			logger.Infof("os.Executable Error: %s \n", err)
 		}
 		err = os.WriteFile(path.Join(executablePath, "config.toml"), bytes, 0644)
 		if err != nil {
-			fmt.Printf("os.WriteFile Error: %s \n", err)
+			logger.Infof("os.WriteFile Error: %s \n", err)
 		}
 	}
 }

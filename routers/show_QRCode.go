@@ -1,7 +1,7 @@
 package routers
 
 import (
-	"fmt"
+	"github.com/yumenaka/comi/logger"
 	"strings"
 
 	"github.com/sanity-io/litter"
@@ -18,7 +18,7 @@ func showQRCode() {
 	if types.GetBooksNumber() == 1 {
 		bookList, err := types.GetAllBookInfoList("name")
 		if err != nil {
-			fmt.Println(err)
+			logger.Info(err)
 		}
 		if len(bookList.BookInfos) == 1 {
 			etcStr = "/#/scroll/" + bookList.BookInfos[0].BookID
@@ -44,5 +44,5 @@ func showQRCode() {
 	if config.Config.Debug {
 		litter.Dump(config.Config)
 	}
-	fmt.Println(locale.GetString("ctrl_c_hint"))
+	logger.Info(locale.GetString("ctrl_c_hint"))
 }

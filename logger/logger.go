@@ -18,9 +18,16 @@ func init() {
 	Log = logrus.New()
 }
 
+func Info(args ...interface{}) {
+	Log.Info(args...)
+}
+
+func Infof(format string, args ...interface{}) {
+	Log.Infof(format, args...)
+}
+
 // HandlerLog 默认log
 func HandlerLog(LogToFile bool, LogFilePath string, LogFileName string) gin.HandlerFunc {
-
 	//设置日志级别
 	Log.SetLevel(logrus.DebugLevel)
 	//设置输出
@@ -59,6 +66,7 @@ func HandlerLog(LogToFile bool, LogFilePath string, LogFileName string) gin.Hand
 			TimestampFormat: "2006-01-02 03:04:05",
 		}))
 	}
+	//自定义gin处理函数
 	return func(c *gin.Context) {
 		//开始时间
 		startTime := time.Now()
@@ -92,7 +100,7 @@ func LoggerToStdout() gin.HandlerFunc {
 	Log.SetLevel(logrus.DebugLevel)
 	//设置输出
 	Log.SetOutput(os.Stdout)
-	//
+	//自定义gin处理函数
 	return func(c *gin.Context) {
 		//开始时间
 		startTime := time.Now()

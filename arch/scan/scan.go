@@ -3,7 +3,6 @@ package scan
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/sirupsen/logrus"
 	"github.com/yumenaka/comi/logger"
 	"io/fs"
@@ -107,7 +106,7 @@ func ScanStorePath(scanConfig Option) error {
 		for _, p := range scanConfig.StoresPath {
 			addList, err := ScanAndGetBookList(p, scanConfig)
 			if err != nil {
-				logger.Log.Info(locale.GetString("scan_error"), p, err)
+				logger.Info(locale.GetString("scan_error"), p, err)
 				return err
 			} else {
 				AddBooksToStore(addList, p, scanConfig.MinImageNum)
@@ -125,7 +124,7 @@ func SaveResultsToDatabase(ConfigPath string, ClearDatabaseWhenExit bool) error 
 	}
 	saveErr := database.SaveBookListToDatabase(types.GetArchiveBooks())
 	if saveErr != nil {
-		fmt.Println(saveErr)
+		logger.Info(saveErr)
 		return saveErr
 	}
 	return nil
@@ -142,11 +141,11 @@ func ClearDatabaseWhenExit(ConfigPath string) {
 func AddBooksToStore(bookList []*types.Book, basePath string, MinImageNum int) {
 	err := types.AddBooks(bookList, basePath, MinImageNum)
 	if err != nil {
-		fmt.Println(locale.GetString("AddBook_error"), basePath)
+		logger.Info(locale.GetString("AddBook_error"), basePath)
 	}
 	// 然后生成对应的虚拟书籍组
 	if err := types.Stores.GenerateBookGroup(); err != nil {
-		fmt.Println(err)
+		logger.Info(err)
 	}
 }
 
@@ -159,9 +158,9 @@ func ScanAndGetBookList(storePath string, scanOption Option) (newBookList []*typ
 	storePathAbs, err := filepath.Abs(storePath)
 	if err != nil {
 		storePathAbs = storePath
-		fmt.Println(err)
+		logger.Info(err)
 	}
-	logger.Log.Info(locale.GetString("SCAN_START_HINT") + storePathAbs)
+	logger.Info(locale.GetString("SCAN_START_HINT") + storePathAbs)
 	err = filepath.Walk(storePathAbs, func(walkPath string, fileInfo os.FileInfo, err error) error {
 		if !scanOption.ReScanFile {
 			for _, p := range types.GetArchiveBooks() {
@@ -169,11 +168,11 @@ func ScanAndGetBookList(storePath string, scanOption Option) (newBookList []*typ
 				if err != nil {
 					// 无法取得的情况下，用相对路径
 					AbsW = walkPath
-					fmt.Println(err, AbsW)
+					logger.Info(err, AbsW)
 				}
 				if walkPath == p.FilePath || AbsW == p.FilePath {
 					//跳过已经在数据库里面的文件
-					logger.Log.Info(locale.GetString("FoundInDatabase"), walkPath)
+					logger.Info(locale.GetString("FoundInDatabase"), walkPath)
 					return nil
 				}
 			}
@@ -184,11 +183,11 @@ func ScanAndGetBookList(storePath string, scanOption Option) (newBookList []*typ
 			depth = strings.Count(walkPath, "\\") - strings.Count(storePathAbs, "\\")
 		}
 		if depth > scanOption.MaxScanDepth {
-			logger.Log.Infof(locale.GetString("ExceedsMaximumDepth")+" %d，base：%s scan: %s:\n", scanOption.MaxScanDepth, storePathAbs, walkPath)
+			logger.Infof(locale.GetString("ExceedsMaximumDepth")+" %d，base：%s scan: %s:\n", scanOption.MaxScanDepth, storePathAbs, walkPath)
 			return filepath.SkipDir // 当WalkFunc的返回值是filepath.SkipDir时，Walk将会跳过这个目录，照常执行下一个文件。
 		}
 		if scanOption.IsSkipDir(walkPath) {
-			logger.Log.Infof(locale.GetString("SkipPath"), walkPath)
+			logger.Infof(locale.GetString("SkipPath"), walkPath)
 			return filepath.SkipDir
 		}
 		if fileInfo == nil {
@@ -202,7 +201,7 @@ func ScanAndGetBookList(storePath string, scanOption Option) (newBookList []*typ
 			// 得到书籍文件数据
 			getBook, err := scanFileGetBook(walkPath, storePathAbs, depth, scanOption)
 			if err != nil {
-				fmt.Println(err)
+				logger.Info(err)
 				return nil
 			}
 			newBookList = append(newBookList, getBook)
@@ -212,7 +211,7 @@ func ScanAndGetBookList(storePath string, scanOption Option) (newBookList []*typ
 			// 得到书籍文件数据
 			getBook, err := scanDirGetBook(walkPath, storePathAbs, depth, scanOption)
 			if err != nil {
-				fmt.Println(err)
+				logger.Info(err)
 				return nil
 			}
 			newBookList = append(newBookList, getBook)
@@ -221,7 +220,7 @@ func ScanAndGetBookList(storePath string, scanOption Option) (newBookList []*typ
 	})
 	// 所有可用书籍，包括压缩包与文件夹
 	if len(newBookList) > 0 {
-		logger.Log.Infof(locale.GetString("FOUND_IN_PATH"), len(newBookList), storePathAbs)
+		logger.Infof(locale.GetString("FOUND_IN_PATH"), len(newBookList), storePathAbs)
 	}
 	return newBookList, err
 }
@@ -253,7 +252,7 @@ func scanDirGetBook(dirPath string, storePath string, depth int, scanOption Opti
 		// 输出绝对路径
 		strAbsPath, errPath := filepath.Abs(dirPath + "/" + file.Name())
 		if errPath != nil {
-			fmt.Println(errPath)
+			logger.Info(errPath)
 		}
 		if scanOption.IsSupportMedia(file.Name()) {
 			TempURL := "api/getfile?id=" + newBook.BookID + "&filename=" + url.QueryEscape(file.Name())
@@ -270,17 +269,17 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 	// 打开文件
 	file, err := os.OpenFile(filePath, os.O_RDONLY, 0o400) // Use mode 0400 for a read-only // file and 0600 for a readable+writable file.
 	if err != nil {
-		fmt.Println(err.Error())
+		logger.Info(err.Error())
 	}
 	defer func(file *os.File) {
 		err := file.Close()
 		if err != nil {
-			fmt.Println(err.Error())
+			logger.Info(err.Error())
 		}
 	}(file)
 	FileInfo, err := file.Stat()
 	if err != nil {
-		fmt.Println(err.Error())
+		logger.Info(err.Error())
 	}
 	// 初始化一本书，设置文件路径等等
 	newBook, err := types.New(filePath, FileInfo.ModTime(), FileInfo.Size(), storePath, depth, types.GetBookTypeByFilename(filePath))
@@ -294,7 +293,7 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 		// 使用Archiver的虚拟文件系统，无法处理非UTF-8编码
 		fsys, zipErr := zip.OpenReader(filePath)
 		if zipErr != nil {
-			// fmt.Println(zipErr)
+			// logger.Info(zipErr)
 			return nil, errors.New(locale.GetString("NOT_A_VALID_ZIP_FILE") + filePath)
 		}
 		err = walkUTF8ZipFs(fsys, "", ".", newBook, scanOption)
@@ -302,7 +301,7 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 		var pathError *fs.PathError
 		if errors.As(err, &pathError) {
 			if scanOption.Debug {
-				fmt.Println("NonUTF-8 ZIP:" + filePath + "  Error:" + err.Error())
+				logger.Info("NonUTF-8 ZIP:" + filePath + "  Error:" + err.Error())
 			}
 			// 忽略 fs.PathError 并换个方式扫描
 			err = scanNonUTF8ZipFile(filePath, newBook, scanOption)
@@ -311,14 +310,14 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 		if newBook.Type == types.TypeEpub {
 			imageList, err := arch.GetImageListFromEpubFile(newBook.FilePath)
 			if err != nil {
-				fmt.Println(err)
+				logger.Info(err)
 			} else {
 				newBook.SortPagesByImageList(imageList)
 			}
 			// 根据metadata，改写书籍信息
 			metaData, err := arch.GetEpubMetadata(newBook.FilePath)
 			if err != nil {
-				fmt.Println(err)
+				logger.Info(err)
 			} else {
 				newBook.Author = metaData.Creator
 				newBook.Press = metaData.Publisher
@@ -354,12 +353,12 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 		}
 		err = fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
 			if scanOption.IsSkipDir(path) {
-				logger.Log.Info("Skip Scan:", path)
+				logger.Info("Skip Scan:", path)
 				return fs.SkipDir
 			}
 			f, errInfo := d.Info()
 			if errInfo != nil {
-				fmt.Println(errInfo)
+				logger.Info(errInfo)
 				return fs.SkipDir
 			}
 			if !scanOption.IsSupportMedia(path) {
@@ -376,7 +375,7 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 					//实验：用getfile接口提供文件服务
 					TempURL := "api/getfile?id=" + newBook.BookID + "&filename=" + url.QueryEscape(path)
 					newBook.Pages.Images = append(newBook.Pages.Images, types.ImageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: "", Url: TempURL})
-					// fmt.Println(locale.GetString("unsupported_extract")+" %s", f)
+					// logger.Info(locale.GetString("unsupported_extract")+" %s", f)
 				} else {
 					// 替换特殊字符的时候，额外将“+替换成"%2b"，因为gin会将+解析为空格。
 					TempURL := "api/getfile?id=" + newBook.BookID + "&filename=" + url.QueryEscape(u.NameInArchive)
@@ -422,7 +421,7 @@ func scanNonUTF8ZipFile(filePath string, b *types.Book, scanOption Option) error
 // https://books.studygolang.com/The-Golang-Standard-Library-by-Example/chapter06/06.3.html
 func walkUTF8ZipFs(fsys fs.FS, parent, base string, b *types.Book, scanOption Option) error {
 	// 一般zip文件的处理流程
-	// fmt.Println("parent:" + parent + " base:" + base)
+	// logger.Info("parent:" + parent + " base:" + base)
 	dirName := path.Join(parent, base)
 	dirEntries, err := fs.ReadDir(fsys, dirName)
 	for _, dirEntry := range dirEntries {

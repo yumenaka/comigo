@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
+	"github.com/yumenaka/comi/logger"
 	"io"
 	"log"
 	"math/rand"
@@ -131,7 +132,7 @@ func testDatabase() {
 func testPDF() {
 	//pageCount, err := CountPagesOfPDFFile("01.pdf")
 	//if err != nil {
-	//	fmt.Println(err)
+	//	logger.Info(err)
 	//}
 	//for i := 0; i < pageCount; i++ {
 	//	ExportImageFromPDF("01.pdf", i+1)
@@ -145,14 +146,14 @@ func ImageResize() {
 	buf := bytes.NewBuffer(imgData)
 	image, err := imaging.Decode(buf)
 	if err != nil {
-		fmt.Println(err)
+		logger.Info(err)
 		return
 	}
 	// 生成缩略图，尺寸150*200，并保持到为文件2.jpg
 	image = imaging.Resize(image, 150, 200, imaging.Lanczos)
 	err = imaging.Save(image, "d:/2.jpg")
 	if err != nil {
-		fmt.Println(err)
+		logger.Info(err)
 	}
 }
 
@@ -162,17 +163,17 @@ func UnArchiveZip(filePath string, extractPath string, textEncoding string) erro
 	// 如果解压路径不存在，创建路径
 	err := os.MkdirAll(extractPath, os.ModePerm)
 	if err != nil {
-		fmt.Println(err)
+		logger.Info(err)
 	}
 	// 打开文件，只读模式
 	file, err := os.OpenFile(filePath, os.O_RDONLY, 0o400) // Use mode 0400 for a read-only // file and 0600 for a readable+writable file.
 	if err != nil {
-		fmt.Println(err)
+		logger.Info(err)
 	}
 	defer func(file *os.File) {
 		err := file.Close()
 		if err != nil {
-			fmt.Println(err)
+			logger.Info(err)
 		}
 	}(file)
 	// 是否是压缩包
@@ -190,7 +191,7 @@ func UnArchiveZip(filePath string, extractPath string, textEncoding string) erro
 		if err != nil {
 			return err
 		}
-		fmt.Println("zip文件解压完成：" + getAbsPath(filePath) + " 解压到：" + getAbsPath(extractPath))
+		logger.Info("zip文件解压完成：" + getAbsPath(filePath) + " 解压到：" + getAbsPath(extractPath))
 	}
 	return nil
 }
@@ -201,12 +202,12 @@ func UnArchiveZip(filePath string, extractPath string, textEncoding string) erro
 //	//如果解压路径不存在，创建路径
 //	err := os.MkdirAll(extractPath, os.ModePerm)
 //	if err != nil {
-//		fmt.Println(err)
+//		logger.Info(err)
 //	}
 //	//打开文件，只读模式
 //	file, err := os.OpenFile(filePath, os.O_RDONLY, 0400) //Use mode 0400 for a read-only // file and 0600 for a readable+writable file.
 //	if err != nil {
-//		fmt.Println(err)
+//		logger.Info(err)
 //	}
 //	defer file.Close()
 //	//是否是压缩包
@@ -223,7 +224,7 @@ func UnArchiveZip(filePath string, extractPath string, textEncoding string) erro
 //		if err != nil {
 //			return err
 //		}
-//		fmt.Println("rar文件解压完成：" + getAbsPath(filePath) + " 解压到：" + getAbsPath(extractPath))
+//		logger.Info("rar文件解压完成：" + getAbsPath(filePath) + " 解压到：" + getAbsPath(extractPath))
 //	}
 //	return nil
 //}
@@ -237,19 +238,19 @@ func extractFileHandler(ctx context.Context, f archiver.File) error {
 	// 取得压缩文件
 	file, err := f.Open()
 	if err != nil {
-		fmt.Println(err)
+		logger.Info(err)
 	}
 	defer func(file io.ReadCloser) {
 		err := file.Close()
 		if err != nil {
-			fmt.Println(err)
+			logger.Info(err)
 		}
 	}(file)
 	// 如果是文件夹，直接创建文件夹
 	if f.IsDir() {
 		err = os.MkdirAll(filepath.Join(extractPath, f.NameInArchive), os.ModePerm)
 		if err != nil {
-			fmt.Println(err)
+			logger.Info(err)
 		}
 		return err
 	}
@@ -260,19 +261,19 @@ func extractFileHandler(ctx context.Context, f archiver.File) error {
 	if !isExist(checkDir) {
 		err = os.MkdirAll(checkDir, os.ModePerm)
 		if err != nil {
-			fmt.Println(err)
+			logger.Info(err)
 		}
 		return err
 	}
 	// 具体内容
 	content, err := io.ReadAll(file)
 	if err != nil {
-		fmt.Println(err)
+		logger.Info(err)
 	}
 	// 写入文件
 	err = os.WriteFile(writeFilePath, content, 0o644)
 	if err != nil {
-		fmt.Println(err)
+		logger.Info(err)
 	}
 	return err
 }
@@ -287,7 +288,7 @@ func isExist(path string) bool {
 		if os.IsNotExist(err) {
 			return false
 		}
-		fmt.Println(err)
+		logger.Info(err)
 		return false
 	}
 	return true
