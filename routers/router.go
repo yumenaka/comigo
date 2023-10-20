@@ -17,12 +17,12 @@ var api *gin.RouterGroup
 func StartWebServer() {
 	//设置 gin
 	gin.SetMode(gin.ReleaseMode)
-	//// 创建带有默认中间件的路由: 日志与恢复中间件
-	engine := gin.Default()
-	////Recovery 中间件会恢复(recovers) 任何恐慌(panics) 如果存在恐慌，中间件将会写入500 gin.Default()已经默认启用了这个中间件
-	//engine.Use(gin.Recovery())
-	////Logger() 以默认配置创建日志中间件，将所有请求信息按指定格式打印到标准输出。 gin.Default()已经默认启用了这个中间件
+	//使用 gin.New() 而不是 gin.Default() 以避免使用 Gin 的默认日志中间件
+	engine := gin.New()
+	////Logger() 以默认配置创建日志中间件，将所有请求信息按指定格式打印到标准输出。 gin.Default()默认启用这个中间件
 	//engine.Use(gin.Logger())
+	//使用 Recovery 中间件，避免程序崩溃，返回 500 错误页面
+	engine.Use(gin.Recovery())
 
 	//1、embedFile
 	embedFile(engine)

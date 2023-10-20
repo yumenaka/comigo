@@ -75,9 +75,10 @@ func embedFile(engine *gin.Engine) {
 	if config.Config.LogToFile {
 		// 关闭 log 打印的字体颜色。输出到文件不需要颜色
 		gin.DisableConsoleColor()
-		//禁止控制台输出
-		gin.DefaultWriter = io.Discard
+
 	}
+	//禁止控制台输出
+	gin.DefaultWriter = io.Discard
 	// 中间件，输出 log 到文件
 	engine.Use(logger.HandlerLog(config.Config.LogToFile, config.Config.LogFilePath, config.Config.LogFileName))
 

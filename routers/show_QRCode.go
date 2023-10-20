@@ -1,6 +1,7 @@
 package routers
 
 import (
+	"fmt"
 	"github.com/yumenaka/comi/logger"
 	"strings"
 
@@ -44,5 +45,5 @@ func showQRCode() {
 	if config.Config.Debug {
 		litter.Dump(config.Config)
 	}
-	logger.Info(locale.GetString("ctrl_c_hint"))
+	fmt.Println(locale.GetString("ctrl_c_hint"))
 }
