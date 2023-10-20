@@ -26,6 +26,10 @@ func Infof(format string, args ...interface{}) {
 	Log.Infof(format, args...)
 }
 
+func DebugWithFields(fields logrus.Fields, args ...interface{}) {
+	Log.WithFields(fields).Debug(args...)
+}
+
 // HandlerLog 默认log
 func HandlerLog(LogToFile bool, LogFilePath string, LogFileName string) gin.HandlerFunc {
 	//设置日志级别
