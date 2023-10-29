@@ -26,6 +26,8 @@ func setWebAPI(engine *gin.Engine) {
 		api.GET("/getlist", handlers.HandlerGetBookList)
 		//通过URL字符串参数查询书籍信息
 		api.GET("/getbook", handlers.HandlerGetBook)
+		//返回同一文件夹的书籍ID列表
+		api.GET("/get_quick_jump_info", handlers.HandlerGetQuickJumpInfo)
 		//通过链接下载reg配置
 		api.GET("/comigo.reg", handlers.HandlerGetRegFile)
 		//通过链接下载toml格式的示例配置
@@ -60,6 +62,8 @@ func setWebAPI(engine *gin.Engine) {
 		api.GET("/getlist", jwtMiddleware.MiddlewareFunc(), handlers.HandlerGetBookList)
 		//通过URL字符串参数查询书籍信息
 		api.GET("/getbook", jwtMiddleware.MiddlewareFunc(), handlers.HandlerGetBook)
+		//返回同一文件夹的书籍ID列表
+		api.GET("/get_quick_jump_info", jwtMiddleware.MiddlewareFunc(), handlers.HandlerGetQuickJumpInfo)
 		//通过链接下载reg配置
 		api.GET("/comigo.reg", jwtMiddleware.MiddlewareFunc(), handlers.HandlerGetRegFile)
 		//通过链接下载示例配置
