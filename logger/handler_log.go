@@ -73,10 +73,10 @@ func HandlerLog(LogToFile bool, LogFilePath string, LogFileName string) gin.Hand
 		//%15s 是一个格式说明符，用于格式化字符串。这里的 15 表示输出的字符串宽度应该为至少15个字符。
 		//使用 %12s 使得字符串 "test" 右对齐，并在其左侧添加了空格来达到15个字符的宽度。
 		//使用 %-12s 使得字符串左对齐，并在其右侧添加了空格来达到15个字符的宽度
-		logrus.WithFields(logrus.Fields{
+		Log.WithFields(logrus.Fields{
 			//"status_code":  statusCode,
 			//"client_ip":    c.ClientIP(),
-		}).Info(fmt.Sprintf("%s:%3d|%13v|%s%s", reqMethod, statusCode, latencyTime, c.ClientIP(), reqURI))
+		}).Info(fmt.Sprintf("%s:%3d|%13v|%s%s\n", reqMethod, statusCode, latencyTime, c.ClientIP(), reqURI))
 	}
 }
 

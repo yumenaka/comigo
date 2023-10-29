@@ -48,7 +48,7 @@ comi --help
 - [ ] 网页端：浏览器快捷键
 - [x] 网页端：HTTPS加密
 - [x] 网页端：显示服务器信息
-- [ ] 网页端：上一章、下一章
+- [ ] 网页端：上一章、下一章,快速跳转。
 - [ ] shell 互动（https://github.com/rivo/tview ）
 - [x] websocket通信（[参考](https://github.com/Unrud/remote-touchpad)）
 - [x] 访问权限设置，账号系统

@@ -400,12 +400,10 @@ func GetBookByID(id string, sortBy string) (*Book, error) {
 		b.SortPages(sortBy)
 		return b, nil
 	}
-	//为了调试方便，支持模糊查找，可以使用UUID的开头来查找书籍，当然这样有可能出错
-	for _, b := range mapBooks {
-		if strings.HasPrefix(b.BookID, id) {
-			b.SortPages(sortBy)
-			return b, nil
-		}
+	b2, ok := mapBookFolders[id]
+	if ok {
+		b2.SortPages(sortBy)
+		return b2, nil
 	}
 	return nil, errors.New("can not found book,id=" + id)
 }
@@ -414,7 +412,6 @@ func GetBookByID(id string, sortBy string) (*Book, error) {
 func GetBookByAuthor(author string, sortBy string) ([]*Book, error) {
 	var bookList []*Book
 	for _, b := range mapBooks {
-
 		if b.Author == author {
 			b.SortPages(sortBy)
 			bookList = append(bookList, b)
@@ -424,6 +421,20 @@ func GetBookByAuthor(author string, sortBy string) ([]*Book, error) {
 		return bookList, nil
 	}
 	return nil, errors.New("can not found book,author=" + author)
+}
+
+func GetBookIDByParentFolder(parentFolder string, sortBy string) ([]*Book, error) {
+	var bookList []*Book
+	for _, b := range mapBooks {
+		if b.ParentFolder == parentFolder {
+			b.SortPages(sortBy)
+			bookList = append(bookList, b)
+		}
+	}
+	if len(bookList) > 0 {
+		return bookList, nil
+	}
+	return nil, errors.New("can not found book,parentFolder=" + parentFolder)
 }
 
 type AllPageInfo struct {
