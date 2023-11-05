@@ -24,24 +24,24 @@ func HandlerGetBookList(c *gin.Context) {
 	maxDepth, err := strconv.Atoi(c.DefaultQuery("max_depth", ""))
 	//如果传了maxDepth这个参数
 	if err == nil {
-		bookInfoList, err := types.GetBookInfoListByMaxDepth(maxDepth, sortBy)
+		bookInfoList, err := types.GetBaseBooksByMaxDepth(maxDepth, sortBy)
 		if err != nil {
 			logger.Info(err)
 			return
 		}
 		bookInfoList.SortBooks(sortBy)
-		c.PureJSON(http.StatusOK, bookInfoList.BookInfos)
+		c.PureJSON(http.StatusOK, bookInfoList.BaseBooks)
 	}
 	//bookGroup的BookId获取
 	bookGroupId := c.DefaultQuery("book_group_book_id", "")
 	//如果传了bookGroupId这个参数
 	if bookGroupId != "" {
-		bookInfoList, err := types.GetBookInfoListByBookGroupBookID(bookGroupId, sortBy)
+		bookInfoList, err := types.GetInfoListByID(bookGroupId, sortBy)
 		if err != nil {
 			logger.Info(err)
 		}
 		bookInfoList.SortBooks(sortBy)
-		c.PureJSON(http.StatusOK, bookInfoList.BookInfos)
+		c.PureJSON(http.StatusOK, bookInfoList.BaseBooks)
 		return
 	}
 
@@ -54,7 +54,7 @@ func HandlerGetBookList(c *gin.Context) {
 			logger.Info(err)
 		} else {
 			bookInfoList.SortBooks(sortBy)
-			c.PureJSON(http.StatusOK, bookInfoList.BookInfos)
+			c.PureJSON(http.StatusOK, bookInfoList.BaseBooks)
 		}
 	}
 }

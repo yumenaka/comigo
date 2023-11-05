@@ -12,6 +12,7 @@ var swagHandler gin.HandlerFunc
 
 // 简单的路由组: api,方便管理部分相同的URL
 var api *gin.RouterGroup
+var protectedAPI *gin.RouterGroup
 
 // StartWebServer 启动web服务
 func StartWebServer() {

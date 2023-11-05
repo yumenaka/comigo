@@ -97,7 +97,7 @@ func (s *singleBookstore) initBookGroupMap() error {
 			}
 			//检测是否已经生成并添加过
 			Added := false
-			for _, checkB := range mapBookFolders {
+			for _, checkB := range mapBookGroup {
 				if checkB.FilePath == newBook.FilePath {
 					Added = true
 				}
@@ -110,8 +110,8 @@ func (s *singleBookstore) initBookGroupMap() error {
 			newBook.Author, _ = util.GetAuthor(newBook.Name)
 			//将这本书加到子书库的BookGroup表（Images.BookGroupMap）里面去
 			s.BookGroupMap[newBook.BookID] = newBook
-			//将这本书加到BookGroup总表（mapBookFolders）里面去
-			mapBookFolders[newBook.BookID] = newBook
+			//将这本书加到BookGroup总表（mapBookGroup）里面去
+			mapBookGroup[newBook.BookID] = newBook
 			//fmt.Print("生成book_group：")
 			//logger.Info(newBook)
 		}

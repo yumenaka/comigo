@@ -21,11 +21,11 @@ func showQRCode() {
 		if err != nil {
 			logger.Info(err)
 		}
-		if len(bookList.BookInfos) == 1 {
-			etcStr = "/#/scroll/" + bookList.BookInfos[0].BookID
+		if len(bookList.BaseBooks) == 1 {
+			etcStr = "/#/scroll/" + bookList.BaseBooks[0].BookID
 		}
 		if config.Config.DefaultMode != "" {
-			etcStr = "/#/" + strings.ToLower(config.Config.DefaultMode) + "/" + bookList.BookInfos[0].BookID
+			etcStr = "/#/" + strings.ToLower(config.Config.DefaultMode) + "/" + bookList.BaseBooks[0].BookID
 		}
 	}
 	enableTls := config.Config.CertFile != "" && config.Config.KeyFile != ""

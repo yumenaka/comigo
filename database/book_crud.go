@@ -91,27 +91,27 @@ func SaveBookToDatabase(save *mainTypes.Book) error {
 	ctx := context.Background()
 	b, err := client.Book.
 		Create().
-		SetName(save.BookInfo.Name).
-		SetBookID(save.BookInfo.BookID).
+		SetName(save.BaseBook.Name).
+		SetBookID(save.BaseBook.BookID).
 		SetOwner("").
-		SetFilePath(save.BookInfo.FilePath).
-		SetBookStorePath(save.BookInfo.BookStorePath).
-		SetChildBookNum(save.BookInfo.ChildBookNum).
-		SetType(string(save.BookInfo.Type)).
-		SetDepth(save.BookInfo.Depth).
-		SetParentFolder(save.BookInfo.ParentFolder).
-		SetAllPageNum(save.BookInfo.AllPageNum).
-		SetFileSize(save.BookInfo.FileSize).
+		SetFilePath(save.BaseBook.FilePath).
+		SetBookStorePath(save.BaseBook.BookStorePath).
+		SetChildBookNum(save.BaseBook.ChildBookNum).
+		SetType(string(save.BaseBook.Type)).
+		SetDepth(save.BaseBook.Depth).
+		SetParentFolder(save.BaseBook.ParentFolder).
+		SetAllPageNum(save.BaseBook.AllPageNum).
+		SetFileSize(save.BaseBook.FileSize).
 		SetAuthors(save.GetAuthor()).
-		SetISBN(save.BookInfo.ISBN).
-		SetPress(save.BookInfo.Press).
-		SetPublishedAt(save.BookInfo.PublishedAt).
-		SetExtractPath(save.BookInfo.ExtractPath).
-		SetInitComplete(save.BookInfo.InitComplete).
-		SetReadPercent(save.BookInfo.ReadPercent).
-		SetNonUTF8Zip(save.BookInfo.NonUTF8Zip).
-		SetZipTextEncoding(save.BookInfo.ZipTextEncoding).
-		SetExtractNum(save.BookInfo.ExtractNum).
+		SetISBN(save.BaseBook.ISBN).
+		SetPress(save.BaseBook.Press).
+		SetPublishedAt(save.BaseBook.PublishedAt).
+		SetExtractPath(save.BaseBook.ExtractPath).
+		SetInitComplete(save.BaseBook.InitComplete).
+		SetReadPercent(save.BaseBook.ReadPercent).
+		SetNonUTF8Zip(save.BaseBook.NonUTF8Zip).
+		SetZipTextEncoding(save.BaseBook.ZipTextEncoding).
+		SetExtractNum(save.BaseBook.ExtractNum).
 		Save(ctx) // 创建并返回 //还有一个SaveX(ctx)，和 Save() 不一样， SaveX 在出错时 panic。
 	if err != nil {
 		//log.Fatalf("failed creating book: %v", err)
@@ -143,7 +143,7 @@ func SaveBookToDatabase(save *mainTypes.Book) error {
 	return err
 }
 
-// GetBookFromDatabase 根据文件路径，从数据库查询一本书的详细信息,避免重复扫描压缩包？
+// GetBookFromDatabase 根据文件路径，从数据库查询一本书的详细信息,避免重复扫描压缩包
 func GetBookFromDatabase(filepath string) (*mainTypes.Book, error) {
 	ctx := context.Background()
 	books, err := client.Book. // UserClient.
@@ -158,7 +158,7 @@ func GetBookFromDatabase(filepath string) (*mainTypes.Book, error) {
 	}
 	temp := books[0]
 	b := mainTypes.Book{
-		BookInfo: mainTypes.BookInfo{
+		BaseBook: mainTypes.BaseBook{
 			Name:            temp.Name,
 			BookID:          temp.BookID,
 			FilePath:        temp.FilePath,
@@ -227,7 +227,7 @@ func GetBooksFromDatabase() (list []*mainTypes.Book, err error) {
 	}
 	for _, temp := range books {
 		b := mainTypes.Book{
-			BookInfo: mainTypes.BookInfo{
+			BaseBook: mainTypes.BaseBook{
 				Name:            temp.Name,
 				BookID:          temp.BookID,
 				FilePath:        temp.FilePath,

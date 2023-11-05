@@ -177,7 +177,7 @@ const store = createStore({
     //拉取远程设定数据
     async syncSeverStatusDataAction(context) {
       const msg = await axios
-        .get("getstatus")
+        .get("get_status")
         .then(
           (res) => res.data,
           () => ""
