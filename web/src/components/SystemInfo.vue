@@ -70,7 +70,7 @@ export default defineComponent({
   beforeUnmount() {
   },
   methods: {
-    //开始展示  api/getstatus
+    //开始展示  api/get_status
     // ServerName	"Comigo v0.8.5"
     // ServerHost	"192.168.3.145"
     // ServerPort	1234

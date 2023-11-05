@@ -16,6 +16,14 @@ func init() {
 	})
 }
 
+func Fatal(args ...interface{}) {
+	Log.Fatal(args...)
+}
+
+func Fatalf(format string, args ...interface{}) {
+	Log.Fatalf(format, args...)
+}
+
 func Info(args ...interface{}) {
 	Log.Info(args...)
 }

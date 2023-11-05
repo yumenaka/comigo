@@ -37,8 +37,8 @@ func HandlerGetBook(c *gin.Context) {
 	}
 }
 
-// HandlerGetQuickJumpInfo 示例 URL： http://127.0.0.1:1234/api/getbook?id=1215a&sort_by=name
-func HandlerGetQuickJumpInfo(c *gin.Context) {
+// HandlerQuickJumpInfo 示例 URL： http://127.0.0.1:1234/api/getbook?id=1215a&sort_by=name
+func HandlerQuickJumpInfo(c *gin.Context) {
 	sortBy := c.DefaultQuery("sort_by", "default")
 	id := c.DefaultQuery("id", "")
 	if id == "" {
@@ -52,15 +52,11 @@ func HandlerGetQuickJumpInfo(c *gin.Context) {
 		c.PureJSON(http.StatusBadRequest, "id not found")
 		return
 	}
-	bookList, err := types.GetBookIDByParentFolder(b.ParentFolder, sortBy)
+	infoList, err := types.GetInfoListByParentFolder(b.ParentFolder, sortBy)
 	if err != nil {
 		logger.Info(err)
 		c.PureJSON(http.StatusBadRequest, "ParentFolder, not found")
 		return
 	}
-	idArray := make([]string, 0)
-	for _, book := range bookList {
-		idArray = append(idArray, book.BookID)
-	}
-	c.PureJSON(http.StatusOK, idArray)
+	c.PureJSON(http.StatusOK, infoList)
 }
