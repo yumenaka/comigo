@@ -8,6 +8,7 @@
 		<button v-if="((startLoadPageNum > 1) && (nowLoading === false))"
 			class="w-24 h-12 m-2 bg-blue-300 text-gray-900 hover:bg-blue-500 rounded" @click="loadAllPage"
 			size="large">{{ $t('load_all_pages') }}</button>
+			<QuickJumpBar></QuickJumpBar>
 		<!-- 渲染漫画部分 -->
 		<div class="main_manga" v-for="(single_image, n) in localImages" :key="single_image.url"
 			@click="onMouseClick($event)" @mousemove="onMouseMove">
@@ -153,13 +154,14 @@
 
 <script lang="ts">
 // 直接导入组件并使用它。这种情况下,只有导入的组件才会被打包。
-import { NBackTop, NSlider, NSwitch, NInputNumber, NButton, useMessage, useDialog, NSelect, } from 'naive-ui'
+import {NBackTop, NButton, NInputNumber, NSelect, NSlider, NSwitch, useDialog, useMessage,} from 'naive-ui'
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
 import Bottom from "@/components/Bottom.vue";
 import Observer from "@/components/Observer_in_Scroll.vue";
 import ImageScroll from "@/components/Image_in_Scroll.vue";
-import { CSSProperties, defineComponent, reactive } from 'vue'
+import QuickJumpBar from "@/components/QuickJumpBar.vue";
+import {CSSProperties, defineComponent, reactive} from 'vue'
 // import { useCookies } from "vue3-cookies";// https://github.com/KanHarI/vue3-cookies
 import axios from "axios";
 
@@ -179,12 +181,13 @@ export default defineComponent({
 		NInputNumber,//数字输入 https://www.naiveui.com/zh-CN/os-theme/components/input-number
 		NButton,//按钮，来自:https://www.naiveui.com/zh-CN/os-theme/components/button
 		NSelect,
+		QuickJumpBar,
 	},
 	// setup在创建组件前执行，因此没有this
 	setup() {
 		//此处不能使用this,但可以用getCurrentInstance 这个vue函数取得Proxy，实现类似 proxy.$socket.onmessage 这样的调用(https://github.com/likaia/vue-native-websocket-vue3)。
 		// const { cookies } = useCookies();
-		//在setup中访问vuex需要通过useStore()来访问  https://juejin.cn/post/6917592199140458504#heading-22=
+		//在setup中访问 vuex 需要通过useStore()来访问  https://juejin.cn/post/6917592199140458504#heading-22=
 		//背景颜色,颜色选择器用
 		//reactive({}) 创建并返回一个响应式对象: https://www.bilibili.com/video/av925511720/?p=4  也讲到了toRefs()
 		const model = reactive({
@@ -235,9 +238,8 @@ export default defineComponent({
 					const addStr = resize_width_str + resize_height_str + do_auto_resize_str + resize_max_height_str + auto_crop_str + gray_str;
 					//如果有附加转换参数，则设置成不缓存
 					const nocache_str = (addStr === "" ? "" : "&no-cache=true");
-					const full_url = base_str + addStr + nocache_str;
-					// console.log(full_url);
-					return full_url;
+          // console.log(full_url);
+					return base_str + addStr + nocache_str;
 				} else {
 					return source_url
 				}
@@ -277,7 +279,7 @@ export default defineComponent({
 			loadPageLimit: 20,//一次最多载入的漫画张数，默认为20.
 			endLoadPageNum: 20,//载入漫画的最后一页，默认为20.
 			saveNowPageNumFlag: true,//是否（在本地存储里面）保存与恢复页数
-			firstloadComplete: true,//首次加载是否完成
+			firstLoadComplete: true,//首次加载是否完成
 			localImages: [
 				{
 					filename: "",
@@ -611,7 +613,7 @@ export default defineComponent({
 			}
 			//用户正在操作，不对翻页消息作反应。
 			if (this.userControlling) {
-				console.log("handlePacket:Return,Becase User Controlling");
+				console.log("handlePacket:Return,Because User Controlling");
 				return;
 			}
 			var localUserID = this.$store.userID;
@@ -656,7 +658,7 @@ export default defineComponent({
 		toPageSimple(syncData: any) {
 			//用户正在操作，不对翻页消息作反应。
 			if (this.userControlling) {
-				console.log("toPage:Return,Becase User Controlling");
+				console.log("toPage:Return,Because User Controlling");
 				return;
 			}
 			if (this.nowPageNum === syncData.now_page_num) {
@@ -691,7 +693,7 @@ export default defineComponent({
 		toPage(syncData: any) {
 			//用户正在操作，不对翻页消息作反应。
 			if (this.userControlling) {
-				console.log("toPage:Return,Becase User Controlling");
+				console.log("toPage:Return,Because User Controlling");
 				return;
 			}
 			if (this.nowPageNum === syncData.now_page_num) {

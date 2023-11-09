@@ -1,10 +1,10 @@
 {
     "i18n-ally.localesPaths": [
-      "src/locales" // 翻译文件放在哪个目录
+      "src/locales"
     ],
-    "i18n-ally.sourceLanguage": "zh", // 默认中文
-    "i18n-ally.keystyle": "nested", // 翻译路径格式
-    "i18n-ally.displayLanguage": "zh",//显示语系
+    "i18n-ally.sourceLanguage": "zh",
+    "i18n-ally.keystyle": "nested",
+    "i18n-ally.displayLanguage": "zh",
     "i18n-ally.enabledFrameworks": [
       "vue",
       "flutter"
@@ -22,6 +22,7 @@
       "getbook",
       "lazyload",
       "tailwindcss",
-      "vicons"
-    ],
+      "vicons",
+      "vuex"
+    ]
   }
