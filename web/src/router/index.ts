@@ -86,7 +86,7 @@ const router = createRouter({
   history: createWebHashHistory(),
   routes,
   scrollBehavior(to, from, savedPosition) {
-    debugger
+    //debugger
     // 如果有记录页面的滚动行为
     if (savedPosition) {
       return savedPosition

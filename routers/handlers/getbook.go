@@ -39,7 +39,7 @@ func HandlerGetBook(c *gin.Context) {
 
 // HandlerQuickJumpInfo 示例 URL： http://127.0.0.1:1234/api/getbook?id=1215a&sort_by=name
 func HandlerQuickJumpInfo(c *gin.Context) {
-	sortBy := c.DefaultQuery("sort_by", "default")
+	sortBy := c.DefaultQuery("sort_by", "filename")
 	id := c.DefaultQuery("id", "")
 	if id == "" {
 		c.PureJSON(http.StatusBadRequest, "id not set")

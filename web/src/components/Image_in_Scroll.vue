@@ -19,7 +19,7 @@ export default {
     data: () => ({
         observer: null,
         tempThreshold: 0,
-        leaveing: false,
+        leaving: false,
         intersectionRatioSave: 0,
         flipModeMessageNumCount: 0,
     }),
@@ -35,11 +35,11 @@ export default {
         this.observer = new IntersectionObserver(([entry]) => {
             //判断当前是正在进入视窗，还是正在离开视窗。后续优化用。
             if (this.isIntersectingSave < entry.intersectionRatio) {
-                this.leaveing = false;
+                this.leaving = false;
             } else if (this.isIntersectingSave === entry.intersectionRatio) {
-                this.leaveing = false;
+                this.leaving = false;
             } else {
-                this.leaveing = true;
+                this.leaving = true;
             }
             this.intersectionRatioSave = entry.intersectionRatio;
 
