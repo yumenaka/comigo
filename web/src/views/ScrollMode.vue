@@ -8,7 +8,7 @@
 		<button v-if="((startLoadPageNum > 1) && (nowLoading === false))"
 			class="w-24 h-12 m-2 bg-blue-300 text-gray-900 hover:bg-blue-500 rounded" @click="loadAllPage"
 			size="large">{{ $t('load_all_pages') }}</button>
-			<QuickJumpBar></QuickJumpBar>
+		<QuickJumpBar class="self-center" :nowBookID="book.id"></QuickJumpBar>
 		<!-- 渲染漫画部分 -->
 		<div class="main_manga" v-for="(single_image, n) in localImages" :key="single_image.url"
 			@click="onMouseClick($event)" @mousemove="onMouseMove">
