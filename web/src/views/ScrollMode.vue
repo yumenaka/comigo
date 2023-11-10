@@ -1,21 +1,19 @@
 <template>
 	<div id="ScrollMode" class="manga" @mouseenter="onMouseEnter" @mouseleave="onMouseLeave">
 		<Header :setDownLoadLink="needDownloadLink()" :headerTitle="book.name" :bookID="book.id" :showReturnIcon="true"
-			:showSettingsIcon="true" v-bind:style="{ background: model.interfaceColor }"
-			@drawerActivate="drawerActivate">
+			:showSettingsIcon="true" v-bind:style="{ background: model.interfaceColor }" @drawerActivate="drawerActivate">
 		</Header>
 		<!-- 顶部的加载全部页面顶部按钮 -->
-		<button v-if="((startLoadPageNum > 1) && (nowLoading === false))"
-			class="w-24 h-12 m-2 bg-blue-300 text-gray-900 hover:bg-blue-500 rounded" @click="loadAllPage"
-			size="large">{{ $t('load_all_pages') }}</button>
+		<button v-if="((startLoadPageNum > 1) && !nowLoading)"
+			class="w-24 h-12 m-2 bg-blue-300 text-gray-900 hover:bg-blue-500 rounded" @click="loadAllPage" size="large">{{
+				$t('load_all_pages') }}</button>
 		<QuickJumpBar class="self-center" :nowBookID="book.id"></QuickJumpBar>
 		<!-- 渲染漫画部分 -->
 		<div class="main_manga" v-for="(single_image, n) in localImages" :key="single_image.url"
 			@click="onMouseClick($event)" @mousemove="onMouseMove">
 			<ImageScroll :image_url="imageParametersString(single_image.url)" :sPWL="sPWL" :dPWL="dPWL" :sPWP="sPWP"
-				:dPWP="dPWP" :MyPageNum="n + startLoadPageNum" :nowPageNum="nowPageNum"
-				:all_page_num="book.all_page_num" :book_id="book.id"
-				:showPageNumFlag_ScrollMode="showPageNumFlag_ScrollMode" :syncPageByWS="syncPageByWS"
+				:dPWP="dPWP" :MyPageNum="n + startLoadPageNum" :nowPageNum="nowPageNum" :all_page_num="book.all_page_num"
+				:book_id="book.id" :showPageNumFlag_ScrollMode="showPageNumFlag_ScrollMode" :syncPageByWS="syncPageByWS"
 				:id="'JUMP_ID:' + (n + startLoadPageNum)" :startLoadPageNum="startLoadPageNum"
 				:endLoadPageNum="endLoadPageNum" :autoScrolling="autoScrolling" :userControlling="userControlling"
 				:margin="marginOnScrollMode" @refreshNowPageNum="refreshNowPageNum">
@@ -100,8 +98,8 @@
 			</n-input-number>
 
 			<!-- 滑动选择PX -->
-			<n-slider v-if="!imageWidth_usePercentFlag" v-model:value="singlePageWidth_PX" :step="10" :max="1600"
-				:min="50" :format-tooltip="(value: any) => `${value}px`" />
+			<n-slider v-if="!imageWidth_usePercentFlag" v-model:value="singlePageWidth_PX" :step="10" :max="1600" :min="50"
+				:format-tooltip="(value: any) => `${value}px`" />
 
 			<!-- 数字输入框 -->
 			<n-input-number v-if="!imageWidth_usePercentFlag" size="small" :show-button="false"
@@ -111,8 +109,8 @@
 			</n-input-number>
 
 			<!-- 滑动选择PX -->
-			<n-slider v-if="!imageWidth_usePercentFlag" v-model:value="doublePageWidth_PX" :step="10" :max="1600"
-				:min="50" :format-tooltip="(value: any) => `${value}px`" />
+			<n-slider v-if="!imageWidth_usePercentFlag" v-model:value="doublePageWidth_PX" :step="10" :max="1600" :min="50"
+				:format-tooltip="(value: any) => `${value}px`" />
 
 			<!-- 页面间隙px -->
 			<n-input-number v-if="!imageWidth_usePercentFlag" size="small" :show-button="false"
@@ -154,14 +152,14 @@
 
 <script lang="ts">
 // 直接导入组件并使用它。这种情况下,只有导入的组件才会被打包。
-import {NBackTop, NButton, NInputNumber, NSelect, NSlider, NSwitch, useDialog, useMessage,} from 'naive-ui'
+import { NBackTop, NButton, NInputNumber, NSelect, NSlider, NSwitch, useDialog, useMessage, } from 'naive-ui'
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
 import Bottom from "@/components/Bottom.vue";
 import Observer from "@/components/Observer_in_Scroll.vue";
 import ImageScroll from "@/components/Image_in_Scroll.vue";
 import QuickJumpBar from "@/components/QuickJumpBar.vue";
-import {CSSProperties, defineComponent, reactive} from 'vue'
+import { CSSProperties, defineComponent, reactive } from 'vue'
 // import { useCookies } from "vue3-cookies";// https://github.com/KanHarI/vue3-cookies
 import axios from "axios";
 
@@ -238,7 +236,7 @@ export default defineComponent({
 					const addStr = resize_width_str + resize_height_str + do_auto_resize_str + resize_max_height_str + auto_crop_str + gray_str;
 					//如果有附加转换参数，则设置成不缓存
 					const nocache_str = (addStr === "" ? "" : "&no-cache=true");
-          // console.log(full_url);
+					// console.log(full_url);
 					return base_str + addStr + nocache_str;
 				} else {
 					return source_url
@@ -431,13 +429,12 @@ export default defineComponent({
 					_this.loadLocalBookMark();
 					_this.nowLoading = false;
 				}, 1500);
-			}).catch((error) => {
-                    // console.log(error);
-                    this.$router.push({
-                        name: "LoginPage",
-                        query: {redirect: window.location.href} 
-                    });
-                })
+			}).catch(() => {
+				this.$router.push({
+					name: "LoginPage",
+					query: { redirect: window.location.href }
+				});
+			})
 			.finally(
 				() => {
 					document.title = this.book.name;
@@ -452,7 +449,12 @@ export default defineComponent({
 					axios
 						.get("/getbook?id=" + this.$route.params.id + sort_image_by_str)
 						.then((response) => (this.book = response.data))
-						.finally(() => console.log("路由参数改变,书籍ID:" + id));
+						.finally(() => {
+							console.log("路由参数改变,书籍ID:" + id);
+							//refresh web page
+							window.location.reload();
+						}
+				);
 				}
 			}
 		);
