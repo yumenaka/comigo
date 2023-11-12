@@ -15,8 +15,8 @@ import (
 // max_depth：书籍的最大深度									&max_depth=1
 // book_group_book_id：按照书籍组的BookID 						&book_group_book_id=abc321
 // depth：书籍的深度，      									&depth=0
-// 示例 URL： http://127.0.0.1:1234/api/getshelf?sort=name&depth=0
-// 示例 URL： http://127.0.0.1:1234/api/getshelf?book_group_id=aedxl
+// 示例 URL： http://127.0.0.1:1234/api/get_shelf?sort=name&depth=0
+// 示例 URL： http://127.0.0.1:1234/api/get_shelf?book_group_id=aedxl
 func HandlerGetShelf(c *gin.Context) {
 	//书籍排列的方式，默认name，TODO:按照修改时间、作者、文件大小等排序书籍
 	sortBy := c.DefaultQuery("sort_by", "default")
@@ -57,4 +57,28 @@ func HandlerGetShelf(c *gin.Context) {
 			c.PureJSON(http.StatusOK, bookInfoList.BaseBooks)
 		}
 	}
+}
+
+// HandlerSameGroupBooks 示例 URL： http://127.0.0.1:1234/api/same_group_books?id=1215a&sort_by=filename
+func HandlerSameGroupBooks(c *gin.Context) {
+	sortBy := c.DefaultQuery("sort_by", "filename")
+	id := c.DefaultQuery("id", "")
+	if id == "" {
+		c.PureJSON(http.StatusBadRequest, "book id not set")
+		return
+	}
+	//sortBy: 根据压缩包原始顺序、时间、文件名排序
+	b, err := types.GetBookByID(id, sortBy)
+	if err != nil {
+		logger.Info(err)
+		c.PureJSON(http.StatusBadRequest, "book id not found")
+		return
+	}
+	infoList, err := types.GetInfoListByParentFolder(b.ParentFolder, sortBy)
+	if err != nil {
+		logger.Info(err)
+		c.PureJSON(http.StatusBadRequest, "ParentFolder, not found")
+		return
+	}
+	c.PureJSON(http.StatusOK, infoList)
 }

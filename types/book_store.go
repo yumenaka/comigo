@@ -78,7 +78,6 @@ func (s *singleBookstore) initBookGroupMap() error {
 			//名字应该设置成parent
 			if newBook.Name != parent {
 				newBook.Name = parent
-				//logger.Infof("newBook.Name!=parent!?")
 			}
 			//初始化ChildBook
 			//然后把同一parent的书，都加进某个书籍组

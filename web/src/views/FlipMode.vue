@@ -286,7 +286,7 @@ export default defineComponent({
       imageParameters, //获取图片所用的参数
       imageParametersString: (source_url: string) => {
         // var temp =
-        if (source_url.substr(0, 12) === "api/getfile?") {
+        if (source_url.substr(0, 12) === "api/get_file?") {
           //当前URL
           const url = document.location.toString();
           //按照“/”分割字符串
@@ -458,7 +458,7 @@ export default defineComponent({
 
     //根据路由参数获取特定书籍
     axios
-      .get("/getbook?id=" + this.$route.params.id + sort_image_by_str)
+      .get("/get_book?id=" + this.$route.params.id + sort_image_by_str)
       .then((response) => (this.book = response.data))
       .catch((error) => {
         // console.log(error);
@@ -478,7 +478,7 @@ export default defineComponent({
       (id: any) => {
         // console.log(id)
         axios
-          .get("/getbook?id=" + this.$route.params.id + sort_image_by_str)
+          .get("/get_book?id=" + this.$route.params.id + sort_image_by_str)
           .then((response) => (this.book = response.data))
           .catch((error) => {
             console.log(error);
@@ -708,7 +708,7 @@ export default defineComponent({
     onResort(key: string) {
       this.resort_hint_key = key;
       axios
-        .get("/getbook?id=" + this.$route.params.id + "&sort_by=" + key)
+        .get("/get_book?id=" + this.$route.params.id + "&sort_by=" + key)
         .then((response) => (this.book = response.data))
         .finally(() => {
           document.title = this.book.name;
@@ -786,13 +786,7 @@ export default defineComponent({
       let nextPageIsDouble = this.checkImageIsDoublePage_byPageNum(
         this.nowPageNum + 1
       );
-      if (nowPageIsDouble || nextPageIsDouble) {
-        // this.nowAndNextPageIsSingleFlag = false;
-        return false;
-      } else {
-        // this.nowAndNextPageIsSingleFlag = false;
-        return true;
-      }
+      return !(nowPageIsDouble || nextPageIsDouble);
     },
     //根据书籍UUID,设定当前页数,因为需要取得远程书籍数据（this.book）,所以延迟执行
     loadLocalBookMark() {
@@ -877,7 +871,7 @@ export default defineComponent({
     },
     //开始速写（quick sketch）,每秒执行一次
     sketchCount() {
-      if (this.sketchModeFlag === false || this.readerMode === "flip") {
+      if (!this.sketchModeFlag || this.readerMode === "flip") {
         this.stopSketchMode();
         return
       }
@@ -1066,14 +1060,14 @@ export default defineComponent({
         //决定如何翻页
         if (clickX < innerWidth * 0.5) {
           //左边的翻页
-          if (this.rightToLeftFlag === true) {
+          if (this.rightToLeftFlag) {
             this.toPerviousPage();
           } else {
             this.toNextPage();
           }
         } else {
           //右边的翻页
-          if (this.rightToLeftFlag === true) {
+          if (this.rightToLeftFlag) {
             this.toNextPage();
           } else {
             this.toPerviousPage();
@@ -1272,12 +1266,12 @@ export default defineComponent({
           this.flipPage(-1); //上一页
           break;
         case "ArrowLeft":
-          this.rightToLeftFlag === true
+          this.rightToLeftFlag
             ? this.toPerviousPage()
             : this.toNextPage();
           break;
         case "ArrowRight":
-          this.rightToLeftFlag === true
+          this.rightToLeftFlag
             ? this.toNextPage()
             : this.toPerviousPage();
           break;
@@ -1358,7 +1352,7 @@ export default defineComponent({
       console.log("value:" + value);
       this.debugModeFlag = value;
       //关闭Debug模式的时候顺便也关上“自动合并单双页”的功能（因为还有BUG）
-      if (value === false) {
+      if (!value) {
         this.autoDoublePageModeFlag = false;
       }
       localStorage.setItem("debugModeFlag", value ? "true" : "false");
@@ -1370,7 +1364,7 @@ export default defineComponent({
     setAutoDoublePage_FlipMode(value: boolean) {
       console.log("value:" + value);
       this.autoDoublePageModeFlag = value;
-      if (value === true) {
+      if (value) {
         this.doublePageModeFlag = false;
       }
       localStorage.setItem("autoDoublePageModeFlag", value ? "true" : "false");
@@ -1379,7 +1373,7 @@ export default defineComponent({
     setSimpleDoublePage_FlipMode(value: boolean) {
       console.log("value:" + value);
       this.doublePageModeFlag = value;
-      if (value === true) {
+      if (value) {
         this.autoDoublePageModeFlag = false;
       }
       localStorage.setItem("doublePageModeFlag", value ? "true" : "false");
@@ -1491,7 +1485,7 @@ export default defineComponent({
     },
     //从左到右还是从右到左
     get_flex_direction() {
-      if (this.rightToLeftFlag === true) {
+      if (this.rightToLeftFlag) {
         return "row";
       } else {
         return "row-reverse";

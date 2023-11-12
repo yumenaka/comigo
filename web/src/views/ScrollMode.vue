@@ -218,7 +218,7 @@ export default defineComponent({
 			imageParameters,//获取图片所用参数
 			imageParametersString: (source_url: string) => {
 				// console.log("source_url:" + source_url)
-				if (source_url.substr(0, 12) == "api/getfile?") {
+				if (source_url.substr(0, 12) == "api/get_file?") {
 					//当前URL
 					const url = document.location.toString();
 					//按照“/”分割字符串
@@ -413,7 +413,7 @@ export default defineComponent({
 		this.nowLoading = true;
 		var _this = this
 		axios
-			.get("/getbook?id=" + this.$route.params.id + sort_image_by_str)
+			.get("/get_book?id=" + this.$route.params.id + sort_image_by_str)
 			.then((response) => {
 				//请求接口成功的逻辑
 				this.book = response.data;
@@ -447,7 +447,7 @@ export default defineComponent({
 			(id: any) => {
 				if (id) {
 					axios
-						.get("/getbook?id=" + this.$route.params.id + sort_image_by_str)
+						.get("/get_book?id=" + this.$route.params.id + sort_image_by_str)
 						.then((response) => (this.book = response.data))
 						.finally(() => {
 							console.log("路由参数改变,书籍ID:" + id);
@@ -850,7 +850,7 @@ export default defineComponent({
 		//页面排序相关
 		onResort(key: string) {
 			axios
-				.get("/getbook?id=" + this.$route.params.id + "&sort_by=" + key)
+				.get("/get_book?id=" + this.$route.params.id + "&sort_by=" + key)
 				.then((response) => (this.book = response.data))
 				.finally(
 					() => {
@@ -941,33 +941,27 @@ export default defineComponent({
 			// console.log("value:" + value);
 			this.showHeaderFlag = value;
 			localStorage.setItem("showHeaderFlag", value ? "true" : "false");
-			// console.log("成功保存设置: showHeaderFlag=" + localStorage.getItem("showHeaderFlag"));
 		},
 		setShowPageNumChange(value: boolean) {
 			// console.log("value:" + value);
 			this.showPageNumFlag_ScrollMode = value;
 			localStorage.setItem("showPageNumFlag_ScrollMode", value ? "true" : "false");
-			// console.log("成功保存设置: showPageNumFlag_ScrollMode=" + localStorage.getItem("showPageNumFlag_ScrollMode"));
 		},
 		//图片处理相关
 		//黑白化参数
 		setImageParameters_Gray(value: boolean) {
-			// console.log("value:" + value);
 			this.imageParameters.gray = value;
 			localStorage.setItem("ImageParameters_Gray", value ? "true" : "false");
-			// console.log("成功保存设置: ImageParameters_Gray=" + localStorage.getItem("ImageParameters_Gray"));
 		},
 		//缩放图片大小的参数
 		setImageParameters_DoAutoResize(value: boolean) {
 			this.imageParameters.do_auto_resize = value;
 			localStorage.setItem("ImageParameters_DoAutoResize", value ? "true" : "false");
-			// console.log("成功保存设置: ImageParameters_DoAutoResize=" + localStorage.getItem("ImageParameters_DoAutoResize"));
 		},
 		//设置是否切白边
 		setImageParameters_DoAutoCrop(value: boolean) {
 			this.imageParameters.do_auto_crop = value;
 			localStorage.setItem("ImageParameters_DoAutoCrop", this.imageParameters.do_auto_crop ? "true" : "false");
-			// console.log("成功保存设置: ImageParameters_DoAutoCrop=" + localStorage.getItem("ImageParameters_DoAutoCrop"));
 		},
 		//切白边参数
 		setImageParameters_AutoCropNum(value: number) {
@@ -979,7 +973,6 @@ export default defineComponent({
 			console.log("value:" + value);
 			this.imageWidth_usePercentFlag = value;
 			localStorage.setItem("imageWidth_usePercentFlag", value ? "true" : "false");
-			// console.log("成功保存设置: imageWidth_usePercentFlag=" + this.imageWidth_usePercentFlag);
 		},
 
 		setSavePageNumFlag(value: boolean) {
@@ -995,10 +988,6 @@ export default defineComponent({
 		setDebugModeFlag(value: boolean) {
 			console.log("value:" + value);
 			this.debugModeFlag = value;
-			// //关闭Debug模式的时候顺便也关上“自动合并单双页”的功能（因为还有BUG）
-			// if (value === false) {
-			// 	this.autoDoublePageModeFlag = false;
-			// }
 			localStorage.setItem("debugModeFlag", value ? "true" : "false");
 			console.log(
 				"cookie设置完毕: debugModeFlag=" + localStorage.getItem("debugModeFlag")
@@ -1008,7 +997,6 @@ export default defineComponent({
 		//可见区域变化的时候改变页面状态
 		onResize() {
 			this.imageMaxWidth = window.innerWidth
-			// document.querySelectorAll(".name");
 			this.clientWidth = document.documentElement.clientWidth
 			this.clientHeight = document.documentElement.clientHeight
 			// var aspectRatio = window.innerWidth / window.innerHeight
@@ -1121,11 +1109,7 @@ export default defineComponent({
 			} else {
 				e.currentTarget.style.cursor = '';
 			}
-			//获取元素,统计页数?
-			// let offsetWidth = e.currentTarget.offsetWidth;
-			// let offsetHeight = e.currentTarget.offsetHeight;
 		},
-
 
 		scrollToTop(scrollDuration: number) {
 			let scrollStep = -window.scrollY / (scrollDuration / 15),
@@ -1141,10 +1125,6 @@ export default defineComponent({
 		// window.innerWidth  不是响应式依赖,所以不能用计算属性
 		inLandscapeModeCheck() {
 			//避免除数等于0,虽然正常情况下不会触发
-			// if (window.innerHeight == 0) {
-			// 	return false
-			// }
-			// var aspectRatio = document.documentElement.clientWidth / document.documentElement.clientHeight
 			this.aspectRatio = window.innerWidth / window.innerHeight
 			// console.log("aspectRatio=" + this.aspectRatio);
 			// 为了测试方便,阈值是正方形
@@ -1184,7 +1164,6 @@ export default defineComponent({
 	}
 });
 </script>
-
 
 <style scoped>
 .manga {

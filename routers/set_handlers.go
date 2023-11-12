@@ -23,7 +23,7 @@ func setWebAPI(engine *gin.Engine) {
 	// 无需认证，不受保护的路由
 	publicRoutes := func(rg *gin.RouterGroup) {
 		rg.GET("/qrcode.png", handlers.GetQrcodeHandler)
-		rg.GET("/get_status", handlers.PublicServerInfoHandler)
+		rg.GET("/server_info_public", handlers.HandlerServerInfoPublic)
 		websocket.WsDebug = &config.Config.Debug
 		rg.GET("/ws", websocket.WsHandler)
 	}
@@ -51,15 +51,15 @@ func setWebAPI(engine *gin.Engine) {
 	//文件上传
 	protectedAPI.POST("/upload", handlers.HandlerUpload)
 	//通过URL字符串参数获取特定文件
-	protectedAPI.GET("/getfile", handlers.HandlerGetFile)
+	protectedAPI.GET("/get_file", handlers.HandlerGetFile)
 	//登录后才能查看的服务器状态，包括标题、机器状态等
-	protectedAPI.GET("/get_status_all", handlers.HandlerGetStatusAll)
+	protectedAPI.GET("/server_info", handlers.HandlerServerInfo)
 	//获取书架信息，不包含每页信息
-	protectedAPI.GET("/getshelf", handlers.HandlerGetShelf)
+	protectedAPI.GET("/get_shelf", handlers.HandlerGetShelf)
 	//通过URL字符串参数查询书籍信息
-	protectedAPI.GET("/getbook", handlers.HandlerGetBook)
+	protectedAPI.GET("/get_book", handlers.HandlerGetBook)
 	//返回同一文件夹的书籍ID列表
-	protectedAPI.GET("/quick_jump_info", handlers.HandlerQuickJumpInfo)
+	protectedAPI.GET("/same_group_books", handlers.HandlerSameGroupBooks)
 	//通过链接下载reg配置
 	protectedAPI.GET("/comigo.reg", handlers.HandlerGetRegFile)
 	//通过链接下载toml格式的示例配置
@@ -70,7 +70,6 @@ func setWebAPI(engine *gin.Engine) {
 	protectedAPI.POST("/config_update", handlers.HandlerConfigUpdate)
 	//保存服务器配置
 	protectedAPI.POST("/config_save", handlers.HandlerConfigSave)
-
 	// 其他初始化代码，如 SetDownloadLink()
 	SetDownloadLink()
 }

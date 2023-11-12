@@ -177,7 +177,7 @@ const store = createStore({
     //拉取远程设定数据
     async syncSeverStatusDataAction(context) {
       const msg = await axios
-        .get("get_status")
+        .get("server_info_public")
         .then(
           (res) => res.data,
           () => ""
@@ -203,7 +203,7 @@ const store = createStore({
     },
     //拉取书架数据
     async syncBookShelfDataAction(context) {
-      const msg = await axios.get("getshelf").then(
+      const msg = await axios.get("get_shelf").then(
         (res) => res.data,
         () => ""
       );

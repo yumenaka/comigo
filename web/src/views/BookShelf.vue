@@ -331,7 +331,7 @@ export default defineComponent({
             }
             let _this = this;
             axios
-                .get("getshelf?max_depth=1" + sort_image_by_str)
+                .get("get_shelf?max_depth=1" + sort_image_by_str)
                 .then((response) => {
                     if (response.data !== "") {
                         this.bookshelf = response.data;
@@ -366,7 +366,7 @@ export default defineComponent({
                 sort_image_by_str = "&sort_by=" + this.$route.query.sort_by;
             }
             axios
-                .get("getshelf?book_group_book_id=" + group_id + sort_image_by_str)
+                .get("get_shelf?book_group_book_id=" + group_id + sort_image_by_str)
                 .then((response) => {
                     this.bookshelf = response.data;
                 }).catch((error) => {
@@ -508,7 +508,7 @@ export default defineComponent({
                 //打开新的标签页,跳转到浏览器自带的打开功能
                 // Window open() 方法 https://www.runoob.com/jsref/met-win-open.html
                 axios
-                    .get("/getbook?id=" + bookID)
+                    .get("/get_book?id=" + bookID)
                     .then((response) =>
                         window.open(
                             "api/raw/" + bookID + "/" + response.data.name,

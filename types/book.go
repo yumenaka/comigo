@@ -39,8 +39,8 @@ var (
 // Book 定义书籍，BooID不应该重复，根据文件路径生成
 type Book struct {
 	BaseBook
-	Pages     AllPageInfo      `json:"pages"`       //storm:"inline" 内联字段，结构体嵌套时使用
 	ChildBook map[string]*Book `json:"child_book" ` //key：BookID
+	Pages     AllPageInfo      `json:"pages"`       //storm:"inline" 内联字段，结构体嵌套时使用
 }
 
 type SupportFileType string
