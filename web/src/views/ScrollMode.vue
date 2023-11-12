@@ -26,7 +26,7 @@
 		<!-- 底部最下面的返回顶部按钮 -->
 		<button class="w-24 h-12 m-2 bg-blue-300 text-gray-900 hover:bg-blue-500 rounded" @click="scrollToTop(90);"
 			size="large">{{ $t('back-to-top') }}</button>
-
+			<QuickJumpBar class="self-center" :nowBookID="book.id"></QuickJumpBar>
 		<Bottom v-bind:style="{ background: model.interfaceColor }"
 			:softVersion="$store.state.server_status.ServerName ? $store.state.server_status.ServerName : 'Comigo'">
 		</Bottom>

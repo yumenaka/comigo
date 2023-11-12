@@ -215,6 +215,9 @@ export default defineComponent({
       //其他情况下，后退一页。与单击浏览器中的“后退”按钮相同。
       this.$router.back();
       // location.reload();
+
+
+      
     },
     //点击上传的时候，去上传页
     gotoUploadPage() {
