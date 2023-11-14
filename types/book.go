@@ -38,7 +38,7 @@ var (
 
 // Book 定义书籍，BooID不应该重复，根据文件路径生成
 type Book struct {
-	BaseBook
+	BookInfo
 	ChildBook map[string]*Book `json:"child_book" ` //key：BookID
 	Pages     AllPageInfo      `json:"pages"`       //storm:"inline" 内联字段，结构体嵌套时使用
 }
@@ -110,7 +110,7 @@ func New(filePath string, modified time.Time, fileSize int64, storePath string, 
 	}
 	//初始化书籍
 	var b = Book{
-		BaseBook: BaseBook{
+		BookInfo: BookInfo{
 			Author:        "",
 			Modified:      modified,
 			FileSize:      fileSize,
@@ -291,14 +291,14 @@ func GetRandomBook() *Book {
 	return nil
 }
 
-func GetAllBookInfoList(sortBy string) (*InfoList, error) {
-	var infoList InfoList
+func GetAllBookInfoList(sortBy string) (*BookInfoList, error) {
+	var infoList BookInfoList
 	//首先加上所有真实的书籍
 	for _, b := range mapBooks {
-		info := NewBaseBook(b)
-		infoList.BaseBooks = append(infoList.BaseBooks, *info)
+		info := NewBaseInfo(b)
+		infoList.BookInfos = append(infoList.BookInfos, *info)
 	}
-	if len(infoList.BaseBooks) > 0 {
+	if len(infoList.BookInfos) > 0 {
 		infoList.SortBooks(sortBy)
 		return &infoList, nil
 	}
@@ -325,66 +325,66 @@ func GetArchiveBooks() []*Book {
 	return list
 }
 
-func GetBookInfoListByDepth(depth int, sortBy string) (*InfoList, error) {
-	var infoList InfoList
+func GetBookInfoListByDepth(depth int, sortBy string) (*BookInfoList, error) {
+	var infoList BookInfoList
 	//首先加上所有真实的书籍
 	for _, b := range mapBooks {
 		if b.Depth == depth {
-			info := NewBaseBook(b)
-			infoList.BaseBooks = append(infoList.BaseBooks, *info)
+			info := NewBaseInfo(b)
+			infoList.BookInfos = append(infoList.BookInfos, *info)
 		}
 	}
 	//接下来还要加上扫描生成出来的书籍组
 	for _, bs := range Stores.mapBookstores {
 		for _, b := range bs.BookGroupMap {
 			if b.Depth == depth {
-				info := NewBaseBook(b)
-				infoList.BaseBooks = append(infoList.BaseBooks, *info)
+				info := NewBaseInfo(b)
+				infoList.BookInfos = append(infoList.BookInfos, *info)
 			}
 		}
 	}
-	if len(infoList.BaseBooks) > 0 {
+	if len(infoList.BookInfos) > 0 {
 		infoList.SortBooks(sortBy)
 		return &infoList, nil
 	}
 	return nil, errors.New("error:can not found bookshelf. GetBookInfoListByDepth")
 }
 
-func GetBaseBooksByMaxDepth(depth int, sortBy string) (*InfoList, error) {
-	var infoList InfoList
+func GetBookInfoListByMaxDepth(depth int, sortBy string) (*BookInfoList, error) {
+	var infoList BookInfoList
 	//首先加上所有真实的书籍
 	for _, b := range mapBooks {
 		if b.Depth <= depth {
-			info := NewBaseBook(b)
-			infoList.BaseBooks = append(infoList.BaseBooks, *info)
+			info := NewBaseInfo(b)
+			infoList.BookInfos = append(infoList.BookInfos, *info)
 		}
 	}
 	//接下来还要加上扫描生成出来的书籍组
 	for _, bs := range Stores.mapBookstores {
 		for _, b := range bs.BookGroupMap {
 			if b.Depth <= depth {
-				info := NewBaseBook(b)
-				infoList.BaseBooks = append(infoList.BaseBooks, *info)
+				info := NewBaseInfo(b)
+				infoList.BookInfos = append(infoList.BookInfos, *info)
 			}
 		}
 	}
-	if len(infoList.BaseBooks) > 0 {
+	if len(infoList.BookInfos) > 0 {
 		infoList.SortBooks(sortBy)
 		return &infoList, nil
 	}
-	return nil, errors.New("error:can not found bookshelf. GetBaseBooksByMaxDepth")
+	return nil, errors.New("error:can not found bookshelf. GetBookInfoListByMaxDepth")
 }
 
-func GetInfoListByID(BookID string, sortBy string) (*InfoList, error) {
-	var infoList InfoList
+func GetBookInfoListByID(BookID string, sortBy string) (*BookInfoList, error) {
+	var infoList BookInfoList
 	book := mapBookGroup[BookID]
 	if book != nil {
 		//首先加上所有真实的书籍
 		for _, b := range book.ChildBook {
-			info := NewBaseBook(b)
-			infoList.BaseBooks = append(infoList.BaseBooks, *info)
+			info := NewBaseInfo(b)
+			infoList.BookInfos = append(infoList.BookInfos, *info)
 		}
-		if len(infoList.BaseBooks) > 0 {
+		if len(infoList.BookInfos) > 0 {
 			infoList.SortBooks(sortBy)
 			return &infoList, nil
 		}
@@ -392,15 +392,15 @@ func GetInfoListByID(BookID string, sortBy string) (*InfoList, error) {
 	return nil, errors.New("can not found bookshelf")
 }
 
-func GetInfoListByParentFolder(parentFolder string, sortBy string) (*InfoList, error) {
-	var infoList InfoList
+func GetBookInfoListByParentFolder(parentFolder string, sortBy string) (*BookInfoList, error) {
+	var infoList BookInfoList
 	for _, b := range mapBooks {
 		if b.ParentFolder == parentFolder {
-			info := NewBaseBook(b)
-			infoList.BaseBooks = append(infoList.BaseBooks, *info)
+			info := NewBaseInfo(b)
+			infoList.BookInfos = append(infoList.BookInfos, *info)
 		}
 	}
-	if len(infoList.BaseBooks) > 0 {
+	if len(infoList.BookInfos) > 0 {
 		infoList.SortBooks(sortBy)
 		return &infoList, nil
 	}

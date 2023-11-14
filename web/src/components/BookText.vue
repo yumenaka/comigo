@@ -67,7 +67,6 @@ export default defineComponent({
       let bookID = this.book_info.id;
       let bookType = this.book_info.book_type;
       let bookName = this.book_info.name;
-      console.log("getBookURL  bookID：" + bookID + " bookType：" + bookType);
       if (bookType === "book_group") {
         return "/#/child_shelf/" + bookID + "/";
       }

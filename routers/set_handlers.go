@@ -55,11 +55,11 @@ func setWebAPI(engine *gin.Engine) {
 	//登录后才能查看的服务器状态，包括标题、机器状态等
 	protectedAPI.GET("/server_info", handlers.HandlerServerInfo)
 	//获取书架信息，不包含每页信息
-	protectedAPI.GET("/get_shelf", handlers.HandlerGetShelf)
+	protectedAPI.GET("/get_book_infos", handlers.HandlerGetBookInfos)
 	//通过URL字符串参数查询书籍信息
 	protectedAPI.GET("/get_book", handlers.HandlerGetBook)
 	//返回同一文件夹的书籍ID列表
-	protectedAPI.GET("/same_group_books", handlers.HandlerSameGroupBooks)
+	protectedAPI.GET("/same_group_book_infos", handlers.HandlerSameGroupBookInfo)
 	//通过链接下载reg配置
 	protectedAPI.GET("/comigo.reg", handlers.HandlerGetRegFile)
 	//通过链接下载toml格式的示例配置
@@ -81,7 +81,7 @@ func SetDownloadLink() {
 		if err != nil {
 			logger.Info("设置文件下载失败")
 		} else {
-			for _, info := range allBook.BaseBooks {
+			for _, info := range allBook.BookInfos {
 				//下载文件
 				if info.Type != types.TypeBooksGroup && info.Type != types.TypeDir {
 					//staticUrl := "/raw/" + info.BookID + "/" + url.QueryEscape(info.Name)

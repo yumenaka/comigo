@@ -203,7 +203,7 @@ const store = createStore({
     },
     //拉取书架数据
     async syncBookShelfDataAction(context) {
-      const msg = await axios.get("get_shelf").then(
+      const msg = await axios.get("get_book_infos").then(
         (res) => res.data,
         () => ""
       );

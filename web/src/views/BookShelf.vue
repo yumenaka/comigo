@@ -331,7 +331,7 @@ export default defineComponent({
             }
             let _this = this;
             axios
-                .get("get_shelf?max_depth=1" + sort_image_by_str)
+                .get("get_book_infos?max_depth=1" + sort_image_by_str)
                 .then((response) => {
                     if (response.data !== "") {
                         this.bookshelf = response.data;
@@ -366,7 +366,7 @@ export default defineComponent({
                 sort_image_by_str = "&sort_by=" + this.$route.query.sort_by;
             }
             axios
-                .get("get_shelf?book_group_book_id=" + group_id + sort_image_by_str)
+                .get("get_book_infos?book_group_book_id=" + group_id + sort_image_by_str)
                 .then((response) => {
                     this.bookshelf = response.data;
                 }).catch((error) => {
@@ -462,71 +462,6 @@ export default defineComponent({
                     replace: true,
                     query: { sort_by: key },
                 });
-            }
-        },
-
-        getBookCardOpenURL(bookID: string, bookType: string, bookName: string) {
-            // console.log("getBookCardOpenURL  bookID：" + bookID + " bookType：" + bookType)
-            if (bookType === "book_group") {
-                return "/#/child_shelf/" + bookID + "/";
-            }
-            if (
-                bookType === ".pdf" ||
-                bookType === "video" ||
-                bookType === "audio" ||
-                bookType === "unknown"
-            ) {
-                return "/api/raw/" + bookID + "/" + bookName;
-            }
-            if (this.readerMode === "flip" || this.readerMode === "sketch") {
-                return "/#/flip/" + bookID;
-            }
-            if (this.readerMode === "scroll") {
-                // 命名路由,并加上参数,让路由建立 url
-                return "/#/scroll/" + bookID;
-            }
-        },
-
-        //已经被 getBookCardOpenURL与getBookCardOpenURL代替
-        // 打开书阅读，或继续在书架里展示一组书
-        onOpenBook(bookID: string, bookType: string) {
-            // console.log("onOpenBook  bookID：" + bookID + " bookType：" + bookType)
-            if (bookType == "book_group") {
-                this.$router.push({
-                    name: "ChildBookShelf",
-                    params: { group_id: bookID },
-                });
-                return;
-            }
-            if (
-                bookType === ".pdf" ||
-                bookType === ".mp4" ||
-                bookType === "video" ||
-                bookType === "audio" ||
-                bookType === "unknown"
-            ) {
-                //打开新的标签页,跳转到浏览器自带的打开功能
-                // Window open() 方法 https://www.runoob.com/jsref/met-win-open.html
-                axios
-                    .get("/get_book?id=" + bookID)
-                    .then((response) =>
-                        window.open(
-                            "api/raw/" + bookID + "/" + response.data.name,
-                            "_blank"
-                        )
-                    ) // _blank - URL加载到一个新的窗口。默认值
-                    .finally(() => {
-                        console.log("成功刷新书籍数据,书籍ID:" + bookID);
-                    });
-                return;
-            }
-            if (this.readerMode === "flip" || this.readerMode === "sketch") {
-                // 命名路由,并加上参数,让路由建立 url
-                this.$router.push({ name: "FlipMode", params: { id: bookID } });
-            }
-            if (this.readerMode === "scroll") {
-                // 命名路由,并加上参数,让路由建立 url
-                this.$router.push({ name: "ScrollMode", params: { id: bookID } });
             }
         },
 
