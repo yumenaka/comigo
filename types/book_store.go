@@ -9,15 +9,15 @@ import (
 	"github.com/yumenaka/comi/util"
 )
 
-// Bookstores 本地总书库，扫描后生成。可以有多个子书库。
-type Bookstores struct {
-	mapBookstores map[string]*singleBookstore //key为子书库搜索路径（）
-	SortBy        string
+// BookGroup 本地总书库，扫描后生成。可以有多个子书库。
+type BookGroup struct {
+	mapChildBookGroups map[string]*childBookGroup //key为子书库搜索路径（）
+	SortBy             string
 }
 
 // GenerateBookGroup 生成书籍组
-func (bs *Bookstores) GenerateBookGroup() error {
-	for _, single := range bs.mapBookstores {
+func (bs *BookGroup) GenerateBookGroup() error {
+	for _, single := range bs.mapChildBookGroups {
 		err := single.initBookGroupMap()
 		if err != nil {
 			return err
@@ -27,7 +27,7 @@ func (bs *Bookstores) GenerateBookGroup() error {
 }
 
 // 对应某个扫描路径的子书库
-type singleBookstore struct {
+type childBookGroup struct {
 	StorePath    string           //书库ID，从0开始？用 mapBookstores的大小定义
 	BasePath     string           //扫描路径，可能是相对路径。Bookstores的Key。
 	Name         string           //书库名，不指定就默认等于Path
@@ -35,7 +35,7 @@ type singleBookstore struct {
 	BookGroupMap map[string]*Book //拥有的书籍组,通过扫描书库生成，key是BookID。需要通过Depth从深到浅生成
 }
 
-func (s *singleBookstore) initBookGroupMap() error {
+func (s *childBookGroup) initBookGroupMap() error {
 	if len(s.BookMap) == 0 {
 		return errors.New("empty Bookstore")
 	}
@@ -118,31 +118,31 @@ func (s *singleBookstore) initBookGroupMap() error {
 	return nil
 }
 
-// NewSingleBookstore 创建一个新书库
-func (bs *Bookstores) NewSingleBookstore(basePath string) error {
-	if _, ok := bs.mapBookstores[basePath]; ok {
+// NewChildBookGroup 创建一个新书库
+func (bs *BookGroup) NewChildBookGroup(basePath string) error {
+	if _, ok := bs.mapChildBookGroups[basePath]; ok {
 		// 已经有这个key了
 		return errors.New("add Bookstore Error： The key already exists [" + basePath + "]")
 	}
-	s := singleBookstore{
+	s := childBookGroup{
 		StorePath:    basePath,
 		BasePath:     basePath, //暂时与路径同名 TODO：自定义书库名
 		Name:         basePath,
 		BookMap:      make(map[string]*Book),
 		BookGroupMap: make(map[string]*Book),
 	}
-	bs.mapBookstores[basePath] = &s
+	bs.mapChildBookGroups[basePath] = &s
 	return nil
 }
 
-// AddBookToStores 将某一本书，放到basePath做key的某子书库中
-func (bs *Bookstores) AddBookToStores(searchPath string, b *Book) error {
-	if _, ok := bs.mapBookstores[searchPath]; !ok {
+// AddBookToGroups 将某一本书，放到basePath做key的某子书库中
+func (bs *BookGroup) AddBookToGroups(searchPath string, b *Book) error {
+	if _, ok := bs.mapChildBookGroups[searchPath]; !ok {
 		//创建一个新子书库，并添加一本书
-		bs.mapBookstores[searchPath].BookMap[b.BookID] = b
+		bs.mapChildBookGroups[searchPath].BookMap[b.BookID] = b
 		return errors.New("add Bookstore Error： The key not found [" + searchPath + "]")
 	}
 	//给已有子书库添加一本书
-	bs.mapBookstores[searchPath].BookMap[b.BookID] = b
+	bs.mapChildBookGroups[searchPath].BookMap[b.BookID] = b
 	return nil
 }

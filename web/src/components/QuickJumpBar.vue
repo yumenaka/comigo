@@ -21,9 +21,9 @@ export default defineComponent({
   props: ['nowBookID'],
   data() {
     return {
-      SomeFlag: '',
+      SomeFlag: 'filename',
       same_group_book_infos: {
-        BaseBooks: [
+        BookInfos: [
           {
             id: 0,
             name: '',
