@@ -144,7 +144,7 @@ func AddBooksToStore(bookList []*types.Book, basePath string, MinImageNum int) {
 		logger.Info(locale.GetString("AddBook_error"), basePath)
 	}
 	// 然后生成对应的虚拟书籍组
-	if err := types.Stores.GenerateBookGroup(); err != nil {
+	if err := types.Stores.InitBookGroup(); err != nil {
 		logger.Info(err)
 	}
 }

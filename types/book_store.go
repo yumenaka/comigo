@@ -15,10 +15,10 @@ type BookGroup struct {
 	SortBy             string
 }
 
-// GenerateBookGroup 生成书籍组
-func (bs *BookGroup) GenerateBookGroup() error {
+// InitBookGroup 生成书籍组
+func (bs *BookGroup) InitBookGroup() error {
 	for _, single := range bs.mapChildBookGroups {
-		err := single.initBookGroupMap()
+		err := single.generetaBookGroup()
 		if err != nil {
 			return err
 		}
@@ -28,14 +28,13 @@ func (bs *BookGroup) GenerateBookGroup() error {
 
 // 对应某个扫描路径的子书库
 type childBookGroup struct {
-	StorePath    string           //书库ID，从0开始？用 mapBookstores的大小定义
-	BasePath     string           //扫描路径，可能是相对路径。Bookstores的Key。
+	BasePath     string           //扫描路径，可能是相对路径。childBookGroupp的Key。
 	Name         string           //书库名，不指定就默认等于Path
 	BookMap      map[string]*Book //拥有的书籍,key是BookID
 	BookGroupMap map[string]*Book //拥有的书籍组,通过扫描书库生成，key是BookID。需要通过Depth从深到浅生成
 }
 
-func (s *childBookGroup) initBookGroupMap() error {
+func (s *childBookGroup) generetaBookGroup() error {
 	if len(s.BookMap) == 0 {
 		return errors.New("empty Bookstore")
 	}
@@ -50,10 +49,6 @@ func (s *childBookGroup) initBookGroupMap() error {
 	//从深往浅遍历
 	//如果有几本书同时有同一个父文件夹，那么应该【新建]一本书(组)，并加入到depth-1层里面
 	for depth := maxDepth; depth >= 0; depth-- {
-		//最上层（0）与第一层（1）的书籍直接展示，不需要创建书籍组
-		if depth < 2 {
-			continue
-		}
 		//用父文件夹做key的parentMap，后面遍历用
 		parentTempMap := make(map[string][]Book)
 		////遍历depth等于i的所有book
@@ -70,7 +65,7 @@ func (s *childBookGroup) initBookGroupMap() error {
 			}
 			// 获取修改时间
 			modTime := pathInfo.ModTime()
-			newBook, err := New(filepath.Dir(sameParentBookList[0].FilePath), modTime, 0, s.StorePath, depth-1, TypeBooksGroup)
+			newBook, err := New(filepath.Dir(sameParentBookList[0].FilePath), modTime, 0, s.BasePath, depth-1, TypeBooksGroup)
 			if err != nil {
 				logger.Info(err)
 				continue
@@ -125,8 +120,7 @@ func (bs *BookGroup) NewChildBookGroup(basePath string) error {
 		return errors.New("add Bookstore Error： The key already exists [" + basePath + "]")
 	}
 	s := childBookGroup{
-		StorePath:    basePath,
-		BasePath:     basePath, //暂时与路径同名 TODO：自定义书库名
+		BasePath:     basePath,
 		Name:         basePath,
 		BookMap:      make(map[string]*Book),
 		BookGroupMap: make(map[string]*Book),
