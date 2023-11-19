@@ -55,7 +55,9 @@ func setWebAPI(engine *gin.Engine) {
 	//登录后才能查看的服务器状态，包括标题、机器状态等
 	protectedAPI.GET("/server_info", handlers.HandlerServerInfo)
 	//获取书架信息，不包含每页信息
-	protectedAPI.GET("/get_book_infos", handlers.HandlerGetBookInfos)
+	protectedAPI.GET("/get_book_infos_by_depth", handlers.HandlerGetBookInfosByDepth)
+	protectedAPI.GET("/get_book_infos_by_max_depth", handlers.HandlerGetBookInfosByMaxDepth)
+	protectedAPI.GET("/get_book_infos_by_group_id", handlers.HandlerGetBookInfosByGroupID)
 	//通过URL字符串参数查询书籍信息
 	protectedAPI.GET("/get_book", handlers.HandlerGetBook)
 	//返回同一文件夹的书籍ID列表

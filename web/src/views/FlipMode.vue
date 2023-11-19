@@ -236,7 +236,6 @@ import {
   NSelect,
 } from "naive-ui";
 import axios from "axios";
-import md5 from "js-md5";
 
 export default defineComponent({
   name: "FlipMode",
@@ -697,11 +696,6 @@ export default defineComponent({
       // console.dir(this.$socket)
       this.$socket.sendObj(newMsg);
       console.log("send:", newMsg);
-    },
-
-    // 辅助函数，用于从 Gravatar 获取头像。URL 的最后一段需要用户的 email 地址的 MD5 编码。
-    gravatarURL: function (email: md5.message) {
-      return "http://www.gravatar.com/avatar/" + md5(email);
     },
 
     //页面排序相关

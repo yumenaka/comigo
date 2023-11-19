@@ -359,7 +359,7 @@ func GetBookInfoListByMaxDepth(depth int, sortBy string) (*BookInfoList, error) 
 			infoList.BookInfos = append(infoList.BookInfos, *info)
 		}
 	}
-	//接下来还要加上扫描生成出来的书籍组
+	//扫描生成的书籍组
 	for _, bs := range MainFolder.SubFolders {
 		for _, b := range bs.BookGroupMap {
 			if b.Depth <= depth {

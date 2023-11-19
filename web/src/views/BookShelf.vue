@@ -320,18 +320,18 @@ export default defineComponent({
         // 获取所有书籍信息
         initBookShelf() {
             //根据文件名、修改时间、文件大小等要素排序的参数
-            var sort_image_by_str = "";
+            let sort_by = "";
             //按照本地的存储值或默认值排序
             if (this.resort_hint_key !== "") {
-                sort_image_by_str = "&sort_by=" + this.resort_hint_key;
+                sort_by = "&sort_by=" + this.resort_hint_key;
             }
             //按照路由里的查询参数排序
             if (this.$route.query.sort_by) {
-                sort_image_by_str = "&sort_by=" + this.$route.query.sort_by;
+                sort_by = "&sort_by=" + this.$route.query.sort_by;
             }
             let _this = this;
             axios
-                .get("get_book_infos?max_depth=1" + sort_image_by_str)
+                .get("get_book_infos_by_max_depth?max_depth=1" + sort_by)
                 .then((response) => {
                     if (response.data !== "") {
                         this.bookshelf = response.data;
@@ -366,7 +366,7 @@ export default defineComponent({
                 sort_image_by_str = "&sort_by=" + this.$route.query.sort_by;
             }
             axios
-                .get("get_book_infos?book_group_book_id=" + group_id + sort_image_by_str)
+                .get("get_book_infos_by_group_id?book_group_book_id=" + group_id + sort_image_by_str)
                 .then((response) => {
                     this.bookshelf = response.data;
                 }).catch((error) => {

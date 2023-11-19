@@ -4,7 +4,7 @@ import axios from "axios";
 import App from "@/App.vue";
 import router from "@/router"; //vue-router
 //新状态管理库，用来代替vuex
-import { createPinia } from 'pinia'
+//import { createPinia } from 'pinia'
 // // useSocketStore为pinia的socket配置文件
 // import { useSocketStoreWithOut } from './store/useSocketStore';
 // const store = useSocketStoreWithOut();
@@ -25,11 +25,9 @@ app.use(VueAxios, axios);
 // 传入 injection key
 //VueX
 app.use(store);
-//新状态管理库Pinia，用来代替vuex
-app.use(createPinia())
 app.use(router);
-
-
+//研究新状态管理库Pinia，用来代替vuex
+// app.use(createPinia())
 
 // vue3-lazyload
 // https://github.com/murongg/vue3-lazyload
