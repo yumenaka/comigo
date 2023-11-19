@@ -9,15 +9,31 @@ import (
 	"github.com/yumenaka/comi/util"
 )
 
-// BookGroup 本地总书库，扫描后生成。可以有多个子书库。
-type BookGroup struct {
-	mapChildBookGroups map[string]*childBookGroup //key为子书库搜索路径（）
-	SortBy             string
+// Folder 本地总书库，扫描后生成。可以有多个子书库。
+type Folder struct {
+	Path       string
+	SortBy     string                  //新字段   //排序方式
+	BookMap    map[string]*Book        ///新字段   //拥有的书籍,key是BookID
+	SubFolders map[string]*childFolder //key为子书库搜索路径（）
+}
+
+//type Folder struct {
+//	Path     string
+//	Books    []Ebook
+//	SubFolders map[string]*Folder
+//}
+
+// 对应某个扫描路径的子书库
+type childFolder struct {
+	Path         string           //扫描路径，可能是相对路径。childBookGroupp的Key。
+	SortBy       string           //排序方式
+	BookMap      map[string]*Book //拥有的书籍,key是BookID
+	BookGroupMap map[string]*Book //拥有的书籍组,通过扫描书库生成，key是BookID。需要通过Depth从深到浅生成
 }
 
 // InitBookGroup 生成书籍组
-func (bs *BookGroup) InitBookGroup() error {
-	for _, single := range bs.mapChildBookGroups {
+func (folder *Folder) InitBookGroup() error {
+	for _, single := range folder.SubFolders {
 		err := single.generetaBookGroup()
 		if err != nil {
 			return err
@@ -26,15 +42,7 @@ func (bs *BookGroup) InitBookGroup() error {
 	return nil
 }
 
-// 对应某个扫描路径的子书库
-type childBookGroup struct {
-	BasePath     string           //扫描路径，可能是相对路径。childBookGroupp的Key。
-	Name         string           //书库名，不指定就默认等于Path
-	BookMap      map[string]*Book //拥有的书籍,key是BookID
-	BookGroupMap map[string]*Book //拥有的书籍组,通过扫描书库生成，key是BookID。需要通过Depth从深到浅生成
-}
-
-func (s *childBookGroup) generetaBookGroup() error {
+func (s *childFolder) generetaBookGroup() error {
 	if len(s.BookMap) == 0 {
 		return errors.New("empty Bookstore")
 	}
@@ -65,7 +73,7 @@ func (s *childBookGroup) generetaBookGroup() error {
 			}
 			// 获取修改时间
 			modTime := pathInfo.ModTime()
-			newBook, err := New(filepath.Dir(sameParentBookList[0].FilePath), modTime, 0, s.BasePath, depth-1, TypeBooksGroup)
+			newBook, err := New(filepath.Dir(sameParentBookList[0].FilePath), modTime, 0, s.Path, depth-1, TypeBooksGroup)
 			if err != nil {
 				logger.Info(err)
 				continue
@@ -106,37 +114,34 @@ func (s *childBookGroup) generetaBookGroup() error {
 			s.BookGroupMap[newBook.BookID] = newBook
 			//将这本书加到BookGroup总表（mapBookGroup）里面去
 			mapBookGroup[newBook.BookID] = newBook
-			//fmt.Print("生成book_group：")
-			//logger.Info(newBook)
 		}
 	}
 	return nil
 }
 
 // NewChildBookGroup 创建一个新书库
-func (bs *BookGroup) NewChildBookGroup(basePath string) error {
-	if _, ok := bs.mapChildBookGroups[basePath]; ok {
+func (folder *Folder) NewChildBookGroup(basePath string) error {
+	if _, ok := folder.SubFolders[basePath]; ok {
 		// 已经有这个key了
 		return errors.New("add Bookstore Error： The key already exists [" + basePath + "]")
 	}
-	s := childBookGroup{
-		BasePath:     basePath,
-		Name:         basePath,
+	s := childFolder{
+		Path:         basePath,
 		BookMap:      make(map[string]*Book),
 		BookGroupMap: make(map[string]*Book),
 	}
-	bs.mapChildBookGroups[basePath] = &s
+	folder.SubFolders[basePath] = &s
 	return nil
 }
 
 // AddBookToGroups 将某一本书，放到basePath做key的某子书库中
-func (bs *BookGroup) AddBookToGroups(searchPath string, b *Book) error {
-	if _, ok := bs.mapChildBookGroups[searchPath]; !ok {
+func (folder *Folder) AddBookToGroups(searchPath string, b *Book) error {
+	if _, ok := folder.SubFolders[searchPath]; !ok {
 		//创建一个新子书库，并添加一本书
-		bs.mapChildBookGroups[searchPath].BookMap[b.BookID] = b
+		folder.SubFolders[searchPath].BookMap[b.BookID] = b
 		return errors.New("add Bookstore Error： The key not found [" + searchPath + "]")
 	}
 	//给已有子书库添加一本书
-	bs.mapChildBookGroups[searchPath].BookMap[b.BookID] = b
+	folder.SubFolders[searchPath].BookMap[b.BookID] = b
 	return nil
 }
