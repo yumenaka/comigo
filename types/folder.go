@@ -128,7 +128,7 @@ func (folder *Folder) AddSubFolder(basePath string) error {
 	return nil
 }
 
-// AddBookToSubFolder 将某一本书，放到basePath做key的某子书库中
+// AddBookToSubFolder 将某一本书，放到BookMap里面去
 func (folder *Folder) AddBookToSubFolder(searchPath string, b *Book) error {
 	if _, ok := folder.SubFolders[searchPath]; !ok {
 		//创建一个新子书库，并添加一本书

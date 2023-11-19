@@ -30,7 +30,7 @@ import (
 var (
 	mapBooks     = make(map[string]*Book) //实际存在的书，通过扫描生成
 	mapBookGroup = make(map[string]*Book) //通过分析路径与深度生成的书组。不备份，也不存储到数据库。key是BookID
-	Stores       = Folder{
+	MainFolder   = Folder{
 		SubFolders: make(map[string]*subFolder),
 		SortBy:     "name",
 	}
@@ -255,13 +255,13 @@ func AddBook(b *Book, basePath string, minPageNum int) error {
 	if b.GetAllPageNum() < minPageNum {
 		return errors.New("add book Error：minPageNum = " + strconv.Itoa(b.GetAllPageNum()))
 	}
-	if _, ok := Stores.SubFolders[basePath]; !ok {
-		if err := Stores.AddSubFolder(basePath); err != nil {
+	if _, ok := MainFolder.SubFolders[basePath]; !ok {
+		if err := MainFolder.AddSubFolder(basePath); err != nil {
 			logger.Info(err)
 		}
 	}
 	mapBooks[b.BookID] = b
-	return Stores.AddBookToSubFolder(basePath, b)
+	return MainFolder.AddBookToSubFolder(basePath, b)
 }
 
 // DeleteBookByID 删除一本书
@@ -335,7 +335,7 @@ func GetBookInfoListByDepth(depth int, sortBy string) (*BookInfoList, error) {
 		}
 	}
 	//接下来还要加上扫描生成出来的书籍组
-	for _, bs := range Stores.SubFolders {
+	for _, bs := range MainFolder.SubFolders {
 		for _, b := range bs.BookGroupMap {
 			if b.Depth == depth {
 				info := NewBaseInfo(b)
@@ -360,7 +360,7 @@ func GetBookInfoListByMaxDepth(depth int, sortBy string) (*BookInfoList, error) 
 		}
 	}
 	//接下来还要加上扫描生成出来的书籍组
-	for _, bs := range Stores.SubFolders {
+	for _, bs := range MainFolder.SubFolders {
 		for _, b := range bs.BookGroupMap {
 			if b.Depth <= depth {
 				info := NewBaseInfo(b)
