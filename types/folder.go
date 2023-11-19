@@ -12,29 +12,23 @@ import (
 // Folder 本地总书库，扫描后生成。可以有多个子书库。
 type Folder struct {
 	Path       string
-	SortBy     string                  //新字段   //排序方式
-	BookMap    map[string]*Book        ///新字段   //拥有的书籍,key是BookID
-	SubFolders map[string]*childFolder //key为子书库搜索路径（）
+	SortBy     string                //新字段   //排序方式
+	BookMap    map[string]*Book      ///新字段   //拥有的书籍,key是BookID
+	SubFolders map[string]*subFolder //key为路径
 }
 
-//type Folder struct {
-//	Path     string
-//	Books    []Ebook
-//	SubFolders map[string]*Folder
-//}
-
 // 对应某个扫描路径的子书库
-type childFolder struct {
-	Path         string           //扫描路径，可能是相对路径。childBookGroupp的Key。
+type subFolder struct {
+	Path         string           //路径
 	SortBy       string           //排序方式
 	BookMap      map[string]*Book //拥有的书籍,key是BookID
 	BookGroupMap map[string]*Book //拥有的书籍组,通过扫描书库生成，key是BookID。需要通过Depth从深到浅生成
 }
 
-// InitBookGroup 生成书籍组
-func (folder *Folder) InitBookGroup() error {
+// InitFolder 生成书籍组
+func (folder *Folder) InitFolder() error {
 	for _, single := range folder.SubFolders {
-		err := single.generetaBookGroup()
+		err := single.AnalyzeFolder()
 		if err != nil {
 			return err
 		}
@@ -42,7 +36,7 @@ func (folder *Folder) InitBookGroup() error {
 	return nil
 }
 
-func (s *childFolder) generetaBookGroup() error {
+func (s *subFolder) AnalyzeFolder() error {
 	if len(s.BookMap) == 0 {
 		return errors.New("empty Bookstore")
 	}
@@ -119,13 +113,13 @@ func (s *childFolder) generetaBookGroup() error {
 	return nil
 }
 
-// NewChildBookGroup 创建一个新书库
-func (folder *Folder) NewChildBookGroup(basePath string) error {
+// AddSubFolder 创建一个新文件夹
+func (folder *Folder) AddSubFolder(basePath string) error {
 	if _, ok := folder.SubFolders[basePath]; ok {
 		// 已经有这个key了
 		return errors.New("add Bookstore Error： The key already exists [" + basePath + "]")
 	}
-	s := childFolder{
+	s := subFolder{
 		Path:         basePath,
 		BookMap:      make(map[string]*Book),
 		BookGroupMap: make(map[string]*Book),
@@ -134,8 +128,8 @@ func (folder *Folder) NewChildBookGroup(basePath string) error {
 	return nil
 }
 
-// AddBookToGroups 将某一本书，放到basePath做key的某子书库中
-func (folder *Folder) AddBookToGroups(searchPath string, b *Book) error {
+// AddBookToSubFolder 将某一本书，放到basePath做key的某子书库中
+func (folder *Folder) AddBookToSubFolder(searchPath string, b *Book) error {
 	if _, ok := folder.SubFolders[searchPath]; !ok {
 		//创建一个新子书库，并添加一本书
 		folder.SubFolders[searchPath].BookMap[b.BookID] = b

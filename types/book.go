@@ -31,7 +31,7 @@ var (
 	mapBooks     = make(map[string]*Book) //实际存在的书，通过扫描生成
 	mapBookGroup = make(map[string]*Book) //通过分析路径与深度生成的书组。不备份，也不存储到数据库。key是BookID
 	Stores       = Folder{
-		SubFolders: make(map[string]*childFolder),
+		SubFolders: make(map[string]*subFolder),
 		SortBy:     "name",
 	}
 )
@@ -256,12 +256,12 @@ func AddBook(b *Book, basePath string, minPageNum int) error {
 		return errors.New("add book Error：minPageNum = " + strconv.Itoa(b.GetAllPageNum()))
 	}
 	if _, ok := Stores.SubFolders[basePath]; !ok {
-		if err := Stores.NewChildBookGroup(basePath); err != nil {
+		if err := Stores.AddSubFolder(basePath); err != nil {
 			logger.Info(err)
 		}
 	}
 	mapBooks[b.BookID] = b
-	return Stores.AddBookToGroups(basePath, b)
+	return Stores.AddBookToSubFolder(basePath, b)
 }
 
 // DeleteBookByID 删除一本书
