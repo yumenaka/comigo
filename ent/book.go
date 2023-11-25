@@ -18,7 +18,7 @@ type Book struct {
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// 书名
-	Name string `json:"Name,omitempty"`
+	Name string `json:"Title,omitempty"`
 	// 书籍ID
 	BookID string `json:"BookID,omitempty"`
 	// 拥有者
@@ -36,7 +36,7 @@ type Book struct {
 	// ParentFolder holds the value of the "ParentFolder" field.
 	ParentFolder string `json:"ParentFolder,omitempty"`
 	// 总页数
-	AllPageNum int `json:"AllPageNum,omitempty"`
+	AllPageNum int `json:"PageCount,omitempty"`
 	// FileSize holds the value of the "FileSize" field.
 	FileSize int64 `json:"FileSize,omitempty"`
 	// Authors holds the value of the "Authors" field.
@@ -123,7 +123,7 @@ func (b *Book) assignValues(columns []string, values []any) error {
 			b.ID = int(value.Int64)
 		case book.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field Name", values[i])
+				return fmt.Errorf("unexpected type %T for field Title", values[i])
 			} else if value.Valid {
 				b.Name = value.String
 			}
@@ -177,7 +177,7 @@ func (b *Book) assignValues(columns []string, values []any) error {
 			}
 		case book.FieldAllPageNum:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field AllPageNum", values[i])
+				return fmt.Errorf("unexpected type %T for field PageCount", values[i])
 			} else if value.Valid {
 				b.AllPageNum = int(value.Int64)
 			}
@@ -294,7 +294,7 @@ func (b *Book) String() string {
 	var builder strings.Builder
 	builder.WriteString("Book(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", b.ID))
-	builder.WriteString("Name=")
+	builder.WriteString("Title=")
 	builder.WriteString(b.Name)
 	builder.WriteString(", ")
 	builder.WriteString("BookID=")
@@ -321,7 +321,7 @@ func (b *Book) String() string {
 	builder.WriteString("ParentFolder=")
 	builder.WriteString(b.ParentFolder)
 	builder.WriteString(", ")
-	builder.WriteString("AllPageNum=")
+	builder.WriteString("PageCount=")
 	builder.WriteString(fmt.Sprintf("%v", b.AllPageNum))
 	builder.WriteString(", ")
 	builder.WriteString("FileSize=")

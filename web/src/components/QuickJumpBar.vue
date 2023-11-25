@@ -5,7 +5,7 @@
       class="mx-2 p-2 w-1/2 border-gray-200 rounded-lg text-xl font-semibold text-center disabled:opacity-50 disabled:pointer-events-none"
       onchange="location = '/#/scroll/'+this.value;location.reload();">
       <option v-for="book in same_group_book_infos.BookInfos" :value="book.id" :key="book.id" :selected="book.id == nowBookID">
-        {{ book.name }}
+        {{ book.title }}
       </option>
     </select>
     <a :href="nextLink" class="text-blue-700 hover:underline text-4xl font-semibold ">➡️</a>

@@ -6,10 +6,10 @@
       :style="setBackgroundImage()">
     </div>
     <div class="w-2/3 flex flex-col my-2 top-0 p-4 border-blue-800 rounded-b">
-      <div class="w-full my-1 text-xl text-left font-bold ">{{ book_info.name }}</div>
+      <div class="w-full my-1 text-xl text-left font-bold ">{{ book_info.title }}</div>
       <div class="w-full my-1 text-xl text-left" v-if="book_info.author!==''">{{ $t('author', [book_info.author]) }}</div>
       <div class="w-full my-1 text-xl text-left" v-if="!isBookGroup&&!isDirBook">{{ $t('filesize', [fileSizeString]) }}</div>
-      <div class="w-full my-1 text-xl text-left"  v-if="!isBookGroup">{{ $t('allpagenum', [book_info.all_page_num]) }}</div>
+      <div class="w-full my-1 text-xl text-left"  v-if="!isBookGroup">{{ $t('allpagenum', [book_info.page_count]) }}</div>
       <div class="w-full my-1 text-xl text-left" v-if="book_info.child_book_num > 0">{{ bookNumHint }}</div>
     </div>
   </a>
@@ -32,13 +32,13 @@ export default defineComponent({
   },
   computed: {
     isBookGroup() {
-      return this.book_info.book_type==='book_group'
+      return this.book_info.type==='book_group'
     },
     isDirBook() {
-      return this.book_info.book_type==='dir'
+      return this.book_info.type==='dir'
     },
     getTarget() {
-      let bookType = this.book_info.book_type;
+      let bookType = this.book_info.type;
       if (
         bookType === ".pdf" ||
         bookType === "video" ||
@@ -66,7 +66,7 @@ export default defineComponent({
       return `${formattedValue} ${sizes[i]}`;
     },
     shortTitle(): string {
-      let short_title = this.book_info.name
+      let short_title = this.book_info.title
       //使用 JavaScript replace() 方法替换掉一些字符串
       if (this.simplifyTitle) {
         //中：/[\u4e00-\u9fa5]/  日：/[\u0800-\u4e00]/  韩：/[\uac00-\ud7ff]/  空格：[\s]
@@ -95,8 +95,8 @@ export default defineComponent({
   methods: {
     getBookURL() {
       let bookID = this.book_info.id;
-      let bookType = this.book_info.book_type;
-      let bookName = this.book_info.name;
+      let bookType = this.book_info.type;
+      let bookName = this.book_info.title;
       // console.log("getBookCardOpenURL  bookID：" + bookID + " bookType：" + bookType)
       if (bookType === "book_group") {
         return "/#/child_shelf/" + bookID + "/";

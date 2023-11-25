@@ -180,10 +180,10 @@ export default defineComponent({
             maxDepth: 1,
             bookshelf: [
                 {
-                    name: "loading",
-                    all_page_num: 1,
+                    title: "loading",
+                    page_count: 1,
                     id: "12345",
-                    book_type: ".zip",
+                    type: ".zip",
                     parent_folder: "",
                     depth: 1,
                     child_book_num: 0,
@@ -331,7 +331,7 @@ export default defineComponent({
             }
             let _this = this;
             axios
-                .get("get_book_infos_by_max_depth?max_depth=1" + sort_by)
+                .get("get_book_infos_by_max_depth?max_depth=0" + sort_by)
                 .then((response) => {
                     if (response.data !== "") {
                         this.bookshelf = response.data;

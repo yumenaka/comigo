@@ -20,7 +20,7 @@ var (
 		{Name: "child_book_num", Type: field.TypeInt},
 		{Name: "depth", Type: field.TypeInt},
 		{Name: "parent_folder", Type: field.TypeString},
-		{Name: "all_page_num", Type: field.TypeInt},
+		{Name: "page_count", Type: field.TypeInt},
 		{Name: "file_size", Type: field.TypeInt64},
 		{Name: "authors", Type: field.TypeString},
 		{Name: "isbn", Type: field.TypeString},

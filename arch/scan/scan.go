@@ -325,20 +325,20 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 		}
 	// TODO:服务器解压速度太慢，网页用PDF.js解析？
 	case types.TypePDF:
-		newBook.AllPageNum = 1
+		newBook.PageCount = 1
 		newBook.InitComplete = true
 		newBook.Cover = types.ImageInfo{RealImageFilePATH: "", FileSize: FileInfo.Size(), ModeTime: FileInfo.ModTime(), NameInArchive: "", Url: "/images/pdf.png"}
 	// TODO：简单的网页播放器
 	case types.TypeVideo:
-		newBook.AllPageNum = 1
+		newBook.PageCount = 1
 		newBook.InitComplete = true
 		newBook.Cover = types.ImageInfo{NameInArchive: "video.png", Url: "/images/video.png"}
 	case types.TypeAudio:
-		newBook.AllPageNum = 1
+		newBook.PageCount = 1
 		newBook.InitComplete = true
 		newBook.Cover = types.ImageInfo{NameInArchive: "audio.png", Url: "/images/audio.png"}
 	case types.TypeUnknownFile:
-		newBook.AllPageNum = 1
+		newBook.PageCount = 1
 		newBook.InitComplete = true
 		newBook.Cover = types.ImageInfo{NameInArchive: "unknown.png", Url: "/images/unknown.png"}
 	// 其他类型的压缩文件或文件夹

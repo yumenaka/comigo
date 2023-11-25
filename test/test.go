@@ -102,7 +102,7 @@ func testDatabase() {
 	// 插入一本书
 	b, err := client.Book.
 		Create().
-		SetName("Test Book Name" + randString).
+		SetName("Test Book Title" + randString).
 		SetBookID("BookID" + randString).
 		SetFilePath("path" + randString).
 		SetBookStorePath("path2").

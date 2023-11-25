@@ -34,7 +34,7 @@ func getLocale() (string, string) {
 	switch osHost {
 	case "windows":
 		// Exec powershell Get-Culture on Windows.
-		cmd := exec.Command("powershell", "Get-Culture | select -exp Name")
+		cmd := exec.Command("powershell", "Get-Culture | select -exp Title")
 		output, err := cmd.Output()
 		if err == nil {
 			langLocRaw := strings.TrimSpace(string(output))

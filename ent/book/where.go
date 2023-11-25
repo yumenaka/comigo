@@ -55,7 +55,7 @@ func IDLTE(id int) predicate.Book {
 	return predicate.Book(sql.FieldLTE(FieldID, id))
 }
 
-// Name applies equality check predicate on the "Name" field. It's identical to NameEQ.
+// Name applies equality check predicate on the "Title" field. It's identical to NameEQ.
 func Name(v string) predicate.Book {
 	return predicate.Book(sql.FieldEQ(FieldName, v))
 }
@@ -100,7 +100,7 @@ func ParentFolder(v string) predicate.Book {
 	return predicate.Book(sql.FieldEQ(FieldParentFolder, v))
 }
 
-// AllPageNum applies equality check predicate on the "AllPageNum" field. It's identical to AllPageNumEQ.
+// AllPageNum applies equality check predicate on the "PageCount" field. It's identical to AllPageNumEQ.
 func AllPageNum(v int) predicate.Book {
 	return predicate.Book(sql.FieldEQ(FieldAllPageNum, v))
 }
@@ -165,67 +165,67 @@ func ZipTextEncoding(v string) predicate.Book {
 	return predicate.Book(sql.FieldEQ(FieldZipTextEncoding, v))
 }
 
-// NameEQ applies the EQ predicate on the "Name" field.
+// NameEQ applies the EQ predicate on the "Title" field.
 func NameEQ(v string) predicate.Book {
 	return predicate.Book(sql.FieldEQ(FieldName, v))
 }
 
-// NameNEQ applies the NEQ predicate on the "Name" field.
+// NameNEQ applies the NEQ predicate on the "Title" field.
 func NameNEQ(v string) predicate.Book {
 	return predicate.Book(sql.FieldNEQ(FieldName, v))
 }
 
-// NameIn applies the In predicate on the "Name" field.
+// NameIn applies the In predicate on the "Title" field.
 func NameIn(vs ...string) predicate.Book {
 	return predicate.Book(sql.FieldIn(FieldName, vs...))
 }
 
-// NameNotIn applies the NotIn predicate on the "Name" field.
+// NameNotIn applies the NotIn predicate on the "Title" field.
 func NameNotIn(vs ...string) predicate.Book {
 	return predicate.Book(sql.FieldNotIn(FieldName, vs...))
 }
 
-// NameGT applies the GT predicate on the "Name" field.
+// NameGT applies the GT predicate on the "Title" field.
 func NameGT(v string) predicate.Book {
 	return predicate.Book(sql.FieldGT(FieldName, v))
 }
 
-// NameGTE applies the GTE predicate on the "Name" field.
+// NameGTE applies the GTE predicate on the "Title" field.
 func NameGTE(v string) predicate.Book {
 	return predicate.Book(sql.FieldGTE(FieldName, v))
 }
 
-// NameLT applies the LT predicate on the "Name" field.
+// NameLT applies the LT predicate on the "Title" field.
 func NameLT(v string) predicate.Book {
 	return predicate.Book(sql.FieldLT(FieldName, v))
 }
 
-// NameLTE applies the LTE predicate on the "Name" field.
+// NameLTE applies the LTE predicate on the "Title" field.
 func NameLTE(v string) predicate.Book {
 	return predicate.Book(sql.FieldLTE(FieldName, v))
 }
 
-// NameContains applies the Contains predicate on the "Name" field.
+// NameContains applies the Contains predicate on the "Title" field.
 func NameContains(v string) predicate.Book {
 	return predicate.Book(sql.FieldContains(FieldName, v))
 }
 
-// NameHasPrefix applies the HasPrefix predicate on the "Name" field.
+// NameHasPrefix applies the HasPrefix predicate on the "Title" field.
 func NameHasPrefix(v string) predicate.Book {
 	return predicate.Book(sql.FieldHasPrefix(FieldName, v))
 }
 
-// NameHasSuffix applies the HasSuffix predicate on the "Name" field.
+// NameHasSuffix applies the HasSuffix predicate on the "Title" field.
 func NameHasSuffix(v string) predicate.Book {
 	return predicate.Book(sql.FieldHasSuffix(FieldName, v))
 }
 
-// NameEqualFold applies the EqualFold predicate on the "Name" field.
+// NameEqualFold applies the EqualFold predicate on the "Title" field.
 func NameEqualFold(v string) predicate.Book {
 	return predicate.Book(sql.FieldEqualFold(FieldName, v))
 }
 
-// NameContainsFold applies the ContainsFold predicate on the "Name" field.
+// NameContainsFold applies the ContainsFold predicate on the "Title" field.
 func NameContainsFold(v string) predicate.Book {
 	return predicate.Book(sql.FieldContainsFold(FieldName, v))
 }
@@ -700,42 +700,42 @@ func ParentFolderContainsFold(v string) predicate.Book {
 	return predicate.Book(sql.FieldContainsFold(FieldParentFolder, v))
 }
 
-// AllPageNumEQ applies the EQ predicate on the "AllPageNum" field.
+// AllPageNumEQ applies the EQ predicate on the "PageCount" field.
 func AllPageNumEQ(v int) predicate.Book {
 	return predicate.Book(sql.FieldEQ(FieldAllPageNum, v))
 }
 
-// AllPageNumNEQ applies the NEQ predicate on the "AllPageNum" field.
+// AllPageNumNEQ applies the NEQ predicate on the "PageCount" field.
 func AllPageNumNEQ(v int) predicate.Book {
 	return predicate.Book(sql.FieldNEQ(FieldAllPageNum, v))
 }
 
-// AllPageNumIn applies the In predicate on the "AllPageNum" field.
+// AllPageNumIn applies the In predicate on the "PageCount" field.
 func AllPageNumIn(vs ...int) predicate.Book {
 	return predicate.Book(sql.FieldIn(FieldAllPageNum, vs...))
 }
 
-// AllPageNumNotIn applies the NotIn predicate on the "AllPageNum" field.
+// AllPageNumNotIn applies the NotIn predicate on the "PageCount" field.
 func AllPageNumNotIn(vs ...int) predicate.Book {
 	return predicate.Book(sql.FieldNotIn(FieldAllPageNum, vs...))
 }
 
-// AllPageNumGT applies the GT predicate on the "AllPageNum" field.
+// AllPageNumGT applies the GT predicate on the "PageCount" field.
 func AllPageNumGT(v int) predicate.Book {
 	return predicate.Book(sql.FieldGT(FieldAllPageNum, v))
 }
 
-// AllPageNumGTE applies the GTE predicate on the "AllPageNum" field.
+// AllPageNumGTE applies the GTE predicate on the "PageCount" field.
 func AllPageNumGTE(v int) predicate.Book {
 	return predicate.Book(sql.FieldGTE(FieldAllPageNum, v))
 }
 
-// AllPageNumLT applies the LT predicate on the "AllPageNum" field.
+// AllPageNumLT applies the LT predicate on the "PageCount" field.
 func AllPageNumLT(v int) predicate.Book {
 	return predicate.Book(sql.FieldLT(FieldAllPageNum, v))
 }
 
-// AllPageNumLTE applies the LTE predicate on the "AllPageNum" field.
+// AllPageNumLTE applies the LTE predicate on the "PageCount" field.
 func AllPageNumLTE(v int) predicate.Book {
 	return predicate.Book(sql.FieldLTE(FieldAllPageNum, v))
 }

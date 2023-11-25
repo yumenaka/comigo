@@ -3,9 +3,7 @@ import axios from "axios";
 import main from "../main";
 import { InjectionKey } from 'vue'
 
-// Vuex TypeScript 支持 
-
-
+// Vuex TypeScript 支持
 // 为 store state 声明类型
 export interface State {
   count: number
@@ -16,7 +14,6 @@ export const key: InjectionKey<Store<State>> = Symbol()
 export function useStore () {
   return baseUseStore(key)
 }
-
 
 //生成一个随机ID
 var tempUserID = "Comigo_" + Math.floor(Math.random() * 100000); //可均衡获取 0 到 99999 的随机整数。
@@ -38,30 +35,6 @@ const store = createStore({
       { id: 2, text: "...", done: false },
     ],
     now_page: 1,
-    book: {
-      name: "loading",
-      all_page_num: 1,
-      pages: [
-        {
-          height: 500,
-          width: 449,
-          url: "/images/loading.gif",
-        },
-      ],
-    },
-    bookshelf: [
-      {
-        name: "loading",
-        all_page_num: 1,
-        pages: [
-          {
-            height: 500,
-            width: 449,
-            url: "/images/loading.gif",
-          },
-        ],
-      },
-    ],
     server_status: {
       template: "scroll",
       sketch_count_seconds: 30,
@@ -153,27 +126,15 @@ const store = createStore({
     SOCKET_RECONNECT_ERROR(state) {
       state.socket.reconnectError = true;
     },
-    increment(state) {
-      state.count++;
-    },
     //使用mutation()函数（store.commit('')）的时候，还可以传入额外的参数，也就是载荷payload
     syncSeverStatusData(state, payload) {
       state.server_status = payload.message;
-    },
-    syncBookData(state, payload) {
-      state.book = payload.message;
-    },
-    syncBookShelfData(state, payload) {
-      state.bookshelf = payload.message;
     },
   },
   //actions 可以包含任意异步操作，通过 store.dispatch 方法触发
   //接收context，与store具有相同方法与属性，不是store本身，
   //context可以访问state与getter，还可以用context.dispatch调用其他Action
   actions: {
-    incrementAction(context) {
-      context.commit("increment");
-    },
     //拉取远程设定数据
     async syncSeverStatusDataAction(context) {
       const msg = await axios
@@ -189,30 +150,6 @@ const store = createStore({
       context.commit("syncSeverStatusData", payload);
       console.log("syncSeverStatusData!");
     },
-    //拉取当前阅读书籍数据
-    async syncBookDataAction(context) {
-      const msg = await axios.get("book.json").then(
-        (res) => res.data,
-        () => ""
-      );
-      const payload = {
-        message: msg,
-      };
-      context.commit("syncBookData", payload);
-      console.log("syncBookData!");
-    },
-    //拉取书架数据
-    async syncBookShelfDataAction(context) {
-      const msg = await axios.get("get_book_infos").then(
-        (res) => res.data,
-        () => ""
-      );
-      const payload = {
-        message: msg,
-      };
-      context.commit("syncBookShelfData", payload);
-      console.log("syncBookShelfData!");
-    },
   },
   //相当于store的计算属性，会被缓存，变化的时候才重新计算
   getters: {
@@ -221,12 +158,6 @@ const store = createStore({
     },
     now_page: (state) => {
       return state.now_page;
-    },
-    book: (state) => {
-      return state.book;
-    },
-    bookshelf: (state) => {
-      return state.bookshelf;
     },
     message: (state) => {
       return state.message;

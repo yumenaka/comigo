@@ -29,7 +29,7 @@ func (bu *BookUpdate) Where(ps ...predicate.Book) *BookUpdate {
 	return bu
 }
 
-// SetName sets the "Name" field.
+// SetName sets the "Title" field.
 func (bu *BookUpdate) SetName(s string) *BookUpdate {
 	bu.mutation.SetName(s)
 	return bu
@@ -105,14 +105,14 @@ func (bu *BookUpdate) SetParentFolder(s string) *BookUpdate {
 	return bu
 }
 
-// SetAllPageNum sets the "AllPageNum" field.
+// SetAllPageNum sets the "PageCount" field.
 func (bu *BookUpdate) SetAllPageNum(i int) *BookUpdate {
 	bu.mutation.ResetAllPageNum()
 	bu.mutation.SetAllPageNum(i)
 	return bu
 }
 
-// AddAllPageNum adds i to the "AllPageNum" field.
+// AddAllPageNum adds i to the "PageCount" field.
 func (bu *BookUpdate) AddAllPageNum(i int) *BookUpdate {
 	bu.mutation.AddAllPageNum(i)
 	return bu
@@ -291,7 +291,7 @@ func (bu *BookUpdate) ExecX(ctx context.Context) {
 func (bu *BookUpdate) check() error {
 	if v, ok := bu.mutation.Name(); ok {
 		if err := book.NameValidator(v); err != nil {
-			return &ValidationError{Name: "Name", err: fmt.Errorf(`ent: validator failed for field "Book.Name": %w`, err)}
+			return &ValidationError{Name: "Title", err: fmt.Errorf(`ent: validator failed for field "Book.Title": %w`, err)}
 		}
 	}
 	if v, ok := bu.mutation.ChildBookNum(); ok {
@@ -306,7 +306,7 @@ func (bu *BookUpdate) check() error {
 	}
 	if v, ok := bu.mutation.AllPageNum(); ok {
 		if err := book.AllPageNumValidator(v); err != nil {
-			return &ValidationError{Name: "AllPageNum", err: fmt.Errorf(`ent: validator failed for field "Book.AllPageNum": %w`, err)}
+			return &ValidationError{Name: "PageCount", err: fmt.Errorf(`ent: validator failed for field "Book.PageCount": %w`, err)}
 		}
 	}
 	return nil
@@ -473,7 +473,7 @@ type BookUpdateOne struct {
 	mutation *BookMutation
 }
 
-// SetName sets the "Name" field.
+// SetName sets the "Title" field.
 func (buo *BookUpdateOne) SetName(s string) *BookUpdateOne {
 	buo.mutation.SetName(s)
 	return buo
@@ -549,14 +549,14 @@ func (buo *BookUpdateOne) SetParentFolder(s string) *BookUpdateOne {
 	return buo
 }
 
-// SetAllPageNum sets the "AllPageNum" field.
+// SetAllPageNum sets the "PageCount" field.
 func (buo *BookUpdateOne) SetAllPageNum(i int) *BookUpdateOne {
 	buo.mutation.ResetAllPageNum()
 	buo.mutation.SetAllPageNum(i)
 	return buo
 }
 
-// AddAllPageNum adds i to the "AllPageNum" field.
+// AddAllPageNum adds i to the "PageCount" field.
 func (buo *BookUpdateOne) AddAllPageNum(i int) *BookUpdateOne {
 	buo.mutation.AddAllPageNum(i)
 	return buo
@@ -748,7 +748,7 @@ func (buo *BookUpdateOne) ExecX(ctx context.Context) {
 func (buo *BookUpdateOne) check() error {
 	if v, ok := buo.mutation.Name(); ok {
 		if err := book.NameValidator(v); err != nil {
-			return &ValidationError{Name: "Name", err: fmt.Errorf(`ent: validator failed for field "Book.Name": %w`, err)}
+			return &ValidationError{Name: "Title", err: fmt.Errorf(`ent: validator failed for field "Book.Title": %w`, err)}
 		}
 	}
 	if v, ok := buo.mutation.ChildBookNum(); ok {
@@ -763,7 +763,7 @@ func (buo *BookUpdateOne) check() error {
 	}
 	if v, ok := buo.mutation.AllPageNum(); ok {
 		if err := book.AllPageNumValidator(v); err != nil {
-			return &ValidationError{Name: "AllPageNum", err: fmt.Errorf(`ent: validator failed for field "Book.AllPageNum": %w`, err)}
+			return &ValidationError{Name: "PageCount", err: fmt.Errorf(`ent: validator failed for field "Book.PageCount": %w`, err)}
 		}
 	}
 	return nil

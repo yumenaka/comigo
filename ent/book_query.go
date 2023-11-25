@@ -298,7 +298,7 @@ func (bq *BookQuery) WithPageInfos(opts ...func(*SinglePageInfoQuery)) *BookQuer
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"Name,omitempty"`
+//		Title string `json:"Title,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -321,7 +321,7 @@ func (bq *BookQuery) GroupBy(field string, fields ...string) *BookGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"Name,omitempty"`
+//		Title string `json:"Title,omitempty"`
 //	}
 //
 //	client.Book.Query().

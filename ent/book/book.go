@@ -33,7 +33,7 @@ const (
 	// FieldParentFolder holds the string denoting the parentfolder field in the database.
 	FieldParentFolder = "parent_folder"
 	// FieldAllPageNum holds the string denoting the allpagenum field in the database.
-	FieldAllPageNum = "all_page_num"
+	FieldAllPageNum = "page_count"
 	// FieldFileSize holds the string denoting the filesize field in the database.
 	FieldFileSize = "file_size"
 	// FieldAuthors holds the string denoting the authors field in the database.
@@ -109,7 +109,7 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// NameValidator is a validator for the "Name" field. It is called by the builders before save.
+	// NameValidator is a validator for the "Title" field. It is called by the builders before save.
 	NameValidator func(string) error
 	// DefaultOwner holds the default value on creation for the "Owner" field.
 	DefaultOwner string
@@ -117,7 +117,7 @@ var (
 	ChildBookNumValidator func(int) error
 	// DepthValidator is a validator for the "Depth" field. It is called by the builders before save.
 	DepthValidator func(int) error
-	// AllPageNumValidator is a validator for the "AllPageNum" field. It is called by the builders before save.
+	// AllPageNumValidator is a validator for the "PageCount" field. It is called by the builders before save.
 	AllPageNumValidator func(int) error
 	// DefaultModified holds the default value on creation for the "Modified" field.
 	DefaultModified func() time.Time

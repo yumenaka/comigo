@@ -17,9 +17,9 @@ import (
 func init() {
 	bookFields := schema.Book{}.Fields()
 	_ = bookFields
-	// bookDescName is the schema descriptor for Name field.
+	// bookDescName is the schema descriptor for Title field.
 	bookDescName := bookFields[0].Descriptor()
-	// book.NameValidator is a validator for the "Name" field. It is called by the builders before save.
+	// book.NameValidator is a validator for the "Title" field. It is called by the builders before save.
 	book.NameValidator = bookDescName.Validators[0].(func(string) error)
 	// bookDescOwner is the schema descriptor for Owner field.
 	bookDescOwner := bookFields[2].Descriptor()
@@ -33,9 +33,9 @@ func init() {
 	bookDescDepth := bookFields[7].Descriptor()
 	// book.DepthValidator is a validator for the "Depth" field. It is called by the builders before save.
 	book.DepthValidator = bookDescDepth.Validators[0].(func(int) error)
-	// bookDescAllPageNum is the schema descriptor for AllPageNum field.
+	// bookDescAllPageNum is the schema descriptor for PageCount field.
 	bookDescAllPageNum := bookFields[9].Descriptor()
-	// book.AllPageNumValidator is a validator for the "AllPageNum" field. It is called by the builders before save.
+	// book.AllPageNumValidator is a validator for the "PageCount" field. It is called by the builders before save.
 	book.AllPageNumValidator = bookDescAllPageNum.Validators[0].(func(int) error)
 	// bookDescModified is the schema descriptor for Modified field.
 	bookDescModified := bookFields[16].Descriptor()

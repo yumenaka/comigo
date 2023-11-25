@@ -1,6 +1,6 @@
 <template>
 	<div id="ScrollMode" class="manga" @mouseenter="onMouseEnter" @mouseleave="onMouseLeave">
-		<Header :setDownLoadLink="needDownloadLink()" :headerTitle="book.name" :bookID="book.id" :showReturnIcon="true"
+		<Header :setDownLoadLink="needDownloadLink()" :headerTitle="book.title" :bookID="book.id" :showReturnIcon="true"
 			:showSettingsIcon="true" v-bind:style="{ background: model.interfaceColor }" @drawerActivate="drawerActivate">
 		</Header>
 		<!-- 顶部的加载全部页面顶部按钮 -->
@@ -12,7 +12,7 @@
 		<div class="main_manga" v-for="(single_image, n) in localImages" :key="single_image.url"
 			@click="onMouseClick($event)" @mousemove="onMouseMove">
 			<ImageScroll :image_url="imageParametersString(single_image.url)" :sPWL="sPWL" :dPWL="dPWL" :sPWP="sPWP"
-				:dPWP="dPWP" :MyPageNum="n + startLoadPageNum" :nowPageNum="nowPageNum" :all_page_num="book.all_page_num"
+				:dPWP="dPWP" :MyPageNum="n + startLoadPageNum" :nowPageNum="nowPageNum" :page_count="book.page_count"
 				:book_id="book.id" :showPageNumFlag_ScrollMode="showPageNumFlag_ScrollMode" :syncPageByWS="syncPageByWS"
 				:id="'JUMP_ID:' + (n + startLoadPageNum)" :startLoadPageNum="startLoadPageNum"
 				:endLoadPageNum="endLoadPageNum" :autoScrolling="autoScrolling" :userControlling="userControlling"
@@ -296,7 +296,7 @@ export default defineComponent({
 			book: {
 				name: "loading",
 				id: "abcde",
-				all_page_num: 2,
+				page_count: 2,
 				book_type: ".zip",
 				pages: {
 					sort_by: "",
@@ -418,10 +418,10 @@ export default defineComponent({
 				//请求接口成功的逻辑
 				this.book = response.data;
 				//确定一开始要加载多少页
-				if (this.loadPageLimit <= this.book.all_page_num) {
+				if (this.loadPageLimit <= this.book.page_count) {
 					this.endLoadPageNum = this.loadPageLimit;
 				} else {
-					this.endLoadPageNum = this.book.all_page_num;
+					this.endLoadPageNum = this.book.page_count;
 				}
 				this.loadPages();
 				// 询问用户是否从中间开始加载，延迟1.5秒执行
@@ -437,7 +437,7 @@ export default defineComponent({
 			})
 			.finally(
 				() => {
-					document.title = this.book.name;
+					document.title = this.book.title;
 					// console.log("成功获取书籍数据,书籍ID:" + this.$route.params.id);
 				}
 			);
@@ -702,7 +702,7 @@ export default defineComponent({
 				console.log("别着急，等一会再翻页 this.nowPageNum=" + this.nowPageNum);
 				return;
 			}
-			if (syncData.now_page_num <= this.book.all_page_num && syncData.now_page_num >= 1) {
+			if (syncData.now_page_num <= this.book.page_count && syncData.now_page_num >= 1) {
 				this.nowPageNum = syncData.now_page_num;
 				this.startLoadPageNum = syncData.start_load_page_num;
 				this.endLoadPageNum = syncData.end_load_page_num;
@@ -758,10 +758,10 @@ export default defineComponent({
 				negativeText: this.$t('starting_from_beginning'),
 				onPositiveClick: () => {
 					this.startLoadPageNum = this.nowPageNum
-					if (this.startLoadPageNum + this.loadPageLimit <= this.book.all_page_num) {
+					if (this.startLoadPageNum + this.loadPageLimit <= this.book.page_count) {
 						this.endLoadPageNum = this.startLoadPageNum + this.loadPageLimit;
 					} else {
-						this.endLoadPageNum = this.book.all_page_num;
+						this.endLoadPageNum = this.book.page_count;
 					}
 					this.message.success(this.$t('successfully_loaded_reading_progress'));
 					this.loadPages();
@@ -792,10 +792,10 @@ export default defineComponent({
 		},
 		//无限加载用,底部刷新
 		loadNextBlock() {
-			if (this.endLoadPageNum + this.loadPageLimit <= this.book.all_page_num) {
+			if (this.endLoadPageNum + this.loadPageLimit <= this.book.page_count) {
 				this.endLoadPageNum = this.endLoadPageNum + this.loadPageLimit;
 			} else {
-				this.endLoadPageNum = this.book.all_page_num;
+				this.endLoadPageNum = this.book.page_count;
 			}
 			// console.log("loadNextBlock");
 			this.loadPages();
@@ -854,7 +854,7 @@ export default defineComponent({
 				.then((response) => (this.book = response.data))
 				.finally(
 					() => {
-						document.title = this.book.name;
+						document.title = this.book.title;
 						this.resort_hint_key = key;
 						this.loadPages();
 						// 带查询参数，结果是 /#/scroll/abc123?sort_by="filesize"
@@ -885,7 +885,7 @@ export default defineComponent({
 			this.$router.push({ name: "FlipMode", replace: true, params: { id: this.$route.params.id } });
 		},
 		needDownloadLink() {
-			return this.book.book_type !== "dir"
+			return this.book.type !== "dir"
 		},
 		//打开抽屉
 		drawerActivate(place: string) {

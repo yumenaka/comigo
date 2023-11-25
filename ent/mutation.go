@@ -172,12 +172,12 @@ func (m *BookMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
-// SetName sets the "Name" field.
+// SetName sets the "Title" field.
 func (m *BookMutation) SetName(s string) {
 	m._Name = &s
 }
 
-// Name returns the value of the "Name" field in the mutation.
+// Name returns the value of the "Title" field in the mutation.
 func (m *BookMutation) Name() (r string, exists bool) {
 	v := m._Name
 	if v == nil {
@@ -186,7 +186,7 @@ func (m *BookMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// OldName returns the old "Name" field's value of the Book entity.
+// OldName returns the old "Title" field's value of the Book entity.
 // If the Book object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *BookMutation) OldName(ctx context.Context) (v string, err error) {
@@ -203,7 +203,7 @@ func (m *BookMutation) OldName(ctx context.Context) (v string, err error) {
 	return oldValue.Name, nil
 }
 
-// ResetName resets all changes to the "Name" field.
+// ResetName resets all changes to the "Title" field.
 func (m *BookMutation) ResetName() {
 	m._Name = nil
 }
@@ -536,13 +536,13 @@ func (m *BookMutation) ResetParentFolder() {
 	m._ParentFolder = nil
 }
 
-// SetAllPageNum sets the "AllPageNum" field.
+// SetAllPageNum sets the "PageCount" field.
 func (m *BookMutation) SetAllPageNum(i int) {
 	m._AllPageNum = &i
 	m.add_AllPageNum = nil
 }
 
-// AllPageNum returns the value of the "AllPageNum" field in the mutation.
+// AllPageNum returns the value of the "PageCount" field in the mutation.
 func (m *BookMutation) AllPageNum() (r int, exists bool) {
 	v := m._AllPageNum
 	if v == nil {
@@ -551,7 +551,7 @@ func (m *BookMutation) AllPageNum() (r int, exists bool) {
 	return *v, true
 }
 
-// OldAllPageNum returns the old "AllPageNum" field's value of the Book entity.
+// OldAllPageNum returns the old "PageCount" field's value of the Book entity.
 // If the Book object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *BookMutation) OldAllPageNum(ctx context.Context) (v int, err error) {
@@ -568,7 +568,7 @@ func (m *BookMutation) OldAllPageNum(ctx context.Context) (v int, err error) {
 	return oldValue.AllPageNum, nil
 }
 
-// AddAllPageNum adds i to the "AllPageNum" field.
+// AddAllPageNum adds i to the "PageCount" field.
 func (m *BookMutation) AddAllPageNum(i int) {
 	if m.add_AllPageNum != nil {
 		*m.add_AllPageNum += i
@@ -577,7 +577,7 @@ func (m *BookMutation) AddAllPageNum(i int) {
 	}
 }
 
-// AddedAllPageNum returns the value that was added to the "AllPageNum" field in this mutation.
+// AddedAllPageNum returns the value that was added to the "PageCount" field in this mutation.
 func (m *BookMutation) AddedAllPageNum() (r int, exists bool) {
 	v := m.add_AllPageNum
 	if v == nil {
@@ -586,7 +586,7 @@ func (m *BookMutation) AddedAllPageNum() (r int, exists bool) {
 	return *v, true
 }
 
-// ResetAllPageNum resets all changes to the "AllPageNum" field.
+// ResetAllPageNum resets all changes to the "PageCount" field.
 func (m *BookMutation) ResetAllPageNum() {
 	m._AllPageNum = nil
 	m.add_AllPageNum = nil

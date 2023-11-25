@@ -21,7 +21,7 @@ type BookCreate struct {
 	hooks    []Hook
 }
 
-// SetName sets the "Name" field.
+// SetName sets the "Title" field.
 func (bc *BookCreate) SetName(s string) *BookCreate {
 	bc.mutation.SetName(s)
 	return bc
@@ -83,7 +83,7 @@ func (bc *BookCreate) SetParentFolder(s string) *BookCreate {
 	return bc
 }
 
-// SetAllPageNum sets the "AllPageNum" field.
+// SetAllPageNum sets the "PageCount" field.
 func (bc *BookCreate) SetAllPageNum(i int) *BookCreate {
 	bc.mutation.SetAllPageNum(i)
 	return bc
@@ -232,11 +232,11 @@ func (bc *BookCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (bc *BookCreate) check() error {
 	if _, ok := bc.mutation.Name(); !ok {
-		return &ValidationError{Name: "Name", err: errors.New(`ent: missing required field "Book.Name"`)}
+		return &ValidationError{Name: "Title", err: errors.New(`ent: missing required field "Book.Title"`)}
 	}
 	if v, ok := bc.mutation.Name(); ok {
 		if err := book.NameValidator(v); err != nil {
-			return &ValidationError{Name: "Name", err: fmt.Errorf(`ent: validator failed for field "Book.Name": %w`, err)}
+			return &ValidationError{Name: "Title", err: fmt.Errorf(`ent: validator failed for field "Book.Title": %w`, err)}
 		}
 	}
 	if _, ok := bc.mutation.BookID(); !ok {
@@ -274,11 +274,11 @@ func (bc *BookCreate) check() error {
 		return &ValidationError{Name: "ParentFolder", err: errors.New(`ent: missing required field "Book.ParentFolder"`)}
 	}
 	if _, ok := bc.mutation.AllPageNum(); !ok {
-		return &ValidationError{Name: "AllPageNum", err: errors.New(`ent: missing required field "Book.AllPageNum"`)}
+		return &ValidationError{Name: "PageCount", err: errors.New(`ent: missing required field "Book.PageCount"`)}
 	}
 	if v, ok := bc.mutation.AllPageNum(); ok {
 		if err := book.AllPageNumValidator(v); err != nil {
-			return &ValidationError{Name: "AllPageNum", err: fmt.Errorf(`ent: validator failed for field "Book.AllPageNum": %w`, err)}
+			return &ValidationError{Name: "PageCount", err: fmt.Errorf(`ent: validator failed for field "Book.PageCount": %w`, err)}
 		}
 	}
 	if _, ok := bc.mutation.FileSize(); !ok {

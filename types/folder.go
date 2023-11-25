@@ -72,9 +72,9 @@ func (s *subFolder) AnalyzeFolder() error {
 				logger.Info(err)
 				continue
 			}
-			//名字应该设置成parent
-			if newBook.Name != parent {
-				newBook.Name = parent
+			//书名应该设置成parent
+			if newBook.Title != parent {
+				newBook.Title = parent
 			}
 			//初始化ChildBook
 			//然后把同一parent的书，都加进某个书籍组
@@ -103,7 +103,7 @@ func (s *subFolder) AnalyzeFolder() error {
 				continue
 			}
 			depthBooksMap[depth-1] = append(depthBooksMap[depth-1], *newBook)
-			newBook.Author, _ = util.GetAuthor(newBook.Name)
+			newBook.Author, _ = util.GetAuthor(newBook.Title)
 			//将这本书加到子书库的BookGroup表（Images.BookGroupMap）里面去
 			s.BookGroupMap[newBook.BookID] = newBook
 			//将这本书加到BookGroup总表（mapBookGroup）里面去
