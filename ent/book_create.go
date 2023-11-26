@@ -21,9 +21,9 @@ type BookCreate struct {
 	hooks    []Hook
 }
 
-// SetName sets the "Title" field.
-func (bc *BookCreate) SetName(s string) *BookCreate {
-	bc.mutation.SetName(s)
+// SetTitle sets the "Title" field.
+func (bc *BookCreate) SetTitle(s string) *BookCreate {
+	bc.mutation.SetTitle(s)
 	return bc
 }
 
@@ -83,9 +83,9 @@ func (bc *BookCreate) SetParentFolder(s string) *BookCreate {
 	return bc
 }
 
-// SetAllPageNum sets the "PageCount" field.
-func (bc *BookCreate) SetAllPageNum(i int) *BookCreate {
-	bc.mutation.SetAllPageNum(i)
+// SetPageCount sets the "PageCount" field.
+func (bc *BookCreate) SetPageCount(i int) *BookCreate {
+	bc.mutation.SetPageCount(i)
 	return bc
 }
 
@@ -231,11 +231,11 @@ func (bc *BookCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (bc *BookCreate) check() error {
-	if _, ok := bc.mutation.Name(); !ok {
+	if _, ok := bc.mutation.Title(); !ok {
 		return &ValidationError{Name: "Title", err: errors.New(`ent: missing required field "Book.Title"`)}
 	}
-	if v, ok := bc.mutation.Name(); ok {
-		if err := book.NameValidator(v); err != nil {
+	if v, ok := bc.mutation.Title(); ok {
+		if err := book.TitleValidator(v); err != nil {
 			return &ValidationError{Name: "Title", err: fmt.Errorf(`ent: validator failed for field "Book.Title": %w`, err)}
 		}
 	}
@@ -273,11 +273,11 @@ func (bc *BookCreate) check() error {
 	if _, ok := bc.mutation.ParentFolder(); !ok {
 		return &ValidationError{Name: "ParentFolder", err: errors.New(`ent: missing required field "Book.ParentFolder"`)}
 	}
-	if _, ok := bc.mutation.AllPageNum(); !ok {
+	if _, ok := bc.mutation.PageCount(); !ok {
 		return &ValidationError{Name: "PageCount", err: errors.New(`ent: missing required field "Book.PageCount"`)}
 	}
-	if v, ok := bc.mutation.AllPageNum(); ok {
-		if err := book.AllPageNumValidator(v); err != nil {
+	if v, ok := bc.mutation.PageCount(); ok {
+		if err := book.PageCountValidator(v); err != nil {
 			return &ValidationError{Name: "PageCount", err: fmt.Errorf(`ent: validator failed for field "Book.PageCount": %w`, err)}
 		}
 	}
@@ -343,9 +343,9 @@ func (bc *BookCreate) createSpec() (*Book, *sqlgraph.CreateSpec) {
 		_node = &Book{config: bc.config}
 		_spec = sqlgraph.NewCreateSpec(book.Table, sqlgraph.NewFieldSpec(book.FieldID, field.TypeInt))
 	)
-	if value, ok := bc.mutation.Name(); ok {
-		_spec.SetField(book.FieldName, field.TypeString, value)
-		_node.Name = value
+	if value, ok := bc.mutation.Title(); ok {
+		_spec.SetField(book.FieldTitle, field.TypeString, value)
+		_node.Title = value
 	}
 	if value, ok := bc.mutation.BookID(); ok {
 		_spec.SetField(book.FieldBookID, field.TypeString, value)
@@ -379,9 +379,9 @@ func (bc *BookCreate) createSpec() (*Book, *sqlgraph.CreateSpec) {
 		_spec.SetField(book.FieldParentFolder, field.TypeString, value)
 		_node.ParentFolder = value
 	}
-	if value, ok := bc.mutation.AllPageNum(); ok {
-		_spec.SetField(book.FieldAllPageNum, field.TypeInt, value)
-		_node.AllPageNum = value
+	if value, ok := bc.mutation.PageCount(); ok {
+		_spec.SetField(book.FieldPageCount, field.TypeInt, value)
+		_node.PageCount = value
 	}
 	if value, ok := bc.mutation.FileSize(); ok {
 		_spec.SetField(book.FieldFileSize, field.TypeInt64, value)

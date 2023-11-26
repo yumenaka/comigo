@@ -86,7 +86,7 @@ func SetDownloadLink() {
 			for _, info := range allBook.BookInfos {
 				//下载文件
 				if info.Type != types.TypeBooksGroup && info.Type != types.TypeDir {
-					//staticUrl := "/raw/" + info.BookID + "/" + url.QueryEscape(info.Title)
+					//staticUrl := "/raw/" + info.BookID + "/" + url.QueryEscape(info.title)
 					staticUrl := "/raw/" + info.BookID + "/" + info.Title
 					if checkUrlRegistered(info.BookID) {
 						if config.Config.Debug {

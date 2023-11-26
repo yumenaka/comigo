@@ -17,7 +17,7 @@ package plugin
 //	_, err = cfg.Section("common").NewKey("server_addr", common.Config.FrpConfig.ServerAddr)
 //	_, err = cfg.Section("common").NewKey("server_port", strconv.Itoa(common.Config.FrpConfig.ServerPort))
 //	_, err = cfg.Section("common").NewKey("token", common.Config.FrpConfig.Token)
-//	FrpConfigName := common.ReadingBook.Title + "(" + "comi " + common.Version + " " + time.Now().Format("2006-01-02 15:04:05") + ")"
+//	FrpConfigName := common.ReadingBook.title + "(" + "comi " + common.Version + " " + time.Now().Format("2006-01-02 15:04:05") + ")"
 //	_, err = cfg.NewSection(FrpConfigName)
 //	_, err = cfg.Section(FrpConfigName).NewKey("type", common.Config.FrpConfig.FrpType)
 //	_, err = cfg.Section(FrpConfigName).NewKey("local_ip", "127.0.0.1")

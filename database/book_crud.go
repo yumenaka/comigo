@@ -43,7 +43,7 @@ func DeleteAllBookInDatabase(debug bool) {
 	ctx := context.Background()
 	deleteBookNum, err := client.Book.
 		Delete().
-		Where(entbook.AllPageNumNEQ(-99999)).
+		Where(entbook.PageCountNEQ(-99999)).
 		Exec(ctx)
 	if err != nil {
 		logger.Info(err)
@@ -91,7 +91,7 @@ func SaveBookToDatabase(save *mainTypes.Book) error {
 	ctx := context.Background()
 	b, err := client.Book.
 		Create().
-		SetName(save.BookInfo.Title).
+		SetTitle(save.BookInfo.Title).
 		SetBookID(save.BookInfo.BookID).
 		SetOwner("").
 		SetFilePath(save.BookInfo.FilePath).
@@ -100,7 +100,7 @@ func SaveBookToDatabase(save *mainTypes.Book) error {
 		SetType(string(save.BookInfo.Type)).
 		SetDepth(save.BookInfo.Depth).
 		SetParentFolder(save.BookInfo.ParentFolder).
-		SetAllPageNum(save.BookInfo.PageCount).
+		SetPageCount(save.BookInfo.PageCount).
 		SetFileSize(save.BookInfo.FileSize).
 		SetAuthors(save.GetAuthor()).
 		SetISBN(save.BookInfo.ISBN).
@@ -159,7 +159,7 @@ func GetBookFromDatabase(filepath string) (*mainTypes.Book, error) {
 	temp := books[0]
 	b := mainTypes.Book{
 		BookInfo: mainTypes.BookInfo{
-			Title:           temp.Name,
+			Title:           temp.Title,
 			BookID:          temp.BookID,
 			FilePath:        temp.FilePath,
 			BookStorePath:   temp.BookStorePath,
@@ -167,7 +167,7 @@ func GetBookFromDatabase(filepath string) (*mainTypes.Book, error) {
 			ChildBookNum:    temp.ChildBookNum,
 			Depth:           temp.Depth,
 			ParentFolder:    temp.ParentFolder,
-			PageCount:       temp.AllPageNum,
+			PageCount:       temp.PageCount,
 			FileSize:        temp.FileSize,
 			ISBN:            temp.ISBN,
 			Press:           temp.Press,
@@ -228,7 +228,7 @@ func GetBooksFromDatabase() (list []*mainTypes.Book, err error) {
 	for _, temp := range books {
 		b := mainTypes.Book{
 			BookInfo: mainTypes.BookInfo{
-				Title:           temp.Name,
+				Title:           temp.Title,
 				BookID:          temp.BookID,
 				FilePath:        temp.FilePath,
 				BookStorePath:   temp.BookStorePath,
@@ -236,7 +236,7 @@ func GetBooksFromDatabase() (list []*mainTypes.Book, err error) {
 				ChildBookNum:    temp.ChildBookNum,
 				Depth:           temp.Depth,
 				ParentFolder:    temp.ParentFolder,
-				PageCount:       temp.AllPageNum,
+				PageCount:       temp.PageCount,
 				FileSize:        temp.FileSize,
 				ISBN:            temp.ISBN,
 				Press:           temp.Press,
