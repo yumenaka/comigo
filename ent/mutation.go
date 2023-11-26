@@ -37,7 +37,7 @@ type BookMutation struct {
 	op                Op
 	typ               string
 	id                *int
-	_Name             *string
+	_Title            *string
 	_BookID           *string
 	_Owner            *string
 	_FilePath         *string
@@ -48,8 +48,8 @@ type BookMutation struct {
 	_Depth            *int
 	add_Depth         *int
 	_ParentFolder     *string
-	_AllPageNum       *int
-	add_AllPageNum    *int
+	_PageCount        *int
+	add_PageCount     *int
 	_FileSize         *int64
 	add_FileSize      *int64
 	_Authors          *string
@@ -172,40 +172,40 @@ func (m *BookMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
-// SetName sets the "Name" field.
-func (m *BookMutation) SetName(s string) {
-	m._Name = &s
+// SetTitle sets the "Title" field.
+func (m *BookMutation) SetTitle(s string) {
+	m._Title = &s
 }
 
-// Name returns the value of the "Name" field in the mutation.
-func (m *BookMutation) Name() (r string, exists bool) {
-	v := m._Name
+// Title returns the value of the "Title" field in the mutation.
+func (m *BookMutation) Title() (r string, exists bool) {
+	v := m._Title
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldName returns the old "Name" field's value of the Book entity.
+// OldTitle returns the old "Title" field's value of the Book entity.
 // If the Book object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *BookMutation) OldName(ctx context.Context) (v string, err error) {
+func (m *BookMutation) OldTitle(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldName is only allowed on UpdateOne operations")
+		return v, errors.New("OldTitle is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldName requires an ID field in the mutation")
+		return v, errors.New("OldTitle requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldName: %w", err)
+		return v, fmt.Errorf("querying old value for OldTitle: %w", err)
 	}
-	return oldValue.Name, nil
+	return oldValue.Title, nil
 }
 
-// ResetName resets all changes to the "Name" field.
-func (m *BookMutation) ResetName() {
-	m._Name = nil
+// ResetTitle resets all changes to the "Title" field.
+func (m *BookMutation) ResetTitle() {
+	m._Title = nil
 }
 
 // SetBookID sets the "BookID" field.
@@ -536,60 +536,60 @@ func (m *BookMutation) ResetParentFolder() {
 	m._ParentFolder = nil
 }
 
-// SetAllPageNum sets the "AllPageNum" field.
-func (m *BookMutation) SetAllPageNum(i int) {
-	m._AllPageNum = &i
-	m.add_AllPageNum = nil
+// SetPageCount sets the "PageCount" field.
+func (m *BookMutation) SetPageCount(i int) {
+	m._PageCount = &i
+	m.add_PageCount = nil
 }
 
-// AllPageNum returns the value of the "AllPageNum" field in the mutation.
-func (m *BookMutation) AllPageNum() (r int, exists bool) {
-	v := m._AllPageNum
+// PageCount returns the value of the "PageCount" field in the mutation.
+func (m *BookMutation) PageCount() (r int, exists bool) {
+	v := m._PageCount
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldAllPageNum returns the old "AllPageNum" field's value of the Book entity.
+// OldPageCount returns the old "PageCount" field's value of the Book entity.
 // If the Book object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *BookMutation) OldAllPageNum(ctx context.Context) (v int, err error) {
+func (m *BookMutation) OldPageCount(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldAllPageNum is only allowed on UpdateOne operations")
+		return v, errors.New("OldPageCount is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldAllPageNum requires an ID field in the mutation")
+		return v, errors.New("OldPageCount requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAllPageNum: %w", err)
+		return v, fmt.Errorf("querying old value for OldPageCount: %w", err)
 	}
-	return oldValue.AllPageNum, nil
+	return oldValue.PageCount, nil
 }
 
-// AddAllPageNum adds i to the "AllPageNum" field.
-func (m *BookMutation) AddAllPageNum(i int) {
-	if m.add_AllPageNum != nil {
-		*m.add_AllPageNum += i
+// AddPageCount adds i to the "PageCount" field.
+func (m *BookMutation) AddPageCount(i int) {
+	if m.add_PageCount != nil {
+		*m.add_PageCount += i
 	} else {
-		m.add_AllPageNum = &i
+		m.add_PageCount = &i
 	}
 }
 
-// AddedAllPageNum returns the value that was added to the "AllPageNum" field in this mutation.
-func (m *BookMutation) AddedAllPageNum() (r int, exists bool) {
-	v := m.add_AllPageNum
+// AddedPageCount returns the value that was added to the "PageCount" field in this mutation.
+func (m *BookMutation) AddedPageCount() (r int, exists bool) {
+	v := m.add_PageCount
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetAllPageNum resets all changes to the "AllPageNum" field.
-func (m *BookMutation) ResetAllPageNum() {
-	m._AllPageNum = nil
-	m.add_AllPageNum = nil
+// ResetPageCount resets all changes to the "PageCount" field.
+func (m *BookMutation) ResetPageCount() {
+	m._PageCount = nil
+	m.add_PageCount = nil
 }
 
 // SetFileSize sets the "FileSize" field.
@@ -1173,8 +1173,8 @@ func (m *BookMutation) Type() string {
 // AddedFields().
 func (m *BookMutation) Fields() []string {
 	fields := make([]string, 0, 22)
-	if m._Name != nil {
-		fields = append(fields, book.FieldName)
+	if m._Title != nil {
+		fields = append(fields, book.FieldTitle)
 	}
 	if m._BookID != nil {
 		fields = append(fields, book.FieldBookID)
@@ -1200,8 +1200,8 @@ func (m *BookMutation) Fields() []string {
 	if m._ParentFolder != nil {
 		fields = append(fields, book.FieldParentFolder)
 	}
-	if m._AllPageNum != nil {
-		fields = append(fields, book.FieldAllPageNum)
+	if m._PageCount != nil {
+		fields = append(fields, book.FieldPageCount)
 	}
 	if m._FileSize != nil {
 		fields = append(fields, book.FieldFileSize)
@@ -1247,8 +1247,8 @@ func (m *BookMutation) Fields() []string {
 // schema.
 func (m *BookMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case book.FieldName:
-		return m.Name()
+	case book.FieldTitle:
+		return m.Title()
 	case book.FieldBookID:
 		return m.BookID()
 	case book.FieldOwner:
@@ -1265,8 +1265,8 @@ func (m *BookMutation) Field(name string) (ent.Value, bool) {
 		return m.Depth()
 	case book.FieldParentFolder:
 		return m.ParentFolder()
-	case book.FieldAllPageNum:
-		return m.AllPageNum()
+	case book.FieldPageCount:
+		return m.PageCount()
 	case book.FieldFileSize:
 		return m.FileSize()
 	case book.FieldAuthors:
@@ -1300,8 +1300,8 @@ func (m *BookMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *BookMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case book.FieldName:
-		return m.OldName(ctx)
+	case book.FieldTitle:
+		return m.OldTitle(ctx)
 	case book.FieldBookID:
 		return m.OldBookID(ctx)
 	case book.FieldOwner:
@@ -1318,8 +1318,8 @@ func (m *BookMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldDepth(ctx)
 	case book.FieldParentFolder:
 		return m.OldParentFolder(ctx)
-	case book.FieldAllPageNum:
-		return m.OldAllPageNum(ctx)
+	case book.FieldPageCount:
+		return m.OldPageCount(ctx)
 	case book.FieldFileSize:
 		return m.OldFileSize(ctx)
 	case book.FieldAuthors:
@@ -1353,12 +1353,12 @@ func (m *BookMutation) OldField(ctx context.Context, name string) (ent.Value, er
 // type.
 func (m *BookMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case book.FieldName:
+	case book.FieldTitle:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetName(v)
+		m.SetTitle(v)
 		return nil
 	case book.FieldBookID:
 		v, ok := value.(string)
@@ -1416,12 +1416,12 @@ func (m *BookMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetParentFolder(v)
 		return nil
-	case book.FieldAllPageNum:
+	case book.FieldPageCount:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetAllPageNum(v)
+		m.SetPageCount(v)
 		return nil
 	case book.FieldFileSize:
 		v, ok := value.(int64)
@@ -1521,8 +1521,8 @@ func (m *BookMutation) AddedFields() []string {
 	if m.add_Depth != nil {
 		fields = append(fields, book.FieldDepth)
 	}
-	if m.add_AllPageNum != nil {
-		fields = append(fields, book.FieldAllPageNum)
+	if m.add_PageCount != nil {
+		fields = append(fields, book.FieldPageCount)
 	}
 	if m.add_FileSize != nil {
 		fields = append(fields, book.FieldFileSize)
@@ -1545,8 +1545,8 @@ func (m *BookMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedChildBookNum()
 	case book.FieldDepth:
 		return m.AddedDepth()
-	case book.FieldAllPageNum:
-		return m.AddedAllPageNum()
+	case book.FieldPageCount:
+		return m.AddedPageCount()
 	case book.FieldFileSize:
 		return m.AddedFileSize()
 	case book.FieldExtractNum:
@@ -1576,12 +1576,12 @@ func (m *BookMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddDepth(v)
 		return nil
-	case book.FieldAllPageNum:
+	case book.FieldPageCount:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddAllPageNum(v)
+		m.AddPageCount(v)
 		return nil
 	case book.FieldFileSize:
 		v, ok := value.(int64)
@@ -1631,8 +1631,8 @@ func (m *BookMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *BookMutation) ResetField(name string) error {
 	switch name {
-	case book.FieldName:
-		m.ResetName()
+	case book.FieldTitle:
+		m.ResetTitle()
 		return nil
 	case book.FieldBookID:
 		m.ResetBookID()
@@ -1658,8 +1658,8 @@ func (m *BookMutation) ResetField(name string) error {
 	case book.FieldParentFolder:
 		m.ResetParentFolder()
 		return nil
-	case book.FieldAllPageNum:
-		m.ResetAllPageNum()
+	case book.FieldPageCount:
+		m.ResetPageCount()
 		return nil
 	case book.FieldFileSize:
 		m.ResetFileSize()

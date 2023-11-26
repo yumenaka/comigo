@@ -55,9 +55,9 @@ func IDLTE(id int) predicate.Book {
 	return predicate.Book(sql.FieldLTE(FieldID, id))
 }
 
-// Name applies equality check predicate on the "Name" field. It's identical to NameEQ.
-func Name(v string) predicate.Book {
-	return predicate.Book(sql.FieldEQ(FieldName, v))
+// Title applies equality check predicate on the "Title" field. It's identical to TitleEQ.
+func Title(v string) predicate.Book {
+	return predicate.Book(sql.FieldEQ(FieldTitle, v))
 }
 
 // BookID applies equality check predicate on the "BookID" field. It's identical to BookIDEQ.
@@ -100,9 +100,9 @@ func ParentFolder(v string) predicate.Book {
 	return predicate.Book(sql.FieldEQ(FieldParentFolder, v))
 }
 
-// AllPageNum applies equality check predicate on the "AllPageNum" field. It's identical to AllPageNumEQ.
-func AllPageNum(v int) predicate.Book {
-	return predicate.Book(sql.FieldEQ(FieldAllPageNum, v))
+// PageCount applies equality check predicate on the "PageCount" field. It's identical to PageCountEQ.
+func PageCount(v int) predicate.Book {
+	return predicate.Book(sql.FieldEQ(FieldPageCount, v))
 }
 
 // FileSize applies equality check predicate on the "FileSize" field. It's identical to FileSizeEQ.
@@ -165,69 +165,69 @@ func ZipTextEncoding(v string) predicate.Book {
 	return predicate.Book(sql.FieldEQ(FieldZipTextEncoding, v))
 }
 
-// NameEQ applies the EQ predicate on the "Name" field.
-func NameEQ(v string) predicate.Book {
-	return predicate.Book(sql.FieldEQ(FieldName, v))
+// TitleEQ applies the EQ predicate on the "Title" field.
+func TitleEQ(v string) predicate.Book {
+	return predicate.Book(sql.FieldEQ(FieldTitle, v))
 }
 
-// NameNEQ applies the NEQ predicate on the "Name" field.
-func NameNEQ(v string) predicate.Book {
-	return predicate.Book(sql.FieldNEQ(FieldName, v))
+// TitleNEQ applies the NEQ predicate on the "Title" field.
+func TitleNEQ(v string) predicate.Book {
+	return predicate.Book(sql.FieldNEQ(FieldTitle, v))
 }
 
-// NameIn applies the In predicate on the "Name" field.
-func NameIn(vs ...string) predicate.Book {
-	return predicate.Book(sql.FieldIn(FieldName, vs...))
+// TitleIn applies the In predicate on the "Title" field.
+func TitleIn(vs ...string) predicate.Book {
+	return predicate.Book(sql.FieldIn(FieldTitle, vs...))
 }
 
-// NameNotIn applies the NotIn predicate on the "Name" field.
-func NameNotIn(vs ...string) predicate.Book {
-	return predicate.Book(sql.FieldNotIn(FieldName, vs...))
+// TitleNotIn applies the NotIn predicate on the "Title" field.
+func TitleNotIn(vs ...string) predicate.Book {
+	return predicate.Book(sql.FieldNotIn(FieldTitle, vs...))
 }
 
-// NameGT applies the GT predicate on the "Name" field.
-func NameGT(v string) predicate.Book {
-	return predicate.Book(sql.FieldGT(FieldName, v))
+// TitleGT applies the GT predicate on the "Title" field.
+func TitleGT(v string) predicate.Book {
+	return predicate.Book(sql.FieldGT(FieldTitle, v))
 }
 
-// NameGTE applies the GTE predicate on the "Name" field.
-func NameGTE(v string) predicate.Book {
-	return predicate.Book(sql.FieldGTE(FieldName, v))
+// TitleGTE applies the GTE predicate on the "Title" field.
+func TitleGTE(v string) predicate.Book {
+	return predicate.Book(sql.FieldGTE(FieldTitle, v))
 }
 
-// NameLT applies the LT predicate on the "Name" field.
-func NameLT(v string) predicate.Book {
-	return predicate.Book(sql.FieldLT(FieldName, v))
+// TitleLT applies the LT predicate on the "Title" field.
+func TitleLT(v string) predicate.Book {
+	return predicate.Book(sql.FieldLT(FieldTitle, v))
 }
 
-// NameLTE applies the LTE predicate on the "Name" field.
-func NameLTE(v string) predicate.Book {
-	return predicate.Book(sql.FieldLTE(FieldName, v))
+// TitleLTE applies the LTE predicate on the "Title" field.
+func TitleLTE(v string) predicate.Book {
+	return predicate.Book(sql.FieldLTE(FieldTitle, v))
 }
 
-// NameContains applies the Contains predicate on the "Name" field.
-func NameContains(v string) predicate.Book {
-	return predicate.Book(sql.FieldContains(FieldName, v))
+// TitleContains applies the Contains predicate on the "Title" field.
+func TitleContains(v string) predicate.Book {
+	return predicate.Book(sql.FieldContains(FieldTitle, v))
 }
 
-// NameHasPrefix applies the HasPrefix predicate on the "Name" field.
-func NameHasPrefix(v string) predicate.Book {
-	return predicate.Book(sql.FieldHasPrefix(FieldName, v))
+// TitleHasPrefix applies the HasPrefix predicate on the "Title" field.
+func TitleHasPrefix(v string) predicate.Book {
+	return predicate.Book(sql.FieldHasPrefix(FieldTitle, v))
 }
 
-// NameHasSuffix applies the HasSuffix predicate on the "Name" field.
-func NameHasSuffix(v string) predicate.Book {
-	return predicate.Book(sql.FieldHasSuffix(FieldName, v))
+// TitleHasSuffix applies the HasSuffix predicate on the "Title" field.
+func TitleHasSuffix(v string) predicate.Book {
+	return predicate.Book(sql.FieldHasSuffix(FieldTitle, v))
 }
 
-// NameEqualFold applies the EqualFold predicate on the "Name" field.
-func NameEqualFold(v string) predicate.Book {
-	return predicate.Book(sql.FieldEqualFold(FieldName, v))
+// TitleEqualFold applies the EqualFold predicate on the "Title" field.
+func TitleEqualFold(v string) predicate.Book {
+	return predicate.Book(sql.FieldEqualFold(FieldTitle, v))
 }
 
-// NameContainsFold applies the ContainsFold predicate on the "Name" field.
-func NameContainsFold(v string) predicate.Book {
-	return predicate.Book(sql.FieldContainsFold(FieldName, v))
+// TitleContainsFold applies the ContainsFold predicate on the "Title" field.
+func TitleContainsFold(v string) predicate.Book {
+	return predicate.Book(sql.FieldContainsFold(FieldTitle, v))
 }
 
 // BookIDEQ applies the EQ predicate on the "BookID" field.
@@ -700,44 +700,44 @@ func ParentFolderContainsFold(v string) predicate.Book {
 	return predicate.Book(sql.FieldContainsFold(FieldParentFolder, v))
 }
 
-// AllPageNumEQ applies the EQ predicate on the "AllPageNum" field.
-func AllPageNumEQ(v int) predicate.Book {
-	return predicate.Book(sql.FieldEQ(FieldAllPageNum, v))
+// PageCountEQ applies the EQ predicate on the "PageCount" field.
+func PageCountEQ(v int) predicate.Book {
+	return predicate.Book(sql.FieldEQ(FieldPageCount, v))
 }
 
-// AllPageNumNEQ applies the NEQ predicate on the "AllPageNum" field.
-func AllPageNumNEQ(v int) predicate.Book {
-	return predicate.Book(sql.FieldNEQ(FieldAllPageNum, v))
+// PageCountNEQ applies the NEQ predicate on the "PageCount" field.
+func PageCountNEQ(v int) predicate.Book {
+	return predicate.Book(sql.FieldNEQ(FieldPageCount, v))
 }
 
-// AllPageNumIn applies the In predicate on the "AllPageNum" field.
-func AllPageNumIn(vs ...int) predicate.Book {
-	return predicate.Book(sql.FieldIn(FieldAllPageNum, vs...))
+// PageCountIn applies the In predicate on the "PageCount" field.
+func PageCountIn(vs ...int) predicate.Book {
+	return predicate.Book(sql.FieldIn(FieldPageCount, vs...))
 }
 
-// AllPageNumNotIn applies the NotIn predicate on the "AllPageNum" field.
-func AllPageNumNotIn(vs ...int) predicate.Book {
-	return predicate.Book(sql.FieldNotIn(FieldAllPageNum, vs...))
+// PageCountNotIn applies the NotIn predicate on the "PageCount" field.
+func PageCountNotIn(vs ...int) predicate.Book {
+	return predicate.Book(sql.FieldNotIn(FieldPageCount, vs...))
 }
 
-// AllPageNumGT applies the GT predicate on the "AllPageNum" field.
-func AllPageNumGT(v int) predicate.Book {
-	return predicate.Book(sql.FieldGT(FieldAllPageNum, v))
+// PageCountGT applies the GT predicate on the "PageCount" field.
+func PageCountGT(v int) predicate.Book {
+	return predicate.Book(sql.FieldGT(FieldPageCount, v))
 }
 
-// AllPageNumGTE applies the GTE predicate on the "AllPageNum" field.
-func AllPageNumGTE(v int) predicate.Book {
-	return predicate.Book(sql.FieldGTE(FieldAllPageNum, v))
+// PageCountGTE applies the GTE predicate on the "PageCount" field.
+func PageCountGTE(v int) predicate.Book {
+	return predicate.Book(sql.FieldGTE(FieldPageCount, v))
 }
 
-// AllPageNumLT applies the LT predicate on the "AllPageNum" field.
-func AllPageNumLT(v int) predicate.Book {
-	return predicate.Book(sql.FieldLT(FieldAllPageNum, v))
+// PageCountLT applies the LT predicate on the "PageCount" field.
+func PageCountLT(v int) predicate.Book {
+	return predicate.Book(sql.FieldLT(FieldPageCount, v))
 }
 
-// AllPageNumLTE applies the LTE predicate on the "AllPageNum" field.
-func AllPageNumLTE(v int) predicate.Book {
-	return predicate.Book(sql.FieldLTE(FieldAllPageNum, v))
+// PageCountLTE applies the LTE predicate on the "PageCount" field.
+func PageCountLTE(v int) predicate.Book {
+	return predicate.Book(sql.FieldLTE(FieldPageCount, v))
 }
 
 // FileSizeEQ applies the EQ predicate on the "FileSize" field.

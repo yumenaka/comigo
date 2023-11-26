@@ -34,10 +34,26 @@ func (spiu *SinglePageInfoUpdate) SetBookID(s string) *SinglePageInfoUpdate {
 	return spiu
 }
 
+// SetNillableBookID sets the "BookID" field if the given value is not nil.
+func (spiu *SinglePageInfoUpdate) SetNillableBookID(s *string) *SinglePageInfoUpdate {
+	if s != nil {
+		spiu.SetBookID(*s)
+	}
+	return spiu
+}
+
 // SetPageNum sets the "PageNum" field.
 func (spiu *SinglePageInfoUpdate) SetPageNum(i int) *SinglePageInfoUpdate {
 	spiu.mutation.ResetPageNum()
 	spiu.mutation.SetPageNum(i)
+	return spiu
+}
+
+// SetNillablePageNum sets the "PageNum" field if the given value is not nil.
+func (spiu *SinglePageInfoUpdate) SetNillablePageNum(i *int) *SinglePageInfoUpdate {
+	if i != nil {
+		spiu.SetPageNum(*i)
+	}
 	return spiu
 }
 
@@ -53,9 +69,25 @@ func (spiu *SinglePageInfoUpdate) SetNameInArchive(s string) *SinglePageInfoUpda
 	return spiu
 }
 
+// SetNillableNameInArchive sets the "NameInArchive" field if the given value is not nil.
+func (spiu *SinglePageInfoUpdate) SetNillableNameInArchive(s *string) *SinglePageInfoUpdate {
+	if s != nil {
+		spiu.SetNameInArchive(*s)
+	}
+	return spiu
+}
+
 // SetURL sets the "Url" field.
 func (spiu *SinglePageInfoUpdate) SetURL(s string) *SinglePageInfoUpdate {
 	spiu.mutation.SetURL(s)
+	return spiu
+}
+
+// SetNillableURL sets the "Url" field if the given value is not nil.
+func (spiu *SinglePageInfoUpdate) SetNillableURL(s *string) *SinglePageInfoUpdate {
+	if s != nil {
+		spiu.SetURL(*s)
+	}
 	return spiu
 }
 
@@ -65,10 +97,26 @@ func (spiu *SinglePageInfoUpdate) SetBlurHash(s string) *SinglePageInfoUpdate {
 	return spiu
 }
 
+// SetNillableBlurHash sets the "BlurHash" field if the given value is not nil.
+func (spiu *SinglePageInfoUpdate) SetNillableBlurHash(s *string) *SinglePageInfoUpdate {
+	if s != nil {
+		spiu.SetBlurHash(*s)
+	}
+	return spiu
+}
+
 // SetHeight sets the "Height" field.
 func (spiu *SinglePageInfoUpdate) SetHeight(i int) *SinglePageInfoUpdate {
 	spiu.mutation.ResetHeight()
 	spiu.mutation.SetHeight(i)
+	return spiu
+}
+
+// SetNillableHeight sets the "Height" field if the given value is not nil.
+func (spiu *SinglePageInfoUpdate) SetNillableHeight(i *int) *SinglePageInfoUpdate {
+	if i != nil {
+		spiu.SetHeight(*i)
+	}
 	return spiu
 }
 
@@ -82,6 +130,14 @@ func (spiu *SinglePageInfoUpdate) AddHeight(i int) *SinglePageInfoUpdate {
 func (spiu *SinglePageInfoUpdate) SetWidth(i int) *SinglePageInfoUpdate {
 	spiu.mutation.ResetWidth()
 	spiu.mutation.SetWidth(i)
+	return spiu
+}
+
+// SetNillableWidth sets the "Width" field if the given value is not nil.
+func (spiu *SinglePageInfoUpdate) SetNillableWidth(i *int) *SinglePageInfoUpdate {
+	if i != nil {
+		spiu.SetWidth(*i)
+	}
 	return spiu
 }
 
@@ -112,6 +168,14 @@ func (spiu *SinglePageInfoUpdate) SetFileSize(i int64) *SinglePageInfoUpdate {
 	return spiu
 }
 
+// SetNillableFileSize sets the "FileSize" field if the given value is not nil.
+func (spiu *SinglePageInfoUpdate) SetNillableFileSize(i *int64) *SinglePageInfoUpdate {
+	if i != nil {
+		spiu.SetFileSize(*i)
+	}
+	return spiu
+}
+
 // AddFileSize adds i to the "FileSize" field.
 func (spiu *SinglePageInfoUpdate) AddFileSize(i int64) *SinglePageInfoUpdate {
 	spiu.mutation.AddFileSize(i)
@@ -124,9 +188,25 @@ func (spiu *SinglePageInfoUpdate) SetRealImageFilePATH(s string) *SinglePageInfo
 	return spiu
 }
 
+// SetNillableRealImageFilePATH sets the "RealImageFilePATH" field if the given value is not nil.
+func (spiu *SinglePageInfoUpdate) SetNillableRealImageFilePATH(s *string) *SinglePageInfoUpdate {
+	if s != nil {
+		spiu.SetRealImageFilePATH(*s)
+	}
+	return spiu
+}
+
 // SetImgType sets the "ImgType" field.
 func (spiu *SinglePageInfoUpdate) SetImgType(s string) *SinglePageInfoUpdate {
 	spiu.mutation.SetImgType(s)
+	return spiu
+}
+
+// SetNillableImgType sets the "ImgType" field if the given value is not nil.
+func (spiu *SinglePageInfoUpdate) SetNillableImgType(s *string) *SinglePageInfoUpdate {
+	if s != nil {
+		spiu.SetImgType(*s)
+	}
 	return spiu
 }
 
@@ -242,10 +322,26 @@ func (spiuo *SinglePageInfoUpdateOne) SetBookID(s string) *SinglePageInfoUpdateO
 	return spiuo
 }
 
+// SetNillableBookID sets the "BookID" field if the given value is not nil.
+func (spiuo *SinglePageInfoUpdateOne) SetNillableBookID(s *string) *SinglePageInfoUpdateOne {
+	if s != nil {
+		spiuo.SetBookID(*s)
+	}
+	return spiuo
+}
+
 // SetPageNum sets the "PageNum" field.
 func (spiuo *SinglePageInfoUpdateOne) SetPageNum(i int) *SinglePageInfoUpdateOne {
 	spiuo.mutation.ResetPageNum()
 	spiuo.mutation.SetPageNum(i)
+	return spiuo
+}
+
+// SetNillablePageNum sets the "PageNum" field if the given value is not nil.
+func (spiuo *SinglePageInfoUpdateOne) SetNillablePageNum(i *int) *SinglePageInfoUpdateOne {
+	if i != nil {
+		spiuo.SetPageNum(*i)
+	}
 	return spiuo
 }
 
@@ -261,9 +357,25 @@ func (spiuo *SinglePageInfoUpdateOne) SetNameInArchive(s string) *SinglePageInfo
 	return spiuo
 }
 
+// SetNillableNameInArchive sets the "NameInArchive" field if the given value is not nil.
+func (spiuo *SinglePageInfoUpdateOne) SetNillableNameInArchive(s *string) *SinglePageInfoUpdateOne {
+	if s != nil {
+		spiuo.SetNameInArchive(*s)
+	}
+	return spiuo
+}
+
 // SetURL sets the "Url" field.
 func (spiuo *SinglePageInfoUpdateOne) SetURL(s string) *SinglePageInfoUpdateOne {
 	spiuo.mutation.SetURL(s)
+	return spiuo
+}
+
+// SetNillableURL sets the "Url" field if the given value is not nil.
+func (spiuo *SinglePageInfoUpdateOne) SetNillableURL(s *string) *SinglePageInfoUpdateOne {
+	if s != nil {
+		spiuo.SetURL(*s)
+	}
 	return spiuo
 }
 
@@ -273,10 +385,26 @@ func (spiuo *SinglePageInfoUpdateOne) SetBlurHash(s string) *SinglePageInfoUpdat
 	return spiuo
 }
 
+// SetNillableBlurHash sets the "BlurHash" field if the given value is not nil.
+func (spiuo *SinglePageInfoUpdateOne) SetNillableBlurHash(s *string) *SinglePageInfoUpdateOne {
+	if s != nil {
+		spiuo.SetBlurHash(*s)
+	}
+	return spiuo
+}
+
 // SetHeight sets the "Height" field.
 func (spiuo *SinglePageInfoUpdateOne) SetHeight(i int) *SinglePageInfoUpdateOne {
 	spiuo.mutation.ResetHeight()
 	spiuo.mutation.SetHeight(i)
+	return spiuo
+}
+
+// SetNillableHeight sets the "Height" field if the given value is not nil.
+func (spiuo *SinglePageInfoUpdateOne) SetNillableHeight(i *int) *SinglePageInfoUpdateOne {
+	if i != nil {
+		spiuo.SetHeight(*i)
+	}
 	return spiuo
 }
 
@@ -290,6 +418,14 @@ func (spiuo *SinglePageInfoUpdateOne) AddHeight(i int) *SinglePageInfoUpdateOne 
 func (spiuo *SinglePageInfoUpdateOne) SetWidth(i int) *SinglePageInfoUpdateOne {
 	spiuo.mutation.ResetWidth()
 	spiuo.mutation.SetWidth(i)
+	return spiuo
+}
+
+// SetNillableWidth sets the "Width" field if the given value is not nil.
+func (spiuo *SinglePageInfoUpdateOne) SetNillableWidth(i *int) *SinglePageInfoUpdateOne {
+	if i != nil {
+		spiuo.SetWidth(*i)
+	}
 	return spiuo
 }
 
@@ -320,6 +456,14 @@ func (spiuo *SinglePageInfoUpdateOne) SetFileSize(i int64) *SinglePageInfoUpdate
 	return spiuo
 }
 
+// SetNillableFileSize sets the "FileSize" field if the given value is not nil.
+func (spiuo *SinglePageInfoUpdateOne) SetNillableFileSize(i *int64) *SinglePageInfoUpdateOne {
+	if i != nil {
+		spiuo.SetFileSize(*i)
+	}
+	return spiuo
+}
+
 // AddFileSize adds i to the "FileSize" field.
 func (spiuo *SinglePageInfoUpdateOne) AddFileSize(i int64) *SinglePageInfoUpdateOne {
 	spiuo.mutation.AddFileSize(i)
@@ -332,9 +476,25 @@ func (spiuo *SinglePageInfoUpdateOne) SetRealImageFilePATH(s string) *SinglePage
 	return spiuo
 }
 
+// SetNillableRealImageFilePATH sets the "RealImageFilePATH" field if the given value is not nil.
+func (spiuo *SinglePageInfoUpdateOne) SetNillableRealImageFilePATH(s *string) *SinglePageInfoUpdateOne {
+	if s != nil {
+		spiuo.SetRealImageFilePATH(*s)
+	}
+	return spiuo
+}
+
 // SetImgType sets the "ImgType" field.
 func (spiuo *SinglePageInfoUpdateOne) SetImgType(s string) *SinglePageInfoUpdateOne {
 	spiuo.mutation.SetImgType(s)
+	return spiuo
+}
+
+// SetNillableImgType sets the "ImgType" field if the given value is not nil.
+func (spiuo *SinglePageInfoUpdateOne) SetNillableImgType(s *string) *SinglePageInfoUpdateOne {
+	if s != nil {
+		spiuo.SetImgType(*s)
+	}
 	return spiuo
 }
 

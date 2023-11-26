@@ -25,7 +25,7 @@ func ClearBookData(clearBook *mainTypes.Book) {
 	if err != nil {
 		logger.Info("ClearBookData Book:" + err.Error())
 	}
-	logger.Info("Clear Book ：" + clearBook.Name)
+	logger.Info("Clear Book ：" + clearBook.Title)
 	deletePageInfoNum, err := client.SinglePageInfo.
 		Delete().
 		Where(singlepageinfo.BookIDEQ(clearBook.BookID)).
@@ -43,7 +43,7 @@ func DeleteAllBookInDatabase(debug bool) {
 	ctx := context.Background()
 	deleteBookNum, err := client.Book.
 		Delete().
-		Where(entbook.AllPageNumNEQ(-99999)).
+		Where(entbook.PageCountNEQ(-99999)).
 		Exec(ctx)
 	if err != nil {
 		logger.Info(err)
@@ -91,27 +91,27 @@ func SaveBookToDatabase(save *mainTypes.Book) error {
 	ctx := context.Background()
 	b, err := client.Book.
 		Create().
-		SetName(save.BaseBook.Name).
-		SetBookID(save.BaseBook.BookID).
+		SetTitle(save.BookInfo.Title).
+		SetBookID(save.BookInfo.BookID).
 		SetOwner("").
-		SetFilePath(save.BaseBook.FilePath).
-		SetBookStorePath(save.BaseBook.BookStorePath).
-		SetChildBookNum(save.BaseBook.ChildBookNum).
-		SetType(string(save.BaseBook.Type)).
-		SetDepth(save.BaseBook.Depth).
-		SetParentFolder(save.BaseBook.ParentFolder).
-		SetAllPageNum(save.BaseBook.AllPageNum).
-		SetFileSize(save.BaseBook.FileSize).
+		SetFilePath(save.BookInfo.FilePath).
+		SetBookStorePath(save.BookInfo.BookStorePath).
+		SetChildBookNum(save.BookInfo.ChildBookNum).
+		SetType(string(save.BookInfo.Type)).
+		SetDepth(save.BookInfo.Depth).
+		SetParentFolder(save.BookInfo.ParentFolder).
+		SetPageCount(save.BookInfo.PageCount).
+		SetFileSize(save.BookInfo.FileSize).
 		SetAuthors(save.GetAuthor()).
-		SetISBN(save.BaseBook.ISBN).
-		SetPress(save.BaseBook.Press).
-		SetPublishedAt(save.BaseBook.PublishedAt).
-		SetExtractPath(save.BaseBook.ExtractPath).
-		SetInitComplete(save.BaseBook.InitComplete).
-		SetReadPercent(save.BaseBook.ReadPercent).
-		SetNonUTF8Zip(save.BaseBook.NonUTF8Zip).
-		SetZipTextEncoding(save.BaseBook.ZipTextEncoding).
-		SetExtractNum(save.BaseBook.ExtractNum).
+		SetISBN(save.BookInfo.ISBN).
+		SetPress(save.BookInfo.Press).
+		SetPublishedAt(save.BookInfo.PublishedAt).
+		SetExtractPath(save.BookInfo.ExtractPath).
+		SetInitComplete(save.BookInfo.InitComplete).
+		SetReadPercent(save.BookInfo.ReadPercent).
+		SetNonUTF8Zip(save.BookInfo.NonUTF8Zip).
+		SetZipTextEncoding(save.BookInfo.ZipTextEncoding).
+		SetExtractNum(save.BookInfo.ExtractNum).
 		Save(ctx) // 创建并返回 //还有一个SaveX(ctx)，和 Save() 不一样， SaveX 在出错时 panic。
 	if err != nil {
 		//log.Fatalf("failed creating book: %v", err)
@@ -158,8 +158,8 @@ func GetBookFromDatabase(filepath string) (*mainTypes.Book, error) {
 	}
 	temp := books[0]
 	b := mainTypes.Book{
-		BaseBook: mainTypes.BaseBook{
-			Name:            temp.Name,
+		BookInfo: mainTypes.BookInfo{
+			Title:           temp.Title,
 			BookID:          temp.BookID,
 			FilePath:        temp.FilePath,
 			BookStorePath:   temp.BookStorePath,
@@ -167,7 +167,7 @@ func GetBookFromDatabase(filepath string) (*mainTypes.Book, error) {
 			ChildBookNum:    temp.ChildBookNum,
 			Depth:           temp.Depth,
 			ParentFolder:    temp.ParentFolder,
-			AllPageNum:      temp.AllPageNum,
+			PageCount:       temp.PageCount,
 			FileSize:        temp.FileSize,
 			ISBN:            temp.ISBN,
 			Press:           temp.Press,
@@ -227,8 +227,8 @@ func GetBooksFromDatabase() (list []*mainTypes.Book, err error) {
 	}
 	for _, temp := range books {
 		b := mainTypes.Book{
-			BaseBook: mainTypes.BaseBook{
-				Name:            temp.Name,
+			BookInfo: mainTypes.BookInfo{
+				Title:           temp.Title,
 				BookID:          temp.BookID,
 				FilePath:        temp.FilePath,
 				BookStorePath:   temp.BookStorePath,
@@ -236,7 +236,7 @@ func GetBooksFromDatabase() (list []*mainTypes.Book, err error) {
 				ChildBookNum:    temp.ChildBookNum,
 				Depth:           temp.Depth,
 				ParentFolder:    temp.ParentFolder,
-				AllPageNum:      temp.AllPageNum,
+				PageCount:       temp.PageCount,
 				FileSize:        temp.FileSize,
 				ISBN:            temp.ISBN,
 				Press:           temp.Press,

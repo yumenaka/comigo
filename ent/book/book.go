@@ -14,8 +14,8 @@ const (
 	Label = "book"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldName holds the string denoting the name field in the database.
-	FieldName = "name"
+	// FieldTitle holds the string denoting the title field in the database.
+	FieldTitle = "title"
 	// FieldBookID holds the string denoting the bookid field in the database.
 	FieldBookID = "book_id"
 	// FieldOwner holds the string denoting the owner field in the database.
@@ -32,8 +32,8 @@ const (
 	FieldDepth = "depth"
 	// FieldParentFolder holds the string denoting the parentfolder field in the database.
 	FieldParentFolder = "parent_folder"
-	// FieldAllPageNum holds the string denoting the allpagenum field in the database.
-	FieldAllPageNum = "all_page_num"
+	// FieldPageCount holds the string denoting the pagecount field in the database.
+	FieldPageCount = "page_count"
 	// FieldFileSize holds the string denoting the filesize field in the database.
 	FieldFileSize = "file_size"
 	// FieldAuthors holds the string denoting the authors field in the database.
@@ -74,7 +74,7 @@ const (
 // Columns holds all SQL columns for book fields.
 var Columns = []string{
 	FieldID,
-	FieldName,
+	FieldTitle,
 	FieldBookID,
 	FieldOwner,
 	FieldFilePath,
@@ -83,7 +83,7 @@ var Columns = []string{
 	FieldChildBookNum,
 	FieldDepth,
 	FieldParentFolder,
-	FieldAllPageNum,
+	FieldPageCount,
 	FieldFileSize,
 	FieldAuthors,
 	FieldISBN,
@@ -109,16 +109,16 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// NameValidator is a validator for the "Name" field. It is called by the builders before save.
-	NameValidator func(string) error
+	// TitleValidator is a validator for the "Title" field. It is called by the builders before save.
+	TitleValidator func(string) error
 	// DefaultOwner holds the default value on creation for the "Owner" field.
 	DefaultOwner string
 	// ChildBookNumValidator is a validator for the "ChildBookNum" field. It is called by the builders before save.
 	ChildBookNumValidator func(int) error
 	// DepthValidator is a validator for the "Depth" field. It is called by the builders before save.
 	DepthValidator func(int) error
-	// AllPageNumValidator is a validator for the "AllPageNum" field. It is called by the builders before save.
-	AllPageNumValidator func(int) error
+	// PageCountValidator is a validator for the "PageCount" field. It is called by the builders before save.
+	PageCountValidator func(int) error
 	// DefaultModified holds the default value on creation for the "Modified" field.
 	DefaultModified func() time.Time
 )
@@ -131,9 +131,9 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
-// ByName orders the results by the Name field.
-func ByName(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldName, opts...).ToFunc()
+// ByTitle orders the results by the Title field.
+func ByTitle(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTitle, opts...).ToFunc()
 }
 
 // ByBookID orders the results by the BookID field.
@@ -176,9 +176,9 @@ func ByParentFolder(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldParentFolder, opts...).ToFunc()
 }
 
-// ByAllPageNum orders the results by the AllPageNum field.
-func ByAllPageNum(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldAllPageNum, opts...).ToFunc()
+// ByPageCount orders the results by the PageCount field.
+func ByPageCount(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPageCount, opts...).ToFunc()
 }
 
 // ByFileSize orders the results by the FileSize field.

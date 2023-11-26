@@ -17,7 +17,7 @@ export default defineComponent({
   },
   computed: {
     getTarget() {
-      let bookType = this.book_info.book_type;
+      let bookType = this.book_info.type;
       if (
         bookType === ".pdf" ||
         bookType === "video" ||
@@ -29,7 +29,7 @@ export default defineComponent({
       return "_self";
     },
     shortTitle(): string {
-      let short_title = this.book_info.name;
+      let short_title = this.book_info.title;
       //使用 JavaScript replace() 方法替换掉一些字符串
       if (this.simplifyTitle) {
         //中：/[\u4e00-\u9fa5]/  日：/[\u0800-\u4e00]/  韩：/[\uac00-\ud7ff]/  空格：[\s]
@@ -65,9 +65,8 @@ export default defineComponent({
   methods: {
     getBookURL() {
       let bookID = this.book_info.id;
-      let bookType = this.book_info.book_type;
-      let bookName = this.book_info.name;
-      console.log("getBookURL  bookID：" + bookID + " bookType：" + bookType);
+      let bookType = this.book_info.type;
+      let bookName = this.book_info.title;
       if (bookType === "book_group") {
         return "/#/child_shelf/" + bookID + "/";
       }

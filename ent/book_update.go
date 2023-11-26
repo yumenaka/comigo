@@ -29,15 +29,31 @@ func (bu *BookUpdate) Where(ps ...predicate.Book) *BookUpdate {
 	return bu
 }
 
-// SetName sets the "Name" field.
-func (bu *BookUpdate) SetName(s string) *BookUpdate {
-	bu.mutation.SetName(s)
+// SetTitle sets the "Title" field.
+func (bu *BookUpdate) SetTitle(s string) *BookUpdate {
+	bu.mutation.SetTitle(s)
+	return bu
+}
+
+// SetNillableTitle sets the "Title" field if the given value is not nil.
+func (bu *BookUpdate) SetNillableTitle(s *string) *BookUpdate {
+	if s != nil {
+		bu.SetTitle(*s)
+	}
 	return bu
 }
 
 // SetBookID sets the "BookID" field.
 func (bu *BookUpdate) SetBookID(s string) *BookUpdate {
 	bu.mutation.SetBookID(s)
+	return bu
+}
+
+// SetNillableBookID sets the "BookID" field if the given value is not nil.
+func (bu *BookUpdate) SetNillableBookID(s *string) *BookUpdate {
+	if s != nil {
+		bu.SetBookID(*s)
+	}
 	return bu
 }
 
@@ -61,9 +77,25 @@ func (bu *BookUpdate) SetFilePath(s string) *BookUpdate {
 	return bu
 }
 
+// SetNillableFilePath sets the "FilePath" field if the given value is not nil.
+func (bu *BookUpdate) SetNillableFilePath(s *string) *BookUpdate {
+	if s != nil {
+		bu.SetFilePath(*s)
+	}
+	return bu
+}
+
 // SetBookStorePath sets the "BookStorePath" field.
 func (bu *BookUpdate) SetBookStorePath(s string) *BookUpdate {
 	bu.mutation.SetBookStorePath(s)
+	return bu
+}
+
+// SetNillableBookStorePath sets the "BookStorePath" field if the given value is not nil.
+func (bu *BookUpdate) SetNillableBookStorePath(s *string) *BookUpdate {
+	if s != nil {
+		bu.SetBookStorePath(*s)
+	}
 	return bu
 }
 
@@ -73,10 +105,26 @@ func (bu *BookUpdate) SetType(s string) *BookUpdate {
 	return bu
 }
 
+// SetNillableType sets the "Type" field if the given value is not nil.
+func (bu *BookUpdate) SetNillableType(s *string) *BookUpdate {
+	if s != nil {
+		bu.SetType(*s)
+	}
+	return bu
+}
+
 // SetChildBookNum sets the "ChildBookNum" field.
 func (bu *BookUpdate) SetChildBookNum(i int) *BookUpdate {
 	bu.mutation.ResetChildBookNum()
 	bu.mutation.SetChildBookNum(i)
+	return bu
+}
+
+// SetNillableChildBookNum sets the "ChildBookNum" field if the given value is not nil.
+func (bu *BookUpdate) SetNillableChildBookNum(i *int) *BookUpdate {
+	if i != nil {
+		bu.SetChildBookNum(*i)
+	}
 	return bu
 }
 
@@ -93,6 +141,14 @@ func (bu *BookUpdate) SetDepth(i int) *BookUpdate {
 	return bu
 }
 
+// SetNillableDepth sets the "Depth" field if the given value is not nil.
+func (bu *BookUpdate) SetNillableDepth(i *int) *BookUpdate {
+	if i != nil {
+		bu.SetDepth(*i)
+	}
+	return bu
+}
+
 // AddDepth adds i to the "Depth" field.
 func (bu *BookUpdate) AddDepth(i int) *BookUpdate {
 	bu.mutation.AddDepth(i)
@@ -105,16 +161,32 @@ func (bu *BookUpdate) SetParentFolder(s string) *BookUpdate {
 	return bu
 }
 
-// SetAllPageNum sets the "AllPageNum" field.
-func (bu *BookUpdate) SetAllPageNum(i int) *BookUpdate {
-	bu.mutation.ResetAllPageNum()
-	bu.mutation.SetAllPageNum(i)
+// SetNillableParentFolder sets the "ParentFolder" field if the given value is not nil.
+func (bu *BookUpdate) SetNillableParentFolder(s *string) *BookUpdate {
+	if s != nil {
+		bu.SetParentFolder(*s)
+	}
 	return bu
 }
 
-// AddAllPageNum adds i to the "AllPageNum" field.
-func (bu *BookUpdate) AddAllPageNum(i int) *BookUpdate {
-	bu.mutation.AddAllPageNum(i)
+// SetPageCount sets the "PageCount" field.
+func (bu *BookUpdate) SetPageCount(i int) *BookUpdate {
+	bu.mutation.ResetPageCount()
+	bu.mutation.SetPageCount(i)
+	return bu
+}
+
+// SetNillablePageCount sets the "PageCount" field if the given value is not nil.
+func (bu *BookUpdate) SetNillablePageCount(i *int) *BookUpdate {
+	if i != nil {
+		bu.SetPageCount(*i)
+	}
+	return bu
+}
+
+// AddPageCount adds i to the "PageCount" field.
+func (bu *BookUpdate) AddPageCount(i int) *BookUpdate {
+	bu.mutation.AddPageCount(i)
 	return bu
 }
 
@@ -122,6 +194,14 @@ func (bu *BookUpdate) AddAllPageNum(i int) *BookUpdate {
 func (bu *BookUpdate) SetFileSize(i int64) *BookUpdate {
 	bu.mutation.ResetFileSize()
 	bu.mutation.SetFileSize(i)
+	return bu
+}
+
+// SetNillableFileSize sets the "FileSize" field if the given value is not nil.
+func (bu *BookUpdate) SetNillableFileSize(i *int64) *BookUpdate {
+	if i != nil {
+		bu.SetFileSize(*i)
+	}
 	return bu
 }
 
@@ -137,9 +217,25 @@ func (bu *BookUpdate) SetAuthors(s string) *BookUpdate {
 	return bu
 }
 
+// SetNillableAuthors sets the "Authors" field if the given value is not nil.
+func (bu *BookUpdate) SetNillableAuthors(s *string) *BookUpdate {
+	if s != nil {
+		bu.SetAuthors(*s)
+	}
+	return bu
+}
+
 // SetISBN sets the "ISBN" field.
 func (bu *BookUpdate) SetISBN(s string) *BookUpdate {
 	bu.mutation.SetISBN(s)
+	return bu
+}
+
+// SetNillableISBN sets the "ISBN" field if the given value is not nil.
+func (bu *BookUpdate) SetNillableISBN(s *string) *BookUpdate {
+	if s != nil {
+		bu.SetISBN(*s)
+	}
 	return bu
 }
 
@@ -149,15 +245,39 @@ func (bu *BookUpdate) SetPress(s string) *BookUpdate {
 	return bu
 }
 
+// SetNillablePress sets the "Press" field if the given value is not nil.
+func (bu *BookUpdate) SetNillablePress(s *string) *BookUpdate {
+	if s != nil {
+		bu.SetPress(*s)
+	}
+	return bu
+}
+
 // SetPublishedAt sets the "PublishedAt" field.
 func (bu *BookUpdate) SetPublishedAt(s string) *BookUpdate {
 	bu.mutation.SetPublishedAt(s)
 	return bu
 }
 
+// SetNillablePublishedAt sets the "PublishedAt" field if the given value is not nil.
+func (bu *BookUpdate) SetNillablePublishedAt(s *string) *BookUpdate {
+	if s != nil {
+		bu.SetPublishedAt(*s)
+	}
+	return bu
+}
+
 // SetExtractPath sets the "ExtractPath" field.
 func (bu *BookUpdate) SetExtractPath(s string) *BookUpdate {
 	bu.mutation.SetExtractPath(s)
+	return bu
+}
+
+// SetNillableExtractPath sets the "ExtractPath" field if the given value is not nil.
+func (bu *BookUpdate) SetNillableExtractPath(s *string) *BookUpdate {
+	if s != nil {
+		bu.SetExtractPath(*s)
+	}
 	return bu
 }
 
@@ -182,6 +302,14 @@ func (bu *BookUpdate) SetExtractNum(i int) *BookUpdate {
 	return bu
 }
 
+// SetNillableExtractNum sets the "ExtractNum" field if the given value is not nil.
+func (bu *BookUpdate) SetNillableExtractNum(i *int) *BookUpdate {
+	if i != nil {
+		bu.SetExtractNum(*i)
+	}
+	return bu
+}
+
 // AddExtractNum adds i to the "ExtractNum" field.
 func (bu *BookUpdate) AddExtractNum(i int) *BookUpdate {
 	bu.mutation.AddExtractNum(i)
@@ -194,10 +322,26 @@ func (bu *BookUpdate) SetInitComplete(b bool) *BookUpdate {
 	return bu
 }
 
+// SetNillableInitComplete sets the "InitComplete" field if the given value is not nil.
+func (bu *BookUpdate) SetNillableInitComplete(b *bool) *BookUpdate {
+	if b != nil {
+		bu.SetInitComplete(*b)
+	}
+	return bu
+}
+
 // SetReadPercent sets the "ReadPercent" field.
 func (bu *BookUpdate) SetReadPercent(f float64) *BookUpdate {
 	bu.mutation.ResetReadPercent()
 	bu.mutation.SetReadPercent(f)
+	return bu
+}
+
+// SetNillableReadPercent sets the "ReadPercent" field if the given value is not nil.
+func (bu *BookUpdate) SetNillableReadPercent(f *float64) *BookUpdate {
+	if f != nil {
+		bu.SetReadPercent(*f)
+	}
 	return bu
 }
 
@@ -213,9 +357,25 @@ func (bu *BookUpdate) SetNonUTF8Zip(b bool) *BookUpdate {
 	return bu
 }
 
+// SetNillableNonUTF8Zip sets the "NonUTF8Zip" field if the given value is not nil.
+func (bu *BookUpdate) SetNillableNonUTF8Zip(b *bool) *BookUpdate {
+	if b != nil {
+		bu.SetNonUTF8Zip(*b)
+	}
+	return bu
+}
+
 // SetZipTextEncoding sets the "ZipTextEncoding" field.
 func (bu *BookUpdate) SetZipTextEncoding(s string) *BookUpdate {
 	bu.mutation.SetZipTextEncoding(s)
+	return bu
+}
+
+// SetNillableZipTextEncoding sets the "ZipTextEncoding" field if the given value is not nil.
+func (bu *BookUpdate) SetNillableZipTextEncoding(s *string) *BookUpdate {
+	if s != nil {
+		bu.SetZipTextEncoding(*s)
+	}
 	return bu
 }
 
@@ -289,9 +449,9 @@ func (bu *BookUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (bu *BookUpdate) check() error {
-	if v, ok := bu.mutation.Name(); ok {
-		if err := book.NameValidator(v); err != nil {
-			return &ValidationError{Name: "Name", err: fmt.Errorf(`ent: validator failed for field "Book.Name": %w`, err)}
+	if v, ok := bu.mutation.Title(); ok {
+		if err := book.TitleValidator(v); err != nil {
+			return &ValidationError{Name: "Title", err: fmt.Errorf(`ent: validator failed for field "Book.Title": %w`, err)}
 		}
 	}
 	if v, ok := bu.mutation.ChildBookNum(); ok {
@@ -304,9 +464,9 @@ func (bu *BookUpdate) check() error {
 			return &ValidationError{Name: "Depth", err: fmt.Errorf(`ent: validator failed for field "Book.Depth": %w`, err)}
 		}
 	}
-	if v, ok := bu.mutation.AllPageNum(); ok {
-		if err := book.AllPageNumValidator(v); err != nil {
-			return &ValidationError{Name: "AllPageNum", err: fmt.Errorf(`ent: validator failed for field "Book.AllPageNum": %w`, err)}
+	if v, ok := bu.mutation.PageCount(); ok {
+		if err := book.PageCountValidator(v); err != nil {
+			return &ValidationError{Name: "PageCount", err: fmt.Errorf(`ent: validator failed for field "Book.PageCount": %w`, err)}
 		}
 	}
 	return nil
@@ -324,8 +484,8 @@ func (bu *BookUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := bu.mutation.Name(); ok {
-		_spec.SetField(book.FieldName, field.TypeString, value)
+	if value, ok := bu.mutation.Title(); ok {
+		_spec.SetField(book.FieldTitle, field.TypeString, value)
 	}
 	if value, ok := bu.mutation.BookID(); ok {
 		_spec.SetField(book.FieldBookID, field.TypeString, value)
@@ -357,11 +517,11 @@ func (bu *BookUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := bu.mutation.ParentFolder(); ok {
 		_spec.SetField(book.FieldParentFolder, field.TypeString, value)
 	}
-	if value, ok := bu.mutation.AllPageNum(); ok {
-		_spec.SetField(book.FieldAllPageNum, field.TypeInt, value)
+	if value, ok := bu.mutation.PageCount(); ok {
+		_spec.SetField(book.FieldPageCount, field.TypeInt, value)
 	}
-	if value, ok := bu.mutation.AddedAllPageNum(); ok {
-		_spec.AddField(book.FieldAllPageNum, field.TypeInt, value)
+	if value, ok := bu.mutation.AddedPageCount(); ok {
+		_spec.AddField(book.FieldPageCount, field.TypeInt, value)
 	}
 	if value, ok := bu.mutation.FileSize(); ok {
 		_spec.SetField(book.FieldFileSize, field.TypeInt64, value)
@@ -473,15 +633,31 @@ type BookUpdateOne struct {
 	mutation *BookMutation
 }
 
-// SetName sets the "Name" field.
-func (buo *BookUpdateOne) SetName(s string) *BookUpdateOne {
-	buo.mutation.SetName(s)
+// SetTitle sets the "Title" field.
+func (buo *BookUpdateOne) SetTitle(s string) *BookUpdateOne {
+	buo.mutation.SetTitle(s)
+	return buo
+}
+
+// SetNillableTitle sets the "Title" field if the given value is not nil.
+func (buo *BookUpdateOne) SetNillableTitle(s *string) *BookUpdateOne {
+	if s != nil {
+		buo.SetTitle(*s)
+	}
 	return buo
 }
 
 // SetBookID sets the "BookID" field.
 func (buo *BookUpdateOne) SetBookID(s string) *BookUpdateOne {
 	buo.mutation.SetBookID(s)
+	return buo
+}
+
+// SetNillableBookID sets the "BookID" field if the given value is not nil.
+func (buo *BookUpdateOne) SetNillableBookID(s *string) *BookUpdateOne {
+	if s != nil {
+		buo.SetBookID(*s)
+	}
 	return buo
 }
 
@@ -505,9 +681,25 @@ func (buo *BookUpdateOne) SetFilePath(s string) *BookUpdateOne {
 	return buo
 }
 
+// SetNillableFilePath sets the "FilePath" field if the given value is not nil.
+func (buo *BookUpdateOne) SetNillableFilePath(s *string) *BookUpdateOne {
+	if s != nil {
+		buo.SetFilePath(*s)
+	}
+	return buo
+}
+
 // SetBookStorePath sets the "BookStorePath" field.
 func (buo *BookUpdateOne) SetBookStorePath(s string) *BookUpdateOne {
 	buo.mutation.SetBookStorePath(s)
+	return buo
+}
+
+// SetNillableBookStorePath sets the "BookStorePath" field if the given value is not nil.
+func (buo *BookUpdateOne) SetNillableBookStorePath(s *string) *BookUpdateOne {
+	if s != nil {
+		buo.SetBookStorePath(*s)
+	}
 	return buo
 }
 
@@ -517,10 +709,26 @@ func (buo *BookUpdateOne) SetType(s string) *BookUpdateOne {
 	return buo
 }
 
+// SetNillableType sets the "Type" field if the given value is not nil.
+func (buo *BookUpdateOne) SetNillableType(s *string) *BookUpdateOne {
+	if s != nil {
+		buo.SetType(*s)
+	}
+	return buo
+}
+
 // SetChildBookNum sets the "ChildBookNum" field.
 func (buo *BookUpdateOne) SetChildBookNum(i int) *BookUpdateOne {
 	buo.mutation.ResetChildBookNum()
 	buo.mutation.SetChildBookNum(i)
+	return buo
+}
+
+// SetNillableChildBookNum sets the "ChildBookNum" field if the given value is not nil.
+func (buo *BookUpdateOne) SetNillableChildBookNum(i *int) *BookUpdateOne {
+	if i != nil {
+		buo.SetChildBookNum(*i)
+	}
 	return buo
 }
 
@@ -537,6 +745,14 @@ func (buo *BookUpdateOne) SetDepth(i int) *BookUpdateOne {
 	return buo
 }
 
+// SetNillableDepth sets the "Depth" field if the given value is not nil.
+func (buo *BookUpdateOne) SetNillableDepth(i *int) *BookUpdateOne {
+	if i != nil {
+		buo.SetDepth(*i)
+	}
+	return buo
+}
+
 // AddDepth adds i to the "Depth" field.
 func (buo *BookUpdateOne) AddDepth(i int) *BookUpdateOne {
 	buo.mutation.AddDepth(i)
@@ -549,16 +765,32 @@ func (buo *BookUpdateOne) SetParentFolder(s string) *BookUpdateOne {
 	return buo
 }
 
-// SetAllPageNum sets the "AllPageNum" field.
-func (buo *BookUpdateOne) SetAllPageNum(i int) *BookUpdateOne {
-	buo.mutation.ResetAllPageNum()
-	buo.mutation.SetAllPageNum(i)
+// SetNillableParentFolder sets the "ParentFolder" field if the given value is not nil.
+func (buo *BookUpdateOne) SetNillableParentFolder(s *string) *BookUpdateOne {
+	if s != nil {
+		buo.SetParentFolder(*s)
+	}
 	return buo
 }
 
-// AddAllPageNum adds i to the "AllPageNum" field.
-func (buo *BookUpdateOne) AddAllPageNum(i int) *BookUpdateOne {
-	buo.mutation.AddAllPageNum(i)
+// SetPageCount sets the "PageCount" field.
+func (buo *BookUpdateOne) SetPageCount(i int) *BookUpdateOne {
+	buo.mutation.ResetPageCount()
+	buo.mutation.SetPageCount(i)
+	return buo
+}
+
+// SetNillablePageCount sets the "PageCount" field if the given value is not nil.
+func (buo *BookUpdateOne) SetNillablePageCount(i *int) *BookUpdateOne {
+	if i != nil {
+		buo.SetPageCount(*i)
+	}
+	return buo
+}
+
+// AddPageCount adds i to the "PageCount" field.
+func (buo *BookUpdateOne) AddPageCount(i int) *BookUpdateOne {
+	buo.mutation.AddPageCount(i)
 	return buo
 }
 
@@ -566,6 +798,14 @@ func (buo *BookUpdateOne) AddAllPageNum(i int) *BookUpdateOne {
 func (buo *BookUpdateOne) SetFileSize(i int64) *BookUpdateOne {
 	buo.mutation.ResetFileSize()
 	buo.mutation.SetFileSize(i)
+	return buo
+}
+
+// SetNillableFileSize sets the "FileSize" field if the given value is not nil.
+func (buo *BookUpdateOne) SetNillableFileSize(i *int64) *BookUpdateOne {
+	if i != nil {
+		buo.SetFileSize(*i)
+	}
 	return buo
 }
 
@@ -581,9 +821,25 @@ func (buo *BookUpdateOne) SetAuthors(s string) *BookUpdateOne {
 	return buo
 }
 
+// SetNillableAuthors sets the "Authors" field if the given value is not nil.
+func (buo *BookUpdateOne) SetNillableAuthors(s *string) *BookUpdateOne {
+	if s != nil {
+		buo.SetAuthors(*s)
+	}
+	return buo
+}
+
 // SetISBN sets the "ISBN" field.
 func (buo *BookUpdateOne) SetISBN(s string) *BookUpdateOne {
 	buo.mutation.SetISBN(s)
+	return buo
+}
+
+// SetNillableISBN sets the "ISBN" field if the given value is not nil.
+func (buo *BookUpdateOne) SetNillableISBN(s *string) *BookUpdateOne {
+	if s != nil {
+		buo.SetISBN(*s)
+	}
 	return buo
 }
 
@@ -593,15 +849,39 @@ func (buo *BookUpdateOne) SetPress(s string) *BookUpdateOne {
 	return buo
 }
 
+// SetNillablePress sets the "Press" field if the given value is not nil.
+func (buo *BookUpdateOne) SetNillablePress(s *string) *BookUpdateOne {
+	if s != nil {
+		buo.SetPress(*s)
+	}
+	return buo
+}
+
 // SetPublishedAt sets the "PublishedAt" field.
 func (buo *BookUpdateOne) SetPublishedAt(s string) *BookUpdateOne {
 	buo.mutation.SetPublishedAt(s)
 	return buo
 }
 
+// SetNillablePublishedAt sets the "PublishedAt" field if the given value is not nil.
+func (buo *BookUpdateOne) SetNillablePublishedAt(s *string) *BookUpdateOne {
+	if s != nil {
+		buo.SetPublishedAt(*s)
+	}
+	return buo
+}
+
 // SetExtractPath sets the "ExtractPath" field.
 func (buo *BookUpdateOne) SetExtractPath(s string) *BookUpdateOne {
 	buo.mutation.SetExtractPath(s)
+	return buo
+}
+
+// SetNillableExtractPath sets the "ExtractPath" field if the given value is not nil.
+func (buo *BookUpdateOne) SetNillableExtractPath(s *string) *BookUpdateOne {
+	if s != nil {
+		buo.SetExtractPath(*s)
+	}
 	return buo
 }
 
@@ -626,6 +906,14 @@ func (buo *BookUpdateOne) SetExtractNum(i int) *BookUpdateOne {
 	return buo
 }
 
+// SetNillableExtractNum sets the "ExtractNum" field if the given value is not nil.
+func (buo *BookUpdateOne) SetNillableExtractNum(i *int) *BookUpdateOne {
+	if i != nil {
+		buo.SetExtractNum(*i)
+	}
+	return buo
+}
+
 // AddExtractNum adds i to the "ExtractNum" field.
 func (buo *BookUpdateOne) AddExtractNum(i int) *BookUpdateOne {
 	buo.mutation.AddExtractNum(i)
@@ -638,10 +926,26 @@ func (buo *BookUpdateOne) SetInitComplete(b bool) *BookUpdateOne {
 	return buo
 }
 
+// SetNillableInitComplete sets the "InitComplete" field if the given value is not nil.
+func (buo *BookUpdateOne) SetNillableInitComplete(b *bool) *BookUpdateOne {
+	if b != nil {
+		buo.SetInitComplete(*b)
+	}
+	return buo
+}
+
 // SetReadPercent sets the "ReadPercent" field.
 func (buo *BookUpdateOne) SetReadPercent(f float64) *BookUpdateOne {
 	buo.mutation.ResetReadPercent()
 	buo.mutation.SetReadPercent(f)
+	return buo
+}
+
+// SetNillableReadPercent sets the "ReadPercent" field if the given value is not nil.
+func (buo *BookUpdateOne) SetNillableReadPercent(f *float64) *BookUpdateOne {
+	if f != nil {
+		buo.SetReadPercent(*f)
+	}
 	return buo
 }
 
@@ -657,9 +961,25 @@ func (buo *BookUpdateOne) SetNonUTF8Zip(b bool) *BookUpdateOne {
 	return buo
 }
 
+// SetNillableNonUTF8Zip sets the "NonUTF8Zip" field if the given value is not nil.
+func (buo *BookUpdateOne) SetNillableNonUTF8Zip(b *bool) *BookUpdateOne {
+	if b != nil {
+		buo.SetNonUTF8Zip(*b)
+	}
+	return buo
+}
+
 // SetZipTextEncoding sets the "ZipTextEncoding" field.
 func (buo *BookUpdateOne) SetZipTextEncoding(s string) *BookUpdateOne {
 	buo.mutation.SetZipTextEncoding(s)
+	return buo
+}
+
+// SetNillableZipTextEncoding sets the "ZipTextEncoding" field if the given value is not nil.
+func (buo *BookUpdateOne) SetNillableZipTextEncoding(s *string) *BookUpdateOne {
+	if s != nil {
+		buo.SetZipTextEncoding(*s)
+	}
 	return buo
 }
 
@@ -746,9 +1066,9 @@ func (buo *BookUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (buo *BookUpdateOne) check() error {
-	if v, ok := buo.mutation.Name(); ok {
-		if err := book.NameValidator(v); err != nil {
-			return &ValidationError{Name: "Name", err: fmt.Errorf(`ent: validator failed for field "Book.Name": %w`, err)}
+	if v, ok := buo.mutation.Title(); ok {
+		if err := book.TitleValidator(v); err != nil {
+			return &ValidationError{Name: "Title", err: fmt.Errorf(`ent: validator failed for field "Book.Title": %w`, err)}
 		}
 	}
 	if v, ok := buo.mutation.ChildBookNum(); ok {
@@ -761,9 +1081,9 @@ func (buo *BookUpdateOne) check() error {
 			return &ValidationError{Name: "Depth", err: fmt.Errorf(`ent: validator failed for field "Book.Depth": %w`, err)}
 		}
 	}
-	if v, ok := buo.mutation.AllPageNum(); ok {
-		if err := book.AllPageNumValidator(v); err != nil {
-			return &ValidationError{Name: "AllPageNum", err: fmt.Errorf(`ent: validator failed for field "Book.AllPageNum": %w`, err)}
+	if v, ok := buo.mutation.PageCount(); ok {
+		if err := book.PageCountValidator(v); err != nil {
+			return &ValidationError{Name: "PageCount", err: fmt.Errorf(`ent: validator failed for field "Book.PageCount": %w`, err)}
 		}
 	}
 	return nil
@@ -798,8 +1118,8 @@ func (buo *BookUpdateOne) sqlSave(ctx context.Context) (_node *Book, err error) 
 			}
 		}
 	}
-	if value, ok := buo.mutation.Name(); ok {
-		_spec.SetField(book.FieldName, field.TypeString, value)
+	if value, ok := buo.mutation.Title(); ok {
+		_spec.SetField(book.FieldTitle, field.TypeString, value)
 	}
 	if value, ok := buo.mutation.BookID(); ok {
 		_spec.SetField(book.FieldBookID, field.TypeString, value)
@@ -831,11 +1151,11 @@ func (buo *BookUpdateOne) sqlSave(ctx context.Context) (_node *Book, err error) 
 	if value, ok := buo.mutation.ParentFolder(); ok {
 		_spec.SetField(book.FieldParentFolder, field.TypeString, value)
 	}
-	if value, ok := buo.mutation.AllPageNum(); ok {
-		_spec.SetField(book.FieldAllPageNum, field.TypeInt, value)
+	if value, ok := buo.mutation.PageCount(); ok {
+		_spec.SetField(book.FieldPageCount, field.TypeInt, value)
 	}
-	if value, ok := buo.mutation.AddedAllPageNum(); ok {
-		_spec.AddField(book.FieldAllPageNum, field.TypeInt, value)
+	if value, ok := buo.mutation.AddedPageCount(); ok {
+		_spec.AddField(book.FieldPageCount, field.TypeInt, value)
 	}
 	if value, ok := buo.mutation.FileSize(); ok {
 		_spec.SetField(book.FieldFileSize, field.TypeInt64, value)

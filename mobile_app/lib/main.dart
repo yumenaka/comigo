@@ -7,28 +7,26 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
+  // 这个小部件是你应用的根部件。
   @override
   Widget build(BuildContext context) {
+    print('build');
+    // 谷歌推荐的Material（ Android 默认的视觉风格）的组件库
     return MaterialApp(
-      title: 'Comigo Demo',
+      title: 'Comigo Demo v0.1',
+      //debug条件下，显示右上角的debug标签。我不需要，所以设置为false。
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        // This is the theme of your application.
+        // 这是你的应用程序的主题。
         //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a blue toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
+        // 尝试一下：运行你的应用程序，使用 "flutter run" 命令。你会看到应用程序有一个蓝色的工具栏。
+        // 然后，在不退出应用程序的情况下，尝试将 colorScheme 中的 seedColor 更改为 Colors.green，
+        // 然后触发 "hot reload"（保存更改或在支持Flutter的IDE中按下 "hot reload" 按钮，或者如果你使用命令行启动应用程序，则按下 "r"）。
         //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
+        // 注意，计数器没有重置为零；应用程序状态在重新加载期间不会丢失。要重置状态，请使用热重启。
         //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.yellowAccent),
+        // 这对于代码也适用，不仅仅是值：大多数代码更改只需要进行热重载即可测试。
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
         useMaterial3: true,
       ),
       home: const MyHomePage(title: 'Comigo Home Page'),
@@ -39,15 +37,8 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
+  // 这个小部件是你应用的主页。它是有状态的，意味着它有一个包含影响其外观的字段的 State 对象（在下面定义）。
+  // 这个类是状态的配置。它保存了父级（在这种情况下是 App 小部件）提供的值（在这种情况下是标题），并由状态的 build 方法使用。Widget 子类中的字段始终标记为 "final"。
   final String title;
 
   @override
@@ -59,67 +50,44 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _incrementCounter() {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-      _counter++;
+      // 这个调用setState告诉Flutter框架，这个状态发生了变化，
+      // 导致重新运行下面的build方法，以便显示可以反映更新后的值。
+      // 如果我们在不调用setState的情况下更改_counter，
+      // 那么build方法将不会被再次调用，因此不会有任何变化显示出来。
+      _counter = _counter + 2;
     });
   }
 
   void _minusCounter() {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter--;
-      _counter--;
+      _counter = _counter - 2;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
+    // 每次调用setState时，此方法都会重新运行，例如上面的_incrementCounter方法。
     //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    // Flutter框架已经进行了优化，使重新运行build方法变得快速，因此您只需重新构建需要更新的内容，
+    // 而不必逐个更改小部件的实例。
     return Scaffold(
+      backgroundColor: Colors.yellowAccent,
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
+        // 试试这个：尝试在这里将颜色更改为特定的颜色（例如Colors.amber），然后触发热重载，看看AppBar的颜色是否改变，而其他颜色保持不变。
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
+        // 在这里，我们从由App.build方法创建的MyHomePage对象中获取值，并将其用于设置我们的应用栏标题。
         title: Text(widget.title),
       ),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
+        // Center是一个布局小部件。它接受一个子部件并将其放置在父级的中间位置。
         child: Row(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
+          // Column也是一个布局小部件。它接受一个子部件列表并垂直排列它们。默认情况下，它会水平调整自身大小以适应其子部件，并尽量与其父级一样高。
+          // Column有各种属性来控制其自身的大小和子部件的位置。在这里，我们使用mainAxisAlignment来垂直居中子部件；主轴在这里是垂直轴，因为Column是垂直的（交叉轴将是水平的）。
+          // 试试这个：调用“调试绘制”（在IDE中选择“切换调试绘制”操作，或在控制台中按“p”），以查看每个小部件的线框。
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text(
-              'You have pushed the button this many times:',
+              '你已经点击按钮：',
             ),
             Text(
               '$_counter',
@@ -137,7 +105,7 @@ class _MyHomePageState extends State<MyHomePage> {
         onPressed: _incrementCounter,
         tooltip: 'Increment',
         child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ), // 这个尾随逗号使构建方法的自动格式化更加美观。
     );
   }
 }
