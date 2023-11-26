@@ -23,7 +23,7 @@ type ServerStatus struct {
 	OSInfo                util.SystemStatus //系统信息
 }
 
-func PublicServerInfoHandler(c *gin.Context) {
+func HandlerServerInfoPublic(c *gin.Context) {
 	serverName := "Comigo " + config.Version
 	//本机首选出站IP
 	OutIP := util.GetOutboundIP().String()
@@ -42,7 +42,7 @@ func PublicServerInfoHandler(c *gin.Context) {
 	c.PureJSON(http.StatusOK, serverStatus)
 }
 
-func HandlerGetStatusAll(c *gin.Context) {
+func HandlerServerInfo(c *gin.Context) {
 	serverName := "Comigo " + config.Version
 	//本机首选出站IP
 	host := ""

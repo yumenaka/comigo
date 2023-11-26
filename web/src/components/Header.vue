@@ -60,7 +60,7 @@
       <!-- QRCode图，点击可以在屏幕正中显示二维码 -->
       <Qrcode class="w-10 p-0"></Qrcode>
       <!-- 全屏图标 -->
-      <svg class="w-10 static" @click="onFullSreen" xmlns="http://www.w3.org/2000/svg"
+      <svg class="w-10 static" @click="onFullScreen" xmlns="http://www.w3.org/2000/svg"
         xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24">
         <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M16 4h4v4"></path>
@@ -184,7 +184,7 @@ export default defineComponent({
     },
     //进入全屏，由screenfull实现 https://github.com/sindresorhus/screenfull
     //全屏 API： https://developer.mozilla.org/zh-CN/docs/Web/API/Fullscreen_API
-    onFullSreen() {
+    onFullScreen() {
       //如果不允许进入全屏，发提示
       if (!screenfull.isEnabled) {
         this.message.warning(this.$t('not_support_fullscreen'))
@@ -215,6 +215,9 @@ export default defineComponent({
       //其他情况下，后退一页。与单击浏览器中的“后退”按钮相同。
       this.$router.back();
       // location.reload();
+
+
+      
     },
     //点击上传的时候，去上传页
     gotoUploadPage() {

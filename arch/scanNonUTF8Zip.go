@@ -35,7 +35,7 @@ func ScanNonUTF8Zip(filePath string, textEncoding string) (reader *zip.Reader, e
 		////WithValue返回parent的一个副本，该副本保存了传入的key/value，而调用Context接口的Value(key)方法就可以得到val。注意在同一个context中设置key/value，若key相同，值会被覆盖。
 		//ctx = context.WithValue(ctx, "extractPath", extractPath)
 		reader, err := ex.LsAllFile(ctx, file, func(ctx context.Context, f archiver.File) error {
-			//logger.Info(f.Name())
+			//logger.Info(f.title())
 			return nil
 		})
 		if err != nil {

@@ -1,13 +1,13 @@
 package cmd
 
 import (
+	"github.com/mitchellh/go-homedir"
 	"os"
 	"path"
 	"path/filepath"
 	"runtime"
 	"time"
 
-	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/yumenaka/comi/config"
@@ -17,9 +17,20 @@ import (
 	"github.com/yumenaka/comi/routers/handlers"
 )
 
+//cobra & viper sample:
+//https://qiita.com/nirasan/items/cc2ab5bc2889401fe596
+
 var runtimeViper *viper.Viper
 
+// init 初始化命令行参数
+// 执行顺序：init() → rootCmd.Execute → cobra.OnInitialize → rootCmd.Run
+// 依照执行顺序，配置的优先度是：配置文件 > 命令行参数 > 环境变量 > 默认值
 func init() {
+	runtimeViper = viper.New()
+	//加载环境变量，改写对应值
+	runtimeViper.AutomaticEnv()
+	//设置环境变量的前缀，将 PORT变为 COMI_PORT
+	runtimeViper.SetEnvPrefix("COMI")
 	cobra.MousetrapHelpText = ""       //屏蔽鼠标提示，支持拖拽、双击运行
 	cobra.MousetrapDisplayDuration = 5 //"这是命令行程序"的提醒表示时间
 	//登陆用户名、密码
@@ -75,83 +86,13 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&config.Config.CachePath, "cache-path", "", locale.GetString("CACHE_FILE_PATH"))
 	//退出时清除缓存
 	rootCmd.PersistentFlags().BoolVar(&config.Config.ClearCacheExit, "cache-clean", true, locale.GetString("CACHE_FILE_CLEAN"))
-
 	handlers.EnableUpload = &config.Config.EnableUpload
 	handlers.UploadPath = &config.Config.UploadPath
-
 	//手动指定zip文件编码 gbk、shiftjis……
 	rootCmd.PersistentFlags().StringVar(&config.Config.ZipFileTextEncoding, "zip-encode", "gbk", locale.GetString("ZIP_ENCODE"))
-
-	//cobra & viper sample:https://qiita.com/nirasan/items/cc2ab5bc2889401fe596
-	// rootCmd.Run() 运行前的初始化定义。
-	// 运行前后顺序：rootCmd.Execute → 命令行参数的处理 → cobra.OnInitialize → rootCmd.Run、
-	// 于是可以通过CMD读取配置文件、按照配置文件的设定值执行。不一致的时候，配置文件优先于CMD参数
-	//cobra.OnInitialize(initConfig)
-	cobra.OnInitialize(func() {
-		runtimeViper = viper.New()
-		//自动读取环境变量，改写对应值
-		runtimeViper.AutomaticEnv()
-		//设置环境变量的前缀，将 PORT变为 COMI_PORT
-		runtimeViper.SetEnvPrefix("COMI")
-		home, err := homedir.Dir()
-		if err != nil {
-			logger.Info(err)
-			time.Sleep(3 * time.Second)
-		}
-		//需要在home目录下面搜索配置文件
-		homeConfigPath := path.Join(home, ".config/comigo")
-		runtimeViper.AddConfigPath(homeConfigPath)
-
-		// 获取可执行程序自身的文件路径
-		executablePath, err := os.Executable()
-		if err != nil {
-			logger.Info("无法获取程序路径:", err)
-			return
-		}
-
-		// 将可执行程序自身的文件路径转换为绝对路径
-		absPath, err := filepath.Abs(executablePath)
-		if err != nil {
-			logger.Info("Failed to get absolute path:", err)
-			return
-		}
-		logger.Info("Executable path:", absPath)
-		runtimeViper.AddConfigPath(absPath)
-
-		// 当前执行目录
-		nowPath, err := os.Getwd()
-		if err != nil {
-			logger.Info("无法获取程序执行目录:", err)
-		}
-		runtimeViper.AddConfigPath(nowPath)
-		runtimeViper.SetConfigType("toml")
-		runtimeViper.SetConfigName("config.toml")
-		// 读取设定文件
-		if err := runtimeViper.ReadInConfig(); err != nil {
-			if config.Config.ConfigPath == "" && config.Config.Debug {
-				logger.Info(err)
-			}
-		} else {
-			//获取当前使用的配置文件路径
-			//https://github.com/spf13/viper/issues/89
-			config.Config.ConfigPath = runtimeViper.ConfigFileUsed()
-			logger.Info(locale.GetString("FoundConfigFile") + config.Config.ConfigPath)
-		}
-
-		// 把设定文件的内容，解析到构造体里面。
-		if err := runtimeViper.Unmarshal(&config.Config); err != nil {
-			logger.Info(err)
-			time.Sleep(3 * time.Second)
-			os.Exit(1)
-		}
-		//监听文件修改
-		runtimeViper.WatchConfig()
-		//文件修改时，执行重载设置、服务重启的函数
-		runtimeViper.OnConfigChange(handlerConfigReload)
-	})
 }
 
-// rootCmd 没有任何子命令的情况下调用时的基本命令
+// rootCmd 没有任何子命令的情况下时的基本命令
 var rootCmd = &cobra.Command{
 	Use:     locale.GetString("comigo_use"),
 	Short:   locale.GetString("short_description"),
@@ -169,13 +110,70 @@ var rootCmd = &cobra.Command{
 		routers.StartWebServer()
 		//退出时清理临时文件
 		SetShutdownHandler()
-		return
 	},
+}
+
+func initConfigFile() {
+	home, err := homedir.Dir()
+	if err != nil {
+		logger.Info(err)
+		time.Sleep(3 * time.Second)
+	}
+	//需要在home目录下面搜索配置文件
+	homeConfigPath := path.Join(home, ".config/comigo")
+	runtimeViper.AddConfigPath(homeConfigPath)
+
+	// 获取可执行程序自身的文件路径
+	executablePath, err := os.Executable()
+	if err != nil {
+		logger.Info("无法获取程序路径:", err)
+		return
+	}
+	// 将可执行程序自身的文件路径转换为绝对路径
+	absPath, err := filepath.Abs(executablePath)
+	if err != nil {
+		logger.Info("Failed to get absolute path:", err)
+		return
+	}
+	logger.Info("Executable path:", absPath)
+	runtimeViper.AddConfigPath(absPath)
+
+	// 当前执行目录
+	nowPath, err := os.Getwd()
+	if err != nil {
+		logger.Info("无法获取程序执行目录:", err)
+	}
+	runtimeViper.AddConfigPath(nowPath)
+	runtimeViper.SetConfigType("toml")
+	runtimeViper.SetConfigName("config.toml")
+	// 读取设定文件
+	if err := runtimeViper.ReadInConfig(); err != nil {
+		if config.Config.ConfigPath == "" && config.Config.Debug {
+			logger.Info(err)
+		}
+	} else {
+		//获取当前使用的配置文件路径
+		//https://github.com/spf13/viper/issues/89
+		config.Config.ConfigPath = runtimeViper.ConfigFileUsed()
+		logger.Info(locale.GetString("FoundConfigFile") + config.Config.ConfigPath)
+	}
+
+	// 把设定文件的内容，解析到构造体里面。
+	if err := runtimeViper.Unmarshal(&config.Config); err != nil {
+		logger.Info(err)
+		os.Exit(1)
+	}
+	//监听文件修改
+	runtimeViper.WatchConfig()
+	//文件修改时，执行重载设置、服务重启的函数
+	runtimeViper.OnConfigChange(handlerConfigReload)
 }
 
 // Execute 执行将所有子命令添加到根命令并适当设置标志。
 // 这是由 main.main() 调用的。 rootCmd 只需要执行一次。
 func Execute() {
+	// rootCmd.Run() 运行前的初始化定义。 重新运行rootCmd.Run()，会再次执行 cobra.OnInitialize。
+	cobra.OnInitialize(initConfigFile)
 	//执行命令
 	if err := rootCmd.Execute(); err != nil {
 		logger.Info(err)

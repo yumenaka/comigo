@@ -21,7 +21,6 @@
 import { useCookies } from "vue3-cookies";
 import { defineComponent } from 'vue'
 import { NMessageProvider, NDialogProvider, darkTheme, lightTheme } from 'naive-ui'
-import { StringChain } from "lodash";
 export default defineComponent({
   name: "ComigoHome", //默认为 default。如果 <router-view>设置了名称，则会渲染对应的路由配置中 components 下的相应组件。
   components: {
@@ -40,19 +39,8 @@ export default defineComponent({
     };
   },
   created() {
-    // this.$store.dispatch("syncBookDataAction");
     this.$store.dispatch("syncSeverStatusDataAction");
-    // this.$store.dispatch("syncBookShelfDataAction");
     this.selectTemplate = this.getDefaultTemplate;
-
-    // // 连接websocket服务器，参数为websocket服务地址
-    // var protocol = 'ws://'
-    // if (window.location.protocol === "https") {
-    //   protocol = 'wss://'
-    // }
-    // var ws_url = protocol + window.location.host + '/api/ws';
-    // this.$connect(ws_url);
-    // console.log("ws_url:" + ws_url)
   },
   beforeMount() {
     if (this.$store.state.server_status.ServerName != null) {

@@ -144,7 +144,7 @@ func AddBooksToStore(bookList []*types.Book, basePath string, MinImageNum int) {
 		logger.Info(locale.GetString("AddBook_error"), basePath)
 	}
 	// 然后生成对应的虚拟书籍组
-	if err := types.Stores.GenerateBookGroup(); err != nil {
+	if err := types.MainFolder.InitFolder(); err != nil {
 		logger.Info(err)
 	}
 }
@@ -255,7 +255,7 @@ func scanDirGetBook(dirPath string, storePath string, depth int, scanOption Opti
 			logger.Info(errPath)
 		}
 		if scanOption.IsSupportMedia(file.Name()) {
-			TempURL := "api/getfile?id=" + newBook.BookID + "&filename=" + url.QueryEscape(file.Name())
+			TempURL := "api/get_file?id=" + newBook.BookID + "&filename=" + url.QueryEscape(file.Name())
 			newBook.Pages.Images = append(newBook.Pages.Images, types.ImageInfo{RealImageFilePATH: strAbsPath, FileSize: file.Size(), ModeTime: file.ModTime(), NameInArchive: file.Name(), Url: TempURL})
 		}
 	}
@@ -325,20 +325,20 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 		}
 	// TODO:服务器解压速度太慢，网页用PDF.js解析？
 	case types.TypePDF:
-		newBook.AllPageNum = 1
+		newBook.PageCount = 1
 		newBook.InitComplete = true
 		newBook.Cover = types.ImageInfo{RealImageFilePATH: "", FileSize: FileInfo.Size(), ModeTime: FileInfo.ModTime(), NameInArchive: "", Url: "/images/pdf.png"}
 	// TODO：简单的网页播放器
 	case types.TypeVideo:
-		newBook.AllPageNum = 1
+		newBook.PageCount = 1
 		newBook.InitComplete = true
 		newBook.Cover = types.ImageInfo{NameInArchive: "video.png", Url: "/images/video.png"}
 	case types.TypeAudio:
-		newBook.AllPageNum = 1
+		newBook.PageCount = 1
 		newBook.InitComplete = true
 		newBook.Cover = types.ImageInfo{NameInArchive: "audio.png", Url: "/images/audio.png"}
 	case types.TypeUnknownFile:
-		newBook.AllPageNum = 1
+		newBook.PageCount = 1
 		newBook.InitComplete = true
 		newBook.Cover = types.ImageInfo{NameInArchive: "unknown.png", Url: "/images/unknown.png"}
 	// 其他类型的压缩文件或文件夹
@@ -370,15 +370,15 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 					newBook.Type = types.TypeDir
 					////用Archiver的虚拟文件系统提供图片文件，理论上现在不应该用到
 					//newBook.Pages = append(newBook.Pages, ImageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: "", Url: "/cache/" + newBook.BookID + "/" + url.QueryEscape(path)})
-					//实验：用getfile接口提供文件服务
-					TempURL := "api/getfile?id=" + newBook.BookID + "&filename=" + url.QueryEscape(path)
+					//实验：用get_file接口提供文件服务
+					TempURL := "api/get_file?id=" + newBook.BookID + "&filename=" + url.QueryEscape(path)
 					newBook.Pages.Images = append(newBook.Pages.Images, types.ImageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: "", Url: TempURL})
 					// logger.Info(locale.GetString("unsupported_extract")+" %s", f)
 				} else {
 					// 替换特殊字符的时候，额外将“+替换成"%2b"，因为gin会将+解析为空格。
-					TempURL := "api/getfile?id=" + newBook.BookID + "&filename=" + url.QueryEscape(u.NameInArchive)
+					TempURL := "api/get_file?id=" + newBook.BookID + "&filename=" + url.QueryEscape(u.NameInArchive)
 					// 不替换特殊字符
-					// TempURL := "api/getfile?id=" + newBook.BookID + "&filename=" + u.NameInArchive
+					// TempURL := "api/get_file?id=" + newBook.BookID + "&filename=" + u.NameInArchive
 					newBook.Pages.Images = append(newBook.Pages.Images, types.ImageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: u.NameInArchive, Url: TempURL})
 				}
 			}
@@ -403,7 +403,7 @@ func scanNonUTF8ZipFile(filePath string, b *types.Book, scanOption Option) error
 		if scanOption.IsSupportMedia(f.Name) {
 			// 如果是压缩文件
 			// 替换特殊字符的时候，额外将“+替换成"%2b"，因为gin会将+解析为空格。
-			TempURL := "api/getfile?id=" + b.BookID + "&filename=" + url.QueryEscape(f.Name)
+			TempURL := "api/get_file?id=" + b.BookID + "&filename=" + url.QueryEscape(f.Name)
 			b.Pages.Images = append(b.Pages.Images, types.ImageInfo{RealImageFilePATH: "", FileSize: f.FileInfo().Size(), ModeTime: f.FileInfo().ModTime(), NameInArchive: f.Name, Url: TempURL})
 		} else {
 			logger.DebugWithFields(logrus.Fields{"filename": f.Name}, locale.GetString("unsupported_file_type"))
@@ -442,7 +442,7 @@ func walkUTF8ZipFs(fsys fs.FS, parent, base string, b *types.Book, scanOption Op
 			logger.DebugWithFields(logrus.Fields{"filename": name}, locale.GetString("unsupported_file_type"))
 		} else {
 			inArchiveName := path.Join(parent, f.Name())
-			TempURL := "api/getfile?id=" + b.BookID + "&filename=" + url.QueryEscape(inArchiveName)
+			TempURL := "api/get_file?id=" + b.BookID + "&filename=" + url.QueryEscape(inArchiveName)
 			// 替换特殊字符的时候,不要用url.PathEscape()，PathEscape不会把“+“替换成"%2b"，会导致BUG，让gin会将+解析为空格。
 			b.Pages.Images = append(b.Pages.Images, types.ImageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: inArchiveName, Url: TempURL})
 		}

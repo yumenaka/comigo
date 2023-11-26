@@ -3,7 +3,7 @@
     <div class="manga">
         <img alt="" v-lazy="this.image_url" />
         <div class="page_hint" v-if="this.showPageNumFlag_ScrollMode">{{ this.MyPageNum }}/{{
-                this.all_page_num
+                this.page_count
         }}</div>
     </div>
 </template>
@@ -14,7 +14,7 @@
 // https://www.w3cplus.com/vue/build-an-infinite-scroll-component-using-intersection-observer-api.html 
 // https://vueschool.io/articles/vuejs-tutorials/build-an-infinite-scroll-component-using-intersection-observer-api/
 export default {
-    props: ['options', "syncPageByWS", 'userControlling', 'book_id', 'image_url', 'MyPageNum', 'nowPageNum', 'all_page_num', "showPageNumFlag_ScrollMode", "sPWL", "dPWL", "sPWP", "dPWP", "startLoadPageNum", "endLoadPageNum", "autoScrolling", "margin"],
+    props: ['options', "syncPageByWS", 'userControlling', 'book_id', 'image_url', 'MyPageNum', 'nowPageNum', 'page_count', "showPageNumFlag_ScrollMode", "sPWL", "dPWL", "sPWP", "dPWP", "startLoadPageNum", "endLoadPageNum", "autoScrolling", "margin"],
     emits: ['refreshNowPageNum'],
     data: () => ({
         observer: null,

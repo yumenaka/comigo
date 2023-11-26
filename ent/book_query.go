@@ -298,12 +298,12 @@ func (bq *BookQuery) WithPageInfos(opts ...func(*SinglePageInfoQuery)) *BookQuer
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"Name,omitempty"`
+//		Title string `json:"Title,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Book.Query().
-//		GroupBy(book.FieldName).
+//		GroupBy(book.FieldTitle).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (bq *BookQuery) GroupBy(field string, fields ...string) *BookGroupBy {
@@ -321,11 +321,11 @@ func (bq *BookQuery) GroupBy(field string, fields ...string) *BookGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"Name,omitempty"`
+//		Title string `json:"Title,omitempty"`
 //	}
 //
 //	client.Book.Query().
-//		Select(book.FieldName).
+//		Select(book.FieldTitle).
 //		Scan(ctx, &v)
 func (bq *BookQuery) Select(fields ...string) *BookSelect {
 	bq.ctx.Fields = append(bq.ctx.Fields, fields...)

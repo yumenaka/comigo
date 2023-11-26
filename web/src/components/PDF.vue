@@ -52,7 +52,7 @@ export default {
             pdfCtx: null,
             book: {
                 name: "loading",
-                all_page_num: 2,
+                page_count: 2,
                 book_type: "dir",
                 pages: [
                     {

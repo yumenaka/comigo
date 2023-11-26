@@ -9,7 +9,7 @@
     <transition name="header-bottom">
       <Header v-if="showHeaderFlag_FlipMode" class="mx-auto w-full opacity-80"
         v-bind:class="{ 'fixed': hideToolbar, absolute: hideToolbar, 'top-0': hideToolbar }"
-        v-bind:style="{ background: model.interfaceColor }" :setDownLoadLink="needDownloadLink()" :headerTitle="book.name"
+        v-bind:style="{ background: model.interfaceColor }" :setDownLoadLink="needDownloadLink()" :headerTitle="book.title"
         :bookID="book.id" :showReturnIcon="true" :showSettingsIcon="true" @drawerActivate="drawerActivate">
       </Header>
     </transition>
@@ -27,13 +27,13 @@
           <!-- 简单拼合双页,不管单双页什么的 -->
           <img v-if="!autoDoublePageModeFlag &&
             doublePageModeFlag &&
-            nowPageNum < book.all_page_num
+            nowPageNum < book.page_count
             " v-bind:src="imageParametersString(book.pages.images[nowPageNum].url)
     " v-bind:alt="(nowPageNum + 1).toString()" />
 
           <!-- 自动拼合模式当前页,如果开启自动拼合,右边可能显示拼合页 -->
           <img v-if="autoDoublePageModeFlag &&
-            nowPageNum < book.all_page_num &&
+            nowPageNum < book.page_count &&
             nowAndNextPageIsSingle()
             " v-bind:src="imageParametersString(book.pages.images[nowPageNum].url)
     " v-bind:alt="(nowPageNum + 1).toString()" />
@@ -89,8 +89,8 @@
             px-4
             h-full
           " v-if="!rightToLeftFlag">
-            <span class="right">{{ book.all_page_num }}</span>
-            <n-slider class="w-10/11" reverse v-model:value="nowPageNum" :max="book.all_page_num" :min="1" :step="1"
+            <span class="right">{{ book.page_count }}</span>
+            <n-slider class="w-10/11" reverse v-model:value="nowPageNum" :max="book.page_count" :min="1" :step="1"
               :format-tooltip="(value: any) => `${value}`" @update:value="saveLocalBookMark" />
             <span class="left">{{ nowPageNum }}</span>
           </div>
@@ -108,9 +108,9 @@
             h-full
           " v-if="rightToLeftFlag">
             <span class="right">{{ nowPageNum }}</span>
-            <n-slider class="bg-yellow-300" v-model:value="nowPageNum" :max="book.all_page_num" :min="1" :step="1"
+            <n-slider class="bg-yellow-300" v-model:value="nowPageNum" :max="book.page_count" :min="1" :step="1"
               :format-tooltip="(value: any) => `${value}`" @update:value="saveLocalBookMark" />
-            <span class="left">{{ book.all_page_num }}</span>
+            <span class="left">{{ book.page_count }}</span>
           </div>
         </div>
       </div>
@@ -236,7 +236,6 @@ import {
   NSelect,
 } from "naive-ui";
 import axios from "axios";
-import md5 from "js-md5";
 
 export default defineComponent({
   name: "FlipMode",
@@ -286,7 +285,7 @@ export default defineComponent({
       imageParameters, //获取图片所用的参数
       imageParametersString: (source_url: string) => {
         // var temp =
-        if (source_url.substr(0, 12) === "api/getfile?") {
+        if (source_url.substr(0, 12) === "api/get_file?") {
           //当前URL
           const url = document.location.toString();
           //按照“/”分割字符串
@@ -392,10 +391,10 @@ export default defineComponent({
         },
       ],
       book: {
-        name: "loading",
+        title: "loading",
         id: "loading",
-        all_page_num: 2,
-        book_type: ".zip",
+        page_count: 2,
+        type: ".zip",
         pages: {
           sort_by: "",
           images: [
@@ -458,7 +457,7 @@ export default defineComponent({
 
     //根据路由参数获取特定书籍
     axios
-      .get("/getbook?id=" + this.$route.params.id + sort_image_by_str)
+      .get("/get_book?id=" + this.$route.params.id + sort_image_by_str)
       .then((response) => (this.book = response.data))
       .catch((error) => {
         // console.log(error);
@@ -468,7 +467,7 @@ export default defineComponent({
         });
       })
       .finally(() => {
-        document.title = this.book.name;
+        document.title = this.book.title;
         console.log("成功获取书籍数据,书籍ID:" + this.$route.params.id);
         this.loadLocalBookMark();
       });
@@ -478,7 +477,7 @@ export default defineComponent({
       (id: any) => {
         // console.log(id)
         axios
-          .get("/getbook?id=" + this.$route.params.id + sort_image_by_str)
+          .get("/get_book?id=" + this.$route.params.id + sort_image_by_str)
           .then((response) => (this.book = response.data))
           .catch((error) => {
             console.log(error);
@@ -699,19 +698,14 @@ export default defineComponent({
       console.log("send:", newMsg);
     },
 
-    // 辅助函数，用于从 Gravatar 获取头像。URL 的最后一段需要用户的 email 地址的 MD5 编码。
-    gravatarURL: function (email: md5.message) {
-      return "http://www.gravatar.com/avatar/" + md5(email);
-    },
-
     //页面排序相关
     onResort(key: string) {
       this.resort_hint_key = key;
       axios
-        .get("/getbook?id=" + this.$route.params.id + "&sort_by=" + key)
+        .get("/get_book?id=" + this.$route.params.id + "&sort_by=" + key)
         .then((response) => (this.book = response.data))
         .finally(() => {
-          document.title = this.book.name;
+          document.title = this.book.title;
           this.resort_hint_key = key;
           // 带查询参数，结果是 /#/flip/abc123?sort_by="filesize"
           this.$router.push({
@@ -776,7 +770,7 @@ export default defineComponent({
     },
     //判断这本书是否需要提供原始压缩包下载
     needDownloadLink() {
-      return this.book.book_type !== "dir";
+      return this.book.type !== "dir";
     },
     // 分析单双页用
     nowAndNextPageIsSingle() {
@@ -786,13 +780,7 @@ export default defineComponent({
       let nextPageIsDouble = this.checkImageIsDoublePage_byPageNum(
         this.nowPageNum + 1
       );
-      if (nowPageIsDouble || nextPageIsDouble) {
-        // this.nowAndNextPageIsSingleFlag = false;
-        return false;
-      } else {
-        // this.nowAndNextPageIsSingleFlag = false;
-        return true;
-      }
+      return !(nowPageIsDouble || nextPageIsDouble);
     },
     //根据书籍UUID,设定当前页数,因为需要取得远程书籍数据（this.book）,所以延迟执行
     loadLocalBookMark() {
@@ -877,7 +865,7 @@ export default defineComponent({
     },
     //开始速写（quick sketch）,每秒执行一次
     sketchCount() {
-      if (this.sketchModeFlag === false || this.readerMode === "flip") {
+      if (!this.sketchModeFlag || this.readerMode === "flip") {
         this.stopSketchMode();
         return
       }
@@ -885,7 +873,7 @@ export default defineComponent({
       let nowSecond = this.sketchSecondCount % this.sketchFlipSecond;
       // console.log("sketchSecondCount=" + this.sketchSecondCount + " nowSecond:" + nowSecond)
       if (nowSecond === 0) {
-        if (this.nowPageNum < this.book.all_page_num) {
+        if (this.nowPageNum < this.book.page_count) {
           this.flipPage(1);
         } else {
           this.toPage(1);
@@ -998,7 +986,7 @@ export default defineComponent({
               "url(/images/Prohibited28Filled.png), pointer";
           } else if (
             !this.rightToLeftFlag &&
-            this.nowPageNum === this.book.all_page_num
+            this.nowPageNum === this.book.page_count
           ) {
             //左边翻下一页,且目前是最后一页的时候,左边的鼠标指针,设置为禁止翻页
             e.currentTarget.style.cursor =
@@ -1012,7 +1000,7 @@ export default defineComponent({
           //设置右边的鼠标指针
           if (
             this.rightToLeftFlag &&
-            this.nowPageNum === this.book.all_page_num
+            this.nowPageNum === this.book.page_count
           ) {
             //右边翻下一页,且目前是最后页的时候,右边的鼠标指针,设置为禁止翻页
             e.currentTarget.style.cursor =
@@ -1066,14 +1054,14 @@ export default defineComponent({
         //决定如何翻页
         if (clickX < innerWidth * 0.5) {
           //左边的翻页
-          if (this.rightToLeftFlag === true) {
+          if (this.rightToLeftFlag) {
             this.toPerviousPage();
           } else {
             this.toNextPage();
           }
         } else {
           //右边的翻页
-          if (this.rightToLeftFlag === true) {
+          if (this.rightToLeftFlag) {
             this.toNextPage();
           } else {
             this.toPerviousPage();
@@ -1084,7 +1072,7 @@ export default defineComponent({
     toNextPage() {
       //简单合并模式
       if (this.doublePageModeFlag) {
-        if (this.nowPageNum < this.book.all_page_num - 1) {
+        if (this.nowPageNum < this.book.page_count - 1) {
           this.flipPage(2);
           return;
         } else {
@@ -1098,7 +1086,7 @@ export default defineComponent({
         this.autoDoublePageModeFlag &&
         this.checkMergedStatus_ByPageNum(this.nowPageNum)
       ) {
-        if (this.nowPageNum < this.book.all_page_num - 1) {
+        if (this.nowPageNum < this.book.page_count - 1) {
           this.flipPage(2);
         } else {
           this.flipPage(1);
@@ -1159,13 +1147,13 @@ export default defineComponent({
         return false;
       }
       //可能传入的错误值,打印到控制台
-      if (pageNum <= 0 || pageNum >= this.book.all_page_num) {
+      if (pageNum <= 0 || pageNum >= this.book.page_count) {
         console.log("Error pageNum :" + pageNum);
         return false;
       }
 
       //已经是最后一页了,显然不需要自动合并下一页
-      if (pageNum === this.book.all_page_num) {
+      if (pageNum === this.book.page_count) {
         return false;
       }
       //分析现在这张图片的宽高比,看是不是双开页
@@ -1181,7 +1169,7 @@ export default defineComponent({
     },
     checkImageIsDoublePage_byPageNum(pageNum: number) {
       //如果传进了错误值
-      if (pageNum <= 0 || pageNum > this.book.all_page_num) {
+      if (pageNum <= 0 || pageNum > this.book.page_count) {
         console.log("Error checkImageIsDoublePage_byPageNum:" + pageNum);
         return false;
       }
@@ -1226,7 +1214,7 @@ export default defineComponent({
     //翻页,其实不限页数
     flipPage: function (num: number) {
       if (
-        this.nowPageNum + num <= this.book.all_page_num &&
+        this.nowPageNum + num <= this.book.page_count &&
         this.nowPageNum + num >= 1
       ) {
         this.nowPageNum = this.nowPageNum + num;
@@ -1253,7 +1241,7 @@ export default defineComponent({
     },
     //跳转到指定页数
     toPage: function (num: number, sendWSMessage = true) {
-      if (num <= this.book.all_page_num && num >= 1) {
+      if (num <= this.book.page_count && num >= 1) {
         this.nowPageNum = num;
       }
       //保存页数
@@ -1272,12 +1260,12 @@ export default defineComponent({
           this.flipPage(-1); //上一页
           break;
         case "ArrowLeft":
-          this.rightToLeftFlag === true
+          this.rightToLeftFlag
             ? this.toPerviousPage()
             : this.toNextPage();
           break;
         case "ArrowRight":
-          this.rightToLeftFlag === true
+          this.rightToLeftFlag
             ? this.toNextPage()
             : this.toPerviousPage();
           break;
@@ -1290,7 +1278,7 @@ export default defineComponent({
           this.toPage(1); //跳转到第一页
           break;
         case "End":
-          this.toPage(this.book.all_page_num); //跳转到最后一页
+          this.toPage(this.book.page_count); //跳转到最后一页
           break;
         case "Ctrl":
           // Ctrl key pressed //组合键？
@@ -1358,7 +1346,7 @@ export default defineComponent({
       console.log("value:" + value);
       this.debugModeFlag = value;
       //关闭Debug模式的时候顺便也关上“自动合并单双页”的功能（因为还有BUG）
-      if (value === false) {
+      if (!value) {
         this.autoDoublePageModeFlag = false;
       }
       localStorage.setItem("debugModeFlag", value ? "true" : "false");
@@ -1370,7 +1358,7 @@ export default defineComponent({
     setAutoDoublePage_FlipMode(value: boolean) {
       console.log("value:" + value);
       this.autoDoublePageModeFlag = value;
-      if (value === true) {
+      if (value) {
         this.doublePageModeFlag = false;
       }
       localStorage.setItem("autoDoublePageModeFlag", value ? "true" : "false");
@@ -1379,7 +1367,7 @@ export default defineComponent({
     setSimpleDoublePage_FlipMode(value: boolean) {
       console.log("value:" + value);
       this.doublePageModeFlag = value;
-      if (value === true) {
+      if (value) {
         this.autoDoublePageModeFlag = false;
       }
       localStorage.setItem("doublePageModeFlag", value ? "true" : "false");
@@ -1426,7 +1414,7 @@ export default defineComponent({
           this.$t("page")
         );
       } else {
-        return this.nowPageNum + "/" + this.book.all_page_num;
+        return this.nowPageNum + "/" + this.book.page_count;
       }
     },
     mangaAreaHeight() {
@@ -1491,7 +1479,7 @@ export default defineComponent({
     },
     //从左到右还是从右到左
     get_flex_direction() {
-      if (this.rightToLeftFlag === true) {
+      if (this.rightToLeftFlag) {
         return "row";
       } else {
         return "row-reverse";

@@ -18,7 +18,7 @@ type Book struct {
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// 书名
-	Name string `json:"Name,omitempty"`
+	Title string `json:"Title,omitempty"`
 	// 书籍ID
 	BookID string `json:"BookID,omitempty"`
 	// 拥有者
@@ -36,7 +36,7 @@ type Book struct {
 	// ParentFolder holds the value of the "ParentFolder" field.
 	ParentFolder string `json:"ParentFolder,omitempty"`
 	// 总页数
-	AllPageNum int `json:"AllPageNum,omitempty"`
+	PageCount int `json:"PageCount,omitempty"`
 	// FileSize holds the value of the "FileSize" field.
 	FileSize int64 `json:"FileSize,omitempty"`
 	// Authors holds the value of the "Authors" field.
@@ -94,9 +94,9 @@ func (*Book) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case book.FieldReadPercent:
 			values[i] = new(sql.NullFloat64)
-		case book.FieldID, book.FieldChildBookNum, book.FieldDepth, book.FieldAllPageNum, book.FieldFileSize, book.FieldExtractNum:
+		case book.FieldID, book.FieldChildBookNum, book.FieldDepth, book.FieldPageCount, book.FieldFileSize, book.FieldExtractNum:
 			values[i] = new(sql.NullInt64)
-		case book.FieldName, book.FieldBookID, book.FieldOwner, book.FieldFilePath, book.FieldBookStorePath, book.FieldType, book.FieldParentFolder, book.FieldAuthors, book.FieldISBN, book.FieldPress, book.FieldPublishedAt, book.FieldExtractPath, book.FieldZipTextEncoding:
+		case book.FieldTitle, book.FieldBookID, book.FieldOwner, book.FieldFilePath, book.FieldBookStorePath, book.FieldType, book.FieldParentFolder, book.FieldAuthors, book.FieldISBN, book.FieldPress, book.FieldPublishedAt, book.FieldExtractPath, book.FieldZipTextEncoding:
 			values[i] = new(sql.NullString)
 		case book.FieldModified:
 			values[i] = new(sql.NullTime)
@@ -121,11 +121,11 @@ func (b *Book) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			b.ID = int(value.Int64)
-		case book.FieldName:
+		case book.FieldTitle:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field Name", values[i])
+				return fmt.Errorf("unexpected type %T for field Title", values[i])
 			} else if value.Valid {
-				b.Name = value.String
+				b.Title = value.String
 			}
 		case book.FieldBookID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -175,11 +175,11 @@ func (b *Book) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				b.ParentFolder = value.String
 			}
-		case book.FieldAllPageNum:
+		case book.FieldPageCount:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field AllPageNum", values[i])
+				return fmt.Errorf("unexpected type %T for field PageCount", values[i])
 			} else if value.Valid {
-				b.AllPageNum = int(value.Int64)
+				b.PageCount = int(value.Int64)
 			}
 		case book.FieldFileSize:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -294,8 +294,8 @@ func (b *Book) String() string {
 	var builder strings.Builder
 	builder.WriteString("Book(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", b.ID))
-	builder.WriteString("Name=")
-	builder.WriteString(b.Name)
+	builder.WriteString("Title=")
+	builder.WriteString(b.Title)
 	builder.WriteString(", ")
 	builder.WriteString("BookID=")
 	builder.WriteString(b.BookID)
@@ -321,8 +321,8 @@ func (b *Book) String() string {
 	builder.WriteString("ParentFolder=")
 	builder.WriteString(b.ParentFolder)
 	builder.WriteString(", ")
-	builder.WriteString("AllPageNum=")
-	builder.WriteString(fmt.Sprintf("%v", b.AllPageNum))
+	builder.WriteString("PageCount=")
+	builder.WriteString(fmt.Sprintf("%v", b.PageCount))
 	builder.WriteString(", ")
 	builder.WriteString("FileSize=")
 	builder.WriteString(fmt.Sprintf("%v", b.FileSize))

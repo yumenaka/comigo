@@ -19,7 +19,7 @@
     "vue3snippets.enable-compile-vue-file-on-did-save-code": false,
     "vue-i18n.i18nPaths": "src\\locales",
     "cSpell.words": [
-      "getbook",
+      "get_book",
       "lazyload",
       "tailwindcss",
       "vicons",

@@ -23,8 +23,8 @@ import (
 	"github.com/yumenaka/comi/util"
 )
 
-// HandlerGetFile 示例 URL： 127.0.0.1:1234/getfile?id=2b17a13&filename=1.jpg
-// 缩放文件，会转化为jpeg：http://127.0.0.1:1234/api/getfile?resize_width=300&resize_height=400&id=597e06&filename=01.jpeg
+// HandlerGetFile 示例 URL： 127.0.0.1:1234/get_file?id=2b17a13&filename=1.jpg
+// 缩放文件，会转化为jpeg：http://127.0.0.1:1234/api/get_file?resize_width=300&resize_height=400&id=597e06&filename=01.jpeg
 // 相关参数：
 // id：书籍的ID，必须项目       							&id=2B17a
 // filename:获取的文件名，必须项目   							&filename=01.jpg

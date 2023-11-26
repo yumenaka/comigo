@@ -17,7 +17,7 @@ type Book struct {
 // Fields of the Book.
 func (Book) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("Name").
+		field.String("Title").
 			MaxLen(1024). //限制长度
 			Comment("书名"),
 		field.String("BookID").
@@ -31,7 +31,7 @@ func (Book) Fields() []ent.Field {
 		field.Int("ChildBookNum").NonNegative(),
 		field.Int("Depth").NonNegative(),
 		field.String("ParentFolder"),
-		field.Int("AllPageNum").
+		field.Int("PageCount").
 			NonNegative(). //内置校验器，非负数
 			Comment("总页数"),
 		field.Int64("FileSize"),
