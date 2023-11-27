@@ -23,7 +23,7 @@ func setWebAPI(engine *gin.Engine) {
 	// 无需认证，不受保护的路由
 	publicRoutes := func(rg *gin.RouterGroup) {
 		rg.GET("/qrcode.png", handlers.GetQrcodeHandler)
-		rg.GET("/server_info_public", handlers.HandlerServerInfoPublic)
+		rg.GET("/get_server_info_public", handlers.HandlerGetServerInfoPublic)
 		websocket.WsDebug = &config.Config.Debug
 		rg.GET("/ws", websocket.WsHandler)
 	}
@@ -53,7 +53,7 @@ func setWebAPI(engine *gin.Engine) {
 	//通过URL字符串参数获取特定文件
 	protectedAPI.GET("/get_file", handlers.HandlerGetFile)
 	//登录后才能查看的服务器状态，包括标题、机器状态等
-	protectedAPI.GET("/server_info", handlers.HandlerServerInfo)
+	protectedAPI.GET("/get_server_info", handlers.HandlerGetServerInfo)
 	//获取书架信息，不包含每页信息
 	protectedAPI.GET("/get_book_infos_by_depth", handlers.HandlerGetBookInfosByDepth)
 	protectedAPI.GET("/get_book_infos_by_max_depth", handlers.HandlerGetBookInfosByMaxDepth)
@@ -69,9 +69,9 @@ func setWebAPI(engine *gin.Engine) {
 	//获取json格式的当前配置
 	protectedAPI.GET("/config.json", handlers.HandlerGetConfigJson)
 	//修改服务器配置
-	protectedAPI.POST("/config_update", handlers.HandlerConfigUpdate)
+	protectedAPI.POST("/config_update", handlers.HandlerPostConfigUpdate)
 	//保存服务器配置
-	protectedAPI.POST("/config_save", handlers.HandlerConfigSave)
+	protectedAPI.POST("/config_save", handlers.HandlerPostConfigSave)
 	// 其他初始化代码，如 SetDownloadLink()
 	SetDownloadLink()
 }

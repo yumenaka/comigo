@@ -8,7 +8,6 @@ import (
 	"github.com/yumenaka/comi/logger"
 	"image"
 	"log"
-	"math/rand"
 	"os"
 	"path"
 	"path/filepath"
@@ -274,23 +273,6 @@ func GetBooksNumber() int {
 	return len(mapBooks)
 }
 
-// GetRandomBook 随机选取一本书
-func GetRandomBook() *Book {
-	if len(mapBooks) == 0 {
-		return nil
-	}
-	rand.Seed(time.Now().UnixNano()) //随机种子，否则每回都会一样
-	randNum := rand.Intn(100) % len(mapBooks)
-	start := 0
-	for _, b := range mapBooks {
-		if randNum == start {
-			return b
-		}
-		start++
-	}
-	return nil
-}
-
 func GetAllBookInfoList(sortBy string) (*BookInfoList, error) {
 	var infoList BookInfoList
 	//首先加上所有真实的书籍
@@ -423,6 +405,18 @@ func GetBookByID(id string, sortBy string) (*Book, error) {
 	return nil, errors.New("can not found book,id=" + id)
 }
 
+func GetBookGroupIDByBookID(id string) (string, error) {
+	//根据id查找
+	for _, book := range mapBookGroup {
+		for _, b := range book.ChildBook {
+			if b.BookID == id {
+				return book.BookID, nil
+			}
+		}
+	}
+	return "", errors.New("can not found book,id=" + id)
+}
+
 // GetBookByAuthor 获取同一作者的书籍。
 func GetBookByAuthor(author string, sortBy string) ([]*Book, error) {
 	var bookList []*Book
@@ -481,7 +475,6 @@ func (b *Book) SortPages(s string) {
 	if s != "" {
 		b.Pages.SortBy = s
 		sort.Sort(b.Pages)
-		//logger.Info("sort_by:" + s)
 	}
 	b.setClover() //重新排序后重新设置封面
 }

@@ -9,8 +9,8 @@ import (
 	"net/http"
 )
 
-// HandlerConfigSave 保存服务器配置到文件
-func HandlerConfigSave(c *gin.Context) {
+// HandlerPostConfigSave 保存服务器配置到文件
+func HandlerPostConfigSave(c *gin.Context) {
 	// 读取请求体中的JSON数据
 	body, err := io.ReadAll(c.Request.Body)
 	if err != nil {
