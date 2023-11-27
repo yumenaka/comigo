@@ -14,8 +14,8 @@ import (
 	"github.com/yumenaka/comi/util"
 )
 
-// HandlerConfigUpdate 修改服务器配置(post json)
-func HandlerConfigUpdate(c *gin.Context) {
+// HandlerPostConfigUpdate 修改服务器配置(post json)
+func HandlerPostConfigUpdate(c *gin.Context) {
 	// 读取请求体中的JSON数据
 	body, err := io.ReadAll(c.Request.Body)
 	if err != nil {

@@ -94,3 +94,20 @@ func HandlerSameGroupBookInfo(c *gin.Context) {
 	}
 	c.PureJSON(http.StatusOK, infoList)
 }
+
+// HandlerSameGroupBookInfo 示例 URL： http://127.0.0.1:1234/api/same_group_book_infos?id=1215a&sort_by=filename
+func HandlerGetBookGroupID(c *gin.Context) {
+	id := c.DefaultQuery("id", "")
+	if id == "" {
+		c.PureJSON(http.StatusBadRequest, "book id not set")
+		return
+	}
+	//sortBy: 根据压缩包原始顺序、时间、文件名排序
+	id, err := types.GetBookGroupIDByBookID(id)
+	if err != nil {
+		logger.Info(err)
+		c.PureJSON(http.StatusBadRequest, "book id not found")
+		return
+	}
+	c.PureJSON(http.StatusOK, id)
+}

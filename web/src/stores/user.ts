@@ -63,7 +63,7 @@ export const userStore = defineStore("user", {
         syncSeverStatusData() {
             let _this = this;
             axios
-                .get("server_info_public")
+                .get("get_server_info_public")
                 .then(function (response) {
                     _this.server_status = response.data;
                     console.log(response.data);
