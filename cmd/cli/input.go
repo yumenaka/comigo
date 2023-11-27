@@ -7,13 +7,13 @@ import (
 )
 
 type Input interface {
-	Blink() tea.Msg
-	Blur() tea.Msg
-	Focus() tea.Cmd
-	SetValue(string)
-	Value() string
-	Update(tea.Msg) (Input, tea.Cmd)
-	View() string
+	Blink() tea.Msg                  //初始化光标闪烁的命令
+	Blur() tea.Msg                   //失去焦点
+	Focus() tea.Cmd                  //获取焦点
+	SetValue(string)                 //设置值
+	Value() string                   //获取值
+	Update(tea.Msg) (Input, tea.Cmd) //更新
+	View() string                    //渲染
 }
 
 // ShortDescriptionField 短描述输入框 只能输入一行
@@ -32,7 +32,9 @@ func NewShortDescriptionField() *ShortDescriptionField {
 	return &d
 }
 
-// Value 实现 Input 接口
+/* 实现 Input 接口 */
+
+// Blink 是用于初始化光标闪烁的命令。注意，这里是textinput.Blink()，而不是d.textinput.Blink()！
 func (d *ShortDescriptionField) Blink() tea.Msg {
 	return textinput.Blink() //Blink 是用于初始化光标闪烁的命令。注意，这里是textinput.Blink()，而不是d.textinput.Blink()！
 }
@@ -81,7 +83,9 @@ func NewLongDescriptionField() *LongDescriptionField {
 	return &d
 }
 
-// Value 实现 Input 接口
+/* 实现 Input 接口 */
+
+// Blink 是用于初始化光标闪烁的命令。注意，这里是textinput.Blink()，而不是d.textinput.Blink()！
 func (ld *LongDescriptionField) Blink() tea.Msg {
 	return textarea.Blink() //Blink 是用于初始化光标闪烁的命令。注意，这里是textinput.Blink()，而不是d.textinput.Blink()！
 }

@@ -2,7 +2,7 @@ package main
 
 // 参考视频：
 // https://youtu.be/Gl31diSVP8M
-
+// go run bubbletea.go input.go
 import (
 	"fmt"
 	"log"
@@ -20,7 +20,7 @@ type Styles struct {
 func DefaultStyles() *Styles {
 	s := new(Styles)
 	s.BorderColor = lipgloss.Color("36")
-	// 将边框设置为正常边框，而不是粗体边框。同时，将边框的颜色设置为我们的边框颜色。间距设置为1，宽度设置为80。
+	// 将边框设置为正常边框，而不是粗体边框。同时设置边框颜色。间距设置为1，宽度设置为80。
 	s.InputField = lipgloss.NewStyle().
 		Bold(true).
 		Foreground(s.BorderColor).
