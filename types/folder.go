@@ -2,10 +2,10 @@ package types
 
 import (
 	"errors"
-	"github.com/yumenaka/comi/logger"
 	"os"
 	"path/filepath"
 
+	"github.com/yumenaka/comi/logger"
 	"github.com/yumenaka/comi/util"
 )
 

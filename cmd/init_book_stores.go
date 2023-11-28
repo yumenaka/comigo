@@ -1,12 +1,12 @@
 package cmd
 
 import (
-	"github.com/yumenaka/comi/logger"
 	"strconv"
 
 	"github.com/yumenaka/comi/arch/scan"
 	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/database"
+	"github.com/yumenaka/comi/logger"
 	"github.com/yumenaka/comi/types"
 )
 

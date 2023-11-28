@@ -1,11 +1,11 @@
 package cmd
 
 import (
-	"github.com/yumenaka/comi/logger"
 	"os"
 	"path"
 
 	"github.com/yumenaka/comi/config"
+	"github.com/yumenaka/comi/logger"
 )
 
 // initStorePath 添加默认扫描路径

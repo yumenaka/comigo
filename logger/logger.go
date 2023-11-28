@@ -3,6 +3,7 @@ package logger
 import (
 	"bytes"
 	"fmt"
+
 	"github.com/sirupsen/logrus"
 )
 

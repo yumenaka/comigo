@@ -1,6 +1,8 @@
 package routers
 
 import (
+	"log"
+
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comi/config"
@@ -9,7 +11,6 @@ import (
 	"github.com/yumenaka/comi/routers/token"
 	"github.com/yumenaka/comi/routers/websocket"
 	"github.com/yumenaka/comi/types"
-	"log"
 )
 
 // 2、设置获取书籍信息、图片文件的 API

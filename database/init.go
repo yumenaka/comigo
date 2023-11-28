@@ -7,13 +7,13 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
-	"github.com/yumenaka/comi/logger"
 	"path"
 	"path/filepath"
 
 	"entgo.io/ent/dialect"
 	"github.com/yumenaka/comi/ent"
 	"github.com/yumenaka/comi/locale"
+	"github.com/yumenaka/comi/logger"
 	"modernc.org/sqlite"
 )
 

@@ -1,13 +1,13 @@
 package routers
 
 import (
-	"github.com/yumenaka/comi/logger"
 	"math/rand"
 	"strconv"
 	"time"
 
 	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/locale"
+	"github.com/yumenaka/comi/logger"
 	"github.com/yumenaka/comi/util"
 )
 

@@ -5,7 +5,6 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"errors"
-	"github.com/yumenaka/comi/logger"
 	"image"
 	"log"
 	"os"
@@ -13,7 +12,6 @@ import (
 	"path/filepath"
 	"sort"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/bbrks/go-blurhash"
@@ -23,6 +21,7 @@ import (
 	"github.com/xxjwxc/gowp/workpool"
 	"github.com/yumenaka/comi/arch"
 	"github.com/yumenaka/comi/locale"
+	"github.com/yumenaka/comi/logger"
 	"github.com/yumenaka/comi/util"
 )
 
@@ -38,27 +37,8 @@ var (
 // Book 定义书籍，BooID不应该重复，根据文件路径生成
 type Book struct {
 	BookInfo
-	Pages     Pages            `json:"pages"`       //storm:"inline" 内联字段，结构体嵌套时使用
-	ChildBook map[string]*Book `json:"child_book" ` //key：BookID
+	Pages Pages `json:"pages"` //storm:"inline" 内联字段，结构体嵌套时使用
 }
-
-type SupportFileType string
-
-// 书籍类型
-const (
-	TypeDir         SupportFileType = "dir"
-	TypeZip         SupportFileType = ".zip"
-	TypeRar         SupportFileType = ".rar"
-	TypeBooksGroup  SupportFileType = "book_group"
-	TypeCbz         SupportFileType = ".cbz"
-	TypeCbr         SupportFileType = ".cbr"
-	TypeTar         SupportFileType = ".tar"
-	TypeEpub        SupportFileType = ".epub"
-	TypePDF         SupportFileType = ".pdf"
-	TypeVideo       SupportFileType = "video"
-	TypeAudio       SupportFileType = "audio"
-	TypeUnknownFile SupportFileType = "unknown"
-)
 
 // ImageInfo 单张书页
 type ImageInfo struct {
@@ -84,7 +64,6 @@ func CheckBookExist(filePath string, bookType SupportFileType, storePath string)
 	if bookType == TypeDir || bookType == TypeBooksGroup {
 		return false
 	}
-
 	//实际存在的书，通过扫描生成
 	for _, realBook := range mapBooks {
 		fileAbaPath, err := filepath.Abs(filePath)
@@ -102,8 +81,8 @@ func CheckBookExist(filePath string, bookType SupportFileType, storePath string)
 	return false
 }
 
-// New  初始化Book，设置文件路径、书名、BookID等等
-func New(filePath string, modified time.Time, fileSize int64, storePath string, depth int, bookType SupportFileType) (*Book, error) {
+// NewBook  初始化Book，设置文件路径、书名、BookID等等
+func NewBook(filePath string, modified time.Time, fileSize int64, storePath string, depth int, bookType SupportFileType) (*Book, error) {
 	if CheckBookExist(filePath, bookType, storePath) {
 		return nil, errors.New("skip:" + filePath)
 	}
@@ -127,33 +106,6 @@ func New(filePath string, modified time.Time, fileSize int64, storePath string, 
 	b.setParentFolder(filePath)
 	b.setBookID()
 	return &b, nil
-}
-
-// GetBookTypeByFilename 初始化Book时，取得BookType
-func GetBookTypeByFilename(filename string) SupportFileType {
-	//获取文件后缀
-	switch strings.ToLower(path.Ext(filename)) {
-	case ".zip":
-		return TypeZip
-	case ".rar":
-		return TypeRar
-	case ".cbz":
-		return TypeCbz
-	case ".cbr":
-		return TypeCbr
-	case ".epub":
-		return TypeEpub
-	case ".tar":
-		return TypeTar
-	case ".pdf":
-		return TypePDF
-	case ".mp4", ".m4v", ".flv", ".avi", ".webm":
-		return TypeVideo
-	case ".mp3", ".wav", ".wma", ".ogg":
-		return TypeAudio
-	default:
-		return TypeUnknownFile
-	}
 }
 
 // 初始化Book时，设置页数

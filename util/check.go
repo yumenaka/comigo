@@ -3,13 +3,13 @@ package util
 //https://github.com/gookit/goutil/blob/master/fsutil/check.go
 import (
 	"bytes"
-	"github.com/yumenaka/comi/logger"
-
 	"io"
 	"net/http"
 	"os"
 	"path"
 	"path/filepath"
+
+	"github.com/yumenaka/comi/logger"
 )
 
 // perm for create dir or file

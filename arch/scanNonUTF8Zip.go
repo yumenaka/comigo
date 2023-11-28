@@ -3,11 +3,11 @@ package arch
 import (
 	"context"
 	"errors"
-	"github.com/yumenaka/comi/logger"
 	"os"
 
 	"github.com/klauspost/compress/zip"
 	"github.com/yumenaka/archiver/v4"
+	"github.com/yumenaka/comi/logger"
 )
 
 // ScanNonUTF8Zip 扫描文件，初始化书籍用

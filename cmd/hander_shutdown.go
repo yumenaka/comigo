@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"github.com/yumenaka/comi/logger"
 	"log"
 	"os/signal"
 	"syscall"
@@ -10,6 +9,7 @@ import (
 
 	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/locale"
+	"github.com/yumenaka/comi/logger"
 	"github.com/yumenaka/comi/types"
 )
 

@@ -1,13 +1,13 @@
 package config
 
 import (
-	"github.com/yumenaka/comi/logger"
 	"net/http"
 	"os"
 	"path"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/pelletier/go-toml/v2"
+	"github.com/yumenaka/comi/logger"
 	"github.com/yumenaka/comi/types"
 )
 

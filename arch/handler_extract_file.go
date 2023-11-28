@@ -2,12 +2,12 @@ package arch
 
 import (
 	"context"
-	"github.com/yumenaka/comi/logger"
 	"io"
 	"os"
 	"path/filepath"
 
 	"github.com/yumenaka/archiver/v4"
+	"github.com/yumenaka/comi/logger"
 	"github.com/yumenaka/comi/util"
 )
 
