@@ -27,8 +27,8 @@ import (
 )
 
 var (
-	mapBooks     = make(map[string]*Book) //实际存在的书，通过扫描生成
-	mapBookGroup = make(map[string]*Book) //通过分析路径与深度生成的书组。不备份，也不存储到数据库。key是BookID
+	mapBooks     = make(map[string]*Book)      //实际存在的书，通过扫描生成
+	mapBookGroup = make(map[string]*BookGroup) //通过分析路径与深度生成的书组。不备份，也不存储到数据库。key是BookID
 	MainFolder   = Folder{
 		SubFolders: make(map[string]*subFolder),
 		SortBy:     "name",
@@ -129,18 +129,6 @@ func New(filePath string, modified time.Time, fileSize int64, storePath string, 
 	return &b, nil
 }
 
-// 初始化Book时，设置FilePath
-func (b *Book) setFilePath(path string) {
-	fileAbaPath, err := filepath.Abs(path)
-	if err != nil {
-		//因为权限问题，无法取得绝对路径的情况下，用相对路径
-		logger.Info(err, fileAbaPath)
-		b.FilePath = path
-	} else {
-		b.FilePath = fileAbaPath
-	}
-}
-
 // GetBookTypeByFilename 初始化Book时，取得BookType
 func GetBookTypeByFilename(filename string) SupportFileType {
 	//获取文件后缀
@@ -165,46 +153,6 @@ func GetBookTypeByFilename(filename string) SupportFileType {
 		return TypeAudio
 	default:
 		return TypeUnknownFile
-	}
-}
-
-func (b *Book) setParentFolder(filePath string) {
-	//取得文件所在文件夹的路径
-	//如果类型是文件夹，同时最后一个字符是路径分隔符的话，就多取一次dir，移除多余的Unix路径分隔符或windows分隔符
-	if b.Type == TypeDir {
-		if filePath[len(filePath)-1] == '/' || filePath[len(filePath)-1] == '\\' {
-			filePath = filepath.Dir(filePath)
-		}
-	}
-	folder := filepath.Dir(filePath)
-	post := strings.LastIndex(folder, "/") //Unix路径分隔符
-	if post == -1 {
-		post = strings.LastIndex(folder, "\\") //windows分隔符
-	}
-	if post != -1 {
-		//FilePath = string([]rune(FilePath)[post:]) //为了防止中文字符被错误截断，先转换成rune，再转回来
-		p := folder[post:]
-		p = strings.ReplaceAll(p, "\\", "")
-		p = strings.ReplaceAll(p, "/", "")
-		b.ParentFolder = p
-	}
-}
-
-func (b *Book) setTitle(filePath string) {
-	b.Title = filePath
-	//设置属性：书籍名，取文件后缀(可能为 .zip .rar .pdf .mp4等等)。
-	if b.Type != TypeBooksGroup { //不是书籍组(book_group)。
-		post := strings.LastIndex(filePath, "/") //Unix路径分隔符
-		if post == -1 {
-			post = strings.LastIndex(filePath, "\\") //windows分隔符
-		}
-		if post != -1 {
-			//FilePath = string([]rune(FilePath)[post:]) //为了防止中文字符被错误截断，先转换成rune，再转回来
-			filename := filePath[post:]
-			filename = strings.ReplaceAll(filename, "\\", "")
-			filename = strings.ReplaceAll(filename, "/", "")
-			b.Title = filename
-		}
 	}
 }
 
@@ -260,7 +208,7 @@ func AddBook(b *Book, basePath string, minPageNum int) error {
 		}
 	}
 	mapBooks[b.BookID] = b
-	return MainFolder.AddBookToSubFolder(basePath, b)
+	return MainFolder.AddBookToSubFolder(basePath, &b.BookInfo)
 }
 
 // DeleteBookByID 删除一本书
@@ -307,88 +255,6 @@ func GetArchiveBooks() []*Book {
 	return list
 }
 
-func GetBookInfoListByDepth(depth int, sortBy string) (*BookInfoList, error) {
-	var infoList BookInfoList
-	//首先加上所有真实的书籍
-	for _, b := range mapBooks {
-		if b.Depth == depth {
-			info := NewBaseInfo(b)
-			infoList.BookInfos = append(infoList.BookInfos, *info)
-		}
-	}
-	//接下来还要加上扫描生成出来的书籍组
-	for _, bs := range MainFolder.SubFolders {
-		for _, b := range bs.BookGroupMap {
-			if b.Depth == depth {
-				info := NewBaseInfo(b)
-				infoList.BookInfos = append(infoList.BookInfos, *info)
-			}
-		}
-	}
-	if len(infoList.BookInfos) > 0 {
-		infoList.SortBooks(sortBy)
-		return &infoList, nil
-	}
-	return nil, errors.New("error:can not found bookshelf. GetBookInfoListByDepth")
-}
-
-func GetBookInfoListByMaxDepth(depth int, sortBy string) (*BookInfoList, error) {
-	var infoList BookInfoList
-	//首先加上所有真实的书籍
-	for _, b := range mapBooks {
-		if b.Depth <= depth {
-			info := NewBaseInfo(b)
-			infoList.BookInfos = append(infoList.BookInfos, *info)
-		}
-	}
-	//扫描生成的书籍组
-	for _, bs := range MainFolder.SubFolders {
-		for _, b := range bs.BookGroupMap {
-			if b.Depth <= depth {
-				info := NewBaseInfo(b)
-				infoList.BookInfos = append(infoList.BookInfos, *info)
-			}
-		}
-	}
-	if len(infoList.BookInfos) > 0 {
-		infoList.SortBooks(sortBy)
-		return &infoList, nil
-	}
-	return nil, errors.New("error:can not found bookshelf. GetBookInfoListByMaxDepth")
-}
-
-func GetBookInfoListByID(BookID string, sortBy string) (*BookInfoList, error) {
-	var infoList BookInfoList
-	book := mapBookGroup[BookID]
-	if book != nil {
-		//首先加上所有真实的书籍
-		for _, b := range book.ChildBook {
-			info := NewBaseInfo(b)
-			infoList.BookInfos = append(infoList.BookInfos, *info)
-		}
-		if len(infoList.BookInfos) > 0 {
-			infoList.SortBooks(sortBy)
-			return &infoList, nil
-		}
-	}
-	return nil, errors.New("can not found bookshelf")
-}
-
-func GetBookInfoListByParentFolder(parentFolder string, sortBy string) (*BookInfoList, error) {
-	var infoList BookInfoList
-	for _, b := range mapBooks {
-		if b.ParentFolder == parentFolder {
-			info := NewBaseInfo(b)
-			infoList.BookInfos = append(infoList.BookInfos, *info)
-		}
-	}
-	if len(infoList.BookInfos) > 0 {
-		infoList.SortBooks(sortBy)
-		return &infoList, nil
-	}
-	return nil, errors.New("can not found book,parentFolder=" + parentFolder)
-}
-
 // GetBookByID 获取特定书籍，复制一份数据
 func GetBookByID(id string, sortBy string) (*Book, error) {
 	//根据id查找
@@ -397,24 +263,26 @@ func GetBookByID(id string, sortBy string) (*Book, error) {
 		b.SortPages(sortBy)
 		return b, nil
 	}
-	b2, ok := mapBookGroup[id]
+	g, ok := mapBookGroup[id]
 	if ok {
-		b2.SortPages(sortBy)
-		return b2, nil
+		temp := Book{
+			BookInfo: g.BookInfo,
+		}
+		return &temp, nil
 	}
 	return nil, errors.New("can not found book,id=" + id)
 }
 
 func GetBookGroupIDByBookID(id string) (string, error) {
 	//根据id查找
-	for _, book := range mapBookGroup {
-		for _, b := range book.ChildBook {
+	for _, group := range mapBookGroup {
+		for _, b := range group.ChildBook {
 			if b.BookID == id {
-				return book.BookID, nil
+				return group.BookID, nil
 			}
 		}
 	}
-	return "", errors.New("can not found book,id=" + id)
+	return "", errors.New("can not found group,id=" + id)
 }
 
 // GetBookByAuthor 获取同一作者的书籍。
@@ -522,7 +390,7 @@ func md5string(s string) string {
 }
 
 // setBookID  根据路径的MD5，生成书籍ID。初始化时调用。
-func (b *Book) setBookID() {
+func (b *BookInfo) setBookID() {
 	//logger.Info("文件绝对路径："+fileAbaPath, "路径的md5："+md5string(fileAbaPath))
 	fileAbaPath, err := filepath.Abs(b.FilePath)
 	if err != nil {
@@ -551,8 +419,8 @@ func getShortBookID(fullID string, minLength int) string {
 				pass = false
 			}
 		}
-		for _, book := range mapBookGroup {
-			if shortID == book.BookID {
+		for _, group := range mapBookGroup {
+			if shortID == group.BookID {
 				add++
 				shortID = fullID[0 : minLength+add]
 				pass = false
