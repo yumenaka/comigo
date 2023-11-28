@@ -40,24 +40,6 @@ type Book struct {
 	Pages Pages `json:"pages"` //storm:"inline" 内联字段，结构体嵌套时使用
 }
 
-// ImageInfo 单张书页
-type ImageInfo struct {
-	PageNum           int       `json:"-"`        //这个字段不解析
-	NameInArchive     string    `json:"filename"` //用于解压的压缩文件内文件路径，或图片名，为了适应特殊字符，经过一次转义
-	Url               string    `json:"url"`      //远程用户读取图片的URL，为了适应特殊字符，经过一次转义
-	Blurhash          string    `json:"-"`        //`json:"blurhash"` //blurhash占位符。需要扫描图片生成（util.GetImageDataBlurHash）
-	Height            int       `json:"-"`        //暂时用不着 这个字段不解析`json:"height"`   //blurhash用，图片高
-	Width             int       `json:"-"`        //暂时用不着 这个字段不解析`json:"width"`    //blurhash用，图片宽
-	ModeTime          time.Time `json:"-"`        //这个字段不解析
-	FileSize          int64     `json:"-"`        //这个字段不解析
-	RealImageFilePATH string    `json:"-"`        //这个字段不解析  书籍为文件夹的时候，实际图片的路径
-	ImgType           string    `json:"-"`        //这个字段不解析
-}
-
-func NewImageInfo(pageNum int, nameInArchive string, url string, fileSize int64) *ImageInfo {
-	return &ImageInfo{PageNum: pageNum, NameInArchive: nameInArchive, Url: url, FileSize: fileSize}
-}
-
 // CheckBookExist 查看内存中是否已经有了这本书,有了就报错，让调用者跳过
 func CheckBookExist(filePath string, bookType SupportFileType, storePath string) bool {
 	//如果是文件夹，就不用检查了
@@ -173,20 +155,6 @@ func GetBooksNumber() int {
 	return len(mapBooks)
 }
 
-func GetAllBookInfoList(sortBy string) (*BookInfoList, error) {
-	var infoList BookInfoList
-	//首先加上所有真实的书籍
-	for _, b := range mapBooks {
-		info := NewBaseInfo(b)
-		infoList.BookInfos = append(infoList.BookInfos, *info)
-	}
-	if len(infoList.BookInfos) > 0 {
-		infoList.SortBooks(sortBy)
-		return &infoList, nil
-	}
-	return nil, errors.New("error:can not found bookshelf. GetAllBookInfoList")
-}
-
 func GetAllBookList() []*Book {
 	var list []*Book
 	//加上所有真实书籍
@@ -265,7 +233,7 @@ func (s Pages) Len() int {
 func (s Pages) Less(i, j int) (less bool) {
 	//如何定义 Images[i] < Images[j]
 	switch s.SortBy {
-	case "filename": //根据文件名(第三方库、自然语言字符串)
+	case "filename": //根据文件名(自然语言字符串)
 		return util.Compare(s.Images[i].NameInArchive, s.Images[j].NameInArchive)
 	case "filesize": //根据文件大小
 		return s.Images[i].FileSize < s.Images[j].FileSize
@@ -336,11 +304,6 @@ func (b *Book) SortPagesByImageList(imageList []string) {
 	b.setClover() //重新排序后重新设置封面
 }
 
-func md5string(s string) string {
-	r := md5.Sum([]byte(s))
-	return hex.EncodeToString(r[:])
-}
-
 // setBookID  根据路径的MD5，生成书籍ID。初始化时调用。
 func (b *BookInfo) setBookID() {
 	//logger.Info("文件绝对路径："+fileAbaPath, "路径的md5："+md5string(fileAbaPath))
@@ -352,7 +315,10 @@ func (b *BookInfo) setBookID() {
 	b62 := base62.EncodeToString([]byte(md5string(md5string(tempStr))))
 	b.BookID = getShortBookID(b62, 7)
 }
-
+func md5string(s string) string {
+	r := md5.Sum([]byte(s))
+	return hex.EncodeToString(r[:])
+}
 func getShortBookID(fullID string, minLength int) string {
 	if len(fullID) <= minLength {
 		logger.Info("can not short ID:" + fullID)
@@ -413,10 +379,6 @@ func (b *Book) GetPageCount() int {
 
 func (b *Book) GetFilePath() string {
 	return b.FilePath
-}
-
-func (b *Book) GetName() string { //绑定到Book结构体的方法
-	return b.Title
 }
 
 // ScanAllImage 服务器端分析分辨率、漫画单双页，只适合已解压文件
