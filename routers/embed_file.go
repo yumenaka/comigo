@@ -2,7 +2,6 @@ package routers
 
 import (
 	"embed"
-	"github.com/yumenaka/comi/logger"
 	"html/template"
 	"io"
 	"io/fs"
@@ -11,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/locale"
+	"github.com/yumenaka/comi/logger"
 )
 
 // TemplateString 模板文件

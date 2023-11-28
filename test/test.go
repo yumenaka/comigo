@@ -6,7 +6,6 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
-	"github.com/yumenaka/comi/logger"
 	"io"
 	"log"
 	"math/rand"
@@ -18,11 +17,9 @@ import (
 	"entgo.io/ent/dialect"
 	"github.com/disintegration/imaging"
 	"github.com/yumenaka/archiver/v4"
-	"modernc.org/sqlite"
-
-	//_ "modernc.org/sqlite"// //_操作其实只是引入该包。当导入一个包时，它所有的init()函数就会被执行，但有些时候并非真的需要使用这些包，仅仅是希望它的init()函数被执 行而已。这个时候就可以使用_操作引用该包了。匿名导入的包与其他方式导入包一样会让导入包编译到可执行文件中。
-
 	"github.com/yumenaka/comi/ent"
+	"github.com/yumenaka/comi/logger"
+	"modernc.org/sqlite"
 )
 
 // 参考：
@@ -102,7 +99,7 @@ func testDatabase() {
 	// 插入一本书
 	b, err := client.Book.
 		Create().
-		SetName("Test Book title" + randString).
+		SetTitle("Test Book title" + randString).
 		SetBookID("BookID" + randString).
 		SetFilePath("path" + randString).
 		SetBookStorePath("path2").
@@ -110,7 +107,7 @@ func testDatabase() {
 		SetType("zip").
 		SetDepth(1).
 		SetParentFolder("ParentPath").
-		SetAllPageNum(99).
+		SetPageCount(99).
 		SetFileSize(66).
 		SetAuthors("unknown").
 		SetISBN("").

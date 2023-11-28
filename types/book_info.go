@@ -1,11 +1,11 @@
 package types
 
 import (
-	"sort"
-	"strconv"
+	"errors"
+	"github.com/yumenaka/comi/logger"
+	"path/filepath"
+	"strings"
 	"time"
-
-	"github.com/yumenaka/comi/util"
 )
 
 // BookInfo 与Book唯一的区别是没有AllPageInfo,而是封面图URL 减小 json文件的大小
@@ -68,89 +68,133 @@ func NewBaseInfo(b *Book) *BookInfo {
 	}
 }
 
-// BookInfoList Slice
-type BookInfoList struct {
-	SortBy    string
-	BookInfos []BookInfo
-}
-
-func (s BookInfoList) Len() int {
-	return len(s.BookInfos)
-}
-
-// Less 按时间或URL，将图片排序
-func (s BookInfoList) Less(i, j int) (less bool) {
-	//如何定义 Images[i] < Images[j]
-	//根据文件名
-	switch s.SortBy {
-	case "filename":
-		return util.Compare(s.BookInfos[i].Title, s.BookInfos[j].Title) //(使用了第三方库、比较自然语言字符串)
-	case "filesize":
-		//两本之中有一本是书籍组。同样是书籍组，比较子书籍数。
-		if s.BookInfos[i].Type == TypeBooksGroup || s.BookInfos[j].Type == TypeBooksGroup {
-			if s.BookInfos[i].Type == TypeBooksGroup && s.BookInfos[j].Type == TypeBooksGroup {
-				return s.BookInfos[i].ChildBookNum > s.BookInfos[j].ChildBookNum
-			}
-			if s.BookInfos[i].Type != TypeBooksGroup || s.BookInfos[j].Type != TypeBooksGroup {
-				return s.BookInfos[i].Type == TypeBooksGroup
-			}
-		}
-		//两本之中有一本是文件夹。同样是文件夹，比较页数。
-		if s.BookInfos[i].Type == TypeDir || s.BookInfos[j].Type == TypeDir {
-			if s.BookInfos[i].Type == TypeDir && s.BookInfos[j].Type == TypeDir {
-				return s.BookInfos[i].PageCount > s.BookInfos[j].PageCount
-			}
-			if s.BookInfos[i].Type != TypeDir || s.BookInfos[j].Type != TypeDir {
-				return s.BookInfos[i].Type == TypeDir
-			}
-		}
-		//一般情况，比较文件大小
-		return !util.Compare(strconv.Itoa(int(s.BookInfos[i].FileSize)), strconv.Itoa(int(s.BookInfos[j].FileSize)))
-	case "modify_time":
-		return !util.Compare(s.BookInfos[i].Modified.String(), s.BookInfos[j].Modified.String())
-	case "author":
-		return util.Compare(s.BookInfos[i].Author, s.BookInfos[j].Author)
-	//如何定义 Images[i] < Images[j] 反向
-	case "filename_reverse":
-		return !util.Compare(s.BookInfos[i].Title, s.BookInfos[j].Title) //(使用了第三方库、比较自然语言字符串)
-	case "filesize_reverse":
-		//两本之中有一本是书籍组。同样是书籍组，比较子书籍数。
-		if s.BookInfos[i].Type == TypeBooksGroup || s.BookInfos[j].Type == TypeBooksGroup {
-			if s.BookInfos[i].Type == TypeBooksGroup && s.BookInfos[j].Type == TypeBooksGroup {
-				return !(s.BookInfos[i].ChildBookNum > s.BookInfos[j].ChildBookNum)
-			}
-			if s.BookInfos[i].Type != TypeBooksGroup || s.BookInfos[j].Type != TypeBooksGroup {
-				return !(s.BookInfos[i].Type == TypeBooksGroup)
-			}
-		}
-		//两本之中有一本是文件夹。同样是文件夹，比较页数。
-		if s.BookInfos[i].Type == TypeDir || s.BookInfos[j].Type == TypeDir {
-			if s.BookInfos[i].Type == TypeDir && s.BookInfos[j].Type == TypeDir {
-				return !(s.BookInfos[i].PageCount > s.BookInfos[j].PageCount)
-			}
-			if s.BookInfos[i].Type != TypeDir || s.BookInfos[j].Type != TypeDir {
-				return !(s.BookInfos[i].Type == TypeDir)
-			}
-		}
-		//一般情况，比较文件大小
-		return util.Compare(strconv.Itoa(int(s.BookInfos[i].FileSize)), strconv.Itoa(int(s.BookInfos[j].FileSize)))
-	case "modify_time_reverse":
-		return util.Compare(s.BookInfos[i].Modified.String(), s.BookInfos[j].Modified.String())
-	case "author_reverse":
-		return !util.Compare(s.BookInfos[i].Author, s.BookInfos[j].Author)
-	default:
-		return util.Compare(s.BookInfos[i].Title, s.BookInfos[j].Title)
+// 初始化Book时，设置FilePath
+func (b *BookInfo) setFilePath(path string) {
+	fileAbaPath, err := filepath.Abs(path)
+	if err != nil {
+		//因为权限问题，无法取得绝对路径的情况下，用相对路径
+		logger.Info(err, fileAbaPath)
+		b.FilePath = path
+	} else {
+		b.FilePath = fileAbaPath
 	}
 }
 
-func (s BookInfoList) Swap(i, j int) {
-	s.BookInfos[i], s.BookInfos[j] = s.BookInfos[j], s.BookInfos[i]
+func (b *BookInfo) setParentFolder(filePath string) {
+	//取得文件所在文件夹的路径
+	//如果类型是文件夹，同时最后一个字符是路径分隔符的话，就多取一次dir，移除多余的Unix路径分隔符或windows分隔符
+	if b.Type == TypeDir {
+		if filePath[len(filePath)-1] == '/' || filePath[len(filePath)-1] == '\\' {
+			filePath = filepath.Dir(filePath)
+		}
+	}
+	folder := filepath.Dir(filePath)
+	post := strings.LastIndex(folder, "/") //Unix路径分隔符
+	if post == -1 {
+		post = strings.LastIndex(folder, "\\") //windows分隔符
+	}
+	if post != -1 {
+		//FilePath = string([]rune(FilePath)[post:]) //为了防止中文字符被错误截断，先转换成rune，再转回来
+		p := folder[post:]
+		p = strings.ReplaceAll(p, "\\", "")
+		p = strings.ReplaceAll(p, "/", "")
+		b.ParentFolder = p
+	}
 }
 
-// SortBooks 上面三个函数定义好了，终于可以使用sort包排序了
-func (s *BookInfoList) SortBooks(by string) {
-	if by != "" {
-		s.SortBy = by
-		sort.Sort(s)
+func (b *BookInfo) setTitle(filePath string) {
+	b.Title = filePath
+	//设置属性：书籍名，取文件后缀(可能为 .zip .rar .pdf .mp4等等)。
+	if b.Type != TypeBooksGroup { //不是书籍组(book_group)。
+		post := strings.LastIndex(filePath, "/") //Unix路径分隔符
+		if post == -1 {
+			post = strings.LastIndex(filePath, "\\") //windows分隔符
+		}
+		if post != -1 {
+			//FilePath = string([]rune(FilePath)[post:]) //为了防止中文字符被错误截断，先转换成rune，再转回来
+			filename := filePath[post:]
+			filename = strings.ReplaceAll(filename, "\\", "")
+			filename = strings.ReplaceAll(filename, "/", "")
+			b.Title = filename
+		}
 	}
+}
+
+func GetBookInfoListByDepth(depth int, sortBy string) (*BookInfoList, error) {
+	var infoList BookInfoList
+	//首先加上所有真实的书籍
+	for _, b := range mapBooks {
+		if b.Depth == depth {
+			info := NewBaseInfo(b)
+			infoList.BookInfos = append(infoList.BookInfos, *info)
+		}
+	}
+	//接下来还要加上扫描生成出来的书籍组
+	for _, bs := range MainFolder.SubFolders {
+		for _, group := range bs.BookGroupMap {
+			if group.Depth == depth {
+				infoList.BookInfos = append(infoList.BookInfos, *group)
+			}
+		}
+	}
+	if len(infoList.BookInfos) > 0 {
+		infoList.SortBooks(sortBy)
+		return &infoList, nil
+	}
+	return nil, errors.New("error:can not found bookshelf. GetBookInfoListByDepth")
+}
+
+func GetBookInfoListByMaxDepth(depth int, sortBy string) (*BookInfoList, error) {
+	var infoList BookInfoList
+	//首先加上所有真实的书籍
+	for _, b := range mapBooks {
+		if b.Depth <= depth {
+			info := NewBaseInfo(b)
+			infoList.BookInfos = append(infoList.BookInfos, *info)
+		}
+	}
+	//扫描生成的书籍组
+	for _, bs := range MainFolder.SubFolders {
+		for _, group := range bs.BookGroupMap {
+			if group.Depth <= depth {
+				infoList.BookInfos = append(infoList.BookInfos, *group)
+			}
+		}
+	}
+	if len(infoList.BookInfos) > 0 {
+		infoList.SortBooks(sortBy)
+		return &infoList, nil
+	}
+	return nil, errors.New("error:can not found bookshelf. GetBookInfoListByMaxDepth")
+}
+
+func GetBookInfoListByID(BookID string, sortBy string) (*BookInfoList, error) {
+	var infoList BookInfoList
+	group := mapBookGroup[BookID]
+	if group != nil {
+		//首先加上所有真实的书籍
+		for _, g := range group.ChildBook {
+			infoList.BookInfos = append(infoList.BookInfos, *g)
+		}
+		if len(infoList.BookInfos) > 0 {
+			infoList.SortBooks(sortBy)
+			return &infoList, nil
+		}
+	}
+	return nil, errors.New("can not found bookshelf")
+}
+
+func GetBookInfoListByParentFolder(parentFolder string, sortBy string) (*BookInfoList, error) {
+	var infoList BookInfoList
+	for _, b := range mapBooks {
+		if b.ParentFolder == parentFolder {
+			info := NewBaseInfo(b)
+			infoList.BookInfos = append(infoList.BookInfos, *info)
+		}
+	}
+	if len(infoList.BookInfos) > 0 {
+		infoList.SortBooks(sortBy)
+		return &infoList, nil
+	}
+	return nil, errors.New("can not found book,parentFolder=" + parentFolder)
 }

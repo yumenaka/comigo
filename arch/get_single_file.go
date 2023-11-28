@@ -3,13 +3,17 @@ package arch
 import (
 	"context"
 	"errors"
-	"github.com/yumenaka/comi/logger"
 	"io"
 	"io/fs"
 	"os"
+	"sync"
 
 	"github.com/yumenaka/archiver/v4"
+	"github.com/yumenaka/comi/logger"
 )
+
+// 使用sync.Map代替map，保证并发情况下的读写安全
+var mapBookFS sync.Map
 
 // GetSingleFile  获取单个文件
 // TODO:大文件需要针对性优化，可能需要保持打开状态、或通过持久化的虚拟文件系统获取

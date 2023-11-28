@@ -6,8 +6,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	qrcodeTerminal "github.com/Baozisoftware/qrcode-terminal-go"
-	"github.com/yumenaka/comi/logger"
 	"image"
 	"image/draw"
 	"io"
@@ -24,11 +22,12 @@ import (
 	"time"
 	"unicode/utf8"
 
+	qrcodeTerminal "github.com/Baozisoftware/qrcode-terminal-go"
 	"github.com/bbrks/go-blurhash"
 	"github.com/disintegration/imaging"
 	"github.com/mandykoh/autocrop"
-
 	"github.com/yumenaka/comi/locale"
+	"github.com/yumenaka/comi/logger"
 )
 
 // GetMainName 取得无后缀的文件名

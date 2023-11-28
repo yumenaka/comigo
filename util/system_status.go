@@ -1,11 +1,11 @@
 package util
 
 import (
-	"github.com/yumenaka/comi/logger"
 	"runtime"
 
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/mem"
+	"github.com/yumenaka/comi/logger"
 )
 
 // Documentation: https://pkg.go.dev/github.com/shirou/gopsutil

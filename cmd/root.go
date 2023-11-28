@@ -1,13 +1,13 @@
 package cmd
 
 import (
-	"github.com/mitchellh/go-homedir"
 	"os"
 	"path"
 	"path/filepath"
 	"runtime"
 	"time"
 
+	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/yumenaka/comi/config"

@@ -1,11 +1,11 @@
 package config
 
 import (
-	"github.com/yumenaka/comi/logger"
 	"os"
 	"path"
 
 	"github.com/yumenaka/comi/locale"
+	"github.com/yumenaka/comi/logger"
 	"github.com/yumenaka/comi/util"
 )
 

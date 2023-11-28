@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"github.com/yumenaka/comi/logger"
 	"log"
 	"os"
 	"time"
@@ -10,6 +9,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/yumenaka/comi/arch/scan"
 	"github.com/yumenaka/comi/config"
+	"github.com/yumenaka/comi/logger"
 	"github.com/yumenaka/comi/routers"
 )
 

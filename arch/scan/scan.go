@@ -227,7 +227,7 @@ func ScanAndGetBookList(storePath string, scanOption Option) (newBookList []*typ
 
 func scanDirGetBook(dirPath string, storePath string, depth int, scanOption Option) (*types.Book, error) {
 	// 初始化，生成UUID
-	newBook, err := types.New(dirPath, time.Now(), 0, storePath, depth, types.TypeDir)
+	newBook, err := types.NewBook(dirPath, time.Now(), 0, storePath, depth, types.TypeDir)
 	if err != nil {
 		return nil, err
 	}
@@ -282,7 +282,7 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 		logger.Info(err.Error())
 	}
 	// 初始化一本书，设置文件路径等等
-	newBook, err := types.New(filePath, FileInfo.ModTime(), FileInfo.Size(), storePath, depth, types.GetBookTypeByFilename(filePath))
+	newBook, err := types.NewBook(filePath, FileInfo.ModTime(), FileInfo.Size(), storePath, depth, types.GetBookTypeByFilename(filePath))
 	if err != nil {
 		return nil, err
 	}
