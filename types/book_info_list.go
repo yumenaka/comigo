@@ -1,6 +1,7 @@
 package types
 
 import (
+	"errors"
 	"sort"
 	"strconv"
 
@@ -13,6 +14,20 @@ type BookInfoList struct {
 	BookInfos []BookInfo
 }
 
+func GetAllBookInfoList(sortBy string) (*BookInfoList, error) {
+	var infoList BookInfoList
+	//首先加上所有真实的书籍
+	for _, b := range mapBooks {
+		info := NewBaseInfo(b)
+		infoList.BookInfos = append(infoList.BookInfos, *info)
+	}
+	if len(infoList.BookInfos) > 0 {
+		infoList.SortBooks(sortBy)
+		return &infoList, nil
+	}
+	return nil, errors.New("error:can not found bookshelf. GetAllBookInfoList")
+}
+
 func (s BookInfoList) Len() int {
 	return len(s.BookInfos)
 }
@@ -23,7 +38,7 @@ func (s BookInfoList) Less(i, j int) (less bool) {
 	//根据文件名
 	switch s.SortBy {
 	case "filename":
-		return util.Compare(s.BookInfos[i].Title, s.BookInfos[j].Title) //(使用了第三方库、比较自然语言字符串)
+		return util.Compare(s.BookInfos[i].Title, s.BookInfos[j].Title) //(比较自然语言字符串)
 	case "filesize":
 		//两本之中有一本是书籍组。同样是书籍组，比较子书籍数。
 		if s.BookInfos[i].Type == TypeBooksGroup || s.BookInfos[j].Type == TypeBooksGroup {
@@ -51,7 +66,7 @@ func (s BookInfoList) Less(i, j int) (less bool) {
 		return util.Compare(s.BookInfos[i].Author, s.BookInfos[j].Author)
 	//如何定义 Images[i] < Images[j] 反向
 	case "filename_reverse":
-		return !util.Compare(s.BookInfos[i].Title, s.BookInfos[j].Title) //(使用了第三方库、比较自然语言字符串)
+		return !util.Compare(s.BookInfos[i].Title, s.BookInfos[j].Title) //(比较自然语言字符串)
 	case "filesize_reverse":
 		//两本之中有一本是书籍组。同样是书籍组，比较子书籍数。
 		if s.BookInfos[i].Type == TypeBooksGroup || s.BookInfos[j].Type == TypeBooksGroup {
