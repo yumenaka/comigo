@@ -22,8 +22,8 @@ func setWebAPI(engine *gin.Engine) {
 
 	// 无需认证，不受保护的路由
 	publicRoutes := func(rg *gin.RouterGroup) {
-		rg.GET("/qrcode.png", handlers.GetQrcodeHandler)
-		rg.GET("/get_server_info_public", handlers.HandlerGetServerInfoPublic)
+		rg.GET("/qrcode.png", handlers.GetQrcode)
+		rg.GET("/get_server_info_public", handlers.GetServerInfoPublic)
 		websocket.WsDebug = &config.Config.Debug
 		rg.GET("/ws", websocket.WsHandler)
 	}
@@ -50,31 +50,34 @@ func setWebAPI(engine *gin.Engine) {
 	}
 
 	//文件上传
-	protectedAPI.POST("/upload", handlers.HandlerUpload)
+	protectedAPI.POST("/upload", handlers.Upload)
 	//通过URL字符串参数获取特定文件
-	protectedAPI.GET("/get_file", handlers.HandlerGetFile)
+	protectedAPI.GET("/get_file", handlers.GetFile)
 	//登录后才能查看的服务器状态，包括标题、机器状态等
-	protectedAPI.GET("/get_server_info", handlers.HandlerGetServerInfo)
+	protectedAPI.GET("/get_server_info", handlers.GetServerInfo)
 	//获取书架信息，不包含每页信息
-	protectedAPI.GET("/get_book_infos_by_depth", handlers.HandlerGetBookInfosByDepth)
-	protectedAPI.GET("/get_book_infos_by_max_depth", handlers.HandlerGetBookInfosByMaxDepth)
-	protectedAPI.GET("/get_book_infos_by_group_id", handlers.HandlerGetBookInfosByGroupID)
+	protectedAPI.GET("/get_book_infos_by_depth", handlers.GetBookInfosByDepth)
+	protectedAPI.GET("/get_book_infos_by_max_depth", handlers.GetBookInfosByMaxDepth)
+	protectedAPI.GET("/get_book_infos_by_group_id", handlers.GetBookInfosByGroupID)
 	//通过URL字符串参数查询书籍信息
-	protectedAPI.GET("/get_book", handlers.HandlerGetBook)
+	protectedAPI.GET("/get_book", handlers.GetBook)
 	//返回同一文件夹的书籍ID列表
-	protectedAPI.GET("/same_group_book_infos", handlers.HandlerSameGroupBookInfo)
+	protectedAPI.GET("/same_group_book_infos", handlers.SameGroupBookInfo)
 	//通过链接下载reg配置
-	protectedAPI.GET("/comigo.reg", handlers.HandlerGetRegFile)
+	protectedAPI.GET("/comigo.reg", handlers.GetRegFile)
 	//通过链接下载toml格式的示例配置
-	protectedAPI.GET("/config.toml", handlers.HandlerGetConfigToml)
+	protectedAPI.GET("/config.toml", handlers.GetConfigToml)
 
-	//config,尝试改写成 RESTful 风格的 API
-	//获取json格式的当前配置
-	protectedAPI.GET("/config.json", handlers.HandlerGetConfigJson)
-	//修改服务器配置
-	protectedAPI.POST("/config_update", handlers.HandlerPostConfigUpdate)
-	//保存服务器配置
-	protectedAPI.POST("/config_save", handlers.HandlerPostConfigSave)
+	//config,改写成 RESTful 风格的 API
+	//Create	POST/PUT
+	//Read	    GET
+	//Update	PUT
+	//Delete	DELETE
+	protectedAPI.GET("/config", handlers.GetConfig)
+	protectedAPI.PUT("/config", handlers.UpdateConfig)
+	protectedAPI.POST("/config", handlers.SaveConfig)
+	//protectedAPI.DELETE("/config/:location", handlers.DeleteConfigByLocation)
+
 	//压缩包直接下载链接
 	SetDownloadLink()
 }

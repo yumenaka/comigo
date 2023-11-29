@@ -8,8 +8,8 @@ import (
 	"net/http"
 )
 
-// HandlerGetConfigToml 下载服务器配置(toml)
-func HandlerGetConfigToml(c *gin.Context) {
+// GetConfigToml 下载服务器配置(toml)
+func GetConfigToml(c *gin.Context) {
 	//golang结构体默认深拷贝（但是基本类型浅拷贝）
 	tempConfig := config.Config
 	tempConfig.LogFilePath = ""

@@ -18,12 +18,12 @@ var UploadPath *string
 func init() {
 }
 
-// HandlerUpload 下载服务器配置
+// Upload 下载服务器配置
 // 除了设置头像以外，也可以做上传文件并阅读功能
 // Set a lower memory limit for multipart forms (default is 32 MiB)
 
-// HandlerUpload engine.MaxMultipartMemory = 60 << 20  // 60 MiB  只限制程序在上传文件时可以使用多少内存，而是不限制上传文件的大小。(default is 32 MiB)
-func HandlerUpload(c *gin.Context) {
+// Upload engine.MaxMultipartMemory = 60 << 20  // 60 MiB  只限制程序在上传文件时可以使用多少内存，而是不限制上传文件的大小。(default is 32 MiB)
+func Upload(c *gin.Context) {
 	if !*EnableUpload {
 		logger.Info(locale.GetString("UPLOAD_DISABLE_HINT"))
 		return
