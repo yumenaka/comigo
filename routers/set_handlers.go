@@ -68,7 +68,7 @@ func setWebAPI(engine *gin.Engine) {
 	//通过链接下载toml格式的示例配置
 	protectedAPI.GET("/config.toml", handlers.GetConfigToml)
 
-	//config,改写成 RESTful 风格的 API
+	//config操作,试着做成 RESTful API
 	//Create	POST/PUT
 	//Read	    GET
 	//Update	PUT
@@ -76,7 +76,7 @@ func setWebAPI(engine *gin.Engine) {
 	protectedAPI.GET("/config", handlers.GetConfig)
 	protectedAPI.PUT("/config", handlers.UpdateConfig)
 	protectedAPI.POST("/config", handlers.SaveConfig)
-	//protectedAPI.DELETE("/config/:location", handlers.DeleteConfigByLocation)
+	protectedAPI.DELETE("/config/:in", handlers.DeleteConfig)
 
 	//压缩包直接下载链接
 	SetDownloadLink()
