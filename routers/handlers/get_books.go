@@ -9,7 +9,7 @@ import (
 	"github.com/yumenaka/comi/types"
 )
 
-func HandlerGetBookInfosByMaxDepth(c *gin.Context) {
+func GetBookInfosByMaxDepth(c *gin.Context) {
 	//书籍排列的方式，默认name
 	sortBy := c.DefaultQuery("sort_by", "default")
 	//按照书籍所在深度获取书籍信息，0是顶层，即为执行文件夹本身
@@ -30,7 +30,7 @@ func HandlerGetBookInfosByMaxDepth(c *gin.Context) {
 	c.PureJSON(http.StatusOK, bookInfoList.BookInfos)
 }
 
-func HandlerGetBookInfosByDepth(c *gin.Context) {
+func GetBookInfosByDepth(c *gin.Context) {
 	//书籍排列的方式，默认name
 	sortBy := c.DefaultQuery("sort_by", "default")
 	//按照书籍所在深度获取书籍信息，0是顶层，即为执行文件夹本身
@@ -51,7 +51,7 @@ func HandlerGetBookInfosByDepth(c *gin.Context) {
 	c.PureJSON(http.StatusOK, bookInfoList.BookInfos)
 }
 
-func HandlerGetBookInfosByGroupID(c *gin.Context) {
+func GetBookInfosByGroupID(c *gin.Context) {
 	//书籍排列的方式，默认name
 	sortBy := c.DefaultQuery("sort_by", "default")
 	//bookGroup的BookId获取
@@ -71,8 +71,8 @@ func HandlerGetBookInfosByGroupID(c *gin.Context) {
 	c.PureJSON(http.StatusOK, bookInfoList.BookInfos)
 }
 
-// HandlerSameGroupBookInfo 示例 URL： http://127.0.0.1:1234/api/same_group_book_infos?id=1215a&sort_by=filename
-func HandlerSameGroupBookInfo(c *gin.Context) {
+// SameGroupBookInfo 示例 URL： http://127.0.0.1:1234/api/same_group_book_infos?id=1215a&sort_by=filename
+func SameGroupBookInfo(c *gin.Context) {
 	sortBy := c.DefaultQuery("sort_by", "filename")
 	id := c.DefaultQuery("id", "")
 	if id == "" {
@@ -95,8 +95,8 @@ func HandlerSameGroupBookInfo(c *gin.Context) {
 	c.PureJSON(http.StatusOK, infoList)
 }
 
-// HandlerSameGroupBookInfo 示例 URL： http://127.0.0.1:1234/api/same_group_book_infos?id=1215a&sort_by=filename
-func HandlerGetBookGroupID(c *gin.Context) {
+// SameGroupBookInfo 示例 URL： http://127.0.0.1:1234/api/same_group_book_infos?id=1215a&sort_by=filename
+func GetBookGroupID(c *gin.Context) {
 	id := c.DefaultQuery("id", "")
 	if id == "" {
 		c.PureJSON(http.StatusBadRequest, "book id not set")

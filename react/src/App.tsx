@@ -50,7 +50,7 @@ function App() {
     }
     // 获取远程comigo配置
     axios
-      .get<Config>(`${baseURL}/config.json`)
+      .get<Config>(`${baseURL}/config`)
       .then((response) => {
         dispatch({
           type: 'downloadConfig',

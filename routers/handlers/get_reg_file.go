@@ -12,8 +12,8 @@ import (
 	"github.com/yumenaka/comi/locale"
 )
 
-// HandlerGetRegFile 下载服务器配置
-func HandlerGetRegFile(c *gin.Context) {
+// GetRegFile 下载服务器配置
+func GetRegFile(c *gin.Context) {
 	if runtime.GOOS != "windows" {
 		logger.Info("Now system not windows,can't generate reg file.")
 		return

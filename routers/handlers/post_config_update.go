@@ -14,8 +14,8 @@ import (
 	"github.com/yumenaka/comi/util"
 )
 
-// HandlerPostConfigUpdate 修改服务器配置(post json)
-func HandlerPostConfigUpdate(c *gin.Context) {
+// UpdateConfig 修改服务器配置(post json)
+func UpdateConfig(c *gin.Context) {
 	// 读取请求体中的JSON数据
 	body, err := io.ReadAll(c.Request.Body)
 	if err != nil {
@@ -33,8 +33,8 @@ func HandlerPostConfigUpdate(c *gin.Context) {
 		c.JSON(http.StatusMethodNotAllowed, gin.H{"error": "Failed to parse JSON data"})
 		return
 	}
+	// 根据配置的变化，做相应的操作。比如打开浏览器重新扫描等
 	BeforeConfigUpdate(&config.Config, &newConfig)
-
 	// 返回成功消息
 	c.JSON(http.StatusOK, gin.H{"message": "Server settings updated successfully"})
 }

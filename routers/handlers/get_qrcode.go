@@ -12,8 +12,8 @@ import (
 	"github.com/yumenaka/comi/util"
 )
 
-// GetQrcodeHandler 下载服务器配置
-func GetQrcodeHandler(c *gin.Context) {
+// GetQrcode 下载服务器配置
+func GetQrcode(c *gin.Context) {
 	//通过参数过去自定义文本的二维码，更通用
 	qrcodeStr := c.DefaultQuery("qrcode_str", "")
 	if qrcodeStr != "" {

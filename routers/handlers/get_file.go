@@ -23,7 +23,7 @@ import (
 	"github.com/yumenaka/comi/util"
 )
 
-// HandlerGetFile 示例 URL： 127.0.0.1:1234/get_file?id=2b17a13&filename=1.jpg
+// GetFile 示例 URL： 127.0.0.1:1234/get_file?id=2b17a13&filename=1.jpg
 // 缩放文件，会转化为jpeg：http://127.0.0.1:1234/api/get_file?resize_width=300&resize_height=400&id=597e06&filename=01.jpeg
 // 相关参数：
 // id：书籍的ID，必须项目       							&id=2B17a
@@ -38,7 +38,7 @@ import (
 // gray:黑白化												&gray=true
 // blurhash:获取对应图片的blurhash，而不是原始图片 				&blurhash=3
 // blurhash_image:获取对应图片的blurhash图片，而不是原始图片  	&blurhash_image=3
-func HandlerGetFile(c *gin.Context) {
+func GetFile(c *gin.Context) {
 	//time.Sleep(5 * time.Second)
 	id := c.DefaultQuery("id", "")
 	needFile := c.DefaultQuery("filename", "")

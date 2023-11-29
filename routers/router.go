@@ -2,7 +2,6 @@ package routers
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comi/logger"
 )
 
 // StartWebServer 启动web服务
@@ -15,7 +14,7 @@ func StartWebServer() {
 	//Recovery 中间件。返回 500 错误页面，避免程序直接崩溃，同时记录错误日志。
 	engine.Use(gin.Recovery())
 	//日志中间件
-	logger.SetLogger(engine)
+	setLogger(engine)
 
 	//嵌入静态文件到二进制文件
 	embedFile(engine)

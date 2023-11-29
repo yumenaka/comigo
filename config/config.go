@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	Version = "v0.9.5"
+	Version = "v0.9.6"
 	Srv     *http.Server
 	Config  = types.ServerConfig{
 		Port:                  1234,
