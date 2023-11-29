@@ -3,8 +3,6 @@ package scan
 import (
 	"context"
 	"errors"
-	"github.com/sirupsen/logrus"
-	"github.com/yumenaka/comi/logger"
 	"io/fs"
 	"net/url"
 	"os"
@@ -15,10 +13,12 @@ import (
 	"time"
 
 	"github.com/klauspost/compress/zip"
+	"github.com/sirupsen/logrus"
 	"github.com/yumenaka/archiver/v4"
 	"github.com/yumenaka/comi/arch"
 	"github.com/yumenaka/comi/database"
 	"github.com/yumenaka/comi/locale"
+	"github.com/yumenaka/comi/logger"
 	"github.com/yumenaka/comi/types"
 	"github.com/yumenaka/comi/util"
 )

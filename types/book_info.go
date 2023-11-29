@@ -34,14 +34,6 @@ type BookInfo struct {
 	ZipTextEncoding string          `json:"-"`              //zip文件编码
 }
 
-func getChildInfoMap(ChildBookMap map[string]*Book) (ChildInfoMap map[string]*BookInfo) {
-	ChildInfoMap = make(map[string]*BookInfo)
-	for key, book := range ChildBookMap {
-		ChildInfoMap[key] = NewBaseInfo(book)
-	}
-	return ChildInfoMap
-}
-
 // NewBaseInfo 模拟构造函数
 func NewBaseInfo(b *Book) *BookInfo {
 	//需要单独先执行这个，来设定封面

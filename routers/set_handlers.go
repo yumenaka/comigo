@@ -13,13 +13,12 @@ import (
 	"github.com/yumenaka/comi/types"
 )
 
-// 2、设置获取书籍信息、图片文件的 API
+var protectedAPI *gin.RouterGroup
+
+// 前端需要的 API
 func setWebAPI(engine *gin.Engine) {
-	// swagger 文档路由（加编译参数才会启用）
-	if swagHandler != nil {
-		engine.GET("/swagger/*any", swagHandler)
-	}
-	api = engine.Group("/api")
+	// 路由组,方便管理部分相同的URL
+	api := engine.Group("/api")
 
 	// 无需认证，不受保护的路由
 	publicRoutes := func(rg *gin.RouterGroup) {
@@ -30,6 +29,8 @@ func setWebAPI(engine *gin.Engine) {
 	}
 	publicRoutes(api)
 
+	// 可能需要认证的路由
+	protectedAPI = api.Group("/")
 	// 初始化 jwtMiddleware 一次，无论是否设置了密码。
 	var jwtMiddleware *jwt.GinJWTMiddleware
 	if config.Config.Password != "" {
@@ -39,7 +40,6 @@ func setWebAPI(engine *gin.Engine) {
 			log.Fatalf("JWT Error: %s", err.Error()) // 终止程序或其他错误处理
 		}
 	}
-	protectedAPI = api.Group("/")
 	if jwtMiddleware != nil {
 		// 登录、注销和 token 刷新路由只有在设置了密码时才添加
 		api.POST("/login", jwtMiddleware.LoginHandler)
@@ -48,7 +48,7 @@ func setWebAPI(engine *gin.Engine) {
 		// 如果设置了密码，则应用 JWT 中间件到一个新的路由组
 		protectedAPI = api.Group("/", jwtMiddleware.MiddlewareFunc())
 	}
-	// 以下路由都可能需要认证
+
 	//文件上传
 	protectedAPI.POST("/upload", handlers.HandlerUpload)
 	//通过URL字符串参数获取特定文件
@@ -67,17 +67,19 @@ func setWebAPI(engine *gin.Engine) {
 	protectedAPI.GET("/comigo.reg", handlers.HandlerGetRegFile)
 	//通过链接下载toml格式的示例配置
 	protectedAPI.GET("/config.toml", handlers.HandlerGetConfigToml)
+
+	//config,尝试改写成 RESTful 风格的 API
 	//获取json格式的当前配置
 	protectedAPI.GET("/config.json", handlers.HandlerGetConfigJson)
 	//修改服务器配置
 	protectedAPI.POST("/config_update", handlers.HandlerPostConfigUpdate)
 	//保存服务器配置
 	protectedAPI.POST("/config_save", handlers.HandlerPostConfigSave)
-	// 其他初始化代码，如 SetDownloadLink()
+	//压缩包直接下载链接
 	SetDownloadLink()
 }
 
-// SetDownloadLink 设定压缩包下载链接
+// SetDownloadLink 压缩包直接下载链接
 func SetDownloadLink() {
 	if types.GetBooksNumber() >= 1 {
 		allBook, err := types.GetAllBookInfoList("name")
