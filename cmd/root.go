@@ -99,13 +99,14 @@ var rootCmd = &cobra.Command{
 	Example: locale.GetString("comigo_example"),
 	Version: config.Version,
 	Long:    locale.GetString("long_description"),
+	// 不加参数的命令。
 	Run: func(cmd *cobra.Command, args []string) {
 		//解析命令，扫描文件
-		initBookStores(args)
+		StartScan(args)
 		//设置临时文件夹
 		config.SetTempDir()
-		//CheckWebPort
-		routers.CheckWebPort()
+		//SetPort
+		routers.SetPort()
 		//设置书籍API
 		routers.StartWebServer()
 		//退出时清理临时文件
@@ -122,7 +123,6 @@ func initConfigFile() {
 	//需要在home目录下面搜索配置文件
 	homeConfigPath := path.Join(home, ".config/comigo")
 	runtimeViper.AddConfigPath(homeConfigPath)
-
 	// 获取可执行程序自身的文件路径
 	executablePath, err := os.Executable()
 	if err != nil {
@@ -157,7 +157,6 @@ func initConfigFile() {
 		config.Config.ConfigPath = runtimeViper.ConfigFileUsed()
 		logger.Info(locale.GetString("FoundConfigFile") + config.Config.ConfigPath)
 	}
-
 	// 把设定文件的内容，解析到构造体里面。
 	if err := runtimeViper.Unmarshal(&config.Config); err != nil {
 		logger.Info(err)

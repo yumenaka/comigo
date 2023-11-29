@@ -10,8 +10,8 @@ import (
 	"github.com/yumenaka/comi/types"
 )
 
-// initBookStores 解析命令,扫描书库
-func initBookStores(args []string) {
+// StartScan 解析命令,扫描书库
+func StartScan(args []string) {
 	//1. 初始化数据库
 	if config.Config.EnableDatabase {
 		// 从数据库中读取书籍信息并持久化
@@ -52,7 +52,6 @@ func initBookStores(args []string) {
 	if err != nil {
 		logger.Infof("Failed to scan store path: %v", err)
 	}
-
 	//4、保存扫描结果到数据库
 	if config.Config.EnableDatabase {
 		err = scan.SaveResultsToDatabase(config.Config.ConfigPath, config.Config.ClearDatabaseWhenExit)
@@ -61,7 +60,6 @@ func initBookStores(args []string) {
 			return
 		}
 	}
-
 	//5、通过“可执行文件名”设置部分默认参数,目前不生效
 	config.Config.SetByExecutableFilename()
 }

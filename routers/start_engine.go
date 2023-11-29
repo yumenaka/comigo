@@ -24,8 +24,7 @@ func startEngine(engine *gin.Engine) {
 		Addr:    webHost + strconv.Itoa(config.Config.Port),
 		Handler: engine,
 	}
-
-	//在 goroutine 中初始化服务器，这样它就不会阻塞下面的正常关闭处理
+	//在 goroutine 中初始化服务器，这样它就不会阻塞关闭处理
 	go func() {
 		// 监听并启动服务(TLS)
 		if enableTls {

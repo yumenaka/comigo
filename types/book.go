@@ -1,11 +1,9 @@
 package types
 
 import (
-	"bytes"
 	"crypto/md5"
 	"encoding/hex"
 	"errors"
-	"image"
 	"log"
 	"os"
 	"path"
@@ -14,12 +12,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/bbrks/go-blurhash"
 	"github.com/cheggaaa/pb/v3"
-	"github.com/disintegration/imaging"
 	"github.com/jxskiss/base62"
 	"github.com/xxjwxc/gowp/workpool"
-	"github.com/yumenaka/comi/arch"
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/logger"
 	"github.com/yumenaka/comi/util"
@@ -443,33 +438,6 @@ func analyzePageImages(p *ImageInfo, bookPath string) {
 	} else {
 		p.ImgType = "SinglePage"
 	}
-}
-
-// analyzeImage 获取某页漫画的分辨率与blurhash
-func (i *ImageInfo) analyzeImage(bookPath string) (err error) {
-	var img image.Image
-	//img, err = imaging.Open(i.RealImageFilePATH)
-
-	imgData, err := arch.GetSingleFile(bookPath, i.NameInArchive, "gbk")
-	if err != nil {
-		logger.Info(err)
-	}
-	buf := bytes.NewBuffer(imgData)
-	img, err = imaging.Decode(buf)
-	if err != nil {
-		log.Printf(locale.GetString("check_image_error")+" %v\n", err)
-	} else {
-		i.Width = img.Bounds().Dx()
-		i.Height = img.Bounds().Dy()
-		//很耗费服务器资源，以后再研究。
-		str, err := blurhash.Encode(1, 1, img)
-		if err != nil {
-			// Handle errors
-			log.Printf(locale.GetString("check_image_error")+" %v\n", err)
-		}
-		i.Blurhash = str
-	}
-	return err
 }
 
 // ClearTempFilesALL web加载时保存的临时图片，在在退出后清理

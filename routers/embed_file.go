@@ -3,7 +3,6 @@ package routers
 import (
 	"embed"
 	"html/template"
-	"io"
 	"io/fs"
 	"net/http"
 
@@ -38,22 +37,12 @@ func checkUrlRegistered(bookID string) bool {
 	return ok
 }
 
-// 1、设置web文件
+// 1、嵌入文件
 func embedFile(engine *gin.Engine) {
 	//使用自定义的模板引擎，命名为"template-data"，为了与VUE兼容，把左右分隔符自定义为 [[ ]]
 	tmpl := template.Must(template.New("template-data").Delims("[[", "]]").Parse(TemplateString))
 	//使用模板
 	engine.SetHTMLTemplate(tmpl)
-	if config.Config.LogToFile {
-		// 关闭 log 打印的字体颜色。输出到文件不需要颜色
-		gin.DisableConsoleColor()
-
-	}
-	//禁止控制台输出
-	gin.DefaultWriter = io.Discard
-	// 中间件，输出 log 到文件
-	engine.Use(logger.HandlerLog(config.Config.LogToFile, config.Config.LogFilePath, config.Config.LogFileName))
-
 	//https://stackoverflow.com/questions/66248258/serve-embedded-filesystem-from-root-path-of-url
 	assetsEmbedFS, err := fs.Sub(staticAssetFS, "static/assets")
 	if err != nil {
