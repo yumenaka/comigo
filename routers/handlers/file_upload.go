@@ -15,15 +15,12 @@ var LocalRescanBroadcast *chan string
 var EnableUpload *bool
 var UploadPath *string
 
-func init() {
-}
-
-// Upload 下载服务器配置
+// UploadFile 下载服务器配置
 // 除了设置头像以外，也可以做上传文件并阅读功能
 // Set a lower memory limit for multipart forms (default is 32 MiB)
 
-// Upload engine.MaxMultipartMemory = 60 << 20  // 60 MiB  只限制程序在上传文件时可以使用多少内存，而是不限制上传文件的大小。(default is 32 MiB)
-func Upload(c *gin.Context) {
+// UploadFile engine.MaxMultipartMemory = 60 << 20  // 60 MiB  只限制程序在上传文件时可以使用多少内存，而是不限制上传文件的大小。(default is 32 MiB)
+func UploadFile(c *gin.Context) {
 	if !*EnableUpload {
 		logger.Info(locale.GetString("UPLOAD_DISABLE_HINT"))
 		return
@@ -52,7 +49,7 @@ func Upload(c *gin.Context) {
 		logger.Info(err)
 	}
 
-	// Upload the file to specific dst.
+	// UploadFile the file to specific dst.
 	err = c.SaveUploadedFile(file, filepath.Join(path, file.Filename))
 	if err != nil {
 		logger.Info(err)

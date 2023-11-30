@@ -1,15 +1,14 @@
 package handlers
 
 import (
-	"github.com/yumenaka/comi/logger"
 	"net/http"
 	"os"
 	"runtime"
 	"strings"
 
 	"github.com/gin-gonic/gin"
-
 	"github.com/yumenaka/comi/locale"
+	"github.com/yumenaka/comi/logger"
 )
 
 // GetRegFile 下载服务器配置

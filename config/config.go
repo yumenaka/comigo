@@ -1,8 +1,9 @@
 package config
 
 import (
-	"github.com/yumenaka/comi/types"
 	"net/http"
+
+	"github.com/yumenaka/comi/types"
 )
 
 var (

@@ -1,14 +1,13 @@
 package handlers
 
 import (
-	"github.com/yumenaka/comi/logger"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/skip2/go-qrcode"
-
 	"github.com/yumenaka/comi/config"
+	"github.com/yumenaka/comi/logger"
 	"github.com/yumenaka/comi/util"
 )
 
