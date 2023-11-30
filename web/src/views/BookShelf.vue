@@ -331,7 +331,7 @@ export default defineComponent({
             }
             let _this = this;
             axios
-                .get("get_book_infos_by_max_depth?max_depth=1" + sort_by)
+                .get("book_infos?max_depth=1" + sort_by)
                 .then((response) => {
                     if (response.data !== "") {
                         this.bookshelf = response.data;
@@ -366,7 +366,7 @@ export default defineComponent({
                 sort_image_by_str = "&sort_by=" + this.$route.query.sort_by;
             }
             axios
-                .get("get_book_infos_by_group_id?book_group_book_id=" + group_id + sort_image_by_str)
+                .get("book_infos?book_group_id=" + group_id + sort_image_by_str)
                 .then((response) => {
                     this.bookshelf = response.data;
                 }).catch((error) => {
