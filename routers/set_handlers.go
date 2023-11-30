@@ -60,7 +60,7 @@ func setWebAPI(engine *gin.Engine) {
 	//通过URL字符串参数查询书籍信息
 	protectedAPI.GET("/get_book", handlers.GetBook)
 	//返回同一文件夹的书籍ID列表
-	protectedAPI.GET("/group_books", handlers.SameGroupBookInfo)
+	protectedAPI.GET("/group_info", handlers.GroupInfo)
 	//通过链接下载reg配置
 	protectedAPI.GET("/comigo.reg", handlers.GetRegFile)
 	//通过链接下载toml格式的示例配置
@@ -72,6 +72,7 @@ func setWebAPI(engine *gin.Engine) {
 	//Update	PUT
 	//Delete	DELETE
 	protectedAPI.GET("/config", handlers.GetConfig)
+	protectedAPI.GET("/config/info", handlers.GetConfigInfo)
 	protectedAPI.PUT("/config", handlers.UpdateConfig)
 	protectedAPI.POST("/config", handlers.SaveConfig)
 	protectedAPI.DELETE("/config/:in", handlers.DeleteConfig)

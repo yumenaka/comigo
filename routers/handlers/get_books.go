@@ -94,8 +94,8 @@ func GetBookInfosByGroupID(c *gin.Context, sortBy string) {
 	c.PureJSON(http.StatusOK, bookInfoList.BookInfos)
 }
 
-// SameGroupBookInfo 示例 URL： http://127.0.0.1:1234/api/group_books?id=1215a&sort_by=filename
-func SameGroupBookInfo(c *gin.Context) {
+// GroupInfo 示例 URL： http://127.0.0.1:1234/api/group_info?id=1215a&sort_by=filename
+func GroupInfo(c *gin.Context) {
 	sortBy := c.DefaultQuery("sort_by", "filename")
 	id := c.DefaultQuery("id", "")
 	if id == "" {
@@ -118,7 +118,7 @@ func SameGroupBookInfo(c *gin.Context) {
 	c.PureJSON(http.StatusOK, infoList)
 }
 
-// SameGroupBookInfo 示例 URL： http://127.0.0.1:1234/api/group_books?id=1215a&sort_by=filename
+// GroupInfo 示例 URL： http://127.0.0.1:1234/api/group_info?id=1215a&sort_by=filename
 func GetBookGroupID(c *gin.Context) {
 	id := c.DefaultQuery("id", "")
 	if id == "" {
