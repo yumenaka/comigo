@@ -33,7 +33,7 @@ func UploadFile(c *gin.Context) {
 		path = *UploadPath
 	}
 	//如果保存路径不存在，就新建路径
-	if !util.CheckExists(path) {
+	if !util.IsExist(path) {
 		// 创建文件夹
 		err := os.MkdirAll(path, os.ModePerm)
 		if err != nil {
@@ -81,5 +81,4 @@ func UploadFile(c *gin.Context) {
 	//}
 	//c.String(http.StatusOK, "Uploaded successfully %d files", len(files))
 	//*LocalRescanBroadcast <- "upload"
-
 }

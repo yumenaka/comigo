@@ -2,17 +2,59 @@ package types
 
 import (
 	"encoding/json"
-	"github.com/yumenaka/comi/logger"
+	"errors"
+	"github.com/mitchellh/go-homedir"
+	"github.com/yumenaka/comi/util"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
 
 	"github.com/tidwall/gjson"
+	"github.com/yumenaka/comi/logger"
 )
 
-// ServerConfig 服务器设置(config.toml)
-type ServerConfig struct {
+type ConfigStatus struct {
+	// 当前生效的配置文件路径 RAM、HomeDir、NowDir、ProgramDir
+	// 设置读取顺序：RAM（默认值+命令行参数） -> HomeDir -> ProgramDir -> NowDir
+	CurrentConfig string
+	// 对应目录下是否存在配置文件
+	Home      bool
+	Execution bool
+	Program   bool
+}
+
+func (c *ConfigStatus) SetConfigStatus() error {
+	logger.Info("Check Config Path")
+	c.CurrentConfig = "RAM"
+	// Home 目录
+	home, err := homedir.Dir()
+	if err != nil {
+		return errors.New("error: Failed find home directory")
+	}
+	if util.IsExist(path.Join(home, ".config/comigo/config.toml")) {
+		c.Home = true
+		c.CurrentConfig = "HomeDir"
+	}
+	// 可执行程序自身的文件路径
+	executablePath, err := os.Executable()
+	if err != nil {
+		return errors.New("error: Failed find executable path")
+	}
+	if util.IsExist(path.Join(executablePath, "config.toml")) {
+		c.Program = true
+		c.CurrentConfig = "ProgramDir"
+	}
+	//当前执行目录
+	if util.IsExist("config.toml") {
+		c.Execution = true
+		c.CurrentConfig = "ExecutionDir"
+	}
+	return nil
+}
+
+// ComigoConfig 服务器设置(config.toml)
+type ComigoConfig struct {
 	Port                   int      `json:"Port" comment:"Comigo设置文件(config.toml)，放在默认保存目录中。可选值：RAM（不保存）、HomeDir（$HOME/.config/comigo/config.toml）、NowDir（当前执行目录）、ProgramDir（程序所在目录）下。可用“comi --config-save”生成本文件\n网页服务端口，此项配置不支持热重载"`
 	ConfigPath             string   `json:"-" toml:"-" comment:"当前生效的yaml设置文件路径，数据库文件(comigo.db)在同一个文件夹"`
 	Host                   string   `json:"Host" comment:"自定义二维码显示的主机名"`
@@ -49,7 +91,7 @@ type ServerConfig struct {
 	GenerateMetaData       bool     `json:"GenerateMetaData" toml:"GenerateMetaData" comment:"生成书籍元数据"`
 }
 
-func UpdateConfig(oldConfig ServerConfig, jsonString string) (newConfig ServerConfig, err error) {
+func UpdateConfig(oldConfig ComigoConfig, jsonString string) (newConfig ComigoConfig, err error) {
 	newConfig = oldConfig
 	Port := gjson.Get(jsonString, "Port")
 	if Port.Exists() {
@@ -220,7 +262,7 @@ type WebPServerConfig struct {
 }
 
 // SetByExecutableFilename 通过执行文件名设置默认网页模板参数
-func (c *ServerConfig) SetByExecutableFilename() {
+func (c *ComigoConfig) SetByExecutableFilename() {
 	// 当前执行目录
 	//targetPath, _ := os.Getwd()
 	//logger.Info(locale.GetString("target_path"), targetPath)

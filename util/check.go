@@ -6,10 +6,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"path"
-	"path/filepath"
-
-	"github.com/yumenaka/comi/logger"
 )
 
 // perm for create dir or file
@@ -32,78 +28,6 @@ var (
 	FileExist = IsFile
 	PathExist = PathExists
 )
-
-// IsExist 判断文件夹或文件是否存在
-func IsExist(path string) bool {
-	_, err := os.Stat(path)
-	if err != nil {
-		if os.IsExist(err) {
-			return true
-		}
-		if os.IsNotExist(err) {
-			return false
-		}
-		logger.Info(err)
-		return false
-	}
-	return true
-}
-
-// GetAbsPath 获取绝对路径
-func GetAbsPath(path string) string {
-	abs, err := filepath.Abs(path)
-	if err != nil {
-		abs = path
-	}
-	return abs
-}
-
-// PathExists reports whether the named file or directory exists.
-func PathExists(path string) bool {
-	if path == "" {
-		return false
-	}
-	if _, err := os.Stat(path); err != nil {
-		if os.IsNotExist(err) {
-			return false
-		}
-	}
-	return true
-}
-
-// IsDir reports whether the named directory exists.
-func IsDir(path string) bool {
-	if path == "" {
-		return false
-	}
-
-	if fi, err := os.Stat(path); err == nil {
-		return fi.IsDir()
-	}
-	return false
-}
-
-// FileExists reports whether the named file or directory exists.
-func FileExists(path string) bool {
-	return IsFile(path)
-}
-
-// IsFile reports whether the named file or directory exists.
-func IsFile(path string) bool {
-	if path == "" {
-		return false
-	}
-
-	if fi, err := os.Stat(path); err == nil {
-		return !fi.IsDir()
-	}
-	return false
-}
-
-// IsAbsPath is abs path.
-func IsAbsPath(aPath string) bool {
-	return path.IsAbs(aPath)
-}
 
 // ImageMimeTypes refer net/http package
 var ImageMimeTypes = map[string]string{
@@ -181,7 +105,6 @@ func IsZipFile(filepath string) bool {
 
 		}
 	}(f)
-
 	buf := make([]byte, 4)
 	if n, err := f.Read(buf); err != nil || n < 4 {
 		return false
