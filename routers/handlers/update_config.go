@@ -40,7 +40,7 @@ func UpdateConfig(c *gin.Context) {
 }
 
 // BeforeConfigUpdate 根据配置的变化，判断是否需要打开浏览器重新扫描等
-func BeforeConfigUpdate(oldConfig *types.ServerConfig, newConfig *types.ServerConfig) {
+func BeforeConfigUpdate(oldConfig *types.ComigoConfig, newConfig *types.ComigoConfig) {
 	if (newConfig.OpenBrowser == true) && (oldConfig.OpenBrowser == false) {
 		protocol := "http://"
 		if newConfig.EnableTLS {

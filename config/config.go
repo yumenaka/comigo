@@ -7,9 +7,10 @@ import (
 )
 
 var (
-	Version = "v0.9.6"
+	Version = "v0.9.7"
 	Srv     *http.Server
-	Config  = types.ServerConfig{
+	Status  = types.ConfigStatus{}
+	Config  = types.ComigoConfig{
 		Port:                  1234,
 		Host:                  "DefaultHost",
 		StoresPath:            []string{},

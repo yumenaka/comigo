@@ -48,6 +48,13 @@ func setWebAPI(engine *gin.Engine) {
 		// 如果设置了密码，则应用 JWT 中间件到一个新的路由组
 		protectedAPI = api.Group("/", jwtMiddleware.MiddlewareFunc())
 	}
+	//RESTful API
+	//Create	POST/PUT
+	//Read	    GET
+	//Update	PUT
+	//Delete	DELETE
+	//谷歌API设计规范：
+	//https://cloud.google.com/apis/design/standard_methods?hl=zh-cn
 
 	//文件上传
 	protectedAPI.POST("/upload", handlers.UploadFile)
@@ -66,13 +73,9 @@ func setWebAPI(engine *gin.Engine) {
 	//通过链接下载toml格式的示例配置
 	protectedAPI.GET("/config.toml", handlers.GetConfigToml)
 
-	//config操作,RESTful API
-	//Create	POST/PUT
-	//Read	    GET
-	//Update	PUT
-	//Delete	DELETE
+	//config操作
 	protectedAPI.GET("/config", handlers.GetConfig)
-	protectedAPI.GET("/config/info", handlers.GetConfigInfo)
+	protectedAPI.GET("/config/status", handlers.GetConfigStatus)
 	protectedAPI.PUT("/config", handlers.UpdateConfig)
 	protectedAPI.POST("/config", handlers.SaveConfig)
 	protectedAPI.DELETE("/config/:in", handlers.DeleteConfig)
