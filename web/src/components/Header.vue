@@ -42,14 +42,16 @@
     <!-- 文本装饰（下划线）：https://www.tailwindcss.cn/docs/text-decoration -->
     <!-- 文本溢出：https://www.tailwindcss.cn/docs/text-overflow -->
     <!-- 字体粗细:https://www.tailwindcss.cn/docs/font-weight -->
-    <div class="p-0 m-0 py-2 font-semibold content-center truncate">
+    <div class="p-0 m-0 py-0 font-semibold content-center truncate">
       <!-- 标题，只显示 -->
-      <span class="text-lg" v-if="!setDownLoadLink">{{ headerTitle }}</span>
+      <span class="text-lg" v-if="!setDownLoadLink&&(inShelf)">{{ headerTitle }}</span>
       <!-- 标题，可下载压缩包 -->
       <span class="text-lg text-blue-700 text-opacity-100  hover:underline">
-        <a v-if="setDownLoadLink" :href="'api/raw/' + bookID + '/' + encodeURIComponent(headerTitle)">{{ headerTitle
+        <a v-if="setDownLoadLink&&(inShelf)" :href="'api/raw/' + bookID + '/' + encodeURIComponent(headerTitle)">{{ headerTitle
         }}</a>
       </span>
+      <!-- 快速跳转 -->
+      <QuickJumpBar v-if="!inShelf" class="self-center" :nowBookID="bookID" :ReadMode="ReadMode"></QuickJumpBar>
     </div>
     <!-- slot，用来插入自定义组件。但是目前没需求 -->
     <!-- <slot></slot> -->
@@ -88,9 +90,10 @@ import { ReturnUpBack, SettingsOutline, Grid, List, Filter, Text } from '@vicons
 import { h, defineComponent } from 'vue'
 import Qrcode from "@/components/Qrcode.vue";
 import screenfull from 'screenfull'
+import QuickJumpBar from "@/components/QuickJumpBar.vue";
 export default defineComponent({
   name: "ComigoHeader",
-  props: ['setDownLoadLink', 'headerTitle', 'bookID', 'showReturnIcon', 'showSettingsIcon', 'showReSortIcon'],
+  props: ['setDownLoadLink', 'headerTitle', 'bookID', 'showReturnIcon', 'showSettingsIcon', 'showReSortIcon','ReadMode','inShelf'],
   emits: ['drawerActivate', 'onResort'],
   components: {
     NDropdown,//下拉菜单 https://www.naiveui.com/zh-CN/os-theme/components/dropdown
@@ -103,6 +106,7 @@ export default defineComponent({
     Text,
     SettingsOutline, //图标,来自 https://www.xicons.org/#/   需要安装（npm i -D @vicons/ionicons5）
     Qrcode,//https://github.com/scopewu/qrcode.vue
+    QuickJumpBar,
   },
   setup() {
     const { cookies } = useCookies();
@@ -215,9 +219,6 @@ export default defineComponent({
       //其他情况下，后退一页。与单击浏览器中的“后退”按钮相同。
       this.$router.back();
       // location.reload();
-
-
-      
     },
     //点击上传的时候，去上传页
     gotoUploadPage() {

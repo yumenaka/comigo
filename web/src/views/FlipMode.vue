@@ -7,7 +7,7 @@
     <!-- 不透明度：opacity-70 https://www.tailwindcss.cn/docs/opacity -->
     <!-- Vue组建过渡：https://v3.cn.vuejs.org/guide/transitions-enterleave.html#%E5%8D%95%E5%85%83%E7%B4%A0-%E7%BB%84%E4%BB%B6%E7%9A%84%E8%BF%87%E6%B8%A1= -->
     <transition name="header-bottom">
-      <Header v-if="showHeaderFlag_FlipMode" class="mx-auto w-full opacity-80"
+      <Header v-if="showHeaderFlag_FlipMode" in-shelf="false" :ReadMode="'flip'"  class="mx-auto w-full opacity-80"
         v-bind:class="{ 'fixed': hideToolbar, absolute: hideToolbar, 'top-0': hideToolbar }"
         v-bind:style="{ background: model.interfaceColor }" :setDownLoadLink="needDownloadLink()" :headerTitle="book.title"
         :bookID="book.id" :showReturnIcon="true" :showSettingsIcon="true" @drawerActivate="drawerActivate">

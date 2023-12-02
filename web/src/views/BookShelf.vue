@@ -1,6 +1,6 @@
 <template>
     <div class="BookShelf w-full h-screen flex flex-col">
-        <Header class="flex-none h-12" :bookIsFolder="false" :headerTitle="bookShelfTitle" :showReSortIcon="true"
+        <Header class="flex-none h-12" in-shelf="true"  :bookIsFolder="false" :headerTitle="bookShelfTitle" :showReSortIcon="true"
             :showReturnIcon="headerShowReturnIcon" :showSettingsIcon="true" :bookID="bookshelf ? bookshelf[0].id : 'null'"
             :setDownLoadLink="false" @drawerActivate="drawerActivate" @onResort="onResort">
         </Header>
