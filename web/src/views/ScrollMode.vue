@@ -1,13 +1,12 @@
 <template>
 	<div id="ScrollMode" class="manga" @mouseenter="onMouseEnter" @mouseleave="onMouseLeave">
-		<Header :setDownLoadLink="needDownloadLink()" :headerTitle="book.title" :bookID="book.id" :showReturnIcon="true"
+		<Header :inShelf="false"  :ReadMode="'scroll'" :setDownLoadLink="needDownloadLink()" :headerTitle="book.title" :bookID="book.id" :showReturnIcon="true"
 			:showSettingsIcon="true" v-bind:style="{ background: model.interfaceColor }" @drawerActivate="drawerActivate">
 		</Header>
 		<!-- 顶部的加载全部页面顶部按钮 -->
 		<button v-if="((startLoadPageNum > 1) && !nowLoading)"
 			class="w-24 h-12 m-2 bg-blue-300 text-gray-900 hover:bg-blue-500 rounded" @click="loadAllPage" size="large">{{
 				$t('load_all_pages') }}</button>
-		<QuickJumpBar class="self-center" :nowBookID="book.id"></QuickJumpBar>
 		<!-- 渲染漫画部分 -->
 		<div class="main_manga" v-for="(single_image, n) in localImages" :key="single_image.url"
 			@click="onMouseClick($event)" @mousemove="onMouseMove">
@@ -26,7 +25,7 @@
 		<!-- 底部最下面的返回顶部按钮 -->
 		<button class="w-24 h-12 m-2 bg-blue-300 text-gray-900 hover:bg-blue-500 rounded" @click="scrollToTop(90);"
 			size="large">{{ $t('back-to-top') }}</button>
-			<QuickJumpBar class="self-center" :nowBookID="book.id"></QuickJumpBar>
+			<QuickJumpBar class="self-center" :nowBookID="book.id" :ReadMode="'scroll'"></QuickJumpBar>
 		<Bottom v-bind:style="{ background: model.interfaceColor }"
 			:softVersion="$store.state.server_status.ServerName ? $store.state.server_status.ServerName : 'Comigo'">
 		</Bottom>
@@ -294,10 +293,10 @@ export default defineComponent({
 			userControlling: false,//用户是否正在操控，操控的时候不接收、也不发送WS翻页消息
 			autoScrolling: false,//是否正在自动翻页，为真的时候，不发送WS消息
 			book: {
-				name: "loading",
+				title: "loading",
 				id: "abcde",
 				page_count: 2,
-				book_type: ".zip",
+				type: ".zip",
 				pages: {
 					sort_by: "",
 					images: [

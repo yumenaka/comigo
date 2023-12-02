@@ -1,14 +1,14 @@
 <template>
-  <div class="w-full my-3 flex flex-row justify-center items-center">
-    <a :href="prevLink" class="text-blue-700 hover:underline text-4xl font-semibold">⬅️</a>
+  <div class="w-full my-0 flex flex-row justify-center items-center">
+    <a :href="prevLink" class="text-blue-700  text-2xl font-semibold">⬅️</a>
     <select
       class="mx-2 p-2 w-1/2 border-gray-200 rounded-lg text-xl font-semibold text-center disabled:opacity-50 disabled:pointer-events-none"
-      onchange="location = '/#/scroll/'+this.value;location.reload();">
+      :onchange="handleChange">
       <option v-for="book in group_info_filter.BookInfos" :value="book.id" :key="book.id" :selected="book.id == nowBookID">
         {{ book.title }}
       </option>
     </select>
-    <a :href="nextLink" class="text-blue-700 hover:underline text-4xl font-semibold ">➡️</a>
+    <a :href="nextLink" class="text-blue-700  text-2xl font-semibold ">➡️</a>
   </div>
 </template>
 
@@ -18,7 +18,7 @@ import axios from 'axios';
 
 export default defineComponent({
   name: 'QuickJumpBar',
-  props: ['nowBookID'],
+  props: ['nowBookID','ReadMode'],
   data() {
     return {
       SomeFlag: 'filename',
@@ -39,9 +39,9 @@ export default defineComponent({
       for (let i = 0; i < this.group_info_filter.BookInfos.length; i++) {
         if (this.group_info_filter.BookInfos[i].id === this.nowBookID) {
           if (i === 0) {
-            return `/#/scroll/${this.nowBookID}`;
+            return `/#/${this.ReadMode}/${this.nowBookID}`;
           }
-          return `/#/scroll/${this.group_info_filter.BookInfos[i - 1].id}`;
+          return `/#/${this.ReadMode}/${this.group_info_filter.BookInfos[i - 1].id}`;
         }
       }
     },
@@ -49,9 +49,9 @@ export default defineComponent({
       for (let i = 0; i < this.group_info_filter.BookInfos.length; i++) {
         if (this.group_info_filter.BookInfos[i].id === this.nowBookID) {
           if (i === this.group_info_filter.BookInfos.length - 1) {
-            return `/#/scroll/${this.nowBookID}`;
+            return `/#/${this.ReadMode}/${this.nowBookID}`;
           }
-          return `/#/scroll/${this.group_info_filter.BookInfos[i + 1].id}`;
+          return `/#/${this.ReadMode}/${this.group_info_filter.BookInfos[i + 1].id}`;
         }
       }
     },
@@ -61,6 +61,11 @@ export default defineComponent({
     this.fetchQuickJumpInfo();
   },
   methods: {
+    handleChange(event: Event) {
+      const target = event.target as HTMLInputElement;
+      location.href = `/\#/${this.ReadMode}/` + target.value;
+      location.reload();
+    },
     async fetchQuickJumpInfo() {
       try {
         const response = await axios.get(`/group_info_filter?id=${this.$route.params.id}`);
