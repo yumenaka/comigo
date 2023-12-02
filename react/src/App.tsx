@@ -1,20 +1,24 @@
+//导入各种库
 import axios from "axios";
-import React, { useReducer } from "react";
+import React, { useReducer,useState } from "react";
 import { useTranslation } from "react-i18next";
+// react-use中文文档： https://github.com/zenghongtu/react-use-chinese/blob/master/README.md  英文文档：https://streamich.github.io/react-use/?path=%2Fstory%2Flifecycle-useeffectonce--docs
+import { useEffectOnce } from 'react-use';
+import Cookies from 'js-cookie';
+
+//自定义组件
 import Contained from "./components/Contained";
-import Config from "./types/Config";
-import ConfigStatus from "./types/ConfigStatus";
 import NormalConfig from "./components/NormalInput";
 import ArrayConfig from "./components/ArrayConfig";
 import BoolConfig from "./components/BoolConfig";
-import { useState } from "react";
+// import DialogModal from "./components/DialogModal";
 
+//使用useReducer管理的远程数据
+import Config from "./types/Config";
+import ConfigStatus from "./types/ConfigStatus";
 import { configReducer, defaultConfig } from "./reducers/configReducer";
 import { configStatusReducer, defaultConfigStatus } from "./reducers/configStatusReducer";
-// https://github.com/zenghongtu/react-use-chinese/blob/master/README.md
-// https://streamich.github.io/react-use/?path=%2Fstory%2Fside-effects-usecookie--docs
-import { useEffectOnce } from 'react-use';
-import Cookies from 'js-cookie';
+
 // import DialogModal from "./components/DialogModal";
 // import SelectConfig from "./components/SelectConfig";
 // import { useForm } from "react-hook-form"; //sample：https://reffect.co.jp/react/react-hook-form-ts/  （TypeScript環境でReact Hook Formのフォーム作成の基礎を学ぶ）
@@ -23,15 +27,13 @@ function App() {
   const baseURL = "/api";
   const { t, i18n } = useTranslation();
   const [show, setShow] = useState("bookstore")
+  const [BackgroundColor, setBackgroundColor] = useState("#e0d9cd")
+  const [InterfaceColor, setInterfaceColor] = useState("#F5F5E4")
   //useReducer 和 useState 非常相似，但是它可以让你把状态更新逻辑从事件处理函数中移动到组件外部:https://zh-hans.react.dev/reference/react/useReducer
   //在用法上，它接收一个reducer函数作为第一个参数，第二个参数是初始化的state。
   //useReducer最终返回一个存储有当前状态值的数组和一个dispatch函数，该dispatch函数执行触发action，带来状态的变化。
   const [config, config_dispatch] = useReducer(configReducer, defaultConfig);
-
   const [config_status, config_status_dispatch] = useReducer(configStatusReducer, defaultConfigStatus);
-
-  const [BackgroundColor, setBackgroundColor] = useState("#e0d9cd")
-  const [InterfaceColor, setInterfaceColor] = useState("#F5F5E4")
 
   // 只执行一次的useEffect，来自'react-use'库。
   useEffectOnce(() => {
@@ -51,28 +53,12 @@ function App() {
       console.log("tempBackgroundColor", tempBackgroundColor)
       setBackgroundColor(tempBackgroundColor)
     }
-    //主题色2
+    // 主题色2
     const tempInterfaceColor = localStorage.getItem("InterfaceColor");
     if (tempInterfaceColor !== null) {
       console.log("tempInterfaceColor", tempInterfaceColor)
       setInterfaceColor(tempInterfaceColor)
     }
-
-    // 获取comigo配置的状态
-    axios
-      .get<ConfigStatus>(`${baseURL}/config/status`)
-      .then((response) => {
-        config_status_dispatch({
-          type: 'init',
-          name: "",
-          value: "",
-          config: response.data
-        });
-      })
-      .catch((error) => {
-        console.error(error);
-        console.log("config_status", config_status);
-      });
 
     // 获取comigo配置
     axios
@@ -88,6 +74,22 @@ function App() {
       .catch((error) => {
         console.error(error);
       });
+
+    // comigo配置状态
+    axios
+    .get<ConfigStatus>(`${baseURL}/config/status`)
+    .then((response) => {
+      config_status_dispatch({
+        type: 'init',
+        name: "",
+        value: "",
+        config: response.data
+      });
+    })
+    .catch((error) => {
+      console.error(error);
+      console.log("config_status", config_status);
+    });
   });
 
   //配置文件修改后，保存到后端的各种函数
@@ -134,15 +136,15 @@ function App() {
       config: config
     });
   };
-  //   const [isOpenModel, setIsOpenModel] = useState(true)
-  //   const [dialogMessage, setDialogMessage] = useState("")
-  //  function openDialogClick() {
-  //   openDialogModal("打开model")
-  //   }
-  //   function openDialogModal(message:string) {
-  //     setIsOpenModel(true)
-  //     setDialogMessage(message)
-  //   }
+    const [isOpenModel, setIsOpenModel] = useState(true)
+    const [dialogMessage, setDialogMessage] = useState("")
+   function openDialogClick() {
+    openDialogModal("打开model")
+    }
+    function openDialogModal(message:string) {
+      setIsOpenModel(true)
+      setDialogMessage(message)
+    }
 
   return (
     <div

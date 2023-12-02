@@ -4,7 +4,7 @@
     <select
       class="mx-2 p-2 w-1/2 border-gray-200 rounded-lg text-xl font-semibold text-center disabled:opacity-50 disabled:pointer-events-none"
       onchange="location = '/#/scroll/'+this.value;location.reload();">
-      <option v-for="book in group_info.BookInfos" :value="book.id" :key="book.id" :selected="book.id == nowBookID">
+      <option v-for="book in group_info_filter.BookInfos" :value="book.id" :key="book.id" :selected="book.id == nowBookID">
         {{ book.title }}
       </option>
     </select>
@@ -22,11 +22,12 @@ export default defineComponent({
   data() {
     return {
       SomeFlag: 'filename',
-      group_info: {
+      group_info_filter: {
         BookInfos: [
           {
             id: 0,
-            name: '',
+            title: '',
+            type: '',
           },
         ],
       },
@@ -35,22 +36,22 @@ export default defineComponent({
   },
   computed: {
     prevLink() {
-      for (let i = 0; i < this.group_info.BookInfos.length; i++) {
-        if (this.group_info.BookInfos[i].id === this.nowBookID) {
+      for (let i = 0; i < this.group_info_filter.BookInfos.length; i++) {
+        if (this.group_info_filter.BookInfos[i].id === this.nowBookID) {
           if (i === 0) {
             return `/#/scroll/${this.nowBookID}`;
           }
-          return `/#/scroll/${this.group_info.BookInfos[i - 1].id}`;
+          return `/#/scroll/${this.group_info_filter.BookInfos[i - 1].id}`;
         }
       }
     },
     nextLink() {
-      for (let i = 0; i < this.group_info.BookInfos.length; i++) {
-        if (this.group_info.BookInfos[i].id === this.nowBookID) {
-          if (i === this.group_info.BookInfos.length - 1) {
+      for (let i = 0; i < this.group_info_filter.BookInfos.length; i++) {
+        if (this.group_info_filter.BookInfos[i].id === this.nowBookID) {
+          if (i === this.group_info_filter.BookInfos.length - 1) {
             return `/#/scroll/${this.nowBookID}`;
           }
-          return `/#/scroll/${this.group_info.BookInfos[i + 1].id}`;
+          return `/#/scroll/${this.group_info_filter.BookInfos[i + 1].id}`;
         }
       }
     },
@@ -62,8 +63,8 @@ export default defineComponent({
   methods: {
     async fetchQuickJumpInfo() {
       try {
-        const response = await axios.get(`/group_info?id=${this.$route.params.id}`);
-        this.group_info = response.data;
+        const response = await axios.get(`/group_info_filter?id=${this.$route.params.id}`);
+        this.group_info_filter = response.data;
       } catch (error) {
         console.log(error);
       }
