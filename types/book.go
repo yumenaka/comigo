@@ -200,6 +200,18 @@ func GetBookGroupIDByBookID(id string) (string, error) {
 	return "", errors.New("can not found group,id=" + id)
 }
 
+func GetBookGroupInfoByChildBookID(id string) (*BookGroup, error) {
+	//根据id查找
+	for _, group := range mapBookGroup {
+		for _, b := range group.ChildBook {
+			if b.BookID == id {
+				return group, nil
+			}
+		}
+	}
+	return nil, errors.New("can not found group,id=" + id)
+}
+
 // GetBookByAuthor 获取同一作者的书籍。
 func GetBookByAuthor(author string, sortBy string) ([]*Book, error) {
 	var bookList []*Book

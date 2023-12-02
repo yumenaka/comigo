@@ -7,10 +7,11 @@
     <!-- 不透明度：opacity-70 https://www.tailwindcss.cn/docs/opacity -->
     <!-- Vue组建过渡：https://v3.cn.vuejs.org/guide/transitions-enterleave.html#%E5%8D%95%E5%85%83%E7%B4%A0-%E7%BB%84%E4%BB%B6%E7%9A%84%E8%BF%87%E6%B8%A1= -->
     <transition name="header-bottom">
-      <Header v-if="showHeaderFlag_FlipMode" in-shelf="false" :ReadMode="'flip'"  class="mx-auto w-full opacity-80"
+      <Header v-if="showHeaderFlag_FlipMode" in-shelf="false" :readMode="'flip'" class="mx-auto w-full opacity-80"
         v-bind:class="{ 'fixed': hideToolbar, absolute: hideToolbar, 'top-0': hideToolbar }"
-        v-bind:style="{ background: model.interfaceColor }" :setDownLoadLink="needDownloadLink()" :headerTitle="book.title"
-        :bookID="book.id" :showReturnIcon="true" :showSettingsIcon="true" @drawerActivate="drawerActivate">
+        v-bind:style="{ background: model.interfaceColor }" :setDownLoadLink="needDownloadLink()"
+        :headerTitle="book.title" :bookID="book.id" :depth="book.depth" :showReturnIcon="true" :showSettingsIcon="true"
+        @drawerActivate="drawerActivate">
       </Header>
     </transition>
 
@@ -156,7 +157,7 @@
         <template #checked>{{ $t("DoublePageMode") }}</template>
         <template #unchecked>{{ $t("SinglePageMode") }}</template>
       </n-switch>
-      
+
       <!-- 更改跨页匹配 -->
       <n-button @click="FlipOddEvenPage" v-if="doublePageModeFlag" :title="$t('如果跨页内容不匹配，可以尝试点击修正')">{{
         $t("Flip_odd_even_page")
@@ -186,7 +187,6 @@
         <template #checked>{{ $t('auto_hide_toolbar') }}</template>
         <template #unchecked>{{ $t('auto_hide_toolbar') }}</template>
       </n-switch>
-
 
       <!-- 分割线 -->
       <n-divider v-if="readerMode === 'sketch'" />
@@ -395,6 +395,7 @@ export default defineComponent({
         id: "loading",
         page_count: 2,
         type: ".zip",
+        depth: 0,
         pages: {
           sort_by: "",
           images: [
@@ -460,11 +461,7 @@ export default defineComponent({
       .get("/get_book?id=" + this.$route.params.id + sort_image_by_str)
       .then((response) => (this.book = response.data))
       .catch((error) => {
-        // console.log(error);
-        this.$router.push({
-          name: "LoginPage",
-          query: { redirect: window.location.href }
-        });
+        console.log("请求接口失败" + error);
       })
       .finally(() => {
         document.title = this.book.title;
@@ -480,10 +477,7 @@ export default defineComponent({
           .get("/get_book?id=" + this.$route.params.id + sort_image_by_str)
           .then((response) => (this.book = response.data))
           .catch((error) => {
-            console.log(error);
-            this.$router.push({
-              name: "LoginPage",
-            });
+            console.log("请求接口失败" + error);
           })
           .finally(() => console.log("路由参数改变,书籍ID:" + id));
       }
