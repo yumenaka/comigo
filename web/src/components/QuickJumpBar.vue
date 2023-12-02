@@ -18,7 +18,7 @@ import axios from 'axios';
 
 export default defineComponent({
   name: 'QuickJumpBar',
-  props: ['nowBookID','ReadMode'],
+  props: ['nowBookID','readMode'],
   data() {
     return {
       SomeFlag: 'filename',
@@ -39,9 +39,9 @@ export default defineComponent({
       for (let i = 0; i < this.group_info_filter.BookInfos.length; i++) {
         if (this.group_info_filter.BookInfos[i].id === this.nowBookID) {
           if (i === 0) {
-            return `/#/${this.ReadMode}/${this.nowBookID}`;
+            return `/#/${this.readMode}/${this.nowBookID}`;
           }
-          return `/#/${this.ReadMode}/${this.group_info_filter.BookInfos[i - 1].id}`;
+          return `/#/${this.readMode}/${this.group_info_filter.BookInfos[i - 1].id}`;
         }
       }
     },
@@ -49,9 +49,9 @@ export default defineComponent({
       for (let i = 0; i < this.group_info_filter.BookInfos.length; i++) {
         if (this.group_info_filter.BookInfos[i].id === this.nowBookID) {
           if (i === this.group_info_filter.BookInfos.length - 1) {
-            return `/#/${this.ReadMode}/${this.nowBookID}`;
+            return `/#/${this.readMode}/${this.nowBookID}`;
           }
-          return `/#/${this.ReadMode}/${this.group_info_filter.BookInfos[i + 1].id}`;
+          return `/#/${this.readMode}/${this.group_info_filter.BookInfos[i + 1].id}`;
         }
       }
     },
@@ -63,7 +63,7 @@ export default defineComponent({
   methods: {
     handleChange(event: Event) {
       const target = event.target as HTMLInputElement;
-      location.href = `/\#/${this.ReadMode}/` + target.value;
+      location.href = `/\#/${this.readMode}/` + target.value;
       location.reload();
     },
     async fetchQuickJumpInfo() {

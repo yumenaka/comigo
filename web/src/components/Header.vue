@@ -8,7 +8,7 @@
       </n-icon>
 
       <!-- 服务器设置 -->
-      <n-icon  class="p-0 mx-1 my-0" v-if="!showReturnIcon" @click="ToAdminPage()" size="40">
+      <n-icon class="p-0 mx-1 my-0" v-if="!showReturnIcon" @click="ToAdminPage()" size="40">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
           class="w-6 h-6">
           <path stroke-linecap="round" stroke-linejoin="round"
@@ -36,29 +36,28 @@
       </n-dropdown>
     </div>
 
-
     <!-- 标题-->
     <!-- 文本颜色： https://www.tailwindcss.cn/docs/text-color -->
     <!-- 文本装饰（下划线）：https://www.tailwindcss.cn/docs/text-decoration -->
     <!-- 文本溢出：https://www.tailwindcss.cn/docs/text-overflow -->
     <!-- 字体粗细:https://www.tailwindcss.cn/docs/font-weight -->
-    <div class="p-0 m-0 py-0 font-semibold content-center truncate">
+    <div class="p-0 m-0 py-0 flex flex-col justify-center font-semibold content-center truncate">
       <!-- 标题，只显示 -->
-      <span class="text-lg" v-if="!setDownLoadLink&&(inShelf)">{{ headerTitle }}</span>
+      <span class="text-lg" v-if="!setDownLoadLink && (inShelf)">{{ headerTitle }}</span>
       <!-- 标题，可下载压缩包 -->
       <span class="text-lg text-blue-700 text-opacity-100  hover:underline">
-        <a v-if="setDownLoadLink&&(inShelf)" :href="'api/raw/' + bookID + '/' + encodeURIComponent(headerTitle)">{{ headerTitle
+        <a v-if="setDownLoadLink && (inShelf)" :href="'api/raw/' + bookID + '/' + encodeURIComponent(headerTitle)">{{
+          headerTitle
         }}</a>
       </span>
       <!-- 快速跳转 -->
-      <QuickJumpBar v-if="!inShelf" class="self-center" :nowBookID="bookID" :ReadMode="ReadMode"></QuickJumpBar>
+      <QuickJumpBar v-if="!inShelf" class="self-center" :nowBookID="bookID" :readMode="readMode"></QuickJumpBar>
     </div>
     <!-- slot，用来插入自定义组件。但是目前没需求 -->
     <!-- <slot></slot> -->
 
     <!-- 溢出 overflow-x-auton :https://www.tailwindcss.cn/docs/overflow -->
     <div class="p-0 h-10 w-33 flex justify-between content-center overflow-x-auton">
-
       <!-- QRCode图，点击可以在屏幕正中显示二维码 -->
       <Qrcode class="w-10 p-0"></Qrcode>
       <!-- 全屏图标 -->
@@ -91,9 +90,11 @@ import { h, defineComponent } from 'vue'
 import Qrcode from "@/components/Qrcode.vue";
 import screenfull from 'screenfull'
 import QuickJumpBar from "@/components/QuickJumpBar.vue";
+import axios from "axios";
+
 export default defineComponent({
   name: "ComigoHeader",
-  props: ['setDownLoadLink', 'headerTitle', 'bookID', 'showReturnIcon', 'showSettingsIcon', 'showReSortIcon','ReadMode','inShelf'],
+  props: ['setDownLoadLink', 'headerTitle', 'bookID', 'showReturnIcon', 'showSettingsIcon', 'showReSortIcon', 'readMode', 'inShelf', 'depth'],
   emits: ['drawerActivate', 'onResort'],
   components: {
     NDropdown,//下拉菜单 https://www.naiveui.com/zh-CN/os-theme/components/dropdown
@@ -181,6 +182,18 @@ export default defineComponent({
     };
   },
   methods: {
+    //点击返回图标的时候，后退到上一页或主页
+    onClickReturnIcon() {
+      axios
+        .get("/parent_book_info?id=" + this.bookID)
+        .then((response) => {
+          //请求接口成功，跳转到书架页面
+          location.href = `/\#/child_shelf/${response.data.id}`;
+        }).catch((error) => {
+          //console.log("请求接口失败" + error);
+          this.$router.push('/')
+        });
+    },
     //根据文件名、修改时间、文件大小等参数重新排序
     onSelect(key: string) {
       // console.info(key);
@@ -203,23 +216,7 @@ export default defineComponent({
       //切换全屏状态
       screenfull.toggle()
     },
-    //点击返回图标的时候，后退到上一页或主页
-    onClickReturnIcon() {
-      // console.log(window.history)
-      //如果直接进入本页面，没有上一页，那么回到主页。不过这时候浏览器back按钮本来应该也不能按。
-      if (window.history.length === 1) {
-        this.$router.push('/')
-        return
-      }
-      //如果是新建标签页,并不是从书架点进去的时候，window.history.state.back为null，直接回到主页。
-      if (window.history.state.back === null) {
-        this.$router.push('/')
-        return
-      }
-      //其他情况下，后退一页。与单击浏览器中的“后退”按钮相同。
-      this.$router.back();
-      // location.reload();
-    },
+
     //点击上传的时候，去上传页
     gotoUploadPage() {
       this.$router.push({

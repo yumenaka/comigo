@@ -1,8 +1,9 @@
 <template>
     <div class="BookShelf w-full h-screen flex flex-col">
-        <Header class="flex-none h-12" in-shelf="true"  :bookIsFolder="false" :headerTitle="bookShelfTitle" :showReSortIcon="true"
-            :showReturnIcon="headerShowReturnIcon" :showSettingsIcon="true" :bookID="bookshelf ? bookshelf[0].id : 'null'"
-            :setDownLoadLink="false" @drawerActivate="drawerActivate" @onResort="onResort">
+        <Header class="flex-none h-12" in-shelf="true" :bookIsFolder="false" :headerTitle="bookShelfTitle"
+            :showReSortIcon="true" :showReturnIcon="headerShowReturnIcon" :showSettingsIcon="true"
+            :bookID="$route.params.group_id" :depth="bookshelf[0].depth > 1 ? bookshelf[0].depth - 1 : 0" :setDownLoadLink="false"
+            @drawerActivate="drawerActivate" @onResort="onResort">
         </Header>
 
         <!-- Flex Grow 控制 flex 项目放大的功能类 https://www.tailwindcss.cn/docs/flex-grow -->
@@ -331,7 +332,7 @@ export default defineComponent({
             }
             let _this = this;
             axios
-                .get("book_infos?max_depth=1" + sort_by)
+                .get("book_infos?max_depth=0" + sort_by)
                 .then((response) => {
                     if (response.data !== "") {
                         this.bookshelf = response.data;
@@ -342,11 +343,7 @@ export default defineComponent({
                         });
                     }
                 }).catch((error) => {
-                    console.log(error);
-                    this.$router.push({
-                        name: "LoginPage",
-                        query: { redirect: window.location.href }
-                    });
+                    console.log("请求接口失败" + error);
                 })
                 .finally(() => {
                     this.setBookShelfTitle();
@@ -370,11 +367,7 @@ export default defineComponent({
                 .then((response) => {
                     this.bookshelf = response.data;
                 }).catch((error) => {
-                    // console.log(error);
-                    this.$router.push({
-                        name: "LoginPage",
-                        query: { redirect: window.location.href }
-                    });
+                    console.log("请求接口失败" + error);
                 })
                 .finally(() => {
                     this.setBookShelfTitle();

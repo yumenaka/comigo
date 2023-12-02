@@ -66,6 +66,8 @@ func setWebAPI(engine *gin.Engine) {
 	protectedAPI.GET("/book_infos", handlers.GetBookInfos)
 	//通过URL字符串参数查询书籍信息
 	protectedAPI.GET("/get_book", handlers.GetBook)
+	//查询父书籍信息
+	protectedAPI.GET("/parent_book_info", handlers.GetParentBookInfo)
 	//返回同一文件夹的书籍ID列表
 	protectedAPI.GET("/group_info", handlers.GroupInfo)
 	//返回同一文件夹的书籍ID列表

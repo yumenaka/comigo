@@ -155,7 +155,6 @@ func GroupInfoFilter(c *gin.Context) {
 	c.PureJSON(http.StatusOK, filterList)
 }
 
-// GroupInfo 示例 URL： http://127.0.0.1:1234/api/group_info_filter?id=1215a&sort_by=filename
 func GetBookGroupID(c *gin.Context) {
 	id := c.DefaultQuery("id", "")
 	if id == "" {

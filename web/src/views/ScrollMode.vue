@@ -1,7 +1,8 @@
 <template>
 	<div id="ScrollMode" class="manga" @mouseenter="onMouseEnter" @mouseleave="onMouseLeave">
-		<Header :inShelf="false"  :ReadMode="'scroll'" :setDownLoadLink="needDownloadLink()" :headerTitle="book.title" :bookID="book.id" :showReturnIcon="true"
-			:showSettingsIcon="true" v-bind:style="{ background: model.interfaceColor }" @drawerActivate="drawerActivate">
+		<Header :inShelf="false" :readMode="'scroll'" :setDownLoadLink="needDownloadLink()" :headerTitle="book.title"
+			:bookID="book.id" :depth="book.depth" :showReturnIcon="true" :showSettingsIcon="true"
+			v-bind:style="{ background: model.interfaceColor }" @drawerActivate="drawerActivate">
 		</Header>
 		<!-- 顶部的加载全部页面顶部按钮 -->
 		<button v-if="((startLoadPageNum > 1) && !nowLoading)"
@@ -25,7 +26,7 @@
 		<!-- 底部最下面的返回顶部按钮 -->
 		<button class="w-24 h-12 m-2 bg-blue-300 text-gray-900 hover:bg-blue-500 rounded" @click="scrollToTop(90);"
 			size="large">{{ $t('back-to-top') }}</button>
-			<QuickJumpBar class="self-center" :nowBookID="book.id" :ReadMode="'scroll'"></QuickJumpBar>
+		<QuickJumpBar class="self-center" :nowBookID="book.id" :readMode="'scroll'"></QuickJumpBar>
 		<Bottom v-bind:style="{ background: model.interfaceColor }"
 			:softVersion="$store.state.server_status.ServerName ? $store.state.server_status.ServerName : 'Comigo'">
 		</Bottom>
@@ -297,6 +298,7 @@ export default defineComponent({
 				id: "abcde",
 				page_count: 2,
 				type: ".zip",
+				depth: 0,
 				pages: {
 					sort_by: "",
 					images: [
@@ -428,11 +430,8 @@ export default defineComponent({
 					_this.loadLocalBookMark();
 					_this.nowLoading = false;
 				}, 1500);
-			}).catch(() => {
-				this.$router.push({
-					name: "LoginPage",
-					query: { redirect: window.location.href }
-				});
+			}).catch((error) => {
+				console.log("请求接口失败" + error);
 			})
 			.finally(
 				() => {
@@ -453,7 +452,7 @@ export default defineComponent({
 							//refresh web page
 							window.location.reload();
 						}
-				);
+						);
 				}
 			}
 		);
