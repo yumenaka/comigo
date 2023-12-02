@@ -2,11 +2,11 @@ import Config from "../types/Config";
 import axios from "axios";
 type Action = {
     type:
-    | "downloadConfig"
-    | "boolConfig"
-    | "stringConfig"
-    | "numberConfig"
-    | "arrayConfig";
+    | "init"
+    | "boolean"
+    | "string"
+    | "number"
+    | "array";
     name: string;
     value: boolean | string | number | string[];
     config: Config;
@@ -14,9 +14,9 @@ type Action = {
 
 export function configReducer(c: Config, action: Action) {
     switch (action.type) {
-        case "downloadConfig":
+        case "init":
             return { ...action.config };
-        case "boolConfig":
+        case "boolean":
             axios
                 .put("/api/config", { [action.name]: action.value })
                 .then((response) => {
@@ -27,7 +27,7 @@ export function configReducer(c: Config, action: Action) {
                     console.error("Error sending data:", error);
                 });
             return { ...c, [action.name]: action.value };
-        case "stringConfig":
+        case "string":
             axios
                 .put("/api/config", { [action.name]: action.value })
                 .then((response) => {
@@ -38,7 +38,7 @@ export function configReducer(c: Config, action: Action) {
                     console.error("Error sending data:", error);
                 });
             return { ...c, [action.name]: action.value };
-        case "numberConfig":
+        case "number":
             axios
                 .put("/api/config", { [action.name]: action.value })
                 .then((response) => {
@@ -49,7 +49,7 @@ export function configReducer(c: Config, action: Action) {
                     console.error("Error sending data:", error);
                 });
             return { ...c, [action.name]: action.value };
-        case "arrayConfig":
+        case "array":
             axios
                 .put("/api/config", { [action.name]: action.value })
                 .then((response) => {
