@@ -68,6 +68,8 @@ func setWebAPI(engine *gin.Engine) {
 	protectedAPI.GET("/get_book", handlers.GetBook)
 	//返回同一文件夹的书籍ID列表
 	protectedAPI.GET("/group_info", handlers.GroupInfo)
+	//返回同一文件夹的书籍ID列表
+	protectedAPI.GET("/group_info_filter", handlers.GroupInfoFilter)
 	//通过链接下载reg配置
 	protectedAPI.GET("/comigo.reg", handlers.GetRegFile)
 	//通过链接下载toml格式的示例配置

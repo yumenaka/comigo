@@ -118,7 +118,44 @@ func GroupInfo(c *gin.Context) {
 	c.PureJSON(http.StatusOK, infoList)
 }
 
-// GroupInfo 示例 URL： http://127.0.0.1:1234/api/group_info?id=1215a&sort_by=filename
+// GroupInfo 示例 URL： http://127.0.0.1:1234/api/group_info_filter?id=1215a&sort_by=filename
+func GroupInfoFilter(c *gin.Context) {
+	sortBy := c.DefaultQuery("sort_by", "filename")
+	id := c.DefaultQuery("id", "")
+	if id == "" {
+		c.PureJSON(http.StatusBadRequest, "book id not set")
+		return
+	}
+	//sortBy: 根据压缩包原始顺序、时间、文件名排序
+	b, err := types.GetBookByID(id, sortBy)
+	if err != nil {
+		logger.Info(err)
+		c.PureJSON(http.StatusBadRequest, "book id not found")
+		return
+	}
+	infoList, err := types.GetBookInfoListByParentFolder(b.ParentFolder, sortBy)
+	if err != nil {
+		logger.Info(err)
+		c.PureJSON(http.StatusBadRequest, "ParentFolder, not found")
+		return
+	}
+	//过滤掉不需要的类型
+	filterList := types.BookInfoList{}
+	filterList.SortBy = infoList.SortBy
+	for _, info := range infoList.BookInfos {
+		if info.Type == types.TypeZip ||
+			info.Type == types.TypeRar ||
+			info.Type == types.TypeDir ||
+			info.Type == types.TypeCbz ||
+			info.Type == types.TypeCbr ||
+			info.Type == types.TypeEpub {
+			filterList.BookInfos = append(filterList.BookInfos, info)
+		}
+	}
+	c.PureJSON(http.StatusOK, filterList)
+}
+
+// GroupInfo 示例 URL： http://127.0.0.1:1234/api/group_info_filter?id=1215a&sort_by=filename
 func GetBookGroupID(c *gin.Context) {
 	id := c.DefaultQuery("id", "")
 	if id == "" {
