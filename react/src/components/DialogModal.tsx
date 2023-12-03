@@ -4,20 +4,20 @@ import { Fragment } from 'react'
 
 type PropsType = {
     message: string
-    isOpenModel: boolean
-    setIsOpenModel: React.Dispatch<React.SetStateAction<boolean>>
+    showDialog: boolean
+    setShowDialog: React.Dispatch<React.SetStateAction<boolean>>
     InterfaceColor: string
 }
 
 export default function DialogModal(props: PropsType) {
-    const { message, isOpenModel, setIsOpenModel, InterfaceColor,} = props
+    const { message, showDialog, setShowDialog, InterfaceColor,} = props
     function closeDialogModal() {
-        setIsOpenModel(false)
+        setShowDialog(false)
     }
 
     return (
         <>
-            <Transition appear show={isOpenModel} as={Fragment}>
+            <Transition appear show={showDialog} as={Fragment}>
                 <Dialog as="div" className="relative z-10" onClose={closeDialogModal} style={{
                 backgroundColor: InterfaceColor, // 绑定样式
             }}>

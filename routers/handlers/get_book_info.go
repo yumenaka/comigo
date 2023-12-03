@@ -9,6 +9,21 @@ import (
 	"github.com/yumenaka/comi/types"
 )
 
+func GetParentBookInfo(c *gin.Context) {
+	id := c.DefaultQuery("id", "")
+	if id == "" {
+		c.PureJSON(http.StatusBadRequest, "not set id param")
+		return
+	}
+	info, err := types.GetBookGroupInfoByChildBookID(id)
+	if err != nil {
+		logger.Info(err)
+		c.PureJSON(http.StatusBadRequest, "ParentBookInfo not found")
+		return
+	}
+	c.PureJSON(http.StatusOK, info)
+}
+
 func GetBookInfos(c *gin.Context) {
 	//书籍排列的方式，默认name
 	sortBy := c.DefaultQuery("sort_by", "default")
@@ -153,20 +168,4 @@ func GroupInfoFilter(c *gin.Context) {
 		}
 	}
 	c.PureJSON(http.StatusOK, filterList)
-}
-
-func GetBookGroupID(c *gin.Context) {
-	id := c.DefaultQuery("id", "")
-	if id == "" {
-		c.PureJSON(http.StatusBadRequest, "book id not set")
-		return
-	}
-	//sortBy: 根据压缩包原始顺序、时间、文件名排序
-	id, err := types.GetBookGroupIDByBookID(id)
-	if err != nil {
-		logger.Info(err)
-		c.PureJSON(http.StatusBadRequest, "book id not found")
-		return
-	}
-	c.PureJSON(http.StatusOK, id)
 }
