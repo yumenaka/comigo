@@ -1,6 +1,6 @@
 //导入各种库
 import axios from "axios";
-import React, { useReducer,useState } from "react";
+import React, { useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
 // react-use中文文档： https://github.com/zenghongtu/react-use-chinese/blob/master/README.md  英文文档：https://streamich.github.io/react-use/?path=%2Fstory%2Flifecycle-useeffectonce--docs
 import { useEffectOnce } from 'react-use';
@@ -11,7 +11,7 @@ import Contained from "./components/Contained";
 import NormalConfig from "./components/NormalInput";
 import ArrayConfig from "./components/ArrayConfig";
 import BoolConfig from "./components/BoolConfig";
-// import DialogModal from "./components/DialogModal";
+import DialogModal from "./components/DialogModal";
 
 //使用useReducer管理的远程数据
 import Config from "./types/Config";
@@ -77,19 +77,19 @@ function App() {
 
     // comigo配置状态
     axios
-    .get<ConfigStatus>(`${baseURL}/config/status`)
-    .then((response) => {
-      config_status_dispatch({
-        type: 'init',
-        name: "",
-        value: "",
-        config: response.data
+      .get<ConfigStatus>(`${baseURL}/config/status`)
+      .then((response) => {
+        config_status_dispatch({
+          type: 'init',
+          name: "",
+          value: "",
+          config: response.data
+        });
+      })
+      .catch((error) => {
+        console.error(error);
+        console.log("config_status", config_status);
       });
-    })
-    .catch((error) => {
-      console.error(error);
-      console.log("config_status", config_status);
-    });
   });
 
   //配置文件修改后，保存到后端的各种函数
@@ -136,15 +136,14 @@ function App() {
       config: config
     });
   };
-    const [isOpenModel, setIsOpenModel] = useState(true)
-    const [dialogMessage, setDialogMessage] = useState("")
-   function openDialogClick() {
-    openDialogModal("打开model")
-    }
-    function openDialogModal(message:string) {
-      setIsOpenModel(true)
-      setDialogMessage(message)
-    }
+  // 提示用弹出框
+  const [showDialog, setShowDialog] = useState(true)
+  const [dialogMessage, setDialogMessage] = useState("")
+
+  function showDialogFunc(message: string) {
+    setShowDialog(true)
+    setDialogMessage(message)
+  }
 
   return (
     <div
@@ -153,16 +152,16 @@ function App() {
       }}
       className={`w-full h-full min-h-screen flex flex-col justify-start items-center`} >
 
-      {/* <div className="fixed inset-0 flex items-center justify-center">
+      <div className="fixed inset-0 flex items-center justify-center">
         <button
           type="button"
-          onClick={openDialogClick}
+          onClick={()=>showDialogFunc("Message示例")}
           className="rounded-md bg-black bg-opacity-20 px-4 py-2 text-sm font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
         >
           打开model
         </button>
       </div>
-      <DialogModal message={dialogMessage} isOpenModel={isOpenModel} setIsOpenModel={setIsOpenModel} InterfaceColor={InterfaceColor} /> */}
+      <DialogModal message={dialogMessage} showDialog={showDialog} setShowDialog={setShowDialog} InterfaceColor={InterfaceColor} />
 
       {/* 顶部标题 */}
       <div className="w-full h-16 mb-1 rounded shadow flex flex-row justify-center items-center" style={{
