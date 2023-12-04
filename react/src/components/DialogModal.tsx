@@ -1,23 +1,22 @@
 import { Dialog, Transition } from '@headlessui/react'
 import { Fragment } from 'react'
 
-
 type PropsType = {
-    message: string
-    showDialog: boolean
-    setShowDialog: React.Dispatch<React.SetStateAction<boolean>>
+    message: string 
+    visible: boolean
+    setVisible: React.Dispatch<React.SetStateAction<boolean>>
     InterfaceColor: string
 }
 
 export default function DialogModal(props: PropsType) {
-    const { message, showDialog, setShowDialog, InterfaceColor,} = props
+    const { message, visible, setVisible, InterfaceColor,} = props
     function closeDialogModal() {
-        setShowDialog(false)
+        setVisible(false)
     }
 
     return (
         <>
-            <Transition appear show={showDialog} as={Fragment}>
+            <Transition appear show={visible} as={Fragment}>
                 <Dialog as="div" className="relative z-10" onClose={closeDialogModal} style={{
                 backgroundColor: InterfaceColor, // 绑定样式
             }}>
