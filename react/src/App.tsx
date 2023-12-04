@@ -7,7 +7,7 @@ import { useEffectOnce } from 'react-use';
 import Cookies from 'js-cookie';
 
 //自定义组件
-import Contained from "./components/Contained";
+import Header from "./components/Header";
 import NormalConfig from "./components/NormalInput";
 import ArrayConfig from "./components/ArrayConfig";
 import BoolConfig from "./components/BoolConfig";
@@ -19,14 +19,13 @@ import ConfigStatus from "./types/ConfigStatus";
 import { configReducer, defaultConfig } from "./reducers/configReducer";
 import { configStatusReducer, defaultConfigStatus } from "./reducers/configStatusReducer";
 
-// import DialogModal from "./components/DialogModal";
 // import SelectConfig from "./components/SelectConfig";
 // import { useForm } from "react-hook-form"; //sample：https://reffect.co.jp/react/react-hook-form-ts/  （TypeScript環境でReact Hook Formのフォーム作成の基礎を学ぶ）
 
 function App() {
   const baseURL = "/api";
   const { t, i18n } = useTranslation();
-  const [show, setShow] = useState("bookstore")
+  const [headerGroup, setHeaderGroup] = useState("bookstore")
   const [BackgroundColor, setBackgroundColor] = useState("#e0d9cd")
   const [InterfaceColor, setInterfaceColor] = useState("#F5F5E4")
   //useReducer 和 useState 非常相似，但是它可以让你把状态更新逻辑从事件处理函数中移动到组件外部:https://zh-hans.react.dev/reference/react/useReducer
@@ -102,12 +101,12 @@ function App() {
       config: config
     });
   };
-
+  //字符串类型的配置文件修改后，保存到后端的函数
   const setStringValue = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setStringValueFunc(name, value);
   };
-
+  //数字类型的配置文件修改后，保存到后端的函数
   const setNumberValue = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     config_dispatch({
@@ -117,7 +116,7 @@ function App() {
       config: config
     });
   };
-
+  //布尔类型的配置文件修改后，保存到后端的函数
   const setBoolValue = (name: string, value: boolean) => {
     console.log("setBoolValue " + name, value);
     config_dispatch({
@@ -127,7 +126,7 @@ function App() {
       config: config
     });
   };
-
+  //字符串数组类型的配置文件修改后，保存到后端的函数
   const setStringArray = (valueName: string, value: string[]) => {
     config_dispatch({
       type: 'boolean',
@@ -136,12 +135,11 @@ function App() {
       config: config
     });
   };
-  // 提示用弹出框
-  const [showDialog, setShowDialog] = useState(true)
+  // 弹出框
+  const [dialogVisible, setDialogVisible] = useState(false)
   const [dialogMessage, setDialogMessage] = useState("")
-
-  function showDialogFunc(message: string) {
-    setShowDialog(true)
+  function showDialog(message: string) {
+    setDialogVisible(true)
     setDialogMessage(message)
   }
 
@@ -152,28 +150,14 @@ function App() {
       }}
       className={`w-full h-full min-h-screen flex flex-col justify-start items-center`} >
 
-      <div className="fixed inset-0 flex items-center justify-center">
-        <button
-          type="button"
-          onClick={()=>showDialogFunc("Message示例")}
-          className="rounded-md bg-black bg-opacity-20 px-4 py-2 text-sm font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
-        >
-          打开model
-        </button>
-      </div>
-      <DialogModal message={dialogMessage} showDialog={showDialog} setShowDialog={setShowDialog} InterfaceColor={InterfaceColor} />
-
       {/* 顶部标题 */}
-      <div className="w-full h-16 mb-1 rounded shadow flex flex-row justify-center items-center" style={{
-        backgroundColor: InterfaceColor, // 绑定样式
-      }}>
-        <Contained show={show} setShow={setShow} InterfaceColor={InterfaceColor} />
-      </div>
+      <Header group={headerGroup} setGroup={setHeaderGroup} InterfaceColor={InterfaceColor} />
+      <DialogModal message={dialogMessage} visible={dialogVisible} setVisible={setDialogVisible} InterfaceColor={InterfaceColor} />
 
       <div
         className={`main-area w-3/5 min-w-[24rem] flex flex-col justify-center items-center`}
       >
-        {show === "bookstore" &&
+        {headerGroup === "bookstore" &&
           <>
             {/* <SelectConfig
               label={t("ConfigSaveTo")}
@@ -192,6 +176,7 @@ function App() {
               boolValue={config.OpenBrowser}
               InterfaceColor={InterfaceColor}
               setBoolValue={setBoolValue}
+              showDialogModal={showDialog}
             ></BoolConfig>
 
             <ArrayConfig
@@ -296,7 +281,7 @@ function App() {
           </>
         }
 
-        {show === "internet" &&
+        {headerGroup === "internet" &&
           <>
             <NormalConfig
               label={t("Port")}
@@ -405,7 +390,7 @@ function App() {
           </>
         }
 
-        {show === "other" &&
+        {headerGroup === "other" &&
           <>
             <div style={{ backgroundColor: InterfaceColor, }}// 绑定样式 
               className={`w-full m-1 p-2 flex flex-col shadow-md hover:shadow-2xl font-semibold rounded-md  justify-left items-left`}>
