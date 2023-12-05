@@ -19,7 +19,7 @@ import ConfigStatus from "./types/ConfigStatus";
 import { configReducer, defaultConfig } from "./reducers/configReducer";
 import { configStatusReducer, defaultConfigStatus } from "./reducers/configStatusReducer";
 
-// import SelectConfig from "./components/SelectConfig";
+import SelectConfig from "./components/SelectConfig";
 // import { useForm } from "react-hook-form"; //sample：https://reffect.co.jp/react/react-hook-form-ts/  （TypeScript環境でReact Hook Formのフォーム作成の基礎を学ぶ）
 
 function App() {
@@ -33,6 +33,14 @@ function App() {
   //useReducer最终返回一个存储有当前状态值的数组和一个dispatch函数，该dispatch函数执行触发action，带来状态的变化。
   const [config, config_dispatch] = useReducer(configReducer, defaultConfig);
   const [config_status, config_status_dispatch] = useReducer(configStatusReducer, defaultConfigStatus);
+
+  // 弹出框
+  const [dialogVisible, setDialogVisible] = useState(false)
+  const [dialogMessage, setDialogMessage] = useState("")
+  function showDialog(message: string) {
+    setDialogVisible(true)
+    setDialogMessage(message)
+  }
 
   // 只执行一次的useEffect，来自'react-use'库。
   useEffectOnce(() => {
@@ -135,13 +143,6 @@ function App() {
       config: config
     });
   };
-  // 弹出框
-  const [dialogVisible, setDialogVisible] = useState(false)
-  const [dialogMessage, setDialogMessage] = useState("")
-  function showDialog(message: string) {
-    setDialogVisible(true)
-    setDialogMessage(message)
-  }
 
   return (
     <div
@@ -159,15 +160,11 @@ function App() {
       >
         {headerGroup === "bookstore" &&
           <>
-            {/* <SelectConfig
+            <SelectConfig
               label={t("ConfigSaveTo")}
-              fieldDescription="配置文件的默认保存位置，可选值：RAM、HomeDir、NowDir、ProgramDir）"
               name={"ConfigSaveTo"}
-              value={config.ConfigSaveTo}
-              optionalValue={["RAM", "HomeDir", "NowDir", "ProgramDir"]}
               InterfaceColor={InterfaceColor}
-              setSelectedOption={setStringValueFunc}
-            ></SelectConfig> */}
+            ></SelectConfig>
             {/* <button className="h-15 w-full" onClick={() => setLang(lang === 'en' ? 'ja' : 'en')}>切换语言</button> */}
             <BoolConfig
               label={t("OpenBrowser")}
@@ -176,7 +173,7 @@ function App() {
               boolValue={config.OpenBrowser}
               InterfaceColor={InterfaceColor}
               setBoolValue={setBoolValue}
-              showDialogModal={showDialog}
+              showDialog={showDialog}
             ></BoolConfig>
 
             <ArrayConfig
@@ -228,6 +225,10 @@ function App() {
               boolValue={config.EnableUpload}
               InterfaceColor={InterfaceColor}
               setBoolValue={setBoolValue}
+              showDialog={()=>{
+                showDialog("EnableUpload_Description");
+                setDialogVisible(true);
+              }}
             ></BoolConfig>
 
             {config.EnableUpload && <NormalConfig

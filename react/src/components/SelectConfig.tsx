@@ -1,19 +1,46 @@
+import { useState } from "react";
 
 type PropsType = {
     name: string
     label: string
-    fieldDescription: string
-    value: string
-    optionalValue: string[]
+
     InterfaceColor: string
-    setSelectedOption: (valueName: string, value: string) => void
 }
 
 const SelectConfig = (props: PropsType) => {
-    const { name: valueName, label, fieldDescription, value, optionalValue, InterfaceColor } = props
+    const { name: valueName, label,  InterfaceColor } = props
+
+    const optionalValue = ["RAM","Home","NowDir","ProgramDir"]
+    //RAM（内存，临时生效，程序关闭后消失）。
+    //Home（家目录，这个目录中的配置，每次启动时候都会生效)。
+    //NowDir（命令执行目录，在此文件夹下面执行，配置会被读取）
+    //Program（程序所在目录，每次启动时生效。适合制作便携版。）
+    const [value, setValue] = useState("RAM")
+    const [description, setDescription] = useState("RAM"); // 选中的选项
+   
 
     const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        props.setSelectedOption(props.name, event.target.value); // 更新 selectedOption 状态
+        let saveTo ="RAM"
+        if(event.target.value.startsWith("RAM")){
+            saveTo = "RAM"
+            setDescription("RAM（启动过程中生效，程序关闭后消失）")
+        }
+        if(event.target.value.startsWith("Home")){
+            saveTo = "Home"
+            setDescription("Home（保存到Home目录，每次启动时候都被读取）")
+        }
+        if(event.target.value.startsWith("NowDir")){
+            saveTo = "NowDir"
+            setDescription("NowDir（保存到命令执行目录，在此文件夹下面执行，对应配置会被读取）")
+        }
+        if(event.target.value.startsWith("ProgramDir")){
+            saveTo = "ProgramDir"
+            setDescription("ProgramDir（保存到程序所在目录，每次启动时读取，适合制作便携版。）")
+        }
+        console.log("saveTo",saveTo);
+        setValue(saveTo);
+
+        //props.setSelectedOption(props.name, saveTo); // 更新 selectedOption 状态
     };
 
     return (
@@ -37,7 +64,7 @@ const SelectConfig = (props: PropsType) => {
                     <option key={index} value={option}>{option}</option>
                 ))}
             </select>
-            <div className="py-1 w-3/4 text-xs text-gray-500">{fieldDescription}</div>
+            <div className="py-1 w-3/4 text-xs text-gray-500">{description}</div>
         </div>
 
     )
