@@ -1,14 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect, useReducer, } from "react";
+import axios from "axios";
+import ConfigStatus from "../types/ConfigStatus";
+import { configStatusReducer, defaultConfigStatus } from "../reducers/configStatusReducer";
 
 type PropsType = {
     name: string
     label: string
-
     InterfaceColor: string
 }
 
 const ConfigManager = (props: PropsType) => {
     const { name: valueName, label, InterfaceColor } = props
+    const [config_status, config_status_dispatch] = useReducer(configStatusReducer, defaultConfigStatus);
 
     const optionalValue = ["RAM", "HomeDir", "NowDir", "ProgramDir"]
     //RAM（内存，临时生效，程序关闭后消失）。
@@ -17,6 +20,28 @@ const ConfigManager = (props: PropsType) => {
     //Program（程序所在目录，每次启动时生效。适合制作便携版。）
     const [value, setValue] = useState("RAM")
     const [description, setDescription] = useState("RAM（临时生效，程序关闭后消失）"); // 选中的选项
+
+    //useEffect
+    useEffect(() => {
+        // comigo配置状态
+        axios
+            .get<ConfigStatus>(`api/config/status`)
+            .then((response) => {
+                config_status_dispatch({
+                    type: 'init',
+                    name: "",
+                    value: "",
+                    config: response.data
+                });
+            })
+            .catch((error) => {
+                console.error(error);
+                console.log("config_status", config_status);
+            });
+    }, [config_status]);
+
+
+
 
     const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         let saveTo = "RAM"
@@ -38,7 +63,6 @@ const ConfigManager = (props: PropsType) => {
         }
         console.log("saveTo", saveTo);
         setValue(saveTo);
-
         //props.setSelectedOption(props.name, saveTo); // 更新 selectedOption 状态
     };
 
