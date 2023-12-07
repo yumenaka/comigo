@@ -15,9 +15,7 @@ import DialogModal from "./components/DialogModal";
 
 //使用useReducer管理的远程数据
 import Config from "./types/Config";
-import ConfigStatus from "./types/ConfigStatus";
 import { configReducer, defaultConfig } from "./reducers/configReducer";
-import { configStatusReducer, defaultConfigStatus } from "./reducers/configStatusReducer";
 
 import ConfigManager from "./components/ConfigManager";
 // import { useForm } from "react-hook-form"; //sample：https://reffect.co.jp/react/react-hook-form-ts/  （TypeScript環境でReact Hook Formのフォーム作成の基礎を学ぶ）
@@ -32,7 +30,6 @@ function App() {
   //在用法上，它接收一个reducer函数作为第一个参数，第二个参数是初始化的state。
   //useReducer最终返回一个存储有当前状态值的数组和一个dispatch函数，该dispatch函数执行触发action，带来状态的变化。
   const [config, config_dispatch] = useReducer(configReducer, defaultConfig);
-  const [config_status, config_status_dispatch] = useReducer(configStatusReducer, defaultConfigStatus);
 
   // 弹出框
   const [dialogVisible, setDialogVisible] = useState(false)
@@ -82,21 +79,6 @@ function App() {
         console.error(error);
       });
 
-    // comigo配置状态
-    axios
-      .get<ConfigStatus>(`${baseURL}/config/status`)
-      .then((response) => {
-        config_status_dispatch({
-          type: 'init',
-          name: "",
-          value: "",
-          config: response.data
-        });
-      })
-      .catch((error) => {
-        console.error(error);
-        console.log("config_status", config_status);
-      });
   });
 
   //配置文件修改后，保存到后端的各种函数
