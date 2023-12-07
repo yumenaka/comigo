@@ -11,12 +11,19 @@ import (
 	"github.com/yumenaka/comi/logger"
 )
 
-// DeleteConfig 删除服务器配置文件
+const (
+	HomeDirectory      = "HomeDir"
+	ExecutionDirectory = "NowDir"
+	ProgramDirectory   = "ProgramDir"
+)
+
 func DeleteConfig(c *gin.Context) {
 	in := c.Param("in")
-	if !(in == "ExecutionDirectory" || in == "HomeDirectory" || in == "ProgramDirectory") {
-		logger.Info("error: Failed save to " + in + " directory")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed save to " + in + " directory"})
+	validDirs := []string{ExecutionDirectory, HomeDirectory, ProgramDirectory}
+
+	if !contains(validDirs, in) {
+		logger.Info("error: Failed save to" + in + " directory")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed save to" + in + " directory"})
 		return
 	}
 	err := deleteConfigIn(in)
@@ -28,38 +35,43 @@ func DeleteConfig(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Config yaml save successfully"})
 }
 
-func deleteConfigIn(Directory string) error {
+// contains 函数来检查切片是否包含特定字符串
+func contains(slice []string, str string) bool {
+	for _, v := range slice {
+		if v == str {
+			return true
+		}
+	}
+	return false
+}
+
+func deleteConfigIn(Directory string) (err error) {
 	logger.Info("Delete Config in " + Directory)
-	// Home 目录
-	if Directory == "HomeDirectory" {
+	var filePath string
+
+	switch Directory {
+	case HomeDirectory:
 		home, err := homedir.Dir()
-		if err != nil {
-			return err
+		if err == nil {
+			filePath = path.Join(home, ".config/comigo/config.toml")
 		}
-		err = deleteFileIfExist(path.Join(home, ".config/comigo/config.toml"))
-		if err != nil {
-			return err
-		}
+	case ExecutionDirectory:
+		filePath = "config.toml"
+	case ProgramDirectory:
+		filePath, err = getProgramDirectoryConfigFilePath()
 	}
-	//当前执行目录
-	if Directory == "ExecutionDirectory" {
-		err := deleteFileIfExist("config.toml")
-		if err != nil {
-			return err
-		}
+	if err != nil {
+		return err
 	}
-	// 可执行程序自身的文件路径
-	if Directory == "ProgramDirectory" {
-		executablePath, err := os.Executable()
-		if err != nil {
-			return err
-		}
-		err = deleteFileIfExist(path.Join(executablePath, "config.toml"))
-		if err != nil {
-			return err
-		}
+	return deleteFileIfExist(filePath)
+}
+
+func getProgramDirectoryConfigFilePath() (string, error) {
+	executablePath, err := os.Executable()
+	if err != nil {
+		return "", err
 	}
-	return nil
+	return path.Join(executablePath, "config.toml"), nil
 }
 
 // 删除文件

@@ -19,7 +19,7 @@ import ConfigStatus from "./types/ConfigStatus";
 import { configReducer, defaultConfig } from "./reducers/configReducer";
 import { configStatusReducer, defaultConfigStatus } from "./reducers/configStatusReducer";
 
-import SelectConfig from "./components/SelectConfig";
+import ConfigManager from "./components/ConfigManager";
 // import { useForm } from "react-hook-form"; //sample：https://reffect.co.jp/react/react-hook-form-ts/  （TypeScript環境でReact Hook Formのフォーム作成の基礎を学ぶ）
 
 function App() {
@@ -160,11 +160,11 @@ function App() {
       >
         {headerGroup === "bookstore" &&
           <>
-            <SelectConfig
-              label={t("ConfigSaveTo")}
+            <ConfigManager
+              label={"配置保存："}
               name={"ConfigSaveTo"}
               InterfaceColor={InterfaceColor}
-            ></SelectConfig>
+            ></ConfigManager>
             {/* <button className="h-15 w-full" onClick={() => setLang(lang === 'en' ? 'ja' : 'en')}>切换语言</button> */}
             <BoolConfig
               label={t("OpenBrowser")}

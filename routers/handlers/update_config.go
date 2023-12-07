@@ -41,16 +41,33 @@ func UpdateConfig(c *gin.Context) {
 
 // BeforeConfigUpdate 根据配置的变化，判断是否需要打开浏览器重新扫描等
 func BeforeConfigUpdate(oldConfig *types.ComigoConfig, newConfig *types.ComigoConfig) {
-	if (newConfig.OpenBrowser == true) && (oldConfig.OpenBrowser == false) {
+
+	openBrowserIfNeeded(oldConfig, newConfig)
+
+	needScan, reScanFile := updateConfigIfNeeded(oldConfig, newConfig)
+
+	if needScan {
+		performScanAndUpdateDBIfNeeded(oldConfig, newConfig, reScanFile)
+	} else {
+		if oldConfig.Debug {
+			logger.Infof("No changes in Config, skipped scan store path")
+		}
+	}
+}
+
+func openBrowserIfNeeded(oldConfig *types.ComigoConfig, newConfig *types.ComigoConfig) {
+	if newConfig.OpenBrowser && !oldConfig.OpenBrowser {
 		protocol := "http://"
 		if newConfig.EnableTLS {
 			protocol = "https://"
 		}
 		util.OpenBrowser(protocol + "127.0.0.1:" + strconv.Itoa(newConfig.Port))
 	}
-	needScan := false
-	reScanFile := false
-	if !reflect.DeepEqual(oldConfig.StoresPath, newConfig.StoresPath) {
+}
+
+// updateConfigIfNeeded 检查旧的和新的配置是否需要更新，并返回需要重新扫描和重新扫描文件的布尔值
+func updateConfigIfNeeded(oldConfig *types.ComigoConfig, newConfig *types.ComigoConfig) (needScan bool, reScanFile bool) {
+	if differentConfig(oldConfig.StoresPath, newConfig.StoresPath) {
 		needScan = true
 		oldConfig.StoresPath = newConfig.StoresPath
 	}
@@ -58,12 +75,12 @@ func BeforeConfigUpdate(oldConfig *types.ComigoConfig, newConfig *types.ComigoCo
 		needScan = true
 		oldConfig.MaxScanDepth = newConfig.MaxScanDepth
 	}
-	if !reflect.DeepEqual(oldConfig.SupportMediaType, newConfig.SupportMediaType) {
+	if differentConfig(oldConfig.SupportMediaType, newConfig.SupportMediaType) {
 		needScan = true
 		reScanFile = true
 		oldConfig.SupportMediaType = newConfig.SupportMediaType
 	}
-	if !reflect.DeepEqual(oldConfig.SupportFileType, newConfig.SupportFileType) {
+	if differentConfig(oldConfig.SupportFileType, newConfig.SupportFileType) {
 		needScan = true
 		oldConfig.SupportFileType = newConfig.SupportFileType
 	}
@@ -72,7 +89,7 @@ func BeforeConfigUpdate(oldConfig *types.ComigoConfig, newConfig *types.ComigoCo
 		reScanFile = true
 		oldConfig.MinImageNum = newConfig.MinImageNum
 	}
-	if !reflect.DeepEqual(oldConfig.ExcludePath, newConfig.ExcludePath) {
+	if differentConfig(oldConfig.ExcludePath, newConfig.ExcludePath) {
 		needScan = true
 		oldConfig.ExcludePath = newConfig.ExcludePath
 	}
@@ -80,34 +97,39 @@ func BeforeConfigUpdate(oldConfig *types.ComigoConfig, newConfig *types.ComigoCo
 		needScan = true
 		oldConfig.EnableDatabase = newConfig.EnableDatabase
 	}
-	if needScan {
-		option := scan.NewScanOption(
-			reScanFile,
-			newConfig.StoresPath,
-			newConfig.MaxScanDepth,
-			newConfig.MinImageNum,
-			newConfig.TimeoutLimitForScan,
-			newConfig.ExcludePath,
-			newConfig.SupportMediaType,
-			newConfig.SupportFileType,
-			newConfig.ZipFileTextEncoding,
-			newConfig.EnableDatabase,
-			newConfig.ClearDatabaseWhenExit,
-			newConfig.Debug,
-		)
-		if err := scan.ScanStorePath(option); err != nil {
-			logger.Infof("Failed to scan store path: %v", err)
-		}
-		// 保存扫描结果到数据库 //TODO:这里有问题，启用数据库会报错
-		if oldConfig.EnableDatabase {
-			if err := scan.SaveResultsToDatabase(config.Config.ConfigPath, config.Config.ClearDatabaseWhenExit); err != nil {
-				logger.Infof("Failed to save results to database: %v", err)
-			}
-		}
-	} else {
-		if oldConfig.Debug {
-			logger.Infof("oldConfig.StoresPath == newConfig.StoresPath,skip scan store path")
-		}
+	return
+}
+
+func differentConfig(old, new interface{}) bool {
+	return !reflect.DeepEqual(old, new)
+}
+
+// performScanAndUpdateDBIfNeeded 扫描并相应地更新数据库
+func performScanAndUpdateDBIfNeeded(oldConfig *types.ComigoConfig, newConfig *types.ComigoConfig, reScanFile bool) {
+	option := scan.NewScanOption(
+		reScanFile,
+		newConfig.StoresPath,
+		newConfig.MaxScanDepth,
+		newConfig.MinImageNum,
+		newConfig.TimeoutLimitForScan,
+		newConfig.ExcludePath,
+		newConfig.SupportMediaType,
+		newConfig.SupportFileType,
+		newConfig.ZipFileTextEncoding,
+		newConfig.EnableDatabase,
+		newConfig.ClearDatabaseWhenExit,
+		newConfig.Debug,
+	)
+	if err := scan.ScanStorePath(option); err != nil {
+		logger.Infof("Failed to scan store path: %v", err)
 	}
-	oldConfig = newConfig
+	if oldConfig.EnableDatabase {
+		saveResultsToDatabase(config.Config.ConfigPath, config.Config.ClearDatabaseWhenExit)
+	}
+}
+
+func saveResultsToDatabase(configPath string, clearDatabaseWhenExit bool) {
+	if err := scan.SaveResultsToDatabase(configPath, clearDatabaseWhenExit); err != nil {
+		logger.Infof("Failed to save results to database: %v", err)
+	}
 }
