@@ -1,7 +1,8 @@
-import { useState, useEffect, useReducer, } from "react";
-import axios from "axios";
-import ConfigStatus from "../types/ConfigStatus";
-import { configStatusReducer, defaultConfigStatus } from "../reducers/configStatusReducer";
+import { useState, useEffect, useReducer,  } from "react"
+import axios from "axios"
+import ConfigStatus from "../types/ConfigStatus"
+import { configStatusReducer, defaultConfigStatus } from "../reducers/configStatusReducer"
+
 
 type PropsType = {
     name: string
@@ -13,14 +14,13 @@ const ConfigManager = (props: PropsType) => {
     const { name: valueName, label, InterfaceColor } = props
     const [config_status, config_status_dispatch] = useReducer(configStatusReducer, defaultConfigStatus);
 
-    const optionalValue = ["RAM", "HomeDir", "NowDir", "ProgramDir"]
-    //RAM（内存，临时生效，程序关闭后消失）。
-    //HomeDir（家目录，这个目录中的配置，每次启动时候都会生效)。
-    //NowDir（命令执行目录，在此文件夹下面执行，配置会被读取）
-    //Program（程序所在目录，每次启动时生效。适合制作便携版。）
-    const [value, setValue] = useState("RAM")
-    const [description, setDescription] = useState("RAM（临时生效，程序关闭后消失）"); // 选中的选项
-
+    const saveToPos = {
+        "用户目录": "用户的主目录",
+        "执行目录": "命令运行目录",
+        "程序目录": "程序所在目录"
+    }
+    const [saveTo, setSaveTo] = useState("HOME");
+    
     //useEffect
     useEffect(() => {
         // comigo配置状态
@@ -33,37 +33,26 @@ const ConfigManager = (props: PropsType) => {
                     value: "",
                     config: response.data
                 });
+                //console.log("config_status", config_status);
             })
             .catch((error) => {
                 console.error(error);
-                console.log("config_status", config_status);
             });
-    }, [config_status]);
+    }, []);
 
 
-
-
-    const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        let saveTo = "RAM"
-        if (event.target.value.startsWith("RAM")) {
-            saveTo = "RAM"
-            setDescription("RAM（临时生效，程序关闭后消失）")
-        }
+    const handleSaveConfig = (event: React.ChangeEvent<HTMLSelectElement>) => {
         if (event.target.value.startsWith("HomeDir")) {
-            saveTo = "HomeDir"
-            setDescription("Home（保存到Home目录，每次启动时候都被读取）")
+            setSaveTo("RAM");
         }
         if (event.target.value.startsWith("NowDir")) {
-            saveTo = "NowDir"
-            setDescription("NowDir（保存到命令执行目录，在此文件夹下面执行，对应配置会被读取）")
+            setSaveTo("RAM");
         }
         if (event.target.value.startsWith("ProgramDir")) {
-            saveTo = "ProgramDir"
-            setDescription("ProgramDir（保存到程序所在目录，每次启动时读取，适合制作便携版。）")
+            setSaveTo("RAM");
         }
         console.log("saveTo", saveTo);
-        setValue(saveTo);
-        //props.setSelectedOption(props.name, saveTo); // 更新 selectedOption 状态
+        setSaveTo(saveTo);
     };
 
     return (
@@ -76,24 +65,15 @@ const ConfigManager = (props: PropsType) => {
                 {label}
             </label>
             <div className="flex flex-row mx-0 my-1">
-                <select
-                    value={value} // 绑定 value 值
-                    onChange={handleSelectChange}
-                    name={valueName}
-                    id={valueName}
-                    className=" w-full rounded-lg border-gray-300 text-gray-700 "
-                >
-                    {/* 使用 option 元素来定义选项 */}
-                    {optionalValue.map((option, index) => (
-                        <option key={index} value={option}>{option}</option>
-                    ))}
-                </select>
-                <button className='bg-sky-400 hover:bg-sky-600 disabled:bg-gray-600 text-white border border-black font-bold mx-2 py-2 px-4 rounded'>
-                    SAVE
-                </button>
+                {Object.entries(saveToPos).map(([key, value]) => (
+                    <div className="text-xs font-normal flex flex-col justify-center items-center p-1 mx-1 w-64 h-16 border border-gray-500 rounded">
+                        <div key={key}>
+                            {key}
+                        </div>
+                        <div>{value}</div>
+                    </div>
+                ))}
             </div>
-
-            <div className="py-1 w-3/4 text-xs text-gray-500">{description}</div>
         </div>
 
     )

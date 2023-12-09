@@ -1,25 +1,20 @@
 import { Dialog, Transition } from '@headlessui/react'
 import { Fragment } from 'react'
-
+import DialogStatus from '../types/DialogStatus'
 type PropsType = {
-    message: string 
-    visible: boolean
-    setVisible: React.Dispatch<React.SetStateAction<boolean>>
+    dialogStatus: DialogStatus
+    closeDialog: () => void
+    //showDialog: (title: string, message: string, description:string) => void
     InterfaceColor: string
 }
 
 export default function DialogModal(props: PropsType) {
-    const { message, visible, setVisible, InterfaceColor,} = props
-    function closeDialogModal() {
-        setVisible(false)
-    }
+    const {closeDialog,dialogStatus,InterfaceColor, } = props
 
     return (
         <>
-            <Transition appear show={visible} as={Fragment}>
-                <Dialog as="div" className="relative z-10" onClose={closeDialogModal} style={{
-                backgroundColor: InterfaceColor, // 绑定样式
-            }}>
+            <Transition appear show={dialogStatus.isOpen} as={Fragment}>
+                <Dialog as="div" className="relative z-10" onClose={closeDialog}>
                     <Transition.Child
                         as={Fragment}
                         enter="ease-out duration-300"
@@ -29,7 +24,7 @@ export default function DialogModal(props: PropsType) {
                         leaveFrom="opacity-100"
                         leaveTo="opacity-0"
                     >
-                        <div className="fixed inset-0 bg-black bg-opacity-25" />
+                        <div className="fixed inset-0 bg-black/25" />
                     </Transition.Child>
 
                     <div className="fixed inset-0 overflow-y-auto">
@@ -43,26 +38,27 @@ export default function DialogModal(props: PropsType) {
                                 leaveFrom="opacity-100 scale-100"
                                 leaveTo="opacity-0 scale-95"
                             >
-                                <Dialog.Panel className="w-full text-center align-middle max-w-md transform overflow-hidden rounded-2xl bg-white p-6  shadow-xl transition-all">
+                                <Dialog.Panel style={{backgroundColor: InterfaceColor,}} 
+                                className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
                                     <Dialog.Title
                                         as="h3"
                                         className="text-lg font-medium leading-6 text-gray-900"
                                     >
-                                        设定更新
+                                        {dialogStatus.title}
                                     </Dialog.Title>
                                     <div className="mt-2">
                                         <p className="text-sm text-gray-500">
-                                            {message}
+                                            {dialogStatus.description}
                                         </p>
                                     </div>
 
                                     <div className="mt-4">
                                         <button
                                             type="button"
-                                            className="inline-flex  text-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                                            onClick={closeDialogModal}
+                                            className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                                            onClick={closeDialog}
                                         >
-                                            了解
+                                           {dialogStatus.OK}
                                         </button>
                                     </div>
                                 </Dialog.Panel>
