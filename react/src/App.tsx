@@ -19,6 +19,7 @@ import { configReducer, defaultConfig } from "./reducers/configReducer";
 
 import ConfigManager from "./components/ConfigManager";
 // import { useForm } from "react-hook-form"; //sample：https://reffect.co.jp/react/react-hook-form-ts/  （TypeScript環境でReact Hook Formのフォーム作成の基礎を学ぶ）
+import DialogStatus from './types/DialogStatus';
 
 function App() {
   const baseURL = "/api";
@@ -29,15 +30,9 @@ function App() {
   //useReducer 和 useState 非常相似，但是它可以让你把状态更新逻辑从事件处理函数中移动到组件外部:https://zh-hans.react.dev/reference/react/useReducer
   //在用法上，它接收一个reducer函数作为第一个参数，第二个参数是初始化的state。
   //useReducer最终返回一个存储有当前状态值的数组和一个dispatch函数，该dispatch函数执行触发action，带来状态的变化。
-  const [config, config_dispatch] = useReducer(configReducer, defaultConfig);
+  const [config, config_dispatch] = useReducer(configReducer, defaultConfig)
 
-  // 弹出框
-  const [dialogVisible, setDialogVisible] = useState(false)
-  const [dialogMessage, setDialogMessage] = useState("")
-  function showDialog(message: string) {
-    setDialogVisible(true)
-    setDialogMessage(message)
-  }
+
 
   // 只执行一次的useEffect，来自'react-use'库。
   useEffectOnce(() => {
@@ -126,6 +121,33 @@ function App() {
     });
   };
 
+  //弹窗提示
+  const [dialogStatus, setDialogStatus] = useState({
+    isOpen: true,
+    title: "Test",
+    OK: "OK",
+    description: "bla bla bla"
+  });
+  //开启弹窗的函数，给需要弹窗提示组件用
+  function openDialog(title: string, OK: string, description: string) {
+    setDialogStatus({
+      isOpen: true,
+      title: title,
+      OK: OK,
+      description: description
+    }as DialogStatus);
+  }
+  //关闭弹窗的函数，弹窗组件本身用
+  function closeDialog() {
+    setDialogStatus({
+      isOpen: false,
+      title: dialogStatus.title,
+      OK: dialogStatus.OK,
+      description: dialogStatus.description
+    }as DialogStatus);
+  }
+
+
   return (
     <div
       style={{
@@ -135,7 +157,7 @@ function App() {
 
       {/* 顶部标题 */}
       <Header group={headerGroup} setGroup={setHeaderGroup} InterfaceColor={InterfaceColor} />
-      <DialogModal message={dialogMessage} visible={dialogVisible} setVisible={setDialogVisible} InterfaceColor={InterfaceColor} />
+      <DialogModal dialogStatus={dialogStatus} closeDialog={closeDialog} InterfaceColor={InterfaceColor} />
 
       <div
         className={`main-area w-3/5 min-w-[24rem] flex flex-col justify-center items-center`}
@@ -155,7 +177,6 @@ function App() {
               boolValue={config.OpenBrowser}
               InterfaceColor={InterfaceColor}
               setBoolValue={setBoolValue}
-              showDialog={showDialog}
             ></BoolConfig>
 
             <ArrayConfig
@@ -207,9 +228,8 @@ function App() {
               boolValue={config.EnableUpload}
               InterfaceColor={InterfaceColor}
               setBoolValue={setBoolValue}
-              showDialog={()=>{
-                showDialog("EnableUpload_Description");
-                setDialogVisible(true);
+              showDialog={() => {
+                openDialog(t("EnableUpload"), "OK", t("EnableUpload_Description"))
               }}
             ></BoolConfig>
 
