@@ -15,8 +15,8 @@ import (
 )
 
 type ConfigStatus struct {
-	// 当前生效的配置文件路径 RAM、HomeDir、NowDir、ProgramDir
-	// 设置读取顺序：RAM（默认值+命令行参数） -> HomeDir -> ProgramDir -> NowDir
+	// 当前生效的配置文件路径 RAM、HomeDirectory、WorkingDirectory、ProgramDirectory
+	// 设置读取顺序：RAM（默认值+命令行参数） -> HomeDirectory -> ProgramDirectory -> WorkingDirectory
 	CurrentConfig string
 	// 对应目录下是否存在配置文件
 	Home      bool
@@ -34,7 +34,7 @@ func (c *ConfigStatus) SetConfigStatus() error {
 	}
 	if util.IsExist(path.Join(home, ".config/comigo/config.toml")) {
 		c.Home = true
-		c.CurrentConfig = "HomeDir"
+		c.CurrentConfig = "HomeDirectory"
 	}
 	// 可执行程序自身的文件路径
 	executablePath, err := os.Executable()
@@ -43,19 +43,19 @@ func (c *ConfigStatus) SetConfigStatus() error {
 	}
 	if util.IsExist(path.Join(executablePath, "config.toml")) {
 		c.Program = true
-		c.CurrentConfig = "ProgramDir"
+		c.CurrentConfig = "ProgramDirectory"
 	}
 	//当前执行目录
 	if util.IsExist("config.toml") {
 		c.Execution = true
-		c.CurrentConfig = "ExecutionDir"
+		c.CurrentConfig = "WorkingDirectory"
 	}
 	return nil
 }
 
 // ComigoConfig 服务器设置(config.toml)
 type ComigoConfig struct {
-	Port                   int      `json:"Port" comment:"Comigo设置文件(config.toml)，放在默认保存目录中。可选值：RAM（不保存）、HomeDir（$HOME/.config/comigo/config.toml）、NowDir（当前执行目录）、ProgramDir（程序所在目录）下。可用“comi --config-save”生成本文件\n网页服务端口，此项配置不支持热重载"`
+	Port                   int      `json:"Port" comment:"Comigo设置文件(config.toml)，放在默认保存目录中。可选值：RAM（不保存）、HomeDirectory（$HOME/.config/comigo/config.toml）、WorkingDirectory（当前执行目录）、ProgramDirectory（程序所在目录）下。可用“comi --config-save”生成本文件\n网页服务端口，此项配置不支持热重载"`
 	ConfigPath             string   `json:"-" toml:"-" comment:"当前生效的yaml设置文件路径，数据库文件(comigo.db)在同一个文件夹"`
 	Host                   string   `json:"Host" comment:"自定义二维码显示的主机名"`
 	StoresPath             []string `json:"StoresPath" comment:"默认扫描的书库文件夹"`

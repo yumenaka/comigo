@@ -1,5 +1,5 @@
 interface ConfigStatus {
-    CurrentConfig: string;
+    ConfigDirectory: string;
     Home:      boolean;
 	Execution: boolean;
 	Program:   boolean;
