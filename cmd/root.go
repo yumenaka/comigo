@@ -47,7 +47,7 @@ var rootCmd = &cobra.Command{
 	},
 }
 
-// 读取顺序：RAM（代码当中设定的默认值）+命令行参数  -> HomeDir -> ProgramDir -> NowDir
+// 读取顺序：RAM（代码当中设定的默认值）+命令行参数  -> HomeDirectory -> ProgramDirectory -> WorkingDirectory
 func initConfigFile() {
 	home, err := homedir.Dir()
 	if err != nil {
@@ -56,27 +56,27 @@ func initConfigFile() {
 	//在HomeDir搜索配置
 	homeConfigDir := path.Join(home, ".config/comigo")
 	runtimeViper.AddConfigPath(homeConfigDir)
-	// 在ProgramDir(二进制程序所在文件夹）的配置
-	programDir, err := os.Executable()
+	// 在ProgramDirectory(二进制程序所在文件夹）的配置
+	ProgramDirectory, err := os.Executable()
 	if err != nil {
-		logger.Info("Failed to get ProgramDir:", err)
+		logger.Info("Failed to get ProgramDirectory:", err)
 		return
 	}
-	// 将ProgramDir转换为绝对路径
-	absPath, err := filepath.Abs(programDir)
+	// 将ProgramDirectory转换为绝对路径
+	absPath, err := filepath.Abs(ProgramDirectory)
 	if err != nil {
 		logger.Info("Failed to get absolute path:", err)
 		return
 	}
-	logger.Info("programDir:", absPath)
+	logger.Info("ProgramDirectory:", absPath)
 	runtimeViper.AddConfigPath(absPath)
 
-	// NowDir：当前执行目录
-	nowDir, err := os.Getwd()
+	// WorkingDirectory：当前执行目录
+	WorkingDirectory, err := os.Getwd()
 	if err != nil {
-		logger.Info("Failed to get nowDir:", err)
+		logger.Info("Failed to get WorkingDirectory:", err)
 	}
-	runtimeViper.AddConfigPath(nowDir)
+	runtimeViper.AddConfigPath(WorkingDirectory)
 	runtimeViper.SetConfigType("toml")
 	runtimeViper.SetConfigName("config.toml")
 	// 读取设定文件
@@ -125,7 +125,7 @@ func initFlags() {
 	cobra.MousetrapDisplayDuration = 5 //"这是命令行程序"的提醒表示时间
 	//登陆用户名、密码
 	rootCmd.PersistentFlags().BoolVar(&config.Config.EnableLogin, "login", false, locale.GetString("ENABLE_LOGIN"))
-	rootCmd.PersistentFlags().StringVarP(&config.Config.Username, "username", "u", "comigo", locale.GetString("USERNAME"))
+	rootCmd.PersistentFlags().StringVarP(&config.Config.Username, "username", "u", "admin", locale.GetString("USERNAME"))
 	rootCmd.PersistentFlags().StringVarP(&config.Config.Password, "password", "k", "", locale.GetString("PASSWORD"))
 	rootCmd.PersistentFlags().IntVarP(&config.Config.Timeout, "timeout", "t", 65535, locale.GetString("TIMEOUT"))
 	//TLS设定
@@ -171,7 +171,7 @@ func initFlags() {
 	//输出log文件
 	rootCmd.PersistentFlags().BoolVar(&config.Config.LogToFile, "log", false, locale.GetString("LOG_TO_FILE"))
 	//web图片缓存
-	rootCmd.PersistentFlags().BoolVar(&config.Config.UseCache, "use-cache", true, locale.GetString("CACHE_FILE_ENABLE"))
+	rootCmd.PersistentFlags().BoolVar(&config.Config.UseCache, "use-cache", false, locale.GetString("CACHE_FILE_ENABLE"))
 	//图片缓存路径
 	rootCmd.PersistentFlags().StringVar(&config.Config.CachePath, "cache-path", "", locale.GetString("CACHE_FILE_PATH"))
 	//退出时清除缓存

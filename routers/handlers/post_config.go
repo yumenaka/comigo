@@ -15,7 +15,7 @@ import (
 // SaveConfig 保存服务器配置到文件
 func SaveConfig(c *gin.Context) {
 	SaveTo := c.Param("to")
-	if !(SaveTo == "ExecutionDirectory" || SaveTo == "HomeDirectory" || SaveTo == "ProgramDirectory") {
+	if !(SaveTo == "WorkingDirectory" || SaveTo == "HomeDirectory" || SaveTo == "ProgramDirectoryectory") {
 		logger.Info("error: Failed save to " + SaveTo + " directory")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed save to " + SaveTo + " directory"})
 		return
@@ -52,14 +52,14 @@ func saveConfigTo(Directory string) error {
 		}
 	}
 	//当前执行目录
-	if Directory == "ExecutionDirectory" {
+	if Directory == "WorkingDirectory" {
 		err = os.WriteFile("config.toml", bytes, 0644)
 		if err != nil {
 			return err
 		}
 	}
 	// 可执行程序自身的文件路径
-	if Directory == "ProgramDirectory" {
+	if Directory == "ProgramDirectoryectory" {
 		executablePath, err := os.Executable()
 		if err != nil {
 			return err

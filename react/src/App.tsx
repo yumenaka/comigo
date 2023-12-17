@@ -123,7 +123,7 @@ function App() {
 
   //弹窗提示
   const [dialogStatus, setDialogStatus] = useState({
-    isOpen: true,
+    isOpen: false,
     title: "Test",
     OK: "OK",
     description: "bla bla bla"
@@ -162,13 +162,14 @@ function App() {
       <div
         className={`main-area w-3/5 min-w-[24rem] flex flex-col justify-center items-center`}
       >
-        {headerGroup === "bookstore" &&
-          <>
-            <ConfigManager
+        <ConfigManager
               label={"配置保存："}
               name={"ConfigSaveTo"}
               InterfaceColor={InterfaceColor}
             ></ConfigManager>
+        {headerGroup === "bookstore" &&
+          <>
+   
             {/* <button className="h-15 w-full" onClick={() => setLang(lang === 'en' ? 'ja' : 'en')}>切换语言</button> */}
             <BoolConfig
               label={t("OpenBrowser")}

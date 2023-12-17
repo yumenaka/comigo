@@ -12,14 +12,14 @@ import (
 )
 
 const (
-	HomeDirectory      = "HomeDir"
-	ExecutionDirectory = "NowDir"
-	ProgramDirectory   = "ProgramDir"
+	HomeDirectory          = "HomeDirectory"
+	WorkingDirectory       = "WorkingDirectory"
+	ProgramDirectoryectory = "ProgramDirectory"
 )
 
 func DeleteConfig(c *gin.Context) {
 	in := c.Param("in")
-	validDirs := []string{ExecutionDirectory, HomeDirectory, ProgramDirectory}
+	validDirs := []string{WorkingDirectory, HomeDirectory, ProgramDirectoryectory}
 
 	if !contains(validDirs, in) {
 		logger.Info("error: Failed save to" + in + " directory")
@@ -55,10 +55,10 @@ func deleteConfigIn(Directory string) (err error) {
 		if err == nil {
 			filePath = path.Join(home, ".config/comigo/config.toml")
 		}
-	case ExecutionDirectory:
+	case WorkingDirectory:
 		filePath = "config.toml"
-	case ProgramDirectory:
-		filePath, err = getProgramDirectoryConfigFilePath()
+	case ProgramDirectoryectory:
+		filePath, err = getProgramDirectoryectoryConfigFilePath()
 	}
 	if err != nil {
 		return err
@@ -66,7 +66,7 @@ func deleteConfigIn(Directory string) (err error) {
 	return deleteFileIfExist(filePath)
 }
 
-func getProgramDirectoryConfigFilePath() (string, error) {
+func getProgramDirectoryectoryConfigFilePath() (string, error) {
 	executablePath, err := os.Executable()
 	if err != nil {
 		return "", err
