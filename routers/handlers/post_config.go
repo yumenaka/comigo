@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"path"
@@ -15,7 +16,7 @@ import (
 // SaveConfig 保存服务器配置到文件
 func SaveConfig(c *gin.Context) {
 	SaveTo := c.Param("to")
-	if !(SaveTo == "WorkingDirectory" || SaveTo == "HomeDirectory" || SaveTo == "ProgramDirectoryectory") {
+	if !(SaveTo == "WorkingDirectory" || SaveTo == "HomeDirectory" || SaveTo == "ProgramDirectory") {
 		logger.Info("error: Failed save to " + SaveTo + " directory")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed save to " + SaveTo + " directory"})
 		return
@@ -59,13 +60,16 @@ func saveConfigTo(Directory string) error {
 		}
 	}
 	// 可执行程序自身的文件路径
-	if Directory == "ProgramDirectoryectory" {
+	if Directory == "ProgramDirectory" {
 		executablePath, err := os.Executable()
 		if err != nil {
+			fmt.Println(executablePath)
 			return err
 		}
-		err = os.WriteFile(path.Join(executablePath, "config.toml"), bytes, 0644)
+		congigPath := path.Join(path.Dir(executablePath), "config.toml")
+		err = os.WriteFile(congigPath, bytes, 0644)
 		if err != nil {
+			fmt.Println(path.Join(executablePath, "config.toml"))
 			return err
 		}
 	}

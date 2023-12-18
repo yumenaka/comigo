@@ -41,7 +41,7 @@ func (c *ConfigStatus) SetConfigStatus() error {
 	if err != nil {
 		return errors.New("error: Failed find executable path")
 	}
-	if util.IsExist(path.Join(executablePath, "config.toml")) {
+	if util.IsExist(path.Join(path.Dir(executablePath), "config.toml")) {
 		c.Program = true
 		c.CurrentConfig = "ProgramDirectory"
 	}
