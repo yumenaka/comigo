@@ -71,7 +71,7 @@ func getProgramDirectoryectoryConfigFilePath() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return path.Join(executablePath, "config.toml"), nil
+	return path.Join(path.Dir(executablePath), "config.toml"), nil
 }
 
 // 删除文件
