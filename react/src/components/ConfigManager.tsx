@@ -4,13 +4,13 @@ import ConfigStatus from "../types/ConfigStatus"
 import { useEffectOnce } from 'react-use';
 
 type PropsType = {
-    name: string
+
     label: string
     InterfaceColor: string
 }
 
 const ConfigManager = (props: PropsType) => {
-    const { name: valueName, label, InterfaceColor } = props
+    const {  label, InterfaceColor } = props
     const [config_status, setConfigStatus] = useState( {
         ConfigDirectory: "",
         Home: false,
@@ -34,7 +34,7 @@ const ConfigManager = (props: PropsType) => {
         updateConfigStatus();
     });
 
-    const [selected, setSelected] = useState("");
+    const [selected, setSelected] = useState("WorkingDirectory");
     const selectOption = {
         "WorkingDirectory": ["icon/working_directory.png", "当前运行目录"],//https://icon-icons.com/icon/coding-program/71231
         "HomeDirectory": ["icon/home_directory.png", "用户主目录"],//https://icon-icons.com/icon/web-page-home/85808
@@ -50,18 +50,24 @@ const ConfigManager = (props: PropsType) => {
         // get element data
         console.log(event.currentTarget.getAttribute("data-save_to"));
         axios
-            .post(`api/config`, {
-                name: valueName,
-                value: selected,
-            })
+            .post(`api/config/${selected}`)
             .then((response) => {
                 console.log(response);
-                // config_status_dispatch({
-                //     type: 'save',
-                //     name: valueName,
-                //     value: selected,
-                //     config: config_status.CurrentConfig === "HomeDirectory" ? "ProgramDirectory" : "HomeDirectory"
-                // });
+                updateConfigStatus();
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    }
+
+    const onDeleteConfig = (event: React.MouseEvent) => {
+        // get element data
+        console.log(event.currentTarget.getAttribute("data-save_to"));
+        axios
+            .delete(`api/config/${selected}`)
+            .then((response) => {
+                console.log(response);
+                updateConfigStatus();
             })
             .catch((error) => {
                 console.error(error);
@@ -74,7 +80,7 @@ const ConfigManager = (props: PropsType) => {
             style={{
                 backgroundColor: InterfaceColor, // 绑定样式
             }}>
-            <label htmlFor={valueName} className="py-0 w-full">
+            <label  className="py-0 w-full">
                 {label}
             </label>
             <div className="flex flex-row mx-0 my-1 w-full">
@@ -86,7 +92,9 @@ const ConfigManager = (props: PropsType) => {
                     </div>
                 ))}
             </div>
-            <button onClick={onSaveConfig} className="h-10 w-24 bg-cyan-200 border border-gray-300 text-center text-gray-700 transition hover:text-gray-900 rounded">SAVE</button>
+            <button onClick={onSaveConfig} className="h-10 w-24 my-1 bg-cyan-200 border border-gray-300 text-center text-gray-700 transition hover:text-gray-900 rounded">SAVE</button>
+
+            <button onClick={onDeleteConfig} className="h-10 w-24 my-1 bg-cyan-200 border border-gray-300 text-center text-gray-700 transition hover:text-gray-900 rounded">DELETE</button>
         </div>
     )
 }

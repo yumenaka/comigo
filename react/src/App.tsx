@@ -164,7 +164,6 @@ function App() {
       >
         <ConfigManager
               label={"配置保存："}
-              name={"ConfigSaveTo"}
               InterfaceColor={InterfaceColor}
             ></ConfigManager>
         {headerGroup === "bookstore" &&
