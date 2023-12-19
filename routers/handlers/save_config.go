@@ -27,7 +27,7 @@ func SaveConfig(c *gin.Context) {
 		c.JSON(http.StatusMethodNotAllowed, gin.H{"error": "Failed to save config"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Config yaml save successfully"})
+	GetConfigStatus(c)
 }
 
 func saveConfigTo(Directory string) error {

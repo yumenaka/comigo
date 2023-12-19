@@ -33,7 +33,6 @@ function App() {
   const [config, config_dispatch] = useReducer(configReducer, defaultConfig)
 
 
-
   // 只执行一次的useEffect，来自'react-use'库。
   useEffectOnce(() => {
     // 当前语言 jp zh en
@@ -129,13 +128,13 @@ function App() {
     description: "bla bla bla"
   });
   //开启弹窗的函数，给需要弹窗提示组件用
-  function openDialog(title: string, OK: string, description: string) {
+  function showDialogFunc(title: string,  content: string) {
     setDialogStatus({
       isOpen: true,
       title: title,
-      OK: OK,
-      description: description
-    }as DialogStatus);
+      OK: "OK",
+      description: content
+    } as DialogStatus);
   }
   //关闭弹窗的函数，弹窗组件本身用
   function closeDialog() {
@@ -165,6 +164,7 @@ function App() {
         <ConfigManager
               label={"配置保存："}
               InterfaceColor={InterfaceColor}
+              showDialogFunc={showDialogFunc}
             ></ConfigManager>
         {headerGroup === "bookstore" &&
           <>
@@ -229,7 +229,7 @@ function App() {
               InterfaceColor={InterfaceColor}
               setBoolValue={setBoolValue}
               showDialog={() => {
-                openDialog(t("EnableUpload"), "OK", t("EnableUpload_Description"))
+                showDialogFunc(t("EnableUpload"), t("EnableUpload_Description"))
               }}
             ></BoolConfig>
 

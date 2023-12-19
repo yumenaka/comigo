@@ -4,19 +4,19 @@ import ConfigStatus from "../types/ConfigStatus"
 import { useEffectOnce } from 'react-use';
 
 type PropsType = {
-
     label: string
     InterfaceColor: string
+    showDialogFunc: (title: string, content: string) => void
 }
 
 const ConfigManager = (props: PropsType) => {
-    const {  label, InterfaceColor } = props
-    const [config_status, setConfigStatus] = useState( {
+    const { label, InterfaceColor,showDialogFunc } = props
+    const [config_status, setConfigStatus] = useState({
         ConfigDirectory: "",
         Home: false,
         Execution: false,
         Program: false,
-    }as ConfigStatus);
+    } as ConfigStatus);
 
     // 获取comigo配置的状态
     // 可以用React query代替useEffectOnce，获得loading，error，retry,cache等功能。 https://reffect.co.jp/react/react-use-query 
@@ -46,14 +46,13 @@ const ConfigManager = (props: PropsType) => {
         setSelected(event.currentTarget.getAttribute("data-save_to") ?? "RAM");
     };
 
-    const onSaveConfig = (event: React.MouseEvent) => {
-        // get element data
-        console.log(event.currentTarget.getAttribute("data-save_to"));
+    const onSaveConfig = () => {
         axios
-            .post(`api/config/${selected}`)
+            .post<ConfigStatus>(`api/config/${selected}`)
             .then((response) => {
-                console.log(response);
-                updateConfigStatus();
+                console.log(response.data);
+                setConfigStatus(response.data);
+                showDialogFunc("提示", "配置已保存");
             })
             .catch((error) => {
                 console.error(error);
@@ -64,10 +63,11 @@ const ConfigManager = (props: PropsType) => {
         // get element data
         console.log(event.currentTarget.getAttribute("data-save_to"));
         axios
-            .delete(`api/config/${selected}`)
+            .delete<ConfigStatus>(`api/config/${selected}`)
             .then((response) => {
-                console.log(response);
-                updateConfigStatus();
+                console.log(response.data);
+                setConfigStatus(response.data);
+                showDialogFunc("提示", "配置已删除");
             })
             .catch((error) => {
                 console.error(error);
@@ -80,7 +80,7 @@ const ConfigManager = (props: PropsType) => {
             style={{
                 backgroundColor: InterfaceColor, // 绑定样式
             }}>
-            <label  className="py-0 w-full">
+            <label className="py-0 w-full">
                 {label}
             </label>
             <div className="flex flex-row mx-0 my-1 w-full">
@@ -92,9 +92,11 @@ const ConfigManager = (props: PropsType) => {
                     </div>
                 ))}
             </div>
-            <button onClick={onSaveConfig} className="h-10 w-24 my-1 bg-cyan-200 border border-gray-300 text-center text-gray-700 transition hover:text-gray-900 rounded">SAVE</button>
+            <div className="flex flex-row mx-4">
+                <button onClick={onSaveConfig} className="h-10 w-24 mx-2 my-1 bg-sky-300 border border-gray-500 text-center text-gray-700 transition hover:text-gray-900 rounded">SAVE</button>
+                <button onClick={onDeleteConfig} className="h-10 w-24 mx-2 my-1 bg-red-300 border border-gray-500 text-center text-gray-700 transition hover:text-gray-900 rounded">DELETE</button>
+            </div>
 
-            <button onClick={onDeleteConfig} className="h-10 w-24 my-1 bg-cyan-200 border border-gray-300 text-center text-gray-700 transition hover:text-gray-900 rounded">DELETE</button>
         </div>
     )
 }

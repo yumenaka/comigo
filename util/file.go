@@ -1,6 +1,7 @@
 package util
 
 import (
+	"errors"
 	"os"
 	"path"
 	"path/filepath"
@@ -23,6 +24,23 @@ func IsExist(path string) bool {
 		return false
 	}
 	return true
+}
+
+// 删除文件
+func DeleteFileIfExist(filePath string) error {
+	// 使用os.Stat检查文件是否存在
+	if _, err := os.Stat(filePath); err == nil {
+		// 文件存在，尝试删除
+		err := os.Remove(filePath)
+		if err != nil {
+			return err
+		}
+	} else if os.IsNotExist(err) {
+		return errors.New("File does not exist:" + filePath)
+	} else {
+		return err
+	}
+	return nil
 }
 
 // ChickIsDir 判断所给路径是否为文件夹
