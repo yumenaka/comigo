@@ -37,7 +37,7 @@ func saveConfigTo(Directory string) error {
 		return err
 	}
 	logger.Info("Config Save To " + Directory)
-	// Home 目录
+	// HomeDirectory 目录
 	if Directory == "HomeDirectory" {
 		home, err := homedir.Dir()
 		if err != nil {
