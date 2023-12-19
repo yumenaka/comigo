@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"errors"
 	"net/http"
 	"os"
 	"path"
@@ -9,17 +8,18 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mitchellh/go-homedir"
 	"github.com/yumenaka/comi/logger"
+	"github.com/yumenaka/comi/util"
 )
 
 const (
-	HomeDirectory          = "HomeDirectory"
-	WorkingDirectory       = "WorkingDirectory"
-	ProgramDirectoryectory = "ProgramDirectory"
+	HomeDirectory    = "HomeDirectory"
+	WorkingDirectory = "WorkingDirectory"
+	ProgramDirectory = "ProgramDirectory"
 )
 
 func DeleteConfig(c *gin.Context) {
 	in := c.Param("in")
-	validDirs := []string{WorkingDirectory, HomeDirectory, ProgramDirectoryectory}
+	validDirs := []string{WorkingDirectory, HomeDirectory, ProgramDirectory}
 
 	if !contains(validDirs, in) {
 		logger.Info("error: Failed save to" + in + " directory")
@@ -28,11 +28,10 @@ func DeleteConfig(c *gin.Context) {
 	}
 	err := deleteConfigIn(in)
 	if err != nil {
-		logger.Info(err.Error())
 		c.JSON(http.StatusMethodNotAllowed, gin.H{"error": "Failed to save config"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Config yaml save successfully"})
+	GetConfigStatus(c)
 }
 
 // contains 函数来检查切片是否包含特定字符串
@@ -57,36 +56,15 @@ func deleteConfigIn(Directory string) (err error) {
 		}
 	case WorkingDirectory:
 		filePath = "config.toml"
-	case ProgramDirectoryectory:
-		filePath, err = getProgramDirectoryectoryConfigFilePath()
-	}
-	if err != nil {
-		return err
-	}
-	return deleteFileIfExist(filePath)
-}
-
-func getProgramDirectoryectoryConfigFilePath() (string, error) {
-	executablePath, err := os.Executable()
-	if err != nil {
-		return "", err
-	}
-	return path.Join(path.Dir(executablePath), "config.toml"), nil
-}
-
-// 删除文件
-func deleteFileIfExist(filePath string) error {
-	// 使用os.Stat检查文件是否存在
-	if _, err := os.Stat(filePath); err == nil {
-		// 文件存在，尝试删除
-		err := os.Remove(filePath)
+	case ProgramDirectory:
+		executablePath, err := os.Executable()
 		if err != nil {
 			return err
 		}
-	} else if os.IsNotExist(err) {
-		return errors.New("File does not exist:" + filePath)
-	} else {
+		filePath = path.Join(path.Dir(executablePath), "config.toml")
+	}
+	if err != nil {
 		return err
 	}
-	return nil
+	return util.DeleteFileIfExist(filePath)
 }
