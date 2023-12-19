@@ -19,35 +19,41 @@ type ConfigStatus struct {
 	// 设置读取顺序：RAM（默认值+命令行参数） -> HomeDirectory -> ProgramDirectory -> WorkingDirectory
 	CurrentConfig string
 	// 对应目录下是否存在配置文件
-	Home      bool
-	Execution bool
-	Program   bool
+	WorkingDirectory bool
+	HomeDirectory    bool
+	ProgramDirectory bool
 }
 
 func (c *ConfigStatus) SetConfigStatus() error {
 	logger.Info("Check Config Path")
-	c.CurrentConfig = "RAM"
-	// Home 目录
-	home, err := homedir.Dir()
-	if err != nil {
-		return errors.New("error: Failed find home directory")
-	}
-	if util.IsExist(path.Join(home, ".config/comigo/config.toml")) {
-		c.Home = true
-		c.CurrentConfig = "HomeDirectory"
-	}
+	c.CurrentConfig = ""
+	c.WorkingDirectory = false
+	c.HomeDirectory = false
+	c.ProgramDirectory = false
+
 	// 可执行程序自身的文件路径
 	executablePath, err := os.Executable()
 	if err != nil {
 		return errors.New("error: Failed find executable path")
 	}
 	if util.IsExist(path.Join(path.Dir(executablePath), "config.toml")) {
-		c.Program = true
+		c.ProgramDirectory = true
 		c.CurrentConfig = "ProgramDirectory"
 	}
+
+	// HomeDirectory 目录
+	home, err := homedir.Dir()
+	if err != nil {
+		return errors.New("error: Failed find home directory")
+	}
+	if util.IsExist(path.Join(home, ".config/comigo/config.toml")) {
+		c.HomeDirectory = true
+		c.CurrentConfig = "HomeDirectory"
+	}
+
 	//当前执行目录
 	if util.IsExist("config.toml") {
-		c.Execution = true
+		c.WorkingDirectory = true
 		c.CurrentConfig = "WorkingDirectory"
 	}
 	return nil
