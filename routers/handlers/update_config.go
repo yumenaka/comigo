@@ -27,25 +27,26 @@ func UpdateConfig(c *gin.Context) {
 	logger.Infof("Received JSON data: %s \n", jsonString)
 
 	// 解析JSON数据并更新服务器配置
-	newConfig, err := types.UpdateConfig(config.Config, jsonString)
+	newConfig, err := types.UpdateConfig(&config.Config, jsonString)
 	if err != nil {
 		logger.Info(err.Error())
 		c.JSON(http.StatusMethodNotAllowed, gin.H{"error": "Failed to parse JSON data"})
 		return
 	}
 	// 根据配置的变化，做相应的操作。比如打开浏览器重新扫描等
-	BeforeConfigUpdate(&config.Config, &newConfig)
+	BeforeConfigUpdate(&config.Config, newConfig)
 	// 返回成功消息
 	c.JSON(http.StatusOK, gin.H{"message": "Server settings updated successfully"})
 }
 
 // BeforeConfigUpdate 根据配置的变化，判断是否需要打开浏览器重新扫描等
 func BeforeConfigUpdate(oldConfig *types.ComigoConfig, newConfig *types.ComigoConfig) {
-
+	err := config.UpdateLocalConfig()
+	if err != nil {
+		logger.Infof("Failed to update local config: %v", err)
+	}
 	openBrowserIfNeeded(oldConfig, newConfig)
-
 	needScan, reScanFile := updateConfigIfNeeded(oldConfig, newConfig)
-
 	if needScan {
 		performScanAndUpdateDBIfNeeded(oldConfig, newConfig, reScanFile)
 	} else {

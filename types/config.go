@@ -3,15 +3,15 @@ package types
 import (
 	"encoding/json"
 	"errors"
-	"github.com/mitchellh/go-homedir"
-	"github.com/yumenaka/comi/util"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
 
+	"github.com/mitchellh/go-homedir"
 	"github.com/tidwall/gjson"
 	"github.com/yumenaka/comi/logger"
+	"github.com/yumenaka/comi/util"
 )
 
 type ConfigStatus struct {
@@ -97,15 +97,15 @@ type ComigoConfig struct {
 	GenerateMetaData       bool     `json:"GenerateMetaData" toml:"GenerateMetaData" comment:"生成书籍元数据"`
 }
 
-func UpdateConfig(oldConfig ComigoConfig, jsonString string) (newConfig ComigoConfig, err error) {
-	newConfig = oldConfig
+func UpdateConfig(config *ComigoConfig, jsonString string) (*ComigoConfig, error) {
+	oldConfig := *config
 	Port := gjson.Get(jsonString, "Port")
 	if Port.Exists() {
-		newConfig.Port = int(Port.Int())
+		config.Port = int(Port.Int())
 	}
 	Host := gjson.Get(jsonString, "Host")
 	if Host.Exists() {
-		newConfig.Host = Host.String()
+		config.Host = Host.String()
 	}
 	StoresPath := gjson.Get(jsonString, "StoresPath")
 	if StoresPath.Exists() {
@@ -113,65 +113,65 @@ func UpdateConfig(oldConfig ComigoConfig, jsonString string) (newConfig ComigoCo
 		arr, err := parseString(StoresPath.String())
 		if err != nil {
 			logger.Info("Failed to parse string:", err)
-			return newConfig, err
+			return config, err
 		}
-		newConfig.StoresPath = arr
+		config.StoresPath = arr
 	}
 	UseCache := gjson.Get(jsonString, "UseCache")
 	if UseCache.Exists() {
-		newConfig.UseCache = UseCache.Bool()
+		config.UseCache = UseCache.Bool()
 	}
 	CachePath := gjson.Get(jsonString, "CachePath")
 	if CachePath.Exists() {
-		newConfig.CachePath = CachePath.String()
+		config.CachePath = CachePath.String()
 	}
 	ClearCacheExit := gjson.Get(jsonString, "ClearCacheExit")
 	if ClearCacheExit.Exists() {
-		newConfig.ClearCacheExit = ClearCacheExit.Bool()
+		config.ClearCacheExit = ClearCacheExit.Bool()
 	}
 	UploadPath := gjson.Get(jsonString, "UploadPath")
 	if UploadPath.Exists() {
-		newConfig.UploadPath = UploadPath.String()
+		config.UploadPath = UploadPath.String()
 	}
 	EnableUpload := gjson.Get(jsonString, "EnableUpload")
 	if EnableUpload.Exists() {
-		newConfig.EnableUpload = EnableUpload.Bool()
+		config.EnableUpload = EnableUpload.Bool()
 	}
 	EnableDatabase := gjson.Get(jsonString, "EnableDatabase")
 	if EnableDatabase.Exists() {
-		newConfig.EnableDatabase = EnableDatabase.Bool()
+		config.EnableDatabase = EnableDatabase.Bool()
 	}
 	ClearDatabaseWhenExit := gjson.Get(jsonString, "ClearDatabaseWhenExit")
 	if ClearDatabaseWhenExit.Exists() {
-		newConfig.ClearDatabaseWhenExit = ClearDatabaseWhenExit.Bool()
+		config.ClearDatabaseWhenExit = ClearDatabaseWhenExit.Bool()
 	}
 	OpenBrowser := gjson.Get(jsonString, "OpenBrowser")
 	if OpenBrowser.Exists() {
-		newConfig.OpenBrowser = OpenBrowser.Bool()
+		config.OpenBrowser = OpenBrowser.Bool()
 	}
 	DisableLAN := gjson.Get(jsonString, "DisableLAN")
 	if DisableLAN.Exists() {
-		newConfig.DisableLAN = DisableLAN.Bool()
+		config.DisableLAN = DisableLAN.Bool()
 	}
 	DefaultMode := gjson.Get(jsonString, "DefaultMode")
 	if DefaultMode.Exists() {
-		newConfig.DefaultMode = DefaultMode.String()
+		config.DefaultMode = DefaultMode.String()
 	}
 	LogToFile := gjson.Get(jsonString, "LogToFile")
 	if LogToFile.Exists() {
-		newConfig.LogToFile = LogToFile.Bool()
+		config.LogToFile = LogToFile.Bool()
 	}
 	MaxScanDepth := gjson.Get(jsonString, "MaxScanDepth")
 	if MaxScanDepth.Exists() {
-		newConfig.MaxScanDepth = int(MaxScanDepth.Int())
+		config.MaxScanDepth = int(MaxScanDepth.Int())
 	}
 	MinImageNum := gjson.Get(jsonString, "MinImageNum")
 	if MinImageNum.Exists() {
-		newConfig.MinImageNum = int(MinImageNum.Int())
+		config.MinImageNum = int(MinImageNum.Int())
 	}
 	ZipFileTextEncoding := gjson.Get(jsonString, "ZipFileTextEncoding")
 	if ZipFileTextEncoding.Exists() {
-		newConfig.ZipFileTextEncoding = ZipFileTextEncoding.String()
+		config.ZipFileTextEncoding = ZipFileTextEncoding.String()
 	}
 	ExcludePath := gjson.Get(jsonString, "ExcludePath")
 	if ExcludePath.Exists() {
@@ -179,9 +179,9 @@ func UpdateConfig(oldConfig ComigoConfig, jsonString string) (newConfig ComigoCo
 		arr, err := parseString(ExcludePath.String())
 		if err != nil {
 			logger.Info("Failed to parse string:", err)
-			return newConfig, err
+			return config, err
 		}
-		newConfig.ExcludePath = arr
+		config.ExcludePath = arr
 	}
 	SupportMediaType := gjson.Get(jsonString, "SupportMediaType")
 	if SupportMediaType.Exists() {
@@ -189,9 +189,9 @@ func UpdateConfig(oldConfig ComigoConfig, jsonString string) (newConfig ComigoCo
 		arr, err := parseString(SupportMediaType.String())
 		if err != nil {
 			logger.Info("Failed to parse string:", err)
-			return newConfig, err
+			return config, err
 		}
-		newConfig.SupportMediaType = arr
+		config.SupportMediaType = arr
 	}
 	SupportFileType := gjson.Get(jsonString, "SupportFileType")
 	if SupportFileType.Exists() {
@@ -199,40 +199,39 @@ func UpdateConfig(oldConfig ComigoConfig, jsonString string) (newConfig ComigoCo
 		arr, err := parseString(SupportFileType.String())
 		if err != nil {
 			logger.Info("Failed to parse string:", err)
-			return newConfig, err
+			return config, err
 		}
-		newConfig.SupportFileType = arr
+		config.SupportFileType = arr
 	}
 	TimeoutLimitForScan := gjson.Get(jsonString, "TimeoutLimitForScan")
 	if TimeoutLimitForScan.Exists() {
-		newConfig.TimeoutLimitForScan = int(TimeoutLimitForScan.Int())
+		config.TimeoutLimitForScan = int(TimeoutLimitForScan.Int())
 	}
 	PrintAllPossibleQRCode := gjson.Get(jsonString, "PrintAllPossibleQRCode")
 	if PrintAllPossibleQRCode.Exists() {
-		newConfig.PrintAllPossibleQRCode = PrintAllPossibleQRCode.Bool()
+		config.PrintAllPossibleQRCode = PrintAllPossibleQRCode.Bool()
 	}
 	Debug := gjson.Get(jsonString, "Debug")
 	if Debug.Exists() {
-		newConfig.Debug = Debug.Bool()
+		config.Debug = Debug.Bool()
 	}
 	Username := gjson.Get(jsonString, "Username")
 	if Username.Exists() {
-		newConfig.Username = Username.String()
+		config.Username = Username.String()
 	}
 	Password := gjson.Get(jsonString, "Password")
 	if Password.Exists() {
-		newConfig.Password = Password.String()
+		config.Password = Password.String()
 	}
 	Timeout := gjson.Get(jsonString, "Timeout")
 	if Timeout.Exists() {
-		newConfig.Timeout = int(Timeout.Int())
+		config.Timeout = int(Timeout.Int())
 	}
 	GenerateMetaData := gjson.Get(jsonString, "GenerateMetaData")
 	if GenerateMetaData.Exists() {
-		newConfig.GenerateMetaData = GenerateMetaData.Bool()
+		config.GenerateMetaData = GenerateMetaData.Bool()
 	}
-
-	return newConfig, nil
+	return &oldConfig, nil
 }
 
 // 将字符串解析为字符串切片
