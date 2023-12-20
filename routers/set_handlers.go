@@ -81,7 +81,7 @@ func setWebAPI(engine *gin.Engine) {
 	protectedAPI.GET("/config", handlers.GetConfig)
 	protectedAPI.GET("/config/status", handlers.GetConfigStatus)
 	protectedAPI.PUT("/config", handlers.UpdateConfig)
-	protectedAPI.POST("/config/:to", handlers.SaveConfig)
+	protectedAPI.POST("/config/:to", handlers.SaveConfigHandler)
 	protectedAPI.DELETE("/config/:in", handlers.DeleteConfig)
 
 	//压缩包直接下载链接
