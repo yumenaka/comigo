@@ -6,13 +6,13 @@ export default defineConfig({
   base: "/admin",
   plugins: [react()],
   build: {
-    outDir: "../routers/admin",
+    outDir: "../routers/react_static",
     emptyOutDir: true, //清除目标目录：aaaaaaaaacece
     chunkSizeWarningLimit: 1500, //规定触发警告的 chunk 大小。（以 kbs 为单位）https://cn.vitejs.dev/config/#build-emptyoutdir
   },
   server: {
     strictPort: false, //设置为 true 时，如果端口已被使用，则直接退出，而不会再进行后续端口的尝试。
-    open: "/admin", //开发服务器启动时，自动在浏览器中打开应用程序。(false  或 'index.html')
+    open: "/react_static", //开发服务器启动时，自动在浏览器中打开应用程序。(false  或 'index.html')
     port: 4090, //开发服务器端口。如果设端口已被使用，Vite 将自动尝试下一个可用端口。
     host: "0.0.0.0", //为开发服务器指定 ip 地址。 设置为 0.0.0.0 或 true 会监听所有地址，包括局域网和公共地址。
     //https://zxuqian.cn/vite-proxy-config/
