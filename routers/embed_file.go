@@ -14,19 +14,19 @@ import (
 
 // TemplateString 模板文件
 //
-//go:embed static/index.html
+//go:embed vue_static/index.html
 var TemplateString string
 
-//go:embed  static
+//go:embed  vue_static
 var staticFS embed.FS
 
-//go:embed  static/assets
+//go:embed  vue_static/assets
 var staticAssetFS embed.FS
 
-//go:embed  static/images
+//go:embed  vue_static/images
 var staticImageFS embed.FS
 
-//go:embed  admin
+//go:embed  react_static
 var adminFS embed.FS
 
 // 用来防止重复注册的URL表，key是bookID，值是StaticURL
@@ -44,19 +44,19 @@ func embedFile(engine *gin.Engine) {
 	//使用模板
 	engine.SetHTMLTemplate(tmpl)
 	//https://stackoverflow.com/questions/66248258/serve-embedded-filesystem-from-root-path-of-url
-	assetsEmbedFS, err := fs.Sub(staticAssetFS, "static/assets")
+	assetsEmbedFS, err := fs.Sub(staticAssetFS, "vue_static/assets")
 	if err != nil {
 		logger.Info(err)
 	}
 	engine.StaticFS("/assets/", http.FS(assetsEmbedFS))
-	imagesEmbedFS, errStaticImageFS := fs.Sub(staticImageFS, "static/images")
+	imagesEmbedFS, errStaticImageFS := fs.Sub(staticImageFS, "vue_static/images")
 	if errStaticImageFS != nil {
 		logger.Info(errStaticImageFS)
 	}
 	engine.StaticFS("/images/", http.FS(imagesEmbedFS))
 
 	engine.GET("/favicon.ico", func(c *gin.Context) {
-		file, _ := staticFS.ReadFile("static/images/favicon.ico")
+		file, _ := staticFS.ReadFile("vue_static/images/favicon.ico")
 		c.Data(
 			http.StatusOK,
 			"image/x-icon",
@@ -64,7 +64,7 @@ func embedFile(engine *gin.Engine) {
 		)
 	})
 	//用react写的后台界面：
-	adminEmbedFS, errAdminFS := fs.Sub(adminFS, "admin")
+	adminEmbedFS, errAdminFS := fs.Sub(adminFS, "react_static")
 	if errAdminFS != nil {
 		logger.Info(errAdminFS)
 	}

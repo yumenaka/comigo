@@ -1,6 +1,7 @@
 package routers
 
 import (
+	config_handlers2 "github.com/yumenaka/comi/routers/config_handlers"
 	"log"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
@@ -72,17 +73,21 @@ func setWebAPI(engine *gin.Engine) {
 	protectedAPI.GET("/group_info", handlers.GroupInfo)
 	//返回同一文件夹的书籍ID列表
 	protectedAPI.GET("/group_info_filter", handlers.GroupInfoFilter)
-	//通过链接下载reg配置
+	//通过链接下载reg设置文件
 	protectedAPI.GET("/comigo.reg", handlers.GetRegFile)
-	//通过链接下载toml格式的示例配置
-	protectedAPI.GET("/config.toml", handlers.GetConfigToml)
 
-	//config操作
-	protectedAPI.GET("/config", handlers.GetConfig)
-	protectedAPI.GET("/config/status", handlers.GetConfigStatus)
-	protectedAPI.PUT("/config", handlers.UpdateConfig)
-	protectedAPI.POST("/config/:to", handlers.SaveConfigHandler)
-	protectedAPI.DELETE("/config/:in", handlers.DeleteConfig)
+	//获取配置
+	protectedAPI.GET("/config", config_handlers2.GetConfig)
+	//获取配置状态
+	protectedAPI.GET("/config/status", config_handlers2.GetConfigStatus)
+	//更新配置
+	protectedAPI.PUT("/config", config_handlers2.UpdateConfig)
+	//保存配置到文件
+	protectedAPI.POST("/config/:to", config_handlers2.SaveConfigHandler)
+	//删除特定路径下的配置
+	protectedAPI.DELETE("/config/:in", config_handlers2.DeleteConfig)
+	//通过链接下载toml格式的示例配置
+	protectedAPI.GET("/config.toml", config_handlers2.GetConfigToml)
 
 	//压缩包直接下载链接
 	SetDownloadLink()
