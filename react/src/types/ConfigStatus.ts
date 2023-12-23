@@ -1,7 +1,9 @@
 interface ConfigStatus {
-    ConfigDirectory: string;
-    Home:      boolean;
-	Execution: boolean;
-	Program:   boolean;
+    In: string;
+    Path :{
+        WorkingDirectory: string;
+        HomeDirectory: string;
+        ProgramDirectory: string;
+    }
 }
 export default ConfigStatus;

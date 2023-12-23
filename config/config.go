@@ -78,31 +78,31 @@ func UpdateLocalConfig() error {
 	}
 
 	// 可执行程序自身的路径
-	executablePath, err := os.Executable()
+	executable, err := os.Executable()
 	if err != nil {
-		fmt.Println(executablePath)
+		fmt.Println(executable)
 		return err
 	}
-	congigPath := path.Join(path.Dir(executablePath), "config.toml")
-	if util.FileExist(congigPath) {
-		err = os.WriteFile(congigPath, bytes, 0644)
+	p := path.Join(path.Dir(executable), "config.toml")
+	if util.FileExist(p) {
+		err = os.WriteFile(p, bytes, 0644)
 		if err != nil {
-			fmt.Println(path.Join(executablePath, "config.toml"))
+			fmt.Println(path.Join(executable, "config.toml"))
 			return err
 		}
 	}
 	return nil
 }
 
-func SaveConfig(Directory string) error {
+func SaveConfig(to string) error {
 	//保存配置
 	bytes, err := toml.Marshal(Config)
 	if err != nil {
 		return err
 	}
-	logger.Info("Config Save To " + Directory)
-	// HomeDirectory 目录
-	if Directory == HomeDirectory {
+	logger.Info("Config Save To " + to)
+	switch to {
+	case HomeDirectory:
 		home, err := homedir.Dir()
 		if err != nil {
 			return err
@@ -115,52 +115,48 @@ func SaveConfig(Directory string) error {
 		if err != nil {
 			return err
 		}
-	}
-	//当前执行目录
-	if Directory == WorkingDirectory {
+	case WorkingDirectory:
 		err = os.WriteFile("config.toml", bytes, 0644)
 		if err != nil {
 			return err
 		}
-	}
-	// 可执行程序自身的文件路径
-	if Directory == ProgramDirectory {
-		executablePath, err := os.Executable()
+	case ProgramDirectory:
+		executable, err := os.Executable()
 		if err != nil {
-			fmt.Println(executablePath)
+			fmt.Println(executable)
 			return err
 		}
-		congigPath := path.Join(path.Dir(executablePath), "config.toml")
-		err = os.WriteFile(congigPath, bytes, 0644)
+		p := path.Join(path.Dir(executable), "config.toml")
+		err = os.WriteFile(p, bytes, 0644)
 		if err != nil {
-			fmt.Println(path.Join(executablePath, "config.toml"))
+			fmt.Println(path.Join(executable, "config.toml"))
 			return err
 		}
 	}
+
 	return nil
 }
 
-func DeleteConfigIn(Directory string) (err error) {
-	logger.Info("Delete Config in " + Directory)
-	var filePath string
-
-	switch Directory {
+func DeleteConfigIn(in string) (err error) {
+	logger.Info("Delete Config in " + in)
+	var configFile string
+	switch in {
 	case HomeDirectory:
 		home, err := homedir.Dir()
 		if err == nil {
-			filePath = path.Join(home, ".config/comigo/config.toml")
+			configFile = path.Join(home, ".config/comigo/config.toml")
 		}
 	case WorkingDirectory:
-		filePath = "config.toml"
+		configFile = "config.toml"
 	case ProgramDirectory:
-		executablePath, err := os.Executable()
+		executable, err := os.Executable()
 		if err != nil {
 			return err
 		}
-		filePath = path.Join(path.Dir(executablePath), "config.toml")
+		configFile = path.Join(path.Dir(executable), "config.toml")
 	}
 	if err != nil {
 		return err
 	}
-	return util.DeleteFileIfExist(filePath)
+	return util.DeleteFileIfExist(configFile)
 }

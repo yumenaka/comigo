@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@headlessui/react": "^1.7.17",
+    "@tailwindcss/line-clamp": "^0.4.4",
     "@tanstack/react-query": "^5.14.0",
     "@tanstack/react-query-devtools": "^5.14.0",
     "axios": "^1.5.0",

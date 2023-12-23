@@ -12,10 +12,12 @@ type PropsType = {
 const ConfigManager = (props: PropsType) => {
     const { label, InterfaceColor,showDialogFunc } = props
     const [config_status, setConfigStatus] = useState({
-        ConfigDirectory: "",
-        Home: false,
-        Execution: false,
-        Program: false,
+        In: "",
+        Path:{
+            WorkingDirectory: "",
+            HomeDirectory: "",
+            ProgramDirectory: ""
+        }
     } as ConfigStatus);
 
     // 获取comigo配置的状态
@@ -83,12 +85,15 @@ const ConfigManager = (props: PropsType) => {
             <label className="py-0 w-full">
                 {label}
             </label>
-            <div className="flex flex-row mx-0 my-1 w-full">
+            <div className="flex flex-row  mx-0 my-1 w-full">
                 {Object.entries(selectOption).map(([key, value]) => (
-                    <div key={key} data-save_to={key} onClick={onSelect} className={"text-xs font-normal flex flex-col justify-center items-center p-1 mx-1 w-1/3 h-20 border border-gray-500 rounded" + (selected === key ? " bg-cyan-200" : "")}>
+                    <div key={key} data-save_to={key} onClick={onSelect} className={"flex flex-col justify-start items-center text-xs font-normal pt-2 mx-1 w-1/3 min-h-20 border border-gray-500 rounded" + (selected === key ? " bg-cyan-200" : "")}>
                         <img className="h-7 w-7" src={value[0]} alt={key} />
                         <div className="mt-1">{value[1]}</div>
-                        {config_status.ConfigDirectory === "HomeDirectory" && <div className="my-1 text-xs text-gray-500">配置生效</div>}
+                        {/* 超过两行，显示省略号。https://zenn.dev/ilove/articles/8a93705d396e05 */}
+                        {key === "WorkingDirectory" && <div className="mx-1 my-1 text-xs text-gray-500 line-clamp-2">{config_status.Path.WorkingDirectory}</div>}
+                        {key === "HomeDirectory" && <div className="mx-1 my-1 text-xs text-gray-500 line-clamp-2">{config_status.Path.HomeDirectory}</div>}
+                        {key === "ProgramDirectory" && <div className="mx-1 my-1 text-xs text-gray-500 line-clamp-2 hover:line-clamp-none active:line-clamp-none">{config_status.Path.ProgramDirectory}</div>}
                     </div>
                 ))}
             </div>
