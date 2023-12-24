@@ -13,7 +13,7 @@ import (
 
 var (
 	server *http.Server
-	lock   sync.Mutex
+	mutex  sync.Mutex
 )
 
 // startServer 启动一个在指定端口监听的HTTP服务器
@@ -23,12 +23,12 @@ func startServer(port string) {
 		c.String(http.StatusOK, "Listening on port "+port)
 	})
 
-	lock.Lock()
+	mutex.Lock()
 	server = &http.Server{
 		Addr:    ":" + port,
 		Handler: ginRouter,
 	}
-	lock.Unlock()
+	mutex.Unlock()
 
 	if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Fatalf("listen: %s\n", err)
@@ -37,8 +37,8 @@ func startServer(port string) {
 
 // stopServer 停止当前的HTTP服务器
 func stopServer() error {
-	lock.Lock()
-	defer lock.Unlock()
+	mutex.Lock()
+	defer mutex.Unlock()
 	if server == nil {
 		return nil
 	}

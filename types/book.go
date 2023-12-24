@@ -28,7 +28,7 @@ var (
 		SubFolders: make(map[string]*subFolder),
 		SortBy:     "name",
 	}
-	lock sync.Mutex
+	mutex sync.Mutex
 )
 
 // Book 定义书籍，BooID不应该重复，根据文件路径生成
@@ -117,7 +117,9 @@ func AddBooks(list []*Book, basePath string, minPageNum int) (err error) {
 func RestoreDatabaseBooks(list []*Book) (err error) {
 	for _, b := range list {
 		if b.Type == TypeZip || b.Type == TypeRar || b.Type == TypeCbz || b.Type == TypeCbr || b.Type == TypeTar || b.Type == TypeEpub {
+			mutex.Lock()
 			mapBooks[b.BookID] = b
+			mutex.Unlock()
 		}
 	}
 	return err
@@ -138,15 +140,17 @@ func AddBook(b *Book, basePath string, minPageNum int) error {
 			logger.Info(err)
 		}
 	}
-	lock.Lock()
+	mutex.Lock()
 	mapBooks[b.BookID] = b
-	lock.Unlock()
+	mutex.Unlock()
 	return MainFolder.AddBookToSubFolder(basePath, &b.BookInfo)
 }
 
 // DeleteBookByID 删除一本书
 func DeleteBookByID(bookID string) {
+	mutex.Lock()
 	delete(mapBooks, bookID) //如果key存在在删除此数据；如果不存在，delete不进行操作，也不会报错
+	mutex.Unlock()
 }
 
 // GetBooksNumber 获取书籍总数，当然不包括BookGroup
