@@ -27,14 +27,14 @@ func UpdateConfig(c *gin.Context) {
 	logger.Infof("Received JSON data: %s \n", jsonString)
 
 	// 解析JSON数据并更新服务器配置
-	newConfig, err := types.UpdateConfig(&config.Config, jsonString)
+	oldConfig, err := types.UpdateConfig(&config.Config, jsonString)
 	if err != nil {
 		logger.Info(err.Error())
 		c.JSON(http.StatusMethodNotAllowed, gin.H{"error": "Failed to parse JSON data"})
 		return
 	}
 	// 根据配置的变化，做相应的操作。比如打开浏览器重新扫描等
-	BeforeConfigUpdate(&config.Config, newConfig)
+	BeforeConfigUpdate(oldConfig, &config.Config)
 	// 返回成功消息
 	c.JSON(http.StatusOK, gin.H{"message": "Server settings updated successfully"})
 }
@@ -48,16 +48,16 @@ func BeforeConfigUpdate(oldConfig *types.ComigoConfig, newConfig *types.ComigoCo
 	openBrowserIfNeeded(oldConfig, newConfig)
 	needScan, reScanFile := updateConfigIfNeeded(oldConfig, newConfig)
 	if needScan {
-		performScanAndUpdateDBIfNeeded(oldConfig, newConfig, reScanFile)
+		performScanAndUpdateDBIfNeeded(newConfig, reScanFile)
 	} else {
-		if oldConfig.Debug {
+		if newConfig.Debug {
 			logger.Infof("No changes in Config, skipped scan store path")
 		}
 	}
 }
 
 func openBrowserIfNeeded(oldConfig *types.ComigoConfig, newConfig *types.ComigoConfig) {
-	if newConfig.OpenBrowser && !oldConfig.OpenBrowser {
+	if !oldConfig.OpenBrowser && newConfig.OpenBrowser {
 		protocol := "http://"
 		if newConfig.EnableTLS {
 			protocol = "https://"
@@ -68,7 +68,7 @@ func openBrowserIfNeeded(oldConfig *types.ComigoConfig, newConfig *types.ComigoC
 
 // updateConfigIfNeeded 检查旧的和新的配置是否需要更新，并返回需要重新扫描和重新扫描文件的布尔值
 func updateConfigIfNeeded(oldConfig *types.ComigoConfig, newConfig *types.ComigoConfig) (needScan bool, reScanFile bool) {
-	if differentConfig(oldConfig.StoresPath, newConfig.StoresPath) {
+	if !reflect.DeepEqual(oldConfig.StoresPath, newConfig.StoresPath) {
 		needScan = true
 		oldConfig.StoresPath = newConfig.StoresPath
 	}
@@ -76,12 +76,12 @@ func updateConfigIfNeeded(oldConfig *types.ComigoConfig, newConfig *types.Comigo
 		needScan = true
 		oldConfig.MaxScanDepth = newConfig.MaxScanDepth
 	}
-	if differentConfig(oldConfig.SupportMediaType, newConfig.SupportMediaType) {
+	if !reflect.DeepEqual(oldConfig.SupportMediaType, newConfig.SupportMediaType) {
 		needScan = true
 		reScanFile = true
 		oldConfig.SupportMediaType = newConfig.SupportMediaType
 	}
-	if differentConfig(oldConfig.SupportFileType, newConfig.SupportFileType) {
+	if !reflect.DeepEqual(oldConfig.SupportFileType, newConfig.SupportFileType) {
 		needScan = true
 		oldConfig.SupportFileType = newConfig.SupportFileType
 	}
@@ -90,7 +90,7 @@ func updateConfigIfNeeded(oldConfig *types.ComigoConfig, newConfig *types.Comigo
 		reScanFile = true
 		oldConfig.MinImageNum = newConfig.MinImageNum
 	}
-	if differentConfig(oldConfig.ExcludePath, newConfig.ExcludePath) {
+	if !reflect.DeepEqual(oldConfig.ExcludePath, newConfig.ExcludePath) {
 		needScan = true
 		oldConfig.ExcludePath = newConfig.ExcludePath
 	}
@@ -101,12 +101,8 @@ func updateConfigIfNeeded(oldConfig *types.ComigoConfig, newConfig *types.Comigo
 	return
 }
 
-func differentConfig(old, new interface{}) bool {
-	return !reflect.DeepEqual(old, new)
-}
-
 // performScanAndUpdateDBIfNeeded 扫描并相应地更新数据库
-func performScanAndUpdateDBIfNeeded(oldConfig *types.ComigoConfig, newConfig *types.ComigoConfig, reScanFile bool) {
+func performScanAndUpdateDBIfNeeded(newConfig *types.ComigoConfig, reScanFile bool) {
 	option := scan.NewScanOption(
 		reScanFile,
 		newConfig.StoresPath,
@@ -124,7 +120,7 @@ func performScanAndUpdateDBIfNeeded(oldConfig *types.ComigoConfig, newConfig *ty
 	if err := scan.ScanStorePath(option); err != nil {
 		logger.Infof("Failed to scan store path: %v", err)
 	}
-	if oldConfig.EnableDatabase {
+	if newConfig.EnableDatabase {
 		saveResultsToDatabase(config.Config.ConfigPath, config.Config.ClearDatabaseWhenExit)
 	}
 }
