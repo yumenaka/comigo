@@ -26,7 +26,7 @@ const ConfigManager = (props: PropsType) => {
     // 可以用React query代替useEffectOnce，获得loading，error，retry,cache等功能。 https://reffect.co.jp/react/react-use-query 
     const updateConfigStatus = () => {
         axios
-            .get<ConfigStatus>(`api/config/status`)
+            .get<ConfigStatus>(`/api/config/status`)
             .then((response) => {
                 setConfigStatus(response.data);
             })
@@ -61,7 +61,7 @@ const ConfigManager = (props: PropsType) => {
         }
 
         axios
-            .post<ConfigStatus | { error: string }>(`api/config/${selected}`)
+            .post<ConfigStatus | { error: string }>(`/api/config/${selected}`)
             .then((response) => {
                 if (response.status === 200) {
                     console.log(response.data);
@@ -83,7 +83,7 @@ const ConfigManager = (props: PropsType) => {
         // get element data
         console.log(event.currentTarget.getAttribute("data-save_to"));
         axios
-            .delete<ConfigStatus | { error: string }>(`api/config/${selected}`)
+            .delete<ConfigStatus | { error: string }>(`/api/config/${selected}`)
             .then((response) => {
                 if (response.status === 200) {
                     console.log(response.data);
