@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/cheggaaa/pb/v3"
@@ -27,6 +28,7 @@ var (
 		SubFolders: make(map[string]*subFolder),
 		SortBy:     "name",
 	}
+	lock sync.Mutex
 )
 
 // Book 定义书籍，BooID不应该重复，根据文件路径生成
@@ -136,7 +138,9 @@ func AddBook(b *Book, basePath string, minPageNum int) error {
 			logger.Info(err)
 		}
 	}
+	lock.Lock()
 	mapBooks[b.BookID] = b
+	lock.Unlock()
 	return MainFolder.AddBookToSubFolder(basePath, &b.BookInfo)
 }
 

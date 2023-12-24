@@ -32,7 +32,6 @@ function App() {
   //useReducer最终返回一个存储有当前状态值的数组和一个dispatch函数，该dispatch函数执行触发action，带来状态的变化。
   const [config, config_dispatch] = useReducer(configReducer, defaultConfig)
 
-
   // 只执行一次的useEffect，来自'react-use'库。
   useEffectOnce(() => {
     // 当前语言 jp zh en
