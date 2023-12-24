@@ -31,7 +31,7 @@ const NormalConfig = ({
         }} 
         className={`w-full m-1 p-2 flex flex-col shadow-md hover:shadow-2xl font-semibold rounded-md justify-start items-left`}>
             <label htmlFor={name} className="w-64">
-                {label}:
+                {label}
             </label>
             <input
                 className="px-1 w-64 rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm"
