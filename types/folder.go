@@ -107,7 +107,9 @@ func (s *subFolder) AnalyzeFolder() error {
 			//将这本书加到子书库的BookGroup表（Images.BookGroupMap）里面去
 			s.BookGroupMap[newBookGroup.BookID] = &newBookGroup.BookInfo
 			//将这本书加到BookGroup总表（mapBookGroup）里面去
+			mutex.Lock()
 			mapBookGroup[newBookGroup.BookID] = newBookGroup
+			mutex.Unlock()
 		}
 	}
 	return nil

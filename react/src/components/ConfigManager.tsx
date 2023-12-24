@@ -41,11 +41,11 @@ const ConfigManager = (props: PropsType) => {
     const [selected, setSelected] = useState("WorkingDirectory");
     const selectOption = [
         //https://icon-icons.com/icon/coding-program/71231
-        { name: "WorkingDirectory", icon: "icon/working_directory.png", description: t("WorkingDirectory"), path: config_status.Path.WorkingDirectory },
+        { name: "WorkingDirectory", icon: "/admin/icon/working_directory.png", description: t("WorkingDirectory"), path: config_status.Path.WorkingDirectory },
         //https://icon-icons.com/icon/web-page-home/85808
-        { name: "HomeDirectory", icon: "icon/home_directory.png", description: t("HomeDirectory"), path: config_status.Path.HomeDirectory },
+        { name: "HomeDirectory", icon: "/admin/icon/home_directory.png", description: t("HomeDirectory"), path: config_status.Path.HomeDirectory },
         //https://icon-icons.com/icon/folder-sync-outline/139517
-        { name: "ProgramDirectory", icon: "icon/program_directory.png", description: t("ProgramDirectory"), path: config_status.Path.ProgramDirectory },
+        { name: "ProgramDirectory", icon: "/admin/icon/program_directory.png", description: t("ProgramDirectory"), path: config_status.Path.ProgramDirectory },
     ];
 
     const onSelect = (event: React.MouseEvent) => {
@@ -112,13 +112,13 @@ const ConfigManager = (props: PropsType) => {
             </label>
             <div className="flex flex-row  mx-0 my-1 w-full">
                 {Object.entries(selectOption).map(([key, value]) => (
-                    <div key={value.name} data-save_to={value.name} onClick={onSelect} className={"flex flex-col justify-center items-center text-xs font-normal pt-2 mx-1 w-1/3 min-h-20 border border-gray-500 rounded" + (selected === value.name ? " bg-cyan-200" : "")}>
-                        <img className="h-7 w-7" src={value.icon} alt={key} />
+                    <div key={key} data-save_to={value.name} onClick={onSelect} className={"flex flex-col justify-center items-center text-xs font-normal pt-2 mx-1 w-1/3 min-h-20 border border-gray-500 rounded" + (selected === value.name ? " bg-cyan-200" : "")}>
+                        <img className="h-7 w-7" src={value.icon} key={key} />
                         <div className="mt-1">{value.description}</div>
                         {/* 超过两行，显示省略号。https://zenn.dev/ilove/articles/8a93705d396e05 */}
                         {selectOption.map(s =>
                             value.name === s.name &&
-                            <div className="mx-1 my-1 text-xs text-gray-500 line-clamp-2 hover:line-clamp-none active:line-clamp-none">{s.path}</div>
+                            <div key={s.name} className="mx-1 my-1 text-xs text-gray-500 line-clamp-2 hover:line-clamp-none active:line-clamp-none">{s.path}</div>
                         )}
                     </div>
                 ))}
@@ -127,7 +127,7 @@ const ConfigManager = (props: PropsType) => {
                 <button onClick={onSaveConfig} className="h-10 w-24 mx-2 my-1 bg-sky-300 border border-gray-500 text-center text-gray-700 transition hover:text-gray-900 rounded">SAVE</button>
                 {selectOption.map(s =>
                     selected === s.name && s.path !== "" &&
-                    <button onClick={onDeleteConfig} className="h-10 w-24 mx-2 my-1 bg-red-300 border border-gray-500 text-center text-gray-700 transition hover:text-gray-900 rounded">DELETE</button>
+                    <button key={s.name} onClick={onDeleteConfig} className="h-10 w-24 mx-2 my-1 bg-red-300 border border-gray-500 text-center text-gray-700 transition hover:text-gray-900 rounded">DELETE</button>
                 )}
             </div>
         </div>

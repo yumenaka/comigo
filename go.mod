@@ -19,32 +19,32 @@ require (
 	github.com/elliotchance/pie/v2 v2.8.0
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gin-gonic/gin v1.9.1
-	github.com/google/uuid v1.4.0
+	github.com/google/uuid v1.5.0
 	github.com/gorilla/websocket v1.5.1
 	github.com/jxskiss/base62 v1.1.0
-	github.com/klauspost/compress v1.17.3
+	github.com/klauspost/compress v1.17.4
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/mandykoh/autocrop v0.4.7
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/nicksnyder/go-i18n/v2 v2.2.2
-	github.com/pelletier/go-toml/v2 v2.1.0
+	github.com/nicksnyder/go-i18n/v2 v2.3.0
+	github.com/pelletier/go-toml/v2 v2.1.1
 	github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5
 	github.com/sanity-io/litter v1.5.5
 	github.com/shirou/gopsutil/v3 v3.23.11
 	github.com/sirupsen/logrus v1.9.3
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/spf13/cobra v1.8.0
-	github.com/spf13/viper v1.17.0
+	github.com/spf13/viper v1.18.2
 	github.com/tidwall/gjson v1.17.0
 	github.com/xxjwxc/gowp v0.0.0-20230612082025-23a9b62c1da6
 	github.com/yumenaka/archiver/v4 v4.0.1
 	golang.org/x/net v0.19.0
 	golang.org/x/text v0.14.0
-	modernc.org/sqlite v1.27.0
+	modernc.org/sqlite v1.28.0
 )
 
 require (
-	ariga.io/atlas v0.15.0 // indirect
+	ariga.io/atlas v0.16.0 // indirect
 	github.com/VividCortex/ewma v1.2.0 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/andybalholm/brotli v1.0.6 // indirect
@@ -52,7 +52,7 @@ require (
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/bodgit/plumbing v1.3.0 // indirect
-	github.com/bodgit/sevenzip v1.4.4 // indirect
+	github.com/bodgit/sevenzip v1.4.5 // indirect
 	github.com/bodgit/windows v1.0.1 // indirect
 	github.com/bytedance/sonic v1.10.2 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
@@ -101,7 +101,7 @@ require (
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/termenv v0.15.2 // indirect
 	github.com/nwaples/rardecode/v2 v2.0.0-beta.2 // indirect
-	github.com/pierrec/lz4/v4 v4.1.18 // indirect
+	github.com/pierrec/lz4/v4 v4.1.19 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/power-devops/perfstat v0.0.0-20221212215047-62379fc7944b // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
@@ -117,33 +117,33 @@ require (
 	github.com/therootcompany/xz v1.0.1 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
-	github.com/tklauser/go-sysconf v0.3.12 // indirect
-	github.com/tklauser/numcpus v0.6.1 // indirect
+	github.com/tklauser/go-sysconf v0.3.13 // indirect
+	github.com/tklauser/numcpus v0.7.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
 	github.com/ulikunitz/xz v0.5.11 // indirect
-	github.com/xxjwxc/public v0.0.0-20231123085200-159e77d6cf08 // indirect
+	github.com/xxjwxc/public v0.0.0-20231222074226-4cffde1f03a8 // indirect
 	github.com/yusufpapurcu/wmi v1.2.3 // indirect
 	github.com/zclconf/go-cty v1.14.1 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go4.org v0.0.0-20230225012048-214862532bf5 // indirect
 	golang.org/x/arch v0.6.0 // indirect
-	golang.org/x/crypto v0.16.0 // indirect
-	golang.org/x/exp v0.0.0-20231127185646-65229373498e // indirect
+	golang.org/x/crypto v0.17.0 // indirect
+	golang.org/x/exp v0.0.0-20231219180239-dc181d75b848 // indirect
 	golang.org/x/image v0.14.0 // indirect
 	golang.org/x/mod v0.14.0 // indirect
 	golang.org/x/sync v0.5.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect
 	golang.org/x/term v0.15.0 // indirect
-	golang.org/x/tools v0.16.0 // indirect
-	google.golang.org/protobuf v1.31.0 // indirect
+	golang.org/x/tools v0.16.1 // indirect
+	google.golang.org/protobuf v1.32.0 // indirect
 	gopkg.in/eapache/queue.v1 v1.1.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	lukechampine.com/uint128 v1.3.0 // indirect
 	modernc.org/cc/v3 v3.41.0 // indirect
 	modernc.org/ccgo/v3 v3.16.15 // indirect
-	modernc.org/libc v1.34.11 // indirect
+	modernc.org/libc v1.38.0 // indirect
 	modernc.org/mathutil v1.6.0 // indirect
 	modernc.org/memory v1.7.2 // indirect
 	modernc.org/opt v0.1.3 // indirect
