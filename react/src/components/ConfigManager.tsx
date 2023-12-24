@@ -2,23 +2,25 @@ import { useState, } from "react"
 import axios from "axios"
 import ConfigStatus from "../types/ConfigStatus"
 import { useEffectOnce } from 'react-use';
+import { useTranslation } from "react-i18next";
+
 
 type PropsType = {
-    label: string
     InterfaceColor: string
     showDialogFunc: (title: string, content: string) => void
 }
 
 const ConfigManager = (props: PropsType) => {
-    const { label, InterfaceColor,showDialogFunc } = props
+    const { InterfaceColor, showDialogFunc } = props
     const [config_status, setConfigStatus] = useState({
         In: "",
-        Path:{
+        Path: {
             WorkingDirectory: "",
             HomeDirectory: "",
             ProgramDirectory: ""
         }
     } as ConfigStatus);
+    const { t } = useTranslation();
 
     // 获取comigo配置的状态
     // 可以用React query代替useEffectOnce，获得loading，error，retry,cache等功能。 https://reffect.co.jp/react/react-use-query 
@@ -37,24 +39,40 @@ const ConfigManager = (props: PropsType) => {
     });
 
     const [selected, setSelected] = useState("WorkingDirectory");
-    const selectOption = {
-        "WorkingDirectory": ["icon/working_directory.png", "当前运行目录"],//https://icon-icons.com/icon/coding-program/71231
-        "HomeDirectory": ["icon/home_directory.png", "用户主目录"],//https://icon-icons.com/icon/web-page-home/85808
-        "ProgramDirectory": ["icon/program_directory.png", "程序所在目录"]//https://icon-icons.com/icon/folder-sync-outline/139517
-    }
+    const selectOption = [
+        //https://icon-icons.com/icon/coding-program/71231
+        { name: "WorkingDirectory", icon: "icon/working_directory.png", description: t("WorkingDirectory"), path: config_status.Path.WorkingDirectory },
+        //https://icon-icons.com/icon/web-page-home/85808
+        { name: "HomeDirectory", icon: "icon/home_directory.png", description: t("HomeDirectory"), path: config_status.Path.HomeDirectory },
+        //https://icon-icons.com/icon/folder-sync-outline/139517
+        { name: "ProgramDirectory", icon: "icon/program_directory.png", description: t("ProgramDirectory"), path: config_status.Path.ProgramDirectory },
+    ];
 
     const onSelect = (event: React.MouseEvent) => {
-        //console.log(event.currentTarget.getAttribute("data-save_to"));
-        setSelected(event.currentTarget.getAttribute("data-save_to") ?? "RAM");
+        setSelected(event.currentTarget.getAttribute("data-save_to") ?? "");
     };
 
     const onSaveConfig = () => {
+        for (let i = 0; i < selectOption.length; i++) {
+            if (selected !== selectOption[i].name && selectOption[i].path !== "") {
+                showDialogFunc(t("hint"), `【${selectOption[i].description}】`+t("ConfigManagerSaveHint"));
+                return;
+            }
+        }
+
         axios
-            .post<ConfigStatus>(`api/config/${selected}`)
+            .post<ConfigStatus | { error: string }>(`api/config/${selected}`)
             .then((response) => {
-                console.log(response.data);
-                setConfigStatus(response.data);
-                showDialogFunc("提示", "配置已保存");
+                if (response.status === 200) {
+                    console.log(response.data);
+                    setConfigStatus(response.data as ConfigStatus);
+                    showDialogFunc(t("hint"), t("ConfigManagerSaveSuccess"));
+                }
+                if (response.status === 400) {
+                    const error = response.data as { error: string };
+                    console.log(error.error);
+                    showDialogFunc(t("hint"), error.error);
+                }
             })
             .catch((error) => {
                 console.error(error);
@@ -65,11 +83,18 @@ const ConfigManager = (props: PropsType) => {
         // get element data
         console.log(event.currentTarget.getAttribute("data-save_to"));
         axios
-            .delete<ConfigStatus>(`api/config/${selected}`)
+            .delete<ConfigStatus | { error: string }>(`api/config/${selected}`)
             .then((response) => {
-                console.log(response.data);
-                setConfigStatus(response.data);
-                showDialogFunc("提示", "配置已删除");
+                if (response.status === 200) {
+                    console.log(response.data);
+                    setConfigStatus(response.data as ConfigStatus);
+                    showDialogFunc(t("hint"), t("ConfigManagerDeleteSuccess"));
+                }
+                if (response.status === 400) {
+                    const error = response.data as { error: string };
+                    console.log(error.error);
+                    showDialogFunc(t("hint"), error.error);
+                }
             })
             .catch((error) => {
                 console.error(error);
@@ -80,28 +105,31 @@ const ConfigManager = (props: PropsType) => {
         <div
             className="w-full m-1 p-2 flex flex-col shadow-md hover:shadow-2xl font-semibold rounded-md justify-center items-center"
             style={{
-                backgroundColor: InterfaceColor, // 绑定样式
+                backgroundColor: InterfaceColor,
             }}>
             <label className="py-0 w-full">
-                {label}
+                {t("ConfigManager")}
             </label>
             <div className="flex flex-row  mx-0 my-1 w-full">
                 {Object.entries(selectOption).map(([key, value]) => (
-                    <div key={key} data-save_to={key} onClick={onSelect} className={"flex flex-col justify-start items-center text-xs font-normal pt-2 mx-1 w-1/3 min-h-20 border border-gray-500 rounded" + (selected === key ? " bg-cyan-200" : "")}>
-                        <img className="h-7 w-7" src={value[0]} alt={key} />
-                        <div className="mt-1">{value[1]}</div>
+                    <div key={value.name} data-save_to={value.name} onClick={onSelect} className={"flex flex-col justify-center items-center text-xs font-normal pt-2 mx-1 w-1/3 min-h-20 border border-gray-500 rounded" + (selected === value.name ? " bg-cyan-200" : "")}>
+                        <img className="h-7 w-7" src={value.icon} alt={key} />
+                        <div className="mt-1">{value.description}</div>
                         {/* 超过两行，显示省略号。https://zenn.dev/ilove/articles/8a93705d396e05 */}
-                        {key === "WorkingDirectory" && <div className="mx-1 my-1 text-xs text-gray-500 line-clamp-2">{config_status.Path.WorkingDirectory}</div>}
-                        {key === "HomeDirectory" && <div className="mx-1 my-1 text-xs text-gray-500 line-clamp-2">{config_status.Path.HomeDirectory}</div>}
-                        {key === "ProgramDirectory" && <div className="mx-1 my-1 text-xs text-gray-500 line-clamp-2 hover:line-clamp-none active:line-clamp-none">{config_status.Path.ProgramDirectory}</div>}
+                        {selectOption.map(s =>
+                            value.name === s.name &&
+                            <div className="mx-1 my-1 text-xs text-gray-500 line-clamp-2 hover:line-clamp-none active:line-clamp-none">{s.path}</div>
+                        )}
                     </div>
                 ))}
             </div>
             <div className="flex flex-row mx-4">
                 <button onClick={onSaveConfig} className="h-10 w-24 mx-2 my-1 bg-sky-300 border border-gray-500 text-center text-gray-700 transition hover:text-gray-900 rounded">SAVE</button>
-                <button onClick={onDeleteConfig} className="h-10 w-24 mx-2 my-1 bg-red-300 border border-gray-500 text-center text-gray-700 transition hover:text-gray-900 rounded">DELETE</button>
+                {selectOption.map(s =>
+                    selected === s.name && s.path !== "" &&
+                    <button onClick={onDeleteConfig} className="h-10 w-24 mx-2 my-1 bg-red-300 border border-gray-500 text-center text-gray-700 transition hover:text-gray-900 rounded">DELETE</button>
+                )}
             </div>
-
         </div>
     )
 }

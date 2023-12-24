@@ -158,5 +158,13 @@
   "LogFileName_Description": "ログファイル名",
   "GenerateMetaData_Description": "書籍のメタデータを生成します。現在は有効ではありません。",
   "ClearCacheExit_Description": "プログラムを終了するときは、Web 画像キャッシュをクリアします。",
-  "CachePath_Description": "ローカルの画像キャッシュの場所、デフォルトのシステム一時フォルダー。"
+  "CachePath_Description": "ローカルの画像キャッシュの場所、デフォルトのシステム一時フォルダー。",
+  "ConfigManager": "設定ファイル管理",
+  "WorkingDirectory": "作業ディレクトリ",
+  "HomeDirectory": "ホームディレクトリ",
+  "ProgramDirectory": "プログラムディレクトリ",
+  "hint": "Hint",
+  "ConfigManagerSaveHint": "すでに設定ファイルがあるので、保存場所を変更してください。",
+  "ConfigManagerSaveSuccess": "設定が保存されました。",
+  "ConfigManagerDeleteSuccess": "設定が削除されました。"
 }

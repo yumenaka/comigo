@@ -158,5 +158,13 @@
   "LogFileName_Description": "Log文件名",
   "GenerateMetaData_Description": "生成书籍元数据。当前未生效。",
   "ClearCacheExit_Description": "退出程序的时候，清理web图片缓存。",
-  "CachePath_Description": "本地图片缓存位置，默认系统临时文件夹。"
+  "CachePath_Description": "本地图片缓存位置，默认系统临时文件夹。",
+  "ConfigManager": "配置文件管理",
+  "WorkingDirectory": "当前工作目录",
+  "HomeDirectory": "用户主目录",
+  "ProgramDirectory": "程序所在目录",
+  "hint": "提示",
+  "ConfigManagerSaveHint": "已有配置文件,请切换保存位置。",
+  "ConfigManagerSaveSuccess": "配置已保存。",
+  "ConfigManagerDeleteSuccess": "配置已删除。"
 }

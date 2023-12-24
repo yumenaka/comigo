@@ -162,13 +162,11 @@ function App() {
         className={`main-area w-3/5 min-w-[24rem] flex flex-col justify-center items-center`}
       >
         <ConfigManager
-              label={"配置保存："}
               InterfaceColor={InterfaceColor}
               showDialogFunc={showDialogFunc}
             ></ConfigManager>
         {headerGroup === "bookstore" &&
           <>
-   
             {/* <button className="h-15 w-full" onClick={() => setLang(lang === 'en' ? 'ja' : 'en')}>切换语言</button> */}
             <BoolConfig
               label={t("OpenBrowser")}

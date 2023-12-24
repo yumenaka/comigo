@@ -49,7 +49,7 @@ const ArrayConfig: React.FC<Props> = ({
             }}
             className={`w-full m-1 p-2 flex flex-col shadow-md hover:shadow-2xl font-semibold rounded-md justify-start items-left`}>
             <label className="py-0 w-32" htmlFor={name}>
-                {label}:
+                {label}
             </label>
             <div className="py-1 w-3/4 flex flex-row flex-wrap">
                 {/* {value.toString()} */}
