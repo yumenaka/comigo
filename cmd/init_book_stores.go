@@ -48,7 +48,7 @@ func StartScan(args []string) {
 		config.Config.ClearDatabaseWhenExit,
 		config.Config.Debug,
 	)
-	err := scan.ScanStorePath(option)
+	err := scan.InitStore(option)
 	if err != nil {
 		logger.Infof("Failed to scan store path: %v", err)
 	}

@@ -37,7 +37,16 @@ type Book struct {
 	Pages Pages `json:"pages"` //storm:"inline" 内联字段，结构体嵌套时使用
 }
 
-// CheckBookExist 查看内存中是否已经有了这本书,有了就报错，让调用者跳过
+func ResetBookList() {
+	mapBooks = make(map[string]*Book)
+	mapBookGroup = make(map[string]*BookGroup)
+	MainFolder = Folder{
+		SubFolders: make(map[string]*subFolder),
+		SortBy:     "name",
+	}
+}
+
+// CheckBookExist 查看内存中是否已经有了这本书,有了就false，让调用者跳过
 func CheckBookExist(filePath string, bookType SupportFileType, storePath string) bool {
 	//如果是文件夹，就不用检查了
 	if bookType == TypeDir || bookType == TypeBooksGroup {

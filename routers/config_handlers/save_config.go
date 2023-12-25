@@ -16,7 +16,7 @@ func SaveConfigHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed save to " + SaveTo + " directory"})
 		return
 	}
-	//如果其他目录已经存在了，就不能保存（暂时不支持多配置文件）
+	//如果其他目录已经存在了，就不能保存（暂不支持多配置文件）
 	if SaveTo == "WorkingDirectory" && (config.Status.Path.HomeDirectory != "" || config.Status.Path.ProgramDirectory != "") {
 		logger.Info("error: Find config in " + config.Status.Path.HomeDirectory + " " + config.Status.Path.ProgramDirectory)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "error: Find config in " + config.Status.Path.HomeDirectory + " " + config.Status.Path.ProgramDirectory})
