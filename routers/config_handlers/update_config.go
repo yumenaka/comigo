@@ -33,7 +33,7 @@ func UpdateConfig(c *gin.Context) {
 		c.JSON(http.StatusMethodNotAllowed, gin.H{"error": "Failed to parse JSON data"})
 		return
 	}
-	// 根据配置的变化，做相应的操作。比如打开浏览器重新扫描等
+	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等
 	BeforeConfigUpdate(oldConfig, &config.Config)
 	// 返回成功消息
 	c.JSON(http.StatusOK, gin.H{"message": "Server settings updated successfully"})
@@ -117,7 +117,7 @@ func performScanAndUpdateDBIfNeeded(newConfig *types.ComigoConfig, reScanFile bo
 		newConfig.ClearDatabaseWhenExit,
 		newConfig.Debug,
 	)
-	if err := scan.ScanStorePath(option); err != nil {
+	if err := scan.InitStore(option); err != nil {
 		logger.Infof("Failed to scan store path: %v", err)
 	}
 	if newConfig.EnableDatabase {

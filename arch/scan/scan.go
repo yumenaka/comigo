@@ -100,18 +100,17 @@ func (o *Option) IsSkipDir(path string) bool {
 	return false
 }
 
-// ScanStorePath 3、扫描配置文件指定的的书籍库
-func ScanStorePath(scanConfig Option) error {
-	if len(scanConfig.StoresPath) > 0 {
-		for _, p := range scanConfig.StoresPath {
-			addList, err := ScanAndGetBookList(p, scanConfig)
-			if err != nil {
-				logger.Info(locale.GetString("scan_error"), p, err)
-				return err
-			} else {
-				AddBooksToStore(addList, p, scanConfig.MinImageNum)
-			}
+// InitStore 3、扫描路径，取得路径里的书籍
+func InitStore(scanConfig Option) error {
+	// 重置书籍列表
+	types.ResetBookList()
+	for _, p := range scanConfig.StoresPath {
+		addList, err := ScanAndGetBookList(p, scanConfig)
+		if err != nil {
+			logger.Info(locale.GetString("scan_error"), p, err)
+			continue
 		}
+		AddBooksToStore(addList, p, scanConfig.MinImageNum)
 	}
 	return nil
 }
