@@ -31,9 +31,8 @@ import (
 //遍历map 	          for…range 	        sync.Range()
 //
 //sync.Map 两个特有的函数:
-//
 //LoadOrStore - sync.Map 存在就返回，不存在就插入
-//LoadAndDelet - sync.Map 获取某个 key，如果存在的话，同时删除这个 key
+//LoadAndDelete - sync.Map 获取某个 key，如果存在的话，同时删除这个 key
 
 var (
 	mapBooks     sync.Map //实际存在的书，通过扫描生成 原本是 map[string]*Book 但是为了并发安全，改成sync.Map
@@ -235,11 +234,13 @@ func GetBookGroupIDByBookID(id string) (group_id string, err error) {
 	//根据id查找
 	mapBookGroup.Range(func(_, value interface{}) bool {
 		group := value.(*BookGroup)
-		for _, b := range group.ChildBook {
+		group.ChildBook.Range(func(key, value interface{}) bool {
+			b := value.(*BookInfo)
 			if b.BookID == id {
 				group_id = group.BookID
 			}
-		}
+			return true
+		})
 		return true
 	})
 	if group_id != "" {
@@ -252,11 +253,13 @@ func GetBookGroupInfoByChildBookID(id string) (g *BookGroup, err error) {
 	//根据id查找
 	mapBookGroup.Range(func(_, value interface{}) bool {
 		group := value.(*BookGroup)
-		for _, b := range group.ChildBook {
+		group.ChildBook.Range(func(key, value interface{}) bool {
+			b := value.(*BookInfo)
 			if b.BookID == id {
 				g = group
 			}
-		}
+			return true
+		})
 		return true
 	})
 	if g != nil {
