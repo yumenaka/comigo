@@ -13,7 +13,6 @@ import (
 type Folder struct {
 	Path       string
 	SortBy     string                //新字段   //排序方式
-	BookMap    map[string]*BookInfo  ///新字段   //拥有的书籍,key是BookID
 	SubFolders map[string]*subFolder //key为路径
 }
 
@@ -93,11 +92,14 @@ func (s *subFolder) AnalyzeFolder() error {
 			}
 			//检测是否已经生成并添加过
 			Added := false
-			for _, group := range mapBookGroup {
+			mapBookGroup.Range(func(_, value interface{}) bool {
+				group := value.(*BookGroup)
 				if group.FilePath == newBookGroup.FilePath {
 					Added = true
 				}
-			}
+				return true
+			})
+
 			//添加过的不需要添加
 			if Added {
 				continue
@@ -107,9 +109,7 @@ func (s *subFolder) AnalyzeFolder() error {
 			//将这本书加到子书库的BookGroup表（Images.BookGroupMap）里面去
 			s.BookGroupMap[newBookGroup.BookID] = &newBookGroup.BookInfo
 			//将这本书加到BookGroup总表（mapBookGroup）里面去
-			mutex.Lock()
-			mapBookGroup[newBookGroup.BookID] = newBookGroup
-			mutex.Unlock()
+			mapBookGroup.Store(newBookGroup.BookID, newBookGroup)
 		}
 	}
 	return nil

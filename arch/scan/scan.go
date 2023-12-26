@@ -103,7 +103,7 @@ func (o *Option) IsSkipDir(path string) bool {
 // InitStore 3、扫描路径，取得路径里的书籍
 func InitStore(scanConfig Option) error {
 	// 重置书籍列表
-	types.ResetBookList()
+	//types.ResetBookList()
 	for _, p := range scanConfig.StoresPath {
 		addList, err := ScanAndGetBookList(p, scanConfig)
 		if err != nil {
@@ -361,7 +361,7 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 				return fs.SkipDir
 			}
 			if !scanOption.IsSupportMedia(path) {
-				logger.DebugWithFields(logrus.Fields{"filepath": path}, locale.GetString("unsupported_file_type"))
+				logger.Info(locale.GetString("unsupported_file_type") + path)
 			} else {
 				u, ok := f.(archiver.File) // f.Name不包含路径信息.需要转换一下
 				if !ok {
