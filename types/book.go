@@ -21,12 +21,25 @@ import (
 	"github.com/yumenaka/comi/util"
 )
 
+//https://wnanbei.github.io/post/go-%E5%B9%B6%E5%8F%91%E5%AE%89%E5%85%A8%E7%9A%84-sync.map/
+//sync.Map 是标准库 sync 中实现的并发安全的 map。
+//
+//操作 	            普通map 	             sync.Map
+//map获取某个key 	  map[1] 	            sync.Load(1)
+//map添加元素 	      map[1] = 10 	        sync.Store(1, 10)
+//map删除一个key 	  delete(map, 1) 	    sync.Delete(1)
+//遍历map 	          for…range 	        sync.Range()
+//
+//sync.Map 两个特有的函数:
+//
+//LoadOrStore - sync.Map 存在就返回，不存在就插入
+//LoadAndDelet - sync.Map 获取某个 key，如果存在的话，同时删除这个 key
+
 var (
 	mapBooks     sync.Map //实际存在的书，通过扫描生成 原本是 map[string]*Book 但是为了并发安全，改成sync.Map
 	mapBookGroup sync.Map //通过分析路径与深度生成的书组。不备份，也不存储到数据库。key是BookID
 	MainFolder   = Folder{
-		SubFolders: make(map[string]*subFolder),
-		SortBy:     "name",
+		SortBy: "name",
 	}
 )
 
@@ -146,7 +159,7 @@ func AddBook(b *Book, basePath string, minPageNum int) error {
 	if b.GetPageCount() < minPageNum {
 		return errors.New("add book Error：minPageNum = " + strconv.Itoa(b.GetPageCount()))
 	}
-	if _, ok := MainFolder.SubFolders[basePath]; !ok {
+	if _, ok := MainFolder.SubFolders.Load(basePath); !ok {
 		if err := MainFolder.AddSubFolder(basePath); err != nil {
 			logger.Info(err)
 		}

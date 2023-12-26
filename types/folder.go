@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"github.com/yumenaka/comi/logger"
 	"github.com/yumenaka/comi/util"
@@ -12,41 +13,53 @@ import (
 // Folder 本地总书库，扫描后生成。可以有多个子书库。
 type Folder struct {
 	Path       string
-	SortBy     string                //新字段   //排序方式
-	SubFolders map[string]*subFolder //key为路径
+	SortBy     string   //新字段   //排序方式
+	SubFolders sync.Map //key为路径 存储 *subFolder
 }
 
 // 对应某个扫描路径的子书库
 type subFolder struct {
-	Path         string               //路径
-	SortBy       string               //排序方式
-	BookMap      map[string]*BookInfo //拥有的书籍,key是BookID
-	BookGroupMap map[string]*BookInfo //拥有的书籍组,通过扫描书库生成，key是BookID。需要通过Depth从深到浅生成
+	Path         string   //路径
+	SortBy       string   //排序方式
+	BookMap      sync.Map //拥有的书籍,key是BookID,存储 *BookInfo
+	BookGroupMap sync.Map //拥有的书籍组,通过扫描书库生成，key是BookID,存储 *BookInfo。需要通过Depth从深到浅生成
 }
 
 // InitFolder 生成书籍组
-func (folder *Folder) InitFolder() error {
-	for _, single := range folder.SubFolders {
-		err := single.AnalyzeFolder()
+func (folder *Folder) InitFolder() (e error) {
+	//遍历所有子书库
+	folder.SubFolders.Range(func(_, value interface{}) bool {
+		s := value.(*subFolder)
+		err := s.AnalyzeFolder()
 		if err != nil {
-			return err
+			e = err
 		}
-	}
-	return nil
+		return true
+	})
+	return e
 }
 
 func (s *subFolder) AnalyzeFolder() error {
-	if len(s.BookMap) == 0 {
+	count := 0
+	s.BookMap.Range(func(key, value interface{}) bool {
+		count++
+		return true
+	})
+	if count == 0 {
 		return errors.New("empty Bookstore")
 	}
 	depthBooksMap := make(map[int][]BookInfo) //key是Depth的临时map
 	maxDepth := 0
-	for _, b := range s.BookMap {
+
+	s.BookMap.Range(func(key, value interface{}) bool {
+		b := value.(*BookInfo)
 		depthBooksMap[b.Depth] = append(depthBooksMap[b.Depth], *b)
 		if b.Depth > maxDepth {
 			maxDepth = b.Depth
 		}
-	}
+		return true
+	})
+
 	//从深往浅遍历
 	//如果有几本书同时有同一个父文件夹，那么应该【新建]一本书(组)，并加入到depth-1层里面
 	for depth := maxDepth; depth >= 0; depth-- {
@@ -107,7 +120,7 @@ func (s *subFolder) AnalyzeFolder() error {
 			depthBooksMap[depth-1] = append(depthBooksMap[depth-1], newBookGroup.BookInfo)
 			newBookGroup.Author, _ = util.GetAuthor(newBookGroup.Title)
 			//将这本书加到子书库的BookGroup表（Images.BookGroupMap）里面去
-			s.BookGroupMap[newBookGroup.BookID] = &newBookGroup.BookInfo
+			s.BookGroupMap.Store(newBookGroup.BookID, &newBookGroup.BookInfo)
 			//将这本书加到BookGroup总表（mapBookGroup）里面去
 			mapBookGroup.Store(newBookGroup.BookID, newBookGroup)
 		}
@@ -117,27 +130,31 @@ func (s *subFolder) AnalyzeFolder() error {
 
 // AddSubFolder 创建一个新文件夹
 func (folder *Folder) AddSubFolder(basePath string) error {
-	if _, ok := folder.SubFolders[basePath]; ok {
+	if _, ok := folder.SubFolders.Load(basePath); ok {
 		// 已经有这个key了
 		return errors.New("add Bookstore Error： The key already exists [" + basePath + "]")
 	}
 	s := subFolder{
-		Path:         basePath,
-		BookMap:      make(map[string]*BookInfo),
-		BookGroupMap: make(map[string]*BookInfo),
+		Path: basePath,
 	}
-	folder.SubFolders[basePath] = &s
+	folder.SubFolders.Store(basePath, &s)
 	return nil
 }
 
 // AddBookToSubFolder 将某一本书，放到BookMap里面去
 func (folder *Folder) AddBookToSubFolder(searchPath string, b *BookInfo) error {
-	if _, ok := folder.SubFolders[searchPath]; !ok {
+	if f, ok := folder.SubFolders.Load(searchPath); !ok {
 		//创建一个新子书库，并添加一本书
-		folder.SubFolders[searchPath].BookMap[b.BookID] = b
+		newStore := subFolder{
+			Path: searchPath,
+		}
+		newStore.BookMap.Store(b.BookID, b)
+		folder.SubFolders.Store(searchPath, &newStore)
 		return errors.New("add Bookstore Error： The key not found [" + searchPath + "]")
+	} else {
+		//给已有子书库添加一本书
+		temp := f.(*subFolder)
+		temp.BookMap.Store(b.BookID, b)
+		return nil
 	}
-	//给已有子书库添加一本书
-	folder.SubFolders[searchPath].BookMap[b.BookID] = b
-	return nil
 }
