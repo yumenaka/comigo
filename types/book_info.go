@@ -115,12 +115,15 @@ func (b *BookInfo) setTitle(filePath string) {
 func GetBookInfoListByDepth(depth int, sortBy string) (*BookInfoList, error) {
 	var infoList BookInfoList
 	//首先加上所有真实的书籍
-	for _, b := range mapBooks {
+	mapBooks.Range(func(_, value interface{}) bool {
+		b := value.(*Book)
 		if b.Depth == depth {
 			info := NewBaseInfo(b)
 			infoList.BookInfos = append(infoList.BookInfos, *info)
 		}
-	}
+		return true
+	})
+
 	//接下来还要加上扫描生成出来的书籍组
 	for _, bs := range MainFolder.SubFolders {
 		for _, group := range bs.BookGroupMap {
@@ -139,12 +142,15 @@ func GetBookInfoListByDepth(depth int, sortBy string) (*BookInfoList, error) {
 func GetBookInfoListByMaxDepth(depth int, sortBy string) (*BookInfoList, error) {
 	var infoList BookInfoList
 	//首先加上所有真实的书籍
-	for _, b := range mapBooks {
+	mapBooks.Range(func(_, value interface{}) bool {
+		b := value.(*Book)
 		if b.Depth <= depth {
 			info := NewBaseInfo(b)
 			infoList.BookInfos = append(infoList.BookInfos, *info)
 		}
-	}
+		return true
+	})
+
 	//扫描生成的书籍组
 	for _, bs := range MainFolder.SubFolders {
 		for _, group := range bs.BookGroupMap {
@@ -162,10 +168,11 @@ func GetBookInfoListByMaxDepth(depth int, sortBy string) (*BookInfoList, error) 
 
 func GetBookInfoListByID(BookID string, sortBy string) (*BookInfoList, error) {
 	var infoList BookInfoList
-	group := mapBookGroup[BookID]
-	if group != nil {
+	group, ok := mapBookGroup.Load(BookID)
+	if ok {
+		tempGroup := group.(*BookGroup)
 		//首先加上所有真实的书籍
-		for _, g := range group.ChildBook {
+		for _, g := range tempGroup.ChildBook {
 			infoList.BookInfos = append(infoList.BookInfos, *g)
 		}
 		if len(infoList.BookInfos) > 0 {
@@ -178,12 +185,15 @@ func GetBookInfoListByID(BookID string, sortBy string) (*BookInfoList, error) {
 
 func GetBookInfoListByParentFolder(parentFolder string, sortBy string) (*BookInfoList, error) {
 	var infoList BookInfoList
-	for _, b := range mapBooks {
+	mapBooks.Range(func(_, value interface{}) bool {
+		b := value.(*Book)
 		if b.ParentFolder == parentFolder {
 			info := NewBaseInfo(b)
 			infoList.BookInfos = append(infoList.BookInfos, *info)
 		}
-	}
+		return true
+	})
+
 	if len(infoList.BookInfos) > 0 {
 		infoList.SortBooks(sortBy)
 		return &infoList, nil
