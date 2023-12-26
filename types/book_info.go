@@ -182,9 +182,12 @@ func GetBookInfoListByID(BookID string, sortBy string) (*BookInfoList, error) {
 	if ok {
 		tempGroup := group.(*BookGroup)
 		//首先加上所有真实的书籍
-		for _, g := range tempGroup.ChildBook {
-			infoList.BookInfos = append(infoList.BookInfos, *g)
-		}
+		tempGroup.ChildBook.Range(func(key, value interface{}) bool {
+			b := value.(*BookInfo)
+			infoList.BookInfos = append(infoList.BookInfos, *b)
+			return true
+		})
+
 		if len(infoList.BookInfos) > 0 {
 			infoList.SortBooks(sortBy)
 			return &infoList, nil

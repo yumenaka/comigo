@@ -90,15 +90,14 @@ func (s *subFolder) AnalyzeFolder() error {
 			}
 			//初始化ChildBook
 			//然后把同一parent的书，都加进某个书籍组
-			newBookGroup.ChildBook = make(map[string]*BookInfo)
 			for i, bookInList := range sameParentBookList {
 				//顺便设置一下封面，只设置一次
 				if i == 0 {
 					newBookGroup.Cover = bookInList.Cover //
 				}
-				newBookGroup.ChildBook[bookInList.BookID] = &sameParentBookList[i]
+				newBookGroup.ChildBook.Store(bookInList.BookID, &sameParentBookList[i])
 			}
-			newBookGroup.ChildBookNum = len(newBookGroup.ChildBook)
+			newBookGroup.ChildBookNum = len(sameParentBookList)
 			//如果书籍组的子书籍数量大于等于1，且从来没有添加过，将书籍组加到上一层
 			if newBookGroup.ChildBookNum == 0 {
 				continue

@@ -1,6 +1,7 @@
 package types
 
 import (
+	"sync"
 	"time"
 
 	"github.com/yumenaka/comi/util"
@@ -8,7 +9,7 @@ import (
 
 type BookGroup struct {
 	BookInfo
-	ChildBook map[string]*BookInfo `json:"child_book" ` //key：BookID
+	ChildBook sync.Map //key：BookID,value: *BookInfo
 }
 
 // NewBook  初始化Book，设置文件路径、书名、BookID等等
