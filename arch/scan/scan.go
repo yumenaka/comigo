@@ -103,7 +103,7 @@ func (o *Option) IsSkipDir(path string) bool {
 // InitStore 3、扫描路径，取得路径里的书籍
 func InitStore(scanConfig Option) error {
 	// 重置书籍列表
-	//types.ResetBookList()
+	types.ResetBookList()
 	for _, p := range scanConfig.StoresPath {
 		addList, err := ScanAndGetBookList(p, scanConfig)
 		if err != nil {

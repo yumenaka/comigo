@@ -42,19 +42,20 @@ var (
 	}
 )
 
+// 将 sync.Map 的变量设置为一个新的实例。这样做会让原来的 sync.Map 实例失去引用，随后被垃圾回收器清理。
+func ResetBookList() {
+	mapBooks = sync.Map{}
+	mapBookGroup = sync.Map{}
+	MainFolder = Folder{
+		SubFolders: sync.Map{},
+		SortBy:     "name",
+	}
+}
+
 // Book 定义书籍，BooID不应该重复，根据文件路径生成
 type Book struct {
 	BookInfo
 	Pages Pages `json:"pages"` //storm:"inline" 内联字段，结构体嵌套时使用
-}
-
-func ResetBookList() {
-	//mapBooks = make(map[string]*Book)
-	//mapBookGroup = make(map[string]*BookGroup)
-	//MainFolder = Folder{
-	//	SubFolders: make(map[string]*subFolder),
-	//	SortBy:     "name",
-	//}
 }
 
 // CheckBookExist 查看内存中是否已经有了这本书,有了就false，让调用者跳过
