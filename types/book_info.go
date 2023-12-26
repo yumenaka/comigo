@@ -125,13 +125,18 @@ func GetBookInfoListByDepth(depth int, sortBy string) (*BookInfoList, error) {
 	})
 
 	//接下来还要加上扫描生成出来的书籍组
-	for _, bs := range MainFolder.SubFolders {
-		for _, group := range bs.BookGroupMap {
+	MainFolder.SubFolders.Range(func(_, value interface{}) bool {
+		bs := value.(*subFolder)
+		bs.BookGroupMap.Range(func(key, value interface{}) bool {
+			group := value.(*BookInfo)
 			if group.Depth == depth {
 				infoList.BookInfos = append(infoList.BookInfos, *group)
 			}
-		}
-	}
+			return true
+		})
+		return true
+	})
+
 	if len(infoList.BookInfos) > 0 {
 		infoList.SortBooks(sortBy)
 		return &infoList, nil
@@ -152,13 +157,18 @@ func GetBookInfoListByMaxDepth(depth int, sortBy string) (*BookInfoList, error) 
 	})
 
 	//扫描生成的书籍组
-	for _, bs := range MainFolder.SubFolders {
-		for _, group := range bs.BookGroupMap {
+	MainFolder.SubFolders.Range(func(_, value interface{}) bool {
+		bs := value.(*subFolder)
+		bs.BookGroupMap.Range(func(key, value interface{}) bool {
+			group := value.(*BookInfo)
 			if group.Depth <= depth {
 				infoList.BookInfos = append(infoList.BookInfos, *group)
 			}
-		}
-	}
+			return true
+		})
+		return true
+	})
+
 	if len(infoList.BookInfos) > 0 {
 		infoList.SortBooks(sortBy)
 		return &infoList, nil
