@@ -43,7 +43,7 @@ var (
 )
 
 // 将 sync.Map 的变量设置为一个新的实例。这样做会让原来的 sync.Map 实例失去引用，随后被垃圾回收器清理。
-func ResetBookList() {
+func ResetBookMap() {
 	mapBooks = sync.Map{}
 	mapBookGroup = sync.Map{}
 	MainFolder = Folder{
