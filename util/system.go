@@ -107,7 +107,6 @@ func GetOutboundIP() net.IP {
 	return localAddr.IP
 }
 
-// OpenBrowser 打开浏览器
 func OpenBrowser(uri string) {
 	var cmd *exec.Cmd
 	if runtime.GOOS == "windows" {

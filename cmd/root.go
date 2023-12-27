@@ -77,28 +77,36 @@ func initConfigFile() {
 		logger.Info("Failed to get WorkingDirectory:", err)
 	}
 	runtimeViper.AddConfigPath(WorkingDirectory)
+
 	runtimeViper.SetConfigType("toml")
 	runtimeViper.SetConfigName("config.toml")
+
+	//用户命令行指定的目录或文件
+	if config.Config.ConfigPath != "" {
+		//SetConfigFile 显式定义配置文件的路径、名称和扩展名。 Viper 将使用它并且不检查任何配置路径。
+		runtimeViper.SetConfigFile(config.Config.ConfigPath)
+	}
+
 	// 读取设定文件
 	if err := runtimeViper.ReadInConfig(); err != nil {
-		if config.Config.ConfigPath == "" && config.Config.Debug {
+		if config.Config.ConfigPath == "" {
 			logger.Info(err)
 		}
 	} else {
 		//获取当前使用的配置文件路径
 		//https://github.com/spf13/viper/issues/89
-		config.Config.ConfigPath = runtimeViper.ConfigFileUsed()
-		logger.Info(locale.GetString("FoundConfigFile") + config.Config.ConfigPath)
+		tempConfigPath := runtimeViper.ConfigFileUsed()
+		logger.Info(locale.GetString("FoundConfigFile") + tempConfigPath)
 	}
 	// 把设定文件的内容，解析到构造体里面。
 	if err := runtimeViper.Unmarshal(&config.Config); err != nil {
 		logger.Info(err)
 		os.Exit(1)
 	}
-	//监听文件修改
-	runtimeViper.WatchConfig()
-	//文件修改时，执行重载设置、服务重启的函数
-	runtimeViper.OnConfigChange(handlerConfigReload)
+	////监听文件修改
+	//runtimeViper.WatchConfig()
+	////文件修改时，执行重载设置、服务重启的函数
+	//runtimeViper.OnConfigChange(handlerConfigReload)
 }
 
 // Execute 执行将所有子命令添加到根命令并适当设置标志。

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/spf13/viper"
 	"strconv"
 
 	"github.com/yumenaka/comi/arch/scan"
@@ -15,7 +16,7 @@ func StartScan(args []string) {
 	//1. 初始化数据库
 	if config.Config.EnableDatabase {
 		// 从数据库中读取书籍信息并持久化
-		if err := database.InitDatabase(config.Config.ConfigPath); err != nil {
+		if err := database.InitDatabase(viper.ConfigFileUsed()); err != nil {
 			logger.Info(err)
 		}
 		books, err := database.GetBooksFromDatabase()
@@ -54,7 +55,7 @@ func StartScan(args []string) {
 	}
 	//4、保存扫描结果到数据库
 	if config.Config.EnableDatabase {
-		err = scan.SaveResultsToDatabase(config.Config.ConfigPath, config.Config.ClearDatabaseWhenExit)
+		err = scan.SaveResultsToDatabase(viper.ConfigFileUsed(), config.Config.ClearDatabaseWhenExit)
 		if err != nil {
 			logger.Infof("Failed SaveResultsToDatabase: %v", err)
 			return

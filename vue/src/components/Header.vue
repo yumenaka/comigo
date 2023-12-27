@@ -1,34 +1,60 @@
 <template>
   <!-- 外边距: m-2 https://www.tailwindcss.cn/docs/margin -->
   <!-- 内边距： p-4 https://www.tailwindcss.cn/docs/padding  p-0 m-0  -->
-  <header class="header p-1 h-12 w-full flex justify-between content-center">
-    <div> <!-- 返回箭头,点击返回上一页 -->
-      <n-icon class="p-0 mx-1 my-0" v-if="showReturnIcon" size="40" @click="onClickReturnIcon()">
-        <return-up-back />
-      </n-icon>
+  <header class="header p-1 h-12 w-full flex flex-row justify-between content-center">
+    <div class="flex flex-row">
+      <!-- 返回箭头,点击返回上一页 -->
+      <n-tooltip placement="bottom" trigger="hover">
+        <template #trigger>
+          <div class="p-0 m-0">
+            <n-icon class="p-0 mx-1 my-0" v-if="showReturnIcon" size="40" @click="onClickReturnIcon()">
+              <return-up-back />
+            </n-icon>
+          </div>
+        </template>
+        <span>{{ $t("back_button") }}</span>
+      </n-tooltip>
 
       <!-- 服务器设置 -->
-      <n-icon class="p-0 mx-1 my-0" v-if="!showReturnIcon" @click="ToAdminPage()" size="40">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-          class="w-6 h-6">
-          <path stroke-linecap="round" stroke-linejoin="round"
-            d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z" />
-        </svg>
-      </n-icon>
-      <!-- 上传按钮，点击进入上传页面 -->
-      <n-icon class="p-0 mx-1 my-0" v-if="!showReturnIcon" @click="gotoUploadPage()" size="40">
-        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512">
-          <path
-            d="M320 367.79h76c55 0 100-29.21 100-83.6s-53-81.47-96-83.6c-8.89-85.06-71-136.8-144-136.8c-69 0-113.44 45.79-128 91.2c-60 5.7-112 43.88-112 106.4s54 106.4 120 106.4h56"
-            fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></path>
-          <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"
-            d="M320 255.79l-64-64l-64 64"></path>
-          <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"
-            d="M256 448.21V207.79"></path>
-        </svg>
-      </n-icon>
+      <n-tooltip placement="bottom" trigger="hover">
+        <template #trigger>
+          <div class="p-0 m-0">
+            <n-icon @title='$t("server_config")' class="p-0 mx-1 my-0" v-if="!showReturnIcon" @click="ToAdminPage()"
+              size="40">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor" class="w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z" />
+              </svg>
+            </n-icon>
+          </div>
+        </template>
+        <span>{{ $t("server_config") }}</span>
+      </n-tooltip>
 
-      <!-- 列表图标 -->
+
+      <!-- 上传按钮，点击进入上传页面 -->
+      <n-tooltip placement="bottom" trigger="hover">
+        <template #trigger>
+          <div class="p-0 m-0">
+            <n-icon class="p-0 mx-1 my-0" v-if="!showReturnIcon" @click="gotoUploadPage()" size="40">
+              <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512">
+                <path
+                  d="M320 367.79h76c55 0 100-29.21 100-83.6s-53-81.47-96-83.6c-8.89-85.06-71-136.8-144-136.8c-69 0-113.44 45.79-128 91.2c-60 5.7-112 43.88-112 106.4s54 106.4 120 106.4h56"
+                  fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32">
+                </path>
+                <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"
+                  d="M320 255.79l-64-64l-64 64"></path>
+                <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"
+                  d="M256 448.21V207.79"></path>
+              </svg>
+            </n-icon>
+          </div>
+        </template>
+        <span>{{ $t("upload_file") }}</span>
+      </n-tooltip>
+
+      <!-- 文件重排序 -->
       <n-dropdown v-if="showReSortIcon" trigger="hover" :options="options" @select="onSelect">
         <n-icon class="w-10" size="40">
           <Filter />
@@ -58,33 +84,58 @@
 
     <!-- 溢出 overflow-x-auton :https://www.tailwindcss.cn/docs/overflow -->
     <div class="p-0 h-10 w-33 flex justify-between content-center overflow-x-auton">
-      <!-- QRCode图，点击可以在屏幕正中显示二维码 -->
-      <Qrcode class="w-10 p-0"></Qrcode>
-      <!-- 全屏图标 -->
-      <svg class="w-10 static" @click="onFullScreen" xmlns="http://www.w3.org/2000/svg"
-        xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24">
-        <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M16 4h4v4"></path>
-          <path d="M14 10l6-6"></path>
-          <path d="M8 20H4v-4"></path>
-          <path d="M4 20l6-6"></path>
-          <path d="M16 20h4v-4"></path>
-          <path d="M14 14l6 6"></path>
-          <path d="M8 4H4v4"></path>
-          <path d="M4 4l6 6"></path>
-        </g>
-      </svg>
-      <!-- 右边的设置图标,点击屏幕中央也可以打开  可自定义方向 -->
-      <n-icon v-if="showSettingsIcon" class="w-10" size="40" @click="onClickSettingIcon('right')">
-        <settings-outline />
-      </n-icon>
+
+      <!-- 扫码阅读，点击可以在屏幕正中显示二维码 -->
+      <n-tooltip placement="bottom" trigger="hover">
+        <template #trigger>
+          <div class="p-0 m-0">
+            <Qrcode class="w-10 p-0"></Qrcode>
+          </div>
+        </template>
+        <span>{{ $t("qrcode_hint") }}</span>
+      </n-tooltip>
+
+      <!-- 全屏按钮 -->
+      <n-tooltip placement="bottom" trigger="hover">
+        <template #trigger>
+          <div class="p-0 m-0">
+            <svg class="w-10 static" @click="onFullScreen" xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24">
+              <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 4h4v4"></path>
+                <path d="M14 10l6-6"></path>
+                <path d="M8 20H4v-4"></path>
+                <path d="M4 20l6-6"></path>
+                <path d="M16 20h4v-4"></path>
+                <path d="M14 14l6 6"></path>
+                <path d="M8 4H4v4"></path>
+                <path d="M4 4l6 6"></path>
+              </g>
+            </svg>
+          </div>
+        </template>
+        <span>{{ $t("full_screen_hint") }}</span>
+      </n-tooltip>
+
+      <!-- 阅读器设定,点击屏幕中央也可以打开  可自定义方向 -->
+      <n-tooltip placement="bottom" trigger="hover">
+        <template #trigger>
+          <div class="p-0 m-0">
+            <n-icon v-if="showSettingsIcon" class="w-10" size="40" @click="onClickSettingIcon('right')">
+              <settings-outline />
+            </n-icon>
+          </div>
+        </template>
+        <span>{{ $t("ReaderSettings") }}</span>
+      </n-tooltip>
+
     </div>
   </header>
 </template>
 
 <script lang="ts">
 import { useCookies } from "vue3-cookies";
-import { NIcon, NDropdown, useMessage, } from 'naive-ui'
+import { NIcon, NDropdown, useMessage, NTooltip } from 'naive-ui'
 import { ReturnUpBack, SettingsOutline, Grid, List, Filter, Text } from '@vicons/ionicons5'
 import { h, defineComponent } from 'vue'
 import Qrcode from "@/components/Qrcode.vue";
@@ -108,6 +159,7 @@ export default defineComponent({
     SettingsOutline, //图标,来自 https://www.xicons.org/#/   需要安装（npm i -D @vicons/ionicons5）
     Qrcode,//https://github.com/scopewu/qrcode.vue
     QuickJumpBar,
+    NTooltip,//https://www.naiveui.com/zh-CN/dark/components/tooltip
   },
   setup() {
     const { cookies } = useCookies();

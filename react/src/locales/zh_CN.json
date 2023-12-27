@@ -166,5 +166,9 @@
   "hint": "提示",
   "ConfigManagerSaveHint": "已有配置文件,请切换保存位置。",
   "ConfigManagerSaveSuccess": "配置已保存。",
-  "ConfigManagerDeleteSuccess": "配置已删除。"
+  "ConfigManagerDeleteSuccess": "配置已删除。",
+  "book_shelf": "书库",
+  "network": "网络",
+  "abs": "实验",
+  "temp_future_hint": "临时放一些还未完成的功能，开发与调整中。"
 }

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/spf13/viper"
 	"github.com/yumenaka/comi/arch/scan"
 	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/locale"
@@ -29,7 +30,7 @@ func waitRescanMessages() {
 			ReScanUploadPath()
 			//保存扫描结果到数据库
 			if config.Config.EnableDatabase {
-				err := scan.SaveResultsToDatabase(config.Config.ConfigPath, config.Config.ClearDatabaseWhenExit)
+				err := scan.SaveResultsToDatabase(viper.ConfigFileUsed(), config.Config.ClearDatabaseWhenExit)
 				if err != nil {
 					return
 				}

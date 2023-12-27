@@ -166,5 +166,9 @@
   "hint": "Hint",
   "ConfigManagerSaveHint": "すでに設定ファイルがあるので、保存場所を変更してください。",
   "ConfigManagerSaveSuccess": "設定が保存されました。",
-  "ConfigManagerDeleteSuccess": "設定が削除されました。"
+  "ConfigManagerDeleteSuccess": "設定が削除されました。",
+  "book_shelf": "本棚",
+  "network": "ットワーク",
+  "abs": "ボ",
+  "temp_future_hint": "まだ完成していないいくつかの機能を、一時的にに置く。"
 }

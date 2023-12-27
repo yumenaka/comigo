@@ -159,7 +159,7 @@
       </n-switch>
 
       <!-- 更改跨页匹配 -->
-      <n-button @click="FlipOddEvenPage" v-if="doublePageModeFlag" :title="$t('如果跨页内容不匹配，可以尝试点击修正')">{{
+      <n-button @click="FlipOddEvenPage" v-if="doublePageModeFlag" :title="$t('FlipOddEvenPageHint')">{{
         $t("Flip_odd_even_page")
       }}
       </n-button>

@@ -92,5 +92,12 @@
   "author": "作者:{0}",
   "allpagenum": "总页数:{0}",
   "filesize": "大小:{0}",
-  "childbookhint": "文件夹内有{0}本书"
+  "childbookhint": "文件夹内有{0}本书",
+  "server_config": "服务器设置",
+  "upload_file": "上传文件",
+  "FlipOddEvenPageHint": "如果跨页内容不匹配，可以尝试点击修正",
+  "resort_file": "文件重排序",
+  "back_button": "返回按钮",
+  "qrcode_hint": "扫码阅读，点击可以显示二维码",
+  "full_screen_hint": "全屏按钮"
 }

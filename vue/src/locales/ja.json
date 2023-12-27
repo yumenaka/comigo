@@ -91,5 +91,13 @@
   "author": "作者:{0}",
   "allpagenum": "総ページ数:{0}",
   "filesize": "ファイルサイズ:{0}",
-  "childbookhint": "フォルダーには{0}冊の本が入っている"
+  "childbookhint": "フォルダーには{0}冊の本が入っている",
+  "server_config": "サーバー設定",
+  "upload_file": "アップロード",
+  "FlipOddEvenPageHint": "If the cross-page content doesn't match, try clicking to fix it",
+  "resort_file": "ファイル並び替え",
+  "Flip_odd_even_page": "ページ間マッチングの変更",
+  "back_button": "戻るボタン",
+  "qrcode_hint": "クリックしてQRコードを表示する",
+  "full_screen_hint": "フルスクリーンボタン"
 }
