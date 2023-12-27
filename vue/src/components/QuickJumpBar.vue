@@ -1,8 +1,8 @@
 <template>
-  <div class="w-full my-0 flex flex-row justify-center items-center">
+  <div class="quick_jump_bar w-full my-0 flex flex-row justify-center items-center">
     <a :href="prevLink" class="text-blue-700  text-2xl font-semibold">⬅️</a>
     <select
-      class="mx-2 p-2 w-1/2 border-gray-200 rounded-lg text-xl font-semibold text-center disabled:opacity-50 disabled:pointer-events-none"
+      class="mx-4 px-2 py-4 w-3/4 border-gray-200 rounded-lg text-xl font-semibold text-center disabled:opacity-50 disabled:pointer-events-none"
       :onchange="handleChange">
       <option v-for="book in group_info_filter.BookInfos" :value="book.id" :key="book.id" :selected="book.id == nowBookID">
         {{ book.title }}

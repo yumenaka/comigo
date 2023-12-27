@@ -1,17 +1,17 @@
 package config_handlers
 
 import (
-	"io"
-	"net/http"
-	"reflect"
-	"strconv"
-
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 	"github.com/yumenaka/comi/arch/scan"
 	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/logger"
 	"github.com/yumenaka/comi/types"
 	"github.com/yumenaka/comi/util"
+	"io"
+	"net/http"
+	"reflect"
+	"strconv"
 )
 
 // UpdateConfig 修改服务器配置(post json)
@@ -33,6 +33,10 @@ func UpdateConfig(c *gin.Context) {
 		c.JSON(http.StatusMethodNotAllowed, gin.H{"error": "Failed to parse JSON data"})
 		return
 	}
+	err = config.UpdateLocalConfig()
+	if err != nil {
+		logger.Infof("Failed to update local config: %v", err)
+	}
 	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等
 	BeforeConfigUpdate(oldConfig, &config.Config)
 	// 返回成功消息
@@ -41,10 +45,6 @@ func UpdateConfig(c *gin.Context) {
 
 // BeforeConfigUpdate 根据配置的变化，判断是否需要打开浏览器重新扫描等
 func BeforeConfigUpdate(oldConfig *types.ComigoConfig, newConfig *types.ComigoConfig) {
-	err := config.UpdateLocalConfig()
-	if err != nil {
-		logger.Infof("Failed to update local config: %v", err)
-	}
 	openBrowserIfNeeded(oldConfig, newConfig)
 	needScan, reScanFile := updateConfigIfNeeded(oldConfig, newConfig)
 	if needScan {
@@ -57,7 +57,7 @@ func BeforeConfigUpdate(oldConfig *types.ComigoConfig, newConfig *types.ComigoCo
 }
 
 func openBrowserIfNeeded(oldConfig *types.ComigoConfig, newConfig *types.ComigoConfig) {
-	if !oldConfig.OpenBrowser && newConfig.OpenBrowser {
+	if (oldConfig.OpenBrowser == false) && (newConfig.OpenBrowser == true) {
 		protocol := "http://"
 		if newConfig.EnableTLS {
 			protocol = "https://"
@@ -121,7 +121,7 @@ func performScanAndUpdateDBIfNeeded(newConfig *types.ComigoConfig, reScanFile bo
 		logger.Infof("Failed to scan store path: %v", err)
 	}
 	if newConfig.EnableDatabase {
-		saveResultsToDatabase(config.Config.ConfigPath, config.Config.ClearDatabaseWhenExit)
+		saveResultsToDatabase(viper.ConfigFileUsed(), config.Config.ClearDatabaseWhenExit)
 	}
 }
 

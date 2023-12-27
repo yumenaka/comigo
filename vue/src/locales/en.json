@@ -82,7 +82,6 @@
   "DoublePageMode": "DoublePage",
   "SinglePageMode": "SinglePage",
   "Flip_odd_even_page": "Flip odd even page",
-  "如果跨页内容不匹配，可以尝试点击修正": "Try to click here if double pages didn't match at joint.",
   "marginOnScrollMode": "margin bottom:",
   "login_success_hint": "Login successfully, return to previous page",
   "server_setting": "comigo server setting",
@@ -93,5 +92,12 @@
   "author": "Author:{0}",
   "allpagenum": "Total pages: {0}",
   "filesize": "File size:{0}",
-  "childbookhint": "{0}books in the folder"
+  "childbookhint": "{0}books in the folder",
+  "server_config": "Server Config",
+  "upload_file": "Upload file",
+  "FlipOddEvenPageHint": "Try to click here if double pages didn't match at joint.",
+  "resort_file": "Resort file",
+  "back_button": "Back Button",
+  "qrcode_hint": "Scan to read, click to show QR code",
+  "full_screen_hint": "FullScreen"
 }

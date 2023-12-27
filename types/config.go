@@ -63,8 +63,8 @@ func (c *ConfigStatus) SetConfigStatus() error {
 
 // ComigoConfig 服务器设置(config.toml)
 type ComigoConfig struct {
-	Port                   int      `json:"Port" comment:"Comigo设置文件(config.toml)，放在默认保存目录中。可选值：RAM（不保存）、HomeDirectory（$HOME/.config/comigo/config.toml）、WorkingDirectory（当前执行目录）、ProgramDirectory（程序所在目录）下。可用“comi --config-save”生成本文件\n网页服务端口，此项配置不支持热重载"`
-	ConfigPath             string   `json:"-" toml:"-" comment:"当前生效的yaml设置文件路径，数据库文件(comigo.db)在同一个文件夹"`
+	Port                   int      `json:"Port" comment:"Comigo设置文件(config.toml)，可保存在：HomeDirectory（$HOME/.config/comigo/config.toml）、WorkingDirectory（当前执行目录）、ProgramDirectory（程序所在目录）下。可用“comi --config-save”生成本文件\n网页服务端口，此项配置不支持热重载"`
+	ConfigPath             string   `json:"-" toml:"-" comment:"用户指定的的yaml设置文件路径"`
 	Host                   string   `json:"Host" comment:"自定义二维码显示的主机名"`
 	StoresPath             []string `json:"StoresPath" comment:"默认扫描的书库文件夹"`
 	ExcludePath            []string `json:"ExcludePath" comment:"扫描书籍的时候，需要排除的文件或文件夹的名字"`

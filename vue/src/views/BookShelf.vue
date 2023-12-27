@@ -332,7 +332,7 @@ export default defineComponent({
             }
             let _this = this;
             axios
-                .get("book_infos?max_depth=0" + sort_by)
+                .get("book_infos?depth=0" + sort_by)
                 .then((response) => {
                     if (response.data !== "") {
                         this.bookshelf = response.data;
