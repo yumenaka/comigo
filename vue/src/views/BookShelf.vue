@@ -25,7 +25,7 @@
         </div>
 
         <div v-if="bookCardMode == 'text'" class="bookshelf flex-grow">
-            <div class="flex flex-row flex-wrap justify-center min-h-48">
+            <div class="flex flex-row flex-wrap mt-4 mb-4 px-4 justify-left items-center min-w-4">
                 <BookText v-for="(book_info, key) in bookshelf" :key="key" :book_info="book_info" :readerMode="readerMode">
                 </BookText>
             </div>
