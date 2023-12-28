@@ -1,12 +1,12 @@
 # Makefile for cross-compilation
 # Window icon Need：go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo
 
-# make all VERSION=v0.9.7
-# make md5SumThemAll VERSION=v0.9.5
-# mingw32-make all VERSION=v0.9.5
-# rm  resource.syso && make  Linux-armv8   VERSION=v0.9.5
-# make Windows_i386  VERSION=v0.9.5
-# make Windows_x86_64  VERSION=v0.9.5
+# make all VERSION=v0.9.6
+# make md5SumThemAll VERSION=v0.9.6
+# mingw32-make all VERSION=v0.9.6
+# rm  resource.syso && make  Linux-armv8   VERSION=v0.9.6
+# make Windows_i386  VERSION=v0.9.6
+# make Windows_x86_64  VERSION=v0.9.7
 
 # Windows：MSYS2 or mingw32 + find.exe make.exe zip.exe upx.exe ！！
 

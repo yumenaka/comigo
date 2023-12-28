@@ -38,6 +38,7 @@ func GetServerInfoPublic(c *gin.Context) {
 		ServerHost:        host,
 		ServerPort:        config.Config.Port,
 		SupportUploadFile: config.Config.EnableUpload,
+		NumberOfBooks:     types.GetBooksNumber(),
 	}
 	c.PureJSON(http.StatusOK, serverStatus)
 }
