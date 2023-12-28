@@ -1,6 +1,6 @@
 <template>
     <div class="UploadPage w-full h-screen flex flex-col">
-        <Header class="header flex-none h-12" :bookIsFolder="false" :headerTitle="getUploadTitile()"
+        <Header class="header flex-none h-12"  in-shelf="true" :bookIsFolder="false" :headerTitle="getUploadTitile()"
             :showReturnIcon="true" :showSettingsIcon="true" :bookID='null' :setDownLoadLink="false"
             @drawerActivate="drawerActivate">
         </Header>
@@ -13,7 +13,7 @@
 
         </div>
 
-        <Bottom class="bottom flex-none h-12" :softVersion="
+        <Bottom class="bottom flex-none h-12" :ServerName="
             $store.state.server_status.ServerName
                 ? $store.state.server_status.ServerName
                 : 'Comigo'
@@ -24,8 +24,6 @@
             <SystemInfo :showSystemInfo="drawerActive">
             </SystemInfo>
         </Drawer>
-
-
     </div>
 </template>
 
