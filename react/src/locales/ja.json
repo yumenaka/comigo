@@ -135,7 +135,7 @@
   "MinImageNum_Description": "本とみなされるには、少なくとも数枚の画像が含まれている必要があります。",
   "TimeoutLimitForScan_Description": "ファイルのスキャン時に数秒以上かかる場合、大きすぎるファイルでスタックすることを避けるためにファイルのスキャンを中止します。",
   "EnableUpload_Description": "アップロード機能を有効にします。",
-  "UploadPath_Description": "アップロードされたファイルの保存場所をカスタマイズします。デフォルトでは、upload フォルダーは現在の実行ディレクトリに作成されます。",
+  "UploadPath_Description": "アップロードされたファイルの保存場所をカスタマイズします。デフォルトでは、アップロードフォルダは現在の実行ディレクトリまたは最初のブックストアディレクトリの下に作成されます。",
   "ZipFileTextEncoding_Description": "utf-8 以外でエンコードされた ZIP ファイル。解析するにはどのエンコードを使用する必要があります。デフォルトのGBK。",
   "ExcludePath_Description": "本をスキャンするときに、除外する必要があるファイルまたはフォルダーの名前",
   "SupportMediaType_Description": "圧縮パッケージをスキャンするときに画像の数をカウントするために使用される画像ファイルの接尾辞",

@@ -31,7 +31,15 @@ func initStorePath(args []string) {
 			config.Config.StoresPath = append(config.Config.StoresPath, config.Config.UploadPath)
 		}
 		if config.Config.UploadPath == "" && len(config.Config.StoresPath) > 0 {
-			config.Config.StoresPath = append(config.Config.StoresPath, path.Join(config.Config.StoresPath[0], "upload"))
+			createUploadFolder := true
+			for _, checkPath := range config.Config.StoresPath {
+				if checkPath == path.Join(config.Config.StoresPath[0], "upload") {
+					createUploadFolder = false
+				}
+			}
+			if createUploadFolder {
+				config.Config.StoresPath = append(config.Config.StoresPath, path.Join(config.Config.StoresPath[0], "upload"))
+			}
 		}
 	}
 }
