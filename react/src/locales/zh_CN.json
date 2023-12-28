@@ -135,7 +135,7 @@
   "MinImageNum_Description": "压缩包或文件夹内至少有几张图片，才算作书籍。",
   "TimeoutLimitForScan_Description": "扫描文件时，超过几秒钟，就放弃扫描这个文件，避免卡在过大文件上。",
   "EnableUpload_Description": "启用上传功能。",
-  "UploadPath_Description": "自定义上传文件存储位置，默认在当前执行目录下创建 upload 文件夹。",
+  "UploadPath_Description": "自定义上传文件存储位置，默认在当前执行目录或第一个书库目录下面创建 upload 文件夹。",
   "ZipFileTextEncoding_Description": "非utf-8编码ZIP文件，尝试用什么编码解析。默认GBK。",
   "ExcludePath_Description": "扫描书籍的时候，需要排除的文件或文件夹的名字",
   "SupportMediaType_Description": "扫描压缩包时，用于统计图片数量的图片文件后缀",

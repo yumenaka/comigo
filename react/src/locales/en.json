@@ -71,7 +71,7 @@
   "TimeoutLimitForScan_Description": "When scanning a file, if it takes more than a few seconds, it will give up scanning the file to avoid getting stuck on an overly large file.",
   "Timeout_Description": "Cookie expiration time after enabling login. \nThe unit is minutes. \nIt expires in 180 minutes by default.",
   "UploadPath": "Upload location",
-  "UploadPath_Description": "Customize the storage location of uploaded files. By default, the upload folder is created in the current execution directory.",
+  "UploadPath_Description": "Customize the storage location of the uploaded files, by default, the upload folder is created under the current execution directory or the first bookstore directory.",
   "UseCache": "Local image cache",
   "Username": "username",
   "Username_Description": "After enabling login, the username required for the login interface.",
