@@ -4,8 +4,8 @@ package database
 
 import (
 	"errors"
-	"fmt"
 
+	"github.com/yumenaka/comi/logger"
 	mainTypes "github.com/yumenaka/comi/types"
 )
 
