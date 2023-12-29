@@ -10,7 +10,6 @@
         <div class="mian_area flex-grow">
             <UploadFile>
             </UploadFile>
-
         </div>
 
         <Bottom class="bottom flex-none h-12" :ServerName="

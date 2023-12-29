@@ -6,7 +6,6 @@ import (
 	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/logger"
-	"github.com/yumenaka/comi/routers"
 	"github.com/yumenaka/comi/routers/handlers"
 )
 
@@ -35,8 +34,6 @@ func waitRescanMessages() {
 					return
 				}
 			}
-			//重新设置文件下载链接
-			routers.SetDownloadLink()
 		case "SomePath":
 			logger.Info("收到重新扫描消息：", msg)
 			ReScanPath(msg, false)

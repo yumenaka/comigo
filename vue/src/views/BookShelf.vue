@@ -87,14 +87,14 @@
 // 直接导入组件并使用它。这种情况下,只有导入的组件才会被打包。
 // Firefox插件Textarea Cache 报错：源映射错误：Error: NetworkError when attempting to fetch resource.
 // Firefox插件Video DownloadHelper报错:已不赞成使用 CanvasRenderingContext2D 中的 drawWindow 方法
-import { NColorPicker, NSwitch, NButton, NSelect, NBackTop, NIcon, c } from "naive-ui";
+import { NColorPicker, NSwitch, NButton, NSelect, NBackTop, } from "naive-ui";
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
 import BookCard from "@/components/BookCard.vue";
 import BookList from "@/components/BookList.vue";
 import BookText from "@/components/BookText.vue";
 import Bottom from "@/components/Bottom.vue";
-import { h, CSSProperties, defineComponent, reactive } from "vue";
+import { CSSProperties, defineComponent, reactive } from "vue";
 import { useCookies } from "vue3-cookies"; // https://github.com/KanHarI/vue3-cookies
 import axios from "axios";
 

@@ -1,18 +1,18 @@
-import { createStore, useStore as baseUseStore, Store  } from "vuex";
+import { createStore, useStore as baseUseStore, Store } from "vuex";
 import axios from "axios";
 import main from "../main";
-import { InjectionKey } from 'vue'
+import { InjectionKey } from "vue";
 
 // Vuex TypeScript 支持
 // 为 store state 声明类型
 export interface State {
-  count: number
+  count: number;
 }
 // 定义 injection key
-export const key: InjectionKey<Store<State>> = Symbol()
+export const key: InjectionKey<Store<State>> = Symbol();
 // 定义自己的 `useStore` 组合式函数
-export function useStore () {
-  return baseUseStore(key)
+export function useStore() {
+  return baseUseStore(key);
 }
 
 //生成一个随机ID
@@ -130,6 +130,10 @@ const store = createStore({
     syncSeverStatusData(state, payload) {
       state.server_status = payload.message;
     },
+    //使用mutation()函数（store.commit('')）的时候，还可以传入额外的参数，也就是载荷payload
+    syncSeverStatusDataAll(state, payload) {
+      state.server_status = payload.message;
+    },
   },
   //actions 可以包含任意异步操作，通过 store.dispatch 方法触发
   //接收context，与store具有相同方法与属性，不是store本身，
@@ -149,6 +153,24 @@ const store = createStore({
       };
       context.commit("syncSeverStatusData", payload);
       console.log("syncSeverStatusData!");
+    },
+    //拉取远程设定数据
+    async syncSeverStatusDataAllAction(context) {
+      const msg = await axios
+        .get("server_info_all")
+        .then(
+          (res) => res.data,
+          () => ""
+        )
+        .catch((error) => {
+          console.log(error);
+        })
+        .finally(() => {});
+      const payload = {
+        message: msg,
+      };
+      context.commit("syncSeverStatusDataAll", payload);
+      console.log("syncSeverStatusDataAll!");
     },
   },
   //相当于store的计算属性，会被缓存，变化的时候才重新计算
