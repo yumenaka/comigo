@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/yumenaka/comi/arch"
 	"github.com/yumenaka/comi/logger"
 	"github.com/yumenaka/comi/types"
 )
@@ -32,6 +33,16 @@ func GetBook(c *gin.Context) {
 			logger.Info(err)
 			c.PureJSON(http.StatusBadRequest, "id not found")
 			return
+		}
+		// 如果是epub文件，重新按照Epub信息排序
+		if b.Type == types.TypeEpub && sortBy == "epub_info" {
+			imageList, err := arch.GetImageListFromEpubFile(b.FilePath)
+			if err != nil {
+				logger.Info(err)
+				c.PureJSON(http.StatusOK, b)
+				return
+			}
+			b.SortPagesByImageList(imageList)
 		}
 		c.PureJSON(http.StatusOK, b)
 	}

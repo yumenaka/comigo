@@ -99,5 +99,6 @@
   "Flip_odd_even_page": "ページ間マッチングの変更",
   "back_button": "戻るボタン",
   "qrcode_hint": "クリックしてQRコードを表示する",
-  "full_screen_hint": "フルスクリーンボタン"
+  "full_screen_hint": "フルスクリーンボタン",
+  "epub_info": "ePub 情報"
 }

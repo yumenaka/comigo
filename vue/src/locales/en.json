@@ -99,5 +99,6 @@
   "resort_file": "Resort file",
   "back_button": "Back Button",
   "qrcode_hint": "Scan to read, click to show QR code",
-  "full_screen_hint": "FullScreen"
+  "full_screen_hint": "FullScreen",
+  "epub_info": "ePub Info"
 }
