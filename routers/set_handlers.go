@@ -1,13 +1,13 @@
 package routers
 
 import (
-	"github.com/yumenaka/comi/routers/config_handlers"
 	"log"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/logger"
+	"github.com/yumenaka/comi/routers/config_handlers"
 	"github.com/yumenaka/comi/routers/handlers"
 	"github.com/yumenaka/comi/routers/token"
 	"github.com/yumenaka/comi/routers/websocket"
