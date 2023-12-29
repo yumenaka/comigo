@@ -99,5 +99,6 @@
   "resort_file": "文件重排序",
   "back_button": "返回按钮",
   "qrcode_hint": "扫码阅读，点击可以显示二维码",
-  "full_screen_hint": "全屏按钮"
+  "full_screen_hint": "全屏按钮",
+  "epub_info": "ePub 信息"
 }

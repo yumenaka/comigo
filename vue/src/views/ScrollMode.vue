@@ -424,6 +424,14 @@ export default defineComponent({
 				} else {
 					this.endLoadPageNum = this.book.page_count;
 				}
+				if (this.book.type == ".epub") {
+					this.options.push(
+						{
+							label: this.$t('epub_info'),
+							value: "epub_info",
+						}
+					)
+				}
 				this.loadPages();
 				// 询问用户是否从中间开始加载，延迟1.5秒执行
 				setTimeout(function () {
