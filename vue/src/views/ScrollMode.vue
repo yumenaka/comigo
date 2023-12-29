@@ -128,11 +128,11 @@
 				<template #unchecked>{{ $t('auto_crop') }}</template>
 			</n-switch>
 			<!-- 切白边阈值 -->
-			<!-- <n-input-number :show-button="false" v-if="imageParameters.do_auto_crop"
-				v-model:value="imageParameters.auto_crop_num" @update:value="setImageParameters_AutoCropNum"
+			<n-input-number :show-button="false" v-if="imageParameters.do_auto_crop"
+				v-model:value="imageParameters.auto_crop_num"
 				:max="10" :min="0">
 				<template #prefix>{{ $t('energy_threshold') }}</template>
-			</n-input-number> -->
+			</n-input-number> 
 
 			<!-- 开关：压缩图片 -->
 			<n-switch size="large" :rail-style="railStyle" v-model:value="imageParameters.do_auto_resize"
@@ -217,8 +217,8 @@ export default defineComponent({
 			dialog,
 			imageParameters,//获取图片所用参数
 			imageParametersString: (source_url: string) => {
-				// console.log("source_url:" + source_url)
-				if (source_url.substr(0, 12) == "api/get_file?") {
+				//console.log("source_url:" + source_url)
+				if (source_url.startsWith("api/get_file?")) {
 					//当前URL
 					const url = document.location.toString();
 					//按照“/”分割字符串
@@ -236,7 +236,7 @@ export default defineComponent({
 					const addStr = resize_width_str + resize_height_str + do_auto_resize_str + resize_max_height_str + auto_crop_str + gray_str;
 					//如果有附加转换参数，则设置成不缓存
 					const nocache_str = (addStr === "" ? "" : "&no-cache=true");
-					// console.log(full_url);
+					//console.log(base_str + addStr + nocache_str);
 					return base_str + addStr + nocache_str;
 				} else {
 					return source_url
