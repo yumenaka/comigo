@@ -6,12 +6,10 @@ import (
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comi/config"
-	"github.com/yumenaka/comi/logger"
 	"github.com/yumenaka/comi/routers/config_handlers"
 	"github.com/yumenaka/comi/routers/handlers"
 	"github.com/yumenaka/comi/routers/token"
 	"github.com/yumenaka/comi/routers/websocket"
-	"github.com/yumenaka/comi/types"
 )
 
 var protectedAPI *gin.RouterGroup
@@ -61,6 +59,8 @@ func setWebAPI(engine *gin.Engine) {
 	protectedAPI.POST("/upload", handlers.UploadFile)
 	//通过URL字符串参数获取特定文件
 	protectedAPI.GET("/get_file", handlers.GetFile)
+	//直接下载原始文件
+	protectedAPI.GET("/raw/:book_id/:file_name", handlers.GetRawFile)
 	//登录后才能查看的服务器状态，包括标题、机器状态等
 	protectedAPI.GET("/server_info_all", handlers.GetServerInfo)
 	//获取书架信息，不包含每页信息
@@ -88,34 +88,4 @@ func setWebAPI(engine *gin.Engine) {
 	protectedAPI.DELETE("/config/:in", config_handlers.DeleteConfig)
 	//通过链接下载toml格式的示例配置
 	protectedAPI.GET("/config.toml", config_handlers.GetConfigToml)
-
-	//压缩包直接下载链接
-	SetDownloadLink()
-}
-
-// SetDownloadLink 压缩包直接下载链接
-func SetDownloadLink() {
-	if types.GetBooksNumber() >= 1 {
-		allBook, err := types.GetAllBookInfoList("name")
-		if err != nil {
-			logger.Info("设置文件下载失败")
-		} else {
-			for _, info := range allBook.BookInfos {
-				//下载文件
-				if info.Type != types.TypeBooksGroup && info.Type != types.TypeDir {
-					//staticUrl := "/raw/" + info.BookID + "/" + url.QueryEscape(info.title)
-					staticUrl := "/raw/" + info.BookID + "/" + info.Title
-					if checkUrlRegistered(info.BookID) {
-						if config.Config.Debug {
-							logger.Info("路径已注册：", info)
-						}
-						continue
-					} else {
-						protectedAPI.StaticFile(staticUrl, info.FilePath)
-						staticUrlMap[info.BookID] = staticUrl
-					}
-				}
-			}
-		}
-	}
 }

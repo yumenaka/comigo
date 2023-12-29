@@ -170,5 +170,6 @@
   "book_shelf": "Bookshelf",
   "network": "Network",
   "abs": "labs",
-  "temp_future_hint": "Temporarily put some features that are not yet finished, under development and adjustment."
+  "temp_future_hint": "Temporarily put some features that are not yet finished, under development and adjustment.",
+  "ConfigManagerDescription": "Uploads the current configuration to the server or deletes an already existing settings file."
 }

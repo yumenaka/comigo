@@ -4,7 +4,6 @@ import ConfigStatus from "../types/ConfigStatus"
 import { useEffectOnce } from 'react-use';
 import { useTranslation } from "react-i18next";
 
-
 type PropsType = {
     InterfaceColor: string
     showDialogFunc: (title: string, content: string) => void
@@ -130,7 +129,9 @@ const ConfigManager = (props: PropsType) => {
                     <button key={s.name} onClick={onDeleteConfig} className="h-10 w-24 mx-2 my-1 bg-red-300 border border-gray-500 text-center text-gray-700 transition hover:text-gray-900 rounded">DELETE</button>
                 )}
             </div>
+            <div className="py-1 w-full text-xs text-gray-500">{t("ConfigManagerDescription")}</div>
         </div>
+        
     )
 }
 

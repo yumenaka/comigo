@@ -170,5 +170,6 @@
   "book_shelf": "本棚",
   "network": "ットワーク",
   "abs": "ボ",
-  "temp_future_hint": "まだ完成していないいくつかの機能を、一時的にに置く。"
+  "temp_future_hint": "まだ完成していないいくつかの機能を、一時的にに置く。",
+  "ConfigManagerDescription": "現在の設定をサーバーにアップロードするか、すでに存在する設定ファイルを削除します。"
 }

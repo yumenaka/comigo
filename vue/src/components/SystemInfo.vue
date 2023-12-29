@@ -94,7 +94,8 @@ export default defineComponent({
       //每次上传完成后，触发轮询的次数
       const pollTimer = setInterval(() => {
         //服务器拉取最新状态，看是否新加了书籍
-        this.$store.dispatch("syncSeverStatusDataAction");
+        this.$store.dispatch("syncSeverStatusDataAllAction");
+        //console.log(this.$store.state.server_status.OSInfo.cpu_used_percent);
         this.cpu_percentage = this.$store.state.server_status.OSInfo.cpu_used_percent.toFixed(2);
         this.ram_percentage = this.$store.state.server_status.OSInfo.memory_used_percent.toFixed(2);
         if (!this.showSystemInfo) {

@@ -32,7 +32,6 @@
         <span>{{ $t("server_config") }}</span>
       </n-tooltip>
 
-
       <!-- 上传按钮，点击进入上传页面 -->
       <n-tooltip placement="bottom" trigger="hover">
         <template #trigger>
