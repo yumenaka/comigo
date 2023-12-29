@@ -5,9 +5,52 @@
   <a :href="getBookURL()" :target="getTarget"
     class="relative w-32 h-44 mx-4 my-4 bg-gray-200 rounded shadow-xl hover:shadow-2xl ring-1 ring-gray-400 hover:ring hover:ring-blue-500 bg-top bg-cover"
     :style="setBackgroundImage()">
-    <div v-if="childBookNum != ''" class="absolute inset-x-0 top-0 text-right">
+    <!-- 书籍组：显示书籍数量 -->
+    <div v-if="childBookNum != ''" class="flex flex-row justify-end pl-2">
+      <svg class="opacity-70 w-7 h-7" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="rgb(234 179 8)" stroke-width="1.0"
+        stroke="currentColor">
+        <path
+          d="M11.25 4.533A9.707 9.707 0 0 0 6 3a9.735 9.735 0 0 0-3.25.555.75.75 0 0 0-.5.707v14.25a.75.75 0 0 0 1 .707A8.237 8.237 0 0 1 6 18.75c1.995 0 3.823.707 5.25 1.886V4.533ZM12.75 20.636A8.214 8.214 0 0 1 18 18.75c.966 0 1.89.166 2.75.47a.75.75 0 0 0 1-.708V4.262a.75.75 0 0 0-.5-.707A9.735 9.735 0 0 0 18 3a9.707 9.707 0 0 0-5.25 1.533v16.103Z" />
+      </svg>
+
       <span class="text-2xl text-yellow-500 font-black text-shadow">{{ childBookNum }}</span>
     </div>
+
+    <!-- 文件夹 -->
+    <svg v-if='book_info.type == "dir"' class="opacity-70 w-7 h-7 m-0 absolute top-1 right-1 shadow-2xl hover:shadow-2xl"
+      xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="rgb(234 179 8)" stroke-width="1.0"
+      stroke="currentColor">
+      <path
+        d="M19.5 21a3 3 0 0 0 3-3v-4.5a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3V18a3 3 0 0 0 3 3h15ZM1.5 10.146V6a3 3 0 0 1 3-3h5.379a2.25 2.25 0 0 1 1.59.659l2.122 2.121c.14.141.331.22.53.22H19.5a3 3 0 0 1 3 3v1.146A4.483 4.483 0 0 0 19.5 9h-15a4.483 4.483 0 0 0-3 1.146Z" />
+    </svg>
+
+    <!-- 视频  -->
+    <svg v-if='book_info.type == "video"'
+      class="opacity-70 w-7 h-7 m-0 absolute top-1 right-1 shadow-2xl hover:shadow-2xl" xmlns="http://www.w3.org/2000/svg"
+      fill="rgb(234 179 8)" viewBox="0 0 24 24" stroke-width="1.0" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round"
+        d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
+    </svg>
+
+    <!-- 音乐  -->
+    <svg v-if='book_info.type == "audio"'
+      class="opacity-70 w-7 h-7 m-0 absolute top-1 right-1 shadow-2xl hover:shadow-2xl" xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24" fill="rgb(234 179 8)" stroke-width="1.0" stroke="currentColor">
+      <path fill-rule="evenodd"
+        d="M19.952 1.651a.75.75 0 0 1 .298.599V16.303a3 3 0 0 1-2.176 2.884l-1.32.377a2.553 2.553 0 1 1-1.403-4.909l2.311-.66a1.5 1.5 0 0 0 1.088-1.442V6.994l-9 2.572v9.737a3 3 0 0 1-2.176 2.884l-1.32.377a2.553 2.553 0 1 1-1.402-4.909l2.31-.66a1.5 1.5 0 0 0 1.088-1.442V5.25a.75.75 0 0 1 .544-.721l10.5-3a.75.75 0 0 1 .658.122Z"
+        clip-rule="evenodd" />
+    </svg>
+
+    <!-- PDF  -->
+    <svg v-if='book_info.type == ".pdf"' class="opacity-70 w-7 h-7 m-0 absolute top-1 right-1 shadow-2xl hover:shadow-2xl"
+      xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="rgb(234 179 8)" stroke-width="1.0"
+      stroke="currentColor">
+      <path
+        d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625Z" />
+      <path
+        d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
+    </svg>
+
     <div v-if="showTitle"
       class="absolute inset-x-0 bottom-0 h-1/4 bg-gray-100 bg-opacity-80 font-semibold border-blue-800 rounded-b">
       <!-- 如果把链接的 target 属性设置为 "_blank"，该链接会在新窗口中打开。 -->
@@ -48,7 +91,7 @@ export default defineComponent({
     },
     childBookNum(): string {
       if (this.book_info.type === 'dir') {
-        return 'dir'
+        return ''
       }
       if (this.book_info.child_book_num > 0) {
         return "x" + this.book_info.child_book_num.toString();
