@@ -198,6 +198,7 @@ function App() {
               value={config.StoresPath}
               InterfaceColor={InterfaceColor}
               setStringArray={setStringArray}
+              showDialog={showDialogFunc}
             ></ArrayConfig>
 
             <NormalConfig
@@ -240,9 +241,7 @@ function App() {
               boolValue={config.EnableUpload}
               InterfaceColor={InterfaceColor}
               setBoolValue={setBoolValue}
-              showDialog={() => {
-                showDialogFunc(t("EnableUpload"), t("EnableUpload_Description"))
-              }}
+  
             ></BoolConfig>
 
             {config.EnableUpload && <NormalConfig

@@ -77,4 +77,4 @@ vue/.idea
 *.njsproj
 *.sln
 *.sw?
-
+*nohup.out
