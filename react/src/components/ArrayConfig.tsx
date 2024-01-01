@@ -7,8 +7,8 @@ interface Props {
     value: string[];
     setStringArray: (name: string, value: string[]) => void;
     error?: string;
-    // register?: any;
     InterfaceColor?: string;
+    showDialog?: (title: string, content: string) => void;
 }
 
 const ArrayConfig: React.FC<Props> = ({
@@ -19,6 +19,7 @@ const ArrayConfig: React.FC<Props> = ({
     setStringArray,
     error,
     InterfaceColor,
+    showDialog,
 }) => {
     function push(element: string): void {
         setStringArray(name, [...value, element])
@@ -39,6 +40,8 @@ const ArrayConfig: React.FC<Props> = ({
         if (input.value !== '') {
             push(input.value)
             input.value = ''
+        }else{
+            showDialog && showDialog("提示","请输入内容")
         }
     }
 
@@ -68,18 +71,19 @@ const ArrayConfig: React.FC<Props> = ({
                     <input
                         type="text"
                         id="Search"
-                        placeholder="Add new..."
+                        placeholder="键入或粘贴内容"
                         className="w-full rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm"
                         onKeyDown={onEnter}
                     ></input>
 
-                    <span className="absolute inset-y-0 end-0 grid w-10 place-content-center">
+             
+                </div>
+                <span className="grid w-10 place-content-center">
                         <button onClick={onClick} type="button" className="text-gray-600 hover:text-gray-700">
                             <span className="sr-only">Search</span>
                             <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M448 256c0-106-86-192-192-192S64 150 64 256s86 192 192 192s192-86 192-192z" fill="none" stroke="currentColor" strokeMiterlimit="10" strokeWidth="32"></path><path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="32" d="M256 176v160"></path><path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="32" d="M336 256H176"></path></svg>
                         </button>
                     </span>
-                </div>
             </div>
 
             <div className="ml-2 py-1 w-3/4 text-xs text-gray-500">{fieldDescription}</div>

@@ -6,9 +6,14 @@ After=network.target nss-lookup.target
 [Service]
 Type=simple
 User=root
-ExecStart=/usr/bin/comi --config  /etc/comigo/config.toml
+WorkingDirectory=/home
+ExecStart=/usr/bin/comi
 Restart=on-failure
 RestartPreventExitStatus=23
 
 [Install]
 WantedBy=multi-user.target
+# sudo nano /etc/systemd/system/comigo.service
+# sudo systemctl daemon-reload
+# sudo systemctl enable --now comigo
+

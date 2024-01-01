@@ -6,7 +6,7 @@ type PropsType = {
     boolValue: boolean
     InterfaceColor: string
     setBoolValue: (valueName: string, checked: boolean) => void
-    showDialog?: (message: string) => void
+    showDialog?: (title: string, content: string) => void
 }
 
 const BoolConfig = (props: PropsType) => {
@@ -15,7 +15,7 @@ const BoolConfig = (props: PropsType) => {
         console.log(valueName, event.target.checked)
         setBoolValue(valueName, event.target.checked)
         if (showDialog) {
-            showDialog("Checkbox value changed");
+            showDialog("Hint","Checkbox value changed");
         }
     }
 
