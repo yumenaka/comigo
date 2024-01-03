@@ -31,7 +31,7 @@ func ReverseProxyHandle(path string, option ReverseProxyOptions) gin.HandlerFunc
 			defer func(Body io.ReadCloser) {
 				err := Body.Close()
 				if err != nil {
-					logger.Info("Body.Close() Error:", err)
+					logger.Infof("Body.Close() Error:", err)
 				}
 			}(resp.Body)
 			body, err := io.ReadAll(resp.Body)

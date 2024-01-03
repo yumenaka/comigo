@@ -22,10 +22,10 @@ var UploadPath *string
 // UploadFile engine.MaxMultipartMemory = 60 << 20  // 60 MiB  只限制程序在上传文件时可以使用多少内存，而是不限制上传文件的大小。(default is 32 MiB)
 func UploadFile(c *gin.Context) {
 	if !*EnableUpload {
-		logger.Info(locale.GetString("UPLOAD_DISABLE_HINT"))
+		logger.Infof(locale.GetString("UPLOAD_DISABLE_HINT"))
 		return
 	}
-	//logger.Info("EnableUpload:", *EnableUpload)
+	//logger.Infof("EnableUpload:", *EnableUpload)
 	//默认的上传路径
 	path := "upload"
 	//如果设置过上传路径
@@ -46,13 +46,13 @@ func UploadFile(c *gin.Context) {
 	// 上传单个文件 sample: https://github.com/gin-gonic/examples/blob/master/upload-file/single/main.go
 	file, err := c.FormFile("file")
 	if err != nil { //没有传文件会报错，处理这个错误。
-		logger.Info(err)
+		logger.Infof("%s", err)
 	}
 
 	// UploadFile the file to specific dst.
 	err = c.SaveUploadedFile(file, filepath.Join(path, file.Filename))
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 	}
 	/*
 	  也可以直接使用io操作，拷贝文件数据。
@@ -71,7 +71,7 @@ func UploadFile(c *gin.Context) {
 	//	return
 	//}
 	//files := form.File["files"]
-	//logger.Info("files:", files)
+	//logger.Infof("files:", files)
 	//for _, file := range files {
 	//	filename := filepath.Base(file.Filename)
 	//	if err := c.SaveUploadedFile(file, filepath.Join(path, filename)); err != nil {

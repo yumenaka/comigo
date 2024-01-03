@@ -19,7 +19,7 @@ func showQRCode() {
 	if types.GetBooksNumber() == 1 {
 		bookList, err := types.GetAllBookInfoList("name")
 		if err != nil {
-			logger.Info(err)
+			logger.Infof("%s", err)
 		}
 		if len(bookList.BookInfos) == 1 {
 			etcStr = "/#/scroll/" + bookList.BookInfos[0].BookID

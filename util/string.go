@@ -29,7 +29,7 @@ import (
 //		FromLanguages(languages...).
 //		Build()
 //	if language, exists := detector.DetectLanguageOf("languages are awesome"); exists {
-//		logger.Info(language)
+//		logger.Infof(language)
 //		return language
 //	}
 //	return ""
@@ -61,13 +61,12 @@ func DetectUTF8(s string) (valid, require bool) {
 func MD5file(fName string) string {
 	f, e := os.Open(fName)
 	if e != nil {
-		logger.Info(e)
-		//log.Fatal(e)
+		logger.Infof("%s", e)
 	}
 	h := md5.New()
 	_, e = io.Copy(h, f)
 	if e != nil {
-		logger.Info(e)
+		logger.Infof("%s", e)
 		//log.Fatal(e)
 	}
 	return hex.EncodeToString(h.Sum(nil))
@@ -86,13 +85,13 @@ func getNumberFromString(s string) (int, error) {
 			for _, v := range value {
 				temp, errTemp := strconv.Atoi(v)
 				if errTemp != nil {
-					logger.Info("error num value:" + v)
+					logger.Infof("error num value:" + v)
 				} else {
 					num = num + temp
 				}
 			}
 		}
-		//logger.Info("get Number:",num," form string:",s,"numbers[]=",numbers)
+		//logger.Infof("get Number:",num," form string:",s,"numbers[]=",numbers)
 	} else {
 		err = errors.New("number not found")
 		return 0, err

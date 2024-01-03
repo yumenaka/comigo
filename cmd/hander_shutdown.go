@@ -27,15 +27,18 @@ func SetShutdownHandler() {
 	log.Println(locale.GetString("ShutdownHint"))
 	//清理临时文件
 	if config.Config.ClearCacheExit {
-		logger.Info("\r" + locale.GetString("start_clear_file") + " CachePath:" + config.Config.CachePath)
+		logger.Infof("\r" + locale.GetString("start_clear_file") + " CachePath:" + config.Config.CachePath)
 		types.ClearTempFilesALL(config.Config.Debug, config.Config.CachePath)
-		logger.Info(locale.GetString("clear_temp_file_completed"))
+		logger.Infof(locale.GetString("clear_temp_file_completed"))
 	}
 	// 上下文用于通知服务器它有 5 秒的时间来完成它当前正在处理的请求
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
+	//只能通过http.Server.Shutdown()/http.Server.Close()等http包里的方法去实现,没办法自己实现.
+	//因为这样的设计即使你给自定义Server接口的实现类设计了Shutdown()方法,也调用不到.
+	//本质上还是因为从端口启动开始,后续的所有工作都是http包来完成的,我们无法干涉这其中的步骤
 	if err := config.Srv.Shutdown(ctx); err != nil {
-		//logger.Info("Comigo Server forced to shutdown: ", err)
+		//logger.Infof("Comigo Server forced to shutdown: ", err)
 		//time.Sleep(3 * time.Second)
 		log.Fatal("Comigo Server forced to shutdown: ", err)
 	}

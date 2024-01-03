@@ -27,11 +27,12 @@ type ConfigStatus struct {
 }
 
 func (c *ConfigStatus) SetConfigStatus() error {
-	logger.Info("Check Config Path")
+
 	c.In = ""
 	c.Path.WorkingDirectory = ""
 	c.Path.HomeDirectory = ""
 	c.Path.ProgramDirectory = ""
+	logger.Infof("Check Config Path")
 
 	// 可执行程序自身的文件路径
 	executablePath, err := os.Executable()
@@ -114,7 +115,7 @@ func UpdateConfig(config *ComigoConfig, jsonString string) (*ComigoConfig, error
 		// 将字符串解析为字符串切片
 		arr, err := parseString(StoresPath.String())
 		if err != nil {
-			logger.Info("Failed to parse string:", err)
+			logger.Infof("Failed to parse string:", err)
 			return config, err
 		}
 		config.StoresPath = arr
@@ -180,7 +181,7 @@ func UpdateConfig(config *ComigoConfig, jsonString string) (*ComigoConfig, error
 		// 将字符串解析为字符串切片
 		arr, err := parseString(ExcludePath.String())
 		if err != nil {
-			logger.Info("Failed to parse string:", err)
+			logger.Infof("Failed to parse string:", err)
 			return config, err
 		}
 		config.ExcludePath = arr
@@ -190,7 +191,7 @@ func UpdateConfig(config *ComigoConfig, jsonString string) (*ComigoConfig, error
 		// 将字符串解析为字符串切片
 		arr, err := parseString(SupportMediaType.String())
 		if err != nil {
-			logger.Info("Failed to parse string:", err)
+			logger.Infof("Failed to parse string:", err)
 			return config, err
 		}
 		config.SupportMediaType = arr
@@ -200,7 +201,7 @@ func UpdateConfig(config *ComigoConfig, jsonString string) (*ComigoConfig, error
 		// 将字符串解析为字符串切片
 		arr, err := parseString(SupportFileType.String())
 		if err != nil {
-			logger.Info("Failed to parse string:", err)
+			logger.Infof("Failed to parse string:", err)
 			return config, err
 		}
 		config.SupportFileType = arr
@@ -272,22 +273,22 @@ type WebPServerConfig struct {
 func (c *ComigoConfig) SetByExecutableFilename() {
 	// 当前执行目录
 	//targetPath, _ := os.Getwd()
-	//logger.Info(locale.GetString("target_path"), targetPath)
+	//logger.Infof(locale.GetString("target_path"), targetPath)
 	// 带后缀的执行文件名 comi.exe  sketch.exe
 	filenameWithSuffix := path.Base(os.Args[0])
 	// 执行文件名后缀
 	fileSuffix := path.Ext(filenameWithSuffix)
 	// 去掉后缀后的执行文件名
 	filenameWithOutSuffix := strings.TrimSuffix(filenameWithSuffix, fileSuffix)
-	//logger.Info("filenameWithOutSuffix =", filenameWithOutSuffix)
+	//logger.Infof("filenameWithOutSuffix =", filenameWithOutSuffix)
 	ex, err := os.Executable()
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 	}
 	extPath := filepath.Dir(ex)
-	//logger.Info("extPath =",extPath)
+	//logger.Infof("extPath =",extPath)
 	ExtFileName := strings.TrimPrefix(filenameWithOutSuffix, extPath)
 	if c.Debug {
-		logger.Info("ExtFileName =", ExtFileName)
+		logger.Infof("ExtFileName =%s", ExtFileName)
 	}
 }

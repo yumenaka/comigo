@@ -55,7 +55,7 @@ var client *ent.Client
 
 func InitDatabase(configFilePath string) error {
 	if client != nil {
-		//logger.Info("database already initialized")
+		//logger.Infof("database already initialized")
 		return nil
 	}
 	//链接或创建数据库
@@ -70,7 +70,7 @@ func InitDatabase(configFilePath string) error {
 		configDir := filepath.Dir(configFilePath) //不能用path.Dir()，因为windows返回 "."
 		dataSourceName = "file:" + path.Join(configDir, "comigo.sqlite") + "?cache=shared"
 	}
-	logger.Info(locale.GetString("InitDatabase") + dataSourceName)
+	logger.Infof(locale.GetString("InitDatabase") + dataSourceName)
 	client, err = ent.Open(dialect.SQLite, dataSourceName, entOptions...)
 	if err != nil {
 		return fmt.Errorf("failed opening connection to sqlite: %v", err)
@@ -89,6 +89,6 @@ func InitDatabase(configFilePath string) error {
 func CloseDatabase() {
 	err := client.Close()
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 	}
 }

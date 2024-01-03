@@ -19,13 +19,13 @@ func GetImageDataBlurHash(loadedImage []byte, components int) string {
 	buf := bytes.NewBuffer(loadedImage)
 	imageData, err := imaging.Decode(buf)
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 		return "error blurhash!"
 	}
 	str, err := blurhash.Encode(components, components, imageData)
 	if err != nil {
 		// Handle errors
-		logger.Info(err)
+		logger.Infof("%s", err)
 		return "error blurhash!"
 	}
 	logger.Infof("Hash: %s\n", str)
@@ -38,17 +38,17 @@ func GetImageDataBlurHashImage(loadedImage []byte, components int) []byte {
 	buf := bytes.NewBuffer(loadedImage)
 	imageData, err := imaging.Decode(buf)
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 	}
 	str, err := blurhash.Encode(components, components, imageData)
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 	}
 	// Generate an imageData for a given BlurHash
 	// Punch specifies the contrasts and defaults to 1
 	img, err := blurhash.Decode(str, imageData.Bounds().Dx(), imageData.Bounds().Dy(), 1)
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 	}
 	buf2 := &bytes.Buffer{}
 	//将图片编码成jpeg
@@ -64,7 +64,7 @@ func ImageResizeByWidth(loadedImage []byte, width int) []byte {
 	buf := bytes.NewBuffer(loadedImage)
 	decode, err := imaging.Decode(buf)
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 		return loadedImage
 	}
 	sourceWidth := decode.Bounds().Dx()
@@ -86,7 +86,7 @@ func ImageResizeByMaxWidth(loadedImage []byte, maxWidth int) ([]byte, error) {
 	buf := bytes.NewBuffer(loadedImage)
 	decode, err := imaging.Decode(buf)
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 		return nil, errors.New("imaging.Decode() Error")
 	}
 	sourceWidth := decode.Bounds().Dx()
@@ -111,7 +111,7 @@ func ImageResizeByMaxHeight(loadedImage []byte, maxHeight int) ([]byte, error) {
 	buf := bytes.NewBuffer(loadedImage)
 	decode, err := imaging.Decode(buf)
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 		return nil, errors.New("imaging.Decode() Error")
 	}
 	sourceHeight := decode.Bounds().Dy()
@@ -135,7 +135,7 @@ func ImageResizeByHeight(loadedImage []byte, height int) []byte {
 	buf := bytes.NewBuffer(loadedImage)
 	decode, err := imaging.Decode(buf)
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 		return loadedImage
 	}
 	sourceHeight := decode.Bounds().Dy()
@@ -157,7 +157,7 @@ func ImageResize(loadedImage []byte, width int, height int) []byte {
 	buf := bytes.NewBuffer(loadedImage)
 	decode, err := imaging.Decode(buf)
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 		return loadedImage
 	}
 	//生成缩略图，尺寸width*height
@@ -176,7 +176,7 @@ func ImageThumbnail(loadedImage []byte, width int, height int) []byte {
 	buf := bytes.NewBuffer(loadedImage)
 	imageData, err := imaging.Decode(buf)
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 		return loadedImage
 	}
 	//生成缩略图，尺寸width*height
@@ -197,7 +197,7 @@ func ImageAutoCrop(loadedImage []byte, energyThreshold float32) []byte {
 	buf := bytes.NewBuffer(loadedImage)
 	img, err := imaging.Decode(buf)
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 		return loadedImage
 	}
 	//使用 BoundsForThreshold 查找图像的自动裁剪边界
@@ -224,7 +224,7 @@ func ImageGray(loadedImage []byte) []byte {
 	buf := bytes.NewBuffer(loadedImage)
 	img, err := imaging.Decode(buf)
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 		return loadedImage
 	}
 	result := imaging.Grayscale(img)

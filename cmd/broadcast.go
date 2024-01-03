@@ -25,7 +25,7 @@ func waitRescanMessages() {
 		// Send it out to every client that is currently connected
 		switch msg {
 		case "upload":
-			logger.Info("扫描上传文件夹：", msg)
+			logger.Infof("扫描上传文件夹：", msg)
 			ReScanUploadPath()
 			//保存扫描结果到数据库
 			if config.Config.EnableDatabase {
@@ -35,7 +35,7 @@ func waitRescanMessages() {
 				}
 			}
 		case "SomePath":
-			logger.Info("收到重新扫描消息：", msg)
+			logger.Infof("收到重新扫描消息：", msg)
 			ReScanPath(msg, false)
 		default:
 			continue
@@ -74,7 +74,7 @@ func ReScanPath(path string, reScanFile bool) {
 	)
 	addList, err := scan.ScanAndGetBookList(path, option)
 	if err != nil {
-		logger.Info(locale.GetString("scan_error"), path, err)
+		logger.Infof(locale.GetString("scan_error"), path, err)
 	} else {
 		scan.AddBooksToStore(addList, path, config.Config.MinImageNum)
 	}

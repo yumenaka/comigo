@@ -23,17 +23,17 @@ func ClearBookData(clearBook *types.Book) {
 		Where(entbook.BookIDEQ(clearBook.BookID)).
 		Exec(ctx)
 	if err != nil {
-		logger.Info("ClearBookData Book:" + err.Error())
+		logger.Infof("ClearBookData Book:" + err.Error())
 	}
-	logger.Info("Clear Book ：" + clearBook.Title)
+	logger.Infof("Clear Book ：" + clearBook.Title)
 	deletePageInfoNum, err := client.SinglePageInfo.
 		Delete().
 		Where(singlepageinfo.BookIDEQ(clearBook.BookID)).
 		Exec(ctx)
 	if err != nil {
-		logger.Info("ClearBookData SinglePageInfo:" + err.Error())
+		logger.Infof("ClearBookData SinglePageInfo:" + err.Error())
 	}
-	logger.Info("Clear SinglePageInfo Num：" + strconv.Itoa(deletePageInfoNum))
+	logger.Infof("Clear SinglePageInfo Num：" + strconv.Itoa(deletePageInfoNum))
 }
 
 // DeleteAllBookInDatabase  清空数据库的Book与SinglePageInfo表
@@ -46,20 +46,20 @@ func DeleteAllBookInDatabase(debug bool) {
 		Where(entbook.PageCountNEQ(-99999)).
 		Exec(ctx)
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 	}
 	if debug {
-		logger.Info("Delete Book Num：" + strconv.Itoa(deleteBookNum))
+		logger.Infof("Delete Book Num：" + strconv.Itoa(deleteBookNum))
 	}
 	deletePageInfoNum, err := client.SinglePageInfo.
 		Delete().
 		Where(singlepageinfo.WidthNEQ(-99999)).
 		Exec(ctx)
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 	}
 	if debug {
-		logger.Info("Delete SinglePageInfo Num：" + strconv.Itoa(deletePageInfoNum))
+		logger.Infof("Delete SinglePageInfo Num：" + strconv.Itoa(deletePageInfoNum))
 	}
 }
 
@@ -69,7 +69,7 @@ func SaveAllBookToDatabase(m map[string]*types.Book) {
 		var c = *b
 		err := SaveBookToDatabase(&c)
 		if err != nil {
-			logger.Info("SaveAllBookToDatabase error :" + err.Error())
+			logger.Infof("SaveAllBookToDatabase error :" + err.Error())
 		}
 	}
 }
@@ -151,7 +151,7 @@ func GetBookFromDatabase(filepath string) (*types.Book, error) {
 					Where(entbook.FilePath(filepath)).
 					All(ctx) // query and return.
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 	}
 	if len(books) == 0 {
 		return nil, errors.New("not found in database,filepath:" + filepath)
@@ -207,7 +207,7 @@ func GetBookFromDatabase(filepath string) (*types.Book, error) {
 		b.Cover = b.Pages.Images[0]
 	}
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 	}
 	return &b, err
 }
@@ -220,7 +220,7 @@ func GetBooksFromDatabase() (list []*types.Book, err error) {
 		//Where(ent_book.Not(ent_book.Type("dir"))). //忽略文件夹型的书籍
 		All(ctx) // query and return.
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 	}
 	if len(books) == 0 {
 		return nil, errors.New("not found in database")
@@ -257,7 +257,7 @@ func GetBooksFromDatabase() (list []*types.Book, err error) {
 							Where(singlepageinfo.BookID(temp.BookID)).
 							All(ctx) // query and return.
 		if err != nil {
-			logger.Info(err)
+			logger.Infof("%s", err)
 		}
 		for _, v := range pages {
 			b.Pages.Images = append(b.Pages.Images, types.ImageInfo{

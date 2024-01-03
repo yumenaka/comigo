@@ -26,15 +26,15 @@ package plugin
 //	//保存文件
 //	err = cfg.SaveToIndent(configPath+"/frpc.ini", "\t")
 //	if err != nil {
-//		logger.Info(locale.GetString("frpc_ini_error"))
+//		logger.Infof(locale.GetString("frpc_ini_error"))
 //		return err
 //	} else {
-//		logger.Info(locale.GetString("frpc_setting_save_completed"), configPath, cfg)
+//		logger.Infof(locale.GetString("frpc_setting_save_completed"), configPath, cfg)
 //	}
 //	//实际执行
 //	var cmd *exec.Cmd
 //	cmd = exec.Command(common.Config.FrpConfig.FrpcCommand, "-c", configPath+"/frpc.ini")
-//	logger.Info(cmd)
+//	logger.Infof(cmd)
 //	if err = cmd.Start(); err != nil {
 //		return err
 //	}
@@ -60,12 +60,12 @@ package plugin
 //		return err
 //	}
 //	if _, err := jsonObject.Write(content); err == nil {
-//		logger.Info(locale.GetString("webp_setting_save_completed"), webpConfigFile, content)
+//		logger.Infof(locale.GetString("webp_setting_save_completed"), webpConfigFile, content)
 //	}
 //	//err = webpCMD(webpConfigFile, Config.WebpCommand)
 //	var cmd *exec.Cmd
 //	cmd = exec.Command(Config.WebpConfig.WebpCommand, "--config", webpConfigFile)
-//	logger.Info(cmd)
+//	logger.Infof(cmd)
 //	if err = cmd.Start(); err != nil {
 //		return err
 //	}

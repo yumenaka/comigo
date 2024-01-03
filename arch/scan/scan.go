@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/klauspost/compress/zip"
-	"github.com/sirupsen/logrus"
 	"github.com/yumenaka/archiver/v4"
 	"github.com/yumenaka/comi/arch"
 	"github.com/yumenaka/comi/database"
@@ -107,7 +106,7 @@ func InitStore(scanConfig Option) error {
 	for _, p := range scanConfig.StoresPath {
 		addList, err := ScanAndGetBookList(p, scanConfig)
 		if err != nil {
-			logger.Info(locale.GetString("scan_error"), p, err)
+			logger.Infof(locale.GetString("scan_error"), p, err)
 			continue
 		}
 		AddBooksToStore(addList, p, scanConfig.MinImageNum)
@@ -140,11 +139,11 @@ func ClearDatabaseWhenExit(ConfigPath string) {
 func AddBooksToStore(bookList []*types.Book, basePath string, MinImageNum int) {
 	err := types.AddBooks(bookList, basePath, MinImageNum)
 	if err != nil {
-		logger.Info(locale.GetString("AddBook_error"), basePath)
+		logger.Infof(locale.GetString("AddBook_error"), basePath)
 	}
 	// 然后生成对应的虚拟书籍组
 	if err := types.MainFolder.InitFolder(); err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 	}
 }
 
@@ -157,9 +156,9 @@ func ScanAndGetBookList(storePath string, scanOption Option) (newBookList []*typ
 	storePathAbs, err := filepath.Abs(storePath)
 	if err != nil {
 		storePathAbs = storePath
-		logger.Info(err)
+		logger.Infof("%s", err)
 	}
-	logger.Info(locale.GetString("SCAN_START_HINT") + storePathAbs)
+	logger.Infof(locale.GetString("SCAN_START_HINT") + storePathAbs)
 	err = filepath.Walk(storePathAbs, func(walkPath string, fileInfo os.FileInfo, err error) error {
 		if !scanOption.ReScanFile {
 			for _, p := range types.GetArchiveBooks() {
@@ -171,7 +170,7 @@ func ScanAndGetBookList(storePath string, scanOption Option) (newBookList []*typ
 				}
 				if walkPath == p.FilePath || AbsW == p.FilePath {
 					//跳过已经在数据库里面的文件
-					logger.Info(locale.GetString("FoundInDatabase"), walkPath)
+					logger.Infof(locale.GetString("FoundInDatabase"), walkPath)
 					return nil
 				}
 			}
@@ -200,7 +199,7 @@ func ScanAndGetBookList(storePath string, scanOption Option) (newBookList []*typ
 			// 得到书籍文件数据
 			getBook, err := scanFileGetBook(walkPath, storePathAbs, depth, scanOption)
 			if err != nil {
-				logger.Info(err)
+				logger.Infof("%s", err)
 				return nil
 			}
 			newBookList = append(newBookList, getBook)
@@ -210,7 +209,7 @@ func ScanAndGetBookList(storePath string, scanOption Option) (newBookList []*typ
 			// 得到书籍文件数据
 			getBook, err := scanDirGetBook(walkPath, storePathAbs, depth, scanOption)
 			if err != nil {
-				logger.Info(err)
+				logger.Infof("%s", err)
 				return nil
 			}
 			newBookList = append(newBookList, getBook)
@@ -268,17 +267,17 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 	// 打开文件
 	file, err := os.OpenFile(filePath, os.O_RDONLY, 0o400) // Use mode 0400 for a read-only // file and 0600 for a readable+writable file.
 	if err != nil {
-		logger.Info(err.Error())
+		logger.Infof("%s", err.Error())
 	}
 	defer func(file *os.File) {
 		err := file.Close()
 		if err != nil {
-			logger.Info(err.Error())
+			logger.Infof("%s", err.Error())
 		}
 	}(file)
 	FileInfo, err := file.Stat()
 	if err != nil {
-		logger.Info(err.Error())
+		logger.Infof("%s", err.Error())
 	}
 	// 初始化一本书，设置文件路径等等
 	newBook, err := types.NewBook(filePath, FileInfo.ModTime(), FileInfo.Size(), storePath, depth, types.GetBookTypeByFilename(filePath))
@@ -292,7 +291,7 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 		// 使用Archiver的虚拟文件系统，无法处理非UTF-8编码
 		fsys, zipErr := zip.OpenReader(filePath)
 		if zipErr != nil {
-			// logger.Info(zipErr)
+			// logger.Infof(zipErr)
 			return nil, errors.New(locale.GetString("NOT_A_VALID_ZIP_FILE") + filePath)
 		}
 		err = walkUTF8ZipFs(fsys, "", ".", newBook, scanOption)
@@ -300,7 +299,7 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 		var pathError *fs.PathError
 		if errors.As(err, &pathError) {
 			if scanOption.Debug {
-				logger.Info("NonUTF-8 ZIP:" + filePath + "  Error:" + err.Error())
+				logger.Infof("NonUTF-8 ZIP:" + filePath + "  Error:" + err.Error())
 			}
 			// 忽略 fs.PathError 并换个方式扫描
 			err = scanNonUTF8ZipFile(filePath, newBook, scanOption)
@@ -309,14 +308,14 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 		if newBook.Type == types.TypeEpub {
 			imageList, err := arch.GetImageListFromEpubFile(newBook.FilePath)
 			if err != nil {
-				logger.Info(err)
+				logger.Infof("%s", err)
 			} else {
 				newBook.SortPagesByImageList(imageList)
 			}
 			// 根据metadata，改写书籍信息
 			metaData, err := arch.GetEpubMetadata(newBook.FilePath)
 			if err != nil {
-				logger.Info(err)
+				logger.Infof("%s", err)
 			} else {
 				newBook.Author = metaData.Creator
 				newBook.Press = metaData.Publisher
@@ -352,7 +351,7 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 		}
 		err = fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
 			if scanOption.IsSkipDir(path) {
-				logger.Info("Skip Scan:", path)
+				logger.Infof("Skip Scan:", path)
 				return fs.SkipDir
 			}
 			f, errInfo := d.Info()
@@ -361,7 +360,9 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 				return fs.SkipDir
 			}
 			if !scanOption.IsSupportMedia(path) {
-				logger.Info(locale.GetString("unsupported_file_type") + path)
+				if scanOption.Debug {
+					logger.Infof(locale.GetString("unsupported_file_type") + path)
+				}
 			} else {
 				u, ok := f.(archiver.File) // f.Name不包含路径信息.需要转换一下
 				if !ok {
@@ -372,7 +373,7 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 					//实验：用get_file接口提供文件服务
 					TempURL := "api/get_file?id=" + newBook.BookID + "&filename=" + url.QueryEscape(path)
 					newBook.Pages.Images = append(newBook.Pages.Images, types.ImageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: "", Url: TempURL})
-					// logger.Info(locale.GetString("unsupported_extract")+" %s", f)
+					// logger.Infof(locale.GetString("unsupported_extract")+" %s", f)
 				} else {
 					// 替换特殊字符的时候，额外将“+替换成"%2b"，因为gin会将+解析为空格。
 					TempURL := "api/get_file?id=" + newBook.BookID + "&filename=" + url.QueryEscape(u.NameInArchive)
@@ -405,7 +406,9 @@ func scanNonUTF8ZipFile(filePath string, b *types.Book, scanOption Option) error
 			TempURL := "api/get_file?id=" + b.BookID + "&filename=" + url.QueryEscape(f.Name)
 			b.Pages.Images = append(b.Pages.Images, types.ImageInfo{RealImageFilePATH: "", FileSize: f.FileInfo().Size(), ModeTime: f.FileInfo().ModTime(), NameInArchive: f.Name, Url: TempURL})
 		} else {
-			logger.DebugWithFields(logrus.Fields{"filename": f.Name}, locale.GetString("unsupported_file_type"))
+			if scanOption.Debug {
+				logger.Infof(locale.GetString("unsupported_file_type")+" %s", f.Name)
+			}
 		}
 	}
 	b.SortPages("default")
@@ -416,7 +419,7 @@ func scanNonUTF8ZipFile(filePath string, b *types.Book, scanOption Option) error
 // https://books.studygolang.com/The-Golang-Standard-Library-by-Example/chapter06/06.3.html
 func walkUTF8ZipFs(fsys fs.FS, parent, base string, b *types.Book, scanOption Option) error {
 	// 一般zip文件的处理流程
-	// logger.Info("parent:" + parent + " base:" + base)
+	// logger.Infof("parent:" + parent + " base:" + base)
 	dirName := path.Join(parent, base)
 	dirEntries, err := fs.ReadDir(fsys, dirName)
 	for _, dirEntry := range dirEntries {
@@ -438,7 +441,9 @@ func walkUTF8ZipFs(fsys fs.FS, parent, base string, b *types.Book, scanOption Op
 			joinPath := path.Join(parent, name)
 			err = walkUTF8ZipFs(fsys, joinPath, base, b, scanOption)
 		} else if !scanOption.IsSupportMedia(name) {
-			logger.DebugWithFields(logrus.Fields{"filename": name}, locale.GetString("unsupported_file_type"))
+			if scanOption.Debug {
+				logger.Infof(locale.GetString("unsupported_file_type")+" %s", name)
+			}
 		} else {
 			inArchiveName := path.Join(parent, f.Name())
 			TempURL := "api/get_file?id=" + b.BookID + "&filename=" + url.QueryEscape(inArchiveName)

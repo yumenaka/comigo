@@ -20,7 +20,7 @@ func IsExist(path string) bool {
 		if os.IsNotExist(err) {
 			return false
 		}
-		logger.Info(err)
+		logger.Infof("%s", err)
 		return false
 	}
 	return true

@@ -51,7 +51,7 @@ var rootCmd = &cobra.Command{
 func initConfigFile() {
 	home, err := homedir.Dir()
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 	}
 	//在HomeDir搜索配置
 	homeConfigDir := path.Join(home, ".config/comigo")
@@ -59,22 +59,22 @@ func initConfigFile() {
 	// 在ProgramDirectory(二进制程序所在文件夹）的配置
 	ProgramDirectory, err := os.Executable()
 	if err != nil {
-		logger.Info("Failed to get ProgramDirectory:", err)
+		logger.Infof("Failed to get ProgramDirectory:", err)
 		return
 	}
 	// 将ProgramDirectory转换为绝对路径
 	absPath, err := filepath.Abs(ProgramDirectory)
 	if err != nil {
-		logger.Info("Failed to get absolute path:", err)
+		logger.Infof("Failed to get absolute path:", err)
 		return
 	}
-	logger.Info("ProgramDirectory:", absPath)
+	logger.Infof("ProgramDirectory:", absPath)
 	runtimeViper.AddConfigPath(absPath)
 
 	// WorkingDirectory：当前执行目录
 	WorkingDirectory, err := os.Getwd()
 	if err != nil {
-		logger.Info("Failed to get WorkingDirectory:", err)
+		logger.Infof("Failed to get WorkingDirectory:", err)
 	}
 	runtimeViper.AddConfigPath(WorkingDirectory)
 
@@ -90,17 +90,17 @@ func initConfigFile() {
 	// 读取设定文件
 	if err := runtimeViper.ReadInConfig(); err != nil {
 		if config.Config.ConfigPath == "" {
-			logger.Info(err)
+			logger.Infof("%s", err)
 		}
 	} else {
 		//获取当前使用的配置文件路径
 		//https://github.com/spf13/viper/issues/89
 		tempConfigPath := runtimeViper.ConfigFileUsed()
-		logger.Info(locale.GetString("FoundConfigFile") + tempConfigPath)
+		logger.Infof(locale.GetString("FoundConfigFile") + tempConfigPath)
 	}
 	// 把设定文件的内容，解析到构造体里面。
 	if err := runtimeViper.Unmarshal(&config.Config); err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 		os.Exit(1)
 	}
 	////监听文件修改
@@ -118,7 +118,7 @@ func Execute() {
 	cobra.OnInitialize(initConfigFile) // "OnInitialize"传入的函数，应该会在所有命令执行之前，包括rootCmd.Run之前执行。
 	//执行命令
 	if err := rootCmd.Execute(); err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 		time.Sleep(3 * time.Second)
 		os.Exit(1)
 	}

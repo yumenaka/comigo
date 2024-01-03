@@ -18,7 +18,7 @@ func GetQrcode(c *gin.Context) {
 	if qrcodeStr != "" {
 		png, err := qrcode.Encode(qrcodeStr, qrcode.Medium, 256)
 		if err != nil {
-			logger.Info(err)
+			logger.Infof("%s", err)
 		}
 		c.Data(http.StatusOK, "image/png", png)
 		return
@@ -37,7 +37,7 @@ func GetQrcode(c *gin.Context) {
 		readURL := protocol + OutIP + ":" + strconv.Itoa(config.Config.Port)
 		png, err := qrcode.Encode(readURL, qrcode.Medium, 256)
 		if err != nil {
-			logger.Info(err)
+			logger.Infof("%s", err)
 		}
 		c.Data(http.StatusOK, "image/png", png)
 	} else {
@@ -45,7 +45,7 @@ func GetQrcode(c *gin.Context) {
 		readURL := protocol + config.Config.Host + ":" + strconv.Itoa(config.Config.Port)
 		png, err := qrcode.Encode(readURL, qrcode.Medium, 256)
 		if err != nil {
-			logger.Info(err)
+			logger.Infof("%s", err)
 		}
 		c.Data(http.StatusOK, "image/png", png)
 	}

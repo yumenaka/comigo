@@ -100,7 +100,7 @@ func SaveConfig(to string) error {
 	if err != nil {
 		return err
 	}
-	logger.Info("Config Save To " + to)
+	logger.Infof("Config Save To " + to)
 	switch to {
 	case HomeDirectory:
 		home, err := homedir.Dir()
@@ -138,7 +138,7 @@ func SaveConfig(to string) error {
 }
 
 func DeleteConfigIn(in string) (err error) {
-	logger.Info("Delete Config in " + in)
+	logger.Infof("Delete Config in " + in)
 	var configFile string
 	switch in {
 	case HomeDirectory:

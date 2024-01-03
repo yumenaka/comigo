@@ -18,7 +18,7 @@ func GetRawFile(c *gin.Context) {
 		return
 	}
 	fileName := c.Param("file_name")
-	logger.Info("下载文件：", fileName)
+	logger.Infof("下载文件：", fileName)
 
 	// 获取文件信息
 	fileInfo, err := os.Stat(b.FilePath)

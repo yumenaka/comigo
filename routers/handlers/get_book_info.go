@@ -17,7 +17,7 @@ func GetParentBookInfo(c *gin.Context) {
 	}
 	info, err := types.GetBookGroupInfoByChildBookID(id)
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 		c.PureJSON(http.StatusBadRequest, "ParentBookInfo not found")
 		return
 	}
@@ -57,14 +57,14 @@ func GetBookInfosByMaxDepth(c *gin.Context, sortBy string) {
 	//按照书籍所在深度获取书籍信息，0是顶层，即为执行文件夹本身
 	maxDepth, err := strconv.Atoi(c.DefaultQuery("max_depth", "0"))
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 		c.PureJSON(http.StatusBadRequest, "book_info not found")
 		return
 	}
 	//如果传了maxDepth这个参数
 	bookInfoList, err := types.GetBookInfoListByMaxDepth(maxDepth, sortBy)
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 		c.PureJSON(http.StatusBadRequest, "book_info not found")
 		return
 	}
@@ -76,14 +76,14 @@ func GetBookInfosByDepth(c *gin.Context, sortBy string) {
 	//按照书籍所在深度获取书籍信息，0是顶层，即为执行文件夹本身
 	depth, err := strconv.Atoi(c.DefaultQuery("depth", ""))
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 		c.PureJSON(http.StatusBadRequest, "book_info not found")
 		return
 	}
 	//如果传了depth这个参数
 	bookInfoList, err := types.GetBookInfoListByDepth(depth, sortBy)
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 		c.PureJSON(http.StatusBadRequest, "book_info not found")
 		return
 	}
@@ -101,7 +101,7 @@ func GetBookInfosByGroupID(c *gin.Context, sortBy string) {
 	//如果传了bookGroupId这个参数
 	bookInfoList, err := types.GetBookInfoListByID(bookGroupID, sortBy)
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 		c.PureJSON(http.StatusBadRequest, "book_info not found")
 		return
 	}
@@ -120,13 +120,13 @@ func GroupInfo(c *gin.Context) {
 	//sortBy: 根据压缩包原始顺序、时间、文件名排序
 	b, err := types.GetBookByID(id, sortBy)
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 		c.PureJSON(http.StatusBadRequest, "book id not found")
 		return
 	}
 	infoList, err := types.GetBookInfoListByParentFolder(b.ParentFolder, sortBy)
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 		c.PureJSON(http.StatusBadRequest, "ParentFolder, not found")
 		return
 	}
@@ -144,13 +144,13 @@ func GroupInfoFilter(c *gin.Context) {
 	//sortBy: 根据压缩包原始顺序、时间、文件名排序
 	b, err := types.GetBookByID(id, sortBy)
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 		c.PureJSON(http.StatusBadRequest, "book id not found")
 		return
 	}
 	infoList, err := types.GetBookInfoListByParentFolder(b.ParentFolder, sortBy)
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 		c.PureJSON(http.StatusBadRequest, "ParentFolder, not found")
 		return
 	}

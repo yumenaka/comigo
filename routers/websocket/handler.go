@@ -40,12 +40,12 @@ var upGrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		////验证方法，只支持Get的话这样写
 		//if r.Method != "GET" {
-		//	logger.Info("method is not GET")
+		//	logger.Infof("method is not GET")
 		//	return false
 		//}
 		//验证路径
 		if r.URL.Path != "/api/ws" {
-			logger.Info("path error")
+			logger.Infof("path error")
 			return false
 		}
 		return true
@@ -81,7 +81,7 @@ func WsHandler(c *gin.Context) {
 	defer func() {
 		closeSocketErr := wsConn.Close()
 		if closeSocketErr != nil {
-			logger.Info(err)
+			logger.Infof("%s", err)
 		}
 	}()
 
@@ -91,7 +91,7 @@ func WsHandler(c *gin.Context) {
 		var msg Message // Read in a new message as JSON and map it to a Detail object
 		err = wsConn.ReadJSON(&msg)
 		if err != nil {
-			//logger.Info()
+			//logger.Infof()
 			log.Printf(locale.GetString("WEBSOCKET_ERROR")+"%v", err)
 			//如果从 socket 中读取数据有误，我们假设客户端已经因为某种原因断开。我们记录错误并从全局的 “clients” 映射表里删除该客户端，这样一来，我们不会继续尝试与其通信。
 			delete(clients, wsConn)
