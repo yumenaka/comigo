@@ -81,7 +81,7 @@ func (s *subFolder) AnalyzeFolder() error {
 			modTime := pathInfo.ModTime()
 			newBookGroup, err := NewBookGroup(filepath.Dir(sameParentBookList[0].FilePath), modTime, 0, s.Path, depth-1, TypeBooksGroup)
 			if err != nil {
-				logger.Info(err)
+				logger.Infof("%s", err)
 				continue
 			}
 			//书名应该设置成parent

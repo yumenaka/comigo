@@ -46,7 +46,7 @@ func embedFile(engine *gin.Engine) {
 	//https://stackoverflow.com/questions/66248258/serve-embedded-filesystem-from-root-path-of-url
 	assetsEmbedFS, err := fs.Sub(staticAssetFS, "vue_static/assets")
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 	}
 	engine.StaticFS("/assets/", http.FS(assetsEmbedFS))
 	imagesEmbedFS, errStaticImageFS := fs.Sub(staticImageFS, "vue_static/images")

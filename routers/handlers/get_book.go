@@ -22,7 +22,7 @@ func GetBook(c *gin.Context) {
 	if author != "" {
 		bookList, err := types.GetBookByAuthor(author, sortBy)
 		if err != nil {
-			logger.Info(err)
+			logger.Infof("%s", err)
 		}
 		c.PureJSON(http.StatusOK, bookList)
 		return
@@ -30,7 +30,7 @@ func GetBook(c *gin.Context) {
 	if id != "" {
 		b, err := types.GetBookByID(id, sortBy)
 		if err != nil {
-			logger.Info(err)
+			logger.Infof("%s", err)
 			c.PureJSON(http.StatusBadRequest, "id not found")
 			return
 		}
@@ -38,7 +38,7 @@ func GetBook(c *gin.Context) {
 		if b.Type == types.TypeEpub && sortBy == "epub_info" {
 			imageList, err := arch.GetImageListFromEpubFile(b.FilePath)
 			if err != nil {
-				logger.Info(err)
+				logger.Infof("%s", err)
 				c.PureJSON(http.StatusOK, b)
 				return
 			}

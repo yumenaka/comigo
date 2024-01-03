@@ -24,7 +24,7 @@ func CheckPort(port int) bool {
 	}
 	err = ln.Close()
 	if err != nil {
-		logger.Info(locale.GetString("check_pork_error") + strconv.Itoa(port))
+		logger.Infof(locale.GetString("check_pork_error") + strconv.Itoa(port))
 		return false
 	}
 	//logger.Infof("TCP Port %q is available", port)
@@ -66,7 +66,7 @@ func GetIPList() (IPList []string, err error) {
 		}
 		addrs, err := i.Addrs()
 		if err != nil {
-			logger.Info(locale.GetString("get_ip_error")+"%v", err)
+			logger.Infof(locale.GetString("get_ip_error")+"%v", err)
 			return nil, err
 		}
 		for _, addr := range addrs {
@@ -112,14 +112,14 @@ func OpenBrowser(uri string) {
 	if runtime.GOOS == "windows" {
 		cmd = exec.Command("CMD", "/C", "start", uri)
 		if err := cmd.Start(); err != nil {
-			logger.Info(locale.GetString("open_browser_error"))
-			logger.Info(err.Error())
+			logger.Infof(locale.GetString("open_browser_error"))
+			logger.Infof("%s", err.Error())
 		}
 	} else if runtime.GOOS == "darwin" {
 		cmd = exec.Command("open", uri)
 		if err := cmd.Start(); err != nil {
-			logger.Info(locale.GetString("open_browser_error"))
-			logger.Info(err.Error())
+			logger.Infof(locale.GetString("open_browser_error"))
+			logger.Infof("%s", err.Error())
 		}
 	} else if runtime.GOOS == "linux" {
 		cmd = exec.Command("xdg-open", uri)
@@ -154,19 +154,19 @@ func GetSystemStatus() SystemStatus {
 	//获取物理和逻辑核数,以及CPU、内存整体使用率
 	CPUNumLogical, err := cpu.Counts(true)
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 	} else {
 		sys.CPUNumLogical = CPUNumLogical
 	}
 	CPUNumPhysical, err := cpu.Counts(false)
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 	} else {
 		sys.CPUNumPhysical = CPUNumPhysical
 	}
 	CPUUsedPercent, err := cpu.Percent(0, false)
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 	} else {
 		//p := 0.0
 		//if len(CPUUsedPercent) > 1 {
@@ -181,7 +181,7 @@ func GetSystemStatus() SystemStatus {
 	}
 	v, err := mem.VirtualMemory()
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 	} else {
 		sys.MemoryTotal = v.Total
 		sys.MemoryFree = v.Free
@@ -190,11 +190,11 @@ func GetSystemStatus() SystemStatus {
 	//// almost every return value is a struct
 	//logger.Infof("Total: %v, Free:%v, UsedPercent:%f%%\n", v.Total, v.Free, v.UsedPercent)
 	//// convert to JSON. String() is also implemented
-	//logger.Info(v)
+	//logger.Infof(v)
 
 	//hostname, err := os.Hostname()
 	//if err == nil {
-	//	logger.Info(hostname)
+	//	logger.Infof(hostname)
 	//}
 	return sys
 }

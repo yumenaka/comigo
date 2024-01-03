@@ -20,19 +20,19 @@ func extractFileHandler(ctx context.Context, f archiver.File) error {
 	// 取得压缩文件
 	file, err := f.Open()
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 	}
 	defer func(file io.ReadCloser) {
 		err := file.Close()
 		if err != nil {
-			logger.Info("file.Close() Error:", err)
+			logger.Infof("file.Close() Error:%s", err)
 		}
 	}(file)
 	//如果是文件夹，直接创建文件夹
 	if f.IsDir() {
 		err = os.MkdirAll(filepath.Join(extractPath, f.NameInArchive), os.ModePerm)
 		if err != nil {
-			logger.Info(err)
+			logger.Infof("%s", err)
 		}
 		return err
 	}
@@ -43,19 +43,19 @@ func extractFileHandler(ctx context.Context, f archiver.File) error {
 	if !util.IsExist(checkDir) {
 		err = os.MkdirAll(checkDir, os.ModePerm)
 		if err != nil {
-			logger.Info(err)
+			logger.Infof("%s", err)
 		}
 		return err
 	}
 	//具体内容
 	content, err := io.ReadAll(file)
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 	}
 	//写入文件
 	err = os.WriteFile(writeFilePath, content, 0644)
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 	}
 	return err
 }

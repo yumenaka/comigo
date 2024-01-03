@@ -17,17 +17,17 @@ func StartScan(args []string) {
 	if config.Config.EnableDatabase {
 		// 从数据库中读取书籍信息并持久化
 		if err := database.InitDatabase(viper.ConfigFileUsed()); err != nil {
-			logger.Info(err)
+			logger.Infof("%s", err)
 		}
 		books, err := database.GetBooksFromDatabase()
 		if err != nil {
-			logger.Info(err)
+			logger.Infof("%s", err)
 		} else {
 			err := types.RestoreDatabaseBooks(books)
 			if err != nil {
-				logger.Info(err)
+				logger.Infof("%s", err)
 			} else {
-				logger.Info("从数据库中读取书籍信息,持久化成功:" + strconv.Itoa(len(books)))
+				logger.Infof("从数据库中读取书籍信息,持久化成功:" + strconv.Itoa(len(books)))
 			}
 		}
 	}

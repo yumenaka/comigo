@@ -29,7 +29,7 @@ func UpdateConfig(c *gin.Context) {
 	// 解析JSON数据并更新服务器配置
 	oldConfig, err := types.UpdateConfig(&config.Config, jsonString)
 	if err != nil {
-		logger.Info(err.Error())
+		logger.Infof("%s", err.Error())
 		c.JSON(http.StatusMethodNotAllowed, gin.H{"error": "Failed to parse JSON data"})
 		return
 	}

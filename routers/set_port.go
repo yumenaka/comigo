@@ -18,7 +18,7 @@ func SetPort() {
 		//获取一个空闲可用的系统端口号
 		port, err := util.GetFreePort()
 		if err != nil {
-			logger.Info(err)
+			logger.Infof("%s", err)
 			r := rand.New(rand.NewSource(time.Now().UnixNano()))
 			if config.Config.Port+2000 > 65535 {
 				config.Config.Port = config.Config.Port + r.Intn(1024)
@@ -28,6 +28,6 @@ func SetPort() {
 		} else {
 			config.Config.Port = port
 		}
-		logger.Info(locale.GetString("port_busy") + strconv.Itoa(config.Config.Port))
+		logger.Infof(locale.GetString("port_busy") + strconv.Itoa(config.Config.Port))
 	}
 }

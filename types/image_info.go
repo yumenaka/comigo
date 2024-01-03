@@ -33,7 +33,7 @@ func (i *ImageInfo) analyzeImage(bookPath string) (err error) {
 
 	imgData, err := arch.GetSingleFile(bookPath, i.NameInArchive, "gbk")
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 	}
 	buf := bytes.NewBuffer(imgData)
 	img, err = imaging.Decode(buf)

@@ -9,7 +9,7 @@ func init() {
 	// Find home directory.
 	home, err := homedir.Dir()
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 	}
 	Config.LogFilePath = home
 	Config.LogFileName = "comigo.log"

@@ -61,23 +61,23 @@ func GetFile(c *gin.Context) {
 	}
 	bookByID, err := types.GetBookByID(id, "")
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 	}
 	bookPath := bookByID.GetFilePath()
-	//logger.Info(bookPath)
+	//logger.Infof(bookPath)
 	var imgData []byte
 	//如果是特殊编码的ZIP文件
 	if bookByID.NonUTF8Zip && bookByID.Type != types.TypeDir {
 		imgData, err = arch.GetSingleFile(bookPath, needFile, "gbk")
 		if err != nil {
-			logger.Info(err)
+			logger.Infof("%s", err)
 		}
 	}
 	//如果是一般压缩文件，如zip、rar。epub
 	if !bookByID.NonUTF8Zip && bookByID.Type != types.TypeDir && bookByID.Type != types.TypePDF {
 		imgData, err = arch.GetSingleFile(bookPath, needFile, "")
 		if err != nil {
-			logger.Info(err)
+			logger.Infof("%s", err)
 		}
 	}
 	//如果是PDF
@@ -89,7 +89,7 @@ func GetFile(c *gin.Context) {
 		//直接读取磁盘文件
 		imgData, err = os.ReadFile(filepath.Join(bookPath, needFile))
 		if err != nil {
-			logger.Info(err)
+			logger.Infof("%s", err)
 		}
 	}
 	//默认的媒体类型，默认值根据文件后缀设定。
@@ -266,7 +266,7 @@ func saveFileToCache(id string, filename string, data []byte, query url.Values, 
 	}
 	err = os.WriteFile(filepath.Join(config.Config.CachePath, id, filename), data, 0644)
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 	}
 	qS := getQueryStringKey(query)
 	key := cacheKey{bookID: id, queryString: qS}
@@ -307,7 +307,7 @@ func getQueryStringKey(query url.Values) string {
 			}
 		}
 	}
-	//logger.Info("queryString:" + queryString)
+	//logger.Infof("queryString:" + queryString)
 	return queryString
 }
 
@@ -331,7 +331,7 @@ func getFileFromCache(id string, filename string, query url.Values, isCover bool
 	}
 	loadedImage, err := os.ReadFile(filepath.Join(config.Config.CachePath, id, filename))
 	if err != nil && config.Config.Debug {
-		logger.Info("getFileFromCache,file not found:" + filename)
+		logger.Infof("getFileFromCache,file not found:" + filename)
 	}
 	return loadedImage, contentType, err
 }

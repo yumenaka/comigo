@@ -22,9 +22,10 @@ func startEngine(engine *gin.Engine) {
 	enableTls := config.Config.CertFile != "" && config.Config.KeyFile != ""
 	config.Srv = &http.Server{
 		Addr:    webHost + strconv.Itoa(config.Config.Port),
-		Handler: engine,
+		Handler: engine, //gin.Engine本身可以作为一个Handler传递到http包,用于启动服务器
 	}
 	//在 goroutine 中初始化服务器，这样它就不会阻塞关闭处理
+	//从端口启动开始,后续的所有工作都是http包来完成的 https://go.sai.show/PART02.%20Server/0.1-server-xiang-jie-yu-mian-shi-yao-dian
 	go func() {
 		// 监听并启动服务(TLS)
 		if enableTls {

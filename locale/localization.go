@@ -82,8 +82,8 @@ func getLocale() (string, string) {
 //	if runtime.GOOS == "windows" {
 //		cmd = exec.Command("CMD", "/C", "chcp.com", "65001")
 //		if err := cmd.Start(); err != nil {
-//			logger.Info("设置Windows活动代码页失败")
-//			logger.Info(err.Error())
+//			logger.Infof("设置Windows活动代码页失败")
+//			logger.Infof("%s", err.Error())
 //		}
 //	}
 //}

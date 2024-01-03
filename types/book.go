@@ -161,7 +161,7 @@ func AddBook(b *Book, basePath string, minPageNum int) error {
 	}
 	if _, ok := MainFolder.SubFolders.Load(basePath); !ok {
 		if err := MainFolder.AddSubFolder(basePath); err != nil {
-			logger.Info(err)
+			logger.Infof("%s", err)
 		}
 	}
 	//加入到书籍总表
@@ -351,7 +351,7 @@ func (b *Book) SortPagesByImageList(imageList []string) {
 		}
 	}
 	if len(reSortList) == 0 {
-		logger.Info(locale.GetString("EPUB_CANNOT_RESORT"), b.FilePath)
+		logger.Infof(locale.GetString("EPUB_CANNOT_RESORT"), b.FilePath)
 		return
 	}
 	//不在表中的话，就不改变顺序，并加在有序表的后面
@@ -373,7 +373,7 @@ func (b *Book) SortPagesByImageList(imageList []string) {
 
 // setBookID  根据路径的MD5，生成书籍ID。初始化时调用。
 func (b *BookInfo) setBookID() {
-	//logger.Info("文件绝对路径："+fileAbaPath, "路径的md5："+md5string(fileAbaPath))
+	//logger.Infof("文件绝对路径："+fileAbaPath, "路径的md5："+md5string(fileAbaPath))
 	fileAbaPath, err := filepath.Abs(b.FilePath)
 	if err != nil {
 		logger.Info(err, fileAbaPath)
@@ -388,7 +388,7 @@ func md5string(s string) string {
 }
 func getShortBookID(fullID string, minLength int) string {
 	if len(fullID) <= minLength {
-		logger.Info("can not short ID:" + fullID)
+		logger.Infof("can not short ID:" + fullID)
 		return fullID
 	}
 	shortID := fullID[0:minLength]
@@ -427,7 +427,7 @@ func getShortBookID(fullID string, minLength int) string {
 func (b *Book) GetBookID() string {
 	//防止未初始化，最好不要用到
 	if b.BookID == "" {
-		logger.Info("BookID未初始化，一定是哪里写错了")
+		logger.Infof("BookID未初始化，一定是哪里写错了")
 		b.setBookID()
 	}
 	return b.BookID
@@ -527,7 +527,7 @@ func ClearTempFilesALL(debug bool, cacheFilePath string) {
 
 // 清空某一本压缩漫画的解压缓存
 func clearTempFilesOne(debug bool, cacheFilePath string, book *Book) {
-	//logger.Info(locale.GetString("clear_temp_file_start"))
+	//logger.Infof(locale.GetString("clear_temp_file_start"))
 	haveThisBook := false
 	mapBooks.Range(func(_, value interface{}) bool {
 		tempBook := value.(*Book)
@@ -540,10 +540,10 @@ func clearTempFilesOne(debug bool, cacheFilePath string, book *Book) {
 		cachePath := path.Join(cacheFilePath, book.GetBookID())
 		err := os.RemoveAll(cachePath)
 		if err != nil {
-			logger.Info(locale.GetString("clear_temp_file_error") + cachePath)
+			logger.Infof(locale.GetString("clear_temp_file_error") + cachePath)
 		} else {
 			if debug {
-				logger.Info(locale.GetString("clear_temp_file_completed") + cachePath)
+				logger.Infof(locale.GetString("clear_temp_file_completed") + cachePath)
 			}
 		}
 	}

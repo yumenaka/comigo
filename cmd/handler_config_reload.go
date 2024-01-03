@@ -17,12 +17,12 @@ func handlerConfigReload(e fsnotify.Event) {
 	////重新读取改变后的配置文件
 	//if err := runtimeViper.ReadInConfig(); err != nil {
 	//	if config.Config.ConfigPath == "" && config.Config.Debug {
-	//		logger.Info(err)
+	//		logger.Infof("%s", err)
 	//	}
 	//}
 	//// 把设定文件的内容，解析到构造体里面。
 	//if err := runtimeViper.Unmarshal(&config.Config); err != nil {
-	//	logger.Info(err)
+	//	logger.Infof("%s", err)
 	//	time.Sleep(3 * time.Second)
 	//	os.Exit(1)
 	//}

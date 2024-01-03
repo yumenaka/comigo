@@ -18,7 +18,7 @@ func DeleteConfig(c *gin.Context) {
 	validDirs := []string{WorkingDirectory, HomeDirectory, ProgramDirectory}
 
 	if !contains(validDirs, in) {
-		logger.Info("error: Failed save to" + in + " directory")
+		logger.Infof("error: Failed save to" + in + " directory")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed save to" + in + " directory"})
 		return
 	}

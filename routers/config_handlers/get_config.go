@@ -30,10 +30,10 @@ func GetConfigToml(c *gin.Context) {
 	tempConfig.Password = ""
 	bytes, err := toml.Marshal(tempConfig)
 	if err != nil {
-		logger.Info("toml.Marshal Error")
+		logger.Infof("toml.Marshal Error")
 	}
 	//在命令行打印
-	logger.Info(string(bytes))
+	logger.Infof(string(bytes))
 	//用gin实现下载文件的功能，只需要在接口返回时设置Response-Header中的Content-Type为文件类型，并设置Content-Disposition指定默认的文件名，然后将文件数据返回浏览器即可
 	fileContentDisposition := "attachment;filename=\"" + "config.toml" + "\""
 	c.Header("Content-Type", "application/octet-stream")

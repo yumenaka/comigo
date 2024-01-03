@@ -15,17 +15,17 @@ func UnArchiveRar(filePath string, extractPath string) error {
 	//如果解压路径不存在，创建路径
 	err := os.MkdirAll(extractPath, os.ModePerm)
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 	}
 	//打开文件，只读模式
 	file, err := os.OpenFile(filePath, os.O_RDONLY, 0400) //Use mode 0400 for a read-only // file and 0600 for a readable+writable file.
 	if err != nil {
-		logger.Info(err)
+		logger.Infof("%s", err)
 	}
 	defer func(file *os.File) {
 		err := file.Close()
 		if err != nil {
-			logger.Info(err)
+			logger.Infof("%s", err)
 		}
 	}(file)
 	//是否是压缩包
@@ -42,7 +42,7 @@ func UnArchiveRar(filePath string, extractPath string) error {
 		if err != nil {
 			return err
 		}
-		logger.Info("rar文件解压完成：" + util.GetAbsPath(filePath) + " 解压到：" + util.GetAbsPath(extractPath))
+		logger.Infof("rar文件解压完成：%s 解压到：%s", util.GetAbsPath(filePath), util.GetAbsPath(extractPath))
 	}
 	return nil
 }
