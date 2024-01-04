@@ -81,7 +81,7 @@ func handSyncPageMessageToFlipMode(client *websocket.Conn, msg Message, clientID
 		return
 	}
 	if *WsDebug {
-		logger.Infof(" SyncPage message toFlipMode:", data, clientID)
+		logger.Infof(" SyncPage message toFlipMode: %s %s", data, clientID)
 	}
 	//验证收到的数据
 	if data.BookID == "" || data.NowPageNum < 0 || data.NowPageNum > math.MaxInt {
@@ -131,7 +131,7 @@ func handSyncPageMessageToScrollMode(client *websocket.Conn, msg Message, client
 		return
 	}
 	if *WsDebug {
-		logger.Infof(" SyncPage message to ScrollMode:", data, clientID)
+		logger.Infof(" SyncPage message to ScrollMode:%s %s", data, clientID)
 	}
 	if data.BookID == "" || data.NowPageNum < 0 || data.NowPageNum > math.MaxInt || data.NowPageNumPercent > 1 {
 		log.Printf("handSyncPage_ToFlipode data error: %v", data)

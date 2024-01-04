@@ -14,7 +14,7 @@ import (
 // GetRegFile 下载服务器配置
 func GetRegFile(c *gin.Context) {
 	if runtime.GOOS != "windows" {
-		logger.Infof("Now system not windows,can't generate reg file.")
+		logger.Info("Now system not windows,can't generate reg file.\n")
 		return
 	}
 	// Windows特定文件添加右键菜单
@@ -24,8 +24,8 @@ func GetRegFile(c *gin.Context) {
 	exeFilePath := os.Args[0]
 	// 在创建字符串类型的键值时，如果该字符串中包含路径分隔符，这个路径分隔符要用双斜杠“\\"表示。
 	newStr := strings.Replace(exeFilePath, `\`, `\\`, -1)
-	logger.Infof("exe_file_path:", exeFilePath)
-	logger.Infof("newStr:", newStr)
+	logger.Infof("exe_file_path:%s", exeFilePath)
+	logger.Infof("newStr:%s", newStr)
 	//HKEY_CLASSES_ROOT\*：系统所有文件，右键系统任一文件都会添加右键菜单
 	//1% 用来传递文件名，一定要加引号，不然当文件名含有空格时，只能得到空格前的部分。
 	//最后要以一个换行结束，为了保证汉字正常，最好用ANSI编码

@@ -85,7 +85,7 @@ func getNumberFromString(s string) (int, error) {
 			for _, v := range value {
 				temp, errTemp := strconv.Atoi(v)
 				if errTemp != nil {
-					logger.Infof("error num value:" + v)
+					logger.Infof("error num value:%s", v)
 				} else {
 					num = num + temp
 				}

@@ -19,8 +19,8 @@ func SetTempDir() {
 	}
 	err := os.MkdirAll(Config.CachePath, os.ModePerm)
 	if err != nil {
-		logger.Infof(locale.GetString("temp_folder_error"))
+		logger.Infof("%s", locale.GetString("temp_folder_error"))
 	} else {
-		logger.Infof(locale.GetString("temp_folder_path") + Config.CachePath)
+		logger.Infof("%s", locale.GetString("temp_folder_path")+Config.CachePath)
 	}
 }

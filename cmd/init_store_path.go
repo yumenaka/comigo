@@ -12,9 +12,9 @@ import (
 func initStorePath(args []string) {
 	wd, err := os.Getwd()
 	if err != nil {
-		logger.Infof("Failed to get working directory:", err)
+		logger.Infof("Failed to get working directory:%s", err)
 	}
-	logger.Infof("Working directory:", wd)
+	logger.Infof("Working directory:%s", wd)
 
 	//没指定路径或文件,同时也配置文件也没设定书库文件夹
 	if len(args) == 0 && len(config.Config.StoresPath) == 0 {

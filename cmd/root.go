@@ -65,16 +65,16 @@ func initConfigFile() {
 	// 将ProgramDirectory转换为绝对路径
 	absPath, err := filepath.Abs(ProgramDirectory)
 	if err != nil {
-		logger.Infof("Failed to get absolute path:", err)
+		logger.Infof("Failed to get absolute path:%s", err)
 		return
 	}
-	logger.Infof("ProgramDirectory:", absPath)
+	logger.Infof("ProgramDirectory:%s", absPath)
 	runtimeViper.AddConfigPath(absPath)
 
 	// WorkingDirectory：当前执行目录
 	WorkingDirectory, err := os.Getwd()
 	if err != nil {
-		logger.Infof("Failed to get WorkingDirectory:", err)
+		logger.Infof("Failed to get WorkingDirectory:%s", err)
 	}
 	runtimeViper.AddConfigPath(WorkingDirectory)
 
@@ -96,7 +96,7 @@ func initConfigFile() {
 		//获取当前使用的配置文件路径
 		//https://github.com/spf13/viper/issues/89
 		tempConfigPath := runtimeViper.ConfigFileUsed()
-		logger.Infof(locale.GetString("FoundConfigFile") + tempConfigPath)
+		logger.Infof(locale.GetString("FoundConfigFile")+"%s", tempConfigPath)
 	}
 	// 把设定文件的内容，解析到构造体里面。
 	if err := runtimeViper.Unmarshal(&config.Config); err != nil {

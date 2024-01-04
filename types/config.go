@@ -32,7 +32,7 @@ func (c *ConfigStatus) SetConfigStatus() error {
 	c.Path.WorkingDirectory = ""
 	c.Path.HomeDirectory = ""
 	c.Path.ProgramDirectory = ""
-	logger.Infof("Check Config Path")
+	logger.Info("Check Config Path\n")
 
 	// 可执行程序自身的文件路径
 	executablePath, err := os.Executable()
@@ -115,7 +115,7 @@ func UpdateConfig(config *ComigoConfig, jsonString string) (*ComigoConfig, error
 		// 将字符串解析为字符串切片
 		arr, err := parseString(StoresPath.String())
 		if err != nil {
-			logger.Infof("Failed to parse string:", err)
+			logger.Infof("Failed to parse string:%s", err)
 			return config, err
 		}
 		config.StoresPath = arr
@@ -181,7 +181,7 @@ func UpdateConfig(config *ComigoConfig, jsonString string) (*ComigoConfig, error
 		// 将字符串解析为字符串切片
 		arr, err := parseString(ExcludePath.String())
 		if err != nil {
-			logger.Infof("Failed to parse string:", err)
+			logger.Infof("Failed to parse string:%s", err)
 			return config, err
 		}
 		config.ExcludePath = arr
@@ -191,7 +191,7 @@ func UpdateConfig(config *ComigoConfig, jsonString string) (*ComigoConfig, error
 		// 将字符串解析为字符串切片
 		arr, err := parseString(SupportMediaType.String())
 		if err != nil {
-			logger.Infof("Failed to parse string:", err)
+			logger.Infof("Failed to parse string:%s", err)
 			return config, err
 		}
 		config.SupportMediaType = arr
@@ -201,7 +201,7 @@ func UpdateConfig(config *ComigoConfig, jsonString string) (*ComigoConfig, error
 		// 将字符串解析为字符串切片
 		arr, err := parseString(SupportFileType.String())
 		if err != nil {
-			logger.Infof("Failed to parse string:", err)
+			logger.Infof("Failed to parse string:%s", err)
 			return config, err
 		}
 		config.SupportFileType = arr

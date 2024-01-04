@@ -351,7 +351,7 @@ func (b *Book) SortPagesByImageList(imageList []string) {
 		}
 	}
 	if len(reSortList) == 0 {
-		logger.Infof(locale.GetString("EPUB_CANNOT_RESORT"), b.FilePath)
+		logger.Infof(locale.GetString("EPUB_CANNOT_RESORT")+"%s", b.FilePath)
 		return
 	}
 	//不在表中的话，就不改变顺序，并加在有序表的后面
@@ -388,7 +388,7 @@ func md5string(s string) string {
 }
 func getShortBookID(fullID string, minLength int) string {
 	if len(fullID) <= minLength {
-		logger.Infof("can not short ID:" + fullID)
+		logger.Infof("can not short ID:%s", fullID)
 		return fullID
 	}
 	shortID := fullID[0:minLength]
@@ -427,7 +427,7 @@ func getShortBookID(fullID string, minLength int) string {
 func (b *Book) GetBookID() string {
 	//防止未初始化，最好不要用到
 	if b.BookID == "" {
-		logger.Infof("BookID未初始化，一定是哪里写错了")
+		logger.Infof("%s", "BookID未初始化，一定是哪里写错了")
 		b.setBookID()
 	}
 	return b.BookID
@@ -540,10 +540,10 @@ func clearTempFilesOne(debug bool, cacheFilePath string, book *Book) {
 		cachePath := path.Join(cacheFilePath, book.GetBookID())
 		err := os.RemoveAll(cachePath)
 		if err != nil {
-			logger.Infof(locale.GetString("clear_temp_file_error") + cachePath)
+			logger.Infof(locale.GetString("clear_temp_file_error")+"%s", cachePath)
 		} else {
 			if debug {
-				logger.Infof(locale.GetString("clear_temp_file_completed") + cachePath)
+				logger.Infof(locale.GetString("clear_temp_file_completed")+"%s", cachePath)
 			}
 		}
 	}

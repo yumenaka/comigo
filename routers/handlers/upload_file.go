@@ -22,7 +22,7 @@ var UploadPath *string
 // UploadFile engine.MaxMultipartMemory = 60 << 20  // 60 MiB  只限制程序在上传文件时可以使用多少内存，而是不限制上传文件的大小。(default is 32 MiB)
 func UploadFile(c *gin.Context) {
 	if !*EnableUpload {
-		logger.Infof(locale.GetString("UPLOAD_DISABLE_HINT"))
+		logger.Infof("%s", locale.GetString("UPLOAD_DISABLE_HINT"))
 		return
 	}
 	//logger.Infof("EnableUpload:", *EnableUpload)
@@ -37,9 +37,9 @@ func UploadFile(c *gin.Context) {
 		// 创建文件夹
 		err := os.MkdirAll(path, os.ModePerm)
 		if err != nil {
-			logger.Infof("mkdir failed![%v]\n", err)
+			logger.Infof("mkdir failed![%s]\n", err)
 		} else {
-			logger.Infof("mkdir success!\n")
+			logger.Infof("%s", "mkdir success!\n")
 		}
 	}
 

@@ -24,7 +24,7 @@ func CheckPort(port int) bool {
 	}
 	err = ln.Close()
 	if err != nil {
-		logger.Infof(locale.GetString("check_pork_error") + strconv.Itoa(port))
+		logger.Infof(locale.GetString("check_pork_error")+"%d", port)
 		return false
 	}
 	//logger.Infof("TCP Port %q is available", port)
@@ -112,14 +112,12 @@ func OpenBrowser(uri string) {
 	if runtime.GOOS == "windows" {
 		cmd = exec.Command("CMD", "/C", "start", uri)
 		if err := cmd.Start(); err != nil {
-			logger.Infof(locale.GetString("open_browser_error"))
-			logger.Infof("%s", err.Error())
+			logger.Infof(locale.GetString("open_browser_error")+"%s", err.Error())
 		}
 	} else if runtime.GOOS == "darwin" {
 		cmd = exec.Command("open", uri)
 		if err := cmd.Start(); err != nil {
-			logger.Infof(locale.GetString("open_browser_error"))
-			logger.Infof("%s", err.Error())
+			logger.Infof(locale.GetString("open_browser_error")+"%s", err.Error())
 		}
 	} else if runtime.GOOS == "linux" {
 		cmd = exec.Command("xdg-open", uri)

@@ -27,7 +27,7 @@ func StartScan(args []string) {
 			if err != nil {
 				logger.Infof("%s", err)
 			} else {
-				logger.Infof("从数据库中读取书籍信息,持久化成功:" + strconv.Itoa(len(books)))
+				logger.Infof("从数据库中读取书籍信息,一共有 %d 本书", strconv.Itoa(len(books)))
 			}
 		}
 	}

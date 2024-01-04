@@ -45,7 +45,7 @@ var upGrader = websocket.Upgrader{
 		//}
 		//验证路径
 		if r.URL.Path != "/api/ws" {
-			logger.Infof("path error")
+			logger.Info("path error\n")
 			return false
 		}
 		return true
