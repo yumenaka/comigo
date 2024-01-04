@@ -10,7 +10,7 @@ import (
 // 监听配置文件变更
 // 优雅地重启或停止  https://learnku.com/docs/gin-gonic/1.7/examples-graceful-restart-or-stop/11376
 func handlerConfigReload(e fsnotify.Event) {
-	logger.Infof("检测到Comigo配置文件改变:%s Op:%s\n", e.Name, e.Op)
+	logger.Infof("检测到Comigo配置文件改变:%s Op:%s", e.Name, e.Op)
 
 	//打印配置文件路径与触发事件
 	//logger.Infof("配置文件改变，Comigo重启:%s Op:%s\n", e.Name, e.Op)

@@ -51,7 +51,7 @@ func BeforeConfigUpdate(oldConfig *types.ComigoConfig, newConfig *types.ComigoCo
 		performScanAndUpdateDBIfNeeded(newConfig, reScanFile)
 	} else {
 		if newConfig.Debug {
-			logger.Infof("No changes in Config, skipped scan store path")
+			logger.Info("No changes in Config, skipped scan store path\n")
 		}
 	}
 }

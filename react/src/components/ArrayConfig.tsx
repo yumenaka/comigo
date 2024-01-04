@@ -1,5 +1,5 @@
 import React from "react";
-
+import { useTranslation } from "react-i18next";
 interface Props {
     label: string;
     fieldDescription: string;
@@ -21,6 +21,7 @@ const ArrayConfig: React.FC<Props> = ({
     InterfaceColor,
     showDialog,
 }) => {
+    const { t } = useTranslation();
     function push(element: string): void {
         setStringArray(name, [...value, element])
     }
@@ -40,8 +41,8 @@ const ArrayConfig: React.FC<Props> = ({
         if (input.value !== '') {
             push(input.value)
             input.value = ''
-        }else{
-            showDialog && showDialog("提示","请输入内容")
+        } else {
+            showDialog && showDialog(t("hint"), t("please_enter_content"))
         }
     }
 
@@ -67,25 +68,23 @@ const ArrayConfig: React.FC<Props> = ({
 
                 {/* https://www.hyperui.dev/components/application-ui/inputs */}
                 <div className="relative">
-                    <label htmlFor="Search" className="sr-only"> Search </label>
+                    <label htmlFor="Array" className="sr-only">
+                        {t("type_or_paste_content")}
+                    </label>
                     <input
                         type="text"
-                        id="Search"
-                        placeholder="键入或粘贴内容"
+                        id="Array"
+                        placeholder={t("type_or_paste_content")}
                         className="w-full rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm"
                         onKeyDown={onEnter}
                     ></input>
-
-             
-                </div>
-                <span className="grid w-10 place-content-center">
-                        <button onClick={onClick} type="button" className="text-gray-600 hover:text-gray-700">
-                            <span className="sr-only">Search</span>
-                            <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M448 256c0-106-86-192-192-192S64 150 64 256s86 192 192 192s192-86 192-192z" fill="none" stroke="currentColor" strokeMiterlimit="10" strokeWidth="32"></path><path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="32" d="M256 176v160"></path><path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="32" d="M336 256H176"></path></svg>
+                    <span className="absolute top-[0px] right-[-80px] place-content-center">
+                        <button onClick={onClick} type="button" className="h-10 w-16 mx-2 my-1 bg-sky-300 border border-gray-500 text-center text-gray-700 transition hover:text-gray-900 rounded">
+                            {t("submit")}
                         </button>
                     </span>
+                </div>
             </div>
-
             <div className="ml-2 py-1 w-3/4 text-xs text-gray-500">{fieldDescription}</div>
             <div className="bg-red-600">{error && <div>{error}</div>}</div>
         </div>

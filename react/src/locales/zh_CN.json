@@ -171,5 +171,8 @@
   "network": "网络",
   "abs": "实验",
   "temp_future_hint": "临时放一些还未完成的功能，开发与调整中。",
-  "ConfigManagerDescription": "将当前配置上传到服务器，或删除已经存在的设定文件。"
+  "ConfigManagerDescription": "将当前配置上传到服务器，或删除已经存在的设定文件。",
+  "please_enter_content": "请输入内容",
+  "submit": "提交",
+  "type_or_paste_content": "键入或粘贴内容"
 }

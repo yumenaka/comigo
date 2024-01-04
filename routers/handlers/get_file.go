@@ -331,7 +331,7 @@ func getFileFromCache(id string, filename string, query url.Values, isCover bool
 	}
 	loadedImage, err := os.ReadFile(filepath.Join(config.Config.CachePath, id, filename))
 	if err != nil && config.Config.Debug {
-		logger.Infof("getFileFromCache,file not found:" + filename)
+		logger.Infof("getFileFromCache,file not found:%s", filename)
 	}
 	return loadedImage, contentType, err
 }

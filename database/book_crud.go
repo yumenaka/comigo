@@ -5,8 +5,6 @@ package database // Package database 编译条件的注释和 package 语句之�
 import (
 	"context"
 	"errors"
-	"strconv"
-
 	"github.com/yumenaka/comi/ent"
 	entbook "github.com/yumenaka/comi/ent/book"
 	"github.com/yumenaka/comi/ent/singlepageinfo"
@@ -23,17 +21,17 @@ func ClearBookData(clearBook *types.Book) {
 		Where(entbook.BookIDEQ(clearBook.BookID)).
 		Exec(ctx)
 	if err != nil {
-		logger.Infof("ClearBookData Book:" + err.Error())
+		logger.Infof("%s", "ClearBookData Book:"+err.Error())
 	}
-	logger.Infof("Clear Book ：" + clearBook.Title)
+	logger.Infof("%s", "Clear Book ："+clearBook.Title)
 	deletePageInfoNum, err := client.SinglePageInfo.
 		Delete().
 		Where(singlepageinfo.BookIDEQ(clearBook.BookID)).
 		Exec(ctx)
 	if err != nil {
-		logger.Infof("ClearBookData SinglePageInfo:" + err.Error())
+		logger.Infof("ClearBookData SinglePageInfo:%s", err.Error())
 	}
-	logger.Infof("Clear SinglePageInfo Num：" + strconv.Itoa(deletePageInfoNum))
+	logger.Infof("Clear SinglePageInfo Num：%d", deletePageInfoNum)
 }
 
 // DeleteAllBookInDatabase  清空数据库的Book与SinglePageInfo表
@@ -49,7 +47,7 @@ func DeleteAllBookInDatabase(debug bool) {
 		logger.Infof("%s", err)
 	}
 	if debug {
-		logger.Infof("Delete Book Num：" + strconv.Itoa(deleteBookNum))
+		logger.Infof("Delete Book Num：%d", deleteBookNum)
 	}
 	deletePageInfoNum, err := client.SinglePageInfo.
 		Delete().
@@ -59,7 +57,7 @@ func DeleteAllBookInDatabase(debug bool) {
 		logger.Infof("%s", err)
 	}
 	if debug {
-		logger.Infof("Delete SinglePageInfo Num：" + strconv.Itoa(deletePageInfoNum))
+		logger.Infof("Delete SinglePageInfo Num：%d", deletePageInfoNum)
 	}
 }
 
@@ -69,7 +67,7 @@ func SaveAllBookToDatabase(m map[string]*types.Book) {
 		var c = *b
 		err := SaveBookToDatabase(&c)
 		if err != nil {
-			logger.Infof("SaveAllBookToDatabase error :" + err.Error())
+			logger.Infof("SaveAllBookToDatabase error :%s", err.Error())
 		}
 	}
 }

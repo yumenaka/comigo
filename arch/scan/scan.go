@@ -106,7 +106,7 @@ func InitStore(scanConfig Option) error {
 	for _, p := range scanConfig.StoresPath {
 		addList, err := ScanAndGetBookList(p, scanConfig)
 		if err != nil {
-			logger.Infof(locale.GetString("scan_error"), p, err)
+			logger.Infof(locale.GetString("scan_error")+" path:%s %s", p, err)
 			continue
 		}
 		AddBooksToStore(addList, p, scanConfig.MinImageNum)
@@ -139,7 +139,7 @@ func ClearDatabaseWhenExit(ConfigPath string) {
 func AddBooksToStore(bookList []*types.Book, basePath string, MinImageNum int) {
 	err := types.AddBooks(bookList, basePath, MinImageNum)
 	if err != nil {
-		logger.Infof(locale.GetString("AddBook_error"), basePath)
+		logger.Infof(locale.GetString("AddBook_error")+"%s", basePath)
 	}
 	// 然后生成对应的虚拟书籍组
 	if err := types.MainFolder.InitFolder(); err != nil {
@@ -158,7 +158,7 @@ func ScanAndGetBookList(storePath string, scanOption Option) (newBookList []*typ
 		storePathAbs = storePath
 		logger.Infof("%s", err)
 	}
-	logger.Infof(locale.GetString("SCAN_START_HINT") + storePathAbs)
+	logger.Infof(locale.GetString("SCAN_START_HINT")+"%s", storePathAbs)
 	err = filepath.Walk(storePathAbs, func(walkPath string, fileInfo os.FileInfo, err error) error {
 		if !scanOption.ReScanFile {
 			for _, p := range types.GetArchiveBooks() {
@@ -170,7 +170,7 @@ func ScanAndGetBookList(storePath string, scanOption Option) (newBookList []*typ
 				}
 				if walkPath == p.FilePath || AbsW == p.FilePath {
 					//跳过已经在数据库里面的文件
-					logger.Infof(locale.GetString("FoundInDatabase"), walkPath)
+					logger.Infof(locale.GetString("FoundInDatabase")+"%s", walkPath)
 					return nil
 				}
 			}
@@ -181,11 +181,11 @@ func ScanAndGetBookList(storePath string, scanOption Option) (newBookList []*typ
 			depth = strings.Count(walkPath, "\\") - strings.Count(storePathAbs, "\\")
 		}
 		if depth > scanOption.MaxScanDepth {
-			logger.Infof(locale.GetString("ExceedsMaximumDepth")+" %d，base：%s scan: %s:\n", scanOption.MaxScanDepth, storePathAbs, walkPath)
+			logger.Infof(locale.GetString("ExceedsMaximumDepth")+" %d，base：%s scan: %s:", scanOption.MaxScanDepth, storePathAbs, walkPath)
 			return filepath.SkipDir // 当WalkFunc的返回值是filepath.SkipDir时，Walk将会跳过这个目录，照常执行下一个文件。
 		}
 		if scanOption.IsSkipDir(walkPath) {
-			logger.Infof(locale.GetString("SkipPath"), walkPath)
+			logger.Infof(locale.GetString("SkipPath")+"%s", walkPath)
 			return filepath.SkipDir
 		}
 		if fileInfo == nil {
@@ -299,7 +299,7 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 		var pathError *fs.PathError
 		if errors.As(err, &pathError) {
 			if scanOption.Debug {
-				logger.Infof("NonUTF-8 ZIP:" + filePath + "  Error:" + err.Error())
+				logger.Infof("NonUTF-8 ZIP:%s  Error:%s", filePath, err.Error())
 			}
 			// 忽略 fs.PathError 并换个方式扫描
 			err = scanNonUTF8ZipFile(filePath, newBook, scanOption)
@@ -361,7 +361,7 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 			}
 			if !scanOption.IsSupportMedia(path) {
 				if scanOption.Debug {
-					logger.Infof(locale.GetString("unsupported_file_type") + path)
+					logger.Infof(locale.GetString("unsupported_file_type")+"%s", path)
 				}
 			} else {
 				u, ok := f.(archiver.File) // f.Name不包含路径信息.需要转换一下

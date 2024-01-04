@@ -171,5 +171,8 @@
   "network": "ットワーク",
   "abs": "ボ",
   "temp_future_hint": "まだ完成していないいくつかの機能を、一時的にに置く。",
-  "ConfigManagerDescription": "現在の設定をサーバーにアップロードするか、すでに存在する設定ファイルを削除します。"
+  "ConfigManagerDescription": "現在の設定をサーバーにアップロードするか、すでに存在する設定ファイルを削除します。",
+  "please_enter_content": "内容を入力してください",
+  "submit": "送信",
+  "type_or_paste_content": "力または貼り付け"
 }

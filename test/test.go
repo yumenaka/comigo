@@ -188,7 +188,7 @@ func UnArchiveZip(filePath string, extractPath string, textEncoding string) erro
 		if err != nil {
 			return err
 		}
-		logger.Infof("zip文件解压完成：" + getAbsPath(filePath) + " 解压到：" + getAbsPath(extractPath))
+		logger.Infof("zip文件解压完成：%s 解压到：%s", getAbsPath(filePath), getAbsPath(extractPath))
 	}
 	return nil
 }

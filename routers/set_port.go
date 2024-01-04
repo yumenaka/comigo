@@ -2,7 +2,6 @@ package routers
 
 import (
 	"math/rand"
-	"strconv"
 	"time"
 
 	"github.com/yumenaka/comi/config"
@@ -28,6 +27,6 @@ func SetPort() {
 		} else {
 			config.Config.Port = port
 		}
-		logger.Infof(locale.GetString("port_busy") + strconv.Itoa(config.Config.Port))
+		logger.Infof(locale.GetString("port_busy")+"%s", config.Config.Port)
 	}
 }

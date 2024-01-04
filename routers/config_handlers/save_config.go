@@ -12,23 +12,23 @@ func SaveConfigHandler(c *gin.Context) {
 	SaveTo := c.Param("to")
 	//如果不是三个目录之一，就不能保存
 	if !(SaveTo == "WorkingDirectory" || SaveTo == "HomeDirectory" || SaveTo == "ProgramDirectory") {
-		logger.Infof("error: Failed save to " + SaveTo + " directory")
+		logger.Infof("error: Failed save to %s directory", SaveTo)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed save to " + SaveTo + " directory"})
 		return
 	}
 	//如果其他目录已经存在了，就不能保存（暂不支持多配置文件）
 	if SaveTo == "WorkingDirectory" && (config.Status.Path.HomeDirectory != "" || config.Status.Path.ProgramDirectory != "") {
-		logger.Infof("error: Find config in " + config.Status.Path.HomeDirectory + " " + config.Status.Path.ProgramDirectory)
+		logger.Infof("error: Find config in %s %s", config.Status.Path.HomeDirectory, config.Status.Path.ProgramDirectory)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "error: Find config in " + config.Status.Path.HomeDirectory + " " + config.Status.Path.ProgramDirectory})
 		return
 	}
 	if SaveTo == "HomeDirectory" && (config.Status.Path.WorkingDirectory != "" || config.Status.Path.ProgramDirectory != "") {
-		logger.Infof("error: Find config in " + config.Status.Path.WorkingDirectory + " " + config.Status.Path.ProgramDirectory)
+		logger.Infof("error: Find config in  %s %s", config.Status.Path.WorkingDirectory, config.Status.Path.ProgramDirectory)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "error: Find config in " + config.Status.Path.WorkingDirectory + " " + config.Status.Path.ProgramDirectory})
 		return
 	}
 	if SaveTo == "ProgramDirectory" && (config.Status.Path.WorkingDirectory != "" || config.Status.Path.HomeDirectory != "") {
-		logger.Infof("error: Find config in " + config.Status.Path.WorkingDirectory + " " + config.Status.Path.HomeDirectory)
+		logger.Infof("error: Find config in  %s %s", config.Status.Path.WorkingDirectory, config.Status.Path.HomeDirectory)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "error: Find config in " + config.Status.Path.WorkingDirectory + " " + config.Status.Path.HomeDirectory})
 		return
 	}
