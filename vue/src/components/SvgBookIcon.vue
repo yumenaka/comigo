@@ -10,6 +10,8 @@
     </div>
 
     <!-- 文件夹 -->
+    <i class="icon-[material-symbols--arrow-back-ios-new]"></i>
+
     <svg v-if='book_info.type == "dir"'
         class="opacity-70 w-7 h-7 m-0 absolute top-1 z-10 right-1 shadow-2xl hover:shadow-2xl"
         xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512">

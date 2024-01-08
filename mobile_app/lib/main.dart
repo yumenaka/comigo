@@ -1,51 +1,52 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const ComigoApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class ComigoApp extends StatelessWidget {
+  const ComigoApp({super.key});
 
-  // 这个小部件是你应用的根部件。
+  // 这个小部件是应用的根部件。
   @override
   Widget build(BuildContext context) {
     print('build');
     // 谷歌推荐的Material（ Android 默认的视觉风格）的组件库
     return MaterialApp(
-      title: 'Comigo Demo v0.1',
+      title: 'Comigo Demo v1.0',
       //debug条件下，显示右上角的debug标签。我不需要，所以设置为false。
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        // 这是你的应用程序的主题。
+        // 这是应用程序的主题。
         //
-        // 尝试一下：运行你的应用程序，使用 "flutter run" 命令。你会看到应用程序有一个蓝色的工具栏。
+        // 尝试一下：运行应用程序，使用 "flutter run" 命令。会看到应用程序有一个蓝色的工具栏。
         // 然后，在不退出应用程序的情况下，尝试将 colorScheme 中的 seedColor 更改为 Colors.green，
         // 然后触发 "hot reload"（保存更改或在支持Flutter的IDE中按下 "hot reload" 按钮，或者如果你使用命令行启动应用程序，则按下 "r"）。
         //
         // 注意，计数器没有重置为零；应用程序状态在重新加载期间不会丢失。要重置状态，请使用热重启。
         //
         // 这对于代码也适用，不仅仅是值：大多数代码更改只需要进行热重载即可测试。
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Comigo Home Page'),
+      home: const ComigoHomePage(title: 'Comigo Home Page'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+class ComigoHomePage extends StatefulWidget {
+  const ComigoHomePage({super.key, required this.title});
 
-  // 这个小部件是你应用的主页。它是有状态的，意味着它有一个包含影响其外观的字段的 State 对象（在下面定义）。
-  // 这个类是状态的配置。它保存了父级（在这种情况下是 App 小部件）提供的值（在这种情况下是标题），并由状态的 build 方法使用。Widget 子类中的字段始终标记为 "final"。
+  // 这个小部件是应用的主页。它是有状态的，意味着它有一个包含影响其外观的字段的 State 对象（在下面定义）。
+  // 这个类是状态的配置。它保存了父级（在这种情况下是 App 小部件）提供的值（在这种情况下是标题），并由状态的 build 方法使用。
+  // Widget 子类中的字段始终标记为 "final"。
   final String title;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<ComigoHomePage> createState() => _ComigoHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _ComigoHomePageState extends State<ComigoHomePage> {
   int _counter = 0;
 
   void _incrementCounter() {

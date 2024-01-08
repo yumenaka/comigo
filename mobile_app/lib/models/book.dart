@@ -1,25 +1,32 @@
-class book {
+import 'image_info.dart';
+
+class Book {
   String title;
-  String author;
-  String description;
-  String image;
-  String price;
-  String rating;
-  String url;
+  String id;
+  String type;
+  int pageCount;
+  int childBookNum;
+  ImageInfo? cover;
+  List<ImageInfo>? pages;
 
-  book({required this.title, this.author, this.description, this.image, this.price, this.rating, this.url});
+  Book(
+      {required this.title,
+        required this.id,
+        required this.type,
+        this.pageCount = 0,
+        this.childBookNum = 0,
+        this.cover,
+        this.pages});
 
-  factory book.fromJson(Map<String, dynamic> json) {
-    return book(
-      title: json['title'],
-      author: json['author'],
-      description: json['description'],
-      image: json['image'],
-      price: json['price'],
-      rating: json['rating'],
-      url: json['url'],
+  factory Book.fromJson(Map<String, dynamic> json) {
+    return Book(
+      title: json['title'] as String,
+      type: json['author'] as String,
+      id: json['id'] as String,
+      cover: json['cover'] != null ? ImageInfo.fromJson(json['cover']) : null,
+      pages: json['pages'] != null ? (json['pages'] as List).map((i) => ImageInfo.fromJson(i)).toList() : null,
+      pageCount: json['page_count'] ?? 0,
+      childBookNum: json['child_book_num'] ?? 0,
     );
   }
-
-
 }
