@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'models/book.dart';
+
 void main() {
   runApp(const ComigoApp());
 }
@@ -10,7 +12,7 @@ class ComigoApp extends StatelessWidget {
   // 这个小部件是应用的根部件。
   @override
   Widget build(BuildContext context) {
-    print('build');
+
     // 谷歌推荐的Material（ Android 默认的视觉风格）的组件库
     return MaterialApp(
       title: 'Comigo Demo v1.0',
@@ -48,6 +50,18 @@ class ComigoHomePage extends StatefulWidget {
 
 class _ComigoHomePageState extends State<ComigoHomePage> {
   int _counter = 0;
+
+  Future<List<Book>>? booksFuture;
+  @override
+  void initState() {
+    super.initState();
+    booksFuture = fetchBooks(); // 调用函数并初始化参数
+    booksFuture?.then((value) => {
+      for (var book in value) {
+        print(book.title)
+      }
+    });
+  }
 
   void _incrementCounter() {
     setState(() {
