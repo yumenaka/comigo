@@ -5,7 +5,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 Future<List<Book>> fetchBooks() async {
-  final response = await http.get(Uri.parse('http://192.168.3.8:1234/api/book_infos?depth=0&sort_by=name'));
+  final response = await http.get(Uri.parse('http://192.168.3.15:1234/api/book_infos?depth=1&sort_by=name'));
 
   if (response.statusCode == 200) {
     List<Book> bookshelf = [];

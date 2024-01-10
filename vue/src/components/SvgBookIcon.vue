@@ -62,7 +62,7 @@
 import { defineComponent } from "vue";
 export default defineComponent({
     name: "SvgBookIcon",
-    props: ["book_info", "childBookNum"],
+    props: ["book_info"],
     components: {
     },
     computed: {
