@@ -116,6 +116,9 @@ func (s *subFolder) AnalyzeFolder() error {
 			if Added {
 				continue
 			}
+			if (depth - 1) < 0 {
+				continue
+			}
 			depthBooksMap[depth-1] = append(depthBooksMap[depth-1], newBookGroup.BookInfo)
 			newBookGroup.Author, _ = util.GetAuthor(newBookGroup.Title)
 			//将这本书加到子书库的BookGroup表（Images.BookGroupMap）里面去
