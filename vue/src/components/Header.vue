@@ -238,15 +238,7 @@ export default defineComponent({
       axios
         .get("/parent_book_info?id=" + this.bookID)
         .then((response) => {
-          //请求接口成功，跳转到书架页面
-          //console.log(response.data);
-          if (response.data.depth < 0) {
-            //如果是主页，就跳转到主页
-            this.$router.push("/");
-          } else {
-            //如果不是主页，就跳转到书架页面
-            this.$router.push("/child_shelf/" + response.data.id);
-          }
+          this.$router.push("/child_shelf/" + response.data.id);
         }).catch((error) => {
           console.log(error.message);
           this.$router.push('/')
