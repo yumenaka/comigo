@@ -7,7 +7,7 @@
     :style="setBackgroundImage()">
 
     <!-- 书籍类型图标 -->
-    <SvgBookIcon :book_info="book_info" :childBookNum="childBookNum"></SvgBookIcon>
+    <SvgBookIcon :book_info="book_info"></SvgBookIcon>
     <!-- 图书封面 -->
     <div v-if="showTitle"
       class="absolute inset-x-0 bottom-0 h-1/4 bg-gray-100 bg-opacity-80 font-semibold border-blue-800 rounded-b">
@@ -48,15 +48,6 @@ export default defineComponent({
         return "_blank";
       }
       return "_self";
-    },
-    childBookNum(): string {
-      if (this.book_info.type === 'dir') {
-        return ''
-      }
-      if (this.book_info.child_book_num > 0) {
-        return "x" + this.book_info.child_book_num.toString();
-      }
-      return "";
     },
     shortTitle(): string {
       let short_title = this.book_info.title
