@@ -39,17 +39,9 @@ class ComigoHomePage extends StatefulWidget {
 
 class _ComigoHomePageState extends State<ComigoHomePage> {
 
-
-  Future<List<Book>>? Books;
   @override
   void initState() {
     super.initState();
-    Books = fetchBooks(); // 调用函数并初始化参数
-    Books?.then((value) => {
-      for (var book in value) {
-        debugPrint(book.title)
-      }
-    });
   }
 
   Future<List<Book>> initBooks() async {
@@ -69,7 +61,7 @@ class _ComigoHomePageState extends State<ComigoHomePage> {
     // https://book.flutterchina.club/chapter7/futurebuilder_and_streambuilder.html
     Widget booksWidget = FutureBuilder<List<Book>>(
       future: fetchBooks(),
-      initialData: [Book(title: 'Loading...', id: '0', type: '0')],
+      initialData: [],
       // snapshot会包含当前异步任务的状态信息及结果信息
       builder: (context, snapshot) {
         if (snapshot.hasData) {
@@ -80,6 +72,8 @@ class _ComigoHomePageState extends State<ComigoHomePage> {
               return ListTile(
                 title: Text(snapshot.data![index].title),
                 subtitle: Text(snapshot.data![index].id),
+                leading: Icon(Icons.book),
+                trailing: Image.network("http://192.168.3.15:1234/${snapshot.data![index].cover?.url}"),
               );
             },
           );
