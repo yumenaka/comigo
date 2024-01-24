@@ -1,19 +1,22 @@
-import 'image_info.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
+import 'pages.dart';
 
 // 在Flutter中发起HTTP网络请求 https://doc.flutterchina.club/networking/
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 
 Future<List<Book>> fetchBooks() async {
-  final response = await http.get(Uri.parse('http://192.168.3.15:1234/api/book_infos?depth=1&sort_by=name'));
-
+  final dio = Dio();
+  const url = 'http://192.168.3.15:1234/api/book_infos?depth=1&sort_by=name';
+  final response = await dio.get(url);
   if (response.statusCode == 200) {
-    List<Book> bookshelf = [];
-    List<dynamic> booksJson = jsonDecode(response.body);
-    for (var bookJson in booksJson) {
-      bookshelf.add(Book.fromJson(bookJson));
+    try {
+      final data = response.data as List<dynamic>;
+      final books = data.map((e) => Book.fromJson(e)).toList();
+      return books;
+    } catch (e) {
+      debugPrint(e.toString());
+      rethrow;
     }
-    return bookshelf;
   } else {
     throw Exception('Failed to load books');
   }
@@ -25,8 +28,8 @@ class Book {
   String type;
   int pageCount;
   int childBookNum;
-  ImageInfo? cover;
-  List<ImageInfo>? pages;
+  PageInfo? cover;
+  List<PageInfo>? pages;
 
   Book(
       {required this.title,
@@ -42,8 +45,8 @@ class Book {
       title: json['title'] as String,
       type: json['author'] as String,
       id: json['id'] as String,
-      cover: json['cover'] != null ? ImageInfo.fromJson(json['cover']) : null,
-      pages: json['pages'] != null ? (json['pages'] as List).map((i) => ImageInfo.fromJson(i)).toList() : null,
+      cover: json['cover'] != null ? PageInfo.fromJson(json['cover']) : null,
+      pages: json['pages'] != null ? (json['pages'] as List).map((i) => PageInfo.fromJson(i)).toList() : null,
       pageCount: json['page_count'] ?? 0,
       childBookNum: json['child_book_num'] ?? 0,
     );
