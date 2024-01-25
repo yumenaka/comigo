@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'models/book.dart';
 
 void main() {
@@ -39,9 +40,20 @@ class ComigoHomePage extends StatefulWidget {
 
 class _ComigoHomePageState extends State<ComigoHomePage> {
 
+  String comigoHost = "http://192.168.3.15:1234";
   @override
   void initState() {
     super.initState();
+    initHost();
+  }
+
+  /// Load the initial counter value from persistent storage on start,
+  /// or fallback to 0 if it doesn't exist.
+  Future<void> initHost() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      comigoHost = prefs.getString('comigo_host') ?? "http://192.168.3.15:1234";
+    });
   }
 
   Future<List<Book>> initBooks() async {
@@ -55,13 +67,14 @@ class _ComigoHomePageState extends State<ComigoHomePage> {
     final mediaQueryData = MediaQuery.of(context);
     // トップナビゲーションバーの高さ
     final headerHeight = mediaQueryData.size.height * 0.07;
+
     // ボトムナビゲーションバーの高さ
     // final bottomHeight = mediaQueryData.size.height * 0.1;
     // 异步UI更新（FutureBuilder、StreamBuilder）
     // https://book.flutterchina.club/chapter7/futurebuilder_and_streambuilder.html
     Widget booksWidget = FutureBuilder<List<Book>>(
       future: fetchBooks(),
-      initialData: [],
+      initialData: const [],
       // snapshot会包含当前异步任务的状态信息及结果信息
       builder: (context, snapshot) {
         if (snapshot.hasData) {
@@ -73,7 +86,7 @@ class _ComigoHomePageState extends State<ComigoHomePage> {
                 title: Text(snapshot.data![index].title),
                 subtitle: Text(snapshot.data![index].id),
                 leading: Icon(Icons.book),
-                trailing: Image.network("http://192.168.3.15:1234/${snapshot.data![index].cover?.url}"),
+                trailing: Image.network("$comigoHost/${snapshot.data![index].cover?.url}"),
               );
             },
           );
