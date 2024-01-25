@@ -1,12 +1,15 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'pages.dart';
 
 // 在Flutter中发起HTTP网络请求 https://doc.flutterchina.club/networking/
 
 Future<List<Book>> fetchBooks() async {
   final dio = Dio();
-  const url = 'http://192.168.3.15:1234/api/book_infos?depth=1&sort_by=name';
+  final prefs = await SharedPreferences.getInstance();
+  final comigoHost = prefs.getString('comigo_host') ?? "http://192.168.3.15:1234";
+  var url = '$comigoHost/api/book_infos?depth=1&sort_by=name';
   final response = await dio.get(url);
   if (response.statusCode == 200) {
     try {
