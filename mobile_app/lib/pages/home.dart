@@ -3,26 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/book.dart';
 
-class ComigoApp extends StatelessWidget {
-  const ComigoApp({super.key});
 
-  // 这个小部件是应用的根部件。
-  @override
-  Widget build(BuildContext context) {
-    // 谷歌推荐的Material（ Android 默认的视觉风格）的组件库
-    return MaterialApp(
-      title: 'Comigo Demo Mobile',
-      //隐藏右上角的debug标签
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        // 应用程序的主题。
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
-        useMaterial3: true,
-      ),
-      home: const ComigoHomePage(title: 'Comigo Mobile'),
-    );
-  }
-}
 
 class ComigoHomePage extends StatefulWidget {
   const ComigoHomePage({super.key, required this.title});
