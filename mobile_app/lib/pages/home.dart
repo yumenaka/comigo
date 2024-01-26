@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/book.dart';
 
-
-
+// 这个Widget是Home页面的根部件。
 class ComigoHomePage extends StatefulWidget {
   const ComigoHomePage({super.key, required this.title});
   // 这个小部件是应用的主页。它是有状态的，意味着它有一个包含影响其外观的字段的 State 对象（在下面定义）。
@@ -35,7 +34,7 @@ class _ComigoHomePageState extends State<ComigoHomePage> {
 
   /// 获取书籍列表
   Future<List<Book>> initBooks() async {
-    Future<List<Book>>? books = fetchBooks(); // 调用函数并初始化参数
+    Future<List<Book>>? books = getBookData(); // 调用函数并初始化参数
     return books.then((value) => value);
   }
 
@@ -48,7 +47,7 @@ class _ComigoHomePageState extends State<ComigoHomePage> {
     // 异步UI更新（FutureBuilder、StreamBuilder）
     // https://book.flutterchina.club/chapter7/futurebuilder_and_streambuilder.html
     Widget booksWidget = FutureBuilder<List<Book>>(
-      future: fetchBooks(),
+      future: getBookData(),
       initialData: const [],
       // snapshot会包含当前异步任务的状态信息及结果信息
       builder: (context, snapshot) {

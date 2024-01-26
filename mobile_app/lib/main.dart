@@ -21,13 +21,13 @@ class ComigoApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
         useMaterial3: true,
       ),
-      //ルーティング表を登録する
+      //路由表注册
       routes: <String, WidgetBuilder>{
-        "webview": (context) => const ComigoHomePage(title: 'Comigo Mobile'),
-        "/": (context) => const ComigoHomePage(title: 'Comigo Mobile'), //ホームページのルートを登録する
+        "/": (context) => const ComigoHomePage(title: 'Comigo Mobile'), //注册首页路由
+        "ScrollMode": (context) => const ComigoHomePage(title: 'Comigo Mobile'),
+        "FlipMode": (context) => const ComigoHomePage(title: 'Comigo Mobile'),
       },
-      initialRoute: "/", //"/"という名前のルートをアプリのホーム（スタートページ）とする
-      home: const ComigoHomePage(title: 'Comigo Mobile'),
+      initialRoute: "/", //设定名为"/"的route为首页
     );
   }
 }
