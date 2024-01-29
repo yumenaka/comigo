@@ -1,9 +1,8 @@
 import 'package:comigo/pages/book_shelf.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-import 'models/AppSetting.dart';
-import 'models/RemoteServer.dart';
+import 'models/setting.dart';
+import 'models/remote_server.dart';
 
 void main() {
   runApp(const ComigoApp());
@@ -18,7 +17,7 @@ class ComigoApp extends StatelessWidget {
     // https://flutter.cn/docs/development/data-and-backend/state-mgmt/simple#changenotifierprovider
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AppSetting()),
+        ChangeNotifierProvider(create: (_) => Setting()),
         ChangeNotifierProvider(create: (_) => RemoteServer()),
       ],
       child: MaterialApp(
