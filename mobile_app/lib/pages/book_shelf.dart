@@ -68,6 +68,9 @@ class _BookShelfState extends State<BookShelf> {
                   subtitle: Text(snapshot.data![index].id),
                   leading: const Icon(Icons.book),
                   trailing: Image.network("$remoteHost/${snapshot.data![index].cover?.url}"),
+                  onTap: () {
+                    Navigator.pushNamed(context, "ScrollMode");
+                  }
                 ),
               );
             },
