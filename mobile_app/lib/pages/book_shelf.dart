@@ -3,18 +3,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/book.dart';
 
 // 这个Widget是Home页面的根部件。
-class ComigoHomePage extends StatefulWidget {
-  const ComigoHomePage({super.key, required this.title});
+class BookShelf extends StatefulWidget {
+  const BookShelf({super.key, required this.title});
   // 这个小部件是应用的主页。它是有状态的，意味着它有一个包含影响其外观的字段的 State 对象（在下面定义）。
   // 这个类是状态的配置。它保存了父级（在这种情况下是 App 小部件）提供的值（在这种情况下是标题），并由状态的 build 方法使用。
   // Widget 子类中的字段始终标记为 "final"。
   final String title;
 
   @override
-  State<ComigoHomePage> createState() => _ComigoHomePageState();
+  State<BookShelf> createState() => _BookShelfState();
 }
 
-class _ComigoHomePageState extends State<ComigoHomePage> {
+class _BookShelfState extends State<BookShelf> {
 
   String comigoHost = "http://192.168.3.15:1234";
   @override
@@ -58,7 +58,7 @@ class _ComigoHomePageState extends State<ComigoHomePage> {
               return ListTile(
                 title: Text(snapshot.data![index].title),
                 subtitle: Text(snapshot.data![index].id),
-                leading: Icon(Icons.book),
+                leading: const Icon(Icons.book),
                 trailing: Image.network("$comigoHost/${snapshot.data![index].cover?.url}"),
               );
             },

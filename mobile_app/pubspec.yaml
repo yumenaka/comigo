@@ -36,8 +36,10 @@ dependencies:
   flutter_svg: ^2.0.9
   dio: ^5.4.0
   shared_preferences: ^2.2.2
+  #  简单的应用状态管理：https://flutter.cn/docs/development/data-and-backend/state-mgmt/simple
   provider: ^6.1.1
   url_launcher: ^6.2.4
+  intl: ^0.19.0
 
 dev_dependencies:
   flutter_test:
