@@ -2,9 +2,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class AppSetting extends ChangeNotifier {
+class Setting extends ChangeNotifier {
   String comigoHost = "";
-  AppSetting() {
+  Setting() {
     initHost();
   }
 

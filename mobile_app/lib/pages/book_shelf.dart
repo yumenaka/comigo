@@ -16,7 +16,7 @@ class BookShelf extends StatefulWidget {
 
 class _BookShelfState extends State<BookShelf> {
 
-  String comigoHost = "http://192.168.3.15:1234";
+  String remoteHost = "http://192.168.3.15:1234";
   @override
   void initState() {
     super.initState();
@@ -27,7 +27,7 @@ class _BookShelfState extends State<BookShelf> {
   Future<void> initHost() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      comigoHost = prefs.getString('comigo_host') ?? "http://192.168.3.15:1234";
+      remoteHost = prefs.getString('remote_host') ?? "http://192.168.3.15:1234";
     });
   }
 
@@ -59,7 +59,7 @@ class _BookShelfState extends State<BookShelf> {
                 title: Text(snapshot.data![index].title),
                 subtitle: Text(snapshot.data![index].id),
                 leading: const Icon(Icons.book),
-                trailing: Image.network("$comigoHost/${snapshot.data![index].cover?.url}"),
+                trailing: Image.network("$remoteHost/${snapshot.data![index].cover?.url}"),
               );
             },
           );
