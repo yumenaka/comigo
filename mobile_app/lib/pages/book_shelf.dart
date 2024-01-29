@@ -50,22 +50,32 @@ class _BookShelfState extends State<BookShelf> {
       initialData: const [],
       // snapshot会包含当前异步任务的状态信息及结果信息
       builder: (context, snapshot) {
+        // 请求结束
         if (snapshot.hasData) {
           debugPrint(snapshot.data!.length.toString());
           return ListView.builder(
             itemCount: snapshot.data!.length,
             itemBuilder: (context, index) {
-              return ListTile(
-                title: Text(snapshot.data![index].title),
-                subtitle: Text(snapshot.data![index].id),
-                leading: const Icon(Icons.book),
-                trailing: Image.network("$remoteHost/${snapshot.data![index].cover?.url}"),
+              return Container(
+                padding: const EdgeInsets.all(2.0),
+                margin: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 4.0),
+                decoration:  BoxDecoration(
+                    borderRadius: const BorderRadius.all(Radius.circular(10.0)),
+                    border: Border.all(width: 1, color: Colors.grey,),
+              ),
+                child: ListTile(
+                  title: Text(snapshot.data![index].title),
+                  subtitle: Text(snapshot.data![index].id),
+                  leading: const Icon(Icons.book),
+                  trailing: Image.network("$remoteHost/${snapshot.data![index].cover?.url}"),
+                ),
               );
             },
           );
         } else if (snapshot.hasError) {
           return Text('${snapshot.error}');
         }
+        // 默认情况下，显示一个进度条
         return const CircularProgressIndicator();
       },
     );
