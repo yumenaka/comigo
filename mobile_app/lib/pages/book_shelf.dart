@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/book.dart';
+import '../models/remote_server.dart';
 
 // 这个Widget是Home页面的根部件。
 class BookShelf extends StatefulWidget {
@@ -20,7 +22,9 @@ class _BookShelfState extends State<BookShelf> {
   @override
   void initState() {
     super.initState();
+    /// 初始化host
     initHost();
+    //Provider.of<RemoteServer>(context).init();
   }
 
   /// 初始化host
