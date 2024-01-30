@@ -15,11 +15,13 @@ class ComigoApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+
     // https://github.com/rrousselGit/provider/blob/master/resources/translations/zh-CN/README.md#multiprovider
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => Setting()),
-        ChangeNotifierProvider(create: (_) => RemoteServer()),
+        ChangeNotifierProvider(create: (_) => RemoteServer(defaultHost: "http://192.168.3.15:1234")),
       ],
       child: MaterialApp(
         title: 'Comigo Demo Mobile',

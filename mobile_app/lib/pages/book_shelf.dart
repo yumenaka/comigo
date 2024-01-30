@@ -18,21 +18,9 @@ class BookShelf extends StatefulWidget {
 
 class _BookShelfState extends State<BookShelf> {
 
-  String remoteHost = "http://192.168.3.15:1234";
   @override
   void initState() {
     super.initState();
-    /// 初始化host
-    initHost();
-    //Provider.of<RemoteServer>(context).init();
-  }
-
-  /// 初始化host
-  Future<void> initHost() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      remoteHost = prefs.getString('remote_host') ?? "http://192.168.3.15:1234";
-    });
   }
 
   /// 获取书籍列表
@@ -71,9 +59,9 @@ class _BookShelfState extends State<BookShelf> {
                   title: Text(snapshot.data![index].title),
                   subtitle: Text(snapshot.data![index].id),
                   leading: const Icon(Icons.book),
-                  trailing: Image.network("$remoteHost/${snapshot.data![index].cover?.url}"),
+                  trailing: Image.network("${Provider.of<RemoteServer>(context).remoteHost}/${snapshot.data![index].cover?.url}"),
                   onTap: () {
-                    Navigator.pushNamed(context, "ScrollMode");
+                    debugPrint("remoteHost:${Provider.of<RemoteServer>(context, listen: false).remoteHost}");
                   }
                 ),
               );
