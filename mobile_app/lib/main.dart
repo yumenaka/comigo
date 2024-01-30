@@ -1,6 +1,7 @@
 import 'package:comigo/pages/book_shelf.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'common/theme.dart';
 import 'models/setting.dart';
 import 'models/remote_server.dart';
 
@@ -14,7 +15,7 @@ class ComigoApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // https://flutter.cn/docs/development/data-and-backend/state-mgmt/simple#changenotifierprovider
+    // https://github.com/rrousselGit/provider/blob/master/resources/translations/zh-CN/README.md#multiprovider
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => Setting()),
@@ -24,11 +25,7 @@ class ComigoApp extends StatelessWidget {
         title: 'Comigo Demo Mobile',
         //隐藏右上角的debug标签
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          // 应用程序的主题。
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
-          useMaterial3: true,
-        ),
+        theme: appTheme,
         //路由表注册
         routes: <String, WidgetBuilder>{
           "/": (context) => const BookShelf(title: 'Comigo Mobile'),
