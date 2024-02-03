@@ -1,11 +1,14 @@
 import 'package:comigo/pages/book_shelf.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'common/theme.dart';
 import 'models/setting.dart';
 import 'models/remote_server.dart';
 
-void main() {
+Future main() async {
+  //https://www.dhiwise.com/post/flutter-dotenv-comprehensive-guide-on-environment-management
+  await dotenv.load(fileName: '.env');
   runApp(const ComigoApp());
 }
 
@@ -15,7 +18,6 @@ class ComigoApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
 
     // https://github.com/rrousselGit/provider/blob/master/resources/translations/zh-CN/README.md#multiprovider
     return MultiProvider(
