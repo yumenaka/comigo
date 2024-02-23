@@ -323,7 +323,11 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 		}
 	// TODO:服务器解压速度太慢，网页用PDF.js解析？
 	case types.TypePDF:
-		newBook.PageCount = 1
+		pageCount, pdfErr := arch.CountPagesOfPDF(filePath)
+		if pdfErr != nil {
+			return nil, pdfErr
+		}
+		newBook.PageCount = pageCount
 		newBook.InitComplete = true
 		newBook.Cover = types.ImageInfo{RealImageFilePATH: "", FileSize: FileInfo.Size(), ModeTime: FileInfo.ModTime(), NameInArchive: "", Url: "/images/pdf.png"}
 	// TODO：简单的网页播放器
