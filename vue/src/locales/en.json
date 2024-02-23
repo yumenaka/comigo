@@ -102,5 +102,7 @@
   "full_screen_hint": "FullScreen",
   "epub_info": "ePub Info",
   "pdf_hint_message": "純粋な画像PDFに対応しています。もし読み込みが遅かったり、エラーが発生した場合は、以下を試してみてください：",
-  "original_pdf_link": "Original PDF link"
+  "original_pdf_link": "Original PDF link",
+  "infinite_dropdown": "Infinite Dropdown",
+  "pagination_mode": "Pagination Mode"
 }
