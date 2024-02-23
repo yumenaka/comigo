@@ -9,6 +9,7 @@ import (
 	"path"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"time"
 
@@ -331,13 +332,13 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 			return nil, errors.New(locale.GetString("NO_PAGES_IN_PDF") + filePath)
 		}
 		logger.Infof(locale.GetString("SCAN_PDF")+"%s: %d", filePath, pageCount)
-		//newBook.PageCount = pageCount
-		//newBook.InitComplete = true
-		//newBook.Cover = types.ImageInfo{RealImageFilePATH: "", FileSize: FileInfo.Size(), ModeTime: FileInfo.ModTime(), NameInArchive: "", Url: "/images/pdf.png"}
-		//for i := 1; i <= pageCount; i++ {
-		//	TempURL := "api/get_file?id=" + newBook.BookID + "&filename=" + strconv.Itoa(i)
-		//	newBook.Pages.Images = append(newBook.Pages.Images, types.ImageInfo{RealImageFilePATH: "", FileSize: FileInfo.Size(), ModeTime: FileInfo.ModTime(), NameInArchive: strconv.Itoa(i), Url: TempURL})
-		//}
+		newBook.PageCount = pageCount
+		newBook.InitComplete = true
+		newBook.Cover = types.ImageInfo{RealImageFilePATH: "", FileSize: FileInfo.Size(), ModeTime: FileInfo.ModTime(), NameInArchive: "", Url: "/images/pdf.png"}
+		for i := 1; i <= pageCount; i++ {
+			TempURL := "api/get_file?id=" + newBook.BookID + "&filename=" + strconv.Itoa(i)
+			newBook.Pages.Images = append(newBook.Pages.Images, types.ImageInfo{RealImageFilePATH: "", FileSize: FileInfo.Size(), ModeTime: FileInfo.ModTime(), NameInArchive: strconv.Itoa(i), Url: TempURL})
+		}
 	// TODO：简单的网页播放器
 	case types.TypeVideo:
 		newBook.PageCount = 1

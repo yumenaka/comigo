@@ -75,7 +75,6 @@ func setWebAPI(engine *gin.Engine) {
 	protectedAPI.GET("/group_info_filter", handlers.GroupInfoFilter)
 	//通过链接下载reg设置文件
 	protectedAPI.GET("/comigo.reg", handlers.GetRegFile)
-
 	//获取配置
 	protectedAPI.GET("/config", config_handlers.GetConfig)
 	//获取配置状态
