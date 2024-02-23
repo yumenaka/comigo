@@ -87,10 +87,16 @@ func GetFile(c *gin.Context) {
 		if err != nil {
 			logger.Infof("%s", err)
 		}
-		//获取PDF的第几页
 		imgData, err = arch.GetImageFromPDF(bookPath, page)
 		if err != nil {
 			logger.Infof("%s", err)
+		}
+		if imgData == nil {
+			logger.Infof("GetImageFromPDF: imgData is nil")
+			imgData, err = util.GenerateImage("Page " + util.RemoveExtension(needFile) + ":" + locale.GetString("UnableToExtractImagesFromPDF"))
+			if err != nil {
+				logger.Infof("%s", err)
+			}
 		}
 	}
 	//如果是本地文件夹
