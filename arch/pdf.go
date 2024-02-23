@@ -51,56 +51,41 @@ func GetImageFromPDF(pdfFileName string, pageNum int) ([]byte, error) {
 	pdfSetting.DecodeAllStreams = true
 
 	////api.ExtractImagesRaw(） 只能导出图片，无法输出文档
-	//imageList, err := api.ExtractImagesRaw(file, []string{strconv.Itoa(pageNum)}, pdfSetting)
+	//pageImagesMap, err := api.ExtractImagesRaw(file, []string{strconv.Itoa(pageNum)}, pdfSetting)
 	//if err != nil {
 	//	fmt.Println(err)
 	//}
-	//imageOut, err := imaging.Decode(imageList[0])
-	//if err != nil {
-	//	fmt.Println(err)
-	//	return nil, errors.New("imaging.Decode() Error")
+	//images := make([]model.Image, 0)
+	//for _, pageImages := range pageImagesMap {
+	//	for _, img := range pageImages {
+	//		images = append(images, img)
+	//	}
 	//}
-	//buffer := &bytes.Buffer{}
-	//err = jpeg.Encode(buffer, imageOut, &jpeg.Options{Quality: 75})
-	//if err != nil {
-	//	return nil, errors.New("jpeg.Encode( Error")
+	//var imgBytes []byte = nil
+	//for i := range images {
+	//	b, err := io.ReadAll(images[i])
+	//	if err != nil {
+	//		continue
+	//	}
+	//	imgBytes = b
+	//	fmt.Println(time.Now().Sub(start))
+	//	return b, nil
 	//}
+	//return imgBytes, nil
 
-	pageImagesMap, err := api.ExtractImagesRaw(file, []string{strconv.Itoa(pageNum)}, pdfSetting)
+	//api.ExtractImagesRaw(） 另一种调用方式，效果相同，依然无法渲染文字为图片。
+	buffer := &bytes.Buffer{}
+	err = api.ExtractImages(file, []string{strconv.Itoa(pageNum)}, digestImage(buffer), pdfSetting)
 	if err != nil {
 		fmt.Println(err)
 	}
-	images := make([]model.Image, 0)
-	for _, pageImages := range pageImagesMap {
-		for _, img := range pageImages {
-			images = append(images, img)
-		}
-	}
-	var imgBytes []byte = nil
-	for i := range images {
-		b, err := io.ReadAll(images[i])
-		if err != nil {
-			continue
-		}
-		imgBytes = b
-		fmt.Println(time.Now().Sub(start))
-		return b, nil
-	}
-	return imgBytes, nil
-
-	////api.ExtractImagesRaw(） 另一种调用方式，效果相同，依然无法渲染文字为图片。
-	//buffer := &bytes.Buffer{}
-	//err = api.ExtractImages(file, []string{strconv.Itoa(pageNum)}, digestImage(buffer), pdfSetting)
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
 	//参考：https://github.com/pdfcpu/pdfcpu/issues/45
 	// https://github.com/pdfcpu/pdfcpu/issues/351
 	//将PDF转换为图像，相当于重写一个pdf查看器。
 	//虽然可以引用mupdf。但这会导致导入C代码，破坏跨平台兼容性。
-	//或许可以调用imagemagick，曲线救国？
-
-	//return buffer.Bytes(), nil
+	//或许可以cli调用imagemagick，曲线救国？
+	fmt.Println(time.Now().Sub(start))
+	return buffer.Bytes(), nil
 }
 
 // 自定义钩子函数参数的方法：输入自定义参数、输出符合要求的函数

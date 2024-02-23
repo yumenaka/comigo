@@ -4,14 +4,56 @@ import (
 	"bytes"
 	"errors"
 	"image"
+	"image/color"
 	"image/draw"
+	"image/jpeg"
 	"strconv"
 
 	"github.com/bbrks/go-blurhash"
 	"github.com/disintegration/imaging"
 	"github.com/mandykoh/autocrop"
 	"github.com/yumenaka/comi/logger"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/basicfont"
+	"golang.org/x/image/math/fixed"
 )
+
+// GenerateImage 创建一个带有动态文字的JPEG图片，并返回其[]byte形式
+func GenerateImage(text string) ([]byte, error) {
+	// 图片的大小
+	width, height := 440, 200
+	// 创建一个指定大小和颜色模式的图片
+	img := image.NewRGBA(image.Rect(0, 0, width, height))
+	// 设置图片背景颜色为灰色
+	draw.Draw(img, img.Bounds(), &image.Uniform{color.Gray{Y: 180}}, image.Point{}, draw.Src)
+
+	// 设置字体
+	face := basicfont.Face7x13
+
+	// 计算文本绘制的起始点，这里简单地将其放在图片的中心
+	x := (width - len(text)*7) / 2 // 7 is an approximate width of a character
+	y := (height + 13) / 2         // 13 is the height of the character
+
+	// 在图片上绘制文字
+	d := &font.Drawer{
+		Dst:  img,
+		Src:  image.NewUniform(color.RGBA{R: 77, G: 77, B: 77, A: 255}),
+		Face: face,
+		Dot: fixed.Point26_6{
+			X: fixed.Int26_6(x * 64),
+			Y: fixed.Int26_6(y * 64),
+		},
+	}
+	d.DrawString(text)
+
+	// 编码图片为JPEG格式
+	var buf bytes.Buffer
+	err := jpeg.Encode(&buf, img, nil)
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
 
 // GetImageDataBlurHash  获取图片的BlurHash
 func GetImageDataBlurHash(loadedImage []byte, components int) string {
