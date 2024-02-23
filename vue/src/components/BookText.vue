@@ -41,7 +41,6 @@ export default defineComponent({
     getTarget() {
       let bookType = this.book_info.type;
       if (
-        bookType === ".pdf" ||
         bookType === "video" ||
         bookType === "audio" ||
         bookType === "unknown"
@@ -93,7 +92,6 @@ export default defineComponent({
         return "/#/child_shelf/" + bookID + "/";
       }
       if (
-        bookType === ".pdf" ||
         bookType === "video" ||
         bookType === "audio" ||
         bookType === "unknown"

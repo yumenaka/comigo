@@ -163,6 +163,7 @@ func GroupInfoFilter(c *gin.Context) {
 			info.Type == types.TypeDir ||
 			info.Type == types.TypeCbz ||
 			info.Type == types.TypeCbr ||
+			info.Type == types.TypePDF ||
 			info.Type == types.TypeEpub {
 			filterList.BookInfos = append(filterList.BookInfos, info)
 		}
