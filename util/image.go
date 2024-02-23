@@ -21,7 +21,7 @@ import (
 // GenerateImage 创建一个带有动态文字的JPEG图片，并返回其[]byte形式
 func GenerateImage(text string) ([]byte, error) {
 	// 图片的大小
-	width, height := 440, 200
+	width, height := 880, 400
 	// 创建一个指定大小和颜色模式的图片
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
 	// 设置图片背景颜色为灰色

@@ -9,6 +9,14 @@
 			class="w-24 h-12 m-2 bg-blue-300 text-gray-900 hover:bg-blue-500 rounded" @click="loadAllPage" size="large">{{
 				$t('load_all_pages') }}</button>
 		<!-- 渲染漫画部分 -->
+		<div v-if="book.type === '.pdf'" class="pdf_hint w-full flex flex-col justify-center">
+			<div class="w-96 text-center font-bold  m-4 p-4  bg-slate-300 self-center rounded  shadow-2xl">
+				<div class="pb-1">{{ $t('pdf_hint_message') }}</div>
+				<a class="text-blue-700 underline " :href="'api/raw/' + book.id + '/' + encodeURIComponent(book.title)"
+					target="_blank">{{ $t('original_pdf_link') }} </a>
+			</div>
+		</div>
+
 		<div class="main_manga" v-for="(single_image, n) in localImages" :key="single_image.url"
 			@click="onMouseClick($event)" @mousemove="onMouseMove">
 			<ImageScroll :image_url="imageParametersString(single_image.url)" :sPWL="sPWL" :dPWL="dPWL" :sPWP="sPWP"
@@ -129,10 +137,9 @@
 			</n-switch>
 			<!-- 切白边阈值 -->
 			<n-input-number :show-button="false" v-if="imageParameters.do_auto_crop"
-				v-model:value="imageParameters.auto_crop_num"
-				:max="10" :min="0">
+				v-model:value="imageParameters.auto_crop_num" :max="10" :min="0">
 				<template #prefix>{{ $t('energy_threshold') }}</template>
-			</n-input-number> 
+			</n-input-number>
 
 			<!-- 开关：压缩图片 -->
 			<n-switch size="large" :rail-style="railStyle" v-model:value="imageParameters.do_auto_resize"
@@ -162,6 +169,7 @@ import QuickJumpBar from "@/components/QuickJumpBar.vue";
 import { CSSProperties, defineComponent, reactive } from 'vue'
 // import { useCookies } from "vue3-cookies";// https://github.com/KanHarI/vue3-cookies
 import axios from "axios";
+import App from '@/App.vue';
 
 export default defineComponent({
 	name: "ScrollMode",
