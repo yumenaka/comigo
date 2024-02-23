@@ -336,7 +336,7 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 		newBook.InitComplete = true
 		newBook.Cover = types.ImageInfo{RealImageFilePATH: "", FileSize: FileInfo.Size(), ModeTime: FileInfo.ModTime(), NameInArchive: "", Url: "/images/pdf.png"}
 		for i := 1; i <= pageCount; i++ {
-			TempURL := "api/get_file?id=" + newBook.BookID + "&filename=" + strconv.Itoa(i)
+			TempURL := "api/get_file?id=" + newBook.BookID + "&filename=" + strconv.Itoa(i) + ".jpg"
 			newBook.Pages.Images = append(newBook.Pages.Images, types.ImageInfo{RealImageFilePATH: "", FileSize: FileInfo.Size(), ModeTime: FileInfo.ModTime(), NameInArchive: strconv.Itoa(i), Url: TempURL})
 		}
 	// TODO：简单的网页播放器
