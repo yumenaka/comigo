@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"image/jpeg"
+	"io"
 	"log"
 	"os"
 	"strconv"
@@ -14,6 +15,8 @@ import (
 	"github.com/pdfcpu/pdfcpu/pkg/api"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/model"
 )
+
+//sample code: https://github.com/pdfcpu/pdfcpu/blob/master/pkg/api/extract.go
 
 // CountPagesOfPDF 确定PDF的页数
 func CountPagesOfPDF(pdfFileName string) (int, error) {
@@ -95,20 +98,29 @@ func ExportImageFromPDF(pdfFile string, pageNum int) {
 	}
 	defer file.Close()
 
-	imageList, err := api.ExtractImagesRaw(file, []string{strconv.Itoa(pageNum)}, model.NewDefaultConfiguration())
+	pageImagesMap, err := api.ExtractImagesRaw(file, []string{strconv.Itoa(pageNum)}, model.NewDefaultConfiguration())
 	if err != nil {
 		fmt.Println(err)
 	}
-	imageOut, err := imaging.Decode(imageList[0])
-	if err != nil {
-		fmt.Println(err)
-		return
+	images := make([]model.Image, 0)
+	for _, pageImages := range pageImagesMap {
+		for _, img := range pageImages {
+			images = append(images, img)
+		}
 	}
-	//保存文件
-	err = imaging.Save(imageOut, "test/"+strconv.Itoa(pageNum)+".jpg")
-	if err != nil {
-		fmt.Println(err)
+
+	for i := range images {
+		imgBytes, err := io.ReadAll(images[i])
+		if err != nil {
+			continue
+		}
+		// 写入文件，如果文件不存在则创建，文件权限设置为 0644
+		err = os.WriteFile("example.txt", imgBytes, 0644)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
+
 	fmt.Println(time.Now().Sub(start))
 }
 
@@ -151,20 +163,28 @@ func ExportAllImageFromPDF(pdfFile string) {
 	for i := 0; i < pageCount; i++ {
 		list = append(list, strconv.Itoa(i+1))
 	}
-	imageList, err := api.ExtractImagesRaw(file, list, model.NewDefaultConfiguration())
+
+	pageImagesMap, err := api.ExtractImagesRaw(file, []string{strconv.Itoa(pageCount)}, model.NewDefaultConfiguration())
 	if err != nil {
 		fmt.Println(err)
 	}
-	for k, i := range imageList {
-		imageOut, err := imaging.Decode(i)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		//保存文件
-		err = imaging.Save(imageOut, "test/"+strconv.Itoa(k+1)+".jpg")
-		if err != nil {
-			fmt.Println(err)
+	images := make([]model.Image, 0)
+	for _, pageImages := range pageImagesMap {
+		for _, img := range pageImages {
+			images = append(images, img)
 		}
 	}
+
+	for i := range images {
+		imgBytes, err := io.ReadAll(images[i])
+		if err != nil {
+			continue
+		}
+		// 写入文件，如果文件不存在则创建，文件权限设置为 0644
+		err = os.WriteFile("test/"+strconv.Itoa(i+1)+".jpg", imgBytes, 0644)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
 }
