@@ -10,7 +10,7 @@
 				$t('load_all_pages') }}</button>
 		<!-- 渲染漫画部分 -->
 		<div v-if="book.type === '.pdf'" class="pdf_hint w-full flex flex-col justify-center">
-			<div class="w-96 text-center font-bold  m-4 p-4  bg-slate-300 self-center rounded  shadow-2xl">
+			<div class="w-96 text-center font-bold  m-4 p-4  bg-slate-200 self-center rounded  shadow-2xl">
 				<div class="pb-1">{{ $t('pdf_hint_message') }}</div>
 				<a class="text-blue-700 underline " :href="'api/raw/' + book.id + '/' + encodeURIComponent(book.title)"
 					target="_blank">{{ $t('original_pdf_link') }} </a>

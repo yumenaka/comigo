@@ -87,7 +87,7 @@ func GetFile(c *gin.Context) {
 		if err != nil {
 			logger.Infof("%s", err)
 		}
-		imgData, err = arch.GetImageFromPDF(bookPath, page)
+		imgData, err = arch.GetImageFromPDF(bookPath, page, config.Config.Debug)
 		if err != nil {
 			logger.Infof("%s", err)
 		}
