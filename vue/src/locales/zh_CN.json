@@ -100,5 +100,7 @@
   "back_button": "返回按钮",
   "qrcode_hint": "扫码阅读，点击可以显示二维码",
   "full_screen_hint": "全屏按钮",
-  "epub_info": "ePub 信息"
+  "epub_info": "ePub 信息",
+  "pdf_hint_message": "支持纯图片PDF，如果加载缓慢或出错，请尝试：",
+  "original_pdf_link": "查看原始PDF"
 }

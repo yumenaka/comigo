@@ -93,7 +93,7 @@ func GetFile(c *gin.Context) {
 		}
 		if imgData == nil {
 			logger.Infof("GetImageFromPDF: imgData is nil")
-			imgData, err = util.GenerateImage("Page " + util.RemoveExtension(needFile) + ":" + locale.GetString("UnableToExtractImagesFromPDF"))
+			imgData, err = util.GenerateImage("Page " + util.RemoveExtension(needFile) + ": " + locale.GetString("UnableToExtractImagesFromPDF"))
 			if err != nil {
 				logger.Infof("%s", err)
 			}
