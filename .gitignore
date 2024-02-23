@@ -41,8 +41,7 @@ archiver
 bin
 comic
 .config
-test
-test2
+test*
 *md5Sums.txt
 resource.syso
 \[*

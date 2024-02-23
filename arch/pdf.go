@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/yumenaka/comi/logger"
 	"image/jpeg"
 	"io"
 	"log"
@@ -20,10 +21,17 @@ import (
 
 // CountPagesOfPDF 确定PDF的页数
 func CountPagesOfPDF(pdfFileName string) (int, error) {
+	//设置一个defer语句来捕获并处理潜在的panic。defer语句会确保在函数返回之前执行其中的代码，而recover函数用于捕获并恢复panic，防止panic向上传播并导致整个程序崩溃
+	defer func() {
+		if r := recover(); r != nil {
+			logger.Infof("CountPagesOfPDF: invalid PDF: %v Error:%v", pdfFileName, r)
+			// 这里可以根据需要进行错误处理，比如返回特定的错误值给调用者
+		}
+	}()
 	// use default configuration for pdfcpu ("nil")
 	err := api.ValidateFile(pdfFileName, nil)
 	if err != nil {
-		return -1, errors.New("CountPagesOfPDF: invalid PDF: %v")
+		return -1, errors.New("CountPagesOfPDF: invalid PDF: " + pdfFileName + " " + err.Error())
 	}
 	return api.PageCountFile(pdfFileName)
 }
