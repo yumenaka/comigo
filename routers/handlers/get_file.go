@@ -82,7 +82,16 @@ func GetFile(c *gin.Context) {
 	}
 	//如果是PDF
 	if bookByID.Type == types.TypePDF {
-
+		//获取PDF的第几页
+		page, err := strconv.Atoi(needFile)
+		if err != nil {
+			logger.Infof("%s", err)
+		}
+		//获取PDF的第几页
+		imgData, err = arch.GetImageFromPDF(bookPath, page)
+		if err != nil {
+			logger.Infof("%s", err)
+		}
 	}
 	//如果是本地文件夹
 	if bookByID.Type == types.TypeDir {
