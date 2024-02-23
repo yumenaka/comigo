@@ -38,7 +38,7 @@ func CountPagesOfPDF(pdfFileName string) (int, error) {
 }
 
 // GetImageFromPDF 从PDF里面取jpeg文件，pageNum从1开始
-func GetImageFromPDF(pdfFileName string, pageNum int) ([]byte, error) {
+func GetImageFromPDF(pdfFileName string, pageNum int, Debug bool) ([]byte, error) {
 	start := time.Now()
 	//打开PDF文件
 	file, err := os.Open(pdfFileName)
@@ -84,7 +84,10 @@ func GetImageFromPDF(pdfFileName string, pageNum int) ([]byte, error) {
 	//将PDF转换为图像，相当于重写一个pdf查看器。
 	//虽然可以引用mupdf。但这会导致导入C代码，破坏跨平台兼容性。
 	//或许可以cli调用imagemagick，曲线救国？
-	fmt.Println(time.Now().Sub(start))
+	if Debug {
+		logger.Infof("GetImageFromPDF: %v", time.Now().Sub(start))
+	}
+
 	return buffer.Bytes(), nil
 }
 
