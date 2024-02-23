@@ -10,6 +10,12 @@ import (
 	"github.com/yumenaka/comi/logger"
 )
 
+// RemoveExtension 从文件名中去除扩展名
+func RemoveExtension(filename string) string {
+	extension := filepath.Ext(filename)
+	return strings.TrimSuffix(filename, extension)
+}
+
 // IsExist 判断文件夹或文件是否存在
 func IsExist(path string) bool {
 	_, err := os.Stat(path)

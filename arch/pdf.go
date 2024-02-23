@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/yumenaka/comi/logger"
 	"image/jpeg"
 	"io"
 	"log"
@@ -15,6 +14,7 @@ import (
 	"github.com/disintegration/imaging"
 	"github.com/pdfcpu/pdfcpu/pkg/api"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/model"
+	"github.com/yumenaka/comi/logger"
 )
 
 //sample code: https://github.com/pdfcpu/pdfcpu/blob/master/pkg/api/extract.go
@@ -66,20 +66,41 @@ func GetImageFromPDF(pdfFileName string, pageNum int) ([]byte, error) {
 	//	return nil, errors.New("jpeg.Encode( Error")
 	//}
 
-	//api.ExtractImagesRaw(） 另一种调用方式，效果相同，依然无法渲染文字为图片。
-	buffer := &bytes.Buffer{}
-	err = api.ExtractImages(file, []string{strconv.Itoa(pageNum)}, digestImage(buffer), pdfSetting)
+	pageImagesMap, err := api.ExtractImagesRaw(file, []string{strconv.Itoa(pageNum)}, pdfSetting)
 	if err != nil {
 		fmt.Println(err)
 	}
+	images := make([]model.Image, 0)
+	for _, pageImages := range pageImagesMap {
+		for _, img := range pageImages {
+			images = append(images, img)
+		}
+	}
+	var imgBytes []byte = nil
+	for i := range images {
+		b, err := io.ReadAll(images[i])
+		if err != nil {
+			continue
+		}
+		imgBytes = b
+		fmt.Println(time.Now().Sub(start))
+		return b, nil
+	}
+	return imgBytes, nil
+
+	////api.ExtractImagesRaw(） 另一种调用方式，效果相同，依然无法渲染文字为图片。
+	//buffer := &bytes.Buffer{}
+	//err = api.ExtractImages(file, []string{strconv.Itoa(pageNum)}, digestImage(buffer), pdfSetting)
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
 	//参考：https://github.com/pdfcpu/pdfcpu/issues/45
 	// https://github.com/pdfcpu/pdfcpu/issues/351
 	//将PDF转换为图像，相当于重写一个pdf查看器。
 	//虽然可以引用mupdf。但这会导致导入C代码，破坏跨平台兼容性。
 	//或许可以调用imagemagick，曲线救国？
 
-	fmt.Println(time.Now().Sub(start))
-	return buffer.Bytes(), nil
+	//return buffer.Bytes(), nil
 }
 
 // 自定义钩子函数参数的方法：输入自定义参数、输出符合要求的函数
@@ -124,7 +145,7 @@ func ExportImageFromPDF(pdfFile string, pageNum int) {
 			continue
 		}
 		// 写入文件，如果文件不存在则创建，文件权限设置为 0644
-		err = os.WriteFile("example.txt", imgBytes, 0644)
+		err = os.WriteFile("example.jpeg", imgBytes, 0644)
 		if err != nil {
 			log.Fatal(err)
 		}
