@@ -102,5 +102,7 @@
   "full_screen_hint": "全屏按钮",
   "epub_info": "ePub 信息",
   "pdf_hint_message": "支持纯图片PDF，如果加载缓慢或出错，请尝试：",
-  "original_pdf_link": "查看原始PDF"
+  "original_pdf_link": "查看原始PDF",
+  "infinite_dropdown": "无限下拉",
+  "pagination_mode": "分页模式"
 }

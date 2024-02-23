@@ -4,11 +4,8 @@
 			:bookID="book.id" :depth="book.depth" :showReturnIcon="true" :showSettingsIcon="true"
 			v-bind:style="{ background: model.interfaceColor }" @drawerActivate="drawerActivate">
 		</Header>
-		<!-- 顶部的加载全部页面顶部按钮 -->
-		<button v-if="((startLoadPageNum > 1) && !nowLoading)"
-			class="w-24 h-12 m-2 bg-blue-300 text-gray-900 hover:bg-blue-500 rounded" @click="loadAllPage" size="large">{{
-				$t('load_all_pages') }}</button>
-		<!-- 渲染漫画部分 -->
+
+		<!-- PDF格式的额外提示信息。-->
 		<div v-if="book.type === '.pdf'" class="pdf_hint w-full flex flex-col justify-center">
 			<div class="w-96 text-center font-bold  m-4 p-4  bg-slate-200 self-center rounded  shadow-2xl">
 				<div class="pb-1">{{ $t('pdf_hint_message') }}</div>
@@ -17,24 +14,35 @@
 			</div>
 		</div>
 
+		<!-- 分页条 -->
+		<n-pagination class="flex flex-row justify-center m-2 font-semibold text-lg"  v-if="!InfiniteDropdownMode" v-model:page="paginationPage"
+			:page-count="Math.ceil(book.page_count / 20)" :on-update:page="onPaginationPageChange" />
+
+		<!-- 渲染漫画的主体部分 -->
 		<div class="main_manga" v-for="(single_image, n) in localImages" :key="single_image.url"
 			@click="onMouseClick($event)" @mousemove="onMouseMove">
 			<ImageScroll :image_url="imageParametersString(single_image.url)" :sPWL="sPWL" :dPWL="dPWL" :sPWP="sPWP"
-				:dPWP="dPWP" :MyPageNum="n + startLoadPageNum" :nowPageNum="nowPageNum" :page_count="book.page_count"
-				:book_id="book.id" :showPageNumFlag_ScrollMode="showPageNumFlag_ScrollMode" :syncPageByWS="syncPageByWS"
-				:id="'JUMP_ID:' + (n + startLoadPageNum)" :startLoadPageNum="startLoadPageNum"
-				:endLoadPageNum="endLoadPageNum" :autoScrolling="autoScrolling" :userControlling="userControlling"
-				:margin="marginOnScrollMode" @refreshNowPageNum="refreshNowPageNum">
+				:dPWP="dPWP" :nowPageNum="nowPageNum" :page_count="book.page_count" :book_id="book.id"
+				:showPageNumFlag_ScrollMode="showPageNumFlag_ScrollMode" :syncPageByWS="syncPageByWS"
+				:autoScrolling="autoScrolling" :userControlling="userControlling" :margin="marginOnScrollMode"
+				@refreshNowPageNum="refreshNowPageNum">
 			</ImageScroll>
 		</div>
 
 		<Observer @loadNextBlock="loadNextBlock" />
 		<!-- 返回顶部的圆形按钮，向上滑动的时候出现 -->
 		<n-back-top class="bg-blue-200" :show="showBackTopFlag" type="info" :right="20" :bottom="20" />
+
+		<!-- 分页条 -->
+		<n-pagination class="flex flex-row justify-center m-2 font-semibold text-lg"  v-if="!InfiniteDropdownMode" v-model:page="paginationPage"
+			:page-count="Math.ceil(book.page_count / 20)" :on-update:page="onPaginationPageChange" />
+
 		<!-- 底部最下面的返回顶部按钮 -->
-		<button class="w-24 h-12 m-2 bg-blue-300 text-gray-900 hover:bg-blue-500 rounded" @click="scrollToTop(90);"
+		<button v-if="InfiniteDropdownMode" class="w-24 h-12 m-2 bg-blue-300 text-gray-900 hover:bg-blue-500 rounded" @click="scrollToTop(90);"
 			size="large">{{ $t('back-to-top') }}</button>
-		<QuickJumpBar class="self-center" :nowBookID="book.id" :readMode="'scroll'"></QuickJumpBar>
+
+		<QuickJumpBar class="self-center mt-2 mb-2" :nowBookID="book.id" :readMode="'scroll'"></QuickJumpBar>
+
 		<Bottom v-bind:style="{ background: model.interfaceColor }"
 			:softVersion="$store.state.server_status.ServerName ? $store.state.server_status.ServerName : 'Comigo'">
 		</Bottom>
@@ -46,19 +54,22 @@
 			<!-- 选择：切换页面模式 -->
 			<n-button @click="changeReaderModeToFlipMode">{{ $t('switch_to_flip_mode') }}</n-button>
 
-			<!-- 页面重新排序 -->
+			<!-- 页面加载模式 -->
 			<n-select :placeholder='$t("re_sort_page")' @update:value="onResort" :options="options" />
+
+			<!-- 无限加载下拉，还是分页模式 -->
+			<n-switch size="large" v-model:value="InfiniteDropdownMode" :rail-style="railStyle"
+				@update:value="setInfiniteDropdownMode">
+				<template #checked>{{ $t("infinite_dropdown") }}</template>
+				<template #unchecked>{{ $t("pagination_mode") }}</template>
+			</n-switch>
+
 			<!-- 空白行-->
 			<!-- <p> &nbsp;</p> -->
 			<!-- 同步翻页 -->
 			<n-switch size="large" v-model:value="syncPageByWS" @update:value="setSyncPageByWS">
 				<template #checked>{{ $t("sync_page") }}</template>
 				<template #unchecked>{{ $t("sync_page") }}</template>
-			</n-switch>
-			<!-- 保存页数 -->
-			<n-switch size="large" v-model:value="saveNowPageNumFlag" @update:value="setSavePageNumFlag">
-				<template #checked>{{ $t("savePageNum") }}</template>
-				<template #unchecked>{{ $t("savePageNum") }}</template>
 			</n-switch>
 
 			<!-- 显示页数 -->
@@ -159,17 +170,17 @@
 
 <script lang="ts">
 // 直接导入组件并使用它。这种情况下,只有导入的组件才会被打包。
-import { NBackTop, NButton, NInputNumber, NSelect, NSlider, NSwitch, useDialog, useMessage, } from 'naive-ui'
+import { NBackTop, NButton, NInputNumber, NSelect, NSlider, NSwitch, useDialog, useMessage, NPagination, } from 'naive-ui'
 import Header from "@/components/Header.vue";
 import Drawer from "@/components/Drawer.vue";
 import Bottom from "@/components/Bottom.vue";
 import Observer from "@/components/Observer_in_Scroll.vue";
 import ImageScroll from "@/components/Image_in_Scroll.vue";
 import QuickJumpBar from "@/components/QuickJumpBar.vue";
-import { CSSProperties, defineComponent, reactive } from 'vue'
-// import { useCookies } from "vue3-cookies";// https://github.com/KanHarI/vue3-cookies
+import { CSSProperties, defineComponent, reactive, ref } from 'vue'
 import axios from "axios";
-import App from '@/App.vue';
+import { useThrottledRefHistory } from '@vueuse/core';
+
 
 export default defineComponent({
 	name: "ScrollMode",
@@ -188,6 +199,7 @@ export default defineComponent({
 		NButton,//按钮，来自:https://www.naiveui.com/zh-CN/os-theme/components/button
 		NSelect,
 		QuickJumpBar,
+		NPagination,
 	},
 	// setup在创建组件前执行，因此没有this
 	setup() {
@@ -217,7 +229,7 @@ export default defineComponent({
 		const message = useMessage();
 		const dialog = useDialog();
 		return {
-			pdfUrl: "",
+			paginationPage: ref(1),
 			// cookies,
 			//背景色
 			model,
@@ -280,12 +292,9 @@ export default defineComponent({
 			debug: false,
 			//加载页面相关
 			nowPageNum: 1,//当前页数,从1开始,,不是数组下标,在pages.images数组当中用的时候需要-1
-			startLoadPageNum: 1,//开始加载的页数,从1开始,不是数组下标,在pages.images数组当中用的时候需要-1
-			StartFromBreakpoint: false,
-			loadPageLimit: 20,//一次最多载入的漫画张数，默认为20.
-			endLoadPageNum: 20,//载入漫画的最后一页，默认为20.
-			saveNowPageNumFlag: true,//是否（在本地存储里面）保存与恢复页数
-			firstLoadComplete: true,//首次加载是否完成
+			LOAD_LIMIT: 20,//一次载入的漫画张数，默认为20.
+			lastPageNum: 20,//载入漫画的最后一页，默认为20.
+			InfiniteDropdownMode: true,//是否是无限下拉模式
 			localImages: [
 				{
 					filename: "",
@@ -406,31 +415,35 @@ export default defineComponent({
 		if (this.$route.query.sort_by) {
 			sort_image_by_str = "&sort_by=" + this.$route.query.sort_by
 		}
-		//是否保存页数
-		if (localStorage.getItem("saveNowPageNumFlag") === "true") {
-			this.saveNowPageNumFlag = true;
-		} else if (localStorage.getItem("saveNowPageNumFlag") === "false") {
-			this.saveNowPageNumFlag = false;
-		}
+
 		//是否通过websocket同步页数
 		if (localStorage.getItem("SyncPageByWS") === "true") {
 			this.syncPageByWS = true;
 		} else if (localStorage.getItem("SyncPageByWS") === "false") {
 			this.syncPageByWS = false;
 		}
+
+		//是否是无限下拉模式
+		if (localStorage.getItem("InfiniteDropdownMode") === "true") {
+			this.InfiniteDropdownMode = true;
+		} else if (localStorage.getItem("InfiniteDropdownMode") === "false") {
+			this.InfiniteDropdownMode = false;
+			let page = this.getPageNumberFromUrl();
+			this.paginationPage = page !== null ? page : 1;
+		}
+
 		//根据路由参数获取特定书籍
 		this.nowLoading = true;
-		var _this = this
 		axios
 			.get("/get_book?id=" + this.$route.params.id + sort_image_by_str)
 			.then((response) => {
 				//请求接口成功的逻辑
 				this.book = response.data;
 				//确定一开始要加载多少页
-				if (this.loadPageLimit <= this.book.page_count) {
-					this.endLoadPageNum = this.loadPageLimit;
+				if (this.book.page_count >= this.LOAD_LIMIT) {
+					this.lastPageNum = this.LOAD_LIMIT;
 				} else {
-					this.endLoadPageNum = this.book.page_count;
+					this.lastPageNum = this.book.page_count;
 				}
 				if (this.book.type == ".epub") {
 					this.options.push(
@@ -441,11 +454,6 @@ export default defineComponent({
 					)
 				}
 				this.loadPages();
-				// 询问用户是否从中间开始加载，延迟1.5秒执行
-				setTimeout(function () {
-					_this.loadLocalBookMark();
-					_this.nowLoading = false;
-				}, 1500);
 			}).catch((error) => {
 				console.log("请求接口失败" + error);
 			})
@@ -499,7 +507,7 @@ export default defineComponent({
 		} else if (localStorage.getItem("showPageNumFlag_ScrollMode") === "false") {
 			this.showPageNumFlag_ScrollMode = false;
 		}
-		//console.log("读取设置并初始化: showPageNumFlag_ScrollMode=" + this.showPageNumFlag_ScrollMode);
+
 		//javascript 数字类型转换：https://www.runoob.com/js/js-type-conversion.html
 		// NaN不能通过相等操作符（== 和 ===）来判断
 
@@ -564,7 +572,6 @@ export default defineComponent({
 		} else if (localStorage.getItem("ImageParameters_Gray") === "false") {
 			this.imageParameters.gray = false;
 		}
-		// console.log("读取设置并初始化: ImageParameters_Gray=" + this.imageParameters.gray);
 
 		//是否压缩图片
 		if (localStorage.getItem("ImageParameters_DoAutoResize") === "true") {
@@ -638,7 +645,6 @@ export default defineComponent({
 				console.log(this.$store.userID + "接收到Message:msg.user_id=" + msg.user_id);
 				return;
 			}
-
 			if (msg.type === "scroll_mode_sync_page") {
 				// console.log("自动翻页 msg：", msg);
 				const syncData = JSON.parse(msg.data_string);
@@ -646,221 +652,49 @@ export default defineComponent({
 					console.log("虽然有翻页信息，但" + syncData.book_id + "≠" + this.book.id);
 					return;
 				}
-				// console.log("自动翻页 syncData：", syncData);
-				// this.toPage(syncData);
 			}
-
-			// if (msg.type === "flip_mode_sync_page") {
-			// 	// console.log("自动翻页 msg：", msg);
-			// 	const syncData = JSON.parse(msg.data_string);
-			// 	if (syncData.book_id !== this.book.id) {
-			// 		console.log("虽然有翻页信息，但" + syncData.book_id + "≠" + this.book.id);
-			// 		return;
-			// 	}
-			// 	// console.log("自动翻页 syncData：", syncData);
-			// 	// this.toPage(syncData);
-			// }
-
-			// //服务器发来翻页信息，来自于另一个用户才做反应
-			// if (msg.type === "flip_mode_sync_page") {
-			// 	const syncData = JSON.parse(msg.data_string);
-			// 	//正在读的是同一本书、就翻页。
-			// 	if (syncData.book_id === this.book.id && syncData.now_page_num !== this.nowPageNum) {
-			// 		this.toPageSimple(syncData);
-			// 	}
-			// }
-		},
-
-		toPageSimple(syncData: any) {
-			//用户正在操作，不对翻页消息作反应。
-			if (this.userControlling) {
-				console.log("toPage:Return,Because User Controlling");
-				return;
-			}
-			if (this.nowPageNum === syncData.now_page_num) {
-				console.log("别着急，等一会再翻页 this.nowPageNum=" + this.nowPageNum);
-				return;
-			}
-			//如果已经翻到很后面了，强制加载后续页
-			if (this.endLoadPageNum < syncData.now_page_num) {
-				this.endLoadPageNum < syncData.now_page_num
-			}
-			if (this.startLoadPageNum > syncData.now_page_num) {
-				this.startLoadPageNum = syncData.now_page_num
-				this.loadNextBlock();
-			}
-			//获取目标元素
-			let element = document.getElementById("JUMP_ID:" + syncData.now_page_num);
-			if (element) {
-				// console.log("找到：", element);
-				this.nowPageNum = syncData.now_page_num;
-				if (this.endLoadPageNum <= this.nowPageNum) {
-					this.loadNextBlock();
-				}
-				//Element 接口的 scrollIntoView() 方法会滚动元素的父容器，使被调用 scrollIntoView() 的元素对用户可见。
-				//https://developer.mozilla.org/zh-CN/docs/Web/API/Element/scrollIntoView
-				element.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" });
-			} else {
-				console.log("element：", element);
-			}
-		},
-
-		//滚动跳转到指定页数
-		toPage(syncData: any) {
-			//用户正在操作，不对翻页消息作反应。
-			if (this.userControlling) {
-				console.log("toPage:Return,Because User Controlling");
-				return;
-			}
-			if (this.nowPageNum === syncData.now_page_num) {
-				console.log("别着急，等一会再翻页 this.nowPageNum=" + this.nowPageNum);
-				return;
-			}
-			if (syncData.now_page_num <= this.book.page_count && syncData.now_page_num >= 1) {
-				this.nowPageNum = syncData.now_page_num;
-				this.startLoadPageNum = syncData.start_load_page_num;
-				this.endLoadPageNum = syncData.end_load_page_num;
-			}
-			this.loadPages();
-			// 前端页面滚动到某个位置的方式
-			//获取目标元素
-			let element = document.getElementById("JUMP_ID:" + syncData.now_page_num);
-			if (element === null) {
-				console.log("没找到：", element);
-				this.loadNextBlock();
-				element = document.getElementById("JUMP_ID:" + syncData.now_page_num);
-			}
-			//元素方法调用
-			// https://blog.csdn.net/weixin_41804429/article/details/102954146
-			// https://developer.mozilla.org/zh-CN/docs/Web/API/Element/scrollIntoView
-
-			if (element) {
-				// Element.getBoundingClientRect()
-				// https://developer.mozilla.org/zh-CN/docs/Web/API/Element/getBoundingClientRect
-				//获取元素距离页面顶部的距离+额外的滚动距离
-				var height = element.getBoundingClientRect().top + window.scrollY;
-				var plusHeight = syncData.now_page_num_percent * element.clientHeight;
-				var toHeight = height + plusHeight;
-				// console.log("height=" + height, "plusHeight=" + plusHeight,"toHeight="+toHeight);
-				this.autoScrolling = true;
-				let _this = this;
-				var scrollInterval = setInterval(function () {
-					if (window.scrollY !== toHeight) {
-						console.log("height=" + height, "plusHeight=" + plusHeight, "toHeight=" + toHeight);
-						// 此处不能用window.scrollBy 在窗口中按指定的偏移量滚动文档。
-						// Window.scroll() 滚动窗口至文档中的特定位置。 https://developer.mozilla.org/zh-CN/docs/Web/API/Window/scroll
-						window.scroll(0, toHeight);
-					}
-					else {
-						clearInterval(scrollInterval);
-						_this.autoScrolling = false;
-					}
-					if (_this.userControlling) {
-						clearInterval(scrollInterval);
-					}
-				}, 1000);
-			}
-			//保存页数
-			this.saveLocalBookMark(this.nowPageNum);
-		},
-
-		loadBookMarkDialog() {
-			this.dialog.warning({
-				title: this.$t('found_read_history'),
-				content: this.$t('load_from_interrupt').replace("XX", this.nowPageNum.toString()),
-				positiveText: this.$t('from_interrupt'),
-				negativeText: this.$t('starting_from_beginning'),
-				onPositiveClick: () => {
-					this.startLoadPageNum = this.nowPageNum
-					if (this.startLoadPageNum + this.loadPageLimit <= this.book.page_count) {
-						this.endLoadPageNum = this.startLoadPageNum + this.loadPageLimit;
-					} else {
-						this.endLoadPageNum = this.book.page_count;
-					}
-					this.message.success(this.$t('successfully_loaded_reading_progress'));
-					this.loadPages();
-					this.nowLoading = false;
-				},
-				onNegativeClick: () => {
-					this.startLoadPageNum = 1;
-					this.nowPageNum = 1;
-					this.message.success(this.$t('starting_from_beginning_hint'));
-					this.loadPages();
-					this.nowLoading = false;
-				}
-			});
 		},
 
 		//刷新到底部的时候,改变images数据
 		loadPages() {
-			// console.log("startLoadPageNum:", this.startLoadPageNum)
-			// console.log("endLoadPageNum:", this.endLoadPageNum)
-			// console.dir(this.localImages)
-			//slice() 方法返回一个新的数组对象，这一对象是一个由 begin 和 end 决定的原数组的浅拷贝（包括 begin，不包括end）
-			this.localImages = this.book.pages.images.slice(this.startLoadPageNum - 1, this.endLoadPageNum);//javascript的接片不能直接用[a,b]，而是需要调用.slice()函数
+			if (this.InfiniteDropdownMode) {
+				//slice() 方法返回一个新的数组对象，这一对象是一个由 begin 和 end 决定的原数组的浅拷贝（包括 begin，不包括end）
+				this.localImages = this.book.pages.images.slice(0, this.lastPageNum);//javascript的接片不能直接用[a,b]，而是需要调用.slice()函数
+			} else {
+				let start = (this.paginationPage - 1) * this.LOAD_LIMIT;
+				let end = this.paginationPage * this.LOAD_LIMIT;
+				if (end > this.book.page_count) {
+					end = this.book.page_count;
+				}
+				this.localImages = this.book.pages.images.slice(start, end);
+			}
 		},
-		loadAllPage() {
-			this.startLoadPageNum = 1;
-			this.nowPageNum = 1;
-			this.loadPages()
-		},
+
 		//无限加载用,底部刷新
 		loadNextBlock() {
-			if (this.endLoadPageNum + this.loadPageLimit <= this.book.page_count) {
-				this.endLoadPageNum = this.endLoadPageNum + this.loadPageLimit;
-			} else {
-				this.endLoadPageNum = this.book.page_count;
+			if (!this.InfiniteDropdownMode) {
+				return;
 			}
-			// console.log("loadNextBlock");
+			if (this.book.page_count >= this.lastPageNum + this.LOAD_LIMIT) {
+				this.lastPageNum = this.lastPageNum + this.LOAD_LIMIT;
+			} else {
+				this.lastPageNum = this.book.page_count;
+			}
 			this.loadPages();
 		},
 		//监听子组件事件: https://v3.cn.vuejs.org/guide/component-basics.html#%E7%9B%91%E5%90%AC%E5%AD%90%E7%BB%84%E4%BB%B6%E4%BA%8B%E4%BB%B6
 		//滚动页面的时候刷新页数
 		refreshNowPageNum(n: number) {
-			// console.log("refreshNowPageNum:"+n);
-			// console.log("this.nowLoading:"+this.nowLoading);
+			if (!this.InfiniteDropdownMode) {
+				return;
+			}
 			if (this.nowLoading) {
 				return
 			}
 			this.nowPageNum = n;
-			//保存页数
-			this.saveLocalBookMark(this.nowPageNum);
 			this.loadPages();
 		},
 
-		//滑动页面、停止滚动的时候保存页数
-		saveLocalBookMark(value: number) {
-			if (this.saveNowPageNumFlag && (!this.nowLoading)) {
-				localStorage.setItem("nowPageNum" + this.book.id, value.toString());
-				// console.log("save nowPageNum:"+value);
-			}
-		},
-
-		//根据书籍UUID,设定当前页数,显示的时候需要远程书籍数据（this.book）,可能需要延迟执行
-		loadLocalBookMark() {
-			if (!this.saveNowPageNumFlag) {
-				return
-			}
-			let localValue = localStorage.getItem("nowPageNum" + this.book.id);
-			if (localValue === null) {
-				console.log("未发现本地书签");
-			}
-			let saveNum = Number(localValue);
-			if (isNaN(saveNum)) {
-				console.log("本地书签错误,localValue = " + localValue);
-			}
-			console.log("Local BookMark Value:" + localValue);
-			//至少读到第三页才开始提醒中途加载
-			if (saveNum >= 3) {
-				this.nowPageNum = saveNum;
-				this.startLoadPageNum = 1;
-				this.loadBookMarkDialog();
-				console.log("成功读取页数" + saveNum);
-				return
-			}
-			this.startLoadPageNum = 1;
-			this.loadNextBlock();
-		},
 		//页面排序相关
 		onResort(key: string) {
 			axios
@@ -878,7 +712,7 @@ export default defineComponent({
 				);
 		},
 
-		//返回“重新排序”选择菜单的文字提示
+		//“重新排序”选择菜单的文字提示
 		getSortHintText(key: string) {
 			switch (key) {
 				case "filename": return this.$t('sort_by_filename');
@@ -929,6 +763,7 @@ export default defineComponent({
 			// 储存配置
 			localStorage.setItem("nowPageNum" + this.book.id, this.nowPageNum.toString());
 			localStorage.setItem("SyncPageFlag", this.syncPageByWS ? "true" : "false");
+			localStorage.setItem("InfiniteDropdownMode", this.InfiniteDropdownMode ? "true" : "false");
 			localStorage.setItem("showHeaderFlag", this.showHeaderFlag ? "true" : "false");
 			localStorage.setItem("showPageNumFlag_ScrollMode", this.showPageNumFlag_ScrollMode ? "true" : "false");
 			localStorage.setItem("imageWidth_usePercentFlag", this.imageWidth_usePercentFlag ? "true" : "false");
@@ -943,21 +778,106 @@ export default defineComponent({
 			localStorage.setItem("marginOnScrollMode", this.marginOnScrollMode.toString());
 		},
 		setSyncPageByWS(value: boolean) {
-			console.log("value:" + value);
 			this.syncPageByWS = value;
 			localStorage.setItem("SyncPageFlag", value ? "true" : "false");
-			console.log(
-				"设置完毕: SyncPageFlag=" +
-				localStorage.getItem("SyncPageByWS")
-			);
 		},
+
+		//InfiniteDropdownMode
+		setInfiniteDropdownMode(value: boolean) {
+			this.InfiniteDropdownMode = value;
+			localStorage.setItem("InfiniteDropdownMode", value ? "true" : "false");
+			if (!value) {
+				// 重定向到新的 URL
+				window.location.href = this.addPageQueryParamAfterHash(this.paginationPage);
+				//刷新页面
+				window.location.reload();
+			} else {
+				// 重定向到新的 URL
+				window.location.href = this.removePageQueryParamFromHash();
+				//刷新页面
+				window.location.reload();
+			}
+		},
+		onPaginationPageChange(value: number) {
+			this.paginationPage = value;
+			// 重定向到新的 URL
+			let url = this.addPageQueryParamAfterHash(this.paginationPage);
+			console.log("onPaginationPageChange:" + url);
+			window.location.href = url;
+			this.loadPages();
+		},
+		addPageQueryParamAfterHash(page = 1) {
+			// 获取当前页面的 URL,并移除page参数
+			let currentUrl = this.removePageQueryParamFromHash();
+			// 检查 URL 中是否已经有哈希部分
+			const hashIndex = currentUrl.indexOf('#');
+			if (hashIndex !== -1) {
+				// 如果有哈希，检查是否已有查询字符串
+				const afterHash = currentUrl.substring(hashIndex + 1); // 获取哈希之后的部分
+				const hasQuery = afterHash.includes('?');
+				if (hasQuery) {
+					// 如果已有查询字符串，添加 &page=1
+					currentUrl = `${currentUrl}&page=${page}`;
+				} else {
+					// 如果没有查询字符串，添加 ?page=1
+					currentUrl = `${currentUrl}?page=${page}`;
+				}
+			} else {
+				// 如果没有哈希，正常添加 ?page=1
+				currentUrl = `${currentUrl}#?page=${page}`;
+			}
+			return currentUrl;
+		},
+		removePageQueryParamFromHash() {
+			// 获取当前页面的 URL
+			let currentUrl = window.location.href;
+			// 分割 URL 为基础部分和哈希部分
+			const hashIndex = currentUrl.indexOf('#');
+			if (hashIndex === -1) return currentUrl; // 如果没有哈希，直接返回原 URL
+			const baseUrl = currentUrl.substring(0, hashIndex);
+			let hashPart = currentUrl.substring(hashIndex + 1);
+			// 检查哈希部分是否有查询参数
+			const queryParamsIndex = hashPart.indexOf('?');
+			if (queryParamsIndex === -1) return currentUrl; // 如果没有查询参数，直接返回原 URL
+			// 解析哈希中的查询参数
+			let queryParamsString = hashPart.substring(queryParamsIndex + 1);
+			const queryParams = new URLSearchParams(queryParamsString);
+			// 移除特定的查询参数（这里是 'page'）
+			queryParams.delete('page');
+			// 重构哈希部分
+			const newQueryParamsString = queryParams.toString();
+			hashPart = hashPart.substring(0, queryParamsIndex) + (newQueryParamsString ? '?' + newQueryParamsString : '');
+			// 重构整个 URL
+			return baseUrl + '#' + hashPart;
+		},
+
+		getPageNumberFromUrl() {
+			let url = window.location.href;
+			// 找到 URL 中哈希(#)符号的位置
+			const hashIndex = url.indexOf('#');
+			// 如果没有找到哈希，说明没有查询参数
+			if (hashIndex === -1) return null;
+			// 获取哈希之后的部分
+			const hashPart = url.substring(hashIndex + 1);
+			// 查找查询参数部分开始的位置
+			const queryParamsIndex = hashPart.indexOf('?');
+			// 如果没有查询参数，返回null
+			if (queryParamsIndex === -1) return null;
+			// 获取查询参数字符串
+			const queryParamsString = hashPart.substring(queryParamsIndex + 1);
+			// 使用 URLSearchParams 来解析查询参数
+			const searchParams = new URLSearchParams(queryParamsString);
+			// 获取 'page' 查询参数的值
+			const page = searchParams.get('page');
+			// 如果 'page' 参数存在，将其转换为数字并返回
+			return page ? parseInt(page, 10) : null;
+		},
+
 		setShowHeaderChange(value: boolean) {
-			// console.log("value:" + value);
 			this.showHeaderFlag = value;
 			localStorage.setItem("showHeaderFlag", value ? "true" : "false");
 		},
 		setShowPageNumChange(value: boolean) {
-			// console.log("value:" + value);
 			this.showPageNumFlag_ScrollMode = value;
 			localStorage.setItem("showPageNumFlag_ScrollMode", value ? "true" : "false");
 		},
@@ -984,28 +904,13 @@ export default defineComponent({
 		},
 
 		setImageWidthUsePercentFlag(value: boolean) {
-			console.log("value:" + value);
 			this.imageWidth_usePercentFlag = value;
 			localStorage.setItem("imageWidth_usePercentFlag", value ? "true" : "false");
 		},
 
-		setSavePageNumFlag(value: boolean) {
-			console.log("value:" + value);
-			this.saveNowPageNumFlag = value;
-			localStorage.setItem("saveNowPageNumFlag", value ? "true" : "false");
-			console.log(
-				"cookie设置完毕: saveNowPageNumFlag=" +
-				localStorage.getItem("saveNowPageNumFlag")
-			);
-		},
-
 		setDebugModeFlag(value: boolean) {
-			console.log("value:" + value);
 			this.debugModeFlag = value;
 			localStorage.setItem("debugModeFlag", value ? "true" : "false");
-			console.log(
-				"cookie设置完毕: debugModeFlag=" + localStorage.getItem("debugModeFlag")
-			);
 		},
 
 		//可见区域变化的时候改变页面状态
@@ -1015,7 +920,6 @@ export default defineComponent({
 			this.clientHeight = document.documentElement.clientHeight
 			// var aspectRatio = window.innerWidth / window.innerHeight
 			this.aspectRatio = this.clientWidth / this.clientHeight
-			//console.log("OnReSize,aspectRatio=" + this.aspectRatio);
 			// 为了调试的时候方便,阈值是正方形
 			if (this.aspectRatio > (19 / 19)) {
 				this.isLandscapeMode = true
@@ -1042,17 +946,15 @@ export default defineComponent({
 		onMouseEnter() {
 			//进入控制模式是立刻出发
 			this.userControlling = true;
-			console.log("MouseEnter User Controlling =" + this.userControlling);
+			//console.log("MouseEnter User Controlling =" + this.userControlling);
 
 		},
 		onMouseLeave(e: any) {
-			// this.userControlling = false;
-			// console.log("MouseLeave User Controlling =" + this.userControlling);
 			//退出控制模式、延迟2秒执行
 			let _this = this;
 			setTimeout(function () {
 				_this.userControlling = true;
-				console.log("User Controlling=" + _this.userControlling);
+				//console.log("User Controlling=" + _this.userControlling);
 			}, 500);
 			//离开区域的时候,清空鼠标样式
 			e.currentTarget.style.cursor = '';
@@ -1087,10 +989,6 @@ export default defineComponent({
 			if (inSetArea) {
 				this.drawerActivate('right')
 			}
-			// console.log("window.innerWidth=", window.innerWidth, "window.innerHeight=", window.innerHeight);
-			// console.log("MinX=", MinX, "MaxX=", MaxX);
-			// console.log("MinY=", MinY, "MaxY=", MaxY);
-			// console.log("x=", e.x, "y=", e.y);
 		},
 
 		onMouseMove(e: any) {

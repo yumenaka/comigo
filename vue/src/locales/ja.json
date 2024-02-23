@@ -102,5 +102,7 @@
   "full_screen_hint": "フルスクリーンボタン",
   "epub_info": "ePub 情報",
   "pdf_hint_message": "Supports pure image PDFs. If loading is slow or errors occur, please try:",
-  "original_pdf_link": "PDFファイルのリンク"
+  "original_pdf_link": "PDFファイルのリンク",
+  "infinite_dropdown": "無限ドロップダウン",
+  "pagination_mode": "ページングモード"
 }
