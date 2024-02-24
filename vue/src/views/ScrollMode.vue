@@ -15,8 +15,9 @@
 		</div>
 
 		<!-- 分页条 -->
-		<n-pagination class="flex flex-row justify-center m-2 font-semibold text-lg"  v-if="!InfiniteDropdownMode" v-model:page="paginationPage"
-			:page-count="Math.ceil(book.page_count / 20)" :on-update:page="onPaginationPageChange" />
+		<n-pagination class="flex flex-row justify-center m-2 font-semibold text-lg" v-if="!InfiniteDropdownMode"
+			v-model:page="paginationPage" :page-count="Math.ceil(book.page_count / 20)"
+			:on-update:page="onPaginationPageChange" />
 
 		<!-- 渲染漫画的主体部分 -->
 		<div class="main_manga" v-for="(single_image, n) in localImages" :key="single_image.url"
@@ -34,12 +35,13 @@
 		<n-back-top class="bg-blue-200" :show="showBackTopFlag" type="info" :right="20" :bottom="20" />
 
 		<!-- 分页条 -->
-		<n-pagination class="flex flex-row justify-center m-2 font-semibold text-lg"  v-if="!InfiniteDropdownMode" v-model:page="paginationPage"
-			:page-count="Math.ceil(book.page_count / 20)" :on-update:page="onPaginationPageChange" />
+		<n-pagination class="flex flex-row justify-center m-2 font-semibold text-lg" v-if="!InfiniteDropdownMode"
+			v-model:page="paginationPage" :page-count="Math.ceil(book.page_count / 20)"
+			:on-update:page="onPaginationPageChange" />
 
 		<!-- 底部最下面的返回顶部按钮 -->
-		<button v-if="InfiniteDropdownMode" class="w-24 h-12 m-2 bg-blue-300 text-gray-900 hover:bg-blue-500 rounded" @click="scrollToTop(90);"
-			size="large">{{ $t('back-to-top') }}</button>
+		<button v-if="InfiniteDropdownMode" class="w-24 h-12 m-2 bg-blue-300 text-gray-900 hover:bg-blue-500 rounded"
+			@click="scrollToTop(90);" size="large">{{ $t('back-to-top') }}</button>
 
 		<QuickJumpBar class="self-center mt-2 mb-2" :nowBookID="book.id" :readMode="'scroll'"></QuickJumpBar>
 
@@ -179,8 +181,6 @@ import ImageScroll from "@/components/Image_in_Scroll.vue";
 import QuickJumpBar from "@/components/QuickJumpBar.vue";
 import { CSSProperties, defineComponent, reactive, ref } from 'vue'
 import axios from "axios";
-import { useThrottledRefHistory } from '@vueuse/core';
-
 
 export default defineComponent({
 	name: "ScrollMode",
@@ -428,8 +428,19 @@ export default defineComponent({
 			this.InfiniteDropdownMode = true;
 		} else if (localStorage.getItem("InfiniteDropdownMode") === "false") {
 			this.InfiniteDropdownMode = false;
-			let page = this.getPageNumberFromUrl();
-			this.paginationPage = page !== null ? page : 1;
+			//如果没有指定页数,则默认为1
+			this.paginationPage = 1;
+			//使用Vue Router的this.$route.query获取查询参数
+			if (this.$route.query.page !== null) {
+				// 如果链接上有多个同名query，route.query会返回一个数组
+				// 但是我不想这样玩，query预计为string，所以as一下防止报错
+				const pageAsNumber = parseInt(this.$route.query.page as string, 1);
+				if (!isNaN(pageAsNumber)) {
+					this.paginationPage = pageAsNumber;
+				}
+			}
+			//let page = this.getPageNumberFromUrl();
+			//this.paginationPage = page !== null ? page : 1;
 		}
 
 		//根据路由参数获取特定书籍
@@ -787,70 +798,24 @@ export default defineComponent({
 			this.InfiniteDropdownMode = value;
 			localStorage.setItem("InfiniteDropdownMode", value ? "true" : "false");
 			if (!value) {
-				// 重定向到新的 URL
-				window.location.href = this.addPageQueryParamAfterHash(this.paginationPage);
+				//  Vue Router, 重定向到新 URL
+				this.$router.push({ name: "ScrollMode", query: { page: this.paginationPage } });
 				//刷新页面
 				window.location.reload();
 			} else {
 				// 重定向到新的 URL
-				window.location.href = this.removePageQueryParamFromHash();
+				this.$router.push({ name: "ScrollMode" });
 				//刷新页面
 				window.location.reload();
 			}
 		},
 		onPaginationPageChange(value: number) {
 			this.paginationPage = value;
-			// 重定向到新的 URL
-			let url = this.addPageQueryParamAfterHash(this.paginationPage);
-			console.log("onPaginationPageChange:" + url);
-			window.location.href = url;
+			this.$router.push({ name: "ScrollMode", query: { page: value } });
 			this.loadPages();
 		},
-		addPageQueryParamAfterHash(page = 1) {
-			// 获取当前页面的 URL,并移除page参数
-			let currentUrl = this.removePageQueryParamFromHash();
-			// 检查 URL 中是否已经有哈希部分
-			const hashIndex = currentUrl.indexOf('#');
-			if (hashIndex !== -1) {
-				// 如果有哈希，检查是否已有查询字符串
-				const afterHash = currentUrl.substring(hashIndex + 1); // 获取哈希之后的部分
-				const hasQuery = afterHash.includes('?');
-				if (hasQuery) {
-					// 如果已有查询字符串，添加 &page=1
-					currentUrl = `${currentUrl}&page=${page}`;
-				} else {
-					// 如果没有查询字符串，添加 ?page=1
-					currentUrl = `${currentUrl}?page=${page}`;
-				}
-			} else {
-				// 如果没有哈希，正常添加 ?page=1
-				currentUrl = `${currentUrl}#?page=${page}`;
-			}
-			return currentUrl;
-		},
-		removePageQueryParamFromHash() {
-			// 获取当前页面的 URL
-			let currentUrl = window.location.href;
-			// 分割 URL 为基础部分和哈希部分
-			const hashIndex = currentUrl.indexOf('#');
-			if (hashIndex === -1) return currentUrl; // 如果没有哈希，直接返回原 URL
-			const baseUrl = currentUrl.substring(0, hashIndex);
-			let hashPart = currentUrl.substring(hashIndex + 1);
-			// 检查哈希部分是否有查询参数
-			const queryParamsIndex = hashPart.indexOf('?');
-			if (queryParamsIndex === -1) return currentUrl; // 如果没有查询参数，直接返回原 URL
-			// 解析哈希中的查询参数
-			let queryParamsString = hashPart.substring(queryParamsIndex + 1);
-			const queryParams = new URLSearchParams(queryParamsString);
-			// 移除特定的查询参数（这里是 'page'）
-			queryParams.delete('page');
-			// 重构哈希部分
-			const newQueryParamsString = queryParams.toString();
-			hashPart = hashPart.substring(0, queryParamsIndex) + (newQueryParamsString ? '?' + newQueryParamsString : '');
-			// 重构整个 URL
-			return baseUrl + '#' + hashPart;
-		},
 
+		//获取URL中的查询参数
 		getPageNumberFromUrl() {
 			let url = window.location.href;
 			// 找到 URL 中哈希(#)符号的位置
