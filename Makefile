@@ -1,7 +1,7 @@
 # Makefile for cross-compilation
 # Window icon Need：go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo
 
-# make all VERSION=v0.9.7-1
+# make all VERSION=v0.9.8
 # make md5SumThemAll VERSION=v0.9.8
 # mingw32-make all VERSION=v0.9.9
 # rm  resource.syso && make  Linux-armv8   VERSION=v0.9.6
