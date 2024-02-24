@@ -76,7 +76,8 @@
         }}</a>
       </span>
       <!-- 快速跳转 -->
-      <QuickJumpBar v-if="!inShelf" class="self-center" :nowBookID="bookID" :readMode="readMode"></QuickJumpBar>
+      <QuickJumpBar v-if="!inShelf" class="self-center" :nowBookID="bookID" :readMode="readMode"
+        :InfiniteDropdown="InfiniteDropdown"></QuickJumpBar>
     </div>
     <!-- slot，用来插入自定义组件。但是目前没需求 -->
     <!-- <slot></slot> -->
@@ -144,7 +145,7 @@ import axios from "axios";
 
 export default defineComponent({
   name: "ComigoHeader",
-  props: ['setDownLoadLink', 'headerTitle', 'bookID', 'showReturnIcon', 'showSettingsIcon', 'showReSortIcon', 'readMode', 'inShelf', 'depth'],
+  props: ['setDownLoadLink', 'headerTitle', 'bookID', 'showReturnIcon', 'showSettingsIcon', 'showReSortIcon', 'readMode', 'inShelf', 'depth', 'InfiniteDropdown'],
   emits: ['drawerActivate', 'onResort'],
   components: {
     NDropdown,//下拉菜单 https://www.naiveui.com/zh-CN/os-theme/components/dropdown

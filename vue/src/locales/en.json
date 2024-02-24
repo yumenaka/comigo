@@ -103,6 +103,8 @@
   "epub_info": "ePub Info",
   "pdf_hint_message": "純粋な画像PDFに対応しています。もし読み込みが遅かったり、エラーが発生した場合は、以下を試してみてください：",
   "original_pdf_link": "Original PDF link",
-  "infinite_dropdown": "Infinite Dropdown",
+  "to_infinite_dropdown_mode": "Infinite Dropdown",
+  "to_pagination_mode": "Pagination Mode",
+  "infinite_dropdown": "InfiniteDropdown",
   "pagination_mode": "Pagination Mode"
 }
