@@ -2,8 +2,8 @@
     <div class="BookShelf w-full h-screen flex flex-col">
         <Header class="flex-none h-12" in-shelf="true" :bookIsFolder="false" :headerTitle="bookShelfTitle"
             :showReSortIcon="true" :showReturnIcon="headerShowReturnIcon" :showSettingsIcon="true"
-            :bookID="$route.params.group_id" :depth="bookshelf[0].depth > 1 ? bookshelf[0].depth - 1 : 0" :setDownLoadLink="false"
-            @drawerActivate="drawerActivate" @onResort="onResort">
+            :bookID="$route.params.group_id" :depth="bookshelf[0].depth > 1 ? bookshelf[0].depth - 1 : 0"
+            :setDownLoadLink="false" @drawerActivate="drawerActivate" @onResort="onResort">
         </Header>
 
         <!-- Flex Grow 控制 flex 项目放大的功能类 https://www.tailwindcss.cn/docs/flex-grow -->
@@ -13,20 +13,21 @@
             <div class="flex flex-row flex-wrap justify-center min-h-48">
                 <BookCard v-for="(book_info, key) in bookshelf" :key="key" :book_info="book_info"
                     :bookCardMode="bookCardMode" :simplifyTitle="simplifyTitle" :readerMode="readerMode"
-                    :showTitle="bookCardShowTitleFlag">
+                    :InfiniteDropdown="InfiniteDropdown" :showTitle="bookCardShowTitleFlag">
                 </BookCard>
             </div>
         </div>
 
         <div v-if="bookCardMode == 'list'" class="bookshelf flex-grow flex flex-col justify-center items-center">
             <BookList v-for="(book_info, key) in bookshelf" :key="key" :book_info="book_info" :simplifyTitle="simplifyTitle"
-                :showTitle="bookCardShowTitleFlag" :readerMode="readerMode">
+                :showTitle="bookCardShowTitleFlag" :readerMode="readerMode" :InfiniteDropdown="InfiniteDropdown">
             </BookList>
         </div>
 
         <div v-if="bookCardMode == 'text'" class="bookshelf flex-grow">
             <div class="flex flex-row flex-wrap mt-4 mb-4 px-4 justify-left items-center min-w-4">
-                <BookText v-for="(book_info, key) in bookshelf" :key="key" :book_info="book_info" :readerMode="readerMode">
+                <BookText v-for="(book_info, key) in bookshelf" :key="key" :book_info="book_info" :readerMode="readerMode"
+                    :InfiniteDropdown="InfiniteDropdown">
                 </BookText>
             </div>
         </div>
@@ -55,6 +56,13 @@
                 <template #checked>{{ $t("scroll_mode") }}</template>
                 <template #unchecked>{{ $t("flip_mode") }}</template>
             </n-switch>
+
+            <!-- 开关：卷轴模式下，是无限下拉，还是分页加载 -->
+			<n-switch v-if="readerModeIsScroll" size="large" v-model:value="InfiniteDropdown" :rail-style="railStyle"
+				@update:value="setInfiniteDropdown">
+				<template #checked>{{ $t("infinite_dropdown") }}</template>
+				<template #unchecked>{{ $t("pagination_mode") }}</template>
+			</n-switch>
 
             <!-- 开关：显示书名 -->
             <n-switch size="large" v-model:value="bookCardShowTitleFlag" @update:value="setBookCardShowTitleFlag">
@@ -175,6 +183,7 @@ export default defineComponent({
             resort_hint_key: "filename", //书籍的排序方式。可以按照文件名、修改时间、文件大小排序（或反向排序）
             readerMode: "scroll",
             readerModeIsScroll: true,
+            InfiniteDropdown: true,//卷轴模式下，是否无限下拉
             bookShelfTitle: "Loading",
             headerShowReturnIcon: false,
             bookCardShowTitleFlag: true, // 书库中的书籍是否显示文字版标题
@@ -462,7 +471,12 @@ export default defineComponent({
             if (localStorage.getItem("ReaderMode") === "scroll") {
                 this.readerModeIsScroll = true;
                 this.readerMode = "scroll";
-                // localStorage.setItem("ReaderMode", "scroll");
+                //InfiniteDropdown
+                if (localStorage.getItem("InfiniteDropdown") === "true") {
+                    this.InfiniteDropdown = true;
+                } else if (localStorage.getItem("InfiniteDropdown") === "false") {
+                    this.InfiniteDropdown = false;
+                }
             }
             if (localStorage.getItem("ReaderMode") === "flip") {
                 this.readerModeIsScroll = false;
@@ -483,6 +497,11 @@ export default defineComponent({
             }
             localStorage.setItem("ReaderModeIsScroll", value ? "true" : "false");
         },
+        //InfiniteDropdown
+		setInfiniteDropdown(value: boolean) {
+			this.InfiniteDropdown = value;
+			localStorage.setItem("InfiniteDropdown", value ? "true" : "false");
+		},
         // 设置背景色的时候
         onBackgroundColorChange(value: string) {
             this.model.backgroundColor = value;

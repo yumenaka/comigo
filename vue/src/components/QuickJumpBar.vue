@@ -8,7 +8,7 @@
           clip-rule="evenodd" />
       </svg>
     </a>
-    
+
     <!-- 选择框 -->
     <select
       class="rounded mx-4 px-3 py-1.5 w-3/4 border border-gray-400 text-lg font-semibold text-center  disabled:opacity-50 disabled:pointer-events-none"
@@ -34,7 +34,7 @@ import axios from 'axios';
 
 export default defineComponent({
   name: 'QuickJumpBar',
-  props: ['nowBookID', 'readMode'],
+  props: ['nowBookID', 'readMode', 'InfiniteDropdown'],
   data() {
     return {
       SomeFlag: 'filename',
@@ -52,22 +52,30 @@ export default defineComponent({
   },
   computed: {
     prevLink() {
+      let query_string = "";
+      if (this.InfiniteDropdown === false) {
+        query_string = "?page=1"
+      }
       for (let i = 0; i < this.group_info_filter.BookInfos.length; i++) {
         if (this.group_info_filter.BookInfos[i].id === this.nowBookID) {
           if (i === 0) {
-            return `/#/${this.readMode}/${this.nowBookID}`;
+            return `/#/${this.readMode}/${this.nowBookID}` + query_string;
           }
-          return `/#/${this.readMode}/${this.group_info_filter.BookInfos[i - 1].id}`;
+          return `/#/${this.readMode}/${this.group_info_filter.BookInfos[i - 1].id}` + query_string;
         }
       }
     },
     nextLink() {
+      let query_string = "";
+      if (this.InfiniteDropdown === false) {
+        query_string = "?page=1"
+      }
       for (let i = 0; i < this.group_info_filter.BookInfos.length; i++) {
         if (this.group_info_filter.BookInfos[i].id === this.nowBookID) {
           if (i === this.group_info_filter.BookInfos.length - 1) {
-            return `/#/${this.readMode}/${this.nowBookID}`;
+            return `/#/${this.readMode}/${this.nowBookID}` + query_string;
           }
-          return `/#/${this.readMode}/${this.group_info_filter.BookInfos[i + 1].id}`;
+          return `/#/${this.readMode}/${this.group_info_filter.BookInfos[i + 1].id}` + query_string;
         }
       }
     },
@@ -78,8 +86,12 @@ export default defineComponent({
   },
   methods: {
     handleChange(event: Event) {
+      let query_string = "";
+      if (this.InfiniteDropdown === false) {
+        query_string = "?page=1"
+      }
       const target = event.target as HTMLInputElement;
-      location.href = `/\#/${this.readMode}/` + target.value;
+      location.href = `/\#/${this.readMode}/` + target.value+ query_string;
       location.reload();
     },
     async fetchQuickJumpInfo() {
@@ -94,9 +106,7 @@ export default defineComponent({
 });
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
 
 
 

@@ -13,7 +13,7 @@ import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "BookText",
-  props: ["book_info", "bookCardMode", "readerMode", "simplifyTitle"],
+  props: ["book_info", "bookCardMode", "readerMode", "simplifyTitle", "InfiniteDropdown"],
   components: {},
   setup() {
     return {};
@@ -32,7 +32,7 @@ export default defineComponent({
           return "📄";
         case "video":
           return "💽";
-        case ".zip"||".rar"||".cbr"||".cbz"||".tar"||".gz":
+        case ".zip" || ".rar" || ".cbr" || ".cbz" || ".tar" || ".gz":
           return "💼";
         default:
           return "❔";
@@ -102,8 +102,12 @@ export default defineComponent({
         return "/#/flip/" + bookID;
       }
       if (this.readerMode === "scroll") {
+        let query_string = "";
+        if (this.InfiniteDropdown === false) {
+          query_string = "?page=1"
+        }
         // 命名路由,并加上参数,让路由建立 url
-        return "/#/scroll/" + bookID;
+        return "/#/scroll/" + bookID + query_string;
       }
     },
   },

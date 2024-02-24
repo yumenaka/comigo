@@ -23,7 +23,7 @@ import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "BookCover",
-  props: ["book_info", "bookCardMode", "readerMode", "showTitle", "simplifyTitle"],
+  props: ["book_info", "bookCardMode", "readerMode", "showTitle", "simplifyTitle", "InfiniteDropdown"],
   components: {
   },
   setup() {
@@ -111,8 +111,12 @@ export default defineComponent({
         return "/#/flip/" + bookID;
       }
       if (this.readerMode === "scroll") {
+        let query_string = "";
+        if (this.InfiniteDropdown === false) {
+          query_string = "?page=1"
+        }
         // 命名路由,并加上参数,让路由建立 url
-        return "/#/scroll/" + bookID;
+        return "/#/scroll/" + bookID + query_string;
       }
     },
     // 回首页

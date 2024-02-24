@@ -2,22 +2,23 @@
 	<div id="ScrollMode" class="manga" @mouseenter="onMouseEnter" @mouseleave="onMouseLeave">
 		<Header :inShelf="false" :readMode="'scroll'" :setDownLoadLink="needDownloadLink()" :headerTitle="book.title"
 			:bookID="book.id" :depth="book.depth" :showReturnIcon="true" :showSettingsIcon="true"
-			v-bind:style="{ background: model.interfaceColor }" @drawerActivate="drawerActivate">
+			:InfiniteDropdown="InfiniteDropdown" v-bind:style="{ background: model.interfaceColor }"
+			@drawerActivate="drawerActivate">
 		</Header>
 
+		<!-- 分页条 -->
+		<n-pagination class="flex flex-row justify-center m-2 font-semibold text-lg" v-if="!InfiniteDropdown"
+			v-model:page="paginationPage" :page-count="Math.ceil(book.page_count / LOAD_LIMIT)"
+			:on-update:page="onPaginationPageChange" />
+
 		<!-- PDF格式的额外提示信息。-->
-		<div v-if="book.type === '.pdf'" class="pdf_hint w-full flex flex-col justify-center">
-			<div class="w-96 text-center font-bold  m-4 p-4  bg-slate-200 self-center rounded  shadow-2xl">
-				<div class="pb-1">{{ $t('pdf_hint_message') }}</div>
-				<a class="text-blue-700 underline " :href="'api/raw/' + book.id + '/' + encodeURIComponent(book.title)"
-					target="_blank">{{ $t('original_pdf_link') }} </a>
-			</div>
+		<div v-if="book.type === '.pdf' && ((!InfiniteDropdown && paginationPage === 1) || InfiniteDropdown)"
+			class="w-full text-center font-semibold  flex flex-row justify-center m-1 p-1  self-center rounded  shadow-2xl">
+			<div class="pb-1">{{ $t('pdf_hint_message') }}</div>
+			<a class="text-blue-700 underline " :href="'api/raw/' + book.id + '/' + encodeURIComponent(book.title)"
+				target="_blank">{{ $t('original_pdf_link') }} </a>
 		</div>
 
-		<!-- 分页条 -->
-		<n-pagination class="flex flex-row justify-center m-2 font-semibold text-lg" v-if="!InfiniteDropdownMode"
-			v-model:page="paginationPage" :page-count="Math.ceil(book.page_count / 20)"
-			:on-update:page="onPaginationPageChange" />
 
 		<!-- 渲染漫画的主体部分 -->
 		<div class="main_manga" v-for="(single_image, n) in localImages" :key="single_image.url"
@@ -35,15 +36,16 @@
 		<n-back-top class="bg-blue-200" :show="showBackTopFlag" type="info" :right="20" :bottom="20" />
 
 		<!-- 分页条 -->
-		<n-pagination class="flex flex-row justify-center m-2 font-semibold text-lg" v-if="!InfiniteDropdownMode"
-			v-model:page="paginationPage" :page-count="Math.ceil(book.page_count / 20)"
+		<n-pagination class="flex flex-row justify-center m-2 font-semibold text-lg" v-if="!InfiniteDropdown"
+			v-model:page="paginationPage" :page-count="Math.ceil(book.page_count / LOAD_LIMIT)"
 			:on-update:page="onPaginationPageChange" />
 
 		<!-- 底部最下面的返回顶部按钮 -->
-		<button v-if="InfiniteDropdownMode" class="w-24 h-12 m-2 bg-blue-300 text-gray-900 hover:bg-blue-500 rounded"
+		<button v-if="InfiniteDropdown" class="w-24 h-12 m-2 bg-blue-300 text-gray-900 hover:bg-blue-500 rounded"
 			@click="scrollToTop(90);" size="large">{{ $t('back-to-top') }}</button>
 
-		<QuickJumpBar class="self-center mt-2 mb-2" :nowBookID="book.id" :readMode="'scroll'"></QuickJumpBar>
+		<QuickJumpBar class="self-center mt-2 mb-2" :nowBookID="book.id" :readMode="'scroll'"
+			:InfiniteDropdown="InfiniteDropdown"></QuickJumpBar>
 
 		<Bottom v-bind:style="{ background: model.interfaceColor }"
 			:softVersion="$store.state.server_status.ServerName ? $store.state.server_status.ServerName : 'Comigo'">
@@ -55,16 +57,21 @@
 
 			<!-- 选择：切换页面模式 -->
 			<n-button @click="changeReaderModeToFlipMode">{{ $t('switch_to_flip_mode') }}</n-button>
+			<!-- 开关：卷轴模式下，是无限下拉，还是分页加载 -->
+			<n-switch size="large" v-model:value="InfiniteDropdown" :rail-style="railStyle"
+				@update:value="setInfiniteDropdown">
+				<template #checked>{{ $t("infinite_dropdown") }}</template>
+				<template #unchecked>{{ $t("pagination_mode") }}</template>
+			</n-switch>
 
 			<!-- 页面加载模式 -->
 			<n-select :placeholder='$t("re_sort_page")' @update:value="onResort" :options="options" />
 
-			<!-- 无限加载下拉，还是分页模式 -->
-			<n-switch size="large" v-model:value="InfiniteDropdownMode" :rail-style="railStyle"
-				@update:value="setInfiniteDropdownMode">
-				<template #checked>{{ $t("infinite_dropdown") }}</template>
-				<template #unchecked>{{ $t("pagination_mode") }}</template>
-			</n-switch>
+			<!-- 无限加载下拉，还是分页模式的切换按钮 -->
+			<!-- <n-button v-if="!InfiniteDropdown" @click="setInfiniteDropdown(true)">{{ $t('to_infinite_dropdown_mode')
+			}}</n-button>
+			<n-button v-if="InfiniteDropdown" @click="setInfiniteDropdown(false)">{{ $t('to_pagination_mode')
+			}}</n-button> -->
 
 			<!-- 空白行-->
 			<!-- <p> &nbsp;</p> -->
@@ -294,7 +301,7 @@ export default defineComponent({
 			nowPageNum: 1,//当前页数,从1开始,,不是数组下标,在pages.images数组当中用的时候需要-1
 			LOAD_LIMIT: 20,//一次载入的漫画张数，默认为20.
 			lastPageNum: 20,//载入漫画的最后一页，默认为20.
-			InfiniteDropdownMode: true,//是否是无限下拉模式
+			InfiniteDropdown: true,//卷轴模式下，是否无限下拉
 			localImages: [
 				{
 					filename: "",
@@ -423,24 +430,22 @@ export default defineComponent({
 			this.syncPageByWS = false;
 		}
 
-		//是否是无限下拉模式
-		if (localStorage.getItem("InfiniteDropdownMode") === "true") {
-			this.InfiniteDropdownMode = true;
-		} else if (localStorage.getItem("InfiniteDropdownMode") === "false") {
-			this.InfiniteDropdownMode = false;
+		this.InfiniteDropdown = true;
+		this.LOAD_LIMIT = 20;
+		// 使用Vue Router的this.$route.query获取查询参数
+		// 判断是否是无限下拉模式
+		if (this.$route.query.page !== null && this.$route.query.page !== undefined) {
+			this.InfiniteDropdown = false;
+			this.LOAD_LIMIT = 35;
 			//如果没有指定页数,则默认为1
 			this.paginationPage = 1;
-			//使用Vue Router的this.$route.query获取查询参数
-			if (this.$route.query.page !== null) {
-				// 如果链接上有多个同名query，route.query会返回一个数组
-				// 但是我不想这样玩，query预计为string，所以as一下防止报错
-				const pageAsNumber = parseInt(this.$route.query.page as string, 1);
-				if (!isNaN(pageAsNumber)) {
-					this.paginationPage = pageAsNumber;
-				}
+			// 如果链接上有多个同名query，route.query会返回一个数组
+			// 但是我不想这样玩，query预计为string，所以as一下防止报错
+			const pageAsNumber = parseInt(this.$route.query.page as string, 10);//转换为数字,10进制
+			if (!isNaN(pageAsNumber)) {
+				this.paginationPage = pageAsNumber;
+				//console.log("从URL获取到的页数:" + this.paginationPage);
 			}
-			//let page = this.getPageNumberFromUrl();
-			//this.paginationPage = page !== null ? page : 1;
 		}
 
 		//根据路由参数获取特定书籍
@@ -668,7 +673,7 @@ export default defineComponent({
 
 		//刷新到底部的时候,改变images数据
 		loadPages() {
-			if (this.InfiniteDropdownMode) {
+			if (this.InfiniteDropdown) {
 				//slice() 方法返回一个新的数组对象，这一对象是一个由 begin 和 end 决定的原数组的浅拷贝（包括 begin，不包括end）
 				this.localImages = this.book.pages.images.slice(0, this.lastPageNum);//javascript的接片不能直接用[a,b]，而是需要调用.slice()函数
 			} else {
@@ -683,7 +688,7 @@ export default defineComponent({
 
 		//无限加载用,底部刷新
 		loadNextBlock() {
-			if (!this.InfiniteDropdownMode) {
+			if (!this.InfiniteDropdown) {
 				return;
 			}
 			if (this.book.page_count >= this.lastPageNum + this.LOAD_LIMIT) {
@@ -696,7 +701,7 @@ export default defineComponent({
 		//监听子组件事件: https://v3.cn.vuejs.org/guide/component-basics.html#%E7%9B%91%E5%90%AC%E5%AD%90%E7%BB%84%E4%BB%B6%E4%BA%8B%E4%BB%B6
 		//滚动页面的时候刷新页数
 		refreshNowPageNum(n: number) {
-			if (!this.InfiniteDropdownMode) {
+			if (!this.InfiniteDropdown) {
 				return;
 			}
 			if (this.nowLoading) {
@@ -774,7 +779,7 @@ export default defineComponent({
 			// 储存配置
 			localStorage.setItem("nowPageNum" + this.book.id, this.nowPageNum.toString());
 			localStorage.setItem("SyncPageFlag", this.syncPageByWS ? "true" : "false");
-			localStorage.setItem("InfiniteDropdownMode", this.InfiniteDropdownMode ? "true" : "false");
+			localStorage.setItem("InfiniteDropdown", this.InfiniteDropdown ? "true" : "false");
 			localStorage.setItem("showHeaderFlag", this.showHeaderFlag ? "true" : "false");
 			localStorage.setItem("showPageNumFlag_ScrollMode", this.showPageNumFlag_ScrollMode ? "true" : "false");
 			localStorage.setItem("imageWidth_usePercentFlag", this.imageWidth_usePercentFlag ? "true" : "false");
@@ -793,20 +798,25 @@ export default defineComponent({
 			localStorage.setItem("SyncPageFlag", value ? "true" : "false");
 		},
 
-		//InfiniteDropdownMode
-		setInfiniteDropdownMode(value: boolean) {
-			this.InfiniteDropdownMode = value;
-			localStorage.setItem("InfiniteDropdownMode", value ? "true" : "false");
-			if (!value) {
+		//InfiniteDropdown
+		setInfiniteDropdown(value: boolean) {
+			this.InfiniteDropdown = value;
+			localStorage.setItem("InfiniteDropdown", value ? "true" : "false");
+			if (!this.InfiniteDropdown) {
+				this.paginationPage = 1;
+				this.LOAD_LIMIT = 35;
 				//  Vue Router, 重定向到新 URL
-				this.$router.push({ name: "ScrollMode", query: { page: this.paginationPage } });
-				//刷新页面
-				window.location.reload();
+				this.$router.push({ name: "ScrollMode", query: { page: this.paginationPage } }).then(() => {
+					//刷新页面
+					window.location.reload();
+				});
 			} else {
+				this.LOAD_LIMIT = 20;
 				// 重定向到新的 URL
-				this.$router.push({ name: "ScrollMode" });
-				//刷新页面
-				window.location.reload();
+				this.$router.push({ name: "ScrollMode" }).then(() => {
+					//刷新页面
+					window.location.reload();
+				});
 			}
 		},
 		onPaginationPageChange(value: number) {
@@ -814,30 +824,7 @@ export default defineComponent({
 			this.$router.push({ name: "ScrollMode", query: { page: value } });
 			this.loadPages();
 		},
-
-		//获取URL中的查询参数
-		getPageNumberFromUrl() {
-			let url = window.location.href;
-			// 找到 URL 中哈希(#)符号的位置
-			const hashIndex = url.indexOf('#');
-			// 如果没有找到哈希，说明没有查询参数
-			if (hashIndex === -1) return null;
-			// 获取哈希之后的部分
-			const hashPart = url.substring(hashIndex + 1);
-			// 查找查询参数部分开始的位置
-			const queryParamsIndex = hashPart.indexOf('?');
-			// 如果没有查询参数，返回null
-			if (queryParamsIndex === -1) return null;
-			// 获取查询参数字符串
-			const queryParamsString = hashPart.substring(queryParamsIndex + 1);
-			// 使用 URLSearchParams 来解析查询参数
-			const searchParams = new URLSearchParams(queryParamsString);
-			// 获取 'page' 查询参数的值
-			const page = searchParams.get('page');
-			// 如果 'page' 参数存在，将其转换为数字并返回
-			return page ? parseInt(page, 10) : null;
-		},
-
+		//设置是否显示顶部页头
 		setShowHeaderChange(value: boolean) {
 			this.showHeaderFlag = value;
 			localStorage.setItem("showHeaderFlag", value ? "true" : "false");
