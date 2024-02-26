@@ -47,9 +47,11 @@
 		<QuickJumpBar class="self-center mt-2 mb-2" :nowBookID="book.id" :readMode="'scroll'"
 			:InfiniteDropdown="InfiniteDropdown"></QuickJumpBar>
 
-		<Bottom v-bind:style="{ background: model.interfaceColor }"
-			:softVersion="$store.state.server_status.ServerName ? $store.state.server_status.ServerName : 'Comigo'">
-		</Bottom>
+		<!-- 底部页脚 -->
+		<Bottom v-bind:style="{ background: model.interfaceColor }" class="flex-none h-12" :ServerName="$store.state.server_status.ServerName
+            ? $store.state.server_status.ServerName
+            : 'Comigo'
+            "></Bottom>
 
 		<Drawer :initDrawerActive="drawerActive" :initDrawerPlacement="drawerPlacement"
 			@saveConfig="saveConfigToLocalStorage" @startSketch="startSketchMode" @closeDrawer="drawerDeactivate"
