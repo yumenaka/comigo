@@ -34,7 +34,7 @@ func waitRescanMessages() {
 					return
 				}
 			}
-		case "SomePath":
+		case "AnotherPath":
 			logger.Infof("收到重新扫描消息：%s", msg)
 			ReScanPath(msg, false)
 		default:
@@ -53,7 +53,7 @@ func ReScanUploadPath() {
 	if config.Config.UploadPath != "" {
 		uploadPath = config.Config.UploadPath
 	}
-	ReScanPath(uploadPath, false)
+	ReScanPath(uploadPath, true)
 }
 
 func ReScanPath(path string, reScanFile bool) {
