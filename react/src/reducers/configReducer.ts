@@ -69,7 +69,7 @@ export function configReducer(c: Config, action: Action) {
 export const defaultConfig: Config = {
     Port: 1234,
     Host: "",
-    StoresPath: [],
+    LocalStores: [],
     MaxScanDepth: 3,
     OpenBrowser: false,
     DisableLAN: false,

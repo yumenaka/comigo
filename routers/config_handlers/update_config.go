@@ -68,9 +68,9 @@ func openBrowserIfNeeded(oldConfig *types.ComigoConfig, newConfig *types.ComigoC
 
 // updateConfigIfNeeded 检查旧的和新的配置是否需要更新，并返回需要重新扫描和重新扫描文件的布尔值
 func updateConfigIfNeeded(oldConfig *types.ComigoConfig, newConfig *types.ComigoConfig) (needScan bool, reScanFile bool) {
-	if !reflect.DeepEqual(oldConfig.StoresPath, newConfig.StoresPath) {
+	if !reflect.DeepEqual(oldConfig.LocalStores, newConfig.LocalStores) {
 		needScan = true
-		oldConfig.StoresPath = newConfig.StoresPath
+		oldConfig.LocalStores = newConfig.LocalStores
 	}
 	if oldConfig.MaxScanDepth != newConfig.MaxScanDepth {
 		needScan = true
@@ -105,7 +105,7 @@ func updateConfigIfNeeded(oldConfig *types.ComigoConfig, newConfig *types.Comigo
 func performScanAndUpdateDBIfNeeded(newConfig *types.ComigoConfig, reScanFile bool) {
 	option := scan.NewScanOption(
 		reScanFile,
-		newConfig.StoresPath,
+		newConfig.LocalStores,
 		newConfig.MaxScanDepth,
 		newConfig.MinImageNum,
 		newConfig.TimeoutLimitForScan,

@@ -25,7 +25,7 @@ func GetConfigToml(c *gin.Context) {
 	tempConfig.LogFilePath = ""
 	config.Config.OpenBrowser = false
 	config.Config.EnableDatabase = true
-	tempConfig.StoresPath = []string{"C:\\test\\Comic", "D:\\some_path\\book", "/home/user/download"}
+	tempConfig.LocalStores = []string{"C:\\test\\Comic", "D:\\some_path\\book", "/home/user/download"}
 	tempConfig.Username = "comigo"
 	tempConfig.Password = ""
 	bytes, err := toml.Marshal(tempConfig)

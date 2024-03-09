@@ -401,7 +401,7 @@ export default defineComponent({
 			doublePageWidth_Percent: 95,
 			//横屏(Landscape)状态的漫画页宽度。px。
 			singlePageWidth_PX: 720,
-			doublePageWidth_PX: 1080,
+			doublePageWidth_PX: 720,
 			//可见范围宽高的具体值
 			clientWidth: 0,
 			clientHeight: 0,

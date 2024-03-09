@@ -192,10 +192,10 @@ function App() {
             ></BoolConfig>
 
             <ArrayConfig
-              label={t("StoresPath")}
-              fieldDescription={t("StoresPath_Description")}
-              name={"StoresPath"}
-              value={config.StoresPath}
+              label={t("LocalStores")}
+              fieldDescription={t("LocalStores_Description")}
+              name={"LocalStores"}
+              value={config.LocalStores}
               InterfaceColor={InterfaceColor}
               setStringArray={setStringArray}
               showDialog={showDialogFunc}

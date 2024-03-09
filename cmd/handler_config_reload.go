@@ -29,7 +29,7 @@ func handlerConfigReload(e fsnotify.Event) {
 	////3、扫描配置文件指定的书籍库
 	//option := scan.NewScanOption(
 	//	true,
-	//	config.Config.StoresPath,
+	//	config.Config.LocalStores,
 	//	config.Config.MaxScanDepth,
 	//	config.Config.MinImageNum,
 	//	config.Config.TimeoutLimitForScan,

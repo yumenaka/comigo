@@ -60,7 +60,7 @@ func ReScanPath(path string, reScanFile bool) {
 	//扫描上传目录的文件
 	option := scan.NewScanOption(
 		reScanFile,
-		config.Config.StoresPath,
+		config.Config.LocalStores,
 		config.Config.MaxScanDepth,
 		config.Config.MinImageNum,
 		config.Config.TimeoutLimitForScan,

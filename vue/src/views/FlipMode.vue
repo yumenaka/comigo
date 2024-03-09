@@ -23,21 +23,21 @@
         <div class="manga_area_img_div">
           <!-- 非自动拼合模式最简单,直接显示一张图 -->
           <img class="w-auto h-auto" v-bind:src="imageParametersString(book.pages.images[nowPageNum - 1].url)
-            " v-bind:alt="nowPageNum.toString()" />
+        " v-bind:alt="nowPageNum.toString()" />
 
           <!-- 简单拼合双页,不管单双页什么的 -->
           <img v-if="!autoDoublePageModeFlag &&
-            doublePageModeFlag &&
-            nowPageNum < book.page_count
-            " v-bind:src="imageParametersString(book.pages.images[nowPageNum].url)
-    " v-bind:alt="(nowPageNum + 1).toString()" />
+        doublePageModeFlag &&
+        nowPageNum < book.page_count
+        " v-bind:src="imageParametersString(book.pages.images[nowPageNum].url)
+        " v-bind:alt="(nowPageNum + 1).toString()" />
 
           <!-- 自动拼合模式当前页,如果开启自动拼合,右边可能显示拼合页 -->
           <img v-if="autoDoublePageModeFlag &&
-            nowPageNum < book.page_count &&
-            nowAndNextPageIsSingle()
-            " v-bind:src="imageParametersString(book.pages.images[nowPageNum].url)
-    " v-bind:alt="(nowPageNum + 1).toString()" />
+        nowPageNum < book.page_count &&
+        nowAndNextPageIsSingle()
+        " v-bind:src="imageParametersString(book.pages.images[nowPageNum].url)
+        " v-bind:alt="(nowPageNum + 1).toString()" />
         </div>
       </div>
     </div>
@@ -119,8 +119,8 @@
 
     <!-- 设置抽屉,一开始隐藏 -->
     <Drawer :initDrawerActive="drawerActive" :initDrawerPlacement="drawerPlacement" @saveConfig="saveConfigToLocal"
-      @startSketch="startSketchMode" @stopSketch="stopSketchMode" @closeDrawer="drawerDeactivate" :readerMode="readerMode"
-      :inBookShelf="false" :sketching="sketchModeFlag">
+      @startSketch="startSketchMode" @stopSketch="stopSketchMode" @closeDrawer="drawerDeactivate"
+      :readerMode="readerMode" :inBookShelf="false" :sketching="sketchModeFlag">
 
       <!-- 选择：切换页面模式 -->
       <n-button @click="changeReaderModeToScrollMode">{{
@@ -362,7 +362,7 @@ export default defineComponent({
     return {
       //自动隐藏工具条
       interval: 0,
-      hideToolbar: false,
+      hideToolbar: true,
       resort_hint_key: "resort",
       options: [
         {
