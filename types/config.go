@@ -32,7 +32,7 @@ func (c *ConfigStatus) SetConfigStatus() error {
 	c.Path.WorkingDirectory = ""
 	c.Path.HomeDirectory = ""
 	c.Path.ProgramDirectory = ""
-	logger.Info("Check Config Path\n")
+	logger.Info("Check Config ShareName\n")
 
 	// 可执行程序自身的文件路径
 	executablePath, err := os.Executable()
@@ -73,6 +73,10 @@ type RemoteStore struct {
 	Username string
 	// 远程书库的密码
 	Password string
+	// smb的共享名
+	ShareName string
+	// 二级路径
+	Path string
 }
 
 // ComigoConfig 服务器设置(config.toml)
@@ -101,8 +105,8 @@ type ComigoConfig struct {
 	Password               string        `json:"Password" comment:"启用登陆后，登录界面需要的密码。"`
 	Timeout                int           `json:"Timeout" comment:"启用登陆后，cookie过期的时间。单位为分钟。默认180分钟后过期。"`
 	EnableTLS              bool          `json:"EnableTLS" comment:"是否启用HTTPS协议。需要设置证书于key文件。"`
-	CertFile               string        `json:"CertFile" comment:"TLS/SSL 证书文件路径 (default: "~/.config/.comigo/cert.crt")"`
-	KeyFile                string        `json:"KeyFile" comment:"TLS/SSL key文件路径 (default: "~/.config/.comigo/key.key")"`
+	CertFile               string        `json:"CertFile" comment:"TLS/SSL 证书文件路径 (default: ~/.config/.comigo/cert.crt)"`
+	KeyFile                string        `json:"KeyFile" comment:"TLS/SSL key文件路径 (default: ~/.config/.comigo/key.key)"`
 	UseCache               bool          `json:"UseCache" comment:"开启本地图片缓存，可以加快二次读取，但会占用硬盘空间"`
 	CachePath              string        `json:"CachePath" comment:"本地图片缓存位置，默认系统临时文件夹"`
 	ClearCacheExit         bool          `json:"ClearCacheExit" comment:"退出程序的时候，清理web图片缓存"`

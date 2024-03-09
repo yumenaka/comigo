@@ -106,6 +106,7 @@ func performScanAndUpdateDBIfNeeded(newConfig *types.ComigoConfig, reScanFile bo
 	option := scan.NewScanOption(
 		reScanFile,
 		newConfig.LocalStores,
+		config.Config.RemoteStores,
 		newConfig.MaxScanDepth,
 		newConfig.MinImageNum,
 		newConfig.TimeoutLimitForScan,

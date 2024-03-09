@@ -61,6 +61,7 @@ func ReScanPath(path string, reScanFile bool) {
 	option := scan.NewScanOption(
 		reScanFile,
 		config.Config.LocalStores,
+		config.Config.RemoteStores,
 		config.Config.MaxScanDepth,
 		config.Config.MinImageNum,
 		config.Config.TimeoutLimitForScan,
@@ -72,7 +73,7 @@ func ReScanPath(path string, reScanFile bool) {
 		config.Config.ClearDatabaseWhenExit,
 		config.Config.Debug,
 	)
-	addList, err := scan.ScanAndGetBookList(path, option)
+	addList, err := scan.Local(path, option)
 	if err != nil {
 		logger.Infof(locale.GetString("scan_error")+"path:%s  %s", path, err)
 	} else {

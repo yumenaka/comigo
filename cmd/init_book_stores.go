@@ -38,6 +38,7 @@ func StartScan(args []string) {
 	option := scan.NewScanOption(
 		true,
 		config.Config.LocalStores,
+		config.Config.RemoteStores,
 		config.Config.MaxScanDepth,
 		config.Config.MinImageNum,
 		config.Config.TimeoutLimitForScan,
