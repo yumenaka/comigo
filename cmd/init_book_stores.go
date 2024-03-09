@@ -37,7 +37,7 @@ func StartScan(args []string) {
 	//3、扫描配置文件里面的书库路径
 	option := scan.NewScanOption(
 		true,
-		config.Config.StoresPath,
+		config.Config.LocalStores,
 		config.Config.MaxScanDepth,
 		config.Config.MinImageNum,
 		config.Config.TimeoutLimitForScan,

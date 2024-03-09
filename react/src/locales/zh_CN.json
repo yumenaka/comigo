@@ -1,7 +1,7 @@
 {
   "Port": "端口",
   "Host": "域名",
-  "StoresPath": "书库文件夹",
+  "LocalStores": "书库文件夹",
   "MaxScanDepth": "最大扫描深度",
   "OpenBrowser": "打开浏览器",
   "DisableLAN": "禁止局域网共享",
@@ -130,7 +130,7 @@
   "EnableLogin": "启用登陆",
   "ConfigSaveTo": "配置默认保存路径",
   "OpenBrowser_Description": "扫描完成后，是否同时打开浏览器。windows默认true，其他平台默认false。",
-  "StoresPath_Description": "书库文件夹，支持绝对目录与相对目录。相对目录以当前执行目录为基准",
+  "LocalStores_Description": "书库文件夹，支持绝对目录与相对目录。相对目录以当前执行目录为基准",
   "MaxScanDepth_Description": "最大扫描深度。超过深度的文件不会被扫描。当前执行目录为基准。",
   "MinImageNum_Description": "压缩包或文件夹内至少有几张图片，才算作书籍。",
   "TimeoutLimitForScan_Description": "扫描文件时，超过几秒钟，就放弃扫描这个文件，避免卡在过大文件上。",

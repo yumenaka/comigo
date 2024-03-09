@@ -25,7 +25,7 @@ import (
 
 type Option struct {
 	ReScanFile            bool     // 是否重新扫描文件
-	StoresPath            []string // 书库路径
+	LocalStores           []string // 书库路径
 	MaxScanDepth          int      // 扫描深度
 	MinImageNum           int      // 最小图片数量
 	TimeoutLimitForScan   int      // 扫描超时时间
@@ -54,7 +54,7 @@ func NewScanOption(
 ) Option {
 	return Option{
 		ReScanFile:            reScanFile,
-		StoresPath:            storesPath,
+		LocalStores:           storesPath,
 		MaxScanDepth:          maxScanDepth,
 		MinImageNum:           minImageNum,
 		TimeoutLimitForScan:   timeoutLimitForScan,
@@ -104,7 +104,7 @@ func (o *Option) IsSkipDir(path string) bool {
 func InitStore(scanConfig Option) error {
 	// 重置书籍列表
 	types.ResetBookMap()
-	for _, p := range scanConfig.StoresPath {
+	for _, p := range scanConfig.LocalStores {
 		addList, err := ScanAndGetBookList(p, scanConfig)
 		if err != nil {
 			logger.Infof(locale.GetString("scan_error")+" path:%s %s", p, err)

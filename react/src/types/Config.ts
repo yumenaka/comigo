@@ -3,7 +3,7 @@
 interface Config {
   Port: number;
   Host: string;
-  StoresPath: [];
+  LocalStores: [];
   MaxScanDepth: number;
   OpenBrowser: boolean;
   DisableLAN: boolean;
