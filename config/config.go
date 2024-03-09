@@ -2,15 +2,16 @@ package config
 
 import (
 	"fmt"
-	"github.com/mitchellh/go-homedir"
-	"github.com/pelletier/go-toml/v2"
-	"github.com/yumenaka/comi/logger"
-	"github.com/yumenaka/comi/util"
+	"github.com/joho/godotenv"
 	"net/http"
 	"os"
 	"path"
 
+	"github.com/mitchellh/go-homedir"
+	"github.com/pelletier/go-toml/v2"
+	"github.com/yumenaka/comi/logger"
 	"github.com/yumenaka/comi/types"
+	"github.com/yumenaka/comi/util"
 )
 
 var (
@@ -18,9 +19,19 @@ var (
 	Srv     *http.Server
 	Status  = types.ConfigStatus{}
 	Config  = types.ComigoConfig{
-		Port:                  1234,
-		Host:                  "DefaultHost",
-		LocalStores:           []string{},
+		Port:        1234,
+		Host:        "DefaultHost",
+		LocalStores: []string{},
+		RemoteStores: []types.RemoteStore{
+			{
+				Type:      "smb",
+				Host:      os.Getenv("SMB_HOST"),
+				Port:      445,
+				Username:  os.Getenv("SMB_USER"),
+				Password:  os.Getenv("SMB_PASS"),
+				ShareName: os.Getenv("SMB_PATH"),
+			},
+		},
 		SupportFileType:       []string{".zip", ".tar", ".rar", ".cbr", ".cbz", ".epub", ".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".tar.xz", ".txz", ".tar.lz4", ".tlz4", ".tar.sz", ".tsz", ".bz2", ".gz", ".lz4", ".sz", ".xz", ".mp4", ".webm", ".pdf", ".m4v", ".flv", ".avi", ".mp3", ".wav", ".wma", ".ogg"},
 		SupportMediaType:      []string{".jpg", ".jpeg", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".gif", ".apng", ".bmp", ".webp", ".ico", ".heic", ".heif", ".avif"},
 		ExcludePath:           []string{".comigo", ".idea", ".vscode", ".git", "node_modules", "flutter_ui", "$RECYCLE.BIN", "System Volume Information", ".cache"},
@@ -50,6 +61,19 @@ const (
 	WorkingDirectory = "WorkingDirectory"
 	ProgramDirectory = "ProgramDirectory"
 )
+
+func init() {
+	err := godotenv.Load()
+	if err != nil {
+		logger.Infof("Error loading .env file")
+	}
+	Config.RemoteStores[0].Host = os.Getenv("SMB_HOST")
+	Config.RemoteStores[0].Username = os.Getenv("SMB_USER")
+	Config.RemoteStores[0].Password = os.Getenv("SMB_PASS")
+	Config.RemoteStores[0].ShareName = os.Getenv("SMB_SHARE_NAME")
+	Config.RemoteStores[0].Path = os.Getenv("SMB_PATH")
+
+}
 
 // UpdateLocalConfig 如果存在本地配置，更新本地配置
 func UpdateLocalConfig() error {

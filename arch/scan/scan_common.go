@@ -8,7 +8,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -20,27 +19,28 @@ import (
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/logger"
 	"github.com/yumenaka/comi/types"
-	"github.com/yumenaka/comi/util"
 )
 
 type Option struct {
-	ReScanFile            bool     // 是否重新扫描文件
-	LocalStores           []string // 书库路径
-	MaxScanDepth          int      // 扫描深度
-	MinImageNum           int      // 最小图片数量
-	TimeoutLimitForScan   int      // 扫描超时时间
-	ExcludePath           []string // 排除路径
-	SupportMediaType      []string // 支持的媒体类型
-	SupportFileType       []string // 支持的文件类型
-	ZipFileTextEncoding   string   // 非UTF-8编码的ZIP文件，尝试用什么编码解析，默认GBK
-	EnableDatabase        bool     // 启用数据库
-	ClearDatabaseWhenExit bool     // 启用数据库时，扫描完成后，清除不存在的书籍
+	ReScanFile            bool                // 是否重新扫描文件
+	LocalStores           []string            // 本地书库路径
+	RemoteStores          []types.RemoteStore // 远程书库路径
+	MaxScanDepth          int                 // 扫描深度
+	MinImageNum           int                 // 最小图片数量
+	TimeoutLimitForScan   int                 // 扫描超时时间
+	ExcludePath           []string            // 排除路径
+	SupportMediaType      []string            // 支持的媒体类型
+	SupportFileType       []string            // 支持的文件类型
+	ZipFileTextEncoding   string              // 非UTF-8编码的ZIP文件，尝试用什么编码解析，默认GBK
+	EnableDatabase        bool                // 启用数据库
+	ClearDatabaseWhenExit bool                // 启用数据库时，扫描完成后，清除不存在的书籍
 	Debug                 bool
 }
 
 func NewScanOption(
 	reScanFile bool,
-	storesPath []string,
+	localPath []string,
+	remoteStores []types.RemoteStore,
 	maxScanDepth int,
 	minImageNum int,
 	timeoutLimitForScan int,
@@ -54,7 +54,8 @@ func NewScanOption(
 ) Option {
 	return Option{
 		ReScanFile:            reScanFile,
-		LocalStores:           storesPath,
+		LocalStores:           localPath,
+		RemoteStores:          remoteStores,
 		MaxScanDepth:          maxScanDepth,
 		MinImageNum:           minImageNum,
 		TimeoutLimitForScan:   timeoutLimitForScan,
@@ -104,13 +105,21 @@ func (o *Option) IsSkipDir(path string) bool {
 func InitStore(scanConfig Option) error {
 	// 重置书籍列表
 	types.ResetBookMap()
-	for _, p := range scanConfig.LocalStores {
-		addList, err := ScanAndGetBookList(p, scanConfig)
+	for _, localPath := range scanConfig.LocalStores {
+		addList, err := Local(localPath, scanConfig)
 		if err != nil {
-			logger.Infof(locale.GetString("scan_error")+" path:%s %s", p, err)
+			logger.Infof(locale.GetString("scan_error")+" path:%s %s", localPath, err)
 			continue
 		}
-		AddBooksToStore(addList, p, scanConfig.MinImageNum)
+		AddBooksToStore(addList, localPath, scanConfig.MinImageNum)
+	}
+	for _, server := range scanConfig.RemoteStores {
+		addList, err := Smb(scanConfig)
+		if err != nil {
+			logger.Infof(locale.GetString("scan_error")+" path:%s %s", server.ShareName, err)
+			continue
+		}
+		AddBooksToStore(addList, server.ShareName, scanConfig.MinImageNum)
 	}
 	return nil
 }
@@ -146,82 +155,6 @@ func AddBooksToStore(bookList []*types.Book, basePath string, MinImageNum int) {
 	if err := types.MainFolder.InitFolder(); err != nil {
 		logger.Infof("%s", err)
 	}
-}
-
-// ScanAndGetBookList 扫描路径，取得路径里的书籍
-func ScanAndGetBookList(storePath string, scanOption Option) (newBookList []*types.Book, err error) {
-	// 路径不存在的Error，不过目前并不会打印出来
-	if !util.PathExists(storePath) {
-		return nil, errors.New(locale.GetString("PATH_NOT_EXIST"))
-	}
-	storePathAbs, err := filepath.Abs(storePath)
-	if err != nil {
-		storePathAbs = storePath
-		logger.Infof("%s", err)
-	}
-	logger.Infof(locale.GetString("SCAN_START_HINT")+"%s", storePathAbs)
-	err = filepath.Walk(storePathAbs, func(walkPath string, fileInfo os.FileInfo, err error) error {
-		if !scanOption.ReScanFile {
-			for _, p := range types.GetArchiveBooks() {
-				AbsW, err := filepath.Abs(walkPath) // 取得绝对路径
-				if err != nil {
-					// 无法取得的情况下，用相对路径
-					AbsW = walkPath
-					logger.Info(err, AbsW)
-				}
-				if walkPath == p.FilePath || AbsW == p.FilePath {
-					//跳过已经在数据库里面的文件
-					logger.Infof(locale.GetString("FoundInDatabase")+"%s", walkPath)
-					return nil
-				}
-			}
-		}
-		// 路径深度
-		depth := strings.Count(walkPath, "/") - strings.Count(storePathAbs, "/")
-		if runtime.GOOS == "windows" {
-			depth = strings.Count(walkPath, "\\") - strings.Count(storePathAbs, "\\")
-		}
-		if depth > scanOption.MaxScanDepth {
-			logger.Infof(locale.GetString("ExceedsMaximumDepth")+" %d，base：%s scan: %s:", scanOption.MaxScanDepth, storePathAbs, walkPath)
-			return filepath.SkipDir // 当WalkFunc的返回值是filepath.SkipDir时，Walk将会跳过这个目录，照常执行下一个文件。
-		}
-		if scanOption.IsSkipDir(walkPath) {
-			logger.Infof(locale.GetString("SkipPath")+"%s", walkPath)
-			return filepath.SkipDir
-		}
-		if fileInfo == nil {
-			return err
-		}
-		// 如果不是文件夹
-		if !fileInfo.IsDir() {
-			if !scanOption.IsSupportArchiver(walkPath) {
-				return nil
-			}
-			// 得到书籍文件数据
-			getBook, err := scanFileGetBook(walkPath, storePathAbs, depth, scanOption)
-			if err != nil {
-				logger.Infof("%s", err)
-				return nil
-			}
-			newBookList = append(newBookList, getBook)
-		}
-		// 如果是文件夹
-		if fileInfo.IsDir() {
-			// 得到书籍文件数据
-			getBook, err := scanDirGetBook(walkPath, storePathAbs, depth, scanOption)
-			if err != nil {
-				logger.Infof("%s", err)
-				return nil
-			}
-			newBookList = append(newBookList, getBook)
-		}
-		return nil
-	})
-	// 所有可用书籍，包括压缩包与文件夹
-	if len(newBookList) > 0 {
-		logger.Infof(locale.GetString("FOUND_IN_PATH"), len(newBookList), storePathAbs)
-	}
-	return newBookList, err
 }
 
 func scanDirGetBook(dirPath string, storePath string, depth int, scanOption Option) (*types.Book, error) {
