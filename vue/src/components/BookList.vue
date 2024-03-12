@@ -1,5 +1,5 @@
 <template>
-  <a class="my-2 flex flex-row justify-between  w-11/12  max-w-2xl rounded bg-gray-100 shadow-xl hover:shadow-2xl ring-1 ring-gray-400 hover:ring hover:ring-blue-500"
+  <a class="mx-2 my-2 flex flex-row justify-between  w-[32rem] h-[15rem] rounded bg-gray-100 shadow-xl hover:shadow-2xl ring-1 ring-gray-400 hover:ring hover:ring-blue-500"
     :href="getBookURL()" :target="getTarget">
     <div
       class="relative mx-4 my-4 w-32 h-44 bg-cover bg-top bg-gray-200 rounded shadow-xl hover:shadow-2xl ring-1 ring-gray-400 hover:ring hover:ring-blue-500 "
@@ -7,9 +7,13 @@
     </div>
     <div class="w-2/3 flex flex-col my-2 top-0 p-4 border-blue-800 rounded-b">
       <div class="w-full my-1 text-xl text-left font-bold ">{{ book_info.title }}</div>
-      <div class="w-full my-1 text-xl text-left" v-if="book_info.author!==''">{{ $t('author', [book_info.author]) }}</div>
-      <div class="w-full my-1 text-xl text-left" v-if="!isBookGroup&&!isDirBook">{{ $t('filesize', [fileSizeString]) }}</div>
-      <div class="w-full my-1 text-xl text-left"  v-if="!isBookGroup">{{ $t('allpagenum', [book_info.page_count]) }}</div>
+      <div class="w-full my-1 text-xl text-left" v-if="book_info.author !== ''">{{ $t('author', [book_info.author]) }}
+      </div>
+      <div class="w-full my-1 text-xl text-left" v-if="!isBookGroup && !isDirBook">{{ $t('filesize', [fileSizeString])
+        }}
+      </div>
+      <div class="w-full my-1 text-xl text-left" v-if="!isBookGroup">{{ $t('allpagenum', [book_info.page_count]) }}
+      </div>
       <div class="w-full my-1 text-xl text-left" v-if="book_info.child_book_num > 0">{{ bookNumHint }}</div>
     </div>
   </a>
@@ -32,10 +36,10 @@ export default defineComponent({
   },
   computed: {
     isBookGroup() {
-      return this.book_info.type==='book_group'
+      return this.book_info.type === 'book_group'
     },
     isDirBook() {
-      return this.book_info.type==='dir'
+      return this.book_info.type === 'dir'
     },
     getTarget() {
       let bookType = this.book_info.type;
