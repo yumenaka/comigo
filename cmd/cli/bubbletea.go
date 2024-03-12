@@ -3,6 +3,8 @@ package main
 // 参考视频：
 // https://youtu.be/Gl31diSVP8M
 // go run bubbletea.go input.go
+// Go 每日一库之 bubbletea:
+// https://darjun.github.io/2021/06/11/godailylib/bubbletea/
 import (
 	"fmt"
 	"log"

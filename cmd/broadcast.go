@@ -76,7 +76,8 @@ func ReScanPath(path string, reScanFile bool) {
 	addList, err := scan.Local(path, option)
 	if err != nil {
 		logger.Infof(locale.GetString("scan_error")+"path:%s  %s", path, err)
-	} else {
-		scan.AddBooksToStore(addList, path, config.Config.MinImageNum)
+		return
 	}
+	//TODO：这里有BUG需要修：网页上传，upload文件夹看不到新文件（阅读界面-快速调跳转里面反而有）。应该是书架数据刷新逻辑写错了。
+	scan.AddBooksToStore(addList, path, config.Config.MinImageNum)
 }

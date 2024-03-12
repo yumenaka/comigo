@@ -18,16 +18,18 @@
             </div>
         </div>
 
-        <div v-if="bookCardMode == 'list'" class="bookshelf flex-grow flex flex-col justify-center items-center">
-            <BookList v-for="(book_info, key) in bookshelf" :key="key" :book_info="book_info" :simplifyTitle="simplifyTitle"
-                :showTitle="bookCardShowTitleFlag" :readerMode="readerMode" :InfiniteDropdown="InfiniteDropdown">
+        <div v-if="bookCardMode == 'list'"
+            class="bookshelf flex-grow flex flex-row flex-wrap justify-center items-center">
+            <BookList v-for="(book_info, key) in bookshelf" :key="key" :book_info="book_info"
+                :simplifyTitle="simplifyTitle" :showTitle="bookCardShowTitleFlag" :readerMode="readerMode"
+                :InfiniteDropdown="InfiniteDropdown">
             </BookList>
         </div>
 
         <div v-if="bookCardMode == 'text'" class="bookshelf flex-grow">
             <div class="flex flex-row flex-wrap mt-4 mb-4 px-4 justify-left items-center min-w-4">
-                <BookText v-for="(book_info, key) in bookshelf" :key="key" :book_info="book_info" :readerMode="readerMode"
-                    :InfiniteDropdown="InfiniteDropdown">
+                <BookText v-for="(book_info, key) in bookshelf" :key="key" :book_info="book_info"
+                    :readerMode="readerMode" :InfiniteDropdown="InfiniteDropdown">
                 </BookText>
             </div>
         </div>
@@ -40,8 +42,8 @@
             : 'Comigo'
             "></Bottom>
         <Drawer :initDrawerActive="drawerActive" :initDrawerPlacement="drawerPlacement" @saveConfig="saveConfigToLocal"
-            @startSketch="startSketchMode" @closeDrawer="drawerDeactivate" @setRM="OnSetReaderMode" :readerMode="readerMode"
-            :sketching="false" :inBookShelf="true">
+            @startSketch="startSketchMode" @closeDrawer="drawerDeactivate" @setRM="OnSetReaderMode"
+            :readerMode="readerMode" :sketching="false" :inBookShelf="true">
             <!-- 设置颜色 -->
             <span>{{ $t("setInterfaceColor") }}</span>
             <n-color-picker v-model:value="model.interfaceColor" :modes="['hex']" :show-alpha="false"
@@ -58,11 +60,11 @@
             </n-switch>
 
             <!-- 开关：卷轴模式下，是无限下拉，还是分页加载 -->
-			<n-switch v-if="readerModeIsScroll" size="large" v-model:value="InfiniteDropdown" :rail-style="railStyle"
-				@update:value="setInfiniteDropdown">
-				<template #checked>{{ $t("infinite_dropdown") }}</template>
-				<template #unchecked>{{ $t("pagination_mode") }}</template>
-			</n-switch>
+            <n-switch v-if="readerModeIsScroll" size="large" v-model:value="InfiniteDropdown" :rail-style="railStyle"
+                @update:value="setInfiniteDropdown">
+                <template #checked>{{ $t("infinite_dropdown") }}</template>
+                <template #unchecked>{{ $t("pagination_mode") }}</template>
+            </n-switch>
 
             <!-- 开关：显示书名 -->
             <n-switch size="large" v-model:value="bookCardShowTitleFlag" @update:value="setBookCardShowTitleFlag">
@@ -498,10 +500,10 @@ export default defineComponent({
             localStorage.setItem("ReaderModeIsScroll", value ? "true" : "false");
         },
         //InfiniteDropdown
-		setInfiniteDropdown(value: boolean) {
-			this.InfiniteDropdown = value;
-			localStorage.setItem("InfiniteDropdown", value ? "true" : "false");
-		},
+        setInfiniteDropdown(value: boolean) {
+            this.InfiniteDropdown = value;
+            localStorage.setItem("InfiniteDropdown", value ? "true" : "false");
+        },
         // 设置背景色的时候
         onBackgroundColorChange(value: string) {
             this.model.backgroundColor = value;
