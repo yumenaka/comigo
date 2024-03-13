@@ -26,7 +26,6 @@ func CountPagesOfPDF(pdfFileName string) (int, error) {
 		if r := recover(); r != nil {
 			logger.Infof("CountPagesOfPDF: invalid PDF: %v Error:%v", pdfFileName, r)
 			// 这里可以根据需要进行错误处理，比如返回特定的错误值给调用者
-
 		}
 	}()
 	// use default configuration for pdfcpu ("nil")
