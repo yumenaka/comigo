@@ -105,14 +105,14 @@ func InitStore(scanConfig Option) error {
 		}
 		AddBooksToStore(addList, localPath, scanConfig.MinImageNum)
 	}
-	//for _, server := range scanConfig.RemoteStores {
-	//	addList, err := Smb(scanConfig)
-	//	if err != nil {
-	//		logger.Infof(locale.GetString("smb scan_error")+" path:%s %s", server.ShareName, err)
-	//		continue
-	//	}
-	//	AddBooksToStore(addList, server.ShareName, scanConfig.MinImageNum)
-	//}
+	for _, server := range scanConfig.RemoteStores {
+		addList, err := Smb(scanConfig)
+		if err != nil {
+			logger.Infof("smb scan_error"+" path:%s %s", server.ShareName, err)
+			continue
+		}
+		AddBooksToStore(addList, server.ShareName, scanConfig.MinImageNum)
+	}
 	return nil
 }
 
