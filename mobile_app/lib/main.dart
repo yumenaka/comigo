@@ -1,4 +1,5 @@
 import 'package:comigo/pages/book_shelf.dart';
+import 'package:comigo/pages/scroll_mode.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
@@ -18,12 +19,13 @@ class ComigoApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     // https://github.com/rrousselGit/provider/blob/master/resources/translations/zh-CN/README.md#multiprovider
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => Setting()),
-        ChangeNotifierProvider(create: (_) => RemoteServer(defaultHost: "http://192.168.3.15:1234")),
+        ChangeNotifierProvider(
+            create: (_) =>
+                RemoteServer(defaultHost:  dotenv.env['DEFAULT_HOST']!)),
       ],
       child: MaterialApp(
         title: 'Comigo Demo Mobile',
@@ -33,9 +35,8 @@ class ComigoApp extends StatelessWidget {
         //路由表注册
         routes: <String, WidgetBuilder>{
           "/": (context) => const BookShelf(title: 'Comigo Mobile'),
-          "ScrollMode": (context) =>
-              const BookShelf(title: 'Comigo Mobile'),
-          "FlipMode": (context) => const BookShelf(title: 'Comigo Mobile'),
+          "ScrollMode": (context) => const ScrollMode(title: 'ScrollMode'),
+          "FlipMode": (context) => const ScrollMode(title: 'FlipMode'),
         },
         initialRoute: "/", //设定名为"/"的route为首页
       ),
