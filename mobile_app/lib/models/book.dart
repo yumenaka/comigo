@@ -2,13 +2,31 @@ import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'page_info.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 // 在Flutter中发起HTTP网络请求 https://doc.flutterchina.club/networking/
-Future<List<Book>> getBookData() async {
+Future<Book> getBook() async {
+  final dio = Dio();
+  final comigoHost = dotenv.env['DEFAULT_HOST']!;
+  var url = '$comigoHost/api/get_book?id=zczYxIW';
+  final response = await dio.get(url);
+  if (response.statusCode == 200) {
+    try {
+      final book = Book.fromJson(response.data);
+      return book;
+    } catch (e) {
+      debugPrint(e.toString());
+      rethrow;
+    }
+  } else {
+    throw Exception('Failed to load books');
+  }
+}
+
+Future<List<Book>> getBookList() async {
   final dio = Dio();
   final prefs = await SharedPreferences.getInstance();
-  final comigoHost =
-      prefs.getString('comigo_host') ?? "http://192.168.3.15:1234";
+  final comigoHost = dotenv.env['DEFAULT_HOST']!;
   var url = '$comigoHost/api/book_infos?depth=1&sort_by=name';
   final response = await dio.get(url);
   if (response.statusCode == 200) {
@@ -24,6 +42,10 @@ Future<List<Book>> getBookData() async {
     throw Exception('Failed to load books');
   }
 }
+
+
+
+
 
 class Book {
   String title;
