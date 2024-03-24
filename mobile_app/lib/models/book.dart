@@ -11,7 +11,16 @@ Future<Book> getBook() async {
   var url = '$comigoHost/api/get_book?id=zczYxIW';
   final response = await dio.get(url);
   if (response.statusCode == 200) {
-      return Book.fromJson(response.data);
+    try {
+      print(response.data); // 添加这行来调试查看数据结构
+      final data = response.data as Map<String, dynamic>;
+      var book = Book.fromJson(data);
+      print(book);
+      return book;
+    } catch (e) {
+      debugPrint(e.toString());
+      rethrow;
+    }
   } else {
     throw Exception('Failed to load books');
   }
@@ -59,14 +68,16 @@ class Book {
 // 命名构造函数的格式是ClassName.identifier
 // 普通构造函数是没有返回值，而factory构造函数需要一个返回值。
   factory Book.fromJson(Map<String, dynamic> json) {
+    // 解析pages字段
+    var pagesList = (json['pages']['images'] as List)
+        .map((i) => PageInfo.fromJson(i))
+        .toList();
     return Book(
       title: json['title'] as String,
       type: json['author'] as String,
       id: json['id'] as String,
       cover: json['cover'] != null ? PageInfo.fromJson(json['cover']) : null,
-      pages: json['pages'] != null
-          ? (json['pages'] as List).map((i) => PageInfo.fromJson(i)).toList()
-          : null,
+      pages: json['pages'] != null ? pagesList : null,
       pageCount: json['page_count'] ?? 0,
       childBookNum: json['child_book_num'] ?? 0,
     );

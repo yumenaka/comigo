@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../models/book.dart';
 import '../models/remote_server.dart';
 
@@ -21,12 +20,6 @@ class _ScrollModeState extends State<ScrollMode> {
   @override
   void initState() {
     super.initState();
-  }
-
-  /// 获取书籍
-  Future<Book> initBooks() async {
-    Future<Book>? book = getBook(); // 调用函数并初始化参数
-    return book.then((value) => value);
   }
 
   @override
