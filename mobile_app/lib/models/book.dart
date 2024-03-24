@@ -11,13 +11,7 @@ Future<Book> getBook() async {
   var url = '$comigoHost/api/get_book?id=zczYxIW';
   final response = await dio.get(url);
   if (response.statusCode == 200) {
-    try {
-      final book = Book.fromJson(response.data);
-      return book;
-    } catch (e) {
-      debugPrint(e.toString());
-      rethrow;
-    }
+      return Book.fromJson(response.data);
   } else {
     throw Exception('Failed to load books');
   }
@@ -43,10 +37,6 @@ Future<List<Book>> getBookList() async {
   }
 }
 
-
-
-
-
 class Book {
   String title;
   String id;
@@ -65,6 +55,9 @@ class Book {
       this.cover,
       this.pages});
 
+// Book.fromJson就是一个命名构造函数。可以使用该构造函数从Map中生成一个Student对象，有点像是java中的工厂方法。
+// 命名构造函数的格式是ClassName.identifier
+// 普通构造函数是没有返回值，而factory构造函数需要一个返回值。
   factory Book.fromJson(Map<String, dynamic> json) {
     return Book(
       title: json['title'] as String,
