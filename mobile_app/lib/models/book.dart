@@ -8,7 +8,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 Future<Book> getBook() async {
   final dio = Dio();
   final comigoHost = dotenv.env['DEFAULT_HOST']!;
-  var url = '$comigoHost/api/get_book?id=zczYxIW';
+  final fakeBookID = dotenv.env['FAKE_BOOK_ID']!;
+  var url = '$comigoHost/api/get_book?id=$fakeBookID';
   final response = await dio.get(url);
   if (response.statusCode == 200) {
     try {

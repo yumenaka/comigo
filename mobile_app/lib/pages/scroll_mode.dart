@@ -38,22 +38,17 @@ class _ScrollModeState extends State<ScrollMode> {
         // 请求结束
         if (snapshot.hasData) {
           debugPrint(snapshot.data!.title.toString());
-          return ListView.builder(
-            itemCount: snapshot.data!.pages!.length,
-            itemBuilder: (context, index) {
-              return Container(
-                color: Colors.white,
-                padding: const EdgeInsets.all(2.0),
-                margin: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 8.0),
-                child: ListTile(
-                  //snapshot.data!.pages!.length
-                    trailing: Image.network("${Provider.of<RemoteServer>(context).remoteHost}/${snapshot.data!.pages![index].url}"),
-                    onTap: () {
-                      debugPrint("remoteHost:${Provider.of<RemoteServer>(context, listen: false).remoteHost}");
-                    }
-                ),
-              );
-            },
+          return SingleChildScrollView(
+            child: Column(
+              children: List.generate(snapshot.data!.pages!.length, (index) {
+                return Container(
+                  color: Colors.white,
+                  padding: const EdgeInsets.all(2.0),
+                  // margin: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 8.0),
+                  child: Image.network("${Provider.of<RemoteServer>(context).remoteHost}/${snapshot.data!.pages![index].url}"),
+                );
+              }),
+            ),
           );
         } else if (snapshot.hasError) {
           return Text('${snapshot.error}');
