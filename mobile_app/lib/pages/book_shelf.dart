@@ -21,12 +21,6 @@ class _BookShelfState extends State<BookShelf> {
     super.initState();
   }
 
-  /// 获取书籍列表
-  Future<List<Book>> initBooks() async {
-    Future<List<Book>>? books = getBookList(); // 调用函数并初始化参数
-    return books.then((value) => value);
-  }
-
   @override
   Widget build(BuildContext context) {
     //  画面の高さを取得する
