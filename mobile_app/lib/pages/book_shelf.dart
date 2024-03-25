@@ -44,11 +44,6 @@ class _BookShelfState extends State<BookShelf> {
                 color: Colors.white,
                 padding: const EdgeInsets.all(2.0),
                 margin: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 8.0),
-              // 不能与背景色同时设置
-              //   decoration:  BoxDecoration(
-              //       borderRadius: const BorderRadius.all(Radius.circular(10.0)),
-              //       border: Border.all(width: 1, color: Colors.grey,),
-              // ),
                 child: ListTile(
                   title: Text(snapshot.data![index].title),
                   subtitle: Text(snapshot.data![index].id),
@@ -56,6 +51,7 @@ class _BookShelfState extends State<BookShelf> {
                   trailing: Image.network("${Provider.of<RemoteServer>(context).remoteHost}/${snapshot.data![index].cover?.url}"),
                   onTap: () {
                     debugPrint("remoteHost:${Provider.of<RemoteServer>(context, listen: false).remoteHost}");
+                    Navigator.pushNamed(context, "ScrollMode", arguments:{snapshot.data![index].title,snapshot.data![index].id});
                   }
                 ),
               );

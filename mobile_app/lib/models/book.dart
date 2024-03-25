@@ -5,10 +5,11 @@ import 'page_info.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 // 在Flutter中发起HTTP网络请求 https://doc.flutterchina.club/networking/
-Future<Book> getBook() async {
+Future<Book> getBook({required String bookID}) async {
   final dio = Dio();
   final comigoHost = dotenv.env['DEFAULT_HOST']!;
   final fakeBookID = dotenv.env['FAKE_BOOK_ID']!;
+  print('$comigoHost/api/get_book?id=$bookID');
   var url = '$comigoHost/api/get_book?id=$fakeBookID';
   final response = await dio.get(url);
   if (response.statusCode == 200) {
@@ -70,9 +71,14 @@ class Book {
 // 普通构造函数是没有返回值，而factory构造函数需要一个返回值。
   factory Book.fromJson(Map<String, dynamic> json) {
     // 解析pages字段
-    var pagesList = (json['pages']['images'] as List)
-        .map((i) => PageInfo.fromJson(i))
-        .toList();
+    List<PageInfo> pagesList;
+    if(json['pages'] != null){
+      pagesList = (json['pages']['images'] as List)
+          .map((i) => PageInfo.fromJson(i))
+          .toList();
+    }else{
+      pagesList = [];
+    }
     return Book(
       title: json['title'] as String,
       type: json['author'] as String,
