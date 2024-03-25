@@ -34,8 +34,8 @@ class ComigoApp extends StatelessWidget {
         theme: appTheme,
         //路由表注册
         routes: <String, WidgetBuilder>{
-          "/": (context) => const ScrollMode(title: 'Comigo Mobile'),
-          "ScrollMode": (context) => const ScrollMode(title: 'ScrollMode'),
+          "/": (context) => const BookShelf(title: 'Comigo Mobile'),
+          "ScrollMode": (context) => const ScrollMode(title: 'ScrollMode', bookID: '',),
           "FlipMode": (context) => const BookShelf(title: 'FlipMode'),
         },
         initialRoute: "/", //设定名为"/"的route为首页

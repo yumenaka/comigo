@@ -5,11 +5,12 @@ import '../models/remote_server.dart';
 
 // 这个Widget是Home页面的根部件。
 class ScrollMode extends StatefulWidget {
-  const ScrollMode({super.key, required this.title});
+  const ScrollMode({super.key, required this.title, required this.bookID});
   // 这个小部件是应用的主页。它是有状态的，意味着它有一个包含影响其外观的字段的 State 对象（在下面定义）。
   // 这个类是状态的配置。它保存了父级（在这种情况下是 App 小部件）提供的值（在这种情况下是标题），并由状态的 build 方法使用。
   // Widget 子类中的字段始终标记为 "final"。
   final String title;
+  final String bookID;
 
   @override
   State<ScrollMode> createState() => _ScrollModeState();
@@ -31,7 +32,7 @@ class _ScrollModeState extends State<ScrollMode> {
     // 异步UI更新（FutureBuilder、StreamBuilder）
     // https://book.flutterchina.club/chapter7/futurebuilder_and_streambuilder.html
     Widget booksWidget = FutureBuilder<Book>(
-      future: getBook(),
+      future: getBook(bookID: widget.bookID),
       initialData: null,
       // snapshot会包含当前异步任务的状态信息及结果信息
       builder: (context, snapshot) {
@@ -71,26 +72,6 @@ class _ScrollModeState extends State<ScrollMode> {
         centerTitle: true, //タイトルを中央に配置
       ),
       body: booksWidget,
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.store),
-            label: 'Store',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
-        selectedItemColor: Colors.amber[800],
-        onTap: (int index) {
-          debugPrint("index:$index");
-        },
-      ),
     );
   }
 }
