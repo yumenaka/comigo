@@ -8,9 +8,9 @@ tmp_dir = "tmp"
 
 [build]
 # Just plain old shell command. You could use `make` as well.
-cmd = "go build -o ./tmp/main ."
+cmd = "go build -o ./tmp/comigo ./comigo.go"
 # Binary file yields from `cmd`.
-bin = "tmp/main"
+bin = "tmp/comigo"
 # Customize binary, can setup environment variables when run your app.
 # full_bin = "COMI_DEBUG_MODE=true COMI_MIN_MEDIA_NUM=2 ./tmp/main test --max-depth=5"
 # Watch these filename extensions.
