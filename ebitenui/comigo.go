@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"image/color"
 	"log"
+	"strconv"
 
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"golang.org/x/image/font/gofont/goregular"
 
 	"github.com/ebitenui/ebitenui"
@@ -20,7 +21,7 @@ type game struct {
 
 func main() {
 	ebiten.SetWindowSize(900, 800)
-	ebiten.SetWindowTitle("Hello World")
+	ebiten.SetWindowTitle("Demo")
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 	// 为此 UI 创建根容器。
 	// 所有其他 UI 元素都必须添加到此容器中。
@@ -28,15 +29,19 @@ func main() {
 		widget.NewContainer(
 			// 根容器的布局设置。
 			widget.ContainerOpts.Layout(
-				// 使用 GridLayout 布局来排列子元素。
+				//GridLayout 网格布局模式，将小部件放置在网格中。
 				widget.NewGridLayout(
-					widget.GridLayoutOpts.Columns(1),
-					//使用 Stretch 参数来定义行的布局方式。
-					widget.GridLayoutOpts.Stretch([]bool{true}, []bool{false, true, false}),
-					// Padding defines how much space to put around the outside of the grid.
+					// 使用 Columns 参数来定义列的数量。
+					widget.GridLayoutOpts.Columns(4),
+					// 使用 ColumnStretch 和 RowStretch 参数来分别定义列和行的拉伸因子。
+					// 只支持布尔值，true表示拉伸，false表示不拉伸。
+					widget.GridLayoutOpts.Stretch([]bool{true, true, true, true}, []bool{true, false, true, false}),
+					// Padding 定义了网格块的外间距大小。
 					widget.GridLayoutOpts.Padding(widget.Insets{
 						Top:    30,
+						Left:   20,
 						Bottom: 20,
+						Right:  20,
 					}),
 				)))
 
@@ -54,13 +59,16 @@ func main() {
 		Size: 32,
 	})
 
-	// 这将创建一个文本小部件，上面写着“Hello World！”
-	helloWorldLabel := widget.NewText(
-		widget.TextOpts.Text("Hello World!", fontFace, color.White),
-	)
-
-	// 要显示文本小部件，我们必须将其添加到根容器中。
-	rootContainer.AddChild(helloWorldLabel)
+	for i := range 70 {
+		// 文本颜色。
+		rgba := color.RGBA{R: uint8((210 - 3*i) % 255), G: uint8((100 + 7*i) % 255), B: uint8((100 + i*i) % 255), A: 0xff}
+		// 创建一个文本小部件，上面写“World_i”
+		helloWorldLabel := widget.NewText(
+			widget.TextOpts.Text("World_"+strconv.Itoa(i)+" ", fontFace, rgba),
+		)
+		// 要显示文本小部件，将其添加到根容器中。
+		rootContainer.AddChild(helloWorldLabel)
+	}
 
 	game := game{
 		ui: eui,
