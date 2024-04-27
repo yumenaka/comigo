@@ -4,30 +4,37 @@
 #bash <(curl -s https://raw.githubusercontent.com/yumenaka/comi/master/get_comigo.sh)
 
 if command -v curl &> /dev/null; then
-    echo "check curl"
+    echo "curl found"
 else
-    echo "curl not found"
+    echo "curl not found, please install curl"
     exit 1
 fi
 
 if command -v tar &> /dev/null; then
     echo "check tar"
 else
-    echo "tar not found"
+    echo "tar not found, please install tar"
     exit 1
 fi
 
 # 最新版本tag
 latest_tag=$(curl --silent "https://api.github.com/repos/yumenaka/comi/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
 
+# 使用正则表达式提取基础版本号
+if [[ $latest_tag =~ ^v([0-9]+\.[0-9]+\.[0-9]+) ]]; then
+    Version=${BASH_REMATCH[1]}
+else
+    echo "Error: unable to parse version number"
+    exit 1
+fi
 # 根据操作系统和处理器架构，选择下载文件
 if [[ "$(uname -s)" == "Linux" ]]; then
   if [[ "$(uname -m)" == "x86_64" ]]; then
-    file_name="comi_${latest_tag}_Linux_x86_64.tar.gz" # x86 64位
+    file_name="comi_v${Version}_Linux_x86_64.tar.gz" # x86 64位
   elif [[ "$(uname -m)" == "armv7l" ]]; then
-    file_name="comi_${latest_tag}_Linux-armv7.tar.gz"  # ARM 32位
+    file_name="comi_v${Version}_Linux-armv7.tar.gz"  # ARM 32位
   elif [[ "$(uname -m)" == "arm64" || "$(uname -m)" == "aarch64" ]]; then
-    file_name="comi_${latest_tag}_Linux-armv8.tar.gz"   # ARM 64位
+    file_name="comi_v${Version}_Linux-armv8.tar.gz"   # ARM 64位
   else
     echo "Unsupported architecture: $(uname -m)"
     exit 1
@@ -46,15 +53,19 @@ else
   exit 1
 fi
 
+
 # 下载文件并解压
 url="https://github.com/yumenaka/comi/releases/download/${latest_tag}/${file_name}"
+echo "Downloading $url"
 curl -L -O $url
-tar xf $file_name
+tar xvf $file_name
 
 # 清理下载文件
+echo "Cleaning up $file_name"
 rm $file_name
 
 # 添加执行权限并移动到 bin 目录
+echo "Adding execute permission and moving to /usr/local/bin/"
 chmod +x comi
 sudo mv comi /usr/local/bin/
 
