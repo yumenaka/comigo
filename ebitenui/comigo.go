@@ -6,13 +6,12 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
-	"golang.org/x/image/font/gofont/goregular"
-
 	"github.com/ebitenui/ebitenui"
 	"github.com/ebitenui/ebitenui/widget"
 	"github.com/golang/freetype/truetype"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"golang.org/x/image/font/gofont/goregular"
 )
 
 type game struct {
@@ -23,6 +22,7 @@ func main() {
 	ebiten.SetWindowSize(900, 800)
 	ebiten.SetWindowTitle("Demo")
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
+
 	// 为此 UI 创建根容器。
 	// 所有其他 UI 元素都必须添加到此容器中。
 	rootContainer :=
@@ -61,7 +61,7 @@ func main() {
 
 	for i := range 70 {
 		// 文本颜色。
-		rgba := color.RGBA{R: uint8((210 - 3*i) % 255), G: uint8((100 + 7*i) % 255), B: uint8((100 + i*i) % 255), A: 0xff}
+		rgba := color.RGBA{R: uint8((250 - 3*i) % 255), G: uint8((150 + 7*i) % 255), B: uint8((70 + i*i) % 255), A: 0xff}
 		// 创建一个文本小部件，上面写“World_i”
 		helloWorldLabel := widget.NewText(
 			widget.TextOpts.Text("World_"+strconv.Itoa(i)+" ", fontFace, rgba),
@@ -73,8 +73,7 @@ func main() {
 	game := game{
 		ui: eui,
 	}
-
-	err = ebiten.RunGame(&game)
+	ebiten.RunGameWithOptions(&game, &ebiten.RunGameOptions{ScreenTransparent: true})
 	if err != nil {
 		log.Print(err)
 	}

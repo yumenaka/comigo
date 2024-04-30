@@ -7,7 +7,6 @@ import (
 	"sync"
 
 	"github.com/yumenaka/comi/logger"
-	"github.com/yumenaka/comi/util"
 )
 
 // Folder 本地总书库，扫描后生成。可以有多个子书库。
@@ -123,7 +122,7 @@ func (s *subFolder) AnalyzeFolder() error {
 				continue
 			}
 			depthBooksMap[depth-1] = append(depthBooksMap[depth-1], newBookGroup.BookInfo)
-			newBookGroup.Author, _ = util.GetAuthor(newBookGroup.Title)
+			newBookGroup.setAuthor()
 			//将这本书加到子书库的BookGroup表（Images.BookGroupMap）里面去
 			s.BookGroupMap.Store(newBookGroup.BookID, &newBookGroup.BookInfo)
 			//将这本书加到BookGroup总表（mapBookGroup）里面去

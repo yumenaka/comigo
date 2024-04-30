@@ -6,7 +6,7 @@
 # mingw32-make all VERSION=v0.9.9
 # rm  resource.syso && make  Linux-armv8   VERSION=v0.9.6
 # make Windows_i386  VERSION=v1.0.0
-# make Windows_x86_64  VERSION=v1.0.1
+# make Windows_x86_64
 
 # Windows：MSYS2 or mingw32 + find.exe make.exe zip.exe upx.exe ！！
 
@@ -20,7 +20,7 @@ unexport GOBIN
 
 MAIN_FILE_DIR := ./
 # -ldflags 指定编译参数。-s 去掉符号信息。 -w去掉调试信息。
-GOBUILD=CGO_ENABLED=0 go build -ldflags "-s -w -X $controllers.Version=$VERSION" 
+GOBUILD=CGO_ENABLED=0 go build -ldflags "-s -w -X config.Version=${VERSION} -X cmd.Version=${VERSION}"
 
 ifeq ($(OS), Darwin)
   MD5_UTIL = md5
