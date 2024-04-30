@@ -4,7 +4,7 @@ import (
 	"strings"
 )
 
-func GetAuthor(input string) (string, bool) {
+func GetAuthor(input string) string {
 	pairs := map[rune]rune{
 		'[': ']', //这里的中括号是半角的
 		'［': '］', //这里的中括号是全角的
@@ -26,7 +26,7 @@ func GetAuthor(input string) (string, bool) {
 		if strings.HasPrefix(input, string(open)) {
 			closeIndex := strings.IndexRune(input, closed)
 			if closeIndex != -1 {
-				return input[1:closeIndex], true
+				return input[1:closeIndex]
 			}
 		}
 	}
@@ -39,9 +39,9 @@ func GetAuthor(input string) (string, bool) {
 		if strings.HasPrefix(input, string(open)) {
 			closeIndex := strings.IndexRune(input, closed)
 			if closeIndex != -1 {
-				return input[1:closeIndex], true
+				return input[1:closeIndex]
 			}
 		}
 	}
-	return "", false
+	return ""
 }

@@ -3,8 +3,6 @@ package types
 import (
 	"sync"
 	"time"
-
-	"github.com/yumenaka/comi/util"
 )
 
 type BookGroup struct {
@@ -29,7 +27,7 @@ func NewBookGroup(filePath string, modified time.Time, fileSize int64, storePath
 	//FilePath，转换为绝对路径
 	group.setFilePath(filePath)
 	group.setTitle(filePath)
-	group.Author, _ = util.GetAuthor(group.Title)
+	group.setAuthor()
 	//设置属性：父文件夹
 	group.setParentFolder(filePath)
 	group.setBookID()

@@ -102,14 +102,8 @@ func NewBook(filePath string, modified time.Time, fileSize int64, storePath stri
 			BookStorePath: storePath,
 			Type:          bookType},
 	}
-	//设置属性：
-	//FilePath，转换为绝对路径
-	b.setFilePath(filePath)
-	b.setTitle(filePath)
-	b.Author, _ = util.GetAuthor(b.Title)
-	//设置属性：父文件夹
-	b.setParentFolder(filePath)
-	b.setBookID()
+	//方法链： https://colobu.com/gotips/005.html
+	b.setFilePath(filePath).setParentFolder(filePath).setTitle(filePath).setAuthor().setBookID()
 	return &b, nil
 }
 
@@ -372,7 +366,7 @@ func (b *Book) SortPagesByImageList(imageList []string) {
 }
 
 // setBookID  根据路径的MD5，生成书籍ID。初始化时调用。
-func (b *BookInfo) setBookID() {
+func (b *BookInfo) setBookID() *BookInfo {
 	//logger.Infof("文件绝对路径："+fileAbaPath, "路径的md5："+md5string(fileAbaPath))
 	fileAbaPath, err := filepath.Abs(b.FilePath)
 	if err != nil {
@@ -381,6 +375,7 @@ func (b *BookInfo) setBookID() {
 	tempStr := b.FilePath + strconv.Itoa(b.ChildBookNum) + strconv.Itoa(int(b.FileSize)) + string(b.Type) + b.ParentFolder + b.BookStorePath
 	b62 := base62.EncodeToString([]byte(md5string(md5string(tempStr))))
 	b.BookID = getShortBookID(b62, 7)
+	return b
 }
 func md5string(s string) string {
 	r := md5.Sum([]byte(s))

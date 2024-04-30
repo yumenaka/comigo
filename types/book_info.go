@@ -3,6 +3,7 @@ package types
 import (
 	"errors"
 	"github.com/yumenaka/comi/logger"
+	"github.com/yumenaka/comi/util"
 	"path/filepath"
 	"strings"
 	"time"
@@ -61,7 +62,7 @@ func NewBaseInfo(b *Book) *BookInfo {
 }
 
 // 初始化Book时，设置FilePath
-func (b *BookInfo) setFilePath(path string) {
+func (b *BookInfo) setFilePath(path string) *BookInfo {
 	fileAbaPath, err := filepath.Abs(path)
 	if err != nil {
 		//因为权限问题，无法取得绝对路径的情况下，用相对路径
@@ -70,9 +71,10 @@ func (b *BookInfo) setFilePath(path string) {
 	} else {
 		b.FilePath = fileAbaPath
 	}
+	return b
 }
 
-func (b *BookInfo) setParentFolder(filePath string) {
+func (b *BookInfo) setParentFolder(filePath string) *BookInfo {
 	//取得文件所在文件夹的路径
 	//如果类型是文件夹，同时最后一个字符是路径分隔符的话，就多取一次dir，移除多余的Unix路径分隔符或windows分隔符
 	if b.Type == TypeDir {
@@ -92,9 +94,15 @@ func (b *BookInfo) setParentFolder(filePath string) {
 		p = strings.ReplaceAll(p, "/", "")
 		b.ParentFolder = p
 	}
+	return b
 }
 
-func (b *BookInfo) setTitle(filePath string) {
+func (b *BookInfo) setAuthor() *BookInfo {
+	b.Author = util.GetAuthor(b.Title)
+	return b
+}
+
+func (b *BookInfo) setTitle(filePath string) *BookInfo {
 	b.Title = filePath
 	//设置属性：书籍名，取文件后缀(可能为 .zip .rar .pdf .mp4等等)。
 	if b.Type != TypeBooksGroup { //不是书籍组(book_group)。
@@ -110,6 +118,7 @@ func (b *BookInfo) setTitle(filePath string) {
 			b.Title = filename
 		}
 	}
+	return b
 }
 
 func GetBookInfoListByDepth(depth int, sortBy string) (*BookInfoList, error) {
