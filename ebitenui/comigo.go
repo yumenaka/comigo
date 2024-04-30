@@ -22,6 +22,8 @@ func main() {
 	ebiten.SetWindowSize(900, 800)
 	ebiten.SetWindowTitle("Demo")
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
+	// SetWindowDecorated 设置窗口是否有边框和标题栏。
+	ebiten.SetWindowDecorated(true)
 
 	// 为此 UI 创建根容器。
 	// 所有其他 UI 元素都必须添加到此容器中。
@@ -73,7 +75,7 @@ func main() {
 	game := game{
 		ui: eui,
 	}
-	ebiten.RunGameWithOptions(&game, &ebiten.RunGameOptions{ScreenTransparent: true})
+	err = ebiten.RunGameWithOptions(&game, &ebiten.RunGameOptions{ScreenTransparent: true})
 	if err != nil {
 		log.Print(err)
 	}

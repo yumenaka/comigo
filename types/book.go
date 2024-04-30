@@ -14,26 +14,24 @@ import (
 	"time"
 
 	"github.com/cheggaaa/pb/v3"
-	"github.com/jxskiss/base62"
 	"github.com/xxjwxc/gowp/workpool"
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/logger"
 	"github.com/yumenaka/comi/util"
 )
 
-//https://wnanbei.github.io/post/go-%E5%B9%B6%E5%8F%91%E5%AE%89%E5%85%A8%E7%9A%84-sync.map/
-//sync.Map 是标准库 sync 中实现的并发安全的 map。
+// https://wnanbei.github.io/post/go-%E5%B9%B6%E5%8F%91%E5%AE%89%E5%85%A8%E7%9A%84-sync.map/
+// sync.Map 是标准库 sync 中实现的并发安全的 map。
 //
-//操作 	            普通map 	             sync.Map
-//map获取某个key 	  map[1] 	            sync.Load(1)
-//map添加元素 	      map[1] = 10 	        sync.Store(1, 10)
-//map删除一个key 	  delete(map, 1) 	    sync.Delete(1)
-//遍历map 	          for…range 	        sync.Range()
+// 操作 	            普通map 	             sync.Map
+// map获取某个key 	  map[1] 	            sync.Load(1)
+// map添加元素 	      map[1] = 10 	        sync.Store(1, 10)
+// map删除一个key 	  delete(map, 1) 	    sync.Delete(1)
+// 遍历map 	          for…range 	        sync.Range()
 //
-//sync.Map 两个特有的函数:
-//LoadOrStore - sync.Map 存在就返回，不存在就插入
-//LoadAndDelete - sync.Map 获取某个 key，如果存在的话，同时删除这个 key
-
+// sync.Map 两个特有的函数:
+// LoadOrStore - sync.Map 存在就返回，不存在就插入
+// LoadAndDelete - sync.Map 获取某个 key，如果存在的话，同时删除这个 key
 var (
 	mapBooks     sync.Map //实际存在的书，通过扫描生成 原本是 map[string]*Book 但是为了并发安全，改成sync.Map
 	mapBookGroup sync.Map //通过分析路径与深度生成的书组。不备份，也不存储到数据库。key是BookID
@@ -66,7 +64,6 @@ func CheckBookExist(filePath string, bookType SupportFileType, storePath string)
 		return exit
 	}
 	//实际存在的书，通过扫描生成
-
 	mapBooks.Range(func(_, value interface{}) bool {
 		//id := key.(string)
 		realBook := value.(*Book)
@@ -103,7 +100,7 @@ func NewBook(filePath string, modified time.Time, fileSize int64, storePath stri
 			Type:          bookType},
 	}
 	//方法链： https://colobu.com/gotips/005.html
-	b.setFilePath(filePath).setParentFolder(filePath).setTitle(filePath).setAuthor().setBookID()
+	b.setFilePath(filePath).setParentFolder(filePath).setTitle(filePath).setAuthor().initBookID()
 	return &b, nil
 }
 
@@ -113,7 +110,7 @@ func (b *Book) setPageNum() {
 }
 
 // 初始化Book时， 设置封面信息
-func (b *Book) setClover() {
+func (b *Book) initClover() {
 	if len(b.Pages.Images) >= 1 {
 		b.Cover = b.Pages.Images[0]
 	}
@@ -325,7 +322,7 @@ func (b *Book) SortPages(s string) {
 		b.Pages.SortBy = s
 		sort.Sort(b.Pages)
 	}
-	b.setClover() //重新排序后重新设置封面
+	b.initClover() //重新排序后重新设置封面
 }
 
 // SortPagesByImageList 根据一个既定的文件列表，重新对页面排序。用于epub文件。
@@ -362,21 +359,9 @@ func (b *Book) SortPagesByImageList(imageList []string) {
 		}
 	}
 	b.Pages.Images = reSortList
-	b.setClover() //重新排序后重新设置封面
+	b.initClover() //重新排序后重新设置封面
 }
 
-// setBookID  根据路径的MD5，生成书籍ID。初始化时调用。
-func (b *BookInfo) setBookID() *BookInfo {
-	//logger.Infof("文件绝对路径："+fileAbaPath, "路径的md5："+md5string(fileAbaPath))
-	fileAbaPath, err := filepath.Abs(b.FilePath)
-	if err != nil {
-		logger.Info(err, fileAbaPath)
-	}
-	tempStr := b.FilePath + strconv.Itoa(b.ChildBookNum) + strconv.Itoa(int(b.FileSize)) + string(b.Type) + b.ParentFolder + b.BookStorePath
-	b62 := base62.EncodeToString([]byte(md5string(md5string(tempStr))))
-	b.BookID = getShortBookID(b62, 7)
-	return b
-}
 func md5string(s string) string {
 	r := md5.Sum([]byte(s))
 	return hex.EncodeToString(r[:])
@@ -422,8 +407,8 @@ func getShortBookID(fullID string, minLength int) string {
 func (b *Book) GetBookID() string {
 	//防止未初始化，最好不要用到
 	if b.BookID == "" {
-		logger.Infof("%s", "BookID未初始化，一定是哪里写错了")
-		b.setBookID()
+		logger.Infof("%s", "BookID未初始化，估计是哪里写错了")
+		b.initBookID()
 	}
 	return b.BookID
 }
@@ -434,7 +419,7 @@ func (b *Book) GetAuthor() string {
 }
 
 func (b *Book) GetPageCount() int {
-	b.setClover()
+	b.initClover()
 	if !b.InitComplete {
 		//设置页数
 		b.setPageNum()

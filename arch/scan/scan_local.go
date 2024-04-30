@@ -168,7 +168,7 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 		logger.Infof(locale.GetString("SCAN_PDF")+"%s: %d", filePath, pageCount)
 		newBook.PageCount = pageCount
 		newBook.InitComplete = true
-		newBook.Cover = types.ImageInfo{RealImageFilePATH: "", FileSize: FileInfo.Size(), ModeTime: FileInfo.ModTime(), NameInArchive: "", Url: "/images/pdf.png"}
+		newBook.SetClover(types.ImageInfo{RealImageFilePATH: "", FileSize: FileInfo.Size(), ModeTime: FileInfo.ModTime(), NameInArchive: "", Url: "/images/pdf.png"})
 		for i := 1; i <= pageCount; i++ {
 			TempURL := "api/get_file?id=" + newBook.BookID + "&filename=" + strconv.Itoa(i) + ".jpg"
 			newBook.Pages.Images = append(newBook.Pages.Images, types.ImageInfo{RealImageFilePATH: "", FileSize: FileInfo.Size(), ModeTime: FileInfo.ModTime(), NameInArchive: strconv.Itoa(i), Url: TempURL})
@@ -177,15 +177,15 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 	case types.TypeVideo:
 		newBook.PageCount = 1
 		newBook.InitComplete = true
-		newBook.Cover = types.ImageInfo{NameInArchive: "video.png", Url: "images/video.png"}
+		newBook.SetClover(types.ImageInfo{NameInArchive: "video.png", Url: "images/video.png"})
 	case types.TypeAudio:
 		newBook.PageCount = 1
 		newBook.InitComplete = true
-		newBook.Cover = types.ImageInfo{NameInArchive: "audio.png", Url: "images/audio.png"}
+		newBook.SetClover(types.ImageInfo{NameInArchive: "audio.png", Url: "images/audio.png"})
 	case types.TypeUnknownFile:
 		newBook.PageCount = 1
 		newBook.InitComplete = true
-		newBook.Cover = types.ImageInfo{NameInArchive: "unknown.png", Url: "images/unknown.png"}
+		newBook.SetClover(types.ImageInfo{NameInArchive: "unknown.png", Url: "images/unknown.png"})
 	// 其他类型的压缩文件或文件夹
 	default:
 		// archiver.FileSystem可以配合ctx了，加个默认超时时间

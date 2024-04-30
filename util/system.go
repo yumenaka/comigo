@@ -1,6 +1,7 @@
 package util
 
 import (
+	"fmt"
 	"log"
 	"net"
 	"os"
@@ -14,6 +15,14 @@ import (
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/logger"
 )
+
+// TrackTIme 计算耗时
+// 使用时只需要写一行：defer util.TrackTIme(time.Now())
+func TrackTIme(pre time.Time) time.Duration {
+	elapsed := time.Since(pre)
+	fmt.Print("耗时：", elapsed, "\n")
+	return elapsed
+}
 
 // CheckPort 检测端口是否可用
 func CheckPort(port int) bool {
