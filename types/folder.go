@@ -94,7 +94,7 @@ func (s *subFolder) AnalyzeFolder() error {
 			for i, bookInList := range sameParentBookList {
 				//顺便设置一下封面，只设置一次
 				if i == 0 {
-					newBookGroup.Cover = bookInList.Cover //
+					newBookGroup.SetClover(bookInList.Cover)
 				}
 				newBookGroup.ChildBook.Store(bookInList.BookID, &sameParentBookList[i])
 			}

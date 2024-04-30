@@ -202,7 +202,7 @@ func GetBookFromDatabase(filepath string) (*types.Book, error) {
 	}
 	//设置封面
 	if len(b.Pages.Images) > 0 {
-		b.Cover = b.Pages.Images[0]
+		b.SetClover(b.Pages.Images[0])
 	}
 	if err != nil {
 		logger.Infof("%s", err)
@@ -273,18 +273,18 @@ func GetBooksFromDatabase() (list []*types.Book, err error) {
 		}
 		//设置封面
 		if len(b.Pages.Images) > 0 {
-			b.Cover = b.Pages.Images[0]
+			b.SetClover(b.Pages.Images[0])
 		}
 		//硬写一个封面
 		switch b.Type {
 		case types.TypePDF:
-			b.Cover = types.ImageInfo{NameInArchive: "pdf.png", Url: "/images/pdf.png"}
+			b.SetClover(types.ImageInfo{NameInArchive: "pdf.png", Url: "/images/pdf.png"})
 		case types.TypeVideo:
-			b.Cover = types.ImageInfo{NameInArchive: "video.png", Url: "/images/video.png"}
+			b.SetClover(types.ImageInfo{NameInArchive: "video.png", Url: "/images/video.png"})
 		case types.TypeAudio:
-			b.Cover = types.ImageInfo{NameInArchive: "audio.png", Url: "/images/audio.png"}
+			b.SetClover(types.ImageInfo{NameInArchive: "audio.png", Url: "/images/audio.png"})
 		case types.TypeUnknownFile:
-			b.Cover = types.ImageInfo{NameInArchive: "unknown.png", Url: "/images/unknown.png"}
+			b.SetClover(types.ImageInfo{NameInArchive: "unknown.png", Url: "/images/unknown.png"})
 		}
 		list = append(list, &b)
 	}

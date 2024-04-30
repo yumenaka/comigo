@@ -15,7 +15,6 @@ func NewBookGroup(filePath string, modified time.Time, fileSize int64, storePath
 	//初始化书籍
 	var group = BookGroup{
 		BookInfo: BookInfo{
-			Author:        "",
 			Modified:      modified,
 			FileSize:      fileSize,
 			InitComplete:  false,
@@ -24,12 +23,6 @@ func NewBookGroup(filePath string, modified time.Time, fileSize int64, storePath
 			Type:          bookType},
 	}
 	//设置属性：
-	//FilePath，转换为绝对路径
-	group.setFilePath(filePath)
-	group.setTitle(filePath)
-	group.setAuthor()
-	//设置属性：父文件夹
-	group.setParentFolder(filePath)
-	group.setBookID()
+	group.setTitle(filePath).setFilePath(filePath).setAuthor().setParentFolder(filePath).initBookID()
 	return &group, nil
 }

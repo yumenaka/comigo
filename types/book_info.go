@@ -2,9 +2,11 @@ package types
 
 import (
 	"errors"
+	"github.com/jxskiss/base62"
 	"github.com/yumenaka/comi/logger"
 	"github.com/yumenaka/comi/util"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -59,6 +61,25 @@ func NewBaseInfo(b *Book) *BookInfo {
 		Cover:        b.Cover,
 		ParentFolder: b.ParentFolder,
 	}
+}
+
+// initBookID  根据路径的MD5，初始化书籍ID。
+func (b *BookInfo) initBookID() *BookInfo {
+	//logger.Infof("文件绝对路径："+fileAbaPath, "路径的md5："+md5string(fileAbaPath))
+	fileAbaPath, err := filepath.Abs(b.FilePath)
+	if err != nil {
+		logger.Info(err, fileAbaPath)
+	}
+	tempStr := b.FilePath + strconv.Itoa(b.ChildBookNum) + strconv.Itoa(int(b.FileSize)) + string(b.Type) + b.ParentFolder + b.BookStorePath
+	b62 := base62.EncodeToString([]byte(md5string(md5string(tempStr))))
+	b.BookID = getShortBookID(b62, 7)
+	return b
+}
+
+// 设置封面
+func (b *BookInfo) SetClover(c ImageInfo) *BookInfo {
+	b.Cover = c
+	return b
 }
 
 // 初始化Book时，设置FilePath
