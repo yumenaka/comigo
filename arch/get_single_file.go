@@ -69,12 +69,6 @@ func GetSingleFile(filePath string, NameInArchive string, textEncoding string) (
 	if fsOK {
 		fsys = fsysAny.(fs.FS)
 	} else {
-		//会引发500错误，原因似乎是10秒后的timeout？
-		////archiver.FileSystem可以配合ctx了，加个默认超时时间
-		//const shortDuration = 10 * 1000 * time.Millisecond //超时时间，10秒
-		//ctx, cancel := context.WithTimeout(context.Background(), shortDuration)
-		//defer cancel()
-
 		//如果从来没保存过这个文件系统
 		temp, errFS := archiver.FileSystem(context.Background(), filePath)
 		if errFS == nil {
