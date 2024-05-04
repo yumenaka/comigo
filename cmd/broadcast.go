@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"github.com/spf13/viper"
-	"github.com/yumenaka/comi/arch/scan"
 	"github.com/yumenaka/comi/config"
+	"github.com/yumenaka/comi/fileutil/scan"
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/logger"
 	"github.com/yumenaka/comi/routers/handlers"

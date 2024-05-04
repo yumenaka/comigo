@@ -14,7 +14,7 @@ import (
 
 	"github.com/klauspost/compress/zip"
 	"github.com/yumenaka/archiver/v4"
-	"github.com/yumenaka/comi/arch"
+	"github.com/yumenaka/comi/fileutil"
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/logger"
 	"github.com/yumenaka/comi/types"
@@ -141,14 +141,14 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 		}
 		// epub文件，需要根据 META-INF/container.xml 里面定义的rootfile （.opf文件）来重新排序
 		if newBook.Type == types.TypeEpub {
-			imageList, err := arch.GetImageListFromEpubFile(newBook.FilePath)
+			imageList, err := fileutil.GetImageListFromEpubFile(newBook.FilePath)
 			if err != nil {
 				logger.Infof("%s", err)
 			} else {
 				newBook.SortPagesByImageList(imageList)
 			}
 			// 根据metadata，改写书籍信息
-			metaData, err := arch.GetEpubMetadata(newBook.FilePath)
+			metaData, err := fileutil.GetEpubMetadata(newBook.FilePath)
 			if err != nil {
 				logger.Infof("%s", err)
 			} else {
@@ -158,7 +158,7 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 		}
 	// TODO:服务器解压速度太慢，网页用PDF.js解析？
 	case types.TypePDF:
-		pageCount, pdfErr := arch.CountPagesOfPDF(filePath)
+		pageCount, pdfErr := fileutil.CountPagesOfPDF(filePath)
 		if pdfErr != nil {
 			return nil, pdfErr
 		}

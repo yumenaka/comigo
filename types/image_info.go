@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"github.com/bbrks/go-blurhash"
 	"github.com/disintegration/imaging"
-	"github.com/yumenaka/comi/arch"
+	"github.com/yumenaka/comi/fileutil"
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/logger"
 	"image"
@@ -31,7 +31,7 @@ func (i *ImageInfo) analyzeImage(bookPath string) (err error) {
 	var img image.Image
 	//img, err = imaging.Open(i.RealImageFilePATH)
 
-	imgData, err := arch.GetSingleFile(bookPath, i.NameInArchive, "gbk")
+	imgData, err := fileutil.GetSingleFile(bookPath, i.NameInArchive, "gbk")
 	if err != nil {
 		logger.Infof("%s", err)
 	}

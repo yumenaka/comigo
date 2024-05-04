@@ -3,8 +3,8 @@ package config_handlers
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
-	"github.com/yumenaka/comi/arch/scan"
 	"github.com/yumenaka/comi/config"
+	"github.com/yumenaka/comi/fileutil/scan"
 	"github.com/yumenaka/comi/logger"
 	"github.com/yumenaka/comi/types"
 	"github.com/yumenaka/comi/util"

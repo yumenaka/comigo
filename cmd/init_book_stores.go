@@ -4,9 +4,9 @@ import (
 	"github.com/spf13/viper"
 	"strconv"
 
-	"github.com/yumenaka/comi/arch/scan"
 	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/database"
+	"github.com/yumenaka/comi/fileutil/scan"
 	"github.com/yumenaka/comi/logger"
 	"github.com/yumenaka/comi/types"
 )

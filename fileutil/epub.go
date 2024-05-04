@@ -1,4 +1,4 @@
-package arch
+package fileutil
 
 import (
 	"bytes"
