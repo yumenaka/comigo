@@ -5,8 +5,8 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comi/arch"
 	"github.com/yumenaka/comi/config"
+	"github.com/yumenaka/comi/fileutil"
 	"github.com/yumenaka/comi/logger"
 	"github.com/yumenaka/comi/types"
 )
@@ -39,10 +39,10 @@ func GetFile(c *gin.Context) {
 		//获取所有的参数键值对
 		query := c.Request.URL.Query()
 		//如果有缓存，直接读取本地获取缓存文件并返回
-		cacheData, ct, errGet := arch.GetFileFromCache(
+		cacheData, ct, errGet := fileutil.GetFileFromCache(
 			id,
 			needFile,
-			arch.GetQueryString(query),
+			fileutil.GetQueryString(query),
 			c.DefaultQuery("thumbnail_mode", "false") == "true",
 			config.Config.CachePath,
 			config.Config.Debug,
@@ -94,7 +94,7 @@ func GetFile(c *gin.Context) {
 		blurhashImage = 0
 	}
 
-	option := arch.GetPictureDataOption{
+	option := fileutil.GetPictureDataOption{
 		PictureName:      needFile,
 		BookIsPDF:        bookByID.Type == types.TypePDF,
 		BookIsDir:        bookByID.Type == types.TypeDir,
@@ -112,7 +112,7 @@ func GetFile(c *gin.Context) {
 		BlurHash:         blurhash,
 		BlurHashImage:    blurhashImage,
 	}
-	imgData, contentType, err := arch.GetPictureData(option)
+	imgData, contentType, err := fileutil.GetPictureData(option)
 	if err != nil {
 		c.String(http.StatusBadRequest, "GetPictureData error:%s", err)
 	}
@@ -122,12 +122,13 @@ func GetFile(c *gin.Context) {
 		//获取所有的参数键值对
 		query := c.Request.URL.Query()
 		//缓存文件到本地，避免重复解压
-		errSave := arch.SaveFileToCache(
+		errSave := fileutil.SaveFileToCache(
 			id,
 			needFile,
 			imgData,
-			arch.GetQueryString(query),
-			contentType, c.DefaultQuery("thumbnail_mode", "false") == "true",
+			fileutil.GetQueryString(query),
+			contentType,
+			c.DefaultQuery("thumbnail_mode", "false") == "true",
 			config.Config.CachePath,
 			config.Config.Debug,
 		)

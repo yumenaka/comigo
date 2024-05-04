@@ -6,8 +6,8 @@ import (
 	"path"
 	"strings"
 
-	"github.com/yumenaka/comi/arch"
 	"github.com/yumenaka/comi/database"
+	"github.com/yumenaka/comi/fileutil"
 	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/logger"
 	"github.com/yumenaka/comi/types"
@@ -151,7 +151,7 @@ func AddBooksToStore(bookList []*types.Book, basePath string, MinImageNum int) {
 
 func scanNonUTF8ZipFile(filePath string, b *types.Book, scanOption Option) error {
 	b.NonUTF8Zip = true
-	reader, err := arch.ScanNonUTF8Zip(filePath, scanOption.ZipFileTextEncoding)
+	reader, err := fileutil.ScanNonUTF8Zip(filePath, scanOption.ZipFileTextEncoding)
 	if err != nil {
 		return err
 	}
