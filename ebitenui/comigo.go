@@ -19,11 +19,22 @@ type game struct {
 }
 
 func main() {
-	ebiten.SetWindowSize(900, 800)
-	ebiten.SetWindowTitle("Demo")
-	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
+	readerConfig := NewReaderConfig()
+	readerConfig.SetTitle("Comigo Reader v0.9.9").
+		SetReaderMode(ScrollMode).
+		SetWindowFullScreen(false).
+		SetWindowDecorated(true).
+		SetWindowResizingModeEnabled(ebiten.WindowResizingModeEnabled).
+		SetWindowSize(800, 600).
+		SetRunOptions(ebiten.RunGameOptions{
+			ScreenTransparent: false,
+		})
+
+	ebiten.SetWindowSize(readerConfig.Width(), readerConfig.Height())
+	ebiten.SetWindowTitle(readerConfig.Title())
+	ebiten.SetWindowResizingMode(readerConfig.WindowResizingModeEnabled())
 	// SetWindowDecorated 设置窗口是否有边框和标题栏。
-	ebiten.SetWindowDecorated(true)
+	ebiten.SetWindowDecorated(readerConfig.WindowDecorated())
 
 	// 为此 UI 创建根容器。
 	// 所有其他 UI 元素都必须添加到此容器中。
@@ -75,7 +86,7 @@ func main() {
 	game := game{
 		ui: eui,
 	}
-	err = ebiten.RunGameWithOptions(&game, &ebiten.RunGameOptions{ScreenTransparent: true})
+	err = ebiten.RunGameWithOptions(&game, readerConfig.RunOptions())
 	if err != nil {
 		log.Print(err)
 	}

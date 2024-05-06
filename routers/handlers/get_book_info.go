@@ -50,7 +50,6 @@ func GetBookInfos(c *gin.Context) {
 		GetBookInfosByDepth(c, sortBy)
 		return
 	}
-
 }
 
 func GetBookInfosByMaxDepth(c *gin.Context, sortBy string) {
@@ -133,7 +132,7 @@ func GroupInfo(c *gin.Context) {
 	c.PureJSON(http.StatusOK, infoList)
 }
 
-// GroupInfo 示例 URL： http://127.0.0.1:1234/api/group_info_filter?id=1215a&sort_by=filename
+// GroupInfoFilter 示例 URL： http://127.0.0.1:1234/api/group_info_filter?id=1215a&sort_by=filename
 func GroupInfoFilter(c *gin.Context) {
 	sortBy := c.DefaultQuery("sort_by", "filename")
 	id := c.DefaultQuery("id", "")
