@@ -25,9 +25,9 @@ func GetQrcode(c *gin.Context) {
 	}
 
 	//cmd打印链接二维码
-	enableTls := config.Config.CertFile != "" && config.Config.KeyFile != ""
+	enableTLS := config.Config.CertFile != "" && config.Config.KeyFile != ""
 	protocol := "http://"
-	if enableTls {
+	if enableTLS {
 		protocol = "https://"
 	}
 	//取得本机的首选出站IP
