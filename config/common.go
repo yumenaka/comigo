@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"github.com/joho/godotenv"
 	"net/http"
 	"os"
 	"path"
@@ -15,7 +14,7 @@ import (
 )
 
 var (
-	Version = "v0.9.8"
+	Version = "v0.9.9"
 	Srv     *http.Server
 	Status  = types.ConfigStatus{}
 	Config  = types.ComigoConfig{
@@ -62,19 +61,6 @@ const (
 	ProgramDirectory = "ProgramDirectory"
 )
 
-func init() {
-	err := godotenv.Load()
-	if err != nil {
-		logger.Infof("Error loading .env file")
-	}
-	Config.RemoteStores[0].Host = os.Getenv("SMB_HOST")
-	Config.RemoteStores[0].Username = os.Getenv("SMB_USER")
-	Config.RemoteStores[0].Password = os.Getenv("SMB_PASS")
-	Config.RemoteStores[0].ShareName = os.Getenv("SMB_SHARE_NAME")
-	Config.RemoteStores[0].Path = os.Getenv("SMB_PATH")
-
-}
-
 // UpdateLocalConfig 如果存在本地配置，更新本地配置
 func UpdateLocalConfig() error {
 	bytes, err := toml.Marshal(Config)
@@ -120,9 +106,9 @@ func UpdateLocalConfig() error {
 
 func SaveConfig(to string) error {
 	//保存配置
-	bytes, err := toml.Marshal(Config)
-	if err != nil {
-		return err
+	bytes, errMarshal := toml.Marshal(Config)
+	if errMarshal != nil {
+		return errMarshal
 	}
 	logger.Infof("Config Save To %s", to)
 	switch to {
@@ -140,7 +126,7 @@ func SaveConfig(to string) error {
 			return err
 		}
 	case WorkingDirectory:
-		err = os.WriteFile("config.toml", bytes, 0644)
+		err := os.WriteFile("config.toml", bytes, 0644)
 		if err != nil {
 			return err
 		}
@@ -157,30 +143,27 @@ func SaveConfig(to string) error {
 			return err
 		}
 	}
-
 	return nil
 }
 
-func DeleteConfigIn(in string) (err error) {
+func DeleteConfigIn(in string) error {
 	logger.Infof("Delete Config in %s", in)
 	var configFile string
 	switch in {
 	case HomeDirectory:
-		home, err := homedir.Dir()
-		if err == nil {
-			configFile = path.Join(home, ".config/comigo/config.toml")
+		home, errHomeDirectory := homedir.Dir()
+		if errHomeDirectory != nil {
+			return errHomeDirectory
 		}
+		configFile = path.Join(home, ".config/comigo/config.toml")
 	case WorkingDirectory:
 		configFile = "config.toml"
 	case ProgramDirectory:
-		executable, err := os.Executable()
-		if err != nil {
-			return err
+		executable, errExecutable := os.Executable()
+		if errExecutable != nil {
+			return errExecutable
 		}
 		configFile = path.Join(path.Dir(executable), "config.toml")
-	}
-	if err != nil {
-		return err
 	}
 	return util.DeleteFileIfExist(configFile)
 }

@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"github.com/spf13/viper"
 	"strconv"
 
+	"github.com/spf13/viper"
 	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/database"
 	"github.com/yumenaka/comi/fileutil/scan"

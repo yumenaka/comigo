@@ -30,7 +30,7 @@ type ReaderConfig struct {
 	runOptions ebiten.RunGameOptions
 }
 
-//// 获取各种值的方法
+//// 获取值
 
 // Title 返回阅读器标题
 func (rc *ReaderConfig) Title() string {
@@ -72,7 +72,7 @@ func (rc *ReaderConfig) RunOptions() *ebiten.RunGameOptions {
 	return &rc.runOptions
 }
 
-//// 设置各种值的方法
+//// 设置值
 
 // SetTitle 设置阅读器标题
 func (rc *ReaderConfig) SetTitle(title string) *ReaderConfig {

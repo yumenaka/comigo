@@ -10,8 +10,8 @@ import (
 	"github.com/yumenaka/comi/util"
 )
 
-// SetPort 3、设置服务端口
-func SetPort() {
+// SetWebServerPort 3、设置服务端口
+func SetWebServerPort() {
 	//检测端口
 	if !util.CheckPort(config.Config.Port) {
 		//获取一个空闲可用的系统端口号
