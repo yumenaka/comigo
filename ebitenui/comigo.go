@@ -11,6 +11,7 @@ import (
 	"github.com/golang/freetype/truetype"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/yumenaka/comi/cmd"
 	"golang.org/x/image/font/gofont/goregular"
 )
 
@@ -19,6 +20,8 @@ type game struct {
 }
 
 func main() {
+	// comigo/cmd.Execute()
+	cmd.Execute()
 	readerConfig := NewReaderConfig()
 	readerConfig.SetTitle("Comigo Reader v0.9.9").
 		SetReaderMode(ScrollMode).

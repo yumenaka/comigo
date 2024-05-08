@@ -90,7 +90,7 @@ Comigo服务器设置，可选的保存位置：
 - [ ] 文件管理
 - [ ] 更新提示
 - [ ] 移动客户端（Android，iOS）
-- [ ] 跨平台GUI（react naitive or flutter？）
+- [ ] 跨平台GUI（ebitenui react naitive or flutter？）
 
 ### Special Thanks：
 [mholt](https://github.com/mholt)  、[spf13](https://github.com/spf13)  [disintegration](https://github.com/disintegration)   、 [Baozisoftware ](https://github.com/Baozisoftware) 、 [markbates](github.com/markbates/pkger)  and more。
@@ -98,3 +98,6 @@ Comigo服务器设置，可选的保存位置：
 ## License
 
 This software is released under the MIT license.
+
+## Stargazers over time
+[![Stargazers over time](https://starchart.cc/yumenaka/comi.svg?variant=adaptive)](https://starchart.cc/yumenaka/comi)
