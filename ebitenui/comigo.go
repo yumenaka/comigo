@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/yumenaka/comi/cmd"
 	"image/color"
 	"log"
 	"strconv"
@@ -11,7 +12,6 @@ import (
 	"github.com/golang/freetype/truetype"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
-	"github.com/yumenaka/comi/cmd"
 	"golang.org/x/image/font/gofont/goregular"
 )
 
@@ -20,24 +20,27 @@ type game struct {
 }
 
 func main() {
-	// comigo/cmd.Execute()
-	cmd.Execute()
+	// 后后台跑一个Comigo
+	//go cmd.Execute() // 不加go的话，会阻塞在这里，不会执行下面的代码
+
+	// 读取配置文件
+	cmd.ReadConfigFile()
 	readerConfig := NewReaderConfig()
 	readerConfig.SetTitle("Comigo Reader v0.9.9").
 		SetReaderMode(ScrollMode).
 		SetWindowFullScreen(false).
 		SetWindowDecorated(true).
 		SetWindowResizingModeEnabled(ebiten.WindowResizingModeEnabled).
-		SetWindowSize(800, 600).
+		SetWindowSize(1280, 800).
 		SetRunOptions(ebiten.RunGameOptions{
 			ScreenTransparent: false,
 		})
 
-	ebiten.SetWindowSize(readerConfig.Width(), readerConfig.Height())
-	ebiten.SetWindowTitle(readerConfig.Title())
-	ebiten.SetWindowResizingMode(readerConfig.WindowResizingModeEnabled())
+	ebiten.SetWindowSize(readerConfig.Width, readerConfig.Height)
+	ebiten.SetWindowTitle(readerConfig.Title)
+	ebiten.SetWindowResizingMode(readerConfig.WindowResizingModeEnabled)
 	// SetWindowDecorated 设置窗口是否有边框和标题栏。
-	ebiten.SetWindowDecorated(readerConfig.WindowDecorated())
+	ebiten.SetWindowDecorated(readerConfig.WindowDecorated)
 
 	// 为此 UI 创建根容器。
 	// 所有其他 UI 元素都必须添加到此容器中。
@@ -89,7 +92,7 @@ func main() {
 	game := game{
 		ui: eui,
 	}
-	err = ebiten.RunGameWithOptions(&game, readerConfig.RunOptions())
+	err = ebiten.RunGameWithOptions(&game, &readerConfig.RunOptions)
 	if err != nil {
 		log.Print(err)
 	}
