@@ -21,7 +21,7 @@ type game struct {
 
 func main() {
 	// 后后台跑一个Comigo
-	//go cmd.Execute() // 不加go的话，会阻塞在这里，不会执行下面的代码
+	go cmd.Execute() // 不加go的话，会阻塞在这里，不会执行下面的代码
 
 	// 读取配置文件
 	cmd.ReadConfigFile()

@@ -1,18 +1,33 @@
 # Config file for [Air](https://github.com/cosmtrek/air) in TOML format
 ## go install github.com/cosmtrek/air@latest
 
+# nixos
+# nix develop nixpkgs#aaaaxy
+
 # Working directory
 # . or absolute path, please note that the directories following must be under root.
 root = "."
-tmp_dir = "tmp"
+tmp_dir = "temp"
 
 [build]
+# Array of commands to run after ^C
+# post_cmd = ["echo 'hello air' > post_cmd.txt"]
+
+# 通过ssh自动推送代码，两边都需要rsync，编译完成后执行
+# pre_cmd = ["rsync -e 'ssh -p 22' -avP sample@sample.com:/home/sample/some_path  /home/sample/some_path"]
+
 # Just plain old shell command. You could use `make` as well.
-cmd = "go build -o ./tmp/comigo ./comigo.go"
+cmd = "go build -mod=mod -o ./temp/comigo ./"
+  
 # Binary file yields from `cmd`.
-bin = "tmp/comigo"
+bin = "temp/comigo"
+  
 # Customize binary, can setup environment variables when run your app.
-# full_bin = "COMI_DEBUG_MODE=true COMI_MIN_MEDIA_NUM=2 ./tmp/main test --max-depth=5"
+# full_bin = "COMI_DEBUG_MODE=true COMI_MIN_MEDIA_NUM=2 ./temp/comigo"
+
+# Add additional arguments when running binary (bin/full_bin). Will run './tmp/comigo ../'.
+args_bin = ["../"]
+  
 # Watch these filename extensions.
 include_ext = ["go", "rar","zip","cbr","cbz","tpl", "tmpl", "html"]
 # Ignore these filename extensions or directories.
@@ -32,9 +47,29 @@ delay = 1000 # ms
 kill_delay = "0s"
 poll = false
 poll_interval = 0
-post_cmd = []
-pre_cmd = []
+
+# Rerun binary or not
 rerun = true
 rerun_delay = 500
 send_interrupt = false
 stop_on_error = false
+
+[log]
+# Show log time
+time = false
+# Only show main log (silences watcher, build, runner)
+main_only = false
+
+[misc]
+# Delete tmp directory on exit
+clean_on_exit = true
+
+[screen]
+clear_on_rebuild = true
+keep_scroll = true
+
+# Enable live-reloading on the browser.
+[proxy]
+enabled = true
+proxy_port = 12345
+app_port = 1234
