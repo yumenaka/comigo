@@ -1,8 +1,8 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	"github.com/yumenaka/comi/cmd"
 	"image/color"
 	"log"
 	"strconv"
@@ -12,6 +12,7 @@ import (
 	"github.com/golang/freetype/truetype"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/yumenaka/comi/cmd"
 	"golang.org/x/image/font/gofont/goregular"
 )
 
@@ -20,13 +21,26 @@ type game struct {
 }
 
 func main() {
+	// 定义一个布尔型变量，用于接收 --disable-ui 参数的值
+	debugMode := flag.Bool("debug", false, "Disable UI by debug mode.")
+	// 解析命令行参数
+	flag.Parse()
+	// 根据 debugMode 的值决定后续逻辑
+	if *debugMode {
+		fmt.Println("Debug Mode, UI is disabled.")
+		cmd.Execute()
+		return
+	}
+	fmt.Println("UI is enabled.")
+
 	// 后后台跑一个Comigo
 	go cmd.Execute() // 不加go的话，会阻塞在这里，不会执行下面的代码
 
 	// 读取配置文件
-	cmd.ReadConfigFile()
+	//cmd.ReadConfigFile()
+
 	readerConfig := NewReaderConfig()
-	readerConfig.SetTitle("Comigo Reader v0.9.9").
+	readerConfig.SetTitle("Comigo Reader v0.9.0").
 		SetReaderMode(ScrollMode).
 		SetWindowFullScreen(false).
 		SetWindowDecorated(true).

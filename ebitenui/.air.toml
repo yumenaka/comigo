@@ -1,41 +1,42 @@
-# Config file for [Air](https://github.com/cosmtrek/air) in TOML format
+
 ## go install github.com/cosmtrek/air@latest
 
-# nixos
-# nix develop nixpkgs#aaaaxy
+# nix develop nixpkgs#aaaaxy ?
 
-# Working directory
-# . or absolute path, please note that the directories following must be under root.
+# https://github.com/cosmtrek/air/blob/master/air_example.toml
+
+
 root = "."
 tmp_dir = "temp"
 
 [build]
+# Array of commands to run before each build
+# pre_cmd = ["sh sync_code.sh"]
+
 # Array of commands to run after ^C
 # post_cmd = ["echo 'hello air' > post_cmd.txt"]
 
-# 通过ssh自动推送代码，两边都需要rsync，编译完成后执行
-pre_cmd = ["sh sync_code.sh"]
-
 # Just plain old shell command. You could use `make` as well.
-cmd = "go build -mod=mod -o ./temp/comigo ./"
-  
+cmd = "go build -o ./temp/comigo ./"
+
 # Binary file yields from `cmd`.
 bin = "temp/comigo"
-  
+
 # Customize binary, can setup environment variables when run your app.
-# full_bin = "COMI_DEBUG_MODE=true COMI_MIN_MEDIA_NUM=2 ./temp/comigo"
+full_bin = "COMI_DEBUG_MODE=true COMI_MIN_MEDIA_NUM=2 ./temp/comigo"
 
 # Add additional arguments when running binary (bin/full_bin). Will run './tmp/comigo ../'.
-args_bin = ["../"]
-  
+#args_bin = ["--debug", "/somepath"]
+
+
 # Watch these filename extensions.
-include_ext = ["go", "rar","zip","cbr","cbz","tpl", "tmpl", "html"]
+include_ext = ["go", "rar", "zip", "cbr", "cbz", "tpl", "tmpl", "html"]
 # Ignore these filename extensions or directories.
-exclude_dir = ["tmp", ".idea",".git", ".vscode", ".cache"]
+exclude_dir = ["tmp", ".idea", ".git", ".vscode", ".cache"]
 # Watch these directories if you specified.
 include_dir = []
 # Exclude files.
-exclude_file = ["_test.go",]
+exclude_file = ["_test.go", ]
 # Exclude unchanged files.
 exclude_unchanged = false
 # Follow symlink for directories
@@ -50,9 +51,16 @@ poll_interval = 0
 
 # Rerun binary or not
 rerun = true
-rerun_delay = 500
+rerun_delay = 1500
 send_interrupt = false
-stop_on_error = false
+stop_on_error = true
+
+[color]
+app = ""
+build = "yellow"
+main = "magenta"
+runner = "green"
+watcher = "cyan"
 
 [log]
 # Show log time

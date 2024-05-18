@@ -9,3 +9,4 @@ test*
 *.pdf
 *.epub
 config.toml
+sync_code.sh
