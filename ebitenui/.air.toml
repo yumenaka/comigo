@@ -14,7 +14,7 @@ tmp_dir = "temp"
 # post_cmd = ["echo 'hello air' > post_cmd.txt"]
 
 # 通过ssh自动推送代码，两边都需要rsync，编译完成后执行
-# pre_cmd = ["rsync -e 'ssh -p 22' -avP sample@sample.com:/home/sample/some_path  /home/sample/some_path"]
+pre_cmd = ["sh sync_code.sh"]
 
 # Just plain old shell command. You could use `make` as well.
 cmd = "go build -mod=mod -o ./temp/comigo ./"
