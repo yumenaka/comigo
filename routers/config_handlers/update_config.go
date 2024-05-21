@@ -4,10 +4,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"github.com/yumenaka/comi/config"
-	"github.com/yumenaka/comi/fileutil/scan"
+	"github.com/yumenaka/comi/entity"
 	"github.com/yumenaka/comi/logger"
-	"github.com/yumenaka/comi/types"
 	"github.com/yumenaka/comi/util"
+	"github.com/yumenaka/comi/util/file/scan"
 	"io"
 	"net/http"
 	"reflect"
@@ -27,7 +27,7 @@ func UpdateConfig(c *gin.Context) {
 	logger.Infof("Received JSON data: %s \n", jsonString)
 
 	// 解析JSON数据并更新服务器配置
-	oldConfig, err := types.UpdateConfig(&config.Config, jsonString)
+	oldConfig, err := entity.UpdateConfig(&config.Config, jsonString)
 	if err != nil {
 		logger.Infof("%s", err.Error())
 		c.JSON(http.StatusMethodNotAllowed, gin.H{"error": "Failed to parse JSON data"})
@@ -44,7 +44,7 @@ func UpdateConfig(c *gin.Context) {
 }
 
 // BeforeConfigUpdate 根据配置的变化，判断是否需要打开浏览器重新扫描等
-func BeforeConfigUpdate(oldConfig *types.ComigoConfig, newConfig *types.ComigoConfig) {
+func BeforeConfigUpdate(oldConfig *entity.ComigoConfig, newConfig *entity.ComigoConfig) {
 	openBrowserIfNeeded(oldConfig, newConfig)
 	needScan, reScanFile := updateConfigIfNeeded(oldConfig, newConfig)
 	if needScan {
@@ -56,7 +56,7 @@ func BeforeConfigUpdate(oldConfig *types.ComigoConfig, newConfig *types.ComigoCo
 	}
 }
 
-func openBrowserIfNeeded(oldConfig *types.ComigoConfig, newConfig *types.ComigoConfig) {
+func openBrowserIfNeeded(oldConfig *entity.ComigoConfig, newConfig *entity.ComigoConfig) {
 	if (oldConfig.OpenBrowser == false) && (newConfig.OpenBrowser == true) {
 		protocol := "http://"
 		if newConfig.EnableTLS {
@@ -67,7 +67,7 @@ func openBrowserIfNeeded(oldConfig *types.ComigoConfig, newConfig *types.ComigoC
 }
 
 // updateConfigIfNeeded 检查旧的和新的配置是否需要更新，并返回需要重新扫描和重新扫描文件的布尔值
-func updateConfigIfNeeded(oldConfig *types.ComigoConfig, newConfig *types.ComigoConfig) (needScan bool, reScanFile bool) {
+func updateConfigIfNeeded(oldConfig *entity.ComigoConfig, newConfig *entity.ComigoConfig) (needScan bool, reScanFile bool) {
 	if !reflect.DeepEqual(oldConfig.LocalStores, newConfig.LocalStores) {
 		needScan = true
 		oldConfig.LocalStores = newConfig.LocalStores
@@ -102,7 +102,7 @@ func updateConfigIfNeeded(oldConfig *types.ComigoConfig, newConfig *types.Comigo
 }
 
 // performScanAndUpdateDBIfNeeded 扫描并相应地更新数据库
-func performScanAndUpdateDBIfNeeded(newConfig *types.ComigoConfig, reScanFile bool) {
+func performScanAndUpdateDBIfNeeded(newConfig *entity.ComigoConfig, reScanFile bool) {
 	option := scan.NewScanOption(
 		reScanFile,
 		newConfig.LocalStores,

@@ -1,14 +1,14 @@
 package cmd
 
 import (
+	"github.com/yumenaka/comi/util/file/scan"
 	"strconv"
 
 	"github.com/spf13/viper"
 	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/database"
-	"github.com/yumenaka/comi/fileutil/scan"
+	"github.com/yumenaka/comi/entity"
 	"github.com/yumenaka/comi/logger"
-	"github.com/yumenaka/comi/types"
 )
 
 // StartScan 解析命令,扫描书库
@@ -23,7 +23,7 @@ func StartScan(args []string) {
 		if err != nil {
 			logger.Infof("%s", err)
 		} else {
-			err := types.RestoreDatabaseBooks(books)
+			err := entity.RestoreDatabaseBooks(books)
 			if err != nil {
 				logger.Infof("%s", err)
 			} else {

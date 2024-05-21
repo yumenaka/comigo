@@ -1,14 +1,14 @@
 package handlers
 
 import (
+	fileutil "github.com/yumenaka/comi/util/file"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comi/config"
-	"github.com/yumenaka/comi/fileutil"
+	"github.com/yumenaka/comi/entity"
 	"github.com/yumenaka/comi/logger"
-	"github.com/yumenaka/comi/types"
 )
 
 // GetFile 示例 URL： 127.0.0.1:1234/get_file?id=2b17a13&filename=1.jpg
@@ -53,7 +53,7 @@ func GetFile(c *gin.Context) {
 		}
 	}
 
-	bookByID, err := types.GetBookByID(id, "")
+	bookByID, err := entity.GetBookByID(id, "")
 	if err != nil {
 		logger.Infof("%s", err)
 	}
@@ -96,8 +96,8 @@ func GetFile(c *gin.Context) {
 
 	option := fileutil.GetPictureDataOption{
 		PictureName:      needFile,
-		BookIsPDF:        bookByID.Type == types.TypePDF,
-		BookIsDir:        bookByID.Type == types.TypeDir,
+		BookIsPDF:        bookByID.Type == entity.TypePDF,
+		BookIsDir:        bookByID.Type == entity.TypeDir,
 		BookIsNonUTF8Zip: bookByID.NonUTF8Zip,
 		BookFilePath:     bookByID.FilePath,
 		Debug:            config.Config.Debug,
@@ -118,7 +118,7 @@ func GetFile(c *gin.Context) {
 	}
 
 	//如果启用了本地缓存
-	if config.Config.UseCache && noCache == "false" && bookByID.Type != types.TypeDir {
+	if config.Config.UseCache && noCache == "false" && bookByID.Type != entity.TypeDir {
 		//获取所有的参数键值对
 		query := c.Request.URL.Query()
 		//缓存文件到本地，避免重复解压

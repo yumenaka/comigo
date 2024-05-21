@@ -2,22 +2,22 @@ package routers
 
 import (
 	"fmt"
+	"github.com/yumenaka/comi/util"
+	"github.com/yumenaka/comi/util/locale"
 	"strings"
 
 	"github.com/sanity-io/litter"
 	"github.com/yumenaka/comi/config"
-	"github.com/yumenaka/comi/locale"
+	"github.com/yumenaka/comi/entity"
 	"github.com/yumenaka/comi/logger"
-	"github.com/yumenaka/comi/types"
-	"github.com/yumenaka/comi/util"
 )
 
 func showQRCode() {
 	//cmd打印链接二维码.如果只有一本书，就直接打开那本书.
 	etcStr := ""
 	//只有一本书的时候，URL需要附加的参数
-	if types.GetBooksNumber() == 1 {
-		bookList, err := types.GetAllBookInfoList("name")
+	if entity.GetBooksNumber() == 1 {
+		bookList, err := entity.GetAllBookInfoList("name")
 		if err != nil {
 			logger.Infof("%s", err)
 		}

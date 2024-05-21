@@ -5,8 +5,8 @@ package database
 import (
 	"errors"
 
+	mainTypes "github.com/yumenaka/comi/entity"
 	"github.com/yumenaka/comi/logger"
-	mainTypes "github.com/yumenaka/comi/types"
 )
 
 func InitDatabase(configFilePath string) error {

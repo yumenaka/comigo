@@ -1,12 +1,12 @@
 package handlers
 
 import (
+	"github.com/yumenaka/comi/util/file"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comi/fileutil"
+	"github.com/yumenaka/comi/entity"
 	"github.com/yumenaka/comi/logger"
-	"github.com/yumenaka/comi/types"
 )
 
 // GetBook 相关参数：
@@ -20,7 +20,7 @@ func GetBook(c *gin.Context) {
 	sortBy := c.DefaultQuery("sort_by", "default")
 	id := c.DefaultQuery("id", "")
 	if author != "" {
-		bookList, err := types.GetBookByAuthor(author, sortBy)
+		bookList, err := entity.GetBookByAuthor(author, sortBy)
 		if err != nil {
 			logger.Infof("%s", err)
 		}
@@ -28,15 +28,15 @@ func GetBook(c *gin.Context) {
 		return
 	}
 	if id != "" {
-		b, err := types.GetBookByID(id, sortBy)
+		b, err := entity.GetBookByID(id, sortBy)
 		if err != nil {
 			logger.Infof("%s", err)
 			c.PureJSON(http.StatusBadRequest, "id not found")
 			return
 		}
 		// 如果是epub文件，重新按照Epub信息排序
-		if b.Type == types.TypeEpub && sortBy == "epub_info" {
-			imageList, err := fileutil.GetImageListFromEpubFile(b.FilePath)
+		if b.Type == entity.TypeEpub && sortBy == "epub_info" {
+			imageList, err := file.GetImageListFromEpubFile(b.FilePath)
 			if err != nil {
 				logger.Infof("%s", err)
 				c.PureJSON(http.StatusOK, b)

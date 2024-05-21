@@ -1,13 +1,13 @@
 package handlers
 
 import (
+	"github.com/yumenaka/comi/util/locale"
 	"net/http"
 	"os"
 	"runtime"
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/logger"
 )
 

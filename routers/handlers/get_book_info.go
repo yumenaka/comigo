@@ -5,8 +5,8 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/yumenaka/comi/entity"
 	"github.com/yumenaka/comi/logger"
-	"github.com/yumenaka/comi/types"
 )
 
 func GetParentBookInfo(c *gin.Context) {
@@ -15,7 +15,7 @@ func GetParentBookInfo(c *gin.Context) {
 		c.PureJSON(http.StatusBadRequest, "not set id param")
 		return
 	}
-	info, err := types.GetBookGroupInfoByChildBookID(id)
+	info, err := entity.GetBookGroupInfoByChildBookID(id)
 	if err != nil {
 		logger.Infof("%s", err)
 		c.PureJSON(http.StatusBadRequest, "ParentBookInfo not found")
@@ -61,7 +61,7 @@ func GetBookInfosByMaxDepth(c *gin.Context, sortBy string) {
 		return
 	}
 	//如果传了maxDepth这个参数
-	bookInfoList, err := types.GetBookInfoListByMaxDepth(maxDepth, sortBy)
+	bookInfoList, err := entity.GetBookInfoListByMaxDepth(maxDepth, sortBy)
 	if err != nil {
 		logger.Infof("%s", err)
 		c.PureJSON(http.StatusBadRequest, "book_info not found")
@@ -80,7 +80,7 @@ func GetBookInfosByDepth(c *gin.Context, sortBy string) {
 		return
 	}
 	//如果传了depth这个参数
-	bookInfoList, err := types.GetBookInfoListByDepth(depth, sortBy)
+	bookInfoList, err := entity.GetBookInfoListByDepth(depth, sortBy)
 	if err != nil {
 		logger.Infof("%s", err)
 		c.PureJSON(http.StatusBadRequest, "book_info not found")
@@ -98,7 +98,7 @@ func GetBookInfosByGroupID(c *gin.Context, sortBy string) {
 		return
 	}
 	//如果传了bookGroupId这个参数
-	bookInfoList, err := types.GetBookInfoListByID(bookGroupID, sortBy)
+	bookInfoList, err := entity.GetBookInfoListByID(bookGroupID, sortBy)
 	if err != nil {
 		logger.Infof("%s", err)
 		c.PureJSON(http.StatusBadRequest, "book_info not found")
@@ -117,13 +117,13 @@ func GroupInfo(c *gin.Context) {
 		return
 	}
 	//sortBy: 根据压缩包原始顺序、时间、文件名排序
-	b, err := types.GetBookByID(id, sortBy)
+	b, err := entity.GetBookByID(id, sortBy)
 	if err != nil {
 		logger.Infof("%s", err)
 		c.PureJSON(http.StatusBadRequest, "book id not found")
 		return
 	}
-	infoList, err := types.GetBookInfoListByParentFolder(b.ParentFolder, sortBy)
+	infoList, err := entity.GetBookInfoListByParentFolder(b.ParentFolder, sortBy)
 	if err != nil {
 		logger.Infof("%s", err)
 		c.PureJSON(http.StatusBadRequest, "ParentFolder, not found")
@@ -141,29 +141,29 @@ func GroupInfoFilter(c *gin.Context) {
 		return
 	}
 	//sortBy: 根据压缩包原始顺序、时间、文件名排序
-	b, err := types.GetBookByID(id, sortBy)
+	b, err := entity.GetBookByID(id, sortBy)
 	if err != nil {
 		logger.Infof("%s", err)
 		c.PureJSON(http.StatusBadRequest, "book id not found")
 		return
 	}
-	infoList, err := types.GetBookInfoListByParentFolder(b.ParentFolder, sortBy)
+	infoList, err := entity.GetBookInfoListByParentFolder(b.ParentFolder, sortBy)
 	if err != nil {
 		logger.Infof("%s", err)
 		c.PureJSON(http.StatusBadRequest, "ParentFolder, not found")
 		return
 	}
 	//过滤掉不需要的类型
-	filterList := types.BookInfoList{}
+	filterList := entity.BookInfoList{}
 	filterList.SortBy = infoList.SortBy
 	for _, info := range infoList.BookInfos {
-		if info.Type == types.TypeZip ||
-			info.Type == types.TypeRar ||
-			info.Type == types.TypeDir ||
-			info.Type == types.TypeCbz ||
-			info.Type == types.TypeCbr ||
-			info.Type == types.TypePDF ||
-			info.Type == types.TypeEpub {
+		if info.Type == entity.TypeZip ||
+			info.Type == entity.TypeRar ||
+			info.Type == entity.TypeDir ||
+			info.Type == entity.TypeCbz ||
+			info.Type == entity.TypeCbr ||
+			info.Type == entity.TypePDF ||
+			info.Type == entity.TypeEpub {
 			filterList.BookInfos = append(filterList.BookInfos, info)
 		}
 	}

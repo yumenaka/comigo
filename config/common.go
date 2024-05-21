@@ -2,26 +2,26 @@ package config
 
 import (
 	"fmt"
+	"github.com/yumenaka/comi/util"
 	"net/http"
 	"os"
 	"path"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/pelletier/go-toml/v2"
+	"github.com/yumenaka/comi/entity"
 	"github.com/yumenaka/comi/logger"
-	"github.com/yumenaka/comi/types"
-	"github.com/yumenaka/comi/util"
 )
 
 var (
 	Version = "v0.9.9"
 	Srv     *http.Server
-	Status  = types.ConfigStatus{}
-	Config  = types.ComigoConfig{
+	Status  = entity.ConfigStatus{}
+	Config  = entity.ComigoConfig{
 		Port:        1234,
 		Host:        "DefaultHost",
 		LocalStores: []string{},
-		RemoteStores: []types.RemoteStore{
+		RemoteStores: []entity.RemoteStore{
 			{
 				Type:      "smb",
 				Host:      os.Getenv("SMB_HOST"),
