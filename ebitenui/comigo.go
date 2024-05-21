@@ -6,6 +6,7 @@ import (
 	"image/color"
 	"log"
 	"strconv"
+	"time"
 
 	"github.com/ebitenui/ebitenui"
 	"github.com/ebitenui/ebitenui/widget"
@@ -21,7 +22,7 @@ type game struct {
 }
 
 func main() {
-	// 定义一个布尔型变量，用于接收 --disable-ui 参数的值
+	// 如果参数当中有--debug，则不启动UI
 	debugMode := flag.Bool("debug", false, "Disable UI by debug mode.")
 	// 解析命令行参数
 	flag.Parse()
@@ -40,12 +41,12 @@ func main() {
 	//cmd.ReadConfigFile()
 
 	readerConfig := NewReaderConfig()
-	readerConfig.SetTitle("Comigo Reader v0.9.0").
+	readerConfig.SetTitle("Comigo Reader v0.9.9").
 		SetReaderMode(ScrollMode).
-		SetWindowFullScreen(false).
-		SetWindowDecorated(true).
-		SetWindowResizingModeEnabled(ebiten.WindowResizingModeEnabled).
-		SetWindowSize(1280, 800).
+		SetWindowFullScreen(false).                                     //SetWindowFullScreen 设置窗口是否全屏。
+		SetWindowDecorated(true).                                       //SetWindowDecorated 设置是否有边框和标题栏
+		SetWindowResizingModeEnabled(ebiten.WindowResizingModeEnabled). //SetWindowResizingModeEnabled 设置窗口是否可以调整大小。
+		SetWindowSize(1024, 768).
 		SetRunOptions(ebiten.RunGameOptions{
 			ScreenTransparent: false,
 		})
@@ -55,6 +56,7 @@ func main() {
 	ebiten.SetWindowResizingMode(readerConfig.WindowResizingModeEnabled)
 	// SetWindowDecorated 设置窗口是否有边框和标题栏。
 	ebiten.SetWindowDecorated(readerConfig.WindowDecorated)
+	ebiten.SetScreenClearedEveryFrame(false)
 
 	// 为此 UI 创建根容器。
 	// 所有其他 UI 元素都必须添加到此容器中。
@@ -65,7 +67,7 @@ func main() {
 				//GridLayout 网格布局模式，将小部件放置在网格中。
 				widget.NewGridLayout(
 					// 使用 Columns 参数来定义列的数量。
-					widget.GridLayoutOpts.Columns(4),
+					widget.GridLayoutOpts.Columns(2),
 					// 使用 ColumnStretch 和 RowStretch 参数来分别定义列和行的拉伸因子。
 					// 只支持布尔值，true表示拉伸，false表示不拉伸。
 					widget.GridLayoutOpts.Stretch([]bool{true, true, true, true}, []bool{true, false, true, false}),
@@ -89,15 +91,16 @@ func main() {
 		log.Fatal("Error Parsing Font", err)
 	}
 	fontFace := truetype.NewFace(ttfFont, &truetype.Options{
-		Size: 32,
+		Size: 24,
 	})
 
-	for i := range 70 {
+	for i := range 40 {
 		// 文本颜色。
 		rgba := color.RGBA{R: uint8((250 - 3*i) % 255), G: uint8((150 + 7*i) % 255), B: uint8((70 + i*i) % 255), A: 0xff}
-		// 创建一个文本小部件，上面写“World_i”
+		// 创建一个文本小部件，上面写“World_i”+现在时间
+		nowTime := time.Now().Format("2006-01-02 15:04:05")
 		helloWorldLabel := widget.NewText(
-			widget.TextOpts.Text("World_"+strconv.Itoa(i)+" ", fontFace, rgba),
+			widget.TextOpts.Text("Chrome_"+strconv.Itoa(i)+" "+nowTime, fontFace, rgba),
 		)
 		// 要显示文本小部件，将其添加到根容器中。
 		rootContainer.AddChild(helloWorldLabel)
