@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+	"github.com/yumenaka/comi/util/locale"
 	"log"
 	"net"
 	"os"
@@ -12,7 +13,6 @@ import (
 
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/mem"
-	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/logger"
 )
 

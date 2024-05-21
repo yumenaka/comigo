@@ -3,9 +3,9 @@ package handlers
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comi/locale"
 	"github.com/yumenaka/comi/logger"
 	"github.com/yumenaka/comi/util"
+	"github.com/yumenaka/comi/util/locale"
 	"net/http"
 	"os"
 	"path/filepath"

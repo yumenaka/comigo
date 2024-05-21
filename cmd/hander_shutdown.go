@@ -2,15 +2,15 @@ package cmd
 
 import (
 	"context"
+	"github.com/yumenaka/comi/util/locale"
 	"log"
 	"os/signal"
 	"syscall"
 	"time"
 
 	"github.com/yumenaka/comi/config"
-	"github.com/yumenaka/comi/locale"
+	"github.com/yumenaka/comi/entity"
 	"github.com/yumenaka/comi/logger"
-	"github.com/yumenaka/comi/types"
 )
 
 // SetShutdownHandler TODO:退出时清理临时文件的函数
@@ -28,7 +28,7 @@ func SetShutdownHandler() {
 	//清理临时文件
 	if config.Config.ClearCacheExit {
 		logger.Infof("\r"+locale.GetString("start_clear_file")+" CachePath:%s ", config.Config.CachePath)
-		types.ClearTempFilesALL(config.Config.Debug, config.Config.CachePath)
+		entity.ClearTempFilesALL(config.Config.Debug, config.Config.CachePath)
 		logger.Infof("%s", locale.GetString("clear_temp_file_completed"))
 	}
 	// 上下文用于通知服务器它有 5 秒的时间来完成它当前正在处理的请求

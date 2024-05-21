@@ -1,13 +1,13 @@
 package handlers
 
 import (
+	"github.com/yumenaka/comi/util"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/yumenaka/comi/config"
-	"github.com/yumenaka/comi/types"
-	"github.com/yumenaka/comi/util"
+	"github.com/yumenaka/comi/entity"
 )
 
 // ServerStatus 服务器当前状况
@@ -38,7 +38,7 @@ func GetServerInfoPublic(c *gin.Context) {
 		ServerHost:        host,
 		ServerPort:        config.Config.Port,
 		SupportUploadFile: config.Config.EnableUpload,
-		NumberOfBooks:     types.GetBooksNumber(),
+		NumberOfBooks:     entity.GetBooksNumber(),
 	}
 	c.PureJSON(http.StatusOK, serverStatus)
 }
@@ -57,7 +57,7 @@ func GetServerInfo(c *gin.Context) {
 		ServerHost:            host,
 		ServerPort:            config.Config.Port,
 		SupportUploadFile:     config.Config.EnableUpload,
-		NumberOfBooks:         types.GetBooksNumber(),
+		NumberOfBooks:         entity.GetBooksNumber(),
 		NumberOfOnLineUser:    1,
 		NumberOfOnLineDevices: 1,
 		ClientIP:              c.ClientIP(),

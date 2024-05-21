@@ -8,12 +8,12 @@ import (
 	"github.com/yumenaka/comi/ent"
 	entbook "github.com/yumenaka/comi/ent/book"
 	"github.com/yumenaka/comi/ent/singlepageinfo"
+	"github.com/yumenaka/comi/entity"
 	"github.com/yumenaka/comi/logger"
-	"github.com/yumenaka/comi/types"
 )
 
 // ClearBookData   清空数据库的Book与SinglePageInfo表  // 后台并发执行，所以不能保证结果如预期，不用这个函数???
-func ClearBookData(clearBook *types.Book) {
+func ClearBookData(clearBook *entity.Book) {
 	//如何增删查改： https://entgo.io/zh/docs/crud
 	ctx := context.Background()
 	_, err := client.Book.
@@ -62,7 +62,7 @@ func DeleteAllBookInDatabase(debug bool) {
 }
 
 // SaveAllBookToDatabase 将Map里面的书籍信息，全部保存到本地数据库中
-func SaveAllBookToDatabase(m map[string]*types.Book) {
+func SaveAllBookToDatabase(m map[string]*entity.Book) {
 	for _, b := range m {
 		var c = *b
 		err := SaveBookToDatabase(&c)
@@ -73,7 +73,7 @@ func SaveAllBookToDatabase(m map[string]*types.Book) {
 }
 
 // SaveBookListToDatabase  向数据库中插入一组书
-func SaveBookListToDatabase(bookList []*types.Book) error {
+func SaveBookListToDatabase(bookList []*entity.Book) error {
 	for _, b := range bookList {
 		err := SaveBookToDatabase(b)
 		if err != nil {
@@ -84,7 +84,7 @@ func SaveBookListToDatabase(bookList []*types.Book) error {
 }
 
 // SaveBookToDatabase 向数据库中插入一本书
-func SaveBookToDatabase(save *types.Book) error {
+func SaveBookToDatabase(save *entity.Book) error {
 	//如何增删查改： https://entgo.io/zh/docs/crud
 	ctx := context.Background()
 	b, err := client.Book.
@@ -142,7 +142,7 @@ func SaveBookToDatabase(save *types.Book) error {
 }
 
 // GetBookFromDatabase 根据文件路径，从数据库查询一本书的详细信息,避免重复扫描压缩包
-func GetBookFromDatabase(filepath string) (*types.Book, error) {
+func GetBookFromDatabase(filepath string) (*entity.Book, error) {
 	ctx := context.Background()
 	books, err := client.Book. // UserClient.
 					Query(). // 用户查询生成器。
@@ -155,13 +155,13 @@ func GetBookFromDatabase(filepath string) (*types.Book, error) {
 		return nil, errors.New("not found in database,filepath:" + filepath)
 	}
 	temp := books[0]
-	b := types.Book{
-		BookInfo: types.BookInfo{
+	b := entity.Book{
+		BookInfo: entity.BookInfo{
 			Title:           temp.Title,
 			BookID:          temp.BookID,
 			FilePath:        temp.FilePath,
 			BookStorePath:   temp.BookStorePath,
-			Type:            types.SupportFileType(temp.Type),
+			Type:            entity.SupportFileType(temp.Type),
 			ChildBookNum:    temp.ChildBookNum,
 			Depth:           temp.Depth,
 			ParentFolder:    temp.ParentFolder,
@@ -187,7 +187,7 @@ func GetBookFromDatabase(filepath string) (*types.Book, error) {
 						Where(singlepageinfo.BookID(temp.BookID)).
 						All(ctx) // query and return.
 	for _, v := range pages {
-		b.Pages.Images = append(b.Pages.Images, types.ImageInfo{
+		b.Pages.Images = append(b.Pages.Images, entity.ImageInfo{
 			PageNum:           v.PageNum,
 			NameInArchive:     v.NameInArchive,
 			Url:               v.URL,
@@ -211,7 +211,7 @@ func GetBookFromDatabase(filepath string) (*types.Book, error) {
 }
 
 // GetBooksFromDatabase  根据文件路径，从数据库查询书的详细信息,避免重复扫描压缩包。//忽略文件夹型的书籍
-func GetBooksFromDatabase() (list []*types.Book, err error) {
+func GetBooksFromDatabase() (list []*entity.Book, err error) {
 	ctx := context.Background()
 	books, err := client.Book. // UserClient.
 					Query(). // 用户查询生成器。
@@ -224,13 +224,13 @@ func GetBooksFromDatabase() (list []*types.Book, err error) {
 		return nil, errors.New("not found in database")
 	}
 	for _, temp := range books {
-		b := types.Book{
-			BookInfo: types.BookInfo{
+		b := entity.Book{
+			BookInfo: entity.BookInfo{
 				Title:           temp.Title,
 				BookID:          temp.BookID,
 				FilePath:        temp.FilePath,
 				BookStorePath:   temp.BookStorePath,
-				Type:            types.SupportFileType(temp.Type),
+				Type:            entity.SupportFileType(temp.Type),
 				ChildBookNum:    temp.ChildBookNum,
 				Depth:           temp.Depth,
 				ParentFolder:    temp.ParentFolder,
@@ -258,7 +258,7 @@ func GetBooksFromDatabase() (list []*types.Book, err error) {
 			logger.Infof("%s", err)
 		}
 		for _, v := range pages {
-			b.Pages.Images = append(b.Pages.Images, types.ImageInfo{
+			b.Pages.Images = append(b.Pages.Images, entity.ImageInfo{
 				PageNum:           v.PageNum,
 				NameInArchive:     v.NameInArchive,
 				Url:               v.URL,
@@ -277,14 +277,14 @@ func GetBooksFromDatabase() (list []*types.Book, err error) {
 		}
 		//硬写一个封面
 		switch b.Type {
-		case types.TypePDF:
-			b.SetClover(types.ImageInfo{NameInArchive: "pdf.png", Url: "/images/pdf.png"})
-		case types.TypeVideo:
-			b.SetClover(types.ImageInfo{NameInArchive: "video.png", Url: "/images/video.png"})
-		case types.TypeAudio:
-			b.SetClover(types.ImageInfo{NameInArchive: "audio.png", Url: "/images/audio.png"})
-		case types.TypeUnknownFile:
-			b.SetClover(types.ImageInfo{NameInArchive: "unknown.png", Url: "/images/unknown.png"})
+		case entity.TypePDF:
+			b.SetClover(entity.ImageInfo{NameInArchive: "pdf.png", Url: "/images/pdf.png"})
+		case entity.TypeVideo:
+			b.SetClover(entity.ImageInfo{NameInArchive: "video.png", Url: "/images/video.png"})
+		case entity.TypeAudio:
+			b.SetClover(entity.ImageInfo{NameInArchive: "audio.png", Url: "/images/audio.png"})
+		case entity.TypeUnknownFile:
+			b.SetClover(entity.ImageInfo{NameInArchive: "unknown.png", Url: "/images/unknown.png"})
 		}
 		list = append(list, &b)
 	}

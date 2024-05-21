@@ -31,6 +31,7 @@ cache
 *.tar.gz
 *.7z
 *.log
+*.pdf
 main
 *.DS_Store
 *package-lock.json
@@ -41,7 +42,6 @@ archiver
 bin
 comic
 .config
-test*
 *md5Sums.txt
 resource.syso
 \[*
@@ -55,22 +55,22 @@ __*
 #routers/vue_static
 tmp
 bin/main
-vue/node_modules
-vue/dist
-vue/static
-vue/node_modules/*
+web/node_modules
+web/dist
+web/static
+web/node_modules/*
 
 # local env files
-vue/.env.local
-vue/.env.*.local
+web/.env.local
+web/.env.*.local
 
 # Log files
-vue/npm-debug.log*
-vue/yarn-debug.log*
-vue/yarn-error.log*
+web/npm-debug.log*
+web/yarn-debug.log*
+web/yarn-error.log*
 
 # Editor directories and files
-vue/.idea
+web/.idea
 *.suo
 *.ntvs*
 *.njsproj
