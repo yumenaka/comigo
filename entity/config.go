@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/yumenaka/comi/util"
+	"github.com/yumenaka/comi/util/logger"
 	"os"
 	"path"
 	"path/filepath"
@@ -11,7 +12,6 @@ import (
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/tidwall/gjson"
-	"github.com/yumenaka/comi/logger"
 )
 
 type ConfigStatus struct {

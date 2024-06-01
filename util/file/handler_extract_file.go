@@ -3,12 +3,12 @@ package file
 import (
 	"context"
 	"github.com/yumenaka/comi/util"
+	"github.com/yumenaka/comi/util/logger"
 	"io"
 	"os"
 	"path/filepath"
 
 	"github.com/yumenaka/archiver/v4"
-	"github.com/yumenaka/comi/logger"
 )
 
 // 解压文件的函数

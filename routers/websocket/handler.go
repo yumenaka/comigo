@@ -1,8 +1,8 @@
 package websocket
 
 import (
-	"github.com/yumenaka/comi/logger"
 	"github.com/yumenaka/comi/util/locale"
+	"github.com/yumenaka/comi/util/logger"
 	"log"
 	"net/http"
 

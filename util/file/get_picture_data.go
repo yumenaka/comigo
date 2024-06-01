@@ -3,12 +3,11 @@ package file
 import (
 	"github.com/yumenaka/comi/util"
 	"github.com/yumenaka/comi/util/locale"
+	"github.com/yumenaka/comi/util/logger"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
-
-	"github.com/yumenaka/comi/logger"
 )
 
 type GetPictureDataOption struct {

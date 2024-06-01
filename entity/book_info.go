@@ -3,8 +3,8 @@ package entity
 import (
 	"errors"
 	"github.com/jxskiss/base62"
-	"github.com/yumenaka/comi/logger"
 	"github.com/yumenaka/comi/util"
+	"github.com/yumenaka/comi/util/logger"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -76,7 +76,7 @@ func (b *BookInfo) initBookID() *BookInfo {
 	return b
 }
 
-// 设置封面
+// SetClover 设置封面
 func (b *BookInfo) SetClover(c ImageInfo) *BookInfo {
 	b.Cover = c
 	return b

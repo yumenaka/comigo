@@ -3,6 +3,7 @@ package util
 import (
 	"bytes"
 	"errors"
+	"github.com/yumenaka/comi/util/logger"
 	"image"
 	"image/color"
 	"image/draw"
@@ -12,7 +13,6 @@ import (
 	"github.com/bbrks/go-blurhash"
 	"github.com/disintegration/imaging"
 	"github.com/mandykoh/autocrop"
-	"github.com/yumenaka/comi/logger"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/basicfont"
 	"golang.org/x/image/math/fixed"

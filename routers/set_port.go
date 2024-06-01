@@ -3,11 +3,11 @@ package routers
 import (
 	"github.com/yumenaka/comi/util"
 	"github.com/yumenaka/comi/util/locale"
+	"github.com/yumenaka/comi/util/logger"
 	"math/rand"
 	"time"
 
 	"github.com/yumenaka/comi/config"
-	"github.com/yumenaka/comi/logger"
 )
 
 // SetWebServerPort 3、设置服务端口

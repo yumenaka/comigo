@@ -1,6 +1,6 @@
 {
   "name": "comigo-webui",
-  "version": "0.8.0",
+  "version": "0.9.9",
   "private": true,
   "scripts": {
     "serve": "vite",

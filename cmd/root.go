@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/yumenaka/comi/util/locale"
+	"github.com/yumenaka/comi/util/logger"
 	"os"
 	"path"
 	"path/filepath"
@@ -10,7 +11,6 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/yumenaka/comi/config"
-	"github.com/yumenaka/comi/logger"
 	"github.com/yumenaka/comi/routers"
 )
 

@@ -3,13 +3,13 @@ package routers
 import (
 	"embed"
 	"github.com/yumenaka/comi/util/locale"
+	"github.com/yumenaka/comi/util/logger"
 	"html/template"
 	"io/fs"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comi/config"
-	"github.com/yumenaka/comi/logger"
 )
 
 // TemplateString 模板文件

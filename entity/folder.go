@@ -2,11 +2,10 @@ package entity
 
 import (
 	"errors"
+	"github.com/yumenaka/comi/util/logger"
 	"os"
 	"path/filepath"
 	"sync"
-
-	"github.com/yumenaka/comi/logger"
 )
 
 // Folder 本地总书库，扫描后生成。可以有多个子书库。

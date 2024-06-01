@@ -2,7 +2,7 @@ package websocket
 
 import (
 	"encoding/json"
-	"github.com/yumenaka/comi/logger"
+	"github.com/yumenaka/comi/util/logger"
 	"log"
 	"math"
 	"time"

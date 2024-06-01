@@ -3,7 +3,7 @@ package config_handlers
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comi/config"
-	"github.com/yumenaka/comi/logger"
+	"github.com/yumenaka/comi/util/logger"
 	"net/http"
 )
 

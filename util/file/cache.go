@@ -3,6 +3,7 @@ package file
 import (
 	"errors"
 	"github.com/yumenaka/comi/util/locale"
+	"github.com/yumenaka/comi/util/logger"
 	"net/url"
 	"os"
 	"path"
@@ -11,7 +12,6 @@ import (
 
 	"github.com/elliotchance/orderedmap"
 	"github.com/elliotchance/pie/v2"
-	"github.com/yumenaka/comi/logger"
 )
 
 // 储存文件信息的key

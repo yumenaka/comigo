@@ -1,11 +1,11 @@
 package config_handlers
 
 import (
+	"github.com/yumenaka/comi/util/logger"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comi/config"
-	"github.com/yumenaka/comi/logger"
 )
 
 // SaveConfigHandler 保存服务器配置到文件

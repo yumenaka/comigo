@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/yumenaka/comi/util/locale"
+	"github.com/yumenaka/comi/util/logger"
 	iofs "io/fs"
 	"net/url"
 	"os"
@@ -16,7 +17,6 @@ import (
 
 	"github.com/cloudsoda/go-smb2"
 	"github.com/yumenaka/comi/entity"
-	"github.com/yumenaka/comi/logger"
 )
 
 // Smb 扫描smb书籍  github.com/hirochachacha/go-smb2
