@@ -6,7 +6,7 @@ export default defineConfig({
   base: "/admin",
   plugins: [react()],
   build: {
-    outDir: "../../routers/react_static",
+    outDir: "../../routers/admin_static",
     emptyOutDir: true, //清除目标目录：https://cn.vitejs.dev/config/build-options.html#build-emptyoutdir
     chunkSizeWarningLimit: 1500, //规定触发警告的 chunk 大小。（以 kbs 为单位）https://cn.vitejs.dev/config/#build-emptyoutdir
   },

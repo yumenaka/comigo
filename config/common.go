@@ -21,7 +21,7 @@ var (
 		Port:        1234,
 		Host:        "DefaultHost",
 		LocalStores: []string{},
-		RemoteStores: []entity.RemoteStore{
+		BookStores: []entity.BookStore{
 			{
 				Type:      "smb",
 				Host:      os.Getenv("SMB_HOST"),

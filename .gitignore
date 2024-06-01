@@ -52,7 +52,7 @@ resource.syso
 *comigo.db
 
 __*
-#routers/vue_static
+#routers/web_static
 tmp
 bin/main
 web/node_modules

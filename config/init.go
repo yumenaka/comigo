@@ -24,9 +24,9 @@ func init() {
 	if err != nil {
 		logger.Infof("Error loading .env file")
 	}
-	Config.RemoteStores[0].Host = os.Getenv("SMB_HOST")
-	Config.RemoteStores[0].Username = os.Getenv("SMB_USER")
-	Config.RemoteStores[0].Password = os.Getenv("SMB_PASS")
-	Config.RemoteStores[0].ShareName = os.Getenv("SMB_SHARE_NAME")
-	Config.RemoteStores[0].Path = os.Getenv("SMB_PATH")
+	Config.BookStores[0].Host = os.Getenv("SMB_HOST")
+	Config.BookStores[0].Username = os.Getenv("SMB_USER")
+	Config.BookStores[0].Password = os.Getenv("SMB_PASS")
+	Config.BookStores[0].ShareName = os.Getenv("SMB_SHARE_NAME")
+	Config.BookStores[0].Path = os.Getenv("SMB_PATH")
 }
