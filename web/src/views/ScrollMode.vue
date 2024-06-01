@@ -2,31 +2,30 @@
 	<div id="ScrollMode" class="manga" @mouseenter="onMouseEnter" @mouseleave="onMouseLeave">
 		<Header :inShelf="false" :readMode="'scroll'" :setDownLoadLink="needDownloadLink()" :headerTitle="book.title"
 			:bookID="book.id" :depth="book.depth" :showReturnIcon="true" :showSettingsIcon="true"
-			:InfiniteDropdown="InfiniteDropdown" v-bind:style="{ background: model.interfaceColor }"
+			:InfiniteDropdown="ScrollModeConfig.InfiniteDropdown" v-bind:style="{ background: model.interfaceColor }"
 			@drawerActivate="drawerActivate">
 		</Header>
 
 		<!-- 分页条 -->
-		<n-pagination class="flex flex-row justify-center m-2 font-semibold text-lg" v-if="!InfiniteDropdown"
+		<n-pagination class="flex flex-row justify-center m-2 text-lg font-semibold" v-if="!ScrollModeConfig.InfiniteDropdown"
 			v-model:page="paginationPage" :page-count="Math.ceil(book.page_count / LOAD_LIMIT)"
 			:on-update:page="onPaginationPageChange" />
 
 		<!-- PDF格式的额外提示信息。-->
-		<div v-if="book.type === '.pdf' && ((!InfiniteDropdown && paginationPage === 1) || InfiniteDropdown)"
-			class="w-full text-center font-semibold  flex flex-row justify-center m-1 p-1  self-center rounded  shadow-2xl">
+		<div v-if="book.type === '.pdf' && ((!ScrollModeConfig.InfiniteDropdown && paginationPage === 1) || ScrollModeConfig.InfiniteDropdown)"
+			class="flex flex-row self-center justify-center w-full p-1 m-1 font-semibold text-center rounded shadow-2xl">
 			<div class="pb-1">{{ $t('pdf_hint_message') }}</div>
 			<a class="text-blue-700 underline " :href="'api/raw/' + book.id + '/' + encodeURIComponent(book.title)"
 				target="_blank">{{ $t('original_pdf_link') }} </a>
 		</div>
-
 
 		<!-- 渲染漫画的主体部分 -->
 		<div class="main_manga" v-for="(single_image, n) in localImages" :key="single_image.url"
 			@click="onMouseClick($event)" @mousemove="onMouseMove">
 			<ImageScroll :image_url="imageParametersString(single_image.url)" :sPWL="sPWL" :dPWL="dPWL" :sPWP="sPWP"
 				:dPWP="dPWP" :nowPageNum="nowPageNum" :page_count="book.page_count" :book_id="book.id"
-				:showPageNumFlag_ScrollMode="showPageNumFlag_ScrollMode" :syncPageByWS="syncPageByWS"
-				:autoScrolling="autoScrolling" :userControlling="userControlling" :margin="marginOnScrollMode"
+				:showPageNumFlag_ScrollMode="ScrollModeConfig.showPageNumFlag_ScrollMode" :syncPageByWS="ScrollModeConfig.syncPageByWS"
+				:autoScrolling="autoScrolling" :userControlling="userControlling" :margin="ScrollModeConfig.marginOnScrollMode"
 				@refreshNowPageNum="refreshNowPageNum">
 			</ImageScroll>
 		</div>
@@ -36,31 +35,31 @@
 		<n-back-top class="bg-blue-200" :show="showBackTopFlag" type="info" :right="20" :bottom="20" />
 
 		<!-- 分页条 -->
-		<n-pagination class="flex flex-row justify-center m-2 font-semibold text-lg" v-if="!InfiniteDropdown"
+		<n-pagination class="flex flex-row justify-center m-2 text-lg font-semibold" v-if="!ScrollModeConfig.InfiniteDropdown"
 			v-model:page="paginationPage" :page-count="Math.ceil(book.page_count / LOAD_LIMIT)"
 			:on-update:page="onPaginationPageChange" />
 
 		<!-- 底部最下面的返回顶部按钮 -->
-		<button v-if="InfiniteDropdown" class="w-24 h-12 m-2 bg-blue-300 text-gray-900 hover:bg-blue-500 rounded"
+		<button v-if="ScrollModeConfig.InfiniteDropdown" class="w-24 h-12 m-2 text-gray-900 bg-blue-300 rounded hover:bg-blue-500"
 			@click="scrollToTop(90);" size="large">{{ $t('back-to-top') }}</button>
 
 		<QuickJumpBar class="self-center mt-2 mb-2" :nowBookID="book.id" :readMode="'scroll'"
-			:InfiniteDropdown="InfiniteDropdown"></QuickJumpBar>
+			:InfiniteDropdown="ScrollModeConfig.InfiniteDropdown"></QuickJumpBar>
 
 		<!-- 底部页脚 -->
 		<Bottom v-bind:style="{ background: model.interfaceColor }" class="flex-none h-12" :ServerName="$store.state.server_status.ServerName
-            ? $store.state.server_status.ServerName
-            : 'Comigo'
-            "></Bottom>
+		? $store.state.server_status.ServerName
+		: 'Comigo'
+		"></Bottom>
 
 		<Drawer :initDrawerActive="drawerActive" :initDrawerPlacement="drawerPlacement"
 			@saveConfig="saveConfigToLocalStorage" @startSketch="startSketchMode" @closeDrawer="drawerDeactivate"
-			@setT="OnSetTemplate" :readerMode="readerMode" :inBookShelf="false" :sketching="false">
+			@setT="OnSetTemplate" :readerMode="ScrollModeConfig.readerMode" :inBookShelf="false" :sketching="false">
 
 			<!-- 选择：切换页面模式 -->
 			<n-button @click="changeReaderModeToFlipMode">{{ $t('switch_to_flip_mode') }}</n-button>
 			<!-- 开关：卷轴模式下，是无限下拉，还是分页加载 -->
-			<n-switch size="large" v-model:value="InfiniteDropdown" :rail-style="railStyle"
+			<n-switch size="large" v-model:value="ScrollModeConfig.InfiniteDropdown" :rail-style="railStyle"
 				@update:value="setInfiniteDropdown">
 				<template #checked>{{ $t("infinite_dropdown") }}</template>
 				<template #unchecked>{{ $t("pagination_mode") }}</template>
@@ -75,22 +74,20 @@
 			<n-button v-if="InfiniteDropdown" @click="setInfiniteDropdown(false)">{{ $t('to_pagination_mode')
 			}}</n-button> -->
 
-			<!-- 空白行-->
-			<!-- <p> &nbsp;</p> -->
 			<!-- 同步翻页 -->
-			<n-switch size="large" v-model:value="syncPageByWS" @update:value="setSyncPageByWS">
+			<n-switch size="large" v-model:value="ScrollModeConfig.syncPageByWS" @update:value="setSyncPageByWS">
 				<template #checked>{{ $t("sync_page") }}</template>
 				<template #unchecked>{{ $t("sync_page") }}</template>
 			</n-switch>
 
 			<!-- 显示页数 -->
-			<n-switch size="large" v-model:value="showPageNumFlag_ScrollMode" @update:value="setShowPageNumChange">
+			<n-switch size="large" v-model:value="ScrollModeConfig.showPageNumFlag_ScrollMode" @update:value="setShowPageNumChange">
 				<template #checked>{{ $t('showPageNum') }}</template>
 				<template #unchecked>{{ $t('showPageNum') }}</template>
 			</n-switch>
 
 			<!-- 开关：横屏状态下,宽度单位是百分比还是固定值 -->
-			<n-switch size="large" v-model:value="imageWidth_usePercentFlag" :rail-style="railStyle"
+			<n-switch size="large" v-model:value="ScrollModeConfig.imageWidth_usePercentFlag" :rail-style="railStyle"
 				@update:value="setImageWidthUsePercentFlag">
 				<template #checked>{{ $t('width_usePercent') }}</template>
 				<template #unchecked>{{ $t('width_useFixedValue') }}</template>
@@ -98,57 +95,57 @@
 
 			<!-- 单页-漫画宽度-使用百分比 -->
 			<!-- 数字输入% -->
-			<n-input-number v-if="imageWidth_usePercentFlag" size="small" :show-button="false"
-				v-model:value="singlePageWidth_Percent" :max="100" :min="10" :update-value-on-input="false">
+			<n-input-number v-if="ScrollModeConfig.imageWidth_usePercentFlag" size="small" :show-button="false"
+				v-model:value="ScrollModeConfig.singlePageWidth_Percent" :max="100" :min="10" :update-value-on-input="false">
 				<template #prefix>{{ $t('singlePageWidth') }}</template>
 				<template #suffix>%</template>
 			</n-input-number>
 
 			<!-- 滑动选择% -->
-			<n-slider v-if="imageWidth_usePercentFlag" v-model:value="singlePageWidth_Percent" :step="1" :max="100"
+			<n-slider v-if="ScrollModeConfig.imageWidth_usePercentFlag" v-model:value="ScrollModeConfig.singlePageWidth_Percent" :step="1" :max="100"
 				:min="10" :format-tooltip="(value: any) => `${value}%`" />
 
 			<!-- 开页-漫画宽度-使用百分比  -->
 			<!-- 数字输入% -->
-			<n-input-number v-if="imageWidth_usePercentFlag" size="small" :show-button="false"
-				v-model:value="doublePageWidth_Percent" :max="100" :min="10" :update-value-on-input="false">
+			<n-input-number v-if="ScrollModeConfig.imageWidth_usePercentFlag" size="small" :show-button="false"
+				v-model:value="ScrollModeConfig.doublePageWidth_Percent" :max="100" :min="10" :update-value-on-input="false">
 				<template #prefix>{{ $t('doublePageWidth') }}</template>
 				<template #suffix>%</template>
 			</n-input-number>
 			<!-- 滑动选择% -->
-			<n-slider v-if="imageWidth_usePercentFlag" v-model:value="doublePageWidth_Percent" :step="1" :max="100"
+			<n-slider v-if="ScrollModeConfig.imageWidth_usePercentFlag" v-model:value="ScrollModeConfig.doublePageWidth_Percent" :step="1" :max="100"
 				:min="10" :format-tooltip="(value: number) => `${value}%`" />
 
 			<!-- 单页-漫画宽度-使用固定值PX -->
 			<!-- 数字输入框 -->
-			<n-input-number v-if="!imageWidth_usePercentFlag" size="small" :show-button="false"
-				v-model:value="singlePageWidth_PX" :min="50" :update-value-on-input="false">
+			<n-input-number v-if="!ScrollModeConfig.imageWidth_usePercentFlag" size="small" :show-button="false"
+				v-model:value="ScrollModeConfig.singlePageWidth_PX" :min="50" :update-value-on-input="false">
 				<template #prefix>{{ $t('singlePageWidth') }}</template>
 				<template #suffix>px</template>
 			</n-input-number>
 
 			<!-- 滑动选择PX -->
-			<n-slider v-if="!imageWidth_usePercentFlag" v-model:value="singlePageWidth_PX" :step="10" :max="1600" :min="50"
-				:format-tooltip="(value: any) => `${value}px`" />
+			<n-slider v-if="!ScrollModeConfig.imageWidth_usePercentFlag" v-model:value="ScrollModeConfig.singlePageWidth_PX" :step="10" :max="1600"
+				:min="50" :format-tooltip="(value: any) => `${value}px`" />
 
 			<!-- 数字输入框 -->
-			<n-input-number v-if="!imageWidth_usePercentFlag" size="small" :show-button="false"
-				v-model:value="doublePageWidth_PX" :min="50" :update-value-on-input="false">
+			<n-input-number v-if="!ScrollModeConfig.imageWidth_usePercentFlag" size="small" :show-button="false"
+				v-model:value="ScrollModeConfig.doublePageWidth_PX" :min="50" :update-value-on-input="false">
 				<template #prefix>{{ $t('doublePageWidth') }}</template>
 				<template #suffix>px</template>
 			</n-input-number>
 
 			<!-- 滑动选择PX -->
-			<n-slider v-if="!imageWidth_usePercentFlag" v-model:value="doublePageWidth_PX" :step="10" :max="1600" :min="50"
-				:format-tooltip="(value: any) => `${value}px`" />
+			<n-slider v-if="!ScrollModeConfig.imageWidth_usePercentFlag" v-model:value="ScrollModeConfig.doublePageWidth_PX" :step="10" :max="1600"
+				:min="50" :format-tooltip="(value: any) => `${value}px`" />
 
 			<!-- 页面间隙px -->
-			<n-input-number v-if="!imageWidth_usePercentFlag" size="small" :show-button="false"
-				v-model:value="marginOnScrollMode" :min="0" :update-value-on-input="false">
+			<n-input-number v-if="!ScrollModeConfig.imageWidth_usePercentFlag" size="small" :show-button="false"
+				v-model:value="ScrollModeConfig.marginOnScrollMode" :min="0" :update-value-on-input="false">
 				<template #prefix>{{ $t('marginOnScrollMode') }}</template>
 				<template #suffix>px</template>
 			</n-input-number>
-			<n-slider v-model:value="marginOnScrollMode" :step="1" :max="100" :min="0"
+			<n-slider v-model:value="ScrollModeConfig.marginOnScrollMode" :step="1" :max="100" :min="0"
 				:format-tooltip="(value: any) => `${value}px`" />
 
 			<!-- 开关：自动切边 -->
@@ -265,7 +262,6 @@ export default defineComponent({
 					const addStr = resize_width_str + resize_height_str + do_auto_resize_str + resize_max_height_str + auto_crop_str + gray_str;
 					//如果有附加转换参数，则设置成不缓存
 					const nocache_str = (addStr === "" ? "" : "&no-cache=true");
-					//console.log(base_str + addStr + nocache_str);
 					return base_str + addStr + nocache_str;
 				} else {
 					return source_url
@@ -303,7 +299,6 @@ export default defineComponent({
 			nowPageNum: 1,//当前页数,从1开始,,不是数组下标,在pages.images数组当中用的时候需要-1
 			LOAD_LIMIT: 20,//一次载入的漫画张数，默认为20.
 			lastPageNum: 20,//载入漫画的最后一页，默认为20.
-			InfiniteDropdown: true,//卷轴模式下，是否无限下拉
 			localImages: [
 				{
 					filename: "",
@@ -315,8 +310,6 @@ export default defineComponent({
 				}
 			],
 			nowLoading: true,//是否正在加载，延迟执行操作、隐藏按钮用
-			//ws翻页相关
-			syncPageByWS: true,//是否通过websocket同步翻页
 			userControlling: false,//用户是否正在操控，操控的时候不接收、也不发送WS翻页消息
 			autoScrolling: false,//是否正在自动翻页，为真的时候，不发送WS消息
 			book: {
@@ -366,16 +359,11 @@ export default defineComponent({
 					value: "filesize_reverse"
 				},
 			],
-			readerMode: "scroll",
+
 			drawerActive: false,
 			drawerPlacement: 'right',
 			//开发模式 还没有做的功能与设置,设置Debug以后才能见到
 			debugModeFlag: true,
-			//书籍数据,需要从远程拉取
-			//是否显示顶部页头
-			showHeaderFlag: true,
-			//是否显示页数
-			showPageNumFlag_ScrollMode: false,
 			//是否显示回到顶部按钮
 			showBackTopFlag: false,
 			//是否正在向下滚动
@@ -387,25 +375,38 @@ export default defineComponent({
 			//鼠标点击或触摸的位置
 			clickX: 0,
 			clickY: 0,
-			//可见范围是否是横向
-			isLandscapeMode: true,
-			isPortraitMode: false,
-			imageMaxWidth: 10,
 			//屏幕宽横比,inLandscapeMode的判断依据
 			aspectRatio: 1.2,
-			//状态驱动的动态 CSS https://v3.cn.vuejs.org/api/sfc-style.html#%E7%8A%B6%E6%80%81%E9%A9%B1%E5%8A%A8%E7%9A%84%E5%8A%A8%E6%80%81-css
-			//图片宽度的单位,是否使用百分比
-			imageWidth_usePercentFlag: false,
-			//横屏(Landscape)状态的漫画页宽度,百分比
-			singlePageWidth_Percent: 50,
-			doublePageWidth_Percent: 95,
-			//横屏(Landscape)状态的漫画页宽度。px。
-			singlePageWidth_PX: 720,
-			doublePageWidth_PX: 720,
 			//可见范围宽高的具体值
 			clientWidth: 0,
 			clientHeight: 0,
-			marginOnScrollMode: 10,//下拉模式下，漫画页面的底部间距。px。
+			ScrollModeConfig: {
+				InfiniteDropdown: true,//卷轴模式下，是否无限下拉
+				marginOnScrollMode: 10,//下拉模式下，漫画页面的底部间距。px。
+				//状态驱动的动态 CSS https://v3.cn.vuejs.org/api/sfc-style.html#%E7%8A%B6%E6%80%81%E9%A9%B1%E5%8A%A8%E7%9A%84%E5%8A%A8%E6%80%81-css
+				//图片宽度的单位,是否使用百分比
+				imageWidth_usePercentFlag: false,
+				//横屏(Landscape)状态的漫画页宽度,百分比
+				singlePageWidth_Percent: 50,
+				doublePageWidth_Percent: 95,
+				//横屏(Landscape)状态的漫画页宽度。px。
+				singlePageWidth_PX: 720,
+				doublePageWidth_PX: 720,
+				//可见范围是否是横向
+				isLandscapeMode: true,
+				isPortraitMode: false,
+				//书籍数据,需要从远程拉取
+				//是否显示顶部页头
+				showHeaderFlag: true,
+				//是否显示页数
+				showPageNumFlag_ScrollMode: false,
+				readerMode: "scroll",
+				imageMaxWidth: 10,
+				//ws翻页相关
+				syncPageByWS: true,//是否通过websocket同步翻页
+				interfaceColor: "#F5F5E4",
+                backgroundColor: "#E0D9CD",
+			},
 		};
 	},
 	//Vue3生命周期:  https://v3.cn.vuejs.org/api/options-lifecycle-hooks.html#beforecreate
@@ -417,6 +418,23 @@ export default defineComponent({
 	// beforeUnmount: 当指令与在绑定元素父组件卸载之前时,只调用一次。
 	// unmounted: 当指令与元素解除绑定且父组件已卸载时,只调用一次。
 	created() {
+		// 从本次存储读取设置
+		let configString = localStorage.getItem('ScrollModeConfig');
+		if (localStorage.getItem('ScrollModeConfig') !== null && typeof configString === "string") {
+				this.ScrollModeConfig = JSON.parse(configString)
+		}
+		//UI配色
+		const tempBackgroundColor = localStorage.getItem("BackgroundColor")
+		if (typeof (tempBackgroundColor) === 'string') {
+			this.ScrollModeConfig.backgroundColor = tempBackgroundColor;
+		}
+		const tempInterfaceColor = localStorage.getItem("InterfaceColor")
+		if (typeof (tempInterfaceColor) === 'string') {
+			this.ScrollModeConfig.interfaceColor = tempInterfaceColor
+		}
+		this.model.backgroundColor = this.ScrollModeConfig.backgroundColor;
+		this.model.interfaceColor = this.ScrollModeConfig.interfaceColor;
+
 		// 消息监听，即接收websocket服务端推送的消息. optionsAPI用法
 		this.$options.sockets.onmessage = (data: any) => this.handlePacket(data);
 		//根据文件名、修改时间、文件大小等要素排序的参数
@@ -425,19 +443,12 @@ export default defineComponent({
 			sort_image_by_str = "&sort_by=" + this.$route.query.sort_by
 		}
 
-		//是否通过websocket同步页数
-		if (localStorage.getItem("SyncPageByWS") === "true") {
-			this.syncPageByWS = true;
-		} else if (localStorage.getItem("SyncPageByWS") === "false") {
-			this.syncPageByWS = false;
-		}
-
-		this.InfiniteDropdown = true;
+		this.ScrollModeConfig.InfiniteDropdown = true;
 		this.LOAD_LIMIT = 20;
 		// 使用Vue Router的this.$route.query获取查询参数
 		// 判断是否是无限下拉模式
 		if (this.$route.query.page !== null && this.$route.query.page !== undefined) {
-			this.InfiniteDropdown = false;
+			this.ScrollModeConfig.InfiniteDropdown = false;
 			this.LOAD_LIMIT = 35;
 			//如果没有指定页数,则默认为1
 			this.paginationPage = 1;
@@ -446,7 +457,6 @@ export default defineComponent({
 			const pageAsNumber = parseInt(this.$route.query.page as string, 10);//转换为数字,10进制
 			if (!isNaN(pageAsNumber)) {
 				this.paginationPage = pageAsNumber;
-				//console.log("从URL获取到的页数:" + this.paginationPage);
 			}
 		}
 
@@ -502,131 +512,14 @@ export default defineComponent({
 		window.addEventListener("scroll", this.onScroll);
 		//文档视图调整大小时会触发 resize 事件。 https://developer.mozilla.org/zh-CN/docs/Web/API/Window/resize_event
 		window.addEventListener("resize", this.onResize);
-		this.imageMaxWidth = window.innerWidth;
-
-		//根据本地存储初始化默认值,读取出来的是字符串,不要直接用
-		//是否通过websocket同步页数
-		if (localStorage.getItem("SyncPageByWS") === "true") {
-			this.syncPageByWS = true;
-		} else if (localStorage.getItem("SyncPageByWS") === "false") {
-			this.syncPageByWS = false;
-		}
-
-		//是否显示页头
-		if (localStorage.getItem("showHeaderFlag") === "true") {
-			this.showHeaderFlag = true;
-		} else if (localStorage.getItem("showHeaderFlag") === "false") {
-			this.showHeaderFlag = false;
-		}
-
-		//是否显示页数
-		if (localStorage.getItem("showPageNumFlag_ScrollMode") === "true") {
-			this.showPageNumFlag_ScrollMode = true;
-		} else if (localStorage.getItem("showPageNumFlag_ScrollMode") === "false") {
-			this.showPageNumFlag_ScrollMode = false;
-		}
-
-		//javascript 数字类型转换：https://www.runoob.com/js/js-type-conversion.html
-		// NaN不能通过相等操作符（== 和 ===）来判断
-
-		//漫画页宽度,Percent
-		if (localStorage.getItem("singlePageWidth_Percent") != null) {
-			let saveNum = Number(localStorage.getItem("singlePageWidth_Percent"));
-			if (!isNaN(saveNum)) {
-				this.singlePageWidth_Percent = saveNum;
-			}
-		}
-
-		if (localStorage.getItem("doublePageWidth_Percent") != null) {
-			let saveNum = Number(localStorage.getItem("doublePageWidth_Percent"));
-			if (!isNaN(saveNum)) {
-				this.doublePageWidth_Percent = saveNum;
-			}
-		}
-
-		//漫画页宽度,PX
-		if (localStorage.getItem("singlePageWidth_PX") != null) {
-			let saveNum = Number(localStorage.getItem("singlePageWidth_PX"));
-			if (!isNaN(saveNum)) {
-				this.singlePageWidth_PX = saveNum;
-			}
-		}
-		if (localStorage.getItem("doublePageWidth_PX") != null) {
-			let saveNum = Number(localStorage.getItem("doublePageWidth_PX"));
-			if (!isNaN(saveNum)) {
-				this.doublePageWidth_PX = saveNum;
-			}
-		}
-
-		//	漫画底部页边距
-		if (localStorage.getItem("marginOnScrollMode") != null) {
-			let saveNum = Number(localStorage.getItem("marginOnScrollMode"));
-			if (!isNaN(saveNum)) {
-				this.marginOnScrollMode = saveNum;
-			}
-		}
-
-		//当前颜色
-		const tempBackgroundColor = localStorage.getItem("BackgroundColor")
-		if (typeof (tempBackgroundColor) === 'string') {
-			this.model.backgroundColor = tempBackgroundColor;
-		}
-		const tempInterfaceColor = localStorage.getItem("InterfaceColor")
-		if (typeof (tempInterfaceColor) === 'string') {
-			this.model.interfaceColor = tempInterfaceColor
-		}
-
-		//宽度是否使用百分比
-		if (localStorage.getItem("imageWidth_usePercentFlag") === "true") {
-			this.imageWidth_usePercentFlag = true;
-		} else if (localStorage.getItem("imageWidth_usePercentFlag") === "false") {
-			this.imageWidth_usePercentFlag = false;
-		}
-
-		// 图片处理相关
-		//是否获取黑白图片
-		if (localStorage.getItem("ImageParameters_Gray") === "true") {
-			this.imageParameters.gray = true;
-		} else if (localStorage.getItem("ImageParameters_Gray") === "false") {
-			this.imageParameters.gray = false;
-		}
-
-		//是否压缩图片
-		if (localStorage.getItem("ImageParameters_DoAutoResize") === "true") {
-			this.imageParameters.do_auto_resize = true;
-		} else if (localStorage.getItem("ImageParameters_DoAutoResize") === "false") {
-			this.imageParameters.do_auto_resize = false;
-		}
-
-		//启用压缩的Width下限
-		if (localStorage.getItem("ImageParametersResizeMaxWidth") != null) {
-			let saveNum = Number(localStorage.getItem("ImageParametersResizeMaxWidth"));
-			if (!isNaN(saveNum)) {
-				this.imageParameters.resize_max_width = saveNum;
-			}
-		}
-
-		//是否自动切白边
-		if (localStorage.getItem("ImageParameters_DoAutoCrop") === "true") {
-			this.imageParameters.do_auto_crop = true;
-		} else if (localStorage.getItem("ImageParameters_DoAutoCrop") === "false") {
-			this.imageParameters.do_auto_crop = false;
-		}
-
-		//切白边参数
-		if (localStorage.getItem("ImageParameters_AutoCropNum") != null) {
-			let saveNum = Number(localStorage.getItem("ImageParameters_AutoCropNum"));
-			if (!isNaN(saveNum)) {
-				this.imageParameters.auto_crop_num = saveNum;
-			}
-		}
+		this.ScrollModeConfig.imageMaxWidth = window.innerWidth;
 	},
 	// 挂载前 : 指令第一次绑定到元素并且在挂载父组件之前调用。
 	beforeMount() {
 	},
 	onMounted() {
-		this.isLandscapeMode = this.inLandscapeModeCheck();
-		this.isPortraitMode = !this.inLandscapeModeCheck();
+		this.ScrollModeConfig.isLandscapeMode = this.inLandscapeModeCheck();
+		this.ScrollModeConfig.isPortraitMode = !this.inLandscapeModeCheck();
 		// https://v3.cn.vuejs.org/api/options-lifecycle-hooks.html#beforemount
 		this.$nextTick(function () {
 			//视图渲染之后运行的代码
@@ -644,7 +537,7 @@ export default defineComponent({
 			if (!this.debug) {
 				return;
 			}
-			if (!this.syncPageByWS) {
+			if (!this.ScrollModeConfig.syncPageByWS) {
 				return;
 			}
 			const msg = JSON.parse(data.data);
@@ -675,7 +568,7 @@ export default defineComponent({
 
 		//刷新到底部的时候,改变images数据
 		loadPages() {
-			if (this.InfiniteDropdown) {
+			if (this.ScrollModeConfig.InfiniteDropdown) {
 				//slice() 方法返回一个新的数组对象，这一对象是一个由 begin 和 end 决定的原数组的浅拷贝（包括 begin，不包括end）
 				this.localImages = this.book.pages.images.slice(0, this.lastPageNum);//javascript的接片不能直接用[a,b]，而是需要调用.slice()函数
 			} else {
@@ -690,7 +583,7 @@ export default defineComponent({
 
 		//无限加载用,底部刷新
 		loadNextBlock() {
-			if (!this.InfiniteDropdown) {
+			if (!this.ScrollModeConfig.InfiniteDropdown) {
 				return;
 			}
 			if (this.book.page_count >= this.lastPageNum + this.LOAD_LIMIT) {
@@ -703,7 +596,7 @@ export default defineComponent({
 		//监听子组件事件: https://v3.cn.vuejs.org/guide/component-basics.html#%E7%9B%91%E5%90%AC%E5%AD%90%E7%BB%84%E4%BB%B6%E4%BA%8B%E4%BB%B6
 		//滚动页面的时候刷新页数
 		refreshNowPageNum(n: number) {
-			if (!this.InfiniteDropdown) {
+			if (!this.ScrollModeConfig.InfiniteDropdown) {
 				return;
 			}
 			if (this.nowLoading) {
@@ -772,39 +665,26 @@ export default defineComponent({
 			this.$emit("setTemplate", value);
 		},
 		onBackgroundColorChange(value: string) {
-			this.model.backgroundColor = value
-			localStorage.setItem("BackgroundColor", value);
+			this.model.backgroundColor = value;
+			this.ScrollModeConfig.backgroundColor = value;
+      		localStorage.setItem("BackgroundColor", value);
+			localStorage.setItem('ScrollModeConfig', JSON.stringify(this.ScrollModeConfig));
 		},
 		//关闭抽屉的时候保存配置 
 		//如果在一个组件上使用了 v-model:xxx,应该使用 @update:xxx  https://www.naiveui.com/zh-CN/os-theme/docs/common-issues
 		saveConfigToLocalStorage() {
-			// 储存配置
-			localStorage.setItem("nowPageNum" + this.book.id, this.nowPageNum.toString());
-			localStorage.setItem("SyncPageFlag", this.syncPageByWS ? "true" : "false");
-			localStorage.setItem("InfiniteDropdown", this.InfiniteDropdown ? "true" : "false");
-			localStorage.setItem("showHeaderFlag", this.showHeaderFlag ? "true" : "false");
-			localStorage.setItem("showPageNumFlag_ScrollMode", this.showPageNumFlag_ScrollMode ? "true" : "false");
-			localStorage.setItem("imageWidth_usePercentFlag", this.imageWidth_usePercentFlag ? "true" : "false");
-			localStorage.setItem("singlePageWidth_Percent", this.singlePageWidth_Percent.toString());
-			localStorage.setItem("doublePageWidth_Percent", this.doublePageWidth_Percent.toString());
-			localStorage.setItem("singlePageWidth_PX", this.singlePageWidth_PX.toString());
-			localStorage.setItem("doublePageWidth_PX", this.doublePageWidth_PX.toString());
-			localStorage.setItem("BackgroundColor", this.model.backgroundColor);
-			//set对有setXXXChange函数的来说有些多余,但没有set函数的话就有必要了
-			localStorage.setItem("ImageParameters_DoAutoCrop", this.imageParameters.do_auto_crop ? "true" : "false");
-			localStorage.setItem("ImageParametersResizeMaxWidth", this.imageParameters.resize_max_width.toString());
-			localStorage.setItem("marginOnScrollMode", this.marginOnScrollMode.toString());
+			localStorage.setItem('ScrollModeConfig', JSON.stringify(this.ScrollModeConfig));
 		},
 		setSyncPageByWS(value: boolean) {
-			this.syncPageByWS = value;
+			this.ScrollModeConfig.syncPageByWS = value;
 			localStorage.setItem("SyncPageFlag", value ? "true" : "false");
 		},
 
 		//InfiniteDropdown
 		setInfiniteDropdown(value: boolean) {
-			this.InfiniteDropdown = value;
+			this.ScrollModeConfig.InfiniteDropdown = value;
 			localStorage.setItem("InfiniteDropdown", value ? "true" : "false");
-			if (!this.InfiniteDropdown) {
+			if (!this.ScrollModeConfig.InfiniteDropdown) {
 				this.paginationPage = 1;
 				this.LOAD_LIMIT = 35;
 				//  Vue Router, 重定向到新 URL
@@ -828,11 +708,11 @@ export default defineComponent({
 		},
 		//设置是否显示顶部页头
 		setShowHeaderChange(value: boolean) {
-			this.showHeaderFlag = value;
+			this.ScrollModeConfig.showHeaderFlag = value;
 			localStorage.setItem("showHeaderFlag", value ? "true" : "false");
 		},
 		setShowPageNumChange(value: boolean) {
-			this.showPageNumFlag_ScrollMode = value;
+			this.ScrollModeConfig.showPageNumFlag_ScrollMode = value;
 			localStorage.setItem("showPageNumFlag_ScrollMode", value ? "true" : "false");
 		},
 		//图片处理相关
@@ -858,7 +738,7 @@ export default defineComponent({
 		},
 
 		setImageWidthUsePercentFlag(value: boolean) {
-			this.imageWidth_usePercentFlag = value;
+			this.ScrollModeConfig.imageWidth_usePercentFlag = value;
 			localStorage.setItem("imageWidth_usePercentFlag", value ? "true" : "false");
 		},
 
@@ -869,18 +749,18 @@ export default defineComponent({
 
 		//可见区域变化的时候改变页面状态
 		onResize() {
-			this.imageMaxWidth = window.innerWidth
+			this.ScrollModeConfig.imageMaxWidth = window.innerWidth
 			this.clientWidth = document.documentElement.clientWidth
 			this.clientHeight = document.documentElement.clientHeight
 			// var aspectRatio = window.innerWidth / window.innerHeight
 			this.aspectRatio = this.clientWidth / this.clientHeight
 			// 为了调试的时候方便,阈值是正方形
 			if (this.aspectRatio > (19 / 19)) {
-				this.isLandscapeMode = true
-				this.isPortraitMode = false
+				this.ScrollModeConfig.isLandscapeMode = true
+				this.ScrollModeConfig.isPortraitMode = false
 			} else {
-				this.isLandscapeMode = false
-				this.isPortraitMode = true
+				this.ScrollModeConfig.isLandscapeMode = false
+				this.ScrollModeConfig.isPortraitMode = true
 			}
 		},
 		//页面滚动的时候,改变返回顶部按钮的显隐
@@ -1000,31 +880,31 @@ export default defineComponent({
 
 	computed: {
 		sPWL() {
-			if (this.imageWidth_usePercentFlag) {
-				return this.singlePageWidth_Percent + '%';
+			if (this.ScrollModeConfig.imageWidth_usePercentFlag) {
+				return this.ScrollModeConfig.singlePageWidth_Percent + '%';
 			} else {
-				return this.singlePageWidth_PX + 'px';
+				return this.ScrollModeConfig.singlePageWidth_PX + 'px';
 			}
 		},
 		dPWL() {
-			if (this.imageWidth_usePercentFlag) {
-				return this.doublePageWidth_Percent + '%';
+			if (this.ScrollModeConfig.imageWidth_usePercentFlag) {
+				return this.ScrollModeConfig.doublePageWidth_Percent + '%';
 			} else {
-				return this.doublePageWidth_PX + 'px';
+				return this.ScrollModeConfig.doublePageWidth_PX + 'px';
 			}
 		},
 		sPWP() {
-			if (this.imageWidth_usePercentFlag) {
-				return this.singlePageWidth_Percent + '%';
+			if (this.ScrollModeConfig.imageWidth_usePercentFlag) {
+				return this.ScrollModeConfig.singlePageWidth_Percent + '%';
 			} else {
-				return this.singlePageWidth_PX + 'px';
+				return this.ScrollModeConfig.singlePageWidth_PX + 'px';
 			}
 		},
 		dPWP() {
-			if (this.imageWidth_usePercentFlag) {
-				return this.doublePageWidth_Percent + '%';
+			if (this.ScrollModeConfig.imageWidth_usePercentFlag) {
+				return this.ScrollModeConfig.doublePageWidth_Percent + '%';
 			} else {
-				return this.doublePageWidth_PX + 'px';
+				return this.ScrollModeConfig.doublePageWidth_PX + 'px';
 			}
 		},
 	}

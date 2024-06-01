@@ -1,10 +1,11 @@
 package routers
 
 import (
+	"io"
+
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/util/logger"
-	"io"
 )
 
 // SetLogger 设置日志中间件

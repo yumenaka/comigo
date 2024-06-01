@@ -19,7 +19,7 @@ func StartWebServer() {
 
 	// CORS 中间件
 	engine.Use(func(c *gin.Context) {
-		//在这个代码中，CORS 中间件设置了几个关键的 HTTP 头部：
+		//在这个代码中，CORS 中间件设置了几个关键的 HTTP 头：
 		//Access-Control-Allow-Origin: 指定允许跨域请求的域名。在示例中使用 * 表示允许所有域名。根据您的需求，您也可以指定具体的域名。
 		//Access-Control-Allow-Methods: 指定允许的 HTTP 方法。
 		//Access-Control-Allow-Headers: 指定允许的 HTTP 头部字段。

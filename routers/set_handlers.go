@@ -14,6 +14,11 @@ import (
 
 var protectedAPI *gin.RouterGroup
 
+// RESTful API
+// Create	POST/PUT
+// Read	    GET
+// Update	PUT
+// Delete	DELETE
 // 前端需要的 API
 func setWebAPI(engine *gin.Engine) {
 	// 路由组,方便管理部分相同的URL
@@ -47,13 +52,6 @@ func setWebAPI(engine *gin.Engine) {
 		// 如果设置了密码，则应用 JWT 中间件到一个新的路由组
 		protectedAPI = api.Group("/", jwtMiddleware.MiddlewareFunc())
 	}
-	//RESTful API
-	//Create	POST/PUT
-	//Read	    GET
-	//Update	PUT
-	//Delete	DELETE
-	//谷歌API设计规范：
-	//https://cloud.google.com/apis/design/standard_methods?hl=zh-cn
 
 	//文件上传
 	protectedAPI.POST("/upload", handlers.UploadFile)

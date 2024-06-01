@@ -14,25 +14,25 @@ import (
 )
 
 type Option struct {
-	ReScanFile            bool                 // 是否重新扫描文件
-	LocalStores           []string             // 本地书库路径
-	RemoteStores          []entity.RemoteStore // 远程书库路径
-	MaxScanDepth          int                  // 扫描深度
-	MinImageNum           int                  // 最小图片数量
-	TimeoutLimitForScan   int                  // 扫描超时时间
-	ExcludePath           []string             // 排除路径
-	SupportMediaType      []string             // 支持的媒体类型
-	SupportFileType       []string             // 支持的文件类型
-	ZipFileTextEncoding   string               // 非UTF-8编码的ZIP文件，尝试用什么编码解析，默认GBK
-	EnableDatabase        bool                 // 启用数据库
-	ClearDatabaseWhenExit bool                 // 启用数据库时，扫描完成后，清除不存在的书籍
+	ReScanFile            bool               // 是否重新扫描文件
+	LocalStores           []string           // 本地书库路径
+	RemoteStores          []entity.BookStore // 远程书库路径
+	MaxScanDepth          int                // 扫描深度
+	MinImageNum           int                // 最小图片数量
+	TimeoutLimitForScan   int                // 扫描超时时间
+	ExcludePath           []string           // 排除路径
+	SupportMediaType      []string           // 支持的媒体类型
+	SupportFileType       []string           // 支持的文件类型
+	ZipFileTextEncoding   string             // 非UTF-8编码的ZIP文件，尝试用什么编码解析，默认GBK
+	EnableDatabase        bool               // 启用数据库
+	ClearDatabaseWhenExit bool               // 启用数据库时，扫描完成后，清除不存在的书籍
 	Debug                 bool
 }
 
 func NewScanOption(
 	reScanFile bool,
 	localPath []string,
-	remoteStores []entity.RemoteStore,
+	remoteStores []entity.BookStore,
 	maxScanDepth int,
 	minImageNum int,
 	timeoutLimitForScan int,
@@ -105,7 +105,7 @@ func InitStore(scanConfig Option) error {
 		}
 		AddBooksToStore(addList, localPath, scanConfig.MinImageNum)
 	}
-	//for _, server := range scanConfig.RemoteStores {
+	//for _, server := range scanConfig.BookStores {
 	//	addList, err := Smb(scanConfig)
 	//	if err != nil {
 	//		logger.Infof("smb scan_error"+" path:%s %s", server.ShareName, err)

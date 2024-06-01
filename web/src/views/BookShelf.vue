@@ -1,5 +1,5 @@
 <template>
-    <div class="BookShelf w-full h-screen flex flex-col">
+    <div class="flex flex-col w-full h-screen BookShelf">
         <Header class="flex-none h-12" in-shelf="true" :bookIsFolder="false" :headerTitle="bookShelfTitle"
             :showReSortIcon="true" :showReturnIcon="headerShowReturnIcon" :showSettingsIcon="true"
             :bookID="$route.params.group_id" :depth="bookshelf[0].depth > 1 ? bookshelf[0].depth - 1 : 0"
@@ -7,29 +7,30 @@
         </Header>
 
         <!-- Flex Grow 控制 flex 项目放大的功能类 https://www.tailwindcss.cn/docs/flex-grow -->
-        <div v-if="bookCardMode == 'gird'" class="bookshelf flex-grow">
+        <div v-if="BookShelfConfig.bookCardMode == 'gird'" class="flex-grow bookshelf">
             <!-- 使用tailwindcss提供的flex布局： -->
             <!-- flex-row：https://www.tailwindcss.cn/docs/flex-direction -->
             <div class="flex flex-row flex-wrap justify-center min-h-48">
                 <BookCard v-for="(book_info, key) in bookshelf" :key="key" :book_info="book_info"
-                    :bookCardMode="bookCardMode" :simplifyTitle="simplifyTitle" :readerMode="readerMode"
-                    :InfiniteDropdown="InfiniteDropdown" :showTitle="bookCardShowTitleFlag">
+                    :bookCardMode="BookShelfConfig.bookCardMode" :simplifyTitle="BookShelfConfig.simplifyTitle"
+                    :readerMode="BookShelfConfig.readerMode" :InfiniteDropdown="BookShelfConfig.InfiniteDropdown"
+                    :showTitle="BookShelfConfig.bookCardShowTitleFlag">
                 </BookCard>
             </div>
         </div>
 
-        <div v-if="bookCardMode == 'list'"
-            class="bookshelf flex-grow flex flex-row flex-wrap justify-center items-center">
+        <div v-if="BookShelfConfig.bookCardMode == 'list'"
+            class="flex flex-row flex-wrap items-center justify-center flex-grow bookshelf">
             <BookList v-for="(book_info, key) in bookshelf" :key="key" :book_info="book_info"
-                :simplifyTitle="simplifyTitle" :showTitle="bookCardShowTitleFlag" :readerMode="readerMode"
-                :InfiniteDropdown="InfiniteDropdown">
+                :simplifyTitle="BookShelfConfig.simplifyTitle" :showTitle="BookShelfConfig.bookCardShowTitleFlag"
+                :readerMode="BookShelfConfig.readerMode" :InfiniteDropdown="BookShelfConfig.InfiniteDropdown">
             </BookList>
         </div>
 
-        <div v-if="bookCardMode == 'text'" class="bookshelf flex-grow">
-            <div class="flex flex-row flex-wrap mt-4 mb-4 px-4 justify-left items-center min-w-4">
+        <div v-if="BookShelfConfig.bookCardMode == 'text'" class="flex-grow bookshelf">
+            <div class="flex flex-row flex-wrap items-center px-4 mt-4 mb-4 justify-left min-w-4">
                 <BookText v-for="(book_info, key) in bookshelf" :key="key" :book_info="book_info"
-                    :readerMode="readerMode" :InfiniteDropdown="InfiniteDropdown">
+                    :readerMode="BookShelfConfig.readerMode" :InfiniteDropdown="BookShelfConfig.InfiniteDropdown">
                 </BookText>
             </div>
         </div>
@@ -43,7 +44,7 @@
             "></Bottom>
         <Drawer :initDrawerActive="drawerActive" :initDrawerPlacement="drawerPlacement" @saveConfig="saveConfigToLocal"
             @startSketch="startSketchMode" @closeDrawer="drawerDeactivate" @setRM="OnSetReaderMode"
-            :readerMode="readerMode" :sketching="false" :inBookShelf="true">
+            :readerMode="BookShelfConfig.readerMode" :sketching="false" :inBookShelf="true">
             <!-- 设置颜色 -->
             <span>{{ $t("setInterfaceColor") }}</span>
             <n-color-picker v-model:value="model.interfaceColor" :modes="['hex']" :show-alpha="false"
@@ -53,27 +54,29 @@
                 @update:value="onBackgroundColorChange" />
 
             <!-- 开关：下拉阅读 -->
-            <n-switch size="large" :rail-style="railStyle" v-model:value="readerModeIsScroll"
+            <n-switch size="large" :rail-style="railStyle" v-model:value="BookShelfConfig.readerModeIsScroll"
                 @update:value="setReaderModeIsScroll">
                 <template #checked>{{ $t("scroll_mode") }}</template>
                 <template #unchecked>{{ $t("flip_mode") }}</template>
             </n-switch>
 
             <!-- 开关：卷轴模式下，是无限下拉，还是分页加载 -->
-            <n-switch v-if="readerModeIsScroll" size="large" v-model:value="InfiniteDropdown" :rail-style="railStyle"
+            <n-switch v-if="BookShelfConfig.readerModeIsScroll" size="large"
+                v-model:value="BookShelfConfig.InfiniteDropdown" :rail-style="railStyle"
                 @update:value="setInfiniteDropdown">
                 <template #checked>{{ $t("infinite_dropdown") }}</template>
                 <template #unchecked>{{ $t("pagination_mode") }}</template>
             </n-switch>
 
             <!-- 开关：显示书名 -->
-            <n-switch size="large" v-model:value="bookCardShowTitleFlag" @update:value="setBookCardShowTitleFlag">
+            <n-switch size="large" v-model:value="BookShelfConfig.bookCardShowTitleFlag"
+                @update:value="setBookCardShowTitleFlag">
                 <template #checked>{{ $t("show_book_titles") }}</template>
                 <template #unchecked>{{ $t("show_book_titles") }}</template>
             </n-switch>
 
             <!-- 开关：简化书名 -->
-            <n-switch size="large" v-model:value="simplifyTitle" @update:value="setSimplifyTitle">
+            <n-switch size="large" v-model:value="BookShelfConfig.simplifyTitle" @update:value="setSimplifyTitle">
                 <template #checked>{{ $t("simplify_book_titles") }}</template>
                 <template #unchecked>{{ $t("simplify_book_titles") }}</template>
             </n-switch>
@@ -113,12 +116,12 @@ export default defineComponent({
     props: ["testProp"],
     emits: ["setTemplate"],
     components: {
-        Header, // 自定义页头
-        Drawer, // 自定义抽屉
-        BookCard, //自定义书本
-        BookList,
-        BookText,
-        Bottom, // 自定义页尾
+        Header, // 页头
+        Drawer, // 抽屉
+        BookCard, //书籍-卡片
+        BookList, //书籍-列表
+        BookText, //书籍-文本
+        Bottom, // 页尾
         NButton, //按钮,来自:https://www.naiveui.com/zh-CN/os-theme/components/button
         NSwitch,
         // NDivider, // 分割线  https://www.naiveui.com/zh-CN/os-theme/components/divider
@@ -174,21 +177,26 @@ export default defineComponent({
     },
     data() {
         return {
-            bookCardMode: "gird",//gird,list,text
-            simplifyTitle: true, //简化显示标题
+            BookShelfConfig: {
+                bookCardMode: "gird",//gird,list,text
+                simplifyTitle: true,
+                resort_hint_key: "filename", //排序方式。可以按照文件名、修改时间、文件大小排序（或反向排序）
+                readerMode: "scroll",
+                readerModeIsScroll: true,
+                InfiniteDropdown: true,//卷轴模式下，是否无限下拉
+                bookCardShowTitleFlag: true, // 书库中的书籍是否显示文字版标题
+                syncScrollFlag: false,// 同步滚动,目前还没做
+                interfaceColor: "#F5F5E4",
+                backgroundColor: "#E0D9CD",
+            },
             //是否显示回到顶部按钮
             showBackTopFlag: false,
             //是否正在向下滚动
             scrollDownFlag: false,
             //存储现在滚动的位置
             scrollTopSave: 0,
-            resort_hint_key: "filename", //书籍的排序方式。可以按照文件名、修改时间、文件大小排序（或反向排序）
-            readerMode: "scroll",
-            readerModeIsScroll: true,
-            InfiniteDropdown: true,//卷轴模式下，是否无限下拉
             bookShelfTitle: "Loading",
             headerShowReturnIcon: false,
-            bookCardShowTitleFlag: true, // 书库中的书籍是否显示文字版标题
             maxDepth: 1,
             bookshelf: [
                 {
@@ -218,9 +226,6 @@ export default defineComponent({
             drawerPlacement: "right",
             // 开发模式 还没有做的功能与设置,设置Debug以后才能见到
             debugModeFlag: true,
-            // 书籍数据,需要从远程拉取
-            // 同步滚动,目前还没做
-            syncScrollFlag: false,
             // 鼠标点击或触摸的位置
             clickX: 0,
             clickY: 0,
@@ -244,14 +249,26 @@ export default defineComponent({
     // beforeUnmount: 当指令与在绑定元素父组件卸载之前时,只调用一次。
     // unmounted: 当指令与元素解除绑定且父组件已卸载时,只调用一次。
     created() {
+        // 初始化浏览器设置
+        let configString = localStorage.getItem('BookShelfConfig');
+        if (localStorage.getItem('BookShelfConfig') !== null && typeof configString === "string") {
+            this.BookShelfConfig = JSON.parse(configString)
+        }
+        //UI配色
+		const tempBackgroundColor = localStorage.getItem("BackgroundColor")
+		if (typeof (tempBackgroundColor) === 'string') {
+			this.BookShelfConfig.backgroundColor = tempBackgroundColor;
+		}
+		const tempInterfaceColor = localStorage.getItem("InterfaceColor")
+		if (typeof (tempInterfaceColor) === 'string') {
+			this.BookShelfConfig.interfaceColor = tempInterfaceColor
+		}
+		this.model.backgroundColor = this.BookShelfConfig.backgroundColor
+		this.model.interfaceColor = this.BookShelfConfig.interfaceColor
+        this.BookShelfConfig.InfiniteDropdown = localStorage.getItem("InfiniteDropdown") === "true";
+
         //监听滚动，返回顶部按钮用
         window.addEventListener("scroll", this.onScroll);
-        // 初始化默认值,读取出来的都是字符串,不要直接用
-        //书籍排序方式。可以按照文件名、修改时间、文件大小排序（或反向排序）
-        const tempBookShelf_SortBy = localStorage.getItem("BookShelf_SortBy");
-        if (typeof tempBookShelf_SortBy === "string") {
-            this.resort_hint_key = tempBookShelf_SortBy;
-        }
         // 从服务器上拉取书架信息
         this.setBookShelf();
         // 刷新ReadMode
@@ -260,45 +277,11 @@ export default defineComponent({
         this.$watch(
             () => this.$route.params,
             () => {
-                // 想知道参数的变化的话,可把参数设置为 toParams, previousParams
-                // console.log(toParams);
-                // console.log(previousParams);
-                // console.log("BookShelf: route change");
                 this.refreshReadMode();
                 this.setBookShelfTitle();
                 this.setBookShelf();
             }
         );
-        // 继续初始化默认值
-        // 书籍卡片是否显示文字版标题
-        if (localStorage.getItem("BookCardShowTitleFlag") === "true") {
-            this.bookCardShowTitleFlag = true;
-        } else if (localStorage.getItem("BookCardShowTitleFlag") === "false") {
-            this.bookCardShowTitleFlag = false;
-        }
-
-        // 简化标题
-        if (localStorage.getItem("SimplifyTitle") === "true") {
-            this.simplifyTitle = true;
-        } else if (localStorage.getItem("SimplifyTitle") === "false") {
-            this.simplifyTitle = false;
-        }
-
-        // 当前颜色
-        let tempBackgroundColor = localStorage.getItem("BackgroundColor");
-        if (typeof tempBackgroundColor === "string") {
-            this.model.backgroundColor = tempBackgroundColor;
-        }
-
-        let tempInterfaceColor = localStorage.getItem("InterfaceColor");
-        if (typeof tempInterfaceColor === "string") {
-            this.model.interfaceColor = tempInterfaceColor;
-        }
-
-        let tempBookCardMode = localStorage.getItem("bookCardMode");
-        if (typeof tempBookCardMode === "string") {
-            this.bookCardMode = tempBookCardMode;
-        }
     },
     // 挂载前
     beforeMount() {
@@ -331,11 +314,11 @@ export default defineComponent({
 
         // 获取所有书籍信息
         initBookShelf() {
-            //根据文件名、修改时间、文件大小等要素排序的参数
+            //根据文件名、修改时间、文件大小等要素排序
             let sort_by = "";
             //按照本地的存储值或默认值排序
-            if (this.resort_hint_key !== "") {
-                sort_by = "&sort_by=" + this.resort_hint_key;
+            if (this.BookShelfConfig.resort_hint_key !== "") {
+                sort_by = "&sort_by=" + this.BookShelfConfig.resort_hint_key;
             }
             //按照路由里的查询参数排序
             if (this.$route.query.sort_by) {
@@ -366,8 +349,8 @@ export default defineComponent({
             //排序参数（文件名、修改时间、文件大小等）
             var sort_image_by_str = "";
             //按照本地的存储值或默认值排序
-            if (this.resort_hint_key !== "") {
-                sort_image_by_str = "&sort_by=" + this.resort_hint_key;
+            if (this.BookShelfConfig.resort_hint_key !== "") {
+                sort_image_by_str = "&sort_by=" + this.BookShelfConfig.resort_hint_key;
             }
             //按照路由里的查询参数排序
             if (this.$route.query.sort_by) {
@@ -407,12 +390,10 @@ export default defineComponent({
 
         //页面滚动的时候,改变返回顶部按钮的显隐
         onScroll() {
-            let scrollTop =
-                document.documentElement.scrollTop || document.body.scrollTop;
+            let scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
             this.scrollDownFlag = scrollTop > this.scrollTopSave;
             //防手抖,小于一定数值状态就不变 Math.abs()会导致报错
             let step = this.scrollTopSave - scrollTop;
-            // console.log("this.scrollDownFlag:",this.scrollDownFlag,"scrollTop:",scrollTop,"step:", step);
             this.scrollTopSave = scrollTop;
             if (step < -5 || step > 5) {
                 this.showBackTopFlag = scrollTop > 400 && !this.scrollDownFlag;
@@ -442,12 +423,12 @@ export default defineComponent({
         //根据文件名、修改时间、文件大小等参数重新排序
         onResort(key: string) {
             if (key === "gird" || key === "list" || key === "text") {
-                this.bookCardMode = key;
-                localStorage.setItem("bookCardMode", this.bookCardMode);
+                this.BookShelfConfig.bookCardMode = key;
+                localStorage.setItem('BookShelfConfig', JSON.stringify(this.BookShelfConfig));
                 return;
             }
-            this.resort_hint_key = key;
-            localStorage.setItem("BookShelf_SortBy", key);
+            this.BookShelfConfig.resort_hint_key = key;
+            localStorage.setItem('BookShelfConfig', JSON.stringify(this.BookShelfConfig));
             if (this.$route.params.group_id) {
                 console.log(
                     "onResort  bookID：" + this.$route.params.group_id + ", key:" + key
@@ -471,60 +452,56 @@ export default defineComponent({
         refreshReadMode() {
             // 初始化或者路由变化时,读取其他页面的更改,并存储到本地存储的阅读器模式（ReaderMode）这个值,
             if (localStorage.getItem("ReaderMode") === "scroll") {
-                this.readerModeIsScroll = true;
-                this.readerMode = "scroll";
-                //InfiniteDropdown
-                if (localStorage.getItem("InfiniteDropdown") === "true") {
-                    this.InfiniteDropdown = true;
-                } else if (localStorage.getItem("InfiniteDropdown") === "false") {
-                    this.InfiniteDropdown = false;
-                }
+                this.BookShelfConfig.readerModeIsScroll = true;
+                this.BookShelfConfig.readerMode = "scroll";
             }
             if (localStorage.getItem("ReaderMode") === "flip") {
-                this.readerModeIsScroll = false;
-                this.readerMode = "flip";
-                // localStorage.setItem("ReaderMode", "flip");
+                this.BookShelfConfig.readerModeIsScroll = false;
+                this.BookShelfConfig.readerMode = "flip";
             }
+            localStorage.setItem('BookShelfConfig', JSON.stringify(this.BookShelfConfig));
         },
 
         // 切换下拉、翻页阅读模式
         setReaderModeIsScroll(value: boolean) {
-            this.readerModeIsScroll = value;
-            if (this.readerModeIsScroll) {
-                this.readerMode = "scroll";
-                localStorage.setItem("ReaderMode", "scroll");
+            this.BookShelfConfig.readerModeIsScroll = value;
+            if (this.BookShelfConfig.readerModeIsScroll) {
+                this.BookShelfConfig.readerMode = "scroll";
             } else {
-                this.readerMode = "flip";
-                localStorage.setItem("ReaderMode", "flip");
+                this.BookShelfConfig.readerMode = "flip";
             }
-            localStorage.setItem("ReaderModeIsScroll", value ? "true" : "false");
+            localStorage.setItem('BookShelfConfig', JSON.stringify(this.BookShelfConfig));
         },
         //InfiniteDropdown
         setInfiniteDropdown(value: boolean) {
-            this.InfiniteDropdown = value;
+            this.BookShelfConfig.InfiniteDropdown = value;
             localStorage.setItem("InfiniteDropdown", value ? "true" : "false");
+            localStorage.setItem('BookShelfConfig', JSON.stringify(this.BookShelfConfig));
         },
         // 设置背景色的时候
         onBackgroundColorChange(value: string) {
             this.model.backgroundColor = value;
+            this.BookShelfConfig.backgroundColor = value;
             localStorage.setItem("BackgroundColor", value);
+            localStorage.setItem('BookShelfConfig', JSON.stringify(this.BookShelfConfig));
         },
         // 设置UI颜色的时候
         onInterfaceColorChange(value: string) {
             this.model.interfaceColor = value;
+            this.BookShelfConfig.interfaceColor = value;
             localStorage.setItem("InterfaceColor", value);
+            localStorage.setItem('BookShelfConfig', JSON.stringify(this.BookShelfConfig));
         },
         // 书籍卡片是否显示文字标题
         setBookCardShowTitleFlag(value: boolean) {
-            this.bookCardShowTitleFlag = value;
-            localStorage.setItem("BookCardShowTitleFlag", value ? "true" : "false");
-            // console.log("成功保存设置: BookCardShowTitleFlag=" + localStorage.getItem("BookCardShowTitleFlag"));
+            this.BookShelfConfig.bookCardShowTitleFlag = value;
+            localStorage.setItem('BookShelfConfig', JSON.stringify(this.BookShelfConfig));
         },
 
         // 书籍卡片是否显示文字标题
         setSimplifyTitle(value: boolean) {
-            this.simplifyTitle = value;
-            localStorage.setItem("SimplifyTitle", value ? "true" : "false");
+            this.BookShelfConfig.simplifyTitle = value;
+            localStorage.setItem('BookShelfConfig', JSON.stringify(this.BookShelfConfig));
         },
 
         // 打开抽屉
@@ -542,13 +519,11 @@ export default defineComponent({
         },
         // 接收Draw的参数,继续往父组件传
         OnSetReaderMode(value: string) {
-            if (value == "scroll" || value == "scroll") this.readerMode = value;
+            if (value == "scroll") this.BookShelfConfig.readerMode = value;
         },
         // 如果在一个组件上使用了 v-model:xxx,应该使用 @update:xxx  https://www.naiveui.com/zh-CN/os-theme/docs/common-issues
         saveConfigToLocal() {
-            // 储存cookie
-            localStorage.setItem("BackgroundColor", this.model.backgroundColor);
-            localStorage.setItem("InterfaceColor", this.model.interfaceColor);
+            localStorage.setItem('BookShelfConfig', JSON.stringify(this.BookShelfConfig));
         },
 
         // 根据可视区域(viewport)长宽比,确认是横屏还是竖屏

@@ -1,15 +1,14 @@
 package websocket
 
 import (
-	"github.com/yumenaka/comi/util/locale"
-	"github.com/yumenaka/comi/util/logger"
 	"log"
 	"net/http"
 
-	"github.com/google/uuid"
-
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
+	"github.com/yumenaka/comi/util/locale"
+	"github.com/yumenaka/comi/util/logger"
 )
 
 func init() {

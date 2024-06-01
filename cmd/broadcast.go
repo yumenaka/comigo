@@ -61,7 +61,7 @@ func ReScanPath(path string, reScanFile bool) {
 	option := scan.NewScanOption(
 		reScanFile,
 		config.Config.LocalStores,
-		config.Config.RemoteStores,
+		config.Config.BookStores,
 		config.Config.MaxScanDepth,
 		config.Config.MinImageNum,
 		config.Config.TimeoutLimitForScan,

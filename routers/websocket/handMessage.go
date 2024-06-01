@@ -2,12 +2,12 @@ package websocket
 
 import (
 	"encoding/json"
-	"github.com/yumenaka/comi/util/logger"
 	"log"
 	"math"
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/yumenaka/comi/util/logger"
 )
 
 var WsDebug *bool
