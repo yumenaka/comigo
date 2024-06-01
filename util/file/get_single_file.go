@@ -3,13 +3,13 @@ package file
 import (
 	"context"
 	"errors"
+	"github.com/yumenaka/comi/util/logger"
 	"io"
 	"io/fs"
 	"os"
 	"sync"
 
 	"github.com/yumenaka/archiver/v4"
-	"github.com/yumenaka/comi/logger"
 )
 
 // 使用sync.Map代替map，保证并发情况下的读写安全

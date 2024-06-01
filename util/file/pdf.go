@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/yumenaka/comi/util/logger"
 	"image/jpeg"
 	"io"
 	"log"
@@ -14,7 +15,6 @@ import (
 	"github.com/disintegration/imaging"
 	"github.com/pdfcpu/pdfcpu/pkg/api"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/model"
-	"github.com/yumenaka/comi/logger"
 )
 
 //sample code: https://github.com/pdfcpu/pdfcpu/blob/master/pkg/api/extract.go

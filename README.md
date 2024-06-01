@@ -91,6 +91,7 @@ Comigo服务器设置，可选的保存位置：
 - [ ] 更新提示
 - [ ] 移动客户端（Android，iOS）
 - [ ] 跨平台GUI（ebitenui react naitive or flutter？）
+- [ ] Debian，RPM包（https://github.com/goreleaser/nfpm）
 
 ### Special Thanks：
 [mholt](https://github.com/mholt)  、[spf13](https://github.com/spf13)  [disintegration](https://github.com/disintegration)   、 [Baozisoftware ](https://github.com/Baozisoftware) 、 [markbates](github.com/markbates/pkger)  and more。

@@ -2,7 +2,7 @@ package config_handlers
 
 import (
 	"github.com/pelletier/go-toml/v2"
-	"github.com/yumenaka/comi/logger"
+	"github.com/yumenaka/comi/util/logger"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

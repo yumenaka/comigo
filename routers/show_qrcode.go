@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"github.com/yumenaka/comi/util"
 	"github.com/yumenaka/comi/util/locale"
+	"github.com/yumenaka/comi/util/logger"
 	"strings"
 
 	"github.com/sanity-io/litter"
 	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/entity"
-	"github.com/yumenaka/comi/logger"
 )
 
 func showQRCode() {

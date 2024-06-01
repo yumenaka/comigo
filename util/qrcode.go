@@ -3,10 +3,10 @@ package util
 import (
 	"fmt"
 	"github.com/yumenaka/comi/util/locale"
+	"github.com/yumenaka/comi/util/logger"
 	"strconv"
 
 	qrcodeTerminal "github.com/Baozisoftware/qrcode-terminal-go"
-	"github.com/yumenaka/comi/logger"
 )
 
 // PrintAllReaderURL 打印阅读链接

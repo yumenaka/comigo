@@ -3,6 +3,7 @@ package util
 import (
 	"fmt"
 	"github.com/yumenaka/comi/util/locale"
+	"github.com/yumenaka/comi/util/logger"
 	"log"
 	"net"
 	"os"
@@ -13,7 +14,6 @@ import (
 
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/mem"
-	"github.com/yumenaka/comi/logger"
 )
 
 // TrackTIme 计算耗时

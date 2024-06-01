@@ -2,12 +2,11 @@ package util
 
 import (
 	"errors"
+	"github.com/yumenaka/comi/util/logger"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
-
-	"github.com/yumenaka/comi/logger"
 )
 
 // RemoveExtension 从文件名中去除扩展名

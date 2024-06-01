@@ -2,7 +2,7 @@ package token
 
 import (
 	"github.com/yumenaka/comi/config"
-	"github.com/yumenaka/comi/logger"
+	"github.com/yumenaka/comi/util/logger"
 	"time"
 
 	jwt "github.com/appleboy/gin-jwt/v2"

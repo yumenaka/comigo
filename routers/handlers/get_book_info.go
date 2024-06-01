@@ -1,12 +1,12 @@
 package handlers
 
 import (
+	"github.com/yumenaka/comi/util/logger"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comi/entity"
-	"github.com/yumenaka/comi/logger"
 )
 
 func GetParentBookInfo(c *gin.Context) {

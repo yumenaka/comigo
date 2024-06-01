@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"github.com/yumenaka/comi/util/locale"
+	"github.com/yumenaka/comi/util/logger"
 	"log"
 	"os/signal"
 	"syscall"
@@ -10,7 +11,6 @@ import (
 
 	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/entity"
-	"github.com/yumenaka/comi/logger"
 )
 
 // SetShutdownHandler TODO:退出时清理临时文件的函数

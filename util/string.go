@@ -4,14 +4,13 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"errors"
+	"github.com/yumenaka/comi/util/logger"
 	"io"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
 	"unicode/utf8"
-
-	"github.com/yumenaka/comi/logger"
 )
 
 //// 一个语言检测包，它告诉您某些提供的文本数据是用哪种（人类）语言编写的。 需要导入：

@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/fsnotify/fsnotify"
-	"github.com/yumenaka/comi/logger"
+	"github.com/yumenaka/comi/util/logger"
 )
 
 //Go 每日一库之 fsnotify  https://darjun.github.io/2020/01/19/godailylib/fsnotify/

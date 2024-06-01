@@ -3,10 +3,10 @@ package file
 import (
 	"context"
 	"github.com/yumenaka/comi/util"
+	"github.com/yumenaka/comi/util/logger"
 	"os"
 
 	"github.com/yumenaka/archiver/v4"
-	"github.com/yumenaka/comi/logger"
 )
 
 // UnArchiveRar  一次性解压rar文件

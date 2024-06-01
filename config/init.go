@@ -3,7 +3,7 @@ package config
 import (
 	"github.com/joho/godotenv"
 	"github.com/mitchellh/go-homedir"
-	"github.com/yumenaka/comi/logger"
+	"github.com/yumenaka/comi/util/logger"
 	"os"
 )
 
@@ -29,5 +29,4 @@ func init() {
 	Config.RemoteStores[0].Password = os.Getenv("SMB_PASS")
 	Config.RemoteStores[0].ShareName = os.Getenv("SMB_SHARE_NAME")
 	Config.RemoteStores[0].Path = os.Getenv("SMB_PATH")
-
 }

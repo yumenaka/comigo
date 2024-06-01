@@ -2,13 +2,13 @@ package handlers
 
 import (
 	"github.com/yumenaka/comi/util"
+	"github.com/yumenaka/comi/util/logger"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/skip2/go-qrcode"
 	"github.com/yumenaka/comi/config"
-	"github.com/yumenaka/comi/logger"
 )
 
 // GetQrcode 下载服务器配置
