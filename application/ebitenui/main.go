@@ -114,6 +114,10 @@ func main() {
 		widget.ContainerOpts.WidgetOpts(
 			widget.WidgetOpts.MinSize(100, 100),
 		),
+		// 容器有布局的概念。这就是这个容器的子级小部件的布局设置：
+		// 它们将被放置在容器的边界内。
+		// 容器将使用锚布局来布局其单个子窗口小部件
+		widget.ContainerOpts.Layout(widget.NewAnchorLayout()),
 	)
 	label1 := widget.NewText(
 		widget.TextOpts.Text("innerContainer1", fontFace, textColor),
@@ -126,11 +130,12 @@ func main() {
 		widget.ContainerOpts.WidgetOpts(
 			widget.WidgetOpts.MinSize(100, 100),
 		),
+		widget.ContainerOpts.Layout(widget.NewAnchorLayout()),
 	)
 	label2 := widget.NewText(
 		widget.TextOpts.Text("innerContainer2", fontFace, textColor),
 	)
-	innerContainer1.AddChild(label2)
+	innerContainer2.AddChild(label2)
 	rootContainer.AddChild(innerContainer2)
 
 	innerContainer3 := widget.NewContainer(
@@ -147,7 +152,12 @@ func main() {
 			}),
 			widget.WidgetOpts.MinSize(100, 100),
 		),
+		widget.ContainerOpts.Layout(widget.NewAnchorLayout()),
 	)
+	label3 := widget.NewText(
+		widget.TextOpts.Text("innerContainer3", fontFace, textColor),
+	)
+	innerContainer3.AddChild(label3)
 	rootContainer.AddChild(innerContainer3)
 
 	innerContainer4 := widget.NewContainer(
@@ -155,7 +165,12 @@ func main() {
 		widget.ContainerOpts.WidgetOpts(
 			widget.WidgetOpts.MinSize(100, 100),
 		),
+		widget.ContainerOpts.Layout(widget.NewAnchorLayout()),
 	)
+	label4 := widget.NewText(
+		widget.TextOpts.Text("innerContainer4", fontFace, color.NRGBA{128, 0, 0, 128}),
+	)
+	innerContainer4.AddChild(label4)
 	rootContainer.AddChild(innerContainer4)
 
 	g := game{
