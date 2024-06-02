@@ -4,8 +4,6 @@
 # nix develop nixpkgs#aaaaxy ?
 
 # https://github.com/cosmtrek/air/blob/master/air_example.toml
-
-
 root = "."
 tmp_dir = "temp"
 
@@ -32,7 +30,7 @@ full_bin = "COMI_DEBUG_MODE=true COMI_MIN_MEDIA_NUM=2 ./temp/comigo"
 # Watch these filename extensions.
 include_ext = ["go", "rar", "zip", "cbr", "cbz", "tpl", "tmpl", "html"]
 # Ignore these filename extensions or directories.
-exclude_dir = ["tmp", ".idea", ".git", ".vscode", ".cache"]
+exclude_dir = ["temp", ".idea", ".git", ".vscode", ".cache"]
 # Watch these directories if you specified.
 include_dir = []
 # Exclude files.
