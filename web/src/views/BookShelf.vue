@@ -200,7 +200,7 @@ export default defineComponent({
             maxDepth: 1,
             bookshelf: [
                 {
-                    title: "loading",
+                    title: "not found",
                     page_count: 1,
                     id: "12345",
                     type: ".zip",
@@ -215,10 +215,10 @@ export default defineComponent({
                         },
                     ],
                     cover: {
-                        filename: "loading.jpg",
+                        filename: "unknown.jpg",
                         height: 500,
                         width: 449,
-                        url: "/images/loading.gif",
+                        url: "/images/not_found.png",
                     },
                 },
             ],
@@ -318,15 +318,15 @@ export default defineComponent({
             let sort_by = "";
             //按照本地的存储值或默认值排序
             if (this.BookShelfConfig.resort_hint_key !== "") {
-                sort_by = "&sort_by=" + this.BookShelfConfig.resort_hint_key;
+                sort_by = "?sort_by=" + this.BookShelfConfig.resort_hint_key;
             }
             //按照路由里的查询参数排序
             if (this.$route.query.sort_by) {
-                sort_by = "&sort_by=" + this.$route.query.sort_by;
+                sort_by = "?sort_by=" + this.$route.query.sort_by;
             }
             let _this = this;
             axios
-                .get("book_infos?depth=0" + sort_by)
+                .get("top_shelf" + sort_by)
                 .then((response) => {
                     if (response.data !== "") {
                         this.bookshelf = response.data;
@@ -337,6 +337,7 @@ export default defineComponent({
                         });
                     }
                 }).catch((error) => {
+                    this.bookShelfTitle = _this.$t("no_book_found_hint");
                     console.log("请求接口失败" + error);
                 })
                 .finally(() => {
