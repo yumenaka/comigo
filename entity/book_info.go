@@ -206,6 +206,45 @@ func GetBookInfoListByMaxDepth(depth int, sortBy string) (*BookInfoList, error) 
 	return nil, errors.New("error:can not found bookshelf. GetBookInfoListByMaxDepth")
 }
 
+func TopOfShelfInfo(sortBy string) (*BookInfoList, error) {
+	//顶层书组
+	topGroupBookNum := 0
+	//扫描生成的书籍组
+	var top0 BookInfoList
+	MainFolder.SubFolders.Range(func(_, value interface{}) bool {
+		bs := value.(*subFolder)
+		bs.BookGroupMap.Range(func(key, value interface{}) bool {
+			group := value.(*BookInfo)
+			if group.Depth == 0 {
+				topGroupBookNum++
+				top0.BookInfos = append(top0.BookInfos, *group)
+			}
+			return true
+		})
+		return true
+	})
+	//如果顶层书组数量大于1，说明有多个顶层书库。只显示顶层书库。
+	if topGroupBookNum > 1 {
+		top0.SortBooks(sortBy)
+		return &top0, nil
+	}
+	//如果只有一个顶层书库，显示真实的书籍
+	var infoList BookInfoList
+	mapBooks.Range(func(_, value interface{}) bool {
+		b := value.(*Book)
+		if b.Depth == 1 {
+			info := NewBaseInfo(b)
+			infoList.BookInfos = append(infoList.BookInfos, *info)
+		}
+		return true
+	})
+	if len(infoList.BookInfos) > 0 {
+		infoList.SortBooks(sortBy)
+		return &infoList, nil
+	}
+	return nil, errors.New("error:can not found bookshelf. GetBookInfoListByMaxDepth")
+}
+
 func GetBookInfoListByID(BookID string, sortBy string) (*BookInfoList, error) {
 	var infoList BookInfoList
 	group, ok := mapBookGroup.Load(BookID)

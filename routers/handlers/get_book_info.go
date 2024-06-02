@@ -52,6 +52,19 @@ func GetBookInfos(c *gin.Context) {
 	}
 }
 
+func GetTopOfShelfInfo(c *gin.Context) {
+	//书籍排列的方式，默认name
+	sortBy := c.DefaultQuery("sort_by", "default")
+	//如果传了maxDepth这个参数
+	bookInfoList, err := entity.TopOfShelfInfo(sortBy)
+	if err != nil {
+		logger.Infof("%s", err)
+		c.PureJSON(http.StatusBadRequest, "GetTopOfShelfInfo Failed")
+		return
+	}
+	c.PureJSON(http.StatusOK, bookInfoList.BookInfos)
+}
+
 func GetBookInfosByMaxDepth(c *gin.Context, sortBy string) {
 	//按照书籍所在深度获取书籍信息，0是顶层，即为执行文件夹本身
 	maxDepth, err := strconv.Atoi(c.DefaultQuery("max_depth", "0"))
@@ -67,7 +80,6 @@ func GetBookInfosByMaxDepth(c *gin.Context, sortBy string) {
 		c.PureJSON(http.StatusBadRequest, "book_info not found")
 		return
 	}
-	bookInfoList.SortBooks(sortBy)
 	c.PureJSON(http.StatusOK, bookInfoList.BookInfos)
 }
 

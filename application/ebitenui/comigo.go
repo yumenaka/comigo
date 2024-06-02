@@ -3,8 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/yumenaka/comi/cmd"
+	"github.com/yumenaka/comi/config"
+	"github.com/yumenaka/comi/routers"
 	"image/color"
 	"log"
+	"os"
 	"strconv"
 	"time"
 
@@ -13,7 +17,6 @@ import (
 	"github.com/golang/freetype/truetype"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
-	"github.com/yumenaka/comi/cmd"
 	"golang.org/x/image/font/gofont/goregular"
 )
 
@@ -22,6 +25,14 @@ type game struct {
 }
 
 func main() {
+	//解析命令，扫描文件
+	cmd.StartScan(os.Args)
+	//设置临时文件夹
+	config.SetTempDir()
+	//SetWebServerPort
+	routers.SetWebServerPort()
+	//设置书籍API
+	routers.StartWebServer()
 	// 如果参数当中有--debug，则不启动UI
 	debugMode := flag.Bool("debug", false, "Disable UI by debug mode.")
 	// 解析命令行参数
@@ -29,16 +40,10 @@ func main() {
 	// 根据 debugMode 的值决定后续逻辑
 	if *debugMode {
 		fmt.Println("Debug Mode, UI is disabled.")
-		cmd.Execute()
+		select {}
 		return
 	}
 	fmt.Println("UI is enabled.")
-
-	// 后后台跑一个Comigo
-	go cmd.Execute() // 不加go的话，会阻塞在这里，不会执行下面的代码
-
-	// 读取配置文件
-	//cmd.ReadConfigFile()
 
 	readerConfig := NewReaderConfig()
 	readerConfig.SetTitle("Comigo Reader v0.9.9").
@@ -46,7 +51,7 @@ func main() {
 		SetWindowFullScreen(false).                                     //SetWindowFullScreen 设置窗口是否全屏。
 		SetWindowDecorated(true).                                       //SetWindowDecorated 设置是否有边框和标题栏
 		SetWindowResizingModeEnabled(ebiten.WindowResizingModeEnabled). //SetWindowResizingModeEnabled 设置窗口是否可以调整大小。
-		SetWindowSize(1024, 768).
+		SetWindowSize(1024, 800).
 		SetRunOptions(ebiten.RunGameOptions{
 			ScreenTransparent: false,
 		})
@@ -100,7 +105,7 @@ func main() {
 		// 创建一个文本小部件，上面写“World_i”+现在时间
 		nowTime := time.Now().Format("2006-01-02 15:04:05")
 		helloWorldLabel := widget.NewText(
-			widget.TextOpts.Text("Chrome_"+strconv.Itoa(i)+" "+nowTime, fontFace, rgba),
+			widget.TextOpts.Text(strconv.Itoa(i)+" "+nowTime, fontFace, rgba),
 		)
 		// 要显示文本小部件，将其添加到根容器中。
 		rootContainer.AddChild(helloWorldLabel)

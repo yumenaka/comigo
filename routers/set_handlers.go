@@ -63,6 +63,8 @@ func setWebAPI(engine *gin.Engine) {
 	protectedAPI.GET("/server_info_all", handlers.GetServerInfo)
 	//获取书架信息，不包含每页信息
 	protectedAPI.GET("/book_infos", handlers.GetBookInfos)
+	//获取书架信息2.0
+	protectedAPI.GET("/top_shelf", handlers.GetTopOfShelfInfo)
 	//通过URL字符串参数查询书籍信息
 	protectedAPI.GET("/get_book", handlers.GetBook)
 	//查询父书籍信息
