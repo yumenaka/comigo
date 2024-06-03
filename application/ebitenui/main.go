@@ -3,18 +3,20 @@ package main
 import (
 	"flag"
 	"fmt"
+	"image/color"
+	"log"
+	"os"
+
 	"github.com/ebitenui/ebitenui"
 	"github.com/ebitenui/ebitenui/image"
 	"github.com/ebitenui/ebitenui/widget"
 	"github.com/golang/freetype/truetype"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/yumenaka/comi/cmd"
 	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/routers"
 	"golang.org/x/image/font/gofont/goregular"
-	"image/color"
-	"log"
-	"os"
 )
 
 // Game object used by ebiten
@@ -50,19 +52,21 @@ func main() {
 	readerConfig := NewReaderConfig()
 	readerConfig.SetTitle("Comigo Reader v0.9.9").
 		SetReaderMode(ScrollMode).
-		SetWindowFullScreen(false).                                     //SetWindowFullScreen 设置窗口是否全屏。
+		SetWindowFullScreen(true).                                      //SetWindowFullScreen 设置窗口是否全屏。
 		SetWindowDecorated(true).                                       //SetWindowDecorated 设置是否有边框和标题栏
 		SetWindowResizingModeEnabled(ebiten.WindowResizingModeEnabled). //SetWindowResizingModeEnabled 设置窗口是否可以调整大小。
-		SetWindowSize(1024, 800).
+		SetWindowSize(1280, 800).
 		SetRunOptions(ebiten.RunGameOptions{
 			ScreenTransparent: false,
 		})
-
+	// 设置窗口大小和标题等
 	ebiten.SetWindowSize(readerConfig.Width, readerConfig.Height)
 	ebiten.SetWindowTitle(readerConfig.Title)
 	ebiten.SetWindowResizingMode(readerConfig.WindowResizingModeEnabled)
 	// SetWindowDecorated 设置窗口是否有边框和标题栏。
 	ebiten.SetWindowDecorated(readerConfig.WindowDecorated)
+	// SetWindowFullScreen 设置窗口是否全屏。
+	ebiten.SetFullscreen(readerConfig.WindowFullScreen)
 	ebiten.SetScreenClearedEveryFrame(false)
 
 	// 2.根容器与布局设置，
@@ -78,16 +82,16 @@ func main() {
 				//GridLayout 网格布局模式，将小部件放置在网格中。
 				widget.NewGridLayout(
 					// 使用 Columns 参数来定义列的数量。
-					widget.GridLayoutOpts.Columns(2),
+					widget.GridLayoutOpts.Columns(1),
 					// 使用 ColumnStretch 和 RowStretch 参数来分别定义列和行的拉伸因子。
 					// 只支持布尔值，true表示拉伸，false表示不拉伸。
-					widget.GridLayoutOpts.Stretch([]bool{true, true, true, true}, []bool{false, true, true, true, true, true}),
+					widget.GridLayoutOpts.Stretch([]bool{true}, []bool{false, true, false}),
 					// Padding 定义了网格块的外间距大小。
 					widget.GridLayoutOpts.Padding(widget.Insets{
-						Top:    15,
-						Left:   20,
-						Bottom: 20,
-						Right:  20,
+						Top:    10,
+						Left:   10,
+						Bottom: 10,
+						Right:  10,
 					}),
 				)))
 
@@ -109,10 +113,10 @@ func main() {
 	textColor := color.RGBA{R: 255, G: 255, B: 255, A: 0xff}
 
 	// 一个新的文本小部件，用于显示一些文本。
-	innerContainer1 := widget.NewContainer(
+	headerContainer := widget.NewContainer(
 		widget.ContainerOpts.BackgroundImage(image.NewNineSliceColor(color.NRGBA{255, 0, 0, 255})),
 		widget.ContainerOpts.WidgetOpts(
-			widget.WidgetOpts.MinSize(100, 100),
+			widget.WidgetOpts.MinSize(50, 50),
 		),
 		// 容器有布局的概念。这就是这个容器的子级小部件的布局设置：
 		// 它们将被放置在容器的边界内。
@@ -120,58 +124,56 @@ func main() {
 		widget.ContainerOpts.Layout(widget.NewAnchorLayout()),
 	)
 	label1 := widget.NewText(
-		widget.TextOpts.Text("innerContainer1", fontFace, textColor),
+		widget.TextOpts.Text("headerContainer", fontFace, textColor),
 	)
-	innerContainer1.AddChild(label1)
-	rootContainer.AddChild(innerContainer1)
+	headerContainer.AddChild(label1)
+	rootContainer.AddChild(headerContainer)
 
-	innerContainer2 := widget.NewContainer(
-		widget.ContainerOpts.BackgroundImage(image.NewNineSliceColor(color.NRGBA{0, 255, 0, 255})),
+	bodyContainer := widget.NewContainer(
+		widget.ContainerOpts.BackgroundImage(image.NewNineSliceColor(color.NRGBA{77, 77, 77, 255})),
 		widget.ContainerOpts.WidgetOpts(
-			widget.WidgetOpts.MinSize(100, 100),
+			widget.WidgetOpts.MinSize(50, 50),
+			widget.WidgetOpts.LayoutData(widget.GridLayoutData{
+				//指定网格单元内的水平锚定位置。
+				//HorizontalPosition: widget.GridLayoutPositionCenter,
+				// 指定网格单元格内的垂直锚定位置。
+				//VerticalPosition: widget.GridLayoutPositionStart,
+				// 限制最大大小。
+				//MaxWidth:  300,
+				//MaxHeight: 300,
+			}),
 		),
 		widget.ContainerOpts.Layout(widget.NewAnchorLayout()),
 	)
 	label2 := widget.NewText(
-		widget.TextOpts.Text("innerContainer2", fontFace, textColor),
+		widget.TextOpts.Text("bodyContainer", fontFace, textColor),
 	)
-	innerContainer2.AddChild(label2)
-	rootContainer.AddChild(innerContainer2)
+	bodyContainer.AddChild(label2)
+	rootContainer.AddChild(bodyContainer)
 
-	innerContainer3 := widget.NewContainer(
-		widget.ContainerOpts.BackgroundImage(image.NewNineSliceColor(color.NRGBA{0, 0, 255, 255})),
+	bottomContainer := widget.NewContainer(
+		widget.ContainerOpts.BackgroundImage(image.NewNineSliceColor(color.NRGBA{R: 0, G: 0, B: 255, A: 255})),
 		widget.ContainerOpts.WidgetOpts(
-			//The widget in this cell has a MaxHeight and MaxWidth less than the
-			//Size of the grid cell so it will use the Position fields below to
-			//Determine where the widget should be displayed within that grid cell.
+			//此单元格中的小部件的 MaxHeight 和 MaxWidth 小于
+			//网格单元的大小，因此它将使用下面的位置字段
+			//确定小部件应在该网格单元中显示的位置。
 			widget.WidgetOpts.LayoutData(widget.GridLayoutData{
-				HorizontalPosition: widget.GridLayoutPositionCenter,
-				VerticalPosition:   widget.GridLayoutPositionCenter,
-				MaxWidth:           100,
-				MaxHeight:          100,
+				// 设置水平和垂直位置。
+				//HorizontalPosition: widget.GridLayoutPositionCenter,
+				//VerticalPosition:   widget.GridLayoutPositionCenter,
+				// 限制最大大小。
+				//MaxWidth:  300,
+				//MaxHeight: 300,
 			}),
-			widget.WidgetOpts.MinSize(100, 100),
+			widget.WidgetOpts.MinSize(100, 50),
 		),
 		widget.ContainerOpts.Layout(widget.NewAnchorLayout()),
 	)
 	label3 := widget.NewText(
-		widget.TextOpts.Text("innerContainer3", fontFace, textColor),
+		widget.TextOpts.Text("bottomContainer", fontFace, textColor),
 	)
-	innerContainer3.AddChild(label3)
-	rootContainer.AddChild(innerContainer3)
-
-	innerContainer4 := widget.NewContainer(
-		widget.ContainerOpts.BackgroundImage(image.NewNineSliceColor(color.NRGBA{0, 255, 255, 255})),
-		widget.ContainerOpts.WidgetOpts(
-			widget.WidgetOpts.MinSize(100, 100),
-		),
-		widget.ContainerOpts.Layout(widget.NewAnchorLayout()),
-	)
-	label4 := widget.NewText(
-		widget.TextOpts.Text("innerContainer4", fontFace, color.NRGBA{128, 0, 0, 128}),
-	)
-	innerContainer4.AddChild(label4)
-	rootContainer.AddChild(innerContainer4)
+	bottomContainer.AddChild(label3)
+	rootContainer.AddChild(bottomContainer)
 
 	g := game{
 		ui: eui,
@@ -195,8 +197,8 @@ func (g *game) Draw(screen *ebiten.Image) {
 	// 应在 ebiten Draw 函数中调用 ui.Draw()，以将 UI 绘制到屏幕上。
 	// 还应该在游戏的所有其他事件渲染之后调用它，以便它显示在游戏世界的顶部。
 	g.ui.Draw(screen)
-	// 这只是一个调试打印，用于在屏幕左上角显示当前 FPS。
-	//ebitenutil.DebugPrint(screen, fmt.Sprintf("FPS: %f", ebiten.ActualFPS()))
+	// 在屏幕左上角显示当前 FPS。
+	ebitenutil.DebugPrint(screen, fmt.Sprintf("FPS: %f", ebiten.ActualFPS()))
 }
 
 func (g *game) Layout(outsideWidth int, outsideHeight int) (int, int) {
