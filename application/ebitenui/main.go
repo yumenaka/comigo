@@ -3,8 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
+	"golang.org/x/image/font"
 	"image/color"
 	"log"
+	"math"
 	"os"
 
 	"github.com/ebitenui/ebitenui"
@@ -141,6 +143,12 @@ func main() {
 	headerContainer.AddChild(headerText)
 	rootContainer.AddChild(headerContainer)
 
+	// 加载按钮状态的图片：静止、悬停和按下(idle, hover, and pressed)。
+	buttonImage, _ := loadButtonImage()
+
+	// 加载按钮文字字体
+	face, _ := loadFont(20)
+
 	bodyContainer := widget.NewContainer(
 		widget.ContainerOpts.BackgroundImage(image.NewNineSliceColor(color.NRGBA{77, 77, 77, 255})),
 		widget.ContainerOpts.WidgetOpts(
@@ -156,21 +164,117 @@ func main() {
 			}),
 		),
 		widget.ContainerOpts.Layout(widget.NewAnchorLayout()),
+		// 容器将使用网格布局来配置 ScrollableContainer 和 Slider
+		widget.ContainerOpts.Layout(widget.NewGridLayout(
+			widget.GridLayoutOpts.Columns(2),
+			widget.GridLayoutOpts.Spacing(2, 0),
+			widget.GridLayoutOpts.Stretch([]bool{true, false}, []bool{true}),
+		)),
 	)
-	bodyText := widget.NewText(
-		widget.TextOpts.Text("Body", fontFace, textColor),
-		// WidgetOpts 用于设置小部件的各种属性。这里用来设置文本的锚点布局。
-		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
-			// 指定网格单元内的水平锚定位置。
-			HorizontalPosition: widget.AnchorLayoutPositionCenter,
-			// 指定网格单元格内的垂直锚定位置。
-			VerticalPosition: widget.AnchorLayoutPositionCenter,
-		})),
+
+	// 创建一个应包含滚动内容的容器
+	content := widget.NewContainer(widget.ContainerOpts.Layout(widget.NewRowLayout(
+		widget.RowLayoutOpts.Direction(widget.DirectionVertical),
+		widget.RowLayoutOpts.Spacing(20),
+	)))
+
+	// 将20个按钮添加到可滚动内容容器中
+	for x := 0; x < 50; x++ {
+		// Capture x for use in callback
+		x := x
+		// construct a button
+		button := widget.NewButton(
+			// set general widget options
+			widget.ButtonOpts.WidgetOpts(
+				// 指示容器的锚点布局将按钮水平和垂直居中”
+				widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+					Position: widget.RowLayoutPositionCenter,
+				}),
+			),
+
+			// 指定要使用的图像
+			widget.ButtonOpts.Image(buttonImage),
+
+			// 指定按钮的文本、字体和颜色
+			widget.ButtonOpts.Text(fmt.Sprintf("Awesome! %d", x), face, &widget.ButtonTextColor{
+				Idle: color.NRGBA{0xdf, 0xf4, 0xff, 0xff},
+			}),
+
+			// 指定按钮的文本需要一些填充才能正确显示
+			widget.ButtonOpts.TextPadding(widget.Insets{
+				Left:   30,
+				Right:  30,
+				Top:    5,
+				Bottom: 5,
+			}),
+
+			// 添加一个处理程序以响应点击按钮事件
+			widget.ButtonOpts.ClickedHandler(func(args *widget.ButtonClickedEventArgs) {
+				println(fmt.Sprintf("Button %d Clicked!", x))
+			}),
+		)
+
+		// 将按钮添加为容器的子元素
+		content.AddChild(button)
+	}
+
+	// 创建新的 ScrollContainer 对象
+	scrollContainer := widget.NewScrollContainer(
+		// 设置将要滚动的内容
+		widget.ScrollContainerOpts.Content(content),
+		// 让容器将内容宽度拉伸以匹配可用空间
+		widget.ScrollContainerOpts.StretchContentWidth(),
+		// 为可滚动容器设置背景图像。
+		widget.ScrollContainerOpts.Image(&widget.ScrollContainerImage{
+			Idle: image.NewNineSliceColor(color.NRGBA{0x13, 0x1a, 0x22, 0xff}),
+			Mask: image.NewNineSliceColor(color.NRGBA{0x13, 0x1a, 0x22, 0xff}),
+		}),
 	)
-	bodyContainer.AddChild(bodyText)
+	// 将可滚动容器添加到左侧网格单元中
+	bodyContainer.AddChild(scrollContainer)
+
+	// 创建一个函数来返回滑块使用的页面大小
+	pageSizeFunc := func() int {
+		return int(math.Round(float64(scrollContainer.ViewRect().Dy()) / float64(content.GetWidget().Rect.Dy()) * 1000))
+	}
+	// 创建一个垂直滑块来控制可滚动容器
+	vSlider := widget.NewSlider(
+		widget.SliderOpts.Direction(widget.DirectionVertical),
+		widget.SliderOpts.MinMax(0, 1000),
+		widget.SliderOpts.PageSizeFunc(pageSizeFunc),
+		// 根据滑块的值更新滚动位置
+		widget.SliderOpts.ChangedHandler(func(args *widget.SliderChangedEventArgs) {
+			scrollContainer.ScrollTop = float64(args.Slider.Current) / 1000
+		}),
+		widget.SliderOpts.Images(
+			// 设置轨道图片
+			&widget.SliderTrackImage{
+				Idle:  image.NewNineSliceColor(color.NRGBA{100, 100, 100, 255}),
+				Hover: image.NewNineSliceColor(color.NRGBA{100, 100, 100, 255}),
+			},
+			// 设置滑动块图片
+			&widget.ButtonImage{
+				Idle:    image.NewNineSliceColor(color.NRGBA{150, 150, 235, 255}),
+				Hover:   image.NewNineSliceColor(color.NRGBA{150, 150, 235, 255}),
+				Pressed: image.NewNineSliceColor(color.NRGBA{150, 150, 235, 255}),
+			},
+		),
+	)
+	// 如果滚动容器通过滑块以外的其他方式进行滚动，设置滑块的位置。
+	scrollContainer.GetWidget().ScrolledEvent.AddHandler(func(args interface{}) {
+		a := args.(*widget.WidgetScrolledEventArgs)
+		p := pageSizeFunc() / 3
+		if p < 1 {
+			p = 1
+		}
+		vSlider.Current -= int(math.Round(a.Y * float64(p)))
+	})
+
+	// 将滑块添加到bodyContainer容器的第二个列插槽中
+	bodyContainer.AddChild(vSlider)
 	rootContainer.AddChild(bodyContainer)
 
-	bottomContainer := widget.NewContainer(
+	footerContainer := widget.NewContainer(
 		widget.ContainerOpts.BackgroundImage(image.NewNineSliceColor(color.NRGBA{R: 0, G: 0, B: 255, A: 255})),
 		widget.ContainerOpts.WidgetOpts(
 			//此单元格中的小部件的 MaxHeight 和 MaxWidth 小于
@@ -188,8 +292,8 @@ func main() {
 		),
 		widget.ContainerOpts.Layout(widget.NewAnchorLayout()),
 	)
-	bottomText := widget.NewText(
-		widget.TextOpts.Text("Bottom", fontFace, textColor),
+	footerText := widget.NewText(
+		widget.TextOpts.Text("Footer", fontFace, textColor),
 		// WidgetOpts 用于设置小部件的各种属性。这里用来设置文本的锚点布局。
 		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
 			// 指定网格单元内的水平锚定位置。
@@ -198,8 +302,8 @@ func main() {
 			VerticalPosition: widget.AnchorLayoutPositionCenter,
 		})),
 	)
-	bottomContainer.AddChild(bottomText)
-	rootContainer.AddChild(bottomContainer)
+	footerContainer.AddChild(footerText)
+	rootContainer.AddChild(footerContainer)
 
 	g := game{
 		ui: eui,
@@ -229,4 +333,31 @@ func (g *game) Draw(screen *ebiten.Image) {
 
 func (g *game) Layout(outsideWidth int, outsideHeight int) (int, int) {
 	return outsideWidth, outsideHeight
+}
+
+func loadButtonImage() (*widget.ButtonImage, error) {
+	idle := image.NewNineSliceColor(color.NRGBA{R: 170, G: 170, B: 180, A: 255})
+
+	hover := image.NewNineSliceColor(color.NRGBA{R: 130, G: 130, B: 150, A: 255})
+
+	pressed := image.NewNineSliceColor(color.NRGBA{R: 100, G: 100, B: 120, A: 255})
+
+	return &widget.ButtonImage{
+		Idle:    idle,
+		Hover:   hover,
+		Pressed: pressed,
+	}, nil
+}
+
+func loadFont(size float64) (font.Face, error) {
+	ttfFont, err := truetype.Parse(goregular.TTF)
+	if err != nil {
+		return nil, err
+	}
+
+	return truetype.NewFace(ttfFont, &truetype.Options{
+		Size:    size,
+		DPI:     72,
+		Hinting: font.HintingFull,
+	}), nil
 }
