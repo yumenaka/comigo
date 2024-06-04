@@ -86,6 +86,8 @@ func main() {
 					// 使用 ColumnStretch 和 RowStretch 参数来分别定义列和行的拉伸因子。
 					// 只支持布尔值，true表示拉伸，false表示不拉伸。
 					widget.GridLayoutOpts.Stretch([]bool{true}, []bool{false, true, false}),
+					//间距配置网格布局，以通过间距 c 分隔列，并通过间距 r 分隔行。
+					widget.GridLayoutOpts.Spacing(20, 20),
 					// Padding 定义了网格块的外间距大小。
 					widget.GridLayoutOpts.Padding(widget.Insets{
 						Top:    10,
@@ -121,12 +123,22 @@ func main() {
 		// 容器有布局的概念。这就是这个容器的子级小部件的布局设置：
 		// 它们将被放置在容器的边界内。
 		// 容器将使用锚布局来布局其单个子窗口小部件
-		widget.ContainerOpts.Layout(widget.NewAnchorLayout()),
+		widget.ContainerOpts.Layout(widget.NewAnchorLayout(
+			//外边与内部内容之间的的填充(padding)的大小
+			widget.AnchorLayoutOpts.Padding(widget.NewInsetsSimple(40)),
+		)),
 	)
-	label1 := widget.NewText(
-		widget.TextOpts.Text("headerContainer", fontFace, textColor),
+	headerText := widget.NewText(
+		widget.TextOpts.Text("Header", fontFace, textColor),
+		// WidgetOpts 用于设置小部件的各种属性。这里用来设置文本的锚点布局。
+		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
+			// 指定网格单元内的水平锚定位置。
+			HorizontalPosition: widget.AnchorLayoutPositionCenter,
+			// 指定网格单元格内的垂直锚定位置。
+			VerticalPosition: widget.AnchorLayoutPositionCenter,
+		})),
 	)
-	headerContainer.AddChild(label1)
+	headerContainer.AddChild(headerText)
 	rootContainer.AddChild(headerContainer)
 
 	bodyContainer := widget.NewContainer(
@@ -145,10 +157,17 @@ func main() {
 		),
 		widget.ContainerOpts.Layout(widget.NewAnchorLayout()),
 	)
-	label2 := widget.NewText(
-		widget.TextOpts.Text("bodyContainer", fontFace, textColor),
+	bodyText := widget.NewText(
+		widget.TextOpts.Text("Body", fontFace, textColor),
+		// WidgetOpts 用于设置小部件的各种属性。这里用来设置文本的锚点布局。
+		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
+			// 指定网格单元内的水平锚定位置。
+			HorizontalPosition: widget.AnchorLayoutPositionCenter,
+			// 指定网格单元格内的垂直锚定位置。
+			VerticalPosition: widget.AnchorLayoutPositionCenter,
+		})),
 	)
-	bodyContainer.AddChild(label2)
+	bodyContainer.AddChild(bodyText)
 	rootContainer.AddChild(bodyContainer)
 
 	bottomContainer := widget.NewContainer(
@@ -169,10 +188,17 @@ func main() {
 		),
 		widget.ContainerOpts.Layout(widget.NewAnchorLayout()),
 	)
-	label3 := widget.NewText(
-		widget.TextOpts.Text("bottomContainer", fontFace, textColor),
+	bottomText := widget.NewText(
+		widget.TextOpts.Text("Bottom", fontFace, textColor),
+		// WidgetOpts 用于设置小部件的各种属性。这里用来设置文本的锚点布局。
+		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
+			// 指定网格单元内的水平锚定位置。
+			HorizontalPosition: widget.AnchorLayoutPositionCenter,
+			// 指定网格单元格内的垂直锚定位置。
+			VerticalPosition: widget.AnchorLayoutPositionCenter,
+		})),
 	)
-	bottomContainer.AddChild(label3)
+	bottomContainer.AddChild(bottomText)
 	rootContainer.AddChild(bottomContainer)
 
 	g := game{
