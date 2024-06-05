@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"golang.org/x/image/font"
 	"image/color"
 	"log"
 	"math"
@@ -18,6 +17,7 @@ import (
 	"github.com/yumenaka/comi/cmd"
 	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/routers"
+	"golang.org/x/image/font"
 	"golang.org/x/image/font/gofont/goregular"
 )
 
@@ -52,23 +52,34 @@ func main() {
 
 	// 1. 创建一个新的 ReaderConfig 对象，用于配置阅读器的设置。
 	readerConfig := NewReaderConfig()
-	readerConfig.SetTitle("Comigo Reader v0.9.9").
+	readerConfig.SetTitle("Sample v1.0").
+		// 阅读器模式。
 		SetReaderMode(ScrollMode).
-		SetWindowFullScreen(true).                                      //SetWindowFullScreen 设置窗口是否全屏。
-		SetWindowDecorated(true).                                       //SetWindowDecorated 设置是否有边框和标题栏
-		SetWindowResizingModeEnabled(ebiten.WindowResizingModeEnabled). //SetWindowResizingModeEnabled 设置窗口是否可以调整大小。
+		// 窗口是否全屏。
+		SetWindowFullScreen(false).
+		// 窗口是否有边框和标题栏。
+		SetWindowDecorated(true).
+		// 窗口是否可以调整大小。
+		SetWindowResizingModeEnabled(ebiten.WindowResizingModeEnabled).
+		// 窗口的宽度和高度。
 		SetWindowSize(1280, 800).
+		// 运行选项。
 		SetRunOptions(ebiten.RunGameOptions{
+			// 背景透明
 			ScreenTransparent: false,
 		})
-	// 设置窗口大小和标题等
+	// 设置窗口大小
 	ebiten.SetWindowSize(readerConfig.Width, readerConfig.Height)
+	// 设置窗口标题。
 	ebiten.SetWindowTitle(readerConfig.Title)
+	// 设置窗口是否可以调整大小。
 	ebiten.SetWindowResizingMode(readerConfig.WindowResizingModeEnabled)
-	// SetWindowDecorated 设置窗口是否有边框和标题栏。
+	// 设置窗口是否有边框和标题栏。
 	ebiten.SetWindowDecorated(readerConfig.WindowDecorated)
-	// SetWindowFullScreen 设置窗口是否全屏。
+	//  设置窗口是否全屏。
 	ebiten.SetFullscreen(readerConfig.WindowFullScreen)
+	// SetScreenClearedEveryFrame 用于启用或禁用每个帧开始时清除屏幕的功能。
+	// 默认值为 true，这意味着默认情况下每个帧都会清屏。
 	ebiten.SetScreenClearedEveryFrame(false)
 
 	// 2.根容器与布局设置，
@@ -78,7 +89,7 @@ func main() {
 	rootContainer :=
 		widget.NewContainer(
 			//使用纯色作为背景
-			widget.ContainerOpts.BackgroundImage(image.NewNineSliceColor(color.NRGBA{0x13, 0x1a, 0x22, 0xff})),
+			widget.ContainerOpts.BackgroundImage(image.NewNineSliceColor(color.NRGBA{A: 255})),
 			// 容器将使用锚布局来布局其单个子窗口小部件
 			widget.ContainerOpts.Layout(
 				//GridLayout 网格布局模式，将小部件放置在网格中。
@@ -88,14 +99,14 @@ func main() {
 					// 使用 ColumnStretch 和 RowStretch 参数来分别定义列和行的拉伸因子。
 					// 只支持布尔值，true表示拉伸，false表示不拉伸。
 					widget.GridLayoutOpts.Stretch([]bool{true}, []bool{false, true, false}),
-					//间距配置网格布局，以通过间距 c 分隔列，并通过间距 r 分隔行。
-					widget.GridLayoutOpts.Spacing(20, 20),
+					//网格布局的间距，c 列间距，r行间距。
+					widget.GridLayoutOpts.Spacing(20, 0),
 					// Padding 定义了网格块的外间距大小。
 					widget.GridLayoutOpts.Padding(widget.Insets{
-						Top:    10,
-						Left:   10,
-						Bottom: 10,
-						Right:  10,
+						Top:    0,
+						Left:   0,
+						Bottom: 0,
+						Right:  0,
 					}),
 				)))
 
@@ -111,23 +122,24 @@ func main() {
 	}
 	// 字体大小
 	fontFace := truetype.NewFace(ttfFont, &truetype.Options{
-		Size: 24,
+		Size: 20,
 	})
 	// 文本颜色
-	textColor := color.RGBA{R: 255, G: 255, B: 255, A: 0xff}
+	textColor := color.RGBA{R: 0, G: 0, B: 0, A: 0xff}
 
 	// 一个新的文本小部件，用于显示一些文本。
 	headerContainer := widget.NewContainer(
-		widget.ContainerOpts.BackgroundImage(image.NewNineSliceColor(color.NRGBA{255, 0, 0, 255})),
+		// header容器的背景颜色
+		widget.ContainerOpts.BackgroundImage(image.NewNineSliceColor(color.NRGBA{R: 245, G: 245, B: 228, A: 255})),
 		widget.ContainerOpts.WidgetOpts(
-			widget.WidgetOpts.MinSize(50, 50),
+			widget.WidgetOpts.MinSize(50, 30),
 		),
 		// 容器有布局的概念。这就是这个容器的子级小部件的布局设置：
 		// 它们将被放置在容器的边界内。
 		// 容器将使用锚布局来布局其单个子窗口小部件
 		widget.ContainerOpts.Layout(widget.NewAnchorLayout(
 			//外边与内部内容之间的的填充(padding)的大小
-			widget.AnchorLayoutOpts.Padding(widget.NewInsetsSimple(40)),
+			widget.AnchorLayoutOpts.Padding(widget.NewInsetsSimple(15)),
 		)),
 	)
 	headerText := widget.NewText(
@@ -145,12 +157,11 @@ func main() {
 
 	// 加载按钮状态的图片：静止、悬停和按下(idle, hover, and pressed)。
 	buttonImage, _ := loadButtonImage()
-
 	// 加载按钮文字字体
 	face, _ := loadFont(20)
-
 	bodyContainer := widget.NewContainer(
-		widget.ContainerOpts.BackgroundImage(image.NewNineSliceColor(color.NRGBA{77, 77, 77, 255})),
+		// 设置容器的背景图像。#E0D9CD
+		widget.ContainerOpts.BackgroundImage(image.NewNineSliceColor(color.NRGBA{R: 0xE0, G: 0xD9, B: 0xCD, A: 0xff})),
 		widget.ContainerOpts.WidgetOpts(
 			widget.WidgetOpts.MinSize(50, 50),
 			widget.WidgetOpts.LayoutData(widget.GridLayoutData{
@@ -172,21 +183,30 @@ func main() {
 		)),
 	)
 
-	// 创建一个应包含滚动内容的容器
+	// 创建一个包含滚动内容的容器
 	content := widget.NewContainer(widget.ContainerOpts.Layout(widget.NewRowLayout(
+		// 设置行布局的方向
 		widget.RowLayoutOpts.Direction(widget.DirectionVertical),
-		widget.RowLayoutOpts.Spacing(20),
+		// 设置行布局的填充
+		widget.RowLayoutOpts.Padding(widget.Insets{
+			Left:   0,
+			Right:  0,
+			Top:    30,
+			Bottom: 30,
+		}),
+		// 设置行布局的间距
+		widget.RowLayoutOpts.Spacing(10),
 	)))
 
 	// 将20个按钮添加到可滚动内容容器中
-	for x := 0; x < 50; x++ {
+	for x := 0; x < 150; x++ {
 		// Capture x for use in callback
 		x := x
 		// construct a button
 		button := widget.NewButton(
 			// set general widget options
 			widget.ButtonOpts.WidgetOpts(
-				// 指示容器的锚点布局将按钮水平和垂直居中”
+				// 指示容器的锚点布局，将按钮水平和垂直居中
 				widget.WidgetOpts.LayoutData(widget.RowLayoutData{
 					Position: widget.RowLayoutPositionCenter,
 				}),
@@ -197,15 +217,15 @@ func main() {
 
 			// 指定按钮的文本、字体和颜色
 			widget.ButtonOpts.Text(fmt.Sprintf("Awesome! %d", x), face, &widget.ButtonTextColor{
-				Idle: color.NRGBA{0xdf, 0xf4, 0xff, 0xff},
+				Idle: color.NRGBA{R: 0xdf, G: 0xf4, B: 0xff, A: 0xff},
 			}),
 
 			// 指定按钮的文本需要一些填充才能正确显示
 			widget.ButtonOpts.TextPadding(widget.Insets{
-				Left:   30,
-				Right:  30,
-				Top:    5,
-				Bottom: 5,
+				Left:   300,
+				Right:  300,
+				Top:    120,
+				Bottom: 120,
 			}),
 
 			// 添加一个处理程序以响应点击按钮事件
@@ -226,8 +246,8 @@ func main() {
 		widget.ScrollContainerOpts.StretchContentWidth(),
 		// 为可滚动容器设置背景图像。
 		widget.ScrollContainerOpts.Image(&widget.ScrollContainerImage{
-			Idle: image.NewNineSliceColor(color.NRGBA{0x13, 0x1a, 0x22, 0xff}),
-			Mask: image.NewNineSliceColor(color.NRGBA{0x13, 0x1a, 0x22, 0xff}),
+			Idle: image.NewNineSliceColor(color.NRGBA{0xE0, 0xD9, 0xCD, 0xff}),
+			Mask: image.NewNineSliceColor(color.NRGBA{0xE0, 0xD9, 0xCD, 0xff}),
 		}),
 	)
 	// 将可滚动容器添加到左侧网格单元中
@@ -275,7 +295,7 @@ func main() {
 	rootContainer.AddChild(bodyContainer)
 
 	footerContainer := widget.NewContainer(
-		widget.ContainerOpts.BackgroundImage(image.NewNineSliceColor(color.NRGBA{R: 0, G: 0, B: 255, A: 255})),
+		widget.ContainerOpts.BackgroundImage(image.NewNineSliceColor(color.NRGBA{245, 245, 228, 255})),
 		widget.ContainerOpts.WidgetOpts(
 			//此单元格中的小部件的 MaxHeight 和 MaxWidth 小于
 			//网格单元的大小，因此它将使用下面的位置字段
