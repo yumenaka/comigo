@@ -40,7 +40,7 @@ var (
 	}
 )
 
-// 将 sync.Map 的变量设置为一个新的实例。这样做会让原来的 sync.Map 实例失去引用，随后被垃圾回收器清理。
+// ResetBookMap 将 sync.Map 的变量设置为一个新的实例。这样做会让原来的 sync.Map 实例失去引用，随后被垃圾回收器清理。
 func ResetBookMap() {
 	mapBooks = sync.Map{}
 	mapBookGroup = sync.Map{}
@@ -228,6 +228,14 @@ func GetBookByID(id string, sortBy string) (*Book, error) {
 		return &temp, nil
 	}
 	return nil, errors.New("can not found book,id=" + id)
+}
+
+// GetRandomBook 随机获取一本书
+func GetRandomBook() (*Book, error) {
+	for _, value := range GetAllBookList() {
+		return value, nil
+	}
+	return nil, errors.New("can not found book")
 }
 
 func GetBookGroupIDByBookID(id string) (group_id string, err error) {

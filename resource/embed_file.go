@@ -1,4 +1,4 @@
-package routers
+package resource
 
 import (
 	"embed"
@@ -7,13 +7,14 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comi/config"
-	"github.com/yumenaka/comi/util/locale"
 	"github.com/yumenaka/comi/util/logger"
 )
 
+var webTitle string
+
 // 嵌入静态文件
-func embedFile(engine *gin.Engine) {
+func EmbedResoure(engine *gin.Engine, title string) {
+	webTitle = title
 	//go template 设置网页标题
 	embedTemplate(engine)
 	//vue静态文件 web阅读器主体
@@ -35,7 +36,7 @@ func embedTemplate(engine *gin.Engine) {
 	//解析模板到HTML
 	engine.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "template-data", gin.H{
-			"title": locale.GetString("HTML_TITLE") + config.Version, //页面标题
+			"title": webTitle, //页面标题
 		})
 	})
 }
