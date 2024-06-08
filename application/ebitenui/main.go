@@ -22,9 +22,12 @@ import (
 	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/entity"
 	"github.com/yumenaka/comi/routers"
+	"github.com/yumenaka/comi/util"
 	fileutil "github.com/yumenaka/comi/util/file"
+	_ "golang.org/x/image/bmp"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/gofont/goregular"
+	_ "golang.org/x/image/webp"
 )
 
 // Game object used by ebiten
@@ -46,6 +49,7 @@ func main() {
 			return
 		}
 		fmt.Println("UI is enabled.")
+		config.Config.OpenBrowser = false
 		//解析命令，扫描文件
 		cmd.StartScan(os.Args)
 		//设置临时文件夹
@@ -58,7 +62,7 @@ func main() {
 
 	// 1. 创建一个新的 ReaderConfig 对象，用于配置阅读器的设置。
 	readerConfig := NewReaderConfig()
-	readerConfig.SetTitle("Sample v1.0").
+	readerConfig.SetTitle("Comigo v0.9").
 		// 阅读器模式。
 		SetReaderMode(ScrollMode).
 		// 窗口是否全屏。
@@ -90,15 +94,16 @@ func main() {
 
 	// 2.根容器与布局设置，
 	//参考了 https://github.com/ebitenui/ebitenui/tree/master/_examples/widget_demos/gridlayout/main.go
-	// 为此 UI 创建根容器。
-	// 所有其他 UI 元素都必须添加到此容器中。
+	// 为此 UI 创建根容器。所有其他 UI 元素都必须添加到此容器中。
+	// 在 Ebiten UI 中，小部件通常不是手动布局的。相反，它们作为子部件被组合在一个容器中，容器的布局器负责布局这些部件。
 	rootContainer :=
 		widget.NewContainer(
 			//使用纯色作为背景
 			widget.ContainerOpts.BackgroundImage(image.NewNineSliceColor(color.NRGBA{A: 255})),
 			// 容器将使用锚布局来布局其单个子窗口小部件
 			widget.ContainerOpts.Layout(
-				//GridLayout 网格布局模式，将小部件放置在网格中。
+				//GridLayout 可以在网格中布置任意数量的小部件。它可以为每个网格单元的小部件设置不同的位置，并且还可以拉伸它们。
+				// 根据小部件的实现方式，某些选项是必须指定的（例如按钮的图片），而其他选项则是可选的。选项的顺序通常无关紧要。有些选项可以被多次指定。
 				widget.NewGridLayout(
 					// 使用 Columns 参数来定义列的数量。
 					widget.GridLayoutOpts.Columns(1),
@@ -140,9 +145,8 @@ func main() {
 		widget.ContainerOpts.WidgetOpts(
 			widget.WidgetOpts.MinSize(50, 30),
 		),
-		// 容器有布局的概念。这就是这个容器的子级小部件的布局设置：
-		// 它们将被放置在容器的边界内。
-		// widget.NewAnchorLayout() 创建一个新的锚点布局。锚点布局不会处理重叠。要自定义重叠顺序的话，可以用widget.NewStackedLayout()
+		// 锚点布局(AnchorLayout) 只能定位一个小部件，它将其锚定到容器的角落或边缘。它可以选择沿任何方向拉伸小部件。
+		// 多个小部件+自定义重叠顺序，可以用widget.NewStackedLayout()
 		widget.ContainerOpts.Layout(widget.NewAnchorLayout(
 			//外边与内部内容之间的的填充(padding)的大小
 			widget.AnchorLayoutOpts.Padding(widget.NewInsetsSimple(15)),
@@ -150,7 +154,8 @@ func main() {
 	)
 	headerText := widget.NewText(
 		widget.TextOpts.Text("Header", fontFace, textColor),
-		// WidgetOpts 用于设置小部件的各种属性。这里用来设置文本的锚点布局。
+		//要配置单个小部件与其兄弟小部件有不同的布局，可以在小部件上设置一个可选的“布局数据”。
+		//布局数据的类型取决于所使用的布局实现。例如，AnchorLayout 需要使用 AnchorLayoutData。
 		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
 			// 指定网格单元内的水平锚定位置。
 			HorizontalPosition: widget.AnchorLayoutPositionCenter,
@@ -186,6 +191,7 @@ func main() {
 	)
 
 	// 创建一个包含滚动内容的容器
+	// RowLayout 可以在一行或一列中布置任意数量的小部件。它还可以根据需要对小部件进行不同的定位和拉伸。
 	bodyContent := widget.NewContainer(widget.ContainerOpts.Layout(widget.NewRowLayout(
 		// 设置行布局的方向
 		widget.RowLayoutOpts.Direction(widget.DirectionVertical),
@@ -197,18 +203,14 @@ func main() {
 			Bottom: 30,
 		}),
 		// 设置行布局的间距
-		widget.RowLayoutOpts.Spacing(10),
+		widget.RowLayoutOpts.Spacing(5),
 	)))
 
 	randomBook, err := entity.GetRandomBook()
 	if err != nil {
 		log.Print(err)
 	}
-
 	for _, i := range randomBook.Pages.Images {
-		//if _ > 10 {
-		//	break
-		//}
 		println(fmt.Sprintf("GetFile: %s", i.NameInArchive))
 		option := fileutil.GetPictureDataOption{
 			PictureName:      i.NameInArchive,
@@ -216,11 +218,28 @@ func main() {
 			BookIsDir:        randomBook.Type == entity.TypeDir,
 			BookIsNonUTF8Zip: randomBook.NonUTF8Zip,
 			BookFilePath:     randomBook.FilePath,
+			ResizeMaxWidth:   800,
+			ResizeMaxHeight:  1000,
 		}
 		imgData, _, err := fileutil.GetPictureData(option)
 		if err != nil {
 			println(fmt.Sprintf("GetPictureData error:%s", err))
 		}
+		// 限制图片大小(宽度)
+		tempData, limitErr := util.ImageResizeByMaxWidth(imgData, option.ResizeMaxWidth)
+		if limitErr != nil {
+			println(fmt.Sprintf(limitErr.Error()))
+		} else {
+			imgData = tempData
+		}
+		// 限制图片大小(高度)
+		tempData, limitErr = util.ImageResizeByMaxHeight(imgData, option.ResizeMaxHeight)
+		if limitErr != nil {
+			println(fmt.Sprintf(limitErr.Error()))
+		} else {
+			imgData = tempData
+		}
+		// 从图像数据中创建一个新的 Reader
 		reader := bytes.NewReader(imgData)
 		// 从图像数据中创建一个新的图像
 		eImage, _, err := ebitenutil.NewImageFromReader(reader)
@@ -228,16 +247,18 @@ func main() {
 			println(fmt.Sprintf("NewImageFromReader error:%s", err))
 		}
 		g := widget.NewGraphic(
+			// 设置图像
+			widget.GraphicOpts.Image(eImage),
 			// 设置小部件的通用选项
 			widget.GraphicOpts.WidgetOpts(
-				// 锚点布局，水平和垂直居中
+				//要配置单个小部件与其兄弟小部件有不同的布局，可以在小部件上设置一个可选的“布局数据”。
+				//布局数据的类型取决于所使用的布局实现。例如，AnchorLayout 需要使用 AnchorLayoutData。
 				widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+					MaxWidth: 800,
+					//MaxHeight: 480,
+					// 锚点布局，水平和垂直居中
 					Position: widget.RowLayoutPositionCenter,
 				}),
-			),
-			widget.GraphicOpts.Image(eImage),
-			widget.GraphicOpts.WidgetOpts(
-				widget.WidgetOpts.MinSize(600, 480),
 			),
 		)
 		// 获取首选大小
@@ -246,50 +267,6 @@ func main() {
 
 		bodyContent.AddChild(g)
 	}
-
-	//// 加载按钮状态的图片：静止、悬停和按下(idle, hover, and pressed)。
-	//buttonImage, _ := loadButtonImage()
-	//// 加载按钮文字字体
-	//face, _ := loadFont(20)
-	//// 将N个按钮添加到可滚动内容容器中
-	//for x := 0; x < 100; x++ {
-	//	// Capture x for use in callback
-	//	x := x
-	//	// construct a button
-	//	button := widget.NewButton(
-	//		// 设置小部件的通用选项
-	//		widget.ButtonOpts.WidgetOpts(
-	//			// 指示容器的锚点布局，将按钮水平和垂直居中
-	//			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
-	//				Position: widget.RowLayoutPositionCenter,
-	//			}),
-	//		),
-	//
-	//		// 指定要使用的图像
-	//		widget.ButtonOpts.Image(buttonImage),
-	//
-	//		// 指定按钮的文本、字体和颜色
-	//		widget.ButtonOpts.Text(fmt.Sprintf("Awesome! %d", x), face, &widget.ButtonTextColor{
-	//			Idle: color.NRGBA{R: 0xdf, G: 0xf4, B: 0xff, A: 0xff},
-	//		}),
-	//
-	//		// 指定按钮的文本需要一些填充才能正确显示
-	//		widget.ButtonOpts.TextPadding(widget.Insets{
-	//			Left:   300,
-	//			Right:  300,
-	//			Top:    120,
-	//			Bottom: 120,
-	//		}),
-	//
-	//		// 添加一个处理程序以响应点击按钮事件
-	//		widget.ButtonOpts.ClickedHandler(func(args *widget.ButtonClickedEventArgs) {
-	//			println(fmt.Sprintf("Button %d Clicked!", x))
-	//		}),
-	//	)
-	//
-	//	// 将按钮添加为容器的子元素
-	//	bodyContent.AddChild(button)
-	//}
 
 	// 创建新的 ScrollContainer 对象
 	scrollContainer := widget.NewScrollContainer(
