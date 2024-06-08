@@ -1,6 +1,5 @@
-# comigo-webUI
+# Comigo WebUI
 
-## 目前已经迁移到了vite
 
 ````bash
 # 初始化

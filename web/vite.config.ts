@@ -91,7 +91,7 @@ export default defineConfig({
   build: {
     // target: 'esnext',//设置最终构建的浏览器兼容目标。默认值是一个 Vite 特有的值——'modules'，这是指 支持原生 ES 模块的浏览器。另一个特殊值是 “esnext” —— 即假设有原生动态导入支持，并且将会转译得尽可能小。
     // minify: 'terser',//如果 build.minify 选项为 'terser'， 'esnext' 将会强制降级为 'es2019' need to install it (npm add -D terser)
-    outDir: "../routers/web_static",
+    outDir: "../resource/web_static",
     emptyOutDir: true, //清除目标目录：
     chunkSizeWarningLimit: 1500, //规定触发警告的 chunk 大小。（以 kbs 为单位）https://cn.vitejs.dev/config/#build-emptyoutdir
   },

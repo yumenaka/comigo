@@ -1,9 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"image/color"
+	_ "image/gif"
+	_ "image/jpeg"
+	_ "image/png"
 	"log"
 	"math"
 	"os"
@@ -16,7 +20,9 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/yumenaka/comi/cmd"
 	"github.com/yumenaka/comi/config"
+	"github.com/yumenaka/comi/entity"
 	"github.com/yumenaka/comi/routers"
+	fileutil "github.com/yumenaka/comi/util/file"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/gofont/goregular"
 )
@@ -136,7 +142,7 @@ func main() {
 		),
 		// 容器有布局的概念。这就是这个容器的子级小部件的布局设置：
 		// 它们将被放置在容器的边界内。
-		// 容器将使用锚布局来布局其单个子窗口小部件
+		// widget.NewAnchorLayout() 创建一个新的锚点布局。锚点布局不会处理重叠。要自定义重叠顺序的话，可以用widget.NewStackedLayout()
 		widget.ContainerOpts.Layout(widget.NewAnchorLayout(
 			//外边与内部内容之间的的填充(padding)的大小
 			widget.AnchorLayoutOpts.Padding(widget.NewInsetsSimple(15)),
@@ -155,10 +161,6 @@ func main() {
 	headerContainer.AddChild(headerText)
 	rootContainer.AddChild(headerContainer)
 
-	// 加载按钮状态的图片：静止、悬停和按下(idle, hover, and pressed)。
-	buttonImage, _ := loadButtonImage()
-	// 加载按钮文字字体
-	face, _ := loadFont(20)
 	bodyContainer := widget.NewContainer(
 		// 设置容器的背景图像。#E0D9CD
 		widget.ContainerOpts.BackgroundImage(image.NewNineSliceColor(color.NRGBA{R: 0xE0, G: 0xD9, B: 0xCD, A: 0xff})),
@@ -184,7 +186,7 @@ func main() {
 	)
 
 	// 创建一个包含滚动内容的容器
-	content := widget.NewContainer(widget.ContainerOpts.Layout(widget.NewRowLayout(
+	bodyContent := widget.NewContainer(widget.ContainerOpts.Layout(widget.NewRowLayout(
 		// 设置行布局的方向
 		widget.RowLayoutOpts.Direction(widget.DirectionVertical),
 		// 设置行布局的填充
@@ -198,50 +200,101 @@ func main() {
 		widget.RowLayoutOpts.Spacing(10),
 	)))
 
-	// 将20个按钮添加到可滚动内容容器中
-	for x := 0; x < 150; x++ {
-		// Capture x for use in callback
-		x := x
-		// construct a button
-		button := widget.NewButton(
-			// set general widget options
-			widget.ButtonOpts.WidgetOpts(
-				// 指示容器的锚点布局，将按钮水平和垂直居中
+	randomBook, err := entity.GetRandomBook()
+	if err != nil {
+		log.Print(err)
+	}
+
+	for _, i := range randomBook.Pages.Images {
+		//if _ > 10 {
+		//	break
+		//}
+		println(fmt.Sprintf("GetFile: %s", i.NameInArchive))
+		option := fileutil.GetPictureDataOption{
+			PictureName:      i.NameInArchive,
+			BookIsPDF:        randomBook.Type == entity.TypePDF,
+			BookIsDir:        randomBook.Type == entity.TypeDir,
+			BookIsNonUTF8Zip: randomBook.NonUTF8Zip,
+			BookFilePath:     randomBook.FilePath,
+		}
+		imgData, _, err := fileutil.GetPictureData(option)
+		if err != nil {
+			println(fmt.Sprintf("GetPictureData error:%s", err))
+		}
+		reader := bytes.NewReader(imgData)
+		// 从图像数据中创建一个新的图像
+		eImage, _, err := ebitenutil.NewImageFromReader(reader)
+		if err != nil {
+			println(fmt.Sprintf("NewImageFromReader error:%s", err))
+		}
+		g := widget.NewGraphic(
+			// 设置小部件的通用选项
+			widget.GraphicOpts.WidgetOpts(
+				// 锚点布局，水平和垂直居中
 				widget.WidgetOpts.LayoutData(widget.RowLayoutData{
 					Position: widget.RowLayoutPositionCenter,
 				}),
 			),
-
-			// 指定要使用的图像
-			widget.ButtonOpts.Image(buttonImage),
-
-			// 指定按钮的文本、字体和颜色
-			widget.ButtonOpts.Text(fmt.Sprintf("Awesome! %d", x), face, &widget.ButtonTextColor{
-				Idle: color.NRGBA{R: 0xdf, G: 0xf4, B: 0xff, A: 0xff},
-			}),
-
-			// 指定按钮的文本需要一些填充才能正确显示
-			widget.ButtonOpts.TextPadding(widget.Insets{
-				Left:   300,
-				Right:  300,
-				Top:    120,
-				Bottom: 120,
-			}),
-
-			// 添加一个处理程序以响应点击按钮事件
-			widget.ButtonOpts.ClickedHandler(func(args *widget.ButtonClickedEventArgs) {
-				println(fmt.Sprintf("Button %d Clicked!", x))
-			}),
+			widget.GraphicOpts.Image(eImage),
+			widget.GraphicOpts.WidgetOpts(
+				widget.WidgetOpts.MinSize(600, 480),
+			),
 		)
+		// 获取首选大小
+		w, h := g.PreferredSize()
+		fmt.Println(w, h)
 
-		// 将按钮添加为容器的子元素
-		content.AddChild(button)
+		bodyContent.AddChild(g)
 	}
+
+	//// 加载按钮状态的图片：静止、悬停和按下(idle, hover, and pressed)。
+	//buttonImage, _ := loadButtonImage()
+	//// 加载按钮文字字体
+	//face, _ := loadFont(20)
+	//// 将N个按钮添加到可滚动内容容器中
+	//for x := 0; x < 100; x++ {
+	//	// Capture x for use in callback
+	//	x := x
+	//	// construct a button
+	//	button := widget.NewButton(
+	//		// 设置小部件的通用选项
+	//		widget.ButtonOpts.WidgetOpts(
+	//			// 指示容器的锚点布局，将按钮水平和垂直居中
+	//			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+	//				Position: widget.RowLayoutPositionCenter,
+	//			}),
+	//		),
+	//
+	//		// 指定要使用的图像
+	//		widget.ButtonOpts.Image(buttonImage),
+	//
+	//		// 指定按钮的文本、字体和颜色
+	//		widget.ButtonOpts.Text(fmt.Sprintf("Awesome! %d", x), face, &widget.ButtonTextColor{
+	//			Idle: color.NRGBA{R: 0xdf, G: 0xf4, B: 0xff, A: 0xff},
+	//		}),
+	//
+	//		// 指定按钮的文本需要一些填充才能正确显示
+	//		widget.ButtonOpts.TextPadding(widget.Insets{
+	//			Left:   300,
+	//			Right:  300,
+	//			Top:    120,
+	//			Bottom: 120,
+	//		}),
+	//
+	//		// 添加一个处理程序以响应点击按钮事件
+	//		widget.ButtonOpts.ClickedHandler(func(args *widget.ButtonClickedEventArgs) {
+	//			println(fmt.Sprintf("Button %d Clicked!", x))
+	//		}),
+	//	)
+	//
+	//	// 将按钮添加为容器的子元素
+	//	bodyContent.AddChild(button)
+	//}
 
 	// 创建新的 ScrollContainer 对象
 	scrollContainer := widget.NewScrollContainer(
 		// 设置将要滚动的内容
-		widget.ScrollContainerOpts.Content(content),
+		widget.ScrollContainerOpts.Content(bodyContent),
 		// 让容器将内容宽度拉伸以匹配可用空间
 		widget.ScrollContainerOpts.StretchContentWidth(),
 		// 为可滚动容器设置背景图像。
@@ -255,7 +308,7 @@ func main() {
 
 	// 创建一个函数来返回滑块使用的页面大小
 	pageSizeFunc := func() int {
-		return int(math.Round(float64(scrollContainer.ViewRect().Dy()) / float64(content.GetWidget().Rect.Dy()) * 1000))
+		return int(math.Round(float64(scrollContainer.ViewRect().Dy()) / float64(bodyContent.GetWidget().Rect.Dy()) * 1000))
 	}
 	// 创建一个垂直滑块来控制可滚动容器
 	vSlider := widget.NewSlider(

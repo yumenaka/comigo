@@ -2,6 +2,9 @@ package routers
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/yumenaka/comi/config"
+	"github.com/yumenaka/comi/resource"
+	"github.com/yumenaka/comi/util/locale"
 	"net/http"
 )
 
@@ -39,9 +42,8 @@ func StartWebServer() {
 		}
 		c.Next()
 	})
-
 	//嵌入静态文件到二进制文件
-	embedFile(engine)
+	resource.EmbedResoure(engine, locale.GetString("HTML_TITLE")+config.Version)
 	//设置各种API
 	setWebAPI(engine)
 	//显示QRCode

@@ -26,8 +26,8 @@
     "vuex": "^4.1.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.24.6",
-    "@babel/eslint-parser": "^7.24.6",
+    "@babel/core": "^7.24.7",
+    "@babel/eslint-parser": "^7.24.7",
     "@originjs/vite-plugin-commonjs": "^1.0.1",
     "@types/vue-i18n": "^7.0.0",
     "@vicons/ionicons5": "^0.12.0",
@@ -42,10 +42,10 @@
     "eslint-plugin-vue": "^9.26.0",
     "naive-ui": "^2.38.2",
     "postcss": "^8.4.38",
-    "tailwindcss": "^3.4.3",
-    "terser": "^5.31.0",
+    "tailwindcss": "^3.4.4",
+    "terser": "^5.31.1",
     "typescript": "~5.4.5",
-    "vite": "^5.2.12",
+    "vite": "^5.2.13",
     "vite-plugin-env-compatible": "^2.0.1",
     "vite-plugin-html": "3.2.2",
     "vite-plugin-vue-devtools": "^7.2.1"
