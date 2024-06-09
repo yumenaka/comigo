@@ -126,22 +126,22 @@ func main() {
 		Container: rootContainer,
 	}
 
-	// 加载字体
+	// 加载按钮文字所需的字体
 	ttfFont, err := truetype.Parse(goregular.TTF)
 	if err != nil {
 		log.Fatal("Error Parsing Font", err)
 	}
-	// 字体大小
+	// 设置字体大小
 	fontFace := truetype.NewFace(ttfFont, &truetype.Options{
 		Size: 20,
 	})
-	// 文本颜色
+	// 设置文本颜色
 	textColor := color.RGBA{R: 0, G: 0, B: 0, A: 0xff}
 	// 加载按钮状态的图片：静止、悬停和按下(idle, hover, and pressed)。
 	buttonImage, _ := loadButtonImage()
 	// 加载按钮文字字体
 	face, _ := loadFont(20)
-	// 一个新的文本小部件，用于显示文本。
+	// headerContainer 是一个新的容器，用于包含标题文本和按钮。
 	headerContainer := widget.NewContainer(
 		// header容器的背景颜色
 		widget.ContainerOpts.BackgroundImage(image.NewNineSliceColor(color.NRGBA{R: 245, G: 245, B: 228, A: 255})),
