@@ -171,7 +171,7 @@
   "network": "Network",
   "abs": "labs",
   "temp_future_hint": "Temporarily put some features that are not yet finished, under development and adjustment.",
-  "ConfigManagerDescription": "Uploads the current configuration to the server or deletes an already existing settings file.",
+  "ConfigManagerDescription": "Clicking Save will upload the current configuration to the server and overwrite the existing configuration file.",
   "please_enter_content": "Please enter content",
   "submit": "submit",
   "type_or_paste_content": "Type or paste content"
