@@ -21,7 +21,7 @@ func HeaderContainer(readerConfig *model.ReaderConfig) widget.PreferredSizeLocat
 	}
 	// 设置字体大小
 	fontFace := truetype.NewFace(ttfFont, &truetype.Options{
-		Size: 20,
+		Size: 24,
 	})
 	// 设置文本颜色
 	textColor := color.RGBA{R: 0, G: 0, B: 0, A: 0xff}
