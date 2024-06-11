@@ -134,7 +134,7 @@ func createUI(readerConfig *model.ReaderConfig) (*ebitenui.UI, func(), error) {
 	rootContainer.AddChild(components.FooterContainer())
 
 	return eui, func() {
-		// TODO:在结束时，关闭资源。
+		// 在结束时，关闭资源。
 		//res.close()
 	}, nil
 }

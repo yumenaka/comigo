@@ -4,6 +4,7 @@ import (
 	"github.com/ebitenui/ebitenui/image"
 	"github.com/ebitenui/ebitenui/widget"
 	"github.com/golang/freetype/truetype"
+	"github.com/yumenaka/comi/config"
 	"golang.org/x/image/font/gofont/goregular"
 	"image/color"
 	"log"
@@ -17,7 +18,7 @@ func FooterContainer() widget.PreferredSizeLocateableWidget {
 	}
 	// 设置字体大小
 	fontFace := truetype.NewFace(ttfFont, &truetype.Options{
-		Size: 20,
+		Size: 18,
 	})
 	// 设置文本颜色
 	textColor := color.RGBA{R: 0, G: 0, B: 0, A: 0xff}
@@ -40,7 +41,7 @@ func FooterContainer() widget.PreferredSizeLocateableWidget {
 		widget.ContainerOpts.Layout(widget.NewAnchorLayout()),
 	)
 	footerText := widget.NewText(
-		widget.TextOpts.Text("Footer", fontFace, textColor),
+		widget.TextOpts.Text("Power by Comigo "+config.Version, fontFace, textColor),
 		// WidgetOpts 用于设置小部件的各种属性。这里用来设置文本的锚点布局。
 		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
 			// 指定网格单元内的水平锚定位置。
