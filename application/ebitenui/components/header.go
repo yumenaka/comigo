@@ -107,33 +107,35 @@ func HeaderContainer(readerConfig *model.ReaderConfig) widget.PreferredSizeLocat
 	headerContainer.AddChild(uploadButton)
 
 	// Sort按钮
-	sortButton := widget.NewButton(
-		// 指定要使用的图像
-		widget.ButtonOpts.Image(buttonImage),
-		// 指定按钮的文本、字体和颜色
-		widget.ButtonOpts.Text(fmt.Sprintf("Sort"), face, &widget.ButtonTextColor{
-			Idle: color.NRGBA{R: 0xdf, G: 0xf4, B: 0xff, A: 0xff},
-		}),
-		// 指定按钮的文本需要一些填充才能正确显示
-		widget.ButtonOpts.TextPadding(widget.Insets{
-			Left:   10,
-			Right:  10,
-			Top:    10,
-			Bottom: 10,
-		}),
-		// 添加一个处理程序以响应点击按钮事件
-		widget.ButtonOpts.ClickedHandler(func(args *widget.ButtonClickedEventArgs) {
-			println(fmt.Sprintf("Sort Button Clicked!"))
-		}),
-		// 设置按钮的通用选项
-		widget.ButtonOpts.WidgetOpts(
-			// 布局设置，将按钮水平和垂直居中
-			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
-				Position: widget.RowLayoutPositionCenter,
-			}),
-		),
-	)
-	headerContainer.AddChild(sortButton)
+	//sortButton := widget.NewButton(
+	//	// 指定要使用的图像
+	//	widget.ButtonOpts.Image(buttonImage),
+	//	// 指定按钮的文本、字体和颜色
+	//	widget.ButtonOpts.Text(fmt.Sprintf("Sort"), face, &widget.ButtonTextColor{
+	//		Idle: color.NRGBA{R: 0xdf, G: 0xf4, B: 0xff, A: 0xff},
+	//	}),
+	//	// 指定按钮的文本需要一些填充才能正确显示
+	//	widget.ButtonOpts.TextPadding(widget.Insets{
+	//		Left:   10,
+	//		Right:  10,
+	//		Top:    10,
+	//		Bottom: 10,
+	//	}),
+	//	// 添加一个处理程序以响应点击按钮事件
+	//	widget.ButtonOpts.ClickedHandler(func(args *widget.ButtonClickedEventArgs) {
+	//		println(fmt.Sprintf("Sort Button Clicked!"))
+	//	}),
+	//	// 设置按钮的通用选项
+	//	widget.ButtonOpts.WidgetOpts(
+	//		// 布局设置，将按钮水平和垂直居中
+	//		widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+	//			Position: widget.RowLayoutPositionCenter,
+	//		}),
+	//	),
+	//)
+
+	// add the button as a child of the container
+	headerContainer.AddChild(sortButton())
 
 	// 一个新的文本小部件，用于显示文本。
 	titleText := widget.NewText(
