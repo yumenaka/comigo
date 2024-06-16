@@ -2,18 +2,21 @@ package components
 
 import (
 	"fmt"
-	"github.com/ebitenui/ebitenui/image"
+	"image"
+	"image/color"
+	"log"
+
+	"github.com/ebitenui/ebitenui"
+	eimage "github.com/ebitenui/ebitenui/image"
 	"github.com/ebitenui/ebitenui/widget"
 	"github.com/golang/freetype/truetype"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/yumenaka/comi/application/ebitenui/model"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/gofont/goregular"
-	"image/color"
-	"log"
 )
 
-func HeaderContainer(readerConfig *model.ReaderConfig) widget.PreferredSizeLocateableWidget {
+func HeaderContainer(readerConfig *model.ReaderConfig, eui *ebitenui.UI) widget.PreferredSizeLocateableWidget {
 	// 加载按钮文字所需的字体
 	ttfFont, err := truetype.Parse(goregular.TTF)
 	if err != nil {
@@ -32,7 +35,7 @@ func HeaderContainer(readerConfig *model.ReaderConfig) widget.PreferredSizeLocat
 	// headerContainer 是一个新的容器，用于包含标题文本和按钮。
 	headerContainer := widget.NewContainer(
 		// header容器的背景颜色
-		widget.ContainerOpts.BackgroundImage(image.NewNineSliceColor(color.NRGBA{R: 245, G: 245, B: 228, A: 255})),
+		widget.ContainerOpts.BackgroundImage(eimage.NewNineSliceColor(color.NRGBA{R: 245, G: 245, B: 228, A: 255})),
 		// 设置容器的布局
 		widget.ContainerOpts.Layout(widget.NewGridLayout(
 			// 使用 Columns 参数来定义列的数量。
@@ -149,6 +152,66 @@ func HeaderContainer(readerConfig *model.ReaderConfig) widget.PreferredSizeLocat
 	)
 	headerContainer.AddChild(titleText)
 
+	// 创建窗口的内容
+	windowContainer := widget.NewContainer(
+		widget.ContainerOpts.BackgroundImage(eimage.NewNineSliceColor(color.NRGBA{100, 100, 100, 255})),
+		widget.ContainerOpts.Layout(widget.NewAnchorLayout()),
+	)
+	windowContainer.AddChild(widget.NewText(
+		widget.TextOpts.Text("QRCode PlaceHolder", face, color.NRGBA{254, 255, 255, 255}),
+		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
+			HorizontalPosition: widget.AnchorLayoutPositionCenter,
+			VerticalPosition:   widget.AnchorLayoutPositionCenter,
+		})),
+	))
+
+	// load the font for the window title
+	titleFace, _ := loadFont(12)
+
+	// 为窗口创建标题栏
+	titleContainer := widget.NewContainer(
+		widget.ContainerOpts.BackgroundImage(eimage.NewNineSliceColor(color.NRGBA{150, 150, 150, 255})),
+		widget.ContainerOpts.Layout(widget.NewAnchorLayout()),
+	)
+	titleContainer.AddChild(widget.NewText(
+		widget.TextOpts.Text("QRCode window", titleFace, color.NRGBA{254, 255, 255, 255}),
+		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
+			HorizontalPosition: widget.AnchorLayoutPositionCenter,
+			VerticalPosition:   widget.AnchorLayoutPositionCenter,
+		})),
+	))
+
+	// Create the new window object. The window object is not tied to a container. Its location and
+	// size are set manually using the SetLocation method on the window and added to the UI with ui.AddWindow()
+	// Set the Button callback below to see how the window is added to the UI.
+	window := widget.NewWindow(
+		//Set the main contents of the window
+		widget.WindowOpts.Contents(windowContainer),
+		//Set the titlebar for the window (Optional)
+		widget.WindowOpts.TitleBar(titleContainer, 25),
+		//Set the window above everything else and block input elsewhere
+		widget.WindowOpts.Modal(),
+		//Set how to close the window. CLICK_OUT will close the window when clicking anywhere
+		//that is not a part of the window object
+		widget.WindowOpts.CloseMode(widget.CLICK_OUT),
+		//Indicates that the window is draggable. It must have a TitleBar for this to work
+		widget.WindowOpts.Draggable(),
+		//Set the window resizeable
+		widget.WindowOpts.Resizeable(),
+		//Set the minimum size the window can be
+		widget.WindowOpts.MinSize(400, 300),
+		//Set the maximum size a window can be
+		widget.WindowOpts.MaxSize(400, 300),
+		//Set the callback that triggers when a move is complete
+		widget.WindowOpts.MoveHandler(func(args *widget.WindowChangedEventArgs) {
+			fmt.Println("Window Moved")
+		}),
+		//Set the callback that triggers when a resize is complete
+		widget.WindowOpts.ResizeHandler(func(args *widget.WindowChangedEventArgs) {
+			fmt.Println("Window Resized")
+		}),
+	)
+
 	// QRCode按钮
 	qrcodeButton := widget.NewButton(
 		// 指定要使用的图像
@@ -166,8 +229,27 @@ func HeaderContainer(readerConfig *model.ReaderConfig) widget.PreferredSizeLocat
 		}),
 		// 添加一个处理程序以响应点击按钮事件
 		widget.ButtonOpts.ClickedHandler(func(args *widget.ButtonClickedEventArgs) {
-			println(fmt.Sprintf("Sort Button Clicked!"))
+			println(fmt.Sprintf("QRCode Button Clicked!"))
+			//获取内容的首选大小
+			x, y := window.Contents.PreferredSize()
+			//创建一个具有内容首选大小的矩形
+			r := image.Rect(0, 0, x, y)
+			//如果窗口全屏
+			if readerConfig.WindowFullScreen {
+				w, h := ebiten.Monitor().Size()
+				//使用 Add 方法将窗口移动到指定点
+				r = r.Add(image.Point{(w / 2) - 200, (h / 2) - 150})
+			} else {
+				//使用 Add 方法将窗口移动到指定点
+				r = r.Add(image.Point{(readerConfig.Width / 2) - 200, (readerConfig.Height / 2) - 150})
+			}
+			//将窗口位置设置到矩形。
+			window.SetLocation(r)
+			//将窗口添加到用户界面。
+			//注意：如果窗口已经添加，这将只移动窗口，而不会添加重复项。
+			eui.AddWindow(window)
 		}),
+
 		// 设置按钮的通用选项
 		widget.ButtonOpts.WidgetOpts(
 			// 布局设置，将按钮水平和垂直居中
@@ -241,11 +323,11 @@ func HeaderContainer(readerConfig *model.ReaderConfig) widget.PreferredSizeLocat
 }
 
 func loadButtonImage() (*widget.ButtonImage, error) {
-	idle := image.NewNineSliceColor(color.NRGBA{R: 170, G: 170, B: 180, A: 255})
+	idle := eimage.NewNineSliceColor(color.NRGBA{R: 170, G: 170, B: 180, A: 255})
 
-	hover := image.NewNineSliceColor(color.NRGBA{R: 130, G: 130, B: 150, A: 255})
+	hover := eimage.NewNineSliceColor(color.NRGBA{R: 130, G: 130, B: 150, A: 255})
 
-	pressed := image.NewNineSliceColor(color.NRGBA{R: 100, G: 100, B: 120, A: 255})
+	pressed := eimage.NewNineSliceColor(color.NRGBA{R: 100, G: 100, B: 120, A: 255})
 
 	return &widget.ButtonImage{
 		Idle:    idle,

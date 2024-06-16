@@ -44,7 +44,7 @@ func main() {
 		// 阅读器模式。
 		SetReaderMode(model.ScrollMode).
 		// 窗口是否全屏。
-		SetWindowFullScreen(true).
+		SetWindowFullScreen(false).
 		// 窗口是否有边框和标题栏。
 		SetWindowDecorated(true).
 		// 窗口是否可以调整大小。
@@ -127,7 +127,7 @@ func createUI(readerConfig *model.ReaderConfig) (*ebitenui.UI, func(), error) {
 		Container: rootContainer,
 	}
 
-	rootContainer.AddChild(components.HeaderContainer(readerConfig))
+	rootContainer.AddChild(components.HeaderContainer(readerConfig, eui))
 
 	rootContainer.AddChild(components.BodyContainer())
 
