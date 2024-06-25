@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strconv"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/pelletier/go-toml/v2"
@@ -166,4 +167,18 @@ func DeleteConfigIn(in string) error {
 		configFile = path.Join(path.Dir(executable), "config.toml")
 	}
 	return util.DeleteFileIfExist(configFile)
+}
+
+func GetQrcodeURL() string {
+	enableTLS := Config.CertFile != "" && Config.KeyFile != ""
+	protocol := "http://"
+	if enableTLS {
+		protocol = "https://"
+	}
+	//取得本机的首选出站IP
+	OutIP := util.GetOutboundIP().String()
+	if Config.Host == "DefaultHost" {
+		return protocol + OutIP + ":" + strconv.Itoa(Config.Port)
+	}
+	return protocol + Config.Host + ":" + strconv.Itoa(Config.Port)
 }
