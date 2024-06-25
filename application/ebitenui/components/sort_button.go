@@ -91,11 +91,11 @@ func sortButton() widget.PreferredSizeLocateableWidget {
 		widget.ListComboButtonOpts.EntryLabelFunc(
 			func(e any) string {
 				//Button Label function
-				return "Now: " + e.(ListEntry).name
+				return e.(ListEntry).name
 			},
 			func(e any) string {
 				//List Label function
-				return "Select: " + e.(ListEntry).name
+				return e.(ListEntry).name
 			}),
 		//Callback when a new entry is selected
 		widget.ListComboButtonOpts.EntrySelectedHandler(func(args *widget.ListComboButtonEntrySelectedEventArgs) {
