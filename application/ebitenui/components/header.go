@@ -169,6 +169,7 @@ func HeaderContainer(readerConfig *model.ReaderConfig, eui *ebitenui.UI) widget.
 		}),
 		// 添加一个处理程序以响应点击按钮事件
 		widget.ButtonOpts.ClickedHandler(func(args *widget.ButtonClickedEventArgs) {
+			// 显示QRCode窗口
 			println(fmt.Sprintf("QRCode Button Clicked!"))
 			//获取内容的首选大小
 			x, y := QRCodeWindow.Contents.PreferredSize()
@@ -198,23 +199,6 @@ func HeaderContainer(readerConfig *model.ReaderConfig, eui *ebitenui.UI) widget.
 		),
 	)
 	headerContainer.AddChild(qrcodeButton)
-	// 显示QRCode窗口
-	//获取内容的首选大小
-	x, y := QRCodeWindow.Contents.PreferredSize()
-	//创建一个具有内容首选大小的矩形
-	r := image.Rect(0, 0, x, y)
-	//如果窗口全屏
-	if readerConfig.WindowFullScreen {
-		w, h := ebiten.Monitor().Size()
-		//使用 Add 方法将窗口移动到指定点
-		r = r.Add(image.Point{X: (w / 2) - 200, Y: (h / 2) - 150})
-	} else {
-		//使用 Add 方法将窗口移动到指定点
-		r = r.Add(image.Point{X: (readerConfig.Width / 2) - 200, Y: (readerConfig.Height / 2) - 150})
-	}
-	//将窗口位置设置到矩形。
-	QRCodeWindow.SetLocation(r)
-	eui.AddWindow(QRCodeWindow)
 
 	// FullScreen按钮
 	fullScreenButton := widget.NewButton(
