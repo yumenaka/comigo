@@ -1,11 +1,12 @@
-package main
+package comi
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/yumenaka/comi/cmd"
 	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/routers"
-	"os"
 )
 
 // StartComigoWebserver 启动Comigo Web服务器
