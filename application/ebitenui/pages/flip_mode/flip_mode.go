@@ -1,4 +1,4 @@
-package pages
+package flip_mode
 
 import (
 	"github.com/ebitenui/ebitenui/image"
