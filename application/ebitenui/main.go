@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/yumenaka/comi/application/ebitenui/pages"
+	"github.com/yumenaka/comi/application/ebitenui/pages/book_shelf"
 	_ "image/gif"
 	_ "image/jpeg"
 	_ "image/png"
@@ -75,14 +75,14 @@ func main() {
 	ebiten.SetScreenClearedEveryFrame(false)
 
 	// 构建UI
-	eui, closeUI, err := createUI(readerConfig)
+	ui, closeUI, err := createUI(readerConfig)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer closeUI()
 	// 创建游戏对象
 	g := game{
-		ui: eui,
+		ui: ui,
 	}
 	// 运行ebitenUI
 	err = ebiten.RunGameWithOptions(
@@ -97,21 +97,17 @@ func main() {
 
 // 构建UI，需要进一步拆分
 func createUI(readerConfig *model.ReaderConfig) (*ebitenui.UI, func(), error) {
-
-	rootContainer := pages.BookShelf()
-
+	// 创建一个新的根容器，用于包含整个 UI。
+	rootContainer := book_shelf.NewPage()
 	//这会将根容器添加到 UI，以便将其展示。
-	eui := &ebitenui.UI{
+	ui := &ebitenui.UI{
 		Container: rootContainer,
 	}
-
-	rootContainer.AddChild(components.HeaderContainer(readerConfig, eui))
-
-	rootContainer.AddChild(components.BodyContainer())
-
+	rootContainer.AddChild(components.HeaderContainer(readerConfig, ui))
+	rootContainer.AddChild(book_shelf.BodyContainer())
 	rootContainer.AddChild(components.FooterContainer())
 
-	return eui, func() {
+	return ui, func() {
 		// 在结束时，关闭资源。
 		//res.close()
 	}, nil

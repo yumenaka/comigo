@@ -1,17 +1,18 @@
-package components
+package book_shelf
 
 import (
 	"bytes"
 	"fmt"
+	"image/color"
+	"log"
+	"math"
+
 	"github.com/ebitenui/ebitenui/image"
 	"github.com/ebitenui/ebitenui/widget"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/yumenaka/comi/entity"
 	"github.com/yumenaka/comi/util"
 	fileutil "github.com/yumenaka/comi/util/file"
-	"image/color"
-	"log"
-	"math"
 )
 
 func BodyContainer() widget.PreferredSizeLocateableWidget {

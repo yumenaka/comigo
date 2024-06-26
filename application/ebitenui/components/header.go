@@ -16,7 +16,7 @@ import (
 	"golang.org/x/image/font/gofont/goregular"
 )
 
-func HeaderContainer(readerConfig *model.ReaderConfig, eui *ebitenui.UI) widget.PreferredSizeLocateableWidget {
+func HeaderContainer(readerConfig *model.ReaderConfig, ui *ebitenui.UI) widget.PreferredSizeLocateableWidget {
 	// 加载按钮文字所需的字体
 	ttfFont, err := truetype.Parse(goregular.TTF)
 	if err != nil {
@@ -142,7 +142,7 @@ func HeaderContainer(readerConfig *model.ReaderConfig, eui *ebitenui.UI) widget.
 
 	// 一个新的文本小部件，用于显示文本。
 	titleText := widget.NewText(
-		widget.TextOpts.Text("Title", fontFace, textColor),
+		widget.TextOpts.Text(readerConfig.Title, fontFace, textColor),
 		widget.TextOpts.Position(widget.TextPositionCenter, widget.TextPositionCenter),
 		//要配置单个小部件与其兄弟小部件有不同的布局，可以在小部件上设置一个可选的“布局数据”。
 		//布局数据的类型取决于所使用的布局实现。例如，RowLayout 需要使用 RowLayoutData。
@@ -188,7 +188,7 @@ func HeaderContainer(readerConfig *model.ReaderConfig, eui *ebitenui.UI) widget.
 			QRCodeWindow.SetLocation(r)
 			//将窗口添加到用户界面。
 			//注意：如果窗口已经添加，这将只移动窗口，而不会添加重复项。
-			eui.AddWindow(QRCodeWindow)
+			ui.AddWindow(QRCodeWindow)
 		}),
 		// 设置按钮的通用选项
 		widget.ButtonOpts.WidgetOpts(

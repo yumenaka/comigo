@@ -1,4 +1,4 @@
-package pages
+package scroll_mode
 
 import (
 	"github.com/ebitenui/ebitenui/image"
@@ -7,7 +7,7 @@ import (
 )
 
 // ScrollMode  滚动模式
-func ScrollMode() *widget.Container {
+func NewPage() *widget.Container {
 	// 2.根容器与布局设置，
 	//参考了 https://github.com/ebitenui/ebitenui/tree/master/_examples/widget_demos/gridlayout/main.go
 	// 为此 UI 创建根容器。所有其他 UI 元素都必须添加到此容器中。
