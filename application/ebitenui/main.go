@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/yumenaka/comi/application/ebitenui/pages/book_shelf"
+	"github.com/yumenaka/comi/application/ebitenui/resources"
 	_ "image/gif"
 	_ "image/jpeg"
 	_ "image/png"
@@ -15,6 +15,7 @@ import (
 	"github.com/yumenaka/comi/application/ebitenui/comi"
 	"github.com/yumenaka/comi/application/ebitenui/components"
 	"github.com/yumenaka/comi/application/ebitenui/model"
+	"github.com/yumenaka/comi/application/ebitenui/pages/book_shelf"
 	"github.com/yumenaka/comi/config"
 	_ "golang.org/x/image/bmp"
 	_ "golang.org/x/image/webp"
@@ -103,7 +104,12 @@ func createUI(readerConfig *model.ReaderConfig) (*ebitenui.UI, func(), error) {
 	ui := &ebitenui.UI{
 		Container: rootContainer,
 	}
-	rootContainer.AddChild(components.HeaderContainer(readerConfig, ui))
+	// 加载资源
+	res, err := resources.NewUIResources()
+	if err != nil {
+		return nil, nil, err
+	}
+	rootContainer.AddChild(components.HeaderContainer(res, readerConfig, ui))
 	rootContainer.AddChild(book_shelf.BodyContainer())
 	rootContainer.AddChild(components.FooterContainer())
 
