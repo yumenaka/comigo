@@ -2,34 +2,23 @@ package components
 
 import (
 	"fmt"
-	"image"
-	"image/color"
-	"log"
-
 	"github.com/ebitenui/ebitenui"
 	eimage "github.com/ebitenui/ebitenui/image"
 	"github.com/ebitenui/ebitenui/widget"
 	"github.com/golang/freetype/truetype"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/yumenaka/comi/application/ebitenui/model"
+	"github.com/yumenaka/comi/application/ebitenui/resources"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/gofont/goregular"
+	"image"
+	"image/color"
 )
 
-func HeaderContainer(readerConfig *model.ReaderConfig, ui *ebitenui.UI) widget.PreferredSizeLocateableWidget {
-	// 加载按钮文字所需的字体
-	ttfFont, err := truetype.Parse(goregular.TTF)
-	if err != nil {
-		log.Fatal("Error Parsing Font", err)
-	}
-	// 设置字体大小
-	fontFace := truetype.NewFace(ttfFont, &truetype.Options{
-		Size: 24,
-	})
+func HeaderContainer(res *resources.UIResources, readerConfig *model.ReaderConfig, ui *ebitenui.UI) widget.PreferredSizeLocateableWidget {
+
 	// 设置文本颜色
 	textColor := color.RGBA{R: 0, G: 0, B: 0, A: 0xff}
-	// 加载按钮状态的图片：静止、悬停和按下(idle, hover, and pressed)。
-	buttonImage, _ := loadButtonImage()
 	// 加载按钮文字字体
 	face, _ := loadFont(20)
 	// headerContainer 是一个新的容器，用于包含标题文本和按钮。
@@ -43,8 +32,10 @@ func HeaderContainer(readerConfig *model.ReaderConfig, ui *ebitenui.UI) widget.P
 			// 使用 ColumnStretch 和 RowStretch 参数来分别定义列和行的拉伸因子。
 			// 只支持布尔值，true表示拉伸，false表示不拉伸。
 			widget.GridLayoutOpts.Stretch([]bool{false, false, false, true, false, false, false}, []bool{true}),
+			//定义内边距的大小，以嵌入子内容
+			widget.GridLayoutOpts.Padding(widget.NewInsetsSimple(8)),
 			//网格布局的间距，c 列间距，r行间距。
-			widget.GridLayoutOpts.Spacing(2, 0),
+			widget.GridLayoutOpts.Spacing(8, 8),
 		)),
 		// 设置容器的通用选项
 		widget.ContainerOpts.WidgetOpts(
@@ -53,25 +44,22 @@ func HeaderContainer(readerConfig *model.ReaderConfig, ui *ebitenui.UI) widget.P
 	)
 	// 服务器设置按钮
 	serverButton := widget.NewButton(
+		widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+			Stretch: true,
+		})),
 		// 指定要使用的图像
-		widget.ButtonOpts.Image(buttonImage),
+		widget.ButtonOpts.Image(res.Button.Image),
 		// 指定按钮的文本、字体和颜色
-		widget.ButtonOpts.Text(fmt.Sprintf("Server"), face, &widget.ButtonTextColor{
-			Idle: color.NRGBA{R: 0xdf, G: 0xf4, B: 0xff, A: 0xff},
-		}),
-		// 指定按钮的文本需要一些填充才能正确显示
-		widget.ButtonOpts.TextPadding(widget.Insets{
-			Left:   10,
-			Right:  10,
-			Top:    10,
-			Bottom: 10,
-		}),
+		widget.ButtonOpts.Text(fmt.Sprintf("Server"), res.Button.Face, res.Button.Text),
+		// 按钮文本填充
+		widget.ButtonOpts.TextPadding(res.Button.Padding),
 		// 添加一个处理程序以响应点击按钮事件
 		widget.ButtonOpts.ClickedHandler(func(args *widget.ButtonClickedEventArgs) {
 			println(fmt.Sprintf("Server Button Clicked!"))
 		}),
 		// 设置按钮的通用选项
 		widget.ButtonOpts.WidgetOpts(
+			widget.WidgetOpts.MinSize(10, 32),
 			// 布局设置，将按钮水平和垂直居中
 			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
 				Position: widget.RowLayoutPositionCenter,
@@ -83,7 +71,7 @@ func HeaderContainer(readerConfig *model.ReaderConfig, ui *ebitenui.UI) widget.P
 	// Upload按钮
 	uploadButton := widget.NewButton(
 		// 指定要使用的图像
-		widget.ButtonOpts.Image(buttonImage),
+		widget.ButtonOpts.Image(res.Button.Image),
 		// 指定按钮的文本、字体和颜色
 		widget.ButtonOpts.Text(fmt.Sprintf("Upload"), face, &widget.ButtonTextColor{
 			Idle: color.NRGBA{R: 0xdf, G: 0xf4, B: 0xff, A: 0xff},
@@ -109,40 +97,12 @@ func HeaderContainer(readerConfig *model.ReaderConfig, ui *ebitenui.UI) widget.P
 	)
 	headerContainer.AddChild(uploadButton)
 
-	// Sort按钮
-	//sortButton := widget.NewButton(
-	//	// 指定要使用的图像
-	//	widget.ButtonOpts.Image(buttonImage),
-	//	// 指定按钮的文本、字体和颜色
-	//	widget.ButtonOpts.Text(fmt.Sprintf("Sort"), face, &widget.ButtonTextColor{
-	//		Idle: color.NRGBA{R: 0xdf, G: 0xf4, B: 0xff, A: 0xff},
-	//	}),
-	//	// 指定按钮的文本需要一些填充才能正确显示
-	//	widget.ButtonOpts.TextPadding(widget.Insets{
-	//		Left:   10,
-	//		Right:  10,
-	//		Top:    10,
-	//		Bottom: 10,
-	//	}),
-	//	// 添加一个处理程序以响应点击按钮事件
-	//	widget.ButtonOpts.ClickedHandler(func(args *widget.ButtonClickedEventArgs) {
-	//		println(fmt.Sprintf("Sort Button Clicked!"))
-	//	}),
-	//	// 设置按钮的通用选项
-	//	widget.ButtonOpts.WidgetOpts(
-	//		// 布局设置，将按钮水平和垂直居中
-	//		widget.WidgetOpts.LayoutData(widget.RowLayoutData{
-	//			Position: widget.RowLayoutPositionCenter,
-	//		}),
-	//	),
-	//)
-
 	// add the button as a child of the container
 	headerContainer.AddChild(sortButton())
 
 	// 一个新的文本小部件，用于显示文本。
 	titleText := widget.NewText(
-		widget.TextOpts.Text(readerConfig.Title, fontFace, textColor),
+		widget.TextOpts.Text(readerConfig.Title, res.Button.Face, textColor),
 		widget.TextOpts.Position(widget.TextPositionCenter, widget.TextPositionCenter),
 		//要配置单个小部件与其兄弟小部件有不同的布局，可以在小部件上设置一个可选的“布局数据”。
 		//布局数据的类型取决于所使用的布局实现。例如，RowLayout 需要使用 RowLayoutData。
@@ -155,7 +115,7 @@ func HeaderContainer(readerConfig *model.ReaderConfig, ui *ebitenui.UI) widget.P
 	// QRCode按钮
 	qrcodeButton := widget.NewButton(
 		// 指定要使用的图像
-		widget.ButtonOpts.Image(buttonImage),
+		widget.ButtonOpts.Image(res.Button.Image),
 		// 指定按钮的文本、字体和颜色
 		widget.ButtonOpts.Text(fmt.Sprintf("QRCode"), face, &widget.ButtonTextColor{
 			Idle: color.NRGBA{R: 0xdf, G: 0xf4, B: 0xff, A: 0xff},
@@ -203,7 +163,7 @@ func HeaderContainer(readerConfig *model.ReaderConfig, ui *ebitenui.UI) widget.P
 	// FullScreen按钮
 	fullScreenButton := widget.NewButton(
 		// 指定要使用的图像
-		widget.ButtonOpts.Image(buttonImage),
+		widget.ButtonOpts.Image(res.Button.Image),
 		// 指定按钮的文本、字体和颜色
 		widget.ButtonOpts.Text(fmt.Sprintf("FullScreen"), face, &widget.ButtonTextColor{
 			Idle: color.NRGBA{R: 0xdf, G: 0xf4, B: 0xff, A: 0xff},
@@ -234,7 +194,7 @@ func HeaderContainer(readerConfig *model.ReaderConfig, ui *ebitenui.UI) widget.P
 	// 设置按钮
 	settingButton := widget.NewButton(
 		// 指定要使用的图像
-		widget.ButtonOpts.Image(buttonImage),
+		widget.ButtonOpts.Image(res.Button.Image),
 		// 指定按钮的文本、字体和颜色
 		widget.ButtonOpts.Text(fmt.Sprintf("Setting"), face, &widget.ButtonTextColor{
 			Idle: color.NRGBA{R: 0xdf, G: 0xf4, B: 0xff, A: 0xff},
