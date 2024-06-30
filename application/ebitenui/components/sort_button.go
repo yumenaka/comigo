@@ -13,7 +13,7 @@ type ListEntry struct {
 	name string
 }
 
-func sortButton() widget.PreferredSizeLocateableWidget {
+func SortButton() widget.PreferredSizeLocateableWidget {
 	// 加载按钮状态的图片：静止、悬停和按下(idle, hover, and pressed)。
 	buttonImage, _ := loadButtonImage()
 	// 加载按钮文字字体

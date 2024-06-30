@@ -43,34 +43,44 @@ func BodyContainer() widget.PreferredSizeLocateableWidget {
 
 	// 创建一个包含滚动内容的容器
 	// RowLayout 可以在一行或一列中布置任意数量的小部件。它还可以根据需要对小部件进行不同的定位和拉伸。
-	bodyContent := widget.NewContainer(widget.ContainerOpts.Layout(widget.NewRowLayout(
-		// 设置行布局的方向
-		widget.RowLayoutOpts.Direction(widget.DirectionVertical),
-		// 设置行布局的填充
-		widget.RowLayoutOpts.Padding(widget.Insets{
-			Left:   0,
-			Right:  0,
-			Top:    30,
-			Bottom: 30,
-		}),
-		// 设置行布局的间距
-		widget.RowLayoutOpts.Spacing(5),
-	)))
+	bodyContent := widget.NewContainer(widget.ContainerOpts.Layout(
+		// GridLayout 可以在网格中布置任意数量的小部件。它可以为每个网格单元的小部件设置不同的位置，并且还可以拉伸它们。
+		// 根据小部件的实现方式，某些选项是必须指定的（例如按钮的图片），而其他选项则是可选的。选项的顺序通常无关紧要。有些选项可以被多次指定。
+		widget.NewGridLayout(
+			// 使用 Columns 参数来定义列的数量。
+			widget.GridLayoutOpts.Columns(7),
+			// 使用 ColumnStretch 和 RowStretch 参数来分别定义列和行的拉伸因子。
+			// 只支持布尔值，true表示拉伸，false表示不拉伸。
+			widget.GridLayoutOpts.Stretch([]bool{}, []bool{}),
+			//网格布局的间距，c 列间距，r行间距。
+			widget.GridLayoutOpts.Spacing(20, 10),
+			// Padding 定义了网格块的外间距大小。
+			widget.GridLayoutOpts.Padding(widget.Insets{
+				Top:    20,
+				Left:   20,
+				Bottom: 20,
+				Right:  20,
+			}),
+		)))
 
-	randomBook, err := entity.GetRandomBook()
+	// 默认书架
+	//书籍排列的方式，默认name
+	sortBy := "default"
+	//如果传了maxDepth这个参数
+	bookInfoList, err := entity.TopOfShelfInfo(sortBy)
 	if err != nil {
 		log.Print(err)
 	}
-	for _, i := range randomBook.Pages.Images {
-		println(fmt.Sprintf("GetFile: %s", i.NameInArchive))
+	for _, bookInfo := range bookInfoList.BookInfos {
+		println(fmt.Sprintf("GetFile: %s", bookInfo.Title))
 		option := fileutil.GetPictureDataOption{
-			PictureName:      i.NameInArchive,
-			BookIsPDF:        randomBook.Type == entity.TypePDF,
-			BookIsDir:        randomBook.Type == entity.TypeDir,
-			BookIsNonUTF8Zip: randomBook.NonUTF8Zip,
-			BookFilePath:     randomBook.FilePath,
-			ResizeMaxWidth:   800,
-			ResizeMaxHeight:  1000,
+			PictureName:      bookInfo.Cover.NameInArchive,
+			BookIsPDF:        bookInfo.Type == entity.TypePDF,
+			BookIsDir:        bookInfo.Type == entity.TypeDir,
+			BookIsNonUTF8Zip: bookInfo.NonUTF8Zip,
+			BookFilePath:     bookInfo.FilePath,
+			ResizeMaxWidth:   160,
+			ResizeMaxHeight:  240,
 		}
 		imgData, _, err := fileutil.GetPictureData(option)
 		if err != nil {
