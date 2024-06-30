@@ -98,7 +98,7 @@ func HeaderContainer(res *resources.UIResources, readerConfig *model.ReaderConfi
 	headerContainer.AddChild(uploadButton)
 
 	// add the button as a child of the container
-	headerContainer.AddChild(SortButton())
+	headerContainer.AddChild(SortButton(res))
 
 	// 一个新的文本小部件，用于显示文本。
 	titleText := widget.NewText(

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/ebitenui/ebitenui/image"
 	"github.com/ebitenui/ebitenui/widget"
+	"github.com/yumenaka/comi/application/ebitenui/resources"
 	"image/color"
 )
 
@@ -13,7 +14,7 @@ type ListEntry struct {
 	name string
 }
 
-func SortButton() widget.PreferredSizeLocateableWidget {
+func SortButton(res *resources.UIResources) widget.PreferredSizeLocateableWidget {
 	// 加载按钮状态的图片：静止、悬停和按下(idle, hover, and pressed)。
 	buttonImage, _ := loadButtonImage()
 	// 加载按钮文字字体
@@ -32,7 +33,8 @@ func SortButton() widget.PreferredSizeLocateableWidget {
 				widget.ComboButtonOpts.MaxContentHeight(150),
 				//Set the parameters for the primary displayed button
 				widget.ComboButtonOpts.ButtonOpts(
-					widget.ButtonOpts.Image(buttonImage),
+					// 加载按钮状态的图片：静止、悬停和按下(idle, hover, and pressed)。
+					widget.ButtonOpts.Image(res.Button.Image),
 					widget.ButtonOpts.TextPadding(widget.NewInsetsSimple(5)),
 					widget.ButtonOpts.Text("", face, &widget.ButtonTextColor{
 						Idle:     color.White,
