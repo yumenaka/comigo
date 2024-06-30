@@ -42,12 +42,11 @@ gomobile:
 	export ANDROID_NDK_HOME=/Users/bai/Library/Android/sdk/ndk/26.1.10909125
 	gomobile bind -target=android -o comigo.aar -androidapi 26
 
-
 md5SumThemAll:
 	rm -f $(MD5_TEXTFILE)
 	find $(BINDIR) -type f -name "$(NAME)_*" -exec $(MD5_UTIL) {} >> $(MD5_TEXTFILE) \;
+	sed -i 's/$(BINDIR)\///g' $(MD5_TEXTFILE)
 	cat $(MD5_TEXTFILE)
-
 
 # upx可能导致报毒，取消windows平台的upx压缩
 # 换行用TAB而不是空格

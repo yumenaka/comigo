@@ -32,21 +32,23 @@ func HeaderContainer(res *resources.UIResources, readerConfig *model.ReaderConfi
 			// 使用 ColumnStretch 和 RowStretch 参数来分别定义列和行的拉伸因子。
 			// 只支持布尔值，true表示拉伸，false表示不拉伸。
 			widget.GridLayoutOpts.Stretch([]bool{false, false, false, true, false, false, false}, []bool{true}),
-			//定义内边距的大小，以嵌入子内容
+			//内边距的大小
 			widget.GridLayoutOpts.Padding(widget.NewInsetsSimple(8)),
 			//网格布局的间距，c 列间距，r行间距。
 			widget.GridLayoutOpts.Spacing(8, 8),
 		)),
-		// 设置容器的通用选项
+		// 统一设定布局设定
 		widget.ContainerOpts.WidgetOpts(
-			widget.WidgetOpts.MinSize(10, 10),
+			//widget.WidgetOpts.MinSize(80, 20),
+			widget.WidgetOpts.LayoutData(widget.GridLayoutData{
+				MaxHeight:          56,
+				HorizontalPosition: widget.GridLayoutPositionCenter,
+				VerticalPosition:   widget.GridLayoutPositionCenter,
+			}),
 		),
 	)
 	// 服务器设置按钮
 	serverButton := widget.NewButton(
-		widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
-			Stretch: true,
-		})),
 		// 指定要使用的图像
 		widget.ButtonOpts.Image(res.Button.Image),
 		// 指定按钮的文本、字体和颜色
@@ -57,14 +59,17 @@ func HeaderContainer(res *resources.UIResources, readerConfig *model.ReaderConfi
 		widget.ButtonOpts.ClickedHandler(func(args *widget.ButtonClickedEventArgs) {
 			println(fmt.Sprintf("Server Button Clicked!"))
 		}),
-		// 设置按钮的通用选项
-		widget.ButtonOpts.WidgetOpts(
-			widget.WidgetOpts.MinSize(10, 32),
-			// 布局设置，将按钮水平和垂直居中
-			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
-				Position: widget.RowLayoutPositionCenter,
-			}),
-		),
+		widget.ButtonOpts.CursorEnteredHandler(func(args *widget.ButtonHoverEventArgs) { fmt.Println("Cursor Entered: " + args.Button.Text().Label) }),
+		widget.ButtonOpts.CursorExitedHandler(func(args *widget.ButtonHoverEventArgs) { fmt.Println("Cursor Exited: " + args.Button.Text().Label) }),
+		//// 单独某个按钮的布局设定
+		//widget.ButtonOpts.WidgetOpts(
+		//	widget.WidgetOpts.MinSize(80, 20),
+		//	widget.WidgetOpts.LayoutData(widget.GridLayoutData{
+		//		MaxHeight:          40,
+		//		HorizontalPosition: widget.GridLayoutPositionCenter,
+		//		VerticalPosition:   widget.GridLayoutPositionCenter,
+		//	}),
+		//),
 	)
 	headerContainer.AddChild(serverButton)
 
@@ -76,13 +81,8 @@ func HeaderContainer(res *resources.UIResources, readerConfig *model.ReaderConfi
 		widget.ButtonOpts.Text(fmt.Sprintf("Upload"), face, &widget.ButtonTextColor{
 			Idle: color.NRGBA{R: 0xdf, G: 0xf4, B: 0xff, A: 0xff},
 		}),
-		// 指定按钮的文本需要一些填充才能正确显示
-		widget.ButtonOpts.TextPadding(widget.Insets{
-			Left:   10,
-			Right:  10,
-			Top:    10,
-			Bottom: 10,
-		}),
+		// 按钮文本填充
+		widget.ButtonOpts.TextPadding(res.Button.Padding),
 		// 添加一个处理程序以响应点击按钮事件
 		widget.ButtonOpts.ClickedHandler(func(args *widget.ButtonClickedEventArgs) {
 			println(fmt.Sprintf("Upload Button Clicked!"))
@@ -120,13 +120,8 @@ func HeaderContainer(res *resources.UIResources, readerConfig *model.ReaderConfi
 		widget.ButtonOpts.Text(fmt.Sprintf("QRCode"), face, &widget.ButtonTextColor{
 			Idle: color.NRGBA{R: 0xdf, G: 0xf4, B: 0xff, A: 0xff},
 		}),
-		// 指定按钮的文本需要一些填充才能正确显示
-		widget.ButtonOpts.TextPadding(widget.Insets{
-			Left:   10,
-			Right:  10,
-			Top:    10,
-			Bottom: 10,
-		}),
+		// 按钮文本填充
+		widget.ButtonOpts.TextPadding(res.Button.Padding),
 		// 添加一个处理程序以响应点击按钮事件
 		widget.ButtonOpts.ClickedHandler(func(args *widget.ButtonClickedEventArgs) {
 			// 显示QRCode窗口
@@ -168,13 +163,8 @@ func HeaderContainer(res *resources.UIResources, readerConfig *model.ReaderConfi
 		widget.ButtonOpts.Text(fmt.Sprintf("FullScreen"), face, &widget.ButtonTextColor{
 			Idle: color.NRGBA{R: 0xdf, G: 0xf4, B: 0xff, A: 0xff},
 		}),
-		// 指定按钮的文本需要一些填充才能正确显示
-		widget.ButtonOpts.TextPadding(widget.Insets{
-			Left:   10,
-			Right:  10,
-			Top:    10,
-			Bottom: 10,
-		}),
+		// 按钮文本填充
+		widget.ButtonOpts.TextPadding(res.Button.Padding),
 		// 添加一个处理程序以响应点击按钮事件
 		widget.ButtonOpts.ClickedHandler(func(args *widget.ButtonClickedEventArgs) {
 			println(fmt.Sprintf("FullScreen Button Clicked!"))
@@ -199,13 +189,8 @@ func HeaderContainer(res *resources.UIResources, readerConfig *model.ReaderConfi
 		widget.ButtonOpts.Text(fmt.Sprintf("Setting"), face, &widget.ButtonTextColor{
 			Idle: color.NRGBA{R: 0xdf, G: 0xf4, B: 0xff, A: 0xff},
 		}),
-		// 指定按钮的文本需要一些填充才能正确显示
-		widget.ButtonOpts.TextPadding(widget.Insets{
-			Left:   10,
-			Right:  10,
-			Top:    10,
-			Bottom: 10,
-		}),
+		// 按钮文本填充
+		widget.ButtonOpts.TextPadding(res.Button.Padding),
 		// 添加一个处理程序以响应点击按钮事件
 		widget.ButtonOpts.ClickedHandler(func(args *widget.ButtonClickedEventArgs) {
 			println(fmt.Sprintf("Setting Button Clicked!"))
