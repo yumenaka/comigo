@@ -22,7 +22,9 @@ func init() {
 func init() {
 	err := godotenv.Load()
 	if err != nil {
-		logger.Infof("Error loading .env file")
+		if Config.Debug {
+			logger.Infof("Not found .env file")
+		}
 	}
 	Config.BookStores[0].Host = os.Getenv("SMB_HOST")
 	Config.BookStores[0].Username = os.Getenv("SMB_USER")
