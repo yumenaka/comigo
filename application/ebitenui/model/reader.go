@@ -16,6 +16,7 @@ type ReaderConfig struct {
 	Title string
 	//阅读器默认阅读模式
 	ReaderMode ReaderMode
+	Router     func(to string)
 	//是否全屏
 	WindowFullScreen bool
 	//是否有边框和标题栏
