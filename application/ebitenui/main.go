@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/yumenaka/comi/application/ebitenui/pages/flip_mode"
 	"github.com/yumenaka/comi/application/ebitenui/resources"
 	_ "image/gif"
 	_ "image/jpeg"
@@ -110,7 +111,7 @@ func createUI(readerConfig *model.ReaderConfig) (*ebitenui.UI, func(), error) {
 		return nil, nil, err
 	}
 	rootContainer.AddChild(components.HeaderContainer(res, readerConfig, ui))
-	rootContainer.AddChild(book_shelf.BodyContainer())
+	rootContainer.AddChild(flip_mode.BodyContainer())
 	rootContainer.AddChild(components.FooterContainer())
 
 	return ui, func() {
