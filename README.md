@@ -72,12 +72,16 @@ Comigo服务器设置，可选的保存位置：
 - [x] log记录
 - [x] 设置中心，设置热重载
 - [x] CPU、内存占用、状态监控
-- [ ] 优化epub与PDF阅读体验，支持图文混排（pdf.js与epub.js）
-- [ ] 用户系统、访问密码，流量限制等
+- [x] 网页端：卷轴模式分页。
+- [ ] 画个示例漫画。
+- [ ] 网页端：优化图片预加载，长图片支持。
+- [ ] 网页端：添加预定义主题与颜色。
+- [ ] 网页端：内置帮助文档。
+- [ ] 跨平台GUI（flutter+gomobile）
+- [ ] 更新提示，自动更新。
 - [ ] 文件夹监控，自动更新
 - [ ] 文件持久化，meta文件，阅读历史与统计。
-- [x] 网页端：卷轴模式分页。
-- [ ] 网页端：内置帮助文档。
+- [ ] 用户系统、访问密码，流量限制等
 - [ ] 网页端：浏览器快捷键。
 - [ ] shell 互动（https://github.com/rivo/tview ）
 - [ ] 子命令，download rar2zip 
@@ -87,11 +91,10 @@ Comigo服务器设置，可选的保存位置：
 - [ ] 命令行交互
 - [ ] 调用第三方API
 - [ ] 挂载smb、webdav
-- [ ] 文件管理
-- [ ] 更新提示
+- [ ] 文件管理，删除。
 - [ ] 移动客户端（Android，iOS）
-- [ ] 跨平台GUI（ebitenui react naitive or flutter？）
 - [ ] Debian，RPM包（https://github.com/goreleaser/nfpm）
+- [ ] 优化epub与PDF阅读体验，支持图文混排（pdf.js与epub.js）
 
 ### Special Thanks：
 [mholt](https://github.com/mholt)  、[spf13](https://github.com/spf13)  [disintegration](https://github.com/disintegration)   、 [Baozisoftware ](https://github.com/Baozisoftware) 、 [markbates](github.com/markbates/pkger)  and more。
