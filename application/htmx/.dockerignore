@@ -1,0 +1,34 @@
+# Auto-generated .dockerignore file.
+# See https://gowebly.org for more information.
+
+# Ignore folders.
+.git/
+.github/
+.vscode/
+.idea/
+node_modules/
+bin/
+dist/
+dist-ssr/
+tmp/
+pb_data/
+tests/
+
+# Ignore files.
+LICENSE
+.DS_Store
+.dockerignore
+.gitignore
+.postcssrc
+Dockerfile
+**/*.templ
+**/*_test.go
+package.json
+*-lock.json
+*.lockb
+*.config.*
+*.yml
+*.yaml
+*.toml
+*.md
+*.out
