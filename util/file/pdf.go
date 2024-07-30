@@ -22,6 +22,7 @@ import (
 // CountPagesOfPDF 确定PDF的页数
 func CountPagesOfPDF(pdfFileName string) (int, error) {
 	//设置一个defer语句来捕获并处理潜在的panic。defer语句会确保在函数返回之前执行其中的代码，而recover函数用于捕获并恢复panic，防止panic向上传播并导致整个程序崩溃
+	// recover 函数旨在捕获恐慌，但必须在延迟函数中调用它才能正常工作。https://victoriametrics.com/blog/defer-in-go/
 	defer func() {
 		if r := recover(); r != nil {
 			logger.Infof("CountPagesOfPDF: invalid PDF: %v Error:%v", pdfFileName, r)
