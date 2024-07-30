@@ -8,6 +8,7 @@ tmp_dir = "tmp"
 pre_cmd = ["bun run build"]
 cmd = "go run github.com/a-h/templ/cmd/templ@latest generate && go build -o ./tmp/comigo ."
 bin = "tmp/comigo"
+args_bin = ["--debug", "../../test"]
 include_ext = ["go", "templ", "html", "json", "js", "ts", "css", "scss"]
 exclude_dir = [".parcel-cache", "bin", "dist", "node_modules", "static", "tmp", "tests", "vendor"]
 exclude_regex = ["_test\\.go", "_templ\\.go"]
@@ -43,4 +44,4 @@ keep_scroll = true
 [proxy]
 enabled = true
 proxy_port = 7777
-app_port = 7070
+app_port = 1234

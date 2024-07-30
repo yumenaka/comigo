@@ -16,9 +16,9 @@ And some words [about the Gowebly CLI](#about-the-gowebly-cli).
 
 Backend:
 
-- Module name in the go.mod file: `github.com/yumenaka/comi/application/htmx`
+- Module name in the go.mod file: `github.com/yumenaka/comi/htmx`
 - Go web framework/router: `Gin`
-- Server port: `7070`
+- Server port: `1234`
 
 Frontend:
 

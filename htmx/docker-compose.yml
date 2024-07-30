@@ -14,12 +14,12 @@ services:
       dockerfile: Dockerfile
     # Set restart rules for the container.
     restart: unless-stopped
-    # Forward the exposed port 7070 on the container to port 7070 on the host machine.
+    # Forward the exposed port 1234 on the container to port 1234 on the host machine.
     ports:
-      - '7070:7070'
+      - '1234:1234'
     # Set needed environment variables for the Go backend.
     environment:
-      BACKEND_PORT: 7070 # same as the exposed container port
+      BACKEND_PORT: 1234 # same as the exposed container port
     # Networks to join.
     # Services on the same network can communicate with each other using their name.
     networks:
