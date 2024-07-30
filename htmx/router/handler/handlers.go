@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"errors"
@@ -6,14 +6,14 @@ import (
 
 	"github.com/angelofallars/htmx-go"
 
-	"github.com/yumenaka/comi/application/htmx/templates"
-	"github.com/yumenaka/comi/application/htmx/templates/pages"
+	"github.com/yumenaka/comi/htmx/templates"
+	"github.com/yumenaka/comi/htmx/templates/pages"
 
 	"github.com/gin-gonic/gin"
 )
 
-// indexViewHandler handles a view for the index page.
-func indexViewHandler(c *gin.Context) {
+// IndexViewHandler handles a view for the index page.
+func IndexViewHandler(c *gin.Context) {
 
 	// Define template meta tags.
 	metaTags := pages.MetaTags(
@@ -43,8 +43,8 @@ func indexViewHandler(c *gin.Context) {
 
 }
 
-// showContentAPIHandler handles an API endpoint to show content.
-func showContentAPIHandler(c *gin.Context) {
+// ShowContentAPIHandler handles an API endpoint to show content.
+func ShowContentAPIHandler(c *gin.Context) {
 	// Check, if the current request has a 'HX-Request' header.
 	// For more information, see https://htmx.org/docs/#request-headers
 	if !htmx.IsHTMX(c.Request) {

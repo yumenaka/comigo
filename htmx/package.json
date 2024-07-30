@@ -1,14 +1,14 @@
 {
   "name": "comigo",
-  "version": "0.0.0",
-  "description": "Frontend part of the Gowebly project.",
+  "version": "1.0.0",
+  "description": "Frontend part of the Comigo project.",
   "license": "MIT",
   "browserslist": "> 0.5%, last 2 versions, not dead",
   "scripts": {
     "fmt": "prettier --write .",
-    "build": "parcel build ./assets/scripts.js ./assets/styles.scss --dist-dir ./static",
-    "dev": "parcel build ./assets/scripts.js ./assets/styles.scss --dist-dir ./static --no-optimize",
-    "watch": "parcel watch ./assets/scripts.js ./assets/styles.scss --dist-dir ./static --no-optimize"
+    "build": "parcel build ./router/assets/scripts.js ./router/assets/styles.scss --dist-dir ./router/static",
+    "dev": "parcel build ./router/assets/scripts.js ./router/assets/styles.scss --dist-dir ./router/static --no-optimize",
+    "watch": "parcel watch ./router/assets/scripts.js ./router/assets/styles.scss --dist-dir ./router/static --no-optimize"
   },
   "dependencies": {
     "@tailwindcss/forms": "latest",
