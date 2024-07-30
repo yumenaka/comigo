@@ -18,7 +18,7 @@ Backend:
 
 - Module name in the go.mod file: `github.com/yumenaka/comi/application/htmx`
 - Go web framework/router: `Gin`
-- Server port: `7777`
+- Server port: `7070`
 
 Frontend:
 

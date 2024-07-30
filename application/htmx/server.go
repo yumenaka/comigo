@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/yumenaka/comi/application/htmx/comi"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -51,12 +52,12 @@ func (t *TemplRender) Instance(name string, data interface{}) render.Render {
 // runServer runs a new HTTP server with the loaded environment variables.
 func runServer() error {
 	// Validate environment variables.
-	port, err := strconv.Atoi(gowebly.Getenv("BACKEND_PORT", "7777"))
+	port, err := strconv.Atoi(gowebly.Getenv("BACKEND_PORT", "7070"))
 	if err != nil {
 		return err
 	}
 
-	// Create a new Fiber server.
+	// Create a new Gin server.
 	router := gin.Default()
 
 	// Define HTML renderer for template engine.
@@ -79,7 +80,7 @@ func runServer() error {
 		WriteTimeout: 10 * time.Second,
 		Handler:      router,
 	}
-
+	comi.StartComigoWebserver()
 	// Send log message.
 	slog.Info("Starting server...", "port", port)
 
