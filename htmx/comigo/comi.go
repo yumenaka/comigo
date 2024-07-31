@@ -1,4 +1,4 @@
-package file_server
+package comigo
 
 import (
 	"fmt"
