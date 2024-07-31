@@ -21,16 +21,16 @@ type HeaderProps struct {
 }
 
 templ Header(prop HeaderProps) {
-	<div class="flex flex-row justify-between w-full h-12 p-1 bg-blue-300 border">
+	<div class="flex flex-row justify-between w-full h-12 p-1 border bg-sky-200">
 		<div class="flex flex-row">
 			<!-- 返回箭头,点击返回上一页 -->
-			<div class="w-10 py-0 mx-1 my-0">
-				<svg class="static w-10" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M112 160l-64 64l64 64"></path><path d="M64 224h294c58.76 0 106 49.33 106 108v20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></path></svg>
+			<div class="w-8 pt-1 mx-1 my-0">
+				<svg class="static w-8" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M112 160l-64 64l64 64"></path><path d="M64 224h294c58.76 0 106 49.33 106 108v20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></path></svg>
 			</div>
 			<!-- 服务器设置 -->
-			<div class="w-10 py-0 mx-1 my-0">
+			<div class="w-8 pt-1 mx-1 my-0">
 				<svg
-					class="static w-10"
+					class="static w-8"
 					xmlns="http://www.w3.org/2000/svg"
 					fill="none"
 					viewBox="0 0 24 24"
@@ -45,8 +45,8 @@ templ Header(prop HeaderProps) {
 				</svg>
 			</div>
 			<!-- 上传按钮，点击进入上传页面 -->
-			<div class="w-10 py-0 mx-1 my-0">
-				<svg class="static w-10" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512">
+			<div class="w-8 pt-1 mx-1 my-0">
+				<svg class="static w-8" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512">
 					<path
 						d="M320 367.79h76c55 0 100-29.21 100-83.6s-53-81.47-96-83.6c-8.89-85.06-71-136.8-144-136.8c-69 0-113.44 45.79-128 91.2c-60 5.7-112 43.88-112 106.4s54 106.4 120 106.4h56"
 						fill="none"
@@ -74,8 +74,8 @@ templ Header(prop HeaderProps) {
 				</svg>
 			</div>
 			<!-- 文件重排序 -->
-			<div class="w-10 py-0 mx-1 my-0">
-				<svg class="static w-10" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24"><path d="M12 4c4.41 0 8 3.59 8 8s-3.59 8-8 8s-8-3.59-8-8s3.59-8 8-8m0-2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm0 13l-4-4h8z" fill="currentColor"></path></svg>
+			<div class="w-8 pt-1 mx-1 my-0">
+				<svg class="static w-8" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24"><path d="M12 4c4.41 0 8 3.59 8 8s-3.59 8-8 8s-8-3.59-8-8s3.59-8 8-8m0-2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm0 13l-4-4h8z" fill="currentColor"></path></svg>
 			</div>
 		</div>
 		<!-- 标题-->
@@ -96,13 +96,13 @@ templ Header(prop HeaderProps) {
 		<!-- 溢出 overflow-x-auton :https://www.tailwindcss.cn/docs/overflow -->
 		<div class="flex justify-between p-0 m-0 max-w-64">
 			<!-- 点击可以在屏幕正中显示二维码 -->
-			<div class="w-10 py-0 mx-1 my-0">
-				<svg class="static w-10" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><rect x="336" y="336" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect><rect x="272" y="272" width="64" height="64" rx="8" ry="8" fill="currentColor"></rect><rect x="416" y="416" width="64" height="64" rx="8" ry="8" fill="currentColor"></rect><rect x="432" y="272" width="48" height="48" rx="8" ry="8" fill="currentColor"></rect><rect x="272" y="432" width="48" height="48" rx="8" ry="8" fill="currentColor"></rect><rect x="336" y="96" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect><rect x="288" y="48" width="176" height="176" rx="16" ry="16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></rect><rect x="96" y="96" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect><rect x="48" y="48" width="176" height="176" rx="16" ry="16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></rect><rect x="96" y="336" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect><rect x="48" y="288" width="176" height="176" rx="16" ry="16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></rect></svg>
+			<div class="w-8 pt-1 mx-1 my-0">
+				<svg class="static w-8" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><rect x="336" y="336" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect><rect x="272" y="272" width="64" height="64" rx="8" ry="8" fill="currentColor"></rect><rect x="416" y="416" width="64" height="64" rx="8" ry="8" fill="currentColor"></rect><rect x="432" y="272" width="48" height="48" rx="8" ry="8" fill="currentColor"></rect><rect x="272" y="432" width="48" height="48" rx="8" ry="8" fill="currentColor"></rect><rect x="336" y="96" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect><rect x="288" y="48" width="176" height="176" rx="16" ry="16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></rect><rect x="96" y="96" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect><rect x="48" y="48" width="176" height="176" rx="16" ry="16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></rect><rect x="96" y="336" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect><rect x="48" y="288" width="176" height="176" rx="16" ry="16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></rect></svg>
 			</div>
 			<!-- 全屏按钮 -->
-			<div class="w-10 py-0 mx-1 my-0">
+			<div class="w-8 pt-1 mx-1 my-0">
 				<svg
-					class="static w-10"
+					class="static w-8"
 					onClick="onFullScreen"
 					xmlns="http://www.w3.org/2000/svg"
 					xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -121,8 +121,8 @@ templ Header(prop HeaderProps) {
 				</svg>
 			</div>
 			<!-- 阅读器设定,点击屏幕中央也可以打开  可自定义方向 -->
-			<div class="w-10 py-0 mx-1 my-0">
-				<svg class="static w-10" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><path d="M262.29 192.31a64 64 0 1 0 57.4 57.4a64.13 64.13 0 0 0-57.4-57.4zM416.39 256a154.34 154.34 0 0 1-1.53 20.79l45.21 35.46a10.81 10.81 0 0 1 2.45 13.75l-42.77 74a10.81 10.81 0 0 1-13.14 4.59l-44.9-18.08a16.11 16.11 0 0 0-15.17 1.75A164.48 164.48 0 0 1 325 400.8a15.94 15.94 0 0 0-8.82 12.14l-6.73 47.89a11.08 11.08 0 0 1-10.68 9.17h-85.54a11.11 11.11 0 0 1-10.69-8.87l-6.72-47.82a16.07 16.07 0 0 0-9-12.22a155.3 155.3 0 0 1-21.46-12.57a16 16 0 0 0-15.11-1.71l-44.89 18.07a10.81 10.81 0 0 1-13.14-4.58l-42.77-74a10.8 10.8 0 0 1 2.45-13.75l38.21-30a16.05 16.05 0 0 0 6-14.08c-.36-4.17-.58-8.33-.58-12.5s.21-8.27.58-12.35a16 16 0 0 0-6.07-13.94l-38.19-30A10.81 10.81 0 0 1 49.48 186l42.77-74a10.81 10.81 0 0 1 13.14-4.59l44.9 18.08a16.11 16.11 0 0 0 15.17-1.75A164.48 164.48 0 0 1 187 111.2a15.94 15.94 0 0 0 8.82-12.14l6.73-47.89A11.08 11.08 0 0 1 213.23 42h85.54a11.11 11.11 0 0 1 10.69 8.87l6.72 47.82a16.07 16.07 0 0 0 9 12.22a155.3 155.3 0 0 1 21.46 12.57a16 16 0 0 0 15.11 1.71l44.89-18.07a10.81 10.81 0 0 1 13.14 4.58l42.77 74a10.8 10.8 0 0 1-2.45 13.75l-38.21 30a16.05 16.05 0 0 0-6.05 14.08c.33 4.14.55 8.3.55 12.47z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></path></svg>
+			<div class="w-8 pt-1 mx-1 my-0">
+				<svg class="static w-8" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><path d="M262.29 192.31a64 64 0 1 0 57.4 57.4a64.13 64.13 0 0 0-57.4-57.4zM416.39 256a154.34 154.34 0 0 1-1.53 20.79l45.21 35.46a10.81 10.81 0 0 1 2.45 13.75l-42.77 74a10.81 10.81 0 0 1-13.14 4.59l-44.9-18.08a16.11 16.11 0 0 0-15.17 1.75A164.48 164.48 0 0 1 325 400.8a15.94 15.94 0 0 0-8.82 12.14l-6.73 47.89a11.08 11.08 0 0 1-10.68 9.17h-85.54a11.11 11.11 0 0 1-10.69-8.87l-6.72-47.82a16.07 16.07 0 0 0-9-12.22a155.3 155.3 0 0 1-21.46-12.57a16 16 0 0 0-15.11-1.71l-44.89 18.07a10.81 10.81 0 0 1-13.14-4.58l-42.77-74a10.8 10.8 0 0 1 2.45-13.75l38.21-30a16.05 16.05 0 0 0 6-14.08c-.36-4.17-.58-8.33-.58-12.5s.21-8.27.58-12.35a16 16 0 0 0-6.07-13.94l-38.19-30A10.81 10.81 0 0 1 49.48 186l42.77-74a10.81 10.81 0 0 1 13.14-4.59l44.9 18.08a16.11 16.11 0 0 0 15.17-1.75A164.48 164.48 0 0 1 187 111.2a15.94 15.94 0 0 0 8.82-12.14l6.73-47.89A11.08 11.08 0 0 1 213.23 42h85.54a11.11 11.11 0 0 1 10.69 8.87l6.72 47.82a16.07 16.07 0 0 0 9 12.22a155.3 155.3 0 0 1 21.46 12.57a16 16 0 0 0 15.11 1.71l44.89-18.07a10.81 10.81 0 0 1 13.14 4.58l42.77 74a10.8 10.8 0 0 1-2.45 13.75l-38.21 30a16.05 16.05 0 0 0-6.05 14.08c.33 4.14.55 8.3.55 12.47z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></path></svg>
 			</div>
 		</div>
 	</div>
@@ -133,25 +133,26 @@ templ Main() {
 }
 
 templ Footer(version string) {
-	<footer class="flex flex-row justify-center w-full h-12 py-4 space-x-2 text-base text-gray-900 bg-blue-300 border item-center">
-		<span class="text-base">Power by</span>
-		<a href="https://github.com/yumenaka/comi/releases" class="font-semibold text-blue-700 hover:underline">
-			{ version }
-		</a>
+	<footer class="w-full p-0 m-0 footer">
+		<aside class="flex flex-row justify-center w-full h-10 py-2 border hover:space-x-8 footer bg-sky-200 item-center">
+			<a class="text-sm font-semibold text-blue-700 hover:underline" href="https://github.com/yumenaka/comi/releases" target="_blank">
+				Power by { version }
+			</a>
+		</aside>
 	</footer>
 }
 
 // BodyContent 定义 BodyHTML
 templ BodyContent(h1, text string) {
-		@Header(HeaderProps{
-			title:           "Comigo v1.0.0",
-			showReturnIcon:  true,
-			setDownLoadLink: false,
-			inShelf:         false,
-			downLoadLink:    "",
-		})
-		@Main()
-		@Footer("Comigo v1.0.0")
+	@Header(HeaderProps{
+		title:           "Comigo v1.0.0",
+		showReturnIcon:  true,
+		setDownLoadLink: false,
+		inShelf:         false,
+		downLoadLink:    "",
+	})
+	@Main()
+	@Footer("Comigo v1.0.0")
 }
 
 // BodyScripts defines JavaScript code.

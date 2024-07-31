@@ -4,7 +4,7 @@ import (
 	"context"
 	"embed"
 	"errors"
-	"log"
+	"io/fs"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -16,6 +16,7 @@ import (
 	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/htmx/file_server"
 	"github.com/yumenaka/comi/htmx/router/handler"
+	"github.com/yumenaka/comi/util/logger"
 )
 
 //go:embed all:static
@@ -28,7 +29,7 @@ type TemplRender struct {
 }
 
 // Render 实现了 render.Render 接口。
-func (t TemplRender) Render(w http.ResponseWriter) error {
+func (t *TemplRender) Render(w http.ResponseWriter) error {
 	t.WriteContentType(w)
 	w.WriteHeader(t.Code)
 	if t.Data != nil {
@@ -38,7 +39,7 @@ func (t TemplRender) Render(w http.ResponseWriter) error {
 }
 
 // WriteContentType 实现了 render.Render 接口。
-func (t TemplRender) WriteContentType(w http.ResponseWriter) {
+func (t *TemplRender) WriteContentType(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 }
 
@@ -62,13 +63,13 @@ func RunServer() (err error) {
 	// 为模板引擎定义 HTML 渲染器。
 	router.HTMLRender = &TemplRender{}
 	// 静态文件。
-	router.Static("/static", "./router/static")
+	//router.Static("/static", "./router/static")
 	// 嵌入静态文件。
-	// staticFS, err := fs.Sub(static, "static")
-	// if err != nil {
-	// 	logger.Infof("%s", err)
-	// }
-	// router.StaticFS("/static/", http.FS(staticFS))
+	staticFS, err := fs.Sub(static, "static")
+	if err != nil {
+		logger.Infof("%s", err)
+	}
+	router.StaticFS("/static/", http.FS(staticFS))
 
 	// 处理主页视图
 	router.GET("/", handler.IndexViewHandler)
@@ -96,14 +97,14 @@ func RunServer() (err error) {
 	if enableTls {
 		if err := server.ListenAndServeTLS(config.Config.CertFile, config.Config.KeyFile); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			time.Sleep(3 * time.Second)
-			log.Fatalf("listen: %s\n", err)
+			logger.Fatalf("listen: %s\n", err)
 		}
 	}
 	if !enableTls {
 		// 监听并启动服务(HTTP)
 		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			time.Sleep(3 * time.Second)
-			log.Fatalf("listen: %s\n", err)
+			logger.Fatalf("listen: %s\n", err)
 		}
 	}
 	return err

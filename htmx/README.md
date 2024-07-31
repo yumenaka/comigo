@@ -2,9 +2,11 @@
 
 > ❗️ 下面是开发必须的工具和库，你可以在这里找到它们的文档和更多信息:
 > - `Templ（模板引擎）`: [https://templ.guide/](https://templ.guide/)
-> - `golangci-lint`: [https://github.com/golangci/golangci-lint](https://github.com/golangci/golangci-lint)
 > - `Air`: [https://github.com/air-verse/air](https://github.com/air-verse/air)
 > - `Bun`: [https://github.com/oven-sh/bun](https://github.com/oven-sh/bun)
+> - `Tailwind CSS`: [https://tailwindcss.com/docs/flex](https://tailwindcss.com/docs/flex)
+> - `daisyUI`: [https://daisyui.com/components/](https://daisyui.com/components/)
+> - `golangci-lint`: [https://github.com/golangci/golangci-lint](https://github.com/golangci/golangci-lint)  
 
 要开始您的项目，在终端中运行 **Gowebly** CLI命令：
 
