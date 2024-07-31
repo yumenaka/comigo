@@ -1,4 +1,4 @@
-package handler
+package templates
 
 import (
 	"errors"
@@ -7,17 +7,22 @@ import (
 
 	"github.com/angelofallars/htmx-go"
 	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comi/htmx/templates"
+	"github.com/yumenaka/comi/entity"
+	"github.com/yumenaka/comi/htmx/state"
 	"github.com/yumenaka/comi/htmx/templates/pages"
+	"github.com/yumenaka/comi/util/logger"
 )
 
-// IndexViewHandler handles a view for the index page.
-func IndexViewHandler(c *gin.Context) {
-
-	////书籍排列的方式，默认name
+// MainHandler handles a view for the index page.
+func MainHandler(c *gin.Context) {
+	// 书籍排列的方式，默认name
 	//sortBy := c.DefaultQuery("sort_by", "default")
-	////如果传了maxDepth这个参数
-	//bookInfoList, err := entity.TopOfShelfInfo(sortBy)
+	// 如果传了maxDepth这个参数
+	var err error
+	state.Global.BooksList, err = entity.TopOfShelfInfo("name")
+	if err != nil {
+		logger.Infof("TopOfShelfInfo: %v", err)
+	}
 
 	// 定义模板元标签。TODO：用书籍的元标签替换。
 	metaTags := pages.MetaTags(
@@ -26,16 +31,13 @@ func IndexViewHandler(c *gin.Context) {
 	)
 
 	// 定义模板主体内容。
-	bodyContent := pages.BodyContent(
-		"Welcome to example!",                // define h1 text
-		"You're here because it worked out.", // define p text
-	)
+	scrollPage := pages.ScrollPage(&state.Global)
 
-	//为首页定义模板布局。
-	indexTemplate := templates.Layout(
-		"Comigo v1.0.0", // define title text
-		metaTags,        // define meta tags
-		bodyContent,     // define body content
+	// 为首页定义模板布局。
+	indexTemplate := MainLayout(
+		"Comigo "+state.Global.Version, // define title text
+		metaTags,                       // define meta tags
+		scrollPage,                     // define body content
 	)
 
 	// 渲染索引页模板。
