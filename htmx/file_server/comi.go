@@ -1,4 +1,4 @@
-package comi
+package file_server
 
 import (
 	"fmt"
@@ -8,9 +8,9 @@ import (
 	"github.com/yumenaka/comi/config"
 )
 
-// StartComigoWebserver 启动Comigo Web服务器
-func StartComigoWebserver() {
-	fmt.Println("Start Comigo Server.")
+// StartComigoServer 启动Comigo Web服务器
+func StartComigoServer() {
+	fmt.Println("Start Comigo File Server.")
 	config.Config.OpenBrowser = false
 	//解析命令，扫描文件
 	cmd.StartScan(os.Args)

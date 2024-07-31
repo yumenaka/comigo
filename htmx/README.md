@@ -1,16 +1,20 @@
-# Your awesome project
+## Starting your project
 
-Welcome to the yet another awesome project generated with the Gowebly CLI! 🎉
+> ❗️ 下面是开发必须的工具和库，你可以在这里找到它们的文档和更多信息:
+> - `Templ（模板引擎）`: [https://templ.guide/](https://templ.guide/)
+> - `golangci-lint`: [https://github.com/golangci/golangci-lint](https://github.com/golangci/golangci-lint)
+> - `Air`: [https://github.com/air-verse/air](https://github.com/air-verse/air)
+> - `Bun`: [https://github.com/oven-sh/bun](https://github.com/oven-sh/bun)
 
-This README file contains all the necessary information about:
+要开始您的项目，在终端中运行 **Gowebly** CLI命令：
 
-- [Project overview](#project-overview)
-- [Folders structure](#folders-structure)
-- [Starting your project](#starting-your-project)
-- [Developing your project](#developing-your-project)
-- [Deploying your project](#deploying-your-project)
-
-And some words [about the Gowebly CLI](#about-the-gowebly-cli).
+```console
+gowebly run
+```
+或者：
+```console
+air
+```
 
 ## Project overview
 
@@ -72,20 +76,7 @@ Tools:
 └── README.md
 ```
 
-## Starting your project
 
-> ❗️ Please make sure that you have installed the executable files for all the necessary tools before starting your project. Exactly:
->
-> - `Air`: [https://github.com/air-verse/air](https://github.com/air-verse/air)
-> - `Bun`: [https://github.com/oven-sh/bun](https://github.com/oven-sh/bun)
-> - `Templ`: [https://github.com/a-h/templ](https://github.com/a-h/templ)
-> - `golangci-lint`: [https://github.com/golangci/golangci-lint](https://github.com/golangci/golangci-lint)
-
-To start your project, run the **Gowebly** CLI command in your terminal:
-
-```console
-gowebly run
-```
 
 ## Developing your project
 
@@ -114,4 +105,3 @@ The [**Gowebly**](https://github.com/gowebly/gowebly) CLI is a next-generation C
 
 It's highly recommended to start exploring the Gowebly CLI with short articles "[**What is Gowebly CLI?**](https://gowebly.org/getting-started)" and "[**How does it work?**](https://gowebly.org/getting-started/how-does-it-work)" to understand the basic principle and the main components built into the **Gowebly** CLI.
 
-<a href="https://gowebly.org/" target="_blank"><img height="112px" alt="another awesome project built with the Gowebly CLI" src="https://raw.githubusercontent.com/gowebly/.github/main/images/gowebly-new-project-banner.svg"/></a>
