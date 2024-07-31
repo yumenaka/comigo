@@ -15,7 +15,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/render"
 	"github.com/yumenaka/comi/config"
-	"github.com/yumenaka/comi/htmx/comi"
+	"github.com/yumenaka/comi/htmx/file_server"
 	"github.com/yumenaka/comi/htmx/router/handler"
 	"github.com/yumenaka/comi/util/logger"
 )
@@ -57,6 +57,8 @@ func (t *TemplRender) Instance(name string, data interface{}) render.Render {
 
 // RunServer 运行一个新的 HTTP 服务器。
 func RunServer() error {
+	// 扫描漫画
+	file_server.StartComigoServer()
 	// 创建一个新的Gin服务器。
 	router := gin.Default()
 	// 为模板引擎定义 HTML 渲染器。
@@ -72,8 +74,6 @@ func RunServer() error {
 	router.GET("/", handler.IndexViewHandler)
 	// 处理 API
 	router.GET("/api/hello-world", handler.ShowContentAPIHandler)
-	// 扫描漫画
-	comi.StartComigoWebserver()
 
 	// 发消息
 	slog.Info("Starting server...", "port", config.Config.Port)

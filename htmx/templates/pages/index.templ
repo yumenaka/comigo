@@ -1,57 +1,166 @@
 package pages
 
 // MetaTags defines meta tags.
-
 templ MetaTags(keywords, description string) {
 	<meta name="keywords" content={ keywords }/>
 	<meta name="description" content={ description }/>
 }
 
-// styledTextStyles defines CSS styles for component.
+// styledTextStyles 定义组件的 CSS 样式
 
 css styledTextStyles() {
 	color: #02BF87;
 }
 
-// BodyContent defines HTML content.
+type HeaderProps struct {
+	title           string
+	showReturnIcon  bool
+	setDownLoadLink bool
+	inShelf         bool
+	downLoadLink    string
+}
 
-templ BodyContent(h1, text string) {
-	<div id="app">
-		<div>
-			<a href="https://gowebly.org" target="_blank">
-				<img src="/static/images/gowebly.svg" class="gowebly logo" alt="Gowebly logo"/>
-			</a>
-			<h1>Go + Templ + htmx</h1>
-			<p class={ styledTextStyles() }>
-				You're using <strong>Templ</strong> package to generate HTML content!
-				<br/>
-				Edit this styled text in the <code>./templates/pages/index.templ</code> file.
-			</p>
-			<div class="content">
-				<button hx-get="/api/hello-world" hx-target="#htmx-result">Hello, World!</button>
-				<div id="htmx-result"></div>
+templ Header(prop HeaderProps) {
+	<header class="flex flex-row content-center justify-between w-full h-12 p-1 bg-blue-300 border header">
+		<div class="flex flex-row">
+			<!-- 返回箭头,点击返回上一页 -->
+			<div class="p-0 mx-1 my-0">
+				<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M112 160l-64 64l64 64"></path><path d="M64 224h294c58.76 0 106 49.33 106 108v20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></path></svg>
 			</div>
-			<p class="read-the-docs">
-				A next-generation CLI tool that makes it easy to create amazing web applications
-				<br/>
-				with <strong>Go</strong> on the backend, using <strong>htmx</strong>,
-				<strong>hyperscript</strong> or <strong>Alpine.js</strong>,
-				<br/>
-				and the most popular CSS frameworks on the frontend.
-			</p>
-			<p class="read-the-docs">
-				<a href="https://gowebly.org" target="_blank">Documentation</a> &sdot;
-				<a href="https://github.com/gowebly/gowebly" target="_blank">GitHub</a>
-			</p>
+			<!-- 服务器设置 -->
+			<div class="p-0 mx-1 my-0">
+				<svg
+					class="static w-10"
+					xmlns="http://www.w3.org/2000/svg"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke-width="1.5"
+					stroke="currentColor"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z"
+					></path>
+				</svg>
+			</div>
+			<!-- 上传按钮，点击进入上传页面 -->
+			<div class="p-0 mx-1 my-0">
+				<svg class="static w-10" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512">
+					<path
+						d="M320 367.79h76c55 0 100-29.21 100-83.6s-53-81.47-96-83.6c-8.89-85.06-71-136.8-144-136.8c-69 0-113.44 45.79-128 91.2c-60 5.7-112 43.88-112 106.4s54 106.4 120 106.4h56"
+						fill="none"
+						stroke="currentColor"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="32"
+					></path>
+					<path
+						fill="none"
+						stroke="currentColor"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="32"
+						d="M320 255.79l-64-64l-64 64"
+					></path>
+					<path
+						fill="none"
+						stroke="currentColor"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="32"
+						d="M256 448.21V207.79"
+					></path>
+				</svg>
+			</div>
+			<!-- 文件重排序 -->
+			<div class="p-0 mx-1 my-0">
+				<svg class="static w-10" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24"><path d="M12 4c4.41 0 8 3.59 8 8s-3.59 8-8 8s-8-3.59-8-8s3.59-8 8-8m0-2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm0 13l-4-4h8z" fill="currentColor"></path></svg>
+			</div>
 		</div>
+		<!-- 标题-->
+		<div class="flex flex-col content-center justify-center p-0 py-0 m-0 font-semibold truncate">
+			<!-- 标题，快速跳转 or 可下载压缩包 or 只显示 -->
+			if (prop.inShelf) {
+				<div class="p-0 mx-1 my-0">QuickJumpBar</div>
+			} else {
+				if (prop.setDownLoadLink) {
+					<span class="text-lg text-blue-700 text-opacity-100 hover:underline">
+						<a href={ templ.URL(prop.downLoadLink) }>{ prop.title }</a>
+					</span>
+				} else {
+					<span class="text-lg">{ prop.title }</span>
+				}
+			}
+		</div>
+		<!-- 溢出 overflow-x-auton :https://www.tailwindcss.cn/docs/overflow -->
+		<div class="flex content-center justify-between h-10 p-0 w-33 overflow-x-auton">
+			<!-- 扫码阅读，点击可以在屏幕正中显示二维码 -->
+			<div class="p-0 mx-1 my-0">
+				<svg class="static w-10" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><rect x="336" y="336" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect><rect x="272" y="272" width="64" height="64" rx="8" ry="8" fill="currentColor"></rect><rect x="416" y="416" width="64" height="64" rx="8" ry="8" fill="currentColor"></rect><rect x="432" y="272" width="48" height="48" rx="8" ry="8" fill="currentColor"></rect><rect x="272" y="432" width="48" height="48" rx="8" ry="8" fill="currentColor"></rect><rect x="336" y="96" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect><rect x="288" y="48" width="176" height="176" rx="16" ry="16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></rect><rect x="96" y="96" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect><rect x="48" y="48" width="176" height="176" rx="16" ry="16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></rect><rect x="96" y="336" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect><rect x="48" y="288" width="176" height="176" rx="16" ry="16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></rect></svg>
+			</div>
+			<!-- 全屏按钮 -->
+			<div class="p-0 mx-1 my-0">
+				<svg
+					class="static w-10"
+					onClick="onFullScreen"
+					xmlns="http://www.w3.org/2000/svg"
+					xmlns:xlink="http://www.w3.org/1999/xlink"
+					viewBox="0 0 24 24"
+				>
+					<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M16 4h4v4"></path>
+						<path d="M14 10l6-6"></path>
+						<path d="M8 20H4v-4"></path>
+						<path d="M4 20l6-6"></path>
+						<path d="M16 20h4v-4"></path>
+						<path d="M14 14l6 6"></path>
+						<path d="M8 4H4v4"></path>
+						<path d="M4 4l6 6"></path>
+					</g>
+				</svg>
+			</div>
+			<!-- 阅读器设定,点击屏幕中央也可以打开  可自定义方向 -->
+			<div class="w-4 p-0 mx-1 my-0">
+				<svg class="static w-10" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><path d="M262.29 192.31a64 64 0 1 0 57.4 57.4a64.13 64.13 0 0 0-57.4-57.4zM416.39 256a154.34 154.34 0 0 1-1.53 20.79l45.21 35.46a10.81 10.81 0 0 1 2.45 13.75l-42.77 74a10.81 10.81 0 0 1-13.14 4.59l-44.9-18.08a16.11 16.11 0 0 0-15.17 1.75A164.48 164.48 0 0 1 325 400.8a15.94 15.94 0 0 0-8.82 12.14l-6.73 47.89a11.08 11.08 0 0 1-10.68 9.17h-85.54a11.11 11.11 0 0 1-10.69-8.87l-6.72-47.82a16.07 16.07 0 0 0-9-12.22a155.3 155.3 0 0 1-21.46-12.57a16 16 0 0 0-15.11-1.71l-44.89 18.07a10.81 10.81 0 0 1-13.14-4.58l-42.77-74a10.8 10.8 0 0 1 2.45-13.75l38.21-30a16.05 16.05 0 0 0 6-14.08c-.36-4.17-.58-8.33-.58-12.5s.21-8.27.58-12.35a16 16 0 0 0-6.07-13.94l-38.19-30A10.81 10.81 0 0 1 49.48 186l42.77-74a10.81 10.81 0 0 1 13.14-4.59l44.9 18.08a16.11 16.11 0 0 0 15.17-1.75A164.48 164.48 0 0 1 187 111.2a15.94 15.94 0 0 0 8.82-12.14l6.73-47.89A11.08 11.08 0 0 1 213.23 42h85.54a11.11 11.11 0 0 1 10.69 8.87l6.72 47.82a16.07 16.07 0 0 0 9 12.22a155.3 155.3 0 0 1 21.46 12.57a16 16 0 0 0 15.11 1.71l44.89-18.07a10.81 10.81 0 0 1 13.14 4.58l42.77 74a10.8 10.8 0 0 1-2.45 13.75l-38.21 30a16.05 16.05 0 0 0-6.05 14.08c.33 4.14.55 8.3.55 12.47z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></path></svg>
+			</div>
+		</div>
+	</header>
+}
+
+templ Main() {
+	<div>Main</div>
+}
+
+templ Footer(version string) {
+	<footer class="content-center h-12 py-4 space-x-2 text-base text-gray-900 bottom">
+		<span class="text-base">Power by</span>
+		<a href="https://github.com/yumenaka/comi/releases" class="font-semibold text-blue-700 hover:underline">
+			{ 
+      version }
+		</a>
+	</footer>
+}
+
+// BodyContent 定义 BodyHTML
+templ BodyContent(h1, text string) {
+	<div id="app" class="flex flex-col items-center w-full h-full min-h-screen">
+		@Header(HeaderProps{
+			title:           "Comigo v1.0.0",
+			showReturnIcon:  true,
+			setDownLoadLink: false,
+			inShelf:         false,
+			downLoadLink:    "",
+		})
+		@Main()
+		@Footer("Comigo v1.0.0")
 	</div>
 }
 
 // BodyScripts defines JavaScript code.
-
 script BodyScripts() {
 	console.log(
-		"You're using Templ package to generate HTML content!",
-		"Edit this JavaScript code in the `./templates/pages/index.templ` file.",
+		"你正在使用 Templ 包来生成 HTML 内容！",
+		"在 `./templates/pages/index.templ` 文件中编辑这段 JavaScript 代码。",
 	);
 }
