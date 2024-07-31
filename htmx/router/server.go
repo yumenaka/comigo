@@ -4,7 +4,6 @@ import (
 	"context"
 	"embed"
 	"errors"
-	"io/fs"
 	"log"
 	"log/slog"
 	"net/http"
@@ -17,7 +16,6 @@ import (
 	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/htmx/file_server"
 	"github.com/yumenaka/comi/htmx/router/handler"
-	"github.com/yumenaka/comi/util/logger"
 )
 
 //go:embed all:static
@@ -56,19 +54,21 @@ func (t *TemplRender) Instance(name string, data interface{}) render.Render {
 }
 
 // RunServer 运行一个新的 HTTP 服务器。
-func RunServer() error {
+func RunServer() (err error) {
 	// 扫描漫画
 	file_server.StartComigoServer()
 	// 创建一个新的Gin服务器。
 	router := gin.Default()
 	// 为模板引擎定义 HTML 渲染器。
 	router.HTMLRender = &TemplRender{}
+	// 静态文件。
+	router.Static("/static", "./router/static")
 	// 嵌入静态文件。
-	staticFS, err := fs.Sub(static, "static")
-	if err != nil {
-		logger.Infof("%s", err)
-	}
-	router.StaticFS("/static/", http.FS(staticFS))
+	// staticFS, err := fs.Sub(static, "static")
+	// if err != nil {
+	// 	logger.Infof("%s", err)
+	// }
+	// router.StaticFS("/static/", http.FS(staticFS))
 
 	// 处理主页视图
 	router.GET("/", handler.IndexViewHandler)
@@ -78,18 +78,18 @@ func RunServer() error {
 	// 发消息
 	slog.Info("Starting server...", "port", config.Config.Port)
 
-	//是否对外服务
+	// 是否对外服务
 	webHost := ":"
 	if config.Config.DisableLAN {
 		webHost = "localhost:"
 	}
-	//是否启用TLS
+	// 是否启用TLS
 	enableTls := config.Config.CertFile != "" && config.Config.KeyFile != ""
 	server := &http.Server{
 		Addr:         webHost + strconv.Itoa(config.Config.Port),
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
-		Handler:      router, //gin.Engine本身可以作为一个Handler传递到http包,用于启动服务器
+		Handler:      router, // gin.Engine本身可以作为一个Handler传递到http包,用于启动服务器
 	}
 
 	// 监听并启动服务(TLS)

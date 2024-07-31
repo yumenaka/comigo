@@ -19,7 +19,7 @@ templ Layout(title string, metaTags, bodyContent templ.Component) {
 			<link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet"/>
 			<link href="/static/styles.css" rel="stylesheet"/>
 		</head>
-		<body onload={ pages.BodyScripts() }>
+		<body onload={ pages.BodyScripts() }  class="flex flex-col items-center justify-between w-0 w-full h-full min-h-screen p-0 m-0 font-sans">
 			@bodyContent
 			<script src="/static/scripts.js"></script>
 		</body>
