@@ -1,6 +1,7 @@
 package router
 
 import (
+	"context"
 	"embed"
 	"github.com/a-h/templ"
 	"github.com/gin-gonic/gin/render"
