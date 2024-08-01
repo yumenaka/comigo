@@ -6,12 +6,10 @@ import (
 )
 
 func bindURL(router *gin.Engine) {
-	// 处理主页视图
+	// 主页视图
 	router.GET("/", pages.TopPageHandler)
-	// 书架
+	// 书架视图
 	router.GET("/show/:id", pages.ShelfHandler)
-	// 处理漫画视图
+	// 漫画视图
 	router.GET("/read", pages.ReadHandler)
-	// 处理 API
-	router.GET("/api/hello-world", pages.ShowContentAPIHandler)
 }
