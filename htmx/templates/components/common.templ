@@ -19,3 +19,26 @@ script BodyScripts() {
 		"在 `./templates/pages/index.templ` 文件中编辑这段 JavaScript 代码。",
 	);
 }
+
+templ MainLayout(title string, metaTags, bodyContent templ.Component) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+			<title>{ title }</title>
+			@metaTags
+			<link rel="manifest" href="/static/manifest.webmanifest"/>
+			<link rel="apple-touch-icon" href="/static/apple-touch-icon.png"/>
+			<link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon"/>
+			<link rel="icon" href="/static/favicon.png" sizes="any"/>
+			<link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet"/>
+			<link href="/static/styles.css" rel="stylesheet"/>
+		</head>
+		<body onload={ BodyScripts() }  class="flex flex-col items-center justify-between w-0 w-full h-full min-h-screen p-0 m-0 font-sans">
+			@bodyContent
+			<script src="/static/scripts.js"></script>
+		</body>
+	</html>
+}

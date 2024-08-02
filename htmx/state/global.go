@@ -3,6 +3,7 @@ package state
 import (
 	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/entity"
+	"strings"
 )
 
 type GlobalState struct {
@@ -29,4 +30,12 @@ func init() {
 	Global.NowBookID = ""
 	Global.OnlineUserCount = 0
 	Global.BooksList = nil
+}
+
+func GetCloverBackgroundImageUrl(book *entity.BookInfo) string {
+	imageUrl := book.Cover.Url
+	if strings.HasPrefix(book.Cover.Url, "api") {
+		imageUrl = book.Cover.Url + "&resize_width=256&resize_height=360&thumbnail_mode=true"
+	}
+	return imageUrl
 }

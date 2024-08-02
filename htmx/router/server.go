@@ -2,6 +2,7 @@ package router
 
 import (
 	"errors"
+	"github.com/yumenaka/comi/htmx/comigo"
 	"io/fs"
 	"log/slog"
 	"net/http"
@@ -10,17 +11,17 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comi/config"
-	"github.com/yumenaka/comi/htmx/comigo"
 	"github.com/yumenaka/comi/util/logger"
 )
 
 // RunServer 运行一个新的 HTTP 服务器。
 func RunServer() (err error) {
-	// 扫描漫画
-	comigo.StartComigoServer()
+
 	gin.SetMode(gin.ReleaseMode)
 	// 创建一个新的Gin服务器。
 	router := gin.Default()
+	// 扫描漫画
+	comigo.StartComigoServer(router)
 	// 为模板引擎定义 HTML 渲染器。
 	router.HTMLRender = &TemplRender{}
 	// 静态文件。

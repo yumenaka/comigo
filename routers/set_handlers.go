@@ -20,7 +20,7 @@ var protectedAPI *gin.RouterGroup
 // Update	PUT
 // Delete	DELETE
 // 前端需要的 API
-func setWebAPI(engine *gin.Engine) {
+func BindAPI(engine *gin.Engine) {
 	// 路由组,方便管理部分相同的URL
 	api := engine.Group("/api")
 
