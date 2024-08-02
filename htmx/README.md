@@ -10,6 +10,7 @@
 > - `Air`: [https://github.com/air-verse/air](https://github.com/air-verse/air)
 > - `Bun`: [https://github.com/oven-sh/bun](https://github.com/oven-sh/bun)
 > - `golangci-lint`: [https://github.com/golangci/golangci-lint](https://github.com/golangci/golangci-lint)  
+> - `Prettier`: [https://prettier.io/docs/en/index.html](https://prettier.io/docs/en/index.html)
 
 
 要开始您的项目，在终端中运行 **Gowebly** CLI命令：

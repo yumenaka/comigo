@@ -18,7 +18,7 @@ func StartComigoServer(engine *gin.Engine) {
 	//解析命令，扫描文件
 	cmd.StartScan(os.Args)
 	routers.BindAPI(engine)
-	// Admin界面 TODO：用Htmx重写
+	// Admin界面 TODO：用 Htmx 重写
 	resource.EmbedAdmin(engine)
 	//设置临时文件夹
 	config.SetTempDir()

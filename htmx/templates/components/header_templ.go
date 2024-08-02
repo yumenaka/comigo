@@ -14,8 +14,48 @@ type HeaderProps struct {
 	SetDownLoadLink bool
 	InShelf         bool
 	DownLoadLink    string
+	SetTheme        bool
 }
 
+// 网页主题颜色的使用可以帮助你创建一个一致且视觉上吸引人的界面。以下是这些颜色的一般使用指南：
+
+// 1. **primary (主要颜色)**：
+//    - 主要用于品牌标识和主要的互动元素，例如按钮和链接。
+//    - 在整个网站中保持一致，以帮助用户识别和导航。
+
+// 2. **secondary (次要颜色)**：
+//    - 辅助主要颜色，用于次要按钮、链接或背景。
+//    - 可以在一些强调的地方使用，但不应喧宾夺主。
+
+// 3. **accent (强调颜色)**：
+//    - 用于引起注意的重要信息、通知或警示。
+//    - 可以用于图标、标签或其他需要视觉突出的元素。
+
+// 4. **neutral (中性色)**：
+//    - 用于背景、文本或不需要吸引注意力的元素。
+//    - 包括各种灰色调，可以帮助创建层次感和对比度。
+
+// 5. **base-100**：
+//    - 通常指最浅的背景颜色，通常是白色或接近白色的颜色。
+//    - 用于主要的背景颜色，以确保文本和其他内容的可读性。
+
+// ### 实际应用示例
+
+// - **按钮**：
+//   - 主要按钮：使用 primary 颜色
+//   - 次要按钮：使用 secondary 颜色
+//   - 危险操作按钮：使用 accent 颜色
+
+// - **背景和文本**：
+//   - 主背景：使用 base-100 颜色
+//   - 次级背景：使用 neutral 颜色
+//   - 主文本：通常使用黑色或深色
+//   - 次级文本：使用浅灰色
+
+// - **通知和警示**：
+//   - 信息通知：使用 accent 颜色
+
+// 通过一致地使用这些颜色，可以创建一个视觉上和谐、易于导航的用户界面。如果有品牌指南或设计规范，可以依据这些规范进一步调整颜色使用。
 func Header(prop HeaderProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -34,7 +74,17 @@ func Header(prop HeaderProps) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-row justify-between w-full h-12 p-1 border bg-sky-200\"><div class=\"flex flex-row\"><!-- 返回箭头,点击返回上一页 --><div class=\"w-8 pt-1 mx-1 my-0\"><svg class=\"static w-8\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 512 512\"><path fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"32\" d=\"M112 160l-64 64l64 64\"></path><path d=\"M64 224h294c58.76 0 106 49.33 106 108v20\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"32\"></path></svg></div><!-- 服务器设置 --><div onclick=\"window.location.href=&#39;/admin/&#39;\" class=\"w-8 pt-1 mx-1 my-0\"><svg class=\"static w-8\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z\"></path></svg></div><!-- 上传按钮，点击进入上传页面 --><div class=\"w-8 pt-1 mx-1 my-0\"><svg class=\"static w-8\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 512 512\"><path d=\"M320 367.79h76c55 0 100-29.21 100-83.6s-53-81.47-96-83.6c-8.89-85.06-71-136.8-144-136.8c-69 0-113.44 45.79-128 91.2c-60 5.7-112 43.88-112 106.4s54 106.4 120 106.4h56\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"32\"></path> <path fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"32\" d=\"M320 255.79l-64-64l-64 64\"></path> <path fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"32\" d=\"M256 448.21V207.79\"></path></svg></div><!-- 文件重排序 --><div class=\"w-8 pt-1 mx-1 my-0\"><svg class=\"static w-8\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 24 24\"><path d=\"M12 4c4.41 0 8 3.59 8 8s-3.59 8-8 8s-8-3.59-8-8s3.59-8 8-8m0-2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm0 13l-4-4h8z\" fill=\"currentColor\"></path></svg></div></div><!-- 标题--><div class=\"flex flex-col justify-center flex-1 p-0 m-0 font-semibold text-center truncate\"><!-- 标题，快速跳转 or 可下载压缩包 or 只显示 -->")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-row justify-between w-full h-12 p-1 border-b bg-base-200\"><div class=\"flex flex-row\"><!-- 返回箭头,点击返回上一页 --><div class=\"w-8 pt-1 mx-1 my-0\"><svg class=\"static w-8\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 512 512\"><path fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"32\" d=\"M112 160l-64 64l64 64\"></path><path d=\"M64 224h294c58.76 0 106 49.33 106 108v20\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"32\"></path></svg></div><!-- 服务器设置 --><div onclick=\"window.location.href=&#39;/admin/&#39;\" class=\"w-8 pt-1 mx-1 my-0\"><svg class=\"static w-8\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z\"></path></svg></div><!-- 上传按钮，点击进入上传页面 --><div class=\"w-8 pt-1 mx-1 my-0\"><svg class=\"static w-8\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 512 512\"><path d=\"M320 367.79h76c55 0 100-29.21 100-83.6s-53-81.47-96-83.6c-8.89-85.06-71-136.8-144-136.8c-69 0-113.44 45.79-128 91.2c-60 5.7-112 43.88-112 106.4s54 106.4 120 106.4h56\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"32\"></path> <path fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"32\" d=\"M320 255.79l-64-64l-64 64\"></path> <path fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"32\" d=\"M256 448.21V207.79\"></path></svg></div><!-- 文件重排序 --><div class=\"w-8 pt-1 mx-1 my-0\"><svg class=\"static w-8\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 24 24\"><path d=\"M12 4c4.41 0 8 3.59 8 8s-3.59 8-8 8s-8-3.59-8-8s3.59-8 8-8m0-2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm0 13l-4-4h8z\" fill=\"currentColor\"></path></svg></div><!-- 主题选择 推荐 daisyui 示例页面直接F12 --><!-- https://daisyui.com/docs/themes/ --><!-- https://github.com/saadeghi/theme-change --><select")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if true {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" data-choose-theme")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" onchange=\"updateTheme(this.value)\" class=\"bg-secondary text-secondary-content h-10 pl-3 pr-3 border rounded focus:outline-none\"><option value=\"retro\">Retro</option> <option value=\"light\">light</option> <option value=\"dark\">Dark</option> <option value=\"dracula\">Dracula</option> <option value=\"cupcake\">Cupcake</option> <option value=\"cyberpunk\">Cyberpunk</option> <option value=\"valentine\">Valentine</option> <option value=\"aqua\">Aqua</option> <option value=\"coffee\">Coffee</option> <option value=\"winter\">Winter</option> <option value=\"nord\">Nord</option></select><script>\n              function updateTheme(selectedTheme) {\n                document.body.setAttribute('data-theme', selectedTheme);\n              }\n            </script></div><!-- 标题--><div class=\"flex flex-col justify-center flex-1 p-0 m-0 font-semibold text-center truncate\"><!-- 标题，快速跳转 or 可下载压缩包 or 只显示 -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -61,7 +111,7 @@ func Header(prop HeaderProps) templ.Component {
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(prop.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/components/header.templ`, Line: 77, Col: 59}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/components/header.templ`, Line: 138, Col: 59}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -79,7 +129,7 @@ func Header(prop HeaderProps) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(prop.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/components/header.templ`, Line: 80, Col: 53}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/components/header.templ`, Line: 141, Col: 53}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
