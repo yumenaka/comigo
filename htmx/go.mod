@@ -7,7 +7,7 @@ require (
 	github.com/angelofallars/htmx-go v0.5.0
 	github.com/gin-gonic/gin v1.10.0
 	github.com/gowebly/helpers v0.4.0
-	github.com/yumenaka/comi v0.9.10-0.20240802055737-a52b790f8b5f
+	github.com/yumenaka/comi v0.9.10-0.20240802101130-09985e1c70e8
 )
 
 require (

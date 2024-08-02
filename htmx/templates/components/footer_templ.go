@@ -26,14 +26,14 @@ func Footer(version string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<footer class=\"w-full p-0 m-0 footer\"><aside class=\"flex flex-row justify-center w-full h-10 py-2 border hover:space-x-8 footer bg-sky-200 item-center\"><a class=\"text-sm font-semibold text-blue-700 hover:underline\" href=\"https://github.com/yumenaka/comi/releases\" target=\"_blank\">Power by ")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<footer class=\"w-full p-0 m-0 footer\"><aside class=\"flex flex-row justify-center w-full h-10 py-2 border hover:space-x-8 footer bg-sky-200 item-center\"><a class=\"text-sm font-semibold text-blue-700 hover:underline\" href=\"https://comigo.xyz\" target=\"_blank\">Power by Comigo ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(version)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/components/footer.templ`, Line: 7, Col: 22}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/components/footer.templ`, Line: 7, Col: 29}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
