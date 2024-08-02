@@ -17,7 +17,7 @@ templ ShelfPage(s *state.GlobalState) {
 		DownLoadLink:    "",
 	})
 	@ShelfMainArea(s)
-	@components.Footer("Comigo "+ " "+  s.Version)
+	@components.Footer(s.Version)
 }
 
 templ ShelfMainArea(s *state.GlobalState) {

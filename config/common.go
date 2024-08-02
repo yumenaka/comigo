@@ -2,16 +2,15 @@ package config
 
 import (
 	"fmt"
+	"github.com/mitchellh/go-homedir"
+	"github.com/pelletier/go-toml/v2"
+	"github.com/yumenaka/comi/entity"
 	"github.com/yumenaka/comi/util"
 	"github.com/yumenaka/comi/util/logger"
 	"net/http"
 	"os"
 	"path"
 	"strconv"
-
-	"github.com/mitchellh/go-homedir"
-	"github.com/pelletier/go-toml/v2"
-	"github.com/yumenaka/comi/entity"
 )
 
 var (

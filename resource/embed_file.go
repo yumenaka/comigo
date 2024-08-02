@@ -18,9 +18,9 @@ func EmbedResoure(engine *gin.Engine, title string) {
 	//go template 设置网页标题
 	embedTemplate(engine)
 	//vue静态文件 web阅读器主体
-	embedWeb(engine)
+	EmbedWeb(engine)
 	//react静态文件，admin界面
-	embedAdmin(engine)
+	EmbedAdmin(engine)
 }
 
 // 使用go模板，设置网页标题
@@ -50,7 +50,7 @@ var staticAssetFS embed.FS
 //go:embed  web_static/images
 var staticImageFS embed.FS
 
-func embedWeb(engine *gin.Engine) {
+func EmbedWeb(engine *gin.Engine) {
 	//https://stackoverflow.com/questions/66248258/serve-embedded-filesystem-from-root-path-of-url
 	assetsEmbedFS, err := fs.Sub(staticAssetFS, "web_static/assets")
 	if err != nil {
@@ -76,7 +76,7 @@ func embedWeb(engine *gin.Engine) {
 //go:embed  admin_static
 var adminFS embed.FS
 
-func embedAdmin(engine *gin.Engine) {
+func EmbedAdmin(engine *gin.Engine) {
 	adminEmbedFS, errAdminFS := fs.Sub(adminFS, "admin_static")
 	if errAdminFS != nil {
 		logger.Info(errAdminFS)
