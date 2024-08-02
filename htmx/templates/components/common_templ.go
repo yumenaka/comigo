@@ -36,7 +36,7 @@ func MetaTags(keywords, description string) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(keywords)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/components/common.templ`, Line: 6, Col: 41}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/components/common.templ`, Line: 7, Col: 41}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -49,7 +49,7 @@ func MetaTags(keywords, description string) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(description)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/components/common.templ`, Line: 7, Col: 47}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/components/common.templ`, Line: 8, Col: 47}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -77,14 +77,30 @@ func styledTextStyles() templ.CSSClass {
 // BodyScripts defines JavaScript code.
 func BodyScripts() templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_BodyScripts_d732`,
-		Function: `function __templ_BodyScripts_d732(){console.log(
+		Name: `__templ_BodyScripts_fc46`,
+		Function: `function __templ_BodyScripts_fc46(){console.log(
 		"你正在使用 Templ 包来生成 HTML 内容！",
-		"在 ` + "`" + `./templates/pages/index.templ` + "`" + ` 文件中编辑这段 JavaScript 代码。",
+		"在 ` + "`" + `./templates/components/common.templ` + "`" + ` 文件中编辑这段 JavaScript 代码。",
 	);
+    // 为了防止变量泄露到全局作用域，
+    // 这个脚本被包裹在一个立即调用函数表达式（IIFE）中。
+    var element = document.getElementById('FullScreenIcon');
+    if (element) {
+        element.addEventListener('click', function() {
+        	if (!FullScreenHelper.supported()){
+            	alert('Your browser does not support full screen mode.');
+            	return;
+            }
+            if(!FullScreenHelper.state()){
+                FullScreenHelper.request()
+            }else{
+                FullScreenHelper.exit()
+            }
+        });
+    }
 }`,
-		Call:       templ.SafeScript(`__templ_BodyScripts_d732`),
-		CallInline: templ.SafeScriptInline(`__templ_BodyScripts_d732`),
+		Call:       templ.SafeScript(`__templ_BodyScripts_fc46`),
+		CallInline: templ.SafeScriptInline(`__templ_BodyScripts_fc46`),
 	}
 }
 
@@ -113,7 +129,7 @@ func MainLayout(title string, metaTags, bodyContent templ.Component) templ.Compo
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/components/common.templ`, Line: 30, Col: 17}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/components/common.templ`, Line: 48, Col: 17}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -127,7 +143,7 @@ func MainLayout(title string, metaTags, bodyContent templ.Component) templ.Compo
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<link rel=\"manifest\" href=\"/static/manifest.webmanifest\"><link rel=\"apple-touch-icon\" href=\"/static/apple-touch-icon.png\"><link rel=\"shortcut icon\" href=\"/static/favicon.ico\" type=\"image/x-icon\"><link rel=\"icon\" href=\"/static/favicon.png\" sizes=\"any\"><link href=\"https://fonts.googleapis.com/css2?family=Inter&amp;display=swap\" rel=\"stylesheet\"><link href=\"/static/styles.css\" rel=\"stylesheet\"></head>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<link rel=\"manifest\" href=\"/static/manifest.webmanifest\"><link rel=\"apple-touch-icon\" href=\"/static/apple-touch-icon.png\"><link rel=\"shortcut icon\" href=\"/static/favicon.ico\" type=\"image/x-icon\"><link rel=\"icon\" href=\"/static/favicon.png\" sizes=\"any\"><link href=\"https://fonts.googleapis.com/css2?family=Inter&amp;display=swap\" rel=\"stylesheet\"><link href=\"/static/styles.css\" rel=\"stylesheet\"><script src=\"/static/full-screen-helper.min.js\"></script></head>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

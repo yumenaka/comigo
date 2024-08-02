@@ -1,4 +1,5 @@
 package components
+
 // 存放一些公用的全局变量
 
 // MetaTags defines meta tags.
@@ -8,6 +9,7 @@ templ MetaTags(keywords, description string) {
 }
 
 // styledTextStyles 定义组件的 CSS 样式
+
 css styledTextStyles() {
 	color: #02BF87;
 }
@@ -16,8 +18,24 @@ css styledTextStyles() {
 script BodyScripts() {
 	console.log(
 		"你正在使用 Templ 包来生成 HTML 内容！",
-		"在 `./templates/pages/index.templ` 文件中编辑这段 JavaScript 代码。",
+		"在 `./templates/components/common.templ` 文件中编辑这段 JavaScript 代码。",
 	);
+    // 为了防止变量泄露到全局作用域，
+    // 这个脚本被包裹在一个立即调用函数表达式（IIFE）中。
+    var element = document.getElementById('FullScreenIcon');
+    if (element) {
+        element.addEventListener('click', function() {
+        	if (!FullScreenHelper.supported()){
+            	alert('Your browser does not support full screen mode.');
+            	return;
+            }
+            if(!FullScreenHelper.state()){
+                FullScreenHelper.request()
+            }else{
+                FullScreenHelper.exit()
+            }
+        });
+    }
 }
 
 templ MainLayout(title string, metaTags, bodyContent templ.Component) {
@@ -35,8 +53,9 @@ templ MainLayout(title string, metaTags, bodyContent templ.Component) {
 			<link rel="icon" href="/static/favicon.png" sizes="any"/>
 			<link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet"/>
 			<link href="/static/styles.css" rel="stylesheet"/>
+			<script src="/static/full-screen-helper.min.js"></script>
 		</head>
-		<body onload={ BodyScripts() }  class="flex flex-col items-center justify-between w-0 w-full h-full min-h-screen p-0 m-0 font-sans">
+		<body onload={ BodyScripts() } class="flex flex-col items-center justify-between w-0 w-full h-full min-h-screen p-0 m-0 font-sans">
 			@bodyContent
 			<script src="/static/scripts.js"></script>
 		</body>
