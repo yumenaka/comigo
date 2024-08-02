@@ -1,21 +1,55 @@
 package pages
-import "github.com/yumenaka/comi/htmx/templates/components"
-import "github.com/yumenaka/comi/htmx/state"
-import "strconv"
 
-templ Main(s *state.GlobalState) {
-	<div class="flex flex-col justify-center min-h-64">Main Contents x{strconv.Itoa(s.GetAllBookNum())}</div>
-}
+import (
+	"github.com/yumenaka/comi/entity"
+	"github.com/yumenaka/comi/htmx/state"
+	"github.com/yumenaka/comi/htmx/templates/components"
+	"strconv"
+)
 
-// ScrollPage 定义 BodyHTML
-templ Bookshelf(s *state.GlobalState) {
+// ShelfPage 书架页面
+templ ShelfPage(s *state.GlobalState) {
 	@components.Header(components.HeaderProps{
-		Title:           "Comigo v1.0",
+		Title:           "Comigo" +" "+ s.Version,
 		ShowReturnIcon:  true,
 		SetDownLoadLink: false,
 		InShelf:         false,
 		DownLoadLink:    "",
 	})
-	@Main(s)
-	@components.Footer("Comigo v1.0")
+	@ShelfMainArea(s)
+	@components.Footer("Comigo "+ " "+  s.Version)
+}
+
+templ ShelfMainArea(s *state.GlobalState) {
+	<div class="flex flex-row flex-wrap justify-center min-h-48 ">
+		for _, book := range s.BooksList.BookInfos {
+			<!-- 如果把链接的 target 属性设置为 "_blank"，该链接会在新窗口中打开。 -->
+			<a href={ templ.URL("/scroll/" + book.BookID) } target={ getTarget(book) } class={ backgroundImage(state.GetCloverBackgroundImageUrl(&book)) , "relative w-32 mx-4 my-4 bg-gray-200 bg-top bg-cover rounded shadow-xl h-44 hover:shadow-2xl ring-1 ring-gray-400 hover:ring hover:ring-blue-500 overflow-hidden" }>
+				<!-- 书籍类型图标 -->
+				<!-- <SvgBookIcon :book_info="book_info"></SvgBookIcon> -->
+				<!-- 图书封面 -->
+				<div
+					class="absolute inset-x-0 bottom-0 text-sm font-semibold text-center text-black bg-gray-100 border-blue-800 rounded-b h-1/4 bg-opacity-80"
+				>
+					<span class="absolute inset-x-0 top-0 p-1 align-middle">
+						{ book.Title }
+					</span>
+				</div>
+			</a>
+		}
+		if s.GetAllBookNum() == 0 {
+			<div class="flex flex-col justify-center min-h-64">No Book , { strconv.Itoa(s.GetAllBookNum()) }</div>
+		}
+	</div>
+}
+
+func getTarget(book entity.BookInfo) string {
+	if book.Type == entity.TypeVideo || book.Type == entity.TypeAudio || book.Type == entity.TypeUnknownFile {
+		return "_blank"
+	}
+	return "_self"
+}
+
+css backgroundImage(imageUrl string) {
+	background-image: { "url(" + imageUrl + ")" };
 }

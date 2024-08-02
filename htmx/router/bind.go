@@ -7,9 +7,9 @@ import (
 
 func bindURL(router *gin.Engine) {
 	// 主页视图
-	router.GET("/", pages.TopPageHandler)
+	router.GET("/", pages.ShelfHandler)
 	// 书架视图
-	router.GET("/show/:id", pages.ShelfHandler)
+	router.GET("/shelf/:id", pages.ShelfHandler)
 	// 漫画视图
-	router.GET("/read", pages.ReadHandler)
+	router.GET("/scroll/:id", pages.ScrollHandler)
 }

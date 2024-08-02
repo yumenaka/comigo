@@ -1,4 +1,4 @@
-package pages
+package components
 
 import (
 	"errors"

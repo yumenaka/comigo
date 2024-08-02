@@ -11,8 +11,8 @@ import (
 	"github.com/yumenaka/comi/util/logger"
 )
 
-// TopPageHandler handles a view for the index page.
-func ReadHandler(c *gin.Context) {
+// ScrollHandler 阅读界面（先做卷轴模式）
+func ScrollHandler(c *gin.Context) {
 	// 书籍排列的方式，默认name
 	//sortBy := c.DefaultQuery("sort_by", "default")
 	// 如果传了maxDepth这个参数
@@ -32,7 +32,7 @@ func ReadHandler(c *gin.Context) {
 	scrollPage := ScrollPage(&state.Global)
 
 	// 为首页定义模板布局。
-	indexTemplate := MainLayout(
+	indexTemplate := components.MainLayout(
 		"Comigo "+state.Global.Version, // define title text
 		metaTags,                       // define meta tags
 		scrollPage,                     // define body content

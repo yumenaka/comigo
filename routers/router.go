@@ -45,7 +45,7 @@ func StartWebServer() {
 	//嵌入静态文件到二进制文件
 	resource.EmbedResoure(engine, locale.GetString("HTML_TITLE")+config.Version)
 	//设置各种API
-	setWebAPI(engine)
+	BindAPI(engine)
 	//显示QRCode
 	showQRCode()
 	//监听并启动web服务
