@@ -6,10 +6,50 @@ type HeaderProps struct {
 	SetDownLoadLink bool
 	InShelf         bool
 	DownLoadLink    string
+	SetTheme        bool
 }
 
+// 网页主题颜色的使用可以帮助你创建一个一致且视觉上吸引人的界面。以下是这些颜色的一般使用指南：
+
+// 1. **primary (主要颜色)**：
+//    - 主要用于品牌标识和主要的互动元素，例如按钮和链接。
+//    - 在整个网站中保持一致，以帮助用户识别和导航。
+
+// 2. **secondary (次要颜色)**：
+//    - 辅助主要颜色，用于次要按钮、链接或背景。
+//    - 可以在一些强调的地方使用，但不应喧宾夺主。
+
+// 3. **accent (强调颜色)**：
+//    - 用于引起注意的重要信息、通知或警示。
+//    - 可以用于图标、标签或其他需要视觉突出的元素。
+
+// 4. **neutral (中性色)**：
+//    - 用于背景、文本或不需要吸引注意力的元素。
+//    - 包括各种灰色调，可以帮助创建层次感和对比度。
+
+// 5. **base-100**：
+//    - 通常指最浅的背景颜色，通常是白色或接近白色的颜色。
+//    - 用于主要的背景颜色，以确保文本和其他内容的可读性。
+
+// ### 实际应用示例
+
+// - **按钮**：
+//   - 主要按钮：使用 primary 颜色
+//   - 次要按钮：使用 secondary 颜色
+//   - 危险操作按钮：使用 accent 颜色
+
+// - **背景和文本**：
+//   - 主背景：使用 base-100 颜色
+//   - 次级背景：使用 neutral 颜色
+//   - 主文本：通常使用黑色或深色
+//   - 次级文本：使用浅灰色
+
+// - **通知和警示**：
+//   - 信息通知：使用 accent 颜色
+
+// 通过一致地使用这些颜色，可以创建一个视觉上和谐、易于导航的用户界面。如果有品牌指南或设计规范，可以依据这些规范进一步调整颜色使用。
 templ Header(prop HeaderProps) {
-	<div class="flex flex-row justify-between w-full h-12 p-1 border bg-sky-200">
+	<div class="flex flex-row justify-between w-full h-12 p-1 border-b bg-base-200">
 		<div class="flex flex-row">
 			<!-- 返回箭头,点击返回上一页 -->
 			<div class="w-8 pt-1 mx-1 my-0">
@@ -65,6 +105,27 @@ templ Header(prop HeaderProps) {
 			<div class="w-8 pt-1 mx-1 my-0">
 				<svg class="static w-8" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24"><path d="M12 4c4.41 0 8 3.59 8 8s-3.59 8-8 8s-8-3.59-8-8s3.59-8 8-8m0-2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm0 13l-4-4h8z" fill="currentColor"></path></svg>
 			</div>
+			<!-- 主题选择 推荐 daisyui 示例页面直接F12 -->
+			<!-- https://daisyui.com/docs/themes/ -->
+			<!-- https://github.com/saadeghi/theme-change -->
+			<select data-choose-theme?={ true } onchange="updateTheme(this.value)" class="bg-secondary text-secondary-content h-10 pl-3 pr-3 border rounded focus:outline-none">
+			    <option value="retro">Retro</option>
+				<option value="light">light</option>
+				<option value="dark">Dark</option>
+                <option value="dracula">Dracula</option>
+				<option value="cupcake">Cupcake</option>
+				<option value="cyberpunk">Cyberpunk</option>
+				<option value="valentine">Valentine</option>
+				<option value="aqua">Aqua</option>
+				<option value="coffee">Coffee</option>
+				<option value="winter">Winter</option>
+				<option value="nord">Nord</option>
+			</select>
+			<script>
+              function updateTheme(selectedTheme) {
+                document.body.setAttribute('data-theme', selectedTheme);
+              }
+            </script>
 		</div>
 		<!-- 标题-->
 		<div class="flex flex-col justify-center flex-1 p-0 m-0 font-semibold text-center truncate">
@@ -88,7 +149,7 @@ templ Header(prop HeaderProps) {
 				<svg class="static w-8" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><rect x="336" y="336" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect><rect x="272" y="272" width="64" height="64" rx="8" ry="8" fill="currentColor"></rect><rect x="416" y="416" width="64" height="64" rx="8" ry="8" fill="currentColor"></rect><rect x="432" y="272" width="48" height="48" rx="8" ry="8" fill="currentColor"></rect><rect x="272" y="432" width="48" height="48" rx="8" ry="8" fill="currentColor"></rect><rect x="336" y="96" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect><rect x="288" y="48" width="176" height="176" rx="16" ry="16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></rect><rect x="96" y="96" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect><rect x="48" y="48" width="176" height="176" rx="16" ry="16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></rect><rect x="96" y="336" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect><rect x="48" y="288" width="176" height="176" rx="16" ry="16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></rect></svg>
 			</div>
 			<!-- 全屏按钮 -->
-			<div id="FullScreenIcon" class="w-8 pt-1 mx-1 my-0" >
+			<div id="FullScreenIcon" class="w-8 pt-1 mx-1 my-0">
 				<svg
 					class="static w-8"
 					xmlns="http://www.w3.org/2000/svg"

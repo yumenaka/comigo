@@ -63,28 +63,11 @@ func MetaTags(keywords, description string) templ.Component {
 	})
 }
 
-// styledTextStyles 定义组件的 CSS 样式
-func styledTextStyles() templ.CSSClass {
-	templ_7745c5c3_CSSBuilder := templruntime.GetBuilder()
-	templ_7745c5c3_CSSBuilder.WriteString(`color:#02BF87;`)
-	templ_7745c5c3_CSSID := templ.CSSID(`styledTextStyles`, templ_7745c5c3_CSSBuilder.String())
-	return templ.ComponentCSSClass{
-		ID:    templ_7745c5c3_CSSID,
-		Class: templ.SafeCSS(`.` + templ_7745c5c3_CSSID + `{` + templ_7745c5c3_CSSBuilder.String() + `}`),
-	}
-}
-
 // BodyScripts defines JavaScript code.
 func BodyScripts() templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_BodyScripts_fc46`,
-		Function: `function __templ_BodyScripts_fc46(){console.log(
-		"你正在使用 Templ 包来生成 HTML 内容！",
-		"在 ` + "`" + `./templates/components/common.templ` + "`" + ` 文件中编辑这段 JavaScript 代码。",
-	);
-    // 为了防止变量泄露到全局作用域，
-    // 这个脚本被包裹在一个立即调用函数表达式（IIFE）中。
-    var element = document.getElementById('FullScreenIcon');
+		Name: `__templ_BodyScripts_6fa6`,
+		Function: `function __templ_BodyScripts_6fa6(){var element = document.getElementById('FullScreenIcon');
     if (element) {
         element.addEventListener('click', function() {
         	if (!FullScreenHelper.supported()){
@@ -99,8 +82,8 @@ func BodyScripts() templ.ComponentScript {
         });
     }
 }`,
-		Call:       templ.SafeScript(`__templ_BodyScripts_fc46`),
-		CallInline: templ.SafeScriptInline(`__templ_BodyScripts_fc46`),
+		Call:       templ.SafeScript(`__templ_BodyScripts_6fa6`),
+		CallInline: templ.SafeScriptInline(`__templ_BodyScripts_6fa6`),
 	}
 }
 
@@ -129,7 +112,7 @@ func MainLayout(title string, metaTags, bodyContent templ.Component) templ.Compo
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/components/common.templ`, Line: 48, Col: 17}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/components/common.templ`, Line: 36, Col: 17}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -151,7 +134,7 @@ func MainLayout(title string, metaTags, bodyContent templ.Component) templ.Compo
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<body onload=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<body data-theme=\"retro\" onload=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

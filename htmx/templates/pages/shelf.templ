@@ -15,16 +15,17 @@ templ ShelfPage(s *state.GlobalState) {
 		SetDownLoadLink: false,
 		InShelf:         false,
 		DownLoadLink:    "",
+		SetTheme:        true,
 	})
 	@ShelfMainArea(s)
 	@components.Footer(s.Version)
 }
 
 templ ShelfMainArea(s *state.GlobalState) {
-	<div class="flex flex-row flex-wrap justify-center min-h-48 ">
+	<div class="flex flex-row flex-1  flex-wrap justify-center content-start min-h-48 text-base-content bg-base-100">
 		for _, book := range s.BooksList.BookInfos {
 			<!-- 如果把链接的 target 属性设置为 "_blank"，该链接会在新窗口中打开。 -->
-			<a href={ templ.URL("/scroll/" + book.BookID) } target={ getTarget(book) } class={ backgroundImage(state.GetCloverBackgroundImageUrl(&book)) , "relative w-32 mx-4 my-4 bg-gray-200 bg-top bg-cover rounded shadow-xl h-44 hover:shadow-2xl ring-1 ring-gray-400 hover:ring hover:ring-blue-500 overflow-hidden" }>
+			<a href={ templ.URL("/scroll/" + book.BookID) } target={ getTarget(book) } class={ backgroundImage(state.GetCloverBackgroundImageUrl(&book)) , "relative w-32 mx-4 my-4 bg-top bg-cover rounded shadow-xl h-44 hover:shadow-2xl ring-1 ring-gray-400 hover:ring hover:ring-blue-500 overflow-hidden" }>
 				<!-- 书籍类型图标 -->
 				<!-- <SvgBookIcon :book_info="book_info"></SvgBookIcon> -->
 				<!-- 图书封面 -->

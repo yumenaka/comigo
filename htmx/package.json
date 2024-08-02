@@ -13,10 +13,11 @@
   "dependencies": {
     "@tailwindcss/forms": "latest",
     "@tailwindcss/typography": "latest",
-    "tailwindcss": "latest",
-    "daisyui": "latest",
     "alpinejs": "latest",
-    "htmx.org": "latest"
+    "daisyui": "latest",
+    "htmx.org": "latest",
+    "tailwindcss": "latest",
+    "theme-change": "^2.5.0"
   },
   "devDependencies": {
     "@parcel/transformer-sass": "latest",
