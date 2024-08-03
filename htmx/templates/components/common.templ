@@ -9,6 +9,7 @@ templ MetaTags(keywords, description string) {
 }
 
 // BodyScripts defines JavaScript code.
+
 script BodyScripts() {
     var element = document.getElementById('FullScreenIcon');
     if (element) {
@@ -28,7 +29,7 @@ script BodyScripts() {
 
 templ MainLayout(title string, metaTags, bodyContent templ.Component) {
 	<!DOCTYPE html>
-	<html  lang="en">
+	<html lang="en">
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -41,11 +42,15 @@ templ MainLayout(title string, metaTags, bodyContent templ.Component) {
 			<link rel="icon" href="/static/favicon.png" sizes="any"/>
 			<link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet"/>
 			<link href="/static/styles.css" rel="stylesheet"/>
-			<script src="/static/full-screen-helper.min.js"></script>
 		</head>
-		<body data-theme="retro" onload={ BodyScripts() } class="flex flex-col items-center justify-between w-0 w-full h-full min-h-screen p-0 m-0 font-sans">
+		<!-- x-bind: Alpine.js的语法，声明全局主题 theme -->
+		<!-- $persist 可以存储原始值以及数组和对象。本地存储，默认的key是 _x_变量名 -->
+		<!-- ！！！当变量的类型发生变化时，必须手动清除 localStorage，否则相应数值将无法正确更新。！！！ -->
+		<!-- 详细用法参见： https://alpinejs.dev/plugins/persist -->
+		<body x-data="{ theme: $persist('retro') }" x-bind:data-theme="theme" onload={ BodyScripts() } class="flex flex-col items-center justify-between w-0 w-full h-full min-h-screen p-0 m-0 font-sans">
 			@bodyContent
 			<script src="/static/scripts.js"></script>
+			<script src="/static/full-screen-helper.min.js"></script>
 		</body>
 	</html>
 }

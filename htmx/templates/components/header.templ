@@ -108,11 +108,13 @@ templ Header(prop HeaderProps) {
 			<!-- 主题选择 推荐 daisyui 示例页面直接F12 -->
 			<!-- https://daisyui.com/docs/themes/ -->
 			<!-- https://github.com/saadeghi/theme-change -->
-			<select data-choose-theme?={ true } onchange="updateTheme(this.value)" class="bg-secondary text-secondary-content h-10 pl-3 pr-3 border rounded focus:outline-none">
-			    <option value="retro">Retro</option>
-				<option value="light">light</option>
+			<!-- https://alpinejs.dev/directives/on -->
+			<!-- https://alpinejs.dev/directives/model -->
+			<select x-model="theme" x-on:change="theme = $event.target.value" class="h-10 pl-3 pr-3 border rounded bg-secondary text-secondary-content focus:outline-none">
+				<option value="retro">Retro</option>
+				<option value="light">Light</option>
 				<option value="dark">Dark</option>
-                <option value="dracula">Dracula</option>
+				<option value="dracula">Dracula</option>
 				<option value="cupcake">Cupcake</option>
 				<option value="cyberpunk">Cyberpunk</option>
 				<option value="valentine">Valentine</option>
