@@ -17,6 +17,7 @@
     "alpinejs": "latest",
     "daisyui": "latest",
     "htmx.org": "latest",
+    "i18next": "^23.12.2",
     "tailwindcss": "latest",
     "theme-change": "^2.5.0"
   },

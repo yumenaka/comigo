@@ -9,6 +9,7 @@
 > - `daisyUI`: [https://daisyui.com/components/](https://daisyui.com/components/)
 > - `Air`: [https://github.com/air-verse/air](https://github.com/air-verse/air)
 > - `Bun`: [https://github.com/oven-sh/bun](https://github.com/oven-sh/bun)
+> - `i18next`: [https://www.i18next.com/](https://www.i18next.com/)
 > - `golangci-lint`: [https://github.com/golangci/golangci-lint](https://github.com/golangci/golangci-lint)  
 > - `Prettier`: [https://prettier.io/docs/en/index.html](https://prettier.io/docs/en/index.html)
 
