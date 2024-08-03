@@ -2,7 +2,6 @@ import 'htmx.org'
 import Alpine from 'alpinejs'
 import persist from '@alpinejs/persist'
 import i18next from 'i18next';
-import resourcesToBackend from 'i18next-resources-to-backend';
 import LanguageDetector from 'i18next-browser-languagedetector';
 // Add Alpine instance to window object.
 window.Alpine = Alpine

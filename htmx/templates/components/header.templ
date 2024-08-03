@@ -110,24 +110,19 @@ templ Header(prop HeaderProps) {
 			<!-- https://github.com/saadeghi/theme-change -->
 			<!-- https://alpinejs.dev/directives/on -->
 			<!-- https://alpinejs.dev/directives/model -->
-			<select x-model="theme" x-on:change="theme = $event.target.value" class="h-10 pl-3 pr-3 border rounded bg-secondary text-secondary-content focus:outline-none">
-				<option value="retro">Retro</option>
-				<option value="light">Light</option>
-				<option value="dark">Dark</option>
-				<option value="dracula">Dracula</option>
-				<option value="cupcake">Cupcake</option>
-				<option value="cyberpunk">Cyberpunk</option>
-				<option value="valentine">Valentine</option>
-				<option value="aqua">Aqua</option>
-				<option value="coffee">Coffee</option>
-				<option value="winter">Winter</option>
-				<option value="nord">Nord</option>
+			<select x-model="theme" x-on:change="theme = $event.target.value" class="h-10 pl-3 pr-3 border rounded bg-accent text-accent-content focus:outline-none">
+				<option class="bg-base-100" value="retro">Retro</option>
+				<option class="bg-base-100" value="light">Light</option>
+				<option class="bg-base-100" value="dark">Dark</option>
+				<option class="bg-base-100" value="dracula">Dracula</option>
+				<option class="bg-base-100" value="cupcake">Cupcake</option>
+				<option class="bg-base-100" value="cyberpunk">Cyberpunk</option>
+				<option class="bg-base-100" value="valentine">Valentine</option>
+				<option class="bg-base-100" value="aqua">Aqua</option>
+				<option class="bg-base-100" value="coffee">Coffee</option>
+				<option class="bg-base-100" value="winter">Winter</option>
+				<option class="bg-base-100" value="nord">Nord</option>
 			</select>
-			<script>
-              function updateTheme(selectedTheme) {
-                document.body.setAttribute('data-theme', selectedTheme);
-              }
-            </script>
 		</div>
 		<!-- 标题-->
 		<div class="flex flex-col justify-center flex-1 p-0 m-0 font-semibold text-center truncate">
@@ -171,9 +166,9 @@ templ Header(prop HeaderProps) {
 				</svg>
 			</div>
 			<!-- 阅读器设定,点击屏幕中央也可以打开  可自定义方向 -->
-			<div class="w-8 pt-1 mx-1 my-0">
+			<label for="my-drawer" class="w-8 pt-1 mx-1 my-0 drawer-button">
 				<svg class="static w-8" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><path d="M262.29 192.31a64 64 0 1 0 57.4 57.4a64.13 64.13 0 0 0-57.4-57.4zM416.39 256a154.34 154.34 0 0 1-1.53 20.79l45.21 35.46a10.81 10.81 0 0 1 2.45 13.75l-42.77 74a10.81 10.81 0 0 1-13.14 4.59l-44.9-18.08a16.11 16.11 0 0 0-15.17 1.75A164.48 164.48 0 0 1 325 400.8a15.94 15.94 0 0 0-8.82 12.14l-6.73 47.89a11.08 11.08 0 0 1-10.68 9.17h-85.54a11.11 11.11 0 0 1-10.69-8.87l-6.72-47.82a16.07 16.07 0 0 0-9-12.22a155.3 155.3 0 0 1-21.46-12.57a16 16 0 0 0-15.11-1.71l-44.89 18.07a10.81 10.81 0 0 1-13.14-4.58l-42.77-74a10.8 10.8 0 0 1 2.45-13.75l38.21-30a16.05 16.05 0 0 0 6-14.08c-.36-4.17-.58-8.33-.58-12.5s.21-8.27.58-12.35a16 16 0 0 0-6.07-13.94l-38.19-30A10.81 10.81 0 0 1 49.48 186l42.77-74a10.81 10.81 0 0 1 13.14-4.59l44.9 18.08a16.11 16.11 0 0 0 15.17-1.75A164.48 164.48 0 0 1 187 111.2a15.94 15.94 0 0 0 8.82-12.14l6.73-47.89A11.08 11.08 0 0 1 213.23 42h85.54a11.11 11.11 0 0 1 10.69 8.87l6.72 47.82a16.07 16.07 0 0 0 9 12.22a155.3 155.3 0 0 1 21.46 12.57a16 16 0 0 0 15.11 1.71l44.89-18.07a10.81 10.81 0 0 1 13.14 4.58l42.77 74a10.8 10.8 0 0 1-2.45 13.75l-38.21 30a16.05 16.05 0 0 0-6.05 14.08c.33 4.14.55 8.3.55 12.47z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></path></svg>
-			</div>
+			</label>
 		</div>
 	</div>
 }
