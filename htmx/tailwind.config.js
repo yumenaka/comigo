@@ -220,6 +220,7 @@ module.exports = {
                 "accent-content": "#000000",
                 "neutral": "#2F1B05",
                 "base-100": "#212121",
+                "base-content": "#ff7557",
                 "info": "#2563eb",
                 "success": "#16a34a",
                 "warning": "#d97706",

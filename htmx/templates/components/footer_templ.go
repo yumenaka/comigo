@@ -26,7 +26,7 @@ func Footer(version string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<footer class=\"bg-base-100 text-base-content w-full p-0 m-0 footer border-t\"><aside class=\"flex flex-row justify-center w-full h-10 py-2 h footer item-center\"><a class=\"text-sm font-semibold text-blue-700 hover:underline\" href=\"https://comigo.xyz\" target=\"_blank\">Power by Comigo ")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<footer class=\"bg-base-100 text-base-content w-full p-0 m-0 footer border-t border-slate-400\"><aside class=\"flex flex-row justify-center w-full h-10 py-2 h footer item-center\"><a class=\"text-sm font-semibold text-blue-700 hover:underline\" href=\"https://comigo.xyz\" target=\"_blank\">Power by Comigo ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
