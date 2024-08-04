@@ -21,6 +21,7 @@ templ ShelfPage(s *state.GlobalState) {
 			@ShelfMainArea(s)
 			@components.Footer(s.Version)
 			@components.Drawer(s)
+			@components.QRCode(s)
 }
 
 templ ShelfMainArea(s *state.GlobalState) {
