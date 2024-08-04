@@ -55,3 +55,6 @@ lerna-debug.log*
 *.test
 *.tmp
 *.out
+
+*.js.map
+*.css.map

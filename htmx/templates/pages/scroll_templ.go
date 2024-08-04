@@ -72,7 +72,7 @@ func ScrollPage(s *state.GlobalState) templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"drawer drawer-end\"><input id=\"my-drawer\" type=\"checkbox\" class=\"drawer-toggle\"><div class=\"drawer-content\"><!-- Page content here   --><!--  <label for=\"my-drawer\" class=\"btn btn-primary drawer-button\">Open drawer</label>  -->")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"drawer drawer-end\"><input id=\"my-drawer\" type=\"checkbox\" class=\"drawer-toggle\"><div class=\"flex flex-col items-center justify-between w-full h-full min-h-screen p-0 m-0 font-sans drawer-content\"><!-- Page content here   --><!--  <label for=\"my-drawer\" class=\"btn btn-primary drawer-button\">Open drawer</label>  -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
