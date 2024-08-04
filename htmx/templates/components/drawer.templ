@@ -1,0 +1,44 @@
+package components
+
+import "github.com/yumenaka/comi/htmx/state"
+
+templ Drawer(s *state.GlobalState) {
+<!-- drawer component -->
+<div id="drawer-right" class="fixed top-0 right-0 z-40 h-screen p-4 overflow-y-auto transition-transform translate-x-full w-80 bg-base-200 text-base-content" tabindex="-1" aria-labelledby="drawer-right-label">
+    <h5 x-text="i18next.t('test')" id="drawer-right-label" class="inline-flex items-center mb-4 text-base font-semibold text-gray-500 dark:text-gray-400"><svg class="w-4 h-4 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+    <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
+  </svg>Right drawer</h5>
+   <button type="button" data-drawer-hide="drawer-right" aria-controls="drawer-right" class="font-bold bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 absolute top-2.5 end-2.5 inline-flex items-center justify-center dark:hover:bg-gray-600 dark:hover:text-white" >
+      X
+   </button>
+    <div class="grid grid-cols-2 gap-4">
+      		<!-- drawer component -->
+      		<!-- https://github.com/saadeghi/theme-change -->
+      		<!-- https://alpinejs.dev/directives/on -->
+      		<!-- https://alpinejs.dev/directives/model -->
+      		<select x-model="theme" x-on:change="theme = $event.target.value;console.log(theme);" class="h-10 pl-3 pr-3 m-2 border rounded bg-base-100 text-accent-content focus:outline-none">
+      			<option class="bg-base-100" value="retro">Retro</option>
+      			<option class="bg-base-100" value="light">Light</option>
+      			<option class="bg-base-100" value="dark">Dark</option>
+      			<!-- <option class="bg-base-100" value="dracula">Dracula</option> -->
+      			<option class="bg-base-100" value="cupcake">Cupcake</option>
+      			<!-- <option class="bg-base-100" value="cyberpunk">Cyberpunk</option> -->
+      			<!-- <option class="bg-base-100" value="valentine">Valentine</option> -->
+      			<!-- <option class="bg-base-100" value="aqua">Aqua</option>-->
+      			<!-- <option class="bg-base-100" value="coffee">Coffee</option>-->
+      			<option class="bg-base-100" value="winter">Winter</option>
+      			<option class="bg-base-100" value="nord">Nord</option>
+      		</select>
+   </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+}

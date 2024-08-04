@@ -1,25 +1,28 @@
 ## Starting your project
 
 > ❗️ 下面是开发必须的工具和库，你可以在这里找到它们的文档和更多信息:
-> - `Templ（模板引擎）`: [https://templ.guide/](https://templ.guide/)
+>
+> - `Templ（模板引擎）`: [https://templ.guide](https://templ.guide/)
+> - `Flowbite（组件库）`: [https://flowbite.com](https://flowbite.com/docs/getting-started/quickstart/)
+> - `Preline（组件库）`: [https://preline.co/docs/index.html](https://preline.co/docs/index.html)
 > - `Gin`: [https://gin-gonic.com/zh-cn/docs/examples/](https://gin-gonic.com/zh-cn/docs/examples/)
-> - `htmx`: [https://htmx.org/examples/](https://htmx.org/examples/)
-> - `Alpine.js`: [https://alpinejs.dev/](https://alpinejs.dev/)
+> - `htmx`: [https://htmx.org/examples](https://htmx.org/examples/)
+> - `Alpine.js`: [https://alpinejs.dev](https://alpinejs.dev/)
 > - `Tailwind CSS`: [https://tailwindcss.com/docs/flex](https://tailwindcss.com/docs/flex)
-> - `daisyUI`: [https://daisyui.com/components/](https://daisyui.com/components/)
 > - `Air`: [https://github.com/air-verse/air](https://github.com/air-verse/air)
 > - `Bun`: [https://github.com/oven-sh/bun](https://github.com/oven-sh/bun)
-> - `i18next`: [https://www.i18next.com/](https://www.i18next.com/)
-> - `golangci-lint`: [https://github.com/golangci/golangci-lint](https://github.com/golangci/golangci-lint)  
+> - `i18next`: [https://www.i18next.com](https://www.i18next.com/)
+> - `golangci-lint`: [https://github.com/golangci/golangci-lint](https://github.com/golangci/golangci-lint)
 > - `Prettier`: [https://prettier.io/docs/en/index.html](https://prettier.io/docs/en/index.html)
-
 
 要开始您的项目，在终端中运行 **Gowebly** CLI命令：
 
 ```console
 gowebly run
 ```
+
 或者：
+
 ```console
 air
 ```
@@ -84,8 +87,6 @@ Tools:
 └── README.md
 ```
 
-
-
 ## Developing your project
 
 The backend part is located in the `*.go` files in your project folder.
@@ -112,4 +113,3 @@ To deploy your project to a remote server, follow these steps:
 The [**Gowebly**](https://github.com/gowebly/gowebly) CLI is a next-generation CLI tool that makes it easy to create amazing web applications with **Go** on the backend, using **htmx**, **hyperscript** or **Alpine.js**, and the most popular **CSS frameworks** on the frontend.
 
 It's highly recommended to start exploring the Gowebly CLI with short articles "[**What is Gowebly CLI?**](https://gowebly.org/getting-started)" and "[**How does it work?**](https://gowebly.org/getting-started/how-does-it-work)" to understand the basic principle and the main components built into the **Gowebly** CLI.
-

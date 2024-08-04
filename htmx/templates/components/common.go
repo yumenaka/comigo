@@ -21,7 +21,6 @@ func ShowContentAPIHandler(c *gin.Context) {
 		}
 		return
 	}
-
 	// 编写 HTML内容。
 	_, err := c.Writer.Write([]byte("<p>🎉 Yes, <strong>htmx</strong> is ready to use! (<code>GET /api/hello-world</code>)</p>"))
 	if err != nil {

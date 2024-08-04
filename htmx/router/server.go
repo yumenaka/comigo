@@ -3,7 +3,6 @@ package router
 import (
 	"errors"
 	"github.com/yumenaka/comi/htmx/comigo"
-	"io/fs"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -14,24 +13,38 @@ import (
 	"github.com/yumenaka/comi/util/logger"
 )
 
+func noCache() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
+		c.Header("Pragma", "no-cache")
+		c.Header("Expires", "0")
+		c.Header("Last-Modified", time.Now().UTC().Format(http.TimeFormat))
+		c.Next()
+	}
+}
+
 // RunServer 运行一个新的 HTTP 服务器。
 func RunServer() (err error) {
 
 	gin.SetMode(gin.ReleaseMode)
 	// 创建一个新的Gin服务器。
 	router := gin.Default()
+
+	// 使用 noCache 中间件
+	router.Use(noCache())
+
 	// 扫描漫画
 	comigo.StartComigoServer(router)
 	// 为模板引擎定义 HTML 渲染器。
 	router.HTMLRender = &TemplRender{}
 	// 静态文件。
-	//router.Static("/static", "./router/static")
-	// 嵌入静态文件。
-	staticFS, err := fs.Sub(static, "static")
-	if err != nil {
-		logger.Infof("%s", err)
-	}
-	router.StaticFS("/static/", http.FS(staticFS))
+	router.Static("/static", "./router/static")
+	//// 嵌入静态文件。
+	//staticFS, err := fs.Sub(static, "static")
+	//if err != nil {
+	//	logger.Infof("%s", err)
+	//}
+	//router.StaticFS("/static/", http.FS(staticFS))
 	// 设置路由
 	bindURL(router)
 
