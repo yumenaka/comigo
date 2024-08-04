@@ -13,10 +13,12 @@ import (
 
 // ScrollHandler 阅读界面（先做卷轴模式）
 func ScrollHandler(c *gin.Context) {
-	// 书籍排列的方式，默认name
-	//sortBy := c.DefaultQuery("sort_by", "default")
-	// 如果传了maxDepth这个参数
-	var err error
+	bookID := c.Param("id")
+	book, err := entity.GetBookByID(bookID, "default")
+	if err != nil {
+		logger.Infof("GetBookByID: %v", err)
+	}
+	// TODO: 如果没有找到书籍，返回 HTTP 404 错误信息，或建议跳转上传页面。
 	state.Global.BooksList, err = entity.TopOfShelfInfo("name")
 	if err != nil {
 		logger.Infof("TopOfShelfInfo: %v", err)
@@ -29,7 +31,7 @@ func ScrollHandler(c *gin.Context) {
 	)
 
 	// 定义模板主体内容。
-	scrollPage := ScrollPage(&state.Global)
+	scrollPage := ScrollPage(&state.Global, book)
 
 	// 为首页定义模板布局。
 	indexTemplate := components.MainLayout(

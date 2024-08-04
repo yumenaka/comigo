@@ -1,40 +1,42 @@
 package pages
 
 import (
+	"github.com/yumenaka/comi/entity"
 	"github.com/yumenaka/comi/htmx/state"
 	"github.com/yumenaka/comi/htmx/templates/components"
 	"strconv"
 )
 
-templ ScrollMainArea(s *state.GlobalState) {
-	<div class="flex flex-col justify-center min-h-64">Main Contents x{ strconv.Itoa(s.GetAllBookNum()) }</div>
+func getImageAlt(key int) string {
+	return strconv.Itoa(key)
+}
+
+func getImageUrl(url string) string {
+	return "/" + url
+}
+
+templ ScrollMainArea(s *state.GlobalState, book *entity.Book) {
+	<div
+		class="flex flex-col items-center justify-center flex-1 w-full bg-base-100 text-base-content"
+		:class="(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') && 'bg-base-300'"
+	>
+		for _, image := range book.Pages.Images {
+			<img class="m-2 max-w-[800px] rounded shadow-lg" src={ getImageUrl(image.Url) }/>
+		}
+	</div>
 }
 
 // ScrollPage 定义 BodyHTML
-templ ScrollPage(s *state.GlobalState) {
-	<div class="drawer drawer-end">
-		<input id="my-drawer" type="checkbox" class="drawer-toggle"/>
-		<div class="flex flex-col items-center justify-between w-full h-full min-h-screen p-0 m-0 font-sans drawer-content">
-			<!-- Page content here   -->
-			<!--  <label for="my-drawer" class="btn btn-primary drawer-button">Open drawer</label>  -->
-			@components.Header(components.HeaderProps{
-				Title:           "Comigo " + s.Version,
-				ShowReturnIcon:  true,
-				SetDownLoadLink: false,
-				InShelf:         false,
-				DownLoadLink:    "",
-				SetTheme:        true,
-			})
-			@ScrollMainArea(s)
-			@components.Footer("Comigo " + s.Version)
-		</div>
-		<div class="drawer-side">
-			<label for="my-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
-			<ul class="min-h-full p-4 menu bg-base-100 text-base-content w-80">
-				<!-- Sidebar content here -->
-				<li><a>Sidebar Item 1</a></li>
-				<li><a>Sidebar Item 2</a></li>
-			</ul>
-		</div>
-	</div>
+templ ScrollPage(s *state.GlobalState, book *entity.Book) {
+	@components.Header(components.HeaderProps{
+		Title:           book.Title,
+		ShowReturnIcon:  true,
+		SetDownLoadLink: false,
+		InShelf:         false,
+		DownLoadLink:    "",
+		SetTheme:        true,
+	})
+	@ScrollMainArea(s, book)
+	@components.Footer(s.Version)
+	@components.Drawer(s)
 }

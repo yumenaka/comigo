@@ -80,7 +80,7 @@ func ShelfMainArea(s *state.GlobalState) templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!-- 有的颜色模板只有base-100 ，没有颜色更深或更的 base-200 base-300，这样写是为了防止没定义颜色 --><div class=\"bg-base-100 text-base-content flex flex-row flex-wrap content-start justify-center flex-1 min-h-48\" :class=\"(theme.toString() ===&#39;light&#39;||theme.toString() ===&#39;dark&#39;||theme.toString() ===&#39;retro&#39;||theme.toString() ===&#39;lofi&#39;||theme.toString() ===&#39;nord&#39;) &amp;&amp; &#39;bg-base-300&#39;\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!-- 有的颜色模板只有base-100 ，没有颜色更深或更的 base-200 base-300，这样写是为了防止没定义颜色 --><div class=\"flex flex-row flex-wrap content-start justify-center flex-1 bg-base-100 text-base-content min-h-48\" :class=\"(theme.toString() ===&#39;light&#39;||theme.toString() ===&#39;dark&#39;||theme.toString() ===&#39;retro&#39;||theme.toString() ===&#39;lofi&#39;||theme.toString() ===&#39;nord&#39;) &amp;&amp; &#39;bg-base-300&#39;\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
