@@ -1364,8 +1364,8 @@ input:checked + .toggle-bg {
   max-width: 16rem;
 }
 
-.max-w-\[800px\] {
-  max-width: 800px;
+.max-w-full {
+  max-width: 100%;
 }
 
 .max-w-md {
@@ -2768,6 +2768,12 @@ body {
 
   .md\:p-5 {
     padding: 1.25rem;
+  }
+}
+
+@media (width >= 1024px) {
+  .lg\:max-w-\[800px\] {
+    max-width: 800px;
   }
 }
 
