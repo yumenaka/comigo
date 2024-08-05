@@ -47,7 +47,6 @@ type HeaderProps struct {
 // - **通知和警示**：
 //   - 信息通知：使用 accent 颜色
 
-
 //PrimaryColor：主题颜色。app的主要颜色，即整个屏幕和所有控件的主要颜色，首选颜色。
 
 //SecondaryColor：提示性颜色。这颜色一般比PrimaryColor亮一些或暗一些，取决于白天模式还是黑暗模式。一般用于提示相关动作或信息，提示性颜色。
@@ -59,7 +58,7 @@ type HeaderProps struct {
 
 // 通过一致地使用这些颜色，可以创建一个视觉上和谐、易于导航的用户界面。如果有品牌指南或设计规范，可以依据这些规范进一步调整颜色使用。
 templ Header(prop HeaderProps) {
-	<div class="bg-base-100 text-base-content flex flex-row justify-between w-full h-12 p-1 border-b border-slate-400">
+	<div class="flex flex-row justify-between w-full h-12 p-1 border-b bg-base-100 text-base-content border-slate-400">
 		<div class="flex flex-row">
 			<!-- 返回箭头,点击返回上一页 -->
 			<div class="w-8 pt-1 mx-1 my-0">
@@ -133,8 +132,8 @@ templ Header(prop HeaderProps) {
 		</div>
 		<!-- 溢出 overflow-x-auto :https://www.tailwindcss.cn/docs/overflow -->
 		<div class="flex justify-between p-0 m-0 max-w-64">
-			<!-- 点击可以在屏幕正中显示二维码 -->
-			<div data-modal-target="default-modal" data-modal-toggle="default-modal" class="w-8 pt-1 mx-1 my-0">
+			<!-- 点击显示二维码 -->
+			<div data-modal-target="qrcode-modal" data-modal-toggle="qrcode-modal" class="w-8 pt-1 mx-1 my-0">
 				<svg class="static w-8" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><rect x="336" y="336" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect><rect x="272" y="272" width="64" height="64" rx="8" ry="8" fill="currentColor"></rect><rect x="416" y="416" width="64" height="64" rx="8" ry="8" fill="currentColor"></rect><rect x="432" y="272" width="48" height="48" rx="8" ry="8" fill="currentColor"></rect><rect x="272" y="432" width="48" height="48" rx="8" ry="8" fill="currentColor"></rect><rect x="336" y="96" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect><rect x="288" y="48" width="176" height="176" rx="16" ry="16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></rect><rect x="96" y="96" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect><rect x="48" y="48" width="176" height="176" rx="16" ry="16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></rect><rect x="96" y="336" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect><rect x="48" y="288" width="176" height="176" rx="16" ry="16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></rect></svg>
 			</div>
 			<!-- 全屏按钮 -->

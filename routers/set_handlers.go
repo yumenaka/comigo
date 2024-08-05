@@ -27,7 +27,7 @@ func BindAPI(engine *gin.Engine) {
 	// 无需认证，不受保护的路由
 	publicRoutes := func(rg *gin.RouterGroup) {
 		rg.GET("/qrcode.png", handlers.GetQrcode)
-		rg.GET("/server_info", handlers.GetServerInfoPublic)
+		rg.GET("/server_info", handlers.GetServerInfoHandler)
 		websocket.WsDebug = &config.Config.Debug
 		rg.GET("/ws", websocket.WsHandler)
 	}
@@ -60,7 +60,7 @@ func BindAPI(engine *gin.Engine) {
 	//直接下载原始文件
 	protectedAPI.GET("/raw/:book_id/:file_name", handlers.GetRawFile)
 	//登录后才能查看的服务器状态，包括标题、机器状态等
-	protectedAPI.GET("/server_info_all", handlers.GetServerInfo)
+	protectedAPI.GET("/server_info_all", handlers.GetAllServerInfoHandler)
 	//获取书架信息，不包含每页信息
 	protectedAPI.GET("/book_infos", handlers.GetBookInfos)
 	//获取书架信息2.0
