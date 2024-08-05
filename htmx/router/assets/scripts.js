@@ -8,6 +8,8 @@ import 'tw-colors'
 // 将 Alpine 实例添加到窗口对象中。
 window.Alpine = Alpine
 
+
+
 // Alpine Persist 插件，用于持久化存储。默认存储到 localStorage。
 // 详细用法参见： https://alpinejs.dev/plugins/persist
 Alpine.plugin(persist)
@@ -58,6 +60,17 @@ i18next
   })
 
 window.i18next = i18next; // 使i18next在全局作用域中可用
+
+import screenfull from 'screenfull';
+document.getElementById('FullScreenIcon').addEventListener('click', () => {
+    if (screenfull.isEnabled) {
+        screenfull.toggle();
+    } else {
+        // Ignore or do something else
+        i18next.t('not_support_fullscreen');
+    }
+});
+
 
 // Start Alpine.
 Alpine.start()

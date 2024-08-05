@@ -19,6 +19,7 @@
     "htmx.org": "latest",
     "i18next": "^23.12.2",
     "i18next-browser-languagedetector": "^8.0.0",
+    "screenfull": "^6.0.2",
     "tailwindcss": "latest",
     "tw-colors": "^3.3.1"
   },

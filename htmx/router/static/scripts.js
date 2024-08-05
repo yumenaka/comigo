@@ -18937,6 +18937,135 @@ var $957fcd3881abe7da$exports = {};
 $957fcd3881abe7da$exports = JSON.parse('{"test":"\u5B9F\u9A13","debugMode":"Debug Mode","ReaderSettings":"\u30EA\u30FC\u30C0\u30FC\u8A2D\u5B9A","scroll_mode":"\u30B9\u30AF\u30ED\u30FC\u30EB","flip_mode":"\u30DA\u30FC\u30B8\u3081\u304F\u308A","singlePageWidth":"1\u30DA\u30FC\u30B8\u6F2B\u753B\u6A2A\u5E45:","doublePageWidth":"\u898B\u958B\u304D\u30DA\u30FC\u30B8\u306E\u5E45:","width_usePercent":"\u6A2A\u5E45:\u30D1\u30FC\u30BB\u30F3\u30C8","width_useFixedValue":"\u6A2A\u5E45:\u56FA\u5B9A\u5024","showHeader":"\u30BF\u30A4\u30C8\u30EB\u8868\u793A","showPageNum":"\u30DA\u30FC\u30B8\u6570\u8868\u793A","setBackColor":"\u80CC\u666F\u8272\u3092\u6307\u5B9A\u3059\u308B:","readingProgressBar":"\u30D7\u30ED\u30B0\u30EC\u30B9\u30D0\u30FC","savePageNum":"\u8AAD\u66F8\u9032\u6357\u306E\u4FDD\u5B58","rightScreenToNext":"\u5DE6\u53F3\u306E\u5411\u304D:\u30DE\u30F3\u30AC","leftScreenToNext":"\u5DE6\u53F3\u306E\u5411\u304D:Comic","startSketchMode":"\u30AF\u30ED\u30C3\u30AD\u30FC\u958B\u59CB","stopSketchMode":"\u30AF\u30ED\u30C3\u30AD\u30FC\u7D42\u4E86","hintFirstPage":"\u6700\u521D\u306E\u30DA\u30FC\u30B8\u3067\u3001\u9032\u3081\u308B\u3053\u3068\u306F\u3067\u304D\u307E\u305B\u3093","hintLastPage":"\u6700\u5F8C\u306E\u30DA\u30FC\u30B8\u3067\u3059","now_is":"\u4ECA:","second":"\u79D2","minute":"\u5206","total_is":"\u5408\u8A08:","interval":"\u9593\u9694:","page":"\u30DA\u30FC\u30B8","totalTime":"\u5408\u8A08\u6642\u9593:","hour":"\u6642\u9593","pageTurningSeconds":"\u30DA\u30FC\u30B8\u3092\u3081\u304F\u308B\u79D2\u6570:","startSketchMessage":"\u30AF\u30ED\u30C3\u30AD\u30FC\u304C\u59CB\u307E\u308A\u307E\u3057\u305F\u3001\u826F\u3044\u4E00\u65E5\u3092\u3002","goodjob_and_byebye":"\u304A\u75B2\u308C\u69D8\u3067\u3057\u305F\u3001\u30D0\u30A4\u30D0\u30A4\u3002","autoDoublePage":"\u30DA\u30FC\u30B8\u5408\u4F75(beta)","gray_image":"\u30E2\u30CE\u30AF\u30ED\u5316","image_width_limit":"\u30B5\u30A4\u30BA\uFF08\u5E45\uFF09\u3092\u5236\u9650","auto_crop":"\u4F59\u767D\u81EA\u52D5\u30C8\u30EA\u30DF\u30F3\u30B0","max_width":"\u6700\u5927\u5E45:","energy_threshold":"\u30A8\u30CD\u30EB\u30AE\u30FC\u95BE\u5024\uFF1A","back-to-top":"\u30DA\u30FC\u30B8\u306E\u30C8\u30C3\u30D7\u3078\u623B\u308B","raw_resolution":"\u5143\u306E\u89E3\u50CF\u5EA6","reset_all_settings":" \u521D\u671F\u8A2D\u5B9A","do_you_reset_all_settings":"\u521D\u671F\u8A2D\u5B9A\u306B\u623B\u3059\u304B\uFF1F","original_image":"\u5143\u306E\u89E3\u50CF\u5EA6","setInterfaceColor":"UI\u30AB\u30E9\u30FC:","show_book_titles":"\u672C\u306E\u30BF\u30A4\u30C8\u30EB\u3092\u8868\u793A\u3059\u308B","switch_to_scrolling_mode":"\u30B9\u30AF\u30ED\u30FC\u30EB\u30E2\u30FC\u30C9\u3078","switch_to_flip_mode":"\u3081\u304F\u308A\u30E2\u30FC\u30C9\u3078","DownloadSampleConfigFile":"\u8A2D\u5B9A\u30D5\u30A1\u30A4\u30EB\u306E\u30C0\u30A6\u30F3\u30ED\u30FC\u30C9","select-language":"\u8A00\u8A9E\u3092\u9078\u629E\u3059\u308B","scan_qrcode":"QR\u30B3\u30FC\u30C9\uFF1A","sort_by_filename":"\u30D5\u30A1\u30A4\u30EB\u540D(a-z)","sort_by_filesize":"\u30D5\u30A1\u30A4\u30EB\u30B5\u30A4\u30BA(\u5927\u304D\u3044->\u5C0F\u3055\u3044)","sort_by_modify_time":"\u66F4\u65B0\u65E5\u6642\uFF08\u65B0\u3057\u3044->\u53E4\u3044\uFF09","sort_reverse":"\uFF08\u9006\uFF09","fullscreen":"\u30D5\u30EB\u30B9\u30AF\u30EA\u30FC\u30F3","sort_by_default":"\u5727\u7E2E\u9806\u5E8F","sync_page":"\u30EA\u30E2\u30FC\u30C8\u30DA\u30FC\u30B8\u540C\u671F","success_fullScreen":"\u30D5\u30EB\u30B9\u30AF\u30EA\u30FC\u30F3\u6210\u529F","not_support_fullscreen":"\u3053\u306E\u30D6\u30E9\u30A6\u30B6\u306F\u30D5\u30EB\u30B9\u30AF\u30EA\u30FC\u30F3\u306B\u5BFE\u5FDC\u3057\u3066\u3044\u307E\u305B\u3093","exit_fullScreen":"\u30D5\u30EB\u30B9\u30AF\u30EA\u30FC\u30F3\u3092\u7D42\u4E86","auto_hide_toolbar":"\u30C4\u30FC\u30EB\u30D0\u30FC\u81EA\u52D5\u975E\u8868\u793A","found_read_history":"\u8AAD\u66F8\u8A18\u9332\u304C\u898B\u3064\u304B\u308A\u307E\u3057\u305F","from_interrupt":"\u9014\u4E2D\u304B\u3089","starting_from_beginning":"\u6700\u521D\u304B\u3089","successfully_loaded_reading_progress":"\u8AAD\u66F8\u9032\u6357\u306E\u8AAD\u307F\u8FBC\u307F\u306B\u6210\u529F\u3057\u307E\u3057\u305F","starting_from_beginning_hint":"\u6700\u521D\u306E\u30DA\u30FC\u30B8\u304B\u3089\u8AAD\u307F\u8FBC\u3080","load_from_interrupt":"XX\u30DA\u30FC\u30B8\u304B\u3089\u8AAD\u307F\u8FBC\u307F\u3092\u958B\u59CB\u3057\u307E\u3059\u304B\uFF1F","load_all_pages":"\u5168\u3066\u306E\u30DA\u30FC\u30B8\u3092\u8AAD\u307F\u8FBC\u3080","re_sort_page":"\u30DA\u30FC\u30B8\u4E26\u3079\u66FF\u3048","re_sort_book":"\u672C\u306E\u4E26\u3073\u66FF\u3048","no_book_found_hint":"\u672C\u304C\u898B\u3064\u304B\u308A\u307E\u305B\u3093\u3002\u30D5\u30A1\u30A4\u30EB\u3092\u30A2\u30C3\u30D7\u30ED\u30FC\u30C9\u3057\u3066\u307F\u3066\u306F\u3044\u304B\u304C\u3067\u3057\u3087\u3046\u304B\uFF1F","scanned_hint":"XX\u518A\u898B\u3064\u304B\u308A\u307E\u3057\u305F\u3001\u89B3\u306B\u884C\u304F\u304B?","refresh_page":"\u30DA\u30FC\u30B8\u3092\u66F4\u65B0\u3059\u308B","drop_to_upload":"\u30D5\u30A1\u30A4\u30EB\u3092\u30AF\u30EA\u30C3\u30AF\u307E\u305F\u306F\u3053\u306E\u9818\u57DF\u306B\u30C9\u30E9\u30C3\u30B0\u3057\u3066\u30A2\u30C3\u30D7\u30ED\u30FC\u30C9\u3057\u307E\u3059","uploaded_folder_hint":"\u30D5\u30A1\u30A4\u30EB\u306F\u5B9F\u884C\u30C7\u30A3\u30EC\u30AF\u30C8\u30EA\u306E\u4E0B\u306EComigoUpload\u30D5\u30A9\u30EB\u30C0\u306B\u30A2\u30C3\u30D7\u30ED\u30FC\u30C9\u3055\u308C\u307E\u3059","DownloadWindowsRegFile":"REG\u30D5\u30A1\u30A4\u30EB\u30C0\u30A6\u30F3\u30ED\u30FC\u30C9","number_of_online_books":"\u30AA\u30F3\u30E9\u30A4\u30F3\u8535\u66F8\u6570\uFF1A","back_to_bookshelf":"\u672C\u68DA\u753B\u9762\u306B\u623B\u308B","no_support_upload_file":"\u3044\u3089\u3063\u3057\u3083\u3044\u307E\u3059\u304C\u3001\u30D5\u30A1\u30A4\u30EB\u30A2\u30C3\u30D7\u30ED\u30FC\u30C9\u6A5F\u80FD\u306F\u7BA1\u7406\u8005\u306B\u3088\u308AOFF\u306B\u3055\u308C\u3066\u3044\u307E\u3059","please_enable_upload":"\u30B5\u30FC\u30D0\u30FC\u306E\u30A2\u30C3\u30D7\u30ED\u30FC\u30C9\u6A5F\u80FD\u3092\u6709\u52B9\u306B\u3057\u3066\u304F\u3060\u3055\u3044","simplify_book_titles":"\u30BF\u30A4\u30C8\u30EB\u306E\u7C21\u7565\u5316","DoublePageMode":"\u30C0\u30D6\u30EB\u30DA\u30FC\u30B8","SinglePageMode":"\u30B7\u30F3\u30B0\u30EB\u30DA\u30FC\u30B8","marginOnScrollMode":"\u30DA\u30FC\u30B8 \u30AE\u30E3\u30C3\u30D7:","login_success_hint":"\u30ED\u30B0\u30A4\u30F3\u6210\u529F\u3001\u524D\u30DA\u30FC\u30B8\u306B\u623B\u308B","server_setting":"comigo \u30B5\u30FC\u30D0\u30FC\u8A2D\u5B9A","logout":"\u30ED\u30B0\u30A2\u30A6\u30C8","sort_by_filename_reverse":"\u30D5\u30A1\u30A4\u30EB\u540D(z-a)","sort_by_modify_time_reverse":"\u66F4\u65B0\u65E5\u6642\uFF08\u53E4\u3044->\u65B0\u3057\u3044\uFF09","sort_by_filesize_reverse":"\u30D5\u30A1\u30A4\u30EB\u30B5\u30A4\u30BA(\u5C0F\u3055\u3044->\u5927\u304D\u3044)","author":"\u4F5C\u8005:{0}","allpagenum":"\u7DCF\u30DA\u30FC\u30B8\u6570:{0}","filesize":"\u30D5\u30A1\u30A4\u30EB\u30B5\u30A4\u30BA:{0}","childbookhint":"\u30D5\u30A9\u30EB\u30C0\u30FC\u306B\u306F{0}\u518A\u306E\u672C\u304C\u5165\u3063\u3066\u3044\u308B","server_config":"\u30B5\u30FC\u30D0\u30FC\u8A2D\u5B9A","upload_file":"\u30A2\u30C3\u30D7\u30ED\u30FC\u30C9","FlipOddEvenPageHint":"If the cross-page content doesn\'t match, try clicking to fix it","resort_file":"\u30D5\u30A1\u30A4\u30EB\u4E26\u3073\u66FF\u3048","Flip_odd_even_page":"\u30DA\u30FC\u30B8\u9593\u30DE\u30C3\u30C1\u30F3\u30B0\u306E\u5909\u66F4","back_button":"\u623B\u308B\u30DC\u30BF\u30F3","qrcode_hint":"\u30AF\u30EA\u30C3\u30AF\u3057\u3066QR\u30B3\u30FC\u30C9\u3092\u8868\u793A\u3059\u308B","full_screen_hint":"\u30D5\u30EB\u30B9\u30AF\u30EA\u30FC\u30F3\u30DC\u30BF\u30F3","epub_info":"ePub \u60C5\u5831","pdf_hint_message":"\u7D14\u7C8B\u306A\u753B\u50CFPDF\u306B\u5BFE\u5FDC\u3057\u3066\u3044\u307E\u3059\u3002\u3082\u3057\u8AAD\u307F\u8FBC\u307F\u304C\u9045\u304B\u3063\u305F\u308A\u3001\u30A8\u30E9\u30FC\u304C\u767A\u751F\u3057\u305F\u5834\u5408\u306F\u3001\u4EE5\u4E0B\u3092\u8A66\u3057\u3066\u307F\u3066\u304F\u3060\u3055\u3044\uFF1A","original_pdf_link":"PDF\u30D5\u30A1\u30A4\u30EB\u306E\u30EA\u30F3\u30AF","to_infinite_dropdown_mode":"\u7121\u9650\u30C9\u30ED\u30C3\u30D7\u30C0\u30A6\u30F3","to_pagination_mode":"\u30DA\u30FC\u30B8\u30F3\u30B0\u30E2\u30FC\u30C9","infinite_dropdown":"\u7121\u9650\u30C9\u30ED\u30C3\u30D7\u30C0\u30A6\u30F3","pagination_mode":"\u30DA\u30FC\u30B8\u30F3\u30B0\u30E2\u30FC\u30C9"}');
 
 
+/* eslint-disable promise/prefer-await-to-then */ const $fe9db8f8165fa827$var$methodMap = [
+    [
+        "requestFullscreen",
+        "exitFullscreen",
+        "fullscreenElement",
+        "fullscreenEnabled",
+        "fullscreenchange",
+        "fullscreenerror"
+    ],
+    // New WebKit
+    [
+        "webkitRequestFullscreen",
+        "webkitExitFullscreen",
+        "webkitFullscreenElement",
+        "webkitFullscreenEnabled",
+        "webkitfullscreenchange",
+        "webkitfullscreenerror"
+    ],
+    // Old WebKit
+    [
+        "webkitRequestFullScreen",
+        "webkitCancelFullScreen",
+        "webkitCurrentFullScreenElement",
+        "webkitCancelFullScreen",
+        "webkitfullscreenchange",
+        "webkitfullscreenerror"
+    ],
+    [
+        "mozRequestFullScreen",
+        "mozCancelFullScreen",
+        "mozFullScreenElement",
+        "mozFullScreenEnabled",
+        "mozfullscreenchange",
+        "mozfullscreenerror"
+    ],
+    [
+        "msRequestFullscreen",
+        "msExitFullscreen",
+        "msFullscreenElement",
+        "msFullscreenEnabled",
+        "MSFullscreenChange",
+        "MSFullscreenError"
+    ]
+];
+const $fe9db8f8165fa827$var$nativeAPI = (()=>{
+    if (typeof document === "undefined") return false;
+    const unprefixedMethods = $fe9db8f8165fa827$var$methodMap[0];
+    const returnValue = {};
+    for (const methodList of $fe9db8f8165fa827$var$methodMap){
+        const exitFullscreenMethod = methodList?.[1];
+        if (exitFullscreenMethod in document) {
+            for (const [index, method] of methodList.entries())returnValue[unprefixedMethods[index]] = method;
+            return returnValue;
+        }
+    }
+    return false;
+})();
+const $fe9db8f8165fa827$var$eventNameMap = {
+    change: $fe9db8f8165fa827$var$nativeAPI.fullscreenchange,
+    error: $fe9db8f8165fa827$var$nativeAPI.fullscreenerror
+};
+// eslint-disable-next-line import/no-mutable-exports
+let $fe9db8f8165fa827$var$screenfull = {
+    // eslint-disable-next-line default-param-last
+    request (element = document.documentElement, options) {
+        return new Promise((resolve, reject)=>{
+            const onFullScreenEntered = ()=>{
+                $fe9db8f8165fa827$var$screenfull.off("change", onFullScreenEntered);
+                resolve();
+            };
+            $fe9db8f8165fa827$var$screenfull.on("change", onFullScreenEntered);
+            const returnPromise = element[$fe9db8f8165fa827$var$nativeAPI.requestFullscreen](options);
+            if (returnPromise instanceof Promise) returnPromise.then(onFullScreenEntered).catch(reject);
+        });
+    },
+    exit () {
+        return new Promise((resolve, reject)=>{
+            if (!$fe9db8f8165fa827$var$screenfull.isFullscreen) {
+                resolve();
+                return;
+            }
+            const onFullScreenExit = ()=>{
+                $fe9db8f8165fa827$var$screenfull.off("change", onFullScreenExit);
+                resolve();
+            };
+            $fe9db8f8165fa827$var$screenfull.on("change", onFullScreenExit);
+            const returnPromise = document[$fe9db8f8165fa827$var$nativeAPI.exitFullscreen]();
+            if (returnPromise instanceof Promise) returnPromise.then(onFullScreenExit).catch(reject);
+        });
+    },
+    toggle (element, options) {
+        return $fe9db8f8165fa827$var$screenfull.isFullscreen ? $fe9db8f8165fa827$var$screenfull.exit() : $fe9db8f8165fa827$var$screenfull.request(element, options);
+    },
+    onchange (callback) {
+        $fe9db8f8165fa827$var$screenfull.on("change", callback);
+    },
+    onerror (callback) {
+        $fe9db8f8165fa827$var$screenfull.on("error", callback);
+    },
+    on (event, callback) {
+        const eventName = $fe9db8f8165fa827$var$eventNameMap[event];
+        if (eventName) document.addEventListener(eventName, callback, false);
+    },
+    off (event, callback) {
+        const eventName = $fe9db8f8165fa827$var$eventNameMap[event];
+        if (eventName) document.removeEventListener(eventName, callback, false);
+    },
+    raw: $fe9db8f8165fa827$var$nativeAPI
+};
+Object.defineProperties($fe9db8f8165fa827$var$screenfull, {
+    isFullscreen: {
+        get: ()=>Boolean(document[$fe9db8f8165fa827$var$nativeAPI.fullscreenElement])
+    },
+    element: {
+        enumerable: true,
+        get: ()=>document[$fe9db8f8165fa827$var$nativeAPI.fullscreenElement] ?? undefined
+    },
+    isEnabled: {
+        enumerable: true,
+        // Coerce to boolean in case of old WebKit.
+        get: ()=>Boolean(document[$fe9db8f8165fa827$var$nativeAPI.fullscreenEnabled])
+    }
+});
+if (!$fe9db8f8165fa827$var$nativeAPI) $fe9db8f8165fa827$var$screenfull = {
+    isEnabled: false
+};
+var $fe9db8f8165fa827$export$2e2bcd8739ae039 = $fe9db8f8165fa827$var$screenfull;
+
+
 // 将 Alpine 实例添加到窗口对象中。
 window.Alpine = (0, $8c83eaf28779ff46$export$2e2bcd8739ae039);
 // Alpine Persist 插件，用于持久化存储。默认存储到 localStorage。
@@ -18990,6 +19119,11 @@ window.Alpine = (0, $8c83eaf28779ff46$export$2e2bcd8739ae039);
 // });
 });
 window.i18next = (0, $1bac384020b50752$export$2e2bcd8739ae039); // 使i18next在全局作用域中可用
+document.getElementById("FullScreenIcon").addEventListener("click", ()=>{
+    if ((0, $fe9db8f8165fa827$export$2e2bcd8739ae039).isEnabled) (0, $fe9db8f8165fa827$export$2e2bcd8739ae039).toggle();
+    else // Ignore or do something else
+    (0, $1bac384020b50752$export$2e2bcd8739ae039).t("not_support_fullscreen");
+});
 // Start Alpine.
 (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).start();
 

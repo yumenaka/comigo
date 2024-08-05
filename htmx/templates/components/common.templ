@@ -50,7 +50,6 @@ templ MainLayout(title string, metaTags, bodyContent templ.Component) {
 		<body x-data="{ theme: $persist('retro') }" x-bind:data-theme="theme" onload={ BodyScripts() } class="flex flex-col items-center justify-between w-0 w-full h-full min-h-screen p-0 m-0 font-sans">
 			@bodyContent
 			<script src="/static/scripts.js"></script>
-			<script src="/static/full-screen-helper.min.js"></script>
 		</body>
 	</html>
 }
