@@ -46,7 +46,7 @@ func QRCode(s *state.GlobalState) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" id=\"qrcode-modal\" tabindex=\"-1\" aria-hidden=\"true\" class=\"hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full\"><!-- Modal content --><img class=\"relative w-64 h-64 p-4 pt-1 mx-1 my-0\" x-data=\"{ qrcodeSrc: &#39;&#39; }\" x-init=\"qrcodeSrc = window.location.origin +&#39;/api/qrcode.png?qrcode_str=&#39;+ encodeURIComponent(window.location.origin.replace(window.location.hostname,serverHost))\" :src=\"qrcodeSrc\" data-modal-target=\"qrcode-modal\" data-modal-toggle=\"qrcode-modal\"></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" id=\"qrcode-modal\" tabindex=\"-1\" aria-hidden=\"true\" class=\"hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full\"><!-- Modal content --><div class=\"relative w-64 h-64 p-1 m-1\" x-data=\"{ qrcodeSrc: &#39;&#39; }\" x-init=\"qrcodeSrc = window.location.origin +&#39;/api/qrcode.png?qrcode_str=&#39;+ encodeURIComponent(window.location.toString().replace(window.location.hostname,serverHost))\"><img class=\"w-64 h-64\" :src=\"qrcodeSrc\"></img> <a :href=\"window.location.toString().replace(window.location.hostname,serverHost)\" target=\"_blank\"><div class=\"min-w-64 p-1 text-center text-white text-xs font-semibold\" x-text=\"window.location.toString().replace(window.location.hostname,serverHost)\"></div></a></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

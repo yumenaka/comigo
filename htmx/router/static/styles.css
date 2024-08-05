@@ -1127,6 +1127,10 @@ input:checked + .toggle-bg {
   margin: 0;
 }
 
+.m-1 {
+  margin: .25rem;
+}
+
 .m-2 {
   margin: .5rem;
 }
@@ -1326,6 +1330,10 @@ input:checked + .toggle-bg {
 
 .w-full {
   width: 100%;
+}
+
+.min-w-64 {
+  min-width: 16rem;
 }
 
 .max-w-4xl {
@@ -1802,6 +1810,11 @@ input:checked + .toggle-bg {
 .text-sm {
   font-size: .875rem;
   line-height: 1.25rem;
+}
+
+.text-xs {
+  font-size: .75rem;
+  line-height: 1rem;
 }
 
 .font-bold {
