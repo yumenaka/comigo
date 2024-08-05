@@ -3,6 +3,7 @@ package state
 import (
 	"github.com/yumenaka/comi/config"
 	"github.com/yumenaka/comi/entity"
+	"github.com/yumenaka/comi/util"
 	"strings"
 )
 
@@ -12,6 +13,7 @@ type GlobalState struct {
 	NowBookID       string
 	OnlineUserCount int
 	BooksList       *entity.BookInfoList
+	ServerStatus    *util.ServerStatus
 }
 
 // GetAllBookNum 获取所有书籍数量
@@ -30,6 +32,7 @@ func init() {
 	Global.NowBookID = ""
 	Global.OnlineUserCount = 0
 	Global.BooksList = nil
+	Global.ServerStatus = util.GetServerInfo(config.Config.Host, config.Version, config.Config.Port, config.Config.EnableUpload, 0)
 }
 
 func GetCloverBackgroundImageUrl(book *entity.BookInfo) string {

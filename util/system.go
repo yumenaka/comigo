@@ -2,8 +2,6 @@ package util
 
 import (
 	"fmt"
-	"github.com/yumenaka/comi/util/locale"
-	"github.com/yumenaka/comi/util/logger"
 	"log"
 	"net"
 	"os"
@@ -14,10 +12,12 @@ import (
 
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/mem"
+	"github.com/yumenaka/comi/util/locale"
+	"github.com/yumenaka/comi/util/logger"
 )
 
 // TrackTIme 计算耗时
-// 使用时只需要写一行：defer util.TrackTIme(time.Now())
+// 使用时只需要写一行：defer TrackTIme(time.Now())
 func TrackTIme(pre time.Time) time.Duration {
 	elapsed := time.Since(pre)
 	fmt.Print("耗时：", elapsed, "\n")
@@ -228,3 +228,59 @@ func GetSystemStatus() SystemStatus {
 //	}
 //	return macAddrList
 //}
+
+// ServerStatus 服务器当前状况
+type ServerStatus struct {
+	ServerName            string       //服务器描述
+	ServerHost            string       //
+	ServerPort            int          //
+	NumberOfBooks         int          //当前拥有的书籍总数
+	NumberOfOnLineUser    int          //TODO：在线用户数
+	NumberOfOnLineDevices int          //TODO：在线设备数
+	SupportUploadFile     bool         //
+	ClientIP              string       //客户端IP
+	OSInfo                SystemStatus //系统信息
+}
+
+func GetServerInfo(configHost string, comigoVersion string, configPort int, configEnableUpload bool, allBooksNumber int) *ServerStatus {
+	serverName := "Comigo " + comigoVersion
+	//本机首选出站IP
+	OutIP := GetOutboundIP().String()
+	host := ""
+	if configHost == "DefaultHost" {
+		host = OutIP
+	} else {
+		host = configHost
+	}
+	var serverStatus = ServerStatus{
+		ServerName:        serverName,
+		ServerHost:        host,
+		ServerPort:        configPort,
+		SupportUploadFile: configEnableUpload,
+		NumberOfBooks:     allBooksNumber,
+	}
+	return &serverStatus
+}
+
+func GetAllServerInfo(configHost string, comigoVersion string, configPort int, configEnableUpload bool, allBooksNumber int, clientIP string) *ServerStatus {
+	serverName := "Comigo " + comigoVersion
+	//本机首选出站IP
+	host := ""
+	if configHost == "DefaultHost" {
+		host = GetOutboundIP().String()
+	} else {
+		host = configHost
+	}
+	var serverStatus = ServerStatus{
+		ServerName:            serverName,
+		ServerHost:            host,
+		ServerPort:            configPort,
+		SupportUploadFile:     configEnableUpload,
+		NumberOfBooks:         allBooksNumber,
+		NumberOfOnLineUser:    1,
+		NumberOfOnLineDevices: 1,
+		ClientIP:              clientIP,
+		OSInfo:                GetSystemStatus(),
+	}
+	return &serverStatus
+}

@@ -23,45 +23,12 @@ type ServerStatus struct {
 	OSInfo                util.SystemStatus //系统信息
 }
 
-func GetServerInfoPublic(c *gin.Context) {
-	serverName := "Comigo " + config.Version
-	//本机首选出站IP
-	OutIP := util.GetOutboundIP().String()
-	host := ""
-	if config.Config.Host == "DefaultHost" {
-		host = OutIP
-	} else {
-		host = config.Config.Host
-	}
-	var serverStatus = ServerStatus{
-		ServerName:        serverName,
-		ServerHost:        host,
-		ServerPort:        config.Config.Port,
-		SupportUploadFile: config.Config.EnableUpload,
-		NumberOfBooks:     entity.GetBooksNumber(),
-	}
+func GetServerInfoHandler(c *gin.Context) {
+	serverStatus := util.GetServerInfo(config.Config.Host, config.Version, config.Config.Port, config.Config.EnableUpload, entity.GetBooksNumber())
 	c.PureJSON(http.StatusOK, serverStatus)
 }
 
-func GetServerInfo(c *gin.Context) {
-	serverName := "Comigo " + config.Version
-	//本机首选出站IP
-	host := ""
-	if config.Config.Host == "DefaultHost" {
-		host = util.GetOutboundIP().String()
-	} else {
-		host = config.Config.Host
-	}
-	var serverStatus = ServerStatus{
-		ServerName:            serverName,
-		ServerHost:            host,
-		ServerPort:            config.Config.Port,
-		SupportUploadFile:     config.Config.EnableUpload,
-		NumberOfBooks:         entity.GetBooksNumber(),
-		NumberOfOnLineUser:    1,
-		NumberOfOnLineDevices: 1,
-		ClientIP:              c.ClientIP(),
-		OSInfo:                util.GetSystemStatus(),
-	}
+func GetAllServerInfoHandler(c *gin.Context) {
+	serverStatus := util.GetAllServerInfo(config.Config.Host, config.Version, config.Config.Port, config.Config.EnableUpload, entity.GetBooksNumber(), c.ClientIP())
 	c.PureJSON(http.StatusOK, serverStatus)
 }
