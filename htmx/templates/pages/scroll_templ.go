@@ -15,6 +15,124 @@ import (
 	"strconv"
 )
 
+func ScrollScripts() templ.ComponentScript {
+	return templ.ComponentScript{
+		Name: `__templ_ScrollScripts_3e65`,
+		Function: `function __templ_ScrollScripts_3e65(){function scrollToTop(scrollDuration) {
+    let scrollStep = -window.scrollY / (scrollDuration / 15),
+        scrollInterval = setInterval(function () {
+            if (window.scrollY !== 0) {
+                window.scrollBy(0, scrollStep);
+            }
+            else clearInterval(scrollInterval);
+        }, 15);
+}
+
+function onScroll() {
+    let scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+    this.scrollDownFlag = scrollTop > this.scrollTopSave;
+    //防手抖,小于一定数值状态就不变 Math.abs()会导致报错
+    let step = this.scrollTopSave - scrollTop;
+    // console.log("this.scrollDownFlag:",this.scrollDownFlag,"scrollTop:",scrollTop,"step:", step);
+    this.scrollTopSave = scrollTop
+    if (step < -5 || step > 5) {
+        this.showBackTopFlag = ((scrollTop > 400) && !this.scrollDownFlag);
+    }
+}
+window.addEventListener("scroll", onScroll);
+
+//可见区域变化的时候改变页面状态
+function onResize() {
+    this.ScrollModeConfig.imageMaxWidth = window.innerWidth
+    this.clientWidth = document.documentElement.clientWidth
+    this.clientHeight = document.documentElement.clientHeight
+    // var aspectRatio = window.innerWidth / window.innerHeight
+    this.aspectRatio = this.clientWidth / this.clientHeight
+    // 为了调试的时候方便,阈值是正方形
+    if (this.aspectRatio > (19 / 19)) {
+        this.ScrollModeConfig.isLandscapeMode = true
+        this.ScrollModeConfig.isPortraitMode = false
+    } else {
+        this.ScrollModeConfig.isLandscapeMode = false
+        this.ScrollModeConfig.isPortraitMode = true
+    }
+}
+//文档视图调整大小时触发 resize 事件。 https://developer.mozilla.org/zh-CN/docs/Web/API/Window/resize_event
+window.addEventListener("resize", this.onResize);
+
+//获取鼠标位置,决定是否打开设置面板
+function onMouseClick(e) {
+    this.clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
+    this.clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离,单位为px）
+    //浏览器的视口,不包括工具栏和滚动条:
+    let innerWidth = window.innerWidth
+    let innerHeight = window.innerHeight
+    //设置区域为正方形，边长按照宽或高里面，比较小的值决定
+    const setArea = 0.15;
+    // innerWidth >= innerHeight 的情况下
+    let MinY = innerHeight * (0.5 - setArea);
+    let MaxY = innerHeight * (0.5 + setArea);
+    let MinX = innerWidth * 0.5 - (MaxY - MinY) * 0.5;
+    let MaxX = innerWidth * 0.5 + (MaxY - MinY) * 0.5;
+    if (innerWidth < innerHeight) {
+        MinX = innerWidth * (0.5 - setArea);
+        MaxX = innerWidth * (0.5 + setArea);
+        MinY = innerHeight * 0.5 - (MaxX - MinX) * 0.5;
+        MaxY = innerHeight * 0.5 + (MaxX - MinX) * 0.5;
+    }
+    //在设置区域
+    let inSetArea = false
+    if ((this.clickX > MinX && this.clickX < MaxX) && (this.clickY > MinY && this.clickY < MaxY)) {
+        console.log("点中了设置区域！");
+        inSetArea = true
+    }
+    if (inSetArea) {
+        //获取ID为 OpenSettingButton的元素，然后模拟点击
+		document.getElementById("OpenSettingButton").click();
+    }
+}
+
+function onMouseMove(e) {
+    this.clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
+    this.clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离,单位为px）
+    //浏览器的视口,不包括工具栏和滚动条:
+    let innerWidth = window.innerWidth
+    let innerHeight = window.innerHeight
+    //设置区域为正方形，边长按照宽或高里面，比较小的值决定
+    const setArea = 0.15;
+    // innerWidth >= innerHeight 的情况下
+    let MinY = innerHeight * (0.5 - setArea);
+    let MaxY = innerHeight * (0.5 + setArea);
+    let MinX = innerWidth * 0.5 - (MaxY - MinY) * 0.5;
+    let MaxX = innerWidth * 0.5 + (MaxY - MinY) * 0.5;
+    if (innerWidth < innerHeight) {
+        MinX = innerWidth * (0.5 - setArea);
+        MaxX = innerWidth * (0.5 + setArea);
+        MinY = innerHeight * 0.5 - (MaxX - MinX) * 0.5;
+        MaxY = innerHeight * 0.5 + (MaxX - MinX) * 0.5;
+    }
+    //在设置区域
+    let inSetArea = false
+    if ((this.clickX > MinX && this.clickX < MaxX) && (this.clickY > MinY && this.clickY < MaxY)) {
+        inSetArea = true
+    }
+    if (inSetArea) {
+        console.log("在设置区域！");
+        e.currentTarget.style.cursor = 'url(/static/images/SettingsOutline.png), pointer';
+    } else {
+        e.currentTarget.style.cursor = '';
+    }
+}
+let body = document.querySelector('body')
+body.addEventListener('mousemove', onMouseMove)
+body.addEventListener('click', onMouseClick)
+
+}`,
+		Call:       templ.SafeScript(`__templ_ScrollScripts_3e65`),
+		CallInline: templ.SafeScriptInline(`__templ_ScrollScripts_3e65`),
+	}
+}
+
 func getImageAlt(key int) string {
 	return strconv.Itoa(key)
 }
@@ -41,21 +159,44 @@ func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-col max-w-full items-center justify-center flex-1 w-full bg-base-100 text-base-content\" :class=\"(theme.toString() ===&#39;light&#39;||theme.toString() ===&#39;dark&#39;||theme.toString() ===&#39;retro&#39;||theme.toString() ===&#39;lofi&#39;||theme.toString() ===&#39;nord&#39;) &amp;&amp; &#39;bg-base-300&#39;\">")
+		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, ScrollScripts())
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		for _, image := range book.Pages.Images {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<img class=\"m-2 max-w-full lg:max-w-[800px] rounded shadow-lg\" src=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div onload=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var2 templ.ComponentScript = ScrollScripts()
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2.Call)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"flex flex-col items-center justify-center flex-1 w-full max-w-full bg-base-100 text-base-content\" :class=\"(theme.toString() ===&#39;light&#39;||theme.toString() ===&#39;dark&#39;||theme.toString() ===&#39;retro&#39;||theme.toString() ===&#39;lofi&#39;||theme.toString() ===&#39;nord&#39;) &amp;&amp; &#39;bg-base-300&#39;\"><noscript class=\"loading-lazy\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		for key, image := range book.Pages.Images {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<img")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var2 string
-			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(getImageUrl(image.Url))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll.templ`, Line: 24, Col: 94}
+			if key > 2 {
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" loading=\"lazy\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" class=\"m-2 max-w-full lg:max-w-[800px] rounded shadow-lg\" src=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var3 string
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(getImageUrl(image.Url))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll.templ`, Line: 139, Col: 134}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -64,7 +205,7 @@ func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</noscript></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -86,9 +227,9 @@ func ScrollPage(s *state.GlobalState, book *entity.Book) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var3 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var3 == nil {
-			templ_7745c5c3_Var3 = templ.NopComponent
+		templ_7745c5c3_Var4 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var4 == nil {
+			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = components.Header(components.HeaderProps{
