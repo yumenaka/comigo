@@ -14,6 +14,7 @@
 > - `i18next`: [https://www.i18next.com](https://www.i18next.com/)
 > - `golangci-lint`: [https://github.com/golangci/golangci-lint](https://github.com/golangci/golangci-lint)
 > - `Prettier`: [https://prettier.io/docs/en/index.html](https://prettier.io/docs/en/index.html)
+> - `Icon`: [https://www.xicons.org/#/](https://www.xicons.org/#/)
 
 要开始您的项目，在终端中运行 **Gowebly** CLI命令：
 

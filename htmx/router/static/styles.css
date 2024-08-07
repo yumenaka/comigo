@@ -1079,6 +1079,10 @@ input:checked + .toggle-bg {
   bottom: 0;
 }
 
+.bottom-4 {
+  bottom: 1rem;
+}
+
 .bottom-\[60px\] {
   bottom: 60px;
 }
@@ -1097,6 +1101,10 @@ input:checked + .toggle-bg {
 
 .right-0 {
   right: 0;
+}
+
+.right-4 {
+  right: 1rem;
 }
 
 .top-0 {
@@ -1310,6 +1318,10 @@ input:checked + .toggle-bg {
 
 .w-1\/2 {
   width: 50%;
+}
+
+.w-10 {
+  width: 2.5rem;
 }
 
 .w-32 {
@@ -1552,6 +1564,10 @@ input:checked + .toggle-bg {
   border-radius: .25rem;
 }
 
+.rounded-full {
+  border-radius: 9999px;
+}
+
 .rounded-lg {
   border-radius: .5rem;
 }
@@ -1656,6 +1672,11 @@ input:checked + .toggle-bg {
 .bg-base-300 {
   --tw-bg-opacity: 1;
   background-color: hsl(var(--twc-base-300) / var(--twc-base-300-opacity, var(--tw-bg-opacity)));
+}
+
+.bg-blue-500 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(63 131 248 / var(--tw-bg-opacity));
 }
 
 .bg-blue-700 {

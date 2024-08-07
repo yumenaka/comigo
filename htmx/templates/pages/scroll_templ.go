@@ -17,8 +17,9 @@ import (
 
 func ScrollScripts() templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_ScrollScripts_3e65`,
-		Function: `function __templ_ScrollScripts_3e65(){function scrollToTop(scrollDuration) {
+		Name: `__templ_ScrollScripts_5a3b`,
+		Function: `function __templ_ScrollScripts_5a3b(){//滚动到顶部
+function scrollToTop(scrollDuration) {
     let scrollStep = -window.scrollY / (scrollDuration / 15),
         scrollInterval = setInterval(function () {
             if (window.scrollY !== 0) {
@@ -27,16 +28,29 @@ func ScrollScripts() templ.ComponentScript {
             else clearInterval(scrollInterval);
         }, 15);
 }
+// Button ID为BackTopButton的元素，点击后滚动到顶部
+document.getElementById("BackTopButton").addEventListener("click", function () {
+    scrollToTop(500);
+});
 
+//滚动到一定位置显示返回顶部按钮
+let scrollTopSave = 0
+let scrollDownFlag = false
+let step = 0
 function onScroll() {
     let scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-    this.scrollDownFlag = scrollTop > this.scrollTopSave;
+    scrollDownFlag = scrollTop > scrollTopSave;
     //防手抖,小于一定数值状态就不变 Math.abs()会导致报错
-    let step = this.scrollTopSave - scrollTop;
+    step = scrollTopSave - scrollTop;
     // console.log("this.scrollDownFlag:",this.scrollDownFlag,"scrollTop:",scrollTop,"step:", step);
-    this.scrollTopSave = scrollTop
-    if (step < -5 || step > 5) {
-        this.showBackTopFlag = ((scrollTop > 400) && !this.scrollDownFlag);
+    scrollTopSave = scrollTop
+    if (step < -10 || step > 10) {
+        showBackTopFlag = ((scrollTop > 400) && !scrollDownFlag);
+        if (showBackTopFlag) {
+            document.getElementById("BackTopButton").style.display = "block";
+        } else {
+            document.getElementById("BackTopButton").style.display = "none";
+        }
     }
 }
 window.addEventListener("scroll", onScroll);
@@ -91,7 +105,7 @@ function onMouseClick(e) {
 		document.getElementById("OpenSettingButton").click();
     }
 }
-
+//获取鼠标位置,决定是否打开设置面板
 function onMouseMove(e) {
     this.clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
     this.clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离,单位为px）
@@ -117,19 +131,18 @@ function onMouseMove(e) {
         inSetArea = true
     }
     if (inSetArea) {
-        console.log("在设置区域！");
+        //console.log("在设置区域！");
         e.currentTarget.style.cursor = 'url(/static/images/SettingsOutline.png), pointer';
     } else {
         e.currentTarget.style.cursor = '';
     }
 }
-let body = document.querySelector('body')
-body.addEventListener('mousemove', onMouseMove)
-body.addEventListener('click', onMouseClick)
-
+let mouseMoveArea = document.getElementById("mouseMoveArea")
+mouseMoveArea.addEventListener('mousemove', onMouseMove)
+mouseMoveArea.addEventListener('click', onMouseClick)
 }`,
-		Call:       templ.SafeScript(`__templ_ScrollScripts_3e65`),
-		CallInline: templ.SafeScriptInline(`__templ_ScrollScripts_3e65`),
+		Call:       templ.SafeScript(`__templ_ScrollScripts_5a3b`),
+		CallInline: templ.SafeScriptInline(`__templ_ScrollScripts_5a3b`),
 	}
 }
 
@@ -159,20 +172,7 @@ func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, ScrollScripts())
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div onload=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var2 templ.ComponentScript = ScrollScripts()
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2.Call)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"flex flex-col items-center justify-center flex-1 w-full max-w-full bg-base-100 text-base-content\" :class=\"(theme.toString() ===&#39;light&#39;||theme.toString() ===&#39;dark&#39;||theme.toString() ===&#39;retro&#39;||theme.toString() ===&#39;lofi&#39;||theme.toString() ===&#39;nord&#39;) &amp;&amp; &#39;bg-base-300&#39;\"><noscript class=\"loading-lazy\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"mouseMoveArea\" class=\"flex flex-col items-center justify-center flex-1 w-full max-w-full bg-base-100 text-base-content\" :class=\"(theme.toString() ===&#39;light&#39;||theme.toString() ===&#39;dark&#39;||theme.toString() ===&#39;retro&#39;||theme.toString() ===&#39;lofi&#39;||theme.toString() ===&#39;nord&#39;) &amp;&amp; &#39;bg-base-300&#39;\"><noscript class=\"loading-lazy\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -191,12 +191,12 @@ func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var3 string
-			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(getImageUrl(image.Url))
+			var templ_7745c5c3_Var2 string
+			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(getImageUrl(image.Url))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll.templ`, Line: 139, Col: 134}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll.templ`, Line: 152, Col: 88}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -205,7 +205,11 @@ func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</noscript></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</noscript></div><button id=\"BackTopButton\" style=\"display: none\" class=\"fixed bottom-4 right-4 bg-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg\"><svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 512 512\"><path d=\"M256 48C141.13 48 48 141.13 48 256s93.13 208 208 208s208-93.13 208-208S370.87 48 256 48zm96 270.63l-96-96l-96 96L137.37 296L256 177.37L374.63 296z\" fill=\"currentColor\"></path></svg></button>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = ScrollScripts().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -227,9 +231,9 @@ func ScrollPage(s *state.GlobalState, book *entity.Book) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var4 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var4 == nil {
-			templ_7745c5c3_Var4 = templ.NopComponent
+		templ_7745c5c3_Var3 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var3 == nil {
+			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = components.Header(components.HeaderProps{

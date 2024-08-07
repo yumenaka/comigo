@@ -21,7 +21,7 @@ import jaLocale from './locales/ja_JP.json'
 i18next
   .use(LanguageDetector)
   .init({
-    debug: true,
+    debug: false,
     // // 在 setTimeout（默认异步行为）内的 init（） 中触发资源加载。如果您的后端同步加载资源，请将其设置为 false - 这样，
     // // 可以在 init（） 之后调用 i18next.t（） 而无需依赖初始化回调。此选项仅适用于同步（阻塞）加载后端，例如 i18next-fs-backend 和 i18next-sync-fs-backend！
     initImmediate: false,
@@ -51,7 +51,7 @@ i18next
     },
   })
   .then(function (t) {
-    console.log(t('test'))
+    //console.log(t('test'))
     // i18next.changeLanguage('en', (err, t) => {
     //     if (err) return console.log('something went wrong loading', err);
     //     console.log(t('test'));
