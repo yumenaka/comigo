@@ -4,7 +4,7 @@ import "github.com/yumenaka/comi/htmx/state"
 
 templ Drawer(s *state.GlobalState) {
 <!-- drawer component -->
-<div id="drawer-right" class="bg-base-100 text-base-content fixed top-0 right-0 z-40 h-screen p-4 overflow-y-auto transition-transform translate-x-full w-80" tabindex="-1" aria-labelledby="drawer-right-label">
+<div id="drawer-right" class="w-80 md:w-64 min-w-fit bg-base-100 text-base-content fixed top-0 right-0 z-40 h-screen p-4 overflow-y-auto transition-transform translate-x-full" tabindex="-1" aria-labelledby="drawer-right-label">
     <h5 x-text="i18next.t('test')" id="drawer-right-label" class="inline-flex items-center mb-4 text-base font-semibold text-gray-500 dark:text-gray-400"><svg class="w-4 h-4 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
     <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
   </svg>Right drawer</h5>
