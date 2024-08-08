@@ -70,6 +70,5 @@ document.getElementById('FullScreenIcon').addEventListener('click', () => {
     }
 });
 
-
 // Start Alpine.
 Alpine.start()
