@@ -1340,20 +1340,12 @@ input:checked + .toggle-bg {
   width: 2rem;
 }
 
-.w-80 {
-  width: 20rem;
-}
-
 .w-full {
   width: 100%;
 }
 
 .min-w-64 {
   min-width: 16rem;
-}
-
-.min-w-fit {
-  min-width: fit-content;
 }
 
 .max-w-4xl {
@@ -2739,10 +2731,6 @@ body {
 @media (width >= 768px) {
   .md\:inset-0 {
     inset: 0;
-  }
-
-  .md\:w-64 {
-    width: 16rem;
   }
 
   .md\:max-w-4xl {

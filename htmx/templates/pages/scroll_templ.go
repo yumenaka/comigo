@@ -17,8 +17,8 @@ import (
 
 func ScrollScripts() templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_ScrollScripts_5a3b`,
-		Function: `function __templ_ScrollScripts_5a3b(){//滚动到顶部
+		Name: `__templ_ScrollScripts_49dc`,
+		Function: `function __templ_ScrollScripts_49dc(){//滚动到顶部
 function scrollToTop(scrollDuration) {
     let scrollStep = -window.scrollY / (scrollDuration / 15),
         scrollInterval = setInterval(function () {
@@ -137,12 +137,17 @@ function onMouseMove(e) {
         e.currentTarget.style.cursor = '';
     }
 }
+//获取ID为 mouseMoveArea 的元素
 let mouseMoveArea = document.getElementById("mouseMoveArea")
+// 鼠标移动的时候触发移动事件
 mouseMoveArea.addEventListener('mousemove', onMouseMove)
+// 点击的时候触发点击事件
 mouseMoveArea.addEventListener('click', onMouseClick)
+// 触摸的时候也触发点击事件
+mouseMoveArea.addEventListener('touchstart', onMouseClick)
 }`,
-		Call:       templ.SafeScript(`__templ_ScrollScripts_5a3b`),
-		CallInline: templ.SafeScriptInline(`__templ_ScrollScripts_5a3b`),
+		Call:       templ.SafeScript(`__templ_ScrollScripts_49dc`),
+		CallInline: templ.SafeScriptInline(`__templ_ScrollScripts_49dc`),
 	}
 }
 
@@ -194,7 +199,7 @@ func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(getImageUrl(image.Url))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll.templ`, Line: 152, Col: 88}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll.templ`, Line: 157, Col: 88}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {

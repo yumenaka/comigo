@@ -127,9 +127,14 @@ function onMouseMove(e) {
         e.currentTarget.style.cursor = '';
     }
 }
+//获取ID为 mouseMoveArea 的元素
 let mouseMoveArea = document.getElementById("mouseMoveArea")
+// 鼠标移动的时候触发移动事件
 mouseMoveArea.addEventListener('mousemove', onMouseMove)
+// 点击的时候触发点击事件
 mouseMoveArea.addEventListener('click', onMouseClick)
+// 触摸的时候也触发点击事件
+mouseMoveArea.addEventListener('touchstart', onMouseClick)
 }
 
 func getImageAlt(key int) string {
