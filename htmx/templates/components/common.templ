@@ -27,6 +27,21 @@ script BodyScripts() {
     }
 }
 
+script StoreInit() {
+    document.addEventListener('alpine:init', () => {
+        Alpine.store('setting', {
+            readerMode: "scroll",
+            toggleReaderMode() {
+            	if (this.readerMode === "scroll") {
+                	this.readerMode = "flip"
+                } else {
+                	this.readerMode = "scroll"
+                }
+            }
+        })
+    })
+}
+
 templ MainLayout(title string, metaTags, bodyContent templ.Component) {
 	<!DOCTYPE html>
 	<html lang="en">
@@ -43,16 +58,17 @@ templ MainLayout(title string, metaTags, bodyContent templ.Component) {
 			<link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet"/>
 			<link href="/static/styles.css" rel="stylesheet"/>
 			<!--  让旧版浏览器也支持 原生的 image 延迟加载属性  https://github.com/mfranzke/loading-attribute-polyfill  -->
-            <link rel="stylesheet" href="/static/script/loading-attribute-polyfill.css" />
-            <script src="/static/script/loading-attribute-polyfill.umd.js" async></script>
+			<link rel="stylesheet" href="/static/script/loading-attribute-polyfill.css"/>
+			<script src="/static/script/loading-attribute-polyfill.umd.js" async></script>
 		</head>
 		<!-- x-bind: Alpine.js的语法，声明全局主题 theme -->
 		<!-- $persist 可以存储原始值以及数组和对象。本地存储，默认的key是 _x_变量名 -->
 		<!-- ！！！当变量的类型发生变化时，必须手动清除 localStorage，否则相应数值将无法正确更新。！！！ -->
 		<!-- 详细用法参见： https://alpinejs.dev/plugins/persist -->
-		<body x-data="{ theme: $persist('retro') }" x-bind:data-theme="theme" onload={ BodyScripts() } class="flex flex-col items-center justify-between w-0 w-full h-full min-h-screen p-0 m-0 font-sans">
+		<body x-data="{ theme: $persist('retro'), readerMode: $persist('readerMode') }" x-bind:data-theme="theme" onload={ BodyScripts() } class="flex flex-col items-center justify-between w-full h-full min-h-screen p-0 m-0 font-sans">
 			@bodyContent
 			<script src="/static/scripts.js"></script>
 		</body>
+		@StoreInit()
 	</html>
 }

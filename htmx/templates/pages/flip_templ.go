@@ -14,37 +14,37 @@ import (
 	"github.com/yumenaka/comi/htmx/templates/components"
 )
 
-func ScrollScripts() templ.ComponentScript {
+func FlipScripts() templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_ScrollScripts_49dc`,
-		Function: `function __templ_ScrollScripts_49dc(){//滚动到顶部
-function scrollToTop(scrollDuration) {
-    let scrollStep = -window.scrollY / (scrollDuration / 15),
-        scrollInterval = setInterval(function () {
-            if (window.scrollY !== 0) {
-                window.scrollBy(0, scrollStep);
+		Name: `__templ_FlipScripts_0f6e`,
+		Function: `function __templ_FlipScripts_0f6e(){//滚动到顶部
+function FlipToTop(FlipDuration) {
+    let FlipStep = -window.FlipY / (FlipDuration / 15),
+        FlipInterval = setInterval(function () {
+            if (window.FlipY !== 0) {
+                window.FlipBy(0, FlipStep);
             }
-            else clearInterval(scrollInterval);
+            else clearInterval(FlipInterval);
         }, 15);
 }
 // Button ID为BackTopButton的元素，点击后滚动到顶部
 document.getElementById("BackTopButton").addEventListener("click", function () {
-    scrollToTop(500);
+    FlipToTop(500);
 });
 
 //滚动到一定位置显示返回顶部按钮
-let scrollTopSave = 0
-let scrollDownFlag = false
+let FlipTopSave = 0
+let FlipDownFlag = false
 let step = 0
-function onScroll() {
-    let scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-    scrollDownFlag = scrollTop > scrollTopSave;
+function onFlip() {
+    let FlipTop = document.documentElement.FlipTop || document.body.FlipTop;
+    FlipDownFlag = FlipTop > FlipTopSave;
     //防手抖,小于一定数值状态就不变 Math.abs()会导致报错
-    step = scrollTopSave - scrollTop;
-    // console.log("this.scrollDownFlag:",this.scrollDownFlag,"scrollTop:",scrollTop,"step:", step);
-    scrollTopSave = scrollTop
+    step = FlipTopSave - FlipTop;
+    // console.log("this.FlipDownFlag:",this.FlipDownFlag,"FlipTop:",FlipTop,"step:", step);
+    FlipTopSave = FlipTop
     if (step < -10 || step > 10) {
-        showBackTopFlag = ((scrollTop > 400) && !scrollDownFlag);
+        showBackTopFlag = ((FlipTop > 400) && !FlipDownFlag);
         if (showBackTopFlag) {
             document.getElementById("BackTopButton").style.display = "block";
         } else {
@@ -52,22 +52,22 @@ function onScroll() {
         }
     }
 }
-window.addEventListener("scroll", onScroll);
+window.addEventListener("Flip", onFlip);
 
 //可见区域变化的时候改变页面状态
 function onResize() {
-    this.ScrollModeConfig.imageMaxWidth = window.innerWidth
+    this.FlipModeConfig.imageMaxWidth = window.innerWidth
     this.clientWidth = document.documentElement.clientWidth
     this.clientHeight = document.documentElement.clientHeight
     // var aspectRatio = window.innerWidth / window.innerHeight
     this.aspectRatio = this.clientWidth / this.clientHeight
     // 为了调试的时候方便,阈值是正方形
     if (this.aspectRatio > (19 / 19)) {
-        this.ScrollModeConfig.isLandscapeMode = true
-        this.ScrollModeConfig.isPortraitMode = false
+        this.FlipModeConfig.isLandscapeMode = true
+        this.FlipModeConfig.isPortraitMode = false
     } else {
-        this.ScrollModeConfig.isLandscapeMode = false
-        this.ScrollModeConfig.isPortraitMode = true
+        this.FlipModeConfig.isLandscapeMode = false
+        this.FlipModeConfig.isPortraitMode = true
     }
 }
 //文档视图调整大小时触发 resize 事件。 https://developer.mozilla.org/zh-CN/docs/Web/API/Window/resize_event
@@ -145,12 +145,12 @@ mouseMoveArea.addEventListener('click', onMouseClick)
 // 触摸的时候也触发点击事件
 mouseMoveArea.addEventListener('touchstart', onMouseClick)
 }`,
-		Call:       templ.SafeScript(`__templ_ScrollScripts_49dc`),
-		CallInline: templ.SafeScriptInline(`__templ_ScrollScripts_49dc`),
+		Call:       templ.SafeScript(`__templ_FlipScripts_0f6e`),
+		CallInline: templ.SafeScriptInline(`__templ_FlipScripts_0f6e`),
 	}
 }
 
-func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
+func FlipMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -190,7 +190,7 @@ func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(getImageUrl(image.Url))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll.templ`, Line: 148, Col: 88}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/flip.templ`, Line: 148, Col: 88}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
@@ -205,7 +205,7 @@ func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = ScrollScripts().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = FlipScripts().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -213,8 +213,8 @@ func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 	})
 }
 
-// ScrollPage 定义 BodyHTML
-func ScrollPage(s *state.GlobalState, book *entity.Book) templ.Component {
+// FlipPage 定义 BodyHTML
+func FlipPage(s *state.GlobalState, book *entity.Book) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -243,7 +243,7 @@ func ScrollPage(s *state.GlobalState, book *entity.Book) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = ScrollMainArea(s, book).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = FlipMainArea(s, book).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

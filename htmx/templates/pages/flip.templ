@@ -6,35 +6,35 @@ import (
 	"github.com/yumenaka/comi/htmx/templates/components"
 )
 
-script ScrollScripts() {
+script FlipScripts() {
 //滚动到顶部
-function scrollToTop(scrollDuration) {
-    let scrollStep = -window.scrollY / (scrollDuration / 15),
-        scrollInterval = setInterval(function () {
-            if (window.scrollY !== 0) {
-                window.scrollBy(0, scrollStep);
+function FlipToTop(FlipDuration) {
+    let FlipStep = -window.FlipY / (FlipDuration / 15),
+        FlipInterval = setInterval(function () {
+            if (window.FlipY !== 0) {
+                window.FlipBy(0, FlipStep);
             }
-            else clearInterval(scrollInterval);
+            else clearInterval(FlipInterval);
         }, 15);
 }
 // Button ID为BackTopButton的元素，点击后滚动到顶部
 document.getElementById("BackTopButton").addEventListener("click", function () {
-    scrollToTop(500);
+    FlipToTop(500);
 });
 
 //滚动到一定位置显示返回顶部按钮
-let scrollTopSave = 0
-let scrollDownFlag = false
+let FlipTopSave = 0
+let FlipDownFlag = false
 let step = 0
-function onScroll() {
-    let scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-    scrollDownFlag = scrollTop > scrollTopSave;
+function onFlip() {
+    let FlipTop = document.documentElement.FlipTop || document.body.FlipTop;
+    FlipDownFlag = FlipTop > FlipTopSave;
     //防手抖,小于一定数值状态就不变 Math.abs()会导致报错
-    step = scrollTopSave - scrollTop;
-    // console.log("this.scrollDownFlag:",this.scrollDownFlag,"scrollTop:",scrollTop,"step:", step);
-    scrollTopSave = scrollTop
+    step = FlipTopSave - FlipTop;
+    // console.log("this.FlipDownFlag:",this.FlipDownFlag,"FlipTop:",FlipTop,"step:", step);
+    FlipTopSave = FlipTop
     if (step < -10 || step > 10) {
-        showBackTopFlag = ((scrollTop > 400) && !scrollDownFlag);
+        showBackTopFlag = ((FlipTop > 400) && !FlipDownFlag);
         if (showBackTopFlag) {
             document.getElementById("BackTopButton").style.display = "block";
         } else {
@@ -42,22 +42,22 @@ function onScroll() {
         }
     }
 }
-window.addEventListener("scroll", onScroll);
+window.addEventListener("Flip", onFlip);
 
 //可见区域变化的时候改变页面状态
 function onResize() {
-    this.ScrollModeConfig.imageMaxWidth = window.innerWidth
+    this.FlipModeConfig.imageMaxWidth = window.innerWidth
     this.clientWidth = document.documentElement.clientWidth
     this.clientHeight = document.documentElement.clientHeight
     // var aspectRatio = window.innerWidth / window.innerHeight
     this.aspectRatio = this.clientWidth / this.clientHeight
     // 为了调试的时候方便,阈值是正方形
     if (this.aspectRatio > (19 / 19)) {
-        this.ScrollModeConfig.isLandscapeMode = true
-        this.ScrollModeConfig.isPortraitMode = false
+        this.FlipModeConfig.isLandscapeMode = true
+        this.FlipModeConfig.isPortraitMode = false
     } else {
-        this.ScrollModeConfig.isLandscapeMode = false
-        this.ScrollModeConfig.isPortraitMode = true
+        this.FlipModeConfig.isLandscapeMode = false
+        this.FlipModeConfig.isPortraitMode = true
     }
 }
 //文档视图调整大小时触发 resize 事件。 https://developer.mozilla.org/zh-CN/docs/Web/API/Window/resize_event
@@ -136,7 +136,7 @@ mouseMoveArea.addEventListener('click', onMouseClick)
 mouseMoveArea.addEventListener('touchstart', onMouseClick)
 }
 
-templ ScrollMainArea(s *state.GlobalState, book *entity.Book) {
+templ FlipMainArea(s *state.GlobalState, book *entity.Book) {
 	<div id="mouseMoveArea"
 		class="flex flex-col items-center justify-center flex-1 w-full max-w-full bg-base-100 text-base-content"
 		:class="(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') && 'bg-base-300'"
@@ -152,11 +152,11 @@ templ ScrollMainArea(s *state.GlobalState, book *entity.Book) {
 	    <button id="BackTopButton" style="display: none" class="fixed bottom-4 right-4 bg-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg">
             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><path d="M256 48C141.13 48 48 141.13 48 256s93.13 208 208 208s208-93.13 208-208S370.87 48 256 48zm96 270.63l-96-96l-96 96L137.37 296L256 177.37L374.63 296z" fill="currentColor"></path></svg>
         </button>
-	@ScrollScripts()
+	@FlipScripts()
 }
 
-// ScrollPage 定义 BodyHTML
-templ ScrollPage(s *state.GlobalState, book *entity.Book) {
+// FlipPage 定义 BodyHTML
+templ FlipPage(s *state.GlobalState, book *entity.Book) {
 	@components.Header(components.HeaderProps{
 		Title:           book.Title,
 		ShowReturnIcon:  true,
@@ -165,7 +165,7 @@ templ ScrollPage(s *state.GlobalState, book *entity.Book) {
 		DownLoadLink:    "",
 		SetTheme:        true,
 	})
-	@ScrollMainArea(s, book)
+	@FlipMainArea(s, book)
 	@components.Footer(s.Version)
 	@components.Drawer(s)
 	@components.QRCode(s)
