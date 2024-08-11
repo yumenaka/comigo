@@ -112,7 +112,7 @@ func ShelfMainArea(s *state.GlobalState) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" :href=\"&#39;/&#39;+Alpine.store(&#39;setting&#39;).readerMode+ &#39;/&#39; + BookID\" target=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" :href=\"&#39;/&#39;+$store.readerMode+ &#39;/&#39; + BookID\" target=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -72,8 +72,114 @@ document.getElementById('FullScreenIcon').addEventListener('click', () => {
 
 // 用Alpine Persist 注册全局变量
 // https://alpinejs.dev/plugins/persist#using-alpine-persist-global
-Alpine.store('setting', {
-    readerMode: Alpine.$persist("flip").as('readerMode'),
+
+// readerMode 当前阅读模式
+Alpine.store('readerMode', Alpine.$persist("flip").as('readerMode'));
+
+// debugMode 是否开启调试模式
+Alpine.store('debugMode', Alpine.$persist(false).as('debugMode'));
+
+// BookShelf 书架设置
+Alpine.store('BookShelf', {
+    bookCardMode: Alpine.$persist("gird").as('BookShelf.bookCardMode'),//gird,list,text
+    simplifyTitle: Alpine.$persist(true).as('BookShelf.simplifyTitle'),//是否简化标题
+    resort_hint_key: Alpine.$persist("filename").as('BookShelf.resort_hint_key'),
+    InfiniteDropdown: true,//卷轴模式下，是否无限下拉
+    bookCardShowTitleFlag: true, // 书库中的书籍是否显示文字版标题
+    syncScrollFlag: false,// 同步滚动,目前还没做
+    scrollTopSave: 0,//存储现在滚动的位置
+    // 可见范围是否是横向
+    isLandscapeMode: true,
+    isPortraitMode: false,
+    imageMaxWidth: 800,
+    // 屏幕宽横比,inLandscapeMode的判断依据
+    aspectRatio: 1.2,
+    // 可见范围宽高的具体值
+    clientWidth: 0,
+    clientHeight: 0,
+    toggleSimplifyTitle() {
+        this.simplifyTitle = ! this.simplifyTitle
+    }
+})
+
+// Scroll 卷轴模式
+Alpine.store('Scroll', {
+    nowPageNum: 0,
+    simplifyTitle: Alpine.$persist(true).as('Scroll.simplifyTitle'),//是否简化标题
+    resort_hint_key: Alpine.$persist("filename").as('Scroll.resort_hint_key'),
+    //下拉模式下，漫画页面的底部间距。px。
+    marginOnScrollMode: Alpine.$persist(10).as('Scroll.marginOnScrollMode'),
+    //卷轴模式下，是否无限下拉
+    InfiniteDropdown: Alpine.$persist(true).as('Scroll.InfiniteDropdown'),
+    // 书库中的书籍是否显示文字版标题
+    bookCardShowTitleFlag: Alpine.$persist(true).as('Scroll.bookCardShowTitleFlag'),
+    syncScrollFlag:  Alpine.$persist(false).as('Scroll.syncScrollFlag'),// 同步滚动,目前还没做
+    scrollTopSave: 0,//存储现在滚动的位置
+    imageMaxWidth: 800,
+    // 屏幕宽横比,inLandscapeMode的判断依据
+    aspectRatio: 1.2,
+    // 可见范围宽高的具体值
+    clientWidth: 0,
+    clientHeight: 0,
+    //图片宽度的单位,是否使用百分比
+    imageWidth_usePercentFlag: false,
+    //横屏(Landscape)状态的漫画页宽度,百分比
+    singlePageWidth_Percent: 50,
+    doublePageWidth_Percent: 95,
+    //横屏(Landscape)状态的漫画页宽度。px。
+    singlePageWidth_PX: 720,
+    doublePageWidth_PX: 720,
+    //可见范围是否是横向
+    isLandscapeMode: true,
+    isPortraitMode: false,
+    //书籍数据,需要从远程拉取
+    //是否显示顶部页头
+    showHeaderFlag: true,
+    //是否显示页数
+    showPageNumFlag_ScrollMode: false,
+    //ws翻页相关
+    syncPageByWS: true,//是否通过websocket同步翻页
+    toggleSimplifyTitle() {
+        this.simplifyTitle = ! this.simplifyTitle
+    }
+})
+
+// Flip 翻页模式
+Alpine.store('Flip', {
+    //自动隐藏工具条
+    interval: 0,
+    hideToolbar: true,
+    //是否显示页头
+    showHeaderFlag_FlipMode: true,
+    //是否显示页脚
+    showFooterFlag_FlipMode: true,
+    //是否是右半屏翻页（从右到左）?日本漫画从左到右(false)
+    rightToLeftFlag: Alpine.$persist(false).as('Flip.rightToLeftFlag'),
+    //简单拼合双页
+    doublePageModeFlag: Alpine.$persist(false).as('Flip.doublePageModeFlag'),
+    //自动拼合双页,效果不太好
+    autoDoublePageModeFlag: Alpine.$persist(false).as('Flip.autoDoublePageModeFlag'),
+    //是否保存当前页数
+    saveNowPageNumFlag: Alpine.$persist(true).as('Flip.saveNowPageNumFlag'),
+    //素描模式标记
+    sketchModeFlag: false,
+    //是否显示素描提示
+    showPageHintFlag_FlipMode: Alpine.$persist(false).as('Flip.showPageHintFlag_FlipMode'),
+    //翻页间隔时间
+    sketchFlipSecond: 30,
+    //计时用,从0开始
+    sketchSecondCount: 0,
+})
+
+// 自定义主题
+Alpine.store('theme', {
+    theme: Alpine.$persist("light").as('theme'),
+    interfaceColor: "#F5F5E4",
+    backgroundColor: "#E0D9CD",
+    textColor: "#000000",
+    toggleTheme() {
+        this.theme = this.theme === 'light' ? 'dark' : 'light'
+    }
 });
 
 
