@@ -70,5 +70,12 @@ document.getElementById('FullScreenIcon').addEventListener('click', () => {
     }
 });
 
+// 用Alpine Persist 注册全局变量
+// https://alpinejs.dev/plugins/persist#using-alpine-persist-global
+Alpine.store('setting', {
+    readerMode: Alpine.$persist("flip").as('readerMode'),
+});
+
+
 // Start Alpine.
 Alpine.start()

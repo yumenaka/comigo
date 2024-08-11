@@ -10,6 +10,8 @@ func bindURL(router *gin.Engine) {
 	router.GET("/", pages.ShelfHandler)
 	// 书架视图
 	router.GET("/shelf/:id", pages.ShelfHandler)
-	// 漫画视图
+	// 卷轴模式视图
 	router.GET("/scroll/:id", pages.ScrollHandler)
+	// 翻页模式视图
+	router.GET("/flip/:id", pages.FlipHandler)
 }

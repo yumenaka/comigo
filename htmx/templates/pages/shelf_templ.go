@@ -13,6 +13,7 @@ import (
 	"github.com/yumenaka/comi/htmx/state"
 	"github.com/yumenaka/comi/htmx/templates/components"
 	//"github.com/yumenaka/comi/htmx/templates/components/drawer"
+	"fmt"
 	"strconv"
 )
 
@@ -84,12 +85,12 @@ func ShelfMainArea(s *state.GlobalState) templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!-- 有的颜色模板只有base-100 ，没有颜色更深或更的 base-200 base-300，这样写是为了防止没定义颜色 --><div class=\"flex flex-row flex-wrap content-start justify-center flex-1 bg-base-100 text-base-content min-h-48\" :class=\"(theme.toString() ===&#39;light&#39;||theme.toString() ===&#39;dark&#39;||theme.toString() ===&#39;retro&#39;||theme.toString() ===&#39;lofi&#39;||theme.toString() ===&#39;nord&#39;) &amp;&amp; &#39;bg-base-300&#39;\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!-- 有的颜色模板只有base-100 ，没有颜色更深或更的 base-200 base-300，这样写是为了防止没定义颜色 --><div x-data class=\"flex flex-row flex-wrap content-start justify-center flex-1 bg-base-100 text-base-content min-h-48\" :class=\"(theme.toString() ===&#39;light&#39;||theme.toString() ===&#39;dark&#39;||theme.toString() ===&#39;retro&#39;||theme.toString() ===&#39;lofi&#39;||theme.toString() ===&#39;nord&#39;) &amp;&amp; &#39;bg-base-300&#39;\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		for _, book := range s.BooksList.BookInfos {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!-- 如果把链接的 target 属性设置为 \"_blank\"，该链接会在新窗口中打开。 --> ")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!-- 用go-templ，创建Alpine的x-data。 --> <!-- 如果把链接的 target 属性设置为 \"_blank\"，该链接会在新窗口中打开。 --> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -98,23 +99,27 @@ func ShelfMainArea(s *state.GlobalState) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<a href=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<a x-data=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var4 templ.SafeURL = templ.URL("/scroll/" + book.BookID)
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var4)))
+			var templ_7745c5c3_Var4 string
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("{ BookID: %s }", "\""+book.BookID+"\""))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/shelf.templ`, Line: 36, Col: 70}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" target=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" :href=\"&#39;/&#39;+Alpine.store(&#39;setting&#39;).readerMode+ &#39;/&#39; + BookID\" target=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(getTarget(book))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/shelf.templ`, Line: 34, Col: 75}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/shelf.templ`, Line: 37, Col: 29}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -140,7 +145,7 @@ func ShelfMainArea(s *state.GlobalState) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(book.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/shelf.templ`, Line: 42, Col: 18}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/shelf.templ`, Line: 45, Col: 18}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -159,7 +164,7 @@ func ShelfMainArea(s *state.GlobalState) templ.Component {
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(s.GetAllBookNum()))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/shelf.templ`, Line: 48, Col: 97}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/shelf.templ`, Line: 51, Col: 97}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
