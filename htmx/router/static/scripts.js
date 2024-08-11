@@ -19126,8 +19126,108 @@ document.getElementById("FullScreenIcon").addEventListener("click", ()=>{
 });
 // 用Alpine Persist 注册全局变量
 // https://alpinejs.dev/plugins/persist#using-alpine-persist-global
-(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("setting", {
-    readerMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist("flip").as("readerMode")
+// readerMode 当前阅读模式
+(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("readerMode", (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist("flip").as("readerMode"));
+// debugMode 是否开启调试模式
+(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("debugMode", (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("debugMode"));
+// BookShelf 书架设置
+(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("BookShelf", {
+    bookCardMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist("gird").as("BookShelf.bookCardMode"),
+    simplifyTitle: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("BookShelf.simplifyTitle"),
+    resort_hint_key: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist("filename").as("BookShelf.resort_hint_key"),
+    InfiniteDropdown: true,
+    bookCardShowTitleFlag: true,
+    syncScrollFlag: false,
+    scrollTopSave: 0,
+    // 可见范围是否是横向
+    isLandscapeMode: true,
+    isPortraitMode: false,
+    imageMaxWidth: 800,
+    // 屏幕宽横比,inLandscapeMode的判断依据
+    aspectRatio: 1.2,
+    // 可见范围宽高的具体值
+    clientWidth: 0,
+    clientHeight: 0,
+    toggleSimplifyTitle () {
+        this.simplifyTitle = !this.simplifyTitle;
+    }
+});
+// Scroll 卷轴模式
+(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("Scroll", {
+    nowPageNum: 0,
+    simplifyTitle: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("Scroll.simplifyTitle"),
+    resort_hint_key: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist("filename").as("Scroll.resort_hint_key"),
+    //下拉模式下，漫画页面的底部间距。px。
+    marginOnScrollMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(10).as("Scroll.marginOnScrollMode"),
+    //卷轴模式下，是否无限下拉
+    InfiniteDropdown: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("Scroll.InfiniteDropdown"),
+    // 书库中的书籍是否显示文字版标题
+    bookCardShowTitleFlag: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("Scroll.bookCardShowTitleFlag"),
+    syncScrollFlag: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("Scroll.syncScrollFlag"),
+    scrollTopSave: 0,
+    imageMaxWidth: 800,
+    // 屏幕宽横比,inLandscapeMode的判断依据
+    aspectRatio: 1.2,
+    // 可见范围宽高的具体值
+    clientWidth: 0,
+    clientHeight: 0,
+    //图片宽度的单位,是否使用百分比
+    imageWidth_usePercentFlag: false,
+    //横屏(Landscape)状态的漫画页宽度,百分比
+    singlePageWidth_Percent: 50,
+    doublePageWidth_Percent: 95,
+    //横屏(Landscape)状态的漫画页宽度。px。
+    singlePageWidth_PX: 720,
+    doublePageWidth_PX: 720,
+    //可见范围是否是横向
+    isLandscapeMode: true,
+    isPortraitMode: false,
+    //书籍数据,需要从远程拉取
+    //是否显示顶部页头
+    showHeaderFlag: true,
+    //是否显示页数
+    showPageNumFlag_ScrollMode: false,
+    //ws翻页相关
+    syncPageByWS: true,
+    toggleSimplifyTitle () {
+        this.simplifyTitle = !this.simplifyTitle;
+    }
+});
+// Flip 翻页模式
+(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("Flip", {
+    //自动隐藏工具条
+    interval: 0,
+    hideToolbar: true,
+    //是否显示页头
+    showHeaderFlag_FlipMode: true,
+    //是否显示页脚
+    showFooterFlag_FlipMode: true,
+    //是否是右半屏翻页（从右到左）?日本漫画从左到右(false)
+    rightToLeftFlag: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("Flip.rightToLeftFlag"),
+    //简单拼合双页
+    doublePageModeFlag: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("Flip.doublePageModeFlag"),
+    //自动拼合双页,效果不太好
+    autoDoublePageModeFlag: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("Flip.autoDoublePageModeFlag"),
+    //是否保存当前页数
+    saveNowPageNumFlag: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("Flip.saveNowPageNumFlag"),
+    //素描模式标记
+    sketchModeFlag: false,
+    //是否显示素描提示
+    showPageHintFlag_FlipMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("Flip.showPageHintFlag_FlipMode"),
+    //翻页间隔时间
+    sketchFlipSecond: 30,
+    //计时用,从0开始
+    sketchSecondCount: 0
+});
+// 自定义主题
+(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("theme", {
+    theme: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist("light").as("theme"),
+    interfaceColor: "#F5F5E4",
+    backgroundColor: "#E0D9CD",
+    textColor: "#000000",
+    toggleTheme () {
+        this.theme = this.theme === "light" ? "dark" : "light";
+    }
 });
 // Start Alpine.
 (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).start();
