@@ -158,7 +158,7 @@ templ FlipMainArea(s *state.GlobalState, book *entity.Book) {
 // FlipPage 定义 BodyHTML
 templ FlipPage(s *state.GlobalState, book *entity.Book) {
 	@components.Header(components.HeaderProps{
-		Title:           book.Title,
+		Title:           "FLIP"+book.Title,
 		ShowReturnIcon:  true,
 		SetDownLoadLink: false,
 		InShelf:         false,

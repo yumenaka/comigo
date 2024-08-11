@@ -19124,6 +19124,11 @@ document.getElementById("FullScreenIcon").addEventListener("click", ()=>{
     else // Ignore or do something else
     (0, $1bac384020b50752$export$2e2bcd8739ae039).t("not_support_fullscreen");
 });
+// 用Alpine Persist 注册全局变量
+// https://alpinejs.dev/plugins/persist#using-alpine-persist-global
+(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("setting", {
+    readerMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist("flip").as("readerMode")
+});
 // Start Alpine.
 (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).start();
 

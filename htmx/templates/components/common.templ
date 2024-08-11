@@ -27,21 +27,6 @@ script BodyScripts() {
     }
 }
 
-script StoreInit() {
-    document.addEventListener('alpine:init', () => {
-        Alpine.store('setting', {
-            readerMode: "scroll",
-            toggleReaderMode() {
-            	if (this.readerMode === "scroll") {
-                	this.readerMode = "flip"
-                } else {
-                	this.readerMode = "scroll"
-                }
-            }
-        })
-    })
-}
-
 templ MainLayout(title string, metaTags, bodyContent templ.Component) {
 	<!DOCTYPE html>
 	<html lang="en">
@@ -69,6 +54,5 @@ templ MainLayout(title string, metaTags, bodyContent templ.Component) {
 			@bodyContent
 			<script src="/static/scripts.js"></script>
 		</body>
-		@StoreInit()
 	</html>
 }
