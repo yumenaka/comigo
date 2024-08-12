@@ -147,10 +147,10 @@ func (b *BookInfo) setTitle(filePath string) *BookInfo {
 func (b *BookInfo) ShortTitle() string {
 	shortTitle := b.Title
 	// 使用 Go 的正则表达式替换掉一些字符串
-	re1 := regexp.MustCompile(`[\\[\\(（【][A-Za-z0-9_\-×\s+\u4e00-\u9fa5\u0800-\u4e00\uac00-\ud7ff]+`)
+	re1 := regexp.MustCompile(`[\[\(（【][A-Za-z0-9_\-×\s+\p{Han}\p{Hiragana}\p{Katakana}\p{Hangul}]+`)
 	shortTitle = re1.ReplaceAllString(shortTitle, "")
 
-	re2 := regexp.MustCompile(`[\\]）】\\)]`)
+	re2 := regexp.MustCompile(`[\]）】\)]`)
 	shortTitle = re2.ReplaceAllString(shortTitle, "")
 
 	re3 := regexp.MustCompile(`\.(zip|rar|cbr|cbz|tar|pdf|mp3|mp4|flv|gz|webm|gif|png|jpg|jpeg|webp|svg|psd|bmp|tif)`)
@@ -162,13 +162,13 @@ func (b *BookInfo) ShortTitle() string {
 	re4 := regexp.MustCompile(`^[\s]`)
 	shortTitle = re4.ReplaceAllString(shortTitle, "")
 
-	re5 := regexp.MustCompile(`^[\\\-` + "`" + `~!@#$^&*()=|{}':;'@#￥……&*（）——|{}‘；：”“'。，、？]`)
+	re5 := regexp.MustCompile(`^[\-` + "`" + `~!@#$^&*()=|{}':;'@#￥……&*（）——|{}‘；：”“'。，、？]`)
 	shortTitle = re5.ReplaceAllString(shortTitle, "")
-
-	if len(shortTitle) <= 15 {
+	// rune 切片
+	if len([]rune(shortTitle)) <= 15 {
 		return shortTitle
 	}
-	return shortTitle[:15] + "…"
+	return string([]rune(shortTitle[:15])) + "…"
 }
 
 func GetBookInfoListByDepth(depth int, sortBy string) (*BookInfoList, error) {
