@@ -143,10 +143,13 @@ templ FlipMainArea(s *state.GlobalState, book *entity.Book) {
 	>
 		<noscript class="loading-lazy">
 			for key, image := range book.Pages.Images {
-				<img if key > 2 {
-	loading="lazy"
-} class="m-2 max-w-full lg:max-w-[800px] rounded shadow-lg" src={ image.Url }/>
-			}
+				if key <= 2 {
+					<img class="m-2 max-w-full lg:max-w-[800px] rounded shadow-lg" src={ image.Url }/>
+				}
+				if key > 2 {
+					<img loading="lazy" class="m-2 max-w-full lg:max-w-[800px] rounded shadow-lg" src={ image.Url }/>
+				}
+            }
 		</noscript>
 	</div>
 	    <button id="BackTopButton" style="display: none" class="fixed bottom-4 right-4 bg-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg">

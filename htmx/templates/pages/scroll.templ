@@ -137,19 +137,26 @@ mouseMoveArea.addEventListener('touchstart', onMouseClick)
 }
 
 templ ScrollMainArea(s *state.GlobalState, book *entity.Book) {
-	<div id="mouseMoveArea"
+	<div
+		id="mouseMoveArea"
 		class="flex flex-col items-center justify-center flex-1 w-full max-w-full bg-base-100 text-base-content"
 		:class="(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') && 'bg-base-300'"
 	>
 		<noscript class="loading-lazy">
 			for key, image := range book.Pages.Images {
-				<img if key > 2 {loading="lazy"} class="m-2 max-w-full lg:max-w-[800px] rounded shadow-lg" src={ image.Url }/>
+			<img hx-get={ image.Url+"&base64=true" } hx-target="this" hx-swap="outerHTML"/>
+				if key <= 2 && false{
+					<img class="m-2 max-w-full lg:max-w-[800px] rounded shadow-lg"  src={ image.Url }/>
+				}
+				if key > 2 && false{
+					<img loading="lazy" class="m-2 max-w-full lg:max-w-[800px] rounded shadow-lg" src={ image.Url }/>
+				}
 			}
 		</noscript>
 	</div>
-	    <button id="BackTopButton" style="display: none" class="fixed bottom-4 right-4 bg-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg">
-            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><path d="M256 48C141.13 48 48 141.13 48 256s93.13 208 208 208s208-93.13 208-208S370.87 48 256 48zm96 270.63l-96-96l-96 96L137.37 296L256 177.37L374.63 296z" fill="currentColor"></path></svg>
-        </button>
+	<button id="BackTopButton" style="display: none" class="fixed flex items-center justify-center w-10 h-10 text-white bg-blue-500 rounded-full shadow-lg bottom-4 right-4">
+		<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><path d="M256 48C141.13 48 48 141.13 48 256s93.13 208 208 208s208-93.13 208-208S370.87 48 256 48zm96 270.63l-96-96l-96 96L137.37 296L256 177.37L374.63 296z" fill="currentColor"></path></svg>
+	</button>
 	@ScrollScripts()
 }
 
