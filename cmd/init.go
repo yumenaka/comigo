@@ -64,7 +64,7 @@ func initFlags() {
 	//不对局域网开放
 	rootCmd.PersistentFlags().BoolVarP(&config.Config.DisableLAN, "disable-lan", "d", false, locale.GetString("DISABLE_LAN"))
 	//文件搜索深度
-	rootCmd.PersistentFlags().IntVarP(&config.Config.MaxScanDepth, "max-depth", "m", 3, locale.GetString("MAX_DEPTH"))
+	rootCmd.PersistentFlags().IntVarP(&config.Config.MaxScanDepth, "max-depth", "m", 5, locale.GetString("MAX_DEPTH"))
 	////服务器解析书籍元数据，如果生成blurhash，需要消耗大量资源
 	rootCmd.PersistentFlags().BoolVar(&config.Config.GenerateMetaData, "generate-metadata", false, locale.GetString("GENERATE_METADATA"))
 	//打印所有可用网卡ip

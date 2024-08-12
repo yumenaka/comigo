@@ -3,6 +3,7 @@ package router
 import (
 	"errors"
 	"github.com/yumenaka/comi/htmx/comigo"
+	"io/fs"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -38,13 +39,13 @@ func RunServer() (err error) {
 	// 为模板引擎定义 HTML 渲染器。
 	router.HTMLRender = &TemplRender{}
 	// 静态文件。
-	router.Static("/static", "./router/static")
-	//// 嵌入静态文件。
-	//staticFS, err := fs.Sub(static, "static")
-	//if err != nil {
-	//	logger.Infof("%s", err)
-	//}
-	//router.StaticFS("/static/", http.FS(staticFS))
+	//router.Static("/static", "./router/static")
+	// 嵌入静态文件。
+	staticFS, err := fs.Sub(static, "static")
+	if err != nil {
+		logger.Infof("%s", err)
+	}
+	router.StaticFS("/static/", http.FS(staticFS))
 	// 设置路由
 	bindURL(router)
 

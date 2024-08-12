@@ -1300,10 +1300,6 @@ input:checked + .toggle-bg {
   max-height: 100%;
 }
 
-.min-h-48 {
-  min-height: 12rem;
-}
-
 .min-h-64 {
   min-height: 16rem;
 }
@@ -1496,12 +1492,12 @@ input:checked + .toggle-bg {
   justify-content: space-between;
 }
 
-.gap-4 {
-  gap: 1rem;
-}
-
 .gap-6 {
   gap: 1.5rem;
+}
+
+.gap-8 {
+  gap: 2rem;
 }
 
 .space-x-2 > :not([hidden]) ~ :not([hidden]) {

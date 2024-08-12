@@ -13,13 +13,26 @@ import (
 
 // ShelfHandler 书架页面的处理程序。
 func ShelfHandler(c *gin.Context) {
-	// 书籍排列的方式，默认name
-	//sortBy := c.DefaultQuery("sort_by", "default")
-	// 如果传了maxDepth这个参数
+	//书籍排列的方式，默认name
+	sortBy := c.DefaultQuery("sort_by", "default")
+
+	// 获取书架信息。
+	id := c.Param("id")
 	var err error
-	state.Global.BooksList, err = entity.TopOfShelfInfo("name")
-	if err != nil {
-		logger.Infof("TopOfShelfInfo: %v", err)
+	if id == "" {
+		// 获取顶层书架信息。
+		state.Global.BooksList, err = entity.TopOfShelfInfo(sortBy)
+		if err != nil {
+			logger.Infof("TopOfShelfInfo: %v", err)
+			//TODO: 处理没有图书的情况（上传压缩包或远程下载示例漫画）
+		}
+	}
+	if id != "" {
+		// 通过书架ID获取书架信息。
+		state.Global.BooksList, err = entity.GetBookInfoListByID(id, sortBy)
+		if err != nil {
+			logger.Infof("GetBookShelf: %v", err)
+		}
 	}
 
 	// 网页meta标签。

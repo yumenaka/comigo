@@ -8,7 +8,6 @@ import 'tw-colors'
 // 将 Alpine 实例添加到窗口对象中。
 window.Alpine = Alpine
 
-
 // Alpine Persist 插件，用于持久化存储。默认存储到 localStorage。
 // 详细用法参见： https://alpinejs.dev/plugins/persist
 Alpine.plugin(persist)
@@ -73,17 +72,24 @@ document.getElementById('FullScreenIcon').addEventListener('click', () => {
 // 用Alpine Persist 注册全局变量
 // https://alpinejs.dev/plugins/persist#using-alpine-persist-global
 
-// readerMode 当前阅读模式
-Alpine.store('readerMode', Alpine.$persist("flip").as('readerMode'));
-
-// debugMode 是否开启调试模式
-Alpine.store('debugMode', Alpine.$persist(false).as('debugMode'));
+// global 全局设置
+Alpine.store('global', {
+    // debugMode 是否开启调试模式
+    debugMode: Alpine.$persist(false).as('global.debugMode'),
+    // readerMode 当前阅读模式
+    readMode: Alpine.$persist("flip").as('global.readMode'),
+    //是否通过websocket同步翻页
+    syncPageByWS: Alpine.$persist(true).as('global.syncPageByWS'),
+    // bookSortBy 书籍排序方式 以按照文件名、修改时间、文件大小排序（或反向排序）
+    bookSortBy: Alpine.$persist("name").as('global.bookSortBy'),
+    // pageSortBy 书页排序顺序 以按照文件名、修改时间、文件大小排序（或反向排序）
+    pageSortBy: Alpine.$persist("name").as('global.pageSortBy'),
+})
 
 // BookShelf 书架设置
 Alpine.store('BookShelf', {
     bookCardMode: Alpine.$persist("gird").as('BookShelf.bookCardMode'),//gird,list,text
     simplifyTitle: Alpine.$persist(true).as('BookShelf.simplifyTitle'),//是否简化标题
-    resort_hint_key: Alpine.$persist("filename").as('BookShelf.resort_hint_key'),
     InfiniteDropdown: true,//卷轴模式下，是否无限下拉
     bookCardShowTitleFlag: true, // 书库中的书籍是否显示文字版标题
     syncScrollFlag: false,// 同步滚动,目前还没做
@@ -106,7 +112,6 @@ Alpine.store('BookShelf', {
 Alpine.store('Scroll', {
     nowPageNum: 0,
     simplifyTitle: Alpine.$persist(true).as('Scroll.simplifyTitle'),//是否简化标题
-    resort_hint_key: Alpine.$persist("filename").as('Scroll.resort_hint_key'),
     //下拉模式下，漫画页面的底部间距。px。
     marginOnScrollMode: Alpine.$persist(10).as('Scroll.marginOnScrollMode'),
     //卷轴模式下，是否无限下拉
