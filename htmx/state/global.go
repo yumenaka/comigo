@@ -37,7 +37,7 @@ func init() {
 
 func GetCloverBackgroundImageUrl(book *entity.BookInfo) string {
 	imageUrl := book.Cover.Url
-	if strings.HasPrefix(book.Cover.Url, "api") {
+	if strings.HasPrefix(book.Cover.Url, "/api") {
 		imageUrl = book.Cover.Url + "&resize_width=256&resize_height=360&thumbnail_mode=true"
 	}
 	return imageUrl

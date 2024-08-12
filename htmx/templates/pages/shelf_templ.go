@@ -199,12 +199,13 @@ func ShelfMainArea(s *state.GlobalState) templ.Component {
 func getHref(book entity.BookInfo) string {
 	// 如果是书籍组，就跳转到子书架
 	if book.Type == entity.TypeBooksGroup {
-		return "/shelf/" + book.BookID + "/"
+		return "\"/shelf/" + book.BookID + "/\""
 	}
 	// 如果是视频、音频、未知文件，就在新窗口打开
 	if book.Type == entity.TypeVideo || book.Type == entity.TypeAudio || book.Type == entity.TypeUnknownFile {
-		return "/api/raw/" + book.BookID + "/" + url.QueryEscape(book.Title)
+		return "\"/api/raw/" + book.BookID + "/" + url.QueryEscape(book.Title) + "\""
 	}
+	// 其他情况，跳转到阅读页面,
 	return "'/'+$store.global.readMode+ '/' + BookID"
 }
 

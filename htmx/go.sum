@@ -509,6 +509,10 @@ github.com/yumenaka/comi v0.9.10-0.20240805153607-8590d0375328 h1:r6Ibz4j2+ysHmL
 github.com/yumenaka/comi v0.9.10-0.20240805153607-8590d0375328/go.mod h1:SLbHtkurVPrUPps/j9gG488/+Fc/B0hZ7Gob04UseQk=
 github.com/yumenaka/comi v0.9.10-0.20240812044302-81f33b44685f h1:eqIWvbrSvWX2zuVvEi4URR5BB640cC4zqzDDcwahVeI=
 github.com/yumenaka/comi v0.9.10-0.20240812044302-81f33b44685f/go.mod h1:SLbHtkurVPrUPps/j9gG488/+Fc/B0hZ7Gob04UseQk=
+github.com/yumenaka/comi v0.9.10-0.20240812052642-472c173d186c h1:o67cfRM4oLfdvFGle2gl3YczydftNxlQg3XSz6Q7dIM=
+github.com/yumenaka/comi v0.9.10-0.20240812052642-472c173d186c/go.mod h1:SLbHtkurVPrUPps/j9gG488/+Fc/B0hZ7Gob04UseQk=
+github.com/yumenaka/comi v0.9.10-0.20240812064318-f19f18448cd6 h1:KoNJR3EUhFkjN7+9g36d+njuFH9v6EvaMjIc/67q/NU=
+github.com/yumenaka/comi v0.9.10-0.20240812064318-f19f18448cd6/go.mod h1:SLbHtkurVPrUPps/j9gG488/+Fc/B0hZ7Gob04UseQk=
 github.com/yusufpapurcu/wmi v1.2.4 h1:zFUKzehAFReQwLys1b/iSMl+JQGSCSjtVqQn9bBrPo0=
 github.com/yusufpapurcu/wmi v1.2.4/go.mod h1:SBZ9tNy3G9/m5Oi98Zks0QjeHVDvuK0qfxQmPyzfmi0=
 github.com/zclconf/go-cty v1.14.4 h1:uXXczd9QDGsgu0i/QFR/hzI5NYCHLf6NQw/atrbnhq8=
