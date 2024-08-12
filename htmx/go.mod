@@ -7,7 +7,7 @@ require (
 	github.com/angelofallars/htmx-go v0.5.0
 	github.com/gin-gonic/gin v1.10.0
 	github.com/gowebly/helpers v0.4.0
-	github.com/yumenaka/comi v0.9.10-0.20240812124227-d98a14dc70e3
+	github.com/yumenaka/comi v0.9.10-0.20240812160430-a4f855fc5cff
 )
 
 require (
@@ -141,7 +141,7 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	modernc.org/gc/v3 v3.0.0-20240801135723-a856999a2e4a // indirect
-	modernc.org/libc v1.59.1 // indirect
+	modernc.org/libc v1.59.2 // indirect
 	modernc.org/mathutil v1.6.0 // indirect
 	modernc.org/memory v1.8.0 // indirect
 	modernc.org/sqlite v1.32.0 // indirect

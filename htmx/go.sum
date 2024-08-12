@@ -517,6 +517,8 @@ github.com/yumenaka/comi v0.9.10-0.20240812122353-f24cb933608a h1:EpX2m26d6FMNDK
 github.com/yumenaka/comi v0.9.10-0.20240812122353-f24cb933608a/go.mod h1:SLbHtkurVPrUPps/j9gG488/+Fc/B0hZ7Gob04UseQk=
 github.com/yumenaka/comi v0.9.10-0.20240812124227-d98a14dc70e3 h1:gy9i4Z3PZXhq6f1GiLFeTKgYcAHlT2u6T+akaIeU1pI=
 github.com/yumenaka/comi v0.9.10-0.20240812124227-d98a14dc70e3/go.mod h1:SLbHtkurVPrUPps/j9gG488/+Fc/B0hZ7Gob04UseQk=
+github.com/yumenaka/comi v0.9.10-0.20240812160430-a4f855fc5cff h1:gSBWRiFGwwRBtZTwFIT9bVlF6LZjE8XXXs4Sz8hd0yI=
+github.com/yumenaka/comi v0.9.10-0.20240812160430-a4f855fc5cff/go.mod h1:SLbHtkurVPrUPps/j9gG488/+Fc/B0hZ7Gob04UseQk=
 github.com/yusufpapurcu/wmi v1.2.4 h1:zFUKzehAFReQwLys1b/iSMl+JQGSCSjtVqQn9bBrPo0=
 github.com/yusufpapurcu/wmi v1.2.4/go.mod h1:SBZ9tNy3G9/m5Oi98Zks0QjeHVDvuK0qfxQmPyzfmi0=
 github.com/zclconf/go-cty v1.14.4 h1:uXXczd9QDGsgu0i/QFR/hzI5NYCHLf6NQw/atrbnhq8=
@@ -868,6 +870,8 @@ modernc.org/libc v1.56.0 h1:O9Xq2c2MnP1bU69vbPX5jHQyQfElMprUR94GlBljRaw=
 modernc.org/libc v1.56.0/go.mod h1:s9jnOo7LcO1G9+nGj4GY/+Fj8+teenJoC/WfVxnSd+M=
 modernc.org/libc v1.59.1 h1:ZVsgtxNu5OyIsX0Qq6T4aN7IxP1YTmvKZuf8T5fV0Ro=
 modernc.org/libc v1.59.1/go.mod h1:EY/egGEU7Ju66eU6SBqCNYaFUDuc4npICkMWnU5EE3A=
+modernc.org/libc v1.59.2 h1:wgPtnOeUhblvumpyNjvFQGryTZn6INQ5TrJDcWPJd+g=
+modernc.org/libc v1.59.2/go.mod h1:EY/egGEU7Ju66eU6SBqCNYaFUDuc4npICkMWnU5EE3A=
 modernc.org/mathutil v1.6.0 h1:fRe9+AmYlaej+64JsEEhoWuAYBkOtQiMEU7n/XgfYi4=
 modernc.org/mathutil v1.6.0/go.mod h1:Ui5Q9q1TR2gFm0AQRqQUaBWFLAhQpCwNcuhBOSedWPo=
 modernc.org/memory v1.8.0 h1:IqGTL6eFMaDZZhEWwcREgeMXYwmW83LYW8cROZYkg+E=
