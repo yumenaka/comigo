@@ -515,6 +515,8 @@ github.com/yumenaka/comi v0.9.10-0.20240812064318-f19f18448cd6 h1:KoNJR3EUhFkjN7
 github.com/yumenaka/comi v0.9.10-0.20240812064318-f19f18448cd6/go.mod h1:SLbHtkurVPrUPps/j9gG488/+Fc/B0hZ7Gob04UseQk=
 github.com/yumenaka/comi v0.9.10-0.20240812122353-f24cb933608a h1:EpX2m26d6FMNDKXVz9bUtLh7sfU7isR7hTijURKnKdE=
 github.com/yumenaka/comi v0.9.10-0.20240812122353-f24cb933608a/go.mod h1:SLbHtkurVPrUPps/j9gG488/+Fc/B0hZ7Gob04UseQk=
+github.com/yumenaka/comi v0.9.10-0.20240812124227-d98a14dc70e3 h1:gy9i4Z3PZXhq6f1GiLFeTKgYcAHlT2u6T+akaIeU1pI=
+github.com/yumenaka/comi v0.9.10-0.20240812124227-d98a14dc70e3/go.mod h1:SLbHtkurVPrUPps/j9gG488/+Fc/B0hZ7Gob04UseQk=
 github.com/yusufpapurcu/wmi v1.2.4 h1:zFUKzehAFReQwLys1b/iSMl+JQGSCSjtVqQn9bBrPo0=
 github.com/yusufpapurcu/wmi v1.2.4/go.mod h1:SBZ9tNy3G9/m5Oi98Zks0QjeHVDvuK0qfxQmPyzfmi0=
 github.com/zclconf/go-cty v1.14.4 h1:uXXczd9QDGsgu0i/QFR/hzI5NYCHLf6NQw/atrbnhq8=

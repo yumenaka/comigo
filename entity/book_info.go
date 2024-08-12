@@ -168,7 +168,7 @@ func (b *BookInfo) ShortTitle() string {
 	if len([]rune(shortTitle)) <= 15 {
 		return shortTitle
 	}
-	return string([]rune(shortTitle[:15])) + "…"
+	return string([]rune(shortTitle)[:15]) + "…"
 }
 
 func GetBookInfoListByDepth(depth int, sortBy string) (*BookInfoList, error) {
