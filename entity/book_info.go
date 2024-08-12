@@ -267,6 +267,13 @@ func TopOfShelfInfo(sortBy string) (*BookInfoList, error) {
 		}
 		return true
 	})
+	mapBookGroup.Range(func(_, value interface{}) bool {
+		group := value.(*BookGroup)
+		if group.BookInfo.Depth == 1 {
+			infoList.BookInfos = append(infoList.BookInfos, group.BookInfo)
+		}
+		return true
+	})
 	if len(infoList.BookInfos) > 0 {
 		infoList.SortBooks(sortBy)
 		return &infoList, nil
