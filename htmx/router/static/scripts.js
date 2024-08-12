@@ -19126,10 +19126,15 @@ document.getElementById("FullScreenIcon").addEventListener("click", ()=>{
 });
 // 用Alpine Persist 注册全局变量
 // https://alpinejs.dev/plugins/persist#using-alpine-persist-global
-// readerMode 当前阅读模式
-(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("readerMode", (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist("flip").as("readerMode"));
-// debugMode 是否开启调试模式
-(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("debugMode", (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("debugMode"));
+// global 全局设置
+(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("global", {
+    // readerMode 当前阅读模式
+    readMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist("flip").as("global.readMode"),
+    // debugMode 是否开启调试模式
+    debugMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("global.debugMode"),
+    //是否通过websocket同步翻页
+    syncPageByWS: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("global.syncPageByWS")
+});
 // BookShelf 书架设置
 (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("BookShelf", {
     bookCardMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist("gird").as("BookShelf.bookCardMode"),
