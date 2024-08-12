@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"encoding/base64"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -139,35 +137,34 @@ func GetFile(c *gin.Context) {
 			logger.Info(errSave)
 		}
 	}
-	// 是否需要base64编码
-	// https://freshman.tech/snippets/go/image-to-base64/
-	base64Encode := c.DefaultQuery("base64Encode", "false") == "true"
-	if base64Encode {
-		var base64Encoding string
-		// Determine the content type of the image file
-		mimeType := http.DetectContentType(imgData)
-		// Prepend the appropriate URI scheme header depending
-		// on the MIME type
-		switch mimeType {
-		case "image/jpeg":
-			base64Encoding += "data:image/jpeg;base64Encode,"
-		case "image/png":
-			base64Encoding += "data:image/png;base64Encode,"
-		case "image/gif":
-			base64Encoding += "data:image/gif;base64Encode,"
-		case "image/webp":
-			base64Encoding += "data:image/webp;base64Encode,"
-		case "image/svg+xml":
-			base64Encoding += "data:image/svg+xml;base64Encode,"
-		case "image/bmp":
-			base64Encoding += "data:image/bmp;base64Encode,"
-		case "image/avif":
-			base64Encoding += "data:image/avif;base64Encode,"
-		}
-		base64Encoding += base64.StdEncoding.EncodeToString(imgData)
-		// 返回包含 base64 编码数据的 img 标签
-		c.String(http.StatusOK, fmt.Sprintf(`<img class="m-2 max-w-full lg:max-w-[800px] rounded shadow-lg" src="%s" alt="Base64 Image"/>`, base64Encoding))
-	}
-
+	//// 是否需要base64编码
+	//// https://freshman.tech/snippets/go/image-to-base64/
+	//base64Encode := c.DefaultQuery("base64Encode", "false") == "true"
+	//if base64Encode {
+	//	var base64Encoding string
+	//	// Determine the content type of the image file
+	//	mimeType := http.DetectContentType(imgData)
+	//	// Prepend the appropriate URI scheme header depending
+	//	// on the MIME type
+	//	switch mimeType {
+	//	case "image/jpeg":
+	//		base64Encoding += "data:image/jpeg;base64Encode,"
+	//	case "image/png":
+	//		base64Encoding += "data:image/png;base64Encode,"
+	//	case "image/gif":
+	//		base64Encoding += "data:image/gif;base64Encode,"
+	//	case "image/webp":
+	//		base64Encoding += "data:image/webp;base64Encode,"
+	//	case "image/svg+xml":
+	//		base64Encoding += "data:image/svg+xml;base64Encode,"
+	//	case "image/bmp":
+	//		base64Encoding += "data:image/bmp;base64Encode,"
+	//	case "image/avif":
+	//		base64Encoding += "data:image/avif;base64Encode,"
+	//	}
+	//	base64Encoding += base64.StdEncoding.EncodeToString(imgData)
+	//	// 返回包含 base64 编码数据的 img 标签
+	//	c.String(http.StatusOK, fmt.Sprintf(`<img class="m-2 max-w-full lg:max-w-[800px] rounded shadow-lg" src="%s" alt="Base64 Image"/>`, base64Encoding))
+	//}
 	c.Data(http.StatusOK, contentType, imgData)
 }
