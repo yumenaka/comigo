@@ -145,7 +145,7 @@ templ FlipMainArea(s *state.GlobalState, book *entity.Book) {
 			for key, image := range book.Pages.Images {
 				<img if key > 2 {
 	loading="lazy"
-} class="m-2 max-w-full lg:max-w-[800px] rounded shadow-lg" src={ getImageUrl(image.Url) }/>
+} class="m-2 max-w-full lg:max-w-[800px] rounded shadow-lg" src={ image.Url }/>
 			}
 		</noscript>
 	</div>

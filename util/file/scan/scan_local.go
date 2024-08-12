@@ -170,7 +170,7 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 		newBook.InitComplete = true
 		newBook.SetClover(entity.ImageInfo{RealImageFilePATH: "", FileSize: FileInfo.Size(), ModeTime: FileInfo.ModTime(), NameInArchive: "", Url: "/images/pdf.png"})
 		for i := 1; i <= pageCount; i++ {
-			TempURL := "api/get_file?id=" + newBook.BookID + "&filename=" + strconv.Itoa(i) + ".jpg"
+			TempURL := "/api/get_file?id=" + newBook.BookID + "&filename=" + strconv.Itoa(i) + ".jpg"
 			newBook.Pages.Images = append(newBook.Pages.Images, entity.ImageInfo{RealImageFilePATH: "", FileSize: FileInfo.Size(), ModeTime: FileInfo.ModTime(), NameInArchive: strconv.Itoa(i), Url: TempURL})
 		}
 	// TODO：简单的网页播放器
@@ -218,14 +218,14 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 					////用Archiver的虚拟文件系统提供图片文件，理论上现在不应该用到
 					//newBook.Pages = append(newBook.Pages, ImageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: "", Url: "/cache/" + newBook.BookID + "/" + url.QueryEscape(path)})
 					//实验：用get_file接口提供文件服务
-					TempURL := "api/get_file?id=" + newBook.BookID + "&filename=" + url.QueryEscape(path)
+					TempURL := "/api/get_file?id=" + newBook.BookID + "&filename=" + url.QueryEscape(path)
 					newBook.Pages.Images = append(newBook.Pages.Images, entity.ImageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: "", Url: TempURL})
 					// logger.Infof(locale.GetString("unsupported_extract")+" %s", f)
 				} else {
 					// 替换特殊字符的时候，额外将“+替换成"%2b"，因为gin会将+解析为空格。
-					TempURL := "api/get_file?id=" + newBook.BookID + "&filename=" + url.QueryEscape(u.NameInArchive)
+					TempURL := "/api/get_file?id=" + newBook.BookID + "&filename=" + url.QueryEscape(u.NameInArchive)
 					// 不替换特殊字符
-					// TempURL := "api/get_file?id=" + newBook.BookID + "&filename=" + u.NameInArchive
+					// TempURL := "/api/get_file?id=" + newBook.BookID + "&filename=" + u.NameInArchive
 					newBook.Pages.Images = append(newBook.Pages.Images, entity.ImageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: u.NameInArchive, Url: TempURL})
 				}
 			}
@@ -270,7 +270,7 @@ func scanDirGetBook(dirPath string, storePath string, depth int, scanOption Opti
 			logger.Info(errPath)
 		}
 		if scanOption.IsSupportMedia(file.Name()) {
-			TempURL := "api/get_file?id=" + newBook.BookID + "&filename=" + url.QueryEscape(file.Name())
+			TempURL := "/api/get_file?id=" + newBook.BookID + "&filename=" + url.QueryEscape(file.Name())
 			newBook.Pages.Images = append(newBook.Pages.Images, entity.ImageInfo{RealImageFilePATH: strAbsPath, FileSize: file.Size(), ModeTime: file.ModTime(), NameInArchive: file.Name(), Url: TempURL})
 		}
 	}

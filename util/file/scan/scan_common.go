@@ -159,7 +159,7 @@ func scanNonUTF8ZipFile(filePath string, b *entity.Book, scanOption Option) erro
 		if scanOption.IsSupportMedia(f.Name) {
 			// 如果是压缩文件
 			// 替换特殊字符的时候，额外将“+替换成"%2b"，因为gin会将+解析为空格。
-			TempURL := "api/get_file?id=" + b.BookID + "&filename=" + url.QueryEscape(f.Name)
+			TempURL := "/api/get_file?id=" + b.BookID + "&filename=" + url.QueryEscape(f.Name)
 			b.Pages.Images = append(b.Pages.Images, entity.ImageInfo{RealImageFilePATH: "", FileSize: f.FileInfo().Size(), ModeTime: f.FileInfo().ModTime(), NameInArchive: f.Name, Url: TempURL})
 		} else {
 			if scanOption.Debug {
@@ -202,7 +202,7 @@ func walkUTF8ZipFs(fsys fs.FS, parent, base string, b *entity.Book, scanOption O
 			}
 		} else {
 			inArchiveName := path.Join(parent, f.Name())
-			TempURL := "api/get_file?id=" + b.BookID + "&filename=" + url.QueryEscape(inArchiveName)
+			TempURL := "/api/get_file?id=" + b.BookID + "&filename=" + url.QueryEscape(inArchiveName)
 			// 替换特殊字符的时候,不要用url.PathEscape()，PathEscape不会把“+“替换成"%2b"，会导致BUG，让gin会将+解析为空格。
 			b.Pages.Images = append(b.Pages.Images, entity.ImageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: inArchiveName, Url: TempURL})
 		}

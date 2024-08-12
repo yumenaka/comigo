@@ -33,7 +33,7 @@ templ ShelfMainArea(s *state.GlobalState) {
 		for _, book := range s.BooksList.BookInfos {
 		    <!-- 用go-templ，创建Alpine的x-data。 -->
 			<!-- 如果把链接的 target 属性设置为 "_blank"，该链接会在新窗口中打开。 -->
-			<a   x-data={fmt.Sprintf("{ BookID: %s }", "\""+book.BookID+"\""  ) } :href={ getHref(book) }
+			<a   x-data={fmt.Sprintf("{ BookID: %s }", "\""+book.BookID+"\""  ) } :href={ getHref(book)}
 			  target={ getTarget(book) } class={ backgroundImage(state.GetCloverBackgroundImageUrl(&book)) , "relative w-32 mx-4 my-4 bg-top bg-cover rounded shadow-xl h-44 hover:shadow-2xl ring-1 ring-gray-400 hover:ring hover:ring-blue-500 overflow-hidden" }>
 				<!-- 书籍类型图标 -->
 				<!-- <SvgBookIcon :book_info="book_info"></SvgBookIcon> -->
@@ -56,12 +56,13 @@ templ ShelfMainArea(s *state.GlobalState) {
 func getHref(book entity.BookInfo) string {
     // 如果是书籍组，就跳转到子书架
     if book.Type == entity.TypeBooksGroup {
-        return  "/shelf/" + book.BookID+ "/"
+        return  "\"/shelf/" + book.BookID+ "/\""
     }
     // 如果是视频、音频、未知文件，就在新窗口打开
 	if book.Type == entity.TypeVideo || book.Type == entity.TypeAudio || book.Type == entity.TypeUnknownFile {
-		return "/api/raw/" + book.BookID+ "/" +url.QueryEscape(book.Title)
+		return "\"/api/raw/" + book.BookID+ "/" +url.QueryEscape(book.Title)+ "\""
 	}
+	// 其他情况，跳转到阅读页面,
 	return "'/'+$store.global.readMode+ '/' + BookID"
 }
 
