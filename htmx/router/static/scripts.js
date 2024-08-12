@@ -19128,18 +19128,26 @@ document.getElementById("FullScreenIcon").addEventListener("click", ()=>{
 // https://alpinejs.dev/plugins/persist#using-alpine-persist-global
 // global 全局设置
 (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("global", {
-    // readerMode 当前阅读模式
-    readMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist("flip").as("global.readMode"),
     // debugMode 是否开启调试模式
     debugMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("global.debugMode"),
+    // readerMode 当前阅读模式
+    readMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist("flip").as("global.readMode"),
     //是否通过websocket同步翻页
-    syncPageByWS: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("global.syncPageByWS")
+    syncPageByWS: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("global.syncPageByWS"),
+    // bookSortBy 书籍排序方式 以按照文件名、修改时间、文件大小排序（或反向排序）
+    bookSortBy: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist("name").as("global.bookSortBy"),
+    // pageSortBy 书页排序顺序 以按照文件名、修改时间、文件大小排序（或反向排序）
+    pageSortBy: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist("name").as("global.pageSortBy"),
+    language: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist("en").as("global.language"),
+    toggleReadMode () {
+        this.readMode = this.readMode === "flip" ? "scroll" : "flip";
+    }
 });
 // BookShelf 书架设置
-(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("BookShelf", {
-    bookCardMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist("gird").as("BookShelf.bookCardMode"),
-    simplifyTitle: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("BookShelf.simplifyTitle"),
-    resort_hint_key: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist("filename").as("BookShelf.resort_hint_key"),
+(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("shelf", {
+    bookCardMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist("gird").as("shelf.bookCardMode"),
+    showTitle: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("shelf.showTitle"),
+    simplifyTitle: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("shelf.simplifyTitle"),
     InfiniteDropdown: true,
     bookCardShowTitleFlag: true,
     syncScrollFlag: false,
@@ -19152,23 +19160,19 @@ document.getElementById("FullScreenIcon").addEventListener("click", ()=>{
     aspectRatio: 1.2,
     // 可见范围宽高的具体值
     clientWidth: 0,
-    clientHeight: 0,
-    toggleSimplifyTitle () {
-        this.simplifyTitle = !this.simplifyTitle;
-    }
+    clientHeight: 0
 });
 // Scroll 卷轴模式
-(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("Scroll", {
+(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("scroll", {
     nowPageNum: 0,
-    simplifyTitle: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("Scroll.simplifyTitle"),
-    resort_hint_key: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist("filename").as("Scroll.resort_hint_key"),
+    simplifyTitle: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("scroll.simplifyTitle"),
     //下拉模式下，漫画页面的底部间距。px。
-    marginOnScrollMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(10).as("Scroll.marginOnScrollMode"),
+    marginOnScrollMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(10).as("scroll.marginOnScrollMode"),
     //卷轴模式下，是否无限下拉
-    InfiniteDropdown: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("Scroll.InfiniteDropdown"),
+    InfiniteDropdown: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("scroll.InfiniteDropdown"),
     // 书库中的书籍是否显示文字版标题
-    bookCardShowTitleFlag: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("Scroll.bookCardShowTitleFlag"),
-    syncScrollFlag: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("Scroll.syncScrollFlag"),
+    bookCardShowTitleFlag: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("scroll.bookCardShowTitleFlag"),
+    syncScrollFlag: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("scroll.syncScrollFlag"),
     scrollTopSave: 0,
     imageMaxWidth: 800,
     // 屏幕宽横比,inLandscapeMode的判断依据
@@ -19193,10 +19197,7 @@ document.getElementById("FullScreenIcon").addEventListener("click", ()=>{
     //是否显示页数
     showPageNumFlag_ScrollMode: false,
     //ws翻页相关
-    syncPageByWS: true,
-    toggleSimplifyTitle () {
-        this.simplifyTitle = !this.simplifyTitle;
-    }
+    syncPageByWS: true //是否通过websocket同步翻页
 });
 // Flip 翻页模式
 (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("Flip", {
