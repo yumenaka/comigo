@@ -206,11 +206,7 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 				logger.Info(errInfo)
 				return fs.SkipDir
 			}
-			if !scanOption.IsSupportMedia(path) {
-				if scanOption.Debug {
-					logger.Infof(locale.GetString("unsupported_file_type")+"%s", path)
-				}
-			} else {
+			if scanOption.IsSupportMedia(path) {
 				u, ok := f.(archiver.File) // f.Name不包含路径信息.需要转换一下
 				if !ok {
 					// 如果是文件夹+图片
@@ -227,6 +223,10 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 					// 不替换特殊字符
 					// TempURL := "/api/get_file?id=" + newBook.BookID + "&filename=" + u.NameInArchive
 					newBook.Pages.Images = append(newBook.Pages.Images, entity.ImageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: u.NameInArchive, Url: TempURL})
+				}
+			} else {
+				if scanOption.Debug {
+					logger.Infof(locale.GetString("unsupported_file_type")+"%s", path)
 				}
 			}
 			return nil
