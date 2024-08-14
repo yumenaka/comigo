@@ -10,11 +10,6 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import "github.com/yumenaka/comi/htmx/state"
 
-func serverHostBindStr(serverHost string) string {
-	//"{ serverHost: 'abc.com' }"
-	return "{ serverHost: '" + serverHost + "' }"
-}
-
 func QRCode(s *state.GlobalState) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -40,7 +35,7 @@ func QRCode(s *state.GlobalState) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(serverHostBindStr(s.ServerStatus.ServerHost))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/components/qrcode.templ`, Line: 12, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/components/qrcode.templ`, Line: 9, Col: 61}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {

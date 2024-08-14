@@ -141,6 +141,29 @@ templ FlipMainArea(s *state.GlobalState, book *entity.Book) {
 		class="flex flex-col items-center justify-center flex-1 w-full max-w-full bg-base-100 text-base-content"
 		:class="(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') && 'bg-base-300'"
 	>
+	      <div class="manga_area" id="MangaMain" @click.stop="onMouseClick" @mousemove.stop="onMouseMove"
+            @mouseleave.stop="onMouseLeave">
+            <div class="manga_area_img_div">
+              <!-- 非自动拼合模式最简单,直接显示一张图 -->
+              <img class="w-auto h-auto" v-bind:src="imageParametersString(book.pages.images[nowPageNum - 1].url)
+            " v-bind:alt="nowPageNum.toString()" />
+
+              <!-- 简单拼合双页,不管单双页什么的 -->
+              <img v-if="!FlipModeConfig.autoDoublePageModeFlag &&
+              FlipModeConfig.doublePageModeFlag &&
+              nowPageNum < book.page_count
+            " v-bind:src="imageParametersString(book.pages.images[nowPageNum].url)
+            " v-bind:alt="(nowPageNum + 1).toString()" />
+
+              <!-- 自动拼合模式当前页,如果开启自动拼合,右边可能显示拼合页 -->
+              <img v-if="FlipModeConfig.autoDoublePageModeFlag &&
+              nowPageNum < book.page_count &&
+            nowAndNextPageIsSingle()
+            " v-bind:src="imageParametersString(book.pages.images[nowPageNum].url)
+            " v-bind:alt="(nowPageNum + 1).toString()" />
+            </div>
+          </div>
+
 		<noscript class="loading-lazy">
 			for key, image := range book.Pages.Images {
 				if key <= 2 {
@@ -158,6 +181,10 @@ templ FlipMainArea(s *state.GlobalState, book *entity.Book) {
 	@FlipScripts()
 }
 
+templ FlipDrawerSlot() {
+      <div></div>
+}
+
 // FlipPage 定义 BodyHTML
 templ FlipPage(s *state.GlobalState, book *entity.Book) {
 	@components.Header(components.HeaderProps{
@@ -170,6 +197,6 @@ templ FlipPage(s *state.GlobalState, book *entity.Book) {
 	})
 	@FlipMainArea(s, book)
 	@components.Footer(s.Version)
-	@components.Drawer(s)
+	@components.Drawer(s,FlipDrawerSlot())
 	@components.QRCode(s)
 }
