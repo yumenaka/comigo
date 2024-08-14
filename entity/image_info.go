@@ -24,6 +24,7 @@ type ImageInfo struct {
 	FileSize          int64     `json:"-"`        //这个字段不解析
 	RealImageFilePATH string    `json:"-"`        //这个字段不解析  书籍为文件夹的时候，实际图片的路径
 	ImgType           string    `json:"-"`        //这个字段不解析
+	InsertHtml        string    `json:"-"`        //这个字段不解析
 }
 
 // analyzeImage 获取某页漫画的分辨率与blurhash

@@ -45,6 +45,7 @@ func StartScan(args []string) {
 		config.Config.ExcludePath,
 		config.Config.SupportMediaType,
 		config.Config.SupportFileType,
+		config.Config.SupportTemplateFile,
 		config.Config.ZipFileTextEncoding,
 		config.Config.EnableDatabase,
 		config.Config.ClearDatabaseWhenExit,

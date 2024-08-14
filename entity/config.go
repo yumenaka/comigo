@@ -89,6 +89,7 @@ type ComigoConfig struct {
 	ExcludePath            []string    `json:"ExcludePath" comment:"扫描书籍的时候，需要排除的文件或文件夹的名字"`
 	SupportMediaType       []string    `json:"SupportMediaType" comment:"扫描压缩包时，用于统计图片数量的图片文件后缀"`
 	SupportFileType        []string    `json:"SupportFileType" comment:"支持的书籍压缩包后缀"`
+	SupportTemplateFile    []string    `json:"SupportTemplateFile" comment:"支持的模板文件类型，默认为html"`
 	MinImageNum            int         `json:"MinImageNum" comment:"压缩包或文件夹内，至少有几张图片，才算作书籍"`
 	TimeoutLimitForScan    int         `json:"TimeoutLimitForScan" comment:"扫描文件时，超过几秒钟，就放弃扫描这个文件，避免卡在特殊文件上"`
 	EnableUpload           bool        `json:"EnableUpload" comment:"启用上传功能"`

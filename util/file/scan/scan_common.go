@@ -23,6 +23,7 @@ type Option struct {
 	ExcludePath           []string           // 排除路径
 	SupportMediaType      []string           // 支持的媒体类型
 	SupportFileType       []string           // 支持的文件类型
+	SupportTemplateFile   []string           // 支持的模板文件类型，默认为html
 	ZipFileTextEncoding   string             // 非UTF-8编码的ZIP文件，尝试用什么编码解析，默认GBK
 	EnableDatabase        bool               // 启用数据库
 	ClearDatabaseWhenExit bool               // 启用数据库时，扫描完成后，清除不存在的书籍
@@ -39,6 +40,7 @@ func NewScanOption(
 	excludePath []string,
 	supportMediaType []string,
 	supportFileType []string,
+	supportTemplateFile []string, // 支持的模板文件类型，默认为html
 	zipFileTextEncoding string,
 	enableDatabase bool,
 	clearDatabaseWhenExit bool,
@@ -54,11 +56,23 @@ func NewScanOption(
 		ExcludePath:           excludePath,
 		SupportMediaType:      supportMediaType,
 		SupportFileType:       supportFileType,
+		SupportTemplateFile:   supportTemplateFile,
 		ZipFileTextEncoding:   zipFileTextEncoding,
 		EnableDatabase:        enableDatabase,
 		ClearDatabaseWhenExit: clearDatabaseWhenExit,
 		Debug:                 debug,
 	}
+}
+
+// SupportTemplateFile 判断压缩包内的文件是否是支持的模板文件
+func (o *Option) IsSupportTemplate(checkPath string) bool {
+	for _, ex := range o.SupportTemplateFile {
+		suffix := strings.ToLower(path.Ext(checkPath)) //strings.ToLower():某些文件会用大写文件名
+		if ex == suffix {
+			return true
+		}
+	}
+	return false
 }
 
 // IsSupportMedia 判断压缩包内的文件是否需要展示（包括图片、音频、视频、PDF在内的媒体文件）
@@ -196,15 +210,15 @@ func walkUTF8ZipFs(fsys fs.FS, parent, base string, b *entity.Book, scanOption O
 			}
 			joinPath := path.Join(parent, name)
 			err = walkUTF8ZipFs(fsys, joinPath, base, b, scanOption)
-		} else if !scanOption.IsSupportMedia(name) {
-			if scanOption.Debug {
-				logger.Infof(locale.GetString("unsupported_file_type")+" %s", name)
-			}
-		} else {
+		} else if scanOption.IsSupportMedia(name) {
 			inArchiveName := path.Join(parent, f.Name())
 			TempURL := "/api/get_file?id=" + b.BookID + "&filename=" + url.QueryEscape(inArchiveName)
 			// 替换特殊字符的时候,不要用url.PathEscape()，PathEscape不会把“+“替换成"%2b"，会导致BUG，让gin会将+解析为空格。
 			b.Pages.Images = append(b.Pages.Images, entity.ImageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: inArchiveName, Url: TempURL})
+		} else {
+			if scanOption.Debug {
+				logger.Infof(locale.GetString("unsupported_file_type")+" %s", name)
+			}
 		}
 	}
 	b.SortPages("default")

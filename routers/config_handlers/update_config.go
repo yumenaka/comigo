@@ -113,6 +113,7 @@ func performScanAndUpdateDBIfNeeded(newConfig *entity.ComigoConfig, reScanFile b
 		newConfig.ExcludePath,
 		newConfig.SupportMediaType,
 		newConfig.SupportFileType,
+		config.Config.SupportTemplateFile,
 		newConfig.ZipFileTextEncoding,
 		newConfig.EnableDatabase,
 		newConfig.ClearDatabaseWhenExit,
