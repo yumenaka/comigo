@@ -1179,6 +1179,11 @@ input:checked + .toggle-bg {
   margin-bottom: 0;
 }
 
+.my-2 {
+  margin-top: .5rem;
+  margin-bottom: .5rem;
+}
+
 .my-4 {
   margin-top: 1rem;
   margin-bottom: 1rem;
@@ -1284,6 +1289,10 @@ input:checked + .toggle-bg {
   height: 11rem;
 }
 
+.h-48 {
+  height: 12rem;
+}
+
 .h-6 {
   height: 1.5rem;
 }
@@ -1302,6 +1311,10 @@ input:checked + .toggle-bg {
 
 .h-\[calc\(100\%-1rem\)\] {
   height: calc(100% - 1rem);
+}
+
+.h-auto {
+  height: auto;
 }
 
 .h-full {
@@ -1344,12 +1357,20 @@ input:checked + .toggle-bg {
   width: 1rem;
 }
 
+.w-48 {
+  width: 12rem;
+}
+
 .w-64 {
   width: 16rem;
 }
 
 .w-8 {
   width: 2rem;
+}
+
+.w-auto {
+  width: auto;
 }
 
 .w-full {

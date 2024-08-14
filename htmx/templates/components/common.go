@@ -9,6 +9,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func serverHostBindStr(serverHost string) string {
+	//"{ serverHost: 'abc.com' }"
+	return "{ serverHost: '" + serverHost + "' }"
+}
+
 // ShowContentAPIHandler 处理一个用于显示内容的 API
 func ShowContentAPIHandler(c *gin.Context) {
 	// 检查当前请求是否有 'HX-Request' 头部。

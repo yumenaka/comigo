@@ -21,8 +21,35 @@ templ ShelfPage(s *state.GlobalState) {
 	})
 	@ShelfMainArea(s)
 	@components.Footer(s.Version)
-	@components.Drawer(s)
+	@components.Drawer(s, ShelfDrawerSlot())
 	@components.QRCode(s)
+}
+
+templ ShelfDrawerSlot() {
+	<!-- <div class="w-full font-semibold text-left">阅读模式</div> -->
+	<!--阅读模式的toggle  https://flowbite.com/docs/forms/toggle/ -->
+	<label class="inline-flex items-center w-full my-2 cursor-pointer">
+		<input type="checkbox" :value="$store.global.readMode === 'scroll'" x-on:click="$store.global.toggleReadMode()" class="sr-only peer"/>
+		<div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+		<span class="text-sm font-medium text-gray-900 ms-3 dark:text-gray-300" x-text="$store.global.readMode === 'scroll'?'卷轴模式':'翻页模式'">Toggle me</span>
+	</label>
+	<!-- <div class="w-full my-2 font-semibold text-left">显示书名</div> -->
+	<label class="inline-flex items-center w-full my-2 cursor-pointer">
+		<input type="checkbox" :value="$store.shelf.showTitle" x-on:click="$store.shelf.showTitle =!$store.shelf.showTitle" class="sr-only peer"/>
+		<div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+		<span class="text-sm font-medium text-gray-900 ms-3 dark:text-gray-300" x-text="$store.shelf.showTitle === true?'显示书名':'隐藏书名'">Toggle me</span>
+	</label>
+	<!-- <div class="w-full my-2 font-semibold text-left">简化书名</div> -->
+	<label class="inline-flex items-center w-full my-2 cursor-pointer">
+		<input type="checkbox" :value="$store.shelf.simplifyTitle" x-on:click="$store.shelf.simplifyTitle =!$store.shelf.simplifyTitle" class="sr-only peer"/>
+		<div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+		<span class="text-sm font-medium text-gray-900 ms-3 dark:text-gray-300" x-text="$store.shelf.simplifyTitle === true?'简化书名':'完整书名'">Toggle me</span>
+	</label>
+	<!-- QRCode  -->
+	<!-- <div class="w-full my-2 font-semibold text-left">简化书名</div> -->
+	<div class="w-48 h-48 p-1 m-1" x-data="{ qrcodeSrc: '' }" x-init="qrcodeSrc = window.location.origin +'/api/qrcode.png?qrcode_str='+ encodeURIComponent(window.location.toString().replace(window.location.hostname,serverHost))">
+		<img class="w-48 h-48" :src="qrcodeSrc"/>
+	</div>
 }
 
 templ ShelfMainArea(s *state.GlobalState) {
@@ -48,8 +75,7 @@ templ ShelfMainArea(s *state.GlobalState) {
 					x-show="$store.shelf.showTitle"
 					class="absolute inset-x-0 bottom-0 text-sm font-semibold text-center text-black bg-gray-100 border-blue-800 rounded-b h-1/4 bg-opacity-80"
 				>
-					<span class="absolute inset-x-0 top-0 p-1 align-middle" x-text={ "$store.shelf.simplifyTitle === true?'"+book.ShortTitle()+"':'"+book.Title+"'" }>
-					</span>
+					<span class="absolute inset-x-0 top-0 p-1 align-middle" x-text={ "$store.shelf.simplifyTitle === true?'" + book.ShortTitle() + "':'" + book.Title + "'" }></span>
 				</div>
 			</a>
 		}
