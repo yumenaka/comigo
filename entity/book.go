@@ -71,7 +71,7 @@ func CheckBookExist(filePath string, bookType SupportFileType, storePath string)
 		return exit
 	}
 	// 实际存在的书，通过扫描生成
-	mapBooks.Range(func(_, value interface{}) bool {
+	for _, value := range mapBooks.Range {
 		// id := key.(string)
 		realBook := value.(*Book)
 		fileAbaPath, err := filepath.Abs(filePath)
@@ -85,8 +85,7 @@ func CheckBookExist(filePath string, bookType SupportFileType, storePath string)
 				exit = true
 			}
 		}
-		return true // Range 按顺序调用映射中存在的每个键和值的 f。如果 f 返回 false，则 range 将停止迭代。
-	})
+	}
 	return exit
 }
 
@@ -179,34 +178,31 @@ func GetBooksNumber() int {
 	// 用于计数的变量
 	var count int
 	// 遍历 map 并递增计数器
-	mapBooks.Range(func(key, value interface{}) bool {
+	for _, _ = range mapBooks.Range {
 		count++
-		return true
-	})
+	}
 	return count
 }
 
 func GetAllBookList() []*Book {
 	var list []*Book
 	// 加上所有真实书籍
-	mapBooks.Range(func(_, value interface{}) bool {
+	for _, value := range mapBooks.Range {
 		b := value.(*Book)
 		list = append(list, b)
-		return true
-	})
+	}
 	return list
 }
 
 func GetArchiveBooks() []*Book {
 	var list []*Book
 	// 所有真实书籍
-	mapBooks.Range(func(_, value interface{}) bool {
+	for _, value := range mapBooks.Range {
 		b := value.(*Book)
 		if b.Type == TypeZip || b.Type == TypeRar || b.Type == TypeCbz || b.Type == TypeCbr || b.Type == TypeTar || b.Type == TypeEpub {
 			list = append(list, b)
 		}
-		return true
-	})
+	}
 	return list
 }
 
@@ -240,17 +236,16 @@ func GetRandomBook() (*Book, error) {
 
 func GetBookGroupIDByBookID(id string) (group_id string, err error) {
 	// 根据id查找
-	mapBookGroup.Range(func(_, value interface{}) bool {
+	for _, value := range mapBookGroup.Range {
 		group := value.(*BookGroup)
-		group.ChildBook.Range(func(key, value interface{}) bool {
+		for _, value := range group.ChildBook.Range {
 			b := value.(*BookInfo)
 			if b.BookID == id {
 				group_id = group.BookID
+				break
 			}
-			return true
-		})
-		return true
-	})
+		}
+	}
 	if group_id != "" {
 		return group_id, nil
 	}
@@ -259,17 +254,16 @@ func GetBookGroupIDByBookID(id string) (group_id string, err error) {
 
 func GetBookGroupInfoByChildBookID(id string) (g *BookGroup, err error) {
 	// 根据id查找
-	mapBookGroup.Range(func(_, value interface{}) bool {
+	for _, value := range mapBookGroup.Range {
 		group := value.(*BookGroup)
-		group.ChildBook.Range(func(key, value interface{}) bool {
+		for _, value := range group.ChildBook.Range {
 			b := value.(*BookInfo)
 			if b.BookID == id {
 				g = group
+				break
 			}
-			return true
-		})
-		return true
-	})
+		}
+	}
 	if g != nil {
 		return g, nil
 	}
@@ -279,14 +273,13 @@ func GetBookGroupInfoByChildBookID(id string) (g *BookGroup, err error) {
 // GetBookByAuthor 获取同一作者的书籍。
 func GetBookByAuthor(author string, sortBy string) ([]*Book, error) {
 	var bookList []*Book
-	mapBooks.Range(func(_, value interface{}) bool {
+	for _, value := range mapBooks.Range {
 		b := value.(*Book)
 		if b.Author == author {
 			b.SortPages(sortBy)
 			bookList = append(bookList, b)
 		}
-		return true
-	})
+	}
 
 	if len(bookList) > 0 {
 		return bookList, nil
@@ -394,24 +387,22 @@ func getShortBookID(fullID string, minLength int) string {
 	pass := false
 	for notFound {
 		pass = true
-		mapBooks.Range(func(_, value interface{}) bool {
+		for _, value := range mapBooks.Range {
 			b := value.(*Book)
 			if shortID == b.BookID {
 				add++
 				shortID = fullID[0 : minLength+add]
 				pass = false
 			}
-			return true
-		})
-		mapBookGroup.Range(func(_, value interface{}) bool {
+		}
+		for _, value := range mapBookGroup.Range {
 			group := value.(*BookGroup)
 			if shortID == group.BookID {
 				add++
 				shortID = fullID[0 : minLength+add]
 				pass = false
 			}
-			return true
-		})
+		}
 		if pass {
 			notFound = false
 			return shortID
@@ -515,24 +506,22 @@ func analyzePageImages(p *ImageInfo, bookPath string) {
 
 // ClearTempFilesALL web加载时保存的临时图片，在在退出后清理
 func ClearTempFilesALL(debug bool, cacheFilePath string) {
-	mapBooks.Range(func(_, value interface{}) bool {
+	for _, value := range mapBooks.Range {
 		tempBook := value.(*Book)
 		clearTempFilesOne(debug, cacheFilePath, tempBook)
-		return true
-	})
+	}
 }
 
 // 清空某一本压缩漫画的解压缓存
 func clearTempFilesOne(debug bool, cacheFilePath string, book *Book) {
 	// logger.Infof(locale.GetString("clear_temp_file_start"))
 	haveThisBook := false
-	mapBooks.Range(func(_, value interface{}) bool {
+	for _, value := range mapBooks.Range {
 		tempBook := value.(*Book)
 		if tempBook.GetBookID() == book.GetBookID() {
 			haveThisBook = true
 		}
-		return true
-	})
+	}
 	if haveThisBook {
 		cachePath := path.Join(cacheFilePath, book.GetBookID())
 		err := os.RemoveAll(cachePath)
