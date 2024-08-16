@@ -1,6 +1,6 @@
 module github.com/yumenaka/comi
 
-go 1.22.5
+go 1.23.0
 
 require (
 	entgo.io/ent v0.14.0
@@ -35,7 +35,7 @@ require (
 	github.com/spf13/viper v1.19.0
 	github.com/tidwall/gjson v1.17.3
 	github.com/xxjwxc/gowp v0.0.0-20230612082025-23a9b62c1da6
-	github.com/yumenaka/archiver/v4 v4.0.3
+	github.com/yumenaka/archiver/v4 v4.0.4
 	golang.org/x/net v0.28.0
 	golang.org/x/text v0.17.0
 	modernc.org/sqlite v1.32.0
@@ -72,7 +72,7 @@ require (
 	github.com/cloudwego/base64x v0.1.4 // indirect
 	github.com/cloudwego/iasm v0.2.0 // indirect
 	github.com/containerd/console v1.0.4-0.20230313162750-1ae8d489ac81 // indirect
-	github.com/dsnet/compress v0.0.1 // indirect
+	github.com/dsnet/compress v0.0.2-0.20230904184137-39efe44ab707 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/ebitengine/gomobile v0.0.0-20240518074828-e86332849895 // indirect
 	github.com/ebitengine/hideconsole v1.0.0 // indirect

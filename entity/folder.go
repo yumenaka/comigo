@@ -26,39 +26,35 @@ type subFolder struct {
 // InitFolder 生成书籍组
 func (folder *Folder) InitFolder() (e error) {
 	//遍历所有子书库
-	folder.SubFolders.Range(func(_, value interface{}) bool {
+	for _, value := range folder.SubFolders.Range {
 		s := value.(*subFolder)
 		err := s.AnalyzeFolder()
 		if err != nil {
 			e = err
 		}
-		return true
-	})
+	}
 	return e
 }
 
 func (s *subFolder) AnalyzeFolder() error {
 	count := 0
-	s.BookMap.Range(func(key, value interface{}) bool {
+	for _, _ = range s.BookMap.Range {
 		count++
-		return true
-	})
+	}
 	if count == 0 {
 		return errors.New("empty Bookstore")
 	}
 	depthBooksMap := make(map[int][]BookInfo) //key是Depth的临时map
 	//定义一个最大深度
 	maxDepth := 0
-	s.BookMap.Range(
-		func(key, value interface{}) bool {
-			b := value.(*BookInfo)
-			depthBooksMap[b.Depth] = append(depthBooksMap[b.Depth], *b)
-			//找到最大深度
-			if b.Depth > maxDepth {
-				maxDepth = b.Depth
-			}
-			return true
-		})
+	for _, value := range s.BookMap.Range {
+		b := value.(*BookInfo)
+		depthBooksMap[b.Depth] = append(depthBooksMap[b.Depth], *b)
+		//找到最大深度
+		if b.Depth > maxDepth {
+			maxDepth = b.Depth
+		}
+	}
 
 	//从深往浅遍历
 	//如果有几本书同时有同一个父文件夹，那么应该【新建]一本书(组)，并加入到depth-1层里面
@@ -104,14 +100,12 @@ func (s *subFolder) AnalyzeFolder() error {
 			}
 			//检测是否已经生成并添加过
 			Added := false
-			mapBookGroup.Range(
-				func(_, value interface{}) bool {
-					group := value.(*BookGroup)
-					if group.FilePath == newBookGroup.FilePath {
-						Added = true
-					}
-					return true
-				})
+			for _, value := range mapBookGroup.Range {
+				group := value.(*BookGroup)
+				if group.FilePath == newBookGroup.FilePath {
+					Added = true
+				}
+			}
 
 			//添加过的不需要添加
 			if Added {

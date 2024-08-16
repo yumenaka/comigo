@@ -174,27 +174,24 @@ func (b *BookInfo) ShortTitle() string {
 func GetBookInfoListByDepth(depth int, sortBy string) (*BookInfoList, error) {
 	var infoList BookInfoList
 	// 首先加上所有真实的书籍
-	mapBooks.Range(func(_, value interface{}) bool {
+	for _, value := range mapBooks.Range {
 		b := value.(*Book)
 		if b.Depth == depth {
 			info := NewBaseInfo(b)
 			infoList.BookInfos = append(infoList.BookInfos, *info)
 		}
-		return true
-	})
+	}
 
 	// 接下来还要加上扫描生成出来的书籍组
-	MainFolder.SubFolders.Range(func(_, value interface{}) bool {
+	for _, value := range MainFolder.SubFolders.Range {
 		bs := value.(*subFolder)
-		bs.BookGroupMap.Range(func(key, value interface{}) bool {
+		for _, value := range bs.BookGroupMap.Range {
 			group := value.(*BookInfo)
 			if group.Depth == depth {
 				infoList.BookInfos = append(infoList.BookInfos, *group)
 			}
-			return true
-		})
-		return true
-	})
+		}
+	}
 
 	if len(infoList.BookInfos) > 0 {
 		infoList.SortBooks(sortBy)
@@ -206,27 +203,24 @@ func GetBookInfoListByDepth(depth int, sortBy string) (*BookInfoList, error) {
 func GetBookInfoListByMaxDepth(depth int, sortBy string) (*BookInfoList, error) {
 	var infoList BookInfoList
 	// 首先加上所有真实的书籍
-	mapBooks.Range(func(_, value interface{}) bool {
+	for _, value := range mapBooks.Range {
 		b := value.(*Book)
 		if b.Depth <= depth {
 			info := NewBaseInfo(b)
 			infoList.BookInfos = append(infoList.BookInfos, *info)
 		}
-		return true
-	})
+	}
 
 	// 扫描生成的书籍组
-	MainFolder.SubFolders.Range(func(_, value interface{}) bool {
+	for _, value := range MainFolder.SubFolders.Range {
 		bs := value.(*subFolder)
-		bs.BookGroupMap.Range(func(key, value interface{}) bool {
+		for _, value := range bs.BookGroupMap.Range {
 			group := value.(*BookInfo)
 			if group.Depth <= depth {
 				infoList.BookInfos = append(infoList.BookInfos, *group)
 			}
-			return true
-		})
-		return true
-	})
+		}
+	}
 
 	if len(infoList.BookInfos) > 0 {
 		infoList.SortBooks(sortBy)
@@ -240,18 +234,16 @@ func TopOfShelfInfo(sortBy string) (*BookInfoList, error) {
 	topGroupBookNum := 0
 	// 扫描生成的书籍组
 	var top0 BookInfoList
-	MainFolder.SubFolders.Range(func(_, value interface{}) bool {
+	for _, value := range MainFolder.SubFolders.Range {
 		bs := value.(*subFolder)
-		bs.BookGroupMap.Range(func(key, value interface{}) bool {
+		for _, value := range bs.BookGroupMap.Range {
 			group := value.(*BookInfo)
 			if group.Depth == 0 {
 				topGroupBookNum++
 				top0.BookInfos = append(top0.BookInfos, *group)
 			}
-			return true
-		})
-		return true
-	})
+		}
+	}
 	// 如果顶层书组数量大于1，说明有多个顶层书库。只显示顶层书库。
 	if topGroupBookNum > 1 {
 		top0.SortBooks(sortBy)
@@ -259,21 +251,19 @@ func TopOfShelfInfo(sortBy string) (*BookInfoList, error) {
 	}
 	// 如果只有一个顶层书库，显示真实的书籍
 	var infoList BookInfoList
-	mapBooks.Range(func(_, value interface{}) bool {
+	for _, value := range mapBooks.Range {
 		b := value.(*Book)
 		if b.Depth == 1 {
 			info := NewBaseInfo(b)
 			infoList.BookInfos = append(infoList.BookInfos, *info)
 		}
-		return true
-	})
-	mapBookGroup.Range(func(_, value interface{}) bool {
+	}
+	for _, value := range mapBookGroup.Range {
 		group := value.(*BookGroup)
 		if group.BookInfo.Depth == 1 {
 			infoList.BookInfos = append(infoList.BookInfos, group.BookInfo)
 		}
-		return true
-	})
+	}
 	if len(infoList.BookInfos) > 0 {
 		infoList.SortBooks(sortBy)
 		return &infoList, nil
@@ -287,11 +277,10 @@ func GetBookInfoListByID(BookID string, sortBy string) (*BookInfoList, error) {
 	if ok {
 		tempGroup := group.(*BookGroup)
 		// 首先加上所有真实的书籍
-		tempGroup.ChildBook.Range(func(key, value interface{}) bool {
+		for _, value := range tempGroup.ChildBook.Range {
 			b := value.(*BookInfo)
 			infoList.BookInfos = append(infoList.BookInfos, *b)
-			return true
-		})
+		}
 
 		if len(infoList.BookInfos) > 0 {
 			infoList.SortBooks(sortBy)
@@ -303,14 +292,13 @@ func GetBookInfoListByID(BookID string, sortBy string) (*BookInfoList, error) {
 
 func GetBookInfoListByParentFolder(parentFolder string, sortBy string) (*BookInfoList, error) {
 	var infoList BookInfoList
-	mapBooks.Range(func(_, value interface{}) bool {
+	for _, value := range mapBooks.Range {
 		b := value.(*Book)
 		if b.ParentFolder == parentFolder {
 			info := NewBaseInfo(b)
 			infoList.BookInfos = append(infoList.BookInfos, *info)
 		}
-		return true
-	})
+	}
 
 	if len(infoList.BookInfos) > 0 {
 		infoList.SortBooks(sortBy)

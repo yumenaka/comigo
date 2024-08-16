@@ -16,12 +16,11 @@ type BookInfoList struct {
 func GetAllBookInfoList(sortBy string) (*BookInfoList, error) {
 	var infoList BookInfoList
 	//首先加上所有真实的书籍
-	mapBooks.Range(func(_, value interface{}) bool {
+	for _, value := range mapBooks.Range {
 		b := value.(*Book)
 		info := NewBaseInfo(b)
 		infoList.BookInfos = append(infoList.BookInfos, *info)
-		return true
-	})
+	}
 
 	if len(infoList.BookInfos) > 0 {
 		infoList.SortBooks(sortBy)
