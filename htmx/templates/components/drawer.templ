@@ -16,8 +16,6 @@ templ Drawer(s *state.GlobalState,slot templ.Component) {
 		</button>
 		<div class="flex flex-col items-center justify-center p-1 my-2 dbg-accent text-accent-content">
 		@slot
-
-
 			<!--<div class="w-full font-semibold text-left">主题</div> -->
 			<select x-model="theme" x-on:change="theme = $event.target.value;console.log(theme);" class="w-full h-10 m-2 border rounded bg-base-100 text-accent-content focus:outline-none">
 				<option value="retro">Retro</option>
