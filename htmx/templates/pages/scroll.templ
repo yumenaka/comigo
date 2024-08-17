@@ -4,6 +4,7 @@ import (
 	"github.com/yumenaka/comi/entity"
 	"github.com/yumenaka/comi/htmx/state"
 	"github.com/yumenaka/comi/htmx/templates/components"
+	"strings"
 )
 
 script ScrollScripts() {
@@ -144,13 +145,19 @@ templ ScrollMainArea(s *state.GlobalState, book *entity.Book) {
 	>
 		<noscript class="loading-lazy">
 			for key, image := range book.Pages.Images {
-				if key <= 2 {
-					<img class="m-2 max-w-full lg:max-w-[800px] rounded shadow-lg" src={ image.Url }/>
-				}
-				if key > 2 {
-					<img loading="lazy" class="m-2 max-w-full lg:max-w-[800px] rounded shadow-lg" src={ image.Url }/>
-				}
+			if strings.Contains(image.Url, ".html")&& !strings.Contains(image.Url, "hidden."){
+			    <!-- https://htmx.org/docs/#triggers -->
+                <!-- https://htmx.org/docs/#swapping -->
+			    <!-- hx-get 用于获取图片的URL，hx-trigger 用于触发加载，hx-swap 用于替换元素，innerHTML默认值，将内容放在目标元素内 outerHTML用返回的内容替换整个目标元素  hx-target 用于指定目标元素 -->
+                <div hx-get={image.Url} hx-trigger="load" hx-swap="innerHTML" class="m-2 max-w-full lg:max-w-[800px] rounded shadow-lg"></div>
 			}
+			if key <= 2 && !strings.Contains(image.Url, "hidden.")&& !strings.Contains(image.Url, ".html") {
+				<img class="m-2 max-w-full lg:max-w-[800px] rounded shadow-lg" src={ image.Url }/>
+			}
+			if key > 2 && !strings.Contains(image.Url, "hidden.")&& !strings.Contains(image.Url, ".html")  {
+				<img loading="lazy" class="m-2 max-w-full lg:max-w-[800px] rounded shadow-lg" src={ image.Url }/>
+			}
+		}
 		</noscript>
 	</div>
 	<button id="BackTopButton" style="display: none" class="fixed flex items-center justify-center w-10 h-10 text-white bg-blue-500 rounded-full shadow-lg bottom-4 right-4">

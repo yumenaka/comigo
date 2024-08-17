@@ -7,7 +7,7 @@ require (
 	github.com/angelofallars/htmx-go v0.5.0
 	github.com/gin-gonic/gin v1.10.0
 	github.com/gowebly/helpers v0.4.0
-	github.com/yumenaka/comi v0.9.10-0.20240812160430-a4f855fc5cff
+	github.com/yumenaka/comi v0.9.10-0.20240817030237-50bbcea3c021
 )
 
 require (
@@ -32,7 +32,7 @@ require (
 	github.com/cloudwego/base64x v0.1.4 // indirect
 	github.com/cloudwego/iasm v0.2.0 // indirect
 	github.com/disintegration/imaging v1.6.2 // indirect
-	github.com/dsnet/compress v0.0.1 // indirect
+	github.com/dsnet/compress v0.0.2-0.20230904184137-39efe44ab707 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/elliotchance/orderedmap v1.6.0 // indirect
 	github.com/elliotchance/pie/v2 v2.8.1 // indirect
@@ -120,7 +120,7 @@ require (
 	github.com/ulikunitz/xz v0.5.12 // indirect
 	github.com/xxjwxc/gowp v0.0.0-20230612082025-23a9b62c1da6 // indirect
 	github.com/xxjwxc/public v0.0.0-20240120091159-a1da7f89355e // indirect
-	github.com/yumenaka/archiver/v4 v4.0.3 // indirect
+	github.com/yumenaka/archiver/v4 v4.0.4 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	github.com/zclconf/go-cty v1.15.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
@@ -141,7 +141,7 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	modernc.org/gc/v3 v3.0.0-20240801135723-a856999a2e4a // indirect
-	modernc.org/libc v1.59.5 // indirect
+	modernc.org/libc v1.59.9 // indirect
 	modernc.org/mathutil v1.6.0 // indirect
 	modernc.org/memory v1.8.0 // indirect
 	modernc.org/sqlite v1.32.0 // indirect

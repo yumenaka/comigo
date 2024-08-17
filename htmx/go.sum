@@ -116,6 +116,8 @@ github.com/disintegration/imaging v1.6.2 h1:w1LecBlG2Lnp8B3jk5zSuNqd7b4DXhcjwek1
 github.com/disintegration/imaging v1.6.2/go.mod h1:44/5580QXChDfwIclfc/PCwrr44amcmDAg8hxG0Ewe4=
 github.com/dsnet/compress v0.0.1 h1:PlZu0n3Tuv04TzpfPbrnI0HW/YwodEXDS+oPKahKF0Q=
 github.com/dsnet/compress v0.0.1/go.mod h1:Aw8dCMJ7RioblQeTqt88akK31OvO8Dhf5JflhBbQEHo=
+github.com/dsnet/compress v0.0.2-0.20230904184137-39efe44ab707 h1:2tV76y6Q9BB+NEBasnqvs7e49aEBFI8ejC89PSnWH+4=
+github.com/dsnet/compress v0.0.2-0.20230904184137-39efe44ab707/go.mod h1:qssHWj60/X5sZFNxpG4HBPDHVqxNm4DfnCKgrbZOT+s=
 github.com/dsnet/golib v0.0.0-20171103203638-1ea166775780/go.mod h1:Lj+Z9rebOhdfkVLjJ8T6VcRQv3SXugXy999NBtR9aFY=
 github.com/dustin/go-humanize v1.0.1 h1:GzkhY7T5VNhEkwH0PVJgjz+fX1rhBrR7pRT3mDkpeCY=
 github.com/dustin/go-humanize v1.0.1/go.mod h1:Mu1zIs6XwVuF/gI1OepvI0qD18qycQx+mFykh5fBlto=
@@ -211,6 +213,7 @@ github.com/google/go-cmp v0.3.0/go.mod h1:8QqcDgzrUqlUb/G2PQTWiueGozuR1884gddMyw
 github.com/google/go-cmp v0.3.1/go.mod h1:8QqcDgzrUqlUb/G2PQTWiueGozuR1884gddMywk6iLU=
 github.com/google/go-cmp v0.4.0/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
 github.com/google/go-cmp v0.5.4/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
+github.com/google/go-cmp v0.5.5/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
 github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=
 github.com/google/go-cmp v0.6.0/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
 github.com/google/gofuzz v1.0.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/M65Eg=
@@ -485,6 +488,7 @@ github.com/ugorji/go v1.1.4/go.mod h1:uQMGLiO92mf5W77hV/PUCpI3pbzQx3CRekS0kk+RGr
 github.com/ugorji/go/codec v1.2.12 h1:9LC83zGrHhuUA9l16C9AHXAqEV/2wBQ4nkvumAE65EE=
 github.com/ugorji/go/codec v1.2.12/go.mod h1:UNopzCgEMSXjBc6AOMqYvWC1ktqTAfzJZUZgYf6w6lg=
 github.com/ulikunitz/xz v0.5.6/go.mod h1:2bypXElzHzzJZwzH67Y6wb67pO62Rzfn7BSiF4ABRW8=
+github.com/ulikunitz/xz v0.5.8/go.mod h1:nbz6k7qbPmH4IRqmfOplQw/tblSgqTqBwxkY0oWt/14=
 github.com/ulikunitz/xz v0.5.12 h1:37Nm15o69RwBkXM0J6A5OlE67RZTfzUxTj8fB3dfcsc=
 github.com/ulikunitz/xz v0.5.12/go.mod h1:nbz6k7qbPmH4IRqmfOplQw/tblSgqTqBwxkY0oWt/14=
 github.com/xiang90/probing v0.0.0-20190116061207-43a291ad63a2/go.mod h1:UETIi67q53MR2AWcXfiuqkDkRtnGDLqkBTpCHuJHxtU=
@@ -499,6 +503,8 @@ github.com/xxjwxc/public v0.0.0-20240120091159-a1da7f89355e/go.mod h1:wV2wEiovX9
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 github.com/yumenaka/archiver/v4 v4.0.3 h1:POI+TeSwRXBwRNZSZxEkRXu8knAqTSCMdMJnP8/WsSg=
 github.com/yumenaka/archiver/v4 v4.0.3/go.mod h1:7x5YpgCh9XhIc6af7D3nSSKL9TbTd45Jy5PueezK+ts=
+github.com/yumenaka/archiver/v4 v4.0.4 h1:vQce3qFsucxsDD+OxtbGmswhtC4U8GAAWJHOxT856Yw=
+github.com/yumenaka/archiver/v4 v4.0.4/go.mod h1:DQ8cmP7Y2+4+yAZOKs4DgUPha13v+TGGRvta4YiOXgk=
 github.com/yumenaka/comi v0.9.10-0.20240730031535-f74507e7a901 h1:JtlFx8l7ecEqux9K6gsyU9v1REynCcik1H3LOuKKRlg=
 github.com/yumenaka/comi v0.9.10-0.20240730031535-f74507e7a901/go.mod h1:B24W3mwcRTJ3f1qn3jF38LDozfikC7Cf246Kfy61y+s=
 github.com/yumenaka/comi v0.9.10-0.20240802055737-a52b790f8b5f h1:AmwmaKC3k7B+QrkClC4+GsMlnvty1A2lSP8cdcJBjUM=
@@ -519,6 +525,8 @@ github.com/yumenaka/comi v0.9.10-0.20240812124227-d98a14dc70e3 h1:gy9i4Z3PZXhq6f
 github.com/yumenaka/comi v0.9.10-0.20240812124227-d98a14dc70e3/go.mod h1:SLbHtkurVPrUPps/j9gG488/+Fc/B0hZ7Gob04UseQk=
 github.com/yumenaka/comi v0.9.10-0.20240812160430-a4f855fc5cff h1:gSBWRiFGwwRBtZTwFIT9bVlF6LZjE8XXXs4Sz8hd0yI=
 github.com/yumenaka/comi v0.9.10-0.20240812160430-a4f855fc5cff/go.mod h1:SLbHtkurVPrUPps/j9gG488/+Fc/B0hZ7Gob04UseQk=
+github.com/yumenaka/comi v0.9.10-0.20240817030237-50bbcea3c021 h1:EPTHxo/17Isxilp4g7DGdN0+QvGnTa/zZySp3uIIguw=
+github.com/yumenaka/comi v0.9.10-0.20240817030237-50bbcea3c021/go.mod h1:2ubudy9bgDxZebc5sb2o6BY4uII8F/Y15vz9yQixgSs=
 github.com/yusufpapurcu/wmi v1.2.4 h1:zFUKzehAFReQwLys1b/iSMl+JQGSCSjtVqQn9bBrPo0=
 github.com/yusufpapurcu/wmi v1.2.4/go.mod h1:SBZ9tNy3G9/m5Oi98Zks0QjeHVDvuK0qfxQmPyzfmi0=
 github.com/zclconf/go-cty v1.14.4 h1:uXXczd9QDGsgu0i/QFR/hzI5NYCHLf6NQw/atrbnhq8=
@@ -874,6 +882,8 @@ modernc.org/libc v1.59.2 h1:wgPtnOeUhblvumpyNjvFQGryTZn6INQ5TrJDcWPJd+g=
 modernc.org/libc v1.59.2/go.mod h1:EY/egGEU7Ju66eU6SBqCNYaFUDuc4npICkMWnU5EE3A=
 modernc.org/libc v1.59.5 h1:HlLBu4LEvQV27W50xTI5hrtGwjRBLum8Vth6ekHfLwA=
 modernc.org/libc v1.59.5/go.mod h1:EY/egGEU7Ju66eU6SBqCNYaFUDuc4npICkMWnU5EE3A=
+modernc.org/libc v1.59.9 h1:k+nNDDakwipimgmJ1D9H466LhFeSkaPPycAs1OZiDmY=
+modernc.org/libc v1.59.9/go.mod h1:EY/egGEU7Ju66eU6SBqCNYaFUDuc4npICkMWnU5EE3A=
 modernc.org/mathutil v1.6.0 h1:fRe9+AmYlaej+64JsEEhoWuAYBkOtQiMEU7n/XgfYi4=
 modernc.org/mathutil v1.6.0/go.mod h1:Ui5Q9q1TR2gFm0AQRqQUaBWFLAhQpCwNcuhBOSedWPo=
 modernc.org/memory v1.8.0 h1:IqGTL6eFMaDZZhEWwcREgeMXYwmW83LYW8cROZYkg+E=
