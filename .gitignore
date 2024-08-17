@@ -79,3 +79,4 @@ web/.idea
 *nohup.out
 go.env
 /.env
+/test/*

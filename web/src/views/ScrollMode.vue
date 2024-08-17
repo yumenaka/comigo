@@ -22,7 +22,7 @@
 		<!-- 渲染漫画的主体部分 -->
 		<div class="main_manga" v-for="(single_image, n) in localImages" :key="single_image.url"
 			@click="onMouseClick($event)" @mousemove="onMouseMove">
-			<ImageScroll :image_url="imageParametersString(single_image.url)" :sPWL="sPWL" :dPWL="dPWL" :sPWP="sPWP"
+			<ImageScroll  v-if="(!single_image.url.endsWith('.html'))&&(!single_image.url.includes('.hidden.'))"  :image_url="imageParametersString(single_image.url)" :sPWL="sPWL" :dPWL="dPWL" :sPWP="sPWP"
 				:dPWP="dPWP" :nowPageNum="nowPageNum" :page_count="book.page_count" :book_id="book.id"
 				:showPageNumFlag_ScrollMode="ScrollModeConfig.showPageNumFlag_ScrollMode" :syncPageByWS="ScrollModeConfig.syncPageByWS"
 				:autoScrolling="autoScrolling" :userControlling="userControlling" :margin="ScrollModeConfig.marginOnScrollMode"
