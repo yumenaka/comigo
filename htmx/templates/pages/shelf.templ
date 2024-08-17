@@ -69,7 +69,7 @@ templ ShelfMainArea(s *state.GlobalState) {
 				class={ backgroundImage(state.GetCloverBackgroundImageUrl(&book)) , "relative w-32 mx-4 my-4 bg-top bg-cover rounded shadow-xl h-44 hover:shadow-2xl ring-1 ring-gray-400 hover:ring hover:ring-blue-500 overflow-hidden" }
 			>
 				<!-- 书籍类型图标 -->
-				<!-- <SvgBookIcon :book_info="book_info"></SvgBookIcon> -->
+				<div class="absolute top-0 z-10 right-1  text-lg font-bold text-yellow-400">{string(book.Type)}</div>
 				<!-- 图书封面 -->
 				<div
 					x-show="$store.shelf.showTitle"

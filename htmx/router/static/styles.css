@@ -1115,6 +1115,10 @@ input:checked + .toggle-bg {
   right: 0;
 }
 
+.right-1 {
+  right: .25rem;
+}
+
 .right-4 {
   right: 1rem;
 }
@@ -1972,6 +1976,11 @@ input:checked + .toggle-bg {
 .text-white {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity));
+}
+
+.text-yellow-400 {
+  --tw-text-opacity: 1;
+  color: rgb(227 160 8 / var(--tw-text-opacity));
 }
 
 .text-opacity-100 {
