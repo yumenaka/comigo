@@ -3,6 +3,7 @@ package components
 type HeaderProps struct {
 	Title           string
 	ShowReturnIcon  bool
+	ReturnUrl      string
 	SetDownLoadLink bool
 	InShelf         bool
 	DownLoadLink    string
@@ -61,7 +62,7 @@ templ Header(prop HeaderProps) {
 	<div class="flex flex-row justify-between w-full h-12 p-1 border-b bg-base-100 text-base-content border-slate-400">
 		<div class="flex flex-row">
 			<!-- 返回箭头,点击返回上一页 -->
-      <a href="/">
+      <a href={ templ.SafeURL(prop.ReturnUrl)}>
 			<div class="w-8 pt-1 mx-1 my-0">
 				<svg class="static w-8" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M112 160l-64 64l64 64"></path><path d="M64 224h294c58.76 0 106 49.33 106 108v20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></path></svg>
 			</div>

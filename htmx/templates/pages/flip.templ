@@ -190,6 +190,7 @@ templ FlipPage(s *state.GlobalState, book *entity.Book) {
 	@components.Header(components.HeaderProps{
 		Title:           "FLIP"+book.Title,
 		ShowReturnIcon:  true,
+		ReturnUrl: getReturnUrl(s.NowBookID),
 		SetDownLoadLink: false,
 		InShelf:         false,
 		DownLoadLink:    "",
