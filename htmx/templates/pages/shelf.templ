@@ -9,11 +9,22 @@ import (
 	"strconv"
 )
 
+func getReturnUrl(BookID string) string {
+	info, err := entity.GetBookGroupInfoByChildBookID(BookID)
+	if err != nil {
+		fmt.Println("ParentBookInfo not found")
+		return "/"
+	}
+    return "/shelf/" + info.BookID
+}
+
+
 // ShelfPage 书架页面
 templ ShelfPage(s *state.GlobalState) {
 	@components.Header(components.HeaderProps{
 		Title:           "Comigo" + " " + s.Version,
 		ShowReturnIcon:  true,
+		ReturnUrl: getReturnUrl(s.NowBookID),
 		SetDownLoadLink: false,
 		InShelf:         false,
 		DownLoadLink:    "",

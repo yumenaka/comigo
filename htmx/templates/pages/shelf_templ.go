@@ -17,6 +17,15 @@ import (
 	"strconv"
 )
 
+func getReturnUrl(BookID string) string {
+	info, err := entity.GetBookGroupInfoByChildBookID(BookID)
+	if err != nil {
+		fmt.Println("ParentBookInfo not found")
+		return "/"
+	}
+	return "/shelf/" + info.BookID
+}
+
 // ShelfPage 书架页面
 func ShelfPage(s *state.GlobalState) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -39,6 +48,7 @@ func ShelfPage(s *state.GlobalState) templ.Component {
 		templ_7745c5c3_Err = components.Header(components.HeaderProps{
 			Title:           "Comigo" + " " + s.Version,
 			ShowReturnIcon:  true,
+			ReturnUrl:       getReturnUrl(s.NowBookID),
 			SetDownLoadLink: false,
 			InShelf:         false,
 			DownLoadLink:    "",
@@ -132,7 +142,7 @@ func ShelfMainArea(s *state.GlobalState) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("{ BookID: %s }", "\""+book.BookID+"\""))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/shelf.templ`, Line: 66, Col: 65}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/shelf.templ`, Line: 77, Col: 65}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -145,7 +155,7 @@ func ShelfMainArea(s *state.GlobalState) templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(getHref(book))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/shelf.templ`, Line: 67, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/shelf.templ`, Line: 78, Col: 25}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -158,7 +168,7 @@ func ShelfMainArea(s *state.GlobalState) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(getTarget(book))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/shelf.templ`, Line: 68, Col: 28}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/shelf.templ`, Line: 79, Col: 28}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -184,7 +194,7 @@ func ShelfMainArea(s *state.GlobalState) templ.Component {
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(string(book.Type))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/shelf.templ`, Line: 72, Col: 98}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/shelf.templ`, Line: 83, Col: 98}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -197,7 +207,7 @@ func ShelfMainArea(s *state.GlobalState) templ.Component {
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs("$store.shelf.simplifyTitle === true?'" + book.ShortTitle() + "':'" + book.Title + "'")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/shelf.templ`, Line: 78, Col: 156}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/shelf.templ`, Line: 89, Col: 156}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -216,7 +226,7 @@ func ShelfMainArea(s *state.GlobalState) templ.Component {
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(s.GetAllBookNum()))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/shelf.templ`, Line: 83, Col: 97}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/shelf.templ`, Line: 94, Col: 97}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {

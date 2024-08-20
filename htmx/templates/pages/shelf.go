@@ -1,14 +1,13 @@
 package pages
 
 import (
-	"net/http"
-
 	"github.com/angelofallars/htmx-go"
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comi/entity"
 	"github.com/yumenaka/comi/htmx/state"
 	"github.com/yumenaka/comi/htmx/templates/components"
 	"github.com/yumenaka/comi/util/logger"
+	"net/http"
 )
 
 // ShelfHandler 书架页面的处理程序。
@@ -29,6 +28,7 @@ func ShelfHandler(c *gin.Context) {
 	}
 	if id != "" {
 		// 通过书架ID获取书架信息。
+		state.Global.NowBookID = id
 		state.Global.BooksList, err = entity.GetBookInfoListByID(id, sortBy)
 		if err != nil {
 			logger.Infof("GetBookShelf: %v", err)

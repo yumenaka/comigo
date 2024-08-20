@@ -276,6 +276,7 @@ func FlipPage(s *state.GlobalState, book *entity.Book) templ.Component {
 		templ_7745c5c3_Err = components.Header(components.HeaderProps{
 			Title:           "FLIP" + book.Title,
 			ShowReturnIcon:  true,
+			ReturnUrl:       getReturnUrl(s.NowBookID),
 			SetDownLoadLink: false,
 			InShelf:         false,
 			DownLoadLink:    "",
