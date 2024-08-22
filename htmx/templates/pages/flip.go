@@ -19,7 +19,7 @@ func FlipHandler(c *gin.Context) {
 		logger.Infof("GetBookByID: %v", err)
 	}
 	// TODO: 如果没有找到书籍，返回 HTTP 404 错误信息，或建议跳转上传页面。
-	state.Global.BooksList, err = entity.TopOfShelfInfo("name")
+	state.Global.TopBooks, err = entity.TopOfShelfInfo("name")
 	if err != nil {
 		logger.Infof("TopOfShelfInfo: %v", err)
 	}

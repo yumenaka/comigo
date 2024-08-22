@@ -12,16 +12,16 @@ type GlobalState struct {
 	SingleUserMode  bool
 	NowBookID       string
 	OnlineUserCount int
-	BooksList       *entity.BookInfoList
+	TopBooks        *entity.BookInfoList
 	ServerStatus    *util.ServerStatus
 }
 
 // GetAllBookNum 获取所有书籍数量
 func (g *GlobalState) GetAllBookNum() int {
-	if g.BooksList == nil {
+	if g.TopBooks == nil {
 		return 0
 	}
-	return len(g.BooksList.BookInfos)
+	return len(g.TopBooks.BookInfos)
 }
 
 var Global GlobalState
@@ -31,7 +31,7 @@ func init() {
 	Global.SingleUserMode = false
 	Global.NowBookID = ""
 	Global.OnlineUserCount = 0
-	Global.BooksList = nil
+	Global.TopBooks = nil
 	Global.ServerStatus = util.GetServerInfo(config.Config.Host, config.Version, config.Config.Port, config.Config.EnableUpload, 0)
 }
 

@@ -20,7 +20,7 @@ func ShelfHandler(c *gin.Context) {
 	var err error
 	if id == "" {
 		// 获取顶层书架信息。
-		state.Global.BooksList, err = entity.TopOfShelfInfo(sortBy)
+		state.Global.TopBooks, err = entity.TopOfShelfInfo(sortBy)
 		if err != nil {
 			logger.Infof("TopOfShelfInfo: %v", err)
 			//TODO: 处理没有图书的情况（上传压缩包或远程下载示例漫画）
@@ -29,7 +29,7 @@ func ShelfHandler(c *gin.Context) {
 	if id != "" {
 		// 通过书架ID获取书架信息。
 		state.Global.NowBookID = id
-		state.Global.BooksList, err = entity.GetBookInfoListByID(id, sortBy)
+		state.Global.TopBooks, err = entity.GetBookInfoListByID(id, sortBy)
 		if err != nil {
 			logger.Infof("GetBookShelf: %v", err)
 		}
