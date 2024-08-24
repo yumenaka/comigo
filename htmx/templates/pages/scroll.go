@@ -14,6 +14,9 @@ import (
 // ScrollHandler 阅读界面（先做卷轴模式）
 func ScrollHandler(c *gin.Context) {
 	bookID := c.Param("id")
+	if bookID != "" {
+		state.Global.RequestBookID = bookID
+	}
 	book, err := entity.GetBookByID(bookID, "default")
 	if err != nil {
 		logger.Infof("GetBookByID: %v", err)
@@ -35,9 +38,9 @@ func ScrollHandler(c *gin.Context) {
 
 	// 为首页定义模板布局。
 	indexTemplate := components.MainLayout(
-		"Comigo "+state.Global.Version, // define title text
-		metaTags,                       // define meta tags
-		scrollPage,                     // define body content
+		getPageTitle(bookID), // define title text
+		metaTags,             // define meta tags
+		scrollPage,           // define body content
 	)
 
 	// 渲染索引页模板。

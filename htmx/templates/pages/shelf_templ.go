@@ -37,7 +37,7 @@ func ShelfPage(s *state.GlobalState) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = components.Header(components.HeaderProps{
-			Title:           "Comigo" + " " + s.Version,
+			Title:           getPageTitle(s.RequestBookID),
 			ShowReturnIcon:  true,
 			ReturnUrl:       getReturnUrl(s.RequestBookID),
 			SetDownLoadLink: false,

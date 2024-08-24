@@ -29,3 +29,15 @@ func getReturnUrl(BookID string) string {
 	}
 	return "/shelf/" + info.BookID
 }
+
+func getPageTitle(bookID string) string {
+	if bookID == "" {
+		return "Comigo " + state.Global.Version
+	}
+	groupBook, err := entity.GetBookByID(bookID, "")
+	if err != nil {
+		fmt.Printf("GetBookByID: %v", err)
+		return "Comigo " + state.Global.Version
+	}
+	return groupBook.Title
+}

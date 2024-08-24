@@ -13,7 +13,7 @@ import (
 // ShelfPage 书架页面
 templ ShelfPage(s *state.GlobalState) {
 	@components.Header(components.HeaderProps{
-		Title:           "Comigo" + " " + s.Version,
+		Title:           getPageTitle(s.RequestBookID),
 		ShowReturnIcon:  true,
 		ReturnUrl: getReturnUrl(s.RequestBookID),
 		SetDownLoadLink: false,
