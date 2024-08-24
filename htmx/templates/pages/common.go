@@ -27,6 +27,9 @@ func getReturnUrl(BookID string) string {
 		fmt.Println("ParentBookInfo not found")
 		return "/"
 	}
+	if info.Depth <= 0 {
+		return "/"
+	}
 	return "/shelf/" + info.BookID
 }
 
