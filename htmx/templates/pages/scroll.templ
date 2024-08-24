@@ -175,7 +175,7 @@ templ ScrollPage(s *state.GlobalState, book *entity.Book) {
 	@components.Header(components.HeaderProps{
 		Title:           book.Title,
 		ShowReturnIcon:  true,
-		ReturnUrl: getReturnUrl(s.NowBookID),
+		ReturnUrl: getReturnUrl(s.RequestBookID),
 		SetDownLoadLink: false,
 		InShelf:         false,
 		DownLoadLink:    "",

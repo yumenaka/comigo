@@ -10,7 +10,7 @@ import (
 type GlobalState struct {
 	Version         string
 	SingleUserMode  bool
-	NowBookID       string
+	RequestBookID   string
 	OnlineUserCount int
 	TopBooks        *entity.BookInfoList
 	ServerStatus    *util.ServerStatus
@@ -29,7 +29,7 @@ var Global GlobalState
 func init() {
 	Global.Version = config.Version
 	Global.SingleUserMode = false
-	Global.NowBookID = ""
+	Global.RequestBookID = ""
 	Global.OnlineUserCount = 0
 	Global.TopBooks = nil
 	Global.ServerStatus = util.GetServerInfo(config.Config.Host, config.Version, config.Config.Port, config.Config.EnableUpload, 0)

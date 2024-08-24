@@ -28,7 +28,7 @@ func ShelfHandler(c *gin.Context) {
 	}
 	if id != "" {
 		// 通过书架ID获取书架信息。
-		state.Global.NowBookID = id
+		state.Global.RequestBookID = id
 		state.Global.TopBooks, err = entity.GetBookInfoListByID(id, sortBy)
 		if err != nil {
 			logger.Infof("GetBookShelf: %v", err)
