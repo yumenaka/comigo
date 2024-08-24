@@ -16,6 +16,8 @@ func ShelfHandler(c *gin.Context) {
 	sortBy := c.DefaultQuery("sort_by", "default")
 	// 获取书架信息。
 	bookID := c.Param("id")
+	// 设置当前请求的书架ID。
+	state.Global.RequestBookID = bookID
 	var err error
 	if bookID == "" {
 		// 获取顶层书架信息。
@@ -26,8 +28,6 @@ func ShelfHandler(c *gin.Context) {
 		}
 	}
 	if bookID != "" {
-		// 设置当前请求的书架ID。
-		state.Global.RequestBookID = bookID
 		// 通过书架ID获取书架信息。
 		state.Global.TopBooks, err = entity.GetBookInfoListByID(bookID, sortBy)
 		if err != nil {
