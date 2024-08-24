@@ -14,11 +14,10 @@ import (
 func ShelfHandler(c *gin.Context) {
 	//书籍排列的方式，默认name
 	sortBy := c.DefaultQuery("sort_by", "default")
-
 	// 获取书架信息。
-	id := c.Param("id")
+	bookID := c.Param("id")
 	var err error
-	if id == "" {
+	if bookID == "" {
 		// 获取顶层书架信息。
 		state.Global.TopBooks, err = entity.TopOfShelfInfo(sortBy)
 		if err != nil {
@@ -26,10 +25,11 @@ func ShelfHandler(c *gin.Context) {
 			//TODO: 处理没有图书的情况（上传压缩包或远程下载示例漫画）
 		}
 	}
-	if id != "" {
+	if bookID != "" {
+		// 设置当前请求的书架ID。
+		state.Global.RequestBookID = bookID
 		// 通过书架ID获取书架信息。
-		state.Global.RequestBookID = id
-		state.Global.TopBooks, err = entity.GetBookInfoListByID(id, sortBy)
+		state.Global.TopBooks, err = entity.GetBookInfoListByID(bookID, sortBy)
 		if err != nil {
 			logger.Infof("GetBookShelf: %v", err)
 		}
@@ -43,9 +43,9 @@ func ShelfHandler(c *gin.Context) {
 
 	// 为首页定义模板布局。
 	indexTemplate := components.MainLayout(
-		"Comigo "+state.Global.Version, // define title text
-		metaTags,                       // define meta tags
-		ShelfPage(&state.Global),       // define body content
+		getPageTitle(bookID),
+		metaTags,                 // define meta tags
+		ShelfPage(&state.Global), // define body content
 	)
 
 	// 渲染索引页模板。

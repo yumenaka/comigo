@@ -188,7 +188,7 @@ templ FlipDrawerSlot() {
 // FlipPage 定义 BodyHTML
 templ FlipPage(s *state.GlobalState, book *entity.Book) {
 	@components.Header(components.HeaderProps{
-		Title:           "FLIP"+book.Title,
+		Title:           getPageTitle(s.RequestBookID),
 		ShowReturnIcon:  true,
 		ReturnUrl: getReturnUrl(s.RequestBookID),
 		SetDownLoadLink: false,

@@ -173,7 +173,7 @@ templ ScrollDrawerSlot() {
 // ScrollPage 定义 BodyHTML
 templ ScrollPage(s *state.GlobalState, book *entity.Book) {
 	@components.Header(components.HeaderProps{
-		Title:           book.Title,
+		Title:           getPageTitle(s.RequestBookID),
 		ShowReturnIcon:  true,
 		ReturnUrl: getReturnUrl(s.RequestBookID),
 		SetDownLoadLink: false,
