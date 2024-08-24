@@ -9,31 +9,13 @@ import (
 	"strconv"
 )
 
-func getReturnUrl(BookID string) string {
-    if BookID == "" {
-        return "/"
-    }
-    for _, book := range state.Global.TopBooks.BookInfos {
-        if book.BookID == BookID {
-            return "/"
-        }
-    }
-    // 如果是书籍组，就跳转到子书架
-	info, err := entity.GetBookGroupInfoByChildBookID(BookID)
-	if err != nil {
-		fmt.Println("ParentBookInfo not found")
-		return "/"
-	}
-    return "/shelf/" + info.BookID
-}
-
 
 // ShelfPage 书架页面
 templ ShelfPage(s *state.GlobalState) {
 	@components.Header(components.HeaderProps{
 		Title:           "Comigo" + " " + s.Version,
 		ShowReturnIcon:  true,
-		ReturnUrl: getReturnUrl(s.NowBookID),
+		ReturnUrl: getReturnUrl(s.RequestBookID),
 		SetDownLoadLink: false,
 		InShelf:         false,
 		DownLoadLink:    "",
