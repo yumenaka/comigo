@@ -4,7 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"errors"
-	"github.com/yumenaka/comi/util/logger"
+	"github.com/yumenaka/comigo/util/logger"
 	"io"
 	"os"
 	"regexp"

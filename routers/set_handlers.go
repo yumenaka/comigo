@@ -5,11 +5,11 @@ import (
 
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comi/config"
-	"github.com/yumenaka/comi/routers/config_handlers"
-	"github.com/yumenaka/comi/routers/handlers"
-	"github.com/yumenaka/comi/routers/token"
-	"github.com/yumenaka/comi/routers/websocket"
+	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/routers/config_handlers"
+	"github.com/yumenaka/comigo/routers/handlers"
+	"github.com/yumenaka/comigo/routers/token"
+	"github.com/yumenaka/comigo/routers/websocket"
 )
 
 var protectedAPI *gin.RouterGroup

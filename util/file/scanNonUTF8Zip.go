@@ -3,7 +3,7 @@ package file
 import (
 	"context"
 	"errors"
-	"github.com/yumenaka/comi/util/logger"
+	"github.com/yumenaka/comigo/util/logger"
 	"os"
 
 	"github.com/klauspost/compress/zip"

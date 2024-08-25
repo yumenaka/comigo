@@ -2,11 +2,11 @@ package cmd
 
 import (
 	"github.com/spf13/viper"
-	"github.com/yumenaka/comi/config"
-	"github.com/yumenaka/comi/routers/handlers"
-	"github.com/yumenaka/comi/util/file/scan"
-	"github.com/yumenaka/comi/util/locale"
-	"github.com/yumenaka/comi/util/logger"
+	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/routers/handlers"
+	"github.com/yumenaka/comigo/util/file/scan"
+	"github.com/yumenaka/comigo/util/locale"
+	"github.com/yumenaka/comigo/util/logger"
 )
 
 // 用于由客户端发送消息的队列，扮演通道的角色。后面定义了一个 goroutine 来从这个通道读取新消息，然后将它们发送给其它连接到服务器的客户端。

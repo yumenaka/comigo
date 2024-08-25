@@ -11,8 +11,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/yumenaka/comi/internal/ent/predicate"
-	"github.com/yumenaka/comi/internal/ent/singlepageinfo"
+	"github.com/yumenaka/comigo/internal/ent/predicate"
+	"github.com/yumenaka/comigo/internal/ent/singlepageinfo"
 )
 
 // SinglePageInfoUpdate is the builder for updating SinglePageInfo entities.

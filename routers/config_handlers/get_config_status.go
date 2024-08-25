@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comi/config"
+	"github.com/yumenaka/comigo/config"
 )
 
 // GetConfigStatus 获取json格式的当前配置

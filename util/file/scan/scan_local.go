@@ -3,10 +3,10 @@ package scan
 import (
 	"context"
 	"errors"
-	"github.com/yumenaka/comi/util"
-	fileutil "github.com/yumenaka/comi/util/file"
-	"github.com/yumenaka/comi/util/locale"
-	"github.com/yumenaka/comi/util/logger"
+	"github.com/yumenaka/comigo/util"
+	fileutil "github.com/yumenaka/comigo/util/file"
+	"github.com/yumenaka/comigo/util/locale"
+	"github.com/yumenaka/comigo/util/logger"
 	"io/fs"
 	"net/url"
 	"os"
@@ -18,7 +18,7 @@ import (
 
 	"github.com/klauspost/compress/zip"
 	"github.com/yumenaka/archiver/v4"
-	"github.com/yumenaka/comi/entity"
+	"github.com/yumenaka/comigo/entity"
 )
 
 // Local 扫描路径，取得路径里的书籍

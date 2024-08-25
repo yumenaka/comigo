@@ -10,8 +10,8 @@ import (
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/tidwall/gjson"
-	"github.com/yumenaka/comi/util"
-	"github.com/yumenaka/comi/util/logger"
+	"github.com/yumenaka/comigo/util"
+	"github.com/yumenaka/comigo/util/logger"
 )
 
 type ConfigStatus struct {

@@ -5,12 +5,12 @@ package enttest
 import (
 	"context"
 
-	"github.com/yumenaka/comi/internal/ent"
+	"github.com/yumenaka/comigo/internal/ent"
 	// required by schema hooks.
-	_ "github.com/yumenaka/comi/internal/ent/runtime"
+	_ "github.com/yumenaka/comigo/internal/ent/runtime"
 
 	"entgo.io/ent/dialect/sql/schema"
-	"github.com/yumenaka/comi/internal/ent/migrate"
+	"github.com/yumenaka/comigo/internal/ent/migrate"
 )
 
 type (

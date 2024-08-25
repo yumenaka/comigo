@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/ebitenui/ebitenui/image"
 	"github.com/ebitenui/ebitenui/widget"
-	"github.com/yumenaka/comi/application/ebitenui/resources"
+	"github.com/yumenaka/comigo/application/ebitenui/resources"
 	"image/color"
 )
 

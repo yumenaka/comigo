@@ -32,7 +32,7 @@ air
 
 Backend:
 
-- Module name in the go.mod file: `github.com/yumenaka/comi/htmx`
+- Module name in the go.mod file: `github.com/yumenaka/comigo/htmx`
 - Go web framework/router: `Gin`
 - Server port: `1234`
 

@@ -1,16 +1,16 @@
 package scan
 
 import (
-	"github.com/yumenaka/comi/internal/database"
-	"github.com/yumenaka/comi/util/file"
-	"github.com/yumenaka/comi/util/locale"
-	"github.com/yumenaka/comi/util/logger"
+	"github.com/yumenaka/comigo/internal/database"
+	"github.com/yumenaka/comigo/util/file"
+	"github.com/yumenaka/comigo/util/locale"
+	"github.com/yumenaka/comigo/util/logger"
 	"io/fs"
 	"net/url"
 	"path"
 	"strings"
 
-	"github.com/yumenaka/comi/entity"
+	"github.com/yumenaka/comigo/entity"
 )
 
 type Option struct {

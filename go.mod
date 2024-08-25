@@ -1,4 +1,4 @@
-module github.com/yumenaka/comi
+module github.com/yumenaka/comigo
 
 go 1.23.0
 

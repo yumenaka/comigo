@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/jxskiss/base62"
-	"github.com/yumenaka/comi/util"
-	"github.com/yumenaka/comi/util/logger"
+	"github.com/yumenaka/comigo/util"
+	"github.com/yumenaka/comigo/util/logger"
 )
 
 // BookInfo 与Book唯一的区别是没有AllPageInfo,而是封面图URL 减小 json文件的大小

@@ -9,7 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/yumenaka/comi/internal/ent/singlepageinfo"
+	"github.com/yumenaka/comigo/internal/ent/singlepageinfo"
 )
 
 // SinglePageInfo is the model entity for the SinglePageInfo schema.

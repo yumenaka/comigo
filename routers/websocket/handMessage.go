@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/yumenaka/comi/util/logger"
+	"github.com/yumenaka/comigo/util/logger"
 )
 
 var WsDebug *bool

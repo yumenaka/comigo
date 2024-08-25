@@ -6,7 +6,7 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
-	"github.com/yumenaka/comi/util/logger"
+	"github.com/yumenaka/comigo/util/logger"
 	"io"
 	"log"
 	"math/rand"
@@ -18,7 +18,7 @@ import (
 	"entgo.io/ent/dialect"
 	"github.com/disintegration/imaging"
 	"github.com/yumenaka/archiver/v4"
-	"github.com/yumenaka/comi/internal/ent"
+	"github.com/yumenaka/comigo/internal/ent"
 	"modernc.org/sqlite"
 )
 

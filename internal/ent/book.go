@@ -9,7 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/yumenaka/comi/internal/ent/book"
+	"github.com/yumenaka/comigo/internal/ent/book"
 )
 
 // Book is the model entity for the Book schema.

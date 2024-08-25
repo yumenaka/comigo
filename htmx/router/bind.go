@@ -2,7 +2,7 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comi/htmx/templates/pages"
+	"github.com/yumenaka/comigo/htmx/templates/pages"
 )
 
 func bindURL(router *gin.Engine) {

@@ -1,7 +1,7 @@
 package reverse_proxy
 
 import (
-	"github.com/yumenaka/comi/util/logger"
+	"github.com/yumenaka/comigo/util/logger"
 	"io"
 	"net/http"
 	"strings"

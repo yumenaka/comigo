@@ -3,7 +3,7 @@ package util
 import (
 	"bytes"
 	"errors"
-	"github.com/yumenaka/comi/util/logger"
+	"github.com/yumenaka/comigo/util/logger"
 	"image"
 	"image/color"
 	"image/draw"

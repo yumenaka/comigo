@@ -509,7 +509,7 @@ function App() {
       <div className="w-full mt-auto flex flex-row justify-center items-center text-gray-900 h-12 py-4 space-x-2 text-base content-center" style={{
         backgroundColor: InterfaceColor, // 绑定样式
       }}>
-        <span>Power by <a href="https://github.com/yumenaka/comi/releases" className="comigo_link text-blue-700 hover:underline font-bold">Comigo</a></span>
+        <span>Power by <a href="https://github.com/yumenaka/comigo/releases" className="comigo_link text-blue-700 hover:underline font-bold">Comigo</a></span>
       </div>
     </div>
   );

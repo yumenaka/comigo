@@ -2,7 +2,7 @@ package router
 
 import (
 	"errors"
-	"github.com/yumenaka/comi/htmx/comigo"
+	"github.com/yumenaka/comigo/htmx/comigo"
 	"io/fs"
 	"log/slog"
 	"net/http"
@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comi/config"
-	"github.com/yumenaka/comi/util/logger"
+	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/util/logger"
 )
 
 func noCache() gin.HandlerFunc {

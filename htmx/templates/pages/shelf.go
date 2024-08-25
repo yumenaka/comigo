@@ -3,10 +3,10 @@ package pages
 import (
 	"github.com/angelofallars/htmx-go"
 	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comi/entity"
-	"github.com/yumenaka/comi/htmx/state"
-	"github.com/yumenaka/comi/htmx/templates/components"
-	"github.com/yumenaka/comi/util/logger"
+	"github.com/yumenaka/comigo/entity"
+	"github.com/yumenaka/comigo/htmx/state"
+	"github.com/yumenaka/comigo/htmx/templates/components"
+	"github.com/yumenaka/comigo/util/logger"
 	"net/http"
 )
 

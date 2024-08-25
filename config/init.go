@@ -3,7 +3,7 @@ package config
 import (
 	"github.com/joho/godotenv"
 	"github.com/mitchellh/go-homedir"
-	"github.com/yumenaka/comi/util/logger"
+	"github.com/yumenaka/comigo/util/logger"
 	"os"
 )
 

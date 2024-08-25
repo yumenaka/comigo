@@ -2,7 +2,7 @@ package entity
 
 import (
 	"errors"
-	"github.com/yumenaka/comi/util"
+	"github.com/yumenaka/comigo/util"
 	"sort"
 	"strconv"
 )

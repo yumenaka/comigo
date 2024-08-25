@@ -1,7 +1,7 @@
 <template>
   <div class="bottom text-gray-900 h-12 py-4 space-x-2 text-base content-center">
     <span class="text-base">Power by</span>
-    <a href="https://github.com/yumenaka/comi/releases" class="text-blue-700 hover:underline font-semibold">{{
+    <a href="https://github.com/yumenaka/comigo/releases" class="text-blue-700 hover:underline font-semibold">{{
       ServerName }}</a>
   </div>
 </template>

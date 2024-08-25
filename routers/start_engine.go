@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comi/config"
+	"github.com/yumenaka/comigo/config"
 )
 
 // startEngine 7、启动网页服务

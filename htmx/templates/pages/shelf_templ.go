@@ -10,9 +10,9 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
-	"github.com/yumenaka/comi/entity"
-	"github.com/yumenaka/comi/htmx/state"
-	"github.com/yumenaka/comi/htmx/templates/components"
+	"github.com/yumenaka/comigo/entity"
+	"github.com/yumenaka/comigo/htmx/state"
+	"github.com/yumenaka/comigo/htmx/templates/components"
 	"net/url"
 	"strconv"
 )

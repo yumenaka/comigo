@@ -5,10 +5,10 @@ package ent
 import (
 	"time"
 
-	"github.com/yumenaka/comi/internal/ent/book"
-	"github.com/yumenaka/comi/internal/ent/schema"
-	"github.com/yumenaka/comi/internal/ent/singlepageinfo"
-	"github.com/yumenaka/comi/internal/ent/user"
+	"github.com/yumenaka/comigo/internal/ent/book"
+	"github.com/yumenaka/comigo/internal/ent/schema"
+	"github.com/yumenaka/comigo/internal/ent/singlepageinfo"
+	"github.com/yumenaka/comigo/internal/ent/user"
 )
 
 // The init function reads all schema descriptors with runtime code

@@ -5,10 +5,10 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comi/config"
-	"github.com/yumenaka/comi/entity"
-	fileutil "github.com/yumenaka/comi/util/file"
-	"github.com/yumenaka/comi/util/logger"
+	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/entity"
+	fileutil "github.com/yumenaka/comigo/util/file"
+	"github.com/yumenaka/comigo/util/logger"
 )
 
 // GetFile 示例 URL： 127.0.0.1:1234/get_file?id=2b17a13&filename=1.jpg

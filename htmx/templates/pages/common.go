@@ -2,8 +2,8 @@ package pages
 
 import (
 	"fmt"
-	"github.com/yumenaka/comi/entity"
-	"github.com/yumenaka/comi/htmx/state"
+	"github.com/yumenaka/comigo/entity"
+	"github.com/yumenaka/comigo/htmx/state"
 	"strconv"
 )
 

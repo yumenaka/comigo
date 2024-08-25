@@ -3,9 +3,9 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/yumenaka/comi/config"
-	"github.com/yumenaka/comi/routers/handlers"
-	"github.com/yumenaka/comi/util/locale"
+	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/routers/handlers"
+	"github.com/yumenaka/comigo/util/locale"
 	"os"
 	"path"
 	"path/filepath"

@@ -2,8 +2,8 @@ package util
 
 import (
 	"fmt"
-	"github.com/yumenaka/comi/util/locale"
-	"github.com/yumenaka/comi/util/logger"
+	"github.com/yumenaka/comigo/util/locale"
+	"github.com/yumenaka/comigo/util/logger"
 	"strconv"
 
 	qrcodeTerminal "github.com/Baozisoftware/qrcode-terminal-go"

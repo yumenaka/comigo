@@ -111,7 +111,7 @@ and more..
 [README CN]: README_CN.md '中文文档'
 
 [Windows Page Issue]: https://github.com/golang/go/issues/32350
-[Releases]: https://github.com/yumenaka/comi/releases
+[Releases]: https://github.com/yumenaka/comigo/releases
 [License]: LICENSE
 
 [Windows Example]: https://www.yumenaka.net/wp-content/uploads/2020/08/sample.gif 'Windows Example'

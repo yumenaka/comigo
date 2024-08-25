@@ -9,7 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/yumenaka/comi/internal/ent/user"
+	"github.com/yumenaka/comigo/internal/ent/user"
 )
 
 // User is the model entity for the User schema.

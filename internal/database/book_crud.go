@@ -5,11 +5,11 @@ package database // Package database 编译条件的注释和 package 语句之�
 import (
 	"context"
 	"errors"
-	"github.com/yumenaka/comi/entity"
-	"github.com/yumenaka/comi/internal/ent"
-	entbook "github.com/yumenaka/comi/internal/ent/book"
-	"github.com/yumenaka/comi/internal/ent/singlepageinfo"
-	"github.com/yumenaka/comi/util/logger"
+	"github.com/yumenaka/comigo/entity"
+	"github.com/yumenaka/comigo/internal/ent"
+	entbook "github.com/yumenaka/comigo/internal/ent/book"
+	"github.com/yumenaka/comigo/internal/ent/singlepageinfo"
+	"github.com/yumenaka/comigo/util/logger"
 )
 
 // ClearBookData   清空数据库的Book与SinglePageInfo表  // 后台并发执行，所以不能保证结果如预期，不用这个函数???

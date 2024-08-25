@@ -9,8 +9,8 @@ import (
 	"github.com/ebitenui/ebitenui/widget"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/skip2/go-qrcode"
-	"github.com/yumenaka/comi/config"
-	"github.com/yumenaka/comi/util/logger"
+	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/util/logger"
 )
 
 // QRCodeWindow QRCode弹出窗口

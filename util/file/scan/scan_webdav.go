@@ -3,7 +3,7 @@ package scan
 import (
 	"fmt"
 	"github.com/hirochachacha/go-smb2"
-	"github.com/yumenaka/comi/entity"
+	"github.com/yumenaka/comigo/entity"
 	iofs "io/fs"
 	"net"
 	"strconv"
