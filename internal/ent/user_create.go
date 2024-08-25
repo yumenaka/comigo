@@ -10,7 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/yumenaka/comi/internal/ent/user"
+	"github.com/yumenaka/comigo/internal/ent/user"
 )
 
 // UserCreate is the builder for creating a User entity.

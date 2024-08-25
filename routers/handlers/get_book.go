@@ -1,12 +1,12 @@
 package handlers
 
 import (
-	"github.com/yumenaka/comi/util/file"
-	"github.com/yumenaka/comi/util/logger"
+	"github.com/yumenaka/comigo/util/file"
+	"github.com/yumenaka/comigo/util/logger"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comi/entity"
+	"github.com/yumenaka/comigo/entity"
 )
 
 // GetBook 相关参数：

@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/yumenaka/comi/internal/ent"
+	"github.com/yumenaka/comigo/internal/ent"
 )
 
 // The BookFunc type is an adapter to allow the use of ordinary

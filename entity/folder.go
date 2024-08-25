@@ -2,7 +2,7 @@ package entity
 
 import (
 	"errors"
-	"github.com/yumenaka/comi/util/logger"
+	"github.com/yumenaka/comigo/util/logger"
 	"os"
 	"path/filepath"
 	"sync"

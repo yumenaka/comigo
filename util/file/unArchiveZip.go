@@ -2,8 +2,8 @@ package file
 
 import (
 	"context"
-	"github.com/yumenaka/comi/util"
-	"github.com/yumenaka/comi/util/logger"
+	"github.com/yumenaka/comigo/util"
+	"github.com/yumenaka/comigo/util/logger"
 	"os"
 
 	"github.com/yumenaka/archiver/v4"

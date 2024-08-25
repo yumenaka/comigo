@@ -1,9 +1,9 @@
 package state
 
 import (
-	"github.com/yumenaka/comi/config"
-	"github.com/yumenaka/comi/entity"
-	"github.com/yumenaka/comi/util"
+	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/entity"
+	"github.com/yumenaka/comigo/util"
 	"strings"
 )
 

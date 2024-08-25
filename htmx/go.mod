@@ -1,4 +1,4 @@
-module github.com/yumenaka/comi/htmx
+module github.com/yumenaka/comigo/htmx
 
 go 1.23.0
 

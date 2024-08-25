@@ -10,7 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/yumenaka/comi/internal/ent/singlepageinfo"
+	"github.com/yumenaka/comigo/internal/ent/singlepageinfo"
 )
 
 // SinglePageInfoCreate is the builder for creating a SinglePageInfo entity.

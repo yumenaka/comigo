@@ -15,9 +15,9 @@ import (
 
 	"github.com/cheggaaa/pb/v3"
 	"github.com/xxjwxc/gowp/workpool"
-	"github.com/yumenaka/comi/util"
-	"github.com/yumenaka/comi/util/locale"
-	"github.com/yumenaka/comi/util/logger"
+	"github.com/yumenaka/comigo/util"
+	"github.com/yumenaka/comigo/util/locale"
+	"github.com/yumenaka/comigo/util/logger"
 )
 
 // https://wnanbei.github.io/post/go-%E5%B9%B6%E5%8F%91%E5%AE%89%E5%85%A8%E7%9A%84-sync.map/

@@ -11,9 +11,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/yumenaka/comi/internal/ent/book"
-	"github.com/yumenaka/comi/internal/ent/predicate"
-	"github.com/yumenaka/comi/internal/ent/singlepageinfo"
+	"github.com/yumenaka/comigo/internal/ent/book"
+	"github.com/yumenaka/comigo/internal/ent/predicate"
+	"github.com/yumenaka/comigo/internal/ent/singlepageinfo"
 )
 
 // BookUpdate is the builder for updating Book entities.

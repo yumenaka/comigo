@@ -6,9 +6,9 @@ import (
 	"github.com/ebitenui/ebitenui/image"
 	"github.com/ebitenui/ebitenui/widget"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
-	"github.com/yumenaka/comi/entity"
-	"github.com/yumenaka/comi/util"
-	fileutil "github.com/yumenaka/comi/util/file"
+	"github.com/yumenaka/comigo/entity"
+	"github.com/yumenaka/comigo/util"
+	fileutil "github.com/yumenaka/comigo/util/file"
 	"image/color"
 	"log"
 )

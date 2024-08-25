@@ -1,8 +1,8 @@
 package token
 
 import (
-	"github.com/yumenaka/comi/config"
-	"github.com/yumenaka/comi/util/logger"
+	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/util/logger"
 	"time"
 
 	jwt "github.com/appleboy/gin-jwt/v2"

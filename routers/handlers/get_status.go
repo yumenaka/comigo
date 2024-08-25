@@ -1,13 +1,13 @@
 package handlers
 
 import (
-	"github.com/yumenaka/comi/util"
+	"github.com/yumenaka/comigo/util"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/yumenaka/comi/config"
-	"github.com/yumenaka/comi/entity"
+	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/entity"
 )
 
 // ServerStatus 服务器当前状况

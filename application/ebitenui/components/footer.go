@@ -4,7 +4,7 @@ import (
 	"github.com/ebitenui/ebitenui/image"
 	"github.com/ebitenui/ebitenui/widget"
 	"github.com/golang/freetype/truetype"
-	"github.com/yumenaka/comi/config"
+	"github.com/yumenaka/comigo/config"
 	"golang.org/x/image/font/gofont/goregular"
 	"image/color"
 	"log"

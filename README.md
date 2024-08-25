@@ -2,15 +2,15 @@
 
 # ComiGo: 简单粗暴的漫画阅读器 
 [![Go Report](https://goreportcard.com/badge/github.com/yumenaka/comi?style=flat-square)](https://goreportcard.com/report/github.com/yumenaka/comi)
-[![License](https://img.shields.io/github/license/yumenaka/comi?style=flat-square&color=blue)](https://github.com/yumenaka/comi/blob/main/LICENSE)
+[![License](https://img.shields.io/github/license/yumenaka/comi?style=flat-square&color=blue)](https://github.com/yumenaka/comigo/blob/main/LICENSE)
 
-[//]: # ([![Downloads]&#40;https://img.shields.io/github/downloads/yumenaka/comi/total?style=flat-square&color=success&#41;]&#40;https://github.com/yumenaka/comi/releases&#41;)
+[//]: # ([![Downloads]&#40;https://img.shields.io/github/downloads/yumenaka/comi/total?style=flat-square&color=success&#41;]&#40;https://github.com/yumenaka/comigo/releases&#41;)
 [//]: # (<img src="https://raw.githubusercontent.com/yumenaka/comi/master/icon.ico" alt="ComiGo: 简单粗暴的漫画阅读器" width="200">)
 </div>
 
 ![Windows示例](https://www.yumenaka.net/wp-content/uploads/2020/08/sample.gif "Windows示例")
 
-[English](https://github.com/yumenaka/comi/blob/master/README_EN.md)   [日本語](https://github.com/yumenaka/comi/blob/master/README_JP.md)
+[English](https://github.com/yumenaka/comigo/blob/master/README_EN.md)   [日本語](https://github.com/yumenaka/comigo/blob/master/README_JP.md)
 
 ### Features：  
 1. 支持Windows、Linux、MacOS。支持卷轴、下拉、翻页等多种模式。
@@ -20,7 +20,7 @@
 
 ### 安装：
 手动下载  
-在 [Releases页面](https://github.com/yumenaka/comi/releases ) ，下载最新版文件，放到系统PATH。
+在 [Releases页面](https://github.com/yumenaka/comigo/releases ) ，下载最新版文件，放到系统PATH。
 Linux MacOS 一键安装脚本  
 ```bash
 # 需要curl与tar，文件将安装到/usr/local/bin/ 

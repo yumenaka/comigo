@@ -1,14 +1,14 @@
 package cmd
 
 import (
-	"github.com/yumenaka/comi/internal/database"
-	"github.com/yumenaka/comi/util/file/scan"
-	"github.com/yumenaka/comi/util/logger"
+	"github.com/yumenaka/comigo/internal/database"
+	"github.com/yumenaka/comigo/util/file/scan"
+	"github.com/yumenaka/comigo/util/logger"
 	"strconv"
 
 	"github.com/spf13/viper"
-	"github.com/yumenaka/comi/config"
-	"github.com/yumenaka/comi/entity"
+	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/entity"
 )
 
 // StartScan 解析命令,扫描书库

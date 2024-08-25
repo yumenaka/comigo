@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/yumenaka/comi/htmx/router"
+	"github.com/yumenaka/comigo/htmx/router"
 	"log/slog"
 	"os"
 )

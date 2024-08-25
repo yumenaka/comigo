@@ -2,8 +2,8 @@ package file
 
 import (
 	"errors"
-	"github.com/yumenaka/comi/util/locale"
-	"github.com/yumenaka/comi/util/logger"
+	"github.com/yumenaka/comigo/util/locale"
+	"github.com/yumenaka/comigo/util/logger"
 	"net/url"
 	"os"
 	"path"

@@ -11,10 +11,10 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/yumenaka/comi/internal/ent/book"
-	"github.com/yumenaka/comi/internal/ent/predicate"
-	"github.com/yumenaka/comi/internal/ent/singlepageinfo"
-	"github.com/yumenaka/comi/internal/ent/user"
+	"github.com/yumenaka/comigo/internal/ent/book"
+	"github.com/yumenaka/comigo/internal/ent/predicate"
+	"github.com/yumenaka/comigo/internal/ent/singlepageinfo"
+	"github.com/yumenaka/comigo/internal/ent/user"
 )
 
 const (

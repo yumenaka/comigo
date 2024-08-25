@@ -10,8 +10,8 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/yumenaka/comi/internal/ent/book"
-	"github.com/yumenaka/comi/internal/ent/singlepageinfo"
+	"github.com/yumenaka/comigo/internal/ent/book"
+	"github.com/yumenaka/comigo/internal/ent/singlepageinfo"
 )
 
 // BookCreate is the builder for creating a Book entity.

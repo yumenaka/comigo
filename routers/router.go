@@ -2,9 +2,9 @@ package routers
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comi/config"
-	"github.com/yumenaka/comi/resource"
-	"github.com/yumenaka/comi/util/locale"
+	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/resource"
+	"github.com/yumenaka/comigo/util/locale"
 	"net/http"
 )
 

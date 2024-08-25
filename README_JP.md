@@ -5,9 +5,9 @@
 
 ![Windowssample](https://www.yumenaka.net/wp-content/uploads/2020/08/sample.gif "Windows示例")  
 
-### ダウンロードは [github release](https://github.com/yumenaka/comi/releases ) をご参照ください：
+### ダウンロードは [github release](https://github.com/yumenaka/comigo/releases ) をご参照ください：
 
-[https://github.com/yumenaka/comi/releases](https://github.com/yumenaka/comi/releases ) 
+[https://github.com/yumenaka/comigo/releases](https://github.com/yumenaka/comigo/releases ) 
 
 ### Usage：
 ```

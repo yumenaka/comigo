@@ -9,15 +9,15 @@ import (
 	"log"
 	"reflect"
 
-	"github.com/yumenaka/comi/internal/ent/migrate"
+	"github.com/yumenaka/comigo/internal/ent/migrate"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/yumenaka/comi/internal/ent/book"
-	"github.com/yumenaka/comi/internal/ent/singlepageinfo"
-	"github.com/yumenaka/comi/internal/ent/user"
+	"github.com/yumenaka/comigo/internal/ent/book"
+	"github.com/yumenaka/comigo/internal/ent/singlepageinfo"
+	"github.com/yumenaka/comigo/internal/ent/user"
 )
 
 // Client is the client that holds all ent builders.

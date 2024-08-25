@@ -5,11 +5,11 @@ import (
 	"strings"
 
 	"github.com/sanity-io/litter"
-	"github.com/yumenaka/comi/config"
-	"github.com/yumenaka/comi/entity"
-	"github.com/yumenaka/comi/util"
-	"github.com/yumenaka/comi/util/locale"
-	"github.com/yumenaka/comi/util/logger"
+	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/entity"
+	"github.com/yumenaka/comigo/util"
+	"github.com/yumenaka/comigo/util/locale"
+	"github.com/yumenaka/comigo/util/logger"
 )
 
 func showQRCode() {

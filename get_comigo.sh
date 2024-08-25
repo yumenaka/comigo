@@ -55,7 +55,7 @@ fi
 
 
 # 下载文件并解压
-url="https://github.com/yumenaka/comi/releases/download/${latest_tag}/${file_name}"
+url="https://github.com/yumenaka/comigo/releases/download/${latest_tag}/${file_name}"
 echo "Downloading $url"
 curl -L -O $url
 tar xvf $file_name

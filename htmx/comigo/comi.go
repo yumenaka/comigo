@@ -3,12 +3,12 @@ package comigo
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comi/resource"
+	"github.com/yumenaka/comigo/resource"
 	"os"
 
-	"github.com/yumenaka/comi/cmd"
-	"github.com/yumenaka/comi/config"
-	"github.com/yumenaka/comi/routers"
+	"github.com/yumenaka/comigo/cmd"
+	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/routers"
 )
 
 // StartComigoServer 启动Comigo Web服务器
