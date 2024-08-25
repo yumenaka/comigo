@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	Version = "v0.9.10"
+	Version = "v0.9.11"
 	Srv     *http.Server
 	Status  = entity.ConfigStatus{}
 	Config  = entity.ComigoConfig{
