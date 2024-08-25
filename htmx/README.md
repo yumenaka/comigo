@@ -4,7 +4,6 @@
 >
 > - `Templ（模板引擎）`: [https://templ.guide](https://templ.guide/)
 > - `Flowbite（组件库）`: [https://flowbite.com](https://flowbite.com/docs/getting-started/quickstart/)
-> - `Preline（组件库）`: [https://preline.co/docs/index.html](https://preline.co/docs/index.html)
 > - `Gin`: [https://gin-gonic.com/zh-cn/docs/examples/](https://gin-gonic.com/zh-cn/docs/examples/)
 > - `htmx`: [https://htmx.org/examples](https://htmx.org/examples/)
 > - `Alpine.js`: [https://alpinejs.dev](https://alpinejs.dev/)
