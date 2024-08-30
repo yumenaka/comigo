@@ -25,7 +25,7 @@ func BodyContainer() widget.PreferredSizeLocateableWidget {
 		),
 		// 该容器将使用锚点布局来布局其单个子部件
 		widget.ContainerOpts.Layout(widget.NewRowLayout(
-			//“如何布置孩子们的方向”
+			//“如何布置childs的方向”
 			widget.RowLayoutOpts.Direction(widget.DirectionHorizontal),
 			//Set how much padding before displaying content
 			widget.RowLayoutOpts.Padding(widget.NewInsetsSimple(30)),
