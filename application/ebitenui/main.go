@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/yumenaka/comigo/application/ebitenui/pages/flip_mode"
+	"github.com/yumenaka/comigo/application/ebitenui/pages/scroll_mode"
 	"github.com/yumenaka/comigo/application/ebitenui/resources"
 	_ "image/gif"
 	_ "image/jpeg"
@@ -29,14 +29,14 @@ type game struct {
 
 func main() {
 	//如果参数当中有--debug，则不启动UI
-	debugMode := flag.Bool("debug", false, "Disable UI by debug mode.")
+	//debugMode := flag.Bool("debug", false, "Disable UI by debug mode.")
 	// 解析命令行参数
 	flag.Parse()
-	if *debugMode {
-		fmt.Println("Debug Mode, no thing to do.")
-		select {}
-		return
-	}
+	//if *debugMode {
+	//	fmt.Println("Debug Mode, no thing to do.")
+	//	select {}
+	//	return
+	//}
 	// 启动Comigo Web服务器
 	// 如果参数当中有--debug，则不启动UI，且什么都不做（UI抢焦点，所以用另一台机器rsync同步代码跑效果）
 	comi.StartComigoWebserver()
@@ -111,7 +111,7 @@ func createUI(readerConfig *model.ReaderConfig) (*ebitenui.UI, func(), error) {
 		return nil, nil, err
 	}
 	rootContainer.AddChild(components.HeaderContainer(res, readerConfig, ui))
-	rootContainer.AddChild(flip_mode.BodyContainer())
+	rootContainer.AddChild(scroll_mode.BodyContainer())
 	rootContainer.AddChild(components.FooterContainer())
 
 	return ui, func() {
