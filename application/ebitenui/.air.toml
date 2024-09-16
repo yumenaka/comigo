@@ -24,7 +24,7 @@ bin = "temp/comigo"
 full_bin = "COMI_DEBUG_MODE=true COMI_MIN_MEDIA_NUM=2 ./temp/comigo"
 
 # Add additional arguments when running binary (bin/full_bin). Will run './tmp/comigo ../'.
-#args_bin = ["--debug", "/somepath"]
+args_bin = [ "../../test"]
 
 
 # Watch these filename extensions.
