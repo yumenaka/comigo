@@ -45,7 +45,8 @@ gomobile:
 md5SumThemAll:
 	rm -f $(MD5_TEXTFILE)
 	find $(BINDIR) -type f -name "$(NAME)_*" -exec $(MD5_UTIL) {} >> $(MD5_TEXTFILE) \;
-	sed -i 's/$(BINDIR)\///g' $(MD5_TEXTFILE)
+	# 删除 $(MD5_TEXTFILE)里面的 ./bin/ 字符串
+	sed -i '' 's|./bin/||g' $(MD5_TEXTFILE)
 	cat $(MD5_TEXTFILE)
 
 # upx可能导致报毒，取消windows平台的upx压缩
