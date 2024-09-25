@@ -15,13 +15,13 @@
     "@tailwindcss/forms": "latest",
     "@tailwindcss/typography": "latest",
     "alpinejs": "latest",
-    "flowbite": "^2.4.1",
+    "flowbite": "^2.5.2",
     "htmx.org": "latest",
-    "i18next": "^23.12.2",
+    "i18next": "^23.15.1",
     "i18next-browser-languagedetector": "^8.0.0",
     "screenfull": "^6.0.2",
     "tailwindcss": "latest",
-    "tw-colors": "^3.3.1"
+    "tw-colors": "^3.3.2"
   },
   "devDependencies": {
     "@parcel/transformer-sass": "latest",

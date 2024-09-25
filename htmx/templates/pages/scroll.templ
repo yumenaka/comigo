@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// js代码,滚动到顶部,显示返回顶部按钮,获取鼠标位置,决定是否打开设置面板等
 script ScrollScripts() {
 //滚动到顶部
 function scrollToTop(scrollDuration) {
@@ -136,7 +137,7 @@ mouseMoveArea.addEventListener('click', onMouseClick)
 // 触摸的时候也触发点击事件
 mouseMoveArea.addEventListener('touchstart', onMouseClick)
 }
-
+// ScrollMainArea 定义 BodyHTML
 templ ScrollMainArea(s *state.GlobalState, book *entity.Book) {
 	<div
 		id="mouseMoveArea"
