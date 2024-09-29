@@ -14,9 +14,8 @@ templ Drawer(s *state.GlobalState, slot templ.Component) {
 		<button type="button" data-drawer-hide="drawer-right" aria-controls="drawer-right" class="font-bold bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 absolute top-2.5 end-2.5 inline-flex items-center justify-center dark:hover:bg-gray-600 dark:hover:text-white">
 			X
 		</button>
-		<div  class="flex flex-col items-center justify-center p-1 my-2 dbg-accent text-accent-content">
+		<div class="flex flex-col items-center justify-center p-1 my-2 rounded text-accent-content dark:text-white">
 			@slot
-			<!--<div class="w-full font-semibold text-left">主题</div> -->
 			<select x-model="theme" x-on:change="theme = $event.target.value;console.log(theme);" class="w-full h-10 m-2 border rounded bg-base-100 text-accent-content focus:outline-none">
 				<option value="retro">Retro</option>
 				<option value="light">Light</option>
@@ -32,16 +31,33 @@ templ Drawer(s *state.GlobalState, slot templ.Component) {
 				<option value="winter">Winter</option>
 				<option value="nord">Nord</option>
 			</select>
-			<!--选择语言的select -->
-			<!-- <div class="w-full font-semibold text-left">语言</div> -->
+			<!-- 选择语言的select  -->
 			<select x-model="i18next.language" x-on:change="i18next.changeLanguage($event.target.value).then(location.reload())" class="w-full h-10 pl-3 pr-3 m-2 border rounded bg-base-100 text-accent-content focus:outline-none">
 				<option value="en">English</option>
 				<option value="zh">中文</option>
 				<option value="ja">日本語</option>
 			</select>
-			<!-- 下拉模式下，漫画页面的底部间距。px。-->
-			<label for="marginBottom" class="w-full block mb-2 text-sm font-medium text-gray-900 dark:text-white" x-text="i18next.t('marginOnScrollMode') + $store.scroll.marginBottomOnScrollMode"></label>
-			<input id="marginBottom" type="range" min="0" max="40" x-model:value="$store.scroll.marginBottomOnScrollMode" step="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"/>
+			<!-- 滑动选择组件: 下拉模式下，漫画页面的底部间距（px）-->
+			<!-- 组件来自：https://flowbite.com/docs/forms/range/-->
+			<div class="relative w-full mb-8">
+				<label for="marginBottom" class="block w-full mb-2 text-sm font-medium" x-text="i18next.t('marginBottomOnScrollMode') + $store.scroll.marginBottomOnScrollMode+'px'"></label>
+				<input id="marginBottom" type="range" min="0" max="100" x-model:value="$store.scroll.marginBottomOnScrollMode" step="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"/>
+				<span class="absolute text-sm text-gray-500 dark:text-gray-400 start-0 -bottom-6">Min (0px)</span>
+				<span class="absolute text-sm text-gray-500 dark:text-gray-400 end-0 -bottom-6">Max (100px)</span>
+			</div>
+			<!-- toggle开关：显示页数 -->
+			<label class="inline-flex items-center w-full my-2 cursor-pointer">
+				<input type="checkbox" x-model:value="$store.scroll.showPageNum" class="sr-only peer" checked/>
+				<div class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+				<span class="text-sm font-medium ms-3" x-text="i18next.t('showPageNum')"></span>
+			</label>
+			<!-- toggle开关组件：横屏状态下,宽度单位是固定值还是百分比 -->
+			<!-- 组件来自：https://flowbite.com/docs/forms/toggle/ -->
+			<label class="inline-flex items-center w-full my-2 cursor-pointer">
+				<input type="checkbox" x-model:value="$store.scroll.widthUseFixedValue" class="sr-only peer" checked/>
+				<div class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+				<span class="text-sm font-medium ms-3" x-text="$store.scroll.widthUseFixedValue?i18next.t('widthUseFixedValue'):i18next.t('widthUsePercent')"></span>
+			</label>
 		</div>
 	</div>
 }
