@@ -11300,7 +11300,7 @@ var $8d24653c8cdd4795$var$Modal = /** @class */ function() {
             // Add keyboard event listener to the document
             if (this._options.closable) this._setupModalCloseEventListeners();
             // prevent body scroll
-            document.body.classList.add("overflow-hidden");
+            //document.body.classList.add('overflow-hidden');
             // callback function
             this._options.onShow(this);
         }
@@ -11551,7 +11551,7 @@ var $c647e009fa86f7f0$var$Drawer = /** @class */ function() {
         this._targetEl.setAttribute("role", "dialog");
         this._targetEl.removeAttribute("aria-hidden");
         // disable body scroll
-        if (!this._options.bodyScrolling) document.body.classList.add("overflow-hidden");
+        this._options.bodyScrolling;
         // show backdrop
         if (this._options.backdrop) this._createBackdrop();
         this._visible = true;
