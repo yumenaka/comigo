@@ -2,10 +2,10 @@ package components
 
 import "github.com/yumenaka/comigo/htmx/state"
 
-templ Drawer(s *state.GlobalState,slot templ.Component) {
+templ Drawer(s *state.GlobalState, slot templ.Component) {
 	<!-- drawer component -->
 	<!-- https://flowbite.com/docs/components/drawer/ -->
-	<div id="drawer-right" x-data={ serverHostBindStr(s.ServerStatus.ServerHost)}  class="fixed top-0 right-0 z-40 w-64 h-screen p-4 overflow-y-auto transition-transform translate-x-full bg-base-100 text-base-content" tabindex="-1" aria-labelledby="drawer-right-label">
+	<div id="drawer-right" x-data={ serverHostBindStr(s.ServerStatus.ServerHost) } class="fixed top-0 right-0 z-40 w-64 h-screen p-4 overflow-y-auto transition-transform translate-x-full bg-base-100 text-base-content" tabindex="-1" aria-labelledby="drawer-right-label">
 		<h5 x-text="i18next.t('ReaderSettings')" id="drawer-right-label" class="inline-flex items-center mb-4 text-base font-semibold text-gray-500 dark:text-gray-400">
 			<svg class="w-4 h-4 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
 				<path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"></path>
@@ -14,8 +14,8 @@ templ Drawer(s *state.GlobalState,slot templ.Component) {
 		<button type="button" data-drawer-hide="drawer-right" aria-controls="drawer-right" class="font-bold bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 absolute top-2.5 end-2.5 inline-flex items-center justify-center dark:hover:bg-gray-600 dark:hover:text-white">
 			X
 		</button>
-		<div class="flex flex-col items-center justify-center p-1 my-2 dbg-accent text-accent-content">
-		@slot
+		<div  class="flex flex-col items-center justify-center p-1 my-2 dbg-accent text-accent-content">
+			@slot
 			<!--<div class="w-full font-semibold text-left">主题</div> -->
 			<select x-model="theme" x-on:change="theme = $event.target.value;console.log(theme);" class="w-full h-10 m-2 border rounded bg-base-100 text-accent-content focus:outline-none">
 				<option value="retro">Retro</option>
@@ -39,6 +39,9 @@ templ Drawer(s *state.GlobalState,slot templ.Component) {
 				<option value="zh">中文</option>
 				<option value="ja">日本語</option>
 			</select>
+			<!-- 下拉模式下，漫画页面的底部间距。px。-->
+			<label for="marginBottom" class="w-full block mb-2 text-sm font-medium text-gray-900 dark:text-white" x-text="i18next.t('marginOnScrollMode') + $store.scroll.marginBottomOnScrollMode"></label>
+			<input id="marginBottom" type="range" min="0" max="40" x-model:value="$store.scroll.marginBottomOnScrollMode" step="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"/>
 		</div>
 	</div>
 }

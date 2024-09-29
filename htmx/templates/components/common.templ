@@ -52,7 +52,7 @@ templ MainLayout(title string, metaTags, bodyContent templ.Component) {
 		<!-- 详细用法参见： https://alpinejs.dev/plugins/persist -->
 		<body x-data="{ theme: $persist('dark') }" x-bind:data-theme="theme" onload={ BodyScripts() } class="flex flex-col items-center justify-between w-full h-full min-h-screen p-0 m-0 font-sans">
 			@bodyContent
-			<script src="/static/scripts.js"></script>
 		</body>
+		<script src="/static/scripts.js"></script>
 	</html>
 }
