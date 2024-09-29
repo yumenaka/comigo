@@ -19167,14 +19167,14 @@ document.getElementById("FullScreenIcon").addEventListener("click", ()=>{
     nowPageNum: 0,
     simplifyTitle: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("scroll.simplifyTitle"),
     //下拉模式下，漫画页面的底部间距。px。
-    marginOnScrollMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(10).as("scroll.marginOnScrollMode"),
+    marginBottomOnScrollMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(10).as("scroll.marginBottomOnScrollMode"),
     //卷轴模式下，是否无限下拉
     InfiniteDropdown: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("scroll.InfiniteDropdown"),
     // 书库中的书籍是否显示文字版标题
     bookCardShowTitleFlag: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("scroll.bookCardShowTitleFlag"),
     syncScrollFlag: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("scroll.syncScrollFlag"),
     scrollTopSave: 0,
-    imageMaxWidth: 800,
+    imageMaxWidth: 400,
     // 屏幕宽横比,inLandscapeMode的判断依据
     aspectRatio: 1.2,
     // 可见范围宽高的具体值

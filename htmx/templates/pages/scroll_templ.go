@@ -15,6 +15,7 @@ import (
 	"strings"
 )
 
+// js代码,滚动到顶部,显示返回顶部按钮,获取鼠标位置,决定是否打开设置面板等
 func ScrollScripts() templ.ComponentScript {
 	return templ.ComponentScript{
 		Name: `__templ_ScrollScripts_49dc`,
@@ -151,6 +152,7 @@ mouseMoveArea.addEventListener('touchstart', onMouseClick)
 	}
 }
 
+// ScrollMainArea 定义 BodyHTML
 func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -172,20 +174,20 @@ func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"mouseMoveArea\" class=\"flex flex-col items-center justify-center flex-1 w-full max-w-full bg-base-100 text-base-content\" :class=\"(theme.toString() ===&#39;light&#39;||theme.toString() ===&#39;dark&#39;||theme.toString() ===&#39;retro&#39;||theme.toString() ===&#39;lofi&#39;||theme.toString() ===&#39;nord&#39;) &amp;&amp; &#39;bg-base-300&#39;\"><noscript class=\"loading-lazy\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"mouseMoveArea\" class=\"flex flex-col items-center justify-center flex-1 w-full max-w-full pt-2 bg-base-100 text-base-content\" :class=\"(theme.toString() ===&#39;light&#39;||theme.toString() ===&#39;dark&#39;||theme.toString() ===&#39;retro&#39;||theme.toString() ===&#39;lofi&#39;||theme.toString() ===&#39;nord&#39;) &amp;&amp; &#39;bg-base-300&#39;\"><!-- 这个做法不生效（无论使用x-html还是x-text），需要用内联写法 --><!-- <style x-html=\"'img { margin-bottom: ' + $store.scroll.marginBottomOnScrollMode*10  + 'px; }'\"></style> --><!-- Alpine.js 动态CSS，内联写法 --><!--  style=\"{ marginBottom: $store.scroll.marginBottomOnScrollMode + 'px' }\" --><!-- https://htmx.org/docs/#triggers --><!-- https://htmx.org/docs/#swapping --><!-- hx-get 用于获取图片的URL，hx-trigger 用于触发加载，hx-swap 用于替换元素，innerHTML默认值，将内容放在目标元素内 outerHTML用返回的内容替换整个目标元素  hx-target 用于指定目标元素 --><noscript class=\"loading-lazy\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		for key, image := range book.Pages.Images {
 			if strings.Contains(image.Url, ".html") && !strings.Contains(image.Url, "hidden.") {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!-- https://htmx.org/docs/#triggers --> <!-- https://htmx.org/docs/#swapping --> <!-- hx-get 用于获取图片的URL，hx-trigger 用于触发加载，hx-swap 用于替换元素，innerHTML默认值，将内容放在目标元素内 outerHTML用返回的内容替换整个目标元素  hx-target 用于指定目标元素 --> <div hx-get=\"")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div hx-get=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var2 string
 				templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(image.Url)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll.templ`, Line: 152, Col: 38}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll.templ`, Line: 158, Col: 28}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 				if templ_7745c5c3_Err != nil {
@@ -201,20 +203,20 @@ func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			if key <= 2 && !strings.Contains(image.Url, "hidden.") && !strings.Contains(image.Url, ".html") {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<img class=\"m-2 max-w-full lg:max-w-[800px] rounded shadow-lg\" src=\"")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<img class=\"mx-2 max-w-full lg:max-w-[800px] rounded shadow-lg\" src=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(image.Url)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll.templ`, Line: 155, Col: 82}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll.templ`, Line: 161, Col: 84}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" :style=\"{ marginBottom: $store.scroll.marginBottomOnScrollMode + &#39;px&#39; }\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -224,20 +226,20 @@ func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			if key > 2 && !strings.Contains(image.Url, "hidden.") && !strings.Contains(image.Url, ".html") {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<img loading=\"lazy\" class=\"m-2 max-w-full lg:max-w-[800px] rounded shadow-lg\" src=\"")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<img loading=\"lazy\" class=\"mx-2 max-w-full lg:max-w-[800px] rounded shadow-lg\" src=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(image.Url)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll.templ`, Line: 158, Col: 97}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll.templ`, Line: 164, Col: 99}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" :style=\"{ marginBottom: $store.scroll.marginBottomOnScrollMode + &#39;px&#39; }\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -248,6 +250,10 @@ func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = ScrollScripts().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<style type=\"text/css\">\n    /* https://developer.mozilla.org/zh-CN/docs/Web/CSS/object-fit */\n\n\n\n\n    img {\n        margin: auto;\n        /* object-fit: scale-down; */\n        /* margin-top: v-bind(margin+'px'); */\n        margin-bottom: v-bind(margin+'px');\n        /* padding-bottom: 30px; */\n        /* border-radius: 3px; */\n        /* 任意数量的阴影，用逗号分隔 如果元素同时设置了 border-radius属性，那么阴影也会有圆角效果。*/\n        /* 属性可设置的值包括阴影的 X 轴偏移量、Y 轴偏移量、模糊半径、扩散半径和颜色。 */\n        /* box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); */\n        box-shadow: 0px 6px 3px 0px rgba(0, 0, 0, 0.19);\n    }\n\n    .page_hint {\n        /* 文字颜色 */\n        color: #413d3d;\n        /* 文字阴影：https://www.w3school.com.cn/css/css3_shadows.asp*/\n        text-shadow: -1px 0 rgb(240, 229, 229), 0 1px rgb(253, 242, 242),\n            1px 0 rgb(206, 183, 183), 0 -1px rgb(196, 175, 175);\n    }\n\n    .LoadingImage {\n        width: 90vw;\n        max-width: 90vw;\n    }\n\n    .ErrorImage {\n        width: 90vw;\n        max-width: 90vw;\n    }\n\n    /* 横屏（显示区域）时的CSS样式,IE无效 */\n    @media screen and (min-aspect-ratio: 19/19) {\n        .SinglePageImage {\n            width: v-bind(sPWL);\n            max-width: 100%;\n        }\n\n        .DoublePageImage {\n            width: v-bind(dPWL);\n            max-width: 100%;\n        }\n    }\n\n    /* 竖屏(显示区域)CSS样式,IE无效 */\n    @media screen and (max-aspect-ratio: 19/19) {\n        .SinglePageImage {\n            width: v-bind(sPWP);\n            max-width: 100%;\n        }\n\n        .DoublePageImage {\n            /* width: 100%; */\n            width: v-bind(dPWP);\n            max-width: 100%;\n        }\n    }\n    </style>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

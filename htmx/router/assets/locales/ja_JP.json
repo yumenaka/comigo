@@ -81,7 +81,7 @@
   "simplify_book_titles": "タイトルの簡略化",
   "DoublePageMode": "ダブルページ",
   "SinglePageMode": "シングルページ",
-  "marginOnScrollMode": "ページ ギャップ:",
+  "marginBottomOnScrollMode": "ページ ギャップ:",
   "login_success_hint": "ログイン成功、前ページに戻る",
   "server_setting": "comigo サーバー設定",
   "logout": "ログアウト",

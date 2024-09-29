@@ -115,14 +115,14 @@ Alpine.store('scroll', {
   nowPageNum: 0,
   simplifyTitle: Alpine.$persist(true).as('scroll.simplifyTitle'),//是否简化标题
   //下拉模式下，漫画页面的底部间距。px。
-  marginOnScrollMode: Alpine.$persist(10).as('scroll.marginOnScrollMode'),
+  marginBottomOnScrollMode: Alpine.$persist(10).as('scroll.marginBottomOnScrollMode'),
   //卷轴模式下，是否无限下拉
   InfiniteDropdown: Alpine.$persist(true).as('scroll.InfiniteDropdown'),
   // 书库中的书籍是否显示文字版标题
   bookCardShowTitleFlag: Alpine.$persist(true).as('scroll.bookCardShowTitleFlag'),
   syncScrollFlag: Alpine.$persist(false).as('scroll.syncScrollFlag'),// 同步滚动,目前还没做
   scrollTopSave: 0,//存储现在滚动的位置
-  imageMaxWidth: 800,
+  imageMaxWidth: 400,
   // 屏幕宽横比,inLandscapeMode的判断依据
   aspectRatio: 1.2,
   // 可见范围宽高的具体值

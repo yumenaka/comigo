@@ -137,34 +137,103 @@ mouseMoveArea.addEventListener('click', onMouseClick)
 // 触摸的时候也触发点击事件
 mouseMoveArea.addEventListener('touchstart', onMouseClick)
 }
+
 // ScrollMainArea 定义 BodyHTML
 templ ScrollMainArea(s *state.GlobalState, book *entity.Book) {
 	<div
 		id="mouseMoveArea"
-		class="flex flex-col items-center justify-center flex-1 w-full max-w-full bg-base-100 text-base-content"
+		class="flex flex-col items-center justify-center flex-1 w-full max-w-full pt-2 bg-base-100 text-base-content"
 		:class="(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') && 'bg-base-300'"
 	>
+		<!-- 这个做法不生效（无论使用x-html还是x-text），需要用内联写法 -->
+		<!-- <style x-html="'img { margin-bottom: ' + $store.scroll.marginBottomOnScrollMode*10  + 'px; }'"></style> -->
+		<!-- Alpine.js 动态CSS，内联写法 -->
+		<!--  style="{ marginBottom: $store.scroll.marginBottomOnScrollMode + 'px' }" -->
+		<!-- https://htmx.org/docs/#triggers -->
+		<!-- https://htmx.org/docs/#swapping -->
+		<!-- hx-get 用于获取图片的URL，hx-trigger 用于触发加载，hx-swap 用于替换元素，innerHTML默认值，将内容放在目标元素内 outerHTML用返回的内容替换整个目标元素  hx-target 用于指定目标元素 -->
 		<noscript class="loading-lazy">
 			for key, image := range book.Pages.Images {
-			if strings.Contains(image.Url, ".html")&& !strings.Contains(image.Url, "hidden."){
-			    <!-- https://htmx.org/docs/#triggers -->
-                <!-- https://htmx.org/docs/#swapping -->
-			    <!-- hx-get 用于获取图片的URL，hx-trigger 用于触发加载，hx-swap 用于替换元素，innerHTML默认值，将内容放在目标元素内 outerHTML用返回的内容替换整个目标元素  hx-target 用于指定目标元素 -->
-                <div hx-get={image.Url} hx-trigger="load" hx-swap="innerHTML" class="m-2 max-w-full lg:max-w-[800px] rounded shadow-lg"></div>
+				if strings.Contains(image.Url, ".html")&& !strings.Contains(image.Url, "hidden.") {
+					<div hx-get={ image.Url } hx-trigger="load" hx-swap="innerHTML" class="m-2 max-w-full lg:max-w-[800px] rounded shadow-lg"></div>
+				}
+				if key <= 2 && !strings.Contains(image.Url, "hidden.")&& !strings.Contains(image.Url, ".html") {
+					<img class="mx-2 max-w-full lg:max-w-[800px] rounded shadow-lg" src={ image.Url } :style="{ marginBottom: $store.scroll.marginBottomOnScrollMode + 'px' }"/>
+				}
+				if key > 2 && !strings.Contains(image.Url, "hidden.")&& !strings.Contains(image.Url, ".html") {
+					<img loading="lazy" class="mx-2 max-w-full lg:max-w-[800px] rounded shadow-lg" src={ image.Url } :style="{ marginBottom: $store.scroll.marginBottomOnScrollMode + 'px' }"/>
+				}
 			}
-			if key <= 2 && !strings.Contains(image.Url, "hidden.")&& !strings.Contains(image.Url, ".html") {
-				<img class="m-2 max-w-full lg:max-w-[800px] rounded shadow-lg" src={ image.Url }/>
-			}
-			if key > 2 && !strings.Contains(image.Url, "hidden.")&& !strings.Contains(image.Url, ".html")  {
-				<img loading="lazy" class="m-2 max-w-full lg:max-w-[800px] rounded shadow-lg" src={ image.Url }/>
-			}
-		}
 		</noscript>
 	</div>
 	<button id="BackTopButton" style="display: none" class="fixed flex items-center justify-center w-10 h-10 text-white bg-blue-500 rounded-full shadow-lg bottom-4 right-4">
 		<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><path d="M256 48C141.13 48 48 141.13 48 256s93.13 208 208 208s208-93.13 208-208S370.87 48 256 48zm96 270.63l-96-96l-96 96L137.37 296L256 177.37L374.63 296z" fill="currentColor"></path></svg>
 	</button>
 	@ScrollScripts()
+	<style type="text/css">
+    /* https://developer.mozilla.org/zh-CN/docs/Web/CSS/object-fit */
+
+
+
+
+    img {
+        margin: auto;
+        /* object-fit: scale-down; */
+        /* margin-top: v-bind(margin+'px'); */
+        margin-bottom: v-bind(margin+'px');
+        /* padding-bottom: 30px; */
+        /* border-radius: 3px; */
+        /* 任意数量的阴影，用逗号分隔 如果元素同时设置了 border-radius属性，那么阴影也会有圆角效果。*/
+        /* 属性可设置的值包括阴影的 X 轴偏移量、Y 轴偏移量、模糊半径、扩散半径和颜色。 */
+        /* box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); */
+        box-shadow: 0px 6px 3px 0px rgba(0, 0, 0, 0.19);
+    }
+
+    .page_hint {
+        /* 文字颜色 */
+        color: #413d3d;
+        /* 文字阴影：https://www.w3school.com.cn/css/css3_shadows.asp*/
+        text-shadow: -1px 0 rgb(240, 229, 229), 0 1px rgb(253, 242, 242),
+            1px 0 rgb(206, 183, 183), 0 -1px rgb(196, 175, 175);
+    }
+
+    .LoadingImage {
+        width: 90vw;
+        max-width: 90vw;
+    }
+
+    .ErrorImage {
+        width: 90vw;
+        max-width: 90vw;
+    }
+
+    /* 横屏（显示区域）时的CSS样式,IE无效 */
+    @media screen and (min-aspect-ratio: 19/19) {
+        .SinglePageImage {
+            width: v-bind(sPWL);
+            max-width: 100%;
+        }
+
+        .DoublePageImage {
+            width: v-bind(dPWL);
+            max-width: 100%;
+        }
+    }
+
+    /* 竖屏(显示区域)CSS样式,IE无效 */
+    @media screen and (max-aspect-ratio: 19/19) {
+        .SinglePageImage {
+            width: v-bind(sPWP);
+            max-width: 100%;
+        }
+
+        .DoublePageImage {
+            /* width: 100%; */
+            width: v-bind(dPWP);
+            max-width: 100%;
+        }
+    }
+    </style>
 }
 
 templ ScrollDrawerSlot() {
@@ -176,7 +245,7 @@ templ ScrollPage(s *state.GlobalState, book *entity.Book) {
 	@components.Header(components.HeaderProps{
 		Title:           getPageTitle(s.RequestBookID),
 		ShowReturnIcon:  true,
-		ReturnUrl: getReturnUrl(s.RequestBookID),
+		ReturnUrl:       getReturnUrl(s.RequestBookID),
 		SetDownLoadLink: false,
 		InShelf:         false,
 		DownLoadLink:    "",

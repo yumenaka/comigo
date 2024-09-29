@@ -82,7 +82,7 @@
   "DoublePageMode": "DoublePage",
   "SinglePageMode": "SinglePage",
   "Flip_odd_even_page": "Flip odd even page",
-  "marginOnScrollMode": "margin bottom:",
+  "marginBottomOnScrollMode": "margin bottom:",
   "login_success_hint": "Login successfully, return to previous page",
   "server_setting": "comigo server setting",
   "logout": "logout",
