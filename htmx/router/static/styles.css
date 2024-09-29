@@ -1050,6 +1050,10 @@ input:checked + .toggle-bg {
   overflow: hidden;
 }
 
+.pointer-events-none {
+  pointer-events: none;
+}
+
 .visible {
   visibility: visible;
 }
@@ -1087,6 +1091,10 @@ input:checked + .toggle-bg {
   right: 0;
 }
 
+.-bottom-6 {
+  bottom: -1.5rem;
+}
+
 .bottom-0 {
   bottom: 0;
 }
@@ -1097,6 +1105,10 @@ input:checked + .toggle-bg {
 
 .bottom-\[60px\] {
   bottom: 60px;
+}
+
+.end-0 {
+  inset-inline-end: 0;
 }
 
 .end-2\.5 {
@@ -1121,6 +1133,10 @@ input:checked + .toggle-bg {
 
 .right-4 {
   right: 1rem;
+}
+
+.start-0 {
+  inset-inline-start: 0;
 }
 
 .top-0 {
@@ -1168,11 +1184,6 @@ input:checked + .toggle-bg {
   margin-right: .25rem;
 }
 
-.mx-2 {
-  margin-left: .5rem;
-  margin-right: .5rem;
-}
-
 .mx-4 {
   margin-left: 1rem;
   margin-right: 1rem;
@@ -1208,6 +1219,10 @@ input:checked + .toggle-bg {
 
 .mb-4 {
   margin-bottom: 1rem;
+}
+
+.mb-8 {
+  margin-bottom: 2rem;
 }
 
 .me-2\.5 {
@@ -1927,6 +1942,10 @@ input:checked + .toggle-bg {
   text-transform: uppercase;
 }
 
+.capitalize {
+  text-transform: capitalize;
+}
+
 .leading-6 {
   line-height: 1.5rem;
 }
@@ -2526,6 +2545,11 @@ body {
 .after\:start-\[2px\]:after {
   content: var(--tw-content);
   inset-inline-start: 2px;
+}
+
+.after\:top-0\.5:after {
+  content: var(--tw-content);
+  top: .125rem;
 }
 
 .after\:top-\[2px\]:after {

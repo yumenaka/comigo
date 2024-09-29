@@ -5,6 +5,7 @@ import (
 	"github.com/yumenaka/comigo/htmx/state"
 	"github.com/yumenaka/comigo/htmx/templates/components"
 	"strings"
+	"fmt"
 )
 
 // js代码,滚动到顶部,显示返回顶部按钮,获取鼠标位置,决定是否打开设置面板等
@@ -145,24 +146,27 @@ templ ScrollMainArea(s *state.GlobalState, book *entity.Book) {
 		class="flex flex-col items-center justify-center flex-1 w-full max-w-full pt-2 bg-base-100 text-base-content"
 		:class="(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') && 'bg-base-300'"
 	>
-		<!-- 这个做法不生效（无论使用x-html还是x-text），需要用内联写法 -->
-		<!-- <style x-html="'img { margin-bottom: ' + $store.scroll.marginBottomOnScrollMode*10  + 'px; }'"></style> -->
-		<!-- Alpine.js 动态CSS，内联写法 -->
-		<!--  style="{ marginBottom: $store.scroll.marginBottomOnScrollMode + 'px' }" -->
+		<!-- Alpine.js 动态CSS，只支持内联写法 -->
+		<!-- Alpine.js 的 v-if 需要用template包裹起来，原因参照： https://alpinejs.dev/directives/if -->
 		<!-- https://htmx.org/docs/#triggers -->
 		<!-- https://htmx.org/docs/#swapping -->
 		<!-- hx-get 用于获取图片的URL，hx-trigger 用于触发加载，hx-swap 用于替换元素，innerHTML默认值，将内容放在目标元素内 outerHTML用返回的内容替换整个目标元素  hx-target 用于指定目标元素 -->
 		<noscript class="loading-lazy">
 			for key, image := range book.Pages.Images {
+			<div class="flex flex-col justify-start m-0 max-w-full lg:max-w-[800px] rounded" :style="{ marginBottom: $store.scroll.marginBottomOnScrollMode + 'px' }">
 				if strings.Contains(image.Url, ".html")&& !strings.Contains(image.Url, "hidden.") {
-					<div hx-get={ image.Url } hx-trigger="load" hx-swap="innerHTML" class="m-2 max-w-full lg:max-w-[800px] rounded shadow-lg"></div>
+					<div hx-get={ image.Url } hx-trigger="load" hx-swap="innerHTML" class="w-full m-0"></div>
 				}
 				if key <= 2 && !strings.Contains(image.Url, "hidden.")&& !strings.Contains(image.Url, ".html") {
-					<img class="mx-2 max-w-full lg:max-w-[800px] rounded shadow-lg" src={ image.Url } :style="{ marginBottom: $store.scroll.marginBottomOnScrollMode + 'px' }"/>
+					<img class="w-full m-0" src={ image.Url }/>
 				}
 				if key > 2 && !strings.Contains(image.Url, "hidden.")&& !strings.Contains(image.Url, ".html") {
-					<img loading="lazy" class="mx-2 max-w-full lg:max-w-[800px] rounded shadow-lg" src={ image.Url } :style="{ marginBottom: $store.scroll.marginBottomOnScrollMode + 'px' }"/>
+					<img loading="lazy" class="w-full m-0" src={ image.Url } />
 				}
+				<template x-if="$store.scroll.showPageNum">
+                    <div class="w-full mt-0 mb-2 font-semibold text-lg text-center ">{fmt.Sprintf("%d / %d", key+1,book.BookInfo.PageCount)}</div>
+                </template>
+            </div>
 			}
 		</noscript>
 	</div>
@@ -170,12 +174,8 @@ templ ScrollMainArea(s *state.GlobalState, book *entity.Book) {
 		<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><path d="M256 48C141.13 48 48 141.13 48 256s93.13 208 208 208s208-93.13 208-208S370.87 48 256 48zm96 270.63l-96-96l-96 96L137.37 296L256 177.37L374.63 296z" fill="currentColor"></path></svg>
 	</button>
 	@ScrollScripts()
-	<style type="text/css">
+	<style>
     /* https://developer.mozilla.org/zh-CN/docs/Web/CSS/object-fit */
-
-
-
-
     img {
         margin: auto;
         /* object-fit: scale-down; */
