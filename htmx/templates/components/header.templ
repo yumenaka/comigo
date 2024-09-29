@@ -138,8 +138,12 @@ templ Header(prop HeaderProps) {
 		<!-- 溢出 overflow-x-auto :https://www.tailwindcss.cn/docs/overflow -->
 		<div class="flex justify-between p-0 m-0 max-w-64">
 			<!-- 点击显示二维码 -->
-			<!--已知问题： 打开的时候body会加上一个 overflow-hidden 属性。此时滑动条被禁用，导致背景元素移动 -->
-			<div data-modal-target="qrcode-modal"  data-modal-toggle="qrcode-modal" class="w-8 pt-1 mx-1 my-0">
+			<!-- 已知问题： 打开的时候body会加上一个 overflow-hidden 属性。此时滑动条被禁用，导致背景元素移动 -->
+			<!-- 临时解决方法：router/static/scripts.js，把这个句删掉 document.body.classList.add("overflow-hidden"); -->
+			<!-- 不管用的解决方法：添加点击事件，把这个属性删掉  @click="document.body.classList.remove('overflow-hidden');"  -->
+			<!-- 根本的解决方案（patch）(TODO:研究 patch 用法)：. https://bun.sh/docs/install/patch  -->
+			<!-- https://github.com/themesberg/flowbite/blob/c22565d406246749a09c5d556c540c102e0f98ae/src/components/modal/index.ts#L305 -->
+			<div data-modal-target="qrcode-modal" data-modal-toggle="qrcode-modal" class="w-8 pt-1 mx-1 my-0">
 				<svg class="static w-8" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><rect x="336" y="336" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect><rect x="272" y="272" width="64" height="64" rx="8" ry="8" fill="currentColor"></rect><rect x="416" y="416" width="64" height="64" rx="8" ry="8" fill="currentColor"></rect><rect x="432" y="272" width="48" height="48" rx="8" ry="8" fill="currentColor"></rect><rect x="272" y="432" width="48" height="48" rx="8" ry="8" fill="currentColor"></rect><rect x="336" y="96" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect><rect x="288" y="48" width="176" height="176" rx="16" ry="16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></rect><rect x="96" y="96" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect><rect x="48" y="48" width="176" height="176" rx="16" ry="16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></rect><rect x="96" y="336" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect><rect x="48" y="288" width="176" height="176" rx="16" ry="16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></rect></svg>
 			</div>
 			<!-- 全屏按钮 -->

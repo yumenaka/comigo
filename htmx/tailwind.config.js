@@ -9,7 +9,13 @@ module.exports = {
   //@alpinejs: 以 @ 开头的包通常表示这是一个命名空间（scoped package）。这种命名方式用于将一组相关的包归类在一个命名空间中，以便于管理和组织。这意味着 @alpinejs 可能包含 Alpine.js 相关的多个子包或插件，例如 @alpinejs/morph 或 @alpinejs/persist。这些包属于 Alpine.js 的一个生态系统或工具集。
   //alpinejs: 这是没有命名空间的包，可能表示核心的 Alpine.js 库。这种方式通常用于单个独立的包，它是最常见的包管理方式。
   // 不推荐使用'**/*.{html,templ}',因为会匹配node_modules下的文件，可能不是你想要的内容 TODO：无法用 './templates/*.{html,templ}'代替，暂时先不管
-  content: ['**/*.{html,templ}', './node_modules/flowbite/**/*.js', './node_modules/alpinejs/dist/cdn.js', './node_modules/@alpinejs/persist/dist/cdn.js','./router/assets/scripts.js'],
+  content: [
+    '**/*.{html,templ}',
+    './node_modules/flowbite/**/*.js',
+    './node_modules/alpinejs/dist/cdn.js',
+    './node_modules/@alpinejs/persist/dist/cdn.js',
+    './router/assets/scripts.js',
+  ],
   theme: {
     extend: {},
   },
