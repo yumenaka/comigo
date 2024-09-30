@@ -1,14 +1,15 @@
 package pages
 
 import (
+	"fmt"
 	"github.com/yumenaka/comigo/entity"
 	"github.com/yumenaka/comigo/htmx/state"
 	"github.com/yumenaka/comigo/htmx/templates/components"
 	"strings"
-	"fmt"
 )
 
 // js代码,滚动到顶部,显示返回顶部按钮,获取鼠标位置,决定是否打开设置面板等
+
 script ScrollScripts() {
 //滚动到顶部
 function scrollToTop(scrollDuration) {
@@ -153,20 +154,43 @@ templ ScrollMainArea(s *state.GlobalState, book *entity.Book) {
 		<!-- hx-get 用于获取图片的URL，hx-trigger 用于触发加载，hx-swap 用于替换元素，innerHTML默认值，将内容放在目标元素内 outerHTML用返回的内容替换整个目标元素  hx-target 用于指定目标元素 -->
 		<noscript class="loading-lazy">
 			for key, image := range book.Pages.Images {
-			<div class="flex flex-col justify-start m-0 max-w-full lg:max-w-[800px] rounded" :style="{ marginBottom: $store.scroll.marginBottomOnScrollMode + 'px' }">
-				if strings.Contains(image.Url, ".html")&& !strings.Contains(image.Url, "hidden.") {
-					<div hx-get={ image.Url } hx-trigger="load" hx-swap="innerHTML" class="w-full m-0"></div>
-				}
-				if key <= 2 && !strings.Contains(image.Url, "hidden.")&& !strings.Contains(image.Url, ".html") {
-					<img class="w-full m-0" src={ image.Url }/>
-				}
-				if key > 2 && !strings.Contains(image.Url, "hidden.")&& !strings.Contains(image.Url, ".html") {
-					<img loading="lazy" class="w-full m-0" src={ image.Url } />
-				}
-				<template x-if="$store.scroll.showPageNum">
-                    <div class="w-full mt-0 mb-2 font-semibold text-lg text-center ">{fmt.Sprintf("%d / %d", key+1,book.BookInfo.PageCount)}</div>
-                </template>
-            </div>
+				<div class="flex flex-col justify-start m-0 max-w-full lg:max-w-[800px] rounded" :style="{ marginBottom: $store.scroll.marginBottomOnScrollMode + 'px' }">
+					if strings.Contains(image.Url, ".html")&& !strings.Contains(image.Url, "hidden.") {
+						<div hx-get={ image.Url } hx-trigger="load" hx-swap="innerHTML" class="w-full m-0"></div>
+					}
+					if key <= 2 && !strings.Contains(image.Url, "hidden.")&& !strings.Contains(image.Url, ".html") {
+						<img
+							class="w-full m-0"
+							src={ image.Url }
+							x-on:load="
+                            if ($event.target.naturalWidth > $event.target.naturalHeight) {
+                                $el.classList.add('double');
+                                $el.classList.remove('single');
+                            } else { 
+                                $el.classList.add('single');
+                                $el.classList.remove('double');
+                            }"
+						/>
+					}
+					if key > 2 && !strings.Contains(image.Url, "hidden.")&& !strings.Contains(image.Url, ".html") {
+						<img
+							loading="lazy"
+							class="w-full m-0"
+							src={ image.Url }
+							x-on:load="
+                            if ($event.target.naturalWidth > $event.target.naturalHeight) {
+                                $el.classList.add('double');
+                                $el.classList.remove('single');
+                            } else { 
+                                $el.classList.add('single');
+                                $el.classList.remove('double');
+                            }"
+						/>
+					}
+					<template x-if="$store.scroll.showPageNum">
+						<div class="w-full mt-0 mb-2 text-lg font-semibold text-center ">{ fmt.Sprintf("%d / %d", key+1,book.BookInfo.PageCount) }</div>
+					</template>
+				</div>
 			}
 		</noscript>
 	</div>
