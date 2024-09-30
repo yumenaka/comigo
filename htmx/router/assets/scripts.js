@@ -5,13 +5,14 @@ import i18next from 'i18next'
 import 'flowbite'
 import LanguageDetector from 'i18next-browser-languagedetector'
 import 'tw-colors'
+import morph from '@alpinejs/morph'
 // 将 Alpine 实例添加到窗口对象中。
 window.Alpine = Alpine
 
 // Alpine Persist 插件，用于持久化存储。默认存储到 localStorage。
 // 详细用法参见： https://alpinejs.dev/plugins/persist
 Alpine.plugin(persist)
-
+Alpine.plugin(morph)
 // i18next 国际化插件，用于国际化。详细用法参见：
 // https://www.i18next.com/overview/getting-started
 import enLocale from './locales/en_US.json'

@@ -6092,7 +6092,7 @@ class $1bac384020b50752$var$EventEmitter {
         }
     }
 }
-function $1bac384020b50752$var$defer() {
+const $1bac384020b50752$var$defer = ()=>{
     let res;
     let rej;
     const promise = new Promise((resolve, reject)=>{
@@ -6102,41 +6102,37 @@ function $1bac384020b50752$var$defer() {
     promise.resolve = res;
     promise.reject = rej;
     return promise;
-}
-function $1bac384020b50752$var$makeString(object) {
+};
+const $1bac384020b50752$var$makeString = (object)=>{
     if (object == null) return "";
     return "" + object;
-}
-function $1bac384020b50752$var$copy(a, s, t) {
+};
+const $1bac384020b50752$var$copy = (a, s, t)=>{
     a.forEach((m)=>{
         if (s[m]) t[m] = s[m];
     });
-}
+};
 const $1bac384020b50752$var$lastOfPathSeparatorRegExp = /###/g;
-function $1bac384020b50752$var$getLastOfPath(object, path, Empty) {
-    function cleanKey(key) {
-        return key && key.indexOf("###") > -1 ? key.replace($1bac384020b50752$var$lastOfPathSeparatorRegExp, ".") : key;
-    }
-    function canNotTraverseDeeper() {
-        return !object || typeof object === "string";
-    }
+const $1bac384020b50752$var$cleanKey = (key)=>key && key.indexOf("###") > -1 ? key.replace($1bac384020b50752$var$lastOfPathSeparatorRegExp, ".") : key;
+const $1bac384020b50752$var$canNotTraverseDeeper = (object)=>!object || typeof object === "string";
+const $1bac384020b50752$var$getLastOfPath = (object, path, Empty)=>{
     const stack = typeof path !== "string" ? path : path.split(".");
     let stackIndex = 0;
     while(stackIndex < stack.length - 1){
-        if (canNotTraverseDeeper()) return {};
-        const key = cleanKey(stack[stackIndex]);
+        if ($1bac384020b50752$var$canNotTraverseDeeper(object)) return {};
+        const key = $1bac384020b50752$var$cleanKey(stack[stackIndex]);
         if (!object[key] && Empty) object[key] = new Empty();
         if (Object.prototype.hasOwnProperty.call(object, key)) object = object[key];
         else object = {};
         ++stackIndex;
     }
-    if (canNotTraverseDeeper()) return {};
+    if ($1bac384020b50752$var$canNotTraverseDeeper(object)) return {};
     return {
         obj: object,
-        k: cleanKey(stack[stackIndex])
+        k: $1bac384020b50752$var$cleanKey(stack[stackIndex])
     };
-}
-function $1bac384020b50752$var$setPath(object, path, newValue) {
+};
+const $1bac384020b50752$var$setPath = (object, path, newValue)=>{
     const { obj: obj, k: k } = $1bac384020b50752$var$getLastOfPath(object, path, Object);
     if (obj !== undefined || path.length === 1) {
         obj[k] = newValue;
@@ -6152,23 +6148,23 @@ function $1bac384020b50752$var$setPath(object, path, newValue) {
         if (last && last.obj && typeof last.obj[`${last.k}.${e}`] !== "undefined") last.obj = undefined;
     }
     last.obj[`${last.k}.${e}`] = newValue;
-}
-function $1bac384020b50752$var$pushPath(object, path, newValue, concat) {
+};
+const $1bac384020b50752$var$pushPath = (object, path, newValue, concat)=>{
     const { obj: obj, k: k } = $1bac384020b50752$var$getLastOfPath(object, path, Object);
     obj[k] = obj[k] || [];
     obj[k].push(newValue);
-}
-function $1bac384020b50752$var$getPath(object, path) {
+};
+const $1bac384020b50752$var$getPath = (object, path)=>{
     const { obj: obj, k: k } = $1bac384020b50752$var$getLastOfPath(object, path);
     if (!obj) return undefined;
     return obj[k];
-}
-function $1bac384020b50752$var$getPathWithDefaults(data, defaultData, key) {
+};
+const $1bac384020b50752$var$getPathWithDefaults = (data, defaultData, key)=>{
     const value = $1bac384020b50752$var$getPath(data, key);
     if (value !== undefined) return value;
     return $1bac384020b50752$var$getPath(defaultData, key);
-}
-function $1bac384020b50752$var$deepExtend(target, source, overwrite) {
+};
+const $1bac384020b50752$var$deepExtend = (target, source, overwrite)=>{
     for(const prop in source)if (prop !== "__proto__" && prop !== "constructor") {
         if (prop in target) {
             if (typeof target[prop] === "string" || target[prop] instanceof String || typeof source[prop] === "string" || source[prop] instanceof String) {
@@ -6177,10 +6173,8 @@ function $1bac384020b50752$var$deepExtend(target, source, overwrite) {
         } else target[prop] = source[prop];
     }
     return target;
-}
-function $1bac384020b50752$var$regexEscape(str) {
-    return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
-}
+};
+const $1bac384020b50752$var$regexEscape = (str)=>str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
 var $1bac384020b50752$var$_entityMap = {
     "&": "&amp;",
     "<": "&lt;",
@@ -6189,10 +6183,10 @@ var $1bac384020b50752$var$_entityMap = {
     "'": "&#39;",
     "/": "&#x2F;"
 };
-function $1bac384020b50752$var$escape(data) {
+const $1bac384020b50752$var$escape = (data)=>{
     if (typeof data === "string") return data.replace(/[&<>"'\/]/g, (s)=>$1bac384020b50752$var$_entityMap[s]);
     return data;
-}
+};
 class $1bac384020b50752$var$RegExpCache {
     constructor(capacity){
         this.capacity = capacity;
@@ -6217,7 +6211,7 @@ const $1bac384020b50752$var$chars = [
     ";"
 ];
 const $1bac384020b50752$var$looksLikeObjectPathRegExpCache = new $1bac384020b50752$var$RegExpCache(20);
-function $1bac384020b50752$var$looksLikeObjectPath(key, nsSeparator, keySeparator) {
+const $1bac384020b50752$var$looksLikeObjectPath = (key, nsSeparator, keySeparator)=>{
     nsSeparator = nsSeparator || "";
     keySeparator = keySeparator || "";
     const possibleChars = $1bac384020b50752$var$chars.filter((c)=>nsSeparator.indexOf(c) < 0 && keySeparator.indexOf(c) < 0);
@@ -6229,8 +6223,8 @@ function $1bac384020b50752$var$looksLikeObjectPath(key, nsSeparator, keySeparato
         if (ki > 0 && !r.test(key.substring(0, ki))) matched = true;
     }
     return matched;
-}
-function $1bac384020b50752$var$deepFind(obj, path) {
+};
+const $1bac384020b50752$var$deepFind = function(obj, path) {
     let keySeparator = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : ".";
     if (!obj) return undefined;
     if (obj[path]) return obj[path];
@@ -6257,11 +6251,11 @@ function $1bac384020b50752$var$deepFind(obj, path) {
         current = next;
     }
     return current;
-}
-function $1bac384020b50752$var$getCleanedCode(code) {
+};
+const $1bac384020b50752$var$getCleanedCode = (code)=>{
     if (code && code.indexOf("_") > 0) return code.replace("_", "-");
     return code;
-}
+};
 class $1bac384020b50752$var$ResourceStore extends $1bac384020b50752$var$EventEmitter {
     constructor(data){
         let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {
@@ -6787,9 +6781,7 @@ class $1bac384020b50752$var$Translator extends $1bac384020b50752$var$EventEmitte
         return false;
     }
 }
-function $1bac384020b50752$var$capitalize(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-}
+const $1bac384020b50752$var$capitalize = (string)=>string.charAt(0).toUpperCase() + string.slice(1);
 class $1bac384020b50752$var$LanguageUtil {
     constructor(options){
         this.options = options;
@@ -7269,72 +7261,28 @@ let $1bac384020b50752$var$sets = [
     }
 ];
 let $1bac384020b50752$var$_rulesPluralsTypes = {
-    1: function(n) {
-        return Number(n > 1);
-    },
-    2: function(n) {
-        return Number(n != 1);
-    },
-    3: function(n) {
-        return 0;
-    },
-    4: function(n) {
-        return Number(n % 10 == 1 && n % 100 != 11 ? 0 : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 1 : 2);
-    },
-    5: function(n) {
-        return Number(n == 0 ? 0 : n == 1 ? 1 : n == 2 ? 2 : n % 100 >= 3 && n % 100 <= 10 ? 3 : n % 100 >= 11 ? 4 : 5);
-    },
-    6: function(n) {
-        return Number(n == 1 ? 0 : n >= 2 && n <= 4 ? 1 : 2);
-    },
-    7: function(n) {
-        return Number(n == 1 ? 0 : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 1 : 2);
-    },
-    8: function(n) {
-        return Number(n == 1 ? 0 : n == 2 ? 1 : n != 8 && n != 11 ? 2 : 3);
-    },
-    9: function(n) {
-        return Number(n >= 2);
-    },
-    10: function(n) {
-        return Number(n == 1 ? 0 : n == 2 ? 1 : n < 7 ? 2 : n < 11 ? 3 : 4);
-    },
-    11: function(n) {
-        return Number(n == 1 || n == 11 ? 0 : n == 2 || n == 12 ? 1 : n > 2 && n < 20 ? 2 : 3);
-    },
-    12: function(n) {
-        return Number(n % 10 != 1 || n % 100 == 11);
-    },
-    13: function(n) {
-        return Number(n !== 0);
-    },
-    14: function(n) {
-        return Number(n == 1 ? 0 : n == 2 ? 1 : n == 3 ? 2 : 3);
-    },
-    15: function(n) {
-        return Number(n % 10 == 1 && n % 100 != 11 ? 0 : n % 10 >= 2 && (n % 100 < 10 || n % 100 >= 20) ? 1 : 2);
-    },
-    16: function(n) {
-        return Number(n % 10 == 1 && n % 100 != 11 ? 0 : n !== 0 ? 1 : 2);
-    },
-    17: function(n) {
-        return Number(n == 1 || n % 10 == 1 && n % 100 != 11 ? 0 : 1);
-    },
-    18: function(n) {
-        return Number(n == 0 ? 0 : n == 1 ? 1 : 2);
-    },
-    19: function(n) {
-        return Number(n == 1 ? 0 : n == 0 || n % 100 > 1 && n % 100 < 11 ? 1 : n % 100 > 10 && n % 100 < 20 ? 2 : 3);
-    },
-    20: function(n) {
-        return Number(n == 1 ? 0 : n == 0 || n % 100 > 0 && n % 100 < 20 ? 1 : 2);
-    },
-    21: function(n) {
-        return Number(n % 100 == 1 ? 1 : n % 100 == 2 ? 2 : n % 100 == 3 || n % 100 == 4 ? 3 : 0);
-    },
-    22: function(n) {
-        return Number(n == 1 ? 0 : n == 2 ? 1 : (n < 0 || n > 10) && n % 10 == 0 ? 2 : 3);
-    }
+    1: (n)=>Number(n > 1),
+    2: (n)=>Number(n != 1),
+    3: (n)=>0,
+    4: (n)=>Number(n % 10 == 1 && n % 100 != 11 ? 0 : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 1 : 2),
+    5: (n)=>Number(n == 0 ? 0 : n == 1 ? 1 : n == 2 ? 2 : n % 100 >= 3 && n % 100 <= 10 ? 3 : n % 100 >= 11 ? 4 : 5),
+    6: (n)=>Number(n == 1 ? 0 : n >= 2 && n <= 4 ? 1 : 2),
+    7: (n)=>Number(n == 1 ? 0 : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 1 : 2),
+    8: (n)=>Number(n == 1 ? 0 : n == 2 ? 1 : n != 8 && n != 11 ? 2 : 3),
+    9: (n)=>Number(n >= 2),
+    10: (n)=>Number(n == 1 ? 0 : n == 2 ? 1 : n < 7 ? 2 : n < 11 ? 3 : 4),
+    11: (n)=>Number(n == 1 || n == 11 ? 0 : n == 2 || n == 12 ? 1 : n > 2 && n < 20 ? 2 : 3),
+    12: (n)=>Number(n % 10 != 1 || n % 100 == 11),
+    13: (n)=>Number(n !== 0),
+    14: (n)=>Number(n == 1 ? 0 : n == 2 ? 1 : n == 3 ? 2 : 3),
+    15: (n)=>Number(n % 10 == 1 && n % 100 != 11 ? 0 : n % 10 >= 2 && (n % 100 < 10 || n % 100 >= 20) ? 1 : 2),
+    16: (n)=>Number(n % 10 == 1 && n % 100 != 11 ? 0 : n !== 0 ? 1 : 2),
+    17: (n)=>Number(n == 1 || n % 10 == 1 && n % 100 != 11 ? 0 : 1),
+    18: (n)=>Number(n == 0 ? 0 : n == 1 ? 1 : 2),
+    19: (n)=>Number(n == 1 ? 0 : n == 0 || n % 100 > 1 && n % 100 < 11 ? 1 : n % 100 > 10 && n % 100 < 20 ? 2 : 3),
+    20: (n)=>Number(n == 1 ? 0 : n == 0 || n % 100 > 0 && n % 100 < 20 ? 1 : 2),
+    21: (n)=>Number(n % 100 == 1 ? 1 : n % 100 == 2 ? 2 : n % 100 == 3 || n % 100 == 4 ? 3 : 0),
+    22: (n)=>Number(n == 1 ? 0 : n == 2 ? 1 : (n < 0 || n > 10) && n % 10 == 0 ? 2 : 3)
 };
 const $1bac384020b50752$var$nonIntlVersions = [
     "v1",
@@ -7352,7 +7300,7 @@ const $1bac384020b50752$var$suffixesOrder = {
     many: 4,
     other: 5
 };
-function $1bac384020b50752$var$createRules() {
+const $1bac384020b50752$var$createRules = ()=>{
     const rules = {};
     $1bac384020b50752$var$sets.forEach((set)=>{
         set.lngs.forEach((l)=>{
@@ -7363,7 +7311,7 @@ function $1bac384020b50752$var$createRules() {
         });
     });
     return rules;
-}
+};
 class $1bac384020b50752$var$PluralResolver {
     constructor(languageUtils){
         let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
@@ -7375,16 +7323,29 @@ class $1bac384020b50752$var$PluralResolver {
             this.logger.error("Your environment seems not to be Intl API compatible, use an Intl.PluralRules polyfill. Will fallback to the compatibilityJSON v3 format handling.");
         }
         this.rules = $1bac384020b50752$var$createRules();
+        this.pluralRulesCache = {};
     }
     addRule(lng, obj) {
         this.rules[lng] = obj;
     }
+    clearCache() {
+        this.pluralRulesCache = {};
+    }
     getRule(code) {
         let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
         if (this.shouldUseIntlApi()) try {
-            return new Intl.PluralRules($1bac384020b50752$var$getCleanedCode(code === "dev" ? "en" : code), {
-                type: options.ordinal ? "ordinal" : "cardinal"
+            const cleanedCode = $1bac384020b50752$var$getCleanedCode(code === "dev" ? "en" : code);
+            const type = options.ordinal ? "ordinal" : "cardinal";
+            const cacheKey = JSON.stringify({
+                cleanedCode: cleanedCode,
+                type: type
             });
+            if (cacheKey in this.pluralRulesCache) return this.pluralRulesCache[cacheKey];
+            const rule = new Intl.PluralRules(cleanedCode, {
+                type: type
+            });
+            this.pluralRulesCache[cacheKey] = rule;
+            return rule;
         } catch (err) {
             return;
         }
@@ -7437,7 +7398,7 @@ class $1bac384020b50752$var$PluralResolver {
         return !$1bac384020b50752$var$nonIntlVersions.includes(this.options.compatibilityJSON);
     }
 }
-function $1bac384020b50752$var$deepFindWithDefaults(data, defaultData, key) {
+const $1bac384020b50752$var$deepFindWithDefaults = function(data, defaultData, key) {
     let keySeparator = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : ".";
     let ignoreJSONStructure = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : true;
     let path = $1bac384020b50752$var$getPathWithDefaults(data, defaultData, key);
@@ -7446,7 +7407,8 @@ function $1bac384020b50752$var$deepFindWithDefaults(data, defaultData, key) {
         if (path === undefined) path = $1bac384020b50752$var$deepFind(defaultData, key, keySeparator);
     }
     return path;
-}
+};
+const $1bac384020b50752$var$regexSafe = (val)=>val.replace(/\$/g, "$$$$");
 class $1bac384020b50752$var$Interpolator {
     constructor(){
         let options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -7496,9 +7458,6 @@ class $1bac384020b50752$var$Interpolator {
         let value;
         let replaces;
         const defaultData = this.options && this.options.interpolation && this.options.interpolation.defaultVariables || {};
-        function regexSafe(val) {
-            return val.replace(/\$/g, "$$$$");
-        }
         const handleFormat = (key)=>{
             if (key.indexOf(this.formatSeparator) < 0) {
                 const path = $1bac384020b50752$var$deepFindWithDefaults(data, defaultData, key, this.options.keySeparator, this.options.ignoreJSONStructure);
@@ -7523,11 +7482,11 @@ class $1bac384020b50752$var$Interpolator {
         const todos = [
             {
                 regex: this.regexpUnescape,
-                safeValue: (val)=>regexSafe(val)
+                safeValue: (val)=>$1bac384020b50752$var$regexSafe(val)
             },
             {
                 regex: this.regexp,
-                safeValue: (val)=>this.escapeValue ? regexSafe(this.escape(val)) : regexSafe(val)
+                safeValue: (val)=>this.escapeValue ? $1bac384020b50752$var$regexSafe(this.escape(val)) : $1bac384020b50752$var$regexSafe(val)
             }
         ];
         todos.forEach((todo)=>{
@@ -7565,7 +7524,7 @@ class $1bac384020b50752$var$Interpolator {
         let match;
         let value;
         let clonedOptions;
-        function handleHasOptions(key, inheritedOptions) {
+        const handleHasOptions = (key, inheritedOptions)=>{
             const sep = this.nestingOptionsSeparator;
             if (key.indexOf(sep) < 0) return key;
             const c = key.split(new RegExp(`${sep}[ ]*{`));
@@ -7587,7 +7546,7 @@ class $1bac384020b50752$var$Interpolator {
             }
             if (clonedOptions.defaultValue && clonedOptions.defaultValue.indexOf(this.prefix) > -1) delete clonedOptions.defaultValue;
             return key;
-        }
+        };
         while(match = this.nestingRegexp.exec(str)){
             let formatters = [];
             clonedOptions = {
@@ -7620,7 +7579,7 @@ class $1bac384020b50752$var$Interpolator {
         return str;
     }
 }
-function $1bac384020b50752$var$parseFormatStr(formatStr) {
+const $1bac384020b50752$var$parseFormatStr = (formatStr)=>{
     let formatName = formatStr.toLowerCase().trim();
     const formatOptions = {};
     if (formatStr.indexOf("(") > -1) {
@@ -7650,11 +7609,16 @@ function $1bac384020b50752$var$parseFormatStr(formatStr) {
         formatName: formatName,
         formatOptions: formatOptions
     };
-}
-function $1bac384020b50752$var$createCachedFormatter(fn) {
+};
+const $1bac384020b50752$var$createCachedFormatter = (fn)=>{
     const cache = {};
-    return function invokeFormatter(val, lng, options) {
-        const key = lng + JSON.stringify(options);
+    return (val, lng, options)=>{
+        let optForCache = options;
+        if (options && options.interpolationkey && options.formatParams && options.formatParams[options.interpolationkey] && options[options.interpolationkey]) optForCache = {
+            ...optForCache,
+            [options.interpolationkey]: undefined
+        };
+        const key = lng + JSON.stringify(optForCache);
         let formatter = cache[key];
         if (!formatter) {
             formatter = fn($1bac384020b50752$var$getCleanedCode(lng), options);
@@ -7662,7 +7626,7 @@ function $1bac384020b50752$var$createCachedFormatter(fn) {
         }
         return formatter(val);
     };
-}
+};
 class $1bac384020b50752$var$Formatter {
     constructor(){
         let options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -7719,6 +7683,13 @@ class $1bac384020b50752$var$Formatter {
     format(value, format, lng) {
         let options = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
         const formats = format.split(this.formatSeparator);
+        if (formats.length > 1 && formats[0].indexOf("(") > 1 && formats[0].indexOf(")") < 0 && formats.find((f)=>f.indexOf(")") > -1)) {
+            const lastIndex = formats.findIndex((f)=>f.indexOf(")") > -1);
+            formats[0] = [
+                formats[0],
+                ...formats.splice(1, lastIndex)
+            ].join(this.formatSeparator);
+        }
         const result = formats.reduce((mem, f)=>{
             const { formatName: formatName, formatOptions: formatOptions } = $1bac384020b50752$var$parseFormatStr(f);
             if (this.formats[formatName]) {
@@ -7741,12 +7712,12 @@ class $1bac384020b50752$var$Formatter {
         return result;
     }
 }
-function $1bac384020b50752$var$removePending(q, name) {
+const $1bac384020b50752$var$removePending = (q, name)=>{
     if (q.pending[name] !== undefined) {
         delete q.pending[name];
         q.pendingCount--;
     }
-}
+};
 class $1bac384020b50752$var$Connector extends $1bac384020b50752$var$EventEmitter {
     constructor(backend, store, services){
         let options = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
@@ -7808,10 +7779,11 @@ class $1bac384020b50752$var$Connector extends $1bac384020b50752$var$EventEmitter
         const lng = s[0];
         const ns = s[1];
         if (err) this.emit("failedLoading", lng, ns, err);
-        if (data) this.store.addResourceBundle(lng, ns, data, undefined, undefined, {
+        if (!err && data) this.store.addResourceBundle(lng, ns, data, undefined, undefined, {
             skipCopy: true
         });
         this.state[name] = err ? -1 : 2;
+        if (err && data) this.state[name] = 0;
         const loaded = {};
         this.queue.forEach((q)=>{
             $1bac384020b50752$var$pushPath(q.loaded, [
@@ -7947,8 +7919,7 @@ class $1bac384020b50752$var$Connector extends $1bac384020b50752$var$EventEmitter
         this.store.addResource(languages[0], namespace, key, fallbackValue);
     }
 }
-function $1bac384020b50752$var$get() {
-    return {
+const $1bac384020b50752$var$get = ()=>({
         debug: false,
         initImmediate: true,
         ns: [
@@ -7987,7 +7958,7 @@ function $1bac384020b50752$var$get() {
         parseMissingKeyHandler: false,
         appendNamespaceToMissingKey: false,
         appendNamespaceToCIMode: false,
-        overloadTranslationOptionHandler: function handle(args) {
+        overloadTranslationOptionHandler: (args)=>{
             let ret = {};
             if (typeof args[1] === "object") ret = args[1];
             if (typeof args[1] === "string") ret.defaultValue = args[1];
@@ -8013,9 +7984,8 @@ function $1bac384020b50752$var$get() {
             maxReplaces: 1000,
             skipOnVariables: true
         }
-    };
-}
-function $1bac384020b50752$var$transformOptions(options) {
+    });
+const $1bac384020b50752$var$transformOptions = (options)=>{
     if (typeof options.ns === "string") options.ns = [
         options.ns
     ];
@@ -8029,14 +7999,14 @@ function $1bac384020b50752$var$transformOptions(options) {
         "cimode"
     ]);
     return options;
-}
-function $1bac384020b50752$var$noop() {}
-function $1bac384020b50752$var$bindMemberFunctions(inst) {
+};
+const $1bac384020b50752$var$noop = ()=>{};
+const $1bac384020b50752$var$bindMemberFunctions = (inst)=>{
     const mems = Object.getOwnPropertyNames(Object.getPrototypeOf(inst));
     mems.forEach((mem)=>{
         if (typeof inst[mem] === "function") inst[mem] = inst[mem].bind(inst);
     });
-}
+};
 class $1bac384020b50752$var$I18n extends $1bac384020b50752$var$EventEmitter {
     constructor(){
         let options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -8084,11 +8054,11 @@ class $1bac384020b50752$var$I18n extends $1bac384020b50752$var$EventEmitter {
         };
         if (options.keySeparator !== undefined) this.options.userDefinedKeySeparator = options.keySeparator;
         if (options.nsSeparator !== undefined) this.options.userDefinedNsSeparator = options.nsSeparator;
-        function createClassOnDemand(ClassOrObject) {
+        const createClassOnDemand = (ClassOrObject)=>{
             if (!ClassOrObject) return null;
             if (typeof ClassOrObject === "function") return new ClassOrObject();
             return ClassOrObject;
-        }
+        };
         if (!this.options.isClone) {
             if (this.modules.logger) $1bac384020b50752$var$baseLogger.init(createClassOnDemand(this.modules.logger), this.options);
             else $1bac384020b50752$var$baseLogger.init(null, this.options);
@@ -8215,6 +8185,14 @@ class $1bac384020b50752$var$I18n extends $1bac384020b50752$var$EventEmitter {
     }
     reloadResources(lngs, ns, callback) {
         const deferred = $1bac384020b50752$var$defer();
+        if (typeof lngs === "function") {
+            callback = lngs;
+            lngs = undefined;
+        }
+        if (typeof ns === "function") {
+            callback = ns;
+            ns = undefined;
+        }
         if (!lngs) lngs = this.languages;
         if (!ns) ns = this.options.ns;
         if (!callback) callback = $1bac384020b50752$var$noop;
@@ -8353,7 +8331,7 @@ class $1bac384020b50752$var$I18n extends $1bac384020b50752$var$EventEmitter {
         if (lng.toLowerCase() === "cimode") return true;
         const loadNotPending = (l, n)=>{
             const loadState = this.services.backendConnector.state[`${l}|${n}`];
-            return loadState === -1 || loadState === 2;
+            return loadState === -1 || loadState === 0 || loadState === 2;
         };
         if (options.precheck) {
             const preResult = options.precheck(this, loadNotPending);
@@ -11051,6 +11029,7 @@ var $ece16b3047178a9c$var$Dropdown = /** @class */ function() {
     Dropdown.prototype.show = function() {
         this._targetEl.classList.remove("hidden");
         this._targetEl.classList.add("block");
+        this._targetEl.removeAttribute("aria-hidden");
         // Enable the event listeners
         this._popperInstance.setOptions(function(options) {
             return $ece16b3047178a9c$var$__assign($ece16b3047178a9c$var$__assign({}, options), {
@@ -11072,6 +11051,7 @@ var $ece16b3047178a9c$var$Dropdown = /** @class */ function() {
     Dropdown.prototype.hide = function() {
         this._targetEl.classList.remove("block");
         this._targetEl.classList.add("hidden");
+        this._targetEl.setAttribute("aria-hidden", "true");
         // Disable the event listeners
         this._popperInstance.setOptions(function(options) {
             return $ece16b3047178a9c$var$__assign($ece16b3047178a9c$var$__assign({}, options), {
@@ -11300,7 +11280,7 @@ var $8d24653c8cdd4795$var$Modal = /** @class */ function() {
             // Add keyboard event listener to the document
             if (this._options.closable) this._setupModalCloseEventListeners();
             // prevent body scroll
-            //document.body.classList.add('overflow-hidden');
+            document.body.classList.add("overflow-hidden");
             // callback function
             this._options.onShow(this);
         }
@@ -11551,7 +11531,7 @@ var $c647e009fa86f7f0$var$Drawer = /** @class */ function() {
         this._targetEl.setAttribute("role", "dialog");
         this._targetEl.removeAttribute("aria-hidden");
         // disable body scroll
-        this._options.bodyScrolling;
+        if (!this._options.bodyScrolling) document.body.classList.add("overflow-hidden");
         // show backdrop
         if (this._options.backdrop) this._createBackdrop();
         this._visible = true;
@@ -19066,6 +19046,7 @@ if (!$fe9db8f8165fa827$var$nativeAPI) $fe9db8f8165fa827$var$screenfull = {
 var $fe9db8f8165fa827$export$2e2bcd8739ae039 = $fe9db8f8165fa827$var$screenfull;
 
 
+//import morph from '@alpinejs/morph'
 // 将 Alpine 实例添加到窗口对象中。
 window.Alpine = (0, $8c83eaf28779ff46$export$2e2bcd8739ae039);
 // Alpine Persist 插件，用于持久化存储。默认存储到 localStorage。
