@@ -108,6 +108,78 @@ templ Drawer(s *state.GlobalState, slot templ.Component) {
 					x-text="$store.scroll.widthUseFixedValue?i18next.t('widthUseFixedValue'):i18next.t('widthUsePercent')"
 				></span>
 			</label>
+			<!-- 单页漫画宽度（横屏状态+宽度限制使用百分比） -->
+			<!-- 组件来自：https://flowbite.com/docs/forms/range/-->
+			<div x-show="!$store.scroll.widthUseFixedValue" class="relative w-full ">
+				<label
+					for="singlePageWidth_Percent"
+					class="block w-full mb-2 text-sm font-medium"
+					x-text="i18next.t('singlePageWidth') + $store.scroll.singlePageWidth_Percent+'%'"
+				></label>
+				<input
+					id="singlePageWidth_Percent"
+					type="range"
+					min="10"
+					max="100"
+					x-model="$store.scroll.singlePageWidth_Percent"
+					step="1"
+					class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+				/>
+			</div>
+			<!-- 双页漫画宽度（横屏状态+宽度限制使用百分比） -->
+			<!-- 组件来自：https://flowbite.com/docs/forms/range/-->
+			<div  x-show="!$store.scroll.widthUseFixedValue" class="relative w-full">
+				<label
+					for="doublePageWidth_Percent"
+					class="block w-full mb-2 text-sm font-medium"
+					x-text="i18next.t('doublePageWidth') + $store.scroll.doublePageWidth_Percent+'%'"
+				></label>
+				<input
+					id="doublePageWidth_Percent"
+					type="range"
+					min="10"
+					max="100"
+					x-model="$store.scroll.doublePageWidth_Percent"
+					step="1"
+					class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+				/>
+			</div>
+			<!-- 单页漫画宽度（横屏状态+宽度限制使用固定值） -->
+			<!-- 组件来自：https://flowbite.com/docs/forms/range/-->
+			<div x-show="$store.scroll.widthUseFixedValue" class="relative w-full">
+				<label
+					for="singlePageWidth_PX"
+					class="block w-full mb-2 text-sm font-medium"
+					x-text="i18next.t('singlePageWidth') + $store.scroll.singlePageWidth_PX+' px'"
+				></label>
+				<input
+					id="singlePageWidth_PX"
+					type="range"
+					min="100"
+					max="1600"
+					x-model="$store.scroll.singlePageWidth_PX"
+					step="20"
+					class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+				/>
+			</div>
+			<!-- 双页漫画宽度（横屏状态+宽度限制使用固定值） -->
+			<!-- 组件来自：https://flowbite.com/docs/forms/range/-->
+			<div x-show="$store.scroll.widthUseFixedValue" class="relative w-full">
+				<label
+					for="doublePageWidth_PX"
+					class="block w-full mb-2 text-sm font-medium"
+					x-text="i18next.t('doublePageWidth') + $store.scroll.doublePageWidth_PX+' px'"
+				></label>
+				<input
+					id="doublePageWidth_PX"
+					type="range"
+					min="100"
+					max="1600"
+					x-model="$store.scroll.doublePageWidth_PX"
+					step="20"
+					class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+				/>
+			</div>
 		</div>
 	</div>
 }

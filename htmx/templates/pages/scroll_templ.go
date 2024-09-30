@@ -241,14 +241,14 @@ func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<template x-if=\"$store.scroll.showPageNum\"><div class=\"w-full mt-0 mb-2 text-lg font-semibold text-center \">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<template x-if=\"$store.scroll.showPageNum\"><div class=\"page_hint w-full mt-0 mb-2 text-lg font-semibold text-center \">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d / %d", key+1, book.BookInfo.PageCount))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll.templ`, Line: 191, Col: 126}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll.templ`, Line: 191, Col: 136}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -267,7 +267,7 @@ func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<style>\n    /* https://developer.mozilla.org/zh-CN/docs/Web/CSS/object-fit */\n    img {\n        margin: auto;\n        /* object-fit: scale-down; */\n        /* margin-top: v-bind(margin+'px'); */\n        margin-bottom: v-bind(margin+'px');\n        /* padding-bottom: 30px; */\n        /* border-radius: 3px; */\n        /* 任意数量的阴影，用逗号分隔 如果元素同时设置了 border-radius属性，那么阴影也会有圆角效果。*/\n        /* 属性可设置的值包括阴影的 X 轴偏移量、Y 轴偏移量、模糊半径、扩散半径和颜色。 */\n        /* box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); */\n        box-shadow: 0px 6px 3px 0px rgba(0, 0, 0, 0.19);\n    }\n\n    .page_hint {\n        /* 文字颜色 */\n        color: #413d3d;\n        /* 文字阴影：https://www.w3school.com.cn/css/css3_shadows.asp*/\n        text-shadow: -1px 0 rgb(240, 229, 229), 0 1px rgb(253, 242, 242),\n            1px 0 rgb(206, 183, 183), 0 -1px rgb(196, 175, 175);\n    }\n\n    .LoadingImage {\n        width: 90vw;\n        max-width: 90vw;\n    }\n\n    .ErrorImage {\n        width: 90vw;\n        max-width: 90vw;\n    }\n\n    /* 横屏（显示区域）时的CSS样式,IE无效 */\n    @media screen and (min-aspect-ratio: 19/19) {\n        .SinglePageImage {\n            width: v-bind(sPWL);\n            max-width: 100%;\n        }\n\n        .DoublePageImage {\n            width: v-bind(dPWL);\n            max-width: 100%;\n        }\n    }\n\n    /* 竖屏(显示区域)CSS样式,IE无效 */\n    @media screen and (max-aspect-ratio: 19/19) {\n        .SinglePageImage {\n            width: v-bind(sPWP);\n            max-width: 100%;\n        }\n\n        .DoublePageImage {\n            /* width: 100%; */\n            width: v-bind(dPWP);\n            max-width: 100%;\n        }\n    }\n    </style>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<style>\n    /* https://developer.mozilla.org/zh-CN/docs/Web/CSS/object-fit */\n    img {\n        margin: auto;\n        margin-bottom: v-bind(margin+'px');\n        box-shadow: 0px 6px 3px 0px rgba(0, 0, 0, 0.19);\n    }\n\n    .page_hint {\n        /* 文字颜色 */\n        color: #413d3d;\n        /* 文字阴影：https://www.w3school.com.cn/css/css3_shadows.asp*/\n        text-shadow: -1px 0 rgb(240, 229, 229), 0 1px rgb(253, 242, 242),\n            1px 0 rgb(206, 183, 183), 0 -1px rgb(196, 175, 175);\n    }\n\n    .LoadingImage {\n        width: 90vw;\n        max-width: 90vw;\n    }\n\n    .ErrorImage {\n        width: 90vw;\n        max-width: 90vw;\n    }\n\n    /* 横屏（显示区域）时的CSS样式,IE无效 */\n    @media screen and (min-aspect-ratio: 19/19) {\n        .SinglePageImage {\n            width: v-bind(sPWL);\n            max-width: 100%;\n        }\n\n        .DoublePageImage {\n            width: v-bind(dPWL);\n            max-width: 100%;\n        }\n    }\n\n    /* 竖屏(显示区域)CSS样式,IE无效 */\n    @media screen and (max-aspect-ratio: 19/19) {\n        .SinglePageImage {\n            width: v-bind(sPWP);\n            max-width: 100%;\n        }\n\n        .DoublePageImage {\n            /* width: 100%; */\n            width: v-bind(dPWP);\n            max-width: 100%;\n        }\n    }\n    </style>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

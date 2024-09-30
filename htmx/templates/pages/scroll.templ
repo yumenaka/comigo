@@ -188,7 +188,7 @@ templ ScrollMainArea(s *state.GlobalState, book *entity.Book) {
 						/>
 					}
 					<template x-if="$store.scroll.showPageNum">
-						<div class="w-full mt-0 mb-2 text-lg font-semibold text-center ">{ fmt.Sprintf("%d / %d", key+1,book.BookInfo.PageCount) }</div>
+						<div class="page_hint w-full mt-0 mb-2 text-lg font-semibold text-center ">{ fmt.Sprintf("%d / %d", key+1,book.BookInfo.PageCount) }</div>
 					</template>
 				</div>
 			}
@@ -202,14 +202,7 @@ templ ScrollMainArea(s *state.GlobalState, book *entity.Book) {
     /* https://developer.mozilla.org/zh-CN/docs/Web/CSS/object-fit */
     img {
         margin: auto;
-        /* object-fit: scale-down; */
-        /* margin-top: v-bind(margin+'px'); */
         margin-bottom: v-bind(margin+'px');
-        /* padding-bottom: 30px; */
-        /* border-radius: 3px; */
-        /* 任意数量的阴影，用逗号分隔 如果元素同时设置了 border-radius属性，那么阴影也会有圆角效果。*/
-        /* 属性可设置的值包括阴影的 X 轴偏移量、Y 轴偏移量、模糊半径、扩散半径和颜色。 */
-        /* box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); */
         box-shadow: 0px 6px 3px 0px rgba(0, 0, 0, 0.19);
     }
 
