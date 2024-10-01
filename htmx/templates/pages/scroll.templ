@@ -188,7 +188,7 @@ templ ScrollMainArea(s *state.GlobalState, book *entity.Book) {
 						/>
 					}
 					<template x-if="$store.scroll.showPageNum">
-						<div class="page_hint w-full mt-0 mb-2 text-lg font-semibold text-center ">{ fmt.Sprintf("%d / %d", key+1,book.BookInfo.PageCount) }</div>
+						<div class="w-full mt-0 mb-2 text-lg font-semibold text-center page_hint ">{ fmt.Sprintf("%d / %d", key+1,book.BookInfo.PageCount) }</div>
 					</template>
 				</div>
 			}
@@ -254,7 +254,116 @@ templ ScrollMainArea(s *state.GlobalState, book *entity.Book) {
 }
 
 templ ScrollDrawerSlot() {
-	<div></div>
+	<!-- 滑动选择组件: 下拉模式下，漫画页面的底部间距（px）-->
+	<!-- 组件来自：https://flowbite.com/docs/forms/range/-->
+	<div class="outline outline-offset-8 outline-dotted hover:outline outline-2 my-4  relative w-full">
+		<label
+			for="marginBottom"
+			class="block w-full mb-2 text-sm font-medium"
+			x-text="i18next.t('marginBottomOnScrollMode') + $store.scroll.marginBottomOnScrollMode+'px'"
+		></label>
+		<input
+			id="marginBottom"
+			type="range"
+			min="0"
+			max="100"
+			x-model="$store.scroll.marginBottomOnScrollMode"
+			step="1"
+			class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+		/>
+	</div>
+	<!-- toggle开关：显示页数 -->
+	<label class="outline outline-offset-8 outline-dotted hover:outline outline-2 my-4  inline-flex items-center w-full my-2 cursor-pointer">
+		<input type="checkbox" x-model="$store.scroll.showPageNum" class="sr-only peer" checked/>
+		<div
+			class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+		></div>
+		<span class="text-sm font-medium ms-3" x-text="i18next.t('showPageNum')"></span>
+	</label>
+	<!-- toggle开关组件：横屏状态下,宽度单位是固定值还是百分比 -->
+	<!-- 组件来自：https://flowbite.com/docs/forms/toggle/ -->
+	<label class="outline outline-offset-8 outline-dotted hover:outline outline-2 my-4 inline-flex items-center w-full my-2 cursor-pointer">
+		<input type="checkbox" x-model:value="$store.scroll.widthUseFixedValue" class="sr-only peer" checked/>
+		<div
+			class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+		></div>
+		<span
+			class="text-sm font-medium ms-3"
+			x-text="$store.scroll.widthUseFixedValue?i18next.t('widthUseFixedValue'):i18next.t('widthUsePercent')"
+		></span>
+	</label>
+	<!-- 单页漫画宽度（横屏状态+宽度限制使用百分比） -->
+	<!-- 组件来自：https://flowbite.com/docs/forms/range/-->
+	<div x-show="!$store.scroll.widthUseFixedValue" class="outline outline-offset-8 outline-dotted hover:outline outline-2 my-4 relative w-full ">
+		<label
+			for="singlePageWidth_Percent"
+			class="block w-full mb-2 text-sm font-medium"
+			x-text="i18next.t('singlePageWidth') + $store.scroll.singlePageWidth_Percent+'%'"
+		></label>
+		<input
+			id="singlePageWidth_Percent"
+			type="range"
+			min="10"
+			max="100"
+			x-model="$store.scroll.singlePageWidth_Percent"
+			step="1"
+			class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+		/>
+	</div>
+	<!-- 双页漫画宽度（横屏状态+宽度限制使用百分比） -->
+	<!-- 组件来自：https://flowbite.com/docs/forms/range/-->
+	<div x-show="!$store.scroll.widthUseFixedValue" class="outline outline-offset-8 outline-dotted hover:outline outline-2 my-4 relative w-full">
+		<label
+			for="doublePageWidth_Percent"
+			class="block w-full mb-2 text-sm font-medium"
+			x-text="i18next.t('doublePageWidth') + $store.scroll.doublePageWidth_Percent+'%'"
+		></label>
+		<input
+			id="doublePageWidth_Percent"
+			type="range"
+			min="10"
+			max="100"
+			x-model="$store.scroll.doublePageWidth_Percent"
+			step="1"
+			class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+		/>
+	</div>
+	<!-- 单页漫画宽度（横屏状态+宽度限制使用固定值） -->
+	<!-- 组件来自：https://flowbite.com/docs/forms/range/-->
+	<div x-show="$store.scroll.widthUseFixedValue" class="outline outline-offset-8 outline-dotted hover:outline outline-2 my-4 relative w-full">
+		<label
+			for="singlePageWidth_PX"
+			class="block w-full mb-2 text-sm font-medium"
+			x-text="i18next.t('singlePageWidth') + $store.scroll.singlePageWidth_PX+' px'"
+		></label>
+		<input
+			id="singlePageWidth_PX"
+			type="range"
+			min="100"
+			max="1600"
+			x-model="$store.scroll.singlePageWidth_PX"
+			step="20"
+			class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+		/>
+	</div>
+	<!-- 双页漫画宽度（横屏状态+宽度限制使用固定值） -->
+	<!-- 组件来自：https://flowbite.com/docs/forms/range/-->
+	<div x-show="$store.scroll.widthUseFixedValue" class="outline outline-offset-8 outline-dotted hover:outline outline-2 my-4 relative w-full">
+		<label
+			for="doublePageWidth_PX"
+			class="block w-full mb-2 text-sm font-medium"
+			x-text="i18next.t('doublePageWidth') + $store.scroll.doublePageWidth_PX+' px'"
+		></label>
+		<input
+			id="doublePageWidth_PX"
+			type="range"
+			min="100"
+			max="1600"
+			x-model="$store.scroll.doublePageWidth_PX"
+			step="20"
+			class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+		/>
+	</div>
 }
 
 // ScrollPage 定义 BodyHTML
