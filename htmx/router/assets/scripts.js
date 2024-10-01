@@ -78,7 +78,7 @@ Alpine.store('global', {
   // debugMode 是否开启调试模式
   debugMode: Alpine.$persist(false).as('global.debugMode'),
   // readerMode 当前阅读模式
-  readMode: Alpine.$persist('flip').as('global.readMode'),
+  readMode: Alpine.$persist('scroll').as('global.readMode'),
   //是否通过websocket同步翻页
   syncPageByWS: Alpine.$persist(true).as('global.syncPageByWS'),
   // bookSortBy 书籍排序方式 以按照文件名、修改时间、文件大小排序（或反向排序）
@@ -129,16 +129,13 @@ Alpine.store('scroll', {
   clientWidth: 0,
   clientHeight: 0,
   //漫画页的单位,是否使用固定值
-  widthUseFixedValue: true,
+  widthUseFixedValue: Alpine.$persist(true).as('scroll.widthUseFixedValue'),
   //横屏(Landscape)状态的漫画页宽度,百分比
-  singlePageWidth_Percent: 50,
-  doublePageWidth_Percent: 95,
+  singlePageWidth_Percent: Alpine.$persist(60).as('scroll.singlePageWidth_Percent'),
+  doublePageWidth_Percent: Alpine.$persist(95).as('scroll.doublePageWidth_Percent'),
   //横屏(Landscape)状态的漫画页宽度。px。
-  singlePageWidth_PX: 720,
-  doublePageWidth_PX: 720,
-  //可见范围是否是横向
-  isLandscapeMode: true,
-  isPortraitMode: false,
+  singlePageWidth_PX:  Alpine.$persist(720).as('scroll.singlePageWidth_PX'),
+  doublePageWidth_PX: Alpine.$persist(1200).as('scroll.doublePageWidth_PX'),
   //书籍数据,需要从远程拉取
   //是否显示顶部页头
   showHeaderFlag: true,

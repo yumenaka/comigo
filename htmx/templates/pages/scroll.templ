@@ -5,6 +5,7 @@ import (
 	"github.com/yumenaka/comigo/entity"
 	"github.com/yumenaka/comigo/htmx/state"
 	"github.com/yumenaka/comigo/htmx/templates/components"
+	"strconv"
 	"strings"
 )
 
@@ -152,47 +153,51 @@ templ ScrollMainArea(s *state.GlobalState, book *entity.Book) {
 		<!-- https://htmx.org/docs/#triggers -->
 		<!-- https://htmx.org/docs/#swapping -->
 		<!-- hx-get 用于获取图片的URL，hx-trigger 用于触发加载，hx-swap 用于替换元素，innerHTML默认值，将内容放在目标元素内 outerHTML用返回的内容替换整个目标元素  hx-target 用于指定目标元素 -->
-		<noscript class="loading-lazy">
-			for key, image := range book.Pages.Images {
-				<div class="flex flex-col justify-start m-0 max-w-full lg:max-w-[800px] rounded" :style="{ marginBottom: $store.scroll.marginBottomOnScrollMode + 'px' }">
-					if strings.Contains(image.Url, ".html")&& !strings.Contains(image.Url, "hidden.") {
-						<div hx-get={ image.Url } hx-trigger="load" hx-swap="innerHTML" class="w-full m-0"></div>
-					}
-					if key <= 2 && !strings.Contains(image.Url, "hidden.")&& !strings.Contains(image.Url, ".html") {
-						<img
-							class="w-full m-0"
-							src={ image.Url }
-							x-on:load="
+		for key, image := range book.Pages.Images {
+			<div
+				x-data="{
+                            orientation: '',
+                            updateOrientation() {
+                                this.orientation = (window.innerWidth / window.innerHeight >= 1) ? 'landscape' : 'portrait';
+                            }
+                        }"
+				class="flex flex-col justify-start w-full max-w-full m-0 rounded item-center"
+				:style="{ marginBottom: $store.scroll.marginBottomOnScrollMode + 'px' }"
+			>
+				if strings.Contains(image.Url, ".html")&& !strings.Contains(image.Url, "hidden.") {
+					<div hx-get={ image.Url } hx-trigger="load" hx-swap="innerHTML" class="w-full m-0"></div>
+				}
+				if !strings.Contains(image.Url, "hidden.")&& !strings.Contains(image.Url, ".html") {
+					<img
+						class="w-full"
+						src={ image.Url }
+						x-data="{
+                                    isDoublePage: false,
+                                    imageWidth: ''
+                                }"
+						x-init="updateOrientation();"
+						@load="
                             if ($event.target.naturalWidth > $event.target.naturalHeight) {
+                                // 双页
+                                isDoublePage = true;
                                 $el.classList.add('double');
                                 $el.classList.remove('single');
-                            } else { 
+                            } else {
+                                // 单页
+                                isDoublePage = false;
                                 $el.classList.add('single');
                                 $el.classList.remove('double');
                             }"
-						/>
-					}
-					if key > 2 && !strings.Contains(image.Url, "hidden.")&& !strings.Contains(image.Url, ".html") {
-						<img
-							loading="lazy"
-							class="w-full m-0"
-							src={ image.Url }
-							x-on:load="
-                            if ($event.target.naturalWidth > $event.target.naturalHeight) {
-                                $el.classList.add('double');
-                                $el.classList.remove('single');
-                            } else { 
-                                $el.classList.add('single');
-                                $el.classList.remove('double');
-                            }"
-						/>
-					}
-					<template x-if="$store.scroll.showPageNum">
-						<div class="w-full mt-0 mb-2 text-lg font-semibold text-center page_hint ">{ fmt.Sprintf("%d / %d", key+1,book.BookInfo.PageCount) }</div>
-					</template>
-				</div>
-			}
-		</noscript>
+						@resize.window="updateOrientation()"
+						:style="{ width: orientation === 'landscape'?(Alpine.store('scroll').widthUseFixedValue? (isDoublePage ? Alpine.store('scroll').doublePageWidth_PX +'px': Alpine.store('scroll').singlePageWidth_PX +'px'): (isDoublePage ? Alpine.store('scroll').doublePageWidth_Percent + '%': Alpine.store('scroll').singlePageWidth_Percent + '%')): '100%', maxWidth: '100%'}"
+						alt={ strconv.Itoa(key) }
+					/>
+				}
+				<template x-if="$store.scroll.showPageNum">
+					<div class="w-full mt-0 mb-2 text-lg font-semibold text-center page_hint ">{ fmt.Sprintf("%d / %d", key+1,book.BookInfo.PageCount) }</div>
+				</template>
+			</div>
+		}
 	</div>
 	<button id="BackTopButton" style="display: none" class="fixed flex items-center justify-center w-10 h-10 text-white bg-blue-500 rounded-full shadow-lg bottom-4 right-4">
 		<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><path d="M256 48C141.13 48 48 141.13 48 256s93.13 208 208 208s208-93.13 208-208S370.87 48 256 48zm96 270.63l-96-96l-96 96L137.37 296L256 177.37L374.63 296z" fill="currentColor"></path></svg>
@@ -253,10 +258,11 @@ templ ScrollMainArea(s *state.GlobalState, book *entity.Book) {
     </style>
 }
 
+// 卷轴阅读，侧栏设置slot
 templ ScrollDrawerSlot() {
 	<!-- 滑动选择组件: 下拉模式下，漫画页面的底部间距（px）-->
 	<!-- 组件来自：https://flowbite.com/docs/forms/range/-->
-	<div class="outline outline-offset-8 outline-dotted hover:outline outline-2 my-4  relative w-full">
+	<div class="relative w-full my-4 outline outline-offset-8 outline-dotted hover:outline outline-2">
 		<label
 			for="marginBottom"
 			class="block w-full mb-2 text-sm font-medium"
@@ -273,7 +279,7 @@ templ ScrollDrawerSlot() {
 		/>
 	</div>
 	<!-- toggle开关：显示页数 -->
-	<label class="outline outline-offset-8 outline-dotted hover:outline outline-2 my-4  inline-flex items-center w-full my-2 cursor-pointer">
+	<label class="inline-flex items-center w-full my-2 my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2">
 		<input type="checkbox" x-model="$store.scroll.showPageNum" class="sr-only peer" checked/>
 		<div
 			class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
@@ -282,7 +288,7 @@ templ ScrollDrawerSlot() {
 	</label>
 	<!-- toggle开关组件：横屏状态下,宽度单位是固定值还是百分比 -->
 	<!-- 组件来自：https://flowbite.com/docs/forms/toggle/ -->
-	<label class="outline outline-offset-8 outline-dotted hover:outline outline-2 my-4 inline-flex items-center w-full my-2 cursor-pointer">
+	<label class="inline-flex items-center w-full my-2 my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2">
 		<input type="checkbox" x-model:value="$store.scroll.widthUseFixedValue" class="sr-only peer" checked/>
 		<div
 			class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
@@ -294,7 +300,7 @@ templ ScrollDrawerSlot() {
 	</label>
 	<!-- 单页漫画宽度（横屏状态+宽度限制使用百分比） -->
 	<!-- 组件来自：https://flowbite.com/docs/forms/range/-->
-	<div x-show="!$store.scroll.widthUseFixedValue" class="outline outline-offset-8 outline-dotted hover:outline outline-2 my-4 relative w-full ">
+	<div x-show="!$store.scroll.widthUseFixedValue" class="relative w-full my-4 outline outline-offset-8 outline-dotted hover:outline outline-2 ">
 		<label
 			for="singlePageWidth_Percent"
 			class="block w-full mb-2 text-sm font-medium"
@@ -312,7 +318,7 @@ templ ScrollDrawerSlot() {
 	</div>
 	<!-- 双页漫画宽度（横屏状态+宽度限制使用百分比） -->
 	<!-- 组件来自：https://flowbite.com/docs/forms/range/-->
-	<div x-show="!$store.scroll.widthUseFixedValue" class="outline outline-offset-8 outline-dotted hover:outline outline-2 my-4 relative w-full">
+	<div x-show="!$store.scroll.widthUseFixedValue" class="relative w-full my-4 outline outline-offset-8 outline-dotted hover:outline outline-2">
 		<label
 			for="doublePageWidth_Percent"
 			class="block w-full mb-2 text-sm font-medium"
@@ -330,7 +336,7 @@ templ ScrollDrawerSlot() {
 	</div>
 	<!-- 单页漫画宽度（横屏状态+宽度限制使用固定值） -->
 	<!-- 组件来自：https://flowbite.com/docs/forms/range/-->
-	<div x-show="$store.scroll.widthUseFixedValue" class="outline outline-offset-8 outline-dotted hover:outline outline-2 my-4 relative w-full">
+	<div x-show="$store.scroll.widthUseFixedValue" class="relative w-full my-4 outline outline-offset-8 outline-dotted hover:outline outline-2">
 		<label
 			for="singlePageWidth_PX"
 			class="block w-full mb-2 text-sm font-medium"
@@ -348,7 +354,7 @@ templ ScrollDrawerSlot() {
 	</div>
 	<!-- 双页漫画宽度（横屏状态+宽度限制使用固定值） -->
 	<!-- 组件来自：https://flowbite.com/docs/forms/range/-->
-	<div x-show="$store.scroll.widthUseFixedValue" class="outline outline-offset-8 outline-dotted hover:outline outline-2 my-4 relative w-full">
+	<div x-show="$store.scroll.widthUseFixedValue" class="relative w-full my-4 outline outline-offset-8 outline-dotted hover:outline outline-2">
 		<label
 			for="doublePageWidth_PX"
 			class="block w-full mb-2 text-sm font-medium"

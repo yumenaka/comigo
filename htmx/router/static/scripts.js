@@ -18905,6 +18905,305 @@ function $1cab5c01d65a66cd$var$addRootUtilities(utilities, { key: key, value: va
 }
 
 
+// packages/morph/src/morph.js
+function $fd2717825660a9ff$var$morph(from, toHtml, options) {
+    $fd2717825660a9ff$var$monkeyPatchDomSetAttributeToAllowAtSymbols();
+    let fromEl;
+    let toEl;
+    let key, lookahead, updating, updated, removing, removed, adding, added;
+    function assignOptions(options2 = {}) {
+        let defaultGetKey = (el)=>el.getAttribute("key");
+        let noop = ()=>{};
+        updating = options2.updating || noop;
+        updated = options2.updated || noop;
+        removing = options2.removing || noop;
+        removed = options2.removed || noop;
+        adding = options2.adding || noop;
+        added = options2.added || noop;
+        key = options2.key || defaultGetKey;
+        lookahead = options2.lookahead || false;
+    }
+    function patch(from2, to) {
+        if (differentElementNamesTypesOrKeys(from2, to)) return swapElements(from2, to);
+        let updateChildrenOnly = false;
+        if ($fd2717825660a9ff$var$shouldSkip(updating, from2, to, ()=>updateChildrenOnly = true)) return;
+        if (from2.nodeType === 1 && window.Alpine) {
+            window.Alpine.cloneNode(from2, to);
+            if (from2._x_teleport && to._x_teleport) patch(from2._x_teleport, to._x_teleport);
+        }
+        if ($fd2717825660a9ff$var$textOrComment(to)) {
+            patchNodeValue(from2, to);
+            updated(from2, to);
+            return;
+        }
+        if (!updateChildrenOnly) patchAttributes(from2, to);
+        updated(from2, to);
+        patchChildren(from2, to);
+    }
+    function differentElementNamesTypesOrKeys(from2, to) {
+        return from2.nodeType != to.nodeType || from2.nodeName != to.nodeName || getKey(from2) != getKey(to);
+    }
+    function swapElements(from2, to) {
+        if ($fd2717825660a9ff$var$shouldSkip(removing, from2)) return;
+        let toCloned = to.cloneNode(true);
+        if ($fd2717825660a9ff$var$shouldSkip(adding, toCloned)) return;
+        from2.replaceWith(toCloned);
+        removed(from2);
+        added(toCloned);
+    }
+    function patchNodeValue(from2, to) {
+        let value = to.nodeValue;
+        if (from2.nodeValue !== value) from2.nodeValue = value;
+    }
+    function patchAttributes(from2, to) {
+        if (from2._x_transitioning) return;
+        if (from2._x_isShown && !to._x_isShown) return;
+        if (!from2._x_isShown && to._x_isShown) return;
+        let domAttributes = Array.from(from2.attributes);
+        let toAttributes = Array.from(to.attributes);
+        for(let i = domAttributes.length - 1; i >= 0; i--){
+            let name = domAttributes[i].name;
+            if (!to.hasAttribute(name)) from2.removeAttribute(name);
+        }
+        for(let i = toAttributes.length - 1; i >= 0; i--){
+            let name = toAttributes[i].name;
+            let value = toAttributes[i].value;
+            if (from2.getAttribute(name) !== value) from2.setAttribute(name, value);
+        }
+    }
+    function patchChildren(from2, to) {
+        let fromKeys = keyToMap(from2.children);
+        let fromKeyHoldovers = {};
+        let currentTo = $fd2717825660a9ff$var$getFirstNode(to);
+        let currentFrom = $fd2717825660a9ff$var$getFirstNode(from2);
+        while(currentTo){
+            $fd2717825660a9ff$var$seedingMatchingId(currentTo, currentFrom);
+            let toKey = getKey(currentTo);
+            let fromKey = getKey(currentFrom);
+            if (!currentFrom) {
+                if (toKey && fromKeyHoldovers[toKey]) {
+                    let holdover = fromKeyHoldovers[toKey];
+                    from2.appendChild(holdover);
+                    currentFrom = holdover;
+                } else {
+                    if (!$fd2717825660a9ff$var$shouldSkip(adding, currentTo)) {
+                        let clone = currentTo.cloneNode(true);
+                        from2.appendChild(clone);
+                        added(clone);
+                    }
+                    currentTo = $fd2717825660a9ff$var$getNextSibling(to, currentTo);
+                    continue;
+                }
+            }
+            let isIf = (node)=>node && node.nodeType === 8 && node.textContent === "[if BLOCK]><![endif]";
+            let isEnd = (node)=>node && node.nodeType === 8 && node.textContent === "[if ENDBLOCK]><![endif]";
+            if (isIf(currentTo) && isIf(currentFrom)) {
+                let nestedIfCount = 0;
+                let fromBlockStart = currentFrom;
+                while(currentFrom){
+                    let next = $fd2717825660a9ff$var$getNextSibling(from2, currentFrom);
+                    if (isIf(next)) nestedIfCount++;
+                    else if (isEnd(next) && nestedIfCount > 0) nestedIfCount--;
+                    else if (isEnd(next) && nestedIfCount === 0) {
+                        currentFrom = next;
+                        break;
+                    }
+                    currentFrom = next;
+                }
+                let fromBlockEnd = currentFrom;
+                nestedIfCount = 0;
+                let toBlockStart = currentTo;
+                while(currentTo){
+                    let next = $fd2717825660a9ff$var$getNextSibling(to, currentTo);
+                    if (isIf(next)) nestedIfCount++;
+                    else if (isEnd(next) && nestedIfCount > 0) nestedIfCount--;
+                    else if (isEnd(next) && nestedIfCount === 0) {
+                        currentTo = next;
+                        break;
+                    }
+                    currentTo = next;
+                }
+                let toBlockEnd = currentTo;
+                let fromBlock = new $fd2717825660a9ff$var$Block(fromBlockStart, fromBlockEnd);
+                let toBlock = new $fd2717825660a9ff$var$Block(toBlockStart, toBlockEnd);
+                patchChildren(fromBlock, toBlock);
+                continue;
+            }
+            if (currentFrom.nodeType === 1 && lookahead && !currentFrom.isEqualNode(currentTo)) {
+                let nextToElementSibling = $fd2717825660a9ff$var$getNextSibling(to, currentTo);
+                let found = false;
+                while(!found && nextToElementSibling){
+                    if (nextToElementSibling.nodeType === 1 && currentFrom.isEqualNode(nextToElementSibling)) {
+                        found = true;
+                        currentFrom = addNodeBefore(from2, currentTo, currentFrom);
+                        fromKey = getKey(currentFrom);
+                    }
+                    nextToElementSibling = $fd2717825660a9ff$var$getNextSibling(to, nextToElementSibling);
+                }
+            }
+            if (toKey !== fromKey) {
+                if (!toKey && fromKey) {
+                    fromKeyHoldovers[fromKey] = currentFrom;
+                    currentFrom = addNodeBefore(from2, currentTo, currentFrom);
+                    fromKeyHoldovers[fromKey].remove();
+                    currentFrom = $fd2717825660a9ff$var$getNextSibling(from2, currentFrom);
+                    currentTo = $fd2717825660a9ff$var$getNextSibling(to, currentTo);
+                    continue;
+                }
+                if (toKey && !fromKey) {
+                    if (fromKeys[toKey]) {
+                        currentFrom.replaceWith(fromKeys[toKey]);
+                        currentFrom = fromKeys[toKey];
+                    }
+                }
+                if (toKey && fromKey) {
+                    let fromKeyNode = fromKeys[toKey];
+                    if (fromKeyNode) {
+                        fromKeyHoldovers[fromKey] = currentFrom;
+                        currentFrom.replaceWith(fromKeyNode);
+                        currentFrom = fromKeyNode;
+                    } else {
+                        fromKeyHoldovers[fromKey] = currentFrom;
+                        currentFrom = addNodeBefore(from2, currentTo, currentFrom);
+                        fromKeyHoldovers[fromKey].remove();
+                        currentFrom = $fd2717825660a9ff$var$getNextSibling(from2, currentFrom);
+                        currentTo = $fd2717825660a9ff$var$getNextSibling(to, currentTo);
+                        continue;
+                    }
+                }
+            }
+            let currentFromNext = currentFrom && $fd2717825660a9ff$var$getNextSibling(from2, currentFrom);
+            patch(currentFrom, currentTo);
+            currentTo = currentTo && $fd2717825660a9ff$var$getNextSibling(to, currentTo);
+            currentFrom = currentFromNext;
+        }
+        let removals = [];
+        while(currentFrom){
+            if (!$fd2717825660a9ff$var$shouldSkip(removing, currentFrom)) removals.push(currentFrom);
+            currentFrom = $fd2717825660a9ff$var$getNextSibling(from2, currentFrom);
+        }
+        while(removals.length){
+            let domForRemoval = removals.shift();
+            domForRemoval.remove();
+            removed(domForRemoval);
+        }
+    }
+    function getKey(el) {
+        return el && el.nodeType === 1 && key(el);
+    }
+    function keyToMap(els) {
+        let map = {};
+        for (let el of els){
+            let theKey = getKey(el);
+            if (theKey) map[theKey] = el;
+        }
+        return map;
+    }
+    function addNodeBefore(parent, node, beforeMe) {
+        if (!$fd2717825660a9ff$var$shouldSkip(adding, node)) {
+            let clone = node.cloneNode(true);
+            parent.insertBefore(clone, beforeMe);
+            added(clone);
+            return clone;
+        }
+        return node;
+    }
+    assignOptions(options);
+    fromEl = from;
+    toEl = typeof toHtml === "string" ? $fd2717825660a9ff$var$createElement(toHtml) : toHtml;
+    if (window.Alpine && window.Alpine.closestDataStack && !from._x_dataStack) {
+        toEl._x_dataStack = window.Alpine.closestDataStack(from);
+        toEl._x_dataStack && window.Alpine.cloneNode(from, toEl);
+    }
+    patch(from, toEl);
+    fromEl = void 0;
+    toEl = void 0;
+    return from;
+}
+$fd2717825660a9ff$var$morph.step = ()=>{};
+$fd2717825660a9ff$var$morph.log = ()=>{};
+function $fd2717825660a9ff$var$shouldSkip(hook, ...args) {
+    let skip = false;
+    hook(...args, ()=>skip = true);
+    return skip;
+}
+var $fd2717825660a9ff$var$patched = false;
+function $fd2717825660a9ff$var$createElement(html) {
+    const template = document.createElement("template");
+    template.innerHTML = html;
+    return template.content.firstElementChild;
+}
+function $fd2717825660a9ff$var$textOrComment(el) {
+    return el.nodeType === 3 || el.nodeType === 8;
+}
+var $fd2717825660a9ff$var$Block = class {
+    constructor(start, end){
+        this.startComment = start;
+        this.endComment = end;
+    }
+    get children() {
+        let children = [];
+        let currentNode = this.startComment.nextSibling;
+        while(currentNode && currentNode !== this.endComment){
+            children.push(currentNode);
+            currentNode = currentNode.nextSibling;
+        }
+        return children;
+    }
+    appendChild(child) {
+        this.endComment.before(child);
+    }
+    get firstChild() {
+        let first = this.startComment.nextSibling;
+        if (first === this.endComment) return;
+        return first;
+    }
+    nextNode(reference) {
+        let next = reference.nextSibling;
+        if (next === this.endComment) return;
+        return next;
+    }
+    insertBefore(newNode, reference) {
+        reference.before(newNode);
+        return newNode;
+    }
+};
+function $fd2717825660a9ff$var$getFirstNode(parent) {
+    return parent.firstChild;
+}
+function $fd2717825660a9ff$var$getNextSibling(parent, reference) {
+    let next;
+    if (parent instanceof $fd2717825660a9ff$var$Block) next = parent.nextNode(reference);
+    else next = reference.nextSibling;
+    return next;
+}
+function $fd2717825660a9ff$var$monkeyPatchDomSetAttributeToAllowAtSymbols() {
+    if ($fd2717825660a9ff$var$patched) return;
+    $fd2717825660a9ff$var$patched = true;
+    let original = Element.prototype.setAttribute;
+    let hostDiv = document.createElement("div");
+    Element.prototype.setAttribute = function newSetAttribute(name, value) {
+        if (!name.includes("@")) return original.call(this, name, value);
+        hostDiv.innerHTML = `<span ${name}="${value}"></span>`;
+        let attr = hostDiv.firstElementChild.getAttributeNode(name);
+        hostDiv.firstElementChild.removeAttributeNode(attr);
+        this.setAttributeNode(attr);
+    };
+}
+function $fd2717825660a9ff$var$seedingMatchingId(to, from) {
+    let fromId = from && from._x_bindings && from._x_bindings.id;
+    if (!fromId) return;
+    to.setAttribute("id", fromId);
+    to.id = fromId;
+}
+// packages/morph/src/index.js
+function $fd2717825660a9ff$export$2e5e8c41f5d4e7c7(Alpine) {
+    Alpine.morph = $fd2717825660a9ff$var$morph;
+}
+// packages/morph/builds/module.js
+var $fd2717825660a9ff$export$2e2bcd8739ae039 = $fd2717825660a9ff$export$2e5e8c41f5d4e7c7;
+
+
 var $6797e850f8b9b57d$exports = {};
 $6797e850f8b9b57d$exports = JSON.parse('{"test":"test","debugMode":"Debug Mode","ReaderSettings":"Reader Settings","scroll_mode":"Scroll Mode","flip_mode":"FlipMode","singlePageWidth":"singlePageWidth:","doublePageWidth":"doublePageWidth:","widthUsePercent":"Width:Percent","widthUseFixedValue":"Width:Fixed value","showHeader":"Header Shown","showPageNum":"Show page number","setBackColor":"Background Color:","readingProgressBar":"Reading Progress Bar","savePageNum":"Save Progress","rightScreenToNext":"RightToLeft-Manga","leftScreenToNext":"RightToLeft-Comic","startSketchMode":"Start Sketch","stopSketchMode":"Stop Sketch","hintFirstPage":"Now is the first page, can not turn forward","hintLastPage":"Now is the last page, can not turn the page","now_is":"now: ","second":"second","minute":"minute","total_is":"total: ","interval":"interval: ","page":"page","totalTime":"Total time: ","hour":"hour","pageTurningSeconds":"interval: ","startSketchMessage":"The countdown begins, Have a nice day.","goodjob_and_byebye":"Goodjob,bye.","autoDoublePage":"DoublePage(beta)","gray_image":"gray image","image_width_limit":"Limit size (width)","auto_crop":"Auto white cut","max_width":"max width:","energy_threshold":"Energy Threshold:","back-to-top":"Back To Top","raw_resolution":"Raw Resolution","reset_all_settings":"Reset","do_you_reset_all_settings":" Do you want to reset to the default settings?","original_image":"Original Image","setInterfaceColor":"InterfaceColor:","show_book_titles":"Show book titles","switch_to_scrolling_mode":"Switch to scroll mode","switch_to_flip_mode":"switch to flip mode","select-language":"Select Language","DownloadSampleConfigFile":"Download sample config ","scan_qrcode":"QRCode:","sort_by_filename":"Filename(a-z)","sort_by_filesize":"Filesize(Large to Small)","sort_by_modify_time":"Modify Time\uFF08Newto Old\uFF09","sort_reverse":"(Reverse)","fullscreen":"Fullscreen","sort_by_default":"default sort","sync_page":"Remote Page Sync ","success_fullScreen":"Success Full Screen","not_support_fullscreen":"This browser does not support full screen","exit_fullScreen":"Exit fullscreen","auto_hide_toolbar":"Auto HideToolBar","found_read_history":"Local reading history found","load_from_interrupt":"Loading from the break (page XX)?","from_interrupt":"From the interruption","starting_from_beginning":"Restart","successfully_loaded_reading_progress":"Successfully loaded reading progress","starting_from_beginning_hint":"Load from the first page","load_all_pages":"Load all pages","re_sort_page":"Resort pages","re_sort_book":"Resort Book","no_book_found_hint":"No book found, try uploading a file?","drop_to_upload":"Click or drag files to this area to upload","uploaded_folder_hint":"The file is uploaded to the upload folder under the default library directory.directory","scanned_hint":"Scan a total of XX books, and watch it immediately?","refresh_page":"Refresh page","DownloadWindowsRegFile":"WindowsRegFileDownload","number_of_online_books":"Number of online books:","back_to_bookshelf":"Back to bookshelf ","no_support_upload_file":"Although coming here, the server\'s upload file function was turned off by the administrator","please_enable_upload":"Please enable server upload file support","simplify_book_titles":"Simplify Title","DoublePageMode":"DoublePage","SinglePageMode":"SinglePage","Flip_odd_even_page":"Flip odd even page","marginBottomOnScrollMode":"margin bottom:","login_success_hint":"Login successfully, return to previous page","server_setting":"comigo server setting","logout":"logout","sort_by_filename_reverse":"Filename(z-a)","sort_by_modify_time_reverse":"Modify Time\uFF08Old to New\uFF09","sort_by_filesize_reverse":"Filesize(Small to Large)","author":"Author:{0}","allpagenum":"Total pages: {0}","filesize":"File size:{0}","childbookhint":"{0}books in the folder","server_config":"Server Config","upload_file":"Upload file","FlipOddEvenPageHint":"Try to click here if double pages didn\'t match at joint.","resort_file":"Resort file","back_button":"Back Button","qrcode_hint":"Scan to read, click to show QR code","full_screen_hint":"FullScreen","epub_info":"ePub Info","pdf_hint_message":"Supports pure image PDFs. If loading is slow or errors occur, please try:","original_pdf_link":"Original PDF link","to_infinite_dropdown_mode":"Infinite Dropdown","to_pagination_mode":"Pagination Mode","infinite_dropdown":"InfiniteDropdown","pagination_mode":"Pagination Mode"}');
 
@@ -19046,12 +19345,12 @@ if (!$fe9db8f8165fa827$var$nativeAPI) $fe9db8f8165fa827$var$screenfull = {
 var $fe9db8f8165fa827$export$2e2bcd8739ae039 = $fe9db8f8165fa827$var$screenfull;
 
 
-//import morph from '@alpinejs/morph'
 // 将 Alpine 实例添加到窗口对象中。
 window.Alpine = (0, $8c83eaf28779ff46$export$2e2bcd8739ae039);
 // Alpine Persist 插件，用于持久化存储。默认存储到 localStorage。
 // 详细用法参见： https://alpinejs.dev/plugins/persist
 (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).plugin((0, $9b2f94dab0f686ea$export$2e2bcd8739ae039));
+(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).plugin((0, $fd2717825660a9ff$export$2e2bcd8739ae039));
 (0, $1bac384020b50752$export$2e2bcd8739ae039).use((0, $199830a05f92d3d0$export$2e2bcd8739ae039)).init({
     debug: false,
     // // 在 setTimeout（默认异步行为）内的 init（） 中触发资源加载。如果您的后端同步加载资源，请将其设置为 false - 这样，
@@ -19113,7 +19412,7 @@ document.getElementById("FullScreenIcon").addEventListener("click", ()=>{
     // debugMode 是否开启调试模式
     debugMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("global.debugMode"),
     // readerMode 当前阅读模式
-    readMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist("flip").as("global.readMode"),
+    readMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist("scroll").as("global.readMode"),
     //是否通过websocket同步翻页
     syncPageByWS: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("global.syncPageByWS"),
     // bookSortBy 书籍排序方式 以按照文件名、修改时间、文件大小排序（或反向排序）
@@ -19160,16 +19459,13 @@ document.getElementById("FullScreenIcon").addEventListener("click", ()=>{
     clientWidth: 0,
     clientHeight: 0,
     //漫画页的单位,是否使用固定值
-    widthUseFixedValue: true,
+    widthUseFixedValue: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("scroll.widthUseFixedValue"),
     //横屏(Landscape)状态的漫画页宽度,百分比
-    singlePageWidth_Percent: 50,
-    doublePageWidth_Percent: 95,
+    singlePageWidth_Percent: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(60).as("scroll.singlePageWidth_Percent"),
+    doublePageWidth_Percent: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(95).as("scroll.doublePageWidth_Percent"),
     //横屏(Landscape)状态的漫画页宽度。px。
-    singlePageWidth_PX: 720,
-    doublePageWidth_PX: 720,
-    //可见范围是否是横向
-    isLandscapeMode: true,
-    isPortraitMode: false,
+    singlePageWidth_PX: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(720).as("scroll.singlePageWidth_PX"),
+    doublePageWidth_PX: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(1200).as("scroll.doublePageWidth_PX"),
     //书籍数据,需要从远程拉取
     //是否显示顶部页头
     showHeaderFlag: true,
