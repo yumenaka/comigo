@@ -12,37 +12,44 @@ templ Drawer(s *state.GlobalState, slot templ.Component) {
 		tabindex="-1"
 		aria-labelledby="drawer-right-label"
 	>
-		<h5
-			x-text="i18next.t('ReaderSettings')"
-			id="drawer-right-label"
-			class="inline-flex items-center mb-4 text-base font-semibold text-gray-500 dark:text-gray-400"
-		>
-			<svg
-				class="w-4 h-4 me-2.5"
-				aria-hidden="true"
-				xmlns="http://www.w3.org/2000/svg"
-				fill="currentColor"
-				viewBox="0 0 20 20"
+		<div class="mb-4 outline outline-offset-8 outline-2">
+			<h5
+				x-text="i18next.t('ReaderSettings')"
+				id="drawer-right-label"
+				class="inline-flex items-center mb-4 text-base font-semibold"
 			>
-				<path
-					d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"
-				></path>
-			</svg>Right drawer
-		</h5>
-		<button
-			type="button"
-			data-drawer-hide="drawer-right"
-			aria-controls="drawer-right"
-			class="font-bold bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 absolute top-2.5 end-2.5 inline-flex items-center justify-center dark:hover:bg-gray-600 dark:hover:text-white"
-		>
-			X
-		</button>
-		<div class="flex flex-col items-center justify-center p-1 my-2 rounded text-accent-content dark:text-white">
+				<svg
+					class="w-4 h-4 me-2.5"
+					aria-hidden="true"
+					xmlns="http://www.w3.org/2000/svg"
+					fill="currentColor"
+					viewBox="0 0 20 20"
+				>
+					<path
+						d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"
+					></path>
+				</svg>
+			</h5>
+			<button
+				type="button"
+				data-drawer-hide="drawer-right"
+				aria-controls="drawer-right"
+				class="font-bold bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 absolute top-2.5 end-2.5 inline-flex items-center justify-center dark:hover:bg-gray-600 dark:hover:text-white"
+			>
+				❌
+			</button>
+		</div>
+		<div class="flex flex-col items-center justify-end p-1 my-2 rounded drawer_slot text-accent-content dark:text-white">
 			@slot
+			<!-- 二维码 -->
+			<div class="w-36 h-36 p-1 m-2" x-data="{ qrcodeSrc: '' }" x-init="qrcodeSrc = window.location.origin +'/api/qrcode.png?qrcode_str='+ encodeURIComponent(window.location.toString().replace(window.location.hostname,serverHost))">
+            	<img class="w-32 h-32" :src="qrcodeSrc"> </img>
+			</div>
+            <!-- 选择主题的select -->
 			<select
 				x-model="theme"
 				x-on:change="theme = $event.target.value;console.log(theme);"
-				class="w-full h-10 m-2 border rounded bg-base-100 text-accent-content focus:outline-none"
+				class="w-full h-10 mt-auto mb-2 border rounded bg-base-100 text-accent-content focus:outline-none"
 			>
 				<option value="retro">Retro</option>
 				<option value="light">Light</option>
@@ -62,124 +69,12 @@ templ Drawer(s *state.GlobalState, slot templ.Component) {
 			<select
 				x-model="i18next.language"
 				x-on:change="i18next.changeLanguage($event.target.value).then(location.reload())"
-				class="w-full h-10 pl-3 pr-3 m-2 border rounded bg-base-100 text-accent-content focus:outline-none"
+				class="w-full h-10 border rounded bg-base-100 text-accent-content focus:outline-none"
 			>
 				<option value="en-US">English</option>
 				<option value="zh-CN">中文</option>
 				<option value="ja">日本語</option>
 			</select>
-			<!-- 滑动选择组件: 下拉模式下，漫画页面的底部间距（px）-->
-			<!-- 组件来自：https://flowbite.com/docs/forms/range/-->
-			<div class="relative w-full mb-8">
-				<label
-					for="marginBottom"
-					class="block w-full mb-2 text-sm font-medium"
-					x-text="i18next.t('marginBottomOnScrollMode') + $store.scroll.marginBottomOnScrollMode+'px'"
-				></label>
-				<input
-					id="marginBottom"
-					type="range"
-					min="0"
-					max="100"
-					x-model="$store.scroll.marginBottomOnScrollMode"
-					step="1"
-					class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
-				/>
-				<span class="absolute text-sm text-gray-500 dark:text-gray-400 start-0 -bottom-6">Min (0px)</span>
-				<span class="absolute text-sm text-gray-500 dark:text-gray-400 end-0 -bottom-6">Max (100px)</span>
-			</div>
-			<!-- toggle开关：显示页数 -->
-			<label class="inline-flex items-center w-full my-2 cursor-pointer">
-				<input type="checkbox" x-model="$store.scroll.showPageNum" class="sr-only peer" checked/>
-				<div
-					class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
-				></div>
-				<span class="text-sm font-medium ms-3" x-text="i18next.t('showPageNum')"></span>
-			</label>
-			<!-- toggle开关组件：横屏状态下,宽度单位是固定值还是百分比 -->
-			<!-- 组件来自：https://flowbite.com/docs/forms/toggle/ -->
-			<label class="inline-flex items-center w-full my-2 cursor-pointer">
-				<input type="checkbox" x-model:value="$store.scroll.widthUseFixedValue" class="sr-only peer" checked/>
-				<div
-					class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
-				></div>
-				<span
-					class="text-sm font-medium ms-3"
-					x-text="$store.scroll.widthUseFixedValue?i18next.t('widthUseFixedValue'):i18next.t('widthUsePercent')"
-				></span>
-			</label>
-			<!-- 单页漫画宽度（横屏状态+宽度限制使用百分比） -->
-			<!-- 组件来自：https://flowbite.com/docs/forms/range/-->
-			<div x-show="!$store.scroll.widthUseFixedValue" class="relative w-full ">
-				<label
-					for="singlePageWidth_Percent"
-					class="block w-full mb-2 text-sm font-medium"
-					x-text="i18next.t('singlePageWidth') + $store.scroll.singlePageWidth_Percent+'%'"
-				></label>
-				<input
-					id="singlePageWidth_Percent"
-					type="range"
-					min="10"
-					max="100"
-					x-model="$store.scroll.singlePageWidth_Percent"
-					step="1"
-					class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
-				/>
-			</div>
-			<!-- 双页漫画宽度（横屏状态+宽度限制使用百分比） -->
-			<!-- 组件来自：https://flowbite.com/docs/forms/range/-->
-			<div  x-show="!$store.scroll.widthUseFixedValue" class="relative w-full">
-				<label
-					for="doublePageWidth_Percent"
-					class="block w-full mb-2 text-sm font-medium"
-					x-text="i18next.t('doublePageWidth') + $store.scroll.doublePageWidth_Percent+'%'"
-				></label>
-				<input
-					id="doublePageWidth_Percent"
-					type="range"
-					min="10"
-					max="100"
-					x-model="$store.scroll.doublePageWidth_Percent"
-					step="1"
-					class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
-				/>
-			</div>
-			<!-- 单页漫画宽度（横屏状态+宽度限制使用固定值） -->
-			<!-- 组件来自：https://flowbite.com/docs/forms/range/-->
-			<div x-show="$store.scroll.widthUseFixedValue" class="relative w-full">
-				<label
-					for="singlePageWidth_PX"
-					class="block w-full mb-2 text-sm font-medium"
-					x-text="i18next.t('singlePageWidth') + $store.scroll.singlePageWidth_PX+' px'"
-				></label>
-				<input
-					id="singlePageWidth_PX"
-					type="range"
-					min="100"
-					max="1600"
-					x-model="$store.scroll.singlePageWidth_PX"
-					step="20"
-					class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
-				/>
-			</div>
-			<!-- 双页漫画宽度（横屏状态+宽度限制使用固定值） -->
-			<!-- 组件来自：https://flowbite.com/docs/forms/range/-->
-			<div x-show="$store.scroll.widthUseFixedValue" class="relative w-full">
-				<label
-					for="doublePageWidth_PX"
-					class="block w-full mb-2 text-sm font-medium"
-					x-text="i18next.t('doublePageWidth') + $store.scroll.doublePageWidth_PX+' px'"
-				></label>
-				<input
-					id="doublePageWidth_PX"
-					type="range"
-					min="100"
-					max="1600"
-					x-model="$store.scroll.doublePageWidth_PX"
-					step="20"
-					class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
-				/>
-			</div>
 		</div>
 	</div>
 }

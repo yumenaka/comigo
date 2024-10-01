@@ -140,7 +140,7 @@ func MainLayout(title string, metaTags, bodyContent templ.Component) templ.Compo
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<body x-data=\"{ theme: $persist(&#39;dark&#39;) }\" x-bind:data-theme=\"theme\" onload=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<body x-data=\"{ theme: $persist(&#39;retro&#39;) }\" x-bind:data-theme=\"theme\" onload=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
