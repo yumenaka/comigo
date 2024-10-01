@@ -13,6 +13,7 @@ import (
 	"github.com/yumenaka/comigo/entity"
 	"github.com/yumenaka/comigo/htmx/state"
 	"github.com/yumenaka/comigo/htmx/templates/components"
+	"strconv"
 	"strings"
 )
 
@@ -175,12 +176,12 @@ func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"mouseMoveArea\" class=\"flex flex-col items-center justify-center flex-1 w-full max-w-full pt-2 bg-base-100 text-base-content\" :class=\"(theme.toString() ===&#39;light&#39;||theme.toString() ===&#39;dark&#39;||theme.toString() ===&#39;retro&#39;||theme.toString() ===&#39;lofi&#39;||theme.toString() ===&#39;nord&#39;) &amp;&amp; &#39;bg-base-300&#39;\"><!-- Alpine.js 动态CSS，只支持内联写法 --><!-- Alpine.js 的 v-if 需要用template包裹起来，原因参照： https://alpinejs.dev/directives/if --><!-- https://htmx.org/docs/#triggers --><!-- https://htmx.org/docs/#swapping --><!-- hx-get 用于获取图片的URL，hx-trigger 用于触发加载，hx-swap 用于替换元素，innerHTML默认值，将内容放在目标元素内 outerHTML用返回的内容替换整个目标元素  hx-target 用于指定目标元素 --><noscript class=\"loading-lazy\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"mouseMoveArea\" class=\"flex flex-col items-center justify-center flex-1 w-full max-w-full pt-2 bg-base-100 text-base-content\" :class=\"(theme.toString() ===&#39;light&#39;||theme.toString() ===&#39;dark&#39;||theme.toString() ===&#39;retro&#39;||theme.toString() ===&#39;lofi&#39;||theme.toString() ===&#39;nord&#39;) &amp;&amp; &#39;bg-base-300&#39;\"><!-- Alpine.js 动态CSS，只支持内联写法 --><!-- Alpine.js 的 v-if 需要用template包裹起来，原因参照： https://alpinejs.dev/directives/if --><!-- https://htmx.org/docs/#triggers --><!-- https://htmx.org/docs/#swapping --><!-- hx-get 用于获取图片的URL，hx-trigger 用于触发加载，hx-swap 用于替换元素，innerHTML默认值，将内容放在目标元素内 outerHTML用返回的内容替换整个目标元素  hx-target 用于指定目标元素 -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		for key, image := range book.Pages.Images {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-col justify-start m-0 max-w-full lg:max-w-[800px] rounded\" :style=\"{ marginBottom: $store.scroll.marginBottomOnScrollMode + &#39;px&#39; }\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div x-data=\"{\n                            orientation: &#39;&#39;,\n                            updateOrientation() {\n                                this.orientation = (window.innerWidth / window.innerHeight &gt;= 1) ? &#39;landscape&#39; : &#39;portrait&#39;;\n                            }\n                        }\" class=\"flex flex-col justify-start w-full max-w-full m-0 rounded item-center\" :style=\"{ marginBottom: $store.scroll.marginBottomOnScrollMode + &#39;px&#39; }\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -192,7 +193,7 @@ func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 				var templ_7745c5c3_Var2 string
 				templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(image.Url)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll.templ`, Line: 159, Col: 29}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll.templ`, Line: 168, Col: 28}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 				if templ_7745c5c3_Err != nil {
@@ -203,40 +204,34 @@ func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			if key <= 2 && !strings.Contains(image.Url, "hidden.") && !strings.Contains(image.Url, ".html") {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<img class=\"w-full m-0\" src=\"")
+			if !strings.Contains(image.Url, "hidden.") && !strings.Contains(image.Url, ".html") {
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<img class=\"w-full\" src=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(image.Url)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll.templ`, Line: 164, Col: 22}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll.templ`, Line: 173, Col: 21}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" x-on:load=\"\n                            if ($event.target.naturalWidth &gt; $event.target.naturalHeight) {\n                                $el.classList.add(&#39;double&#39;);\n                                $el.classList.remove(&#39;single&#39;);\n                            } else { \n                                $el.classList.add(&#39;single&#39;);\n                                $el.classList.remove(&#39;double&#39;);\n                            }\"> ")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			if key > 2 && !strings.Contains(image.Url, "hidden.") && !strings.Contains(image.Url, ".html") {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<img loading=\"lazy\" class=\"w-full m-0\" src=\"")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" x-data=\"{\n                                    isDoublePage: false,\n                                    imageWidth: &#39;&#39;\n                                }\" x-init=\"updateOrientation();\" @load=\"\n                            if ($event.target.naturalWidth &gt; $event.target.naturalHeight) {\n                                // 双页\n                                isDoublePage = true;\n                                $el.classList.add(&#39;double&#39;);\n                                $el.classList.remove(&#39;single&#39;);\n                            } else {\n                                // 单页\n                                isDoublePage = false;\n                                $el.classList.add(&#39;single&#39;);\n                                $el.classList.remove(&#39;double&#39;);\n                            }\" @resize.window=\"updateOrientation()\" :style=\"{ width: orientation === &#39;landscape&#39;?(Alpine.store(&#39;scroll&#39;).widthUseFixedValue? (isDoublePage ? Alpine.store(&#39;scroll&#39;).doublePageWidth_PX +&#39;px&#39;: Alpine.store(&#39;scroll&#39;).singlePageWidth_PX +&#39;px&#39;): (isDoublePage ? Alpine.store(&#39;scroll&#39;).doublePageWidth_Percent + &#39;%&#39;: Alpine.store(&#39;scroll&#39;).singlePageWidth_Percent + &#39;%&#39;)): &#39;100%&#39;, maxWidth: &#39;100%&#39;}\" alt=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var4 string
-				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(image.Url)
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(key))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll.templ`, Line: 179, Col: 22}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll.templ`, Line: 193, Col: 29}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" x-on:load=\"\n                            if ($event.target.naturalWidth &gt; $event.target.naturalHeight) {\n                                $el.classList.add(&#39;double&#39;);\n                                $el.classList.remove(&#39;single&#39;);\n                            } else { \n                                $el.classList.add(&#39;single&#39;);\n                                $el.classList.remove(&#39;double&#39;);\n                            }\">")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -248,7 +243,7 @@ func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d / %d", key+1, book.BookInfo.PageCount))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll.templ`, Line: 191, Col: 136}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll.templ`, Line: 197, Col: 135}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -259,7 +254,7 @@ func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</noscript></div><button id=\"BackTopButton\" style=\"display: none\" class=\"fixed flex items-center justify-center w-10 h-10 text-white bg-blue-500 rounded-full shadow-lg bottom-4 right-4\"><svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 512 512\"><path d=\"M256 48C141.13 48 48 141.13 48 256s93.13 208 208 208s208-93.13 208-208S370.87 48 256 48zm96 270.63l-96-96l-96 96L137.37 296L256 177.37L374.63 296z\" fill=\"currentColor\"></path></svg></button>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><button id=\"BackTopButton\" style=\"display: none\" class=\"fixed flex items-center justify-center w-10 h-10 text-white bg-blue-500 rounded-full shadow-lg bottom-4 right-4\"><svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 512 512\"><path d=\"M256 48C141.13 48 48 141.13 48 256s93.13 208 208 208s208-93.13 208-208S370.87 48 256 48zm96 270.63l-96-96l-96 96L137.37 296L256 177.37L374.63 296z\" fill=\"currentColor\"></path></svg></button>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -275,6 +270,7 @@ func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 	})
 }
 
+// 卷轴阅读，侧栏设置slot
 func ScrollDrawerSlot() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -296,7 +292,7 @@ func ScrollDrawerSlot() templ.Component {
 			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!-- 滑动选择组件: 下拉模式下，漫画页面的底部间距（px）--><!-- 组件来自：https://flowbite.com/docs/forms/range/--><div class=\"outline outline-offset-8 outline-dotted hover:outline outline-2 my-4  relative w-full\"><label for=\"marginBottom\" class=\"block w-full mb-2 text-sm font-medium\" x-text=\"i18next.t(&#39;marginBottomOnScrollMode&#39;) + $store.scroll.marginBottomOnScrollMode+&#39;px&#39;\"></label> <input id=\"marginBottom\" type=\"range\" min=\"0\" max=\"100\" x-model=\"$store.scroll.marginBottomOnScrollMode\" step=\"1\" class=\"w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700\"></div><!-- toggle开关：显示页数 --><label class=\"outline outline-offset-8 outline-dotted hover:outline outline-2 my-4  inline-flex items-center w-full my-2 cursor-pointer\"><input type=\"checkbox\" x-model=\"$store.scroll.showPageNum\" class=\"sr-only peer\" checked><div class=\"relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[&#39;&#39;] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600\"></div><span class=\"text-sm font-medium ms-3\" x-text=\"i18next.t(&#39;showPageNum&#39;)\"></span></label><!-- toggle开关组件：横屏状态下,宽度单位是固定值还是百分比 --><!-- 组件来自：https://flowbite.com/docs/forms/toggle/ --><label class=\"outline outline-offset-8 outline-dotted hover:outline outline-2 my-4 inline-flex items-center w-full my-2 cursor-pointer\"><input type=\"checkbox\" x-model:value=\"$store.scroll.widthUseFixedValue\" class=\"sr-only peer\" checked><div class=\"relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[&#39;&#39;] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600\"></div><span class=\"text-sm font-medium ms-3\" x-text=\"$store.scroll.widthUseFixedValue?i18next.t(&#39;widthUseFixedValue&#39;):i18next.t(&#39;widthUsePercent&#39;)\"></span></label><!-- 单页漫画宽度（横屏状态+宽度限制使用百分比） --><!-- 组件来自：https://flowbite.com/docs/forms/range/--><div x-show=\"!$store.scroll.widthUseFixedValue\" class=\"outline outline-offset-8 outline-dotted hover:outline outline-2 my-4 relative w-full \"><label for=\"singlePageWidth_Percent\" class=\"block w-full mb-2 text-sm font-medium\" x-text=\"i18next.t(&#39;singlePageWidth&#39;) + $store.scroll.singlePageWidth_Percent+&#39;%&#39;\"></label> <input id=\"singlePageWidth_Percent\" type=\"range\" min=\"10\" max=\"100\" x-model=\"$store.scroll.singlePageWidth_Percent\" step=\"1\" class=\"w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700\"></div><!-- 双页漫画宽度（横屏状态+宽度限制使用百分比） --><!-- 组件来自：https://flowbite.com/docs/forms/range/--><div x-show=\"!$store.scroll.widthUseFixedValue\" class=\"outline outline-offset-8 outline-dotted hover:outline outline-2 my-4 relative w-full\"><label for=\"doublePageWidth_Percent\" class=\"block w-full mb-2 text-sm font-medium\" x-text=\"i18next.t(&#39;doublePageWidth&#39;) + $store.scroll.doublePageWidth_Percent+&#39;%&#39;\"></label> <input id=\"doublePageWidth_Percent\" type=\"range\" min=\"10\" max=\"100\" x-model=\"$store.scroll.doublePageWidth_Percent\" step=\"1\" class=\"w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700\"></div><!-- 单页漫画宽度（横屏状态+宽度限制使用固定值） --><!-- 组件来自：https://flowbite.com/docs/forms/range/--><div x-show=\"$store.scroll.widthUseFixedValue\" class=\"outline outline-offset-8 outline-dotted hover:outline outline-2 my-4 relative w-full\"><label for=\"singlePageWidth_PX\" class=\"block w-full mb-2 text-sm font-medium\" x-text=\"i18next.t(&#39;singlePageWidth&#39;) + $store.scroll.singlePageWidth_PX+&#39; px&#39;\"></label> <input id=\"singlePageWidth_PX\" type=\"range\" min=\"100\" max=\"1600\" x-model=\"$store.scroll.singlePageWidth_PX\" step=\"20\" class=\"w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700\"></div><!-- 双页漫画宽度（横屏状态+宽度限制使用固定值） --><!-- 组件来自：https://flowbite.com/docs/forms/range/--><div x-show=\"$store.scroll.widthUseFixedValue\" class=\"outline outline-offset-8 outline-dotted hover:outline outline-2 my-4 relative w-full\"><label for=\"doublePageWidth_PX\" class=\"block w-full mb-2 text-sm font-medium\" x-text=\"i18next.t(&#39;doublePageWidth&#39;) + $store.scroll.doublePageWidth_PX+&#39; px&#39;\"></label> <input id=\"doublePageWidth_PX\" type=\"range\" min=\"100\" max=\"1600\" x-model=\"$store.scroll.doublePageWidth_PX\" step=\"20\" class=\"w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700\"></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!-- 滑动选择组件: 下拉模式下，漫画页面的底部间距（px）--><!-- 组件来自：https://flowbite.com/docs/forms/range/--><div class=\"relative w-full my-4 outline outline-offset-8 outline-dotted hover:outline outline-2\"><label for=\"marginBottom\" class=\"block w-full mb-2 text-sm font-medium\" x-text=\"i18next.t(&#39;marginBottomOnScrollMode&#39;) + $store.scroll.marginBottomOnScrollMode+&#39;px&#39;\"></label> <input id=\"marginBottom\" type=\"range\" min=\"0\" max=\"100\" x-model=\"$store.scroll.marginBottomOnScrollMode\" step=\"1\" class=\"w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700\"></div><!-- toggle开关：显示页数 --><label class=\"inline-flex items-center w-full my-2 my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2\"><input type=\"checkbox\" x-model=\"$store.scroll.showPageNum\" class=\"sr-only peer\" checked><div class=\"relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[&#39;&#39;] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600\"></div><span class=\"text-sm font-medium ms-3\" x-text=\"i18next.t(&#39;showPageNum&#39;)\"></span></label><!-- toggle开关组件：横屏状态下,宽度单位是固定值还是百分比 --><!-- 组件来自：https://flowbite.com/docs/forms/toggle/ --><label class=\"inline-flex items-center w-full my-2 my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2\"><input type=\"checkbox\" x-model:value=\"$store.scroll.widthUseFixedValue\" class=\"sr-only peer\" checked><div class=\"relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[&#39;&#39;] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600\"></div><span class=\"text-sm font-medium ms-3\" x-text=\"$store.scroll.widthUseFixedValue?i18next.t(&#39;widthUseFixedValue&#39;):i18next.t(&#39;widthUsePercent&#39;)\"></span></label><!-- 单页漫画宽度（横屏状态+宽度限制使用百分比） --><!-- 组件来自：https://flowbite.com/docs/forms/range/--><div x-show=\"!$store.scroll.widthUseFixedValue\" class=\"relative w-full my-4 outline outline-offset-8 outline-dotted hover:outline outline-2 \"><label for=\"singlePageWidth_Percent\" class=\"block w-full mb-2 text-sm font-medium\" x-text=\"i18next.t(&#39;singlePageWidth&#39;) + $store.scroll.singlePageWidth_Percent+&#39;%&#39;\"></label> <input id=\"singlePageWidth_Percent\" type=\"range\" min=\"10\" max=\"100\" x-model=\"$store.scroll.singlePageWidth_Percent\" step=\"1\" class=\"w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700\"></div><!-- 双页漫画宽度（横屏状态+宽度限制使用百分比） --><!-- 组件来自：https://flowbite.com/docs/forms/range/--><div x-show=\"!$store.scroll.widthUseFixedValue\" class=\"relative w-full my-4 outline outline-offset-8 outline-dotted hover:outline outline-2\"><label for=\"doublePageWidth_Percent\" class=\"block w-full mb-2 text-sm font-medium\" x-text=\"i18next.t(&#39;doublePageWidth&#39;) + $store.scroll.doublePageWidth_Percent+&#39;%&#39;\"></label> <input id=\"doublePageWidth_Percent\" type=\"range\" min=\"10\" max=\"100\" x-model=\"$store.scroll.doublePageWidth_Percent\" step=\"1\" class=\"w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700\"></div><!-- 单页漫画宽度（横屏状态+宽度限制使用固定值） --><!-- 组件来自：https://flowbite.com/docs/forms/range/--><div x-show=\"$store.scroll.widthUseFixedValue\" class=\"relative w-full my-4 outline outline-offset-8 outline-dotted hover:outline outline-2\"><label for=\"singlePageWidth_PX\" class=\"block w-full mb-2 text-sm font-medium\" x-text=\"i18next.t(&#39;singlePageWidth&#39;) + $store.scroll.singlePageWidth_PX+&#39; px&#39;\"></label> <input id=\"singlePageWidth_PX\" type=\"range\" min=\"100\" max=\"1600\" x-model=\"$store.scroll.singlePageWidth_PX\" step=\"20\" class=\"w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700\"></div><!-- 双页漫画宽度（横屏状态+宽度限制使用固定值） --><!-- 组件来自：https://flowbite.com/docs/forms/range/--><div x-show=\"$store.scroll.widthUseFixedValue\" class=\"relative w-full my-4 outline outline-offset-8 outline-dotted hover:outline outline-2\"><label for=\"doublePageWidth_PX\" class=\"block w-full mb-2 text-sm font-medium\" x-text=\"i18next.t(&#39;doublePageWidth&#39;) + $store.scroll.doublePageWidth_PX+&#39; px&#39;\"></label> <input id=\"doublePageWidth_PX\" type=\"range\" min=\"100\" max=\"1600\" x-model=\"$store.scroll.doublePageWidth_PX\" step=\"20\" class=\"w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700\"></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
