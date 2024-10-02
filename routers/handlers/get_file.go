@@ -1,7 +1,10 @@
 package handlers
 
 import (
+	"encoding/base64"
+	"mime"
 	"net/http"
+	"path/filepath"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -35,6 +38,7 @@ func GetFile(c *gin.Context) {
 		return
 	}
 	noCache := c.DefaultQuery("no-cache", "false")
+	htmx := c.DefaultQuery("htmx", "false")
 	//如果启用了本地缓存
 	if config.Config.UseCache && noCache == "false" {
 		//获取所有的参数键值对
@@ -166,5 +170,47 @@ func GetFile(c *gin.Context) {
 	//	// 返回包含 base64 编码数据的 img 标签
 	//	c.String(http.StatusOK, fmt.Sprintf(`<img class="m-2 max-w-full lg:max-w-[800px] rounded shadow-lg" src="%s" alt="Base64 Image"/>`, base64Encoding))
 	//}
+	if htmx == "true" {
+		// 获取图片的 MIME 类型
+		mimeType := mime.TypeByExtension(filepath.Ext(needFile))
+		if mimeType == "" {
+			mimeType = "application/octet-stream"
+		}
+
+		// 对图片进行 Base64 编码
+		base64Data := base64.StdEncoding.EncodeToString(imgData)
+
+		// 生成 data URI
+		dataURI := "data:" + mimeType + ";base64," + base64Data
+		// 返回包含内嵌图片的 <img> 标签
+		imgTag := `<img src="` + dataURI + `
+						class="w-full"
+						x-data="{
+                                    isDoublePage: false,
+                                    imageWidth: ''
+                                }"
+						x-init="updateOrientation();"
+						@load="
+                            if ($event.target.naturalWidth > $event.target.naturalHeight) {
+                                // 双页
+                                isDoublePage = true;
+                                $el.classList.add('double');
+                                $el.classList.remove('single');
+                            } else {
+                                // 单页
+                                isDoublePage = false;
+                                $el.classList.add('single');
+                                $el.classList.remove('double');
+                            }"
+						@resize.window="updateOrientation()"
+						:style="{ width: orientation === 'landscape'?(Alpine.store('scroll').widthUseFixedValue? (isDoublePage ? Alpine.store('scroll').doublePageWidth_PX +'px': Alpine.store('scroll').singlePageWidth_PX +'px'): (isDoublePage ? Alpine.store('scroll').doublePageWidth_Percent + '%': Alpine.store('scroll').singlePageWidth_Percent + '%')): '100%', maxWidth: '100%'}"
+						alt={ strconv.Itoa(key) }
+					/>
+`
+
+		c.Header("Content-Type", "text/html")
+		c.String(http.StatusOK, imgTag)
+		return
+	}
 	c.Data(http.StatusOK, contentType, imgData)
 }
