@@ -20,7 +20,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/jxskiss/base62 v1.1.0
-	github.com/klauspost/compress v1.17.9
+	github.com/klauspost/compress v1.17.10
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/mandykoh/autocrop v0.4.7
 	github.com/mitchellh/go-homedir v1.1.0
@@ -33,8 +33,8 @@ require (
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
-	github.com/tidwall/gjson v1.17.3
-	github.com/xxjwxc/gowp v0.0.0-20240913094734-c22af3f9ffce
+	github.com/tidwall/gjson v1.18.0
+	github.com/xxjwxc/gowp v0.0.0-20240929033016-5be68d222389
 	github.com/yumenaka/archiver/v4 v4.0.5
 	golang.org/x/net v0.29.0
 	golang.org/x/text v0.18.0
@@ -53,7 +53,7 @@ require (
 )
 
 require (
-	ariga.io/atlas v0.27.0 // indirect
+	ariga.io/atlas v0.28.0 // indirect
 	github.com/STARRY-S/zip v0.1.0 // indirect
 	github.com/VividCortex/ewma v1.2.0 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
@@ -62,10 +62,11 @@ require (
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
+	github.com/bmatcuk/doublestar v1.3.4 // indirect
 	github.com/bodgit/plumbing v1.3.0 // indirect
 	github.com/bodgit/sevenzip v1.5.2 // indirect
 	github.com/bodgit/windows v1.0.1 // indirect
-	github.com/bytedance/sonic v1.12.2 // indirect
+	github.com/bytedance/sonic v1.12.3 // indirect
 	github.com/bytedance/sonic/loader v0.2.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
 	github.com/chenzhuoyu/iasm v0.9.1 // indirect
