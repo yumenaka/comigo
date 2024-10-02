@@ -489,8 +489,8 @@ github.com/xxjwxc/public v0.0.0-20240120091159-a1da7f89355e/go.mod h1:wV2wEiovX9
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 github.com/yumenaka/archiver/v4 v4.0.5 h1:uUsQlUk0fkrP+RIS3DyCekPui8HGPskPMtPPTuVL3mk=
 github.com/yumenaka/archiver/v4 v4.0.5/go.mod h1:z07lGvlXagy2bTXnDrHxpcYd14R7p4kPwYTT/iHogn4=
-github.com/yumenaka/comigo v0.9.12-0.20241002232941-c07b8734549a h1:pnyl/mFOigPh0axMuBgllxZ3n4jeynqH+n0eQK/mbxw=
-github.com/yumenaka/comigo v0.9.12-0.20241002232941-c07b8734549a/go.mod h1:kP6E5aWftnj0Loq3+XhUt85k8y3KsacNVyhoXCO2qCg=
+github.com/yumenaka/comigo v0.9.12-0.20241002234112-6c9ad7a143e4 h1:k4qD7OFezBMczhU5ugnuv8mLWe9Sxfz+laeibk1yLOI=
+github.com/yumenaka/comigo v0.9.12-0.20241002234112-6c9ad7a143e4/go.mod h1:kP6E5aWftnj0Loq3+XhUt85k8y3KsacNVyhoXCO2qCg=
 github.com/yusufpapurcu/wmi v1.2.4 h1:zFUKzehAFReQwLys1b/iSMl+JQGSCSjtVqQn9bBrPo0=
 github.com/yusufpapurcu/wmi v1.2.4/go.mod h1:SBZ9tNy3G9/m5Oi98Zks0QjeHVDvuK0qfxQmPyzfmi0=
 github.com/zclconf/go-cty v1.15.0 h1:tTCRWxsexYUmtt/wVxgDClUe+uQusuI443uL6e+5sXQ=
