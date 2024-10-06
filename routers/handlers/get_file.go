@@ -33,17 +33,17 @@ import (
 func GetFile(c *gin.Context) {
 	id := c.DefaultQuery("id", "")
 	needFile := c.DefaultQuery("filename", "")
-	//没有指定这两项，直接返回
+	// 没有指定这两项，直接返回
 	if id == "" && needFile == "" {
 		return
 	}
 	noCache := c.DefaultQuery("no-cache", "false")
 	htmx := c.DefaultQuery("htmx", "false")
-	//如果启用了本地缓存
+	// 如果启用了本地缓存
 	if config.Config.UseCache && noCache == "false" {
-		//获取所有的参数键值对
+		// 获取所有的参数键值对
 		query := c.Request.URL.Query()
-		//如果有缓存，直接读取本地获取缓存文件并返回
+		// 如果有缓存，直接读取本地获取缓存文件并返回
 		cacheData, ct, errGet := fileutil.GetFileFromCache(
 			id,
 			needFile,
@@ -63,27 +63,27 @@ func GetFile(c *gin.Context) {
 		logger.Infof("%s", err)
 	}
 
-	//读取图片Resize用的resizeWidth
+	// 读取图片Resize用的resizeWidth
 	resizeWidth, errX := strconv.Atoi(c.DefaultQuery("resize_width", "0"))
 	if errX != nil {
 		resizeWidth = 0
 	}
-	//读取图片Resize用的resizeHeight
+	// 读取图片Resize用的resizeHeight
 	resizeHeight, errY := strconv.Atoi(c.DefaultQuery("resize_height", "0"))
 	if errY != nil {
 		resizeHeight = 0
 	}
-	//自动切白边参数
-	autoCrop, errCrop := strconv.Atoi(c.DefaultQuery("auto_crop", "-1"))
+	// 自动切白边参数
+	autoCrop, errCrop := strconv.Atoi(c.DefaultQuery("auto_crop", "0"))
 	if errCrop != nil {
-		autoCrop = -1
+		autoCrop = 0
 	}
-	//图片Resize, 按照 maxWidth 限制大小
+	// 图片Resize, 按照 maxWidth 限制大小
 	resizeMaxWidth, errMX := strconv.Atoi(c.DefaultQuery("resize_max_width", "0"))
 	if errMX != nil {
 		resizeMaxWidth = 0
 	}
-	//图片Resize, 按照 MaxHeight 限制大小
+	// 图片Resize, 按照 MaxHeight 限制大小
 	resizeMaxHeight, errMY := strconv.Atoi(c.DefaultQuery("resize_max_height", "0"))
 	if errMY != nil {
 		resizeMaxHeight = 0
@@ -122,11 +122,11 @@ func GetFile(c *gin.Context) {
 		c.String(http.StatusBadRequest, "GetPictureData error:%s", err)
 	}
 
-	//如果启用了本地缓存
+	// 如果启用了本地缓存
 	if config.Config.UseCache && noCache == "false" && bookByID.Type != entity.TypeDir {
-		//获取所有的参数键值对
+		// 获取所有的参数键值对
 		query := c.Request.URL.Query()
-		//缓存文件到本地，避免重复解压
+		// 缓存文件到本地，避免重复解压
 		errSave := fileutil.SaveFileToCache(
 			id,
 			needFile,
@@ -141,35 +141,7 @@ func GetFile(c *gin.Context) {
 			logger.Info(errSave)
 		}
 	}
-	//// 是否需要base64编码
-	//// https://freshman.tech/snippets/go/image-to-base64/
-	//base64Encode := c.DefaultQuery("base64Encode", "false") == "true"
-	//if base64Encode {
-	//	var base64Encoding string
-	//	// Determine the content type of the image file
-	//	mimeType := http.DetectContentType(imgData)
-	//	// Prepend the appropriate URI scheme header depending
-	//	// on the MIME type
-	//	switch mimeType {
-	//	case "image/jpeg":
-	//		base64Encoding += "data:image/jpeg;base64Encode,"
-	//	case "image/png":
-	//		base64Encoding += "data:image/png;base64Encode,"
-	//	case "image/gif":
-	//		base64Encoding += "data:image/gif;base64Encode,"
-	//	case "image/webp":
-	//		base64Encoding += "data:image/webp;base64Encode,"
-	//	case "image/svg+xml":
-	//		base64Encoding += "data:image/svg+xml;base64Encode,"
-	//	case "image/bmp":
-	//		base64Encoding += "data:image/bmp;base64Encode,"
-	//	case "image/avif":
-	//		base64Encoding += "data:image/avif;base64Encode,"
-	//	}
-	//	base64Encoding += base64.StdEncoding.EncodeToString(imgData)
-	//	// 返回包含 base64 编码数据的 img 标签
-	//	c.String(http.StatusOK, fmt.Sprintf(`<img class="m-2 max-w-full lg:max-w-[800px] rounded shadow-lg" src="%s" alt="Base64 Image"/>`, base64Encoding))
-	//}
+	// 如果启用了 Base64 编码
 	if htmx == "true" {
 		// 获取图片的 MIME 类型
 		mimeType := mime.TypeByExtension(filepath.Ext(needFile))
