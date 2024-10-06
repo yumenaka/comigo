@@ -27,20 +27,12 @@ func ScrollHandler(c *gin.Context) {
 		logger.Infof("TopOfShelfInfo: %v", err)
 	}
 
-	// 网页meta标签。
-	metaTags := components.MetaTags(
-		"Comigo  Comic Manga Reader 在线漫画 阅读器",         // define meta keywords
-		"Simple Manga Reader in Linux，Windows，Mac OS", // define meta description
-	)
-
 	// 定义模板主体内容。
 	scrollPage := ScrollPage(&state.Global, book)
-
 	// 为首页定义模板布局。
 	indexTemplate := components.MainLayout(
-		getPageTitle(bookID), // define title text
-		metaTags,             // define meta tags
-		scrollPage,           // define body content
+		c,
+		scrollPage, // define body content
 	)
 
 	// 渲染索引页模板。

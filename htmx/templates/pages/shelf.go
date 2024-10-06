@@ -35,16 +35,9 @@ func ShelfHandler(c *gin.Context) {
 		}
 	}
 
-	// 网页meta标签。
-	metaTags := components.MetaTags(
-		"Comigo  Comic Manga Reader 在线漫画 阅读器",         // define meta keywords
-		"Simple Manga Reader in Linux，Windows，Mac OS", // define meta description
-	)
-
 	// 为首页定义模板布局。
 	indexTemplate := components.MainLayout(
-		getPageTitle(bookID),
-		metaTags,                 // define meta tags
+		c,
 		ShelfPage(&state.Global), // define body content
 	)
 

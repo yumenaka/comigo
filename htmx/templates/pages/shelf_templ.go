@@ -40,7 +40,7 @@ func ShelfPage(s *state.GlobalState) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = components.Header(components.HeaderProps{
-			Title:           getPageTitle(s.RequestBookID),
+			Title:           components.GetPageTitle(s.RequestBookID),
 			ShowReturnIcon:  true,
 			ReturnUrl:       getReturnUrl(s.RequestBookID),
 			SetDownLoadLink: false,

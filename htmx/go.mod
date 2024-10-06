@@ -12,7 +12,8 @@ require (
 // 使用最新的 master 提交 然后，在项目根目录下运行以下命令来下载最新的依赖 go mod tidy && go mod download
 // replace github.com/yumenaka/comigo => github.com/yumenaka/comigo master
 //replace github.com/yumenaka/comigo => github.com/yumenaka/comigo <commit-hash>
-replace github.com/yumenaka/comigo => github.com/yumenaka/comigo v0.9.12-0.20241002234112-6c9ad7a143e4
+// replace github.com/yumenaka/comigo => github.com/yumenaka/comigo v0.9.12-0.20241002234112-6c9ad7a143e4
+replace github.com/yumenaka/comigo v0.9.11 => ../
 
 require (
 	ariga.io/atlas v0.28.0 // indirect

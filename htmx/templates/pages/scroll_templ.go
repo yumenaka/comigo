@@ -323,9 +323,9 @@ func ScrollPage(s *state.GlobalState, book *entity.Book) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = components.Header(components.HeaderProps{
-			Title:           getPageTitle(s.RequestBookID),
+			Title:           components.GetPageTitle(book.BookInfo.BookID),
 			ShowReturnIcon:  true,
-			ReturnUrl:       getReturnUrl(s.RequestBookID),
+			ReturnUrl:       getReturnUrl(book.BookInfo.BookID),
 			SetDownLoadLink: false,
 			InShelf:         false,
 			DownLoadLink:    "",

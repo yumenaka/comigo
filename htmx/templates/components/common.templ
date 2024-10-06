@@ -1,12 +1,11 @@
 package components
 
+import (
+	"github.com/gin-gonic/gin"
+)
+
 // 存放一些公用的全局变量
 
-// MetaTags defines meta tags.
-templ MetaTags(keywords, description string) {
-	<meta name="keywords" content={ keywords }/>
-	<meta name="description" content={ description }/>
-}
 
 // BodyScripts defines JavaScript code.
 
@@ -27,16 +26,22 @@ script BodyScripts() {
     }
 }
 
-templ MainLayout(title string, metaTags, bodyContent templ.Component) {
+func getStaticMode(c *gin.Context) bool{
+    return c.DefaultQuery("StaticMode", "false") == "true"
+}
+
+templ MainLayout(c *gin.Context,bodyContent templ.Component) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
-			<title>{ title }</title>
-			@metaTags
-			<link rel="manifest" href="/static/manifest.webmanifest"/>
+			<title>{ GetPageTitle(c.Param("id")) }</title>
+			<meta name="keywords" content="Comigo  Comic Manga Reader 在线漫画 阅读器"/>
+            <meta name="description" content="Simple Manga Reader in Linux，Windows，Mac OS"/>
+
+			<!--TODO:PWA模式  <link rel="manifest" href="/static/manifest.webmanifest"/>  -->
 			<link rel="apple-touch-icon" href="/static/apple-touch-icon.png"/>
 			<link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon"/>
 			<link rel="icon" href="/static/favicon.png" sizes="any"/>
