@@ -10,6 +10,18 @@
 
 # Windows：MSYS2 or mingw32 + find.exe make.exe zip.exe upx.exe ！！
 
+#我应该下载哪个版本？
+#
+#MacOS intel芯片（2020年以前的Mac）: MacOS_x86_64.tar.gz
+#MacOS apple （2020年以后的新Mac，M系列芯片）: MacOS_arm64.tar.gz
+#Linux ARM 32位（树莓派1、树莓派Zero等老设备）: Linux_armv6.tar.gz
+#Linux ARM 32位（树莓派2~4，其他arm设备）: Linux_armv7.tar.gz
+#Linux ARM 64位（树莓派4或树莓派5，安装64位的ARM系统的时候）: Linux_armv8.tar.gz
+#
+#Windows 64位（大多数Windows用户）: Windows_x86_64.zip
+#Windows 32位（比较老的Windows）: Windows_i386.zip
+#Windows ARM版（Windows 骁龙Elite等）：Windows_arm64.zip
+
 NAME=comi
 SKETCH_NAME=sketch_66seconds
 OS := $(shell uname)
@@ -79,14 +91,14 @@ Windows_arm64:
 # golang支持的交叉编译架构的列表，参见 go tool dist list
 # 看ARM处理器是否支持VFP功能:grep -i vfp /proc/cpuinfo
 
-#Linux-armv5,GOARM=5：使用软件浮点；当 CPU 没有 VFP 协处理器时
-Linux-armv5:
-	GOARCH=arm GOOS=linux GOARM=5 $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME) 
-#ifdef UPX
-#	upx -9 $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME)
-#endif
-	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME)
-	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
+##Linux-armv5,GOARM=5：使用软件浮点；当 CPU 没有 VFP 协处理器时
+#Linux-armv5:
+#	GOARCH=arm GOOS=linux GOARM=5 $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME)
+##ifdef UPX
+##	upx -9 $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME)
+##endif
+#	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME)
+#	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
 
 #Linux-armv6 RaspberryPi1,2,zero,GOARM=6：仅使用 VFPv1；交叉编译时默认；通常是 ARM11 或更好的内核（也支持 VFPv2 或更好的内核）
 Linux-armv6:
