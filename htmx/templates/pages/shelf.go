@@ -18,9 +18,9 @@ func ShelfHandler(c *gin.Context) {
 	bookID := c.Param("id")
 	// 设置当前请求的书架ID。
 	state.Global.RequestBookID = bookID
-	var err error
 	if bookID == "" {
 		// 获取顶层书架信息。
+		var err error
 		state.Global.TopBooks, err = entity.TopOfShelfInfo(sortBy)
 		if err != nil {
 			logger.Infof("TopOfShelfInfo: %v", err)
@@ -29,10 +29,21 @@ func ShelfHandler(c *gin.Context) {
 	}
 	if bookID != "" {
 		// 通过书架ID获取书架信息。
+		var err error
 		state.Global.TopBooks, err = entity.GetBookInfoListByID(bookID, sortBy)
 		if err != nil {
 			logger.Infof("GetBookShelf: %v", err)
 		}
+	}
+
+	// 书籍重排的方式，默认time
+	sortBookBy, err := c.Cookie("SortBookBy")
+	if err != nil {
+		sortBookBy = "default"
+		//Secure 表示：不讓 Cookie 在 HTTP 之外的環境下被存取
+		//HttpOnly 表示：拒絕與 JavaScript 共享 Cookie！
+		//SameSite 表示：所有和 Cookie 來源不同的請求都不會帶上 Cookie
+		c.SetCookie("SortBookBy", sortBookBy, 3600000, "/", c.Request.Host, false, true)
 	}
 
 	// 为首页定义模板布局。
