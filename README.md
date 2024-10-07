@@ -19,8 +19,20 @@
 4. windows支持拖拽压缩包到comi.exe（或快捷方式）上打开。
 
 ### 安装：
-手动下载  
-在 [Releases页面](https://github.com/yumenaka/comigo/releases ) ，下载最新版文件，放到系统PATH。
+**手动下载**  
+
+在 [Releases页面](https://github.com/yumenaka/comigo/releases ) ，下载最新版文件，放到系统PATH。  
+
+**我应该下载哪个版本？**  
+- Windows 64位（大多数Windows用户）: Windows_x86_64.zip
+- Windows 32位（比较老的Windows）: Windows_i386.zip
+- Windows ARM版（Windows 骁龙Elite等）：Windows_arm64.zip  
+- MacOS intel芯片（2020年以前的Mac）: MacOS_x86_64.tar.gz  
+- MacOS apple （2020年以后的新Mac，M系列芯片）: MacOS_arm64.tar.gz  
+- Linux ARM 32位（树莓派1、树莓派Zero等老设备）: Linux_armv6.tar.gz  
+- Linux ARM 32位（树莓派2~4，其他arm设备）: Linux_armv7.tar.gz  
+- Linux ARM 64位（树莓派4或树莓派5，安装64位的ARM系统的时候）: Linux_armv8.tar.gz  
+  
 Linux MacOS 一键安装脚本  
 ```bash
 # 需要curl与tar，文件将安装到/usr/local/bin/ 
