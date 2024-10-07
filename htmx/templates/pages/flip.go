@@ -26,6 +26,15 @@ func FlipHandler(c *gin.Context) {
 	if err != nil {
 		logger.Infof("TopOfShelfInfo: %v", err)
 	}
+	// 图片重排的方式，默认name
+	sortPageBy, err := c.Cookie("SortPageBy")
+	if err != nil {
+		sortPageBy = "default"
+		//Secure 表示：不讓 Cookie 在 HTTP 之外的環境下被存取
+		//HttpOnly 表示：拒絕與 JavaScript 共享 Cookie！
+		//SameSite 表示：所有和 Cookie 來源不同的請求都不會帶上 Cookie
+		c.SetCookie("SortPageBy", sortPageBy, 3600000, "/", c.Request.Host, false, true)
+	}
 
 	// 定义模板主体内容。
 	FlipPage := FlipPage(&state.Global, book)
