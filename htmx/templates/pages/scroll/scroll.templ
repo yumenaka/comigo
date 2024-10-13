@@ -1,12 +1,13 @@
-package pages
+package scroll
 
 import (
 	"fmt"
+	"strconv"
+    "strings"
+	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comigo/entity"
 	"github.com/yumenaka/comigo/htmx/state"
-	"github.com/yumenaka/comigo/htmx/templates/components"
-	"strconv"
-	"strings"
+	"github.com/yumenaka/comigo/htmx/templates/common"
 )
 
 // js代码,滚动到顶部,显示返回顶部按钮,获取鼠标位置,决定是否打开设置面板等
@@ -54,7 +55,6 @@ function onResize() {
     this.ScrollModeConfig.imageMaxWidth = window.innerWidth
     this.clientWidth = document.documentElement.clientWidth
     this.clientHeight = document.documentElement.clientHeight
-    // var aspectRatio = window.innerWidth / window.innerHeight
     this.aspectRatio = this.clientWidth / this.clientHeight
     // 为了调试的时候方便,阈值是正方形
     if (this.aspectRatio > (19 / 19)) {
@@ -373,18 +373,20 @@ templ ScrollDrawerSlot() {
 }
 
 // ScrollPage 定义 BodyHTML
-templ ScrollPage(s *state.GlobalState, book *entity.Book) {
-	@components.Header(components.HeaderProps{
-		Title:           components.GetPageTitle(book.BookInfo.BookID),
+templ ScrollPage(c *gin.Context, s *state.GlobalState, book *entity.Book) {
+	@common.Header(
+	c,
+	    common.HeaderProps{
+		Title:           common.GetPageTitle(book.BookInfo.BookID),
 		ShowReturnIcon:  true,
-		ReturnUrl:       getReturnUrl(book.BookInfo.BookID),
+		ReturnUrl:       common.GetReturnUrl(book.BookInfo.BookID),
 		SetDownLoadLink: false,
 		InShelf:         false,
 		DownLoadLink:    "",
 		SetTheme:        true,
 	})
 	@ScrollMainArea(s, book)
-	@components.Footer(s.Version)
-	@components.Drawer(s, ScrollDrawerSlot())
-	@components.QRCode(s)
+	@common.Footer(s.Version)
+	@common.Drawer(s, ScrollDrawerSlot())
+	@common.QRCode(s)
 }

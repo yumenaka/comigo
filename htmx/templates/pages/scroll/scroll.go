@@ -1,4 +1,4 @@
-package pages
+package scroll
 
 import (
 	"net/http"
@@ -7,16 +7,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comigo/entity"
 	"github.com/yumenaka/comigo/htmx/state"
-	"github.com/yumenaka/comigo/htmx/templates/components"
+	"github.com/yumenaka/comigo/htmx/templates/common"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
-// FlipHandler 阅读界面（先做卷轴模式）
-func FlipHandler(c *gin.Context) {
+// ScrollHandler 阅读界面（先做卷轴模式）
+func ScrollHandler(c *gin.Context) {
 	bookID := c.Param("id")
-	if bookID != "" {
-		state.Global.RequestBookID = bookID
-	}
 	book, err := entity.GetBookByID(bookID, "default")
 	if err != nil {
 		logger.Infof("GetBookByID: %v", err)
@@ -37,11 +34,11 @@ func FlipHandler(c *gin.Context) {
 	}
 
 	// 定义模板主体内容。
-	FlipPage := FlipPage(&state.Global, book)
+	scrollPage := ScrollPage(c, &state.Global, book)
 	// 为首页定义模板布局。
-	indexTemplate := components.MainLayout(
+	indexTemplate := common.MainLayout(
 		c,
-		FlipPage, // define body content
+		scrollPage, // define body content
 	)
 
 	// 渲染索引页模板。

@@ -1,9 +1,13 @@
-package components
+package common
+
+import (
+	"github.com/gin-gonic/gin"
+)
 
 type HeaderProps struct {
 	Title           string
 	ShowReturnIcon  bool
-	ReturnUrl      string
+	ReturnUrl       string
 	SetDownLoadLink bool
 	InShelf         bool
 	DownLoadLink    string
@@ -58,15 +62,17 @@ type HeaderProps struct {
 // https://github.com/RyanClementsHax/tailwindcss-themer
 
 // 通过一致地使用这些颜色，可以创建一个视觉上和谐、易于导航的用户界面。如果有品牌指南或设计规范，可以依据这些规范进一步调整颜色使用。
-templ Header(prop HeaderProps) {
+templ Header(c *gin.Context, prop HeaderProps) {
 	<div class="flex flex-row justify-between w-full h-12 p-1 border-b bg-base-100 text-base-content border-slate-400">
 		<div class="flex flex-row">
-			<!-- 返回箭头,点击返回上一页 -->
-      <a href={ templ.SafeURL(prop.ReturnUrl)}>
-			<div class="w-8 pt-1 mx-1 my-0">
-				<svg class="static w-8" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M112 160l-64 64l64 64"></path><path d="M64 224h294c58.76 0 106 49.33 106 108v20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></path></svg>
-			</div>
-      </a>
+			if prop.ShowReturnIcon {
+				<!-- 返回箭头,点击返回上一页 -->
+				<a href={ templ.SafeURL(prop.ReturnUrl) }>
+					<div class="w-8 pt-1 mx-1 my-0">
+						<svg class="static w-8" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M112 160l-64 64l64 64"></path><path d="M64 224h294c58.76 0 106 49.33 106 108v20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></path></svg>
+					</div>
+				</a>
+			}
 			<!-- 服务器设置 -->
 			<div onclick="window.location.href='/admin/'" class="w-8 pt-1 mx-1 my-0">
 				<svg
@@ -169,8 +175,7 @@ templ Header(prop HeaderProps) {
 			<!-- 阅读器设定,点击屏幕中央也可以打开  可自定义方向 -->
 			<!-- data-drawer-body-scrolling="true"  允许鼠标穿透，滚动下面的页面，设置此项有个好处，就是打开抽屉时背景不抖动 -->
 			<!-- https://flowbite.com/docs/components/drawer/#body-scrolling -->
-
-			<div  id="OpenSettingButton" data-drawer-target="drawer-right" data-drawer-show="drawer-right" aria-controls="drawer-right" data-drawer-placement="right" data-drawer-body-scrolling="true" class="w-8 pt-1 mx-1 my-0 drawer-button">
+			<div id="OpenSettingButton" data-drawer-target="drawer-right" data-drawer-show="drawer-right" aria-controls="drawer-right" data-drawer-placement="right" data-drawer-body-scrolling="true" class="w-8 pt-1 mx-1 my-0 drawer-button">
 				<svg class="static w-8" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><path d="M262.29 192.31a64 64 0 1 0 57.4 57.4a64.13 64.13 0 0 0-57.4-57.4zM416.39 256a154.34 154.34 0 0 1-1.53 20.79l45.21 35.46a10.81 10.81 0 0 1 2.45 13.75l-42.77 74a10.81 10.81 0 0 1-13.14 4.59l-44.9-18.08a16.11 16.11 0 0 0-15.17 1.75A164.48 164.48 0 0 1 325 400.8a15.94 15.94 0 0 0-8.82 12.14l-6.73 47.89a11.08 11.08 0 0 1-10.68 9.17h-85.54a11.11 11.11 0 0 1-10.69-8.87l-6.72-47.82a16.07 16.07 0 0 0-9-12.22a155.3 155.3 0 0 1-21.46-12.57a16 16 0 0 0-15.11-1.71l-44.89 18.07a10.81 10.81 0 0 1-13.14-4.58l-42.77-74a10.8 10.8 0 0 1 2.45-13.75l38.21-30a16.05 16.05 0 0 0 6-14.08c-.36-4.17-.58-8.33-.58-12.5s.21-8.27.58-12.35a16 16 0 0 0-6.07-13.94l-38.19-30A10.81 10.81 0 0 1 49.48 186l42.77-74a10.81 10.81 0 0 1 13.14-4.59l44.9 18.08a16.11 16.11 0 0 0 15.17-1.75A164.48 164.48 0 0 1 187 111.2a15.94 15.94 0 0 0 8.82-12.14l6.73-47.89A11.08 11.08 0 0 1 213.23 42h85.54a11.11 11.11 0 0 1 10.69 8.87l6.72 47.82a16.07 16.07 0 0 0 9 12.22a155.3 155.3 0 0 1 21.46 12.57a16 16 0 0 0 15.11 1.71l44.89-18.07a10.81 10.81 0 0 1 13.14 4.58l42.77 74a10.8 10.8 0 0 1-2.45 13.75l-38.21 30a16.05 16.05 0 0 0-6.05 14.08c.33 4.14.55 8.3.55 12.47z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></path></svg>
 			</div>
 		</div>

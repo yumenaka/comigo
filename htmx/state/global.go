@@ -1,16 +1,16 @@
 package state
 
 import (
+	"strings"
+
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/entity"
 	"github.com/yumenaka/comigo/util"
-	"strings"
 )
 
 type GlobalState struct {
 	Version         string
 	SingleUserMode  bool
-	RequestBookID   string
 	OnlineUserCount int
 	TopBooks        *entity.BookInfoList
 	ServerStatus    *util.ServerStatus
@@ -29,7 +29,6 @@ var Global GlobalState
 func init() {
 	Global.Version = config.Version
 	Global.SingleUserMode = false
-	Global.RequestBookID = ""
 	Global.OnlineUserCount = 0
 	Global.TopBooks = nil
 	Global.ServerStatus = util.GetServerInfo(config.Config.Host, config.Version, config.Config.Port, config.Config.EnableUpload, 0)
