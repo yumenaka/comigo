@@ -1131,6 +1131,10 @@ input:checked + .toggle-bg {
   top: 0;
 }
 
+.top-1 {
+  top: .25rem;
+}
+
 .top-2\.5 {
   top: .625rem;
 }
@@ -1325,6 +1329,10 @@ input:checked + .toggle-bg {
   height: 16rem;
 }
 
+.h-7 {
+  height: 1.75rem;
+}
+
 .h-8 {
   height: 2rem;
 }
@@ -1391,6 +1399,10 @@ input:checked + .toggle-bg {
 
 .w-64 {
   width: 16rem;
+}
+
+.w-7 {
+  width: 1.75rem;
 }
 
 .w-8 {
@@ -1913,9 +1925,18 @@ input:checked + .toggle-bg {
   line-height: 1.25rem;
 }
 
+.text-xl {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
+
 .text-xs {
   font-size: .75rem;
   line-height: 1rem;
+}
+
+.font-black {
+  font-weight: 900;
 }
 
 .font-bold {

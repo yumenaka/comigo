@@ -7,7 +7,8 @@
     <!-- 不透明度：opacity-70 https://www.tailwindcss.cn/docs/opacity -->
     <!-- Vue组建过渡：https://v3.cn.vuejs.org/guide/transitions-enterleave.html#%E5%8D%95%E5%85%83%E7%B4%A0-%E7%BB%84%E4%BB%B6%E7%9A%84%E8%BF%87%E6%B8%A1= -->
     <transition name="header-bottom">
-      <Header v-if="FlipModeConfig.showHeaderFlag_FlipMode" in-shelf="false" :readMode="'flip'" class="w-full mx-auto opacity-80"
+      <Header v-if="FlipModeConfig.showHeaderFlag_FlipMode" in-shelf="false" :readMode="'flip'"
+        class="w-full mx-auto opacity-80"
         v-bind:class="{ 'fixed': hideToolbar, absolute: hideToolbar, 'top-0': hideToolbar }"
         v-bind:style="{ background: model.interfaceColor }" :setDownLoadLink="needDownloadLink()"
         :headerTitle="book.title" :bookID="book.id" :depth="book.depth" :showReturnIcon="true" :showSettingsIcon="true"
@@ -23,21 +24,21 @@
         <div class="manga_area_img_div">
           <!-- 非自动拼合模式最简单,直接显示一张图 -->
           <img class="w-auto h-auto" v-bind:src="imageParametersString(book.pages.images[nowPageNum - 1].url)
-        " v-bind:alt="nowPageNum.toString()" />
+            " v-bind:alt="nowPageNum.toString()" />
 
           <!-- 简单拼合双页,不管单双页什么的 -->
           <img v-if="!FlipModeConfig.autoDoublePageModeFlag &&
-          FlipModeConfig.doublePageModeFlag &&
-          nowPageNum < book.page_count
-        " v-bind:src="imageParametersString(book.pages.images[nowPageNum].url)
-        " v-bind:alt="(nowPageNum + 1).toString()" />
+            FlipModeConfig.doublePageModeFlag &&
+            nowPageNum < book.page_count
+          " v-bind:src="imageParametersString(book.pages.images[nowPageNum].url)
+            " v-bind:alt="(nowPageNum + 1).toString()" />
 
           <!-- 自动拼合模式当前页,如果开启自动拼合,右边可能显示拼合页 -->
           <img v-if="FlipModeConfig.autoDoublePageModeFlag &&
-          nowPageNum < book.page_count &&
-        nowAndNextPageIsSingle()
-        " v-bind:src="imageParametersString(book.pages.images[nowPageNum].url)
-        " v-bind:alt="(nowPageNum + 1).toString()" />
+            nowPageNum < book.page_count &&
+            nowAndNextPageIsSingle()
+          " v-bind:src="imageParametersString(book.pages.images[nowPageNum].url)
+            " v-bind:alt="(nowPageNum + 1).toString()" />
         </div>
       </div>
     </div>
@@ -46,7 +47,8 @@
     <!-- 文字描边效果CSS参考了：https://www.zhangxinxu.com/wordpress/2017/06/webkit-text-stroke-css-text-shadow/ -->
     <div class="fixed bottom-0 w-full h-auto font-sans text-black "
       v-bind:class="{ 'text-2xl': FlipModeConfig.sketchModeFlag, 'text-lg': (!FlipModeConfig.sketchModeFlag) }"
-      style="text-shadow: 0 1px yellow, 1px 0 yellow, -1px 0 yellow, 0 -1px yellow;" v-if="FlipModeConfig.showPageHintFlag_FlipMode">
+      style="text-shadow: 0 1px yellow, 1px 0 yellow, -1px 0 yellow, 0 -1px yellow;"
+      v-if="FlipModeConfig.showPageHintFlag_FlipMode">
       {{ pageNumOrSketchHint }}
     </div>
 
@@ -67,7 +69,8 @@
         <div class="flex flex-row items-end justify-center w-full h-10 mx-auto bg-yellow-400 ">
           <!-- 底部滑动条,日漫模式，reverse翻转计数方向 -->
           <!-- 背景颜色：bg-blue-300  https://www.tailwindcss.cn/docs/background-color  -->
-          <div class="flex flex-row items-center justify-center w-5/6 h-full px-4 bg-blue-300 " v-if="!FlipModeConfig.rightToLeftFlag">
+          <div class="flex flex-row items-center justify-center w-5/6 h-full px-4 bg-blue-300 "
+            v-if="!FlipModeConfig.rightToLeftFlag">
             <span class="right">{{ book.page_count }}</span>
             <n-slider class="w-10/11" reverse v-model:value="nowPageNum" :max="book.page_count" :min="1" :step="1"
               :format-tooltip="(value: any) => `${value}`" @update:value="saveLocalBookMark" />
@@ -77,7 +80,8 @@
           <!-- 底部滑动条，美漫模式 -->
           <!-- h-full: 将一个元素的高度设置为其父元素的 100%，只要父元素有一个定义的高度。 https://www.tailwindcss.cn/docs/height -->
           <!-- 使用 items-center 沿着容器的交叉轴中心对齐项目：https://www.tailwindcss.cn/docs/align-items#center=  -->
-          <div class="flex flex-row items-center justify-center w-5/6 h-full px-4 bg-blue-300 " v-if="FlipModeConfig.rightToLeftFlag">
+          <div class="flex flex-row items-center justify-center w-5/6 h-full px-4 bg-blue-300 "
+            v-if="FlipModeConfig.rightToLeftFlag">
             <span class="right">{{ nowPageNum }}</span>
             <n-slider class="bg-yellow-300" v-model:value="nowPageNum" :max="book.page_count" :min="1" :step="1"
               :format-tooltip="(value: any) => `${value}`" @update:value="saveLocalBookMark" />
@@ -110,7 +114,8 @@
       </n-switch>
 
       <!-- 显示当前页数 -->
-      <n-switch size="large" v-model:value="FlipModeConfig.showPageHintFlag_FlipMode" @update:value="setShowPageNumChange">
+      <n-switch size="large" v-model:value="FlipModeConfig.showPageHintFlag_FlipMode"
+        @update:value="setShowPageNumChange">
         <template #checked>{{ $t("showPageNum") }}</template>
         <template #unchecked>{{ $t("showPageNum") }}</template>
       </n-switch>
@@ -147,7 +152,8 @@
       </n-input-number>
 
       <!-- 翻页模式,默认右开本（日漫）-->
-      <n-switch size="large" v-model:value="FlipModeConfig.rightToLeftFlag" :rail-style="railStyle" @update:value="setFlipScreenFlag">
+      <n-switch size="large" v-model:value="FlipModeConfig.rightToLeftFlag" :rail-style="railStyle"
+        @update:value="setFlipScreenFlag">
         <template #checked>{{ $t("leftScreenToNext") }}</template>
         <template #unchecked>{{ $t("rightScreenToNext") }}</template>
       </n-switch>
@@ -162,14 +168,15 @@
       <n-divider v-if="FlipModeConfig.readerMode === 'sketch'" />
       <!-- 自动翻页秒数 -->
       <!-- 数字输入% -->
-      <n-input-number v-if="FlipModeConfig.readerMode === 'sketch'" size="small" :show-button="false" v-model:value="sketchFlipSecond"
-        :max="65535" :min="1" :update-value-on-input="false" @update:value="resetSketchSecondCount">
+      <n-input-number v-if="FlipModeConfig.readerMode === 'sketch'" size="small" :show-button="false"
+        v-model:value="sketchFlipSecond" :max="65535" :min="1" :update-value-on-input="false"
+        @update:value="resetSketchSecondCount">
         <template #prefix>{{ $t("pageTurningSeconds") }}</template>
         <template #suffix>{{ $t("second") }}</template>
       </n-input-number>
       <!-- 滑动选择% -->
-      <n-slider v-if="FlipModeConfig.readerMode === 'sketch'" v-model:value="sketchFlipSecond" :step="1" :max="120" :min="1"
-        :marks="marks" :format-tooltip="(value: any) => `${value}s`" @update:value="resetSketchSecondCount" />
+      <n-slider v-if="FlipModeConfig.readerMode === 'sketch'" v-model:value="sketchFlipSecond" :step="1" :max="120"
+        :min="1" :marks="marks" :format-tooltip="(value: any) => `${value}s`" @update:value="resetSketchSecondCount" />
 
       <!-- Debug,开启一些不稳定功能 -->
       <!-- <n-switch size="large" v-model:value="debugModeFlag" @update:value="setDebugModeFlag">
@@ -424,22 +431,22 @@ export default defineComponent({
   created() {
     //初始化阅读器设置
     let configString = localStorage.getItem('FlipModeConfig');
-		if (localStorage.getItem('FlipModeConfig') !== null && typeof configString === "string") {
-				this.FlipModeConfig = JSON.parse(configString)
-				this.model.backgroundColor = this.FlipModeConfig.backgroundColor;
-				this.model.interfaceColor = this.FlipModeConfig.interfaceColor;
-		}
+    if (localStorage.getItem('FlipModeConfig') !== null && typeof configString === "string") {
+      this.FlipModeConfig = JSON.parse(configString)
+      this.model.backgroundColor = this.FlipModeConfig.backgroundColor;
+      this.model.interfaceColor = this.FlipModeConfig.interfaceColor;
+    }
     //UI配色
-		const tempBackgroundColor = localStorage.getItem("BackgroundColor")
-		if (typeof (tempBackgroundColor) === 'string') {
-			this.FlipModeConfig.backgroundColor = tempBackgroundColor;
-		}
-		const tempInterfaceColor = localStorage.getItem("InterfaceColor")
-		if (typeof (tempInterfaceColor) === 'string') {
-			this.FlipModeConfig.interfaceColor = tempInterfaceColor
-		}
-		this.model.backgroundColor = this.FlipModeConfig.backgroundColor;
-		this.model.interfaceColor = this.FlipModeConfig.interfaceColor;
+    const tempBackgroundColor = localStorage.getItem("BackgroundColor")
+    if (typeof (tempBackgroundColor) === 'string') {
+      this.FlipModeConfig.backgroundColor = tempBackgroundColor;
+    }
+    const tempInterfaceColor = localStorage.getItem("InterfaceColor")
+    if (typeof (tempInterfaceColor) === 'string') {
+      this.FlipModeConfig.interfaceColor = tempInterfaceColor
+    }
+    this.model.backgroundColor = this.FlipModeConfig.backgroundColor;
+    this.model.interfaceColor = this.FlipModeConfig.interfaceColor;
 
     // 消息监听，即接收websocket服务端推送的消息. optionsAPI用法
     this.$options.sockets.onmessage = (data: any) => this.handlePacket(data);
