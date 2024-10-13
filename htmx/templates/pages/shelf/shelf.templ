@@ -1,30 +1,29 @@
-package pages
+package shelf
 
 import (
-	"fmt"
-	"github.com/yumenaka/comigo/entity"
+	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comigo/htmx/state"
-	"github.com/yumenaka/comigo/htmx/templates/components"
-	"net/url"
+	"github.com/yumenaka/comigo/htmx/templates/common"
 	"strconv"
 )
 
-
 // ShelfPage 书架页面
-templ ShelfPage(s *state.GlobalState) {
-	@components.Header(components.HeaderProps{
-		Title:           components.GetPageTitle(s.RequestBookID),
-		ShowReturnIcon:  true,
-		ReturnUrl: getReturnUrl(s.RequestBookID),
+templ ShelfPage(c *gin.Context, s *state.GlobalState) {
+	@common.Header(
+	    c,
+	    common.HeaderProps{
+		Title:           common.GetPageTitle(c.Param("id")),
+		ShowReturnIcon:  c.Param("id") != "",
+		ReturnUrl:       common.GetReturnUrl(c.Param("id")),
 		SetDownLoadLink: false,
 		InShelf:         false,
 		DownLoadLink:    "",
 		SetTheme:        true,
 	})
-	@ShelfMainArea(s)
-	@components.Footer(s.Version)
-	@components.Drawer(s, ShelfDrawerSlot())
-	@components.QRCode(s)
+	@ShelfMainArea(c, s)
+	@common.Footer(s.Version)
+	@common.Drawer(s, ShelfDrawerSlot())
+	@common.QRCode(s)
 }
 
 templ ShelfDrawerSlot() {
@@ -54,7 +53,7 @@ templ ShelfDrawerSlot() {
 	</div>
 }
 
-templ ShelfMainArea(s *state.GlobalState) {
+templ ShelfMainArea(c *gin.Context, s *state.GlobalState) {
 	<!-- 有的颜色模板只有base-100 ，没有颜色更深或更的 base-200 base-300，这样写是为了防止没定义颜色 -->
 	<div
 		x-data
@@ -62,49 +61,12 @@ templ ShelfMainArea(s *state.GlobalState) {
 		:class="(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') && 'bg-base-300'"
 	>
 		for _, book := range s.TopBooks.BookInfos {
-			<!-- 用go-templ，创建Alpine的x-data。 -->
-			<!-- 如果把链接的 target 属性设置为 "_blank"，该链接会在新窗口中打开。 -->
-			<a
-				x-data={ fmt.Sprintf("{ BookID: %s }", "\""+book.BookID+"\"") }
-				:href={ getHref(book) }
-				target={ getTarget(book) }
-				class={ backgroundImage(state.GetCloverBackgroundImageUrl(&book)) , "relative w-32 mx-4 my-4 bg-top bg-cover rounded shadow-xl h-44 hover:shadow-2xl ring-1 ring-gray-400 hover:ring hover:ring-blue-500 overflow-hidden" }
-			>
-				<!-- 书籍类型图标 -->
-				<div class="absolute top-0 z-10 right-1  text-lg font-bold text-yellow-400">{string(book.Type)}</div>
-				<!-- 图书封面 -->
-				<div
-					x-show="$store.shelf.showTitle"
-					class="absolute inset-x-0 bottom-0 text-sm font-semibold text-center text-black bg-gray-100 border-blue-800 rounded-b h-1/4 bg-opacity-80"
-				>
-					<span class="absolute inset-x-0 top-0 p-1 align-middle" x-text={ "$store.shelf.simplifyTitle === true?'" + book.ShortTitle() + "':'" + book.Title + "'" }></span>
-				</div>
-			</a>
+			@BookCard(c, s, book)
 		}
 		if s.GetAllBookNum() == 0 {
 			<div class="flex flex-col justify-center min-h-64">No Book , { strconv.Itoa(s.GetAllBookNum()) }</div>
 		}
 	</div>
-}
-
-func getHref(book entity.BookInfo) string {
-	// 如果是书籍组，就跳转到子书架
-	if book.Type == entity.TypeBooksGroup {
-		return "\"/shelf/" + book.BookID + "/\""
-	}
-	// 如果是视频、音频、未知文件，就在新窗口打开
-	if book.Type == entity.TypeVideo || book.Type == entity.TypeAudio || book.Type == entity.TypeUnknownFile {
-		return "\"/api/raw/" + book.BookID + "/" + url.QueryEscape(book.Title) + "\""
-	}
-	// 其他情况，跳转到阅读页面,
-	return "'/'+$store.global.readMode+ '/' + BookID"
-}
-
-func getTarget(book entity.BookInfo) string {
-	if book.Type == entity.TypeVideo || book.Type == entity.TypeAudio || book.Type == entity.TypeUnknownFile {
-		return "_blank"
-	}
-	return "_self"
 }
 
 css backgroundImage(imageUrl string) {

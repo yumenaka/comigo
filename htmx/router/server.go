@@ -2,7 +2,6 @@ package router
 
 import (
 	"errors"
-	"github.com/yumenaka/comigo/htmx/comigo"
 	"io/fs"
 	"log/slog"
 	"net/http"
@@ -11,9 +10,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/htmx/comigo"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
+// noCache 中间件设置 HTTP 响应头，禁用缓存。
 func noCache() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
@@ -26,7 +27,6 @@ func noCache() gin.HandlerFunc {
 
 // RunServer 运行一个新的 HTTP 服务器。
 func RunServer() (err error) {
-
 	gin.SetMode(gin.ReleaseMode)
 	// 创建一个新的Gin服务器。
 	router := gin.Default()

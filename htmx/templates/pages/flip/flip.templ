@@ -1,9 +1,10 @@
-package pages
+package flip
 
 import (
+    "github.com/gin-gonic/gin"
 	"github.com/yumenaka/comigo/entity"
 	"github.com/yumenaka/comigo/htmx/state"
-	"github.com/yumenaka/comigo/htmx/templates/components"
+	"github.com/yumenaka/comigo/htmx/templates/common"
 )
 
 script FlipScripts() {
@@ -186,18 +187,20 @@ templ FlipDrawerSlot() {
 }
 
 // FlipPage 定义 BodyHTML
-templ FlipPage(s *state.GlobalState, book *entity.Book) {
-	@components.Header(components.HeaderProps{
-		Title:           components.GetPageTitle(book.BookInfo.BookID),
+templ FlipPage(c *gin.Context, s *state.GlobalState, book *entity.Book) {
+	@common.Header(
+	c,
+	common.HeaderProps{
+		Title:           common.GetPageTitle(book.BookInfo.BookID),
 		ShowReturnIcon:  true,
-		ReturnUrl: getReturnUrl(book.BookInfo.BookID),
+		ReturnUrl:       common.GetReturnUrl(book.BookInfo.BookID),
 		SetDownLoadLink: false,
 		InShelf:         false,
 		DownLoadLink:    "",
 		SetTheme:        true,
 	})
 	@FlipMainArea(s, book)
-	@components.Footer(s.Version)
-	@components.Drawer(s,FlipDrawerSlot())
-	@components.QRCode(s)
+	@common.Footer(s.Version)
+	@common.Drawer(s,FlipDrawerSlot())
+	@common.QRCode(s)
 }

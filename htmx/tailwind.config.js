@@ -18,6 +18,9 @@ module.exports = {
   ],
   theme: {
     extend: {},
+    boxShadow: {
+      "nprogress": "0 0 10px #29d, 0 0 5px #29d"
+    }
   },
   plugins: [
     require('@tailwindcss/forms'),

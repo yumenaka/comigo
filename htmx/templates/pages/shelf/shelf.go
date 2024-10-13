@@ -1,13 +1,15 @@
-package pages
+package shelf
 
 import (
+	"net/http"
+	"net/url"
+
 	"github.com/angelofallars/htmx-go"
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comigo/entity"
 	"github.com/yumenaka/comigo/htmx/state"
-	"github.com/yumenaka/comigo/htmx/templates/components"
+	"github.com/yumenaka/comigo/htmx/templates/common"
 	"github.com/yumenaka/comigo/util/logger"
-	"net/http"
 )
 
 // ShelfHandler 书架页面的处理程序。
@@ -16,8 +18,6 @@ func ShelfHandler(c *gin.Context) {
 	sortBy := c.DefaultQuery("sort_by", "default")
 	// 获取书架信息。
 	bookID := c.Param("id")
-	// 设置当前请求的书架ID。
-	state.Global.RequestBookID = bookID
 	if bookID == "" {
 		// 获取顶层书架信息。
 		var err error
@@ -47,9 +47,9 @@ func ShelfHandler(c *gin.Context) {
 	}
 
 	// 为首页定义模板布局。
-	indexTemplate := components.MainLayout(
+	indexTemplate := common.MainLayout(
 		c,
-		ShelfPage(&state.Global), // define body content
+		ShelfPage(c, &state.Global), // define body content
 	)
 
 	// 渲染索引页模板。
@@ -58,4 +58,24 @@ func ShelfHandler(c *gin.Context) {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
+}
+
+func getHref(book entity.BookInfo) string {
+	// 如果是书籍组，就跳转到子书架
+	if book.Type == entity.TypeBooksGroup {
+		return "\"/shelf/" + book.BookID + "/\""
+	}
+	// 如果是视频、音频、未知文件，就在新窗口打开
+	if book.Type == entity.TypeVideo || book.Type == entity.TypeAudio || book.Type == entity.TypeUnknownFile {
+		return "\"/api/raw/" + book.BookID + "/" + url.QueryEscape(book.Title) + "\""
+	}
+	// 其他情况，跳转到阅读页面,
+	return "'/'+$store.global.readMode+ '/' + BookID"
+}
+
+func getTarget(book entity.BookInfo) string {
+	if book.Type == entity.TypeVideo || book.Type == entity.TypeAudio || book.Type == entity.TypeUnknownFile {
+		return "_blank"
+	}
+	return "_self"
 }

@@ -1,4 +1,4 @@
-package components
+package common
 
 import "github.com/yumenaka/comigo/htmx/state"
 
@@ -7,7 +7,7 @@ templ Drawer(s *state.GlobalState, slot templ.Component) {
 	<!-- https://flowbite.com/docs/components/drawer/ -->
 	<div
 		id="drawer-right"
-		x-data={ serverHostBindStr(s.ServerStatus.ServerHost) }
+		x-data={ ServerHostBindStr(s.ServerStatus.ServerHost) }
 		class="fixed top-0 right-0 z-40 w-64 h-screen p-4 overflow-y-auto transition-transform translate-x-full bg-base-100 text-base-content"
 		tabindex="-1"
 		aria-labelledby="drawer-right-label"

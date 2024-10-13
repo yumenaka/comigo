@@ -3,7 +3,7 @@
 > ❗️ 下面是开发必须的工具和库，你可以在这里找到它们的文档和更多信息:
 >
 > - `Templ（模板引擎）`: [https://templ.guide](https://templ.guide/)
-> - `Flowbite（组件库）`: [https://flowbite.com](https://flowbite.com/docs/getting-started/quickstart/)
+> - `Flowbite（组件库）`: [https://flowbite.com/docs/components/gallery/](https://flowbite.com/docs/components/gallery/)
 > - `Gin`: [https://gin-gonic.com/zh-cn/docs/examples/](https://gin-gonic.com/zh-cn/docs/examples/)
 > - `htmx`: [https://htmx.org/examples](https://htmx.org/examples/)
 > - `Alpine.js`: [https://alpinejs.dev](https://alpinejs.dev/)

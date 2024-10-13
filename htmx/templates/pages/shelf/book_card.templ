@@ -1,0 +1,29 @@
+package shelf
+
+import (
+	"fmt"
+	"github.com/gin-gonic/gin"
+	"github.com/yumenaka/comigo/entity"
+	"github.com/yumenaka/comigo/htmx/state"
+)
+
+templ BookCard(c *gin.Context, s *state.GlobalState, book entity.BookInfo) {
+	<!-- 用go-templ，创建Alpine的x-data。 -->
+	<!-- 如果把链接的 target 属性设置为 "_blank"，该链接会在新窗口中打开。 -->
+	<a
+		:href={ getHref(book) }
+		target={ getTarget(book) }
+		x-data={ fmt.Sprintf("{ BookID: %s }", "\""+book.BookID+"\"") }
+		class={ backgroundImage(state.GetCloverBackgroundImageUrl(&book)) , "relative w-32 mx-4 my-4 bg-top bg-cover rounded shadow-xl h-44 hover:shadow-2xl ring-1 ring-gray-400 hover:ring hover:ring-blue-500 overflow-hidden" }
+	>
+		<!-- 书籍类型图标 -->
+		<div class="absolute top-0 z-10 text-lg font-bold text-yellow-400 right-1 boxShadow">{ string(book.Type) }</div>
+		<!-- 图书封面 -->
+		<div
+			x-show="$store.shelf.showTitle"
+			class="absolute inset-x-0 bottom-0 text-sm font-semibold text-center text-black bg-gray-100 border-blue-800 rounded-b h-1/4 bg-opacity-80"
+		>
+			<span class="absolute inset-x-0 top-0 p-1 align-middle" x-text={ "$store.shelf.simplifyTitle === true?'" + book.ShortTitle() + "':'" + book.Title + "'" }></span>
+		</div>
+	</a>
+}
