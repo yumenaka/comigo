@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comigo/entity"
 	"github.com/yumenaka/comigo/htmx/state"
 	"strconv"
@@ -53,27 +54,19 @@ func GetReturnUrl(BookID string) string {
 	return "/shelf/" + info.BookID
 }
 
-//// ShowContentAPIHandler htmx：一个用于显示内容的 API，未使用 htmx 时返回 HTTP 400 错误。
-//func ShowContentAPIHandler(c *gin.Context) {
-//	// 检查当前请求是否有 'HX-Request' 头部。
-//	// 更多信息请见 https://htmx.org/docs/#request-headers”
-//	if !htmx.IsHTMX(c.Request) {
-//		// If not, return HTTP 400 error.
-//		err := c.AbortWithError(http.StatusBadRequest, errors.New("non-htmx request"))
-//		if err != nil {
-//			log.Println(err)
-//		}
-//		return
-//	}
-//	// 编写 HTML内容。
-//	_, err := c.Writer.Write([]byte("<p>🎉 Yes, <strong>htmx</strong> is ready to use! (<code>GET /api/hello-world</code>)</p>"))
-//	if err != nil {
-//		log.Println(err)
-//	}
-//
-//	// 发送 htmx 响应。
-//	err = htmx.NewResponse().Write(c.Writer)
-//	if err != nil {
-//		log.Println(err)
-//	}
-//}
+func AddQuery(c *gin.Context, key string, value string) string {
+	// 获取当前请求的 URL
+	currentUrl := c.Request.URL
+
+	// 解析 URL 参数
+	params := currentUrl.Query()
+
+	// 使用 Set 方法替换或添加新的查询参数 key=value
+	params.Set(key, value)
+
+	// 将修改后的查询参数重新编码
+	currentUrl.RawQuery = params.Encode()
+
+	// 输出修改后的 URL
+	return currentUrl.String()
+}

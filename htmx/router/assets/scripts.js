@@ -96,14 +96,9 @@ Alpine.store('shelf', {
   bookCardMode: Alpine.$persist('gird').as('shelf.bookCardMode'), //gird,list,text
   showTitle: Alpine.$persist(true).as('shelf.showTitle'), //是否显示标题
   simplifyTitle: Alpine.$persist(true).as('shelf.simplifyTitle'), //是否简化标题
-  InfiniteDropdown: true, //卷轴模式下，是否无限下拉
-  bookCardShowTitleFlag: true, // 书库中的书籍是否显示文字版标题
+  InfiniteDropdown: Alpine.$persist(false).as('shelf.InfiniteDropdown'), //卷轴模式下，是否无限下拉
+  bookCardShowTitleFlag: Alpine.$persist(true).as('shelf.bookCardShowTitleFlag'), // 书库中的书籍是否显示文字版标题
   syncScrollFlag: false, // 同步滚动,目前还没做
-  scrollTopSave: 0, //存储现在滚动的位置
-  // 可见范围是否是横向
-  isLandscapeMode: true,
-  isPortraitMode: false,
-  imageMaxWidth: 800,
   // 屏幕宽横比,inLandscapeMode的判断依据
   aspectRatio: 1.2,
   // 可见范围宽高的具体值
@@ -140,9 +135,9 @@ Alpine.store('scroll', {
   //是否显示顶部页头
   showHeaderFlag: true,
   //是否显示页数
-  showPageNum: false,
+  showPageNum: Alpine.$persist(false).as('scroll.showPageNum'),
   //ws翻页相关
-  syncPageByWS: true, //是否通过websocket同步翻页
+  syncPageByWS: Alpine.$persist(false).as('scroll.syncPageByWS'), //是否通过websocket同步翻页
   // //此处修改不会实时生效，不要这么做
   // toggleSimplifyTitle() {
   //     this.simplifyTitle = ! this.simplifyTitle
@@ -155,24 +150,24 @@ Alpine.store('Flip', {
   interval: 0,
   hideToolbar: true,
   //是否显示页头
-  showHeaderFlag_FlipMode: true,
+  showHeader: Alpine.$persist(true).as('Flip.showHeader'),
   //是否显示页脚
-  showFooterFlag_FlipMode: true,
+  showFooter: Alpine.$persist(true).as('Flip.showFooter'),
   //是否是右半屏翻页（从右到左）?日本漫画从左到右(false)
-  rightToLeftFlag: Alpine.$persist(false).as('Flip.rightToLeftFlag'),
+  rightToLeft: Alpine.$persist(false).as('Flip.rightToLeft'),
   //简单拼合双页
-  doublePageModeFlag: Alpine.$persist(false).as('Flip.doublePageModeFlag'),
+  doublePageMode: Alpine.$persist(false).as('Flip.doublePageMode'),
   //自动拼合双页,效果不太好
   autoDoublePageModeFlag: Alpine.$persist(false).as(
     'Flip.autoDoublePageModeFlag'
   ),
   //是否保存当前页数
-  saveNowPageNumFlag: Alpine.$persist(true).as('Flip.saveNowPageNumFlag'),
+  saveNowPageNum: Alpine.$persist(true).as('Flip.saveNowPageNum'),
   //素描模式标记
   sketchModeFlag: false,
   //是否显示素描提示
-  showPageHintFlag_FlipMode: Alpine.$persist(false).as(
-    'Flip.showPageHintFlag_FlipMode'
+  showPageHint: Alpine.$persist(false).as(
+    'Flip.showPageHint'
   ),
   //翻页间隔时间
   sketchFlipSecond: 30,

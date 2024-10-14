@@ -19429,14 +19429,9 @@ document.getElementById("FullScreenIcon").addEventListener("click", ()=>{
     bookCardMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist("gird").as("shelf.bookCardMode"),
     showTitle: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("shelf.showTitle"),
     simplifyTitle: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("shelf.simplifyTitle"),
-    InfiniteDropdown: true,
-    bookCardShowTitleFlag: true,
+    InfiniteDropdown: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("shelf.InfiniteDropdown"),
+    bookCardShowTitleFlag: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("shelf.bookCardShowTitleFlag"),
     syncScrollFlag: false,
-    scrollTopSave: 0,
-    // 可见范围是否是横向
-    isLandscapeMode: true,
-    isPortraitMode: false,
-    imageMaxWidth: 800,
     // 屏幕宽横比,inLandscapeMode的判断依据
     aspectRatio: 1.2,
     // 可见范围宽高的具体值
@@ -19470,9 +19465,9 @@ document.getElementById("FullScreenIcon").addEventListener("click", ()=>{
     //是否显示顶部页头
     showHeaderFlag: true,
     //是否显示页数
-    showPageNum: false,
+    showPageNum: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("scroll.showPageNum"),
     //ws翻页相关
-    syncPageByWS: true
+    syncPageByWS: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("scroll.syncPageByWS")
 });
 // Flip 翻页模式
 (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("Flip", {
@@ -19480,21 +19475,21 @@ document.getElementById("FullScreenIcon").addEventListener("click", ()=>{
     interval: 0,
     hideToolbar: true,
     //是否显示页头
-    showHeaderFlag_FlipMode: true,
+    showHeader: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("Flip.showHeader"),
     //是否显示页脚
-    showFooterFlag_FlipMode: true,
+    showFooter: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("Flip.showFooter"),
     //是否是右半屏翻页（从右到左）?日本漫画从左到右(false)
-    rightToLeftFlag: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("Flip.rightToLeftFlag"),
+    rightToLeft: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("Flip.rightToLeft"),
     //简单拼合双页
-    doublePageModeFlag: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("Flip.doublePageModeFlag"),
+    doublePageMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("Flip.doublePageMode"),
     //自动拼合双页,效果不太好
     autoDoublePageModeFlag: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("Flip.autoDoublePageModeFlag"),
     //是否保存当前页数
-    saveNowPageNumFlag: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("Flip.saveNowPageNumFlag"),
+    saveNowPageNum: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("Flip.saveNowPageNum"),
     //素描模式标记
     sketchModeFlag: false,
     //是否显示素描提示
-    showPageHintFlag_FlipMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("Flip.showPageHintFlag_FlipMode"),
+    showPageHint: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("Flip.showPageHint"),
     //翻页间隔时间
     sketchFlipSecond: 30,
     //计时用,从0开始
