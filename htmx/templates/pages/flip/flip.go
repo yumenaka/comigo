@@ -11,8 +11,8 @@ import (
 	"github.com/yumenaka/comigo/util/logger"
 )
 
-// FlipHandler 阅读界面（先做卷轴模式）
-func FlipHandler(c *gin.Context) {
+// Handler 阅读界面（TODO：翻页模式）
+func Handler(c *gin.Context) {
 	bookID := c.Param("id")
 	book, err := entity.GetBookByID(bookID, "default")
 	if err != nil {

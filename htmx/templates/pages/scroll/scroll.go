@@ -11,8 +11,8 @@ import (
 	"github.com/yumenaka/comigo/util/logger"
 )
 
-// ScrollHandler 阅读界面（先做卷轴模式）
-func ScrollHandler(c *gin.Context) {
+// Handler 阅读界面（卷轴模式）
+func Handler(c *gin.Context) {
 	bookID := c.Param("id")
 	book, err := entity.GetBookByID(bookID, "default")
 	if err != nil {
@@ -23,7 +23,7 @@ func ScrollHandler(c *gin.Context) {
 	if err != nil {
 		logger.Infof("TopOfShelfInfo: %v", err)
 	}
-	// 图片重排的方式，默认name
+	// cookie存储图片重排的设定，默认name
 	sortPageBy, err := c.Cookie("SortPageBy")
 	if err != nil {
 		sortPageBy = "default"
