@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comigo/htmx/state"
 	"github.com/yumenaka/comigo/htmx/templates/common"
-	"strconv"
 )
 
 // ShelfPage 书架页面
@@ -20,53 +19,32 @@ templ ShelfPage(c *gin.Context, s *state.GlobalState) {
 		DownLoadLink:    "",
 		SetTheme:        true,
 	})
-	@ShelfMainArea(c, s)
+	@MainArea(c, s)
 	@common.Footer(s.Version)
 	@common.Drawer(s, ShelfDrawerSlot())
 	@common.QRCode(s)
 }
 
 templ ShelfDrawerSlot() {
-	<!-- <div class="w-full font-semibold text-left">阅读模式</div> -->
+	<!-- 阅读模式 -->
 	<!--阅读模式的toggle  https://flowbite.com/docs/forms/toggle/ -->
 	<label class="inline-flex items-center w-full my-2 cursor-pointer">
 		<input type="checkbox" :value="$store.global.readMode === 'scroll'" x-on:click="$store.global.toggleReadMode()" class="sr-only peer"/>
 		<div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
 		<span class="text-sm font-medium text-gray-900 ms-3 dark:text-gray-300" x-text="$store.global.readMode === 'scroll'?'卷轴模式':'翻页模式'">Toggle me</span>
 	</label>
-	<!-- <div class="w-full my-2 font-semibold text-left">显示书名</div> -->
+	<!-- 显示书名  -->
 	<label class="inline-flex items-center w-full my-2 cursor-pointer">
 		<input type="checkbox" :value="$store.shelf.showTitle" x-on:click="$store.shelf.showTitle =!$store.shelf.showTitle" class="sr-only peer"/>
 		<div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
 		<span class="text-sm font-medium text-gray-900 ms-3 dark:text-gray-300" x-text="$store.shelf.showTitle === true?'显示书名':'隐藏书名'">Toggle me</span>
 	</label>
-	<!-- <div class="w-full my-2 font-semibold text-left">简化书名</div> -->
+	<!-- 简化书名 -->
 	<label class="inline-flex items-center w-full my-2 cursor-pointer">
 		<input type="checkbox" :value="$store.shelf.simplifyTitle" x-on:click="$store.shelf.simplifyTitle =!$store.shelf.simplifyTitle" class="sr-only peer"/>
 		<div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
 		<span class="text-sm font-medium text-gray-900 ms-3 dark:text-gray-300" x-text="$store.shelf.simplifyTitle === true?'简化书名':'完整书名'">Toggle me</span>
 	</label>
-	<!-- QRCode  -->
-	<!-- <div class="w-full my-2 font-semibold text-left">简化书名</div> -->
-	<div class="w-48 h-48 p-1 m-1" x-data="{ qrcodeSrc: '' }" x-init="qrcodeSrc = window.location.origin +'/api/qrcode.png?qrcode_str='+ encodeURIComponent(window.location.toString().replace(window.location.hostname,serverHost))">
-		<img class="w-48 h-48" :src="qrcodeSrc"/>
-	</div>
-}
-
-templ ShelfMainArea(c *gin.Context, s *state.GlobalState) {
-	<!-- 有的颜色模板只有base-100 ，没有颜色更深或更的 base-200 base-300，这样写是为了防止没定义颜色 -->
-	<div
-		x-data
-		class="flex flex-row flex-wrap content-start justify-center flex-1 w-full bg-base-100 text-base-content"
-		:class="(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') && 'bg-base-300'"
-	>
-		for _, book := range s.TopBooks.BookInfos {
-			@BookCard(c, s, book)
-		}
-		if s.GetAllBookNum() == 0 {
-			<div class="flex flex-col justify-center min-h-64">No Book , { strconv.Itoa(s.GetAllBookNum()) }</div>
-		}
-	</div>
 }
 
 css backgroundImage(imageUrl string) {

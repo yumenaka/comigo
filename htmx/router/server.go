@@ -47,7 +47,7 @@ func RunServer() (err error) {
 	}
 	router.StaticFS("/static/", http.FS(staticFS))
 	// 设置路由
-	bindURL(router)
+	bind(router)
 
 	// 发消息
 	slog.Info("Starting server...", "port", config.Config.Port)

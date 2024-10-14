@@ -1,19 +1,16 @@
 package shelf
 
 import (
-	"net/http"
-	"net/url"
-
 	"github.com/angelofallars/htmx-go"
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comigo/entity"
 	"github.com/yumenaka/comigo/htmx/state"
-	"github.com/yumenaka/comigo/htmx/templates/common"
 	"github.com/yumenaka/comigo/util/logger"
+	"net/http"
 )
 
-// Handler 书架页面的处理程序。
-func Handler(c *gin.Context) {
+// GetBookListHandler 返回排序完毕的book list
+func GetBookListHandler(c *gin.Context) {
 	// 书籍重排的方式，默认文件名
 	sortBookBy, err := c.Cookie("SortBookBy")
 	if err != nil {
@@ -24,6 +21,7 @@ func Handler(c *gin.Context) {
 		//SameSite 表示：所有和 Cookie 來源不同的請求都不會帶上 Cookie
 		c.SetCookie("SortBookBy", sortBookBy, 3600000, "/", c.Request.Host, false, false)
 	}
+
 	// 读取url参数，获取书籍ID
 	bookID := c.Param("id")
 	// 如果没有指定书籍ID，获取顶层书架信息。
@@ -44,36 +42,13 @@ func Handler(c *gin.Context) {
 		}
 	}
 
-	// 为首页定义模板布局。
-	indexTemplate := common.MainLayout(
-		c,
-		ShelfPage(c, &state.Global), // define body content
-	)
+	// 主体内容的模板(书籍列表)
+	template := MainArea(c, &state.Global) // define body content
 
-	// 用模板渲染书架页面。
-	if err := htmx.NewResponse().RenderTempl(c.Request.Context(), c.Writer, indexTemplate); err != nil {
+	// 用模板渲染 html 元素
+	if renderErr := htmx.NewResponse().RenderTempl(c.Request.Context(), c.Writer, template); renderErr != nil {
 		// 如果出错，返回 HTTP 500 错误。
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-}
-
-func getHref(book entity.BookInfo) string {
-	// 如果是书籍组，就跳转到子书架
-	if book.Type == entity.TypeBooksGroup {
-		return "\"/shelf/" + book.BookID + "/\""
-	}
-	// 如果是视频、音频、未知文件，就在新窗口打开
-	if book.Type == entity.TypeVideo || book.Type == entity.TypeAudio || book.Type == entity.TypeUnknownFile {
-		return "\"/api/raw/" + book.BookID + "/" + url.QueryEscape(book.Title) + "\""
-	}
-	// 其他情况，跳转到阅读页面,
-	return "'/'+$store.global.readMode+ '/' + BookID"
-}
-
-func getTarget(book entity.BookInfo) string {
-	if book.Type == entity.TypeVideo || book.Type == entity.TypeAudio || book.Type == entity.TypeUnknownFile {
-		return "_blank"
-	}
-	return "_self"
 }
