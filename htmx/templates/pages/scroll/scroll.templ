@@ -194,7 +194,7 @@ templ ScrollMainArea(s *state.GlobalState, book *entity.Book) {
 					/>
 				}
 				<template x-if="$store.scroll.showPageNum">
-					<div class="w-full mt-0 mb-2 text-lg font-semibold text-center page_hint ">{ fmt.Sprintf("%d / %d", key+1,book.BookInfo.PageCount) }</div>
+					<div class="w-full mt-0 mb-1 text-sm font-semibold text-center page_hint ">{ fmt.Sprintf("%d / %d", key+1,book.BookInfo.PageCount) }</div>
 				</template>
 			</div>
 		}
@@ -279,7 +279,7 @@ templ ScrollDrawerSlot() {
 		/>
 	</div>
 	<!-- toggle开关：显示页数 -->
-	<label class="inline-flex items-center w-full my-2 my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2">
+	<label class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2">
 		<input type="checkbox" x-model="$store.scroll.showPageNum" class="sr-only peer" checked/>
 		<div
 			class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
@@ -288,7 +288,7 @@ templ ScrollDrawerSlot() {
 	</label>
 	<!-- toggle开关组件：横屏状态下,宽度单位是固定值还是百分比 -->
 	<!-- 组件来自：https://flowbite.com/docs/forms/toggle/ -->
-	<label class="inline-flex items-center w-full my-2 my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2">
+	<label class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2">
 		<input type="checkbox" x-model:value="$store.scroll.widthUseFixedValue" class="sr-only peer" checked/>
 		<div
 			class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
