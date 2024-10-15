@@ -43,7 +43,7 @@ func Handler(c *gin.Context) {
 		ShelfPage(c, &state.Global), // define body content
 	)
 
-	// 用模板渲染书架页面。
+	// 用模板渲染书架页面(htmx-go)
 	if err := htmx.NewResponse().RenderTempl(c.Request.Context(), c.Writer, indexTemplate); err != nil {
 		// 如果出错，返回 HTTP 500 错误。
 		c.AbortWithStatus(http.StatusInternalServerError)

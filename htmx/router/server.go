@@ -46,8 +46,17 @@ func RunServer() (err error) {
 		logger.Infof("%s", err)
 	}
 	router.StaticFS("/static/", http.FS(staticFS))
+	//favicon.ico
+	router.GET("/favicon.ico", func(c *gin.Context) {
+		file, _ := static.ReadFile("/images/favicon.ico")
+		c.Data(
+			http.StatusOK,
+			"image/x-icon",
+			file,
+		)
+	})
 	// 设置路由
-	bind(router)
+	setURLs(router)
 
 	// 发消息
 	slog.Info("Starting server...", "port", config.Config.Port)

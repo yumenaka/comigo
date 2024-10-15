@@ -12,36 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// 存放一些公用的全局变量
-
-// BodyScripts defines JavaScript code.
-func BodyScripts() templ.ComponentScript {
-	return templ.ComponentScript{
-		Name: `__templ_BodyScripts_6fa6`,
-		Function: `function __templ_BodyScripts_6fa6(){var element = document.getElementById('FullScreenIcon');
-    if (element) {
-        element.addEventListener('click', function() {
-        	if (!FullScreenHelper.supported()){
-            	alert('Your browser does not support full screen mode.');
-            	return;
-            }
-            if(!FullScreenHelper.state()){
-                FullScreenHelper.request()
-            }else{
-                FullScreenHelper.exit()
-            }
-        });
-    }
-}`,
-		Call:       templ.SafeScript(`__templ_BodyScripts_6fa6`),
-		CallInline: templ.SafeScriptInline(`__templ_BodyScripts_6fa6`),
-	}
-}
-
-func getStaticMode(c *gin.Context) bool {
-	return c.DefaultQuery("StaticMode", "false") == "true"
-}
-
+// MainLayout 定义网页布局
 func MainLayout(c *gin.Context, bodyContent templ.Component) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -70,7 +41,7 @@ func MainLayout(c *gin.Context, bodyContent templ.Component) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(GetPageTitle(c.Param("id")))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/common/common.templ`, Line: 40, Col: 39}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/common/main_layout.templ`, Line: 15, Col: 39}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -107,6 +78,30 @@ func MainLayout(c *gin.Context, bodyContent templ.Component) templ.Component {
 		}
 		return templ_7745c5c3_Err
 	})
+}
+
+// BodyScripts JavaScript 代码。在页面加载时，绑定全屏按钮的点击事件。
+func BodyScripts() templ.ComponentScript {
+	return templ.ComponentScript{
+		Name: `__templ_BodyScripts_6fa6`,
+		Function: `function __templ_BodyScripts_6fa6(){var element = document.getElementById('FullScreenIcon');
+    if (element) {
+        element.addEventListener('click', function() {
+        	if (!FullScreenHelper.supported()){
+            	alert('Your browser does not support full screen mode.');
+            	return;
+            }
+            if(!FullScreenHelper.state()){
+                FullScreenHelper.request()
+            }else{
+                FullScreenHelper.exit()
+            }
+        });
+    }
+}`,
+		Call:       templ.SafeScript(`__templ_BodyScripts_6fa6`),
+		CallInline: templ.SafeScriptInline(`__templ_BodyScripts_6fa6`),
+	}
 }
 
 var _ = templruntime.GeneratedTemplate

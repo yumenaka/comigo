@@ -244,7 +244,7 @@ img, video {
   height: auto;
 }
 
-[hidden] {
+[hidden]:where(:not([hidden="until-found"])) {
   display: none;
 }
 
@@ -1171,6 +1171,10 @@ input:checked + .toggle-bg {
   margin: .25rem;
 }
 
+.m-12 {
+  margin: 3rem;
+}
+
 .m-2 {
   margin: .5rem;
 }
@@ -1183,6 +1187,11 @@ input:checked + .toggle-bg {
 .mx-1 {
   margin-left: .25rem;
   margin-right: .25rem;
+}
+
+.mx-2 {
+  margin-left: .5rem;
+  margin-right: .5rem;
 }
 
 .mx-4 {
@@ -1220,6 +1229,10 @@ input:checked + .toggle-bg {
 
 .mb-4 {
   margin-bottom: 1rem;
+}
+
+.me-2 {
+  margin-inline-end: .5rem;
 }
 
 .me-2\.5 {
@@ -1350,12 +1363,12 @@ input:checked + .toggle-bg {
   height: auto;
 }
 
-.h-full {
-  height: 100%;
+.h-dvh {
+  height: 100dvh;
 }
 
-.h-screen {
-  height: 100vh;
+.h-full {
+  height: 100%;
 }
 
 .max-h-full {
@@ -1392,6 +1405,10 @@ input:checked + .toggle-bg {
 
 .w-44 {
   width: 11rem;
+}
+
+.w-6 {
+  width: 1.5rem;
 }
 
 .w-64 {
@@ -1440,6 +1457,10 @@ input:checked + .toggle-bg {
 
 .flex-shrink {
   flex-shrink: 1;
+}
+
+.flex-grow {
+  flex-grow: 1;
 }
 
 .-translate-x-1\/2 {
@@ -1639,10 +1660,6 @@ input:checked + .toggle-bg {
   border-radius: .375rem;
 }
 
-.rounded-sm {
-  border-radius: .125rem;
-}
-
 .rounded-b {
   border-bottom-right-radius: .25rem;
   border-bottom-left-radius: .25rem;
@@ -1692,6 +1709,10 @@ input:checked + .toggle-bg {
   border-top-width: 1px;
 }
 
+.border-double {
+  border-style: double;
+}
+
 .border-blue-600 {
   --tw-border-opacity: 1;
   border-color: rgb(28 100 242 / var(--tw-border-opacity));
@@ -1725,6 +1746,11 @@ input:checked + .toggle-bg {
 .border-slate-400 {
   --tw-border-opacity: 1;
   border-color: rgb(148 163 184 / var(--tw-border-opacity));
+}
+
+.border-slate-500 {
+  --tw-border-opacity: 1;
+  border-color: rgb(100 116 139 / var(--tw-border-opacity));
 }
 
 .border-transparent {
@@ -2081,10 +2107,6 @@ input:checked + .toggle-bg {
   outline-style: dotted;
 }
 
-.outline-1 {
-  outline-width: 1px;
-}
-
 .outline-2 {
   outline-width: 2px;
 }
@@ -2311,7 +2333,6 @@ input:checked + .toggle-bg {
   --twc-primary-content: 180 7.3% 8%;
   --twc-secondary: 277.7 100% 38%;
   --twc-accent: 95.9 100% 33.1%;
-  --twc-accent-content: 0 0% 0%;
   --twc-neutral: 31.4 80.8% 10.2%;
   --twc-base-100: 0 0% 12.9%;
   --twc-base-content: 10.7 100% 67.1%;
@@ -2898,11 +2919,6 @@ body {
 .dark\:text-gray-200:is(.dark *) {
   --tw-text-opacity: 1;
   color: rgb(229 231 235 / var(--tw-text-opacity));
-}
-
-.dark\:text-gray-300:is(.dark *) {
-  --tw-text-opacity: 1;
-  color: rgb(209 213 219 / var(--tw-text-opacity));
 }
 
 .dark\:text-gray-400:is(.dark *) {

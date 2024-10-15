@@ -106,5 +106,6 @@
   "to_infinite_dropdown_mode": "Infinite Dropdown",
   "to_pagination_mode": "Pagination Mode",
   "infinite_dropdown": "InfiniteDropdown",
-  "pagination_mode": "Pagination Mode"
+  "pagination_mode": "Pagination Mode",
+  "show_file_icon": "File Icons"
 }

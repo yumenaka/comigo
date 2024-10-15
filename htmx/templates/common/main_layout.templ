@@ -4,32 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// 存放一些公用的全局变量
-
-
-// BodyScripts defines JavaScript code.
-
-script BodyScripts() {
-    var element = document.getElementById('FullScreenIcon');
-    if (element) {
-        element.addEventListener('click', function() {
-        	if (!FullScreenHelper.supported()){
-            	alert('Your browser does not support full screen mode.');
-            	return;
-            }
-            if(!FullScreenHelper.state()){
-                FullScreenHelper.request()
-            }else{
-                FullScreenHelper.exit()
-            }
-        });
-    }
-}
-
-func getStaticMode(c *gin.Context) bool{
-    return c.DefaultQuery("StaticMode", "false") == "true"
-}
-
+// MainLayout 定义网页布局
 templ MainLayout(c *gin.Context,bodyContent templ.Component) {
 	<!DOCTYPE html>
 	<html lang="en">
@@ -61,3 +36,22 @@ templ MainLayout(c *gin.Context,bodyContent templ.Component) {
 		<script src="/static/scripts.js"></script>
 	</html>
 }
+
+// BodyScripts JavaScript 代码。在页面加载时，绑定全屏按钮的点击事件。
+script BodyScripts() {
+    var element = document.getElementById('FullScreenIcon');
+    if (element) {
+        element.addEventListener('click', function() {
+        	if (!FullScreenHelper.supported()){
+            	alert('Your browser does not support full screen mode.');
+            	return;
+            }
+            if(!FullScreenHelper.state()){
+                FullScreenHelper.request()
+            }else{
+                FullScreenHelper.exit()
+            }
+        });
+    }
+}
+

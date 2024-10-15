@@ -106,5 +106,6 @@
   "to_infinite_dropdown_mode": "无限下拉",
   "to_pagination_mode": "分页模式",
   "infinite_dropdown": "无限下拉",
-  "pagination_mode": "分页加载"
+  "pagination_mode": "分页加载",
+  "show_file_icon": "文件图标"
 }
