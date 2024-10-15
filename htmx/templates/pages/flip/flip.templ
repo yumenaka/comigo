@@ -1,51 +1,16 @@
 package flip
 
 import (
-    "github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comigo/entity"
 	"github.com/yumenaka/comigo/htmx/state"
 	"github.com/yumenaka/comigo/htmx/templates/common"
+	"strconv"
 )
 
 script FlipScripts() {
-//滚动到顶部
-function FlipToTop(FlipDuration) {
-    let FlipStep = -window.FlipY / (FlipDuration / 15),
-        FlipInterval = setInterval(function () {
-            if (window.FlipY !== 0) {
-                window.FlipBy(0, FlipStep);
-            }
-            else clearInterval(FlipInterval);
-        }, 15);
-}
-// Button ID为BackTopButton的元素，点击后滚动到顶部
-document.getElementById("BackTopButton").addEventListener("click", function () {
-    FlipToTop(500);
-});
 
-//滚动到一定位置显示返回顶部按钮
-let FlipTopSave = 0
-let FlipDownFlag = false
-let step = 0
-function onFlip() {
-    let FlipTop = document.documentElement.FlipTop || document.body.FlipTop;
-    FlipDownFlag = FlipTop > FlipTopSave;
-    //防手抖,小于一定数值状态就不变 Math.abs()会导致报错
-    step = FlipTopSave - FlipTop;
-    // console.log("this.FlipDownFlag:",this.FlipDownFlag,"FlipTop:",FlipTop,"step:", step);
-    FlipTopSave = FlipTop
-    if (step < -10 || step > 10) {
-        showBackTopFlag = ((FlipTop > 400) && !FlipDownFlag);
-        if (showBackTopFlag) {
-            document.getElementById("BackTopButton").style.display = "block";
-        } else {
-            document.getElementById("BackTopButton").style.display = "none";
-        }
-    }
-}
-window.addEventListener("Flip", onFlip);
-
-//可见区域变化的时候改变页面状态
+//可见区域变化时，改变页面状态
 function onResize() {
     this.FlipModeConfig.imageMaxWidth = window.innerWidth
     this.clientWidth = document.documentElement.clientWidth
@@ -95,7 +60,7 @@ function onMouseClick(e) {
 		document.getElementById("OpenSettingButton").click();
     }
 }
-//获取鼠标位置,决定是否打开设置面板
+//获取鼠标位置,决定是否显示鼠标
 function onMouseMove(e) {
     this.clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
     this.clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离,单位为px）
@@ -138,69 +103,154 @@ mouseMoveArea.addEventListener('touchstart', onMouseClick)
 }
 
 templ FlipMainArea(s *state.GlobalState, book *entity.Book) {
-	<div id="mouseMoveArea"
+	<div
+		id="mouseMoveArea"
 		class="flex flex-col items-center justify-center flex-1 w-full max-w-full bg-base-100 text-base-content"
 		:class="(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') && 'bg-base-300'"
 	>
-	      <div class="manga_area" id="MangaMain" @click.stop="onMouseClick" @mousemove.stop="onMouseMove"
-            @mouseleave.stop="onMouseLeave">
-            <div class="manga_area_img_div">
-              <!-- 非自动拼合模式最简单,直接显示一张图 -->
-              <img class="w-auto h-auto" v-bind:src="imageParametersString(book.pages.images[nowPageNum - 1].url)
-            " v-bind:alt="nowPageNum.toString()" />
-
-              <!-- 简单拼合双页,不管单双页什么的 -->
-              <img v-if="!FlipModeConfig.autoDoublePageModeFlag &&
+		<div
+			class="manga_area"
+			id="MangaMain"
+			@click.stop="onMouseClick"
+			@mousemove.stop="onMouseMove"
+			@mouseleave.stop="onMouseLeave"
+		>
+			<div class="m-2 text-2xl font-semibold">翻页模式（Doing）</div>
+			<div class="manga_area_img_div">
+				<!-- 非自动拼合模式最简单,直接显示一张图 -->
+				<img
+					class="w-auto h-auto"
+					v-bind:src="imageParametersString(book.pages.images[nowPageNum - 1].url)
+            "
+					v-bind:alt="nowPageNum.toString()"
+				/>
+				<!-- 简单拼合双页,不管单双页什么的 -->
+				<img
+					v-if="!FlipModeConfig.autoDoublePageModeFlag &&
               FlipModeConfig.doublePageModeFlag &&
               nowPageNum < book.page_count
-            " v-bind:src="imageParametersString(book.pages.images[nowPageNum].url)
-            " v-bind:alt="(nowPageNum + 1).toString()" />
-
-              <!-- 自动拼合模式当前页,如果开启自动拼合,右边可能显示拼合页 -->
-              <img v-if="FlipModeConfig.autoDoublePageModeFlag &&
+            "
+					v-bind:src="imageParametersString(book.pages.images[nowPageNum].url)
+            "
+					v-bind:alt="(nowPageNum + 1).toString()"
+				/>
+				<!-- 自动拼合模式当前页,如果开启自动拼合,右边可能显示拼合页 -->
+				<img
+					v-if="FlipModeConfig.autoDoublePageModeFlag &&
               nowPageNum < book.page_count &&
             nowAndNextPageIsSingle()
-            " v-bind:src="imageParametersString(book.pages.images[nowPageNum].url)
-            " v-bind:alt="(nowPageNum + 1).toString()" />
-            </div>
-          </div>
-
-		<noscript class="loading-lazy">
-			for key, image := range book.Pages.Images {
-				if key <= 2 {
-					<img class="m-2 max-w-full lg:max-w-[800px] rounded shadow-lg" src={ image.Url }/>
-				}
-				if key > 2 {
-					<img loading="lazy" class="m-2 max-w-full lg:max-w-[800px] rounded shadow-lg" src={ image.Url }/>
-				}
-            }
-		</noscript>
+            "
+					v-bind:src="imageParametersString(book.pages.images[nowPageNum].url)
+            "
+					v-bind:alt="(nowPageNum + 1).toString()"
+				/>
+			</div>
+		</div>
+		for key, image := range book.Pages.Images {
+			<img class="m-2 max-w-full lg:max-w-[800px] rounded shadow-lg" src={ image.Url } alt={ strconv.Itoa(key) }/>
+		}
 	</div>
-	    <button id="BackTopButton" style="display: none" class="fixed bottom-4 right-4 bg-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg">
-            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><path d="M256 48C141.13 48 48 141.13 48 256s93.13 208 208 208s208-93.13 208-208S370.87 48 256 48zm96 270.63l-96-96l-96 96L137.37 296L256 177.37L374.63 296z" fill="currentColor"></path></svg>
-        </button>
+	<button id="BackTopButton" style="display: none" class="fixed flex items-center justify-center w-10 h-10 text-white bg-blue-500 rounded-full shadow-lg bottom-4 right-4">
+		<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><path d="M256 48C141.13 48 48 141.13 48 256s93.13 208 208 208s208-93.13 208-208S370.87 48 256 48zm96 270.63l-96-96l-96 96L137.37 296L256 177.37L374.63 296z" fill="currentColor"></path></svg>
+	</button>
 	@FlipScripts()
 }
 
 templ FlipDrawerSlot() {
-      <div></div>
+  <!-- 阅读模式 -->
+  <!-- toggle组件来自： https://flowbite.com/docs/forms/toggle/ -->
+  <label
+    class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2">
+    <input type="checkbox" :value="$store.global.readMode === 'scroll'" x-on:click="$store.global.toggleReadMode()"
+      class="sr-only peer" />
+    <div
+      class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
+    </div>
+    <span class="text-sm font-medium ms-3"
+      x-text="$store.global.readMode === 'scroll'?i18next.t('scroll_mode'):i18next.t('flip_mode')">
+      Toggle
+      me
+    </span>
+  </label>
+  <!-- 远程同步翻页 -->
+  <label
+    class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2">
+    <input type="checkbox" :value="$store.flip.syncPage" x-on:click="$store.flip.syncpage =!$store.flip.syncPage"
+      class="sr-only peer" />
+    <div
+      class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
+    </div>
+    <span class="text-sm font-medium ms-3" x-text="i18next.t('SyncPage')"></span>
+  </label>
+  <!-- 保存阅读进度 -->
+  <label
+    class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2">
+    <input type="checkbox" :value="$store.flip.savePageNum"
+      x-on:click="$store.flip.savePageNum =!$store.flip.savePageNum" class="sr-only peer" />
+    <div
+      class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
+    </div>
+    <span class="text-sm font-medium ms-3" x-text="i18next.t('SavePageNum')"></span>
+  </label>
+  <!-- 右开本（日漫模式）  -->
+  <label
+    class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2">
+    <input type="checkbox" :value="$store.flip.rightToLeft" x-on:click="$store.flip.rightToLeft =!$store.flip.rightToLeft"
+      class="sr-only peer" />
+    <div
+      class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
+    </div>
+    <span class="text-sm font-medium ms-3"
+      x-text="$store.flip.rightToLeft?i18next.t('LeftScreenToNext'):i18next.t('RightScreenToNext')"></span>
+  </label>
+  <!-- 单页模式  -->
+  <label
+    class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2">
+    <input type="checkbox" :value="$store.flip.doublePageMode"
+      x-on:click="$store.flip.doublePageMode =!$store.flip.doublePageMode" class="sr-only peer" />
+    <div
+      class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
+    </div>
+    <span class="text-sm font-medium ms-3"
+      x-text="$store.flip.doublePageMode?i18next.t('DoublePageMode'):i18next.t('SinglePageMode')"></span>
+  </label>
+  <!-- 自动隐藏工具栏  -->
+  <label
+    class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2">
+    <input type="checkbox" :value="$store.flip.autoHideToolbar" x-on:click="$store.flip.autoHideToolbar =!$store.flip.autoHideToolbar"
+      class="sr-only peer" />
+    <div
+      class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
+    </div>
+    <span class="text-sm font-medium ms-3" x-text="i18next.t('AutoHideToolbar')"></span>
+  </label>
+  <!-- 显示页数  -->
+  <label
+    class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2">
+    <input type="checkbox" :value="$store.flip.showPageNum" x-on:click="$store.flip.showPageNum =!$store.flip.showPageNum"
+      class="sr-only peer" />
+    <div
+      class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
+    </div>
+    <span class="text-sm font-medium ms-3" x-text="i18next.t('ShowPageNum')"></span>
+  </label>
 }
 
 // FlipPage 定义 BodyHTML
 templ FlipPage(c *gin.Context, s *state.GlobalState, book *entity.Book) {
 	@common.Header(
-	c,
-	common.HeaderProps{
-		Title:           common.GetPageTitle(book.BookInfo.BookID),
-		ShowReturnIcon:  true,
-		ReturnUrl:       common.GetReturnUrl(book.BookInfo.BookID),
-		SetDownLoadLink: false,
-		InShelf:         false,
-		DownLoadLink:    "",
-		SetTheme:        true,
-	})
+		c,
+		common.HeaderProps{
+			Title:           common.GetPageTitle(book.BookInfo.BookID),
+			ShowReturnIcon:  true,
+			ReturnUrl:       common.GetReturnUrl(book.BookInfo.BookID),
+			SetDownLoadLink: false,
+			InShelf:         false,
+			DownLoadLink:    "",
+			SetTheme:        true,
+		})
 	@FlipMainArea(s, book)
 	@common.Footer(s.Version)
-	@common.Drawer(s,FlipDrawerSlot())
+	@common.Drawer(s, FlipDrawerSlot())
 	@common.QRCode(s)
 }

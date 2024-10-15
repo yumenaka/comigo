@@ -13,49 +13,13 @@ import (
 	"github.com/yumenaka/comigo/entity"
 	"github.com/yumenaka/comigo/htmx/state"
 	"github.com/yumenaka/comigo/htmx/templates/common"
+	"strconv"
 )
 
 func FlipScripts() templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_FlipScripts_0f6e`,
-		Function: `function __templ_FlipScripts_0f6e(){//滚动到顶部
-function FlipToTop(FlipDuration) {
-    let FlipStep = -window.FlipY / (FlipDuration / 15),
-        FlipInterval = setInterval(function () {
-            if (window.FlipY !== 0) {
-                window.FlipBy(0, FlipStep);
-            }
-            else clearInterval(FlipInterval);
-        }, 15);
-}
-// Button ID为BackTopButton的元素，点击后滚动到顶部
-document.getElementById("BackTopButton").addEventListener("click", function () {
-    FlipToTop(500);
-});
-
-//滚动到一定位置显示返回顶部按钮
-let FlipTopSave = 0
-let FlipDownFlag = false
-let step = 0
-function onFlip() {
-    let FlipTop = document.documentElement.FlipTop || document.body.FlipTop;
-    FlipDownFlag = FlipTop > FlipTopSave;
-    //防手抖,小于一定数值状态就不变 Math.abs()会导致报错
-    step = FlipTopSave - FlipTop;
-    // console.log("this.FlipDownFlag:",this.FlipDownFlag,"FlipTop:",FlipTop,"step:", step);
-    FlipTopSave = FlipTop
-    if (step < -10 || step > 10) {
-        showBackTopFlag = ((FlipTop > 400) && !FlipDownFlag);
-        if (showBackTopFlag) {
-            document.getElementById("BackTopButton").style.display = "block";
-        } else {
-            document.getElementById("BackTopButton").style.display = "none";
-        }
-    }
-}
-window.addEventListener("Flip", onFlip);
-
-//可见区域变化的时候改变页面状态
+		Name: `__templ_FlipScripts_612f`,
+		Function: `function __templ_FlipScripts_612f(){//可见区域变化时，改变页面状态
 function onResize() {
     this.FlipModeConfig.imageMaxWidth = window.innerWidth
     this.clientWidth = document.documentElement.clientWidth
@@ -105,7 +69,7 @@ function onMouseClick(e) {
 		document.getElementById("OpenSettingButton").click();
     }
 }
-//获取鼠标位置,决定是否打开设置面板
+//获取鼠标位置,决定是否显示鼠标
 function onMouseMove(e) {
     this.clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
     this.clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离,单位为px）
@@ -146,8 +110,8 @@ mouseMoveArea.addEventListener('click', onMouseClick)
 // 触摸的时候也触发点击事件
 mouseMoveArea.addEventListener('touchstart', onMouseClick)
 }`,
-		Call:       templ.SafeScript(`__templ_FlipScripts_0f6e`),
-		CallInline: templ.SafeScriptInline(`__templ_FlipScripts_0f6e`),
+		Call:       templ.SafeScript(`__templ_FlipScripts_612f`),
+		CallInline: templ.SafeScriptInline(`__templ_FlipScripts_612f`),
 	}
 }
 
@@ -172,55 +136,43 @@ func FlipMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"mouseMoveArea\" class=\"flex flex-col items-center justify-center flex-1 w-full max-w-full bg-base-100 text-base-content\" :class=\"(theme.toString() ===&#39;light&#39;||theme.toString() ===&#39;dark&#39;||theme.toString() ===&#39;retro&#39;||theme.toString() ===&#39;lofi&#39;||theme.toString() ===&#39;nord&#39;) &amp;&amp; &#39;bg-base-300&#39;\"><div class=\"manga_area\" id=\"MangaMain\" @click.stop=\"onMouseClick\" @mousemove.stop=\"onMouseMove\" @mouseleave.stop=\"onMouseLeave\"><div class=\"manga_area_img_div\"><!-- 非自动拼合模式最简单,直接显示一张图 --><img class=\"w-auto h-auto\" v-bind:src=\"imageParametersString(book.pages.images[nowPageNum - 1].url)\n            \" v-bind:alt=\"nowPageNum.toString()\"><!-- 简单拼合双页,不管单双页什么的 --><img v-if=\"!FlipModeConfig.autoDoublePageModeFlag &amp;&amp;\n              FlipModeConfig.doublePageModeFlag &amp;&amp;\n              nowPageNum &lt; book.page_count\n            \" v-bind:src=\"imageParametersString(book.pages.images[nowPageNum].url)\n            \" v-bind:alt=\"(nowPageNum + 1).toString()\"><!-- 自动拼合模式当前页,如果开启自动拼合,右边可能显示拼合页 --><img v-if=\"FlipModeConfig.autoDoublePageModeFlag &amp;&amp;\n              nowPageNum &lt; book.page_count &amp;&amp;\n            nowAndNextPageIsSingle()\n            \" v-bind:src=\"imageParametersString(book.pages.images[nowPageNum].url)\n            \" v-bind:alt=\"(nowPageNum + 1).toString()\"></div></div><noscript class=\"loading-lazy\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"mouseMoveArea\" class=\"flex flex-col items-center justify-center flex-1 w-full max-w-full bg-base-100 text-base-content\" :class=\"(theme.toString() ===&#39;light&#39;||theme.toString() ===&#39;dark&#39;||theme.toString() ===&#39;retro&#39;||theme.toString() ===&#39;lofi&#39;||theme.toString() ===&#39;nord&#39;) &amp;&amp; &#39;bg-base-300&#39;\"><div class=\"manga_area\" id=\"MangaMain\" @click.stop=\"onMouseClick\" @mousemove.stop=\"onMouseMove\" @mouseleave.stop=\"onMouseLeave\"><div class=\"m-2 text-2xl font-semibold\">翻页模式（Doing）</div><div class=\"manga_area_img_div\"><!-- 非自动拼合模式最简单,直接显示一张图 --><img class=\"w-auto h-auto\" v-bind:src=\"imageParametersString(book.pages.images[nowPageNum - 1].url)\n            \" v-bind:alt=\"nowPageNum.toString()\"><!-- 简单拼合双页,不管单双页什么的 --><img v-if=\"!FlipModeConfig.autoDoublePageModeFlag &amp;&amp;\n              FlipModeConfig.doublePageModeFlag &amp;&amp;\n              nowPageNum &lt; book.page_count\n            \" v-bind:src=\"imageParametersString(book.pages.images[nowPageNum].url)\n            \" v-bind:alt=\"(nowPageNum + 1).toString()\"><!-- 自动拼合模式当前页,如果开启自动拼合,右边可能显示拼合页 --><img v-if=\"FlipModeConfig.autoDoublePageModeFlag &amp;&amp;\n              nowPageNum &lt; book.page_count &amp;&amp;\n            nowAndNextPageIsSingle()\n            \" v-bind:src=\"imageParametersString(book.pages.images[nowPageNum].url)\n            \" v-bind:alt=\"(nowPageNum + 1).toString()\"></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		for key, image := range book.Pages.Images {
-			if key <= 2 {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<img class=\"m-2 max-w-full lg:max-w-[800px] rounded shadow-lg\" src=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var2 string
-				templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(image.Url)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/flip/flip.templ`, Line: 171, Col: 83}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" ")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<img class=\"m-2 max-w-full lg:max-w-[800px] rounded shadow-lg\" src=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if key > 2 {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<img loading=\"lazy\" class=\"m-2 max-w-full lg:max-w-[800px] rounded shadow-lg\" src=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var3 string
-				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(image.Url)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/flip/flip.templ`, Line: 174, Col: 98}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
+			var templ_7745c5c3_Var2 string
+			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(image.Url)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/flip/flip.templ`, Line: 150, Col: 81}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" alt=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var3 string
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(key))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/flip/flip.templ`, Line: 150, Col: 107}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</noscript></div><button id=\"BackTopButton\" style=\"display: none\" class=\"fixed bottom-4 right-4 bg-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg\"><svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 512 512\"><path d=\"M256 48C141.13 48 48 141.13 48 256s93.13 208 208 208s208-93.13 208-208S370.87 48 256 48zm96 270.63l-96-96l-96 96L137.37 296L256 177.37L374.63 296z\" fill=\"currentColor\"></path></svg></button>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><button id=\"BackTopButton\" style=\"display: none\" class=\"fixed flex items-center justify-center w-10 h-10 text-white bg-blue-500 rounded-full shadow-lg bottom-4 right-4\"><svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 512 512\"><path d=\"M256 48C141.13 48 48 141.13 48 256s93.13 208 208 208s208-93.13 208-208S370.87 48 256 48zm96 270.63l-96-96l-96 96L137.37 296L256 177.37L374.63 296z\" fill=\"currentColor\"></path></svg></button>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -253,7 +205,7 @@ func FlipDrawerSlot() templ.Component {
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!-- 阅读模式 --><!-- toggle组件来自： https://flowbite.com/docs/forms/toggle/ --><label class=\"inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2\"><input type=\"checkbox\" :value=\"$store.global.readMode === &#39;scroll&#39;\" x-on:click=\"$store.global.toggleReadMode()\" class=\"sr-only peer\"><div class=\"relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[&#39;&#39;] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600\"></div><span class=\"text-sm font-medium ms-3\" x-text=\"$store.global.readMode === &#39;scroll&#39;?i18next.t(&#39;scroll_mode&#39;):i18next.t(&#39;flip_mode&#39;)\">Toggle me</span></label><!-- 远程同步翻页 --><label class=\"inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2\"><input type=\"checkbox\" :value=\"$store.flip.syncPage\" x-on:click=\"$store.flip.syncpage =!$store.flip.syncPage\" class=\"sr-only peer\"><div class=\"relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[&#39;&#39;] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600\"></div><span class=\"text-sm font-medium ms-3\" x-text=\"i18next.t(&#39;SyncPage&#39;)\"></span></label><!-- 保存阅读进度 --><label class=\"inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2\"><input type=\"checkbox\" :value=\"$store.flip.savePageNum\" x-on:click=\"$store.flip.savePageNum =!$store.flip.savePageNum\" class=\"sr-only peer\"><div class=\"relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[&#39;&#39;] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600\"></div><span class=\"text-sm font-medium ms-3\" x-text=\"i18next.t(&#39;SavePageNum&#39;)\"></span></label><!-- 右开本（日漫模式）  --><label class=\"inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2\"><input type=\"checkbox\" :value=\"$store.flip.rightToLeft\" x-on:click=\"$store.flip.rightToLeft =!$store.flip.rightToLeft\" class=\"sr-only peer\"><div class=\"relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[&#39;&#39;] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600\"></div><span class=\"text-sm font-medium ms-3\" x-text=\"$store.flip.rightToLeft?i18next.t(&#39;LeftScreenToNext&#39;):i18next.t(&#39;RightScreenToNext&#39;)\"></span></label><!-- 单页模式  --><label class=\"inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2\"><input type=\"checkbox\" :value=\"$store.flip.doublePageMode\" x-on:click=\"$store.flip.doublePageMode =!$store.flip.doublePageMode\" class=\"sr-only peer\"><div class=\"relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[&#39;&#39;] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600\"></div><span class=\"text-sm font-medium ms-3\" x-text=\"$store.flip.doublePageMode?i18next.t(&#39;DoublePageMode&#39;):i18next.t(&#39;SinglePageMode&#39;)\"></span></label><!-- 自动隐藏工具栏  --><label class=\"inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2\"><input type=\"checkbox\" :value=\"$store.flip.autoHideToolbar\" x-on:click=\"$store.flip.autoHideToolbar =!$store.flip.autoHideToolbar\" class=\"sr-only peer\"><div class=\"relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[&#39;&#39;] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600\"></div><span class=\"text-sm font-medium ms-3\" x-text=\"i18next.t(&#39;AutoHideToolbar&#39;)\"></span></label><!-- 显示页数  --><label class=\"inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2\"><input type=\"checkbox\" :value=\"$store.flip.showPageNum\" x-on:click=\"$store.flip.showPageNum =!$store.flip.showPageNum\" class=\"sr-only peer\"><div class=\"relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[&#39;&#39;] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600\"></div><span class=\"text-sm font-medium ms-3\" x-text=\"i18next.t(&#39;ShowPageNum&#39;)\"></span></label>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

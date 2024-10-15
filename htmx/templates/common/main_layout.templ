@@ -1,11 +1,9 @@
 package common
 
-import (
-	"github.com/gin-gonic/gin"
-)
+import "github.com/gin-gonic/gin"
 
 // MainLayout 定义网页布局
-templ MainLayout(c *gin.Context,bodyContent templ.Component) {
+templ MainLayout(c *gin.Context, bodyContent templ.Component) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -14,8 +12,7 @@ templ MainLayout(c *gin.Context,bodyContent templ.Component) {
 			<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
 			<title>{ GetPageTitle(c.Param("id")) }</title>
 			<meta name="keywords" content="Comigo  Comic Manga Reader 在线漫画 阅读器"/>
-            <meta name="description" content="Simple Manga Reader in Linux，Windows，Mac OS"/>
-
+			<meta name="description" content="Simple Manga Reader in Linux，Windows，Mac OS"/>
 			<!--TODO:PWA模式  <link rel="manifest" href="/static/manifest.webmanifest"/>  -->
 			<link rel="apple-touch-icon" href="/static/apple-touch-icon.png"/>
 			<link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon"/>
@@ -38,6 +35,7 @@ templ MainLayout(c *gin.Context,bodyContent templ.Component) {
 }
 
 // BodyScripts JavaScript 代码。在页面加载时，绑定全屏按钮的点击事件。
+
 script BodyScripts() {
     var element = document.getElementById('FullScreenIcon');
     if (element) {
@@ -54,4 +52,3 @@ script BodyScripts() {
         });
     }
 }
-
