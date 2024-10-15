@@ -7,7 +7,7 @@ import (
 	"github.com/yumenaka/comigo/htmx/templates/pages/shelf"
 )
 
-func bind(router *gin.Engine) {
+func setURLs(router *gin.Engine) {
 	bindView(router)
 	bindAPI(router)
 }

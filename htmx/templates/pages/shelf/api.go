@@ -11,6 +11,12 @@ import (
 
 // GetBookListHandler 返回排序完毕的book list
 func GetBookListHandler(c *gin.Context) {
+	//检查请求来源是不是htmx   https://github.com/angelofallars/htmx-go#htmx-requests
+	if htmx.IsHTMX(c.Request) {
+		// logic for handling HTMX requests
+	} else {
+		// logic for handling non-HTMX requests (e.g. render a full page for first-time visitors)
+	}
 	// 书籍重排的方式，默认文件名
 	sortBookBy, err := c.Cookie("SortBookBy")
 	if err != nil {
@@ -42,6 +48,7 @@ func GetBookListHandler(c *gin.Context) {
 		}
 	}
 
+	// https://github.com/angelofallars/htmx-go#templ-integration
 	// 主体内容的模板(书籍列表)
 	template := MainArea(c, &state.Global) // define body content
 

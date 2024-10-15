@@ -233,7 +233,7 @@ module.exports = {
         'primary-content': '#131616',
         secondary: 'rgb(122, 0, 194)',
         accent: 'rgb(68, 169, 0)',
-        'accent-content': '#000000',
+        // 'accent-content': '#000000',
         neutral: '#2F1B05',
         'base-100': '#212121',
         'base-content': '#ff7557',

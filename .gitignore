@@ -11,7 +11,6 @@
 # Output of the go coverage tools, specifically when used with LiteIDE
 *.out
 
-
 # Dependency directories (remove the comment below to include it)
 # vendor/
 *.vscode
@@ -34,7 +33,6 @@ cache
 *.pdf
 main
 *.DS_Store
-*package-lock.json
 
 #项目相关配置或文件
 go_build_main_go

@@ -95,6 +95,7 @@ Alpine.store('global', {
 Alpine.store('shelf', {
   bookCardMode: Alpine.$persist('gird').as('shelf.bookCardMode'), //gird,list,text
   showTitle: Alpine.$persist(true).as('shelf.showTitle'), //是否显示标题
+  showFileIcon: Alpine.$persist(true).as('shelf.showFileIcon'), //是否显示文件图标
   simplifyTitle: Alpine.$persist(true).as('shelf.simplifyTitle'), //是否简化标题
   InfiniteDropdown: Alpine.$persist(false).as('shelf.InfiniteDropdown'), //卷轴模式下，是否无限下拉
   bookCardShowTitleFlag: Alpine.$persist(true).as('shelf.bookCardShowTitleFlag'), // 书库中的书籍是否显示文字版标题

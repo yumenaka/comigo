@@ -8,44 +8,39 @@ templ Drawer(s *state.GlobalState, slot templ.Component) {
 	<div
 		id="drawer-right"
 		x-data={ ServerHostBindStr(s.ServerStatus.ServerHost) }
-		class="fixed top-0 right-0 z-40 w-64 h-screen p-4 overflow-y-auto transition-transform translate-x-full bg-base-100 text-base-content"
+		class="fixed flex flex-col top-0 right-0 z-40 w-64 h-dvh p-4 overflow-y-auto transition-transform translate-x-full bg-base-100 text-base-content"
 		tabindex="-1"
 		aria-labelledby="drawer-right-label"
 	>
-		<div class="mb-4 outline outline-offset-8 outline-1 rounded-sm">
+		<div class="w-full m-0 p-0 cursor-pointer border-slate-500 border-double border-b-2">
 			<h5
-				x-text="i18next.t('ReaderSettings')"
+				x-data="{
+                    ReaderSettings() {
+                      return i18next.t('ReaderSettings') + '<img class=\'mx-2 w-6 h-6 me-2.5\' src=\'/static/favicon.png\'/>';
+                    }
+                  }"
+				x-html="ReaderSettings()"
 				id="drawer-right-label"
 				class="inline-flex items-center mb-4 text-base font-semibold"
-			>
-				<svg
-					class="w-4 h-4 me-2.5"
-					aria-hidden="true"
-					xmlns="http://www.w3.org/2000/svg"
-					fill="currentColor"
-					viewBox="0 0 20 20"
-				>
-					<path
-						d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"
-					></path>
-				</svg>
-			</h5>
+			></h5>
 			<button
 				type="button"
 				data-drawer-hide="drawer-right"
 				aria-controls="drawer-right"
-				class="font-bold bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 absolute top-2.5 end-2.5 inline-flex items-center justify-center dark:hover:bg-gray-600 dark:hover:text-white"
+				class="font-bold rounded text-sm w-8 h-8 absolute top-2.5 end-2.5 inline-flex items-center justify-center bg-transparent hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-white"
 			>
-				❌
+				<svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1024 1024"><path d="M685.4 354.8c0-4.4-3.6-8-8-8l-66 .3L512 465.6l-99.3-118.4l-66.1-.3c-4.4 0-8 3.5-8 8c0 1.9.7 3.7 1.9 5.2l130.1 155L340.5 670a8.32 8.32 0 0 0-1.9 5.2c0 4.4 3.6 8 8 8l66.1-.3L512 564.4l99.3 118.4l66 .3c4.4 0 8-3.5 8-8c0-1.9-.7-3.7-1.9-5.2L553.5 515l130.1-155c1.2-1.4 1.8-3.3 1.8-5.2z" fill="currentColor"></path><path d="M512 65C264.6 65 64 265.6 64 513s200.6 448 448 448s448-200.6 448-448S759.4 65 512 65zm0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372s372 166.6 372 372s-166.6 372-372 372z" fill="currentColor"></path></svg>
 			</button>
 		</div>
-		<div class="flex flex-col items-center justify-end p-1 my-2 rounded drawer_slot text-accent-content dark:text-white">
+		<div class="drawer_slot flex flex-col flex-grow items-center justify-end p-1 my-2 rounded text-accent-content dark:text-white">
 			@slot
+			<div class="place-holder w-full flex-1"></div>
+			<!-- <div class="place-holder w-full p-1 m-12"></div> -->
 			<!-- 二维码 -->
-			<div class="w-36 h-36 p-1 m-2" x-data="{ qrcodeSrc: '' }" x-init="qrcodeSrc = window.location.origin +'/api/qrcode.png?qrcode_str='+ encodeURIComponent(window.location.toString().replace(window.location.hostname,serverHost))">
-            	<img class="w-32 h-32" :src="qrcodeSrc"> </img>
+			<div class="p-1 mt-4 mb-2 w-36 h-36" x-data="{ qrcodeSrc: '' }" x-init="qrcodeSrc = window.location.origin +'/api/qrcode.png?qrcode_str='+ encodeURIComponent(window.location.toString().replace(window.location.hostname,serverHost))">
+				<img class="w-32 h-32" :src="qrcodeSrc"/>
 			</div>
-            <!-- 选择主题的select -->
+			<!-- 选择主题的select -->
 			<select
 				x-model="theme"
 				x-on:change="theme = $event.target.value;console.log(theme);"
