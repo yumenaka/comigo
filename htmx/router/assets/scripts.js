@@ -130,7 +130,7 @@ Alpine.store('scroll', {
   singlePageWidth_Percent: Alpine.$persist(60).as('scroll.singlePageWidth_Percent'),
   doublePageWidth_Percent: Alpine.$persist(95).as('scroll.doublePageWidth_Percent'),
   //横屏(Landscape)状态的漫画页宽度。px。
-  singlePageWidth_PX:  Alpine.$persist(720).as('scroll.singlePageWidth_PX'),
+  singlePageWidth_PX: Alpine.$persist(720).as('scroll.singlePageWidth_PX'),
   doublePageWidth_PX: Alpine.$persist(1200).as('scroll.doublePageWidth_PX'),
   //书籍数据,需要从远程拉取
   //是否显示顶部页头
@@ -146,29 +146,31 @@ Alpine.store('scroll', {
 })
 
 // Flip 翻页模式
-Alpine.store('Flip', {
+Alpine.store('flip', {
   //自动隐藏工具条
   interval: 0,
-  hideToolbar: true,
+  autoCrop: Alpine.$persist(true).as('flip.autoCrop'),
+  autoHideToolbar: Alpine.$persist(true).as('flip.autoHideToolbar'),
   //是否显示页头
-  showHeader: Alpine.$persist(true).as('Flip.showHeader'),
+  showHeader: Alpine.$persist(true).as('flip.showHeader'),
+  showPageNum: Alpine.$persist(false).as('flip.showPageNum'),
   //是否显示页脚
-  showFooter: Alpine.$persist(true).as('Flip.showFooter'),
+  showFooter: Alpine.$persist(true).as('flip.showFooter'),
   //是否是右半屏翻页（从右到左）?日本漫画从左到右(false)
-  rightToLeft: Alpine.$persist(false).as('Flip.rightToLeft'),
+  rightToLeft: Alpine.$persist(false).as('flip.rightToLeft'),
   //简单拼合双页
-  doublePageMode: Alpine.$persist(false).as('Flip.doublePageMode'),
+  doublePageMode: Alpine.$persist(false).as('flip.doublePageMode'),
   //自动拼合双页,效果不太好
   autoDoublePageModeFlag: Alpine.$persist(false).as(
-    'Flip.autoDoublePageModeFlag'
+    'flip.autoDoublePageModeFlag'
   ),
-  //是否保存当前页数
-  saveNowPageNum: Alpine.$persist(true).as('Flip.saveNowPageNum'),
+  //是否保存阅读进度（页数）
+  savePageNum: Alpine.$persist(true).as('flip.savePageNum'),
   //素描模式标记
   sketchModeFlag: false,
   //是否显示素描提示
   showPageHint: Alpine.$persist(false).as(
-    'Flip.showPageHint'
+    'flip.showPageHint'
   ),
   //翻页间隔时间
   sketchFlipSecond: 30,

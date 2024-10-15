@@ -16,16 +16,20 @@
 > - `Icon`: [https://www.xicons.org/#/](https://www.xicons.org/#/)
 > - `htmx-go`: [https://github.com/angelofallars/htmx-go](https://github.com/angelofallars/htmx-go)
 
-
 ## 提示
-https://github.com/angelofallars/htmx-go#triggers  
-Alpine.js  可以监听并接收由 htmx-go 触发的事件详细信息，这使得服务器端触发的事件在事件驱动的应用程序中非常方便！
+
+<https://github.com/angelofallars/htmx-go#triggers>  
+Alpine.js 可以监听并接收由 htmx-go 触发的事件详细信息，这使得服务器端触发的事件在事件驱动的应用程序中非常方便！
 
 对于 Alpine.js，你可以注册一个 x-on:<EventName>.window 监听器。.window 修饰符很重要，因为 HTMX 会从根窗口对象调度事件。要接收由 htmx.TriggerDetail 和 htmx.TriggerObject 发送的值，你可以使用 $event.detail.value。
 
 要开始您的项目，在终端中运行 **Gowebly** CLI命令：
 
 ```console
+go install github.com/a-h/templ/cmd/templ@latest
+go install github.com/gowebly/gowebly/v2@latest
+go install github.com/air-verse/air@latest
+curl -fsSL https://bun.sh/install | bash
 gowebly run
 ```
 

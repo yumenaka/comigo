@@ -128,22 +128,22 @@ templ Header(c *gin.Context, prop HeaderProps) {
 			<div id="dropdownHover" class="z-10 hidden divide-y divide-gray-100 rounded-lg shadow w-44 bg-white/90 dark:bg-gray-700/90">
 				<ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
 					<li>
-						<a href={ templ.URL(AddQuery(c, "sortBy", "filename"))} x-text="i18next.t('sort_by_filename')" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"></a>
+						<a href={ templ.URL(AddQuery(c, "sortBy", "filename")) } x-text="i18next.t('sort_by_filename')" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"></a>
 					</li>
 					<li>
-						<a href={ templ.URL(AddQuery(c, "sortBy", "modify_time"))} x-text="i18next.t('sort_by_modify_time')" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"></a>
+						<a href={ templ.URL(AddQuery(c, "sortBy", "modify_time")) } x-text="i18next.t('sort_by_modify_time')" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"></a>
 					</li>
 					<li>
-						<a href={ templ.URL(AddQuery(c, "sortBy", "filesize"))} x-text="i18next.t('sort_by_filesize')" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"></a>
+						<a href={ templ.URL(AddQuery(c, "sortBy", "filesize")) } x-text="i18next.t('sort_by_filesize')" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"></a>
 					</li>
 					<li>
-						<a href={ templ.URL(AddQuery(c, "sortBy", "filename_reverse"))} x-text="i18next.t('sort_by_filename_reverse')" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Sign out</a>
+						<a href={ templ.URL(AddQuery(c, "sortBy", "filename_reverse")) } x-text="i18next.t('sort_by_filename_reverse')" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Sign out</a>
 					</li>
 					<li>
-						<a href={ templ.URL(AddQuery(c, "sortBy", "modify_time_reverse"))} x-text="i18next.t('sort_by_modify_time_reverse')" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Sign out</a>
+						<a href={ templ.URL(AddQuery(c, "sortBy", "modify_time_reverse")) } x-text="i18next.t('sort_by_modify_time_reverse')" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Sign out</a>
 					</li>
 					<li>
-						<a href={ templ.URL(AddQuery(c, "sortBy", "filesize_reverse"))} x-text="i18next.t('sort_by_filesize_reverse')" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Sign out</a>
+						<a href={ templ.URL(AddQuery(c, "sortBy", "filesize_reverse")) } x-text="i18next.t('sort_by_filesize_reverse')" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Sign out</a>
 					</li>
 				</ul>
 			</div>
