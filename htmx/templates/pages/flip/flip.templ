@@ -100,6 +100,32 @@ mouseMoveArea.addEventListener('mousemove', onMouseMove)
 mouseMoveArea.addEventListener('click', onMouseClick)
 // 触摸的时候也触发点击事件
 mouseMoveArea.addEventListener('touchstart', onMouseClick)
+
+function hideComponent() {
+  return {
+    showDiv: true,
+    hideTimeout: null,
+    startHideTimer() {
+      // Cancel any existing timer
+      this.cancelHideTimer();
+      // Start a new timer to hide the div after 3 seconds
+      this.hideTimeout = setTimeout(() => {
+        this.showDiv = false;
+      }, 3000);
+    },
+    cancelHideTimer() {
+      // Clear the hide timer if it exists
+      if (this.hideTimeout) {
+        clearTimeout(this.hideTimeout);
+        this.hideTimeout = null;
+      }
+      // Ensure the div is shown
+      this.showDiv = true;
+    }
+  }
+}
+
+
 }
 
 templ FlipMainArea(s *state.GlobalState, book *entity.Book) {
@@ -115,7 +141,6 @@ templ FlipMainArea(s *state.GlobalState, book *entity.Book) {
 			@mousemove.stop="onMouseMove"
 			@mouseleave.stop="onMouseLeave"
 		>
-			<div class="m-2 text-2xl font-semibold">翻页模式（Doing）</div>
 			<div class="manga_area_img_div">
 				<!-- 非自动拼合模式最简单,直接显示一张图 -->
 				<img
@@ -237,7 +262,7 @@ templ FlipDrawerSlot() {
 }
 
 // FlipPage 定义 BodyHTML
-templ FlipPage(c *gin.Context, s *state.GlobalState, book *entity.Book) {
+templ FlipPage(c *gin.Context, s *state.GlobalState, book *entity.Book,readingProgress *entity.ReadingProgress) {
 	@common.Header(
 		c,
 		common.HeaderProps{
@@ -248,6 +273,7 @@ templ FlipPage(c *gin.Context, s *state.GlobalState, book *entity.Book) {
 			InShelf:         false,
 			DownLoadLink:    "",
 			SetTheme:        true,
+			FlipMode:        true,
 		})
 	@FlipMainArea(s, book)
 	@common.Footer(s.Version)

@@ -147,12 +147,13 @@ Alpine.store('scroll', {
 
 // Flip 翻页模式
 Alpine.store('flip', {
-  //自动隐藏工具条
-  interval: 0,
+  nowPageNum: 0,
   autoCrop: Alpine.$persist(true).as('flip.autoCrop'),
+  //自动隐藏工具条
   autoHideToolbar: Alpine.$persist(true).as('flip.autoHideToolbar'),
   //是否显示页头
   showHeader: Alpine.$persist(true).as('flip.showHeader'),
+  //是否显示页数
   showPageNum: Alpine.$persist(false).as('flip.showPageNum'),
   //是否显示页脚
   showFooter: Alpine.$persist(true).as('flip.showFooter'),
@@ -160,8 +161,8 @@ Alpine.store('flip', {
   rightToLeft: Alpine.$persist(false).as('flip.rightToLeft'),
   //简单拼合双页
   doublePageMode: Alpine.$persist(false).as('flip.doublePageMode'),
-  //自动拼合双页,效果不太好
-  autoDoublePageModeFlag: Alpine.$persist(false).as(
+  //自动拼合双页(TODO)
+  autoDoublePageMode: Alpine.$persist(false).as(
     'flip.autoDoublePageModeFlag'
   ),
   //是否保存阅读进度（页数）

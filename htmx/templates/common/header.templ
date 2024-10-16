@@ -10,6 +10,7 @@ type HeaderProps struct {
 	InShelf         bool
 	DownLoadLink    string
 	SetTheme        bool
+	FlipMode        bool
 }
 
 // 网页主题颜色的使用可以帮助你创建一个一致且视觉上吸引人的界面。以下是这些颜色的一般使用指南：
@@ -61,7 +62,11 @@ type HeaderProps struct {
 
 // 使用这些颜色，创建一个视觉和谐、易于导航的用户界面。如果有品牌指南或设计规范，可以依据这些规范进一步调整。
 templ Header(c *gin.Context, prop HeaderProps) {
-	<div class="flex flex-row justify-between w-full h-12 p-1 border-b bg-base-100 text-base-content border-slate-400">
+	<div x-data="{ flipMode: false }" class={"flex flex-row justify-between w-full h-12 p-1 border-b bg-base-100 text-base-content border-slate-400",templ.KV("mx-auto opacity-80", prop.FlipMode)}
+	     if prop.FlipMode {
+         	:class="{ 'fixed absolute top-0': $store.flip.autoHideToolbar}"
+         }
+	     >
 		<div class="flex flex-row">
 			if prop.ShowReturnIcon {
 				<!-- 返回箭头,点击返回上一页 -->
