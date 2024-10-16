@@ -18,8 +18,8 @@ import (
 
 func FlipScripts() templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_FlipScripts_612f`,
-		Function: `function __templ_FlipScripts_612f(){//可见区域变化时，改变页面状态
+		Name: `__templ_FlipScripts_7f8b`,
+		Function: `function __templ_FlipScripts_7f8b(){//可见区域变化时，改变页面状态
 function onResize() {
     this.FlipModeConfig.imageMaxWidth = window.innerWidth
     this.clientWidth = document.documentElement.clientWidth
@@ -109,9 +109,35 @@ mouseMoveArea.addEventListener('mousemove', onMouseMove)
 mouseMoveArea.addEventListener('click', onMouseClick)
 // 触摸的时候也触发点击事件
 mouseMoveArea.addEventListener('touchstart', onMouseClick)
+
+function hideComponent() {
+  return {
+    showDiv: true,
+    hideTimeout: null,
+    startHideTimer() {
+      // Cancel any existing timer
+      this.cancelHideTimer();
+      // Start a new timer to hide the div after 3 seconds
+      this.hideTimeout = setTimeout(() => {
+        this.showDiv = false;
+      }, 3000);
+    },
+    cancelHideTimer() {
+      // Clear the hide timer if it exists
+      if (this.hideTimeout) {
+        clearTimeout(this.hideTimeout);
+        this.hideTimeout = null;
+      }
+      // Ensure the div is shown
+      this.showDiv = true;
+    }
+  }
+}
+
+
 }`,
-		Call:       templ.SafeScript(`__templ_FlipScripts_612f`),
-		CallInline: templ.SafeScriptInline(`__templ_FlipScripts_612f`),
+		Call:       templ.SafeScript(`__templ_FlipScripts_7f8b`),
+		CallInline: templ.SafeScriptInline(`__templ_FlipScripts_7f8b`),
 	}
 }
 
@@ -136,7 +162,7 @@ func FlipMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"mouseMoveArea\" class=\"flex flex-col items-center justify-center flex-1 w-full max-w-full bg-base-100 text-base-content\" :class=\"(theme.toString() ===&#39;light&#39;||theme.toString() ===&#39;dark&#39;||theme.toString() ===&#39;retro&#39;||theme.toString() ===&#39;lofi&#39;||theme.toString() ===&#39;nord&#39;) &amp;&amp; &#39;bg-base-300&#39;\"><div class=\"manga_area\" id=\"MangaMain\" @click.stop=\"onMouseClick\" @mousemove.stop=\"onMouseMove\" @mouseleave.stop=\"onMouseLeave\"><div class=\"m-2 text-2xl font-semibold\">翻页模式（Doing）</div><div class=\"manga_area_img_div\"><!-- 非自动拼合模式最简单,直接显示一张图 --><img class=\"w-auto h-auto\" v-bind:src=\"imageParametersString(book.pages.images[nowPageNum - 1].url)\n            \" v-bind:alt=\"nowPageNum.toString()\"><!-- 简单拼合双页,不管单双页什么的 --><img v-if=\"!FlipModeConfig.autoDoublePageModeFlag &amp;&amp;\n              FlipModeConfig.doublePageModeFlag &amp;&amp;\n              nowPageNum &lt; book.page_count\n            \" v-bind:src=\"imageParametersString(book.pages.images[nowPageNum].url)\n            \" v-bind:alt=\"(nowPageNum + 1).toString()\"><!-- 自动拼合模式当前页,如果开启自动拼合,右边可能显示拼合页 --><img v-if=\"FlipModeConfig.autoDoublePageModeFlag &amp;&amp;\n              nowPageNum &lt; book.page_count &amp;&amp;\n            nowAndNextPageIsSingle()\n            \" v-bind:src=\"imageParametersString(book.pages.images[nowPageNum].url)\n            \" v-bind:alt=\"(nowPageNum + 1).toString()\"></div></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"mouseMoveArea\" class=\"flex flex-col items-center justify-center flex-1 w-full max-w-full bg-base-100 text-base-content\" :class=\"(theme.toString() ===&#39;light&#39;||theme.toString() ===&#39;dark&#39;||theme.toString() ===&#39;retro&#39;||theme.toString() ===&#39;lofi&#39;||theme.toString() ===&#39;nord&#39;) &amp;&amp; &#39;bg-base-300&#39;\"><div class=\"manga_area\" id=\"MangaMain\" @click.stop=\"onMouseClick\" @mousemove.stop=\"onMouseMove\" @mouseleave.stop=\"onMouseLeave\"><div class=\"manga_area_img_div\"><!-- 非自动拼合模式最简单,直接显示一张图 --><img class=\"w-auto h-auto\" v-bind:src=\"imageParametersString(book.pages.images[nowPageNum - 1].url)\n            \" v-bind:alt=\"nowPageNum.toString()\"><!-- 简单拼合双页,不管单双页什么的 --><img v-if=\"!FlipModeConfig.autoDoublePageModeFlag &amp;&amp;\n              FlipModeConfig.doublePageModeFlag &amp;&amp;\n              nowPageNum &lt; book.page_count\n            \" v-bind:src=\"imageParametersString(book.pages.images[nowPageNum].url)\n            \" v-bind:alt=\"(nowPageNum + 1).toString()\"><!-- 自动拼合模式当前页,如果开启自动拼合,右边可能显示拼合页 --><img v-if=\"FlipModeConfig.autoDoublePageModeFlag &amp;&amp;\n              nowPageNum &lt; book.page_count &amp;&amp;\n            nowAndNextPageIsSingle()\n            \" v-bind:src=\"imageParametersString(book.pages.images[nowPageNum].url)\n            \" v-bind:alt=\"(nowPageNum + 1).toString()\"></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -148,7 +174,7 @@ func FlipMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(image.Url)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/flip/flip.templ`, Line: 150, Col: 81}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/flip/flip.templ`, Line: 175, Col: 81}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
@@ -161,7 +187,7 @@ func FlipMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(key))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/flip/flip.templ`, Line: 150, Col: 107}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/flip/flip.templ`, Line: 175, Col: 107}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -214,7 +240,7 @@ func FlipDrawerSlot() templ.Component {
 }
 
 // FlipPage 定义 BodyHTML
-func FlipPage(c *gin.Context, s *state.GlobalState, book *entity.Book) templ.Component {
+func FlipPage(c *gin.Context, s *state.GlobalState, book *entity.Book, readingProgress *entity.ReadingProgress) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -245,6 +271,7 @@ func FlipPage(c *gin.Context, s *state.GlobalState, book *entity.Book) templ.Com
 				InShelf:         false,
 				DownLoadLink:    "",
 				SetTheme:        true,
+				FlipMode:        true,
 			}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
