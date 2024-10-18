@@ -18,142 +18,6 @@ import (
 	"strings"
 )
 
-// js代码,滚动到顶部,显示返回顶部按钮,获取鼠标位置,决定是否打开设置面板等
-func ScrollScripts() templ.ComponentScript {
-	return templ.ComponentScript{
-		Name: `__templ_ScrollScripts_5478`,
-		Function: `function __templ_ScrollScripts_5478(){//滚动到顶部
-function scrollToTop(scrollDuration) {
-    let scrollStep = -window.scrollY / (scrollDuration / 15),
-        scrollInterval = setInterval(function () {
-            if (window.scrollY !== 0) {
-                window.scrollBy(0, scrollStep);
-            }
-            else clearInterval(scrollInterval);
-        }, 15);
-}
-// Button ID为BackTopButton的元素，点击后滚动到顶部
-document.getElementById("BackTopButton").addEventListener("click", function () {
-    scrollToTop(500);
-});
-
-//滚动到一定位置显示返回顶部按钮
-let scrollTopSave = 0
-let scrollDownFlag = false
-let step = 0
-function onScroll() {
-    let scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-    scrollDownFlag = scrollTop > scrollTopSave;
-    //防手抖,小于一定数值状态就不变 Math.abs()会导致报错
-    step = scrollTopSave - scrollTop;
-    // console.log("this.scrollDownFlag:",this.scrollDownFlag,"scrollTop:",scrollTop,"step:", step);
-    scrollTopSave = scrollTop
-    if (step < -10 || step > 10) {
-        showBackTopFlag = ((scrollTop > 400) && !scrollDownFlag);
-        if (showBackTopFlag) {
-            document.getElementById("BackTopButton").style.display = "block";
-        } else {
-            document.getElementById("BackTopButton").style.display = "none";
-        }
-    }
-}
-window.addEventListener("scroll", onScroll);
-
-//可见区域变化的时候改变页面状态
-function onResize() {
-    this.ScrollModeConfig.imageMaxWidth = window.innerWidth
-    this.clientWidth = document.documentElement.clientWidth
-    this.clientHeight = document.documentElement.clientHeight
-    this.aspectRatio = this.clientWidth / this.clientHeight
-    // 为了调试的时候方便,阈值是正方形
-    if (this.aspectRatio > (19 / 19)) {
-        this.ScrollModeConfig.isLandscapeMode = true
-        this.ScrollModeConfig.isPortraitMode = false
-    } else {
-        this.ScrollModeConfig.isLandscapeMode = false
-        this.ScrollModeConfig.isPortraitMode = true
-    }
-}
-//文档视图调整大小时触发 resize 事件。 https://developer.mozilla.org/zh-CN/docs/Web/API/Window/resize_event
-window.addEventListener("resize", this.onResize);
-
-//获取鼠标位置,决定是否打开设置面板
-function onMouseClick(e) {
-    this.clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
-    this.clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离,单位为px）
-    //浏览器的视口,不包括工具栏和滚动条:
-    let innerWidth = window.innerWidth
-    let innerHeight = window.innerHeight
-    //设置区域为正方形，边长按照宽或高里面，比较小的值决定
-    const setArea = 0.15;
-    // innerWidth >= innerHeight 的情况下
-    let MinY = innerHeight * (0.5 - setArea);
-    let MaxY = innerHeight * (0.5 + setArea);
-    let MinX = innerWidth * 0.5 - (MaxY - MinY) * 0.5;
-    let MaxX = innerWidth * 0.5 + (MaxY - MinY) * 0.5;
-    if (innerWidth < innerHeight) {
-        MinX = innerWidth * (0.5 - setArea);
-        MaxX = innerWidth * (0.5 + setArea);
-        MinY = innerHeight * 0.5 - (MaxX - MinX) * 0.5;
-        MaxY = innerHeight * 0.5 + (MaxX - MinX) * 0.5;
-    }
-    //在设置区域
-    let inSetArea = false
-    if ((this.clickX > MinX && this.clickX < MaxX) && (this.clickY > MinY && this.clickY < MaxY)) {
-        console.log("点中了设置区域！");
-        inSetArea = true
-    }
-    if (inSetArea) {
-        //获取ID为 OpenSettingButton的元素，然后模拟点击
-		document.getElementById("OpenSettingButton").click();
-    }
-}
-//获取鼠标位置,决定是否打开设置面板
-function onMouseMove(e) {
-    this.clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
-    this.clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离,单位为px）
-    //浏览器的视口,不包括工具栏和滚动条:
-    let innerWidth = window.innerWidth
-    let innerHeight = window.innerHeight
-    //设置区域为正方形，边长按照宽或高里面，比较小的值决定
-    const setArea = 0.15;
-    // innerWidth >= innerHeight 的情况下
-    let MinY = innerHeight * (0.5 - setArea);
-    let MaxY = innerHeight * (0.5 + setArea);
-    let MinX = innerWidth * 0.5 - (MaxY - MinY) * 0.5;
-    let MaxX = innerWidth * 0.5 + (MaxY - MinY) * 0.5;
-    if (innerWidth < innerHeight) {
-        MinX = innerWidth * (0.5 - setArea);
-        MaxX = innerWidth * (0.5 + setArea);
-        MinY = innerHeight * 0.5 - (MaxX - MinX) * 0.5;
-        MaxY = innerHeight * 0.5 + (MaxX - MinX) * 0.5;
-    }
-    //在设置区域
-    let inSetArea = false
-    if ((this.clickX > MinX && this.clickX < MaxX) && (this.clickY > MinY && this.clickY < MaxY)) {
-        inSetArea = true
-    }
-    if (inSetArea) {
-        //console.log("在设置区域！");
-        e.currentTarget.style.cursor = 'url(/static/images/SettingsOutline.png), pointer';
-    } else {
-        e.currentTarget.style.cursor = '';
-    }
-}
-//获取ID为 mouseMoveArea 的元素
-let mouseMoveArea = document.getElementById("mouseMoveArea")
-// 鼠标移动的时候触发移动事件
-mouseMoveArea.addEventListener('mousemove', onMouseMove)
-// 点击的时候触发点击事件
-mouseMoveArea.addEventListener('click', onMouseClick)
-// 触摸的时候也触发点击事件
-mouseMoveArea.addEventListener('touchstart', onMouseClick)
-}`,
-		Call:       templ.SafeScript(`__templ_ScrollScripts_5478`),
-		CallInline: templ.SafeScriptInline(`__templ_ScrollScripts_5478`),
-	}
-}
-
 // ScrollMainArea 定义 BodyHTML
 func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -193,7 +57,7 @@ func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 				var templ_7745c5c3_Var2 string
 				templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(image.Url)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll/scroll.templ`, Line: 168, Col: 28}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll/scroll.templ`, Line: 37, Col: 28}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 				if templ_7745c5c3_Err != nil {
@@ -212,7 +76,7 @@ func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(image.Url)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll/scroll.templ`, Line: 173, Col: 21}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll/scroll.templ`, Line: 42, Col: 21}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -225,7 +89,7 @@ func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(key))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll/scroll.templ`, Line: 193, Col: 29}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll/scroll.templ`, Line: 62, Col: 29}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -243,7 +107,7 @@ func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d / %d", key+1, book.BookInfo.PageCount))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll/scroll.templ`, Line: 197, Col: 135}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll/scroll.templ`, Line: 66, Col: 135}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -254,15 +118,7 @@ func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><button id=\"BackTopButton\" style=\"display: none\" class=\"fixed flex items-center justify-center w-10 h-10 text-white bg-blue-500 rounded-full shadow-lg bottom-4 right-4\"><svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 512 512\"><path d=\"M256 48C141.13 48 48 141.13 48 256s93.13 208 208 208s208-93.13 208-208S370.87 48 256 48zm96 270.63l-96-96l-96 96L137.37 296L256 177.37L374.63 296z\" fill=\"currentColor\"></path></svg></button>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = ScrollScripts().Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<style>\n    /* https://developer.mozilla.org/zh-CN/docs/Web/CSS/object-fit */\n    img {\n        margin: auto;\n        margin-bottom: v-bind(margin+'px');\n        box-shadow: 0px 6px 3px 0px rgba(0, 0, 0, 0.19);\n    }\n\n    .page_hint {\n        /* 文字颜色 */\n        color: #413d3d;\n        /* 文字阴影：https://www.w3school.com.cn/css/css3_shadows.asp*/\n        text-shadow: -1px 0 rgb(240, 229, 229), 0 1px rgb(253, 242, 242),\n            1px 0 rgb(206, 183, 183), 0 -1px rgb(196, 175, 175);\n    }\n\n    .LoadingImage {\n        width: 90vw;\n        max-width: 90vw;\n    }\n\n    .ErrorImage {\n        width: 90vw;\n        max-width: 90vw;\n    }\n\n    /* 横屏（显示区域）时的CSS样式,IE无效 */\n    @media screen and (min-aspect-ratio: 19/19) {\n        .SinglePageImage {\n            width: v-bind(sPWL);\n            max-width: 100%;\n        }\n\n        .DoublePageImage {\n            width: v-bind(dPWL);\n            max-width: 100%;\n        }\n    }\n\n    /* 竖屏(显示区域)CSS样式,IE无效 */\n    @media screen and (max-aspect-ratio: 19/19) {\n        .SinglePageImage {\n            width: v-bind(sPWP);\n            max-width: 100%;\n        }\n\n        .DoublePageImage {\n            /* width: 100%; */\n            width: v-bind(dPWP);\n            max-width: 100%;\n        }\n    }\n    </style>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><button id=\"BackTopButton\" style=\"display: none\" class=\"fixed flex items-center justify-center w-10 h-10 text-white bg-blue-500 rounded-full shadow-lg bottom-4 right-4\"><svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 512 512\"><path d=\"M256 48C141.13 48 48 141.13 48 256s93.13 208 208 208s208-93.13 208-208S370.87 48 256 48zm96 270.63l-96-96l-96 96L137.37 296L256 177.37L374.63 296z\" fill=\"currentColor\"></path></svg></button><!-- js代码,滚动到顶部,显示返回顶部按钮,获取鼠标位置,决定是否打开设置面板等  --><script src=\"/static/pages/scroll/scroll.js\"></script><style>\n    /* https://developer.mozilla.org/zh-CN/docs/Web/CSS/object-fit */\n    img {\n        margin: auto;\n        margin-bottom: v-bind(margin+'px');\n        box-shadow: 0px 6px 3px 0px rgba(0, 0, 0, 0.19);\n    }\n\n    .page_hint {\n        /* 文字颜色 */\n        color: #413d3d;\n        /* 文字阴影：https://www.w3school.com.cn/css/css3_shadows.asp*/\n        text-shadow: -1px 0 rgb(240, 229, 229), 0 1px rgb(253, 242, 242),\n            1px 0 rgb(206, 183, 183), 0 -1px rgb(196, 175, 175);\n    }\n\n    .LoadingImage {\n        width: 90vw;\n        max-width: 90vw;\n    }\n\n    .ErrorImage {\n        width: 90vw;\n        max-width: 90vw;\n    }\n\n    /* 横屏（显示区域）时的CSS样式,IE无效 */\n    @media screen and (min-aspect-ratio: 19/19) {\n        .SinglePageImage {\n            width: v-bind(sPWL);\n            max-width: 100%;\n        }\n\n        .DoublePageImage {\n            width: v-bind(dPWL);\n            max-width: 100%;\n        }\n    }\n\n    /* 竖屏(显示区域)CSS样式,IE无效 */\n    @media screen and (max-aspect-ratio: 19/19) {\n        .SinglePageImage {\n            width: v-bind(sPWP);\n            max-width: 100%;\n        }\n\n        .DoublePageImage {\n            /* width: 100%; */\n            width: v-bind(dPWP);\n            max-width: 100%;\n        }\n    }\n    </style>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -300,8 +156,7 @@ func ScrollDrawerSlot() templ.Component {
 	})
 }
 
-// ScrollPage 定义 BodyHTML
-func ScrollPage(c *gin.Context, s *state.GlobalState, book *entity.Book) templ.Component {
+func InsertData(bookData any, stateData any) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -322,6 +177,44 @@ func ScrollPage(c *gin.Context, s *state.GlobalState, book *entity.Book) templ.C
 			templ_7745c5c3_Var7 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templ.JSONScript("NowBook", bookData).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ.JSONScript("GlobalState", stateData).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return templ_7745c5c3_Err
+	})
+}
+
+// ScrollPage 定义 BodyHTML
+func ScrollPage(c *gin.Context, s *state.GlobalState, book *entity.Book) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var8 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var8 == nil {
+			templ_7745c5c3_Var8 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = InsertData(book, s).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
 		templ_7745c5c3_Err = common.Header(
 			c,
 			common.HeaderProps{
