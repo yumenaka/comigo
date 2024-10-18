@@ -9,6 +9,7 @@ import (
 )
 
 type GlobalState struct {
+	Debug           bool
 	Version         string
 	SingleUserMode  bool
 	OnlineUserCount int
@@ -27,6 +28,7 @@ func (g *GlobalState) GetAllBookNum() int {
 var Global GlobalState
 
 func init() {
+	Global.Debug = config.Config.Debug
 	Global.Version = config.Version
 	Global.SingleUserMode = false
 	Global.OnlineUserCount = 0

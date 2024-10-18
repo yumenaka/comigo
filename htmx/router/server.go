@@ -38,17 +38,19 @@ func RunServer() (err error) {
 	comigo.StartComigoServer(router)
 	// 为模板引擎定义 HTML 渲染器。
 	router.HTMLRender = &TemplRender{}
-	// 静态文件。
-	//router.Static("/static", "./router/static")
-	// 嵌入静态文件。
-	staticFS, err := fs.Sub(static, "static")
+
+	// 设置嵌入静态文件的文件系统
+	staticFS, err = fs.Sub(static, "static")
 	if err != nil {
 		logger.Infof("%s", err)
 	}
 	router.StaticFS("/static/", http.FS(staticFS))
 	//favicon.ico
 	router.GET("/favicon.ico", func(c *gin.Context) {
-		file, _ := static.ReadFile("/images/favicon.ico")
+		file, err := static.ReadFile("/images/favicon.ico")
+		if err != nil {
+			logger.Infof("%s", err)
+		}
 		c.Data(
 			http.StatusOK,
 			"image/x-icon",
