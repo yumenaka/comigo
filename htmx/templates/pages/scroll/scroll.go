@@ -43,6 +43,7 @@ func Handler(c *gin.Context) {
 		c,
 		&state.Global,
 		scrollPage, // define body content
+		"static/scroll.js",
 	)
 
 	// 渲染索引页模板。

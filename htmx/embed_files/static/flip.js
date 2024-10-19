@@ -10,23 +10,23 @@ if (globalState.Debug)  {
 
 //可见区域变化时，改变页面状态
 function onResize() {
-    this.FlipModeConfig.imageMaxWidth = window.innerWidth
-    this.clientWidth = document.documentElement.clientWidth
-    this.clientHeight = document.documentElement.clientHeight
+    let imageMaxWidth = window.innerWidth
+    let clientWidth = document.documentElement.clientWidth
+    let clientHeight = document.documentElement.clientHeight
     // var aspectRatio = window.innerWidth / window.innerHeight
-    this.aspectRatio = this.clientWidth / this.clientHeight
+    let aspectRatio = clientWidth / clientHeight
     // 为了调试的时候方便,阈值是正方形
-    if (this.aspectRatio > (19 / 19)) {
-        this.FlipModeConfig.isLandscapeMode = true
-        this.FlipModeConfig.isPortraitMode = false
+    if (aspectRatio > (19 / 19)) {
+        Alpine.store('flip').isLandscapeMode = true
+        Alpine.store('flip').isPortraitMode = false
     } else {
-        this.FlipModeConfig.isLandscapeMode = false
-        this.FlipModeConfig.isPortraitMode = true
+        Alpine.store('flip').isLandscapeMode = false
+        Alpine.store('flip').isPortraitMode = true
     }
 }
-
+onResize();
 //文档视图调整大小时触发 resize 事件。 https://developer.mozilla.org/zh-CN/docs/Web/API/Window/resize_event
-window.addEventListener("resize", this.onResize);
+window.addEventListener("resize", onResize);
 
 //获取鼠标位置,决定是否打开设置面板
 function onMouseClick(e) {
