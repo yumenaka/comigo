@@ -3,6 +3,7 @@ package flip
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comigo/entity"
+	"github.com/yumenaka/comigo/htmx/embed_files"
 	"github.com/yumenaka/comigo/htmx/state"
 	"github.com/yumenaka/comigo/htmx/templates/common"
 	"strconv"
@@ -61,7 +62,12 @@ templ FlipMainArea(s *state.GlobalState, book *entity.Book) {
 		<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><path d="M256 48C141.13 48 48 141.13 48 256s93.13 208 208 208s208-93.13 208-208S370.87 48 256 48zm96 270.63l-96-96l-96 96L137.37 296L256 177.37L374.63 296z" fill="currentColor"></path></svg>
 	</button>
 	<!-- js代码,滚动到顶部,显示返回顶部按钮,获取鼠标位置,决定是否打开设置面板等  -->
-    <script src="/static/pages/flip/flip.js"></script>
+	if !s.StaticMode {
+        <script src="/static/flip.js"></script>
+    }
+    if s.StaticMode {
+    	@templ.Raw("<script>"+embed_files.GetFileStr("static/flip.js")+ "</script>")
+    }
 }
 
 templ FlipDrawerSlot() {

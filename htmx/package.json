@@ -6,9 +6,9 @@
   "browserslist": "> 0.5%, last 2 versions, not dead",
   "scripts": {
     "fmt": "prettier --write .",
-    "build": "parcel build ./router/assets/scripts.js ./router/assets/styles.scss --dist-dir ./router/static",
-    "dev": "parcel build ./router/assets/scripts.js ./router/assets/styles.scss --dist-dir ./router/static --no-optimize",
-    "watch": "parcel watch ./router/assets/scripts.js ./router/assets/styles.scss --dist-dir ./router/static --no-optimize"
+    "build": "parcel build ./embed_files/assets/scripts.js ./embed_files/assets/styles.scss --dist-dir embed_files/static",
+    "dev": "parcel build ./embed_files/assets/scripts.js ./embed_files/assets/styles.scss --dist-dir embed_files/static --no-optimize",
+    "watch": "parcel watch ./embed_files/assets/scripts.js ./embed_files/assets/styles.scss --dist-dir embed_files/static --no-optimize"
   },
   "dependencies": {
     "@alpinejs/morph": "^3.14.1",

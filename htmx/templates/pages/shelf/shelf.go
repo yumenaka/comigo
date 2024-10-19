@@ -46,6 +46,7 @@ func Handler(c *gin.Context) {
 	// 为首页定义模板布局。
 	indexTemplate := common.MainLayout(
 		c,
+		&state.Global,
 		ShelfPage(c, &state.Global), // define body content
 	)
 

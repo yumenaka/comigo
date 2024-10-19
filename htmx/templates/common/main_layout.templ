@@ -1,9 +1,13 @@
 package common
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/yumenaka/comigo/htmx/embed_files"
+	"github.com/yumenaka/comigo/htmx/state"
+)
 
 // MainLayout 定义网页布局
-templ MainLayout(c *gin.Context, bodyContent templ.Component) {
+templ MainLayout(c *gin.Context, s *state.GlobalState, bodyContent templ.Component) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -18,7 +22,12 @@ templ MainLayout(c *gin.Context, bodyContent templ.Component) {
 			<link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon"/>
 			<link rel="icon" href="/static/favicon.png" sizes="any"/>
 			<!--  font-sans：https://tailwindcss.com/docs/font-family -->
-			<link href="/static/styles.css" rel="stylesheet"/>
+			if !s.StaticMode {
+				<link href="/static/styles.css" rel="stylesheet"/>
+			}
+			if s.StaticMode {
+				@templ.Raw("<style>" + embed_files.GetFileStr("static/styles.css") + "</style>")
+			}
 		</head>
 		<!-- x-bind: Alpine.js的语法，声明全局主题 theme -->
 		<!-- $persist 可以存储原始值以及数组和对象。本地存储，默认的key是 _x_变量名 -->
@@ -27,7 +36,12 @@ templ MainLayout(c *gin.Context, bodyContent templ.Component) {
 		<body x-data="{ theme: $persist('retro') }" x-bind:data-theme="theme" onload={ BodyScripts() } class="flex flex-col items-center justify-between w-full h-full min-h-screen p-0 m-0 font-sans">
 			@bodyContent
 		</body>
-		<script src="/static/scripts.js"></script>
+		if !s.StaticMode {
+			<script src="/static/scripts.js"></script>
+		}
+		if s.StaticMode {
+			@templ.Raw("<script>" + embed_files.GetFileStr("static/scripts.js") + "</script>")
+		}
 	</html>
 }
 

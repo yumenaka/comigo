@@ -2,17 +2,11 @@ package router
 
 import (
 	"context"
-	"embed"
-	"io/fs"
 	"net/http"
 
 	"github.com/a-h/templ"
 	"github.com/gin-gonic/gin/render"
 )
-
-//go:embed all:static
-var static embed.FS
-var staticFS fs.FS
 
 // TemplRender 实现了 render.Render 接口。
 type TemplRender struct {
