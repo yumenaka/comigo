@@ -58,7 +58,7 @@ func Handler(c *gin.Context) {
 		c,
 		&state.Global,
 		FlipPage, // define body content
-	)
+		"static/flip.js")
 
 	// 渲染索引页模板。
 	if err := htmx.NewResponse().RenderTempl(c.Request.Context(), c.Writer, indexTemplate); err != nil {

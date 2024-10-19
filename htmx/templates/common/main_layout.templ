@@ -7,7 +7,7 @@ import (
 )
 
 // MainLayout 定义网页布局
-templ MainLayout(c *gin.Context, s *state.GlobalState, bodyContent templ.Component) {
+templ MainLayout(c *gin.Context, s *state.GlobalState, bodyContent templ.Component, insertScript string) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -36,11 +36,21 @@ templ MainLayout(c *gin.Context, s *state.GlobalState, bodyContent templ.Compone
 		<body x-data="{ theme: $persist('retro') }" x-bind:data-theme="theme" onload={ BodyScripts() } class="flex flex-col items-center justify-between w-full h-full min-h-screen p-0 m-0 font-sans">
 			@bodyContent
 		</body>
+		<!-- 通用js代码,初始化htmx、Alpine等第三方库  -->
 		if !s.StaticMode {
 			<script src="/static/scripts.js"></script>
 		}
 		if s.StaticMode {
 			@templ.Raw("<script>" + embed_files.GetFileStr("static/scripts.js") + "</script>")
+		}
+
+		<!-- js代码,滚动到顶部,显示返回顶部按钮,获取鼠标位置,决定是否打开设置面板等  -->
+		<!-- <script src="/static/flip.js"></script>  -->
+		if !s.StaticMode {
+			<script src={"/"+insertScript}></script>
+		}
+		if s.StaticMode {
+			@templ.Raw("<script>" + embed_files.GetFileStr(insertScript) + "</script>")
 		}
 	</html>
 }

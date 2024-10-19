@@ -148,6 +148,9 @@ Alpine.store('scroll', {
 // Flip 翻页模式
 Alpine.store('flip', {
   nowPageNum: 0,
+  imageMaxWidth: 400,
+  isLandscapeMode: true,
+  isPortraitMode: false,
   autoCrop: Alpine.$persist(true).as('flip.autoCrop'),
   //自动隐藏工具条
   autoHideToolbar: Alpine.$persist(true).as('flip.autoHideToolbar'),
