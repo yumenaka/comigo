@@ -1,9 +1,12 @@
 // 使用标准 <script> 标记插入的 JavaScript 代码
 //https://templ.guide/syntax-and-usage/script-templates/
 const book = JSON.parse(document.getElementById('NowBook').textContent);
-const slobalState = JSON.parse(document.getElementById('GlobalState').textContent);
-console.log(book);
-console.log(slobalState);
+const globalState = JSON.parse(document.getElementById('GlobalState').textContent);
+
+if (globalState.Debug)  {
+    console.log(book);
+    console.log(globalState);
+}
 
 //可见区域变化时，改变页面状态
 function onResize() {
@@ -94,43 +97,43 @@ function onMouseMove(e) {
     }
     if (inSetArea) {
         e.currentTarget.style.cursor =
-            "url(/images/SettingsOutline.png), pointer";
+            "url(/static/images/SettingsOutline.png), pointer";
     } else {
         if (clickX < innerWidth * 0.5) {
             //设置左边的鼠标指针
             if (Alpine.store('flip').rightToLeft && this.nowPageNum === 1) {
                 //右边翻下一页,且目前是第一页的时候,左边的鼠标指针,设置为禁止翻页
                 e.currentTarget.style.cursor =
-                    "url(/images/Prohibited28Filled.png), pointer";
+                    "url(/static/images/Prohibited28Filled.png), pointer";
             } else if (
                 !Alpine.store('flip').rightToLeft &&
-                Alpine.store('flip').nowPageNum === this.book.page_count
+                Alpine.store('flip').nowPageNum === book.page_count
             ) {
                 //左边翻下一页,且目前是最后一页的时候,左边的鼠标指针,设置为禁止翻页
                 e.currentTarget.style.cursor =
-                    "url(/images/Prohibited28Filled.png), pointer";
+                    "url(/static/images/Prohibited28Filled.png), pointer";
             } else {
                 //正常情况下,左边是向左的箭头
                 e.currentTarget.style.cursor =
-                    "url(/images/ArrowLeft.png), pointer";
+                    "url(/static/images/ArrowLeft.png), pointer";
             }
         } else {
             //设置右边的鼠标指针
             if (
                 Alpine.store('flip').rightToLeft &&
-                Alpine.store('flip').nowPageNum === this.book.page_count
+                Alpine.store('flip').nowPageNum === book.page_count
             ) {
                 //右边翻下一页,且目前是最后页的时候,右边的鼠标指针,设置为禁止翻页
                 e.currentTarget.style.cursor =
-                    "url(/images/Prohibited28Filled.png), pointer";
+                    "url(/static/images/Prohibited28Filled.png), pointer";
             } else if (!Alpine.store('flip').rightToLeft && this.nowPageNum === 1) {
                 //左边翻下一页,且目前是第一页的时候,右边的鼠标指针,设置为禁止翻页
                 e.currentTarget.style.cursor =
-                    "url(/images/Prohibited28Filled.png), pointer";
+                    "url(/static/images/Prohibited28Filled.png), pointer";
             } else {
                 //正常情况下,右边是向右的箭头
                 e.currentTarget.style.cursor =
-                    "url(/images/ArrowRight.png), pointer";
+                    "url(/static/images/ArrowRight.png), pointer";
             }
         }
     }

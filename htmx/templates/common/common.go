@@ -2,10 +2,11 @@ package common
 
 import (
 	"fmt"
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comigo/entity"
 	"github.com/yumenaka/comigo/htmx/state"
-	"strconv"
 )
 
 // ServerHostBindStr  传递给前端，现实QRCode用的“主机域名”字符串

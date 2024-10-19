@@ -2,6 +2,7 @@ package router
 
 import (
 	"errors"
+	"github.com/yumenaka/comigo/htmx/embed_files"
 	"io/fs"
 	"log/slog"
 	"net/http"
@@ -40,14 +41,14 @@ func RunServer() (err error) {
 	router.HTMLRender = &TemplRender{}
 
 	// 设置嵌入静态文件的文件系统
-	staticFS, err = fs.Sub(static, "static")
+	embed_files.StaticFS, err = fs.Sub(embed_files.Static, "static")
 	if err != nil {
 		logger.Infof("%s", err)
 	}
-	router.StaticFS("/static/", http.FS(staticFS))
+	router.StaticFS("/static/", http.FS(embed_files.StaticFS))
 	//favicon.ico
 	router.GET("/favicon.ico", func(c *gin.Context) {
-		file, err := static.ReadFile("/images/favicon.ico")
+		file, err := embed_files.Static.ReadFile("/images/favicon.ico")
 		if err != nil {
 			logger.Infof("%s", err)
 		}

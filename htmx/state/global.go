@@ -12,6 +12,7 @@ type GlobalState struct {
 	Debug           bool
 	Version         string
 	SingleUserMode  bool
+	StaticMode      bool
 	OnlineUserCount int
 	TopBooks        *entity.BookInfoList
 	ServerStatus    *util.ServerStatus
@@ -31,6 +32,7 @@ func init() {
 	Global.Debug = config.Config.Debug
 	Global.Version = config.Version
 	Global.SingleUserMode = false
+	Global.StaticMode = false
 	Global.OnlineUserCount = 0
 	Global.TopBooks = nil
 	Global.ServerStatus = util.GetServerInfo(config.Config.Host, config.Version, config.Config.Port, config.Config.EnableUpload, 0)
