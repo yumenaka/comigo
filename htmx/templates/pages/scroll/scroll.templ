@@ -2,13 +2,44 @@ package scroll
 
 import (
 	"fmt"
+	"strconv"
+    "strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comigo/entity"
 	"github.com/yumenaka/comigo/htmx/state"
 	"github.com/yumenaka/comigo/htmx/templates/common"
-	"strconv"
-	"strings"
 )
+
+// ScrollPage 定义 BodyHTML
+templ ScrollPage(c *gin.Context, s *state.GlobalState, book *entity.Book) {
+    @InsertData(book,s)
+	@common.Header(
+		c,
+		common.HeaderProps{
+			Title:           common.GetPageTitle(book.BookInfo.BookID),
+			ShowReturnIcon:  true,
+			ReturnUrl:       common.GetReturnUrl(book.BookInfo.BookID),
+			SetDownLoadLink: false,
+			InShelf:         false,
+			DownLoadLink:    "",
+			SetTheme:        true,
+		})
+	@ScrollMainArea(s, book)
+	@common.Footer(s.Version)
+	@common.Drawer(s, ScrollDrawerSlot())
+	@common.QRCode(s)
+}
+
+templ InsertData(bookData any,stateData any) {
+  @templ.JSONScript("NowBook", bookData)
+  @templ.JSONScript("GlobalState", stateData)
+}
+templ InsertRawJSONScript(data string) {
+  <script>
+    @templ.Raw(data)
+  </script>
+}
 
 // ScrollMainArea 定义 BodyHTML
 templ ScrollMainArea(s *state.GlobalState, book *entity.Book) {
@@ -248,32 +279,4 @@ templ ScrollDrawerSlot() {
         </div>
         <span class="text-sm font-medium ms-3" x-text="i18next.t('AutoCrop')"></span>
       </label>
-}
-templ InsertData(bookData any,stateData any) {
-  @templ.JSONScript("NowBook", bookData)
-  @templ.JSONScript("GlobalState", stateData)
-}
-templ InsertRawJSONScript(data string) {
-  <script>
-    @templ.Raw(data)
-  </script>
-}
-// ScrollPage 定义 BodyHTML
-templ ScrollPage(c *gin.Context, s *state.GlobalState, book *entity.Book) {
-    @InsertData(book,s)
-	@common.Header(
-		c,
-		common.HeaderProps{
-			Title:           common.GetPageTitle(book.BookInfo.BookID),
-			ShowReturnIcon:  true,
-			ReturnUrl:       common.GetReturnUrl(book.BookInfo.BookID),
-			SetDownLoadLink: false,
-			InShelf:         false,
-			DownLoadLink:    "",
-			SetTheme:        true,
-		})
-	@ScrollMainArea(s, book)
-	@common.Footer(s.Version)
-	@common.Drawer(s, ScrollDrawerSlot())
-	@common.QRCode(s)
 }

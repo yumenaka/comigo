@@ -16,7 +16,7 @@ templ Drawer(s *state.GlobalState, slot templ.Component) {
 			<h5
 				x-data="{
                     ReaderSettings() {
-                      return i18next.t('ReaderSettings') + '<img class=\'mx-2 w-6 h-6 me-2.5\' src=\'/static/favicon.png\'/>';
+                      return i18next.t('ReaderSettings') + '<img class=\'mx-2 w-6 h-6 rounded-full border border-stone-500 border-dotted outline-offset-4\' src=\'/static/favicon.png\'/>';
                     }
                   }"
 				x-html="ReaderSettings()"

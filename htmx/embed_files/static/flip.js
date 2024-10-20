@@ -4,7 +4,7 @@ const book = JSON.parse(document.getElementById('NowBook').textContent);
 const globalState = JSON.parse(document.getElementById('GlobalState').textContent);
 
 if (globalState.Debug)  {
-    console.log(book);
+    console.log(nowBook);
     console.log(globalState);
 }
 
