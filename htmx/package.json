@@ -29,6 +29,7 @@
     "autoprefixer": "latest",
     "parcel": "latest",
     "postcss": "latest",
-    "prettier": "latest"
+    "prettier": "latest",
+    "url": "^0.11.4"
   }
 }

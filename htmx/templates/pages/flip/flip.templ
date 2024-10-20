@@ -5,8 +5,33 @@ import (
 	"github.com/yumenaka/comigo/entity"
 	"github.com/yumenaka/comigo/htmx/state"
 	"github.com/yumenaka/comigo/htmx/templates/common"
-	"strconv"
+	//"strconv"
 )
+
+// FlipPage 定义 BodyHTML
+templ FlipPage(c *gin.Context, s *state.GlobalState, book *entity.Book, readingProgress *entity.ReadingProgress) {
+	@InsertData(book, s)
+	@common.Header(
+		c,
+		common.HeaderProps{
+			Title:           common.GetPageTitle(book.BookInfo.BookID),
+			ShowReturnIcon:  true,
+			ReturnUrl:       common.GetReturnUrl(book.BookInfo.BookID),
+			SetDownLoadLink: false,
+			InShelf:         false,
+			DownLoadLink:    "",
+			SetTheme:        true,
+			FlipMode:        true,
+		})
+	@FlipMainArea(s, book)
+	@common.Drawer(s, FlipDrawerSlot())
+	@common.QRCode(s)
+}
+
+templ InsertData(bookData any, stateData any) {
+	@templ.JSONScript("NowBook", bookData)
+	@templ.JSONScript("GlobalState", stateData)
+}
 
 templ FlipMainArea(s *state.GlobalState, book *entity.Book) {
 	<div
@@ -51,119 +76,139 @@ templ FlipMainArea(s *state.GlobalState, book *entity.Book) {
 				/>
 			</div>
 		</div>
-		for key, image := range book.Pages.Images {
-		if key == 0 {
-			<img class="m-2 max-w-full lg:max-w-[800px] rounded shadow-lg" src={ image.Url } alt={ strconv.Itoa(key) }/>
-			}
-		}
+		<img id="nowImage" class="m-2 max-w-full max-h-screen lg:max-w-[800px] rounded shadow-lg" src="/static/images/ball-triangle.svg" alt=""/>
 	</div>
-	<button id="BackTopButton" style="display: none" class="fixed flex items-center justify-center w-10 h-10 text-white bg-blue-500 rounded-full shadow-lg bottom-4 right-4">
-		<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><path d="M256 48C141.13 48 48 141.13 48 256s93.13 208 208 208s208-93.13 208-208S370.87 48 256 48zm96 270.63l-96-96l-96 96L137.37 296L256 177.37L374.63 296z" fill="currentColor"></path></svg>
-	</button>
+	<!-- 底部的阅读进度条 -->
+	<!-- https://flowbite.com/docs/forms/range/ -->
+	<!-- 宽度：w-5/6 https://www.tailwindcss.cn/docs/width 使用 w-{fraction} 或 w-full 将元素设置为基于百分比的宽度。 -->
+	<!-- 定位：https://www.tailwindcss.cn/docs/position  -->
+	<!-- 使用 fixed 来定位一个元素相对于浏览器窗视口的位置。偏移量是相对于视口计算的，且该元素将作为绝对定位的子元素的位置参考。 -->
+	<!-- 控制 flex 和 grid 项目如何沿着容器的主轴定位:https://www.tailwindcss.cn/docs/justify-content -->
+	<!-- Tailwind 的容器不会自动居中，也没有任何内置的水平方向的内边距。要使一个容器居中，使用 mx-auto 功能类： -->
+	<div id="steps-range_area" class="w-full h-14 px-2 rounded bg-gray-400 border border-blue-800  overflow-hidden opacity-80" :class="Alpine.store('flip').autoHideToolbar? 'absolute fixed bottom-0':'flex flex-col justify-center'">
+		<label for="steps-range" class="block m-0 text-sm text-center font-medium text-gray-900 dark:text-white" x-text="$store.flip.nowPageNum+'/'+$store.flip.allPageNum">Range steps</label>
+		<input id="steps-range"  class="w-full h-2 mb-2 bg-yellow-800 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" type="range" min="1" max="$store.flip.allPageNum" x-model="Alpine.store('flip').nowPageNum" step="1" />
+	</div>
 }
 
 templ FlipDrawerSlot() {
-  <!-- 阅读模式 -->
-  <!-- toggle组件来自： https://flowbite.com/docs/forms/toggle/ -->
-  <label
-    class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2">
-    <input type="checkbox" :value="$store.global.readMode === 'scroll'" x-on:click="$store.global.toggleReadMode()"
-      class="sr-only peer" />
-    <div
-      class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
-    </div>
-    <span class="text-sm font-medium ms-3"
-      x-text="$store.global.readMode === 'scroll'?i18next.t('scroll_mode'):i18next.t('flip_mode')">
-      Toggle
-      me
-    </span>
-  </label>
-  <!-- 远程同步翻页 -->
-  <label
-    class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2">
-    <input type="checkbox" :value="$store.flip.syncPage" x-on:click="$store.flip.syncpage =!$store.flip.syncPage"
-      class="sr-only peer" />
-    <div
-      class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
-    </div>
-    <span class="text-sm font-medium ms-3" x-text="i18next.t('SyncPage')"></span>
-  </label>
-  <!-- 保存阅读进度 -->
-  <label
-    class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2">
-    <input type="checkbox" :value="$store.flip.savePageNum"
-      x-on:click="$store.flip.savePageNum =!$store.flip.savePageNum" class="sr-only peer" />
-    <div
-      class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
-    </div>
-    <span class="text-sm font-medium ms-3" x-text="i18next.t('SavePageNum')"></span>
-  </label>
-  <!-- 右开本（日漫模式）  -->
-  <label
-    class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2">
-    <input type="checkbox" :value="$store.flip.rightToLeft" x-on:click="$store.flip.rightToLeft =!$store.flip.rightToLeft"
-      class="sr-only peer" />
-    <div
-      class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
-    </div>
-    <span class="text-sm font-medium ms-3"
-      x-text="$store.flip.rightToLeft?i18next.t('LeftScreenToNext'):i18next.t('RightScreenToNext')"></span>
-  </label>
-  <!-- 单页模式  -->
-  <label
-    class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2">
-    <input type="checkbox" :value="$store.flip.doublePageMode"
-      x-on:click="$store.flip.doublePageMode =!$store.flip.doublePageMode" class="sr-only peer" />
-    <div
-      class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
-    </div>
-    <span class="text-sm font-medium ms-3"
-      x-text="$store.flip.doublePageMode?i18next.t('DoublePageMode'):i18next.t('SinglePageMode')"></span>
-  </label>
-  <!-- 自动隐藏工具栏  -->
-  <label
-    class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2">
-    <input type="checkbox" :value="$store.flip.autoHideToolbar" x-on:click="$store.flip.autoHideToolbar =!$store.flip.autoHideToolbar"
-      class="sr-only peer" />
-    <div
-      class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
-    </div>
-    <span class="text-sm font-medium ms-3" x-text="i18next.t('AutoHideToolbar')"></span>
-  </label>
-  <!-- 显示页数  -->
-  <label
-    class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2">
-    <input type="checkbox" :value="$store.flip.showPageNum" x-on:click="$store.flip.showPageNum =!$store.flip.showPageNum"
-      class="sr-only peer" />
-    <div
-      class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
-    </div>
-    <span class="text-sm font-medium ms-3" x-text="i18next.t('ShowPageNum')"></span>
-  </label>
+	<!-- 阅读模式 -->
+	<!-- toggle组件来自： https://flowbite.com/docs/forms/toggle/ -->
+	<label
+		class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2"
+	>
+		<input
+			type="checkbox"
+			:value="$store.global.readMode === 'scroll'"
+			x-on:click="$store.global.toggleReadMode()"
+			class="sr-only peer"
+		/>
+		<div
+			class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+		></div>
+		<span
+			class="text-sm font-medium ms-3"
+			x-text="$store.global.readMode === 'scroll'?i18next.t('scroll_mode'):i18next.t('flip_mode')"
+		>
+			Toggle
+			me
+		</span>
+	</label>
+	<!-- 远程同步翻页 -->
+	<label
+		class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2"
+	>
+		<input
+			type="checkbox"
+			:value="$store.flip.syncPage"
+			x-on:click="$store.flip.syncpage =!$store.flip.syncPage"
+			class="sr-only peer"
+		/>
+		<div
+			class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+		></div>
+		<span class="text-sm font-medium ms-3" x-text="i18next.t('SyncPage')"></span>
+	</label>
+	<!-- 保存阅读进度 -->
+	<label
+		class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2"
+	>
+		<input
+			type="checkbox"
+			:value="$store.flip.savePageNum"
+			x-on:click="$store.flip.savePageNum =!$store.flip.savePageNum"
+			class="sr-only peer"
+		/>
+		<div
+			class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+		></div>
+		<span class="text-sm font-medium ms-3" x-text="i18next.t('SavePageNum')"></span>
+	</label>
+	<!-- 右开本（日漫模式）  -->
+	<label
+		class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2"
+	>
+		<input
+			type="checkbox"
+			:value="$store.flip.rightToLeft"
+			x-on:click="$store.flip.rightToLeft =!$store.flip.rightToLeft"
+			class="sr-only peer"
+		/>
+		<div
+			class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+		></div>
+		<span
+			class="text-sm font-medium ms-3"
+			x-text="$store.flip.rightToLeft?i18next.t('LeftScreenToNext'):i18next.t('RightScreenToNext')"
+		></span>
+	</label>
+	<!-- 单页模式  -->
+	<label
+		class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2"
+	>
+		<input
+			type="checkbox"
+			:value="$store.flip.doublePageMode"
+			x-on:click="$store.flip.doublePageMode =!$store.flip.doublePageMode"
+			class="sr-only peer"
+		/>
+		<div
+			class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+		></div>
+		<span
+			class="text-sm font-medium ms-3"
+			x-text="$store.flip.doublePageMode?i18next.t('DoublePageMode'):i18next.t('SinglePageMode')"
+		></span>
+	</label>
+	<!-- 自动隐藏工具栏  -->
+	<label
+		class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2"
+	>
+		<input
+			type="checkbox"
+			:value="$store.flip.autoHideToolbar"
+			x-on:click="$store.flip.autoHideToolbar =!$store.flip.autoHideToolbar"
+			class="sr-only peer"
+		/>
+		<div
+			class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+		></div>
+		<span class="text-sm font-medium ms-3" x-text="i18next.t('AutoHideToolbar')"></span>
+	</label>
+	<!-- 显示页数  -->
+	<label
+		class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2"
+	>
+		<input
+			type="checkbox"
+			:value="$store.flip.showPageNum"
+			x-on:click="$store.flip.showPageNum =!$store.flip.showPageNum"
+			class="sr-only peer"
+		/>
+		<div
+			class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+		></div>
+		<span class="text-sm font-medium ms-3" x-text="i18next.t('ShowPageNum')"></span>
+	</label>
 }
 
-templ InsertData(bookData any,stateData any) {
-  @templ.JSONScript("NowBook", bookData)
-  @templ.JSONScript("GlobalState", stateData)
-}
-
-// FlipPage 定义 BodyHTML
-templ FlipPage(c *gin.Context, s *state.GlobalState, book *entity.Book,readingProgress *entity.ReadingProgress) {
-	@InsertData(book,s)
-	@common.Header(
-		c,
-		common.HeaderProps{
-			Title:           common.GetPageTitle(book.BookInfo.BookID),
-			ShowReturnIcon:  true,
-			ReturnUrl:       common.GetReturnUrl(book.BookInfo.BookID),
-			SetDownLoadLink: false,
-			InShelf:         false,
-			DownLoadLink:    "",
-			SetTheme:        true,
-			FlipMode:        true,
-		})
-	@FlipMainArea(s, book)
-	@common.Footer(s.Version)
-	@common.Drawer(s, FlipDrawerSlot())
-	@common.QRCode(s)
-}

@@ -19475,6 +19475,10 @@ document.getElementById("FullScreenIcon").addEventListener("click", ()=>{
 // Flip 翻页模式
 (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("flip", {
     nowPageNum: 0,
+    allPageNum: 100,
+    imageMaxWidth: 400,
+    isLandscapeMode: true,
+    isPortraitMode: false,
     autoCrop: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("flip.autoCrop"),
     //自动隐藏工具条
     autoHideToolbar: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("flip.autoHideToolbar"),
@@ -19511,6 +19515,17 @@ document.getElementById("FullScreenIcon").addEventListener("click", ()=>{
         this.theme = this.theme === "light" ? "dark" : "light";
     }
 });
+// 从页面中获取书籍信息
+if (document.getElementById("NowBook")) {
+    if (window.location.pathname.includes("flip")) {
+        (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("flip").nowBook = document.getElementById("NowBook").value;
+        (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("flip").globalState = document.getElementById("GlobalState").value;
+    }
+    if (window.location.pathname.includes("flip")) {
+        (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("scroll").nowBook = document.getElementById("NowBook").value;
+        (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("scroll").globalState = document.getElementById("GlobalState").value;
+    }
+}
 // Start Alpine.
 (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).start();
 

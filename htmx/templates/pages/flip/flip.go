@@ -2,6 +2,7 @@ package flip
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/angelofallars/htmx-go"
 	"github.com/gin-gonic/gin"
@@ -24,17 +25,24 @@ func Handler(c *gin.Context) {
 	}
 	// 当前书籍的阅读进度，存储在cookie里面，与服务器共享与交互 readingProgress
 	readingProgressStr, err := c.Cookie("bookID:" + bookID)
+	// 获取纯域名部分，不带端口号 ////Cookie.Domain 的规范：根据 RFC 6265，Cookie.Domain 不应该包含端口号。它只能包含域名或 IP 地址
+	domain := c.Request.Host
+	if idx := strings.IndexByte(domain, ':'); idx != -1 {
+		domain = domain[:idx] // 去掉端口号
+	}
 	if err != nil {
-		readingProgressStr = "{nowPageNum:0,nowChapterNum:0,readingTime:0}"
+		readingProgressStr = `{"nowPageNum":0,"nowChapterNum":0,"readingTime":0}`
 		// TODO：加密链接的时候，应该设置Secure为true
 		//Secure 表示：Cookie 必须使用类似 HTTPS 的加密环境下才能读取
 		//HttpOnly 表示：不能通过非HTTP方式来访问，拒绝 JavaScript 访问 Cookie！(例如引用 document.cookie）
 		//SameSite 表示：所有和 Cookie 來源不同的請求都不會帶上 Cookie
-		c.SetCookie("bookID:"+bookID, readingProgressStr, 60*60*24*356, "/", c.Request.Host, false, false)
+		//Cookie.Domain 的规范：根据 RFC 6265，Cookie.Domain 不应该包含端口号。它只能包含域名或 IP 地址，而像 localhost:1234 这样的格式是不允许的。
+		//localhost 特例：对于 localhost，一般不需要指定域名。直接设置 Cookie.Domain 为空字符串或者不设置 Domain 属性，Cookie 会被默认设置在 localhost 上，而不需要显式指定。
+		c.SetCookie("bookID:"+bookID, readingProgressStr, 60*60*24*356, "/", domain, false, false)
 	}
 	readingProgress, err := entity.GetReadingProgress(readingProgressStr)
 	if err != nil {
-		logger.Infof("GetReadingProgress: %v", err)
+		logger.Infof("GetReadingProgress: %v readingProgressStr: "+readingProgressStr, err)
 	}
 
 	state.Global.TopBooks, err = entity.TopOfShelfInfo("name")

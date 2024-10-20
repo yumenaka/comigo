@@ -107,6 +107,7 @@ Alpine.store('shelf', {
   clientHeight: 0,
 })
 
+
 // Scroll 卷轴模式
 Alpine.store('scroll', {
   nowPageNum: 0,
@@ -148,6 +149,7 @@ Alpine.store('scroll', {
 // Flip 翻页模式
 Alpine.store('flip', {
   nowPageNum: 0,
+  allPageNum: 100,
   imageMaxWidth: 400,
   isLandscapeMode: true,
   isPortraitMode: false,
@@ -192,6 +194,18 @@ Alpine.store('theme', {
     this.theme = this.theme === 'light' ? 'dark' : 'light'
   },
 })
+
+// 从页面中获取书籍信息
+if (document.getElementById('NowBook')){
+  if (window.location.pathname.includes('flip')){
+    Alpine.store('flip').nowBook = document.getElementById('NowBook').value
+    Alpine.store('flip').globalState = document.getElementById('GlobalState').value
+  }
+  if (window.location.pathname.includes('flip')){
+    Alpine.store('scroll').nowBook = document.getElementById('NowBook').value
+    Alpine.store('scroll').globalState = document.getElementById('GlobalState').value
+  }
+}
 
 // Start Alpine.
 Alpine.start()
