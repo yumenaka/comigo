@@ -110,7 +110,7 @@ func MainLayout(c *gin.Context, s *state.GlobalState, bodyContent templ.Componen
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if !s.StaticMode {
+		if !s.StaticMode && insertScript != "" {
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<script src=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -129,7 +129,7 @@ func MainLayout(c *gin.Context, s *state.GlobalState, bodyContent templ.Componen
 				return templ_7745c5c3_Err
 			}
 		}
-		if s.StaticMode {
+		if s.StaticMode && insertScript != "" {
 			templ_7745c5c3_Err = templ.Raw("<script>"+embed_files.GetFileStr(insertScript)+"</script>").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

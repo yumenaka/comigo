@@ -19443,7 +19443,7 @@ document.getElementById("FullScreenIcon").addEventListener("click", ()=>{
 });
 // Scroll 卷轴模式
 (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("scroll", {
-    nowPageNum: 0,
+    nowPageNum: 1,
     simplifyTitle: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("scroll.simplifyTitle"),
     //下拉模式下，漫画页面的底部间距。单位px。
     marginBottomOnScrollMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(10).as("scroll.marginBottomOnScrollMode"),
@@ -19474,7 +19474,7 @@ document.getElementById("FullScreenIcon").addEventListener("click", ()=>{
 });
 // Flip 翻页模式
 (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("flip", {
-    nowPageNum: 0,
+    nowPageNum: 1,
     allPageNum: 100,
     imageMaxWidth: 400,
     isLandscapeMode: true,
@@ -19515,17 +19515,17 @@ document.getElementById("FullScreenIcon").addEventListener("click", ()=>{
         this.theme = this.theme === "light" ? "dark" : "light";
     }
 });
-// 从页面中获取书籍信息
-if (document.getElementById("NowBook")) {
-    if (window.location.pathname.includes("flip")) {
-        (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("flip").nowBook = document.getElementById("NowBook").value;
-        (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("flip").globalState = document.getElementById("GlobalState").value;
-    }
-    if (window.location.pathname.includes("flip")) {
-        (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("scroll").nowBook = document.getElementById("NowBook").value;
-        (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("scroll").globalState = document.getElementById("GlobalState").value;
-    }
-}
+// // 从页面中获取书籍信息
+// if (document.getElementById('NowBook')){
+//   if (window.location.pathname.includes('flip')){
+//     Alpine.store('flip').nowBook = document.getElementById('NowBook').value
+//     Alpine.store('flip').globalState = document.getElementById('GlobalState').value
+//   }
+//   if (window.location.pathname.includes('flip')){
+//     Alpine.store('scroll').nowBook = document.getElementById('NowBook').value
+//     Alpine.store('scroll').globalState = document.getElementById('GlobalState').value
+//   }
+// }
 // Start Alpine.
 (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).start();
 
