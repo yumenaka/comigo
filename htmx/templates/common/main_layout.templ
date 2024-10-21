@@ -46,10 +46,10 @@ templ MainLayout(c *gin.Context, s *state.GlobalState, bodyContent templ.Compone
 
 		<!-- js代码,滚动到顶部,显示返回顶部按钮,获取鼠标位置,决定是否打开设置面板等  -->
 		<!-- <script src="/static/flip.js"></script>  -->
-		if !s.StaticMode {
+		if !s.StaticMode && insertScript != "" {
 			<script src={"/"+insertScript}></script>
 		}
-		if s.StaticMode {
+		if s.StaticMode && insertScript != "" {
 			@templ.Raw("<script>" + embed_files.GetFileStr(insertScript) + "</script>")
 		}
 	</html>

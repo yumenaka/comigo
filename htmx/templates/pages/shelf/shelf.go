@@ -48,7 +48,7 @@ func Handler(c *gin.Context) {
 		c,
 		&state.Global,
 		ShelfPage(c, &state.Global), // define body content
-		"")
+		"static/shelf.js")
 
 	// 用模板渲染书架页面(htmx-go)
 	if err := htmx.NewResponse().RenderTempl(c.Request.Context(), c.Writer, indexTemplate); err != nil {

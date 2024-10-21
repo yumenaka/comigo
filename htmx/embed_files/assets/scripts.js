@@ -110,7 +110,7 @@ Alpine.store('shelf', {
 
 // Scroll 卷轴模式
 Alpine.store('scroll', {
-  nowPageNum: 0,
+  nowPageNum: 1,
   simplifyTitle: Alpine.$persist(true).as('scroll.simplifyTitle'), //是否简化标题
   //下拉模式下，漫画页面的底部间距。单位px。
   marginBottomOnScrollMode: Alpine.$persist(10).as(
@@ -148,7 +148,7 @@ Alpine.store('scroll', {
 
 // Flip 翻页模式
 Alpine.store('flip', {
-  nowPageNum: 0,
+  nowPageNum: 1,
   allPageNum: 100,
   imageMaxWidth: 400,
   isLandscapeMode: true,
@@ -195,17 +195,17 @@ Alpine.store('theme', {
   },
 })
 
-// 从页面中获取书籍信息
-if (document.getElementById('NowBook')){
-  if (window.location.pathname.includes('flip')){
-    Alpine.store('flip').nowBook = document.getElementById('NowBook').value
-    Alpine.store('flip').globalState = document.getElementById('GlobalState').value
-  }
-  if (window.location.pathname.includes('flip')){
-    Alpine.store('scroll').nowBook = document.getElementById('NowBook').value
-    Alpine.store('scroll').globalState = document.getElementById('GlobalState').value
-  }
-}
+// // 从页面中获取书籍信息
+// if (document.getElementById('NowBook')){
+//   if (window.location.pathname.includes('flip')){
+//     Alpine.store('flip').nowBook = document.getElementById('NowBook').value
+//     Alpine.store('flip').globalState = document.getElementById('GlobalState').value
+//   }
+//   if (window.location.pathname.includes('flip')){
+//     Alpine.store('scroll').nowBook = document.getElementById('NowBook').value
+//     Alpine.store('scroll').globalState = document.getElementById('GlobalState').value
+//   }
+// }
 
 // Start Alpine.
 Alpine.start()
