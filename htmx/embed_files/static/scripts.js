@@ -19484,10 +19484,10 @@ document.getElementById("FullScreenIcon").addEventListener("click", ()=>{
     autoHideToolbar: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("flip.autoHideToolbar"),
     //是否显示页头
     showHeader: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("flip.showHeader"),
-    //是否显示页数
-    showPageNum: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("flip.showPageNum"),
     //是否显示页脚
     showFooter: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("flip.showFooter"),
+    //是否显示页数
+    showPageNum: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("flip.showPageNum"),
     //是否是右半屏翻页（从右到左）?日本漫画从左到右(false)
     rightToLeft: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("flip.rightToLeft"),
     //简单拼合双页
