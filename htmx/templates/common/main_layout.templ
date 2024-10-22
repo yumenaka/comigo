@@ -33,7 +33,7 @@ templ MainLayout(c *gin.Context, s *state.GlobalState, bodyContent templ.Compone
 		<!-- $persist 可以存储原始值以及数组和对象。本地存储，默认的key是 _x_变量名 -->
 		<!-- ！！！当变量的类型发生变化时，必须手动清除 localStorage，否则相应数值将无法正确更新。！！！ -->
 		<!-- 详细用法参见： https://alpinejs.dev/plugins/persist -->
-		<body x-data="{ theme: $persist('retro') }" x-bind:data-theme="theme" onload={ BodyScripts() } class="flex flex-col items-center justify-between w-full h-full min-h-screen p-0 m-0 font-sans">
+		<body x-data="{ theme: $persist('retro') }" x-bind:data-theme="theme"  class="flex flex-col items-center justify-between w-full h-full min-h-screen p-0 m-0 font-sans">
 			@bodyContent
 		</body>
 		<!-- 通用js代码,初始化htmx、Alpine等第三方库  -->
@@ -43,9 +43,7 @@ templ MainLayout(c *gin.Context, s *state.GlobalState, bodyContent templ.Compone
 		if s.StaticMode {
 			@templ.Raw("<script>" + embed_files.GetFileStr("static/scripts.js") + "</script>")
 		}
-
-		<!-- js代码,滚动到顶部,显示返回顶部按钮,获取鼠标位置,决定是否打开设置面板等  -->
-		<!-- <script src="/static/flip.js"></script>  -->
+		<!-- js代码,滚动到顶部,显示返回顶部按钮,获取鼠标位置,决定是否打开设置面板等 src="/static/flip.js"  -->
 		if !s.StaticMode && insertScript != "" {
 			<script src={"/"+insertScript}></script>
 		}
@@ -53,23 +51,4 @@ templ MainLayout(c *gin.Context, s *state.GlobalState, bodyContent templ.Compone
 			@templ.Raw("<script>" + embed_files.GetFileStr(insertScript) + "</script>")
 		}
 	</html>
-}
-
-// BodyScripts JavaScript 代码。在页面加载时，绑定全屏按钮的点击事件。
-
-script BodyScripts() {
-    var element = document.getElementById('FullScreenIcon');
-    if (element) {
-        element.addEventListener('click', function() {
-        	if (!FullScreenHelper.supported()){
-            	alert('Your browser does not support full screen mode.');
-            	return;
-            }
-            if(!FullScreenHelper.state()){
-                FullScreenHelper.request()
-            }else{
-                FullScreenHelper.exit()
-            }
-        });
-    }
 }

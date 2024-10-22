@@ -1,6 +1,7 @@
 <div align="center">
 
-# ComiGo: 简单粗暴的漫画阅读器 
+# ComiGo: 简单粗暴的漫画阅读器
+
 [![Go Report](https://goreportcard.com/badge/github.com/yumenaka/comi?style=flat-square)](https://goreportcard.com/report/github.com/yumenaka/comi)
 [![License](https://img.shields.io/github/license/yumenaka/comi?style=flat-square&color=blue)](https://github.com/yumenaka/comigo/blob/main/LICENSE)
 
@@ -12,18 +13,21 @@
 
 [English](https://github.com/yumenaka/comigo/blob/master/README_EN.md)   [日本語](https://github.com/yumenaka/comigo/blob/master/README_JP.md)
 
-### Features：  
+### Features  
+
 1. 支持Windows、Linux、MacOS。支持卷轴、下拉、翻页等多种模式。
 2. 支持图片文件夹与.rar、.zip、.tar、.cbz、.cbr、.epub压缩包。
 3. 局域网的手机或平板设备，可扫描二维码阅读。  
 4. windows支持拖拽压缩包到comi.exe（或快捷方式）上打开。
 
-### 安装：
+### 安装
+
 **手动下载**  
 
 在 [Releases页面](https://github.com/yumenaka/comigo/releases ) ，下载最新版文件，放到系统PATH。  
 
 **我应该下载哪个版本？**  
+
 - Windows 64位（大多数Windows用户）: Windows_x86_64.zip
 - Windows 32位（比较老的Windows）: Windows_i386.zip
 - Windows ARM版（Windows 骁龙Elite等）：Windows_arm64.zip  
@@ -34,6 +38,7 @@
 - Linux ARM 64位（树莓派4或树莓派5，安装64位的ARM系统的时候）: Linux_armv8.tar.gz  
   
 Linux MacOS 一键安装脚本  
+
 ```bash
 # 需要curl与tar，文件将安装到/usr/local/bin/ 
 bash <(curl -s https://raw.githubusercontent.com/yumenaka/comi/master/get_comigo.sh)
@@ -41,14 +46,20 @@ bash <(curl -s https://raw.githubusercontent.com/yumenaka/comi/master/get_comigo
 #  如果你设置了golang环境，也可以这样安装：
 go install github.com/yumenaka/comi@latest
 ```
-### 用法：
+找不到 comi 命令？
+如果您的系统提示你缺少 comi 命令，请确保您已正确安装 Golang。 
+通常，这意味着/usr/local/bin/（一键脚本）或您的用户 home 目录中的 go/bin 目录（go install）不在 PATH 环境变量中。 
+通常情况下还需要关闭并重新打开已打开的终端，以便安装程序对环境变量做的更改反映在终端中。
+### 用法
+
 ```
 comi [flags] file_or_dir
 # more
 comi --help
 ```
 
-### 配置文件：
+### 配置文件
+
 Comigo服务器设置，可选的保存位置：
 
 **Home目录**  
@@ -65,8 +76,8 @@ Comigo服务器设置，可选的保存位置：
 **用户指定目录**  
 在命令行中调用时，指定`--config`参数，也可以指定任意位置的配置文件。
 
+### 特性与 Todo
 
-### 特性与 Todo：
 - [x] 多文件支持
 - [x] 网页书架
 - [x] 优化打开速度
@@ -87,7 +98,7 @@ Comigo服务器设置，可选的保存位置：
 - [x] 网页端：卷轴模式分页。
 - [ ] 画个示例漫画。
 - [ ] PWA模式。
-- [ ] 优化配置文件 （[参考](https://toml.io/cn/v1.0.0） (better config file formart).
+- [ ] 优化配置文件 （[参考](<https://toml.io/cn/v1.0.0）> (better config file formart).
 - [ ] 嵌入html，防剧透效果。回忆模式，特殊背景，音乐etc
 - [ ] 网页端：优化图片预加载，长图片支持。
 - [x] 网页端：添加预定义主题与颜色。
@@ -97,12 +108,12 @@ Comigo服务器设置，可选的保存位置：
 - [ ] 网页端：网页前端查看log
 - [ ] 跨平台GUI（flutter+gomobile）
 - [ ] 更新提示，自动更新。
-- [ ] 文件夹监控，自动更新
+- [ ] 文件夹监控(fsnotify)，自动更新(github.com/jpillora/overseer)
 - [ ] 文件持久化，meta文件，阅读历史与统计。
 - [ ] 用户系统、访问密码，流量限制等
 - [ ] 网页端：浏览器快捷键。
-- [ ] shell 互动（https://github.com/rivo/tview ）
-- [ ] 子命令，download rar2zip 
+- [ ] shell 互动（<https://github.com/rivo/tview> ）
+- [ ] 子命令，download rar2zip
 - [ ] 支持rar压缩包密码。处理损坏文件，扩展名错误的文件，固实压缩文件（7z）。更准确的文件类型判断。
 - [ ] 崩溃后恢复，恶意存档处理。
 - [ ] 编写测试
@@ -111,15 +122,17 @@ Comigo服务器设置，可选的保存位置：
 - [ ] 挂载smb、webdav
 - [ ] 文件管理，删除。
 - [ ] 移动客户端（Android，iOS）
-- [ ] Debian，RPM包（https://github.com/goreleaser/nfpm）
+- [ ] Debian，RPM包（<https://github.com/goreleaser/nfpm）>
 - [ ] 优化epub与PDF阅读体验，支持图文混排（pdf.js与epub.js）
 
-### Special Thanks：
-[mholt](https://github.com/mholt)  、[spf13](https://github.com/spf13)  [disintegration](https://github.com/disintegration)   、 [Baozisoftware ](https://github.com/Baozisoftware) 、 [markbates](github.com/markbates/pkger)  and more。
+### Special Thanks
+
+[mholt](https://github.com/mholt)  、[spf13](https://github.com/spf13)  [disintegration](https://github.com/disintegration)   、 [Baozisoftware](https://github.com/Baozisoftware) 、 [markbates](github.com/markbates/pkger)  and more。
 
 ## License
 
 This software is released under the MIT license.
 
 ## Stargazers over time
+
 [![Stargazers over time](https://starchart.cc/yumenaka/comi.svg?variant=adaptive)](https://starchart.cc/yumenaka/comi)

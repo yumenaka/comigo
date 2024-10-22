@@ -107,7 +107,6 @@ Alpine.store('shelf', {
   clientHeight: 0,
 })
 
-
 // Scroll 卷轴模式
 Alpine.store('scroll', {
   nowPageNum: 1,
@@ -158,10 +157,11 @@ Alpine.store('flip', {
   autoHideToolbar: Alpine.$persist(true).as('flip.autoHideToolbar'),
   //是否显示页头
   showHeader: Alpine.$persist(true).as('flip.showHeader'),
-  //是否显示页数
-  showPageNum: Alpine.$persist(false).as('flip.showPageNum'),
   //是否显示页脚
   showFooter: Alpine.$persist(true).as('flip.showFooter'),
+  //是否显示页数
+  showPageNum: Alpine.$persist(false).as('flip.showPageNum'),
+
   //是否是右半屏翻页（从右到左）?日本漫画从左到右(false)
   rightToLeft: Alpine.$persist(false).as('flip.rightToLeft'),
   //简单拼合双页
