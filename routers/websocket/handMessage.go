@@ -61,7 +61,7 @@ func handSyncPageMessageToFlipMode(client *websocket.Conn, msg Message, clientID
 	msg.Detail = "同步页数。"
 	err := client.WriteJSON(msg)
 	if err != nil {
-		log.Printf("handSyncPage_ToFlipode error: %v", err)
+		log.Printf("handSyncPageMessageToFlipMode error: %v", err)
 		//如果写入 Websocket 时出现错误，关闭连接，并将其从“clients” 映射中删除。
 		err := client.Close()
 		if err != nil {
@@ -77,7 +77,7 @@ func handSyncPageMessageToFlipMode(client *websocket.Conn, msg Message, clientID
 	}
 	var data syncData
 	if err := json.Unmarshal([]byte(msg.DataString), &data); err != nil {
-		log.Printf("handSyncPage_ToFlipode error: %v", err)
+		log.Printf("handSyncPageMessageToFlipMode error: %v", err)
 		return
 	}
 	if *WsDebug {

@@ -75,6 +75,8 @@ document.getElementById('FullScreenIcon').addEventListener('click', () => {
 
 // global 全局设置
 Alpine.store('global', {
+  // userID 当前用户ID  用于同步阅读进度 随机生成
+  userID: Alpine.$persist(Math.random().toString(36).substring(2)).as('global.userID'),
   // debugMode 是否开启调试模式
   debugMode: Alpine.$persist(false).as('global.debugMode'),
   // readerMode 当前阅读模式
@@ -161,7 +163,6 @@ Alpine.store('flip', {
   showFooter: Alpine.$persist(true).as('flip.showFooter'),
   //是否显示页数
   showPageNum: Alpine.$persist(false).as('flip.showPageNum'),
-
   //是否是右半屏翻页（从右到左）?日本漫画从左到右(false)
   rightToLeft: Alpine.$persist(false).as('flip.rightToLeft'),
   //双页模式
@@ -194,18 +195,5 @@ Alpine.store('theme', {
     this.theme = this.theme === 'light' ? 'dark' : 'light'
   },
 })
-
-// // 从页面中获取书籍信息
-// if (document.getElementById('NowBook')){
-//   if (window.location.pathname.includes('flip')){
-//     Alpine.store('flip').nowBook = document.getElementById('NowBook').value
-//     Alpine.store('flip').globalState = document.getElementById('GlobalState').value
-//   }
-//   if (window.location.pathname.includes('flip')){
-//     Alpine.store('scroll').nowBook = document.getElementById('NowBook').value
-//     Alpine.store('scroll').globalState = document.getElementById('GlobalState').value
-//   }
-// }
-
 // Start Alpine.
 Alpine.start()

@@ -44,7 +44,7 @@ func initFlags() {
 	//本地Host
 	rootCmd.PersistentFlags().StringVar(&config.Config.Host, "host", "DefaultHost", locale.GetString("LOCAL_HOST"))
 	//DEBUG
-	rootCmd.PersistentFlags().BoolVar(&config.Config.Debug, "debug", false, locale.GetString("DEBUG_MODE"))
+	rootCmd.PersistentFlags().BoolVar(&config.Config.Debug, "debug", true, locale.GetString("DEBUG_MODE"))
 	//启用文件上传功能
 	rootCmd.PersistentFlags().BoolVar(&config.Config.EnableUpload, "enable-upload", true, locale.GetString("ENABLE_FILE_UPLOAD"))
 	//上传文件的保存路径

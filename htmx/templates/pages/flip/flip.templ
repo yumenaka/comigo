@@ -104,8 +104,8 @@ templ FlipDrawerSlot() {
 	>
 		<input
 			type="checkbox"
-			:value="$store.flip.syncPage"
-			x-on:click="$store.flip.syncpage =!$store.flip.syncPage"
+			:value="$store.global.syncPageByWS"
+			x-on:click="$store.global.syncPageByWS =!$store.global.syncPageByWS"
 			class="sr-only peer"
 		/>
 		<div
