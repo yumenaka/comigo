@@ -32,8 +32,8 @@ func RunServer() (err error) {
 	// 创建一个新的Gin服务器。
 	router := gin.Default()
 
-	// 使用 noCache 中间件
-	router.Use(noCache())
+	// 使用 noCache 中间件，会导致浏览器每次都重新加载页面，不使用缓存。与翻页模式的预加载功能冲突。
+	//router.Use(noCache())
 
 	// 扫描漫画
 	comigo.StartComigoServer(router)

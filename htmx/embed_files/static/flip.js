@@ -6,14 +6,44 @@
 const book = JSON.parse(document.getElementById('NowBook').textContent);
 // const globalState = JSON.parse(document.getElementById('GlobalState').textContent);
 
+
 // 设置图片资源，预加载等
+// 需要 HTTP 响应头中允许缓存（没有使用 Cache-Control: no-cache），也就是 gin 不能用htmx/router/server.go 里面的noCache 中间件。
+// 在预加载用到的图片资源URL
+let preloadedImages = new Set();
 function setImageSrc() {
-  if (Alpine.store('flip').nowPageNum !== 0 && Alpine.store('flip').nowPageNum !== book.pages.images.length + 1) {
-    document.getElementById('NowImage').src = book.pages.images[Alpine.store('flip').nowPageNum - 1].url;
+  const nowPageNum = Alpine.store('flip').nowPageNum;
+  const images = book.pages.images;
+  const totalImages = images.length;
+
+  if (nowPageNum !== 0 && nowPageNum <= totalImages) {
+    // 加载当前图片
+    document.getElementById('NowImage').src = images[nowPageNum - 1].url;
+    preloadedImages.add(images[nowPageNum - 1].url);
+    // 双页模式，加载下一张图片
+    if (Alpine.store('flip').doublePageMode && nowPageNum < totalImages) {
+      document.getElementById('NextImage').src = images[nowPageNum].url;
+      preloadedImages.add(images[nowPageNum].url);
+    }
+
+    // 预加载前一张和后十张图片
+    const preloadRange = 10; // 预加载范围，可以根据需要调整
+    for (let i = nowPageNum - 2; i <= nowPageNum + preloadRange; i++) {
+      if (i >= 0 && i < totalImages) {
+        const imgUrl = images[i].url;
+        if (!preloadedImages.has(imgUrl)) {
+          let img = new Image();
+          img.src = imgUrl;
+          preloadedImages.add(imgUrl);
+        }
+      }
+    }
   } else {
-    console.log("setImageSrc: nowPageNum is 0 or out of range", Alpine.store('flip').nowPageNum);
+    console.log("setImageSrc: nowPageNum is 0 or out of range", nowPageNum);
   }
 }
+
+
 //首次加载时
 setImageSrc();
 //设置初始值
@@ -87,8 +117,13 @@ let header = document.getElementById("header");
 let range = document.getElementById("steps-range_area");
 // 显示工具栏
 function showToolbar() {
+  if (Alpine.store('flip').autoHideToolbar) {
     header.style.opacity = '0.9';
     range.style.opacity = '0.9';
+  } else {
+    header.style.opacity = '1';
+    range.style.opacity = '1';
+  }
 }
 // 隐藏工具栏
 function hideToolbar() {
@@ -237,30 +272,40 @@ function onMouseMove(e) {
 
 // 获取两个元素的边界信息
 function getElementsRect() {
+
   return {
     rect1: header.getBoundingClientRect(),
-    rect2: range.getBoundingClientRect()
+    rect2: range.getBoundingClientRect(),
+    rect3: document.getElementById("dropdownHover").getBoundingClientRect()
   };
 }
 
-document.addEventListener('mousemove', function(event) {
-  const { rect1, rect2 } = getElementsRect();
+document.addEventListener('mousemove', function (event) {
+  const { rect1, rect2,rect3 } = getElementsRect();
   const x = event.clientX;
   const y = event.clientY;
   // 判断鼠标是否在元素 1 范围内
   const isInElement1 = (
-      x >= rect1.left &&
-      x <= rect1.right &&
-      y >= rect1.top &&
-      y <= rect1.bottom
+    x >= rect1.left &&
+    x <= rect1.right &&
+    y >= rect1.top &&
+    y <= rect1.bottom
   );
   // 判断鼠标是否在元素 2 范围内
   const isInElement2 = (
-      x >= rect2.left &&
-      x <= rect2.right &&
-      y >= rect2.top &&
-      y <= rect2.bottom
+    x >= rect2.left &&
+    x <= rect2.right &&
+    y >= rect2.top &&
+    y <= rect2.bottom
   );
+  // 判断鼠标是否在元素 3 范围内
+  const isInElement3 = (
+    x >= rect3.left &&
+    x <= rect3.right &&
+    y >= rect3.top &&
+    y <= rect3.bottom
+    );
+
   let clickX = event.x; //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
   let clickY = event.y; //获取鼠标的Y坐标（鼠标与屏幕顶部的距离,单位为px）
   // 浏览器的视口,不包括工具栏和滚动条:
@@ -287,13 +332,13 @@ document.addEventListener('mousemove', function(event) {
     showToolbar();
   }
   // 判断鼠标是否不在任一元素范围内
-  if (!isInElement1 && !isInElement2) {
+  if (!isInElement1 && !isInElement2 && !isInElement3) {
     //console.log('鼠标不在任何一个元素范围内');
     if (inSetArea === false) {
       hideToolbar();
     }
   }
-  if (isInElement1 || isInElement2||inSetArea) {
+  if (isInElement1 || isInElement2 || isInElement3 ||inSetArea) {
     //console.log('鼠标在元素范围内');
     showToolbar();
   }
