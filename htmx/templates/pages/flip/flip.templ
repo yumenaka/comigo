@@ -36,7 +36,8 @@ templ InsertData(bookData any, stateData any) {
 templ FlipMainArea(s *state.GlobalState, book *entity.Book) {
 	<div
 		id="mouseMoveArea"
-		class="flex flex-col items-center justify-center flex-1 w-full max-w-full bg-base-100 text-base-content"
+		class="grid-line flex flex-col items-center justify-center flex-1 w-full max-w-full bg-base-100 text-base-content"
+		:class="$store.global.bgPattern !== 'normal' && $store.global.bgPattern"
 		:class="(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') && 'bg-base-300'"
 	>
 		<div class="manga_area" id="MangaMain">
@@ -113,14 +114,14 @@ templ FlipDrawerSlot() {
 		></div>
 		<span class="text-sm font-medium ms-3" x-text="i18next.t('SyncPage')"></span>
 	</label>
-	<!-- 保存阅读进度 -->
+	<!-- 保存阅读进度 SaveReadingProgress -->
 	<label
 		class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2"
 	>
 		<input
 			type="checkbox"
-			:value="$store.flip.savePageNum"
-			x-on:click="$store.flip.savePageNum =!$store.flip.savePageNum"
+			:value="$store.flip.saveReadingProgress"
+			x-on:click="$store.flip.saveReadingProgress =!$store.flip.saveReadingProgress"
 			class="sr-only peer"
 		/>
 		<div

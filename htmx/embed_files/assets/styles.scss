@@ -28,3 +28,29 @@ body {
 [x-cloak] {
   display: none !important;
 }
+
+/* Custom styles */
+/* 用纯 CSS 实现网格背景 https://spacexcode.com/blog/pure-css-grid-line/ */
+.grid-line {
+    background-image:
+            linear-gradient(to right, rgb(203 213 225) 1px, transparent 1px),
+            linear-gradient(to bottom, rgb(203 213 225) 1px, transparent 1px);
+    background-size: 20px 20px;
+    background-position: center center;
+}
+
+.grid-point {
+    background-image: radial-gradient(circle, rgba(203 213 225) 2px, rgba(255 255 255 / 30% ) 2px);
+    background-size: 20px 20px;
+    background-position: center center;
+}
+
+.grid-mosaic {
+    background-image:
+            linear-gradient(45deg, #8d8b8b 25%, transparent 0),
+            linear-gradient(-45deg, #8d8b8b 25%, transparent 0),
+            linear-gradient(45deg, transparent 75%, #8d8b8b 0),
+            linear-gradient(-45deg, transparent 75%, #8d8b8b 0);
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+    background-size: 20px 20px;
+}

@@ -1928,6 +1928,10 @@ input:checked + .toggle-bg {
   padding-bottom: 2rem;
 }
 
+.pt-0 {
+  padding-top: 0;
+}
+
 .pt-1 {
   padding-top: .25rem;
 }
@@ -2608,6 +2612,24 @@ body {
 
 [x-cloak] {
   display: none !important;
+}
+
+.grid-line {
+  background-image: linear-gradient(to right, #cbd5e1 1px, #0000 1px), linear-gradient(#cbd5e1 1px, #0000 1px);
+  background-position: center;
+  background-size: 20px 20px;
+}
+
+.grid-point {
+  background-image: radial-gradient(circle, #cbd5e1 2px, #ffffff4d 2px);
+  background-position: center;
+  background-size: 20px 20px;
+}
+
+.grid-mosaic {
+  background-image: linear-gradient(45deg, #8d8b8b 25%, #0000 0), linear-gradient(-45deg, #8d8b8b 25%, #0000 0), linear-gradient(45deg, #0000 75%, #8d8b8b 0), linear-gradient(-45deg, #0000 75%, #8d8b8b 0);
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+  background-size: 20px 20px;
 }
 
 .after\:absolute:after {
