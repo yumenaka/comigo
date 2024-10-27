@@ -110,10 +110,9 @@ function toNextPage() {
 }
 
 // 翻页函数，前一页
-function toPerviousPage() {
+function toPreviousPage() {
     let doublePageMode = Alpine.store('flip').doublePageMode === true;
     let nowPageNum = parseInt(Alpine.store('flip').nowPageNum);
-    let allPageNum = parseInt(Alpine.store('flip').allPageNum);
     //错误值,第0或第1页。
     if (nowPageNum <= 1) {
         alert(i18next.t("hintFirstPage"));
@@ -164,11 +163,8 @@ if (Alpine.store('flip').autoHideToolbar) {
     startHideTimer();
 }
 
-//获取鼠标位置,决定是否打开设置面板
-function onMouseClick(e) {
-    // https://developer.mozilla.org/zh-CN/docs/Web/API/Event/stopPropagation
-    // 相当于 Alpinejs的  @click.stop="onMouseMove()" ? https://alpinejs.dev/directives/on#prevent
-    e.stopPropagation();
+//鼠标是否在设置区域
+function getInSetArea(e) {
     let clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
     let clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离,单位为px）
     //浏览器的视口,不包括工具栏和滚动条:
@@ -190,9 +186,21 @@ function onMouseClick(e) {
     //在设置区域
     let inSetArea = false
     if ((clickX > MinX && clickX < MaxX) && (clickY > MinY && clickY < MaxY)) {
-        console.log("点中了设置区域！");
-        inSetArea = true;
+        inSetArea = true
     }
+    return inSetArea;
+}
+
+
+//获取鼠标位置,决定是否打开设置面板
+function onMouseClick(e) {
+    // // https://developer.mozilla.org/zh-CN/docs/Web/API/Event/stopPropagation
+    // // 相当于 Alpinejs的  @click.stop="onMouseMove()" ? https://alpinejs.dev/directives/on#prevent
+    // e.stopPropagation();
+    let clickX = e.x; //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
+    //浏览器的视口宽,不包括工具栏和滚动条:
+    let innerWidth = window.innerWidth
+    let inSetArea = getInSetArea(e);
     if (inSetArea) {
         //获取ID为 OpenSettingButton的元素，然后模拟点击
         document.getElementById("OpenSettingButton").click();
@@ -202,7 +210,7 @@ function onMouseClick(e) {
         if (clickX < innerWidth * 0.5) {
             //左边的翻页
             if (Alpine.store('flip').rightToLeft) {
-                toPerviousPage();
+                toPreviousPage();
             } else {
                 toNextPage();
             }
@@ -211,7 +219,7 @@ function onMouseClick(e) {
             if (Alpine.store('flip').rightToLeft) {
                 toNextPage();
             } else {
-                toPerviousPage();
+                toPreviousPage();
             }
         }
     }
@@ -226,30 +234,11 @@ function onMouseMove(e) {
     // https://developer.mozilla.org/zh-CN/docs/Web/API/Event/stopPropagation
     // 相当于 Alpinejs的  @click.stop="onMouseMove()" ? https://alpinejs.dev/directives/on#prevent
     let clickX = e.x; //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
-    let clickY = e.y; //获取鼠标的Y坐标（鼠标与屏幕顶部的距离,单位为px）
-    // 浏览器的视口,不包括工具栏和滚动条:
+    // 浏览器的视口宽,不包括工具栏和滚动条:
     let innerWidth = window.innerWidth;
-    let innerHeight = window.innerHeight;
 
-    //进入设置区域的时候，设置鼠标的形状
-    //设置区域为正方形，边长按照宽或高里面，比较小的值决定
-    const setArea = 0.15;
-    // innerWidth >= innerHeight 的情况下
-    let MinY = innerHeight * (0.5 - setArea);
-    let MaxY = innerHeight * (0.5 + setArea);
-    let MinX = innerWidth * 0.5 - (MaxY - MinY) * 0.5;
-    let MaxX = innerWidth * 0.5 + (MaxY - MinY) * 0.5;
-    if (innerWidth < innerHeight) {
-        MinX = innerWidth * (0.5 - setArea);
-        MaxX = innerWidth * (0.5 + setArea);
-        MinY = innerHeight * 0.5 - (MaxX - MinX) * 0.5;
-        MaxY = innerHeight * 0.5 + (MaxX - MinX) * 0.5;
-    }
     //在设置区域
-    let inSetArea = false
-    if (clickX > MinX && clickX < MaxX && clickY > MinY && clickY < MaxY) {
-        inSetArea = true
-    }
+    let inSetArea = getInSetArea(e);
     if (inSetArea) {
         e.currentTarget.style.cursor =
             "url(/static/images/SettingsOutline.png), pointer";
@@ -330,38 +319,18 @@ document.addEventListener('mousemove', function (event) {
         y <= rect3.bottom
     );
 
-    let clickX = event.x; //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
-    let clickY = event.y; //获取鼠标的Y坐标（鼠标与屏幕顶部的距离,单位为px）
-    // 浏览器的视口,不包括工具栏和滚动条:
-    let innerWidth = window.innerWidth;
-    let innerHeight = window.innerHeight;
-
-    //设置区域为正方形，边长按照宽或高里面，比较小的值决定
-    const setArea = 0.15;
-    // innerWidth >= innerHeight 的情况下
-    let MinY = innerHeight * (0.5 - setArea);
-    let MaxY = innerHeight * (0.5 + setArea);
-    let MinX = innerWidth * 0.5 - (MaxY - MinY) * 0.5;
-    let MaxX = innerWidth * 0.5 + (MaxY - MinY) * 0.5;
-    if (innerWidth < innerHeight) {
-        MinX = innerWidth * (0.5 - setArea);
-        MaxX = innerWidth * (0.5 + setArea);
-        MinY = innerHeight * 0.5 - (MaxX - MinX) * 0.5;
-        MaxY = innerHeight * 0.5 + (MaxX - MinX) * 0.5;
-    }
-    //在设置区域
-    let inSetArea = false
-    if (clickX > MinX && clickX < MaxX && clickY > MinY && clickY < MaxY) {
-        inSetArea = true
+    //鼠标在设置区域
+    let inSetArea = getInSetArea(event);
+    if (inSetArea) {
         showToolbar();
     }
-    // 判断鼠标是否不在任一元素范围内
+    // '鼠标不在任何一个元素范围内'
     if (!isInElement1 && !isInElement2 && !isInElement3) {
-        //console.log('鼠标不在任何一个元素范围内');
         if (inSetArea === false) {
             hideToolbar();
         }
     }
+    // '鼠标在元素范围内'
     if (isInElement1 || isInElement2 || isInElement3 || inSetArea) {
         //console.log('鼠标在元素范围内');
         showToolbar();
@@ -370,7 +339,7 @@ document.addEventListener('mousemove', function (event) {
 
 //可见区域变化时，改变页面状态
 function onResize() {
-    let imageMaxWidth = window.innerWidth
+    Alpine.store("flip").imageMaxWidth = window.innerWidth
     let clientWidth = document.documentElement.clientWidth
     let clientHeight = document.documentElement.clientHeight
     // var aspectRatio = window.innerWidth / window.innerHeight
@@ -384,7 +353,7 @@ function onResize() {
         Alpine.store('flip').isPortraitMode = true
     }
 }
-
+//初始化时,执行一次onResize()
 onResize();
 //文档视图调整大小时触发 resize 事件。 https://developer.mozilla.org/zh-CN/docs/Web/API/Window/resize_event
 window.addEventListener("resize", onResize);
@@ -394,12 +363,15 @@ function onMouseLeave(e) {
     e.currentTarget.style.cursor = "";
 }
 
+
 //获取ID为 mouseMoveArea 的元素
 let mouseMoveArea = document.getElementById("mouseMoveArea")
 // 鼠标移动时触发移动事件
 mouseMoveArea.addEventListener('mousemove', onMouseMove)
 //点击的时候触发点击事件
 mouseMoveArea.addEventListener('click', onMouseClick)
+//离开的时候触发离开事件
+mouseMoveArea.addEventListener('mouseleave', onMouseLeave)
 
 // Websocket 连接和消息处理
 // https://www.ruanyifeng.com/blog/2017/05/websocket.html
