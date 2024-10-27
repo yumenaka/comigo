@@ -141,6 +141,11 @@ func InsertRawJSONScript(data string) templ.Component {
 	})
 }
 
+// getImageUrlForAlpine 用于获取图片的URL
+func getImageUrlForAlpine(Url string) string {
+	return `{ imageUrl: '` + Url + `' + ($store.global.autoCrop  ? "?auto_crop=1" : '') }`
+}
+
 // ScrollMainArea 定义 BodyHTML
 // 需要更复杂的屏幕状态判断的时候，可以参考：https://developer.mozilla.org/zh-CN/docs/Web/API/Screen/orientation
 // orientation: (screen.orientation || {}).type ||  screen.mozOrientation || screen.msOrientation
@@ -185,7 +190,7 @@ func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(image.Url)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll/scroll.templ`, Line: 73, Col: 28}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll/scroll.templ`, Line: 79, Col: 28}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -197,27 +202,27 @@ func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 				}
 			}
 			if !strings.Contains(image.Url, "hidden.") && !strings.Contains(image.Url, ".html") {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<img class=\"w-full manga_image\" src=\"")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<img x-data=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var6 string
-				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(image.Url)
+				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(getImageUrlForAlpine(image.Url))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll/scroll.templ`, Line: 78, Col: 21}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll/scroll.templ`, Line: 83, Col: 48}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" @load=\"\n                            if ($event.target.naturalWidth &gt; $event.target.naturalHeight) {\n                                // 双页\n                                isDoublePage = true;\n                                $el.classList.add(&#39;double&#39;);\n                                $el.classList.remove(&#39;single&#39;);\n                            } else {\n                                // 单页\n                                isDoublePage = false;\n                                $el.classList.add(&#39;single&#39;);\n                                $el.classList.remove(&#39;double&#39;);\n                            }\" @resize.window=\"updateOrientation()\" :style=\"{ width: orientation.toString().includes(&#39;landscape&#39;) ?(Alpine.store(&#39;scroll&#39;).widthUseFixedValue? (isDoublePage ? Alpine.store(&#39;scroll&#39;).doublePageWidth_PX +&#39;px&#39;: Alpine.store(&#39;scroll&#39;).singlePageWidth_PX +&#39;px&#39;): (isDoublePage ? Alpine.store(&#39;scroll&#39;).doublePageWidth_Percent + &#39;%&#39;: Alpine.store(&#39;scroll&#39;).singlePageWidth_Percent + &#39;%&#39;)): &#39;100%&#39;, maxWidth: &#39;100%&#39;}\" alt=\"")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"w-full manga_image\" :src=\"imageUrl\" @load=\"\n                            if ($event.target.naturalWidth &gt; $event.target.naturalHeight) {\n                                // 双页\n                                isDoublePage = true;\n                                $el.classList.add(&#39;double&#39;);\n                                $el.classList.remove(&#39;single&#39;);\n                            } else {\n                                // 单页\n                                isDoublePage = false;\n                                $el.classList.add(&#39;single&#39;);\n                                $el.classList.remove(&#39;double&#39;);\n                            }\" @resize.window=\"updateOrientation()\" :style=\"{ width: orientation.toString().includes(&#39;landscape&#39;) ?(Alpine.store(&#39;scroll&#39;).widthUseFixedValue? (isDoublePage ? Alpine.store(&#39;scroll&#39;).doublePageWidth_PX +&#39;px&#39;: Alpine.store(&#39;scroll&#39;).singlePageWidth_PX +&#39;px&#39;): (isDoublePage ? Alpine.store(&#39;scroll&#39;).doublePageWidth_Percent + &#39;%&#39;: Alpine.store(&#39;scroll&#39;).singlePageWidth_Percent + &#39;%&#39;)): &#39;100%&#39;, maxWidth: &#39;100%&#39;}\" alt=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(key))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll/scroll.templ`, Line: 93, Col: 29}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll/scroll.templ`, Line: 100, Col: 29}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -235,7 +240,7 @@ func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d / %d", key+1, book.BookInfo.PageCount))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll/scroll.templ`, Line: 97, Col: 135}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll/scroll.templ`, Line: 104, Col: 135}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
