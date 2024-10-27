@@ -1,9 +1,11 @@
 // 使用标准 <script> 标记插入的 JavaScript 代码
+"use strict";
+
 //https://templ.guide/syntax-and-usage/script-templates/
 const book = JSON.parse(document.getElementById('NowBook').textContent);
-const slobalState = JSON.parse(document.getElementById('GlobalState').textContent);
-console.log(book);
-console.log(slobalState);
+//const globalState = JSON.parse(document.getElementById('GlobalState').textContent);
+//console.log(book);
+//console.log(globalState);
 
 //滚动到顶部
 function scrollToTop(scrollDuration) {
@@ -23,13 +25,14 @@ document.getElementById("BackTopButton").addEventListener("click", function () {
 //滚动到一定位置显示返回顶部按钮
 let scrollTopSave = 0
 let scrollDownFlag = false
+let showBackTopFlag = false
 let step = 0
 function onScroll() {
     let scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
     scrollDownFlag = scrollTop > scrollTopSave;
     //防手抖,小于一定数值状态就不变 Math.abs()会导致报错
     step = scrollTopSave - scrollTop;
-    // console.log("this.scrollDownFlag:",this.scrollDownFlag,"scrollTop:",scrollTop,"step:", step);
+    // console.log("scrollDownFlag:",scrollDownFlag,"scrollTop:",scrollTop,"step:", step);
     scrollTopSave = scrollTop
     if (step < -10 || step > 10) {
         showBackTopFlag = ((scrollTop > 400) && !scrollDownFlag);
@@ -42,28 +45,32 @@ function onScroll() {
 }
 window.addEventListener("scroll", onScroll);
 
+let isLandscapeMode = true
+let isPortraitMode = false
 //可见区域变化的时候改变页面状态
 function onResize() {
-    this.ScrollModeConfig.imageMaxWidth = window.innerWidth
-    this.clientWidth = document.documentElement.clientWidth
-    this.clientHeight = document.documentElement.clientHeight
-    this.aspectRatio = this.clientWidth / this.clientHeight
+    Alpine.store("scroll").imageMaxWidth = window.innerWidth
+    let clientWidth = document.documentElement.clientWidth
+    let clientHeight = document.documentElement.clientHeight
+    let aspectRatio =  clientWidth / clientHeight
     // 为了调试的时候方便,阈值是正方形
-    if (this.aspectRatio > (19 / 19)) {
-        this.ScrollModeConfig.isLandscapeMode = true
-        this.ScrollModeConfig.isPortraitMode = false
+    if (aspectRatio > (19 / 19)) {
+        isLandscapeMode = true
+        isPortraitMode = false
     } else {
-        this.ScrollModeConfig.isLandscapeMode = false
-        this.ScrollModeConfig.isPortraitMode = true
+        isLandscapeMode = false
+        isPortraitMode = true
     }
 }
+//初始化时执行一次onResize()
+onResize();
 //文档视图调整大小时触发 resize 事件。 https://developer.mozilla.org/zh-CN/docs/Web/API/Window/resize_event
-window.addEventListener("resize", this.onResize);
+window.addEventListener("resize", onResize);
 
 //获取鼠标位置,决定是否打开设置面板
 function onMouseClick(e) {
-    this.clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
-    this.clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离,单位为px）
+    let clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
+    let clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离,单位为px）
     //浏览器的视口,不包括工具栏和滚动条:
     let innerWidth = window.innerWidth
     let innerHeight = window.innerHeight
@@ -82,9 +89,9 @@ function onMouseClick(e) {
     }
     //在设置区域
     let inSetArea = false
-    if ((this.clickX > MinX && this.clickX < MaxX) && (this.clickY > MinY && this.clickY < MaxY)) {
-        console.log("点中了设置区域！");
+    if ((clickX > MinX && clickX < MaxX) && (clickY > MinY && clickY < MaxY)) {
         inSetArea = true
+        //console.log("点中了设置区域！");
     }
     if (inSetArea) {
         //获取ID为 OpenSettingButton的元素，然后模拟点击
@@ -93,8 +100,8 @@ function onMouseClick(e) {
 }
 //获取鼠标位置,决定是否打开设置面板
 function onMouseMove(e) {
-    this.clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
-    this.clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离,单位为px）
+    let clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
+    let clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离,单位为px）
     //浏览器的视口,不包括工具栏和滚动条:
     let innerWidth = window.innerWidth
     let innerHeight = window.innerHeight
@@ -113,7 +120,7 @@ function onMouseMove(e) {
     }
     //在设置区域
     let inSetArea = false
-    if ((this.clickX > MinX && this.clickX < MaxX) && (this.clickY > MinY && this.clickY < MaxY)) {
+    if ((clickX > MinX && clickX < MaxX) && (clickY > MinY && clickY < MaxY)) {
         inSetArea = true
     }
     if (inSetArea) {

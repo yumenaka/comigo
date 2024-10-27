@@ -32,7 +32,7 @@ unexport GOBIN
 
 MAIN_FILE_DIR := ./
 # -ldflags 指定编译参数。-s 去掉符号信息。 -w去掉调试信息。
-GOBUILD=CGO_ENABLED=0 go build -ldflags "-s -w -X config.Version=${VERSION} -X cmd.Version=${VERSION}"
+GOBUILD=CGO_ENABLED=0 go build -ldflags "-s -w -X config.Version=${VERSION}"
 
 ifeq ($(OS), Darwin)
   MD5_UTIL = md5

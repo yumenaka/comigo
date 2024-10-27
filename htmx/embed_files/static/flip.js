@@ -5,7 +5,7 @@
 "use strict";
 
 const book = JSON.parse(document.getElementById('NowBook').textContent);
-console.log(book);
+//console.log(book);
 // const globalState = JSON.parse(document.getElementById('GlobalState').textContent);
 
 // 设置图片资源，预加载等

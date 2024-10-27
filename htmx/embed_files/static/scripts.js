@@ -19396,10 +19396,12 @@ document.getElementById("FullScreenIcon").addEventListener("click", ()=>{
 // https://alpinejs.dev/plugins/persist#using-alpine-persist-global
 // global 全局设置
 (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("global", {
+    // bgPattern 背景花纹
+    bgPattern: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist("normal").as("global.bgPattern"),
     // userID 当前用户ID  用于同步阅读进度 随机生成
     userID: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(Math.random().toString(36).substring(2)).as("global.userID"),
     // debugMode 是否开启调试模式
-    debugMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("global.debugMode"),
+    debugMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("global.debugMode"),
     // readerMode 当前阅读模式
     readMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist("scroll").as("global.readMode"),
     //是否通过websocket同步翻页
@@ -19482,7 +19484,7 @@ document.getElementById("FullScreenIcon").addEventListener("click", ()=>{
     //自动拼合双页(TODO)
     autoDoublePageMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("flip.autoDoublePageModeFlag"),
     //是否保存阅读进度（页数）
-    savePageNum: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("flip.savePageNum"),
+    saveReadingProgress: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("flip.saveReadingProgress"),
     //素描模式标记
     sketchModeFlag: false,
     //是否显示素描提示
@@ -19501,6 +19503,26 @@ document.getElementById("FullScreenIcon").addEventListener("click", ()=>{
     toggleTheme () {
         this.theme = this.theme === "light" ? "dark" : "light";
     }
+});
+// https://alpinejs.dev/plugins/persist#custom-storage
+// 定义自定义存储对象，公开 getItem 函数和 setItem 函数
+// 使用会话 cookie 作为存储
+window.cookieStorage = {
+    getItem (key) {
+        let cookies = document.cookie.split(";");
+        for(let i = 0; i < cookies.length; i++){
+            let cookie = cookies[i].split("=");
+            if (key === cookie[0].trim()) return decodeURIComponent(cookie[1]);
+        }
+        return null;
+    },
+    setItem (key, value) {
+        document.cookie = key + " = " + encodeURIComponent(value);
+    }
+};
+// 使用 cookieStorage 作为存储
+(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("cookie", {
+    someCookieKey: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).using(cookieStorage).as("cookie.someCookieKey")
 });
 // Start Alpine.
 (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).start();

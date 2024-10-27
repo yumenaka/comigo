@@ -75,10 +75,12 @@ document.getElementById('FullScreenIcon').addEventListener('click', () => {
 
 // global 全局设置
 Alpine.store('global', {
+  // bgPattern 背景花纹
+  bgPattern: Alpine.$persist('normal').as('global.bgPattern'),
   // userID 当前用户ID  用于同步阅读进度 随机生成
   userID: Alpine.$persist(Math.random().toString(36).substring(2)).as('global.userID'),
   // debugMode 是否开启调试模式
-  debugMode: Alpine.$persist(false).as('global.debugMode'),
+  debugMode: Alpine.$persist(true).as('global.debugMode'),
   // readerMode 当前阅读模式
   readMode: Alpine.$persist('scroll').as('global.readMode'),
   //是否通过websocket同步翻页
@@ -172,7 +174,7 @@ Alpine.store('flip', {
     'flip.autoDoublePageModeFlag'
   ),
   //是否保存阅读进度（页数）
-  savePageNum: Alpine.$persist(true).as('flip.savePageNum'),
+  saveReadingProgress: Alpine.$persist(true).as('flip.saveReadingProgress'),
   //素描模式标记
   sketchModeFlag: false,
   //是否显示素描提示
@@ -194,6 +196,29 @@ Alpine.store('theme', {
   toggleTheme() {
     this.theme = this.theme === 'light' ? 'dark' : 'light'
   },
+})
+
+// https://alpinejs.dev/plugins/persist#custom-storage
+// 定义自定义存储对象，公开 getItem 函数和 setItem 函数
+// 使用会话 cookie 作为存储
+window.cookieStorage = {
+  getItem(key) {
+    let cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+      let cookie = cookies[i].split("=");
+      if (key === cookie[0].trim()) {
+        return decodeURIComponent(cookie[1]);
+      }
+    }
+    return null;
+  },
+  setItem(key, value) {
+    document.cookie = key+' = '+encodeURIComponent(value)
+  }
+}
+// 使用 cookieStorage 作为存储
+Alpine.store('cookie', {
+  someCookieKey :  Alpine.$persist(false).using(cookieStorage).as('cookie.someCookieKey'),
 })
 // Start Alpine.
 Alpine.start()
