@@ -3,7 +3,7 @@ package scroll
 import (
 	"fmt"
 	"strconv"
-    "strings"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comigo/entity"
@@ -13,7 +13,7 @@ import (
 
 // ScrollPage 定义 BodyHTML
 templ ScrollPage(c *gin.Context, s *state.GlobalState, book *entity.Book) {
-    @InsertData(book,s)
+	@InsertData(book, s)
 	@common.Header(
 		c,
 		common.HeaderProps{
@@ -31,37 +31,41 @@ templ ScrollPage(c *gin.Context, s *state.GlobalState, book *entity.Book) {
 	@common.QRCode(s)
 }
 
-templ InsertData(bookData any,stateData any) {
-  @templ.JSONScript("NowBook", bookData)
-  @templ.JSONScript("GlobalState", stateData)
+templ InsertData(bookData any, stateData any) {
+	@templ.JSONScript("NowBook", bookData)
+	@templ.JSONScript("GlobalState", stateData)
 }
+
 templ InsertRawJSONScript(data string) {
-  <script>
+	<script>
     @templ.Raw(data)
   </script>
 }
 
 // ScrollMainArea 定义 BodyHTML
+// 需要更复杂的屏幕状态判断的时候，可以参考：https://developer.mozilla.org/zh-CN/docs/Web/API/Screen/orientation
+// orientation: (screen.orientation || {}).type ||  screen.mozOrientation || screen.msOrientation
+// tips：hx-get 用于获取图片的URL，hx-trigger 用于触发加载，hx-swap 用于替换元素，innerHTML默认值，将内容放在目标元素内 outerHTML用返回的内容替换整个目标元素  hx-target 用于指定目标元素
+// https://htmx.org/docs/#triggers  https://htmx.org/docs/#swapping
+// tips： Alpine.js 动态CSS，只支持内联写法
 templ ScrollMainArea(s *state.GlobalState, book *entity.Book) {
 	<div
 		id="mouseMoveArea"
+		x-data="{
+            isDoublePage: false,
+            imageWidth: '',
+            orientation: '',
+            updateOrientation() {
+                this.orientation = (window.innerWidth / window.innerHeight >= 1) ? 'landscape' : 'portrait';
+            }
+        }"
+		x-init="updateOrientation();"
+		@resize.window="updateOrientation()"
 		class="flex flex-col items-center justify-center flex-1 w-full max-w-full pt-0 bg-base-100 text-base-content"
-		:class="$store.global.bgPattern !== 'normal' && $store.global.bgPattern"
-		:class="(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') && 'bg-base-300'"
+		:class="(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') ? ($store.global.bgPattern !== 'none'?$store.global.bgPattern+' bg-base-300':'bg-base-300'):($store.global.bgPattern !== 'none'?$store.global.bgPattern:'')"
 	>
-		<!-- Alpine.js 动态CSS，只支持内联写法 -->
-		<!-- Alpine.js 的 v-if 需要用template包裹起来，原因参照： https://alpinejs.dev/directives/if -->
-		<!-- https://htmx.org/docs/#triggers -->
-		<!-- https://htmx.org/docs/#swapping -->
-		<!-- hx-get 用于获取图片的URL，hx-trigger 用于触发加载，hx-swap 用于替换元素，innerHTML默认值，将内容放在目标元素内 outerHTML用返回的内容替换整个目标元素  hx-target 用于指定目标元素 -->
 		for key, image := range book.Pages.Images {
 			<div
-				x-data="{
-                            orientation: '',
-                            updateOrientation() {
-                                this.orientation = (window.innerWidth / window.innerHeight >= 1) ? 'landscape' : 'portrait';
-                            }
-                        }"
 				class="flex flex-col justify-start w-full max-w-full m-0 rounded item-center"
 				:style="{ marginBottom: $store.scroll.marginBottomOnScrollMode + 'px' }"
 			>
@@ -70,13 +74,8 @@ templ ScrollMainArea(s *state.GlobalState, book *entity.Book) {
 				}
 				if !strings.Contains(image.Url, "hidden.")&& !strings.Contains(image.Url, ".html") {
 					<img
-						class="w-full"
+						class="w-full manga_image"
 						src={ image.Url }
-						x-data="{
-                                    isDoublePage: false,
-                                    imageWidth: ''
-                                }"
-						x-init="updateOrientation();"
 						@load="
                             if ($event.target.naturalWidth > $event.target.naturalHeight) {
                                 // 双页
@@ -90,7 +89,7 @@ templ ScrollMainArea(s *state.GlobalState, book *entity.Book) {
                                 $el.classList.remove('double');
                             }"
 						@resize.window="updateOrientation()"
-						:style="{ width: orientation === 'landscape'?(Alpine.store('scroll').widthUseFixedValue? (isDoublePage ? Alpine.store('scroll').doublePageWidth_PX +'px': Alpine.store('scroll').singlePageWidth_PX +'px'): (isDoublePage ? Alpine.store('scroll').doublePageWidth_Percent + '%': Alpine.store('scroll').singlePageWidth_Percent + '%')): '100%', maxWidth: '100%'}"
+						:style="{ width: orientation.toString().includes('landscape') ?(Alpine.store('scroll').widthUseFixedValue? (isDoublePage ? Alpine.store('scroll').doublePageWidth_PX +'px': Alpine.store('scroll').singlePageWidth_PX +'px'): (isDoublePage ? Alpine.store('scroll').doublePageWidth_Percent + '%': Alpine.store('scroll').singlePageWidth_Percent + '%')): '100%', maxWidth: '100%'}"
 						alt={ strconv.Itoa(key) }
 					/>
 				}
@@ -105,9 +104,8 @@ templ ScrollMainArea(s *state.GlobalState, book *entity.Book) {
 	</button>
 	<style>
     /* https://developer.mozilla.org/zh-CN/docs/Web/CSS/object-fit */
-    img {
+    .manga_image {
         margin: auto;
-        margin-bottom: v-bind(margin+'px');
         box-shadow: 0px 6px 3px 0px rgba(0, 0, 0, 0.19);
     }
 
@@ -270,14 +268,19 @@ templ ScrollDrawerSlot() {
 			class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
 		/>
 	</div>
-	  <!-- 自动切边  -->
-      <label
-        class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2">
-        <input type="checkbox" :value="$store.flip.autoCrop" x-on:click="$store.flip.autoCrop =!$store.flip.autoCrop"
-          class="sr-only peer" />
-        <div
-          class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
-        </div>
-        <span class="text-sm font-medium ms-3" x-text="i18next.t('AutoCrop')"></span>
-      </label>
+	<!-- 自动切边  -->
+	<label
+		class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2"
+	>
+		<input
+			type="checkbox"
+			:value="$store.flip.autoCrop"
+			x-on:click="$store.flip.autoCrop =!$store.flip.autoCrop"
+			class="sr-only peer"
+		/>
+		<div
+			class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+		></div>
+		<span class="text-sm font-medium ms-3" x-text="i18next.t('AutoCrop')"></span>
+	</label>
 }

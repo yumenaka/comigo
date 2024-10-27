@@ -62,13 +62,13 @@ function onResize() {
         isPortraitMode = true
     }
 }
-//初始化时执行一次onResize()
+//初始化时,执行一次onResize()
 onResize();
 //文档视图调整大小时触发 resize 事件。 https://developer.mozilla.org/zh-CN/docs/Web/API/Window/resize_event
 window.addEventListener("resize", onResize);
 
-//获取鼠标位置,决定是否打开设置面板
-function onMouseClick(e) {
+//鼠标是否在设置区域
+function getInSetArea(e) {
     let clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
     let clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离,单位为px）
     //浏览器的视口,不包括工具栏和滚动条:
@@ -91,40 +91,20 @@ function onMouseClick(e) {
     let inSetArea = false
     if ((clickX > MinX && clickX < MaxX) && (clickY > MinY && clickY < MaxY)) {
         inSetArea = true
-        //console.log("点中了设置区域！");
     }
-    if (inSetArea) {
+    return inSetArea;
+}
+
+//获取鼠标位置,决定是否打开设置面板
+function onMouseClick(e) {
+    if (getInSetArea(e)) {
         //获取ID为 OpenSettingButton的元素，然后模拟点击
         document.getElementById("OpenSettingButton").click();
     }
 }
 //获取鼠标位置,决定是否打开设置面板
 function onMouseMove(e) {
-    let clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
-    let clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离,单位为px）
-    //浏览器的视口,不包括工具栏和滚动条:
-    let innerWidth = window.innerWidth
-    let innerHeight = window.innerHeight
-    //设置区域为正方形，边长按照宽或高里面，比较小的值决定
-    const setArea = 0.15;
-    // innerWidth >= innerHeight 的情况下
-    let MinY = innerHeight * (0.5 - setArea);
-    let MaxY = innerHeight * (0.5 + setArea);
-    let MinX = innerWidth * 0.5 - (MaxY - MinY) * 0.5;
-    let MaxX = innerWidth * 0.5 + (MaxY - MinY) * 0.5;
-    if (innerWidth < innerHeight) {
-        MinX = innerWidth * (0.5 - setArea);
-        MaxX = innerWidth * (0.5 + setArea);
-        MinY = innerHeight * 0.5 - (MaxX - MinX) * 0.5;
-        MaxY = innerHeight * 0.5 + (MaxX - MinX) * 0.5;
-    }
-    //在设置区域
-    let inSetArea = false
-    if ((clickX > MinX && clickX < MaxX) && (clickY > MinY && clickY < MaxY)) {
-        inSetArea = true
-    }
-    if (inSetArea) {
-        //console.log("在设置区域！");
+    if (getInSetArea(e)) {
         e.currentTarget.style.cursor = 'url(/static/images/SettingsOutline.png), pointer';
     } else {
         e.currentTarget.style.cursor = '';

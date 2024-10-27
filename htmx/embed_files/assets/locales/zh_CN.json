@@ -4,7 +4,7 @@
   "scroll_mode": "卷轴模式",
   "flip_mode": "翻页模式",
   "ReaderSettings": "阅读器设定",
-  "SinglePageWidth": "横屏单页度:",
+  "SinglePageWidth": "横屏单页宽:",
   "DoublePageWidth": "横屏双页宽:",
   "WidthUsePercent": "横屏宽度:百分比%",
   "WidthUseFixedValue": "横屏宽度:固定值px",

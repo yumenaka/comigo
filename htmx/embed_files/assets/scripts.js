@@ -76,7 +76,7 @@ document.getElementById('FullScreenIcon').addEventListener('click', () => {
 // global 全局设置
 Alpine.store('global', {
   // bgPattern 背景花纹
-  bgPattern: Alpine.$persist('normal').as('global.bgPattern'),
+  bgPattern: Alpine.$persist('grid-line').as('global.bgPattern'),
   // userID 当前用户ID  用于同步阅读进度 随机生成
   userID: Alpine.$persist(Math.random().toString(36).substring(2)).as('global.userID'),
   // debugMode 是否开启调试模式
@@ -198,6 +198,11 @@ Alpine.store('theme', {
   },
 })
 
+
+// 由于 Cookie “cookie.someCookieKey”缺少正确的“sameSite”属性值，缺少“SameSite”或含有无效值的 Cookie
+// 即将被视作指定为“Lax”，该 Cookie 将无法发送至第三方上下文中。若您的应用程序依赖这组 Cookie 以在不同上下文中工作，
+// 请添加“SameSite=None”属性。若要了解“SameSite”属性的更多信息，请参阅：https://developer.mozilla.org/docs/Web/HTTP/Headers/Set-Cookie/SameSite
+
 // https://alpinejs.dev/plugins/persist#custom-storage
 // 定义自定义存储对象，公开 getItem 函数和 setItem 函数
 // 使用会话 cookie 作为存储
@@ -213,12 +218,14 @@ window.cookieStorage = {
     return null;
   },
   setItem(key, value) {
-    document.cookie = key+' = '+encodeURIComponent(value)
+    document.cookie = `${key}=${encodeURIComponent(value)}; SameSite=Lax`;//SameSite设置默认值（Lax），防止控制台报错。加载图像或框架（frame）的请求将不会包含用户的 Cookie。
   }
 }
 // 使用 cookieStorage 作为存储
 Alpine.store('cookie', {
   someCookieKey :  Alpine.$persist(false).using(cookieStorage).as('cookie.someCookieKey'),
 })
+
+
 // Start Alpine.
 Alpine.start()
