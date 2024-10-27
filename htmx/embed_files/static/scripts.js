@@ -19398,6 +19398,8 @@ document.getElementById("FullScreenIcon").addEventListener("click", ()=>{
 (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("global", {
     // bgPattern 背景花纹
     bgPattern: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist("grid-line").as("global.bgPattern"),
+    autoCrop: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("global.autoCrop"),
+    autoCropNum: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(1).as("global.autoCropNum"),
     // userID 当前用户ID  用于同步阅读进度 随机生成
     userID: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(Math.random().toString(36).substring(2)).as("global.userID"),
     // debugMode 是否开启调试模式
@@ -19468,7 +19470,6 @@ document.getElementById("FullScreenIcon").addEventListener("click", ()=>{
     imageMaxWidth: 400,
     isLandscapeMode: true,
     isPortraitMode: false,
-    autoCrop: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("flip.autoCrop"),
     //自动隐藏工具条
     autoHideToolbar: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("flip.autoHideToolbar"),
     //是否显示页头
@@ -19527,6 +19528,30 @@ window.cookieStorage = {
 (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("cookie", {
     someCookieKey: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).using(cookieStorage).as("cookie.someCookieKey")
 });
+//请求图片文件时，可添加的额外参数
+const $0c7aa0f20b85e54e$var$imageParameters = {
+    resize_width: -1,
+    resize_height: -1,
+    do_auto_resize: false,
+    resize_max_width: 800,
+    resize_max_height: -1,
+    do_auto_crop: false,
+    auto_crop_num: 1,
+    gray: false
+};
+//添加各种字符串参数,不需要的话为空
+const $0c7aa0f20b85e54e$var$resize_width_str = $0c7aa0f20b85e54e$var$imageParameters.resize_width > 0 ? "&resize_width=" + $0c7aa0f20b85e54e$var$imageParameters.resize_width : "";
+const $0c7aa0f20b85e54e$var$resize_height_str = $0c7aa0f20b85e54e$var$imageParameters.resize_height > 0 ? "&resize_height=" + $0c7aa0f20b85e54e$var$imageParameters.resize_height : "";
+const $0c7aa0f20b85e54e$var$gray_str = $0c7aa0f20b85e54e$var$imageParameters.gray ? "&gray=true" : "";
+const $0c7aa0f20b85e54e$var$do_auto_resize_str = $0c7aa0f20b85e54e$var$imageParameters.do_auto_resize ? "&resize_max_width=" + $0c7aa0f20b85e54e$var$imageParameters.resize_max_width : "";
+const $0c7aa0f20b85e54e$var$resize_max_height_str = $0c7aa0f20b85e54e$var$imageParameters.resize_max_height > 0 ? "&resize_max_height=" + $0c7aa0f20b85e54e$var$imageParameters.resize_max_height : "";
+const $0c7aa0f20b85e54e$var$auto_crop_str = $0c7aa0f20b85e54e$var$imageParameters.do_auto_crop ? "&auto_crop=" + $0c7aa0f20b85e54e$var$imageParameters.auto_crop_num : "";
+//所有附加的转换参数
+let $0c7aa0f20b85e54e$var$addStr = $0c7aa0f20b85e54e$var$resize_width_str + $0c7aa0f20b85e54e$var$resize_height_str + $0c7aa0f20b85e54e$var$do_auto_resize_str + $0c7aa0f20b85e54e$var$resize_max_height_str + $0c7aa0f20b85e54e$var$auto_crop_str + $0c7aa0f20b85e54e$var$gray_str;
+if ($0c7aa0f20b85e54e$var$addStr !== "") {
+    $0c7aa0f20b85e54e$var$addStr = "?" + $0c7aa0f20b85e54e$var$addStr.substring(1);
+    console.log("addStr:", $0c7aa0f20b85e54e$var$addStr);
+}
 // Start Alpine.
 (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).start();
 

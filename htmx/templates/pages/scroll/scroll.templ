@@ -42,6 +42,12 @@ templ InsertRawJSONScript(data string) {
   </script>
 }
 
+// getImageUrlForAlpine 用于获取图片的URL
+func getImageUrlForAlpine(Url string) string {
+    return `{ imageUrl: '` + Url + `' + ($store.global.autoCrop  ? "?auto_crop=1" : '') }`
+}
+
+
 // ScrollMainArea 定义 BodyHTML
 // 需要更复杂的屏幕状态判断的时候，可以参考：https://developer.mozilla.org/zh-CN/docs/Web/API/Screen/orientation
 // orientation: (screen.orientation || {}).type ||  screen.mozOrientation || screen.msOrientation
@@ -74,8 +80,9 @@ templ ScrollMainArea(s *state.GlobalState, book *entity.Book) {
 				}
 				if !strings.Contains(image.Url, "hidden.")&& !strings.Contains(image.Url, ".html") {
 					<img
+					    x-data={getImageUrlForAlpine(image.Url)}
 						class="w-full manga_image"
-						src={ image.Url }
+						:src="imageUrl"
 						@load="
                             if ($event.target.naturalWidth > $event.target.naturalHeight) {
                                 // 双页
