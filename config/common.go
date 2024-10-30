@@ -3,14 +3,16 @@ package config
 import (
 	"fmt"
 	"github.com/mitchellh/go-homedir"
+	"net/http"
+	"os"
+	"path"
+	"path/filepath"
+	"strconv"
+
 	"github.com/pelletier/go-toml/v2"
 	"github.com/yumenaka/comigo/entity"
 	"github.com/yumenaka/comigo/util"
 	"github.com/yumenaka/comigo/util/logger"
-	"net/http"
-	"os"
-	"path"
-	"strconv"
 )
 
 var (
@@ -69,12 +71,12 @@ func UpdateLocalConfig() error {
 		return err
 	}
 	//HomeDirectory
-	home, err := homedir.Dir()
+	confDir, err := os.UserConfigDir()
 	if err != nil {
 		return err
 	}
-	if util.FileExist(path.Join(home, ".config/comigo/config.toml")) {
-		err = os.WriteFile(path.Join(home, ".config/comigo/config.toml"), bytes, 0644)
+	if util.FileExist(filepath.Join(confDir, "comigo", "config.toml")) {
+		err = os.WriteFile(filepath.Join(confDir, "comigo", "config.toml"), bytes, 0644)
 		if err != nil {
 			return err
 		}
@@ -114,7 +116,7 @@ func SaveConfig(to string) error {
 	logger.Infof("Config Save To %s", to)
 	switch to {
 	case HomeDirectory:
-		home, err := homedir.Dir()
+		home, err := os.UserHomeDir()
 		if err != nil {
 			return err
 		}

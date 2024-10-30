@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/routers"
@@ -38,7 +37,7 @@ var rootCmd = &cobra.Command{
 
 // ReadConfigFile 读取顺序：RAM（代码当中设定的默认值）+命令行参数  -> HomeDirectory -> ProgramDirectory -> WorkingDirectory
 func ReadConfigFile() {
-	home, err := homedir.Dir()
+	home, err := os.UserHomeDir()
 	if err != nil {
 		logger.Infof("%s", err)
 	}

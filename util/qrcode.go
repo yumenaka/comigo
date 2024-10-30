@@ -2,11 +2,11 @@ package util
 
 import (
 	"fmt"
-	"github.com/yumenaka/comigo/util/locale"
-	"github.com/yumenaka/comigo/util/logger"
 	"strconv"
 
 	qrcodeTerminal "github.com/Baozisoftware/qrcode-terminal-go"
+	"github.com/yumenaka/comigo/util/locale"
+	"github.com/yumenaka/comigo/util/logger"
 )
 
 // PrintAllReaderURL 打印阅读链接
@@ -55,6 +55,7 @@ func printURLAndQRCode(port int, PrintAllPossibleQRCode bool, ServerHost string,
 }
 
 func PrintQRCode(text string) {
+	// or https://github.com/mdp/qrterminal
 	obj := qrcodeTerminal.New()
 	obj.Get(text).Print()
 }

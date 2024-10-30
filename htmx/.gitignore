@@ -58,3 +58,5 @@ lerna-debug.log*
 
 *.js.map
 *.css.map
+# useage: https://github.com/zpm-zsh/autoenv
+.in
