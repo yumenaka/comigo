@@ -2,7 +2,6 @@ package config
 
 import (
 	"github.com/joho/godotenv"
-	"github.com/mitchellh/go-homedir"
 	"github.com/yumenaka/comigo/util/logger"
 	"os"
 )
@@ -10,7 +9,7 @@ import (
 // home目录 配置
 func init() {
 	// Find home directory.
-	home, err := homedir.Dir()
+	home, err := os.UserHomeDir()
 	if err != nil {
 		logger.Infof("%s", err)
 	}

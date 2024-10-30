@@ -2,12 +2,12 @@ package comigo
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comigo/resource"
 	"os"
 
+	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comigo/cmd"
 	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/resource"
 	"github.com/yumenaka/comigo/routers"
 )
 
