@@ -42,6 +42,8 @@ func RunServer() (err error) {
 	comigo.StartComigoServer(router)
 	// 为模板引擎定义 HTML 渲染器。
 	router.HTMLRender = &TemplRender{}
+	// 设置上传文件的最大内存限制
+	router.MaxMultipartMemory = 5000 << 20 // 5000 MB
 
 	// 设置嵌入静态文件的文件系统
 	embed_files.StaticFS, err = fs.Sub(embed_files.Static, "static")

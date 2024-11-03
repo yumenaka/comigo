@@ -23,11 +23,9 @@ func Handler(c *gin.Context) {
 	if bookID == "" {
 		var err error
 		state.Global.TopBooks, err = entity.TopOfShelfInfo(sortBy)
-		//TODO: 没有图书的提示（返回主页\上传压缩包\远程下载示例漫画）
+		//TODO: 没有图书的提示（上传压缩包\远程下载示例漫画）
 		if err != nil {
 			logger.Infof("TopOfShelfInfo: %v", err)
-			// 显示 HTTP 404 错误信息，文本“404 not found”
-			c.String(http.StatusNotFound, "404 not found")
 		}
 	}
 	// 如果指定了书籍ID，获取子书架信息。

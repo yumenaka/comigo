@@ -4,6 +4,7 @@ import (
 	"log"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/routers/config_handlers"
@@ -14,12 +15,7 @@ import (
 
 var protectedAPI *gin.RouterGroup
 
-// RESTful API
-// Create	POST/PUT
-// Read	    GET
-// Update	PUT
-// Delete	DELETE
-// 前端需要的 API
+// BindAPI 为前端绑定 API 路由
 func BindAPI(engine *gin.Engine) {
 	// 路由组,方便管理部分相同的URL
 	api := engine.Group("/api")
@@ -32,6 +28,15 @@ func BindAPI(engine *gin.Engine) {
 		rg.GET("/ws", websocket.WsHandler)
 	}
 	publicRoutes(api)
+
+	// 配置 CORS
+	corsConfig := cors.Config{
+		AllowOrigins:     []string{"http://localhost:7777"}, // 调试用前端地址，根据实际情况调整
+		AllowMethods:     []string{"GET", "POST"},
+		AllowHeaders:     []string{"Origin", "Content-Type"},
+		AllowCredentials: true,
+	}
+	engine.Use(cors.New(corsConfig))
 
 	// 可能需要认证的路由
 	protectedAPI = api.Group("/")

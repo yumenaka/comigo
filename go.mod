@@ -43,6 +43,7 @@ require (
 require (
 	github.com/cloudsoda/go-smb2 v0.0.0-20231124195312-f3ec8ae2c891
 	github.com/ebitenui/ebitenui v0.5.7
+	github.com/gin-contrib/cors v1.7.2
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/hajimehoshi/ebiten/v2 v2.7.5
 	github.com/hirochachacha/go-smb2 v1.1.0
@@ -111,7 +112,6 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-localereader v0.0.1 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
-	github.com/mdp/qrterminal/v3 v3.2.0 // indirect
 	github.com/mholt/lzip-go v0.3.6 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
@@ -168,7 +168,6 @@ require (
 	modernc.org/memory v1.8.0 // indirect
 	modernc.org/strutil v1.2.0 // indirect
 	modernc.org/token v1.1.0 // indirect
-	rsc.io/qr v0.2.0 // indirect
 )
 
 //替换依赖项：
