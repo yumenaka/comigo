@@ -44,7 +44,8 @@ templ InsertRawJSONScript(data string) {
 
 // getImageUrlForAlpine 用于获取图片的URL
 func getImageUrlForAlpine(Url string) string {
-    return `{ imageUrl: '` + Url + `' + ($store.global.autoCrop  ? "?auto_crop=1" : '') }`
+    //return `{ imageUrl: '` + Url + `' + ($store.global.autoCrop  ? "?auto_crop=1" : '') }`
+    return `{ imageUrl: '` + Url + `' + ($store.global.autoCrop  ? "" : '') }`
 }
 
 

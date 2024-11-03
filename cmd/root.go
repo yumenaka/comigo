@@ -101,7 +101,7 @@ func ReadConfigFile() {
 // 这是由 main.main() 调用的。 rootCmd 只需要执行一次。
 func Execute() {
 	//初始化命令行参数。不能放在初始化配置文件之后。
-	initFlags()
+	InitFlags()
 	//初始化配置文件
 	cobra.OnInitialize(ReadConfigFile) // "OnInitialize"传入的函数，应该会在所有命令执行之前，包括rootCmd.Run之前执行。
 	//执行命令
