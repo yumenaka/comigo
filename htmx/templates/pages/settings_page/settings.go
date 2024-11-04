@@ -1,4 +1,4 @@
-package upload_page
+package settings_page
 
 import (
 	"net/http"
@@ -14,7 +14,7 @@ func Handler(c *gin.Context) {
 	indexTemplate := common.MainLayout(
 		c,
 		&state.Global,
-		UploadPage(c, &state.Global),
+		SettingsPage(c, &state.Global),
 		"",
 	)
 	// 渲染页面
