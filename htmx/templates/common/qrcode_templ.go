@@ -8,9 +8,7 @@ package common
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/yumenaka/comigo/htmx/state"
-
-func QRCode(s *state.GlobalState) templ.Component {
+func QRCode(serverHost string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -36,9 +34,9 @@ func QRCode(s *state.GlobalState) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(ServerHostBindStr(s.ServerStatus.ServerHost))
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(ServerHostBindStr(serverHost))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/common/qrcode.templ`, Line: 7, Col: 59}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/common/qrcode.templ`, Line: 5, Col: 44}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {

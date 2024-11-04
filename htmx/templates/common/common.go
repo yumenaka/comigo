@@ -11,7 +11,6 @@ import (
 
 // ServerHostBindStr  传递给前端，现实QRCode用的“主机域名”字符串
 func ServerHostBindStr(serverHost string) string {
-	//"{ serverHost: 'abc.com' }"
 	return "{ serverHost: '" + serverHost + "' }"
 }
 

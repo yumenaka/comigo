@@ -8,6 +8,7 @@ import (
 	"github.com/yumenaka/comigo/entity"
 	"github.com/yumenaka/comigo/htmx/state"
 	"github.com/yumenaka/comigo/htmx/templates/common"
+	"github.com/yumenaka/comigo/htmx/templates/pages/error_page"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
@@ -26,29 +27,32 @@ func Handler(c *gin.Context) {
 	sortBy := c.DefaultQuery("sortBy", "default")
 	// 读取url参数，获取书籍ID
 	bookID := c.Param("id")
-	book, err := entity.GetBookByID(bookID, sortBy)
-	if err != nil {
-		logger.Infof("GetBookByID: %v", err)
-	}
-	// TODO: 如果没有找到书籍，返回 HTTP 404 错误信息，或建议跳转上传页面。
-	state.Global.TopBooks, err = entity.TopOfShelfInfo(sortBy)
-	if err != nil {
-		logger.Infof("TopOfShelfInfo: %v", err)
-	}
-
-	// 定义模板主体内容。
-	scrollPage := ScrollPage(c, &state.Global, book)
-	// 为首页定义模板布局。
+	//没有找到书籍，显示 HTTP 404 错误
 	indexTemplate := common.MainLayout(
 		c,
 		&state.Global,
-		scrollPage, // define body content
-		"static/scroll.js",
+		error_page.NotFound404(c, &state.Global),
+		"",
 	)
-
-	// 渲染索引页模板。
+	book, err := entity.GetBookByID(bookID, sortBy)
+	if err != nil {
+		c.Status(http.StatusNotFound)
+		logger.Infof("GetBookByID: %v", err)
+	}
+	if err == nil {
+		// 定义模板主体内容。
+		scrollPage := ScrollPage(c, &state.Global, book)
+		// 拼接页面
+		indexTemplate = common.MainLayout(
+			c,
+			&state.Global,
+			scrollPage, // define body content
+			"static/scroll.js",
+		)
+	}
+	// 渲染页面
 	if err := htmx.NewResponse().RenderTempl(c.Request.Context(), c.Writer, indexTemplate); err != nil {
-		// 如果不是，返回 HTTP 500 错误。
+		// 渲染失败，返回 HTTP 500 错误。
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}

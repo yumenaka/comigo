@@ -67,11 +67,11 @@ func ScrollPage(c *gin.Context, s *state.GlobalState, book *entity.Book) templ.C
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = common.Drawer(s, ScrollDrawerSlot()).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.Drawer(s.ServerStatus.ServerHost, ScrollDrawerSlot()).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = common.QRCode(s).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.QRCode(s.ServerStatus.ServerHost).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -143,8 +143,8 @@ func InsertRawJSONScript(data string) templ.Component {
 
 // getImageUrlForAlpine 用于获取图片的URL
 func getImageUrlForAlpine(Url string) string {
-	//return `{ imageUrl: '` + Url + `' + ($store.global.autoCrop  ? "?auto_crop=1" : '') }`
-	return `{ imageUrl: '` + Url + `' + ($store.global.autoCrop  ? "" : '') }`
+	return `{ imageUrl: '` + Url + `' + ($store.global.autoCrop  ? "&auto_crop=1" : '') }`
+	//return `{ imageUrl: '` + Url + `' + ($store.global.autoCrop  ? "" : '') }`
 }
 
 // ScrollMainArea 定义 BodyHTML
