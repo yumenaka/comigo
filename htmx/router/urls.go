@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comigo/htmx/templates/pages/flip"
 	"github.com/yumenaka/comigo/htmx/templates/pages/scroll"
+	"github.com/yumenaka/comigo/htmx/templates/pages/settings_page"
 	"github.com/yumenaka/comigo/htmx/templates/pages/shelf"
 	"github.com/yumenaka/comigo/htmx/templates/pages/upload_page"
 )
@@ -24,6 +25,8 @@ func bindView(router *gin.Engine) {
 	router.GET("/flip/:id", flip.Handler)
 	// 上传页面
 	router.GET("/upload", upload_page.Handler)
+	// 设置页面
+	router.GET("/settings", settings_page.Handler)
 }
 
 func bindAPI(router *gin.Engine) {
