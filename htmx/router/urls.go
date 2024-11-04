@@ -5,6 +5,7 @@ import (
 	"github.com/yumenaka/comigo/htmx/templates/pages/flip"
 	"github.com/yumenaka/comigo/htmx/templates/pages/scroll"
 	"github.com/yumenaka/comigo/htmx/templates/pages/shelf"
+	"github.com/yumenaka/comigo/htmx/templates/pages/upload_page"
 )
 
 func setURLs(router *gin.Engine) {
@@ -21,6 +22,8 @@ func bindView(router *gin.Engine) {
 	router.GET("/scroll/:id", scroll.Handler)
 	// 翻页模式
 	router.GET("/flip/:id", flip.Handler)
+	// 上传页面
+	router.GET("/upload", upload_page.Handler)
 }
 
 func bindAPI(router *gin.Engine) {

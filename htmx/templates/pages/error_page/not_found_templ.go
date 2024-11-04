@@ -8,7 +8,13 @@ package error_page
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-func NotFound() templ.Component {
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/yumenaka/comigo/htmx/state"
+	"github.com/yumenaka/comigo/htmx/templates/common"
+)
+
+func NotFound404(c *gin.Context, s *state.GlobalState) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -29,7 +35,33 @@ func NotFound() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-col items-center justify-center h-full\"><div class=\"text-4xl font-bold text-gray-500\">404</div><div class=\"text-2xl font-bold text-gray-500\">Not Found</div></div>")
+		templ_7745c5c3_Err = common.Header(
+			c,
+			common.HeaderProps{
+				Title:           "没找到这本书",
+				ShowReturnIcon:  true,
+				ReturnUrl:       "/",
+				SetDownLoadLink: false,
+				InShelf:         false,
+				DownLoadLink:    "",
+				SetTheme:        true,
+			}).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-col items-center justify-center flex-1 w-full p-8 text-center bg-base-100 text-base-content\" :class=\"(theme.toString() ===&#39;light&#39;||theme.toString() ===&#39;dark&#39;||theme.toString() ===&#39;retro&#39;||theme.toString() ===&#39;lofi&#39;||theme.toString() ===&#39;nord&#39;) ? ($store.global.bgPattern !== &#39;none&#39;?$store.global.bgPattern+&#39; bg-base-300&#39;:&#39;bg-base-300&#39;):($store.global.bgPattern !== &#39;none&#39;?$store.global.bgPattern:&#39;&#39;)\"><div class=\"text-4xl font-bold text-gray-500\">404</div><div class=\"text-2xl font-bold text-gray-500\">Not Found</div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = common.Footer(s.Version).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = common.Drawer(s.ServerStatus.ServerHost, nil).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = common.QRCode(s.ServerStatus.ServerHost).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

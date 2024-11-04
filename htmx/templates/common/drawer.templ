@@ -1,13 +1,11 @@
 package common
 
-import "github.com/yumenaka/comigo/htmx/state"
-
-templ Drawer(s *state.GlobalState, slot templ.Component) {
+templ Drawer(serverHost string, slot templ.Component) {
 	<!-- drawer component -->
 	<!-- https://flowbite.com/docs/components/drawer/ -->
 	<div
 		id="drawer-right"
-		x-data={ ServerHostBindStr(s.ServerStatus.ServerHost) }
+		x-data={ ServerHostBindStr(serverHost) }
 		class="fixed flex flex-col top-0 right-0 z-40 w-64 h-dvh p-4 overflow-y-auto transition-transform translate-x-full bg-base-100 text-base-content"
 		tabindex="-1"
 		aria-labelledby="drawer-right-label"
@@ -30,7 +28,9 @@ templ Drawer(s *state.GlobalState, slot templ.Component) {
 			</button>
 		</div>
 		<div class="drawer_slot flex flex-col flex-grow items-center justify-end p-1 my-2 rounded text-accent-content dark:text-white">
-			@slot
+			if slot != nil {
+                @slot
+            }
 			<div class="place-holder w-full flex-1"></div>
 			<!-- 二维码 -->
 			<div class="p-1 mt-4 mb-2 w-36 h-36" x-data="{ qrcodeSrc: '' }" x-init="qrcodeSrc = window.location.origin +'/api/qrcode.png?qrcode_str='+ encodeURIComponent(window.location.toString().replace(window.location.hostname,serverHost))">

@@ -10,7 +10,7 @@ import (
 )
 
 templ MainArea(c *gin.Context, s *state.GlobalState) {
-	<!-- 如果书籍数量不为0，显示书架 -->
+	<!-- 显示书架 -->
 	if s.GetAllBookNum() != 0 {
 		<!-- 有的颜色模板只有base-100 ，没有颜色更深的 base-200 base-300 -->
 		<div
@@ -25,7 +25,7 @@ templ MainArea(c *gin.Context, s *state.GlobalState) {
 			</div>
 		</div>
 	}
-	// 如果书籍数量为0，显示上传文件区域
+	<!-- 显示上传文件区域 -->
 	if s.GetAllBookNum() == 0 {
 		<div
 			x-data

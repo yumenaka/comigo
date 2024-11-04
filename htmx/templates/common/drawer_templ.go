@@ -8,9 +8,7 @@ package common
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/yumenaka/comigo/htmx/state"
-
-func Drawer(s *state.GlobalState, slot templ.Component) templ.Component {
+func Drawer(serverHost string, slot templ.Component) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -36,9 +34,9 @@ func Drawer(s *state.GlobalState, slot templ.Component) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(ServerHostBindStr(s.ServerStatus.ServerHost))
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(ServerHostBindStr(serverHost))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/common/drawer.templ`, Line: 10, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/common/drawer.templ`, Line: 8, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -48,9 +46,11 @@ func Drawer(s *state.GlobalState, slot templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = slot.Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
+		if slot != nil {
+			templ_7745c5c3_Err = slot.Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"place-holder w-full flex-1\"></div><!-- 二维码 --><div class=\"p-1 mt-4 mb-2 w-36 h-36\" x-data=\"{ qrcodeSrc: &#39;&#39; }\" x-init=\"qrcodeSrc = window.location.origin +&#39;/api/qrcode.png?qrcode_str=&#39;+ encodeURIComponent(window.location.toString().replace(window.location.hostname,serverHost))\"><img class=\"w-32 h-32\" :src=\"qrcodeSrc\"></div><!-- 选择主题的select --><select x-model=\"theme\" x-on:change=\"theme = $event.target.value;console.log(theme);\" class=\"w-full h-10 mt-auto mb-2 border rounded bg-base-100 text-accent-content focus:outline-none\"><option value=\"retro\">Retro</option> <option value=\"light\">Light</option> <option value=\"dark\">Dark</option> <option value=\"dracula\">Dracula</option> <option value=\"cupcake\">Cupcake</option> <option value=\"cyberpunk\">Cyberpunk</option> <option value=\"valentine\">Valentine</option> <option value=\"aqua\">Aqua</option> <option value=\"lofi\">Lofi</option> <option value=\"halloween\">Halloween</option> <option value=\"coffee\">Coffee</option> <option value=\"winter\">Winter</option> <option value=\"nord\">Nord</option></select><!-- 选择背景花纹的select --><select x-show=\"$store.global.debugMode\" x-model=\"$store.global.bgPattern\" x-on:change=\"$store.global.bgPattern = $event.target.value;console.log($store.global.bgPattern);\" class=\"w-full h-10 mt-auto mb-2 border rounded bg-base-100 text-accent-content focus:outline-none\"><option value=\"none\">None</option> <option value=\"grid-line\">Grid Line</option> <option value=\"grid-point\">Grid Point</option> <option value=\"grid-mosaic\">Grid Mosaic</option></select><!-- 选择语言的select 此处需要与自动探测到的结果一致，所以才是 \"en-US\" \"zh-CN\" \"ja\"这种不统一的形式\"--><select x-model=\"i18next.language\" x-on:change=\"i18next.changeLanguage($event.target.value).then(location.reload())\" class=\"w-full h-10 border rounded bg-base-100 text-accent-content focus:outline-none\"><option value=\"en-US\">English</option> <option value=\"zh-CN\">中文</option> <option value=\"ja\">日本語</option></select></div></div>")
 		if templ_7745c5c3_Err != nil {

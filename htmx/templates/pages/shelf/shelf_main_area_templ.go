@@ -38,7 +38,7 @@ func MainArea(c *gin.Context, s *state.GlobalState) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!-- 如果书籍数量不为0，显示书架 -->")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!-- 显示书架 -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -57,6 +57,10 @@ func MainArea(c *gin.Context, s *state.GlobalState) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!-- 显示上传文件区域 -->")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
 		}
 		if s.GetAllBookNum() == 0 {
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div x-data class=\"flex flex-col items-center justify-center flex-1 w-full h-full bg-base-100\" :class=\"(theme.toString() ===&#39;light&#39;||theme.toString() ===&#39;dark&#39;||theme.toString() ===&#39;retro&#39;||theme.toString() ===&#39;lofi&#39;||theme.toString() ===&#39;nord&#39;) ? ($store.global.bgPattern !== &#39;none&#39;?$store.global.bgPattern+&#39; bg-base-300&#39;:&#39;bg-base-300&#39;):($store.global.bgPattern !== &#39;none&#39;?$store.global.bgPattern:&#39;&#39;)\">")

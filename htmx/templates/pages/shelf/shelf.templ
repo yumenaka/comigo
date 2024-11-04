@@ -21,8 +21,8 @@ templ ShelfPage(c *gin.Context, s *state.GlobalState) {
 		})
 	@MainArea(c, s)
 	@common.Footer(s.Version)
-	@common.Drawer(s, ShelfDrawerSlot())
-	@common.QRCode(s)
+	@common.Drawer(s.ServerStatus.ServerHost, ShelfDrawerSlot())
+	@common.QRCode(s.ServerStatus.ServerHost)
 }
 
 templ ShelfDrawerSlot() {

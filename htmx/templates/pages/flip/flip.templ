@@ -24,8 +24,8 @@ templ FlipPage(c *gin.Context, s *state.GlobalState, book *entity.Book, readingP
 			FlipMode:        true,
 		})
 	@FlipMainArea(s, book)
-	@common.Drawer(s, FlipDrawerSlot())
-	@common.QRCode(s)
+	@common.Drawer(s.ServerStatus.ServerHost, FlipDrawerSlot())
+	@common.QRCode(s.ServerStatus.ServerHost)
 }
 
 templ InsertData(bookData any, stateData any) {

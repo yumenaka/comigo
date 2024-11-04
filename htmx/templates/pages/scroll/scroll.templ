@@ -27,8 +27,8 @@ templ ScrollPage(c *gin.Context, s *state.GlobalState, book *entity.Book) {
 		})
 	@ScrollMainArea(s, book)
 	@common.Footer(s.Version)
-	@common.Drawer(s, ScrollDrawerSlot())
-	@common.QRCode(s)
+	@common.Drawer(s.ServerStatus.ServerHost, ScrollDrawerSlot())
+	@common.QRCode(s.ServerStatus.ServerHost)
 }
 
 templ InsertData(bookData any, stateData any) {
@@ -37,15 +37,15 @@ templ InsertData(bookData any, stateData any) {
 }
 
 templ InsertRawJSONScript(data string) {
-	<script>
+  <script>
     @templ.Raw(data)
   </script>
 }
 
 // getImageUrlForAlpine 用于获取图片的URL
 func getImageUrlForAlpine(Url string) string {
-    //return `{ imageUrl: '` + Url + `' + ($store.global.autoCrop  ? "?auto_crop=1" : '') }`
-    return `{ imageUrl: '` + Url + `' + ($store.global.autoCrop  ? "" : '') }`
+    return `{ imageUrl: '` + Url + `' + ($store.global.autoCrop  ? "&auto_crop=1" : '') }`
+    //return `{ imageUrl: '` + Url + `' + ($store.global.autoCrop  ? "" : '') }`
 }
 
 
