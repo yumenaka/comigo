@@ -1,0 +1,35 @@
+package shelf
+
+templ ShelfDrawerSlot() {
+	<!-- 阅读模式 -->
+	<!-- toggle组件来自： https://flowbite.com/docs/forms/toggle/ -->
+	<label class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2">
+		<input type="checkbox" :value="$store.global.readMode === 'scroll'" x-on:click="$store.global.toggleReadMode()" class="sr-only peer"/>
+		<div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+		<span class="text-sm font-medium ms-3" x-text="$store.global.readMode === 'scroll'?i18next.t('scroll_mode'):i18next.t('flip_mode')">Toggle me</span>
+	</label>
+	<!-- 显示书名  -->
+	<label class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2">
+		<input type="checkbox" :value="$store.shelf.showTitle" x-on:click="$store.shelf.showTitle =!$store.shelf.showTitle" class="sr-only peer"/>
+		<div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+		<span class="text-sm font-medium ms-3" x-text="i18next.t('show_book_titles')"></span>
+	</label>
+	<!-- 简化书名 -->
+	<label x-show="$store.shelf.showTitle" class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2">
+		<input type="checkbox" :value="$store.shelf.simplifyTitle" x-on:click="$store.shelf.simplifyTitle =!$store.shelf.simplifyTitle" class="sr-only peer"/>
+		<div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+		<span class="text-sm font-medium ms-3" x-text="i18next.t('simplify_book_titles')"></span>
+	</label>
+	<!-- 显示文件图标  -->
+	<label class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2">
+		<input type="checkbox" :value="$store.shelf.showFileIcon" x-on:click="$store.shelf.showFileIcon =!$store.shelf.showFileIcon" class="sr-only peer"/>
+		<div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+		<span class="text-sm font-medium ms-3" x-text="i18next.t('show_file_icon')"></span>
+	</label>
+	<!-- debug mode -->
+	<label class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2">
+		<input type="checkbox" :value="$store.global.debugMode" x-on:click="$store.global.debugMode =!$store.global.debugMode" class="sr-only peer"/>
+		<div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+		<span class="text-sm font-medium ms-3" x-text="i18next.t('debugMode')"></span>
+	</label>
+}

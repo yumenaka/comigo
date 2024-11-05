@@ -1,0 +1,124 @@
+package flip
+
+
+
+templ FlipDrawerSlot() {
+	<!-- 阅读模式 -->
+	<!-- toggle组件来自： https://flowbite.com/docs/forms/toggle/ -->
+	<label
+		class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2"
+	>
+		<input
+			type="checkbox"
+			:value="$store.global.readMode === 'scroll'"
+			x-on:click="$store.global.toggleReadMode()"
+			class="sr-only peer"
+		/>
+		<div
+			class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+		></div>
+		<span
+			class="text-sm font-medium ms-3"
+			x-text="$store.global.readMode === 'scroll'?i18next.t('scroll_mode'):i18next.t('flip_mode')"
+		>
+			Toggle
+			me
+		</span>
+	</label>
+	<!-- 远程同步翻页 -->
+	<label
+		class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2"
+	>
+		<input
+			type="checkbox"
+			:value="$store.global.syncPageByWS"
+			x-on:click="$store.global.syncPageByWS =!$store.global.syncPageByWS"
+			class="sr-only peer"
+		/>
+		<div
+			class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+		></div>
+		<span class="text-sm font-medium ms-3" x-text="i18next.t('SyncPage')"></span>
+	</label>
+	<!-- 保存阅读进度 SaveReadingProgress -->
+	<label
+		class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2"
+	>
+		<input
+			type="checkbox"
+			:value="$store.flip.saveReadingProgress"
+			x-on:click="$store.flip.saveReadingProgress =!$store.flip.saveReadingProgress"
+			class="sr-only peer"
+		/>
+		<div
+			class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+		></div>
+		<span class="text-sm font-medium ms-3" x-text="i18next.t('SavePageNum')"></span>
+	</label>
+	<!-- 右开本（日漫模式）  -->
+	<label
+		class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2"
+	>
+		<input
+			type="checkbox"
+			:value="$store.flip.rightToLeft"
+			x-on:click="$store.flip.rightToLeft =!$store.flip.rightToLeft"
+			class="sr-only peer"
+		/>
+		<div
+			class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+		></div>
+		<span
+			class="text-sm font-medium ms-3"
+			x-text="$store.flip.rightToLeft?i18next.t('LeftScreenToNext'):i18next.t('RightScreenToNext')"
+		></span>
+	</label>
+	<!-- 单页模式  -->
+	<label
+		class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2"
+	>
+		<input
+			type="checkbox"
+			:value="$store.flip.doublePageMode"
+			x-on:click="$store.flip.doublePageMode =!$store.flip.doublePageMode"
+			class="sr-only peer"
+		/>
+		<div
+			class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+		></div>
+		<span
+			class="text-sm font-medium ms-3"
+			x-text="$store.flip.doublePageMode?i18next.t('DoublePageMode'):i18next.t('SinglePageMode')"
+		></span>
+	</label>
+	<!-- 自动隐藏工具栏  -->
+	<label
+		class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2"
+	>
+		<input
+			type="checkbox"
+			:value="$store.flip.autoHideToolbar"
+			x-on:click="$store.flip.autoHideToolbar =!$store.flip.autoHideToolbar;showToolbar();"
+			class="sr-only peer"
+		/>
+		<div
+			class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+		></div>
+		<span class="text-sm font-medium ms-3" x-text="i18next.t('AutoHideToolbar')"></span>
+	</label>
+	<!-- 显示页数  -->
+	<label
+		class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2"
+	>
+		<input
+			type="checkbox"
+			:value="$store.flip.showPageNum"
+			x-on:click="$store.flip.showPageNum =!$store.flip.showPageNum"
+			class="sr-only peer"
+		/>
+		<div
+			class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+		></div>
+		<span class="text-sm font-medium ms-3" x-text="i18next.t('ShowPageNum')"></span>
+	</label>
+}
