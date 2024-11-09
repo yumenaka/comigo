@@ -34,9 +34,7 @@ func Handler(c *gin.Context) {
 		state.Global.TopBooks, err = entity.GetBookInfoListByID(bookID, sortBy)
 		//TODO: 没有图书的提示（返回主页\上传压缩包\远程下载示例漫画）
 		if err != nil {
-			logger.Infof("GetBookShelf: %v", err)
-			// 显示 HTTP 404 错误信息，文本“404 not found”
-			c.String(http.StatusNotFound, "404 not found")
+			logger.Infof("GetBookShelf Error: %v", err)
 			return
 		}
 	}
