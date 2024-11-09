@@ -17,7 +17,7 @@ templ UploadArea(s *state.GlobalState) {
 				<!-- 动态插入文件项 -->
 			</ul>
 		</div>
-		<!-- 进度条区域  显示与隐藏有过渡效果，不可点击。-->
+		<!-- 进度条背景 显示与隐藏有过渡效果，不可点击。-->
 		<div id="progress-bar" class="absolute pointer-events-none top-0 left-0 h-full transition-opacity duration-500 bg-blue-500 opacity-30" style="width: 0%;"></div>
 		<!-- 上传按钮 -->
 		<button id="upload-button" class="w-full py-2 mt-6 text-white bg-blue-500 rounded hover:bg-blue-600 disabled:opacity-50" disabled>上传文件<p id="progress-text" class="mt-2 text-gray-700"></p></button>
@@ -161,16 +161,26 @@ templ UploadArea(s *state.GlobalState) {
                 xhr.onload = function() {
                     if (xhr.status === 200) {
                         const data = JSON.parse(xhr.responseText);
-                        resultDiv.innerHTML = `<p class="text-green-500">${data.message}</p>
+                        resultDiv.innerHTML = `<p class="text-green-500 text-lg text-center">${data.message}</p>
                                                <ul class="text-gray-700 list-disc list-inside">
                                                    ${data.files.map(file => `<li>${file}</li>`).join('')}
                                                </ul>`;
+                        // 提示上传成功
+                        showMessage({
+                          message: '成功上传'+filesToUpload.length+'个文件',
+                          buttons: 'confirm',
+                          onConfirm: () => {
+                             // 上传成功后刷新页面
+                             window.location.reload();
+                          }
+                        });
                         // 清空文件列表
                         filesToUpload = [];
                         fileList.innerHTML = '';
+
                     } else {
                         const errorData = JSON.parse(xhr.responseText);
-                        resultDiv.innerHTML = `<p class="text-red-500">${errorData.error || '上传失败'}</p>`;
+                        resultDiv.innerHTML = `<p class="text-red-500 text-lg text-center">${errorData.error || '上传失败'}</p>`;
                     }
                 // 重置上传按钮和进度条
                 uploadButton.disabled = filesToUpload.length === 0;

@@ -34,6 +34,7 @@ templ MainLayout(c *gin.Context, s *state.GlobalState, bodyContent templ.Compone
 		<!-- ！！！当变量的类型发生变化时，必须手动清除 localStorage，否则相应数值将无法正确更新。！！！ -->
 		<!-- 详细用法参见： https://alpinejs.dev/plugins/persist -->
 		<body x-data="{ theme: $persist('retro') }" x-bind:data-theme="theme"  class="flex flex-col items-center justify-between w-full h-full min-h-screen p-0 m-0 font-sans">
+			@MessageModal()
 			@bodyContent
 		</body>
 		<!-- 通用js代码,初始化htmx、Alpine等第三方库  -->

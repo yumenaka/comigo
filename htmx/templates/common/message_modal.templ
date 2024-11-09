@@ -1,0 +1,70 @@
+package common
+
+templ MessageModal() {
+	<!-- 模态遮罩层 -->
+	<div id="modal-overlay" class="z-50 fixed inset-0 flex items-center justify-center hidden bg-black bg-opacity-50">
+		<!-- 模态窗口 -->
+		<div id="modal" class="max-w-sm p-6 mx-auto bg-white rounded-lg">
+			<!-- 提示信息 -->
+			<p id="modal-message" class="text-lg text-gray-800"></p>
+			<!-- 按钮容器 -->
+			<div id="modal-buttons" class="flex justify-end mt-4 space-x-2">
+				<!-- 按钮将动态插入 -->
+			</div>
+		</div>
+	</div>
+	<script>
+function showMessage(options) {
+  const overlay = document.getElementById('modal-overlay');
+  const messageElem = document.getElementById('modal-message');
+  const buttonsContainer = document.getElementById('modal-buttons');
+
+  // 设置提示信息
+  messageElem.textContent = options.message || '默认提示信息';
+
+  // 清空之前的按钮
+  buttonsContainer.innerHTML = '';
+
+  // 根据选项创建按钮
+  if (options.buttons === 'confirm') {
+    const confirmButton = document.createElement('button');
+    confirmButton.textContent = '确定';
+    confirmButton.className = 'px-4 py-2 bg-blue-500 text-white rounded';
+    confirmButton.onclick = function() {
+      hideModal();
+      if (typeof options.onConfirm === 'function') {
+         options.onConfirm();
+      }
+    };
+    buttonsContainer.appendChild(confirmButton);
+  } else if (options.buttons === 'yesno') {
+    const yesButton = document.createElement('button');
+    yesButton.textContent = '是';
+    yesButton.className = 'px-4 py-2 bg-green-500 text-white rounded';
+    yesButton.onclick = function() {
+      hideModal();
+      if (typeof options.onYes === 'function') {
+        options.onYes();
+      }
+    };
+    const noButton = document.createElement('button');
+    noButton.textContent = '否';
+    noButton.className = 'px-4 py-2 bg-gray-500 text-white rounded';
+    noButton.onclick = function() {
+      hideModal();
+    };
+    buttonsContainer.appendChild(yesButton);
+    buttonsContainer.appendChild(noButton);
+  }
+
+  // 显示模态
+  overlay.classList.remove('hidden');
+}
+
+function hideModal() {
+  const overlay = document.getElementById('modal-overlay');
+  overlay.classList.add('hidden');
+}
+
+</script>
+}
