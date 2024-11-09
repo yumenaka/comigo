@@ -2173,6 +2173,10 @@ input:checked + .toggle-bg {
   opacity: 1;
 }
 
+.opacity-30 {
+  opacity: .3;
+}
+
 .opacity-80 {
   opacity: .8;
 }
@@ -2248,8 +2252,8 @@ input:checked + .toggle-bg {
   transition-duration: .3s;
 }
 
-.duration-\[2000ms\] {
-  transition-duration: 2s;
+.duration-500 {
+  transition-duration: .5s;
 }
 
 .ease-out {
