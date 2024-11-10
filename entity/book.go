@@ -89,6 +89,30 @@ func CheckBookExist(filePath string, bookType SupportFileType, storePath string)
 	return exit
 }
 
+// CheckAllBookFileExist 查看内存中的书的源文件是否存在,不存在就删掉
+func CheckAllBookFileExist() {
+	logger.Infof("CheckAllBookFileExist!")
+	deletedBook := make([]string, 0)
+	// 实际存在的书，通过扫描生成
+	for _, value := range mapBooks.Range {
+		book := value.(*Book)
+		if _, err := os.Stat(book.FilePath); err != nil {
+			deletedBook = append(deletedBook, book.FilePath)
+			//logger.Infof(locale.GetString("delete_book")+"%s", book.FilePath)
+			DeleteBookByID(book.BookID)
+		}
+	}
+	if len(deletedBook) > 0 {
+		//logger.Infof(locale.GetString("delete_book_count")+"%d", len(deletedBook))
+		// 清理虚拟书籍组
+		mapBookGroup.Clear()
+		// 重新虚拟书籍组
+		if err := MainFolder.InitFolder(); err != nil {
+			logger.Infof("%s", err)
+		}
+	}
+}
+
 // NewBook  初始化Book，设置文件路径、书名、BookID等等
 func NewBook(filePath string, modified time.Time, fileSize int64, storePath string, depth int, bookType SupportFileType) (*Book, error) {
 	if CheckBookExist(filePath, bookType, storePath) {

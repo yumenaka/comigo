@@ -22,6 +22,7 @@ func Handler(c *gin.Context) {
 	// 如果没有指定书籍ID，获取顶层书架信息。
 	if bookID == "" {
 		var err error
+		entity.CheckAllBookFileExist()
 		state.Global.TopBooks, err = entity.TopOfShelfInfo(sortBy)
 		//TODO: 没有图书的提示（上传压缩包\远程下载示例漫画）
 		if err != nil {
@@ -31,6 +32,7 @@ func Handler(c *gin.Context) {
 	// 如果指定了书籍ID，获取子书架信息。
 	if bookID != "" {
 		var err error
+		entity.CheckAllBookFileExist()
 		state.Global.TopBooks, err = entity.GetBookInfoListByID(bookID, sortBy)
 		//TODO: 没有图书的提示（返回主页\上传压缩包\远程下载示例漫画）
 		if err != nil {

@@ -15,27 +15,28 @@ import (
 
 // BookInfo 与Book唯一的区别是没有AllPageInfo,而是封面图URL 减小 json文件的大小
 type BookInfo struct {
-	Title           string          `json:"title"`          // 书名
+	Author          string          `json:"author"`         // 作者
 	BookID          string          `json:"id"`             // 根据FilePath生成的唯一ID
 	BookStorePath   string          `json:"-"   `           // 在哪个子书库
-	Type            SupportFileType `json:"type"`           // 书籍类型
-	Depth           int             `json:"depth"`          // 书籍深度
 	ChildBookNum    int             `json:"child_book_num"` // 子书籍数量
-	PageCount       int             `json:"page_count"`     // 总页数
 	Cover           ImageInfo       `json:"cover"`          // 封面图
-	ParentFolder    string          `json:"parent_folder"`  // 父文件夹
-	Author          string          `json:"author"`         // 作者
-	ISBN            string          `json:"isbn"`           // ISBN
-	Press           string          `json:"press"`          // 出版社
-	PublishedAt     string          `json:"published_at"`   // 出版日期
-	FilePath        string          `json:"-"`              // 文件绝对路径，json不解析
-	FileSize        int64           `json:"file_size"`      // 文件大小
-	Modified        time.Time       `json:"modified_time"`  // 修改时间
-	ReadPercent     float64         `json:"read_percent"`   // 阅读进度
+	Deleted         bool            `json:"deleted"`        // 源文件是否已删除
+	Depth           int             `json:"depth"`          // 书籍深度
 	ExtractPath     string          `json:"-"`              // 解压路径，7z用，json不解析
 	ExtractNum      int             `json:"-"`              // 文件解压数    extract_num
+	FileSize        int64           `json:"file_size"`      // 文件大小
+	FilePath        string          `json:"-"`              // 文件绝对路径，json不解析
+	ISBN            string          `json:"isbn"`           // ISBN
 	InitComplete    bool            `json:"-"`              // 是否解压完成  extract_complete
+	Modified        time.Time       `json:"modified_time"`  // 修改时间
 	NonUTF8Zip      bool            `json:"-"`              // 是否为特殊编码zip
+	PageCount       int             `json:"page_count"`     // 总页数
+	ParentFolder    string          `json:"parent_folder"`  // 父文件夹
+	Press           string          `json:"press"`          // 出版社
+	PublishedAt     string          `json:"published_at"`   // 出版日期
+	ReadPercent     float64         `json:"read_percent"`   // 阅读进度
+	Title           string          `json:"title"`          // 书名
+	Type            SupportFileType `json:"type"`           // 书籍类型
 	ZipTextEncoding string          `json:"-"`              // zip文件编码
 }
 
@@ -44,24 +45,29 @@ func NewBaseInfo(b *Book) *BookInfo {
 	// 需要单独先执行这个，来设定封面
 	pageCount := b.GetPageCount()
 	return &BookInfo{
-		Title:        b.Title,
-		Author:       b.Author,
-		Depth:        b.Depth,
-		ISBN:         b.ISBN,
-		FilePath:     b.GetFilePath(),
-		ExtractPath:  b.ExtractPath,
-		PageCount:    pageCount,
-		Type:         b.Type,
-		ChildBookNum: b.ChildBookNum,
-		FileSize:     b.FileSize,
-		Modified:     b.Modified,
-		BookID:       b.BookID,
-		ExtractNum:   b.ExtractNum,
-		InitComplete: b.InitComplete,
-		ReadPercent:  b.ReadPercent,
-		NonUTF8Zip:   b.NonUTF8Zip,
-		Cover:        b.Cover,
-		ParentFolder: b.ParentFolder,
+		Author:          b.Author,
+		BookID:          b.BookID,
+		BookStorePath:   b.BookStorePath,
+		Cover:           b.Cover,
+		ChildBookNum:    b.ChildBookNum,
+		Deleted:         b.Deleted,
+		Depth:           b.Depth,
+		ExtractPath:     b.ExtractPath,
+		ExtractNum:      b.ExtractNum,
+		FilePath:        b.GetFilePath(),
+		FileSize:        b.FileSize,
+		ISBN:            b.ISBN,
+		InitComplete:    b.InitComplete,
+		Modified:        b.Modified,
+		NonUTF8Zip:      b.NonUTF8Zip,
+		PageCount:       pageCount,
+		ParentFolder:    b.ParentFolder,
+		Press:           b.Press,
+		PublishedAt:     b.PublishedAt,
+		ReadPercent:     b.ReadPercent,
+		Type:            b.Type,
+		Title:           b.Title,
+		ZipTextEncoding: b.ZipTextEncoding,
 	}
 }
 
@@ -111,7 +117,6 @@ func (b *BookInfo) setParentFolder(filePath string) *BookInfo {
 		post = strings.LastIndex(folder, "\\") // windows分隔符
 	}
 	if post != -1 {
-		// FilePath = string([]rune(FilePath)[post:]) //为了防止中文字符被错误截断，先转换成rune，再转回来
 		p := folder[post:]
 		p = strings.ReplaceAll(p, "\\", "")
 		p = strings.ReplaceAll(p, "/", "")
