@@ -19,6 +19,7 @@ func GetBook(c *gin.Context) {
 	author := c.DefaultQuery("author", "")
 	sortBy := c.DefaultQuery("sort_by", "default")
 	id := c.DefaultQuery("id", "")
+	entity.CheckAllBookFileExist()
 	if author != "" {
 		bookList, err := entity.GetBookByAuthor(author, sortBy)
 		if err != nil {

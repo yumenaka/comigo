@@ -64,7 +64,7 @@ func NewScanOption(
 	}
 }
 
-// SupportTemplateFile 判断压缩包内的文件是否是支持的模板文件
+// IsSupportTemplate 判断压缩包内的文件是否是支持的模板文件
 func (o *Option) IsSupportTemplate(checkPath string) bool {
 	for _, ex := range o.SupportTemplateFile {
 		suffix := strings.ToLower(path.Ext(checkPath)) //strings.ToLower():某些文件会用大写文件名
@@ -157,7 +157,7 @@ func AddBooksToStore(bookList []*entity.Book, basePath string, MinImageNum int) 
 	if err != nil {
 		logger.Infof(locale.GetString("AddBook_error")+"%s", basePath)
 	}
-	// 然后生成对应的虚拟书籍组
+	// 生成虚拟书籍组
 	if err := entity.MainFolder.InitFolder(); err != nil {
 		logger.Infof("%s", err)
 	}

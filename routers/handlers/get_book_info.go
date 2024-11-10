@@ -34,6 +34,7 @@ func GetBookInfos(c *gin.Context) {
 		c.PureJSON(http.StatusBadRequest, "need book_group_id or depth or max_depth")
 		return
 	}
+	entity.CheckAllBookFileExist()
 	//按照最大书籍所在深度获取书籍信息
 	if c.Query("max_depth") != "" {
 		GetBookInfosByMaxDepth(c, sortBy)
@@ -55,6 +56,7 @@ func GetBookInfos(c *gin.Context) {
 func GetTopOfShelfInfo(c *gin.Context) {
 	//书籍排列的方式，默认name
 	sortBy := c.DefaultQuery("sort_by", "default")
+	entity.CheckAllBookFileExist()
 	//如果传了maxDepth这个参数
 	bookInfoList, err := entity.TopOfShelfInfo(sortBy)
 	if err != nil {
@@ -66,6 +68,7 @@ func GetTopOfShelfInfo(c *gin.Context) {
 }
 
 func GetBookInfosByMaxDepth(c *gin.Context, sortBy string) {
+	entity.CheckAllBookFileExist()
 	//按照书籍所在深度获取书籍信息，0是顶层，即为执行文件夹本身
 	maxDepth, err := strconv.Atoi(c.DefaultQuery("max_depth", "0"))
 	if err != nil {
@@ -84,6 +87,7 @@ func GetBookInfosByMaxDepth(c *gin.Context, sortBy string) {
 }
 
 func GetBookInfosByDepth(c *gin.Context, sortBy string) {
+	entity.CheckAllBookFileExist()
 	//按照书籍所在深度获取书籍信息，0是顶层，即为执行文件夹本身
 	depth, err := strconv.Atoi(c.DefaultQuery("depth", ""))
 	if err != nil {
@@ -103,6 +107,7 @@ func GetBookInfosByDepth(c *gin.Context, sortBy string) {
 }
 
 func GetBookInfosByGroupID(c *gin.Context, sortBy string) {
+	entity.CheckAllBookFileExist()
 	//按照 BookGroupID获取
 	bookGroupID := c.DefaultQuery("book_group_id", "")
 	if bookGroupID == "" {
@@ -122,6 +127,7 @@ func GetBookInfosByGroupID(c *gin.Context, sortBy string) {
 
 // GroupInfo 示例 URL： http://127.0.0.1:1234/api/group_info?id=1215a&sort_by=filename
 func GroupInfo(c *gin.Context) {
+	entity.CheckAllBookFileExist()
 	sortBy := c.DefaultQuery("sort_by", "filename")
 	id := c.DefaultQuery("id", "")
 	if id == "" {
@@ -146,6 +152,7 @@ func GroupInfo(c *gin.Context) {
 
 // GroupInfoFilter 示例 URL： http://127.0.0.1:1234/api/group_info_filter?id=1215a&sort_by=filename
 func GroupInfoFilter(c *gin.Context) {
+	entity.CheckAllBookFileExist()
 	sortBy := c.DefaultQuery("sort_by", "filename")
 	id := c.DefaultQuery("id", "")
 	if id == "" {
