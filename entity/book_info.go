@@ -78,7 +78,7 @@ func (b *BookInfo) initBookID() *BookInfo {
 	if err != nil {
 		logger.Info(err, fileAbaPath)
 	}
-	tempStr := b.FilePath + strconv.Itoa(b.ChildBookNum) + strconv.Itoa(int(b.FileSize)) + string(b.Type) + b.ParentFolder + b.BookStorePath
+	tempStr := b.FilePath + strconv.Itoa(int(b.FileSize)) + string(b.Type) + b.ParentFolder + b.BookStorePath
 	b62 := base62.EncodeToString([]byte(md5string(md5string(tempStr))))
 	b.BookID = getShortBookID(b62, 7)
 	return b

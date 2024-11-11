@@ -15,6 +15,7 @@ import (
 
 // Handler 阅读界面（TODO：翻页模式）
 func Handler(c *gin.Context) {
+	entity.CheckAllBookFileExist()
 	bookID := c.Param("id")
 	book, err := entity.GetBookByID(bookID, "default")
 	if err != nil {

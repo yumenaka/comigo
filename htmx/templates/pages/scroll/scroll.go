@@ -14,6 +14,7 @@ import (
 
 // Handler 阅读界面（卷轴模式）
 func Handler(c *gin.Context) {
+	entity.CheckAllBookFileExist()
 	//// 图片重排设定，存储在 cookie 里面，默认为“default”
 	//sortPageBy, err := c.Cookie("SortPageBy")
 	//if err != nil {
