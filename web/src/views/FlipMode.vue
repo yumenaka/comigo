@@ -262,7 +262,9 @@ export default defineComponent({
       imageParameters, //获取图片所用的参数
       imageParametersString: (source_url: string) => {
         // var temp =
-        if (source_url.substr(0, 12) === "api/get_file?") {
+        if (source_url.startsWith("/api/get_file?")) {
+          //去掉最初的“/”
+					source_url = source_url.substring(1);
           //当前URL
           const url = document.location.toString();
           //按照“/”分割字符串
