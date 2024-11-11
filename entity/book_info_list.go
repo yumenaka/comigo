@@ -2,20 +2,20 @@ package entity
 
 import (
 	"errors"
-	"github.com/yumenaka/comigo/util"
 	"sort"
-	"strconv"
+
+	"github.com/yumenaka/comigo/util"
 )
 
-// BookInfoList Slice
+// BookInfoList 表示 BookInfo 的列表
 type BookInfoList struct {
-	SortBy    string
 	BookInfos []BookInfo
 }
 
+// GetAllBookInfoList 获取所有 BookInfo，并根据 sortBy 参数进行排序
 func GetAllBookInfoList(sortBy string) (*BookInfoList, error) {
 	var infoList BookInfoList
-	//首先加上所有真实的书籍
+	// 添加所有真实的书籍
 	for _, value := range mapBooks.Range {
 		b := value.(*Book)
 		info := NewBaseInfo(b)
@@ -26,86 +26,76 @@ func GetAllBookInfoList(sortBy string) (*BookInfoList, error) {
 		infoList.SortBooks(sortBy)
 		return &infoList, nil
 	}
-	return nil, errors.New("error:can not found bookshelf. GetAllBookInfoList")
+	return nil, errors.New("error: cannot find bookshelf in GetAllBookInfoList")
 }
 
-func (s BookInfoList) Len() int {
-	return len(s.BookInfos)
-}
+// SortBooks 根据 sortBy 参数对 BookInfos 进行排序
+func (s *BookInfoList) SortBooks(sortBy string) {
+	if sortBy == "" {
+		sortBy = "filename"
+	}
 
-// Less 按时间或URL，将图片排序
-func (s BookInfoList) Less(i, j int) (less bool) {
-	//如何定义 Images[i] < Images[j]
-	//根据文件名
-	switch s.SortBy {
+	var lessFunc func(i, j int) bool
+
+	switch sortBy {
 	case "filename":
-		return util.Compare(s.BookInfos[i].Title, s.BookInfos[j].Title) //(比较自然语言字符串)
-	case "filesize":
-		//两本之中有一本是书籍组。同样是书籍组，比较子书籍数。
-		if s.BookInfos[i].Type == TypeBooksGroup || s.BookInfos[j].Type == TypeBooksGroup {
-			if s.BookInfos[i].Type == TypeBooksGroup && s.BookInfos[j].Type == TypeBooksGroup {
-				return s.BookInfos[i].ChildBookNum > s.BookInfos[j].ChildBookNum
-			}
-			if s.BookInfos[i].Type != TypeBooksGroup || s.BookInfos[j].Type != TypeBooksGroup {
-				return s.BookInfos[i].Type == TypeBooksGroup
-			}
+		lessFunc = func(i, j int) bool {
+			return util.Compare(s.BookInfos[i].Title, s.BookInfos[j].Title)
 		}
-		//两本之中有一本是文件夹。同样是文件夹，比较页数。
-		if s.BookInfos[i].Type == TypeDir || s.BookInfos[j].Type == TypeDir {
-			if s.BookInfos[i].Type == TypeDir && s.BookInfos[j].Type == TypeDir {
-				return s.BookInfos[i].PageCount > s.BookInfos[j].PageCount
-			}
-			if s.BookInfos[i].Type != TypeDir || s.BookInfos[j].Type != TypeDir {
-				return s.BookInfos[i].Type == TypeDir
-			}
-		}
-		//一般情况，比较文件大小
-		return !util.Compare(strconv.Itoa(int(s.BookInfos[i].FileSize)), strconv.Itoa(int(s.BookInfos[j].FileSize)))
-	case "modify_time":
-		return !util.Compare(s.BookInfos[i].Modified.String(), s.BookInfos[j].Modified.String())
-	case "author":
-		return util.Compare(s.BookInfos[i].Author, s.BookInfos[j].Author)
-	//如何定义 Images[i] < Images[j] 反向
 	case "filename_reverse":
-		return !util.Compare(s.BookInfos[i].Title, s.BookInfos[j].Title) //(比较自然语言字符串)
+		lessFunc = func(i, j int) bool {
+			return !util.Compare(s.BookInfos[i].Title, s.BookInfos[j].Title)
+		}
+	case "filesize":
+		lessFunc = func(i, j int) bool {
+			return compareByFileSize(s.BookInfos[i], s.BookInfos[j])
+		}
 	case "filesize_reverse":
-		//两本之中有一本是书籍组。同样是书籍组，比较子书籍数。
-		if s.BookInfos[i].Type == TypeBooksGroup || s.BookInfos[j].Type == TypeBooksGroup {
-			if s.BookInfos[i].Type == TypeBooksGroup && s.BookInfos[j].Type == TypeBooksGroup {
-				return !(s.BookInfos[i].ChildBookNum > s.BookInfos[j].ChildBookNum)
-			}
-			if s.BookInfos[i].Type != TypeBooksGroup || s.BookInfos[j].Type != TypeBooksGroup {
-				return !(s.BookInfos[i].Type == TypeBooksGroup)
-			}
+		lessFunc = func(i, j int) bool {
+			return !compareByFileSize(s.BookInfos[i], s.BookInfos[j])
 		}
-		//两本之中有一本是文件夹。同样是文件夹，比较页数。
-		if s.BookInfos[i].Type == TypeDir || s.BookInfos[j].Type == TypeDir {
-			if s.BookInfos[i].Type == TypeDir && s.BookInfos[j].Type == TypeDir {
-				return !(s.BookInfos[i].PageCount > s.BookInfos[j].PageCount)
-			}
-			if s.BookInfos[i].Type != TypeDir || s.BookInfos[j].Type != TypeDir {
-				return !(s.BookInfos[i].Type == TypeDir)
-			}
+	case "modify_time": //根据修改时间排序 从新到旧
+		lessFunc = func(i, j int) bool {
+			return s.BookInfos[i].Modified.After(s.BookInfos[j].Modified)
 		}
-		//一般情况，比较文件大小
-		return util.Compare(strconv.Itoa(int(s.BookInfos[i].FileSize)), strconv.Itoa(int(s.BookInfos[j].FileSize)))
-	case "modify_time_reverse":
-		return util.Compare(s.BookInfos[i].Modified.String(), s.BookInfos[j].Modified.String())
+	case "modify_time_reverse": //根据修改时间排序 从旧到新
+		lessFunc = func(i, j int) bool {
+			return s.BookInfos[i].Modified.Before(s.BookInfos[j].Modified)
+
+		}
+	case "author":
+		lessFunc = func(i, j int) bool {
+			return util.Compare(s.BookInfos[i].Author, s.BookInfos[j].Author)
+		}
 	case "author_reverse":
-		return !util.Compare(s.BookInfos[i].Author, s.BookInfos[j].Author)
+		lessFunc = func(i, j int) bool {
+			return !util.Compare(s.BookInfos[i].Author, s.BookInfos[j].Author)
+		}
 	default:
-		return util.Compare(s.BookInfos[i].Title, s.BookInfos[j].Title)
+		lessFunc = func(i, j int) bool {
+			return util.Compare(s.BookInfos[i].Title, s.BookInfos[j].Title)
+		}
 	}
+	//  Go 1.8 及以上版本的 sort.Slice 函数。简化排序逻辑，无需再实现 Len、Less 和 Swap 方法。
+	sort.Slice(s.BookInfos, lessFunc)
 }
 
-func (s BookInfoList) Swap(i, j int) {
-	s.BookInfos[i], s.BookInfos[j] = s.BookInfos[j], s.BookInfos[i]
-}
-
-// SortBooks 上面三个函数定义好了，终于可以使用sort包排序了
-func (s *BookInfoList) SortBooks(by string) {
-	if by != "" {
-		s.SortBy = by
-		sort.Sort(s)
+// compareByFileSize 按文件大小比较两个 BookInfo
+func compareByFileSize(a, b BookInfo) bool {
+	// 如果其中一本是书籍组，比较子书籍数量
+	if a.Type == TypeBooksGroup || b.Type == TypeBooksGroup {
+		if a.Type == TypeBooksGroup && b.Type == TypeBooksGroup {
+			return a.ChildBookNum > b.ChildBookNum
+		}
+		return a.Type == TypeBooksGroup
 	}
+	// 如果其中一本是文件夹，比较页数
+	if a.Type == TypeDir || b.Type == TypeDir {
+		if a.Type == TypeDir && b.Type == TypeDir {
+			return a.PageCount > b.PageCount
+		}
+		return a.Type == TypeDir
+	}
+	// 一般情况下，直接比较文件大小
+	return a.FileSize > b.FileSize
 }

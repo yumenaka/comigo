@@ -2,14 +2,15 @@ package entity
 
 import (
 	"bytes"
+	"image"
+	"log"
+	"time"
+
 	"github.com/bbrks/go-blurhash"
 	"github.com/disintegration/imaging"
 	"github.com/yumenaka/comigo/util/file"
 	"github.com/yumenaka/comigo/util/locale"
 	"github.com/yumenaka/comigo/util/logger"
-	"image"
-	"log"
-	"time"
 )
 
 // ImageInfo 单张漫画图片

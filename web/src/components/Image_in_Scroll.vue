@@ -2,7 +2,7 @@
 <template>
     <div class="manga">
         <img alt="" v-lazy="this.image_url" />
-        <div class="page_hint" v-if="this.showPageNumFlag_ScrollMode">{{ this.MyPageNum }}/{{
+        <div class="page_hint" v-if="this.showPageNumFlag_ScrollMode">{{ this.nowPageNum }}/{{
                 this.page_count
         }}</div>
     </div>

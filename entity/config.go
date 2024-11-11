@@ -3,13 +3,12 @@ package entity
 import (
 	"encoding/json"
 	"errors"
+	"github.com/yumenaka/comigo/config/stores"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
 
-	"github.com/mitchellh/go-homedir"
-	"github.com/tidwall/gjson"
 	"github.com/yumenaka/comigo/util"
 	"github.com/yumenaka/comigo/util/logger"
 )
@@ -27,243 +26,261 @@ type ConfigStatus struct {
 }
 
 func (c *ConfigStatus) SetConfigStatus() error {
+	logger.Info("Checking Config ShareName")
 
-	c.In = ""
+	// 初始化
+	c.In = "None"
 	c.Path.WorkingDirectory = ""
 	c.Path.HomeDirectory = ""
 	c.Path.ProgramDirectory = ""
-	logger.Info("Check Config ShareName\n")
 
-	// 可执行程序自身的文件路径
+	// 配置文件搜索路径及顺序
+	type configPath struct {
+		name string
+		path string
+	}
+	var configPaths []configPath
+
+	// 获取可执行文件所在目录
 	executablePath, err := os.Executable()
 	if err != nil {
-		return errors.New("error: Failed find executable path")
+		return errors.New("error: failed to find executable path")
 	}
-	if util.IsExist(path.Join(path.Dir(executablePath), "config.toml")) {
-		c.Path.ProgramDirectory = util.GetAbsPath(path.Join(path.Dir(executablePath), "config.toml"))
-		c.In = "ProgramDirectory"
-	}
+	programDir := path.Dir(executablePath)
 
-	// HomeDirectory 目录
-	home, err := homedir.Dir()
+	// 获取用户主目录
+	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		return errors.New("error: Failed find home directory")
-	}
-	if util.IsExist(path.Join(home, ".config/comigo/config.toml")) {
-		c.Path.HomeDirectory = util.GetAbsPath(path.Join(home, ".config/comigo/config.toml"))
-		c.In = "HomeDirectory"
+		return errors.New("error: failed to find home directory")
 	}
 
-	//当前执行目录
-	if util.IsExist("config.toml") {
-		c.Path.WorkingDirectory = util.GetAbsPath("config.toml")
-		c.In = "WorkingDirectory"
+	// 添加搜索路径
+	configPaths = append(configPaths, configPath{
+		name: "HomeDirectory",
+		path: util.GetAbsPath(path.Join(homeDir, ".config/comigo/config.toml")),
+	})
+	configPaths = append(configPaths, configPath{
+		name: "ProgramDirectory",
+		path: util.GetAbsPath(path.Join(programDir, "config.toml")),
+	})
+	configPaths = append(configPaths, configPath{
+		name: "WorkingDirectory",
+		path: util.GetAbsPath("config.toml"),
+	})
+
+	// 按顺序检查配置文件是否存在
+	for _, cp := range configPaths {
+		if util.IsExist(cp.path) {
+			switch cp.name {
+			case "HomeDirectory":
+				c.Path.HomeDirectory = cp.path
+			case "ProgramDirectory":
+				c.Path.ProgramDirectory = cp.path
+			case "WorkingDirectory":
+				c.Path.WorkingDirectory = cp.path
+			}
+			c.In = cp.name
+			return nil
+		}
 	}
 	return nil
 }
 
-type BookStore struct {
-	// 书库的类型,支持local，ftp、sftp、webdav、smb（2或3）
-	Type string
-	// 书库的地址
-	Host string
-	// 书库的端口
-	Port int
-	// 书库的用户名
-	Username string
-	// 书库的密码
-	Password string
-	// smb的共享名
-	ShareName string
-	// 二级路径
-	Path string
-}
+type UploadDirOption int
 
-// ComigoConfig 服务器设置(config.toml)
+const (
+	UseCurrentDirectory      UploadDirOption = iota // 当前执行目录
+	UseFirstLibraryDirectory                        // 第一个书库目录
+	UseSpecifiedUploadPath                          // 指定上传路径
+)
+
 type ComigoConfig struct {
-	Port                   int         `json:"Port" comment:"Comigo设置文件(config.toml)，可保存在：HomeDirectory（$HOME/.config/comigo/config.toml）、WorkingDirectory（当前执行目录）、ProgramDirectory（程序所在目录）下。可用“comi --config-save”生成本文件\n网页服务端口，此项配置不支持热重载"`
-	ConfigPath             string      `json:"-" toml:"-" comment:"用户指定的的yaml设置文件路径"`
-	Host                   string      `json:"Host" comment:"自定义二维码显示的主机名"`
-	LocalStores            []string    `json:"LocalStores" comment:"本地书库文件夹"`
-	BookStores             []BookStore `json:"BookStores" toml:"-" comment:"用户指定的的yaml设置文件路径"`
-	ExcludePath            []string    `json:"ExcludePath" comment:"扫描书籍的时候，需要排除的文件或文件夹的名字"`
-	SupportMediaType       []string    `json:"SupportMediaType" comment:"扫描压缩包时，用于统计图片数量的图片文件后缀"`
-	SupportFileType        []string    `json:"SupportFileType" comment:"支持的书籍压缩包后缀"`
-	SupportTemplateFile    []string    `json:"SupportTemplateFile" comment:"支持的模板文件类型，默认为html"`
-	MinImageNum            int         `json:"MinImageNum" comment:"压缩包或文件夹内，至少有几张图片，才算作书籍"`
-	TimeoutLimitForScan    int         `json:"TimeoutLimitForScan" comment:"扫描文件时，超过几秒钟，就放弃扫描这个文件，避免卡在特殊文件上"`
-	EnableUpload           bool        `json:"EnableUpload" comment:"启用上传功能"`
-	UploadPath             string      `json:"UploadPath" comment:"上传文件存储位置，默认在当前执行目录下创建 upload 文件夹"`
-	MaxScanDepth           int         `json:"MaxScanDepth" comment:"最大扫描深度"`
-	ZipFileTextEncoding    string      `json:"ZipFileTextEncoding" comment:"非utf-8编码的ZIP文件，尝试用什么编码解析，默认GBK"`
-	PrintAllPossibleQRCode bool        `json:"PrintAllPossibleQRCode" comment:"扫描完成后，打印所有可能的阅读链接二维码"`
-	Debug                  bool        `json:"Debug" comment:"开启Debug模式"`
-	OpenBrowser            bool        `json:"OpenBrowser" comment:"是否同时打开浏览器，windows默认true，其他默认false"`
-	DisableLAN             bool        `json:"DisableLAN" comment:"只在本机提供阅读服务，不对外共享，此项配置不支持热重载"`
-	DefaultMode            string      `json:"DefaultMode" comment:"默认阅读模式，默认为空，可以设置为scroll或flip"`
-	EnableLogin            bool        `json:"EnableLogin" comment:"是否启用登录。默认不需要登陆。此项配置不支持热重载。"`
-	Username               string      `json:"Username" comment:"启用登陆后，登录界面需要的用户名。"`
-	Password               string      `json:"Password" comment:"启用登陆后，登录界面需要的密码。"`
-	Timeout                int         `json:"Timeout" comment:"启用登陆后，cookie过期的时间。单位为分钟。默认180分钟后过期。"`
-	EnableTLS              bool        `json:"EnableTLS" comment:"是否启用HTTPS协议。需要设置证书于key文件。"`
-	CertFile               string      `json:"CertFile" comment:"TLS/SSL 证书文件路径 (default: ~/.config/.comigo/cert.crt)"`
-	KeyFile                string      `json:"KeyFile" comment:"TLS/SSL key文件路径 (default: ~/.config/.comigo/key.key)"`
-	UseCache               bool        `json:"UseCache" comment:"开启本地图片缓存，可以加快二次读取，但会占用硬盘空间"`
-	CachePath              string      `json:"CachePath" comment:"本地图片缓存位置，默认系统临时文件夹"`
-	ClearCacheExit         bool        `json:"ClearCacheExit" comment:"退出程序的时候，清理web图片缓存"`
-	EnableDatabase         bool        `json:"EnableDatabase" comment:"启用本地数据库，保存扫描到的书籍数据。此项配置不支持热重载。"`
-	ClearDatabaseWhenExit  bool        `json:"ClearDatabaseWhenExit" comment:"启用本地数据库时，扫描完成后，清除不存在的书籍。"`
-	LogToFile              bool        `json:"LogToFile" comment:"是否保存程序Log到本地文件。默认不保存。"`
-	LogFilePath            string      `json:"LogFilePath" comment:"Log文件的保存位置"`
-	LogFileName            string      `json:"LogFileName" comment:"Log文件名"`
-	GenerateMetaData       bool        `json:"GenerateMetaData" toml:"GenerateMetaData" comment:"生成书籍元数据"`
+	Stores                 []stores.Store  `json:"BookStores" toml:"-" comment:"用户指定的的yaml设置文件路径"`
+	CachePath              string          `json:"CachePath" comment:"本地图片缓存位置，默认系统临时文件夹"`
+	CertFile               string          `json:"CertFile" comment:"TLS/SSL 证书文件路径 (default: ~/.config/.comigo/cert.crt)"`
+	ClearCacheExit         bool            `json:"ClearCacheExit" comment:"退出程序的时候，清理web图片缓存"`
+	ClearDatabaseWhenExit  bool            `json:"ClearDatabaseWhenExit" comment:"启用本地数据库时，扫描完成后，清除不存在的书籍。"`
+	ConfigPath             string          `json:"-" toml:"-" comment:"用户指定的的yaml设置文件路径"`
+	Debug                  bool            `json:"Debug" comment:"开启Debug模式"`
+	DefaultMode            string          `json:"DefaultMode" comment:"默认阅读模式，默认为空，可以设置为scroll或flip"`
+	DisableLAN             bool            `json:"DisableLAN" comment:"只在本机提供阅读服务，不对外共享，此项配置不支持热重载"`
+	EnableDatabase         bool            `json:"EnableDatabase" comment:"启用本地数据库，保存扫描到的书籍数据。此项配置不支持热重载。"`
+	EnableLogin            bool            `json:"EnableLogin" comment:"是否启用登录。默认不需要登陆。此项配置不支持热重载。"`
+	EnableTLS              bool            `json:"EnableTLS" comment:"是否启用HTTPS协议。需要设置证书于key文件。"`
+	EnableUpload           bool            `json:"EnableUpload" comment:"启用上传功能"`
+	ExcludePath            []string        `json:"ExcludePath" comment:"扫描书籍的时候，需要排除的文件或文件夹的名字"`
+	GenerateMetaData       bool            `json:"GenerateMetaData" toml:"GenerateMetaData" comment:"生成书籍元数据"`
+	Host                   string          `json:"Host" comment:"自定义二维码显示的主机名"`
+	KeyFile                string          `json:"KeyFile" comment:"TLS/SSL key文件路径 (default: ~/.config/.comigo/key.key)"`
+	LocalStores            []string        `json:"LocalStores" comment:"本地书库文件夹"`
+	LogFileName            string          `json:"LogFileName" comment:"Log文件名"`
+	LogFilePath            string          `json:"LogFilePath" comment:"Log文件的保存位置"`
+	LogToFile              bool            `json:"LogToFile" comment:"是否保存程序Log到本地文件。默认不保存。"`
+	MaxScanDepth           int             `json:"MaxScanDepth" comment:"最大扫描深度"`
+	MinImageNum            int             `json:"MinImageNum" comment:"压缩包或文件夹内，至少有几张图片，才算作书籍"`
+	OpenBrowser            bool            `json:"OpenBrowser" comment:"是否同时打开浏览器，windows默认true，其他默认false"`
+	Password               string          `json:"Password" comment:"启用登陆后，登录界面需要的密码。"`
+	Port                   int             `json:"Port" comment:"Comigo设置文件(config.toml)，可保存在：HomeDirectory（$HOME/.config/comigo/config.toml）、WorkingDirectory（当前执行目录）、ProgramDirectory（程序所在目录）下。可用“comi --config-save”生成本文件\n网页服务端口，此项配置不支持热重载"`
+	PrintAllPossibleQRCode bool            `json:"PrintAllPossibleQRCode" comment:"扫描完成后，打印所有可能的阅读链接二维码"`
+	SupportFileType        []string        `json:"SupportFileType" comment:"支持的书籍压缩包后缀"`
+	SupportMediaType       []string        `json:"SupportMediaType" comment:"扫描压缩包时，用于统计图片数量的图片文件后缀"`
+	SupportTemplateFile    []string        `json:"SupportTemplateFile" comment:"支持的模板文件类型，默认为html"`
+	Timeout                int             `json:"Timeout" comment:"启用登陆后，cookie过期的时间。单位为分钟。默认180分钟后过期。"`
+	TimeoutLimitForScan    int             `json:"TimeoutLimitForScan" comment:"扫描文件时，超过几秒钟，就放弃扫描这个文件，避免卡在特殊文件上"`
+	UploadDirOption        UploadDirOption `json:"UploadDirOption" comment:"上传目录的位置选项：0-当前执行目录，1-第一个书库目录，2-指定上传路径"`
+	UploadPath             string          `json:"UploadPath" comment:"指定上传路径时，上传文件的存储位置"`
+	UseCache               bool            `json:"UseCache" comment:"开启本地图片缓存，可以加快二次读取，但会占用硬盘空间"`
+	Username               string          `json:"Username" comment:"启用登陆后，登录界面需要的用户名。"`
+	ZipFileTextEncoding    string          `json:"ZipFileTextEncoding" comment:"非utf-8编码的ZIP文件，尝试用什么编码解析，默认GBK"`
 }
 
+// UpdateConfig 更新配置。 使用 JSON 反序列化将更新的配置解析为映射，遍历映射并更新配置，减少重复的代码。
 func UpdateConfig(config *ComigoConfig, jsonString string) (*ComigoConfig, error) {
 	oldConfig := *config
-	Port := gjson.Get(jsonString, "Port")
-	if Port.Exists() {
-		config.Port = int(Port.Int())
+	var updates map[string]interface{}
+	if err := json.Unmarshal([]byte(jsonString), &updates); err != nil {
+		logger.Infof("Failed to unmarshal JSON: %v", err)
+		return &oldConfig, err
 	}
-	Host := gjson.Get(jsonString, "Host")
-	if Host.Exists() {
-		config.Host = Host.String()
-	}
-	LocalStores := gjson.Get(jsonString, "LocalStores")
-	if LocalStores.Exists() {
-		// 将字符串解析为字符串切片
-		arr, err := parseString(LocalStores.String())
-		if err != nil {
-			logger.Infof("Failed to parse string:%s", err)
-			return config, err
+	for key, value := range updates {
+		switch key {
+		case "Port":
+			if v, ok := value.(float64); ok {
+				config.Port = int(v)
+			}
+		case "Host":
+			if v, ok := value.(string); ok {
+				config.Host = v
+			}
+		case "LocalStores":
+			if v, ok := value.([]interface{}); ok {
+				var stores []string
+				for _, s := range v {
+					if str, ok := s.(string); ok {
+						stores = append(stores, str)
+					}
+				}
+				config.LocalStores = stores
+			}
+		case "UseCache":
+			if v, ok := value.(bool); ok {
+				config.UseCache = v
+			}
+		case "CachePath":
+			if v, ok := value.(string); ok {
+				config.CachePath = v
+			}
+		case "ClearCacheExit":
+			if v, ok := value.(bool); ok {
+				config.ClearCacheExit = v
+			}
+		case "UploadPath":
+			if v, ok := value.(string); ok {
+				config.UploadPath = v
+			}
+		case "EnableUpload":
+			if v, ok := value.(bool); ok {
+				config.EnableUpload = v
+			}
+		case "EnableDatabase":
+			if v, ok := value.(bool); ok {
+				config.EnableDatabase = v
+			}
+		case "ClearDatabaseWhenExit":
+			if v, ok := value.(bool); ok {
+				config.ClearDatabaseWhenExit = v
+			}
+		case "OpenBrowser":
+			if v, ok := value.(bool); ok {
+				config.OpenBrowser = v
+			}
+		case "DisableLAN":
+			if v, ok := value.(bool); ok {
+				config.DisableLAN = v
+			}
+		case "DefaultMode":
+			if v, ok := value.(string); ok {
+				config.DefaultMode = v
+			}
+		case "LogToFile":
+			if v, ok := value.(bool); ok {
+				config.LogToFile = v
+			}
+		case "MaxScanDepth":
+			if v, ok := value.(float64); ok {
+				config.MaxScanDepth = int(v)
+			}
+		case "MinImageNum":
+			if v, ok := value.(float64); ok {
+				config.MinImageNum = int(v)
+			}
+		case "ZipFileTextEncoding":
+			if v, ok := value.(string); ok {
+				config.ZipFileTextEncoding = v
+			}
+		case "ExcludePath":
+			if v, ok := value.([]interface{}); ok {
+				var paths []string
+				for _, s := range v {
+					if str, ok := s.(string); ok {
+						paths = append(paths, str)
+					}
+				}
+				config.ExcludePath = paths
+			}
+		case "SupportMediaType":
+			if v, ok := value.([]interface{}); ok {
+				var mediaTypes []string
+				for _, s := range v {
+					if str, ok := s.(string); ok {
+						mediaTypes = append(mediaTypes, str)
+					}
+				}
+				config.SupportMediaType = mediaTypes
+			}
+		case "SupportFileType":
+			if v, ok := value.([]interface{}); ok {
+				var fileTypes []string
+				for _, s := range v {
+					if str, ok := s.(string); ok {
+						fileTypes = append(fileTypes, str)
+					}
+				}
+				config.SupportFileType = fileTypes
+			}
+		case "TimeoutLimitForScan":
+			if v, ok := value.(float64); ok {
+				config.TimeoutLimitForScan = int(v)
+			}
+		case "PrintAllPossibleQRCode":
+			if v, ok := value.(bool); ok {
+				config.PrintAllPossibleQRCode = v
+			}
+		case "Debug":
+			if v, ok := value.(bool); ok {
+				config.Debug = v
+			}
+		case "Username":
+			if v, ok := value.(string); ok {
+				config.Username = v
+			}
+		case "Password":
+			if v, ok := value.(string); ok {
+				config.Password = v
+			}
+		case "Timeout":
+			if v, ok := value.(float64); ok {
+				config.Timeout = int(v)
+			}
+		case "GenerateMetaData":
+			if v, ok := value.(bool); ok {
+				config.GenerateMetaData = v
+			}
+		default:
+			logger.Infof("Unknown config key: %s", key)
 		}
-		config.LocalStores = arr
-	}
-	UseCache := gjson.Get(jsonString, "UseCache")
-	if UseCache.Exists() {
-		config.UseCache = UseCache.Bool()
-	}
-	CachePath := gjson.Get(jsonString, "CachePath")
-	if CachePath.Exists() {
-		config.CachePath = CachePath.String()
-	}
-	ClearCacheExit := gjson.Get(jsonString, "ClearCacheExit")
-	if ClearCacheExit.Exists() {
-		config.ClearCacheExit = ClearCacheExit.Bool()
-	}
-	UploadPath := gjson.Get(jsonString, "UploadPath")
-	if UploadPath.Exists() {
-		config.UploadPath = UploadPath.String()
-	}
-	EnableUpload := gjson.Get(jsonString, "EnableUpload")
-	if EnableUpload.Exists() {
-		config.EnableUpload = EnableUpload.Bool()
-	}
-	EnableDatabase := gjson.Get(jsonString, "EnableDatabase")
-	if EnableDatabase.Exists() {
-		config.EnableDatabase = EnableDatabase.Bool()
-	}
-	ClearDatabaseWhenExit := gjson.Get(jsonString, "ClearDatabaseWhenExit")
-	if ClearDatabaseWhenExit.Exists() {
-		config.ClearDatabaseWhenExit = ClearDatabaseWhenExit.Bool()
-	}
-	OpenBrowser := gjson.Get(jsonString, "OpenBrowser")
-	if OpenBrowser.Exists() {
-		config.OpenBrowser = OpenBrowser.Bool()
-	}
-	DisableLAN := gjson.Get(jsonString, "DisableLAN")
-	if DisableLAN.Exists() {
-		config.DisableLAN = DisableLAN.Bool()
-	}
-	DefaultMode := gjson.Get(jsonString, "DefaultMode")
-	if DefaultMode.Exists() {
-		config.DefaultMode = DefaultMode.String()
-	}
-	LogToFile := gjson.Get(jsonString, "LogToFile")
-	if LogToFile.Exists() {
-		config.LogToFile = LogToFile.Bool()
-	}
-	MaxScanDepth := gjson.Get(jsonString, "MaxScanDepth")
-	if MaxScanDepth.Exists() {
-		config.MaxScanDepth = int(MaxScanDepth.Int())
-	}
-	MinImageNum := gjson.Get(jsonString, "MinImageNum")
-	if MinImageNum.Exists() {
-		config.MinImageNum = int(MinImageNum.Int())
-	}
-	ZipFileTextEncoding := gjson.Get(jsonString, "ZipFileTextEncoding")
-	if ZipFileTextEncoding.Exists() {
-		config.ZipFileTextEncoding = ZipFileTextEncoding.String()
-	}
-	ExcludePath := gjson.Get(jsonString, "ExcludePath")
-	if ExcludePath.Exists() {
-		// 将字符串解析为字符串切片
-		arr, err := parseString(ExcludePath.String())
-		if err != nil {
-			logger.Infof("Failed to parse string:%s", err)
-			return config, err
-		}
-		config.ExcludePath = arr
-	}
-	SupportMediaType := gjson.Get(jsonString, "SupportMediaType")
-	if SupportMediaType.Exists() {
-		// 将字符串解析为字符串切片
-		arr, err := parseString(SupportMediaType.String())
-		if err != nil {
-			logger.Infof("Failed to parse string:%s", err)
-			return config, err
-		}
-		config.SupportMediaType = arr
-	}
-	SupportFileType := gjson.Get(jsonString, "SupportFileType")
-	if SupportFileType.Exists() {
-		// 将字符串解析为字符串切片
-		arr, err := parseString(SupportFileType.String())
-		if err != nil {
-			logger.Infof("Failed to parse string:%s", err)
-			return config, err
-		}
-		config.SupportFileType = arr
-	}
-	TimeoutLimitForScan := gjson.Get(jsonString, "TimeoutLimitForScan")
-	if TimeoutLimitForScan.Exists() {
-		config.TimeoutLimitForScan = int(TimeoutLimitForScan.Int())
-	}
-	PrintAllPossibleQRCode := gjson.Get(jsonString, "PrintAllPossibleQRCode")
-	if PrintAllPossibleQRCode.Exists() {
-		config.PrintAllPossibleQRCode = PrintAllPossibleQRCode.Bool()
-	}
-	Debug := gjson.Get(jsonString, "Debug")
-	if Debug.Exists() {
-		config.Debug = Debug.Bool()
-	}
-	Username := gjson.Get(jsonString, "Username")
-	if Username.Exists() {
-		config.Username = Username.String()
-	}
-	Password := gjson.Get(jsonString, "Password")
-	if Password.Exists() {
-		config.Password = Password.String()
-	}
-	Timeout := gjson.Get(jsonString, "Timeout")
-	if Timeout.Exists() {
-		config.Timeout = int(Timeout.Int())
-	}
-	GenerateMetaData := gjson.Get(jsonString, "GenerateMetaData")
-	if GenerateMetaData.Exists() {
-		config.GenerateMetaData = GenerateMetaData.Bool()
 	}
 	return &oldConfig, nil
-}
-
-// 将字符串解析为字符串切片
-func parseString(str string) ([]string, error) {
-	var arr []string
-	err := json.Unmarshal([]byte(str), &arr)
-	if err != nil {
-		return nil, err
-	}
-	return arr, nil
 }
 
 // FrpClientConfig frp客户端配置
@@ -290,24 +307,21 @@ type WebPServerConfig struct {
 
 // SetByExecutableFilename 通过执行文件名设置默认网页模板参数
 func (c *ComigoConfig) SetByExecutableFilename() {
-	// 当前执行目录
-	//targetPath, _ := os.Getwd()
-	//logger.Infof(locale.GetString("target_path"), targetPath)
-	// 带后缀的执行文件名 comi.exe  sketch.exe
+	// 获取可执行文件的名称
 	filenameWithSuffix := path.Base(os.Args[0])
-	// 执行文件名后缀
 	fileSuffix := path.Ext(filenameWithSuffix)
-	// 去掉后缀后的执行文件名
-	filenameWithOutSuffix := strings.TrimSuffix(filenameWithSuffix, fileSuffix)
-	//logger.Infof("filenameWithOutSuffix =", filenameWithOutSuffix)
-	ex, err := os.Executable()
+	filenameWithoutSuffix := strings.TrimSuffix(filenameWithSuffix, fileSuffix)
+
+	// 获取可执行文件所在目录
+	executablePath, err := os.Executable()
 	if err != nil {
-		logger.Infof("%s", err)
+		logger.Infof("Error getting executable path: %s", err)
+		return
 	}
-	extPath := filepath.Dir(ex)
-	//logger.Infof("extPath =",extPath)
-	ExtFileName := strings.TrimPrefix(filenameWithOutSuffix, extPath)
+	executableDir := filepath.Dir(executablePath)
+
 	if c.Debug {
-		logger.Infof("ExtFileName =%s", ExtFileName)
+		logger.Infof("Executable Name: %s", filenameWithoutSuffix)
+		logger.Infof("Executable Path: %s", executableDir)
 	}
 }

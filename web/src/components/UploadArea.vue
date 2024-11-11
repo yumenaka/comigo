@@ -1,170 +1,192 @@
-
-
 <template>
-  <!-- 上传 Upload: https://www.naiveui.com/zh-CN/os-theme/components/upload -->
-  <!-- 在 web 应用程序中使用文件: https://developer.mozilla.org/zh-CN/docs/Web/API/File_API/Using_files_from_web_applications -->
-  <!-- 使用 type="file" 的 <input> 元素: https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/Input/file -->
-  <!--HTML 上传文件允许选择文件夹功能: https://blog.jijian.link/2020-01-08/html-upload-folder/ -->
-  <!-- <input type="file"></input> -->
-
-  <!-- multiple:是否支持上传多个文件 -->
-  <!-- directory-dnd:是否支持目录拖拽上传 -->
-  <!-- max:限制上传文件数量 :max="10" -->
-  <div id="UploadFile" class="">
-    <n-upload color="#ff69b4" multiple directory-dnd :show-remove-button="false" :action="actionUrl()"
-      @finish="onFinishUpload">
-      <n-upload-dragger>
-        <div style="margin-bottom: 12px">
-          <n-icon size="48" :depth="3">
-            <svg v-if="$store.state.server_status.SupportUploadFile" xmlns="http://www.w3.org/2000/svg"
-              xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512">
-              <path
-                d="M320 367.79h76c55 0 100-29.21 100-83.6s-53-81.47-96-83.6c-8.89-85.06-71-136.8-144-136.8c-69 0-113.44 45.79-128 91.2c-60 5.7-112 43.88-112 106.4s54 106.4 120 106.4h56"
-                fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32">
-              </path>
-              <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"
-                d="M320 255.79l-64-64l-64 64"></path>
-              <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"
-                d="M256 448.21V207.79"></path>
-            </svg>
-
-            <svg v-if="!$store.state.server_status.SupportUploadFile" xmlns="http://www.w3.org/2000/svg"
-              xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24">
-              <path
-                d="M19 19H5V5h14v14zM3 3v18h18V3H3zm14 12.59L15.59 17L12 13.41L8.41 17L7 15.59L10.59 12L7 8.41L8.41 7L12 10.59L15.59 7L17 8.41L13.41 12L17 15.59z"
-                fill="currentColor"></path>
-            </svg>
-
-          </n-icon>
-        </div>
-        <n-text v-if="$store.state.server_status.SupportUploadFile" style="font-size: 16px">
-          {{ $t('drop_to_upload') }}
-        </n-text>
-
-        <n-text v-if="!$store.state.server_status.SupportUploadFile" style="font-size: 16px">
-          {{ $t('please_enable_upload') }}
-        </n-text>
-
-        <n-p depth="3" style="margin: 8px 0 0 0">
-          {{ $t('uploaded_folder_hint') }}
-        </n-p>
-      </n-upload-dragger>
-    </n-upload>
-    <!-- 上传完毕提示 -->
-    <!-- <n-p v-if="$store.state.server_status.NumberOfBooks > 0" depth="3" style="margin: 8px 0 0 0">
-      {{ $t('scanned_hint').replace("XX", ($store.state.server_status.NumberOfBooks - beforeBookNum)) }}
-    </n-p> -->
-    <!-- 上传完毕按钮 -->
-    <n-button class="w-22 h-12" color="#ff69b4" v-if="$store.state.server_status.NumberOfBooks > 0"
-      @click="onBackToBookShelf">{{
-      $t('back_to_bookshelf')
-      }}</n-button>
+  <div class="relative w-full max-w-2xl p-8 bg-white rounded shadow-md">
+    <h2 class="mb-6 text-xl font-bold text-center">
+      {{ pathname === '/' ? '上传文件' : '没找到漫画，试试“上传文件？' }}
+    </h2>
+    <!-- 文件选择与拖拽区域 -->
+    <div
+      class="text-center transition duration-300 border-4 border-gray-300 border-dashed rounded cursor-pointer hover:border-blue-500"
+      @click="fileInput.click()"
+      @dragenter.prevent="onDragEnter"
+      @dragover.prevent="onDragOver"
+      @dragleave.prevent="onDragLeave"
+      @drop.prevent="onDrop"
+      :class="{ 'border-blue-500': isDragOver }"
+      ref="dropArea"
+    >
+      <p class="p-20 text-gray-500">将文件拖拽到此处或点击选择文件</p>
+      <input type="file" multiple class="hidden" ref="fileInput" @change="onFileChange" />
+    </div>
+    <!-- 预览选中文件列表 -->
+    <div class="mt-6" v-if="filesToUpload.length > 0">
+      <h3 class="mb-4 text-lg font-semibold">选择的文件</h3>
+      <ul class="divide-y divide-gray-200">
+        <li
+          v-for="(file, index) in filesToUpload"
+          :key="file.name + file.size + file.lastModified"
+          class="flex items-center justify-between py-2"
+        >
+          <div class="flex items-center">
+            <img
+              v-if="file.type.startsWith('image/')"
+              :src="file.previewUrl"
+              class="object-cover w-12 h-12 mr-4 rounded"
+              @load="revokeObjectURL(file.previewUrl)"
+            />
+            <div>
+              <p class="font-medium">{{ file.name }}</p>
+              <p class="text-sm text-gray-500">{{ formatFileSize(file.size) }}</p>
+            </div>
+          </div>
+          <button class="text-red-500 hover:text-red-700" @click="removeFile(file)">
+            &#10005;
+          </button>
+        </li>
+      </ul>
+    </div>
+    <!-- 进度条背景 显示与隐藏有过渡效果，不可点击。-->
+    <div
+      class="absolute top-0 left-0 h-full transition-opacity duration-500 bg-blue-500 pointer-events-none opacity-30"
+      :style="{ width: uploadProgress + '%' }"
+      v-show="uploading"
+    ></div>
+    <!-- 上传按钮 -->
+    <button
+      class="w-full py-2 mt-6 text-white bg-blue-500 rounded hover:bg-blue-600 disabled:opacity-50"
+      :disabled="filesToUpload.length === 0 || uploading"
+      @click="uploadFiles"
+    >
+      {{ uploading ? '上传文件 ' + uploadProgress.toFixed(2) + '%' : '上传文件' }}
+    </button>
+    <!-- 上传结果显示区域 -->
+    <div class="mt-4" v-if="result.message">
+      <p class="text-lg text-center text-green-500" v-if="result.success">{{ result.message }}</p>
+      <p class="text-lg text-center text-red-500" v-else>{{ result.message }}</p>
+      <ul class="text-gray-700 list-disc list-inside" v-if="result.files && result.files.length">
+        <li v-for="file in result.files" :key="file">{{ file }}</li>
+      </ul>
+    </div>
   </div>
+  <div class="flex-grow bg-gray-400 place-holder"></div>
 </template>
 
-<script lang="ts">
-import { NUpload, NUploadDragger, NText, NP, NIcon, NButton, useMessage } from "naive-ui";
-import { defineComponent } from 'vue'
-export default defineComponent({
-  name: "AboutPage",
-  props: ['readMode'],
-  emits: ["setSome"],
-  components: {
-    NUpload,//上传 https://www.naiveui.com/zh-CN/os-theme/components/upload
-    NUploadDragger,
-    NText,
-    NIcon,
-    NP,
-    NButton,
-  },
-  setup() {
-    const message = useMessage()
-    return {
-      message,
-    }
-  },
-  data() {
-    return {
-      beforeBookNum: 0,
-      readerMode: "",
-      upLoadHint: "",
-    };
-  },
-  //Vue3生命周期:  https://v3.cn.vuejs.org/api/options-lifecycle-hooks.html#beforecreate
-  // created : 在绑定元素的属性或事件监听器被应用之前调用。
-  // beforeMount : 指令第一次绑定到元素并且在挂载父组件之前调用。
-  // mounted : 在绑定元素的父组件被挂载后调用。
-  // beforeUpdate: 在更新包含组件的 VNode 之前调用。。
-  // updated: 在包含组件的 VNode 及其子组件的 VNode 更新后调用。
-  // beforeUnmount: 当指令与在绑定元素父组件卸载之前时，只调用一次。
-  // unmounted: 当指令与元素解除绑定且父组件已卸载时，只调用一次。
-  created() {
-    this.beforeBookNum = this.$store.state.server_status.NumberOfBooks;
-    this.$store.dispatch("syncSeverStatusDataAction");
-  },
-  //挂载前
-  beforeMount() {
-  },
-  onMounted() {
+<script setup>
+import { ref } from 'vue';
 
-  },
-  //卸载前
-  beforeUnmount() {
-  },
-  methods: {
-    onBackToBookShelf() {
-      this.$router.push({
-        name: "BookShelf"
-      });
-    },
-    onRefreshPage() {
-      location.reload();
-    },
-    //上传结束的回调
-    onFinishUpload({ file }: any) {
-      // console.log(file);
-      this.message.success(file.name);
-      //每次上传完成后，触发轮询的次数
-      let minTryNum = 4;
-      let StartNum = this.$store.state.server_status.NumberOfBooks;
-      const pollTimer = setInterval(() => {
-        //服务器拉取最新状态，看是否新加了书籍
-        this.$store.dispatch("syncSeverStatusDataAction");
-        //重新拉取书架数据,目前的写法并不需要执行
-        // this.$store.dispatch("syncBookShelfDataAction");
-        //ES6语法的格式化，字符串需要使用反单引号
-        console.log(`this.$store.state.server_status.NumberOfBooks: ${this.$store.state.server_status.NumberOfBooks}`);
-        minTryNum = minTryNum - 1;
-        if (this.$store.state.server_status.NumberOfBooks > StartNum) {
-          minTryNum = minTryNum - 1;
-        }
-        if (minTryNum <= 0) {
-          clearInterval(pollTimer);
-        }
+const pathname = window.location.pathname;
 
-      }, 2000);
-    },
-    // 拼接上传接口路径
-    actionUrl() {
-      let protocol = 'http://'
-      if (window.location.protocol === "https") {
-        protocol = 'https://'
+const fileInput = ref(null);
+const filesToUpload = ref([]);
+const isDragOver = ref(false);
+const uploading = ref(false);
+const uploadProgress = ref(0);
+const result = ref({ message: '', files: [], success: false });
+
+function onFileChange(event) {
+  const files = event.target.files;
+  handleFiles(files);
+  event.target.value = '';
+}
+
+function onDragEnter() {
+  isDragOver.value = true;
+}
+
+function onDragOver() {
+  isDragOver.value = true;
+}
+
+function onDragLeave() {
+  isDragOver.value = false;
+}
+
+function onDrop(event) {
+  isDragOver.value = false;
+  const files = event.dataTransfer.files;
+  handleFiles(files);
+}
+
+function handleFiles(files) {
+  for (let file of files) {
+    // Avoid duplicates
+    if (
+      !filesToUpload.value.some(
+        (f) =>
+          f.name === file.name &&
+          f.size === file.size &&
+          f.lastModified === file.lastModified
+      )
+    ) {
+      // If it's an image, create a preview URL
+      if (file.type.startsWith('image/')) {
+        file.previewUrl = URL.createObjectURL(file);
       }
-      return protocol + window.location.host + '/api/upload';
-    },
-  },
-  computed: {
-  },
-});
+      filesToUpload.value.push(file);
+    }
+  }
+}
+
+function removeFile(file) {
+  filesToUpload.value = filesToUpload.value.filter((f) => f !== file);
+  if (file.previewUrl) {
+    URL.revokeObjectURL(file.previewUrl);
+  }
+}
+
+function formatFileSize(size) {
+  if (size > 1024 * 1024 * 1024) {
+    return (size / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
+  } else if (size > 1024 * 1024) {
+    return (size / (1024 * 1024)).toFixed(2) + ' MB';
+  } else {
+    return (size / 1024).toFixed(2) + ' KB';
+  }
+}
+
+function uploadFiles() {
+  if (filesToUpload.value.length === 0) return;
+  uploading.value = true;
+  uploadProgress.value = 0;
+  const formData = new FormData();
+  filesToUpload.value.forEach((file) => {
+    formData.append('files', file);
+  });
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', '/api/upload', true);
+  xhr.upload.addEventListener('progress', (e) => {
+    if (e.lengthComputable) {
+      uploadProgress.value = (e.loaded / e.total) * 100;
+    }
+  });
+  xhr.onload = function () {
+    if (xhr.status === 200) {
+      const data = JSON.parse(xhr.responseText);
+      result.value.message = data.message;
+      result.value.files = data.files;
+      result.value.success = true;
+      // Revoke object URLs
+      filesToUpload.value.forEach((file) => {
+        if (file.previewUrl) {
+          URL.revokeObjectURL(file.previewUrl);
+        }
+      });
+      // Clear files
+      filesToUpload.value = [];
+      location.reload();
+    } else {
+      const errorData = JSON.parse(xhr.responseText);
+      result.value.message = errorData.error || '上传失败';
+      result.value.success = false;
+    }
+    uploading.value = false;
+    uploadProgress.value = 0;
+  };
+  xhr.onerror = function () {
+    result.value.message = '上传失败: 网络错误';
+    result.value.success = false;
+    uploading.value = false;
+    uploadProgress.value = 0;
+  };
+  xhr.send(formData);
+}
 </script>
-
-<style scoped>
-#UploadFile {
-  padding: 20px;
-}
-
-.n-upload {
-  --tw-bg-opacity: 0.5;
-  background-color: rgba(249, 250, 251, var(--tw-bg-opacity));
-}
-</style>

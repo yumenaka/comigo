@@ -262,7 +262,9 @@ export default defineComponent({
       imageParameters, //获取图片所用的参数
       imageParametersString: (source_url: string) => {
         // var temp =
-        if (source_url.substr(0, 12) === "api/get_file?") {
+        if (source_url.startsWith("/api/get_file?")) {
+          //去掉最初的“/”
+					source_url = source_url.substring(1);
           //当前URL
           const url = document.location.toString();
           //按照“/”分割字符串
@@ -355,15 +357,15 @@ export default defineComponent({
           value: "filesize",
         },
         {
-          label: this.$t("sort_by_filename") + this.$t("sort_reverse"),
+          label: this.$t("sort_by_filename_reverse") + this.$t("sort_reverse"),
           value: "filename_reverse",
         },
         {
-          label: this.$t("sort_by_modify_time") + this.$t("sort_reverse"),
+          label: this.$t("sort_by_modify_time_reverse") + this.$t("sort_reverse"),
           value: "modify_time_reverse",
         },
         {
-          label: this.$t("sort_by_filesize") + this.$t("sort_reverse"),
+          label: this.$t("sort_by_filesize_reverse") + this.$t("sort_reverse"),
           value: "filesize_reverse",
         },
       ],

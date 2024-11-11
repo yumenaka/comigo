@@ -1,10 +1,11 @@
 package config_handlers
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/util/logger"
-	"net/http"
 )
 
 const (

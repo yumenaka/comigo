@@ -1,12 +1,12 @@
 package config_handlers
 
 import (
-	"github.com/pelletier/go-toml/v2"
-	"github.com/yumenaka/comigo/util/logger"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/pelletier/go-toml/v2"
 	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/util/logger"
 )
 
 // GetConfig 获取json格式的当前配置

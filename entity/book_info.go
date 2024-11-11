@@ -13,23 +13,23 @@ import (
 	"github.com/yumenaka/comigo/util/logger"
 )
 
-// BookInfo 与Book唯一的区别是没有AllPageInfo,而是封面图URL 减小 json文件的大小
+// BookInfo 与 Book 唯一的区别是没有 AllPageInfo，而是封面图 URL，减小 JSON 文件的大小
 type BookInfo struct {
 	Author          string          `json:"author"`         // 作者
-	BookID          string          `json:"id"`             // 根据FilePath生成的唯一ID
-	BookStorePath   string          `json:"-"   `           // 在哪个子书库
+	BookID          string          `json:"id"`             // 根据 FilePath 生成的唯一 ID
+	BookStorePath   string          `json:"-"`              // 在哪个子书库
 	ChildBookNum    int             `json:"child_book_num"` // 子书籍数量
 	Cover           ImageInfo       `json:"cover"`          // 封面图
 	Deleted         bool            `json:"deleted"`        // 源文件是否已删除
 	Depth           int             `json:"depth"`          // 书籍深度
-	ExtractPath     string          `json:"-"`              // 解压路径，7z用，json不解析
-	ExtractNum      int             `json:"-"`              // 文件解压数    extract_num
+	ExtractPath     string          `json:"-"`              // 解压路径，7z 用，JSON 不解析
+	ExtractNum      int             `json:"-"`              // 文件解压数
 	FileSize        int64           `json:"file_size"`      // 文件大小
-	FilePath        string          `json:"-"`              // 文件绝对路径，json不解析
+	FilePath        string          `json:"-"`              // 文件绝对路径，JSON 不解析
 	ISBN            string          `json:"isbn"`           // ISBN
-	InitComplete    bool            `json:"-"`              // 是否解压完成  extract_complete
+	InitComplete    bool            `json:"-"`              // 是否解压完成
 	Modified        time.Time       `json:"modified_time"`  // 修改时间
-	NonUTF8Zip      bool            `json:"-"`              // 是否为特殊编码zip
+	NonUTF8Zip      bool            `json:"-"`              // 是否为特殊编码 zip
 	PageCount       int             `json:"page_count"`     // 总页数
 	ParentFolder    string          `json:"parent_folder"`  // 父文件夹
 	Press           string          `json:"press"`          // 出版社
@@ -37,13 +37,11 @@ type BookInfo struct {
 	ReadPercent     float64         `json:"read_percent"`   // 阅读进度
 	Title           string          `json:"title"`          // 书名
 	Type            SupportFileType `json:"type"`           // 书籍类型
-	ZipTextEncoding string          `json:"-"`              // zip文件编码
+	ZipTextEncoding string          `json:"-"`              // zip 文件编码
 }
 
-// NewBaseInfo 模拟构造函数
+// NewBaseInfo 创建新的 BookInfo 实例
 func NewBaseInfo(b *Book) *BookInfo {
-	// 需要单独先执行这个，来设定封面
-	pageCount := b.GetPageCount()
 	return &BookInfo{
 		Author:          b.Author,
 		BookID:          b.BookID,
@@ -60,7 +58,7 @@ func NewBaseInfo(b *Book) *BookInfo {
 		InitComplete:    b.InitComplete,
 		Modified:        b.Modified,
 		NonUTF8Zip:      b.NonUTF8Zip,
-		PageCount:       pageCount,
+		PageCount:       b.GetPageCount(),
 		ParentFolder:    b.ParentFolder,
 		Press:           b.Press,
 		PublishedAt:     b.PublishedAt,
@@ -71,201 +69,176 @@ func NewBaseInfo(b *Book) *BookInfo {
 	}
 }
 
-// initBookID  根据路径的MD5，初始化书籍ID。
+// initBookID 根据路径的 MD5，初始化书籍 ID
 func (b *BookInfo) initBookID() *BookInfo {
-	// logger.Infof("文件绝对路径："+fileAbaPath, "路径的md5："+md5string(fileAbaPath))
-	fileAbaPath, err := filepath.Abs(b.FilePath)
-	if err != nil {
-		logger.Info(err, fileAbaPath)
-	}
-	tempStr := b.FilePath + strconv.Itoa(b.ChildBookNum) + strconv.Itoa(int(b.FileSize)) + string(b.Type) + b.ParentFolder + b.BookStorePath
+	tempStr := b.FilePath + strconv.Itoa(int(b.FileSize)) + string(b.Type) + b.ParentFolder + b.BookStorePath
 	b62 := base62.EncodeToString([]byte(md5string(md5string(tempStr))))
 	b.BookID = getShortBookID(b62, 7)
 	return b
 }
 
-// SetClover 设置封面
-func (b *BookInfo) SetClover(c ImageInfo) *BookInfo {
+// SetCover 设置封面
+func (b *BookInfo) SetCover(c ImageInfo) *BookInfo {
 	b.Cover = c
 	return b
 }
 
-// 初始化Book时，设置FilePath
+// setFilePath 初始化 Book 时，设置 FilePath
 func (b *BookInfo) setFilePath(path string) *BookInfo {
-	fileAbaPath, err := filepath.Abs(path)
+	fileAbsPath, err := filepath.Abs(path)
 	if err != nil {
 		// 因为权限问题，无法取得绝对路径的情况下，用相对路径
-		logger.Info(err, fileAbaPath)
+		logger.Info(err, fileAbsPath)
 		b.FilePath = path
 	} else {
-		b.FilePath = fileAbaPath
+		b.FilePath = fileAbsPath
 	}
 	return b
 }
 
+// setParentFolder 设置父文件夹
 func (b *BookInfo) setParentFolder(filePath string) *BookInfo {
-	// 取得文件所在文件夹的路径
-	// 如果类型是文件夹，同时最后一个字符是路径分隔符的话，就多取一次dir，移除多余的Unix路径分隔符或windows分隔符
+	dirPath := filePath
 	if b.Type == TypeDir {
-		if filePath[len(filePath)-1] == '/' || filePath[len(filePath)-1] == '\\' {
-			filePath = filepath.Dir(filePath)
-		}
+		dirPath = strings.TrimRight(filePath, "/\\")
 	}
-	folder := filepath.Dir(filePath)
-	post := strings.LastIndex(folder, "/") // Unix路径分隔符
-	if post == -1 {
-		post = strings.LastIndex(folder, "\\") // windows分隔符
-	}
-	if post != -1 {
-		p := folder[post:]
-		p = strings.ReplaceAll(p, "\\", "")
-		p = strings.ReplaceAll(p, "/", "")
-		b.ParentFolder = p
-	}
+	parentDir := filepath.Dir(dirPath)
+	b.ParentFolder = filepath.Base(parentDir)
 	return b
 }
 
+// setAuthor 设置作者
 func (b *BookInfo) setAuthor() *BookInfo {
 	b.Author = util.GetAuthor(b.Title)
 	return b
 }
 
+// setTitle 设置标题
 func (b *BookInfo) setTitle(filePath string) *BookInfo {
-	b.Title = filePath
-	// 设置属性：书籍名，取文件后缀(可能为 .zip .rar .pdf .mp4等等)。
-	if b.Type != TypeBooksGroup { // 不是书籍组(book_group)。
-		post := strings.LastIndex(filePath, "/") // Unix路径分隔符
-		if post == -1 {
-			post = strings.LastIndex(filePath, "\\") // windows分隔符
-		}
-		if post != -1 {
-			// FilePath = string([]rune(FilePath)[post:]) //为了防止中文字符被错误截断，先转换成rune，再转回来
-			filename := filePath[post:]
-			filename = strings.ReplaceAll(filename, "\\", "")
-			filename = strings.ReplaceAll(filename, "/", "")
-			b.Title = filename
-		}
+	if b.Type != TypeBooksGroup {
+		b.Title = filepath.Base(filePath)
+	} else {
+		b.Title = filePath
 	}
 	return b
 }
 
+// ShortTitle 返回简短的标题
 func (b *BookInfo) ShortTitle() string {
 	shortTitle := b.Title
-	// 使用 Go 的正则表达式替换掉一些字符串
-	re1 := regexp.MustCompile(`[\[(（【][A-Za-z0-9_\-×\s+\p{Han}\p{Hiragana}\p{Katakana}\p{Hangul}]+`)
+	// 使用预编译正则表达式进行替换
 	shortTitle = re1.ReplaceAllString(shortTitle, "")
-
-	re2 := regexp.MustCompile(`[]）】)]`)
 	shortTitle = re2.ReplaceAllString(shortTitle, "")
-
-	re3 := regexp.MustCompile(`\.(zip|rar|cbr|cbz|tar|pdf|mp3|mp4|flv|gz|webm|gif|png|jpg|jpeg|webp|svg|psd|bmp|tif)`)
 	shortTitle = re3.ReplaceAllString(shortTitle, "")
-
-	domainReg := regexp.MustCompile(`^(((ht|f)tps?)://)?([^!@#$%^&*?.\s-]([^!@#$%^&*?.\s]{0,63}[^!@#$%^&*?.\s])?\.)+[a-zA-Z]{2,6}/?`)
 	shortTitle = domainReg.ReplaceAllString(shortTitle, "")
-
-	re4 := regexp.MustCompile(`^\s`)
 	shortTitle = re4.ReplaceAllString(shortTitle, "")
-
-	re5 := regexp.MustCompile(`^[\-` + "`" + `~!@#$^&*()=|{}':;'@#￥……&*（）——|{}‘；：”“'。，、？]`)
 	shortTitle = re5.ReplaceAllString(shortTitle, "")
-	// rune 切片
 	if len([]rune(shortTitle)) <= 15 {
 		return shortTitle
 	}
 	return string([]rune(shortTitle)[:15]) + "…"
 }
 
+// 预编译正则表达式
+var (
+	re1       = regexp.MustCompile(`[\[(（【][A-Za-z0-9_\-×\s+\p{Han}\p{Hiragana}\p{Katakana}\p{Hangul}]+`)
+	re2       = regexp.MustCompile(`[]）】)]`)
+	re3       = regexp.MustCompile(`\.(zip|rar|cbr|cbz|tar|pdf|mp3|mp4|flv|gz|webm|gif|png|jpg|jpeg|webp|svg|psd|bmp|tif)`)
+	domainReg = regexp.MustCompile(`^(((ht|f)tps?)://)?([^!@#$%^&*?.\s-]([^!@#$%^&*?.\s]{0,63}[^!@#$%^&*?.\s])?\.)+[a-zA-Z]{2,6}/?`)
+	re4       = regexp.MustCompile(`^\s`)
+	re5       = regexp.MustCompile(`^[\-` + "`" + `~!@#$^&*()=|{}':;'@#￥……&*（）——|{}‘；：”“'。，、？]`)
+)
+
+// GetBookInfoListByDepth 根据深度获取书籍列表
 func GetBookInfoListByDepth(depth int, sortBy string) (*BookInfoList, error) {
 	var infoList BookInfoList
 	// 首先加上所有真实的书籍
-	for _, value := range mapBooks.Range {
-		b := value.(*Book)
+	for _, bookValue := range mapBooks.Range {
+		b := bookValue.(*Book)
 		if b.Depth == depth {
 			info := NewBaseInfo(b)
 			infoList.BookInfos = append(infoList.BookInfos, *info)
 		}
 	}
-
 	// 接下来还要加上扫描生成出来的书籍组
-	for _, value := range MainFolder.SubFolders.Range {
-		bs := value.(*subFolder)
-		for _, value := range bs.BookGroupMap.Range {
-			group := value.(*BookInfo)
+	for _, folderValue := range MainStore.SubStores.Range {
+		bs := folderValue.(*subStore)
+		for _, groupValue := range bs.BookGroupMap.Range {
+			group := groupValue.(*BookInfo)
 			if group.Depth == depth {
 				infoList.BookInfos = append(infoList.BookInfos, *group)
 			}
 		}
 	}
-
 	if len(infoList.BookInfos) > 0 {
 		infoList.SortBooks(sortBy)
 		return &infoList, nil
 	}
-	return nil, errors.New("error:can not found bookshelf. GetBookInfoListByDepth")
+	return nil, errors.New("error: cannot find bookshelf in GetBookInfoListByDepth")
 }
 
+// GetBookInfoListByMaxDepth 获取指定最大深度的书籍列表
 func GetBookInfoListByMaxDepth(depth int, sortBy string) (*BookInfoList, error) {
 	var infoList BookInfoList
 	// 首先加上所有真实的书籍
-	for _, value := range mapBooks.Range {
-		b := value.(*Book)
+	for _, bookValue := range mapBooks.Range {
+		b := bookValue.(*Book)
 		if b.Depth <= depth {
 			info := NewBaseInfo(b)
 			infoList.BookInfos = append(infoList.BookInfos, *info)
 		}
 	}
-
 	// 扫描生成的书籍组
-	for _, value := range MainFolder.SubFolders.Range {
-		bs := value.(*subFolder)
-		for _, value := range bs.BookGroupMap.Range {
-			group := value.(*BookInfo)
+	for _, folderValue := range MainStore.SubStores.Range {
+		bs := folderValue.(*subStore)
+		for _, groupValue := range bs.BookGroupMap.Range {
+			group := groupValue.(*BookInfo)
 			if group.Depth <= depth {
 				infoList.BookInfos = append(infoList.BookInfos, *group)
 			}
 		}
 	}
-
 	if len(infoList.BookInfos) > 0 {
 		infoList.SortBooks(sortBy)
 		return &infoList, nil
 	}
-	return nil, errors.New("error:can not found bookshelf. GetBookInfoListByMaxDepth")
+	return nil, errors.New("error: cannot find bookshelf in GetBookInfoListByMaxDepth")
 }
 
+// TopOfShelfInfo 获取顶层书架信息
 func TopOfShelfInfo(sortBy string) (*BookInfoList, error) {
-	// 顶层书组
-	topGroupBookNum := 0
-	// 扫描生成的书籍组
-	var top0 BookInfoList
-	for _, value := range MainFolder.SubFolders.Range {
-		bs := value.(*subFolder)
-		for _, value := range bs.BookGroupMap.Range {
-			group := value.(*BookInfo)
-			if group.Depth == 0 {
-				topGroupBookNum++
-				top0.BookInfos = append(top0.BookInfos, *group)
-			}
-		}
-	}
-	// 如果顶层书组数量大于1，说明有多个顶层书库。只显示顶层书库。
-	if topGroupBookNum > 1 {
-		top0.SortBooks(sortBy)
-		return &top0, nil
-	}
-	// 如果只有一个顶层书库，显示真实的书籍
+	//if len(*LocalStores) == 0 {
+	//	return nil, errors.New("error: cannot find book in TopOfShelfInfo")
+	//}
+	//if len(*LocalStores) > 1 {
+	//	// 有多个书库
+	//	var infoList BookInfoList
+	//	for _, localPath := range *LocalStores {
+	//		for _, groupValue := range mapBookGroup.Range {
+	//			group := groupValue.(*BookGroup)
+	//			if group.BookInfo.ParentFolder == localPath {
+	//				infoList.BookInfos = append(infoList.BookInfos, group.BookInfo)
+	//			}
+	//		}
+	//	}
+	//	if len(infoList.BookInfos) > 0 {
+	//		infoList.SortBooks(sortBy)
+	//		return &infoList, nil
+	//	}
+	//	return nil, errors.New("error: cannot find book in TopOfShelfInfo")
+	//}
+	// 显示顶层书库的书籍
 	var infoList BookInfoList
-	for _, value := range mapBooks.Range {
-		b := value.(*Book)
-		if b.Depth == 1 {
+	for _, bookValue := range mapBooks.Range {
+		b := bookValue.(*Book)
+		if b.Depth == 0 {
 			info := NewBaseInfo(b)
 			infoList.BookInfos = append(infoList.BookInfos, *info)
 		}
 	}
-	for _, value := range mapBookGroup.Range {
-		group := value.(*BookGroup)
-		if group.BookInfo.Depth == 1 {
+	for _, groupValue := range mapBookGroup.Range {
+		group := groupValue.(*BookGroup)
+		if group.BookInfo.Depth == 0 {
 			infoList.BookInfos = append(infoList.BookInfos, group.BookInfo)
 		}
 	}
@@ -273,41 +246,41 @@ func TopOfShelfInfo(sortBy string) (*BookInfoList, error) {
 		infoList.SortBooks(sortBy)
 		return &infoList, nil
 	}
-	return nil, errors.New("error:can not found bookshelf. GetBookInfoListByMaxDepth")
+	// 没找到任何书
+	return nil, errors.New("error: cannot find book in TopOfShelfInfo")
 }
 
+// GetBookInfoListByID 根据 ID 获取书籍列表
 func GetBookInfoListByID(BookID string, sortBy string) (*BookInfoList, error) {
 	var infoList BookInfoList
-	group, ok := mapBookGroup.Load(BookID)
+	groupValue, ok := mapBookGroup.Load(BookID)
 	if ok {
-		tempGroup := group.(*BookGroup)
-		// 首先加上所有真实的书籍
-		for _, value := range tempGroup.ChildBook.Range {
-			b := value.(*BookInfo)
+		tempGroup := groupValue.(*BookGroup)
+		for _, bookValue := range tempGroup.ChildBook.Range {
+			b := bookValue.(*BookInfo)
 			infoList.BookInfos = append(infoList.BookInfos, *b)
 		}
-
 		if len(infoList.BookInfos) > 0 {
 			infoList.SortBooks(sortBy)
 			return &infoList, nil
 		}
 	}
-	return nil, errors.New("can not found bookshelf")
+	return nil, errors.New("cannot find bookshelf")
 }
 
+// GetBookInfoListByParentFolder 根据父文件夹获取书籍列表
 func GetBookInfoListByParentFolder(parentFolder string, sortBy string) (*BookInfoList, error) {
 	var infoList BookInfoList
-	for _, value := range mapBooks.Range {
-		b := value.(*Book)
+	for _, bookValue := range mapBooks.Range {
+		b := bookValue.(*Book)
 		if b.ParentFolder == parentFolder {
 			info := NewBaseInfo(b)
 			infoList.BookInfos = append(infoList.BookInfos, *info)
 		}
 	}
-
 	if len(infoList.BookInfos) > 0 {
 		infoList.SortBooks(sortBy)
 		return &infoList, nil
 	}
-	return nil, errors.New("can not found book,parentFolder=" + parentFolder)
+	return nil, errors.New("cannot find book, parentFolder=" + parentFolder)
 }

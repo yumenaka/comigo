@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"github.com/yumenaka/comigo/util/locale"
-	"github.com/yumenaka/comigo/util/logger"
 	"os"
 	"path"
 	"path/filepath"
@@ -11,6 +9,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/routers"
+	"github.com/yumenaka/comigo/util/locale"
+	"github.com/yumenaka/comigo/util/logger"
 )
 
 // rootCmd 没有任何子命令的情况下时的基本命令

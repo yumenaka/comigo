@@ -1,6 +1,11 @@
 package config_handlers
 
 import (
+	"io"
+	"net/http"
+	"reflect"
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"github.com/yumenaka/comigo/config"
@@ -8,10 +13,6 @@ import (
 	"github.com/yumenaka/comigo/util"
 	"github.com/yumenaka/comigo/util/file/scan"
 	"github.com/yumenaka/comigo/util/logger"
-	"io"
-	"net/http"
-	"reflect"
-	"strconv"
 )
 
 // UpdateConfig 修改服务器配置(post json)
@@ -106,7 +107,7 @@ func performScanAndUpdateDBIfNeeded(newConfig *entity.ComigoConfig, reScanFile b
 	option := scan.NewScanOption(
 		reScanFile,
 		newConfig.LocalStores,
-		config.Config.BookStores,
+		config.Config.Stores,
 		newConfig.MaxScanDepth,
 		newConfig.MinImageNum,
 		newConfig.TimeoutLimitForScan,

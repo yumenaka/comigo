@@ -2,7 +2,7 @@ package config
 
 import (
 	"fmt"
-	"github.com/mitchellh/go-homedir"
+	"github.com/yumenaka/comigo/config/stores"
 	"net/http"
 	"os"
 	"path"
@@ -16,14 +16,14 @@ import (
 )
 
 var (
-	Version = "v0.9.11"
+	Version = "v0.9.12"
 	Srv     *http.Server
 	Status  = entity.ConfigStatus{}
 	Config  = entity.ComigoConfig{
 		Port:        1234,
 		Host:        "DefaultHost",
 		LocalStores: []string{},
-		BookStores: []entity.BookStore{
+		Stores: []stores.Store{
 			{
 				Type:      "smb",
 				Host:      os.Getenv("SMB_HOST"),
@@ -154,7 +154,7 @@ func DeleteConfigIn(in string) error {
 	var configFile string
 	switch in {
 	case HomeDirectory:
-		home, errHomeDirectory := homedir.Dir()
+		home, errHomeDirectory := os.UserHomeDir()
 		if errHomeDirectory != nil {
 			return errHomeDirectory
 		}

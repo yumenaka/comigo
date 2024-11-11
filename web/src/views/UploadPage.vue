@@ -1,18 +1,18 @@
 <template>
-    <div class="UploadPage w-full h-screen flex flex-col">
-        <Header class="header flex-none h-12"  in-shelf="true" :bookIsFolder="false" :headerTitle="getUploadTitile()"
+    <div class="flex flex-col w-full h-screen UploadPage">
+        <Header class="flex-none h-12 header"  in-shelf="true" :bookIsFolder="false" :headerTitle="getUploadTitile()"
             :showReturnIcon="true" :showSettingsIcon="true" :bookID='null' :setDownLoadLink="false"
             @drawerActivate="drawerActivate">
         </Header>
         <!-- 渲染书架部分 有书的时候显示书  没有的时候显示上传控件-->
         <!-- Flex Grow 控制 flex 项目放大的功能类 https://www.tailwindcss.cn/docs/flex-grow -->
         <!-- 上传控件 -->
-        <div class="mian_area flex-grow">
+        <div class="flex flex-col items-center justify-center flex-grow w-full main_area">
             <UploadFile>
             </UploadFile>
         </div>
 
-        <Bottom class="bottom flex-none h-12" :ServerName="
+        <Bottom class="flex-none h-12 bottom" :ServerName="
             $store.state.server_status.ServerName
                 ? $store.state.server_status.ServerName
                 : 'Comigo'

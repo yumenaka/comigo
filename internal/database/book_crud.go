@@ -5,6 +5,7 @@ package database // Package database 编译条件的注释和 package 语句之�
 import (
 	"context"
 	"errors"
+
 	"github.com/yumenaka/comigo/entity"
 	"github.com/yumenaka/comigo/internal/ent"
 	entbook "github.com/yumenaka/comigo/internal/ent/book"
@@ -202,7 +203,7 @@ func GetBookFromDatabase(filepath string) (*entity.Book, error) {
 	}
 	//设置封面
 	if len(b.Pages.Images) > 0 {
-		b.SetClover(b.Pages.Images[0])
+		b.SetCover(b.Pages.Images[0])
 	}
 	if err != nil {
 		logger.Infof("%s", err)
@@ -273,18 +274,18 @@ func GetBooksFromDatabase() (list []*entity.Book, err error) {
 		}
 		//设置封面
 		if len(b.Pages.Images) > 0 {
-			b.SetClover(b.Pages.Images[0])
+			b.SetCover(b.Pages.Images[0])
 		}
 		//硬写一个封面
 		switch b.Type {
 		case entity.TypePDF:
-			b.SetClover(entity.ImageInfo{NameInArchive: "pdf.png", Url: "/images/pdf.png"})
+			b.SetCover(entity.ImageInfo{NameInArchive: "pdf.png", Url: "/images/pdf.png"})
 		case entity.TypeVideo:
-			b.SetClover(entity.ImageInfo{NameInArchive: "video.png", Url: "/images/video.png"})
+			b.SetCover(entity.ImageInfo{NameInArchive: "video.png", Url: "/images/video.png"})
 		case entity.TypeAudio:
-			b.SetClover(entity.ImageInfo{NameInArchive: "audio.png", Url: "/images/audio.png"})
+			b.SetCover(entity.ImageInfo{NameInArchive: "audio.png", Url: "/images/audio.png"})
 		case entity.TypeUnknownFile:
-			b.SetClover(entity.ImageInfo{NameInArchive: "unknown.png", Url: "/images/unknown.png"})
+			b.SetCover(entity.ImageInfo{NameInArchive: "unknown.png", Url: "/images/unknown.png"})
 		}
 		list = append(list, &b)
 	}

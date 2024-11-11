@@ -47,7 +47,6 @@ func GetRegFile(c *gin.Context) {
 @="\"ComigoExePath\"  \"%V\""
 
 `
-
 	//替换Icon那一行
 	regText = strings.Replace(regText, `C:\\Users\\%USERNAME%\\Desktop\\comi.exe`, newStr, -1)
 	//替换 ComigoExePath
@@ -60,27 +59,4 @@ func GetRegFile(c *gin.Context) {
 	c.Header("Content-Type", "application/octet-stream") // 这里是压缩文件类型 .zip
 	c.Header("Content-Disposition", fileContentDisposition)
 	c.Data(http.StatusOK, "application/octet-stream", []byte(regText))
-	//在程序执行目录创建一个REG文件，并写入内容
-	//targetPath, _ := os.Getwd()
-	//filePath := path.Join(targetPath, regFileName)
-	//file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, 0666)
-	//if err != nil {
-	//	logger.Infof("open file error=%v\n", err)
-	//	return
-	//}
-	//defer func(file *os.File) {
-	//	err := file.Close()
-	//	if err != nil {
-	//		logger.Infof("Close file error=%v\n", err)
-	//	}
-	//}(file)
-	//writer := bufio.NewWriter(file)
-	//_, err = writer.WriteString(regText)
-	//if err != nil {
-	//	return
-	//}
-	//err := writer.Flush()
-	//if err != nil {
-	//	return
-	//}
 }

@@ -51,7 +51,7 @@ func Smb(scanOption Option) (newBookList []*entity.Book, err error) {
 	//	//对于目录中的每一个项（无论是文件还是目录），指定的函数都会被调用。
 	//	func(path string, d iofs.DirEntry, err error) error {
 	//		//这个函数接收三个参数：path（项的路径），dialer（一个DirEntry对象，表示文件或目录的信息），和err（如果在访问该项时出现错误）
-	//		fmt.Println("smb hint： smb://"+scanOption.BookStores[0].Host+"/"+scanOption.BookStores[0].ShareName+"/test/"+path, d.IsDir(), err)
+	//		fmt.Println("smb hint： smb://"+scanOption.Stores[0].Host+"/"+scanOption.Stores[0].ShareName+"/test/"+path, d.IsDir(), err)
 	//		return nil
 	//	})
 	//if err != nil {
@@ -113,7 +113,7 @@ func Smb(scanOption Option) (newBookList []*entity.Book, err error) {
 			//// 如果是文件夹
 			//if fileInfo.IsDir() {
 			//	// 得到书籍文件数据
-			//	getBook, err := smbScanDir(walkPath, scanOption.BookStores[0].ShareName, depth, scanOption)
+			//	getBook, err := smbScanDir(walkPath, scanOption.Stores[0].ShareName, depth, scanOption)
 			//	if err != nil {
 			//		logger.Infof("%e", err)
 			//		return nil

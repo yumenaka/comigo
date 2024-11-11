@@ -13,27 +13,6 @@ import (
 	"unicode/utf8"
 )
 
-//// 一个语言检测包，它告诉您某些提供的文本数据是用哪种（人类）语言编写的。 需要导入：
-////go get github.com/pemistahl/lingua-go@v1.0.5
-//func CheckStringLanguage(s string) string {
-//	languages := []lingua.Language{
-//		lingua.English,
-//		lingua.Japanese,
-//		lingua.Chinese,
-//		lingua.French,
-//		lingua.German,
-//		lingua.Spanish,
-//	}
-//	detector := lingua.NewLanguageDetectorBuilder().
-//		FromLanguages(languages...).
-//		Build()
-//	if language, exists := detector.DetectLanguageOf("languages are awesome"); exists {
-//		logger.Infof(language)
-//		return language
-//	}
-//	return ""
-//}
-
 // DetectUTF8 检测 s 是否为有效的 UTF-8 字符串，以及该字符串是否必须被视为 UTF-8 编码（即，不兼容CP-437、ASCII 或任何其他常见编码）。
 // 来自： go\src\archive\zip\reader.go
 func DetectUTF8(s string) (valid, require bool) {

@@ -10,9 +10,9 @@ import (
 )
 
 // PrintAllReaderURL 打印阅读链接
-func PrintAllReaderURL(Port int, OpenBrowserFlag bool, PrintAllPossibleQRCode bool, ServerHost string, DisableLAN bool, enableTls bool, etcStr string) {
+func PrintAllReaderURL(Port int, OpenBrowserFlag bool, PrintAllPossibleQRCode bool, ServerHost string, DisableLAN bool, enableTLS bool, etcStr string) {
 	protocol := "http://"
-	if enableTls {
+	if enableTLS {
 		protocol = "https://"
 	}
 	localURL := protocol + "127.0.0.1:" + strconv.Itoa(Port) + etcStr
@@ -27,7 +27,7 @@ func PrintAllReaderURL(Port int, OpenBrowserFlag bool, PrintAllPossibleQRCode bo
 }
 
 func printURLAndQRCode(port int, PrintAllPossibleQRCode bool, ServerHost string, protocol string, etcStr string) {
-
+	//打印指定的服务器地址
 	if ServerHost != "" {
 		readURL := protocol + ServerHost + ":" + strconv.Itoa(port) + etcStr
 		fmt.Println(locale.GetString("reading_url_maybe") + readURL)

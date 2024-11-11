@@ -1,11 +1,12 @@
 package config
 
 import (
+	"os"
+	"path"
+
 	"github.com/yumenaka/comigo/util"
 	"github.com/yumenaka/comigo/util/locale"
 	"github.com/yumenaka/comigo/util/logger"
-	"os"
-	"path"
 )
 
 // SetTempDir 设置临时文件夹，退出时会被清理

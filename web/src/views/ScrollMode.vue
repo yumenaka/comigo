@@ -244,13 +244,16 @@ export default defineComponent({
 			imageParameters,//获取图片所用参数
 			imageParametersString: (source_url: string) => {
 				//console.log("source_url:" + source_url)
-				if (source_url.startsWith("api/get_file?")) {
+				if (source_url.startsWith("/api/get_file?")) {
+					//去掉最初的“/”
+					source_url = source_url.substring(1);
 					//当前URL
 					const url = document.location.toString();
 					//按照“/”分割字符串
 					const arrUrl = url.split("/");
 					//拼一个完整的图片URL（因为路由路径会变化,所以不能用相对路径？）
 					const base_str = arrUrl[0] + "//" + arrUrl[2] + "/" + source_url;
+					//console.log("base_str:" + base_str)
 					//添加各种字符串参数,不需要的话为空
 					const resize_width_str = (imageParameters.resize_width > 0 ? "&resize_width=" + imageParameters.resize_width : "");
 					const resize_height_str = (imageParameters.resize_height > 0 ? "&resize_height=" + imageParameters.resize_height : "");
@@ -262,6 +265,7 @@ export default defineComponent({
 					const addStr = resize_width_str + resize_height_str + do_auto_resize_str + resize_max_height_str + auto_crop_str + gray_str;
 					//如果有附加转换参数，则设置成不缓存
 					const nocache_str = (addStr === "" ? "" : "&no-cache=true");
+					console.log("addStr:" + addStr)
 					return base_str + addStr + nocache_str;
 				} else {
 					return source_url
@@ -347,15 +351,15 @@ export default defineComponent({
 					value: "filesize"
 				},
 				{
-					label: this.$t('sort_by_filename') + this.$t('sort_reverse'),
+					label: this.$t('sort_by_filename_reverse') + this.$t('sort_reverse'),
 					value: "filename_reverse",
 				},
 				{
-					label: this.$t('sort_by_modify_time') + this.$t('sort_reverse'),
+					label: this.$t('sort_by_modify_time_reverse') + this.$t('sort_reverse'),
 					value: "modify_time_reverse"
 				},
 				{
-					label: this.$t('sort_by_filesize') + this.$t('sort_reverse'),
+					label: this.$t('sort_by_filesize_reverse') + this.$t('sort_reverse'),
 					value: "filesize_reverse"
 				},
 			],

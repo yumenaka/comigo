@@ -13,37 +13,43 @@ import (
 )
 
 func showQRCode() {
-	//cmd打印链接二维码.如果只有一本书，就直接打开那本书.
+	// 如果只有一本书，URL 需要附加的参数
 	etcStr := ""
-	//只有一本书的时候，URL需要附加的参数
 	if entity.GetBooksNumber() == 1 {
 		bookList, err := entity.GetAllBookInfoList("name")
 		if err != nil {
-			logger.Infof("%s", err)
+			logger.Infof("Error getting book list: %s", err)
+			return
 		}
 		if len(bookList.BookInfos) == 1 {
-			etcStr = "/#/scroll/" + bookList.BookInfos[0].BookID
-		}
-		if config.Config.DefaultMode != "" {
-			etcStr = "/#/" + strings.ToLower(config.Config.DefaultMode) + "/" + bookList.BookInfos[0].BookID
+			mode := "scroll"
+			if config.Config.DefaultMode != "" {
+				mode = strings.ToLower(config.Config.DefaultMode)
+			}
+			etcStr = fmt.Sprintf("/#/%s/%s", mode, bookList.BookInfos[0].BookID)
 		}
 	}
-	enableTls := config.Config.CertFile != "" && config.Config.KeyFile != ""
-	OutIP := config.Config.Host
+
+	enableTLS := config.Config.CertFile != "" && config.Config.KeyFile != ""
+	outIP := config.Config.Host
 	if config.Config.Host == "DefaultHost" {
-		OutIP = util.GetOutboundIP().String()
+		outIP = util.GetOutboundIP().String()
 	}
+
 	util.PrintAllReaderURL(
 		config.Config.Port,
 		config.Config.OpenBrowser,
 		config.Config.PrintAllPossibleQRCode,
-		OutIP,
+		outIP,
 		config.Config.DisableLAN,
-		enableTls,
-		etcStr)
-	//打印配置，调试用
+		enableTLS,
+		etcStr,
+	)
+
+	// 打印配置，调试用
 	if config.Config.Debug {
 		litter.Dump(config.Config)
 	}
+
 	fmt.Println(locale.GetString("ctrl_c_hint"))
 }
