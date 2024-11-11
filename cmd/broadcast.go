@@ -3,6 +3,7 @@ package cmd
 import (
 	"github.com/spf13/viper"
 	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/entity"
 	"github.com/yumenaka/comigo/routers/handlers"
 	"github.com/yumenaka/comigo/util/file/scan"
 	"github.com/yumenaka/comigo/util/locale"
@@ -49,11 +50,7 @@ func ReScanUploadPath() {
 	if !config.Config.EnableUpload {
 		return
 	}
-	uploadPath := "upload"
-	if config.Config.UploadPath != "" {
-		uploadPath = config.Config.UploadPath
-	}
-	ReScanPath(uploadPath, true)
+	ReScanPath(config.Config.UploadPath, true)
 }
 
 func ReScanPath(path string, reScanFile bool) {
@@ -61,7 +58,7 @@ func ReScanPath(path string, reScanFile bool) {
 	option := scan.NewScanOption(
 		reScanFile,
 		config.Config.LocalStores,
-		config.Config.BookStores,
+		config.Config.Stores,
 		config.Config.MaxScanDepth,
 		config.Config.MinImageNum,
 		config.Config.TimeoutLimitForScan,
@@ -79,6 +76,7 @@ func ReScanPath(path string, reScanFile bool) {
 		logger.Infof(locale.GetString("scan_error")+"path:%s  %s", path, err)
 		return
 	}
-	//TODO：这里有BUG需要修：网页上传，upload文件夹看不到新文件（阅读界面-快速调跳转里面反而有）。应该是书架数据刷新逻辑写错了。
+	//DO：这里有BUG需要修：网页上传，upload文件夹看不到新文件（阅读界面-快速调跳转里面反而有）。应该是书架数据刷新逻辑写错了。
 	scan.AddBooksToStore(addList, path, config.Config.MinImageNum)
+	entity.ResetBookStore()
 }

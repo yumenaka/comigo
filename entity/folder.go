@@ -2,32 +2,31 @@ package entity
 
 import (
 	"errors"
-	"github.com/yumenaka/comigo/util/logger"
 	"os"
 	"path/filepath"
 	"sync"
+
+	"github.com/yumenaka/comigo/util/logger"
 )
 
-// Folder 本地总书库，扫描后生成。可以有多个子书库。
-type Folder struct {
-	Path       string
-	SortBy     string   //新字段   //排序方式
-	SubFolders sync.Map //key为路径 存储 *subFolder
+// Store 本地总书库，扫描后生成。可以有多个子书库。
+type Store struct {
+	SubStores sync.Map //key为路径 存储 *subStore
 }
 
 // 对应某个扫描路径的子书库
-type subFolder struct {
-	Path         string   //路径
+type subStore struct {
+	Path         string   //扫描路径
 	SortBy       string   //排序方式
 	BookMap      sync.Map //拥有的书籍,key是BookID,存储 *BookInfo
 	BookGroupMap sync.Map //拥有的书籍组,通过扫描书库生成，key是BookID,存储 *BookInfo。需要通过Depth从深到浅生成
 }
 
-// InitFolder 生成书籍组
-func (folder *Folder) InitFolder() (e error) {
+// InitStore 生成书籍组
+func (folder *Store) InitStore() (e error) {
 	//遍历所有子书库
-	for _, value := range folder.SubFolders.Range {
-		s := value.(*subFolder)
+	for _, value := range folder.SubStores.Range {
+		s := value.(*subStore)
 		err := s.AnalyzeFolder()
 		if err != nil {
 			e = err
@@ -36,7 +35,7 @@ func (folder *Folder) InitFolder() (e error) {
 	return e
 }
 
-func (s *subFolder) AnalyzeFolder() error {
+func (s *subStore) AnalyzeFolder() error {
 	count := 0
 	for _, _ = range s.BookMap.Range {
 		count++
@@ -89,7 +88,7 @@ func (s *subFolder) AnalyzeFolder() error {
 			for i, bookInList := range sameParentBookList {
 				//顺便设置一下封面，只设置一次
 				if i == 0 {
-					newBookGroup.SetClover(bookInList.Cover)
+					newBookGroup.SetCover(bookInList.Cover)
 				}
 				newBookGroup.ChildBook.Store(bookInList.BookID, &sameParentBookList[i])
 			}
@@ -125,32 +124,32 @@ func (s *subFolder) AnalyzeFolder() error {
 	return nil
 }
 
-// AddSubFolder 创建一个新文件夹
-func (folder *Folder) AddSubFolder(basePath string) error {
-	if _, ok := folder.SubFolders.Load(basePath); ok {
+// AddSubStore 创建一个新文件夹
+func (folder *Store) AddSubStore(basePath string) error {
+	if _, ok := folder.SubStores.Load(basePath); ok {
 		// 已经有这个key了
 		return errors.New("add Bookstore Error： The key already exists [" + basePath + "]")
 	}
-	s := subFolder{
+	s := subStore{
 		Path: basePath,
 	}
-	folder.SubFolders.Store(basePath, &s)
+	folder.SubStores.Store(basePath, &s)
 	return nil
 }
 
-// AddBookToSubFolder 将某一本书，放到BookMap里面去
-func (folder *Folder) AddBookToSubFolder(searchPath string, b *BookInfo) error {
-	if f, ok := folder.SubFolders.Load(searchPath); !ok {
+// AddBookToSubStore 将某一本书，放到BookMap里面去
+func (folder *Store) AddBookToSubStore(searchPath string, b *BookInfo) error {
+	if f, ok := folder.SubStores.Load(searchPath); !ok {
 		//创建一个新子书库，并添加一本书
-		newStore := subFolder{
+		newStore := subStore{
 			Path: searchPath,
 		}
 		newStore.BookMap.Store(b.BookID, b)
-		folder.SubFolders.Store(searchPath, &newStore)
+		folder.SubStores.Store(searchPath, &newStore)
 		return errors.New("add Bookstore Error： The key not found [" + searchPath + "]")
 	} else {
 		//给已有子书库添加一本书
-		temp := f.(*subFolder)
+		temp := f.(*subStore)
 		temp.BookMap.Store(b.BookID, b)
 		return nil
 	}

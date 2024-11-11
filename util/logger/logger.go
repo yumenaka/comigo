@@ -32,6 +32,10 @@ func Infof(format string, args ...interface{}) {
 	Log.Infof(format, args...)
 }
 
+func Errorf(format string, args ...interface{}) {
+	Log.Errorf(format, args...)
+}
+
 func DebugWithFields(fields logrus.Fields, args ...interface{}) {
 	Log.WithFields(fields).Debug(args...)
 }

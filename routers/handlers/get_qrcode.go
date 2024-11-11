@@ -1,11 +1,12 @@
 package handlers
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/skip2/go-qrcode"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/util/logger"
-	"net/http"
 )
 
 // GetQrcode 下载服务器配置
