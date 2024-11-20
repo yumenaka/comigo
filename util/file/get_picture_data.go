@@ -1,13 +1,14 @@
 package file
 
 import (
-	"github.com/yumenaka/comigo/util"
-	"github.com/yumenaka/comigo/util/locale"
-	"github.com/yumenaka/comigo/util/logger"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/yumenaka/comigo/util"
+	"github.com/yumenaka/comigo/util/locale"
+	"github.com/yumenaka/comigo/util/logger"
 )
 
 type GetPictureDataOption struct {

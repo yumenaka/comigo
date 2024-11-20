@@ -33,7 +33,7 @@ templ MainLayout(c *gin.Context, s *state.GlobalState, bodyContent templ.Compone
 		<!-- $persist 可以存储原始值以及数组和对象。本地存储，默认的key是 _x_变量名 -->
 		<!-- ！！！当变量的类型发生变化时，必须手动清除 localStorage，否则相应数值将无法正确更新。！！！ -->
 		<!-- 详细用法参见： https://alpinejs.dev/plugins/persist -->
-		<body x-data="{ theme: $persist('retro') }" x-bind:data-theme="theme"  class="flex flex-col items-center justify-between w-full h-full min-h-screen p-0 m-0 font-sans">
+		<body x-data="{ theme: $persist('retro') }" x-bind:data-theme="theme" class="flex flex-col items-center justify-between w-full h-full min-h-screen p-0 m-0 font-sans">
 			@MessageModal()
 			@bodyContent
 		</body>
@@ -46,7 +46,7 @@ templ MainLayout(c *gin.Context, s *state.GlobalState, bodyContent templ.Compone
 		}
 		<!-- js代码,滚动到顶部,显示返回顶部按钮,获取鼠标位置,决定是否打开设置面板等 src="/static/flip.js"  -->
 		if !s.StaticMode && insertScript != "" {
-			<script src={"/"+insertScript}></script>
+			<script src={ "/" + insertScript }></script>
 		}
 		if s.StaticMode && insertScript != "" {
 			@templ.Raw("<script>" + embed_files.GetFileStr(insertScript) + "</script>")

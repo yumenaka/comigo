@@ -1,12 +1,12 @@
 package handlers
 
 import (
-	"github.com/yumenaka/comigo/util/logger"
 	"net/http"
 	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comigo/entity"
+	"github.com/yumenaka/comigo/util/logger"
 )
 
 func GetRawFile(c *gin.Context) {

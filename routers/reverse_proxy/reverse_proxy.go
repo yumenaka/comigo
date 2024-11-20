@@ -1,12 +1,12 @@
 package reverse_proxy
 
 import (
-	"github.com/yumenaka/comigo/util/logger"
 	"io"
 	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/yumenaka/comigo/util/logger"
 )
 
 type ReverseProxyOptions struct {

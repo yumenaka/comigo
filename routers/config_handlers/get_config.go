@@ -1,12 +1,12 @@
 package config_handlers
 
 import (
-	"github.com/pelletier/go-toml/v2"
-	"github.com/yumenaka/comigo/util/logger"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/pelletier/go-toml/v2"
 	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/util/logger"
 )
 
 // GetConfig 获取json格式的当前配置
@@ -25,7 +25,7 @@ func GetConfigToml(c *gin.Context) {
 	tempConfig.LogFilePath = ""
 	config.Config.OpenBrowser = false
 	config.Config.EnableDatabase = true
-	tempConfig.LocalStores = []string{"C:\\test\\Comic", "D:\\some_path\\book", "/home/user/download"}
+	tempConfig.ReplaceLocalStores([]string{"C:\\test\\Comic", "D:\\some_path\\book", "/home/user/download"})
 	tempConfig.Username = "comigo"
 	tempConfig.Password = ""
 	bytes, err := toml.Marshal(tempConfig)

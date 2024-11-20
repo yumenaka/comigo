@@ -10,7 +10,7 @@ type BookGroup struct {
 	ChildBook sync.Map //key：BookID,value: *BookInfo
 }
 
-// NewBook  初始化Book，设置文件路径、书名、BookID等等
+// NewBookGroup   初始化BookGroup，设置文件路径、书名、BookID等等
 func NewBookGroup(filePath string, modified time.Time, fileSize int64, storePath string, depth int, bookType SupportFileType) (*BookGroup, error) {
 	//初始化书籍
 	var group = BookGroup{

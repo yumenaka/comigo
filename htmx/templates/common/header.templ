@@ -63,20 +63,26 @@ type HeaderProps struct {
 // 使用这些颜色，创建一个视觉和谐、易于导航的用户界面。如果有品牌指南或设计规范，可以依据这些规范进一步调整。
 templ Header(c *gin.Context, prop HeaderProps) {
 	<header
-	id="header"
-	if prop.FlipMode { x-data="{ FlipMode: true }"  onmouseover="showToolbar();" onmouseout="hideToolbar()" }
-	if !prop.FlipMode { x-data="{ FlipMode: false }" }
-	class={"toolbar flex flex-row justify-between w-full h-12 p-1 border-b bg-base-100 text-base-content border-slate-400",templ.KV("mx-auto opacity-90", prop.FlipMode)}
-	     if prop.FlipMode {
-         	:class="{ 'fixed absolute top-0': $store.flip.autoHideToolbar}"
-         }
-	     >
+		id="header"
+		if prop.FlipMode {
+			x-data="{ FlipMode: true }"
+			onmouseover="showToolbar();"
+			onmouseout="hideToolbar()"
+		}
+		if !prop.FlipMode {
+			x-data="{ FlipMode: false }"
+		}
+		class={ "toolbar flex flex-row justify-between w-full h-12 p-1 border-b bg-base-100 text-base-content border-slate-400",templ.KV("mx-auto opacity-90", prop.FlipMode) }
+		if prop.FlipMode {
+			:class="{ 'fixed absolute top-0': $store.flip.autoHideToolbar}"
+		}
+	>
 		<div class="flex flex-row">
 			if prop.ShowReturnIcon {
 				<!-- 返回箭头,点击返回上一页 -->
 				<a href={ templ.SafeURL(prop.ReturnUrl) }>
 					<div class="w-8 pt-1 m-0">
-						<svg class="static w-8 rounded hover:ring" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M112 160l-64 64l64 64"></path><path d="M64 224h294c58.76 0 106 49.33 106 108v20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></path></svg>
+						<svg class="static w-8 rounded hover:ring" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 512 512"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M112 160l-64 64l64 64"></path><path d="M64 224h294c58.76 0 106 49.33 106 108v20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></path></svg>
 					</div>
 				</a>
 			}
@@ -100,7 +106,7 @@ templ Header(c *gin.Context, prop HeaderProps) {
 			if false {
 				<!-- 上传按钮，点击进入上传页面 -->
 				<div class="w-8 pt-1 mx-1 my-0 rounded hover:ring ">
-					<svg class="static w-8" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512">
+					<svg class="static w-8" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 512 512">
 						<path
 							d="M320 367.79h76c55 0 100-29.21 100-83.6s-53-81.47-96-83.6c-8.89-85.06-71-136.8-144-136.8c-69 0-113.44 45.79-128 91.2c-60 5.7-112 43.88-112 106.4s54 106.4 120 106.4h56"
 							fill="none"
@@ -185,12 +191,11 @@ templ Header(c *gin.Context, prop HeaderProps) {
 			</div>
 			<!-- 全屏按钮 -->
 			<div id="FullScreenIcon" class="w-8 pt-1 mx-1 my-0 rounded hover:ring">
-				<svg
-					class="static w-8"
-					xmlns="http://www.w3.org/2000/svg"
-					xmlns:xlink="http://www.w3.org/1999/xlink"
-					viewBox="0 0 24 24"
-				>
+                <svg
+                        class="static w-8"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                >
 					<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<path d="M16 4h4v4"></path>
 						<path d="M14 10l6-6"></path>

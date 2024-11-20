@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/yumenaka/comigo/util/logger"
 	"image/jpeg"
 	"io"
 	"log"
@@ -15,6 +14,7 @@ import (
 	"github.com/disintegration/imaging"
 	"github.com/pdfcpu/pdfcpu/pkg/api"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/model"
+	"github.com/yumenaka/comigo/util/logger"
 )
 
 //sample code: https://github.com/pdfcpu/pdfcpu/blob/master/pkg/api/extract.go
@@ -46,34 +46,9 @@ func GetImageFromPDF(pdfFileName string, pageNum int, Debug bool) ([]byte, error
 		fmt.Println(err)
 	}
 	defer file.Close()
-
+	// use default configuration for pdfcpu
 	pdfSetting := model.NewDefaultConfiguration()
 	pdfSetting.DecodeAllStreams = true
-
-	////api.ExtractImagesRaw(） 只能导出图片，无法输出文档
-	//pageImagesMap, err := api.ExtractImagesRaw(file, []string{strconv.Itoa(pageNum)}, pdfSetting)
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
-	//images := make([]model.Image, 0)
-	//for _, pageImages := range pageImagesMap {
-	//	for _, img := range pageImages {
-	//		images = append(images, img)
-	//	}
-	//}
-	//var imgBytes []byte = nil
-	//for i := range images {
-	//	b, err := io.ReadAll(images[i])
-	//	if err != nil {
-	//		continue
-	//	}
-	//	imgBytes = b
-	//	fmt.Println(time.Now().Sub(start))
-	//	return b, nil
-	//}
-	//return imgBytes, nil
-
-	//api.ExtractImagesRaw(） 另一种调用方式，效果相同，依然无法渲染文字为图片。
 	buffer := &bytes.Buffer{}
 	err = api.ExtractImages(file, []string{strconv.Itoa(pageNum)}, digestImage(buffer), pdfSetting)
 	if err != nil {

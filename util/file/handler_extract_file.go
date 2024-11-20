@@ -2,60 +2,65 @@ package file
 
 import (
 	"context"
-	"github.com/yumenaka/comigo/util"
-	"github.com/yumenaka/comigo/util/logger"
+	"errors"
 	"io"
 	"os"
 	"path/filepath"
 
 	"github.com/yumenaka/archiver/v4"
+	"github.com/yumenaka/comigo/util/logger"
 )
 
-// 解压文件的函数
+// extractFileHandler 解压文件的处理函数
 func extractFileHandler(ctx context.Context, f archiver.File) error {
-	extractPath := ""
-	if e, ok := ctx.Value("extractPath").(string); ok {
-		extractPath = e
+	// 从上下文中获取解压路径
+	extractPath, ok := ctx.Value("extractPath").(string)
+	if !ok {
+		return errors.New("extractPath not found in context")
 	}
-	// 取得压缩文件
-	file, err := f.Open()
+
+	// 打开压缩文件中的当前文件
+	fileReader, err := f.Open()
 	if err != nil {
-		logger.Infof("%s", err)
+		logger.Infof("Failed to open file in archive: %v", err)
+		return err
 	}
-	defer func(file io.ReadCloser) {
-		err := file.Close()
-		if err != nil {
-			logger.Infof("file.Close() Error:%s", err)
-		}
-	}(file)
-	//如果是文件夹，直接创建文件夹
+	defer fileReader.Close()
+
+	// 目标文件路径
+	targetPath := filepath.Join(extractPath, f.NameInArchive)
+
+	// 如果是目录，创建目录并返回
 	if f.IsDir() {
-		err = os.MkdirAll(filepath.Join(extractPath, f.NameInArchive), os.ModePerm)
+		err := os.MkdirAll(targetPath, os.ModePerm)
 		if err != nil {
-			logger.Infof("%s", err)
+			logger.Infof("Failed to create directory: %v", err)
+			return err
 		}
+		return nil
+	}
+
+	// 确保目标文件所在的目录存在
+	err = os.MkdirAll(filepath.Dir(targetPath), os.ModePerm)
+	if err != nil {
+		logger.Infof("Failed to create parent directory: %v", err)
 		return err
 	}
-	//如果是一般文件，将文件写入磁盘
-	writeFilePath := filepath.Join(extractPath, f.NameInArchive)
-	//写文件前，如果对应文件夹不存在，就创建对应文件夹
-	checkDir := filepath.Dir(writeFilePath)
-	if !util.IsExist(checkDir) {
-		err = os.MkdirAll(checkDir, os.ModePerm)
-		if err != nil {
-			logger.Infof("%s", err)
-		}
+
+	// 创建目标文件
+	destFile, err := os.Create(targetPath)
+	if err != nil {
+		logger.Infof("Failed to create file: %v", err)
 		return err
 	}
-	//具体内容
-	content, err := io.ReadAll(file)
+	defer destFile.Close()
+
+	// 将文件内容从压缩包复制到目标文件
+	_, err = io.Copy(destFile, fileReader)
 	if err != nil {
-		logger.Infof("%s", err)
+		logger.Infof("Failed to copy file content: %v", err)
+		return err
 	}
-	//写入文件
-	err = os.WriteFile(writeFilePath, content, 0644)
-	if err != nil {
-		logger.Infof("%s", err)
-	}
-	return err
+
+	return nil
 }

@@ -1,14 +1,14 @@
 package cmd
 
 import (
-	"github.com/yumenaka/comigo/internal/database"
-	"github.com/yumenaka/comigo/util/file/scan"
-	"github.com/yumenaka/comigo/util/logger"
 	"strconv"
 
 	"github.com/spf13/viper"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/entity"
+	"github.com/yumenaka/comigo/internal/database"
+	"github.com/yumenaka/comigo/util/file/scan"
+	"github.com/yumenaka/comigo/util/logger"
 )
 
 // StartScan 解析命令,扫描书库
@@ -23,12 +23,8 @@ func StartScan(args []string) {
 		if err != nil {
 			logger.Infof("%s", err)
 		} else {
-			err := entity.RestoreDatabaseBooks(books)
-			if err != nil {
-				logger.Infof("%s", err)
-			} else {
-				logger.Infof("从数据库中读取书籍信息,一共有 %d 本书", strconv.Itoa(len(books)))
-			}
+			entity.RestoreDatabaseBooks(books)
+			logger.Infof("从数据库中读取书籍信息,一共有 %d 本书", strconv.Itoa(len(books)))
 		}
 	}
 	//2、设置默认书库路径：扫描CMD指定的路径，如果开启上传，额外增加上传文件夹到默认书库路径
@@ -37,8 +33,8 @@ func StartScan(args []string) {
 	//3、扫描配置文件里面的书库路径
 	option := scan.NewScanOption(
 		true,
-		config.Config.LocalStores,
-		config.Config.BookStores,
+		config.Config.LocalStoresList(),
+		config.Config.Stores,
 		config.Config.MaxScanDepth,
 		config.Config.MinImageNum,
 		config.Config.TimeoutLimitForScan,

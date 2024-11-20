@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/yumenaka/comigo/config"
-	"github.com/yumenaka/comigo/routers/handlers"
 	"github.com/yumenaka/comigo/util/locale"
 )
 
@@ -46,7 +45,7 @@ func InitFlags() {
 	// 本地Host
 	rootCmd.PersistentFlags().StringVar(&config.Config.Host, "host", "DefaultHost", locale.GetString("LOCAL_HOST"))
 	// DEBUG
-	rootCmd.PersistentFlags().BoolVar(&config.Config.Debug, "debug", true, locale.GetString("DEBUG_MODE"))
+	rootCmd.PersistentFlags().BoolVar(&config.Config.Debug, "debug", false, locale.GetString("DEBUG_MODE"))
 	// 启用文件上传功能
 	rootCmd.PersistentFlags().BoolVar(&config.Config.EnableUpload, "enable-upload", true, locale.GetString("ENABLE_FILE_UPLOAD"))
 	// 上传文件的保存路径
@@ -81,8 +80,6 @@ func InitFlags() {
 	rootCmd.PersistentFlags().StringVar(&config.Config.CachePath, "cache-path", "", locale.GetString("CACHE_FILE_PATH"))
 	// 退出时清除缓存
 	rootCmd.PersistentFlags().BoolVar(&config.Config.ClearCacheExit, "cache-clean", true, locale.GetString("CACHE_FILE_CLEAN"))
-	handlers.EnableUpload = &config.Config.EnableUpload
-	handlers.UploadPath = &config.Config.UploadPath
 	// 手动指定zip文件编码 gbk、shiftjis……
 	rootCmd.PersistentFlags().StringVar(&config.Config.ZipFileTextEncoding, "zip-encode", "gbk", locale.GetString("ZIP_ENCODE"))
 }

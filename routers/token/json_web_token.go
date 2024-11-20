@@ -1,12 +1,12 @@
 package token
 
 import (
-	"github.com/yumenaka/comigo/config"
-	"github.com/yumenaka/comigo/util/logger"
 	"time"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
+	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/util/logger"
 )
 
 // NewJwtMiddleware returns a new JWT middleware.
