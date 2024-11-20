@@ -98,7 +98,7 @@ Comigo服务器设置，可选的保存位置：
 - [x] 网页端：卷轴模式分页。
 - [ ] 画个示例漫画。
 - [ ] PWA模式。
-- [ ] 优化配置文件 （[参考](<https://toml.io/cn/v1.0.0）> (better config file formart).
+- [x] 优化配置文件 （[参考](<https://toml.io/cn/v1.0.0）> (better config file formart).
 - [ ] 嵌入html，防剧透效果。回忆模式，特殊背景，音乐etc
 - [ ] 网页端：优化图片预加载，长图片支持。
 - [x] 网页端：添加预定义主题与颜色。
@@ -116,6 +116,7 @@ Comigo服务器设置，可选的保存位置：
 - [ ] 子命令，download rar2zip
 - [ ] 支持rar压缩包密码。处理损坏文件，扩展名错误的文件，固实压缩文件（7z）。更准确的文件类型判断。
 - [ ] 崩溃后恢复，恶意存档处理。
+- [ ] 使用新版压缩包处理库（https://github.com/mholt/archives）
 - [ ] 编写测试
 - [ ] 命令行交互
 - [ ] 调用第三方API

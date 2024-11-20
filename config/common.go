@@ -20,17 +20,18 @@ var (
 	Srv     *http.Server
 	Status  = entity.ConfigStatus{}
 	Config  = entity.ComigoConfig{
-		Port:        1234,
-		Host:        "DefaultHost",
-		LocalStores: []string{},
+		Port: 1234,
+		Host: "DefaultHost",
 		Stores: []stores.Store{
 			{
-				Type:      "smb",
-				Host:      os.Getenv("SMB_HOST"),
-				Port:      445,
-				Username:  os.Getenv("SMB_USER"),
-				Password:  os.Getenv("SMB_PASS"),
-				ShareName: os.Getenv("SMB_PATH"),
+				Type: stores.SMB,
+				Smb: stores.SMBOption{
+					Host:      os.Getenv("SMB_HOST"),
+					Port:      445,
+					Username:  os.Getenv("SMB_USER"),
+					Password:  os.Getenv("SMB_PASS"),
+					ShareName: os.Getenv("SMB_PATH"),
+				},
 			},
 		},
 		SupportFileType:       []string{".zip", ".tar", ".rar", ".cbr", ".cbz", ".epub", ".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".tar.xz", ".txz", ".tar.lz4", ".tlz4", ".tar.sz", ".tsz", ".bz2", ".gz", ".lz4", ".sz", ".xz", ".mp4", ".webm", ".pdf", ".m4v", ".flv", ".avi", ".mp3", ".wav", ".wma", ".ogg"},

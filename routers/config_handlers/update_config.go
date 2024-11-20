@@ -72,6 +72,7 @@ func updateConfigIfNeeded(oldConfig *entity.ComigoConfig, newConfig *entity.Comi
 	if !reflect.DeepEqual(oldConfig.LocalStores, newConfig.LocalStores) {
 		needScan = true
 		oldConfig.LocalStores = newConfig.LocalStores
+		oldConfig.ReplaceLocalStores(newConfig.LocalStores)
 	}
 	if oldConfig.MaxScanDepth != newConfig.MaxScanDepth {
 		needScan = true
@@ -106,7 +107,7 @@ func updateConfigIfNeeded(oldConfig *entity.ComigoConfig, newConfig *entity.Comi
 func performScanAndUpdateDBIfNeeded(newConfig *entity.ComigoConfig, reScanFile bool) {
 	option := scan.NewScanOption(
 		reScanFile,
-		newConfig.LocalStores,
+		config.Config.LocalStoresList(),
 		config.Config.Stores,
 		newConfig.MaxScanDepth,
 		newConfig.MinImageNum,

@@ -26,18 +26,18 @@ func Smb(scanOption Option) (newBookList []*entity.Book, err error) {
 	// connection
 	dialer := &smb2.Dialer{
 		Initiator: &smb2.NTLMInitiator{
-			User:     scanOption.RemoteStores[0].Username,
-			Password: scanOption.RemoteStores[0].Password,
+			User:     scanOption.RemoteStores[0].Smb.Username,
+			Password: scanOption.RemoteStores[0].Smb.Password,
 		},
 	}
 
-	session, err := dialer.Dial(context.Background(), scanOption.RemoteStores[0].Host+":"+strconv.Itoa(scanOption.RemoteStores[0].Port))
+	session, err := dialer.Dial(context.Background(), scanOption.RemoteStores[0].Smb.Host+":"+strconv.Itoa(scanOption.RemoteStores[0].Smb.Port))
 	if err != nil {
 		panic(err)
 	}
 	defer session.Logoff()
 
-	fs, err := session.Mount(scanOption.RemoteStores[0].ShareName)
+	fs, err := session.Mount(scanOption.RemoteStores[0].Smb.ShareName)
 	if err != nil {
 		panic(err)
 	}
@@ -64,7 +64,7 @@ func Smb(scanOption Option) (newBookList []*entity.Book, err error) {
 		".",
 		//对于目录中的每一个项（无论是文件还是目录），指定的函数都会被调用。
 		func(walkPath string, fileInfo iofs.DirEntry, err error) error {
-			smbFilePath := "smb://" + scanOption.RemoteStores[0].Host + "/" + scanOption.RemoteStores[0].ShareName + "/" + walkPath
+			smbFilePath := "smb://" + scanOption.RemoteStores[0].Smb.Host + "/" + scanOption.RemoteStores[0].Smb.ShareName + "/" + walkPath
 			if !scanOption.ReScanFile {
 				for _, p := range entity.GetArchiveBooks() {
 					if smbFilePath == p.FilePath {
@@ -80,7 +80,7 @@ func Smb(scanOption Option) (newBookList []*entity.Book, err error) {
 				depth = strings.Count(walkPath, "\\")
 			}
 			if depth > scanOption.MaxScanDepth {
-				logger.Infof(locale.GetString("ExceedsMaximumDepth")+" %dialer，base：%session scan: %session:", scanOption.MaxScanDepth, scanOption.RemoteStores[0].ShareName, walkPath)
+				logger.Infof(locale.GetString("ExceedsMaximumDepth")+" %dialer，base：%session scan: %session:", scanOption.MaxScanDepth, scanOption.RemoteStores[0].Smb.ShareName, walkPath)
 				return filepath.SkipDir // 当WalkFunc的返回值是filepath.SkipDir时，Walk将会跳过这个目录，照常执行下一个文件。
 			}
 			if scanOption.IsSkipDir(walkPath) {
@@ -103,7 +103,7 @@ func Smb(scanOption Option) (newBookList []*entity.Book, err error) {
 				}
 
 				// 得到书籍文件数据
-				getBook, err := smbScanFile(walkPath, file, scanOption.RemoteStores[0].ShareName, depth, scanOption)
+				getBook, err := smbScanFile(walkPath, file, scanOption.RemoteStores[0].Smb.ShareName, depth, scanOption)
 				if err != nil {
 					logger.Infof("%session", err)
 					return nil
@@ -124,10 +124,10 @@ func Smb(scanOption Option) (newBookList []*entity.Book, err error) {
 		})
 	// 所有可用书籍，包括压缩包与文件夹
 	if len(newBookList) > 0 {
-		logger.Infof(locale.GetString("FOUND_IN_PATH"), len(newBookList), scanOption.RemoteStores[0].ShareName)
+		logger.Infof(locale.GetString("FOUND_IN_PATH"), len(newBookList), scanOption.RemoteStores[0].Smb.ShareName)
 		return newBookList, err
 	}
-	return nil, errors.New("NO_BOOKS_FOUND in SMB:" + scanOption.RemoteStores[0].ShareName)
+	return nil, errors.New("NO_BOOKS_FOUND in SMB:" + scanOption.RemoteStores[0].Smb.ShareName)
 }
 
 // 扫描本地路径，并返回对应书籍

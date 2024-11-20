@@ -3,12 +3,12 @@ package entity
 import (
 	"encoding/json"
 	"errors"
-	"github.com/yumenaka/comigo/config/stores"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
 
+	"github.com/yumenaka/comigo/config/stores"
 	"github.com/yumenaka/comigo/util"
 	"github.com/yumenaka/comigo/util/logger"
 )
@@ -88,14 +88,7 @@ func (c *ConfigStatus) SetConfigStatus() error {
 
 type UploadDirOption int
 
-const (
-	UseCurrentDirectory      UploadDirOption = iota // 当前执行目录
-	UseFirstLibraryDirectory                        // 第一个书库目录
-	UseSpecifiedUploadPath                          // 指定上传路径
-)
-
 type ComigoConfig struct {
-	Stores                 []stores.Store  `json:"BookStores" toml:"-" comment:"用户指定的的yaml设置文件路径"`
 	CachePath              string          `json:"CachePath" comment:"本地图片缓存位置，默认系统临时文件夹"`
 	CertFile               string          `json:"CertFile" comment:"TLS/SSL 证书文件路径 (default: ~/.config/.comigo/cert.crt)"`
 	ClearCacheExit         bool            `json:"ClearCacheExit" comment:"退出程序的时候，清理web图片缓存"`
@@ -122,6 +115,7 @@ type ComigoConfig struct {
 	Password               string          `json:"Password" comment:"启用登陆后，登录界面需要的密码。"`
 	Port                   int             `json:"Port" comment:"Comigo设置文件(config.toml)，可保存在：HomeDirectory（$HOME/.config/comigo/config.toml）、WorkingDirectory（当前执行目录）、ProgramDirectory（程序所在目录）下。可用“comi --config-save”生成本文件\n网页服务端口，此项配置不支持热重载"`
 	PrintAllPossibleQRCode bool            `json:"PrintAllPossibleQRCode" comment:"扫描完成后，打印所有可能的阅读链接二维码"`
+	Stores                 []stores.Store  `json:"BookStores" toml:"-" comment:"书库设置"`
 	SupportFileType        []string        `json:"SupportFileType" comment:"支持的书籍压缩包后缀"`
 	SupportMediaType       []string        `json:"SupportMediaType" comment:"扫描压缩包时，用于统计图片数量的图片文件后缀"`
 	SupportTemplateFile    []string        `json:"SupportTemplateFile" comment:"支持的模板文件类型，默认为html"`
@@ -132,6 +126,61 @@ type ComigoConfig struct {
 	UseCache               bool            `json:"UseCache" comment:"开启本地图片缓存，可以加快二次读取，但会占用硬盘空间"`
 	Username               string          `json:"Username" comment:"启用登陆后，登录界面需要的用户名。"`
 	ZipFileTextEncoding    string          `json:"ZipFileTextEncoding" comment:"非utf-8编码的ZIP文件，尝试用什么编码解析，默认GBK"`
+}
+
+// CheckLocalStores 检查本地书库路径是否已存在
+func (c *ComigoConfig) CheckLocalStores(path string) bool {
+	for _, store := range c.Stores {
+		if store.Type == stores.Local && store.Local.Path == path {
+			return true
+		}
+	}
+	return false
+}
+
+// AddLocalStore 添加本地书库(单个路径)
+func (c *ComigoConfig) AddLocalStore(path string) {
+	if c.CheckLocalStores(path) {
+		return
+	}
+	c.Stores = append(c.Stores, stores.Store{
+		Type: stores.Local,
+		Local: stores.LocalOption{
+			Path: path,
+		},
+	})
+}
+
+// AddLocalStores 添加本地书库（多个路径）
+func (c *ComigoConfig) AddLocalStores(path []string) {
+	for _, p := range path {
+		if !c.CheckLocalStores(p) {
+			c.AddLocalStore(p)
+		}
+	}
+}
+
+// ReplaceLocalStores 替换现有的“本地”类型的书库，保留其他类型的书库
+func (c *ComigoConfig) ReplaceLocalStores(pathList []string) {
+	var newStores []stores.Store
+	for _, store := range c.Stores {
+		if store.Type != stores.Local {
+			newStores = append(newStores, store)
+		}
+	}
+	c.Stores = newStores
+	c.AddLocalStores(pathList)
+}
+
+// LocalStoresList 获取本地书库列表
+func (c *ComigoConfig) LocalStoresList() []string {
+	var localStoresList []string
+	for _, store := range c.Stores {
+		if store.Type == stores.Local {
+			localStoresList = append(localStoresList, store.Local.Path)
+		}
+	}
+	return localStoresList
 }
 
 // UpdateConfig 更新配置。 使用 JSON 反序列化将更新的配置解析为映射，遍历映射并更新配置，减少重复的代码。
@@ -154,13 +203,13 @@ func UpdateConfig(config *ComigoConfig, jsonString string) (*ComigoConfig, error
 			}
 		case "LocalStores":
 			if v, ok := value.([]interface{}); ok {
-				var stores []string
+				var storeList []string
 				for _, s := range v {
 					if str, ok := s.(string); ok {
-						stores = append(stores, str)
+						storeList = append(storeList, str)
 					}
 				}
-				config.LocalStores = stores
+				config.ReplaceLocalStores(storeList)
 			}
 		case "UseCache":
 			if v, ok := value.(bool); ok {
