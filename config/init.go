@@ -26,9 +26,9 @@ func init() {
 			logger.Infof("Not found .env file")
 		}
 	}
-	Config.Stores[0].Host = os.Getenv("SMB_HOST")
-	Config.Stores[0].Username = os.Getenv("SMB_USER")
-	Config.Stores[0].Password = os.Getenv("SMB_PASS")
-	Config.Stores[0].ShareName = os.Getenv("SMB_SHARE_NAME")
-	Config.Stores[0].Path = os.Getenv("SMB_PATH")
+	Config.Stores[0].Smb.Host = os.Getenv("SMB_HOST")
+	Config.Stores[0].Smb.Username = os.Getenv("SMB_USER")
+	Config.Stores[0].Smb.Password = os.Getenv("SMB_PASS")
+	Config.Stores[0].Smb.ShareName = os.Getenv("SMB_SHARE_NAME")
+	Config.Stores[0].Smb.Path = os.Getenv("SMB_PATH")
 }

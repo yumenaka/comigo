@@ -29,8 +29,8 @@ templ Drawer(serverHost string, slot templ.Component) {
 		</div>
 		<div class="drawer_slot flex flex-col flex-grow items-center justify-end p-1 my-2 rounded text-accent-content dark:text-white">
 			if slot != nil {
-                @slot
-            }
+				@slot
+			}
 			<div class="place-holder w-full flex-1"></div>
 			<!-- 二维码 -->
 			<div class="p-1 mt-4 mb-2 w-36 h-36" x-data="{ qrcodeSrc: '' }" x-init="qrcodeSrc = window.location.origin +'/api/qrcode.png?qrcode_str='+ encodeURIComponent(window.location.toString().replace(window.location.hostname,serverHost))">
