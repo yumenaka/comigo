@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/xml"
 	"errors"
-	"github.com/yumenaka/comigo/util/logger"
 	"io"
 	"net/url"
 	"os"
@@ -13,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/yumenaka/archiver/v4"
+	"github.com/yumenaka/comigo/util/logger"
 	"golang.org/x/net/html"
 )
 

@@ -12,7 +12,7 @@ import (
 // TODO:扫描书籍
 // https://pkg.go.dev/github.com/studio-b12/gowebdav ?
 func Webdav(scanOption Option) (newBookList []*entity.Book, err error) {
-	conn, err := net.Dial("tcp", scanOption.RemoteStores[0].Host+":"+strconv.Itoa(scanOption.RemoteStores[0].Port))
+	conn, err := net.Dial("tcp", scanOption.RemoteStores[0].Smb.Host+":"+strconv.Itoa(scanOption.RemoteStores[0].Smb.Port))
 	if err != nil {
 		//panic(err)
 		fmt.Println(err)
@@ -27,8 +27,8 @@ func Webdav(scanOption Option) (newBookList []*entity.Book, err error) {
 
 	d := &smb2.Dialer{
 		Initiator: &smb2.NTLMInitiator{
-			User:     scanOption.RemoteStores[0].Username,
-			Password: scanOption.RemoteStores[0].Password,
+			User:     scanOption.RemoteStores[0].Smb.Username,
+			Password: scanOption.RemoteStores[0].Smb.Password,
 		},
 	}
 
@@ -43,7 +43,7 @@ func Webdav(scanOption Option) (newBookList []*entity.Book, err error) {
 		}
 	}(s)
 
-	fs, err := s.Mount(scanOption.RemoteStores[0].ShareName)
+	fs, err := s.Mount(scanOption.RemoteStores[0].Smb.ShareName)
 	if err != nil {
 		panic(err)
 	}

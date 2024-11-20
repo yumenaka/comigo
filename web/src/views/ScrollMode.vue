@@ -351,15 +351,15 @@ export default defineComponent({
 					value: "filesize"
 				},
 				{
-					label: this.$t('sort_by_filename') + this.$t('sort_reverse'),
+					label: this.$t('sort_by_filename_reverse') + this.$t('sort_reverse'),
 					value: "filename_reverse",
 				},
 				{
-					label: this.$t('sort_by_modify_time') + this.$t('sort_reverse'),
+					label: this.$t('sort_by_modify_time_reverse') + this.$t('sort_reverse'),
 					value: "modify_time_reverse"
 				},
 				{
-					label: this.$t('sort_by_filesize') + this.$t('sort_reverse'),
+					label: this.$t('sort_by_filesize_reverse') + this.$t('sort_reverse'),
 					value: "filesize_reverse"
 				},
 			],

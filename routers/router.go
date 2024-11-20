@@ -1,11 +1,12 @@
 package routers
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/resource"
 	"github.com/yumenaka/comigo/util/locale"
-	"net/http"
 )
 
 // StartWebServer 启动web服务

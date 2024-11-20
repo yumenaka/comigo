@@ -3,7 +3,6 @@ package routers
 import (
 	"log"
 
-	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comigo/config"
@@ -13,83 +12,81 @@ import (
 	"github.com/yumenaka/comigo/routers/websocket"
 )
 
-var protectedAPI *gin.RouterGroup
-
 // BindAPI 为前端绑定 API 路由
 func BindAPI(engine *gin.Engine) {
-	// 路由组,方便管理部分相同的URL
+	// 配置 CORS，默认允许所有来源，根据需要可修改
+	// 以后可以设置成“从配置文件中读取”，避免硬编码调试地址
+	engine.Use(cors.Default())
+
+	// 路由组，方便管理部分相同的 URL
 	api := engine.Group("/api")
 
-	// 无需认证，不受保护的路由
-	publicRoutes := func(rg *gin.RouterGroup) {
-		rg.GET("/qrcode.png", handlers.GetQrcode)
-		rg.GET("/server_info", handlers.GetServerInfoHandler)
-		websocket.WsDebug = &config.Config.Debug
-		rg.GET("/ws", websocket.WsHandler)
-	}
+	// 注册公共路由
 	publicRoutes(api)
 
-	// 配置 CORS
-	corsConfig := cors.Config{
-		AllowOrigins:     []string{"http://localhost:7777"}, // 调试用前端地址，根据实际情况调整
-		AllowMethods:     []string{"GET", "POST"},
-		AllowHeaders:     []string{"Origin", "Content-Type"},
-		AllowCredentials: true,
-	}
-	engine.Use(cors.New(corsConfig))
-
-	// 可能需要认证的路由
-	protectedAPI = api.Group("/")
-	// 初始化 jwtMiddleware 一次，无论是否设置了密码。
-	var jwtMiddleware *jwt.GinJWTMiddleware
+	// 判断是否需要 JWT 认证
 	if config.Config.Password != "" {
-		var err error
-		jwtMiddleware, err = token.NewJwtMiddleware()
+		jwtMiddleware, err := token.NewJwtMiddleware()
 		if err != nil {
-			log.Fatalf("JWT Error: %s", err.Error()) // 终止程序或其他错误处理
+			log.Fatal("JWT Error: " + err.Error())
 		}
-	}
-	if jwtMiddleware != nil {
-		// 登录、注销和 token 刷新路由只有在设置了密码时才添加
+
+		// 登录、注销和刷新 token 路由
 		api.POST("/login", jwtMiddleware.LoginHandler)
 		api.POST("/logout", jwtMiddleware.LogoutHandler)
 		api.GET("/refresh_token", jwtMiddleware.RefreshHandler)
-		// 如果设置了密码，则应用 JWT 中间件到一个新的路由组
-		protectedAPI = api.Group("/", jwtMiddleware.MiddlewareFunc())
-	}
 
-	//文件上传
-	protectedAPI.POST("/upload", handlers.UploadFile)
-	//通过URL字符串参数获取特定文件
-	protectedAPI.GET("/get_file", handlers.GetFile)
-	//直接下载原始文件
-	protectedAPI.GET("/raw/:book_id/:file_name", handlers.GetRawFile)
-	//登录后才能查看的服务器状态，包括标题、机器状态等
-	protectedAPI.GET("/server_info_all", handlers.GetAllServerInfoHandler)
-	//获取书架信息，不包含每页信息
-	protectedAPI.GET("/book_infos", handlers.GetBookInfos)
-	//获取书架信息2.0
-	protectedAPI.GET("/top_shelf", handlers.GetTopOfShelfInfo)
-	//通过URL字符串参数查询书籍信息
-	protectedAPI.GET("/get_book", handlers.GetBook)
-	//查询父书籍信息
-	protectedAPI.GET("/parent_book_info", handlers.GetParentBookInfo)
-	//返回同一文件夹的书籍ID列表
-	protectedAPI.GET("/group_info", handlers.GroupInfo)
-	//返回同一文件夹的书籍ID列表
-	protectedAPI.GET("/group_info_filter", handlers.GroupInfoFilter)
-	//通过链接下载reg设置文件
-	protectedAPI.GET("/comigo.reg", handlers.GetRegFile)
-	//获取配置
-	protectedAPI.GET("/config", config_handlers.GetConfig)
-	//获取配置状态
-	protectedAPI.GET("/config/status", config_handlers.GetConfigStatus)
-	//更新配置
-	protectedAPI.PUT("/config", config_handlers.UpdateConfig)
-	//保存配置到文件
-	protectedAPI.POST("/config/:to", config_handlers.SaveConfigHandler)
-	//删除特定路径下的配置
-	protectedAPI.DELETE("/config/:in", config_handlers.DeleteConfig)
-	//通过链接下载toml格式的示例配置
-	protectedAPI.GET("/config.toml", config_handlers.GetConfigToml)
+		// 受保护的路由，应用 JWT 中间件
+		protectedAPI := api.Group("/", jwtMiddleware.MiddlewareFunc())
+		protectedRoutes(protectedAPI)
+	} else {
+		// 如果不需要认证，直接注册受保护的路由
+		protectedAPI := api.Group("/")
+		protectedRoutes(protectedAPI)
+	}
+}
+
+// publicRoutes 注册公共路由
+func publicRoutes(rg *gin.RouterGroup) {
+	rg.GET("/qrcode.png", handlers.GetQrcode)
+	rg.GET("/server_info", handlers.GetServerInfoHandler)
+	websocket.WsDebug = &config.Config.Debug
+	rg.GET("/ws", websocket.WsHandler)
+}
+
+// protectedRoutes 注册需要认证的路由
+func protectedRoutes(rg *gin.RouterGroup) {
+	// 文件上传
+	rg.POST("/upload", handlers.UploadFile)
+	// 获取特定文件
+	rg.GET("/get_file", handlers.GetFile)
+	// 直接下载原始文件
+	rg.GET("/raw/:book_id/:file_name", handlers.GetRawFile)
+	// 查看服务器状态
+	rg.GET("/server_info_all", handlers.GetAllServerInfoHandler)
+	// 获取书架信息
+	rg.GET("/book_infos", handlers.GetBookInfos)
+	// 获取书架信息 2.0
+	rg.GET("/top_shelf", handlers.GetTopOfShelfInfo)
+	// 查询书籍信息
+	rg.GET("/get_book", handlers.GetBook)
+	// 查询父书籍信息
+	rg.GET("/parent_book_info", handlers.GetParentBookInfo)
+	// 返回同一文件夹的书籍 ID 列表
+	rg.GET("/group_info", handlers.GroupInfo)
+	rg.GET("/group_info_filter", handlers.GroupInfoFilter)
+	// 下载 reg 设置文件
+	rg.GET("/comigo.reg", handlers.GetRegFile)
+	// 获取配置
+	rg.GET("/config", config_handlers.GetConfig)
+	// 获取配置状态
+	rg.GET("/config/status", config_handlers.GetConfigStatus)
+	// 更新配置
+	rg.PUT("/config", config_handlers.UpdateConfig)
+	// 保存配置到文件
+	rg.POST("/config/:to", config_handlers.SaveConfigHandler)
+	// 删除特定路径下的配置
+	rg.DELETE("/config/:in", config_handlers.DeleteConfig)
+	// 下载 toml 格式的示例配置
+	rg.GET("/config.toml", config_handlers.GetConfigToml)
 }

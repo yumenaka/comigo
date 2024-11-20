@@ -1,12 +1,12 @@
 package handlers
 
 import (
-	"github.com/yumenaka/comigo/util/logger"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comigo/entity"
+	"github.com/yumenaka/comigo/util/logger"
 )
 
 func GetParentBookInfo(c *gin.Context) {
@@ -174,7 +174,6 @@ func GroupInfoFilter(c *gin.Context) {
 	}
 	//过滤掉不需要的类型
 	filterList := entity.BookInfoList{}
-	filterList.SortBy = infoList.SortBy
 	for _, info := range infoList.BookInfos {
 		if info.Type == entity.TypeZip ||
 			info.Type == entity.TypeRar ||
@@ -186,5 +185,6 @@ func GroupInfoFilter(c *gin.Context) {
 			filterList.BookInfos = append(filterList.BookInfos, info)
 		}
 	}
+	filterList.SortBooks(sortBy)
 	c.PureJSON(http.StatusOK, filterList)
 }

@@ -1,11 +1,11 @@
 package config_handlers
 
 import (
-	"github.com/yumenaka/comigo/util/logger"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/util/logger"
 )
 
 // SaveConfigHandler 保存服务器配置到文件
@@ -17,7 +17,7 @@ func SaveConfigHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed save to " + SaveTo + " directory"})
 		return
 	}
-	//如果其他目录已经存在了，就不能保存（暂不支持多配置文件）
+	//如果其他目录有配置文件，就不能保存（暂不支持多配置文件）
 	if SaveTo == "WorkingDirectory" && (config.Status.Path.HomeDirectory != "" || config.Status.Path.ProgramDirectory != "") {
 		logger.Infof("error: Find config in %s %s", config.Status.Path.HomeDirectory, config.Status.Path.ProgramDirectory)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "error: Find config in " + config.Status.Path.HomeDirectory + " " + config.Status.Path.ProgramDirectory})

@@ -2,48 +2,54 @@ package file
 
 import (
 	"context"
-	"github.com/yumenaka/comigo/util"
-	"github.com/yumenaka/comigo/util/logger"
+	"errors"
 	"os"
 
 	"github.com/yumenaka/archiver/v4"
+	"github.com/yumenaka/comigo/util"
+	"github.com/yumenaka/comigo/util/logger"
 )
 
-// UnArchiveZip 一次性解压zip文件
+// UnArchiveZip 一次性解压 ZIP 文件
 func UnArchiveZip(filePath string, extractPath string, textEncoding string) error {
 	extractPath = util.GetAbsPath(extractPath)
-	//如果解压路径不存在，创建路径
+	// 如果解压路径不存在，创建路径
 	err := os.MkdirAll(extractPath, os.ModePerm)
 	if err != nil {
-		logger.Infof("%s", err)
-	}
-	//打开文件，只读模式
-	file, err := os.OpenFile(filePath, os.O_RDONLY, 0400) //Use mode 0400 for a read-only // file and 0600 for a readable+writable file.
-	if err != nil {
-		logger.Infof("%s", err)
-	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			logger.Infof("%s", err)
-		}
-	}(file)
-	//是否是压缩包
-	format, _, err := archiver.Identify(filePath, file)
-	if err != nil {
+		logger.Infof("Failed to create extract path: %v", err)
 		return err
 	}
-	//如果是zip
-	if ex, ok := format.(archiver.Zip); ok {
-		ex.TextEncoding = textEncoding // “”  "shiftjis" "gbk"
-		ctx := context.Background()
-		//WithValue返回parent的一个副本，该副本保存了传入的key/value，而调用Context接口的Value(key)方法就可以得到val。注意在同一个context中设置key/value，若key相同，值会被覆盖。
-		ctx = context.WithValue(ctx, "extractPath", extractPath)
-		_, err := ex.LsAllFile(ctx, file, extractFileHandler)
+
+	// 打开文件，只读模式
+	file, err := os.Open(filePath)
+	if err != nil {
+		logger.Infof("Failed to open file: %v", err)
+		return err
+	}
+	defer file.Close()
+
+	// 确认文件格式
+	format, _, err := archiver.Identify(filePath, file)
+	if err != nil {
+		logger.Infof("Failed to identify file format: %v", err)
+		return err
+	}
+
+	// 如果是 ZIP 文件
+	if zipFormat, ok := format.(archiver.Zip); ok {
+		zipFormat.TextEncoding = textEncoding // 如 ""、"shiftjis"、"gbk"
+		ctx := context.WithValue(context.Background(), "extractPath", extractPath)
+
+		_, err := zipFormat.LsAllFile(ctx, file, extractFileHandler)
 		if err != nil {
+			logger.Infof("Failed to extract zip file: %v", err)
 			return err
 		}
-		logger.Infof("zip文件解压完成：" + util.GetAbsPath(filePath) + " 解压到：" + util.GetAbsPath(extractPath))
+		logger.Infof("ZIP 文件解压完成：%s 解压到：%s", util.GetAbsPath(filePath), extractPath)
+	} else {
+		logger.Infof("File is not a ZIP archive: %s", filePath)
+		return errors.New("file is not a ZIP archive")
 	}
+
 	return nil
 }

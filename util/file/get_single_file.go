@@ -3,13 +3,13 @@ package file
 import (
 	"context"
 	"errors"
-	"github.com/yumenaka/comigo/util/logger"
 	"io"
 	"io/fs"
 	"os"
 	"sync"
 
 	"github.com/yumenaka/archiver/v4"
+	"github.com/yumenaka/comigo/util/logger"
 )
 
 // 使用sync.Map代替map，保证并发情况下的读写安全
@@ -17,7 +17,8 @@ var mapBookFS sync.Map
 
 // GetSingleFile  获取单个文件
 // TODO:大文件需要针对性优化，可能需要保持打开状态、或通过持久化的虚拟文件系统获取
-// TODO:可选择文件缓存功能，一旦解压，下次直接读缓存文件
+// TODO:测试文件缓存功能，一旦解压，下次直接读缓存文件
+// TODO:使用 https://github.com/mholt/archiver 代替 github.com/yumenaka/archiver/v4 。ex.Extract(）方法有更新，可能支持此项目的用法。
 func GetSingleFile(filePath string, NameInArchive string, textEncoding string) ([]byte, error) {
 	//必须传值
 	if NameInArchive == "" {
@@ -48,12 +49,12 @@ func GetSingleFile(filePath string, NameInArchive string, textEncoding string) (
 		//这里是file，而不是sourceArchive，否则会出错。
 		err := ex.Extract(ctx, file, []string{NameInArchive}, func(ctx context.Context, f archiver.File) error {
 			// 取得特定压缩文件
-			file, err := f.Open()
+			readCloser, err := f.Open()
 			if err != nil {
 				logger.Infof("%s", err)
 			}
-			//defer file.Close()
-			content, err := io.ReadAll(file)
+			defer readCloser.Close()
+			content, err := io.ReadAll(readCloser)
 			if err != nil {
 				logger.Infof("%s", err)
 			}
