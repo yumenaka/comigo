@@ -5,7 +5,7 @@ import (
 	"errors"
 	"os"
 
-	"github.com/yumenaka/archiver/v4"
+	"github.com/mholt/archives"
 	"github.com/yumenaka/comigo/util"
 	"github.com/yumenaka/comigo/util/logger"
 )
@@ -29,17 +29,17 @@ func UnArchiveRar(filePath string, extractPath string) error {
 	defer file.Close()
 
 	// 确认文件格式
-	format, _, err := archiver.Identify(filePath, file)
+	format, _, err := archives.Identify(context.Background(), filePath, file)
 	if err != nil {
 		logger.Infof("Failed to identify file format: %v", err)
 		return err
 	}
 
 	// 如果是 RAR 文件
-	if rarFormat, ok := format.(archiver.Rar); ok {
+	if rarFormat, ok := format.(archives.Rar); ok {
 		ctx := context.WithValue(context.Background(), "extractPath", extractPath)
 
-		err := rarFormat.LsAllFile(ctx, file, extractFileHandler)
+		err := rarFormat.Extract(ctx, file, extractFileHandler)
 		if err != nil {
 			logger.Infof("Failed to extract RAR file: %v", err)
 			return err

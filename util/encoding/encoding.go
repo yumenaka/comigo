@@ -1,4 +1,4 @@
-package util
+package encoding
 
 //source: github.com/mholt/archiver/pull/149/files/92cf5d0fb45d7fa943e25fc83fc71cd2e734a4fb
 import (
@@ -141,4 +141,14 @@ func DecodeFileName(headerName string, ZipFilenameEncoding string) string {
 		}
 	}
 	return headerName
+}
+
+func ByName(charset string) encoding.Encoding {
+	charset = strings.ToLower(charset)
+	enc, ok := encodings[charset]
+	if !ok {
+		return unicode.UTF8
+	} else {
+		return enc
+	}
 }
