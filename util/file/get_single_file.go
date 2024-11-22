@@ -4,13 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/yumenaka/comigo/util/encoding"
 	"io"
 	"io/fs"
 	"os"
 	"sync"
 
 	"github.com/mholt/archives"
-	"github.com/yumenaka/comigo/util/encoding"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
@@ -45,7 +45,9 @@ func GetSingleFile(filePath string, NameInArchive string, textEncoding string) (
 	var data []byte
 	//如果是zip文件,文件编码为UTF-8时textEncoding为空,其他特殊编码的zip文件根据设定指定（默认GBK）
 	if ex, ok := format.(archives.Zip); ok {
-		ex.TextEncoding = encoding.GetEncodingByName(textEncoding) // “”  "shiftjis" "gbk"
+		if textEncoding != "" {
+			ex.TextEncoding = encoding.ByName(textEncoding)
+		}
 		ctx := context.Background()
 		// 在这里对文件进行处理；比如如果只需要特定的文件或目录，则只需返回所需的 f.NameInArchive 值即可。 https://github.com/mholt/archives#extract-archive
 		err := ex.Extract(ctx, file, func(ctx context.Context, f archives.FileInfo) error {

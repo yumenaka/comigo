@@ -143,11 +143,11 @@ func DecodeFileName(headerName string, ZipFilenameEncoding string) string {
 	return headerName
 }
 
-func GetEncodingByName(charset string) encoding.Encoding {
+func ByName(charset string) encoding.Encoding {
 	charset = strings.ToLower(charset)
 	enc, ok := encodings[charset]
 	if !ok {
-		return charmap.Windows1252
+		return unicode.UTF8
 	} else {
 		return enc
 	}

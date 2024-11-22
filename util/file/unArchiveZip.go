@@ -38,7 +38,9 @@ func UnArchiveZip(filePath string, extractPath string, textEncoding string) erro
 
 	// 如果是 ZIP 文件 TODO:测试文件解压
 	if zipFormat, ok := format.(archives.Zip); ok {
-		zipFormat.TextEncoding = encoding.GetEncodingByName(textEncoding)
+		if textEncoding != "" {
+			zipFormat.TextEncoding = encoding.ByName(textEncoding)
+		}
 		ctx := context.WithValue(context.Background(), "extractPath", extractPath)
 
 		err := zipFormat.Extract(ctx, file, extractFileHandler)
