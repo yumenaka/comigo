@@ -3,12 +3,14 @@ package file
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"io/fs"
 	"os"
 	"sync"
 
-	"github.com/yumenaka/archiver/v4"
+	"github.com/mholt/archives"
+	"github.com/yumenaka/comigo/util/encoding"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
@@ -18,7 +20,6 @@ var mapBookFS sync.Map
 // GetSingleFile  获取单个文件
 // TODO:大文件需要针对性优化，可能需要保持打开状态、或通过持久化的虚拟文件系统获取
 // TODO:测试文件缓存功能，一旦解压，下次直接读缓存文件
-// TODO:使用 https://github.com/mholt/archiver 代替 github.com/yumenaka/archiver/v4 。ex.Extract(）方法有更新，可能支持此项目的用法。
 func GetSingleFile(filePath string, NameInArchive string, textEncoding string) ([]byte, error) {
 	//必须传值
 	if NameInArchive == "" {
@@ -35,20 +36,26 @@ func GetSingleFile(filePath string, NameInArchive string, textEncoding string) (
 			logger.Infof("file.Close() Error:%s", err)
 		}
 	}(file)
-	//是否是压缩包
-	format, sourceArchive, err := archiver.Identify(filePath, file)
+	//判断是否是压缩包
+	//context 用来取消，这里用不到，所以传了一个空的Context
+	format, sourceArchive, err := archives.Identify(context.Background(), filePath, file)
 	if err != nil {
 		return nil, err
 	}
 	var data []byte
 	//如果是zip文件,文件编码为UTF-8时textEncoding为空,其他特殊编码的zip文件根据设定指定（默认GBK）
-	if ex, ok := format.(archiver.Zip); ok {
-		//特殊编码
-		ex.TextEncoding = textEncoding // “”  "shiftjis" "gbk"
+	if ex, ok := format.(archives.Zip); ok {
+		ex.TextEncoding = encoding.GetEncodingByName(textEncoding) // “”  "shiftjis" "gbk"
 		ctx := context.Background()
-		//这里是file，而不是sourceArchive，否则会出错。
-		err := ex.Extract(ctx, file, []string{NameInArchive}, func(ctx context.Context, f archiver.File) error {
-			// 取得特定压缩文件
+		// 在这里对文件进行处理；比如如果只需要特定的文件或目录，则只需返回所需的 f.NameInArchive 值即可。 https://github.com/mholt/archives#extract-archive
+		err := ex.Extract(ctx, file, func(ctx context.Context, f archives.FileInfo) error {
+			if f.NameInArchive != NameInArchive {
+				fmt.Println("Skip " + f.NameInArchive + "|" + NameInArchive + " in " + filePath)
+				return nil
+			}
+			//if f.NameInArchive == NameInArchive {
+			//	fmt.Println("Get " + NameInArchive + " in " + filePath)
+			//}
 			readCloser, err := f.Open()
 			if err != nil {
 				logger.Infof("%s", err)
@@ -71,7 +78,7 @@ func GetSingleFile(filePath string, NameInArchive string, textEncoding string) (
 		fsys = fsysAny.(fs.FS)
 	} else {
 		//如果从来没保存过这个文件系统
-		temp, errFS := archiver.FileSystem(context.Background(), filePath)
+		temp, errFS := archives.FileSystem(context.Background(), filePath, nil)
 		if errFS == nil {
 			//将文件系统加入到sync.Map
 			mapBookFS.Store(filePath, temp) //因为被gin并发调用，需要考虑并发读写问题
@@ -98,10 +105,10 @@ func GetSingleFile(filePath string, NameInArchive string, textEncoding string) (
 
 	//TODO:Rar密码
 	//如果是 Rar 文件
-	if ex, ok := format.(archiver.Rar); ok {
+	if ex, ok := format.(archives.Rar); ok {
 		//如果虚拟FS方案无效，继续用Extract方案
 		ctx := context.Background()
-		err := ex.Extract(ctx, sourceArchive, []string{NameInArchive}, func(ctx context.Context, f archiver.File) error {
+		err := ex.Extract(ctx, sourceArchive, func(ctx context.Context, f archives.FileInfo) error {
 			// 取得特定压缩文件
 			fileInRar, err := f.Open()
 			if err != nil {
@@ -124,9 +131,9 @@ func GetSingleFile(filePath string, NameInArchive string, textEncoding string) (
 	}
 
 	//其他格式的压缩包，正常情况下不应该用到
-	if ex, ok := format.(archiver.Extractor); ok {
+	if ex, ok := format.(archives.Extractor); ok {
 		ctx := context.Background()
-		err := ex.Extract(ctx, sourceArchive, []string{NameInArchive}, func(ctx context.Context, f archiver.File) error {
+		err := ex.Extract(ctx, sourceArchive, func(ctx context.Context, f archives.FileInfo) error {
 			// 取得特定压缩文件
 			file, err := f.Open()
 			if err != nil {
