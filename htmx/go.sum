@@ -31,6 +31,7 @@ github.com/DATA-DOG/go-sqlmock v1.5.0/go.mod h1:f/Ixk793poVmq4qj/V1dPUg2JEAKC73Q
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/STARRY-S/zip v0.1.0 h1:eUER3jKmHKXjv+iy3BekLa+QnNSo1Lqz4eTzYBcGDqo=
 github.com/STARRY-S/zip v0.1.0/go.mod h1:qj/mTZkvb3AvfGQ2e775/3AODRvB4peSw8KNMvrM8/I=
+github.com/STARRY-S/zip v0.2.1/go.mod h1:xNvshLODWtC4EJ702g7cTYn13G53o1+X9BWnPFpcWV4=
 github.com/VividCortex/ewma v1.2.0 h1:f58SaIzcDXrSy3kWaHNvuJgJ3Nmz59Zji6XoJR/q1ow=
 github.com/VividCortex/ewma v1.2.0/go.mod h1:nz4BbCtbLyFDeC9SUHbtcT5644juEuWfUAUnGx7j5l4=
 github.com/a-h/templ v0.2.778 h1:VzhOuvWECrwOec4790lcLlZpP4Iptt5Q4K9aFxQmtaM=
@@ -67,6 +68,7 @@ github.com/bodgit/plumbing v1.3.0 h1:pf9Itz1JOQgn7vEOE7v7nlEfBykYqvUYioC61TwWCFU
 github.com/bodgit/plumbing v1.3.0/go.mod h1:JOTb4XiRu5xfnmdnDJo6GmSbSbtSyufrsyZFByMtKEs=
 github.com/bodgit/sevenzip v1.5.2 h1:acMIYRaqoHAdeu9LhEGGjL9UzBD4RNf9z7+kWDNignI=
 github.com/bodgit/sevenzip v1.5.2/go.mod h1:gTGzXA67Yko6/HLSD0iK4kWaWzPlPmLfDO73jTjSRqc=
+github.com/bodgit/sevenzip v1.6.0/go.mod h1:zOBh9nJUof7tcrlqJFv1koWRrhz3LbDbUNngkuZxLMc=
 github.com/bodgit/windows v1.0.1 h1:tF7K6KOluPYygXa3Z2594zxlkbKPAOvqr97etrGNIz4=
 github.com/bodgit/windows v1.0.1/go.mod h1:a6JLwrB4KrTR5hBpp8FI9/9W9jJfeQ2h4XDXU74ZCdM=
 github.com/btcsuite/winsvc v1.0.0/go.mod h1:jsenWakMcC0zFBFurPLEAyrnc/teJEM1O46fmI40EZs=
@@ -357,6 +359,7 @@ github.com/nsqio/go-nsq v1.0.8/go.mod h1:vKq36oyeVXgsS5Q8YEO7WghqidAVXQlcFxzQbQT
 github.com/nwaples/rardecode/v2 v2.0.0-beta.3 h1:evQTW0IjM2GAL5AaPHiQrT+laWohkt5zHKA3yCsGQGU=
 github.com/nwaples/rardecode/v2 v2.0.0-beta.3/go.mod h1:yntwv/HfMc/Hbvtq9I19D1n58te3h6KsqCf3GxyfBGY=
 github.com/nwaples/rardecode/v2 v2.0.0-beta.4/go.mod h1:yntwv/HfMc/Hbvtq9I19D1n58te3h6KsqCf3GxyfBGY=
+github.com/nwaples/rardecode/v2 v2.0.0-beta.4.0.20241112120701-034e449c6e78/go.mod h1:yntwv/HfMc/Hbvtq9I19D1n58te3h6KsqCf3GxyfBGY=
 github.com/nxadm/tail v1.4.4/go.mod h1:kenIhsEOeOJmVchQTgglprH7qJGnHDVpk1VPCcaMI8A=
 github.com/oklog/ulid v1.3.1/go.mod h1:CirwcVhetQ6Lv90oh/F+FBtV6XMibvdAFo93nm5qn4U=
 github.com/olivere/elastic v6.2.31+incompatible/go.mod h1:J+q1zQJTgAz9woqsbVRqGeB5G1iqDKVBWLNSYW8yfJ8=

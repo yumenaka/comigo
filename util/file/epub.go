@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/yumenaka/archiver/v4"
+	"github.com/mholt/archives"
 	"github.com/yumenaka/comigo/util/logger"
 	"golang.org/x/net/html"
 )
@@ -34,17 +34,17 @@ func getDataFromEpub(epubPath string, needFile string) (data []byte, err error) 
 		}
 	}(file)
 	//是否是压缩包
-	format, _, err := archiver.Identify(epubPath, file)
+	format, _, err := archives.Identify(context.Background(), epubPath, file)
 	if err != nil {
 		return nil, err
 	}
-	//如果是epub文件,文件编码为UTF-8
-	if ex, ok := format.(archiver.Zip); ok {
+	//如果是epub文件,文件编码为UTF-8，不需要特殊处理。
+	if ex, ok := format.(archives.Zip); ok {
 		//特殊编码
-		ex.TextEncoding = "" // “”
+		//ex.TextEncoding = util.GetEncodingByName(textEncoding)
 		ctx := context.Background()
 		//这里是file，而不是sourceArchive，否则会出错。
-		err := ex.Extract(ctx, file, []string{needFile}, func(ctx context.Context, f archiver.File) error {
+		err := ex.Extract(ctx, file, func(ctx context.Context, f archives.FileInfo) error {
 			// 取得特定压缩文件
 			file, err := f.Open()
 			if err != nil {

@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/klauspost/compress/zip"
-	"github.com/yumenaka/archiver/v4"
+	"github.com/mholt/archives"
 	"github.com/yumenaka/comigo/entity"
 	"github.com/yumenaka/comigo/util"
 	fileutil "github.com/yumenaka/comigo/util/file"
@@ -237,7 +237,7 @@ func handleOtherArchiveFiles(filePath string, newBook *entity.Book, scanOption O
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	fsys, err := archiver.FileSystem(ctx, filePath)
+	fsys, err := archives.FileSystem(ctx, filePath, nil)
 	if err != nil {
 		return err
 	}
@@ -260,7 +260,7 @@ func handleOtherArchiveFiles(filePath string, newBook *entity.Book, scanOption O
 		}
 
 		if scanOption.IsSupportMedia(path) {
-			archivedFile, ok := f.(archiver.File)
+			archivedFile, ok := f.(archives.FileInfo)
 			var tempURL string
 			if ok {
 				tempURL = "/api/get_file?id=" + newBook.BookID + "&filename=" + url.QueryEscape(archivedFile.NameInArchive)

@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
+	"github.com/yumenaka/comigo/encoding"
 	"github.com/yumenaka/comigo/util/logger"
 	"io"
 	"log"
@@ -17,7 +18,7 @@ import (
 
 	"entgo.io/ent/dialect"
 	"github.com/disintegration/imaging"
-	"github.com/yumenaka/archiver/v4"
+	"github.com/mholt/archives"
 	"github.com/yumenaka/comigo/internal/ent"
 	"modernc.org/sqlite"
 )
@@ -174,17 +175,17 @@ func UnArchiveZip(filePath string, extractPath string, textEncoding string) erro
 		}
 	}(file)
 	// 是否是压缩包
-	format, _, err := archiver.Identify(filePath, file)
+	format, _, err := archives.Identify(context.Background(), filePath, file)
 	if err != nil {
 		return err
 	}
 	// 如果是zip
-	if ex, ok := format.(archiver.Zip); ok {
-		ex.TextEncoding = textEncoding // “”  "shiftjis" "gbk"
+	if ex, ok := format.(archives.Zip); ok {
+		ex.TextEncoding = encoding.GetEncodingByName(textEncoding)
 		ctx := context.Background()
 		// WithValue返回parent的一个副本，该副本保存了传入的key/value，而调用Context接口的Value(key)方法就可以得到val。注意在同一个context中设置key/value，若key相同，值会被覆盖。
 		ctx = context.WithValue(ctx, "extractPath", extractPath)
-		_, err := ex.LsAllFile(ctx, file, extractFileHandler)
+		err := ex.Extract(ctx, file, extractFileHandler)
 		if err != nil {
 			return err
 		}
@@ -208,12 +209,12 @@ func UnArchiveZip(filePath string, extractPath string, textEncoding string) erro
 //	}
 //	defer file.Close()
 //	//是否是压缩包
-//	format, _, err := archiver.Identify(filePath, file)
+//	format, _, err := archives.Identify(filePath, file)
 //	if err != nil {
 //		return err
 //	}
 //	//如果是rar
-//	if ex, ok := format.(archiver.Rar); ok {
+//	if ex, ok := format.(archives.Rar); ok {
 //		ctx := context.Background()
 //		//WithValue返回parent的一个副本，该副本保存了传入的key/value，而调用Context接口的Value(key)方法就可以得到val。注意在同一个context中设置key/value，若key相同，值会被覆盖。
 //		ctx = context.WithValue(ctx, "extractPath", extractPath)
@@ -227,7 +228,7 @@ func UnArchiveZip(filePath string, extractPath string, textEncoding string) erro
 //}
 
 // 解压文件的函数
-func extractFileHandler(ctx context.Context, f archiver.File) error {
+func extractFileHandler(ctx context.Context, f archives.FileInfo) error {
 	extractPath := ""
 	if e, ok := ctx.Value("extractPath").(string); ok {
 		extractPath = e

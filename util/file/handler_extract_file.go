@@ -7,12 +7,12 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/yumenaka/archiver/v4"
+	"github.com/mholt/archives"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
 // extractFileHandler 解压文件的处理函数
-func extractFileHandler(ctx context.Context, f archiver.File) error {
+func extractFileHandler(ctx context.Context, f archives.FileInfo) error {
 	// 从上下文中获取解压路径
 	extractPath, ok := ctx.Value("extractPath").(string)
 	if !ok {
