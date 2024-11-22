@@ -5,8 +5,9 @@ import (
 	"errors"
 	"os"
 
-	"github.com/yumenaka/archiver/v4"
+	"github.com/mholt/archives"
 	"github.com/yumenaka/comigo/util"
+	"github.com/yumenaka/comigo/util/encoding"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
@@ -29,18 +30,20 @@ func UnArchiveZip(filePath string, extractPath string, textEncoding string) erro
 	defer file.Close()
 
 	// 确认文件格式
-	format, _, err := archiver.Identify(filePath, file)
+	format, _, err := archives.Identify(context.Background(), filePath, file)
 	if err != nil {
 		logger.Infof("Failed to identify file format: %v", err)
 		return err
 	}
 
-	// 如果是 ZIP 文件
-	if zipFormat, ok := format.(archiver.Zip); ok {
-		zipFormat.TextEncoding = textEncoding // 如 ""、"shiftjis"、"gbk"
+	// 如果是 ZIP 文件 TODO:测试文件解压
+	if zipFormat, ok := format.(archives.Zip); ok {
+		if textEncoding != "" {
+			zipFormat.TextEncoding = encoding.ByName(textEncoding)
+		}
 		ctx := context.WithValue(context.Background(), "extractPath", extractPath)
 
-		_, err := zipFormat.LsAllFile(ctx, file, extractFileHandler)
+		err := zipFormat.Extract(ctx, file, extractFileHandler)
 		if err != nil {
 			logger.Infof("Failed to extract zip file: %v", err)
 			return err

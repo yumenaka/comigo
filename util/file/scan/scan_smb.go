@@ -4,8 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/yumenaka/comigo/util/locale"
-	"github.com/yumenaka/comigo/util/logger"
 	iofs "io/fs"
 	"net/url"
 	"os"
@@ -17,6 +15,8 @@ import (
 
 	"github.com/cloudsoda/go-smb2"
 	"github.com/yumenaka/comigo/entity"
+	"github.com/yumenaka/comigo/util/locale"
+	"github.com/yumenaka/comigo/util/logger"
 )
 
 // Smb 扫描smb书籍  github.com/hirochachacha/go-smb2
