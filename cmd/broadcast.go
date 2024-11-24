@@ -76,7 +76,7 @@ func ReScanPath(path string, reScanFile bool) {
 		logger.Infof(locale.GetString("scan_error")+"path:%s  %s", path, err)
 		return
 	}
-	//DO：这里有BUG需要修：网页上传，upload文件夹看不到新文件（阅读界面-快速调跳转里面反而有）。应该是书架数据刷新逻辑写错了。
+	//TODO：这里有BUG需要修：网页上传，upload文件夹看不到新文件（阅读界面-快速调跳转里面反而有）。应该是书架数据刷新逻辑写错了。
 	scan.AddBooksToStore(addList, path, config.Config.MinImageNum)
 	entity.ResetBookStore()
 }

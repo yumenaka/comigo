@@ -65,15 +65,15 @@ func Smb(scanOption Option) (newBookList []*entity.Book, err error) {
 		//对于目录中的每一个项（无论是文件还是目录），指定的函数都会被调用。
 		func(walkPath string, fileInfo iofs.DirEntry, err error) error {
 			smbFilePath := "smb://" + scanOption.RemoteStores[0].Smb.Host + "/" + scanOption.RemoteStores[0].Smb.ShareName + "/" + walkPath
-			if !scanOption.ReScanFile {
-				for _, p := range entity.GetArchiveBooks() {
-					if smbFilePath == p.FilePath {
-						//跳过已经在数据库里面的文件
-						logger.Infof(locale.GetString("FoundInDatabase")+"%path", walkPath)
-						return nil
-					}
+
+			for _, p := range entity.GetArchiveBooks() {
+				if smbFilePath == p.FilePath {
+					//跳过已经扫描到里面的文件
+					logger.Infof(locale.GetString("FoundInBookStore")+"%path", walkPath)
+					return nil
 				}
 			}
+
 			// TODO：SMB路径深度。这里的深度是指相对于扫描的根目录的深度。
 			depth := strings.Count(walkPath, "/")
 			if runtime.GOOS == "windows" {

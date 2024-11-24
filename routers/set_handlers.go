@@ -79,6 +79,8 @@ func protectedRoutes(rg *gin.RouterGroup) {
 	rg.GET("/comigo.reg", handlers.GetRegFile)
 	// 获取配置
 	rg.GET("/config", config_handlers.GetConfig)
+	// 生成图片 http://localhost:1234/api/generate_image?height=220&width=160&text=12345&font_size=32
+	rg.GET("/generate_image", handlers.GenerateImage)
 	// 获取配置状态
 	rg.GET("/config/status", config_handlers.GetConfigStatus)
 	// 更新配置

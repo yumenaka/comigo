@@ -101,7 +101,7 @@ func SFTP(scanOption Option) (newBookList []*entity.Book, err error) {
 	//			}
 	//			if walkPath == p.FilePath || AbsW == p.FilePath {
 	//				//跳过已经在数据库里面的文件
-	//				logger.Infof(locale.GetString("FoundInDatabase")+"%s", walkPath)
+	//				logger.Infof(locale.GetString("FoundInBookStore")+"%s", walkPath)
 	//				return nil
 	//			}
 	//		}

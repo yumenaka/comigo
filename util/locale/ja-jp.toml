@@ -106,7 +106,7 @@ ZIP_ENCODE = "ZIPファイルのエンコーディングを手動で指定する
 ConfigSaveTo = "設定ファイルのデフォルトの保存場所、オプション値：RAM、HomeDirectory、WorkingDirectory、ProgramDirectory"
 EnableDatabase = "スキャンした本のデータを保存するローカルデータベースを有効にする"
 InitDatabase = "データベースの初期化:"
-FoundInDatabase = "データベースで見つかった:"
+FoundInBookStore = "本棚で見つかった:"
 FoundConfigFile="設定ファイルが見つかりました："
 SkipPath="スキップパス："
 ExceedsMaximumDepth="最大検索深度を超えている，MaxDepth ="

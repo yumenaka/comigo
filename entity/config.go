@@ -149,6 +149,7 @@ func (c *ComigoConfig) AddLocalStore(path string) {
 			Path: path,
 		},
 	})
+	c.LocalStores = c.LocalStoresList()
 }
 
 // AddLocalStores 添加本地书库（多个路径）
@@ -170,6 +171,7 @@ func (c *ComigoConfig) ReplaceLocalStores(pathList []string) {
 	}
 	c.Stores = newStores
 	c.AddLocalStores(pathList)
+	c.LocalStores = c.LocalStoresList()
 }
 
 // LocalStoresList 获取本地书库列表

@@ -33,12 +33,10 @@ func Local(storePath string, scanOption Option) ([]*entity.Book, error) {
 	}
 	logger.Infof(locale.GetString("SCAN_START_HINT")+" %s", storePathAbs)
 
-	// 创建已存在书籍的集合，提高查找效率
+	// 已存在书籍的集合，跳过已有书籍，提高查找效率
 	existingBooks := make(map[string]struct{})
-	if !scanOption.ReScanFile {
-		for _, book := range entity.GetArchiveBooks() {
-			existingBooks[book.FilePath] = struct{}{}
-		}
+	for _, book := range entity.GetArchiveBooks() {
+		existingBooks[book.FilePath] = struct{}{}
 	}
 
 	var newBookList []*entity.Book
@@ -56,7 +54,7 @@ func Local(storePath string, scanOption Option) ([]*entity.Book, error) {
 
 		// 跳过已存在的书籍
 		if _, exists := existingBooks[absWalkPath]; exists {
-			logger.Infof(locale.GetString("FoundInDatabase")+" %s", walkPath)
+			logger.Infof(locale.GetString("FoundInBookStore")+" %s", walkPath)
 			return nil
 		}
 
