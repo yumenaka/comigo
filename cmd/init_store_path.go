@@ -1,11 +1,12 @@
 package cmd
 
 import (
+	"os"
+
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/routers/handlers"
+	"github.com/yumenaka/comigo/util"
 	"github.com/yumenaka/comigo/util/logger"
-	"os"
-	"path/filepath"
 )
 
 // initStorePath 添加默认扫描路径
@@ -40,8 +41,15 @@ func initStorePath(args []string) {
 			//把上传路径添加到扫描路径里面去
 			config.Config.AddLocalStore(config.Config.UploadPath)
 		}
+		//如果用户启用上传，但是用户没有指定上传路径，就把【本地存储】里面的第一个路径作为上传路径
 		if config.Config.UploadPath == "" {
-			config.Config.AddLocalStore(filepath.Join(config.Config.LocalStoresList()[0], "upload"))
+			for _, store := range config.Config.LocalStoresList() {
+				if util.IsExist(store) {
+					config.Config.UploadPath = store
+					config.Config.AddLocalStore(config.Config.UploadPath)
+					break
+				}
+			}
 		}
 	}
 	//把扫描路径设置，传递给handlers包

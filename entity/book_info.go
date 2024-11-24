@@ -71,7 +71,14 @@ func NewBaseInfo(b *Book) *BookInfo {
 
 // initBookID 根据路径的 MD5，初始化书籍 ID
 func (b *BookInfo) initBookID() *BookInfo {
+	// 生成 BookID 的字符串
 	tempStr := b.FilePath + strconv.Itoa(int(b.FileSize)) + string(b.Type) + b.ParentFolder + b.BookStorePath
+	// 两次 MD5 加密，然后转为 base62 编码
+	// 为什么选择 Base62?
+	// 1. 人类可读，可以目视或简单的 regexp 进行验证
+	// 2. 仅包含字母数字符号，不包含特殊字符
+	// 3. 可以通过在任何文本编辑器和浏览器地址栏中双击鼠标来完全选择
+	// 4. 紧凑，生成的字符串比 Base32 短
 	b62 := base62.EncodeToString([]byte(md5string(md5string(tempStr))))
 	b.BookID = getShortBookID(b62, 7)
 	return b
