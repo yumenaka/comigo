@@ -22,8 +22,8 @@ type subStore struct {
 	BookGroupMap sync.Map //拥有的书籍组,通过扫描书库生成，key是BookID,存储 *BookInfo。需要通过Depth从深到浅生成
 }
 
-// InitStore 生成书籍组
-func (folder *Store) InitStore() (e error) {
+// AnalyzeStore 分析并生成书籍组
+func (folder *Store) AnalyzeStore() (e error) {
 	//遍历所有子书库
 	for _, value := range folder.SubStores.Range {
 		s := value.(*subStore)
