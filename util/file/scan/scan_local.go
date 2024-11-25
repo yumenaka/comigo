@@ -35,7 +35,7 @@ func Local(storePath string, scanOption Option) ([]*entity.Book, error) {
 
 	// 已存在书籍的集合，跳过已有书籍，提高查找效率
 	existingBooks := make(map[string]struct{})
-	for _, book := range entity.GetArchiveBooks() {
+	for _, book := range entity.GetAllBookList() {
 		existingBooks[book.FilePath] = struct{}{}
 	}
 

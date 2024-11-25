@@ -159,7 +159,7 @@ func AddBooksToStore(bookList []*entity.Book, basePath string, MinImageNum int) 
 		logger.Infof(locale.GetString("AddBook_error")+"%s", basePath)
 	}
 	// 生成虚拟书籍组
-	if err := entity.MainStore.InitStore(); err != nil {
+	if err := entity.MainStore.AnalyzeStore(); err != nil {
 		logger.Infof("%s", err)
 	}
 }

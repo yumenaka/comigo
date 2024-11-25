@@ -27,31 +27,28 @@ var (
 	MainStore = Store{}
 )
 
-// ClearAllBookData  重置所有书籍与书组信息
+// ClearAllBookData  清空所有书籍与虚拟书组数据
 func ClearAllBookData() {
-	ClearBookMap()
-	ClearBookGroupMap()
+	ClearBookData()
+	ClearBookGroupData()
 }
 
-// ClearBookMap 重置书籍的映射
-func ClearBookMap() {
-	//会让原来的 sync.Map 实例失去引用，随后被垃圾回收器清理。
-	mapBooks = sync.Map{}
+// ClearBookData 清空书籍数据
+func ClearBookData() {
+	mapBooks.Clear()
 }
 
-// ClearBookGroupMap 重置书组的映射。
-func ClearBookGroupMap() {
-	//重会让原来的 sync.Map 实例失去引用，随后被垃圾回收器清理。
-	mapBookGroup = sync.Map{}
-	MainStore = Store{
-		SubStores: sync.Map{},
-	}
+// ClearBookGroupData  清空书组相关数据
+func ClearBookGroupData() {
+	//Clear 会删除所有条目，从而产生一个空的 Map。
+	mapBookGroup.Clear()
+	MainStore.SubStores.Clear()
 }
 
-// ResetBookStore 重置虚拟书库
-func ResetBookStore() {
-	ClearBookGroupMap()
-	if err := MainStore.InitStore(); err != nil {
+// ResetBookGroupData 重置虚拟书库
+func ResetBookGroupData() {
+	ClearBookGroupData()
+	if err := MainStore.AnalyzeStore(); err != nil {
 		logger.Infof("Error initializing main folder: %s", err)
 	}
 }
@@ -95,7 +92,7 @@ func CheckAllBookFileExist() {
 	}
 	// 删除不存在的书组
 	if len(deletedBooks) > 0 {
-		ResetBookStore()
+		ResetBookGroupData()
 	}
 }
 
