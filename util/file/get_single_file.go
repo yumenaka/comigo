@@ -3,158 +3,140 @@ package file
 import (
 	"context"
 	"errors"
-	"fmt"
-	"github.com/yumenaka/comigo/util/encoding"
 	"io"
 	"io/fs"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/mholt/archives"
+	"github.com/yumenaka/comigo/util/encoding"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
 // 使用sync.Map代替map，保证并发情况下的读写安全
 var mapBookFS sync.Map
 
-// GetSingleFile  获取单个文件
-// TODO:大文件需要针对性优化，可能需要保持打开状态、或通过持久化的虚拟文件系统获取
-// TODO:测试文件缓存功能，一旦解压，下次直接读缓存文件
-func GetSingleFile(filePath string, NameInArchive string, textEncoding string) ([]byte, error) {
-	//必须传值
-	if NameInArchive == "" {
-		return nil, errors.New("NameInArchive is empty")
+// GetSingleFile 获取单个文件
+func GetSingleFile(filePath, nameInArchive, textEncoding string) ([]byte, error) {
+	if nameInArchive == "" {
+		return nil, errors.New("nameInArchive is empty")
 	}
-	//打开文件，只读模式
-	file, err := os.OpenFile(filePath, os.O_RDONLY, 0400) //Use mode 0400 for a read-only // file and 0600 for a readable+writable file.
+
+	// 创建一个30秒超时的Context
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// 打开文件
+	file, err := os.Open(filePath)
 	if err != nil {
-		logger.Infof("%s", err)
-	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			logger.Infof("file.Close() Error:%s", err)
-		}
-	}(file)
-	//判断是否是压缩包
-	//context 用来取消，这里用不到，所以传了一个空的Context
-	format, sourceArchive, err := archives.Identify(context.Background(), filePath, file)
-	if err != nil {
+		logger.Infof("无法打开文件 %s: %v", filePath, err)
 		return nil, err
 	}
-	var data []byte
-	//如果是zip文件,文件编码为UTF-8时textEncoding为空,其他特殊编码的zip文件根据设定指定（默认GBK）
-	if ex, ok := format.(archives.Zip); ok {
-		if textEncoding != "" {
-			ex.TextEncoding = encoding.ByName(textEncoding)
-		}
-		ctx := context.Background()
-		// 在这里对文件进行处理；比如如果只需要特定的文件或目录，则只需返回所需的 f.NameInArchive 值即可。 https://github.com/mholt/archives#extract-archive
-		err := ex.Extract(ctx, file, func(ctx context.Context, f archives.FileInfo) error {
-			if f.NameInArchive != NameInArchive {
-				fmt.Println("Skip " + f.NameInArchive + "|" + NameInArchive + " in " + filePath)
-				return nil
-			}
-			//if f.NameInArchive == NameInArchive {
-			//	fmt.Println("Get " + NameInArchive + " in " + filePath)
-			//}
-			readCloser, err := f.Open()
-			if err != nil {
-				logger.Infof("%s", err)
-			}
-			defer readCloser.Close()
-			content, err := io.ReadAll(readCloser)
-			if err != nil {
-				logger.Infof("%s", err)
-			}
-			data = content
-			return err
-		})
-		return data, err
-	}
+	defer file.Close()
 
-	//通过一个持久化的虚拟文件系统读取文件（加快rar文件的解压速度），key是文件路径
-	var fsys fs.FS
-	fsysAny, fsOK := mapBookFS.Load(filePath)
-	if fsOK {
-		fsys = fsysAny.(fs.FS)
-	} else {
-		//如果从来没保存过这个文件系统
-		temp, errFS := archives.FileSystem(context.Background(), filePath, nil)
-		if errFS == nil {
-			//将文件系统加入到sync.Map
-			mapBookFS.Store(filePath, temp) //因为被gin并发调用，需要考虑并发读写问题
-			fsys = temp
+	// 识别压缩格式
+	format, sourceArchiveReader, err := archives.Identify(ctx, filePath, file)
+	if err != nil {
+		// 检查是否是超时错误
+		if errors.Is(err, context.DeadlineExceeded) {
+			logger.Infof("操作超时：识别压缩格式花费了超过30秒")
 		} else {
-			logger.Infof("%s", errFS)
+			logger.Infof("识别压缩格式失败: %v", err)
 		}
+		return nil, err
 	}
 
-	//通过虚拟文件系统打开特定文件
-	fileInRarFS, errFSOpen := fsys.Open(NameInArchive)
-	if errFSOpen != nil {
-		logger.Infof("%s", errFSOpen)
-	}
-	//defer fileInRarFS.Close()
-	if errFSOpen == nil {
-		content, err := io.ReadAll(fileInRarFS)
-		if err != nil {
-			logger.Infof("%s", err)
+	// 处理 ZIP 文件
+	if zipFormat, ok := format.(archives.Zip); ok {
+		if textEncoding != "" {
+			zipFormat.TextEncoding = encoding.ByName(textEncoding)
 		}
-		data = content
+		return extractFileFromArchive(ctx, zipFormat, file, nameInArchive)
+	}
+
+	// 从缓存中获取虚拟文件系统
+	var fileSystem fs.FS
+	if fsInterface, ok := mapBookFS.Load(filePath); ok {
+		fileSystem = fsInterface.(fs.FS)
+	} else {
+		fileSystem, err = archives.FileSystem(ctx, filePath, nil)
+		if err != nil {
+			if errors.Is(err, context.DeadlineExceeded) {
+				logger.Infof("操作超时：创建文件系统花费了超过30秒")
+			} else {
+				logger.Infof("创建文件系统失败: %v", err)
+			}
+			return nil, err
+		}
+		mapBookFS.Store(filePath, fileSystem)
+	}
+
+	// 从虚拟文件系统中读取文件
+	fileInArchive, err := fileSystem.Open(nameInArchive)
+	if err == nil {
+		defer fileInArchive.Close()
+		data, err := io.ReadAll(fileInArchive)
+		if err != nil {
+			if errors.Is(err, context.DeadlineExceeded) {
+				logger.Infof("操作超时：读取文件内容花费了超过30秒")
+			} else {
+				logger.Infof("读取文件内容失败: %v", err)
+			}
+			return nil, err
+		}
 		return data, nil
 	}
 
-	//TODO:Rar密码
-	//如果是 Rar 文件
-	if ex, ok := format.(archives.Rar); ok {
-		//如果虚拟FS方案无效，继续用Extract方案
-		ctx := context.Background()
-		err := ex.Extract(ctx, sourceArchive, func(ctx context.Context, f archives.FileInfo) error {
-			// 取得特定压缩文件
-			fileInRar, err := f.Open()
-			if err != nil {
-				logger.Infof("%s", err)
-			}
-			defer func(fileInRar io.ReadCloser) {
-				err := fileInRar.Close()
-				if err != nil {
-					logger.Infof("fileInRar.Close() Error:%s", err)
-				}
-			}(fileInRar)
-			content, err := io.ReadAll(fileInRar)
-			if err != nil {
-				logger.Infof("%s", err)
-			}
-			data = content
-			return err
-		})
-		return data, err
+	// 处理 RAR 文件
+	if rarFormat, ok := format.(archives.Rar); ok {
+		return extractFileFromArchive(ctx, rarFormat, sourceArchiveReader, nameInArchive)
 	}
 
-	//其他格式的压缩包，正常情况下不应该用到
-	if ex, ok := format.(archives.Extractor); ok {
-		ctx := context.Background()
-		err := ex.Extract(ctx, sourceArchive, func(ctx context.Context, f archives.FileInfo) error {
-			// 取得特定压缩文件
-			file, err := f.Open()
-			if err != nil {
-				logger.Infof("%s", err)
-			}
-			defer func(file io.ReadCloser) {
-				err := file.Close()
-				if err != nil {
-					logger.Infof("file.Close() Error:%s", err)
-				}
-			}(file)
-			content, err := io.ReadAll(file)
-			if err != nil {
-				logger.Infof("%s", err)
-			}
-			data = content
-			return err
-		})
-		return data, err
+	// 处理其他格式的压缩文件
+	if extractor, ok := format.(archives.Extractor); ok {
+		return extractFileFromArchive(ctx, extractor, sourceArchiveReader, nameInArchive)
 	}
-	return nil, errors.New("2,not Found " + NameInArchive + " in " + filePath)
+
+	return nil, errors.New("不支持的压缩格式或在压缩包中未找到文件")
+}
+
+func extractFileFromArchive(ctx context.Context, extractor archives.Extractor, sourceArchive io.Reader, nameInArchive string) ([]byte, error) {
+	var data []byte
+	err := extractor.Extract(ctx, sourceArchive, func(ctx context.Context, f archives.FileInfo) error {
+		if f.NameInArchive != nameInArchive {
+			return nil
+		}
+		readCloser, err := f.Open()
+		if err != nil {
+			if errors.Is(err, context.DeadlineExceeded) {
+				logger.Infof("操作超时：打开压缩包内文件花费了超过30秒")
+			} else {
+				logger.Infof("打开压缩包内文件失败: %v", err)
+			}
+			return err
+		}
+		defer readCloser.Close()
+		data, err = io.ReadAll(readCloser)
+		if err != nil {
+			if errors.Is(err, context.DeadlineExceeded) {
+				logger.Infof("操作超时：读取文件内容花费了超过30秒")
+			} else {
+				logger.Infof("读取文件内容失败: %v", err)
+			}
+		}
+		return err
+	})
+	if err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			logger.Infof("操作超时：提取文件花费了超过30秒")
+		} else {
+			logger.Infof("提取文件失败: %v", err)
+		}
+		return nil, err
+	}
+	if data != nil {
+		return data, nil
+	}
+	return nil, errors.New("在压缩包中未找到文件")
 }

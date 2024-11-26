@@ -44,7 +44,7 @@ Linux MacOS 一键安装脚本
 bash <(curl -s https://raw.githubusercontent.com/yumenaka/comi/master/get_comigo.sh)
 
 #  如果你设置了golang环境，也可以这样安装：
-go install github.com/yumenaka/comi@latest
+go install github.com/yumenaka/comigo/cli/comi@latest
 ```
 找不到 comi 命令？
 如果您的系统提示你缺少 comi 命令，请确保您已正确安装 Golang。 
