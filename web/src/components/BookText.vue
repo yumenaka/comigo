@@ -1,6 +1,6 @@
 <template>
-  <div class="my-1 mx-2 p-2 border rounded-lg bg-slate-300">
-    <a class="font-medium text-lg flex flex-row justify-center items-center" :href="getBookURL()" :target="getTarget">
+  <div class="p-2 mx-2 my-1 border rounded-lg bg-slate-300">
+    <a class="flex flex-row items-center justify-center text-lg font-medium" :href="getBookURL()" :target="getTarget">
       <!-- 书籍类型图标 -->
 
       <span>{{ getIcon }}{{ shortTitle }}</span>
@@ -88,6 +88,9 @@ export default defineComponent({
       let bookID = this.book_info.id;
       let bookType = this.book_info.type;
       let bookName = this.book_info.title;
+      if (bookName === "Upload Book") {
+        return "/#/upload";
+      }
       if (bookType === "book_group") {
         return "/#/child_shelf/" + bookID + "/";
       }

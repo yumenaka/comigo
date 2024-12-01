@@ -2,11 +2,11 @@
   <a class="mx-2 my-2 flex flex-row justify-between  w-[32rem] h-[15rem] rounded bg-gray-100 shadow-xl hover:shadow-2xl ring-1 ring-gray-400 hover:ring hover:ring-blue-500"
     :href="getBookURL()" :target="getTarget">
     <div
-      class="relative mx-4 my-4 w-32 h-44 bg-cover bg-top bg-gray-200 rounded shadow-xl hover:shadow-2xl ring-1 ring-gray-400 hover:ring hover:ring-blue-500 "
+      class="relative w-32 mx-4 my-4 bg-gray-200 bg-top bg-cover rounded shadow-xl h-44 hover:shadow-2xl ring-1 ring-gray-400 hover:ring hover:ring-blue-500 "
       :style="setBackgroundImage()">
     </div>
-    <div class="w-2/3 flex flex-col my-2 top-0 p-4 border-blue-800 rounded-b">
-      <div class="w-full my-1 text-xl text-left font-bold ">{{ book_info.title }}</div>
+    <div class="top-0 flex flex-col w-2/3 p-4 my-2 border-blue-800 rounded-b">
+      <div class="w-full my-1 text-xl font-bold text-left ">{{ book_info.title }}</div>
       <div class="w-full my-1 text-xl text-left" v-if="book_info.author !== ''">{{ $t('author', [book_info.author]) }}
       </div>
       <div class="w-full my-1 text-xl text-left" v-if="!isBookGroup && !isDirBook">{{ $t('filesize', [fileSizeString])
@@ -100,6 +100,9 @@ export default defineComponent({
       let bookID = this.book_info.id;
       let bookType = this.book_info.type;
       let bookName = this.book_info.title;
+      if (bookName === "Upload Book") {
+        return "/#/upload";
+      }
       // console.log("getBookCardOpenURL  bookID：" + bookID + " bookType：" + bookType)
       if (bookType === "book_group") {
         return "/#/child_shelf/" + bookID + "/";
@@ -134,8 +137,7 @@ export default defineComponent({
     getThumbnailsImageUrl() {
       // 按照“/”分割字符串
       const arrUrl = this.book_info.cover.url.split("/");
-      // console.log(arrUrl)
-      if (arrUrl[0] === "api") {
+      if (arrUrl[1]!==undefined&&arrUrl[1].includes("api")) {
         return `${this.book_info.cover.url}&resize_width=256&resize_height=360&thumbnail_mode=true`;
       }
       return this.book_info.cover.url;

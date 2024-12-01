@@ -200,7 +200,7 @@ export default defineComponent({
             maxDepth: 1,
             bookshelf: [
                 {
-                    title: "not found",
+                    title: "Upload Book",
                     page_count: 1,
                     id: "12345",
                     type: ".zip",
@@ -211,14 +211,14 @@ export default defineComponent({
                         {
                             height: 500,
                             width: 449,
-                            url: "/images/loading.gif",
+                            url: "api/generate_image?height=1280&width=720&text=Please%20Upload%20Book&font_size=64",
                         },
                     ],
                     cover: {
                         filename: "unknown.jpg",
                         height: 500,
                         width: 449,
-                        url: "/images/not_found.png",
+                        url: "api/generate_image?height=220&width=160&text=Please%20Upload%20Book&font_size=16",
                     },
                 },
             ],
@@ -332,9 +332,10 @@ export default defineComponent({
                         this.bookshelf = response.data;
                     } else {
                         this.bookShelfTitle = _this.$t("no_book_found_hint");
-                        this.$router.push({
-                            name: "UploadPage",
-                        });
+                        // not work when 400
+                        // this.$router.push({
+                        //     name: "UploadPage",
+                        // });
                     }
                 }).catch((error) => {
                     this.bookShelfTitle = _this.$t("no_book_found_hint");
