@@ -27,7 +27,7 @@ func InitFlags() {
 	runtimeViper.SetEnvPrefix("COMI")
 	cobra.MousetrapHelpText = ""       // 屏蔽鼠标提示，支持拖拽、双击运行
 	cobra.MousetrapDisplayDuration = 5 //"这是命令行程序"的提醒表示时间
-	rootCmd.PersistentFlags().BoolVar(&config.Config.AutoRescan, "rescan", true, locale.GetString("RESCAN"))
+	//rootCmd.PersistentFlags().BoolVar(&config.Config.AutoRescan, "rescan", true, locale.GetString("RESCAN"))
 	// 启用登陆保护，需要输入用户名、密码。
 	rootCmd.PersistentFlags().BoolVar(&config.Config.EnableLogin, "login", false, locale.GetString("ENABLE_LOGIN"))
 	rootCmd.PersistentFlags().StringVarP(&config.Config.Username, "username", "u", "admin", locale.GetString("USERNAME"))
