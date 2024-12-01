@@ -89,6 +89,7 @@ func (c *ConfigStatus) SetConfigStatus() error {
 type UploadDirOption int
 
 type ComigoConfig struct {
+	//AutoRescan             bool            `json:"AutoRescan" comment:"刷新页面时，是否自动重新扫描"`
 	CachePath              string          `json:"CachePath" comment:"本地图片缓存位置，默认系统临时文件夹"`
 	CertFile               string          `json:"CertFile" comment:"TLS/SSL 证书文件路径 (default: ~/.config/.comigo/cert.crt)"`
 	ClearCacheExit         bool            `json:"ClearCacheExit" comment:"退出程序的时候，清理web图片缓存"`

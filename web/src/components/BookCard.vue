@@ -3,16 +3,16 @@
   <!-- 响应式设计：https://www.tailwindcss.cn/docs/responsive-design -->
   <!-- sm<640px  md<768px lg<1024px  lg<1280px 2xl<1536px-->
   <a :href="getBookURL()" :target="getTarget"
-    class="relative w-32 h-44 mx-4 my-4 bg-gray-200 rounded shadow-xl hover:shadow-2xl ring-1 ring-gray-400 hover:ring hover:ring-blue-500 bg-top bg-cover"
+    class="relative w-32 mx-4 my-4 bg-gray-200 bg-top bg-cover rounded shadow-xl h-44 hover:shadow-2xl ring-1 ring-gray-400 hover:ring hover:ring-blue-500"
     :style="setBackgroundImage()">
 
     <!-- 书籍类型图标 -->
     <SvgBookIcon :book_info="book_info"></SvgBookIcon>
     <!-- 图书封面 -->
     <div v-if="showTitle"
-      class="absolute inset-x-0 bottom-0 h-1/4 bg-gray-100 bg-opacity-80 font-semibold border-blue-800 rounded-b">
+      class="absolute inset-x-0 bottom-0 font-semibold bg-gray-100 border-blue-800 rounded-b h-1/4 bg-opacity-80">
       <!-- 如果把链接的 target 属性设置为 "_blank"，该链接会在新窗口中打开。 -->
-      <span class="absolute inset-x-0  font-bold top-0 p-1 align-middle">{{
+      <span class="absolute inset-x-0 top-0 p-1 font-bold align-middle">{{
         shortTitle
       }}</span>
     </div>
@@ -25,6 +25,7 @@
 import { useCookies } from "vue3-cookies";
 import { defineComponent } from "vue";
 import SvgBookIcon from "@/components/SvgBookIcon.vue";
+import { c } from "naive-ui";
 
 export default defineComponent({
   name: "BookCard",
@@ -83,6 +84,9 @@ export default defineComponent({
       let bookID = this.book_info.id;
       let bookType = this.book_info.type;
       let bookName = this.book_info.title;
+      if (bookName === "Upload Book") {
+        return "/#/upload";
+      }
       if (bookType === "book_group") {
         return "/#/child_shelf/" + bookID + "/";
       }
@@ -116,8 +120,7 @@ export default defineComponent({
     getThumbnailsImageUrl() {
       // 按照“/”分割字符串
       const arrUrl = this.book_info.cover.url.split("/");
-      // console.log(arrUrl)
-      if (arrUrl[0] === "api") {
+      if (arrUrl[1]!==undefined&&arrUrl[1].includes("api")) {
         return `${this.book_info.cover.url}&resize_width=256&resize_height=360&thumbnail_mode=true`;
       }
       return this.book_info.cover.url;
