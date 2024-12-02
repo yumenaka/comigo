@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # 一键安装脚本
-
 # 使用 curl：
 #   bash <(curl -s https://raw.githubusercontent.com/yumenaka/comigo/master/get_comigo.sh)
 # 使用 wget：
@@ -20,11 +19,11 @@ function print_message() {
     case "$key" in
         "error_no_curl_wget")
             case "$system_language" in
-                en_US)
-                    echo "Error: curl or wget is required."
-                    ;;
                 zh_CN)
                     echo "错误：需要安装 curl 或 wget"
+                    ;;
+                en_US)
+                    echo "Error: curl or wget is required."
                     ;;
                 ja_JP)
                     echo "エラー：curlまたはwgetが必要です。"
@@ -36,11 +35,11 @@ function print_message() {
             ;;
         "error_cmd_not_found")
             case "$system_language" in
-                en_US)
-                    echo "Error: $param not found. Please install $param."
-                    ;;
                 zh_CN)
                     echo "错误：未找到 $param，请先安装 $param"
+                    ;;
+                en_US)
+                    echo "Error: $param not found. Please install $param."
                     ;;
                 ja_JP)
                     echo "エラー：$param が見つかりません。$param をインストールしてください。"
@@ -52,11 +51,11 @@ function print_message() {
             ;;
         "error_cannot_get_latest_tag")
             case "$system_language" in
-                en_US)
-                    echo "Error: Unable to fetch the latest version tag."
-                    ;;
                 zh_CN)
                     echo "错误：无法获取最新版本标签。"
+                    ;;
+                en_US)
+                    echo "Error: Unable to fetch the latest version tag."
                     ;;
                 ja_JP)
                     echo "エラー：最新のバージョンタグを取得できません。"
@@ -68,11 +67,11 @@ function print_message() {
             ;;
         "error_cannot_parse_version")
             case "$system_language" in
-                en_US)
-                    echo "Error: Unable to parse version number from tag $param."
-                    ;;
                 zh_CN)
                     echo "错误：无法从标签 $param 解析版本号。"
+                    ;;
+                en_US)
+                    echo "Error: Unable to parse version number from tag $param."
                     ;;
                 ja_JP)
                     echo "エラー：タグ $param からバージョン番号を解析できません。"
@@ -84,11 +83,11 @@ function print_message() {
             ;;
         "error_unsupported_os")
             case "$system_language" in
-                en_US)
-                    echo "Error: Unsupported operating system: $param"
-                    ;;
                 zh_CN)
                     echo "错误：不支持的操作系统：$param"
+                    ;;
+                en_US)
+                    echo "Error: Unsupported operating system: $param"
                     ;;
                 ja_JP)
                     echo "エラー：サポートされていないオペレーティングシステム：$param"
@@ -100,11 +99,11 @@ function print_message() {
             ;;
         "error_unsupported_arch")
             case "$system_language" in
-                en_US)
-                    echo "Error: Unsupported architecture: $param"
-                    ;;
                 zh_CN)
                     echo "错误：不支持的架构：$param"
+                    ;;
+                en_US)
+                    echo "Error: Unsupported architecture: $param"
                     ;;
                 ja_JP)
                     echo "エラー：サポートされていないアーキテクチャ：$param"
@@ -116,11 +115,11 @@ function print_message() {
             ;;
         "downloading")
             case "$system_language" in
-                en_US)
-                    echo "Downloading $param"
-                    ;;
                 zh_CN)
                     echo "正在下载 $param"
+                    ;;
+                en_US)
+                    echo "Downloading $param"
                     ;;
                 ja_JP)
                     echo "$param をダウンロードしています"
@@ -132,11 +131,11 @@ function print_message() {
             ;;
         "error_download_failed")
             case "$system_language" in
-                en_US)
-                    echo "Error: Download failed."
-                    ;;
                 zh_CN)
                     echo "错误：下载失败。"
+                    ;;
+                en_US)
+                    echo "Error: Download failed."
                     ;;
                 ja_JP)
                     echo "エラー：ダウンロードに失敗しました。"
@@ -148,11 +147,11 @@ function print_message() {
             ;;
         "cleaning")
             case "$system_language" in
-                en_US)
-                    echo "Cleaning up $param"
-                    ;;
                 zh_CN)
                     echo "清理 $param"
+                    ;;
+                en_US)
+                    echo "Cleaning up $param"
                     ;;
                 ja_JP)
                     echo "$param をクリーンアップしています"
@@ -164,11 +163,11 @@ function print_message() {
             ;;
         "moving")
             case "$system_language" in
-                en_US)
-                    echo "Adding execution permissions and moving to /usr/local/bin/"
-                    ;;
                 zh_CN)
                     echo "添加执行权限并移动到 /usr/local/bin/"
+                    ;;
+                en_US)
+                    echo "Adding execution permissions and moving to /usr/local/bin/"
                     ;;
                 ja_JP)
                     echo "実行権限を追加し、/usr/local/bin/ に移動します"
@@ -180,11 +179,11 @@ function print_message() {
             ;;
         "installation_complete")
             case "$system_language" in
-                en_US)
-                    echo -e "\033[34mComigo is installed. You can now run the 'comi' command in the comics directory to scan for comics.\033[0m"
-                    ;;
                 zh_CN)
                     echo -e "\033[34mComigo 安装完毕，可以在漫画目录下执行 'comi' 命令扫描漫画了。\033[0m"
+                    ;;
+                en_US)
+                    echo -e "\033[34mComigo is installed. You can now run the 'comi' command in the comics directory to scan for comics.\033[0m"
                     ;;
                 ja_JP)
                     echo -e "\033[34mComigoがインストールされました。コミックディレクトリで 'comi' コマンドを実行してコミックをスキャンできます。\033[0m"
@@ -227,14 +226,15 @@ else
     latest_release=$(wget -qO- "https://api.github.com/repos/yumenaka/comigo/releases/latest")
 fi
 
-latest_tag=$(echo "$latest_release" | grep -Po '"tag_name": "\K.*?(?=")')
+# 使用 sed 提取最新标签(MacOS不支持 grep -P)
+latest_tag=$(echo "$latest_release" | sed -n 's/.*"tag_name": *"\(v[^"]*\)".*/\1/p')
 if [[ -z "$latest_tag" ]]; then
     print_message "error_cannot_get_latest_tag"
     exit 1
 fi
 
-# 提取版本号
-if [[ $latest_tag =~ ^v([0-9]+\.[0-9]+\.[0-9]+) ]]; then
+# 提取版本号，支持两个或多个数字段的版本号
+if [[ $latest_tag =~ ^v([0-9]+(\.[0-9]+)+) ]]; then
     Version="${BASH_REMATCH[1]}"
 else
     print_message "error_cannot_parse_version" "$latest_tag"
