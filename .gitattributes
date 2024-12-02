@@ -4,10 +4,10 @@
 resource/CHANGELOG.md -linguist-documentation
 htmx/README.md -linguist-documentation
 
-# 排除生成的代码
-resource/web_static/* linguist-vendored
-resource/admin_static/* linguist-vendored
-internal/ent/* linguist-vendored
+# 排除目录
+resource/**/* linguist-vendored
+internal/ent/**/* linguist-vendored
+application/mobile/**/* linguist-vendored
 
 #排除手机项目
 application/mobile/* linguist-vendored

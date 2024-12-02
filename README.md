@@ -1,66 +1,67 @@
 <div align="center">
 
-# ComiGo: 简单粗暴的漫画阅读器
+# ComiGo：简单粗暴的漫画阅读器
 
 [![Go Report](https://goreportcard.com/badge/github.com/yumenaka/comi?style=flat-square)](https://goreportcard.com/report/github.com/yumenaka/comi)
 [![License](https://img.shields.io/github/license/yumenaka/comi?style=flat-square&color=blue)](https://github.com/yumenaka/comigo/blob/main/LICENSE)
 
-[//]: # ([![Downloads]&#40;https://img.shields.io/github/downloads/yumenaka/comi/total?style=flat-square&color=success&#41;]&#40;https://github.com/yumenaka/comigo/releases&#41;)
-[//]: # (<img src="https://raw.githubusercontent.com/yumenaka/comi/master/icon.ico" alt="ComiGo: 简单粗暴的漫画阅读器" width="200">)
+<!--
+[![Downloads](https://img.shields.io/github/downloads/yumenaka/comi/total?style=flat-square&color=success)](https://github.com/yumenaka/comigo/releases)
+<img src="https://raw.githubusercontent.com/yumenaka/comi/master/icon.ico" alt="ComiGo：简单粗暴的漫画阅读器" width="200">
+-->
+
 </div>
 
 ![Windows示例](https://www.yumenaka.net/wp-content/uploads/2020/08/sample.gif "Windows示例")
 
-[English](https://github.com/yumenaka/comigo/blob/master/README_EN.md)   [日本語](https://github.com/yumenaka/comigo/blob/master/README_JP.md)
+[English](https://github.com/yumenaka/comigo/blob/master/README_EN.md) [日本語](https://github.com/yumenaka/comigo/blob/master/README_JP.md)
 
-### Features  
+### 功能特点
 
-1. 支持Windows、Linux、MacOS。支持卷轴、下拉、翻页等多种模式。
-2. 支持图片文件夹与.rar、.zip、.tar、.cbz、.cbr、.epub压缩包。
-3. 局域网的手机或平板设备，可扫描二维码阅读。  
-4. windows支持拖拽压缩包到comi.exe（或快捷方式）上打开。
+1. 支持 Windows、Linux、MacOS，提供卷轴、下拉、翻页等多种模式。
+2. 支持图片文件夹与 `.rar`、`.zip`、`.tar`、`.cbz`、`.cbr`、`.epub` 等压缩包。
+3. 局域网内的手机或平板设备可扫描二维码阅读。
+4. Windows 支持拖拽压缩包到 `comi.exe`（或快捷方式）上打开。
 
 ### 安装
 
-**手动下载**  
-
-在 [Releases页面](https://github.com/yumenaka/comigo/releases ) ，下载最新版文件，放到系统PATH。  
-
-**我应该下载哪个版本？**  
-
-- Windows 64位（大多数Windows用户）: Windows_x86_64.zip
-- Windows 32位（比较老的Windows）: Windows_i386.zip
-- Windows ARM版（Windows 骁龙Elite等）：Windows_arm64.zip  
-- MacOS intel芯片（2020年以前的Mac）: MacOS_x86_64.tar.gz  
-- MacOS apple （2020年以后的新Mac，M系列芯片）: MacOS_arm64.tar.gz  
-- Linux ARM 32位（树莓派1、树莓派Zero等老设备）: Linux_armv6.tar.gz  
-- Linux ARM 32位（树莓派2~4，其他arm设备）: Linux_armv7.tar.gz  
-- Linux ARM 64位（树莓派4或树莓派5，安装64位的ARM系统的时候）: Linux_armv8.tar.gz  
-  
-Linux MacOS 一键安装脚本  
+**Linux/MacOS 一键安装脚本**
 
 ```bash
-# 需要curl与tar，文件将安装到/usr/local/bin/ 
-bash <(curl -s https://raw.githubusercontent.com/yumenaka/comi/master/get_comigo.sh)
+# 一键安装脚本
+# 使用 curl：
+bash <(curl -s https://raw.githubusercontent.com/yumenaka/comigo/master/get_comigo.sh)
 
-#  如果你设置了golang环境，也可以这样安装：
+# 使用 wget：
+bash <(wget -qO- https://raw.githubusercontent.com/yumenaka/comigo/master/get_comigo.sh)
+
+# 如果您已设置 Golang 环境，也可以这样安装：
 go install github.com/yumenaka/comigo/cli/comi@latest
 ```
-找不到 comi 命令？
-如果您的系统提示你缺少 comi 命令，请确保您已正确安装 Golang。 
-通常，这意味着/usr/local/bin/（一键脚本）或您的用户 home 目录中的 go/bin 目录（go install）不在 PATH 环境变量中。 
-通常情况下还需要关闭并重新打开已打开的终端，以便安装程序对环境变量做的更改反映在终端中。
+
+**手动下载**
+
+在 [Releases 页面](https://github.com/yumenaka/comigo/releases) 下载最新版文件，并放到系统的 `PATH` 中。
+
+**应该下载哪个版本？**
+
+- Windows 64 位（大多数 Windows 用户）：Windows_x86_64.zip
+- Windows ARM 版（骁龙X Elite）：Windows_arm64.zip
+- MacOS Apple 芯片（Apple Silicon系列芯）：MacOS_arm64.tar.gz
+- MacOS Intel 芯片（2020 年以前的 Mac）：MacOS_x86_64.tar.gz
+- Linux 64 位（最常见的Linux）：Linux_x86_64.tar.gz
+- Linux ARM 32 位（树莓派 2~4，其他 ARM 设备）：Linux_arm.tar.gz
+- Linux ARM 64 位（树莓派 4 或树莓派 5，安装 64 位 ARM 系统时）：Linux_arm64.tar.gz
+
 ### 用法
 
 ```
 comi [flags] file_or_dir
-# more
-comi --help
 ```
 
 ### 配置文件
 
-Comigo服务器设置，可选的保存位置：
+Comigo服务器设置，可选保存位置：
 
 **Home目录**  
 一般是`C:\Users\用户名\.config\comigo.toml`，或者`/home/用户名/.config/comigo.toml`。  
