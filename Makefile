@@ -1,29 +1,31 @@
 # Makefile for cross-compilation
 # Window icon Need：go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo
 
+##Release:
 # make all VERSION=v0.9.12
-# make md5SumThemAll VERSION=v0.9.9
+
+## Windows Release(Need MSYS2 or mingw32 + find.exe make.exe zip.exe upx.exe):
 # mingw32-make all VERSION=v0.9.9
-# rm  resource.syso && make  Linux-armv8   VERSION=v0.9.6
-# make Windows_i386  VERSION=v1.0.0
+
 # make Windows_x86_64
 
-# Windows：MSYS2 or mingw32 + find.exe make.exe zip.exe upx.exe ！！
+# 我应该下载哪个版本？
+#
+#| 操作系统    | 设备类型/芯片架构                            | 下载文件              |
+#| ----------- | -------------------------------------------- | --------------------- |
+#| **MacOS**   | Intel 芯片（2020 年以前的 Mac）              | `MacOS_x86_64.tar.gz` |
+#|             | Apple 芯片（M 系列，2020 年以后）            | `MacOS_arm64.tar.gz`  |
+#| **Linux**   | ARM 32 位（树莓派 2~4，安装 32 位系统）      | `Linux_arm.tar.gz`   |
+#|             | ARM 64 位（树莓派 4 或 5，安装了 64 位系统） | `Linux_arm64.tar.gz`  |
+#| **Windows** | 64 位（大多数 Windows 设备）                 | `Windows_x86_64.zip`  |
+#|             | 32 位（较老的 Windows 设备）                 | `Windows_i386.zip`    |
+#|             | ARM 架构（如骁龙 Elite 本）                  | `Windows_arm64.zip`   |
 
-#我应该下载哪个版本？
-#
-#MacOS intel芯片（2020年以前的Mac）: MacOS_x86_64.tar.gz
-#MacOS apple （2020年以后的新Mac，M系列芯片）: MacOS_arm64.tar.gz
-#Linux ARM 32位（树莓派1、树莓派Zero等老设备）: Linux_armv6.tar.gz
-#Linux ARM 32位（树莓派2~4，其他arm设备）: Linux_armv7.tar.gz
-#Linux ARM 64位（树莓派4或树莓派5，安装64位的ARM系统的时候）: Linux_armv8.tar.gz
-#
-#Windows 64位（大多数Windows用户）: Windows_x86_64.zip
-#Windows 32位（比较老的Windows）: Windows_i386.zip
-#Windows ARM版（Windows 骁龙Elite等）：Windows_arm64.zip
+# 查看 golang 支持那些架构：
+# go tool dist list
 
 NAME=comi
-SKETCH_NAME=sketch_66seconds
+
 OS := $(shell uname)
 BINDIR := ./bin
 MD5_TEXTFILE := $(BINDIR)/md5Sums.txt
@@ -42,9 +44,10 @@ endif
 
 all: compileThemAll md5SumThemAll
 
-# 因为sqlite（ent）库的关系，部分架构（Windows_i386）无法正常运行，需要写条件编译代码。 ent库的编译检测状态： https://modern-c.appspot.com/-/builder/?importpath=modernc.org%2Fsqlite
+# 因为sqlite（ent）库的关系，部分架构（Windows_i386）无法正常运行，需要写条件编译代码。但是最近似乎都Pass了，或许可以不再分架构：
+# ent库的编译检测状态： https://modern-c.appspot.com/-/builder/?importpath=modernc.org%2Fsqlite
 
-compileThemAll: Windows_x86_64 Windows_i386  Windows_arm64 Linux_x86_64 Linux_i386 MacOS_x86_64 MacOS_arm64 Linux-armv6 Linux-armv7 Linux-armv8 
+compileThemAll: Windows_x86_64 Windows_i386  Windows_arm64 Linux_x86_64 Linux_i386 Linux-arm Linux-arm64 MacOS_x86_64 MacOS_arm64
 
 android: Linux-arm-android Linux-arm64-android
 
@@ -109,8 +112,8 @@ Linux-armv6:
 	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME)
 	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
 
-#Linux-armv7，RaspberryPi3 官方32位armv7l系统。GOARM=7：使用 VFPv3；通常是 Cortex-A 内核.
-Linux-armv7:
+#Linux-armv7，RaspberryPi3 官方32位armv7l系统。GOARM=7：使用 VFPv3；通常是 Cortex-A 内核. 2012年发布的架构。
+Linux-arm:
 	GOARCH=arm GOOS=linux GOARM=7 $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME) 
 #ifdef UPX
 #	upx -9 $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME)
@@ -118,8 +121,8 @@ Linux-armv7:
 	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME)
 	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
 
-#linux，64位arm
-Linux-armv8:
+#linux，64位arm。2012年发布的架构。
+Linux-arm64:
 	GOARCH=arm64 GOOS=linux $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME) 
 #ifdef UPX
 #	upx -9 $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME)
