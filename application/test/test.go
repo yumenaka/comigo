@@ -6,7 +6,7 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
-	"github.com/yumenaka/comigo/encoding"
+	"github.com/yumenaka/comigo/util/encoding"
 	"github.com/yumenaka/comigo/util/logger"
 	"io"
 	"log"
@@ -181,7 +181,7 @@ func UnArchiveZip(filePath string, extractPath string, textEncoding string) erro
 	}
 	// 如果是zip
 	if ex, ok := format.(archives.Zip); ok {
-		ex.TextEncoding = encoding.GetEncodingByName(textEncoding)
+		ex.TextEncoding = encoding.ByName(textEncoding)
 		ctx := context.Background()
 		// WithValue返回parent的一个副本，该副本保存了传入的key/value，而调用Context接口的Value(key)方法就可以得到val。注意在同一个context中设置key/value，若key相同，值会被覆盖。
 		ctx = context.WithValue(ctx, "extractPath", extractPath)

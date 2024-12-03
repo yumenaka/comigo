@@ -2,7 +2,7 @@ package config
 
 import (
 	"fmt"
-	"github.com/yumenaka/comigo/config/stores"
+
 	"net/http"
 	"os"
 	"path"
@@ -10,13 +10,14 @@ import (
 	"strconv"
 
 	"github.com/pelletier/go-toml/v2"
+	"github.com/yumenaka/comigo/config/stores"
 	"github.com/yumenaka/comigo/entity"
 	"github.com/yumenaka/comigo/util"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
 var (
-	Version = "v0.9.12"
+	Version = "v0.9.13"
 	Srv     *http.Server
 	Status  = entity.ConfigStatus{}
 	Config  = entity.ComigoConfig{
