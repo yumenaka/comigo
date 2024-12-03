@@ -36,7 +36,7 @@ bash <(curl -s https://raw.githubusercontent.com/yumenaka/comigo/master/get_comi
 bash <(wget -qO- https://raw.githubusercontent.com/yumenaka/comigo/master/get_comigo.sh)
 
 # 如果您已设置 Golang 环境，也可以这样安装：
-go install github.com/yumenaka/comigo/cli/comi@latest
+go install github.com/yumenaka/comigo/cmd/comi@latest
 ```
 
 **手动下载**
