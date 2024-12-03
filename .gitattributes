@@ -8,7 +8,7 @@ htmx/README.md -linguist-documentation
 resource/**/* linguist-vendored
 internal/ent/**/* linguist-vendored
 application/mobile/**/* linguist-vendored
-
+htmx/embed_files/**/* linguist-vendored
 #排除手机项目
 application/mobile/* linguist-vendored
 
