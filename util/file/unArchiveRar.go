@@ -5,7 +5,7 @@ import (
 	"errors"
 	"os"
 
-	"github.com/mholt/archives"
+	"github.com/yumenaka/archives"
 	"github.com/yumenaka/comigo/util"
 	"github.com/yumenaka/comigo/util/logger"
 )

@@ -18,7 +18,7 @@ import (
 
 	"entgo.io/ent/dialect"
 	"github.com/disintegration/imaging"
-	"github.com/mholt/archives"
+	"github.com/yumenaka/archives"
 	"github.com/yumenaka/comigo/internal/ent"
 	"modernc.org/sqlite"
 )

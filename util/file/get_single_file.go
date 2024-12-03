@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mholt/archives"
+	"github.com/yumenaka/archives"
 	"github.com/yumenaka/comigo/util/encoding"
 	"github.com/yumenaka/comigo/util/logger"
 )

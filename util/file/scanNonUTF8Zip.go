@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/klauspost/compress/zip"
-	"github.com/mholt/archives"
+	"github.com/yumenaka/archives"
 	"github.com/yumenaka/comigo/util/encoding"
 	"github.com/yumenaka/comigo/util/logger"
 )
@@ -35,8 +35,7 @@ func ScanNonUTF8Zip(filePath string, textEncoding string) (reader *zip.Reader, e
 			ex.TextEncoding = encoding.ByName(textEncoding)
 		}
 		ctx := context.Background()
-		////WithValue返回parent的一个副本，该副本保存了传入的key/value，而调用Context接口的Value(key)方法就可以得到val。注意在同一个context中设置key/value，若key相同，值会被覆盖。
-		err := ex.Extract(ctx, file, func(ctx context.Context, f archives.FileInfo) error {
+		reader, err := ex.CheckNonUTF8Zip(ctx, file, func(ctx context.Context, f archives.FileInfo) error {
 			//logger.Infof(f.title())
 			return nil
 		})

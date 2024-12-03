@@ -45,7 +45,6 @@ require (
 	github.com/hajimehoshi/ebiten/v2 v2.7.10
 	github.com/hirochachacha/go-smb2 v1.1.0
 	github.com/joho/godotenv v1.5.1
-	github.com/mholt/archives v0.0.0-20241129155617-ff6062f60091
 	github.com/pdfcpu/pdfcpu v0.9.1
 	golang.org/x/image v0.22.0
 )
@@ -142,6 +141,7 @@ require (
 	github.com/ugorji/go/codec v1.2.12 // indirect
 	github.com/ulikunitz/xz v0.5.12 // indirect
 	github.com/xxjwxc/public v0.0.0-20241118042544-92f0e4894253 // indirect
+	github.com/yumenaka/archives v0.0.0-20241203135456-4d26874d6764 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	github.com/zclconf/go-cty v1.15.1 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
@@ -168,7 +168,7 @@ require (
 )
 
 //替换依赖项：
-//go mod edit -replace github.com/mholt/archiver/v4@v4.0.0-alpha.6=github.com/yumenaka/archiver/v4@master
+//go mod edit -replace github.com/mholt/archives@v0.0.0-20241129155617-ff6062f60091=github.com/yumenaka/archives
 //go mod edit -replace github.com/yumenaka/archiver/v4@v4.0.0-alpha.1.0.20221203043821-726a0d696b0e=github.com/yumenaka/archiver/v4@master
 //go get -u
 
@@ -180,3 +180,5 @@ require (
 
 //清理mod缓存
 // go clean -modcache
+
+//replace github.com/mholt/archives v0.0.0-20241129155617-ff6062f60091 => ./archives
