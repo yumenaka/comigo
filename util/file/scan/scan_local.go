@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/klauspost/compress/zip"
-	"github.com/mholt/archives"
+	"github.com/yumenaka/archives"
 	"github.com/yumenaka/comigo/entity"
 	"github.com/yumenaka/comigo/util"
 	fileutil "github.com/yumenaka/comigo/util/file"
