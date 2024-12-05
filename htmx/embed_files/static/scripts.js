@@ -19554,6 +19554,16 @@ if ($0c7aa0f20b85e54e$var$addStr !== "") {
 }
 // Start Alpine.
 (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).start();
+// Document ready function to ensure the DOM is fully loaded.
+document.addEventListener("DOMContentLoaded", function() {
+    initFlowbite() // initialize Flowbite
+    ;
+});
+// Add event listeners for all HTMX events.
+document.body.addEventListener("htmx:afterSwap htmx:afterRequest htmx:afterSettle", function() {
+    initFlowbite() // initialize Flowbite
+    ;
+});
 
 })();
 //# sourceMappingURL=scripts.js.map
