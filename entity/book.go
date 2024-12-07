@@ -342,7 +342,7 @@ func (b *Book) SortPagesByImageList(imageList []string) {
 		}
 	}
 	if len(reSortList) == 0 {
-		logger.Infof(locale.GetString("EPUB_CANNOT_RESORT")+"%s", b.FilePath)
+		logger.Infof(locale.GetString("epub_cannot_resort")+"%s", b.FilePath)
 		return
 	}
 	// 添加不在列表中的图片

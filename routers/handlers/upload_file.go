@@ -21,8 +21,8 @@ var ConfigUploadPath *string
 func UploadFile(c *gin.Context) {
 	// 是否开启上传功能
 	if !*ConfigEnableUpload {
-		logger.Infof("%s", locale.GetString("UPLOAD_DISABLE_HINT"))
-		c.PureJSON(http.StatusForbidden, gin.H{"error": locale.GetString("UPLOAD_DISABLE_HINT")})
+		logger.Infof("%s", locale.GetString("upload_disable_hint"))
+		c.PureJSON(http.StatusForbidden, gin.H{"error": locale.GetString("upload_disable_hint")})
 		return
 	}
 	//默认的上传路径是否已设置

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"os"
 	"os/exec"
 	"runtime"
 	"strconv"
@@ -28,12 +27,12 @@ func TrackTIme(pre time.Time) time.Duration {
 func CheckPort(port int) bool {
 	ln, err := net.Listen("tcp", ":"+strconv.Itoa(port))
 	if err != nil {
-		logger.Info(os.Stderr, locale.GetString("cannot_listen"), port, err)
+		logger.Info(locale.GetString("cannot_listen"), port, err)
 		return false
 	}
 	err = ln.Close()
 	if err != nil {
-		logger.Infof(locale.GetString("check_pork_error")+"%d", port)
+		logger.Infof(locale.GetString("check_port_error"), port)
 		return false
 	}
 	//logger.Infof("TCP Port %q is available", port)

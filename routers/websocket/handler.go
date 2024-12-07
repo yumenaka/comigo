@@ -91,7 +91,7 @@ func WsHandler(c *gin.Context) {
 		err = wsConn.ReadJSON(&msg)
 		if err != nil {
 			//logger.Infof()
-			log.Printf(locale.GetString("WEBSOCKET_ERROR")+"%v", err)
+			log.Printf(locale.GetString("websocket_error")+"%v", err)
 			//如果从 socket 中读取数据有误，我们假设客户端已经因为某种原因断开。我们记录错误并从全局的 “clients” 映射表里删除该客户端，这样一来，我们不会继续尝试与其通信。
 			delete(clients, wsConn)
 			break

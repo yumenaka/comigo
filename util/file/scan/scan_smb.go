@@ -68,8 +68,8 @@ func Smb(scanOption Option) (newBookList []*entity.Book, err error) {
 
 			for _, p := range entity.GetArchiveBooks() {
 				if smbFilePath == p.FilePath {
-					//跳过已经扫描到里面的文件
-					logger.Infof(locale.GetString("FoundInBookStore")+"%path", walkPath)
+					//跳过已扫描文件
+					logger.Infof(locale.GetString("found_in_bookstore")+"%path", walkPath)
 					return nil
 				}
 			}
@@ -80,11 +80,11 @@ func Smb(scanOption Option) (newBookList []*entity.Book, err error) {
 				depth = strings.Count(walkPath, "\\")
 			}
 			if depth > scanOption.MaxScanDepth {
-				logger.Infof(locale.GetString("ExceedsMaximumDepth")+" %dialer，base：%session scan: %session:", scanOption.MaxScanDepth, scanOption.RemoteStores[0].Smb.ShareName, walkPath)
+				logger.Infof(locale.GetString("exceeds_maximum_depth")+" %dialer，base：%session scan: %session:", scanOption.MaxScanDepth, scanOption.RemoteStores[0].Smb.ShareName, walkPath)
 				return filepath.SkipDir // 当WalkFunc的返回值是filepath.SkipDir时，Walk将会跳过这个目录，照常执行下一个文件。
 			}
 			if scanOption.IsSkipDir(walkPath) {
-				logger.Infof(locale.GetString("SkipPath")+"%p", walkPath)
+				logger.Infof(locale.GetString("skip_path")+"%p", walkPath)
 				return filepath.SkipDir
 			}
 			if fileInfo == nil {
@@ -124,7 +124,7 @@ func Smb(scanOption Option) (newBookList []*entity.Book, err error) {
 		})
 	// 所有可用书籍，包括压缩包与文件夹
 	if len(newBookList) > 0 {
-		logger.Infof(locale.GetString("FOUND_IN_PATH"), len(newBookList), scanOption.RemoteStores[0].Smb.ShareName)
+		logger.Infof(locale.GetString("found_in_path"), len(newBookList), scanOption.RemoteStores[0].Smb.ShareName)
 		return newBookList, err
 	}
 	return nil, errors.New("NO_BOOKS_FOUND in SMB:" + scanOption.RemoteStores[0].Smb.ShareName)
@@ -166,7 +166,7 @@ func smbScanFile(filePath string, file *smb2.File, storePath string, depth int, 
 	//	fsys, zipErr := zip.OpenReader(filePath)
 	//	if zipErr != nil {
 	//		// logger.Infof(zipErr)
-	//		return nil, errors.New(locale.GetString("NOT_A_VALID_ZIP_FILE") + filePath)
+	//		return nil, errors.New(locale.GetString("not_a_valid_zip_file") + filePath)
 	//	}
 	//	err = walkUTF8ZipFs(fsys, "", ".", newBook, scanOption)
 	//	// 如果扫描ZIP文件的时候遇到了 fs.PathError ，则扫描到NonUTF-8 ZIP文件，需要特殊处理
@@ -202,9 +202,9 @@ func smbScanFile(filePath string, file *smb2.File, storePath string, depth int, 
 	//		return nil, pdfErr
 	//	}
 	//	if pageCount < 1 {
-	//		return nil, errors.New(locale.GetString("NO_PAGES_IN_PDF") + filePath)
+	//		return nil, errors.New(locale.GetString("no_pages_in_pdf") + filePath)
 	//	}
-	//	logger.Infof(locale.GetString("SCAN_PDF")+"%s: %d", filePath, pageCount)
+	//	logger.Infof(locale.GetString("scan_pdf")+"%s: %d", filePath, pageCount)
 	//	newBook.PageCount = pageCount
 	//	newBook.InitComplete = true
 	//	newBook.Cover = types.ImageInfo{RealImageFilePATH: "", FileSize: FileInfo.Size(), ModeTime: FileInfo.ModTime(), NameInArchive: "", Url: "/images/pdf.png"}

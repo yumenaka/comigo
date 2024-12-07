@@ -70,7 +70,7 @@ func InitDatabase(configFilePath string) error {
 		configDir := filepath.Dir(configFilePath) //不能用path.Dir()，因为windows返回 "."
 		dataSourceName = "file:" + path.Join(configDir, "comigo.sqlite") + "?cache=shared"
 	}
-	logger.Infof(locale.GetString("InitDatabase")+"%s", dataSourceName)
+	logger.Infof(locale.GetString("init_database")+"%s", dataSourceName)
 	client, err = ent.Open(dialect.SQLite, dataSourceName, entOptions...)
 	if err != nil {
 		return fmt.Errorf("failed opening connection to sqlite: %v", err)

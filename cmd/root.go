@@ -84,7 +84,7 @@ func ReadConfigFile() {
 		//获取当前使用的配置文件路径
 		//https://github.com/spf13/viper/issues/89
 		tempConfigPath := runtimeViper.ConfigFileUsed()
-		logger.Infof(locale.GetString("FoundConfigFile")+"%s", tempConfigPath)
+		logger.Infof(locale.GetString("found_config_file")+"%s", tempConfigPath)
 	}
 	// 把设定文件的内容，解析到构造体里面。
 	if err := runtimeViper.Unmarshal(&config.Config); err != nil {

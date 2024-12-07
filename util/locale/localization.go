@@ -46,21 +46,23 @@ func getLocale() (string, string) {
 			}
 			return lang, loc
 		}
-	case "darwin":
-		// Exec powershell Get-Culture on Windows.
-		cmd := exec.Command("sh", "osascript -e 'user locale of (get system info)'")
-		output, err := cmd.Output()
-		if err == nil {
-			langLocRaw := strings.TrimSpace(string(output))
-			langLoc := strings.Split(langLocRaw, "_")
-			lang := langLoc[0]
-			loc := lang
-			if len(langLoc) > 1 {
-				loc = langLoc[1]
-			}
-			return lang, loc
-		}
-	case "linux":
+	//case "darwin":
+	//	// On macOS.
+	//	cmd := exec.Command("sh", "osascript -e 'user locale of (get system info)'")
+	//	output, err := cmd.Output()
+	//	if err == nil {
+	//		langLocRaw := strings.TrimSpace(string(output))
+	//		langLoc := strings.Split(langLocRaw, "_")
+	//		lang := langLoc[0]
+	//		loc := lang
+	//		if len(langLoc) > 1 {
+	//			loc = langLoc[1]
+	//		}
+	//		return lang, loc
+	//	} else {
+	//		logger.Infof("获取系统语言失败：%s", err)
+	//	}
+	case "linux", "darwin":
 		envlang, ok := os.LookupEnv("LANG")
 		if ok {
 			langLocRaw := strings.TrimSpace(envlang)
