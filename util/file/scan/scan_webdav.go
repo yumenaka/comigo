@@ -80,14 +80,14 @@ func Webdav(scanOption Option) (newBookList []*entity.Book, err error) {
 
 	//// 路径不存在的Error，不过目前并不会打印出来
 	//if !util.PathExists(storePath) {
-	//	return nil, errors.New(locale.GetString("PATH_NOT_EXIST"))
+	//	return nil, errors.New(locale.GetString("path_not_exist"))
 	//}
 	//storePathAbs, err := filepath.Abs(storePath)
 	//if err != nil {
 	//	storePathAbs = storePath
 	//	logger.Infof("%s", err)
 	//}
-	//logger.Infof(locale.GetString("SCAN_START_HINT")+"%s", storePathAbs)
+	//logger.Infof(locale.GetString("scan_start_hint")+"%s", storePathAbs)
 	//err = filepath.Walk(storePathAbs, func(walkPath string, fileInfo os.FileInfo, err error) error {
 	//	if !scanOption.ReScanFile {
 	//		for _, p := range types.GetArchiveBooks() {
@@ -99,7 +99,7 @@ func Webdav(scanOption Option) (newBookList []*entity.Book, err error) {
 	//			}
 	//			if walkPath == p.FilePath || AbsW == p.FilePath {
 	//				//跳过已经在数据库里面的文件
-	//				logger.Infof(locale.GetString("FoundInBookStore")+"%s", walkPath)
+	//				logger.Infof(locale.GetString("found_in_bookstore")+"%s", walkPath)
 	//				return nil
 	//			}
 	//		}
@@ -110,11 +110,11 @@ func Webdav(scanOption Option) (newBookList []*entity.Book, err error) {
 	//		depth = strings.Count(walkPath, "\\") - strings.Count(storePathAbs, "\\")
 	//	}
 	//	if depth > scanOption.MaxScanDepth {
-	//		logger.Infof(locale.GetString("ExceedsMaximumDepth")+" %d，base：%s scan: %s:", scanOption.MaxScanDepth, storePathAbs, walkPath)
+	//		logger.Infof(locale.GetString("exceeds_maximum_depth")+" %d，base：%s scan: %s:", scanOption.MaxScanDepth, storePathAbs, walkPath)
 	//		return filepath.SkipDir // 当WalkFunc的返回值是filepath.SkipDir时，Walk将会跳过这个目录，照常执行下一个文件。
 	//	}
 	//	if scanOption.IsSkipDir(walkPath) {
-	//		logger.Infof(locale.GetString("SkipPath")+"%s", walkPath)
+	//		logger.Infof(locale.GetString("skip_path")+"%s", walkPath)
 	//		return filepath.SkipDir
 	//	}
 	//	if fileInfo == nil {
@@ -147,7 +147,7 @@ func Webdav(scanOption Option) (newBookList []*entity.Book, err error) {
 	//})
 	//// 所有可用书籍，包括压缩包与文件夹
 	//if len(newBookList) > 0 {
-	//	logger.Infof(locale.GetString("FOUND_IN_PATH"), len(newBookList), storePathAbs)
+	//	logger.Infof(locale.GetString("found_in_path"), len(newBookList), storePathAbs)
 	//}
 	//return newBookList, err
 	return newBookList, err

@@ -23,7 +23,7 @@ import (
 // Local 扫描路径，取得路径里的书籍
 func Local(storePath string, scanOption Option) ([]*entity.Book, error) {
 	if !util.PathExists(storePath) {
-		return nil, errors.New(locale.GetString("PATH_NOT_EXIST"))
+		return nil, errors.New(locale.GetString("path_not_exist"))
 	}
 
 	storePathAbs, err := filepath.Abs(storePath)
@@ -31,7 +31,7 @@ func Local(storePath string, scanOption Option) ([]*entity.Book, error) {
 		logger.Infof("Failed to get absolute path: %s", err)
 		storePathAbs = storePath
 	}
-	logger.Infof(locale.GetString("SCAN_START_HINT")+" %s", storePathAbs)
+	logger.Infof(locale.GetString("scan_start_hint")+" %s", storePathAbs)
 
 	// 已存在书籍的集合，跳过已有书籍，提高查找效率
 	existingBooks := make(map[string]struct{})
@@ -54,7 +54,7 @@ func Local(storePath string, scanOption Option) ([]*entity.Book, error) {
 
 		// 跳过已存在的书籍
 		if _, exists := existingBooks[absWalkPath]; exists {
-			logger.Infof(locale.GetString("FoundInBookStore")+" %s", walkPath)
+			logger.Infof(locale.GetString("found_in_bookstore")+" %s", walkPath)
 			return nil
 		}
 
@@ -66,12 +66,12 @@ func Local(storePath string, scanOption Option) ([]*entity.Book, error) {
 		}
 		depth := strings.Count(relPath, string(os.PathSeparator))
 		if depth > scanOption.MaxScanDepth {
-			logger.Infof(locale.GetString("ExceedsMaximumDepth")+" %d, base: %s, scan: %s", scanOption.MaxScanDepth, storePathAbs, walkPath)
+			logger.Infof(locale.GetString("exceeds_maximum_depth")+" %d, base: %s, scan: %s", scanOption.MaxScanDepth, storePathAbs, walkPath)
 			return filepath.SkipDir
 		}
 
 		if scanOption.IsSkipDir(walkPath) {
-			logger.Infof(locale.GetString("SkipPath")+" %s", walkPath)
+			logger.Infof(locale.GetString("skip_path")+" %s", walkPath)
 			return filepath.SkipDir
 		}
 
@@ -106,7 +106,7 @@ func Local(storePath string, scanOption Option) ([]*entity.Book, error) {
 	})
 
 	if len(newBookList) > 0 {
-		logger.Infof(locale.GetString("FOUND_IN_PATH"), len(newBookList), storePathAbs)
+		logger.Infof(locale.GetString("found_in_path"), len(newBookList), storePathAbs)
 	}
 	return newBookList, err
 }
@@ -163,7 +163,7 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 func handleZipAndEpubFiles(filePath string, newBook *entity.Book, scanOption Option) error {
 	fsys, err := zip.OpenReader(filePath)
 	if err != nil {
-		return errors.New(locale.GetString("NOT_A_VALID_ZIP_FILE") + filePath)
+		return errors.New(locale.GetString("not_a_valid_zip_file") + filePath)
 	}
 	defer fsys.Close()
 
@@ -206,9 +206,9 @@ func handlePdfFiles(filePath string, newBook *entity.Book) error {
 		return err
 	}
 	if pageCount < 1 {
-		return errors.New(locale.GetString("NO_PAGES_IN_PDF") + filePath)
+		return errors.New(locale.GetString("no_pages_in_pdf") + filePath)
 	}
-	logger.Infof(locale.GetString("SCAN_PDF")+" %s: %d pages", filePath, pageCount)
+	logger.Infof(locale.GetString("scan_pdf")+" %s: %d pages", filePath, pageCount)
 	newBook.PageCount = pageCount
 	newBook.InitComplete = true
 	newBook.SetCover(entity.ImageInfo{Url: "/images/pdf.png"})

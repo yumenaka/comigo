@@ -24,7 +24,7 @@ func SetShutdownHandler() {
 	<-ctx.Done()
 	//恢复中断信号的默认行为并通知用户关机。
 	stop()
-	log.Println(locale.GetString("ShutdownHint"))
+	log.Println(locale.GetString("shutdown_hint"))
 	//清理临时文件
 	if config.Config.ClearCacheExit {
 		logger.Infof("\r"+locale.GetString("start_clear_file")+" CachePath:%s ", config.Config.CachePath)

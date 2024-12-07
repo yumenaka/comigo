@@ -53,7 +53,7 @@ func GetRegFile(c *gin.Context) {
 	regText = strings.Replace(regText, "ComigoExePath", newStr, -1)
 	//命令行打印 如果值中有中文，则需要将.reg文件以ascii编码保存，否则会出现乱码。
 	logger.Infof(regText)
-	regFileName := strings.Replace("comigo(XXX).reg", "XXX", locale.GetString("REG_FILE_HINT"), 1)
+	regFileName := strings.Replace("comigo(XXX).reg", "XXX", locale.GetString("reg_file_hint"), 1)
 	//用gin实现下载文件的功能，只需要在接口返回时设置Response-Header中的Content-Type为文件类型，并设置Content-Disposition指定默认的文件名，然后将文件数据返回浏览器即可
 	fileContentDisposition := "attachment;filename=\"" + regFileName + "\""
 	c.Header("Content-Type", "application/octet-stream") // 这里是压缩文件类型 .zip

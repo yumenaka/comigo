@@ -18,7 +18,7 @@ function $parcel$interopDefault(a) {
 var $parcel$modules = {};
 var $parcel$inits = {};
 
-var parcelRequire = $parcel$global["parcelRequire5e53"];
+var parcelRequire = $parcel$global["parcelRequire94c2"];
 
 if (parcelRequire == null) {
   parcelRequire = function(id) {
@@ -42,7 +42,7 @@ if (parcelRequire == null) {
     $parcel$inits[id] = init;
   };
 
-  $parcel$global["parcelRequire5e53"] = parcelRequire;
+  $parcel$global["parcelRequire94c2"] = parcelRequire;
 }
 
 var parcelRegister = parcelRequire.register;
@@ -172,8 +172,8 @@ parcelRegister("eZIU4", function(module, exports) {
             return "[hx-" + e + "], [data-hx-" + e + "]";
         }).join(", ");
         var S = e("head"), q = e("title"), H = e("svg", true);
-        function e(e, t) {
-            return new RegExp("<" + e + "(\\s[^>]*>|>)([\\s\\S]*?)<\\/" + e + ">", !!t ? "gim" : "im");
+        function e(e1, t) {
+            return new RegExp("<" + e1 + "(\\s[^>]*>|>)([\\s\\S]*?)<\\/" + e1 + ">", !!t ? "gim" : "im");
         }
         function d(e) {
             if (e == undefined) return undefined;
@@ -3044,7 +3044,8 @@ function $8c83eaf28779ff46$var$cleanupAttributes(el, names) {
     });
 }
 function $8c83eaf28779ff46$var$cleanupElement(el) {
-    if (el._x_cleanups) while(el._x_cleanups.length)el._x_cleanups.pop()();
+    el._x_effects?.forEach($8c83eaf28779ff46$var$dequeueJob);
+    while(el._x_cleanups?.length)el._x_cleanups.pop()();
 }
 var $8c83eaf28779ff46$var$observer = new MutationObserver($8c83eaf28779ff46$var$onMutate);
 var $8c83eaf28779ff46$var$currentlyObserving = false;
@@ -3093,15 +3094,27 @@ function $8c83eaf28779ff46$var$onMutate(mutations) {
         $8c83eaf28779ff46$var$deferredMutations = $8c83eaf28779ff46$var$deferredMutations.concat(mutations);
         return;
     }
-    let addedNodes = /* @__PURE__ */ new Set();
+    let addedNodes = [];
     let removedNodes = /* @__PURE__ */ new Set();
     let addedAttributes = /* @__PURE__ */ new Map();
     let removedAttributes = /* @__PURE__ */ new Map();
     for(let i = 0; i < mutations.length; i++){
         if (mutations[i].target._x_ignoreMutationObserver) continue;
         if (mutations[i].type === "childList") {
-            mutations[i].addedNodes.forEach((node)=>node.nodeType === 1 && addedNodes.add(node));
-            mutations[i].removedNodes.forEach((node)=>node.nodeType === 1 && removedNodes.add(node));
+            mutations[i].removedNodes.forEach((node)=>{
+                if (node.nodeType !== 1) return;
+                if (!node._x_marker) return;
+                removedNodes.add(node);
+            });
+            mutations[i].addedNodes.forEach((node)=>{
+                if (node.nodeType !== 1) return;
+                if (removedNodes.has(node)) {
+                    removedNodes.delete(node);
+                    return;
+                }
+                if (node._x_marker) return;
+                addedNodes.push(node);
+            });
         }
         if (mutations[i].type === "attributes") {
             let el = mutations[i].target;
@@ -3132,26 +3145,13 @@ function $8c83eaf28779ff46$var$onMutate(mutations) {
         $8c83eaf28779ff46$var$onAttributeAddeds.forEach((i)=>i(el, attrs));
     });
     for (let node of removedNodes){
-        if (addedNodes.has(node)) continue;
+        if (addedNodes.some((i)=>i.contains(node))) continue;
         $8c83eaf28779ff46$var$onElRemoveds.forEach((i)=>i(node));
     }
-    addedNodes.forEach((node)=>{
-        node._x_ignoreSelf = true;
-        node._x_ignore = true;
-    });
     for (let node of addedNodes){
-        if (removedNodes.has(node)) continue;
         if (!node.isConnected) continue;
-        delete node._x_ignoreSelf;
-        delete node._x_ignore;
         $8c83eaf28779ff46$var$onElAddeds.forEach((i)=>i(node));
-        node._x_ignore = true;
-        node._x_ignoreSelf = true;
     }
-    addedNodes.forEach((node)=>{
-        delete node._x_ignoreSelf;
-        delete node._x_ignore;
-    });
     addedNodes = null;
     removedNodes = null;
     addedAttributes = null;
@@ -3263,28 +3263,25 @@ function $8c83eaf28779ff46$var$magic(name, callback) {
     $8c83eaf28779ff46$var$magics[name] = callback;
 }
 function $8c83eaf28779ff46$var$injectMagics(obj, el) {
+    let memoizedUtilities = $8c83eaf28779ff46$var$getUtilities(el);
     Object.entries($8c83eaf28779ff46$var$magics).forEach(([name, callback])=>{
-        let memoizedUtilities = null;
-        function getUtilities() {
-            if (memoizedUtilities) return memoizedUtilities;
-            else {
-                let [utilities, cleanup2] = $8c83eaf28779ff46$var$getElementBoundUtilities(el);
-                memoizedUtilities = {
-                    interceptor: $8c83eaf28779ff46$var$interceptor,
-                    ...utilities
-                };
-                $8c83eaf28779ff46$var$onElRemoved(el, cleanup2);
-                return memoizedUtilities;
-            }
-        }
         Object.defineProperty(obj, `$${name}`, {
             get () {
-                return callback(el, getUtilities());
+                return callback(el, memoizedUtilities);
             },
             enumerable: false
         });
     });
     return obj;
+}
+function $8c83eaf28779ff46$var$getUtilities(el) {
+    let [utilities, cleanup2] = $8c83eaf28779ff46$var$getElementBoundUtilities(el);
+    let utils = {
+        interceptor: $8c83eaf28779ff46$var$interceptor,
+        ...utilities
+    };
+    $8c83eaf28779ff46$var$onElRemoved(el, cleanup2);
+    return utils;
 }
 // packages/alpinejs/src/utils/error.js
 function $8c83eaf28779ff46$var$tryCatch(el, expression, callback, ...args) {
@@ -3657,20 +3654,25 @@ var $8c83eaf28779ff46$var$initInterceptors2 = [];
 function $8c83eaf28779ff46$var$interceptInit(callback) {
     $8c83eaf28779ff46$var$initInterceptors2.push(callback);
 }
+var $8c83eaf28779ff46$var$markerDispenser = 1;
 function $8c83eaf28779ff46$var$initTree(el, walker = $8c83eaf28779ff46$var$walk, intercept = ()=>{}) {
+    if ($8c83eaf28779ff46$var$findClosest(el, (i)=>i._x_ignore)) return;
     $8c83eaf28779ff46$var$deferHandlingDirectives(()=>{
         walker(el, (el2, skip)=>{
+            if (el2._x_marker) return;
             intercept(el2, skip);
             $8c83eaf28779ff46$var$initInterceptors2.forEach((i)=>i(el2, skip));
             $8c83eaf28779ff46$var$directives(el2, el2.attributes).forEach((handle)=>handle());
+            if (!el2._x_ignore) el2._x_marker = $8c83eaf28779ff46$var$markerDispenser++;
             el2._x_ignore && skip();
         });
     });
 }
 function $8c83eaf28779ff46$var$destroyTree(root, walker = $8c83eaf28779ff46$var$walk) {
     walker(root, (el)=>{
-        $8c83eaf28779ff46$var$cleanupAttributes(el);
         $8c83eaf28779ff46$var$cleanupElement(el);
+        $8c83eaf28779ff46$var$cleanupAttributes(el);
+        delete el._x_marker;
     });
 }
 function $8c83eaf28779ff46$var$warnAboutMissingPlugins() {
@@ -4149,13 +4151,13 @@ function $8c83eaf28779ff46$var$bind(el, name, value, modifiers = []) {
     }
 }
 function $8c83eaf28779ff46$var$bindInputValue(el, value) {
-    if (el.type === "radio") {
+    if ($8c83eaf28779ff46$var$isRadio(el)) {
         if (el.attributes.value === void 0) el.value = value;
         if (window.fromModel) {
             if (typeof value === "boolean") el.checked = $8c83eaf28779ff46$var$safeParseBoolean(el.value) === value;
             else el.checked = $8c83eaf28779ff46$var$checkedAttrLooseCompare(el.value, value);
         }
-    } else if (el.type === "checkbox") {
+    } else if ($8c83eaf28779ff46$var$isCheckbox(el)) {
         if (Number.isInteger(value)) el.value = value;
         else if (!Array.isArray(value) && typeof value !== "boolean" && ![
             null,
@@ -4231,34 +4233,37 @@ function $8c83eaf28779ff46$var$safeParseBoolean(rawValue) {
     ].includes(rawValue)) return false;
     return rawValue ? Boolean(rawValue) : null;
 }
+var $8c83eaf28779ff46$var$booleanAttributes = /* @__PURE__ */ new Set([
+    "allowfullscreen",
+    "async",
+    "autofocus",
+    "autoplay",
+    "checked",
+    "controls",
+    "default",
+    "defer",
+    "disabled",
+    "formnovalidate",
+    "inert",
+    "ismap",
+    "itemscope",
+    "loop",
+    "multiple",
+    "muted",
+    "nomodule",
+    "novalidate",
+    "open",
+    "playsinline",
+    "readonly",
+    "required",
+    "reversed",
+    "selected",
+    "shadowrootclonable",
+    "shadowrootdelegatesfocus",
+    "shadowrootserializable"
+]);
 function $8c83eaf28779ff46$var$isBooleanAttr(attrName) {
-    const booleanAttributes = [
-        "disabled",
-        "checked",
-        "required",
-        "readonly",
-        "open",
-        "selected",
-        "autofocus",
-        "itemscope",
-        "multiple",
-        "novalidate",
-        "allowfullscreen",
-        "allowpaymentrequest",
-        "formnovalidate",
-        "autoplay",
-        "controls",
-        "loop",
-        "muted",
-        "playsinline",
-        "default",
-        "ismap",
-        "reversed",
-        "async",
-        "defer",
-        "nomodule"
-    ];
-    return booleanAttributes.includes(attrName);
+    return $8c83eaf28779ff46$var$booleanAttributes.has(attrName);
 }
 function $8c83eaf28779ff46$var$attributeShouldntBePreservedIfFalsy(name) {
     return ![
@@ -4292,6 +4297,12 @@ function $8c83eaf28779ff46$var$getAttributeBinding(el, name, fallback) {
         "true"
     ].includes(attr);
     return attr;
+}
+function $8c83eaf28779ff46$var$isCheckbox(el) {
+    return el.type === "checkbox" || el.localName === "ui-checkbox" || el.localName === "ui-switch";
+}
+function $8c83eaf28779ff46$var$isRadio(el) {
+    return el.type === "radio" || el.localName === "ui-radio";
 }
 // packages/alpinejs/src/utils/debounce.js
 function $8c83eaf28779ff46$var$debounce(func, wait) {
@@ -4362,8 +4373,8 @@ function $8c83eaf28779ff46$var$store(name, value) {
     }
     if (value === void 0) return $8c83eaf28779ff46$var$stores[name];
     $8c83eaf28779ff46$var$stores[name] = value;
-    if (typeof value === "object" && value !== null && value.hasOwnProperty("init") && typeof value.init === "function") $8c83eaf28779ff46$var$stores[name].init();
     $8c83eaf28779ff46$var$initInterceptors($8c83eaf28779ff46$var$stores[name]);
+    if (typeof value === "object" && value !== null && value.hasOwnProperty("init") && typeof value.init === "function") $8c83eaf28779ff46$var$stores[name].init();
 }
 function $8c83eaf28779ff46$var$getStores() {
     return $8c83eaf28779ff46$var$stores;
@@ -4443,7 +4454,7 @@ var $8c83eaf28779ff46$var$Alpine = {
     get raw () {
         return $8c83eaf28779ff46$var$raw;
     },
-    version: "3.14.1",
+    version: "3.14.6",
     flushAndStopDeferringMutations: $8c83eaf28779ff46$var$flushAndStopDeferringMutations,
     dontAutoEvaluateFunctions: $8c83eaf28779ff46$var$dontAutoEvaluateFunctions,
     disableEffectScheduling: $8c83eaf28779ff46$var$disableEffectScheduling,
@@ -5219,7 +5230,10 @@ $8c83eaf28779ff46$var$directive("teleport", (el, { modifiers: modifiers, express
             placeInDom(el._x_teleport, target2, modifiers);
         });
     };
-    cleanup2(()=>clone2.remove());
+    cleanup2(()=>$8c83eaf28779ff46$var$mutateDom(()=>{
+            clone2.remove();
+            $8c83eaf28779ff46$var$destroyTree(clone2);
+        }));
 });
 var $8c83eaf28779ff46$var$teleportContainerDuringClone = document.createElement("div");
 function $8c83eaf28779ff46$var$getTarget(expression) {
@@ -5440,7 +5454,7 @@ $8c83eaf28779ff46$var$directive("model", (el, { modifiers: modifiers, expression
             void 0,
             null,
             ""
-        ].includes(getValue()) || el.type === "checkbox" && Array.isArray(getValue()) || el.tagName.toLowerCase() === "select" && el.multiple) setValue($8c83eaf28779ff46$var$getInputValue(el, modifiers, {
+        ].includes(getValue()) || $8c83eaf28779ff46$var$isCheckbox(el) && Array.isArray(getValue()) || el.tagName.toLowerCase() === "select" && el.multiple) setValue($8c83eaf28779ff46$var$getInputValue(el, modifiers, {
             target: el
         }, getValue()));
     }
@@ -5478,7 +5492,7 @@ $8c83eaf28779ff46$var$directive("model", (el, { modifiers: modifiers, expression
 function $8c83eaf28779ff46$var$getInputValue(el, modifiers, event, currentValue) {
     return $8c83eaf28779ff46$var$mutateDom(()=>{
         if (event instanceof CustomEvent && event.detail !== void 0) return event.detail !== null && event.detail !== void 0 ? event.detail : event.target.value;
-        else if (el.type === "checkbox") {
+        else if ($8c83eaf28779ff46$var$isCheckbox(el)) {
             if (Array.isArray(currentValue)) {
                 let newValue = null;
                 if (modifiers.includes("number")) newValue = $8c83eaf28779ff46$var$safeParseNumber(event.target.value);
@@ -5502,7 +5516,7 @@ function $8c83eaf28779ff46$var$getInputValue(el, modifiers, event, currentValue)
             });
         } else {
             let newValue;
-            if (el.type === "radio") {
+            if ($8c83eaf28779ff46$var$isRadio(el)) {
                 if (event.target.checked) newValue = event.target.value;
                 else newValue = currentValue;
             } else newValue = event.target.value;
@@ -5678,7 +5692,10 @@ $8c83eaf28779ff46$var$directive("for", (el, { expression: expression }, { effect
     el._x_lookup = {};
     effect3(()=>$8c83eaf28779ff46$var$loop(el, iteratorNames, evaluateItems, evaluateKey));
     cleanup2(()=>{
-        Object.values(el._x_lookup).forEach((el2)=>el2.remove());
+        Object.values(el._x_lookup).forEach((el2)=>$8c83eaf28779ff46$var$mutateDom(()=>{
+                $8c83eaf28779ff46$var$destroyTree(el2);
+                el2.remove();
+            }));
         delete el._x_prevKeys;
         delete el._x_lookup;
     });
@@ -5752,9 +5769,11 @@ function $8c83eaf28779ff46$var$loop(el, iteratorNames, evaluateItems, evaluateKe
         }
         for(let i = 0; i < removes.length; i++){
             let key = removes[i];
-            if (!!lookup[key]._x_effects) lookup[key]._x_effects.forEach($8c83eaf28779ff46$var$dequeueJob);
-            lookup[key].remove();
-            lookup[key] = null;
+            if (!(key in lookup)) continue;
+            $8c83eaf28779ff46$var$mutateDom(()=>{
+                $8c83eaf28779ff46$var$destroyTree(lookup[key]);
+                lookup[key].remove();
+            });
             delete lookup[key];
         }
         for(let i = 0; i < moves.length; i++){
@@ -5858,10 +5877,10 @@ $8c83eaf28779ff46$var$directive("if", (el, { expression: expression }, { effect:
         });
         el._x_currentIfEl = clone2;
         el._x_undoIf = ()=>{
-            $8c83eaf28779ff46$var$walk(clone2, (node)=>{
-                if (!!node._x_effects) node._x_effects.forEach($8c83eaf28779ff46$var$dequeueJob);
+            $8c83eaf28779ff46$var$mutateDom(()=>{
+                $8c83eaf28779ff46$var$destroyTree(clone2);
+                clone2.remove();
             });
-            clone2.remove();
             delete el._x_currentIfEl;
         };
         return clone2;
@@ -5990,7 +6009,7 @@ function $9b2f94dab0f686ea$var$storageSet(key, value, storage) {
 var $9b2f94dab0f686ea$export$2e2bcd8739ae039 = $9b2f94dab0f686ea$export$9a6132153fba2e0;
 
 
-const $1bac384020b50752$var$isString = (obj)=>typeof obj === "string";
+const $1bac384020b50752$var$isString = (obj)=>typeof obj === 'string';
 const $1bac384020b50752$var$defer = ()=>{
     let res;
     let rej;
@@ -6003,8 +6022,8 @@ const $1bac384020b50752$var$defer = ()=>{
     return promise;
 };
 const $1bac384020b50752$var$makeString = (object)=>{
-    if (object == null) return "";
-    return "" + object;
+    if (object == null) return '';
+    return '' + object;
 };
 const $1bac384020b50752$var$copy = (a, s, t)=>{
     a.forEach((m)=>{
@@ -6012,10 +6031,10 @@ const $1bac384020b50752$var$copy = (a, s, t)=>{
     });
 };
 const $1bac384020b50752$var$lastOfPathSeparatorRegExp = /###/g;
-const $1bac384020b50752$var$cleanKey = (key)=>key && key.indexOf("###") > -1 ? key.replace($1bac384020b50752$var$lastOfPathSeparatorRegExp, ".") : key;
+const $1bac384020b50752$var$cleanKey = (key)=>key && key.indexOf('###') > -1 ? key.replace($1bac384020b50752$var$lastOfPathSeparatorRegExp, '.') : key;
 const $1bac384020b50752$var$canNotTraverseDeeper = (object)=>!object || $1bac384020b50752$var$isString(object);
 const $1bac384020b50752$var$getLastOfPath = (object, path, Empty)=>{
-    const stack = !$1bac384020b50752$var$isString(path) ? path : path.split(".");
+    const stack = !$1bac384020b50752$var$isString(path) ? path : path.split('.');
     let stackIndex = 0;
     while(stackIndex < stack.length - 1){
         if ($1bac384020b50752$var$canNotTraverseDeeper(object)) return {};
@@ -6044,7 +6063,7 @@ const $1bac384020b50752$var$setPath = (object, path, newValue)=>{
         e = `${p[p.length - 1]}.${e}`;
         p = p.slice(0, p.length - 1);
         last = $1bac384020b50752$var$getLastOfPath(object, p, Object);
-        if (last && last.obj && typeof last.obj[`${last.k}.${e}`] !== "undefined") last.obj = undefined;
+        if (last && last.obj && typeof last.obj[`${last.k}.${e}`] !== 'undefined') last.obj = undefined;
     }
     last.obj[`${last.k}.${e}`] = newValue;
 };
@@ -6064,7 +6083,7 @@ const $1bac384020b50752$var$getPathWithDefaults = (data, defaultData, key)=>{
     return $1bac384020b50752$var$getPath(defaultData, key);
 };
 const $1bac384020b50752$var$deepExtend = (target, source, overwrite)=>{
-    for(const prop in source)if (prop !== "__proto__" && prop !== "constructor") {
+    for(const prop in source)if (prop !== '__proto__' && prop !== 'constructor') {
         if (prop in target) {
             if ($1bac384020b50752$var$isString(target[prop]) || target[prop] instanceof String || $1bac384020b50752$var$isString(source[prop]) || source[prop] instanceof String) {
                 if (overwrite) target[prop] = source[prop];
@@ -6073,14 +6092,14 @@ const $1bac384020b50752$var$deepExtend = (target, source, overwrite)=>{
     }
     return target;
 };
-const $1bac384020b50752$var$regexEscape = (str)=>str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+const $1bac384020b50752$var$regexEscape = (str)=>str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
 var $1bac384020b50752$var$_entityMap = {
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;",
-    "/": "&#x2F;"
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+    '/': '&#x2F;'
 };
 const $1bac384020b50752$var$escape = (data)=>{
     if ($1bac384020b50752$var$isString(data)) return data.replace(/[&<>"'\/]/g, (s)=>$1bac384020b50752$var$_entityMap[s]);
@@ -6103,19 +6122,19 @@ class $1bac384020b50752$var$RegExpCache {
     }
 }
 const $1bac384020b50752$var$chars = [
-    " ",
-    ",",
-    "?",
-    "!",
-    ";"
+    ' ',
+    ',',
+    '?',
+    '!',
+    ';'
 ];
 const $1bac384020b50752$var$looksLikeObjectPathRegExpCache = new $1bac384020b50752$var$RegExpCache(20);
 const $1bac384020b50752$var$looksLikeObjectPath = (key, nsSeparator, keySeparator)=>{
-    nsSeparator = nsSeparator || "";
-    keySeparator = keySeparator || "";
+    nsSeparator = nsSeparator || '';
+    keySeparator = keySeparator || '';
     const possibleChars = $1bac384020b50752$var$chars.filter((c)=>nsSeparator.indexOf(c) < 0 && keySeparator.indexOf(c) < 0);
     if (possibleChars.length === 0) return true;
-    const r = $1bac384020b50752$var$looksLikeObjectPathRegExpCache.getRegExp(`(${possibleChars.map((c)=>c === "?" ? "\\?" : c).join("|")})`);
+    const r = $1bac384020b50752$var$looksLikeObjectPathRegExpCache.getRegExp(`(${possibleChars.map((c)=>c === '?' ? '\\?' : c).join('|')})`);
     let matched = !r.test(key);
     if (!matched) {
         const ki = key.indexOf(keySeparator);
@@ -6124,24 +6143,24 @@ const $1bac384020b50752$var$looksLikeObjectPath = (key, nsSeparator, keySeparato
     return matched;
 };
 const $1bac384020b50752$var$deepFind = function(obj, path) {
-    let keySeparator = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : ".";
+    let keySeparator = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '.';
     if (!obj) return undefined;
     if (obj[path]) return obj[path];
     const tokens = path.split(keySeparator);
     let current = obj;
     for(let i = 0; i < tokens.length;){
-        if (!current || typeof current !== "object") return undefined;
+        if (!current || typeof current !== 'object') return undefined;
         let next;
-        let nextPath = "";
+        let nextPath = '';
         for(let j = i; j < tokens.length; ++j){
             if (j !== i) nextPath += keySeparator;
             nextPath += tokens[j];
             next = current[nextPath];
             if (next !== undefined) {
                 if ([
-                    "string",
-                    "number",
-                    "boolean"
+                    'string',
+                    'number',
+                    'boolean'
                 ].indexOf(typeof next) > -1 && j < tokens.length - 1) continue;
                 i += j - i + 1;
                 break;
@@ -6151,17 +6170,17 @@ const $1bac384020b50752$var$deepFind = function(obj, path) {
     }
     return current;
 };
-const $1bac384020b50752$var$getCleanedCode = (code)=>code && code.replace("_", "-");
+const $1bac384020b50752$var$getCleanedCode = (code)=>code && code.replace('_', '-');
 const $1bac384020b50752$var$consoleLogger = {
-    type: "logger",
+    type: 'logger',
     log (args) {
-        this.output("log", args);
+        this.output('log', args);
     },
     warn (args) {
-        this.output("warn", args);
+        this.output('warn', args);
     },
     error (args) {
-        this.output("error", args);
+        this.output('error', args);
     },
     output (type, args) {
         if (console && console[type]) console[type].apply(console, args);
@@ -6174,26 +6193,26 @@ class $1bac384020b50752$var$Logger {
     }
     init(concreteLogger) {
         let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-        this.prefix = options.prefix || "i18next:";
+        this.prefix = options.prefix || 'i18next:';
         this.logger = concreteLogger || $1bac384020b50752$var$consoleLogger;
         this.options = options;
         this.debug = options.debug;
     }
     log() {
         for(var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++)args[_key] = arguments[_key];
-        return this.forward(args, "log", "", true);
+        return this.forward(args, 'log', '', true);
     }
     warn() {
         for(var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++)args[_key2] = arguments[_key2];
-        return this.forward(args, "warn", "", true);
+        return this.forward(args, 'warn', '', true);
     }
     error() {
         for(var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++)args[_key3] = arguments[_key3];
-        return this.forward(args, "error", "");
+        return this.forward(args, 'error', '');
     }
     deprecate() {
         for(var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++)args[_key4] = arguments[_key4];
-        return this.forward(args, "warn", "WARNING DEPRECATED: ", true);
+        return this.forward(args, 'warn', 'WARNING DEPRECATED: ', true);
     }
     forward(args, lvl, prefix, debugOnly) {
         if (debugOnly && !this.debug) return null;
@@ -6218,7 +6237,7 @@ class $1bac384020b50752$var$EventEmitter {
         this.observers = {};
     }
     on(events, listener) {
-        events.split(" ").forEach((event)=>{
+        events.split(' ').forEach((event)=>{
             if (!this.observers[event]) this.observers[event] = new Map();
             const numListeners = this.observers[event].get(listener) || 0;
             this.observers[event].set(listener, numListeners + 1);
@@ -6242,8 +6261,8 @@ class $1bac384020b50752$var$EventEmitter {
                 for(let i = 0; i < numTimesAdded; i++)observer(...args);
             });
         }
-        if (this.observers["*"]) {
-            const cloned = Array.from(this.observers["*"].entries());
+        if (this.observers['*']) {
+            const cloned = Array.from(this.observers['*'].entries());
             cloned.forEach((_ref2)=>{
                 let [observer, numTimesAdded] = _ref2;
                 for(let i = 0; i < numTimesAdded; i++)observer.apply(observer, [
@@ -6258,14 +6277,14 @@ class $1bac384020b50752$var$ResourceStore extends $1bac384020b50752$var$EventEmi
     constructor(data){
         let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {
             ns: [
-                "translation"
+                'translation'
             ],
-            defaultNS: "translation"
+            defaultNS: 'translation'
         };
         super();
         this.data = data || {};
         this.options = options;
-        if (this.options.keySeparator === undefined) this.options.keySeparator = ".";
+        if (this.options.keySeparator === undefined) this.options.keySeparator = '.';
         if (this.options.ignoreJSONStructure === undefined) this.options.ignoreJSONStructure = true;
     }
     addNamespaces(ns) {
@@ -6280,7 +6299,7 @@ class $1bac384020b50752$var$ResourceStore extends $1bac384020b50752$var$EventEmi
         const keySeparator = options.keySeparator !== undefined ? options.keySeparator : this.options.keySeparator;
         const ignoreJSONStructure = options.ignoreJSONStructure !== undefined ? options.ignoreJSONStructure : this.options.ignoreJSONStructure;
         let path;
-        if (lng.indexOf(".") > -1) path = lng.split(".");
+        if (lng.indexOf('.') > -1) path = lng.split('.');
         else {
             path = [
                 lng,
@@ -6293,10 +6312,10 @@ class $1bac384020b50752$var$ResourceStore extends $1bac384020b50752$var$EventEmi
             }
         }
         const result = $1bac384020b50752$var$getPath(this.data, path);
-        if (!result && !ns && !key && lng.indexOf(".") > -1) {
+        if (!result && !ns && !key && lng.indexOf('.') > -1) {
             lng = path[0];
             ns = path[1];
-            key = path.slice(2).join(".");
+            key = path.slice(2).join('.');
         }
         if (result || !ignoreJSONStructure || !$1bac384020b50752$var$isString(key)) return result;
         return $1bac384020b50752$var$deepFind(this.data && this.data[lng] && this.data[lng][ns], key, keySeparator);
@@ -6311,14 +6330,14 @@ class $1bac384020b50752$var$ResourceStore extends $1bac384020b50752$var$EventEmi
             ns
         ];
         if (key) path = path.concat(keySeparator ? key.split(keySeparator) : key);
-        if (lng.indexOf(".") > -1) {
-            path = lng.split(".");
+        if (lng.indexOf('.') > -1) {
+            path = lng.split('.');
             value = ns;
             ns = path[1];
         }
         this.addNamespaces(ns);
         $1bac384020b50752$var$setPath(this.data, path, value);
-        if (!options.silent) this.emit("added", lng, ns, key, value);
+        if (!options.silent) this.emit('added', lng, ns, key, value);
     }
     addResources(lng, ns, resources) {
         let options = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {
@@ -6327,7 +6346,7 @@ class $1bac384020b50752$var$ResourceStore extends $1bac384020b50752$var$EventEmi
         for(const m in resources)if ($1bac384020b50752$var$isString(resources[m]) || Array.isArray(resources[m])) this.addResource(lng, ns, m, resources[m], {
             silent: true
         });
-        if (!options.silent) this.emit("added", lng, ns, resources);
+        if (!options.silent) this.emit('added', lng, ns, resources);
     }
     addResourceBundle(lng, ns, resources, deep, overwrite) {
         let options = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : {
@@ -6338,8 +6357,8 @@ class $1bac384020b50752$var$ResourceStore extends $1bac384020b50752$var$EventEmi
             lng,
             ns
         ];
-        if (lng.indexOf(".") > -1) {
-            path = lng.split(".");
+        if (lng.indexOf('.') > -1) {
+            path = lng.split('.');
             deep = resources;
             resources = ns;
             ns = path[1];
@@ -6353,19 +6372,19 @@ class $1bac384020b50752$var$ResourceStore extends $1bac384020b50752$var$EventEmi
             ...resources
         };
         $1bac384020b50752$var$setPath(this.data, path, pack);
-        if (!options.silent) this.emit("added", lng, ns, resources);
+        if (!options.silent) this.emit('added', lng, ns, resources);
     }
     removeResourceBundle(lng, ns) {
         if (this.hasResourceBundle(lng, ns)) delete this.data[lng][ns];
         this.removeNamespaces(ns);
-        this.emit("removed", lng, ns);
+        this.emit('removed', lng, ns);
     }
     hasResourceBundle(lng, ns) {
         return this.getResource(lng, ns) !== undefined;
     }
     getResourceBundle(lng, ns) {
         if (!ns) ns = this.options.defaultNS;
-        if (this.options.compatibilityAPI === "v1") return {
+        if (this.options.compatibilityAPI === 'v1') return {
             ...this.getResource(lng, ns)
         };
         return this.getResource(lng, ns);
@@ -6400,17 +6419,17 @@ class $1bac384020b50752$var$Translator extends $1bac384020b50752$var$EventEmitte
         let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
         super();
         $1bac384020b50752$var$copy([
-            "resourceStore",
-            "languageUtils",
-            "pluralResolver",
-            "interpolator",
-            "backendConnector",
-            "i18nFormat",
-            "utils"
+            'resourceStore',
+            'languageUtils',
+            'pluralResolver',
+            'interpolator',
+            'backendConnector',
+            'i18nFormat',
+            'utils'
         ], services, this);
         this.options = options;
-        if (this.options.keySeparator === undefined) this.options.keySeparator = ".";
-        this.logger = $1bac384020b50752$var$baseLogger.create("translator");
+        if (this.options.keySeparator === undefined) this.options.keySeparator = '.';
+        this.logger = $1bac384020b50752$var$baseLogger.create('translator');
     }
     changeLanguage(lng) {
         if (lng) this.language = lng;
@@ -6425,7 +6444,7 @@ class $1bac384020b50752$var$Translator extends $1bac384020b50752$var$EventEmitte
     }
     extractFromKey(key, options) {
         let nsSeparator = options.nsSeparator !== undefined ? options.nsSeparator : this.options.nsSeparator;
-        if (nsSeparator === undefined) nsSeparator = ":";
+        if (nsSeparator === undefined) nsSeparator = ':';
         const keySeparator = options.keySeparator !== undefined ? options.keySeparator : this.options.keySeparator;
         let namespaces = options.ns || this.options.defaultNS || [];
         const wouldCheckForNsInKey = nsSeparator && key.indexOf(nsSeparator) > -1;
@@ -6434,27 +6453,28 @@ class $1bac384020b50752$var$Translator extends $1bac384020b50752$var$EventEmitte
             const m = key.match(this.interpolator.nestingRegexp);
             if (m && m.length > 0) return {
                 key: key,
-                namespaces: namespaces
+                namespaces: $1bac384020b50752$var$isString(namespaces) ? [
+                    namespaces
+                ] : namespaces
             };
             const parts = key.split(nsSeparator);
             if (nsSeparator !== keySeparator || nsSeparator === keySeparator && this.options.ns.indexOf(parts[0]) > -1) namespaces = parts.shift();
             key = parts.join(keySeparator);
         }
-        if ($1bac384020b50752$var$isString(namespaces)) namespaces = [
-            namespaces
-        ];
         return {
             key: key,
-            namespaces: namespaces
+            namespaces: $1bac384020b50752$var$isString(namespaces) ? [
+                namespaces
+            ] : namespaces
         };
     }
     translate(keys, options, lastKey) {
-        if (typeof options !== "object" && this.options.overloadTranslationOptionHandler) options = this.options.overloadTranslationOptionHandler(arguments);
-        if (typeof options === "object") options = {
+        if (typeof options !== 'object' && this.options.overloadTranslationOptionHandler) options = this.options.overloadTranslationOptionHandler(arguments);
+        if (typeof options === 'object') options = {
             ...options
         };
         if (!options) options = {};
-        if (keys === undefined || keys === null) return "";
+        if (keys === undefined || keys === null) return '';
         if (!Array.isArray(keys)) keys = [
             String(keys)
         ];
@@ -6464,7 +6484,7 @@ class $1bac384020b50752$var$Translator extends $1bac384020b50752$var$EventEmitte
         const namespace = namespaces[namespaces.length - 1];
         const lng = options.lng || this.language;
         const appendNamespaceToCIMode = options.appendNamespaceToCIMode || this.options.appendNamespaceToCIMode;
-        if (lng && lng.toLowerCase() === "cimode") {
+        if (lng && lng.toLowerCase() === 'cimode') {
             if (appendNamespaceToCIMode) {
                 const nsSeparator = options.nsSeparator || this.options.nsSeparator;
                 if (returnDetails) return {
@@ -6493,16 +6513,16 @@ class $1bac384020b50752$var$Translator extends $1bac384020b50752$var$EventEmitte
         const resExactUsedKey = resolved && resolved.exactUsedKey || key;
         const resType = Object.prototype.toString.apply(res);
         const noObject = [
-            "[object Number]",
-            "[object Function]",
-            "[object RegExp]"
+            '[object Number]',
+            '[object Function]',
+            '[object RegExp]'
         ];
         const joinArrays = options.joinArrays !== undefined ? options.joinArrays : this.options.joinArrays;
         const handleAsObjectInI18nFormat = !this.i18nFormat || this.i18nFormat.handleAsObject;
-        const handleAsObject = !$1bac384020b50752$var$isString(res) && typeof res !== "boolean" && typeof res !== "number";
+        const handleAsObject = !$1bac384020b50752$var$isString(res) && typeof res !== 'boolean' && typeof res !== 'number';
         if (handleAsObjectInI18nFormat && res && handleAsObject && noObject.indexOf(resType) < 0 && !($1bac384020b50752$var$isString(joinArrays) && Array.isArray(res))) {
             if (!options.returnObjects && !this.options.returnObjects) {
-                if (!this.options.returnedObjectHandler) this.logger.warn("accessing an object - but returnObjects options is not enabled!");
+                if (!this.options.returnedObjectHandler) this.logger.warn('accessing an object - but returnObjects options is not enabled!');
                 const r = this.options.returnedObjectHandler ? this.options.returnedObjectHandler(resUsedKey, res, {
                     ...options,
                     ns: namespaces
@@ -6537,10 +6557,10 @@ class $1bac384020b50752$var$Translator extends $1bac384020b50752$var$EventEmitte
             let usedKey = false;
             const needsPluralHandling = options.count !== undefined && !$1bac384020b50752$var$isString(options.count);
             const hasDefaultValue = $1bac384020b50752$var$Translator.hasDefaultValue(options);
-            const defaultValueSuffix = needsPluralHandling ? this.pluralResolver.getSuffix(lng, options.count, options) : "";
+            const defaultValueSuffix = needsPluralHandling ? this.pluralResolver.getSuffix(lng, options.count, options) : '';
             const defaultValueSuffixOrdinalFallback = options.ordinal && needsPluralHandling ? this.pluralResolver.getSuffix(lng, options.count, {
                 ordinal: false
-            }) : "";
+            }) : '';
             const needsZeroSuffixLookup = needsPluralHandling && !options.ordinal && options.count === 0 && this.pluralResolver.shouldUseIntlApi();
             const defaultValue = needsZeroSuffixLookup && options[`defaultValue${this.options.pluralSeparator}zero`] || options[`defaultValue${defaultValueSuffix}`] || options[`defaultValue${defaultValueSuffixOrdinalFallback}`] || options.defaultValue;
             if (!this.isValidLookup(res) && hasDefaultValue) {
@@ -6555,24 +6575,24 @@ class $1bac384020b50752$var$Translator extends $1bac384020b50752$var$EventEmitte
             const resForMissing = missingKeyNoValueFallbackToKey && usedKey ? undefined : res;
             const updateMissing = hasDefaultValue && defaultValue !== res && this.options.updateMissing;
             if (usedKey || usedDefault || updateMissing) {
-                this.logger.log(updateMissing ? "updateKey" : "missingKey", lng, namespace, key, updateMissing ? defaultValue : res);
+                this.logger.log(updateMissing ? 'updateKey' : 'missingKey', lng, namespace, key, updateMissing ? defaultValue : res);
                 if (keySeparator) {
                     const fk = this.resolve(key, {
                         ...options,
                         keySeparator: false
                     });
-                    if (fk && fk.res) this.logger.warn("Seems the loaded translations were in flat JSON format instead of nested. Either set keySeparator: false on init or make sure your translations are published in nested format.");
+                    if (fk && fk.res) this.logger.warn('Seems the loaded translations were in flat JSON format instead of nested. Either set keySeparator: false on init or make sure your translations are published in nested format.');
                 }
                 let lngs = [];
                 const fallbackLngs = this.languageUtils.getFallbackCodes(this.options.fallbackLng, options.lng || this.language);
-                if (this.options.saveMissingTo === "fallback" && fallbackLngs && fallbackLngs[0]) for(let i = 0; i < fallbackLngs.length; i++)lngs.push(fallbackLngs[i]);
-                else if (this.options.saveMissingTo === "all") lngs = this.languageUtils.toResolveHierarchy(options.lng || this.language);
+                if (this.options.saveMissingTo === 'fallback' && fallbackLngs && fallbackLngs[0]) for(let i = 0; i < fallbackLngs.length; i++)lngs.push(fallbackLngs[i]);
+                else if (this.options.saveMissingTo === 'all') lngs = this.languageUtils.toResolveHierarchy(options.lng || this.language);
                 else lngs.push(options.lng || this.language);
                 const send = (l, k, specificDefaultValue)=>{
                     const defaultForMissing = hasDefaultValue && specificDefaultValue !== res ? specificDefaultValue : resForMissing;
                     if (this.options.missingKeyHandler) this.options.missingKeyHandler(l, namespace, k, defaultForMissing, updateMissing, options);
                     else if (this.backendConnector && this.backendConnector.saveMissing) this.backendConnector.saveMissing(l, namespace, k, defaultForMissing, updateMissing, options);
-                    this.emit("missingKey", l, namespace, k, res);
+                    this.emit('missingKey', l, namespace, k, res);
                 };
                 if (this.options.saveMissing) {
                     if (this.options.saveMissingPlurals && needsPluralHandling) lngs.forEach((language)=>{
@@ -6590,7 +6610,7 @@ class $1bac384020b50752$var$Translator extends $1bac384020b50752$var$EventEmitte
             res = this.extendTranslation(res, keys, options, resolved, lastKey);
             if (usedKey && res === key && this.options.appendNamespaceToMissingKey) res = `${namespace}:${key}`;
             if ((usedKey || usedDefault) && this.options.parseMissingKeyHandler) {
-                if (this.options.compatibilityAPI !== "v1") res = this.options.parseMissingKeyHandler(this.options.appendNamespaceToMissingKey ? `${namespace}:${key}` : key, usedDefault ? res : undefined);
+                if (this.options.compatibilityAPI !== 'v1') res = this.options.parseMissingKeyHandler(this.options.appendNamespaceToMissingKey ? `${namespace}:${key}` : key, usedDefault ? res : undefined);
                 else res = this.options.parseMissingKeyHandler(res);
             }
         }
@@ -6634,7 +6654,7 @@ class $1bac384020b50752$var$Translator extends $1bac384020b50752$var$EventEmitte
                 const nestAft = na && na.length;
                 if (nestBef < nestAft) options.nest = false;
             }
-            if (!options.lng && this.options.compatibilityAPI !== "v1" && resolved && resolved.res) options.lng = this.language || resolved.usedLng;
+            if (!options.lng && this.options.compatibilityAPI !== 'v1' && resolved && resolved.res) options.lng = this.language || resolved.usedLng;
             if (options.nest !== false) res = this.interpolator.nest(res, function() {
                 for(var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++)args[_key] = arguments[_key];
                 if (lastKey && lastKey[0] === args[0] && !options.context) {
@@ -6677,14 +6697,14 @@ class $1bac384020b50752$var$Translator extends $1bac384020b50752$var$EventEmitte
             if (this.options.fallbackNS) namespaces = namespaces.concat(this.options.fallbackNS);
             const needsPluralHandling = options.count !== undefined && !$1bac384020b50752$var$isString(options.count);
             const needsZeroSuffixLookup = needsPluralHandling && !options.ordinal && options.count === 0 && this.pluralResolver.shouldUseIntlApi();
-            const needsContextHandling = options.context !== undefined && ($1bac384020b50752$var$isString(options.context) || typeof options.context === "number") && options.context !== "";
+            const needsContextHandling = options.context !== undefined && ($1bac384020b50752$var$isString(options.context) || typeof options.context === 'number') && options.context !== '';
             const codes = options.lngs ? options.lngs : this.languageUtils.toResolveHierarchy(options.lng || this.language, options.fallbackLng);
             namespaces.forEach((ns)=>{
                 if (this.isValidLookup(found)) return;
                 usedNS = ns;
                 if (!$1bac384020b50752$var$checkedLoadedFor[`${codes[0]}-${ns}`] && this.utils && this.utils.hasLoadedNamespace && !this.utils.hasLoadedNamespace(usedNS)) {
                     $1bac384020b50752$var$checkedLoadedFor[`${codes[0]}-${ns}`] = true;
-                    this.logger.warn(`key "${usedKey}" for languages "${codes.join(", ")}" won't get resolved as namespace "${usedNS}" was not yet loaded`, "This means something IS WRONG in your setup. You access the t function before i18next.init / i18next.loadNamespace / i18next.changeLanguage was done. Wait for the callback or Promise to resolve before accessing it!!!");
+                    this.logger.warn(`key "${usedKey}" for languages "${codes.join(', ')}" won't get resolved as namespace "${usedNS}" was not yet loaded`, 'This means something IS WRONG in your setup. You access the t function before i18next.init / i18next.loadNamespace / i18next.changeLanguage was done. Wait for the callback or Promise to resolve before accessing it!!!');
                 }
                 codes.forEach((code)=>{
                     if (this.isValidLookup(found)) return;
@@ -6730,7 +6750,7 @@ class $1bac384020b50752$var$Translator extends $1bac384020b50752$var$EventEmitte
         };
     }
     isValidLookup(res) {
-        return res !== undefined && !(!this.options.returnNull && res === null) && !(!this.options.returnEmptyString && res === "");
+        return res !== undefined && !(!this.options.returnNull && res === null) && !(!this.options.returnEmptyString && res === '');
     }
     getResource(code, ns, key) {
         let options = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
@@ -6740,25 +6760,25 @@ class $1bac384020b50752$var$Translator extends $1bac384020b50752$var$EventEmitte
     getUsedParamsDetails() {
         let options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
         const optionsKeys = [
-            "defaultValue",
-            "ordinal",
-            "context",
-            "replace",
-            "lng",
-            "lngs",
-            "fallbackLng",
-            "ns",
-            "keySeparator",
-            "nsSeparator",
-            "returnObjects",
-            "returnDetails",
-            "joinArrays",
-            "postProcess",
-            "interpolation"
+            'defaultValue',
+            'ordinal',
+            'context',
+            'replace',
+            'lng',
+            'lngs',
+            'fallbackLng',
+            'ns',
+            'keySeparator',
+            'nsSeparator',
+            'returnObjects',
+            'returnDetails',
+            'joinArrays',
+            'postProcess',
+            'interpolation'
         ];
         const useOptionsReplaceForData = options.replace && !$1bac384020b50752$var$isString(options.replace);
         let data = useOptionsReplaceForData ? options.replace : options;
-        if (useOptionsReplaceForData && typeof options.count !== "undefined") data.count = options.count;
+        if (useOptionsReplaceForData && typeof options.count !== 'undefined') data.count = options.count;
         if (this.options.interpolation.defaultVariables) data = {
             ...this.options.interpolation.defaultVariables,
             ...data
@@ -6772,7 +6792,7 @@ class $1bac384020b50752$var$Translator extends $1bac384020b50752$var$EventEmitte
         return data;
     }
     static hasDefaultValue(options) {
-        const prefix = "defaultValue";
+        const prefix = 'defaultValue';
         for(const option in options){
             if (Object.prototype.hasOwnProperty.call(options, option) && prefix === option.substring(0, prefix.length) && undefined !== options[option]) return true;
         }
@@ -6784,40 +6804,40 @@ class $1bac384020b50752$var$LanguageUtil {
     constructor(options){
         this.options = options;
         this.supportedLngs = this.options.supportedLngs || false;
-        this.logger = $1bac384020b50752$var$baseLogger.create("languageUtils");
+        this.logger = $1bac384020b50752$var$baseLogger.create('languageUtils');
     }
     getScriptPartFromCode(code) {
         code = $1bac384020b50752$var$getCleanedCode(code);
-        if (!code || code.indexOf("-") < 0) return null;
-        const p = code.split("-");
+        if (!code || code.indexOf('-') < 0) return null;
+        const p = code.split('-');
         if (p.length === 2) return null;
         p.pop();
-        if (p[p.length - 1].toLowerCase() === "x") return null;
-        return this.formatLanguageCode(p.join("-"));
+        if (p[p.length - 1].toLowerCase() === 'x') return null;
+        return this.formatLanguageCode(p.join('-'));
     }
     getLanguagePartFromCode(code) {
         code = $1bac384020b50752$var$getCleanedCode(code);
-        if (!code || code.indexOf("-") < 0) return code;
-        const p = code.split("-");
+        if (!code || code.indexOf('-') < 0) return code;
+        const p = code.split('-');
         return this.formatLanguageCode(p[0]);
     }
     formatLanguageCode(code) {
-        if ($1bac384020b50752$var$isString(code) && code.indexOf("-") > -1) {
-            if (typeof Intl !== "undefined" && typeof Intl.getCanonicalLocales !== "undefined") try {
+        if ($1bac384020b50752$var$isString(code) && code.indexOf('-') > -1) {
+            if (typeof Intl !== 'undefined' && typeof Intl.getCanonicalLocales !== 'undefined') try {
                 let formattedCode = Intl.getCanonicalLocales(code)[0];
                 if (formattedCode && this.options.lowerCaseLng) formattedCode = formattedCode.toLowerCase();
                 if (formattedCode) return formattedCode;
             } catch (e) {}
             const specialCases = [
-                "hans",
-                "hant",
-                "latn",
-                "cyrl",
-                "cans",
-                "mong",
-                "arab"
+                'hans',
+                'hant',
+                'latn',
+                'cyrl',
+                'cans',
+                'mong',
+                'arab'
             ];
-            let p = code.split("-");
+            let p = code.split('-');
             if (this.options.lowerCaseLng) p = p.map((part)=>part.toLowerCase());
             else if (p.length === 2) {
                 p[0] = p[0].toLowerCase();
@@ -6826,16 +6846,16 @@ class $1bac384020b50752$var$LanguageUtil {
             } else if (p.length === 3) {
                 p[0] = p[0].toLowerCase();
                 if (p[1].length === 2) p[1] = p[1].toUpperCase();
-                if (p[0] !== "sgn" && p[2].length === 2) p[2] = p[2].toUpperCase();
+                if (p[0] !== 'sgn' && p[2].length === 2) p[2] = p[2].toUpperCase();
                 if (specialCases.indexOf(p[1].toLowerCase()) > -1) p[1] = $1bac384020b50752$var$capitalize(p[1].toLowerCase());
                 if (specialCases.indexOf(p[2].toLowerCase()) > -1) p[2] = $1bac384020b50752$var$capitalize(p[2].toLowerCase());
             }
-            return p.join("-");
+            return p.join('-');
         }
         return this.options.cleanCode || this.options.lowerCaseLng ? code.toLowerCase() : code;
     }
     isSupportedCode(code) {
-        if (this.options.load === "languageOnly" || this.options.nonExplicitSupportedLngs) code = this.getLanguagePartFromCode(code);
+        if (this.options.load === 'languageOnly' || this.options.nonExplicitSupportedLngs) code = this.getLanguagePartFromCode(code);
         return !this.supportedLngs || !this.supportedLngs.length || this.supportedLngs.indexOf(code) > -1;
     }
     getBestMatchFromCodes(codes) {
@@ -6852,8 +6872,8 @@ class $1bac384020b50752$var$LanguageUtil {
             if (this.isSupportedCode(lngOnly)) return found = lngOnly;
             found = this.options.supportedLngs.find((supportedLng)=>{
                 if (supportedLng === lngOnly) return supportedLng;
-                if (supportedLng.indexOf("-") < 0 && lngOnly.indexOf("-") < 0) return;
-                if (supportedLng.indexOf("-") > 0 && lngOnly.indexOf("-") < 0 && supportedLng.substring(0, supportedLng.indexOf("-")) === lngOnly) return supportedLng;
+                if (supportedLng.indexOf('-') < 0 && lngOnly.indexOf('-') < 0) return;
+                if (supportedLng.indexOf('-') > 0 && lngOnly.indexOf('-') < 0 && supportedLng.substring(0, supportedLng.indexOf('-')) === lngOnly) return supportedLng;
                 if (supportedLng.indexOf(lngOnly) === 0 && lngOnly.length > 1) return supportedLng;
             });
         });
@@ -6862,7 +6882,7 @@ class $1bac384020b50752$var$LanguageUtil {
     }
     getFallbackCodes(fallbacks, code) {
         if (!fallbacks) return [];
-        if (typeof fallbacks === "function") fallbacks = fallbacks(code);
+        if (typeof fallbacks === 'function') fallbacks = fallbacks(code);
         if ($1bac384020b50752$var$isString(fallbacks)) fallbacks = [
             fallbacks
         ];
@@ -6883,10 +6903,10 @@ class $1bac384020b50752$var$LanguageUtil {
             if (this.isSupportedCode(c)) codes.push(c);
             else this.logger.warn(`rejecting language code not found in supportedLngs: ${c}`);
         };
-        if ($1bac384020b50752$var$isString(code) && (code.indexOf("-") > -1 || code.indexOf("_") > -1)) {
-            if (this.options.load !== "languageOnly") addCode(this.formatLanguageCode(code));
-            if (this.options.load !== "languageOnly" && this.options.load !== "currentOnly") addCode(this.getScriptPartFromCode(code));
-            if (this.options.load !== "currentOnly") addCode(this.getLanguagePartFromCode(code));
+        if ($1bac384020b50752$var$isString(code) && (code.indexOf('-') > -1 || code.indexOf('_') > -1)) {
+            if (this.options.load !== 'languageOnly') addCode(this.formatLanguageCode(code));
+            if (this.options.load !== 'languageOnly' && this.options.load !== 'currentOnly') addCode(this.getScriptPartFromCode(code));
+            if (this.options.load !== 'currentOnly') addCode(this.getLanguagePartFromCode(code));
         } else if ($1bac384020b50752$var$isString(code)) addCode(this.formatLanguageCode(code));
         fallbackCodes.forEach((fc)=>{
             if (codes.indexOf(fc) < 0) addCode(this.formatLanguageCode(fc));
@@ -6897,26 +6917,26 @@ class $1bac384020b50752$var$LanguageUtil {
 let $1bac384020b50752$var$sets = [
     {
         lngs: [
-            "ach",
-            "ak",
-            "am",
-            "arn",
-            "br",
-            "fil",
-            "gun",
-            "ln",
-            "mfe",
-            "mg",
-            "mi",
-            "oc",
-            "pt",
-            "pt-BR",
-            "tg",
-            "tl",
-            "ti",
-            "tr",
-            "uz",
-            "wa"
+            'ach',
+            'ak',
+            'am',
+            'arn',
+            'br',
+            'fil',
+            'gun',
+            'ln',
+            'mfe',
+            'mg',
+            'mi',
+            'oc',
+            'pt',
+            'pt-BR',
+            'tg',
+            'tl',
+            'ti',
+            'tr',
+            'uz',
+            'wa'
         ],
         nr: [
             1,
@@ -6926,69 +6946,69 @@ let $1bac384020b50752$var$sets = [
     },
     {
         lngs: [
-            "af",
-            "an",
-            "ast",
-            "az",
-            "bg",
-            "bn",
-            "ca",
-            "da",
-            "de",
-            "dev",
-            "el",
-            "en",
-            "eo",
-            "es",
-            "et",
-            "eu",
-            "fi",
-            "fo",
-            "fur",
-            "fy",
-            "gl",
-            "gu",
-            "ha",
-            "hi",
-            "hu",
-            "hy",
-            "ia",
-            "it",
-            "kk",
-            "kn",
-            "ku",
-            "lb",
-            "mai",
-            "ml",
-            "mn",
-            "mr",
-            "nah",
-            "nap",
-            "nb",
-            "ne",
-            "nl",
-            "nn",
-            "no",
-            "nso",
-            "pa",
-            "pap",
-            "pms",
-            "ps",
-            "pt-PT",
-            "rm",
-            "sco",
-            "se",
-            "si",
-            "so",
-            "son",
-            "sq",
-            "sv",
-            "sw",
-            "ta",
-            "te",
-            "tk",
-            "ur",
-            "yo"
+            'af',
+            'an',
+            'ast',
+            'az',
+            'bg',
+            'bn',
+            'ca',
+            'da',
+            'de',
+            'dev',
+            'el',
+            'en',
+            'eo',
+            'es',
+            'et',
+            'eu',
+            'fi',
+            'fo',
+            'fur',
+            'fy',
+            'gl',
+            'gu',
+            'ha',
+            'hi',
+            'hu',
+            'hy',
+            'ia',
+            'it',
+            'kk',
+            'kn',
+            'ku',
+            'lb',
+            'mai',
+            'ml',
+            'mn',
+            'mr',
+            'nah',
+            'nap',
+            'nb',
+            'ne',
+            'nl',
+            'nn',
+            'no',
+            'nso',
+            'pa',
+            'pap',
+            'pms',
+            'ps',
+            'pt-PT',
+            'rm',
+            'sco',
+            'se',
+            'si',
+            'so',
+            'son',
+            'sq',
+            'sv',
+            'sw',
+            'ta',
+            'te',
+            'tk',
+            'ur',
+            'yo'
         ],
         nr: [
             1,
@@ -6998,28 +7018,28 @@ let $1bac384020b50752$var$sets = [
     },
     {
         lngs: [
-            "ay",
-            "bo",
-            "cgg",
-            "fa",
-            "ht",
-            "id",
-            "ja",
-            "jbo",
-            "ka",
-            "km",
-            "ko",
-            "ky",
-            "lo",
-            "ms",
-            "sah",
-            "su",
-            "th",
-            "tt",
-            "ug",
-            "vi",
-            "wo",
-            "zh"
+            'ay',
+            'bo',
+            'cgg',
+            'fa',
+            'ht',
+            'id',
+            'ja',
+            'jbo',
+            'ka',
+            'km',
+            'ko',
+            'ky',
+            'lo',
+            'ms',
+            'sah',
+            'su',
+            'th',
+            'tt',
+            'ug',
+            'vi',
+            'wo',
+            'zh'
         ],
         nr: [
             1
@@ -7028,14 +7048,14 @@ let $1bac384020b50752$var$sets = [
     },
     {
         lngs: [
-            "be",
-            "bs",
-            "cnr",
-            "dz",
-            "hr",
-            "ru",
-            "sr",
-            "uk"
+            'be',
+            'bs',
+            'cnr',
+            'dz',
+            'hr',
+            'ru',
+            'sr',
+            'uk'
         ],
         nr: [
             1,
@@ -7046,7 +7066,7 @@ let $1bac384020b50752$var$sets = [
     },
     {
         lngs: [
-            "ar"
+            'ar'
         ],
         nr: [
             0,
@@ -7060,8 +7080,8 @@ let $1bac384020b50752$var$sets = [
     },
     {
         lngs: [
-            "cs",
-            "sk"
+            'cs',
+            'sk'
         ],
         nr: [
             1,
@@ -7072,8 +7092,8 @@ let $1bac384020b50752$var$sets = [
     },
     {
         lngs: [
-            "csb",
-            "pl"
+            'csb',
+            'pl'
         ],
         nr: [
             1,
@@ -7084,7 +7104,7 @@ let $1bac384020b50752$var$sets = [
     },
     {
         lngs: [
-            "cy"
+            'cy'
         ],
         nr: [
             1,
@@ -7096,7 +7116,7 @@ let $1bac384020b50752$var$sets = [
     },
     {
         lngs: [
-            "fr"
+            'fr'
         ],
         nr: [
             1,
@@ -7106,7 +7126,7 @@ let $1bac384020b50752$var$sets = [
     },
     {
         lngs: [
-            "ga"
+            'ga'
         ],
         nr: [
             1,
@@ -7119,7 +7139,7 @@ let $1bac384020b50752$var$sets = [
     },
     {
         lngs: [
-            "gd"
+            'gd'
         ],
         nr: [
             1,
@@ -7131,7 +7151,7 @@ let $1bac384020b50752$var$sets = [
     },
     {
         lngs: [
-            "is"
+            'is'
         ],
         nr: [
             1,
@@ -7141,7 +7161,7 @@ let $1bac384020b50752$var$sets = [
     },
     {
         lngs: [
-            "jv"
+            'jv'
         ],
         nr: [
             0,
@@ -7151,7 +7171,7 @@ let $1bac384020b50752$var$sets = [
     },
     {
         lngs: [
-            "kw"
+            'kw'
         ],
         nr: [
             1,
@@ -7163,7 +7183,7 @@ let $1bac384020b50752$var$sets = [
     },
     {
         lngs: [
-            "lt"
+            'lt'
         ],
         nr: [
             1,
@@ -7174,7 +7194,7 @@ let $1bac384020b50752$var$sets = [
     },
     {
         lngs: [
-            "lv"
+            'lv'
         ],
         nr: [
             1,
@@ -7185,7 +7205,7 @@ let $1bac384020b50752$var$sets = [
     },
     {
         lngs: [
-            "mk"
+            'mk'
         ],
         nr: [
             1,
@@ -7195,7 +7215,7 @@ let $1bac384020b50752$var$sets = [
     },
     {
         lngs: [
-            "mnk"
+            'mnk'
         ],
         nr: [
             0,
@@ -7206,7 +7226,7 @@ let $1bac384020b50752$var$sets = [
     },
     {
         lngs: [
-            "mt"
+            'mt'
         ],
         nr: [
             1,
@@ -7218,7 +7238,7 @@ let $1bac384020b50752$var$sets = [
     },
     {
         lngs: [
-            "or"
+            'or'
         ],
         nr: [
             2,
@@ -7228,7 +7248,7 @@ let $1bac384020b50752$var$sets = [
     },
     {
         lngs: [
-            "ro"
+            'ro'
         ],
         nr: [
             1,
@@ -7239,7 +7259,7 @@ let $1bac384020b50752$var$sets = [
     },
     {
         lngs: [
-            "sl"
+            'sl'
         ],
         nr: [
             5,
@@ -7251,8 +7271,8 @@ let $1bac384020b50752$var$sets = [
     },
     {
         lngs: [
-            "he",
-            "iw"
+            'he',
+            'iw'
         ],
         nr: [
             1,
@@ -7288,12 +7308,12 @@ let $1bac384020b50752$var$_rulesPluralsTypes = {
     22: (n)=>Number(n == 1 ? 0 : n == 2 ? 1 : (n < 0 || n > 10) && n % 10 == 0 ? 2 : 3)
 };
 const $1bac384020b50752$var$nonIntlVersions = [
-    "v1",
-    "v2",
-    "v3"
+    'v1',
+    'v2',
+    'v3'
 ];
 const $1bac384020b50752$var$intlVersions = [
-    "v4"
+    'v4'
 ];
 const $1bac384020b50752$var$suffixesOrder = {
     zero: 0,
@@ -7320,10 +7340,10 @@ class $1bac384020b50752$var$PluralResolver {
         let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
         this.languageUtils = languageUtils;
         this.options = options;
-        this.logger = $1bac384020b50752$var$baseLogger.create("pluralResolver");
-        if ((!this.options.compatibilityJSON || $1bac384020b50752$var$intlVersions.includes(this.options.compatibilityJSON)) && (typeof Intl === "undefined" || !Intl.PluralRules)) {
-            this.options.compatibilityJSON = "v3";
-            this.logger.error("Your environment seems not to be Intl API compatible, use an Intl.PluralRules polyfill. Will fallback to the compatibilityJSON v3 format handling.");
+        this.logger = $1bac384020b50752$var$baseLogger.create('pluralResolver');
+        if ((!this.options.compatibilityJSON || $1bac384020b50752$var$intlVersions.includes(this.options.compatibilityJSON)) && (typeof Intl === 'undefined' || !Intl.PluralRules)) {
+            this.options.compatibilityJSON = 'v3';
+            this.logger.error('Your environment seems not to be Intl API compatible, use an Intl.PluralRules polyfill. Will fallback to the compatibilityJSON v3 format handling.');
         }
         this.rules = $1bac384020b50752$var$createRules();
         this.pluralRulesCache = {};
@@ -7336,21 +7356,26 @@ class $1bac384020b50752$var$PluralResolver {
     }
     getRule(code) {
         let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-        if (this.shouldUseIntlApi()) try {
-            const cleanedCode = $1bac384020b50752$var$getCleanedCode(code === "dev" ? "en" : code);
-            const type = options.ordinal ? "ordinal" : "cardinal";
+        if (this.shouldUseIntlApi()) {
+            const cleanedCode = $1bac384020b50752$var$getCleanedCode(code === 'dev' ? 'en' : code);
+            const type = options.ordinal ? 'ordinal' : 'cardinal';
             const cacheKey = JSON.stringify({
                 cleanedCode: cleanedCode,
                 type: type
             });
             if (cacheKey in this.pluralRulesCache) return this.pluralRulesCache[cacheKey];
-            const rule = new Intl.PluralRules(cleanedCode, {
-                type: type
-            });
+            let rule;
+            try {
+                rule = new Intl.PluralRules(cleanedCode, {
+                    type: type
+                });
+            } catch (err) {
+                if (!code.match(/-|_/)) return;
+                const lngPart = this.languageUtils.getLanguagePartFromCode(code);
+                rule = this.getRule(lngPart, options);
+            }
             this.pluralRulesCache[cacheKey] = rule;
             return rule;
-        } catch (err) {
-            return;
         }
         return this.rules[code] || this.rules[this.languageUtils.getLanguagePartFromCode(code)];
     }
@@ -7368,32 +7393,32 @@ class $1bac384020b50752$var$PluralResolver {
         let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
         const rule = this.getRule(code, options);
         if (!rule) return [];
-        if (this.shouldUseIntlApi()) return rule.resolvedOptions().pluralCategories.sort((pluralCategory1, pluralCategory2)=>$1bac384020b50752$var$suffixesOrder[pluralCategory1] - $1bac384020b50752$var$suffixesOrder[pluralCategory2]).map((pluralCategory)=>`${this.options.prepend}${options.ordinal ? `ordinal${this.options.prepend}` : ""}${pluralCategory}`);
+        if (this.shouldUseIntlApi()) return rule.resolvedOptions().pluralCategories.sort((pluralCategory1, pluralCategory2)=>$1bac384020b50752$var$suffixesOrder[pluralCategory1] - $1bac384020b50752$var$suffixesOrder[pluralCategory2]).map((pluralCategory)=>`${this.options.prepend}${options.ordinal ? `ordinal${this.options.prepend}` : ''}${pluralCategory}`);
         return rule.numbers.map((number)=>this.getSuffix(code, number, options));
     }
     getSuffix(code, count) {
         let options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
         const rule = this.getRule(code, options);
         if (rule) {
-            if (this.shouldUseIntlApi()) return `${this.options.prepend}${options.ordinal ? `ordinal${this.options.prepend}` : ""}${rule.select(count)}`;
+            if (this.shouldUseIntlApi()) return `${this.options.prepend}${options.ordinal ? `ordinal${this.options.prepend}` : ''}${rule.select(count)}`;
             return this.getSuffixRetroCompatible(rule, count);
         }
         this.logger.warn(`no plural rule found for: ${code}`);
-        return "";
+        return '';
     }
     getSuffixRetroCompatible(rule, count) {
         const idx = rule.noAbs ? rule.plurals(count) : rule.plurals(Math.abs(count));
         let suffix = rule.numbers[idx];
         if (this.options.simplifyPluralSuffix && rule.numbers.length === 2 && rule.numbers[0] === 1) {
-            if (suffix === 2) suffix = "plural";
-            else if (suffix === 1) suffix = "";
+            if (suffix === 2) suffix = 'plural';
+            else if (suffix === 1) suffix = '';
         }
         const returnSuffix = ()=>this.options.prepend && suffix.toString() ? this.options.prepend + suffix.toString() : suffix.toString();
-        if (this.options.compatibilityJSON === "v1") {
-            if (suffix === 1) return "";
-            if (typeof suffix === "number") return `_plural_${suffix.toString()}`;
+        if (this.options.compatibilityJSON === 'v1') {
+            if (suffix === 1) return '';
+            if (typeof suffix === 'number') return `_plural_${suffix.toString()}`;
             return returnSuffix();
-        } else if (this.options.compatibilityJSON === "v2") return returnSuffix();
+        } else if (this.options.compatibilityJSON === 'v2') return returnSuffix();
         else if (this.options.simplifyPluralSuffix && rule.numbers.length === 2 && rule.numbers[0] === 1) return returnSuffix();
         return this.options.prepend && idx.toString() ? this.options.prepend + idx.toString() : idx.toString();
     }
@@ -7402,7 +7427,7 @@ class $1bac384020b50752$var$PluralResolver {
     }
 }
 const $1bac384020b50752$var$deepFindWithDefaults = function(data, defaultData, key) {
-    let keySeparator = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : ".";
+    let keySeparator = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : '.';
     let ignoreJSONStructure = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : true;
     let path = $1bac384020b50752$var$getPathWithDefaults(data, defaultData, key);
     if (!path && ignoreJSONStructure && $1bac384020b50752$var$isString(key)) {
@@ -7411,11 +7436,11 @@ const $1bac384020b50752$var$deepFindWithDefaults = function(data, defaultData, k
     }
     return path;
 };
-const $1bac384020b50752$var$regexSafe = (val)=>val.replace(/\$/g, "$$$$");
+const $1bac384020b50752$var$regexSafe = (val)=>val.replace(/\$/g, '$$$$');
 class $1bac384020b50752$var$Interpolator {
     constructor(){
         let options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-        this.logger = $1bac384020b50752$var$baseLogger.create("interpolator");
+        this.logger = $1bac384020b50752$var$baseLogger.create('interpolator');
         this.options = options;
         this.format = options.interpolation && options.interpolation.format || ((value)=>value);
         this.init(options);
@@ -7429,14 +7454,14 @@ class $1bac384020b50752$var$Interpolator {
         this.escape = escape$1 !== undefined ? escape$1 : $1bac384020b50752$var$escape;
         this.escapeValue = escapeValue !== undefined ? escapeValue : true;
         this.useRawValueToEscape = useRawValueToEscape !== undefined ? useRawValueToEscape : false;
-        this.prefix = prefix ? $1bac384020b50752$var$regexEscape(prefix) : prefixEscaped || "{{";
-        this.suffix = suffix ? $1bac384020b50752$var$regexEscape(suffix) : suffixEscaped || "}}";
-        this.formatSeparator = formatSeparator || ",";
-        this.unescapePrefix = unescapeSuffix ? "" : unescapePrefix || "-";
-        this.unescapeSuffix = this.unescapePrefix ? "" : unescapeSuffix || "";
-        this.nestingPrefix = nestingPrefix ? $1bac384020b50752$var$regexEscape(nestingPrefix) : nestingPrefixEscaped || $1bac384020b50752$var$regexEscape("$t(");
-        this.nestingSuffix = nestingSuffix ? $1bac384020b50752$var$regexEscape(nestingSuffix) : nestingSuffixEscaped || $1bac384020b50752$var$regexEscape(")");
-        this.nestingOptionsSeparator = nestingOptionsSeparator || ",";
+        this.prefix = prefix ? $1bac384020b50752$var$regexEscape(prefix) : prefixEscaped || '{{';
+        this.suffix = suffix ? $1bac384020b50752$var$regexEscape(suffix) : suffixEscaped || '}}';
+        this.formatSeparator = formatSeparator || ',';
+        this.unescapePrefix = unescapeSuffix ? '' : unescapePrefix || '-';
+        this.unescapeSuffix = this.unescapePrefix ? '' : unescapeSuffix || '';
+        this.nestingPrefix = nestingPrefix ? $1bac384020b50752$var$regexEscape(nestingPrefix) : nestingPrefixEscaped || $1bac384020b50752$var$regexEscape('$t(');
+        this.nestingSuffix = nestingSuffix ? $1bac384020b50752$var$regexEscape(nestingSuffix) : nestingSuffixEscaped || $1bac384020b50752$var$regexEscape(')');
+        this.nestingOptionsSeparator = nestingOptionsSeparator || ',';
         this.maxReplaces = maxReplaces || 1000;
         this.alwaysFormat = alwaysFormat !== undefined ? alwaysFormat : false;
         this.resetRegExp();
@@ -7450,7 +7475,7 @@ class $1bac384020b50752$var$Interpolator {
                 existingRegExp.lastIndex = 0;
                 return existingRegExp;
             }
-            return new RegExp(pattern, "g");
+            return new RegExp(pattern, 'g');
         };
         this.regexp = getOrResetRegExp(this.regexp, `${this.prefix}(.+?)${this.suffix}`);
         this.regexpUnescape = getOrResetRegExp(this.regexpUnescape, `${this.prefix}${this.unescapePrefix}(.+?)${this.unescapeSuffix}${this.suffix}`);
@@ -7498,16 +7523,16 @@ class $1bac384020b50752$var$Interpolator {
                 const matchedVar = match[1].trim();
                 value = handleFormat(matchedVar);
                 if (value === undefined) {
-                    if (typeof missingInterpolationHandler === "function") {
+                    if (typeof missingInterpolationHandler === 'function') {
                         const temp = missingInterpolationHandler(str, match, options);
-                        value = $1bac384020b50752$var$isString(temp) ? temp : "";
-                    } else if (options && Object.prototype.hasOwnProperty.call(options, matchedVar)) value = "";
+                        value = $1bac384020b50752$var$isString(temp) ? temp : '';
+                    } else if (options && Object.prototype.hasOwnProperty.call(options, matchedVar)) value = '';
                     else if (skipOnVariables) {
                         value = match[0];
                         continue;
                     } else {
                         this.logger.warn(`missed to pass in variable ${matchedVar} for interpolating ${str}`);
-                        value = "";
+                        value = '';
                     }
                 } else if (!$1bac384020b50752$var$isString(value) && !this.useRawValueToEscape) value = $1bac384020b50752$var$makeString(value);
                 const safeValue = todo.safeValue(value);
@@ -7570,7 +7595,7 @@ class $1bac384020b50752$var$Interpolator {
             if (!$1bac384020b50752$var$isString(value)) value = $1bac384020b50752$var$makeString(value);
             if (!value) {
                 this.logger.warn(`missed to resolve ${match[1]} for nesting ${str}`);
-                value = "";
+                value = '';
             }
             if (doReduce) value = formatters.reduce((v, f)=>this.format(v, f, options.lng, {
                     ...options,
@@ -7585,24 +7610,24 @@ class $1bac384020b50752$var$Interpolator {
 const $1bac384020b50752$var$parseFormatStr = (formatStr)=>{
     let formatName = formatStr.toLowerCase().trim();
     const formatOptions = {};
-    if (formatStr.indexOf("(") > -1) {
-        const p = formatStr.split("(");
+    if (formatStr.indexOf('(') > -1) {
+        const p = formatStr.split('(');
         formatName = p[0].toLowerCase().trim();
         const optStr = p[1].substring(0, p[1].length - 1);
-        if (formatName === "currency" && optStr.indexOf(":") < 0) {
+        if (formatName === 'currency' && optStr.indexOf(':') < 0) {
             if (!formatOptions.currency) formatOptions.currency = optStr.trim();
-        } else if (formatName === "relativetime" && optStr.indexOf(":") < 0) {
+        } else if (formatName === 'relativetime' && optStr.indexOf(':') < 0) {
             if (!formatOptions.range) formatOptions.range = optStr.trim();
         } else {
-            const opts = optStr.split(";");
+            const opts = optStr.split(';');
             opts.forEach((opt)=>{
                 if (opt) {
-                    const [key, ...rest] = opt.split(":");
-                    const val = rest.join(":").trim().replace(/^'+|'+$/g, "");
+                    const [key, ...rest] = opt.split(':');
+                    const val = rest.join(':').trim().replace(/^'+|'+$/g, '');
                     const trimmedKey = key.trim();
                     if (!formatOptions[trimmedKey]) formatOptions[trimmedKey] = val;
-                    if (val === "false") formatOptions[trimmedKey] = false;
-                    if (val === "true") formatOptions[trimmedKey] = true;
+                    if (val === 'false') formatOptions[trimmedKey] = false;
+                    if (val === 'true') formatOptions[trimmedKey] = true;
                     if (!isNaN(val)) formatOptions[trimmedKey] = parseInt(val, 10);
                 }
             });
@@ -7633,25 +7658,40 @@ const $1bac384020b50752$var$createCachedFormatter = (fn)=>{
 class $1bac384020b50752$var$Formatter {
     constructor(){
         let options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-        this.logger = $1bac384020b50752$var$baseLogger.create("formatter");
+        this.logger = $1bac384020b50752$var$baseLogger.create('formatter');
         this.options = options;
         this.formats = {
-            number: $1bac384020b50752$var$createCachedFormatter((lng, opt)=>(val)=>new Intl.NumberFormat(lng, {
-                        ...opt
-                    }).format(val)),
-            currency: $1bac384020b50752$var$createCachedFormatter((lng, opt)=>(val)=>new Intl.NumberFormat(lng, {
-                        ...opt,
-                        style: "currency"
-                    }).format(val)),
-            datetime: $1bac384020b50752$var$createCachedFormatter((lng, opt)=>(val)=>new Intl.DateTimeFormat(lng, {
-                        ...opt
-                    }).format(val)),
-            relativetime: $1bac384020b50752$var$createCachedFormatter((lng, opt)=>(val)=>new Intl.RelativeTimeFormat(lng, {
-                        ...opt
-                    }).format(val, opt.range || "day")),
-            list: $1bac384020b50752$var$createCachedFormatter((lng, opt)=>(val)=>new Intl.ListFormat(lng, {
-                        ...opt
-                    }).format(val))
+            number: $1bac384020b50752$var$createCachedFormatter((lng, opt)=>{
+                const formatter = new Intl.NumberFormat(lng, {
+                    ...opt
+                });
+                return (val)=>formatter.format(val);
+            }),
+            currency: $1bac384020b50752$var$createCachedFormatter((lng, opt)=>{
+                const formatter = new Intl.NumberFormat(lng, {
+                    ...opt,
+                    style: 'currency'
+                });
+                return (val)=>formatter.format(val);
+            }),
+            datetime: $1bac384020b50752$var$createCachedFormatter((lng, opt)=>{
+                const formatter = new Intl.DateTimeFormat(lng, {
+                    ...opt
+                });
+                return (val)=>formatter.format(val);
+            }),
+            relativetime: $1bac384020b50752$var$createCachedFormatter((lng, opt)=>{
+                const formatter = new Intl.RelativeTimeFormat(lng, {
+                    ...opt
+                });
+                return (val)=>formatter.format(val, opt.range || 'day');
+            }),
+            list: $1bac384020b50752$var$createCachedFormatter((lng, opt)=>{
+                const formatter = new Intl.ListFormat(lng, {
+                    ...opt
+                });
+                return (val)=>formatter.format(val);
+            })
         };
         this.init(options);
     }
@@ -7659,7 +7699,7 @@ class $1bac384020b50752$var$Formatter {
         let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {
             interpolation: {}
         };
-        this.formatSeparator = options.interpolation.formatSeparator || ",";
+        this.formatSeparator = options.interpolation.formatSeparator || ',';
     }
     add(name, fc) {
         this.formats[name.toLowerCase().trim()] = fc;
@@ -7670,8 +7710,8 @@ class $1bac384020b50752$var$Formatter {
     format(value, format, lng) {
         let options = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
         const formats = format.split(this.formatSeparator);
-        if (formats.length > 1 && formats[0].indexOf("(") > 1 && formats[0].indexOf(")") < 0 && formats.find((f)=>f.indexOf(")") > -1)) {
-            const lastIndex = formats.findIndex((f)=>f.indexOf(")") > -1);
+        if (formats.length > 1 && formats[0].indexOf('(') > 1 && formats[0].indexOf(')') < 0 && formats.find((f)=>f.indexOf(')') > -1)) {
+            const lastIndex = formats.findIndex((f)=>f.indexOf(')') > -1);
             formats[0] = [
                 formats[0],
                 ...formats.splice(1, lastIndex)
@@ -7714,7 +7754,7 @@ class $1bac384020b50752$var$Connector extends $1bac384020b50752$var$EventEmitter
         this.services = services;
         this.languageUtils = services.languageUtils;
         this.options = options;
-        this.logger = $1bac384020b50752$var$baseLogger.create("backendConnector");
+        this.logger = $1bac384020b50752$var$baseLogger.create('backendConnector');
         this.waitingReads = [];
         this.maxParallelReads = options.maxParallelReads || 10;
         this.readingCalls = 0;
@@ -7762,10 +7802,10 @@ class $1bac384020b50752$var$Connector extends $1bac384020b50752$var$EventEmitter
         };
     }
     loaded(name, err, data) {
-        const s = name.split("|");
+        const s = name.split('|');
         const lng = s[0];
         const ns = s[1];
-        if (err) this.emit("failedLoading", lng, ns, err);
+        if (err) this.emit('failedLoading', lng, ns, err);
         if (!err && data) this.store.addResourceBundle(lng, ns, data, undefined, undefined, {
             skipCopy: true
         });
@@ -7791,7 +7831,7 @@ class $1bac384020b50752$var$Connector extends $1bac384020b50752$var$EventEmitter
                 else q.callback();
             }
         });
-        this.emit("loaded", loaded);
+        this.emit('loaded', loaded);
         this.queue = this.queue.filter((q)=>!q.done);
     }
     read(lng, ns, fcName) {
@@ -7829,7 +7869,7 @@ class $1bac384020b50752$var$Connector extends $1bac384020b50752$var$EventEmitter
         if (fc.length === 2) {
             try {
                 const r = fc(lng, ns);
-                if (r && typeof r.then === "function") r.then((data)=>resolver(null, data)).catch(resolver);
+                if (r && typeof r.then === 'function') r.then((data)=>resolver(null, data)).catch(resolver);
                 else resolver(null, r);
             } catch (err) {
                 resolver(err);
@@ -7842,7 +7882,7 @@ class $1bac384020b50752$var$Connector extends $1bac384020b50752$var$EventEmitter
         let options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
         let callback = arguments.length > 3 ? arguments[3] : undefined;
         if (!this.backend) {
-            this.logger.warn("No backend was added via i18next.use. Will not load resources.");
+            this.logger.warn('No backend was added via i18next.use. Will not load resources.');
             return callback && callback();
         }
         if ($1bac384020b50752$var$isString(languages)) languages = this.languageUtils.toResolveHierarchy(languages);
@@ -7867,11 +7907,11 @@ class $1bac384020b50752$var$Connector extends $1bac384020b50752$var$EventEmitter
         }, callback);
     }
     loadOne(name) {
-        let prefix = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "";
-        const s = name.split("|");
+        let prefix = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+        const s = name.split('|');
         const lng = s[0];
         const ns = s[1];
-        this.read(lng, ns, "read", undefined, undefined, (err, data)=>{
+        this.read(lng, ns, 'read', undefined, undefined, (err, data)=>{
             if (err) this.logger.warn(`${prefix}loading namespace ${ns} for language ${lng} failed`, err);
             if (!err && data) this.logger.log(`${prefix}loaded namespace ${ns} for language ${lng}`, data);
             this.loaded(name, err, data);
@@ -7881,10 +7921,10 @@ class $1bac384020b50752$var$Connector extends $1bac384020b50752$var$EventEmitter
         let options = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : {};
         let clb = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : ()=>{};
         if (this.services.utils && this.services.utils.hasLoadedNamespace && !this.services.utils.hasLoadedNamespace(namespace)) {
-            this.logger.warn(`did not save key "${key}" as the namespace "${namespace}" was not yet loaded`, "This means something IS WRONG in your setup. You access the t function before i18next.init / i18next.loadNamespace / i18next.changeLanguage was done. Wait for the callback or Promise to resolve before accessing it!!!");
+            this.logger.warn(`did not save key "${key}" as the namespace "${namespace}" was not yet loaded`, 'This means something IS WRONG in your setup. You access the t function before i18next.init / i18next.loadNamespace / i18next.changeLanguage was done. Wait for the callback or Promise to resolve before accessing it!!!');
             return;
         }
-        if (key === undefined || key === null || key === "") return;
+        if (key === undefined || key === null || key === '') return;
         if (this.backend && this.backend.create) {
             const opts = {
                 ...options,
@@ -7895,7 +7935,7 @@ class $1bac384020b50752$var$Connector extends $1bac384020b50752$var$EventEmitter
                 let r;
                 if (fc.length === 5) r = fc(languages, namespace, key, fallbackValue, opts);
                 else r = fc(languages, namespace, key, fallbackValue);
-                if (r && typeof r.then === "function") r.then((data)=>clb(null, data)).catch(clb);
+                if (r && typeof r.then === 'function') r.then((data)=>clb(null, data)).catch(clb);
                 else clb(null, r);
             } catch (err) {
                 clb(err);
@@ -7910,28 +7950,28 @@ const $1bac384020b50752$var$get = ()=>({
         debug: false,
         initImmediate: true,
         ns: [
-            "translation"
+            'translation'
         ],
         defaultNS: [
-            "translation"
+            'translation'
         ],
         fallbackLng: [
-            "dev"
+            'dev'
         ],
         fallbackNS: false,
         supportedLngs: false,
         nonExplicitSupportedLngs: false,
-        load: "all",
+        load: 'all',
         preload: false,
         simplifyPluralSuffix: true,
-        keySeparator: ".",
-        nsSeparator: ":",
-        pluralSeparator: "_",
-        contextSeparator: "_",
+        keySeparator: '.',
+        nsSeparator: ':',
+        pluralSeparator: '_',
+        contextSeparator: '_',
         partialBundledLanguages: false,
         saveMissing: false,
         updateMissing: false,
-        saveMissingTo: "fallback",
+        saveMissingTo: 'fallback',
         saveMissingPlurals: true,
         missingKeyHandler: false,
         missingInterpolationHandler: false,
@@ -7947,10 +7987,10 @@ const $1bac384020b50752$var$get = ()=>({
         appendNamespaceToCIMode: false,
         overloadTranslationOptionHandler: (args)=>{
             let ret = {};
-            if (typeof args[1] === "object") ret = args[1];
+            if (typeof args[1] === 'object') ret = args[1];
             if ($1bac384020b50752$var$isString(args[1])) ret.defaultValue = args[1];
             if ($1bac384020b50752$var$isString(args[2])) ret.tDescription = args[2];
-            if (typeof args[2] === "object" || typeof args[3] === "object") {
+            if (typeof args[2] === 'object' || typeof args[3] === 'object') {
                 const options = args[3] || args[2];
                 Object.keys(options).forEach((key)=>{
                     ret[key] = options[key];
@@ -7961,13 +8001,13 @@ const $1bac384020b50752$var$get = ()=>({
         interpolation: {
             escapeValue: true,
             format: (value)=>value,
-            prefix: "{{",
-            suffix: "}}",
-            formatSeparator: ",",
-            unescapePrefix: "-",
-            nestingPrefix: "$t(",
-            nestingSuffix: ")",
-            nestingOptionsSeparator: ",",
+            prefix: '{{',
+            suffix: '}}',
+            formatSeparator: ',',
+            unescapePrefix: '-',
+            nestingPrefix: '$t(',
+            nestingSuffix: ')',
+            nestingOptionsSeparator: ',',
             maxReplaces: 1000,
             skipOnVariables: true
         }
@@ -7982,8 +8022,8 @@ const $1bac384020b50752$var$transformOptions = (options)=>{
     if ($1bac384020b50752$var$isString(options.fallbackNS)) options.fallbackNS = [
         options.fallbackNS
     ];
-    if (options.supportedLngs && options.supportedLngs.indexOf("cimode") < 0) options.supportedLngs = options.supportedLngs.concat([
-        "cimode"
+    if (options.supportedLngs && options.supportedLngs.indexOf('cimode') < 0) options.supportedLngs = options.supportedLngs.concat([
+        'cimode'
     ]);
     return options;
 };
@@ -7991,7 +8031,7 @@ const $1bac384020b50752$var$noop = ()=>{};
 const $1bac384020b50752$var$bindMemberFunctions = (inst)=>{
     const mems = Object.getOwnPropertyNames(Object.getPrototypeOf(inst));
     mems.forEach((mem)=>{
-        if (typeof inst[mem] === "function") inst[mem] = inst[mem].bind(inst);
+        if (typeof inst[mem] === 'function') inst[mem] = inst[mem].bind(inst);
     });
 };
 class $1bac384020b50752$var$I18n extends $1bac384020b50752$var$EventEmitter {
@@ -8021,13 +8061,13 @@ class $1bac384020b50752$var$I18n extends $1bac384020b50752$var$EventEmitter {
         let options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
         let callback = arguments.length > 1 ? arguments[1] : undefined;
         this.isInitializing = true;
-        if (typeof options === "function") {
+        if (typeof options === 'function') {
             callback = options;
             options = {};
         }
         if (!options.defaultNS && options.defaultNS !== false && options.ns) {
             if ($1bac384020b50752$var$isString(options.ns)) options.defaultNS = options.ns;
-            else if (options.ns.indexOf("translation") < 0) options.defaultNS = options.ns[0];
+            else if (options.ns.indexOf('translation') < 0) options.defaultNS = options.ns[0];
         }
         const defOpts = $1bac384020b50752$var$get();
         this.options = {
@@ -8035,7 +8075,7 @@ class $1bac384020b50752$var$I18n extends $1bac384020b50752$var$EventEmitter {
             ...this.options,
             ...$1bac384020b50752$var$transformOptions(options)
         };
-        if (this.options.compatibilityAPI !== "v1") this.options.interpolation = {
+        if (this.options.compatibilityAPI !== 'v1') this.options.interpolation = {
             ...defOpts.interpolation,
             ...this.options.interpolation
         };
@@ -8043,7 +8083,7 @@ class $1bac384020b50752$var$I18n extends $1bac384020b50752$var$EventEmitter {
         if (options.nsSeparator !== undefined) this.options.userDefinedNsSeparator = options.nsSeparator;
         const createClassOnDemand = (ClassOrObject)=>{
             if (!ClassOrObject) return null;
-            if (typeof ClassOrObject === "function") return new ClassOrObject();
+            if (typeof ClassOrObject === 'function') return new ClassOrObject();
             return ClassOrObject;
         };
         if (!this.options.isClone) {
@@ -8051,7 +8091,7 @@ class $1bac384020b50752$var$I18n extends $1bac384020b50752$var$EventEmitter {
             else $1bac384020b50752$var$baseLogger.init(null, this.options);
             let formatter;
             if (this.modules.formatter) formatter = this.modules.formatter;
-            else if (typeof Intl !== "undefined") formatter = $1bac384020b50752$var$Formatter;
+            else if (typeof Intl !== 'undefined') formatter = $1bac384020b50752$var$Formatter;
             const lu = new $1bac384020b50752$var$LanguageUtil(this.options);
             this.store = new $1bac384020b50752$var$ResourceStore(this.options.resources, this.options);
             const s = this.services;
@@ -8073,7 +8113,7 @@ class $1bac384020b50752$var$I18n extends $1bac384020b50752$var$EventEmitter {
                 hasLoadedNamespace: this.hasLoadedNamespace.bind(this)
             };
             s.backendConnector = new $1bac384020b50752$var$Connector(createClassOnDemand(this.modules.backend), s.resourceStore, s, this.options);
-            s.backendConnector.on("*", function(event) {
+            s.backendConnector.on('*', function(event) {
                 for(var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++)args[_key - 1] = arguments[_key];
                 _this.emit(event, ...args);
             });
@@ -8086,7 +8126,7 @@ class $1bac384020b50752$var$I18n extends $1bac384020b50752$var$EventEmitter {
                 if (s.i18nFormat.init) s.i18nFormat.init(this);
             }
             this.translator = new $1bac384020b50752$var$Translator(this.services, this.options);
-            this.translator.on("*", function(event) {
+            this.translator.on('*', function(event) {
                 for(var _len2 = arguments.length, args = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++)args[_key2 - 1] = arguments[_key2];
                 _this.emit(event, ...args);
             });
@@ -8098,14 +8138,14 @@ class $1bac384020b50752$var$I18n extends $1bac384020b50752$var$EventEmitter {
         if (!callback) callback = $1bac384020b50752$var$noop;
         if (this.options.fallbackLng && !this.services.languageDetector && !this.options.lng) {
             const codes = this.services.languageUtils.getFallbackCodes(this.options.fallbackLng);
-            if (codes.length > 0 && codes[0] !== "dev") this.options.lng = codes[0];
+            if (codes.length > 0 && codes[0] !== 'dev') this.options.lng = codes[0];
         }
-        if (!this.services.languageDetector && !this.options.lng) this.logger.warn("init: no languageDetector is used and no lng is defined");
+        if (!this.services.languageDetector && !this.options.lng) this.logger.warn('init: no languageDetector is used and no lng is defined');
         const storeApi = [
-            "getResource",
-            "hasResourceBundle",
-            "getResourceBundle",
-            "getDataByLanguage"
+            'getResource',
+            'hasResourceBundle',
+            'getResourceBundle',
+            'getDataByLanguage'
         ];
         storeApi.forEach((fcName)=>{
             this[fcName] = function() {
@@ -8113,10 +8153,10 @@ class $1bac384020b50752$var$I18n extends $1bac384020b50752$var$EventEmitter {
             };
         });
         const storeApiChained = [
-            "addResource",
-            "addResources",
-            "addResourceBundle",
-            "removeResourceBundle"
+            'addResource',
+            'addResources',
+            'addResourceBundle',
+            'removeResourceBundle'
         ];
         storeApiChained.forEach((fcName)=>{
             this[fcName] = function() {
@@ -8128,14 +8168,14 @@ class $1bac384020b50752$var$I18n extends $1bac384020b50752$var$EventEmitter {
         const load = ()=>{
             const finish = (err, t)=>{
                 this.isInitializing = false;
-                if (this.isInitialized && !this.initializedStoreOnce) this.logger.warn("init: i18next is already initialized. You should call init just once!");
+                if (this.isInitialized && !this.initializedStoreOnce) this.logger.warn('init: i18next is already initialized. You should call init just once!');
                 this.isInitialized = true;
-                if (!this.options.isClone) this.logger.log("initialized", this.options);
-                this.emit("initialized", this.options);
+                if (!this.options.isClone) this.logger.log('initialized', this.options);
+                this.emit('initialized', this.options);
                 deferred.resolve(t);
                 callback(err, t);
             };
-            if (this.languages && this.options.compatibilityAPI !== "v1" && !this.isInitialized) return finish(null, this.t.bind(this));
+            if (this.languages && this.options.compatibilityAPI !== 'v1' && !this.isInitialized) return finish(null, this.t.bind(this));
             this.changeLanguage(this.options.lng, finish);
         };
         if (this.options.resources || !this.options.initImmediate) load();
@@ -8146,16 +8186,16 @@ class $1bac384020b50752$var$I18n extends $1bac384020b50752$var$EventEmitter {
         let callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : $1bac384020b50752$var$noop;
         let usedCallback = callback;
         const usedLng = $1bac384020b50752$var$isString(language) ? language : this.language;
-        if (typeof language === "function") usedCallback = language;
+        if (typeof language === 'function') usedCallback = language;
         if (!this.options.resources || this.options.partialBundledLanguages) {
-            if (usedLng && usedLng.toLowerCase() === "cimode" && (!this.options.preload || this.options.preload.length === 0)) return usedCallback();
+            if (usedLng && usedLng.toLowerCase() === 'cimode' && (!this.options.preload || this.options.preload.length === 0)) return usedCallback();
             const toLoad = [];
             const append = (lng)=>{
                 if (!lng) return;
-                if (lng === "cimode") return;
+                if (lng === 'cimode') return;
                 const lngs = this.services.languageUtils.toResolveHierarchy(lng);
                 lngs.forEach((l)=>{
-                    if (l === "cimode") return;
+                    if (l === 'cimode') return;
                     if (toLoad.indexOf(l) < 0) toLoad.push(l);
                 });
             };
@@ -8172,11 +8212,11 @@ class $1bac384020b50752$var$I18n extends $1bac384020b50752$var$EventEmitter {
     }
     reloadResources(lngs, ns, callback) {
         const deferred = $1bac384020b50752$var$defer();
-        if (typeof lngs === "function") {
+        if (typeof lngs === 'function') {
             callback = lngs;
             lngs = undefined;
         }
-        if (typeof ns === "function") {
+        if (typeof ns === 'function') {
             callback = ns;
             ns = undefined;
         }
@@ -8190,28 +8230,28 @@ class $1bac384020b50752$var$I18n extends $1bac384020b50752$var$EventEmitter {
         return deferred;
     }
     use(module) {
-        if (!module) throw new Error("You are passing an undefined module! Please check the object you are passing to i18next.use()");
-        if (!module.type) throw new Error("You are passing a wrong module! Please check the object you are passing to i18next.use()");
-        if (module.type === "backend") this.modules.backend = module;
-        if (module.type === "logger" || module.log && module.warn && module.error) this.modules.logger = module;
-        if (module.type === "languageDetector") this.modules.languageDetector = module;
-        if (module.type === "i18nFormat") this.modules.i18nFormat = module;
-        if (module.type === "postProcessor") $1bac384020b50752$var$postProcessor.addPostProcessor(module);
-        if (module.type === "formatter") this.modules.formatter = module;
-        if (module.type === "3rdParty") this.modules.external.push(module);
+        if (!module) throw new Error('You are passing an undefined module! Please check the object you are passing to i18next.use()');
+        if (!module.type) throw new Error('You are passing a wrong module! Please check the object you are passing to i18next.use()');
+        if (module.type === 'backend') this.modules.backend = module;
+        if (module.type === 'logger' || module.log && module.warn && module.error) this.modules.logger = module;
+        if (module.type === 'languageDetector') this.modules.languageDetector = module;
+        if (module.type === 'i18nFormat') this.modules.i18nFormat = module;
+        if (module.type === 'postProcessor') $1bac384020b50752$var$postProcessor.addPostProcessor(module);
+        if (module.type === 'formatter') this.modules.formatter = module;
+        if (module.type === '3rdParty') this.modules.external.push(module);
         return this;
     }
     setResolvedLanguage(l) {
         if (!l || !this.languages) return;
         if ([
-            "cimode",
-            "dev"
+            'cimode',
+            'dev'
         ].indexOf(l) > -1) return;
         for(let li = 0; li < this.languages.length; li++){
             const lngInLngs = this.languages[li];
             if ([
-                "cimode",
-                "dev"
+                'cimode',
+                'dev'
             ].indexOf(lngInLngs) > -1) continue;
             if (this.store.hasLanguageSomeTranslations(lngInLngs)) {
                 this.resolvedLanguage = lngInLngs;
@@ -8223,7 +8263,7 @@ class $1bac384020b50752$var$I18n extends $1bac384020b50752$var$EventEmitter {
         var _this2 = this;
         this.isLanguageChangingTo = lng;
         const deferred = $1bac384020b50752$var$defer();
-        this.emit("languageChanging", lng);
+        this.emit('languageChanging', lng);
         const setLngProps = (l)=>{
             this.language = l;
             this.languages = this.services.languageUtils.toResolveHierarchy(l);
@@ -8235,8 +8275,8 @@ class $1bac384020b50752$var$I18n extends $1bac384020b50752$var$EventEmitter {
                 setLngProps(l);
                 this.translator.changeLanguage(l);
                 this.isLanguageChangingTo = undefined;
-                this.emit("languageChanged", l);
-                this.logger.log("languageChanged", l);
+                this.emit('languageChanged', l);
+                this.logger.log('languageChanged', l);
             } else this.isLanguageChangingTo = undefined;
             deferred.resolve(function() {
                 return _this2.t(...arguments);
@@ -8268,7 +8308,7 @@ class $1bac384020b50752$var$I18n extends $1bac384020b50752$var$EventEmitter {
         var _this3 = this;
         const fixedT = function(key, opts) {
             let options;
-            if (typeof opts !== "object") {
+            if (typeof opts !== 'object') {
                 for(var _len3 = arguments.length, rest = new Array(_len3 > 2 ? _len3 - 2 : 0), _key3 = 2; _key3 < _len3; _key3++)rest[_key3 - 2] = arguments[_key3];
                 options = _this3.options.overloadTranslationOptionHandler([
                     key,
@@ -8280,8 +8320,8 @@ class $1bac384020b50752$var$I18n extends $1bac384020b50752$var$EventEmitter {
             options.lng = options.lng || fixedT.lng;
             options.lngs = options.lngs || fixedT.lngs;
             options.ns = options.ns || fixedT.ns;
-            if (options.keyPrefix !== "") options.keyPrefix = options.keyPrefix || keyPrefix || fixedT.keyPrefix;
-            const keySeparator = _this3.options.keySeparator || ".";
+            if (options.keyPrefix !== '') options.keyPrefix = options.keyPrefix || keyPrefix || fixedT.keyPrefix;
+            const keySeparator = _this3.options.keySeparator || '.';
             let resultKey;
             if (options.keyPrefix && Array.isArray(key)) resultKey = key.map((k)=>`${options.keyPrefix}${keySeparator}${k}`);
             else resultKey = options.keyPrefix ? `${options.keyPrefix}${keySeparator}${key}` : key;
@@ -8305,17 +8345,17 @@ class $1bac384020b50752$var$I18n extends $1bac384020b50752$var$EventEmitter {
     hasLoadedNamespace(ns) {
         let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
         if (!this.isInitialized) {
-            this.logger.warn("hasLoadedNamespace: i18next was not initialized", this.languages);
+            this.logger.warn('hasLoadedNamespace: i18next was not initialized', this.languages);
             return false;
         }
         if (!this.languages || !this.languages.length) {
-            this.logger.warn("hasLoadedNamespace: i18n.languages were undefined or empty", this.languages);
+            this.logger.warn('hasLoadedNamespace: i18n.languages were undefined or empty', this.languages);
             return false;
         }
         const lng = options.lng || this.resolvedLanguage || this.languages[0];
         const fallbackLng = this.options ? this.options.fallbackLng : false;
         const lastLng = this.languages[this.languages.length - 1];
-        if (lng.toLowerCase() === "cimode") return true;
+        if (lng.toLowerCase() === 'cimode') return true;
         const loadNotPending = (l, n)=>{
             const loadState = this.services.backendConnector.state[`${l}|${n}`];
             return loadState === -1 || loadState === 0 || loadState === 2;
@@ -8367,73 +8407,73 @@ class $1bac384020b50752$var$I18n extends $1bac384020b50752$var$EventEmitter {
     }
     dir(lng) {
         if (!lng) lng = this.resolvedLanguage || (this.languages && this.languages.length > 0 ? this.languages[0] : this.language);
-        if (!lng) return "rtl";
+        if (!lng) return 'rtl';
         const rtlLngs = [
-            "ar",
-            "shu",
-            "sqr",
-            "ssh",
-            "xaa",
-            "yhd",
-            "yud",
-            "aao",
-            "abh",
-            "abv",
-            "acm",
-            "acq",
-            "acw",
-            "acx",
-            "acy",
-            "adf",
-            "ads",
-            "aeb",
-            "aec",
-            "afb",
-            "ajp",
-            "apc",
-            "apd",
-            "arb",
-            "arq",
-            "ars",
-            "ary",
-            "arz",
-            "auz",
-            "avl",
-            "ayh",
-            "ayl",
-            "ayn",
-            "ayp",
-            "bbz",
-            "pga",
-            "he",
-            "iw",
-            "ps",
-            "pbt",
-            "pbu",
-            "pst",
-            "prp",
-            "prd",
-            "ug",
-            "ur",
-            "ydd",
-            "yds",
-            "yih",
-            "ji",
-            "yi",
-            "hbo",
-            "men",
-            "xmn",
-            "fa",
-            "jpr",
-            "peo",
-            "pes",
-            "prs",
-            "dv",
-            "sam",
-            "ckb"
+            'ar',
+            'shu',
+            'sqr',
+            'ssh',
+            'xaa',
+            'yhd',
+            'yud',
+            'aao',
+            'abh',
+            'abv',
+            'acm',
+            'acq',
+            'acw',
+            'acx',
+            'acy',
+            'adf',
+            'ads',
+            'aeb',
+            'aec',
+            'afb',
+            'ajp',
+            'apc',
+            'apd',
+            'arb',
+            'arq',
+            'ars',
+            'ary',
+            'arz',
+            'auz',
+            'avl',
+            'ayh',
+            'ayl',
+            'ayn',
+            'ayp',
+            'bbz',
+            'pga',
+            'he',
+            'iw',
+            'ps',
+            'pbt',
+            'pbu',
+            'pst',
+            'prp',
+            'prd',
+            'ug',
+            'ur',
+            'ydd',
+            'yds',
+            'yih',
+            'ji',
+            'yi',
+            'hbo',
+            'men',
+            'xmn',
+            'fa',
+            'jpr',
+            'peo',
+            'pes',
+            'prs',
+            'dv',
+            'sam',
+            'ckb'
         ];
         const languageUtils = this.services && this.services.languageUtils || new $1bac384020b50752$var$LanguageUtil($1bac384020b50752$var$get());
-        return rtlLngs.indexOf(languageUtils.getLanguagePartFromCode(lng)) > -1 || lng.toLowerCase().indexOf("-arab") > 1 ? "rtl" : "ltr";
+        return rtlLngs.indexOf(languageUtils.getLanguagePartFromCode(lng)) > -1 || lng.toLowerCase().indexOf('-arab') > 1 ? 'rtl' : 'ltr';
     }
     static createInstance() {
         let options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -8453,9 +8493,9 @@ class $1bac384020b50752$var$I18n extends $1bac384020b50752$var$EventEmitter {
         const clone = new $1bac384020b50752$var$I18n(mergedOptions);
         if (options.debug !== undefined || options.prefix !== undefined) clone.logger = clone.logger.clone(options);
         const membersToCopy = [
-            "store",
-            "services",
-            "language"
+            'store',
+            'services',
+            'language'
         ];
         membersToCopy.forEach((m)=>{
             clone[m] = this[m];
@@ -8471,7 +8511,7 @@ class $1bac384020b50752$var$I18n extends $1bac384020b50752$var$EventEmitter {
             clone.services.resourceStore = clone.store;
         }
         clone.translator = new $1bac384020b50752$var$Translator(clone.services, mergedOptions);
-        clone.translator.on("*", function(event) {
+        clone.translator.on('*', function(event) {
             for(var _len4 = arguments.length, args = new Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++)args[_key4 - 1] = arguments[_key4];
             clone.emit(event, ...args);
         });
@@ -8519,7 +8559,7 @@ var $4c6a2f83122c31a3$var$Events = /** @class */ function() {
     Events.prototype.init = function() {
         var _this = this;
         this._eventFunctions.forEach(function(eventFunction) {
-            if (typeof window !== "undefined") window.addEventListener(_this._eventType, eventFunction);
+            if (typeof window !== 'undefined') window.addEventListener(_this._eventType, eventFunction);
         });
     };
     return Events;
@@ -8613,7 +8653,7 @@ var $43290e7e11b6c4c9$var$Instances = /** @class */ function() {
 }();
 var $43290e7e11b6c4c9$var$instances = new $43290e7e11b6c4c9$var$Instances();
 var $43290e7e11b6c4c9$export$2e2bcd8739ae039 = $43290e7e11b6c4c9$var$instances;
-if (typeof window !== "undefined") window.FlowbiteInstances = $43290e7e11b6c4c9$var$instances;
+if (typeof window !== 'undefined') window.FlowbiteInstances = $43290e7e11b6c4c9$var$instances;
 
 
 var $946dcfd8fe0754f4$var$__assign = undefined && undefined.__assign || function() {
@@ -8628,8 +8668,8 @@ var $946dcfd8fe0754f4$var$__assign = undefined && undefined.__assign || function
 };
 var $946dcfd8fe0754f4$var$Default = {
     alwaysOpen: false,
-    activeClasses: "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white",
-    inactiveClasses: "text-gray-500 dark:text-gray-400",
+    activeClasses: 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white',
+    inactiveClasses: 'text-gray-500 dark:text-gray-400',
     onOpen: function() {},
     onClose: function() {},
     onToggle: function() {}
@@ -8650,7 +8690,7 @@ var $946dcfd8fe0754f4$var$Accordion = /** @class */ function() {
         this._options = $946dcfd8fe0754f4$var$__assign($946dcfd8fe0754f4$var$__assign({}, $946dcfd8fe0754f4$var$Default), options);
         this._initialized = false;
         this.init();
-        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).addInstance("Accordion", this, this._instanceId, instanceOptions.override);
+        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).addInstance('Accordion', this, this._instanceId, instanceOptions.override);
     }
     Accordion.prototype.init = function() {
         var _this = this;
@@ -8661,7 +8701,7 @@ var $946dcfd8fe0754f4$var$Accordion = /** @class */ function() {
                 var clickHandler = function() {
                     _this.toggle(item.id);
                 };
-                item.triggerEl.addEventListener("click", clickHandler);
+                item.triggerEl.addEventListener('click', clickHandler);
                 // Store the clickHandler in a property of the item for removal later
                 item.clickHandler = clickHandler;
             });
@@ -8671,7 +8711,7 @@ var $946dcfd8fe0754f4$var$Accordion = /** @class */ function() {
     Accordion.prototype.destroy = function() {
         if (this._items.length && this._initialized) {
             this._items.forEach(function(item) {
-                item.triggerEl.removeEventListener("click", item.clickHandler);
+                item.triggerEl.removeEventListener('click', item.clickHandler);
                 // Clean up by deleting the clickHandler property from the item
                 delete item.clickHandler;
             });
@@ -8679,7 +8719,7 @@ var $946dcfd8fe0754f4$var$Accordion = /** @class */ function() {
         }
     };
     Accordion.prototype.removeInstance = function() {
-        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).removeInstance("Accordion", this._instanceId);
+        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).removeInstance('Accordion', this._instanceId);
     };
     Accordion.prototype.destroyAndRemoveInstance = function() {
         this.destroy();
@@ -8698,23 +8738,23 @@ var $946dcfd8fe0754f4$var$Accordion = /** @class */ function() {
         if (!this._options.alwaysOpen) this._items.map(function(i) {
             var _a, _b;
             if (i !== item) {
-                (_a = i.triggerEl.classList).remove.apply(_a, _this._options.activeClasses.split(" "));
-                (_b = i.triggerEl.classList).add.apply(_b, _this._options.inactiveClasses.split(" "));
-                i.targetEl.classList.add("hidden");
-                i.triggerEl.setAttribute("aria-expanded", "false");
+                (_a = i.triggerEl.classList).remove.apply(_a, _this._options.activeClasses.split(' '));
+                (_b = i.triggerEl.classList).add.apply(_b, _this._options.inactiveClasses.split(' '));
+                i.targetEl.classList.add('hidden');
+                i.triggerEl.setAttribute('aria-expanded', 'false');
                 i.active = false;
                 // rotate icon if set
-                if (i.iconEl) i.iconEl.classList.add("rotate-180");
+                if (i.iconEl) i.iconEl.classList.add('rotate-180');
             }
         });
         // show active item
-        (_a = item.triggerEl.classList).add.apply(_a, this._options.activeClasses.split(" "));
-        (_b = item.triggerEl.classList).remove.apply(_b, this._options.inactiveClasses.split(" "));
-        item.triggerEl.setAttribute("aria-expanded", "true");
-        item.targetEl.classList.remove("hidden");
+        (_a = item.triggerEl.classList).add.apply(_a, this._options.activeClasses.split(' '));
+        (_b = item.triggerEl.classList).remove.apply(_b, this._options.inactiveClasses.split(' '));
+        item.triggerEl.setAttribute('aria-expanded', 'true');
+        item.targetEl.classList.remove('hidden');
         item.active = true;
         // rotate icon if set
-        if (item.iconEl) item.iconEl.classList.remove("rotate-180");
+        if (item.iconEl) item.iconEl.classList.remove('rotate-180');
         // callback function
         this._options.onOpen(this, item);
     };
@@ -8728,13 +8768,13 @@ var $946dcfd8fe0754f4$var$Accordion = /** @class */ function() {
     Accordion.prototype.close = function(id) {
         var _a, _b;
         var item = this.getItem(id);
-        (_a = item.triggerEl.classList).remove.apply(_a, this._options.activeClasses.split(" "));
-        (_b = item.triggerEl.classList).add.apply(_b, this._options.inactiveClasses.split(" "));
-        item.targetEl.classList.add("hidden");
-        item.triggerEl.setAttribute("aria-expanded", "false");
+        (_a = item.triggerEl.classList).remove.apply(_a, this._options.activeClasses.split(' '));
+        (_b = item.triggerEl.classList).add.apply(_b, this._options.inactiveClasses.split(' '));
+        item.targetEl.classList.add('hidden');
+        item.triggerEl.setAttribute('aria-expanded', 'false');
         item.active = false;
         // rotate icon if set
-        if (item.iconEl) item.iconEl.classList.add("rotate-180");
+        if (item.iconEl) item.iconEl.classList.add('rotate-180');
         // callback function
         this._options.onClose(this, item);
     };
@@ -8750,33 +8790,33 @@ var $946dcfd8fe0754f4$var$Accordion = /** @class */ function() {
     return Accordion;
 }();
 function $946dcfd8fe0754f4$export$226c1dc98323ee4d() {
-    document.querySelectorAll("[data-accordion]").forEach(function($accordionEl) {
-        var alwaysOpen = $accordionEl.getAttribute("data-accordion");
-        var activeClasses = $accordionEl.getAttribute("data-active-classes");
-        var inactiveClasses = $accordionEl.getAttribute("data-inactive-classes");
+    document.querySelectorAll('[data-accordion]').forEach(function($accordionEl) {
+        var alwaysOpen = $accordionEl.getAttribute('data-accordion');
+        var activeClasses = $accordionEl.getAttribute('data-active-classes');
+        var inactiveClasses = $accordionEl.getAttribute('data-inactive-classes');
         var items = [];
-        $accordionEl.querySelectorAll("[data-accordion-target]").forEach(function($triggerEl) {
+        $accordionEl.querySelectorAll('[data-accordion-target]').forEach(function($triggerEl) {
             // Consider only items that directly belong to $accordionEl
             // (to make nested accordions work).
-            if ($triggerEl.closest("[data-accordion]") === $accordionEl) {
+            if ($triggerEl.closest('[data-accordion]') === $accordionEl) {
                 var item = {
-                    id: $triggerEl.getAttribute("data-accordion-target"),
+                    id: $triggerEl.getAttribute('data-accordion-target'),
                     triggerEl: $triggerEl,
-                    targetEl: document.querySelector($triggerEl.getAttribute("data-accordion-target")),
-                    iconEl: $triggerEl.querySelector("[data-accordion-icon]"),
-                    active: $triggerEl.getAttribute("aria-expanded") === "true" ? true : false
+                    targetEl: document.querySelector($triggerEl.getAttribute('data-accordion-target')),
+                    iconEl: $triggerEl.querySelector('[data-accordion-icon]'),
+                    active: $triggerEl.getAttribute('aria-expanded') === 'true' ? true : false
                 };
                 items.push(item);
             }
         });
         new $946dcfd8fe0754f4$var$Accordion($accordionEl, items, {
-            alwaysOpen: alwaysOpen === "open" ? true : false,
+            alwaysOpen: alwaysOpen === 'open' ? true : false,
             activeClasses: activeClasses ? activeClasses : $946dcfd8fe0754f4$var$Default.activeClasses,
             inactiveClasses: inactiveClasses ? inactiveClasses : $946dcfd8fe0754f4$var$Default.inactiveClasses
         });
     });
 }
-if (typeof window !== "undefined") {
+if (typeof window !== 'undefined') {
     window.Accordion = $946dcfd8fe0754f4$var$Accordion;
     window.initAccordions = $946dcfd8fe0754f4$export$226c1dc98323ee4d;
 }
@@ -8816,44 +8856,44 @@ var $16ba7ad25d51d4f8$var$Collapse = /** @class */ function() {
         this._visible = false;
         this._initialized = false;
         this.init();
-        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).addInstance("Collapse", this, this._instanceId, instanceOptions.override);
+        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).addInstance('Collapse', this, this._instanceId, instanceOptions.override);
     }
     Collapse.prototype.init = function() {
         var _this = this;
         if (this._triggerEl && this._targetEl && !this._initialized) {
-            if (this._triggerEl.hasAttribute("aria-expanded")) this._visible = this._triggerEl.getAttribute("aria-expanded") === "true";
+            if (this._triggerEl.hasAttribute('aria-expanded')) this._visible = this._triggerEl.getAttribute('aria-expanded') === 'true';
             else // fix until v2 not to break previous single collapses which became dismiss
-            this._visible = !this._targetEl.classList.contains("hidden");
+            this._visible = !this._targetEl.classList.contains('hidden');
             this._clickHandler = function() {
                 _this.toggle();
             };
-            this._triggerEl.addEventListener("click", this._clickHandler);
+            this._triggerEl.addEventListener('click', this._clickHandler);
             this._initialized = true;
         }
     };
     Collapse.prototype.destroy = function() {
         if (this._triggerEl && this._initialized) {
-            this._triggerEl.removeEventListener("click", this._clickHandler);
+            this._triggerEl.removeEventListener('click', this._clickHandler);
             this._initialized = false;
         }
     };
     Collapse.prototype.removeInstance = function() {
-        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).removeInstance("Collapse", this._instanceId);
+        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).removeInstance('Collapse', this._instanceId);
     };
     Collapse.prototype.destroyAndRemoveInstance = function() {
         this.destroy();
         this.removeInstance();
     };
     Collapse.prototype.collapse = function() {
-        this._targetEl.classList.add("hidden");
-        if (this._triggerEl) this._triggerEl.setAttribute("aria-expanded", "false");
+        this._targetEl.classList.add('hidden');
+        if (this._triggerEl) this._triggerEl.setAttribute('aria-expanded', 'false');
         this._visible = false;
         // callback function
         this._options.onCollapse(this);
     };
     Collapse.prototype.expand = function() {
-        this._targetEl.classList.remove("hidden");
-        if (this._triggerEl) this._triggerEl.setAttribute("aria-expanded", "true");
+        this._targetEl.classList.remove('hidden');
+        if (this._triggerEl) this._triggerEl.setAttribute('aria-expanded', 'true');
         this._visible = true;
         // callback function
         this._options.onExpand(this);
@@ -8876,20 +8916,20 @@ var $16ba7ad25d51d4f8$var$Collapse = /** @class */ function() {
     return Collapse;
 }();
 function $16ba7ad25d51d4f8$export$355ba5a528b4009a() {
-    document.querySelectorAll("[data-collapse-toggle]").forEach(function($triggerEl) {
-        var targetId = $triggerEl.getAttribute("data-collapse-toggle");
+    document.querySelectorAll('[data-collapse-toggle]').forEach(function($triggerEl) {
+        var targetId = $triggerEl.getAttribute('data-collapse-toggle');
         var $targetEl = document.getElementById(targetId);
         // check if the target element exists
         if ($targetEl) {
-            if (!(0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).instanceExists("Collapse", $targetEl.getAttribute("id"))) new $16ba7ad25d51d4f8$var$Collapse($targetEl, $triggerEl);
+            if (!(0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).instanceExists('Collapse', $targetEl.getAttribute('id'))) new $16ba7ad25d51d4f8$var$Collapse($targetEl, $triggerEl);
             else // if instance exists already for the same target element then create a new one with a different trigger element
             new $16ba7ad25d51d4f8$var$Collapse($targetEl, $triggerEl, {}, {
-                id: $targetEl.getAttribute("id") + "_" + (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039)._generateRandomId()
+                id: $targetEl.getAttribute('id') + '_' + (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039)._generateRandomId()
             });
-        } else console.error('The target element with id "'.concat(targetId, '" does not exist. Please check the data-collapse-toggle attribute.'));
+        } else console.error("The target element with id \"".concat(targetId, "\" does not exist. Please check the data-collapse-toggle attribute."));
     });
 }
-if (typeof window !== "undefined") {
+if (typeof window !== 'undefined') {
     window.Collapse = $16ba7ad25d51d4f8$var$Collapse;
     window.initCollapses = $16ba7ad25d51d4f8$export$355ba5a528b4009a;
 }
@@ -8911,8 +8951,8 @@ var $6a8fcd5cc87cb99e$var$Default = {
     defaultPosition: 0,
     indicators: {
         items: [],
-        activeClasses: "bg-white dark:bg-gray-800",
-        inactiveClasses: "bg-white/50 dark:bg-gray-800/50 hover:bg-white dark:hover:bg-gray-800"
+        activeClasses: 'bg-white dark:bg-gray-800',
+        inactiveClasses: 'bg-white/50 dark:bg-gray-800/50 hover:bg-white dark:hover:bg-gray-800'
     },
     interval: 3000,
     onNext: function() {},
@@ -8941,7 +8981,7 @@ var $6a8fcd5cc87cb99e$var$Carousel = /** @class */ function() {
         this._intervalInstance = null;
         this._initialized = false;
         this.init();
-        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).addInstance("Carousel", this, this._instanceId, instanceOptions.override);
+        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).addInstance('Carousel', this, this._instanceId, instanceOptions.override);
     }
     /**
      * initialize carousel and items based on active one
@@ -8949,13 +8989,13 @@ var $6a8fcd5cc87cb99e$var$Carousel = /** @class */ function() {
         var _this = this;
         if (this._items.length && !this._initialized) {
             this._items.map(function(item) {
-                item.el.classList.add("absolute", "inset-0", "transition-transform", "transform");
+                item.el.classList.add('absolute', 'inset-0', 'transition-transform', 'transform');
             });
             // if no active item is set then first position is default
             if (this.getActiveItem()) this.slideTo(this.getActiveItem().position);
             else this.slideTo(0);
             this._indicators.map(function(indicator, position) {
-                indicator.el.addEventListener("click", function() {
+                indicator.el.addEventListener('click', function() {
                     _this.slideTo(position);
                 });
             });
@@ -8966,7 +9006,7 @@ var $6a8fcd5cc87cb99e$var$Carousel = /** @class */ function() {
         if (this._initialized) this._initialized = false;
     };
     Carousel.prototype.removeInstance = function() {
-        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).removeInstance("Carousel", this._instanceId);
+        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).removeInstance('Carousel', this._instanceId);
     };
     Carousel.prototype.destroyAndRemoveInstance = function() {
         this.destroy();
@@ -9023,29 +9063,29 @@ var $6a8fcd5cc87cb99e$var$Carousel = /** @class */ function() {
      */ Carousel.prototype._rotate = function(rotationItems) {
         // reset
         this._items.map(function(item) {
-            item.el.classList.add("hidden");
+            item.el.classList.add('hidden');
         });
         // Handling the case when there is only one item
         if (this._items.length === 1) {
-            rotationItems.middle.el.classList.remove("-translate-x-full", "translate-x-full", "translate-x-0", "hidden", "z-10");
-            rotationItems.middle.el.classList.add("translate-x-0", "z-20");
+            rotationItems.middle.el.classList.remove('-translate-x-full', 'translate-x-full', 'translate-x-0', 'hidden', 'z-10');
+            rotationItems.middle.el.classList.add('translate-x-0', 'z-20');
             return;
         }
         // left item (previously active)
-        rotationItems.left.el.classList.remove("-translate-x-full", "translate-x-full", "translate-x-0", "hidden", "z-20");
-        rotationItems.left.el.classList.add("-translate-x-full", "z-10");
+        rotationItems.left.el.classList.remove('-translate-x-full', 'translate-x-full', 'translate-x-0', 'hidden', 'z-20');
+        rotationItems.left.el.classList.add('-translate-x-full', 'z-10');
         // currently active item
-        rotationItems.middle.el.classList.remove("-translate-x-full", "translate-x-full", "translate-x-0", "hidden", "z-10");
-        rotationItems.middle.el.classList.add("translate-x-0", "z-30");
+        rotationItems.middle.el.classList.remove('-translate-x-full', 'translate-x-full', 'translate-x-0', 'hidden', 'z-10');
+        rotationItems.middle.el.classList.add('translate-x-0', 'z-30');
         // right item (upcoming active)
-        rotationItems.right.el.classList.remove("-translate-x-full", "translate-x-full", "translate-x-0", "hidden", "z-30");
-        rotationItems.right.el.classList.add("translate-x-full", "z-20");
+        rotationItems.right.el.classList.remove('-translate-x-full', 'translate-x-full', 'translate-x-0', 'hidden', 'z-30');
+        rotationItems.right.el.classList.add('translate-x-full', 'z-20');
     };
     /**
      * Set an interval to cycle through the carousel items
      */ Carousel.prototype.cycle = function() {
         var _this = this;
-        if (typeof window !== "undefined") this._intervalInstance = window.setInterval(function() {
+        if (typeof window !== 'undefined') this._intervalInstance = window.setInterval(function() {
             _this.next();
         }, this._intervalDuration);
     };
@@ -9071,13 +9111,13 @@ var $6a8fcd5cc87cb99e$var$Carousel = /** @class */ function() {
         if (this._indicators.length) {
             this._indicators.map(function(indicator) {
                 var _a, _b;
-                indicator.el.setAttribute("aria-current", "false");
-                (_a = indicator.el.classList).remove.apply(_a, _this._options.indicators.activeClasses.split(" "));
-                (_b = indicator.el.classList).add.apply(_b, _this._options.indicators.inactiveClasses.split(" "));
+                indicator.el.setAttribute('aria-current', 'false');
+                (_a = indicator.el.classList).remove.apply(_a, _this._options.indicators.activeClasses.split(' '));
+                (_b = indicator.el.classList).add.apply(_b, _this._options.indicators.inactiveClasses.split(' '));
             });
-            (_a = this._indicators[position].el.classList).add.apply(_a, this._options.indicators.activeClasses.split(" "));
-            (_b = this._indicators[position].el.classList).remove.apply(_b, this._options.indicators.inactiveClasses.split(" "));
-            this._indicators[position].el.setAttribute("aria-current", "true");
+            (_a = this._indicators[position].el.classList).add.apply(_a, this._options.indicators.activeClasses.split(' '));
+            (_b = this._indicators[position].el.classList).remove.apply(_b, this._options.indicators.inactiveClasses.split(' '));
+            this._indicators[position].el.setAttribute('aria-current', 'true');
         }
     };
     Carousel.prototype.updateOnNext = function(callback) {
@@ -9092,22 +9132,22 @@ var $6a8fcd5cc87cb99e$var$Carousel = /** @class */ function() {
     return Carousel;
 }();
 function $6a8fcd5cc87cb99e$export$3ab77386b16b9e58() {
-    document.querySelectorAll("[data-carousel]").forEach(function($carouselEl) {
-        var interval = $carouselEl.getAttribute("data-carousel-interval");
-        var slide = $carouselEl.getAttribute("data-carousel") === "slide" ? true : false;
+    document.querySelectorAll('[data-carousel]').forEach(function($carouselEl) {
+        var interval = $carouselEl.getAttribute('data-carousel-interval');
+        var slide = $carouselEl.getAttribute('data-carousel') === 'slide' ? true : false;
         var items = [];
         var defaultPosition = 0;
-        if ($carouselEl.querySelectorAll("[data-carousel-item]").length) Array.from($carouselEl.querySelectorAll("[data-carousel-item]")).map(function($carouselItemEl, position) {
+        if ($carouselEl.querySelectorAll('[data-carousel-item]').length) Array.from($carouselEl.querySelectorAll('[data-carousel-item]')).map(function($carouselItemEl, position) {
             items.push({
                 position: position,
                 el: $carouselItemEl
             });
-            if ($carouselItemEl.getAttribute("data-carousel-item") === "active") defaultPosition = position;
+            if ($carouselItemEl.getAttribute('data-carousel-item') === 'active') defaultPosition = position;
         });
         var indicators = [];
-        if ($carouselEl.querySelectorAll("[data-carousel-slide-to]").length) Array.from($carouselEl.querySelectorAll("[data-carousel-slide-to]")).map(function($indicatorEl) {
+        if ($carouselEl.querySelectorAll('[data-carousel-slide-to]').length) Array.from($carouselEl.querySelectorAll('[data-carousel-slide-to]')).map(function($indicatorEl) {
             indicators.push({
-                position: parseInt($indicatorEl.getAttribute("data-carousel-slide-to")),
+                position: parseInt($indicatorEl.getAttribute('data-carousel-slide-to')),
                 el: $indicatorEl
             });
         });
@@ -9120,17 +9160,17 @@ function $6a8fcd5cc87cb99e$export$3ab77386b16b9e58() {
         });
         if (slide) carousel.cycle();
         // check for controls
-        var carouselNextEl = $carouselEl.querySelector("[data-carousel-next]");
-        var carouselPrevEl = $carouselEl.querySelector("[data-carousel-prev]");
-        if (carouselNextEl) carouselNextEl.addEventListener("click", function() {
+        var carouselNextEl = $carouselEl.querySelector('[data-carousel-next]');
+        var carouselPrevEl = $carouselEl.querySelector('[data-carousel-prev]');
+        if (carouselNextEl) carouselNextEl.addEventListener('click', function() {
             carousel.next();
         });
-        if (carouselPrevEl) carouselPrevEl.addEventListener("click", function() {
+        if (carouselPrevEl) carouselPrevEl.addEventListener('click', function() {
             carousel.prev();
         });
     });
 }
-if (typeof window !== "undefined") {
+if (typeof window !== 'undefined') {
     window.Carousel = $6a8fcd5cc87cb99e$var$Carousel;
     window.initCarousels = $6a8fcd5cc87cb99e$export$3ab77386b16b9e58;
 }
@@ -9149,9 +9189,9 @@ var $fa24e680ac3fba2d$var$__assign = undefined && undefined.__assign || function
     return $fa24e680ac3fba2d$var$__assign.apply(this, arguments);
 };
 var $fa24e680ac3fba2d$var$Default = {
-    transition: "transition-opacity",
+    transition: 'transition-opacity',
     duration: 300,
-    timing: "ease-out",
+    timing: 'ease-out',
     onHide: function() {}
 };
 var $fa24e680ac3fba2d$var$DefaultInstanceOptions = {
@@ -9170,7 +9210,7 @@ var $fa24e680ac3fba2d$var$Dismiss = /** @class */ function() {
         this._options = $fa24e680ac3fba2d$var$__assign($fa24e680ac3fba2d$var$__assign({}, $fa24e680ac3fba2d$var$Default), options);
         this._initialized = false;
         this.init();
-        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).addInstance("Dismiss", this, this._instanceId, instanceOptions.override);
+        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).addInstance('Dismiss', this, this._instanceId, instanceOptions.override);
     }
     Dismiss.prototype.init = function() {
         var _this = this;
@@ -9178,18 +9218,18 @@ var $fa24e680ac3fba2d$var$Dismiss = /** @class */ function() {
             this._clickHandler = function() {
                 _this.hide();
             };
-            this._triggerEl.addEventListener("click", this._clickHandler);
+            this._triggerEl.addEventListener('click', this._clickHandler);
             this._initialized = true;
         }
     };
     Dismiss.prototype.destroy = function() {
         if (this._triggerEl && this._initialized) {
-            this._triggerEl.removeEventListener("click", this._clickHandler);
+            this._triggerEl.removeEventListener('click', this._clickHandler);
             this._initialized = false;
         }
     };
     Dismiss.prototype.removeInstance = function() {
-        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).removeInstance("Dismiss", this._instanceId);
+        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).removeInstance('Dismiss', this._instanceId);
     };
     Dismiss.prototype.destroyAndRemoveInstance = function() {
         this.destroy();
@@ -9197,9 +9237,9 @@ var $fa24e680ac3fba2d$var$Dismiss = /** @class */ function() {
     };
     Dismiss.prototype.hide = function() {
         var _this = this;
-        this._targetEl.classList.add(this._options.transition, "duration-".concat(this._options.duration), this._options.timing, "opacity-0");
+        this._targetEl.classList.add(this._options.transition, "duration-".concat(this._options.duration), this._options.timing, 'opacity-0');
         setTimeout(function() {
-            _this._targetEl.classList.add("hidden");
+            _this._targetEl.classList.add('hidden');
         }, this._options.duration);
         // callback function
         this._options.onHide(this, this._targetEl);
@@ -9210,14 +9250,14 @@ var $fa24e680ac3fba2d$var$Dismiss = /** @class */ function() {
     return Dismiss;
 }();
 function $fa24e680ac3fba2d$export$69c84787a503daef() {
-    document.querySelectorAll("[data-dismiss-target]").forEach(function($triggerEl) {
-        var targetId = $triggerEl.getAttribute("data-dismiss-target");
+    document.querySelectorAll('[data-dismiss-target]').forEach(function($triggerEl) {
+        var targetId = $triggerEl.getAttribute('data-dismiss-target');
         var $dismissEl = document.querySelector(targetId);
         if ($dismissEl) new $fa24e680ac3fba2d$var$Dismiss($dismissEl, $triggerEl);
-        else console.error('The dismiss element with id "'.concat(targetId, '" does not exist. Please check the data-dismiss-target attribute.'));
+        else console.error("The dismiss element with id \"".concat(targetId, "\" does not exist. Please check the data-dismiss-target attribute."));
     });
 }
-if (typeof window !== "undefined") {
+if (typeof window !== 'undefined') {
     window.Dismiss = $fa24e680ac3fba2d$var$Dismiss;
     window.initDismisses = $fa24e680ac3fba2d$export$69c84787a503daef;
 }
@@ -9226,7 +9266,7 @@ var $fa24e680ac3fba2d$export$2e2bcd8739ae039 = $fa24e680ac3fba2d$var$Dismiss;
 
 function $e992165d27cf1e50$export$2e2bcd8739ae039(node) {
     if (node == null) return window;
-    if (node.toString() !== "[object Window]") {
+    if (node.toString() !== '[object Window]') {
         var ownerDocument = node.ownerDocument;
         return ownerDocument ? ownerDocument.defaultView || window : window;
     }
@@ -9244,7 +9284,7 @@ function $b83e73df1a45d10b$export$1b3bfaa9684536aa(node) {
 }
 function $b83e73df1a45d10b$export$af51f0f06c0f328a(node) {
     // IE 11 has no ShadowRoot
-    if (typeof ShadowRoot === "undefined") return false;
+    if (typeof ShadowRoot === 'undefined') return false;
     var OwnElement = (0, $e992165d27cf1e50$export$2e2bcd8739ae039)(node).ShadowRoot;
     return node instanceof OwnElement || node instanceof ShadowRoot;
 }
@@ -9260,7 +9300,7 @@ function $5e056ec93b493b76$export$2e2bcd8739ae039() {
     var uaData = navigator.userAgentData;
     if (uaData != null && uaData.brands && Array.isArray(uaData.brands)) return uaData.brands.map(function(item) {
         return item.brand + "/" + item.version;
-    }).join(" ");
+    }).join(' ');
     return navigator.userAgent;
 }
 
@@ -9328,7 +9368,7 @@ function $1416989062dadf75$export$2e2bcd8739ae039(node) {
 
 
 function $560fb2f7f26d74c6$export$2e2bcd8739ae039(element) {
-    return element ? (element.nodeName || "").toLowerCase() : null;
+    return element ? (element.nodeName || '').toLowerCase() : null;
 }
 
 
@@ -9390,7 +9430,7 @@ function $cd2b59ec72f3c621$export$2e2bcd8739ae039(elementOrVirtualElement, offse
         y: 0
     };
     if (isOffsetParentAnElement || !isOffsetParentAnElement && !isFixed) {
-        if ((0, $560fb2f7f26d74c6$export$2e2bcd8739ae039)(offsetParent) !== "body" || // https://github.com/popperjs/popper-core/issues/1078
+        if ((0, $560fb2f7f26d74c6$export$2e2bcd8739ae039)(offsetParent) !== 'body' || // https://github.com/popperjs/popper-core/issues/1078
         (0, $3e03f71b3bbb98eb$export$2e2bcd8739ae039)(documentElement)) scroll = (0, $1416989062dadf75$export$2e2bcd8739ae039)(offsetParent);
         if ((0, $b83e73df1a45d10b$export$1b3bfaa9684536aa)(offsetParent)) {
             offsets = (0, $d5b6692e6e485772$export$2e2bcd8739ae039)(offsetParent, true);
@@ -9428,7 +9468,7 @@ function $f4ac90f91f825ce1$export$2e2bcd8739ae039(element) {
 
 
 function $f019b932829cd8d0$export$2e2bcd8739ae039(element) {
-    if ((0, $560fb2f7f26d74c6$export$2e2bcd8739ae039)(element) === "html") return element;
+    if ((0, $560fb2f7f26d74c6$export$2e2bcd8739ae039)(element) === 'html') return element;
     return(// $FlowFixMe[incompatible-return]
     // $FlowFixMe[prop-missing]
     element.assignedSlot || // step into the shadow DOM of the parent of a slotted node
@@ -9444,9 +9484,9 @@ function $f019b932829cd8d0$export$2e2bcd8739ae039(element) {
 
 function $7b745ff2b79fb468$export$2e2bcd8739ae039(node) {
     if ([
-        "html",
-        "body",
-        "#document"
+        'html',
+        'body',
+        '#document'
     ].indexOf((0, $560fb2f7f26d74c6$export$2e2bcd8739ae039)(node)) >= 0) // $FlowFixMe[incompatible-return]: assume body is always available
     return node.ownerDocument.body;
     if ((0, $b83e73df1a45d10b$export$1b3bfaa9684536aa)(node) && (0, $3e03f71b3bbb98eb$export$2e2bcd8739ae039)(node)) return node;
@@ -9478,9 +9518,9 @@ function $ebe9d77e8ccdd6fa$export$2e2bcd8739ae039(element, list) {
 
 function $224b24caa0d1b578$export$2e2bcd8739ae039(element) {
     return [
-        "table",
-        "td",
-        "th"
+        'table',
+        'td',
+        'th'
     ].indexOf((0, $560fb2f7f26d74c6$export$2e2bcd8739ae039)(element)) >= 0;
 }
 
@@ -9489,7 +9529,7 @@ function $224b24caa0d1b578$export$2e2bcd8739ae039(element) {
 
 function $01dd27adea182f9a$var$getTrueOffsetParent(element) {
     if (!(0, $b83e73df1a45d10b$export$1b3bfaa9684536aa)(element) || // https://github.com/popperjs/popper-core/issues/837
-    (0, $7d74e8e12f28eb07$export$2e2bcd8739ae039)(element).position === "fixed") return null;
+    (0, $7d74e8e12f28eb07$export$2e2bcd8739ae039)(element).position === 'fixed') return null;
     return element.offsetParent;
 } // `.offsetParent` reports `null` for fixed elements, while absolute elements
 // return the containing block
@@ -9499,21 +9539,21 @@ function $01dd27adea182f9a$var$getContainingBlock(element) {
     if (isIE && (0, $b83e73df1a45d10b$export$1b3bfaa9684536aa)(element)) {
         // In IE 9, 10 and 11 fixed elements containing block is always established by the viewport
         var elementCss = (0, $7d74e8e12f28eb07$export$2e2bcd8739ae039)(element);
-        if (elementCss.position === "fixed") return null;
+        if (elementCss.position === 'fixed') return null;
     }
     var currentNode = (0, $f019b932829cd8d0$export$2e2bcd8739ae039)(element);
     if ((0, $b83e73df1a45d10b$export$af51f0f06c0f328a)(currentNode)) currentNode = currentNode.host;
     while((0, $b83e73df1a45d10b$export$1b3bfaa9684536aa)(currentNode) && [
-        "html",
-        "body"
+        'html',
+        'body'
     ].indexOf((0, $560fb2f7f26d74c6$export$2e2bcd8739ae039)(currentNode)) < 0){
         var css = (0, $7d74e8e12f28eb07$export$2e2bcd8739ae039)(currentNode); // This is non-exhaustive but covers the most common CSS properties that
         // create a containing block.
         // https://developer.mozilla.org/en-US/docs/Web/CSS/Containing_block#identifying_the_containing_block
-        if (css.transform !== "none" || css.perspective !== "none" || css.contain === "paint" || [
-            "transform",
-            "perspective"
-        ].indexOf(css.willChange) !== -1 || isFirefox && css.willChange === "filter" || isFirefox && css.filter && css.filter !== "none") return currentNode;
+        if (css.transform !== 'none' || css.perspective !== 'none' || css.contain === 'paint' || [
+            'transform',
+            'perspective'
+        ].indexOf(css.willChange) !== -1 || isFirefox && css.willChange === 'filter' || isFirefox && css.filter && css.filter !== 'none') return currentNode;
         else currentNode = currentNode.parentNode;
     }
     return null;
@@ -9521,29 +9561,29 @@ function $01dd27adea182f9a$var$getContainingBlock(element) {
 function $01dd27adea182f9a$export$2e2bcd8739ae039(element) {
     var window = (0, $e992165d27cf1e50$export$2e2bcd8739ae039)(element);
     var offsetParent = $01dd27adea182f9a$var$getTrueOffsetParent(element);
-    while(offsetParent && (0, $224b24caa0d1b578$export$2e2bcd8739ae039)(offsetParent) && (0, $7d74e8e12f28eb07$export$2e2bcd8739ae039)(offsetParent).position === "static")offsetParent = $01dd27adea182f9a$var$getTrueOffsetParent(offsetParent);
-    if (offsetParent && ((0, $560fb2f7f26d74c6$export$2e2bcd8739ae039)(offsetParent) === "html" || (0, $560fb2f7f26d74c6$export$2e2bcd8739ae039)(offsetParent) === "body" && (0, $7d74e8e12f28eb07$export$2e2bcd8739ae039)(offsetParent).position === "static")) return window;
+    while(offsetParent && (0, $224b24caa0d1b578$export$2e2bcd8739ae039)(offsetParent) && (0, $7d74e8e12f28eb07$export$2e2bcd8739ae039)(offsetParent).position === 'static')offsetParent = $01dd27adea182f9a$var$getTrueOffsetParent(offsetParent);
+    if (offsetParent && ((0, $560fb2f7f26d74c6$export$2e2bcd8739ae039)(offsetParent) === 'html' || (0, $560fb2f7f26d74c6$export$2e2bcd8739ae039)(offsetParent) === 'body' && (0, $7d74e8e12f28eb07$export$2e2bcd8739ae039)(offsetParent).position === 'static')) return window;
     return offsetParent || $01dd27adea182f9a$var$getContainingBlock(element) || window;
 }
 
 
-var $8478d2765df37982$export$1e95b668f3b82d = "top";
-var $8478d2765df37982$export$40e543e69a8b3fbb = "bottom";
-var $8478d2765df37982$export$79ffe56a765070d2 = "right";
-var $8478d2765df37982$export$eabcd2c8791e7bf4 = "left";
-var $8478d2765df37982$export$dfb5619354ba860 = "auto";
+var $8478d2765df37982$export$1e95b668f3b82d = 'top';
+var $8478d2765df37982$export$40e543e69a8b3fbb = 'bottom';
+var $8478d2765df37982$export$79ffe56a765070d2 = 'right';
+var $8478d2765df37982$export$eabcd2c8791e7bf4 = 'left';
+var $8478d2765df37982$export$dfb5619354ba860 = 'auto';
 var $8478d2765df37982$export$aec2ce47c367b8c3 = [
     $8478d2765df37982$export$1e95b668f3b82d,
     $8478d2765df37982$export$40e543e69a8b3fbb,
     $8478d2765df37982$export$79ffe56a765070d2,
     $8478d2765df37982$export$eabcd2c8791e7bf4
 ];
-var $8478d2765df37982$export$b3571188c770cc5a = "start";
-var $8478d2765df37982$export$bd5df0f255a350f8 = "end";
-var $8478d2765df37982$export$390fd549c5303b4d = "clippingParents";
-var $8478d2765df37982$export$d7b7311ec04a3e8f = "viewport";
-var $8478d2765df37982$export$ae5ab1c730825774 = "popper";
-var $8478d2765df37982$export$ca50aac9f3ba507f = "reference";
+var $8478d2765df37982$export$b3571188c770cc5a = 'start';
+var $8478d2765df37982$export$bd5df0f255a350f8 = 'end';
+var $8478d2765df37982$export$390fd549c5303b4d = 'clippingParents';
+var $8478d2765df37982$export$d7b7311ec04a3e8f = 'viewport';
+var $8478d2765df37982$export$ae5ab1c730825774 = 'popper';
+var $8478d2765df37982$export$ca50aac9f3ba507f = 'reference';
 var $8478d2765df37982$export$368f9a87e87fa4e1 = /*#__PURE__*/ $8478d2765df37982$export$aec2ce47c367b8c3.reduce(function(acc, placement) {
     return acc.concat([
         placement + "-" + $8478d2765df37982$export$b3571188c770cc5a,
@@ -9559,15 +9599,15 @@ var $8478d2765df37982$export$803cd8101b6c182b = /*#__PURE__*/ [].concat($8478d27
         placement + "-" + $8478d2765df37982$export$bd5df0f255a350f8
     ]);
 }, []); // modifiers that need to read the DOM
-var $8478d2765df37982$export$421679a7c3d56e = "beforeRead";
-var $8478d2765df37982$export$aafa59e2e03f2942 = "read";
-var $8478d2765df37982$export$6964f6c886723980 = "afterRead"; // pure-logic modifiers
-var $8478d2765df37982$export$c65e99957a05207c = "beforeMain";
-var $8478d2765df37982$export$f22da7240b7add18 = "main";
-var $8478d2765df37982$export$bab79516f2d662fe = "afterMain"; // modifier with the purpose to write to the DOM (or write into a framework state)
-var $8478d2765df37982$export$8d4d2d70e7d46032 = "beforeWrite";
-var $8478d2765df37982$export$68d8715fc104d294 = "write";
-var $8478d2765df37982$export$70a6e5159acce2e6 = "afterWrite";
+var $8478d2765df37982$export$421679a7c3d56e = 'beforeRead';
+var $8478d2765df37982$export$aafa59e2e03f2942 = 'read';
+var $8478d2765df37982$export$6964f6c886723980 = 'afterRead'; // pure-logic modifiers
+var $8478d2765df37982$export$c65e99957a05207c = 'beforeMain';
+var $8478d2765df37982$export$f22da7240b7add18 = 'main';
+var $8478d2765df37982$export$bab79516f2d662fe = 'afterMain'; // modifier with the purpose to write to the DOM (or write into a framework state)
+var $8478d2765df37982$export$8d4d2d70e7d46032 = 'beforeWrite';
+var $8478d2765df37982$export$68d8715fc104d294 = 'write';
+var $8478d2765df37982$export$70a6e5159acce2e6 = 'afterWrite';
 var $8478d2765df37982$export$d087d3878fdf71d5 = [
     $8478d2765df37982$export$421679a7c3d56e,
     $8478d2765df37982$export$aafa59e2e03f2942,
@@ -9648,14 +9688,14 @@ function $12b179ff5efeeee3$export$2e2bcd8739ae039(modifiers) {
 
 
 var $f3aacc53d895d057$var$DEFAULT_OPTIONS = {
-    placement: "bottom",
+    placement: 'bottom',
     modifiers: [],
-    strategy: "absolute"
+    strategy: 'absolute'
 };
 function $f3aacc53d895d057$var$areValidElements() {
     for(var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++)args[_key] = arguments[_key];
     return !args.some(function(element) {
-        return !(element && typeof element.getBoundingClientRect === "function");
+        return !(element && typeof element.getBoundingClientRect === 'function');
     });
 }
 function $f3aacc53d895d057$export$ed5e13716264f202(generatorOptions) {
@@ -9664,7 +9704,7 @@ function $f3aacc53d895d057$export$ed5e13716264f202(generatorOptions) {
     return function createPopper(reference, popper, options) {
         if (options === void 0) options = defaultOptions;
         var state = {
-            placement: "bottom",
+            placement: 'bottom',
             orderedModifiers: [],
             options: Object.assign({}, $f3aacc53d895d057$var$DEFAULT_OPTIONS, defaultOptions),
             modifiersData: {},
@@ -9680,7 +9720,7 @@ function $f3aacc53d895d057$export$ed5e13716264f202(generatorOptions) {
         var instance = {
             state: state,
             setOptions: function setOptions(setOptionsAction) {
-                var options = typeof setOptionsAction === "function" ? setOptionsAction(state.options) : setOptionsAction;
+                var options = typeof setOptionsAction === 'function' ? setOptionsAction(state.options) : setOptionsAction;
                 cleanupModifierEffects();
                 state.options = Object.assign({}, defaultOptions, state.options, options);
                 state.scrollParents = {
@@ -9707,7 +9747,7 @@ function $f3aacc53d895d057$export$ed5e13716264f202(generatorOptions) {
                 if (!$f3aacc53d895d057$var$areValidElements(reference, popper)) return;
                  // Store the reference and popper rects to be read by modifiers
                 state.rects = {
-                    reference: (0, $cd2b59ec72f3c621$export$2e2bcd8739ae039)(reference, (0, $01dd27adea182f9a$export$2e2bcd8739ae039)(popper), state.options.strategy === "fixed"),
+                    reference: (0, $cd2b59ec72f3c621$export$2e2bcd8739ae039)(reference, (0, $01dd27adea182f9a$export$2e2bcd8739ae039)(popper), state.options.strategy === 'fixed'),
                     popper: (0, $f4ac90f91f825ce1$export$2e2bcd8739ae039)(popper)
                 }; // Modifiers have the ability to reset the current update cycle. The
                 // most common use case for this is the `flip` modifier changing the
@@ -9729,7 +9769,7 @@ function $f3aacc53d895d057$export$ed5e13716264f202(generatorOptions) {
                         continue;
                     }
                     var _state$orderedModifie = state.orderedModifiers[index], fn = _state$orderedModifie.fn, _state$orderedModifie2 = _state$orderedModifie.options, _options = _state$orderedModifie2 === void 0 ? {} : _state$orderedModifie2, name = _state$orderedModifie.name;
-                    if (typeof fn === "function") state = fn({
+                    if (typeof fn === 'function') state = fn({
                         state: state,
                         options: _options,
                         name: name,
@@ -9761,7 +9801,7 @@ function $f3aacc53d895d057$export$ed5e13716264f202(generatorOptions) {
         function runModifierEffects() {
             state.orderedModifiers.forEach(function(_ref) {
                 var name = _ref.name, _ref$options = _ref.options, options = _ref$options === void 0 ? {} : _ref$options, effect = _ref.effect;
-                if (typeof effect === "function") {
+                if (typeof effect === 'function') {
                     var cleanupFn = effect({
                         state: state,
                         name: name,
@@ -9795,20 +9835,20 @@ function $48430453eb0d053b$var$effect(_ref) {
     var window = (0, $e992165d27cf1e50$export$2e2bcd8739ae039)(state.elements.popper);
     var scrollParents = [].concat(state.scrollParents.reference, state.scrollParents.popper);
     if (scroll) scrollParents.forEach(function(scrollParent) {
-        scrollParent.addEventListener("scroll", instance.update, $48430453eb0d053b$var$passive);
+        scrollParent.addEventListener('scroll', instance.update, $48430453eb0d053b$var$passive);
     });
-    if (resize) window.addEventListener("resize", instance.update, $48430453eb0d053b$var$passive);
+    if (resize) window.addEventListener('resize', instance.update, $48430453eb0d053b$var$passive);
     return function() {
         if (scroll) scrollParents.forEach(function(scrollParent) {
-            scrollParent.removeEventListener("scroll", instance.update, $48430453eb0d053b$var$passive);
+            scrollParent.removeEventListener('scroll', instance.update, $48430453eb0d053b$var$passive);
         });
-        if (resize) window.removeEventListener("resize", instance.update, $48430453eb0d053b$var$passive);
+        if (resize) window.removeEventListener('resize', instance.update, $48430453eb0d053b$var$passive);
     };
 } // eslint-disable-next-line import/no-unused-modules
 var $48430453eb0d053b$export$2e2bcd8739ae039 = {
-    name: "eventListeners",
+    name: 'eventListeners',
     enabled: true,
-    phase: "write",
+    phase: 'write',
     fn: function fn() {},
     effect: $48430453eb0d053b$var$effect,
     data: {}
@@ -9817,20 +9857,20 @@ var $48430453eb0d053b$export$2e2bcd8739ae039 = {
 
 
 function $f33c93a011fffe7b$export$2e2bcd8739ae039(placement) {
-    return placement.split("-")[0];
+    return placement.split('-')[0];
 }
 
 
 function $c5e5c390efc1bad4$export$2e2bcd8739ae039(placement) {
-    return placement.split("-")[1];
+    return placement.split('-')[1];
 }
 
 
 function $247260022a0ad6ee$export$2e2bcd8739ae039(placement) {
     return [
-        "top",
-        "bottom"
-    ].indexOf(placement) >= 0 ? "x" : "y";
+        'top',
+        'bottom'
+    ].indexOf(placement) >= 0 ? 'x' : 'y';
 }
 
 
@@ -9875,7 +9915,7 @@ function $87655a20e47aab91$export$2e2bcd8739ae039(_ref) {
     }
     var mainAxis = basePlacement ? (0, $247260022a0ad6ee$export$2e2bcd8739ae039)(basePlacement) : null;
     if (mainAxis != null) {
-        var len = mainAxis === "y" ? "height" : "width";
+        var len = mainAxis === 'y' ? 'height' : 'width';
         switch(variation){
             case 0, $8478d2765df37982$export$b3571188c770cc5a:
                 offsets[mainAxis] = offsets[mainAxis] - (reference[len] / 2 - element[len] / 2);
@@ -9899,14 +9939,14 @@ function $b19a98045ea3e977$var$popperOffsets(_ref) {
     state.modifiersData[name] = (0, $87655a20e47aab91$export$2e2bcd8739ae039)({
         reference: state.rects.reference,
         element: state.rects.popper,
-        strategy: "absolute",
+        strategy: 'absolute',
         placement: state.placement
     });
 } // eslint-disable-next-line import/no-unused-modules
 var $b19a98045ea3e977$export$2e2bcd8739ae039 = {
-    name: "popperOffsets",
+    name: 'popperOffsets',
     enabled: true,
-    phase: "read",
+    phase: 'read',
     fn: $b19a98045ea3e977$var$popperOffsets,
     data: {}
 };
@@ -9921,10 +9961,10 @@ var $b19a98045ea3e977$export$2e2bcd8739ae039 = {
 
 
 var $c5e18f9acfdbb8a2$var$unsetSides = {
-    top: "auto",
-    right: "auto",
-    bottom: "auto",
-    left: "auto"
+    top: 'auto',
+    right: 'auto',
+    bottom: 'auto',
+    left: 'auto'
 }; // Round the offsets to the nearest suitable subpixel based on the DPR.
 // Zooming can change the DPR, but it seems to report a value that will
 // cleanly divide the values into the appropriate subpixels.
@@ -9940,7 +9980,7 @@ function $c5e18f9acfdbb8a2$export$378fa78a8fea596f(_ref2) {
     var _Object$assign2;
     var popper = _ref2.popper, popperRect = _ref2.popperRect, placement = _ref2.placement, variation = _ref2.variation, offsets = _ref2.offsets, position = _ref2.position, gpuAcceleration = _ref2.gpuAcceleration, adaptive = _ref2.adaptive, roundOffsets = _ref2.roundOffsets, isFixed = _ref2.isFixed;
     var _offsets$x = offsets.x, x = _offsets$x === void 0 ? 0 : _offsets$x, _offsets$y = offsets.y, y = _offsets$y === void 0 ? 0 : _offsets$y;
-    var _ref3 = typeof roundOffsets === "function" ? roundOffsets({
+    var _ref3 = typeof roundOffsets === 'function' ? roundOffsets({
         x: x,
         y: y
     }) : {
@@ -9949,20 +9989,20 @@ function $c5e18f9acfdbb8a2$export$378fa78a8fea596f(_ref2) {
     };
     x = _ref3.x;
     y = _ref3.y;
-    var hasX = offsets.hasOwnProperty("x");
-    var hasY = offsets.hasOwnProperty("y");
+    var hasX = offsets.hasOwnProperty('x');
+    var hasY = offsets.hasOwnProperty('y');
     var sideX = (0, $8478d2765df37982$export$eabcd2c8791e7bf4);
     var sideY = (0, $8478d2765df37982$export$1e95b668f3b82d);
     var win = window;
     if (adaptive) {
         var offsetParent = (0, $01dd27adea182f9a$export$2e2bcd8739ae039)(popper);
-        var heightProp = "clientHeight";
-        var widthProp = "clientWidth";
+        var heightProp = 'clientHeight';
+        var widthProp = 'clientWidth';
         if (offsetParent === (0, $e992165d27cf1e50$export$2e2bcd8739ae039)(popper)) {
             offsetParent = (0, $d56bbea5dd2fe00d$export$2e2bcd8739ae039)(popper);
-            if ((0, $7d74e8e12f28eb07$export$2e2bcd8739ae039)(offsetParent).position !== "static" && position === "absolute") {
-                heightProp = "scrollHeight";
-                widthProp = "scrollWidth";
+            if ((0, $7d74e8e12f28eb07$export$2e2bcd8739ae039)(offsetParent).position !== 'static' && position === 'absolute') {
+                heightProp = 'scrollHeight';
+                widthProp = 'scrollWidth';
             }
         } // $FlowFixMe[incompatible-cast]: force type refinement, we compare offsetParent with window above, but Flow doesn't detect it
         offsetParent;
@@ -9993,9 +10033,9 @@ function $c5e18f9acfdbb8a2$export$378fa78a8fea596f(_ref2) {
     y = _ref4.y;
     if (gpuAcceleration) {
         var _Object$assign;
-        return Object.assign({}, commonStyles, (_Object$assign = {}, _Object$assign[sideY] = hasY ? "0" : "", _Object$assign[sideX] = hasX ? "0" : "", _Object$assign.transform = (win.devicePixelRatio || 1) <= 1 ? "translate(" + x + "px, " + y + "px)" : "translate3d(" + x + "px, " + y + "px, 0)", _Object$assign));
+        return Object.assign({}, commonStyles, (_Object$assign = {}, _Object$assign[sideY] = hasY ? '0' : '', _Object$assign[sideX] = hasX ? '0' : '', _Object$assign.transform = (win.devicePixelRatio || 1) <= 1 ? "translate(" + x + "px, " + y + "px)" : "translate3d(" + x + "px, " + y + "px, 0)", _Object$assign));
     }
-    return Object.assign({}, commonStyles, (_Object$assign2 = {}, _Object$assign2[sideY] = hasY ? y + "px" : "", _Object$assign2[sideX] = hasX ? x + "px" : "", _Object$assign2.transform = "", _Object$assign2));
+    return Object.assign({}, commonStyles, (_Object$assign2 = {}, _Object$assign2[sideY] = hasY ? y + "px" : '', _Object$assign2[sideX] = hasX ? x + "px" : '', _Object$assign2.transform = '', _Object$assign2));
 }
 function $c5e18f9acfdbb8a2$var$computeStyles(_ref5) {
     var state = _ref5.state, options = _ref5.options;
@@ -10006,7 +10046,7 @@ function $c5e18f9acfdbb8a2$var$computeStyles(_ref5) {
         popper: state.elements.popper,
         popperRect: state.rects.popper,
         gpuAcceleration: gpuAcceleration,
-        isFixed: state.options.strategy === "fixed"
+        isFixed: state.options.strategy === 'fixed'
     };
     if (state.modifiersData.popperOffsets != null) state.styles.popper = Object.assign({}, state.styles.popper, $c5e18f9acfdbb8a2$export$378fa78a8fea596f(Object.assign({}, commonStyles, {
         offsets: state.modifiersData.popperOffsets,
@@ -10016,18 +10056,18 @@ function $c5e18f9acfdbb8a2$var$computeStyles(_ref5) {
     })));
     if (state.modifiersData.arrow != null) state.styles.arrow = Object.assign({}, state.styles.arrow, $c5e18f9acfdbb8a2$export$378fa78a8fea596f(Object.assign({}, commonStyles, {
         offsets: state.modifiersData.arrow,
-        position: "absolute",
+        position: 'absolute',
         adaptive: false,
         roundOffsets: roundOffsets
     })));
     state.attributes.popper = Object.assign({}, state.attributes.popper, {
-        "data-popper-placement": state.placement
+        'data-popper-placement': state.placement
     });
 } // eslint-disable-next-line import/no-unused-modules
 var $c5e18f9acfdbb8a2$export$2e2bcd8739ae039 = {
-    name: "computeStyles",
+    name: 'computeStyles',
     enabled: true,
-    phase: "beforeWrite",
+    phase: 'beforeWrite',
     fn: $c5e18f9acfdbb8a2$var$computeStyles,
     data: {}
 };
@@ -10050,7 +10090,7 @@ function $1c7a027d393b751c$var$applyStyles(_ref) {
         Object.keys(attributes).forEach(function(name) {
             var value = attributes[name];
             if (value === false) element.removeAttribute(name);
-            else element.setAttribute(name, value === true ? "" : value);
+            else element.setAttribute(name, value === true ? '' : value);
         });
     });
 }
@@ -10059,12 +10099,12 @@ function $1c7a027d393b751c$var$effect(_ref2) {
     var initialStyles = {
         popper: {
             position: state.options.strategy,
-            left: "0",
-            top: "0",
-            margin: "0"
+            left: '0',
+            top: '0',
+            margin: '0'
         },
         arrow: {
-            position: "absolute"
+            position: 'absolute'
         },
         reference: {}
     };
@@ -10077,7 +10117,7 @@ function $1c7a027d393b751c$var$effect(_ref2) {
             var attributes = state.attributes[name] || {};
             var styleProperties = Object.keys(state.styles.hasOwnProperty(name) ? state.styles[name] : initialStyles[name]); // Set all values to an empty string to unset them
             var style = styleProperties.reduce(function(style, property) {
-                style[property] = "";
+                style[property] = '';
                 return style;
             }, {}); // arrow is optional + virtual elements
             if (!(0, $b83e73df1a45d10b$export$1b3bfaa9684536aa)(element) || !(0, $560fb2f7f26d74c6$export$2e2bcd8739ae039)(element)) return;
@@ -10089,13 +10129,13 @@ function $1c7a027d393b751c$var$effect(_ref2) {
     };
 } // eslint-disable-next-line import/no-unused-modules
 var $1c7a027d393b751c$export$2e2bcd8739ae039 = {
-    name: "applyStyles",
+    name: 'applyStyles',
     enabled: true,
-    phase: "write",
+    phase: 'write',
     fn: $1c7a027d393b751c$var$applyStyles,
     effect: $1c7a027d393b751c$var$effect,
     requires: [
-        "computeStyles"
+        'computeStyles'
     ]
 };
 
@@ -10108,7 +10148,7 @@ function $f0fe73ce831ce17b$export$7fa02d8595b015ed(placement, rects, offset) {
         (0, $8478d2765df37982$export$eabcd2c8791e7bf4),
         (0, $8478d2765df37982$export$1e95b668f3b82d)
     ].indexOf(basePlacement) >= 0 ? -1 : 1;
-    var _ref = typeof offset === "function" ? offset(Object.assign({}, rects, {
+    var _ref = typeof offset === 'function' ? offset(Object.assign({}, rects, {
         placement: placement
     })) : offset, skidding = _ref[0], distance = _ref[1];
     skidding = skidding || 0;
@@ -10142,21 +10182,21 @@ function $f0fe73ce831ce17b$var$offset(_ref2) {
     state.modifiersData[name] = data;
 } // eslint-disable-next-line import/no-unused-modules
 var $f0fe73ce831ce17b$export$2e2bcd8739ae039 = {
-    name: "offset",
+    name: 'offset',
     enabled: true,
-    phase: "main",
+    phase: 'main',
     requires: [
-        "popperOffsets"
+        'popperOffsets'
     ],
     fn: $f0fe73ce831ce17b$var$offset
 };
 
 
 var $c0bd8d5905df73b7$var$hash = {
-    left: "right",
-    right: "left",
-    bottom: "top",
-    top: "bottom"
+    left: 'right',
+    right: 'left',
+    bottom: 'top',
+    top: 'bottom'
 };
 function $c0bd8d5905df73b7$export$2e2bcd8739ae039(placement) {
     return placement.replace(/left|right|bottom|top/g, function(matched) {
@@ -10167,8 +10207,8 @@ function $c0bd8d5905df73b7$export$2e2bcd8739ae039(placement) {
 
 
 var $a0a642892f75993d$var$hash = {
-    start: "end",
-    end: "start"
+    start: 'end',
+    end: 'start'
 };
 function $a0a642892f75993d$export$2e2bcd8739ae039(placement) {
     return placement.replace(/start|end/g, function(matched) {
@@ -10194,7 +10234,7 @@ function $b4831f59b241eaa3$export$2e2bcd8739ae039(element, strategy) {
         width = visualViewport.width;
         height = visualViewport.height;
         var layoutViewport = (0, $ab0cb3910b57b210$export$2e2bcd8739ae039)();
-        if (layoutViewport || !layoutViewport && strategy === "fixed") {
+        if (layoutViewport || !layoutViewport && strategy === 'fixed') {
             x = visualViewport.offsetLeft;
             y = visualViewport.offsetTop;
         }
@@ -10222,7 +10262,7 @@ function $f086f128b1379452$export$2e2bcd8739ae039(element) {
     var height = (0, $9c234cc6f4ed3b92$export$8960430cfd85939f)(html.scrollHeight, html.clientHeight, body ? body.scrollHeight : 0, body ? body.clientHeight : 0);
     var x = -winScroll.scrollLeft + (0, $c4822cfd8628a2db$export$2e2bcd8739ae039)(element);
     var y = -winScroll.scrollTop;
-    if ((0, $7d74e8e12f28eb07$export$2e2bcd8739ae039)(body || html).direction === "rtl") x += (0, $9c234cc6f4ed3b92$export$8960430cfd85939f)(html.clientWidth, body ? body.clientWidth : 0) - width;
+    if ((0, $7d74e8e12f28eb07$export$2e2bcd8739ae039)(body || html).direction === 'rtl') x += (0, $9c234cc6f4ed3b92$export$8960430cfd85939f)(html.clientWidth, body ? body.clientWidth : 0) - width;
     return {
         width: width,
         height: height,
@@ -10268,7 +10308,7 @@ function $fe38ab5b3ef9f518$export$2e2bcd8739ae039(rect) {
 
 
 function $202ca78a1a2af2c0$var$getInnerBoundingClientRect(element, strategy) {
-    var rect = (0, $d5b6692e6e485772$export$2e2bcd8739ae039)(element, false, strategy === "fixed");
+    var rect = (0, $d5b6692e6e485772$export$2e2bcd8739ae039)(element, false, strategy === 'fixed');
     rect.top = rect.top + element.clientTop;
     rect.left = rect.left + element.clientLeft;
     rect.bottom = rect.top + element.clientHeight;
@@ -10287,18 +10327,18 @@ function $202ca78a1a2af2c0$var$getClientRectFromMixedType(element, clippingParen
 function $202ca78a1a2af2c0$var$getClippingParents(element) {
     var clippingParents = (0, $ebe9d77e8ccdd6fa$export$2e2bcd8739ae039)((0, $f019b932829cd8d0$export$2e2bcd8739ae039)(element));
     var canEscapeClipping = [
-        "absolute",
-        "fixed"
+        'absolute',
+        'fixed'
     ].indexOf((0, $7d74e8e12f28eb07$export$2e2bcd8739ae039)(element).position) >= 0;
     var clipperElement = canEscapeClipping && (0, $b83e73df1a45d10b$export$1b3bfaa9684536aa)(element) ? (0, $01dd27adea182f9a$export$2e2bcd8739ae039)(element) : element;
     if (!(0, $b83e73df1a45d10b$export$45a5e7f76e0caa8d)(clipperElement)) return [];
      // $FlowFixMe[incompatible-return]: https://github.com/facebook/flow/issues/1414
     return clippingParents.filter(function(clippingParent) {
-        return (0, $b83e73df1a45d10b$export$45a5e7f76e0caa8d)(clippingParent) && (0, $6bd41d59857881c0$export$2e2bcd8739ae039)(clippingParent, clipperElement) && (0, $560fb2f7f26d74c6$export$2e2bcd8739ae039)(clippingParent) !== "body";
+        return (0, $b83e73df1a45d10b$export$45a5e7f76e0caa8d)(clippingParent) && (0, $6bd41d59857881c0$export$2e2bcd8739ae039)(clippingParent, clipperElement) && (0, $560fb2f7f26d74c6$export$2e2bcd8739ae039)(clippingParent) !== 'body';
     });
 } // Gets the maximum area that the element is visible in due to any number of
 function $202ca78a1a2af2c0$export$2e2bcd8739ae039(element, boundary, rootBoundary, strategy) {
-    var mainClippingParents = boundary === "clippingParents" ? $202ca78a1a2af2c0$var$getClippingParents(element) : [].concat(boundary);
+    var mainClippingParents = boundary === 'clippingParents' ? $202ca78a1a2af2c0$var$getClippingParents(element) : [].concat(boundary);
     var clippingParents = [].concat(mainClippingParents, [
         rootBoundary
     ]);
@@ -10351,7 +10391,7 @@ function $4aa2b0a0a983c60c$export$2e2bcd8739ae039(value, keys) {
 function $8380aa231acdf82c$export$2e2bcd8739ae039(state, options) {
     if (options === void 0) options = {};
     var _options = options, _options$placement = _options.placement, placement = _options$placement === void 0 ? state.placement : _options$placement, _options$strategy = _options.strategy, strategy = _options$strategy === void 0 ? state.strategy : _options$strategy, _options$boundary = _options.boundary, boundary = _options$boundary === void 0 ? (0, $8478d2765df37982$export$390fd549c5303b4d) : _options$boundary, _options$rootBoundary = _options.rootBoundary, rootBoundary = _options$rootBoundary === void 0 ? (0, $8478d2765df37982$export$d7b7311ec04a3e8f) : _options$rootBoundary, _options$elementConte = _options.elementContext, elementContext = _options$elementConte === void 0 ? (0, $8478d2765df37982$export$ae5ab1c730825774) : _options$elementConte, _options$altBoundary = _options.altBoundary, altBoundary = _options$altBoundary === void 0 ? false : _options$altBoundary, _options$padding = _options.padding, padding = _options$padding === void 0 ? 0 : _options$padding;
-    var paddingObject = (0, $2cee3ab2c79c79df$export$2e2bcd8739ae039)(typeof padding !== "number" ? padding : (0, $4aa2b0a0a983c60c$export$2e2bcd8739ae039)(padding, (0, $8478d2765df37982$export$aec2ce47c367b8c3)));
+    var paddingObject = (0, $2cee3ab2c79c79df$export$2e2bcd8739ae039)(typeof padding !== 'number' ? padding : (0, $4aa2b0a0a983c60c$export$2e2bcd8739ae039)(padding, (0, $8478d2765df37982$export$aec2ce47c367b8c3)));
     var altContext = elementContext === (0, $8478d2765df37982$export$ae5ab1c730825774) ? (0, $8478d2765df37982$export$ca50aac9f3ba507f) : (0, $8478d2765df37982$export$ae5ab1c730825774);
     var popperRect = state.rects.popper;
     var element = state.elements[altBoundary ? altContext : elementContext];
@@ -10360,7 +10400,7 @@ function $8380aa231acdf82c$export$2e2bcd8739ae039(state, options) {
     var popperOffsets = (0, $87655a20e47aab91$export$2e2bcd8739ae039)({
         reference: referenceClientRect,
         element: popperRect,
-        strategy: "absolute",
+        strategy: 'absolute',
         placement: placement
     });
     var popperClientRect = (0, $fe38ab5b3ef9f518$export$2e2bcd8739ae039)(Object.assign({}, popperRect, popperOffsets));
@@ -10383,7 +10423,7 @@ function $8380aa231acdf82c$export$2e2bcd8739ae039(state, options) {
             var axis = [
                 (0, $8478d2765df37982$export$1e95b668f3b82d),
                 (0, $8478d2765df37982$export$40e543e69a8b3fbb)
-            ].indexOf(key) >= 0 ? "y" : "x";
+            ].indexOf(key) >= 0 ? 'y' : 'x';
             overflowOffsets[key] += offset[axis] * multiply;
         });
     }
@@ -10468,7 +10508,7 @@ function $2c04a4fb35bcf3ba$var$flip(_ref) {
             (0, $8478d2765df37982$export$1e95b668f3b82d),
             (0, $8478d2765df37982$export$40e543e69a8b3fbb)
         ].indexOf(_basePlacement) >= 0;
-        var len = isVertical ? "width" : "height";
+        var len = isVertical ? 'width' : 'height';
         var overflow = (0, $8380aa231acdf82c$export$2e2bcd8739ae039)(state, {
             placement: placement,
             boundary: boundary,
@@ -10518,12 +10558,12 @@ function $2c04a4fb35bcf3ba$var$flip(_ref) {
     }
 } // eslint-disable-next-line import/no-unused-modules
 var $2c04a4fb35bcf3ba$export$2e2bcd8739ae039 = {
-    name: "flip",
+    name: 'flip',
     enabled: true,
-    phase: "main",
+    phase: 'main',
     fn: $2c04a4fb35bcf3ba$var$flip,
     requiresIfExists: [
-        "offset"
+        'offset'
     ],
     data: {
         _skip: false
@@ -10535,7 +10575,7 @@ var $2c04a4fb35bcf3ba$export$2e2bcd8739ae039 = {
 
 
 function $64f3a18c323e0caa$export$2e2bcd8739ae039(axis) {
-    return axis === "x" ? "y" : "x";
+    return axis === 'x' ? 'y' : 'x';
 }
 
 
@@ -10572,10 +10612,10 @@ function $135f2e2733b618c2$var$preventOverflow(_ref) {
     var popperOffsets = state.modifiersData.popperOffsets;
     var referenceRect = state.rects.reference;
     var popperRect = state.rects.popper;
-    var tetherOffsetValue = typeof tetherOffset === "function" ? tetherOffset(Object.assign({}, state.rects, {
+    var tetherOffsetValue = typeof tetherOffset === 'function' ? tetherOffset(Object.assign({}, state.rects, {
         placement: state.placement
     })) : tetherOffset;
-    var normalizedTetherOffsetValue = typeof tetherOffsetValue === "number" ? {
+    var normalizedTetherOffsetValue = typeof tetherOffsetValue === 'number' ? {
         mainAxis: tetherOffsetValue,
         altAxis: tetherOffsetValue
     } : Object.assign({
@@ -10590,9 +10630,9 @@ function $135f2e2733b618c2$var$preventOverflow(_ref) {
     if (!popperOffsets) return;
     if (checkMainAxis) {
         var _offsetModifierState$;
-        var mainSide = mainAxis === "y" ? (0, $8478d2765df37982$export$1e95b668f3b82d) : (0, $8478d2765df37982$export$eabcd2c8791e7bf4);
-        var altSide = mainAxis === "y" ? (0, $8478d2765df37982$export$40e543e69a8b3fbb) : (0, $8478d2765df37982$export$79ffe56a765070d2);
-        var len = mainAxis === "y" ? "height" : "width";
+        var mainSide = mainAxis === 'y' ? (0, $8478d2765df37982$export$1e95b668f3b82d) : (0, $8478d2765df37982$export$eabcd2c8791e7bf4);
+        var altSide = mainAxis === 'y' ? (0, $8478d2765df37982$export$40e543e69a8b3fbb) : (0, $8478d2765df37982$export$79ffe56a765070d2);
+        var len = mainAxis === 'y' ? 'height' : 'width';
         var offset = popperOffsets[mainAxis];
         var min = offset + overflow[mainSide];
         var max = offset - overflow[altSide];
@@ -10605,7 +10645,7 @@ function $135f2e2733b618c2$var$preventOverflow(_ref) {
             width: 0,
             height: 0
         };
-        var arrowPaddingObject = state.modifiersData["arrow#persistent"] ? state.modifiersData["arrow#persistent"].padding : (0, $8e2ffbe2ceace94c$export$2e2bcd8739ae039)();
+        var arrowPaddingObject = state.modifiersData['arrow#persistent'] ? state.modifiersData['arrow#persistent'].padding : (0, $8e2ffbe2ceace94c$export$2e2bcd8739ae039)();
         var arrowPaddingMin = arrowPaddingObject[mainSide];
         var arrowPaddingMax = arrowPaddingObject[altSide]; // If the reference length is smaller than the arrow length, we don't want
         // to include its full size in the calculation. If the reference is small
@@ -10616,7 +10656,7 @@ function $135f2e2733b618c2$var$preventOverflow(_ref) {
         var minOffset = isBasePlacement ? referenceRect[len] / 2 - additive - arrowLen - arrowPaddingMin - normalizedTetherOffsetValue.mainAxis : minLen - arrowLen - arrowPaddingMin - normalizedTetherOffsetValue.mainAxis;
         var maxOffset = isBasePlacement ? -referenceRect[len] / 2 + additive + arrowLen + arrowPaddingMax + normalizedTetherOffsetValue.mainAxis : maxLen + arrowLen + arrowPaddingMax + normalizedTetherOffsetValue.mainAxis;
         var arrowOffsetParent = state.elements.arrow && (0, $01dd27adea182f9a$export$2e2bcd8739ae039)(state.elements.arrow);
-        var clientOffset = arrowOffsetParent ? mainAxis === "y" ? arrowOffsetParent.clientTop || 0 : arrowOffsetParent.clientLeft || 0 : 0;
+        var clientOffset = arrowOffsetParent ? mainAxis === 'y' ? arrowOffsetParent.clientTop || 0 : arrowOffsetParent.clientLeft || 0 : 0;
         var offsetModifierValue = (_offsetModifierState$ = offsetModifierState == null ? void 0 : offsetModifierState[mainAxis]) != null ? _offsetModifierState$ : 0;
         var tetherMin = offset + minOffset - offsetModifierValue - clientOffset;
         var tetherMax = offset + maxOffset - offsetModifierValue;
@@ -10626,10 +10666,10 @@ function $135f2e2733b618c2$var$preventOverflow(_ref) {
     }
     if (checkAltAxis) {
         var _offsetModifierState$2;
-        var _mainSide = mainAxis === "x" ? (0, $8478d2765df37982$export$1e95b668f3b82d) : (0, $8478d2765df37982$export$eabcd2c8791e7bf4);
-        var _altSide = mainAxis === "x" ? (0, $8478d2765df37982$export$40e543e69a8b3fbb) : (0, $8478d2765df37982$export$79ffe56a765070d2);
+        var _mainSide = mainAxis === 'x' ? (0, $8478d2765df37982$export$1e95b668f3b82d) : (0, $8478d2765df37982$export$eabcd2c8791e7bf4);
+        var _altSide = mainAxis === 'x' ? (0, $8478d2765df37982$export$40e543e69a8b3fbb) : (0, $8478d2765df37982$export$79ffe56a765070d2);
         var _offset = popperOffsets[altAxis];
-        var _len = altAxis === "y" ? "height" : "width";
+        var _len = altAxis === 'y' ? 'height' : 'width';
         var _min = _offset + overflow[_mainSide];
         var _max = _offset - overflow[_altSide];
         var isOriginSide = [
@@ -10646,12 +10686,12 @@ function $135f2e2733b618c2$var$preventOverflow(_ref) {
     state.modifiersData[name] = data;
 } // eslint-disable-next-line import/no-unused-modules
 var $135f2e2733b618c2$export$2e2bcd8739ae039 = {
-    name: "preventOverflow",
+    name: 'preventOverflow',
     enabled: true,
-    phase: "main",
+    phase: 'main',
     fn: $135f2e2733b618c2$var$preventOverflow,
     requiresIfExists: [
-        "offset"
+        'offset'
     ]
 };
 
@@ -10666,10 +10706,10 @@ var $135f2e2733b618c2$export$2e2bcd8739ae039 = {
 
 
 var $19cc820fe7335f18$var$toPaddingObject = function toPaddingObject(padding, state) {
-    padding = typeof padding === "function" ? padding(Object.assign({}, state.rects, {
+    padding = typeof padding === 'function' ? padding(Object.assign({}, state.rects, {
         placement: state.placement
     })) : padding;
-    return (0, $2cee3ab2c79c79df$export$2e2bcd8739ae039)(typeof padding !== "number" ? padding : (0, $4aa2b0a0a983c60c$export$2e2bcd8739ae039)(padding, (0, $8478d2765df37982$export$aec2ce47c367b8c3)));
+    return (0, $2cee3ab2c79c79df$export$2e2bcd8739ae039)(typeof padding !== 'number' ? padding : (0, $4aa2b0a0a983c60c$export$2e2bcd8739ae039)(padding, (0, $8478d2765df37982$export$aec2ce47c367b8c3)));
 };
 function $19cc820fe7335f18$var$arrow(_ref) {
     var _state$modifiersData$;
@@ -10682,16 +10722,16 @@ function $19cc820fe7335f18$var$arrow(_ref) {
         (0, $8478d2765df37982$export$eabcd2c8791e7bf4),
         (0, $8478d2765df37982$export$79ffe56a765070d2)
     ].indexOf(basePlacement) >= 0;
-    var len = isVertical ? "height" : "width";
+    var len = isVertical ? 'height' : 'width';
     if (!arrowElement || !popperOffsets) return;
     var paddingObject = $19cc820fe7335f18$var$toPaddingObject(options.padding, state);
     var arrowRect = (0, $f4ac90f91f825ce1$export$2e2bcd8739ae039)(arrowElement);
-    var minProp = axis === "y" ? (0, $8478d2765df37982$export$1e95b668f3b82d) : (0, $8478d2765df37982$export$eabcd2c8791e7bf4);
-    var maxProp = axis === "y" ? (0, $8478d2765df37982$export$40e543e69a8b3fbb) : (0, $8478d2765df37982$export$79ffe56a765070d2);
+    var minProp = axis === 'y' ? (0, $8478d2765df37982$export$1e95b668f3b82d) : (0, $8478d2765df37982$export$eabcd2c8791e7bf4);
+    var maxProp = axis === 'y' ? (0, $8478d2765df37982$export$40e543e69a8b3fbb) : (0, $8478d2765df37982$export$79ffe56a765070d2);
     var endDiff = state.rects.reference[len] + state.rects.reference[axis] - popperOffsets[axis] - state.rects.popper[len];
     var startDiff = popperOffsets[axis] - state.rects.reference[axis];
     var arrowOffsetParent = (0, $01dd27adea182f9a$export$2e2bcd8739ae039)(arrowElement);
-    var clientSize = arrowOffsetParent ? axis === "y" ? arrowOffsetParent.clientHeight || 0 : arrowOffsetParent.clientWidth || 0 : 0;
+    var clientSize = arrowOffsetParent ? axis === 'y' ? arrowOffsetParent.clientHeight || 0 : arrowOffsetParent.clientWidth || 0 : 0;
     var centerToReference = endDiff / 2 - startDiff / 2; // Make sure the arrow doesn't overflow the popper if the center point is
     // outside of the popper bounds
     var min = paddingObject[minProp];
@@ -10703,10 +10743,10 @@ function $19cc820fe7335f18$var$arrow(_ref) {
 }
 function $19cc820fe7335f18$var$effect(_ref2) {
     var state = _ref2.state, options = _ref2.options;
-    var _options$element = options.element, arrowElement = _options$element === void 0 ? "[data-popper-arrow]" : _options$element;
+    var _options$element = options.element, arrowElement = _options$element === void 0 ? '[data-popper-arrow]' : _options$element;
     if (arrowElement == null) return;
      // CSS selector
-    if (typeof arrowElement === "string") {
+    if (typeof arrowElement === 'string') {
         arrowElement = state.elements.popper.querySelector(arrowElement);
         if (!arrowElement) return;
     }
@@ -10714,16 +10754,16 @@ function $19cc820fe7335f18$var$effect(_ref2) {
     state.elements.arrow = arrowElement;
 } // eslint-disable-next-line import/no-unused-modules
 var $19cc820fe7335f18$export$2e2bcd8739ae039 = {
-    name: "arrow",
+    name: 'arrow',
     enabled: true,
-    phase: "main",
+    phase: 'main',
     fn: $19cc820fe7335f18$var$arrow,
     effect: $19cc820fe7335f18$var$effect,
     requires: [
-        "popperOffsets"
+        'popperOffsets'
     ],
     requiresIfExists: [
-        "preventOverflow"
+        'preventOverflow'
     ]
 };
 
@@ -10758,7 +10798,7 @@ function $1f5fc639c8bd03d5$var$hide(_ref) {
     var popperRect = state.rects.popper;
     var preventedOffsets = state.modifiersData.preventOverflow;
     var referenceOverflow = (0, $8380aa231acdf82c$export$2e2bcd8739ae039)(state, {
-        elementContext: "reference"
+        elementContext: 'reference'
     });
     var popperAltOverflow = (0, $8380aa231acdf82c$export$2e2bcd8739ae039)(state, {
         altBoundary: true
@@ -10774,16 +10814,16 @@ function $1f5fc639c8bd03d5$var$hide(_ref) {
         hasPopperEscaped: hasPopperEscaped
     };
     state.attributes.popper = Object.assign({}, state.attributes.popper, {
-        "data-popper-reference-hidden": isReferenceHidden,
-        "data-popper-escaped": hasPopperEscaped
+        'data-popper-reference-hidden': isReferenceHidden,
+        'data-popper-escaped': hasPopperEscaped
     });
 } // eslint-disable-next-line import/no-unused-modules
 var $1f5fc639c8bd03d5$export$2e2bcd8739ae039 = {
-    name: "hide",
+    name: 'hide',
     enabled: true,
-    phase: "main",
+    phase: 'main',
     requiresIfExists: [
-        "preventOverflow"
+        'preventOverflow'
     ],
     fn: $1f5fc639c8bd03d5$var$hide
 };
@@ -10828,8 +10868,8 @@ var $ece16b3047178a9c$var$__spreadArray = undefined && undefined.__spreadArray |
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 var $ece16b3047178a9c$var$Default = {
-    placement: "bottom",
-    triggerType: "click",
+    placement: 'bottom',
+    triggerType: 'click',
     offsetSkidding: 0,
     offsetDistance: 10,
     delay: 300,
@@ -10856,7 +10896,7 @@ var $ece16b3047178a9c$var$Dropdown = /** @class */ function() {
         this._visible = false;
         this._initialized = false;
         this.init();
-        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).addInstance("Dropdown", this, this._instanceId, instanceOptions.override);
+        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).addInstance('Dropdown', this, this._instanceId, instanceOptions.override);
     }
     Dropdown.prototype.init = function() {
         if (this._triggerEl && this._targetEl && !this._initialized) {
@@ -10869,11 +10909,11 @@ var $ece16b3047178a9c$var$Dropdown = /** @class */ function() {
         var _this = this;
         var triggerEvents = this._getTriggerEvents();
         // Remove click event listeners for trigger element
-        if (this._options.triggerType === "click") triggerEvents.showEvents.forEach(function(ev) {
+        if (this._options.triggerType === 'click') triggerEvents.showEvents.forEach(function(ev) {
             _this._triggerEl.removeEventListener(ev, _this._clickHandler);
         });
         // Remove hover event listeners for trigger and target elements
-        if (this._options.triggerType === "hover") {
+        if (this._options.triggerType === 'hover') {
             triggerEvents.showEvents.forEach(function(ev) {
                 _this._triggerEl.removeEventListener(ev, _this._hoverShowTriggerElHandler);
                 _this._targetEl.removeEventListener(ev, _this._hoverShowTargetElHandler);
@@ -10887,7 +10927,7 @@ var $ece16b3047178a9c$var$Dropdown = /** @class */ function() {
         this._initialized = false;
     };
     Dropdown.prototype.removeInstance = function() {
-        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).removeInstance("Dropdown", this._instanceId);
+        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).removeInstance('Dropdown', this._instanceId);
     };
     Dropdown.prototype.destroyAndRemoveInstance = function() {
         this.destroy();
@@ -10900,11 +10940,11 @@ var $ece16b3047178a9c$var$Dropdown = /** @class */ function() {
             _this.toggle();
         };
         // click event handling for trigger element
-        if (this._options.triggerType === "click") triggerEvents.showEvents.forEach(function(ev) {
+        if (this._options.triggerType === 'click') triggerEvents.showEvents.forEach(function(ev) {
             _this._triggerEl.addEventListener(ev, _this._clickHandler);
         });
         this._hoverShowTriggerElHandler = function(ev) {
-            if (ev.type === "click") _this.toggle();
+            if (ev.type === 'click') _this.toggle();
             else setTimeout(function() {
                 _this.show();
             }, _this._options.delay);
@@ -10914,11 +10954,11 @@ var $ece16b3047178a9c$var$Dropdown = /** @class */ function() {
         };
         this._hoverHideHandler = function() {
             setTimeout(function() {
-                if (!_this._targetEl.matches(":hover")) _this.hide();
+                if (!_this._targetEl.matches(':hover')) _this.hide();
             }, _this._options.delay);
         };
         // hover event handling for trigger element
-        if (this._options.triggerType === "hover") {
+        if (this._options.triggerType === 'hover') {
             triggerEvents.showEvents.forEach(function(ev) {
                 _this._triggerEl.addEventListener(ev, _this._hoverShowTriggerElHandler);
                 _this._targetEl.addEventListener(ev, _this._hoverShowTargetElHandler);
@@ -10934,7 +10974,7 @@ var $ece16b3047178a9c$var$Dropdown = /** @class */ function() {
             placement: this._options.placement,
             modifiers: [
                 {
-                    name: "offset",
+                    name: 'offset',
                     options: {
                         offset: [
                             this._options.offsetSkidding,
@@ -10950,10 +10990,10 @@ var $ece16b3047178a9c$var$Dropdown = /** @class */ function() {
         this._clickOutsideEventListener = function(ev) {
             _this._handleClickOutside(ev, _this._targetEl);
         };
-        document.body.addEventListener("click", this._clickOutsideEventListener, true);
+        document.body.addEventListener('click', this._clickOutsideEventListener, true);
     };
     Dropdown.prototype._removeClickOutsideListener = function() {
-        document.body.removeEventListener("click", this._clickOutsideEventListener, true);
+        document.body.removeEventListener('click', this._clickOutsideEventListener, true);
     };
     Dropdown.prototype._handleClickOutside = function(ev, targetEl) {
         var clickedEl = ev.target;
@@ -10974,24 +11014,24 @@ var $ece16b3047178a9c$var$Dropdown = /** @class */ function() {
     };
     Dropdown.prototype._getTriggerEvents = function() {
         switch(this._options.triggerType){
-            case "hover":
+            case 'hover':
                 return {
                     showEvents: [
-                        "mouseenter",
-                        "click"
+                        'mouseenter',
+                        'click'
                     ],
                     hideEvents: [
-                        "mouseleave"
+                        'mouseleave'
                     ]
                 };
-            case "click":
+            case 'click':
                 return {
                     showEvents: [
-                        "click"
+                        'click'
                     ],
                     hideEvents: []
                 };
-            case "none":
+            case 'none':
                 return {
                     showEvents: [],
                     hideEvents: []
@@ -10999,7 +11039,7 @@ var $ece16b3047178a9c$var$Dropdown = /** @class */ function() {
             default:
                 return {
                     showEvents: [
-                        "click"
+                        'click'
                     ],
                     hideEvents: []
                 };
@@ -11014,15 +11054,15 @@ var $ece16b3047178a9c$var$Dropdown = /** @class */ function() {
         return this._visible;
     };
     Dropdown.prototype.show = function() {
-        this._targetEl.classList.remove("hidden");
-        this._targetEl.classList.add("block");
-        this._targetEl.removeAttribute("aria-hidden");
+        this._targetEl.classList.remove('hidden');
+        this._targetEl.classList.add('block');
+        this._targetEl.removeAttribute('aria-hidden');
         // Enable the event listeners
         this._popperInstance.setOptions(function(options) {
             return $ece16b3047178a9c$var$__assign($ece16b3047178a9c$var$__assign({}, options), {
                 modifiers: $ece16b3047178a9c$var$__spreadArray($ece16b3047178a9c$var$__spreadArray([], options.modifiers, true), [
                     {
-                        name: "eventListeners",
+                        name: 'eventListeners',
                         enabled: true
                     }
                 ], false)
@@ -11036,15 +11076,15 @@ var $ece16b3047178a9c$var$Dropdown = /** @class */ function() {
         this._options.onShow(this);
     };
     Dropdown.prototype.hide = function() {
-        this._targetEl.classList.remove("block");
-        this._targetEl.classList.add("hidden");
-        this._targetEl.setAttribute("aria-hidden", "true");
+        this._targetEl.classList.remove('block');
+        this._targetEl.classList.add('hidden');
+        this._targetEl.setAttribute('aria-hidden', 'true');
         // Disable the event listeners
         this._popperInstance.setOptions(function(options) {
             return $ece16b3047178a9c$var$__assign($ece16b3047178a9c$var$__assign({}, options), {
                 modifiers: $ece16b3047178a9c$var$__spreadArray($ece16b3047178a9c$var$__spreadArray([], options.modifiers, true), [
                     {
-                        name: "eventListeners",
+                        name: 'eventListeners',
                         enabled: false
                     }
                 ], false)
@@ -11067,16 +11107,16 @@ var $ece16b3047178a9c$var$Dropdown = /** @class */ function() {
     return Dropdown;
 }();
 function $ece16b3047178a9c$export$8cb65a02593bf108() {
-    document.querySelectorAll("[data-dropdown-toggle]").forEach(function($triggerEl) {
-        var dropdownId = $triggerEl.getAttribute("data-dropdown-toggle");
+    document.querySelectorAll('[data-dropdown-toggle]').forEach(function($triggerEl) {
+        var dropdownId = $triggerEl.getAttribute('data-dropdown-toggle');
         var $dropdownEl = document.getElementById(dropdownId);
         if ($dropdownEl) {
-            var placement = $triggerEl.getAttribute("data-dropdown-placement");
-            var offsetSkidding = $triggerEl.getAttribute("data-dropdown-offset-skidding");
-            var offsetDistance = $triggerEl.getAttribute("data-dropdown-offset-distance");
-            var triggerType = $triggerEl.getAttribute("data-dropdown-trigger");
-            var delay = $triggerEl.getAttribute("data-dropdown-delay");
-            var ignoreClickOutsideClass = $triggerEl.getAttribute("data-dropdown-ignore-click-outside-class");
+            var placement = $triggerEl.getAttribute('data-dropdown-placement');
+            var offsetSkidding = $triggerEl.getAttribute('data-dropdown-offset-skidding');
+            var offsetDistance = $triggerEl.getAttribute('data-dropdown-offset-distance');
+            var triggerType = $triggerEl.getAttribute('data-dropdown-trigger');
+            var delay = $triggerEl.getAttribute('data-dropdown-delay');
+            var ignoreClickOutsideClass = $triggerEl.getAttribute('data-dropdown-ignore-click-outside-class');
             new $ece16b3047178a9c$var$Dropdown($dropdownEl, $triggerEl, {
                 placement: placement ? placement : $ece16b3047178a9c$var$Default.placement,
                 triggerType: triggerType ? triggerType : $ece16b3047178a9c$var$Default.triggerType,
@@ -11085,10 +11125,10 @@ function $ece16b3047178a9c$export$8cb65a02593bf108() {
                 delay: delay ? parseInt(delay) : $ece16b3047178a9c$var$Default.delay,
                 ignoreClickOutsideClass: ignoreClickOutsideClass ? ignoreClickOutsideClass : $ece16b3047178a9c$var$Default.ignoreClickOutsideClass
             });
-        } else console.error('The dropdown element with id "'.concat(dropdownId, '" does not exist. Please check the data-dropdown-toggle attribute.'));
+        } else console.error("The dropdown element with id \"".concat(dropdownId, "\" does not exist. Please check the data-dropdown-toggle attribute."));
     });
 }
-if (typeof window !== "undefined") {
+if (typeof window !== 'undefined') {
     window.Dropdown = $ece16b3047178a9c$var$Dropdown;
     window.initDropdowns = $ece16b3047178a9c$export$8cb65a02593bf108;
 }
@@ -11107,9 +11147,9 @@ var $8d24653c8cdd4795$var$__assign = undefined && undefined.__assign || function
     return $8d24653c8cdd4795$var$__assign.apply(this, arguments);
 };
 var $8d24653c8cdd4795$var$Default = {
-    placement: "center",
-    backdropClasses: "bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 z-40",
-    backdrop: "dynamic",
+    placement: 'center',
+    backdropClasses: 'bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 z-40',
+    backdrop: 'dynamic',
     closable: true,
     onHide: function() {},
     onShow: function() {},
@@ -11132,7 +11172,7 @@ var $8d24653c8cdd4795$var$Modal = /** @class */ function() {
         this._backdropEl = null;
         this._initialized = false;
         this.init();
-        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).addInstance("Modal", this, this._instanceId, instanceOptions.override);
+        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).addInstance('Modal', this, this._instanceId, instanceOptions.override);
     }
     Modal.prototype.init = function() {
         var _this = this;
@@ -11151,7 +11191,7 @@ var $8d24653c8cdd4795$var$Modal = /** @class */ function() {
         }
     };
     Modal.prototype.removeInstance = function() {
-        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).removeInstance("Modal", this._instanceId);
+        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).removeInstance('Modal', this._instanceId);
     };
     Modal.prototype.destroyAndRemoveInstance = function() {
         this.destroy();
@@ -11160,9 +11200,9 @@ var $8d24653c8cdd4795$var$Modal = /** @class */ function() {
     Modal.prototype._createBackdrop = function() {
         var _a;
         if (this._isHidden) {
-            var backdropEl = document.createElement("div");
-            (_a = backdropEl.classList).add.apply(_a, this._options.backdropClasses.split(" "));
-            document.querySelector("body").append(backdropEl);
+            var backdropEl = document.createElement('div');
+            (_a = backdropEl.classList).add.apply(_a, this._options.backdropClasses.split(' '));
+            document.querySelector('body').append(backdropEl);
             this._backdropEl = backdropEl;
         }
     };
@@ -11174,20 +11214,20 @@ var $8d24653c8cdd4795$var$Modal = /** @class */ function() {
     };
     Modal.prototype._setupModalCloseEventListeners = function() {
         var _this = this;
-        if (this._options.backdrop === "dynamic") {
+        if (this._options.backdrop === 'dynamic') {
             this._clickOutsideEventListener = function(ev) {
                 _this._handleOutsideClick(ev.target);
             };
-            this._targetEl.addEventListener("click", this._clickOutsideEventListener, true);
+            this._targetEl.addEventListener('click', this._clickOutsideEventListener, true);
         }
         this._keydownEventListener = function(ev) {
-            if (ev.key === "Escape") _this.hide();
+            if (ev.key === 'Escape') _this.hide();
         };
-        document.body.addEventListener("keydown", this._keydownEventListener, true);
+        document.body.addEventListener('keydown', this._keydownEventListener, true);
     };
     Modal.prototype._removeModalCloseEventListeners = function() {
-        if (this._options.backdrop === "dynamic") this._targetEl.removeEventListener("click", this._clickOutsideEventListener, true);
-        document.body.removeEventListener("keydown", this._keydownEventListener, true);
+        if (this._options.backdrop === 'dynamic') this._targetEl.removeEventListener('click', this._clickOutsideEventListener, true);
+        document.body.removeEventListener('keydown', this._keydownEventListener, true);
     };
     Modal.prototype._handleOutsideClick = function(target) {
         if (target === this._targetEl || target === this._backdropEl && this.isVisible()) this.hide();
@@ -11195,57 +11235,57 @@ var $8d24653c8cdd4795$var$Modal = /** @class */ function() {
     Modal.prototype._getPlacementClasses = function() {
         switch(this._options.placement){
             // top
-            case "top-left":
+            case 'top-left':
                 return [
-                    "justify-start",
-                    "items-start"
+                    'justify-start',
+                    'items-start'
                 ];
-            case "top-center":
+            case 'top-center':
                 return [
-                    "justify-center",
-                    "items-start"
+                    'justify-center',
+                    'items-start'
                 ];
-            case "top-right":
+            case 'top-right':
                 return [
-                    "justify-end",
-                    "items-start"
+                    'justify-end',
+                    'items-start'
                 ];
             // center
-            case "center-left":
+            case 'center-left':
                 return [
-                    "justify-start",
-                    "items-center"
+                    'justify-start',
+                    'items-center'
                 ];
-            case "center":
+            case 'center':
                 return [
-                    "justify-center",
-                    "items-center"
+                    'justify-center',
+                    'items-center'
                 ];
-            case "center-right":
+            case 'center-right':
                 return [
-                    "justify-end",
-                    "items-center"
+                    'justify-end',
+                    'items-center'
                 ];
             // bottom
-            case "bottom-left":
+            case 'bottom-left':
                 return [
-                    "justify-start",
-                    "items-end"
+                    'justify-start',
+                    'items-end'
                 ];
-            case "bottom-center":
+            case 'bottom-center':
                 return [
-                    "justify-center",
-                    "items-end"
+                    'justify-center',
+                    'items-end'
                 ];
-            case "bottom-right":
+            case 'bottom-right':
                 return [
-                    "justify-end",
-                    "items-end"
+                    'justify-end',
+                    'items-end'
                 ];
             default:
                 return [
-                    "justify-center",
-                    "items-center"
+                    'justify-center',
+                    'items-center'
                 ];
         }
     };
@@ -11257,32 +11297,32 @@ var $8d24653c8cdd4795$var$Modal = /** @class */ function() {
     };
     Modal.prototype.show = function() {
         if (this.isHidden) {
-            this._targetEl.classList.add("flex");
-            this._targetEl.classList.remove("hidden");
-            this._targetEl.setAttribute("aria-modal", "true");
-            this._targetEl.setAttribute("role", "dialog");
-            this._targetEl.removeAttribute("aria-hidden");
+            this._targetEl.classList.add('flex');
+            this._targetEl.classList.remove('hidden');
+            this._targetEl.setAttribute('aria-modal', 'true');
+            this._targetEl.setAttribute('role', 'dialog');
+            this._targetEl.removeAttribute('aria-hidden');
             this._createBackdrop();
             this._isHidden = false;
             // Add keyboard event listener to the document
             if (this._options.closable) this._setupModalCloseEventListeners();
             // prevent body scroll
-            document.body.classList.add("overflow-hidden");
+            document.body.classList.add('overflow-hidden');
             // callback function
             this._options.onShow(this);
         }
     };
     Modal.prototype.hide = function() {
         if (this.isVisible) {
-            this._targetEl.classList.add("hidden");
-            this._targetEl.classList.remove("flex");
-            this._targetEl.setAttribute("aria-hidden", "true");
-            this._targetEl.removeAttribute("aria-modal");
-            this._targetEl.removeAttribute("role");
+            this._targetEl.classList.add('hidden');
+            this._targetEl.classList.remove('flex');
+            this._targetEl.setAttribute('aria-hidden', 'true');
+            this._targetEl.removeAttribute('aria-modal');
+            this._targetEl.removeAttribute('role');
             this._destroyBackdropEl();
             this._isHidden = true;
             // re-apply body scroll
-            document.body.classList.remove("overflow-hidden");
+            document.body.classList.remove('overflow-hidden');
             if (this._options.closable) this._removeModalCloseEventListeners();
             // callback function
             this._options.onHide(this);
@@ -11323,12 +11363,12 @@ var $8d24653c8cdd4795$var$Modal = /** @class */ function() {
 }();
 function $8d24653c8cdd4795$export$e14d3bc873a8b9b1() {
     // initiate modal based on data-modal-target
-    document.querySelectorAll("[data-modal-target]").forEach(function($triggerEl) {
-        var modalId = $triggerEl.getAttribute("data-modal-target");
+    document.querySelectorAll('[data-modal-target]').forEach(function($triggerEl) {
+        var modalId = $triggerEl.getAttribute('data-modal-target');
         var $modalEl = document.getElementById(modalId);
         if ($modalEl) {
-            var placement = $modalEl.getAttribute("data-modal-placement");
-            var backdrop = $modalEl.getAttribute("data-modal-backdrop");
+            var placement = $modalEl.getAttribute('data-modal-placement');
+            var backdrop = $modalEl.getAttribute('data-modal-backdrop');
             new $8d24653c8cdd4795$var$Modal($modalEl, {
                 placement: placement ? placement : $8d24653c8cdd4795$var$Default.placement,
                 backdrop: backdrop ? backdrop : $8d24653c8cdd4795$var$Default.backdrop
@@ -11336,52 +11376,52 @@ function $8d24653c8cdd4795$export$e14d3bc873a8b9b1() {
         } else console.error("Modal with id ".concat(modalId, " does not exist. Are you sure that the data-modal-target attribute points to the correct modal id?."));
     });
     // toggle modal visibility
-    document.querySelectorAll("[data-modal-toggle]").forEach(function($triggerEl) {
-        var modalId = $triggerEl.getAttribute("data-modal-toggle");
+    document.querySelectorAll('[data-modal-toggle]').forEach(function($triggerEl) {
+        var modalId = $triggerEl.getAttribute('data-modal-toggle');
         var $modalEl = document.getElementById(modalId);
         if ($modalEl) {
-            var modal_1 = (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).getInstance("Modal", modalId);
+            var modal_1 = (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).getInstance('Modal', modalId);
             if (modal_1) {
                 var toggleModal = function() {
                     modal_1.toggle();
                 };
-                $triggerEl.addEventListener("click", toggleModal);
-                modal_1.addEventListenerInstance($triggerEl, "click", toggleModal);
+                $triggerEl.addEventListener('click', toggleModal);
+                modal_1.addEventListenerInstance($triggerEl, 'click', toggleModal);
             } else console.error("Modal with id ".concat(modalId, " has not been initialized. Please initialize it using the data-modal-target attribute."));
         } else console.error("Modal with id ".concat(modalId, " does not exist. Are you sure that the data-modal-toggle attribute points to the correct modal id?"));
     });
     // show modal on click if exists based on id
-    document.querySelectorAll("[data-modal-show]").forEach(function($triggerEl) {
-        var modalId = $triggerEl.getAttribute("data-modal-show");
+    document.querySelectorAll('[data-modal-show]').forEach(function($triggerEl) {
+        var modalId = $triggerEl.getAttribute('data-modal-show');
         var $modalEl = document.getElementById(modalId);
         if ($modalEl) {
-            var modal_2 = (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).getInstance("Modal", modalId);
+            var modal_2 = (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).getInstance('Modal', modalId);
             if (modal_2) {
                 var showModal = function() {
                     modal_2.show();
                 };
-                $triggerEl.addEventListener("click", showModal);
-                modal_2.addEventListenerInstance($triggerEl, "click", showModal);
+                $triggerEl.addEventListener('click', showModal);
+                modal_2.addEventListenerInstance($triggerEl, 'click', showModal);
             } else console.error("Modal with id ".concat(modalId, " has not been initialized. Please initialize it using the data-modal-target attribute."));
         } else console.error("Modal with id ".concat(modalId, " does not exist. Are you sure that the data-modal-show attribute points to the correct modal id?"));
     });
     // hide modal on click if exists based on id
-    document.querySelectorAll("[data-modal-hide]").forEach(function($triggerEl) {
-        var modalId = $triggerEl.getAttribute("data-modal-hide");
+    document.querySelectorAll('[data-modal-hide]').forEach(function($triggerEl) {
+        var modalId = $triggerEl.getAttribute('data-modal-hide');
         var $modalEl = document.getElementById(modalId);
         if ($modalEl) {
-            var modal_3 = (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).getInstance("Modal", modalId);
+            var modal_3 = (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).getInstance('Modal', modalId);
             if (modal_3) {
                 var hideModal = function() {
                     modal_3.hide();
                 };
-                $triggerEl.addEventListener("click", hideModal);
-                modal_3.addEventListenerInstance($triggerEl, "click", hideModal);
+                $triggerEl.addEventListener('click', hideModal);
+                modal_3.addEventListenerInstance($triggerEl, 'click', hideModal);
             } else console.error("Modal with id ".concat(modalId, " has not been initialized. Please initialize it using the data-modal-target attribute."));
         } else console.error("Modal with id ".concat(modalId, " does not exist. Are you sure that the data-modal-hide attribute points to the correct modal id?"));
     });
 }
-if (typeof window !== "undefined") {
+if (typeof window !== 'undefined') {
     window.Modal = $8d24653c8cdd4795$var$Modal;
     window.initModals = $8d24653c8cdd4795$export$e14d3bc873a8b9b1;
 }
@@ -11400,12 +11440,12 @@ var $c647e009fa86f7f0$var$__assign = undefined && undefined.__assign || function
     return $c647e009fa86f7f0$var$__assign.apply(this, arguments);
 };
 var $c647e009fa86f7f0$var$Default = {
-    placement: "left",
+    placement: 'left',
     bodyScrolling: false,
     backdrop: true,
     edge: false,
-    edgeOffset: "bottom-[60px]",
-    backdropClasses: "bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 z-30",
+    edgeOffset: 'bottom-[60px]',
+    backdropClasses: 'bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 z-30',
     onShow: function() {},
     onHide: function() {},
     onToggle: function() {}
@@ -11426,27 +11466,27 @@ var $c647e009fa86f7f0$var$Drawer = /** @class */ function() {
         this._visible = false;
         this._initialized = false;
         this.init();
-        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).addInstance("Drawer", this, this._instanceId, instanceOptions.override);
+        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).addInstance('Drawer', this, this._instanceId, instanceOptions.override);
     }
     Drawer.prototype.init = function() {
         var _this = this;
         // set initial accessibility attributes
         if (this._targetEl && !this._initialized) {
-            this._targetEl.setAttribute("aria-hidden", "true");
-            this._targetEl.classList.add("transition-transform");
+            this._targetEl.setAttribute('aria-hidden', 'true');
+            this._targetEl.classList.add('transition-transform');
             // set base placement classes
             this._getPlacementClasses(this._options.placement).base.map(function(c) {
                 _this._targetEl.classList.add(c);
             });
             this._handleEscapeKey = function(event) {
-                if (event.key === "Escape") // if 'Escape' key is pressed
+                if (event.key === 'Escape') // if 'Escape' key is pressed
                 {
                     if (_this.isVisible()) // if the Drawer is visible
                     _this.hide(); // hide the Drawer
                 }
             };
             // add keyboard event listener to document
-            document.addEventListener("keydown", this._handleEscapeKey);
+            document.addEventListener('keydown', this._handleEscapeKey);
             this._initialized = true;
         }
     };
@@ -11455,12 +11495,12 @@ var $c647e009fa86f7f0$var$Drawer = /** @class */ function() {
             this.removeAllEventListenerInstances();
             this._destroyBackdropEl();
             // Remove the keyboard event listener
-            document.removeEventListener("keydown", this._handleEscapeKey);
+            document.removeEventListener('keydown', this._handleEscapeKey);
             this._initialized = false;
         }
     };
     Drawer.prototype.removeInstance = function() {
-        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).removeInstance("Drawer", this._instanceId);
+        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).removeInstance('Drawer', this._instanceId);
     };
     Drawer.prototype.destroyAndRemoveInstance = function() {
         this.destroy();
@@ -11470,10 +11510,10 @@ var $c647e009fa86f7f0$var$Drawer = /** @class */ function() {
         var _this = this;
         // based on the edge option show placement classes
         if (this._options.edge) {
-            this._getPlacementClasses(this._options.placement + "-edge").active.map(function(c) {
+            this._getPlacementClasses(this._options.placement + '-edge').active.map(function(c) {
                 _this._targetEl.classList.remove(c);
             });
-            this._getPlacementClasses(this._options.placement + "-edge").inactive.map(function(c) {
+            this._getPlacementClasses(this._options.placement + '-edge').inactive.map(function(c) {
                 _this._targetEl.classList.add(c);
             });
         } else {
@@ -11485,11 +11525,11 @@ var $c647e009fa86f7f0$var$Drawer = /** @class */ function() {
             });
         }
         // set accessibility attributes
-        this._targetEl.setAttribute("aria-hidden", "true");
-        this._targetEl.removeAttribute("aria-modal");
-        this._targetEl.removeAttribute("role");
+        this._targetEl.setAttribute('aria-hidden', 'true');
+        this._targetEl.removeAttribute('aria-modal');
+        this._targetEl.removeAttribute('role');
         // enable body scroll
-        if (!this._options.bodyScrolling) document.body.classList.remove("overflow-hidden");
+        if (!this._options.bodyScrolling) document.body.classList.remove('overflow-hidden');
         // destroy backdrop
         if (this._options.backdrop) this._destroyBackdropEl();
         this._visible = false;
@@ -11499,10 +11539,10 @@ var $c647e009fa86f7f0$var$Drawer = /** @class */ function() {
     Drawer.prototype.show = function() {
         var _this = this;
         if (this._options.edge) {
-            this._getPlacementClasses(this._options.placement + "-edge").active.map(function(c) {
+            this._getPlacementClasses(this._options.placement + '-edge').active.map(function(c) {
                 _this._targetEl.classList.add(c);
             });
-            this._getPlacementClasses(this._options.placement + "-edge").inactive.map(function(c) {
+            this._getPlacementClasses(this._options.placement + '-edge').inactive.map(function(c) {
                 _this._targetEl.classList.remove(c);
             });
         } else {
@@ -11514,11 +11554,11 @@ var $c647e009fa86f7f0$var$Drawer = /** @class */ function() {
             });
         }
         // set accessibility attributes
-        this._targetEl.setAttribute("aria-modal", "true");
-        this._targetEl.setAttribute("role", "dialog");
-        this._targetEl.removeAttribute("aria-hidden");
+        this._targetEl.setAttribute('aria-modal', 'true');
+        this._targetEl.setAttribute('role', 'dialog');
+        this._targetEl.removeAttribute('aria-hidden');
         // disable body scroll
-        if (!this._options.bodyScrolling) document.body.classList.add("overflow-hidden");
+        if (!this._options.bodyScrolling) document.body.classList.add('overflow-hidden');
         // show backdrop
         if (this._options.backdrop) this._createBackdrop();
         this._visible = true;
@@ -11533,99 +11573,99 @@ var $c647e009fa86f7f0$var$Drawer = /** @class */ function() {
         var _a;
         var _this = this;
         if (!this._visible) {
-            var backdropEl = document.createElement("div");
-            backdropEl.setAttribute("drawer-backdrop", "");
-            (_a = backdropEl.classList).add.apply(_a, this._options.backdropClasses.split(" "));
-            document.querySelector("body").append(backdropEl);
-            backdropEl.addEventListener("click", function() {
+            var backdropEl = document.createElement('div');
+            backdropEl.setAttribute('drawer-backdrop', '');
+            (_a = backdropEl.classList).add.apply(_a, this._options.backdropClasses.split(' '));
+            document.querySelector('body').append(backdropEl);
+            backdropEl.addEventListener('click', function() {
                 _this.hide();
             });
         }
     };
     Drawer.prototype._destroyBackdropEl = function() {
-        if (this._visible && document.querySelector("[drawer-backdrop]") !== null) document.querySelector("[drawer-backdrop]").remove();
+        if (this._visible && document.querySelector('[drawer-backdrop]') !== null) document.querySelector('[drawer-backdrop]').remove();
     };
     Drawer.prototype._getPlacementClasses = function(placement) {
         switch(placement){
-            case "top":
+            case 'top':
                 return {
                     base: [
-                        "top-0",
-                        "left-0",
-                        "right-0"
+                        'top-0',
+                        'left-0',
+                        'right-0'
                     ],
                     active: [
-                        "transform-none"
+                        'transform-none'
                     ],
                     inactive: [
-                        "-translate-y-full"
+                        '-translate-y-full'
                     ]
                 };
-            case "right":
+            case 'right':
                 return {
                     base: [
-                        "right-0",
-                        "top-0"
+                        'right-0',
+                        'top-0'
                     ],
                     active: [
-                        "transform-none"
+                        'transform-none'
                     ],
                     inactive: [
-                        "translate-x-full"
+                        'translate-x-full'
                     ]
                 };
-            case "bottom":
+            case 'bottom':
                 return {
                     base: [
-                        "bottom-0",
-                        "left-0",
-                        "right-0"
+                        'bottom-0',
+                        'left-0',
+                        'right-0'
                     ],
                     active: [
-                        "transform-none"
+                        'transform-none'
                     ],
                     inactive: [
-                        "translate-y-full"
+                        'translate-y-full'
                     ]
                 };
-            case "left":
+            case 'left':
                 return {
                     base: [
-                        "left-0",
-                        "top-0"
+                        'left-0',
+                        'top-0'
                     ],
                     active: [
-                        "transform-none"
+                        'transform-none'
                     ],
                     inactive: [
-                        "-translate-x-full"
+                        '-translate-x-full'
                     ]
                 };
-            case "bottom-edge":
+            case 'bottom-edge':
                 return {
                     base: [
-                        "left-0",
-                        "top-0"
+                        'left-0',
+                        'top-0'
                     ],
                     active: [
-                        "transform-none"
+                        'transform-none'
                     ],
                     inactive: [
-                        "translate-y-full",
+                        'translate-y-full',
                         this._options.edgeOffset
                     ]
                 };
             default:
                 return {
                     base: [
-                        "left-0",
-                        "top-0"
+                        'left-0',
+                        'top-0'
                     ],
                     active: [
-                        "transform-none"
+                        'transform-none'
                     ],
                     inactive: [
-                        "-translate-x-full"
+                        '-translate-x-full'
                     ]
                 };
         }
@@ -11664,69 +11704,69 @@ var $c647e009fa86f7f0$var$Drawer = /** @class */ function() {
     return Drawer;
 }();
 function $c647e009fa86f7f0$export$319df2b10e87c8ec() {
-    document.querySelectorAll("[data-drawer-target]").forEach(function($triggerEl) {
+    document.querySelectorAll('[data-drawer-target]').forEach(function($triggerEl) {
         // mandatory
-        var drawerId = $triggerEl.getAttribute("data-drawer-target");
+        var drawerId = $triggerEl.getAttribute('data-drawer-target');
         var $drawerEl = document.getElementById(drawerId);
         if ($drawerEl) {
-            var placement = $triggerEl.getAttribute("data-drawer-placement");
-            var bodyScrolling = $triggerEl.getAttribute("data-drawer-body-scrolling");
-            var backdrop = $triggerEl.getAttribute("data-drawer-backdrop");
-            var edge = $triggerEl.getAttribute("data-drawer-edge");
-            var edgeOffset = $triggerEl.getAttribute("data-drawer-edge-offset");
+            var placement = $triggerEl.getAttribute('data-drawer-placement');
+            var bodyScrolling = $triggerEl.getAttribute('data-drawer-body-scrolling');
+            var backdrop = $triggerEl.getAttribute('data-drawer-backdrop');
+            var edge = $triggerEl.getAttribute('data-drawer-edge');
+            var edgeOffset = $triggerEl.getAttribute('data-drawer-edge-offset');
             new $c647e009fa86f7f0$var$Drawer($drawerEl, {
                 placement: placement ? placement : $c647e009fa86f7f0$var$Default.placement,
-                bodyScrolling: bodyScrolling ? bodyScrolling === "true" ? true : false : $c647e009fa86f7f0$var$Default.bodyScrolling,
-                backdrop: backdrop ? backdrop === "true" ? true : false : $c647e009fa86f7f0$var$Default.backdrop,
-                edge: edge ? edge === "true" ? true : false : $c647e009fa86f7f0$var$Default.edge,
+                bodyScrolling: bodyScrolling ? bodyScrolling === 'true' ? true : false : $c647e009fa86f7f0$var$Default.bodyScrolling,
+                backdrop: backdrop ? backdrop === 'true' ? true : false : $c647e009fa86f7f0$var$Default.backdrop,
+                edge: edge ? edge === 'true' ? true : false : $c647e009fa86f7f0$var$Default.edge,
                 edgeOffset: edgeOffset ? edgeOffset : $c647e009fa86f7f0$var$Default.edgeOffset
             });
         } else console.error("Drawer with id ".concat(drawerId, " not found. Are you sure that the data-drawer-target attribute points to the correct drawer id?"));
     });
-    document.querySelectorAll("[data-drawer-toggle]").forEach(function($triggerEl) {
-        var drawerId = $triggerEl.getAttribute("data-drawer-toggle");
+    document.querySelectorAll('[data-drawer-toggle]').forEach(function($triggerEl) {
+        var drawerId = $triggerEl.getAttribute('data-drawer-toggle');
         var $drawerEl = document.getElementById(drawerId);
         if ($drawerEl) {
-            var drawer_1 = (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).getInstance("Drawer", drawerId);
+            var drawer_1 = (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).getInstance('Drawer', drawerId);
             if (drawer_1) {
                 var toggleDrawer = function() {
                     drawer_1.toggle();
                 };
-                $triggerEl.addEventListener("click", toggleDrawer);
-                drawer_1.addEventListenerInstance($triggerEl, "click", toggleDrawer);
+                $triggerEl.addEventListener('click', toggleDrawer);
+                drawer_1.addEventListenerInstance($triggerEl, 'click', toggleDrawer);
             } else console.error("Drawer with id ".concat(drawerId, " has not been initialized. Please initialize it using the data-drawer-target attribute."));
         } else console.error("Drawer with id ".concat(drawerId, " not found. Are you sure that the data-drawer-target attribute points to the correct drawer id?"));
     });
-    document.querySelectorAll("[data-drawer-dismiss], [data-drawer-hide]").forEach(function($triggerEl) {
-        var drawerId = $triggerEl.getAttribute("data-drawer-dismiss") ? $triggerEl.getAttribute("data-drawer-dismiss") : $triggerEl.getAttribute("data-drawer-hide");
+    document.querySelectorAll('[data-drawer-dismiss], [data-drawer-hide]').forEach(function($triggerEl) {
+        var drawerId = $triggerEl.getAttribute('data-drawer-dismiss') ? $triggerEl.getAttribute('data-drawer-dismiss') : $triggerEl.getAttribute('data-drawer-hide');
         var $drawerEl = document.getElementById(drawerId);
         if ($drawerEl) {
-            var drawer_2 = (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).getInstance("Drawer", drawerId);
+            var drawer_2 = (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).getInstance('Drawer', drawerId);
             if (drawer_2) {
                 var hideDrawer = function() {
                     drawer_2.hide();
                 };
-                $triggerEl.addEventListener("click", hideDrawer);
-                drawer_2.addEventListenerInstance($triggerEl, "click", hideDrawer);
+                $triggerEl.addEventListener('click', hideDrawer);
+                drawer_2.addEventListenerInstance($triggerEl, 'click', hideDrawer);
             } else console.error("Drawer with id ".concat(drawerId, " has not been initialized. Please initialize it using the data-drawer-target attribute."));
         } else console.error("Drawer with id ".concat(drawerId, " not found. Are you sure that the data-drawer-target attribute points to the correct drawer id"));
     });
-    document.querySelectorAll("[data-drawer-show]").forEach(function($triggerEl) {
-        var drawerId = $triggerEl.getAttribute("data-drawer-show");
+    document.querySelectorAll('[data-drawer-show]').forEach(function($triggerEl) {
+        var drawerId = $triggerEl.getAttribute('data-drawer-show');
         var $drawerEl = document.getElementById(drawerId);
         if ($drawerEl) {
-            var drawer_3 = (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).getInstance("Drawer", drawerId);
+            var drawer_3 = (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).getInstance('Drawer', drawerId);
             if (drawer_3) {
                 var showDrawer = function() {
                     drawer_3.show();
                 };
-                $triggerEl.addEventListener("click", showDrawer);
-                drawer_3.addEventListenerInstance($triggerEl, "click", showDrawer);
+                $triggerEl.addEventListener('click', showDrawer);
+                drawer_3.addEventListenerInstance($triggerEl, 'click', showDrawer);
             } else console.error("Drawer with id ".concat(drawerId, " has not been initialized. Please initialize it using the data-drawer-target attribute."));
         } else console.error("Drawer with id ".concat(drawerId, " not found. Are you sure that the data-drawer-target attribute points to the correct drawer id?"));
     });
 }
-if (typeof window !== "undefined") {
+if (typeof window !== 'undefined') {
     window.Drawer = $c647e009fa86f7f0$var$Drawer;
     window.initDrawers = $c647e009fa86f7f0$export$319df2b10e87c8ec;
 }
@@ -11746,8 +11786,8 @@ var $ff078cf47b3c0903$var$__assign = undefined && undefined.__assign || function
 };
 var $ff078cf47b3c0903$var$Default = {
     defaultTabId: null,
-    activeClasses: "text-blue-600 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-500 border-blue-600 dark:border-blue-500",
-    inactiveClasses: "dark:border-transparent text-gray-500 hover:text-gray-600 dark:text-gray-400 border-gray-100 hover:border-gray-300 dark:border-gray-700 dark:hover:text-gray-300",
+    activeClasses: 'text-blue-600 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-500 border-blue-600 dark:border-blue-500',
+    inactiveClasses: 'dark:border-transparent text-gray-500 hover:text-gray-600 dark:text-gray-400 border-gray-100 hover:border-gray-300 dark:border-gray-700 dark:hover:text-gray-300',
     onShow: function() {}
 };
 var $ff078cf47b3c0903$var$DefaultInstanceOptions = {
@@ -11767,7 +11807,7 @@ var $ff078cf47b3c0903$var$Tabs = /** @class */ function() {
         this._options = $ff078cf47b3c0903$var$__assign($ff078cf47b3c0903$var$__assign({}, $ff078cf47b3c0903$var$Default), options);
         this._initialized = false;
         this.init();
-        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).addInstance("Tabs", this, this._instanceId, instanceOptions.override);
+        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).addInstance('Tabs', this, this._instanceId, instanceOptions.override);
     }
     Tabs.prototype.init = function() {
         var _this = this;
@@ -11778,7 +11818,7 @@ var $ff078cf47b3c0903$var$Tabs = /** @class */ function() {
             this.show(this._activeTab.id, true);
             // show tab content based on click
             this._items.map(function(tab) {
-                tab.triggerEl.addEventListener("click", function(event) {
+                tab.triggerEl.addEventListener('click', function(event) {
                     event.preventDefault();
                     _this.show(tab.id);
                 });
@@ -11790,7 +11830,7 @@ var $ff078cf47b3c0903$var$Tabs = /** @class */ function() {
     };
     Tabs.prototype.removeInstance = function() {
         this.destroy();
-        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).removeInstance("Tabs", this._instanceId);
+        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).removeInstance('Tabs', this._instanceId);
     };
     Tabs.prototype.destroyAndRemoveInstance = function() {
         this.destroy();
@@ -11818,17 +11858,17 @@ var $ff078cf47b3c0903$var$Tabs = /** @class */ function() {
         this._items.map(function(t) {
             var _a, _b;
             if (t !== tab) {
-                (_a = t.triggerEl.classList).remove.apply(_a, _this._options.activeClasses.split(" "));
-                (_b = t.triggerEl.classList).add.apply(_b, _this._options.inactiveClasses.split(" "));
-                t.targetEl.classList.add("hidden");
-                t.triggerEl.setAttribute("aria-selected", "false");
+                (_a = t.triggerEl.classList).remove.apply(_a, _this._options.activeClasses.split(' '));
+                (_b = t.triggerEl.classList).add.apply(_b, _this._options.inactiveClasses.split(' '));
+                t.targetEl.classList.add('hidden');
+                t.triggerEl.setAttribute('aria-selected', 'false');
             }
         });
         // show active tab
-        (_a = tab.triggerEl.classList).add.apply(_a, this._options.activeClasses.split(" "));
-        (_b = tab.triggerEl.classList).remove.apply(_b, this._options.inactiveClasses.split(" "));
-        tab.triggerEl.setAttribute("aria-selected", "true");
-        tab.targetEl.classList.remove("hidden");
+        (_a = tab.triggerEl.classList).add.apply(_a, this._options.activeClasses.split(' '));
+        (_b = tab.triggerEl.classList).remove.apply(_b, this._options.inactiveClasses.split(' '));
+        tab.triggerEl.setAttribute('aria-selected', 'true');
+        tab.targetEl.classList.remove('hidden');
         this.setActiveTab(tab);
         // callback function
         this._options.onShow(this, tab);
@@ -11839,17 +11879,17 @@ var $ff078cf47b3c0903$var$Tabs = /** @class */ function() {
     return Tabs;
 }();
 function $ff078cf47b3c0903$export$c92e8f569ad2976f() {
-    document.querySelectorAll("[data-tabs-toggle]").forEach(function($parentEl) {
+    document.querySelectorAll('[data-tabs-toggle]').forEach(function($parentEl) {
         var tabItems = [];
-        var activeClasses = $parentEl.getAttribute("data-tabs-active-classes");
-        var inactiveClasses = $parentEl.getAttribute("data-tabs-inactive-classes");
+        var activeClasses = $parentEl.getAttribute('data-tabs-active-classes');
+        var inactiveClasses = $parentEl.getAttribute('data-tabs-inactive-classes');
         var defaultTabId = null;
         $parentEl.querySelectorAll('[role="tab"]').forEach(function($triggerEl) {
-            var isActive = $triggerEl.getAttribute("aria-selected") === "true";
+            var isActive = $triggerEl.getAttribute('aria-selected') === 'true';
             var tab = {
-                id: $triggerEl.getAttribute("data-tabs-target"),
+                id: $triggerEl.getAttribute('data-tabs-target'),
                 triggerEl: $triggerEl,
-                targetEl: document.querySelector($triggerEl.getAttribute("data-tabs-target"))
+                targetEl: document.querySelector($triggerEl.getAttribute('data-tabs-target'))
             };
             tabItems.push(tab);
             if (isActive) defaultTabId = tab.id;
@@ -11861,7 +11901,7 @@ function $ff078cf47b3c0903$export$c92e8f569ad2976f() {
         });
     });
 }
-if (typeof window !== "undefined") {
+if (typeof window !== 'undefined') {
     window.Tabs = $ff078cf47b3c0903$var$Tabs;
     window.initTabs = $ff078cf47b3c0903$export$c92e8f569ad2976f;
 }
@@ -11890,8 +11930,8 @@ var $7ab0a41fd48c3b4d$var$__spreadArray = undefined && undefined.__spreadArray |
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 var $7ab0a41fd48c3b4d$var$Default = {
-    placement: "top",
-    triggerType: "hover",
+    placement: 'top',
+    triggerType: 'hover',
     onShow: function() {},
     onHide: function() {},
     onToggle: function() {}
@@ -11914,7 +11954,7 @@ var $7ab0a41fd48c3b4d$var$Tooltip = /** @class */ function() {
         this._visible = false;
         this._initialized = false;
         this.init();
-        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).addInstance("Tooltip", this, this._instanceId, instanceOptions.override);
+        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).addInstance('Tooltip', this, this._instanceId, instanceOptions.override);
     }
     Tooltip.prototype.init = function() {
         if (this._triggerEl && this._targetEl && !this._initialized) {
@@ -11944,7 +11984,7 @@ var $7ab0a41fd48c3b4d$var$Tooltip = /** @class */ function() {
         }
     };
     Tooltip.prototype.removeInstance = function() {
-        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).removeInstance("Tooltip", this._instanceId);
+        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).removeInstance('Tooltip', this._instanceId);
     };
     Tooltip.prototype.destroyAndRemoveInstance = function() {
         this.destroy();
@@ -11971,7 +12011,7 @@ var $7ab0a41fd48c3b4d$var$Tooltip = /** @class */ function() {
             placement: this._options.placement,
             modifiers: [
                 {
-                    name: "offset",
+                    name: 'offset',
                     options: {
                         offset: [
                             0,
@@ -11984,29 +12024,29 @@ var $7ab0a41fd48c3b4d$var$Tooltip = /** @class */ function() {
     };
     Tooltip.prototype._getTriggerEvents = function() {
         switch(this._options.triggerType){
-            case "hover":
+            case 'hover':
                 return {
                     showEvents: [
-                        "mouseenter",
-                        "focus"
+                        'mouseenter',
+                        'focus'
                     ],
                     hideEvents: [
-                        "mouseleave",
-                        "blur"
+                        'mouseleave',
+                        'blur'
                     ]
                 };
-            case "click":
+            case 'click':
                 return {
                     showEvents: [
-                        "click",
-                        "focus"
+                        'click',
+                        'focus'
                     ],
                     hideEvents: [
-                        "focusout",
-                        "blur"
+                        'focusout',
+                        'blur'
                     ]
                 };
-            case "none":
+            case 'none':
                 return {
                     showEvents: [],
                     hideEvents: []
@@ -12014,12 +12054,12 @@ var $7ab0a41fd48c3b4d$var$Tooltip = /** @class */ function() {
             default:
                 return {
                     showEvents: [
-                        "mouseenter",
-                        "focus"
+                        'mouseenter',
+                        'focus'
                     ],
                     hideEvents: [
-                        "mouseleave",
-                        "blur"
+                        'mouseleave',
+                        'blur'
                     ]
                 };
         }
@@ -12027,22 +12067,22 @@ var $7ab0a41fd48c3b4d$var$Tooltip = /** @class */ function() {
     Tooltip.prototype._setupKeydownListener = function() {
         var _this = this;
         this._keydownEventListener = function(ev) {
-            if (ev.key === "Escape") _this.hide();
+            if (ev.key === 'Escape') _this.hide();
         };
-        document.body.addEventListener("keydown", this._keydownEventListener, true);
+        document.body.addEventListener('keydown', this._keydownEventListener, true);
     };
     Tooltip.prototype._removeKeydownListener = function() {
-        document.body.removeEventListener("keydown", this._keydownEventListener, true);
+        document.body.removeEventListener('keydown', this._keydownEventListener, true);
     };
     Tooltip.prototype._setupClickOutsideListener = function() {
         var _this = this;
         this._clickOutsideEventListener = function(ev) {
             _this._handleClickOutside(ev, _this._targetEl);
         };
-        document.body.addEventListener("click", this._clickOutsideEventListener, true);
+        document.body.addEventListener('click', this._clickOutsideEventListener, true);
     };
     Tooltip.prototype._removeClickOutsideListener = function() {
-        document.body.removeEventListener("click", this._clickOutsideEventListener, true);
+        document.body.removeEventListener('click', this._clickOutsideEventListener, true);
     };
     Tooltip.prototype._handleClickOutside = function(ev, targetEl) {
         var clickedEl = ev.target;
@@ -12056,14 +12096,14 @@ var $7ab0a41fd48c3b4d$var$Tooltip = /** @class */ function() {
         else this.show();
     };
     Tooltip.prototype.show = function() {
-        this._targetEl.classList.remove("opacity-0", "invisible");
-        this._targetEl.classList.add("opacity-100", "visible");
+        this._targetEl.classList.remove('opacity-0', 'invisible');
+        this._targetEl.classList.add('opacity-100', 'visible');
         // Enable the event listeners
         this._popperInstance.setOptions(function(options) {
             return $7ab0a41fd48c3b4d$var$__assign($7ab0a41fd48c3b4d$var$__assign({}, options), {
                 modifiers: $7ab0a41fd48c3b4d$var$__spreadArray($7ab0a41fd48c3b4d$var$__spreadArray([], options.modifiers, true), [
                     {
-                        name: "eventListeners",
+                        name: 'eventListeners',
                         enabled: true
                     }
                 ], false)
@@ -12081,14 +12121,14 @@ var $7ab0a41fd48c3b4d$var$Tooltip = /** @class */ function() {
         this._options.onShow(this);
     };
     Tooltip.prototype.hide = function() {
-        this._targetEl.classList.remove("opacity-100", "visible");
-        this._targetEl.classList.add("opacity-0", "invisible");
+        this._targetEl.classList.remove('opacity-100', 'visible');
+        this._targetEl.classList.add('opacity-0', 'invisible');
         // Disable the event listeners
         this._popperInstance.setOptions(function(options) {
             return $7ab0a41fd48c3b4d$var$__assign($7ab0a41fd48c3b4d$var$__assign({}, options), {
                 modifiers: $7ab0a41fd48c3b4d$var$__spreadArray($7ab0a41fd48c3b4d$var$__spreadArray([], options.modifiers, true), [
                     {
-                        name: "eventListeners",
+                        name: 'eventListeners',
                         enabled: false
                     }
                 ], false)
@@ -12115,20 +12155,20 @@ var $7ab0a41fd48c3b4d$var$Tooltip = /** @class */ function() {
     return Tooltip;
 }();
 function $7ab0a41fd48c3b4d$export$8f2a38c1f9d9dc3e() {
-    document.querySelectorAll("[data-tooltip-target]").forEach(function($triggerEl) {
-        var tooltipId = $triggerEl.getAttribute("data-tooltip-target");
+    document.querySelectorAll('[data-tooltip-target]').forEach(function($triggerEl) {
+        var tooltipId = $triggerEl.getAttribute('data-tooltip-target');
         var $tooltipEl = document.getElementById(tooltipId);
         if ($tooltipEl) {
-            var triggerType = $triggerEl.getAttribute("data-tooltip-trigger");
-            var placement = $triggerEl.getAttribute("data-tooltip-placement");
+            var triggerType = $triggerEl.getAttribute('data-tooltip-trigger');
+            var placement = $triggerEl.getAttribute('data-tooltip-placement');
             new $7ab0a41fd48c3b4d$var$Tooltip($tooltipEl, $triggerEl, {
                 placement: placement ? placement : $7ab0a41fd48c3b4d$var$Default.placement,
                 triggerType: triggerType ? triggerType : $7ab0a41fd48c3b4d$var$Default.triggerType
             });
-        } else console.error('The tooltip element with id "'.concat(tooltipId, '" does not exist. Please check the data-tooltip-target attribute.'));
+        } else console.error("The tooltip element with id \"".concat(tooltipId, "\" does not exist. Please check the data-tooltip-target attribute."));
     });
 }
-if (typeof window !== "undefined") {
+if (typeof window !== 'undefined') {
     window.Tooltip = $7ab0a41fd48c3b4d$var$Tooltip;
     window.initTooltips = $7ab0a41fd48c3b4d$export$8f2a38c1f9d9dc3e;
 }
@@ -12157,9 +12197,9 @@ var $5370c2686863c309$var$__spreadArray = undefined && undefined.__spreadArray |
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 var $5370c2686863c309$var$Default = {
-    placement: "top",
+    placement: 'top',
     offset: 10,
-    triggerType: "hover",
+    triggerType: 'hover',
     onShow: function() {},
     onHide: function() {},
     onToggle: function() {}
@@ -12182,7 +12222,7 @@ var $5370c2686863c309$var$Popover = /** @class */ function() {
         this._visible = false;
         this._initialized = false;
         this.init();
-        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).addInstance("Popover", this, instanceOptions.id ? instanceOptions.id : this._targetEl.id, instanceOptions.override);
+        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).addInstance('Popover', this, instanceOptions.id ? instanceOptions.id : this._targetEl.id, instanceOptions.override);
     }
     Popover.prototype.init = function() {
         if (this._triggerEl && this._targetEl && !this._initialized) {
@@ -12214,7 +12254,7 @@ var $5370c2686863c309$var$Popover = /** @class */ function() {
         }
     };
     Popover.prototype.removeInstance = function() {
-        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).removeInstance("Popover", this._instanceId);
+        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).removeInstance('Popover', this._instanceId);
     };
     Popover.prototype.destroyAndRemoveInstance = function() {
         this.destroy();
@@ -12228,7 +12268,7 @@ var $5370c2686863c309$var$Popover = /** @class */ function() {
         };
         this._hideHandler = function() {
             setTimeout(function() {
-                if (!_this._targetEl.matches(":hover")) _this.hide();
+                if (!_this._targetEl.matches(':hover')) _this.hide();
             }, 100);
         };
         triggerEvents.showEvents.forEach(function(ev) {
@@ -12245,7 +12285,7 @@ var $5370c2686863c309$var$Popover = /** @class */ function() {
             placement: this._options.placement,
             modifiers: [
                 {
-                    name: "offset",
+                    name: 'offset',
                     options: {
                         offset: [
                             0,
@@ -12258,29 +12298,29 @@ var $5370c2686863c309$var$Popover = /** @class */ function() {
     };
     Popover.prototype._getTriggerEvents = function() {
         switch(this._options.triggerType){
-            case "hover":
+            case 'hover':
                 return {
                     showEvents: [
-                        "mouseenter",
-                        "focus"
+                        'mouseenter',
+                        'focus'
                     ],
                     hideEvents: [
-                        "mouseleave",
-                        "blur"
+                        'mouseleave',
+                        'blur'
                     ]
                 };
-            case "click":
+            case 'click':
                 return {
                     showEvents: [
-                        "click",
-                        "focus"
+                        'click',
+                        'focus'
                     ],
                     hideEvents: [
-                        "focusout",
-                        "blur"
+                        'focusout',
+                        'blur'
                     ]
                 };
-            case "none":
+            case 'none':
                 return {
                     showEvents: [],
                     hideEvents: []
@@ -12288,12 +12328,12 @@ var $5370c2686863c309$var$Popover = /** @class */ function() {
             default:
                 return {
                     showEvents: [
-                        "mouseenter",
-                        "focus"
+                        'mouseenter',
+                        'focus'
                     ],
                     hideEvents: [
-                        "mouseleave",
-                        "blur"
+                        'mouseleave',
+                        'blur'
                     ]
                 };
         }
@@ -12301,22 +12341,22 @@ var $5370c2686863c309$var$Popover = /** @class */ function() {
     Popover.prototype._setupKeydownListener = function() {
         var _this = this;
         this._keydownEventListener = function(ev) {
-            if (ev.key === "Escape") _this.hide();
+            if (ev.key === 'Escape') _this.hide();
         };
-        document.body.addEventListener("keydown", this._keydownEventListener, true);
+        document.body.addEventListener('keydown', this._keydownEventListener, true);
     };
     Popover.prototype._removeKeydownListener = function() {
-        document.body.removeEventListener("keydown", this._keydownEventListener, true);
+        document.body.removeEventListener('keydown', this._keydownEventListener, true);
     };
     Popover.prototype._setupClickOutsideListener = function() {
         var _this = this;
         this._clickOutsideEventListener = function(ev) {
             _this._handleClickOutside(ev, _this._targetEl);
         };
-        document.body.addEventListener("click", this._clickOutsideEventListener, true);
+        document.body.addEventListener('click', this._clickOutsideEventListener, true);
     };
     Popover.prototype._removeClickOutsideListener = function() {
-        document.body.removeEventListener("click", this._clickOutsideEventListener, true);
+        document.body.removeEventListener('click', this._clickOutsideEventListener, true);
     };
     Popover.prototype._handleClickOutside = function(ev, targetEl) {
         var clickedEl = ev.target;
@@ -12331,14 +12371,14 @@ var $5370c2686863c309$var$Popover = /** @class */ function() {
         this._options.onToggle(this);
     };
     Popover.prototype.show = function() {
-        this._targetEl.classList.remove("opacity-0", "invisible");
-        this._targetEl.classList.add("opacity-100", "visible");
+        this._targetEl.classList.remove('opacity-0', 'invisible');
+        this._targetEl.classList.add('opacity-100', 'visible');
         // Enable the event listeners
         this._popperInstance.setOptions(function(options) {
             return $5370c2686863c309$var$__assign($5370c2686863c309$var$__assign({}, options), {
                 modifiers: $5370c2686863c309$var$__spreadArray($5370c2686863c309$var$__spreadArray([], options.modifiers, true), [
                     {
-                        name: "eventListeners",
+                        name: 'eventListeners',
                         enabled: true
                     }
                 ], false)
@@ -12356,14 +12396,14 @@ var $5370c2686863c309$var$Popover = /** @class */ function() {
         this._options.onShow(this);
     };
     Popover.prototype.hide = function() {
-        this._targetEl.classList.remove("opacity-100", "visible");
-        this._targetEl.classList.add("opacity-0", "invisible");
+        this._targetEl.classList.remove('opacity-100', 'visible');
+        this._targetEl.classList.add('opacity-0', 'invisible');
         // Disable the event listeners
         this._popperInstance.setOptions(function(options) {
             return $5370c2686863c309$var$__assign($5370c2686863c309$var$__assign({}, options), {
                 modifiers: $5370c2686863c309$var$__spreadArray($5370c2686863c309$var$__spreadArray([], options.modifiers, true), [
                     {
-                        name: "eventListeners",
+                        name: 'eventListeners',
                         enabled: false
                     }
                 ], false)
@@ -12390,22 +12430,22 @@ var $5370c2686863c309$var$Popover = /** @class */ function() {
     return Popover;
 }();
 function $5370c2686863c309$export$200409e83b2a0dd4() {
-    document.querySelectorAll("[data-popover-target]").forEach(function($triggerEl) {
-        var popoverID = $triggerEl.getAttribute("data-popover-target");
+    document.querySelectorAll('[data-popover-target]').forEach(function($triggerEl) {
+        var popoverID = $triggerEl.getAttribute('data-popover-target');
         var $popoverEl = document.getElementById(popoverID);
         if ($popoverEl) {
-            var triggerType = $triggerEl.getAttribute("data-popover-trigger");
-            var placement = $triggerEl.getAttribute("data-popover-placement");
-            var offset = $triggerEl.getAttribute("data-popover-offset");
+            var triggerType = $triggerEl.getAttribute('data-popover-trigger');
+            var placement = $triggerEl.getAttribute('data-popover-placement');
+            var offset = $triggerEl.getAttribute('data-popover-offset');
             new $5370c2686863c309$var$Popover($popoverEl, $triggerEl, {
                 placement: placement ? placement : $5370c2686863c309$var$Default.placement,
                 offset: offset ? parseInt(offset) : $5370c2686863c309$var$Default.offset,
                 triggerType: triggerType ? triggerType : $5370c2686863c309$var$Default.triggerType
             });
-        } else console.error('The popover element with id "'.concat(popoverID, '" does not exist. Please check the data-popover-target attribute.'));
+        } else console.error("The popover element with id \"".concat(popoverID, "\" does not exist. Please check the data-popover-target attribute."));
     });
 }
-if (typeof window !== "undefined") {
+if (typeof window !== 'undefined') {
     window.Popover = $5370c2686863c309$var$Popover;
     window.initPopovers = $5370c2686863c309$export$200409e83b2a0dd4;
 }
@@ -12424,7 +12464,7 @@ var $4fe34b241a1ad5f0$var$__assign = undefined && undefined.__assign || function
     return $4fe34b241a1ad5f0$var$__assign.apply(this, arguments);
 };
 var $4fe34b241a1ad5f0$var$Default = {
-    triggerType: "hover",
+    triggerType: 'hover',
     onShow: function() {},
     onHide: function() {},
     onToggle: function() {}
@@ -12448,7 +12488,7 @@ var $4fe34b241a1ad5f0$var$Dial = /** @class */ function() {
         this._visible = false;
         this._initialized = false;
         this.init();
-        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).addInstance("Dial", this, this._instanceId, instanceOptions.override);
+        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).addInstance('Dial', this, this._instanceId, instanceOptions.override);
     }
     Dial.prototype.init = function() {
         var _this = this;
@@ -12462,7 +12502,7 @@ var $4fe34b241a1ad5f0$var$Dial = /** @class */ function() {
                 _this._targetEl.addEventListener(ev, _this._showEventHandler);
             });
             this._hideEventHandler = function() {
-                if (!_this._parentEl.matches(":hover")) _this.hide();
+                if (!_this._parentEl.matches(':hover')) _this.hide();
             };
             triggerEventTypes.hideEvents.forEach(function(ev) {
                 _this._parentEl.addEventListener(ev, _this._hideEventHandler);
@@ -12485,22 +12525,22 @@ var $4fe34b241a1ad5f0$var$Dial = /** @class */ function() {
         }
     };
     Dial.prototype.removeInstance = function() {
-        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).removeInstance("Dial", this._instanceId);
+        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).removeInstance('Dial', this._instanceId);
     };
     Dial.prototype.destroyAndRemoveInstance = function() {
         this.destroy();
         this.removeInstance();
     };
     Dial.prototype.hide = function() {
-        this._targetEl.classList.add("hidden");
-        if (this._triggerEl) this._triggerEl.setAttribute("aria-expanded", "false");
+        this._targetEl.classList.add('hidden');
+        if (this._triggerEl) this._triggerEl.setAttribute('aria-expanded', 'false');
         this._visible = false;
         // callback function
         this._options.onHide(this);
     };
     Dial.prototype.show = function() {
-        this._targetEl.classList.remove("hidden");
-        if (this._triggerEl) this._triggerEl.setAttribute("aria-expanded", "true");
+        this._targetEl.classList.remove('hidden');
+        if (this._triggerEl) this._triggerEl.setAttribute('aria-expanded', 'true');
         this._visible = true;
         // callback function
         this._options.onShow(this);
@@ -12517,29 +12557,29 @@ var $4fe34b241a1ad5f0$var$Dial = /** @class */ function() {
     };
     Dial.prototype._getTriggerEventTypes = function(triggerType) {
         switch(triggerType){
-            case "hover":
+            case 'hover':
                 return {
                     showEvents: [
-                        "mouseenter",
-                        "focus"
+                        'mouseenter',
+                        'focus'
                     ],
                     hideEvents: [
-                        "mouseleave",
-                        "blur"
+                        'mouseleave',
+                        'blur'
                     ]
                 };
-            case "click":
+            case 'click':
                 return {
                     showEvents: [
-                        "click",
-                        "focus"
+                        'click',
+                        'focus'
                     ],
                     hideEvents: [
-                        "focusout",
-                        "blur"
+                        'focusout',
+                        'blur'
                     ]
                 };
-            case "none":
+            case 'none':
                 return {
                     showEvents: [],
                     hideEvents: []
@@ -12547,12 +12587,12 @@ var $4fe34b241a1ad5f0$var$Dial = /** @class */ function() {
             default:
                 return {
                     showEvents: [
-                        "mouseenter",
-                        "focus"
+                        'mouseenter',
+                        'focus'
                     ],
                     hideEvents: [
-                        "mouseleave",
-                        "blur"
+                        'mouseleave',
+                        'blur'
                     ]
                 };
         }
@@ -12569,13 +12609,13 @@ var $4fe34b241a1ad5f0$var$Dial = /** @class */ function() {
     return Dial;
 }();
 function $4fe34b241a1ad5f0$export$33aa68e0bfaa065d() {
-    document.querySelectorAll("[data-dial-init]").forEach(function($parentEl) {
-        var $triggerEl = $parentEl.querySelector("[data-dial-toggle]");
+    document.querySelectorAll('[data-dial-init]').forEach(function($parentEl) {
+        var $triggerEl = $parentEl.querySelector('[data-dial-toggle]');
         if ($triggerEl) {
-            var dialId = $triggerEl.getAttribute("data-dial-toggle");
+            var dialId = $triggerEl.getAttribute('data-dial-toggle');
             var $dialEl = document.getElementById(dialId);
             if ($dialEl) {
-                var triggerType = $triggerEl.getAttribute("data-dial-trigger");
+                var triggerType = $triggerEl.getAttribute('data-dial-trigger');
                 new $4fe34b241a1ad5f0$var$Dial($parentEl, $triggerEl, $dialEl, {
                     triggerType: triggerType ? triggerType : $4fe34b241a1ad5f0$var$Default.triggerType
                 });
@@ -12583,7 +12623,7 @@ function $4fe34b241a1ad5f0$export$33aa68e0bfaa065d() {
         } else console.error("Dial with id ".concat($parentEl.id, " does not have a trigger element. Are you sure that the data-dial-toggle attribute exists?"));
     });
 }
-if (typeof window !== "undefined") {
+if (typeof window !== 'undefined') {
     window.Dial = $4fe34b241a1ad5f0$var$Dial;
     window.initDials = $4fe34b241a1ad5f0$export$33aa68e0bfaa065d;
 }
@@ -12625,7 +12665,7 @@ var $df0fc5a35c362eab$var$InputCounter = /** @class */ function() {
         this._options = $df0fc5a35c362eab$var$__assign($df0fc5a35c362eab$var$__assign({}, $df0fc5a35c362eab$var$Default), options);
         this._initialized = false;
         this.init();
-        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).addInstance("InputCounter", this, this._instanceId, instanceOptions.override);
+        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).addInstance('InputCounter', this, this._instanceId, instanceOptions.override);
     }
     InputCounter.prototype.init = function() {
         var _this = this;
@@ -12634,7 +12674,7 @@ var $df0fc5a35c362eab$var$InputCounter = /** @class */ function() {
                 var target = event.target;
                 // check if the value is numeric
                 if (!/^\d*$/.test(target.value)) // Regex to check if the value is numeric
-                target.value = target.value.replace(/[^\d]/g, ""); // Remove non-numeric characters
+                target.value = target.value.replace(/[^\d]/g, ''); // Remove non-numeric characters
                 // check for max value
                 if (_this._options.maxValue !== null && parseInt(target.value) > _this._options.maxValue) target.value = _this._options.maxValue.toString();
                 // check for min value
@@ -12647,22 +12687,22 @@ var $df0fc5a35c362eab$var$InputCounter = /** @class */ function() {
                 _this.decrement();
             };
             // Add event listener to restrict input to numeric values only
-            this._targetEl.addEventListener("input", this._inputHandler);
-            if (this._incrementEl) this._incrementEl.addEventListener("click", this._incrementClickHandler);
-            if (this._decrementEl) this._decrementEl.addEventListener("click", this._decrementClickHandler);
+            this._targetEl.addEventListener('input', this._inputHandler);
+            if (this._incrementEl) this._incrementEl.addEventListener('click', this._incrementClickHandler);
+            if (this._decrementEl) this._decrementEl.addEventListener('click', this._decrementClickHandler);
             this._initialized = true;
         }
     };
     InputCounter.prototype.destroy = function() {
         if (this._targetEl && this._initialized) {
-            this._targetEl.removeEventListener("input", this._inputHandler);
-            if (this._incrementEl) this._incrementEl.removeEventListener("click", this._incrementClickHandler);
-            if (this._decrementEl) this._decrementEl.removeEventListener("click", this._decrementClickHandler);
+            this._targetEl.removeEventListener('input', this._inputHandler);
+            if (this._incrementEl) this._incrementEl.removeEventListener('click', this._incrementClickHandler);
+            if (this._decrementEl) this._decrementEl.removeEventListener('click', this._decrementClickHandler);
             this._initialized = false;
         }
     };
     InputCounter.prototype.removeInstance = function() {
-        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).removeInstance("InputCounter", this._instanceId);
+        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).removeInstance('InputCounter', this._instanceId);
     };
     InputCounter.prototype.destroyAndRemoveInstance = function() {
         this.destroy();
@@ -12692,22 +12732,22 @@ var $df0fc5a35c362eab$var$InputCounter = /** @class */ function() {
     return InputCounter;
 }();
 function $df0fc5a35c362eab$export$4352dd3b7a1676ab() {
-    document.querySelectorAll("[data-input-counter]").forEach(function($targetEl) {
+    document.querySelectorAll('[data-input-counter]').forEach(function($targetEl) {
         var targetId = $targetEl.id;
         var $incrementEl = document.querySelector('[data-input-counter-increment="' + targetId + '"]');
         var $decrementEl = document.querySelector('[data-input-counter-decrement="' + targetId + '"]');
-        var minValue = $targetEl.getAttribute("data-input-counter-min");
-        var maxValue = $targetEl.getAttribute("data-input-counter-max");
+        var minValue = $targetEl.getAttribute('data-input-counter-min');
+        var maxValue = $targetEl.getAttribute('data-input-counter-max');
         // check if the target element exists
         if ($targetEl) {
-            if (!(0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).instanceExists("InputCounter", $targetEl.getAttribute("id"))) new $df0fc5a35c362eab$var$InputCounter($targetEl, $incrementEl ? $incrementEl : null, $decrementEl ? $decrementEl : null, {
+            if (!(0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).instanceExists('InputCounter', $targetEl.getAttribute('id'))) new $df0fc5a35c362eab$var$InputCounter($targetEl, $incrementEl ? $incrementEl : null, $decrementEl ? $decrementEl : null, {
                 minValue: minValue ? parseInt(minValue) : null,
                 maxValue: maxValue ? parseInt(maxValue) : null
             });
-        } else console.error('The target element with id "'.concat(targetId, '" does not exist. Please check the data-input-counter attribute.'));
+        } else console.error("The target element with id \"".concat(targetId, "\" does not exist. Please check the data-input-counter attribute."));
     });
 }
-if (typeof window !== "undefined") {
+if (typeof window !== 'undefined') {
     window.InputCounter = $df0fc5a35c362eab$var$InputCounter;
     window.initInputCounters = $df0fc5a35c362eab$export$4352dd3b7a1676ab;
 }
@@ -12727,7 +12767,7 @@ var $f2c2b31007186eb1$var$__assign = undefined && undefined.__assign || function
 };
 var $f2c2b31007186eb1$var$Default = {
     htmlEntities: false,
-    contentType: "input",
+    contentType: 'input',
     onCopy: function() {}
 };
 var $f2c2b31007186eb1$var$DefaultInstanceOptions = {
@@ -12746,7 +12786,7 @@ var $f2c2b31007186eb1$var$CopyClipboard = /** @class */ function() {
         this._options = $f2c2b31007186eb1$var$__assign($f2c2b31007186eb1$var$__assign({}, $f2c2b31007186eb1$var$Default), options);
         this._initialized = false;
         this.init();
-        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).addInstance("CopyClipboard", this, this._instanceId, instanceOptions.override);
+        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).addInstance('CopyClipboard', this, this._instanceId, instanceOptions.override);
     }
     CopyClipboard.prototype.init = function() {
         var _this = this;
@@ -12755,27 +12795,27 @@ var $f2c2b31007186eb1$var$CopyClipboard = /** @class */ function() {
                 _this.copy();
             };
             // clicking on the trigger element should copy the value of the target element
-            if (this._triggerEl) this._triggerEl.addEventListener("click", this._triggerElClickHandler);
+            if (this._triggerEl) this._triggerEl.addEventListener('click', this._triggerElClickHandler);
             this._initialized = true;
         }
     };
     CopyClipboard.prototype.destroy = function() {
         if (this._triggerEl && this._targetEl && this._initialized) {
-            if (this._triggerEl) this._triggerEl.removeEventListener("click", this._triggerElClickHandler);
+            if (this._triggerEl) this._triggerEl.removeEventListener('click', this._triggerElClickHandler);
             this._initialized = false;
         }
     };
     CopyClipboard.prototype.removeInstance = function() {
-        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).removeInstance("CopyClipboard", this._instanceId);
+        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).removeInstance('CopyClipboard', this._instanceId);
     };
     CopyClipboard.prototype.destroyAndRemoveInstance = function() {
         this.destroy();
         this.removeInstance();
     };
     CopyClipboard.prototype.getTargetValue = function() {
-        if (this._options.contentType === "input") return this._targetEl.value;
-        if (this._options.contentType === "innerHTML") return this._targetEl.innerHTML;
-        if (this._options.contentType === "textContent") return this._targetEl.textContent.replace(/\s+/g, " ").trim();
+        if (this._options.contentType === 'input') return this._targetEl.value;
+        if (this._options.contentType === 'innerHTML') return this._targetEl.innerHTML;
+        if (this._options.contentType === 'textContent') return this._targetEl.textContent.replace(/\s+/g, ' ').trim();
     };
     CopyClipboard.prototype.copy = function() {
         var textToCopy = this.getTargetValue();
@@ -12783,12 +12823,12 @@ var $f2c2b31007186eb1$var$CopyClipboard = /** @class */ function() {
         if (this._options.htmlEntities) // Encode the text using HTML entities
         textToCopy = this.decodeHTML(textToCopy);
         // Create a temporary textarea element
-        var tempTextArea = document.createElement("textarea");
+        var tempTextArea = document.createElement('textarea');
         tempTextArea.value = textToCopy;
         document.body.appendChild(tempTextArea);
         // Select the text inside the textarea and copy it to the clipboard
         tempTextArea.select();
-        document.execCommand("copy");
+        document.execCommand('copy');
         // Remove the temporary textarea
         document.body.removeChild(tempTextArea);
         // Callback function
@@ -12797,7 +12837,7 @@ var $f2c2b31007186eb1$var$CopyClipboard = /** @class */ function() {
     };
     // Function to encode text into HTML entities
     CopyClipboard.prototype.decodeHTML = function(html) {
-        var textarea = document.createElement("textarea");
+        var textarea = document.createElement('textarea');
         textarea.innerHTML = html;
         return textarea.textContent;
     };
@@ -12807,21 +12847,21 @@ var $f2c2b31007186eb1$var$CopyClipboard = /** @class */ function() {
     return CopyClipboard;
 }();
 function $f2c2b31007186eb1$export$ad4117886fd6cf74() {
-    document.querySelectorAll("[data-copy-to-clipboard-target]").forEach(function($triggerEl) {
-        var targetId = $triggerEl.getAttribute("data-copy-to-clipboard-target");
+    document.querySelectorAll('[data-copy-to-clipboard-target]').forEach(function($triggerEl) {
+        var targetId = $triggerEl.getAttribute('data-copy-to-clipboard-target');
         var $targetEl = document.getElementById(targetId);
-        var contentType = $triggerEl.getAttribute("data-copy-to-clipboard-content-type");
-        var htmlEntities = $triggerEl.getAttribute("data-copy-to-clipboard-html-entities");
+        var contentType = $triggerEl.getAttribute('data-copy-to-clipboard-content-type');
+        var htmlEntities = $triggerEl.getAttribute('data-copy-to-clipboard-html-entities');
         // check if the target element exists
         if ($targetEl) {
-            if (!(0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).instanceExists("CopyClipboard", $targetEl.getAttribute("id"))) new $f2c2b31007186eb1$var$CopyClipboard($triggerEl, $targetEl, {
-                htmlEntities: htmlEntities && htmlEntities === "true" ? true : $f2c2b31007186eb1$var$Default.htmlEntities,
+            if (!(0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).instanceExists('CopyClipboard', $targetEl.getAttribute('id'))) new $f2c2b31007186eb1$var$CopyClipboard($triggerEl, $targetEl, {
+                htmlEntities: htmlEntities && htmlEntities === 'true' ? true : $f2c2b31007186eb1$var$Default.htmlEntities,
                 contentType: contentType ? contentType : $f2c2b31007186eb1$var$Default.contentType
             });
-        } else console.error('The target element with id "'.concat(targetId, '" does not exist. Please check the data-copy-to-clipboard-target attribute.'));
+        } else console.error("The target element with id \"".concat(targetId, "\" does not exist. Please check the data-copy-to-clipboard-target attribute."));
     });
 }
-if (typeof window !== "undefined") {
+if (typeof window !== 'undefined') {
     window.CopyClipboard = $f2c2b31007186eb1$var$CopyClipboard;
     window.initClipboards = $f2c2b31007186eb1$export$ad4117886fd6cf74;
 }
@@ -13006,11 +13046,11 @@ function $a18c32cb29f9cbaf$var$limitToRange(val, min, max) {
 function $a18c32cb29f9cbaf$var$createTagRepeat(tagName, repeat) {
     var attributes = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
     var index = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
-    var html = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : "";
+    var html = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : '';
     var openTagSrc = Object.keys(attributes).reduce(function(src, attr) {
         var val = attributes[attr];
-        if (typeof val === "function") val = val(index);
-        return "".concat(src, " ").concat(attr, '="').concat(val, '"');
+        if (typeof val === 'function') val = val(index);
+        return "".concat(src, " ").concat(attr, "=\"").concat(val, "\"");
     }, tagName);
     html += "<".concat(openTagSrc, "></").concat(tagName, ">");
     var next = index + 1;
@@ -13019,7 +13059,7 @@ function $a18c32cb29f9cbaf$var$createTagRepeat(tagName, repeat) {
 // Remove the spacing surrounding tags for HTML parser not to create text nodes
 // before/after elements
 function $a18c32cb29f9cbaf$var$optimizeTemplateHTML(html) {
-    return html.replace(/>\s+/g, ">").replace(/\s+</, "<");
+    return html.replace(/>\s+/g, '>').replace(/\s+</, '<');
 }
 function $a18c32cb29f9cbaf$var$stripTime(timeValue) {
     return new Date(timeValue).setHours(0, 0, 0, 0);
@@ -13163,14 +13203,14 @@ function $a18c32cb29f9cbaf$var$normalizeMonth(monthIndex) {
     return monthIndex > -1 ? monthIndex % 12 : $a18c32cb29f9cbaf$var$normalizeMonth(monthIndex + 12);
 }
 function $a18c32cb29f9cbaf$var$padZero(num, length) {
-    return num.toString().padStart(length, "0");
+    return num.toString().padStart(length, '0');
 }
 function $a18c32cb29f9cbaf$var$parseFormatString(format) {
-    if (typeof format !== "string") throw new Error("Invalid date format.");
+    if (typeof format !== 'string') throw new Error("Invalid date format.");
     if (format in $a18c32cb29f9cbaf$var$knownFormats) return $a18c32cb29f9cbaf$var$knownFormats[format];
     // sprit the format string into parts and seprators
     var separators = format.split($a18c32cb29f9cbaf$var$reFormatTokens);
-    var parts = format.match(new RegExp($a18c32cb29f9cbaf$var$reFormatTokens, "g"));
+    var parts = format.match(new RegExp($a18c32cb29f9cbaf$var$reFormatTokens, 'g'));
     if (separators.length === 0 || !parts) throw new Error("Invalid date format.");
     // collect format functions used in the format
     var partFormatters = parts.map(function(token) {
@@ -13180,7 +13220,7 @@ function $a18c32cb29f9cbaf$var$parseFormatString(format) {
     // iterate over parseFns' keys in order to keep the order of the keys.
     var partParserKeys = Object.keys($a18c32cb29f9cbaf$var$parseFns).reduce(function(keys, key) {
         var token = parts.find(function(part) {
-            return part[0] !== "D" && part[0].toLowerCase() === key;
+            return part[0] !== 'D' && part[0].toLowerCase() === key;
         });
         if (token) keys.push(key);
         return keys;
@@ -13190,8 +13230,8 @@ function $a18c32cb29f9cbaf$var$parseFormatString(format) {
             var dateParts = dateStr.split($a18c32cb29f9cbaf$var$reNonDateParts).reduce(function(dtParts, part, index) {
                 if (part.length > 0 && parts[index]) {
                     var token = parts[index][0];
-                    if (token === "M") dtParts.m = part;
-                    else if (token !== "D") dtParts[token] = part;
+                    if (token === 'M') dtParts.m = part;
+                    else if (token !== 'D') dtParts[token] = part;
                 }
                 return dtParts;
             }, {});
@@ -13207,19 +13247,19 @@ function $a18c32cb29f9cbaf$var$parseFormatString(format) {
         formatter: function formatter(date, locale) {
             var dateStr = partFormatters.reduce(function(str, fn, index) {
                 return str += "".concat(separators[index]).concat(fn(date, locale));
-            }, "");
+            }, '');
             // separators' length is always parts' length + 1,
             return dateStr += $a18c32cb29f9cbaf$var$lastItemOf(separators);
         }
     };
 }
 function $a18c32cb29f9cbaf$var$parseDate(dateStr, format, locale) {
-    if (dateStr instanceof Date || typeof dateStr === "number") {
+    if (dateStr instanceof Date || typeof dateStr === 'number') {
         var date = $a18c32cb29f9cbaf$var$stripTime(dateStr);
         return isNaN(date) ? undefined : date;
     }
     if (!dateStr) return undefined;
-    if (dateStr === "today") return $a18c32cb29f9cbaf$var$today();
+    if (dateStr === 'today') return $a18c32cb29f9cbaf$var$today();
     if (format && format.toValue) {
         var _date = format.toValue(dateStr, format, locale);
         return isNaN(_date) ? undefined : $a18c32cb29f9cbaf$var$stripTime(_date);
@@ -13227,8 +13267,8 @@ function $a18c32cb29f9cbaf$var$parseDate(dateStr, format, locale) {
     return $a18c32cb29f9cbaf$var$parseFormatString(format).parser(dateStr, locale);
 }
 function $a18c32cb29f9cbaf$var$formatDate(date, format, locale) {
-    if (isNaN(date) || !date && date !== 0) return "";
-    var dateObj = typeof date === "number" ? new Date(date) : date;
+    if (isNaN(date) || !date && date !== 0) return '';
+    var dateObj = typeof date === 'number' ? new Date(date) : date;
     if (format.toDisplay) return format.toDisplay(dateObj, format, locale);
     return $a18c32cb29f9cbaf$var$parseFormatString(format).formatter(dateObj, locale);
 }
@@ -13285,7 +13325,7 @@ function $a18c32cb29f9cbaf$var$findFromPath(path, criteria, currentTarget) {
 }
 // Search for the actual target of a delegated event
 function $a18c32cb29f9cbaf$var$findElementInEventPath(ev, selector) {
-    var criteria = typeof selector === "function" ? selector : function(el) {
+    var criteria = typeof selector === 'function' ? selector : function(el) {
         return el.matches(selector);
     };
     return $a18c32cb29f9cbaf$var$findFromPath(ev.composedPath(), criteria, ev.currentTarget);
@@ -13362,28 +13402,28 @@ var $a18c32cb29f9cbaf$var$defaultOptions = {
     beforeShowYear: null,
     calendarWeeks: false,
     clearBtn: false,
-    dateDelimiter: ",",
+    dateDelimiter: ',',
     datesDisabled: [],
     daysOfWeekDisabled: [],
     daysOfWeekHighlighted: [],
     defaultViewDate: undefined,
     // placeholder, defaults to today() by the program
     disableTouchKeyboard: false,
-    format: "mm/dd/yyyy",
-    language: "en",
+    format: 'mm/dd/yyyy',
+    language: 'en',
     maxDate: null,
     maxNumberOfDates: 1,
     maxView: 3,
     minDate: null,
     nextArrow: '<svg class="w-4 h-4 rtl:rotate-180 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/></svg>',
-    orientation: "auto",
+    orientation: 'auto',
     pickLevel: 0,
     prevArrow: '<svg class="w-4 h-4 rtl:rotate-180 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5H1m0 0 4 4M1 5l4-4"/></svg>',
     showDaysOfWeek: true,
     showOnClick: true,
     showOnFocus: true,
     startView: 0,
-    title: "",
+    title: '',
     todayBtn: false,
     todayBtnMode: 0,
     todayHighlight: false,
@@ -13395,18 +13435,18 @@ function $a18c32cb29f9cbaf$var$parseHTML(html) {
     return $a18c32cb29f9cbaf$var$range.createContextualFragment(html);
 }
 function $a18c32cb29f9cbaf$var$hideElement(el) {
-    if (el.style.display === "none") return;
+    if (el.style.display === 'none') return;
     // back up the existing display setting in data-style-display
     if (el.style.display) el.dataset.styleDisplay = el.style.display;
-    el.style.display = "none";
+    el.style.display = 'none';
 }
 function $a18c32cb29f9cbaf$var$showElement(el) {
-    if (el.style.display !== "none") return;
+    if (el.style.display !== 'none') return;
     if (el.dataset.styleDisplay) {
         // restore backed-up dispay property
         el.style.display = el.dataset.styleDisplay;
         delete el.dataset.styleDisplay;
-    } else el.style.display = "";
+    } else el.style.display = '';
 }
 function $a18c32cb29f9cbaf$var$emptyChildNodes(el) {
     if (el.firstChild) {
@@ -13417,8 +13457,8 @@ function $a18c32cb29f9cbaf$var$emptyChildNodes(el) {
 function $a18c32cb29f9cbaf$var$replaceChildNodes(el, newChildNodes) {
     $a18c32cb29f9cbaf$var$emptyChildNodes(el);
     if (newChildNodes instanceof DocumentFragment) el.appendChild(newChildNodes);
-    else if (typeof newChildNodes === "string") el.appendChild($a18c32cb29f9cbaf$var$parseHTML(newChildNodes));
-    else if (typeof newChildNodes.forEach === "function") newChildNodes.forEach(function(node) {
+    else if (typeof newChildNodes === 'string') el.appendChild($a18c32cb29f9cbaf$var$parseHTML(newChildNodes));
+    else if (typeof newChildNodes.forEach === 'function') newChildNodes.forEach(function(node) {
         el.appendChild(node);
     });
 }
@@ -13454,7 +13494,7 @@ function $a18c32cb29f9cbaf$var$processOptions(options, datepicker) {
             else {
                 // Check if langauge + region tag can fallback to the one without
                 // region (e.g. fr-CA → fr)
-                lang = inOpts.language.split("-")[0];
+                lang = inOpts.language.split('-')[0];
                 if (locales[lang] === undefined) lang = false;
             }
         }
@@ -13480,8 +13520,8 @@ function $a18c32cb29f9cbaf$var$processOptions(options, datepicker) {
         }
     }
     if (inOpts.format) {
-        var hasToDisplay = typeof inOpts.format.toDisplay === "function";
-        var hasToValue = typeof inOpts.format.toValue === "function";
+        var hasToDisplay = typeof inOpts.format.toDisplay === 'function';
+        var hasToValue = typeof inOpts.format.toValue === 'function';
         var validFormatString = $a18c32cb29f9cbaf$var$reFormatTokens.test(inOpts.format);
         if (hasToDisplay && hasToValue || validFormatString) format = config.format = inOpts.format;
         delete inOpts.format;
@@ -13587,18 +13627,18 @@ function $a18c32cb29f9cbaf$var$processOptions(options, datepicker) {
     }
     //*** misc ***//
     if (inOpts.disableTouchKeyboard !== undefined) {
-        config.disableTouchKeyboard = "ontouchstart" in document && !!inOpts.disableTouchKeyboard;
+        config.disableTouchKeyboard = 'ontouchstart' in document && !!inOpts.disableTouchKeyboard;
         delete inOpts.disableTouchKeyboard;
     }
     if (inOpts.orientation) {
         var orientation = inOpts.orientation.toLowerCase().split(/\s+/g);
         config.orientation = {
             x: orientation.find(function(x) {
-                return x === "left" || x === "right";
-            }) || "auto",
+                return x === 'left' || x === 'right';
+            }) || 'auto',
             y: orientation.find(function(y) {
-                return y === "top" || y === "bottom";
-            }) || "auto"
+                return y === 'top' || y === 'bottom';
+            }) || 'auto'
         };
         delete inOpts.orientation;
     }
@@ -13616,14 +13656,14 @@ function $a18c32cb29f9cbaf$var$processOptions(options, datepicker) {
     });
     return config;
 }
-var $a18c32cb29f9cbaf$var$pickerTemplate = $a18c32cb29f9cbaf$var$optimizeTemplateHTML('<div class="datepicker hidden">\n  <div class="datepicker-picker inline-block rounded-lg bg-white dark:bg-gray-700 shadow-lg p-4">\n    <div class="datepicker-header">\n      <div class="datepicker-title bg-white dark:bg-gray-700 dark:text-white px-2 py-3 text-center font-semibold"></div>\n      <div class="datepicker-controls flex justify-between mb-2">\n        <button type="button" class="bg-white dark:bg-gray-700 rounded-lg text-gray-500 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-white text-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-gray-200 prev-btn"></button>\n        <button type="button" class="text-sm rounded-lg text-gray-900 dark:text-white bg-white dark:bg-gray-700 font-semibold py-2.5 px-5 hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-200 view-switch"></button>\n        <button type="button" class="bg-white dark:bg-gray-700 rounded-lg text-gray-500 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-white text-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-gray-200 next-btn"></button>\n      </div>\n    </div>\n    <div class="datepicker-main p-1"></div>\n    <div class="datepicker-footer">\n      <div class="datepicker-controls flex space-x-2 rtl:space-x-reverse mt-2">\n        <button type="button" class="%buttonClass% today-btn text-white bg-blue-700 !bg-primary-700 dark:bg-blue-600 dark:!bg-primary-600 hover:bg-blue-800 hover:!bg-primary-800 dark:hover:bg-blue-700 dark:hover:!bg-primary-700 focus:ring-4 focus:ring-blue-300 focus:!ring-primary-300 font-medium rounded-lg text-sm px-5 py-2 text-center w-1/2"></button>\n        <button type="button" class="%buttonClass% clear-btn text-gray-900 dark:text-white bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 focus:ring-4 focus:ring-blue-300 focus:!ring-primary-300 font-medium rounded-lg text-sm px-5 py-2 text-center w-1/2"></button>\n      </div>\n    </div>\n  </div>\n</div>');
-var $a18c32cb29f9cbaf$var$daysTemplate = $a18c32cb29f9cbaf$var$optimizeTemplateHTML('<div class="days">\n  <div class="days-of-week grid grid-cols-7 mb-1">'.concat($a18c32cb29f9cbaf$var$createTagRepeat("span", 7, {
-    "class": "dow block flex-1 leading-9 border-0 rounded-lg cursor-default text-center text-gray-900 font-semibold text-sm"
-}), '</div>\n  <div class="datepicker-grid w-64 grid grid-cols-7">').concat($a18c32cb29f9cbaf$var$createTagRepeat("span", 42, {
-    "class": "block flex-1 leading-9 border-0 rounded-lg cursor-default text-center text-gray-900 font-semibold text-sm h-6 leading-6 text-sm font-medium text-gray-500 dark:text-gray-400"
+var $a18c32cb29f9cbaf$var$pickerTemplate = $a18c32cb29f9cbaf$var$optimizeTemplateHTML("<div class=\"datepicker hidden\">\n  <div class=\"datepicker-picker inline-block rounded-lg bg-white dark:bg-gray-700 shadow-lg p-4\">\n    <div class=\"datepicker-header\">\n      <div class=\"datepicker-title bg-white dark:bg-gray-700 dark:text-white px-2 py-3 text-center font-semibold\"></div>\n      <div class=\"datepicker-controls flex justify-between mb-2\">\n        <button type=\"button\" class=\"bg-white dark:bg-gray-700 rounded-lg text-gray-500 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-white text-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-gray-200 prev-btn\"></button>\n        <button type=\"button\" class=\"text-sm rounded-lg text-gray-900 dark:text-white bg-white dark:bg-gray-700 font-semibold py-2.5 px-5 hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-200 view-switch\"></button>\n        <button type=\"button\" class=\"bg-white dark:bg-gray-700 rounded-lg text-gray-500 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-white text-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-gray-200 next-btn\"></button>\n      </div>\n    </div>\n    <div class=\"datepicker-main p-1\"></div>\n    <div class=\"datepicker-footer\">\n      <div class=\"datepicker-controls flex space-x-2 rtl:space-x-reverse mt-2\">\n        <button type=\"button\" class=\"%buttonClass% today-btn text-white bg-blue-700 !bg-primary-700 dark:bg-blue-600 dark:!bg-primary-600 hover:bg-blue-800 hover:!bg-primary-800 dark:hover:bg-blue-700 dark:hover:!bg-primary-700 focus:ring-4 focus:ring-blue-300 focus:!ring-primary-300 font-medium rounded-lg text-sm px-5 py-2 text-center w-1/2\"></button>\n        <button type=\"button\" class=\"%buttonClass% clear-btn text-gray-900 dark:text-white bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 focus:ring-4 focus:ring-blue-300 focus:!ring-primary-300 font-medium rounded-lg text-sm px-5 py-2 text-center w-1/2\"></button>\n      </div>\n    </div>\n  </div>\n</div>");
+var $a18c32cb29f9cbaf$var$daysTemplate = $a18c32cb29f9cbaf$var$optimizeTemplateHTML("<div class=\"days\">\n  <div class=\"days-of-week grid grid-cols-7 mb-1\">".concat($a18c32cb29f9cbaf$var$createTagRepeat('span', 7, {
+    "class": 'dow block flex-1 leading-9 border-0 rounded-lg cursor-default text-center text-gray-900 font-semibold text-sm'
+}), "</div>\n  <div class=\"datepicker-grid w-64 grid grid-cols-7\">").concat($a18c32cb29f9cbaf$var$createTagRepeat('span', 42, {
+    "class": 'block flex-1 leading-9 border-0 rounded-lg cursor-default text-center text-gray-900 font-semibold text-sm h-6 leading-6 text-sm font-medium text-gray-500 dark:text-gray-400'
 }), "</div>\n</div>"));
-var $a18c32cb29f9cbaf$var$calendarWeeksTemplate = $a18c32cb29f9cbaf$var$optimizeTemplateHTML('<div class="calendar-weeks">\n  <div class="days-of-week flex"><span class="dow h-6 leading-6 text-sm font-medium text-gray-500 dark:text-gray-400"></span></div>\n  <div class="weeks">'.concat($a18c32cb29f9cbaf$var$createTagRepeat("span", 6, {
-    "class": "week block flex-1 leading-9 border-0 rounded-lg cursor-default text-center text-gray-900 font-semibold text-sm"
+var $a18c32cb29f9cbaf$var$calendarWeeksTemplate = $a18c32cb29f9cbaf$var$optimizeTemplateHTML("<div class=\"calendar-weeks\">\n  <div class=\"days-of-week flex\"><span class=\"dow h-6 leading-6 text-sm font-medium text-gray-500 dark:text-gray-400\"></span></div>\n  <div class=\"weeks\">".concat($a18c32cb29f9cbaf$var$createTagRepeat('span', 6, {
+    "class": 'week block flex-1 leading-9 border-0 rounded-lg cursor-default text-center text-gray-900 font-semibold text-sm'
 }), "</div>\n</div>"));
 // Base class of the view classes
 var $a18c32cb29f9cbaf$var$View = /*#__PURE__*/ function() {
@@ -13631,7 +13671,7 @@ var $a18c32cb29f9cbaf$var$View = /*#__PURE__*/ function() {
         $a18c32cb29f9cbaf$var$_classCallCheck(this, View);
         Object.assign(this, config, {
             picker: picker,
-            element: $a18c32cb29f9cbaf$var$parseHTML('<div class="datepicker-view flex"></div>').firstChild,
+            element: $a18c32cb29f9cbaf$var$parseHTML("<div class=\"datepicker-view flex\"></div>").firstChild,
             selected: []
         });
         this.init(this.picker.datepicker.config);
@@ -13651,26 +13691,26 @@ var $a18c32cb29f9cbaf$var$View = /*#__PURE__*/ function() {
             value: function performBeforeHook(el, current, timeValue) {
                 var result = this.beforeShow(new Date(timeValue));
                 switch($a18c32cb29f9cbaf$var$_typeof(result)){
-                    case "boolean":
+                    case 'boolean':
                         result = {
                             enabled: result
                         };
                         break;
-                    case "string":
+                    case 'string':
                         result = {
                             classes: result
                         };
                 }
                 if (result) {
                     if (result.enabled === false) {
-                        el.classList.add("disabled");
+                        el.classList.add('disabled');
                         $a18c32cb29f9cbaf$var$pushUnique(this.disabled, current);
                     }
                     if (result.classes) {
                         var _el$classList;
                         var extraClasses = result.classes.split(/\s+/);
                         (_el$classList = el.classList).add.apply(_el$classList, $a18c32cb29f9cbaf$var$_toConsumableArray(extraClasses));
-                        if (extraClasses.includes("disabled")) $a18c32cb29f9cbaf$var$pushUnique(this.disabled, current);
+                        if (extraClasses.includes('disabled')) $a18c32cb29f9cbaf$var$pushUnique(this.disabled, current);
                     }
                     if (result.content) $a18c32cb29f9cbaf$var$replaceChildNodes(el, result.content);
                 }
@@ -13685,8 +13725,8 @@ var $a18c32cb29f9cbaf$var$DaysView = /*#__PURE__*/ function(_View) {
             picker,
             {
                 id: 0,
-                name: "days",
-                cellClass: "day"
+                name: 'days',
+                cellClass: 'day'
             }
         ]);
     }
@@ -13710,8 +13750,8 @@ var $a18c32cb29f9cbaf$var$DaysView = /*#__PURE__*/ function(_View) {
             value: function setOptions(options) {
                 var _this = this;
                 var updateDOW;
-                if ($a18c32cb29f9cbaf$var$hasProperty(options, "minDate")) this.minDate = options.minDate;
-                if ($a18c32cb29f9cbaf$var$hasProperty(options, "maxDate")) this.maxDate = options.maxDate;
+                if ($a18c32cb29f9cbaf$var$hasProperty(options, 'minDate')) this.minDate = options.minDate;
+                if ($a18c32cb29f9cbaf$var$hasProperty(options, 'maxDate')) this.maxDate = options.maxDate;
                 if (options.datesDisabled) this.datesDisabled = options.datesDisabled;
                 if (options.daysOfWeekDisabled) {
                     this.daysOfWeekDisabled = options.daysOfWeekDisabled;
@@ -13730,7 +13770,7 @@ var $a18c32cb29f9cbaf$var$DaysView = /*#__PURE__*/ function(_View) {
                     this.switchLabelFormat = locale.titleFormat;
                     updateDOW = true;
                 }
-                if (options.beforeShowDay !== undefined) this.beforeShow = typeof options.beforeShowDay === "function" ? options.beforeShowDay : undefined;
+                if (options.beforeShowDay !== undefined) this.beforeShow = typeof options.beforeShowDay === 'function' ? options.beforeShowDay : undefined;
                 if (options.calendarWeeks !== undefined) {
                     if (options.calendarWeeks && !this.calendarWeeks) {
                         var weeksElem = $a18c32cb29f9cbaf$var$parseHTML($a18c32cb29f9cbaf$var$calendarWeeksTemplate).firstChild;
@@ -13758,7 +13798,7 @@ var $a18c32cb29f9cbaf$var$DaysView = /*#__PURE__*/ function(_View) {
                 if (updateDOW) Array.from(this.dow.children).forEach(function(el, index) {
                     var dow = (_this.weekStart + index) % 7;
                     el.textContent = _this.dayNames[dow];
-                    el.className = _this.daysOfWeekDisabled.includes(dow) ? "dow disabled text-center h-6 leading-6 text-sm font-medium text-gray-500 dark:text-gray-400 cursor-not-allowed" : "dow text-center h-6 leading-6 text-sm font-medium text-gray-500 dark:text-gray-400";
+                    el.className = _this.daysOfWeekDisabled.includes(dow) ? 'dow disabled text-center h-6 leading-6 text-sm font-medium text-gray-500 dark:text-gray-400 cursor-not-allowed' : 'dow text-center h-6 leading-6 text-sm font-medium text-gray-500 dark:text-gray-400';
                 });
             }
         },
@@ -13812,39 +13852,39 @@ var $a18c32cb29f9cbaf$var$DaysView = /*#__PURE__*/ function(_View) {
                     el.className = "datepicker-cell hover:bg-gray-100 dark:hover:bg-gray-600 block flex-1 leading-9 border-0 rounded-lg cursor-pointer text-center text-gray-900 dark:text-white font-semibold text-sm ".concat(_this2.cellClass);
                     el.dataset.date = current;
                     el.textContent = date.getDate();
-                    if (current < _this2.first) classList.add("prev", "text-gray-500", "dark:text-white");
-                    else if (current > _this2.last) classList.add("next", "text-gray-500", "dark:text-white");
-                    if (_this2.today === current) classList.add("today", "bg-gray-100", "dark:bg-gray-600");
+                    if (current < _this2.first) classList.add('prev', 'text-gray-500', 'dark:text-white');
+                    else if (current > _this2.last) classList.add('next', 'text-gray-500', 'dark:text-white');
+                    if (_this2.today === current) classList.add('today', 'bg-gray-100', 'dark:bg-gray-600');
                     if (current < _this2.minDate || current > _this2.maxDate || _this2.disabled.includes(current)) {
-                        classList.add("disabled", "cursor-not-allowed", "text-gray-400", "dark:text-gray-500");
-                        classList.remove("hover:bg-gray-100", "dark:hover:bg-gray-600", "text-gray-900", "dark:text-white", "cursor-pointer");
+                        classList.add('disabled', 'cursor-not-allowed', 'text-gray-400', 'dark:text-gray-500');
+                        classList.remove('hover:bg-gray-100', 'dark:hover:bg-gray-600', 'text-gray-900', 'dark:text-white', 'cursor-pointer');
                     }
                     if (_this2.daysOfWeekDisabled.includes(day)) {
-                        classList.add("disabled", "cursor-not-allowed", "text-gray-400", "dark:text-gray-500");
-                        classList.remove("hover:bg-gray-100", "dark:hover:bg-gray-600", "text-gray-900", "dark:text-white", "cursor-pointer");
+                        classList.add('disabled', 'cursor-not-allowed', 'text-gray-400', 'dark:text-gray-500');
+                        classList.remove('hover:bg-gray-100', 'dark:hover:bg-gray-600', 'text-gray-900', 'dark:text-white', 'cursor-pointer');
                         $a18c32cb29f9cbaf$var$pushUnique(_this2.disabled, current);
                     }
-                    if (_this2.daysOfWeekHighlighted.includes(day)) classList.add("highlighted");
+                    if (_this2.daysOfWeekHighlighted.includes(day)) classList.add('highlighted');
                     if (_this2.range) {
                         var _this2$range = $a18c32cb29f9cbaf$var$_slicedToArray(_this2.range, 2), rangeStart = _this2$range[0], rangeEnd = _this2$range[1];
                         if (current > rangeStart && current < rangeEnd) {
-                            classList.add("range", "bg-gray-200", "dark:bg-gray-600");
-                            classList.remove("rounded-lg", "rounded-l-lg", "rounded-r-lg");
+                            classList.add('range', 'bg-gray-200', 'dark:bg-gray-600');
+                            classList.remove('rounded-lg', 'rounded-l-lg', 'rounded-r-lg');
                         }
                         if (current === rangeStart) {
-                            classList.add("range-start", "bg-gray-100", "dark:bg-gray-600", "rounded-l-lg");
-                            classList.remove("rounded-lg", "rounded-r-lg");
+                            classList.add('range-start', 'bg-gray-100', 'dark:bg-gray-600', 'rounded-l-lg');
+                            classList.remove('rounded-lg', 'rounded-r-lg');
                         }
                         if (current === rangeEnd) {
-                            classList.add("range-end", "bg-gray-100", "dark:bg-gray-600", "rounded-r-lg");
-                            classList.remove("rounded-lg", "rounded-l-lg");
+                            classList.add('range-end', 'bg-gray-100', 'dark:bg-gray-600', 'rounded-r-lg');
+                            classList.remove('rounded-lg', 'rounded-l-lg');
                         }
                     }
                     if (_this2.selected.includes(current)) {
-                        classList.add("selected", "bg-blue-700", "!bg-primary-700", "text-white", "dark:bg-blue-600", "dark:!bg-primary-600", "dark:text-white");
-                        classList.remove("text-gray-900", "text-gray-500", "hover:bg-gray-100", "dark:text-white", "dark:hover:bg-gray-600", "dark:bg-gray-600", "bg-gray-100", "bg-gray-200");
+                        classList.add('selected', 'bg-blue-700', '!bg-primary-700', 'text-white', 'dark:bg-blue-600', 'dark:!bg-primary-600', 'dark:text-white');
+                        classList.remove('text-gray-900', 'text-gray-500', 'hover:bg-gray-100', 'dark:text-white', 'dark:hover:bg-gray-600', 'dark:bg-gray-600', 'bg-gray-100', 'bg-gray-200');
                     }
-                    if (current === _this2.focused) classList.add("focused");
+                    if (current === _this2.focused) classList.add('focused');
                     if (_this2.beforeShow) _this2.performBeforeHook(el, current, current);
                 });
             }
@@ -13854,31 +13894,31 @@ var $a18c32cb29f9cbaf$var$DaysView = /*#__PURE__*/ function(_View) {
             value: function refresh() {
                 var _this3 = this;
                 var _ref = this.range || [], _ref2 = $a18c32cb29f9cbaf$var$_slicedToArray(_ref, 2), rangeStart = _ref2[0], rangeEnd = _ref2[1];
-                this.grid.querySelectorAll(".range, .range-start, .range-end, .selected, .focused").forEach(function(el) {
-                    el.classList.remove("range", "range-start", "range-end", "selected", "bg-blue-700", "!bg-primary-700", "text-white", "dark:bg-blue-600", "dark:!bg-primary-600", "dark:text-white", "focused");
-                    el.classList.add("text-gray-900", "rounded-lg", "dark:text-white");
+                this.grid.querySelectorAll('.range, .range-start, .range-end, .selected, .focused').forEach(function(el) {
+                    el.classList.remove('range', 'range-start', 'range-end', 'selected', 'bg-blue-700', '!bg-primary-700', 'text-white', 'dark:bg-blue-600', 'dark:!bg-primary-600', 'dark:text-white', 'focused');
+                    el.classList.add('text-gray-900', 'rounded-lg', 'dark:text-white');
                 });
                 Array.from(this.grid.children).forEach(function(el) {
                     var current = Number(el.dataset.date);
                     var classList = el.classList;
-                    classList.remove("bg-gray-200", "dark:bg-gray-600", "rounded-l-lg", "rounded-r-lg");
+                    classList.remove('bg-gray-200', 'dark:bg-gray-600', 'rounded-l-lg', 'rounded-r-lg');
                     if (current > rangeStart && current < rangeEnd) {
-                        classList.add("range", "bg-gray-200", "dark:bg-gray-600");
-                        classList.remove("rounded-lg");
+                        classList.add('range', 'bg-gray-200', 'dark:bg-gray-600');
+                        classList.remove('rounded-lg');
                     }
                     if (current === rangeStart) {
-                        classList.add("range-start", "bg-gray-200", "dark:bg-gray-600", "rounded-l-lg");
-                        classList.remove("rounded-lg");
+                        classList.add('range-start', 'bg-gray-200', 'dark:bg-gray-600', 'rounded-l-lg');
+                        classList.remove('rounded-lg');
                     }
                     if (current === rangeEnd) {
-                        classList.add("range-end", "bg-gray-200", "dark:bg-gray-600", "rounded-r-lg");
-                        classList.remove("rounded-lg");
+                        classList.add('range-end', 'bg-gray-200', 'dark:bg-gray-600', 'rounded-r-lg');
+                        classList.remove('rounded-lg');
                     }
                     if (_this3.selected.includes(current)) {
-                        classList.add("selected", "bg-blue-700", "!bg-primary-700", "text-white", "dark:bg-blue-600", "dark:!bg-primary-600", "dark:text-white");
-                        classList.remove("text-gray-900", "hover:bg-gray-100", "dark:text-white", "dark:hover:bg-gray-600", "bg-gray-100", "bg-gray-200", "dark:bg-gray-600");
+                        classList.add('selected', 'bg-blue-700', '!bg-primary-700', 'text-white', 'dark:bg-blue-600', 'dark:!bg-primary-600', 'dark:text-white');
+                        classList.remove('text-gray-900', 'hover:bg-gray-100', 'dark:text-white', 'dark:hover:bg-gray-600', 'bg-gray-100', 'bg-gray-200', 'dark:bg-gray-600');
                     }
-                    if (current === _this3.focused) classList.add("focused");
+                    if (current === _this3.focused) classList.add('focused');
                 });
             }
         },
@@ -13886,10 +13926,10 @@ var $a18c32cb29f9cbaf$var$DaysView = /*#__PURE__*/ function(_View) {
             key: "refreshFocus",
             value: function refreshFocus() {
                 var index = Math.round((this.focused - this.start) / 86400000);
-                this.grid.querySelectorAll(".focused").forEach(function(el) {
-                    el.classList.remove("focused");
+                this.grid.querySelectorAll('.focused').forEach(function(el) {
+                    el.classList.remove('focused');
                 });
-                this.grid.children[index].classList.add("focused");
+                this.grid.children[index].classList.add('focused');
             }
         }
     ]);
@@ -13910,8 +13950,8 @@ var $a18c32cb29f9cbaf$var$MonthsView = /*#__PURE__*/ function(_View) {
             picker,
             {
                 id: 1,
-                name: "months",
-                cellClass: "month"
+                name: 'months',
+                cellClass: 'month'
             }
         ]);
     }
@@ -13923,9 +13963,9 @@ var $a18c32cb29f9cbaf$var$MonthsView = /*#__PURE__*/ function(_View) {
                 var onConstruction = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
                 if (onConstruction) {
                     this.grid = this.element;
-                    this.element.classList.add("months", "datepicker-grid", "w-64", "grid", "grid-cols-4");
-                    this.grid.appendChild($a18c32cb29f9cbaf$var$parseHTML($a18c32cb29f9cbaf$var$createTagRepeat("span", 12, {
-                        "data-month": function dataMonth(ix) {
+                    this.element.classList.add('months', 'datepicker-grid', 'w-64', 'grid', 'grid-cols-4');
+                    this.grid.appendChild($a18c32cb29f9cbaf$var$parseHTML($a18c32cb29f9cbaf$var$createTagRepeat('span', 12, {
+                        'data-month': function dataMonth(ix) {
                             return ix;
                         }
                     })));
@@ -13937,7 +13977,7 @@ var $a18c32cb29f9cbaf$var$MonthsView = /*#__PURE__*/ function(_View) {
             key: "setOptions",
             value: function setOptions(options) {
                 if (options.locale) this.monthNames = options.locale.monthsShort;
-                if ($a18c32cb29f9cbaf$var$hasProperty(options, "minDate")) {
+                if ($a18c32cb29f9cbaf$var$hasProperty(options, 'minDate')) {
                     if (options.minDate === undefined) this.minYear = this.minMonth = this.minDate = undefined;
                     else {
                         var minDateObj = new Date(options.minDate);
@@ -13946,7 +13986,7 @@ var $a18c32cb29f9cbaf$var$MonthsView = /*#__PURE__*/ function(_View) {
                         this.minDate = minDateObj.setDate(1);
                     }
                 }
-                if ($a18c32cb29f9cbaf$var$hasProperty(options, "maxDate")) {
+                if ($a18c32cb29f9cbaf$var$hasProperty(options, 'maxDate')) {
                     if (options.maxDate === undefined) this.maxYear = this.maxMonth = this.maxDate = undefined;
                     else {
                         var maxDateObj = new Date(options.maxDate);
@@ -13955,7 +13995,7 @@ var $a18c32cb29f9cbaf$var$MonthsView = /*#__PURE__*/ function(_View) {
                         this.maxDate = $a18c32cb29f9cbaf$var$dateValue(this.maxYear, this.maxMonth + 1, 0);
                     }
                 }
-                if (options.beforeShowMonth !== undefined) this.beforeShow = typeof options.beforeShowMonth === "function" ? options.beforeShowMonth : undefined;
+                if (options.beforeShowMonth !== undefined) this.beforeShow = typeof options.beforeShowMonth === 'function' ? options.beforeShowMonth : undefined;
             }
         },
         {
@@ -14012,18 +14052,18 @@ var $a18c32cb29f9cbaf$var$MonthsView = /*#__PURE__*/ function(_View) {
                     // reset text on every render to clear the custom content set
                     // by beforeShow hook at previous render
                     el.textContent = _this.monthNames[index];
-                    if (yrOutOfRange || isMinYear && index < _this.minMonth || isMaxYear && index > _this.maxMonth) classList.add("disabled");
+                    if (yrOutOfRange || isMinYear && index < _this.minMonth || isMaxYear && index > _this.maxMonth) classList.add('disabled');
                     if (range) {
                         var _range2 = $a18c32cb29f9cbaf$var$_slicedToArray(range, 2), rangeStart = _range2[0], rangeEnd = _range2[1];
-                        if (index > rangeStart && index < rangeEnd) classList.add("range");
-                        if (index === rangeStart) classList.add("range-start");
-                        if (index === rangeEnd) classList.add("range-end");
+                        if (index > rangeStart && index < rangeEnd) classList.add('range');
+                        if (index === rangeStart) classList.add('range-start');
+                        if (index === rangeEnd) classList.add('range-end');
                     }
                     if (selected.includes(index)) {
-                        classList.add("selected", "bg-blue-700", "!bg-primary-700", "text-white", "dark:bg-blue-600", "dark:!bg-primary-600", "dark:text-white");
-                        classList.remove("text-gray-900", "hover:bg-gray-100", "dark:text-white", "dark:hover:bg-gray-600");
+                        classList.add('selected', 'bg-blue-700', '!bg-primary-700', 'text-white', 'dark:bg-blue-600', 'dark:!bg-primary-600', 'dark:text-white');
+                        classList.remove('text-gray-900', 'hover:bg-gray-100', 'dark:text-white', 'dark:hover:bg-gray-600');
                     }
-                    if (index === _this.focused) classList.add("focused");
+                    if (index === _this.focused) classList.add('focused');
                     if (_this.beforeShow) _this.performBeforeHook(el, index, date);
                 });
             }
@@ -14034,30 +14074,30 @@ var $a18c32cb29f9cbaf$var$MonthsView = /*#__PURE__*/ function(_View) {
                 var _this2 = this;
                 var selected = this.selected[this.year] || [];
                 var _ref = $a18c32cb29f9cbaf$var$computeMonthRange(this.range, this.year) || [], _ref2 = $a18c32cb29f9cbaf$var$_slicedToArray(_ref, 2), rangeStart = _ref2[0], rangeEnd = _ref2[1];
-                this.grid.querySelectorAll(".range, .range-start, .range-end, .selected, .focused").forEach(function(el) {
-                    el.classList.remove("range", "range-start", "range-end", "selected", "bg-blue-700", "!bg-primary-700", "dark:bg-blue-600", "dark:!bg-primary-700", "dark:text-white", "text-white", "focused");
-                    el.classList.add("text-gray-900", "hover:bg-gray-100", "dark:text-white", "dark:hover:bg-gray-600");
+                this.grid.querySelectorAll('.range, .range-start, .range-end, .selected, .focused').forEach(function(el) {
+                    el.classList.remove('range', 'range-start', 'range-end', 'selected', 'bg-blue-700', '!bg-primary-700', 'dark:bg-blue-600', 'dark:!bg-primary-700', 'dark:text-white', 'text-white', 'focused');
+                    el.classList.add('text-gray-900', 'hover:bg-gray-100', 'dark:text-white', 'dark:hover:bg-gray-600');
                 });
                 Array.from(this.grid.children).forEach(function(el, index) {
                     var classList = el.classList;
-                    if (index > rangeStart && index < rangeEnd) classList.add("range");
-                    if (index === rangeStart) classList.add("range-start");
-                    if (index === rangeEnd) classList.add("range-end");
+                    if (index > rangeStart && index < rangeEnd) classList.add('range');
+                    if (index === rangeStart) classList.add('range-start');
+                    if (index === rangeEnd) classList.add('range-end');
                     if (selected.includes(index)) {
-                        classList.add("selected", "bg-blue-700", "!bg-primary-700", "text-white", "dark:bg-blue-600", "dark:!bg-primary-600", "dark:text-white");
-                        classList.remove("text-gray-900", "hover:bg-gray-100", "dark:text-white", "dark:hover:bg-gray-600");
+                        classList.add('selected', 'bg-blue-700', '!bg-primary-700', 'text-white', 'dark:bg-blue-600', 'dark:!bg-primary-600', 'dark:text-white');
+                        classList.remove('text-gray-900', 'hover:bg-gray-100', 'dark:text-white', 'dark:hover:bg-gray-600');
                     }
-                    if (index === _this2.focused) classList.add("focused");
+                    if (index === _this2.focused) classList.add('focused');
                 });
             }
         },
         {
             key: "refreshFocus",
             value: function refreshFocus() {
-                this.grid.querySelectorAll(".focused").forEach(function(el) {
-                    el.classList.remove("focused");
+                this.grid.querySelectorAll('.focused').forEach(function(el) {
+                    el.classList.remove('focused');
                 });
-                this.grid.children[this.focused].classList.add("focused");
+                this.grid.children[this.focused].classList.add('focused');
             }
         }
     ]);
@@ -14065,7 +14105,7 @@ var $a18c32cb29f9cbaf$var$MonthsView = /*#__PURE__*/ function(_View) {
 function $a18c32cb29f9cbaf$var$toTitleCase(word) {
     return $a18c32cb29f9cbaf$var$_toConsumableArray(word).reduce(function(str, ch, ix) {
         return str += ix ? ch : ch.toUpperCase();
-    }, "");
+    }, '');
 }
 // Class representing the years and decades view elements
 var $a18c32cb29f9cbaf$var$YearsView = /*#__PURE__*/ function(_View) {
@@ -14086,8 +14126,8 @@ var $a18c32cb29f9cbaf$var$YearsView = /*#__PURE__*/ function(_View) {
                     this.navStep = this.step * 10;
                     this.beforeShowOption = "beforeShow".concat($a18c32cb29f9cbaf$var$toTitleCase(this.cellClass));
                     this.grid = this.element;
-                    this.element.classList.add(this.name, "datepicker-grid", "w-64", "grid", "grid-cols-4");
-                    this.grid.appendChild($a18c32cb29f9cbaf$var$parseHTML($a18c32cb29f9cbaf$var$createTagRepeat("span", 12)));
+                    this.element.classList.add(this.name, 'datepicker-grid', 'w-64', 'grid', 'grid-cols-4');
+                    this.grid.appendChild($a18c32cb29f9cbaf$var$parseHTML($a18c32cb29f9cbaf$var$createTagRepeat('span', 12)));
                 }
                 $a18c32cb29f9cbaf$var$_get($a18c32cb29f9cbaf$var$_getPrototypeOf(YearsView.prototype), "init", this).call(this, options);
             }
@@ -14095,14 +14135,14 @@ var $a18c32cb29f9cbaf$var$YearsView = /*#__PURE__*/ function(_View) {
         {
             key: "setOptions",
             value: function setOptions(options) {
-                if ($a18c32cb29f9cbaf$var$hasProperty(options, "minDate")) {
+                if ($a18c32cb29f9cbaf$var$hasProperty(options, 'minDate')) {
                     if (options.minDate === undefined) this.minYear = this.minDate = undefined;
                     else {
                         this.minYear = $a18c32cb29f9cbaf$var$startOfYearPeriod(options.minDate, this.step);
                         this.minDate = $a18c32cb29f9cbaf$var$dateValue(this.minYear, 0, 1);
                     }
                 }
-                if ($a18c32cb29f9cbaf$var$hasProperty(options, "maxDate")) {
+                if ($a18c32cb29f9cbaf$var$hasProperty(options, 'maxDate')) {
                     if (options.maxDate === undefined) this.maxYear = this.maxDate = undefined;
                     else {
                         this.maxYear = $a18c32cb29f9cbaf$var$startOfYearPeriod(options.maxDate, this.step);
@@ -14111,7 +14151,7 @@ var $a18c32cb29f9cbaf$var$YearsView = /*#__PURE__*/ function(_View) {
                 }
                 if (options[this.beforeShowOption] !== undefined) {
                     var beforeShow = options[this.beforeShowOption];
-                    this.beforeShow = typeof beforeShow === "function" ? beforeShow : undefined;
+                    this.beforeShow = typeof beforeShow === 'function' ? beforeShow : undefined;
                 }
             }
         },
@@ -14157,20 +14197,20 @@ var $a18c32cb29f9cbaf$var$YearsView = /*#__PURE__*/ function(_View) {
                     el.className = "datepicker-cell hover:bg-gray-100 dark:hover:bg-gray-600 block flex-1 leading-9 border-0 rounded-lg cursor-pointer text-center text-gray-900 dark:text-white font-semibold text-sm ".concat(_this2.cellClass);
                     if (_this2.isMinView) el.dataset.date = date;
                     el.textContent = el.dataset.year = current;
-                    if (index === 0) classList.add("prev");
-                    else if (index === 11) classList.add("next");
-                    if (current < _this2.minYear || current > _this2.maxYear) classList.add("disabled");
+                    if (index === 0) classList.add('prev');
+                    else if (index === 11) classList.add('next');
+                    if (current < _this2.minYear || current > _this2.maxYear) classList.add('disabled');
                     if (_this2.range) {
                         var _this2$range = $a18c32cb29f9cbaf$var$_slicedToArray(_this2.range, 2), rangeStart = _this2$range[0], rangeEnd = _this2$range[1];
-                        if (current > rangeStart && current < rangeEnd) classList.add("range");
-                        if (current === rangeStart) classList.add("range-start");
-                        if (current === rangeEnd) classList.add("range-end");
+                        if (current > rangeStart && current < rangeEnd) classList.add('range');
+                        if (current === rangeStart) classList.add('range-start');
+                        if (current === rangeEnd) classList.add('range-end');
                     }
                     if (_this2.selected.includes(current)) {
-                        classList.add("selected", "bg-blue-700", "!bg-primary-700", "text-white", "dark:bg-blue-600", "dark:!bg-primary-600", "dark:text-white");
-                        classList.remove("text-gray-900", "hover:bg-gray-100", "dark:text-white", "dark:hover:bg-gray-600");
+                        classList.add('selected', 'bg-blue-700', '!bg-primary-700', 'text-white', 'dark:bg-blue-600', 'dark:!bg-primary-600', 'dark:text-white');
+                        classList.remove('text-gray-900', 'hover:bg-gray-100', 'dark:text-white', 'dark:hover:bg-gray-600');
                     }
-                    if (current === _this2.focused) classList.add("focused");
+                    if (current === _this2.focused) classList.add('focused');
                     if (_this2.beforeShow) _this2.performBeforeHook(el, current, date);
                 });
             }
@@ -14180,20 +14220,20 @@ var $a18c32cb29f9cbaf$var$YearsView = /*#__PURE__*/ function(_View) {
             value: function refresh() {
                 var _this3 = this;
                 var _ref = this.range || [], _ref2 = $a18c32cb29f9cbaf$var$_slicedToArray(_ref, 2), rangeStart = _ref2[0], rangeEnd = _ref2[1];
-                this.grid.querySelectorAll(".range, .range-start, .range-end, .selected, .focused").forEach(function(el) {
-                    el.classList.remove("range", "range-start", "range-end", "selected", "bg-blue-700", "!bg-primary-700", "text-white", "dark:bg-blue-600", "dark!bg-primary-600", "dark:text-white", "focused");
+                this.grid.querySelectorAll('.range, .range-start, .range-end, .selected, .focused').forEach(function(el) {
+                    el.classList.remove('range', 'range-start', 'range-end', 'selected', 'bg-blue-700', '!bg-primary-700', 'text-white', 'dark:bg-blue-600', 'dark!bg-primary-600', 'dark:text-white', 'focused');
                 });
                 Array.from(this.grid.children).forEach(function(el) {
                     var current = Number(el.textContent);
                     var classList = el.classList;
-                    if (current > rangeStart && current < rangeEnd) classList.add("range");
-                    if (current === rangeStart) classList.add("range-start");
-                    if (current === rangeEnd) classList.add("range-end");
+                    if (current > rangeStart && current < rangeEnd) classList.add('range');
+                    if (current === rangeStart) classList.add('range-start');
+                    if (current === rangeEnd) classList.add('range-end');
                     if (_this3.selected.includes(current)) {
-                        classList.add("selected", "bg-blue-700", "!bg-primary-700", "text-white", "dark:bg-blue-600", "dark:!bg-primary-600", "dark:text-white");
-                        classList.remove("text-gray-900", "hover:bg-gray-100", "dark:text-white", "dark:hover:bg-gray-600");
+                        classList.add('selected', 'bg-blue-700', '!bg-primary-700', 'text-white', 'dark:bg-blue-600', 'dark:!bg-primary-600', 'dark:text-white');
+                        classList.remove('text-gray-900', 'hover:bg-gray-100', 'dark:text-white', 'dark:hover:bg-gray-600');
                     }
-                    if (current === _this3.focused) classList.add("focused");
+                    if (current === _this3.focused) classList.add('focused');
                 });
             }
         },
@@ -14201,10 +14241,10 @@ var $a18c32cb29f9cbaf$var$YearsView = /*#__PURE__*/ function(_View) {
             key: "refreshFocus",
             value: function refreshFocus() {
                 var index = Math.round((this.focused - this.start) / this.step);
-                this.grid.querySelectorAll(".focused").forEach(function(el) {
-                    el.classList.remove("focused");
+                this.grid.querySelectorAll('.focused').forEach(function(el) {
+                    el.classList.remove('focused');
                 });
-                this.grid.children[index].classList.add("focused");
+                this.grid.children[index].classList.add('focused');
             }
         }
     ]);
@@ -14248,7 +14288,7 @@ function $a18c32cb29f9cbaf$var$unfocus(datepicker) {
         autohide: true
     });
     else {
-        datepicker.refresh("input");
+        datepicker.refresh('input');
         datepicker.hide();
     }
 }
@@ -14291,8 +14331,8 @@ function $a18c32cb29f9cbaf$var$onClickNextBtn(datepicker) {
 }
 // For the picker's main block to delegete the events from `datepicker-cell`s
 function $a18c32cb29f9cbaf$var$onClickView(datepicker, ev) {
-    var target = $a18c32cb29f9cbaf$var$findElementInEventPath(ev, ".datepicker-cell");
-    if (!target || target.classList.contains("disabled")) return;
+    var target = $a18c32cb29f9cbaf$var$findElementInEventPath(ev, '.datepicker-cell');
+    if (!target || target.classList.contains('disabled')) return;
     var _datepicker$picker$cu = datepicker.picker.currentView, id = _datepicker$picker$cu.id, isMinView = _datepicker$picker$cu.isMinView;
     if (isMinView) datepicker.setDate(Number(target.dataset.date));
     else if (id === 1) $a18c32cb29f9cbaf$var$goToSelectedMonthOrYear(datepicker, Number(target.dataset.month));
@@ -14307,7 +14347,7 @@ function $a18c32cb29f9cbaf$var$processPickerOptions(picker, options) {
             picker.controls.title.textContent = options.title;
             $a18c32cb29f9cbaf$var$showElement(picker.controls.title);
         } else {
-            picker.controls.title.textContent = "";
+            picker.controls.title.textContent = '';
             $a18c32cb29f9cbaf$var$hideElement(picker.controls.title);
         }
     }
@@ -14333,7 +14373,7 @@ function $a18c32cb29f9cbaf$var$processPickerOptions(picker, options) {
         if (options.todayBtn) $a18c32cb29f9cbaf$var$showElement(picker.controls.todayBtn);
         else $a18c32cb29f9cbaf$var$hideElement(picker.controls.todayBtn);
     }
-    if ($a18c32cb29f9cbaf$var$hasProperty(options, "minDate") || $a18c32cb29f9cbaf$var$hasProperty(options, "maxDate")) {
+    if ($a18c32cb29f9cbaf$var$hasProperty(options, 'minDate') || $a18c32cb29f9cbaf$var$hasProperty(options, 'maxDate')) {
         var _picker$datepicker$co = picker.datepicker.config, minDate = _picker$datepicker$co.minDate, maxDate = _picker$datepicker$co.maxDate;
         picker.controls.todayBtn.disabled = !$a18c32cb29f9cbaf$var$isInRange($a18c32cb29f9cbaf$var$today(), minDate, maxDate);
     }
@@ -14357,8 +14397,8 @@ function $a18c32cb29f9cbaf$var$setViewDate(picker, newDate) {
     var _picker$currentView = picker.currentView, id = _picker$currentView.id, year = _picker$currentView.year, first = _picker$currentView.first, last = _picker$currentView.last;
     var viewYear = newViewDate.getFullYear();
     picker.viewDate = newDate;
-    if (viewYear !== oldViewDate.getFullYear()) $a18c32cb29f9cbaf$var$triggerDatepickerEvent(picker.datepicker, "changeYear");
-    if (newViewDate.getMonth() !== oldViewDate.getMonth()) $a18c32cb29f9cbaf$var$triggerDatepickerEvent(picker.datepicker, "changeMonth");
+    if (viewYear !== oldViewDate.getFullYear()) $a18c32cb29f9cbaf$var$triggerDatepickerEvent(picker.datepicker, 'changeYear');
+    if (newViewDate.getMonth() !== oldViewDate.getMonth()) $a18c32cb29f9cbaf$var$triggerDatepickerEvent(picker.datepicker, 'changeMonth');
     // return whether the new date is in different period on time from the one
     // displayed in the current view
     // when true, the view needs to be re-rendered on the next UI refresh.
@@ -14395,16 +14435,16 @@ var $a18c32cb29f9cbaf$var$Picker = /*#__PURE__*/ function() {
         };
         this.main = main;
         this.controls = controls;
-        var elementClass = datepicker.inline ? "inline" : "dropdown";
+        var elementClass = datepicker.inline ? 'inline' : 'dropdown';
         element.classList.add("datepicker-".concat(elementClass));
-        elementClass === "dropdown" && element.classList.add("dropdown", "absolute", "top-0", "left-0", "z-50", "pt-2");
+        elementClass === 'dropdown' && element.classList.add('dropdown', 'absolute', 'top-0', 'left-0', 'z-50', 'pt-2');
         $a18c32cb29f9cbaf$var$processPickerOptions(this, datepicker.config);
         this.viewDate = $a18c32cb29f9cbaf$var$computeResetViewDate(datepicker);
         // set up event listeners
         $a18c32cb29f9cbaf$var$registerListeners(datepicker, [
             [
                 element,
-                "click",
+                'click',
                 $a18c32cb29f9cbaf$var$onClickPicker.bind(null, datepicker),
                 {
                     capture: true
@@ -14412,32 +14452,32 @@ var $a18c32cb29f9cbaf$var$Picker = /*#__PURE__*/ function() {
             ],
             [
                 main,
-                "click",
+                'click',
                 $a18c32cb29f9cbaf$var$onClickView.bind(null, datepicker)
             ],
             [
                 controls.viewSwitch,
-                "click",
+                'click',
                 $a18c32cb29f9cbaf$var$onClickViewSwitch.bind(null, datepicker)
             ],
             [
                 controls.prevBtn,
-                "click",
+                'click',
                 $a18c32cb29f9cbaf$var$onClickPrevBtn.bind(null, datepicker)
             ],
             [
                 controls.nextBtn,
-                "click",
+                'click',
                 $a18c32cb29f9cbaf$var$onClickNextBtn.bind(null, datepicker)
             ],
             [
                 controls.todayBtn,
-                "click",
+                'click',
                 $a18c32cb29f9cbaf$var$onClickTodayBtn.bind(null, datepicker)
             ],
             [
                 controls.clearBtn,
-                "click",
+                'click',
                 $a18c32cb29f9cbaf$var$onClickClearBtn.bind(null, datepicker)
             ]
         ]);
@@ -14447,14 +14487,14 @@ var $a18c32cb29f9cbaf$var$Picker = /*#__PURE__*/ function() {
             new $a18c32cb29f9cbaf$var$MonthsView(this),
             new $a18c32cb29f9cbaf$var$YearsView(this, {
                 id: 2,
-                name: "years",
-                cellClass: "year",
+                name: 'years',
+                cellClass: 'year',
                 step: 1
             }),
             new $a18c32cb29f9cbaf$var$YearsView(this, {
                 id: 3,
-                name: "decades",
-                cellClass: "decade",
+                name: 'decades',
+                cellClass: 'decade',
                 step: 10
             })
         ];
@@ -14484,19 +14524,19 @@ var $a18c32cb29f9cbaf$var$Picker = /*#__PURE__*/ function() {
             key: "show",
             value: function show() {
                 if (this.active) return;
-                this.element.classList.add("active", "block");
-                this.element.classList.remove("hidden");
+                this.element.classList.add('active', 'block');
+                this.element.classList.remove('hidden');
                 this.active = true;
                 var datepicker = this.datepicker;
                 if (!datepicker.inline) {
                     // ensure picker's direction matches input's
                     var inputDirection = $a18c32cb29f9cbaf$var$getTextDirection(datepicker.inputField);
                     if (inputDirection !== $a18c32cb29f9cbaf$var$getTextDirection(datepicker.config.container)) this.element.dir = inputDirection;
-                    else if (this.element.dir) this.element.removeAttribute("dir");
+                    else if (this.element.dir) this.element.removeAttribute('dir');
                     this.place();
                     if (datepicker.config.disableTouchKeyboard) datepicker.inputField.blur();
                 }
-                $a18c32cb29f9cbaf$var$triggerDatepickerEvent(datepicker, "show");
+                $a18c32cb29f9cbaf$var$triggerDatepickerEvent(datepicker, 'show');
             }
         },
         {
@@ -14504,10 +14544,10 @@ var $a18c32cb29f9cbaf$var$Picker = /*#__PURE__*/ function() {
             value: function hide() {
                 if (!this.active) return;
                 this.datepicker.exitEditMode();
-                this.element.classList.remove("active", "block");
-                this.element.classList.add("active", "block", "hidden");
+                this.element.classList.remove('active', 'block');
+                this.element.classList.add('active', 'block', 'hidden');
                 this.active = false;
-                $a18c32cb29f9cbaf$var$triggerDatepickerEvent(this.datepicker, "hide");
+                $a18c32cb29f9cbaf$var$triggerDatepickerEvent(this.datepicker, 'hide');
             }
         },
         {
@@ -14532,20 +14572,20 @@ var $a18c32cb29f9cbaf$var$Picker = /*#__PURE__*/ function() {
                     left = inputLeft - containerLeft;
                     top = inputTop - containerTop + scrollTop;
                 }
-                if (orientX === "auto") {
+                if (orientX === 'auto') {
                     if (left < 0) {
                         // align to the left and move into visible area if input's left edge < window's
-                        orientX = "left";
+                        orientX = 'left';
                         left = 10;
                     } else if (left + calendarWidth > containerWidth) // align to the right if canlendar's right edge > container's
-                    orientX = "right";
-                    else orientX = $a18c32cb29f9cbaf$var$getTextDirection(inputField) === "rtl" ? "right" : "left";
+                    orientX = 'right';
+                    else orientX = $a18c32cb29f9cbaf$var$getTextDirection(inputField) === 'rtl' ? 'right' : 'left';
                 }
-                if (orientX === "right") left -= calendarWidth - inputWidth;
-                if (orientY === "auto") orientY = top - calendarHeight < scrollTop ? "bottom" : "top";
-                if (orientY === "top") top -= calendarHeight;
+                if (orientX === 'right') left -= calendarWidth - inputWidth;
+                if (orientY === 'auto') orientY = top - calendarHeight < scrollTop ? 'bottom' : 'top';
+                if (orientY === 'top') top -= calendarHeight;
                 else top += inputHeight;
-                classList.remove("datepicker-orient-top", "datepicker-orient-bottom", "datepicker-orient-right", "datepicker-orient-left");
+                classList.remove('datepicker-orient-top', 'datepicker-orient-bottom', 'datepicker-orient-right', 'datepicker-orient-left');
                 classList.add("datepicker-orient-".concat(orientY), "datepicker-orient-".concat(orientX));
                 style.top = top ? "".concat(top, "px") : top;
                 style.left = left ? "".concat(left, "px") : left;
@@ -14576,8 +14616,8 @@ var $a18c32cb29f9cbaf$var$Picker = /*#__PURE__*/ function() {
                 var newView = this.views[viewId];
                 if (newView.id !== oldView.id) {
                     this.currentView = newView;
-                    this._renderMethod = "render";
-                    $a18c32cb29f9cbaf$var$triggerDatepickerEvent(this.datepicker, "changeView");
+                    this._renderMethod = 'render';
+                    $a18c32cb29f9cbaf$var$triggerDatepickerEvent(this.datepicker, 'changeView');
                     this.main.replaceChild(newView.element, oldView.element);
                 }
                 return this;
@@ -14586,7 +14626,7 @@ var $a18c32cb29f9cbaf$var$Picker = /*#__PURE__*/ function() {
         {
             key: "changeFocus",
             value: function changeFocus(newViewDate) {
-                this._renderMethod = $a18c32cb29f9cbaf$var$setViewDate(this, newViewDate) ? "render" : "refreshFocus";
+                this._renderMethod = $a18c32cb29f9cbaf$var$setViewDate(this, newViewDate) ? 'render' : 'refreshFocus';
                 this.views.forEach(function(view) {
                     view.updateFocus();
                 });
@@ -14597,7 +14637,7 @@ var $a18c32cb29f9cbaf$var$Picker = /*#__PURE__*/ function() {
             key: "update",
             value: function update() {
                 var newViewDate = $a18c32cb29f9cbaf$var$computeResetViewDate(this.datepicker);
-                this._renderMethod = $a18c32cb29f9cbaf$var$setViewDate(this, newViewDate) ? "render" : "refresh";
+                this._renderMethod = $a18c32cb29f9cbaf$var$setViewDate(this, newViewDate) ? 'render' : 'refresh';
                 this.views.forEach(function(view) {
                     view.updateFocus();
                     view.updateSelection();
@@ -14609,7 +14649,7 @@ var $a18c32cb29f9cbaf$var$Picker = /*#__PURE__*/ function() {
             key: "render",
             value: function render() {
                 var quickRender = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
-                var renderMethod = quickRender && this._renderMethod || "render";
+                var renderMethod = quickRender && this._renderMethod || 'render';
                 delete this._renderMethod;
                 this.currentView[renderMethod]();
             }
@@ -14670,28 +14710,28 @@ function $a18c32cb29f9cbaf$var$moveByArrowKey(datepicker, ev, direction, vertica
     if (viewDate !== undefined) picker.changeFocus(viewDate).render();
 }
 function $a18c32cb29f9cbaf$var$onKeydown(datepicker, ev) {
-    if (ev.key === "Tab") {
+    if (ev.key === 'Tab') {
         $a18c32cb29f9cbaf$var$unfocus(datepicker);
         return;
     }
     var picker = datepicker.picker;
     var _picker$currentView = picker.currentView, id = _picker$currentView.id, isMinView = _picker$currentView.isMinView;
     if (!picker.active) switch(ev.key){
-        case "ArrowDown":
-        case "Escape":
+        case 'ArrowDown':
+        case 'Escape':
             picker.show();
             break;
-        case "Enter":
+        case 'Enter':
             datepicker.update();
             break;
         default:
             return;
     }
     else if (datepicker.editMode) switch(ev.key){
-        case "Escape":
+        case 'Escape':
             picker.hide();
             break;
-        case "Enter":
+        case 'Enter':
             datepicker.exitEditMode({
                 update: true,
                 autohide: datepicker.config.autohide
@@ -14701,43 +14741,43 @@ function $a18c32cb29f9cbaf$var$onKeydown(datepicker, ev) {
             return;
     }
     else switch(ev.key){
-        case "Escape":
+        case 'Escape':
             picker.hide();
             break;
-        case "ArrowLeft":
+        case 'ArrowLeft':
             if (ev.ctrlKey || ev.metaKey) $a18c32cb29f9cbaf$var$goToPrevOrNext(datepicker, -1);
             else if (ev.shiftKey) {
                 datepicker.enterEditMode();
                 return;
             } else $a18c32cb29f9cbaf$var$moveByArrowKey(datepicker, ev, -1, false);
             break;
-        case "ArrowRight":
+        case 'ArrowRight':
             if (ev.ctrlKey || ev.metaKey) $a18c32cb29f9cbaf$var$goToPrevOrNext(datepicker, 1);
             else if (ev.shiftKey) {
                 datepicker.enterEditMode();
                 return;
             } else $a18c32cb29f9cbaf$var$moveByArrowKey(datepicker, ev, 1, false);
             break;
-        case "ArrowUp":
+        case 'ArrowUp':
             if (ev.ctrlKey || ev.metaKey) $a18c32cb29f9cbaf$var$switchView(datepicker);
             else if (ev.shiftKey) {
                 datepicker.enterEditMode();
                 return;
             } else $a18c32cb29f9cbaf$var$moveByArrowKey(datepicker, ev, -1, true);
             break;
-        case "ArrowDown":
+        case 'ArrowDown':
             if (ev.shiftKey && !ev.ctrlKey && !ev.metaKey) {
                 datepicker.enterEditMode();
                 return;
             }
             $a18c32cb29f9cbaf$var$moveByArrowKey(datepicker, ev, 1, true);
             break;
-        case "Enter":
+        case 'Enter':
             if (isMinView) datepicker.setDate(picker.viewDate);
             else picker.changeView(id - 1).render();
             break;
-        case "Backspace":
-        case "Delete":
+        case 'Backspace':
+        case 'Delete':
             datepicker.enterEditMode();
             return;
         default:
@@ -14771,7 +14811,7 @@ function $a18c32cb29f9cbaf$var$onClickInput(datepicker, ev) {
     if (datepicker.config.showOnClick) datepicker.show();
 }
 function $a18c32cb29f9cbaf$var$onPaste(datepicker, ev) {
-    if (ev.clipboardData.types.includes("text/plain")) datepicker.enterEditMode();
+    if (ev.clipboardData.types.includes('text/plain')) datepicker.enterEditMode();
 }
 // for the `document` to delegate the events from outside the picker/input field
 function $a18c32cb29f9cbaf$var$onClickOutside(datepicker, ev) {
@@ -14845,7 +14885,7 @@ function $a18c32cb29f9cbaf$var$_setDate(datepicker, inputDates, options) {
     if (newDates.toString() !== datepicker.dates.toString()) {
         datepicker.dates = newDates;
         $a18c32cb29f9cbaf$var$refreshUI(datepicker, render ? 3 : 1);
-        $a18c32cb29f9cbaf$var$triggerDatepickerEvent(datepicker, "changeDate");
+        $a18c32cb29f9cbaf$var$triggerDatepickerEvent(datepicker, 'changeDate');
     } else $a18c32cb29f9cbaf$var$refreshUI(datepicker, 1);
     if (autohide) datepicker.hide();
 }
@@ -14867,7 +14907,7 @@ function $a18c32cb29f9cbaf$var$_setDate(datepicker, inputDates, options) {
         this.element = element;
         // set up config
         var config = this.config = Object.assign({
-            buttonClass: options.buttonClass && String(options.buttonClass) || "button",
+            buttonClass: options.buttonClass && String(options.buttonClass) || 'button',
             container: document.body,
             defaultViewDate: $a18c32cb29f9cbaf$var$today(),
             maxDate: undefined,
@@ -14876,7 +14916,7 @@ function $a18c32cb29f9cbaf$var$_setDate(datepicker, inputDates, options) {
         this._options = options;
         Object.assign(config, $a18c32cb29f9cbaf$var$processOptions(options, this));
         // configure by type
-        var inline = this.inline = element.tagName !== "INPUT";
+        var inline = this.inline = element.tagName !== 'INPUT';
         var inputField;
         var initialDates;
         if (inline) {
@@ -14887,20 +14927,20 @@ function $a18c32cb29f9cbaf$var$_setDate(datepicker, inputDates, options) {
             var container = options.container ? document.querySelector(options.container) : null;
             if (container) config.container = container;
             inputField = this.inputField = element;
-            inputField.classList.add("datepicker-input");
+            inputField.classList.add('datepicker-input');
             initialDates = $a18c32cb29f9cbaf$var$stringToArray(inputField.value, config.dateDelimiter);
         }
         if (rangepicker) {
             // check validiry
             var index = rangepicker.inputs.indexOf(inputField);
             var datepickers = rangepicker.datepickers;
-            if (index < 0 || index > 1 || !Array.isArray(datepickers)) throw Error("Invalid rangepicker object.");
+            if (index < 0 || index > 1 || !Array.isArray(datepickers)) throw Error('Invalid rangepicker object.');
             // attach itaelf to the rangepicker here so that processInputDates() can
             // determine if this is the range-end picker of the rangepicker while
             // setting inital values when pickLevel > 0
             datepickers[index] = this;
             // add getter for rangepicker
-            Object.defineProperty(this, "rangepicker", {
+            Object.defineProperty(this, 'rangepicker', {
                 get: function get() {
                     return rangepicker;
                 }
@@ -14920,42 +14960,42 @@ function $a18c32cb29f9cbaf$var$_setDate(datepicker, inputDates, options) {
             var listeners = [
                 [
                     inputField,
-                    "keydown",
+                    'keydown',
                     $a18c32cb29f9cbaf$var$onKeydown.bind(null, this)
                 ],
                 [
                     inputField,
-                    "focus",
+                    'focus',
                     $a18c32cb29f9cbaf$var$onFocus.bind(null, this)
                 ],
                 [
                     inputField,
-                    "mousedown",
+                    'mousedown',
                     $a18c32cb29f9cbaf$var$onMousedown.bind(null, this)
                 ],
                 [
                     inputField,
-                    "click",
+                    'click',
                     $a18c32cb29f9cbaf$var$onClickInput.bind(null, this)
                 ],
                 [
                     inputField,
-                    "paste",
+                    'paste',
                     $a18c32cb29f9cbaf$var$onPaste.bind(null, this)
                 ],
                 [
                     document,
-                    "mousedown",
+                    'mousedown',
                     onMousedownDocument
                 ],
                 [
                     document,
-                    "touchstart",
+                    'touchstart',
                     onMousedownDocument
                 ],
                 [
                     window,
-                    "resize",
+                    'resize',
                     picker.place.bind(picker)
                 ]
             ];
@@ -15029,7 +15069,7 @@ function $a18c32cb29f9cbaf$var$_setDate(datepicker, inputDates, options) {
                 this.hide();
                 $a18c32cb29f9cbaf$var$unregisterListeners(this);
                 this.picker.detach();
-                if (!this.inline) this.inputField.classList.remove("datepicker-input");
+                if (!this.inline) this.inputField.classList.remove('datepicker-input');
                 delete this.element.datepicker;
                 return this;
             }
@@ -15055,7 +15095,7 @@ function $a18c32cb29f9cbaf$var$_setDate(datepicker, inputDates, options) {
                 var dates = [].concat(args);
                 var opts = {};
                 var lastArg = $a18c32cb29f9cbaf$var$lastItemOf(args);
-                if ($a18c32cb29f9cbaf$var$_typeof(lastArg) === "object" && !Array.isArray(lastArg) && !(lastArg instanceof Date) && lastArg) Object.assign(opts, dates.pop());
+                if ($a18c32cb29f9cbaf$var$_typeof(lastArg) === 'object' && !Array.isArray(lastArg) && !(lastArg instanceof Date) && lastArg) Object.assign(opts, dates.pop());
                 var inputDates = Array.isArray(dates[0]) ? dates[0] : dates;
                 $a18c32cb29f9cbaf$var$_setDate(this, inputDates, opts);
             }
@@ -15078,13 +15118,13 @@ function $a18c32cb29f9cbaf$var$_setDate(datepicker, inputDates, options) {
             value: function refresh() {
                 var target = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : undefined;
                 var forceRender = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-                if (target && typeof target !== "string") {
+                if (target && typeof target !== 'string') {
                     forceRender = target;
                     target = undefined;
                 }
                 var mode;
-                if (target === "picker") mode = 2;
-                else if (target === "input") mode = 1;
+                if (target === 'picker') mode = 2;
+                else if (target === 'input') mode = 1;
                 else mode = 3;
                 $a18c32cb29f9cbaf$var$refreshUI(this, mode, !forceRender);
             }
@@ -15094,7 +15134,7 @@ function $a18c32cb29f9cbaf$var$_setDate(datepicker, inputDates, options) {
             value: function enterEditMode() {
                 if (this.inline || !this.picker.active || this.editMode) return;
                 this.editMode = true;
-                this.inputField.classList.add("in-edit", "border-blue-700", "!border-primary-700");
+                this.inputField.classList.add('in-edit', 'border-blue-700', '!border-primary-700');
             }
         },
         {
@@ -15106,7 +15146,7 @@ function $a18c32cb29f9cbaf$var$_setDate(datepicker, inputDates, options) {
                     update: false
                 }, options);
                 delete this.editMode;
-                this.inputField.classList.remove("in-edit", "border-blue-700", "!border-primary-700");
+                this.inputField.classList.remove('in-edit', 'border-blue-700', '!border-primary-700');
                 if (opts.update) this.update(opts);
             }
         }
@@ -15143,7 +15183,7 @@ function $a18c32cb29f9cbaf$var$setupDatepicker(rangepicker, changeDateListener, 
     $a18c32cb29f9cbaf$var$registerListeners(rangepicker, [
         [
             el,
-            "changeDate",
+            'changeDate',
             changeDateListener
         ]
     ]);
@@ -15194,7 +15234,7 @@ function $a18c32cb29f9cbaf$var$onChangeDate(rangepicker, ev) {
    */ function DateRangePicker(element) {
         var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
         $a18c32cb29f9cbaf$var$_classCallCheck(this, DateRangePicker);
-        var inputs = Array.isArray(options.inputs) ? options.inputs : Array.from(element.querySelectorAll("input"));
+        var inputs = Array.isArray(options.inputs) ? options.inputs : Array.from(element.querySelectorAll('input'));
         if (inputs.length < 2) return;
         element.rangepicker = this;
         this.element = element;
@@ -15205,7 +15245,7 @@ function $a18c32cb29f9cbaf$var$onChangeDate(rangepicker, ev) {
         // in order for initial date setup to work right when pcicLvel > 0,
         // let Datepicker constructor add the instance to the rangepicker
         var datepickers = [];
-        Object.defineProperty(this, "datepickers", {
+        Object.defineProperty(this, 'datepickers', {
             get: function get() {
                 return datepickers;
             }
@@ -15305,14 +15345,14 @@ var $6fd16f8bbe324eab$var$__assign = undefined && undefined.__assign || function
 var $6fd16f8bbe324eab$var$Default = {
     defaultDatepickerId: null,
     autohide: false,
-    format: "mm/dd/yyyy",
+    format: 'mm/dd/yyyy',
     maxDate: null,
     minDate: null,
-    orientation: "bottom",
+    orientation: 'bottom',
     buttons: false,
     autoSelectToday: 0,
     title: null,
-    language: "en",
+    language: 'en',
     rangePicker: false,
     onShow: function() {},
     onHide: function() {}
@@ -15332,7 +15372,7 @@ var $6fd16f8bbe324eab$var$Datepicker = /** @class */ function() {
         this._options = $6fd16f8bbe324eab$var$__assign($6fd16f8bbe324eab$var$__assign({}, $6fd16f8bbe324eab$var$Default), options);
         this._initialized = false;
         this.init();
-        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).addInstance("Datepicker", this, this._instanceId, instanceOptions.override);
+        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).addInstance('Datepicker', this, this._instanceId, instanceOptions.override);
     }
     Datepicker.prototype.init = function() {
         if (this._datepickerEl && !this._initialized) {
@@ -15349,7 +15389,7 @@ var $6fd16f8bbe324eab$var$Datepicker = /** @class */ function() {
     };
     Datepicker.prototype.removeInstance = function() {
         this.destroy();
-        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).removeInstance("Datepicker", this._instanceId);
+        (0, $43290e7e11b6c4c9$export$2e2bcd8739ae039).removeInstance('Datepicker', this._instanceId);
     };
     Datepicker.prototype.destroyAndRemoveInstance = function() {
         this.destroy();
@@ -15399,18 +15439,18 @@ var $6fd16f8bbe324eab$var$Datepicker = /** @class */ function() {
     return Datepicker;
 }();
 function $6fd16f8bbe324eab$export$81c9f52a292162ae() {
-    document.querySelectorAll("[datepicker], [inline-datepicker], [date-rangepicker]").forEach(function($datepickerEl) {
+    document.querySelectorAll('[datepicker], [inline-datepicker], [date-rangepicker]').forEach(function($datepickerEl) {
         if ($datepickerEl) {
-            var buttons = $datepickerEl.hasAttribute("datepicker-buttons");
-            var autoselectToday = $datepickerEl.hasAttribute("datepicker-autoselect-today");
-            var autohide = $datepickerEl.hasAttribute("datepicker-autohide");
-            var format = $datepickerEl.getAttribute("datepicker-format");
-            var maxDate = $datepickerEl.getAttribute("datepicker-max-date");
-            var minDate = $datepickerEl.getAttribute("datepicker-min-date");
-            var orientation_1 = $datepickerEl.getAttribute("datepicker-orientation");
-            var title = $datepickerEl.getAttribute("datepicker-title");
-            var language = $datepickerEl.getAttribute("datepicker-language");
-            var rangePicker = $datepickerEl.hasAttribute("date-rangepicker");
+            var buttons = $datepickerEl.hasAttribute('datepicker-buttons');
+            var autoselectToday = $datepickerEl.hasAttribute('datepicker-autoselect-today');
+            var autohide = $datepickerEl.hasAttribute('datepicker-autohide');
+            var format = $datepickerEl.getAttribute('datepicker-format');
+            var maxDate = $datepickerEl.getAttribute('datepicker-max-date');
+            var minDate = $datepickerEl.getAttribute('datepicker-min-date');
+            var orientation_1 = $datepickerEl.getAttribute('datepicker-orientation');
+            var title = $datepickerEl.getAttribute('datepicker-title');
+            var language = $datepickerEl.getAttribute('datepicker-language');
+            var rangePicker = $datepickerEl.hasAttribute('date-rangepicker');
             new $6fd16f8bbe324eab$var$Datepicker($datepickerEl, {
                 buttons: buttons ? buttons : $6fd16f8bbe324eab$var$Default.buttons,
                 autoSelectToday: autoselectToday ? autoselectToday : $6fd16f8bbe324eab$var$Default.autoSelectToday,
@@ -15426,7 +15466,7 @@ function $6fd16f8bbe324eab$export$81c9f52a292162ae() {
         } else console.error("The datepicker element does not exist. Please check the datepicker attribute.");
     });
 }
-if (typeof window !== "undefined") {
+if (typeof window !== 'undefined') {
     window.Datepicker = $6fd16f8bbe324eab$var$Datepicker;
     window.initDatepickers = $6fd16f8bbe324eab$export$81c9f52a292162ae;
 }
@@ -15463,7 +15503,7 @@ function $abd8bfe2e23ba646$export$4cd50b9c69a85fd5() {
     (0, $f2c2b31007186eb1$export$ad4117886fd6cf74)();
     (0, $6fd16f8bbe324eab$export$81c9f52a292162ae)();
 }
-if (typeof window !== "undefined") window.initFlowbite = $abd8bfe2e23ba646$export$4cd50b9c69a85fd5;
+if (typeof window !== 'undefined') window.initFlowbite = $abd8bfe2e23ba646$export$4cd50b9c69a85fd5;
 
 
 
@@ -15527,7 +15567,7 @@ if (typeof window !== "undefined") window.initFlowbite = $abd8bfe2e23ba646$expor
 
 
 // setup events for data attributes
-var $68c8d9028d8b1de7$var$events = new (0, $4c6a2f83122c31a3$export$2e2bcd8739ae039)("load", [
+var $68c8d9028d8b1de7$var$events = new (0, $4c6a2f83122c31a3$export$2e2bcd8739ae039)('load', [
     (0, $946dcfd8fe0754f4$export$226c1dc98323ee4d),
     (0, $16ba7ad25d51d4f8$export$355ba5a528b4009a),
     (0, $6a8fcd5cc87cb99e$export$3ab77386b16b9e58),
@@ -15559,45 +15599,45 @@ function $199830a05f92d3d0$var$defaults(obj) {
 const $199830a05f92d3d0$var$fieldContentRegExp = /^[\u0009\u0020-\u007e\u0080-\u00ff]+$/;
 const $199830a05f92d3d0$var$serializeCookie = (name, val, options)=>{
     const opt = options || {};
-    opt.path = opt.path || "/";
+    opt.path = opt.path || '/';
     const value = encodeURIComponent(val);
     let str = `${name}=${value}`;
     if (opt.maxAge > 0) {
         const maxAge = opt.maxAge - 0;
-        if (Number.isNaN(maxAge)) throw new Error("maxAge should be a Number");
+        if (Number.isNaN(maxAge)) throw new Error('maxAge should be a Number');
         str += `; Max-Age=${Math.floor(maxAge)}`;
     }
     if (opt.domain) {
-        if (!$199830a05f92d3d0$var$fieldContentRegExp.test(opt.domain)) throw new TypeError("option domain is invalid");
+        if (!$199830a05f92d3d0$var$fieldContentRegExp.test(opt.domain)) throw new TypeError('option domain is invalid');
         str += `; Domain=${opt.domain}`;
     }
     if (opt.path) {
-        if (!$199830a05f92d3d0$var$fieldContentRegExp.test(opt.path)) throw new TypeError("option path is invalid");
+        if (!$199830a05f92d3d0$var$fieldContentRegExp.test(opt.path)) throw new TypeError('option path is invalid');
         str += `; Path=${opt.path}`;
     }
     if (opt.expires) {
-        if (typeof opt.expires.toUTCString !== "function") throw new TypeError("option expires is invalid");
+        if (typeof opt.expires.toUTCString !== 'function') throw new TypeError('option expires is invalid');
         str += `; Expires=${opt.expires.toUTCString()}`;
     }
-    if (opt.httpOnly) str += "; HttpOnly";
-    if (opt.secure) str += "; Secure";
+    if (opt.httpOnly) str += '; HttpOnly';
+    if (opt.secure) str += '; Secure';
     if (opt.sameSite) {
-        const sameSite = typeof opt.sameSite === "string" ? opt.sameSite.toLowerCase() : opt.sameSite;
+        const sameSite = typeof opt.sameSite === 'string' ? opt.sameSite.toLowerCase() : opt.sameSite;
         switch(sameSite){
             case true:
-                str += "; SameSite=Strict";
+                str += '; SameSite=Strict';
                 break;
-            case "lax":
-                str += "; SameSite=Lax";
+            case 'lax':
+                str += '; SameSite=Lax';
                 break;
-            case "strict":
-                str += "; SameSite=Strict";
+            case 'strict':
+                str += '; SameSite=Strict';
                 break;
-            case "none":
-                str += "; SameSite=None";
+            case 'none':
+                str += '; SameSite=None';
                 break;
             default:
-                throw new TypeError("option sameSite is invalid");
+                throw new TypeError('option sameSite is invalid');
         }
     }
     return str;
@@ -15605,8 +15645,8 @@ const $199830a05f92d3d0$var$serializeCookie = (name, val, options)=>{
 const $199830a05f92d3d0$var$cookie = {
     create (name, value, minutes, domain) {
         let cookieOptions = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : {
-            path: "/",
-            sameSite: "strict"
+            path: '/',
+            sameSite: 'strict'
         };
         if (minutes) {
             cookieOptions.expires = new Date();
@@ -15617,45 +15657,45 @@ const $199830a05f92d3d0$var$cookie = {
     },
     read (name) {
         const nameEQ = `${name}=`;
-        const ca = document.cookie.split(";");
+        const ca = document.cookie.split(';');
         for(let i = 0; i < ca.length; i++){
             let c = ca[i];
-            while(c.charAt(0) === " ")c = c.substring(1, c.length);
+            while(c.charAt(0) === ' ')c = c.substring(1, c.length);
             if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
         }
         return null;
     },
     remove (name) {
-        this.create(name, "", -1);
+        this.create(name, '', -1);
     }
 };
 var $199830a05f92d3d0$var$cookie$1 = {
-    name: "cookie",
+    name: 'cookie',
     // Deconstruct the options object and extract the lookupCookie property
     lookup (_ref) {
         let { lookupCookie: lookupCookie } = _ref;
-        if (lookupCookie && typeof document !== "undefined") return $199830a05f92d3d0$var$cookie.read(lookupCookie) || undefined;
+        if (lookupCookie && typeof document !== 'undefined') return $199830a05f92d3d0$var$cookie.read(lookupCookie) || undefined;
         return undefined;
     },
     // Deconstruct the options object and extract the lookupCookie, cookieMinutes, cookieDomain, and cookieOptions properties
     cacheUserLanguage (lng, _ref2) {
         let { lookupCookie: lookupCookie, cookieMinutes: cookieMinutes, cookieDomain: cookieDomain, cookieOptions: cookieOptions } = _ref2;
-        if (lookupCookie && typeof document !== "undefined") $199830a05f92d3d0$var$cookie.create(lookupCookie, lng, cookieMinutes, cookieDomain, cookieOptions);
+        if (lookupCookie && typeof document !== 'undefined') $199830a05f92d3d0$var$cookie.create(lookupCookie, lng, cookieMinutes, cookieDomain, cookieOptions);
     }
 };
 var $199830a05f92d3d0$var$querystring = {
-    name: "querystring",
+    name: 'querystring',
     // Deconstruct the options object and extract the lookupQuerystring property
     lookup (_ref) {
         let { lookupQuerystring: lookupQuerystring } = _ref;
         let found;
-        if (typeof window !== "undefined") {
+        if (typeof window !== 'undefined') {
             let { search: search } = window.location;
-            if (!window.location.search && window.location.hash?.indexOf("?") > -1) search = window.location.hash.substring(window.location.hash.indexOf("?"));
+            if (!window.location.search && window.location.hash?.indexOf('?') > -1) search = window.location.hash.substring(window.location.hash.indexOf('?'));
             const query = search.substring(1);
-            const params = query.split("&");
+            const params = query.split('&');
             for(let i = 0; i < params.length; i++){
-                const pos = params[i].indexOf("=");
+                const pos = params[i].indexOf('=');
                 if (pos > 0) {
                     const key = params[i].substring(0, pos);
                     if (key === lookupQuerystring) found = params[i].substring(pos + 1);
@@ -15669,9 +15709,9 @@ let $199830a05f92d3d0$var$hasLocalStorageSupport = null;
 const $199830a05f92d3d0$var$localStorageAvailable = ()=>{
     if ($199830a05f92d3d0$var$hasLocalStorageSupport !== null) return $199830a05f92d3d0$var$hasLocalStorageSupport;
     try {
-        $199830a05f92d3d0$var$hasLocalStorageSupport = window !== "undefined" && window.localStorage !== null;
-        const testKey = "i18next.translate.boo";
-        window.localStorage.setItem(testKey, "foo");
+        $199830a05f92d3d0$var$hasLocalStorageSupport = window !== 'undefined' && window.localStorage !== null;
+        const testKey = 'i18next.translate.boo';
+        window.localStorage.setItem(testKey, 'foo');
         window.localStorage.removeItem(testKey);
     } catch (e) {
         $199830a05f92d3d0$var$hasLocalStorageSupport = false;
@@ -15679,7 +15719,7 @@ const $199830a05f92d3d0$var$localStorageAvailable = ()=>{
     return $199830a05f92d3d0$var$hasLocalStorageSupport;
 };
 var $199830a05f92d3d0$var$localStorage = {
-    name: "localStorage",
+    name: 'localStorage',
     // Deconstruct the options object and extract the lookupLocalStorage property
     lookup (_ref) {
         let { lookupLocalStorage: lookupLocalStorage } = _ref;
@@ -15696,9 +15736,9 @@ let $199830a05f92d3d0$var$hasSessionStorageSupport = null;
 const $199830a05f92d3d0$var$sessionStorageAvailable = ()=>{
     if ($199830a05f92d3d0$var$hasSessionStorageSupport !== null) return $199830a05f92d3d0$var$hasSessionStorageSupport;
     try {
-        $199830a05f92d3d0$var$hasSessionStorageSupport = window !== "undefined" && window.sessionStorage !== null;
-        const testKey = "i18next.translate.boo";
-        window.sessionStorage.setItem(testKey, "foo");
+        $199830a05f92d3d0$var$hasSessionStorageSupport = window !== 'undefined' && window.sessionStorage !== null;
+        const testKey = 'i18next.translate.boo';
+        window.sessionStorage.setItem(testKey, 'foo');
         window.sessionStorage.removeItem(testKey);
     } catch (e) {
         $199830a05f92d3d0$var$hasSessionStorageSupport = false;
@@ -15706,7 +15746,7 @@ const $199830a05f92d3d0$var$sessionStorageAvailable = ()=>{
     return $199830a05f92d3d0$var$hasSessionStorageSupport;
 };
 var $199830a05f92d3d0$var$sessionStorage = {
-    name: "sessionStorage",
+    name: 'sessionStorage',
     lookup (_ref) {
         let { lookupSessionStorage: lookupSessionStorage } = _ref;
         if (lookupSessionStorage && $199830a05f92d3d0$var$sessionStorageAvailable()) return window.sessionStorage.getItem(lookupSessionStorage) || undefined;
@@ -15718,10 +15758,10 @@ var $199830a05f92d3d0$var$sessionStorage = {
     }
 };
 var $199830a05f92d3d0$var$navigator$1 = {
-    name: "navigator",
+    name: 'navigator',
     lookup (options) {
         const found = [];
-        if (typeof navigator !== "undefined") {
+        if (typeof navigator !== 'undefined') {
             const { languages: languages, userLanguage: userLanguage, language: language } = navigator;
             if (languages) // chrome only; not an array, so can't use .push.apply instead of iterating
             for(let i = 0; i < languages.length; i++)found.push(languages[i]);
@@ -15732,38 +15772,38 @@ var $199830a05f92d3d0$var$navigator$1 = {
     }
 };
 var $199830a05f92d3d0$var$htmlTag = {
-    name: "htmlTag",
+    name: 'htmlTag',
     // Deconstruct the options object and extract the htmlTag property
     lookup (_ref) {
         let { htmlTag: htmlTag } = _ref;
         let found;
-        const internalHtmlTag = htmlTag || (typeof document !== "undefined" ? document.documentElement : null);
-        if (internalHtmlTag && typeof internalHtmlTag.getAttribute === "function") found = internalHtmlTag.getAttribute("lang");
+        const internalHtmlTag = htmlTag || (typeof document !== 'undefined' ? document.documentElement : null);
+        if (internalHtmlTag && typeof internalHtmlTag.getAttribute === 'function') found = internalHtmlTag.getAttribute('lang');
         return found;
     }
 };
 var $199830a05f92d3d0$var$path = {
-    name: "path",
+    name: 'path',
     // Deconstruct the options object and extract the lookupFromPathIndex property
     lookup (_ref) {
         let { lookupFromPathIndex: lookupFromPathIndex } = _ref;
-        if (typeof window === "undefined") return undefined;
+        if (typeof window === 'undefined') return undefined;
         const language = window.location.pathname.match(/\/([a-zA-Z-]*)/g);
         if (!Array.isArray(language)) return undefined;
-        const index = typeof lookupFromPathIndex === "number" ? lookupFromPathIndex : 0;
-        return language[index]?.replace("/", "");
+        const index = typeof lookupFromPathIndex === 'number' ? lookupFromPathIndex : 0;
+        return language[index]?.replace('/', '');
     }
 };
 var $199830a05f92d3d0$var$subdomain = {
-    name: "subdomain",
+    name: 'subdomain',
     lookup (_ref) {
         let { lookupFromSubdomainIndex: lookupFromSubdomainIndex } = _ref;
         // If given get the subdomain index else 1
-        const internalLookupFromSubdomainIndex = typeof lookupFromSubdomainIndex === "number" ? lookupFromSubdomainIndex + 1 : 1;
+        const internalLookupFromSubdomainIndex = typeof lookupFromSubdomainIndex === 'number' ? lookupFromSubdomainIndex + 1 : 1;
         // get all matches if window.location. is existing
         // first item of match is the match itself and the second is the first group match which should be the first subdomain match
         // is the hostname no public domain get the or option of localhost
-        const language = typeof window !== "undefined" && window.location?.hostname?.match(/^(\w{2,5})\.(([a-z0-9-]{1,63}\.[a-z]{2,6})|localhost)/i);
+        const language = typeof window !== 'undefined' && window.location?.hostname?.match(/^(\w{2,5})\.(([a-z0-9-]{1,63}\.[a-z]{2,6})|localhost)/i);
         // if there is no match (null) return undefined
         if (!language) return undefined;
         // return the given group match
@@ -15773,23 +15813,23 @@ var $199830a05f92d3d0$var$subdomain = {
 function $199830a05f92d3d0$var$getDefaults() {
     return {
         order: [
-            "querystring",
-            "cookie",
-            "localStorage",
-            "sessionStorage",
-            "navigator",
-            "htmlTag"
+            'querystring',
+            'cookie',
+            'localStorage',
+            'sessionStorage',
+            'navigator',
+            'htmlTag'
         ],
-        lookupQuerystring: "lng",
-        lookupCookie: "i18next",
-        lookupLocalStorage: "i18nextLng",
-        lookupSessionStorage: "i18nextLng",
+        lookupQuerystring: 'lng',
+        lookupCookie: 'i18next',
+        lookupLocalStorage: 'i18nextLng',
+        lookupSessionStorage: 'i18nextLng',
         // cache user language
         caches: [
-            "localStorage"
+            'localStorage'
         ],
         excludeCacheFor: [
-            "cimode"
+            'cimode'
         ],
         // cookieMinutes: 10,
         // cookieDomain: 'myDomain'
@@ -15799,7 +15839,7 @@ function $199830a05f92d3d0$var$getDefaults() {
 class $199830a05f92d3d0$export$2e2bcd8739ae039 {
     constructor(services){
         let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-        this.type = "languageDetector";
+        this.type = 'languageDetector';
         this.detectors = {};
         this.init(services, options);
     }
@@ -15810,7 +15850,7 @@ class $199830a05f92d3d0$export$2e2bcd8739ae039 {
             languageUtils: {}
         }; // this way the language detector can be used without i18next
         this.options = $199830a05f92d3d0$var$defaults(options, this.options || {}, $199830a05f92d3d0$var$getDefaults());
-        if (typeof this.options.convertDetectedLanguage === "string" && this.options.convertDetectedLanguage.indexOf("15897") > -1) this.options.convertDetectedLanguage = (l)=>l.replace("-", "_");
+        if (typeof this.options.convertDetectedLanguage === 'string' && this.options.convertDetectedLanguage.indexOf('15897') > -1) this.options.convertDetectedLanguage = (l)=>l.replace('-', '_');
         // backwards compatibility
         if (this.options.lookupFromUrlIndex) this.options.lookupFromPathIndex = this.options.lookupFromUrlIndex;
         this.i18nOptions = i18nOptions;
@@ -15833,7 +15873,7 @@ class $199830a05f92d3d0$export$2e2bcd8739ae039 {
         detectionOrder.forEach((detectorName)=>{
             if (this.detectors[detectorName]) {
                 let lookup = this.detectors[detectorName].lookup(this.options);
-                if (lookup && typeof lookup === "string") lookup = [
+                if (lookup && typeof lookup === 'string') lookup = [
                     lookup
                 ];
                 if (lookup) detected = detected.concat(lookup);
@@ -15852,14 +15892,14 @@ class $199830a05f92d3d0$export$2e2bcd8739ae039 {
         });
     }
 }
-$199830a05f92d3d0$export$2e2bcd8739ae039.type = "languageDetector";
+$199830a05f92d3d0$export$2e2bcd8739ae039.type = 'languageDetector';
 
 
 // lib/index.ts
 var $040ba8e83b63f6c5$exports = {};
 var $41148a221f03ee13$exports = {};
 /* MIT license */ var $72c9eba4dd26aa1d$exports = {};
-"use strict";
+'use strict';
 $72c9eba4dd26aa1d$exports = {
     "aliceblue": [
         240,
@@ -16605,11 +16645,11 @@ $72c9eba4dd26aa1d$exports = {
 
 
 var $e97dd6e5b87d46f7$exports = {};
-"use strict";
+'use strict';
 var $a8cbc72403bdcef6$exports = {};
 $a8cbc72403bdcef6$exports = function isArrayish(obj) {
-    if (!obj || typeof obj === "string") return false;
-    return obj instanceof Array || Array.isArray(obj) || obj.length >= 0 && (obj.splice instanceof Function || Object.getOwnPropertyDescriptor(obj, obj.length - 1) && obj.constructor.name !== "String");
+    if (!obj || typeof obj === 'string') return false;
+    return obj instanceof Array || Array.isArray(obj) || obj.length >= 0 && (obj.splice instanceof Function || Object.getOwnPropertyDescriptor(obj, obj.length - 1) && obj.constructor.name !== 'String');
 };
 
 
@@ -16645,17 +16685,17 @@ $41148a221f03ee13$var$cs.get = function(string) {
     var val;
     var model;
     switch(prefix){
-        case "hsl":
+        case 'hsl':
             val = $41148a221f03ee13$var$cs.get.hsl(string);
-            model = "hsl";
+            model = 'hsl';
             break;
-        case "hwb":
+        case 'hwb':
             val = $41148a221f03ee13$var$cs.get.hwb(string);
-            model = "hwb";
+            model = 'hwb';
             break;
         default:
             val = $41148a221f03ee13$var$cs.get.rgb(string);
-            model = "rgb";
+            model = 'rgb';
             break;
     }
     if (!val) return null;
@@ -16707,7 +16747,7 @@ $41148a221f03ee13$var$cs.get.rgb = function(string) {
             else rgb[3] = parseFloat(match[4]);
         }
     } else if (match = string.match(keyword)) {
-        if (match[1] === "transparent") return [
+        if (match[1] === 'transparent') return [
             0,
             0,
             0,
@@ -16762,30 +16802,30 @@ $41148a221f03ee13$var$cs.get.hwb = function(string) {
 };
 $41148a221f03ee13$var$cs.to.hex = function() {
     var rgba = $e97dd6e5b87d46f7$exports(arguments);
-    return "#" + $41148a221f03ee13$var$hexDouble(rgba[0]) + $41148a221f03ee13$var$hexDouble(rgba[1]) + $41148a221f03ee13$var$hexDouble(rgba[2]) + (rgba[3] < 1 ? $41148a221f03ee13$var$hexDouble(Math.round(rgba[3] * 255)) : "");
+    return '#' + $41148a221f03ee13$var$hexDouble(rgba[0]) + $41148a221f03ee13$var$hexDouble(rgba[1]) + $41148a221f03ee13$var$hexDouble(rgba[2]) + (rgba[3] < 1 ? $41148a221f03ee13$var$hexDouble(Math.round(rgba[3] * 255)) : '');
 };
 $41148a221f03ee13$var$cs.to.rgb = function() {
     var rgba = $e97dd6e5b87d46f7$exports(arguments);
-    return rgba.length < 4 || rgba[3] === 1 ? "rgb(" + Math.round(rgba[0]) + ", " + Math.round(rgba[1]) + ", " + Math.round(rgba[2]) + ")" : "rgba(" + Math.round(rgba[0]) + ", " + Math.round(rgba[1]) + ", " + Math.round(rgba[2]) + ", " + rgba[3] + ")";
+    return rgba.length < 4 || rgba[3] === 1 ? 'rgb(' + Math.round(rgba[0]) + ', ' + Math.round(rgba[1]) + ', ' + Math.round(rgba[2]) + ')' : 'rgba(' + Math.round(rgba[0]) + ', ' + Math.round(rgba[1]) + ', ' + Math.round(rgba[2]) + ', ' + rgba[3] + ')';
 };
 $41148a221f03ee13$var$cs.to.rgb.percent = function() {
     var rgba = $e97dd6e5b87d46f7$exports(arguments);
     var r = Math.round(rgba[0] / 255 * 100);
     var g = Math.round(rgba[1] / 255 * 100);
     var b = Math.round(rgba[2] / 255 * 100);
-    return rgba.length < 4 || rgba[3] === 1 ? "rgb(" + r + "%, " + g + "%, " + b + "%)" : "rgba(" + r + "%, " + g + "%, " + b + "%, " + rgba[3] + ")";
+    return rgba.length < 4 || rgba[3] === 1 ? 'rgb(' + r + '%, ' + g + '%, ' + b + '%)' : 'rgba(' + r + '%, ' + g + '%, ' + b + '%, ' + rgba[3] + ')';
 };
 $41148a221f03ee13$var$cs.to.hsl = function() {
     var hsla = $e97dd6e5b87d46f7$exports(arguments);
-    return hsla.length < 4 || hsla[3] === 1 ? "hsl(" + hsla[0] + ", " + hsla[1] + "%, " + hsla[2] + "%)" : "hsla(" + hsla[0] + ", " + hsla[1] + "%, " + hsla[2] + "%, " + hsla[3] + ")";
+    return hsla.length < 4 || hsla[3] === 1 ? 'hsl(' + hsla[0] + ', ' + hsla[1] + '%, ' + hsla[2] + '%)' : 'hsla(' + hsla[0] + ', ' + hsla[1] + '%, ' + hsla[2] + '%, ' + hsla[3] + ')';
 };
 // hwb is a bit different than rgb(a) & hsl(a) since there is no alpha specific syntax
 // (hwb have alpha optional & 1 is default value)
 $41148a221f03ee13$var$cs.to.hwb = function() {
     var hwba = $e97dd6e5b87d46f7$exports(arguments);
-    var a = "";
-    if (hwba.length >= 4 && hwba[3] !== 1) a = ", " + hwba[3];
-    return "hwb(" + hwba[0] + ", " + hwba[1] + "%, " + hwba[2] + "%" + a + ")";
+    var a = '';
+    if (hwba.length >= 4 && hwba[3] !== 1) a = ', ' + hwba[3];
+    return 'hwb(' + hwba[0] + ', ' + hwba[1] + '%, ' + hwba[2] + '%' + a + ')';
 };
 $41148a221f03ee13$var$cs.to.keyword = function(rgb) {
     return $41148a221f03ee13$var$reverseNames[rgb.slice(0, 3)];
@@ -16796,7 +16836,7 @@ function $41148a221f03ee13$var$clamp(num, min, max) {
 }
 function $41148a221f03ee13$var$hexDouble(num) {
     var str = Math.round(num).toString(16).toUpperCase();
-    return str.length < 2 ? "0" + str : str;
+    return str.length < 2 ? '0' + str : str;
 }
 
 
@@ -16811,96 +16851,96 @@ for (const key of Object.keys($72c9eba4dd26aa1d$exports))$f48c6abccc789ef5$var$r
 const $f48c6abccc789ef5$var$convert = {
     rgb: {
         channels: 3,
-        labels: "rgb"
+        labels: 'rgb'
     },
     hsl: {
         channels: 3,
-        labels: "hsl"
+        labels: 'hsl'
     },
     hsv: {
         channels: 3,
-        labels: "hsv"
+        labels: 'hsv'
     },
     hwb: {
         channels: 3,
-        labels: "hwb"
+        labels: 'hwb'
     },
     cmyk: {
         channels: 4,
-        labels: "cmyk"
+        labels: 'cmyk'
     },
     xyz: {
         channels: 3,
-        labels: "xyz"
+        labels: 'xyz'
     },
     lab: {
         channels: 3,
-        labels: "lab"
+        labels: 'lab'
     },
     lch: {
         channels: 3,
-        labels: "lch"
+        labels: 'lch'
     },
     hex: {
         channels: 1,
         labels: [
-            "hex"
+            'hex'
         ]
     },
     keyword: {
         channels: 1,
         labels: [
-            "keyword"
+            'keyword'
         ]
     },
     ansi16: {
         channels: 1,
         labels: [
-            "ansi16"
+            'ansi16'
         ]
     },
     ansi256: {
         channels: 1,
         labels: [
-            "ansi256"
+            'ansi256'
         ]
     },
     hcg: {
         channels: 3,
         labels: [
-            "h",
-            "c",
-            "g"
+            'h',
+            'c',
+            'g'
         ]
     },
     apple: {
         channels: 3,
         labels: [
-            "r16",
-            "g16",
-            "b16"
+            'r16',
+            'g16',
+            'b16'
         ]
     },
     gray: {
         channels: 1,
         labels: [
-            "gray"
+            'gray'
         ]
     }
 };
 $f48c6abccc789ef5$exports = $f48c6abccc789ef5$var$convert;
 // Hide .channels and .labels properties
 for (const model of Object.keys($f48c6abccc789ef5$var$convert)){
-    if (!("channels" in $f48c6abccc789ef5$var$convert[model])) throw new Error("missing channels property: " + model);
-    if (!("labels" in $f48c6abccc789ef5$var$convert[model])) throw new Error("missing channel labels property: " + model);
-    if ($f48c6abccc789ef5$var$convert[model].labels.length !== $f48c6abccc789ef5$var$convert[model].channels) throw new Error("channel and label counts mismatch: " + model);
+    if (!('channels' in $f48c6abccc789ef5$var$convert[model])) throw new Error('missing channels property: ' + model);
+    if (!('labels' in $f48c6abccc789ef5$var$convert[model])) throw new Error('missing channel labels property: ' + model);
+    if ($f48c6abccc789ef5$var$convert[model].labels.length !== $f48c6abccc789ef5$var$convert[model].channels) throw new Error('channel and label counts mismatch: ' + model);
     const { channels: channels, labels: labels } = $f48c6abccc789ef5$var$convert[model];
     delete $f48c6abccc789ef5$var$convert[model].channels;
     delete $f48c6abccc789ef5$var$convert[model].labels;
-    Object.defineProperty($f48c6abccc789ef5$var$convert[model], "channels", {
+    Object.defineProperty($f48c6abccc789ef5$var$convert[model], 'channels', {
         value: channels
     });
-    Object.defineProperty($f48c6abccc789ef5$var$convert[model], "labels", {
+    Object.defineProperty($f48c6abccc789ef5$var$convert[model], 'labels', {
         value: labels
     });
 }
@@ -17416,7 +17456,7 @@ $f48c6abccc789ef5$var$convert.ansi256.rgb = function(args) {
 $f48c6abccc789ef5$var$convert.rgb.hex = function(args) {
     const integer = ((Math.round(args[0]) & 0xFF) << 16) + ((Math.round(args[1]) & 0xFF) << 8) + (Math.round(args[2]) & 0xFF);
     const string = integer.toString(16).toUpperCase();
-    return "000000".substring(string.length) + string;
+    return '000000'.substring(string.length) + string;
 };
 $f48c6abccc789ef5$var$convert.hex.rgb = function(args) {
     const match = args.toString(16).match(/[a-f0-9]{6}|[a-f0-9]{3}/i);
@@ -17426,9 +17466,9 @@ $f48c6abccc789ef5$var$convert.hex.rgb = function(args) {
         0
     ];
     let colorString = match[0];
-    if (match[0].length === 3) colorString = colorString.split("").map((char)=>{
+    if (match[0].length === 3) colorString = colorString.split('').map((char)=>{
         return char + char;
-    }).join("");
+    }).join('');
     const integer = parseInt(colorString, 16);
     const r = integer >> 16 & 0xFF;
     const g = integer >> 8 & 0xFF;
@@ -17645,7 +17685,7 @@ $f48c6abccc789ef5$var$convert.gray.hex = function(gray) {
     const val = Math.round(gray[0] / 100 * 255) & 0xFF;
     const integer = (val << 16) + (val << 8) + val;
     const string = integer.toString(16).toUpperCase();
-    return "000000".substring(string.length) + string;
+    return '000000'.substring(string.length) + string;
 };
 $f48c6abccc789ef5$var$convert.rgb.gray = function(rgb) {
     const val = (rgb[0] + rgb[1] + rgb[2]) / 3;
@@ -17744,7 +17784,7 @@ function $b0ce43f4286ff9ac$var$wrapRaw(fn) {
         return fn(args);
     };
     // Preserve .conversion property if there is one
-    if ("conversion" in fn) wrappedFn.conversion = fn.conversion;
+    if ('conversion' in fn) wrappedFn.conversion = fn.conversion;
     return wrappedFn;
 }
 function $b0ce43f4286ff9ac$var$wrapRounded(fn) {
@@ -17756,19 +17796,19 @@ function $b0ce43f4286ff9ac$var$wrapRounded(fn) {
         // We're assuming the result is an array here.
         // see notice in conversions.js; don't use box types
         // in conversion functions.
-        if (typeof result === "object") for(let len = result.length, i = 0; i < len; i++)result[i] = Math.round(result[i]);
+        if (typeof result === 'object') for(let len = result.length, i = 0; i < len; i++)result[i] = Math.round(result[i]);
         return result;
     };
     // Preserve .conversion property if there is one
-    if ("conversion" in fn) wrappedFn.conversion = fn.conversion;
+    if ('conversion' in fn) wrappedFn.conversion = fn.conversion;
     return wrappedFn;
 }
 $b0ce43f4286ff9ac$var$models.forEach((fromModel)=>{
     $b0ce43f4286ff9ac$var$convert[fromModel] = {};
-    Object.defineProperty($b0ce43f4286ff9ac$var$convert[fromModel], "channels", {
+    Object.defineProperty($b0ce43f4286ff9ac$var$convert[fromModel], 'channels', {
         value: $f48c6abccc789ef5$exports[fromModel].channels
     });
-    Object.defineProperty($b0ce43f4286ff9ac$var$convert[fromModel], "labels", {
+    Object.defineProperty($b0ce43f4286ff9ac$var$convert[fromModel], 'labels', {
         value: $f48c6abccc789ef5$exports[fromModel].labels
     });
     const routes = $145e82ba91440c6e$exports(fromModel);
@@ -17784,25 +17824,25 @@ $b0ce43f4286ff9ac$exports = $b0ce43f4286ff9ac$var$convert;
 
 const $040ba8e83b63f6c5$var$skippedModels = [
     // To be honest, I don't really feel like keyword belongs in color convert, but eh.
-    "keyword",
+    'keyword',
     // Gray conflicts with some method names, and has its own method defined.
-    "gray",
+    'gray',
     // Shouldn't really be in color-convert either...
-    "hex"
+    'hex'
 ];
 const $040ba8e83b63f6c5$var$hashedModelKeys = {};
 for (const model of Object.keys($b0ce43f4286ff9ac$exports))$040ba8e83b63f6c5$var$hashedModelKeys[[
     ...$b0ce43f4286ff9ac$exports[model].labels
-].sort().join("")] = model;
+].sort().join('')] = model;
 const $040ba8e83b63f6c5$var$limiters = {};
 function $040ba8e83b63f6c5$var$Color(object, model) {
     if (!(this instanceof $040ba8e83b63f6c5$var$Color)) return new $040ba8e83b63f6c5$var$Color(object, model);
     if (model && model in $040ba8e83b63f6c5$var$skippedModels) model = null;
-    if (model && !(model in $b0ce43f4286ff9ac$exports)) throw new Error("Unknown model: " + model);
+    if (model && !(model in $b0ce43f4286ff9ac$exports)) throw new Error('Unknown model: ' + model);
     let i;
     let channels;
     if (object == null) {
-        this.model = "rgb";
+        this.model = 'rgb';
         this.color = [
             0,
             0,
@@ -17815,22 +17855,22 @@ function $040ba8e83b63f6c5$var$Color(object, model) {
             ...object.color
         ];
         this.valpha = object.valpha;
-    } else if (typeof object === "string") {
+    } else if (typeof object === 'string') {
         const result = $41148a221f03ee13$exports.get(object);
-        if (result === null) throw new Error("Unable to parse color from string: " + object);
+        if (result === null) throw new Error('Unable to parse color from string: ' + object);
         this.model = result.model;
         channels = $b0ce43f4286ff9ac$exports[this.model].channels;
         this.color = result.value.slice(0, channels);
-        this.valpha = typeof result.value[channels] === "number" ? result.value[channels] : 1;
+        this.valpha = typeof result.value[channels] === 'number' ? result.value[channels] : 1;
     } else if (object.length > 0) {
-        this.model = model || "rgb";
+        this.model = model || 'rgb';
         channels = $b0ce43f4286ff9ac$exports[this.model].channels;
         const newArray = Array.prototype.slice.call(object, 0, channels);
         this.color = $040ba8e83b63f6c5$var$zeroArray(newArray, channels);
-        this.valpha = typeof object[channels] === "number" ? object[channels] : 1;
-    } else if (typeof object === "number") {
+        this.valpha = typeof object[channels] === 'number' ? object[channels] : 1;
+    } else if (typeof object === 'number') {
         // This is always RGB - can be converted later on.
-        this.model = "rgb";
+        this.model = 'rgb';
         this.color = [
             object >> 16 & 0xFF,
             object >> 8 & 0xFF,
@@ -17840,12 +17880,12 @@ function $040ba8e83b63f6c5$var$Color(object, model) {
     } else {
         this.valpha = 1;
         const keys = Object.keys(object);
-        if ("alpha" in object) {
-            keys.splice(keys.indexOf("alpha"), 1);
-            this.valpha = typeof object.alpha === "number" ? object.alpha : 0;
+        if ('alpha' in object) {
+            keys.splice(keys.indexOf('alpha'), 1);
+            this.valpha = typeof object.alpha === 'number' ? object.alpha : 0;
         }
-        const hashedKeys = keys.sort().join("");
-        if (!(hashedKeys in $040ba8e83b63f6c5$var$hashedModelKeys)) throw new Error("Unable to parse color from object: " + JSON.stringify(object));
+        const hashedKeys = keys.sort().join('');
+        if (!(hashedKeys in $040ba8e83b63f6c5$var$hashedModelKeys)) throw new Error('Unable to parse color from object: ' + JSON.stringify(object));
         this.model = $040ba8e83b63f6c5$var$hashedModelKeys[hashedKeys];
         const { labels: labels } = $b0ce43f4286ff9ac$exports[this.model];
         const color = [];
@@ -17872,7 +17912,7 @@ $040ba8e83b63f6c5$var$Color.prototype = {
     },
     string (places) {
         let self = this.model in $41148a221f03ee13$exports.to ? this : this.rgb();
-        self = self.round(typeof places === "number" ? places : 1);
+        self = self.round(typeof places === 'number' ? places : 1);
         const args = self.valpha === 1 ? self.color : [
             ...self.color,
             this.valpha
@@ -17880,7 +17920,7 @@ $040ba8e83b63f6c5$var$Color.prototype = {
         return $41148a221f03ee13$exports.to[self.model](args);
     },
     percentString (places) {
-        const self = this.rgb().round(typeof places === "number" ? places : 1);
+        const self = this.rgb().round(typeof places === 'number' ? places : 1);
         const args = self.valpha === 1 ? self.color : [
             ...self.color,
             this.valpha
@@ -17934,34 +17974,34 @@ $040ba8e83b63f6c5$var$Color.prototype = {
         return this.valpha;
     },
     // Rgb
-    red: $040ba8e83b63f6c5$var$getset("rgb", 0, $040ba8e83b63f6c5$var$maxfn(255)),
-    green: $040ba8e83b63f6c5$var$getset("rgb", 1, $040ba8e83b63f6c5$var$maxfn(255)),
-    blue: $040ba8e83b63f6c5$var$getset("rgb", 2, $040ba8e83b63f6c5$var$maxfn(255)),
+    red: $040ba8e83b63f6c5$var$getset('rgb', 0, $040ba8e83b63f6c5$var$maxfn(255)),
+    green: $040ba8e83b63f6c5$var$getset('rgb', 1, $040ba8e83b63f6c5$var$maxfn(255)),
+    blue: $040ba8e83b63f6c5$var$getset('rgb', 2, $040ba8e83b63f6c5$var$maxfn(255)),
     hue: $040ba8e83b63f6c5$var$getset([
-        "hsl",
-        "hsv",
-        "hsl",
-        "hwb",
-        "hcg"
+        'hsl',
+        'hsv',
+        'hsl',
+        'hwb',
+        'hcg'
     ], 0, (value)=>(value % 360 + 360) % 360),
-    saturationl: $040ba8e83b63f6c5$var$getset("hsl", 1, $040ba8e83b63f6c5$var$maxfn(100)),
-    lightness: $040ba8e83b63f6c5$var$getset("hsl", 2, $040ba8e83b63f6c5$var$maxfn(100)),
-    saturationv: $040ba8e83b63f6c5$var$getset("hsv", 1, $040ba8e83b63f6c5$var$maxfn(100)),
-    value: $040ba8e83b63f6c5$var$getset("hsv", 2, $040ba8e83b63f6c5$var$maxfn(100)),
-    chroma: $040ba8e83b63f6c5$var$getset("hcg", 1, $040ba8e83b63f6c5$var$maxfn(100)),
-    gray: $040ba8e83b63f6c5$var$getset("hcg", 2, $040ba8e83b63f6c5$var$maxfn(100)),
-    white: $040ba8e83b63f6c5$var$getset("hwb", 1, $040ba8e83b63f6c5$var$maxfn(100)),
-    wblack: $040ba8e83b63f6c5$var$getset("hwb", 2, $040ba8e83b63f6c5$var$maxfn(100)),
-    cyan: $040ba8e83b63f6c5$var$getset("cmyk", 0, $040ba8e83b63f6c5$var$maxfn(100)),
-    magenta: $040ba8e83b63f6c5$var$getset("cmyk", 1, $040ba8e83b63f6c5$var$maxfn(100)),
-    yellow: $040ba8e83b63f6c5$var$getset("cmyk", 2, $040ba8e83b63f6c5$var$maxfn(100)),
-    black: $040ba8e83b63f6c5$var$getset("cmyk", 3, $040ba8e83b63f6c5$var$maxfn(100)),
-    x: $040ba8e83b63f6c5$var$getset("xyz", 0, $040ba8e83b63f6c5$var$maxfn(95.047)),
-    y: $040ba8e83b63f6c5$var$getset("xyz", 1, $040ba8e83b63f6c5$var$maxfn(100)),
-    z: $040ba8e83b63f6c5$var$getset("xyz", 2, $040ba8e83b63f6c5$var$maxfn(108.833)),
-    l: $040ba8e83b63f6c5$var$getset("lab", 0, $040ba8e83b63f6c5$var$maxfn(100)),
-    a: $040ba8e83b63f6c5$var$getset("lab", 1),
-    b: $040ba8e83b63f6c5$var$getset("lab", 2),
+    saturationl: $040ba8e83b63f6c5$var$getset('hsl', 1, $040ba8e83b63f6c5$var$maxfn(100)),
+    lightness: $040ba8e83b63f6c5$var$getset('hsl', 2, $040ba8e83b63f6c5$var$maxfn(100)),
+    saturationv: $040ba8e83b63f6c5$var$getset('hsv', 1, $040ba8e83b63f6c5$var$maxfn(100)),
+    value: $040ba8e83b63f6c5$var$getset('hsv', 2, $040ba8e83b63f6c5$var$maxfn(100)),
+    chroma: $040ba8e83b63f6c5$var$getset('hcg', 1, $040ba8e83b63f6c5$var$maxfn(100)),
+    gray: $040ba8e83b63f6c5$var$getset('hcg', 2, $040ba8e83b63f6c5$var$maxfn(100)),
+    white: $040ba8e83b63f6c5$var$getset('hwb', 1, $040ba8e83b63f6c5$var$maxfn(100)),
+    wblack: $040ba8e83b63f6c5$var$getset('hwb', 2, $040ba8e83b63f6c5$var$maxfn(100)),
+    cyan: $040ba8e83b63f6c5$var$getset('cmyk', 0, $040ba8e83b63f6c5$var$maxfn(100)),
+    magenta: $040ba8e83b63f6c5$var$getset('cmyk', 1, $040ba8e83b63f6c5$var$maxfn(100)),
+    yellow: $040ba8e83b63f6c5$var$getset('cmyk', 2, $040ba8e83b63f6c5$var$maxfn(100)),
+    black: $040ba8e83b63f6c5$var$getset('cmyk', 3, $040ba8e83b63f6c5$var$maxfn(100)),
+    x: $040ba8e83b63f6c5$var$getset('xyz', 0, $040ba8e83b63f6c5$var$maxfn(95.047)),
+    y: $040ba8e83b63f6c5$var$getset('xyz', 1, $040ba8e83b63f6c5$var$maxfn(100)),
+    z: $040ba8e83b63f6c5$var$getset('xyz', 2, $040ba8e83b63f6c5$var$maxfn(108.833)),
+    l: $040ba8e83b63f6c5$var$getset('lab', 0, $040ba8e83b63f6c5$var$maxfn(100)),
+    a: $040ba8e83b63f6c5$var$getset('lab', 1),
+    b: $040ba8e83b63f6c5$var$getset('lab', 2),
     keyword (value) {
         if (value !== undefined) return new $040ba8e83b63f6c5$var$Color(value);
         return $b0ce43f4286ff9ac$exports[this.model].keyword(this.color);
@@ -17974,7 +18014,7 @@ $040ba8e83b63f6c5$var$Color.prototype = {
         if (value !== undefined) return new $040ba8e83b63f6c5$var$Color(value);
         const rgbArray = this.rgb().round().color;
         let alphaHex = Math.round(this.valpha * 255).toString(16).toUpperCase();
-        if (alphaHex.length === 1) alphaHex = "0" + alphaHex;
+        if (alphaHex.length === 1) alphaHex = '0' + alphaHex;
         return $41148a221f03ee13$exports.to.hex(rgbArray) + alphaHex;
     },
     rgbNumber () {
@@ -18001,8 +18041,8 @@ $040ba8e83b63f6c5$var$Color.prototype = {
     level (color2) {
         // https://www.w3.org/TR/WCAG/#contrast-enhanced
         const contrastRatio = this.contrast(color2);
-        if (contrastRatio >= 7) return "AAA";
-        return contrastRatio >= 4.5 ? "AA" : "";
+        if (contrastRatio >= 7) return 'AAA';
+        return contrastRatio >= 4.5 ? 'AA' : '';
     },
     isDark () {
         // YIQ equation from http://24ways.org/2010/calculating-color-contrast
@@ -18098,7 +18138,7 @@ for (const model of Object.keys($b0ce43f4286ff9ac$exports)){
     // 'static' construction methods
     $040ba8e83b63f6c5$var$Color[model] = function(...args) {
         let color = args[0];
-        if (typeof color === "number") color = $040ba8e83b63f6c5$var$zeroArray(args, channels);
+        if (typeof color === 'number') color = $040ba8e83b63f6c5$var$zeroArray(args, channels);
         return new $040ba8e83b63f6c5$var$Color(color, model);
     };
 }
@@ -18140,7 +18180,7 @@ function $040ba8e83b63f6c5$var$assertArray(value) {
     ];
 }
 function $040ba8e83b63f6c5$var$zeroArray(array, length) {
-    for(let i = 0; i < length; i++)if (typeof array[i] !== "number") array[i] = 0;
+    for(let i = 0; i < length; i++)if (typeof array[i] !== 'number') array[i] = 0;
     return array;
 }
 $040ba8e83b63f6c5$exports = $040ba8e83b63f6c5$var$Color;
@@ -18182,7 +18222,7 @@ var $ff1d430d0589e4d1$exports = {};
  * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
  * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  */ /** Used as references for various `Number` constants. */ var $ff1d430d0589e4d1$var$MAX_SAFE_INTEGER = 9007199254740991;
-/** `Object#toString` result references. */ var $ff1d430d0589e4d1$var$argsTag = "[object Arguments]", $ff1d430d0589e4d1$var$funcTag = "[object Function]", $ff1d430d0589e4d1$var$genTag = "[object GeneratorFunction]";
+/** `Object#toString` result references. */ var $ff1d430d0589e4d1$var$argsTag = '[object Arguments]', $ff1d430d0589e4d1$var$funcTag = '[object Function]', $ff1d430d0589e4d1$var$genTag = '[object GeneratorFunction]';
 /** Used to detect unsigned integer values. */ var $ff1d430d0589e4d1$var$reIsUint = /^(?:0|[1-9]\d*)$/;
 /**
  * A specialized version of `_.forEach` for arrays without support for
@@ -18245,7 +18285,7 @@ var $ff1d430d0589e4d1$exports = {};
     // Safari 9 makes `arguments.length` enumerable in strict mode.
     var result = $ff1d430d0589e4d1$var$isArray(value) || $ff1d430d0589e4d1$var$isArguments(value) ? $ff1d430d0589e4d1$var$baseTimes(value.length, String) : [];
     var length = result.length, skipIndexes = !!length;
-    for(var key in value)if ((inherited || $ff1d430d0589e4d1$var$hasOwnProperty.call(value, key)) && !(skipIndexes && (key == "length" || $ff1d430d0589e4d1$var$isIndex(key, length)))) result.push(key);
+    for(var key in value)if ((inherited || $ff1d430d0589e4d1$var$hasOwnProperty.call(value, key)) && !(skipIndexes && (key == 'length' || $ff1d430d0589e4d1$var$isIndex(key, length)))) result.push(key);
     return result;
 }
 /**
@@ -18286,7 +18326,7 @@ var $ff1d430d0589e4d1$exports = {};
  */ function $ff1d430d0589e4d1$var$baseKeys(object) {
     if (!$ff1d430d0589e4d1$var$isPrototype(object)) return $ff1d430d0589e4d1$var$nativeKeys(object);
     var result = [];
-    for(var key in Object(object))if ($ff1d430d0589e4d1$var$hasOwnProperty.call(object, key) && key != "constructor") result.push(key);
+    for(var key in Object(object))if ($ff1d430d0589e4d1$var$hasOwnProperty.call(object, key) && key != 'constructor') result.push(key);
     return result;
 }
 /**
@@ -18332,7 +18372,7 @@ var $ff1d430d0589e4d1$exports = {};
  * @returns {boolean} Returns `true` if `value` is a valid index, else `false`.
  */ function $ff1d430d0589e4d1$var$isIndex(value, length) {
     length = length == null ? $ff1d430d0589e4d1$var$MAX_SAFE_INTEGER : length;
-    return !!length && (typeof value == "number" || $ff1d430d0589e4d1$var$reIsUint.test(value)) && value > -1 && value % 1 == 0 && value < length;
+    return !!length && (typeof value == 'number' || $ff1d430d0589e4d1$var$reIsUint.test(value)) && value > -1 && value % 1 == 0 && value < length;
 }
 /**
  * Checks if `value` is likely a prototype object.
@@ -18341,7 +18381,7 @@ var $ff1d430d0589e4d1$exports = {};
  * @param {*} value The value to check.
  * @returns {boolean} Returns `true` if `value` is a prototype, else `false`.
  */ function $ff1d430d0589e4d1$var$isPrototype(value) {
-    var Ctor = value && value.constructor, proto = typeof Ctor == "function" && Ctor.prototype || $ff1d430d0589e4d1$var$objectProto;
+    var Ctor = value && value.constructor, proto = typeof Ctor == 'function' && Ctor.prototype || $ff1d430d0589e4d1$var$objectProto;
     return value === proto;
 }
 /**
@@ -18375,7 +18415,7 @@ var $ff1d430d0589e4d1$exports = {};
  * // => Logs 'a' then 'b' (iteration order is not guaranteed).
  */ function $ff1d430d0589e4d1$var$forEach(collection, iteratee) {
     var func = $ff1d430d0589e4d1$var$isArray(collection) ? $ff1d430d0589e4d1$var$arrayEach : $ff1d430d0589e4d1$var$baseEach;
-    return func(collection, typeof iteratee == "function" ? iteratee : $ff1d430d0589e4d1$var$identity);
+    return func(collection, typeof iteratee == 'function' ? iteratee : $ff1d430d0589e4d1$var$identity);
 }
 /**
  * Checks if `value` is likely an `arguments` object.
@@ -18396,7 +18436,7 @@ var $ff1d430d0589e4d1$exports = {};
  * // => false
  */ function $ff1d430d0589e4d1$var$isArguments(value) {
     // Safari 8.1 makes `arguments.callee` enumerable in strict mode.
-    return $ff1d430d0589e4d1$var$isArrayLikeObject(value) && $ff1d430d0589e4d1$var$hasOwnProperty.call(value, "callee") && (!$ff1d430d0589e4d1$var$propertyIsEnumerable.call(value, "callee") || $ff1d430d0589e4d1$var$objectToString.call(value) == $ff1d430d0589e4d1$var$argsTag);
+    return $ff1d430d0589e4d1$var$isArrayLikeObject(value) && $ff1d430d0589e4d1$var$hasOwnProperty.call(value, 'callee') && (!$ff1d430d0589e4d1$var$propertyIsEnumerable.call(value, 'callee') || $ff1d430d0589e4d1$var$objectToString.call(value) == $ff1d430d0589e4d1$var$argsTag);
 }
 /**
  * Checks if `value` is classified as an `Array` object.
@@ -18494,7 +18534,7 @@ var $ff1d430d0589e4d1$exports = {};
  */ function $ff1d430d0589e4d1$var$isFunction(value) {
     // The use of `Object#toString` avoids issues with the `typeof` operator
     // in Safari 8-9 which returns 'object' for typed array and other constructors.
-    var tag = $ff1d430d0589e4d1$var$isObject(value) ? $ff1d430d0589e4d1$var$objectToString.call(value) : "";
+    var tag = $ff1d430d0589e4d1$var$isObject(value) ? $ff1d430d0589e4d1$var$objectToString.call(value) : '';
     return tag == $ff1d430d0589e4d1$var$funcTag || tag == $ff1d430d0589e4d1$var$genTag;
 }
 /**
@@ -18523,7 +18563,7 @@ var $ff1d430d0589e4d1$exports = {};
  * _.isLength('3');
  * // => false
  */ function $ff1d430d0589e4d1$var$isLength(value) {
-    return typeof value == "number" && value > -1 && value % 1 == 0 && value <= $ff1d430d0589e4d1$var$MAX_SAFE_INTEGER;
+    return typeof value == 'number' && value > -1 && value % 1 == 0 && value <= $ff1d430d0589e4d1$var$MAX_SAFE_INTEGER;
 }
 /**
  * Checks if `value` is the
@@ -18551,7 +18591,7 @@ var $ff1d430d0589e4d1$exports = {};
  * // => false
  */ function $ff1d430d0589e4d1$var$isObject(value) {
     var type = typeof value;
-    return !!value && (type == "object" || type == "function");
+    return !!value && (type == 'object' || type == 'function');
 }
 /**
  * Checks if `value` is object-like. A value is object-like if it's not `null`
@@ -18577,7 +18617,7 @@ var $ff1d430d0589e4d1$exports = {};
  * _.isObjectLike(null);
  * // => false
  */ function $ff1d430d0589e4d1$var$isObjectLike(value) {
-    return !!value && typeof value == "object";
+    return !!value && typeof value == 'object';
 }
 /**
  * Creates an array of the own enumerable property names of `object`.
@@ -18635,14 +18675,14 @@ $4c07cb87e79a40c4$exports = $4c07cb87e79a40c4$var$flatten;
 $4c07cb87e79a40c4$var$flatten.flatten = $4c07cb87e79a40c4$var$flatten;
 $4c07cb87e79a40c4$var$flatten.unflatten = $4c07cb87e79a40c4$var$unflatten;
 function $4c07cb87e79a40c4$var$isBuffer(obj) {
-    return obj && obj.constructor && typeof obj.constructor.isBuffer === "function" && obj.constructor.isBuffer(obj);
+    return obj && obj.constructor && typeof obj.constructor.isBuffer === 'function' && obj.constructor.isBuffer(obj);
 }
 function $4c07cb87e79a40c4$var$keyIdentity(key) {
     return key;
 }
 function $4c07cb87e79a40c4$var$flatten(target, opts) {
     opts = opts || {};
-    const delimiter = opts.delimiter || ".";
+    const delimiter = opts.delimiter || '.';
     const maxDepth = opts.maxDepth;
     const transformKey = opts.transformKey || $4c07cb87e79a40c4$var$keyIdentity;
     const output = {};
@@ -18653,7 +18693,7 @@ function $4c07cb87e79a40c4$var$flatten(target, opts) {
             const isarray = opts.safe && Array.isArray(value);
             const type = Object.prototype.toString.call(value);
             const isbuffer = $4c07cb87e79a40c4$var$isBuffer(value);
-            const isobject = type === "[object Object]" || type === "[object Array]";
+            const isobject = type === '[object Object]' || type === '[object Array]';
             const newKey = prev ? prev + delimiter + transformKey(key) : transformKey(key);
             if (!isarray && !isbuffer && isobject && Object.keys(value).length && (!opts.maxDepth || currentDepth < maxDepth)) return step(value, newKey, currentDepth + 1);
             output[newKey] = value;
@@ -18664,17 +18704,17 @@ function $4c07cb87e79a40c4$var$flatten(target, opts) {
 }
 function $4c07cb87e79a40c4$var$unflatten(target, opts) {
     opts = opts || {};
-    const delimiter = opts.delimiter || ".";
+    const delimiter = opts.delimiter || '.';
     const overwrite = opts.overwrite || false;
     const transformKey = opts.transformKey || $4c07cb87e79a40c4$var$keyIdentity;
     const result = {};
     const isbuffer = $4c07cb87e79a40c4$var$isBuffer(target);
-    if (isbuffer || Object.prototype.toString.call(target) !== "[object Object]") return target;
+    if (isbuffer || Object.prototype.toString.call(target) !== '[object Object]') return target;
     // safely ensure that the key is
     // an integer.
     function getkey(key) {
         const parsedKey = Number(key);
-        return isNaN(parsedKey) || key.indexOf(".") !== -1 || opts.object ? key : parsedKey;
+        return isNaN(parsedKey) || key.indexOf('.') !== -1 || opts.object ? key : parsedKey;
     }
     function addKeys(keyPrefix, recipient, target) {
         return Object.keys(target).reduce(function(result, key) {
@@ -18684,15 +18724,15 @@ function $4c07cb87e79a40c4$var$unflatten(target, opts) {
     }
     function isEmpty(val) {
         const type = Object.prototype.toString.call(val);
-        const isArray = type === "[object Array]";
-        const isObject = type === "[object Object]";
+        const isArray = type === '[object Array]';
+        const isObject = type === '[object Object]';
         if (!val) return true;
         else if (isArray) return !val.length;
         else if (isObject) return !Object.keys(val).length;
     }
     target = Object.keys(target).reduce(function(result, key) {
         const type = Object.prototype.toString.call(target[key]);
-        const isObject = type === "[object Object]" || type === "[object Array]";
+        const isObject = type === '[object Object]' || type === '[object Array]';
         if (!isObject || isEmpty(target[key])) {
             result[key] = target[key];
             return result;
@@ -18704,12 +18744,12 @@ function $4c07cb87e79a40c4$var$unflatten(target, opts) {
         let key2 = getkey(split[0]);
         let recipient = result;
         while(key2 !== undefined){
-            if (key1 === "__proto__") return;
+            if (key1 === '__proto__') return;
             const type = Object.prototype.toString.call(recipient[key1]);
-            const isobject = type === "[object Object]" || type === "[object Array]";
+            const isobject = type === '[object Object]' || type === '[object Array]';
             // do not write over falsey, non-undefined values if overwrite is false
-            if (!overwrite && !isobject && typeof recipient[key1] !== "undefined") return;
-            if (overwrite && !isobject || !overwrite && recipient[key1] == null) recipient[key1] = typeof key2 === "number" && !opts.object ? [] : {};
+            if (!overwrite && !isobject && typeof recipient[key1] !== 'undefined') return;
+            if (overwrite && !isobject || !overwrite && recipient[key1] == null) recipient[key1] = typeof key2 === 'number' && !opts.object ? [] : {};
             recipient = recipient[key1];
             if (split.length > 0) {
                 key1 = getkey(split.shift());
@@ -18972,6 +19012,7 @@ function $fd2717825660a9ff$var$morph(from, toHtml, options) {
                     let holdover = fromKeyHoldovers[toKey];
                     from2.appendChild(holdover);
                     currentFrom = holdover;
+                    fromKey = getKey(currentFrom);
                 } else {
                     if (!$fd2717825660a9ff$var$shouldSkip(adding, currentTo)) {
                         let clone = currentTo.cloneNode(true);
@@ -19041,6 +19082,7 @@ function $fd2717825660a9ff$var$morph(from, toHtml, options) {
                     if (fromKeys[toKey]) {
                         currentFrom.replaceWith(fromKeys[toKey]);
                         currentFrom = fromKeys[toKey];
+                        fromKey = getKey(currentFrom);
                     }
                 }
                 if (toKey && fromKey) {
@@ -19049,6 +19091,7 @@ function $fd2717825660a9ff$var$morph(from, toHtml, options) {
                         fromKeyHoldovers[fromKey] = currentFrom;
                         currentFrom.replaceWith(fromKeyNode);
                         currentFrom = fromKeyNode;
+                        fromKey = getKey(currentFrom);
                     } else {
                         fromKeyHoldovers[fromKey] = currentFrom;
                         currentFrom = addNodeBefore(from2, currentTo, currentFrom);
@@ -19180,6 +19223,7 @@ function $fd2717825660a9ff$var$monkeyPatchDomSetAttributeToAllowAtSymbols() {
 function $fd2717825660a9ff$var$seedingMatchingId(to, from) {
     let fromId = from && from._x_bindings && from._x_bindings.id;
     if (!fromId) return;
+    if (!to.setAttribute) return;
     to.setAttribute("id", fromId);
     to.id = fromId;
 }
@@ -19205,50 +19249,50 @@ $3849b1934e918b8a$exports = JSON.parse('{"test":"\u5B9F\u9A13","debugMode":"Debu
 
 /* eslint-disable promise/prefer-await-to-then */ const $fe9db8f8165fa827$var$methodMap = [
     [
-        "requestFullscreen",
-        "exitFullscreen",
-        "fullscreenElement",
-        "fullscreenEnabled",
-        "fullscreenchange",
-        "fullscreenerror"
+        'requestFullscreen',
+        'exitFullscreen',
+        'fullscreenElement',
+        'fullscreenEnabled',
+        'fullscreenchange',
+        'fullscreenerror'
     ],
     // New WebKit
     [
-        "webkitRequestFullscreen",
-        "webkitExitFullscreen",
-        "webkitFullscreenElement",
-        "webkitFullscreenEnabled",
-        "webkitfullscreenchange",
-        "webkitfullscreenerror"
+        'webkitRequestFullscreen',
+        'webkitExitFullscreen',
+        'webkitFullscreenElement',
+        'webkitFullscreenEnabled',
+        'webkitfullscreenchange',
+        'webkitfullscreenerror'
     ],
     // Old WebKit
     [
-        "webkitRequestFullScreen",
-        "webkitCancelFullScreen",
-        "webkitCurrentFullScreenElement",
-        "webkitCancelFullScreen",
-        "webkitfullscreenchange",
-        "webkitfullscreenerror"
+        'webkitRequestFullScreen',
+        'webkitCancelFullScreen',
+        'webkitCurrentFullScreenElement',
+        'webkitCancelFullScreen',
+        'webkitfullscreenchange',
+        'webkitfullscreenerror'
     ],
     [
-        "mozRequestFullScreen",
-        "mozCancelFullScreen",
-        "mozFullScreenElement",
-        "mozFullScreenEnabled",
-        "mozfullscreenchange",
-        "mozfullscreenerror"
+        'mozRequestFullScreen',
+        'mozCancelFullScreen',
+        'mozFullScreenElement',
+        'mozFullScreenEnabled',
+        'mozfullscreenchange',
+        'mozfullscreenerror'
     ],
     [
-        "msRequestFullscreen",
-        "msExitFullscreen",
-        "msFullscreenElement",
-        "msFullscreenEnabled",
-        "MSFullscreenChange",
-        "MSFullscreenError"
+        'msRequestFullscreen',
+        'msExitFullscreen',
+        'msFullscreenElement',
+        'msFullscreenEnabled',
+        'MSFullscreenChange',
+        'MSFullscreenError'
     ]
 ];
 const $fe9db8f8165fa827$var$nativeAPI = (()=>{
-    if (typeof document === "undefined") return false;
+    if (typeof document === 'undefined') return false;
     const unprefixedMethods = $fe9db8f8165fa827$var$methodMap[0];
     const returnValue = {};
     for (const methodList of $fe9db8f8165fa827$var$methodMap){
@@ -19270,10 +19314,10 @@ let $fe9db8f8165fa827$var$screenfull = {
     request (element = document.documentElement, options) {
         return new Promise((resolve, reject)=>{
             const onFullScreenEntered = ()=>{
-                $fe9db8f8165fa827$var$screenfull.off("change", onFullScreenEntered);
+                $fe9db8f8165fa827$var$screenfull.off('change', onFullScreenEntered);
                 resolve();
             };
-            $fe9db8f8165fa827$var$screenfull.on("change", onFullScreenEntered);
+            $fe9db8f8165fa827$var$screenfull.on('change', onFullScreenEntered);
             const returnPromise = element[$fe9db8f8165fa827$var$nativeAPI.requestFullscreen](options);
             if (returnPromise instanceof Promise) returnPromise.then(onFullScreenEntered).catch(reject);
         });
@@ -19285,10 +19329,10 @@ let $fe9db8f8165fa827$var$screenfull = {
                 return;
             }
             const onFullScreenExit = ()=>{
-                $fe9db8f8165fa827$var$screenfull.off("change", onFullScreenExit);
+                $fe9db8f8165fa827$var$screenfull.off('change', onFullScreenExit);
                 resolve();
             };
-            $fe9db8f8165fa827$var$screenfull.on("change", onFullScreenExit);
+            $fe9db8f8165fa827$var$screenfull.on('change', onFullScreenExit);
             const returnPromise = document[$fe9db8f8165fa827$var$nativeAPI.exitFullscreen]();
             if (returnPromise instanceof Promise) returnPromise.then(onFullScreenExit).catch(reject);
         });
@@ -19297,10 +19341,10 @@ let $fe9db8f8165fa827$var$screenfull = {
         return $fe9db8f8165fa827$var$screenfull.isFullscreen ? $fe9db8f8165fa827$var$screenfull.exit() : $fe9db8f8165fa827$var$screenfull.request(element, options);
     },
     onchange (callback) {
-        $fe9db8f8165fa827$var$screenfull.on("change", callback);
+        $fe9db8f8165fa827$var$screenfull.on('change', callback);
     },
     onerror (callback) {
-        $fe9db8f8165fa827$var$screenfull.on("error", callback);
+        $fe9db8f8165fa827$var$screenfull.on('error', callback);
     },
     on (event, callback) {
         const eventName = $fe9db8f8165fa827$var$eventNameMap[event];
@@ -19346,32 +19390,32 @@ window.Alpine = (0, $8c83eaf28779ff46$export$2e2bcd8739ae039);
     //lng: 'en', // if you're using a language detector, do not define the lng option
     // supportedLngs: ['en', 'cn', 'ja'],
     supportedLngs: [
-        "en-US",
-        "ja-JP",
-        "zh-CN",
-        "en",
-        "zh",
-        "ja"
+        'en-US',
+        'ja-JP',
+        'zh-CN',
+        'en',
+        'zh',
+        'ja'
     ],
     fallbackLng: [
-        "en",
-        "zh",
-        "ja"
+        'en',
+        'zh',
+        'ja'
     ],
     resources: {
-        "en-US": {
+        'en-US': {
             translation: (0, (/*@__PURE__*/$parcel$interopDefault($ae6560896f9c4f0c$exports)))
         },
         en: {
             translation: (0, (/*@__PURE__*/$parcel$interopDefault($ae6560896f9c4f0c$exports)))
         },
-        "zh-CN": {
+        'zh-CN': {
             translation: (0, (/*@__PURE__*/$parcel$interopDefault($c8762dc563519366$exports)))
         },
         zh: {
             translation: (0, (/*@__PURE__*/$parcel$interopDefault($c8762dc563519366$exports)))
         },
-        "ja-JP": {
+        'ja-JP': {
             translation: (0, (/*@__PURE__*/$parcel$interopDefault($3849b1934e918b8a$exports)))
         },
         ja: {
@@ -19387,44 +19431,44 @@ window.Alpine = (0, $8c83eaf28779ff46$export$2e2bcd8739ae039);
 });
 window.i18next = (0, $1bac384020b50752$export$2e2bcd8739ae039 // 使i18next在全局作用域中可用
 );
-document.getElementById("FullScreenIcon").addEventListener("click", ()=>{
+document.getElementById('FullScreenIcon').addEventListener('click', ()=>{
     if ((0, $fe9db8f8165fa827$export$2e2bcd8739ae039).isEnabled) (0, $fe9db8f8165fa827$export$2e2bcd8739ae039).toggle();
     else // Ignore or do something else
-    (0, $1bac384020b50752$export$2e2bcd8739ae039).t("not_support_fullscreen");
+    (0, $1bac384020b50752$export$2e2bcd8739ae039).t('not_support_fullscreen');
 });
 // 用Alpine Persist 注册全局变量
 // https://alpinejs.dev/plugins/persist#using-alpine-persist-global
 // global 全局设置
-(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("global", {
+(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store('global', {
     // bgPattern 背景花纹
-    bgPattern: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist("grid-line").as("global.bgPattern"),
-    autoCrop: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("global.autoCrop"),
-    autoCropNum: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(1).as("global.autoCropNum"),
+    bgPattern: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist('grid-line').as('global.bgPattern'),
+    autoCrop: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as('global.autoCrop'),
+    autoCropNum: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(1).as('global.autoCropNum'),
     // userID 当前用户ID  用于同步阅读进度 随机生成
-    userID: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(Math.random().toString(36).substring(2)).as("global.userID"),
+    userID: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(Math.random().toString(36).substring(2)).as('global.userID'),
     // debugMode 是否开启调试模式
-    debugMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("global.debugMode"),
+    debugMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as('global.debugMode'),
     // readerMode 当前阅读模式
-    readMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist("scroll").as("global.readMode"),
+    readMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist('scroll').as('global.readMode'),
     //是否通过websocket同步翻页
-    syncPageByWS: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("global.syncPageByWS"),
+    syncPageByWS: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as('global.syncPageByWS'),
     // bookSortBy 书籍排序方式 以按照文件名、修改时间、文件大小排序（或反向排序）
-    bookSortBy: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist("name").as("global.bookSortBy"),
+    bookSortBy: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist('name').as('global.bookSortBy'),
     // pageSortBy 书页排序顺序 以按照文件名、修改时间、文件大小排序（或反向排序）
-    pageSortBy: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist("name").as("global.pageSortBy"),
-    language: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist("en").as("global.language"),
+    pageSortBy: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist('name').as('global.pageSortBy'),
+    language: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist('en').as('global.language'),
     toggleReadMode () {
-        this.readMode = this.readMode === "flip" ? "scroll" : "flip";
+        this.readMode = this.readMode === 'flip' ? 'scroll' : 'flip';
     }
 });
 // BookShelf 书架设置
-(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("shelf", {
-    bookCardMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist("gird").as("shelf.bookCardMode"),
-    showTitle: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("shelf.showTitle"),
-    showFileIcon: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("shelf.showFileIcon"),
-    simplifyTitle: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("shelf.simplifyTitle"),
-    InfiniteDropdown: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("shelf.InfiniteDropdown"),
-    bookCardShowTitleFlag: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("shelf.bookCardShowTitleFlag"),
+(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store('shelf', {
+    bookCardMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist('gird').as('shelf.bookCardMode'),
+    showTitle: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as('shelf.showTitle'),
+    showFileIcon: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as('shelf.showFileIcon'),
+    simplifyTitle: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as('shelf.simplifyTitle'),
+    InfiniteDropdown: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as('shelf.InfiniteDropdown'),
+    bookCardShowTitleFlag: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as('shelf.bookCardShowTitleFlag'),
     syncScrollFlag: false,
     // 屏幕宽横比,inLandscapeMode的判断依据
     aspectRatio: 1.2,
@@ -19433,14 +19477,14 @@ document.getElementById("FullScreenIcon").addEventListener("click", ()=>{
     clientHeight: 0
 });
 // Scroll 卷轴模式
-(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("scroll", {
+(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store('scroll', {
     nowPageNum: 1,
-    simplifyTitle: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("scroll.simplifyTitle"),
+    simplifyTitle: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as('scroll.simplifyTitle'),
     //下拉模式下，漫画页面的底部间距。单位px。
-    marginBottomOnScrollMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(10).as("scroll.marginBottomOnScrollMode"),
+    marginBottomOnScrollMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(10).as('scroll.marginBottomOnScrollMode'),
     //卷轴模式下，是否无限下拉
-    InfiniteDropdown: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("scroll.InfiniteDropdown"),
-    syncScrollFlag: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("scroll.syncScrollFlag"),
+    InfiniteDropdown: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as('scroll.InfiniteDropdown'),
+    syncScrollFlag: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as('scroll.syncScrollFlag'),
     imageMaxWidth: 400,
     // 屏幕宽横比,inLandscapeMode的判断依据
     aspectRatio: 1.2,
@@ -19448,61 +19492,61 @@ document.getElementById("FullScreenIcon").addEventListener("click", ()=>{
     clientWidth: 0,
     clientHeight: 0,
     //漫画页的单位,是否使用固定值
-    widthUseFixedValue: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("scroll.widthUseFixedValue"),
+    widthUseFixedValue: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as('scroll.widthUseFixedValue'),
     //横屏(Landscape)状态的漫画页宽度,百分比
-    singlePageWidth_Percent: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(60).as("scroll.singlePageWidth_Percent"),
-    doublePageWidth_Percent: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(95).as("scroll.doublePageWidth_Percent"),
+    singlePageWidth_Percent: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(60).as('scroll.singlePageWidth_Percent'),
+    doublePageWidth_Percent: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(95).as('scroll.doublePageWidth_Percent'),
     //横屏(Landscape)状态的漫画页宽度。px。
-    singlePageWidth_PX: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(720).as("scroll.singlePageWidth_PX"),
-    doublePageWidth_PX: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(1200).as("scroll.doublePageWidth_PX"),
+    singlePageWidth_PX: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(720).as('scroll.singlePageWidth_PX'),
+    doublePageWidth_PX: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(1200).as('scroll.doublePageWidth_PX'),
     //书籍数据,需要从远程拉取
     //是否显示顶部页头
     showHeaderFlag: true,
     //是否显示页数
-    showPageNum: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("scroll.showPageNum"),
+    showPageNum: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as('scroll.showPageNum'),
     //ws翻页相关
-    syncPageByWS: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("scroll.syncPageByWS")
+    syncPageByWS: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as('scroll.syncPageByWS')
 });
 // Flip 翻页模式
-(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("flip", {
+(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store('flip', {
     nowPageNum: 1,
     allPageNum: 100,
     imageMaxWidth: 400,
     isLandscapeMode: true,
     isPortraitMode: false,
     //自动隐藏工具条
-    autoHideToolbar: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("flip.autoHideToolbar"),
+    autoHideToolbar: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as('flip.autoHideToolbar'),
     //是否显示页头
-    showHeader: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("flip.showHeader"),
+    showHeader: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as('flip.showHeader'),
     //是否显示页脚
-    showFooter: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("flip.showFooter"),
+    showFooter: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as('flip.showFooter'),
     //是否显示页数
-    showPageNum: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("flip.showPageNum"),
+    showPageNum: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as('flip.showPageNum'),
     //是否是右半屏翻页（从右到左）?日本漫画从左到右(false)
-    rightToLeft: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("flip.rightToLeft"),
+    rightToLeft: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as('flip.rightToLeft'),
     //双页模式
-    doublePageMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("flip.doublePageMode"),
+    doublePageMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as('flip.doublePageMode'),
     //自动拼合双页(TODO)
-    autoDoublePageMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("flip.autoDoublePageModeFlag"),
+    autoDoublePageMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as('flip.autoDoublePageModeFlag'),
     //是否保存阅读进度（页数）
-    saveReadingProgress: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as("flip.saveReadingProgress"),
+    saveReadingProgress: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as('flip.saveReadingProgress'),
     //素描模式标记
     sketchModeFlag: false,
     //是否显示素描提示
-    showPageHint: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as("flip.showPageHint"),
+    showPageHint: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as('flip.showPageHint'),
     //翻页间隔时间
     sketchFlipSecond: 30,
     //计时用,从0开始
     sketchSecondCount: 0
 });
 // 自定义主题
-(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("theme", {
-    theme: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist("light").as("theme"),
-    interfaceColor: "#F5F5E4",
-    backgroundColor: "#E0D9CD",
-    textColor: "#000000",
+(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store('theme', {
+    theme: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist('light').as('theme'),
+    interfaceColor: '#F5F5E4',
+    backgroundColor: '#E0D9CD',
+    textColor: '#000000',
     toggleTheme () {
-        this.theme = this.theme === "light" ? "dark" : "light";
+        this.theme = this.theme === 'light' ? 'dark' : 'light';
     }
 });
 // 由于 Cookie “cookie.someCookieKey”缺少正确的“sameSite”属性值，缺少“SameSite”或含有无效值的 Cookie
@@ -19525,8 +19569,8 @@ window.cookieStorage = {
     }
 };
 // 使用 cookieStorage 作为存储
-(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store("cookie", {
-    someCookieKey: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).using(cookieStorage).as("cookie.someCookieKey")
+(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store('cookie', {
+    someCookieKey: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).using(cookieStorage).as('cookie.someCookieKey')
 });
 //请求图片文件时，可添加的额外参数
 const $0c7aa0f20b85e54e$var$imageParameters = {
@@ -19555,12 +19599,12 @@ if ($0c7aa0f20b85e54e$var$addStr !== "") {
 // Start Alpine.
 (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).start();
 // Document ready function to ensure the DOM is fully loaded.
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener('DOMContentLoaded', function() {
     initFlowbite() // initialize Flowbite
     ;
 });
 // Add event listeners for all HTMX events.
-document.body.addEventListener("htmx:afterSwap htmx:afterRequest htmx:afterSettle", function() {
+document.body.addEventListener('htmx:afterSwap htmx:afterRequest htmx:afterSettle', function() {
     initFlowbite() // initialize Flowbite
     ;
 });
