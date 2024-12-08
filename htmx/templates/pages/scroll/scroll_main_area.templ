@@ -9,9 +9,11 @@ import (
     "github.com/yumenaka/comigo/htmx/state"
 )
 
-// getImageUrlForAlpine 用于获取图片的URL
-func getImageUrlForAlpine(Url string) string {
-    return `{ imageUrl: '` + Url + `' + ($store.global.autoCrop  ? "&auto_crop=1" : '') }`
+// getImageXData 在Go函数里面计算图片的x-data属性
+// 渲染结果例：
+// x-data="{  isDoublePage: false, imageUrl: '/api/get_file?id=asxScIDD&filename=1.jpg' + ($store.global.autoCrop  ? &quot;&auto_crop=1&quot; : '') }"
+func getImageXData(Url string) string {
+    return `{  isDoublePage: false, imageUrl: '` + Url + `' + ($store.global.autoCrop  ? "&auto_crop=1" : '') }`
     //return `{ imageUrl: '` + Url + `' + ($store.global.autoCrop  ? "" : '') }`
 }
 
@@ -26,7 +28,6 @@ templ ScrollMainArea(s *state.GlobalState, book *entity.Book) {
 	<div
 		id="mouseMoveArea"
 		x-data="{
-            isDoublePage: false,
             imageWidth: '',
             orientation: '',
             updateOrientation() {
@@ -48,7 +49,7 @@ templ ScrollMainArea(s *state.GlobalState, book *entity.Book) {
 				}
 				if !strings.Contains(image.Url, "hidden.")&& !strings.Contains(image.Url, ".html") {
 					<img
-					    x-data={getImageUrlForAlpine(image.Url)}
+					    x-data={getImageXData(image.Url)}
 						class="w-full manga_image"
 						:src="imageUrl"
 						@load="
@@ -62,9 +63,9 @@ templ ScrollMainArea(s *state.GlobalState, book *entity.Book) {
                                 isDoublePage = false;
                                 $el.classList.add('single');
                                 $el.classList.remove('double');
+                                //console.log(`naturalWidth: ${$event.target.naturalWidth}, naturalHeight: ${$event.target.naturalHeight}`);
                             }"
-						@resize.window="updateOrientation()"
-						:style="{ width: orientation.toString().includes('landscape') ?(Alpine.store('scroll').widthUseFixedValue? (isDoublePage ? Alpine.store('scroll').doublePageWidth_PX +'px': Alpine.store('scroll').singlePageWidth_PX +'px'): (isDoublePage ? Alpine.store('scroll').doublePageWidth_Percent + '%': Alpine.store('scroll').singlePageWidth_Percent + '%')): '100%', maxWidth: '100%'}"
+						:style="{ width: window.screen.orientation.type.toString().includes('landscape') ?(Alpine.store('scroll').widthUseFixedValue? (isDoublePage ? Alpine.store('scroll').doublePageWidth_PX +'px': Alpine.store('scroll').singlePageWidth_PX +'px'): (isDoublePage ? Alpine.store('scroll').doublePageWidth_Percent + '%': Alpine.store('scroll').singlePageWidth_Percent + '%')): '100%', maxWidth: '100%'}"
 						alt={ strconv.Itoa(key) }
 					/>
 				}

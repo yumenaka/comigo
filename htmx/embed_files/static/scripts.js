@@ -19442,7 +19442,7 @@ document.getElementById('FullScreenIcon').addEventListener('click', ()=>{
 (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store('global', {
     // bgPattern 背景花纹
     bgPattern: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist('grid-line').as('global.bgPattern'),
-    autoCrop: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as('global.autoCrop'),
+    autoCrop: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as('global.autoCrop'),
     autoCropNum: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(1).as('global.autoCropNum'),
     // userID 当前用户ID  用于同步阅读进度 随机生成
     userID: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(Math.random().toString(36).substring(2)).as('global.userID'),
