@@ -51,7 +51,7 @@ func Handler(c *gin.Context) {
 			logger.Infof("GetReadingProgress: %v readingProgressStr: "+readingProgressStr, err)
 		}
 
-		state.Global.TopBooks, err = entity.TopOfShelfInfo("name")
+		state.Global.ShelfBookList, err = entity.TopOfShelfInfo("name")
 		if err != nil {
 			logger.Infof("TopOfShelfInfo: %v", err)
 		}

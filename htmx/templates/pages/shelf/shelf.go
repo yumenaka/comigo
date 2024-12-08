@@ -23,7 +23,7 @@ func Handler(c *gin.Context) {
 	if bookID == "" {
 		var err error
 		entity.CheckAllBookFileExist()
-		state.Global.TopBooks, err = entity.TopOfShelfInfo(sortBy)
+		state.Global.ShelfBookList, err = entity.TopOfShelfInfo(sortBy)
 		//TODO: 没有图书的提示（上传压缩包\远程下载示例漫画）
 		if err != nil {
 			logger.Infof("TopOfShelfInfo: %v", err)
@@ -33,7 +33,7 @@ func Handler(c *gin.Context) {
 	if bookID != "" {
 		var err error
 		entity.CheckAllBookFileExist()
-		state.Global.TopBooks, err = entity.GetBookInfoListByID(bookID, sortBy)
+		state.Global.ShelfBookList, err = entity.GetBookInfoListByID(bookID, sortBy)
 		//TODO: 没有图书的提示（返回主页\上传压缩包\远程下载示例漫画）
 		if err != nil {
 			logger.Infof("GetBookShelf Error: %v", err)

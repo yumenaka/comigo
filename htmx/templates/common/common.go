@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comigo/entity"
 	"github.com/yumenaka/comigo/htmx/state"
+	"github.com/yumenaka/comigo/util/logger"
 )
 
 // ServerHostBindStr  传递给前端，现实QRCode用的“主机域名”字符串
@@ -34,10 +35,10 @@ func GetImageAlt(key int) string {
 
 // GetReturnUrl 阅读或书架页面，返回按钮实际使用的链接
 func GetReturnUrl(BookID string) string {
-	if BookID == "" {
+	if BookID == "" || state.Global.ShelfBookList == nil {
 		return "/"
 	}
-	for _, book := range state.Global.TopBooks.BookInfos {
+	for _, book := range state.Global.ShelfBookList.BookInfos {
 		if book.BookID == BookID {
 			return "/"
 		}
@@ -69,4 +70,22 @@ func AddQuery(c *gin.Context, key string, value string) string {
 
 	// 输出修改后的 URL
 	return currentUrl.String()
+}
+
+func ShowQuickJumpBar(b *entity.Book) (QuickJumpBar bool) {
+	_, err := entity.GetBookInfoListByParentFolder(b.ParentFolder, "")
+	if err != nil {
+		logger.Infof("%s", err)
+		return false
+	}
+	return true
+}
+
+func QuickJumpBarBooks(b *entity.Book, readMode string) (list *entity.BookInfoList) {
+	list, err := entity.GetBookInfoListByParentFolder(b.ParentFolder, "")
+	if err != nil {
+		logger.Infof("%s", err)
+		return nil
+	}
+	return list
 }

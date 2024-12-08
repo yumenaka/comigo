@@ -13,13 +13,15 @@ templ ScrollPage(c *gin.Context, s *state.GlobalState, book *entity.Book) {
 	@common.Header(
 		c,
 		common.HeaderProps{
-			Title:           common.GetPageTitle(book.BookInfo.BookID),
-			ShowReturnIcon:  true,
-			ReturnUrl:       common.GetReturnUrl(book.BookInfo.BookID),
-			SetDownLoadLink: false,
-			InShelf:         false,
-			DownLoadLink:    "",
-			SetTheme:        true,
+			Title:             common.GetPageTitle(book.BookInfo.BookID),
+			ShowReturnIcon:    true,
+			ReturnUrl:         common.GetReturnUrl(book.BookInfo.BookID),
+			SetDownLoadLink:   false,
+			InShelf:           false,
+			DownLoadLink:      "",
+			SetTheme:          true,
+			ShowQuickJumpBar:  common.ShowQuickJumpBar(book),
+			QuickJumpBarBooks: common.QuickJumpBarBooks(book, "scroll"),
 		})
 	@ScrollMainArea(s, book)
 	@common.Footer(s.Version)
@@ -33,7 +35,7 @@ templ InsertData(bookData any, stateData any) {
 }
 
 templ InsertRawJSONScript(data string) {
-  <script>
+	<script>
     @templ.Raw(data)
   </script>
 }
