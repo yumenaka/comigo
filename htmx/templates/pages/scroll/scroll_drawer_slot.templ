@@ -119,7 +119,7 @@ templ ScrollDrawerSlot() {
 		<input
 			type="checkbox"
 			:value="$store.global.autoCrop"
-			x-on:click="$store.global.autoCrop =!$store.global.autoCrop"
+			x-on:click="$store.global.autoCrop =!$store.global.autoCrop;location.reload()"
 			class="sr-only peer"
 		/>
 		<div

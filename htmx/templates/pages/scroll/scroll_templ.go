@@ -44,13 +44,15 @@ func ScrollPage(c *gin.Context, s *state.GlobalState, book *entity.Book) templ.C
 		templ_7745c5c3_Err = common.Header(
 			c,
 			common.HeaderProps{
-				Title:           common.GetPageTitle(book.BookInfo.BookID),
-				ShowReturnIcon:  true,
-				ReturnUrl:       common.GetReturnUrl(book.BookInfo.BookID),
-				SetDownLoadLink: false,
-				InShelf:         false,
-				DownLoadLink:    "",
-				SetTheme:        true,
+				Title:             common.GetPageTitle(book.BookInfo.BookID),
+				ShowReturnIcon:    true,
+				ReturnUrl:         common.GetReturnUrl(book.BookInfo.BookID),
+				SetDownLoadLink:   false,
+				InShelf:           false,
+				DownLoadLink:      "",
+				SetTheme:          true,
+				ShowQuickJumpBar:  common.ShowQuickJumpBar(book),
+				QuickJumpBarBooks: common.QuickJumpBarBooks(book, "scroll"),
 			}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err

@@ -14,16 +14,16 @@ type GlobalState struct {
 	SingleUserMode  bool
 	StaticMode      bool
 	OnlineUserCount int
-	TopBooks        *entity.BookInfoList
+	ShelfBookList   *entity.BookInfoList
 	ServerStatus    *util.ServerStatus
 }
 
 // GetAllBookNum 获取所有书籍数量
 func (g *GlobalState) GetAllBookNum() int {
-	if g.TopBooks == nil {
+	if g.ShelfBookList == nil {
 		return 0
 	}
-	return len(g.TopBooks.BookInfos)
+	return len(g.ShelfBookList.BookInfos)
 }
 
 var Global GlobalState
@@ -37,7 +37,7 @@ func init() {
 	// 反代出错的原因不明，暂时不管了。调试静态模式的时候看1234就好。
 	Global.StaticMode = false
 	Global.OnlineUserCount = 0
-	Global.TopBooks = nil
+	Global.ShelfBookList = nil
 	Global.ServerStatus = util.GetServerInfo(config.Config.Host, config.Version, config.Config.Port, config.Config.EnableUpload, 0)
 }
 
