@@ -141,11 +141,11 @@ templ Header(c *gin.Context, prop HeaderProps) {
 			}
 			<!-- 文件重排序 Dropdown Menu -->
 			<!-- 来自： https://flowbite.com/docs/components/dropdowns/ -->
-			<svg id="dropdownHoverButton" data-dropdown-toggle="dropdownHover" data-dropdown-trigger="hover" class="w-10 pt-1 mx-0 rounded hover:ring" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24">
+			<svg id="dropdownHoverButton" data-dropdown-toggle="ReSortDropdown" data-dropdown-trigger="hover" class="w-10 pt-1 mx-0 rounded hover:ring" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24">
 				<path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z" fill="currentColor"></path>
 			</svg>
 			<!-- Dropdown menu -->
-			<div id="dropdownHover" class="z-10 hidden divide-y divide-gray-100 rounded-lg shadow max-w-fit bg-white/90 dark:bg-gray-700">
+			<div id="ReSortDropdown" class="z-10 hidden divide-y divide-gray-100 rounded-lg shadow max-w-fit bg-white/90 dark:bg-gray-700">
 				<ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
 					<li>
 						<a href={ templ.URL(AddQuery(c, "sortBy", "filename")) } x-text="i18next.t('sort_by_filename')" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"></a>
@@ -177,7 +177,7 @@ templ Header(c *gin.Context, prop HeaderProps) {
 				if (prop.ShowQuickJumpBar&&prop.QuickJumpBarBooks!=nil) {
 					<button
 						id="dropdownDefaultButton"
-						data-dropdown-toggle="dropdown"
+						data-dropdown-toggle="QuickJumpDropdown" data-dropdown-trigger="hover"
 						class="max-w-fit px-5 py-2.5 inline-flex  hover:bg-gray-400 rounded-lg font-semibold text-center items-center"
 						type="button"
 					>
@@ -187,7 +187,7 @@ templ Header(c *gin.Context, prop HeaderProps) {
 						</svg>
 					</button>
 					<!-- Dropdown menu -->
-					<div id="dropdown" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow max-w-fit dark:bg-gray-700">
+					<div id="QuickJumpDropdown" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow max-w-fit dark:bg-gray-700">
 						<ul class="py-2 mt-0 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
 							for _, book := range prop.QuickJumpBarBooks.BookInfos {
 								if prop.FlipMode {

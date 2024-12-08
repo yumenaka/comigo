@@ -168,7 +168,7 @@ func Header(c *gin.Context, prop HeaderProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!-- 文件重排序 Dropdown Menu --><!-- 来自： https://flowbite.com/docs/components/dropdowns/ --><svg id=\"dropdownHoverButton\" data-dropdown-toggle=\"dropdownHover\" data-dropdown-trigger=\"hover\" class=\"w-10 pt-1 mx-0 rounded hover:ring\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 24 24\"><path d=\"M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z\" fill=\"currentColor\"></path></svg><!-- Dropdown menu --><div id=\"dropdownHover\" class=\"z-10 hidden divide-y divide-gray-100 rounded-lg shadow max-w-fit bg-white/90 dark:bg-gray-700\"><ul class=\"py-2 text-sm text-gray-700 dark:text-gray-200\" aria-labelledby=\"dropdownHoverButton\"><li><a href=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!-- 文件重排序 Dropdown Menu --><!-- 来自： https://flowbite.com/docs/components/dropdowns/ --><svg id=\"dropdownHoverButton\" data-dropdown-toggle=\"ReSortDropdown\" data-dropdown-trigger=\"hover\" class=\"w-10 pt-1 mx-0 rounded hover:ring\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 24 24\"><path d=\"M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z\" fill=\"currentColor\"></path></svg><!-- Dropdown menu --><div id=\"ReSortDropdown\" class=\"z-10 hidden divide-y divide-gray-100 rounded-lg shadow max-w-fit bg-white/90 dark:bg-gray-700\"><ul class=\"py-2 text-sm text-gray-700 dark:text-gray-200\" aria-labelledby=\"dropdownHoverButton\"><li><a href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -246,7 +246,7 @@ func Header(c *gin.Context, prop HeaderProps) templ.Component {
 			}
 		} else {
 			if prop.ShowQuickJumpBar && prop.QuickJumpBarBooks != nil {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<button id=\"dropdownDefaultButton\" data-dropdown-toggle=\"dropdown\" class=\"max-w-fit px-5 py-2.5 inline-flex  hover:bg-gray-400 rounded-lg font-semibold text-center items-center\" type=\"button\">")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<button id=\"dropdownDefaultButton\" data-dropdown-toggle=\"QuickJumpDropdown\" data-dropdown-trigger=\"hover\" class=\"max-w-fit px-5 py-2.5 inline-flex  hover:bg-gray-400 rounded-lg font-semibold text-center items-center\" type=\"button\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -259,7 +259,7 @@ func Header(c *gin.Context, prop HeaderProps) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <svg class=\"w-2.5 h-2.5 ms-3\" aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 10 6\"><path stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"m1 1 4 4 4-4\"></path></svg></button><!-- Dropdown menu --> <div id=\"dropdown\" class=\"z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow max-w-fit dark:bg-gray-700\"><ul class=\"py-2 mt-0 text-sm text-gray-700 dark:text-gray-200\" aria-labelledby=\"dropdownDefaultButton\">")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <svg class=\"w-2.5 h-2.5 ms-3\" aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 10 6\"><path stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"m1 1 4 4 4-4\"></path></svg></button><!-- Dropdown menu --> <div id=\"QuickJumpDropdown\" class=\"z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow max-w-fit dark:bg-gray-700\"><ul class=\"py-2 mt-0 text-sm text-gray-700 dark:text-gray-200\" aria-labelledby=\"dropdownDefaultButton\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
