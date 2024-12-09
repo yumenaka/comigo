@@ -289,34 +289,42 @@ function getElementsRect() {
     return {
         rect1: header.getBoundingClientRect(),
         rect2: range.getBoundingClientRect(),
-        rect3: document.getElementById("ReSortDropdown").getBoundingClientRect()
+        rect3: document.getElementById("ReSortDropdown").getBoundingClientRect(),
+        rect4: document.getElementById("QuickJumpDropdown").getBoundingClientRect(),
     };
 }
 
 document.addEventListener('mousemove', function (event) {
-    const {rect1, rect2, rect3} = getElementsRect();
+    const {rect1, rect2, rect3,rect4} = getElementsRect();
     const x = event.clientX;
     const y = event.clientY;
-    // 判断鼠标是否在元素 1 范围内
+    // 判断鼠标是否在元素 1 范围内(Header)
     const isInElement1 = (
         x >= rect1.left &&
         x <= rect1.right &&
         y >= rect1.top &&
         y <= rect1.bottom
     );
-    // 判断鼠标是否在元素 2 范围内
+    // 判断鼠标是否在元素 2 范围内(导航条)
     const isInElement2 = (
         x >= rect2.left &&
         x <= rect2.right &&
         y >= rect2.top &&
         y <= rect2.bottom
     );
-    // 判断鼠标是否在元素 3 范围内
+    // 判断鼠标是否在元素 3 范围内(页面重新排序的下拉菜单。在菜单上面的时候，导航条需要保持显示状态。)
     const isInElement3 = (
         x >= rect3.left &&
         x <= rect3.right &&
         y >= rect3.top &&
         y <= rect3.bottom
+    );
+    // 判断鼠标是否在元素 4 范围内(快速跳转的下拉菜单。在菜单上面的时候，导航条需要保持显示状态。)
+    const isInElement4 = (
+        x >= rect4.left &&
+        x <= rect4.right &&
+        y >= rect4.top &&
+        y <= rect4.bottom
     );
 
     //鼠标在设置区域
@@ -331,7 +339,7 @@ document.addEventListener('mousemove', function (event) {
         }
     }
     // '鼠标在元素范围内'
-    if (isInElement1 || isInElement2 || isInElement3 || inSetArea) {
+    if (isInElement1 || isInElement2 || isInElement3 || isInElement4 || inSetArea) {
         //console.log('鼠标在元素范围内');
         showToolbar();
     }
