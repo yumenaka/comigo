@@ -289,7 +289,7 @@ function getElementsRect() {
     return {
         rect1: header.getBoundingClientRect(),
         rect2: range.getBoundingClientRect(),
-        rect3: document.getElementById("dropdownHover").getBoundingClientRect()
+        rect3: document.getElementById("ReSortDropdown").getBoundingClientRect()
     };
 }
 

@@ -21,8 +21,7 @@ import (
 // 渲染结果例：
 // x-data="{  isDoublePage: false, imageUrl: '/api/get_file?id=asxScIDD&filename=1.jpg' + ($store.global.autoCrop  ? &quot;&auto_crop=1&quot; : ”) }"
 func getImageXData(Url string) string {
-	return `{  isDoublePage: false, imageUrl: '` + Url + `' + ($store.global.autoCrop  ? "&auto_crop=1" : '') }`
-	//return `{ imageUrl: '` + Url + `' + ($store.global.autoCrop  ? "" : '') }`
+	return fmt.Sprintf(`{ isDoublePage: false, imageUrl: '%s' + ($store.global.autoCrop?"&auto_crop=1":'')}`, Url)
 }
 
 // ScrollMainArea 定义 BodyHTML
@@ -69,7 +68,7 @@ func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 				var templ_7745c5c3_Var2 string
 				templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(image.Url)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll/scroll_main_area.templ`, Line: 48, Col: 28}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll/scroll_main_area.templ`, Line: 46, Col: 28}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 				if templ_7745c5c3_Err != nil {
@@ -88,7 +87,7 @@ func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(getImageXData(image.Url))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll/scroll_main_area.templ`, Line: 52, Col: 41}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll/scroll_main_area.templ`, Line: 50, Col: 41}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -101,7 +100,7 @@ func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(key))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll/scroll_main_area.templ`, Line: 69, Col: 29}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll/scroll_main_area.templ`, Line: 67, Col: 29}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -119,7 +118,7 @@ func ScrollMainArea(s *state.GlobalState, book *entity.Book) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d / %d", key+1, book.BookInfo.PageCount))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll/scroll_main_area.templ`, Line: 73, Col: 135}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll/scroll_main_area.templ`, Line: 71, Col: 135}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {

@@ -13,10 +13,8 @@ import (
 // 渲染结果例：
 // x-data="{  isDoublePage: false, imageUrl: '/api/get_file?id=asxScIDD&filename=1.jpg' + ($store.global.autoCrop  ? &quot;&auto_crop=1&quot; : '') }"
 func getImageXData(Url string) string {
-    return `{  isDoublePage: false, imageUrl: '` + Url + `' + ($store.global.autoCrop  ? "&auto_crop=1" : '') }`
-    //return `{ imageUrl: '` + Url + `' + ($store.global.autoCrop  ? "" : '') }`
+     return fmt.Sprintf(`{ isDoublePage: false, imageUrl: '%s' + ($store.global.autoCrop?"&auto_crop=1":'')}`, Url)
 }
-
 
 // ScrollMainArea 定义 BodyHTML
 // 需要更复杂的屏幕状态判断的时候，可以参考：https://developer.mozilla.org/zh-CN/docs/Web/API/Screen/orientation

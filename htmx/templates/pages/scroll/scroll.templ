@@ -21,7 +21,7 @@ templ ScrollPage(c *gin.Context, s *state.GlobalState, book *entity.Book) {
 			DownLoadLink:      "",
 			SetTheme:          true,
 			ShowQuickJumpBar:  common.ShowQuickJumpBar(book),
-			QuickJumpBarBooks: common.QuickJumpBarBooks(book, "scroll"),
+			QuickJumpBarBooks: common.QuickJumpBarBooks(book),
 		})
 	@ScrollMainArea(s, book)
 	@common.Footer(s.Version)
