@@ -176,7 +176,7 @@ templ Header(c *gin.Context, prop HeaderProps) {
 			} else {
 				if (prop.ShowQuickJumpBar&&prop.QuickJumpBarBooks!=nil) {
 					<button
-						id="dropdownDefaultButton"
+						id="quickJumpBarDropdownButton"
 						data-dropdown-toggle="QuickJumpDropdown" data-dropdown-trigger="hover"
 						class="max-w-fit px-5 py-2.5 inline-flex  hover:bg-gray-400 rounded-lg font-semibold text-center items-center"
 						type="button"
@@ -187,8 +187,8 @@ templ Header(c *gin.Context, prop HeaderProps) {
 						</svg>
 					</button>
 					<!-- Dropdown menu -->
-					<div id="QuickJumpDropdown" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow max-w-fit dark:bg-gray-700">
-						<ul class="py-2 mt-0 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
+					<div id="QuickJumpDropdown" class="z-10 hidden bg-white/90 divide-y divide-gray-100 rounded-lg shadow max-w-fit dark:bg-gray-700">
+						<ul class="py-2 mt-0 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="quickJumpBarDropdownButton">
 							for _, book := range prop.QuickJumpBarBooks.BookInfos {
 								if prop.FlipMode {
 									<li>
@@ -219,7 +219,7 @@ templ Header(c *gin.Context, prop HeaderProps) {
 			<!-- 已知问题： 打开的时候body会加上一个 overflow-hidden 属性。此时滑动条被禁用，导致背景元素移动 -->
 			<!-- 临时解决方法：router/static/scripts.js，把这个句删掉 document.body.classList.add("overflow-hidden"); -->
 			<!-- 不管用的解决方法：添加点击事件，把这个属性删掉  @click="document.body.classList.remove('overflow-hidden');"  -->
-			<!-- 根本的解决方案（patch）(TODO:研究 patch 用法)：. https://bun.sh/docs/install/patch  -->
+			<!-- 解决方案2（patch）(TODO:研究 patch 用法)：. https://bun.sh/docs/install/patch  -->
 			<!-- https://github.com/themesberg/flowbite/blob/c22565d406246749a09c5d556c540c102e0f98ae/src/components/modal/index.ts#L305 -->
 			<div data-modal-target="qrcode-modal" data-modal-toggle="qrcode-modal" class="w-8 pt-1 mx-1 my-0 rounded hover:ring ">
 				<svg class="static w-8" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><rect x="336" y="336" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect><rect x="272" y="272" width="64" height="64" rx="8" ry="8" fill="currentColor"></rect><rect x="416" y="416" width="64" height="64" rx="8" ry="8" fill="currentColor"></rect><rect x="432" y="272" width="48" height="48" rx="8" ry="8" fill="currentColor"></rect><rect x="272" y="432" width="48" height="48" rx="8" ry="8" fill="currentColor"></rect><rect x="336" y="96" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect><rect x="288" y="48" width="176" height="176" rx="16" ry="16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></rect><rect x="96" y="96" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect><rect x="48" y="48" width="176" height="176" rx="16" ry="16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></rect><rect x="96" y="336" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect><rect x="48" y="288" width="176" height="176" rx="16" ry="16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></rect></svg>

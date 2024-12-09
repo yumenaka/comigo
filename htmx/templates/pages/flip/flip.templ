@@ -21,6 +21,8 @@ templ FlipPage(c *gin.Context, s *state.GlobalState, book *entity.Book, readingP
 			DownLoadLink:    "",
 			SetTheme:        true,
 			FlipMode:        true,
+			ShowQuickJumpBar:  common.ShowQuickJumpBar(book),
+            QuickJumpBarBooks: common.QuickJumpBarBooks(book),
 		})
 	@FlipMainArea(s, book)
 	@common.Drawer(s.ServerStatus.ServerHost, FlipDrawerSlot())

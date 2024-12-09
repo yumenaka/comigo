@@ -52,7 +52,7 @@ func ScrollPage(c *gin.Context, s *state.GlobalState, book *entity.Book) templ.C
 				DownLoadLink:      "",
 				SetTheme:          true,
 				ShowQuickJumpBar:  common.ShowQuickJumpBar(book),
-				QuickJumpBarBooks: common.QuickJumpBarBooks(book, "scroll"),
+				QuickJumpBarBooks: common.QuickJumpBarBooks(book),
 			}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err

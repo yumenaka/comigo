@@ -81,7 +81,7 @@ func ShowQuickJumpBar(b *entity.Book) (QuickJumpBar bool) {
 	return true
 }
 
-func QuickJumpBarBooks(b *entity.Book, readMode string) (list *entity.BookInfoList) {
+func QuickJumpBarBooks(b *entity.Book) (list *entity.BookInfoList) {
 	list, err := entity.GetBookInfoListByParentFolder(b.ParentFolder, "")
 	if err != nil {
 		logger.Infof("%s", err)
