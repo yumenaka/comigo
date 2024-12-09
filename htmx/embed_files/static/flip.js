@@ -95,7 +95,7 @@ function toNextPage() {
     let allPageNum = parseInt(Alpine.store('flip').allPageNum);
     // 单页模式
     if (!doublePageMode) {
-        if (nowPageNum < allPageNum) {
+        if (nowPageNum <= allPageNum) {
             addPageNum(1);
         }
     }
