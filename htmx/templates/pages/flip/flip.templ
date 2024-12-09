@@ -27,4 +27,5 @@ templ FlipPage(c *gin.Context, s *state.GlobalState, book *entity.Book, readingP
 	@FlipMainArea(s, book)
 	@common.Drawer(s.ServerStatus.ServerHost, FlipDrawerSlot())
 	@common.QRCode(s.ServerStatus.ServerHost)
+	@common.Toast()
 }

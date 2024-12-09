@@ -29,4 +29,5 @@ templ NotFound404(c *gin.Context, s *state.GlobalState) {
 	@common.Footer(s.Version)
 	@common.Drawer(s.ServerStatus.ServerHost, nil)
     @common.QRCode(s.ServerStatus.ServerHost)
+    @common.Toast()
 }
