@@ -11,15 +11,15 @@
     "watch": "parcel watch ./embed_files/assets/scripts.js ./embed_files/assets/styles.scss --dist-dir embed_files/static --no-optimize"
   },
   "dependencies": {
-    "@alpinejs/morph": "^3.14.6",
-    "@alpinejs/persist": "^3.14.6",
+    "@alpinejs/morph": "^3.14.7",
+    "@alpinejs/persist": "^3.14.7",
     "@tailwindcss/forms": "latest",
     "@tailwindcss/typography": "latest",
     "alpinejs": "latest",
     "flowbite": "^2.5.2",
     "htmx.org": "latest",
     "i18next": "^23.16.8",
-    "i18next-browser-languagedetector": "^8.0.0",
+    "i18next-browser-languagedetector": "^8.0.2",
     "screenfull": "^6.0.2",
     "tailwindcss": "latest",
     "tw-colors": "^3.3.2"
