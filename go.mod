@@ -103,7 +103,7 @@ require (
 	github.com/lestrrat-go/strftime v1.1.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/lufia/plan9stats v0.0.0-20240909124753-873cd0166683 // indirect
-	github.com/magiconair/properties v1.8.7 // indirect
+	github.com/magiconair/properties v1.8.9 // indirect
 	github.com/mandykoh/go-parallel v0.1.0 // indirect
 	github.com/mandykoh/prism v0.35.3 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
@@ -160,7 +160,7 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	modernc.org/gc/v3 v3.0.0-20241004144649-1aea3fae8852 // indirect
-	modernc.org/libc v1.61.3 // indirect
+	modernc.org/libc v1.61.4 // indirect
 	modernc.org/mathutil v1.6.0 // indirect
 	modernc.org/memory v1.8.0 // indirect
 	modernc.org/strutil v1.2.0 // indirect

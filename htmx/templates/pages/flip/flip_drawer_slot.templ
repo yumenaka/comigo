@@ -3,26 +3,11 @@ package flip
 
 
 templ FlipDrawerSlot() {
-	<!-- 阅读模式 -->
-	<!-- toggle组件来自： https://flowbite.com/docs/forms/toggle/ -->
-	<label
-		class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2"
-	>
-		<input
-			type="checkbox"
-			:value="$store.global.readMode === 'scroll'"
-			x-on:click="$store.global.toggleReadMode();toggleFlipScrollFlexible();"
-			class="sr-only peer"
-		/>
-		<div
-			class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
-		></div>
-		<span
-			class="text-sm font-medium ms-3"
-			x-text="$store.global.readMode === 'scroll'?i18next.t('scroll_mode'):i18next.t('flip_mode')"
-		>
-		</span>
-	</label>
+	<!-- 切换阅读模式的Button -->
+	<button type="button" x-on:click="$store.global.toggleReadMode();toggleFlipScrollFlexible();"
+	    class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
+	    x-text="i18next.t('to_scroll_mode')">切换到卷轴模式
+	</button>
 	<script>
     	function toggleFlipScrollFlexible() {
     	        // 切换阅读模式时，如果在阅读，就修改URL路径
@@ -42,6 +27,7 @@ templ FlipDrawerSlot() {
         }
     </script>
 	<!-- 远程同步翻页 -->
+	<!-- toggle组件来自： https://flowbite.com/docs/forms/toggle/ -->
 	<label
 		class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2"
 	>
