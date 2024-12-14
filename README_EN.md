@@ -22,15 +22,6 @@
 
 <br>
   
-## Supported Platforms
-
-<br>
-
-![Badge Linux] 
-![Badge Windows] 
-![Badge MacOs]
-
-*You can also compile it yourself*
 
 
 <br>
@@ -40,14 +31,18 @@
 <br>
 
 ## Install
+```bash
+#  curl：
+bash <(curl -s https://raw.githubusercontent.com/yumenaka/comigo/master/get_comigo.sh)
 
-Download [the latest release for your system][Releases] 
+#  wget：
+bash <(wget -qO- https://raw.githubusercontent.com/yumenaka/comigo/master/get_comigo.sh)
 
-<br>
+# go 1.23 or higher：
+go install github.com/yumenaka/comigo/cmd/comi@latest
+```
+Or Download [the latest release for your system][Releases] 
 
----
-
-<br>
 
 ## Usage
 

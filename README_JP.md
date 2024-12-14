@@ -5,16 +5,25 @@
 
 ![Windowssample](https://www.yumenaka.net/wp-content/uploads/2020/08/sample.gif "Windows示例")  
 
-### ダウンロードは [github release](https://github.com/yumenaka/comigo/releases ) をご参照ください：
+### ダウンロード
+
+```bash
+#  curl：
+bash <(curl -s https://raw.githubusercontent.com/yumenaka/comigo/master/get_comigo.sh)
+
+#  wget：
+bash <(wget -qO- https://raw.githubusercontent.com/yumenaka/comigo/master/get_comigo.sh)
+
+# go 1.23 or higher：
+go install github.com/yumenaka/comigo/cmd/comi@latest
+```
+或いは [github release](https://github.com/yumenaka/comigo/releases ) をご参照ください：　　
 
 [https://github.com/yumenaka/comigo/releases](https://github.com/yumenaka/comigo/releases ) 
 
 ### Usage：
 ```
 comi [flags] file_or_dir
-
-comi --help
-
 ```
 
 ### 詳細：
@@ -29,12 +38,6 @@ comi --help
 4、カウントダウンの長さを設定することができます。sketch-66.exe の名前を sketch-99.exe にすると、カウントダウンが99秒になります。
 
 5、コマンドライン環境で使用可能、config.yaml 設定ファイルをサポート。
-
-6、絵描きツールモード：Flash Playerのサポートを終了するため，posemaniacs.com様の30 Second Drawingはもう使えません。そこで、自分が作った漫画リーダーにも似たような機能を追加してみました。 気に入ってもらえると嬉しいです。
-
-7、sketch-99秒.exeの名前をcomi.exe、double.exe、scroll.exeに改名すれば、普通の漫画リーダーとして機能します。
-
-8、日本語のファイル名（スクロール、クロッキー、ダブルページ）はサポートされていますが、テストはしていません、数字も半角のみ対応。
 
 ### Special Thanks：
 

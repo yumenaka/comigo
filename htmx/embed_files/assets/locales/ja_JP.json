@@ -2,8 +2,8 @@
   "test": "テスト",
   "debugMode": "デバッグモード",
   "ReaderSettings": "リーダー設定",
-  "scroll_mode": "スクロールモード",
-  "flip_mode": "ページめくりモード",
+  "scroll_mode": "タテ読みモード",
+  "flip_mode": "ヨコ読みモード",
   "SinglePageWidth": "シングルページ幅:",
   "DoublePageWidth": "見開きページ幅:",
   "WidthUsePercent": "横幅: パーセンテージ",
@@ -108,6 +108,6 @@
   "infinite_dropdown": "無限ドロップダウンモード",
   "pagination_mode": "ページングモード",
   "show_file_icon": "ファイルアイコンを表示",
-  "to_scroll_mode": "スクロールモードへ",
-  "to_flip_mode":"ページめくりモードへ"
+  "to_scroll_mode": "タテ読モードへ",
+  "to_flip_mode":"ヨコ読みモードへ"
 }
