@@ -14,7 +14,7 @@ type TemplRender struct {
 	Data templ.Component
 }
 
-// Render 实现了 render.Render 接口。
+// Render 实现 render.Render 接口。
 func (t TemplRender) Render(w http.ResponseWriter) error {
 	t.WriteContentType(w)
 	w.WriteHeader(t.Code)

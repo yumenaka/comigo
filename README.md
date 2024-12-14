@@ -14,7 +14,8 @@
 
 ![Windows示例](https://www.yumenaka.net/wp-content/uploads/2020/08/sample.gif "Windows示例")
 
-[English](https://github.com/yumenaka/comigo/blob/master/README_EN.md) [日本語](https://github.com/yumenaka/comigo/blob/master/README_JP.md)
+[English](https://github.com/yumenaka/comigo/blob/master/README_EN.md)  
+[日本語](https://github.com/yumenaka/comigo/blob/master/README_JP.md)  
 
 ### 功能特点
 
@@ -35,7 +36,7 @@ bash <(curl -s https://raw.githubusercontent.com/yumenaka/comigo/master/get_comi
 # 使用 wget：
 bash <(wget -qO- https://raw.githubusercontent.com/yumenaka/comigo/master/get_comigo.sh)
 
-# 如果您已设置 Golang 环境，也可以这样安装：
+# 如果您已设置 Golang 环境（go 1.23 or higher），也可以这样安装：
 go install github.com/yumenaka/comigo/cmd/comi@latest
 ```
 

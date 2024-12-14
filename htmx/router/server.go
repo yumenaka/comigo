@@ -2,7 +2,6 @@ package router
 
 import (
 	"errors"
-	"github.com/yumenaka/comigo/htmx/embed_files"
 	"io/fs"
 	"log/slog"
 	"net/http"
@@ -12,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/htmx/comigo"
+	"github.com/yumenaka/comigo/htmx/embed_files"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
