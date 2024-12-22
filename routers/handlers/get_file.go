@@ -9,7 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comigo/config"
-	"github.com/yumenaka/comigo/entity"
+	"github.com/yumenaka/comigo/model"
 	fileutil "github.com/yumenaka/comigo/util/file"
 	"github.com/yumenaka/comigo/util/logger"
 )
@@ -76,7 +76,7 @@ func GetFile(c *gin.Context) {
 		}
 	}
 	// 获取书籍信息
-	bookByID, err := entity.GetBookByID(id, "")
+	bookByID, err := model.GetBookByID(id, "")
 	if err != nil {
 		logger.Infof("GetBookByID error: %s", err)
 		c.JSON(http.StatusNotFound, gin.H{"error": "Book not found"})
@@ -85,8 +85,8 @@ func GetFile(c *gin.Context) {
 	// 获取图片数据的选项
 	option := fileutil.GetPictureDataOption{
 		PictureName:      needFile,
-		BookIsPDF:        bookByID.Type == entity.TypePDF,
-		BookIsDir:        bookByID.Type == entity.TypeDir,
+		BookIsPDF:        bookByID.Type == model.TypePDF,
+		BookIsDir:        bookByID.Type == model.TypeDir,
 		BookIsNonUTF8Zip: bookByID.NonUTF8Zip,
 		BookFilePath:     bookByID.FilePath,
 		Debug:            config.Config.Debug,
@@ -109,7 +109,7 @@ func GetFile(c *gin.Context) {
 		return
 	}
 	// 缓存文件到本地，避免重复解压。如果书中的图片，来自本地目录，就不需要缓存。
-	if config.Config.UseCache && !noCache && bookByID.Type != entity.TypeDir {
+	if config.Config.UseCache && !noCache && bookByID.Type != model.TypeDir {
 		// 获取所有的参数键值对
 		query := c.Request.URL.Query()
 		errSave := fileutil.SaveFileToCache(

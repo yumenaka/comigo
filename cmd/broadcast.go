@@ -3,7 +3,7 @@ package cmd
 import (
 	"github.com/spf13/viper"
 	"github.com/yumenaka/comigo/config"
-	"github.com/yumenaka/comigo/entity"
+	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/routers/handlers"
 	"github.com/yumenaka/comigo/util/file/scan"
 	"github.com/yumenaka/comigo/util/locale"
@@ -77,5 +77,5 @@ func ReScanPath(path string, reScanFile bool) {
 		return
 	}
 	scan.AddBooksToStore(addList, path, config.Config.MinImageNum)
-	entity.ResetBookGroupData()
+	model.ResetBookGroupData()
 }

@@ -6,7 +6,7 @@ import (
 	"errors"
 	"github.com/yumenaka/comigo/util/logger"
 
-	mainTypes "github.com/yumenaka/comigo/entity"
+	mainTypes "github.com/yumenaka/comigo/model"
 )
 
 func InitDatabase(configFilePath string) error {

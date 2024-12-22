@@ -9,13 +9,11 @@
 [![Downloads](https://img.shields.io/github/downloads/yumenaka/comi/total?style=flat-square&color=success)](https://github.com/yumenaka/comigo/releases)
 <img src="https://raw.githubusercontent.com/yumenaka/comi/master/icon.ico" alt="ComiGo：简单粗暴的漫画阅读器" width="200">
 -->
-
 </div>
 
 ![Windows示例](https://www.yumenaka.net/wp-content/uploads/2020/08/sample.gif "Windows示例")
 
-[English](https://github.com/yumenaka/comigo/blob/master/README_EN.md)  
-[日本語](https://github.com/yumenaka/comigo/blob/master/README_JP.md)  
+[中文文档](https://github.com/yumenaka/comigo/blob/master/README.md)  [English](https://github.com/yumenaka/comigo/blob/master/README_EN.md) [日本語](https://github.com/yumenaka/comigo/blob/master/README_JP.md)  
 
 ### 功能特点
 
@@ -128,9 +126,13 @@ Comigo服务器设置，可选保存位置：
 - [ ] Debian，RPM包（<https://github.com/goreleaser/nfpm）>
 - [ ] 优化epub与PDF阅读体验，支持图文混排（pdf.js与epub.js）
 
+### Feedback 反馈
+有一些反馈或建议吗？请开 issue 或给我留言！
+[Twitter](https://x.com/yumenaka7)
+
 ### Special Thanks
 
-[mholt](https://github.com/mholt)  、[spf13](https://github.com/spf13)  [disintegration](https://github.com/disintegration)   、 [Baozisoftware](https://github.com/Baozisoftware) 、 [markbates](github.com/markbates/pkger)  and more。
+[mholt](https://github.com/mholt)  、[spf13](https://github.com/spf13)  [disintegration](https://github.com/disintegration)   、 [Baozisoftware](https://github.com/Baozisoftware)  and more。
 
 ## License
 

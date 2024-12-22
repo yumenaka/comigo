@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/yumenaka/comigo/config"
-	"github.com/yumenaka/comigo/entity"
+	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/util/locale"
 	"github.com/yumenaka/comigo/util/logger"
 )
@@ -28,7 +28,7 @@ func SetShutdownHandler() {
 	//清理临时文件
 	if config.Config.ClearCacheExit {
 		logger.Infof("\r"+locale.GetString("start_clear_file")+" CachePath:%s ", config.Config.CachePath)
-		entity.ClearTempFilesALL(config.Config.Debug, config.Config.CachePath)
+		model.ClearTempFilesALL(config.Config.Debug, config.Config.CachePath)
 		logger.Infof("%s", locale.GetString("clear_temp_file_completed"))
 	}
 	// 上下文用于通知服务器它有 5 秒的时间来完成它当前正在处理的请求

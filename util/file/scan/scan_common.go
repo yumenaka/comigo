@@ -7,8 +7,8 @@ import (
 	"path"
 	"strings"
 
-	"github.com/yumenaka/comigo/entity"
 	"github.com/yumenaka/comigo/internal/database"
+	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/util/file"
 	"github.com/yumenaka/comigo/util/locale"
 	"github.com/yumenaka/comigo/util/logger"
@@ -111,7 +111,7 @@ func (o *Option) IsSkipDir(path string) bool {
 // InitStore 3、扫描路径，取得路径里的书籍
 func InitStore(scanConfig Option) error {
 	// 重置所有书籍与书组信息
-	entity.ClearAllBookData()
+	model.ClearAllBookData()
 	for _, localPath := range scanConfig.LocalStores {
 		addList, err := Local(localPath, scanConfig)
 		if err != nil {
@@ -137,7 +137,7 @@ func SaveResultsToDatabase(ConfigPath string, ClearDatabaseWhenExit bool) error 
 	if err != nil {
 		return err
 	}
-	saveErr := database.SaveBookListToDatabase(entity.GetArchiveBooks())
+	saveErr := database.SaveBookListToDatabase(model.GetArchiveBooks())
 	if saveErr != nil {
 		logger.Info(saveErr)
 		return saveErr
@@ -146,25 +146,25 @@ func SaveResultsToDatabase(ConfigPath string, ClearDatabaseWhenExit bool) error 
 }
 
 func ClearDatabaseWhenExit(ConfigPath string) {
-	AllBook := entity.GetAllBookList()
+	AllBook := model.GetAllBookList()
 	for _, b := range AllBook {
 		database.ClearBookData(b)
 	}
 }
 
 // AddBooksToStore 添加一组书到书库
-func AddBooksToStore(bookList []*entity.Book, basePath string, MinImageNum int) {
-	err := entity.AddBooks(bookList, basePath, MinImageNum)
+func AddBooksToStore(bookList []*model.Book, basePath string, MinImageNum int) {
+	err := model.AddBooks(bookList, basePath, MinImageNum)
 	if err != nil {
 		logger.Infof(locale.GetString("AddBook_error")+"%s", basePath)
 	}
 	// 生成虚拟书籍组
-	if err := entity.MainStore.AnalyzeStore(); err != nil {
+	if err := model.MainStore.AnalyzeStore(); err != nil {
 		logger.Infof("%s", err)
 	}
 }
 
-func scanNonUTF8ZipFile(filePath string, b *entity.Book, scanOption Option) error {
+func scanNonUTF8ZipFile(filePath string, b *model.Book, scanOption Option) error {
 	b.NonUTF8Zip = true
 	reader, err := file.ScanNonUTF8Zip(filePath, scanOption.ZipFileTextEncoding)
 	if err != nil {
@@ -175,7 +175,7 @@ func scanNonUTF8ZipFile(filePath string, b *entity.Book, scanOption Option) erro
 			// 如果是压缩文件
 			// 替换特殊字符的时候，额外将“+替换成"%2b"，因为gin会将+解析为空格。
 			TempURL := "/api/get_file?id=" + b.BookID + "&filename=" + url.QueryEscape(f.Name)
-			b.Pages.Images = append(b.Pages.Images, entity.ImageInfo{RealImageFilePATH: "", FileSize: f.FileInfo().Size(), ModeTime: f.FileInfo().ModTime(), NameInArchive: f.Name, Url: TempURL})
+			b.Pages.Images = append(b.Pages.Images, model.ImageInfo{RealImageFilePATH: "", FileSize: f.FileInfo().Size(), ModeTime: f.FileInfo().ModTime(), NameInArchive: f.Name, Url: TempURL})
 		} else {
 			if scanOption.Debug {
 				logger.Infof(locale.GetString("unsupported_file_type")+" %s", f.Name)
@@ -188,7 +188,7 @@ func scanNonUTF8ZipFile(filePath string, b *entity.Book, scanOption Option) erro
 
 // 手动写的递归查找，功能与fs.WalkDir()相同。发现一个Archiver/V4的BUG：zip文件的虚拟文件系统，找不到正确的多级文件夹？
 // https://books.studygolang.com/The-Golang-Standard-Library-by-Example/chapter06/06.3.html
-func walkUTF8ZipFs(fsys fs.FS, parent, base string, b *entity.Book, scanOption Option) error {
+func walkUTF8ZipFs(fsys fs.FS, parent, base string, b *model.Book, scanOption Option) error {
 	// 一般zip文件的处理流程
 	// logger.Infof("parent:" + parent + " base:" + base)
 	dirName := path.Join(parent, base)
@@ -215,7 +215,7 @@ func walkUTF8ZipFs(fsys fs.FS, parent, base string, b *entity.Book, scanOption O
 			inArchiveName := path.Join(parent, f.Name())
 			TempURL := "/api/get_file?id=" + b.BookID + "&filename=" + url.QueryEscape(inArchiveName)
 			// 替换特殊字符的时候,不要用url.PathEscape()，PathEscape不会把“+“替换成"%2b"，会导致BUG，让gin会将+解析为空格。
-			b.Pages.Images = append(b.Pages.Images, entity.ImageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: inArchiveName, Url: TempURL})
+			b.Pages.Images = append(b.Pages.Images, model.ImageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: inArchiveName, Url: TempURL})
 		} else {
 			if scanOption.Debug {
 				logger.Infof(locale.GetString("unsupported_file_type")+" %s", name)

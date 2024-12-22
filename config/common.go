@@ -11,7 +11,7 @@ import (
 
 	"github.com/pelletier/go-toml/v2"
 	"github.com/yumenaka/comigo/config/stores"
-	"github.com/yumenaka/comigo/entity"
+	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/util"
 	"github.com/yumenaka/comigo/util/logger"
 )
@@ -19,8 +19,8 @@ import (
 var (
 	Version = "v0.9.13"
 	Srv     *http.Server
-	Status  = entity.ConfigStatus{}
-	Config  = entity.ComigoConfig{
+	Status  = model.ConfigStatus{}
+	Config  = model.ComigoConfig{
 		Port: 1234,
 		Host: "DefaultHost",
 		Stores: []stores.Store{
