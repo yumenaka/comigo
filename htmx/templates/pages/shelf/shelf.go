@@ -6,9 +6,9 @@ import (
 
 	"github.com/angelofallars/htmx-go"
 	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comigo/entity"
 	"github.com/yumenaka/comigo/htmx/state"
 	"github.com/yumenaka/comigo/htmx/templates/common"
+	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
@@ -22,8 +22,8 @@ func Handler(c *gin.Context) {
 	// 如果没有指定书籍ID，获取顶层书架信息。
 	if bookID == "" {
 		var err error
-		entity.CheckAllBookFileExist()
-		state.Global.ShelfBookList, err = entity.TopOfShelfInfo(sortBy)
+		model.CheckAllBookFileExist()
+		state.Global.ShelfBookList, err = model.TopOfShelfInfo(sortBy)
 		//TODO: 没有图书的提示（上传压缩包\远程下载示例漫画）
 		if err != nil {
 			logger.Infof("TopOfShelfInfo: %v", err)
@@ -32,8 +32,8 @@ func Handler(c *gin.Context) {
 	// 如果指定了书籍ID，获取子书架信息。
 	if bookID != "" {
 		var err error
-		entity.CheckAllBookFileExist()
-		state.Global.ShelfBookList, err = entity.GetBookInfoListByID(bookID, sortBy)
+		model.CheckAllBookFileExist()
+		state.Global.ShelfBookList, err = model.GetBookInfoListByID(bookID, sortBy)
 		//TODO: 没有图书的提示（返回主页\上传压缩包\远程下载示例漫画）
 		if err != nil {
 			logger.Infof("GetBookShelf Error: %v", err)
@@ -56,21 +56,21 @@ func Handler(c *gin.Context) {
 	}
 }
 
-func getHref(book entity.BookInfo) string {
+func getHref(book model.BookInfo) string {
 	// 如果是书籍组，就跳转到子书架
-	if book.Type == entity.TypeBooksGroup {
+	if book.Type == model.TypeBooksGroup {
 		return "\"/shelf/" + book.BookID + "/\""
 	}
 	// 如果是视频、音频、未知文件，就在新窗口打开
-	if book.Type == entity.TypeVideo || book.Type == entity.TypeAudio || book.Type == entity.TypeUnknownFile {
+	if book.Type == model.TypeVideo || book.Type == model.TypeAudio || book.Type == model.TypeUnknownFile {
 		return "\"/api/raw/" + book.BookID + "/" + url.QueryEscape(book.Title) + "\""
 	}
 	// 其他情况，跳转到阅读页面,
 	return "'/'+$store.global.readMode+ '/' + BookID"
 }
 
-func getTarget(book entity.BookInfo) string {
-	if book.Type == entity.TypeVideo || book.Type == entity.TypeAudio || book.Type == entity.TypeUnknownFile {
+func getTarget(book model.BookInfo) string {
+	if book.Type == model.TypeVideo || book.Type == model.TypeAudio || book.Type == model.TypeUnknownFile {
 		return "_blank"
 	}
 	return "_self"

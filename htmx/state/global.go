@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/yumenaka/comigo/config"
-	"github.com/yumenaka/comigo/entity"
+	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/util"
 )
 
@@ -14,7 +14,7 @@ type GlobalState struct {
 	SingleUserMode  bool
 	StaticMode      bool
 	OnlineUserCount int
-	ShelfBookList   *entity.BookInfoList
+	ShelfBookList   *model.BookInfoList
 	ServerStatus    *util.ServerStatus
 }
 
@@ -41,7 +41,7 @@ func init() {
 	Global.ServerStatus = util.GetServerInfo(config.Config.Host, config.Version, config.Config.Port, config.Config.EnableUpload, 0)
 }
 
-func GetCloverBackgroundImageUrl(book *entity.BookInfo) string {
+func GetCloverBackgroundImageUrl(book *model.BookInfo) string {
 	imageUrl := book.Cover.Url
 	if strings.HasPrefix(book.Cover.Url, "/api") {
 		imageUrl = book.Cover.Url + "&resize_width=256&resize_height=360&thumbnail_mode=true"

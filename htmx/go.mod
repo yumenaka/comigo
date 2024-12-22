@@ -1,18 +1,19 @@
 module github.com/yumenaka/comigo/htmx
 
 go 1.23.4
+
 // 从 Go 1.24 开始，模块可以声明工具依赖项
 // https://go.dev/doc/modules/managing-dependencies#tools
 // go get -tool golang.org/x/tools/cmd/stringer
-  //tool (
-  //  golang.org/x/tools/cmd/stringer
-  //  ./cmd/migrate
-  //)
+//tool (
+//  golang.org/x/tools/cmd/stringer
+//  ./cmd/migrate
+//)
 require (
 	github.com/a-h/templ v0.2.793
 	github.com/angelofallars/htmx-go v0.5.0
 	github.com/gin-gonic/gin v1.10.0
-	github.com/yumenaka/comigo v0.9.13
+	github.com/yumenaka/comigo v0.9.14-0.20241222085917-b87aebe581d9
 )
 
 // 使用最新的 master 提交 然后，在项目根目录下运行以下命令来下载最新的依赖 go mod tidy && go mod download
@@ -149,6 +150,7 @@ require (
 	golang.org/x/net v0.33.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
+	golang.org/x/term v0.27.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/tools v0.28.0 // indirect
 	google.golang.org/protobuf v1.36.0 // indirect

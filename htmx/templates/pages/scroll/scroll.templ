@@ -2,13 +2,13 @@ package scroll
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comigo/entity"
+	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/htmx/state"
 	"github.com/yumenaka/comigo/htmx/templates/common"
 )
 
 // ScrollPage 定义 BodyHTML
-templ ScrollPage(c *gin.Context, s *state.GlobalState, book *entity.Book) {
+templ ScrollPage(c *gin.Context, s *state.GlobalState, book *model.Book) {
 	@InsertData(book, s)
 	@common.Header(
 		c,

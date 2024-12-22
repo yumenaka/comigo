@@ -7,17 +7,17 @@ import (
 
 	"github.com/angelofallars/htmx-go"
 	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comigo/entity"
 	"github.com/yumenaka/comigo/htmx/state"
 	"github.com/yumenaka/comigo/htmx/templates/common"
+	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
 // Handler 阅读界面（TODO：翻页模式）
 func Handler(c *gin.Context) {
-	entity.CheckAllBookFileExist()
+	model.CheckAllBookFileExist()
 	bookID := c.Param("id")
-	book, err := entity.GetBookByID(bookID, "default")
+	book, err := model.GetBookByID(bookID, "default")
 	if err != nil {
 		logger.Infof("GetBookByID: %v", err)
 	}
@@ -46,12 +46,12 @@ func Handler(c *gin.Context) {
 			//localhost 特例：对于 localhost，一般不需要指定域名。直接设置 Cookie.Domain 为空字符串或者不设置 Domain 属性，Cookie 会被默认设置在 localhost 上，而不需要显式指定。
 			c.SetCookie("bookID:"+bookID, readingProgressStr, 60*60*24*356, "/", domain, false, false)
 		}
-		readingProgress, err := entity.GetReadingProgress(readingProgressStr)
+		readingProgress, err := model.GetReadingProgress(readingProgressStr)
 		if err != nil {
 			logger.Infof("GetReadingProgress: %v readingProgressStr: "+readingProgressStr, err)
 		}
 
-		state.Global.ShelfBookList, err = entity.TopOfShelfInfo("name")
+		state.Global.ShelfBookList, err = model.TopOfShelfInfo("name")
 		if err != nil {
 			logger.Infof("TopOfShelfInfo: %v", err)
 		}
