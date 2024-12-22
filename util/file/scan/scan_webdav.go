@@ -3,7 +3,7 @@ package scan
 import (
 	"fmt"
 	"github.com/hirochachacha/go-smb2"
-	"github.com/yumenaka/comigo/entity"
+	"github.com/yumenaka/comigo/model"
 	iofs "io/fs"
 	"net"
 	"strconv"
@@ -11,7 +11,7 @@ import (
 
 // TODO:扫描书籍
 // https://pkg.go.dev/github.com/studio-b12/gowebdav ?
-func Webdav(scanOption Option) (newBookList []*entity.Book, err error) {
+func Webdav(scanOption Option) (newBookList []*model.Book, err error) {
 	conn, err := net.Dial("tcp", scanOption.RemoteStores[0].Smb.Host+":"+strconv.Itoa(scanOption.RemoteStores[0].Smb.Port))
 	if err != nil {
 		//panic(err)

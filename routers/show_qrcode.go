@@ -6,7 +6,7 @@ import (
 
 	"github.com/sanity-io/litter"
 	"github.com/yumenaka/comigo/config"
-	"github.com/yumenaka/comigo/entity"
+	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/util"
 	"github.com/yumenaka/comigo/util/locale"
 	"github.com/yumenaka/comigo/util/logger"
@@ -15,8 +15,8 @@ import (
 func showQRCode() {
 	// 如果只有一本书，URL 需要附加的参数
 	etcStr := ""
-	if entity.GetBooksNumber() == 1 {
-		bookList, err := entity.GetAllBookInfoList("name")
+	if model.GetBooksNumber() == 1 {
+		bookList, err := model.GetAllBookInfoList("name")
 		if err != nil {
 			logger.Infof("Error getting book list: %s", err)
 			return

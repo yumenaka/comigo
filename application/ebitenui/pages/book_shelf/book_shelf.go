@@ -10,7 +10,7 @@ import (
 	"github.com/ebitenui/ebitenui/image"
 	"github.com/ebitenui/ebitenui/widget"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
-	"github.com/yumenaka/comigo/entity"
+	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/util"
 	fileutil "github.com/yumenaka/comigo/util/file"
 )
@@ -67,7 +67,7 @@ func BodyContainer() widget.PreferredSizeLocateableWidget {
 	//书籍排列的方式，默认name
 	sortBy := "default"
 	//如果传了maxDepth这个参数
-	bookInfoList, err := entity.TopOfShelfInfo(sortBy)
+	bookInfoList, err := model.TopOfShelfInfo(sortBy)
 	if err != nil {
 		log.Print(err)
 	}
@@ -75,8 +75,8 @@ func BodyContainer() widget.PreferredSizeLocateableWidget {
 		println(fmt.Sprintf("GetFile: %s", bookInfo.Title))
 		option := fileutil.GetPictureDataOption{
 			PictureName:      bookInfo.Cover.NameInArchive,
-			BookIsPDF:        bookInfo.Type == entity.TypePDF,
-			BookIsDir:        bookInfo.Type == entity.TypeDir,
+			BookIsPDF:        bookInfo.Type == model.TypePDF,
+			BookIsDir:        bookInfo.Type == model.TypeDir,
 			BookIsNonUTF8Zip: bookInfo.NonUTF8Zip,
 			BookFilePath:     bookInfo.FilePath,
 			ResizeMaxWidth:   160,

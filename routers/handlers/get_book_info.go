@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comigo/entity"
+	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
@@ -15,7 +15,7 @@ func GetParentBookInfo(c *gin.Context) {
 		c.PureJSON(http.StatusBadRequest, "not set id param")
 		return
 	}
-	info, err := entity.GetBookGroupInfoByChildBookID(id)
+	info, err := model.GetBookGroupInfoByChildBookID(id)
 	if err != nil {
 		logger.Infof("%s", err)
 		c.PureJSON(http.StatusBadRequest, "ParentBookInfo not found")
@@ -34,7 +34,7 @@ func GetBookInfos(c *gin.Context) {
 		c.PureJSON(http.StatusBadRequest, "need book_group_id or depth or max_depth")
 		return
 	}
-	entity.CheckAllBookFileExist()
+	model.CheckAllBookFileExist()
 	//按照最大书籍所在深度获取书籍信息
 	if c.Query("max_depth") != "" {
 		GetBookInfosByMaxDepth(c, sortBy)
@@ -56,9 +56,9 @@ func GetBookInfos(c *gin.Context) {
 func GetTopOfShelfInfo(c *gin.Context) {
 	//书籍排列的方式，默认name
 	sortBy := c.DefaultQuery("sort_by", "default")
-	entity.CheckAllBookFileExist()
+	model.CheckAllBookFileExist()
 	//如果传了maxDepth这个参数
-	bookInfoList, err := entity.TopOfShelfInfo(sortBy)
+	bookInfoList, err := model.TopOfShelfInfo(sortBy)
 	if err != nil {
 		logger.Infof("%s", err)
 		c.PureJSON(http.StatusBadRequest, "GetTopOfShelfInfo Failed")
@@ -68,7 +68,7 @@ func GetTopOfShelfInfo(c *gin.Context) {
 }
 
 func GetBookInfosByMaxDepth(c *gin.Context, sortBy string) {
-	entity.CheckAllBookFileExist()
+	model.CheckAllBookFileExist()
 	//按照书籍所在深度获取书籍信息，0是顶层，即为执行文件夹本身
 	maxDepth, err := strconv.Atoi(c.DefaultQuery("max_depth", "0"))
 	if err != nil {
@@ -77,7 +77,7 @@ func GetBookInfosByMaxDepth(c *gin.Context, sortBy string) {
 		return
 	}
 	//如果传了maxDepth这个参数
-	bookInfoList, err := entity.GetBookInfoListByMaxDepth(maxDepth, sortBy)
+	bookInfoList, err := model.GetBookInfoListByMaxDepth(maxDepth, sortBy)
 	if err != nil {
 		logger.Infof("%s", err)
 		c.PureJSON(http.StatusBadRequest, "book_info not found")
@@ -87,7 +87,7 @@ func GetBookInfosByMaxDepth(c *gin.Context, sortBy string) {
 }
 
 func GetBookInfosByDepth(c *gin.Context, sortBy string) {
-	entity.CheckAllBookFileExist()
+	model.CheckAllBookFileExist()
 	//按照书籍所在深度获取书籍信息，0是顶层，即为执行文件夹本身
 	depth, err := strconv.Atoi(c.DefaultQuery("depth", ""))
 	if err != nil {
@@ -96,7 +96,7 @@ func GetBookInfosByDepth(c *gin.Context, sortBy string) {
 		return
 	}
 	//如果传了depth这个参数
-	bookInfoList, err := entity.GetBookInfoListByDepth(depth, sortBy)
+	bookInfoList, err := model.GetBookInfoListByDepth(depth, sortBy)
 	if err != nil {
 		logger.Infof("%s", err)
 		c.PureJSON(http.StatusBadRequest, "book_info not found")
@@ -107,7 +107,7 @@ func GetBookInfosByDepth(c *gin.Context, sortBy string) {
 }
 
 func GetBookInfosByGroupID(c *gin.Context, sortBy string) {
-	entity.CheckAllBookFileExist()
+	model.CheckAllBookFileExist()
 	//按照 BookGroupID获取
 	bookGroupID := c.DefaultQuery("book_group_id", "")
 	if bookGroupID == "" {
@@ -115,7 +115,7 @@ func GetBookInfosByGroupID(c *gin.Context, sortBy string) {
 		return
 	}
 	//如果传了bookGroupId这个参数
-	bookInfoList, err := entity.GetBookInfoListByID(bookGroupID, sortBy)
+	bookInfoList, err := model.GetBookInfoListByID(bookGroupID, sortBy)
 	if err != nil {
 		logger.Infof("%s", err)
 		c.PureJSON(http.StatusBadRequest, "book_info not found")
@@ -127,7 +127,7 @@ func GetBookInfosByGroupID(c *gin.Context, sortBy string) {
 
 // GroupInfo 示例 URL： http://127.0.0.1:1234/api/group_info?id=1215a&sort_by=filename
 func GroupInfo(c *gin.Context) {
-	entity.CheckAllBookFileExist()
+	model.CheckAllBookFileExist()
 	sortBy := c.DefaultQuery("sort_by", "filename")
 	id := c.DefaultQuery("id", "")
 	if id == "" {
@@ -135,13 +135,13 @@ func GroupInfo(c *gin.Context) {
 		return
 	}
 	//sortBy: 根据压缩包原始顺序、时间、文件名排序
-	b, err := entity.GetBookByID(id, sortBy)
+	b, err := model.GetBookByID(id, sortBy)
 	if err != nil {
 		logger.Infof("%s", err)
 		c.PureJSON(http.StatusBadRequest, "book id not found")
 		return
 	}
-	infoList, err := entity.GetBookInfoListByParentFolder(b.ParentFolder, sortBy)
+	infoList, err := model.GetBookInfoListByParentFolder(b.ParentFolder, sortBy)
 	if err != nil {
 		logger.Infof("%s", err)
 		c.PureJSON(http.StatusBadRequest, "ParentFolder, not found")
@@ -152,7 +152,7 @@ func GroupInfo(c *gin.Context) {
 
 // GroupInfoFilter 示例 URL： http://127.0.0.1:1234/api/group_info_filter?id=1215a&sort_by=filename
 func GroupInfoFilter(c *gin.Context) {
-	entity.CheckAllBookFileExist()
+	model.CheckAllBookFileExist()
 	sortBy := c.DefaultQuery("sort_by", "filename")
 	id := c.DefaultQuery("id", "")
 	if id == "" {
@@ -160,28 +160,28 @@ func GroupInfoFilter(c *gin.Context) {
 		return
 	}
 	//sortBy: 根据压缩包原始顺序、时间、文件名排序
-	b, err := entity.GetBookByID(id, sortBy)
+	b, err := model.GetBookByID(id, sortBy)
 	if err != nil {
 		logger.Infof("%s", err)
 		c.PureJSON(http.StatusBadRequest, "book id not found")
 		return
 	}
-	infoList, err := entity.GetBookInfoListByParentFolder(b.ParentFolder, sortBy)
+	infoList, err := model.GetBookInfoListByParentFolder(b.ParentFolder, sortBy)
 	if err != nil {
 		logger.Infof("%s", err)
 		c.PureJSON(http.StatusBadRequest, "ParentFolder, not found")
 		return
 	}
 	//过滤掉不需要的类型
-	filterList := entity.BookInfoList{}
+	filterList := model.BookInfoList{}
 	for _, info := range infoList.BookInfos {
-		if info.Type == entity.TypeZip ||
-			info.Type == entity.TypeRar ||
-			info.Type == entity.TypeDir ||
-			info.Type == entity.TypeCbz ||
-			info.Type == entity.TypeCbr ||
-			info.Type == entity.TypePDF ||
-			info.Type == entity.TypeEpub {
+		if info.Type == model.TypeZip ||
+			info.Type == model.TypeRar ||
+			info.Type == model.TypeDir ||
+			info.Type == model.TypeCbz ||
+			info.Type == model.TypeCbr ||
+			info.Type == model.TypePDF ||
+			info.Type == model.TypeEpub {
 			filterList.BookInfos = append(filterList.BookInfos, info)
 		}
 	}

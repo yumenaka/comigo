@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comigo/config"
-	"github.com/yumenaka/comigo/entity"
+	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/util"
 )
 
@@ -23,11 +23,11 @@ type ServerStatus struct {
 }
 
 func GetServerInfoHandler(c *gin.Context) {
-	serverStatus := util.GetServerInfo(config.Config.Host, config.Version, config.Config.Port, config.Config.EnableUpload, entity.GetBooksNumber())
+	serverStatus := util.GetServerInfo(config.Config.Host, config.Version, config.Config.Port, config.Config.EnableUpload, model.GetBooksNumber())
 	c.PureJSON(http.StatusOK, serverStatus)
 }
 
 func GetAllServerInfoHandler(c *gin.Context) {
-	serverStatus := util.GetAllServerInfo(config.Config.Host, config.Version, config.Config.Port, config.Config.EnableUpload, entity.GetBooksNumber(), c.ClientIP())
+	serverStatus := util.GetAllServerInfo(config.Config.Host, config.Version, config.Config.Port, config.Config.EnableUpload, model.GetBooksNumber(), c.ClientIP())
 	c.PureJSON(http.StatusOK, serverStatus)
 }

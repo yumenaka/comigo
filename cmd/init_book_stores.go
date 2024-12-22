@@ -5,8 +5,8 @@ import (
 
 	"github.com/spf13/viper"
 	"github.com/yumenaka/comigo/config"
-	"github.com/yumenaka/comigo/entity"
 	"github.com/yumenaka/comigo/internal/database"
+	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/util/file/scan"
 	"github.com/yumenaka/comigo/util/logger"
 )
@@ -23,7 +23,7 @@ func StartScan(args []string) {
 		if err != nil {
 			logger.Infof("%s", err)
 		} else {
-			entity.RestoreDatabaseBooks(books)
+			model.RestoreDatabaseBooks(books)
 			logger.Infof("从数据库中读取书籍信息,一共有 %d 本书", strconv.Itoa(len(books)))
 		}
 	}

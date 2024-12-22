@@ -3,7 +3,7 @@ package scan
 import (
 	"fmt"
 	"github.com/hirochachacha/go-smb2"
-	"github.com/yumenaka/comigo/entity"
+	"github.com/yumenaka/comigo/model"
 	iofs "io/fs"
 	"net"
 	"strconv"
@@ -13,7 +13,7 @@ import (
 // https://github.com/spf13/afero  SftpFs
 
 // TODO:SFTP扫描书籍
-func SFTP(scanOption Option) (newBookList []*entity.Book, err error) {
+func SFTP(scanOption Option) (newBookList []*model.Book, err error) {
 	conn, err := net.Dial("tcp", scanOption.RemoteStores[0].Smb.Host+":"+strconv.Itoa(scanOption.RemoteStores[0].Smb.Port))
 	if err != nil {
 		fmt.Println(err)

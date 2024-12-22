@@ -1,7 +1,13 @@
 module github.com/yumenaka/comigo/htmx
 
-go 1.23.0
-
+go 1.23.4
+// 从 Go 1.24 开始，模块可以声明工具依赖项
+// https://go.dev/doc/modules/managing-dependencies#tools
+// go get -tool golang.org/x/tools/cmd/stringer
+  //tool (
+  //  golang.org/x/tools/cmd/stringer
+  //  ./cmd/migrate
+  //)
 require (
 	github.com/a-h/templ v0.2.793
 	github.com/angelofallars/htmx-go v0.5.0
@@ -16,7 +22,7 @@ require (
 replace github.com/yumenaka/comigo v0.9.11 => ../
 
 require (
-	ariga.io/atlas v0.29.0 // indirect
+	ariga.io/atlas v0.29.1 // indirect
 	entgo.io/ent v0.14.1 // indirect
 	github.com/Baozisoftware/qrcode-terminal-go v0.0.0-20170407111555-c0650d8dff0f // indirect
 	github.com/BurntSushi/toml v1.4.0 // indirect
@@ -31,7 +37,7 @@ require (
 	github.com/bodgit/plumbing v1.3.0 // indirect
 	github.com/bodgit/sevenzip v1.6.0 // indirect
 	github.com/bodgit/windows v1.0.1 // indirect
-	github.com/bytedance/sonic v1.12.5 // indirect
+	github.com/bytedance/sonic v1.12.6 // indirect
 	github.com/bytedance/sonic/loader v0.2.1 // indirect
 	github.com/cheggaaa/pb/v3 v3.1.5 // indirect
 	github.com/cloudsoda/go-smb2 v0.0.0-20231124195312-f3ec8ae2c891 // indirect
@@ -53,7 +59,7 @@ require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.23.0 // indirect
-	github.com/goccy/go-json v0.10.3 // indirect
+	github.com/goccy/go-json v0.10.4 // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.1 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
@@ -79,7 +85,7 @@ require (
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible // indirect
 	github.com/lestrrat-go/strftime v1.1.0 // indirect
 	github.com/lufia/plan9stats v0.0.0-20240909124753-873cd0166683 // indirect
-	github.com/magiconair/properties v1.8.7 // indirect
+	github.com/magiconair/properties v1.8.9 // indirect
 	github.com/mandykoh/autocrop v0.4.7 // indirect
 	github.com/mandykoh/go-parallel v0.1.0 // indirect
 	github.com/mandykoh/prism v0.35.3 // indirect
@@ -97,7 +103,7 @@ require (
 	github.com/nwaples/rardecode/v2 v2.0.1 // indirect
 	github.com/pdfcpu/pdfcpu v0.9.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
-	github.com/pierrec/lz4/v4 v4.1.21 // indirect
+	github.com/pierrec/lz4/v4 v4.1.22 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
@@ -113,7 +119,7 @@ require (
 	github.com/sorairolake/lzip-go v0.3.5 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
-	github.com/spf13/cast v1.7.0 // indirect
+	github.com/spf13/cast v1.7.1 // indirect
 	github.com/spf13/cobra v1.8.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.19.0 // indirect
@@ -128,7 +134,7 @@ require (
 	github.com/ugorji/go/codec v1.2.12 // indirect
 	github.com/ulikunitz/xz v0.5.12 // indirect
 	github.com/xxjwxc/gowp v0.0.0-20240929033016-5be68d222389 // indirect
-	github.com/xxjwxc/public v0.0.0-20241118042544-92f0e4894253 // indirect
+	github.com/xxjwxc/public v0.0.0-20241219125313-28617cd75caa // indirect
 	github.com/yumenaka/archiver/v4 v4.0.5 // indirect
 	github.com/yumenaka/archives v0.0.0-20241204225435-77ca01619006 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
@@ -136,25 +142,25 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go4.org v0.0.0-20230225012048-214862532bf5 // indirect
 	golang.org/x/arch v0.12.0 // indirect
-	golang.org/x/crypto v0.30.0 // indirect
-	golang.org/x/exp v0.0.0-20241204233417-43b7b7cde48d // indirect
+	golang.org/x/crypto v0.31.0 // indirect
+	golang.org/x/exp v0.0.0-20241217172543-b2144cdd0a67 // indirect
 	golang.org/x/image v0.23.0 // indirect
 	golang.org/x/mod v0.22.0 // indirect
-	golang.org/x/net v0.32.0 // indirect
+	golang.org/x/net v0.33.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/tools v0.28.0 // indirect
-	google.golang.org/protobuf v1.35.2 // indirect
+	google.golang.org/protobuf v1.36.0 // indirect
 	gopkg.in/eapache/queue.v1 v1.1.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	modernc.org/gc/v3 v3.0.0-20241004144649-1aea3fae8852 // indirect
-	modernc.org/libc v1.61.3 // indirect
+	modernc.org/gc/v3 v3.0.0-20241213165251-3bc300f6d0c9 // indirect
+	modernc.org/libc v1.61.4 // indirect
 	modernc.org/mathutil v1.6.0 // indirect
 	modernc.org/memory v1.8.0 // indirect
-	modernc.org/sqlite v1.34.2 // indirect
+	modernc.org/sqlite v1.34.3 // indirect
 	modernc.org/strutil v1.2.0 // indirect
 	modernc.org/token v1.1.0 // indirect
 )

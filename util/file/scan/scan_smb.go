@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"github.com/cloudsoda/go-smb2"
-	"github.com/yumenaka/comigo/entity"
+	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/util/locale"
 	"github.com/yumenaka/comigo/util/logger"
 )
@@ -22,7 +22,7 @@ import (
 // Smb 扫描smb书籍  github.com/hirochachacha/go-smb2
 // 换用一个持续更新，rclone用的库：github.com/cloudsoda/go-smb2
 // https://github.com/rclone/rclone/blob/master/go.mod
-func Smb(scanOption Option) (newBookList []*entity.Book, err error) {
+func Smb(scanOption Option) (newBookList []*model.Book, err error) {
 	// connection
 	dialer := &smb2.Dialer{
 		Initiator: &smb2.NTLMInitiator{
@@ -66,7 +66,7 @@ func Smb(scanOption Option) (newBookList []*entity.Book, err error) {
 		func(walkPath string, fileInfo iofs.DirEntry, err error) error {
 			smbFilePath := "smb://" + scanOption.RemoteStores[0].Smb.Host + "/" + scanOption.RemoteStores[0].Smb.ShareName + "/" + walkPath
 
-			for _, p := range entity.GetArchiveBooks() {
+			for _, p := range model.GetArchiveBooks() {
 				if smbFilePath == p.FilePath {
 					//跳过已扫描文件
 					logger.Infof(locale.GetString("found_in_bookstore")+"%path", walkPath)
@@ -131,7 +131,7 @@ func Smb(scanOption Option) (newBookList []*entity.Book, err error) {
 }
 
 // 扫描本地路径，并返回对应书籍
-func smbScanFile(filePath string, file *smb2.File, storePath string, depth int, scanOption Option) (newBook *entity.Book, err error) {
+func smbScanFile(filePath string, file *smb2.File, storePath string, depth int, scanOption Option) (newBook *model.Book, err error) {
 	//设置了一个defer函数来捕获可能的panic
 	//defer func() {
 	//	if err := recover(); err != nil {
@@ -279,9 +279,9 @@ func smbScanFile(filePath string, file *smb2.File, storePath string, depth int, 
 	//return newBook, err
 }
 
-func smbScanDir(dirPath string, storePath string, depth int, scanOption Option) (*entity.Book, error) {
+func smbScanDir(dirPath string, storePath string, depth int, scanOption Option) (*model.Book, error) {
 	// 初始化，生成UUID
-	newBook, err := entity.NewBook(dirPath, time.Now(), 0, storePath, depth, entity.TypeDir)
+	newBook, err := model.NewBook(dirPath, time.Now(), 0, storePath, depth, model.TypeDir)
 	if err != nil {
 		return nil, err
 	}
@@ -310,7 +310,7 @@ func smbScanDir(dirPath string, storePath string, depth int, scanOption Option) 
 		}
 		if scanOption.IsSupportMedia(file.Name()) {
 			TempURL := "/api/get_file?id=" + newBook.BookID + "&filename=" + url.QueryEscape(file.Name())
-			newBook.Pages.Images = append(newBook.Pages.Images, entity.ImageInfo{RealImageFilePATH: strAbsPath, FileSize: file.Size(), ModeTime: file.ModTime(), NameInArchive: file.Name(), Url: TempURL})
+			newBook.Pages.Images = append(newBook.Pages.Images, model.ImageInfo{RealImageFilePATH: strAbsPath, FileSize: file.Size(), ModeTime: file.ModTime(), NameInArchive: file.Name(), Url: TempURL})
 		}
 	}
 	newBook.SortPages("default")

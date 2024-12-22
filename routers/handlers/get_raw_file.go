@@ -5,13 +5,13 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comigo/entity"
+	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
 func GetRawFile(c *gin.Context) {
 	bookID := c.Param("book_id")
-	b, err := entity.GetBookByID(bookID, "")
+	b, err := model.GetBookByID(bookID, "")
 	// 打印文件名
 	if err != nil {
 		c.String(http.StatusNotFound, "404 page not found")

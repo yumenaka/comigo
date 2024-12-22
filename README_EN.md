@@ -1,34 +1,17 @@
-[![Badge License]][License]
+<div align="center">
 
-<div align = center>
+# ComiGo：Simple Comic  Reader with GO
 
-<img width = 200 alt = 'ComiGo Logo' align = right src = icon.ico>
+[![Go Report](https://goreportcard.com/badge/github.com/yumenaka/comi?style=flat-square)](https://goreportcard.com/report/github.com/yumenaka/comi)
+[![License](https://img.shields.io/github/license/yumenaka/comi?style=flat-square&color=blue)](https://github.com/yumenaka/comigo/blob/main/LICENSE)
 
-<br>
-
-# ComiGo
-
-**A Simple Manga Reader**
-
-[:jp:][README JP] [:cn:][README CN]
-
-![Windows Example]  
-
+<!--
+[![Downloads](https://img.shields.io/github/downloads/yumenaka/comi/total?style=flat-square&color=success)](https://github.com/yumenaka/comigo/releases)
+<img src="https://raw.githubusercontent.com/yumenaka/comi/master/icon.ico" alt="ComiGo：Simple Comig & Manga Reader" width="200">
+-->
 </div>
 
----
-
-<div align = center>
-
-<br>
-  
-
-
-<br>
-
----
-
-<br>
+![Windows Sample](https://www.yumenaka.net/wp-content/uploads/2020/08/sample.gif "Windows Sample")
 
 ## Install
 ```bash
@@ -41,79 +24,16 @@ bash <(wget -qO- https://raw.githubusercontent.com/yumenaka/comigo/master/get_co
 # go 1.23 or higher：
 go install github.com/yumenaka/comigo/cmd/comi@latest
 ```
-Or Download [the latest release for your system][Releases] 
-
-
+Or see [github release](https://github.com/yumenaka/comigo/releases ) .
 ## Usage
 
-<div align = left>
-
 ```sh
-comi [flags] file_or_dir
+comi somedir_or_file
 ```
 
-```sh
-comi --help
-```
-
-</div>
-
-<br>
-
----
-
-<br>
-
-## Special Thanks
-
-**[mholt]** **[spf13]** **[disintegration]** <br>
-**[Baozisoftware]** **[markbates]** <br>
-and more..
-
-<br>
-
----
-
-<br>
-
-## Possible Problems
-
-</div>
-
-#### MIMEType / `text/plain` Error
-
-*[If you use Windows，and webpage cannot be loaded.][Windows Page Issue]*
-
-1. **<kbd>Win</kbd> + <kbd>R</kbd>**
-
-2. Type `regedit`
-
-3. In the registry navigate to `\HKEY_CLASSES_ROOT.js` **>** `Content Type`
-
-4. Change `text/plain` to `application/javascript`
-
-5. Restart **ComiGo**
-
-
-<!----------------------------------------------------------------------------->
-
-[Badge License]: https://img.shields.io/badge/License-GPLv3-blue.svg?style=for-the-badge
-[Badge Windows]: https://img.shields.io/badge/Windows_-32_/_64-0078D6?style=for-the-badge&logo=windows&logoColor=white
-[Badge Linux]: https://img.shields.io/badge/Linux-AMD64_/_ARMv7/8-10B981?style=for-the-badge&logo=linux&logoColor=white
-[Badge MacOS]: https://img.shields.io/badge/MacOS-999999?style=for-the-badge&logo=apple&logoColor=white
-
-[README JP]: README_JP.md '日本語'
-[README CN]: README_CN.md '中文文档'
-
-[Windows Page Issue]: https://github.com/golang/go/issues/32350
-[Releases]: https://github.com/yumenaka/comigo/releases
-[License]: LICENSE
-
-[Windows Example]: https://www.yumenaka.net/wp-content/uploads/2020/08/sample.gif 'Windows Example'
-
-
-[disintegration]: https://github.com/disintegration
-[Baozisoftware]: https://github.com/Baozisoftware
-[markbates]: github.com/markbates/pkger
-[mholt]: https://github.com/mholt
-[spf13]: https://github.com/spf13
+### Feedback
+Got some feedback or suggestions? Please open an issue or drop me a note!  
+[Twitter](https://x.com/yumenaka7)  
+[issues](https://github.com/yumenaka/comigo/issues)
+### Special Thanks
+[mholt](https://github.com/mholt)  、[spf13](https://github.com/spf13)  [disintegration](https://github.com/disintegration)   、 [Baozisoftware](https://github.com/Baozisoftware)  and more。

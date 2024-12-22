@@ -13,7 +13,7 @@ import (
 
 	"github.com/klauspost/compress/zip"
 	"github.com/yumenaka/archives"
-	"github.com/yumenaka/comigo/entity"
+	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/util"
 	fileutil "github.com/yumenaka/comigo/util/file"
 	"github.com/yumenaka/comigo/util/locale"
@@ -21,7 +21,7 @@ import (
 )
 
 // Local 扫描路径，取得路径里的书籍
-func Local(storePath string, scanOption Option) ([]*entity.Book, error) {
+func Local(storePath string, scanOption Option) ([]*model.Book, error) {
 	if !util.PathExists(storePath) {
 		return nil, errors.New(locale.GetString("path_not_exist"))
 	}
@@ -35,11 +35,11 @@ func Local(storePath string, scanOption Option) ([]*entity.Book, error) {
 
 	// 已存在书籍的集合，跳过已有书籍，提高查找效率
 	existingBooks := make(map[string]struct{})
-	for _, book := range entity.GetAllBookList() {
+	for _, book := range model.GetAllBookList() {
 		existingBooks[book.FilePath] = struct{}{}
 	}
 
-	var newBookList []*entity.Book
+	var newBookList []*model.Book
 	err = filepath.Walk(storePathAbs, func(walkPath string, fileInfo os.FileInfo, err error) error {
 		if err != nil {
 			logger.Infof("Failed to access path %s: %v", walkPath, err)
@@ -112,7 +112,7 @@ func Local(storePath string, scanOption Option) ([]*entity.Book, error) {
 }
 
 // 扫描本地文件，并返回对应书籍
-func scanFileGetBook(filePath string, storePath string, depth int, scanOption Option) (*entity.Book, error) {
+func scanFileGetBook(filePath string, storePath string, depth int, scanOption Option) (*model.Book, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		logger.Infof("Failed to open file: %s, error: %v", filePath, err)
@@ -126,27 +126,27 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 		return nil, err
 	}
 
-	newBook, err := entity.NewBook(filePath, fileInfo.ModTime(), fileInfo.Size(), storePath, depth, entity.GetBookTypeByFilename(filePath))
+	newBook, err := model.NewBook(filePath, fileInfo.ModTime(), fileInfo.Size(), storePath, depth, model.GetBookTypeByFilename(filePath))
 	if err != nil {
 		return nil, err
 	}
 
 	switch newBook.Type {
-	case entity.TypeZip, entity.TypeCbz, entity.TypeEpub:
+	case model.TypeZip, model.TypeCbz, model.TypeEpub:
 		err = handleZipAndEpubFiles(filePath, newBook, scanOption)
 		if err != nil {
 			return nil, err
 		}
-	case entity.TypePDF:
+	case model.TypePDF:
 		err = handlePdfFiles(filePath, newBook)
 		if err != nil {
 			return nil, err
 		}
-	case entity.TypeVideo:
+	case model.TypeVideo:
 		handleMediaFiles(newBook, "video.png", "images/video.png")
-	case entity.TypeAudio:
+	case model.TypeAudio:
 		handleMediaFiles(newBook, "audio.png", "images/audio.png")
-	case entity.TypeUnknownFile:
+	case model.TypeUnknownFile:
 		handleMediaFiles(newBook, "unknown.png", "images/unknown.png")
 	default:
 		err = handleOtherArchiveFiles(filePath, newBook, scanOption)
@@ -160,7 +160,7 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 }
 
 // 处理 ZIP 和 EPUB 文件
-func handleZipAndEpubFiles(filePath string, newBook *entity.Book, scanOption Option) error {
+func handleZipAndEpubFiles(filePath string, newBook *model.Book, scanOption Option) error {
 	fsys, err := zip.OpenReader(filePath)
 	if err != nil {
 		return errors.New(locale.GetString("not_a_valid_zip_file") + filePath)
@@ -180,7 +180,7 @@ func handleZipAndEpubFiles(filePath string, newBook *entity.Book, scanOption Opt
 		}
 	}
 
-	if newBook.Type == entity.TypeEpub {
+	if newBook.Type == model.TypeEpub {
 		imageList, err := fileutil.GetImageListFromEpubFile(newBook.FilePath)
 		if err == nil {
 			newBook.SortPagesByImageList(imageList)
@@ -200,7 +200,7 @@ func handleZipAndEpubFiles(filePath string, newBook *entity.Book, scanOption Opt
 }
 
 // 处理 PDF 文件
-func handlePdfFiles(filePath string, newBook *entity.Book) error {
+func handlePdfFiles(filePath string, newBook *model.Book) error {
 	pageCount, err := fileutil.CountPagesOfPDF(filePath)
 	if err != nil {
 		return err
@@ -211,11 +211,11 @@ func handlePdfFiles(filePath string, newBook *entity.Book) error {
 	logger.Infof(locale.GetString("scan_pdf")+" %s: %d pages", filePath, pageCount)
 	newBook.PageCount = pageCount
 	newBook.InitComplete = true
-	newBook.SetCover(entity.ImageInfo{Url: "/images/pdf.png"})
+	newBook.SetCover(model.ImageInfo{Url: "/images/pdf.png"})
 
 	for i := 1; i <= pageCount; i++ {
 		tempURL := "/api/get_file?id=" + newBook.BookID + "&filename=" + strconv.Itoa(i) + ".jpg"
-		newBook.Pages.Images = append(newBook.Pages.Images, entity.ImageInfo{
+		newBook.Pages.Images = append(newBook.Pages.Images, model.ImageInfo{
 			NameInArchive: strconv.Itoa(i),
 			Url:           tempURL,
 		})
@@ -224,14 +224,14 @@ func handlePdfFiles(filePath string, newBook *entity.Book) error {
 }
 
 // 处理视频、音频等媒体文件
-func handleMediaFiles(newBook *entity.Book, imageName, imageUrl string) {
+func handleMediaFiles(newBook *model.Book, imageName, imageUrl string) {
 	newBook.PageCount = 1
 	newBook.InitComplete = true
-	newBook.SetCover(entity.ImageInfo{NameInArchive: imageName, Url: imageUrl})
+	newBook.SetCover(model.ImageInfo{NameInArchive: imageName, Url: imageUrl})
 }
 
 // 处理其他类型的压缩文件
-func handleOtherArchiveFiles(filePath string, newBook *entity.Book, scanOption Option) error {
+func handleOtherArchiveFiles(filePath string, newBook *model.Book, scanOption Option) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -262,13 +262,13 @@ func handleOtherArchiveFiles(filePath string, newBook *entity.Book, scanOption O
 			var tempURL string
 			if ok {
 				tempURL = "/api/get_file?id=" + newBook.BookID + "&filename=" + url.QueryEscape(archivedFile.NameInArchive)
-				newBook.Pages.Images = append(newBook.Pages.Images, entity.ImageInfo{
+				newBook.Pages.Images = append(newBook.Pages.Images, model.ImageInfo{
 					NameInArchive: archivedFile.NameInArchive,
 					Url:           tempURL,
 				})
 			} else {
 				tempURL = "/api/get_file?id=" + newBook.BookID + "&filename=" + url.QueryEscape(path)
-				newBook.Pages.Images = append(newBook.Pages.Images, entity.ImageInfo{
+				newBook.Pages.Images = append(newBook.Pages.Images, model.ImageInfo{
 					Url: tempURL,
 				})
 			}
@@ -283,8 +283,8 @@ func handleOtherArchiveFiles(filePath string, newBook *entity.Book, scanOption O
 }
 
 // 扫描目录，并返回对应书籍
-func scanDirGetBook(dirPath string, storePath string, depth int, scanOption Option) (*entity.Book, error) {
-	newBook, err := entity.NewBook(dirPath, time.Now(), 0, storePath, depth, entity.TypeDir)
+func scanDirGetBook(dirPath string, storePath string, depth int, scanOption Option) (*model.Book, error) {
+	newBook, err := model.NewBook(dirPath, time.Now(), 0, storePath, depth, model.TypeDir)
 	if err != nil {
 		return nil, err
 	}
@@ -313,7 +313,7 @@ func scanDirGetBook(dirPath string, storePath string, depth int, scanOption Opti
 
 		absPath := filepath.Join(dirPath, fileName)
 		tempURL := "/api/get_file?id=" + newBook.BookID + "&filename=" + url.QueryEscape(fileName)
-		newBook.Pages.Images = append(newBook.Pages.Images, entity.ImageInfo{
+		newBook.Pages.Images = append(newBook.Pages.Images, model.ImageInfo{
 			RealImageFilePATH: absPath,
 			FileSize:          fileInfo.Size(),
 			ModeTime:          fileInfo.ModTime(),

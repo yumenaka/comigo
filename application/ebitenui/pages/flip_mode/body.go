@@ -6,7 +6,7 @@ import (
 	"github.com/ebitenui/ebitenui/image"
 	"github.com/ebitenui/ebitenui/widget"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
-	"github.com/yumenaka/comigo/entity"
+	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/util"
 	fileutil "github.com/yumenaka/comigo/util/file"
 	"image/color"
@@ -34,7 +34,7 @@ func BodyContainer() widget.PreferredSizeLocateableWidget {
 		)),
 	)
 
-	randomBook, err := entity.GetRandomBook()
+	randomBook, err := model.GetRandomBook()
 	if err != nil {
 		log.Print(err)
 	}
@@ -45,8 +45,8 @@ func BodyContainer() widget.PreferredSizeLocateableWidget {
 		println(fmt.Sprintf("GetFile: %s", i.NameInArchive))
 		option := fileutil.GetPictureDataOption{
 			PictureName:      i.NameInArchive,
-			BookIsPDF:        randomBook.Type == entity.TypePDF,
-			BookIsDir:        randomBook.Type == entity.TypeDir,
+			BookIsPDF:        randomBook.Type == model.TypePDF,
+			BookIsDir:        randomBook.Type == model.TypeDir,
 			BookIsNonUTF8Zip: randomBook.NonUTF8Zip,
 			BookFilePath:     randomBook.FilePath,
 			ResizeMaxWidth:   800,
