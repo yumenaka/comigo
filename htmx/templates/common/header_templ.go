@@ -10,7 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comigo/entity"
+	"github.com/yumenaka/comigo/model"
 )
 
 type HeaderProps struct {
@@ -23,7 +23,7 @@ type HeaderProps struct {
 	SetTheme          bool
 	FlipMode          bool
 	ShowQuickJumpBar  bool
-	QuickJumpBarBooks *entity.BookInfoList
+	QuickJumpBarBooks *model.BookInfoList
 }
 
 // 网页主题颜色的使用可以帮助你创建一个一致且视觉上吸引人的界面。以下是这些颜色的一般使用指南：

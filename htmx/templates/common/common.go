@@ -5,8 +5,8 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comigo/entity"
 	"github.com/yumenaka/comigo/htmx/state"
+	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
@@ -20,7 +20,7 @@ func GetPageTitle(bookID string) string {
 	if bookID == "" {
 		return "Comigo " + state.Global.Version
 	}
-	groupBook, err := entity.GetBookByID(bookID, "")
+	groupBook, err := model.GetBookByID(bookID, "")
 	if err != nil {
 		fmt.Printf("GetBookByID: %v", err)
 		return "Comigo " + state.Global.Version
@@ -44,7 +44,7 @@ func GetReturnUrl(BookID string) string {
 		}
 	}
 	// 如果是书籍组，就跳转到子书架
-	info, err := entity.GetBookGroupInfoByChildBookID(BookID)
+	info, err := model.GetBookGroupInfoByChildBookID(BookID)
 	if err != nil {
 		fmt.Println("ParentBookInfo not found")
 		return "/"
@@ -72,8 +72,8 @@ func AddQuery(c *gin.Context, key string, value string) string {
 	return currentUrl.String()
 }
 
-func ShowQuickJumpBar(b *entity.Book) (QuickJumpBar bool) {
-	_, err := entity.GetBookInfoListByParentFolder(b.ParentFolder, "")
+func ShowQuickJumpBar(b *model.Book) (QuickJumpBar bool) {
+	_, err := model.GetBookInfoListByParentFolder(b.ParentFolder, "")
 	if err != nil {
 		logger.Infof("%s", err)
 		return false
@@ -81,8 +81,8 @@ func ShowQuickJumpBar(b *entity.Book) (QuickJumpBar bool) {
 	return true
 }
 
-func QuickJumpBarBooks(b *entity.Book) (list *entity.BookInfoList) {
-	list, err := entity.GetBookInfoListByParentFolder(b.ParentFolder, "")
+func QuickJumpBarBooks(b *model.Book) (list *model.BookInfoList) {
+	list, err := model.GetBookInfoListByParentFolder(b.ParentFolder, "")
 	if err != nil {
 		logger.Infof("%s", err)
 		return nil

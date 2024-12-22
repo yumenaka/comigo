@@ -5,16 +5,16 @@ import (
 
 	"github.com/angelofallars/htmx-go"
 	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comigo/entity"
 	"github.com/yumenaka/comigo/htmx/state"
 	"github.com/yumenaka/comigo/htmx/templates/common"
 	"github.com/yumenaka/comigo/htmx/templates/pages/error_page"
+	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
 // Handler 阅读界面（卷轴模式）
 func Handler(c *gin.Context) {
-	entity.CheckAllBookFileExist()
+	model.CheckAllBookFileExist()
 	//// 图片重排设定，存储在 cookie 里面，默认为“default”
 	//sortPageBy, err := c.Cookie("SortPageBy")
 	//if err != nil {
@@ -35,7 +35,7 @@ func Handler(c *gin.Context) {
 		error_page.NotFound404(c, &state.Global),
 		"",
 	)
-	book, err := entity.GetBookByID(bookID, sortBy)
+	book, err := model.GetBookByID(bookID, sortBy)
 	if err != nil {
 		c.Status(http.StatusNotFound)
 		logger.Infof("GetBookByID: %v", err)

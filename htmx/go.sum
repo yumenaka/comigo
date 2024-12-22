@@ -506,6 +506,8 @@ github.com/yumenaka/archives v0.0.0-20241204225435-77ca01619006 h1:Uf+TWw0VlSlba
 github.com/yumenaka/archives v0.0.0-20241204225435-77ca01619006/go.mod h1:bpb9lIFm13ppHc7E7DUnZVepOBhlPGEd016lUVoJs4Q=
 github.com/yumenaka/comigo v0.9.13 h1:MqaOzCXQkMEJ156QbU+lqfFpXaGpL62/ei0G0rt7z70=
 github.com/yumenaka/comigo v0.9.13/go.mod h1:IAUPh2BweP15ZfbfoNA6xC/ABkNpS2Zx+WvXVJsW9wU=
+github.com/yumenaka/comigo v0.9.14-0.20241222085917-b87aebe581d9 h1:7tjEUEKM2KR4IOP5lA7R5BbX4cuLpewD/CTOMdZh/h8=
+github.com/yumenaka/comigo v0.9.14-0.20241222085917-b87aebe581d9/go.mod h1:VA85YJRZCoGeN5qYD0D39QvdV31g+GMFGZXTiz1mjQc=
 github.com/yusufpapurcu/wmi v1.2.4 h1:zFUKzehAFReQwLys1b/iSMl+JQGSCSjtVqQn9bBrPo0=
 github.com/yusufpapurcu/wmi v1.2.4/go.mod h1:SBZ9tNy3G9/m5Oi98Zks0QjeHVDvuK0qfxQmPyzfmi0=
 github.com/zclconf/go-cty v1.15.1 h1:RgQYm4j2EvoBRXOPxhUvxPzRrGDo1eCOhHXuGfrj5S0=
@@ -685,6 +687,8 @@ golang.org/x/term v0.8.0/go.mod h1:xPskH00ivmX89bAKVGSKKtLOWNx2+17Eiy94tnKShWo=
 golang.org/x/term v0.12.0/go.mod h1:owVbMEjm3cBLCHdkQu9b1opXd4ETQWc3BhuQGKgXgvU=
 golang.org/x/term v0.17.0/go.mod h1:lLRBjIVuehSbZlaOtGMbcMncT+aqLLLmKrsjNrUguwk=
 golang.org/x/term v0.20.0/go.mod h1:8UkIAJTvZgivsXaD6/pH6U9ecQzZ45awqEOzuCvwpFY=
+golang.org/x/term v0.27.0 h1:WP60Sv1nlK1T6SupCHbXzSaN0b9wUmsPoRS9b61A23Q=
+golang.org/x/term v0.27.0/go.mod h1:iMsnZpn0cago0GOrHO2+Y7u7JPn5AylBrcoWkElMTSM=
 golang.org/x/text v0.0.0-20170915032832-14c0d48ead0c/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.1-0.20180807135948-17ff2d5776d2/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
