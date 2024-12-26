@@ -16,7 +16,7 @@ func StartComigoWebserver() {
 	//解析命令，扫描文件
 	cmd.StartScan(os.Args)
 	//设置临时文件夹
-	config.SetTempDir()
+	config.AutoSetCachePath()
 	//SetWebServerPort
 	routers.SetWebServerPort()
 	//设置书籍API

@@ -18,14 +18,14 @@ var rootCmd = &cobra.Command{
 	Use:     locale.GetString("comigo_use"),
 	Short:   locale.GetString("short_description"),
 	Example: locale.GetString("comigo_example"),
-	Version: config.Version,
+	Version: config.GetVersion(),
 	Long:    locale.GetString("long_description"),
 	// 不加参数的命令。
 	Run: func(cmd *cobra.Command, args []string) {
 		//解析命令，扫描文件
 		StartScan(args)
 		//设置临时文件夹
-		config.SetTempDir()
+		config.AutoSetCachePath()
 		//SetWebServerPort
 		routers.SetWebServerPort()
 		//设置书籍API
@@ -70,14 +70,14 @@ func ReadConfigFile() {
 	runtimeViper.SetConfigName("config.toml")
 
 	//用户命令行指定的目录或文件
-	if config.Cfg.ConfigPath != "" {
+	if config.GetConfigPath() != "" {
 		//SetConfigFile 显式定义配置文件的路径、名称和扩展名。 Viper 将使用它并且不检查任何配置路径。
-		runtimeViper.SetConfigFile(config.Cfg.ConfigPath)
+		runtimeViper.SetConfigFile(config.GetConfigPath())
 	}
 
 	// 读取设定文件
 	if err := runtimeViper.ReadInConfig(); err != nil {
-		if config.Cfg.ConfigPath == "" {
+		if config.GetConfigPath() == "" {
 			logger.Infof("%s", err)
 		}
 	} else {

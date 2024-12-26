@@ -246,7 +246,7 @@ func GetServerInfo(configHost string, comigoVersion string, configPort int, conf
 	//本机首选出站IP
 	OutIP := GetOutboundIP().String()
 	host := ""
-	if configHost == "DefaultHost" {
+	if configHost == "" {
 		host = OutIP
 	} else {
 		host = configHost
@@ -265,7 +265,7 @@ func GetAllServerInfo(configHost string, comigoVersion string, configPort int, c
 	serverName := "Comigo " + comigoVersion
 	//本机首选出站IP
 	host := ""
-	if configHost == "DefaultHost" {
+	if configHost == "" {
 		host = GetOutboundIP().String()
 	} else {
 		host = configHost

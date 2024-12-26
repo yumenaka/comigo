@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-
 	"net/http"
 	"os"
 	"path"
@@ -14,10 +13,7 @@ import (
 	"github.com/yumenaka/comigo/util/logger"
 )
 
-var (
-	Version = "v0.9.13"
-	Srv     *http.Server
-)
+var Srv *http.Server
 
 // UpdateLocalConfig 如果存在本地配置，更新本地配置
 func UpdateLocalConfig() error {
@@ -140,7 +136,7 @@ func GetQrcodeURL() string {
 	}
 	//取得本机的首选出站IP
 	OutIP := util.GetOutboundIP().String()
-	if Cfg.Host == "DefaultHost" {
+	if Cfg.Host == "" {
 		return protocol + OutIP + ":" + strconv.Itoa(Cfg.Port)
 	}
 	return protocol + Cfg.Host + ":" + strconv.Itoa(Cfg.Port)

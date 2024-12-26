@@ -21,7 +21,7 @@ func startEngine(engine *gin.Engine) {
 	//是否启用TLS
 	enableTls := config.Cfg.CertFile != "" && config.Cfg.KeyFile != ""
 	config.Srv = &http.Server{
-		Addr:    webHost + strconv.Itoa(config.Cfg.Port),
+		Addr:    webHost + strconv.Itoa(config.GetPort()),
 		Handler: engine, //gin.Engine本身可以作为一个Handler传递到http包,用于启动服务器
 	}
 	//在 goroutine 中初始化服务器，这样它就不会阻塞关闭处理

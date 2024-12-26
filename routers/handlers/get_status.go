@@ -23,11 +23,11 @@ type ServerStatus struct {
 }
 
 func GetServerInfoHandler(c *gin.Context) {
-	serverStatus := util.GetServerInfo(config.Cfg.Host, config.Version, config.Cfg.Port, config.Cfg.EnableUpload, model.GetBooksNumber())
+	serverStatus := util.GetServerInfo(config.Cfg.Host, config.GetVersion(), config.GetPort(), config.Cfg.EnableUpload, model.GetBooksNumber())
 	c.PureJSON(http.StatusOK, serverStatus)
 }
 
 func GetAllServerInfoHandler(c *gin.Context) {
-	serverStatus := util.GetAllServerInfo(config.Cfg.Host, config.Version, config.Cfg.Port, config.Cfg.EnableUpload, model.GetBooksNumber(), c.ClientIP())
+	serverStatus := util.GetAllServerInfo(config.Cfg.Host, config.GetVersion(), config.GetPort(), config.Cfg.EnableUpload, model.GetBooksNumber(), c.ClientIP())
 	c.PureJSON(http.StatusOK, serverStatus)
 }
