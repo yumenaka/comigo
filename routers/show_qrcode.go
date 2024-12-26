@@ -2,8 +2,6 @@ package routers
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/sanity-io/litter"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
@@ -22,22 +20,18 @@ func showQRCode() {
 			return
 		}
 		if len(bookList.BookInfos) == 1 {
-			mode := "scroll"
-			if config.Cfg.DefaultMode != "" {
-				mode = strings.ToLower(config.Cfg.DefaultMode)
-			}
-			etcStr = fmt.Sprintf("/#/%s/%s", mode, bookList.BookInfos[0].BookID)
+			etcStr = fmt.Sprintf("/#/%s/%s", config.GetDefaultMode(), bookList.BookInfos[0].BookID)
 		}
 	}
 
 	enableTLS := config.Cfg.CertFile != "" && config.Cfg.KeyFile != ""
-	outIP := config.Cfg.Host
-	if config.Cfg.Host == "DefaultHost" {
+	outIP := config.GetHost()
+	if config.GetHost() == "" {
 		outIP = util.GetOutboundIP().String()
 	}
 
 	util.PrintAllReaderURL(
-		config.Cfg.Port,
+		config.GetPort(),
 		config.Cfg.OpenBrowser,
 		config.Cfg.PrintAllPossibleQRCode,
 		outIP,

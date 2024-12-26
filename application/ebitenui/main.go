@@ -46,7 +46,7 @@ func main() {
 	config.Cfg.OpenBrowser = false
 	config.Cfg.UseCache = true
 	config.Cfg.ClearCacheExit = false
-	readerConfig.SetTitle("Comigo "+config.Version).
+	readerConfig.SetTitle("Comigo "+config.GetVersion()).
 		// 阅读器模式。
 		SetReaderMode(model.ScrollMode).
 		// 窗口是否全屏。

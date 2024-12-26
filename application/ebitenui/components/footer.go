@@ -41,7 +41,7 @@ func FooterContainer() widget.PreferredSizeLocateableWidget {
 		widget.ContainerOpts.Layout(widget.NewAnchorLayout()),
 	)
 	footerText := widget.NewText(
-		widget.TextOpts.Text("Power by Comigo "+config.Version, fontFace, textColor),
+		widget.TextOpts.Text("Power by Comigo "+config.GetVersion(), fontFace, textColor),
 		// WidgetOpts 用于设置小部件的各种属性。这里用来设置文本的锚点布局。
 		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
 			// 指定网格单元内的水平锚定位置。
