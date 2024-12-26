@@ -26,9 +26,9 @@ func SetShutdownHandler() {
 	stop()
 	log.Println(locale.GetString("shutdown_hint"))
 	//清理临时文件
-	if config.Config.ClearCacheExit {
-		logger.Infof("\r"+locale.GetString("start_clear_file")+" CachePath:%s ", config.Config.CachePath)
-		model.ClearTempFilesALL(config.Config.Debug, config.Config.CachePath)
+	if config.Cfg.ClearCacheExit {
+		logger.Infof("\r"+locale.GetString("start_clear_file")+" CachePath:%s ", config.Cfg.CachePath)
+		model.ClearTempFilesALL(config.Cfg.Debug, config.Cfg.CachePath)
 		logger.Infof("%s", locale.GetString("clear_temp_file_completed"))
 	}
 	// 上下文用于通知服务器它有 5 秒的时间来完成它当前正在处理的请求

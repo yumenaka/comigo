@@ -9,10 +9,10 @@ import (
 
 // GetConfigStatus 获取json格式的当前配置
 func GetConfigStatus(c *gin.Context) {
-	err := config.Status.SetConfigStatus()
+	err := config.CfgStatus.SetConfigStatus()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get config"})
 		return
 	}
-	c.IndentedJSON(http.StatusOK, config.Status)
+	c.IndentedJSON(http.StatusOK, config.CfgStatus)
 }

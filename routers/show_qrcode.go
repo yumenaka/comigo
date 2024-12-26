@@ -23,32 +23,32 @@ func showQRCode() {
 		}
 		if len(bookList.BookInfos) == 1 {
 			mode := "scroll"
-			if config.Config.DefaultMode != "" {
-				mode = strings.ToLower(config.Config.DefaultMode)
+			if config.Cfg.DefaultMode != "" {
+				mode = strings.ToLower(config.Cfg.DefaultMode)
 			}
 			etcStr = fmt.Sprintf("/#/%s/%s", mode, bookList.BookInfos[0].BookID)
 		}
 	}
 
-	enableTLS := config.Config.CertFile != "" && config.Config.KeyFile != ""
-	outIP := config.Config.Host
-	if config.Config.Host == "DefaultHost" {
+	enableTLS := config.Cfg.CertFile != "" && config.Cfg.KeyFile != ""
+	outIP := config.Cfg.Host
+	if config.Cfg.Host == "DefaultHost" {
 		outIP = util.GetOutboundIP().String()
 	}
 
 	util.PrintAllReaderURL(
-		config.Config.Port,
-		config.Config.OpenBrowser,
-		config.Config.PrintAllPossibleQRCode,
+		config.Cfg.Port,
+		config.Cfg.OpenBrowser,
+		config.Cfg.PrintAllPossibleQRCode,
 		outIP,
-		config.Config.DisableLAN,
+		config.Cfg.DisableLAN,
 		enableTLS,
 		etcStr,
 	)
 
 	// 打印配置，调试用
-	if config.Config.Debug {
-		litter.Dump(config.Config)
+	if config.Cfg.Debug {
+		litter.Dump(config.Cfg)
 	}
 
 	fmt.Println(locale.GetString("ctrl_c_hint"))

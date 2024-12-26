@@ -15,13 +15,13 @@ import (
 func startEngine(engine *gin.Engine) {
 	//是否对外服务
 	webHost := ":"
-	if config.Config.DisableLAN {
+	if config.Cfg.DisableLAN {
 		webHost = "localhost:"
 	}
 	//是否启用TLS
-	enableTls := config.Config.CertFile != "" && config.Config.KeyFile != ""
+	enableTls := config.Cfg.CertFile != "" && config.Cfg.KeyFile != ""
 	config.Srv = &http.Server{
-		Addr:    webHost + strconv.Itoa(config.Config.Port),
+		Addr:    webHost + strconv.Itoa(config.Cfg.Port),
 		Handler: engine, //gin.Engine本身可以作为一个Handler传递到http包,用于启动服务器
 	}
 	//在 goroutine 中初始化服务器，这样它就不会阻塞关闭处理
@@ -29,7 +29,7 @@ func startEngine(engine *gin.Engine) {
 	go func() {
 		// 监听并启动服务(TLS)
 		if enableTls {
-			if err := config.Srv.ListenAndServeTLS(config.Config.CertFile, config.Config.KeyFile); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			if err := config.Srv.ListenAndServeTLS(config.Cfg.CertFile, config.Cfg.KeyFile); err != nil && !errors.Is(err, http.ErrServerClosed) {
 				time.Sleep(3 * time.Second)
 				log.Fatalf("listen: %s\n", err)
 			}

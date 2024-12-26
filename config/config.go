@@ -1,94 +1,19 @@
-package model
+package config
 
+import "C"
 import (
 	"encoding/json"
-	"errors"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
 
 	"github.com/yumenaka/comigo/config/stores"
-	"github.com/yumenaka/comigo/util"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
-type ConfigStatus struct {
-	// 当前生效的配置文件路径 None、HomeDirectory、WorkingDirectory、ProgramDirectory
-	// 设置读取顺序：None（默认值） -> HomeDirectory -> ProgramDirectory -> WorkingDirectory
-	In   string
-	Path struct {
-		// 对应配置文件的绝对路径
-		WorkingDirectory string
-		HomeDirectory    string
-		ProgramDirectory string
-	}
-}
-
-func (c *ConfigStatus) SetConfigStatus() error {
-	logger.Info("Checking Config ShareName")
-
-	// 初始化
-	c.In = "None"
-	c.Path.WorkingDirectory = ""
-	c.Path.HomeDirectory = ""
-	c.Path.ProgramDirectory = ""
-
-	// 配置文件搜索路径及顺序
-	type configPath struct {
-		name string
-		path string
-	}
-	var configPaths []configPath
-
-	// 获取可执行文件所在目录
-	executablePath, err := os.Executable()
-	if err != nil {
-		return errors.New("error: failed to find executable path")
-	}
-	programDir := path.Dir(executablePath)
-
-	// 获取用户主目录
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		return errors.New("error: failed to find home directory")
-	}
-
-	// 添加搜索路径
-	configPaths = append(configPaths, configPath{
-		name: "HomeDirectory",
-		path: util.GetAbsPath(path.Join(homeDir, ".config/comigo/config.toml")),
-	})
-	configPaths = append(configPaths, configPath{
-		name: "ProgramDirectory",
-		path: util.GetAbsPath(path.Join(programDir, "config.toml")),
-	})
-	configPaths = append(configPaths, configPath{
-		name: "WorkingDirectory",
-		path: util.GetAbsPath("config.toml"),
-	})
-
-	// 按顺序检查配置文件是否存在
-	for _, cp := range configPaths {
-		if util.IsExist(cp.path) {
-			switch cp.name {
-			case "HomeDirectory":
-				c.Path.HomeDirectory = cp.path
-			case "ProgramDirectory":
-				c.Path.ProgramDirectory = cp.path
-			case "WorkingDirectory":
-				c.Path.WorkingDirectory = cp.path
-			}
-			c.In = cp.name
-			return nil
-		}
-	}
-	return nil
-}
-
-type UploadDirOption int
-
-type ComigoConfig struct {
+// Config Comigo全局配置
+type Config struct {
 	//AutoRescan             bool            `json:"AutoRescan" comment:"刷新页面时，是否自动重新扫描"`
 	CachePath              string          `json:"CachePath" comment:"本地图片缓存位置，默认系统临时文件夹"`
 	CertFile               string          `json:"CertFile" comment:"TLS/SSL 证书文件路径 (default: ~/.config/.comigo/cert.crt)"`
@@ -129,8 +54,24 @@ type ComigoConfig struct {
 	ZipFileTextEncoding    string          `json:"ZipFileTextEncoding" comment:"非utf-8编码的ZIP文件，尝试用什么编码解析，默认GBK"`
 }
 
+func GetCachePath() string {
+	return Cfg.CachePath
+}
+
+func GetCertFile() string {
+	return Cfg.CertFile
+}
+
+func GetConfigPath() string {
+	return Cfg.ConfigPath
+}
+
+func GetKeyFile() string {
+	return Cfg.KeyFile
+}
+
 // CheckLocalStores 检查本地书库路径是否已存在
-func (c *ComigoConfig) CheckLocalStores(path string) bool {
+func (c *Config) CheckLocalStores(path string) bool {
 	for _, store := range c.Stores {
 		if store.Type == stores.Local && store.Local.Path == path {
 			return true
@@ -140,7 +81,7 @@ func (c *ComigoConfig) CheckLocalStores(path string) bool {
 }
 
 // AddLocalStore 添加本地书库(单个路径)
-func (c *ComigoConfig) AddLocalStore(path string) {
+func (c *Config) AddLocalStore(path string) {
 	if c.CheckLocalStores(path) {
 		return
 	}
@@ -154,7 +95,7 @@ func (c *ComigoConfig) AddLocalStore(path string) {
 }
 
 // AddLocalStores 添加本地书库（多个路径）
-func (c *ComigoConfig) AddLocalStores(path []string) {
+func (c *Config) AddLocalStores(path []string) {
 	for _, p := range path {
 		if !c.CheckLocalStores(p) {
 			c.AddLocalStore(p)
@@ -163,7 +104,7 @@ func (c *ComigoConfig) AddLocalStores(path []string) {
 }
 
 // ReplaceLocalStores 替换现有的“本地”类型的书库，保留其他类型的书库
-func (c *ComigoConfig) ReplaceLocalStores(pathList []string) {
+func (c *Config) ReplaceLocalStores(pathList []string) {
 	var newStores []stores.Store
 	for _, store := range c.Stores {
 		if store.Type != stores.Local {
@@ -176,7 +117,7 @@ func (c *ComigoConfig) ReplaceLocalStores(pathList []string) {
 }
 
 // LocalStoresList 获取本地书库列表
-func (c *ComigoConfig) LocalStoresList() []string {
+func (c *Config) LocalStoresList() []string {
 	var localStoresList []string
 	for _, store := range c.Stores {
 		if store.Type == stores.Local {
@@ -187,7 +128,7 @@ func (c *ComigoConfig) LocalStoresList() []string {
 }
 
 // UpdateConfig 更新配置。 使用 JSON 反序列化将更新的配置解析为映射，遍历映射并更新配置，减少重复的代码。
-func UpdateConfig(config *ComigoConfig, jsonString string) (*ComigoConfig, error) {
+func UpdateConfig(config *Config, jsonString string) (*Config, error) {
 	oldConfig := *config
 	var updates map[string]interface{}
 	if err := json.Unmarshal([]byte(jsonString), &updates); err != nil {
@@ -358,7 +299,7 @@ type WebPServerConfig struct {
 }
 
 // SetByExecutableFilename 通过执行文件名设置默认网页模板参数
-func (c *ComigoConfig) SetByExecutableFilename() {
+func (c *Config) SetByExecutableFilename() {
 	// 获取可执行文件的名称
 	filenameWithSuffix := path.Base(os.Args[0])
 	fileSuffix := path.Ext(filenameWithSuffix)
@@ -376,4 +317,43 @@ func (c *ComigoConfig) SetByExecutableFilename() {
 		logger.Infof("Executable Name: %s", filenameWithoutSuffix)
 		logger.Infof("Executable Path: %s", executableDir)
 	}
+}
+
+var Cfg = Config{
+	Port: 1234,
+	Host: "DefaultHost",
+	Stores: []stores.Store{
+		{
+			Type: stores.SMB,
+			Smb: stores.SMBOption{
+				Host:      os.Getenv("SMB_HOST"),
+				Port:      445,
+				Username:  os.Getenv("SMB_USER"),
+				Password:  os.Getenv("SMB_PASS"),
+				ShareName: os.Getenv("SMB_PATH"),
+			},
+		},
+	},
+	SupportFileType:       []string{".zip", ".tar", ".rar", ".cbr", ".cbz", ".epub", ".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".tar.xz", ".txz", ".tar.lz4", ".tlz4", ".tar.sz", ".tsz", ".bz2", ".gz", ".lz4", ".sz", ".xz", ".mp4", ".webm", ".pdf", ".m4v", ".flv", ".avi", ".mp3", ".wav", ".wma", ".ogg"},
+	SupportMediaType:      []string{".jpg", ".jpeg", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".gif", ".apng", ".bmp", ".webp", ".ico", ".heic", ".heif", ".avif"},
+	SupportTemplateFile:   []string{".html"},
+	ExcludePath:           []string{".comigo", ".idea", ".vscode", ".git", "node_modules", "flutter_ui", "$RECYCLE.BIN", "System Volume Information", ".cache"},
+	MaxScanDepth:          4,
+	MinImageNum:           3,
+	ZipFileTextEncoding:   "",
+	OpenBrowser:           true,
+	UseCache:              true,
+	CachePath:             "",
+	ClearCacheExit:        true,
+	UploadPath:            "",
+	EnableUpload:          true,
+	EnableDatabase:        false,
+	ClearDatabaseWhenExit: true,
+	EnableTLS:             false,
+	Username:              "comigo",
+	Password:              "",
+	DisableLAN:            false,
+	DefaultMode:           "scroll",
+	LogToFile:             false,
+	ConfigPath:            "",
 }

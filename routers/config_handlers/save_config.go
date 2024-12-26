@@ -18,19 +18,19 @@ func SaveConfigHandler(c *gin.Context) {
 		return
 	}
 	//如果其他目录有配置文件，就不能保存（暂不支持多配置文件）
-	if SaveTo == "WorkingDirectory" && (config.Status.Path.HomeDirectory != "" || config.Status.Path.ProgramDirectory != "") {
-		logger.Infof("error: Find config in %s %s", config.Status.Path.HomeDirectory, config.Status.Path.ProgramDirectory)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "error: Find config in " + config.Status.Path.HomeDirectory + " " + config.Status.Path.ProgramDirectory})
+	if SaveTo == "WorkingDirectory" && (config.CfgStatus.Path.HomeDirectory != "" || config.CfgStatus.Path.ProgramDirectory != "") {
+		logger.Infof("error: Find config in %s %s", config.CfgStatus.Path.HomeDirectory, config.CfgStatus.Path.ProgramDirectory)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "error: Find config in " + config.CfgStatus.Path.HomeDirectory + " " + config.CfgStatus.Path.ProgramDirectory})
 		return
 	}
-	if SaveTo == "HomeDirectory" && (config.Status.Path.WorkingDirectory != "" || config.Status.Path.ProgramDirectory != "") {
-		logger.Infof("error: Find config in  %s %s", config.Status.Path.WorkingDirectory, config.Status.Path.ProgramDirectory)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "error: Find config in " + config.Status.Path.WorkingDirectory + " " + config.Status.Path.ProgramDirectory})
+	if SaveTo == "HomeDirectory" && (config.CfgStatus.Path.WorkingDirectory != "" || config.CfgStatus.Path.ProgramDirectory != "") {
+		logger.Infof("error: Find config in  %s %s", config.CfgStatus.Path.WorkingDirectory, config.CfgStatus.Path.ProgramDirectory)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "error: Find config in " + config.CfgStatus.Path.WorkingDirectory + " " + config.CfgStatus.Path.ProgramDirectory})
 		return
 	}
-	if SaveTo == "ProgramDirectory" && (config.Status.Path.WorkingDirectory != "" || config.Status.Path.HomeDirectory != "") {
-		logger.Infof("error: Find config in  %s %s", config.Status.Path.WorkingDirectory, config.Status.Path.HomeDirectory)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "error: Find config in " + config.Status.Path.WorkingDirectory + " " + config.Status.Path.HomeDirectory})
+	if SaveTo == "ProgramDirectory" && (config.CfgStatus.Path.WorkingDirectory != "" || config.CfgStatus.Path.HomeDirectory != "") {
+		logger.Infof("error: Find config in  %s %s", config.CfgStatus.Path.WorkingDirectory, config.CfgStatus.Path.HomeDirectory)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "error: Find config in " + config.CfgStatus.Path.WorkingDirectory + " " + config.CfgStatus.Path.HomeDirectory})
 		return
 	}
 	//保存配置
