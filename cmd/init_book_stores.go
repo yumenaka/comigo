@@ -14,7 +14,7 @@ import (
 // StartScan 解析命令,扫描书库
 func StartScan(args []string) {
 	//1. 初始化数据库
-	if config.Config.EnableDatabase {
+	if config.Cfg.EnableDatabase {
 		// 从数据库中读取书籍信息并持久化
 		if err := database.InitDatabase(viper.ConfigFileUsed()); err != nil {
 			logger.Infof("%s", err)
@@ -33,32 +33,33 @@ func StartScan(args []string) {
 	//3、扫描配置文件里面的书库路径
 	option := scan.NewScanOption(
 		true,
-		config.Config.LocalStoresList(),
-		config.Config.Stores,
-		config.Config.MaxScanDepth,
-		config.Config.MinImageNum,
-		config.Config.TimeoutLimitForScan,
-		config.Config.ExcludePath,
-		config.Config.SupportMediaType,
-		config.Config.SupportFileType,
-		config.Config.SupportTemplateFile,
-		config.Config.ZipFileTextEncoding,
-		config.Config.EnableDatabase,
-		config.Config.ClearDatabaseWhenExit,
-		config.Config.Debug,
+		config.Cfg.LocalStoresList(),
+		config.Cfg.Stores,
+
+		config.Cfg.MaxScanDepth,
+		config.Cfg.MinImageNum,
+		config.Cfg.TimeoutLimitForScan,
+		config.Cfg.ExcludePath,
+		config.Cfg.SupportMediaType,
+		config.Cfg.SupportFileType,
+		config.Cfg.SupportTemplateFile,
+		config.Cfg.ZipFileTextEncoding,
+		config.Cfg.EnableDatabase,
+		config.Cfg.ClearDatabaseWhenExit,
+		config.Cfg.Debug,
 	)
 	err := scan.InitStore(option)
 	if err != nil {
 		logger.Infof("Failed to scan store path: %v", err)
 	}
 	//4、保存扫描结果到数据库
-	if config.Config.EnableDatabase {
-		err = scan.SaveResultsToDatabase(viper.ConfigFileUsed(), config.Config.ClearDatabaseWhenExit)
+	if config.Cfg.EnableDatabase {
+		err = scan.SaveResultsToDatabase(viper.ConfigFileUsed(), config.Cfg.ClearDatabaseWhenExit)
 		if err != nil {
 			logger.Infof("Failed SaveResultsToDatabase: %v", err)
 			return
 		}
 	}
 	//5、通过“可执行文件名”设置部分默认参数,目前不生效
-	config.Config.SetByExecutableFilename()
+	config.Cfg.SetByExecutableFilename()
 }

@@ -70,14 +70,14 @@ func ReadConfigFile() {
 	runtimeViper.SetConfigName("config.toml")
 
 	//用户命令行指定的目录或文件
-	if config.Config.ConfigPath != "" {
+	if config.Cfg.ConfigPath != "" {
 		//SetConfigFile 显式定义配置文件的路径、名称和扩展名。 Viper 将使用它并且不检查任何配置路径。
-		runtimeViper.SetConfigFile(config.Config.ConfigPath)
+		runtimeViper.SetConfigFile(config.Cfg.ConfigPath)
 	}
 
 	// 读取设定文件
 	if err := runtimeViper.ReadInConfig(); err != nil {
-		if config.Config.ConfigPath == "" {
+		if config.Cfg.ConfigPath == "" {
 			logger.Infof("%s", err)
 		}
 	} else {
@@ -87,7 +87,7 @@ func ReadConfigFile() {
 		logger.Infof(locale.GetString("found_config_file")+"%s", tempConfigPath)
 	}
 	// 把设定文件的内容，解析到构造体里面。
-	if err := runtimeViper.Unmarshal(&config.Config); err != nil {
+	if err := runtimeViper.Unmarshal(&config.Cfg); err != nil {
 		logger.Infof("%s", err)
 		os.Exit(1)
 	}

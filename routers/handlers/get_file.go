@@ -54,7 +54,7 @@ func GetFile(c *gin.Context) {
 	gray := getBoolQueryParam(c, "gray", false)
 
 	// 如果启用了本地缓存
-	if config.Config.UseCache && !noCache {
+	if config.Cfg.UseCache && !noCache {
 		// 获取所有的参数键值对
 		query := c.Request.URL.Query()
 		// 如果有缓存，直接读取本地获取缓存文件并返回
@@ -63,8 +63,8 @@ func GetFile(c *gin.Context) {
 			needFile,
 			fileutil.GetQueryString(query),
 			thumbnailMode,
-			config.Config.CachePath,
-			config.Config.Debug,
+			config.Cfg.CachePath,
+			config.Cfg.Debug,
 		)
 		if err == nil && cacheData != nil {
 			if base64Encode {
@@ -89,8 +89,8 @@ func GetFile(c *gin.Context) {
 		BookIsDir:        bookByID.Type == model.TypeDir,
 		BookIsNonUTF8Zip: bookByID.NonUTF8Zip,
 		BookFilePath:     bookByID.FilePath,
-		Debug:            config.Config.Debug,
-		UseCache:         config.Config.UseCache,
+		Debug:            config.Cfg.Debug,
+		UseCache:         config.Cfg.UseCache,
 		ResizeWidth:      resizeWidth,
 		ResizeHeight:     resizeHeight,
 		ResizeMaxWidth:   resizeMaxWidth,
@@ -109,7 +109,7 @@ func GetFile(c *gin.Context) {
 		return
 	}
 	// 缓存文件到本地，避免重复解压。如果书中的图片，来自本地目录，就不需要缓存。
-	if config.Config.UseCache && !noCache && bookByID.Type != model.TypeDir {
+	if config.Cfg.UseCache && !noCache && bookByID.Type != model.TypeDir {
 		// 获取所有的参数键值对
 		query := c.Request.URL.Query()
 		errSave := fileutil.SaveFileToCache(
@@ -119,8 +119,8 @@ func GetFile(c *gin.Context) {
 			fileutil.GetQueryString(query),
 			contentType,
 			thumbnailMode,
-			config.Config.CachePath,
-			config.Config.Debug,
+			config.Cfg.CachePath,
+			config.Cfg.Debug,
 		)
 		if errSave != nil {
 			logger.Infof("SaveFileToCache error: %s", errSave)

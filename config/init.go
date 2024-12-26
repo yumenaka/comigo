@@ -14,21 +14,21 @@ func init() {
 	if err != nil {
 		logger.Infof("%s", err)
 	}
-	Config.LogFilePath = home
-	Config.LogFileName = "comigo.log"
+	Cfg.LogFilePath = home
+	Cfg.LogFileName = "comigo.log"
 }
 
 // smb配置（TODO:SMB支持）
 func init() {
 	err := godotenv.Load()
 	if err != nil {
-		if Config.Debug {
+		if Cfg.Debug {
 			logger.Infof("Not found .env file")
 		}
 	}
-	Config.Stores[0].Smb.Host = os.Getenv("SMB_HOST")
-	Config.Stores[0].Smb.Username = os.Getenv("SMB_USER")
-	Config.Stores[0].Smb.Password = os.Getenv("SMB_PASS")
-	Config.Stores[0].Smb.ShareName = os.Getenv("SMB_SHARE_NAME")
-	Config.Stores[0].Smb.Path = os.Getenv("SMB_PATH")
+	Cfg.Stores[0].Smb.Host = os.Getenv("SMB_HOST")
+	Cfg.Stores[0].Smb.Username = os.Getenv("SMB_USER")
+	Cfg.Stores[0].Smb.Password = os.Getenv("SMB_PASS")
+	Cfg.Stores[0].Smb.ShareName = os.Getenv("SMB_SHARE_NAME")
+	Cfg.Stores[0].Smb.Path = os.Getenv("SMB_PATH")
 }

@@ -43,9 +43,9 @@ func main() {
 
 	// 创建一个新的 ReaderConfig 对象，用于配置阅读器的设置。
 	readerConfig := model.NewReaderConfig()
-	config.Config.OpenBrowser = false
-	config.Config.UseCache = true
-	config.Config.ClearCacheExit = false
+	config.Cfg.OpenBrowser = false
+	config.Cfg.UseCache = true
+	config.Cfg.ClearCacheExit = false
 	readerConfig.SetTitle("Comigo "+config.Version).
 		// 阅读器模式。
 		SetReaderMode(model.ScrollMode).

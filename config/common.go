@@ -10,8 +10,6 @@ import (
 	"strconv"
 
 	"github.com/pelletier/go-toml/v2"
-	"github.com/yumenaka/comigo/config/stores"
-	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/util"
 	"github.com/yumenaka/comigo/util/logger"
 )
@@ -19,56 +17,11 @@ import (
 var (
 	Version = "v0.9.13"
 	Srv     *http.Server
-	Status  = model.ConfigStatus{}
-	Config  = model.ComigoConfig{
-		Port: 1234,
-		Host: "DefaultHost",
-		Stores: []stores.Store{
-			{
-				Type: stores.SMB,
-				Smb: stores.SMBOption{
-					Host:      os.Getenv("SMB_HOST"),
-					Port:      445,
-					Username:  os.Getenv("SMB_USER"),
-					Password:  os.Getenv("SMB_PASS"),
-					ShareName: os.Getenv("SMB_PATH"),
-				},
-			},
-		},
-		SupportFileType:       []string{".zip", ".tar", ".rar", ".cbr", ".cbz", ".epub", ".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".tar.xz", ".txz", ".tar.lz4", ".tlz4", ".tar.sz", ".tsz", ".bz2", ".gz", ".lz4", ".sz", ".xz", ".mp4", ".webm", ".pdf", ".m4v", ".flv", ".avi", ".mp3", ".wav", ".wma", ".ogg"},
-		SupportMediaType:      []string{".jpg", ".jpeg", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".gif", ".apng", ".bmp", ".webp", ".ico", ".heic", ".heif", ".avif"},
-		SupportTemplateFile:   []string{".html"},
-		ExcludePath:           []string{".comigo", ".idea", ".vscode", ".git", "node_modules", "flutter_ui", "$RECYCLE.BIN", "System Volume Information", ".cache"},
-		MaxScanDepth:          4,
-		MinImageNum:           3,
-		ZipFileTextEncoding:   "",
-		OpenBrowser:           true,
-		UseCache:              true,
-		CachePath:             "",
-		ClearCacheExit:        true,
-		UploadPath:            "",
-		EnableUpload:          true,
-		EnableDatabase:        false,
-		ClearDatabaseWhenExit: true,
-		EnableTLS:             false,
-		Username:              "comigo",
-		Password:              "",
-		DisableLAN:            false,
-		DefaultMode:           "scroll",
-		LogToFile:             false,
-		ConfigPath:            "",
-	}
-)
-
-const (
-	HomeDirectory    = "HomeDirectory"
-	WorkingDirectory = "WorkingDirectory"
-	ProgramDirectory = "ProgramDirectory"
 )
 
 // UpdateLocalConfig 如果存在本地配置，更新本地配置
 func UpdateLocalConfig() error {
-	bytes, err := toml.Marshal(Config)
+	bytes, err := toml.Marshal(Cfg)
 	if err != nil {
 		return err
 	}
@@ -109,13 +62,19 @@ func UpdateLocalConfig() error {
 	return nil
 }
 
+const (
+	HomeDirectory    = "HomeDirectory"
+	WorkingDirectory = "WorkingDirectory"
+	ProgramDirectory = "ProgramDirectory"
+)
+
 func SaveConfig(to string) error {
 	//保存配置
-	bytes, errMarshal := toml.Marshal(Config)
+	bytes, errMarshal := toml.Marshal(Cfg)
 	if errMarshal != nil {
 		return errMarshal
 	}
-	logger.Infof("Config Save To %s", to)
+	logger.Infof("Cfg Save To %s", to)
 	switch to {
 	case HomeDirectory:
 		home, err := os.UserHomeDir()
@@ -152,7 +111,7 @@ func SaveConfig(to string) error {
 }
 
 func DeleteConfigIn(in string) error {
-	logger.Infof("Delete Config in %s", in)
+	logger.Infof("Delete Cfg in %s", in)
 	var configFile string
 	switch in {
 	case HomeDirectory:
@@ -174,15 +133,15 @@ func DeleteConfigIn(in string) error {
 }
 
 func GetQrcodeURL() string {
-	enableTLS := Config.CertFile != "" && Config.KeyFile != ""
+	enableTLS := Cfg.CertFile != "" && Cfg.KeyFile != ""
 	protocol := "http://"
 	if enableTLS {
 		protocol = "https://"
 	}
 	//取得本机的首选出站IP
 	OutIP := util.GetOutboundIP().String()
-	if Config.Host == "DefaultHost" {
-		return protocol + OutIP + ":" + strconv.Itoa(Config.Port)
+	if Cfg.Host == "DefaultHost" {
+		return protocol + OutIP + ":" + strconv.Itoa(Cfg.Port)
 	}
-	return protocol + Config.Host + ":" + strconv.Itoa(Config.Port)
+	return protocol + Cfg.Host + ":" + strconv.Itoa(Cfg.Port)
 }

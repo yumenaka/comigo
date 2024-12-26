@@ -12,7 +12,7 @@ import (
 // GetConfig 获取json格式的当前配置
 func GetConfig(c *gin.Context) {
 	//golang结构体默认深拷贝（但是基本类型浅拷贝）
-	tempConfig := config.Config
+	tempConfig := config.Cfg
 	// c.Context.JSON()将给定结构序列化为 JSON 到响应正文中。它还将 Content-Type 设置为“application/json”。
 	//c.IndentedJSON 打印格式化后的 JSON 会消耗更多的 CPU 和带宽。
 	c.JSON(http.StatusOK, tempConfig)
@@ -21,10 +21,10 @@ func GetConfig(c *gin.Context) {
 // GetConfigToml 下载服务器配置(toml)
 func GetConfigToml(c *gin.Context) {
 	//golang结构体默认深拷贝（但是基本类型浅拷贝）
-	tempConfig := config.Config
+	tempConfig := config.Cfg
 	tempConfig.LogFilePath = ""
-	config.Config.OpenBrowser = false
-	config.Config.EnableDatabase = true
+	config.Cfg.OpenBrowser = false
+	config.Cfg.EnableDatabase = true
 	tempConfig.ReplaceLocalStores([]string{"C:\\test\\Comic", "D:\\some_path\\book", "/home/user/download"})
 	tempConfig.Username = "comigo"
 	tempConfig.Password = ""
