@@ -53,23 +53,22 @@ type Config struct {
 	ZipFileTextEncoding    string          `json:"ZipFileTextEncoding" comment:"非utf-8编码的ZIP文件，尝试用什么编码解析，默认GBK"`
 }
 
-// UpdateConfig 更新配置。 使用 JSON 反序列化将更新的配置解析为映射，遍历映射并更新配置，减少重复的代码。
-func UpdateConfig(config *Config, jsonString string) (*Config, error) {
-	oldConfig := *config
+// UpdateConfigByJson 使用 JSON 字符串反序列化将更新的配置解析为映射，遍历映射并更新配置，减少重复的代码。
+func UpdateConfigByJson(jsonString string) error {
 	var updates map[string]interface{}
 	if err := json.Unmarshal([]byte(jsonString), &updates); err != nil {
 		logger.Infof("Failed to unmarshal JSON: %v", err)
-		return &oldConfig, err
+		return err
 	}
 	for key, value := range updates {
 		switch key {
 		case "Port":
 			if v, ok := value.(float64); ok {
-				config.Port = int(v)
+				cfg.Port = int(v)
 			}
 		case "Host":
 			if v, ok := value.(string); ok {
-				config.Host = v
+				cfg.Host = v
 			}
 		case "LocalStores":
 			if v, ok := value.([]interface{}); ok {
@@ -83,59 +82,59 @@ func UpdateConfig(config *Config, jsonString string) (*Config, error) {
 			}
 		case "UseCache":
 			if v, ok := value.(bool); ok {
-				config.UseCache = v
+				cfg.UseCache = v
 			}
 		case "CachePath":
 			if v, ok := value.(string); ok {
-				config.CachePath = v
+				cfg.CachePath = v
 			}
 		case "ClearCacheExit":
 			if v, ok := value.(bool); ok {
-				config.ClearCacheExit = v
+				cfg.ClearCacheExit = v
 			}
 		case "UploadPath":
 			if v, ok := value.(string); ok {
-				config.UploadPath = v
+				cfg.UploadPath = v
 			}
 		case "EnableUpload":
 			if v, ok := value.(bool); ok {
-				config.EnableUpload = v
+				cfg.EnableUpload = v
 			}
 		case "EnableDatabase":
 			if v, ok := value.(bool); ok {
-				config.EnableDatabase = v
+				cfg.EnableDatabase = v
 			}
 		case "ClearDatabaseWhenExit":
 			if v, ok := value.(bool); ok {
-				config.ClearDatabaseWhenExit = v
+				cfg.ClearDatabaseWhenExit = v
 			}
 		case "OpenBrowser":
 			if v, ok := value.(bool); ok {
-				config.OpenBrowser = v
+				cfg.OpenBrowser = v
 			}
 		case "DisableLAN":
 			if v, ok := value.(bool); ok {
-				config.DisableLAN = v
+				cfg.DisableLAN = v
 			}
 		case "DefaultMode":
 			if v, ok := value.(string); ok {
-				config.DefaultMode = v
+				cfg.DefaultMode = v
 			}
 		case "LogToFile":
 			if v, ok := value.(bool); ok {
-				config.LogToFile = v
+				cfg.LogToFile = v
 			}
 		case "MaxScanDepth":
 			if v, ok := value.(float64); ok {
-				config.MaxScanDepth = int(v)
+				cfg.MaxScanDepth = int(v)
 			}
 		case "MinImageNum":
 			if v, ok := value.(float64); ok {
-				config.MinImageNum = int(v)
+				cfg.MinImageNum = int(v)
 			}
 		case "ZipFileTextEncoding":
 			if v, ok := value.(string); ok {
-				config.ZipFileTextEncoding = v
+				cfg.ZipFileTextEncoding = v
 			}
 		case "ExcludePath":
 			if v, ok := value.([]interface{}); ok {
@@ -145,7 +144,7 @@ func UpdateConfig(config *Config, jsonString string) (*Config, error) {
 						paths = append(paths, str)
 					}
 				}
-				config.ExcludePath = paths
+				cfg.ExcludePath = paths
 			}
 		case "SupportMediaType":
 			if v, ok := value.([]interface{}); ok {
@@ -155,7 +154,7 @@ func UpdateConfig(config *Config, jsonString string) (*Config, error) {
 						mediaTypes = append(mediaTypes, str)
 					}
 				}
-				config.SupportMediaType = mediaTypes
+				cfg.SupportMediaType = mediaTypes
 			}
 		case "SupportFileType":
 			if v, ok := value.([]interface{}); ok {
@@ -165,41 +164,41 @@ func UpdateConfig(config *Config, jsonString string) (*Config, error) {
 						fileTypes = append(fileTypes, str)
 					}
 				}
-				config.SupportFileType = fileTypes
+				cfg.SupportFileType = fileTypes
 			}
 		case "TimeoutLimitForScan":
 			if v, ok := value.(float64); ok {
-				config.TimeoutLimitForScan = int(v)
+				cfg.TimeoutLimitForScan = int(v)
 			}
 		case "PrintAllPossibleQRCode":
 			if v, ok := value.(bool); ok {
-				config.PrintAllPossibleQRCode = v
+				cfg.PrintAllPossibleQRCode = v
 			}
 		case "Debug":
 			if v, ok := value.(bool); ok {
-				config.Debug = v
+				cfg.Debug = v
 			}
 		case "Username":
 			if v, ok := value.(string); ok {
-				config.Username = v
+				cfg.Username = v
 			}
 		case "Password":
 			if v, ok := value.(string); ok {
-				config.Password = v
+				cfg.Password = v
 			}
 		case "Timeout":
 			if v, ok := value.(float64); ok {
-				config.Timeout = int(v)
+				cfg.Timeout = int(v)
 			}
 		case "GenerateMetaData":
 			if v, ok := value.(bool); ok {
-				config.GenerateMetaData = v
+				cfg.GenerateMetaData = v
 			}
 		default:
 			logger.Infof("Unknown config key: %s", key)
 		}
 	}
-	return &oldConfig, nil
+	return nil
 }
 
 // SetByExecutableFilename 通过执行文件名设置默认网页模板参数

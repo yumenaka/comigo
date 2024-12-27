@@ -15,6 +15,10 @@ func GetCfg() *Config {
 	return &cfg
 }
 
+func CopyCfg() Config {
+	return cfg
+}
+
 func GetConfigPath() string {
 	return cfg.ConfigPath
 }
