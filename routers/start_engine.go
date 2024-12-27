@@ -19,7 +19,7 @@ func startEngine(engine *gin.Engine) {
 		webHost = "localhost:"
 	}
 	//是否启用TLS
-	enableTls := config.Cfg.CertFile != "" && config.Cfg.KeyFile != ""
+	enableTls := config.GetCertFile() != "" && config.GetKeyFile() != ""
 	config.Srv = &http.Server{
 		Addr:    webHost + strconv.Itoa(config.GetPort()),
 		Handler: engine, //gin.Engine本身可以作为一个Handler传递到http包,用于启动服务器
@@ -29,7 +29,7 @@ func startEngine(engine *gin.Engine) {
 	go func() {
 		// 监听并启动服务(TLS)
 		if enableTls {
-			if err := config.Srv.ListenAndServeTLS(config.Cfg.CertFile, config.Cfg.KeyFile); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			if err := config.Srv.ListenAndServeTLS(config.GetCertFile(), config.GetKeyFile()); err != nil && !errors.Is(err, http.ErrServerClosed) {
 				time.Sleep(3 * time.Second)
 				log.Fatalf("listen: %s\n", err)
 			}
