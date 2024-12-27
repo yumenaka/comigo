@@ -87,7 +87,7 @@ func ReadConfigFile() {
 		logger.Infof(locale.GetString("found_config_file")+"%s", tempConfigPath)
 	}
 	// 把设定文件的内容，解析到构造体里面。
-	if err := runtimeViper.Unmarshal(&config.Cfg); err != nil {
+	if err := runtimeViper.Unmarshal(config.GetCfg()); err != nil {
 		logger.Infof("%s", err)
 		os.Exit(1)
 	}

@@ -1,10 +1,7 @@
 package config
 
-import "C"
 import (
 	"encoding/json"
-	"github.com/yumenaka/comigo/util"
-	"github.com/yumenaka/comigo/util/locale"
 	"os"
 	"path"
 	"path/filepath"
@@ -16,7 +13,7 @@ import (
 
 // Config Comigo全局配置
 type Config struct {
-	//AutoRescan             bool            `json:"AutoRescan" comment:"刷新页面时，是否自动重新扫描"`
+	AutoRescan             bool            `json:"AutoRescan" comment:"刷新页面时，是否自动重新扫描"`
 	CachePath              string          `json:"CachePath" comment:"本地图片缓存位置，默认系统临时文件夹"`
 	CertFile               string          `json:"CertFile" comment:"TLS/SSL 证书文件路径 (default: ~/.config/.comigo/cert.crt)"`
 	ClearCacheExit         bool            `json:"ClearCacheExit" comment:"退出程序的时候，清理web图片缓存"`
@@ -56,63 +53,6 @@ type Config struct {
 	ZipFileTextEncoding    string          `json:"ZipFileTextEncoding" comment:"非utf-8编码的ZIP文件，尝试用什么编码解析，默认GBK"`
 }
 
-// CheckLocalStores 检查本地书库路径是否已存在
-func (c *Config) CheckLocalStores(path string) bool {
-	for _, store := range c.Stores {
-		if store.Type == stores.Local && store.Local.Path == path {
-			return true
-		}
-	}
-	return false
-}
-
-// AddLocalStore 添加本地书库(单个路径)
-func (c *Config) AddLocalStore(path string) {
-	if c.CheckLocalStores(path) {
-		return
-	}
-	c.Stores = append(c.Stores, stores.Store{
-		Type: stores.Local,
-		Local: stores.LocalOption{
-			Path: path,
-		},
-	})
-	c.LocalStores = c.LocalStoresList()
-}
-
-// AddLocalStores 添加本地书库（多个路径）
-func (c *Config) AddLocalStores(path []string) {
-	for _, p := range path {
-		if !c.CheckLocalStores(p) {
-			c.AddLocalStore(p)
-		}
-	}
-}
-
-// ReplaceLocalStores 替换现有的“本地”类型的书库，保留其他类型的书库
-func (c *Config) ReplaceLocalStores(pathList []string) {
-	var newStores []stores.Store
-	for _, store := range c.Stores {
-		if store.Type != stores.Local {
-			newStores = append(newStores, store)
-		}
-	}
-	c.Stores = newStores
-	c.AddLocalStores(pathList)
-	c.LocalStores = c.LocalStoresList()
-}
-
-// LocalStoresList 获取本地书库列表
-func (c *Config) LocalStoresList() []string {
-	var localStoresList []string
-	for _, store := range c.Stores {
-		if store.Type == stores.Local {
-			localStoresList = append(localStoresList, store.Local.Path)
-		}
-	}
-	return localStoresList
-}
-
 // UpdateConfig 更新配置。 使用 JSON 反序列化将更新的配置解析为映射，遍历映射并更新配置，减少重复的代码。
 func UpdateConfig(config *Config, jsonString string) (*Config, error) {
 	oldConfig := *config
@@ -139,7 +79,7 @@ func UpdateConfig(config *Config, jsonString string) (*Config, error) {
 						storeList = append(storeList, str)
 					}
 				}
-				config.ReplaceLocalStores(storeList)
+				ReplaceLocalStores(storeList)
 			}
 		case "UseCache":
 			if v, ok := value.(bool); ok {
@@ -262,30 +202,8 @@ func UpdateConfig(config *Config, jsonString string) (*Config, error) {
 	return &oldConfig, nil
 }
 
-// FrpClientConfig frp客户端配置
-type FrpClientConfig struct {
-	FrpcCommand      string `comment:"手动设定frpc可执行程序的路径,默认为frpc"`
-	ServerAddr       string
-	ServerPort       int
-	Token            string
-	FrpType          string //本地转发端口设置
-	RemotePort       int
-	RandomRemotePort bool
-}
-
-// WebPServerConfig  WebPServer服务端配置
-type WebPServerConfig struct {
-	WebpCommand  string
-	HOST         string
-	PORT         string
-	ImgPath      string
-	QUALITY      int
-	AllowedTypes []string
-	ExhaustPath  string
-}
-
 // SetByExecutableFilename 通过执行文件名设置默认网页模板参数
-func (c *Config) SetByExecutableFilename() {
+func SetByExecutableFilename() {
 	// 获取可执行文件的名称
 	filenameWithSuffix := path.Base(os.Args[0])
 	fileSuffix := path.Ext(filenameWithSuffix)
@@ -299,13 +217,14 @@ func (c *Config) SetByExecutableFilename() {
 	}
 	executableDir := filepath.Dir(executablePath)
 
-	if c.Debug {
+	if cfg.Debug {
 		logger.Infof("Executable Name: %s", filenameWithoutSuffix)
 		logger.Infof("Executable Path: %s", executableDir)
 	}
 }
 
-var Cfg = Config{
+// cfg 为全局配置,全局单实例
+var cfg = Config{
 	ConfigPath:            "",
 	CachePath:             "",
 	ClearCacheExit:        true,
@@ -344,105 +263,63 @@ var Cfg = Config{
 	ZipFileTextEncoding: "",
 }
 
-func GetCfg() *Config {
-	return &Cfg
+// CheckLocalStores 检查本地书库路径是否已存在
+func CheckLocalStores(path string) bool {
+	for _, store := range cfg.Stores {
+		if store.Type == stores.Local && store.Local.Path == path {
+			return true
+		}
+	}
+	return false
 }
 
-func GetConfigPath() string {
-	return Cfg.ConfigPath
-}
-
-func SetConfigPath(path string) {
-	//检查路径是否存在
-	if !util.PathExists(path) {
-		logger.Info("Invalid config file path.")
+// AddLocalStore 添加本地书库(单个路径)
+func AddLocalStore(path string) {
+	if CheckLocalStores(path) {
 		return
 	}
-	Cfg.ConfigPath = path
+	cfg.Stores = append(cfg.Stores, stores.Store{
+		Type: stores.Local,
+		Local: stores.LocalOption{
+			Path: path,
+		},
+	})
+	cfg.LocalStores = GetLocalStoresList()
 }
 
-func GetCachePath() string {
-	return Cfg.CachePath
-}
-
-func SetCachePath(path string) {
-	if !util.PathExists(path) {
-		logger.Info("Invalid cache path.")
-		return
-	}
-	Cfg.CachePath = path
-}
-
-func AutoSetCachePath() {
-	//手动设置的临时文件夹
-	if Cfg.CachePath != "" && util.IsExist(Cfg.CachePath) && util.ChickIsDir(Cfg.CachePath) {
-		Cfg.CachePath = path.Join(Cfg.CachePath)
-	} else {
-		Cfg.CachePath = path.Join(os.TempDir(), "comigo_cache") //使用系统文件夹
-	}
-	err := os.MkdirAll(Cfg.CachePath, os.ModePerm)
-	if err != nil {
-		logger.Infof("%s", locale.GetString("temp_folder_error"))
-	} else {
-		logger.Infof("%s", locale.GetString("temp_folder_path")+Cfg.CachePath)
+// AddLocalStores 添加本地书库（多个路径）
+func AddLocalStores(path []string) {
+	for _, p := range path {
+		if !CheckLocalStores(p) {
+			AddLocalStore(p)
+		}
 	}
 }
 
-func GetEnableUpload() bool {
-	return Cfg.EnableUpload
+// InitCfgStores 初始化配置文件中的书库
+func InitCfgStores() {
+	AddLocalStores(cfg.LocalStores)
 }
 
-func GetUploadPath() string {
-	return Cfg.UploadPath
-}
-
-func SetUploadPath(path string) {
-	if (!util.IsDir(path)) || (!util.PathExists(path)) {
-		logger.Info("Invalid upload path.")
-		return
+// ReplaceLocalStores 替换现有的“本地”类型的书库，保留其他类型的书库
+func ReplaceLocalStores(pathList []string) {
+	var newStores []stores.Store
+	for _, store := range cfg.Stores {
+		if store.Type != stores.Local {
+			newStores = append(newStores, store)
+		}
 	}
-	Cfg.UploadPath = path
+	cfg.Stores = newStores
+	AddLocalStores(pathList)
+	cfg.LocalStores = GetLocalStoresList()
 }
 
-func GetCertFile() string {
-	return Cfg.CertFile
-}
-
-func GetDefaultMode() string {
-	return Cfg.DefaultMode
-}
-
-func GetPort() int {
-	return Cfg.Port
-}
-
-func SetPort(port int) {
-	if port < 0 || port > 65535 {
-		port = 1234
-		logger.Infof("Invalid port number. Using default port: %d", port)
+func GetLocalStoresList() []string {
+	var localStoresList []string
+	for _, store := range cfg.Stores {
+		if store.Type == stores.Local {
+			localStoresList = append(localStoresList, store.Local.Path)
+		}
 	}
-	Cfg.Port = port
-}
-
-func GetHost() string {
-	return Cfg.Host
-}
-
-func SetHost(host string) {
-	// 如果主机名为空，使用默认主机名
-	if host == "" {
-		host = ""
-		logger.Infof("Invalid host name. Using default host: %s", host)
-	}
-	Cfg.Host = host
-}
-
-func GetKeyFile() string {
-	return Cfg.KeyFile
-}
-
-var version = "v0.9.13"
-
-func GetVersion() string {
-	return version
+	return localStoresList
 }

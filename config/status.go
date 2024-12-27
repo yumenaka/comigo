@@ -21,7 +21,7 @@ type Status struct {
 }
 
 func (c *Status) SetConfigStatus() error {
-	logger.Info("Checking Cfg ShareName")
+	logger.Info("Checking cfg ShareName")
 
 	// 初始化
 	c.In = "None"
