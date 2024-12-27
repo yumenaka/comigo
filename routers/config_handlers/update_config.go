@@ -27,7 +27,8 @@ func UpdateConfig(c *gin.Context) {
 	logger.Infof("Received JSON data: %s \n", jsonString)
 
 	// 解析JSON数据并更新服务器配置
-	oldConfig, err := config.UpdateConfig(config.GetCfg(), jsonString)
+	oldConfig := config.CopyCfg()
+	err = config.UpdateConfigByJson(jsonString)
 	if err != nil {
 		logger.Infof("%s", err.Error())
 		c.JSON(http.StatusMethodNotAllowed, gin.H{"error": "Failed to parse JSON data"})
@@ -38,7 +39,7 @@ func UpdateConfig(c *gin.Context) {
 		logger.Infof("Failed to update local config: %v", err)
 	}
 	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等
-	BeforeConfigUpdate(oldConfig, config.GetCfg())
+	BeforeConfigUpdate(&oldConfig, config.GetCfg())
 	// 返回成功消息
 	c.JSON(http.StatusOK, gin.H{"message": "Server settings updated successfully"})
 }
@@ -46,9 +47,9 @@ func UpdateConfig(c *gin.Context) {
 // BeforeConfigUpdate 根据配置的变化，判断是否需要打开浏览器重新扫描等
 func BeforeConfigUpdate(oldConfig *config.Config, newConfig *config.Config) {
 	openBrowserIfNeeded(oldConfig, newConfig)
-	needScan, reScanFile := updateConfigIfNeeded(oldConfig, newConfig)
+	needScan, reScanFile := checkReScanStatus(oldConfig, newConfig)
 	if needScan {
-		performScanAndUpdateDBIfNeeded(reScanFile)
+		startReScan(reScanFile)
 	} else {
 		if newConfig.Debug {
 			logger.Info("No changes in cfg, skipped scan store path\n")
@@ -66,44 +67,36 @@ func openBrowserIfNeeded(oldConfig *config.Config, newConfig *config.Config) {
 	}
 }
 
-// updateConfigIfNeeded 检查旧的和新的配置是否需要更新，并返回需要重新扫描和重新扫描文件的布尔值
-func updateConfigIfNeeded(oldConfig *config.Config, newConfig *config.Config) (needScan bool, reScanFile bool) {
+// checkReScanStatus 检查旧的和新的配置是否需要更新，并返回需要重新扫描和重新扫描文件的布尔值
+func checkReScanStatus(oldConfig *config.Config, newConfig *config.Config) (reScanDir bool, reScanFile bool) {
 	if !reflect.DeepEqual(oldConfig.LocalStores, newConfig.LocalStores) {
-		needScan = true
-		oldConfig.LocalStores = newConfig.LocalStores
-		config.ReplaceLocalStores(newConfig.LocalStores)
+		reScanDir = true
 	}
 	if oldConfig.MaxScanDepth != newConfig.MaxScanDepth {
-		needScan = true
-		oldConfig.MaxScanDepth = newConfig.MaxScanDepth
+		reScanDir = true
 	}
 	if !reflect.DeepEqual(oldConfig.SupportMediaType, newConfig.SupportMediaType) {
-		needScan = true
+		reScanDir = true
 		reScanFile = true
-		oldConfig.SupportMediaType = newConfig.SupportMediaType
 	}
 	if !reflect.DeepEqual(oldConfig.SupportFileType, newConfig.SupportFileType) {
-		needScan = true
-		oldConfig.SupportFileType = newConfig.SupportFileType
+		reScanDir = true
 	}
 	if oldConfig.MinImageNum != newConfig.MinImageNum {
-		needScan = true
+		reScanDir = true
 		reScanFile = true
-		oldConfig.MinImageNum = newConfig.MinImageNum
 	}
 	if !reflect.DeepEqual(oldConfig.ExcludePath, newConfig.ExcludePath) {
-		needScan = true
-		oldConfig.ExcludePath = newConfig.ExcludePath
+		reScanDir = true
 	}
 	if oldConfig.EnableDatabase != newConfig.EnableDatabase {
-		needScan = true
-		oldConfig.EnableDatabase = newConfig.EnableDatabase
+		reScanDir = true
 	}
 	return
 }
 
-// performScanAndUpdateDBIfNeeded 扫描并相应地更新数据库
-func performScanAndUpdateDBIfNeeded(reScanFile bool) {
+// startReScan 扫描并相应地更新数据库
+func startReScan(reScanFile bool) {
 	option := scan.NewScanOption(
 		reScanFile,
 		config.GetLocalStoresList(),
