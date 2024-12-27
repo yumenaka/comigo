@@ -15,7 +15,7 @@ import (
 func startEngine(engine *gin.Engine) {
 	//是否对外服务
 	webHost := ":"
-	if config.Cfg.DisableLAN {
+	if config.GetDisableLAN() {
 		webHost = "localhost:"
 	}
 	//是否启用TLS

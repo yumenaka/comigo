@@ -24,7 +24,7 @@ func GetConfigToml(c *gin.Context) {
 	tempConfig := config.Cfg
 	tempConfig.LogFilePath = ""
 	config.Cfg.OpenBrowser = false
-	config.Cfg.EnableDatabase = true
+	config.SetEnableDatabase(true)
 	tempConfig.ReplaceLocalStores([]string{"C:\\test\\Comic", "D:\\some_path\\book", "/home/user/download"})
 	tempConfig.Username = "comigo"
 	tempConfig.Password = ""

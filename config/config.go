@@ -16,7 +16,7 @@ import (
 
 // Config Comigo全局配置
 type Config struct {
-	//AutoRescan             bool            `json:"AutoRescan" comment:"刷新页面时，是否自动重新扫描"`
+	AutoRescan             bool            `json:"AutoRescan" comment:"刷新页面时，是否自动重新扫描"`
 	CachePath              string          `json:"CachePath" comment:"本地图片缓存位置，默认系统临时文件夹"`
 	CertFile               string          `json:"CertFile" comment:"TLS/SSL 证书文件路径 (default: ~/.config/.comigo/cert.crt)"`
 	ClearCacheExit         bool            `json:"ClearCacheExit" comment:"退出程序的时候，清理web图片缓存"`
@@ -262,28 +262,6 @@ func UpdateConfig(config *Config, jsonString string) (*Config, error) {
 	return &oldConfig, nil
 }
 
-// FrpClientConfig frp客户端配置
-type FrpClientConfig struct {
-	FrpcCommand      string `comment:"手动设定frpc可执行程序的路径,默认为frpc"`
-	ServerAddr       string
-	ServerPort       int
-	Token            string
-	FrpType          string //本地转发端口设置
-	RemotePort       int
-	RandomRemotePort bool
-}
-
-// WebPServerConfig  WebPServer服务端配置
-type WebPServerConfig struct {
-	WebpCommand  string
-	HOST         string
-	PORT         string
-	ImgPath      string
-	QUALITY      int
-	AllowedTypes []string
-	ExhaustPath  string
-}
-
 // SetByExecutableFilename 通过执行文件名设置默认网页模板参数
 func (c *Config) SetByExecutableFilename() {
 	// 获取可执行文件的名称
@@ -388,8 +366,35 @@ func AutoSetCachePath() {
 	}
 }
 
+func GetClearDatabaseWhenExit() bool {
+	return Cfg.ClearDatabaseWhenExit
+}
+func SetClearDatabaseWhenExit(clearDatabaseWhenExit bool) {
+	Cfg.ClearDatabaseWhenExit = clearDatabaseWhenExit
+}
+
+func GetDebug() bool {
+	return Cfg.Debug
+}
+
+func SetDebug(debug bool) {
+	Cfg.Debug = debug
+}
+
 func GetEnableUpload() bool {
 	return Cfg.EnableUpload
+}
+
+func GetEnableDatabase() bool {
+	return Cfg.EnableDatabase
+}
+
+func SetEnableDatabase(enableDatabase bool) {
+	Cfg.EnableDatabase = enableDatabase
+}
+
+func GetEnableTLS() bool {
+	return Cfg.EnableTLS
 }
 
 func GetUploadPath() string {
@@ -404,16 +409,112 @@ func SetUploadPath(path string) {
 	Cfg.UploadPath = path
 }
 
+func GetUseCache() bool {
+	return Cfg.UseCache
+}
+
+func SetUseCache(useCache bool) {
+	Cfg.UseCache = useCache
+}
+
 func GetCertFile() string {
 	return Cfg.CertFile
+}
+
+func GetClearCacheExit() bool {
+	return Cfg.ClearCacheExit
+}
+
+func GetLocalStoresList() []string {
+	return Cfg.LocalStores
+}
+
+func GetLogToFile() bool {
+	return Cfg.LogToFile
+}
+
+func GetLogFilePath() string {
+	return Cfg.LogFilePath
+}
+
+func GetLogFileName() string {
+	return Cfg.LogFileName
+}
+
+func GetStores() []stores.Store {
+	return Cfg.Stores
+}
+
+func GetMaxScanDepth() int {
+	return Cfg.MaxScanDepth
+}
+
+func SetClearCacheExit(clearCacheExit bool) {
+	Cfg.ClearCacheExit = clearCacheExit
 }
 
 func GetDefaultMode() string {
 	return Cfg.DefaultMode
 }
 
+func GetDisableLAN() bool {
+	return Cfg.DisableLAN
+}
+
+func SetDisableLAN(disableLAN bool) {
+	Cfg.DisableLAN = disableLAN
+}
+
+func GetMinImageNum() int {
+	return Cfg.MinImageNum
+}
+
+func GetTimeoutLimitForScan() int {
+	return Cfg.TimeoutLimitForScan
+}
+
+func GetExcludePath() []string {
+	return Cfg.ExcludePath
+}
+
+func GetSupportMediaType() []string {
+	return Cfg.SupportMediaType
+}
+
+func GetSupportFileType() []string {
+	return Cfg.SupportFileType
+}
+
+func GetSupportTemplateFile() []string {
+	return Cfg.SupportTemplateFile
+}
+
+func GetZipFileTextEncoding() string {
+	return Cfg.ZipFileTextEncoding
+}
+
+func GetOpenBrowser() bool {
+	return Cfg.OpenBrowser
+}
+
+func GetPrintAllPossibleQRCode() bool {
+	return Cfg.PrintAllPossibleQRCode
+}
+
 func GetPort() int {
 	return Cfg.Port
+}
+
+func GetUsername() string {
+	return Cfg.Username
+}
+
+func GetPassword() string {
+	return Cfg.Password
+}
+
+func GetTimeout() int {
+	return Cfg.Timeout
 }
 
 func SetPort(port int) {
