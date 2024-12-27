@@ -48,7 +48,7 @@ func BeforeConfigUpdate(oldConfig *config.Config, newConfig *config.Config) {
 	openBrowserIfNeeded(oldConfig, newConfig)
 	needScan, reScanFile := updateConfigIfNeeded(oldConfig, newConfig)
 	if needScan {
-		performScanAndUpdateDBIfNeeded(newConfig, reScanFile)
+		performScanAndUpdateDBIfNeeded(reScanFile)
 	} else {
 		if newConfig.Debug {
 			logger.Info("No changes in Cfg, skipped scan store path\n")
@@ -103,28 +103,28 @@ func updateConfigIfNeeded(oldConfig *config.Config, newConfig *config.Config) (n
 }
 
 // performScanAndUpdateDBIfNeeded 扫描并相应地更新数据库
-func performScanAndUpdateDBIfNeeded(newConfig *config.Config, reScanFile bool) {
+func performScanAndUpdateDBIfNeeded(reScanFile bool) {
 	option := scan.NewScanOption(
 		reScanFile,
-		config.Cfg.LocalStoresList(),
-		config.Cfg.Stores,
-		newConfig.MaxScanDepth,
-		newConfig.MinImageNum,
-		newConfig.TimeoutLimitForScan,
-		newConfig.ExcludePath,
-		newConfig.SupportMediaType,
-		newConfig.SupportFileType,
-		config.Cfg.SupportTemplateFile,
-		newConfig.ZipFileTextEncoding,
-		newConfig.EnableDatabase,
-		newConfig.ClearDatabaseWhenExit,
-		newConfig.Debug,
+		config.GetLocalStoresList(),
+		config.GetStores(),
+		config.GetMaxScanDepth(),
+		config.GetMinImageNum(),
+		config.GetTimeoutLimitForScan(),
+		config.GetExcludePath(),
+		config.GetSupportMediaType(),
+		config.GetSupportFileType(),
+		config.GetSupportTemplateFile(),
+		config.GetZipFileTextEncoding(),
+		config.GetEnableDatabase(),
+		config.GetClearDatabaseWhenExit(),
+		config.GetDebug(),
 	)
 	if err := scan.InitStore(option); err != nil {
 		logger.Infof("Failed to scan store path: %v", err)
 	}
-	if newConfig.EnableDatabase {
-		saveResultsToDatabase(viper.ConfigFileUsed(), config.Cfg.ClearDatabaseWhenExit)
+	if config.GetEnableDatabase() {
+		saveResultsToDatabase(viper.ConfigFileUsed(), config.GetClearDatabaseWhenExit())
 	}
 }
 

@@ -13,8 +13,8 @@ func setLogger(engine *gin.Engine) {
 	//禁止控制台输出
 	gin.DefaultWriter = io.Discard
 	//设置log中间件 TODO:输出到tui界面。
-	engine.Use(logger.HandlerLog(config.Cfg.LogToFile, config.Cfg.LogFilePath, config.Cfg.LogFileName))
-	if config.Cfg.LogToFile {
+	engine.Use(logger.HandlerLog(config.GetLogToFile(), config.GetLogFilePath(), config.GetLogFileName()))
+	if config.GetLogToFile() {
 		// 关闭 log 打印的字体颜色。输出到文件不需要颜色
 		gin.DisableConsoleColor()
 	}

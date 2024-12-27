@@ -32,16 +32,16 @@ func showQRCode() {
 
 	util.PrintAllReaderURL(
 		config.GetPort(),
-		config.Cfg.OpenBrowser,
-		config.Cfg.PrintAllPossibleQRCode,
+		config.GetOpenBrowser(),
+		config.GetPrintAllPossibleQRCode(),
 		outIP,
-		config.Cfg.DisableLAN,
+		config.GetDisableLAN(),
 		enableTLS,
 		etcStr,
 	)
 
 	// 打印配置，调试用
-	if config.Cfg.Debug {
+	if config.GetDebug() {
 		litter.Dump(config.Cfg)
 	}
 
