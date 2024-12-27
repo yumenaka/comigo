@@ -60,5 +60,5 @@ func StartScan(args []string) {
 		}
 	}
 	//5、通过“可执行文件名”设置部分默认参数,目前不生效
-	config.Cfg.SetByExecutableFilename()
+	config.SetByExecutableFilename()
 }

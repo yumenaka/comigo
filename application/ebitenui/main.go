@@ -43,7 +43,7 @@ func main() {
 
 	// 创建一个新的 ReaderConfig 对象，用于配置阅读器的设置。
 	readerConfig := model.NewReaderConfig()
-	config.Cfg.OpenBrowser = false
+	config.SetOpenBrowser(false)
 	config.SetUseCache(true)
 	config.SetClearCacheExit(false)
 	readerConfig.SetTitle("Comigo "+config.GetVersion()).

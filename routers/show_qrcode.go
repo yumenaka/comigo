@@ -24,7 +24,7 @@ func showQRCode() {
 		}
 	}
 
-	enableTLS := config.Cfg.CertFile != "" && config.Cfg.KeyFile != ""
+	enableTLS := config.GetCertFile() != "" && config.GetKeyFile() != ""
 	outIP := config.GetHost()
 	if config.GetHost() == "" {
 		outIP = util.GetOutboundIP().String()
@@ -42,7 +42,7 @@ func showQRCode() {
 
 	// 打印配置，调试用
 	if config.GetDebug() {
-		litter.Dump(config.Cfg)
+		litter.Dump(config.GetCfg())
 	}
 
 	fmt.Println(locale.GetString("ctrl_c_hint"))

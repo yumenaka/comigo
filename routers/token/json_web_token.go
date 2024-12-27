@@ -13,9 +13,9 @@ import (
 // sample: https://github.com/appleboy/gin-jwt/blob/master/_example/basic/server.go
 func NewJwtMiddleware() (*jwt.GinJWTMiddleware, error) {
 	jwtMiddleware, err := jwt.New(&jwt.GinJWTMiddleware{
-		Realm:            "comigo server",                                    //标识
-		SigningAlgorithm: "HS256",                                            //加密算法
-		Key:              []byte(config.Cfg.Username + config.GetPassword()), //JWT服务端密钥，需要确保别人不知道
+		Realm:            "comigo server",                                     //标识
+		SigningAlgorithm: "HS256",                                             //加密算法
+		Key:              []byte(config.GetUsername() + config.GetPassword()), //JWT服务端密钥，需要确保别人不知道
 		//time.Duration类型 不能直接和 int类型相乘，需要先将变量转换为time.Duration类型
 		Timeout:       time.Minute * time.Duration(config.GetTimeout()), //jwt过期时间
 		MaxRefresh:    time.Minute * time.Duration(config.GetTimeout()), //刷新时，最大能延长多少时间
@@ -75,7 +75,7 @@ func Authenticator(c *gin.Context) (interface{}, error) {
 	if err := c.ShouldBind(&user); err != nil {
 		return "", jwt.ErrMissingLoginValues
 	}
-	logger.Infof("username is %s, password is %s,Cfg is %s@%s\",", user.Username, user.Password, config.GetUsername(), config.GetPassword())
+	logger.Infof("username is %s, password is %s,cfg is %s@%s\",", user.Username, user.Password, config.GetUsername(), config.GetPassword())
 	if config.GetPassword() == "" {
 		return user, nil
 	}

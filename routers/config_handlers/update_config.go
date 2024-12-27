@@ -27,18 +27,18 @@ func UpdateConfig(c *gin.Context) {
 	logger.Infof("Received JSON data: %s \n", jsonString)
 
 	// 解析JSON数据并更新服务器配置
-	oldConfig, err := config.UpdateConfig(&config.Cfg, jsonString)
+	oldConfig, err := config.UpdateConfig(config.GetCfg(), jsonString)
 	if err != nil {
 		logger.Infof("%s", err.Error())
 		c.JSON(http.StatusMethodNotAllowed, gin.H{"error": "Failed to parse JSON data"})
 		return
 	}
-	err = config.UpdateLocalConfig()
+	err = config.WriteConfigFile()
 	if err != nil {
 		logger.Infof("Failed to update local config: %v", err)
 	}
 	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等
-	BeforeConfigUpdate(oldConfig, &config.Cfg)
+	BeforeConfigUpdate(oldConfig, config.GetCfg())
 	// 返回成功消息
 	c.JSON(http.StatusOK, gin.H{"message": "Server settings updated successfully"})
 }
@@ -51,7 +51,7 @@ func BeforeConfigUpdate(oldConfig *config.Config, newConfig *config.Config) {
 		performScanAndUpdateDBIfNeeded(reScanFile)
 	} else {
 		if newConfig.Debug {
-			logger.Info("No changes in Cfg, skipped scan store path\n")
+			logger.Info("No changes in cfg, skipped scan store path\n")
 		}
 	}
 }
@@ -71,7 +71,7 @@ func updateConfigIfNeeded(oldConfig *config.Config, newConfig *config.Config) (n
 	if !reflect.DeepEqual(oldConfig.LocalStores, newConfig.LocalStores) {
 		needScan = true
 		oldConfig.LocalStores = newConfig.LocalStores
-		oldConfig.ReplaceLocalStores(newConfig.LocalStores)
+		config.ReplaceLocalStores(newConfig.LocalStores)
 	}
 	if oldConfig.MaxScanDepth != newConfig.MaxScanDepth {
 		needScan = true
