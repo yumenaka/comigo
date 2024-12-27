@@ -29,8 +29,8 @@ func waitRescanMessages() {
 			logger.Infof("扫描上传文件夹：%s", msg)
 			ReScanUploadPath()
 			//保存扫描结果到数据库
-			if config.Cfg.EnableDatabase {
-				err := scan.SaveResultsToDatabase(viper.ConfigFileUsed(), config.Cfg.ClearDatabaseWhenExit)
+			if config.GetEnableDatabase() {
+				err := scan.SaveResultsToDatabase(viper.ConfigFileUsed(), config.GetClearDatabaseWhenExit())
 				if err != nil {
 					return
 				}
@@ -47,35 +47,35 @@ func waitRescanMessages() {
 // ReScanUploadPath 重新扫描上传目录,因为需要设置下载路径，gin 初始化后才能执行
 func ReScanUploadPath() {
 	//没启用上传，则不扫描
-	if !config.Cfg.EnableUpload {
+	if !config.GetEnableUpload() {
 		return
 	}
-	ReScanPath(config.Cfg.UploadPath, true)
+	ReScanPath(config.GetUploadPath(), true)
 }
 
 func ReScanPath(path string, reScanFile bool) {
 	//扫描上传目录的文件
 	option := scan.NewScanOption(
 		reScanFile,
-		config.Cfg.LocalStoresList(),
-		config.Cfg.Stores,
-		config.Cfg.MaxScanDepth,
-		config.Cfg.MinImageNum,
-		config.Cfg.TimeoutLimitForScan,
-		config.Cfg.ExcludePath,
-		config.Cfg.SupportMediaType,
-		config.Cfg.SupportFileType,
-		config.Cfg.SupportTemplateFile,
-		config.Cfg.ZipFileTextEncoding,
-		config.Cfg.EnableDatabase,
-		config.Cfg.ClearDatabaseWhenExit,
-		config.Cfg.Debug,
+		config.GetLocalStoresList(),
+		config.GetStores(),
+		config.GetMaxScanDepth(),
+		config.GetMinImageNum(),
+		config.GetTimeoutLimitForScan(),
+		config.GetExcludePath(),
+		config.GetSupportMediaType(),
+		config.GetSupportFileType(),
+		config.GetSupportTemplateFile(),
+		config.GetZipFileTextEncoding(),
+		config.GetEnableDatabase(),
+		config.GetClearDatabaseWhenExit(),
+		config.GetDebug(),
 	)
 	addList, err := scan.Local(path, option)
 	if err != nil {
 		logger.Infof(locale.GetString("scan_error")+"path:%s  %s", path, err)
 		return
 	}
-	scan.AddBooksToStore(addList, path, config.Cfg.MinImageNum)
+	scan.AddBooksToStore(addList, path, config.GetMinImageNum())
 	model.ResetBookGroupData()
 }

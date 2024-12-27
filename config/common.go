@@ -15,9 +15,9 @@ import (
 
 var Srv *http.Server
 
-// UpdateLocalConfig 如果存在本地配置，更新本地配置
-func UpdateLocalConfig() error {
-	bytes, err := toml.Marshal(Cfg)
+// WriteConfigFile 如果存在本地配置，更新本地配置
+func WriteConfigFile() error {
+	bytes, err := toml.Marshal(cfg)
 	if err != nil {
 		return err
 	}
@@ -66,11 +66,11 @@ const (
 
 func SaveConfig(to string) error {
 	//保存配置
-	bytes, errMarshal := toml.Marshal(Cfg)
+	bytes, errMarshal := toml.Marshal(cfg)
 	if errMarshal != nil {
 		return errMarshal
 	}
-	logger.Infof("Cfg Save To %s", to)
+	logger.Infof("cfg Save To %s", to)
 	switch to {
 	case HomeDirectory:
 		home, err := os.UserHomeDir()
@@ -107,7 +107,7 @@ func SaveConfig(to string) error {
 }
 
 func DeleteConfigIn(in string) error {
-	logger.Infof("Delete Cfg in %s", in)
+	logger.Infof("Delete cfg in %s", in)
 	var configFile string
 	switch in {
 	case HomeDirectory:
@@ -129,15 +129,15 @@ func DeleteConfigIn(in string) error {
 }
 
 func GetQrcodeURL() string {
-	enableTLS := Cfg.CertFile != "" && Cfg.KeyFile != ""
+	enableTLS := cfg.CertFile != "" && cfg.KeyFile != ""
 	protocol := "http://"
 	if enableTLS {
 		protocol = "https://"
 	}
 	//取得本机的首选出站IP
 	OutIP := util.GetOutboundIP().String()
-	if Cfg.Host == "" {
-		return protocol + OutIP + ":" + strconv.Itoa(Cfg.Port)
+	if cfg.Host == "" {
+		return protocol + OutIP + ":" + strconv.Itoa(cfg.Port)
 	}
-	return protocol + Cfg.Host + ":" + strconv.Itoa(Cfg.Port)
+	return protocol + cfg.Host + ":" + strconv.Itoa(cfg.Port)
 }

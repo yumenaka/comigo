@@ -9,24 +9,20 @@ import (
 	"github.com/yumenaka/comigo/util/logger"
 )
 
-// GetConfig 获取json格式的当前配置
+// GetConfig 获取json格式的当前配置，不做修改
 func GetConfig(c *gin.Context) {
-	//golang结构体默认深拷贝（但是基本类型浅拷贝）
-	tempConfig := config.Cfg
-	// c.Context.JSON()将给定结构序列化为 JSON 到响应正文中。它还将 Content-Type 设置为“application/json”。
-	//c.IndentedJSON 打印格式化后的 JSON 会消耗更多的 CPU 和带宽。
-	c.JSON(http.StatusOK, tempConfig)
+	c.JSON(http.StatusOK, config.GetCfg())
 }
 
-// GetConfigToml 下载服务器配置(toml)
+// GetConfigToml 下载服务器配置(toml)，修改关键值后上传
 func GetConfigToml(c *gin.Context) {
 	//golang结构体默认深拷贝（但是基本类型浅拷贝）
-	tempConfig := config.Cfg
+	tempConfig := config.GetCfg()
 	tempConfig.LogFilePath = ""
-	config.Cfg.OpenBrowser = false
-	config.Cfg.EnableDatabase = true
-	tempConfig.ReplaceLocalStores([]string{"C:\\test\\Comic", "D:\\some_path\\book", "/home/user/download"})
-	tempConfig.Username = "comigo"
+	tempConfig.OpenBrowser = false
+	tempConfig.EnableDatabase = true
+	tempConfig.LocalStores = []string{"C:\\test\\Comic", "D:\\some_path\\book", "/home/user/download"}
+	tempConfig.Username = "You_can_change_this_value"
 	tempConfig.Password = ""
 	bytes, err := toml.Marshal(tempConfig)
 	if err != nil {

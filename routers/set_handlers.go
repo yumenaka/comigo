@@ -25,7 +25,7 @@ func BindAPI(engine *gin.Engine) {
 	publicRoutes(api)
 
 	// 判断是否需要 JWT 认证
-	if config.Cfg.Password != "" {
+	if config.GetPassword() != "" {
 		jwtMiddleware, err := token.NewJwtMiddleware()
 		if err != nil {
 			log.Fatal("JWT Error: " + err.Error())
@@ -50,7 +50,7 @@ func BindAPI(engine *gin.Engine) {
 func publicRoutes(rg *gin.RouterGroup) {
 	rg.GET("/qrcode.png", handlers.GetQrcode)
 	rg.GET("/server_info", handlers.GetServerInfoHandler)
-	websocket.WsDebug = &config.Cfg.Debug
+	websocket.WsDebug = &config.GetCfg().Debug
 	rg.GET("/ws", websocket.WsHandler)
 }
 
