@@ -15,9 +15,9 @@ import (
 
 // HandlerLog 默认log
 func HandlerLog(LogToFile bool, LogFilePath string, LogFileName string) gin.HandlerFunc {
-	Log.SetLevel(logrus.DebugLevel) //设置最低的日志级别
-	//Log.SetReportCaller(true)           //开启返回函数名和行号
-	Log.SetFormatter(&MyFormatter{}) // 使用自定义格式化程序
+	logger.SetLevel(logrus.DebugLevel) //设置最低的日志级别
+	//logger.SetReportCaller(true)           //开启返回函数名和行号
+	logger.SetFormatter(&MyFormatter{}) // 使用自定义格式化程序
 
 	//设置输出
 	if LogToFile {
@@ -25,10 +25,10 @@ func HandlerLog(LogToFile bool, LogFilePath string, LogFileName string) gin.Hand
 		filename := path.Join(LogFilePath, LogFileName)
 		file, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
 		if err != nil {
-			fmt.Println("Log err:", err)
+			fmt.Println("logger err:", err)
 		}
 		//设置多种输出类型(默认值“os.Stderr”)
-		Log.SetOutput(io.MultiWriter(os.Stdout, file))
+		logger.SetOutput(io.MultiWriter(os.Stdout, file))
 		//设置rotatelogs
 		logWriter, err := rotatelogs.New(
 			//分割后的文件名
@@ -41,7 +41,7 @@ func HandlerLog(LogToFile bool, LogFilePath string, LogFileName string) gin.Hand
 			rotatelogs.WithRotationTime(24*time.Hour),
 		)
 		if err != nil {
-			fmt.Println("Log err:", err)
+			fmt.Println("logger err:", err)
 		}
 		writeMap := lfshook.WriterMap{
 			logrus.InfoLevel:  logWriter,
@@ -51,7 +51,7 @@ func HandlerLog(LogToFile bool, LogFilePath string, LogFileName string) gin.Hand
 			logrus.ErrorLevel: logWriter,
 			logrus.PanicLevel: logWriter,
 		}
-		Log.AddHook(lfshook.NewHook(writeMap, &logrus.TextFormatter{
+		logger.AddHook(lfshook.NewHook(writeMap, &logrus.TextFormatter{
 			TimestampFormat: "2006-01-02 03:04:05",
 		}))
 	}
@@ -74,7 +74,7 @@ func HandlerLog(LogToFile bool, LogFilePath string, LogFileName string) gin.Hand
 		//%15s 是一个格式说明符，用于格式化字符串。这里的 15 表示输出的字符串宽度应该为至少15个字符。
 		//使用 %12s 使得字符串 "test" 右对齐，并在其左侧添加了空格来达到15个字符的宽度。
 		//使用 %-12s 使得字符串左对齐，并在其右侧添加了空格来达到15个字符的宽度
-		Log.WithFields(logrus.Fields{
+		logger.WithFields(logrus.Fields{
 			//"status_code":  statusCode,
 			//"client_ip":    c.ClientIP(),
 		}).Info(fmt.Sprintf("%s:%3d|%13v|%s%s\n", reqMethod, statusCode, latencyTime, c.ClientIP(), reqURI))
@@ -83,9 +83,9 @@ func HandlerLog(LogToFile bool, LogFilePath string, LogFileName string) gin.Hand
 
 func LoggerToStdout() gin.HandlerFunc {
 	//设置日志级别
-	Log.SetLevel(logrus.DebugLevel)
+	logger.SetLevel(logrus.DebugLevel)
 	//设置输出
-	Log.SetOutput(os.Stdout)
+	logger.SetOutput(os.Stdout)
 	//自定义gin处理函数
 	return func(c *gin.Context) {
 		//开始时间
@@ -105,7 +105,7 @@ func LoggerToStdout() gin.HandlerFunc {
 		//请求ip
 		clientIP := c.ClientIP()
 		// 日志格式
-		Log.WithFields(logrus.Fields{
+		logger.WithFields(logrus.Fields{
 			"status_code":  statusCode,
 			"latency_time": latencyTime,
 			"client_ip":    clientIP,

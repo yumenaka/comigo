@@ -6,11 +6,11 @@ require (
 	entgo.io/ent v0.14.1
 	github.com/Baozisoftware/qrcode-terminal-go v0.0.0-20170407111555-c0650d8dff0f
 	github.com/BurntSushi/toml v1.4.0
-	github.com/appleboy/gin-jwt/v2 v2.10.0
+	github.com/appleboy/gin-jwt/v2 v2.10.1
 	github.com/bbrks/go-blurhash v1.1.1
 	github.com/charmbracelet/bubbles v0.16.1
-	github.com/charmbracelet/bubbletea v0.24.2
-	github.com/charmbracelet/lipgloss v0.9.1
+	github.com/charmbracelet/bubbletea v1.2.4
+	github.com/charmbracelet/lipgloss v1.0.0
 	github.com/cheggaaa/pb/v3 v3.1.5
 	github.com/disintegration/imaging v1.6.2
 	github.com/fsnotify/fsnotify v1.8.0
@@ -38,9 +38,9 @@ require (
 )
 
 require (
-	github.com/cloudsoda/go-smb2 v0.0.0-20231124195312-f3ec8ae2c891
+	github.com/cloudsoda/go-smb2 v0.0.0-20241223203758-52b943b88fd6
 	github.com/ebitenui/ebitenui v0.5.8
-	github.com/gin-contrib/cors v1.7.2
+	github.com/gin-contrib/cors v1.7.3
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/hajimehoshi/ebiten/v2 v2.7.10
 	github.com/hirochachacha/go-smb2 v1.1.0
@@ -48,6 +48,7 @@ require (
 	github.com/pdfcpu/pdfcpu v0.9.1
 	github.com/yumenaka/archives v0.0.0-20241222141717-1f2992f21052
 	golang.org/x/image v0.23.0
+	golang.org/x/term v0.27.0
 )
 
 require (
@@ -66,6 +67,8 @@ require (
 	github.com/bodgit/windows v1.0.1 // indirect
 	github.com/bytedance/sonic v1.12.6 // indirect
 	github.com/bytedance/sonic/loader v0.2.1 // indirect
+	github.com/charmbracelet/x/ansi v0.6.0 // indirect
+	github.com/charmbracelet/x/term v0.2.1 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
 	github.com/cloudwego/iasm v0.2.0 // indirect
 	github.com/containerd/console v1.0.4 // indirect
@@ -74,6 +77,7 @@ require (
 	github.com/ebitengine/gomobile v0.0.0-20241016134836-cc2e38a7c0ee // indirect
 	github.com/ebitengine/hideconsole v1.0.0 // indirect
 	github.com/ebitengine/purego v0.7.1 // indirect
+	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.7 // indirect
 	github.com/geoffgarside/ber v1.1.0 // indirect
@@ -88,12 +92,19 @@ require (
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
+	github.com/hashicorp/go-uuid v1.0.3 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.23.0 // indirect
 	github.com/hhrutter/lzw v1.0.0 // indirect
 	github.com/hhrutter/tiff v1.0.1 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/jcmturner/aescts/v2 v2.0.0 // indirect
+	github.com/jcmturner/dnsutils/v2 v2.0.0 // indirect
+	github.com/jcmturner/gofork v1.7.6 // indirect
+	github.com/jcmturner/goidentity/v6 v6.0.1 // indirect
+	github.com/jcmturner/gokrb5/v8 v8.4.4 // indirect
+	github.com/jcmturner/rpc/v2 v2.0.3 // indirect
 	github.com/jezek/xgb v1.1.1 // indirect
 	github.com/josephspurrier/goversioninfo v1.4.1 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
@@ -152,16 +163,15 @@ require (
 	golang.org/x/mod v0.22.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
-	golang.org/x/term v0.27.0 // indirect
 	golang.org/x/tools v0.28.0 // indirect
-	google.golang.org/protobuf v1.36.0 // indirect
+	google.golang.org/protobuf v1.36.1 // indirect
 	gopkg.in/eapache/queue.v1 v1.1.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	modernc.org/gc/v3 v3.0.0-20241213165251-3bc300f6d0c9 // indirect
-	modernc.org/libc v1.61.4 // indirect
-	modernc.org/mathutil v1.7.0 // indirect
+	modernc.org/gc/v3 v3.0.0-20241223112719-96e2e1e4408d // indirect
+	modernc.org/libc v1.61.5 // indirect
+	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.8.0 // indirect
 	modernc.org/strutil v1.2.0 // indirect
 	modernc.org/token v1.1.0 // indirect
