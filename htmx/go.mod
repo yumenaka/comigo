@@ -13,17 +13,17 @@ require (
 	github.com/a-h/templ v0.2.793
 	github.com/angelofallars/htmx-go v0.5.0
 	github.com/gin-gonic/gin v1.10.0
-	github.com/yumenaka/comigo v0.9.14-0.20241222085917-b87aebe581d9
+	github.com/yumenaka/comigo v0.9.14-0.20241229132926-7d88d9e595c0
 )
 
 // 使用最新的 master 提交 然后，在项目根目录下运行以下命令来下载最新的依赖 go mod tidy && go mod download
 // replace github.com/yumenaka/comigo => github.com/yumenaka/comigo master
 //replace github.com/yumenaka/comigo => github.com/yumenaka/comigo <commit-hash>
 // replace github.com/yumenaka/comigo => github.com/yumenaka/comigo v0.9.12-0.20241002234112-6c9ad7a143e4
-replace github.com/yumenaka/comigo v0.9.11 => ../
+//replace github.com/yumenaka/comigo v0.9.14-0.20241222085917-b87aebe581d9 => ../
 
 require (
-	github.com/charmbracelet/bubbletea v0.24.2
+	github.com/charmbracelet/bubbletea v1.2.4
 	golang.org/x/term v0.27.0
 )
 
@@ -37,7 +37,7 @@ require (
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/andybalholm/brotli v1.1.1 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
-	github.com/appleboy/gin-jwt/v2 v2.10.0 // indirect
+	github.com/appleboy/gin-jwt/v2 v2.10.1 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/bbrks/go-blurhash v1.1.1 // indirect
 	github.com/bmatcuk/doublestar v1.3.4 // indirect
@@ -46,19 +46,23 @@ require (
 	github.com/bodgit/windows v1.0.1 // indirect
 	github.com/bytedance/sonic v1.12.6 // indirect
 	github.com/bytedance/sonic/loader v0.2.1 // indirect
+	github.com/charmbracelet/lipgloss v1.0.0 // indirect
+	github.com/charmbracelet/x/ansi v0.6.0 // indirect
+	github.com/charmbracelet/x/term v0.2.1 // indirect
 	github.com/cheggaaa/pb/v3 v3.1.5 // indirect
-	github.com/cloudsoda/go-smb2 v0.0.0-20231124195312-f3ec8ae2c891 // indirect
+	github.com/cloudsoda/go-smb2 v0.0.0-20241223203758-52b943b88fd6 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
 	github.com/cloudwego/iasm v0.2.0 // indirect
 	github.com/containerd/console v1.0.4 // indirect
 	github.com/disintegration/imaging v1.6.2 // indirect
 	github.com/dsnet/compress v0.0.2-0.20230904184137-39efe44ab707 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
+	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/fsnotify/fsnotify v1.8.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.7 // indirect
 	github.com/geoffgarside/ber v1.1.0 // indirect
-	github.com/gin-contrib/cors v1.7.2 // indirect
+	github.com/gin-contrib/cors v1.7.3 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/go-openapi/inflect v0.21.0 // indirect
@@ -73,6 +77,7 @@ require (
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
+	github.com/hashicorp/go-uuid v1.0.3 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.23.0 // indirect
@@ -80,6 +85,12 @@ require (
 	github.com/hhrutter/tiff v1.0.1 // indirect
 	github.com/hirochachacha/go-smb2 v1.1.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/jcmturner/aescts/v2 v2.0.0 // indirect
+	github.com/jcmturner/dnsutils/v2 v2.0.0 // indirect
+	github.com/jcmturner/gofork v1.7.6 // indirect
+	github.com/jcmturner/goidentity/v6 v6.0.1 // indirect
+	github.com/jcmturner/gokrb5/v8 v8.4.4 // indirect
+	github.com/jcmturner/rpc/v2 v2.0.3 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/jxskiss/base62 v1.1.0 // indirect
@@ -156,16 +167,16 @@ require (
 	golang.org/x/sys v0.28.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/tools v0.28.0 // indirect
-	google.golang.org/protobuf v1.36.0 // indirect
+	google.golang.org/protobuf v1.36.1 // indirect
 	gopkg.in/eapache/queue.v1 v1.1.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	modernc.org/gc/v3 v3.0.0-20241213165251-3bc300f6d0c9 // indirect
-	modernc.org/libc v1.61.4 // indirect
-	modernc.org/mathutil v1.7.0 // indirect
+	modernc.org/gc/v3 v3.0.0-20241223112719-96e2e1e4408d // indirect
+	modernc.org/libc v1.61.5 // indirect
+	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.8.0 // indirect
 	modernc.org/sqlite v1.34.4 // indirect
-	modernc.org/strutil v1.2.0 // indirect
+	modernc.org/strutil v1.2.1 // indirect
 	modernc.org/token v1.1.0 // indirect
 )

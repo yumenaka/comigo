@@ -67,24 +67,24 @@ func RunServer() (err error) {
 	setURLs(router)
 
 	// 发消息
-	slog.Info("Starting server...", "port", config.Config.Port)
+	slog.Info("Starting server...", "port", config.GetPort)
 
 	// 是否对外服务
 	webHost := ":"
-	if config.Config.DisableLAN {
+	if config.GetDisableLAN() {
 		webHost = "localhost:"
 	}
 	// 是否启用TLS
-	enableTLS := config.Config.CertFile != "" && config.Config.KeyFile != ""
+	enableTLS := config.GetCertFile() != "" && config.GetKeyFile() != ""
 	server := &http.Server{
-		Addr:         webHost + strconv.Itoa(config.Config.Port),
+		Addr:         webHost + strconv.Itoa(config.GetPort()),
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		Handler:      router, // gin.Engine本身可以作为一个Handler传递到http包,用于启动服务器
 	}
 	// 监听并启动服务(TLS)
 	if enableTLS {
-		if err = server.ListenAndServeTLS(config.Config.CertFile, config.Config.KeyFile); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		if err = server.ListenAndServeTLS(config.GetCertFile(), config.GetKeyFile()); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			time.Sleep(3 * time.Second)
 			logger.Fatalf("listen: %s\n", err)
 		}
