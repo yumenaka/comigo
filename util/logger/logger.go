@@ -4,40 +4,45 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/sirupsen/logrus"
+	"io"
 )
 
-var Log *logrus.Logger
+var logger *logrus.Logger
 
 func init() {
-	Log = logrus.New()
+	logger = logrus.New()
 	logrus.SetFormatter(&logrus.TextFormatter{
 		FullTimestamp:   true,
 		TimestampFormat: "2006-01-02 15:04:05", // 使用完整时间戳
 	})
 }
 
+func SetOutput(output io.Writer) {
+	logger.SetOutput(output)
+}
+
 func Fatal(args ...interface{}) {
-	Log.Fatal(args...)
+	logger.Fatal(args...)
 }
 
 func Fatalf(format string, args ...interface{}) {
-	Log.Fatalf(format, args...)
+	logger.Fatalf(format, args...)
 }
 
 func Info(args ...interface{}) {
-	Log.Info(args...)
+	logger.Info(args...)
 }
 
 func Infof(format string, args ...interface{}) {
-	Log.Infof(format, args...)
+	logger.Infof(format, args...)
 }
 
 func Errorf(format string, args ...interface{}) {
-	Log.Errorf(format, args...)
+	logger.Errorf(format, args...)
 }
 
 func DebugWithFields(fields logrus.Fields, args ...interface{}) {
-	Log.WithFields(fields).Debug(args...)
+	logger.WithFields(fields).Debug(args...)
 }
 
 type MyFormatter struct {
