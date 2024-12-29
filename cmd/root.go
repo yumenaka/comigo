@@ -1,9 +1,6 @@
 package cmd
 
 import (
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/yumenaka/comigo/cmd/tui"
-	"golang.org/x/term"
 	"os"
 	"path"
 	"path/filepath"
@@ -23,31 +20,31 @@ var rootCmd = &cobra.Command{
 	Example: locale.GetString("comigo_example"),
 	Version: config.GetVersion(),
 	Long:    locale.GetString("long_description"),
-	// Run 函数按以下顺序执行：
-	// PersistentPreRun() PreRun() Run() PostRun() PersistentPostRun()
-	// 所有函数都获得相同的参数，即命令名称后面的参数。
-	// 仅当声明了当前命令的 Run 函数时，才会执行 PreRun 和 PostRun 函数。
-	PreRun: func(cmd *cobra.Command, args []string) {
-		//当前 stdout 连接到真实终端时，启动 TUI 界面
-		if term.IsTerminal(int(os.Stdout.Fd())) {
-			// 1. 初始化自定义的日志缓冲区
-			logBuffer := tui.NewLogBuffer()
-			// 将标准日志的输出重定向到 logBuffer
-			logger.SetOutput(logBuffer)
-
-			// 2. 创建 Bubble Tea 程序
-			m := tui.InitialModel(logBuffer)
-			p := tea.NewProgram(m)
-
-			// 3. 运行 TUI 程序
-			go func() {
-				if _, err := p.Run(); err != nil {
-					logger.Errorf("Error running tui interface: %v", err)
-				}
-			}()
-		}
-		//当前 stdout 非终端（可能是文件、管道或者重定向）时，不启动 TUI 界面
-	},
+	//// Run 函数按以下顺序执行：
+	//// PersistentPreRun() PreRun() Run() PostRun() PersistentPostRun()
+	//// 所有函数都获得相同的参数，即命令名称后面的参数。
+	//// 仅当声明了当前命令的 Run 函数时，才会执行 PreRun 和 PostRun 函数。
+	//PreRun: func(cmd *cobra.Command, args []string) {
+	//	//当前 stdout 连接到真实终端时，启动 TUI 界面
+	//	if term.IsTerminal(int(os.Stdout.Fd())) {
+	//		// 1. 初始化自定义的日志缓冲区
+	//		logBuffer := tui.NewLogBuffer()
+	//		// 将标准日志的输出重定向到 logBuffer
+	//		logger.SetOutput(logBuffer)
+	//
+	//		// 2. 创建 Bubble Tea 程序
+	//		m := tui.InitialModel(logBuffer)
+	//		p := tea.NewProgram(m)
+	//
+	//		// 3. 运行 TUI 程序
+	//		go func() {
+	//			if _, err := p.Run(); err != nil {
+	//				logger.Errorf("Error running tui interface: %v", err)
+	//			}
+	//		}()
+	//	}
+	//	//当前 stdout 非终端（可能是文件、管道或者重定向）时，不启动 TUI 界面
+	//},
 	// 实际运行的命令大多写在这里
 	Run: func(cmd *cobra.Command, args []string) {
 		//解析命令，扫描文件

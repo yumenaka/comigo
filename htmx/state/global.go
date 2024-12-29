@@ -29,8 +29,8 @@ func (g *GlobalState) GetAllBookNum() int {
 var Global GlobalState
 
 func init() {
-	Global.Debug = config.Config.Debug
-	Global.Version = config.Version
+	Global.Debug = config.GetDebug()
+	Global.Version = config.GetVersion()
 	Global.SingleUserMode = false
 	// 是否为静态模式 默认为false
 	// 静态模式下，7777 端口的反代服务器无法正常加载静态JS资源，导致页面无法正常显示。
@@ -38,7 +38,7 @@ func init() {
 	Global.StaticMode = false
 	Global.OnlineUserCount = 0
 	Global.ShelfBookList = nil
-	Global.ServerStatus = util.GetServerInfo(config.Config.Host, config.Version, config.Config.Port, config.Config.EnableUpload, 0)
+	Global.ServerStatus = util.GetServerInfo(config.GetHost(), config.GetVersion(), config.GetPort(), config.GetEnableUpload(), 0)
 }
 
 func GetCloverBackgroundImageUrl(book *model.BookInfo) string {
