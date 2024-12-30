@@ -1,7 +1,7 @@
 package comigo
 
 import (
-	"fmt"
+	"github.com/yumenaka/comigo/util/logger"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -13,7 +13,7 @@ import (
 
 // StartComigoServer 启动Comigo Web服务器
 func StartComigoServer(engine *gin.Engine) {
-	fmt.Println("Start Comigo File Server.")
+	logger.Info("Start Comigo File Server.")
 	config.GetCfg().OpenBrowser = false
 	//解析命令，扫描文件
 	cmd.StartScan(os.Args)
