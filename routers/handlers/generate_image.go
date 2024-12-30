@@ -3,6 +3,7 @@ package handlers
 import (
 	_ "embed"
 	"fmt"
+	"github.com/yumenaka/comigo/util/logger"
 	"image"
 	"image/color"
 	"image/draw"
@@ -26,7 +27,7 @@ func GenerateImage(c *gin.Context) {
 	widthStr := c.Query("width")
 	text := c.Query("text")
 	fontSizeStr := c.Query("font_size")
-	fmt.Println("GenerateImage!!!!!", "height:", heightStr, "width:", widthStr, "text:", text, "font_size:", fontSizeStr)
+	logger.Infof("GenerateImage: height=%s, width=%s, text=%s, font_size=%s", heightStr, widthStr, text, fontSizeStr)
 	bgColorStr := c.Query("bg_color") // 背景颜色参数
 
 	// 将高度和宽度转换为整数

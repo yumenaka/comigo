@@ -19,7 +19,7 @@ func StartWebServer() {
 	//Recovery 中间件。返回 500 错误页面，避免程序直接崩溃，同时记录错误日志。
 	engine.Use(gin.Recovery())
 	//日志中间件
-	setLogger(engine)
+	SetLogger(engine)
 
 	// CORS 中间件
 	engine.Use(func(c *gin.Context) {

@@ -128,7 +128,7 @@ func Execute() {
 	//初始化命令行参数。不能放在初始化配置文件之后。
 	InitFlags()
 	//初始化配置文件
-	cobra.OnInitialize(LoadConfigFile) // "OnInitialize"传入的函数，应该会在所有命令执行之前，包括rootCmd.Run之前执行。
+	cobra.OnInitialize(LoadConfigFile) // "OnInitialize"传入的函数，应该会在所有命令执行之前、包括rootCmd.Run之前执行。
 	//执行命令
 	if err := rootCmd.Execute(); err != nil {
 		logger.Infof("%s", err)

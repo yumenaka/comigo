@@ -39,10 +39,6 @@ func (lb *LogBuffer) Write(p []byte) (int, error) {
 			continue
 		}
 		lb.lines = append(lb.lines, line)
-		////限制最多显示10行日志？？
-		//if len(lb.lines) > 10 {
-		//	lb.lines = lb.lines[len(lb.lines)-10:]
-		//}
 	}
 	return len(p), nil
 }
