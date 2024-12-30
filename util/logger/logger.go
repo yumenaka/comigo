@@ -73,7 +73,7 @@ func (f *CustomFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 
 	// 默认的调用信息
 	var callerInfo string
-	if entry.HasCaller() {
+	if ReportCaller && entry.HasCaller() {
 		// 例如：/path/to/pkg/file.go
 		file := entry.Caller.File
 		// 行号
@@ -96,11 +96,11 @@ func (f *CustomFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	// 拼装日志内容
 	var logLine string
 	if ReportCaller {
-		logLine = fmt.Sprintf("[%s] [%s] %s\n",
-			timestamp, entry.Level, entry.Message)
+		logLine = fmt.Sprintf("[%s][%s]%s\n",
+			strings.ToUpper(entry.Level.String()), timestamp, entry.Message)
 	} else {
-		logLine = fmt.Sprintf("[%s] [%s] %s %s\n",
-			timestamp, entry.Level, callerInfo, entry.Message)
+		logLine = fmt.Sprintf("[%s][%s]%s%s\n",
+			strings.ToUpper(entry.Level.String()), timestamp, callerInfo, entry.Message)
 	}
 	b.WriteString(logLine)
 	return b.Bytes(), nil
@@ -168,17 +168,27 @@ func GinLogHandler(LogToFile bool, LogFilePath string, LogFileName string, Debug
 		c.Next()
 		// 请求结束后，计算所需的时间并记录日志
 		endTime := time.Now()
-		latencyTime := endTime.Sub(startTime).String()
+		latencyTime := float64(endTime.Sub(startTime).Microseconds()) / 1000
 		reqMethod := c.Request.Method
 		reqURI := c.Request.RequestURI
 		statusCode := c.Writer.Status()
-		// 日志格式
-		//%15s 是一个格式说明符，用于格式化字符串。这里的 15 表示输出的字符串宽度应该为至少15个字符。
-		//使用 %12s 使得字符串 "test" 右对齐，并在其左侧添加了空格来达到15个字符的宽度。
-		//使用 %-12s 使得字符串左对齐，并在其右侧添加了空格来达到15个字符的宽度
+		// 日志格式 https://www.runoob.com/go/go-fmt-printf.html
+		// 格式化占位符的结构为：%[flags][width][.precision]verb
+		//     flags：用于控制格式化输出的标志（可选）。
+		//        -：左对齐。
+		//        +：始终显示数值的符号。
+		//        0：用零填充。
+		//        #：为二进制、八进制、十六进制等加上前缀。
+		//        空格：正数前加空格，负数前加 -。
+		//    width：输出宽度（可选）。
+		//    .precision：浮点数小数点后的位数（可选）。
+		//    verb：用于指定数据的格式化方式。
+		// %v	以默认格式输出变量
+		// %f	十进制浮点数
+		// %6.2f 表示输出浮点数，宽度为6，小数点后保留2位
 		logger.WithFields(logrus.Fields{
 			//"status_code":  statusCode,
 			//"client_ip":    c.ClientIP(),
-		}).Info(fmt.Sprintf("%s:%3d|%13v|%s%s", reqMethod, statusCode, latencyTime, c.ClientIP(), reqURI))
+		}).Info(fmt.Sprintf("%s:%d|%6.2fms|%s|%s", reqMethod, statusCode, latencyTime, c.ClientIP(), reqURI))
 	}
 }
