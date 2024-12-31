@@ -191,6 +191,21 @@ function getInSetArea(e) {
     return inSetArea;
 }
 
+//htmx翻页模式功能优化：不隐藏工具栏的时候。点击设置区域，自动漫画区域居中。
+function scrollToMangaMain() {
+    if (!Alpine.store('flip').autoHideToolbar) {
+        // 1. 获取 MangaMain 元素
+        const mangaMain = document.getElementById('MangaMain');
+
+        // 2. 将 MangaMain 顶部对齐到浏览器可见区域顶部
+        //    这样它的高度（100vh）就能正好占满整个可见区域
+        mangaMain.scrollIntoView({
+            behavior: 'smooth', // 平滑滚动
+            block: 'start'      // 与可视区顶部对齐
+        });
+    }
+}
+
 
 //获取鼠标位置,决定是否打开设置面板
 function onMouseClick(e) {
@@ -204,6 +219,7 @@ function onMouseClick(e) {
     if (inSetArea) {
         //获取ID为 OpenSettingButton的元素，然后模拟点击
         document.getElementById("OpenSettingButton").click();
+        scrollToMangaMain();
     }
     if (!inSetArea) {
         //决定如何翻页
@@ -295,7 +311,7 @@ function getElementsRect() {
 }
 
 document.addEventListener('mousemove', function (event) {
-    const {rect1, rect2, rect3,rect4} = getElementsRect();
+    const {rect1, rect2, rect3, rect4} = getElementsRect();
     const x = event.clientX;
     const y = event.clientY;
     // 判断鼠标是否在元素 1 范围内(Header)
@@ -361,6 +377,7 @@ function onResize() {
         Alpine.store('flip').isPortraitMode = true
     }
 }
+
 //初始化时,执行一次onResize()
 onResize();
 //文档视图调整大小时触发 resize 事件。 https://developer.mozilla.org/zh-CN/docs/Web/API/Window/resize_event
