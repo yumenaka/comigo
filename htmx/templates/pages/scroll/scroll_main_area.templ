@@ -1,19 +1,19 @@
 package scroll
 
 import (
-    "fmt"
-    "strconv"
-    "strings"
+	"fmt"
+	"strconv"
+	"strings"
 
-    "github.com/yumenaka/comigo/model"
-    "github.com/yumenaka/comigo/htmx/state"
+	"github.com/yumenaka/comigo/htmx/state"
+	"github.com/yumenaka/comigo/model"
 )
 
 // getImageXData 在Go函数里面计算图片的x-data属性
 // 渲染结果例：
-// x-data="{  isDoublePage: false, imageUrl: '/api/get_file?id=asxScIDD&filename=1.jpg' + ($store.global.autoCrop  ? &quot;&auto_crop=1&quot; : '') }"
+// x-data="{  isDoublePage: false, imageUrl: '/api/get_file?id=asxScIDD&filename=1.jpg' + ($store.global.autoCrop  ? &quot;&auto_crop=1&quot; : ”) }"
 func getImageXData(Url string) string {
-     return fmt.Sprintf(`{ isDoublePage: false, imageUrl: '%s' + ($store.global.autoCrop?"&auto_crop=1":'')}`, Url)
+	return fmt.Sprintf(`{ isDoublePage: false, imageUrl: '%s' + ($store.global.autoCrop?"&auto_crop=1":'')}`, Url)
 }
 
 // ScrollMainArea 定义 BodyHTML
@@ -27,9 +27,12 @@ templ ScrollMainArea(s *state.GlobalState, book *model.Book) {
 		id="mouseMoveArea"
 		x-data="{
             imageWidth: '',
-            orientation: '',
+            viewOrientation: '',
             updateOrientation() {
-                this.orientation = (window.innerWidth / window.innerHeight >= 1) ? 'landscape' : 'portrait';
+                // 在 Alpine.js v3 里，如果你在 x-data 中定义了某个属性（例如 viewOrientation），并想在方法里对其赋值，就需要显式地使用 this.xxx 的形式，否则会报错。
+                 this.viewOrientation = (window.innerWidth / window.innerHeight >= 1)
+                        ? 'landscape'
+                        : 'portrait';
             }
         }"
 		x-init="updateOrientation();"
@@ -47,7 +50,7 @@ templ ScrollMainArea(s *state.GlobalState, book *model.Book) {
 				}
 				if !strings.Contains(image.Url, "hidden.")&& !strings.Contains(image.Url, ".html") {
 					<img
-					    x-data={getImageXData(image.Url)}
+						x-data={ getImageXData(image.Url) }
 						class="w-full manga_image"
 						:src="imageUrl"
 						@load="
@@ -63,7 +66,7 @@ templ ScrollMainArea(s *state.GlobalState, book *model.Book) {
                                 $el.classList.remove('double');
                                 //console.log(`naturalWidth: ${$event.target.naturalWidth}, naturalHeight: ${$event.target.naturalHeight}`);
                             }"
-						:style="{ width: window.screen.orientation.type.toString().includes('landscape') ?(Alpine.store('scroll').widthUseFixedValue? (isDoublePage ? Alpine.store('scroll').doublePageWidth_PX +'px': Alpine.store('scroll').singlePageWidth_PX +'px'): (isDoublePage ? Alpine.store('scroll').doublePageWidth_Percent + '%': Alpine.store('scroll').singlePageWidth_Percent + '%')): '100%', maxWidth: '100%'}"
+						:style="{ width: viewOrientation === 'landscape' ?(Alpine.store('scroll').widthUseFixedValue? (isDoublePage ? Alpine.store('scroll').doublePageWidth_PX +'px': Alpine.store('scroll').singlePageWidth_PX +'px'): (isDoublePage ? Alpine.store('scroll').doublePageWidth_Percent + '%': Alpine.store('scroll').singlePageWidth_Percent + '%')): '100%', maxWidth: '100%'}"
 						alt={ strconv.Itoa(key) }
 					/>
 				}
