@@ -2,7 +2,6 @@ package router
 
 import (
 	"errors"
-	"fmt"
 	"io/fs"
 	"net/http"
 	"strconv"
