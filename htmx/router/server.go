@@ -2,7 +2,7 @@ package router
 
 import (
 	"errors"
-	"github.com/yumenaka/comigo/routers"
+	"fmt"
 	"io/fs"
 	"net/http"
 	"strconv"
@@ -35,11 +35,10 @@ func RunServer() (err error) {
 	// 使用 noCache 中间件，会导致浏览器每次都重新加载页面，不使用缓存。与翻页模式的预加载功能冲突。
 	//router.Use(noCache())
 
-	//Recovery 中间件。返回 500 错误页面，避免程序直接崩溃，同时记录错误日志。
+	//Recovery 中间件。返回 500 错误，避免程序直接崩溃，同时记录错误日志。
 	router.Use(gin.Recovery())
-
+	// 设置 Gin 的日志输出
 	SetGinLogger(router)
-	routers.SetWebServerPort()
 	// 扫描漫画
 	comigo.StartComigoServer(router)
 	// 为模板引擎定义 HTML 渲染器。

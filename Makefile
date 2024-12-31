@@ -91,10 +91,8 @@ Windows_arm64:
 	rmdir $(BINDIR)/$(NAME)_$(VERSION)_$@
 	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
 
-# golang支持的交叉编译架构的列表，参见 go tool dist list
 # 看ARM处理器是否支持VFP功能:grep -i vfp /proc/cpuinfo
-
-##Linux-armv5,GOARM=5：使用软件浮点；当 CPU 没有 VFP 协处理器时
+##Linux-armv5,GOARM=5：使用软件浮点； CPU 没有 VFP 协处理器
 #Linux-armv5:
 #	GOARCH=arm GOOS=linux GOARM=5 $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME)
 ##ifdef UPX

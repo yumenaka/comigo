@@ -35,7 +35,7 @@ var ImageMimeTypes = map[string]string{
 	"gif": "image/gif",
 	"ief": "image/ief",
 	"jpg": "image/jpeg",
-	// "jpe":  "image/jpeg",
+	"jpe":  "image/jpeg",
 	"jpeg": "image/jpeg",
 	"png":  "image/png",
 	"svg":  "image/svg+xml",
