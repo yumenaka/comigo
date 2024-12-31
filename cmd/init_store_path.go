@@ -9,8 +9,8 @@ import (
 	"github.com/yumenaka/comigo/util/logger"
 )
 
-// initStorePath 添加默认扫描路径
-func initStorePath(args []string) {
+// SetStorePath 添加默认扫描路径
+func SetStorePath(args []string) {
 	//如果用户指定了扫描路径，就把指定的路径都加入到扫描路径里面
 	config.InitCfgStores()
 	//没指定扫描路径,配置文件也没设置书库文件夹的时候，默认把【当前工作目录】作为扫描路径
@@ -41,7 +41,7 @@ func initStorePath(args []string) {
 			//把上传路径添加到扫描路径里面去
 			config.AddLocalStore(config.GetUploadPath())
 		}
-		//如果用户启用上传，但是用户没有指定上传路径，就把【本地存储】里面的第一个路径作为上传路径
+		//如果用户启用上传，但没有指定上传路径，就把【本地存储】里面的第一个路径作为上传路径
 		if config.GetUploadPath() == "" {
 			for _, store := range config.GetLocalStoresList() {
 				if util.IsExist(store) {

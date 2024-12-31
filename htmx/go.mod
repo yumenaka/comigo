@@ -20,7 +20,7 @@ require (
 // replace github.com/yumenaka/comigo => github.com/yumenaka/comigo master
 //replace github.com/yumenaka/comigo => github.com/yumenaka/comigo <commit-hash>
 // replace github.com/yumenaka/comigo => github.com/yumenaka/comigo v0.9.12-0.20241002234112-6c9ad7a143e4
-//replace github.com/yumenaka/comigo v0.9.14-0.20241222085917-b87aebe581d9 => ../
+replace github.com/yumenaka/comigo v0.9.14-0.20241229132926-7d88d9e595c0 => ../
 
 require (
 	github.com/charmbracelet/bubbletea v1.2.4

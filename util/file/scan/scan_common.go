@@ -108,8 +108,8 @@ func (o *Option) IsSkipDir(path string) bool {
 	return false
 }
 
-// InitStore 3、扫描路径，取得路径里的书籍
-func InitStore(scanConfig Option) error {
+// AllStore 3、扫描路径，取得路径里的书籍
+func AllStore(scanConfig Option) error {
 	// 重置所有书籍与书组信息
 	model.ClearAllBookData()
 	for _, localPath := range scanConfig.LocalStores {

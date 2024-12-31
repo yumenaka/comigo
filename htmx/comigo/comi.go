@@ -14,9 +14,9 @@ import (
 // StartComigoServer 启动Comigo Web服务器
 func StartComigoServer(engine *gin.Engine) {
 	logger.Info("Start Comigo File Server.")
-	config.GetCfg().OpenBrowser = false
+	config.GetCfg().OpenBrowser = true
 	//解析命令，扫描文件
-	cmd.StartScan(os.Args)
+	cmd.SetStore(os.Args)
 	routers.BindAPI(engine)
 	// Admin界面 TODO：用 Htmx 重写
 	resource.EmbedAdmin(engine)

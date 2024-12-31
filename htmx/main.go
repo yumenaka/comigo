@@ -4,15 +4,19 @@ import (
 	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/x/term"
+	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comigo/cmd"
 	"github.com/yumenaka/comigo/htmx/router"
 	"github.com/yumenaka/comigo/htmx/tui"
 	"github.com/yumenaka/comigo/util/logger"
+	"io"
 	"log/slog"
 	"os"
 )
 
 func main() {
+	//禁止Gin自带的控制台输出
+	gin.DefaultWriter = io.Discard
 	// 检测标准输出是否为终端
 	if term.IsTerminal(os.Stdout.Fd()) {
 		fmt.Println("程序正在终端中执行")

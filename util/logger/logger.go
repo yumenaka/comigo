@@ -121,7 +121,7 @@ func GinLogHandler(LogToFile bool, LogFilePath string, LogFileName string, Debug
 	logger.SetLevel(logrus.DebugLevel) //设置最低的日志级别
 	logger.SetReportCaller(Debug)      //显示函数名和行号
 	logger.SetFormatter(&CustomFormatter{
-		FullTimestamp:   true,
+		FullTimestamp:   false,
 		TimestampFormat: "2006-01-02 15:04:05",
 	})
 	//设置输出
@@ -189,6 +189,6 @@ func GinLogHandler(LogToFile bool, LogFilePath string, LogFileName string, Debug
 		logger.WithFields(logrus.Fields{
 			//"status_code":  statusCode,
 			//"client_ip":    c.ClientIP(),
-		}).Info(fmt.Sprintf("%s:%d|%6.2fms|%s|%s", reqMethod, statusCode, latencyTime, c.ClientIP(), reqURI))
+		}).Info(fmt.Sprintf("[%s:%d][%6.2fms][%s]%s", reqMethod, statusCode, latencyTime, c.ClientIP(), reqURI))
 	}
 }

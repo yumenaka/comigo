@@ -47,10 +47,12 @@ var rootCmd = &cobra.Command{
 	//},
 	// 实际运行的命令大多写在这里
 	Run: func(cmd *cobra.Command, args []string) {
-		//解析命令，扫描文件
-		StartScan(args)
+		//通过“可执行文件名”设置部分默认参数,目前不生效
+		config.SetByExecutableFilename()
 		//设置临时文件夹
 		config.AutoSetCachePath()
+		//初始化书库，扫描文件
+		SetStore(args)
 		//SetWebServerPort
 		routers.SetWebServerPort()
 		//设置书籍API
@@ -90,7 +92,6 @@ func LoadConfigFile() {
 		logger.Infof("Failed to get WorkingDirectory:%s", err)
 	}
 	runtimeViper.AddConfigPath(WorkingDirectory)
-
 	runtimeViper.SetConfigType("toml")
 	runtimeViper.SetConfigName("config.toml")
 
