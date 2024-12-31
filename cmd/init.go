@@ -73,7 +73,7 @@ func InitFlags() {
 	// 至少有几张图片，才认定为漫画压缩包
 	rootCmd.PersistentFlags().IntVar(&cfg.MinImageNum, "min-image", 1, locale.GetString("min_media_num"))
 	// 输出log文件
-	rootCmd.PersistentFlags().BoolVar(&cfg.LogToFile, "log", false, locale.GetString("log_to_file"))
+	rootCmd.PersistentFlags().BoolVar(&cfg.LogToFile, "log-file", false, locale.GetString("log_to_file"))
 	// web图片缓存
 	rootCmd.PersistentFlags().BoolVar(&cfg.UseCache, "use-cache", false, locale.GetString("cache_file_enable"))
 	// 图片缓存路径

@@ -11,8 +11,8 @@ import (
 	"github.com/yumenaka/comigo/util/logger"
 )
 
-// StartScan 解析命令,扫描书库
-func StartScan(args []string) {
+// SetStore 解析命令,扫描文件，设置书库等
+func SetStore(args []string) {
 	//1. 初始化数据库
 	if config.GetEnableDatabase() {
 		// 从数据库中读取书籍信息并持久化
@@ -27,8 +27,8 @@ func StartScan(args []string) {
 			logger.Infof("从数据库中读取书籍信息,一共有 %d 本书", strconv.Itoa(len(books)))
 		}
 	}
-	//2、设置默认书库路径：扫描CMD指定的路径，如果开启上传，额外增加上传文件夹到默认书库路径
-	initStorePath(args)
+	//2、设置默认书库路径：扫描CMD指定的路径，或添加当前文件夹为默认路径。
+	SetStorePath(args)
 
 	//3、扫描配置文件里面的书库路径
 	option := scan.NewScanOption(
@@ -47,7 +47,7 @@ func StartScan(args []string) {
 		config.GetClearDatabaseWhenExit(),
 		config.GetDebug(),
 	)
-	err := scan.InitStore(option)
+	err := scan.AllStore(option)
 	if err != nil {
 		logger.Infof("Failed to scan store path: %v", err)
 	}
@@ -59,6 +59,4 @@ func StartScan(args []string) {
 			return
 		}
 	}
-	//5、通过“可执行文件名”设置部分默认参数,目前不生效
-	config.SetByExecutableFilename()
 }

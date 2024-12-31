@@ -9,17 +9,19 @@ import (
 	"github.com/yumenaka/comigo/util/locale"
 )
 
-// StartWebServer 启动web服务
-func StartWebServer() {
+var engine *gin.Engine
+
+func init() {
 	//gin mode：ReleaseMode,DebugMode,TestMode
 	gin.SetMode(gin.ReleaseMode)
-
 	//不用 gin.Default()，避免使用 Gin 的默认日志中间件
-	engine := gin.New()
+	engine = gin.New()
+}
+
+// StartWebServer 启动web服务
+func StartWebServer() {
 	//Recovery 中间件。返回 500 错误页面，避免程序直接崩溃，同时记录错误日志。
 	engine.Use(gin.Recovery())
-	//日志中间件
-	SetLogger(engine)
 
 	// CORS 中间件
 	engine.Use(func(c *gin.Context) {

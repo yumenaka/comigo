@@ -2,8 +2,8 @@ package router
 
 import (
 	"errors"
+	"github.com/yumenaka/comigo/routers"
 	"io/fs"
-	"log/slog"
 	"net/http"
 	"strconv"
 	"time"
@@ -38,6 +38,8 @@ func RunServer() (err error) {
 	//Recovery 中间件。返回 500 错误页面，避免程序直接崩溃，同时记录错误日志。
 	router.Use(gin.Recovery())
 
+	SetGinLogger(router)
+	routers.SetWebServerPort()
 	// 扫描漫画
 	comigo.StartComigoServer(router)
 	// 为模板引擎定义 HTML 渲染器。
@@ -67,7 +69,7 @@ func RunServer() (err error) {
 	setURLs(router)
 
 	// 发消息
-	slog.Info("Starting server...", "port", config.GetPort)
+	logger.Infof("Starting server... port %v", config.GetPort())
 
 	// 是否对外服务
 	webHost := ":"

@@ -113,7 +113,7 @@ func startReScan(reScanFile bool) {
 		config.GetClearDatabaseWhenExit(),
 		config.GetDebug(),
 	)
-	if err := scan.InitStore(option); err != nil {
+	if err := scan.AllStore(option); err != nil {
 		logger.Infof("Failed to scan store path: %v", err)
 	}
 	if config.GetEnableDatabase() {
