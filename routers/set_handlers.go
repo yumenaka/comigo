@@ -1,23 +1,17 @@
 package routers
 
 import (
-	"log"
-
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/routers/config_handlers"
 	"github.com/yumenaka/comigo/routers/handlers"
 	"github.com/yumenaka/comigo/routers/token"
 	"github.com/yumenaka/comigo/routers/websocket"
+	"github.com/yumenaka/comigo/util/logger"
 )
 
 // BindAPI 为前端绑定 API 路由
 func BindAPI(engine *gin.Engine) {
-	// 配置 CORS，默认允许所有来源，根据需要可修改
-	// 以后可以设置成“从配置文件中读取”，避免硬编码调试地址
-	engine.Use(cors.Default())
-
 	// 路由组，方便管理部分相同的 URL
 	api := engine.Group("/api")
 
@@ -28,7 +22,7 @@ func BindAPI(engine *gin.Engine) {
 	if config.GetPassword() != "" {
 		jwtMiddleware, err := token.NewJwtMiddleware()
 		if err != nil {
-			log.Fatal("JWT Error: " + err.Error())
+			logger.Fatalf("JWT Error: %s", err.Error())
 		}
 
 		// 登录、注销和刷新 token 路由

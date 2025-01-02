@@ -39,6 +39,11 @@ func embedTemplate(engine *gin.Engine) {
 			"title": webTitle, //页面标题
 		})
 	})
+	//engine.GET("/index.html", func(c *gin.Context) {
+	//	c.HTML(http.StatusOK, "template-data", gin.H{
+	//		"title": webTitle, //页面标题
+	//	})
+	//})
 }
 
 //go:embed  web_static
