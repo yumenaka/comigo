@@ -17,6 +17,10 @@ func init() {
 	engine = gin.New()
 }
 
+func GetEngine() *gin.Engine {
+	return engine
+}
+
 func SetEngine() {
 	//Recovery 中间件。返回 500 错误页面，避免程序直接崩溃，同时记录错误日志。
 	engine.Use(gin.Recovery())
