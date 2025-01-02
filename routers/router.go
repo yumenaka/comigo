@@ -1,12 +1,11 @@
 package routers
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/resource"
 	"github.com/yumenaka/comigo/util/locale"
+	"net/http"
 )
 
 var engine *gin.Engine
@@ -18,8 +17,7 @@ func init() {
 	engine = gin.New()
 }
 
-// StartWebServer 启动web服务
-func StartWebServer() {
+func SetEngine() {
 	//Recovery 中间件。返回 500 错误页面，避免程序直接崩溃，同时记录错误日志。
 	engine.Use(gin.Recovery())
 
@@ -49,6 +47,11 @@ func StartWebServer() {
 	resource.EmbedResoure(engine, locale.GetString("html_title")+config.GetVersion())
 	//设置各种API
 	BindAPI(engine)
+}
+
+// StartWebServer 启动web服务
+func StartWebServer() {
+	SetEngine()
 	//显示QRCode
 	showQRCode()
 	//监听并启动web服务
