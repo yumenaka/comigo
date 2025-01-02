@@ -26,6 +26,10 @@ func SetEngine() {
 	engine.Use(gin.Recovery())
 
 	// CORS 中间件
+	// 配置 CORS，默认允许所有来源，根据需要可修改
+	// 以后可以设置成“从配置文件中读取”，避免硬编码调试地址
+	//engine.Use(cors.Default()) // 使用第三方包
+	// https://pjchender.dev/golang/gin-cors/
 	engine.Use(func(c *gin.Context) {
 		//在这个代码中，CORS 中间件设置了几个关键的 HTTP 头：
 		//Access-Control-Allow-Origin: 指定允许跨域请求的域名。在示例中使用 * 表示允许所有域名。根据您的需求，您也可以指定具体的域名。
@@ -38,7 +42,6 @@ func SetEngine() {
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 		c.Writer.Header().Set("Access-Control-Expose-Headers", "Content-Length")
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-
 		//在中间件中，针对 OPTIONS 请求做了特殊处理。这是因为在发送实际请求之前，浏览器会先发送一个 OPTIONS 请求（预检请求），以确定服务器是否允许跨域请求。
 		//对于这个预检请求，我们直接返回状态码 204 No Content 并结束请求处理。
 		if c.Request.Method == "OPTIONS" {
