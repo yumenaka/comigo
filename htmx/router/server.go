@@ -39,7 +39,7 @@ func RunServer() (err error) {
 	// 设置 Gin 的日志输出
 	SetGinLogger(router)
 	// 扫描漫画
-	comigo.StartComigoServer(router)
+	comigo.SetComigoServer(router)
 	// 为模板引擎定义 HTML 渲染器。
 	router.HTMLRender = &TemplRender{}
 	// 设置上传文件的最大内存限制

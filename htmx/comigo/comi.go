@@ -11,8 +11,8 @@ import (
 	"github.com/yumenaka/comigo/routers"
 )
 
-// StartComigoServer 启动Comigo Web服务器
-func StartComigoServer(engine *gin.Engine) {
+// SetComigoServer 设置Comigo Web服务器
+func SetComigoServer(engine *gin.Engine) {
 	logger.Info("Start Comigo File Server.")
 	config.GetCfg().OpenBrowser = true
 	//解析命令，扫描文件
