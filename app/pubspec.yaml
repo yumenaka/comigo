@@ -31,17 +31,44 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
+  # iOS 风格图标
   cupertino_icons: ^1.0.8
+  # Flutter SVG 支持 https://pub.dev/packages/flutter_svg
   flutter_svg: ^2.0.16
+  # 网络请求库，支持全局配置、Restful API、FormData、拦截器、 请求取消、Cookie 管理、文件上传/下载、超时、自定义适配器、转换器等。
+  # https://github.com/cfug/dio/blob/main/dio/README-ZH.md
   dio: ^5.7.0
+  # 多平台的持久性存储，用于存储用户数据 https://pub.dev/packages/shared_preferences
+  # 支持的数据类型包括 int、double、bool、String 和 List<String>
   shared_preferences: ^2.3.5
   #  简单的应用状态管理：https://flutter.cn/docs/development/data-and-backend/state-mgmt/simple
   provider: ^6.1.2
+  # 用来打开外部网页或第三方程序 https://pub.dev/packages/url_launcher
   url_launcher: ^6.3.1
+  #翻译插件，提供国际化和本地化功能
   intl: ^0.20.1
+  # 用来读取.env文件，同时.env文件需要在下面的assets指定
   flutter_dotenv: ^5.2.1
+  # webview插件，目前只支持Android、iOS与MacOS
+  # Windows和Linux暂不支持 https://pub.dev/packages/webview_flutter
+  # webview_flutter: ^4.10.0
+  ## 用于生成应用程序图标
+  flutter_launcher_icons: "^0.14.2"
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  remove_alpha_ios: true
+  image_path: "assets/icon/icon-transparent.png"
+  web:
+    generate: true
+    image_path: "assets/icon/icon-transparent.png"
+  windows:
+    generate: true
+    image_path: "assets/icon/icon-transparent.png"
+  macos:
+    generate: true
+    image_path: "assets/icon/icon-white.png"
 
 dev_dependencies:
   flutter_test:
@@ -56,6 +83,8 @@ dev_dependencies:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
+
+
 
 # The following section is specific to Flutter packages.
 flutter:

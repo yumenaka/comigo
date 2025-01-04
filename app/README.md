@@ -1,16 +1,9 @@
-# app
+# 开发笔记
 
-comigo mobile app
 
-## Getting Started
+flutter_launcher_icons自动生成图标 ，可以在项目文件夹下运行此命令：
+```bash
+dart run flutter_launcher_icons
+```
 
-This project is a starting point for a Flutter application.
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
