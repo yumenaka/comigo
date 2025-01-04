@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../models/book.dart';
 import '../models/remote_server.dart';
+
 // 这个Widget是Home页面的根部件。
 class BookShelf extends StatefulWidget {
   const BookShelf({super.key, required this.title});
@@ -15,7 +15,6 @@ class BookShelf extends StatefulWidget {
 }
 
 class _BookShelfState extends State<BookShelf> {
-
   @override
   void initState() {
     super.initState();
@@ -45,17 +44,25 @@ class _BookShelfState extends State<BookShelf> {
                 padding: const EdgeInsets.all(2.0),
                 margin: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 8.0),
                 child: ListTile(
-                  title: Text(snapshot.data![index].title),
-                  subtitle: Text(snapshot.data![index].id),
-                  leading: const Icon(Icons.book),
-                  trailing: Image.network(  (snapshot.data![index].cover?.url?.startsWith('/') ?? false)
-                      ? '${Provider.of<RemoteServer>(context).remoteHost}${snapshot.data![index].cover?.url}'
-                      : '${Provider.of<RemoteServer>(context).remoteHost}/${snapshot.data![index].cover?.url}',),
-                  onTap: () {
-                    debugPrint("remoteHost:${Provider.of<RemoteServer>(context, listen: false).remoteHost}");
-                    Navigator.pushNamed(context, "ScrollMode", arguments:{snapshot.data![index].title,snapshot.data![index].id});
-                  }
-                ),
+                    title: Text(snapshot.data![index].title),
+                    subtitle: Text(snapshot.data![index].id),
+                    leading: const Icon(Icons.book),
+                    trailing: Image.network(
+                      (snapshot.data![index].cover?.url?.startsWith('/') ??
+                              false)
+                          ? '${Provider.of<RemoteServer>(context).remoteHost}${snapshot.data![index].cover?.url}'
+                          : '${Provider.of<RemoteServer>(context).remoteHost}/${snapshot.data![index].cover?.url}',
+                    ),
+                    onTap: () {
+                      Navigator.pushNamed(
+                        context,
+                        "ScrollMode",
+                        arguments: {
+                          "title": snapshot.data![index].title,
+                          "bookID": snapshot.data![index].id,
+                        },
+                      );
+                    }),
               );
             },
           );
@@ -81,25 +88,25 @@ class _BookShelfState extends State<BookShelf> {
       ),
       body: booksWidget,
       bottomNavigationBar: BottomNavigationBar(
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.store),
-              label: 'Store',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.settings),
-              label: 'Settings',
-            ),
-          ],
-          selectedItemColor: Colors.amber[800],
-          onTap: (int index) {
-            debugPrint("index:$index");
-          },
-        ),
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.store),
+            label: 'Store',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Settings',
+          ),
+        ],
+        selectedItemColor: Colors.amber[800],
+        onTap: (int index) {
+          debugPrint("index:$index");
+        },
+      ),
     );
   }
 }

@@ -1,92 +1,116 @@
+/// 参考文档：
+/// 在Flutter中发起HTTP网络请求 https://doc.flutterchina.club/networking/
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'page_info.dart';
+// debugPrint 是 Flutter 提供的一个用于调试的打印方法，可以在控制台中查看
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'page_info.dart';
 
-// 在Flutter中发起HTTP网络请求 https://doc.flutterchina.club/networking/
+/// 预先配置 Dio 实例
+Dio _createDio() {
+  final baseUrl = dotenv.env['DEFAULT_HOST'];
+  if (baseUrl == null || baseUrl.isEmpty) {
+    throw Exception("环境变量 'DEFAULT_HOST' 未配置或为空，请检查 .env 文件。");
+  }
+
+  return Dio(
+    BaseOptions(
+      baseUrl: baseUrl,      // e.g. "https://example.com"
+      connectTimeout: const Duration(milliseconds: 5000),  // 5s
+      receiveTimeout: const Duration(milliseconds: 5000),
+    ),
+  );
+}
+
 Future<Book> getBook({required String bookID}) async {
-  final dio = Dio();
-  final comigoHost = dotenv.env['DEFAULT_HOST']!;
-  final fakeBookID = dotenv.env['FAKE_BOOK_ID']!;
-  print('$comigoHost/api/get_book?id=$bookID');
-  var url = '$comigoHost/api/get_book?id=$fakeBookID';
-  final response = await dio.get(url);
-  if (response.statusCode == 200) {
-    try {
-      print(response.data); // 添加这行来调试查看数据结构
-      final data = response.data as Map<String, dynamic>;
-      var book = Book.fromJson(data);
-      print(book);
-      return book;
-    } catch (e) {
-      debugPrint(e.toString());
-      rethrow;
+  final dio = _createDio();
+  try {
+    // 使用 queryParameters 来构建参数，避免手动字符串拼接
+    final response = await dio.get<Map<String, dynamic>>(
+      '/api/get_book',
+      queryParameters: {'id': bookID},
+    );
+
+    // 检查状态码和响应体
+    if (response.statusCode == 200 && response.data != null) {
+      debugPrint('getBook response data: ${response.data}'); // 调试用
+      return Book.fromJson(response.data!);
+    } else {
+      throw Exception('Failed to load book with id=$bookID');
     }
-  } else {
-    throw Exception('Failed to load books');
+  } catch (e, stackTrace) {
+    debugPrint('getBook error: $e');
+    debugPrint('Stack trace: $stackTrace');
+    rethrow; // 将错误继续向上抛
   }
 }
 
 Future<List<Book>> getBookList() async {
-  final dio = Dio();
-  final prefs = await SharedPreferences.getInstance();
-  final comigoHost = dotenv.env['DEFAULT_HOST']!;
-  var url = '$comigoHost/api/book_infos?depth=1&sort_by=name';
-  final response = await dio.get(url);
-  if (response.statusCode == 200) {
-    try {
-      final data = response.data as List<dynamic>;
-      final books = data.map((e) => Book.fromJson(e)).toList();
+  final dio = _createDio();
+  try {
+    // 同样使用 queryParameters
+    final response = await dio.get<List<dynamic>>(
+      '/api/top_shelf',
+      queryParameters: {'sort_by': 'filename'},
+    );
+
+    if (response.statusCode == 200 && response.data != null) {
+      // 将每个 List item 转换为 Book
+      final books = response.data!
+          .map((jsonItem) => Book.fromJson(jsonItem as Map<String, dynamic>))
+          .toList();
       return books;
-    } catch (e) {
-      debugPrint(e.toString());
-      rethrow;
+    } else {
+      throw Exception('Failed to load books');
     }
-  } else {
-    throw Exception('Failed to load books');
+  } catch (e, stackTrace) {
+    debugPrint('getBookList error: $e');
+    debugPrint('Stack trace: $stackTrace');
+    rethrow;
   }
 }
 
 class Book {
-  String title;
-  String id;
-  String type;
-  int pageCount;
-  int childBookNum;
-  PageInfo? cover;
-  List<PageInfo>? pages;
+  final String title;
+  final String id;
+  final String type;
+  final int? pageCount;
+  final int? childBookNum;
+  final PageInfo? cover;
+  final List<PageInfo>? pages;
 
-  Book(
-      {required this.title,
-      required this.id,
-      required this.type,
-      this.pageCount = 0,
-      this.childBookNum = 0,
-      this.cover,
-      this.pages});
+  const Book({
+    required this.title,
+    required this.id,
+    required this.type,
+    this.pageCount = 0,
+    this.childBookNum = 0,
+    this.cover,
+    this.pages,
+  });
 
-// Book.fromJson就是一个命名构造函数。可以使用该构造函数从Map中生成一个Student对象，有点像是java中的工厂方法。
-// 命名构造函数的格式是ClassName.identifier
-// 普通构造函数是没有返回值，而factory构造函数需要一个返回值。
+  /// 工厂构造函数，用于从 JSON 中解析 Book
   factory Book.fromJson(Map<String, dynamic> json) {
-    // 解析pages字段
-    List<PageInfo> pagesList;
-    if(json['pages'] != null){
-      pagesList = (json['pages']['images'] as List)
-          .map((i) => PageInfo.fromJson(i))
-          .toList();
-    }else{
-      pagesList = [];
-    }
+    // 安全地解析 pages
+    final pagesJson = json['pages'] as Map<String, dynamic>?;
+    final imagesList = pagesJson?['images'] as List<dynamic>? ?? [];
+    final pagesParsed = imagesList.map((e) => PageInfo.fromJson(e)).toList();
+
     return Book(
-      title: json['title'] as String,
-      type: json['author'] as String,
-      id: json['id'] as String,
-      cover: json['cover'] != null ? PageInfo.fromJson(json['cover']) : null,
-      pages: json['pages'] != null ? pagesList : null,
-      pageCount: json['page_count'] ?? 0,
-      childBookNum: json['child_book_num'] ?? 0,
+      title: json['title'] as String? ?? '',
+      id: json['id'] as String? ?? '',
+      type: json['type'] as String? ?? '',
+      cover: json['cover'] != null
+          ? PageInfo.fromJson(json['cover'] as Map<String, dynamic>)
+          : null,
+      pages: pagesParsed.isEmpty ? null : pagesParsed,
+      pageCount: (json['page_count'] as int?) ?? 0,
+      childBookNum: (json['child_book_num'] as int?) ?? 0,
     );
+  }
+
+  @override
+  String toString() {
+    return 'Book(title: $title, id: $id, type: $type)';
   }
 }
