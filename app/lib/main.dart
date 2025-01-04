@@ -1,5 +1,5 @@
-import 'package:app/pages/book_shelf.dart';
-import 'package:app/pages/scroll_mode.dart';
+import 'package:comigo/pages/book_shelf.dart';
+import 'package:comigo/pages/scroll_mode.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
