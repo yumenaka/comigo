@@ -11,7 +11,7 @@ templ InsertData(bookData any, stateData any) {
 	@templ.JSONScript("GlobalState", stateData)
 }
 
-templ FlipMainArea(s *state.GlobalState, book *model.Book) {
+templ MainArea(s *state.GlobalState, book *model.Book) {
 	<div
 		id="mouseMoveArea"
 		class="grid-line flex flex-col items-center justify-center flex-1 w-full max-w-full bg-base-100 text-base-content"

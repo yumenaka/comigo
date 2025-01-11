@@ -24,8 +24,8 @@ templ FlipPage(c *gin.Context, s *state.GlobalState, book *model.Book, readingPr
 			ShowQuickJumpBar:  common.ShowQuickJumpBar(book),
             QuickJumpBarBooks: common.QuickJumpBarBooks(book),
 		})
-	@FlipMainArea(s, book)
-	@common.Drawer(s.ServerStatus.ServerHost, FlipDrawerSlot())
+	@MainArea(s, book)
+	@common.Drawer(s.ServerStatus.ServerHost, DrawerSlot())
 	@common.QRCode(s.ServerStatus.ServerHost)
 	@common.Toast()
 }
