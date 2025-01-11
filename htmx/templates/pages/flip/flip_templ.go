@@ -58,11 +58,11 @@ func FlipPage(c *gin.Context, s *state.GlobalState, book *model.Book, readingPro
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = FlipMainArea(s, book).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = MainArea(s, book).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = common.Drawer(s.ServerStatus.ServerHost, FlipDrawerSlot()).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.Drawer(s.ServerStatus.ServerHost, DrawerSlot()).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

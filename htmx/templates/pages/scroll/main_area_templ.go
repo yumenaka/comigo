@@ -30,7 +30,7 @@ func getImageXData(Url string) string {
 // tips：hx-get 用于获取图片的URL，hx-trigger 用于触发加载，hx-swap 用于替换元素，innerHTML默认值，将内容放在目标元素内 outerHTML用返回的内容替换整个目标元素  hx-target 用于指定目标元素
 // https://htmx.org/docs/#triggers  https://htmx.org/docs/#swapping
 // tips： Alpine.js 动态CSS，只支持内联写法
-func ScrollMainArea(s *state.GlobalState, book *model.Book) templ.Component {
+func MainArea(s *state.GlobalState, book *model.Book) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -68,7 +68,7 @@ func ScrollMainArea(s *state.GlobalState, book *model.Book) templ.Component {
 				var templ_7745c5c3_Var2 string
 				templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(image.Url)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll/scroll_main_area.templ`, Line: 49, Col: 28}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll/main_area.templ`, Line: 49, Col: 28}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 				if templ_7745c5c3_Err != nil {
@@ -87,7 +87,7 @@ func ScrollMainArea(s *state.GlobalState, book *model.Book) templ.Component {
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(getImageXData(image.Url))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll/scroll_main_area.templ`, Line: 53, Col: 39}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll/main_area.templ`, Line: 53, Col: 39}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -100,7 +100,7 @@ func ScrollMainArea(s *state.GlobalState, book *model.Book) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(key))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll/scroll_main_area.templ`, Line: 70, Col: 29}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll/main_area.templ`, Line: 70, Col: 29}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -118,7 +118,7 @@ func ScrollMainArea(s *state.GlobalState, book *model.Book) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d / %d", key+1, book.BookInfo.PageCount))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll/scroll_main_area.templ`, Line: 74, Col: 135}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/scroll/main_area.templ`, Line: 74, Col: 135}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {

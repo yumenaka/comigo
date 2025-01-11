@@ -9,13 +9,10 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comigo/htmx/state"
-	"github.com/yumenaka/comigo/htmx/templates/common"
 )
 
-// SettingsPage 设置页面
-func SettingsPage(c *gin.Context, s *state.GlobalState) templ.Component {
+func MainArea(s *state.GlobalState) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -36,37 +33,7 @@ func SettingsPage(c *gin.Context, s *state.GlobalState) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = common.Header(
-			c,
-			common.HeaderProps{
-				Title:           "设置页面",
-				ShowReturnIcon:  true,
-				ReturnUrl:       "/",
-				SetDownLoadLink: false,
-				InShelf:         false,
-				DownLoadLink:    "",
-				SetTheme:        true,
-			}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = MainArea(&state.Global).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = common.Footer(s.Version).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = common.Drawer(s.ServerStatus.ServerHost, nil).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = common.QRCode(s.ServerStatus.ServerHost).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = common.Toast().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"w-full h-full flex justify-center font-extrabold text-lg items-center bg-yellow-300 flex-1\">MainArea</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -11,7 +11,7 @@ templ SettingsPage(c *gin.Context, s *state.GlobalState) {
 	@common.Header(
 		c,
 		common.HeaderProps{
-			Title:           "SettingsPage 设置页面",
+			Title:           "设置页面",
 			ShowReturnIcon:  true,
 			ReturnUrl:       "/",
 			SetDownLoadLink: false,
@@ -19,7 +19,7 @@ templ SettingsPage(c *gin.Context, s *state.GlobalState) {
 			DownLoadLink:    "",
 			SetTheme:        true,
 		})
-	@common.UploadArea(&state.Global),
+	@MainArea(&state.Global)
 	@common.Footer(s.Version)
 	@common.Drawer(s.ServerStatus.ServerHost, nil)
 	@common.QRCode(s.ServerStatus.ServerHost)

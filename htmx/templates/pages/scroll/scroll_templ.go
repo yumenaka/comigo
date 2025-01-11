@@ -57,7 +57,7 @@ func ScrollPage(c *gin.Context, s *state.GlobalState, book *model.Book) templ.Co
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = ScrollMainArea(s, book).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = MainArea(s, book).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -65,7 +65,7 @@ func ScrollPage(c *gin.Context, s *state.GlobalState, book *model.Book) templ.Co
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = common.Drawer(s.ServerStatus.ServerHost, ScrollDrawerSlot()).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.Drawer(s.ServerStatus.ServerHost, DrawerSlot()).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
