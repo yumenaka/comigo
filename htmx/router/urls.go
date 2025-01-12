@@ -31,4 +31,8 @@ func bindView(router *gin.Engine) {
 
 func bindAPI(router *gin.Engine) {
 	router.GET("/api/shelf/:id", shelf.GetBookListHandler)
+
+	router.GET("/htmx/settings/tab1", settings_page.Tab1)
+	router.GET("/htmx/settings/tab2", settings_page.Tab2)
+	router.GET("/htmx/settings/tab3", settings_page.Tab3)
 }

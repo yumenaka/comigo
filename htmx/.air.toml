@@ -7,7 +7,7 @@ testdata_dir = "testdata"
 [build]
   args_bin = ["../test"]
   bin = "./temp/comi"
-  delay = 5000
+  delay = 1000
   pre_cmd = ["bun dev"]
   cmd = "go run github.com/a-h/templ/cmd/templ@latest generate && go build -o ./temp/comi ."
   exclude_dir = [".parcel-cache", "bin", "dist", "node_modules", "static", "tmp", "tests", "vendor"]
