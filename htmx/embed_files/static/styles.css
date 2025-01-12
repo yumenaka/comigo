@@ -1451,6 +1451,10 @@ input:checked + .toggle-bg {
   width: 100%;
 }
 
+.min-w-24 {
+  min-width: 6rem;
+}
+
 .min-w-64 {
   min-width: 16rem;
 }
@@ -1773,6 +1777,10 @@ input:checked + .toggle-bg {
   border-top-width: 1px;
 }
 
+.border-solid {
+  border-style: solid;
+}
+
 .border-dashed {
   border-style: dashed;
 }
@@ -1813,6 +1821,11 @@ input:checked + .toggle-bg {
 .border-gray-300 {
   --tw-border-opacity: 1;
   border-color: rgb(209 213 219 / var(--tw-border-opacity, 1));
+}
+
+.border-gray-400 {
+  --tw-border-opacity: 1;
+  border-color: rgb(156 163 175 / var(--tw-border-opacity, 1));
 }
 
 .border-slate-400 {
@@ -2081,6 +2094,11 @@ input:checked + .toggle-bg {
 .text-2xl {
   font-size: 1.5rem;
   line-height: 2rem;
+}
+
+.text-3xl {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
 }
 
 .text-4xl {

@@ -233,7 +233,7 @@ var cfg = Config{
 	EnableUpload:          true,
 	EnableDatabase:        false,
 	EnableTLS:             false,
-	ExcludePath:           []string{".comigo", ".idea", ".vscode", ".git", "node_modules", "flutter_ui", "$RECYCLE.BIN", "System Volume Information", ".cache"},
+	ExcludePath:           []string{"$RECYCLE.BIN", "System Volume Information", ".cache", ".comigo", ".idea", ".vscode", ".git", "node_modules"},
 	Host:                  "",
 	LogToFile:             false,
 	MaxScanDepth:          4,

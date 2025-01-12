@@ -1,6 +1,6 @@
 ## Starting your project
 
-> ❗️ 下面是开发必须的工具和库，你可以在这里找到它们的文档和更多信息:
+> ❗️ 下面是开发必须工具和库:
 >
 > - `Templ（模板引擎）`: [https://templ.guide](https://templ.guide/)
 > - `Flowbite（组件库）`: [https://flowbite.com/docs/components/gallery/](https://flowbite.com/docs/components/gallery/)
@@ -15,6 +15,10 @@
 > - `Prettier`: [https://prettier.io/docs/en/index.html](https://prettier.io/docs/en/index.html)
 > - `Icon`: [https://www.xicons.org/#/](https://www.xicons.org/#/)
 > - `htmx-go`: [https://github.com/angelofallars/htmx-go](https://github.com/angelofallars/htmx-go)
+
+## TODO
+ - [ ] 设置页面 v1.0
+ - [ ] 显示服务器log：[web终端示例](https://zenn.dev/ikedam/articles/2e078bfc2a4cb6)，设置页面功能
 
 ## 提示
 
