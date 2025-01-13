@@ -61,15 +61,17 @@ i18next
     })
 
 window.i18next = i18next // 使i18next在全局作用域中可用
+if(document.getElementById('FullScreenIcon')){
+    document.getElementById('FullScreenIcon').addEventListener('click', () => {
+        if (screenfull.isEnabled) {
+            screenfull.toggle()
+        } else {
+            // Ignore or do something else
+            i18next.t('not_support_fullscreen')
+        }
+    })
+}
 
-document.getElementById('FullScreenIcon').addEventListener('click', () => {
-    if (screenfull.isEnabled) {
-        screenfull.toggle()
-    } else {
-        // Ignore or do something else
-        i18next.t('not_support_fullscreen')
-    }
-})
 
 // 用Alpine Persist 注册全局变量
 // https://alpinejs.dev/plugins/persist#using-alpine-persist-global

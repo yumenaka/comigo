@@ -40,7 +40,7 @@ templ DrawerSlot() {
 		<div
 			class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
 		></div>
-		<span class="text-sm font-medium ms-3" x-text="i18next.t('SyncPage')"></span>
+		<span class="text-sm font-medium ms-3" x-text="i18next.t('sync_page')"></span>
 	</label>
 	<!-- 保存阅读进度 SaveReadingProgress -->
 	<label
@@ -55,7 +55,7 @@ templ DrawerSlot() {
 		<div
 			class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
 		></div>
-		<span class="text-sm font-medium ms-3" x-text="i18next.t('SavePageNum')"></span>
+		<span class="text-sm font-medium ms-3" x-text="i18next.t('save_page_num')"></span>
 	</label>
 	<!-- 右开本（日漫模式）  -->
 	<label
@@ -72,7 +72,7 @@ templ DrawerSlot() {
 		></div>
 		<span
 			class="text-sm font-medium ms-3"
-			x-text="$store.flip.rightToLeft?i18next.t('LeftScreenToNext'):i18next.t('RightScreenToNext')"
+			x-text="$store.flip.rightToLeft?i18next.t('left_screen_to_next'):i18next.t('right_screen_to_next')"
 		></span>
 	</label>
 	<!-- 单页模式  -->
@@ -106,7 +106,7 @@ templ DrawerSlot() {
 		<div
 			class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
 		></div>
-		<span class="text-sm font-medium ms-3" x-text="i18next.t('AutoHideToolbar')"></span>
+		<span class="text-sm font-medium ms-3" x-text="i18next.t('auto_hide_toolbar')"></span>
 	</label>
 	<!-- 显示页数  -->
 	<label
@@ -121,6 +121,6 @@ templ DrawerSlot() {
 		<div
 			class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
 		></div>
-		<span class="text-sm font-medium ms-3" x-text="i18next.t('ShowPageNum')"></span>
+		<span class="text-sm font-medium ms-3" x-text="i18next.t('show_page_num')"></span>
 	</label>
 }

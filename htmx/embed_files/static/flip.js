@@ -59,11 +59,11 @@ function addPageNum(n = 1) {
     let allPageNum = parseInt(Alpine.store('flip').allPageNum);
     //  无法继续翻
     if (nowPageNum + num > allPageNum) {
-        showToast(i18next.t("hintLastPage"), 'error');
+        showToast(i18next.t("hint_last_page"), 'error');
         return;
     }
     if (nowPageNum + num < 1) {
-        showToast(i18next.t("hintFirstPage"), 'error');
+        showToast(i18next.t("hint_first_page"), 'error');
         return;
     }
     // 翻页
@@ -115,7 +115,7 @@ function toPreviousPage() {
     let nowPageNum = parseInt(Alpine.store('flip').nowPageNum);
     //错误值,第0或第1页。
     if (nowPageNum <= 1) {
-        showToast(i18next.t("hintFirstPage"), 'error');
+        showToast(i18next.t("hint_first_page"), 'error');
         return;
     }
     //简单合并模式
