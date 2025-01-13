@@ -27,7 +27,7 @@ templ DrawerSlot() {
 	</script>
 	<!-- toggle：显示页数 -->
 	<label class="inline-flex items-center w-full my-4 cursor-pointer outline outline-offset-8 outline-dotted hover:outline outline-2">
-		<input type="checkbox" x-model="$store.scroll.showPageNum" class="sr-only peer" checked/>
+		<input type="checkbox" x-model="$store.scroll.show_page_num" class="sr-only peer" checked/>
 		<div
 			class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
 		></div>
@@ -39,7 +39,7 @@ templ DrawerSlot() {
 		<label
 			for="marginBottom"
 			class="block w-full mb-2 text-sm font-medium"
-			x-text="i18next.t('MarginBottomOnScrollMode') + $store.scroll.marginBottomOnScrollMode+'px'"
+			x-text="i18next.t('margin_bottom_on_scroll_mode') + $store.scroll.marginBottomOnScrollMode+'px'"
 		></label>
 		<input
 			id="marginBottom"

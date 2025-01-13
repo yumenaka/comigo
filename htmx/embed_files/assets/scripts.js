@@ -145,7 +145,7 @@ Alpine.store('scroll', {
     //是否显示顶部页头
     showHeaderFlag: true,
     //是否显示页数
-    showPageNum: Alpine.$persist(false).as('scroll.showPageNum'),
+    show_page_num: Alpine.$persist(false).as('scroll.show_page_num'),
     //ws翻页相关
     syncPageByWS: Alpine.$persist(false).as('scroll.syncPageByWS'), //是否通过websocket同步翻页
     // //此处修改不会实时生效，不要这么做
@@ -164,11 +164,11 @@ Alpine.store('flip', {
     //自动隐藏工具条
     autoHideToolbar: Alpine.$persist(true).as('flip.autoHideToolbar'),
     //是否显示页头
-    showHeader: Alpine.$persist(true).as('flip.showHeader'),
+    show_header: Alpine.$persist(true).as('flip.show_header'),
     //是否显示页脚
     showFooter: Alpine.$persist(true).as('flip.showFooter'),
     //是否显示页数
-    showPageNum: Alpine.$persist(false).as('flip.showPageNum'),
+    show_page_num: Alpine.$persist(false).as('flip.show_page_num'),
     //是否是右半屏翻页（从右到左）?日本漫画从左到右(false)
     rightToLeft: Alpine.$persist(false).as('flip.rightToLeft'),
     //双页模式
