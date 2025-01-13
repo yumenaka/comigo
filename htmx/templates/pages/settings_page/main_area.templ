@@ -1,39 +1,63 @@
 package settings_page
 
-import "github.com/yumenaka/comigo/htmx/state"
-import "github.com/yumenaka/comigo/htmx/templates/common/svg"
+import (
+	"github.com/yumenaka/comigo/htmx/state"
+	"github.com/yumenaka/comigo/htmx/templates/common/svg"
+)
 
 templ MainArea(s *state.GlobalState) {
-	<header id="header" hx-target="#tab-contents" role="tablist" hx-on:htmx-after-on-load="let currentTab = document.querySelector('[aria-selected=true]');
+	<header
+		id="header"
+		hx-target="#tab-contents"
+		role="tablist"
+		hx-on:htmx-after-on-load="let currentTab = document.querySelector('[aria-selected=true]');
                                            currentTab.setAttribute('aria-selected', 'false')
                                            currentTab.classList.remove('selected')
                                            let newTab = event.target
                                            newTab.setAttribute('aria-selected', 'true')
                                            newTab.classList.add('selected')"
-        class="flex justify-between w-full h-12 py-1 border-b bg-base-100 text-base-content border-slate-400">
-        <a href="/" class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
-            @svg.Return()
-        </a>
-        <!-- examples: https://htmx.org/examples/tabs-javascript/-->
-        <div id="tabs"
-            class="flex flex-1  justify-center w-80 p-0 m-0 items-center font-semibold text-sm drop-shadow text-center focus:relative truncate">
-            <button role="tab" aria-controls="tab-contents" aria-selected="true" hx-get="/htmx/settings/tab1"
-                class="selected flex items-center justify-center min-w-20 mx-0.5 my-2 h-9 rounded">
-                @svg.Book()
-                &nbsp;Book
-            </button>
-            <button role="tab" aria-controls="tab-contents" aria-selected="false" hx-get="/htmx/settings/tab2"
-                class="flex items-center justify-center min-w-20 mx-0.5 my-2 h-9 rounded">
-                @svg.Network()
-                &nbsp;Net
-             </button>
-            <button role="tab" aria-controls="tab-contents" aria-selected="false" hx-get="/htmx/settings/tab3"
-                class="flex items-center justify-center min-w-20 mx-0.5  my-2 h-9 rounded">
-                @svg.Labs()
-                &nbsp;Lab
-                </button>
-        </div>
-        <style>
+		class="flex justify-between w-full h-12 py-1 border-b bg-base-100 text-base-content border-slate-400"
+	>
+		<a href="/" class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
+			@svg.Return()
+		</a>
+		<!-- examples: https://htmx.org/examples/tabs-javascript/-->
+		<div
+			id="tabs"
+			class="flex flex-1  justify-center w-80 p-0 m-0 items-center font-semibold text-sm drop-shadow text-center focus:relative truncate"
+		>
+			<button
+				role="tab"
+				aria-controls="tab-contents"
+				aria-selected="true"
+				hx-get="/htmx/settings/tab1"
+				class="selected flex items-center justify-center min-w-20 mx-0.5 my-2 h-9 rounded"
+			>
+				@svg.Book()
+				<span x-text="i18next.t('book_shelf')">Book</span>
+			</button>
+			<button
+				role="tab"
+				aria-controls="tab-contents"
+				aria-selected="false"
+				hx-get="/htmx/settings/tab2"
+				class="flex items-center justify-center min-w-20 mx-0.5 my-2 h-9 rounded"
+			>
+				@svg.Network()
+				<span x-text="i18next.t('network')">Network</span>
+			</button>
+			<button
+				role="tab"
+				aria-controls="tab-contents"
+				aria-selected="false"
+				hx-get="/htmx/settings/tab3"
+				class="flex items-center justify-center min-w-20 mx-0.5  my-2 h-9 rounded"
+			>
+				@svg.Labs()
+				<span x-text="i18next.t('labs')">Lab</span>
+			</button>
+		</div>
+		<style>
             button {
                 background-color: #b1b5bb;
                 --tw-text-opacity: 1;
@@ -49,17 +73,26 @@ templ MainArea(s *state.GlobalState) {
                 color: #3b82f6; /* text-blue-500 */;
             }
         </style>
-        <!-- qrcode icon-->
-        <div data-modal-target="qrcode-modal" data-modal-toggle="qrcode-modal"
-           class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
-           @svg.QRCode()
-        </div>
-    </header>
-    <div class="flex flex-col justify-start items-center flex-1  w-full  h-full w-3/5 min-w-[24rem] font-semibold text-lg text-base-content"
-         :class="(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') ? ($store.global.bgPattern !== 'none'?$store.global.bgPattern+' bg-base-300':'bg-base-300'):($store.global.bgPattern !== 'none'?$store.global.bgPattern:'')">
-        <div id="tab-contents"
-             role="tabpanel" hx-get="/htmx/settings/tab1" hx-trigger="load">
-             Loading……
-        </div>
-    </div>
+		<!-- qrcode icon-->
+		<div
+			data-modal-target="qrcode-modal"
+			data-modal-toggle="qrcode-modal"
+			class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
+		>
+			@svg.QRCode()
+		</div>
+	</header>
+	<div
+		class="flex flex-col justify-start items-center flex-1  w-full  h-full w-3/5 min-w-[24rem] font-semibold text-lg text-base-content"
+		:class="(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') ? ($store.global.bgPattern !== 'none'?$store.global.bgPattern+' bg-base-300':'bg-base-300'):($store.global.bgPattern !== 'none'?$store.global.bgPattern:'')"
+	>
+		<div
+			id="tab-contents"
+			role="tabpanel"
+			hx-get="/htmx/settings/tab1"
+			hx-trigger="load"
+		>
+			Loading……
+		</div>
+	</div>
 }

@@ -74,7 +74,7 @@
   "WorkingDirectory": "当前工作目录",
   "ZipFileTextEncoding": "非UTF-8",
   "ZipFileTextEncoding_Description": "非utf-8编码ZIP文件，尝试用什么编码解析。默认GBK。",
-  "abs": "实验",
+  "labs": "实验",
   "all_page_num": "总页数：{0}",
   "author": "作者：{0}",
   "auto_crop": "自动切边",

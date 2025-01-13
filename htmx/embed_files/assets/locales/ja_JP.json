@@ -74,7 +74,7 @@
   "WorkingDirectory": "作業ディレクトリ",
   "ZipFileTextEncoding": "UTF-8ではありません",
   "ZipFileTextEncoding_Description": "utf-8 以外でエンコードされた ZIP ファイル。解析するにはどのエンコードを使用する必要があります。デフォルトのGBK。",
-  "abs": "ボ",
+  "labs": "ラボズ",
   "all_page_num": "総ページ数: {0}",
   "author": "作者: {0}",
   "auto_crop": "自動エッジトリミング",

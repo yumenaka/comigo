@@ -48,7 +48,7 @@ func MainArea(s *state.GlobalState) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "&nbsp;Book</button> <button role=\"tab\" aria-controls=\"tab-contents\" aria-selected=\"false\" hx-get=\"/htmx/settings/tab2\" class=\"flex items-center justify-center min-w-20 mx-0.5 my-2 h-9 rounded\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<span x-text=\"i18next.t(&#39;book_shelf&#39;)\">Book</span></button> <button role=\"tab\" aria-controls=\"tab-contents\" aria-selected=\"false\" hx-get=\"/htmx/settings/tab2\" class=\"flex items-center justify-center min-w-20 mx-0.5 my-2 h-9 rounded\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -56,7 +56,7 @@ func MainArea(s *state.GlobalState) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "&nbsp;Net</button> <button role=\"tab\" aria-controls=\"tab-contents\" aria-selected=\"false\" hx-get=\"/htmx/settings/tab3\" class=\"flex items-center justify-center min-w-20 mx-0.5  my-2 h-9 rounded\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<span x-text=\"i18next.t(&#39;network&#39;)\">Network</span></button> <button role=\"tab\" aria-controls=\"tab-contents\" aria-selected=\"false\" hx-get=\"/htmx/settings/tab3\" class=\"flex items-center justify-center min-w-20 mx-0.5  my-2 h-9 rounded\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -64,7 +64,7 @@ func MainArea(s *state.GlobalState) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "&nbsp;Lab</button></div><style>\n            button {\n                background-color: #b1b5bb;\n                --tw-text-opacity: 1;\n                color: #6b7280; /* text-gray-500 */;\n            }\n            button:hover {\n                 --tw-text-opacity: 1;\n                 color: #374151 /* text-gray-700 */;\n            }\n            button.selected {\n                background-color: #f9f9f9;\n                --tw-text-opacity: 1;\n                color: #3b82f6; /* text-blue-500 */;\n            }\n        </style><!-- qrcode icon--><div data-modal-target=\"qrcode-modal\" data-modal-toggle=\"qrcode-modal\" class=\"flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<span x-text=\"i18next.t(&#39;network&#39;)\">Lab</span></button></div><style>\n            button {\n                background-color: #b1b5bb;\n                --tw-text-opacity: 1;\n                color: #6b7280; /* text-gray-500 */;\n            }\n            button:hover {\n                 --tw-text-opacity: 1;\n                 color: #374151 /* text-gray-700 */;\n            }\n            button.selected {\n                background-color: #f9f9f9;\n                --tw-text-opacity: 1;\n                color: #3b82f6; /* text-blue-500 */;\n            }\n        </style><!-- qrcode icon--><div data-modal-target=\"qrcode-modal\" data-modal-toggle=\"qrcode-modal\" class=\"flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

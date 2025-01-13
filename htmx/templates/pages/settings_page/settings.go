@@ -9,7 +9,11 @@ import (
 	"github.com/yumenaka/comigo/htmx/templates/common"
 )
 
-// Handler 上传文件页面
+func getTranslations(value string) string {
+	return "i18next.t(\"" + value + "\")"
+}
+
+// Handler 设定页面
 func Handler(c *gin.Context) {
 	indexTemplate := common.MainLayout(
 		c,
