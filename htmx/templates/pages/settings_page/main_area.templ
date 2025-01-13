@@ -3,69 +3,64 @@ package settings_page
 import "github.com/yumenaka/comigo/htmx/state"
 
 templ MainArea(s *state.GlobalState) {
-	<header
-		id="header"
-		hx-target="#tab-contents"
-		role="tablist"
-		hx-on:htmx-after-on-load="let currentTab = document.querySelector('[aria-selected=true]');
-                                       currentTab.setAttribute('aria-selected', 'false')
-                                       currentTab.classList.remove('selected')
-                                       let newTab = event.target
-                                       newTab.setAttribute('aria-selected', 'true')
-                                       newTab.classList.add('selected')"
-		class="flex justify-between w-full py-1 h-12 border-b bg-base-100 text-base-content border-slate-400"
-	>
-		<a href="/" class="flex items-center justify-center text-3xl w-10 rounded hover:ring">
-			🔙
-		</a>
-		<!-- 老设置界面，开发时参考-->
-		<a href="/admin" class="flex items-center justify-center text-3xl w-10 rounded hover:ring">
-			⚙️
-		</a>
-		<!-- examples: https://htmx.org/examples/tabs-javascript/-->
-		<div id="tabs" class="flex flex-1 w-80 items-center justify-center p-0 m-0 font-semibold text-center truncate">
-			<button role="tab" aria-controls="tab-contents" aria-selected="true" hx-get="/htmx/settings/tab1" class="selected flex items-center justify-center min-w-20 mx-0.5 my-2 h-10 border border-solid rounded">📖&nbsp;Book</button>
-			<button role="tab" aria-controls="tab-contents" aria-selected="false" hx-get="/htmx/settings/tab2" class="flex items-center justify-center min-w-20 mx-0.5 my-2 h-10 border border-solid rounded">🛜&nbsp;Net</button>
-			<button role="tab" aria-controls="tab-contents" aria-selected="false" hx-get="/htmx/settings/tab3" class="flex items-center justify-center min-w-20 mx-0.5  my-2 h-10 border border-solid rounded">🧪&nbsp;Lab</button>
-		</div>
-		<style>
-		    button {
+	<header id="header" hx-target="#tab-contents" role="tablist" hx-on:htmx-after-on-load="let currentTab = document.querySelector('[aria-selected=true]');
+                                           currentTab.setAttribute('aria-selected', 'false')
+                                           currentTab.classList.remove('selected')
+                                           let newTab = event.target
+                                           newTab.setAttribute('aria-selected', 'true')
+                                           newTab.classList.add('selected')"
+        class="flex justify-between w-full h-12 py-1 border-b bg-base-100 text-base-content border-slate-400">
+        <a href="/" class="flex items-center justify-center w-10 text-3xl rounded hover:ring">
+            🔙
+        </a>
+        <!-- examples: https://htmx.org/examples/tabs-javascript/-->
+        <div id="tabs"
+            class="flex items-center justify-center flex-1 p-0 m-0 font-semibold text-center text-black truncate w-80">
+            <button role="tab" aria-controls="tab-contents" aria-selected="true" hx-get="/htmx/settings/tab1"
+                class="selected flex items-center justify-center min-w-20 mx-0.5 my-2 h-10 border border-solid rounded">📖&nbsp;Book</button>
+            <button role="tab" aria-controls="tab-contents" aria-selected="false" hx-get="/htmx/settings/tab2"
+                class="flex items-center justify-center min-w-20 mx-0.5 my-2 h-10 border border-solid rounded">🛜&nbsp;Net</button>
+            <button role="tab" aria-controls="tab-contents" aria-selected="false" hx-get="/htmx/settings/tab3"
+                class="flex items-center justify-center min-w-20 mx-0.5  my-2 h-10 border border-solid rounded">🧪&nbsp;Lab</button>
+        </div>
+        <style>
+            button {
                 background-color: #cccccc;
             }
+
             button.selected {
                 background-color: #f9f9f9;
             }
         </style>
-		<!-- 溢出 overflow-x-auto :https://www.tailwindcss.cn/docs/overflow -->
-		<div class="flex justify-between p-0 m-0 max-w-64">
-			<div data-modal-target="qrcode-modal" data-modal-toggle="qrcode-modal" class="w-10 p-0 mx-1 my-0 rounded hover:ring ">
-				<svg class="static w-10" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><rect x="336" y="336" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect><rect x="272" y="272" width="64" height="64" rx="8" ry="8" fill="currentColor"></rect><rect x="416" y="416" width="64" height="64" rx="8" ry="8" fill="currentColor"></rect><rect x="432" y="272" width="48" height="48" rx="8" ry="8" fill="currentColor"></rect><rect x="272" y="432" width="48" height="48" rx="8" ry="8" fill="currentColor"></rect><rect x="336" y="96" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect><rect x="288" y="48" width="176" height="176" rx="16" ry="16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></rect><rect x="96" y="96" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect><rect x="48" y="48" width="176" height="176" rx="16" ry="16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></rect><rect x="96" y="336" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect><rect x="48" y="288" width="176" height="176" rx="16" ry="16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></rect></svg>
-			</div>
-			<div id="FullScreenIcon" class="w-10 p-0 mx-1 my-0 rounded hover:ring">
-				<svg
-					class="static w-10"
-					xmlns="http://www.w3.org/2000/svg"
-					viewBox="0 0 24 24"
-				>
-					<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-						<path d="M16 4h4v4"></path>
-						<path d="M14 10l6-6"></path>
-						<path d="M8 20H4v-4"></path>
-						<path d="M4 20l6-6"></path>
-						<path d="M16 20h4v-4"></path>
-						<path d="M14 14l6 6"></path>
-						<path d="M8 4H4v4"></path>
-						<path d="M4 4l6 6"></path>
-					</g>
-				</svg>
-			</div>
-		</div>
-	</header>
-	<div
-		id="tab-contents"
-		class="w-full h-full flex justify-center font-extrabold text-lg items-center bg-yellow-300 flex-1"
-		role="tabpanel"
-		hx-get="/htmx/settings/tab1"
-		hx-trigger="load"
-	>MainArea</div>
+        <!-- 溢出 overflow-x-auto :https://www.tailwindcss.cn/docs/overflow -->
+        <div class="flex justify-between p-0 m-0 max-w-64">
+            <div data-modal-target="qrcode-modal" data-modal-toggle="qrcode-modal"
+                class="w-10 p-0 mx-1 my-0 rounded hover:ring ">
+                <svg class="static w-10" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                    viewBox="0 0 512 512">
+                    <rect x="336" y="336" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect>
+                    <rect x="272" y="272" width="64" height="64" rx="8" ry="8" fill="currentColor"></rect>
+                    <rect x="416" y="416" width="64" height="64" rx="8" ry="8" fill="currentColor"></rect>
+                    <rect x="432" y="272" width="48" height="48" rx="8" ry="8" fill="currentColor"></rect>
+                    <rect x="272" y="432" width="48" height="48" rx="8" ry="8" fill="currentColor"></rect>
+                    <rect x="336" y="96" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect>
+                    <rect x="288" y="48" width="176" height="176" rx="16" ry="16" fill="none" stroke="currentColor"
+                        stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></rect>
+                    <rect x="96" y="96" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect>
+                    <rect x="48" y="48" width="176" height="176" rx="16" ry="16" fill="none" stroke="currentColor"
+                        stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></rect>
+                    <rect x="96" y="336" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect>
+                    <rect x="48" y="288" width="176" height="176" rx="16" ry="16" fill="none" stroke="currentColor"
+                        stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></rect>
+                </svg>
+            </div>
+        </div>
+    </header>
+    <div class="flex flex-col justify-start items-center flex-1  w-full  h-full w-3/5 min-w-[24rem] font-semibold text-lg text-base-content"
+         :class="(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') ? ($store.global.bgPattern !== 'none'?$store.global.bgPattern+' bg-base-300':'bg-base-300'):($store.global.bgPattern !== 'none'?$store.global.bgPattern:'')">
+        <div id="tab-contents"
+             role="tabpanel" hx-get="/htmx/settings/tab1" hx-trigger="load">
+             Loading……
+        </div>
+    </div>
 }

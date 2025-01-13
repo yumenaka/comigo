@@ -31,7 +31,7 @@ templ DrawerSlot() {
 		<div
 			class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
 		></div>
-		<span class="text-sm font-medium ms-3" x-text="i18next.t('ShowPageNum')"></span>
+		<span class="text-sm font-medium ms-3" x-text="i18next.t('show_page_num')"></span>
 	</label>
 	<!-- 滑动选择组件: 下拉模式下，漫画页面的底部间距（px）-->
 	<!-- 组件来自：https://flowbite.com/docs/forms/range/-->
@@ -60,7 +60,7 @@ templ DrawerSlot() {
 		></div>
 		<span
 			class="text-sm font-medium ms-3"
-			x-text="$store.scroll.widthUseFixedValue?i18next.t('WidthUseFixedValue'):i18next.t('WidthUsePercent')"
+			x-text="$store.scroll.widthUseFixedValue?i18next.t('width_use_fixed_value'):i18next.t('width_use_percent')"
 		></span>
 	</label>
 	<!-- 单页漫画宽度（横屏状态+宽度限制使用百分比） -->
@@ -69,7 +69,7 @@ templ DrawerSlot() {
 		<label
 			for="singlePageWidth_Percent"
 			class="block w-full mb-2 text-sm font-medium"
-			x-text="i18next.t('SinglePageWidth') + $store.scroll.singlePageWidth_Percent+'%'"
+			x-text="i18next.t('single_page_width') + $store.scroll.singlePageWidth_Percent+'%'"
 		></label>
 		<input
 			id="singlePageWidth_Percent"
@@ -87,7 +87,7 @@ templ DrawerSlot() {
 		<label
 			for="doublePageWidth_Percent"
 			class="block w-full mb-2 text-sm font-medium"
-			x-text="i18next.t('DoublePageWidth') + $store.scroll.doublePageWidth_Percent+'%'"
+			x-text="i18next.t('double_page_width') + $store.scroll.doublePageWidth_Percent+'%'"
 		></label>
 		<input
 			id="doublePageWidth_Percent"
@@ -105,7 +105,7 @@ templ DrawerSlot() {
 		<label
 			for="singlePageWidth_PX"
 			class="block w-full mb-2 text-sm font-medium"
-			x-text="i18next.t('SinglePageWidth') + $store.scroll.singlePageWidth_PX+' px'"
+			x-text="i18next.t('single_page_width') + $store.scroll.singlePageWidth_PX+' px'"
 		></label>
 		<input
 			id="singlePageWidth_PX"
@@ -123,7 +123,7 @@ templ DrawerSlot() {
 		<label
 			for="doublePageWidth_PX"
 			class="block w-full mb-2 text-sm font-medium"
-			x-text="i18next.t('DoublePageWidth') + $store.scroll.doublePageWidth_PX+' px'"
+			x-text="i18next.t('double_page_width') + $store.scroll.doublePageWidth_PX+' px'"
 		></label>
 		<input
 			id="doublePageWidth_PX"
@@ -148,6 +148,6 @@ templ DrawerSlot() {
 		<div
 			class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
 		></div>
-		<span class="text-sm font-medium ms-3" x-text="i18next.t('AutoCrop')"></span>
+		<span class="text-sm font-medium ms-3" x-text="i18next.t('auto_crop')"></span>
 	</label>
 }

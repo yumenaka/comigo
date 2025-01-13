@@ -174,5 +174,5 @@
   "ConfigManagerDescription": "Saveをクリックすると、現在の設定がサーバーにアップロードされ、既存の設定ファイルが上書きされます。",
   "please_enter_content": "内容を入力してください",
   "submit": "送信",
-  "type_or_paste_content": "力または貼り付け"
+  "type_or_paste_content": "入力または貼り付け"
 }
