@@ -39,29 +39,25 @@ templ Header(c *gin.Context, prop HeaderProps) {
 			if prop.ShowReturnIcon {
 				<!-- 返回箭头,点击返回上一页 -->
 				<a href={ templ.SafeURL(prop.ReturnUrl) }>
-					<div class="w-10 pt-1 m-0">
+					<div class="flex justify-center items-center w-8 h-10 mx-1 my-0 rounded hover:ring">
 						@svg.Return()
 					</div>
 				</a>
 			}
-			<!-- 文件重排序 Dropdown Menu： https://flowbite.com/docs/components/dropdowns/ -->
-			<svg id="dropdownHoverButton" data-dropdown-toggle="ReSortDropdown" data-dropdown-trigger="hover" class="w-10 pt-1 mx-0 rounded hover:ring" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24">
-				<path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z" fill="currentColor"></path>
-			</svg>
 			<!-- 新服务器设置 -->
-			<a href="/settings" class="w-10 pt-1 m-0 rounded hover:ring">
+			<a href="/settings" class="flex justify-center items-center w-8 h-10 mx-1 my-0 rounded hover:ring">
 				@svg.ServerDisk()
 			</a>
-			<a href="/admin" class="w-10 pt-1 m-0 rounded hover:ring">
-				Old
-			</a>
+			<!-- 文件重排序 Dropdown Menu： https://flowbite.com/docs/components/dropdowns/ -->
+			<svg class="flex justify-center items-center w-8 h-10 mx-1 my-0 rounded hover:ring" id="dropdownHoverButton" data-dropdown-toggle="ReSortDropdown" data-dropdown-trigger="hover"  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24">
+				<path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z" fill="currentColor"></path>
+			</svg>
 			if false {
 				<!-- 上传按钮，点击进入上传页面 -->
 				<div class="w-10 pt-1 mx-1 my-0 rounded hover:ring ">
 					@svg.Upload()
 				</div>
 			}
-			<!-- Dropdown menu -->
 			<div id="ReSortDropdown" class="z-10 hidden divide-y divide-gray-100 rounded-lg shadow max-w-fit bg-white/90 dark:bg-gray-700">
 				<ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
 					<li>
@@ -131,18 +127,18 @@ templ Header(c *gin.Context, prop HeaderProps) {
 		</div>
 		<!-- 溢出 overflow-x-auto :https://www.tailwindcss.cn/docs/overflow -->
 		<div class="flex justify-between p-0 m-0 max-w-64">
-			<!-- 点击显示二维码 -->
-			<div data-modal-target="qrcode-modal" data-modal-toggle="qrcode-modal" class="w-10 pt-1 mx-1 my-0 rounded hover:ring ">
+			<!-- 图标：点击显示二维码 -->
+			<div data-modal-target="qrcode-modal" data-modal-toggle="qrcode-modal" class="flex justify-center items-center w-8 h-10 mx-1 my-0 rounded hover:ring">
 				@svg.QRCode()
 			</div>
 			<!-- 全屏按钮 -->
-			<div id="FullScreenIcon" class="w-8 pt-1 mx-1 my-0 rounded hover:ring">
+			<div id="FullScreenIcon" class="flex justify-center items-center w-8 h-10 mx-1 my-0 rounded hover:ring">
 				@svg.FullScreen()
 			</div>
 			<!-- 阅读器设定,点击屏幕中央也可以打开  可自定义方向 -->
 			<!-- data-drawer-body-scrolling="true"  允许鼠标穿透，滚动下面的页面，设置此项有个好处，就是打开抽屉时背景不抖动 -->
 			<!-- https://flowbite.com/docs/components/drawer/#body-scrolling -->
-			<div id="OpenSettingButton" data-drawer-target="drawer-right" data-drawer-show="drawer-right" aria-controls="drawer-right" data-drawer-placement="right" data-drawer-body-scrolling="true" class="w-10 pt-1 mx-1 my-0 rounded drawer-button hover:ring">
+			<div class="flex justify-center items-center w-8 h-10 mx-1 my-0 rounded hover:ring" id="OpenSettingButton" data-drawer-target="drawer-right" data-drawer-show="drawer-right" aria-controls="drawer-right" data-drawer-placement="right" data-drawer-body-scrolling="true">
 				@svg.Setting()
 			</div>
 		</div>

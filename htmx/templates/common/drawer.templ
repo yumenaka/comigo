@@ -23,7 +23,7 @@ templ Drawer(serverHost string, slot templ.Component) {
 				type="button"
 				data-drawer-hide="drawer-right"
 				aria-controls="drawer-right"
-				class="font-bold rounded text-sm w-8 h-8 absolute top-2.5 end-2.5 inline-flex items-center justify-center bg-transparent hover:ring-2 hover:ring-blue-300 dark:hover:ring-gray-300 dark:hover:text-white"
+				class="font-bold rounded text-sm w-8 h-8 absolute top-2.5 end-2.5 inline-flex items-center justify-center bg-transparent hover:ring dark:hover:text-white"
 			>
 				@svg.Close()
 			</button>
@@ -35,7 +35,7 @@ templ Drawer(serverHost string, slot templ.Component) {
 			<div class="place-holder w-full flex-1"></div>
 			<!-- 二维码 -->
 			<div class="p-1 mt-4 mb-2 w-36 h-36" x-data="{ qrcodeSrc: '' }" x-init="qrcodeSrc = window.location.origin +'/api/qrcode.png?qrcode_str='+ encodeURIComponent(window.location.toString().replace(window.location.hostname,serverHost))">
-				<img class="w-32 h-32" :src="qrcodeSrc"/>
+				<img id="QrcodeImage"  data-modal-target="qrcode-modal" data-modal-toggle="qrcode-modal"  class="w-32 h-32" :src="qrcodeSrc"/>
 			</div>
 			<!-- 选择主题的select -->
 			<select
