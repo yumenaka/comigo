@@ -106,7 +106,7 @@ func Header(c *gin.Context, prop HeaderProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\"><div class=\"w-10 pt-1 m-0\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\"><div class=\"flex justify-center items-center w-8 h-10 mx-1 my-0 rounded hover:ring\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -119,7 +119,7 @@ func Header(c *gin.Context, prop HeaderProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<!-- 文件重排序 Dropdown Menu： https://flowbite.com/docs/components/dropdowns/ --><svg id=\"dropdownHoverButton\" data-dropdown-toggle=\"ReSortDropdown\" data-dropdown-trigger=\"hover\" class=\"w-10 pt-1 mx-0 rounded hover:ring\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 24 24\"><path d=\"M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z\" fill=\"currentColor\"></path></svg><!-- 新服务器设置 --><a href=\"/settings\" class=\"w-10 pt-1 m-0 rounded hover:ring\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<!-- 新服务器设置 --><a href=\"/settings\" class=\"flex justify-center items-center w-8 h-10 mx-1 my-0 rounded hover:ring\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -127,7 +127,7 @@ func Header(c *gin.Context, prop HeaderProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</a> <a href=\"/admin\" class=\"w-10 pt-1 m-0 rounded hover:ring\">Old</a> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</a><!-- 文件重排序 Dropdown Menu： https://flowbite.com/docs/components/dropdowns/ --><svg class=\"flex justify-center items-center w-8 h-10 mx-1 my-0 rounded hover:ring\" id=\"dropdownHoverButton\" data-dropdown-toggle=\"ReSortDropdown\" data-dropdown-trigger=\"hover\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 24 24\"><path d=\"M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z\" fill=\"currentColor\"></path></svg> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -145,7 +145,7 @@ func Header(c *gin.Context, prop HeaderProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<!-- Dropdown menu --><div id=\"ReSortDropdown\" class=\"z-10 hidden divide-y divide-gray-100 rounded-lg shadow max-w-fit bg-white/90 dark:bg-gray-700\"><ul class=\"py-2 text-sm text-gray-700 dark:text-gray-200\" aria-labelledby=\"dropdownHoverButton\"><li><a href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<div id=\"ReSortDropdown\" class=\"z-10 hidden divide-y divide-gray-100 rounded-lg shadow max-w-fit bg-white/90 dark:bg-gray-700\"><ul class=\"py-2 text-sm text-gray-700 dark:text-gray-200\" aria-labelledby=\"dropdownHoverButton\"><li><a href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -211,7 +211,7 @@ func Header(c *gin.Context, prop HeaderProps) templ.Component {
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(prop.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/common/header.templ`, Line: 92, Col: 52}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/common/header.templ`, Line: 88, Col: 52}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -230,7 +230,7 @@ func Header(c *gin.Context, prop HeaderProps) templ.Component {
 				var templ_7745c5c3_Var12 string
 				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(prop.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/common/header.templ`, Line: 102, Col: 18}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/common/header.templ`, Line: 98, Col: 18}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 				if templ_7745c5c3_Err != nil {
@@ -262,7 +262,7 @@ func Header(c *gin.Context, prop HeaderProps) templ.Component {
 						var templ_7745c5c3_Var14 string
 						templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(book.Title)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/common/header.templ`, Line: 111, Col: 159}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/common/header.templ`, Line: 107, Col: 159}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 						if templ_7745c5c3_Err != nil {
@@ -289,7 +289,7 @@ func Header(c *gin.Context, prop HeaderProps) templ.Component {
 						var templ_7745c5c3_Var16 string
 						templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(book.Title)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/common/header.templ`, Line: 115, Col: 161}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/common/header.templ`, Line: 111, Col: 161}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 						if templ_7745c5c3_Err != nil {
@@ -323,7 +323,7 @@ func Header(c *gin.Context, prop HeaderProps) templ.Component {
 					var templ_7745c5c3_Var18 string
 					templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(prop.Title)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/common/header.templ`, Line: 124, Col: 60}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/common/header.templ`, Line: 120, Col: 60}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 					if templ_7745c5c3_Err != nil {
@@ -341,7 +341,7 @@ func Header(c *gin.Context, prop HeaderProps) templ.Component {
 					var templ_7745c5c3_Var19 string
 					templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(prop.Title)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/common/header.templ`, Line: 127, Col: 54}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/common/header.templ`, Line: 123, Col: 54}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 					if templ_7745c5c3_Err != nil {
@@ -354,7 +354,7 @@ func Header(c *gin.Context, prop HeaderProps) templ.Component {
 				}
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "</div><!-- 溢出 overflow-x-auto :https://www.tailwindcss.cn/docs/overflow --><div class=\"flex justify-between p-0 m-0 max-w-64\"><!-- 点击显示二维码 --><div data-modal-target=\"qrcode-modal\" data-modal-toggle=\"qrcode-modal\" class=\"w-10 pt-1 mx-1 my-0 rounded hover:ring \">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "</div><!-- 溢出 overflow-x-auto :https://www.tailwindcss.cn/docs/overflow --><div class=\"flex justify-between p-0 m-0 max-w-64\"><!-- 图标：点击显示二维码 --><div data-modal-target=\"qrcode-modal\" data-modal-toggle=\"qrcode-modal\" class=\"flex justify-center items-center w-8 h-10 mx-1 my-0 rounded hover:ring\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -362,7 +362,7 @@ func Header(c *gin.Context, prop HeaderProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "</div><!-- 全屏按钮 --><div id=\"FullScreenIcon\" class=\"w-8 pt-1 mx-1 my-0 rounded hover:ring\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "</div><!-- 全屏按钮 --><div id=\"FullScreenIcon\" class=\"flex justify-center items-center w-8 h-10 mx-1 my-0 rounded hover:ring\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -370,7 +370,7 @@ func Header(c *gin.Context, prop HeaderProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "</div><!-- 阅读器设定,点击屏幕中央也可以打开  可自定义方向 --><!-- data-drawer-body-scrolling=\"true\"  允许鼠标穿透，滚动下面的页面，设置此项有个好处，就是打开抽屉时背景不抖动 --><!-- https://flowbite.com/docs/components/drawer/#body-scrolling --><div id=\"OpenSettingButton\" data-drawer-target=\"drawer-right\" data-drawer-show=\"drawer-right\" aria-controls=\"drawer-right\" data-drawer-placement=\"right\" data-drawer-body-scrolling=\"true\" class=\"w-10 pt-1 mx-1 my-0 rounded drawer-button hover:ring\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "</div><!-- 阅读器设定,点击屏幕中央也可以打开  可自定义方向 --><!-- data-drawer-body-scrolling=\"true\"  允许鼠标穿透，滚动下面的页面，设置此项有个好处，就是打开抽屉时背景不抖动 --><!-- https://flowbite.com/docs/components/drawer/#body-scrolling --><div class=\"flex justify-center items-center w-8 h-10 mx-1 my-0 rounded hover:ring\" id=\"OpenSettingButton\" data-drawer-target=\"drawer-right\" data-drawer-show=\"drawer-right\" aria-controls=\"drawer-right\" data-drawer-placement=\"right\" data-drawer-body-scrolling=\"true\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

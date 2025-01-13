@@ -11,31 +11,31 @@ templ MainArea(s *state.GlobalState) {
                                            newTab.setAttribute('aria-selected', 'true')
                                            newTab.classList.add('selected')"
         class="flex justify-between w-full h-12 py-1 border-b bg-base-100 text-base-content border-slate-400">
-        <a href="/" class="flex items-center justify-center w-10 text-3xl rounded hover:ring">
+        <a href="/" class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
             @svg.Return()
         </a>
         <!-- examples: https://htmx.org/examples/tabs-javascript/-->
         <div id="tabs"
-            class="flex flex-1  justify-center w-80 p-0 m-0 items-center font-semibold text-sm shadow-sm text-center focus:relative truncate">
+            class="flex flex-1  justify-center w-80 p-0 m-0 items-center font-semibold text-sm drop-shadow text-center focus:relative truncate">
             <button role="tab" aria-controls="tab-contents" aria-selected="true" hx-get="/htmx/settings/tab1"
-                class="selected flex items-center justify-center min-w-20 mx-0.5 my-2 h-10 rounded">
+                class="selected flex items-center justify-center min-w-20 mx-0.5 my-2 h-9 rounded">
                 @svg.Book()
                 &nbsp;Book
             </button>
             <button role="tab" aria-controls="tab-contents" aria-selected="false" hx-get="/htmx/settings/tab2"
-                class="flex items-center justify-center min-w-20 mx-0.5 my-2 h-10 rounded">
+                class="flex items-center justify-center min-w-20 mx-0.5 my-2 h-9 rounded">
                 @svg.Network()
                 &nbsp;Net
              </button>
             <button role="tab" aria-controls="tab-contents" aria-selected="false" hx-get="/htmx/settings/tab3"
-                class="flex items-center justify-center min-w-20 mx-0.5  my-2 h-10 rounded">
+                class="flex items-center justify-center min-w-20 mx-0.5  my-2 h-9 rounded">
                 @svg.Labs()
                 &nbsp;Lab
                 </button>
         </div>
         <style>
             button {
-                background-color: #d1d5db;
+                background-color: #b1b5bb;
                 --tw-text-opacity: 1;
                 color: #6b7280; /* text-gray-500 */;
             }
@@ -50,11 +50,9 @@ templ MainArea(s *state.GlobalState) {
             }
         </style>
         <!-- qrcode icon-->
-        <div class="flex justify-between p-0 m-0 max-w-64">
-            <div data-modal-target="qrcode-modal" data-modal-toggle="qrcode-modal"
-                class="w-10 p-0 mx-1 my-0 rounded hover:ring ">
-                @svg.QRCode()
-            </div>
+        <div data-modal-target="qrcode-modal" data-modal-toggle="qrcode-modal"
+           class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
+           @svg.QRCode()
         </div>
     </header>
     <div class="flex flex-col justify-start items-center flex-1  w-full  h-full w-3/5 min-w-[24rem] font-semibold text-lg text-base-content"
