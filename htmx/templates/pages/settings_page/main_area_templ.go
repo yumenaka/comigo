@@ -9,6 +9,7 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import "github.com/yumenaka/comigo/htmx/state"
+import "github.com/yumenaka/comigo/htmx/templates/common/svg"
 
 func MainArea(s *state.GlobalState) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -31,7 +32,47 @@ func MainArea(s *state.GlobalState) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<header id=\"header\" hx-target=\"#tab-contents\" role=\"tablist\" hx-on:htmx-after-on-load=\"let currentTab = document.querySelector(&#39;[aria-selected=true]&#39;);\n                                           currentTab.setAttribute(&#39;aria-selected&#39;, &#39;false&#39;)\n                                           currentTab.classList.remove(&#39;selected&#39;)\n                                           let newTab = event.target\n                                           newTab.setAttribute(&#39;aria-selected&#39;, &#39;true&#39;)\n                                           newTab.classList.add(&#39;selected&#39;)\" class=\"flex justify-between w-full h-12 py-1 border-b bg-base-100 text-base-content border-slate-400\"><a href=\"/\" class=\"flex items-center justify-center w-10 text-3xl rounded hover:ring\">🔙</a><!-- examples: https://htmx.org/examples/tabs-javascript/--><div id=\"tabs\" class=\"flex items-center justify-center flex-1 p-0 m-0 font-semibold text-center text-black truncate w-80\"><button role=\"tab\" aria-controls=\"tab-contents\" aria-selected=\"true\" hx-get=\"/htmx/settings/tab1\" class=\"selected flex items-center justify-center min-w-20 mx-0.5 my-2 h-10 border border-solid rounded\">📖&nbsp;Book</button> <button role=\"tab\" aria-controls=\"tab-contents\" aria-selected=\"false\" hx-get=\"/htmx/settings/tab2\" class=\"flex items-center justify-center min-w-20 mx-0.5 my-2 h-10 border border-solid rounded\">🛜&nbsp;Net</button> <button role=\"tab\" aria-controls=\"tab-contents\" aria-selected=\"false\" hx-get=\"/htmx/settings/tab3\" class=\"flex items-center justify-center min-w-20 mx-0.5  my-2 h-10 border border-solid rounded\">🧪&nbsp;Lab</button></div><style>\n            button {\n                background-color: #cccccc;\n            }\n\n            button.selected {\n                background-color: #f9f9f9;\n            }\n        </style><!-- 溢出 overflow-x-auto :https://www.tailwindcss.cn/docs/overflow --><div class=\"flex justify-between p-0 m-0 max-w-64\"><div data-modal-target=\"qrcode-modal\" data-modal-toggle=\"qrcode-modal\" class=\"w-10 p-0 mx-1 my-0 rounded hover:ring \"><svg class=\"static w-10\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 512 512\"><rect x=\"336\" y=\"336\" width=\"80\" height=\"80\" rx=\"8\" ry=\"8\" fill=\"currentColor\"></rect> <rect x=\"272\" y=\"272\" width=\"64\" height=\"64\" rx=\"8\" ry=\"8\" fill=\"currentColor\"></rect> <rect x=\"416\" y=\"416\" width=\"64\" height=\"64\" rx=\"8\" ry=\"8\" fill=\"currentColor\"></rect> <rect x=\"432\" y=\"272\" width=\"48\" height=\"48\" rx=\"8\" ry=\"8\" fill=\"currentColor\"></rect> <rect x=\"272\" y=\"432\" width=\"48\" height=\"48\" rx=\"8\" ry=\"8\" fill=\"currentColor\"></rect> <rect x=\"336\" y=\"96\" width=\"80\" height=\"80\" rx=\"8\" ry=\"8\" fill=\"currentColor\"></rect> <rect x=\"288\" y=\"48\" width=\"176\" height=\"176\" rx=\"16\" ry=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"32\"></rect> <rect x=\"96\" y=\"96\" width=\"80\" height=\"80\" rx=\"8\" ry=\"8\" fill=\"currentColor\"></rect> <rect x=\"48\" y=\"48\" width=\"176\" height=\"176\" rx=\"16\" ry=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"32\"></rect> <rect x=\"96\" y=\"336\" width=\"80\" height=\"80\" rx=\"8\" ry=\"8\" fill=\"currentColor\"></rect> <rect x=\"48\" y=\"288\" width=\"176\" height=\"176\" rx=\"16\" ry=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"32\"></rect></svg></div></div></header><div class=\"flex flex-col justify-start items-center flex-1  w-full  h-full w-3/5 min-w-[24rem] font-semibold text-lg text-base-content\" :class=\"(theme.toString() ===&#39;light&#39;||theme.toString() ===&#39;dark&#39;||theme.toString() ===&#39;retro&#39;||theme.toString() ===&#39;lofi&#39;||theme.toString() ===&#39;nord&#39;) ? ($store.global.bgPattern !== &#39;none&#39;?$store.global.bgPattern+&#39; bg-base-300&#39;:&#39;bg-base-300&#39;):($store.global.bgPattern !== &#39;none&#39;?$store.global.bgPattern:&#39;&#39;)\"><div id=\"tab-contents\" role=\"tabpanel\" hx-get=\"/htmx/settings/tab1\" hx-trigger=\"load\">Loading……</div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<header id=\"header\" hx-target=\"#tab-contents\" role=\"tablist\" hx-on:htmx-after-on-load=\"let currentTab = document.querySelector(&#39;[aria-selected=true]&#39;);\n                                           currentTab.setAttribute(&#39;aria-selected&#39;, &#39;false&#39;)\n                                           currentTab.classList.remove(&#39;selected&#39;)\n                                           let newTab = event.target\n                                           newTab.setAttribute(&#39;aria-selected&#39;, &#39;true&#39;)\n                                           newTab.classList.add(&#39;selected&#39;)\" class=\"flex justify-between w-full h-12 py-1 border-b bg-base-100 text-base-content border-slate-400\"><a href=\"/\" class=\"flex items-center justify-center w-10 text-3xl rounded hover:ring\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = svg.Return().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</a><!-- examples: https://htmx.org/examples/tabs-javascript/--><div id=\"tabs\" class=\"flex flex-1  justify-center w-80 p-0 m-0 items-center font-semibold text-sm shadow-sm text-center focus:relative truncate\"><button role=\"tab\" aria-controls=\"tab-contents\" aria-selected=\"true\" hx-get=\"/htmx/settings/tab1\" class=\"selected flex items-center justify-center min-w-20 mx-0.5 my-2 h-10 rounded\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = svg.Book().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "&nbsp;Book</button> <button role=\"tab\" aria-controls=\"tab-contents\" aria-selected=\"false\" hx-get=\"/htmx/settings/tab2\" class=\"flex items-center justify-center min-w-20 mx-0.5 my-2 h-10 rounded\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = svg.Network().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "&nbsp;Net</button> <button role=\"tab\" aria-controls=\"tab-contents\" aria-selected=\"false\" hx-get=\"/htmx/settings/tab3\" class=\"flex items-center justify-center min-w-20 mx-0.5  my-2 h-10 rounded\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = svg.Labs().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "&nbsp;Lab</button></div><style>\n            button {\n                background-color: #d1d5db;\n                --tw-text-opacity: 1;\n                color: #6b7280; /* text-gray-500 */;\n            }\n            button:hover {\n                 --tw-text-opacity: 1;\n                 color: #374151 /* text-gray-700 */;\n            }\n            button.selected {\n                background-color: #f9f9f9;\n                --tw-text-opacity: 1;\n                color: #3b82f6; /* text-blue-500 */;\n            }\n        </style><!-- qrcode icon--><div class=\"flex justify-between p-0 m-0 max-w-64\"><div data-modal-target=\"qrcode-modal\" data-modal-toggle=\"qrcode-modal\" class=\"w-10 p-0 mx-1 my-0 rounded hover:ring \">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = svg.QRCode().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div></div></header><div class=\"flex flex-col justify-start items-center flex-1  w-full  h-full w-3/5 min-w-[24rem] font-semibold text-lg text-base-content\" :class=\"(theme.toString() ===&#39;light&#39;||theme.toString() ===&#39;dark&#39;||theme.toString() ===&#39;retro&#39;||theme.toString() ===&#39;lofi&#39;||theme.toString() ===&#39;nord&#39;) ? ($store.global.bgPattern !== &#39;none&#39;?$store.global.bgPattern+&#39; bg-base-300&#39;:&#39;bg-base-300&#39;):($store.global.bgPattern !== &#39;none&#39;?$store.global.bgPattern:&#39;&#39;)\"><div id=\"tab-contents\" role=\"tabpanel\" hx-get=\"/htmx/settings/tab1\" hx-trigger=\"load\">Loading……</div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

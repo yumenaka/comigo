@@ -1,6 +1,7 @@
 package settings_page
 
 import "github.com/yumenaka/comigo/htmx/state"
+import "github.com/yumenaka/comigo/htmx/templates/common/svg"
 
 templ MainArea(s *state.GlobalState) {
 	<header id="header" hx-target="#tab-contents" role="tablist" hx-on:htmx-after-on-load="let currentTab = document.querySelector('[aria-selected=true]');
@@ -11,48 +12,48 @@ templ MainArea(s *state.GlobalState) {
                                            newTab.classList.add('selected')"
         class="flex justify-between w-full h-12 py-1 border-b bg-base-100 text-base-content border-slate-400">
         <a href="/" class="flex items-center justify-center w-10 text-3xl rounded hover:ring">
-            🔙
+            @svg.Return()
         </a>
         <!-- examples: https://htmx.org/examples/tabs-javascript/-->
         <div id="tabs"
-            class="flex items-center justify-center flex-1 p-0 m-0 font-semibold text-center text-black truncate w-80">
+            class="flex flex-1  justify-center w-80 p-0 m-0 items-center font-semibold text-sm shadow-sm text-center focus:relative truncate">
             <button role="tab" aria-controls="tab-contents" aria-selected="true" hx-get="/htmx/settings/tab1"
-                class="selected flex items-center justify-center min-w-20 mx-0.5 my-2 h-10 border border-solid rounded">📖&nbsp;Book</button>
+                class="selected flex items-center justify-center min-w-20 mx-0.5 my-2 h-10 rounded">
+                @svg.Book()
+                &nbsp;Book
+            </button>
             <button role="tab" aria-controls="tab-contents" aria-selected="false" hx-get="/htmx/settings/tab2"
-                class="flex items-center justify-center min-w-20 mx-0.5 my-2 h-10 border border-solid rounded">🛜&nbsp;Net</button>
+                class="flex items-center justify-center min-w-20 mx-0.5 my-2 h-10 rounded">
+                @svg.Network()
+                &nbsp;Net
+             </button>
             <button role="tab" aria-controls="tab-contents" aria-selected="false" hx-get="/htmx/settings/tab3"
-                class="flex items-center justify-center min-w-20 mx-0.5  my-2 h-10 border border-solid rounded">🧪&nbsp;Lab</button>
+                class="flex items-center justify-center min-w-20 mx-0.5  my-2 h-10 rounded">
+                @svg.Labs()
+                &nbsp;Lab
+                </button>
         </div>
         <style>
             button {
-                background-color: #cccccc;
+                background-color: #d1d5db;
+                --tw-text-opacity: 1;
+                color: #6b7280; /* text-gray-500 */;
             }
-
+            button:hover {
+                 --tw-text-opacity: 1;
+                 color: #374151 /* text-gray-700 */;
+            }
             button.selected {
                 background-color: #f9f9f9;
+                --tw-text-opacity: 1;
+                color: #3b82f6; /* text-blue-500 */;
             }
         </style>
-        <!-- 溢出 overflow-x-auto :https://www.tailwindcss.cn/docs/overflow -->
+        <!-- qrcode icon-->
         <div class="flex justify-between p-0 m-0 max-w-64">
             <div data-modal-target="qrcode-modal" data-modal-toggle="qrcode-modal"
                 class="w-10 p-0 mx-1 my-0 rounded hover:ring ">
-                <svg class="static w-10" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                    viewBox="0 0 512 512">
-                    <rect x="336" y="336" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect>
-                    <rect x="272" y="272" width="64" height="64" rx="8" ry="8" fill="currentColor"></rect>
-                    <rect x="416" y="416" width="64" height="64" rx="8" ry="8" fill="currentColor"></rect>
-                    <rect x="432" y="272" width="48" height="48" rx="8" ry="8" fill="currentColor"></rect>
-                    <rect x="272" y="432" width="48" height="48" rx="8" ry="8" fill="currentColor"></rect>
-                    <rect x="336" y="96" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect>
-                    <rect x="288" y="48" width="176" height="176" rx="16" ry="16" fill="none" stroke="currentColor"
-                        stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></rect>
-                    <rect x="96" y="96" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect>
-                    <rect x="48" y="48" width="176" height="176" rx="16" ry="16" fill="none" stroke="currentColor"
-                        stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></rect>
-                    <rect x="96" y="336" width="80" height="80" rx="8" ry="8" fill="currentColor"></rect>
-                    <rect x="48" y="288" width="176" height="176" rx="16" ry="16" fill="none" stroke="currentColor"
-                        stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></rect>
-                </svg>
+                @svg.QRCode()
             </div>
         </div>
     </header>

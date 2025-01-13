@@ -42,6 +42,21 @@ func Tab3(c *gin.Context) {
 	}
 }
 
+// UpdateBoolConfigHandler 更新Config的htmx接口，返回变更后的html，布尔值专用
+func UpdateBoolConfigHandler(c *gin.Context) {
+	if !htmx.IsHTMX(c.Request) {
+		// If not, return HTTP 400 error.
+		c.AbortWithError(http.StatusBadRequest, errors.New("non-htmx request"))
+		return
+	}
+
+	// Write HTML content.
+	c.Writer.Write([]byte("<p>🎉 Yes, <strong>htmx</strong> is ready to use! (<code>GET /api/hello-world</code>)</p>"))
+
+	// Send htmx response.
+	htmx.NewResponse().Write(c.Writer)
+}
+
 // 比较简单的例子，直接返回一个字符串
 func showContentAPIHandler(c *gin.Context) {
 	// Check, if the current request has a 'HX-Request' header.
