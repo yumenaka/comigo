@@ -74,7 +74,7 @@
   "WorkingDirectory": "current working directory",
   "ZipFileTextEncoding": "Not UTF-8",
   "ZipFileTextEncoding_Description": "Non-utf-8 encoded ZIP file, what encoding should be used to parse it. \nDefault GBK.",
-  "abs": "labs",
+  "labs": "Labs",
   "all_page_num": "Total Pages: {0}",
   "author": "Author: {0}",
   "auto_crop": "Automatic edge trimming",
