@@ -90,7 +90,7 @@ templ DrawerSlot() {
 		></div>
 		<span
 			class="text-sm font-medium ms-3"
-			x-text="$store.flip.doublePageMode?i18next.t('DoublePageMode'):i18next.t('SinglePageMode')"
+			x-text="$store.flip.doublePageMode?i18next.t('double_page_mode'):i18next.t('single_page_mode')"
 		></span>
 	</label>
 	<!-- 自动隐藏工具栏  -->
@@ -114,8 +114,8 @@ templ DrawerSlot() {
 	>
 		<input
 			type="checkbox"
-			:value="$store.flip.showPageNum"
-			x-on:click="$store.flip.showPageNum =!$store.flip.showPageNum"
+			:value="$store.flip.show_page_num"
+			x-on:click="$store.flip.show_page_num =!$store.flip.show_page_num"
 			class="sr-only peer"
 		/>
 		<div
