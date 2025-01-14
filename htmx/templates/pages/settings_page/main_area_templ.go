@@ -8,8 +8,10 @@ package settings_page
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/yumenaka/comigo/htmx/state"
-import "github.com/yumenaka/comigo/htmx/templates/common/svg"
+import (
+	"github.com/yumenaka/comigo/htmx/state"
+	"github.com/yumenaka/comigo/htmx/templates/common/svg"
+)
 
 func MainArea(s *state.GlobalState) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -64,7 +66,7 @@ func MainArea(s *state.GlobalState) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<span x-text=\"i18next.t(&#39;network&#39;)\">Lab</span></button></div><style>\n            button {\n                background-color: #b1b5bb;\n                --tw-text-opacity: 1;\n                color: #6b7280; /* text-gray-500 */;\n            }\n            button:hover {\n                 --tw-text-opacity: 1;\n                 color: #374151 /* text-gray-700 */;\n            }\n            button.selected {\n                background-color: #f9f9f9;\n                --tw-text-opacity: 1;\n                color: #3b82f6; /* text-blue-500 */;\n            }\n        </style><!-- qrcode icon--><div data-modal-target=\"qrcode-modal\" data-modal-toggle=\"qrcode-modal\" class=\"flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<span x-text=\"i18next.t(&#39;labs&#39;)\">Lab</span></button></div><style>\n            button {\n                background-color: #b1b5bb;\n                --tw-text-opacity: 1;\n                color: #6b7280; /* text-gray-500 */;\n            }\n            button:hover {\n                 --tw-text-opacity: 1;\n                 color: #374151 /* text-gray-700 */;\n            }\n            button.selected {\n                background-color: #f9f9f9;\n                --tw-text-opacity: 1;\n                color: #3b82f6; /* text-blue-500 */;\n            }\n        </style><!-- qrcode icon--><div data-modal-target=\"qrcode-modal\" data-modal-toggle=\"qrcode-modal\" class=\"flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

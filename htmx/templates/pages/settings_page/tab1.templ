@@ -10,7 +10,7 @@ import "github.com/yumenaka/comigo/htmx/state"
 // 此外，还可以使用 hx-vals（like: hx-vals='{"myVal": "My Value"}'）在请求中包含额外的值
 
 templ tab1(s *state.GlobalState) {
-    @BoolConfig("OpenBrowser","OpenBrowser_Description")
-    @StringArrawConfig("LocalStores","LocalStores_Description",[]string{"~/Downloads","../test"})
-    @BoolConfig("EnableUpload","EnableUpload_Description")
+    @BoolConfig("OpenBrowser",true, "OpenBrowser_Description")
+    @StringArrawConfig("LocalStores", "LocalStores_Description",[]string{"~/Downloads","../test"})
+    @BoolConfig("EnableUpload", true,"EnableUpload_Description")
 }

@@ -3,8 +3,7 @@ package settings_page
 import "github.com/yumenaka/comigo/htmx/state"
 
 templ tab2(s *state.GlobalState) {
-    <div id="tab2" class="tab-content">
-        <h1>Tab2</h1>
-        <p>Tab2 content</p>
-    </div>
+    @BoolConfig("EnableTLS",true,"EnableTLS_Description")
+    @BoolConfig("Debug",false,"Debug_Description")
+    @BoolConfig("EnableLogin",true,"EnableLogin_Description")
 }
