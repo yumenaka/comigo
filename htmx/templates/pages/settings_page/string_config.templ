@@ -1,10 +1,10 @@
 package settings_page
 
-templ StringConfig(value string, description string) {
-	<div class="flex flex-col w-full p-2 m-1 font-semibold rounded-md shadow-md hover:shadow-2xl justify-left items-left" style="background-color: rgb(245, 245, 228);">
+templ StringConfig(name string, value string, description string) {
+	<div class="flex flex-col w-full p-2 m-1 font-semibold rounded-md shadow-md hover:shadow-2xl justify-left items-left  border bg-base-100 text-base-content border-slate-400">
 		<div x-text={getTranslations(value)} class="w-32"></div>
 		<label for={value} class="relative h-8 cursor-pointer w-14">
-			<input type="checkbox" id={value} name={value} class="sr-only peer"/>
+			<input type="checkbox" id={name} name={name} value={value} class="sr-only peer"/>
 			<span class="absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500"></span>
 			<span class="absolute inset-y-0 w-6 h-6 m-1 transition-all bg-white rounded-full start-0 peer-checked:start-6"></span>
 		</label>

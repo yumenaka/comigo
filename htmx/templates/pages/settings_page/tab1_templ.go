@@ -37,7 +37,7 @@ func tab1(s *state.GlobalState) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = BoolConfig("OpenBrowser", "OpenBrowser_Description").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = BoolConfig("OpenBrowser", true, "OpenBrowser_Description").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -45,7 +45,7 @@ func tab1(s *state.GlobalState) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = BoolConfig("EnableUpload", "EnableUpload_Description").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = BoolConfig("EnableUpload", true, "EnableUpload_Description").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

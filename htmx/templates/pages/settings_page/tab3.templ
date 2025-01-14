@@ -3,8 +3,9 @@ package settings_page
 import "github.com/yumenaka/comigo/htmx/state"
 
 templ tab3(s *state.GlobalState) {
-    <div id="tab3" class="tab-content">
-        <h1>Tab3</h1>
-        <p>Tab3 content</p>
-    </div>
+    @BoolConfig("EnableDatabase",true,"EnableTLS_Description")
+    @BoolConfig("DisableLAN",false,"DisableLAN_Description")
+    @BoolConfig("LogToFile",true,"LogToFile_Description")
+    @BoolConfig("GenerateMetaData",false,"GenerateMetaData_Description")
+    @BoolConfig("ClearCacheExit",true,"ClearCacheExit_Description")
 }

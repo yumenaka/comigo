@@ -2092,6 +2092,11 @@ input:checked + .toggle-bg {
   padding-right: .125rem;
 }
 
+.px-1 {
+  padding-left: .25rem;
+  padding-right: .25rem;
+}
+
 .px-2 {
   padding-left: .5rem;
   padding-right: .5rem;
@@ -2149,6 +2154,14 @@ input:checked + .toggle-bg {
 
 .pe-10 {
   padding-inline-end: 2.5rem;
+}
+
+.pl-0\.5 {
+  padding-left: .125rem;
+}
+
+.pr-10 {
+  padding-right: 2.5rem;
 }
 
 .pt-0 {
