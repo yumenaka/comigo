@@ -4,12 +4,14 @@ import "github.com/yumenaka/comigo/htmx/state"
 
 templ tab3(s *state.GlobalState) {
 <div class="flex flex-col justify-start w-3/5 min-w-[24rem]">
-    临时放一些还未完成的功能，开发与调整中。
-    @BoolConfig("Debug",false,"Debug_Description")
-    @BoolConfig("EnableDatabase",true,"EnableTLS_Description")
-    @BoolConfig("LogToFile",true,"LogToFile_Description")
-    @BoolConfig("GenerateMetaData",false,"GenerateMetaData_Description")
-    @BoolConfig("ClearCacheExit",true,"ClearCacheExit_Description")
-    @StringConfig("CachePath", "/var/folders/","CachePath_Description")
+    <div class="flex flex-col w-full p-2 m-1 font-semibold rounded-md shadow-md hover:shadow-2xl justify-left items-left border bg-base-100 text-base-content border-slate-400">
+        临时放一些还未完成的功能，开发与调整中。
+    </div>
+    @BoolConfig("Debug",state.ServerConfig.Debug,"Debug_Description")
+    @BoolConfig("EnableDatabase",state.ServerConfig.EnableDatabase,"EnableTLS_Description")
+    @BoolConfig("LogToFile",state.ServerConfig.LogToFile,"LogToFile_Description")
+    @BoolConfig("GenerateMetaData",state.ServerConfig.GenerateMetaData,"GenerateMetaData_Description")
+    @BoolConfig("ClearCacheExit",state.ServerConfig.ClearCacheExit,"ClearCacheExit_Description")
+    @StringConfig("CachePath", state.ServerConfig.CachePath,"CachePath_Description")
 </div>
 }

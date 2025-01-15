@@ -4,10 +4,10 @@ import "strconv"
 templ NumberConfig(name string, value int, description string) {
 <div
     class="flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400">
-    <label for={name} class="w-64">最大扫描深度</label><input
+    <label for={name} class="w-64" x-text={getTranslations(name)}></label><input
         class="px-1 w-64 rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm" id={name}
-        name={name} type="number" placeholder={ getTranslations("MaxScanDepth") } value={ strconv.Itoa(value) } />
-    <div class="w-3/4 py-1 text-xs text-gray-500">最大扫描深度。超过深度的文件不会被扫描。当前执行目录为基准。</div>
+        name={name} type="number" placeholder={ getTranslations(name) } value={ strconv.Itoa(value) } />
+    <div class="w-3/4 py-1 text-xs text-gray-500" x-text={getTranslations(description)}></div>
     <div class="bg-red-600"></div>
 </div>
 }

@@ -41,47 +41,47 @@ func tab1(s *state.GlobalState) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = BoolConfig("OpenBrowser", true, "OpenBrowser_Description").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = BoolConfig("OpenBrowser", state.ServerConfig.OpenBrowser, "OpenBrowser_Description").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = StringArrawConfig("LocalStores", []string{"~/Downloads", "../test"}, "LocalStores_Description").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = StringArrawConfig("LocalStores", state.ServerConfig.LocalStores, "LocalStores_Description").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = NumberConfig("MaxScanDepth", 5, "MaxScanDepth_Description").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = NumberConfig("MaxScanDepth", state.ServerConfig.MaxScanDepth, "MaxScanDepth_Description").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = NumberConfig("MinImageNum", 1, "MinImageNum_Description").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = NumberConfig("MinImageNum", state.ServerConfig.MinImageNum, "MinImageNum_Description").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = BoolConfig("EnableUpload", true, "EnableUpload_Description").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = BoolConfig("EnableUpload", state.ServerConfig.EnableUpload, "EnableUpload_Description").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = StringConfig("UploadPath", "~/Downloads", "UploadPath_Description").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = StringConfig("UploadPath", state.ServerConfig.UploadPath, "UploadPath_Description").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = StringConfig("ZipFileTextEncoding", "gbk", "ZipFileTextEncoding_Description").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = StringConfig("ZipFileTextEncoding", state.ServerConfig.ZipFileTextEncoding, "ZipFileTextEncoding_Description").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = StringArrawConfig("ExcludePath", []string{"$RECYCLE.BIN", "System Volume Information"}, "ExcludePath_Description").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = StringArrawConfig("ExcludePath", state.ServerConfig.ExcludePath, "ExcludePath_Description").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = StringArrawConfig("SupportMediaType", []string{".jpeg", ".jpg", ".png"}, "SupportMediaType_Description").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = StringArrawConfig("SupportMediaType", state.ServerConfig.SupportMediaType, "SupportMediaType_Description").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = StringArrawConfig("SupportFileType", []string{".zip", ".rar"}, "SupportFileType_Description").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = StringArrawConfig("SupportFileType", state.ServerConfig.SupportFileType, "SupportFileType_Description").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = BoolConfig("EnableUpload", true, "EnableUpload_Description").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = BoolConfig("EnableUpload", state.ServerConfig.EnableUpload, "EnableUpload_Description").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
