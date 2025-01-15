@@ -2,20 +2,20 @@ package settings_page
 
 import "github.com/yumenaka/comigo/htmx/templates/common/svg"
 
-templ StringArrawConfig(value string, description string,config_array []string) {
+templ StringArrawConfig(name string, value []string ,description string) {
 <div
     class="flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400">
-    <label class="w-32 py-0" for={getTranslations(value)} x-text={getTranslations(value)}></label>
+    <label class="w-32 py-0" for={getTranslations(name)} x-text={getTranslations(name)}></label>
     <div class="flex flex-row flex-wrap w-3/4 py-1">
-        for _, item := range config_array {
+        for _, item := range value {
         <div class="flex flex-row items-center p-2 m-1 text-sm font-medium text-black bg-blue-300 rounded-2xl">
             { item }
             @svg.Delete()
         </div>
         }
         <div class="relative">
-            <label for={value+"Array"} class="sr-only" x-text={getTranslations("type_or_paste_content")}></label>
-            <input type="text" :id={value+"Array"} :placeholder={ getTranslations("type_or_paste_content") }
+            <label for={name+"Array"} class="sr-only" x-text={getTranslations("type_or_paste_content")}></label>
+            <input type="text" :id={name+"Array"} :placeholder={ getTranslations("type_or_paste_content") }
                 class="w-full rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm" />
             <span class="absolute top-[0px] right-[-80px] place-content-center">
                 <button x-text={ getTranslations("submit") } type="button"

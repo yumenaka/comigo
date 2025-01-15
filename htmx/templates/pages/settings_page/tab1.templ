@@ -10,7 +10,17 @@ import "github.com/yumenaka/comigo/htmx/state"
 // 此外，还可以使用 hx-vals（like: hx-vals='{"myVal": "My Value"}'）在请求中包含额外的值
 
 templ tab1(s *state.GlobalState) {
+<div class="flex flex-col justify-start w-3/5 min-w-[24rem]">
     @BoolConfig("OpenBrowser",true, "OpenBrowser_Description")
-    @StringArrawConfig("LocalStores", "LocalStores_Description",[]string{"~/Downloads","../test"})
+    @StringArrawConfig("LocalStores", []string{"~/Downloads","../test"}, "LocalStores_Description")
+    @NumberConfig("MaxScanDepth", 5,"MaxScanDepth_Description")
+    @NumberConfig("MinImageNum", 1,"MinImageNum_Description")
+    @BoolConfig("EnableUpload",true, "EnableUpload_Description")
+    @StringConfig("UploadPath", "~/Downloads", "UploadPath_Description")
+    @StringConfig("ZipFileTextEncoding", "gbk", "ZipFileTextEncoding_Description")
+    @StringArrawConfig("ExcludePath", []string{"$RECYCLE.BIN","System Volume Information"}, "ExcludePath_Description")
+    @StringArrawConfig("SupportMediaType", []string{".jpeg",".jpg",".png"}, "SupportMediaType_Description")
+    @StringArrawConfig("SupportFileType", []string{".zip",".rar"}, "SupportFileType_Description")
     @BoolConfig("EnableUpload", true,"EnableUpload_Description")
+</div>
 }

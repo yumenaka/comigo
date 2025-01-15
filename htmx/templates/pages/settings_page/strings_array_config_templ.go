@@ -10,7 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import "github.com/yumenaka/comigo/htmx/templates/common/svg"
 
-func StringArrawConfig(value string, description string, config_array []string) templ.Component {
+func StringArrawConfig(name string, value []string, description string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -36,9 +36,9 @@ func StringArrawConfig(value string, description string, config_array []string) 
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations(value))
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations(name))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/settings_page/strings_array_config.templ`, Line: 8, Col: 56}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/settings_page/strings_array_config.templ`, Line: 8, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -49,9 +49,9 @@ func StringArrawConfig(value string, description string, config_array []string) 
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations(value))
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations(name))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/settings_page/strings_array_config.templ`, Line: 8, Col: 88}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/settings_page/strings_array_config.templ`, Line: 8, Col: 86}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -61,7 +61,7 @@ func StringArrawConfig(value string, description string, config_array []string) 
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		for _, item := range config_array {
+		for _, item := range value {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"flex flex-row items-center p-2 m-1 text-sm font-medium text-black bg-blue-300 rounded-2xl\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -89,9 +89,9 @@ func StringArrawConfig(value string, description string, config_array []string) 
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(value + "Array")
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(name + "Array")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/settings_page/strings_array_config.templ`, Line: 17, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/settings_page/strings_array_config.templ`, Line: 17, Col: 36}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -104,7 +104,7 @@ func StringArrawConfig(value string, description string, config_array []string) 
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("type_or_paste_content"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/settings_page/strings_array_config.templ`, Line: 17, Col: 103}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/settings_page/strings_array_config.templ`, Line: 17, Col: 102}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -115,9 +115,9 @@ func StringArrawConfig(value string, description string, config_array []string) 
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var7 string
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(value + "Array")
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(name + "Array")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/settings_page/strings_array_config.templ`, Line: 18, Col: 49}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/settings_page/strings_array_config.templ`, Line: 18, Col: 48}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -130,7 +130,7 @@ func StringArrawConfig(value string, description string, config_array []string) 
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("type_or_paste_content"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/settings_page/strings_array_config.templ`, Line: 18, Col: 106}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/settings_page/strings_array_config.templ`, Line: 18, Col: 105}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
