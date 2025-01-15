@@ -18,6 +18,8 @@ type GlobalState struct {
 	ServerStatus    *util.ServerStatus
 }
 
+var ServerConfig *config.Config
+
 // GetAllBookNum 获取所有书籍数量
 func (g *GlobalState) GetAllBookNum() int {
 	if g.ShelfBookList == nil {
@@ -39,6 +41,7 @@ func init() {
 	Global.OnlineUserCount = 0
 	Global.ShelfBookList = nil
 	Global.ServerStatus = util.GetServerInfo(config.GetHost(), config.GetVersion(), config.GetPort(), config.GetEnableUpload(), 0)
+	ServerConfig = config.GetCfg()
 }
 
 func GetCloverBackgroundImageUrl(book *model.BookInfo) string {

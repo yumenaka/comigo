@@ -11,16 +11,16 @@ import "github.com/yumenaka/comigo/htmx/state"
 
 templ tab1(s *state.GlobalState) {
 <div class="flex flex-col justify-start w-3/5 min-w-[24rem]">
-    @BoolConfig("OpenBrowser",true, "OpenBrowser_Description")
-    @StringArrawConfig("LocalStores", []string{"~/Downloads","../test"}, "LocalStores_Description")
-    @NumberConfig("MaxScanDepth", 5,"MaxScanDepth_Description")
-    @NumberConfig("MinImageNum", 1,"MinImageNum_Description")
-    @BoolConfig("EnableUpload",true, "EnableUpload_Description")
-    @StringConfig("UploadPath", "~/Downloads", "UploadPath_Description")
-    @StringConfig("ZipFileTextEncoding", "gbk", "ZipFileTextEncoding_Description")
-    @StringArrawConfig("ExcludePath", []string{"$RECYCLE.BIN","System Volume Information"}, "ExcludePath_Description")
-    @StringArrawConfig("SupportMediaType", []string{".jpeg",".jpg",".png"}, "SupportMediaType_Description")
-    @StringArrawConfig("SupportFileType", []string{".zip",".rar"}, "SupportFileType_Description")
-    @BoolConfig("EnableUpload", true,"EnableUpload_Description")
+    @BoolConfig("OpenBrowser",state.ServerConfig.OpenBrowser, "OpenBrowser_Description")
+    @StringArrawConfig("LocalStores", state.ServerConfig.LocalStores, "LocalStores_Description")
+    @NumberConfig("MaxScanDepth", state.ServerConfig.MaxScanDepth,"MaxScanDepth_Description")
+    @NumberConfig("MinImageNum", state.ServerConfig.MinImageNum,"MinImageNum_Description")
+    @BoolConfig("EnableUpload",state.ServerConfig.EnableUpload, "EnableUpload_Description")
+    @StringConfig("UploadPath", state.ServerConfig.UploadPath, "UploadPath_Description")
+    @StringConfig("ZipFileTextEncoding", state.ServerConfig.ZipFileTextEncoding, "ZipFileTextEncoding_Description")
+    @StringArrawConfig("ExcludePath", state.ServerConfig.ExcludePath, "ExcludePath_Description")
+    @StringArrawConfig("SupportMediaType", state.ServerConfig.SupportMediaType, "SupportMediaType_Description")
+    @StringArrawConfig("SupportFileType", state.ServerConfig.SupportFileType, "SupportFileType_Description")
+    @BoolConfig("EnableUpload", state.ServerConfig.EnableUpload,"EnableUpload_Description")
 </div>
 }

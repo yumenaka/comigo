@@ -4,10 +4,10 @@ import "github.com/yumenaka/comigo/htmx/state"
 
 templ tab2(s *state.GlobalState) {
 <div class="flex flex-col justify-start w-3/5 min-w-[24rem]">
-    @NumberConfig("Port",1234,"Port_Description")
-    @StringConfig("Host","","Host_Description")
-    @BoolConfig("DisableLAN",true,"DisableLAN_Description")
-    @BoolConfig("EnableLogin",true,"EnableLogin_Description")
-    @NumberConfig("Timeout",1234,"Timeout_Description")
+    @NumberConfig("Port",state.ServerConfig.Port,"Port_Description")
+    @StringConfig("Host",state.ServerConfig.Host,"Host_Description")
+    @BoolConfig("DisableLAN",state.ServerConfig.DisableLAN,"DisableLAN_Description")
+    @BoolConfig("EnableLogin",state.ServerConfig.EnableLogin,"EnableLogin_Description")
+    @NumberConfig("Timeout",state.ServerConfig.Timeout,"Timeout_Description")
 </div>
 }
