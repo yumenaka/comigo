@@ -8,9 +8,8 @@ import (
 	"net/http"
 )
 
-// 从模板中获取htmx请求，页面比较复杂的时候用
+// 使用模板中响应htmx请求，页面比较复杂时用
 func Tab1(c *gin.Context) {
-	//检查请求来源是不是htmx
 	template := tab1(&state.Global) // define body content
 	// 用模板渲染 html 元素
 	if renderErr := htmx.NewResponse().RenderTempl(c.Request.Context(), c.Writer, template); renderErr != nil {
@@ -21,7 +20,6 @@ func Tab1(c *gin.Context) {
 }
 
 func Tab2(c *gin.Context) {
-	//检查请求来源是不是htmx
 	template := tab2(&state.Global) // define body content
 	// 用模板渲染 html 元素
 	if renderErr := htmx.NewResponse().RenderTempl(c.Request.Context(), c.Writer, template); renderErr != nil {
@@ -32,7 +30,6 @@ func Tab2(c *gin.Context) {
 }
 
 func Tab3(c *gin.Context) {
-	//检查请求来源是不是htmx
 	template := tab3(&state.Global) // define body content
 	// 用模板渲染 html 元素
 	if renderErr := htmx.NewResponse().RenderTempl(c.Request.Context(), c.Writer, template); renderErr != nil {
@@ -72,4 +69,49 @@ func showContentAPIHandler(c *gin.Context) {
 
 	// Send htmx response.
 	htmx.NewResponse().Write(c.Writer)
+}
+
+// UpdateStringConfigHandler 处理 /api/update-string-config 请求
+func UpdateStringConfigHandler(c *gin.Context) {
+	// 仅接收 HTMX 请求
+	if !htmx.IsHTMX(c.Request) {
+		c.AbortWithError(http.StatusBadRequest, errors.New("non-htmx request"))
+		return
+	}
+
+	// 解析表单
+	if err := c.Request.ParseForm(); err != nil {
+		c.String(http.StatusBadRequest, "ParseForm error: %v", err)
+		return
+	}
+
+	// 假设只有一对数据 (key-value)
+	formData := c.Request.PostForm
+	if len(formData) == 0 {
+		c.String(http.StatusBadRequest, "No form data")
+		return
+	}
+
+	var (
+		name     string
+		newValue string
+	)
+
+	// 这里仅取第一对 key-value
+	for key, values := range formData {
+		name = key
+		if len(values) > 0 {
+			newValue = values[0] // values 是一个切片，通常只有一个值，但要注意可能有多个值
+		}
+		// 只需要取第一对就可以退出循环
+		break
+	}
+
+	updatedHTML := StringConfig(name, newValue, name+"_Description")
+
+	// 用模板渲染 html 元素
+	if renderErr := htmx.NewResponse().RenderTempl(c.Request.Context(), c.Writer, updatedHTML); renderErr != nil {
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 }
