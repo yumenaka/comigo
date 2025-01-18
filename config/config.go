@@ -2,9 +2,13 @@ package config
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"os"
 	"path"
 	"path/filepath"
+	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/yumenaka/comigo/config/stores"
@@ -51,6 +55,61 @@ type Config struct {
 	UseCache               bool            `json:"UseCache" comment:"开启本地图片缓存，可以加快二次读取，但会占用硬盘空间"`
 	Username               string          `json:"Username" comment:"启用登陆后，登录界面需要的用户名。"`
 	ZipFileTextEncoding    string          `json:"ZipFileTextEncoding" comment:"非utf-8编码的ZIP文件，尝试用什么编码解析，默认GBK"`
+}
+
+// SetConfigValue 根据字段名和字符串形式的值，来更新 Config 的相应字段。
+// 如果字段名不存在，则返回错误。如果字段类型不在支持范围内，也返回错误。
+func (c *Config) SetConfigValue(fieldName, fieldValue string) error {
+	// 使用反射获得指向结构体的 Value
+	v := reflect.ValueOf(c).Elem()
+
+	// 根据 fieldName 获取对应字段的 reflect.Value
+	f := v.FieldByName(fieldName)
+	if !f.IsValid() {
+		return fmt.Errorf("不存在名为 '%s' 的字段", fieldName)
+	}
+	if !f.CanSet() {
+		return fmt.Errorf("无法对字段 '%s' 进行设置", fieldName)
+	}
+
+	// 根据字段的类型，进行解析并赋值
+	switch f.Kind() {
+	case reflect.Bool:
+		// ParseBool 返回字符串表示的布尔值。它接受 1、t、T、TRUE、true、True、0、f、F、FALSE、false、False。任何其他值都会返回错误。
+		boolVal, err := strconv.ParseBool(fieldValue)
+		if err != nil {
+			return fmt.Errorf("无法将 '%s' 解析为 bool: %v", fieldValue, err)
+		}
+		f.SetBool(boolVal)
+
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		// ParseInt 以给定基数（0、2 到 36）和位大小（0 到 64）解释字符串 s 并返回相应的值 i。该字符串可以以前导符号开头：“+”或“-”。
+		intVal, err := strconv.ParseInt(fieldValue, 10, 64)
+		if err != nil {
+			return fmt.Errorf("无法将 '%s' 解析为 int: %v", fieldValue, err)
+		}
+		// 这里为了简单，直接设定 int64。如果结构体字段是 int（非 int64），
+		// Go 会自动做一次范围检查和转换；若超范围将报错。
+		f.SetInt(intVal)
+
+	case reflect.String:
+		f.SetString(fieldValue)
+
+	case reflect.Slice:
+		// 针对常见的 []string 做一个示例：
+		if f.Type().Elem().Kind() == reflect.String {
+			// 假设传进来的字符串用逗号分割
+			sliceVal := strings.Split(fieldValue, ",")
+			f.Set(reflect.ValueOf(sliceVal))
+		} else {
+			return errors.New("暂不支持此 slice 的设置(仅支持 []string)")
+		}
+
+	default:
+		return fmt.Errorf("暂不支持设置字段 '%s' 的类型: %s", fieldName, f.Type().String())
+	}
+
+	return nil
 }
 
 // UpdateConfigByJson 使用 JSON 字符串反序列化将更新的配置解析为映射，遍历映射并更新配置，减少重复的代码。
