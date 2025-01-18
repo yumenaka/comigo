@@ -61,6 +61,8 @@ func parseSingleHTMXFormPair(c *gin.Context) (string, string, error) {
 	if !htmx.IsHTMX(c.Request) {
 		return "", "", errors.New("non-htmx request")
 	}
+	// 手动测试错误
+	//return "", "", errors.New("test")
 	if err := c.Request.ParseForm(); err != nil {
 		return "", "", fmt.Errorf("parseForm error: %v", err)
 	}

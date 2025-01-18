@@ -52,6 +52,10 @@ func SettingsPage(c *gin.Context, s *state.GlobalState) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<script>\n\tdocument.addEventListener('htmx:responseError', (event) => {\n      showToast(event.detail.xhr.statusText+\": \"+event.detail.xhr.responseURL, 'error');\n    });\n</script>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
 		return nil
 	})
 }

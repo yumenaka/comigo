@@ -39,7 +39,7 @@ templ Toast() {
                     toast.className = `flex items-center ${bgColor} text-white px-4 py-3 rounded shadow-lg transition transform duration-300 ease-in-out`;
 
                     // Toast 内容
-                    toast.innerHTML = `<span class="flex-1">${message}</span> <button class="ml-4 text-white focus:outline-none">&times;</button>`;
+                    toast.innerHTML = `<span class="flex-1">${message}</span> <button class="ml-4 ${bgColor} text-white focus:outline-none">&times;</button>`;
         
                     // 添加到 Toast 容器
                     toastContainer.appendChild(toast);
