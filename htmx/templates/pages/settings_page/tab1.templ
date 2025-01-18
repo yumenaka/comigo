@@ -8,19 +8,17 @@ import "github.com/yumenaka/comigo/htmx/state"
 // 与 HTML 表单一样，输入的 name 属性用作 htmx 发送的请求中的参数名称。
 // 此外，如果该元素导致非 GET 请求，则将包含最近的封闭表单的所有输入的值。
 // 此外，还可以使用 hx-vals（like: hx-vals='{"myVal": "My Value"}'）在请求中包含额外的值
-
 templ tab1(s *state.GlobalState) {
 <div class="flex flex-col justify-start w-3/5 min-w-[24rem]">
     @BoolConfig("OpenBrowser",state.ServerConfig.OpenBrowser, "OpenBrowser_Description")
     @StringArrawConfig("LocalStores", state.ServerConfig.LocalStores, "LocalStores_Description")
-    @NumberConfig("MaxScanDepth", state.ServerConfig.MaxScanDepth,"MaxScanDepth_Description")
-    @NumberConfig("MinImageNum", state.ServerConfig.MinImageNum,"MinImageNum_Description")
+    @NumberConfig("MaxScanDepth", state.ServerConfig.MaxScanDepth,"MaxScanDepth_Description",0,65535)
+    @NumberConfig("MinImageNum", state.ServerConfig.MinImageNum,"MinImageNum_Description",0,65535)
     @BoolConfig("EnableUpload",state.ServerConfig.EnableUpload, "EnableUpload_Description")
     @StringConfig("UploadPath", state.ServerConfig.UploadPath, "UploadPath_Description")
     @StringConfig("ZipFileTextEncoding", state.ServerConfig.ZipFileTextEncoding, "ZipFileTextEncoding_Description")
     @StringArrawConfig("ExcludePath", state.ServerConfig.ExcludePath, "ExcludePath_Description")
     @StringArrawConfig("SupportMediaType", state.ServerConfig.SupportMediaType, "SupportMediaType_Description")
     @StringArrawConfig("SupportFileType", state.ServerConfig.SupportFileType, "SupportFileType_Description")
-    @BoolConfig("EnableUpload", state.ServerConfig.EnableUpload,"EnableUpload_Description")
 </div>
 }

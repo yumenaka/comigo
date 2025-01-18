@@ -2,10 +2,13 @@ package settings_page
 
 import (
 	"errors"
+	"fmt"
 	"github.com/angelofallars/htmx-go"
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comigo/htmx/state"
+	"github.com/yumenaka/comigo/util/logger"
 	"net/http"
+	"strconv"
 )
 
 // 使用模板中响应htmx请求，页面比较复杂时用
@@ -39,77 +42,121 @@ func Tab3(c *gin.Context) {
 	}
 }
 
-// UpdateBoolConfigHandler 更新Config的htmx接口，返回变更后的html，布尔值专用
-func UpdateBoolConfigHandler(c *gin.Context) {
+// parseSingleHTMXFormPair 提取并返回表单中的“第一对” key/value。
+// 如果不是 HTMX 请求或解析失败等情况，返回对应的错误。
+func parseSingleHTMXFormPair(c *gin.Context) (string, string, error) {
+	// 1. 仅接收 HTMX 请求
 	if !htmx.IsHTMX(c.Request) {
-		// If not, return HTTP 400 error.
-		c.AbortWithError(http.StatusBadRequest, errors.New("non-htmx request"))
-		return
+		return "", "", errors.New("non-htmx request")
 	}
-
-	// Write HTML content.
-	c.Writer.Write([]byte("<p>🎉 Yes, <strong>htmx</strong> is ready to use! (<code>GET /api/hello-world</code>)</p>"))
-
-	// Send htmx response.
-	htmx.NewResponse().Write(c.Writer)
-}
-
-// 比较简单的例子，直接返回一个字符串
-func showContentAPIHandler(c *gin.Context) {
-	// Check, if the current request has a 'HX-Request' header.
-	// For more information, see https://htmx.org/docs/#request-headers
-	if !htmx.IsHTMX(c.Request) {
-		// If not, return HTTP 400 error.
-		c.AbortWithError(http.StatusBadRequest, errors.New("non-htmx request"))
-		return
-	}
-
-	// Write HTML content.
-	c.Writer.Write([]byte("<p>🎉 Yes, <strong>htmx</strong> is ready to use! (<code>GET /api/hello-world</code>)</p>"))
-
-	// Send htmx response.
-	htmx.NewResponse().Write(c.Writer)
-}
-
-// UpdateStringConfigHandler 处理 /api/update-string-config 请求
-func UpdateStringConfigHandler(c *gin.Context) {
-	// 仅接收 HTMX 请求
-	if !htmx.IsHTMX(c.Request) {
-		c.AbortWithError(http.StatusBadRequest, errors.New("non-htmx request"))
-		return
-	}
-
-	// 解析表单
+	// 2. 解析表单
 	if err := c.Request.ParseForm(); err != nil {
-		c.String(http.StatusBadRequest, "ParseForm error: %v", err)
-		return
+		return "", "", fmt.Errorf("parseForm error: %v", err)
 	}
-
-	// 假设只有一对数据 (key-value)
+	// 3. 检查是否有表单数据
 	formData := c.Request.PostForm
 	if len(formData) == 0 {
-		c.String(http.StatusBadRequest, "No form data")
-		return
+		return "", "", errors.New("no form data")
 	}
 
-	var (
-		name     string
-		newValue string
-	)
-
-	// 这里仅取第一对 key-value
+	// 4. 假设只有一对数据 (key=value)，只取第一对就行
+	var name, newValue string
 	for key, values := range formData {
 		name = key
 		if len(values) > 0 {
-			newValue = values[0] // values 是一个切片，通常只有一个值，但要注意可能有多个值
+			newValue = values[0] // 一般只有一个
 		}
-		// 只需要取第一对就可以退出循环
 		break
 	}
 
-	updatedHTML := StringConfig(name, newValue, name+"_Description")
+	return name, newValue, nil
+}
 
-	// 用模板渲染 html 元素
+// UpdateStringConfigHandler 处理 htmx 请求
+func UpdateStringConfigHandler(c *gin.Context) {
+	name, newValue, err := parseSingleHTMXFormPair(c)
+	if err != nil {
+		// 这里根据需要决定是 c.String 还是 c.AbortWithError
+		c.String(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	logger.Infof("Update config: %s = %s", name, newValue)
+
+	// 更新配置
+	if err := state.ServerConfig.SetConfigValue(name, newValue); err != nil {
+		logger.Errorf("Failed to set config value: %v", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	// 渲染对应的模板
+	updatedHTML := StringConfig(name, newValue, name+"_Description")
+	if renderErr := htmx.NewResponse().RenderTempl(c.Request.Context(), c.Writer, updatedHTML); renderErr != nil {
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+}
+
+func UpdateBoolConfigHandler(c *gin.Context) {
+	name, newValue, err := parseSingleHTMXFormPair(c)
+	if err != nil {
+		c.String(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	logger.Infof("Update config: %s = %s", name, newValue)
+
+	// 更新配置（先保存字符串形式）
+	if err := state.ServerConfig.SetConfigValue(name, newValue); err != nil {
+		logger.Errorf("Failed to set config value: %v", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	// 把字符串形式转换为bool
+	boolVal, err := strconv.ParseBool(newValue)
+	if err != nil {
+		logger.Errorf("无法将 '%s' 解析为 bool: %v", newValue, err)
+		// 看需求决定返回什么
+		c.String(http.StatusBadRequest, "parse bool error")
+		return
+	}
+
+	// 渲染对应的模板
+	updatedHTML := BoolConfig(name, boolVal, name+"_Description")
+	if renderErr := htmx.NewResponse().RenderTempl(c.Request.Context(), c.Writer, updatedHTML); renderErr != nil {
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+}
+
+func UpdateNumberConfigHandler(c *gin.Context) {
+	name, newValue, err := parseSingleHTMXFormPair(c)
+	if err != nil {
+		c.String(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	logger.Infof("Update config: %s = %s", name, newValue)
+
+	// 更新配置（字符串形式）
+	if err := state.ServerConfig.SetConfigValue(name, newValue); err != nil {
+		logger.Errorf("Failed to set config value: %v", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	// 转成数字
+	intVal, err := strconv.ParseInt(newValue, 10, 64)
+	if err != nil {
+		logger.Errorf("无法将 '%s' 解析为 int: %v", newValue, err)
+		c.String(http.StatusBadRequest, "parse int error")
+		return
+	}
+
+	// 渲染对应的模板
+	updatedHTML := NumberConfig(name, int(intVal), name+"_Description", 0, 65535)
 	if renderErr := htmx.NewResponse().RenderTempl(c.Request.Context(), c.Writer, updatedHTML); renderErr != nil {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
