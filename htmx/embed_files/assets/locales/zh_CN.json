@@ -156,7 +156,7 @@
   "set_back_color": "背景颜色:",
   "set_interface_color": "界面颜色:",
   "show_book_titles": "显示书名",
-  "show_file_icon": "显示文件图标",
+  "show_file_type": "显示文件类型",
   "show_header": "显示标题",
   "show_page_num": "显示页码",
   "simplify_book_titles": "简化书名",

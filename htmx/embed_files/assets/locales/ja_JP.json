@@ -156,7 +156,7 @@
   "set_back_color": "背景色を設定:",
   "set_interface_color": "UIカラー設定:",
   "show_book_titles": "書籍タイトルを表示",
-  "show_file_icon": "ファイルアイコンを表示",
+  "show_file_type": "ファイルアイコンを表示",
   "show_header": "タイトルを表示",
   "show_page_num": "ページ番号を表示",
   "simplify_book_titles": "書籍タイトルを簡略化",

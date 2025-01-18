@@ -12,4 +12,9 @@ templ SettingsPage(c *gin.Context, s *state.GlobalState) {
 	@common.Footer(s.Version)
 	@common.QRCode(s.ServerStatus.ServerHost)
 	@common.Toast()
+<script>
+	document.addEventListener('htmx:responseError', (event) => {
+      showToast(event.detail.xhr.statusText+": "+event.detail.xhr.responseURL, 'error');
+    });
+</script>
 }
