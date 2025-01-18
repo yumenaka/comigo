@@ -10,7 +10,6 @@ import (
 templ SettingsPage(c *gin.Context, s *state.GlobalState) {
 	@MainArea(&state.Global)
 	@common.Footer(s.Version)
-	@common.Drawer(s.ServerStatus.ServerHost, nil)
 	@common.QRCode(s.ServerStatus.ServerHost)
 	@common.Toast()
 }

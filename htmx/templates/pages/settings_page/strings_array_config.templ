@@ -15,7 +15,7 @@ templ StringArrawConfig(name string, value []string ,description string) {
         }
         <div class="relative">
             <label for={name+"Array"} class="sr-only" x-text={getTranslations("type_or_paste_content")}></label>
-            <input type="text" :id={name+"Array"} :placeholder={ getTranslations("type_or_paste_content") }
+            <input type="text" id={name+"Array"} :placeholder={ getTranslations("type_or_paste_content") }
                 class="w-full rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm" />
             <span class="absolute top-[0px] right-[-80px] place-content-center">
                 <button x-text={ getTranslations("submit") } type="button"

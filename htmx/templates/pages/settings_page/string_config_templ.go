@@ -126,7 +126,7 @@ func StringConfig(name string, value string, description string) templ.Component
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" class=\"px-1 w-64 rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm\" hx-post=\"/api/update-string-config\" hx-trigger=\"change\" hx-target=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" class=\"px-1 w-64 rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm\" hx-post=\"/api/update-string_config\" hx-trigger=\"change\" hx-target=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

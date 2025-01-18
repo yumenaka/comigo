@@ -49,11 +49,11 @@ func tab1(s *state.GlobalState) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = NumberConfig("MaxScanDepth", state.ServerConfig.MaxScanDepth, "MaxScanDepth_Description").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = NumberConfig("MaxScanDepth", state.ServerConfig.MaxScanDepth, "MaxScanDepth_Description", 0, 65535).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = NumberConfig("MinImageNum", state.ServerConfig.MinImageNum, "MinImageNum_Description").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = NumberConfig("MinImageNum", state.ServerConfig.MinImageNum, "MinImageNum_Description", 0, 65535).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -78,10 +78,6 @@ func tab1(s *state.GlobalState) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = StringArrawConfig("SupportFileType", state.ServerConfig.SupportFileType, "SupportFileType_Description").Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = BoolConfig("EnableUpload", state.ServerConfig.EnableUpload, "EnableUpload_Description").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
