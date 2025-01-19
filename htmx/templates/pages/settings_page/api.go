@@ -213,16 +213,15 @@ func doAdd(configName, addValue string) ([]string, error) {
 	oldConfig := config.CopyCfg()
 
 	// 更新配置
-	values, err := state.ServerConfig.AddStringArrayConfig(configName, addValue)
+	values, err := config.GetCfg().AddStringArrayConfig(configName, addValue)
 	if err != nil {
+		logger.Errorf("Failed to add config value: %v", err)
 		return nil, err
 	}
-
 	// 写入配置文件
 	if writeErr := config.WriteConfigFile(); writeErr != nil {
 		logger.Infof("Failed to update local config: %v", writeErr)
 	}
-
 	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等
 	beforeConfigUpdate(&oldConfig, config.GetCfg())
 	return values, nil
