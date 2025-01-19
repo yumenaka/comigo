@@ -18,12 +18,13 @@ import (
 // beforeConfigUpdate 根据配置的变化，判断是否需要打开浏览器重新扫描等
 func beforeConfigUpdate(oldConfig *config.Config, newConfig *config.Config) {
 	openBrowserIfNeeded(oldConfig, newConfig)
-	needScan, reScanFile := checkReScanStatus(oldConfig, newConfig)
-	if needScan {
+	reScanDir, reScanFile := checkReScanStatus(oldConfig, newConfig)
+	logger.Infof("reScanDir: %v, reScanFile: %v\n", reScanDir, reScanFile)
+	if reScanDir {
 		startReScan(reScanFile)
 	} else {
 		if newConfig.Debug {
-			logger.Info("No changes in cfg, skipped scan store path\n")
+			logger.Info("No changes in cfg, skipped rescan dir\n")
 		}
 	}
 }
@@ -68,6 +69,7 @@ func checkReScanStatus(oldConfig *config.Config, newConfig *config.Config) (reSc
 
 // startReScan 扫描并相应地更新数据库
 func startReScan(reScanFile bool) {
+	config.InitCfgStores()
 	option := scan.NewScanOption(
 		reScanFile,
 		config.GetLocalStoresList(),

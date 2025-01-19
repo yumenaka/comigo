@@ -153,6 +153,7 @@ func (c *Config) AddStringArrayConfig(fieldName, addValue string) ([]string, err
 	// 检查新元素是否已存在
 	for _, v := range oldSlice {
 		if v == addValue {
+			logger.Infof("AddStringArrayConfig: 字符串 '%s' 已存在", addValue)
 			return oldSlice, nil // 已存在则直接返回
 		}
 	}
@@ -400,10 +401,22 @@ var cfg = Config{
 	ZipFileTextEncoding: "",
 }
 
-// CheckLocalStores 检查本地书库路径是否已存在
-func CheckLocalStores(path string) bool {
+// LocalStoresExits 检查本地书库路径是否可添加
+func LocalStoresExits(path string) bool {
+	// 如果 Stat 出错（文件/文件夹不存在等）或者该路径不是目录，则返回 false
+	info, err := os.Stat(path)
+	if err != nil {
+		logger.Infof("Error checking local store path: %v", err)
+		return true
+	}
+	if !info.IsDir() {
+		logger.Infof("Error checking local store path: %s is not a directory", path)
+		return true
+	}
+	//检查本地书库路径是否已存在
 	for _, store := range cfg.Stores {
 		if store.Type == stores.Local && store.Local.Path == path {
+			logger.Infof("Local store path already exists: %s", path)
 			return true
 		}
 	}
@@ -412,7 +425,7 @@ func CheckLocalStores(path string) bool {
 
 // AddLocalStore 添加本地书库(单个路径)
 func AddLocalStore(path string) {
-	if CheckLocalStores(path) {
+	if LocalStoresExits(path) {
 		return
 	}
 	cfg.Stores = append(cfg.Stores, stores.Store{
@@ -427,7 +440,7 @@ func AddLocalStore(path string) {
 // AddLocalStores 添加本地书库（多个路径）
 func AddLocalStores(path []string) {
 	for _, p := range path {
-		if !CheckLocalStores(p) {
+		if !LocalStoresExits(p) {
 			AddLocalStore(p)
 		}
 	}
