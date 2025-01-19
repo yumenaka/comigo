@@ -13,8 +13,26 @@ templ SettingsPage(c *gin.Context, s *state.GlobalState) {
 	@common.QRCode(s.ServerStatus.ServerHost)
 	@common.Toast()
 <script>
+    // htmx出错时报错（Toast）
 	document.addEventListener('htmx:responseError', (event) => {
       showToast(event.detail.xhr.statusText+": "+event.detail.xhr.responseURL, 'error');
     });
+    // 删除字符串数组配置中的元素
+	function deleteStringConfigValue(e) {
+	    const configName = e.getAttribute('data-config-name');
+        const arrawIndex = e.getAttribute('data-arraw-index');
+        const deleteValue = e.getAttribute('data-delete-value');
+        console.log(configName, arrawIndex, deleteValue);
+        //todo: remote call
+	}
+	// 添加字符串数组配置中的元素
+	function addStringConfigValue(e) {
+        const configName = e.getAttribute('data-config-name');
+        input = document.getElementById(configName+"AddInput");
+        var addValue = input.value;
+        console.log(configName, addValue);
+        //todo: remote call
+        input.value = "";
+    }
 </script>
 }
