@@ -8,9 +8,13 @@ package settings_page
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
+import "strconv"
 import "github.com/yumenaka/comigo/htmx/templates/common/svg"
 
-func StringArrawConfig(name string, value []string, description string) templ.Component {
+// TODO：出于安全考虑。onclick不能直接拼接函数，未来需要使用JSFuncCall
+// 等 https://github.com/a-h/templ/pull/1038 合并后，可以使用下面的代码
+// onclick={ templ.JSFuncCall("deleteStringValue", templ.JSExpression("e"), name, index) }
+func StringArrawConfig(name string, values []string, description string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -38,7 +42,7 @@ func StringArrawConfig(name string, value []string, description string) templ.Co
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations(name))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/settings_page/strings_array_config.templ`, Line: 8, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/settings_page/strings_array_config.templ`, Line: 13, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -51,7 +55,7 @@ func StringArrawConfig(name string, value []string, description string) templ.Co
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations(name))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/settings_page/strings_array_config.templ`, Line: 8, Col: 86}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/settings_page/strings_array_config.templ`, Line: 13, Col: 86}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -61,17 +65,60 @@ func StringArrawConfig(name string, value []string, description string) templ.Co
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		for _, item := range value {
+		for index, value := range values {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"flex flex-row items-center p-2 m-1 text-sm font-medium text-black bg-blue-300 rounded-2xl\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(item)
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(value)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/settings_page/strings_array_config.templ`, Line: 12, Col: 18}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/settings_page/strings_array_config.templ`, Line: 17, Col: 19}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div data-config-name=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var5 string
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(name)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/settings_page/strings_array_config.templ`, Line: 19, Col: 37}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" data-arraw-index=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var6 string
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(index))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/settings_page/strings_array_config.templ`, Line: 19, Col: 78}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" data-delete-value=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var7 string
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(value)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/settings_page/strings_array_config.templ`, Line: 19, Col: 106}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" onclick=\"deleteStringConfigValue(this)\" class=\"flex justify-center items-center w-6 h-6 ml-1 mr-0.5 rounded hover:ring\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -79,90 +126,103 @@ func StringArrawConfig(name string, value []string, description string) templ.Co
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"relative\"><label for=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(name + "Array")
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/settings_page/strings_array_config.templ`, Line: 17, Col: 36}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" class=\"sr-only\" x-text=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var6 string
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("type_or_paste_content"))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/settings_page/strings_array_config.templ`, Line: 17, Col: 102}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\"></label> <input type=\"text\" id=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var7 string
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(name + "Array")
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/settings_page/strings_array_config.templ`, Line: 18, Col: 47}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" :placeholder=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<div class=\"relative\"><label for=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var8 string
-		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("type_or_paste_content"))
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(name + "Array")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/settings_page/strings_array_config.templ`, Line: 18, Col: 104}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/settings_page/strings_array_config.templ`, Line: 24, Col: 36}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" class=\"w-full rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm\"> <span class=\"absolute top-[0px] right-[-80px] place-content-center\"><button x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" class=\"sr-only\" x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var9 string
-		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("submit"))
+		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("type_or_paste_content"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/settings_page/strings_array_config.templ`, Line: 21, Col: 58}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/settings_page/strings_array_config.templ`, Line: 24, Col: 102}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" type=\"button\" class=\"w-16 h-10 mx-2 my-1 text-center text-gray-700 transition border border-gray-500 rounded bg-sky-300 hover:text-gray-900\">提交</button></span></div></div><div x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\"></label> <input type=\"text\" id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var10 string
-		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations(description))
+		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(name + "AddInput")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/settings_page/strings_array_config.templ`, Line: 26, Col: 46}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/settings_page/strings_array_config.templ`, Line: 25, Col: 50}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\" class=\"w-3/4 py-1 ml-2 text-xs text-gray-500\"></div><div class=\"bg-red-600\"></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" :placeholder=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var11 string
+		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("type_or_paste_content"))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/settings_page/strings_array_config.templ`, Line: 25, Col: 107}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" class=\"w-full rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm\"> <span class=\"absolute top-[0px] right-[-80px] place-content-center\"><button x-text=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var12 string
+		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("submit"))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/settings_page/strings_array_config.templ`, Line: 28, Col: 58}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" type=\"button\" data-config-name=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var13 string
+		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(name)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/settings_page/strings_array_config.templ`, Line: 29, Col: 43}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" onclick=\"addStringConfigValue(this)\" class=\"w-16 h-10 mx-2 my-1 text-center text-gray-700 transition border border-gray-500 rounded bg-sky-300 hover:text-gray-900\">提交</button></span></div></div><div x-text=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var14 string
+		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations(description))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/settings_page/strings_array_config.templ`, Line: 34, Col: 46}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" class=\"w-3/4 py-1 ml-2 text-xs text-gray-500\"></div><div class=\"bg-red-600\"></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

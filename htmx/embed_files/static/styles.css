@@ -1261,12 +1261,20 @@ input:checked + .toggle-bg {
   margin-inline-end: .5rem;
 }
 
+.ml-1 {
+  margin-left: .25rem;
+}
+
 .ml-2 {
   margin-left: .5rem;
 }
 
 .ml-4 {
   margin-left: 1rem;
+}
+
+.mr-0\.5 {
+  margin-right: .125rem;
 }
 
 .mr-4 {

@@ -52,7 +52,7 @@ func SettingsPage(c *gin.Context, s *state.GlobalState) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<script>\n\tdocument.addEventListener('htmx:responseError', (event) => {\n      showToast(event.detail.xhr.statusText+\": \"+event.detail.xhr.responseURL, 'error');\n    });\n</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<script>\n    // htmx出错时报错（Toast）\n\tdocument.addEventListener('htmx:responseError', (event) => {\n      showToast(event.detail.xhr.statusText+\": \"+event.detail.xhr.responseURL, 'error');\n    });\n    // 删除字符串数组配置中的元素\n\tfunction deleteStringConfigValue(e) {\n\t    const configName = e.getAttribute('data-config-name');\n        const arrawIndex = e.getAttribute('data-arraw-index');\n        const deleteValue = e.getAttribute('data-delete-value');\n        console.log(configName, arrawIndex, deleteValue);\n        //todo: remote call\n\t}\n\t// 添加字符串数组配置中的元素\n\tfunction addStringConfigValue(e) {\n        const configName = e.getAttribute('data-config-name');\n        input = document.getElementById(configName+\"AddInput\");\n        var addValue = input.value;\n        console.log(configName, addValue);\n        //todo: remote call\n        input.value = \"\";\n    }\n</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
