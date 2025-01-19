@@ -29,6 +29,7 @@ func bindView(router *gin.Engine) {
 	router.GET("/settings", settings_page.Handler)
 }
 
+// 注册路由
 func bindAPI(router *gin.Engine) {
 	router.GET("/api/shelf/:id", shelf.GetBookListHandler)
 
@@ -39,4 +40,6 @@ func bindAPI(router *gin.Engine) {
 	router.POST("/api/update-string_config", settings_page.UpdateStringConfigHandler)
 	router.POST("/api/update-bool-config", settings_page.UpdateBoolConfigHandler)
 	router.POST("/api/update-number-config", settings_page.UpdateNumberConfigHandler)
+	router.POST("/api/delete-array-config", settings_page.DeleteArrayConfigHandler)
+	router.POST("/api/add-array-config", settings_page.AddArrayConfigHandler)
 }

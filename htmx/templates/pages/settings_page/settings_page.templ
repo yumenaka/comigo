@@ -27,12 +27,11 @@ templ SettingsPage(c *gin.Context, s *state.GlobalState) {
 	}
 	// 添加字符串数组配置中的元素
 	function addStringConfigValue(e) {
-        const configName = e.getAttribute('data-config-name');
-        input = document.getElementById(configName+"AddInput");
-        var addValue = input.value;
+        const buttonID = e.getAttribute('id');
+        const configName = buttonID.replace('AddButton', '');
+        const addValue = document.getElementById(configName+'AddInput').value;
         console.log(configName, addValue);
-        //todo: remote call
-        input.value = "";
+        e.setAttribute('hx-vals', JSON.stringify({configName: configName, addValue: addValue}));
     }
 </script>
 }

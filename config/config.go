@@ -112,6 +112,85 @@ func (c *Config) SetConfigValue(fieldName, fieldValue string) error {
 	return nil
 }
 
+// getStringSliceField 是一个帮助函数，用于根据字段名，获取可设置的 []string 字段。
+func getStringSliceField(c *Config, fieldName string) (reflect.Value, []string, error) {
+	// 取得 *Config 的 Value
+	v := reflect.ValueOf(c)
+	if v.Kind() != reflect.Pointer || v.IsNil() {
+		return reflect.Value{}, nil, errors.New("必须是一个非空的 *Config 指针")
+	}
+	// 取得实际元素
+	v = v.Elem()
+
+	// 根据 fieldName 获取对应字段
+	f := v.FieldByName(fieldName)
+	if !f.IsValid() {
+		return reflect.Value{}, nil, fmt.Errorf("不存在名为 '%s' 的字段", fieldName)
+	}
+	if !f.CanSet() {
+		return reflect.Value{}, nil, fmt.Errorf("无法对字段 '%s' 进行设置", fieldName)
+	}
+	// 检查字段是否是切片类型
+	if f.Kind() != reflect.Slice {
+		return reflect.Value{}, nil, fmt.Errorf("字段 '%s' 不是切片类型", fieldName)
+	}
+	// 检查切片元素类型是否是string
+	if f.Type().Elem().Kind() != reflect.String {
+		return reflect.Value{}, nil, fmt.Errorf("字段 '%s' 的元素类型不是 string", fieldName)
+	}
+	// 转换为 []string
+	oldSlice := f.Interface().([]string)
+
+	return f, oldSlice, nil
+}
+
+// AddStringArrayConfig 往指定的 []string 字段中添加一个新字符串
+func (c *Config) AddStringArrayConfig(fieldName, addValue string) ([]string, error) {
+	f, oldSlice, err := getStringSliceField(c, fieldName)
+	if err != nil {
+		return nil, err
+	}
+	// 检查新元素是否已存在
+	for _, v := range oldSlice {
+		if v == addValue {
+			return oldSlice, nil // 已存在则直接返回
+		}
+	}
+	// 若不存在则添加
+	newSlice := append(oldSlice, addValue)
+	// 赋值给字段
+	f.Set(reflect.ValueOf(newSlice))
+	return newSlice, nil
+}
+
+// DeleteStringArrayConfig 从指定的 []string 字段中删除某个字符串
+func (c *Config) DeleteStringArrayConfig(fieldName, deleteValue string) ([]string, error) {
+	f, oldSlice, err := getStringSliceField(c, fieldName)
+	if err != nil {
+		return nil, err
+	}
+
+	found := false
+	// 过滤掉需要删除的字符串
+	newSlice := make([]string, 0, len(oldSlice))
+	for _, v := range oldSlice {
+		if v == deleteValue {
+			found = true
+			continue
+		}
+		newSlice = append(newSlice, v)
+	}
+
+	// 如果没找到，返回旧切片即可
+	if !found {
+		return oldSlice, nil
+	}
+
+	// 找到了才赋值给字段
+	f.Set(reflect.ValueOf(newSlice))
+	return newSlice, nil
+}
+
 // UpdateConfigByJson 使用 JSON 字符串反序列化将更新的配置解析为映射，遍历映射并更新配置，减少重复的代码。
 func UpdateConfigByJson(jsonString string) error {
 	var updates map[string]interface{}
