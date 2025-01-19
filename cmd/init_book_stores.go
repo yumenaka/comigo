@@ -28,7 +28,7 @@ func SetStore(args []string) {
 		}
 	}
 	//2、设置默认书库路径：扫描CMD指定的路径，或添加当前文件夹为默认路径。
-	SetStorePath(args)
+	SetStorePath(args[1:])
 
 	//3、扫描配置文件里面的书库路径
 	option := scan.NewScanOption(

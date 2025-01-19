@@ -45,7 +45,7 @@ func tab1(s *state.GlobalState) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = StringArrawConfig("LocalStores", state.ServerConfig.LocalStores, "LocalStores_Description").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = StringArrayConfig("LocalStores", state.ServerConfig.LocalStores, "LocalStores_Description").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -69,15 +69,15 @@ func tab1(s *state.GlobalState) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = StringArrawConfig("ExcludePath", state.ServerConfig.ExcludePath, "ExcludePath_Description").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = StringArrayConfig("ExcludePath", state.ServerConfig.ExcludePath, "ExcludePath_Description").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = StringArrawConfig("SupportMediaType", state.ServerConfig.SupportMediaType, "SupportMediaType_Description").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = StringArrayConfig("SupportMediaType", state.ServerConfig.SupportMediaType, "SupportMediaType_Description").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = StringArrawConfig("SupportFileType", state.ServerConfig.SupportFileType, "SupportFileType_Description").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = StringArrayConfig("SupportFileType", state.ServerConfig.SupportFileType, "SupportFileType_Description").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -1,14 +1,15 @@
 package settings_page
 
 import "strconv"
+import "fmt"
 import "github.com/yumenaka/comigo/htmx/templates/common/svg"
 
 // TODO：出于安全考虑。onclick不能直接拼接函数，未来需要使用JSFuncCall
 // 等 https://github.com/a-h/templ/pull/1038 合并后，可以使用下面的代码
 // onclick={ templ.JSFuncCall("deleteStringValue", templ.JSExpression("e"), name, index) }
 
-templ StringArrawConfig(name string, values []string ,description string) {
-<div
+templ StringArrayConfig(name string, values []string ,description string) {
+<div id={ name+"-string-array-config" }
     class="flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400">
     <label class="w-32 py-0" for={getTranslations(name)} x-text={getTranslations(name)}></label>
     <div class="flex flex-row flex-wrap w-3/4 py-1">
@@ -26,7 +27,12 @@ templ StringArrawConfig(name string, values []string ,description string) {
                 class="w-full rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm" />
             <span class="absolute top-[0px] right-[-80px] place-content-center">
                 <button x-text={ getTranslations("submit") } type="button"
-                    data-config-name={ name } onclick="addStringConfigValue(this)"
+                                        id={ name+"AddButton" }
+                                        hx-post="/api/add-array-config"
+                                        hx-target={ "#" + name+"-string-array-config" }
+                                        hx-swap="outerHTML"
+                                        hx-vals={fmt.Sprintf(`{"configName":"%s","value":"%s"}`, name, "")}
+                                        onclick="addStringConfigValue(this)"
                     class="w-16 h-10 mx-2 my-1 text-center text-gray-700 transition border border-gray-500 rounded bg-sky-300 hover:text-gray-900">提交</button>
             </span>
         </div>

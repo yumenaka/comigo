@@ -58,11 +58,11 @@ func Tab3(c *gin.Context) {
 // parseSingleHTMXFormPair 提取并返回表单中的“第一对” key/value。
 // 如果不是 HTMX 请求或解析失败等情况，返回对应的错误。
 func parseSingleHTMXFormPair(c *gin.Context) (string, string, error) {
+	// 手动测试错误
+	//return "", "", errors.New("test")
 	if !htmx.IsHTMX(c.Request) {
 		return "", "", errors.New("non-htmx request")
 	}
-	// 手动测试错误
-	//return "", "", errors.New("test")
 	if err := c.Request.ParseForm(); err != nil {
 		return "", "", fmt.Errorf("parseForm error: %v", err)
 	}
@@ -93,15 +93,15 @@ func updateConfigGeneric(c *gin.Context) (string, string, error) {
 	// 旧配置做个备份（有需要对比）
 	oldConfig := config.CopyCfg()
 
-	// 写入配置文件
-	if writeErr := config.WriteConfigFile(); writeErr != nil {
-		logger.Infof("Failed to update local config: %v", writeErr)
-	}
-
 	// 更新配置
 	if setErr := state.ServerConfig.SetConfigValue(name, newValue); setErr != nil {
 		logger.Errorf("Failed to set config value: %v", setErr)
 		return "", "", setErr
+	}
+
+	// 写入配置文件
+	if writeErr := config.WriteConfigFile(); writeErr != nil {
+		logger.Infof("Failed to update local config: %v", writeErr)
 	}
 
 	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等
@@ -170,6 +170,128 @@ func UpdateNumberConfigHandler(c *gin.Context) {
 	if renderErr := htmx.NewResponse().RenderTempl(c.Request.Context(), c.Writer, updatedHTML); renderErr != nil {
 		c.AbortWithStatus(http.StatusInternalServerError)
 	}
+}
+
+func AddArrayConfigHandler(c *gin.Context) {
+	// 解析htmx的form数据
+	// 原始数据类似：configName=SupportMediaType&addValue=.test
+	// 解析后的数据类似：ConfigName=SupportMediaType, AddValue=.test
+	if !htmx.IsHTMX(c.Request) {
+		c.String(http.StatusBadRequest, "non-htmx request")
+	}
+	if err := c.Request.ParseForm(); err != nil {
+		c.String(http.StatusBadRequest, "parseForm error")
+		return
+	}
+	formData := c.Request.PostForm
+	if len(formData) == 0 {
+		c.String(http.StatusBadRequest, "no form data")
+		return
+	}
+	var ConfigName, AddValue string
+	for key, values := range formData {
+		if key == "configName" {
+			ConfigName = values[0]
+		}
+		if key == "addValue" {
+			AddValue = values[0]
+		}
+	}
+	// 打印日志
+	logger.Infof("AddArrayConfigHandler: %s = %s\n", ConfigName, AddValue)
+	// 根据 ConfigName 找到对应配置，并添加 AddValue
+	values, err := doAdd(ConfigName, AddValue)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "add error")
+		return
+	}
+	// 返回更新后的片段
+	updatedHTML := StringArrayConfig(ConfigName, values, ConfigName+"_Description")
+	if renderErr := htmx.NewResponse().RenderTempl(c.Request.Context(), c.Writer, updatedHTML); renderErr != nil {
+		c.AbortWithStatus(http.StatusInternalServerError)
+	}
+}
+
+func doAdd(configName, addValue string) ([]string, error) {
+	// 旧配置做个备份（有需要对比）
+	oldConfig := config.CopyCfg()
+
+	// 更新配置
+	values, err := state.ServerConfig.AddStringArrayConfig(configName, addValue)
+	if err != nil {
+		return nil, err
+	}
+
+	// 写入配置文件
+	if writeErr := config.WriteConfigFile(); writeErr != nil {
+		logger.Infof("Failed to update local config: %v", writeErr)
+	}
+
+	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等
+	beforeConfigUpdate(&oldConfig, config.GetCfg())
+	return values, nil
+}
+
+// DeleteArrayConfigHandler 处理删除数组元素
+func DeleteArrayConfigHandler(c *gin.Context) {
+	// 解析htmx的form数据
+	// 原始数据类似：configName=SupportMediaType&deleteValue=.test
+	// 解析后的数据类似：ConfigName=SupportMediaType, DeleteValue=.test
+	if !htmx.IsHTMX(c.Request) {
+		c.String(http.StatusBadRequest, "non-htmx request")
+	}
+	if err := c.Request.ParseForm(); err != nil {
+		c.String(http.StatusBadRequest, "parseForm error")
+		return
+	}
+	formData := c.Request.PostForm
+	if len(formData) == 0 {
+		c.String(http.StatusBadRequest, "no form data")
+		return
+	}
+	var ConfigName, DeleteValue string
+	for key, values := range formData {
+		if key == "configName" {
+			ConfigName = values[0]
+		}
+		if key == "deleteValue" {
+			DeleteValue = values[0]
+		}
+	}
+	// 打印日志
+	logger.Infof("DeleteArrayConfigHandler: %s = %s\n", ConfigName, DeleteValue)
+
+	// 根据 ConfigName 找到对应配置，
+	// 然后根据 Index 与 DeleteValue 删除该元素
+	values, err := doDelete(ConfigName, DeleteValue)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "delete error")
+		return
+	}
+	// 最后把更新后的同一段 HTML 片段返回给前端
+	updatedHTML := StringArrayConfig(ConfigName, values, ConfigName+"_Description")
+	if renderErr := htmx.NewResponse().RenderTempl(c.Request.Context(), c.Writer, updatedHTML); renderErr != nil {
+		c.AbortWithStatus(http.StatusInternalServerError)
+	}
+}
+
+func doDelete(configName string, deleteValue string) ([]string, error) {
+	// 旧配置做个备份（有需要对比）
+	oldConfig := config.CopyCfg()
+
+	// 更新配置
+	values, err := state.ServerConfig.DeleteStringArrayConfig(configName, deleteValue)
+	if err != nil {
+		return nil, err
+	}
+
+	// 写入配置文件
+	if writeErr := config.WriteConfigFile(); writeErr != nil {
+		logger.Infof("Failed to update local config: %v", writeErr)
+	}
+	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等
+	beforeConfigUpdate(&oldConfig, config.GetCfg())
+	return values, nil
 }
 
 // -------------------------
