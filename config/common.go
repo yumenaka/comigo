@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -64,6 +65,64 @@ const (
 	ProgramDirectory = "ProgramDirectory"
 )
 
+// CheckConfigLocation 判断当前配置文件应该保存到哪里。
+// 逻辑：
+//  1. 是否在HomeDirectory已有 config.toml
+//  2. 否则是否在WorkingDirectory已有 config.toml
+//  3. 否则是否在ProgramDirectory已有 config.toml
+//     若都没有，则返回 "HomeDirectory"。
+//
+// 返回：location字符串
+func CheckConfigLocation() string {
+	// 1. 检查HomeDirectory
+	home, err := os.UserHomeDir()
+	if err != nil {
+		// 获取Home失败就先记录一下，但不直接return，继续往后查
+		fmt.Println("Warning: failed to get HomeDir:", err)
+	} else {
+		homePath := path.Join(home, ".config", "comigo", "config.toml")
+		if fileExists(homePath) {
+			return HomeDirectory
+		}
+	}
+
+	// 2. 检查WorkingDirectory
+	wdPath := "config.toml"
+	if fileExists(wdPath) {
+		return WorkingDirectory
+	}
+
+	// 3. 检查ProgramDirectory
+	executable, errExe := os.Executable()
+	if errExe != nil {
+		// 获取可执行文件路径出错，这种情况也比较少见，先打印日志
+		fmt.Println("Warning: failed to get Executable path:", errExe)
+	} else {
+		progPath := path.Join(path.Dir(executable), "config.toml")
+		if fileExists(progPath) {
+			return ProgramDirectory
+		}
+	}
+
+	// 4. 如果都找不到，默认返回 HomeDirectory
+	return HomeDirectory
+}
+
+// fileExists 封装一个检查文件是否存在的辅助函数
+func fileExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return false
+		}
+		// 其它错误比如权限问题，也直接返回false
+		fmt.Println("Warning: cannot access file:", filename, "error:", err)
+		return false
+	}
+	// 确实存在且不是目录
+	return !info.IsDir()
+}
+
 func SaveConfig(to string) error {
 	//保存配置
 	bytes, errMarshal := toml.Marshal(cfg)
@@ -104,6 +163,55 @@ func SaveConfig(to string) error {
 		}
 	}
 	return nil
+}
+
+// GetExistingConfigFilePath 依次检查 3 个路径是否存在 config.toml，
+// 若存在则返回对应的“绝对路径”，否则返回空字符串。
+func GetExistingConfigFilePath() string {
+	// 1. HomeDirectory
+	home, err := os.UserHomeDir()
+	if err == nil {
+		homePath := path.Join(home, ".config", "comigo", "config.toml")
+		if fileExists(homePath) {
+			absPath, errAbs := filepath.Abs(homePath)
+			if errAbs == nil {
+				return absPath
+			}
+			// 如果取绝对路径出错，就返回相对路径；或者你也可以直接忽略
+			return homePath
+		}
+	} else {
+		// 获取HomeDir失败，可以做个日志或忽略
+		fmt.Println("Warning: failed to get HomeDir:", err)
+	}
+
+	// 2. WorkingDirectory（就是当前执行命令所在目录）
+	wdPath := "config.toml"
+	if fileExists(wdPath) {
+		absPath, errAbs := filepath.Abs(wdPath)
+		if errAbs == nil {
+			return absPath
+		}
+		return wdPath
+	}
+
+	// 3. ProgramDirectory（可执行文件所在目录）
+	exe, errExe := os.Executable()
+	if errExe == nil {
+		progPath := path.Join(path.Dir(exe), "config.toml")
+		if fileExists(progPath) {
+			absPath, errAbs := filepath.Abs(progPath)
+			if errAbs == nil {
+				return absPath
+			}
+			return progPath
+		}
+	} else {
+		fmt.Println("Warning: failed to get Executable path:", errExe)
+	}
+
+	// 如果都不存在就返回空字符串
+	return ""
 }
 
 func DeleteConfigIn(in string) error {

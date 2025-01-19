@@ -1,6 +1,7 @@
 package settings_page
 
 import "github.com/yumenaka/comigo/htmx/state"
+import "github.com/yumenaka/comigo/config"
 
 templ tab2(s *state.GlobalState) {
 <div class="flex flex-col justify-start w-3/5 min-w-[24rem]">
@@ -9,5 +10,6 @@ templ tab2(s *state.GlobalState) {
     @BoolConfig("DisableLAN",state.ServerConfig.DisableLAN,"DisableLAN_Description")
     @BoolConfig("EnableLogin",state.ServerConfig.EnableLogin,"EnableLogin_Description")
     @NumberConfig("Timeout",state.ServerConfig.Timeout,"Timeout_Description",0,65535)
+    @ConfigManager(config.CheckConfigLocation(),config.GetExistingConfigFilePath())
 </div>
 }

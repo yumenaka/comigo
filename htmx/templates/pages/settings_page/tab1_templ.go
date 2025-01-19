@@ -9,6 +9,7 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import "github.com/yumenaka/comigo/htmx/state"
+import "github.com/yumenaka/comigo/config"
 
 // htmx 是一个用于构建现代 web 应用程序的库，它使用无需刷新页面的 AJAX 技术。请求是通过 HTTP 发送的，但是 htmx 会处理响应并更新页面的部分内容，而不是整个页面。
 // https://htmx.org/docs/#parameters
@@ -78,6 +79,10 @@ func tab1(s *state.GlobalState) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = StringArrayConfig("SupportFileType", state.ServerConfig.SupportFileType, "SupportFileType_Description").Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = ConfigManager(config.CheckConfigLocation(), config.GetExistingConfigFilePath()).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

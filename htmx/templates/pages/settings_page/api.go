@@ -4,16 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"reflect"
 	"strconv"
 
 	"github.com/angelofallars/htmx-go"
 	"github.com/gin-gonic/gin"
-	"github.com/spf13/viper"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/htmx/state"
-	"github.com/yumenaka/comigo/util"
-	"github.com/yumenaka/comigo/util/file/scan"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
@@ -265,7 +261,7 @@ func DeleteArrayConfigHandler(c *gin.Context) {
 	// 然后根据 Index 与 DeleteValue 删除该元素
 	values, err := doDelete(ConfigName, DeleteValue)
 	if err != nil {
-		c.String(http.StatusInternalServerError, "delete error")
+		c.String(http.StatusInternalServerError, ConfigName+" delete Failed")
 		return
 	}
 	// 最后把更新后的同一段 HTML 片段返回给前端
@@ -294,89 +290,60 @@ func doDelete(configName string, deleteValue string) ([]string, error) {
 	return values, nil
 }
 
-// -------------------------
-// 其他辅助逻辑保持不变
-// -------------------------
-
-// beforeConfigUpdate 根据配置的变化，判断是否需要打开浏览器重新扫描等
-func beforeConfigUpdate(oldConfig *config.Config, newConfig *config.Config) {
-	openBrowserIfNeeded(oldConfig, newConfig)
-	needScan, reScanFile := checkReScanStatus(oldConfig, newConfig)
-	if needScan {
-		startReScan(reScanFile)
-	} else {
-		if newConfig.Debug {
-			logger.Info("No changes in cfg, skipped scan store path\n")
-		}
+// HandleConfigSave 处理 /api/config-save 的 POST 请求
+func HandleConfigSave(c *gin.Context) {
+	if !htmx.IsHTMX(c.Request) {
+		c.String(http.StatusBadRequest, "non-htmx request")
+	}
+	// 从表单获取选中的目录
+	selectedDir := c.PostForm("selectedDir")
+	if selectedDir == "" {
+		// 如果前端没传，返回错误信息
+		c.String(http.StatusBadRequest, "No directory selected")
+		return
+	}
+	if selectedDir != config.WorkingDirectory && selectedDir != config.HomeDirectory && selectedDir != config.ProgramDirectory {
+		// 如果不是三个目录之一，就不能保存
+		c.String(http.StatusBadRequest, "Invalid directory selected")
+		return
+	}
+	if err := config.SaveConfig(selectedDir); err != nil {
+		// 保存失败，返回错误信息
+		c.String(http.StatusInternalServerError, "Failed to save config")
+		return
+	}
+	// 最后把更新后的同一段 HTML 片段返回给前端
+	updatedHTML := ConfigManager(config.CheckConfigLocation(), config.GetExistingConfigFilePath())
+	if renderErr := htmx.NewResponse().RenderTempl(c.Request.Context(), c.Writer, updatedHTML); renderErr != nil {
+		c.AbortWithStatus(http.StatusInternalServerError)
 	}
 }
 
-func openBrowserIfNeeded(oldConfig *config.Config, newConfig *config.Config) {
-	if !oldConfig.OpenBrowser && newConfig.OpenBrowser {
-		protocol := "http://"
-		if newConfig.EnableTLS {
-			protocol = "https://"
-		}
-		util.OpenBrowser(protocol + "localhost:" + strconv.Itoa(newConfig.Port))
+// HandleConfigDelete 处理 /api/config-delete 的 POST 请求
+func HandleConfigDelete(c *gin.Context) {
+	if !htmx.IsHTMX(c.Request) {
+		c.String(http.StatusBadRequest, "non-htmx request")
 	}
-}
-
-// checkReScanStatus 检查旧的和新的配置是否需要更新，并返回需要重新扫描和重新扫描文件的布尔值
-func checkReScanStatus(oldConfig *config.Config, newConfig *config.Config) (reScanDir bool, reScanFile bool) {
-	if !reflect.DeepEqual(oldConfig.LocalStores, newConfig.LocalStores) {
-		reScanDir = true
+	// 从表单获取选中的目录
+	selectedDir := c.PostForm("selectedDir")
+	if selectedDir == "" {
+		// 如果前端没传，返回错误信息
+		c.String(http.StatusBadRequest, "No directory selected")
+		return
 	}
-	if oldConfig.MaxScanDepth != newConfig.MaxScanDepth {
-		reScanDir = true
+	if selectedDir != config.WorkingDirectory && selectedDir != config.HomeDirectory && selectedDir != config.ProgramDirectory {
+		// 如果不是三个目录之一，就不能保存
+		c.String(http.StatusBadRequest, "Invalid directory selected")
+		return
 	}
-	if !reflect.DeepEqual(oldConfig.SupportMediaType, newConfig.SupportMediaType) {
-		reScanDir = true
-		reScanFile = true
+	if err := config.DeleteConfigIn(selectedDir); err != nil {
+		// 删除失败，返回错误信息
+		c.String(http.StatusInternalServerError, "Failed to save config")
+		return
 	}
-	if !reflect.DeepEqual(oldConfig.SupportFileType, newConfig.SupportFileType) {
-		reScanDir = true
-	}
-	if oldConfig.MinImageNum != newConfig.MinImageNum {
-		reScanDir = true
-		reScanFile = true
-	}
-	if !reflect.DeepEqual(oldConfig.ExcludePath, newConfig.ExcludePath) {
-		reScanDir = true
-	}
-	if oldConfig.EnableDatabase != newConfig.EnableDatabase {
-		reScanDir = true
-	}
-	return
-}
-
-// startReScan 扫描并相应地更新数据库
-func startReScan(reScanFile bool) {
-	option := scan.NewScanOption(
-		reScanFile,
-		config.GetLocalStoresList(),
-		config.GetStores(),
-		config.GetMaxScanDepth(),
-		config.GetMinImageNum(),
-		config.GetTimeoutLimitForScan(),
-		config.GetExcludePath(),
-		config.GetSupportMediaType(),
-		config.GetSupportFileType(),
-		config.GetSupportTemplateFile(),
-		config.GetZipFileTextEncoding(),
-		config.GetEnableDatabase(),
-		config.GetClearDatabaseWhenExit(),
-		config.GetDebug(),
-	)
-	if err := scan.AllStore(option); err != nil {
-		logger.Infof("Failed to scan store path: %v", err)
-	}
-	if config.GetEnableDatabase() {
-		saveResultsToDatabase(viper.ConfigFileUsed(), config.GetClearDatabaseWhenExit())
-	}
-}
-
-func saveResultsToDatabase(configPath string, clearDatabaseWhenExit bool) {
-	if err := scan.SaveResultsToDatabase(configPath, clearDatabaseWhenExit); err != nil {
-		logger.Infof("Failed to save results to database: %v", err)
+	// 最后把更新后的同一段 HTML 片段返回给前端
+	updatedHTML := ConfigManager(config.CheckConfigLocation(), config.GetExistingConfigFilePath())
+	if renderErr := htmx.NewResponse().RenderTempl(c.Request.Context(), c.Writer, updatedHTML); renderErr != nil {
+		c.AbortWithStatus(http.StatusInternalServerError)
 	}
 }

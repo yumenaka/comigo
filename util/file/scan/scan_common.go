@@ -116,7 +116,6 @@ func AllStore(scanConfig Option) error {
 		addList, err := Local(localPath, scanConfig)
 		if err != nil {
 			logger.Infof(locale.GetString("scan_error")+" path:%s %s", localPath, err)
-			logger.Infof(localPath)
 			continue
 		}
 		AddBooksToStore(addList, localPath, scanConfig.MinImageNum)
