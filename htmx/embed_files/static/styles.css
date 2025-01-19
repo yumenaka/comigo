@@ -1196,6 +1196,11 @@ input:checked + .toggle-bg {
   margin: .5rem;
 }
 
+.mx-0 {
+  margin-left: 0;
+  margin-right: 0;
+}
+
 .mx-0\.5 {
   margin-left: .125rem;
   margin-right: .125rem;
@@ -1313,6 +1318,13 @@ input:checked + .toggle-bg {
   margin-top: auto;
 }
 
+.line-clamp-2 {
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  display: -webkit-box;
+  overflow: hidden;
+}
+
 .block {
   display: block;
 }
@@ -1401,6 +1413,10 @@ input:checked + .toggle-bg {
   height: 16rem;
 }
 
+.h-7 {
+  height: 1.75rem;
+}
+
 .h-8 {
   height: 2rem;
 }
@@ -1429,12 +1445,20 @@ input:checked + .toggle-bg {
   max-height: 100vh;
 }
 
+.min-h-20 {
+  min-height: 5rem;
+}
+
 .min-h-screen {
   min-height: 100vh;
 }
 
 .w-1\/2 {
   width: 50%;
+}
+
+.w-1\/3 {
+  width: 33.3333%;
 }
 
 .w-10 {
@@ -1459,6 +1483,10 @@ input:checked + .toggle-bg {
 
 .w-2\.5 {
   width: .625rem;
+}
+
+.w-24 {
+  width: 6rem;
 }
 
 .w-3\/4 {
@@ -1495,6 +1523,10 @@ input:checked + .toggle-bg {
 
 .w-64 {
   width: 16rem;
+}
+
+.w-7 {
+  width: 1.75rem;
 }
 
 .w-8 {
@@ -1953,6 +1985,11 @@ input:checked + .toggle-bg {
   background-color: rgb(26 86 219 / var(--tw-bg-opacity, 1));
 }
 
+.bg-cyan-200 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(165 243 252 / var(--tw-bg-opacity, 1));
+}
+
 .bg-gray-100 {
   --tw-bg-opacity: 1;
   background-color: rgb(243 244 246 / var(--tw-bg-opacity, 1));
@@ -1995,6 +2032,11 @@ input:checked + .toggle-bg {
 .bg-primary {
   --tw-bg-opacity: 1;
   background-color: hsl(var(--twc-primary) / var(--twc-primary-opacity, var(--tw-bg-opacity)));
+}
+
+.bg-red-300 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(248 180 180 / var(--tw-bg-opacity, 1));
 }
 
 .bg-red-500 {
@@ -2249,6 +2291,10 @@ input:checked + .toggle-bg {
 
 .font-medium {
   font-weight: 500;
+}
+
+.font-normal {
+  font-weight: 400;
 }
 
 .font-semibold {
@@ -2982,6 +3028,13 @@ body {
   content: var(--tw-content);
 }
 
+.hover\:line-clamp-none:hover {
+  -webkit-line-clamp: none;
+  -webkit-box-orient: horizontal;
+  display: block;
+  overflow: visible;
+}
+
 .hover\:border-blue-500:hover {
   --tw-border-opacity: 1;
   border-color: rgb(63 131 248 / var(--tw-border-opacity, 1));
@@ -3174,6 +3227,13 @@ body {
 
 .focus\:ring-offset-2:focus {
   --tw-ring-offset-width: 2px;
+}
+
+.active\:line-clamp-none:active {
+  -webkit-line-clamp: none;
+  -webkit-box-orient: horizontal;
+  display: block;
+  overflow: visible;
 }
 
 .disabled\:opacity-50:disabled {

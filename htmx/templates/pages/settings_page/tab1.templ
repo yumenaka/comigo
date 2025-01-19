@@ -1,6 +1,7 @@
 package settings_page
 
 import "github.com/yumenaka/comigo/htmx/state"
+import "github.com/yumenaka/comigo/config"
 
 // htmx 是一个用于构建现代 web 应用程序的库，它使用无需刷新页面的 AJAX 技术。请求是通过 HTTP 发送的，但是 htmx 会处理响应并更新页面的部分内容，而不是整个页面。
 // https://htmx.org/docs/#parameters
@@ -20,5 +21,6 @@ templ tab1(s *state.GlobalState) {
     @StringArrayConfig("ExcludePath", state.ServerConfig.ExcludePath, "ExcludePath_Description")
     @StringArrayConfig("SupportMediaType", state.ServerConfig.SupportMediaType, "SupportMediaType_Description")
     @StringArrayConfig("SupportFileType", state.ServerConfig.SupportFileType, "SupportFileType_Description")
+    @ConfigManager(config.CheckConfigLocation(),config.GetExistingConfigFilePath())
 </div>
 }

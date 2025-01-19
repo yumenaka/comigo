@@ -42,4 +42,7 @@ func bindAPI(router *gin.Engine) {
 	router.POST("/api/update-number-config", settings_page.UpdateNumberConfigHandler)
 	router.POST("/api/delete-array-config", settings_page.DeleteArrayConfigHandler)
 	router.POST("/api/add-array-config", settings_page.AddArrayConfigHandler)
+
+	router.POST("/api/config-save", settings_page.HandleConfigSave)
+	router.POST("/api/config-delete", settings_page.HandleConfigDelete)
 }

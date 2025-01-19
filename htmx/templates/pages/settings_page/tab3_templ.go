@@ -9,6 +9,7 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import "github.com/yumenaka/comigo/htmx/state"
+import "github.com/yumenaka/comigo/config"
 
 func tab3(s *state.GlobalState) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -56,6 +57,10 @@ func tab3(s *state.GlobalState) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = StringConfig("CachePath", state.ServerConfig.CachePath, "CachePath_Description").Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = ConfigManager(config.CheckConfigLocation(), config.GetExistingConfigFilePath()).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
