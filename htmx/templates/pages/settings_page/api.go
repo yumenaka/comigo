@@ -312,7 +312,7 @@ func HandleConfigSave(c *gin.Context) {
 		return
 	}
 	// 最后把更新后的同一段 HTML 片段返回给前端
-	updatedHTML := ConfigManager(config.CheckConfigLocation(), config.GetExistingConfigFilePath())
+	updatedHTML := ConfigManager(config.DefaultConfigLocation(), config.GetWorkingDirectoryConfig(), config.GetHomeDirectoryConfig(), config.GetProgramDirectoryConfig())
 	if renderErr := htmx.NewResponse().RenderTempl(c.Request.Context(), c.Writer, updatedHTML); renderErr != nil {
 		c.AbortWithStatus(http.StatusInternalServerError)
 	}
@@ -341,7 +341,9 @@ func HandleConfigDelete(c *gin.Context) {
 		return
 	}
 	// 最后把更新后的同一段 HTML 片段返回给前端
-	updatedHTML := ConfigManager(config.CheckConfigLocation(), config.GetExistingConfigFilePath())
+	updatedHTML := ConfigManager(config.DefaultConfigLocation(), config.GetWorkingDirectoryConfig(), config.GetHomeDirectoryConfig(), config.GetProgramDirectoryConfig())
+	logger.Infof("11111111111111111111111111111")
+	logger.Infof("ConfigManager: %v%v%v%v", config.DefaultConfigLocation(), config.GetWorkingDirectoryConfig(), config.GetHomeDirectoryConfig(), config.GetProgramDirectoryConfig())
 	if renderErr := htmx.NewResponse().RenderTempl(c.Request.Context(), c.Writer, updatedHTML); renderErr != nil {
 		c.AbortWithStatus(http.StatusInternalServerError)
 	}
