@@ -21,6 +21,6 @@ templ tab1(s *state.GlobalState) {
     @StringArrayConfig("ExcludePath", state.ServerConfig.ExcludePath, "ExcludePath_Description")
     @StringArrayConfig("SupportMediaType", state.ServerConfig.SupportMediaType, "SupportMediaType_Description")
     @StringArrayConfig("SupportFileType", state.ServerConfig.SupportFileType, "SupportFileType_Description")
-    @ConfigManager(config.CheckConfigLocation(),config.GetExistingConfigFilePath())
+    @ConfigManager(config.DefaultConfigLocation(),config.GetWorkingDirectoryConfig(), config.GetHomeDirectoryConfig(), config.GetProgramDirectoryConfig())
 </div>
 }

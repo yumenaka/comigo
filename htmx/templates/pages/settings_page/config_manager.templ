@@ -1,82 +1,91 @@
 package settings_page
 
-templ ConfigManager(initSaveTo string, configLocation string) {
-<div id="config-container"
-     class="flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
-     x-data={ "{ selectedDir: '" + initSaveTo + "'}" }
-     >
-    <!-- 标题 -->
-    <label class="w-full py-0" x-text={ getTranslations("ConfigManager") }></label>
-    <!-- 配置选项区域：点击一个卡片，就设置隐藏字段的值。 -->
-    <div class="flex flex-row w-full mx-0 my-1">
-        <div data-save_to="WorkingDirectory"
-             class="flex flex-col items-center justify-center w-1/3 pt-2 mx-1 text-xs font-normal border border-gray-500 rounded min-h-20 cursor-pointer"
-             :class="{'bg-cyan-200': selectedDir === 'WorkingDirectory'}"
-             @click="selectedDir = 'WorkingDirectory'">
-            <img class="h-7 w-7" src="/static/images/working_directory.png">
-            <div class="mt-1" x-text={ getTranslations("WorkingDirectory") }>当前工作目录</div>
-            <div
-            x-text={ "{ selectedDir=='WorkingDirectory'?'"+ configLocation+ "'" }
-            class="mx-1 my-1 text-xs text-gray-500 line-clamp-2 hover:line-clamp-none active:line-clamp-none">
-            </div>
-        </div>
-        <div data-save_to="HomeDirectory"
-             class="flex flex-col items-center justify-center w-1/3 pt-2 mx-1 text-xs font-normal border border-gray-500 rounded min-h-20 cursor-pointer"
-             :class="{'bg-cyan-200': selectedDir === 'HomeDirectory'}"
-             @click="selectedDir = 'HomeDirectory'">
-            <img class="h-7 w-7" src="/static/images/home_directory.png">
-            <div class="mt-1" x-text={ getTranslations("HomeDirectory") }>用户主目录</div>
-            <div
-            x-text={ "{ selectedDir=='WorkingDirectory'?'"+ configLocation+ "'" }
-            class="mx-1 my-1 text-xs text-gray-500 line-clamp-2 hover:line-clamp-none active:line-clamp-none">
-            </div>
-        </div>
-        <div data-save_to="ProgramDirectory"
-             class="flex flex-col items-center justify-center w-1/3 pt-2 mx-1 text-xs font-normal border border-gray-500 rounded min-h-20 cursor-pointer"
-             :class="{'bg-cyan-200': selectedDir === 'ProgramDirectory'}"
-             @click="selectedDir = 'ProgramDirectory'">
-            <img class="h-7 w-7" src="/static/images/program_directory.png">
-            <div class="mt-1" x-text={ getTranslations("ProgramDirectory") }>程序所在目录</div>
-            <div
-            x-text={ "{ selectedDir=='ProgramDirectory'?'"+ configLocation+ "'" }
-            class="mx-1 my-1 text-xs text-gray-500 line-clamp-2 hover:line-clamp-none active:line-clamp-none">
-            </div>
-        </div>
-    </div>
-
-    <!-- 用来记录用户当前选择的隐藏字段（和Alpine双向绑定） -->
-    <input
-      id="selectedDir"
-      name="selectedDir"
-      type="hidden"
-      x-model="selectedDir"
-    />
-
-    <!-- SAVE 按钮：发起 HTMX 请求到 /api/config-save -->
-    <div class="flex flex-row justify-center w-full">
-        <!-- hx-include 将 #selectedDir 表单值一并提交 -->
-        <!-- hx-target 将返回结果替换到本容器内 -->
-        <button
-            class="w-24 h-10 mx-2 my-1 text-center text-gray-700 transition border border-gray-500 rounded bg-sky-300 hover:text-gray-900"
-            hx-post="/api/config-save"
-            hx-include="#selectedDir"
-            hx-target="#config-container"
-            hx-swap="outerHTML">
-            SAVE
-        </button>
-
-        <button
-        class="h-10 w-24 mx-2 my-1 bg-red-300 border border-gray-500 text-center text-gray-700 transition hover:text-gray-900 rounded"
-        hx-post="/api/config-delete"
-        hx-include="#selectedDir"
-        hx-target="#config-container"
-        hx-swap="outerHTML"
-        >
-        DELETE</button>
-    </div>
-    <!-- 说明文字 -->
-    <div class="w-full py-1 text-xs text-gray-500" x-text={ getTranslations("ConfigManagerDescription") }>
-        点击Save，会将当前配置上传到服务器，并覆盖已经存在的设定文件。
-    </div>
-</div>
+templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirectoryConfig string, ProgramDirectoryConfig string) {
+	<div
+		id="config-container"
+		class="flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+		x-data={ "{ selectedDir: '" + initSaveTo + "',initinitSaveTo:'" + initSaveTo + "'}" }
+	>
+		<!-- 标题 -->
+		<label class="w-full py-0" x-text={ getTranslations("ConfigManager") }></label>
+		<!-- 配置选项区域：点击一个卡片，就设置隐藏字段的值。 -->
+		<div class="flex flex-row w-full mx-0 my-1">
+			<div
+				data-save_to="WorkingDirectory"
+				class="flex flex-col items-center justify-center w-1/3 pt-2 mx-1 text-xs font-normal border border-gray-500 rounded min-h-20 cursor-pointer"
+				:class="selectedDir === 'WorkingDirectory'?'bg-cyan-200':''"
+				@click="selectedDir = 'WorkingDirectory'"
+			>
+				<img class="h-7 w-7" src="/static/images/working_directory.png"/>
+				<div class="mt-1" x-text={ getTranslations("WorkingDirectory") }>当前工作目录</div>
+				if WorkingDirectoryConfig != "" {
+					<div
+						class="mx-1 my-1 text-xs text-gray-500 line-clamp-2 hover:line-clamp-none active:line-clamp-none"
+					>{ WorkingDirectoryConfig }</div>
+				}
+			</div>
+			<div
+				data-save_to="HomeDirectory"
+				class="flex flex-col items-center justify-center w-1/3 pt-2 mx-1 text-xs font-normal border border-gray-500 rounded min-h-20 cursor-pointer"
+				:class="selectedDir === 'HomeDirectory'?'bg-cyan-200':''"
+				@click="selectedDir = 'HomeDirectory'"
+			>
+				<img class="h-7 w-7" src="/static/images/home_directory.png"/>
+				<div class="mt-1" x-text={ getTranslations("HomeDirectory") }>用户主目录</div>
+				if HomeDirectoryConfig != "" {
+					<div
+						class="mx-1 my-1 text-xs text-gray-500 line-clamp-2 hover:line-clamp-none active:line-clamp-none"
+					>{ HomeDirectoryConfig }</div>
+				}
+			</div>
+			<div
+				data-save_to="ProgramDirectory"
+				class="flex flex-col items-center justify-center w-1/3 pt-2 mx-1 text-xs font-normal border border-gray-500 rounded min-h-20 cursor-pointer"
+				:class="selectedDir === 'ProgramDirectory'?'bg-cyan-200':''"
+				@click="selectedDir = 'ProgramDirectory'"
+			>
+				<img class="h-7 w-7" src="/static/images/program_directory.png"/>
+				<div class="mt-1" x-text={ getTranslations("ProgramDirectory") }>程序所在目录</div>
+				if ProgramDirectoryConfig != "" {
+					<div
+						class="mx-1 my-1 text-xs text-gray-500 line-clamp-2 hover:line-clamp-none active:line-clamp-none"
+					>{ ProgramDirectoryConfig }</div>
+				}
+			</div>
+		</div>
+		<!-- 用来记录用户当前选择的隐藏字段（和Alpine双向绑定） -->
+		<input
+			id="selectedDir"
+			name="selectedDir"
+			type="hidden"
+			x-model="selectedDir"
+		/>
+		<!-- SAVE 按钮：发起 HTMX 请求到 /api/config-save -->
+		<div class="flex flex-row justify-center w-full">
+			<!-- hx-include 将 #selectedDir 表单值一并提交 -->
+			<!-- hx-target 将返回结果替换到本容器内 -->
+			<button
+				class="w-24 h-10 mx-2 my-1 text-center text-gray-700 transition border border-gray-500 rounded bg-sky-300 hover:text-gray-900"
+				hx-post="/api/config-save"
+				hx-include="#selectedDir"
+				hx-target="#config-container"
+				hx-swap="outerHTML"
+			>
+				SAVE
+			</button>
+				<button
+					class="h-10 w-24 mx-2 my-1 bg-red-300 border border-gray-500 text-center text-gray-700 transition hover:text-gray-900 rounded"
+					hx-post="/api/config-delete"
+					hx-include="#selectedDir"
+					hx-target="#config-container"
+					hx-swap="outerHTML"
+				>
+					DELETE
+				</button>
+		</div>
+		<!-- 说明文字 -->
+		<div class="w-full py-1 text-xs text-gray-500" x-text={ getTranslations("ConfigManagerDescription") }>
+			点击Save，会将当前配置上传到服务器，并覆盖已经存在的设定文件。
+		</div>
+	</div>
 }

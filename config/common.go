@@ -65,7 +65,7 @@ const (
 	ProgramDirectory = "ProgramDirectory"
 )
 
-// CheckConfigLocation 判断当前配置文件应该保存到哪里。
+// DefaultConfigLocation 判断当前配置文件应该保存到哪里。
 // 逻辑：
 //  1. 是否在HomeDirectory已有 config.toml
 //  2. 否则是否在WorkingDirectory已有 config.toml
@@ -73,7 +73,7 @@ const (
 //     若都没有，则返回 "HomeDirectory"。
 //
 // 返回：location字符串
-func CheckConfigLocation() string {
+func DefaultConfigLocation() string {
 	// 1. 检查HomeDirectory
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -165,53 +165,53 @@ func SaveConfig(to string) error {
 	return nil
 }
 
-// GetExistingConfigFilePath 依次检查 3 个路径是否存在 config.toml，
-// 若存在则返回对应的“绝对路径”，否则返回空字符串。
-func GetExistingConfigFilePath() string {
-	// 1. HomeDirectory
+func GetWorkingDirectoryConfig() string {
+	WorkingDirectoryConfig := ""
+	wdPath := "config.toml"
+	if fileExists(wdPath) {
+		WorkingDirectoryConfig = wdPath
+		absPath, errAbs := filepath.Abs(WorkingDirectoryConfig)
+		if errAbs == nil {
+			WorkingDirectoryConfig = absPath
+		}
+	}
+	return WorkingDirectoryConfig
+}
+
+func GetHomeDirectoryConfig() string {
+	HomeDirectoryConfig := ""
 	home, err := os.UserHomeDir()
 	if err == nil {
 		homePath := path.Join(home, ".config", "comigo", "config.toml")
 		if fileExists(homePath) {
 			absPath, errAbs := filepath.Abs(homePath)
 			if errAbs == nil {
-				return absPath
+				HomeDirectoryConfig = absPath
 			}
 			// 如果取绝对路径出错，就返回相对路径；或者你也可以直接忽略
-			return homePath
+			HomeDirectoryConfig = homePath
 		}
 	} else {
 		// 获取HomeDir失败，可以做个日志或忽略
 		fmt.Println("Warning: failed to get HomeDir:", err)
 	}
+	return HomeDirectoryConfig
+}
 
-	// 2. WorkingDirectory（就是当前执行命令所在目录）
-	wdPath := "config.toml"
-	if fileExists(wdPath) {
-		absPath, errAbs := filepath.Abs(wdPath)
-		if errAbs == nil {
-			return absPath
-		}
-		return wdPath
-	}
-
-	// 3. ProgramDirectory（可执行文件所在目录）
+func GetProgramDirectoryConfig() string {
+	ProgramDirectoryConfig := ""
 	exe, errExe := os.Executable()
 	if errExe == nil {
 		progPath := path.Join(path.Dir(exe), "config.toml")
 		if fileExists(progPath) {
 			absPath, errAbs := filepath.Abs(progPath)
 			if errAbs == nil {
-				return absPath
+				ProgramDirectoryConfig = absPath
 			}
-			return progPath
+			ProgramDirectoryConfig = progPath
 		}
-	} else {
-		fmt.Println("Warning: failed to get Executable path:", errExe)
 	}
-
-	// 如果都不存在就返回空字符串
-	return ""
+	return ProgramDirectoryConfig
 }
 
 func DeleteConfigIn(in string) error {

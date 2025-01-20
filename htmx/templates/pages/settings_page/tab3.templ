@@ -14,6 +14,6 @@ templ tab3(s *state.GlobalState) {
     @BoolConfig("GenerateMetaData",state.ServerConfig.GenerateMetaData,"GenerateMetaData_Description")
     @BoolConfig("ClearCacheExit",state.ServerConfig.ClearCacheExit,"ClearCacheExit_Description")
     @StringConfig("CachePath", state.ServerConfig.CachePath,"CachePath_Description")
-    @ConfigManager(config.CheckConfigLocation(),config.GetExistingConfigFilePath())
+    @ConfigManager(config.DefaultConfigLocation(),config.GetWorkingDirectoryConfig(), config.GetHomeDirectoryConfig(), config.GetProgramDirectoryConfig())
 </div>
 }
