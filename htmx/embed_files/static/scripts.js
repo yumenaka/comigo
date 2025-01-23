@@ -13429,8 +13429,9 @@ var $a18c32cb29f9cbaf$var$defaultOptions = {
     updateOnBlur: true,
     weekStart: 0
 };
-var $a18c32cb29f9cbaf$var$range = document.createRange();
+var $a18c32cb29f9cbaf$var$range = null;
 function $a18c32cb29f9cbaf$var$parseHTML(html) {
+    if ($a18c32cb29f9cbaf$var$range == null) $a18c32cb29f9cbaf$var$range = document.createRange();
     return $a18c32cb29f9cbaf$var$range.createContextualFragment(html);
 }
 function $a18c32cb29f9cbaf$var$hideElement(el) {

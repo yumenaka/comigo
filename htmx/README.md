@@ -17,10 +17,13 @@
 > - `htmx-go`: [https://github.com/angelofallars/htmx-go](https://github.com/angelofallars/htmx-go)
 
 ## TODO
- - [ ] 设置页面 v1.0
+ - [ ] 服务器设置页面 v1.0
  - [ ] 显示服务器log：[web终端示例](https://zenn.dev/ikedam/articles/2e078bfc2a4cb6)，设置页面功能
+ - [ ] 优化翻页模式 
+ - [ ] 自定义js与css代码块功能。
  - [ ] [使用 Go1.24 的 os.Root 类型](https://antonz.org/go-1-24/)，将文件系统操作限制为特定目录，以防止用户访问系统文件
- - [ ] [使用 Go1.24 的 go get -tool](https://antonz.org/go-1-24/)，添加工具依赖项
+ - [ ] 等到go 1.24正式发布，[使用 Go1.24 的 go get -tool](https://antonz.org/go-1-24/)，添加工具依赖项
+ - [ ] 等 [gowebly](https://github.com/gowebly/gowebly) 更新后，参考 gowebly 的模板，升级tailwindcss到4.0
 ## 提示
 
 <https://github.com/angelofallars/htmx-go#triggers>  
