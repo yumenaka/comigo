@@ -21,7 +21,7 @@
     "i18next": "^23.16.8",
     "i18next-browser-languagedetector": "^8.0.2",
     "screenfull": "^6.0.2",
-    "tailwindcss": "latest",
+    "tailwindcss": "3.4.17",
     "tw-colors": "^3.3.2"
   },
   "devDependencies": {

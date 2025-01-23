@@ -99,7 +99,7 @@ templ Header(c *gin.Context, prop HeaderProps) {
 						@svg.ArrowDown()
 					</button>
 					<!-- Dropdown menu -->
-					<div id="QuickJumpDropdown" class="z-10 hidden divide-y divide-gray-100 rounded-lg shadow bg-white/90 max-w-fit dark:bg-gray-700">
+					<div id="QuickJumpDropdown" class="max-w-full md:max-w-2xl md:truncate z-10 hidden divide-y divide-gray-100 rounded-lg shadow bg-white/90  dark:bg-gray-700">
 						<ul class="py-2 mt-0 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="quickJumpBarDropdownButton">
 							for _, book := range prop.QuickJumpBarBooks.BookInfos {
 								if prop.FlipMode {

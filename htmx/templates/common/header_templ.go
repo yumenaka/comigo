@@ -240,7 +240,7 @@ func Header(c *gin.Context, prop HeaderProps) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "</button><!-- Dropdown menu --> <div id=\"QuickJumpDropdown\" class=\"z-10 hidden divide-y divide-gray-100 rounded-lg shadow bg-white/90 max-w-fit dark:bg-gray-700\"><ul class=\"py-2 mt-0 text-sm text-gray-700 dark:text-gray-200\" aria-labelledby=\"quickJumpBarDropdownButton\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "</button><!-- Dropdown menu --> <div id=\"QuickJumpDropdown\" class=\"max-w-full md:max-w-2xl md:truncate z-10 hidden divide-y divide-gray-100 rounded-lg shadow bg-white/90  dark:bg-gray-700\"><ul class=\"py-2 mt-0 text-sm text-gray-700 dark:text-gray-200\" aria-labelledby=\"quickJumpBarDropdownButton\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
