@@ -47,9 +47,9 @@ all: compileThemAll md5SumThemAll
 # 因为sqlite（ent）库的关系，部分架构（Windows_i386）无法正常运行，需要写条件编译代码。但是最近似乎都Pass了，或许可以不再分架构：
 # ent库的编译检测状态： https://modern-c.appspot.com/-/builder/?importpath=modernc.org%2Fsqlite
 
-compileThemAll: Windows_x86_64 Windows_i386  Windows_arm64 Linux_x86_64 Linux_i386 Linux-arm Linux-arm64 MacOS_x86_64 MacOS_arm64
+compileThemAll: Windows_x86_64 Windows_i386  Windows_arm64 Linux_x86_64 Linux_i386 Linux_arm Linux_arm64 MacOS_x86_64 MacOS_arm64
 
-android: Linux-arm-android Linux-arm64-android
+android: Linux_arm_android Linux_arm64-android
 
 UPX := $(shell command -v upx 2> /dev/null)
 
@@ -92,8 +92,8 @@ Windows_arm64:
 	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
 
 # 看ARM处理器是否支持VFP功能:grep -i vfp /proc/cpuinfo
-##Linux-armv5,GOARM=5：使用软件浮点； CPU 没有 VFP 协处理器
-#Linux-armv5:
+##Linux_armv5,GOARM=5：使用软件浮点； CPU 没有 VFP 协处理器
+#Linux_armv5:
 #	GOARCH=arm GOOS=linux GOARM=5 $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME)
 ##ifdef UPX
 ##	upx -9 $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME)
@@ -101,8 +101,8 @@ Windows_arm64:
 #	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME)
 #	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
 
-#Linux-armv6 RaspberryPi1,2,zero,GOARM=6：仅使用 VFPv1；交叉编译时默认；通常是 ARM11 或更好的内核（也支持 VFPv2 或更好的内核）
-Linux-armv6:
+#Linux_armv6 RaspberryPi1,2,zero,GOARM=6：仅使用 VFPv1；交叉编译时默认；通常是 ARM11 或更好的内核（也支持 VFPv2 或更好的内核）
+Linux_armv6:
 	GOARCH=arm GOOS=linux GOARM=6 $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME) 
 #ifdef UPX
 #	upx -9 $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME)
@@ -110,8 +110,8 @@ Linux-armv6:
 	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME)
 	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
 
-#Linux-armv7，RaspberryPi3 官方32位armv7l系统。GOARM=7：使用 VFPv3；通常是 Cortex-A 内核. 2012年发布的架构。
-Linux-arm:
+#Linux_armv7，RaspberryPi3 官方32位armv7l系统。GOARM=7：使用 VFPv3；通常是 Cortex-A 内核. 2012年发布的架构。
+Linux_arm:
 	GOARCH=arm GOOS=linux GOARM=7 $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME) 
 #ifdef UPX
 #	upx -9 $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME)
@@ -120,7 +120,7 @@ Linux-arm:
 	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
 
 #linux，64位arm。2012年发布的架构。
-Linux-arm64:
+Linux_arm64:
 	GOARCH=arm64 GOOS=linux $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME) 
 #ifdef UPX
 #	upx -9 $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME)
@@ -162,13 +162,13 @@ MacOS_arm64:
 	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
 	
 #Android，32位arm，Termux	
-Linux-arm-android:
+Linux_arm_android:
 	GOARCH=arm GOOS=android $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME) 
 	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME)
 	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
 
 #Android，64位arm，Termux
-Linux-arm64-android:
+Linux_arm64-android:
 	GOARCH=arm64 GOOS=android $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME) 
 	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME)
 	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
