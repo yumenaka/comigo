@@ -116,7 +116,7 @@ templ Header(c *gin.Context, prop HeaderProps) {
 					</div>
 				} else {
 					if (prop.SetDownLoadLink) {
-						<span class="text-lg font-semibold text-blue-700 text-opacity-100 hover:underline">
+						<span class="text-lg font-semibold text-blue-700/90 hover:underline">
 							<a href={ templ.URL(prop.DownLoadLink) }>{ prop.Title }</a>
 						</span>
 					} else {

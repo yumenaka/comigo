@@ -218,7 +218,7 @@ func BookCard(c *gin.Context, s *state.GlobalState, book model.BookInfo) templ.C
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<!-- 图书封面 --><div x-show=\"$store.shelf.showTitle\" class=\"absolute inset-x-0 bottom-0 text-sm font-semibold text-center text-black bg-gray-100 border-blue-800 rounded-b h-1/4 bg-opacity-80\"><span class=\"absolute inset-x-0 top-0 p-1 align-middle\" x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<!-- 图书封面 --><div x-show=\"$store.shelf.showTitle\" class=\"absolute inset-x-0 bottom-0 text-sm font-semibold text-center text-black bg-gray-100/80 border-blue-800 rounded-b h-1/4\"><span class=\"absolute inset-x-0 top-0 p-1 align-middle\" x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
