@@ -307,7 +307,7 @@ func Header(c *gin.Context, prop HeaderProps) templ.Component {
 				}
 			} else {
 				if prop.SetDownLoadLink {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "<span class=\"text-lg font-semibold text-blue-700 text-opacity-100 hover:underline\"><a href=\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "<span class=\"text-lg font-semibold text-blue-700/90 hover:underline\"><a href=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
