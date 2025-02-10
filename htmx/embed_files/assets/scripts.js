@@ -1,25 +1,19 @@
 import 'htmx.org'
-import Alpine from 'alpinejs'
-import persist from '@alpinejs/persist'
-import i18next from 'i18next'
 import 'flowbite'
-import LanguageDetector from 'i18next-browser-languagedetector'
-import 'tw-colors'
+import Alpine from 'alpinejs'
+// Alpine Persist 插件，用于持久化存储。默认存储到 localStorage。详细用法参见： https://alpinejs.dev/plugins/persist
+import persist from '@alpinejs/persist'
 import morph from '@alpinejs/morph'
-// i18next 国际化插件，用于国际化。详细用法参见：
-// https://www.i18next.com/overview/getting-started
-import enLocale from './locales/en_US.json'
-import zhLocale from './locales/zh_CN.json'
-import jaLocale from './locales/ja_JP.json'
-import screenfull from 'screenfull'
-// 将 Alpine 实例添加到窗口对象中。
-window.Alpine = Alpine
-
-// Alpine Persist 插件，用于持久化存储。默认存储到 localStorage。
-// 详细用法参见： https://alpinejs.dev/plugins/persist
+window.Alpine = Alpine // 将 Alpine 实例添加到窗口对象中。
 Alpine.plugin(persist)
 Alpine.plugin(morph)
 
+// 国际化插件。详细用法参见：https://www.i18next.com/overview/getting-started
+import i18next from 'i18next'
+import LanguageDetector from 'i18next-browser-languagedetector'
+import enLocale from './locales/en_US.json'
+import zhLocale from './locales/zh_CN.json'
+import jaLocale from './locales/ja_JP.json'
 i18next
     .use(LanguageDetector)
     .init({
@@ -59,8 +53,10 @@ i18next
         //     console.log(t('test'));
         // });
     })
-
 window.i18next = i18next // 使i18next在全局作用域中可用
+
+// 全屏插件
+import screenfull from 'screenfull'
 if(document.getElementById('FullScreenIcon')){
     document.getElementById('FullScreenIcon').addEventListener('click', () => {
         if (screenfull.isEnabled) {
@@ -72,11 +68,8 @@ if(document.getElementById('FullScreenIcon')){
     })
 }
 
-
 // 用Alpine Persist 注册全局变量
 // https://alpinejs.dev/plugins/persist#using-alpine-persist-global
-
-// global 全局设置
 Alpine.store('global', {
     // bgPattern 背景花纹
     bgPattern: Alpine.$persist('grid-line').as('global.bgPattern'),
@@ -202,7 +195,6 @@ Alpine.store('theme', {
     },
 })
 
-
 // 由于 Cookie “cookie.someCookieKey”缺少正确的“sameSite”属性值，缺少“SameSite”或含有无效值的 Cookie
 // 即将被视作指定为“Lax”，该 Cookie 将无法发送至第三方上下文中。若您的应用程序依赖这组 Cookie 以在不同上下文中工作，
 // 请添加“SameSite=None”属性。若要了解“SameSite”属性的更多信息，请参阅：https://developer.mozilla.org/docs/Web/HTTP/Headers/Set-Cookie/SameSite
@@ -229,7 +221,6 @@ window.cookieStorage = {
 Alpine.store('cookie', {
     someCookieKey: Alpine.$persist(false).using(cookieStorage).as('cookie.someCookieKey'),
 })
-
 
 //请求图片文件时，可添加的额外参数
 const imageParameters = {

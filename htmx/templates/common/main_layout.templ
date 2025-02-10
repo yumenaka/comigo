@@ -5,7 +5,9 @@ import (
 	"github.com/yumenaka/comigo/htmx/embed_files"
 	"github.com/yumenaka/comigo/htmx/state"
 )
-
+func GetTheme() string {
+    return "{theme}"
+}
 // MainLayout 定义网页布局
 templ MainLayout(c *gin.Context, s *state.GlobalState, bodyContent templ.Component, insertScript string) {
 	<!DOCTYPE html>
@@ -21,6 +23,8 @@ templ MainLayout(c *gin.Context, s *state.GlobalState, bodyContent templ.Compone
 			<link rel="apple-touch-icon" href="/static/apple-touch-icon.png"/>
 			<link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon"/>
 			<link rel="icon" href="/static/favicon.png" sizes="any"/>
+			<script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+			<!--  <script src="https://unpkg.com/@tailwindcss/browser@4"></script> -->
 			<!--  font-sans：https://tailwindcss.com/docs/font-family -->
 			if !s.StaticMode {
 				<link href="/static/styles.css" rel="stylesheet"/>
@@ -33,7 +37,7 @@ templ MainLayout(c *gin.Context, s *state.GlobalState, bodyContent templ.Compone
 		<!-- $persist 可以存储原始值以及数组和对象。本地存储，默认的key是 _x_变量名 -->
 		<!-- ！！！当变量的类型发生变化时，必须手动清除 localStorage，否则相应数值将无法正确更新。！！！ -->
 		<!-- 详细用法参见： https://alpinejs.dev/plugins/persist -->
-		<body x-data="{ theme: $persist('retro') }" x-bind:data-theme="theme" class="flex flex-col items-center justify-between w-full h-full min-h-screen p-0 m-0 font-sans">
+		<body x-data="{ theme: $persist('retro') }" x-bind:data-theme="theme" class="flex flex-col items-center justify-between w-full h-full min-h-screen p-0 m-0 font-sans" x-bind:class="theme">
 			@MessageModal()
 			@bodyContent
 		</body>

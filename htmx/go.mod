@@ -10,7 +10,7 @@ go 1.23.4
 //  ./cmd/migrate
 //)
 require (
-	github.com/a-h/templ v0.3.819
+	github.com/a-h/templ v0.3.833
 	github.com/angelofallars/htmx-go v0.5.0
 	github.com/gin-gonic/gin v1.10.0
 	github.com/yumenaka/comigo v0.9.14-0.20241229132926-7d88d9e595c0

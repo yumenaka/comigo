@@ -2875,5680 +2875,7 @@ parcelRegister("eZIU4", function(module, exports) {
 
 });
 
-parcelRegister("2Gj6O", function(module, exports) {
-"use strict";
-Object.defineProperty(module.exports, "__esModule", {
-    value: true
-});
-Object.defineProperty(module.exports, "default", {
-    enumerable: true,
-    get: function() {
-        return $1f3e53a042807708$var$_default;
-    }
-});
-function $1f3e53a042807708$var$createPlugin(plugin, config) {
-    return {
-        handler: plugin,
-        config: config
-    };
-}
-$1f3e53a042807708$var$createPlugin.withOptions = function(pluginFunction, configFunction = ()=>({})) {
-    const optionsFunction = function(options) {
-        return {
-            __options: options,
-            handler: pluginFunction(options),
-            config: configFunction(options)
-        };
-    };
-    optionsFunction.__isOptionsFunction = true;
-    // Expose plugin dependencies so that `object-hash` returns a different
-    // value if anything here changes, to ensure a rebuild is triggered.
-    optionsFunction.__pluginFunction = pluginFunction;
-    optionsFunction.__configFunction = configFunction;
-    return optionsFunction;
-};
-const $1f3e53a042807708$var$_default = $1f3e53a042807708$var$createPlugin;
-
-});
-
 parcelRequire("eZIU4");
-// packages/alpinejs/src/scheduler.js
-var $8c83eaf28779ff46$var$flushPending = false;
-var $8c83eaf28779ff46$var$flushing = false;
-var $8c83eaf28779ff46$var$queue = [];
-var $8c83eaf28779ff46$var$lastFlushedIndex = -1;
-function $8c83eaf28779ff46$var$scheduler(callback) {
-    $8c83eaf28779ff46$var$queueJob(callback);
-}
-function $8c83eaf28779ff46$var$queueJob(job) {
-    if (!$8c83eaf28779ff46$var$queue.includes(job)) $8c83eaf28779ff46$var$queue.push(job);
-    $8c83eaf28779ff46$var$queueFlush();
-}
-function $8c83eaf28779ff46$var$dequeueJob(job) {
-    let index = $8c83eaf28779ff46$var$queue.indexOf(job);
-    if (index !== -1 && index > $8c83eaf28779ff46$var$lastFlushedIndex) $8c83eaf28779ff46$var$queue.splice(index, 1);
-}
-function $8c83eaf28779ff46$var$queueFlush() {
-    if (!$8c83eaf28779ff46$var$flushing && !$8c83eaf28779ff46$var$flushPending) {
-        $8c83eaf28779ff46$var$flushPending = true;
-        queueMicrotask($8c83eaf28779ff46$var$flushJobs);
-    }
-}
-function $8c83eaf28779ff46$var$flushJobs() {
-    $8c83eaf28779ff46$var$flushPending = false;
-    $8c83eaf28779ff46$var$flushing = true;
-    for(let i = 0; i < $8c83eaf28779ff46$var$queue.length; i++){
-        $8c83eaf28779ff46$var$queue[i]();
-        $8c83eaf28779ff46$var$lastFlushedIndex = i;
-    }
-    $8c83eaf28779ff46$var$queue.length = 0;
-    $8c83eaf28779ff46$var$lastFlushedIndex = -1;
-    $8c83eaf28779ff46$var$flushing = false;
-}
-// packages/alpinejs/src/reactivity.js
-var $8c83eaf28779ff46$var$reactive;
-var $8c83eaf28779ff46$var$effect;
-var $8c83eaf28779ff46$var$release;
-var $8c83eaf28779ff46$var$raw;
-var $8c83eaf28779ff46$var$shouldSchedule = true;
-function $8c83eaf28779ff46$var$disableEffectScheduling(callback) {
-    $8c83eaf28779ff46$var$shouldSchedule = false;
-    callback();
-    $8c83eaf28779ff46$var$shouldSchedule = true;
-}
-function $8c83eaf28779ff46$var$setReactivityEngine(engine) {
-    $8c83eaf28779ff46$var$reactive = engine.reactive;
-    $8c83eaf28779ff46$var$release = engine.release;
-    $8c83eaf28779ff46$var$effect = (callback)=>engine.effect(callback, {
-            scheduler: (task)=>{
-                if ($8c83eaf28779ff46$var$shouldSchedule) $8c83eaf28779ff46$var$scheduler(task);
-                else task();
-            }
-        });
-    $8c83eaf28779ff46$var$raw = engine.raw;
-}
-function $8c83eaf28779ff46$var$overrideEffect(override) {
-    $8c83eaf28779ff46$var$effect = override;
-}
-function $8c83eaf28779ff46$var$elementBoundEffect(el) {
-    let cleanup2 = ()=>{};
-    let wrappedEffect = (callback)=>{
-        let effectReference = $8c83eaf28779ff46$var$effect(callback);
-        if (!el._x_effects) {
-            el._x_effects = /* @__PURE__ */ new Set();
-            el._x_runEffects = ()=>{
-                el._x_effects.forEach((i)=>i());
-            };
-        }
-        el._x_effects.add(effectReference);
-        cleanup2 = ()=>{
-            if (effectReference === void 0) return;
-            el._x_effects.delete(effectReference);
-            $8c83eaf28779ff46$var$release(effectReference);
-        };
-        return effectReference;
-    };
-    return [
-        wrappedEffect,
-        ()=>{
-            cleanup2();
-        }
-    ];
-}
-function $8c83eaf28779ff46$var$watch(getter, callback) {
-    let firstTime = true;
-    let oldValue;
-    let effectReference = $8c83eaf28779ff46$var$effect(()=>{
-        let value = getter();
-        JSON.stringify(value);
-        if (!firstTime) queueMicrotask(()=>{
-            callback(value, oldValue);
-            oldValue = value;
-        });
-        else oldValue = value;
-        firstTime = false;
-    });
-    return ()=>$8c83eaf28779ff46$var$release(effectReference);
-}
-// packages/alpinejs/src/mutation.js
-var $8c83eaf28779ff46$var$onAttributeAddeds = [];
-var $8c83eaf28779ff46$var$onElRemoveds = [];
-var $8c83eaf28779ff46$var$onElAddeds = [];
-function $8c83eaf28779ff46$var$onElAdded(callback) {
-    $8c83eaf28779ff46$var$onElAddeds.push(callback);
-}
-function $8c83eaf28779ff46$var$onElRemoved(el, callback) {
-    if (typeof callback === "function") {
-        if (!el._x_cleanups) el._x_cleanups = [];
-        el._x_cleanups.push(callback);
-    } else {
-        callback = el;
-        $8c83eaf28779ff46$var$onElRemoveds.push(callback);
-    }
-}
-function $8c83eaf28779ff46$var$onAttributesAdded(callback) {
-    $8c83eaf28779ff46$var$onAttributeAddeds.push(callback);
-}
-function $8c83eaf28779ff46$var$onAttributeRemoved(el, name, callback) {
-    if (!el._x_attributeCleanups) el._x_attributeCleanups = {};
-    if (!el._x_attributeCleanups[name]) el._x_attributeCleanups[name] = [];
-    el._x_attributeCleanups[name].push(callback);
-}
-function $8c83eaf28779ff46$var$cleanupAttributes(el, names) {
-    if (!el._x_attributeCleanups) return;
-    Object.entries(el._x_attributeCleanups).forEach(([name, value])=>{
-        if (names === void 0 || names.includes(name)) {
-            value.forEach((i)=>i());
-            delete el._x_attributeCleanups[name];
-        }
-    });
-}
-function $8c83eaf28779ff46$var$cleanupElement(el) {
-    el._x_effects?.forEach($8c83eaf28779ff46$var$dequeueJob);
-    while(el._x_cleanups?.length)el._x_cleanups.pop()();
-}
-var $8c83eaf28779ff46$var$observer = new MutationObserver($8c83eaf28779ff46$var$onMutate);
-var $8c83eaf28779ff46$var$currentlyObserving = false;
-function $8c83eaf28779ff46$var$startObservingMutations() {
-    $8c83eaf28779ff46$var$observer.observe(document, {
-        subtree: true,
-        childList: true,
-        attributes: true,
-        attributeOldValue: true
-    });
-    $8c83eaf28779ff46$var$currentlyObserving = true;
-}
-function $8c83eaf28779ff46$var$stopObservingMutations() {
-    $8c83eaf28779ff46$var$flushObserver();
-    $8c83eaf28779ff46$var$observer.disconnect();
-    $8c83eaf28779ff46$var$currentlyObserving = false;
-}
-var $8c83eaf28779ff46$var$queuedMutations = [];
-function $8c83eaf28779ff46$var$flushObserver() {
-    let records = $8c83eaf28779ff46$var$observer.takeRecords();
-    $8c83eaf28779ff46$var$queuedMutations.push(()=>records.length > 0 && $8c83eaf28779ff46$var$onMutate(records));
-    let queueLengthWhenTriggered = $8c83eaf28779ff46$var$queuedMutations.length;
-    queueMicrotask(()=>{
-        if ($8c83eaf28779ff46$var$queuedMutations.length === queueLengthWhenTriggered) while($8c83eaf28779ff46$var$queuedMutations.length > 0)$8c83eaf28779ff46$var$queuedMutations.shift()();
-    });
-}
-function $8c83eaf28779ff46$var$mutateDom(callback) {
-    if (!$8c83eaf28779ff46$var$currentlyObserving) return callback();
-    $8c83eaf28779ff46$var$stopObservingMutations();
-    let result = callback();
-    $8c83eaf28779ff46$var$startObservingMutations();
-    return result;
-}
-var $8c83eaf28779ff46$var$isCollecting = false;
-var $8c83eaf28779ff46$var$deferredMutations = [];
-function $8c83eaf28779ff46$var$deferMutations() {
-    $8c83eaf28779ff46$var$isCollecting = true;
-}
-function $8c83eaf28779ff46$var$flushAndStopDeferringMutations() {
-    $8c83eaf28779ff46$var$isCollecting = false;
-    $8c83eaf28779ff46$var$onMutate($8c83eaf28779ff46$var$deferredMutations);
-    $8c83eaf28779ff46$var$deferredMutations = [];
-}
-function $8c83eaf28779ff46$var$onMutate(mutations) {
-    if ($8c83eaf28779ff46$var$isCollecting) {
-        $8c83eaf28779ff46$var$deferredMutations = $8c83eaf28779ff46$var$deferredMutations.concat(mutations);
-        return;
-    }
-    let addedNodes = [];
-    let removedNodes = /* @__PURE__ */ new Set();
-    let addedAttributes = /* @__PURE__ */ new Map();
-    let removedAttributes = /* @__PURE__ */ new Map();
-    for(let i = 0; i < mutations.length; i++){
-        if (mutations[i].target._x_ignoreMutationObserver) continue;
-        if (mutations[i].type === "childList") {
-            mutations[i].removedNodes.forEach((node)=>{
-                if (node.nodeType !== 1) return;
-                if (!node._x_marker) return;
-                removedNodes.add(node);
-            });
-            mutations[i].addedNodes.forEach((node)=>{
-                if (node.nodeType !== 1) return;
-                if (removedNodes.has(node)) {
-                    removedNodes.delete(node);
-                    return;
-                }
-                if (node._x_marker) return;
-                addedNodes.push(node);
-            });
-        }
-        if (mutations[i].type === "attributes") {
-            let el = mutations[i].target;
-            let name = mutations[i].attributeName;
-            let oldValue = mutations[i].oldValue;
-            let add2 = ()=>{
-                if (!addedAttributes.has(el)) addedAttributes.set(el, []);
-                addedAttributes.get(el).push({
-                    name: name,
-                    value: el.getAttribute(name)
-                });
-            };
-            let remove = ()=>{
-                if (!removedAttributes.has(el)) removedAttributes.set(el, []);
-                removedAttributes.get(el).push(name);
-            };
-            if (el.hasAttribute(name) && oldValue === null) add2();
-            else if (el.hasAttribute(name)) {
-                remove();
-                add2();
-            } else remove();
-        }
-    }
-    removedAttributes.forEach((attrs, el)=>{
-        $8c83eaf28779ff46$var$cleanupAttributes(el, attrs);
-    });
-    addedAttributes.forEach((attrs, el)=>{
-        $8c83eaf28779ff46$var$onAttributeAddeds.forEach((i)=>i(el, attrs));
-    });
-    for (let node of removedNodes){
-        if (addedNodes.some((i)=>i.contains(node))) continue;
-        $8c83eaf28779ff46$var$onElRemoveds.forEach((i)=>i(node));
-    }
-    for (let node of addedNodes){
-        if (!node.isConnected) continue;
-        $8c83eaf28779ff46$var$onElAddeds.forEach((i)=>i(node));
-    }
-    addedNodes = null;
-    removedNodes = null;
-    addedAttributes = null;
-    removedAttributes = null;
-}
-// packages/alpinejs/src/scope.js
-function $8c83eaf28779ff46$var$scope(node) {
-    return $8c83eaf28779ff46$var$mergeProxies($8c83eaf28779ff46$var$closestDataStack(node));
-}
-function $8c83eaf28779ff46$var$addScopeToNode(node, data2, referenceNode) {
-    node._x_dataStack = [
-        data2,
-        ...$8c83eaf28779ff46$var$closestDataStack(referenceNode || node)
-    ];
-    return ()=>{
-        node._x_dataStack = node._x_dataStack.filter((i)=>i !== data2);
-    };
-}
-function $8c83eaf28779ff46$var$closestDataStack(node) {
-    if (node._x_dataStack) return node._x_dataStack;
-    if (typeof ShadowRoot === "function" && node instanceof ShadowRoot) return $8c83eaf28779ff46$var$closestDataStack(node.host);
-    if (!node.parentNode) return [];
-    return $8c83eaf28779ff46$var$closestDataStack(node.parentNode);
-}
-function $8c83eaf28779ff46$var$mergeProxies(objects) {
-    return new Proxy({
-        objects: objects
-    }, $8c83eaf28779ff46$var$mergeProxyTrap);
-}
-var $8c83eaf28779ff46$var$mergeProxyTrap = {
-    ownKeys ({ objects: objects }) {
-        return Array.from(new Set(objects.flatMap((i)=>Object.keys(i))));
-    },
-    has ({ objects: objects }, name) {
-        if (name == Symbol.unscopables) return false;
-        return objects.some((obj)=>Object.prototype.hasOwnProperty.call(obj, name) || Reflect.has(obj, name));
-    },
-    get ({ objects: objects }, name, thisProxy) {
-        if (name == "toJSON") return $8c83eaf28779ff46$var$collapseProxies;
-        return Reflect.get(objects.find((obj)=>Reflect.has(obj, name)) || {}, name, thisProxy);
-    },
-    set ({ objects: objects }, name, value, thisProxy) {
-        const target = objects.find((obj)=>Object.prototype.hasOwnProperty.call(obj, name)) || objects[objects.length - 1];
-        const descriptor = Object.getOwnPropertyDescriptor(target, name);
-        if (descriptor?.set && descriptor?.get) return descriptor.set.call(thisProxy, value) || true;
-        return Reflect.set(target, name, value);
-    }
-};
-function $8c83eaf28779ff46$var$collapseProxies() {
-    let keys = Reflect.ownKeys(this);
-    return keys.reduce((acc, key)=>{
-        acc[key] = Reflect.get(this, key);
-        return acc;
-    }, {});
-}
-// packages/alpinejs/src/interceptor.js
-function $8c83eaf28779ff46$var$initInterceptors(data2) {
-    let isObject2 = (val)=>typeof val === "object" && !Array.isArray(val) && val !== null;
-    let recurse = (obj, basePath = "")=>{
-        Object.entries(Object.getOwnPropertyDescriptors(obj)).forEach(([key, { value: value, enumerable: enumerable }])=>{
-            if (enumerable === false || value === void 0) return;
-            if (typeof value === "object" && value !== null && value.__v_skip) return;
-            let path = basePath === "" ? key : `${basePath}.${key}`;
-            if (typeof value === "object" && value !== null && value._x_interceptor) obj[key] = value.initialize(data2, path, key);
-            else if (isObject2(value) && value !== obj && !(value instanceof Element)) recurse(value, path);
-        });
-    };
-    return recurse(data2);
-}
-function $8c83eaf28779ff46$var$interceptor(callback, mutateObj = ()=>{}) {
-    let obj = {
-        initialValue: void 0,
-        _x_interceptor: true,
-        initialize (data2, path, key) {
-            return callback(this.initialValue, ()=>$8c83eaf28779ff46$var$get(data2, path), (value)=>$8c83eaf28779ff46$var$set(data2, path, value), path, key);
-        }
-    };
-    mutateObj(obj);
-    return (initialValue)=>{
-        if (typeof initialValue === "object" && initialValue !== null && initialValue._x_interceptor) {
-            let initialize = obj.initialize.bind(obj);
-            obj.initialize = (data2, path, key)=>{
-                let innerValue = initialValue.initialize(data2, path, key);
-                obj.initialValue = innerValue;
-                return initialize(data2, path, key);
-            };
-        } else obj.initialValue = initialValue;
-        return obj;
-    };
-}
-function $8c83eaf28779ff46$var$get(obj, path) {
-    return path.split(".").reduce((carry, segment)=>carry[segment], obj);
-}
-function $8c83eaf28779ff46$var$set(obj, path, value) {
-    if (typeof path === "string") path = path.split(".");
-    if (path.length === 1) obj[path[0]] = value;
-    else if (path.length === 0) throw error;
-    else {
-        if (obj[path[0]]) return $8c83eaf28779ff46$var$set(obj[path[0]], path.slice(1), value);
-        else {
-            obj[path[0]] = {};
-            return $8c83eaf28779ff46$var$set(obj[path[0]], path.slice(1), value);
-        }
-    }
-}
-// packages/alpinejs/src/magics.js
-var $8c83eaf28779ff46$var$magics = {};
-function $8c83eaf28779ff46$var$magic(name, callback) {
-    $8c83eaf28779ff46$var$magics[name] = callback;
-}
-function $8c83eaf28779ff46$var$injectMagics(obj, el) {
-    let memoizedUtilities = $8c83eaf28779ff46$var$getUtilities(el);
-    Object.entries($8c83eaf28779ff46$var$magics).forEach(([name, callback])=>{
-        Object.defineProperty(obj, `$${name}`, {
-            get () {
-                return callback(el, memoizedUtilities);
-            },
-            enumerable: false
-        });
-    });
-    return obj;
-}
-function $8c83eaf28779ff46$var$getUtilities(el) {
-    let [utilities, cleanup2] = $8c83eaf28779ff46$var$getElementBoundUtilities(el);
-    let utils = {
-        interceptor: $8c83eaf28779ff46$var$interceptor,
-        ...utilities
-    };
-    $8c83eaf28779ff46$var$onElRemoved(el, cleanup2);
-    return utils;
-}
-// packages/alpinejs/src/utils/error.js
-function $8c83eaf28779ff46$var$tryCatch(el, expression, callback, ...args) {
-    try {
-        return callback(...args);
-    } catch (e) {
-        $8c83eaf28779ff46$var$handleError(e, el, expression);
-    }
-}
-function $8c83eaf28779ff46$var$handleError(error2, el, expression) {
-    error2 = Object.assign(error2 ?? {
-        message: "No error message given."
-    }, {
-        el: el,
-        expression: expression
-    });
-    console.warn(`Alpine Expression Error: ${error2.message}
-
-${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
-    setTimeout(()=>{
-        throw error2;
-    }, 0);
-}
-// packages/alpinejs/src/evaluator.js
-var $8c83eaf28779ff46$var$shouldAutoEvaluateFunctions = true;
-function $8c83eaf28779ff46$var$dontAutoEvaluateFunctions(callback) {
-    let cache = $8c83eaf28779ff46$var$shouldAutoEvaluateFunctions;
-    $8c83eaf28779ff46$var$shouldAutoEvaluateFunctions = false;
-    let result = callback();
-    $8c83eaf28779ff46$var$shouldAutoEvaluateFunctions = cache;
-    return result;
-}
-function $8c83eaf28779ff46$var$evaluate(el, expression, extras = {}) {
-    let result;
-    $8c83eaf28779ff46$var$evaluateLater(el, expression)((value)=>result = value, extras);
-    return result;
-}
-function $8c83eaf28779ff46$var$evaluateLater(...args) {
-    return $8c83eaf28779ff46$var$theEvaluatorFunction(...args);
-}
-var $8c83eaf28779ff46$var$theEvaluatorFunction = $8c83eaf28779ff46$var$normalEvaluator;
-function $8c83eaf28779ff46$var$setEvaluator(newEvaluator) {
-    $8c83eaf28779ff46$var$theEvaluatorFunction = newEvaluator;
-}
-function $8c83eaf28779ff46$var$normalEvaluator(el, expression) {
-    let overriddenMagics = {};
-    $8c83eaf28779ff46$var$injectMagics(overriddenMagics, el);
-    let dataStack = [
-        overriddenMagics,
-        ...$8c83eaf28779ff46$var$closestDataStack(el)
-    ];
-    let evaluator = typeof expression === "function" ? $8c83eaf28779ff46$var$generateEvaluatorFromFunction(dataStack, expression) : $8c83eaf28779ff46$var$generateEvaluatorFromString(dataStack, expression, el);
-    return $8c83eaf28779ff46$var$tryCatch.bind(null, el, expression, evaluator);
-}
-function $8c83eaf28779ff46$var$generateEvaluatorFromFunction(dataStack, func) {
-    return (receiver = ()=>{}, { scope: scope2 = {}, params: params = [] } = {})=>{
-        let result = func.apply($8c83eaf28779ff46$var$mergeProxies([
-            scope2,
-            ...dataStack
-        ]), params);
-        $8c83eaf28779ff46$var$runIfTypeOfFunction(receiver, result);
-    };
-}
-var $8c83eaf28779ff46$var$evaluatorMemo = {};
-function $8c83eaf28779ff46$var$generateFunctionFromString(expression, el) {
-    if ($8c83eaf28779ff46$var$evaluatorMemo[expression]) return $8c83eaf28779ff46$var$evaluatorMemo[expression];
-    let AsyncFunction = Object.getPrototypeOf(async function() {}).constructor;
-    let rightSideSafeExpression = /^[\n\s]*if.*\(.*\)/.test(expression.trim()) || /^(let|const)\s/.test(expression.trim()) ? `(async()=>{ ${expression} })()` : expression;
-    const safeAsyncFunction = ()=>{
-        try {
-            let func2 = new AsyncFunction([
-                "__self",
-                "scope"
-            ], `with (scope) { __self.result = ${rightSideSafeExpression} }; __self.finished = true; return __self.result;`);
-            Object.defineProperty(func2, "name", {
-                value: `[Alpine] ${expression}`
-            });
-            return func2;
-        } catch (error2) {
-            $8c83eaf28779ff46$var$handleError(error2, el, expression);
-            return Promise.resolve();
-        }
-    };
-    let func = safeAsyncFunction();
-    $8c83eaf28779ff46$var$evaluatorMemo[expression] = func;
-    return func;
-}
-function $8c83eaf28779ff46$var$generateEvaluatorFromString(dataStack, expression, el) {
-    let func = $8c83eaf28779ff46$var$generateFunctionFromString(expression, el);
-    return (receiver = ()=>{}, { scope: scope2 = {}, params: params = [] } = {})=>{
-        func.result = void 0;
-        func.finished = false;
-        let completeScope = $8c83eaf28779ff46$var$mergeProxies([
-            scope2,
-            ...dataStack
-        ]);
-        if (typeof func === "function") {
-            let promise = func(func, completeScope).catch((error2)=>$8c83eaf28779ff46$var$handleError(error2, el, expression));
-            if (func.finished) {
-                $8c83eaf28779ff46$var$runIfTypeOfFunction(receiver, func.result, completeScope, params, el);
-                func.result = void 0;
-            } else promise.then((result)=>{
-                $8c83eaf28779ff46$var$runIfTypeOfFunction(receiver, result, completeScope, params, el);
-            }).catch((error2)=>$8c83eaf28779ff46$var$handleError(error2, el, expression)).finally(()=>func.result = void 0);
-        }
-    };
-}
-function $8c83eaf28779ff46$var$runIfTypeOfFunction(receiver, value, scope2, params, el) {
-    if ($8c83eaf28779ff46$var$shouldAutoEvaluateFunctions && typeof value === "function") {
-        let result = value.apply(scope2, params);
-        if (result instanceof Promise) result.then((i)=>$8c83eaf28779ff46$var$runIfTypeOfFunction(receiver, i, scope2, params)).catch((error2)=>$8c83eaf28779ff46$var$handleError(error2, el, value));
-        else receiver(result);
-    } else if (typeof value === "object" && value instanceof Promise) value.then((i)=>receiver(i));
-    else receiver(value);
-}
-// packages/alpinejs/src/directives.js
-var $8c83eaf28779ff46$var$prefixAsString = "x-";
-function $8c83eaf28779ff46$var$prefix(subject = "") {
-    return $8c83eaf28779ff46$var$prefixAsString + subject;
-}
-function $8c83eaf28779ff46$var$setPrefix(newPrefix) {
-    $8c83eaf28779ff46$var$prefixAsString = newPrefix;
-}
-var $8c83eaf28779ff46$var$directiveHandlers = {};
-function $8c83eaf28779ff46$var$directive(name, callback) {
-    $8c83eaf28779ff46$var$directiveHandlers[name] = callback;
-    return {
-        before (directive2) {
-            if (!$8c83eaf28779ff46$var$directiveHandlers[directive2]) {
-                console.warn(String.raw`Cannot find directive \`${directive2}\`. \`${name}\` will use the default order of execution`);
-                return;
-            }
-            const pos = $8c83eaf28779ff46$var$directiveOrder.indexOf(directive2);
-            $8c83eaf28779ff46$var$directiveOrder.splice(pos >= 0 ? pos : $8c83eaf28779ff46$var$directiveOrder.indexOf("DEFAULT"), 0, name);
-        }
-    };
-}
-function $8c83eaf28779ff46$var$directiveExists(name) {
-    return Object.keys($8c83eaf28779ff46$var$directiveHandlers).includes(name);
-}
-function $8c83eaf28779ff46$var$directives(el, attributes, originalAttributeOverride) {
-    attributes = Array.from(attributes);
-    if (el._x_virtualDirectives) {
-        let vAttributes = Object.entries(el._x_virtualDirectives).map(([name, value])=>({
-                name: name,
-                value: value
-            }));
-        let staticAttributes = $8c83eaf28779ff46$var$attributesOnly(vAttributes);
-        vAttributes = vAttributes.map((attribute)=>{
-            if (staticAttributes.find((attr)=>attr.name === attribute.name)) return {
-                name: `x-bind:${attribute.name}`,
-                value: `"${attribute.value}"`
-            };
-            return attribute;
-        });
-        attributes = attributes.concat(vAttributes);
-    }
-    let transformedAttributeMap = {};
-    let directives2 = attributes.map($8c83eaf28779ff46$var$toTransformedAttributes((newName, oldName)=>transformedAttributeMap[newName] = oldName)).filter($8c83eaf28779ff46$var$outNonAlpineAttributes).map($8c83eaf28779ff46$var$toParsedDirectives(transformedAttributeMap, originalAttributeOverride)).sort($8c83eaf28779ff46$var$byPriority);
-    return directives2.map((directive2)=>{
-        return $8c83eaf28779ff46$var$getDirectiveHandler(el, directive2);
-    });
-}
-function $8c83eaf28779ff46$var$attributesOnly(attributes) {
-    return Array.from(attributes).map($8c83eaf28779ff46$var$toTransformedAttributes()).filter((attr)=>!$8c83eaf28779ff46$var$outNonAlpineAttributes(attr));
-}
-var $8c83eaf28779ff46$var$isDeferringHandlers = false;
-var $8c83eaf28779ff46$var$directiveHandlerStacks = /* @__PURE__ */ new Map();
-var $8c83eaf28779ff46$var$currentHandlerStackKey = Symbol();
-function $8c83eaf28779ff46$var$deferHandlingDirectives(callback) {
-    $8c83eaf28779ff46$var$isDeferringHandlers = true;
-    let key = Symbol();
-    $8c83eaf28779ff46$var$currentHandlerStackKey = key;
-    $8c83eaf28779ff46$var$directiveHandlerStacks.set(key, []);
-    let flushHandlers = ()=>{
-        while($8c83eaf28779ff46$var$directiveHandlerStacks.get(key).length)$8c83eaf28779ff46$var$directiveHandlerStacks.get(key).shift()();
-        $8c83eaf28779ff46$var$directiveHandlerStacks.delete(key);
-    };
-    let stopDeferring = ()=>{
-        $8c83eaf28779ff46$var$isDeferringHandlers = false;
-        flushHandlers();
-    };
-    callback(flushHandlers);
-    stopDeferring();
-}
-function $8c83eaf28779ff46$var$getElementBoundUtilities(el) {
-    let cleanups = [];
-    let cleanup2 = (callback)=>cleanups.push(callback);
-    let [effect3, cleanupEffect] = $8c83eaf28779ff46$var$elementBoundEffect(el);
-    cleanups.push(cleanupEffect);
-    let utilities = {
-        Alpine: $8c83eaf28779ff46$var$alpine_default,
-        effect: effect3,
-        cleanup: cleanup2,
-        evaluateLater: $8c83eaf28779ff46$var$evaluateLater.bind($8c83eaf28779ff46$var$evaluateLater, el),
-        evaluate: $8c83eaf28779ff46$var$evaluate.bind($8c83eaf28779ff46$var$evaluate, el)
-    };
-    let doCleanup = ()=>cleanups.forEach((i)=>i());
-    return [
-        utilities,
-        doCleanup
-    ];
-}
-function $8c83eaf28779ff46$var$getDirectiveHandler(el, directive2) {
-    let noop = ()=>{};
-    let handler4 = $8c83eaf28779ff46$var$directiveHandlers[directive2.type] || noop;
-    let [utilities, cleanup2] = $8c83eaf28779ff46$var$getElementBoundUtilities(el);
-    $8c83eaf28779ff46$var$onAttributeRemoved(el, directive2.original, cleanup2);
-    let fullHandler = ()=>{
-        if (el._x_ignore || el._x_ignoreSelf) return;
-        handler4.inline && handler4.inline(el, directive2, utilities);
-        handler4 = handler4.bind(handler4, el, directive2, utilities);
-        $8c83eaf28779ff46$var$isDeferringHandlers ? $8c83eaf28779ff46$var$directiveHandlerStacks.get($8c83eaf28779ff46$var$currentHandlerStackKey).push(handler4) : handler4();
-    };
-    fullHandler.runCleanups = cleanup2;
-    return fullHandler;
-}
-var $8c83eaf28779ff46$var$startingWith = (subject, replacement)=>({ name: name, value: value })=>{
-        if (name.startsWith(subject)) name = name.replace(subject, replacement);
-        return {
-            name: name,
-            value: value
-        };
-    };
-var $8c83eaf28779ff46$var$into = (i)=>i;
-function $8c83eaf28779ff46$var$toTransformedAttributes(callback = ()=>{}) {
-    return ({ name: name, value: value })=>{
-        let { name: newName, value: newValue } = $8c83eaf28779ff46$var$attributeTransformers.reduce((carry, transform)=>{
-            return transform(carry);
-        }, {
-            name: name,
-            value: value
-        });
-        if (newName !== name) callback(newName, name);
-        return {
-            name: newName,
-            value: newValue
-        };
-    };
-}
-var $8c83eaf28779ff46$var$attributeTransformers = [];
-function $8c83eaf28779ff46$var$mapAttributes(callback) {
-    $8c83eaf28779ff46$var$attributeTransformers.push(callback);
-}
-function $8c83eaf28779ff46$var$outNonAlpineAttributes({ name: name }) {
-    return $8c83eaf28779ff46$var$alpineAttributeRegex().test(name);
-}
-var $8c83eaf28779ff46$var$alpineAttributeRegex = ()=>new RegExp(`^${$8c83eaf28779ff46$var$prefixAsString}([^:^.]+)\\b`);
-function $8c83eaf28779ff46$var$toParsedDirectives(transformedAttributeMap, originalAttributeOverride) {
-    return ({ name: name, value: value })=>{
-        let typeMatch = name.match($8c83eaf28779ff46$var$alpineAttributeRegex());
-        let valueMatch = name.match(/:([a-zA-Z0-9\-_:]+)/);
-        let modifiers = name.match(/\.[^.\]]+(?=[^\]]*$)/g) || [];
-        let original = originalAttributeOverride || transformedAttributeMap[name] || name;
-        return {
-            type: typeMatch ? typeMatch[1] : null,
-            value: valueMatch ? valueMatch[1] : null,
-            modifiers: modifiers.map((i)=>i.replace(".", "")),
-            expression: value,
-            original: original
-        };
-    };
-}
-var $8c83eaf28779ff46$var$DEFAULT = "DEFAULT";
-var $8c83eaf28779ff46$var$directiveOrder = [
-    "ignore",
-    "ref",
-    "data",
-    "id",
-    "anchor",
-    "bind",
-    "init",
-    "for",
-    "model",
-    "modelable",
-    "transition",
-    "show",
-    "if",
-    $8c83eaf28779ff46$var$DEFAULT,
-    "teleport"
-];
-function $8c83eaf28779ff46$var$byPriority(a, b) {
-    let typeA = $8c83eaf28779ff46$var$directiveOrder.indexOf(a.type) === -1 ? $8c83eaf28779ff46$var$DEFAULT : a.type;
-    let typeB = $8c83eaf28779ff46$var$directiveOrder.indexOf(b.type) === -1 ? $8c83eaf28779ff46$var$DEFAULT : b.type;
-    return $8c83eaf28779ff46$var$directiveOrder.indexOf(typeA) - $8c83eaf28779ff46$var$directiveOrder.indexOf(typeB);
-}
-// packages/alpinejs/src/utils/dispatch.js
-function $8c83eaf28779ff46$var$dispatch(el, name, detail = {}) {
-    el.dispatchEvent(new CustomEvent(name, {
-        detail: detail,
-        bubbles: true,
-        // Allows events to pass the shadow DOM barrier.
-        composed: true,
-        cancelable: true
-    }));
-}
-// packages/alpinejs/src/utils/walk.js
-function $8c83eaf28779ff46$var$walk(el, callback) {
-    if (typeof ShadowRoot === "function" && el instanceof ShadowRoot) {
-        Array.from(el.children).forEach((el2)=>$8c83eaf28779ff46$var$walk(el2, callback));
-        return;
-    }
-    let skip = false;
-    callback(el, ()=>skip = true);
-    if (skip) return;
-    let node = el.firstElementChild;
-    while(node){
-        $8c83eaf28779ff46$var$walk(node, callback, false);
-        node = node.nextElementSibling;
-    }
-}
-// packages/alpinejs/src/utils/warn.js
-function $8c83eaf28779ff46$var$warn(message, ...args) {
-    console.warn(`Alpine Warning: ${message}`, ...args);
-}
-// packages/alpinejs/src/lifecycle.js
-var $8c83eaf28779ff46$var$started = false;
-function $8c83eaf28779ff46$var$start() {
-    if ($8c83eaf28779ff46$var$started) $8c83eaf28779ff46$var$warn("Alpine has already been initialized on this page. Calling Alpine.start() more than once can cause problems.");
-    $8c83eaf28779ff46$var$started = true;
-    if (!document.body) $8c83eaf28779ff46$var$warn("Unable to initialize. Trying to load Alpine before `<body>` is available. Did you forget to add `defer` in Alpine's `<script>` tag?");
-    $8c83eaf28779ff46$var$dispatch(document, "alpine:init");
-    $8c83eaf28779ff46$var$dispatch(document, "alpine:initializing");
-    $8c83eaf28779ff46$var$startObservingMutations();
-    $8c83eaf28779ff46$var$onElAdded((el)=>$8c83eaf28779ff46$var$initTree(el, $8c83eaf28779ff46$var$walk));
-    $8c83eaf28779ff46$var$onElRemoved((el)=>$8c83eaf28779ff46$var$destroyTree(el));
-    $8c83eaf28779ff46$var$onAttributesAdded((el, attrs)=>{
-        $8c83eaf28779ff46$var$directives(el, attrs).forEach((handle)=>handle());
-    });
-    let outNestedComponents = (el)=>!$8c83eaf28779ff46$var$closestRoot(el.parentElement, true);
-    Array.from(document.querySelectorAll($8c83eaf28779ff46$var$allSelectors().join(","))).filter(outNestedComponents).forEach((el)=>{
-        $8c83eaf28779ff46$var$initTree(el);
-    });
-    $8c83eaf28779ff46$var$dispatch(document, "alpine:initialized");
-    setTimeout(()=>{
-        $8c83eaf28779ff46$var$warnAboutMissingPlugins();
-    });
-}
-var $8c83eaf28779ff46$var$rootSelectorCallbacks = [];
-var $8c83eaf28779ff46$var$initSelectorCallbacks = [];
-function $8c83eaf28779ff46$var$rootSelectors() {
-    return $8c83eaf28779ff46$var$rootSelectorCallbacks.map((fn)=>fn());
-}
-function $8c83eaf28779ff46$var$allSelectors() {
-    return $8c83eaf28779ff46$var$rootSelectorCallbacks.concat($8c83eaf28779ff46$var$initSelectorCallbacks).map((fn)=>fn());
-}
-function $8c83eaf28779ff46$var$addRootSelector(selectorCallback) {
-    $8c83eaf28779ff46$var$rootSelectorCallbacks.push(selectorCallback);
-}
-function $8c83eaf28779ff46$var$addInitSelector(selectorCallback) {
-    $8c83eaf28779ff46$var$initSelectorCallbacks.push(selectorCallback);
-}
-function $8c83eaf28779ff46$var$closestRoot(el, includeInitSelectors = false) {
-    return $8c83eaf28779ff46$var$findClosest(el, (element)=>{
-        const selectors = includeInitSelectors ? $8c83eaf28779ff46$var$allSelectors() : $8c83eaf28779ff46$var$rootSelectors();
-        if (selectors.some((selector)=>element.matches(selector))) return true;
-    });
-}
-function $8c83eaf28779ff46$var$findClosest(el, callback) {
-    if (!el) return;
-    if (callback(el)) return el;
-    if (el._x_teleportBack) el = el._x_teleportBack;
-    if (!el.parentElement) return;
-    return $8c83eaf28779ff46$var$findClosest(el.parentElement, callback);
-}
-function $8c83eaf28779ff46$var$isRoot(el) {
-    return $8c83eaf28779ff46$var$rootSelectors().some((selector)=>el.matches(selector));
-}
-var $8c83eaf28779ff46$var$initInterceptors2 = [];
-function $8c83eaf28779ff46$var$interceptInit(callback) {
-    $8c83eaf28779ff46$var$initInterceptors2.push(callback);
-}
-var $8c83eaf28779ff46$var$markerDispenser = 1;
-function $8c83eaf28779ff46$var$initTree(el, walker = $8c83eaf28779ff46$var$walk, intercept = ()=>{}) {
-    if ($8c83eaf28779ff46$var$findClosest(el, (i)=>i._x_ignore)) return;
-    $8c83eaf28779ff46$var$deferHandlingDirectives(()=>{
-        walker(el, (el2, skip)=>{
-            if (el2._x_marker) return;
-            intercept(el2, skip);
-            $8c83eaf28779ff46$var$initInterceptors2.forEach((i)=>i(el2, skip));
-            $8c83eaf28779ff46$var$directives(el2, el2.attributes).forEach((handle)=>handle());
-            if (!el2._x_ignore) el2._x_marker = $8c83eaf28779ff46$var$markerDispenser++;
-            el2._x_ignore && skip();
-        });
-    });
-}
-function $8c83eaf28779ff46$var$destroyTree(root, walker = $8c83eaf28779ff46$var$walk) {
-    walker(root, (el)=>{
-        $8c83eaf28779ff46$var$cleanupElement(el);
-        $8c83eaf28779ff46$var$cleanupAttributes(el);
-        delete el._x_marker;
-    });
-}
-function $8c83eaf28779ff46$var$warnAboutMissingPlugins() {
-    let pluginDirectives = [
-        [
-            "ui",
-            "dialog",
-            [
-                "[x-dialog], [x-popover]"
-            ]
-        ],
-        [
-            "anchor",
-            "anchor",
-            [
-                "[x-anchor]"
-            ]
-        ],
-        [
-            "sort",
-            "sort",
-            [
-                "[x-sort]"
-            ]
-        ]
-    ];
-    pluginDirectives.forEach(([plugin2, directive2, selectors])=>{
-        if ($8c83eaf28779ff46$var$directiveExists(directive2)) return;
-        selectors.some((selector)=>{
-            if (document.querySelector(selector)) {
-                $8c83eaf28779ff46$var$warn(`found "${selector}", but missing ${plugin2} plugin`);
-                return true;
-            }
-        });
-    });
-}
-// packages/alpinejs/src/nextTick.js
-var $8c83eaf28779ff46$var$tickStack = [];
-var $8c83eaf28779ff46$var$isHolding = false;
-function $8c83eaf28779ff46$var$nextTick(callback = ()=>{}) {
-    queueMicrotask(()=>{
-        $8c83eaf28779ff46$var$isHolding || setTimeout(()=>{
-            $8c83eaf28779ff46$var$releaseNextTicks();
-        });
-    });
-    return new Promise((res)=>{
-        $8c83eaf28779ff46$var$tickStack.push(()=>{
-            callback();
-            res();
-        });
-    });
-}
-function $8c83eaf28779ff46$var$releaseNextTicks() {
-    $8c83eaf28779ff46$var$isHolding = false;
-    while($8c83eaf28779ff46$var$tickStack.length)$8c83eaf28779ff46$var$tickStack.shift()();
-}
-function $8c83eaf28779ff46$var$holdNextTicks() {
-    $8c83eaf28779ff46$var$isHolding = true;
-}
-// packages/alpinejs/src/utils/classes.js
-function $8c83eaf28779ff46$var$setClasses(el, value) {
-    if (Array.isArray(value)) return $8c83eaf28779ff46$var$setClassesFromString(el, value.join(" "));
-    else if (typeof value === "object" && value !== null) return $8c83eaf28779ff46$var$setClassesFromObject(el, value);
-    else if (typeof value === "function") return $8c83eaf28779ff46$var$setClasses(el, value());
-    return $8c83eaf28779ff46$var$setClassesFromString(el, value);
-}
-function $8c83eaf28779ff46$var$setClassesFromString(el, classString) {
-    let split = (classString2)=>classString2.split(" ").filter(Boolean);
-    let missingClasses = (classString2)=>classString2.split(" ").filter((i)=>!el.classList.contains(i)).filter(Boolean);
-    let addClassesAndReturnUndo = (classes)=>{
-        el.classList.add(...classes);
-        return ()=>{
-            el.classList.remove(...classes);
-        };
-    };
-    classString = classString === true ? classString = "" : classString || "";
-    return addClassesAndReturnUndo(missingClasses(classString));
-}
-function $8c83eaf28779ff46$var$setClassesFromObject(el, classObject) {
-    let split = (classString)=>classString.split(" ").filter(Boolean);
-    let forAdd = Object.entries(classObject).flatMap(([classString, bool])=>bool ? split(classString) : false).filter(Boolean);
-    let forRemove = Object.entries(classObject).flatMap(([classString, bool])=>!bool ? split(classString) : false).filter(Boolean);
-    let added = [];
-    let removed = [];
-    forRemove.forEach((i)=>{
-        if (el.classList.contains(i)) {
-            el.classList.remove(i);
-            removed.push(i);
-        }
-    });
-    forAdd.forEach((i)=>{
-        if (!el.classList.contains(i)) {
-            el.classList.add(i);
-            added.push(i);
-        }
-    });
-    return ()=>{
-        removed.forEach((i)=>el.classList.add(i));
-        added.forEach((i)=>el.classList.remove(i));
-    };
-}
-// packages/alpinejs/src/utils/styles.js
-function $8c83eaf28779ff46$var$setStyles(el, value) {
-    if (typeof value === "object" && value !== null) return $8c83eaf28779ff46$var$setStylesFromObject(el, value);
-    return $8c83eaf28779ff46$var$setStylesFromString(el, value);
-}
-function $8c83eaf28779ff46$var$setStylesFromObject(el, value) {
-    let previousStyles = {};
-    Object.entries(value).forEach(([key, value2])=>{
-        previousStyles[key] = el.style[key];
-        if (!key.startsWith("--")) key = $8c83eaf28779ff46$var$kebabCase(key);
-        el.style.setProperty(key, value2);
-    });
-    setTimeout(()=>{
-        if (el.style.length === 0) el.removeAttribute("style");
-    });
-    return ()=>{
-        $8c83eaf28779ff46$var$setStyles(el, previousStyles);
-    };
-}
-function $8c83eaf28779ff46$var$setStylesFromString(el, value) {
-    let cache = el.getAttribute("style", value);
-    el.setAttribute("style", value);
-    return ()=>{
-        el.setAttribute("style", cache || "");
-    };
-}
-function $8c83eaf28779ff46$var$kebabCase(subject) {
-    return subject.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
-}
-// packages/alpinejs/src/utils/once.js
-function $8c83eaf28779ff46$var$once(callback, fallback = ()=>{}) {
-    let called = false;
-    return function() {
-        if (!called) {
-            called = true;
-            callback.apply(this, arguments);
-        } else fallback.apply(this, arguments);
-    };
-}
-// packages/alpinejs/src/directives/x-transition.js
-$8c83eaf28779ff46$var$directive("transition", (el, { value: value, modifiers: modifiers, expression: expression }, { evaluate: evaluate2 })=>{
-    if (typeof expression === "function") expression = evaluate2(expression);
-    if (expression === false) return;
-    if (!expression || typeof expression === "boolean") $8c83eaf28779ff46$var$registerTransitionsFromHelper(el, modifiers, value);
-    else $8c83eaf28779ff46$var$registerTransitionsFromClassString(el, expression, value);
-});
-function $8c83eaf28779ff46$var$registerTransitionsFromClassString(el, classString, stage) {
-    $8c83eaf28779ff46$var$registerTransitionObject(el, $8c83eaf28779ff46$var$setClasses, "");
-    let directiveStorageMap = {
-        "enter": (classes)=>{
-            el._x_transition.enter.during = classes;
-        },
-        "enter-start": (classes)=>{
-            el._x_transition.enter.start = classes;
-        },
-        "enter-end": (classes)=>{
-            el._x_transition.enter.end = classes;
-        },
-        "leave": (classes)=>{
-            el._x_transition.leave.during = classes;
-        },
-        "leave-start": (classes)=>{
-            el._x_transition.leave.start = classes;
-        },
-        "leave-end": (classes)=>{
-            el._x_transition.leave.end = classes;
-        }
-    };
-    directiveStorageMap[stage](classString);
-}
-function $8c83eaf28779ff46$var$registerTransitionsFromHelper(el, modifiers, stage) {
-    $8c83eaf28779ff46$var$registerTransitionObject(el, $8c83eaf28779ff46$var$setStyles);
-    let doesntSpecify = !modifiers.includes("in") && !modifiers.includes("out") && !stage;
-    let transitioningIn = doesntSpecify || modifiers.includes("in") || [
-        "enter"
-    ].includes(stage);
-    let transitioningOut = doesntSpecify || modifiers.includes("out") || [
-        "leave"
-    ].includes(stage);
-    if (modifiers.includes("in") && !doesntSpecify) modifiers = modifiers.filter((i, index)=>index < modifiers.indexOf("out"));
-    if (modifiers.includes("out") && !doesntSpecify) modifiers = modifiers.filter((i, index)=>index > modifiers.indexOf("out"));
-    let wantsAll = !modifiers.includes("opacity") && !modifiers.includes("scale");
-    let wantsOpacity = wantsAll || modifiers.includes("opacity");
-    let wantsScale = wantsAll || modifiers.includes("scale");
-    let opacityValue = wantsOpacity ? 0 : 1;
-    let scaleValue = wantsScale ? $8c83eaf28779ff46$var$modifierValue(modifiers, "scale", 95) / 100 : 1;
-    let delay = $8c83eaf28779ff46$var$modifierValue(modifiers, "delay", 0) / 1e3;
-    let origin = $8c83eaf28779ff46$var$modifierValue(modifiers, "origin", "center");
-    let property = "opacity, transform";
-    let durationIn = $8c83eaf28779ff46$var$modifierValue(modifiers, "duration", 150) / 1e3;
-    let durationOut = $8c83eaf28779ff46$var$modifierValue(modifiers, "duration", 75) / 1e3;
-    let easing = `cubic-bezier(0.4, 0.0, 0.2, 1)`;
-    if (transitioningIn) {
-        el._x_transition.enter.during = {
-            transformOrigin: origin,
-            transitionDelay: `${delay}s`,
-            transitionProperty: property,
-            transitionDuration: `${durationIn}s`,
-            transitionTimingFunction: easing
-        };
-        el._x_transition.enter.start = {
-            opacity: opacityValue,
-            transform: `scale(${scaleValue})`
-        };
-        el._x_transition.enter.end = {
-            opacity: 1,
-            transform: `scale(1)`
-        };
-    }
-    if (transitioningOut) {
-        el._x_transition.leave.during = {
-            transformOrigin: origin,
-            transitionDelay: `${delay}s`,
-            transitionProperty: property,
-            transitionDuration: `${durationOut}s`,
-            transitionTimingFunction: easing
-        };
-        el._x_transition.leave.start = {
-            opacity: 1,
-            transform: `scale(1)`
-        };
-        el._x_transition.leave.end = {
-            opacity: opacityValue,
-            transform: `scale(${scaleValue})`
-        };
-    }
-}
-function $8c83eaf28779ff46$var$registerTransitionObject(el, setFunction, defaultValue = {}) {
-    if (!el._x_transition) el._x_transition = {
-        enter: {
-            during: defaultValue,
-            start: defaultValue,
-            end: defaultValue
-        },
-        leave: {
-            during: defaultValue,
-            start: defaultValue,
-            end: defaultValue
-        },
-        in (before = ()=>{}, after = ()=>{}) {
-            $8c83eaf28779ff46$var$transition(el, setFunction, {
-                during: this.enter.during,
-                start: this.enter.start,
-                end: this.enter.end
-            }, before, after);
-        },
-        out (before = ()=>{}, after = ()=>{}) {
-            $8c83eaf28779ff46$var$transition(el, setFunction, {
-                during: this.leave.during,
-                start: this.leave.start,
-                end: this.leave.end
-            }, before, after);
-        }
-    };
-}
-window.Element.prototype._x_toggleAndCascadeWithTransitions = function(el, value, show, hide) {
-    const nextTick2 = document.visibilityState === "visible" ? requestAnimationFrame : setTimeout;
-    let clickAwayCompatibleShow = ()=>nextTick2(show);
-    if (value) {
-        if (el._x_transition && (el._x_transition.enter || el._x_transition.leave)) el._x_transition.enter && (Object.entries(el._x_transition.enter.during).length || Object.entries(el._x_transition.enter.start).length || Object.entries(el._x_transition.enter.end).length) ? el._x_transition.in(show) : clickAwayCompatibleShow();
-        else el._x_transition ? el._x_transition.in(show) : clickAwayCompatibleShow();
-        return;
-    }
-    el._x_hidePromise = el._x_transition ? new Promise((resolve, reject)=>{
-        el._x_transition.out(()=>{}, ()=>resolve(hide));
-        el._x_transitioning && el._x_transitioning.beforeCancel(()=>reject({
-                isFromCancelledTransition: true
-            }));
-    }) : Promise.resolve(hide);
-    queueMicrotask(()=>{
-        let closest = $8c83eaf28779ff46$var$closestHide(el);
-        if (closest) {
-            if (!closest._x_hideChildren) closest._x_hideChildren = [];
-            closest._x_hideChildren.push(el);
-        } else nextTick2(()=>{
-            let hideAfterChildren = (el2)=>{
-                let carry = Promise.all([
-                    el2._x_hidePromise,
-                    ...(el2._x_hideChildren || []).map(hideAfterChildren)
-                ]).then(([i])=>i?.());
-                delete el2._x_hidePromise;
-                delete el2._x_hideChildren;
-                return carry;
-            };
-            hideAfterChildren(el).catch((e)=>{
-                if (!e.isFromCancelledTransition) throw e;
-            });
-        });
-    });
-};
-function $8c83eaf28779ff46$var$closestHide(el) {
-    let parent = el.parentNode;
-    if (!parent) return;
-    return parent._x_hidePromise ? parent : $8c83eaf28779ff46$var$closestHide(parent);
-}
-function $8c83eaf28779ff46$var$transition(el, setFunction, { during: during, start: start2, end: end } = {}, before = ()=>{}, after = ()=>{}) {
-    if (el._x_transitioning) el._x_transitioning.cancel();
-    if (Object.keys(during).length === 0 && Object.keys(start2).length === 0 && Object.keys(end).length === 0) {
-        before();
-        after();
-        return;
-    }
-    let undoStart, undoDuring, undoEnd;
-    $8c83eaf28779ff46$var$performTransition(el, {
-        start () {
-            undoStart = setFunction(el, start2);
-        },
-        during () {
-            undoDuring = setFunction(el, during);
-        },
-        before: before,
-        end () {
-            undoStart();
-            undoEnd = setFunction(el, end);
-        },
-        after: after,
-        cleanup () {
-            undoDuring();
-            undoEnd();
-        }
-    });
-}
-function $8c83eaf28779ff46$var$performTransition(el, stages) {
-    let interrupted, reachedBefore, reachedEnd;
-    let finish = $8c83eaf28779ff46$var$once(()=>{
-        $8c83eaf28779ff46$var$mutateDom(()=>{
-            interrupted = true;
-            if (!reachedBefore) stages.before();
-            if (!reachedEnd) {
-                stages.end();
-                $8c83eaf28779ff46$var$releaseNextTicks();
-            }
-            stages.after();
-            if (el.isConnected) stages.cleanup();
-            delete el._x_transitioning;
-        });
-    });
-    el._x_transitioning = {
-        beforeCancels: [],
-        beforeCancel (callback) {
-            this.beforeCancels.push(callback);
-        },
-        cancel: $8c83eaf28779ff46$var$once(function() {
-            while(this.beforeCancels.length)this.beforeCancels.shift()();
-            finish();
-        }),
-        finish: finish
-    };
-    $8c83eaf28779ff46$var$mutateDom(()=>{
-        stages.start();
-        stages.during();
-    });
-    $8c83eaf28779ff46$var$holdNextTicks();
-    requestAnimationFrame(()=>{
-        if (interrupted) return;
-        let duration = Number(getComputedStyle(el).transitionDuration.replace(/,.*/, "").replace("s", "")) * 1e3;
-        let delay = Number(getComputedStyle(el).transitionDelay.replace(/,.*/, "").replace("s", "")) * 1e3;
-        if (duration === 0) duration = Number(getComputedStyle(el).animationDuration.replace("s", "")) * 1e3;
-        $8c83eaf28779ff46$var$mutateDom(()=>{
-            stages.before();
-        });
-        reachedBefore = true;
-        requestAnimationFrame(()=>{
-            if (interrupted) return;
-            $8c83eaf28779ff46$var$mutateDom(()=>{
-                stages.end();
-            });
-            $8c83eaf28779ff46$var$releaseNextTicks();
-            setTimeout(el._x_transitioning.finish, duration + delay);
-            reachedEnd = true;
-        });
-    });
-}
-function $8c83eaf28779ff46$var$modifierValue(modifiers, key, fallback) {
-    if (modifiers.indexOf(key) === -1) return fallback;
-    const rawValue = modifiers[modifiers.indexOf(key) + 1];
-    if (!rawValue) return fallback;
-    if (key === "scale") {
-        if (isNaN(rawValue)) return fallback;
-    }
-    if (key === "duration" || key === "delay") {
-        let match = rawValue.match(/([0-9]+)ms/);
-        if (match) return match[1];
-    }
-    if (key === "origin") {
-        if ([
-            "top",
-            "right",
-            "left",
-            "center",
-            "bottom"
-        ].includes(modifiers[modifiers.indexOf(key) + 2])) return [
-            rawValue,
-            modifiers[modifiers.indexOf(key) + 2]
-        ].join(" ");
-    }
-    return rawValue;
-}
-// packages/alpinejs/src/clone.js
-var $8c83eaf28779ff46$var$isCloning = false;
-function $8c83eaf28779ff46$var$skipDuringClone(callback, fallback = ()=>{}) {
-    return (...args)=>$8c83eaf28779ff46$var$isCloning ? fallback(...args) : callback(...args);
-}
-function $8c83eaf28779ff46$var$onlyDuringClone(callback) {
-    return (...args)=>$8c83eaf28779ff46$var$isCloning && callback(...args);
-}
-var $8c83eaf28779ff46$var$interceptors = [];
-function $8c83eaf28779ff46$var$interceptClone(callback) {
-    $8c83eaf28779ff46$var$interceptors.push(callback);
-}
-function $8c83eaf28779ff46$var$cloneNode(from, to) {
-    $8c83eaf28779ff46$var$interceptors.forEach((i)=>i(from, to));
-    $8c83eaf28779ff46$var$isCloning = true;
-    $8c83eaf28779ff46$var$dontRegisterReactiveSideEffects(()=>{
-        $8c83eaf28779ff46$var$initTree(to, (el, callback)=>{
-            callback(el, ()=>{});
-        });
-    });
-    $8c83eaf28779ff46$var$isCloning = false;
-}
-var $8c83eaf28779ff46$var$isCloningLegacy = false;
-function $8c83eaf28779ff46$var$clone(oldEl, newEl) {
-    if (!newEl._x_dataStack) newEl._x_dataStack = oldEl._x_dataStack;
-    $8c83eaf28779ff46$var$isCloning = true;
-    $8c83eaf28779ff46$var$isCloningLegacy = true;
-    $8c83eaf28779ff46$var$dontRegisterReactiveSideEffects(()=>{
-        $8c83eaf28779ff46$var$cloneTree(newEl);
-    });
-    $8c83eaf28779ff46$var$isCloning = false;
-    $8c83eaf28779ff46$var$isCloningLegacy = false;
-}
-function $8c83eaf28779ff46$var$cloneTree(el) {
-    let hasRunThroughFirstEl = false;
-    let shallowWalker = (el2, callback)=>{
-        $8c83eaf28779ff46$var$walk(el2, (el3, skip)=>{
-            if (hasRunThroughFirstEl && $8c83eaf28779ff46$var$isRoot(el3)) return skip();
-            hasRunThroughFirstEl = true;
-            callback(el3, skip);
-        });
-    };
-    $8c83eaf28779ff46$var$initTree(el, shallowWalker);
-}
-function $8c83eaf28779ff46$var$dontRegisterReactiveSideEffects(callback) {
-    let cache = $8c83eaf28779ff46$var$effect;
-    $8c83eaf28779ff46$var$overrideEffect((callback2, el)=>{
-        let storedEffect = cache(callback2);
-        $8c83eaf28779ff46$var$release(storedEffect);
-        return ()=>{};
-    });
-    callback();
-    $8c83eaf28779ff46$var$overrideEffect(cache);
-}
-// packages/alpinejs/src/utils/bind.js
-function $8c83eaf28779ff46$var$bind(el, name, value, modifiers = []) {
-    if (!el._x_bindings) el._x_bindings = $8c83eaf28779ff46$var$reactive({});
-    el._x_bindings[name] = value;
-    name = modifiers.includes("camel") ? $8c83eaf28779ff46$var$camelCase(name) : name;
-    switch(name){
-        case "value":
-            $8c83eaf28779ff46$var$bindInputValue(el, value);
-            break;
-        case "style":
-            $8c83eaf28779ff46$var$bindStyles(el, value);
-            break;
-        case "class":
-            $8c83eaf28779ff46$var$bindClasses(el, value);
-            break;
-        case "selected":
-        case "checked":
-            $8c83eaf28779ff46$var$bindAttributeAndProperty(el, name, value);
-            break;
-        default:
-            $8c83eaf28779ff46$var$bindAttribute(el, name, value);
-            break;
-    }
-}
-function $8c83eaf28779ff46$var$bindInputValue(el, value) {
-    if ($8c83eaf28779ff46$var$isRadio(el)) {
-        if (el.attributes.value === void 0) el.value = value;
-        if (window.fromModel) {
-            if (typeof value === "boolean") el.checked = $8c83eaf28779ff46$var$safeParseBoolean(el.value) === value;
-            else el.checked = $8c83eaf28779ff46$var$checkedAttrLooseCompare(el.value, value);
-        }
-    } else if ($8c83eaf28779ff46$var$isCheckbox(el)) {
-        if (Number.isInteger(value)) el.value = value;
-        else if (!Array.isArray(value) && typeof value !== "boolean" && ![
-            null,
-            void 0
-        ].includes(value)) el.value = String(value);
-        else if (Array.isArray(value)) el.checked = value.some((val)=>$8c83eaf28779ff46$var$checkedAttrLooseCompare(val, el.value));
-        else el.checked = !!value;
-    } else if (el.tagName === "SELECT") $8c83eaf28779ff46$var$updateSelect(el, value);
-    else {
-        if (el.value === value) return;
-        el.value = value === void 0 ? "" : value;
-    }
-}
-function $8c83eaf28779ff46$var$bindClasses(el, value) {
-    if (el._x_undoAddedClasses) el._x_undoAddedClasses();
-    el._x_undoAddedClasses = $8c83eaf28779ff46$var$setClasses(el, value);
-}
-function $8c83eaf28779ff46$var$bindStyles(el, value) {
-    if (el._x_undoAddedStyles) el._x_undoAddedStyles();
-    el._x_undoAddedStyles = $8c83eaf28779ff46$var$setStyles(el, value);
-}
-function $8c83eaf28779ff46$var$bindAttributeAndProperty(el, name, value) {
-    $8c83eaf28779ff46$var$bindAttribute(el, name, value);
-    $8c83eaf28779ff46$var$setPropertyIfChanged(el, name, value);
-}
-function $8c83eaf28779ff46$var$bindAttribute(el, name, value) {
-    if ([
-        null,
-        void 0,
-        false
-    ].includes(value) && $8c83eaf28779ff46$var$attributeShouldntBePreservedIfFalsy(name)) el.removeAttribute(name);
-    else {
-        if ($8c83eaf28779ff46$var$isBooleanAttr(name)) value = name;
-        $8c83eaf28779ff46$var$setIfChanged(el, name, value);
-    }
-}
-function $8c83eaf28779ff46$var$setIfChanged(el, attrName, value) {
-    if (el.getAttribute(attrName) != value) el.setAttribute(attrName, value);
-}
-function $8c83eaf28779ff46$var$setPropertyIfChanged(el, propName, value) {
-    if (el[propName] !== value) el[propName] = value;
-}
-function $8c83eaf28779ff46$var$updateSelect(el, value) {
-    const arrayWrappedValue = [].concat(value).map((value2)=>{
-        return value2 + "";
-    });
-    Array.from(el.options).forEach((option)=>{
-        option.selected = arrayWrappedValue.includes(option.value);
-    });
-}
-function $8c83eaf28779ff46$var$camelCase(subject) {
-    return subject.toLowerCase().replace(/-(\w)/g, (match, char)=>char.toUpperCase());
-}
-function $8c83eaf28779ff46$var$checkedAttrLooseCompare(valueA, valueB) {
-    return valueA == valueB;
-}
-function $8c83eaf28779ff46$var$safeParseBoolean(rawValue) {
-    if ([
-        1,
-        "1",
-        "true",
-        "on",
-        "yes",
-        true
-    ].includes(rawValue)) return true;
-    if ([
-        0,
-        "0",
-        "false",
-        "off",
-        "no",
-        false
-    ].includes(rawValue)) return false;
-    return rawValue ? Boolean(rawValue) : null;
-}
-var $8c83eaf28779ff46$var$booleanAttributes = /* @__PURE__ */ new Set([
-    "allowfullscreen",
-    "async",
-    "autofocus",
-    "autoplay",
-    "checked",
-    "controls",
-    "default",
-    "defer",
-    "disabled",
-    "formnovalidate",
-    "inert",
-    "ismap",
-    "itemscope",
-    "loop",
-    "multiple",
-    "muted",
-    "nomodule",
-    "novalidate",
-    "open",
-    "playsinline",
-    "readonly",
-    "required",
-    "reversed",
-    "selected",
-    "shadowrootclonable",
-    "shadowrootdelegatesfocus",
-    "shadowrootserializable"
-]);
-function $8c83eaf28779ff46$var$isBooleanAttr(attrName) {
-    return $8c83eaf28779ff46$var$booleanAttributes.has(attrName);
-}
-function $8c83eaf28779ff46$var$attributeShouldntBePreservedIfFalsy(name) {
-    return ![
-        "aria-pressed",
-        "aria-checked",
-        "aria-expanded",
-        "aria-selected"
-    ].includes(name);
-}
-function $8c83eaf28779ff46$var$getBinding(el, name, fallback) {
-    if (el._x_bindings && el._x_bindings[name] !== void 0) return el._x_bindings[name];
-    return $8c83eaf28779ff46$var$getAttributeBinding(el, name, fallback);
-}
-function $8c83eaf28779ff46$var$extractProp(el, name, fallback, extract = true) {
-    if (el._x_bindings && el._x_bindings[name] !== void 0) return el._x_bindings[name];
-    if (el._x_inlineBindings && el._x_inlineBindings[name] !== void 0) {
-        let binding = el._x_inlineBindings[name];
-        binding.extract = extract;
-        return $8c83eaf28779ff46$var$dontAutoEvaluateFunctions(()=>{
-            return $8c83eaf28779ff46$var$evaluate(el, binding.expression);
-        });
-    }
-    return $8c83eaf28779ff46$var$getAttributeBinding(el, name, fallback);
-}
-function $8c83eaf28779ff46$var$getAttributeBinding(el, name, fallback) {
-    let attr = el.getAttribute(name);
-    if (attr === null) return typeof fallback === "function" ? fallback() : fallback;
-    if (attr === "") return true;
-    if ($8c83eaf28779ff46$var$isBooleanAttr(name)) return !![
-        name,
-        "true"
-    ].includes(attr);
-    return attr;
-}
-function $8c83eaf28779ff46$var$isCheckbox(el) {
-    return el.type === "checkbox" || el.localName === "ui-checkbox" || el.localName === "ui-switch";
-}
-function $8c83eaf28779ff46$var$isRadio(el) {
-    return el.type === "radio" || el.localName === "ui-radio";
-}
-// packages/alpinejs/src/utils/debounce.js
-function $8c83eaf28779ff46$var$debounce(func, wait) {
-    var timeout;
-    return function() {
-        var context = this, args = arguments;
-        var later = function() {
-            timeout = null;
-            func.apply(context, args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-// packages/alpinejs/src/utils/throttle.js
-function $8c83eaf28779ff46$var$throttle(func, limit) {
-    let inThrottle;
-    return function() {
-        let context = this, args = arguments;
-        if (!inThrottle) {
-            func.apply(context, args);
-            inThrottle = true;
-            setTimeout(()=>inThrottle = false, limit);
-        }
-    };
-}
-// packages/alpinejs/src/entangle.js
-function $8c83eaf28779ff46$var$entangle({ get: outerGet, set: outerSet }, { get: innerGet, set: innerSet }) {
-    let firstRun = true;
-    let outerHash;
-    let innerHash;
-    let reference = $8c83eaf28779ff46$var$effect(()=>{
-        let outer = outerGet();
-        let inner = innerGet();
-        if (firstRun) {
-            innerSet($8c83eaf28779ff46$var$cloneIfObject(outer));
-            firstRun = false;
-        } else {
-            let outerHashLatest = JSON.stringify(outer);
-            let innerHashLatest = JSON.stringify(inner);
-            if (outerHashLatest !== outerHash) innerSet($8c83eaf28779ff46$var$cloneIfObject(outer));
-            else if (outerHashLatest !== innerHashLatest) outerSet($8c83eaf28779ff46$var$cloneIfObject(inner));
-        }
-        outerHash = JSON.stringify(outerGet());
-        innerHash = JSON.stringify(innerGet());
-    });
-    return ()=>{
-        $8c83eaf28779ff46$var$release(reference);
-    };
-}
-function $8c83eaf28779ff46$var$cloneIfObject(value) {
-    return typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value;
-}
-// packages/alpinejs/src/plugin.js
-function $8c83eaf28779ff46$var$plugin(callback) {
-    let callbacks = Array.isArray(callback) ? callback : [
-        callback
-    ];
-    callbacks.forEach((i)=>i($8c83eaf28779ff46$var$alpine_default));
-}
-// packages/alpinejs/src/store.js
-var $8c83eaf28779ff46$var$stores = {};
-var $8c83eaf28779ff46$var$isReactive = false;
-function $8c83eaf28779ff46$var$store(name, value) {
-    if (!$8c83eaf28779ff46$var$isReactive) {
-        $8c83eaf28779ff46$var$stores = $8c83eaf28779ff46$var$reactive($8c83eaf28779ff46$var$stores);
-        $8c83eaf28779ff46$var$isReactive = true;
-    }
-    if (value === void 0) return $8c83eaf28779ff46$var$stores[name];
-    $8c83eaf28779ff46$var$stores[name] = value;
-    $8c83eaf28779ff46$var$initInterceptors($8c83eaf28779ff46$var$stores[name]);
-    if (typeof value === "object" && value !== null && value.hasOwnProperty("init") && typeof value.init === "function") $8c83eaf28779ff46$var$stores[name].init();
-}
-function $8c83eaf28779ff46$var$getStores() {
-    return $8c83eaf28779ff46$var$stores;
-}
-// packages/alpinejs/src/binds.js
-var $8c83eaf28779ff46$var$binds = {};
-function $8c83eaf28779ff46$var$bind2(name, bindings) {
-    let getBindings = typeof bindings !== "function" ? ()=>bindings : bindings;
-    if (name instanceof Element) return $8c83eaf28779ff46$var$applyBindingsObject(name, getBindings());
-    else $8c83eaf28779ff46$var$binds[name] = getBindings;
-    return ()=>{};
-}
-function $8c83eaf28779ff46$var$injectBindingProviders(obj) {
-    Object.entries($8c83eaf28779ff46$var$binds).forEach(([name, callback])=>{
-        Object.defineProperty(obj, name, {
-            get () {
-                return (...args)=>{
-                    return callback(...args);
-                };
-            }
-        });
-    });
-    return obj;
-}
-function $8c83eaf28779ff46$var$applyBindingsObject(el, obj, original) {
-    let cleanupRunners = [];
-    while(cleanupRunners.length)cleanupRunners.pop()();
-    let attributes = Object.entries(obj).map(([name, value])=>({
-            name: name,
-            value: value
-        }));
-    let staticAttributes = $8c83eaf28779ff46$var$attributesOnly(attributes);
-    attributes = attributes.map((attribute)=>{
-        if (staticAttributes.find((attr)=>attr.name === attribute.name)) return {
-            name: `x-bind:${attribute.name}`,
-            value: `"${attribute.value}"`
-        };
-        return attribute;
-    });
-    $8c83eaf28779ff46$var$directives(el, attributes, original).map((handle)=>{
-        cleanupRunners.push(handle.runCleanups);
-        handle();
-    });
-    return ()=>{
-        while(cleanupRunners.length)cleanupRunners.pop()();
-    };
-}
-// packages/alpinejs/src/datas.js
-var $8c83eaf28779ff46$var$datas = {};
-function $8c83eaf28779ff46$var$data(name, callback) {
-    $8c83eaf28779ff46$var$datas[name] = callback;
-}
-function $8c83eaf28779ff46$var$injectDataProviders(obj, context) {
-    Object.entries($8c83eaf28779ff46$var$datas).forEach(([name, callback])=>{
-        Object.defineProperty(obj, name, {
-            get () {
-                return (...args)=>{
-                    return callback.bind(context)(...args);
-                };
-            },
-            enumerable: false
-        });
-    });
-    return obj;
-}
-// packages/alpinejs/src/alpine.js
-var $8c83eaf28779ff46$var$Alpine = {
-    get reactive () {
-        return $8c83eaf28779ff46$var$reactive;
-    },
-    get release () {
-        return $8c83eaf28779ff46$var$release;
-    },
-    get effect () {
-        return $8c83eaf28779ff46$var$effect;
-    },
-    get raw () {
-        return $8c83eaf28779ff46$var$raw;
-    },
-    version: "3.14.8",
-    flushAndStopDeferringMutations: $8c83eaf28779ff46$var$flushAndStopDeferringMutations,
-    dontAutoEvaluateFunctions: $8c83eaf28779ff46$var$dontAutoEvaluateFunctions,
-    disableEffectScheduling: $8c83eaf28779ff46$var$disableEffectScheduling,
-    startObservingMutations: $8c83eaf28779ff46$var$startObservingMutations,
-    stopObservingMutations: $8c83eaf28779ff46$var$stopObservingMutations,
-    setReactivityEngine: $8c83eaf28779ff46$var$setReactivityEngine,
-    onAttributeRemoved: $8c83eaf28779ff46$var$onAttributeRemoved,
-    onAttributesAdded: $8c83eaf28779ff46$var$onAttributesAdded,
-    closestDataStack: $8c83eaf28779ff46$var$closestDataStack,
-    skipDuringClone: $8c83eaf28779ff46$var$skipDuringClone,
-    onlyDuringClone: $8c83eaf28779ff46$var$onlyDuringClone,
-    addRootSelector: $8c83eaf28779ff46$var$addRootSelector,
-    addInitSelector: $8c83eaf28779ff46$var$addInitSelector,
-    interceptClone: $8c83eaf28779ff46$var$interceptClone,
-    addScopeToNode: $8c83eaf28779ff46$var$addScopeToNode,
-    deferMutations: $8c83eaf28779ff46$var$deferMutations,
-    mapAttributes: $8c83eaf28779ff46$var$mapAttributes,
-    evaluateLater: $8c83eaf28779ff46$var$evaluateLater,
-    interceptInit: $8c83eaf28779ff46$var$interceptInit,
-    setEvaluator: $8c83eaf28779ff46$var$setEvaluator,
-    mergeProxies: $8c83eaf28779ff46$var$mergeProxies,
-    extractProp: $8c83eaf28779ff46$var$extractProp,
-    findClosest: $8c83eaf28779ff46$var$findClosest,
-    onElRemoved: $8c83eaf28779ff46$var$onElRemoved,
-    closestRoot: $8c83eaf28779ff46$var$closestRoot,
-    destroyTree: $8c83eaf28779ff46$var$destroyTree,
-    interceptor: $8c83eaf28779ff46$var$interceptor,
-    transition: // INTERNAL: not public API and is subject to change without major release.
-    $8c83eaf28779ff46$var$transition,
-    setStyles: // INTERNAL
-    $8c83eaf28779ff46$var$setStyles,
-    mutateDom: // INTERNAL
-    $8c83eaf28779ff46$var$mutateDom,
-    directive: $8c83eaf28779ff46$var$directive,
-    entangle: $8c83eaf28779ff46$var$entangle,
-    throttle: $8c83eaf28779ff46$var$throttle,
-    debounce: $8c83eaf28779ff46$var$debounce,
-    evaluate: $8c83eaf28779ff46$var$evaluate,
-    initTree: $8c83eaf28779ff46$var$initTree,
-    nextTick: $8c83eaf28779ff46$var$nextTick,
-    prefixed: $8c83eaf28779ff46$var$prefix,
-    prefix: $8c83eaf28779ff46$var$setPrefix,
-    plugin: $8c83eaf28779ff46$var$plugin,
-    magic: $8c83eaf28779ff46$var$magic,
-    store: $8c83eaf28779ff46$var$store,
-    start: $8c83eaf28779ff46$var$start,
-    clone: $8c83eaf28779ff46$var$clone,
-    cloneNode: // INTERNAL
-    $8c83eaf28779ff46$var$cloneNode,
-    // INTERNAL
-    bound: $8c83eaf28779ff46$var$getBinding,
-    $data: $8c83eaf28779ff46$var$scope,
-    watch: $8c83eaf28779ff46$var$watch,
-    walk: $8c83eaf28779ff46$var$walk,
-    data: $8c83eaf28779ff46$var$data,
-    bind: $8c83eaf28779ff46$var$bind2
-};
-var $8c83eaf28779ff46$var$alpine_default = $8c83eaf28779ff46$var$Alpine;
-// node_modules/@vue/shared/dist/shared.esm-bundler.js
-function $8c83eaf28779ff46$var$makeMap(str, expectsLowerCase) {
-    const map = /* @__PURE__ */ Object.create(null);
-    const list = str.split(",");
-    for(let i = 0; i < list.length; i++)map[list[i]] = true;
-    return expectsLowerCase ? (val)=>!!map[val.toLowerCase()] : (val)=>!!map[val];
-}
-var $8c83eaf28779ff46$var$specialBooleanAttrs = `itemscope,allowfullscreen,formnovalidate,ismap,nomodule,novalidate,readonly`;
-var $8c83eaf28779ff46$var$isBooleanAttr2 = /* @__PURE__ */ $8c83eaf28779ff46$var$makeMap($8c83eaf28779ff46$var$specialBooleanAttrs + `,async,autofocus,autoplay,controls,default,defer,disabled,hidden,loop,open,required,reversed,scoped,seamless,checked,muted,multiple,selected`);
-var $8c83eaf28779ff46$var$EMPTY_OBJ = Object.freeze({});
-var $8c83eaf28779ff46$var$EMPTY_ARR = Object.freeze([]);
-var $8c83eaf28779ff46$var$hasOwnProperty = Object.prototype.hasOwnProperty;
-var $8c83eaf28779ff46$var$hasOwn = (val, key)=>$8c83eaf28779ff46$var$hasOwnProperty.call(val, key);
-var $8c83eaf28779ff46$var$isArray = Array.isArray;
-var $8c83eaf28779ff46$var$isMap = (val)=>$8c83eaf28779ff46$var$toTypeString(val) === "[object Map]";
-var $8c83eaf28779ff46$var$isString = (val)=>typeof val === "string";
-var $8c83eaf28779ff46$var$isSymbol = (val)=>typeof val === "symbol";
-var $8c83eaf28779ff46$var$isObject = (val)=>val !== null && typeof val === "object";
-var $8c83eaf28779ff46$var$objectToString = Object.prototype.toString;
-var $8c83eaf28779ff46$var$toTypeString = (value)=>$8c83eaf28779ff46$var$objectToString.call(value);
-var $8c83eaf28779ff46$var$toRawType = (value)=>{
-    return $8c83eaf28779ff46$var$toTypeString(value).slice(8, -1);
-};
-var $8c83eaf28779ff46$var$isIntegerKey = (key)=>$8c83eaf28779ff46$var$isString(key) && key !== "NaN" && key[0] !== "-" && "" + parseInt(key, 10) === key;
-var $8c83eaf28779ff46$var$cacheStringFunction = (fn)=>{
-    const cache = /* @__PURE__ */ Object.create(null);
-    return (str)=>{
-        const hit = cache[str];
-        return hit || (cache[str] = fn(str));
-    };
-};
-var $8c83eaf28779ff46$var$camelizeRE = /-(\w)/g;
-var $8c83eaf28779ff46$var$camelize = $8c83eaf28779ff46$var$cacheStringFunction((str)=>{
-    return str.replace($8c83eaf28779ff46$var$camelizeRE, (_, c)=>c ? c.toUpperCase() : "");
-});
-var $8c83eaf28779ff46$var$hyphenateRE = /\B([A-Z])/g;
-var $8c83eaf28779ff46$var$hyphenate = $8c83eaf28779ff46$var$cacheStringFunction((str)=>str.replace($8c83eaf28779ff46$var$hyphenateRE, "-$1").toLowerCase());
-var $8c83eaf28779ff46$var$capitalize = $8c83eaf28779ff46$var$cacheStringFunction((str)=>str.charAt(0).toUpperCase() + str.slice(1));
-var $8c83eaf28779ff46$var$toHandlerKey = $8c83eaf28779ff46$var$cacheStringFunction((str)=>str ? `on${$8c83eaf28779ff46$var$capitalize(str)}` : ``);
-var $8c83eaf28779ff46$var$hasChanged = (value, oldValue)=>value !== oldValue && (value === value || oldValue === oldValue);
-// node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js
-var $8c83eaf28779ff46$var$targetMap = /* @__PURE__ */ new WeakMap();
-var $8c83eaf28779ff46$var$effectStack = [];
-var $8c83eaf28779ff46$var$activeEffect;
-var $8c83eaf28779ff46$var$ITERATE_KEY = Symbol("iterate");
-var $8c83eaf28779ff46$var$MAP_KEY_ITERATE_KEY = Symbol("Map key iterate");
-function $8c83eaf28779ff46$var$isEffect(fn) {
-    return fn && fn._isEffect === true;
-}
-function $8c83eaf28779ff46$var$effect2(fn, options = $8c83eaf28779ff46$var$EMPTY_OBJ) {
-    if ($8c83eaf28779ff46$var$isEffect(fn)) fn = fn.raw;
-    const effect3 = $8c83eaf28779ff46$var$createReactiveEffect(fn, options);
-    if (!options.lazy) effect3();
-    return effect3;
-}
-function $8c83eaf28779ff46$var$stop(effect3) {
-    if (effect3.active) {
-        $8c83eaf28779ff46$var$cleanup(effect3);
-        if (effect3.options.onStop) effect3.options.onStop();
-        effect3.active = false;
-    }
-}
-var $8c83eaf28779ff46$var$uid = 0;
-function $8c83eaf28779ff46$var$createReactiveEffect(fn, options) {
-    const effect3 = function reactiveEffect() {
-        if (!effect3.active) return fn();
-        if (!$8c83eaf28779ff46$var$effectStack.includes(effect3)) {
-            $8c83eaf28779ff46$var$cleanup(effect3);
-            try {
-                $8c83eaf28779ff46$var$enableTracking();
-                $8c83eaf28779ff46$var$effectStack.push(effect3);
-                $8c83eaf28779ff46$var$activeEffect = effect3;
-                return fn();
-            } finally{
-                $8c83eaf28779ff46$var$effectStack.pop();
-                $8c83eaf28779ff46$var$resetTracking();
-                $8c83eaf28779ff46$var$activeEffect = $8c83eaf28779ff46$var$effectStack[$8c83eaf28779ff46$var$effectStack.length - 1];
-            }
-        }
-    };
-    effect3.id = $8c83eaf28779ff46$var$uid++;
-    effect3.allowRecurse = !!options.allowRecurse;
-    effect3._isEffect = true;
-    effect3.active = true;
-    effect3.raw = fn;
-    effect3.deps = [];
-    effect3.options = options;
-    return effect3;
-}
-function $8c83eaf28779ff46$var$cleanup(effect3) {
-    const { deps: deps } = effect3;
-    if (deps.length) {
-        for(let i = 0; i < deps.length; i++)deps[i].delete(effect3);
-        deps.length = 0;
-    }
-}
-var $8c83eaf28779ff46$var$shouldTrack = true;
-var $8c83eaf28779ff46$var$trackStack = [];
-function $8c83eaf28779ff46$var$pauseTracking() {
-    $8c83eaf28779ff46$var$trackStack.push($8c83eaf28779ff46$var$shouldTrack);
-    $8c83eaf28779ff46$var$shouldTrack = false;
-}
-function $8c83eaf28779ff46$var$enableTracking() {
-    $8c83eaf28779ff46$var$trackStack.push($8c83eaf28779ff46$var$shouldTrack);
-    $8c83eaf28779ff46$var$shouldTrack = true;
-}
-function $8c83eaf28779ff46$var$resetTracking() {
-    const last = $8c83eaf28779ff46$var$trackStack.pop();
-    $8c83eaf28779ff46$var$shouldTrack = last === void 0 ? true : last;
-}
-function $8c83eaf28779ff46$var$track(target, type, key) {
-    if (!$8c83eaf28779ff46$var$shouldTrack || $8c83eaf28779ff46$var$activeEffect === void 0) return;
-    let depsMap = $8c83eaf28779ff46$var$targetMap.get(target);
-    if (!depsMap) $8c83eaf28779ff46$var$targetMap.set(target, depsMap = /* @__PURE__ */ new Map());
-    let dep = depsMap.get(key);
-    if (!dep) depsMap.set(key, dep = /* @__PURE__ */ new Set());
-    if (!dep.has($8c83eaf28779ff46$var$activeEffect)) {
-        dep.add($8c83eaf28779ff46$var$activeEffect);
-        $8c83eaf28779ff46$var$activeEffect.deps.push(dep);
-        if ($8c83eaf28779ff46$var$activeEffect.options.onTrack) $8c83eaf28779ff46$var$activeEffect.options.onTrack({
-            effect: $8c83eaf28779ff46$var$activeEffect,
-            target: target,
-            type: type,
-            key: key
-        });
-    }
-}
-function $8c83eaf28779ff46$var$trigger(target, type, key, newValue, oldValue, oldTarget) {
-    const depsMap = $8c83eaf28779ff46$var$targetMap.get(target);
-    if (!depsMap) return;
-    const effects = /* @__PURE__ */ new Set();
-    const add2 = (effectsToAdd)=>{
-        if (effectsToAdd) effectsToAdd.forEach((effect3)=>{
-            if (effect3 !== $8c83eaf28779ff46$var$activeEffect || effect3.allowRecurse) effects.add(effect3);
-        });
-    };
-    if (type === "clear") depsMap.forEach(add2);
-    else if (key === "length" && $8c83eaf28779ff46$var$isArray(target)) depsMap.forEach((dep, key2)=>{
-        if (key2 === "length" || key2 >= newValue) add2(dep);
-    });
-    else {
-        if (key !== void 0) add2(depsMap.get(key));
-        switch(type){
-            case "add":
-                if (!$8c83eaf28779ff46$var$isArray(target)) {
-                    add2(depsMap.get($8c83eaf28779ff46$var$ITERATE_KEY));
-                    if ($8c83eaf28779ff46$var$isMap(target)) add2(depsMap.get($8c83eaf28779ff46$var$MAP_KEY_ITERATE_KEY));
-                } else if ($8c83eaf28779ff46$var$isIntegerKey(key)) add2(depsMap.get("length"));
-                break;
-            case "delete":
-                if (!$8c83eaf28779ff46$var$isArray(target)) {
-                    add2(depsMap.get($8c83eaf28779ff46$var$ITERATE_KEY));
-                    if ($8c83eaf28779ff46$var$isMap(target)) add2(depsMap.get($8c83eaf28779ff46$var$MAP_KEY_ITERATE_KEY));
-                }
-                break;
-            case "set":
-                if ($8c83eaf28779ff46$var$isMap(target)) add2(depsMap.get($8c83eaf28779ff46$var$ITERATE_KEY));
-                break;
-        }
-    }
-    const run = (effect3)=>{
-        if (effect3.options.onTrigger) effect3.options.onTrigger({
-            effect: effect3,
-            target: target,
-            key: key,
-            type: type,
-            newValue: newValue,
-            oldValue: oldValue,
-            oldTarget: oldTarget
-        });
-        if (effect3.options.scheduler) effect3.options.scheduler(effect3);
-        else effect3();
-    };
-    effects.forEach(run);
-}
-var $8c83eaf28779ff46$var$isNonTrackableKeys = /* @__PURE__ */ $8c83eaf28779ff46$var$makeMap(`__proto__,__v_isRef,__isVue`);
-var $8c83eaf28779ff46$var$builtInSymbols = new Set(Object.getOwnPropertyNames(Symbol).map((key)=>Symbol[key]).filter($8c83eaf28779ff46$var$isSymbol));
-var $8c83eaf28779ff46$var$get2 = /* @__PURE__ */ $8c83eaf28779ff46$var$createGetter();
-var $8c83eaf28779ff46$var$readonlyGet = /* @__PURE__ */ $8c83eaf28779ff46$var$createGetter(true);
-var $8c83eaf28779ff46$var$arrayInstrumentations = /* @__PURE__ */ $8c83eaf28779ff46$var$createArrayInstrumentations();
-function $8c83eaf28779ff46$var$createArrayInstrumentations() {
-    const instrumentations = {};
-    [
-        "includes",
-        "indexOf",
-        "lastIndexOf"
-    ].forEach((key)=>{
-        instrumentations[key] = function(...args) {
-            const arr = $8c83eaf28779ff46$var$toRaw(this);
-            for(let i = 0, l = this.length; i < l; i++)$8c83eaf28779ff46$var$track(arr, "get", i + "");
-            const res = arr[key](...args);
-            if (res === -1 || res === false) return arr[key](...args.map($8c83eaf28779ff46$var$toRaw));
-            else return res;
-        };
-    });
-    [
-        "push",
-        "pop",
-        "shift",
-        "unshift",
-        "splice"
-    ].forEach((key)=>{
-        instrumentations[key] = function(...args) {
-            $8c83eaf28779ff46$var$pauseTracking();
-            const res = $8c83eaf28779ff46$var$toRaw(this)[key].apply(this, args);
-            $8c83eaf28779ff46$var$resetTracking();
-            return res;
-        };
-    });
-    return instrumentations;
-}
-function $8c83eaf28779ff46$var$createGetter(isReadonly = false, shallow = false) {
-    return function get3(target, key, receiver) {
-        if (key === "__v_isReactive") return !isReadonly;
-        else if (key === "__v_isReadonly") return isReadonly;
-        else if (key === "__v_raw" && receiver === (isReadonly ? shallow ? $8c83eaf28779ff46$var$shallowReadonlyMap : $8c83eaf28779ff46$var$readonlyMap : shallow ? $8c83eaf28779ff46$var$shallowReactiveMap : $8c83eaf28779ff46$var$reactiveMap).get(target)) return target;
-        const targetIsArray = $8c83eaf28779ff46$var$isArray(target);
-        if (!isReadonly && targetIsArray && $8c83eaf28779ff46$var$hasOwn($8c83eaf28779ff46$var$arrayInstrumentations, key)) return Reflect.get($8c83eaf28779ff46$var$arrayInstrumentations, key, receiver);
-        const res = Reflect.get(target, key, receiver);
-        if ($8c83eaf28779ff46$var$isSymbol(key) ? $8c83eaf28779ff46$var$builtInSymbols.has(key) : $8c83eaf28779ff46$var$isNonTrackableKeys(key)) return res;
-        if (!isReadonly) $8c83eaf28779ff46$var$track(target, "get", key);
-        if (shallow) return res;
-        if ($8c83eaf28779ff46$var$isRef(res)) {
-            const shouldUnwrap = !targetIsArray || !$8c83eaf28779ff46$var$isIntegerKey(key);
-            return shouldUnwrap ? res.value : res;
-        }
-        if ($8c83eaf28779ff46$var$isObject(res)) return isReadonly ? $8c83eaf28779ff46$var$readonly(res) : $8c83eaf28779ff46$var$reactive2(res);
-        return res;
-    };
-}
-var $8c83eaf28779ff46$var$set2 = /* @__PURE__ */ $8c83eaf28779ff46$var$createSetter();
-function $8c83eaf28779ff46$var$createSetter(shallow = false) {
-    return function set3(target, key, value, receiver) {
-        let oldValue = target[key];
-        if (!shallow) {
-            value = $8c83eaf28779ff46$var$toRaw(value);
-            oldValue = $8c83eaf28779ff46$var$toRaw(oldValue);
-            if (!$8c83eaf28779ff46$var$isArray(target) && $8c83eaf28779ff46$var$isRef(oldValue) && !$8c83eaf28779ff46$var$isRef(value)) {
-                oldValue.value = value;
-                return true;
-            }
-        }
-        const hadKey = $8c83eaf28779ff46$var$isArray(target) && $8c83eaf28779ff46$var$isIntegerKey(key) ? Number(key) < target.length : $8c83eaf28779ff46$var$hasOwn(target, key);
-        const result = Reflect.set(target, key, value, receiver);
-        if (target === $8c83eaf28779ff46$var$toRaw(receiver)) {
-            if (!hadKey) $8c83eaf28779ff46$var$trigger(target, "add", key, value);
-            else if ($8c83eaf28779ff46$var$hasChanged(value, oldValue)) $8c83eaf28779ff46$var$trigger(target, "set", key, value, oldValue);
-        }
-        return result;
-    };
-}
-function $8c83eaf28779ff46$var$deleteProperty(target, key) {
-    const hadKey = $8c83eaf28779ff46$var$hasOwn(target, key);
-    const oldValue = target[key];
-    const result = Reflect.deleteProperty(target, key);
-    if (result && hadKey) $8c83eaf28779ff46$var$trigger(target, "delete", key, void 0, oldValue);
-    return result;
-}
-function $8c83eaf28779ff46$var$has(target, key) {
-    const result = Reflect.has(target, key);
-    if (!$8c83eaf28779ff46$var$isSymbol(key) || !$8c83eaf28779ff46$var$builtInSymbols.has(key)) $8c83eaf28779ff46$var$track(target, "has", key);
-    return result;
-}
-function $8c83eaf28779ff46$var$ownKeys(target) {
-    $8c83eaf28779ff46$var$track(target, "iterate", $8c83eaf28779ff46$var$isArray(target) ? "length" : $8c83eaf28779ff46$var$ITERATE_KEY);
-    return Reflect.ownKeys(target);
-}
-var $8c83eaf28779ff46$var$mutableHandlers = {
-    get: $8c83eaf28779ff46$var$get2,
-    set: $8c83eaf28779ff46$var$set2,
-    deleteProperty: $8c83eaf28779ff46$var$deleteProperty,
-    has: $8c83eaf28779ff46$var$has,
-    ownKeys: $8c83eaf28779ff46$var$ownKeys
-};
-var $8c83eaf28779ff46$var$readonlyHandlers = {
-    get: $8c83eaf28779ff46$var$readonlyGet,
-    set (target, key) {
-        console.warn(`Set operation on key "${String(key)}" failed: target is readonly.`, target);
-        return true;
-    },
-    deleteProperty (target, key) {
-        console.warn(`Delete operation on key "${String(key)}" failed: target is readonly.`, target);
-        return true;
-    }
-};
-var $8c83eaf28779ff46$var$toReactive = (value)=>$8c83eaf28779ff46$var$isObject(value) ? $8c83eaf28779ff46$var$reactive2(value) : value;
-var $8c83eaf28779ff46$var$toReadonly = (value)=>$8c83eaf28779ff46$var$isObject(value) ? $8c83eaf28779ff46$var$readonly(value) : value;
-var $8c83eaf28779ff46$var$toShallow = (value)=>value;
-var $8c83eaf28779ff46$var$getProto = (v)=>Reflect.getPrototypeOf(v);
-function $8c83eaf28779ff46$var$get$1(target, key, isReadonly = false, isShallow = false) {
-    target = target["__v_raw"];
-    const rawTarget = $8c83eaf28779ff46$var$toRaw(target);
-    const rawKey = $8c83eaf28779ff46$var$toRaw(key);
-    if (key !== rawKey) !isReadonly && $8c83eaf28779ff46$var$track(rawTarget, "get", key);
-    !isReadonly && $8c83eaf28779ff46$var$track(rawTarget, "get", rawKey);
-    const { has: has2 } = $8c83eaf28779ff46$var$getProto(rawTarget);
-    const wrap = isShallow ? $8c83eaf28779ff46$var$toShallow : isReadonly ? $8c83eaf28779ff46$var$toReadonly : $8c83eaf28779ff46$var$toReactive;
-    if (has2.call(rawTarget, key)) return wrap(target.get(key));
-    else if (has2.call(rawTarget, rawKey)) return wrap(target.get(rawKey));
-    else if (target !== rawTarget) target.get(key);
-}
-function $8c83eaf28779ff46$var$has$1(key, isReadonly = false) {
-    const target = this["__v_raw"];
-    const rawTarget = $8c83eaf28779ff46$var$toRaw(target);
-    const rawKey = $8c83eaf28779ff46$var$toRaw(key);
-    if (key !== rawKey) !isReadonly && $8c83eaf28779ff46$var$track(rawTarget, "has", key);
-    !isReadonly && $8c83eaf28779ff46$var$track(rawTarget, "has", rawKey);
-    return key === rawKey ? target.has(key) : target.has(key) || target.has(rawKey);
-}
-function $8c83eaf28779ff46$var$size(target, isReadonly = false) {
-    target = target["__v_raw"];
-    !isReadonly && $8c83eaf28779ff46$var$track($8c83eaf28779ff46$var$toRaw(target), "iterate", $8c83eaf28779ff46$var$ITERATE_KEY);
-    return Reflect.get(target, "size", target);
-}
-function $8c83eaf28779ff46$var$add(value) {
-    value = $8c83eaf28779ff46$var$toRaw(value);
-    const target = $8c83eaf28779ff46$var$toRaw(this);
-    const proto = $8c83eaf28779ff46$var$getProto(target);
-    const hadKey = proto.has.call(target, value);
-    if (!hadKey) {
-        target.add(value);
-        $8c83eaf28779ff46$var$trigger(target, "add", value, value);
-    }
-    return this;
-}
-function $8c83eaf28779ff46$var$set$1(key, value) {
-    value = $8c83eaf28779ff46$var$toRaw(value);
-    const target = $8c83eaf28779ff46$var$toRaw(this);
-    const { has: has2, get: get3 } = $8c83eaf28779ff46$var$getProto(target);
-    let hadKey = has2.call(target, key);
-    if (!hadKey) {
-        key = $8c83eaf28779ff46$var$toRaw(key);
-        hadKey = has2.call(target, key);
-    } else $8c83eaf28779ff46$var$checkIdentityKeys(target, has2, key);
-    const oldValue = get3.call(target, key);
-    target.set(key, value);
-    if (!hadKey) $8c83eaf28779ff46$var$trigger(target, "add", key, value);
-    else if ($8c83eaf28779ff46$var$hasChanged(value, oldValue)) $8c83eaf28779ff46$var$trigger(target, "set", key, value, oldValue);
-    return this;
-}
-function $8c83eaf28779ff46$var$deleteEntry(key) {
-    const target = $8c83eaf28779ff46$var$toRaw(this);
-    const { has: has2, get: get3 } = $8c83eaf28779ff46$var$getProto(target);
-    let hadKey = has2.call(target, key);
-    if (!hadKey) {
-        key = $8c83eaf28779ff46$var$toRaw(key);
-        hadKey = has2.call(target, key);
-    } else $8c83eaf28779ff46$var$checkIdentityKeys(target, has2, key);
-    const oldValue = get3 ? get3.call(target, key) : void 0;
-    const result = target.delete(key);
-    if (hadKey) $8c83eaf28779ff46$var$trigger(target, "delete", key, void 0, oldValue);
-    return result;
-}
-function $8c83eaf28779ff46$var$clear() {
-    const target = $8c83eaf28779ff46$var$toRaw(this);
-    const hadItems = target.size !== 0;
-    const oldTarget = $8c83eaf28779ff46$var$isMap(target) ? new Map(target) : new Set(target);
-    const result = target.clear();
-    if (hadItems) $8c83eaf28779ff46$var$trigger(target, "clear", void 0, void 0, oldTarget);
-    return result;
-}
-function $8c83eaf28779ff46$var$createForEach(isReadonly, isShallow) {
-    return function forEach(callback, thisArg) {
-        const observed = this;
-        const target = observed["__v_raw"];
-        const rawTarget = $8c83eaf28779ff46$var$toRaw(target);
-        const wrap = isShallow ? $8c83eaf28779ff46$var$toShallow : isReadonly ? $8c83eaf28779ff46$var$toReadonly : $8c83eaf28779ff46$var$toReactive;
-        !isReadonly && $8c83eaf28779ff46$var$track(rawTarget, "iterate", $8c83eaf28779ff46$var$ITERATE_KEY);
-        return target.forEach((value, key)=>{
-            return callback.call(thisArg, wrap(value), wrap(key), observed);
-        });
-    };
-}
-function $8c83eaf28779ff46$var$createIterableMethod(method, isReadonly, isShallow) {
-    return function(...args) {
-        const target = this["__v_raw"];
-        const rawTarget = $8c83eaf28779ff46$var$toRaw(target);
-        const targetIsMap = $8c83eaf28779ff46$var$isMap(rawTarget);
-        const isPair = method === "entries" || method === Symbol.iterator && targetIsMap;
-        const isKeyOnly = method === "keys" && targetIsMap;
-        const innerIterator = target[method](...args);
-        const wrap = isShallow ? $8c83eaf28779ff46$var$toShallow : isReadonly ? $8c83eaf28779ff46$var$toReadonly : $8c83eaf28779ff46$var$toReactive;
-        !isReadonly && $8c83eaf28779ff46$var$track(rawTarget, "iterate", isKeyOnly ? $8c83eaf28779ff46$var$MAP_KEY_ITERATE_KEY : $8c83eaf28779ff46$var$ITERATE_KEY);
-        return {
-            // iterator protocol
-            next () {
-                const { value: value, done: done } = innerIterator.next();
-                return done ? {
-                    value: value,
-                    done: done
-                } : {
-                    value: isPair ? [
-                        wrap(value[0]),
-                        wrap(value[1])
-                    ] : wrap(value),
-                    done: done
-                };
-            },
-            // iterable protocol
-            [Symbol.iterator] () {
-                return this;
-            }
-        };
-    };
-}
-function $8c83eaf28779ff46$var$createReadonlyMethod(type) {
-    return function(...args) {
-        {
-            const key = args[0] ? `on key "${args[0]}" ` : ``;
-            console.warn(`${$8c83eaf28779ff46$var$capitalize(type)} operation ${key}failed: target is readonly.`, $8c83eaf28779ff46$var$toRaw(this));
-        }
-        return type === "delete" ? false : this;
-    };
-}
-function $8c83eaf28779ff46$var$createInstrumentations() {
-    const mutableInstrumentations2 = {
-        get (key) {
-            return $8c83eaf28779ff46$var$get$1(this, key);
-        },
-        get size () {
-            return $8c83eaf28779ff46$var$size(this);
-        },
-        has: $8c83eaf28779ff46$var$has$1,
-        add: $8c83eaf28779ff46$var$add,
-        set: $8c83eaf28779ff46$var$set$1,
-        delete: $8c83eaf28779ff46$var$deleteEntry,
-        clear: $8c83eaf28779ff46$var$clear,
-        forEach: $8c83eaf28779ff46$var$createForEach(false, false)
-    };
-    const shallowInstrumentations2 = {
-        get (key) {
-            return $8c83eaf28779ff46$var$get$1(this, key, false, true);
-        },
-        get size () {
-            return $8c83eaf28779ff46$var$size(this);
-        },
-        has: $8c83eaf28779ff46$var$has$1,
-        add: $8c83eaf28779ff46$var$add,
-        set: $8c83eaf28779ff46$var$set$1,
-        delete: $8c83eaf28779ff46$var$deleteEntry,
-        clear: $8c83eaf28779ff46$var$clear,
-        forEach: $8c83eaf28779ff46$var$createForEach(false, true)
-    };
-    const readonlyInstrumentations2 = {
-        get (key) {
-            return $8c83eaf28779ff46$var$get$1(this, key, true);
-        },
-        get size () {
-            return $8c83eaf28779ff46$var$size(this, true);
-        },
-        has (key) {
-            return $8c83eaf28779ff46$var$has$1.call(this, key, true);
-        },
-        add: $8c83eaf28779ff46$var$createReadonlyMethod("add"),
-        set: $8c83eaf28779ff46$var$createReadonlyMethod("set"),
-        delete: $8c83eaf28779ff46$var$createReadonlyMethod("delete"),
-        clear: $8c83eaf28779ff46$var$createReadonlyMethod("clear"),
-        forEach: $8c83eaf28779ff46$var$createForEach(true, false)
-    };
-    const shallowReadonlyInstrumentations2 = {
-        get (key) {
-            return $8c83eaf28779ff46$var$get$1(this, key, true, true);
-        },
-        get size () {
-            return $8c83eaf28779ff46$var$size(this, true);
-        },
-        has (key) {
-            return $8c83eaf28779ff46$var$has$1.call(this, key, true);
-        },
-        add: $8c83eaf28779ff46$var$createReadonlyMethod("add"),
-        set: $8c83eaf28779ff46$var$createReadonlyMethod("set"),
-        delete: $8c83eaf28779ff46$var$createReadonlyMethod("delete"),
-        clear: $8c83eaf28779ff46$var$createReadonlyMethod("clear"),
-        forEach: $8c83eaf28779ff46$var$createForEach(true, true)
-    };
-    const iteratorMethods = [
-        "keys",
-        "values",
-        "entries",
-        Symbol.iterator
-    ];
-    iteratorMethods.forEach((method)=>{
-        mutableInstrumentations2[method] = $8c83eaf28779ff46$var$createIterableMethod(method, false, false);
-        readonlyInstrumentations2[method] = $8c83eaf28779ff46$var$createIterableMethod(method, true, false);
-        shallowInstrumentations2[method] = $8c83eaf28779ff46$var$createIterableMethod(method, false, true);
-        shallowReadonlyInstrumentations2[method] = $8c83eaf28779ff46$var$createIterableMethod(method, true, true);
-    });
-    return [
-        mutableInstrumentations2,
-        readonlyInstrumentations2,
-        shallowInstrumentations2,
-        shallowReadonlyInstrumentations2
-    ];
-}
-var [$8c83eaf28779ff46$var$mutableInstrumentations, $8c83eaf28779ff46$var$readonlyInstrumentations, $8c83eaf28779ff46$var$shallowInstrumentations, $8c83eaf28779ff46$var$shallowReadonlyInstrumentations] = /* @__PURE__ */ $8c83eaf28779ff46$var$createInstrumentations();
-function $8c83eaf28779ff46$var$createInstrumentationGetter(isReadonly, shallow) {
-    const instrumentations = shallow ? isReadonly ? $8c83eaf28779ff46$var$shallowReadonlyInstrumentations : $8c83eaf28779ff46$var$shallowInstrumentations : isReadonly ? $8c83eaf28779ff46$var$readonlyInstrumentations : $8c83eaf28779ff46$var$mutableInstrumentations;
-    return (target, key, receiver)=>{
-        if (key === "__v_isReactive") return !isReadonly;
-        else if (key === "__v_isReadonly") return isReadonly;
-        else if (key === "__v_raw") return target;
-        return Reflect.get($8c83eaf28779ff46$var$hasOwn(instrumentations, key) && key in target ? instrumentations : target, key, receiver);
-    };
-}
-var $8c83eaf28779ff46$var$mutableCollectionHandlers = {
-    get: /* @__PURE__ */ $8c83eaf28779ff46$var$createInstrumentationGetter(false, false)
-};
-var $8c83eaf28779ff46$var$readonlyCollectionHandlers = {
-    get: /* @__PURE__ */ $8c83eaf28779ff46$var$createInstrumentationGetter(true, false)
-};
-function $8c83eaf28779ff46$var$checkIdentityKeys(target, has2, key) {
-    const rawKey = $8c83eaf28779ff46$var$toRaw(key);
-    if (rawKey !== key && has2.call(target, rawKey)) {
-        const type = $8c83eaf28779ff46$var$toRawType(target);
-        console.warn(`Reactive ${type} contains both the raw and reactive versions of the same object${type === `Map` ? ` as keys` : ``}, which can lead to inconsistencies. Avoid differentiating between the raw and reactive versions of an object and only use the reactive version if possible.`);
-    }
-}
-var $8c83eaf28779ff46$var$reactiveMap = /* @__PURE__ */ new WeakMap();
-var $8c83eaf28779ff46$var$shallowReactiveMap = /* @__PURE__ */ new WeakMap();
-var $8c83eaf28779ff46$var$readonlyMap = /* @__PURE__ */ new WeakMap();
-var $8c83eaf28779ff46$var$shallowReadonlyMap = /* @__PURE__ */ new WeakMap();
-function $8c83eaf28779ff46$var$targetTypeMap(rawType) {
-    switch(rawType){
-        case "Object":
-        case "Array":
-            return 1;
-        case "Map":
-        case "Set":
-        case "WeakMap":
-        case "WeakSet":
-            return 2;
-        default:
-            return 0;
-    }
-}
-function $8c83eaf28779ff46$var$getTargetType(value) {
-    return value["__v_skip"] || !Object.isExtensible(value) ? 0 : $8c83eaf28779ff46$var$targetTypeMap($8c83eaf28779ff46$var$toRawType(value));
-}
-function $8c83eaf28779ff46$var$reactive2(target) {
-    if (target && target["__v_isReadonly"]) return target;
-    return $8c83eaf28779ff46$var$createReactiveObject(target, false, $8c83eaf28779ff46$var$mutableHandlers, $8c83eaf28779ff46$var$mutableCollectionHandlers, $8c83eaf28779ff46$var$reactiveMap);
-}
-function $8c83eaf28779ff46$var$readonly(target) {
-    return $8c83eaf28779ff46$var$createReactiveObject(target, true, $8c83eaf28779ff46$var$readonlyHandlers, $8c83eaf28779ff46$var$readonlyCollectionHandlers, $8c83eaf28779ff46$var$readonlyMap);
-}
-function $8c83eaf28779ff46$var$createReactiveObject(target, isReadonly, baseHandlers, collectionHandlers, proxyMap) {
-    if (!$8c83eaf28779ff46$var$isObject(target)) {
-        console.warn(`value cannot be made reactive: ${String(target)}`);
-        return target;
-    }
-    if (target["__v_raw"] && !(isReadonly && target["__v_isReactive"])) return target;
-    const existingProxy = proxyMap.get(target);
-    if (existingProxy) return existingProxy;
-    const targetType = $8c83eaf28779ff46$var$getTargetType(target);
-    if (targetType === 0) return target;
-    const proxy = new Proxy(target, targetType === 2 ? collectionHandlers : baseHandlers);
-    proxyMap.set(target, proxy);
-    return proxy;
-}
-function $8c83eaf28779ff46$var$toRaw(observed) {
-    return observed && $8c83eaf28779ff46$var$toRaw(observed["__v_raw"]) || observed;
-}
-function $8c83eaf28779ff46$var$isRef(r) {
-    return Boolean(r && r.__v_isRef === true);
-}
-// packages/alpinejs/src/magics/$nextTick.js
-$8c83eaf28779ff46$var$magic("nextTick", ()=>$8c83eaf28779ff46$var$nextTick);
-// packages/alpinejs/src/magics/$dispatch.js
-$8c83eaf28779ff46$var$magic("dispatch", (el)=>$8c83eaf28779ff46$var$dispatch.bind($8c83eaf28779ff46$var$dispatch, el));
-// packages/alpinejs/src/magics/$watch.js
-$8c83eaf28779ff46$var$magic("watch", (el, { evaluateLater: evaluateLater2, cleanup: cleanup2 })=>(key, callback)=>{
-        let evaluate2 = evaluateLater2(key);
-        let getter = ()=>{
-            let value;
-            evaluate2((i)=>value = i);
-            return value;
-        };
-        let unwatch = $8c83eaf28779ff46$var$watch(getter, callback);
-        cleanup2(unwatch);
-    });
-// packages/alpinejs/src/magics/$store.js
-$8c83eaf28779ff46$var$magic("store", $8c83eaf28779ff46$var$getStores);
-// packages/alpinejs/src/magics/$data.js
-$8c83eaf28779ff46$var$magic("data", (el)=>$8c83eaf28779ff46$var$scope(el));
-// packages/alpinejs/src/magics/$root.js
-$8c83eaf28779ff46$var$magic("root", (el)=>$8c83eaf28779ff46$var$closestRoot(el));
-// packages/alpinejs/src/magics/$refs.js
-$8c83eaf28779ff46$var$magic("refs", (el)=>{
-    if (el._x_refs_proxy) return el._x_refs_proxy;
-    el._x_refs_proxy = $8c83eaf28779ff46$var$mergeProxies($8c83eaf28779ff46$var$getArrayOfRefObject(el));
-    return el._x_refs_proxy;
-});
-function $8c83eaf28779ff46$var$getArrayOfRefObject(el) {
-    let refObjects = [];
-    $8c83eaf28779ff46$var$findClosest(el, (i)=>{
-        if (i._x_refs) refObjects.push(i._x_refs);
-    });
-    return refObjects;
-}
-// packages/alpinejs/src/ids.js
-var $8c83eaf28779ff46$var$globalIdMemo = {};
-function $8c83eaf28779ff46$var$findAndIncrementId(name) {
-    if (!$8c83eaf28779ff46$var$globalIdMemo[name]) $8c83eaf28779ff46$var$globalIdMemo[name] = 0;
-    return ++$8c83eaf28779ff46$var$globalIdMemo[name];
-}
-function $8c83eaf28779ff46$var$closestIdRoot(el, name) {
-    return $8c83eaf28779ff46$var$findClosest(el, (element)=>{
-        if (element._x_ids && element._x_ids[name]) return true;
-    });
-}
-function $8c83eaf28779ff46$var$setIdRoot(el, name) {
-    if (!el._x_ids) el._x_ids = {};
-    if (!el._x_ids[name]) el._x_ids[name] = $8c83eaf28779ff46$var$findAndIncrementId(name);
-}
-// packages/alpinejs/src/magics/$id.js
-$8c83eaf28779ff46$var$magic("id", (el, { cleanup: cleanup2 })=>(name, key = null)=>{
-        let cacheKey = `${name}${key ? `-${key}` : ""}`;
-        return $8c83eaf28779ff46$var$cacheIdByNameOnElement(el, cacheKey, cleanup2, ()=>{
-            let root = $8c83eaf28779ff46$var$closestIdRoot(el, name);
-            let id = root ? root._x_ids[name] : $8c83eaf28779ff46$var$findAndIncrementId(name);
-            return key ? `${name}-${id}-${key}` : `${name}-${id}`;
-        });
-    });
-$8c83eaf28779ff46$var$interceptClone((from, to)=>{
-    if (from._x_id) to._x_id = from._x_id;
-});
-function $8c83eaf28779ff46$var$cacheIdByNameOnElement(el, cacheKey, cleanup2, callback) {
-    if (!el._x_id) el._x_id = {};
-    if (el._x_id[cacheKey]) return el._x_id[cacheKey];
-    let output = callback();
-    el._x_id[cacheKey] = output;
-    cleanup2(()=>{
-        delete el._x_id[cacheKey];
-    });
-    return output;
-}
-// packages/alpinejs/src/magics/$el.js
-$8c83eaf28779ff46$var$magic("el", (el)=>el);
-// packages/alpinejs/src/magics/index.js
-$8c83eaf28779ff46$var$warnMissingPluginMagic("Focus", "focus", "focus");
-$8c83eaf28779ff46$var$warnMissingPluginMagic("Persist", "persist", "persist");
-function $8c83eaf28779ff46$var$warnMissingPluginMagic(name, magicName, slug) {
-    $8c83eaf28779ff46$var$magic(magicName, (el)=>$8c83eaf28779ff46$var$warn(`You can't use [$${magicName}] without first installing the "${name}" plugin here: https://alpinejs.dev/plugins/${slug}`, el));
-}
-// packages/alpinejs/src/directives/x-modelable.js
-$8c83eaf28779ff46$var$directive("modelable", (el, { expression: expression }, { effect: effect3, evaluateLater: evaluateLater2, cleanup: cleanup2 })=>{
-    let func = evaluateLater2(expression);
-    let innerGet = ()=>{
-        let result;
-        func((i)=>result = i);
-        return result;
-    };
-    let evaluateInnerSet = evaluateLater2(`${expression} = __placeholder`);
-    let innerSet = (val)=>evaluateInnerSet(()=>{}, {
-            scope: {
-                "__placeholder": val
-            }
-        });
-    let initialValue = innerGet();
-    innerSet(initialValue);
-    queueMicrotask(()=>{
-        if (!el._x_model) return;
-        el._x_removeModelListeners["default"]();
-        let outerGet = el._x_model.get;
-        let outerSet = el._x_model.set;
-        let releaseEntanglement = $8c83eaf28779ff46$var$entangle({
-            get () {
-                return outerGet();
-            },
-            set (value) {
-                outerSet(value);
-            }
-        }, {
-            get () {
-                return innerGet();
-            },
-            set (value) {
-                innerSet(value);
-            }
-        });
-        cleanup2(releaseEntanglement);
-    });
-});
-// packages/alpinejs/src/directives/x-teleport.js
-$8c83eaf28779ff46$var$directive("teleport", (el, { modifiers: modifiers, expression: expression }, { cleanup: cleanup2 })=>{
-    if (el.tagName.toLowerCase() !== "template") $8c83eaf28779ff46$var$warn("x-teleport can only be used on a <template> tag", el);
-    let target = $8c83eaf28779ff46$var$getTarget(expression);
-    let clone2 = el.content.cloneNode(true).firstElementChild;
-    el._x_teleport = clone2;
-    clone2._x_teleportBack = el;
-    el.setAttribute("data-teleport-template", true);
-    clone2.setAttribute("data-teleport-target", true);
-    if (el._x_forwardEvents) el._x_forwardEvents.forEach((eventName)=>{
-        clone2.addEventListener(eventName, (e)=>{
-            e.stopPropagation();
-            el.dispatchEvent(new e.constructor(e.type, e));
-        });
-    });
-    $8c83eaf28779ff46$var$addScopeToNode(clone2, {}, el);
-    let placeInDom = (clone3, target2, modifiers2)=>{
-        if (modifiers2.includes("prepend")) target2.parentNode.insertBefore(clone3, target2);
-        else if (modifiers2.includes("append")) target2.parentNode.insertBefore(clone3, target2.nextSibling);
-        else target2.appendChild(clone3);
-    };
-    $8c83eaf28779ff46$var$mutateDom(()=>{
-        placeInDom(clone2, target, modifiers);
-        $8c83eaf28779ff46$var$skipDuringClone(()=>{
-            $8c83eaf28779ff46$var$initTree(clone2);
-        })();
-    });
-    el._x_teleportPutBack = ()=>{
-        let target2 = $8c83eaf28779ff46$var$getTarget(expression);
-        $8c83eaf28779ff46$var$mutateDom(()=>{
-            placeInDom(el._x_teleport, target2, modifiers);
-        });
-    };
-    cleanup2(()=>$8c83eaf28779ff46$var$mutateDom(()=>{
-            clone2.remove();
-            $8c83eaf28779ff46$var$destroyTree(clone2);
-        }));
-});
-var $8c83eaf28779ff46$var$teleportContainerDuringClone = document.createElement("div");
-function $8c83eaf28779ff46$var$getTarget(expression) {
-    let target = $8c83eaf28779ff46$var$skipDuringClone(()=>{
-        return document.querySelector(expression);
-    }, ()=>{
-        return $8c83eaf28779ff46$var$teleportContainerDuringClone;
-    })();
-    if (!target) $8c83eaf28779ff46$var$warn(`Cannot find x-teleport element for selector: "${expression}"`);
-    return target;
-}
-// packages/alpinejs/src/directives/x-ignore.js
-var $8c83eaf28779ff46$var$handler = ()=>{};
-$8c83eaf28779ff46$var$handler.inline = (el, { modifiers: modifiers }, { cleanup: cleanup2 })=>{
-    modifiers.includes("self") ? el._x_ignoreSelf = true : el._x_ignore = true;
-    cleanup2(()=>{
-        modifiers.includes("self") ? delete el._x_ignoreSelf : delete el._x_ignore;
-    });
-};
-$8c83eaf28779ff46$var$directive("ignore", $8c83eaf28779ff46$var$handler);
-// packages/alpinejs/src/directives/x-effect.js
-$8c83eaf28779ff46$var$directive("effect", $8c83eaf28779ff46$var$skipDuringClone((el, { expression: expression }, { effect: effect3 })=>{
-    effect3($8c83eaf28779ff46$var$evaluateLater(el, expression));
-}));
-// packages/alpinejs/src/utils/on.js
-function $8c83eaf28779ff46$var$on(el, event, modifiers, callback) {
-    let listenerTarget = el;
-    let handler4 = (e)=>callback(e);
-    let options = {};
-    let wrapHandler = (callback2, wrapper)=>(e)=>wrapper(callback2, e);
-    if (modifiers.includes("dot")) event = $8c83eaf28779ff46$var$dotSyntax(event);
-    if (modifiers.includes("camel")) event = $8c83eaf28779ff46$var$camelCase2(event);
-    if (modifiers.includes("passive")) options.passive = true;
-    if (modifiers.includes("capture")) options.capture = true;
-    if (modifiers.includes("window")) listenerTarget = window;
-    if (modifiers.includes("document")) listenerTarget = document;
-    if (modifiers.includes("debounce")) {
-        let nextModifier = modifiers[modifiers.indexOf("debounce") + 1] || "invalid-wait";
-        let wait = $8c83eaf28779ff46$var$isNumeric(nextModifier.split("ms")[0]) ? Number(nextModifier.split("ms")[0]) : 250;
-        handler4 = $8c83eaf28779ff46$var$debounce(handler4, wait);
-    }
-    if (modifiers.includes("throttle")) {
-        let nextModifier = modifiers[modifiers.indexOf("throttle") + 1] || "invalid-wait";
-        let wait = $8c83eaf28779ff46$var$isNumeric(nextModifier.split("ms")[0]) ? Number(nextModifier.split("ms")[0]) : 250;
-        handler4 = $8c83eaf28779ff46$var$throttle(handler4, wait);
-    }
-    if (modifiers.includes("prevent")) handler4 = wrapHandler(handler4, (next, e)=>{
-        e.preventDefault();
-        next(e);
-    });
-    if (modifiers.includes("stop")) handler4 = wrapHandler(handler4, (next, e)=>{
-        e.stopPropagation();
-        next(e);
-    });
-    if (modifiers.includes("once")) handler4 = wrapHandler(handler4, (next, e)=>{
-        next(e);
-        listenerTarget.removeEventListener(event, handler4, options);
-    });
-    if (modifiers.includes("away") || modifiers.includes("outside")) {
-        listenerTarget = document;
-        handler4 = wrapHandler(handler4, (next, e)=>{
-            if (el.contains(e.target)) return;
-            if (e.target.isConnected === false) return;
-            if (el.offsetWidth < 1 && el.offsetHeight < 1) return;
-            if (el._x_isShown === false) return;
-            next(e);
-        });
-    }
-    if (modifiers.includes("self")) handler4 = wrapHandler(handler4, (next, e)=>{
-        e.target === el && next(e);
-    });
-    if ($8c83eaf28779ff46$var$isKeyEvent(event) || $8c83eaf28779ff46$var$isClickEvent(event)) handler4 = wrapHandler(handler4, (next, e)=>{
-        if ($8c83eaf28779ff46$var$isListeningForASpecificKeyThatHasntBeenPressed(e, modifiers)) return;
-        next(e);
-    });
-    listenerTarget.addEventListener(event, handler4, options);
-    return ()=>{
-        listenerTarget.removeEventListener(event, handler4, options);
-    };
-}
-function $8c83eaf28779ff46$var$dotSyntax(subject) {
-    return subject.replace(/-/g, ".");
-}
-function $8c83eaf28779ff46$var$camelCase2(subject) {
-    return subject.toLowerCase().replace(/-(\w)/g, (match, char)=>char.toUpperCase());
-}
-function $8c83eaf28779ff46$var$isNumeric(subject) {
-    return !Array.isArray(subject) && !isNaN(subject);
-}
-function $8c83eaf28779ff46$var$kebabCase2(subject) {
-    if ([
-        " ",
-        "_"
-    ].includes(subject)) return subject;
-    return subject.replace(/([a-z])([A-Z])/g, "$1-$2").replace(/[_\s]/, "-").toLowerCase();
-}
-function $8c83eaf28779ff46$var$isKeyEvent(event) {
-    return [
-        "keydown",
-        "keyup"
-    ].includes(event);
-}
-function $8c83eaf28779ff46$var$isClickEvent(event) {
-    return [
-        "contextmenu",
-        "click",
-        "mouse"
-    ].some((i)=>event.includes(i));
-}
-function $8c83eaf28779ff46$var$isListeningForASpecificKeyThatHasntBeenPressed(e, modifiers) {
-    let keyModifiers = modifiers.filter((i)=>{
-        return ![
-            "window",
-            "document",
-            "prevent",
-            "stop",
-            "once",
-            "capture",
-            "self",
-            "away",
-            "outside",
-            "passive"
-        ].includes(i);
-    });
-    if (keyModifiers.includes("debounce")) {
-        let debounceIndex = keyModifiers.indexOf("debounce");
-        keyModifiers.splice(debounceIndex, $8c83eaf28779ff46$var$isNumeric((keyModifiers[debounceIndex + 1] || "invalid-wait").split("ms")[0]) ? 2 : 1);
-    }
-    if (keyModifiers.includes("throttle")) {
-        let debounceIndex = keyModifiers.indexOf("throttle");
-        keyModifiers.splice(debounceIndex, $8c83eaf28779ff46$var$isNumeric((keyModifiers[debounceIndex + 1] || "invalid-wait").split("ms")[0]) ? 2 : 1);
-    }
-    if (keyModifiers.length === 0) return false;
-    if (keyModifiers.length === 1 && $8c83eaf28779ff46$var$keyToModifiers(e.key).includes(keyModifiers[0])) return false;
-    const systemKeyModifiers = [
-        "ctrl",
-        "shift",
-        "alt",
-        "meta",
-        "cmd",
-        "super"
-    ];
-    const selectedSystemKeyModifiers = systemKeyModifiers.filter((modifier)=>keyModifiers.includes(modifier));
-    keyModifiers = keyModifiers.filter((i)=>!selectedSystemKeyModifiers.includes(i));
-    if (selectedSystemKeyModifiers.length > 0) {
-        const activelyPressedKeyModifiers = selectedSystemKeyModifiers.filter((modifier)=>{
-            if (modifier === "cmd" || modifier === "super") modifier = "meta";
-            return e[`${modifier}Key`];
-        });
-        if (activelyPressedKeyModifiers.length === selectedSystemKeyModifiers.length) {
-            if ($8c83eaf28779ff46$var$isClickEvent(e.type)) return false;
-            if ($8c83eaf28779ff46$var$keyToModifiers(e.key).includes(keyModifiers[0])) return false;
-        }
-    }
-    return true;
-}
-function $8c83eaf28779ff46$var$keyToModifiers(key) {
-    if (!key) return [];
-    key = $8c83eaf28779ff46$var$kebabCase2(key);
-    let modifierToKeyMap = {
-        "ctrl": "control",
-        "slash": "/",
-        "space": " ",
-        "spacebar": " ",
-        "cmd": "meta",
-        "esc": "escape",
-        "up": "arrow-up",
-        "down": "arrow-down",
-        "left": "arrow-left",
-        "right": "arrow-right",
-        "period": ".",
-        "comma": ",",
-        "equal": "=",
-        "minus": "-",
-        "underscore": "_"
-    };
-    modifierToKeyMap[key] = key;
-    return Object.keys(modifierToKeyMap).map((modifier)=>{
-        if (modifierToKeyMap[modifier] === key) return modifier;
-    }).filter((modifier)=>modifier);
-}
-// packages/alpinejs/src/directives/x-model.js
-$8c83eaf28779ff46$var$directive("model", (el, { modifiers: modifiers, expression: expression }, { effect: effect3, cleanup: cleanup2 })=>{
-    let scopeTarget = el;
-    if (modifiers.includes("parent")) scopeTarget = el.parentNode;
-    let evaluateGet = $8c83eaf28779ff46$var$evaluateLater(scopeTarget, expression);
-    let evaluateSet;
-    if (typeof expression === "string") evaluateSet = $8c83eaf28779ff46$var$evaluateLater(scopeTarget, `${expression} = __placeholder`);
-    else if (typeof expression === "function" && typeof expression() === "string") evaluateSet = $8c83eaf28779ff46$var$evaluateLater(scopeTarget, `${expression()} = __placeholder`);
-    else evaluateSet = ()=>{};
-    let getValue = ()=>{
-        let result;
-        evaluateGet((value)=>result = value);
-        return $8c83eaf28779ff46$var$isGetterSetter(result) ? result.get() : result;
-    };
-    let setValue = (value)=>{
-        let result;
-        evaluateGet((value2)=>result = value2);
-        if ($8c83eaf28779ff46$var$isGetterSetter(result)) result.set(value);
-        else evaluateSet(()=>{}, {
-            scope: {
-                "__placeholder": value
-            }
-        });
-    };
-    if (typeof expression === "string" && el.type === "radio") $8c83eaf28779ff46$var$mutateDom(()=>{
-        if (!el.hasAttribute("name")) el.setAttribute("name", expression);
-    });
-    var event = el.tagName.toLowerCase() === "select" || [
-        "checkbox",
-        "radio"
-    ].includes(el.type) || modifiers.includes("lazy") ? "change" : "input";
-    let removeListener = $8c83eaf28779ff46$var$isCloning ? ()=>{} : $8c83eaf28779ff46$var$on(el, event, modifiers, (e)=>{
-        setValue($8c83eaf28779ff46$var$getInputValue(el, modifiers, e, getValue()));
-    });
-    if (modifiers.includes("fill")) {
-        if ([
-            void 0,
-            null,
-            ""
-        ].includes(getValue()) || $8c83eaf28779ff46$var$isCheckbox(el) && Array.isArray(getValue()) || el.tagName.toLowerCase() === "select" && el.multiple) setValue($8c83eaf28779ff46$var$getInputValue(el, modifiers, {
-            target: el
-        }, getValue()));
-    }
-    if (!el._x_removeModelListeners) el._x_removeModelListeners = {};
-    el._x_removeModelListeners["default"] = removeListener;
-    cleanup2(()=>el._x_removeModelListeners["default"]());
-    if (el.form) {
-        let removeResetListener = $8c83eaf28779ff46$var$on(el.form, "reset", [], (e)=>{
-            $8c83eaf28779ff46$var$nextTick(()=>el._x_model && el._x_model.set($8c83eaf28779ff46$var$getInputValue(el, modifiers, {
-                    target: el
-                }, getValue())));
-        });
-        cleanup2(()=>removeResetListener());
-    }
-    el._x_model = {
-        get () {
-            return getValue();
-        },
-        set (value) {
-            setValue(value);
-        }
-    };
-    el._x_forceModelUpdate = (value)=>{
-        if (value === void 0 && typeof expression === "string" && expression.match(/\./)) value = "";
-        window.fromModel = true;
-        $8c83eaf28779ff46$var$mutateDom(()=>$8c83eaf28779ff46$var$bind(el, "value", value));
-        delete window.fromModel;
-    };
-    effect3(()=>{
-        let value = getValue();
-        if (modifiers.includes("unintrusive") && document.activeElement.isSameNode(el)) return;
-        el._x_forceModelUpdate(value);
-    });
-});
-function $8c83eaf28779ff46$var$getInputValue(el, modifiers, event, currentValue) {
-    return $8c83eaf28779ff46$var$mutateDom(()=>{
-        if (event instanceof CustomEvent && event.detail !== void 0) return event.detail !== null && event.detail !== void 0 ? event.detail : event.target.value;
-        else if ($8c83eaf28779ff46$var$isCheckbox(el)) {
-            if (Array.isArray(currentValue)) {
-                let newValue = null;
-                if (modifiers.includes("number")) newValue = $8c83eaf28779ff46$var$safeParseNumber(event.target.value);
-                else if (modifiers.includes("boolean")) newValue = $8c83eaf28779ff46$var$safeParseBoolean(event.target.value);
-                else newValue = event.target.value;
-                return event.target.checked ? currentValue.includes(newValue) ? currentValue : currentValue.concat([
-                    newValue
-                ]) : currentValue.filter((el2)=>!$8c83eaf28779ff46$var$checkedAttrLooseCompare2(el2, newValue));
-            } else return event.target.checked;
-        } else if (el.tagName.toLowerCase() === "select" && el.multiple) {
-            if (modifiers.includes("number")) return Array.from(event.target.selectedOptions).map((option)=>{
-                let rawValue = option.value || option.text;
-                return $8c83eaf28779ff46$var$safeParseNumber(rawValue);
-            });
-            else if (modifiers.includes("boolean")) return Array.from(event.target.selectedOptions).map((option)=>{
-                let rawValue = option.value || option.text;
-                return $8c83eaf28779ff46$var$safeParseBoolean(rawValue);
-            });
-            return Array.from(event.target.selectedOptions).map((option)=>{
-                return option.value || option.text;
-            });
-        } else {
-            let newValue;
-            if ($8c83eaf28779ff46$var$isRadio(el)) {
-                if (event.target.checked) newValue = event.target.value;
-                else newValue = currentValue;
-            } else newValue = event.target.value;
-            if (modifiers.includes("number")) return $8c83eaf28779ff46$var$safeParseNumber(newValue);
-            else if (modifiers.includes("boolean")) return $8c83eaf28779ff46$var$safeParseBoolean(newValue);
-            else if (modifiers.includes("trim")) return newValue.trim();
-            else return newValue;
-        }
-    });
-}
-function $8c83eaf28779ff46$var$safeParseNumber(rawValue) {
-    let number = rawValue ? parseFloat(rawValue) : null;
-    return $8c83eaf28779ff46$var$isNumeric2(number) ? number : rawValue;
-}
-function $8c83eaf28779ff46$var$checkedAttrLooseCompare2(valueA, valueB) {
-    return valueA == valueB;
-}
-function $8c83eaf28779ff46$var$isNumeric2(subject) {
-    return !Array.isArray(subject) && !isNaN(subject);
-}
-function $8c83eaf28779ff46$var$isGetterSetter(value) {
-    return value !== null && typeof value === "object" && typeof value.get === "function" && typeof value.set === "function";
-}
-// packages/alpinejs/src/directives/x-cloak.js
-$8c83eaf28779ff46$var$directive("cloak", (el)=>queueMicrotask(()=>$8c83eaf28779ff46$var$mutateDom(()=>el.removeAttribute($8c83eaf28779ff46$var$prefix("cloak")))));
-// packages/alpinejs/src/directives/x-init.js
-$8c83eaf28779ff46$var$addInitSelector(()=>`[${$8c83eaf28779ff46$var$prefix("init")}]`);
-$8c83eaf28779ff46$var$directive("init", $8c83eaf28779ff46$var$skipDuringClone((el, { expression: expression }, { evaluate: evaluate2 })=>{
-    if (typeof expression === "string") return !!expression.trim() && evaluate2(expression, {}, false);
-    return evaluate2(expression, {}, false);
-}));
-// packages/alpinejs/src/directives/x-text.js
-$8c83eaf28779ff46$var$directive("text", (el, { expression: expression }, { effect: effect3, evaluateLater: evaluateLater2 })=>{
-    let evaluate2 = evaluateLater2(expression);
-    effect3(()=>{
-        evaluate2((value)=>{
-            $8c83eaf28779ff46$var$mutateDom(()=>{
-                el.textContent = value;
-            });
-        });
-    });
-});
-// packages/alpinejs/src/directives/x-html.js
-$8c83eaf28779ff46$var$directive("html", (el, { expression: expression }, { effect: effect3, evaluateLater: evaluateLater2 })=>{
-    let evaluate2 = evaluateLater2(expression);
-    effect3(()=>{
-        evaluate2((value)=>{
-            $8c83eaf28779ff46$var$mutateDom(()=>{
-                el.innerHTML = value;
-                el._x_ignoreSelf = true;
-                $8c83eaf28779ff46$var$initTree(el);
-                delete el._x_ignoreSelf;
-            });
-        });
-    });
-});
-// packages/alpinejs/src/directives/x-bind.js
-$8c83eaf28779ff46$var$mapAttributes($8c83eaf28779ff46$var$startingWith(":", $8c83eaf28779ff46$var$into($8c83eaf28779ff46$var$prefix("bind:"))));
-var $8c83eaf28779ff46$var$handler2 = (el, { value: value, modifiers: modifiers, expression: expression, original: original }, { effect: effect3, cleanup: cleanup2 })=>{
-    if (!value) {
-        let bindingProviders = {};
-        $8c83eaf28779ff46$var$injectBindingProviders(bindingProviders);
-        let getBindings = $8c83eaf28779ff46$var$evaluateLater(el, expression);
-        getBindings((bindings)=>{
-            $8c83eaf28779ff46$var$applyBindingsObject(el, bindings, original);
-        }, {
-            scope: bindingProviders
-        });
-        return;
-    }
-    if (value === "key") return $8c83eaf28779ff46$var$storeKeyForXFor(el, expression);
-    if (el._x_inlineBindings && el._x_inlineBindings[value] && el._x_inlineBindings[value].extract) return;
-    let evaluate2 = $8c83eaf28779ff46$var$evaluateLater(el, expression);
-    effect3(()=>evaluate2((result)=>{
-            if (result === void 0 && typeof expression === "string" && expression.match(/\./)) result = "";
-            $8c83eaf28779ff46$var$mutateDom(()=>$8c83eaf28779ff46$var$bind(el, value, result, modifiers));
-        }));
-    cleanup2(()=>{
-        el._x_undoAddedClasses && el._x_undoAddedClasses();
-        el._x_undoAddedStyles && el._x_undoAddedStyles();
-    });
-};
-$8c83eaf28779ff46$var$handler2.inline = (el, { value: value, modifiers: modifiers, expression: expression })=>{
-    if (!value) return;
-    if (!el._x_inlineBindings) el._x_inlineBindings = {};
-    el._x_inlineBindings[value] = {
-        expression: expression,
-        extract: false
-    };
-};
-$8c83eaf28779ff46$var$directive("bind", $8c83eaf28779ff46$var$handler2);
-function $8c83eaf28779ff46$var$storeKeyForXFor(el, expression) {
-    el._x_keyExpression = expression;
-}
-// packages/alpinejs/src/directives/x-data.js
-$8c83eaf28779ff46$var$addRootSelector(()=>`[${$8c83eaf28779ff46$var$prefix("data")}]`);
-$8c83eaf28779ff46$var$directive("data", (el, { expression: expression }, { cleanup: cleanup2 })=>{
-    if ($8c83eaf28779ff46$var$shouldSkipRegisteringDataDuringClone(el)) return;
-    expression = expression === "" ? "{}" : expression;
-    let magicContext = {};
-    $8c83eaf28779ff46$var$injectMagics(magicContext, el);
-    let dataProviderContext = {};
-    $8c83eaf28779ff46$var$injectDataProviders(dataProviderContext, magicContext);
-    let data2 = $8c83eaf28779ff46$var$evaluate(el, expression, {
-        scope: dataProviderContext
-    });
-    if (data2 === void 0 || data2 === true) data2 = {};
-    $8c83eaf28779ff46$var$injectMagics(data2, el);
-    let reactiveData = $8c83eaf28779ff46$var$reactive(data2);
-    $8c83eaf28779ff46$var$initInterceptors(reactiveData);
-    let undo = $8c83eaf28779ff46$var$addScopeToNode(el, reactiveData);
-    reactiveData["init"] && $8c83eaf28779ff46$var$evaluate(el, reactiveData["init"]);
-    cleanup2(()=>{
-        reactiveData["destroy"] && $8c83eaf28779ff46$var$evaluate(el, reactiveData["destroy"]);
-        undo();
-    });
-});
-$8c83eaf28779ff46$var$interceptClone((from, to)=>{
-    if (from._x_dataStack) {
-        to._x_dataStack = from._x_dataStack;
-        to.setAttribute("data-has-alpine-state", true);
-    }
-});
-function $8c83eaf28779ff46$var$shouldSkipRegisteringDataDuringClone(el) {
-    if (!$8c83eaf28779ff46$var$isCloning) return false;
-    if ($8c83eaf28779ff46$var$isCloningLegacy) return true;
-    return el.hasAttribute("data-has-alpine-state");
-}
-// packages/alpinejs/src/directives/x-show.js
-$8c83eaf28779ff46$var$directive("show", (el, { modifiers: modifiers, expression: expression }, { effect: effect3 })=>{
-    let evaluate2 = $8c83eaf28779ff46$var$evaluateLater(el, expression);
-    if (!el._x_doHide) el._x_doHide = ()=>{
-        $8c83eaf28779ff46$var$mutateDom(()=>{
-            el.style.setProperty("display", "none", modifiers.includes("important") ? "important" : void 0);
-        });
-    };
-    if (!el._x_doShow) el._x_doShow = ()=>{
-        $8c83eaf28779ff46$var$mutateDom(()=>{
-            if (el.style.length === 1 && el.style.display === "none") el.removeAttribute("style");
-            else el.style.removeProperty("display");
-        });
-    };
-    let hide = ()=>{
-        el._x_doHide();
-        el._x_isShown = false;
-    };
-    let show = ()=>{
-        el._x_doShow();
-        el._x_isShown = true;
-    };
-    let clickAwayCompatibleShow = ()=>setTimeout(show);
-    let toggle = $8c83eaf28779ff46$var$once((value)=>value ? show() : hide(), (value)=>{
-        if (typeof el._x_toggleAndCascadeWithTransitions === "function") el._x_toggleAndCascadeWithTransitions(el, value, show, hide);
-        else value ? clickAwayCompatibleShow() : hide();
-    });
-    let oldValue;
-    let firstTime = true;
-    effect3(()=>evaluate2((value)=>{
-            if (!firstTime && value === oldValue) return;
-            if (modifiers.includes("immediate")) value ? clickAwayCompatibleShow() : hide();
-            toggle(value);
-            oldValue = value;
-            firstTime = false;
-        }));
-});
-// packages/alpinejs/src/directives/x-for.js
-$8c83eaf28779ff46$var$directive("for", (el, { expression: expression }, { effect: effect3, cleanup: cleanup2 })=>{
-    let iteratorNames = $8c83eaf28779ff46$var$parseForExpression(expression);
-    let evaluateItems = $8c83eaf28779ff46$var$evaluateLater(el, iteratorNames.items);
-    let evaluateKey = $8c83eaf28779ff46$var$evaluateLater(el, // the x-bind:key expression is stored for our use instead of evaluated.
-    el._x_keyExpression || "index");
-    el._x_prevKeys = [];
-    el._x_lookup = {};
-    effect3(()=>$8c83eaf28779ff46$var$loop(el, iteratorNames, evaluateItems, evaluateKey));
-    cleanup2(()=>{
-        Object.values(el._x_lookup).forEach((el2)=>$8c83eaf28779ff46$var$mutateDom(()=>{
-                $8c83eaf28779ff46$var$destroyTree(el2);
-                el2.remove();
-            }));
-        delete el._x_prevKeys;
-        delete el._x_lookup;
-    });
-});
-function $8c83eaf28779ff46$var$loop(el, iteratorNames, evaluateItems, evaluateKey) {
-    let isObject2 = (i)=>typeof i === "object" && !Array.isArray(i);
-    let templateEl = el;
-    evaluateItems((items)=>{
-        if ($8c83eaf28779ff46$var$isNumeric3(items) && items >= 0) items = Array.from(Array(items).keys(), (i)=>i + 1);
-        if (items === void 0) items = [];
-        let lookup = el._x_lookup;
-        let prevKeys = el._x_prevKeys;
-        let scopes = [];
-        let keys = [];
-        if (isObject2(items)) items = Object.entries(items).map(([key, value])=>{
-            let scope2 = $8c83eaf28779ff46$var$getIterationScopeVariables(iteratorNames, value, key, items);
-            evaluateKey((value2)=>{
-                if (keys.includes(value2)) $8c83eaf28779ff46$var$warn("Duplicate key on x-for", el);
-                keys.push(value2);
-            }, {
-                scope: {
-                    index: key,
-                    ...scope2
-                }
-            });
-            scopes.push(scope2);
-        });
-        else for(let i = 0; i < items.length; i++){
-            let scope2 = $8c83eaf28779ff46$var$getIterationScopeVariables(iteratorNames, items[i], i, items);
-            evaluateKey((value)=>{
-                if (keys.includes(value)) $8c83eaf28779ff46$var$warn("Duplicate key on x-for", el);
-                keys.push(value);
-            }, {
-                scope: {
-                    index: i,
-                    ...scope2
-                }
-            });
-            scopes.push(scope2);
-        }
-        let adds = [];
-        let moves = [];
-        let removes = [];
-        let sames = [];
-        for(let i = 0; i < prevKeys.length; i++){
-            let key = prevKeys[i];
-            if (keys.indexOf(key) === -1) removes.push(key);
-        }
-        prevKeys = prevKeys.filter((key)=>!removes.includes(key));
-        let lastKey = "template";
-        for(let i = 0; i < keys.length; i++){
-            let key = keys[i];
-            let prevIndex = prevKeys.indexOf(key);
-            if (prevIndex === -1) {
-                prevKeys.splice(i, 0, key);
-                adds.push([
-                    lastKey,
-                    i
-                ]);
-            } else if (prevIndex !== i) {
-                let keyInSpot = prevKeys.splice(i, 1)[0];
-                let keyForSpot = prevKeys.splice(prevIndex - 1, 1)[0];
-                prevKeys.splice(i, 0, keyForSpot);
-                prevKeys.splice(prevIndex, 0, keyInSpot);
-                moves.push([
-                    keyInSpot,
-                    keyForSpot
-                ]);
-            } else sames.push(key);
-            lastKey = key;
-        }
-        for(let i = 0; i < removes.length; i++){
-            let key = removes[i];
-            if (!(key in lookup)) continue;
-            $8c83eaf28779ff46$var$mutateDom(()=>{
-                $8c83eaf28779ff46$var$destroyTree(lookup[key]);
-                lookup[key].remove();
-            });
-            delete lookup[key];
-        }
-        for(let i = 0; i < moves.length; i++){
-            let [keyInSpot, keyForSpot] = moves[i];
-            let elInSpot = lookup[keyInSpot];
-            let elForSpot = lookup[keyForSpot];
-            let marker = document.createElement("div");
-            $8c83eaf28779ff46$var$mutateDom(()=>{
-                if (!elForSpot) $8c83eaf28779ff46$var$warn(`x-for ":key" is undefined or invalid`, templateEl, keyForSpot, lookup);
-                elForSpot.after(marker);
-                elInSpot.after(elForSpot);
-                elForSpot._x_currentIfEl && elForSpot.after(elForSpot._x_currentIfEl);
-                marker.before(elInSpot);
-                elInSpot._x_currentIfEl && elInSpot.after(elInSpot._x_currentIfEl);
-                marker.remove();
-            });
-            elForSpot._x_refreshXForScope(scopes[keys.indexOf(keyForSpot)]);
-        }
-        for(let i = 0; i < adds.length; i++){
-            let [lastKey2, index] = adds[i];
-            let lastEl = lastKey2 === "template" ? templateEl : lookup[lastKey2];
-            if (lastEl._x_currentIfEl) lastEl = lastEl._x_currentIfEl;
-            let scope2 = scopes[index];
-            let key = keys[index];
-            let clone2 = document.importNode(templateEl.content, true).firstElementChild;
-            let reactiveScope = $8c83eaf28779ff46$var$reactive(scope2);
-            $8c83eaf28779ff46$var$addScopeToNode(clone2, reactiveScope, templateEl);
-            clone2._x_refreshXForScope = (newScope)=>{
-                Object.entries(newScope).forEach(([key2, value])=>{
-                    reactiveScope[key2] = value;
-                });
-            };
-            $8c83eaf28779ff46$var$mutateDom(()=>{
-                lastEl.after(clone2);
-                $8c83eaf28779ff46$var$skipDuringClone(()=>$8c83eaf28779ff46$var$initTree(clone2))();
-            });
-            if (typeof key === "object") $8c83eaf28779ff46$var$warn("x-for key cannot be an object, it must be a string or an integer", templateEl);
-            lookup[key] = clone2;
-        }
-        for(let i = 0; i < sames.length; i++)lookup[sames[i]]._x_refreshXForScope(scopes[keys.indexOf(sames[i])]);
-        templateEl._x_prevKeys = keys;
-    });
-}
-function $8c83eaf28779ff46$var$parseForExpression(expression) {
-    let forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/;
-    let stripParensRE = /^\s*\(|\)\s*$/g;
-    let forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/;
-    let inMatch = expression.match(forAliasRE);
-    if (!inMatch) return;
-    let res = {};
-    res.items = inMatch[2].trim();
-    let item = inMatch[1].replace(stripParensRE, "").trim();
-    let iteratorMatch = item.match(forIteratorRE);
-    if (iteratorMatch) {
-        res.item = item.replace(forIteratorRE, "").trim();
-        res.index = iteratorMatch[1].trim();
-        if (iteratorMatch[2]) res.collection = iteratorMatch[2].trim();
-    } else res.item = item;
-    return res;
-}
-function $8c83eaf28779ff46$var$getIterationScopeVariables(iteratorNames, item, index, items) {
-    let scopeVariables = {};
-    if (/^\[.*\]$/.test(iteratorNames.item) && Array.isArray(item)) {
-        let names = iteratorNames.item.replace("[", "").replace("]", "").split(",").map((i)=>i.trim());
-        names.forEach((name, i)=>{
-            scopeVariables[name] = item[i];
-        });
-    } else if (/^\{.*\}$/.test(iteratorNames.item) && !Array.isArray(item) && typeof item === "object") {
-        let names = iteratorNames.item.replace("{", "").replace("}", "").split(",").map((i)=>i.trim());
-        names.forEach((name)=>{
-            scopeVariables[name] = item[name];
-        });
-    } else scopeVariables[iteratorNames.item] = item;
-    if (iteratorNames.index) scopeVariables[iteratorNames.index] = index;
-    if (iteratorNames.collection) scopeVariables[iteratorNames.collection] = items;
-    return scopeVariables;
-}
-function $8c83eaf28779ff46$var$isNumeric3(subject) {
-    return !Array.isArray(subject) && !isNaN(subject);
-}
-// packages/alpinejs/src/directives/x-ref.js
-function $8c83eaf28779ff46$var$handler3() {}
-$8c83eaf28779ff46$var$handler3.inline = (el, { expression: expression }, { cleanup: cleanup2 })=>{
-    let root = $8c83eaf28779ff46$var$closestRoot(el);
-    if (!root._x_refs) root._x_refs = {};
-    root._x_refs[expression] = el;
-    cleanup2(()=>delete root._x_refs[expression]);
-};
-$8c83eaf28779ff46$var$directive("ref", $8c83eaf28779ff46$var$handler3);
-// packages/alpinejs/src/directives/x-if.js
-$8c83eaf28779ff46$var$directive("if", (el, { expression: expression }, { effect: effect3, cleanup: cleanup2 })=>{
-    if (el.tagName.toLowerCase() !== "template") $8c83eaf28779ff46$var$warn("x-if can only be used on a <template> tag", el);
-    let evaluate2 = $8c83eaf28779ff46$var$evaluateLater(el, expression);
-    let show = ()=>{
-        if (el._x_currentIfEl) return el._x_currentIfEl;
-        let clone2 = el.content.cloneNode(true).firstElementChild;
-        $8c83eaf28779ff46$var$addScopeToNode(clone2, {}, el);
-        $8c83eaf28779ff46$var$mutateDom(()=>{
-            el.after(clone2);
-            $8c83eaf28779ff46$var$skipDuringClone(()=>$8c83eaf28779ff46$var$initTree(clone2))();
-        });
-        el._x_currentIfEl = clone2;
-        el._x_undoIf = ()=>{
-            $8c83eaf28779ff46$var$mutateDom(()=>{
-                $8c83eaf28779ff46$var$destroyTree(clone2);
-                clone2.remove();
-            });
-            delete el._x_currentIfEl;
-        };
-        return clone2;
-    };
-    let hide = ()=>{
-        if (!el._x_undoIf) return;
-        el._x_undoIf();
-        delete el._x_undoIf;
-    };
-    effect3(()=>evaluate2((value)=>{
-            value ? show() : hide();
-        }));
-    cleanup2(()=>el._x_undoIf && el._x_undoIf());
-});
-// packages/alpinejs/src/directives/x-id.js
-$8c83eaf28779ff46$var$directive("id", (el, { expression: expression }, { evaluate: evaluate2 })=>{
-    let names = evaluate2(expression);
-    names.forEach((name)=>$8c83eaf28779ff46$var$setIdRoot(el, name));
-});
-$8c83eaf28779ff46$var$interceptClone((from, to)=>{
-    if (from._x_ids) to._x_ids = from._x_ids;
-});
-// packages/alpinejs/src/directives/x-on.js
-$8c83eaf28779ff46$var$mapAttributes($8c83eaf28779ff46$var$startingWith("@", $8c83eaf28779ff46$var$into($8c83eaf28779ff46$var$prefix("on:"))));
-$8c83eaf28779ff46$var$directive("on", $8c83eaf28779ff46$var$skipDuringClone((el, { value: value, modifiers: modifiers, expression: expression }, { cleanup: cleanup2 })=>{
-    let evaluate2 = expression ? $8c83eaf28779ff46$var$evaluateLater(el, expression) : ()=>{};
-    if (el.tagName.toLowerCase() === "template") {
-        if (!el._x_forwardEvents) el._x_forwardEvents = [];
-        if (!el._x_forwardEvents.includes(value)) el._x_forwardEvents.push(value);
-    }
-    let removeListener = $8c83eaf28779ff46$var$on(el, value, modifiers, (e)=>{
-        evaluate2(()=>{}, {
-            scope: {
-                "$event": e
-            },
-            params: [
-                e
-            ]
-        });
-    });
-    cleanup2(()=>removeListener());
-}));
-// packages/alpinejs/src/directives/index.js
-$8c83eaf28779ff46$var$warnMissingPluginDirective("Collapse", "collapse", "collapse");
-$8c83eaf28779ff46$var$warnMissingPluginDirective("Intersect", "intersect", "intersect");
-$8c83eaf28779ff46$var$warnMissingPluginDirective("Focus", "trap", "focus");
-$8c83eaf28779ff46$var$warnMissingPluginDirective("Mask", "mask", "mask");
-function $8c83eaf28779ff46$var$warnMissingPluginDirective(name, directiveName, slug) {
-    $8c83eaf28779ff46$var$directive(directiveName, (el)=>$8c83eaf28779ff46$var$warn(`You can't use [x-${directiveName}] without first installing the "${name}" plugin here: https://alpinejs.dev/plugins/${slug}`, el));
-}
-// packages/alpinejs/src/index.js
-$8c83eaf28779ff46$var$alpine_default.setEvaluator($8c83eaf28779ff46$var$normalEvaluator);
-$8c83eaf28779ff46$var$alpine_default.setReactivityEngine({
-    reactive: $8c83eaf28779ff46$var$reactive2,
-    effect: $8c83eaf28779ff46$var$effect2,
-    release: $8c83eaf28779ff46$var$stop,
-    raw: $8c83eaf28779ff46$var$toRaw
-});
-var $8c83eaf28779ff46$export$b7ee041e4ad2afec = $8c83eaf28779ff46$var$alpine_default;
-// packages/alpinejs/builds/module.js
-var $8c83eaf28779ff46$export$2e2bcd8739ae039 = $8c83eaf28779ff46$export$b7ee041e4ad2afec;
-
-
-// packages/persist/src/index.js
-function $9b2f94dab0f686ea$export$9a6132153fba2e0(Alpine) {
-    let persist = ()=>{
-        let alias;
-        let storage;
-        try {
-            storage = localStorage;
-        } catch (e) {
-            console.error(e);
-            console.warn("Alpine: $persist is using temporary storage since localStorage is unavailable.");
-            let dummy = /* @__PURE__ */ new Map();
-            storage = {
-                getItem: dummy.get.bind(dummy),
-                setItem: dummy.set.bind(dummy)
-            };
-        }
-        return Alpine.interceptor((initialValue, getter, setter, path, key)=>{
-            let lookup = alias || `_x_${path}`;
-            let initial = $9b2f94dab0f686ea$var$storageHas(lookup, storage) ? $9b2f94dab0f686ea$var$storageGet(lookup, storage) : initialValue;
-            setter(initial);
-            Alpine.effect(()=>{
-                let value = getter();
-                $9b2f94dab0f686ea$var$storageSet(lookup, value, storage);
-                setter(value);
-            });
-            return initial;
-        }, (func)=>{
-            func.as = (key)=>{
-                alias = key;
-                return func;
-            }, func.using = (target)=>{
-                storage = target;
-                return func;
-            };
-        });
-    };
-    Object.defineProperty(Alpine, "$persist", {
-        get: ()=>persist()
-    });
-    Alpine.magic("persist", persist);
-    Alpine.persist = (key, { get: get, set: set }, storage = localStorage)=>{
-        let initial = $9b2f94dab0f686ea$var$storageHas(key, storage) ? $9b2f94dab0f686ea$var$storageGet(key, storage) : get();
-        set(initial);
-        Alpine.effect(()=>{
-            let value = get();
-            $9b2f94dab0f686ea$var$storageSet(key, value, storage);
-            set(value);
-        });
-    };
-}
-function $9b2f94dab0f686ea$var$storageHas(key, storage) {
-    return storage.getItem(key) !== null;
-}
-function $9b2f94dab0f686ea$var$storageGet(key, storage) {
-    let value = storage.getItem(key, storage);
-    if (value === void 0) return;
-    return JSON.parse(value);
-}
-function $9b2f94dab0f686ea$var$storageSet(key, value, storage) {
-    storage.setItem(key, JSON.stringify(value));
-}
-// packages/persist/builds/module.js
-var $9b2f94dab0f686ea$export$2e2bcd8739ae039 = $9b2f94dab0f686ea$export$9a6132153fba2e0;
-
-
-const $1bac384020b50752$var$isString = (obj)=>typeof obj === 'string';
-const $1bac384020b50752$var$defer = ()=>{
-    let res;
-    let rej;
-    const promise = new Promise((resolve, reject)=>{
-        res = resolve;
-        rej = reject;
-    });
-    promise.resolve = res;
-    promise.reject = rej;
-    return promise;
-};
-const $1bac384020b50752$var$makeString = (object)=>{
-    if (object == null) return '';
-    return '' + object;
-};
-const $1bac384020b50752$var$copy = (a, s, t)=>{
-    a.forEach((m)=>{
-        if (s[m]) t[m] = s[m];
-    });
-};
-const $1bac384020b50752$var$lastOfPathSeparatorRegExp = /###/g;
-const $1bac384020b50752$var$cleanKey = (key)=>key && key.indexOf('###') > -1 ? key.replace($1bac384020b50752$var$lastOfPathSeparatorRegExp, '.') : key;
-const $1bac384020b50752$var$canNotTraverseDeeper = (object)=>!object || $1bac384020b50752$var$isString(object);
-const $1bac384020b50752$var$getLastOfPath = (object, path, Empty)=>{
-    const stack = !$1bac384020b50752$var$isString(path) ? path : path.split('.');
-    let stackIndex = 0;
-    while(stackIndex < stack.length - 1){
-        if ($1bac384020b50752$var$canNotTraverseDeeper(object)) return {};
-        const key = $1bac384020b50752$var$cleanKey(stack[stackIndex]);
-        if (!object[key] && Empty) object[key] = new Empty();
-        if (Object.prototype.hasOwnProperty.call(object, key)) object = object[key];
-        else object = {};
-        ++stackIndex;
-    }
-    if ($1bac384020b50752$var$canNotTraverseDeeper(object)) return {};
-    return {
-        obj: object,
-        k: $1bac384020b50752$var$cleanKey(stack[stackIndex])
-    };
-};
-const $1bac384020b50752$var$setPath = (object, path, newValue)=>{
-    const { obj: obj, k: k } = $1bac384020b50752$var$getLastOfPath(object, path, Object);
-    if (obj !== undefined || path.length === 1) {
-        obj[k] = newValue;
-        return;
-    }
-    let e = path[path.length - 1];
-    let p = path.slice(0, path.length - 1);
-    let last = $1bac384020b50752$var$getLastOfPath(object, p, Object);
-    while(last.obj === undefined && p.length){
-        e = `${p[p.length - 1]}.${e}`;
-        p = p.slice(0, p.length - 1);
-        last = $1bac384020b50752$var$getLastOfPath(object, p, Object);
-        if (last && last.obj && typeof last.obj[`${last.k}.${e}`] !== 'undefined') last.obj = undefined;
-    }
-    last.obj[`${last.k}.${e}`] = newValue;
-};
-const $1bac384020b50752$var$pushPath = (object, path, newValue, concat)=>{
-    const { obj: obj, k: k } = $1bac384020b50752$var$getLastOfPath(object, path, Object);
-    obj[k] = obj[k] || [];
-    obj[k].push(newValue);
-};
-const $1bac384020b50752$var$getPath = (object, path)=>{
-    const { obj: obj, k: k } = $1bac384020b50752$var$getLastOfPath(object, path);
-    if (!obj) return undefined;
-    return obj[k];
-};
-const $1bac384020b50752$var$getPathWithDefaults = (data, defaultData, key)=>{
-    const value = $1bac384020b50752$var$getPath(data, key);
-    if (value !== undefined) return value;
-    return $1bac384020b50752$var$getPath(defaultData, key);
-};
-const $1bac384020b50752$var$deepExtend = (target, source, overwrite)=>{
-    for(const prop in source)if (prop !== '__proto__' && prop !== 'constructor') {
-        if (prop in target) {
-            if ($1bac384020b50752$var$isString(target[prop]) || target[prop] instanceof String || $1bac384020b50752$var$isString(source[prop]) || source[prop] instanceof String) {
-                if (overwrite) target[prop] = source[prop];
-            } else $1bac384020b50752$var$deepExtend(target[prop], source[prop], overwrite);
-        } else target[prop] = source[prop];
-    }
-    return target;
-};
-const $1bac384020b50752$var$regexEscape = (str)=>str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
-var $1bac384020b50752$var$_entityMap = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;',
-    '/': '&#x2F;'
-};
-const $1bac384020b50752$var$escape = (data)=>{
-    if ($1bac384020b50752$var$isString(data)) return data.replace(/[&<>"'\/]/g, (s)=>$1bac384020b50752$var$_entityMap[s]);
-    return data;
-};
-class $1bac384020b50752$var$RegExpCache {
-    constructor(capacity){
-        this.capacity = capacity;
-        this.regExpMap = new Map();
-        this.regExpQueue = [];
-    }
-    getRegExp(pattern) {
-        const regExpFromCache = this.regExpMap.get(pattern);
-        if (regExpFromCache !== undefined) return regExpFromCache;
-        const regExpNew = new RegExp(pattern);
-        if (this.regExpQueue.length === this.capacity) this.regExpMap.delete(this.regExpQueue.shift());
-        this.regExpMap.set(pattern, regExpNew);
-        this.regExpQueue.push(pattern);
-        return regExpNew;
-    }
-}
-const $1bac384020b50752$var$chars = [
-    ' ',
-    ',',
-    '?',
-    '!',
-    ';'
-];
-const $1bac384020b50752$var$looksLikeObjectPathRegExpCache = new $1bac384020b50752$var$RegExpCache(20);
-const $1bac384020b50752$var$looksLikeObjectPath = (key, nsSeparator, keySeparator)=>{
-    nsSeparator = nsSeparator || '';
-    keySeparator = keySeparator || '';
-    const possibleChars = $1bac384020b50752$var$chars.filter((c)=>nsSeparator.indexOf(c) < 0 && keySeparator.indexOf(c) < 0);
-    if (possibleChars.length === 0) return true;
-    const r = $1bac384020b50752$var$looksLikeObjectPathRegExpCache.getRegExp(`(${possibleChars.map((c)=>c === '?' ? '\\?' : c).join('|')})`);
-    let matched = !r.test(key);
-    if (!matched) {
-        const ki = key.indexOf(keySeparator);
-        if (ki > 0 && !r.test(key.substring(0, ki))) matched = true;
-    }
-    return matched;
-};
-const $1bac384020b50752$var$deepFind = function(obj, path) {
-    let keySeparator = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '.';
-    if (!obj) return undefined;
-    if (obj[path]) return obj[path];
-    const tokens = path.split(keySeparator);
-    let current = obj;
-    for(let i = 0; i < tokens.length;){
-        if (!current || typeof current !== 'object') return undefined;
-        let next;
-        let nextPath = '';
-        for(let j = i; j < tokens.length; ++j){
-            if (j !== i) nextPath += keySeparator;
-            nextPath += tokens[j];
-            next = current[nextPath];
-            if (next !== undefined) {
-                if ([
-                    'string',
-                    'number',
-                    'boolean'
-                ].indexOf(typeof next) > -1 && j < tokens.length - 1) continue;
-                i += j - i + 1;
-                break;
-            }
-        }
-        current = next;
-    }
-    return current;
-};
-const $1bac384020b50752$var$getCleanedCode = (code)=>code && code.replace('_', '-');
-const $1bac384020b50752$var$consoleLogger = {
-    type: 'logger',
-    log (args) {
-        this.output('log', args);
-    },
-    warn (args) {
-        this.output('warn', args);
-    },
-    error (args) {
-        this.output('error', args);
-    },
-    output (type, args) {
-        if (console && console[type]) console[type].apply(console, args);
-    }
-};
-class $1bac384020b50752$var$Logger {
-    constructor(concreteLogger){
-        let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-        this.init(concreteLogger, options);
-    }
-    init(concreteLogger) {
-        let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-        this.prefix = options.prefix || 'i18next:';
-        this.logger = concreteLogger || $1bac384020b50752$var$consoleLogger;
-        this.options = options;
-        this.debug = options.debug;
-    }
-    log() {
-        for(var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++)args[_key] = arguments[_key];
-        return this.forward(args, 'log', '', true);
-    }
-    warn() {
-        for(var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++)args[_key2] = arguments[_key2];
-        return this.forward(args, 'warn', '', true);
-    }
-    error() {
-        for(var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++)args[_key3] = arguments[_key3];
-        return this.forward(args, 'error', '');
-    }
-    deprecate() {
-        for(var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++)args[_key4] = arguments[_key4];
-        return this.forward(args, 'warn', 'WARNING DEPRECATED: ', true);
-    }
-    forward(args, lvl, prefix, debugOnly) {
-        if (debugOnly && !this.debug) return null;
-        if ($1bac384020b50752$var$isString(args[0])) args[0] = `${prefix}${this.prefix} ${args[0]}`;
-        return this.logger[lvl](args);
-    }
-    create(moduleName) {
-        return new $1bac384020b50752$var$Logger(this.logger, {
-            prefix: `${this.prefix}:${moduleName}:`,
-            ...this.options
-        });
-    }
-    clone(options) {
-        options = options || this.options;
-        options.prefix = options.prefix || this.prefix;
-        return new $1bac384020b50752$var$Logger(this.logger, options);
-    }
-}
-var $1bac384020b50752$var$baseLogger = new $1bac384020b50752$var$Logger();
-class $1bac384020b50752$var$EventEmitter {
-    constructor(){
-        this.observers = {};
-    }
-    on(events, listener) {
-        events.split(' ').forEach((event)=>{
-            if (!this.observers[event]) this.observers[event] = new Map();
-            const numListeners = this.observers[event].get(listener) || 0;
-            this.observers[event].set(listener, numListeners + 1);
-        });
-        return this;
-    }
-    off(event, listener) {
-        if (!this.observers[event]) return;
-        if (!listener) {
-            delete this.observers[event];
-            return;
-        }
-        this.observers[event].delete(listener);
-    }
-    emit(event) {
-        for(var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++)args[_key - 1] = arguments[_key];
-        if (this.observers[event]) {
-            const cloned = Array.from(this.observers[event].entries());
-            cloned.forEach((_ref)=>{
-                let [observer, numTimesAdded] = _ref;
-                for(let i = 0; i < numTimesAdded; i++)observer(...args);
-            });
-        }
-        if (this.observers['*']) {
-            const cloned = Array.from(this.observers['*'].entries());
-            cloned.forEach((_ref2)=>{
-                let [observer, numTimesAdded] = _ref2;
-                for(let i = 0; i < numTimesAdded; i++)observer.apply(observer, [
-                    event,
-                    ...args
-                ]);
-            });
-        }
-    }
-}
-class $1bac384020b50752$var$ResourceStore extends $1bac384020b50752$var$EventEmitter {
-    constructor(data){
-        let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {
-            ns: [
-                'translation'
-            ],
-            defaultNS: 'translation'
-        };
-        super();
-        this.data = data || {};
-        this.options = options;
-        if (this.options.keySeparator === undefined) this.options.keySeparator = '.';
-        if (this.options.ignoreJSONStructure === undefined) this.options.ignoreJSONStructure = true;
-    }
-    addNamespaces(ns) {
-        if (this.options.ns.indexOf(ns) < 0) this.options.ns.push(ns);
-    }
-    removeNamespaces(ns) {
-        const index = this.options.ns.indexOf(ns);
-        if (index > -1) this.options.ns.splice(index, 1);
-    }
-    getResource(lng, ns, key) {
-        let options = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
-        const keySeparator = options.keySeparator !== undefined ? options.keySeparator : this.options.keySeparator;
-        const ignoreJSONStructure = options.ignoreJSONStructure !== undefined ? options.ignoreJSONStructure : this.options.ignoreJSONStructure;
-        let path;
-        if (lng.indexOf('.') > -1) path = lng.split('.');
-        else {
-            path = [
-                lng,
-                ns
-            ];
-            if (key) {
-                if (Array.isArray(key)) path.push(...key);
-                else if ($1bac384020b50752$var$isString(key) && keySeparator) path.push(...key.split(keySeparator));
-                else path.push(key);
-            }
-        }
-        const result = $1bac384020b50752$var$getPath(this.data, path);
-        if (!result && !ns && !key && lng.indexOf('.') > -1) {
-            lng = path[0];
-            ns = path[1];
-            key = path.slice(2).join('.');
-        }
-        if (result || !ignoreJSONStructure || !$1bac384020b50752$var$isString(key)) return result;
-        return $1bac384020b50752$var$deepFind(this.data && this.data[lng] && this.data[lng][ns], key, keySeparator);
-    }
-    addResource(lng, ns, key, value) {
-        let options = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : {
-            silent: false
-        };
-        const keySeparator = options.keySeparator !== undefined ? options.keySeparator : this.options.keySeparator;
-        let path = [
-            lng,
-            ns
-        ];
-        if (key) path = path.concat(keySeparator ? key.split(keySeparator) : key);
-        if (lng.indexOf('.') > -1) {
-            path = lng.split('.');
-            value = ns;
-            ns = path[1];
-        }
-        this.addNamespaces(ns);
-        $1bac384020b50752$var$setPath(this.data, path, value);
-        if (!options.silent) this.emit('added', lng, ns, key, value);
-    }
-    addResources(lng, ns, resources) {
-        let options = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {
-            silent: false
-        };
-        for(const m in resources)if ($1bac384020b50752$var$isString(resources[m]) || Array.isArray(resources[m])) this.addResource(lng, ns, m, resources[m], {
-            silent: true
-        });
-        if (!options.silent) this.emit('added', lng, ns, resources);
-    }
-    addResourceBundle(lng, ns, resources, deep, overwrite) {
-        let options = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : {
-            silent: false,
-            skipCopy: false
-        };
-        let path = [
-            lng,
-            ns
-        ];
-        if (lng.indexOf('.') > -1) {
-            path = lng.split('.');
-            deep = resources;
-            resources = ns;
-            ns = path[1];
-        }
-        this.addNamespaces(ns);
-        let pack = $1bac384020b50752$var$getPath(this.data, path) || {};
-        if (!options.skipCopy) resources = JSON.parse(JSON.stringify(resources));
-        if (deep) $1bac384020b50752$var$deepExtend(pack, resources, overwrite);
-        else pack = {
-            ...pack,
-            ...resources
-        };
-        $1bac384020b50752$var$setPath(this.data, path, pack);
-        if (!options.silent) this.emit('added', lng, ns, resources);
-    }
-    removeResourceBundle(lng, ns) {
-        if (this.hasResourceBundle(lng, ns)) delete this.data[lng][ns];
-        this.removeNamespaces(ns);
-        this.emit('removed', lng, ns);
-    }
-    hasResourceBundle(lng, ns) {
-        return this.getResource(lng, ns) !== undefined;
-    }
-    getResourceBundle(lng, ns) {
-        if (!ns) ns = this.options.defaultNS;
-        if (this.options.compatibilityAPI === 'v1') return {
-            ...this.getResource(lng, ns)
-        };
-        return this.getResource(lng, ns);
-    }
-    getDataByLanguage(lng) {
-        return this.data[lng];
-    }
-    hasLanguageSomeTranslations(lng) {
-        const data = this.getDataByLanguage(lng);
-        const n = data && Object.keys(data) || [];
-        return !!n.find((v)=>data[v] && Object.keys(data[v]).length > 0);
-    }
-    toJSON() {
-        return this.data;
-    }
-}
-var $1bac384020b50752$var$postProcessor = {
-    processors: {},
-    addPostProcessor (module) {
-        this.processors[module.name] = module;
-    },
-    handle (processors, value, key, options, translator) {
-        processors.forEach((processor)=>{
-            if (this.processors[processor]) value = this.processors[processor].process(value, key, options, translator);
-        });
-        return value;
-    }
-};
-const $1bac384020b50752$var$checkedLoadedFor = {};
-class $1bac384020b50752$var$Translator extends $1bac384020b50752$var$EventEmitter {
-    constructor(services){
-        let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-        super();
-        $1bac384020b50752$var$copy([
-            'resourceStore',
-            'languageUtils',
-            'pluralResolver',
-            'interpolator',
-            'backendConnector',
-            'i18nFormat',
-            'utils'
-        ], services, this);
-        this.options = options;
-        if (this.options.keySeparator === undefined) this.options.keySeparator = '.';
-        this.logger = $1bac384020b50752$var$baseLogger.create('translator');
-    }
-    changeLanguage(lng) {
-        if (lng) this.language = lng;
-    }
-    exists(key) {
-        let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {
-            interpolation: {}
-        };
-        if (key === undefined || key === null) return false;
-        const resolved = this.resolve(key, options);
-        return resolved && resolved.res !== undefined;
-    }
-    extractFromKey(key, options) {
-        let nsSeparator = options.nsSeparator !== undefined ? options.nsSeparator : this.options.nsSeparator;
-        if (nsSeparator === undefined) nsSeparator = ':';
-        const keySeparator = options.keySeparator !== undefined ? options.keySeparator : this.options.keySeparator;
-        let namespaces = options.ns || this.options.defaultNS || [];
-        const wouldCheckForNsInKey = nsSeparator && key.indexOf(nsSeparator) > -1;
-        const seemsNaturalLanguage = !this.options.userDefinedKeySeparator && !options.keySeparator && !this.options.userDefinedNsSeparator && !options.nsSeparator && !$1bac384020b50752$var$looksLikeObjectPath(key, nsSeparator, keySeparator);
-        if (wouldCheckForNsInKey && !seemsNaturalLanguage) {
-            const m = key.match(this.interpolator.nestingRegexp);
-            if (m && m.length > 0) return {
-                key: key,
-                namespaces: $1bac384020b50752$var$isString(namespaces) ? [
-                    namespaces
-                ] : namespaces
-            };
-            const parts = key.split(nsSeparator);
-            if (nsSeparator !== keySeparator || nsSeparator === keySeparator && this.options.ns.indexOf(parts[0]) > -1) namespaces = parts.shift();
-            key = parts.join(keySeparator);
-        }
-        return {
-            key: key,
-            namespaces: $1bac384020b50752$var$isString(namespaces) ? [
-                namespaces
-            ] : namespaces
-        };
-    }
-    translate(keys, options, lastKey) {
-        if (typeof options !== 'object' && this.options.overloadTranslationOptionHandler) options = this.options.overloadTranslationOptionHandler(arguments);
-        if (typeof options === 'object') options = {
-            ...options
-        };
-        if (!options) options = {};
-        if (keys === undefined || keys === null) return '';
-        if (!Array.isArray(keys)) keys = [
-            String(keys)
-        ];
-        const returnDetails = options.returnDetails !== undefined ? options.returnDetails : this.options.returnDetails;
-        const keySeparator = options.keySeparator !== undefined ? options.keySeparator : this.options.keySeparator;
-        const { key: key, namespaces: namespaces } = this.extractFromKey(keys[keys.length - 1], options);
-        const namespace = namespaces[namespaces.length - 1];
-        const lng = options.lng || this.language;
-        const appendNamespaceToCIMode = options.appendNamespaceToCIMode || this.options.appendNamespaceToCIMode;
-        if (lng && lng.toLowerCase() === 'cimode') {
-            if (appendNamespaceToCIMode) {
-                const nsSeparator = options.nsSeparator || this.options.nsSeparator;
-                if (returnDetails) return {
-                    res: `${namespace}${nsSeparator}${key}`,
-                    usedKey: key,
-                    exactUsedKey: key,
-                    usedLng: lng,
-                    usedNS: namespace,
-                    usedParams: this.getUsedParamsDetails(options)
-                };
-                return `${namespace}${nsSeparator}${key}`;
-            }
-            if (returnDetails) return {
-                res: key,
-                usedKey: key,
-                exactUsedKey: key,
-                usedLng: lng,
-                usedNS: namespace,
-                usedParams: this.getUsedParamsDetails(options)
-            };
-            return key;
-        }
-        const resolved = this.resolve(keys, options);
-        let res = resolved && resolved.res;
-        const resUsedKey = resolved && resolved.usedKey || key;
-        const resExactUsedKey = resolved && resolved.exactUsedKey || key;
-        const resType = Object.prototype.toString.apply(res);
-        const noObject = [
-            '[object Number]',
-            '[object Function]',
-            '[object RegExp]'
-        ];
-        const joinArrays = options.joinArrays !== undefined ? options.joinArrays : this.options.joinArrays;
-        const handleAsObjectInI18nFormat = !this.i18nFormat || this.i18nFormat.handleAsObject;
-        const handleAsObject = !$1bac384020b50752$var$isString(res) && typeof res !== 'boolean' && typeof res !== 'number';
-        if (handleAsObjectInI18nFormat && res && handleAsObject && noObject.indexOf(resType) < 0 && !($1bac384020b50752$var$isString(joinArrays) && Array.isArray(res))) {
-            if (!options.returnObjects && !this.options.returnObjects) {
-                if (!this.options.returnedObjectHandler) this.logger.warn('accessing an object - but returnObjects options is not enabled!');
-                const r = this.options.returnedObjectHandler ? this.options.returnedObjectHandler(resUsedKey, res, {
-                    ...options,
-                    ns: namespaces
-                }) : `key '${key} (${this.language})' returned an object instead of string.`;
-                if (returnDetails) {
-                    resolved.res = r;
-                    resolved.usedParams = this.getUsedParamsDetails(options);
-                    return resolved;
-                }
-                return r;
-            }
-            if (keySeparator) {
-                const resTypeIsArray = Array.isArray(res);
-                const copy = resTypeIsArray ? [] : {};
-                const newKeyToUse = resTypeIsArray ? resExactUsedKey : resUsedKey;
-                for(const m in res)if (Object.prototype.hasOwnProperty.call(res, m)) {
-                    const deepKey = `${newKeyToUse}${keySeparator}${m}`;
-                    copy[m] = this.translate(deepKey, {
-                        ...options,
-                        joinArrays: false,
-                        ns: namespaces
-                    });
-                    if (copy[m] === deepKey) copy[m] = res[m];
-                }
-                res = copy;
-            }
-        } else if (handleAsObjectInI18nFormat && $1bac384020b50752$var$isString(joinArrays) && Array.isArray(res)) {
-            res = res.join(joinArrays);
-            if (res) res = this.extendTranslation(res, keys, options, lastKey);
-        } else {
-            let usedDefault = false;
-            let usedKey = false;
-            const needsPluralHandling = options.count !== undefined && !$1bac384020b50752$var$isString(options.count);
-            const hasDefaultValue = $1bac384020b50752$var$Translator.hasDefaultValue(options);
-            const defaultValueSuffix = needsPluralHandling ? this.pluralResolver.getSuffix(lng, options.count, options) : '';
-            const defaultValueSuffixOrdinalFallback = options.ordinal && needsPluralHandling ? this.pluralResolver.getSuffix(lng, options.count, {
-                ordinal: false
-            }) : '';
-            const needsZeroSuffixLookup = needsPluralHandling && !options.ordinal && options.count === 0 && this.pluralResolver.shouldUseIntlApi();
-            const defaultValue = needsZeroSuffixLookup && options[`defaultValue${this.options.pluralSeparator}zero`] || options[`defaultValue${defaultValueSuffix}`] || options[`defaultValue${defaultValueSuffixOrdinalFallback}`] || options.defaultValue;
-            if (!this.isValidLookup(res) && hasDefaultValue) {
-                usedDefault = true;
-                res = defaultValue;
-            }
-            if (!this.isValidLookup(res)) {
-                usedKey = true;
-                res = key;
-            }
-            const missingKeyNoValueFallbackToKey = options.missingKeyNoValueFallbackToKey || this.options.missingKeyNoValueFallbackToKey;
-            const resForMissing = missingKeyNoValueFallbackToKey && usedKey ? undefined : res;
-            const updateMissing = hasDefaultValue && defaultValue !== res && this.options.updateMissing;
-            if (usedKey || usedDefault || updateMissing) {
-                this.logger.log(updateMissing ? 'updateKey' : 'missingKey', lng, namespace, key, updateMissing ? defaultValue : res);
-                if (keySeparator) {
-                    const fk = this.resolve(key, {
-                        ...options,
-                        keySeparator: false
-                    });
-                    if (fk && fk.res) this.logger.warn('Seems the loaded translations were in flat JSON format instead of nested. Either set keySeparator: false on init or make sure your translations are published in nested format.');
-                }
-                let lngs = [];
-                const fallbackLngs = this.languageUtils.getFallbackCodes(this.options.fallbackLng, options.lng || this.language);
-                if (this.options.saveMissingTo === 'fallback' && fallbackLngs && fallbackLngs[0]) for(let i = 0; i < fallbackLngs.length; i++)lngs.push(fallbackLngs[i]);
-                else if (this.options.saveMissingTo === 'all') lngs = this.languageUtils.toResolveHierarchy(options.lng || this.language);
-                else lngs.push(options.lng || this.language);
-                const send = (l, k, specificDefaultValue)=>{
-                    const defaultForMissing = hasDefaultValue && specificDefaultValue !== res ? specificDefaultValue : resForMissing;
-                    if (this.options.missingKeyHandler) this.options.missingKeyHandler(l, namespace, k, defaultForMissing, updateMissing, options);
-                    else if (this.backendConnector && this.backendConnector.saveMissing) this.backendConnector.saveMissing(l, namespace, k, defaultForMissing, updateMissing, options);
-                    this.emit('missingKey', l, namespace, k, res);
-                };
-                if (this.options.saveMissing) {
-                    if (this.options.saveMissingPlurals && needsPluralHandling) lngs.forEach((language)=>{
-                        const suffixes = this.pluralResolver.getSuffixes(language, options);
-                        if (needsZeroSuffixLookup && options[`defaultValue${this.options.pluralSeparator}zero`] && suffixes.indexOf(`${this.options.pluralSeparator}zero`) < 0) suffixes.push(`${this.options.pluralSeparator}zero`);
-                        suffixes.forEach((suffix)=>{
-                            send([
-                                language
-                            ], key + suffix, options[`defaultValue${suffix}`] || defaultValue);
-                        });
-                    });
-                    else send(lngs, key, defaultValue);
-                }
-            }
-            res = this.extendTranslation(res, keys, options, resolved, lastKey);
-            if (usedKey && res === key && this.options.appendNamespaceToMissingKey) res = `${namespace}:${key}`;
-            if ((usedKey || usedDefault) && this.options.parseMissingKeyHandler) {
-                if (this.options.compatibilityAPI !== 'v1') res = this.options.parseMissingKeyHandler(this.options.appendNamespaceToMissingKey ? `${namespace}:${key}` : key, usedDefault ? res : undefined);
-                else res = this.options.parseMissingKeyHandler(res);
-            }
-        }
-        if (returnDetails) {
-            resolved.res = res;
-            resolved.usedParams = this.getUsedParamsDetails(options);
-            return resolved;
-        }
-        return res;
-    }
-    extendTranslation(res, key, options, resolved, lastKey) {
-        var _this = this;
-        if (this.i18nFormat && this.i18nFormat.parse) res = this.i18nFormat.parse(res, {
-            ...this.options.interpolation.defaultVariables,
-            ...options
-        }, options.lng || this.language || resolved.usedLng, resolved.usedNS, resolved.usedKey, {
-            resolved: resolved
-        });
-        else if (!options.skipInterpolation) {
-            if (options.interpolation) this.interpolator.init({
-                ...options,
-                interpolation: {
-                    ...this.options.interpolation,
-                    ...options.interpolation
-                }
-            });
-            const skipOnVariables = $1bac384020b50752$var$isString(res) && (options && options.interpolation && options.interpolation.skipOnVariables !== undefined ? options.interpolation.skipOnVariables : this.options.interpolation.skipOnVariables);
-            let nestBef;
-            if (skipOnVariables) {
-                const nb = res.match(this.interpolator.nestingRegexp);
-                nestBef = nb && nb.length;
-            }
-            let data = options.replace && !$1bac384020b50752$var$isString(options.replace) ? options.replace : options;
-            if (this.options.interpolation.defaultVariables) data = {
-                ...this.options.interpolation.defaultVariables,
-                ...data
-            };
-            res = this.interpolator.interpolate(res, data, options.lng || this.language || resolved.usedLng, options);
-            if (skipOnVariables) {
-                const na = res.match(this.interpolator.nestingRegexp);
-                const nestAft = na && na.length;
-                if (nestBef < nestAft) options.nest = false;
-            }
-            if (!options.lng && this.options.compatibilityAPI !== 'v1' && resolved && resolved.res) options.lng = this.language || resolved.usedLng;
-            if (options.nest !== false) res = this.interpolator.nest(res, function() {
-                for(var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++)args[_key] = arguments[_key];
-                if (lastKey && lastKey[0] === args[0] && !options.context) {
-                    _this.logger.warn(`It seems you are nesting recursively key: ${args[0]} in key: ${key[0]}`);
-                    return null;
-                }
-                return _this.translate(...args, key);
-            }, options);
-            if (options.interpolation) this.interpolator.reset();
-        }
-        const postProcess = options.postProcess || this.options.postProcess;
-        const postProcessorNames = $1bac384020b50752$var$isString(postProcess) ? [
-            postProcess
-        ] : postProcess;
-        if (res !== undefined && res !== null && postProcessorNames && postProcessorNames.length && options.applyPostProcessor !== false) res = $1bac384020b50752$var$postProcessor.handle(postProcessorNames, res, key, this.options && this.options.postProcessPassResolved ? {
-            i18nResolved: {
-                ...resolved,
-                usedParams: this.getUsedParamsDetails(options)
-            },
-            ...options
-        } : options, this);
-        return res;
-    }
-    resolve(keys) {
-        let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-        let found;
-        let usedKey;
-        let exactUsedKey;
-        let usedLng;
-        let usedNS;
-        if ($1bac384020b50752$var$isString(keys)) keys = [
-            keys
-        ];
-        keys.forEach((k)=>{
-            if (this.isValidLookup(found)) return;
-            const extracted = this.extractFromKey(k, options);
-            const key = extracted.key;
-            usedKey = key;
-            let namespaces = extracted.namespaces;
-            if (this.options.fallbackNS) namespaces = namespaces.concat(this.options.fallbackNS);
-            const needsPluralHandling = options.count !== undefined && !$1bac384020b50752$var$isString(options.count);
-            const needsZeroSuffixLookup = needsPluralHandling && !options.ordinal && options.count === 0 && this.pluralResolver.shouldUseIntlApi();
-            const needsContextHandling = options.context !== undefined && ($1bac384020b50752$var$isString(options.context) || typeof options.context === 'number') && options.context !== '';
-            const codes = options.lngs ? options.lngs : this.languageUtils.toResolveHierarchy(options.lng || this.language, options.fallbackLng);
-            namespaces.forEach((ns)=>{
-                if (this.isValidLookup(found)) return;
-                usedNS = ns;
-                if (!$1bac384020b50752$var$checkedLoadedFor[`${codes[0]}-${ns}`] && this.utils && this.utils.hasLoadedNamespace && !this.utils.hasLoadedNamespace(usedNS)) {
-                    $1bac384020b50752$var$checkedLoadedFor[`${codes[0]}-${ns}`] = true;
-                    this.logger.warn(`key "${usedKey}" for languages "${codes.join(', ')}" won't get resolved as namespace "${usedNS}" was not yet loaded`, 'This means something IS WRONG in your setup. You access the t function before i18next.init / i18next.loadNamespace / i18next.changeLanguage was done. Wait for the callback or Promise to resolve before accessing it!!!');
-                }
-                codes.forEach((code)=>{
-                    if (this.isValidLookup(found)) return;
-                    usedLng = code;
-                    const finalKeys = [
-                        key
-                    ];
-                    if (this.i18nFormat && this.i18nFormat.addLookupKeys) this.i18nFormat.addLookupKeys(finalKeys, key, code, ns, options);
-                    else {
-                        let pluralSuffix;
-                        if (needsPluralHandling) pluralSuffix = this.pluralResolver.getSuffix(code, options.count, options);
-                        const zeroSuffix = `${this.options.pluralSeparator}zero`;
-                        const ordinalPrefix = `${this.options.pluralSeparator}ordinal${this.options.pluralSeparator}`;
-                        if (needsPluralHandling) {
-                            finalKeys.push(key + pluralSuffix);
-                            if (options.ordinal && pluralSuffix.indexOf(ordinalPrefix) === 0) finalKeys.push(key + pluralSuffix.replace(ordinalPrefix, this.options.pluralSeparator));
-                            if (needsZeroSuffixLookup) finalKeys.push(key + zeroSuffix);
-                        }
-                        if (needsContextHandling) {
-                            const contextKey = `${key}${this.options.contextSeparator}${options.context}`;
-                            finalKeys.push(contextKey);
-                            if (needsPluralHandling) {
-                                finalKeys.push(contextKey + pluralSuffix);
-                                if (options.ordinal && pluralSuffix.indexOf(ordinalPrefix) === 0) finalKeys.push(contextKey + pluralSuffix.replace(ordinalPrefix, this.options.pluralSeparator));
-                                if (needsZeroSuffixLookup) finalKeys.push(contextKey + zeroSuffix);
-                            }
-                        }
-                    }
-                    let possibleKey;
-                    while(possibleKey = finalKeys.pop())if (!this.isValidLookup(found)) {
-                        exactUsedKey = possibleKey;
-                        found = this.getResource(code, ns, possibleKey, options);
-                    }
-                });
-            });
-        });
-        return {
-            res: found,
-            usedKey: usedKey,
-            exactUsedKey: exactUsedKey,
-            usedLng: usedLng,
-            usedNS: usedNS
-        };
-    }
-    isValidLookup(res) {
-        return res !== undefined && !(!this.options.returnNull && res === null) && !(!this.options.returnEmptyString && res === '');
-    }
-    getResource(code, ns, key) {
-        let options = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
-        if (this.i18nFormat && this.i18nFormat.getResource) return this.i18nFormat.getResource(code, ns, key, options);
-        return this.resourceStore.getResource(code, ns, key, options);
-    }
-    getUsedParamsDetails() {
-        let options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-        const optionsKeys = [
-            'defaultValue',
-            'ordinal',
-            'context',
-            'replace',
-            'lng',
-            'lngs',
-            'fallbackLng',
-            'ns',
-            'keySeparator',
-            'nsSeparator',
-            'returnObjects',
-            'returnDetails',
-            'joinArrays',
-            'postProcess',
-            'interpolation'
-        ];
-        const useOptionsReplaceForData = options.replace && !$1bac384020b50752$var$isString(options.replace);
-        let data = useOptionsReplaceForData ? options.replace : options;
-        if (useOptionsReplaceForData && typeof options.count !== 'undefined') data.count = options.count;
-        if (this.options.interpolation.defaultVariables) data = {
-            ...this.options.interpolation.defaultVariables,
-            ...data
-        };
-        if (!useOptionsReplaceForData) {
-            data = {
-                ...data
-            };
-            for (const key of optionsKeys)delete data[key];
-        }
-        return data;
-    }
-    static hasDefaultValue(options) {
-        const prefix = 'defaultValue';
-        for(const option in options){
-            if (Object.prototype.hasOwnProperty.call(options, option) && prefix === option.substring(0, prefix.length) && undefined !== options[option]) return true;
-        }
-        return false;
-    }
-}
-const $1bac384020b50752$var$capitalize = (string)=>string.charAt(0).toUpperCase() + string.slice(1);
-class $1bac384020b50752$var$LanguageUtil {
-    constructor(options){
-        this.options = options;
-        this.supportedLngs = this.options.supportedLngs || false;
-        this.logger = $1bac384020b50752$var$baseLogger.create('languageUtils');
-    }
-    getScriptPartFromCode(code) {
-        code = $1bac384020b50752$var$getCleanedCode(code);
-        if (!code || code.indexOf('-') < 0) return null;
-        const p = code.split('-');
-        if (p.length === 2) return null;
-        p.pop();
-        if (p[p.length - 1].toLowerCase() === 'x') return null;
-        return this.formatLanguageCode(p.join('-'));
-    }
-    getLanguagePartFromCode(code) {
-        code = $1bac384020b50752$var$getCleanedCode(code);
-        if (!code || code.indexOf('-') < 0) return code;
-        const p = code.split('-');
-        return this.formatLanguageCode(p[0]);
-    }
-    formatLanguageCode(code) {
-        if ($1bac384020b50752$var$isString(code) && code.indexOf('-') > -1) {
-            if (typeof Intl !== 'undefined' && typeof Intl.getCanonicalLocales !== 'undefined') try {
-                let formattedCode = Intl.getCanonicalLocales(code)[0];
-                if (formattedCode && this.options.lowerCaseLng) formattedCode = formattedCode.toLowerCase();
-                if (formattedCode) return formattedCode;
-            } catch (e) {}
-            const specialCases = [
-                'hans',
-                'hant',
-                'latn',
-                'cyrl',
-                'cans',
-                'mong',
-                'arab'
-            ];
-            let p = code.split('-');
-            if (this.options.lowerCaseLng) p = p.map((part)=>part.toLowerCase());
-            else if (p.length === 2) {
-                p[0] = p[0].toLowerCase();
-                p[1] = p[1].toUpperCase();
-                if (specialCases.indexOf(p[1].toLowerCase()) > -1) p[1] = $1bac384020b50752$var$capitalize(p[1].toLowerCase());
-            } else if (p.length === 3) {
-                p[0] = p[0].toLowerCase();
-                if (p[1].length === 2) p[1] = p[1].toUpperCase();
-                if (p[0] !== 'sgn' && p[2].length === 2) p[2] = p[2].toUpperCase();
-                if (specialCases.indexOf(p[1].toLowerCase()) > -1) p[1] = $1bac384020b50752$var$capitalize(p[1].toLowerCase());
-                if (specialCases.indexOf(p[2].toLowerCase()) > -1) p[2] = $1bac384020b50752$var$capitalize(p[2].toLowerCase());
-            }
-            return p.join('-');
-        }
-        return this.options.cleanCode || this.options.lowerCaseLng ? code.toLowerCase() : code;
-    }
-    isSupportedCode(code) {
-        if (this.options.load === 'languageOnly' || this.options.nonExplicitSupportedLngs) code = this.getLanguagePartFromCode(code);
-        return !this.supportedLngs || !this.supportedLngs.length || this.supportedLngs.indexOf(code) > -1;
-    }
-    getBestMatchFromCodes(codes) {
-        if (!codes) return null;
-        let found;
-        codes.forEach((code)=>{
-            if (found) return;
-            const cleanedLng = this.formatLanguageCode(code);
-            if (!this.options.supportedLngs || this.isSupportedCode(cleanedLng)) found = cleanedLng;
-        });
-        if (!found && this.options.supportedLngs) codes.forEach((code)=>{
-            if (found) return;
-            const lngOnly = this.getLanguagePartFromCode(code);
-            if (this.isSupportedCode(lngOnly)) return found = lngOnly;
-            found = this.options.supportedLngs.find((supportedLng)=>{
-                if (supportedLng === lngOnly) return supportedLng;
-                if (supportedLng.indexOf('-') < 0 && lngOnly.indexOf('-') < 0) return;
-                if (supportedLng.indexOf('-') > 0 && lngOnly.indexOf('-') < 0 && supportedLng.substring(0, supportedLng.indexOf('-')) === lngOnly) return supportedLng;
-                if (supportedLng.indexOf(lngOnly) === 0 && lngOnly.length > 1) return supportedLng;
-            });
-        });
-        if (!found) found = this.getFallbackCodes(this.options.fallbackLng)[0];
-        return found;
-    }
-    getFallbackCodes(fallbacks, code) {
-        if (!fallbacks) return [];
-        if (typeof fallbacks === 'function') fallbacks = fallbacks(code);
-        if ($1bac384020b50752$var$isString(fallbacks)) fallbacks = [
-            fallbacks
-        ];
-        if (Array.isArray(fallbacks)) return fallbacks;
-        if (!code) return fallbacks.default || [];
-        let found = fallbacks[code];
-        if (!found) found = fallbacks[this.getScriptPartFromCode(code)];
-        if (!found) found = fallbacks[this.formatLanguageCode(code)];
-        if (!found) found = fallbacks[this.getLanguagePartFromCode(code)];
-        if (!found) found = fallbacks.default;
-        return found || [];
-    }
-    toResolveHierarchy(code, fallbackCode) {
-        const fallbackCodes = this.getFallbackCodes(fallbackCode || this.options.fallbackLng || [], code);
-        const codes = [];
-        const addCode = (c)=>{
-            if (!c) return;
-            if (this.isSupportedCode(c)) codes.push(c);
-            else this.logger.warn(`rejecting language code not found in supportedLngs: ${c}`);
-        };
-        if ($1bac384020b50752$var$isString(code) && (code.indexOf('-') > -1 || code.indexOf('_') > -1)) {
-            if (this.options.load !== 'languageOnly') addCode(this.formatLanguageCode(code));
-            if (this.options.load !== 'languageOnly' && this.options.load !== 'currentOnly') addCode(this.getScriptPartFromCode(code));
-            if (this.options.load !== 'currentOnly') addCode(this.getLanguagePartFromCode(code));
-        } else if ($1bac384020b50752$var$isString(code)) addCode(this.formatLanguageCode(code));
-        fallbackCodes.forEach((fc)=>{
-            if (codes.indexOf(fc) < 0) addCode(this.formatLanguageCode(fc));
-        });
-        return codes;
-    }
-}
-let $1bac384020b50752$var$sets = [
-    {
-        lngs: [
-            'ach',
-            'ak',
-            'am',
-            'arn',
-            'br',
-            'fil',
-            'gun',
-            'ln',
-            'mfe',
-            'mg',
-            'mi',
-            'oc',
-            'pt',
-            'pt-BR',
-            'tg',
-            'tl',
-            'ti',
-            'tr',
-            'uz',
-            'wa'
-        ],
-        nr: [
-            1,
-            2
-        ],
-        fc: 1
-    },
-    {
-        lngs: [
-            'af',
-            'an',
-            'ast',
-            'az',
-            'bg',
-            'bn',
-            'ca',
-            'da',
-            'de',
-            'dev',
-            'el',
-            'en',
-            'eo',
-            'es',
-            'et',
-            'eu',
-            'fi',
-            'fo',
-            'fur',
-            'fy',
-            'gl',
-            'gu',
-            'ha',
-            'hi',
-            'hu',
-            'hy',
-            'ia',
-            'it',
-            'kk',
-            'kn',
-            'ku',
-            'lb',
-            'mai',
-            'ml',
-            'mn',
-            'mr',
-            'nah',
-            'nap',
-            'nb',
-            'ne',
-            'nl',
-            'nn',
-            'no',
-            'nso',
-            'pa',
-            'pap',
-            'pms',
-            'ps',
-            'pt-PT',
-            'rm',
-            'sco',
-            'se',
-            'si',
-            'so',
-            'son',
-            'sq',
-            'sv',
-            'sw',
-            'ta',
-            'te',
-            'tk',
-            'ur',
-            'yo'
-        ],
-        nr: [
-            1,
-            2
-        ],
-        fc: 2
-    },
-    {
-        lngs: [
-            'ay',
-            'bo',
-            'cgg',
-            'fa',
-            'ht',
-            'id',
-            'ja',
-            'jbo',
-            'ka',
-            'km',
-            'ko',
-            'ky',
-            'lo',
-            'ms',
-            'sah',
-            'su',
-            'th',
-            'tt',
-            'ug',
-            'vi',
-            'wo',
-            'zh'
-        ],
-        nr: [
-            1
-        ],
-        fc: 3
-    },
-    {
-        lngs: [
-            'be',
-            'bs',
-            'cnr',
-            'dz',
-            'hr',
-            'ru',
-            'sr',
-            'uk'
-        ],
-        nr: [
-            1,
-            2,
-            5
-        ],
-        fc: 4
-    },
-    {
-        lngs: [
-            'ar'
-        ],
-        nr: [
-            0,
-            1,
-            2,
-            3,
-            11,
-            100
-        ],
-        fc: 5
-    },
-    {
-        lngs: [
-            'cs',
-            'sk'
-        ],
-        nr: [
-            1,
-            2,
-            5
-        ],
-        fc: 6
-    },
-    {
-        lngs: [
-            'csb',
-            'pl'
-        ],
-        nr: [
-            1,
-            2,
-            5
-        ],
-        fc: 7
-    },
-    {
-        lngs: [
-            'cy'
-        ],
-        nr: [
-            1,
-            2,
-            3,
-            8
-        ],
-        fc: 8
-    },
-    {
-        lngs: [
-            'fr'
-        ],
-        nr: [
-            1,
-            2
-        ],
-        fc: 9
-    },
-    {
-        lngs: [
-            'ga'
-        ],
-        nr: [
-            1,
-            2,
-            3,
-            7,
-            11
-        ],
-        fc: 10
-    },
-    {
-        lngs: [
-            'gd'
-        ],
-        nr: [
-            1,
-            2,
-            3,
-            20
-        ],
-        fc: 11
-    },
-    {
-        lngs: [
-            'is'
-        ],
-        nr: [
-            1,
-            2
-        ],
-        fc: 12
-    },
-    {
-        lngs: [
-            'jv'
-        ],
-        nr: [
-            0,
-            1
-        ],
-        fc: 13
-    },
-    {
-        lngs: [
-            'kw'
-        ],
-        nr: [
-            1,
-            2,
-            3,
-            4
-        ],
-        fc: 14
-    },
-    {
-        lngs: [
-            'lt'
-        ],
-        nr: [
-            1,
-            2,
-            10
-        ],
-        fc: 15
-    },
-    {
-        lngs: [
-            'lv'
-        ],
-        nr: [
-            1,
-            2,
-            0
-        ],
-        fc: 16
-    },
-    {
-        lngs: [
-            'mk'
-        ],
-        nr: [
-            1,
-            2
-        ],
-        fc: 17
-    },
-    {
-        lngs: [
-            'mnk'
-        ],
-        nr: [
-            0,
-            1,
-            2
-        ],
-        fc: 18
-    },
-    {
-        lngs: [
-            'mt'
-        ],
-        nr: [
-            1,
-            2,
-            11,
-            20
-        ],
-        fc: 19
-    },
-    {
-        lngs: [
-            'or'
-        ],
-        nr: [
-            2,
-            1
-        ],
-        fc: 2
-    },
-    {
-        lngs: [
-            'ro'
-        ],
-        nr: [
-            1,
-            2,
-            20
-        ],
-        fc: 20
-    },
-    {
-        lngs: [
-            'sl'
-        ],
-        nr: [
-            5,
-            1,
-            2,
-            3
-        ],
-        fc: 21
-    },
-    {
-        lngs: [
-            'he',
-            'iw'
-        ],
-        nr: [
-            1,
-            2,
-            20,
-            21
-        ],
-        fc: 22
-    }
-];
-let $1bac384020b50752$var$_rulesPluralsTypes = {
-    1: (n)=>Number(n > 1),
-    2: (n)=>Number(n != 1),
-    3: (n)=>0,
-    4: (n)=>Number(n % 10 == 1 && n % 100 != 11 ? 0 : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 1 : 2),
-    5: (n)=>Number(n == 0 ? 0 : n == 1 ? 1 : n == 2 ? 2 : n % 100 >= 3 && n % 100 <= 10 ? 3 : n % 100 >= 11 ? 4 : 5),
-    6: (n)=>Number(n == 1 ? 0 : n >= 2 && n <= 4 ? 1 : 2),
-    7: (n)=>Number(n == 1 ? 0 : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 1 : 2),
-    8: (n)=>Number(n == 1 ? 0 : n == 2 ? 1 : n != 8 && n != 11 ? 2 : 3),
-    9: (n)=>Number(n >= 2),
-    10: (n)=>Number(n == 1 ? 0 : n == 2 ? 1 : n < 7 ? 2 : n < 11 ? 3 : 4),
-    11: (n)=>Number(n == 1 || n == 11 ? 0 : n == 2 || n == 12 ? 1 : n > 2 && n < 20 ? 2 : 3),
-    12: (n)=>Number(n % 10 != 1 || n % 100 == 11),
-    13: (n)=>Number(n !== 0),
-    14: (n)=>Number(n == 1 ? 0 : n == 2 ? 1 : n == 3 ? 2 : 3),
-    15: (n)=>Number(n % 10 == 1 && n % 100 != 11 ? 0 : n % 10 >= 2 && (n % 100 < 10 || n % 100 >= 20) ? 1 : 2),
-    16: (n)=>Number(n % 10 == 1 && n % 100 != 11 ? 0 : n !== 0 ? 1 : 2),
-    17: (n)=>Number(n == 1 || n % 10 == 1 && n % 100 != 11 ? 0 : 1),
-    18: (n)=>Number(n == 0 ? 0 : n == 1 ? 1 : 2),
-    19: (n)=>Number(n == 1 ? 0 : n == 0 || n % 100 > 1 && n % 100 < 11 ? 1 : n % 100 > 10 && n % 100 < 20 ? 2 : 3),
-    20: (n)=>Number(n == 1 ? 0 : n == 0 || n % 100 > 0 && n % 100 < 20 ? 1 : 2),
-    21: (n)=>Number(n % 100 == 1 ? 1 : n % 100 == 2 ? 2 : n % 100 == 3 || n % 100 == 4 ? 3 : 0),
-    22: (n)=>Number(n == 1 ? 0 : n == 2 ? 1 : (n < 0 || n > 10) && n % 10 == 0 ? 2 : 3)
-};
-const $1bac384020b50752$var$nonIntlVersions = [
-    'v1',
-    'v2',
-    'v3'
-];
-const $1bac384020b50752$var$intlVersions = [
-    'v4'
-];
-const $1bac384020b50752$var$suffixesOrder = {
-    zero: 0,
-    one: 1,
-    two: 2,
-    few: 3,
-    many: 4,
-    other: 5
-};
-const $1bac384020b50752$var$createRules = ()=>{
-    const rules = {};
-    $1bac384020b50752$var$sets.forEach((set)=>{
-        set.lngs.forEach((l)=>{
-            rules[l] = {
-                numbers: set.nr,
-                plurals: $1bac384020b50752$var$_rulesPluralsTypes[set.fc]
-            };
-        });
-    });
-    return rules;
-};
-class $1bac384020b50752$var$PluralResolver {
-    constructor(languageUtils){
-        let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-        this.languageUtils = languageUtils;
-        this.options = options;
-        this.logger = $1bac384020b50752$var$baseLogger.create('pluralResolver');
-        if ((!this.options.compatibilityJSON || $1bac384020b50752$var$intlVersions.includes(this.options.compatibilityJSON)) && (typeof Intl === 'undefined' || !Intl.PluralRules)) {
-            this.options.compatibilityJSON = 'v3';
-            this.logger.error('Your environment seems not to be Intl API compatible, use an Intl.PluralRules polyfill. Will fallback to the compatibilityJSON v3 format handling.');
-        }
-        this.rules = $1bac384020b50752$var$createRules();
-        this.pluralRulesCache = {};
-    }
-    addRule(lng, obj) {
-        this.rules[lng] = obj;
-    }
-    clearCache() {
-        this.pluralRulesCache = {};
-    }
-    getRule(code) {
-        let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-        if (this.shouldUseIntlApi()) {
-            const cleanedCode = $1bac384020b50752$var$getCleanedCode(code === 'dev' ? 'en' : code);
-            const type = options.ordinal ? 'ordinal' : 'cardinal';
-            const cacheKey = JSON.stringify({
-                cleanedCode: cleanedCode,
-                type: type
-            });
-            if (cacheKey in this.pluralRulesCache) return this.pluralRulesCache[cacheKey];
-            let rule;
-            try {
-                rule = new Intl.PluralRules(cleanedCode, {
-                    type: type
-                });
-            } catch (err) {
-                if (!code.match(/-|_/)) return;
-                const lngPart = this.languageUtils.getLanguagePartFromCode(code);
-                rule = this.getRule(lngPart, options);
-            }
-            this.pluralRulesCache[cacheKey] = rule;
-            return rule;
-        }
-        return this.rules[code] || this.rules[this.languageUtils.getLanguagePartFromCode(code)];
-    }
-    needsPlural(code) {
-        let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-        const rule = this.getRule(code, options);
-        if (this.shouldUseIntlApi()) return rule && rule.resolvedOptions().pluralCategories.length > 1;
-        return rule && rule.numbers.length > 1;
-    }
-    getPluralFormsOfKey(code, key) {
-        let options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-        return this.getSuffixes(code, options).map((suffix)=>`${key}${suffix}`);
-    }
-    getSuffixes(code) {
-        let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-        const rule = this.getRule(code, options);
-        if (!rule) return [];
-        if (this.shouldUseIntlApi()) return rule.resolvedOptions().pluralCategories.sort((pluralCategory1, pluralCategory2)=>$1bac384020b50752$var$suffixesOrder[pluralCategory1] - $1bac384020b50752$var$suffixesOrder[pluralCategory2]).map((pluralCategory)=>`${this.options.prepend}${options.ordinal ? `ordinal${this.options.prepend}` : ''}${pluralCategory}`);
-        return rule.numbers.map((number)=>this.getSuffix(code, number, options));
-    }
-    getSuffix(code, count) {
-        let options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-        const rule = this.getRule(code, options);
-        if (rule) {
-            if (this.shouldUseIntlApi()) return `${this.options.prepend}${options.ordinal ? `ordinal${this.options.prepend}` : ''}${rule.select(count)}`;
-            return this.getSuffixRetroCompatible(rule, count);
-        }
-        this.logger.warn(`no plural rule found for: ${code}`);
-        return '';
-    }
-    getSuffixRetroCompatible(rule, count) {
-        const idx = rule.noAbs ? rule.plurals(count) : rule.plurals(Math.abs(count));
-        let suffix = rule.numbers[idx];
-        if (this.options.simplifyPluralSuffix && rule.numbers.length === 2 && rule.numbers[0] === 1) {
-            if (suffix === 2) suffix = 'plural';
-            else if (suffix === 1) suffix = '';
-        }
-        const returnSuffix = ()=>this.options.prepend && suffix.toString() ? this.options.prepend + suffix.toString() : suffix.toString();
-        if (this.options.compatibilityJSON === 'v1') {
-            if (suffix === 1) return '';
-            if (typeof suffix === 'number') return `_plural_${suffix.toString()}`;
-            return returnSuffix();
-        } else if (this.options.compatibilityJSON === 'v2') return returnSuffix();
-        else if (this.options.simplifyPluralSuffix && rule.numbers.length === 2 && rule.numbers[0] === 1) return returnSuffix();
-        return this.options.prepend && idx.toString() ? this.options.prepend + idx.toString() : idx.toString();
-    }
-    shouldUseIntlApi() {
-        return !$1bac384020b50752$var$nonIntlVersions.includes(this.options.compatibilityJSON);
-    }
-}
-const $1bac384020b50752$var$deepFindWithDefaults = function(data, defaultData, key) {
-    let keySeparator = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : '.';
-    let ignoreJSONStructure = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : true;
-    let path = $1bac384020b50752$var$getPathWithDefaults(data, defaultData, key);
-    if (!path && ignoreJSONStructure && $1bac384020b50752$var$isString(key)) {
-        path = $1bac384020b50752$var$deepFind(data, key, keySeparator);
-        if (path === undefined) path = $1bac384020b50752$var$deepFind(defaultData, key, keySeparator);
-    }
-    return path;
-};
-const $1bac384020b50752$var$regexSafe = (val)=>val.replace(/\$/g, '$$$$');
-class $1bac384020b50752$var$Interpolator {
-    constructor(){
-        let options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-        this.logger = $1bac384020b50752$var$baseLogger.create('interpolator');
-        this.options = options;
-        this.format = options.interpolation && options.interpolation.format || ((value)=>value);
-        this.init(options);
-    }
-    init() {
-        let options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-        if (!options.interpolation) options.interpolation = {
-            escapeValue: true
-        };
-        const { escape: escape$1, escapeValue: escapeValue, useRawValueToEscape: useRawValueToEscape, prefix: prefix, prefixEscaped: prefixEscaped, suffix: suffix, suffixEscaped: suffixEscaped, formatSeparator: formatSeparator, unescapeSuffix: unescapeSuffix, unescapePrefix: unescapePrefix, nestingPrefix: nestingPrefix, nestingPrefixEscaped: nestingPrefixEscaped, nestingSuffix: nestingSuffix, nestingSuffixEscaped: nestingSuffixEscaped, nestingOptionsSeparator: nestingOptionsSeparator, maxReplaces: maxReplaces, alwaysFormat: alwaysFormat } = options.interpolation;
-        this.escape = escape$1 !== undefined ? escape$1 : $1bac384020b50752$var$escape;
-        this.escapeValue = escapeValue !== undefined ? escapeValue : true;
-        this.useRawValueToEscape = useRawValueToEscape !== undefined ? useRawValueToEscape : false;
-        this.prefix = prefix ? $1bac384020b50752$var$regexEscape(prefix) : prefixEscaped || '{{';
-        this.suffix = suffix ? $1bac384020b50752$var$regexEscape(suffix) : suffixEscaped || '}}';
-        this.formatSeparator = formatSeparator || ',';
-        this.unescapePrefix = unescapeSuffix ? '' : unescapePrefix || '-';
-        this.unescapeSuffix = this.unescapePrefix ? '' : unescapeSuffix || '';
-        this.nestingPrefix = nestingPrefix ? $1bac384020b50752$var$regexEscape(nestingPrefix) : nestingPrefixEscaped || $1bac384020b50752$var$regexEscape('$t(');
-        this.nestingSuffix = nestingSuffix ? $1bac384020b50752$var$regexEscape(nestingSuffix) : nestingSuffixEscaped || $1bac384020b50752$var$regexEscape(')');
-        this.nestingOptionsSeparator = nestingOptionsSeparator || ',';
-        this.maxReplaces = maxReplaces || 1000;
-        this.alwaysFormat = alwaysFormat !== undefined ? alwaysFormat : false;
-        this.resetRegExp();
-    }
-    reset() {
-        if (this.options) this.init(this.options);
-    }
-    resetRegExp() {
-        const getOrResetRegExp = (existingRegExp, pattern)=>{
-            if (existingRegExp && existingRegExp.source === pattern) {
-                existingRegExp.lastIndex = 0;
-                return existingRegExp;
-            }
-            return new RegExp(pattern, 'g');
-        };
-        this.regexp = getOrResetRegExp(this.regexp, `${this.prefix}(.+?)${this.suffix}`);
-        this.regexpUnescape = getOrResetRegExp(this.regexpUnescape, `${this.prefix}${this.unescapePrefix}(.+?)${this.unescapeSuffix}${this.suffix}`);
-        this.nestingRegexp = getOrResetRegExp(this.nestingRegexp, `${this.nestingPrefix}(.+?)${this.nestingSuffix}`);
-    }
-    interpolate(str, data, lng, options) {
-        let match;
-        let value;
-        let replaces;
-        const defaultData = this.options && this.options.interpolation && this.options.interpolation.defaultVariables || {};
-        const handleFormat = (key)=>{
-            if (key.indexOf(this.formatSeparator) < 0) {
-                const path = $1bac384020b50752$var$deepFindWithDefaults(data, defaultData, key, this.options.keySeparator, this.options.ignoreJSONStructure);
-                return this.alwaysFormat ? this.format(path, undefined, lng, {
-                    ...options,
-                    ...data,
-                    interpolationkey: key
-                }) : path;
-            }
-            const p = key.split(this.formatSeparator);
-            const k = p.shift().trim();
-            const f = p.join(this.formatSeparator).trim();
-            return this.format($1bac384020b50752$var$deepFindWithDefaults(data, defaultData, k, this.options.keySeparator, this.options.ignoreJSONStructure), f, lng, {
-                ...options,
-                ...data,
-                interpolationkey: k
-            });
-        };
-        this.resetRegExp();
-        const missingInterpolationHandler = options && options.missingInterpolationHandler || this.options.missingInterpolationHandler;
-        const skipOnVariables = options && options.interpolation && options.interpolation.skipOnVariables !== undefined ? options.interpolation.skipOnVariables : this.options.interpolation.skipOnVariables;
-        const todos = [
-            {
-                regex: this.regexpUnescape,
-                safeValue: (val)=>$1bac384020b50752$var$regexSafe(val)
-            },
-            {
-                regex: this.regexp,
-                safeValue: (val)=>this.escapeValue ? $1bac384020b50752$var$regexSafe(this.escape(val)) : $1bac384020b50752$var$regexSafe(val)
-            }
-        ];
-        todos.forEach((todo)=>{
-            replaces = 0;
-            while(match = todo.regex.exec(str)){
-                const matchedVar = match[1].trim();
-                value = handleFormat(matchedVar);
-                if (value === undefined) {
-                    if (typeof missingInterpolationHandler === 'function') {
-                        const temp = missingInterpolationHandler(str, match, options);
-                        value = $1bac384020b50752$var$isString(temp) ? temp : '';
-                    } else if (options && Object.prototype.hasOwnProperty.call(options, matchedVar)) value = '';
-                    else if (skipOnVariables) {
-                        value = match[0];
-                        continue;
-                    } else {
-                        this.logger.warn(`missed to pass in variable ${matchedVar} for interpolating ${str}`);
-                        value = '';
-                    }
-                } else if (!$1bac384020b50752$var$isString(value) && !this.useRawValueToEscape) value = $1bac384020b50752$var$makeString(value);
-                const safeValue = todo.safeValue(value);
-                str = str.replace(match[0], safeValue);
-                if (skipOnVariables) {
-                    todo.regex.lastIndex += value.length;
-                    todo.regex.lastIndex -= match[0].length;
-                } else todo.regex.lastIndex = 0;
-                replaces++;
-                if (replaces >= this.maxReplaces) break;
-            }
-        });
-        return str;
-    }
-    nest(str, fc) {
-        let options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-        let match;
-        let value;
-        let clonedOptions;
-        const handleHasOptions = (key, inheritedOptions)=>{
-            const sep = this.nestingOptionsSeparator;
-            if (key.indexOf(sep) < 0) return key;
-            const c = key.split(new RegExp(`${sep}[ ]*{`));
-            let optionsString = `{${c[1]}`;
-            key = c[0];
-            optionsString = this.interpolate(optionsString, clonedOptions);
-            const matchedSingleQuotes = optionsString.match(/'/g);
-            const matchedDoubleQuotes = optionsString.match(/"/g);
-            if (matchedSingleQuotes && matchedSingleQuotes.length % 2 === 0 && !matchedDoubleQuotes || matchedDoubleQuotes.length % 2 !== 0) optionsString = optionsString.replace(/'/g, '"');
-            try {
-                clonedOptions = JSON.parse(optionsString);
-                if (inheritedOptions) clonedOptions = {
-                    ...inheritedOptions,
-                    ...clonedOptions
-                };
-            } catch (e) {
-                this.logger.warn(`failed parsing options string in nesting for key ${key}`, e);
-                return `${key}${sep}${optionsString}`;
-            }
-            if (clonedOptions.defaultValue && clonedOptions.defaultValue.indexOf(this.prefix) > -1) delete clonedOptions.defaultValue;
-            return key;
-        };
-        while(match = this.nestingRegexp.exec(str)){
-            let formatters = [];
-            clonedOptions = {
-                ...options
-            };
-            clonedOptions = clonedOptions.replace && !$1bac384020b50752$var$isString(clonedOptions.replace) ? clonedOptions.replace : clonedOptions;
-            clonedOptions.applyPostProcessor = false;
-            delete clonedOptions.defaultValue;
-            let doReduce = false;
-            if (match[0].indexOf(this.formatSeparator) !== -1 && !/{.*}/.test(match[1])) {
-                const r = match[1].split(this.formatSeparator).map((elem)=>elem.trim());
-                match[1] = r.shift();
-                formatters = r;
-                doReduce = true;
-            }
-            value = fc(handleHasOptions.call(this, match[1].trim(), clonedOptions), clonedOptions);
-            if (value && match[0] === str && !$1bac384020b50752$var$isString(value)) return value;
-            if (!$1bac384020b50752$var$isString(value)) value = $1bac384020b50752$var$makeString(value);
-            if (!value) {
-                this.logger.warn(`missed to resolve ${match[1]} for nesting ${str}`);
-                value = '';
-            }
-            if (doReduce) value = formatters.reduce((v, f)=>this.format(v, f, options.lng, {
-                    ...options,
-                    interpolationkey: match[1].trim()
-                }), value.trim());
-            str = str.replace(match[0], value);
-            this.regexp.lastIndex = 0;
-        }
-        return str;
-    }
-}
-const $1bac384020b50752$var$parseFormatStr = (formatStr)=>{
-    let formatName = formatStr.toLowerCase().trim();
-    const formatOptions = {};
-    if (formatStr.indexOf('(') > -1) {
-        const p = formatStr.split('(');
-        formatName = p[0].toLowerCase().trim();
-        const optStr = p[1].substring(0, p[1].length - 1);
-        if (formatName === 'currency' && optStr.indexOf(':') < 0) {
-            if (!formatOptions.currency) formatOptions.currency = optStr.trim();
-        } else if (formatName === 'relativetime' && optStr.indexOf(':') < 0) {
-            if (!formatOptions.range) formatOptions.range = optStr.trim();
-        } else {
-            const opts = optStr.split(';');
-            opts.forEach((opt)=>{
-                if (opt) {
-                    const [key, ...rest] = opt.split(':');
-                    const val = rest.join(':').trim().replace(/^'+|'+$/g, '');
-                    const trimmedKey = key.trim();
-                    if (!formatOptions[trimmedKey]) formatOptions[trimmedKey] = val;
-                    if (val === 'false') formatOptions[trimmedKey] = false;
-                    if (val === 'true') formatOptions[trimmedKey] = true;
-                    if (!isNaN(val)) formatOptions[trimmedKey] = parseInt(val, 10);
-                }
-            });
-        }
-    }
-    return {
-        formatName: formatName,
-        formatOptions: formatOptions
-    };
-};
-const $1bac384020b50752$var$createCachedFormatter = (fn)=>{
-    const cache = {};
-    return (val, lng, options)=>{
-        let optForCache = options;
-        if (options && options.interpolationkey && options.formatParams && options.formatParams[options.interpolationkey] && options[options.interpolationkey]) optForCache = {
-            ...optForCache,
-            [options.interpolationkey]: undefined
-        };
-        const key = lng + JSON.stringify(optForCache);
-        let formatter = cache[key];
-        if (!formatter) {
-            formatter = fn($1bac384020b50752$var$getCleanedCode(lng), options);
-            cache[key] = formatter;
-        }
-        return formatter(val);
-    };
-};
-class $1bac384020b50752$var$Formatter {
-    constructor(){
-        let options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-        this.logger = $1bac384020b50752$var$baseLogger.create('formatter');
-        this.options = options;
-        this.formats = {
-            number: $1bac384020b50752$var$createCachedFormatter((lng, opt)=>{
-                const formatter = new Intl.NumberFormat(lng, {
-                    ...opt
-                });
-                return (val)=>formatter.format(val);
-            }),
-            currency: $1bac384020b50752$var$createCachedFormatter((lng, opt)=>{
-                const formatter = new Intl.NumberFormat(lng, {
-                    ...opt,
-                    style: 'currency'
-                });
-                return (val)=>formatter.format(val);
-            }),
-            datetime: $1bac384020b50752$var$createCachedFormatter((lng, opt)=>{
-                const formatter = new Intl.DateTimeFormat(lng, {
-                    ...opt
-                });
-                return (val)=>formatter.format(val);
-            }),
-            relativetime: $1bac384020b50752$var$createCachedFormatter((lng, opt)=>{
-                const formatter = new Intl.RelativeTimeFormat(lng, {
-                    ...opt
-                });
-                return (val)=>formatter.format(val, opt.range || 'day');
-            }),
-            list: $1bac384020b50752$var$createCachedFormatter((lng, opt)=>{
-                const formatter = new Intl.ListFormat(lng, {
-                    ...opt
-                });
-                return (val)=>formatter.format(val);
-            })
-        };
-        this.init(options);
-    }
-    init(services) {
-        let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {
-            interpolation: {}
-        };
-        this.formatSeparator = options.interpolation.formatSeparator || ',';
-    }
-    add(name, fc) {
-        this.formats[name.toLowerCase().trim()] = fc;
-    }
-    addCached(name, fc) {
-        this.formats[name.toLowerCase().trim()] = $1bac384020b50752$var$createCachedFormatter(fc);
-    }
-    format(value, format, lng) {
-        let options = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
-        const formats = format.split(this.formatSeparator);
-        if (formats.length > 1 && formats[0].indexOf('(') > 1 && formats[0].indexOf(')') < 0 && formats.find((f)=>f.indexOf(')') > -1)) {
-            const lastIndex = formats.findIndex((f)=>f.indexOf(')') > -1);
-            formats[0] = [
-                formats[0],
-                ...formats.splice(1, lastIndex)
-            ].join(this.formatSeparator);
-        }
-        const result = formats.reduce((mem, f)=>{
-            const { formatName: formatName, formatOptions: formatOptions } = $1bac384020b50752$var$parseFormatStr(f);
-            if (this.formats[formatName]) {
-                let formatted = mem;
-                try {
-                    const valOptions = options && options.formatParams && options.formatParams[options.interpolationkey] || {};
-                    const l = valOptions.locale || valOptions.lng || options.locale || options.lng || lng;
-                    formatted = this.formats[formatName](mem, l, {
-                        ...formatOptions,
-                        ...options,
-                        ...valOptions
-                    });
-                } catch (error) {
-                    this.logger.warn(error);
-                }
-                return formatted;
-            } else this.logger.warn(`there was no format function for ${formatName}`);
-            return mem;
-        }, value);
-        return result;
-    }
-}
-const $1bac384020b50752$var$removePending = (q, name)=>{
-    if (q.pending[name] !== undefined) {
-        delete q.pending[name];
-        q.pendingCount--;
-    }
-};
-class $1bac384020b50752$var$Connector extends $1bac384020b50752$var$EventEmitter {
-    constructor(backend, store, services){
-        let options = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
-        super();
-        this.backend = backend;
-        this.store = store;
-        this.services = services;
-        this.languageUtils = services.languageUtils;
-        this.options = options;
-        this.logger = $1bac384020b50752$var$baseLogger.create('backendConnector');
-        this.waitingReads = [];
-        this.maxParallelReads = options.maxParallelReads || 10;
-        this.readingCalls = 0;
-        this.maxRetries = options.maxRetries >= 0 ? options.maxRetries : 5;
-        this.retryTimeout = options.retryTimeout >= 1 ? options.retryTimeout : 350;
-        this.state = {};
-        this.queue = [];
-        if (this.backend && this.backend.init) this.backend.init(services, options.backend, options);
-    }
-    queueLoad(languages, namespaces, options, callback) {
-        const toLoad = {};
-        const pending = {};
-        const toLoadLanguages = {};
-        const toLoadNamespaces = {};
-        languages.forEach((lng)=>{
-            let hasAllNamespaces = true;
-            namespaces.forEach((ns)=>{
-                const name = `${lng}|${ns}`;
-                if (!options.reload && this.store.hasResourceBundle(lng, ns)) this.state[name] = 2;
-                else if (this.state[name] < 0) ;
-                else if (this.state[name] === 1) {
-                    if (pending[name] === undefined) pending[name] = true;
-                } else {
-                    this.state[name] = 1;
-                    hasAllNamespaces = false;
-                    if (pending[name] === undefined) pending[name] = true;
-                    if (toLoad[name] === undefined) toLoad[name] = true;
-                    if (toLoadNamespaces[ns] === undefined) toLoadNamespaces[ns] = true;
-                }
-            });
-            if (!hasAllNamespaces) toLoadLanguages[lng] = true;
-        });
-        if (Object.keys(toLoad).length || Object.keys(pending).length) this.queue.push({
-            pending: pending,
-            pendingCount: Object.keys(pending).length,
-            loaded: {},
-            errors: [],
-            callback: callback
-        });
-        return {
-            toLoad: Object.keys(toLoad),
-            pending: Object.keys(pending),
-            toLoadLanguages: Object.keys(toLoadLanguages),
-            toLoadNamespaces: Object.keys(toLoadNamespaces)
-        };
-    }
-    loaded(name, err, data) {
-        const s = name.split('|');
-        const lng = s[0];
-        const ns = s[1];
-        if (err) this.emit('failedLoading', lng, ns, err);
-        if (!err && data) this.store.addResourceBundle(lng, ns, data, undefined, undefined, {
-            skipCopy: true
-        });
-        this.state[name] = err ? -1 : 2;
-        if (err && data) this.state[name] = 0;
-        const loaded = {};
-        this.queue.forEach((q)=>{
-            $1bac384020b50752$var$pushPath(q.loaded, [
-                lng
-            ], ns);
-            $1bac384020b50752$var$removePending(q, name);
-            if (err) q.errors.push(err);
-            if (q.pendingCount === 0 && !q.done) {
-                Object.keys(q.loaded).forEach((l)=>{
-                    if (!loaded[l]) loaded[l] = {};
-                    const loadedKeys = q.loaded[l];
-                    if (loadedKeys.length) loadedKeys.forEach((n)=>{
-                        if (loaded[l][n] === undefined) loaded[l][n] = true;
-                    });
-                });
-                q.done = true;
-                if (q.errors.length) q.callback(q.errors);
-                else q.callback();
-            }
-        });
-        this.emit('loaded', loaded);
-        this.queue = this.queue.filter((q)=>!q.done);
-    }
-    read(lng, ns, fcName) {
-        let tried = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
-        let wait = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : this.retryTimeout;
-        let callback = arguments.length > 5 ? arguments[5] : undefined;
-        if (!lng.length) return callback(null, {});
-        if (this.readingCalls >= this.maxParallelReads) {
-            this.waitingReads.push({
-                lng: lng,
-                ns: ns,
-                fcName: fcName,
-                tried: tried,
-                wait: wait,
-                callback: callback
-            });
-            return;
-        }
-        this.readingCalls++;
-        const resolver = (err, data)=>{
-            this.readingCalls--;
-            if (this.waitingReads.length > 0) {
-                const next = this.waitingReads.shift();
-                this.read(next.lng, next.ns, next.fcName, next.tried, next.wait, next.callback);
-            }
-            if (err && data && tried < this.maxRetries) {
-                setTimeout(()=>{
-                    this.read.call(this, lng, ns, fcName, tried + 1, wait * 2, callback);
-                }, wait);
-                return;
-            }
-            callback(err, data);
-        };
-        const fc = this.backend[fcName].bind(this.backend);
-        if (fc.length === 2) {
-            try {
-                const r = fc(lng, ns);
-                if (r && typeof r.then === 'function') r.then((data)=>resolver(null, data)).catch(resolver);
-                else resolver(null, r);
-            } catch (err) {
-                resolver(err);
-            }
-            return;
-        }
-        return fc(lng, ns, resolver);
-    }
-    prepareLoading(languages, namespaces) {
-        let options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-        let callback = arguments.length > 3 ? arguments[3] : undefined;
-        if (!this.backend) {
-            this.logger.warn('No backend was added via i18next.use. Will not load resources.');
-            return callback && callback();
-        }
-        if ($1bac384020b50752$var$isString(languages)) languages = this.languageUtils.toResolveHierarchy(languages);
-        if ($1bac384020b50752$var$isString(namespaces)) namespaces = [
-            namespaces
-        ];
-        const toLoad = this.queueLoad(languages, namespaces, options, callback);
-        if (!toLoad.toLoad.length) {
-            if (!toLoad.pending.length) callback();
-            return null;
-        }
-        toLoad.toLoad.forEach((name)=>{
-            this.loadOne(name);
-        });
-    }
-    load(languages, namespaces, callback) {
-        this.prepareLoading(languages, namespaces, {}, callback);
-    }
-    reload(languages, namespaces, callback) {
-        this.prepareLoading(languages, namespaces, {
-            reload: true
-        }, callback);
-    }
-    loadOne(name) {
-        let prefix = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
-        const s = name.split('|');
-        const lng = s[0];
-        const ns = s[1];
-        this.read(lng, ns, 'read', undefined, undefined, (err, data)=>{
-            if (err) this.logger.warn(`${prefix}loading namespace ${ns} for language ${lng} failed`, err);
-            if (!err && data) this.logger.log(`${prefix}loaded namespace ${ns} for language ${lng}`, data);
-            this.loaded(name, err, data);
-        });
-    }
-    saveMissing(languages, namespace, key, fallbackValue, isUpdate) {
-        let options = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : {};
-        let clb = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : ()=>{};
-        if (this.services.utils && this.services.utils.hasLoadedNamespace && !this.services.utils.hasLoadedNamespace(namespace)) {
-            this.logger.warn(`did not save key "${key}" as the namespace "${namespace}" was not yet loaded`, 'This means something IS WRONG in your setup. You access the t function before i18next.init / i18next.loadNamespace / i18next.changeLanguage was done. Wait for the callback or Promise to resolve before accessing it!!!');
-            return;
-        }
-        if (key === undefined || key === null || key === '') return;
-        if (this.backend && this.backend.create) {
-            const opts = {
-                ...options,
-                isUpdate: isUpdate
-            };
-            const fc = this.backend.create.bind(this.backend);
-            if (fc.length < 6) try {
-                let r;
-                if (fc.length === 5) r = fc(languages, namespace, key, fallbackValue, opts);
-                else r = fc(languages, namespace, key, fallbackValue);
-                if (r && typeof r.then === 'function') r.then((data)=>clb(null, data)).catch(clb);
-                else clb(null, r);
-            } catch (err) {
-                clb(err);
-            }
-            else fc(languages, namespace, key, fallbackValue, clb, opts);
-        }
-        if (!languages || !languages[0]) return;
-        this.store.addResource(languages[0], namespace, key, fallbackValue);
-    }
-}
-const $1bac384020b50752$var$get = ()=>({
-        debug: false,
-        initImmediate: true,
-        ns: [
-            'translation'
-        ],
-        defaultNS: [
-            'translation'
-        ],
-        fallbackLng: [
-            'dev'
-        ],
-        fallbackNS: false,
-        supportedLngs: false,
-        nonExplicitSupportedLngs: false,
-        load: 'all',
-        preload: false,
-        simplifyPluralSuffix: true,
-        keySeparator: '.',
-        nsSeparator: ':',
-        pluralSeparator: '_',
-        contextSeparator: '_',
-        partialBundledLanguages: false,
-        saveMissing: false,
-        updateMissing: false,
-        saveMissingTo: 'fallback',
-        saveMissingPlurals: true,
-        missingKeyHandler: false,
-        missingInterpolationHandler: false,
-        postProcess: false,
-        postProcessPassResolved: false,
-        returnNull: false,
-        returnEmptyString: true,
-        returnObjects: false,
-        joinArrays: false,
-        returnedObjectHandler: false,
-        parseMissingKeyHandler: false,
-        appendNamespaceToMissingKey: false,
-        appendNamespaceToCIMode: false,
-        overloadTranslationOptionHandler: (args)=>{
-            let ret = {};
-            if (typeof args[1] === 'object') ret = args[1];
-            if ($1bac384020b50752$var$isString(args[1])) ret.defaultValue = args[1];
-            if ($1bac384020b50752$var$isString(args[2])) ret.tDescription = args[2];
-            if (typeof args[2] === 'object' || typeof args[3] === 'object') {
-                const options = args[3] || args[2];
-                Object.keys(options).forEach((key)=>{
-                    ret[key] = options[key];
-                });
-            }
-            return ret;
-        },
-        interpolation: {
-            escapeValue: true,
-            format: (value)=>value,
-            prefix: '{{',
-            suffix: '}}',
-            formatSeparator: ',',
-            unescapePrefix: '-',
-            nestingPrefix: '$t(',
-            nestingSuffix: ')',
-            nestingOptionsSeparator: ',',
-            maxReplaces: 1000,
-            skipOnVariables: true
-        }
-    });
-const $1bac384020b50752$var$transformOptions = (options)=>{
-    if ($1bac384020b50752$var$isString(options.ns)) options.ns = [
-        options.ns
-    ];
-    if ($1bac384020b50752$var$isString(options.fallbackLng)) options.fallbackLng = [
-        options.fallbackLng
-    ];
-    if ($1bac384020b50752$var$isString(options.fallbackNS)) options.fallbackNS = [
-        options.fallbackNS
-    ];
-    if (options.supportedLngs && options.supportedLngs.indexOf('cimode') < 0) options.supportedLngs = options.supportedLngs.concat([
-        'cimode'
-    ]);
-    return options;
-};
-const $1bac384020b50752$var$noop = ()=>{};
-const $1bac384020b50752$var$bindMemberFunctions = (inst)=>{
-    const mems = Object.getOwnPropertyNames(Object.getPrototypeOf(inst));
-    mems.forEach((mem)=>{
-        if (typeof inst[mem] === 'function') inst[mem] = inst[mem].bind(inst);
-    });
-};
-class $1bac384020b50752$var$I18n extends $1bac384020b50752$var$EventEmitter {
-    constructor(){
-        let options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-        let callback = arguments.length > 1 ? arguments[1] : undefined;
-        super();
-        this.options = $1bac384020b50752$var$transformOptions(options);
-        this.services = {};
-        this.logger = $1bac384020b50752$var$baseLogger;
-        this.modules = {
-            external: []
-        };
-        $1bac384020b50752$var$bindMemberFunctions(this);
-        if (callback && !this.isInitialized && !options.isClone) {
-            if (!this.options.initImmediate) {
-                this.init(options, callback);
-                return this;
-            }
-            setTimeout(()=>{
-                this.init(options, callback);
-            }, 0);
-        }
-    }
-    init() {
-        var _this = this;
-        let options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-        let callback = arguments.length > 1 ? arguments[1] : undefined;
-        this.isInitializing = true;
-        if (typeof options === 'function') {
-            callback = options;
-            options = {};
-        }
-        if (!options.defaultNS && options.defaultNS !== false && options.ns) {
-            if ($1bac384020b50752$var$isString(options.ns)) options.defaultNS = options.ns;
-            else if (options.ns.indexOf('translation') < 0) options.defaultNS = options.ns[0];
-        }
-        const defOpts = $1bac384020b50752$var$get();
-        this.options = {
-            ...defOpts,
-            ...this.options,
-            ...$1bac384020b50752$var$transformOptions(options)
-        };
-        if (this.options.compatibilityAPI !== 'v1') this.options.interpolation = {
-            ...defOpts.interpolation,
-            ...this.options.interpolation
-        };
-        if (options.keySeparator !== undefined) this.options.userDefinedKeySeparator = options.keySeparator;
-        if (options.nsSeparator !== undefined) this.options.userDefinedNsSeparator = options.nsSeparator;
-        const createClassOnDemand = (ClassOrObject)=>{
-            if (!ClassOrObject) return null;
-            if (typeof ClassOrObject === 'function') return new ClassOrObject();
-            return ClassOrObject;
-        };
-        if (!this.options.isClone) {
-            if (this.modules.logger) $1bac384020b50752$var$baseLogger.init(createClassOnDemand(this.modules.logger), this.options);
-            else $1bac384020b50752$var$baseLogger.init(null, this.options);
-            let formatter;
-            if (this.modules.formatter) formatter = this.modules.formatter;
-            else if (typeof Intl !== 'undefined') formatter = $1bac384020b50752$var$Formatter;
-            const lu = new $1bac384020b50752$var$LanguageUtil(this.options);
-            this.store = new $1bac384020b50752$var$ResourceStore(this.options.resources, this.options);
-            const s = this.services;
-            s.logger = $1bac384020b50752$var$baseLogger;
-            s.resourceStore = this.store;
-            s.languageUtils = lu;
-            s.pluralResolver = new $1bac384020b50752$var$PluralResolver(lu, {
-                prepend: this.options.pluralSeparator,
-                compatibilityJSON: this.options.compatibilityJSON,
-                simplifyPluralSuffix: this.options.simplifyPluralSuffix
-            });
-            if (formatter && (!this.options.interpolation.format || this.options.interpolation.format === defOpts.interpolation.format)) {
-                s.formatter = createClassOnDemand(formatter);
-                s.formatter.init(s, this.options);
-                this.options.interpolation.format = s.formatter.format.bind(s.formatter);
-            }
-            s.interpolator = new $1bac384020b50752$var$Interpolator(this.options);
-            s.utils = {
-                hasLoadedNamespace: this.hasLoadedNamespace.bind(this)
-            };
-            s.backendConnector = new $1bac384020b50752$var$Connector(createClassOnDemand(this.modules.backend), s.resourceStore, s, this.options);
-            s.backendConnector.on('*', function(event) {
-                for(var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++)args[_key - 1] = arguments[_key];
-                _this.emit(event, ...args);
-            });
-            if (this.modules.languageDetector) {
-                s.languageDetector = createClassOnDemand(this.modules.languageDetector);
-                if (s.languageDetector.init) s.languageDetector.init(s, this.options.detection, this.options);
-            }
-            if (this.modules.i18nFormat) {
-                s.i18nFormat = createClassOnDemand(this.modules.i18nFormat);
-                if (s.i18nFormat.init) s.i18nFormat.init(this);
-            }
-            this.translator = new $1bac384020b50752$var$Translator(this.services, this.options);
-            this.translator.on('*', function(event) {
-                for(var _len2 = arguments.length, args = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++)args[_key2 - 1] = arguments[_key2];
-                _this.emit(event, ...args);
-            });
-            this.modules.external.forEach((m)=>{
-                if (m.init) m.init(this);
-            });
-        }
-        this.format = this.options.interpolation.format;
-        if (!callback) callback = $1bac384020b50752$var$noop;
-        if (this.options.fallbackLng && !this.services.languageDetector && !this.options.lng) {
-            const codes = this.services.languageUtils.getFallbackCodes(this.options.fallbackLng);
-            if (codes.length > 0 && codes[0] !== 'dev') this.options.lng = codes[0];
-        }
-        if (!this.services.languageDetector && !this.options.lng) this.logger.warn('init: no languageDetector is used and no lng is defined');
-        const storeApi = [
-            'getResource',
-            'hasResourceBundle',
-            'getResourceBundle',
-            'getDataByLanguage'
-        ];
-        storeApi.forEach((fcName)=>{
-            this[fcName] = function() {
-                return _this.store[fcName](...arguments);
-            };
-        });
-        const storeApiChained = [
-            'addResource',
-            'addResources',
-            'addResourceBundle',
-            'removeResourceBundle'
-        ];
-        storeApiChained.forEach((fcName)=>{
-            this[fcName] = function() {
-                _this.store[fcName](...arguments);
-                return _this;
-            };
-        });
-        const deferred = $1bac384020b50752$var$defer();
-        const load = ()=>{
-            const finish = (err, t)=>{
-                this.isInitializing = false;
-                if (this.isInitialized && !this.initializedStoreOnce) this.logger.warn('init: i18next is already initialized. You should call init just once!');
-                this.isInitialized = true;
-                if (!this.options.isClone) this.logger.log('initialized', this.options);
-                this.emit('initialized', this.options);
-                deferred.resolve(t);
-                callback(err, t);
-            };
-            if (this.languages && this.options.compatibilityAPI !== 'v1' && !this.isInitialized) return finish(null, this.t.bind(this));
-            this.changeLanguage(this.options.lng, finish);
-        };
-        if (this.options.resources || !this.options.initImmediate) load();
-        else setTimeout(load, 0);
-        return deferred;
-    }
-    loadResources(language) {
-        let callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : $1bac384020b50752$var$noop;
-        let usedCallback = callback;
-        const usedLng = $1bac384020b50752$var$isString(language) ? language : this.language;
-        if (typeof language === 'function') usedCallback = language;
-        if (!this.options.resources || this.options.partialBundledLanguages) {
-            if (usedLng && usedLng.toLowerCase() === 'cimode' && (!this.options.preload || this.options.preload.length === 0)) return usedCallback();
-            const toLoad = [];
-            const append = (lng)=>{
-                if (!lng) return;
-                if (lng === 'cimode') return;
-                const lngs = this.services.languageUtils.toResolveHierarchy(lng);
-                lngs.forEach((l)=>{
-                    if (l === 'cimode') return;
-                    if (toLoad.indexOf(l) < 0) toLoad.push(l);
-                });
-            };
-            if (!usedLng) {
-                const fallbacks = this.services.languageUtils.getFallbackCodes(this.options.fallbackLng);
-                fallbacks.forEach((l)=>append(l));
-            } else append(usedLng);
-            if (this.options.preload) this.options.preload.forEach((l)=>append(l));
-            this.services.backendConnector.load(toLoad, this.options.ns, (e)=>{
-                if (!e && !this.resolvedLanguage && this.language) this.setResolvedLanguage(this.language);
-                usedCallback(e);
-            });
-        } else usedCallback(null);
-    }
-    reloadResources(lngs, ns, callback) {
-        const deferred = $1bac384020b50752$var$defer();
-        if (typeof lngs === 'function') {
-            callback = lngs;
-            lngs = undefined;
-        }
-        if (typeof ns === 'function') {
-            callback = ns;
-            ns = undefined;
-        }
-        if (!lngs) lngs = this.languages;
-        if (!ns) ns = this.options.ns;
-        if (!callback) callback = $1bac384020b50752$var$noop;
-        this.services.backendConnector.reload(lngs, ns, (err)=>{
-            deferred.resolve();
-            callback(err);
-        });
-        return deferred;
-    }
-    use(module) {
-        if (!module) throw new Error('You are passing an undefined module! Please check the object you are passing to i18next.use()');
-        if (!module.type) throw new Error('You are passing a wrong module! Please check the object you are passing to i18next.use()');
-        if (module.type === 'backend') this.modules.backend = module;
-        if (module.type === 'logger' || module.log && module.warn && module.error) this.modules.logger = module;
-        if (module.type === 'languageDetector') this.modules.languageDetector = module;
-        if (module.type === 'i18nFormat') this.modules.i18nFormat = module;
-        if (module.type === 'postProcessor') $1bac384020b50752$var$postProcessor.addPostProcessor(module);
-        if (module.type === 'formatter') this.modules.formatter = module;
-        if (module.type === '3rdParty') this.modules.external.push(module);
-        return this;
-    }
-    setResolvedLanguage(l) {
-        if (!l || !this.languages) return;
-        if ([
-            'cimode',
-            'dev'
-        ].indexOf(l) > -1) return;
-        for(let li = 0; li < this.languages.length; li++){
-            const lngInLngs = this.languages[li];
-            if ([
-                'cimode',
-                'dev'
-            ].indexOf(lngInLngs) > -1) continue;
-            if (this.store.hasLanguageSomeTranslations(lngInLngs)) {
-                this.resolvedLanguage = lngInLngs;
-                break;
-            }
-        }
-    }
-    changeLanguage(lng, callback) {
-        var _this2 = this;
-        this.isLanguageChangingTo = lng;
-        const deferred = $1bac384020b50752$var$defer();
-        this.emit('languageChanging', lng);
-        const setLngProps = (l)=>{
-            this.language = l;
-            this.languages = this.services.languageUtils.toResolveHierarchy(l);
-            this.resolvedLanguage = undefined;
-            this.setResolvedLanguage(l);
-        };
-        const done = (err, l)=>{
-            if (l) {
-                setLngProps(l);
-                this.translator.changeLanguage(l);
-                this.isLanguageChangingTo = undefined;
-                this.emit('languageChanged', l);
-                this.logger.log('languageChanged', l);
-            } else this.isLanguageChangingTo = undefined;
-            deferred.resolve(function() {
-                return _this2.t(...arguments);
-            });
-            if (callback) callback(err, function() {
-                return _this2.t(...arguments);
-            });
-        };
-        const setLng = (lngs)=>{
-            if (!lng && !lngs && this.services.languageDetector) lngs = [];
-            const l = $1bac384020b50752$var$isString(lngs) ? lngs : this.services.languageUtils.getBestMatchFromCodes(lngs);
-            if (l) {
-                if (!this.language) setLngProps(l);
-                if (!this.translator.language) this.translator.changeLanguage(l);
-                if (this.services.languageDetector && this.services.languageDetector.cacheUserLanguage) this.services.languageDetector.cacheUserLanguage(l);
-            }
-            this.loadResources(l, (err)=>{
-                done(err, l);
-            });
-        };
-        if (!lng && this.services.languageDetector && !this.services.languageDetector.async) setLng(this.services.languageDetector.detect());
-        else if (!lng && this.services.languageDetector && this.services.languageDetector.async) {
-            if (this.services.languageDetector.detect.length === 0) this.services.languageDetector.detect().then(setLng);
-            else this.services.languageDetector.detect(setLng);
-        } else setLng(lng);
-        return deferred;
-    }
-    getFixedT(lng, ns, keyPrefix) {
-        var _this3 = this;
-        const fixedT = function(key, opts) {
-            let options;
-            if (typeof opts !== 'object') {
-                for(var _len3 = arguments.length, rest = new Array(_len3 > 2 ? _len3 - 2 : 0), _key3 = 2; _key3 < _len3; _key3++)rest[_key3 - 2] = arguments[_key3];
-                options = _this3.options.overloadTranslationOptionHandler([
-                    key,
-                    opts
-                ].concat(rest));
-            } else options = {
-                ...opts
-            };
-            options.lng = options.lng || fixedT.lng;
-            options.lngs = options.lngs || fixedT.lngs;
-            options.ns = options.ns || fixedT.ns;
-            if (options.keyPrefix !== '') options.keyPrefix = options.keyPrefix || keyPrefix || fixedT.keyPrefix;
-            const keySeparator = _this3.options.keySeparator || '.';
-            let resultKey;
-            if (options.keyPrefix && Array.isArray(key)) resultKey = key.map((k)=>`${options.keyPrefix}${keySeparator}${k}`);
-            else resultKey = options.keyPrefix ? `${options.keyPrefix}${keySeparator}${key}` : key;
-            return _this3.t(resultKey, options);
-        };
-        if ($1bac384020b50752$var$isString(lng)) fixedT.lng = lng;
-        else fixedT.lngs = lng;
-        fixedT.ns = ns;
-        fixedT.keyPrefix = keyPrefix;
-        return fixedT;
-    }
-    t() {
-        return this.translator && this.translator.translate(...arguments);
-    }
-    exists() {
-        return this.translator && this.translator.exists(...arguments);
-    }
-    setDefaultNamespace(ns) {
-        this.options.defaultNS = ns;
-    }
-    hasLoadedNamespace(ns) {
-        let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-        if (!this.isInitialized) {
-            this.logger.warn('hasLoadedNamespace: i18next was not initialized', this.languages);
-            return false;
-        }
-        if (!this.languages || !this.languages.length) {
-            this.logger.warn('hasLoadedNamespace: i18n.languages were undefined or empty', this.languages);
-            return false;
-        }
-        const lng = options.lng || this.resolvedLanguage || this.languages[0];
-        const fallbackLng = this.options ? this.options.fallbackLng : false;
-        const lastLng = this.languages[this.languages.length - 1];
-        if (lng.toLowerCase() === 'cimode') return true;
-        const loadNotPending = (l, n)=>{
-            const loadState = this.services.backendConnector.state[`${l}|${n}`];
-            return loadState === -1 || loadState === 0 || loadState === 2;
-        };
-        if (options.precheck) {
-            const preResult = options.precheck(this, loadNotPending);
-            if (preResult !== undefined) return preResult;
-        }
-        if (this.hasResourceBundle(lng, ns)) return true;
-        if (!this.services.backendConnector.backend || this.options.resources && !this.options.partialBundledLanguages) return true;
-        if (loadNotPending(lng, ns) && (!fallbackLng || loadNotPending(lastLng, ns))) return true;
-        return false;
-    }
-    loadNamespaces(ns, callback) {
-        const deferred = $1bac384020b50752$var$defer();
-        if (!this.options.ns) {
-            if (callback) callback();
-            return Promise.resolve();
-        }
-        if ($1bac384020b50752$var$isString(ns)) ns = [
-            ns
-        ];
-        ns.forEach((n)=>{
-            if (this.options.ns.indexOf(n) < 0) this.options.ns.push(n);
-        });
-        this.loadResources((err)=>{
-            deferred.resolve();
-            if (callback) callback(err);
-        });
-        return deferred;
-    }
-    loadLanguages(lngs, callback) {
-        const deferred = $1bac384020b50752$var$defer();
-        if ($1bac384020b50752$var$isString(lngs)) lngs = [
-            lngs
-        ];
-        const preloaded = this.options.preload || [];
-        const newLngs = lngs.filter((lng)=>preloaded.indexOf(lng) < 0 && this.services.languageUtils.isSupportedCode(lng));
-        if (!newLngs.length) {
-            if (callback) callback();
-            return Promise.resolve();
-        }
-        this.options.preload = preloaded.concat(newLngs);
-        this.loadResources((err)=>{
-            deferred.resolve();
-            if (callback) callback(err);
-        });
-        return deferred;
-    }
-    dir(lng) {
-        if (!lng) lng = this.resolvedLanguage || (this.languages && this.languages.length > 0 ? this.languages[0] : this.language);
-        if (!lng) return 'rtl';
-        const rtlLngs = [
-            'ar',
-            'shu',
-            'sqr',
-            'ssh',
-            'xaa',
-            'yhd',
-            'yud',
-            'aao',
-            'abh',
-            'abv',
-            'acm',
-            'acq',
-            'acw',
-            'acx',
-            'acy',
-            'adf',
-            'ads',
-            'aeb',
-            'aec',
-            'afb',
-            'ajp',
-            'apc',
-            'apd',
-            'arb',
-            'arq',
-            'ars',
-            'ary',
-            'arz',
-            'auz',
-            'avl',
-            'ayh',
-            'ayl',
-            'ayn',
-            'ayp',
-            'bbz',
-            'pga',
-            'he',
-            'iw',
-            'ps',
-            'pbt',
-            'pbu',
-            'pst',
-            'prp',
-            'prd',
-            'ug',
-            'ur',
-            'ydd',
-            'yds',
-            'yih',
-            'ji',
-            'yi',
-            'hbo',
-            'men',
-            'xmn',
-            'fa',
-            'jpr',
-            'peo',
-            'pes',
-            'prs',
-            'dv',
-            'sam',
-            'ckb'
-        ];
-        const languageUtils = this.services && this.services.languageUtils || new $1bac384020b50752$var$LanguageUtil($1bac384020b50752$var$get());
-        return rtlLngs.indexOf(languageUtils.getLanguagePartFromCode(lng)) > -1 || lng.toLowerCase().indexOf('-arab') > 1 ? 'rtl' : 'ltr';
-    }
-    static createInstance() {
-        let options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-        let callback = arguments.length > 1 ? arguments[1] : undefined;
-        return new $1bac384020b50752$var$I18n(options, callback);
-    }
-    cloneInstance() {
-        let options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-        let callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : $1bac384020b50752$var$noop;
-        const forkResourceStore = options.forkResourceStore;
-        if (forkResourceStore) delete options.forkResourceStore;
-        const mergedOptions = {
-            ...this.options,
-            ...options,
-            isClone: true
-        };
-        const clone = new $1bac384020b50752$var$I18n(mergedOptions);
-        if (options.debug !== undefined || options.prefix !== undefined) clone.logger = clone.logger.clone(options);
-        const membersToCopy = [
-            'store',
-            'services',
-            'language'
-        ];
-        membersToCopy.forEach((m)=>{
-            clone[m] = this[m];
-        });
-        clone.services = {
-            ...this.services
-        };
-        clone.services.utils = {
-            hasLoadedNamespace: clone.hasLoadedNamespace.bind(clone)
-        };
-        if (forkResourceStore) {
-            clone.store = new $1bac384020b50752$var$ResourceStore(this.store.data, mergedOptions);
-            clone.services.resourceStore = clone.store;
-        }
-        clone.translator = new $1bac384020b50752$var$Translator(clone.services, mergedOptions);
-        clone.translator.on('*', function(event) {
-            for(var _len4 = arguments.length, args = new Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++)args[_key4 - 1] = arguments[_key4];
-            clone.emit(event, ...args);
-        });
-        clone.init(mergedOptions, callback);
-        clone.translator.options = mergedOptions;
-        clone.translator.backendConnector.services.utils = {
-            hasLoadedNamespace: clone.hasLoadedNamespace.bind(clone)
-        };
-        return clone;
-    }
-    toJSON() {
-        return {
-            options: this.options,
-            store: this.store,
-            language: this.language,
-            languages: this.languages,
-            resolvedLanguage: this.resolvedLanguage
-        };
-    }
-}
-const $1bac384020b50752$export$2e2bcd8739ae039 = $1bac384020b50752$var$I18n.createInstance();
-$1bac384020b50752$export$2e2bcd8739ae039.createInstance = $1bac384020b50752$var$I18n.createInstance;
-const $1bac384020b50752$export$99152e8d49ca4e7d = $1bac384020b50752$export$2e2bcd8739ae039.createInstance;
-const $1bac384020b50752$export$147ec2801e896265 = $1bac384020b50752$export$2e2bcd8739ae039.dir;
-const $1bac384020b50752$export$2cd8252107eb640b = $1bac384020b50752$export$2e2bcd8739ae039.init;
-const $1bac384020b50752$export$d3d08d944062d7e = $1bac384020b50752$export$2e2bcd8739ae039.loadResources;
-const $1bac384020b50752$export$a5d9bf5d83fcab09 = $1bac384020b50752$export$2e2bcd8739ae039.reloadResources;
-const $1bac384020b50752$export$1f96ae73734a86cc = $1bac384020b50752$export$2e2bcd8739ae039.use;
-const $1bac384020b50752$export$61465194746e7fd2 = $1bac384020b50752$export$2e2bcd8739ae039.changeLanguage;
-const $1bac384020b50752$export$f90d180fc7da3b3b = $1bac384020b50752$export$2e2bcd8739ae039.getFixedT;
-const $1bac384020b50752$export$625550452a3fa3ec = $1bac384020b50752$export$2e2bcd8739ae039.t;
-const $1bac384020b50752$export$f7e9f41ea797a17 = $1bac384020b50752$export$2e2bcd8739ae039.exists;
-const $1bac384020b50752$export$2b4b218e406d2d00 = $1bac384020b50752$export$2e2bcd8739ae039.setDefaultNamespace;
-const $1bac384020b50752$export$93d9ee97c1ad3f31 = $1bac384020b50752$export$2e2bcd8739ae039.hasLoadedNamespace;
-const $1bac384020b50752$export$83be934b53fff43b = $1bac384020b50752$export$2e2bcd8739ae039.loadNamespaces;
-const $1bac384020b50752$export$8cd7e7a54fa865bc = $1bac384020b50752$export$2e2bcd8739ae039.loadLanguages;
-
-
 var $4c6a2f83122c31a3$var$Events = /** @class */ function() {
     function Events(eventType, eventFunctions) {
         if (eventFunctions === void 0) eventFunctions = [];
@@ -15586,6 +9913,5515 @@ var $68c8d9028d8b1de7$var$events = new (0, $4c6a2f83122c31a3$export$2e2bcd8739ae
 $68c8d9028d8b1de7$var$events.init();
 
 
+// packages/alpinejs/src/scheduler.js
+var $8c83eaf28779ff46$var$flushPending = false;
+var $8c83eaf28779ff46$var$flushing = false;
+var $8c83eaf28779ff46$var$queue = [];
+var $8c83eaf28779ff46$var$lastFlushedIndex = -1;
+function $8c83eaf28779ff46$var$scheduler(callback) {
+    $8c83eaf28779ff46$var$queueJob(callback);
+}
+function $8c83eaf28779ff46$var$queueJob(job) {
+    if (!$8c83eaf28779ff46$var$queue.includes(job)) $8c83eaf28779ff46$var$queue.push(job);
+    $8c83eaf28779ff46$var$queueFlush();
+}
+function $8c83eaf28779ff46$var$dequeueJob(job) {
+    let index = $8c83eaf28779ff46$var$queue.indexOf(job);
+    if (index !== -1 && index > $8c83eaf28779ff46$var$lastFlushedIndex) $8c83eaf28779ff46$var$queue.splice(index, 1);
+}
+function $8c83eaf28779ff46$var$queueFlush() {
+    if (!$8c83eaf28779ff46$var$flushing && !$8c83eaf28779ff46$var$flushPending) {
+        $8c83eaf28779ff46$var$flushPending = true;
+        queueMicrotask($8c83eaf28779ff46$var$flushJobs);
+    }
+}
+function $8c83eaf28779ff46$var$flushJobs() {
+    $8c83eaf28779ff46$var$flushPending = false;
+    $8c83eaf28779ff46$var$flushing = true;
+    for(let i = 0; i < $8c83eaf28779ff46$var$queue.length; i++){
+        $8c83eaf28779ff46$var$queue[i]();
+        $8c83eaf28779ff46$var$lastFlushedIndex = i;
+    }
+    $8c83eaf28779ff46$var$queue.length = 0;
+    $8c83eaf28779ff46$var$lastFlushedIndex = -1;
+    $8c83eaf28779ff46$var$flushing = false;
+}
+// packages/alpinejs/src/reactivity.js
+var $8c83eaf28779ff46$var$reactive;
+var $8c83eaf28779ff46$var$effect;
+var $8c83eaf28779ff46$var$release;
+var $8c83eaf28779ff46$var$raw;
+var $8c83eaf28779ff46$var$shouldSchedule = true;
+function $8c83eaf28779ff46$var$disableEffectScheduling(callback) {
+    $8c83eaf28779ff46$var$shouldSchedule = false;
+    callback();
+    $8c83eaf28779ff46$var$shouldSchedule = true;
+}
+function $8c83eaf28779ff46$var$setReactivityEngine(engine) {
+    $8c83eaf28779ff46$var$reactive = engine.reactive;
+    $8c83eaf28779ff46$var$release = engine.release;
+    $8c83eaf28779ff46$var$effect = (callback)=>engine.effect(callback, {
+            scheduler: (task)=>{
+                if ($8c83eaf28779ff46$var$shouldSchedule) $8c83eaf28779ff46$var$scheduler(task);
+                else task();
+            }
+        });
+    $8c83eaf28779ff46$var$raw = engine.raw;
+}
+function $8c83eaf28779ff46$var$overrideEffect(override) {
+    $8c83eaf28779ff46$var$effect = override;
+}
+function $8c83eaf28779ff46$var$elementBoundEffect(el) {
+    let cleanup2 = ()=>{};
+    let wrappedEffect = (callback)=>{
+        let effectReference = $8c83eaf28779ff46$var$effect(callback);
+        if (!el._x_effects) {
+            el._x_effects = /* @__PURE__ */ new Set();
+            el._x_runEffects = ()=>{
+                el._x_effects.forEach((i)=>i());
+            };
+        }
+        el._x_effects.add(effectReference);
+        cleanup2 = ()=>{
+            if (effectReference === void 0) return;
+            el._x_effects.delete(effectReference);
+            $8c83eaf28779ff46$var$release(effectReference);
+        };
+        return effectReference;
+    };
+    return [
+        wrappedEffect,
+        ()=>{
+            cleanup2();
+        }
+    ];
+}
+function $8c83eaf28779ff46$var$watch(getter, callback) {
+    let firstTime = true;
+    let oldValue;
+    let effectReference = $8c83eaf28779ff46$var$effect(()=>{
+        let value = getter();
+        JSON.stringify(value);
+        if (!firstTime) queueMicrotask(()=>{
+            callback(value, oldValue);
+            oldValue = value;
+        });
+        else oldValue = value;
+        firstTime = false;
+    });
+    return ()=>$8c83eaf28779ff46$var$release(effectReference);
+}
+// packages/alpinejs/src/mutation.js
+var $8c83eaf28779ff46$var$onAttributeAddeds = [];
+var $8c83eaf28779ff46$var$onElRemoveds = [];
+var $8c83eaf28779ff46$var$onElAddeds = [];
+function $8c83eaf28779ff46$var$onElAdded(callback) {
+    $8c83eaf28779ff46$var$onElAddeds.push(callback);
+}
+function $8c83eaf28779ff46$var$onElRemoved(el, callback) {
+    if (typeof callback === "function") {
+        if (!el._x_cleanups) el._x_cleanups = [];
+        el._x_cleanups.push(callback);
+    } else {
+        callback = el;
+        $8c83eaf28779ff46$var$onElRemoveds.push(callback);
+    }
+}
+function $8c83eaf28779ff46$var$onAttributesAdded(callback) {
+    $8c83eaf28779ff46$var$onAttributeAddeds.push(callback);
+}
+function $8c83eaf28779ff46$var$onAttributeRemoved(el, name, callback) {
+    if (!el._x_attributeCleanups) el._x_attributeCleanups = {};
+    if (!el._x_attributeCleanups[name]) el._x_attributeCleanups[name] = [];
+    el._x_attributeCleanups[name].push(callback);
+}
+function $8c83eaf28779ff46$var$cleanupAttributes(el, names) {
+    if (!el._x_attributeCleanups) return;
+    Object.entries(el._x_attributeCleanups).forEach(([name, value])=>{
+        if (names === void 0 || names.includes(name)) {
+            value.forEach((i)=>i());
+            delete el._x_attributeCleanups[name];
+        }
+    });
+}
+function $8c83eaf28779ff46$var$cleanupElement(el) {
+    el._x_effects?.forEach($8c83eaf28779ff46$var$dequeueJob);
+    while(el._x_cleanups?.length)el._x_cleanups.pop()();
+}
+var $8c83eaf28779ff46$var$observer = new MutationObserver($8c83eaf28779ff46$var$onMutate);
+var $8c83eaf28779ff46$var$currentlyObserving = false;
+function $8c83eaf28779ff46$var$startObservingMutations() {
+    $8c83eaf28779ff46$var$observer.observe(document, {
+        subtree: true,
+        childList: true,
+        attributes: true,
+        attributeOldValue: true
+    });
+    $8c83eaf28779ff46$var$currentlyObserving = true;
+}
+function $8c83eaf28779ff46$var$stopObservingMutations() {
+    $8c83eaf28779ff46$var$flushObserver();
+    $8c83eaf28779ff46$var$observer.disconnect();
+    $8c83eaf28779ff46$var$currentlyObserving = false;
+}
+var $8c83eaf28779ff46$var$queuedMutations = [];
+function $8c83eaf28779ff46$var$flushObserver() {
+    let records = $8c83eaf28779ff46$var$observer.takeRecords();
+    $8c83eaf28779ff46$var$queuedMutations.push(()=>records.length > 0 && $8c83eaf28779ff46$var$onMutate(records));
+    let queueLengthWhenTriggered = $8c83eaf28779ff46$var$queuedMutations.length;
+    queueMicrotask(()=>{
+        if ($8c83eaf28779ff46$var$queuedMutations.length === queueLengthWhenTriggered) while($8c83eaf28779ff46$var$queuedMutations.length > 0)$8c83eaf28779ff46$var$queuedMutations.shift()();
+    });
+}
+function $8c83eaf28779ff46$var$mutateDom(callback) {
+    if (!$8c83eaf28779ff46$var$currentlyObserving) return callback();
+    $8c83eaf28779ff46$var$stopObservingMutations();
+    let result = callback();
+    $8c83eaf28779ff46$var$startObservingMutations();
+    return result;
+}
+var $8c83eaf28779ff46$var$isCollecting = false;
+var $8c83eaf28779ff46$var$deferredMutations = [];
+function $8c83eaf28779ff46$var$deferMutations() {
+    $8c83eaf28779ff46$var$isCollecting = true;
+}
+function $8c83eaf28779ff46$var$flushAndStopDeferringMutations() {
+    $8c83eaf28779ff46$var$isCollecting = false;
+    $8c83eaf28779ff46$var$onMutate($8c83eaf28779ff46$var$deferredMutations);
+    $8c83eaf28779ff46$var$deferredMutations = [];
+}
+function $8c83eaf28779ff46$var$onMutate(mutations) {
+    if ($8c83eaf28779ff46$var$isCollecting) {
+        $8c83eaf28779ff46$var$deferredMutations = $8c83eaf28779ff46$var$deferredMutations.concat(mutations);
+        return;
+    }
+    let addedNodes = [];
+    let removedNodes = /* @__PURE__ */ new Set();
+    let addedAttributes = /* @__PURE__ */ new Map();
+    let removedAttributes = /* @__PURE__ */ new Map();
+    for(let i = 0; i < mutations.length; i++){
+        if (mutations[i].target._x_ignoreMutationObserver) continue;
+        if (mutations[i].type === "childList") {
+            mutations[i].removedNodes.forEach((node)=>{
+                if (node.nodeType !== 1) return;
+                if (!node._x_marker) return;
+                removedNodes.add(node);
+            });
+            mutations[i].addedNodes.forEach((node)=>{
+                if (node.nodeType !== 1) return;
+                if (removedNodes.has(node)) {
+                    removedNodes.delete(node);
+                    return;
+                }
+                if (node._x_marker) return;
+                addedNodes.push(node);
+            });
+        }
+        if (mutations[i].type === "attributes") {
+            let el = mutations[i].target;
+            let name = mutations[i].attributeName;
+            let oldValue = mutations[i].oldValue;
+            let add2 = ()=>{
+                if (!addedAttributes.has(el)) addedAttributes.set(el, []);
+                addedAttributes.get(el).push({
+                    name: name,
+                    value: el.getAttribute(name)
+                });
+            };
+            let remove = ()=>{
+                if (!removedAttributes.has(el)) removedAttributes.set(el, []);
+                removedAttributes.get(el).push(name);
+            };
+            if (el.hasAttribute(name) && oldValue === null) add2();
+            else if (el.hasAttribute(name)) {
+                remove();
+                add2();
+            } else remove();
+        }
+    }
+    removedAttributes.forEach((attrs, el)=>{
+        $8c83eaf28779ff46$var$cleanupAttributes(el, attrs);
+    });
+    addedAttributes.forEach((attrs, el)=>{
+        $8c83eaf28779ff46$var$onAttributeAddeds.forEach((i)=>i(el, attrs));
+    });
+    for (let node of removedNodes){
+        if (addedNodes.some((i)=>i.contains(node))) continue;
+        $8c83eaf28779ff46$var$onElRemoveds.forEach((i)=>i(node));
+    }
+    for (let node of addedNodes){
+        if (!node.isConnected) continue;
+        $8c83eaf28779ff46$var$onElAddeds.forEach((i)=>i(node));
+    }
+    addedNodes = null;
+    removedNodes = null;
+    addedAttributes = null;
+    removedAttributes = null;
+}
+// packages/alpinejs/src/scope.js
+function $8c83eaf28779ff46$var$scope(node) {
+    return $8c83eaf28779ff46$var$mergeProxies($8c83eaf28779ff46$var$closestDataStack(node));
+}
+function $8c83eaf28779ff46$var$addScopeToNode(node, data2, referenceNode) {
+    node._x_dataStack = [
+        data2,
+        ...$8c83eaf28779ff46$var$closestDataStack(referenceNode || node)
+    ];
+    return ()=>{
+        node._x_dataStack = node._x_dataStack.filter((i)=>i !== data2);
+    };
+}
+function $8c83eaf28779ff46$var$closestDataStack(node) {
+    if (node._x_dataStack) return node._x_dataStack;
+    if (typeof ShadowRoot === "function" && node instanceof ShadowRoot) return $8c83eaf28779ff46$var$closestDataStack(node.host);
+    if (!node.parentNode) return [];
+    return $8c83eaf28779ff46$var$closestDataStack(node.parentNode);
+}
+function $8c83eaf28779ff46$var$mergeProxies(objects) {
+    return new Proxy({
+        objects: objects
+    }, $8c83eaf28779ff46$var$mergeProxyTrap);
+}
+var $8c83eaf28779ff46$var$mergeProxyTrap = {
+    ownKeys ({ objects: objects }) {
+        return Array.from(new Set(objects.flatMap((i)=>Object.keys(i))));
+    },
+    has ({ objects: objects }, name) {
+        if (name == Symbol.unscopables) return false;
+        return objects.some((obj)=>Object.prototype.hasOwnProperty.call(obj, name) || Reflect.has(obj, name));
+    },
+    get ({ objects: objects }, name, thisProxy) {
+        if (name == "toJSON") return $8c83eaf28779ff46$var$collapseProxies;
+        return Reflect.get(objects.find((obj)=>Reflect.has(obj, name)) || {}, name, thisProxy);
+    },
+    set ({ objects: objects }, name, value, thisProxy) {
+        const target = objects.find((obj)=>Object.prototype.hasOwnProperty.call(obj, name)) || objects[objects.length - 1];
+        const descriptor = Object.getOwnPropertyDescriptor(target, name);
+        if (descriptor?.set && descriptor?.get) return descriptor.set.call(thisProxy, value) || true;
+        return Reflect.set(target, name, value);
+    }
+};
+function $8c83eaf28779ff46$var$collapseProxies() {
+    let keys = Reflect.ownKeys(this);
+    return keys.reduce((acc, key)=>{
+        acc[key] = Reflect.get(this, key);
+        return acc;
+    }, {});
+}
+// packages/alpinejs/src/interceptor.js
+function $8c83eaf28779ff46$var$initInterceptors(data2) {
+    let isObject2 = (val)=>typeof val === "object" && !Array.isArray(val) && val !== null;
+    let recurse = (obj, basePath = "")=>{
+        Object.entries(Object.getOwnPropertyDescriptors(obj)).forEach(([key, { value: value, enumerable: enumerable }])=>{
+            if (enumerable === false || value === void 0) return;
+            if (typeof value === "object" && value !== null && value.__v_skip) return;
+            let path = basePath === "" ? key : `${basePath}.${key}`;
+            if (typeof value === "object" && value !== null && value._x_interceptor) obj[key] = value.initialize(data2, path, key);
+            else if (isObject2(value) && value !== obj && !(value instanceof Element)) recurse(value, path);
+        });
+    };
+    return recurse(data2);
+}
+function $8c83eaf28779ff46$var$interceptor(callback, mutateObj = ()=>{}) {
+    let obj = {
+        initialValue: void 0,
+        _x_interceptor: true,
+        initialize (data2, path, key) {
+            return callback(this.initialValue, ()=>$8c83eaf28779ff46$var$get(data2, path), (value)=>$8c83eaf28779ff46$var$set(data2, path, value), path, key);
+        }
+    };
+    mutateObj(obj);
+    return (initialValue)=>{
+        if (typeof initialValue === "object" && initialValue !== null && initialValue._x_interceptor) {
+            let initialize = obj.initialize.bind(obj);
+            obj.initialize = (data2, path, key)=>{
+                let innerValue = initialValue.initialize(data2, path, key);
+                obj.initialValue = innerValue;
+                return initialize(data2, path, key);
+            };
+        } else obj.initialValue = initialValue;
+        return obj;
+    };
+}
+function $8c83eaf28779ff46$var$get(obj, path) {
+    return path.split(".").reduce((carry, segment)=>carry[segment], obj);
+}
+function $8c83eaf28779ff46$var$set(obj, path, value) {
+    if (typeof path === "string") path = path.split(".");
+    if (path.length === 1) obj[path[0]] = value;
+    else if (path.length === 0) throw error;
+    else {
+        if (obj[path[0]]) return $8c83eaf28779ff46$var$set(obj[path[0]], path.slice(1), value);
+        else {
+            obj[path[0]] = {};
+            return $8c83eaf28779ff46$var$set(obj[path[0]], path.slice(1), value);
+        }
+    }
+}
+// packages/alpinejs/src/magics.js
+var $8c83eaf28779ff46$var$magics = {};
+function $8c83eaf28779ff46$var$magic(name, callback) {
+    $8c83eaf28779ff46$var$magics[name] = callback;
+}
+function $8c83eaf28779ff46$var$injectMagics(obj, el) {
+    let memoizedUtilities = $8c83eaf28779ff46$var$getUtilities(el);
+    Object.entries($8c83eaf28779ff46$var$magics).forEach(([name, callback])=>{
+        Object.defineProperty(obj, `$${name}`, {
+            get () {
+                return callback(el, memoizedUtilities);
+            },
+            enumerable: false
+        });
+    });
+    return obj;
+}
+function $8c83eaf28779ff46$var$getUtilities(el) {
+    let [utilities, cleanup2] = $8c83eaf28779ff46$var$getElementBoundUtilities(el);
+    let utils = {
+        interceptor: $8c83eaf28779ff46$var$interceptor,
+        ...utilities
+    };
+    $8c83eaf28779ff46$var$onElRemoved(el, cleanup2);
+    return utils;
+}
+// packages/alpinejs/src/utils/error.js
+function $8c83eaf28779ff46$var$tryCatch(el, expression, callback, ...args) {
+    try {
+        return callback(...args);
+    } catch (e) {
+        $8c83eaf28779ff46$var$handleError(e, el, expression);
+    }
+}
+function $8c83eaf28779ff46$var$handleError(error2, el, expression) {
+    error2 = Object.assign(error2 ?? {
+        message: "No error message given."
+    }, {
+        el: el,
+        expression: expression
+    });
+    console.warn(`Alpine Expression Error: ${error2.message}
+
+${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
+    setTimeout(()=>{
+        throw error2;
+    }, 0);
+}
+// packages/alpinejs/src/evaluator.js
+var $8c83eaf28779ff46$var$shouldAutoEvaluateFunctions = true;
+function $8c83eaf28779ff46$var$dontAutoEvaluateFunctions(callback) {
+    let cache = $8c83eaf28779ff46$var$shouldAutoEvaluateFunctions;
+    $8c83eaf28779ff46$var$shouldAutoEvaluateFunctions = false;
+    let result = callback();
+    $8c83eaf28779ff46$var$shouldAutoEvaluateFunctions = cache;
+    return result;
+}
+function $8c83eaf28779ff46$var$evaluate(el, expression, extras = {}) {
+    let result;
+    $8c83eaf28779ff46$var$evaluateLater(el, expression)((value)=>result = value, extras);
+    return result;
+}
+function $8c83eaf28779ff46$var$evaluateLater(...args) {
+    return $8c83eaf28779ff46$var$theEvaluatorFunction(...args);
+}
+var $8c83eaf28779ff46$var$theEvaluatorFunction = $8c83eaf28779ff46$var$normalEvaluator;
+function $8c83eaf28779ff46$var$setEvaluator(newEvaluator) {
+    $8c83eaf28779ff46$var$theEvaluatorFunction = newEvaluator;
+}
+function $8c83eaf28779ff46$var$normalEvaluator(el, expression) {
+    let overriddenMagics = {};
+    $8c83eaf28779ff46$var$injectMagics(overriddenMagics, el);
+    let dataStack = [
+        overriddenMagics,
+        ...$8c83eaf28779ff46$var$closestDataStack(el)
+    ];
+    let evaluator = typeof expression === "function" ? $8c83eaf28779ff46$var$generateEvaluatorFromFunction(dataStack, expression) : $8c83eaf28779ff46$var$generateEvaluatorFromString(dataStack, expression, el);
+    return $8c83eaf28779ff46$var$tryCatch.bind(null, el, expression, evaluator);
+}
+function $8c83eaf28779ff46$var$generateEvaluatorFromFunction(dataStack, func) {
+    return (receiver = ()=>{}, { scope: scope2 = {}, params: params = [] } = {})=>{
+        let result = func.apply($8c83eaf28779ff46$var$mergeProxies([
+            scope2,
+            ...dataStack
+        ]), params);
+        $8c83eaf28779ff46$var$runIfTypeOfFunction(receiver, result);
+    };
+}
+var $8c83eaf28779ff46$var$evaluatorMemo = {};
+function $8c83eaf28779ff46$var$generateFunctionFromString(expression, el) {
+    if ($8c83eaf28779ff46$var$evaluatorMemo[expression]) return $8c83eaf28779ff46$var$evaluatorMemo[expression];
+    let AsyncFunction = Object.getPrototypeOf(async function() {}).constructor;
+    let rightSideSafeExpression = /^[\n\s]*if.*\(.*\)/.test(expression.trim()) || /^(let|const)\s/.test(expression.trim()) ? `(async()=>{ ${expression} })()` : expression;
+    const safeAsyncFunction = ()=>{
+        try {
+            let func2 = new AsyncFunction([
+                "__self",
+                "scope"
+            ], `with (scope) { __self.result = ${rightSideSafeExpression} }; __self.finished = true; return __self.result;`);
+            Object.defineProperty(func2, "name", {
+                value: `[Alpine] ${expression}`
+            });
+            return func2;
+        } catch (error2) {
+            $8c83eaf28779ff46$var$handleError(error2, el, expression);
+            return Promise.resolve();
+        }
+    };
+    let func = safeAsyncFunction();
+    $8c83eaf28779ff46$var$evaluatorMemo[expression] = func;
+    return func;
+}
+function $8c83eaf28779ff46$var$generateEvaluatorFromString(dataStack, expression, el) {
+    let func = $8c83eaf28779ff46$var$generateFunctionFromString(expression, el);
+    return (receiver = ()=>{}, { scope: scope2 = {}, params: params = [] } = {})=>{
+        func.result = void 0;
+        func.finished = false;
+        let completeScope = $8c83eaf28779ff46$var$mergeProxies([
+            scope2,
+            ...dataStack
+        ]);
+        if (typeof func === "function") {
+            let promise = func(func, completeScope).catch((error2)=>$8c83eaf28779ff46$var$handleError(error2, el, expression));
+            if (func.finished) {
+                $8c83eaf28779ff46$var$runIfTypeOfFunction(receiver, func.result, completeScope, params, el);
+                func.result = void 0;
+            } else promise.then((result)=>{
+                $8c83eaf28779ff46$var$runIfTypeOfFunction(receiver, result, completeScope, params, el);
+            }).catch((error2)=>$8c83eaf28779ff46$var$handleError(error2, el, expression)).finally(()=>func.result = void 0);
+        }
+    };
+}
+function $8c83eaf28779ff46$var$runIfTypeOfFunction(receiver, value, scope2, params, el) {
+    if ($8c83eaf28779ff46$var$shouldAutoEvaluateFunctions && typeof value === "function") {
+        let result = value.apply(scope2, params);
+        if (result instanceof Promise) result.then((i)=>$8c83eaf28779ff46$var$runIfTypeOfFunction(receiver, i, scope2, params)).catch((error2)=>$8c83eaf28779ff46$var$handleError(error2, el, value));
+        else receiver(result);
+    } else if (typeof value === "object" && value instanceof Promise) value.then((i)=>receiver(i));
+    else receiver(value);
+}
+// packages/alpinejs/src/directives.js
+var $8c83eaf28779ff46$var$prefixAsString = "x-";
+function $8c83eaf28779ff46$var$prefix(subject = "") {
+    return $8c83eaf28779ff46$var$prefixAsString + subject;
+}
+function $8c83eaf28779ff46$var$setPrefix(newPrefix) {
+    $8c83eaf28779ff46$var$prefixAsString = newPrefix;
+}
+var $8c83eaf28779ff46$var$directiveHandlers = {};
+function $8c83eaf28779ff46$var$directive(name, callback) {
+    $8c83eaf28779ff46$var$directiveHandlers[name] = callback;
+    return {
+        before (directive2) {
+            if (!$8c83eaf28779ff46$var$directiveHandlers[directive2]) {
+                console.warn(String.raw`Cannot find directive \`${directive2}\`. \`${name}\` will use the default order of execution`);
+                return;
+            }
+            const pos = $8c83eaf28779ff46$var$directiveOrder.indexOf(directive2);
+            $8c83eaf28779ff46$var$directiveOrder.splice(pos >= 0 ? pos : $8c83eaf28779ff46$var$directiveOrder.indexOf("DEFAULT"), 0, name);
+        }
+    };
+}
+function $8c83eaf28779ff46$var$directiveExists(name) {
+    return Object.keys($8c83eaf28779ff46$var$directiveHandlers).includes(name);
+}
+function $8c83eaf28779ff46$var$directives(el, attributes, originalAttributeOverride) {
+    attributes = Array.from(attributes);
+    if (el._x_virtualDirectives) {
+        let vAttributes = Object.entries(el._x_virtualDirectives).map(([name, value])=>({
+                name: name,
+                value: value
+            }));
+        let staticAttributes = $8c83eaf28779ff46$var$attributesOnly(vAttributes);
+        vAttributes = vAttributes.map((attribute)=>{
+            if (staticAttributes.find((attr)=>attr.name === attribute.name)) return {
+                name: `x-bind:${attribute.name}`,
+                value: `"${attribute.value}"`
+            };
+            return attribute;
+        });
+        attributes = attributes.concat(vAttributes);
+    }
+    let transformedAttributeMap = {};
+    let directives2 = attributes.map($8c83eaf28779ff46$var$toTransformedAttributes((newName, oldName)=>transformedAttributeMap[newName] = oldName)).filter($8c83eaf28779ff46$var$outNonAlpineAttributes).map($8c83eaf28779ff46$var$toParsedDirectives(transformedAttributeMap, originalAttributeOverride)).sort($8c83eaf28779ff46$var$byPriority);
+    return directives2.map((directive2)=>{
+        return $8c83eaf28779ff46$var$getDirectiveHandler(el, directive2);
+    });
+}
+function $8c83eaf28779ff46$var$attributesOnly(attributes) {
+    return Array.from(attributes).map($8c83eaf28779ff46$var$toTransformedAttributes()).filter((attr)=>!$8c83eaf28779ff46$var$outNonAlpineAttributes(attr));
+}
+var $8c83eaf28779ff46$var$isDeferringHandlers = false;
+var $8c83eaf28779ff46$var$directiveHandlerStacks = /* @__PURE__ */ new Map();
+var $8c83eaf28779ff46$var$currentHandlerStackKey = Symbol();
+function $8c83eaf28779ff46$var$deferHandlingDirectives(callback) {
+    $8c83eaf28779ff46$var$isDeferringHandlers = true;
+    let key = Symbol();
+    $8c83eaf28779ff46$var$currentHandlerStackKey = key;
+    $8c83eaf28779ff46$var$directiveHandlerStacks.set(key, []);
+    let flushHandlers = ()=>{
+        while($8c83eaf28779ff46$var$directiveHandlerStacks.get(key).length)$8c83eaf28779ff46$var$directiveHandlerStacks.get(key).shift()();
+        $8c83eaf28779ff46$var$directiveHandlerStacks.delete(key);
+    };
+    let stopDeferring = ()=>{
+        $8c83eaf28779ff46$var$isDeferringHandlers = false;
+        flushHandlers();
+    };
+    callback(flushHandlers);
+    stopDeferring();
+}
+function $8c83eaf28779ff46$var$getElementBoundUtilities(el) {
+    let cleanups = [];
+    let cleanup2 = (callback)=>cleanups.push(callback);
+    let [effect3, cleanupEffect] = $8c83eaf28779ff46$var$elementBoundEffect(el);
+    cleanups.push(cleanupEffect);
+    let utilities = {
+        Alpine: $8c83eaf28779ff46$var$alpine_default,
+        effect: effect3,
+        cleanup: cleanup2,
+        evaluateLater: $8c83eaf28779ff46$var$evaluateLater.bind($8c83eaf28779ff46$var$evaluateLater, el),
+        evaluate: $8c83eaf28779ff46$var$evaluate.bind($8c83eaf28779ff46$var$evaluate, el)
+    };
+    let doCleanup = ()=>cleanups.forEach((i)=>i());
+    return [
+        utilities,
+        doCleanup
+    ];
+}
+function $8c83eaf28779ff46$var$getDirectiveHandler(el, directive2) {
+    let noop = ()=>{};
+    let handler4 = $8c83eaf28779ff46$var$directiveHandlers[directive2.type] || noop;
+    let [utilities, cleanup2] = $8c83eaf28779ff46$var$getElementBoundUtilities(el);
+    $8c83eaf28779ff46$var$onAttributeRemoved(el, directive2.original, cleanup2);
+    let fullHandler = ()=>{
+        if (el._x_ignore || el._x_ignoreSelf) return;
+        handler4.inline && handler4.inline(el, directive2, utilities);
+        handler4 = handler4.bind(handler4, el, directive2, utilities);
+        $8c83eaf28779ff46$var$isDeferringHandlers ? $8c83eaf28779ff46$var$directiveHandlerStacks.get($8c83eaf28779ff46$var$currentHandlerStackKey).push(handler4) : handler4();
+    };
+    fullHandler.runCleanups = cleanup2;
+    return fullHandler;
+}
+var $8c83eaf28779ff46$var$startingWith = (subject, replacement)=>({ name: name, value: value })=>{
+        if (name.startsWith(subject)) name = name.replace(subject, replacement);
+        return {
+            name: name,
+            value: value
+        };
+    };
+var $8c83eaf28779ff46$var$into = (i)=>i;
+function $8c83eaf28779ff46$var$toTransformedAttributes(callback = ()=>{}) {
+    return ({ name: name, value: value })=>{
+        let { name: newName, value: newValue } = $8c83eaf28779ff46$var$attributeTransformers.reduce((carry, transform)=>{
+            return transform(carry);
+        }, {
+            name: name,
+            value: value
+        });
+        if (newName !== name) callback(newName, name);
+        return {
+            name: newName,
+            value: newValue
+        };
+    };
+}
+var $8c83eaf28779ff46$var$attributeTransformers = [];
+function $8c83eaf28779ff46$var$mapAttributes(callback) {
+    $8c83eaf28779ff46$var$attributeTransformers.push(callback);
+}
+function $8c83eaf28779ff46$var$outNonAlpineAttributes({ name: name }) {
+    return $8c83eaf28779ff46$var$alpineAttributeRegex().test(name);
+}
+var $8c83eaf28779ff46$var$alpineAttributeRegex = ()=>new RegExp(`^${$8c83eaf28779ff46$var$prefixAsString}([^:^.]+)\\b`);
+function $8c83eaf28779ff46$var$toParsedDirectives(transformedAttributeMap, originalAttributeOverride) {
+    return ({ name: name, value: value })=>{
+        let typeMatch = name.match($8c83eaf28779ff46$var$alpineAttributeRegex());
+        let valueMatch = name.match(/:([a-zA-Z0-9\-_:]+)/);
+        let modifiers = name.match(/\.[^.\]]+(?=[^\]]*$)/g) || [];
+        let original = originalAttributeOverride || transformedAttributeMap[name] || name;
+        return {
+            type: typeMatch ? typeMatch[1] : null,
+            value: valueMatch ? valueMatch[1] : null,
+            modifiers: modifiers.map((i)=>i.replace(".", "")),
+            expression: value,
+            original: original
+        };
+    };
+}
+var $8c83eaf28779ff46$var$DEFAULT = "DEFAULT";
+var $8c83eaf28779ff46$var$directiveOrder = [
+    "ignore",
+    "ref",
+    "data",
+    "id",
+    "anchor",
+    "bind",
+    "init",
+    "for",
+    "model",
+    "modelable",
+    "transition",
+    "show",
+    "if",
+    $8c83eaf28779ff46$var$DEFAULT,
+    "teleport"
+];
+function $8c83eaf28779ff46$var$byPriority(a, b) {
+    let typeA = $8c83eaf28779ff46$var$directiveOrder.indexOf(a.type) === -1 ? $8c83eaf28779ff46$var$DEFAULT : a.type;
+    let typeB = $8c83eaf28779ff46$var$directiveOrder.indexOf(b.type) === -1 ? $8c83eaf28779ff46$var$DEFAULT : b.type;
+    return $8c83eaf28779ff46$var$directiveOrder.indexOf(typeA) - $8c83eaf28779ff46$var$directiveOrder.indexOf(typeB);
+}
+// packages/alpinejs/src/utils/dispatch.js
+function $8c83eaf28779ff46$var$dispatch(el, name, detail = {}) {
+    el.dispatchEvent(new CustomEvent(name, {
+        detail: detail,
+        bubbles: true,
+        // Allows events to pass the shadow DOM barrier.
+        composed: true,
+        cancelable: true
+    }));
+}
+// packages/alpinejs/src/utils/walk.js
+function $8c83eaf28779ff46$var$walk(el, callback) {
+    if (typeof ShadowRoot === "function" && el instanceof ShadowRoot) {
+        Array.from(el.children).forEach((el2)=>$8c83eaf28779ff46$var$walk(el2, callback));
+        return;
+    }
+    let skip = false;
+    callback(el, ()=>skip = true);
+    if (skip) return;
+    let node = el.firstElementChild;
+    while(node){
+        $8c83eaf28779ff46$var$walk(node, callback, false);
+        node = node.nextElementSibling;
+    }
+}
+// packages/alpinejs/src/utils/warn.js
+function $8c83eaf28779ff46$var$warn(message, ...args) {
+    console.warn(`Alpine Warning: ${message}`, ...args);
+}
+// packages/alpinejs/src/lifecycle.js
+var $8c83eaf28779ff46$var$started = false;
+function $8c83eaf28779ff46$var$start() {
+    if ($8c83eaf28779ff46$var$started) $8c83eaf28779ff46$var$warn("Alpine has already been initialized on this page. Calling Alpine.start() more than once can cause problems.");
+    $8c83eaf28779ff46$var$started = true;
+    if (!document.body) $8c83eaf28779ff46$var$warn("Unable to initialize. Trying to load Alpine before `<body>` is available. Did you forget to add `defer` in Alpine's `<script>` tag?");
+    $8c83eaf28779ff46$var$dispatch(document, "alpine:init");
+    $8c83eaf28779ff46$var$dispatch(document, "alpine:initializing");
+    $8c83eaf28779ff46$var$startObservingMutations();
+    $8c83eaf28779ff46$var$onElAdded((el)=>$8c83eaf28779ff46$var$initTree(el, $8c83eaf28779ff46$var$walk));
+    $8c83eaf28779ff46$var$onElRemoved((el)=>$8c83eaf28779ff46$var$destroyTree(el));
+    $8c83eaf28779ff46$var$onAttributesAdded((el, attrs)=>{
+        $8c83eaf28779ff46$var$directives(el, attrs).forEach((handle)=>handle());
+    });
+    let outNestedComponents = (el)=>!$8c83eaf28779ff46$var$closestRoot(el.parentElement, true);
+    Array.from(document.querySelectorAll($8c83eaf28779ff46$var$allSelectors().join(","))).filter(outNestedComponents).forEach((el)=>{
+        $8c83eaf28779ff46$var$initTree(el);
+    });
+    $8c83eaf28779ff46$var$dispatch(document, "alpine:initialized");
+    setTimeout(()=>{
+        $8c83eaf28779ff46$var$warnAboutMissingPlugins();
+    });
+}
+var $8c83eaf28779ff46$var$rootSelectorCallbacks = [];
+var $8c83eaf28779ff46$var$initSelectorCallbacks = [];
+function $8c83eaf28779ff46$var$rootSelectors() {
+    return $8c83eaf28779ff46$var$rootSelectorCallbacks.map((fn)=>fn());
+}
+function $8c83eaf28779ff46$var$allSelectors() {
+    return $8c83eaf28779ff46$var$rootSelectorCallbacks.concat($8c83eaf28779ff46$var$initSelectorCallbacks).map((fn)=>fn());
+}
+function $8c83eaf28779ff46$var$addRootSelector(selectorCallback) {
+    $8c83eaf28779ff46$var$rootSelectorCallbacks.push(selectorCallback);
+}
+function $8c83eaf28779ff46$var$addInitSelector(selectorCallback) {
+    $8c83eaf28779ff46$var$initSelectorCallbacks.push(selectorCallback);
+}
+function $8c83eaf28779ff46$var$closestRoot(el, includeInitSelectors = false) {
+    return $8c83eaf28779ff46$var$findClosest(el, (element)=>{
+        const selectors = includeInitSelectors ? $8c83eaf28779ff46$var$allSelectors() : $8c83eaf28779ff46$var$rootSelectors();
+        if (selectors.some((selector)=>element.matches(selector))) return true;
+    });
+}
+function $8c83eaf28779ff46$var$findClosest(el, callback) {
+    if (!el) return;
+    if (callback(el)) return el;
+    if (el._x_teleportBack) el = el._x_teleportBack;
+    if (!el.parentElement) return;
+    return $8c83eaf28779ff46$var$findClosest(el.parentElement, callback);
+}
+function $8c83eaf28779ff46$var$isRoot(el) {
+    return $8c83eaf28779ff46$var$rootSelectors().some((selector)=>el.matches(selector));
+}
+var $8c83eaf28779ff46$var$initInterceptors2 = [];
+function $8c83eaf28779ff46$var$interceptInit(callback) {
+    $8c83eaf28779ff46$var$initInterceptors2.push(callback);
+}
+var $8c83eaf28779ff46$var$markerDispenser = 1;
+function $8c83eaf28779ff46$var$initTree(el, walker = $8c83eaf28779ff46$var$walk, intercept = ()=>{}) {
+    if ($8c83eaf28779ff46$var$findClosest(el, (i)=>i._x_ignore)) return;
+    $8c83eaf28779ff46$var$deferHandlingDirectives(()=>{
+        walker(el, (el2, skip)=>{
+            if (el2._x_marker) return;
+            intercept(el2, skip);
+            $8c83eaf28779ff46$var$initInterceptors2.forEach((i)=>i(el2, skip));
+            $8c83eaf28779ff46$var$directives(el2, el2.attributes).forEach((handle)=>handle());
+            if (!el2._x_ignore) el2._x_marker = $8c83eaf28779ff46$var$markerDispenser++;
+            el2._x_ignore && skip();
+        });
+    });
+}
+function $8c83eaf28779ff46$var$destroyTree(root, walker = $8c83eaf28779ff46$var$walk) {
+    walker(root, (el)=>{
+        $8c83eaf28779ff46$var$cleanupElement(el);
+        $8c83eaf28779ff46$var$cleanupAttributes(el);
+        delete el._x_marker;
+    });
+}
+function $8c83eaf28779ff46$var$warnAboutMissingPlugins() {
+    let pluginDirectives = [
+        [
+            "ui",
+            "dialog",
+            [
+                "[x-dialog], [x-popover]"
+            ]
+        ],
+        [
+            "anchor",
+            "anchor",
+            [
+                "[x-anchor]"
+            ]
+        ],
+        [
+            "sort",
+            "sort",
+            [
+                "[x-sort]"
+            ]
+        ]
+    ];
+    pluginDirectives.forEach(([plugin2, directive2, selectors])=>{
+        if ($8c83eaf28779ff46$var$directiveExists(directive2)) return;
+        selectors.some((selector)=>{
+            if (document.querySelector(selector)) {
+                $8c83eaf28779ff46$var$warn(`found "${selector}", but missing ${plugin2} plugin`);
+                return true;
+            }
+        });
+    });
+}
+// packages/alpinejs/src/nextTick.js
+var $8c83eaf28779ff46$var$tickStack = [];
+var $8c83eaf28779ff46$var$isHolding = false;
+function $8c83eaf28779ff46$var$nextTick(callback = ()=>{}) {
+    queueMicrotask(()=>{
+        $8c83eaf28779ff46$var$isHolding || setTimeout(()=>{
+            $8c83eaf28779ff46$var$releaseNextTicks();
+        });
+    });
+    return new Promise((res)=>{
+        $8c83eaf28779ff46$var$tickStack.push(()=>{
+            callback();
+            res();
+        });
+    });
+}
+function $8c83eaf28779ff46$var$releaseNextTicks() {
+    $8c83eaf28779ff46$var$isHolding = false;
+    while($8c83eaf28779ff46$var$tickStack.length)$8c83eaf28779ff46$var$tickStack.shift()();
+}
+function $8c83eaf28779ff46$var$holdNextTicks() {
+    $8c83eaf28779ff46$var$isHolding = true;
+}
+// packages/alpinejs/src/utils/classes.js
+function $8c83eaf28779ff46$var$setClasses(el, value) {
+    if (Array.isArray(value)) return $8c83eaf28779ff46$var$setClassesFromString(el, value.join(" "));
+    else if (typeof value === "object" && value !== null) return $8c83eaf28779ff46$var$setClassesFromObject(el, value);
+    else if (typeof value === "function") return $8c83eaf28779ff46$var$setClasses(el, value());
+    return $8c83eaf28779ff46$var$setClassesFromString(el, value);
+}
+function $8c83eaf28779ff46$var$setClassesFromString(el, classString) {
+    let split = (classString2)=>classString2.split(" ").filter(Boolean);
+    let missingClasses = (classString2)=>classString2.split(" ").filter((i)=>!el.classList.contains(i)).filter(Boolean);
+    let addClassesAndReturnUndo = (classes)=>{
+        el.classList.add(...classes);
+        return ()=>{
+            el.classList.remove(...classes);
+        };
+    };
+    classString = classString === true ? classString = "" : classString || "";
+    return addClassesAndReturnUndo(missingClasses(classString));
+}
+function $8c83eaf28779ff46$var$setClassesFromObject(el, classObject) {
+    let split = (classString)=>classString.split(" ").filter(Boolean);
+    let forAdd = Object.entries(classObject).flatMap(([classString, bool])=>bool ? split(classString) : false).filter(Boolean);
+    let forRemove = Object.entries(classObject).flatMap(([classString, bool])=>!bool ? split(classString) : false).filter(Boolean);
+    let added = [];
+    let removed = [];
+    forRemove.forEach((i)=>{
+        if (el.classList.contains(i)) {
+            el.classList.remove(i);
+            removed.push(i);
+        }
+    });
+    forAdd.forEach((i)=>{
+        if (!el.classList.contains(i)) {
+            el.classList.add(i);
+            added.push(i);
+        }
+    });
+    return ()=>{
+        removed.forEach((i)=>el.classList.add(i));
+        added.forEach((i)=>el.classList.remove(i));
+    };
+}
+// packages/alpinejs/src/utils/styles.js
+function $8c83eaf28779ff46$var$setStyles(el, value) {
+    if (typeof value === "object" && value !== null) return $8c83eaf28779ff46$var$setStylesFromObject(el, value);
+    return $8c83eaf28779ff46$var$setStylesFromString(el, value);
+}
+function $8c83eaf28779ff46$var$setStylesFromObject(el, value) {
+    let previousStyles = {};
+    Object.entries(value).forEach(([key, value2])=>{
+        previousStyles[key] = el.style[key];
+        if (!key.startsWith("--")) key = $8c83eaf28779ff46$var$kebabCase(key);
+        el.style.setProperty(key, value2);
+    });
+    setTimeout(()=>{
+        if (el.style.length === 0) el.removeAttribute("style");
+    });
+    return ()=>{
+        $8c83eaf28779ff46$var$setStyles(el, previousStyles);
+    };
+}
+function $8c83eaf28779ff46$var$setStylesFromString(el, value) {
+    let cache = el.getAttribute("style", value);
+    el.setAttribute("style", value);
+    return ()=>{
+        el.setAttribute("style", cache || "");
+    };
+}
+function $8c83eaf28779ff46$var$kebabCase(subject) {
+    return subject.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
+}
+// packages/alpinejs/src/utils/once.js
+function $8c83eaf28779ff46$var$once(callback, fallback = ()=>{}) {
+    let called = false;
+    return function() {
+        if (!called) {
+            called = true;
+            callback.apply(this, arguments);
+        } else fallback.apply(this, arguments);
+    };
+}
+// packages/alpinejs/src/directives/x-transition.js
+$8c83eaf28779ff46$var$directive("transition", (el, { value: value, modifiers: modifiers, expression: expression }, { evaluate: evaluate2 })=>{
+    if (typeof expression === "function") expression = evaluate2(expression);
+    if (expression === false) return;
+    if (!expression || typeof expression === "boolean") $8c83eaf28779ff46$var$registerTransitionsFromHelper(el, modifiers, value);
+    else $8c83eaf28779ff46$var$registerTransitionsFromClassString(el, expression, value);
+});
+function $8c83eaf28779ff46$var$registerTransitionsFromClassString(el, classString, stage) {
+    $8c83eaf28779ff46$var$registerTransitionObject(el, $8c83eaf28779ff46$var$setClasses, "");
+    let directiveStorageMap = {
+        "enter": (classes)=>{
+            el._x_transition.enter.during = classes;
+        },
+        "enter-start": (classes)=>{
+            el._x_transition.enter.start = classes;
+        },
+        "enter-end": (classes)=>{
+            el._x_transition.enter.end = classes;
+        },
+        "leave": (classes)=>{
+            el._x_transition.leave.during = classes;
+        },
+        "leave-start": (classes)=>{
+            el._x_transition.leave.start = classes;
+        },
+        "leave-end": (classes)=>{
+            el._x_transition.leave.end = classes;
+        }
+    };
+    directiveStorageMap[stage](classString);
+}
+function $8c83eaf28779ff46$var$registerTransitionsFromHelper(el, modifiers, stage) {
+    $8c83eaf28779ff46$var$registerTransitionObject(el, $8c83eaf28779ff46$var$setStyles);
+    let doesntSpecify = !modifiers.includes("in") && !modifiers.includes("out") && !stage;
+    let transitioningIn = doesntSpecify || modifiers.includes("in") || [
+        "enter"
+    ].includes(stage);
+    let transitioningOut = doesntSpecify || modifiers.includes("out") || [
+        "leave"
+    ].includes(stage);
+    if (modifiers.includes("in") && !doesntSpecify) modifiers = modifiers.filter((i, index)=>index < modifiers.indexOf("out"));
+    if (modifiers.includes("out") && !doesntSpecify) modifiers = modifiers.filter((i, index)=>index > modifiers.indexOf("out"));
+    let wantsAll = !modifiers.includes("opacity") && !modifiers.includes("scale");
+    let wantsOpacity = wantsAll || modifiers.includes("opacity");
+    let wantsScale = wantsAll || modifiers.includes("scale");
+    let opacityValue = wantsOpacity ? 0 : 1;
+    let scaleValue = wantsScale ? $8c83eaf28779ff46$var$modifierValue(modifiers, "scale", 95) / 100 : 1;
+    let delay = $8c83eaf28779ff46$var$modifierValue(modifiers, "delay", 0) / 1e3;
+    let origin = $8c83eaf28779ff46$var$modifierValue(modifiers, "origin", "center");
+    let property = "opacity, transform";
+    let durationIn = $8c83eaf28779ff46$var$modifierValue(modifiers, "duration", 150) / 1e3;
+    let durationOut = $8c83eaf28779ff46$var$modifierValue(modifiers, "duration", 75) / 1e3;
+    let easing = `cubic-bezier(0.4, 0.0, 0.2, 1)`;
+    if (transitioningIn) {
+        el._x_transition.enter.during = {
+            transformOrigin: origin,
+            transitionDelay: `${delay}s`,
+            transitionProperty: property,
+            transitionDuration: `${durationIn}s`,
+            transitionTimingFunction: easing
+        };
+        el._x_transition.enter.start = {
+            opacity: opacityValue,
+            transform: `scale(${scaleValue})`
+        };
+        el._x_transition.enter.end = {
+            opacity: 1,
+            transform: `scale(1)`
+        };
+    }
+    if (transitioningOut) {
+        el._x_transition.leave.during = {
+            transformOrigin: origin,
+            transitionDelay: `${delay}s`,
+            transitionProperty: property,
+            transitionDuration: `${durationOut}s`,
+            transitionTimingFunction: easing
+        };
+        el._x_transition.leave.start = {
+            opacity: 1,
+            transform: `scale(1)`
+        };
+        el._x_transition.leave.end = {
+            opacity: opacityValue,
+            transform: `scale(${scaleValue})`
+        };
+    }
+}
+function $8c83eaf28779ff46$var$registerTransitionObject(el, setFunction, defaultValue = {}) {
+    if (!el._x_transition) el._x_transition = {
+        enter: {
+            during: defaultValue,
+            start: defaultValue,
+            end: defaultValue
+        },
+        leave: {
+            during: defaultValue,
+            start: defaultValue,
+            end: defaultValue
+        },
+        in (before = ()=>{}, after = ()=>{}) {
+            $8c83eaf28779ff46$var$transition(el, setFunction, {
+                during: this.enter.during,
+                start: this.enter.start,
+                end: this.enter.end
+            }, before, after);
+        },
+        out (before = ()=>{}, after = ()=>{}) {
+            $8c83eaf28779ff46$var$transition(el, setFunction, {
+                during: this.leave.during,
+                start: this.leave.start,
+                end: this.leave.end
+            }, before, after);
+        }
+    };
+}
+window.Element.prototype._x_toggleAndCascadeWithTransitions = function(el, value, show, hide) {
+    const nextTick2 = document.visibilityState === "visible" ? requestAnimationFrame : setTimeout;
+    let clickAwayCompatibleShow = ()=>nextTick2(show);
+    if (value) {
+        if (el._x_transition && (el._x_transition.enter || el._x_transition.leave)) el._x_transition.enter && (Object.entries(el._x_transition.enter.during).length || Object.entries(el._x_transition.enter.start).length || Object.entries(el._x_transition.enter.end).length) ? el._x_transition.in(show) : clickAwayCompatibleShow();
+        else el._x_transition ? el._x_transition.in(show) : clickAwayCompatibleShow();
+        return;
+    }
+    el._x_hidePromise = el._x_transition ? new Promise((resolve, reject)=>{
+        el._x_transition.out(()=>{}, ()=>resolve(hide));
+        el._x_transitioning && el._x_transitioning.beforeCancel(()=>reject({
+                isFromCancelledTransition: true
+            }));
+    }) : Promise.resolve(hide);
+    queueMicrotask(()=>{
+        let closest = $8c83eaf28779ff46$var$closestHide(el);
+        if (closest) {
+            if (!closest._x_hideChildren) closest._x_hideChildren = [];
+            closest._x_hideChildren.push(el);
+        } else nextTick2(()=>{
+            let hideAfterChildren = (el2)=>{
+                let carry = Promise.all([
+                    el2._x_hidePromise,
+                    ...(el2._x_hideChildren || []).map(hideAfterChildren)
+                ]).then(([i])=>i?.());
+                delete el2._x_hidePromise;
+                delete el2._x_hideChildren;
+                return carry;
+            };
+            hideAfterChildren(el).catch((e)=>{
+                if (!e.isFromCancelledTransition) throw e;
+            });
+        });
+    });
+};
+function $8c83eaf28779ff46$var$closestHide(el) {
+    let parent = el.parentNode;
+    if (!parent) return;
+    return parent._x_hidePromise ? parent : $8c83eaf28779ff46$var$closestHide(parent);
+}
+function $8c83eaf28779ff46$var$transition(el, setFunction, { during: during, start: start2, end: end } = {}, before = ()=>{}, after = ()=>{}) {
+    if (el._x_transitioning) el._x_transitioning.cancel();
+    if (Object.keys(during).length === 0 && Object.keys(start2).length === 0 && Object.keys(end).length === 0) {
+        before();
+        after();
+        return;
+    }
+    let undoStart, undoDuring, undoEnd;
+    $8c83eaf28779ff46$var$performTransition(el, {
+        start () {
+            undoStart = setFunction(el, start2);
+        },
+        during () {
+            undoDuring = setFunction(el, during);
+        },
+        before: before,
+        end () {
+            undoStart();
+            undoEnd = setFunction(el, end);
+        },
+        after: after,
+        cleanup () {
+            undoDuring();
+            undoEnd();
+        }
+    });
+}
+function $8c83eaf28779ff46$var$performTransition(el, stages) {
+    let interrupted, reachedBefore, reachedEnd;
+    let finish = $8c83eaf28779ff46$var$once(()=>{
+        $8c83eaf28779ff46$var$mutateDom(()=>{
+            interrupted = true;
+            if (!reachedBefore) stages.before();
+            if (!reachedEnd) {
+                stages.end();
+                $8c83eaf28779ff46$var$releaseNextTicks();
+            }
+            stages.after();
+            if (el.isConnected) stages.cleanup();
+            delete el._x_transitioning;
+        });
+    });
+    el._x_transitioning = {
+        beforeCancels: [],
+        beforeCancel (callback) {
+            this.beforeCancels.push(callback);
+        },
+        cancel: $8c83eaf28779ff46$var$once(function() {
+            while(this.beforeCancels.length)this.beforeCancels.shift()();
+            finish();
+        }),
+        finish: finish
+    };
+    $8c83eaf28779ff46$var$mutateDom(()=>{
+        stages.start();
+        stages.during();
+    });
+    $8c83eaf28779ff46$var$holdNextTicks();
+    requestAnimationFrame(()=>{
+        if (interrupted) return;
+        let duration = Number(getComputedStyle(el).transitionDuration.replace(/,.*/, "").replace("s", "")) * 1e3;
+        let delay = Number(getComputedStyle(el).transitionDelay.replace(/,.*/, "").replace("s", "")) * 1e3;
+        if (duration === 0) duration = Number(getComputedStyle(el).animationDuration.replace("s", "")) * 1e3;
+        $8c83eaf28779ff46$var$mutateDom(()=>{
+            stages.before();
+        });
+        reachedBefore = true;
+        requestAnimationFrame(()=>{
+            if (interrupted) return;
+            $8c83eaf28779ff46$var$mutateDom(()=>{
+                stages.end();
+            });
+            $8c83eaf28779ff46$var$releaseNextTicks();
+            setTimeout(el._x_transitioning.finish, duration + delay);
+            reachedEnd = true;
+        });
+    });
+}
+function $8c83eaf28779ff46$var$modifierValue(modifiers, key, fallback) {
+    if (modifiers.indexOf(key) === -1) return fallback;
+    const rawValue = modifiers[modifiers.indexOf(key) + 1];
+    if (!rawValue) return fallback;
+    if (key === "scale") {
+        if (isNaN(rawValue)) return fallback;
+    }
+    if (key === "duration" || key === "delay") {
+        let match = rawValue.match(/([0-9]+)ms/);
+        if (match) return match[1];
+    }
+    if (key === "origin") {
+        if ([
+            "top",
+            "right",
+            "left",
+            "center",
+            "bottom"
+        ].includes(modifiers[modifiers.indexOf(key) + 2])) return [
+            rawValue,
+            modifiers[modifiers.indexOf(key) + 2]
+        ].join(" ");
+    }
+    return rawValue;
+}
+// packages/alpinejs/src/clone.js
+var $8c83eaf28779ff46$var$isCloning = false;
+function $8c83eaf28779ff46$var$skipDuringClone(callback, fallback = ()=>{}) {
+    return (...args)=>$8c83eaf28779ff46$var$isCloning ? fallback(...args) : callback(...args);
+}
+function $8c83eaf28779ff46$var$onlyDuringClone(callback) {
+    return (...args)=>$8c83eaf28779ff46$var$isCloning && callback(...args);
+}
+var $8c83eaf28779ff46$var$interceptors = [];
+function $8c83eaf28779ff46$var$interceptClone(callback) {
+    $8c83eaf28779ff46$var$interceptors.push(callback);
+}
+function $8c83eaf28779ff46$var$cloneNode(from, to) {
+    $8c83eaf28779ff46$var$interceptors.forEach((i)=>i(from, to));
+    $8c83eaf28779ff46$var$isCloning = true;
+    $8c83eaf28779ff46$var$dontRegisterReactiveSideEffects(()=>{
+        $8c83eaf28779ff46$var$initTree(to, (el, callback)=>{
+            callback(el, ()=>{});
+        });
+    });
+    $8c83eaf28779ff46$var$isCloning = false;
+}
+var $8c83eaf28779ff46$var$isCloningLegacy = false;
+function $8c83eaf28779ff46$var$clone(oldEl, newEl) {
+    if (!newEl._x_dataStack) newEl._x_dataStack = oldEl._x_dataStack;
+    $8c83eaf28779ff46$var$isCloning = true;
+    $8c83eaf28779ff46$var$isCloningLegacy = true;
+    $8c83eaf28779ff46$var$dontRegisterReactiveSideEffects(()=>{
+        $8c83eaf28779ff46$var$cloneTree(newEl);
+    });
+    $8c83eaf28779ff46$var$isCloning = false;
+    $8c83eaf28779ff46$var$isCloningLegacy = false;
+}
+function $8c83eaf28779ff46$var$cloneTree(el) {
+    let hasRunThroughFirstEl = false;
+    let shallowWalker = (el2, callback)=>{
+        $8c83eaf28779ff46$var$walk(el2, (el3, skip)=>{
+            if (hasRunThroughFirstEl && $8c83eaf28779ff46$var$isRoot(el3)) return skip();
+            hasRunThroughFirstEl = true;
+            callback(el3, skip);
+        });
+    };
+    $8c83eaf28779ff46$var$initTree(el, shallowWalker);
+}
+function $8c83eaf28779ff46$var$dontRegisterReactiveSideEffects(callback) {
+    let cache = $8c83eaf28779ff46$var$effect;
+    $8c83eaf28779ff46$var$overrideEffect((callback2, el)=>{
+        let storedEffect = cache(callback2);
+        $8c83eaf28779ff46$var$release(storedEffect);
+        return ()=>{};
+    });
+    callback();
+    $8c83eaf28779ff46$var$overrideEffect(cache);
+}
+// packages/alpinejs/src/utils/bind.js
+function $8c83eaf28779ff46$var$bind(el, name, value, modifiers = []) {
+    if (!el._x_bindings) el._x_bindings = $8c83eaf28779ff46$var$reactive({});
+    el._x_bindings[name] = value;
+    name = modifiers.includes("camel") ? $8c83eaf28779ff46$var$camelCase(name) : name;
+    switch(name){
+        case "value":
+            $8c83eaf28779ff46$var$bindInputValue(el, value);
+            break;
+        case "style":
+            $8c83eaf28779ff46$var$bindStyles(el, value);
+            break;
+        case "class":
+            $8c83eaf28779ff46$var$bindClasses(el, value);
+            break;
+        case "selected":
+        case "checked":
+            $8c83eaf28779ff46$var$bindAttributeAndProperty(el, name, value);
+            break;
+        default:
+            $8c83eaf28779ff46$var$bindAttribute(el, name, value);
+            break;
+    }
+}
+function $8c83eaf28779ff46$var$bindInputValue(el, value) {
+    if ($8c83eaf28779ff46$var$isRadio(el)) {
+        if (el.attributes.value === void 0) el.value = value;
+        if (window.fromModel) {
+            if (typeof value === "boolean") el.checked = $8c83eaf28779ff46$var$safeParseBoolean(el.value) === value;
+            else el.checked = $8c83eaf28779ff46$var$checkedAttrLooseCompare(el.value, value);
+        }
+    } else if ($8c83eaf28779ff46$var$isCheckbox(el)) {
+        if (Number.isInteger(value)) el.value = value;
+        else if (!Array.isArray(value) && typeof value !== "boolean" && ![
+            null,
+            void 0
+        ].includes(value)) el.value = String(value);
+        else if (Array.isArray(value)) el.checked = value.some((val)=>$8c83eaf28779ff46$var$checkedAttrLooseCompare(val, el.value));
+        else el.checked = !!value;
+    } else if (el.tagName === "SELECT") $8c83eaf28779ff46$var$updateSelect(el, value);
+    else {
+        if (el.value === value) return;
+        el.value = value === void 0 ? "" : value;
+    }
+}
+function $8c83eaf28779ff46$var$bindClasses(el, value) {
+    if (el._x_undoAddedClasses) el._x_undoAddedClasses();
+    el._x_undoAddedClasses = $8c83eaf28779ff46$var$setClasses(el, value);
+}
+function $8c83eaf28779ff46$var$bindStyles(el, value) {
+    if (el._x_undoAddedStyles) el._x_undoAddedStyles();
+    el._x_undoAddedStyles = $8c83eaf28779ff46$var$setStyles(el, value);
+}
+function $8c83eaf28779ff46$var$bindAttributeAndProperty(el, name, value) {
+    $8c83eaf28779ff46$var$bindAttribute(el, name, value);
+    $8c83eaf28779ff46$var$setPropertyIfChanged(el, name, value);
+}
+function $8c83eaf28779ff46$var$bindAttribute(el, name, value) {
+    if ([
+        null,
+        void 0,
+        false
+    ].includes(value) && $8c83eaf28779ff46$var$attributeShouldntBePreservedIfFalsy(name)) el.removeAttribute(name);
+    else {
+        if ($8c83eaf28779ff46$var$isBooleanAttr(name)) value = name;
+        $8c83eaf28779ff46$var$setIfChanged(el, name, value);
+    }
+}
+function $8c83eaf28779ff46$var$setIfChanged(el, attrName, value) {
+    if (el.getAttribute(attrName) != value) el.setAttribute(attrName, value);
+}
+function $8c83eaf28779ff46$var$setPropertyIfChanged(el, propName, value) {
+    if (el[propName] !== value) el[propName] = value;
+}
+function $8c83eaf28779ff46$var$updateSelect(el, value) {
+    const arrayWrappedValue = [].concat(value).map((value2)=>{
+        return value2 + "";
+    });
+    Array.from(el.options).forEach((option)=>{
+        option.selected = arrayWrappedValue.includes(option.value);
+    });
+}
+function $8c83eaf28779ff46$var$camelCase(subject) {
+    return subject.toLowerCase().replace(/-(\w)/g, (match, char)=>char.toUpperCase());
+}
+function $8c83eaf28779ff46$var$checkedAttrLooseCompare(valueA, valueB) {
+    return valueA == valueB;
+}
+function $8c83eaf28779ff46$var$safeParseBoolean(rawValue) {
+    if ([
+        1,
+        "1",
+        "true",
+        "on",
+        "yes",
+        true
+    ].includes(rawValue)) return true;
+    if ([
+        0,
+        "0",
+        "false",
+        "off",
+        "no",
+        false
+    ].includes(rawValue)) return false;
+    return rawValue ? Boolean(rawValue) : null;
+}
+var $8c83eaf28779ff46$var$booleanAttributes = /* @__PURE__ */ new Set([
+    "allowfullscreen",
+    "async",
+    "autofocus",
+    "autoplay",
+    "checked",
+    "controls",
+    "default",
+    "defer",
+    "disabled",
+    "formnovalidate",
+    "inert",
+    "ismap",
+    "itemscope",
+    "loop",
+    "multiple",
+    "muted",
+    "nomodule",
+    "novalidate",
+    "open",
+    "playsinline",
+    "readonly",
+    "required",
+    "reversed",
+    "selected",
+    "shadowrootclonable",
+    "shadowrootdelegatesfocus",
+    "shadowrootserializable"
+]);
+function $8c83eaf28779ff46$var$isBooleanAttr(attrName) {
+    return $8c83eaf28779ff46$var$booleanAttributes.has(attrName);
+}
+function $8c83eaf28779ff46$var$attributeShouldntBePreservedIfFalsy(name) {
+    return ![
+        "aria-pressed",
+        "aria-checked",
+        "aria-expanded",
+        "aria-selected"
+    ].includes(name);
+}
+function $8c83eaf28779ff46$var$getBinding(el, name, fallback) {
+    if (el._x_bindings && el._x_bindings[name] !== void 0) return el._x_bindings[name];
+    return $8c83eaf28779ff46$var$getAttributeBinding(el, name, fallback);
+}
+function $8c83eaf28779ff46$var$extractProp(el, name, fallback, extract = true) {
+    if (el._x_bindings && el._x_bindings[name] !== void 0) return el._x_bindings[name];
+    if (el._x_inlineBindings && el._x_inlineBindings[name] !== void 0) {
+        let binding = el._x_inlineBindings[name];
+        binding.extract = extract;
+        return $8c83eaf28779ff46$var$dontAutoEvaluateFunctions(()=>{
+            return $8c83eaf28779ff46$var$evaluate(el, binding.expression);
+        });
+    }
+    return $8c83eaf28779ff46$var$getAttributeBinding(el, name, fallback);
+}
+function $8c83eaf28779ff46$var$getAttributeBinding(el, name, fallback) {
+    let attr = el.getAttribute(name);
+    if (attr === null) return typeof fallback === "function" ? fallback() : fallback;
+    if (attr === "") return true;
+    if ($8c83eaf28779ff46$var$isBooleanAttr(name)) return !![
+        name,
+        "true"
+    ].includes(attr);
+    return attr;
+}
+function $8c83eaf28779ff46$var$isCheckbox(el) {
+    return el.type === "checkbox" || el.localName === "ui-checkbox" || el.localName === "ui-switch";
+}
+function $8c83eaf28779ff46$var$isRadio(el) {
+    return el.type === "radio" || el.localName === "ui-radio";
+}
+// packages/alpinejs/src/utils/debounce.js
+function $8c83eaf28779ff46$var$debounce(func, wait) {
+    var timeout;
+    return function() {
+        var context = this, args = arguments;
+        var later = function() {
+            timeout = null;
+            func.apply(context, args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+// packages/alpinejs/src/utils/throttle.js
+function $8c83eaf28779ff46$var$throttle(func, limit) {
+    let inThrottle;
+    return function() {
+        let context = this, args = arguments;
+        if (!inThrottle) {
+            func.apply(context, args);
+            inThrottle = true;
+            setTimeout(()=>inThrottle = false, limit);
+        }
+    };
+}
+// packages/alpinejs/src/entangle.js
+function $8c83eaf28779ff46$var$entangle({ get: outerGet, set: outerSet }, { get: innerGet, set: innerSet }) {
+    let firstRun = true;
+    let outerHash;
+    let innerHash;
+    let reference = $8c83eaf28779ff46$var$effect(()=>{
+        let outer = outerGet();
+        let inner = innerGet();
+        if (firstRun) {
+            innerSet($8c83eaf28779ff46$var$cloneIfObject(outer));
+            firstRun = false;
+        } else {
+            let outerHashLatest = JSON.stringify(outer);
+            let innerHashLatest = JSON.stringify(inner);
+            if (outerHashLatest !== outerHash) innerSet($8c83eaf28779ff46$var$cloneIfObject(outer));
+            else if (outerHashLatest !== innerHashLatest) outerSet($8c83eaf28779ff46$var$cloneIfObject(inner));
+        }
+        outerHash = JSON.stringify(outerGet());
+        innerHash = JSON.stringify(innerGet());
+    });
+    return ()=>{
+        $8c83eaf28779ff46$var$release(reference);
+    };
+}
+function $8c83eaf28779ff46$var$cloneIfObject(value) {
+    return typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value;
+}
+// packages/alpinejs/src/plugin.js
+function $8c83eaf28779ff46$var$plugin(callback) {
+    let callbacks = Array.isArray(callback) ? callback : [
+        callback
+    ];
+    callbacks.forEach((i)=>i($8c83eaf28779ff46$var$alpine_default));
+}
+// packages/alpinejs/src/store.js
+var $8c83eaf28779ff46$var$stores = {};
+var $8c83eaf28779ff46$var$isReactive = false;
+function $8c83eaf28779ff46$var$store(name, value) {
+    if (!$8c83eaf28779ff46$var$isReactive) {
+        $8c83eaf28779ff46$var$stores = $8c83eaf28779ff46$var$reactive($8c83eaf28779ff46$var$stores);
+        $8c83eaf28779ff46$var$isReactive = true;
+    }
+    if (value === void 0) return $8c83eaf28779ff46$var$stores[name];
+    $8c83eaf28779ff46$var$stores[name] = value;
+    $8c83eaf28779ff46$var$initInterceptors($8c83eaf28779ff46$var$stores[name]);
+    if (typeof value === "object" && value !== null && value.hasOwnProperty("init") && typeof value.init === "function") $8c83eaf28779ff46$var$stores[name].init();
+}
+function $8c83eaf28779ff46$var$getStores() {
+    return $8c83eaf28779ff46$var$stores;
+}
+// packages/alpinejs/src/binds.js
+var $8c83eaf28779ff46$var$binds = {};
+function $8c83eaf28779ff46$var$bind2(name, bindings) {
+    let getBindings = typeof bindings !== "function" ? ()=>bindings : bindings;
+    if (name instanceof Element) return $8c83eaf28779ff46$var$applyBindingsObject(name, getBindings());
+    else $8c83eaf28779ff46$var$binds[name] = getBindings;
+    return ()=>{};
+}
+function $8c83eaf28779ff46$var$injectBindingProviders(obj) {
+    Object.entries($8c83eaf28779ff46$var$binds).forEach(([name, callback])=>{
+        Object.defineProperty(obj, name, {
+            get () {
+                return (...args)=>{
+                    return callback(...args);
+                };
+            }
+        });
+    });
+    return obj;
+}
+function $8c83eaf28779ff46$var$applyBindingsObject(el, obj, original) {
+    let cleanupRunners = [];
+    while(cleanupRunners.length)cleanupRunners.pop()();
+    let attributes = Object.entries(obj).map(([name, value])=>({
+            name: name,
+            value: value
+        }));
+    let staticAttributes = $8c83eaf28779ff46$var$attributesOnly(attributes);
+    attributes = attributes.map((attribute)=>{
+        if (staticAttributes.find((attr)=>attr.name === attribute.name)) return {
+            name: `x-bind:${attribute.name}`,
+            value: `"${attribute.value}"`
+        };
+        return attribute;
+    });
+    $8c83eaf28779ff46$var$directives(el, attributes, original).map((handle)=>{
+        cleanupRunners.push(handle.runCleanups);
+        handle();
+    });
+    return ()=>{
+        while(cleanupRunners.length)cleanupRunners.pop()();
+    };
+}
+// packages/alpinejs/src/datas.js
+var $8c83eaf28779ff46$var$datas = {};
+function $8c83eaf28779ff46$var$data(name, callback) {
+    $8c83eaf28779ff46$var$datas[name] = callback;
+}
+function $8c83eaf28779ff46$var$injectDataProviders(obj, context) {
+    Object.entries($8c83eaf28779ff46$var$datas).forEach(([name, callback])=>{
+        Object.defineProperty(obj, name, {
+            get () {
+                return (...args)=>{
+                    return callback.bind(context)(...args);
+                };
+            },
+            enumerable: false
+        });
+    });
+    return obj;
+}
+// packages/alpinejs/src/alpine.js
+var $8c83eaf28779ff46$var$Alpine = {
+    get reactive () {
+        return $8c83eaf28779ff46$var$reactive;
+    },
+    get release () {
+        return $8c83eaf28779ff46$var$release;
+    },
+    get effect () {
+        return $8c83eaf28779ff46$var$effect;
+    },
+    get raw () {
+        return $8c83eaf28779ff46$var$raw;
+    },
+    version: "3.14.8",
+    flushAndStopDeferringMutations: $8c83eaf28779ff46$var$flushAndStopDeferringMutations,
+    dontAutoEvaluateFunctions: $8c83eaf28779ff46$var$dontAutoEvaluateFunctions,
+    disableEffectScheduling: $8c83eaf28779ff46$var$disableEffectScheduling,
+    startObservingMutations: $8c83eaf28779ff46$var$startObservingMutations,
+    stopObservingMutations: $8c83eaf28779ff46$var$stopObservingMutations,
+    setReactivityEngine: $8c83eaf28779ff46$var$setReactivityEngine,
+    onAttributeRemoved: $8c83eaf28779ff46$var$onAttributeRemoved,
+    onAttributesAdded: $8c83eaf28779ff46$var$onAttributesAdded,
+    closestDataStack: $8c83eaf28779ff46$var$closestDataStack,
+    skipDuringClone: $8c83eaf28779ff46$var$skipDuringClone,
+    onlyDuringClone: $8c83eaf28779ff46$var$onlyDuringClone,
+    addRootSelector: $8c83eaf28779ff46$var$addRootSelector,
+    addInitSelector: $8c83eaf28779ff46$var$addInitSelector,
+    interceptClone: $8c83eaf28779ff46$var$interceptClone,
+    addScopeToNode: $8c83eaf28779ff46$var$addScopeToNode,
+    deferMutations: $8c83eaf28779ff46$var$deferMutations,
+    mapAttributes: $8c83eaf28779ff46$var$mapAttributes,
+    evaluateLater: $8c83eaf28779ff46$var$evaluateLater,
+    interceptInit: $8c83eaf28779ff46$var$interceptInit,
+    setEvaluator: $8c83eaf28779ff46$var$setEvaluator,
+    mergeProxies: $8c83eaf28779ff46$var$mergeProxies,
+    extractProp: $8c83eaf28779ff46$var$extractProp,
+    findClosest: $8c83eaf28779ff46$var$findClosest,
+    onElRemoved: $8c83eaf28779ff46$var$onElRemoved,
+    closestRoot: $8c83eaf28779ff46$var$closestRoot,
+    destroyTree: $8c83eaf28779ff46$var$destroyTree,
+    interceptor: $8c83eaf28779ff46$var$interceptor,
+    transition: // INTERNAL: not public API and is subject to change without major release.
+    $8c83eaf28779ff46$var$transition,
+    setStyles: // INTERNAL
+    $8c83eaf28779ff46$var$setStyles,
+    mutateDom: // INTERNAL
+    $8c83eaf28779ff46$var$mutateDom,
+    directive: $8c83eaf28779ff46$var$directive,
+    entangle: $8c83eaf28779ff46$var$entangle,
+    throttle: $8c83eaf28779ff46$var$throttle,
+    debounce: $8c83eaf28779ff46$var$debounce,
+    evaluate: $8c83eaf28779ff46$var$evaluate,
+    initTree: $8c83eaf28779ff46$var$initTree,
+    nextTick: $8c83eaf28779ff46$var$nextTick,
+    prefixed: $8c83eaf28779ff46$var$prefix,
+    prefix: $8c83eaf28779ff46$var$setPrefix,
+    plugin: $8c83eaf28779ff46$var$plugin,
+    magic: $8c83eaf28779ff46$var$magic,
+    store: $8c83eaf28779ff46$var$store,
+    start: $8c83eaf28779ff46$var$start,
+    clone: $8c83eaf28779ff46$var$clone,
+    cloneNode: // INTERNAL
+    $8c83eaf28779ff46$var$cloneNode,
+    // INTERNAL
+    bound: $8c83eaf28779ff46$var$getBinding,
+    $data: $8c83eaf28779ff46$var$scope,
+    watch: $8c83eaf28779ff46$var$watch,
+    walk: $8c83eaf28779ff46$var$walk,
+    data: $8c83eaf28779ff46$var$data,
+    bind: $8c83eaf28779ff46$var$bind2
+};
+var $8c83eaf28779ff46$var$alpine_default = $8c83eaf28779ff46$var$Alpine;
+// node_modules/@vue/shared/dist/shared.esm-bundler.js
+function $8c83eaf28779ff46$var$makeMap(str, expectsLowerCase) {
+    const map = /* @__PURE__ */ Object.create(null);
+    const list = str.split(",");
+    for(let i = 0; i < list.length; i++)map[list[i]] = true;
+    return expectsLowerCase ? (val)=>!!map[val.toLowerCase()] : (val)=>!!map[val];
+}
+var $8c83eaf28779ff46$var$specialBooleanAttrs = `itemscope,allowfullscreen,formnovalidate,ismap,nomodule,novalidate,readonly`;
+var $8c83eaf28779ff46$var$isBooleanAttr2 = /* @__PURE__ */ $8c83eaf28779ff46$var$makeMap($8c83eaf28779ff46$var$specialBooleanAttrs + `,async,autofocus,autoplay,controls,default,defer,disabled,hidden,loop,open,required,reversed,scoped,seamless,checked,muted,multiple,selected`);
+var $8c83eaf28779ff46$var$EMPTY_OBJ = Object.freeze({});
+var $8c83eaf28779ff46$var$EMPTY_ARR = Object.freeze([]);
+var $8c83eaf28779ff46$var$hasOwnProperty = Object.prototype.hasOwnProperty;
+var $8c83eaf28779ff46$var$hasOwn = (val, key)=>$8c83eaf28779ff46$var$hasOwnProperty.call(val, key);
+var $8c83eaf28779ff46$var$isArray = Array.isArray;
+var $8c83eaf28779ff46$var$isMap = (val)=>$8c83eaf28779ff46$var$toTypeString(val) === "[object Map]";
+var $8c83eaf28779ff46$var$isString = (val)=>typeof val === "string";
+var $8c83eaf28779ff46$var$isSymbol = (val)=>typeof val === "symbol";
+var $8c83eaf28779ff46$var$isObject = (val)=>val !== null && typeof val === "object";
+var $8c83eaf28779ff46$var$objectToString = Object.prototype.toString;
+var $8c83eaf28779ff46$var$toTypeString = (value)=>$8c83eaf28779ff46$var$objectToString.call(value);
+var $8c83eaf28779ff46$var$toRawType = (value)=>{
+    return $8c83eaf28779ff46$var$toTypeString(value).slice(8, -1);
+};
+var $8c83eaf28779ff46$var$isIntegerKey = (key)=>$8c83eaf28779ff46$var$isString(key) && key !== "NaN" && key[0] !== "-" && "" + parseInt(key, 10) === key;
+var $8c83eaf28779ff46$var$cacheStringFunction = (fn)=>{
+    const cache = /* @__PURE__ */ Object.create(null);
+    return (str)=>{
+        const hit = cache[str];
+        return hit || (cache[str] = fn(str));
+    };
+};
+var $8c83eaf28779ff46$var$camelizeRE = /-(\w)/g;
+var $8c83eaf28779ff46$var$camelize = $8c83eaf28779ff46$var$cacheStringFunction((str)=>{
+    return str.replace($8c83eaf28779ff46$var$camelizeRE, (_, c)=>c ? c.toUpperCase() : "");
+});
+var $8c83eaf28779ff46$var$hyphenateRE = /\B([A-Z])/g;
+var $8c83eaf28779ff46$var$hyphenate = $8c83eaf28779ff46$var$cacheStringFunction((str)=>str.replace($8c83eaf28779ff46$var$hyphenateRE, "-$1").toLowerCase());
+var $8c83eaf28779ff46$var$capitalize = $8c83eaf28779ff46$var$cacheStringFunction((str)=>str.charAt(0).toUpperCase() + str.slice(1));
+var $8c83eaf28779ff46$var$toHandlerKey = $8c83eaf28779ff46$var$cacheStringFunction((str)=>str ? `on${$8c83eaf28779ff46$var$capitalize(str)}` : ``);
+var $8c83eaf28779ff46$var$hasChanged = (value, oldValue)=>value !== oldValue && (value === value || oldValue === oldValue);
+// node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js
+var $8c83eaf28779ff46$var$targetMap = /* @__PURE__ */ new WeakMap();
+var $8c83eaf28779ff46$var$effectStack = [];
+var $8c83eaf28779ff46$var$activeEffect;
+var $8c83eaf28779ff46$var$ITERATE_KEY = Symbol("iterate");
+var $8c83eaf28779ff46$var$MAP_KEY_ITERATE_KEY = Symbol("Map key iterate");
+function $8c83eaf28779ff46$var$isEffect(fn) {
+    return fn && fn._isEffect === true;
+}
+function $8c83eaf28779ff46$var$effect2(fn, options = $8c83eaf28779ff46$var$EMPTY_OBJ) {
+    if ($8c83eaf28779ff46$var$isEffect(fn)) fn = fn.raw;
+    const effect3 = $8c83eaf28779ff46$var$createReactiveEffect(fn, options);
+    if (!options.lazy) effect3();
+    return effect3;
+}
+function $8c83eaf28779ff46$var$stop(effect3) {
+    if (effect3.active) {
+        $8c83eaf28779ff46$var$cleanup(effect3);
+        if (effect3.options.onStop) effect3.options.onStop();
+        effect3.active = false;
+    }
+}
+var $8c83eaf28779ff46$var$uid = 0;
+function $8c83eaf28779ff46$var$createReactiveEffect(fn, options) {
+    const effect3 = function reactiveEffect() {
+        if (!effect3.active) return fn();
+        if (!$8c83eaf28779ff46$var$effectStack.includes(effect3)) {
+            $8c83eaf28779ff46$var$cleanup(effect3);
+            try {
+                $8c83eaf28779ff46$var$enableTracking();
+                $8c83eaf28779ff46$var$effectStack.push(effect3);
+                $8c83eaf28779ff46$var$activeEffect = effect3;
+                return fn();
+            } finally{
+                $8c83eaf28779ff46$var$effectStack.pop();
+                $8c83eaf28779ff46$var$resetTracking();
+                $8c83eaf28779ff46$var$activeEffect = $8c83eaf28779ff46$var$effectStack[$8c83eaf28779ff46$var$effectStack.length - 1];
+            }
+        }
+    };
+    effect3.id = $8c83eaf28779ff46$var$uid++;
+    effect3.allowRecurse = !!options.allowRecurse;
+    effect3._isEffect = true;
+    effect3.active = true;
+    effect3.raw = fn;
+    effect3.deps = [];
+    effect3.options = options;
+    return effect3;
+}
+function $8c83eaf28779ff46$var$cleanup(effect3) {
+    const { deps: deps } = effect3;
+    if (deps.length) {
+        for(let i = 0; i < deps.length; i++)deps[i].delete(effect3);
+        deps.length = 0;
+    }
+}
+var $8c83eaf28779ff46$var$shouldTrack = true;
+var $8c83eaf28779ff46$var$trackStack = [];
+function $8c83eaf28779ff46$var$pauseTracking() {
+    $8c83eaf28779ff46$var$trackStack.push($8c83eaf28779ff46$var$shouldTrack);
+    $8c83eaf28779ff46$var$shouldTrack = false;
+}
+function $8c83eaf28779ff46$var$enableTracking() {
+    $8c83eaf28779ff46$var$trackStack.push($8c83eaf28779ff46$var$shouldTrack);
+    $8c83eaf28779ff46$var$shouldTrack = true;
+}
+function $8c83eaf28779ff46$var$resetTracking() {
+    const last = $8c83eaf28779ff46$var$trackStack.pop();
+    $8c83eaf28779ff46$var$shouldTrack = last === void 0 ? true : last;
+}
+function $8c83eaf28779ff46$var$track(target, type, key) {
+    if (!$8c83eaf28779ff46$var$shouldTrack || $8c83eaf28779ff46$var$activeEffect === void 0) return;
+    let depsMap = $8c83eaf28779ff46$var$targetMap.get(target);
+    if (!depsMap) $8c83eaf28779ff46$var$targetMap.set(target, depsMap = /* @__PURE__ */ new Map());
+    let dep = depsMap.get(key);
+    if (!dep) depsMap.set(key, dep = /* @__PURE__ */ new Set());
+    if (!dep.has($8c83eaf28779ff46$var$activeEffect)) {
+        dep.add($8c83eaf28779ff46$var$activeEffect);
+        $8c83eaf28779ff46$var$activeEffect.deps.push(dep);
+        if ($8c83eaf28779ff46$var$activeEffect.options.onTrack) $8c83eaf28779ff46$var$activeEffect.options.onTrack({
+            effect: $8c83eaf28779ff46$var$activeEffect,
+            target: target,
+            type: type,
+            key: key
+        });
+    }
+}
+function $8c83eaf28779ff46$var$trigger(target, type, key, newValue, oldValue, oldTarget) {
+    const depsMap = $8c83eaf28779ff46$var$targetMap.get(target);
+    if (!depsMap) return;
+    const effects = /* @__PURE__ */ new Set();
+    const add2 = (effectsToAdd)=>{
+        if (effectsToAdd) effectsToAdd.forEach((effect3)=>{
+            if (effect3 !== $8c83eaf28779ff46$var$activeEffect || effect3.allowRecurse) effects.add(effect3);
+        });
+    };
+    if (type === "clear") depsMap.forEach(add2);
+    else if (key === "length" && $8c83eaf28779ff46$var$isArray(target)) depsMap.forEach((dep, key2)=>{
+        if (key2 === "length" || key2 >= newValue) add2(dep);
+    });
+    else {
+        if (key !== void 0) add2(depsMap.get(key));
+        switch(type){
+            case "add":
+                if (!$8c83eaf28779ff46$var$isArray(target)) {
+                    add2(depsMap.get($8c83eaf28779ff46$var$ITERATE_KEY));
+                    if ($8c83eaf28779ff46$var$isMap(target)) add2(depsMap.get($8c83eaf28779ff46$var$MAP_KEY_ITERATE_KEY));
+                } else if ($8c83eaf28779ff46$var$isIntegerKey(key)) add2(depsMap.get("length"));
+                break;
+            case "delete":
+                if (!$8c83eaf28779ff46$var$isArray(target)) {
+                    add2(depsMap.get($8c83eaf28779ff46$var$ITERATE_KEY));
+                    if ($8c83eaf28779ff46$var$isMap(target)) add2(depsMap.get($8c83eaf28779ff46$var$MAP_KEY_ITERATE_KEY));
+                }
+                break;
+            case "set":
+                if ($8c83eaf28779ff46$var$isMap(target)) add2(depsMap.get($8c83eaf28779ff46$var$ITERATE_KEY));
+                break;
+        }
+    }
+    const run = (effect3)=>{
+        if (effect3.options.onTrigger) effect3.options.onTrigger({
+            effect: effect3,
+            target: target,
+            key: key,
+            type: type,
+            newValue: newValue,
+            oldValue: oldValue,
+            oldTarget: oldTarget
+        });
+        if (effect3.options.scheduler) effect3.options.scheduler(effect3);
+        else effect3();
+    };
+    effects.forEach(run);
+}
+var $8c83eaf28779ff46$var$isNonTrackableKeys = /* @__PURE__ */ $8c83eaf28779ff46$var$makeMap(`__proto__,__v_isRef,__isVue`);
+var $8c83eaf28779ff46$var$builtInSymbols = new Set(Object.getOwnPropertyNames(Symbol).map((key)=>Symbol[key]).filter($8c83eaf28779ff46$var$isSymbol));
+var $8c83eaf28779ff46$var$get2 = /* @__PURE__ */ $8c83eaf28779ff46$var$createGetter();
+var $8c83eaf28779ff46$var$readonlyGet = /* @__PURE__ */ $8c83eaf28779ff46$var$createGetter(true);
+var $8c83eaf28779ff46$var$arrayInstrumentations = /* @__PURE__ */ $8c83eaf28779ff46$var$createArrayInstrumentations();
+function $8c83eaf28779ff46$var$createArrayInstrumentations() {
+    const instrumentations = {};
+    [
+        "includes",
+        "indexOf",
+        "lastIndexOf"
+    ].forEach((key)=>{
+        instrumentations[key] = function(...args) {
+            const arr = $8c83eaf28779ff46$var$toRaw(this);
+            for(let i = 0, l = this.length; i < l; i++)$8c83eaf28779ff46$var$track(arr, "get", i + "");
+            const res = arr[key](...args);
+            if (res === -1 || res === false) return arr[key](...args.map($8c83eaf28779ff46$var$toRaw));
+            else return res;
+        };
+    });
+    [
+        "push",
+        "pop",
+        "shift",
+        "unshift",
+        "splice"
+    ].forEach((key)=>{
+        instrumentations[key] = function(...args) {
+            $8c83eaf28779ff46$var$pauseTracking();
+            const res = $8c83eaf28779ff46$var$toRaw(this)[key].apply(this, args);
+            $8c83eaf28779ff46$var$resetTracking();
+            return res;
+        };
+    });
+    return instrumentations;
+}
+function $8c83eaf28779ff46$var$createGetter(isReadonly = false, shallow = false) {
+    return function get3(target, key, receiver) {
+        if (key === "__v_isReactive") return !isReadonly;
+        else if (key === "__v_isReadonly") return isReadonly;
+        else if (key === "__v_raw" && receiver === (isReadonly ? shallow ? $8c83eaf28779ff46$var$shallowReadonlyMap : $8c83eaf28779ff46$var$readonlyMap : shallow ? $8c83eaf28779ff46$var$shallowReactiveMap : $8c83eaf28779ff46$var$reactiveMap).get(target)) return target;
+        const targetIsArray = $8c83eaf28779ff46$var$isArray(target);
+        if (!isReadonly && targetIsArray && $8c83eaf28779ff46$var$hasOwn($8c83eaf28779ff46$var$arrayInstrumentations, key)) return Reflect.get($8c83eaf28779ff46$var$arrayInstrumentations, key, receiver);
+        const res = Reflect.get(target, key, receiver);
+        if ($8c83eaf28779ff46$var$isSymbol(key) ? $8c83eaf28779ff46$var$builtInSymbols.has(key) : $8c83eaf28779ff46$var$isNonTrackableKeys(key)) return res;
+        if (!isReadonly) $8c83eaf28779ff46$var$track(target, "get", key);
+        if (shallow) return res;
+        if ($8c83eaf28779ff46$var$isRef(res)) {
+            const shouldUnwrap = !targetIsArray || !$8c83eaf28779ff46$var$isIntegerKey(key);
+            return shouldUnwrap ? res.value : res;
+        }
+        if ($8c83eaf28779ff46$var$isObject(res)) return isReadonly ? $8c83eaf28779ff46$var$readonly(res) : $8c83eaf28779ff46$var$reactive2(res);
+        return res;
+    };
+}
+var $8c83eaf28779ff46$var$set2 = /* @__PURE__ */ $8c83eaf28779ff46$var$createSetter();
+function $8c83eaf28779ff46$var$createSetter(shallow = false) {
+    return function set3(target, key, value, receiver) {
+        let oldValue = target[key];
+        if (!shallow) {
+            value = $8c83eaf28779ff46$var$toRaw(value);
+            oldValue = $8c83eaf28779ff46$var$toRaw(oldValue);
+            if (!$8c83eaf28779ff46$var$isArray(target) && $8c83eaf28779ff46$var$isRef(oldValue) && !$8c83eaf28779ff46$var$isRef(value)) {
+                oldValue.value = value;
+                return true;
+            }
+        }
+        const hadKey = $8c83eaf28779ff46$var$isArray(target) && $8c83eaf28779ff46$var$isIntegerKey(key) ? Number(key) < target.length : $8c83eaf28779ff46$var$hasOwn(target, key);
+        const result = Reflect.set(target, key, value, receiver);
+        if (target === $8c83eaf28779ff46$var$toRaw(receiver)) {
+            if (!hadKey) $8c83eaf28779ff46$var$trigger(target, "add", key, value);
+            else if ($8c83eaf28779ff46$var$hasChanged(value, oldValue)) $8c83eaf28779ff46$var$trigger(target, "set", key, value, oldValue);
+        }
+        return result;
+    };
+}
+function $8c83eaf28779ff46$var$deleteProperty(target, key) {
+    const hadKey = $8c83eaf28779ff46$var$hasOwn(target, key);
+    const oldValue = target[key];
+    const result = Reflect.deleteProperty(target, key);
+    if (result && hadKey) $8c83eaf28779ff46$var$trigger(target, "delete", key, void 0, oldValue);
+    return result;
+}
+function $8c83eaf28779ff46$var$has(target, key) {
+    const result = Reflect.has(target, key);
+    if (!$8c83eaf28779ff46$var$isSymbol(key) || !$8c83eaf28779ff46$var$builtInSymbols.has(key)) $8c83eaf28779ff46$var$track(target, "has", key);
+    return result;
+}
+function $8c83eaf28779ff46$var$ownKeys(target) {
+    $8c83eaf28779ff46$var$track(target, "iterate", $8c83eaf28779ff46$var$isArray(target) ? "length" : $8c83eaf28779ff46$var$ITERATE_KEY);
+    return Reflect.ownKeys(target);
+}
+var $8c83eaf28779ff46$var$mutableHandlers = {
+    get: $8c83eaf28779ff46$var$get2,
+    set: $8c83eaf28779ff46$var$set2,
+    deleteProperty: $8c83eaf28779ff46$var$deleteProperty,
+    has: $8c83eaf28779ff46$var$has,
+    ownKeys: $8c83eaf28779ff46$var$ownKeys
+};
+var $8c83eaf28779ff46$var$readonlyHandlers = {
+    get: $8c83eaf28779ff46$var$readonlyGet,
+    set (target, key) {
+        console.warn(`Set operation on key "${String(key)}" failed: target is readonly.`, target);
+        return true;
+    },
+    deleteProperty (target, key) {
+        console.warn(`Delete operation on key "${String(key)}" failed: target is readonly.`, target);
+        return true;
+    }
+};
+var $8c83eaf28779ff46$var$toReactive = (value)=>$8c83eaf28779ff46$var$isObject(value) ? $8c83eaf28779ff46$var$reactive2(value) : value;
+var $8c83eaf28779ff46$var$toReadonly = (value)=>$8c83eaf28779ff46$var$isObject(value) ? $8c83eaf28779ff46$var$readonly(value) : value;
+var $8c83eaf28779ff46$var$toShallow = (value)=>value;
+var $8c83eaf28779ff46$var$getProto = (v)=>Reflect.getPrototypeOf(v);
+function $8c83eaf28779ff46$var$get$1(target, key, isReadonly = false, isShallow = false) {
+    target = target["__v_raw"];
+    const rawTarget = $8c83eaf28779ff46$var$toRaw(target);
+    const rawKey = $8c83eaf28779ff46$var$toRaw(key);
+    if (key !== rawKey) !isReadonly && $8c83eaf28779ff46$var$track(rawTarget, "get", key);
+    !isReadonly && $8c83eaf28779ff46$var$track(rawTarget, "get", rawKey);
+    const { has: has2 } = $8c83eaf28779ff46$var$getProto(rawTarget);
+    const wrap = isShallow ? $8c83eaf28779ff46$var$toShallow : isReadonly ? $8c83eaf28779ff46$var$toReadonly : $8c83eaf28779ff46$var$toReactive;
+    if (has2.call(rawTarget, key)) return wrap(target.get(key));
+    else if (has2.call(rawTarget, rawKey)) return wrap(target.get(rawKey));
+    else if (target !== rawTarget) target.get(key);
+}
+function $8c83eaf28779ff46$var$has$1(key, isReadonly = false) {
+    const target = this["__v_raw"];
+    const rawTarget = $8c83eaf28779ff46$var$toRaw(target);
+    const rawKey = $8c83eaf28779ff46$var$toRaw(key);
+    if (key !== rawKey) !isReadonly && $8c83eaf28779ff46$var$track(rawTarget, "has", key);
+    !isReadonly && $8c83eaf28779ff46$var$track(rawTarget, "has", rawKey);
+    return key === rawKey ? target.has(key) : target.has(key) || target.has(rawKey);
+}
+function $8c83eaf28779ff46$var$size(target, isReadonly = false) {
+    target = target["__v_raw"];
+    !isReadonly && $8c83eaf28779ff46$var$track($8c83eaf28779ff46$var$toRaw(target), "iterate", $8c83eaf28779ff46$var$ITERATE_KEY);
+    return Reflect.get(target, "size", target);
+}
+function $8c83eaf28779ff46$var$add(value) {
+    value = $8c83eaf28779ff46$var$toRaw(value);
+    const target = $8c83eaf28779ff46$var$toRaw(this);
+    const proto = $8c83eaf28779ff46$var$getProto(target);
+    const hadKey = proto.has.call(target, value);
+    if (!hadKey) {
+        target.add(value);
+        $8c83eaf28779ff46$var$trigger(target, "add", value, value);
+    }
+    return this;
+}
+function $8c83eaf28779ff46$var$set$1(key, value) {
+    value = $8c83eaf28779ff46$var$toRaw(value);
+    const target = $8c83eaf28779ff46$var$toRaw(this);
+    const { has: has2, get: get3 } = $8c83eaf28779ff46$var$getProto(target);
+    let hadKey = has2.call(target, key);
+    if (!hadKey) {
+        key = $8c83eaf28779ff46$var$toRaw(key);
+        hadKey = has2.call(target, key);
+    } else $8c83eaf28779ff46$var$checkIdentityKeys(target, has2, key);
+    const oldValue = get3.call(target, key);
+    target.set(key, value);
+    if (!hadKey) $8c83eaf28779ff46$var$trigger(target, "add", key, value);
+    else if ($8c83eaf28779ff46$var$hasChanged(value, oldValue)) $8c83eaf28779ff46$var$trigger(target, "set", key, value, oldValue);
+    return this;
+}
+function $8c83eaf28779ff46$var$deleteEntry(key) {
+    const target = $8c83eaf28779ff46$var$toRaw(this);
+    const { has: has2, get: get3 } = $8c83eaf28779ff46$var$getProto(target);
+    let hadKey = has2.call(target, key);
+    if (!hadKey) {
+        key = $8c83eaf28779ff46$var$toRaw(key);
+        hadKey = has2.call(target, key);
+    } else $8c83eaf28779ff46$var$checkIdentityKeys(target, has2, key);
+    const oldValue = get3 ? get3.call(target, key) : void 0;
+    const result = target.delete(key);
+    if (hadKey) $8c83eaf28779ff46$var$trigger(target, "delete", key, void 0, oldValue);
+    return result;
+}
+function $8c83eaf28779ff46$var$clear() {
+    const target = $8c83eaf28779ff46$var$toRaw(this);
+    const hadItems = target.size !== 0;
+    const oldTarget = $8c83eaf28779ff46$var$isMap(target) ? new Map(target) : new Set(target);
+    const result = target.clear();
+    if (hadItems) $8c83eaf28779ff46$var$trigger(target, "clear", void 0, void 0, oldTarget);
+    return result;
+}
+function $8c83eaf28779ff46$var$createForEach(isReadonly, isShallow) {
+    return function forEach(callback, thisArg) {
+        const observed = this;
+        const target = observed["__v_raw"];
+        const rawTarget = $8c83eaf28779ff46$var$toRaw(target);
+        const wrap = isShallow ? $8c83eaf28779ff46$var$toShallow : isReadonly ? $8c83eaf28779ff46$var$toReadonly : $8c83eaf28779ff46$var$toReactive;
+        !isReadonly && $8c83eaf28779ff46$var$track(rawTarget, "iterate", $8c83eaf28779ff46$var$ITERATE_KEY);
+        return target.forEach((value, key)=>{
+            return callback.call(thisArg, wrap(value), wrap(key), observed);
+        });
+    };
+}
+function $8c83eaf28779ff46$var$createIterableMethod(method, isReadonly, isShallow) {
+    return function(...args) {
+        const target = this["__v_raw"];
+        const rawTarget = $8c83eaf28779ff46$var$toRaw(target);
+        const targetIsMap = $8c83eaf28779ff46$var$isMap(rawTarget);
+        const isPair = method === "entries" || method === Symbol.iterator && targetIsMap;
+        const isKeyOnly = method === "keys" && targetIsMap;
+        const innerIterator = target[method](...args);
+        const wrap = isShallow ? $8c83eaf28779ff46$var$toShallow : isReadonly ? $8c83eaf28779ff46$var$toReadonly : $8c83eaf28779ff46$var$toReactive;
+        !isReadonly && $8c83eaf28779ff46$var$track(rawTarget, "iterate", isKeyOnly ? $8c83eaf28779ff46$var$MAP_KEY_ITERATE_KEY : $8c83eaf28779ff46$var$ITERATE_KEY);
+        return {
+            // iterator protocol
+            next () {
+                const { value: value, done: done } = innerIterator.next();
+                return done ? {
+                    value: value,
+                    done: done
+                } : {
+                    value: isPair ? [
+                        wrap(value[0]),
+                        wrap(value[1])
+                    ] : wrap(value),
+                    done: done
+                };
+            },
+            // iterable protocol
+            [Symbol.iterator] () {
+                return this;
+            }
+        };
+    };
+}
+function $8c83eaf28779ff46$var$createReadonlyMethod(type) {
+    return function(...args) {
+        {
+            const key = args[0] ? `on key "${args[0]}" ` : ``;
+            console.warn(`${$8c83eaf28779ff46$var$capitalize(type)} operation ${key}failed: target is readonly.`, $8c83eaf28779ff46$var$toRaw(this));
+        }
+        return type === "delete" ? false : this;
+    };
+}
+function $8c83eaf28779ff46$var$createInstrumentations() {
+    const mutableInstrumentations2 = {
+        get (key) {
+            return $8c83eaf28779ff46$var$get$1(this, key);
+        },
+        get size () {
+            return $8c83eaf28779ff46$var$size(this);
+        },
+        has: $8c83eaf28779ff46$var$has$1,
+        add: $8c83eaf28779ff46$var$add,
+        set: $8c83eaf28779ff46$var$set$1,
+        delete: $8c83eaf28779ff46$var$deleteEntry,
+        clear: $8c83eaf28779ff46$var$clear,
+        forEach: $8c83eaf28779ff46$var$createForEach(false, false)
+    };
+    const shallowInstrumentations2 = {
+        get (key) {
+            return $8c83eaf28779ff46$var$get$1(this, key, false, true);
+        },
+        get size () {
+            return $8c83eaf28779ff46$var$size(this);
+        },
+        has: $8c83eaf28779ff46$var$has$1,
+        add: $8c83eaf28779ff46$var$add,
+        set: $8c83eaf28779ff46$var$set$1,
+        delete: $8c83eaf28779ff46$var$deleteEntry,
+        clear: $8c83eaf28779ff46$var$clear,
+        forEach: $8c83eaf28779ff46$var$createForEach(false, true)
+    };
+    const readonlyInstrumentations2 = {
+        get (key) {
+            return $8c83eaf28779ff46$var$get$1(this, key, true);
+        },
+        get size () {
+            return $8c83eaf28779ff46$var$size(this, true);
+        },
+        has (key) {
+            return $8c83eaf28779ff46$var$has$1.call(this, key, true);
+        },
+        add: $8c83eaf28779ff46$var$createReadonlyMethod("add"),
+        set: $8c83eaf28779ff46$var$createReadonlyMethod("set"),
+        delete: $8c83eaf28779ff46$var$createReadonlyMethod("delete"),
+        clear: $8c83eaf28779ff46$var$createReadonlyMethod("clear"),
+        forEach: $8c83eaf28779ff46$var$createForEach(true, false)
+    };
+    const shallowReadonlyInstrumentations2 = {
+        get (key) {
+            return $8c83eaf28779ff46$var$get$1(this, key, true, true);
+        },
+        get size () {
+            return $8c83eaf28779ff46$var$size(this, true);
+        },
+        has (key) {
+            return $8c83eaf28779ff46$var$has$1.call(this, key, true);
+        },
+        add: $8c83eaf28779ff46$var$createReadonlyMethod("add"),
+        set: $8c83eaf28779ff46$var$createReadonlyMethod("set"),
+        delete: $8c83eaf28779ff46$var$createReadonlyMethod("delete"),
+        clear: $8c83eaf28779ff46$var$createReadonlyMethod("clear"),
+        forEach: $8c83eaf28779ff46$var$createForEach(true, true)
+    };
+    const iteratorMethods = [
+        "keys",
+        "values",
+        "entries",
+        Symbol.iterator
+    ];
+    iteratorMethods.forEach((method)=>{
+        mutableInstrumentations2[method] = $8c83eaf28779ff46$var$createIterableMethod(method, false, false);
+        readonlyInstrumentations2[method] = $8c83eaf28779ff46$var$createIterableMethod(method, true, false);
+        shallowInstrumentations2[method] = $8c83eaf28779ff46$var$createIterableMethod(method, false, true);
+        shallowReadonlyInstrumentations2[method] = $8c83eaf28779ff46$var$createIterableMethod(method, true, true);
+    });
+    return [
+        mutableInstrumentations2,
+        readonlyInstrumentations2,
+        shallowInstrumentations2,
+        shallowReadonlyInstrumentations2
+    ];
+}
+var [$8c83eaf28779ff46$var$mutableInstrumentations, $8c83eaf28779ff46$var$readonlyInstrumentations, $8c83eaf28779ff46$var$shallowInstrumentations, $8c83eaf28779ff46$var$shallowReadonlyInstrumentations] = /* @__PURE__ */ $8c83eaf28779ff46$var$createInstrumentations();
+function $8c83eaf28779ff46$var$createInstrumentationGetter(isReadonly, shallow) {
+    const instrumentations = shallow ? isReadonly ? $8c83eaf28779ff46$var$shallowReadonlyInstrumentations : $8c83eaf28779ff46$var$shallowInstrumentations : isReadonly ? $8c83eaf28779ff46$var$readonlyInstrumentations : $8c83eaf28779ff46$var$mutableInstrumentations;
+    return (target, key, receiver)=>{
+        if (key === "__v_isReactive") return !isReadonly;
+        else if (key === "__v_isReadonly") return isReadonly;
+        else if (key === "__v_raw") return target;
+        return Reflect.get($8c83eaf28779ff46$var$hasOwn(instrumentations, key) && key in target ? instrumentations : target, key, receiver);
+    };
+}
+var $8c83eaf28779ff46$var$mutableCollectionHandlers = {
+    get: /* @__PURE__ */ $8c83eaf28779ff46$var$createInstrumentationGetter(false, false)
+};
+var $8c83eaf28779ff46$var$readonlyCollectionHandlers = {
+    get: /* @__PURE__ */ $8c83eaf28779ff46$var$createInstrumentationGetter(true, false)
+};
+function $8c83eaf28779ff46$var$checkIdentityKeys(target, has2, key) {
+    const rawKey = $8c83eaf28779ff46$var$toRaw(key);
+    if (rawKey !== key && has2.call(target, rawKey)) {
+        const type = $8c83eaf28779ff46$var$toRawType(target);
+        console.warn(`Reactive ${type} contains both the raw and reactive versions of the same object${type === `Map` ? ` as keys` : ``}, which can lead to inconsistencies. Avoid differentiating between the raw and reactive versions of an object and only use the reactive version if possible.`);
+    }
+}
+var $8c83eaf28779ff46$var$reactiveMap = /* @__PURE__ */ new WeakMap();
+var $8c83eaf28779ff46$var$shallowReactiveMap = /* @__PURE__ */ new WeakMap();
+var $8c83eaf28779ff46$var$readonlyMap = /* @__PURE__ */ new WeakMap();
+var $8c83eaf28779ff46$var$shallowReadonlyMap = /* @__PURE__ */ new WeakMap();
+function $8c83eaf28779ff46$var$targetTypeMap(rawType) {
+    switch(rawType){
+        case "Object":
+        case "Array":
+            return 1;
+        case "Map":
+        case "Set":
+        case "WeakMap":
+        case "WeakSet":
+            return 2;
+        default:
+            return 0;
+    }
+}
+function $8c83eaf28779ff46$var$getTargetType(value) {
+    return value["__v_skip"] || !Object.isExtensible(value) ? 0 : $8c83eaf28779ff46$var$targetTypeMap($8c83eaf28779ff46$var$toRawType(value));
+}
+function $8c83eaf28779ff46$var$reactive2(target) {
+    if (target && target["__v_isReadonly"]) return target;
+    return $8c83eaf28779ff46$var$createReactiveObject(target, false, $8c83eaf28779ff46$var$mutableHandlers, $8c83eaf28779ff46$var$mutableCollectionHandlers, $8c83eaf28779ff46$var$reactiveMap);
+}
+function $8c83eaf28779ff46$var$readonly(target) {
+    return $8c83eaf28779ff46$var$createReactiveObject(target, true, $8c83eaf28779ff46$var$readonlyHandlers, $8c83eaf28779ff46$var$readonlyCollectionHandlers, $8c83eaf28779ff46$var$readonlyMap);
+}
+function $8c83eaf28779ff46$var$createReactiveObject(target, isReadonly, baseHandlers, collectionHandlers, proxyMap) {
+    if (!$8c83eaf28779ff46$var$isObject(target)) {
+        console.warn(`value cannot be made reactive: ${String(target)}`);
+        return target;
+    }
+    if (target["__v_raw"] && !(isReadonly && target["__v_isReactive"])) return target;
+    const existingProxy = proxyMap.get(target);
+    if (existingProxy) return existingProxy;
+    const targetType = $8c83eaf28779ff46$var$getTargetType(target);
+    if (targetType === 0) return target;
+    const proxy = new Proxy(target, targetType === 2 ? collectionHandlers : baseHandlers);
+    proxyMap.set(target, proxy);
+    return proxy;
+}
+function $8c83eaf28779ff46$var$toRaw(observed) {
+    return observed && $8c83eaf28779ff46$var$toRaw(observed["__v_raw"]) || observed;
+}
+function $8c83eaf28779ff46$var$isRef(r) {
+    return Boolean(r && r.__v_isRef === true);
+}
+// packages/alpinejs/src/magics/$nextTick.js
+$8c83eaf28779ff46$var$magic("nextTick", ()=>$8c83eaf28779ff46$var$nextTick);
+// packages/alpinejs/src/magics/$dispatch.js
+$8c83eaf28779ff46$var$magic("dispatch", (el)=>$8c83eaf28779ff46$var$dispatch.bind($8c83eaf28779ff46$var$dispatch, el));
+// packages/alpinejs/src/magics/$watch.js
+$8c83eaf28779ff46$var$magic("watch", (el, { evaluateLater: evaluateLater2, cleanup: cleanup2 })=>(key, callback)=>{
+        let evaluate2 = evaluateLater2(key);
+        let getter = ()=>{
+            let value;
+            evaluate2((i)=>value = i);
+            return value;
+        };
+        let unwatch = $8c83eaf28779ff46$var$watch(getter, callback);
+        cleanup2(unwatch);
+    });
+// packages/alpinejs/src/magics/$store.js
+$8c83eaf28779ff46$var$magic("store", $8c83eaf28779ff46$var$getStores);
+// packages/alpinejs/src/magics/$data.js
+$8c83eaf28779ff46$var$magic("data", (el)=>$8c83eaf28779ff46$var$scope(el));
+// packages/alpinejs/src/magics/$root.js
+$8c83eaf28779ff46$var$magic("root", (el)=>$8c83eaf28779ff46$var$closestRoot(el));
+// packages/alpinejs/src/magics/$refs.js
+$8c83eaf28779ff46$var$magic("refs", (el)=>{
+    if (el._x_refs_proxy) return el._x_refs_proxy;
+    el._x_refs_proxy = $8c83eaf28779ff46$var$mergeProxies($8c83eaf28779ff46$var$getArrayOfRefObject(el));
+    return el._x_refs_proxy;
+});
+function $8c83eaf28779ff46$var$getArrayOfRefObject(el) {
+    let refObjects = [];
+    $8c83eaf28779ff46$var$findClosest(el, (i)=>{
+        if (i._x_refs) refObjects.push(i._x_refs);
+    });
+    return refObjects;
+}
+// packages/alpinejs/src/ids.js
+var $8c83eaf28779ff46$var$globalIdMemo = {};
+function $8c83eaf28779ff46$var$findAndIncrementId(name) {
+    if (!$8c83eaf28779ff46$var$globalIdMemo[name]) $8c83eaf28779ff46$var$globalIdMemo[name] = 0;
+    return ++$8c83eaf28779ff46$var$globalIdMemo[name];
+}
+function $8c83eaf28779ff46$var$closestIdRoot(el, name) {
+    return $8c83eaf28779ff46$var$findClosest(el, (element)=>{
+        if (element._x_ids && element._x_ids[name]) return true;
+    });
+}
+function $8c83eaf28779ff46$var$setIdRoot(el, name) {
+    if (!el._x_ids) el._x_ids = {};
+    if (!el._x_ids[name]) el._x_ids[name] = $8c83eaf28779ff46$var$findAndIncrementId(name);
+}
+// packages/alpinejs/src/magics/$id.js
+$8c83eaf28779ff46$var$magic("id", (el, { cleanup: cleanup2 })=>(name, key = null)=>{
+        let cacheKey = `${name}${key ? `-${key}` : ""}`;
+        return $8c83eaf28779ff46$var$cacheIdByNameOnElement(el, cacheKey, cleanup2, ()=>{
+            let root = $8c83eaf28779ff46$var$closestIdRoot(el, name);
+            let id = root ? root._x_ids[name] : $8c83eaf28779ff46$var$findAndIncrementId(name);
+            return key ? `${name}-${id}-${key}` : `${name}-${id}`;
+        });
+    });
+$8c83eaf28779ff46$var$interceptClone((from, to)=>{
+    if (from._x_id) to._x_id = from._x_id;
+});
+function $8c83eaf28779ff46$var$cacheIdByNameOnElement(el, cacheKey, cleanup2, callback) {
+    if (!el._x_id) el._x_id = {};
+    if (el._x_id[cacheKey]) return el._x_id[cacheKey];
+    let output = callback();
+    el._x_id[cacheKey] = output;
+    cleanup2(()=>{
+        delete el._x_id[cacheKey];
+    });
+    return output;
+}
+// packages/alpinejs/src/magics/$el.js
+$8c83eaf28779ff46$var$magic("el", (el)=>el);
+// packages/alpinejs/src/magics/index.js
+$8c83eaf28779ff46$var$warnMissingPluginMagic("Focus", "focus", "focus");
+$8c83eaf28779ff46$var$warnMissingPluginMagic("Persist", "persist", "persist");
+function $8c83eaf28779ff46$var$warnMissingPluginMagic(name, magicName, slug) {
+    $8c83eaf28779ff46$var$magic(magicName, (el)=>$8c83eaf28779ff46$var$warn(`You can't use [$${magicName}] without first installing the "${name}" plugin here: https://alpinejs.dev/plugins/${slug}`, el));
+}
+// packages/alpinejs/src/directives/x-modelable.js
+$8c83eaf28779ff46$var$directive("modelable", (el, { expression: expression }, { effect: effect3, evaluateLater: evaluateLater2, cleanup: cleanup2 })=>{
+    let func = evaluateLater2(expression);
+    let innerGet = ()=>{
+        let result;
+        func((i)=>result = i);
+        return result;
+    };
+    let evaluateInnerSet = evaluateLater2(`${expression} = __placeholder`);
+    let innerSet = (val)=>evaluateInnerSet(()=>{}, {
+            scope: {
+                "__placeholder": val
+            }
+        });
+    let initialValue = innerGet();
+    innerSet(initialValue);
+    queueMicrotask(()=>{
+        if (!el._x_model) return;
+        el._x_removeModelListeners["default"]();
+        let outerGet = el._x_model.get;
+        let outerSet = el._x_model.set;
+        let releaseEntanglement = $8c83eaf28779ff46$var$entangle({
+            get () {
+                return outerGet();
+            },
+            set (value) {
+                outerSet(value);
+            }
+        }, {
+            get () {
+                return innerGet();
+            },
+            set (value) {
+                innerSet(value);
+            }
+        });
+        cleanup2(releaseEntanglement);
+    });
+});
+// packages/alpinejs/src/directives/x-teleport.js
+$8c83eaf28779ff46$var$directive("teleport", (el, { modifiers: modifiers, expression: expression }, { cleanup: cleanup2 })=>{
+    if (el.tagName.toLowerCase() !== "template") $8c83eaf28779ff46$var$warn("x-teleport can only be used on a <template> tag", el);
+    let target = $8c83eaf28779ff46$var$getTarget(expression);
+    let clone2 = el.content.cloneNode(true).firstElementChild;
+    el._x_teleport = clone2;
+    clone2._x_teleportBack = el;
+    el.setAttribute("data-teleport-template", true);
+    clone2.setAttribute("data-teleport-target", true);
+    if (el._x_forwardEvents) el._x_forwardEvents.forEach((eventName)=>{
+        clone2.addEventListener(eventName, (e)=>{
+            e.stopPropagation();
+            el.dispatchEvent(new e.constructor(e.type, e));
+        });
+    });
+    $8c83eaf28779ff46$var$addScopeToNode(clone2, {}, el);
+    let placeInDom = (clone3, target2, modifiers2)=>{
+        if (modifiers2.includes("prepend")) target2.parentNode.insertBefore(clone3, target2);
+        else if (modifiers2.includes("append")) target2.parentNode.insertBefore(clone3, target2.nextSibling);
+        else target2.appendChild(clone3);
+    };
+    $8c83eaf28779ff46$var$mutateDom(()=>{
+        placeInDom(clone2, target, modifiers);
+        $8c83eaf28779ff46$var$skipDuringClone(()=>{
+            $8c83eaf28779ff46$var$initTree(clone2);
+        })();
+    });
+    el._x_teleportPutBack = ()=>{
+        let target2 = $8c83eaf28779ff46$var$getTarget(expression);
+        $8c83eaf28779ff46$var$mutateDom(()=>{
+            placeInDom(el._x_teleport, target2, modifiers);
+        });
+    };
+    cleanup2(()=>$8c83eaf28779ff46$var$mutateDom(()=>{
+            clone2.remove();
+            $8c83eaf28779ff46$var$destroyTree(clone2);
+        }));
+});
+var $8c83eaf28779ff46$var$teleportContainerDuringClone = document.createElement("div");
+function $8c83eaf28779ff46$var$getTarget(expression) {
+    let target = $8c83eaf28779ff46$var$skipDuringClone(()=>{
+        return document.querySelector(expression);
+    }, ()=>{
+        return $8c83eaf28779ff46$var$teleportContainerDuringClone;
+    })();
+    if (!target) $8c83eaf28779ff46$var$warn(`Cannot find x-teleport element for selector: "${expression}"`);
+    return target;
+}
+// packages/alpinejs/src/directives/x-ignore.js
+var $8c83eaf28779ff46$var$handler = ()=>{};
+$8c83eaf28779ff46$var$handler.inline = (el, { modifiers: modifiers }, { cleanup: cleanup2 })=>{
+    modifiers.includes("self") ? el._x_ignoreSelf = true : el._x_ignore = true;
+    cleanup2(()=>{
+        modifiers.includes("self") ? delete el._x_ignoreSelf : delete el._x_ignore;
+    });
+};
+$8c83eaf28779ff46$var$directive("ignore", $8c83eaf28779ff46$var$handler);
+// packages/alpinejs/src/directives/x-effect.js
+$8c83eaf28779ff46$var$directive("effect", $8c83eaf28779ff46$var$skipDuringClone((el, { expression: expression }, { effect: effect3 })=>{
+    effect3($8c83eaf28779ff46$var$evaluateLater(el, expression));
+}));
+// packages/alpinejs/src/utils/on.js
+function $8c83eaf28779ff46$var$on(el, event, modifiers, callback) {
+    let listenerTarget = el;
+    let handler4 = (e)=>callback(e);
+    let options = {};
+    let wrapHandler = (callback2, wrapper)=>(e)=>wrapper(callback2, e);
+    if (modifiers.includes("dot")) event = $8c83eaf28779ff46$var$dotSyntax(event);
+    if (modifiers.includes("camel")) event = $8c83eaf28779ff46$var$camelCase2(event);
+    if (modifiers.includes("passive")) options.passive = true;
+    if (modifiers.includes("capture")) options.capture = true;
+    if (modifiers.includes("window")) listenerTarget = window;
+    if (modifiers.includes("document")) listenerTarget = document;
+    if (modifiers.includes("debounce")) {
+        let nextModifier = modifiers[modifiers.indexOf("debounce") + 1] || "invalid-wait";
+        let wait = $8c83eaf28779ff46$var$isNumeric(nextModifier.split("ms")[0]) ? Number(nextModifier.split("ms")[0]) : 250;
+        handler4 = $8c83eaf28779ff46$var$debounce(handler4, wait);
+    }
+    if (modifiers.includes("throttle")) {
+        let nextModifier = modifiers[modifiers.indexOf("throttle") + 1] || "invalid-wait";
+        let wait = $8c83eaf28779ff46$var$isNumeric(nextModifier.split("ms")[0]) ? Number(nextModifier.split("ms")[0]) : 250;
+        handler4 = $8c83eaf28779ff46$var$throttle(handler4, wait);
+    }
+    if (modifiers.includes("prevent")) handler4 = wrapHandler(handler4, (next, e)=>{
+        e.preventDefault();
+        next(e);
+    });
+    if (modifiers.includes("stop")) handler4 = wrapHandler(handler4, (next, e)=>{
+        e.stopPropagation();
+        next(e);
+    });
+    if (modifiers.includes("once")) handler4 = wrapHandler(handler4, (next, e)=>{
+        next(e);
+        listenerTarget.removeEventListener(event, handler4, options);
+    });
+    if (modifiers.includes("away") || modifiers.includes("outside")) {
+        listenerTarget = document;
+        handler4 = wrapHandler(handler4, (next, e)=>{
+            if (el.contains(e.target)) return;
+            if (e.target.isConnected === false) return;
+            if (el.offsetWidth < 1 && el.offsetHeight < 1) return;
+            if (el._x_isShown === false) return;
+            next(e);
+        });
+    }
+    if (modifiers.includes("self")) handler4 = wrapHandler(handler4, (next, e)=>{
+        e.target === el && next(e);
+    });
+    if ($8c83eaf28779ff46$var$isKeyEvent(event) || $8c83eaf28779ff46$var$isClickEvent(event)) handler4 = wrapHandler(handler4, (next, e)=>{
+        if ($8c83eaf28779ff46$var$isListeningForASpecificKeyThatHasntBeenPressed(e, modifiers)) return;
+        next(e);
+    });
+    listenerTarget.addEventListener(event, handler4, options);
+    return ()=>{
+        listenerTarget.removeEventListener(event, handler4, options);
+    };
+}
+function $8c83eaf28779ff46$var$dotSyntax(subject) {
+    return subject.replace(/-/g, ".");
+}
+function $8c83eaf28779ff46$var$camelCase2(subject) {
+    return subject.toLowerCase().replace(/-(\w)/g, (match, char)=>char.toUpperCase());
+}
+function $8c83eaf28779ff46$var$isNumeric(subject) {
+    return !Array.isArray(subject) && !isNaN(subject);
+}
+function $8c83eaf28779ff46$var$kebabCase2(subject) {
+    if ([
+        " ",
+        "_"
+    ].includes(subject)) return subject;
+    return subject.replace(/([a-z])([A-Z])/g, "$1-$2").replace(/[_\s]/, "-").toLowerCase();
+}
+function $8c83eaf28779ff46$var$isKeyEvent(event) {
+    return [
+        "keydown",
+        "keyup"
+    ].includes(event);
+}
+function $8c83eaf28779ff46$var$isClickEvent(event) {
+    return [
+        "contextmenu",
+        "click",
+        "mouse"
+    ].some((i)=>event.includes(i));
+}
+function $8c83eaf28779ff46$var$isListeningForASpecificKeyThatHasntBeenPressed(e, modifiers) {
+    let keyModifiers = modifiers.filter((i)=>{
+        return ![
+            "window",
+            "document",
+            "prevent",
+            "stop",
+            "once",
+            "capture",
+            "self",
+            "away",
+            "outside",
+            "passive"
+        ].includes(i);
+    });
+    if (keyModifiers.includes("debounce")) {
+        let debounceIndex = keyModifiers.indexOf("debounce");
+        keyModifiers.splice(debounceIndex, $8c83eaf28779ff46$var$isNumeric((keyModifiers[debounceIndex + 1] || "invalid-wait").split("ms")[0]) ? 2 : 1);
+    }
+    if (keyModifiers.includes("throttle")) {
+        let debounceIndex = keyModifiers.indexOf("throttle");
+        keyModifiers.splice(debounceIndex, $8c83eaf28779ff46$var$isNumeric((keyModifiers[debounceIndex + 1] || "invalid-wait").split("ms")[0]) ? 2 : 1);
+    }
+    if (keyModifiers.length === 0) return false;
+    if (keyModifiers.length === 1 && $8c83eaf28779ff46$var$keyToModifiers(e.key).includes(keyModifiers[0])) return false;
+    const systemKeyModifiers = [
+        "ctrl",
+        "shift",
+        "alt",
+        "meta",
+        "cmd",
+        "super"
+    ];
+    const selectedSystemKeyModifiers = systemKeyModifiers.filter((modifier)=>keyModifiers.includes(modifier));
+    keyModifiers = keyModifiers.filter((i)=>!selectedSystemKeyModifiers.includes(i));
+    if (selectedSystemKeyModifiers.length > 0) {
+        const activelyPressedKeyModifiers = selectedSystemKeyModifiers.filter((modifier)=>{
+            if (modifier === "cmd" || modifier === "super") modifier = "meta";
+            return e[`${modifier}Key`];
+        });
+        if (activelyPressedKeyModifiers.length === selectedSystemKeyModifiers.length) {
+            if ($8c83eaf28779ff46$var$isClickEvent(e.type)) return false;
+            if ($8c83eaf28779ff46$var$keyToModifiers(e.key).includes(keyModifiers[0])) return false;
+        }
+    }
+    return true;
+}
+function $8c83eaf28779ff46$var$keyToModifiers(key) {
+    if (!key) return [];
+    key = $8c83eaf28779ff46$var$kebabCase2(key);
+    let modifierToKeyMap = {
+        "ctrl": "control",
+        "slash": "/",
+        "space": " ",
+        "spacebar": " ",
+        "cmd": "meta",
+        "esc": "escape",
+        "up": "arrow-up",
+        "down": "arrow-down",
+        "left": "arrow-left",
+        "right": "arrow-right",
+        "period": ".",
+        "comma": ",",
+        "equal": "=",
+        "minus": "-",
+        "underscore": "_"
+    };
+    modifierToKeyMap[key] = key;
+    return Object.keys(modifierToKeyMap).map((modifier)=>{
+        if (modifierToKeyMap[modifier] === key) return modifier;
+    }).filter((modifier)=>modifier);
+}
+// packages/alpinejs/src/directives/x-model.js
+$8c83eaf28779ff46$var$directive("model", (el, { modifiers: modifiers, expression: expression }, { effect: effect3, cleanup: cleanup2 })=>{
+    let scopeTarget = el;
+    if (modifiers.includes("parent")) scopeTarget = el.parentNode;
+    let evaluateGet = $8c83eaf28779ff46$var$evaluateLater(scopeTarget, expression);
+    let evaluateSet;
+    if (typeof expression === "string") evaluateSet = $8c83eaf28779ff46$var$evaluateLater(scopeTarget, `${expression} = __placeholder`);
+    else if (typeof expression === "function" && typeof expression() === "string") evaluateSet = $8c83eaf28779ff46$var$evaluateLater(scopeTarget, `${expression()} = __placeholder`);
+    else evaluateSet = ()=>{};
+    let getValue = ()=>{
+        let result;
+        evaluateGet((value)=>result = value);
+        return $8c83eaf28779ff46$var$isGetterSetter(result) ? result.get() : result;
+    };
+    let setValue = (value)=>{
+        let result;
+        evaluateGet((value2)=>result = value2);
+        if ($8c83eaf28779ff46$var$isGetterSetter(result)) result.set(value);
+        else evaluateSet(()=>{}, {
+            scope: {
+                "__placeholder": value
+            }
+        });
+    };
+    if (typeof expression === "string" && el.type === "radio") $8c83eaf28779ff46$var$mutateDom(()=>{
+        if (!el.hasAttribute("name")) el.setAttribute("name", expression);
+    });
+    var event = el.tagName.toLowerCase() === "select" || [
+        "checkbox",
+        "radio"
+    ].includes(el.type) || modifiers.includes("lazy") ? "change" : "input";
+    let removeListener = $8c83eaf28779ff46$var$isCloning ? ()=>{} : $8c83eaf28779ff46$var$on(el, event, modifiers, (e)=>{
+        setValue($8c83eaf28779ff46$var$getInputValue(el, modifiers, e, getValue()));
+    });
+    if (modifiers.includes("fill")) {
+        if ([
+            void 0,
+            null,
+            ""
+        ].includes(getValue()) || $8c83eaf28779ff46$var$isCheckbox(el) && Array.isArray(getValue()) || el.tagName.toLowerCase() === "select" && el.multiple) setValue($8c83eaf28779ff46$var$getInputValue(el, modifiers, {
+            target: el
+        }, getValue()));
+    }
+    if (!el._x_removeModelListeners) el._x_removeModelListeners = {};
+    el._x_removeModelListeners["default"] = removeListener;
+    cleanup2(()=>el._x_removeModelListeners["default"]());
+    if (el.form) {
+        let removeResetListener = $8c83eaf28779ff46$var$on(el.form, "reset", [], (e)=>{
+            $8c83eaf28779ff46$var$nextTick(()=>el._x_model && el._x_model.set($8c83eaf28779ff46$var$getInputValue(el, modifiers, {
+                    target: el
+                }, getValue())));
+        });
+        cleanup2(()=>removeResetListener());
+    }
+    el._x_model = {
+        get () {
+            return getValue();
+        },
+        set (value) {
+            setValue(value);
+        }
+    };
+    el._x_forceModelUpdate = (value)=>{
+        if (value === void 0 && typeof expression === "string" && expression.match(/\./)) value = "";
+        window.fromModel = true;
+        $8c83eaf28779ff46$var$mutateDom(()=>$8c83eaf28779ff46$var$bind(el, "value", value));
+        delete window.fromModel;
+    };
+    effect3(()=>{
+        let value = getValue();
+        if (modifiers.includes("unintrusive") && document.activeElement.isSameNode(el)) return;
+        el._x_forceModelUpdate(value);
+    });
+});
+function $8c83eaf28779ff46$var$getInputValue(el, modifiers, event, currentValue) {
+    return $8c83eaf28779ff46$var$mutateDom(()=>{
+        if (event instanceof CustomEvent && event.detail !== void 0) return event.detail !== null && event.detail !== void 0 ? event.detail : event.target.value;
+        else if ($8c83eaf28779ff46$var$isCheckbox(el)) {
+            if (Array.isArray(currentValue)) {
+                let newValue = null;
+                if (modifiers.includes("number")) newValue = $8c83eaf28779ff46$var$safeParseNumber(event.target.value);
+                else if (modifiers.includes("boolean")) newValue = $8c83eaf28779ff46$var$safeParseBoolean(event.target.value);
+                else newValue = event.target.value;
+                return event.target.checked ? currentValue.includes(newValue) ? currentValue : currentValue.concat([
+                    newValue
+                ]) : currentValue.filter((el2)=>!$8c83eaf28779ff46$var$checkedAttrLooseCompare2(el2, newValue));
+            } else return event.target.checked;
+        } else if (el.tagName.toLowerCase() === "select" && el.multiple) {
+            if (modifiers.includes("number")) return Array.from(event.target.selectedOptions).map((option)=>{
+                let rawValue = option.value || option.text;
+                return $8c83eaf28779ff46$var$safeParseNumber(rawValue);
+            });
+            else if (modifiers.includes("boolean")) return Array.from(event.target.selectedOptions).map((option)=>{
+                let rawValue = option.value || option.text;
+                return $8c83eaf28779ff46$var$safeParseBoolean(rawValue);
+            });
+            return Array.from(event.target.selectedOptions).map((option)=>{
+                return option.value || option.text;
+            });
+        } else {
+            let newValue;
+            if ($8c83eaf28779ff46$var$isRadio(el)) {
+                if (event.target.checked) newValue = event.target.value;
+                else newValue = currentValue;
+            } else newValue = event.target.value;
+            if (modifiers.includes("number")) return $8c83eaf28779ff46$var$safeParseNumber(newValue);
+            else if (modifiers.includes("boolean")) return $8c83eaf28779ff46$var$safeParseBoolean(newValue);
+            else if (modifiers.includes("trim")) return newValue.trim();
+            else return newValue;
+        }
+    });
+}
+function $8c83eaf28779ff46$var$safeParseNumber(rawValue) {
+    let number = rawValue ? parseFloat(rawValue) : null;
+    return $8c83eaf28779ff46$var$isNumeric2(number) ? number : rawValue;
+}
+function $8c83eaf28779ff46$var$checkedAttrLooseCompare2(valueA, valueB) {
+    return valueA == valueB;
+}
+function $8c83eaf28779ff46$var$isNumeric2(subject) {
+    return !Array.isArray(subject) && !isNaN(subject);
+}
+function $8c83eaf28779ff46$var$isGetterSetter(value) {
+    return value !== null && typeof value === "object" && typeof value.get === "function" && typeof value.set === "function";
+}
+// packages/alpinejs/src/directives/x-cloak.js
+$8c83eaf28779ff46$var$directive("cloak", (el)=>queueMicrotask(()=>$8c83eaf28779ff46$var$mutateDom(()=>el.removeAttribute($8c83eaf28779ff46$var$prefix("cloak")))));
+// packages/alpinejs/src/directives/x-init.js
+$8c83eaf28779ff46$var$addInitSelector(()=>`[${$8c83eaf28779ff46$var$prefix("init")}]`);
+$8c83eaf28779ff46$var$directive("init", $8c83eaf28779ff46$var$skipDuringClone((el, { expression: expression }, { evaluate: evaluate2 })=>{
+    if (typeof expression === "string") return !!expression.trim() && evaluate2(expression, {}, false);
+    return evaluate2(expression, {}, false);
+}));
+// packages/alpinejs/src/directives/x-text.js
+$8c83eaf28779ff46$var$directive("text", (el, { expression: expression }, { effect: effect3, evaluateLater: evaluateLater2 })=>{
+    let evaluate2 = evaluateLater2(expression);
+    effect3(()=>{
+        evaluate2((value)=>{
+            $8c83eaf28779ff46$var$mutateDom(()=>{
+                el.textContent = value;
+            });
+        });
+    });
+});
+// packages/alpinejs/src/directives/x-html.js
+$8c83eaf28779ff46$var$directive("html", (el, { expression: expression }, { effect: effect3, evaluateLater: evaluateLater2 })=>{
+    let evaluate2 = evaluateLater2(expression);
+    effect3(()=>{
+        evaluate2((value)=>{
+            $8c83eaf28779ff46$var$mutateDom(()=>{
+                el.innerHTML = value;
+                el._x_ignoreSelf = true;
+                $8c83eaf28779ff46$var$initTree(el);
+                delete el._x_ignoreSelf;
+            });
+        });
+    });
+});
+// packages/alpinejs/src/directives/x-bind.js
+$8c83eaf28779ff46$var$mapAttributes($8c83eaf28779ff46$var$startingWith(":", $8c83eaf28779ff46$var$into($8c83eaf28779ff46$var$prefix("bind:"))));
+var $8c83eaf28779ff46$var$handler2 = (el, { value: value, modifiers: modifiers, expression: expression, original: original }, { effect: effect3, cleanup: cleanup2 })=>{
+    if (!value) {
+        let bindingProviders = {};
+        $8c83eaf28779ff46$var$injectBindingProviders(bindingProviders);
+        let getBindings = $8c83eaf28779ff46$var$evaluateLater(el, expression);
+        getBindings((bindings)=>{
+            $8c83eaf28779ff46$var$applyBindingsObject(el, bindings, original);
+        }, {
+            scope: bindingProviders
+        });
+        return;
+    }
+    if (value === "key") return $8c83eaf28779ff46$var$storeKeyForXFor(el, expression);
+    if (el._x_inlineBindings && el._x_inlineBindings[value] && el._x_inlineBindings[value].extract) return;
+    let evaluate2 = $8c83eaf28779ff46$var$evaluateLater(el, expression);
+    effect3(()=>evaluate2((result)=>{
+            if (result === void 0 && typeof expression === "string" && expression.match(/\./)) result = "";
+            $8c83eaf28779ff46$var$mutateDom(()=>$8c83eaf28779ff46$var$bind(el, value, result, modifiers));
+        }));
+    cleanup2(()=>{
+        el._x_undoAddedClasses && el._x_undoAddedClasses();
+        el._x_undoAddedStyles && el._x_undoAddedStyles();
+    });
+};
+$8c83eaf28779ff46$var$handler2.inline = (el, { value: value, modifiers: modifiers, expression: expression })=>{
+    if (!value) return;
+    if (!el._x_inlineBindings) el._x_inlineBindings = {};
+    el._x_inlineBindings[value] = {
+        expression: expression,
+        extract: false
+    };
+};
+$8c83eaf28779ff46$var$directive("bind", $8c83eaf28779ff46$var$handler2);
+function $8c83eaf28779ff46$var$storeKeyForXFor(el, expression) {
+    el._x_keyExpression = expression;
+}
+// packages/alpinejs/src/directives/x-data.js
+$8c83eaf28779ff46$var$addRootSelector(()=>`[${$8c83eaf28779ff46$var$prefix("data")}]`);
+$8c83eaf28779ff46$var$directive("data", (el, { expression: expression }, { cleanup: cleanup2 })=>{
+    if ($8c83eaf28779ff46$var$shouldSkipRegisteringDataDuringClone(el)) return;
+    expression = expression === "" ? "{}" : expression;
+    let magicContext = {};
+    $8c83eaf28779ff46$var$injectMagics(magicContext, el);
+    let dataProviderContext = {};
+    $8c83eaf28779ff46$var$injectDataProviders(dataProviderContext, magicContext);
+    let data2 = $8c83eaf28779ff46$var$evaluate(el, expression, {
+        scope: dataProviderContext
+    });
+    if (data2 === void 0 || data2 === true) data2 = {};
+    $8c83eaf28779ff46$var$injectMagics(data2, el);
+    let reactiveData = $8c83eaf28779ff46$var$reactive(data2);
+    $8c83eaf28779ff46$var$initInterceptors(reactiveData);
+    let undo = $8c83eaf28779ff46$var$addScopeToNode(el, reactiveData);
+    reactiveData["init"] && $8c83eaf28779ff46$var$evaluate(el, reactiveData["init"]);
+    cleanup2(()=>{
+        reactiveData["destroy"] && $8c83eaf28779ff46$var$evaluate(el, reactiveData["destroy"]);
+        undo();
+    });
+});
+$8c83eaf28779ff46$var$interceptClone((from, to)=>{
+    if (from._x_dataStack) {
+        to._x_dataStack = from._x_dataStack;
+        to.setAttribute("data-has-alpine-state", true);
+    }
+});
+function $8c83eaf28779ff46$var$shouldSkipRegisteringDataDuringClone(el) {
+    if (!$8c83eaf28779ff46$var$isCloning) return false;
+    if ($8c83eaf28779ff46$var$isCloningLegacy) return true;
+    return el.hasAttribute("data-has-alpine-state");
+}
+// packages/alpinejs/src/directives/x-show.js
+$8c83eaf28779ff46$var$directive("show", (el, { modifiers: modifiers, expression: expression }, { effect: effect3 })=>{
+    let evaluate2 = $8c83eaf28779ff46$var$evaluateLater(el, expression);
+    if (!el._x_doHide) el._x_doHide = ()=>{
+        $8c83eaf28779ff46$var$mutateDom(()=>{
+            el.style.setProperty("display", "none", modifiers.includes("important") ? "important" : void 0);
+        });
+    };
+    if (!el._x_doShow) el._x_doShow = ()=>{
+        $8c83eaf28779ff46$var$mutateDom(()=>{
+            if (el.style.length === 1 && el.style.display === "none") el.removeAttribute("style");
+            else el.style.removeProperty("display");
+        });
+    };
+    let hide = ()=>{
+        el._x_doHide();
+        el._x_isShown = false;
+    };
+    let show = ()=>{
+        el._x_doShow();
+        el._x_isShown = true;
+    };
+    let clickAwayCompatibleShow = ()=>setTimeout(show);
+    let toggle = $8c83eaf28779ff46$var$once((value)=>value ? show() : hide(), (value)=>{
+        if (typeof el._x_toggleAndCascadeWithTransitions === "function") el._x_toggleAndCascadeWithTransitions(el, value, show, hide);
+        else value ? clickAwayCompatibleShow() : hide();
+    });
+    let oldValue;
+    let firstTime = true;
+    effect3(()=>evaluate2((value)=>{
+            if (!firstTime && value === oldValue) return;
+            if (modifiers.includes("immediate")) value ? clickAwayCompatibleShow() : hide();
+            toggle(value);
+            oldValue = value;
+            firstTime = false;
+        }));
+});
+// packages/alpinejs/src/directives/x-for.js
+$8c83eaf28779ff46$var$directive("for", (el, { expression: expression }, { effect: effect3, cleanup: cleanup2 })=>{
+    let iteratorNames = $8c83eaf28779ff46$var$parseForExpression(expression);
+    let evaluateItems = $8c83eaf28779ff46$var$evaluateLater(el, iteratorNames.items);
+    let evaluateKey = $8c83eaf28779ff46$var$evaluateLater(el, // the x-bind:key expression is stored for our use instead of evaluated.
+    el._x_keyExpression || "index");
+    el._x_prevKeys = [];
+    el._x_lookup = {};
+    effect3(()=>$8c83eaf28779ff46$var$loop(el, iteratorNames, evaluateItems, evaluateKey));
+    cleanup2(()=>{
+        Object.values(el._x_lookup).forEach((el2)=>$8c83eaf28779ff46$var$mutateDom(()=>{
+                $8c83eaf28779ff46$var$destroyTree(el2);
+                el2.remove();
+            }));
+        delete el._x_prevKeys;
+        delete el._x_lookup;
+    });
+});
+function $8c83eaf28779ff46$var$loop(el, iteratorNames, evaluateItems, evaluateKey) {
+    let isObject2 = (i)=>typeof i === "object" && !Array.isArray(i);
+    let templateEl = el;
+    evaluateItems((items)=>{
+        if ($8c83eaf28779ff46$var$isNumeric3(items) && items >= 0) items = Array.from(Array(items).keys(), (i)=>i + 1);
+        if (items === void 0) items = [];
+        let lookup = el._x_lookup;
+        let prevKeys = el._x_prevKeys;
+        let scopes = [];
+        let keys = [];
+        if (isObject2(items)) items = Object.entries(items).map(([key, value])=>{
+            let scope2 = $8c83eaf28779ff46$var$getIterationScopeVariables(iteratorNames, value, key, items);
+            evaluateKey((value2)=>{
+                if (keys.includes(value2)) $8c83eaf28779ff46$var$warn("Duplicate key on x-for", el);
+                keys.push(value2);
+            }, {
+                scope: {
+                    index: key,
+                    ...scope2
+                }
+            });
+            scopes.push(scope2);
+        });
+        else for(let i = 0; i < items.length; i++){
+            let scope2 = $8c83eaf28779ff46$var$getIterationScopeVariables(iteratorNames, items[i], i, items);
+            evaluateKey((value)=>{
+                if (keys.includes(value)) $8c83eaf28779ff46$var$warn("Duplicate key on x-for", el);
+                keys.push(value);
+            }, {
+                scope: {
+                    index: i,
+                    ...scope2
+                }
+            });
+            scopes.push(scope2);
+        }
+        let adds = [];
+        let moves = [];
+        let removes = [];
+        let sames = [];
+        for(let i = 0; i < prevKeys.length; i++){
+            let key = prevKeys[i];
+            if (keys.indexOf(key) === -1) removes.push(key);
+        }
+        prevKeys = prevKeys.filter((key)=>!removes.includes(key));
+        let lastKey = "template";
+        for(let i = 0; i < keys.length; i++){
+            let key = keys[i];
+            let prevIndex = prevKeys.indexOf(key);
+            if (prevIndex === -1) {
+                prevKeys.splice(i, 0, key);
+                adds.push([
+                    lastKey,
+                    i
+                ]);
+            } else if (prevIndex !== i) {
+                let keyInSpot = prevKeys.splice(i, 1)[0];
+                let keyForSpot = prevKeys.splice(prevIndex - 1, 1)[0];
+                prevKeys.splice(i, 0, keyForSpot);
+                prevKeys.splice(prevIndex, 0, keyInSpot);
+                moves.push([
+                    keyInSpot,
+                    keyForSpot
+                ]);
+            } else sames.push(key);
+            lastKey = key;
+        }
+        for(let i = 0; i < removes.length; i++){
+            let key = removes[i];
+            if (!(key in lookup)) continue;
+            $8c83eaf28779ff46$var$mutateDom(()=>{
+                $8c83eaf28779ff46$var$destroyTree(lookup[key]);
+                lookup[key].remove();
+            });
+            delete lookup[key];
+        }
+        for(let i = 0; i < moves.length; i++){
+            let [keyInSpot, keyForSpot] = moves[i];
+            let elInSpot = lookup[keyInSpot];
+            let elForSpot = lookup[keyForSpot];
+            let marker = document.createElement("div");
+            $8c83eaf28779ff46$var$mutateDom(()=>{
+                if (!elForSpot) $8c83eaf28779ff46$var$warn(`x-for ":key" is undefined or invalid`, templateEl, keyForSpot, lookup);
+                elForSpot.after(marker);
+                elInSpot.after(elForSpot);
+                elForSpot._x_currentIfEl && elForSpot.after(elForSpot._x_currentIfEl);
+                marker.before(elInSpot);
+                elInSpot._x_currentIfEl && elInSpot.after(elInSpot._x_currentIfEl);
+                marker.remove();
+            });
+            elForSpot._x_refreshXForScope(scopes[keys.indexOf(keyForSpot)]);
+        }
+        for(let i = 0; i < adds.length; i++){
+            let [lastKey2, index] = adds[i];
+            let lastEl = lastKey2 === "template" ? templateEl : lookup[lastKey2];
+            if (lastEl._x_currentIfEl) lastEl = lastEl._x_currentIfEl;
+            let scope2 = scopes[index];
+            let key = keys[index];
+            let clone2 = document.importNode(templateEl.content, true).firstElementChild;
+            let reactiveScope = $8c83eaf28779ff46$var$reactive(scope2);
+            $8c83eaf28779ff46$var$addScopeToNode(clone2, reactiveScope, templateEl);
+            clone2._x_refreshXForScope = (newScope)=>{
+                Object.entries(newScope).forEach(([key2, value])=>{
+                    reactiveScope[key2] = value;
+                });
+            };
+            $8c83eaf28779ff46$var$mutateDom(()=>{
+                lastEl.after(clone2);
+                $8c83eaf28779ff46$var$skipDuringClone(()=>$8c83eaf28779ff46$var$initTree(clone2))();
+            });
+            if (typeof key === "object") $8c83eaf28779ff46$var$warn("x-for key cannot be an object, it must be a string or an integer", templateEl);
+            lookup[key] = clone2;
+        }
+        for(let i = 0; i < sames.length; i++)lookup[sames[i]]._x_refreshXForScope(scopes[keys.indexOf(sames[i])]);
+        templateEl._x_prevKeys = keys;
+    });
+}
+function $8c83eaf28779ff46$var$parseForExpression(expression) {
+    let forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/;
+    let stripParensRE = /^\s*\(|\)\s*$/g;
+    let forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/;
+    let inMatch = expression.match(forAliasRE);
+    if (!inMatch) return;
+    let res = {};
+    res.items = inMatch[2].trim();
+    let item = inMatch[1].replace(stripParensRE, "").trim();
+    let iteratorMatch = item.match(forIteratorRE);
+    if (iteratorMatch) {
+        res.item = item.replace(forIteratorRE, "").trim();
+        res.index = iteratorMatch[1].trim();
+        if (iteratorMatch[2]) res.collection = iteratorMatch[2].trim();
+    } else res.item = item;
+    return res;
+}
+function $8c83eaf28779ff46$var$getIterationScopeVariables(iteratorNames, item, index, items) {
+    let scopeVariables = {};
+    if (/^\[.*\]$/.test(iteratorNames.item) && Array.isArray(item)) {
+        let names = iteratorNames.item.replace("[", "").replace("]", "").split(",").map((i)=>i.trim());
+        names.forEach((name, i)=>{
+            scopeVariables[name] = item[i];
+        });
+    } else if (/^\{.*\}$/.test(iteratorNames.item) && !Array.isArray(item) && typeof item === "object") {
+        let names = iteratorNames.item.replace("{", "").replace("}", "").split(",").map((i)=>i.trim());
+        names.forEach((name)=>{
+            scopeVariables[name] = item[name];
+        });
+    } else scopeVariables[iteratorNames.item] = item;
+    if (iteratorNames.index) scopeVariables[iteratorNames.index] = index;
+    if (iteratorNames.collection) scopeVariables[iteratorNames.collection] = items;
+    return scopeVariables;
+}
+function $8c83eaf28779ff46$var$isNumeric3(subject) {
+    return !Array.isArray(subject) && !isNaN(subject);
+}
+// packages/alpinejs/src/directives/x-ref.js
+function $8c83eaf28779ff46$var$handler3() {}
+$8c83eaf28779ff46$var$handler3.inline = (el, { expression: expression }, { cleanup: cleanup2 })=>{
+    let root = $8c83eaf28779ff46$var$closestRoot(el);
+    if (!root._x_refs) root._x_refs = {};
+    root._x_refs[expression] = el;
+    cleanup2(()=>delete root._x_refs[expression]);
+};
+$8c83eaf28779ff46$var$directive("ref", $8c83eaf28779ff46$var$handler3);
+// packages/alpinejs/src/directives/x-if.js
+$8c83eaf28779ff46$var$directive("if", (el, { expression: expression }, { effect: effect3, cleanup: cleanup2 })=>{
+    if (el.tagName.toLowerCase() !== "template") $8c83eaf28779ff46$var$warn("x-if can only be used on a <template> tag", el);
+    let evaluate2 = $8c83eaf28779ff46$var$evaluateLater(el, expression);
+    let show = ()=>{
+        if (el._x_currentIfEl) return el._x_currentIfEl;
+        let clone2 = el.content.cloneNode(true).firstElementChild;
+        $8c83eaf28779ff46$var$addScopeToNode(clone2, {}, el);
+        $8c83eaf28779ff46$var$mutateDom(()=>{
+            el.after(clone2);
+            $8c83eaf28779ff46$var$skipDuringClone(()=>$8c83eaf28779ff46$var$initTree(clone2))();
+        });
+        el._x_currentIfEl = clone2;
+        el._x_undoIf = ()=>{
+            $8c83eaf28779ff46$var$mutateDom(()=>{
+                $8c83eaf28779ff46$var$destroyTree(clone2);
+                clone2.remove();
+            });
+            delete el._x_currentIfEl;
+        };
+        return clone2;
+    };
+    let hide = ()=>{
+        if (!el._x_undoIf) return;
+        el._x_undoIf();
+        delete el._x_undoIf;
+    };
+    effect3(()=>evaluate2((value)=>{
+            value ? show() : hide();
+        }));
+    cleanup2(()=>el._x_undoIf && el._x_undoIf());
+});
+// packages/alpinejs/src/directives/x-id.js
+$8c83eaf28779ff46$var$directive("id", (el, { expression: expression }, { evaluate: evaluate2 })=>{
+    let names = evaluate2(expression);
+    names.forEach((name)=>$8c83eaf28779ff46$var$setIdRoot(el, name));
+});
+$8c83eaf28779ff46$var$interceptClone((from, to)=>{
+    if (from._x_ids) to._x_ids = from._x_ids;
+});
+// packages/alpinejs/src/directives/x-on.js
+$8c83eaf28779ff46$var$mapAttributes($8c83eaf28779ff46$var$startingWith("@", $8c83eaf28779ff46$var$into($8c83eaf28779ff46$var$prefix("on:"))));
+$8c83eaf28779ff46$var$directive("on", $8c83eaf28779ff46$var$skipDuringClone((el, { value: value, modifiers: modifiers, expression: expression }, { cleanup: cleanup2 })=>{
+    let evaluate2 = expression ? $8c83eaf28779ff46$var$evaluateLater(el, expression) : ()=>{};
+    if (el.tagName.toLowerCase() === "template") {
+        if (!el._x_forwardEvents) el._x_forwardEvents = [];
+        if (!el._x_forwardEvents.includes(value)) el._x_forwardEvents.push(value);
+    }
+    let removeListener = $8c83eaf28779ff46$var$on(el, value, modifiers, (e)=>{
+        evaluate2(()=>{}, {
+            scope: {
+                "$event": e
+            },
+            params: [
+                e
+            ]
+        });
+    });
+    cleanup2(()=>removeListener());
+}));
+// packages/alpinejs/src/directives/index.js
+$8c83eaf28779ff46$var$warnMissingPluginDirective("Collapse", "collapse", "collapse");
+$8c83eaf28779ff46$var$warnMissingPluginDirective("Intersect", "intersect", "intersect");
+$8c83eaf28779ff46$var$warnMissingPluginDirective("Focus", "trap", "focus");
+$8c83eaf28779ff46$var$warnMissingPluginDirective("Mask", "mask", "mask");
+function $8c83eaf28779ff46$var$warnMissingPluginDirective(name, directiveName, slug) {
+    $8c83eaf28779ff46$var$directive(directiveName, (el)=>$8c83eaf28779ff46$var$warn(`You can't use [x-${directiveName}] without first installing the "${name}" plugin here: https://alpinejs.dev/plugins/${slug}`, el));
+}
+// packages/alpinejs/src/index.js
+$8c83eaf28779ff46$var$alpine_default.setEvaluator($8c83eaf28779ff46$var$normalEvaluator);
+$8c83eaf28779ff46$var$alpine_default.setReactivityEngine({
+    reactive: $8c83eaf28779ff46$var$reactive2,
+    effect: $8c83eaf28779ff46$var$effect2,
+    release: $8c83eaf28779ff46$var$stop,
+    raw: $8c83eaf28779ff46$var$toRaw
+});
+var $8c83eaf28779ff46$export$b7ee041e4ad2afec = $8c83eaf28779ff46$var$alpine_default;
+// packages/alpinejs/builds/module.js
+var $8c83eaf28779ff46$export$2e2bcd8739ae039 = $8c83eaf28779ff46$export$b7ee041e4ad2afec;
+
+
+// packages/persist/src/index.js
+function $9b2f94dab0f686ea$export$9a6132153fba2e0(Alpine) {
+    let persist = ()=>{
+        let alias;
+        let storage;
+        try {
+            storage = localStorage;
+        } catch (e) {
+            console.error(e);
+            console.warn("Alpine: $persist is using temporary storage since localStorage is unavailable.");
+            let dummy = /* @__PURE__ */ new Map();
+            storage = {
+                getItem: dummy.get.bind(dummy),
+                setItem: dummy.set.bind(dummy)
+            };
+        }
+        return Alpine.interceptor((initialValue, getter, setter, path, key)=>{
+            let lookup = alias || `_x_${path}`;
+            let initial = $9b2f94dab0f686ea$var$storageHas(lookup, storage) ? $9b2f94dab0f686ea$var$storageGet(lookup, storage) : initialValue;
+            setter(initial);
+            Alpine.effect(()=>{
+                let value = getter();
+                $9b2f94dab0f686ea$var$storageSet(lookup, value, storage);
+                setter(value);
+            });
+            return initial;
+        }, (func)=>{
+            func.as = (key)=>{
+                alias = key;
+                return func;
+            }, func.using = (target)=>{
+                storage = target;
+                return func;
+            };
+        });
+    };
+    Object.defineProperty(Alpine, "$persist", {
+        get: ()=>persist()
+    });
+    Alpine.magic("persist", persist);
+    Alpine.persist = (key, { get: get, set: set }, storage = localStorage)=>{
+        let initial = $9b2f94dab0f686ea$var$storageHas(key, storage) ? $9b2f94dab0f686ea$var$storageGet(key, storage) : get();
+        set(initial);
+        Alpine.effect(()=>{
+            let value = get();
+            $9b2f94dab0f686ea$var$storageSet(key, value, storage);
+            set(value);
+        });
+    };
+}
+function $9b2f94dab0f686ea$var$storageHas(key, storage) {
+    return storage.getItem(key) !== null;
+}
+function $9b2f94dab0f686ea$var$storageGet(key, storage) {
+    let value = storage.getItem(key, storage);
+    if (value === void 0) return;
+    return JSON.parse(value);
+}
+function $9b2f94dab0f686ea$var$storageSet(key, value, storage) {
+    storage.setItem(key, JSON.stringify(value));
+}
+// packages/persist/builds/module.js
+var $9b2f94dab0f686ea$export$2e2bcd8739ae039 = $9b2f94dab0f686ea$export$9a6132153fba2e0;
+
+
+// packages/morph/src/morph.js
+function $fd2717825660a9ff$var$morph(from, toHtml, options) {
+    $fd2717825660a9ff$var$monkeyPatchDomSetAttributeToAllowAtSymbols();
+    let fromEl;
+    let toEl;
+    let key, lookahead, updating, updated, removing, removed, adding, added;
+    function assignOptions(options2 = {}) {
+        let defaultGetKey = (el)=>el.getAttribute("key");
+        let noop = ()=>{};
+        updating = options2.updating || noop;
+        updated = options2.updated || noop;
+        removing = options2.removing || noop;
+        removed = options2.removed || noop;
+        adding = options2.adding || noop;
+        added = options2.added || noop;
+        key = options2.key || defaultGetKey;
+        lookahead = options2.lookahead || false;
+    }
+    function patch(from2, to) {
+        if (differentElementNamesTypesOrKeys(from2, to)) return swapElements(from2, to);
+        let updateChildrenOnly = false;
+        if ($fd2717825660a9ff$var$shouldSkip(updating, from2, to, ()=>updateChildrenOnly = true)) return;
+        if (from2.nodeType === 1 && window.Alpine) {
+            window.Alpine.cloneNode(from2, to);
+            if (from2._x_teleport && to._x_teleport) patch(from2._x_teleport, to._x_teleport);
+        }
+        if ($fd2717825660a9ff$var$textOrComment(to)) {
+            patchNodeValue(from2, to);
+            updated(from2, to);
+            return;
+        }
+        if (!updateChildrenOnly) patchAttributes(from2, to);
+        updated(from2, to);
+        patchChildren(from2, to);
+    }
+    function differentElementNamesTypesOrKeys(from2, to) {
+        return from2.nodeType != to.nodeType || from2.nodeName != to.nodeName || getKey(from2) != getKey(to);
+    }
+    function swapElements(from2, to) {
+        if ($fd2717825660a9ff$var$shouldSkip(removing, from2)) return;
+        let toCloned = to.cloneNode(true);
+        if ($fd2717825660a9ff$var$shouldSkip(adding, toCloned)) return;
+        from2.replaceWith(toCloned);
+        removed(from2);
+        added(toCloned);
+    }
+    function patchNodeValue(from2, to) {
+        let value = to.nodeValue;
+        if (from2.nodeValue !== value) from2.nodeValue = value;
+    }
+    function patchAttributes(from2, to) {
+        if (from2._x_transitioning) return;
+        if (from2._x_isShown && !to._x_isShown) return;
+        if (!from2._x_isShown && to._x_isShown) return;
+        let domAttributes = Array.from(from2.attributes);
+        let toAttributes = Array.from(to.attributes);
+        for(let i = domAttributes.length - 1; i >= 0; i--){
+            let name = domAttributes[i].name;
+            if (!to.hasAttribute(name)) from2.removeAttribute(name);
+        }
+        for(let i = toAttributes.length - 1; i >= 0; i--){
+            let name = toAttributes[i].name;
+            let value = toAttributes[i].value;
+            if (from2.getAttribute(name) !== value) from2.setAttribute(name, value);
+        }
+    }
+    function patchChildren(from2, to) {
+        let fromKeys = keyToMap(from2.children);
+        let fromKeyHoldovers = {};
+        let currentTo = $fd2717825660a9ff$var$getFirstNode(to);
+        let currentFrom = $fd2717825660a9ff$var$getFirstNode(from2);
+        while(currentTo){
+            $fd2717825660a9ff$var$seedingMatchingId(currentTo, currentFrom);
+            let toKey = getKey(currentTo);
+            let fromKey = getKey(currentFrom);
+            if (!currentFrom) {
+                if (toKey && fromKeyHoldovers[toKey]) {
+                    let holdover = fromKeyHoldovers[toKey];
+                    from2.appendChild(holdover);
+                    currentFrom = holdover;
+                    fromKey = getKey(currentFrom);
+                } else {
+                    if (!$fd2717825660a9ff$var$shouldSkip(adding, currentTo)) {
+                        let clone = currentTo.cloneNode(true);
+                        from2.appendChild(clone);
+                        added(clone);
+                    }
+                    currentTo = $fd2717825660a9ff$var$getNextSibling(to, currentTo);
+                    continue;
+                }
+            }
+            let isIf = (node)=>node && node.nodeType === 8 && node.textContent === "[if BLOCK]><![endif]";
+            let isEnd = (node)=>node && node.nodeType === 8 && node.textContent === "[if ENDBLOCK]><![endif]";
+            if (isIf(currentTo) && isIf(currentFrom)) {
+                let nestedIfCount = 0;
+                let fromBlockStart = currentFrom;
+                while(currentFrom){
+                    let next = $fd2717825660a9ff$var$getNextSibling(from2, currentFrom);
+                    if (isIf(next)) nestedIfCount++;
+                    else if (isEnd(next) && nestedIfCount > 0) nestedIfCount--;
+                    else if (isEnd(next) && nestedIfCount === 0) {
+                        currentFrom = next;
+                        break;
+                    }
+                    currentFrom = next;
+                }
+                let fromBlockEnd = currentFrom;
+                nestedIfCount = 0;
+                let toBlockStart = currentTo;
+                while(currentTo){
+                    let next = $fd2717825660a9ff$var$getNextSibling(to, currentTo);
+                    if (isIf(next)) nestedIfCount++;
+                    else if (isEnd(next) && nestedIfCount > 0) nestedIfCount--;
+                    else if (isEnd(next) && nestedIfCount === 0) {
+                        currentTo = next;
+                        break;
+                    }
+                    currentTo = next;
+                }
+                let toBlockEnd = currentTo;
+                let fromBlock = new $fd2717825660a9ff$var$Block(fromBlockStart, fromBlockEnd);
+                let toBlock = new $fd2717825660a9ff$var$Block(toBlockStart, toBlockEnd);
+                patchChildren(fromBlock, toBlock);
+                continue;
+            }
+            if (currentFrom.nodeType === 1 && lookahead && !currentFrom.isEqualNode(currentTo)) {
+                let nextToElementSibling = $fd2717825660a9ff$var$getNextSibling(to, currentTo);
+                let found = false;
+                while(!found && nextToElementSibling){
+                    if (nextToElementSibling.nodeType === 1 && currentFrom.isEqualNode(nextToElementSibling)) {
+                        found = true;
+                        currentFrom = addNodeBefore(from2, currentTo, currentFrom);
+                        fromKey = getKey(currentFrom);
+                    }
+                    nextToElementSibling = $fd2717825660a9ff$var$getNextSibling(to, nextToElementSibling);
+                }
+            }
+            if (toKey !== fromKey) {
+                if (!toKey && fromKey) {
+                    fromKeyHoldovers[fromKey] = currentFrom;
+                    currentFrom = addNodeBefore(from2, currentTo, currentFrom);
+                    fromKeyHoldovers[fromKey].remove();
+                    currentFrom = $fd2717825660a9ff$var$getNextSibling(from2, currentFrom);
+                    currentTo = $fd2717825660a9ff$var$getNextSibling(to, currentTo);
+                    continue;
+                }
+                if (toKey && !fromKey) {
+                    if (fromKeys[toKey]) {
+                        currentFrom.replaceWith(fromKeys[toKey]);
+                        currentFrom = fromKeys[toKey];
+                        fromKey = getKey(currentFrom);
+                    }
+                }
+                if (toKey && fromKey) {
+                    let fromKeyNode = fromKeys[toKey];
+                    if (fromKeyNode) {
+                        fromKeyHoldovers[fromKey] = currentFrom;
+                        currentFrom.replaceWith(fromKeyNode);
+                        currentFrom = fromKeyNode;
+                        fromKey = getKey(currentFrom);
+                    } else {
+                        fromKeyHoldovers[fromKey] = currentFrom;
+                        currentFrom = addNodeBefore(from2, currentTo, currentFrom);
+                        fromKeyHoldovers[fromKey].remove();
+                        currentFrom = $fd2717825660a9ff$var$getNextSibling(from2, currentFrom);
+                        currentTo = $fd2717825660a9ff$var$getNextSibling(to, currentTo);
+                        continue;
+                    }
+                }
+            }
+            let currentFromNext = currentFrom && $fd2717825660a9ff$var$getNextSibling(from2, currentFrom);
+            patch(currentFrom, currentTo);
+            currentTo = currentTo && $fd2717825660a9ff$var$getNextSibling(to, currentTo);
+            currentFrom = currentFromNext;
+        }
+        let removals = [];
+        while(currentFrom){
+            if (!$fd2717825660a9ff$var$shouldSkip(removing, currentFrom)) removals.push(currentFrom);
+            currentFrom = $fd2717825660a9ff$var$getNextSibling(from2, currentFrom);
+        }
+        while(removals.length){
+            let domForRemoval = removals.shift();
+            domForRemoval.remove();
+            removed(domForRemoval);
+        }
+    }
+    function getKey(el) {
+        return el && el.nodeType === 1 && key(el);
+    }
+    function keyToMap(els) {
+        let map = {};
+        for (let el of els){
+            let theKey = getKey(el);
+            if (theKey) map[theKey] = el;
+        }
+        return map;
+    }
+    function addNodeBefore(parent, node, beforeMe) {
+        if (!$fd2717825660a9ff$var$shouldSkip(adding, node)) {
+            let clone = node.cloneNode(true);
+            parent.insertBefore(clone, beforeMe);
+            added(clone);
+            return clone;
+        }
+        return node;
+    }
+    assignOptions(options);
+    fromEl = from;
+    toEl = typeof toHtml === "string" ? $fd2717825660a9ff$var$createElement(toHtml) : toHtml;
+    if (window.Alpine && window.Alpine.closestDataStack && !from._x_dataStack) {
+        toEl._x_dataStack = window.Alpine.closestDataStack(from);
+        toEl._x_dataStack && window.Alpine.cloneNode(from, toEl);
+    }
+    patch(from, toEl);
+    fromEl = void 0;
+    toEl = void 0;
+    return from;
+}
+$fd2717825660a9ff$var$morph.step = ()=>{};
+$fd2717825660a9ff$var$morph.log = ()=>{};
+function $fd2717825660a9ff$var$shouldSkip(hook, ...args) {
+    let skip = false;
+    hook(...args, ()=>skip = true);
+    return skip;
+}
+var $fd2717825660a9ff$var$patched = false;
+function $fd2717825660a9ff$var$createElement(html) {
+    const template = document.createElement("template");
+    template.innerHTML = html;
+    return template.content.firstElementChild;
+}
+function $fd2717825660a9ff$var$textOrComment(el) {
+    return el.nodeType === 3 || el.nodeType === 8;
+}
+var $fd2717825660a9ff$var$Block = class {
+    constructor(start, end){
+        this.startComment = start;
+        this.endComment = end;
+    }
+    get children() {
+        let children = [];
+        let currentNode = this.startComment.nextSibling;
+        while(currentNode && currentNode !== this.endComment){
+            children.push(currentNode);
+            currentNode = currentNode.nextSibling;
+        }
+        return children;
+    }
+    appendChild(child) {
+        this.endComment.before(child);
+    }
+    get firstChild() {
+        let first = this.startComment.nextSibling;
+        if (first === this.endComment) return;
+        return first;
+    }
+    nextNode(reference) {
+        let next = reference.nextSibling;
+        if (next === this.endComment) return;
+        return next;
+    }
+    insertBefore(newNode, reference) {
+        reference.before(newNode);
+        return newNode;
+    }
+};
+function $fd2717825660a9ff$var$getFirstNode(parent) {
+    return parent.firstChild;
+}
+function $fd2717825660a9ff$var$getNextSibling(parent, reference) {
+    let next;
+    if (parent instanceof $fd2717825660a9ff$var$Block) next = parent.nextNode(reference);
+    else next = reference.nextSibling;
+    return next;
+}
+function $fd2717825660a9ff$var$monkeyPatchDomSetAttributeToAllowAtSymbols() {
+    if ($fd2717825660a9ff$var$patched) return;
+    $fd2717825660a9ff$var$patched = true;
+    let original = Element.prototype.setAttribute;
+    let hostDiv = document.createElement("div");
+    Element.prototype.setAttribute = function newSetAttribute(name, value) {
+        if (!name.includes("@")) return original.call(this, name, value);
+        hostDiv.innerHTML = `<span ${name}="${value}"></span>`;
+        let attr = hostDiv.firstElementChild.getAttributeNode(name);
+        hostDiv.firstElementChild.removeAttributeNode(attr);
+        this.setAttributeNode(attr);
+    };
+}
+function $fd2717825660a9ff$var$seedingMatchingId(to, from) {
+    let fromId = from && from._x_bindings && from._x_bindings.id;
+    if (!fromId) return;
+    if (!to.setAttribute) return;
+    to.setAttribute("id", fromId);
+    to.id = fromId;
+}
+// packages/morph/src/index.js
+function $fd2717825660a9ff$export$2e5e8c41f5d4e7c7(Alpine) {
+    Alpine.morph = $fd2717825660a9ff$var$morph;
+}
+// packages/morph/builds/module.js
+var $fd2717825660a9ff$export$2e2bcd8739ae039 = $fd2717825660a9ff$export$2e5e8c41f5d4e7c7;
+
+
+const $1bac384020b50752$var$isString = (obj)=>typeof obj === 'string';
+const $1bac384020b50752$var$defer = ()=>{
+    let res;
+    let rej;
+    const promise = new Promise((resolve, reject)=>{
+        res = resolve;
+        rej = reject;
+    });
+    promise.resolve = res;
+    promise.reject = rej;
+    return promise;
+};
+const $1bac384020b50752$var$makeString = (object)=>{
+    if (object == null) return '';
+    return '' + object;
+};
+const $1bac384020b50752$var$copy = (a, s, t)=>{
+    a.forEach((m)=>{
+        if (s[m]) t[m] = s[m];
+    });
+};
+const $1bac384020b50752$var$lastOfPathSeparatorRegExp = /###/g;
+const $1bac384020b50752$var$cleanKey = (key)=>key && key.indexOf('###') > -1 ? key.replace($1bac384020b50752$var$lastOfPathSeparatorRegExp, '.') : key;
+const $1bac384020b50752$var$canNotTraverseDeeper = (object)=>!object || $1bac384020b50752$var$isString(object);
+const $1bac384020b50752$var$getLastOfPath = (object, path, Empty)=>{
+    const stack = !$1bac384020b50752$var$isString(path) ? path : path.split('.');
+    let stackIndex = 0;
+    while(stackIndex < stack.length - 1){
+        if ($1bac384020b50752$var$canNotTraverseDeeper(object)) return {};
+        const key = $1bac384020b50752$var$cleanKey(stack[stackIndex]);
+        if (!object[key] && Empty) object[key] = new Empty();
+        if (Object.prototype.hasOwnProperty.call(object, key)) object = object[key];
+        else object = {};
+        ++stackIndex;
+    }
+    if ($1bac384020b50752$var$canNotTraverseDeeper(object)) return {};
+    return {
+        obj: object,
+        k: $1bac384020b50752$var$cleanKey(stack[stackIndex])
+    };
+};
+const $1bac384020b50752$var$setPath = (object, path, newValue)=>{
+    const { obj: obj, k: k } = $1bac384020b50752$var$getLastOfPath(object, path, Object);
+    if (obj !== undefined || path.length === 1) {
+        obj[k] = newValue;
+        return;
+    }
+    let e = path[path.length - 1];
+    let p = path.slice(0, path.length - 1);
+    let last = $1bac384020b50752$var$getLastOfPath(object, p, Object);
+    while(last.obj === undefined && p.length){
+        e = `${p[p.length - 1]}.${e}`;
+        p = p.slice(0, p.length - 1);
+        last = $1bac384020b50752$var$getLastOfPath(object, p, Object);
+        if (last?.obj && typeof last.obj[`${last.k}.${e}`] !== 'undefined') last.obj = undefined;
+    }
+    last.obj[`${last.k}.${e}`] = newValue;
+};
+const $1bac384020b50752$var$pushPath = (object, path, newValue, concat)=>{
+    const { obj: obj, k: k } = $1bac384020b50752$var$getLastOfPath(object, path, Object);
+    obj[k] = obj[k] || [];
+    obj[k].push(newValue);
+};
+const $1bac384020b50752$var$getPath = (object, path)=>{
+    const { obj: obj, k: k } = $1bac384020b50752$var$getLastOfPath(object, path);
+    if (!obj) return undefined;
+    if (!Object.prototype.hasOwnProperty.call(obj, k)) return undefined;
+    return obj[k];
+};
+const $1bac384020b50752$var$getPathWithDefaults = (data, defaultData, key)=>{
+    const value = $1bac384020b50752$var$getPath(data, key);
+    if (value !== undefined) return value;
+    return $1bac384020b50752$var$getPath(defaultData, key);
+};
+const $1bac384020b50752$var$deepExtend = (target, source, overwrite)=>{
+    for(const prop in source)if (prop !== '__proto__' && prop !== 'constructor') {
+        if (prop in target) {
+            if ($1bac384020b50752$var$isString(target[prop]) || target[prop] instanceof String || $1bac384020b50752$var$isString(source[prop]) || source[prop] instanceof String) {
+                if (overwrite) target[prop] = source[prop];
+            } else $1bac384020b50752$var$deepExtend(target[prop], source[prop], overwrite);
+        } else target[prop] = source[prop];
+    }
+    return target;
+};
+const $1bac384020b50752$var$regexEscape = (str)=>str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
+var $1bac384020b50752$var$_entityMap = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+    '/': '&#x2F;'
+};
+const $1bac384020b50752$var$escape = (data)=>{
+    if ($1bac384020b50752$var$isString(data)) return data.replace(/[&<>"'\/]/g, (s)=>$1bac384020b50752$var$_entityMap[s]);
+    return data;
+};
+class $1bac384020b50752$var$RegExpCache {
+    constructor(capacity){
+        this.capacity = capacity;
+        this.regExpMap = new Map();
+        this.regExpQueue = [];
+    }
+    getRegExp(pattern) {
+        const regExpFromCache = this.regExpMap.get(pattern);
+        if (regExpFromCache !== undefined) return regExpFromCache;
+        const regExpNew = new RegExp(pattern);
+        if (this.regExpQueue.length === this.capacity) this.regExpMap.delete(this.regExpQueue.shift());
+        this.regExpMap.set(pattern, regExpNew);
+        this.regExpQueue.push(pattern);
+        return regExpNew;
+    }
+}
+const $1bac384020b50752$var$chars = [
+    ' ',
+    ',',
+    '?',
+    '!',
+    ';'
+];
+const $1bac384020b50752$var$looksLikeObjectPathRegExpCache = new $1bac384020b50752$var$RegExpCache(20);
+const $1bac384020b50752$var$looksLikeObjectPath = (key, nsSeparator, keySeparator)=>{
+    nsSeparator = nsSeparator || '';
+    keySeparator = keySeparator || '';
+    const possibleChars = $1bac384020b50752$var$chars.filter((c)=>nsSeparator.indexOf(c) < 0 && keySeparator.indexOf(c) < 0);
+    if (possibleChars.length === 0) return true;
+    const r = $1bac384020b50752$var$looksLikeObjectPathRegExpCache.getRegExp(`(${possibleChars.map((c)=>c === '?' ? '\\?' : c).join('|')})`);
+    let matched = !r.test(key);
+    if (!matched) {
+        const ki = key.indexOf(keySeparator);
+        if (ki > 0 && !r.test(key.substring(0, ki))) matched = true;
+    }
+    return matched;
+};
+const $1bac384020b50752$var$deepFind = function(obj, path) {
+    let keySeparator = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '.';
+    if (!obj) return undefined;
+    if (obj[path]) {
+        if (!Object.prototype.hasOwnProperty.call(obj, path)) return undefined;
+        return obj[path];
+    }
+    const tokens = path.split(keySeparator);
+    let current = obj;
+    for(let i = 0; i < tokens.length;){
+        if (!current || typeof current !== 'object') return undefined;
+        let next;
+        let nextPath = '';
+        for(let j = i; j < tokens.length; ++j){
+            if (j !== i) nextPath += keySeparator;
+            nextPath += tokens[j];
+            next = current[nextPath];
+            if (next !== undefined) {
+                if ([
+                    'string',
+                    'number',
+                    'boolean'
+                ].indexOf(typeof next) > -1 && j < tokens.length - 1) continue;
+                i += j - i + 1;
+                break;
+            }
+        }
+        current = next;
+    }
+    return current;
+};
+const $1bac384020b50752$var$getCleanedCode = (code)=>code?.replace('_', '-');
+const $1bac384020b50752$var$consoleLogger = {
+    type: 'logger',
+    log (args) {
+        this.output('log', args);
+    },
+    warn (args) {
+        this.output('warn', args);
+    },
+    error (args) {
+        this.output('error', args);
+    },
+    output (type, args) {
+        console?.[type]?.apply?.(console, args);
+    }
+};
+class $1bac384020b50752$var$Logger {
+    constructor(concreteLogger){
+        let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+        this.init(concreteLogger, options);
+    }
+    init(concreteLogger) {
+        let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+        this.prefix = options.prefix || 'i18next:';
+        this.logger = concreteLogger || $1bac384020b50752$var$consoleLogger;
+        this.options = options;
+        this.debug = options.debug;
+    }
+    log() {
+        for(var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++)args[_key] = arguments[_key];
+        return this.forward(args, 'log', '', true);
+    }
+    warn() {
+        for(var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++)args[_key2] = arguments[_key2];
+        return this.forward(args, 'warn', '', true);
+    }
+    error() {
+        for(var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++)args[_key3] = arguments[_key3];
+        return this.forward(args, 'error', '');
+    }
+    deprecate() {
+        for(var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++)args[_key4] = arguments[_key4];
+        return this.forward(args, 'warn', 'WARNING DEPRECATED: ', true);
+    }
+    forward(args, lvl, prefix, debugOnly) {
+        if (debugOnly && !this.debug) return null;
+        if ($1bac384020b50752$var$isString(args[0])) args[0] = `${prefix}${this.prefix} ${args[0]}`;
+        return this.logger[lvl](args);
+    }
+    create(moduleName) {
+        return new $1bac384020b50752$var$Logger(this.logger, {
+            prefix: `${this.prefix}:${moduleName}:`,
+            ...this.options
+        });
+    }
+    clone(options) {
+        options = options || this.options;
+        options.prefix = options.prefix || this.prefix;
+        return new $1bac384020b50752$var$Logger(this.logger, options);
+    }
+}
+var $1bac384020b50752$var$baseLogger = new $1bac384020b50752$var$Logger();
+class $1bac384020b50752$var$EventEmitter {
+    constructor(){
+        this.observers = {};
+    }
+    on(events, listener) {
+        events.split(' ').forEach((event)=>{
+            if (!this.observers[event]) this.observers[event] = new Map();
+            const numListeners = this.observers[event].get(listener) || 0;
+            this.observers[event].set(listener, numListeners + 1);
+        });
+        return this;
+    }
+    off(event, listener) {
+        if (!this.observers[event]) return;
+        if (!listener) {
+            delete this.observers[event];
+            return;
+        }
+        this.observers[event].delete(listener);
+    }
+    emit(event) {
+        for(var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++)args[_key - 1] = arguments[_key];
+        if (this.observers[event]) {
+            const cloned = Array.from(this.observers[event].entries());
+            cloned.forEach((_ref)=>{
+                let [observer, numTimesAdded] = _ref;
+                for(let i = 0; i < numTimesAdded; i++)observer(...args);
+            });
+        }
+        if (this.observers['*']) {
+            const cloned = Array.from(this.observers['*'].entries());
+            cloned.forEach((_ref2)=>{
+                let [observer, numTimesAdded] = _ref2;
+                for(let i = 0; i < numTimesAdded; i++)observer.apply(observer, [
+                    event,
+                    ...args
+                ]);
+            });
+        }
+    }
+}
+class $1bac384020b50752$var$ResourceStore extends $1bac384020b50752$var$EventEmitter {
+    constructor(data){
+        let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {
+            ns: [
+                'translation'
+            ],
+            defaultNS: 'translation'
+        };
+        super();
+        this.data = data || {};
+        this.options = options;
+        if (this.options.keySeparator === undefined) this.options.keySeparator = '.';
+        if (this.options.ignoreJSONStructure === undefined) this.options.ignoreJSONStructure = true;
+    }
+    addNamespaces(ns) {
+        if (this.options.ns.indexOf(ns) < 0) this.options.ns.push(ns);
+    }
+    removeNamespaces(ns) {
+        const index = this.options.ns.indexOf(ns);
+        if (index > -1) this.options.ns.splice(index, 1);
+    }
+    getResource(lng, ns, key) {
+        let options = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
+        const keySeparator = options.keySeparator !== undefined ? options.keySeparator : this.options.keySeparator;
+        const ignoreJSONStructure = options.ignoreJSONStructure !== undefined ? options.ignoreJSONStructure : this.options.ignoreJSONStructure;
+        let path;
+        if (lng.indexOf('.') > -1) path = lng.split('.');
+        else {
+            path = [
+                lng,
+                ns
+            ];
+            if (key) {
+                if (Array.isArray(key)) path.push(...key);
+                else if ($1bac384020b50752$var$isString(key) && keySeparator) path.push(...key.split(keySeparator));
+                else path.push(key);
+            }
+        }
+        const result = $1bac384020b50752$var$getPath(this.data, path);
+        if (!result && !ns && !key && lng.indexOf('.') > -1) {
+            lng = path[0];
+            ns = path[1];
+            key = path.slice(2).join('.');
+        }
+        if (result || !ignoreJSONStructure || !$1bac384020b50752$var$isString(key)) return result;
+        return $1bac384020b50752$var$deepFind(this.data?.[lng]?.[ns], key, keySeparator);
+    }
+    addResource(lng, ns, key, value) {
+        let options = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : {
+            silent: false
+        };
+        const keySeparator = options.keySeparator !== undefined ? options.keySeparator : this.options.keySeparator;
+        let path = [
+            lng,
+            ns
+        ];
+        if (key) path = path.concat(keySeparator ? key.split(keySeparator) : key);
+        if (lng.indexOf('.') > -1) {
+            path = lng.split('.');
+            value = ns;
+            ns = path[1];
+        }
+        this.addNamespaces(ns);
+        $1bac384020b50752$var$setPath(this.data, path, value);
+        if (!options.silent) this.emit('added', lng, ns, key, value);
+    }
+    addResources(lng, ns, resources) {
+        let options = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {
+            silent: false
+        };
+        for(const m in resources)if ($1bac384020b50752$var$isString(resources[m]) || Array.isArray(resources[m])) this.addResource(lng, ns, m, resources[m], {
+            silent: true
+        });
+        if (!options.silent) this.emit('added', lng, ns, resources);
+    }
+    addResourceBundle(lng, ns, resources, deep, overwrite) {
+        let options = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : {
+            silent: false,
+            skipCopy: false
+        };
+        let path = [
+            lng,
+            ns
+        ];
+        if (lng.indexOf('.') > -1) {
+            path = lng.split('.');
+            deep = resources;
+            resources = ns;
+            ns = path[1];
+        }
+        this.addNamespaces(ns);
+        let pack = $1bac384020b50752$var$getPath(this.data, path) || {};
+        if (!options.skipCopy) resources = JSON.parse(JSON.stringify(resources));
+        if (deep) $1bac384020b50752$var$deepExtend(pack, resources, overwrite);
+        else pack = {
+            ...pack,
+            ...resources
+        };
+        $1bac384020b50752$var$setPath(this.data, path, pack);
+        if (!options.silent) this.emit('added', lng, ns, resources);
+    }
+    removeResourceBundle(lng, ns) {
+        if (this.hasResourceBundle(lng, ns)) delete this.data[lng][ns];
+        this.removeNamespaces(ns);
+        this.emit('removed', lng, ns);
+    }
+    hasResourceBundle(lng, ns) {
+        return this.getResource(lng, ns) !== undefined;
+    }
+    getResourceBundle(lng, ns) {
+        if (!ns) ns = this.options.defaultNS;
+        return this.getResource(lng, ns);
+    }
+    getDataByLanguage(lng) {
+        return this.data[lng];
+    }
+    hasLanguageSomeTranslations(lng) {
+        const data = this.getDataByLanguage(lng);
+        const n = data && Object.keys(data) || [];
+        return !!n.find((v)=>data[v] && Object.keys(data[v]).length > 0);
+    }
+    toJSON() {
+        return this.data;
+    }
+}
+var $1bac384020b50752$var$postProcessor = {
+    processors: {},
+    addPostProcessor (module) {
+        this.processors[module.name] = module;
+    },
+    handle (processors, value, key, options, translator) {
+        processors.forEach((processor)=>{
+            value = this.processors[processor]?.process(value, key, options, translator) ?? value;
+        });
+        return value;
+    }
+};
+const $1bac384020b50752$var$checkedLoadedFor = {};
+const $1bac384020b50752$var$shouldHandleAsObject = (res)=>!$1bac384020b50752$var$isString(res) && typeof res !== 'boolean' && typeof res !== 'number';
+class $1bac384020b50752$var$Translator extends $1bac384020b50752$var$EventEmitter {
+    constructor(services){
+        let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+        super();
+        $1bac384020b50752$var$copy([
+            'resourceStore',
+            'languageUtils',
+            'pluralResolver',
+            'interpolator',
+            'backendConnector',
+            'i18nFormat',
+            'utils'
+        ], services, this);
+        this.options = options;
+        if (this.options.keySeparator === undefined) this.options.keySeparator = '.';
+        this.logger = $1bac384020b50752$var$baseLogger.create('translator');
+    }
+    changeLanguage(lng) {
+        if (lng) this.language = lng;
+    }
+    exists(key) {
+        let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {
+            interpolation: {}
+        };
+        if (key == null) return false;
+        const resolved = this.resolve(key, options);
+        return resolved?.res !== undefined;
+    }
+    extractFromKey(key, options) {
+        let nsSeparator = options.nsSeparator !== undefined ? options.nsSeparator : this.options.nsSeparator;
+        if (nsSeparator === undefined) nsSeparator = ':';
+        const keySeparator = options.keySeparator !== undefined ? options.keySeparator : this.options.keySeparator;
+        let namespaces = options.ns || this.options.defaultNS || [];
+        const wouldCheckForNsInKey = nsSeparator && key.indexOf(nsSeparator) > -1;
+        const seemsNaturalLanguage = !this.options.userDefinedKeySeparator && !options.keySeparator && !this.options.userDefinedNsSeparator && !options.nsSeparator && !$1bac384020b50752$var$looksLikeObjectPath(key, nsSeparator, keySeparator);
+        if (wouldCheckForNsInKey && !seemsNaturalLanguage) {
+            const m = key.match(this.interpolator.nestingRegexp);
+            if (m && m.length > 0) return {
+                key: key,
+                namespaces: $1bac384020b50752$var$isString(namespaces) ? [
+                    namespaces
+                ] : namespaces
+            };
+            const parts = key.split(nsSeparator);
+            if (nsSeparator !== keySeparator || nsSeparator === keySeparator && this.options.ns.indexOf(parts[0]) > -1) namespaces = parts.shift();
+            key = parts.join(keySeparator);
+        }
+        return {
+            key: key,
+            namespaces: $1bac384020b50752$var$isString(namespaces) ? [
+                namespaces
+            ] : namespaces
+        };
+    }
+    translate(keys, options, lastKey) {
+        if (typeof options !== 'object' && this.options.overloadTranslationOptionHandler) options = this.options.overloadTranslationOptionHandler(arguments);
+        if (typeof options === 'object') options = {
+            ...options
+        };
+        if (!options) options = {};
+        if (keys == null) return '';
+        if (!Array.isArray(keys)) keys = [
+            String(keys)
+        ];
+        const returnDetails = options.returnDetails !== undefined ? options.returnDetails : this.options.returnDetails;
+        const keySeparator = options.keySeparator !== undefined ? options.keySeparator : this.options.keySeparator;
+        const { key: key, namespaces: namespaces } = this.extractFromKey(keys[keys.length - 1], options);
+        const namespace = namespaces[namespaces.length - 1];
+        const lng = options.lng || this.language;
+        const appendNamespaceToCIMode = options.appendNamespaceToCIMode || this.options.appendNamespaceToCIMode;
+        if (lng?.toLowerCase() === 'cimode') {
+            if (appendNamespaceToCIMode) {
+                const nsSeparator = options.nsSeparator || this.options.nsSeparator;
+                if (returnDetails) return {
+                    res: `${namespace}${nsSeparator}${key}`,
+                    usedKey: key,
+                    exactUsedKey: key,
+                    usedLng: lng,
+                    usedNS: namespace,
+                    usedParams: this.getUsedParamsDetails(options)
+                };
+                return `${namespace}${nsSeparator}${key}`;
+            }
+            if (returnDetails) return {
+                res: key,
+                usedKey: key,
+                exactUsedKey: key,
+                usedLng: lng,
+                usedNS: namespace,
+                usedParams: this.getUsedParamsDetails(options)
+            };
+            return key;
+        }
+        const resolved = this.resolve(keys, options);
+        let res = resolved?.res;
+        const resUsedKey = resolved?.usedKey || key;
+        const resExactUsedKey = resolved?.exactUsedKey || key;
+        const noObject = [
+            '[object Number]',
+            '[object Function]',
+            '[object RegExp]'
+        ];
+        const joinArrays = options.joinArrays !== undefined ? options.joinArrays : this.options.joinArrays;
+        const handleAsObjectInI18nFormat = !this.i18nFormat || this.i18nFormat.handleAsObject;
+        const needsPluralHandling = options.count !== undefined && !$1bac384020b50752$var$isString(options.count);
+        const hasDefaultValue = $1bac384020b50752$var$Translator.hasDefaultValue(options);
+        const defaultValueSuffix = needsPluralHandling ? this.pluralResolver.getSuffix(lng, options.count, options) : '';
+        const defaultValueSuffixOrdinalFallback = options.ordinal && needsPluralHandling ? this.pluralResolver.getSuffix(lng, options.count, {
+            ordinal: false
+        }) : '';
+        const needsZeroSuffixLookup = needsPluralHandling && !options.ordinal && options.count === 0;
+        const defaultValue = needsZeroSuffixLookup && options[`defaultValue${this.options.pluralSeparator}zero`] || options[`defaultValue${defaultValueSuffix}`] || options[`defaultValue${defaultValueSuffixOrdinalFallback}`] || options.defaultValue;
+        let resForObjHndl = res;
+        if (handleAsObjectInI18nFormat && !res && hasDefaultValue) resForObjHndl = defaultValue;
+        const handleAsObject = $1bac384020b50752$var$shouldHandleAsObject(resForObjHndl);
+        const resType = Object.prototype.toString.apply(resForObjHndl);
+        if (handleAsObjectInI18nFormat && resForObjHndl && handleAsObject && noObject.indexOf(resType) < 0 && !($1bac384020b50752$var$isString(joinArrays) && Array.isArray(resForObjHndl))) {
+            if (!options.returnObjects && !this.options.returnObjects) {
+                if (!this.options.returnedObjectHandler) this.logger.warn('accessing an object - but returnObjects options is not enabled!');
+                const r = this.options.returnedObjectHandler ? this.options.returnedObjectHandler(resUsedKey, resForObjHndl, {
+                    ...options,
+                    ns: namespaces
+                }) : `key '${key} (${this.language})' returned an object instead of string.`;
+                if (returnDetails) {
+                    resolved.res = r;
+                    resolved.usedParams = this.getUsedParamsDetails(options);
+                    return resolved;
+                }
+                return r;
+            }
+            if (keySeparator) {
+                const resTypeIsArray = Array.isArray(resForObjHndl);
+                const copy = resTypeIsArray ? [] : {};
+                const newKeyToUse = resTypeIsArray ? resExactUsedKey : resUsedKey;
+                for(const m in resForObjHndl)if (Object.prototype.hasOwnProperty.call(resForObjHndl, m)) {
+                    const deepKey = `${newKeyToUse}${keySeparator}${m}`;
+                    if (hasDefaultValue && !res) copy[m] = this.translate(deepKey, {
+                        ...options,
+                        defaultValue: $1bac384020b50752$var$shouldHandleAsObject(defaultValue) ? defaultValue[m] : undefined,
+                        joinArrays: false,
+                        ns: namespaces
+                    });
+                    else copy[m] = this.translate(deepKey, {
+                        ...options,
+                        joinArrays: false,
+                        ns: namespaces
+                    });
+                    if (copy[m] === deepKey) copy[m] = resForObjHndl[m];
+                }
+                res = copy;
+            }
+        } else if (handleAsObjectInI18nFormat && $1bac384020b50752$var$isString(joinArrays) && Array.isArray(res)) {
+            res = res.join(joinArrays);
+            if (res) res = this.extendTranslation(res, keys, options, lastKey);
+        } else {
+            let usedDefault = false;
+            let usedKey = false;
+            if (!this.isValidLookup(res) && hasDefaultValue) {
+                usedDefault = true;
+                res = defaultValue;
+            }
+            if (!this.isValidLookup(res)) {
+                usedKey = true;
+                res = key;
+            }
+            const missingKeyNoValueFallbackToKey = options.missingKeyNoValueFallbackToKey || this.options.missingKeyNoValueFallbackToKey;
+            const resForMissing = missingKeyNoValueFallbackToKey && usedKey ? undefined : res;
+            const updateMissing = hasDefaultValue && defaultValue !== res && this.options.updateMissing;
+            if (usedKey || usedDefault || updateMissing) {
+                this.logger.log(updateMissing ? 'updateKey' : 'missingKey', lng, namespace, key, updateMissing ? defaultValue : res);
+                if (keySeparator) {
+                    const fk = this.resolve(key, {
+                        ...options,
+                        keySeparator: false
+                    });
+                    if (fk && fk.res) this.logger.warn('Seems the loaded translations were in flat JSON format instead of nested. Either set keySeparator: false on init or make sure your translations are published in nested format.');
+                }
+                let lngs = [];
+                const fallbackLngs = this.languageUtils.getFallbackCodes(this.options.fallbackLng, options.lng || this.language);
+                if (this.options.saveMissingTo === 'fallback' && fallbackLngs && fallbackLngs[0]) for(let i = 0; i < fallbackLngs.length; i++)lngs.push(fallbackLngs[i]);
+                else if (this.options.saveMissingTo === 'all') lngs = this.languageUtils.toResolveHierarchy(options.lng || this.language);
+                else lngs.push(options.lng || this.language);
+                const send = (l, k, specificDefaultValue)=>{
+                    const defaultForMissing = hasDefaultValue && specificDefaultValue !== res ? specificDefaultValue : resForMissing;
+                    if (this.options.missingKeyHandler) this.options.missingKeyHandler(l, namespace, k, defaultForMissing, updateMissing, options);
+                    else if (this.backendConnector?.saveMissing) this.backendConnector.saveMissing(l, namespace, k, defaultForMissing, updateMissing, options);
+                    this.emit('missingKey', l, namespace, k, res);
+                };
+                if (this.options.saveMissing) {
+                    if (this.options.saveMissingPlurals && needsPluralHandling) lngs.forEach((language)=>{
+                        const suffixes = this.pluralResolver.getSuffixes(language, options);
+                        if (needsZeroSuffixLookup && options[`defaultValue${this.options.pluralSeparator}zero`] && suffixes.indexOf(`${this.options.pluralSeparator}zero`) < 0) suffixes.push(`${this.options.pluralSeparator}zero`);
+                        suffixes.forEach((suffix)=>{
+                            send([
+                                language
+                            ], key + suffix, options[`defaultValue${suffix}`] || defaultValue);
+                        });
+                    });
+                    else send(lngs, key, defaultValue);
+                }
+            }
+            res = this.extendTranslation(res, keys, options, resolved, lastKey);
+            if (usedKey && res === key && this.options.appendNamespaceToMissingKey) res = `${namespace}:${key}`;
+            if ((usedKey || usedDefault) && this.options.parseMissingKeyHandler) res = this.options.parseMissingKeyHandler(this.options.appendNamespaceToMissingKey ? `${namespace}:${key}` : key, usedDefault ? res : undefined);
+        }
+        if (returnDetails) {
+            resolved.res = res;
+            resolved.usedParams = this.getUsedParamsDetails(options);
+            return resolved;
+        }
+        return res;
+    }
+    extendTranslation(res, key, options, resolved, lastKey) {
+        var _this = this;
+        if (this.i18nFormat?.parse) res = this.i18nFormat.parse(res, {
+            ...this.options.interpolation.defaultVariables,
+            ...options
+        }, options.lng || this.language || resolved.usedLng, resolved.usedNS, resolved.usedKey, {
+            resolved: resolved
+        });
+        else if (!options.skipInterpolation) {
+            if (options.interpolation) this.interpolator.init({
+                ...options,
+                interpolation: {
+                    ...this.options.interpolation,
+                    ...options.interpolation
+                }
+            });
+            const skipOnVariables = $1bac384020b50752$var$isString(res) && (options?.interpolation?.skipOnVariables !== undefined ? options.interpolation.skipOnVariables : this.options.interpolation.skipOnVariables);
+            let nestBef;
+            if (skipOnVariables) {
+                const nb = res.match(this.interpolator.nestingRegexp);
+                nestBef = nb && nb.length;
+            }
+            let data = options.replace && !$1bac384020b50752$var$isString(options.replace) ? options.replace : options;
+            if (this.options.interpolation.defaultVariables) data = {
+                ...this.options.interpolation.defaultVariables,
+                ...data
+            };
+            res = this.interpolator.interpolate(res, data, options.lng || this.language || resolved.usedLng, options);
+            if (skipOnVariables) {
+                const na = res.match(this.interpolator.nestingRegexp);
+                const nestAft = na && na.length;
+                if (nestBef < nestAft) options.nest = false;
+            }
+            if (!options.lng && resolved && resolved.res) options.lng = this.language || resolved.usedLng;
+            if (options.nest !== false) res = this.interpolator.nest(res, function() {
+                for(var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++)args[_key] = arguments[_key];
+                if (lastKey?.[0] === args[0] && !options.context) {
+                    _this.logger.warn(`It seems you are nesting recursively key: ${args[0]} in key: ${key[0]}`);
+                    return null;
+                }
+                return _this.translate(...args, key);
+            }, options);
+            if (options.interpolation) this.interpolator.reset();
+        }
+        const postProcess = options.postProcess || this.options.postProcess;
+        const postProcessorNames = $1bac384020b50752$var$isString(postProcess) ? [
+            postProcess
+        ] : postProcess;
+        if (res != null && postProcessorNames?.length && options.applyPostProcessor !== false) res = $1bac384020b50752$var$postProcessor.handle(postProcessorNames, res, key, this.options && this.options.postProcessPassResolved ? {
+            i18nResolved: {
+                ...resolved,
+                usedParams: this.getUsedParamsDetails(options)
+            },
+            ...options
+        } : options, this);
+        return res;
+    }
+    resolve(keys) {
+        let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+        let found;
+        let usedKey;
+        let exactUsedKey;
+        let usedLng;
+        let usedNS;
+        if ($1bac384020b50752$var$isString(keys)) keys = [
+            keys
+        ];
+        keys.forEach((k)=>{
+            if (this.isValidLookup(found)) return;
+            const extracted = this.extractFromKey(k, options);
+            const key = extracted.key;
+            usedKey = key;
+            let namespaces = extracted.namespaces;
+            if (this.options.fallbackNS) namespaces = namespaces.concat(this.options.fallbackNS);
+            const needsPluralHandling = options.count !== undefined && !$1bac384020b50752$var$isString(options.count);
+            const needsZeroSuffixLookup = needsPluralHandling && !options.ordinal && options.count === 0;
+            const needsContextHandling = options.context !== undefined && ($1bac384020b50752$var$isString(options.context) || typeof options.context === 'number') && options.context !== '';
+            const codes = options.lngs ? options.lngs : this.languageUtils.toResolveHierarchy(options.lng || this.language, options.fallbackLng);
+            namespaces.forEach((ns)=>{
+                if (this.isValidLookup(found)) return;
+                usedNS = ns;
+                if (!$1bac384020b50752$var$checkedLoadedFor[`${codes[0]}-${ns}`] && this.utils?.hasLoadedNamespace && !this.utils?.hasLoadedNamespace(usedNS)) {
+                    $1bac384020b50752$var$checkedLoadedFor[`${codes[0]}-${ns}`] = true;
+                    this.logger.warn(`key "${usedKey}" for languages "${codes.join(', ')}" won't get resolved as namespace "${usedNS}" was not yet loaded`, 'This means something IS WRONG in your setup. You access the t function before i18next.init / i18next.loadNamespace / i18next.changeLanguage was done. Wait for the callback or Promise to resolve before accessing it!!!');
+                }
+                codes.forEach((code)=>{
+                    if (this.isValidLookup(found)) return;
+                    usedLng = code;
+                    const finalKeys = [
+                        key
+                    ];
+                    if (this.i18nFormat?.addLookupKeys) this.i18nFormat.addLookupKeys(finalKeys, key, code, ns, options);
+                    else {
+                        let pluralSuffix;
+                        if (needsPluralHandling) pluralSuffix = this.pluralResolver.getSuffix(code, options.count, options);
+                        const zeroSuffix = `${this.options.pluralSeparator}zero`;
+                        const ordinalPrefix = `${this.options.pluralSeparator}ordinal${this.options.pluralSeparator}`;
+                        if (needsPluralHandling) {
+                            finalKeys.push(key + pluralSuffix);
+                            if (options.ordinal && pluralSuffix.indexOf(ordinalPrefix) === 0) finalKeys.push(key + pluralSuffix.replace(ordinalPrefix, this.options.pluralSeparator));
+                            if (needsZeroSuffixLookup) finalKeys.push(key + zeroSuffix);
+                        }
+                        if (needsContextHandling) {
+                            const contextKey = `${key}${this.options.contextSeparator}${options.context}`;
+                            finalKeys.push(contextKey);
+                            if (needsPluralHandling) {
+                                finalKeys.push(contextKey + pluralSuffix);
+                                if (options.ordinal && pluralSuffix.indexOf(ordinalPrefix) === 0) finalKeys.push(contextKey + pluralSuffix.replace(ordinalPrefix, this.options.pluralSeparator));
+                                if (needsZeroSuffixLookup) finalKeys.push(contextKey + zeroSuffix);
+                            }
+                        }
+                    }
+                    let possibleKey;
+                    while(possibleKey = finalKeys.pop())if (!this.isValidLookup(found)) {
+                        exactUsedKey = possibleKey;
+                        found = this.getResource(code, ns, possibleKey, options);
+                    }
+                });
+            });
+        });
+        return {
+            res: found,
+            usedKey: usedKey,
+            exactUsedKey: exactUsedKey,
+            usedLng: usedLng,
+            usedNS: usedNS
+        };
+    }
+    isValidLookup(res) {
+        return res !== undefined && !(!this.options.returnNull && res === null) && !(!this.options.returnEmptyString && res === '');
+    }
+    getResource(code, ns, key) {
+        let options = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
+        if (this.i18nFormat?.getResource) return this.i18nFormat.getResource(code, ns, key, options);
+        return this.resourceStore.getResource(code, ns, key, options);
+    }
+    getUsedParamsDetails() {
+        let options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+        const optionsKeys = [
+            'defaultValue',
+            'ordinal',
+            'context',
+            'replace',
+            'lng',
+            'lngs',
+            'fallbackLng',
+            'ns',
+            'keySeparator',
+            'nsSeparator',
+            'returnObjects',
+            'returnDetails',
+            'joinArrays',
+            'postProcess',
+            'interpolation'
+        ];
+        const useOptionsReplaceForData = options.replace && !$1bac384020b50752$var$isString(options.replace);
+        let data = useOptionsReplaceForData ? options.replace : options;
+        if (useOptionsReplaceForData && typeof options.count !== 'undefined') data.count = options.count;
+        if (this.options.interpolation.defaultVariables) data = {
+            ...this.options.interpolation.defaultVariables,
+            ...data
+        };
+        if (!useOptionsReplaceForData) {
+            data = {
+                ...data
+            };
+            for (const key of optionsKeys)delete data[key];
+        }
+        return data;
+    }
+    static hasDefaultValue(options) {
+        const prefix = 'defaultValue';
+        for(const option in options){
+            if (Object.prototype.hasOwnProperty.call(options, option) && prefix === option.substring(0, prefix.length) && undefined !== options[option]) return true;
+        }
+        return false;
+    }
+}
+class $1bac384020b50752$var$LanguageUtil {
+    constructor(options){
+        this.options = options;
+        this.supportedLngs = this.options.supportedLngs || false;
+        this.logger = $1bac384020b50752$var$baseLogger.create('languageUtils');
+    }
+    getScriptPartFromCode(code) {
+        code = $1bac384020b50752$var$getCleanedCode(code);
+        if (!code || code.indexOf('-') < 0) return null;
+        const p = code.split('-');
+        if (p.length === 2) return null;
+        p.pop();
+        if (p[p.length - 1].toLowerCase() === 'x') return null;
+        return this.formatLanguageCode(p.join('-'));
+    }
+    getLanguagePartFromCode(code) {
+        code = $1bac384020b50752$var$getCleanedCode(code);
+        if (!code || code.indexOf('-') < 0) return code;
+        const p = code.split('-');
+        return this.formatLanguageCode(p[0]);
+    }
+    formatLanguageCode(code) {
+        if ($1bac384020b50752$var$isString(code) && code.indexOf('-') > -1) {
+            let formattedCode;
+            try {
+                formattedCode = Intl.getCanonicalLocales(code)[0];
+            } catch (e) {}
+            if (formattedCode && this.options.lowerCaseLng) formattedCode = formattedCode.toLowerCase();
+            if (formattedCode) return formattedCode;
+            if (this.options.lowerCaseLng) return code.toLowerCase();
+            return code;
+        }
+        return this.options.cleanCode || this.options.lowerCaseLng ? code.toLowerCase() : code;
+    }
+    isSupportedCode(code) {
+        if (this.options.load === 'languageOnly' || this.options.nonExplicitSupportedLngs) code = this.getLanguagePartFromCode(code);
+        return !this.supportedLngs || !this.supportedLngs.length || this.supportedLngs.indexOf(code) > -1;
+    }
+    getBestMatchFromCodes(codes) {
+        if (!codes) return null;
+        let found;
+        codes.forEach((code)=>{
+            if (found) return;
+            const cleanedLng = this.formatLanguageCode(code);
+            if (!this.options.supportedLngs || this.isSupportedCode(cleanedLng)) found = cleanedLng;
+        });
+        if (!found && this.options.supportedLngs) codes.forEach((code)=>{
+            if (found) return;
+            const lngOnly = this.getLanguagePartFromCode(code);
+            if (this.isSupportedCode(lngOnly)) return found = lngOnly;
+            found = this.options.supportedLngs.find((supportedLng)=>{
+                if (supportedLng === lngOnly) return supportedLng;
+                if (supportedLng.indexOf('-') < 0 && lngOnly.indexOf('-') < 0) return;
+                if (supportedLng.indexOf('-') > 0 && lngOnly.indexOf('-') < 0 && supportedLng.substring(0, supportedLng.indexOf('-')) === lngOnly) return supportedLng;
+                if (supportedLng.indexOf(lngOnly) === 0 && lngOnly.length > 1) return supportedLng;
+            });
+        });
+        if (!found) found = this.getFallbackCodes(this.options.fallbackLng)[0];
+        return found;
+    }
+    getFallbackCodes(fallbacks, code) {
+        if (!fallbacks) return [];
+        if (typeof fallbacks === 'function') fallbacks = fallbacks(code);
+        if ($1bac384020b50752$var$isString(fallbacks)) fallbacks = [
+            fallbacks
+        ];
+        if (Array.isArray(fallbacks)) return fallbacks;
+        if (!code) return fallbacks.default || [];
+        let found = fallbacks[code];
+        if (!found) found = fallbacks[this.getScriptPartFromCode(code)];
+        if (!found) found = fallbacks[this.formatLanguageCode(code)];
+        if (!found) found = fallbacks[this.getLanguagePartFromCode(code)];
+        if (!found) found = fallbacks.default;
+        return found || [];
+    }
+    toResolveHierarchy(code, fallbackCode) {
+        const fallbackCodes = this.getFallbackCodes(fallbackCode || this.options.fallbackLng || [], code);
+        const codes = [];
+        const addCode = (c)=>{
+            if (!c) return;
+            if (this.isSupportedCode(c)) codes.push(c);
+            else this.logger.warn(`rejecting language code not found in supportedLngs: ${c}`);
+        };
+        if ($1bac384020b50752$var$isString(code) && (code.indexOf('-') > -1 || code.indexOf('_') > -1)) {
+            if (this.options.load !== 'languageOnly') addCode(this.formatLanguageCode(code));
+            if (this.options.load !== 'languageOnly' && this.options.load !== 'currentOnly') addCode(this.getScriptPartFromCode(code));
+            if (this.options.load !== 'currentOnly') addCode(this.getLanguagePartFromCode(code));
+        } else if ($1bac384020b50752$var$isString(code)) addCode(this.formatLanguageCode(code));
+        fallbackCodes.forEach((fc)=>{
+            if (codes.indexOf(fc) < 0) addCode(this.formatLanguageCode(fc));
+        });
+        return codes;
+    }
+}
+const $1bac384020b50752$var$suffixesOrder = {
+    zero: 0,
+    one: 1,
+    two: 2,
+    few: 3,
+    many: 4,
+    other: 5
+};
+const $1bac384020b50752$var$dummyRule = {
+    select: (count)=>count === 1 ? 'one' : 'other',
+    resolvedOptions: ()=>({
+            pluralCategories: [
+                'one',
+                'other'
+            ]
+        })
+};
+class $1bac384020b50752$var$PluralResolver {
+    constructor(languageUtils){
+        let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+        this.languageUtils = languageUtils;
+        this.options = options;
+        this.logger = $1bac384020b50752$var$baseLogger.create('pluralResolver');
+        this.pluralRulesCache = {};
+    }
+    addRule(lng, obj) {
+        this.rules[lng] = obj;
+    }
+    clearCache() {
+        this.pluralRulesCache = {};
+    }
+    getRule(code) {
+        let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+        const cleanedCode = $1bac384020b50752$var$getCleanedCode(code === 'dev' ? 'en' : code);
+        const type = options.ordinal ? 'ordinal' : 'cardinal';
+        const cacheKey = JSON.stringify({
+            cleanedCode: cleanedCode,
+            type: type
+        });
+        if (cacheKey in this.pluralRulesCache) return this.pluralRulesCache[cacheKey];
+        let rule;
+        try {
+            rule = new Intl.PluralRules(cleanedCode, {
+                type: type
+            });
+        } catch (err) {
+            if (!Intl) {
+                this.logger.error('No Intl support, please use an Intl polyfill!');
+                return $1bac384020b50752$var$dummyRule;
+            }
+            if (!code.match(/-|_/)) return $1bac384020b50752$var$dummyRule;
+            const lngPart = this.languageUtils.getLanguagePartFromCode(code);
+            rule = this.getRule(lngPart, options);
+        }
+        this.pluralRulesCache[cacheKey] = rule;
+        return rule;
+    }
+    needsPlural(code) {
+        let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+        let rule = this.getRule(code, options);
+        if (!rule) rule = this.getRule('dev', options);
+        return rule?.resolvedOptions().pluralCategories.length > 1;
+    }
+    getPluralFormsOfKey(code, key) {
+        let options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+        return this.getSuffixes(code, options).map((suffix)=>`${key}${suffix}`);
+    }
+    getSuffixes(code) {
+        let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+        let rule = this.getRule(code, options);
+        if (!rule) rule = this.getRule('dev', options);
+        if (!rule) return [];
+        return rule.resolvedOptions().pluralCategories.sort((pluralCategory1, pluralCategory2)=>$1bac384020b50752$var$suffixesOrder[pluralCategory1] - $1bac384020b50752$var$suffixesOrder[pluralCategory2]).map((pluralCategory)=>`${this.options.prepend}${options.ordinal ? `ordinal${this.options.prepend}` : ''}${pluralCategory}`);
+    }
+    getSuffix(code, count) {
+        let options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+        const rule = this.getRule(code, options);
+        if (rule) return `${this.options.prepend}${options.ordinal ? `ordinal${this.options.prepend}` : ''}${rule.select(count)}`;
+        this.logger.warn(`no plural rule found for: ${code}`);
+        return this.getSuffix('dev', count, options);
+    }
+}
+const $1bac384020b50752$var$deepFindWithDefaults = function(data, defaultData, key) {
+    let keySeparator = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : '.';
+    let ignoreJSONStructure = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : true;
+    let path = $1bac384020b50752$var$getPathWithDefaults(data, defaultData, key);
+    if (!path && ignoreJSONStructure && $1bac384020b50752$var$isString(key)) {
+        path = $1bac384020b50752$var$deepFind(data, key, keySeparator);
+        if (path === undefined) path = $1bac384020b50752$var$deepFind(defaultData, key, keySeparator);
+    }
+    return path;
+};
+const $1bac384020b50752$var$regexSafe = (val)=>val.replace(/\$/g, '$$$$');
+class $1bac384020b50752$var$Interpolator {
+    constructor(){
+        let options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+        this.logger = $1bac384020b50752$var$baseLogger.create('interpolator');
+        this.options = options;
+        this.format = options?.interpolation?.format || ((value)=>value);
+        this.init(options);
+    }
+    init() {
+        let options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+        if (!options.interpolation) options.interpolation = {
+            escapeValue: true
+        };
+        const { escape: escape$1, escapeValue: escapeValue, useRawValueToEscape: useRawValueToEscape, prefix: prefix, prefixEscaped: prefixEscaped, suffix: suffix, suffixEscaped: suffixEscaped, formatSeparator: formatSeparator, unescapeSuffix: unescapeSuffix, unescapePrefix: unescapePrefix, nestingPrefix: nestingPrefix, nestingPrefixEscaped: nestingPrefixEscaped, nestingSuffix: nestingSuffix, nestingSuffixEscaped: nestingSuffixEscaped, nestingOptionsSeparator: nestingOptionsSeparator, maxReplaces: maxReplaces, alwaysFormat: alwaysFormat } = options.interpolation;
+        this.escape = escape$1 !== undefined ? escape$1 : $1bac384020b50752$var$escape;
+        this.escapeValue = escapeValue !== undefined ? escapeValue : true;
+        this.useRawValueToEscape = useRawValueToEscape !== undefined ? useRawValueToEscape : false;
+        this.prefix = prefix ? $1bac384020b50752$var$regexEscape(prefix) : prefixEscaped || '{{';
+        this.suffix = suffix ? $1bac384020b50752$var$regexEscape(suffix) : suffixEscaped || '}}';
+        this.formatSeparator = formatSeparator || ',';
+        this.unescapePrefix = unescapeSuffix ? '' : unescapePrefix || '-';
+        this.unescapeSuffix = this.unescapePrefix ? '' : unescapeSuffix || '';
+        this.nestingPrefix = nestingPrefix ? $1bac384020b50752$var$regexEscape(nestingPrefix) : nestingPrefixEscaped || $1bac384020b50752$var$regexEscape('$t(');
+        this.nestingSuffix = nestingSuffix ? $1bac384020b50752$var$regexEscape(nestingSuffix) : nestingSuffixEscaped || $1bac384020b50752$var$regexEscape(')');
+        this.nestingOptionsSeparator = nestingOptionsSeparator || ',';
+        this.maxReplaces = maxReplaces || 1000;
+        this.alwaysFormat = alwaysFormat !== undefined ? alwaysFormat : false;
+        this.resetRegExp();
+    }
+    reset() {
+        if (this.options) this.init(this.options);
+    }
+    resetRegExp() {
+        const getOrResetRegExp = (existingRegExp, pattern)=>{
+            if (existingRegExp?.source === pattern) {
+                existingRegExp.lastIndex = 0;
+                return existingRegExp;
+            }
+            return new RegExp(pattern, 'g');
+        };
+        this.regexp = getOrResetRegExp(this.regexp, `${this.prefix}(.+?)${this.suffix}`);
+        this.regexpUnescape = getOrResetRegExp(this.regexpUnescape, `${this.prefix}${this.unescapePrefix}(.+?)${this.unescapeSuffix}${this.suffix}`);
+        this.nestingRegexp = getOrResetRegExp(this.nestingRegexp, `${this.nestingPrefix}(.+?)${this.nestingSuffix}`);
+    }
+    interpolate(str, data, lng, options) {
+        let match;
+        let value;
+        let replaces;
+        const defaultData = this.options && this.options.interpolation && this.options.interpolation.defaultVariables || {};
+        const handleFormat = (key)=>{
+            if (key.indexOf(this.formatSeparator) < 0) {
+                const path = $1bac384020b50752$var$deepFindWithDefaults(data, defaultData, key, this.options.keySeparator, this.options.ignoreJSONStructure);
+                return this.alwaysFormat ? this.format(path, undefined, lng, {
+                    ...options,
+                    ...data,
+                    interpolationkey: key
+                }) : path;
+            }
+            const p = key.split(this.formatSeparator);
+            const k = p.shift().trim();
+            const f = p.join(this.formatSeparator).trim();
+            return this.format($1bac384020b50752$var$deepFindWithDefaults(data, defaultData, k, this.options.keySeparator, this.options.ignoreJSONStructure), f, lng, {
+                ...options,
+                ...data,
+                interpolationkey: k
+            });
+        };
+        this.resetRegExp();
+        const missingInterpolationHandler = options?.missingInterpolationHandler || this.options.missingInterpolationHandler;
+        const skipOnVariables = options?.interpolation?.skipOnVariables !== undefined ? options.interpolation.skipOnVariables : this.options.interpolation.skipOnVariables;
+        const todos = [
+            {
+                regex: this.regexpUnescape,
+                safeValue: (val)=>$1bac384020b50752$var$regexSafe(val)
+            },
+            {
+                regex: this.regexp,
+                safeValue: (val)=>this.escapeValue ? $1bac384020b50752$var$regexSafe(this.escape(val)) : $1bac384020b50752$var$regexSafe(val)
+            }
+        ];
+        todos.forEach((todo)=>{
+            replaces = 0;
+            while(match = todo.regex.exec(str)){
+                const matchedVar = match[1].trim();
+                value = handleFormat(matchedVar);
+                if (value === undefined) {
+                    if (typeof missingInterpolationHandler === 'function') {
+                        const temp = missingInterpolationHandler(str, match, options);
+                        value = $1bac384020b50752$var$isString(temp) ? temp : '';
+                    } else if (options && Object.prototype.hasOwnProperty.call(options, matchedVar)) value = '';
+                    else if (skipOnVariables) {
+                        value = match[0];
+                        continue;
+                    } else {
+                        this.logger.warn(`missed to pass in variable ${matchedVar} for interpolating ${str}`);
+                        value = '';
+                    }
+                } else if (!$1bac384020b50752$var$isString(value) && !this.useRawValueToEscape) value = $1bac384020b50752$var$makeString(value);
+                const safeValue = todo.safeValue(value);
+                str = str.replace(match[0], safeValue);
+                if (skipOnVariables) {
+                    todo.regex.lastIndex += value.length;
+                    todo.regex.lastIndex -= match[0].length;
+                } else todo.regex.lastIndex = 0;
+                replaces++;
+                if (replaces >= this.maxReplaces) break;
+            }
+        });
+        return str;
+    }
+    nest(str, fc) {
+        let options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+        let match;
+        let value;
+        let clonedOptions;
+        const handleHasOptions = (key, inheritedOptions)=>{
+            const sep = this.nestingOptionsSeparator;
+            if (key.indexOf(sep) < 0) return key;
+            const c = key.split(new RegExp(`${sep}[ ]*{`));
+            let optionsString = `{${c[1]}`;
+            key = c[0];
+            optionsString = this.interpolate(optionsString, clonedOptions);
+            const matchedSingleQuotes = optionsString.match(/'/g);
+            const matchedDoubleQuotes = optionsString.match(/"/g);
+            if ((matchedSingleQuotes?.length ?? 0) % 2 === 0 && !matchedDoubleQuotes || matchedDoubleQuotes.length % 2 !== 0) optionsString = optionsString.replace(/'/g, '"');
+            try {
+                clonedOptions = JSON.parse(optionsString);
+                if (inheritedOptions) clonedOptions = {
+                    ...inheritedOptions,
+                    ...clonedOptions
+                };
+            } catch (e) {
+                this.logger.warn(`failed parsing options string in nesting for key ${key}`, e);
+                return `${key}${sep}${optionsString}`;
+            }
+            if (clonedOptions.defaultValue && clonedOptions.defaultValue.indexOf(this.prefix) > -1) delete clonedOptions.defaultValue;
+            return key;
+        };
+        while(match = this.nestingRegexp.exec(str)){
+            let formatters = [];
+            clonedOptions = {
+                ...options
+            };
+            clonedOptions = clonedOptions.replace && !$1bac384020b50752$var$isString(clonedOptions.replace) ? clonedOptions.replace : clonedOptions;
+            clonedOptions.applyPostProcessor = false;
+            delete clonedOptions.defaultValue;
+            let doReduce = false;
+            if (match[0].indexOf(this.formatSeparator) !== -1 && !/{.*}/.test(match[1])) {
+                const r = match[1].split(this.formatSeparator).map((elem)=>elem.trim());
+                match[1] = r.shift();
+                formatters = r;
+                doReduce = true;
+            }
+            value = fc(handleHasOptions.call(this, match[1].trim(), clonedOptions), clonedOptions);
+            if (value && match[0] === str && !$1bac384020b50752$var$isString(value)) return value;
+            if (!$1bac384020b50752$var$isString(value)) value = $1bac384020b50752$var$makeString(value);
+            if (!value) {
+                this.logger.warn(`missed to resolve ${match[1]} for nesting ${str}`);
+                value = '';
+            }
+            if (doReduce) value = formatters.reduce((v, f)=>this.format(v, f, options.lng, {
+                    ...options,
+                    interpolationkey: match[1].trim()
+                }), value.trim());
+            str = str.replace(match[0], value);
+            this.regexp.lastIndex = 0;
+        }
+        return str;
+    }
+}
+const $1bac384020b50752$var$parseFormatStr = (formatStr)=>{
+    let formatName = formatStr.toLowerCase().trim();
+    const formatOptions = {};
+    if (formatStr.indexOf('(') > -1) {
+        const p = formatStr.split('(');
+        formatName = p[0].toLowerCase().trim();
+        const optStr = p[1].substring(0, p[1].length - 1);
+        if (formatName === 'currency' && optStr.indexOf(':') < 0) {
+            if (!formatOptions.currency) formatOptions.currency = optStr.trim();
+        } else if (formatName === 'relativetime' && optStr.indexOf(':') < 0) {
+            if (!formatOptions.range) formatOptions.range = optStr.trim();
+        } else {
+            const opts = optStr.split(';');
+            opts.forEach((opt)=>{
+                if (opt) {
+                    const [key, ...rest] = opt.split(':');
+                    const val = rest.join(':').trim().replace(/^'+|'+$/g, '');
+                    const trimmedKey = key.trim();
+                    if (!formatOptions[trimmedKey]) formatOptions[trimmedKey] = val;
+                    if (val === 'false') formatOptions[trimmedKey] = false;
+                    if (val === 'true') formatOptions[trimmedKey] = true;
+                    if (!isNaN(val)) formatOptions[trimmedKey] = parseInt(val, 10);
+                }
+            });
+        }
+    }
+    return {
+        formatName: formatName,
+        formatOptions: formatOptions
+    };
+};
+const $1bac384020b50752$var$createCachedFormatter = (fn)=>{
+    const cache = {};
+    return (val, lng, options)=>{
+        let optForCache = options;
+        if (options && options.interpolationkey && options.formatParams && options.formatParams[options.interpolationkey] && options[options.interpolationkey]) optForCache = {
+            ...optForCache,
+            [options.interpolationkey]: undefined
+        };
+        const key = lng + JSON.stringify(optForCache);
+        let formatter = cache[key];
+        if (!formatter) {
+            formatter = fn($1bac384020b50752$var$getCleanedCode(lng), options);
+            cache[key] = formatter;
+        }
+        return formatter(val);
+    };
+};
+class $1bac384020b50752$var$Formatter {
+    constructor(){
+        let options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+        this.logger = $1bac384020b50752$var$baseLogger.create('formatter');
+        this.options = options;
+        this.formats = {
+            number: $1bac384020b50752$var$createCachedFormatter((lng, opt)=>{
+                const formatter = new Intl.NumberFormat(lng, {
+                    ...opt
+                });
+                return (val)=>formatter.format(val);
+            }),
+            currency: $1bac384020b50752$var$createCachedFormatter((lng, opt)=>{
+                const formatter = new Intl.NumberFormat(lng, {
+                    ...opt,
+                    style: 'currency'
+                });
+                return (val)=>formatter.format(val);
+            }),
+            datetime: $1bac384020b50752$var$createCachedFormatter((lng, opt)=>{
+                const formatter = new Intl.DateTimeFormat(lng, {
+                    ...opt
+                });
+                return (val)=>formatter.format(val);
+            }),
+            relativetime: $1bac384020b50752$var$createCachedFormatter((lng, opt)=>{
+                const formatter = new Intl.RelativeTimeFormat(lng, {
+                    ...opt
+                });
+                return (val)=>formatter.format(val, opt.range || 'day');
+            }),
+            list: $1bac384020b50752$var$createCachedFormatter((lng, opt)=>{
+                const formatter = new Intl.ListFormat(lng, {
+                    ...opt
+                });
+                return (val)=>formatter.format(val);
+            })
+        };
+        this.init(options);
+    }
+    init(services) {
+        let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {
+            interpolation: {}
+        };
+        this.formatSeparator = options.interpolation.formatSeparator || ',';
+    }
+    add(name, fc) {
+        this.formats[name.toLowerCase().trim()] = fc;
+    }
+    addCached(name, fc) {
+        this.formats[name.toLowerCase().trim()] = $1bac384020b50752$var$createCachedFormatter(fc);
+    }
+    format(value, format, lng) {
+        let options = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
+        const formats = format.split(this.formatSeparator);
+        if (formats.length > 1 && formats[0].indexOf('(') > 1 && formats[0].indexOf(')') < 0 && formats.find((f)=>f.indexOf(')') > -1)) {
+            const lastIndex = formats.findIndex((f)=>f.indexOf(')') > -1);
+            formats[0] = [
+                formats[0],
+                ...formats.splice(1, lastIndex)
+            ].join(this.formatSeparator);
+        }
+        const result = formats.reduce((mem, f)=>{
+            const { formatName: formatName, formatOptions: formatOptions } = $1bac384020b50752$var$parseFormatStr(f);
+            if (this.formats[formatName]) {
+                let formatted = mem;
+                try {
+                    const valOptions = options?.formatParams?.[options.interpolationkey] || {};
+                    const l = valOptions.locale || valOptions.lng || options.locale || options.lng || lng;
+                    formatted = this.formats[formatName](mem, l, {
+                        ...formatOptions,
+                        ...options,
+                        ...valOptions
+                    });
+                } catch (error) {
+                    this.logger.warn(error);
+                }
+                return formatted;
+            } else this.logger.warn(`there was no format function for ${formatName}`);
+            return mem;
+        }, value);
+        return result;
+    }
+}
+const $1bac384020b50752$var$removePending = (q, name)=>{
+    if (q.pending[name] !== undefined) {
+        delete q.pending[name];
+        q.pendingCount--;
+    }
+};
+class $1bac384020b50752$var$Connector extends $1bac384020b50752$var$EventEmitter {
+    constructor(backend, store, services){
+        let options = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
+        super();
+        this.backend = backend;
+        this.store = store;
+        this.services = services;
+        this.languageUtils = services.languageUtils;
+        this.options = options;
+        this.logger = $1bac384020b50752$var$baseLogger.create('backendConnector');
+        this.waitingReads = [];
+        this.maxParallelReads = options.maxParallelReads || 10;
+        this.readingCalls = 0;
+        this.maxRetries = options.maxRetries >= 0 ? options.maxRetries : 5;
+        this.retryTimeout = options.retryTimeout >= 1 ? options.retryTimeout : 350;
+        this.state = {};
+        this.queue = [];
+        this.backend?.init?.(services, options.backend, options);
+    }
+    queueLoad(languages, namespaces, options, callback) {
+        const toLoad = {};
+        const pending = {};
+        const toLoadLanguages = {};
+        const toLoadNamespaces = {};
+        languages.forEach((lng)=>{
+            let hasAllNamespaces = true;
+            namespaces.forEach((ns)=>{
+                const name = `${lng}|${ns}`;
+                if (!options.reload && this.store.hasResourceBundle(lng, ns)) this.state[name] = 2;
+                else if (this.state[name] < 0) ;
+                else if (this.state[name] === 1) {
+                    if (pending[name] === undefined) pending[name] = true;
+                } else {
+                    this.state[name] = 1;
+                    hasAllNamespaces = false;
+                    if (pending[name] === undefined) pending[name] = true;
+                    if (toLoad[name] === undefined) toLoad[name] = true;
+                    if (toLoadNamespaces[ns] === undefined) toLoadNamespaces[ns] = true;
+                }
+            });
+            if (!hasAllNamespaces) toLoadLanguages[lng] = true;
+        });
+        if (Object.keys(toLoad).length || Object.keys(pending).length) this.queue.push({
+            pending: pending,
+            pendingCount: Object.keys(pending).length,
+            loaded: {},
+            errors: [],
+            callback: callback
+        });
+        return {
+            toLoad: Object.keys(toLoad),
+            pending: Object.keys(pending),
+            toLoadLanguages: Object.keys(toLoadLanguages),
+            toLoadNamespaces: Object.keys(toLoadNamespaces)
+        };
+    }
+    loaded(name, err, data) {
+        const s = name.split('|');
+        const lng = s[0];
+        const ns = s[1];
+        if (err) this.emit('failedLoading', lng, ns, err);
+        if (!err && data) this.store.addResourceBundle(lng, ns, data, undefined, undefined, {
+            skipCopy: true
+        });
+        this.state[name] = err ? -1 : 2;
+        if (err && data) this.state[name] = 0;
+        const loaded = {};
+        this.queue.forEach((q)=>{
+            $1bac384020b50752$var$pushPath(q.loaded, [
+                lng
+            ], ns);
+            $1bac384020b50752$var$removePending(q, name);
+            if (err) q.errors.push(err);
+            if (q.pendingCount === 0 && !q.done) {
+                Object.keys(q.loaded).forEach((l)=>{
+                    if (!loaded[l]) loaded[l] = {};
+                    const loadedKeys = q.loaded[l];
+                    if (loadedKeys.length) loadedKeys.forEach((n)=>{
+                        if (loaded[l][n] === undefined) loaded[l][n] = true;
+                    });
+                });
+                q.done = true;
+                if (q.errors.length) q.callback(q.errors);
+                else q.callback();
+            }
+        });
+        this.emit('loaded', loaded);
+        this.queue = this.queue.filter((q)=>!q.done);
+    }
+    read(lng, ns, fcName) {
+        let tried = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
+        let wait = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : this.retryTimeout;
+        let callback = arguments.length > 5 ? arguments[5] : undefined;
+        if (!lng.length) return callback(null, {});
+        if (this.readingCalls >= this.maxParallelReads) {
+            this.waitingReads.push({
+                lng: lng,
+                ns: ns,
+                fcName: fcName,
+                tried: tried,
+                wait: wait,
+                callback: callback
+            });
+            return;
+        }
+        this.readingCalls++;
+        const resolver = (err, data)=>{
+            this.readingCalls--;
+            if (this.waitingReads.length > 0) {
+                const next = this.waitingReads.shift();
+                this.read(next.lng, next.ns, next.fcName, next.tried, next.wait, next.callback);
+            }
+            if (err && data && tried < this.maxRetries) {
+                setTimeout(()=>{
+                    this.read.call(this, lng, ns, fcName, tried + 1, wait * 2, callback);
+                }, wait);
+                return;
+            }
+            callback(err, data);
+        };
+        const fc = this.backend[fcName].bind(this.backend);
+        if (fc.length === 2) {
+            try {
+                const r = fc(lng, ns);
+                if (r && typeof r.then === 'function') r.then((data)=>resolver(null, data)).catch(resolver);
+                else resolver(null, r);
+            } catch (err) {
+                resolver(err);
+            }
+            return;
+        }
+        return fc(lng, ns, resolver);
+    }
+    prepareLoading(languages, namespaces) {
+        let options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+        let callback = arguments.length > 3 ? arguments[3] : undefined;
+        if (!this.backend) {
+            this.logger.warn('No backend was added via i18next.use. Will not load resources.');
+            return callback && callback();
+        }
+        if ($1bac384020b50752$var$isString(languages)) languages = this.languageUtils.toResolveHierarchy(languages);
+        if ($1bac384020b50752$var$isString(namespaces)) namespaces = [
+            namespaces
+        ];
+        const toLoad = this.queueLoad(languages, namespaces, options, callback);
+        if (!toLoad.toLoad.length) {
+            if (!toLoad.pending.length) callback();
+            return null;
+        }
+        toLoad.toLoad.forEach((name)=>{
+            this.loadOne(name);
+        });
+    }
+    load(languages, namespaces, callback) {
+        this.prepareLoading(languages, namespaces, {}, callback);
+    }
+    reload(languages, namespaces, callback) {
+        this.prepareLoading(languages, namespaces, {
+            reload: true
+        }, callback);
+    }
+    loadOne(name) {
+        let prefix = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+        const s = name.split('|');
+        const lng = s[0];
+        const ns = s[1];
+        this.read(lng, ns, 'read', undefined, undefined, (err, data)=>{
+            if (err) this.logger.warn(`${prefix}loading namespace ${ns} for language ${lng} failed`, err);
+            if (!err && data) this.logger.log(`${prefix}loaded namespace ${ns} for language ${lng}`, data);
+            this.loaded(name, err, data);
+        });
+    }
+    saveMissing(languages, namespace, key, fallbackValue, isUpdate) {
+        let options = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : {};
+        let clb = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : ()=>{};
+        if (this.services?.utils?.hasLoadedNamespace && !this.services?.utils?.hasLoadedNamespace(namespace)) {
+            this.logger.warn(`did not save key "${key}" as the namespace "${namespace}" was not yet loaded`, 'This means something IS WRONG in your setup. You access the t function before i18next.init / i18next.loadNamespace / i18next.changeLanguage was done. Wait for the callback or Promise to resolve before accessing it!!!');
+            return;
+        }
+        if (key === undefined || key === null || key === '') return;
+        if (this.backend?.create) {
+            const opts = {
+                ...options,
+                isUpdate: isUpdate
+            };
+            const fc = this.backend.create.bind(this.backend);
+            if (fc.length < 6) try {
+                let r;
+                if (fc.length === 5) r = fc(languages, namespace, key, fallbackValue, opts);
+                else r = fc(languages, namespace, key, fallbackValue);
+                if (r && typeof r.then === 'function') r.then((data)=>clb(null, data)).catch(clb);
+                else clb(null, r);
+            } catch (err) {
+                clb(err);
+            }
+            else fc(languages, namespace, key, fallbackValue, clb, opts);
+        }
+        if (!languages || !languages[0]) return;
+        this.store.addResource(languages[0], namespace, key, fallbackValue);
+    }
+}
+const $1bac384020b50752$var$get = ()=>({
+        debug: false,
+        initAsync: true,
+        ns: [
+            'translation'
+        ],
+        defaultNS: [
+            'translation'
+        ],
+        fallbackLng: [
+            'dev'
+        ],
+        fallbackNS: false,
+        supportedLngs: false,
+        nonExplicitSupportedLngs: false,
+        load: 'all',
+        preload: false,
+        simplifyPluralSuffix: true,
+        keySeparator: '.',
+        nsSeparator: ':',
+        pluralSeparator: '_',
+        contextSeparator: '_',
+        partialBundledLanguages: false,
+        saveMissing: false,
+        updateMissing: false,
+        saveMissingTo: 'fallback',
+        saveMissingPlurals: true,
+        missingKeyHandler: false,
+        missingInterpolationHandler: false,
+        postProcess: false,
+        postProcessPassResolved: false,
+        returnNull: false,
+        returnEmptyString: true,
+        returnObjects: false,
+        joinArrays: false,
+        returnedObjectHandler: false,
+        parseMissingKeyHandler: false,
+        appendNamespaceToMissingKey: false,
+        appendNamespaceToCIMode: false,
+        overloadTranslationOptionHandler: (args)=>{
+            let ret = {};
+            if (typeof args[1] === 'object') ret = args[1];
+            if ($1bac384020b50752$var$isString(args[1])) ret.defaultValue = args[1];
+            if ($1bac384020b50752$var$isString(args[2])) ret.tDescription = args[2];
+            if (typeof args[2] === 'object' || typeof args[3] === 'object') {
+                const options = args[3] || args[2];
+                Object.keys(options).forEach((key)=>{
+                    ret[key] = options[key];
+                });
+            }
+            return ret;
+        },
+        interpolation: {
+            escapeValue: true,
+            format: (value)=>value,
+            prefix: '{{',
+            suffix: '}}',
+            formatSeparator: ',',
+            unescapePrefix: '-',
+            nestingPrefix: '$t(',
+            nestingSuffix: ')',
+            nestingOptionsSeparator: ',',
+            maxReplaces: 1000,
+            skipOnVariables: true
+        }
+    });
+const $1bac384020b50752$var$transformOptions = (options)=>{
+    if ($1bac384020b50752$var$isString(options.ns)) options.ns = [
+        options.ns
+    ];
+    if ($1bac384020b50752$var$isString(options.fallbackLng)) options.fallbackLng = [
+        options.fallbackLng
+    ];
+    if ($1bac384020b50752$var$isString(options.fallbackNS)) options.fallbackNS = [
+        options.fallbackNS
+    ];
+    if (options.supportedLngs?.indexOf?.('cimode') < 0) options.supportedLngs = options.supportedLngs.concat([
+        'cimode'
+    ]);
+    if (typeof options.initImmediate === 'boolean') options.initAsync = options.initImmediate;
+    return options;
+};
+const $1bac384020b50752$var$noop = ()=>{};
+const $1bac384020b50752$var$bindMemberFunctions = (inst)=>{
+    const mems = Object.getOwnPropertyNames(Object.getPrototypeOf(inst));
+    mems.forEach((mem)=>{
+        if (typeof inst[mem] === 'function') inst[mem] = inst[mem].bind(inst);
+    });
+};
+class $1bac384020b50752$var$I18n extends $1bac384020b50752$var$EventEmitter {
+    constructor(){
+        let options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+        let callback = arguments.length > 1 ? arguments[1] : undefined;
+        super();
+        this.options = $1bac384020b50752$var$transformOptions(options);
+        this.services = {};
+        this.logger = $1bac384020b50752$var$baseLogger;
+        this.modules = {
+            external: []
+        };
+        $1bac384020b50752$var$bindMemberFunctions(this);
+        if (callback && !this.isInitialized && !options.isClone) {
+            if (!this.options.initAsync) {
+                this.init(options, callback);
+                return this;
+            }
+            setTimeout(()=>{
+                this.init(options, callback);
+            }, 0);
+        }
+    }
+    init() {
+        var _this = this;
+        let options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+        let callback = arguments.length > 1 ? arguments[1] : undefined;
+        this.isInitializing = true;
+        if (typeof options === 'function') {
+            callback = options;
+            options = {};
+        }
+        if (options.defaultNS == null && options.ns) {
+            if ($1bac384020b50752$var$isString(options.ns)) options.defaultNS = options.ns;
+            else if (options.ns.indexOf('translation') < 0) options.defaultNS = options.ns[0];
+        }
+        const defOpts = $1bac384020b50752$var$get();
+        this.options = {
+            ...defOpts,
+            ...this.options,
+            ...$1bac384020b50752$var$transformOptions(options)
+        };
+        this.options.interpolation = {
+            ...defOpts.interpolation,
+            ...this.options.interpolation
+        };
+        if (options.keySeparator !== undefined) this.options.userDefinedKeySeparator = options.keySeparator;
+        if (options.nsSeparator !== undefined) this.options.userDefinedNsSeparator = options.nsSeparator;
+        const createClassOnDemand = (ClassOrObject)=>{
+            if (!ClassOrObject) return null;
+            if (typeof ClassOrObject === 'function') return new ClassOrObject();
+            return ClassOrObject;
+        };
+        if (!this.options.isClone) {
+            if (this.modules.logger) $1bac384020b50752$var$baseLogger.init(createClassOnDemand(this.modules.logger), this.options);
+            else $1bac384020b50752$var$baseLogger.init(null, this.options);
+            let formatter;
+            if (this.modules.formatter) formatter = this.modules.formatter;
+            else formatter = $1bac384020b50752$var$Formatter;
+            const lu = new $1bac384020b50752$var$LanguageUtil(this.options);
+            this.store = new $1bac384020b50752$var$ResourceStore(this.options.resources, this.options);
+            const s = this.services;
+            s.logger = $1bac384020b50752$var$baseLogger;
+            s.resourceStore = this.store;
+            s.languageUtils = lu;
+            s.pluralResolver = new $1bac384020b50752$var$PluralResolver(lu, {
+                prepend: this.options.pluralSeparator,
+                simplifyPluralSuffix: this.options.simplifyPluralSuffix
+            });
+            if (formatter && (!this.options.interpolation.format || this.options.interpolation.format === defOpts.interpolation.format)) {
+                s.formatter = createClassOnDemand(formatter);
+                s.formatter.init(s, this.options);
+                this.options.interpolation.format = s.formatter.format.bind(s.formatter);
+            }
+            s.interpolator = new $1bac384020b50752$var$Interpolator(this.options);
+            s.utils = {
+                hasLoadedNamespace: this.hasLoadedNamespace.bind(this)
+            };
+            s.backendConnector = new $1bac384020b50752$var$Connector(createClassOnDemand(this.modules.backend), s.resourceStore, s, this.options);
+            s.backendConnector.on('*', function(event) {
+                for(var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++)args[_key - 1] = arguments[_key];
+                _this.emit(event, ...args);
+            });
+            if (this.modules.languageDetector) {
+                s.languageDetector = createClassOnDemand(this.modules.languageDetector);
+                if (s.languageDetector.init) s.languageDetector.init(s, this.options.detection, this.options);
+            }
+            if (this.modules.i18nFormat) {
+                s.i18nFormat = createClassOnDemand(this.modules.i18nFormat);
+                if (s.i18nFormat.init) s.i18nFormat.init(this);
+            }
+            this.translator = new $1bac384020b50752$var$Translator(this.services, this.options);
+            this.translator.on('*', function(event) {
+                for(var _len2 = arguments.length, args = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++)args[_key2 - 1] = arguments[_key2];
+                _this.emit(event, ...args);
+            });
+            this.modules.external.forEach((m)=>{
+                if (m.init) m.init(this);
+            });
+        }
+        this.format = this.options.interpolation.format;
+        if (!callback) callback = $1bac384020b50752$var$noop;
+        if (this.options.fallbackLng && !this.services.languageDetector && !this.options.lng) {
+            const codes = this.services.languageUtils.getFallbackCodes(this.options.fallbackLng);
+            if (codes.length > 0 && codes[0] !== 'dev') this.options.lng = codes[0];
+        }
+        if (!this.services.languageDetector && !this.options.lng) this.logger.warn('init: no languageDetector is used and no lng is defined');
+        const storeApi = [
+            'getResource',
+            'hasResourceBundle',
+            'getResourceBundle',
+            'getDataByLanguage'
+        ];
+        storeApi.forEach((fcName)=>{
+            this[fcName] = function() {
+                return _this.store[fcName](...arguments);
+            };
+        });
+        const storeApiChained = [
+            'addResource',
+            'addResources',
+            'addResourceBundle',
+            'removeResourceBundle'
+        ];
+        storeApiChained.forEach((fcName)=>{
+            this[fcName] = function() {
+                _this.store[fcName](...arguments);
+                return _this;
+            };
+        });
+        const deferred = $1bac384020b50752$var$defer();
+        const load = ()=>{
+            const finish = (err, t)=>{
+                this.isInitializing = false;
+                if (this.isInitialized && !this.initializedStoreOnce) this.logger.warn('init: i18next is already initialized. You should call init just once!');
+                this.isInitialized = true;
+                if (!this.options.isClone) this.logger.log('initialized', this.options);
+                this.emit('initialized', this.options);
+                deferred.resolve(t);
+                callback(err, t);
+            };
+            if (this.languages && !this.isInitialized) return finish(null, this.t.bind(this));
+            this.changeLanguage(this.options.lng, finish);
+        };
+        if (this.options.resources || !this.options.initAsync) load();
+        else setTimeout(load, 0);
+        return deferred;
+    }
+    loadResources(language) {
+        let callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : $1bac384020b50752$var$noop;
+        let usedCallback = callback;
+        const usedLng = $1bac384020b50752$var$isString(language) ? language : this.language;
+        if (typeof language === 'function') usedCallback = language;
+        if (!this.options.resources || this.options.partialBundledLanguages) {
+            if (usedLng?.toLowerCase() === 'cimode' && (!this.options.preload || this.options.preload.length === 0)) return usedCallback();
+            const toLoad = [];
+            const append = (lng)=>{
+                if (!lng) return;
+                if (lng === 'cimode') return;
+                const lngs = this.services.languageUtils.toResolveHierarchy(lng);
+                lngs.forEach((l)=>{
+                    if (l === 'cimode') return;
+                    if (toLoad.indexOf(l) < 0) toLoad.push(l);
+                });
+            };
+            if (!usedLng) {
+                const fallbacks = this.services.languageUtils.getFallbackCodes(this.options.fallbackLng);
+                fallbacks.forEach((l)=>append(l));
+            } else append(usedLng);
+            this.options.preload?.forEach?.((l)=>append(l));
+            this.services.backendConnector.load(toLoad, this.options.ns, (e)=>{
+                if (!e && !this.resolvedLanguage && this.language) this.setResolvedLanguage(this.language);
+                usedCallback(e);
+            });
+        } else usedCallback(null);
+    }
+    reloadResources(lngs, ns, callback) {
+        const deferred = $1bac384020b50752$var$defer();
+        if (typeof lngs === 'function') {
+            callback = lngs;
+            lngs = undefined;
+        }
+        if (typeof ns === 'function') {
+            callback = ns;
+            ns = undefined;
+        }
+        if (!lngs) lngs = this.languages;
+        if (!ns) ns = this.options.ns;
+        if (!callback) callback = $1bac384020b50752$var$noop;
+        this.services.backendConnector.reload(lngs, ns, (err)=>{
+            deferred.resolve();
+            callback(err);
+        });
+        return deferred;
+    }
+    use(module) {
+        if (!module) throw new Error('You are passing an undefined module! Please check the object you are passing to i18next.use()');
+        if (!module.type) throw new Error('You are passing a wrong module! Please check the object you are passing to i18next.use()');
+        if (module.type === 'backend') this.modules.backend = module;
+        if (module.type === 'logger' || module.log && module.warn && module.error) this.modules.logger = module;
+        if (module.type === 'languageDetector') this.modules.languageDetector = module;
+        if (module.type === 'i18nFormat') this.modules.i18nFormat = module;
+        if (module.type === 'postProcessor') $1bac384020b50752$var$postProcessor.addPostProcessor(module);
+        if (module.type === 'formatter') this.modules.formatter = module;
+        if (module.type === '3rdParty') this.modules.external.push(module);
+        return this;
+    }
+    setResolvedLanguage(l) {
+        if (!l || !this.languages) return;
+        if ([
+            'cimode',
+            'dev'
+        ].indexOf(l) > -1) return;
+        for(let li = 0; li < this.languages.length; li++){
+            const lngInLngs = this.languages[li];
+            if ([
+                'cimode',
+                'dev'
+            ].indexOf(lngInLngs) > -1) continue;
+            if (this.store.hasLanguageSomeTranslations(lngInLngs)) {
+                this.resolvedLanguage = lngInLngs;
+                break;
+            }
+        }
+    }
+    changeLanguage(lng, callback) {
+        var _this2 = this;
+        this.isLanguageChangingTo = lng;
+        const deferred = $1bac384020b50752$var$defer();
+        this.emit('languageChanging', lng);
+        const setLngProps = (l)=>{
+            this.language = l;
+            this.languages = this.services.languageUtils.toResolveHierarchy(l);
+            this.resolvedLanguage = undefined;
+            this.setResolvedLanguage(l);
+        };
+        const done = (err, l)=>{
+            if (l) {
+                setLngProps(l);
+                this.translator.changeLanguage(l);
+                this.isLanguageChangingTo = undefined;
+                this.emit('languageChanged', l);
+                this.logger.log('languageChanged', l);
+            } else this.isLanguageChangingTo = undefined;
+            deferred.resolve(function() {
+                return _this2.t(...arguments);
+            });
+            if (callback) callback(err, function() {
+                return _this2.t(...arguments);
+            });
+        };
+        const setLng = (lngs)=>{
+            if (!lng && !lngs && this.services.languageDetector) lngs = [];
+            const l = $1bac384020b50752$var$isString(lngs) ? lngs : this.services.languageUtils.getBestMatchFromCodes(lngs);
+            if (l) {
+                if (!this.language) setLngProps(l);
+                if (!this.translator.language) this.translator.changeLanguage(l);
+                this.services.languageDetector?.cacheUserLanguage?.(l);
+            }
+            this.loadResources(l, (err)=>{
+                done(err, l);
+            });
+        };
+        if (!lng && this.services.languageDetector && !this.services.languageDetector.async) setLng(this.services.languageDetector.detect());
+        else if (!lng && this.services.languageDetector && this.services.languageDetector.async) {
+            if (this.services.languageDetector.detect.length === 0) this.services.languageDetector.detect().then(setLng);
+            else this.services.languageDetector.detect(setLng);
+        } else setLng(lng);
+        return deferred;
+    }
+    getFixedT(lng, ns, keyPrefix) {
+        var _this3 = this;
+        const fixedT = function(key, opts) {
+            let options;
+            if (typeof opts !== 'object') {
+                for(var _len3 = arguments.length, rest = new Array(_len3 > 2 ? _len3 - 2 : 0), _key3 = 2; _key3 < _len3; _key3++)rest[_key3 - 2] = arguments[_key3];
+                options = _this3.options.overloadTranslationOptionHandler([
+                    key,
+                    opts
+                ].concat(rest));
+            } else options = {
+                ...opts
+            };
+            options.lng = options.lng || fixedT.lng;
+            options.lngs = options.lngs || fixedT.lngs;
+            options.ns = options.ns || fixedT.ns;
+            if (options.keyPrefix !== '') options.keyPrefix = options.keyPrefix || keyPrefix || fixedT.keyPrefix;
+            const keySeparator = _this3.options.keySeparator || '.';
+            let resultKey;
+            if (options.keyPrefix && Array.isArray(key)) resultKey = key.map((k)=>`${options.keyPrefix}${keySeparator}${k}`);
+            else resultKey = options.keyPrefix ? `${options.keyPrefix}${keySeparator}${key}` : key;
+            return _this3.t(resultKey, options);
+        };
+        if ($1bac384020b50752$var$isString(lng)) fixedT.lng = lng;
+        else fixedT.lngs = lng;
+        fixedT.ns = ns;
+        fixedT.keyPrefix = keyPrefix;
+        return fixedT;
+    }
+    t() {
+        for(var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++)args[_key4] = arguments[_key4];
+        return this.translator?.translate(...args);
+    }
+    exists() {
+        for(var _len5 = arguments.length, args = new Array(_len5), _key5 = 0; _key5 < _len5; _key5++)args[_key5] = arguments[_key5];
+        return this.translator?.exists(...args);
+    }
+    setDefaultNamespace(ns) {
+        this.options.defaultNS = ns;
+    }
+    hasLoadedNamespace(ns) {
+        let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+        if (!this.isInitialized) {
+            this.logger.warn('hasLoadedNamespace: i18next was not initialized', this.languages);
+            return false;
+        }
+        if (!this.languages || !this.languages.length) {
+            this.logger.warn('hasLoadedNamespace: i18n.languages were undefined or empty', this.languages);
+            return false;
+        }
+        const lng = options.lng || this.resolvedLanguage || this.languages[0];
+        const fallbackLng = this.options ? this.options.fallbackLng : false;
+        const lastLng = this.languages[this.languages.length - 1];
+        if (lng.toLowerCase() === 'cimode') return true;
+        const loadNotPending = (l, n)=>{
+            const loadState = this.services.backendConnector.state[`${l}|${n}`];
+            return loadState === -1 || loadState === 0 || loadState === 2;
+        };
+        if (options.precheck) {
+            const preResult = options.precheck(this, loadNotPending);
+            if (preResult !== undefined) return preResult;
+        }
+        if (this.hasResourceBundle(lng, ns)) return true;
+        if (!this.services.backendConnector.backend || this.options.resources && !this.options.partialBundledLanguages) return true;
+        if (loadNotPending(lng, ns) && (!fallbackLng || loadNotPending(lastLng, ns))) return true;
+        return false;
+    }
+    loadNamespaces(ns, callback) {
+        const deferred = $1bac384020b50752$var$defer();
+        if (!this.options.ns) {
+            if (callback) callback();
+            return Promise.resolve();
+        }
+        if ($1bac384020b50752$var$isString(ns)) ns = [
+            ns
+        ];
+        ns.forEach((n)=>{
+            if (this.options.ns.indexOf(n) < 0) this.options.ns.push(n);
+        });
+        this.loadResources((err)=>{
+            deferred.resolve();
+            if (callback) callback(err);
+        });
+        return deferred;
+    }
+    loadLanguages(lngs, callback) {
+        const deferred = $1bac384020b50752$var$defer();
+        if ($1bac384020b50752$var$isString(lngs)) lngs = [
+            lngs
+        ];
+        const preloaded = this.options.preload || [];
+        const newLngs = lngs.filter((lng)=>preloaded.indexOf(lng) < 0 && this.services.languageUtils.isSupportedCode(lng));
+        if (!newLngs.length) {
+            if (callback) callback();
+            return Promise.resolve();
+        }
+        this.options.preload = preloaded.concat(newLngs);
+        this.loadResources((err)=>{
+            deferred.resolve();
+            if (callback) callback(err);
+        });
+        return deferred;
+    }
+    dir(lng) {
+        if (!lng) lng = this.resolvedLanguage || (this.languages?.length > 0 ? this.languages[0] : this.language);
+        if (!lng) return 'rtl';
+        const rtlLngs = [
+            'ar',
+            'shu',
+            'sqr',
+            'ssh',
+            'xaa',
+            'yhd',
+            'yud',
+            'aao',
+            'abh',
+            'abv',
+            'acm',
+            'acq',
+            'acw',
+            'acx',
+            'acy',
+            'adf',
+            'ads',
+            'aeb',
+            'aec',
+            'afb',
+            'ajp',
+            'apc',
+            'apd',
+            'arb',
+            'arq',
+            'ars',
+            'ary',
+            'arz',
+            'auz',
+            'avl',
+            'ayh',
+            'ayl',
+            'ayn',
+            'ayp',
+            'bbz',
+            'pga',
+            'he',
+            'iw',
+            'ps',
+            'pbt',
+            'pbu',
+            'pst',
+            'prp',
+            'prd',
+            'ug',
+            'ur',
+            'ydd',
+            'yds',
+            'yih',
+            'ji',
+            'yi',
+            'hbo',
+            'men',
+            'xmn',
+            'fa',
+            'jpr',
+            'peo',
+            'pes',
+            'prs',
+            'dv',
+            'sam',
+            'ckb'
+        ];
+        const languageUtils = this.services?.languageUtils || new $1bac384020b50752$var$LanguageUtil($1bac384020b50752$var$get());
+        return rtlLngs.indexOf(languageUtils.getLanguagePartFromCode(lng)) > -1 || lng.toLowerCase().indexOf('-arab') > 1 ? 'rtl' : 'ltr';
+    }
+    static createInstance() {
+        let options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+        let callback = arguments.length > 1 ? arguments[1] : undefined;
+        return new $1bac384020b50752$var$I18n(options, callback);
+    }
+    cloneInstance() {
+        let options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+        let callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : $1bac384020b50752$var$noop;
+        const forkResourceStore = options.forkResourceStore;
+        if (forkResourceStore) delete options.forkResourceStore;
+        const mergedOptions = {
+            ...this.options,
+            ...options,
+            isClone: true
+        };
+        const clone = new $1bac384020b50752$var$I18n(mergedOptions);
+        if (options.debug !== undefined || options.prefix !== undefined) clone.logger = clone.logger.clone(options);
+        const membersToCopy = [
+            'store',
+            'services',
+            'language'
+        ];
+        membersToCopy.forEach((m)=>{
+            clone[m] = this[m];
+        });
+        clone.services = {
+            ...this.services
+        };
+        clone.services.utils = {
+            hasLoadedNamespace: clone.hasLoadedNamespace.bind(clone)
+        };
+        if (forkResourceStore) {
+            const clonedData = Object.keys(this.store.data).reduce((prev, l)=>{
+                prev[l] = {
+                    ...this.store.data[l]
+                };
+                return Object.keys(prev[l]).reduce((acc, n)=>{
+                    acc[n] = {
+                        ...prev[l][n]
+                    };
+                    return acc;
+                }, {});
+            }, {});
+            clone.store = new $1bac384020b50752$var$ResourceStore(clonedData, mergedOptions);
+            clone.services.resourceStore = clone.store;
+        }
+        clone.translator = new $1bac384020b50752$var$Translator(clone.services, mergedOptions);
+        clone.translator.on('*', function(event) {
+            for(var _len6 = arguments.length, args = new Array(_len6 > 1 ? _len6 - 1 : 0), _key6 = 1; _key6 < _len6; _key6++)args[_key6 - 1] = arguments[_key6];
+            clone.emit(event, ...args);
+        });
+        clone.init(mergedOptions, callback);
+        clone.translator.options = mergedOptions;
+        clone.translator.backendConnector.services.utils = {
+            hasLoadedNamespace: clone.hasLoadedNamespace.bind(clone)
+        };
+        return clone;
+    }
+    toJSON() {
+        return {
+            options: this.options,
+            store: this.store,
+            language: this.language,
+            languages: this.languages,
+            resolvedLanguage: this.resolvedLanguage
+        };
+    }
+}
+const $1bac384020b50752$export$2e2bcd8739ae039 = $1bac384020b50752$var$I18n.createInstance();
+$1bac384020b50752$export$2e2bcd8739ae039.createInstance = $1bac384020b50752$var$I18n.createInstance;
+const $1bac384020b50752$export$99152e8d49ca4e7d = $1bac384020b50752$export$2e2bcd8739ae039.createInstance;
+const $1bac384020b50752$export$147ec2801e896265 = $1bac384020b50752$export$2e2bcd8739ae039.dir;
+const $1bac384020b50752$export$2cd8252107eb640b = $1bac384020b50752$export$2e2bcd8739ae039.init;
+const $1bac384020b50752$export$d3d08d944062d7e = $1bac384020b50752$export$2e2bcd8739ae039.loadResources;
+const $1bac384020b50752$export$a5d9bf5d83fcab09 = $1bac384020b50752$export$2e2bcd8739ae039.reloadResources;
+const $1bac384020b50752$export$1f96ae73734a86cc = $1bac384020b50752$export$2e2bcd8739ae039.use;
+const $1bac384020b50752$export$61465194746e7fd2 = $1bac384020b50752$export$2e2bcd8739ae039.changeLanguage;
+const $1bac384020b50752$export$f90d180fc7da3b3b = $1bac384020b50752$export$2e2bcd8739ae039.getFixedT;
+const $1bac384020b50752$export$625550452a3fa3ec = $1bac384020b50752$export$2e2bcd8739ae039.t;
+const $1bac384020b50752$export$f7e9f41ea797a17 = $1bac384020b50752$export$2e2bcd8739ae039.exists;
+const $1bac384020b50752$export$2b4b218e406d2d00 = $1bac384020b50752$export$2e2bcd8739ae039.setDefaultNamespace;
+const $1bac384020b50752$export$93d9ee97c1ad3f31 = $1bac384020b50752$export$2e2bcd8739ae039.hasLoadedNamespace;
+const $1bac384020b50752$export$83be934b53fff43b = $1bac384020b50752$export$2e2bcd8739ae039.loadNamespaces;
+const $1bac384020b50752$export$8cd7e7a54fa865bc = $1bac384020b50752$export$2e2bcd8739ae039.loadLanguages;
+
+
 const { slice: $199830a05f92d3d0$var$slice, forEach: $199830a05f92d3d0$var$forEach } = [];
 function $199830a05f92d3d0$var$defaults(obj) {
     $199830a05f92d3d0$var$forEach.call($199830a05f92d3d0$var$slice.call(arguments, 1), (source)=>{
@@ -15906,3346 +15742,6 @@ class $199830a05f92d3d0$export$2e2bcd8739ae039 {
 $199830a05f92d3d0$export$2e2bcd8739ae039.type = 'languageDetector';
 
 
-// lib/index.ts
-var $040ba8e83b63f6c5$exports = {};
-var $41148a221f03ee13$exports = {};
-/* MIT license */ var $72c9eba4dd26aa1d$exports = {};
-'use strict';
-$72c9eba4dd26aa1d$exports = {
-    "aliceblue": [
-        240,
-        248,
-        255
-    ],
-    "antiquewhite": [
-        250,
-        235,
-        215
-    ],
-    "aqua": [
-        0,
-        255,
-        255
-    ],
-    "aquamarine": [
-        127,
-        255,
-        212
-    ],
-    "azure": [
-        240,
-        255,
-        255
-    ],
-    "beige": [
-        245,
-        245,
-        220
-    ],
-    "bisque": [
-        255,
-        228,
-        196
-    ],
-    "black": [
-        0,
-        0,
-        0
-    ],
-    "blanchedalmond": [
-        255,
-        235,
-        205
-    ],
-    "blue": [
-        0,
-        0,
-        255
-    ],
-    "blueviolet": [
-        138,
-        43,
-        226
-    ],
-    "brown": [
-        165,
-        42,
-        42
-    ],
-    "burlywood": [
-        222,
-        184,
-        135
-    ],
-    "cadetblue": [
-        95,
-        158,
-        160
-    ],
-    "chartreuse": [
-        127,
-        255,
-        0
-    ],
-    "chocolate": [
-        210,
-        105,
-        30
-    ],
-    "coral": [
-        255,
-        127,
-        80
-    ],
-    "cornflowerblue": [
-        100,
-        149,
-        237
-    ],
-    "cornsilk": [
-        255,
-        248,
-        220
-    ],
-    "crimson": [
-        220,
-        20,
-        60
-    ],
-    "cyan": [
-        0,
-        255,
-        255
-    ],
-    "darkblue": [
-        0,
-        0,
-        139
-    ],
-    "darkcyan": [
-        0,
-        139,
-        139
-    ],
-    "darkgoldenrod": [
-        184,
-        134,
-        11
-    ],
-    "darkgray": [
-        169,
-        169,
-        169
-    ],
-    "darkgreen": [
-        0,
-        100,
-        0
-    ],
-    "darkgrey": [
-        169,
-        169,
-        169
-    ],
-    "darkkhaki": [
-        189,
-        183,
-        107
-    ],
-    "darkmagenta": [
-        139,
-        0,
-        139
-    ],
-    "darkolivegreen": [
-        85,
-        107,
-        47
-    ],
-    "darkorange": [
-        255,
-        140,
-        0
-    ],
-    "darkorchid": [
-        153,
-        50,
-        204
-    ],
-    "darkred": [
-        139,
-        0,
-        0
-    ],
-    "darksalmon": [
-        233,
-        150,
-        122
-    ],
-    "darkseagreen": [
-        143,
-        188,
-        143
-    ],
-    "darkslateblue": [
-        72,
-        61,
-        139
-    ],
-    "darkslategray": [
-        47,
-        79,
-        79
-    ],
-    "darkslategrey": [
-        47,
-        79,
-        79
-    ],
-    "darkturquoise": [
-        0,
-        206,
-        209
-    ],
-    "darkviolet": [
-        148,
-        0,
-        211
-    ],
-    "deeppink": [
-        255,
-        20,
-        147
-    ],
-    "deepskyblue": [
-        0,
-        191,
-        255
-    ],
-    "dimgray": [
-        105,
-        105,
-        105
-    ],
-    "dimgrey": [
-        105,
-        105,
-        105
-    ],
-    "dodgerblue": [
-        30,
-        144,
-        255
-    ],
-    "firebrick": [
-        178,
-        34,
-        34
-    ],
-    "floralwhite": [
-        255,
-        250,
-        240
-    ],
-    "forestgreen": [
-        34,
-        139,
-        34
-    ],
-    "fuchsia": [
-        255,
-        0,
-        255
-    ],
-    "gainsboro": [
-        220,
-        220,
-        220
-    ],
-    "ghostwhite": [
-        248,
-        248,
-        255
-    ],
-    "gold": [
-        255,
-        215,
-        0
-    ],
-    "goldenrod": [
-        218,
-        165,
-        32
-    ],
-    "gray": [
-        128,
-        128,
-        128
-    ],
-    "green": [
-        0,
-        128,
-        0
-    ],
-    "greenyellow": [
-        173,
-        255,
-        47
-    ],
-    "grey": [
-        128,
-        128,
-        128
-    ],
-    "honeydew": [
-        240,
-        255,
-        240
-    ],
-    "hotpink": [
-        255,
-        105,
-        180
-    ],
-    "indianred": [
-        205,
-        92,
-        92
-    ],
-    "indigo": [
-        75,
-        0,
-        130
-    ],
-    "ivory": [
-        255,
-        255,
-        240
-    ],
-    "khaki": [
-        240,
-        230,
-        140
-    ],
-    "lavender": [
-        230,
-        230,
-        250
-    ],
-    "lavenderblush": [
-        255,
-        240,
-        245
-    ],
-    "lawngreen": [
-        124,
-        252,
-        0
-    ],
-    "lemonchiffon": [
-        255,
-        250,
-        205
-    ],
-    "lightblue": [
-        173,
-        216,
-        230
-    ],
-    "lightcoral": [
-        240,
-        128,
-        128
-    ],
-    "lightcyan": [
-        224,
-        255,
-        255
-    ],
-    "lightgoldenrodyellow": [
-        250,
-        250,
-        210
-    ],
-    "lightgray": [
-        211,
-        211,
-        211
-    ],
-    "lightgreen": [
-        144,
-        238,
-        144
-    ],
-    "lightgrey": [
-        211,
-        211,
-        211
-    ],
-    "lightpink": [
-        255,
-        182,
-        193
-    ],
-    "lightsalmon": [
-        255,
-        160,
-        122
-    ],
-    "lightseagreen": [
-        32,
-        178,
-        170
-    ],
-    "lightskyblue": [
-        135,
-        206,
-        250
-    ],
-    "lightslategray": [
-        119,
-        136,
-        153
-    ],
-    "lightslategrey": [
-        119,
-        136,
-        153
-    ],
-    "lightsteelblue": [
-        176,
-        196,
-        222
-    ],
-    "lightyellow": [
-        255,
-        255,
-        224
-    ],
-    "lime": [
-        0,
-        255,
-        0
-    ],
-    "limegreen": [
-        50,
-        205,
-        50
-    ],
-    "linen": [
-        250,
-        240,
-        230
-    ],
-    "magenta": [
-        255,
-        0,
-        255
-    ],
-    "maroon": [
-        128,
-        0,
-        0
-    ],
-    "mediumaquamarine": [
-        102,
-        205,
-        170
-    ],
-    "mediumblue": [
-        0,
-        0,
-        205
-    ],
-    "mediumorchid": [
-        186,
-        85,
-        211
-    ],
-    "mediumpurple": [
-        147,
-        112,
-        219
-    ],
-    "mediumseagreen": [
-        60,
-        179,
-        113
-    ],
-    "mediumslateblue": [
-        123,
-        104,
-        238
-    ],
-    "mediumspringgreen": [
-        0,
-        250,
-        154
-    ],
-    "mediumturquoise": [
-        72,
-        209,
-        204
-    ],
-    "mediumvioletred": [
-        199,
-        21,
-        133
-    ],
-    "midnightblue": [
-        25,
-        25,
-        112
-    ],
-    "mintcream": [
-        245,
-        255,
-        250
-    ],
-    "mistyrose": [
-        255,
-        228,
-        225
-    ],
-    "moccasin": [
-        255,
-        228,
-        181
-    ],
-    "navajowhite": [
-        255,
-        222,
-        173
-    ],
-    "navy": [
-        0,
-        0,
-        128
-    ],
-    "oldlace": [
-        253,
-        245,
-        230
-    ],
-    "olive": [
-        128,
-        128,
-        0
-    ],
-    "olivedrab": [
-        107,
-        142,
-        35
-    ],
-    "orange": [
-        255,
-        165,
-        0
-    ],
-    "orangered": [
-        255,
-        69,
-        0
-    ],
-    "orchid": [
-        218,
-        112,
-        214
-    ],
-    "palegoldenrod": [
-        238,
-        232,
-        170
-    ],
-    "palegreen": [
-        152,
-        251,
-        152
-    ],
-    "paleturquoise": [
-        175,
-        238,
-        238
-    ],
-    "palevioletred": [
-        219,
-        112,
-        147
-    ],
-    "papayawhip": [
-        255,
-        239,
-        213
-    ],
-    "peachpuff": [
-        255,
-        218,
-        185
-    ],
-    "peru": [
-        205,
-        133,
-        63
-    ],
-    "pink": [
-        255,
-        192,
-        203
-    ],
-    "plum": [
-        221,
-        160,
-        221
-    ],
-    "powderblue": [
-        176,
-        224,
-        230
-    ],
-    "purple": [
-        128,
-        0,
-        128
-    ],
-    "rebeccapurple": [
-        102,
-        51,
-        153
-    ],
-    "red": [
-        255,
-        0,
-        0
-    ],
-    "rosybrown": [
-        188,
-        143,
-        143
-    ],
-    "royalblue": [
-        65,
-        105,
-        225
-    ],
-    "saddlebrown": [
-        139,
-        69,
-        19
-    ],
-    "salmon": [
-        250,
-        128,
-        114
-    ],
-    "sandybrown": [
-        244,
-        164,
-        96
-    ],
-    "seagreen": [
-        46,
-        139,
-        87
-    ],
-    "seashell": [
-        255,
-        245,
-        238
-    ],
-    "sienna": [
-        160,
-        82,
-        45
-    ],
-    "silver": [
-        192,
-        192,
-        192
-    ],
-    "skyblue": [
-        135,
-        206,
-        235
-    ],
-    "slateblue": [
-        106,
-        90,
-        205
-    ],
-    "slategray": [
-        112,
-        128,
-        144
-    ],
-    "slategrey": [
-        112,
-        128,
-        144
-    ],
-    "snow": [
-        255,
-        250,
-        250
-    ],
-    "springgreen": [
-        0,
-        255,
-        127
-    ],
-    "steelblue": [
-        70,
-        130,
-        180
-    ],
-    "tan": [
-        210,
-        180,
-        140
-    ],
-    "teal": [
-        0,
-        128,
-        128
-    ],
-    "thistle": [
-        216,
-        191,
-        216
-    ],
-    "tomato": [
-        255,
-        99,
-        71
-    ],
-    "turquoise": [
-        64,
-        224,
-        208
-    ],
-    "violet": [
-        238,
-        130,
-        238
-    ],
-    "wheat": [
-        245,
-        222,
-        179
-    ],
-    "white": [
-        255,
-        255,
-        255
-    ],
-    "whitesmoke": [
-        245,
-        245,
-        245
-    ],
-    "yellow": [
-        255,
-        255,
-        0
-    ],
-    "yellowgreen": [
-        154,
-        205,
-        50
-    ]
-};
-
-
-var $e97dd6e5b87d46f7$exports = {};
-'use strict';
-var $a8cbc72403bdcef6$exports = {};
-$a8cbc72403bdcef6$exports = function isArrayish(obj) {
-    if (!obj || typeof obj === 'string') return false;
-    return obj instanceof Array || Array.isArray(obj) || obj.length >= 0 && (obj.splice instanceof Function || Object.getOwnPropertyDescriptor(obj, obj.length - 1) && obj.constructor.name !== 'String');
-};
-
-
-var $e97dd6e5b87d46f7$var$concat = Array.prototype.concat;
-var $e97dd6e5b87d46f7$var$slice = Array.prototype.slice;
-var $e97dd6e5b87d46f7$var$swizzle = $e97dd6e5b87d46f7$exports = function swizzle(args) {
-    var results = [];
-    for(var i = 0, len = args.length; i < len; i++){
-        var arg = args[i];
-        if ($a8cbc72403bdcef6$exports(arg)) // http://jsperf.com/javascript-array-concat-vs-push/98
-        results = $e97dd6e5b87d46f7$var$concat.call(results, $e97dd6e5b87d46f7$var$slice.call(arg));
-        else results.push(arg);
-    }
-    return results;
-};
-$e97dd6e5b87d46f7$var$swizzle.wrap = function(fn) {
-    return function() {
-        return fn($e97dd6e5b87d46f7$var$swizzle(arguments));
-    };
-};
-
-
-var $41148a221f03ee13$var$hasOwnProperty = Object.hasOwnProperty;
-var $41148a221f03ee13$var$reverseNames = Object.create(null);
-// create a list of reverse color names
-for(var $41148a221f03ee13$var$name in $72c9eba4dd26aa1d$exports)if ($41148a221f03ee13$var$hasOwnProperty.call($72c9eba4dd26aa1d$exports, $41148a221f03ee13$var$name)) $41148a221f03ee13$var$reverseNames[$72c9eba4dd26aa1d$exports[$41148a221f03ee13$var$name]] = $41148a221f03ee13$var$name;
-var $41148a221f03ee13$var$cs = $41148a221f03ee13$exports = {
-    to: {},
-    get: {}
-};
-$41148a221f03ee13$var$cs.get = function(string) {
-    var prefix = string.substring(0, 3).toLowerCase();
-    var val;
-    var model;
-    switch(prefix){
-        case 'hsl':
-            val = $41148a221f03ee13$var$cs.get.hsl(string);
-            model = 'hsl';
-            break;
-        case 'hwb':
-            val = $41148a221f03ee13$var$cs.get.hwb(string);
-            model = 'hwb';
-            break;
-        default:
-            val = $41148a221f03ee13$var$cs.get.rgb(string);
-            model = 'rgb';
-            break;
-    }
-    if (!val) return null;
-    return {
-        model: model,
-        value: val
-    };
-};
-$41148a221f03ee13$var$cs.get.rgb = function(string) {
-    if (!string) return null;
-    var abbr = /^#([a-f0-9]{3,4})$/i;
-    var hex = /^#([a-f0-9]{6})([a-f0-9]{2})?$/i;
-    var rgba = /^rgba?\(\s*([+-]?\d+)(?=[\s,])\s*(?:,\s*)?([+-]?\d+)(?=[\s,])\s*(?:,\s*)?([+-]?\d+)\s*(?:[,|\/]\s*([+-]?[\d\.]+)(%?)\s*)?\)$/;
-    var per = /^rgba?\(\s*([+-]?[\d\.]+)\%\s*,?\s*([+-]?[\d\.]+)\%\s*,?\s*([+-]?[\d\.]+)\%\s*(?:[,|\/]\s*([+-]?[\d\.]+)(%?)\s*)?\)$/;
-    var keyword = /^(\w+)$/;
-    var rgb = [
-        0,
-        0,
-        0,
-        1
-    ];
-    var match;
-    var i;
-    var hexAlpha;
-    if (match = string.match(hex)) {
-        hexAlpha = match[2];
-        match = match[1];
-        for(i = 0; i < 3; i++){
-            // https://jsperf.com/slice-vs-substr-vs-substring-methods-long-string/19
-            var i2 = i * 2;
-            rgb[i] = parseInt(match.slice(i2, i2 + 2), 16);
-        }
-        if (hexAlpha) rgb[3] = parseInt(hexAlpha, 16) / 255;
-    } else if (match = string.match(abbr)) {
-        match = match[1];
-        hexAlpha = match[3];
-        for(i = 0; i < 3; i++)rgb[i] = parseInt(match[i] + match[i], 16);
-        if (hexAlpha) rgb[3] = parseInt(hexAlpha + hexAlpha, 16) / 255;
-    } else if (match = string.match(rgba)) {
-        for(i = 0; i < 3; i++)rgb[i] = parseInt(match[i + 1], 0);
-        if (match[4]) {
-            if (match[5]) rgb[3] = parseFloat(match[4]) * 0.01;
-            else rgb[3] = parseFloat(match[4]);
-        }
-    } else if (match = string.match(per)) {
-        for(i = 0; i < 3; i++)rgb[i] = Math.round(parseFloat(match[i + 1]) * 2.55);
-        if (match[4]) {
-            if (match[5]) rgb[3] = parseFloat(match[4]) * 0.01;
-            else rgb[3] = parseFloat(match[4]);
-        }
-    } else if (match = string.match(keyword)) {
-        if (match[1] === 'transparent') return [
-            0,
-            0,
-            0,
-            0
-        ];
-        if (!$41148a221f03ee13$var$hasOwnProperty.call($72c9eba4dd26aa1d$exports, match[1])) return null;
-        rgb = $72c9eba4dd26aa1d$exports[match[1]];
-        rgb[3] = 1;
-        return rgb;
-    } else return null;
-    for(i = 0; i < 3; i++)rgb[i] = $41148a221f03ee13$var$clamp(rgb[i], 0, 255);
-    rgb[3] = $41148a221f03ee13$var$clamp(rgb[3], 0, 1);
-    return rgb;
-};
-$41148a221f03ee13$var$cs.get.hsl = function(string) {
-    if (!string) return null;
-    var hsl = /^hsla?\(\s*([+-]?(?:\d{0,3}\.)?\d+)(?:deg)?\s*,?\s*([+-]?[\d\.]+)%\s*,?\s*([+-]?[\d\.]+)%\s*(?:[,|\/]\s*([+-]?(?=\.\d|\d)(?:0|[1-9]\d*)?(?:\.\d*)?(?:[eE][+-]?\d+)?)\s*)?\)$/;
-    var match = string.match(hsl);
-    if (match) {
-        var alpha = parseFloat(match[4]);
-        var h = (parseFloat(match[1]) % 360 + 360) % 360;
-        var s = $41148a221f03ee13$var$clamp(parseFloat(match[2]), 0, 100);
-        var l = $41148a221f03ee13$var$clamp(parseFloat(match[3]), 0, 100);
-        var a = $41148a221f03ee13$var$clamp(isNaN(alpha) ? 1 : alpha, 0, 1);
-        return [
-            h,
-            s,
-            l,
-            a
-        ];
-    }
-    return null;
-};
-$41148a221f03ee13$var$cs.get.hwb = function(string) {
-    if (!string) return null;
-    var hwb = /^hwb\(\s*([+-]?\d{0,3}(?:\.\d+)?)(?:deg)?\s*,\s*([+-]?[\d\.]+)%\s*,\s*([+-]?[\d\.]+)%\s*(?:,\s*([+-]?(?=\.\d|\d)(?:0|[1-9]\d*)?(?:\.\d*)?(?:[eE][+-]?\d+)?)\s*)?\)$/;
-    var match = string.match(hwb);
-    if (match) {
-        var alpha = parseFloat(match[4]);
-        var h = (parseFloat(match[1]) % 360 + 360) % 360;
-        var w = $41148a221f03ee13$var$clamp(parseFloat(match[2]), 0, 100);
-        var b = $41148a221f03ee13$var$clamp(parseFloat(match[3]), 0, 100);
-        var a = $41148a221f03ee13$var$clamp(isNaN(alpha) ? 1 : alpha, 0, 1);
-        return [
-            h,
-            w,
-            b,
-            a
-        ];
-    }
-    return null;
-};
-$41148a221f03ee13$var$cs.to.hex = function() {
-    var rgba = $e97dd6e5b87d46f7$exports(arguments);
-    return '#' + $41148a221f03ee13$var$hexDouble(rgba[0]) + $41148a221f03ee13$var$hexDouble(rgba[1]) + $41148a221f03ee13$var$hexDouble(rgba[2]) + (rgba[3] < 1 ? $41148a221f03ee13$var$hexDouble(Math.round(rgba[3] * 255)) : '');
-};
-$41148a221f03ee13$var$cs.to.rgb = function() {
-    var rgba = $e97dd6e5b87d46f7$exports(arguments);
-    return rgba.length < 4 || rgba[3] === 1 ? 'rgb(' + Math.round(rgba[0]) + ', ' + Math.round(rgba[1]) + ', ' + Math.round(rgba[2]) + ')' : 'rgba(' + Math.round(rgba[0]) + ', ' + Math.round(rgba[1]) + ', ' + Math.round(rgba[2]) + ', ' + rgba[3] + ')';
-};
-$41148a221f03ee13$var$cs.to.rgb.percent = function() {
-    var rgba = $e97dd6e5b87d46f7$exports(arguments);
-    var r = Math.round(rgba[0] / 255 * 100);
-    var g = Math.round(rgba[1] / 255 * 100);
-    var b = Math.round(rgba[2] / 255 * 100);
-    return rgba.length < 4 || rgba[3] === 1 ? 'rgb(' + r + '%, ' + g + '%, ' + b + '%)' : 'rgba(' + r + '%, ' + g + '%, ' + b + '%, ' + rgba[3] + ')';
-};
-$41148a221f03ee13$var$cs.to.hsl = function() {
-    var hsla = $e97dd6e5b87d46f7$exports(arguments);
-    return hsla.length < 4 || hsla[3] === 1 ? 'hsl(' + hsla[0] + ', ' + hsla[1] + '%, ' + hsla[2] + '%)' : 'hsla(' + hsla[0] + ', ' + hsla[1] + '%, ' + hsla[2] + '%, ' + hsla[3] + ')';
-};
-// hwb is a bit different than rgb(a) & hsl(a) since there is no alpha specific syntax
-// (hwb have alpha optional & 1 is default value)
-$41148a221f03ee13$var$cs.to.hwb = function() {
-    var hwba = $e97dd6e5b87d46f7$exports(arguments);
-    var a = '';
-    if (hwba.length >= 4 && hwba[3] !== 1) a = ', ' + hwba[3];
-    return 'hwb(' + hwba[0] + ', ' + hwba[1] + '%, ' + hwba[2] + '%' + a + ')';
-};
-$41148a221f03ee13$var$cs.to.keyword = function(rgb) {
-    return $41148a221f03ee13$var$reverseNames[rgb.slice(0, 3)];
-};
-// helpers
-function $41148a221f03ee13$var$clamp(num, min, max) {
-    return Math.min(Math.max(min, num), max);
-}
-function $41148a221f03ee13$var$hexDouble(num) {
-    var str = Math.round(num).toString(16).toUpperCase();
-    return str.length < 2 ? '0' + str : str;
-}
-
-
-var $b0ce43f4286ff9ac$exports = {};
-var $f48c6abccc789ef5$exports = {};
-/* MIT license */ /* eslint-disable no-mixed-operators */ 
-// NOTE: conversions should only return primitive values (i.e. arrays, or
-//       values that give correct `typeof` results).
-//       do not use box values types (i.e. Number(), String(), etc.)
-const $f48c6abccc789ef5$var$reverseKeywords = {};
-for (const key of Object.keys($72c9eba4dd26aa1d$exports))$f48c6abccc789ef5$var$reverseKeywords[$72c9eba4dd26aa1d$exports[key]] = key;
-const $f48c6abccc789ef5$var$convert = {
-    rgb: {
-        channels: 3,
-        labels: 'rgb'
-    },
-    hsl: {
-        channels: 3,
-        labels: 'hsl'
-    },
-    hsv: {
-        channels: 3,
-        labels: 'hsv'
-    },
-    hwb: {
-        channels: 3,
-        labels: 'hwb'
-    },
-    cmyk: {
-        channels: 4,
-        labels: 'cmyk'
-    },
-    xyz: {
-        channels: 3,
-        labels: 'xyz'
-    },
-    lab: {
-        channels: 3,
-        labels: 'lab'
-    },
-    lch: {
-        channels: 3,
-        labels: 'lch'
-    },
-    hex: {
-        channels: 1,
-        labels: [
-            'hex'
-        ]
-    },
-    keyword: {
-        channels: 1,
-        labels: [
-            'keyword'
-        ]
-    },
-    ansi16: {
-        channels: 1,
-        labels: [
-            'ansi16'
-        ]
-    },
-    ansi256: {
-        channels: 1,
-        labels: [
-            'ansi256'
-        ]
-    },
-    hcg: {
-        channels: 3,
-        labels: [
-            'h',
-            'c',
-            'g'
-        ]
-    },
-    apple: {
-        channels: 3,
-        labels: [
-            'r16',
-            'g16',
-            'b16'
-        ]
-    },
-    gray: {
-        channels: 1,
-        labels: [
-            'gray'
-        ]
-    }
-};
-$f48c6abccc789ef5$exports = $f48c6abccc789ef5$var$convert;
-// Hide .channels and .labels properties
-for (const model of Object.keys($f48c6abccc789ef5$var$convert)){
-    if (!('channels' in $f48c6abccc789ef5$var$convert[model])) throw new Error('missing channels property: ' + model);
-    if (!('labels' in $f48c6abccc789ef5$var$convert[model])) throw new Error('missing channel labels property: ' + model);
-    if ($f48c6abccc789ef5$var$convert[model].labels.length !== $f48c6abccc789ef5$var$convert[model].channels) throw new Error('channel and label counts mismatch: ' + model);
-    const { channels: channels, labels: labels } = $f48c6abccc789ef5$var$convert[model];
-    delete $f48c6abccc789ef5$var$convert[model].channels;
-    delete $f48c6abccc789ef5$var$convert[model].labels;
-    Object.defineProperty($f48c6abccc789ef5$var$convert[model], 'channels', {
-        value: channels
-    });
-    Object.defineProperty($f48c6abccc789ef5$var$convert[model], 'labels', {
-        value: labels
-    });
-}
-$f48c6abccc789ef5$var$convert.rgb.hsl = function(rgb) {
-    const r = rgb[0] / 255;
-    const g = rgb[1] / 255;
-    const b = rgb[2] / 255;
-    const min = Math.min(r, g, b);
-    const max = Math.max(r, g, b);
-    const delta = max - min;
-    let h;
-    let s;
-    if (max === min) h = 0;
-    else if (r === max) h = (g - b) / delta;
-    else if (g === max) h = 2 + (b - r) / delta;
-    else if (b === max) h = 4 + (r - g) / delta;
-    h = Math.min(h * 60, 360);
-    if (h < 0) h += 360;
-    const l = (min + max) / 2;
-    if (max === min) s = 0;
-    else if (l <= 0.5) s = delta / (max + min);
-    else s = delta / (2 - max - min);
-    return [
-        h,
-        s * 100,
-        l * 100
-    ];
-};
-$f48c6abccc789ef5$var$convert.rgb.hsv = function(rgb) {
-    let rdif;
-    let gdif;
-    let bdif;
-    let h;
-    let s;
-    const r = rgb[0] / 255;
-    const g = rgb[1] / 255;
-    const b = rgb[2] / 255;
-    const v = Math.max(r, g, b);
-    const diff = v - Math.min(r, g, b);
-    const diffc = function(c) {
-        return (v - c) / 6 / diff + 0.5;
-    };
-    if (diff === 0) {
-        h = 0;
-        s = 0;
-    } else {
-        s = diff / v;
-        rdif = diffc(r);
-        gdif = diffc(g);
-        bdif = diffc(b);
-        if (r === v) h = bdif - gdif;
-        else if (g === v) h = 1 / 3 + rdif - bdif;
-        else if (b === v) h = 2 / 3 + gdif - rdif;
-        if (h < 0) h += 1;
-        else if (h > 1) h -= 1;
-    }
-    return [
-        h * 360,
-        s * 100,
-        v * 100
-    ];
-};
-$f48c6abccc789ef5$var$convert.rgb.hwb = function(rgb) {
-    const r = rgb[0];
-    const g = rgb[1];
-    let b = rgb[2];
-    const h = $f48c6abccc789ef5$var$convert.rgb.hsl(rgb)[0];
-    const w = 1 / 255 * Math.min(r, Math.min(g, b));
-    b = 1 - 1 / 255 * Math.max(r, Math.max(g, b));
-    return [
-        h,
-        w * 100,
-        b * 100
-    ];
-};
-$f48c6abccc789ef5$var$convert.rgb.cmyk = function(rgb) {
-    const r = rgb[0] / 255;
-    const g = rgb[1] / 255;
-    const b = rgb[2] / 255;
-    const k = Math.min(1 - r, 1 - g, 1 - b);
-    const c = (1 - r - k) / (1 - k) || 0;
-    const m = (1 - g - k) / (1 - k) || 0;
-    const y = (1 - b - k) / (1 - k) || 0;
-    return [
-        c * 100,
-        m * 100,
-        y * 100,
-        k * 100
-    ];
-};
-function $f48c6abccc789ef5$var$comparativeDistance(x, y) {
-    /*
-		See https://en.m.wikipedia.org/wiki/Euclidean_distance#Squared_Euclidean_distance
-	*/ return (x[0] - y[0]) ** 2 + (x[1] - y[1]) ** 2 + (x[2] - y[2]) ** 2;
-}
-$f48c6abccc789ef5$var$convert.rgb.keyword = function(rgb) {
-    const reversed = $f48c6abccc789ef5$var$reverseKeywords[rgb];
-    if (reversed) return reversed;
-    let currentClosestDistance = Infinity;
-    let currentClosestKeyword;
-    for (const keyword of Object.keys($72c9eba4dd26aa1d$exports)){
-        const value = $72c9eba4dd26aa1d$exports[keyword];
-        // Compute comparative distance
-        const distance = $f48c6abccc789ef5$var$comparativeDistance(rgb, value);
-        // Check if its less, if so set as closest
-        if (distance < currentClosestDistance) {
-            currentClosestDistance = distance;
-            currentClosestKeyword = keyword;
-        }
-    }
-    return currentClosestKeyword;
-};
-$f48c6abccc789ef5$var$convert.keyword.rgb = function(keyword) {
-    return $72c9eba4dd26aa1d$exports[keyword];
-};
-$f48c6abccc789ef5$var$convert.rgb.xyz = function(rgb) {
-    let r = rgb[0] / 255;
-    let g = rgb[1] / 255;
-    let b = rgb[2] / 255;
-    // Assume sRGB
-    r = r > 0.04045 ? ((r + 0.055) / 1.055) ** 2.4 : r / 12.92;
-    g = g > 0.04045 ? ((g + 0.055) / 1.055) ** 2.4 : g / 12.92;
-    b = b > 0.04045 ? ((b + 0.055) / 1.055) ** 2.4 : b / 12.92;
-    const x = r * 0.4124 + g * 0.3576 + b * 0.1805;
-    const y = r * 0.2126 + g * 0.7152 + b * 0.0722;
-    const z = r * 0.0193 + g * 0.1192 + b * 0.9505;
-    return [
-        x * 100,
-        y * 100,
-        z * 100
-    ];
-};
-$f48c6abccc789ef5$var$convert.rgb.lab = function(rgb) {
-    const xyz = $f48c6abccc789ef5$var$convert.rgb.xyz(rgb);
-    let x = xyz[0];
-    let y = xyz[1];
-    let z = xyz[2];
-    x /= 95.047;
-    y /= 100;
-    z /= 108.883;
-    x = x > 0.008856 ? x ** (1 / 3) : 7.787 * x + 16 / 116;
-    y = y > 0.008856 ? y ** (1 / 3) : 7.787 * y + 16 / 116;
-    z = z > 0.008856 ? z ** (1 / 3) : 7.787 * z + 16 / 116;
-    const l = 116 * y - 16;
-    const a = 500 * (x - y);
-    const b = 200 * (y - z);
-    return [
-        l,
-        a,
-        b
-    ];
-};
-$f48c6abccc789ef5$var$convert.hsl.rgb = function(hsl) {
-    const h = hsl[0] / 360;
-    const s = hsl[1] / 100;
-    const l = hsl[2] / 100;
-    let t2;
-    let t3;
-    let val;
-    if (s === 0) {
-        val = l * 255;
-        return [
-            val,
-            val,
-            val
-        ];
-    }
-    if (l < 0.5) t2 = l * (1 + s);
-    else t2 = l + s - l * s;
-    const t1 = 2 * l - t2;
-    const rgb = [
-        0,
-        0,
-        0
-    ];
-    for(let i = 0; i < 3; i++){
-        t3 = h + 1 / 3 * -(i - 1);
-        if (t3 < 0) t3++;
-        if (t3 > 1) t3--;
-        if (6 * t3 < 1) val = t1 + (t2 - t1) * 6 * t3;
-        else if (2 * t3 < 1) val = t2;
-        else if (3 * t3 < 2) val = t1 + (t2 - t1) * (2 / 3 - t3) * 6;
-        else val = t1;
-        rgb[i] = val * 255;
-    }
-    return rgb;
-};
-$f48c6abccc789ef5$var$convert.hsl.hsv = function(hsl) {
-    const h = hsl[0];
-    let s = hsl[1] / 100;
-    let l = hsl[2] / 100;
-    let smin = s;
-    const lmin = Math.max(l, 0.01);
-    l *= 2;
-    s *= l <= 1 ? l : 2 - l;
-    smin *= lmin <= 1 ? lmin : 2 - lmin;
-    const v = (l + s) / 2;
-    const sv = l === 0 ? 2 * smin / (lmin + smin) : 2 * s / (l + s);
-    return [
-        h,
-        sv * 100,
-        v * 100
-    ];
-};
-$f48c6abccc789ef5$var$convert.hsv.rgb = function(hsv) {
-    const h = hsv[0] / 60;
-    const s = hsv[1] / 100;
-    let v = hsv[2] / 100;
-    const hi = Math.floor(h) % 6;
-    const f = h - Math.floor(h);
-    const p = 255 * v * (1 - s);
-    const q = 255 * v * (1 - s * f);
-    const t = 255 * v * (1 - s * (1 - f));
-    v *= 255;
-    switch(hi){
-        case 0:
-            return [
-                v,
-                t,
-                p
-            ];
-        case 1:
-            return [
-                q,
-                v,
-                p
-            ];
-        case 2:
-            return [
-                p,
-                v,
-                t
-            ];
-        case 3:
-            return [
-                p,
-                q,
-                v
-            ];
-        case 4:
-            return [
-                t,
-                p,
-                v
-            ];
-        case 5:
-            return [
-                v,
-                p,
-                q
-            ];
-    }
-};
-$f48c6abccc789ef5$var$convert.hsv.hsl = function(hsv) {
-    const h = hsv[0];
-    const s = hsv[1] / 100;
-    const v = hsv[2] / 100;
-    const vmin = Math.max(v, 0.01);
-    let sl;
-    let l;
-    l = (2 - s) * v;
-    const lmin = (2 - s) * vmin;
-    sl = s * vmin;
-    sl /= lmin <= 1 ? lmin : 2 - lmin;
-    sl = sl || 0;
-    l /= 2;
-    return [
-        h,
-        sl * 100,
-        l * 100
-    ];
-};
-// http://dev.w3.org/csswg/css-color/#hwb-to-rgb
-$f48c6abccc789ef5$var$convert.hwb.rgb = function(hwb) {
-    const h = hwb[0] / 360;
-    let wh = hwb[1] / 100;
-    let bl = hwb[2] / 100;
-    const ratio = wh + bl;
-    let f;
-    // Wh + bl cant be > 1
-    if (ratio > 1) {
-        wh /= ratio;
-        bl /= ratio;
-    }
-    const i = Math.floor(6 * h);
-    const v = 1 - bl;
-    f = 6 * h - i;
-    if ((i & 0x01) !== 0) f = 1 - f;
-    const n = wh + f * (v - wh); // Linear interpolation
-    let r;
-    let g;
-    let b;
-    /* eslint-disable max-statements-per-line,no-multi-spaces */ switch(i){
-        default:
-        case 6:
-        case 0:
-            r = v;
-            g = n;
-            b = wh;
-            break;
-        case 1:
-            r = n;
-            g = v;
-            b = wh;
-            break;
-        case 2:
-            r = wh;
-            g = v;
-            b = n;
-            break;
-        case 3:
-            r = wh;
-            g = n;
-            b = v;
-            break;
-        case 4:
-            r = n;
-            g = wh;
-            b = v;
-            break;
-        case 5:
-            r = v;
-            g = wh;
-            b = n;
-            break;
-    }
-    /* eslint-enable max-statements-per-line,no-multi-spaces */ return [
-        r * 255,
-        g * 255,
-        b * 255
-    ];
-};
-$f48c6abccc789ef5$var$convert.cmyk.rgb = function(cmyk) {
-    const c = cmyk[0] / 100;
-    const m = cmyk[1] / 100;
-    const y = cmyk[2] / 100;
-    const k = cmyk[3] / 100;
-    const r = 1 - Math.min(1, c * (1 - k) + k);
-    const g = 1 - Math.min(1, m * (1 - k) + k);
-    const b = 1 - Math.min(1, y * (1 - k) + k);
-    return [
-        r * 255,
-        g * 255,
-        b * 255
-    ];
-};
-$f48c6abccc789ef5$var$convert.xyz.rgb = function(xyz) {
-    const x = xyz[0] / 100;
-    const y = xyz[1] / 100;
-    const z = xyz[2] / 100;
-    let r;
-    let g;
-    let b;
-    r = x * 3.2406 + y * -1.5372 + z * -0.4986;
-    g = x * -0.9689 + y * 1.8758 + z * 0.0415;
-    b = x * 0.0557 + y * -0.204 + z * 1.0570;
-    // Assume sRGB
-    r = r > 0.0031308 ? 1.055 * r ** (1.0 / 2.4) - 0.055 : r * 12.92;
-    g = g > 0.0031308 ? 1.055 * g ** (1.0 / 2.4) - 0.055 : g * 12.92;
-    b = b > 0.0031308 ? 1.055 * b ** (1.0 / 2.4) - 0.055 : b * 12.92;
-    r = Math.min(Math.max(0, r), 1);
-    g = Math.min(Math.max(0, g), 1);
-    b = Math.min(Math.max(0, b), 1);
-    return [
-        r * 255,
-        g * 255,
-        b * 255
-    ];
-};
-$f48c6abccc789ef5$var$convert.xyz.lab = function(xyz) {
-    let x = xyz[0];
-    let y = xyz[1];
-    let z = xyz[2];
-    x /= 95.047;
-    y /= 100;
-    z /= 108.883;
-    x = x > 0.008856 ? x ** (1 / 3) : 7.787 * x + 16 / 116;
-    y = y > 0.008856 ? y ** (1 / 3) : 7.787 * y + 16 / 116;
-    z = z > 0.008856 ? z ** (1 / 3) : 7.787 * z + 16 / 116;
-    const l = 116 * y - 16;
-    const a = 500 * (x - y);
-    const b = 200 * (y - z);
-    return [
-        l,
-        a,
-        b
-    ];
-};
-$f48c6abccc789ef5$var$convert.lab.xyz = function(lab) {
-    const l = lab[0];
-    const a = lab[1];
-    const b = lab[2];
-    let x;
-    let y;
-    let z;
-    y = (l + 16) / 116;
-    x = a / 500 + y;
-    z = y - b / 200;
-    const y2 = y ** 3;
-    const x2 = x ** 3;
-    const z2 = z ** 3;
-    y = y2 > 0.008856 ? y2 : (y - 16 / 116) / 7.787;
-    x = x2 > 0.008856 ? x2 : (x - 16 / 116) / 7.787;
-    z = z2 > 0.008856 ? z2 : (z - 16 / 116) / 7.787;
-    x *= 95.047;
-    y *= 100;
-    z *= 108.883;
-    return [
-        x,
-        y,
-        z
-    ];
-};
-$f48c6abccc789ef5$var$convert.lab.lch = function(lab) {
-    const l = lab[0];
-    const a = lab[1];
-    const b = lab[2];
-    let h;
-    const hr = Math.atan2(b, a);
-    h = hr * 360 / 2 / Math.PI;
-    if (h < 0) h += 360;
-    const c = Math.sqrt(a * a + b * b);
-    return [
-        l,
-        c,
-        h
-    ];
-};
-$f48c6abccc789ef5$var$convert.lch.lab = function(lch) {
-    const l = lch[0];
-    const c = lch[1];
-    const h = lch[2];
-    const hr = h / 360 * 2 * Math.PI;
-    const a = c * Math.cos(hr);
-    const b = c * Math.sin(hr);
-    return [
-        l,
-        a,
-        b
-    ];
-};
-$f48c6abccc789ef5$var$convert.rgb.ansi16 = function(args, saturation = null) {
-    const [r, g, b] = args;
-    let value = saturation === null ? $f48c6abccc789ef5$var$convert.rgb.hsv(args)[2] : saturation; // Hsv -> ansi16 optimization
-    value = Math.round(value / 50);
-    if (value === 0) return 30;
-    let ansi = 30 + (Math.round(b / 255) << 2 | Math.round(g / 255) << 1 | Math.round(r / 255));
-    if (value === 2) ansi += 60;
-    return ansi;
-};
-$f48c6abccc789ef5$var$convert.hsv.ansi16 = function(args) {
-    // Optimization here; we already know the value and don't need to get
-    // it converted for us.
-    return $f48c6abccc789ef5$var$convert.rgb.ansi16($f48c6abccc789ef5$var$convert.hsv.rgb(args), args[2]);
-};
-$f48c6abccc789ef5$var$convert.rgb.ansi256 = function(args) {
-    const r = args[0];
-    const g = args[1];
-    const b = args[2];
-    // We use the extended greyscale palette here, with the exception of
-    // black and white. normal palette only has 4 greyscale shades.
-    if (r === g && g === b) {
-        if (r < 8) return 16;
-        if (r > 248) return 231;
-        return Math.round((r - 8) / 247 * 24) + 232;
-    }
-    const ansi = 16 + 36 * Math.round(r / 255 * 5) + 6 * Math.round(g / 255 * 5) + Math.round(b / 255 * 5);
-    return ansi;
-};
-$f48c6abccc789ef5$var$convert.ansi16.rgb = function(args) {
-    let color = args % 10;
-    // Handle greyscale
-    if (color === 0 || color === 7) {
-        if (args > 50) color += 3.5;
-        color = color / 10.5 * 255;
-        return [
-            color,
-            color,
-            color
-        ];
-    }
-    const mult = (~~(args > 50) + 1) * 0.5;
-    const r = (color & 1) * mult * 255;
-    const g = (color >> 1 & 1) * mult * 255;
-    const b = (color >> 2 & 1) * mult * 255;
-    return [
-        r,
-        g,
-        b
-    ];
-};
-$f48c6abccc789ef5$var$convert.ansi256.rgb = function(args) {
-    // Handle greyscale
-    if (args >= 232) {
-        const c = (args - 232) * 10 + 8;
-        return [
-            c,
-            c,
-            c
-        ];
-    }
-    args -= 16;
-    let rem;
-    const r = Math.floor(args / 36) / 5 * 255;
-    const g = Math.floor((rem = args % 36) / 6) / 5 * 255;
-    const b = rem % 6 / 5 * 255;
-    return [
-        r,
-        g,
-        b
-    ];
-};
-$f48c6abccc789ef5$var$convert.rgb.hex = function(args) {
-    const integer = ((Math.round(args[0]) & 0xFF) << 16) + ((Math.round(args[1]) & 0xFF) << 8) + (Math.round(args[2]) & 0xFF);
-    const string = integer.toString(16).toUpperCase();
-    return '000000'.substring(string.length) + string;
-};
-$f48c6abccc789ef5$var$convert.hex.rgb = function(args) {
-    const match = args.toString(16).match(/[a-f0-9]{6}|[a-f0-9]{3}/i);
-    if (!match) return [
-        0,
-        0,
-        0
-    ];
-    let colorString = match[0];
-    if (match[0].length === 3) colorString = colorString.split('').map((char)=>{
-        return char + char;
-    }).join('');
-    const integer = parseInt(colorString, 16);
-    const r = integer >> 16 & 0xFF;
-    const g = integer >> 8 & 0xFF;
-    const b = integer & 0xFF;
-    return [
-        r,
-        g,
-        b
-    ];
-};
-$f48c6abccc789ef5$var$convert.rgb.hcg = function(rgb) {
-    const r = rgb[0] / 255;
-    const g = rgb[1] / 255;
-    const b = rgb[2] / 255;
-    const max = Math.max(Math.max(r, g), b);
-    const min = Math.min(Math.min(r, g), b);
-    const chroma = max - min;
-    let grayscale;
-    let hue;
-    if (chroma < 1) grayscale = min / (1 - chroma);
-    else grayscale = 0;
-    if (chroma <= 0) hue = 0;
-    else if (max === r) hue = (g - b) / chroma % 6;
-    else if (max === g) hue = 2 + (b - r) / chroma;
-    else hue = 4 + (r - g) / chroma;
-    hue /= 6;
-    hue %= 1;
-    return [
-        hue * 360,
-        chroma * 100,
-        grayscale * 100
-    ];
-};
-$f48c6abccc789ef5$var$convert.hsl.hcg = function(hsl) {
-    const s = hsl[1] / 100;
-    const l = hsl[2] / 100;
-    const c = l < 0.5 ? 2.0 * s * l : 2.0 * s * (1.0 - l);
-    let f = 0;
-    if (c < 1.0) f = (l - 0.5 * c) / (1.0 - c);
-    return [
-        hsl[0],
-        c * 100,
-        f * 100
-    ];
-};
-$f48c6abccc789ef5$var$convert.hsv.hcg = function(hsv) {
-    const s = hsv[1] / 100;
-    const v = hsv[2] / 100;
-    const c = s * v;
-    let f = 0;
-    if (c < 1.0) f = (v - c) / (1 - c);
-    return [
-        hsv[0],
-        c * 100,
-        f * 100
-    ];
-};
-$f48c6abccc789ef5$var$convert.hcg.rgb = function(hcg) {
-    const h = hcg[0] / 360;
-    const c = hcg[1] / 100;
-    const g = hcg[2] / 100;
-    if (c === 0.0) return [
-        g * 255,
-        g * 255,
-        g * 255
-    ];
-    const pure = [
-        0,
-        0,
-        0
-    ];
-    const hi = h % 1 * 6;
-    const v = hi % 1;
-    const w = 1 - v;
-    let mg = 0;
-    /* eslint-disable max-statements-per-line */ switch(Math.floor(hi)){
-        case 0:
-            pure[0] = 1;
-            pure[1] = v;
-            pure[2] = 0;
-            break;
-        case 1:
-            pure[0] = w;
-            pure[1] = 1;
-            pure[2] = 0;
-            break;
-        case 2:
-            pure[0] = 0;
-            pure[1] = 1;
-            pure[2] = v;
-            break;
-        case 3:
-            pure[0] = 0;
-            pure[1] = w;
-            pure[2] = 1;
-            break;
-        case 4:
-            pure[0] = v;
-            pure[1] = 0;
-            pure[2] = 1;
-            break;
-        default:
-            pure[0] = 1;
-            pure[1] = 0;
-            pure[2] = w;
-    }
-    /* eslint-enable max-statements-per-line */ mg = (1.0 - c) * g;
-    return [
-        (c * pure[0] + mg) * 255,
-        (c * pure[1] + mg) * 255,
-        (c * pure[2] + mg) * 255
-    ];
-};
-$f48c6abccc789ef5$var$convert.hcg.hsv = function(hcg) {
-    const c = hcg[1] / 100;
-    const g = hcg[2] / 100;
-    const v = c + g * (1.0 - c);
-    let f = 0;
-    if (v > 0.0) f = c / v;
-    return [
-        hcg[0],
-        f * 100,
-        v * 100
-    ];
-};
-$f48c6abccc789ef5$var$convert.hcg.hsl = function(hcg) {
-    const c = hcg[1] / 100;
-    const g = hcg[2] / 100;
-    const l = g * (1.0 - c) + 0.5 * c;
-    let s = 0;
-    if (l > 0.0 && l < 0.5) s = c / (2 * l);
-    else if (l >= 0.5 && l < 1.0) s = c / (2 * (1 - l));
-    return [
-        hcg[0],
-        s * 100,
-        l * 100
-    ];
-};
-$f48c6abccc789ef5$var$convert.hcg.hwb = function(hcg) {
-    const c = hcg[1] / 100;
-    const g = hcg[2] / 100;
-    const v = c + g * (1.0 - c);
-    return [
-        hcg[0],
-        (v - c) * 100,
-        (1 - v) * 100
-    ];
-};
-$f48c6abccc789ef5$var$convert.hwb.hcg = function(hwb) {
-    const w = hwb[1] / 100;
-    const b = hwb[2] / 100;
-    const v = 1 - b;
-    const c = v - w;
-    let g = 0;
-    if (c < 1) g = (v - c) / (1 - c);
-    return [
-        hwb[0],
-        c * 100,
-        g * 100
-    ];
-};
-$f48c6abccc789ef5$var$convert.apple.rgb = function(apple) {
-    return [
-        apple[0] / 65535 * 255,
-        apple[1] / 65535 * 255,
-        apple[2] / 65535 * 255
-    ];
-};
-$f48c6abccc789ef5$var$convert.rgb.apple = function(rgb) {
-    return [
-        rgb[0] / 255 * 65535,
-        rgb[1] / 255 * 65535,
-        rgb[2] / 255 * 65535
-    ];
-};
-$f48c6abccc789ef5$var$convert.gray.rgb = function(args) {
-    return [
-        args[0] / 100 * 255,
-        args[0] / 100 * 255,
-        args[0] / 100 * 255
-    ];
-};
-$f48c6abccc789ef5$var$convert.gray.hsl = function(args) {
-    return [
-        0,
-        0,
-        args[0]
-    ];
-};
-$f48c6abccc789ef5$var$convert.gray.hsv = $f48c6abccc789ef5$var$convert.gray.hsl;
-$f48c6abccc789ef5$var$convert.gray.hwb = function(gray) {
-    return [
-        0,
-        100,
-        gray[0]
-    ];
-};
-$f48c6abccc789ef5$var$convert.gray.cmyk = function(gray) {
-    return [
-        0,
-        0,
-        0,
-        gray[0]
-    ];
-};
-$f48c6abccc789ef5$var$convert.gray.lab = function(gray) {
-    return [
-        gray[0],
-        0,
-        0
-    ];
-};
-$f48c6abccc789ef5$var$convert.gray.hex = function(gray) {
-    const val = Math.round(gray[0] / 100 * 255) & 0xFF;
-    const integer = (val << 16) + (val << 8) + val;
-    const string = integer.toString(16).toUpperCase();
-    return '000000'.substring(string.length) + string;
-};
-$f48c6abccc789ef5$var$convert.rgb.gray = function(rgb) {
-    const val = (rgb[0] + rgb[1] + rgb[2]) / 3;
-    return [
-        val / 255 * 100
-    ];
-};
-
-
-var $145e82ba91440c6e$exports = {};
-
-/*
-	This function routes a model to all other models.
-
-	all functions that are routed have a property `.conversion` attached
-	to the returned synthetic function. This property is an array
-	of strings, each with the steps in between the 'from' and 'to'
-	color models (inclusive).
-
-	conversions that are not possible simply are not included.
-*/ function $145e82ba91440c6e$var$buildGraph() {
-    const graph = {};
-    // https://jsperf.com/object-keys-vs-for-in-with-closure/3
-    const models = Object.keys($f48c6abccc789ef5$exports);
-    for(let len = models.length, i = 0; i < len; i++)graph[models[i]] = {
-        // http://jsperf.com/1-vs-infinity
-        // micro-opt, but this is simple.
-        distance: -1,
-        parent: null
-    };
-    return graph;
-}
-// https://en.wikipedia.org/wiki/Breadth-first_search
-function $145e82ba91440c6e$var$deriveBFS(fromModel) {
-    const graph = $145e82ba91440c6e$var$buildGraph();
-    const queue = [
-        fromModel
-    ]; // Unshift -> queue -> pop
-    graph[fromModel].distance = 0;
-    while(queue.length){
-        const current = queue.pop();
-        const adjacents = Object.keys($f48c6abccc789ef5$exports[current]);
-        for(let len = adjacents.length, i = 0; i < len; i++){
-            const adjacent = adjacents[i];
-            const node = graph[adjacent];
-            if (node.distance === -1) {
-                node.distance = graph[current].distance + 1;
-                node.parent = current;
-                queue.unshift(adjacent);
-            }
-        }
-    }
-    return graph;
-}
-function $145e82ba91440c6e$var$link(from, to) {
-    return function(args) {
-        return to(from(args));
-    };
-}
-function $145e82ba91440c6e$var$wrapConversion(toModel, graph) {
-    const path = [
-        graph[toModel].parent,
-        toModel
-    ];
-    let fn = $f48c6abccc789ef5$exports[graph[toModel].parent][toModel];
-    let cur = graph[toModel].parent;
-    while(graph[cur].parent){
-        path.unshift(graph[cur].parent);
-        fn = $145e82ba91440c6e$var$link($f48c6abccc789ef5$exports[graph[cur].parent][cur], fn);
-        cur = graph[cur].parent;
-    }
-    fn.conversion = path;
-    return fn;
-}
-$145e82ba91440c6e$exports = function(fromModel) {
-    const graph = $145e82ba91440c6e$var$deriveBFS(fromModel);
-    const conversion = {};
-    const models = Object.keys(graph);
-    for(let len = models.length, i = 0; i < len; i++){
-        const toModel = models[i];
-        const node = graph[toModel];
-        if (node.parent === null) continue;
-        conversion[toModel] = $145e82ba91440c6e$var$wrapConversion(toModel, graph);
-    }
-    return conversion;
-};
-
-
-const $b0ce43f4286ff9ac$var$convert = {};
-const $b0ce43f4286ff9ac$var$models = Object.keys($f48c6abccc789ef5$exports);
-function $b0ce43f4286ff9ac$var$wrapRaw(fn) {
-    const wrappedFn = function(...args) {
-        const arg0 = args[0];
-        if (arg0 === undefined || arg0 === null) return arg0;
-        if (arg0.length > 1) args = arg0;
-        return fn(args);
-    };
-    // Preserve .conversion property if there is one
-    if ('conversion' in fn) wrappedFn.conversion = fn.conversion;
-    return wrappedFn;
-}
-function $b0ce43f4286ff9ac$var$wrapRounded(fn) {
-    const wrappedFn = function(...args) {
-        const arg0 = args[0];
-        if (arg0 === undefined || arg0 === null) return arg0;
-        if (arg0.length > 1) args = arg0;
-        const result = fn(args);
-        // We're assuming the result is an array here.
-        // see notice in conversions.js; don't use box types
-        // in conversion functions.
-        if (typeof result === 'object') for(let len = result.length, i = 0; i < len; i++)result[i] = Math.round(result[i]);
-        return result;
-    };
-    // Preserve .conversion property if there is one
-    if ('conversion' in fn) wrappedFn.conversion = fn.conversion;
-    return wrappedFn;
-}
-$b0ce43f4286ff9ac$var$models.forEach((fromModel)=>{
-    $b0ce43f4286ff9ac$var$convert[fromModel] = {};
-    Object.defineProperty($b0ce43f4286ff9ac$var$convert[fromModel], 'channels', {
-        value: $f48c6abccc789ef5$exports[fromModel].channels
-    });
-    Object.defineProperty($b0ce43f4286ff9ac$var$convert[fromModel], 'labels', {
-        value: $f48c6abccc789ef5$exports[fromModel].labels
-    });
-    const routes = $145e82ba91440c6e$exports(fromModel);
-    const routeModels = Object.keys(routes);
-    routeModels.forEach((toModel)=>{
-        const fn = routes[toModel];
-        $b0ce43f4286ff9ac$var$convert[fromModel][toModel] = $b0ce43f4286ff9ac$var$wrapRounded(fn);
-        $b0ce43f4286ff9ac$var$convert[fromModel][toModel].raw = $b0ce43f4286ff9ac$var$wrapRaw(fn);
-    });
-});
-$b0ce43f4286ff9ac$exports = $b0ce43f4286ff9ac$var$convert;
-
-
-const $040ba8e83b63f6c5$var$skippedModels = [
-    // To be honest, I don't really feel like keyword belongs in color convert, but eh.
-    'keyword',
-    // Gray conflicts with some method names, and has its own method defined.
-    'gray',
-    // Shouldn't really be in color-convert either...
-    'hex'
-];
-const $040ba8e83b63f6c5$var$hashedModelKeys = {};
-for (const model of Object.keys($b0ce43f4286ff9ac$exports))$040ba8e83b63f6c5$var$hashedModelKeys[[
-    ...$b0ce43f4286ff9ac$exports[model].labels
-].sort().join('')] = model;
-const $040ba8e83b63f6c5$var$limiters = {};
-function $040ba8e83b63f6c5$var$Color(object, model) {
-    if (!(this instanceof $040ba8e83b63f6c5$var$Color)) return new $040ba8e83b63f6c5$var$Color(object, model);
-    if (model && model in $040ba8e83b63f6c5$var$skippedModels) model = null;
-    if (model && !(model in $b0ce43f4286ff9ac$exports)) throw new Error('Unknown model: ' + model);
-    let i;
-    let channels;
-    if (object == null) {
-        this.model = 'rgb';
-        this.color = [
-            0,
-            0,
-            0
-        ];
-        this.valpha = 1;
-    } else if (object instanceof $040ba8e83b63f6c5$var$Color) {
-        this.model = object.model;
-        this.color = [
-            ...object.color
-        ];
-        this.valpha = object.valpha;
-    } else if (typeof object === 'string') {
-        const result = $41148a221f03ee13$exports.get(object);
-        if (result === null) throw new Error('Unable to parse color from string: ' + object);
-        this.model = result.model;
-        channels = $b0ce43f4286ff9ac$exports[this.model].channels;
-        this.color = result.value.slice(0, channels);
-        this.valpha = typeof result.value[channels] === 'number' ? result.value[channels] : 1;
-    } else if (object.length > 0) {
-        this.model = model || 'rgb';
-        channels = $b0ce43f4286ff9ac$exports[this.model].channels;
-        const newArray = Array.prototype.slice.call(object, 0, channels);
-        this.color = $040ba8e83b63f6c5$var$zeroArray(newArray, channels);
-        this.valpha = typeof object[channels] === 'number' ? object[channels] : 1;
-    } else if (typeof object === 'number') {
-        // This is always RGB - can be converted later on.
-        this.model = 'rgb';
-        this.color = [
-            object >> 16 & 0xFF,
-            object >> 8 & 0xFF,
-            object & 0xFF
-        ];
-        this.valpha = 1;
-    } else {
-        this.valpha = 1;
-        const keys = Object.keys(object);
-        if ('alpha' in object) {
-            keys.splice(keys.indexOf('alpha'), 1);
-            this.valpha = typeof object.alpha === 'number' ? object.alpha : 0;
-        }
-        const hashedKeys = keys.sort().join('');
-        if (!(hashedKeys in $040ba8e83b63f6c5$var$hashedModelKeys)) throw new Error('Unable to parse color from object: ' + JSON.stringify(object));
-        this.model = $040ba8e83b63f6c5$var$hashedModelKeys[hashedKeys];
-        const { labels: labels } = $b0ce43f4286ff9ac$exports[this.model];
-        const color = [];
-        for(i = 0; i < labels.length; i++)color.push(object[labels[i]]);
-        this.color = $040ba8e83b63f6c5$var$zeroArray(color);
-    }
-    // Perform limitations (clamping, etc.)
-    if ($040ba8e83b63f6c5$var$limiters[this.model]) {
-        channels = $b0ce43f4286ff9ac$exports[this.model].channels;
-        for(i = 0; i < channels; i++){
-            const limit = $040ba8e83b63f6c5$var$limiters[this.model][i];
-            if (limit) this.color[i] = limit(this.color[i]);
-        }
-    }
-    this.valpha = Math.max(0, Math.min(1, this.valpha));
-    if (Object.freeze) Object.freeze(this);
-}
-$040ba8e83b63f6c5$var$Color.prototype = {
-    toString () {
-        return this.string();
-    },
-    toJSON () {
-        return this[this.model]();
-    },
-    string (places) {
-        let self = this.model in $41148a221f03ee13$exports.to ? this : this.rgb();
-        self = self.round(typeof places === 'number' ? places : 1);
-        const args = self.valpha === 1 ? self.color : [
-            ...self.color,
-            this.valpha
-        ];
-        return $41148a221f03ee13$exports.to[self.model](args);
-    },
-    percentString (places) {
-        const self = this.rgb().round(typeof places === 'number' ? places : 1);
-        const args = self.valpha === 1 ? self.color : [
-            ...self.color,
-            this.valpha
-        ];
-        return $41148a221f03ee13$exports.to.rgb.percent(args);
-    },
-    array () {
-        return this.valpha === 1 ? [
-            ...this.color
-        ] : [
-            ...this.color,
-            this.valpha
-        ];
-    },
-    object () {
-        const result = {};
-        const { channels: channels } = $b0ce43f4286ff9ac$exports[this.model];
-        const { labels: labels } = $b0ce43f4286ff9ac$exports[this.model];
-        for(let i = 0; i < channels; i++)result[labels[i]] = this.color[i];
-        if (this.valpha !== 1) result.alpha = this.valpha;
-        return result;
-    },
-    unitArray () {
-        const rgb = this.rgb().color;
-        rgb[0] /= 255;
-        rgb[1] /= 255;
-        rgb[2] /= 255;
-        if (this.valpha !== 1) rgb.push(this.valpha);
-        return rgb;
-    },
-    unitObject () {
-        const rgb = this.rgb().object();
-        rgb.r /= 255;
-        rgb.g /= 255;
-        rgb.b /= 255;
-        if (this.valpha !== 1) rgb.alpha = this.valpha;
-        return rgb;
-    },
-    round (places) {
-        places = Math.max(places || 0, 0);
-        return new $040ba8e83b63f6c5$var$Color([
-            ...this.color.map($040ba8e83b63f6c5$var$roundToPlace(places)),
-            this.valpha
-        ], this.model);
-    },
-    alpha (value) {
-        if (value !== undefined) return new $040ba8e83b63f6c5$var$Color([
-            ...this.color,
-            Math.max(0, Math.min(1, value))
-        ], this.model);
-        return this.valpha;
-    },
-    // Rgb
-    red: $040ba8e83b63f6c5$var$getset('rgb', 0, $040ba8e83b63f6c5$var$maxfn(255)),
-    green: $040ba8e83b63f6c5$var$getset('rgb', 1, $040ba8e83b63f6c5$var$maxfn(255)),
-    blue: $040ba8e83b63f6c5$var$getset('rgb', 2, $040ba8e83b63f6c5$var$maxfn(255)),
-    hue: $040ba8e83b63f6c5$var$getset([
-        'hsl',
-        'hsv',
-        'hsl',
-        'hwb',
-        'hcg'
-    ], 0, (value)=>(value % 360 + 360) % 360),
-    saturationl: $040ba8e83b63f6c5$var$getset('hsl', 1, $040ba8e83b63f6c5$var$maxfn(100)),
-    lightness: $040ba8e83b63f6c5$var$getset('hsl', 2, $040ba8e83b63f6c5$var$maxfn(100)),
-    saturationv: $040ba8e83b63f6c5$var$getset('hsv', 1, $040ba8e83b63f6c5$var$maxfn(100)),
-    value: $040ba8e83b63f6c5$var$getset('hsv', 2, $040ba8e83b63f6c5$var$maxfn(100)),
-    chroma: $040ba8e83b63f6c5$var$getset('hcg', 1, $040ba8e83b63f6c5$var$maxfn(100)),
-    gray: $040ba8e83b63f6c5$var$getset('hcg', 2, $040ba8e83b63f6c5$var$maxfn(100)),
-    white: $040ba8e83b63f6c5$var$getset('hwb', 1, $040ba8e83b63f6c5$var$maxfn(100)),
-    wblack: $040ba8e83b63f6c5$var$getset('hwb', 2, $040ba8e83b63f6c5$var$maxfn(100)),
-    cyan: $040ba8e83b63f6c5$var$getset('cmyk', 0, $040ba8e83b63f6c5$var$maxfn(100)),
-    magenta: $040ba8e83b63f6c5$var$getset('cmyk', 1, $040ba8e83b63f6c5$var$maxfn(100)),
-    yellow: $040ba8e83b63f6c5$var$getset('cmyk', 2, $040ba8e83b63f6c5$var$maxfn(100)),
-    black: $040ba8e83b63f6c5$var$getset('cmyk', 3, $040ba8e83b63f6c5$var$maxfn(100)),
-    x: $040ba8e83b63f6c5$var$getset('xyz', 0, $040ba8e83b63f6c5$var$maxfn(95.047)),
-    y: $040ba8e83b63f6c5$var$getset('xyz', 1, $040ba8e83b63f6c5$var$maxfn(100)),
-    z: $040ba8e83b63f6c5$var$getset('xyz', 2, $040ba8e83b63f6c5$var$maxfn(108.833)),
-    l: $040ba8e83b63f6c5$var$getset('lab', 0, $040ba8e83b63f6c5$var$maxfn(100)),
-    a: $040ba8e83b63f6c5$var$getset('lab', 1),
-    b: $040ba8e83b63f6c5$var$getset('lab', 2),
-    keyword (value) {
-        if (value !== undefined) return new $040ba8e83b63f6c5$var$Color(value);
-        return $b0ce43f4286ff9ac$exports[this.model].keyword(this.color);
-    },
-    hex (value) {
-        if (value !== undefined) return new $040ba8e83b63f6c5$var$Color(value);
-        return $41148a221f03ee13$exports.to.hex(this.rgb().round().color);
-    },
-    hexa (value) {
-        if (value !== undefined) return new $040ba8e83b63f6c5$var$Color(value);
-        const rgbArray = this.rgb().round().color;
-        let alphaHex = Math.round(this.valpha * 255).toString(16).toUpperCase();
-        if (alphaHex.length === 1) alphaHex = '0' + alphaHex;
-        return $41148a221f03ee13$exports.to.hex(rgbArray) + alphaHex;
-    },
-    rgbNumber () {
-        const rgb = this.rgb().color;
-        return (rgb[0] & 0xFF) << 16 | (rgb[1] & 0xFF) << 8 | rgb[2] & 0xFF;
-    },
-    luminosity () {
-        // http://www.w3.org/TR/WCAG20/#relativeluminancedef
-        const rgb = this.rgb().color;
-        const lum = [];
-        for (const [i, element] of rgb.entries()){
-            const chan = element / 255;
-            lum[i] = chan <= 0.04045 ? chan / 12.92 : ((chan + 0.055) / 1.055) ** 2.4;
-        }
-        return 0.2126 * lum[0] + 0.7152 * lum[1] + 0.0722 * lum[2];
-    },
-    contrast (color2) {
-        // http://www.w3.org/TR/WCAG20/#contrast-ratiodef
-        const lum1 = this.luminosity();
-        const lum2 = color2.luminosity();
-        if (lum1 > lum2) return (lum1 + 0.05) / (lum2 + 0.05);
-        return (lum2 + 0.05) / (lum1 + 0.05);
-    },
-    level (color2) {
-        // https://www.w3.org/TR/WCAG/#contrast-enhanced
-        const contrastRatio = this.contrast(color2);
-        if (contrastRatio >= 7) return 'AAA';
-        return contrastRatio >= 4.5 ? 'AA' : '';
-    },
-    isDark () {
-        // YIQ equation from http://24ways.org/2010/calculating-color-contrast
-        const rgb = this.rgb().color;
-        const yiq = (rgb[0] * 2126 + rgb[1] * 7152 + rgb[2] * 722) / 10000;
-        return yiq < 128;
-    },
-    isLight () {
-        return !this.isDark();
-    },
-    negate () {
-        const rgb = this.rgb();
-        for(let i = 0; i < 3; i++)rgb.color[i] = 255 - rgb.color[i];
-        return rgb;
-    },
-    lighten (ratio) {
-        const hsl = this.hsl();
-        hsl.color[2] += hsl.color[2] * ratio;
-        return hsl;
-    },
-    darken (ratio) {
-        const hsl = this.hsl();
-        hsl.color[2] -= hsl.color[2] * ratio;
-        return hsl;
-    },
-    saturate (ratio) {
-        const hsl = this.hsl();
-        hsl.color[1] += hsl.color[1] * ratio;
-        return hsl;
-    },
-    desaturate (ratio) {
-        const hsl = this.hsl();
-        hsl.color[1] -= hsl.color[1] * ratio;
-        return hsl;
-    },
-    whiten (ratio) {
-        const hwb = this.hwb();
-        hwb.color[1] += hwb.color[1] * ratio;
-        return hwb;
-    },
-    blacken (ratio) {
-        const hwb = this.hwb();
-        hwb.color[2] += hwb.color[2] * ratio;
-        return hwb;
-    },
-    grayscale () {
-        // http://en.wikipedia.org/wiki/Grayscale#Converting_color_to_grayscale
-        const rgb = this.rgb().color;
-        const value = rgb[0] * 0.3 + rgb[1] * 0.59 + rgb[2] * 0.11;
-        return $040ba8e83b63f6c5$var$Color.rgb(value, value, value);
-    },
-    fade (ratio) {
-        return this.alpha(this.valpha - this.valpha * ratio);
-    },
-    opaquer (ratio) {
-        return this.alpha(this.valpha + this.valpha * ratio);
-    },
-    rotate (degrees) {
-        const hsl = this.hsl();
-        let hue = hsl.color[0];
-        hue = (hue + degrees) % 360;
-        hue = hue < 0 ? 360 + hue : hue;
-        hsl.color[0] = hue;
-        return hsl;
-    },
-    mix (mixinColor, weight) {
-        // Ported from sass implementation in C
-        // https://github.com/sass/libsass/blob/0e6b4a2850092356aa3ece07c6b249f0221caced/functions.cpp#L209
-        if (!mixinColor || !mixinColor.rgb) throw new Error('Argument to "mix" was not a Color instance, but rather an instance of ' + typeof mixinColor);
-        const color1 = mixinColor.rgb();
-        const color2 = this.rgb();
-        const p = weight === undefined ? 0.5 : weight;
-        const w = 2 * p - 1;
-        const a = color1.alpha() - color2.alpha();
-        const w1 = ((w * a === -1 ? w : (w + a) / (1 + w * a)) + 1) / 2;
-        const w2 = 1 - w1;
-        return $040ba8e83b63f6c5$var$Color.rgb(w1 * color1.red() + w2 * color2.red(), w1 * color1.green() + w2 * color2.green(), w1 * color1.blue() + w2 * color2.blue(), color1.alpha() * p + color2.alpha() * (1 - p));
-    }
-};
-// Model conversion methods and static constructors
-for (const model of Object.keys($b0ce43f4286ff9ac$exports)){
-    if ($040ba8e83b63f6c5$var$skippedModels.includes(model)) continue;
-    const { channels: channels } = $b0ce43f4286ff9ac$exports[model];
-    // Conversion methods
-    $040ba8e83b63f6c5$var$Color.prototype[model] = function(...args) {
-        if (this.model === model) return new $040ba8e83b63f6c5$var$Color(this);
-        if (args.length > 0) return new $040ba8e83b63f6c5$var$Color(args, model);
-        return new $040ba8e83b63f6c5$var$Color([
-            ...$040ba8e83b63f6c5$var$assertArray($b0ce43f4286ff9ac$exports[this.model][model].raw(this.color)),
-            this.valpha
-        ], model);
-    };
-    // 'static' construction methods
-    $040ba8e83b63f6c5$var$Color[model] = function(...args) {
-        let color = args[0];
-        if (typeof color === 'number') color = $040ba8e83b63f6c5$var$zeroArray(args, channels);
-        return new $040ba8e83b63f6c5$var$Color(color, model);
-    };
-}
-function $040ba8e83b63f6c5$var$roundTo(number, places) {
-    return Number(number.toFixed(places));
-}
-function $040ba8e83b63f6c5$var$roundToPlace(places) {
-    return function(number) {
-        return $040ba8e83b63f6c5$var$roundTo(number, places);
-    };
-}
-function $040ba8e83b63f6c5$var$getset(model, channel, modifier) {
-    model = Array.isArray(model) ? model : [
-        model
-    ];
-    for (const m of model)($040ba8e83b63f6c5$var$limiters[m] || ($040ba8e83b63f6c5$var$limiters[m] = []))[channel] = modifier;
-    model = model[0];
-    return function(value) {
-        let result;
-        if (value !== undefined) {
-            if (modifier) value = modifier(value);
-            result = this[model]();
-            result.color[channel] = value;
-            return result;
-        }
-        result = this[model]().color[channel];
-        if (modifier) result = modifier(result);
-        return result;
-    };
-}
-function $040ba8e83b63f6c5$var$maxfn(max) {
-    return function(v) {
-        return Math.max(0, Math.min(max, v));
-    };
-}
-function $040ba8e83b63f6c5$var$assertArray(value) {
-    return Array.isArray(value) ? value : [
-        value
-    ];
-}
-function $040ba8e83b63f6c5$var$zeroArray(array, length) {
-    for(let i = 0; i < length; i++)if (typeof array[i] !== 'number') array[i] = 0;
-    return array;
-}
-$040ba8e83b63f6c5$exports = $040ba8e83b63f6c5$var$Color;
-
-
-var $84df4a417d8748cd$exports = {};
-var $a041c22fe0ffdbd8$exports = {};
-"use strict";
-Object.defineProperty($a041c22fe0ffdbd8$exports, "__esModule", {
-    value: true
-});
-Object.defineProperty($a041c22fe0ffdbd8$exports, "default", {
-    enumerable: true,
-    get: function() {
-        return $a041c22fe0ffdbd8$var$_default;
-    }
-});
-
-const $a041c22fe0ffdbd8$var$_createPlugin = /*#__PURE__*/ $a041c22fe0ffdbd8$var$_interop_require_default((parcelRequire("2Gj6O")));
-function $a041c22fe0ffdbd8$var$_interop_require_default(obj) {
-    return obj && obj.__esModule ? obj : {
-        default: obj
-    };
-}
-const $a041c22fe0ffdbd8$var$_default = $a041c22fe0ffdbd8$var$_createPlugin.default;
-
-
-$84df4a417d8748cd$exports = ($a041c22fe0ffdbd8$exports.__esModule ? $a041c22fe0ffdbd8$exports : {
-    default: $a041c22fe0ffdbd8$exports
-}).default;
-
-
-var $ff1d430d0589e4d1$exports = {};
-/**
- * lodash (Custom Build) <https://lodash.com/>
- * Build: `lodash modularize exports="npm" -o ./`
- * Copyright jQuery Foundation and other contributors <https://jquery.org/>
- * Released under MIT license <https://lodash.com/license>
- * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- */ /** Used as references for various `Number` constants. */ var $ff1d430d0589e4d1$var$MAX_SAFE_INTEGER = 9007199254740991;
-/** `Object#toString` result references. */ var $ff1d430d0589e4d1$var$argsTag = '[object Arguments]', $ff1d430d0589e4d1$var$funcTag = '[object Function]', $ff1d430d0589e4d1$var$genTag = '[object GeneratorFunction]';
-/** Used to detect unsigned integer values. */ var $ff1d430d0589e4d1$var$reIsUint = /^(?:0|[1-9]\d*)$/;
-/**
- * A specialized version of `_.forEach` for arrays without support for
- * iteratee shorthands.
- *
- * @private
- * @param {Array} [array] The array to iterate over.
- * @param {Function} iteratee The function invoked per iteration.
- * @returns {Array} Returns `array`.
- */ function $ff1d430d0589e4d1$var$arrayEach(array, iteratee) {
-    var index = -1, length = array ? array.length : 0;
-    while(++index < length){
-        if (iteratee(array[index], index, array) === false) break;
-    }
-    return array;
-}
-/**
- * The base implementation of `_.times` without support for iteratee shorthands
- * or max array length checks.
- *
- * @private
- * @param {number} n The number of times to invoke `iteratee`.
- * @param {Function} iteratee The function invoked per iteration.
- * @returns {Array} Returns the array of results.
- */ function $ff1d430d0589e4d1$var$baseTimes(n, iteratee) {
-    var index = -1, result = Array(n);
-    while(++index < n)result[index] = iteratee(index);
-    return result;
-}
-/**
- * Creates a unary function that invokes `func` with its argument transformed.
- *
- * @private
- * @param {Function} func The function to wrap.
- * @param {Function} transform The argument transform.
- * @returns {Function} Returns the new function.
- */ function $ff1d430d0589e4d1$var$overArg(func, transform) {
-    return function(arg) {
-        return func(transform(arg));
-    };
-}
-/** Used for built-in method references. */ var $ff1d430d0589e4d1$var$objectProto = Object.prototype;
-/** Used to check objects for own properties. */ var $ff1d430d0589e4d1$var$hasOwnProperty = $ff1d430d0589e4d1$var$objectProto.hasOwnProperty;
-/**
- * Used to resolve the
- * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
- * of values.
- */ var $ff1d430d0589e4d1$var$objectToString = $ff1d430d0589e4d1$var$objectProto.toString;
-/** Built-in value references. */ var $ff1d430d0589e4d1$var$propertyIsEnumerable = $ff1d430d0589e4d1$var$objectProto.propertyIsEnumerable;
-/* Built-in method references for those with the same name as other `lodash` methods. */ var $ff1d430d0589e4d1$var$nativeKeys = $ff1d430d0589e4d1$var$overArg(Object.keys, Object);
-/**
- * Creates an array of the enumerable property names of the array-like `value`.
- *
- * @private
- * @param {*} value The value to query.
- * @param {boolean} inherited Specify returning inherited property names.
- * @returns {Array} Returns the array of property names.
- */ function $ff1d430d0589e4d1$var$arrayLikeKeys(value, inherited) {
-    // Safari 8.1 makes `arguments.callee` enumerable in strict mode.
-    // Safari 9 makes `arguments.length` enumerable in strict mode.
-    var result = $ff1d430d0589e4d1$var$isArray(value) || $ff1d430d0589e4d1$var$isArguments(value) ? $ff1d430d0589e4d1$var$baseTimes(value.length, String) : [];
-    var length = result.length, skipIndexes = !!length;
-    for(var key in value)if ((inherited || $ff1d430d0589e4d1$var$hasOwnProperty.call(value, key)) && !(skipIndexes && (key == 'length' || $ff1d430d0589e4d1$var$isIndex(key, length)))) result.push(key);
-    return result;
-}
-/**
- * The base implementation of `_.forEach` without support for iteratee shorthands.
- *
- * @private
- * @param {Array|Object} collection The collection to iterate over.
- * @param {Function} iteratee The function invoked per iteration.
- * @returns {Array|Object} Returns `collection`.
- */ var $ff1d430d0589e4d1$var$baseEach = $ff1d430d0589e4d1$var$createBaseEach($ff1d430d0589e4d1$var$baseForOwn);
-/**
- * The base implementation of `baseForOwn` which iterates over `object`
- * properties returned by `keysFunc` and invokes `iteratee` for each property.
- * Iteratee functions may exit iteration early by explicitly returning `false`.
- *
- * @private
- * @param {Object} object The object to iterate over.
- * @param {Function} iteratee The function invoked per iteration.
- * @param {Function} keysFunc The function to get the keys of `object`.
- * @returns {Object} Returns `object`.
- */ var $ff1d430d0589e4d1$var$baseFor = $ff1d430d0589e4d1$var$createBaseFor();
-/**
- * The base implementation of `_.forOwn` without support for iteratee shorthands.
- *
- * @private
- * @param {Object} object The object to iterate over.
- * @param {Function} iteratee The function invoked per iteration.
- * @returns {Object} Returns `object`.
- */ function $ff1d430d0589e4d1$var$baseForOwn(object, iteratee) {
-    return object && $ff1d430d0589e4d1$var$baseFor(object, iteratee, $ff1d430d0589e4d1$var$keys);
-}
-/**
- * The base implementation of `_.keys` which doesn't treat sparse arrays as dense.
- *
- * @private
- * @param {Object} object The object to query.
- * @returns {Array} Returns the array of property names.
- */ function $ff1d430d0589e4d1$var$baseKeys(object) {
-    if (!$ff1d430d0589e4d1$var$isPrototype(object)) return $ff1d430d0589e4d1$var$nativeKeys(object);
-    var result = [];
-    for(var key in Object(object))if ($ff1d430d0589e4d1$var$hasOwnProperty.call(object, key) && key != 'constructor') result.push(key);
-    return result;
-}
-/**
- * Creates a `baseEach` or `baseEachRight` function.
- *
- * @private
- * @param {Function} eachFunc The function to iterate over a collection.
- * @param {boolean} [fromRight] Specify iterating from right to left.
- * @returns {Function} Returns the new base function.
- */ function $ff1d430d0589e4d1$var$createBaseEach(eachFunc, fromRight) {
-    return function(collection, iteratee) {
-        if (collection == null) return collection;
-        if (!$ff1d430d0589e4d1$var$isArrayLike(collection)) return eachFunc(collection, iteratee);
-        var length = collection.length, index = fromRight ? length : -1, iterable = Object(collection);
-        while(fromRight ? index-- : ++index < length){
-            if (iteratee(iterable[index], index, iterable) === false) break;
-        }
-        return collection;
-    };
-}
-/**
- * Creates a base function for methods like `_.forIn` and `_.forOwn`.
- *
- * @private
- * @param {boolean} [fromRight] Specify iterating from right to left.
- * @returns {Function} Returns the new base function.
- */ function $ff1d430d0589e4d1$var$createBaseFor(fromRight) {
-    return function(object, iteratee, keysFunc) {
-        var index = -1, iterable = Object(object), props = keysFunc(object), length = props.length;
-        while(length--){
-            var key = props[fromRight ? length : ++index];
-            if (iteratee(iterable[key], key, iterable) === false) break;
-        }
-        return object;
-    };
-}
-/**
- * Checks if `value` is a valid array-like index.
- *
- * @private
- * @param {*} value The value to check.
- * @param {number} [length=MAX_SAFE_INTEGER] The upper bounds of a valid index.
- * @returns {boolean} Returns `true` if `value` is a valid index, else `false`.
- */ function $ff1d430d0589e4d1$var$isIndex(value, length) {
-    length = length == null ? $ff1d430d0589e4d1$var$MAX_SAFE_INTEGER : length;
-    return !!length && (typeof value == 'number' || $ff1d430d0589e4d1$var$reIsUint.test(value)) && value > -1 && value % 1 == 0 && value < length;
-}
-/**
- * Checks if `value` is likely a prototype object.
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a prototype, else `false`.
- */ function $ff1d430d0589e4d1$var$isPrototype(value) {
-    var Ctor = value && value.constructor, proto = typeof Ctor == 'function' && Ctor.prototype || $ff1d430d0589e4d1$var$objectProto;
-    return value === proto;
-}
-/**
- * Iterates over elements of `collection` and invokes `iteratee` for each element.
- * The iteratee is invoked with three arguments: (value, index|key, collection).
- * Iteratee functions may exit iteration early by explicitly returning `false`.
- *
- * **Note:** As with other "Collections" methods, objects with a "length"
- * property are iterated like arrays. To avoid this behavior use `_.forIn`
- * or `_.forOwn` for object iteration.
- *
- * @static
- * @memberOf _
- * @since 0.1.0
- * @alias each
- * @category Collection
- * @param {Array|Object} collection The collection to iterate over.
- * @param {Function} [iteratee=_.identity] The function invoked per iteration.
- * @returns {Array|Object} Returns `collection`.
- * @see _.forEachRight
- * @example
- *
- * _([1, 2]).forEach(function(value) {
- *   console.log(value);
- * });
- * // => Logs `1` then `2`.
- *
- * _.forEach({ 'a': 1, 'b': 2 }, function(value, key) {
- *   console.log(key);
- * });
- * // => Logs 'a' then 'b' (iteration order is not guaranteed).
- */ function $ff1d430d0589e4d1$var$forEach(collection, iteratee) {
-    var func = $ff1d430d0589e4d1$var$isArray(collection) ? $ff1d430d0589e4d1$var$arrayEach : $ff1d430d0589e4d1$var$baseEach;
-    return func(collection, typeof iteratee == 'function' ? iteratee : $ff1d430d0589e4d1$var$identity);
-}
-/**
- * Checks if `value` is likely an `arguments` object.
- *
- * @static
- * @memberOf _
- * @since 0.1.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an `arguments` object,
- *  else `false`.
- * @example
- *
- * _.isArguments(function() { return arguments; }());
- * // => true
- *
- * _.isArguments([1, 2, 3]);
- * // => false
- */ function $ff1d430d0589e4d1$var$isArguments(value) {
-    // Safari 8.1 makes `arguments.callee` enumerable in strict mode.
-    return $ff1d430d0589e4d1$var$isArrayLikeObject(value) && $ff1d430d0589e4d1$var$hasOwnProperty.call(value, 'callee') && (!$ff1d430d0589e4d1$var$propertyIsEnumerable.call(value, 'callee') || $ff1d430d0589e4d1$var$objectToString.call(value) == $ff1d430d0589e4d1$var$argsTag);
-}
-/**
- * Checks if `value` is classified as an `Array` object.
- *
- * @static
- * @memberOf _
- * @since 0.1.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an array, else `false`.
- * @example
- *
- * _.isArray([1, 2, 3]);
- * // => true
- *
- * _.isArray(document.body.children);
- * // => false
- *
- * _.isArray('abc');
- * // => false
- *
- * _.isArray(_.noop);
- * // => false
- */ var $ff1d430d0589e4d1$var$isArray = Array.isArray;
-/**
- * Checks if `value` is array-like. A value is considered array-like if it's
- * not a function and has a `value.length` that's an integer greater than or
- * equal to `0` and less than or equal to `Number.MAX_SAFE_INTEGER`.
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is array-like, else `false`.
- * @example
- *
- * _.isArrayLike([1, 2, 3]);
- * // => true
- *
- * _.isArrayLike(document.body.children);
- * // => true
- *
- * _.isArrayLike('abc');
- * // => true
- *
- * _.isArrayLike(_.noop);
- * // => false
- */ function $ff1d430d0589e4d1$var$isArrayLike(value) {
-    return value != null && $ff1d430d0589e4d1$var$isLength(value.length) && !$ff1d430d0589e4d1$var$isFunction(value);
-}
-/**
- * This method is like `_.isArrayLike` except that it also checks if `value`
- * is an object.
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an array-like object,
- *  else `false`.
- * @example
- *
- * _.isArrayLikeObject([1, 2, 3]);
- * // => true
- *
- * _.isArrayLikeObject(document.body.children);
- * // => true
- *
- * _.isArrayLikeObject('abc');
- * // => false
- *
- * _.isArrayLikeObject(_.noop);
- * // => false
- */ function $ff1d430d0589e4d1$var$isArrayLikeObject(value) {
-    return $ff1d430d0589e4d1$var$isObjectLike(value) && $ff1d430d0589e4d1$var$isArrayLike(value);
-}
-/**
- * Checks if `value` is classified as a `Function` object.
- *
- * @static
- * @memberOf _
- * @since 0.1.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a function, else `false`.
- * @example
- *
- * _.isFunction(_);
- * // => true
- *
- * _.isFunction(/abc/);
- * // => false
- */ function $ff1d430d0589e4d1$var$isFunction(value) {
-    // The use of `Object#toString` avoids issues with the `typeof` operator
-    // in Safari 8-9 which returns 'object' for typed array and other constructors.
-    var tag = $ff1d430d0589e4d1$var$isObject(value) ? $ff1d430d0589e4d1$var$objectToString.call(value) : '';
-    return tag == $ff1d430d0589e4d1$var$funcTag || tag == $ff1d430d0589e4d1$var$genTag;
-}
-/**
- * Checks if `value` is a valid array-like length.
- *
- * **Note:** This method is loosely based on
- * [`ToLength`](http://ecma-international.org/ecma-262/7.0/#sec-tolength).
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a valid length, else `false`.
- * @example
- *
- * _.isLength(3);
- * // => true
- *
- * _.isLength(Number.MIN_VALUE);
- * // => false
- *
- * _.isLength(Infinity);
- * // => false
- *
- * _.isLength('3');
- * // => false
- */ function $ff1d430d0589e4d1$var$isLength(value) {
-    return typeof value == 'number' && value > -1 && value % 1 == 0 && value <= $ff1d430d0589e4d1$var$MAX_SAFE_INTEGER;
-}
-/**
- * Checks if `value` is the
- * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
- * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
- *
- * @static
- * @memberOf _
- * @since 0.1.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an object, else `false`.
- * @example
- *
- * _.isObject({});
- * // => true
- *
- * _.isObject([1, 2, 3]);
- * // => true
- *
- * _.isObject(_.noop);
- * // => true
- *
- * _.isObject(null);
- * // => false
- */ function $ff1d430d0589e4d1$var$isObject(value) {
-    var type = typeof value;
-    return !!value && (type == 'object' || type == 'function');
-}
-/**
- * Checks if `value` is object-like. A value is object-like if it's not `null`
- * and has a `typeof` result of "object".
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
- * @example
- *
- * _.isObjectLike({});
- * // => true
- *
- * _.isObjectLike([1, 2, 3]);
- * // => true
- *
- * _.isObjectLike(_.noop);
- * // => false
- *
- * _.isObjectLike(null);
- * // => false
- */ function $ff1d430d0589e4d1$var$isObjectLike(value) {
-    return !!value && typeof value == 'object';
-}
-/**
- * Creates an array of the own enumerable property names of `object`.
- *
- * **Note:** Non-object values are coerced to objects. See the
- * [ES spec](http://ecma-international.org/ecma-262/7.0/#sec-object.keys)
- * for more details.
- *
- * @static
- * @since 0.1.0
- * @memberOf _
- * @category Object
- * @param {Object} object The object to query.
- * @returns {Array} Returns the array of property names.
- * @example
- *
- * function Foo() {
- *   this.a = 1;
- *   this.b = 2;
- * }
- *
- * Foo.prototype.c = 3;
- *
- * _.keys(new Foo);
- * // => ['a', 'b'] (iteration order is not guaranteed)
- *
- * _.keys('hi');
- * // => ['0', '1']
- */ function $ff1d430d0589e4d1$var$keys(object) {
-    return $ff1d430d0589e4d1$var$isArrayLike(object) ? $ff1d430d0589e4d1$var$arrayLikeKeys(object) : $ff1d430d0589e4d1$var$baseKeys(object);
-}
-/**
- * This method returns the first argument it receives.
- *
- * @static
- * @since 0.1.0
- * @memberOf _
- * @category Util
- * @param {*} value Any value.
- * @returns {*} Returns `value`.
- * @example
- *
- * var object = { 'a': 1 };
- *
- * console.log(_.identity(object) === object);
- * // => true
- */ function $ff1d430d0589e4d1$var$identity(value) {
-    return value;
-}
-$ff1d430d0589e4d1$exports = $ff1d430d0589e4d1$var$forEach;
-
-
-var $4c07cb87e79a40c4$exports = {};
-$4c07cb87e79a40c4$exports = $4c07cb87e79a40c4$var$flatten;
-$4c07cb87e79a40c4$var$flatten.flatten = $4c07cb87e79a40c4$var$flatten;
-$4c07cb87e79a40c4$var$flatten.unflatten = $4c07cb87e79a40c4$var$unflatten;
-function $4c07cb87e79a40c4$var$isBuffer(obj) {
-    return obj && obj.constructor && typeof obj.constructor.isBuffer === 'function' && obj.constructor.isBuffer(obj);
-}
-function $4c07cb87e79a40c4$var$keyIdentity(key) {
-    return key;
-}
-function $4c07cb87e79a40c4$var$flatten(target, opts) {
-    opts = opts || {};
-    const delimiter = opts.delimiter || '.';
-    const maxDepth = opts.maxDepth;
-    const transformKey = opts.transformKey || $4c07cb87e79a40c4$var$keyIdentity;
-    const output = {};
-    function step(object, prev, currentDepth) {
-        currentDepth = currentDepth || 1;
-        Object.keys(object).forEach(function(key) {
-            const value = object[key];
-            const isarray = opts.safe && Array.isArray(value);
-            const type = Object.prototype.toString.call(value);
-            const isbuffer = $4c07cb87e79a40c4$var$isBuffer(value);
-            const isobject = type === '[object Object]' || type === '[object Array]';
-            const newKey = prev ? prev + delimiter + transformKey(key) : transformKey(key);
-            if (!isarray && !isbuffer && isobject && Object.keys(value).length && (!opts.maxDepth || currentDepth < maxDepth)) return step(value, newKey, currentDepth + 1);
-            output[newKey] = value;
-        });
-    }
-    step(target);
-    return output;
-}
-function $4c07cb87e79a40c4$var$unflatten(target, opts) {
-    opts = opts || {};
-    const delimiter = opts.delimiter || '.';
-    const overwrite = opts.overwrite || false;
-    const transformKey = opts.transformKey || $4c07cb87e79a40c4$var$keyIdentity;
-    const result = {};
-    const isbuffer = $4c07cb87e79a40c4$var$isBuffer(target);
-    if (isbuffer || Object.prototype.toString.call(target) !== '[object Object]') return target;
-    // safely ensure that the key is
-    // an integer.
-    function getkey(key) {
-        const parsedKey = Number(key);
-        return isNaN(parsedKey) || key.indexOf('.') !== -1 || opts.object ? key : parsedKey;
-    }
-    function addKeys(keyPrefix, recipient, target) {
-        return Object.keys(target).reduce(function(result, key) {
-            result[keyPrefix + delimiter + key] = target[key];
-            return result;
-        }, recipient);
-    }
-    function isEmpty(val) {
-        const type = Object.prototype.toString.call(val);
-        const isArray = type === '[object Array]';
-        const isObject = type === '[object Object]';
-        if (!val) return true;
-        else if (isArray) return !val.length;
-        else if (isObject) return !Object.keys(val).length;
-    }
-    target = Object.keys(target).reduce(function(result, key) {
-        const type = Object.prototype.toString.call(target[key]);
-        const isObject = type === '[object Object]' || type === '[object Array]';
-        if (!isObject || isEmpty(target[key])) {
-            result[key] = target[key];
-            return result;
-        } else return addKeys(key, result, $4c07cb87e79a40c4$var$flatten(target[key], opts));
-    }, {});
-    Object.keys(target).forEach(function(key) {
-        const split = key.split(delimiter).map(transformKey);
-        let key1 = getkey(split.shift());
-        let key2 = getkey(split[0]);
-        let recipient = result;
-        while(key2 !== undefined){
-            if (key1 === '__proto__') return;
-            const type = Object.prototype.toString.call(recipient[key1]);
-            const isobject = type === '[object Object]' || type === '[object Array]';
-            // do not write over falsey, non-undefined values if overwrite is false
-            if (!overwrite && !isobject && typeof recipient[key1] !== 'undefined') return;
-            if (overwrite && !isobject || !overwrite && recipient[key1] == null) recipient[key1] = typeof key2 === 'number' && !opts.object ? [] : {};
-            recipient = recipient[key1];
-            if (split.length > 0) {
-                key1 = getkey(split.shift());
-                key2 = getkey(split[0]);
-            }
-        }
-        // unflatten again for 'messy objects'
-        recipient[key1] = $4c07cb87e79a40c4$var$unflatten(target[key], opts);
-    });
-    return result;
-}
-
-
-var $1cab5c01d65a66cd$var$SCHEME = Symbol("color-scheme");
-var $1cab5c01d65a66cd$var$emptyConfig = {};
-var $1cab5c01d65a66cd$export$231aedbc8f7c4964 = (config = $1cab5c01d65a66cd$var$emptyConfig, { produceCssVariable: produceCssVariable = $1cab5c01d65a66cd$var$defaultProduceCssVariable, produceThemeClass: produceThemeClass = $1cab5c01d65a66cd$var$defaultProduceThemeClass, produceThemeVariant: produceThemeVariant = produceThemeClass, defaultTheme: defaultTheme, strict: strict = false } = {})=>{
-    const resolved = {
-        variants: [],
-        utilities: {},
-        colors: {}
-    };
-    const configObject = typeof config === "function" ? config({
-        dark: $1cab5c01d65a66cd$var$dark,
-        light: $1cab5c01d65a66cd$var$light
-    }) : config;
-    (0, (/*@__PURE__*/$parcel$interopDefault($ff1d430d0589e4d1$exports)))(configObject, (colors, themeName)=>{
-        const themeClassName = produceThemeClass(themeName);
-        const themeVariant = produceThemeVariant(themeName);
-        const flatColors = $1cab5c01d65a66cd$var$flattenColors(colors);
-        resolved.variants.push({
-            name: themeVariant,
-            // tailwind will generate only the first matched definition
-            definition: [
-                $1cab5c01d65a66cd$var$generateVariantDefinitions(`.${themeClassName}`),
-                $1cab5c01d65a66cd$var$generateVariantDefinitions(`[data-theme='${themeName}']`),
-                $1cab5c01d65a66cd$var$generateRootVariantDefinitions(themeName, defaultTheme)
-            ].flat()
-        });
-        const cssSelector = `.${themeClassName},[data-theme="${themeName}"]`;
-        resolved.utilities[cssSelector] = colors[$1cab5c01d65a66cd$var$SCHEME] ? {
-            "color-scheme": colors[$1cab5c01d65a66cd$var$SCHEME]
-        } : {};
-        (0, (/*@__PURE__*/$parcel$interopDefault($ff1d430d0589e4d1$exports)))(flatColors, (colorValue, colorName)=>{
-            if (colorName === $1cab5c01d65a66cd$var$SCHEME) return;
-            const safeColorName = $1cab5c01d65a66cd$var$escapeChars(colorName, "/");
-            let [h, s, l, defaultAlphaValue] = [
-                0,
-                0,
-                0,
-                1
-            ];
-            try {
-                [h, s, l, defaultAlphaValue] = $1cab5c01d65a66cd$var$toHslaArray(colorValue);
-            } catch (error) {
-                const message = `\r
-Warning - In theme "${themeName}" color "${colorName}". ${error.message}`;
-                if (strict) throw new Error(message);
-                return console.error(message);
-            }
-            const twcColorVariable = produceCssVariable(safeColorName);
-            const twcOpacityVariable = `${produceCssVariable(safeColorName)}-opacity`;
-            const hslValues = `${h} ${s}% ${l}%`;
-            resolved.utilities[cssSelector][twcColorVariable] = hslValues;
-            $1cab5c01d65a66cd$var$addRootUtilities(resolved.utilities, {
-                key: twcColorVariable,
-                value: hslValues,
-                defaultTheme: defaultTheme,
-                themeName: themeName
-            });
-            if (typeof defaultAlphaValue === "number") {
-                const alphaValue = defaultAlphaValue.toFixed(2);
-                resolved.utilities[cssSelector][twcOpacityVariable] = alphaValue;
-                $1cab5c01d65a66cd$var$addRootUtilities(resolved.utilities, {
-                    key: twcOpacityVariable,
-                    value: alphaValue,
-                    defaultTheme: defaultTheme,
-                    themeName: themeName
-                });
-            }
-            resolved.colors[colorName] = ({ opacityVariable: opacityVariable, opacityValue: opacityValue })=>{
-                if (!isNaN(+opacityValue)) return `hsl(var(${twcColorVariable}) / ${opacityValue})`;
-                if (opacityVariable) return `hsl(var(${twcColorVariable}) / var(${twcOpacityVariable}, var(${opacityVariable})))`;
-                return `hsl(var(${twcColorVariable}) / var(${twcOpacityVariable}, 1))`;
-            };
-        });
-    });
-    return resolved;
-};
-var $1cab5c01d65a66cd$export$d712115a11635717 = (config = $1cab5c01d65a66cd$var$emptyConfig, options = {})=>{
-    const resolved = $1cab5c01d65a66cd$export$231aedbc8f7c4964(config, options);
-    return (0, (/*@__PURE__*/$parcel$interopDefault($84df4a417d8748cd$exports)))(({ addUtilities: addUtilities, addVariant: addVariant })=>{
-        addUtilities(resolved.utilities);
-        resolved.variants.forEach(({ name: name, definition: definition })=>addVariant(name, definition));
-    }, // extend the colors config
-    {
-        theme: {
-            extend: {
-                // @ts-ignore tailwind types are broken
-                colors: resolved.colors
-            }
-        }
-    });
-};
-function $1cab5c01d65a66cd$var$escapeChars(str, ...chars) {
-    let result = str;
-    for (let char of chars){
-        const regexp = new RegExp(char, "g");
-        result = str.replace(regexp, "\\" + char);
-    }
-    return result;
-}
-function $1cab5c01d65a66cd$var$flattenColors(colors) {
-    const flatColorsWithDEFAULT = (0, (/*@__PURE__*/$parcel$interopDefault($4c07cb87e79a40c4$exports)))(colors, {
-        safe: true,
-        delimiter: "-"
-    });
-    return Object.entries(flatColorsWithDEFAULT).reduce((acc, [key, value])=>{
-        acc[key.replace(/\-DEFAULT$/, "")] = value;
-        return acc;
-    }, {});
-}
-function $1cab5c01d65a66cd$var$toHslaArray(colorValue) {
-    return (0, (/*@__PURE__*/$parcel$interopDefault($040ba8e83b63f6c5$exports)))(colorValue).hsl().round(1).array();
-}
-function $1cab5c01d65a66cd$var$defaultProduceCssVariable(themeName) {
-    return `--twc-${themeName}`;
-}
-function $1cab5c01d65a66cd$var$defaultProduceThemeClass(themeName) {
-    return themeName;
-}
-function $1cab5c01d65a66cd$var$dark(colors) {
-    return {
-        ...colors,
-        [$1cab5c01d65a66cd$var$SCHEME]: "dark"
-    };
-}
-function $1cab5c01d65a66cd$var$light(colors) {
-    return {
-        ...colors,
-        [$1cab5c01d65a66cd$var$SCHEME]: "light"
-    };
-}
-function $1cab5c01d65a66cd$var$generateVariantDefinitions(selector) {
-    return [
-        `${selector}&`,
-        `:is(${selector} > &:not([data-theme]))`,
-        `:is(${selector} &:not(${selector} [data-theme]:not(${selector}) * ))`,
-        `:is(${selector}:not(:has([data-theme])) &:not([data-theme]))`
-    ];
-}
-function $1cab5c01d65a66cd$var$generateRootVariantDefinitions(themeName, defaultTheme) {
-    const baseDefinitions = [
-        `:root&`,
-        `:is(:root > &:not([data-theme]))`,
-        `:is(:root &:not([data-theme] *):not([data-theme]))`
-    ];
-    if (typeof defaultTheme === "string" && themeName === defaultTheme) return baseDefinitions;
-    if (typeof defaultTheme === "object" && themeName === defaultTheme.light) return baseDefinitions.map((definition)=>`@media (prefers-color-scheme: light){${definition}}`);
-    if (typeof defaultTheme === "object" && themeName === defaultTheme.dark) return baseDefinitions.map((definition)=>`@media (prefers-color-scheme: dark){${definition}}`);
-    return [];
-}
-function $1cab5c01d65a66cd$var$addRootUtilities(utilities, { key: key, value: value, defaultTheme: defaultTheme, themeName: themeName }) {
-    if (!defaultTheme) return;
-    if (typeof defaultTheme === "string") {
-        if (themeName === defaultTheme) {
-            if (!utilities[":root"]) utilities[":root"] = {};
-            utilities[":root"][key] = value;
-        }
-    } else if (themeName === defaultTheme.light) {
-        if (!utilities["@media (prefers-color-scheme: light)"]) utilities["@media (prefers-color-scheme: light)"] = {
-            ":root": {}
-        };
-        utilities["@media (prefers-color-scheme: light)"][":root"][key] = value;
-    } else if (themeName === defaultTheme.dark) {
-        if (!utilities["@media (prefers-color-scheme: dark)"]) utilities["@media (prefers-color-scheme: dark)"] = {
-            ":root": {}
-        };
-        utilities["@media (prefers-color-scheme: dark)"][":root"][key] = value;
-    }
-}
-
-
-// packages/morph/src/morph.js
-function $fd2717825660a9ff$var$morph(from, toHtml, options) {
-    $fd2717825660a9ff$var$monkeyPatchDomSetAttributeToAllowAtSymbols();
-    let fromEl;
-    let toEl;
-    let key, lookahead, updating, updated, removing, removed, adding, added;
-    function assignOptions(options2 = {}) {
-        let defaultGetKey = (el)=>el.getAttribute("key");
-        let noop = ()=>{};
-        updating = options2.updating || noop;
-        updated = options2.updated || noop;
-        removing = options2.removing || noop;
-        removed = options2.removed || noop;
-        adding = options2.adding || noop;
-        added = options2.added || noop;
-        key = options2.key || defaultGetKey;
-        lookahead = options2.lookahead || false;
-    }
-    function patch(from2, to) {
-        if (differentElementNamesTypesOrKeys(from2, to)) return swapElements(from2, to);
-        let updateChildrenOnly = false;
-        if ($fd2717825660a9ff$var$shouldSkip(updating, from2, to, ()=>updateChildrenOnly = true)) return;
-        if (from2.nodeType === 1 && window.Alpine) {
-            window.Alpine.cloneNode(from2, to);
-            if (from2._x_teleport && to._x_teleport) patch(from2._x_teleport, to._x_teleport);
-        }
-        if ($fd2717825660a9ff$var$textOrComment(to)) {
-            patchNodeValue(from2, to);
-            updated(from2, to);
-            return;
-        }
-        if (!updateChildrenOnly) patchAttributes(from2, to);
-        updated(from2, to);
-        patchChildren(from2, to);
-    }
-    function differentElementNamesTypesOrKeys(from2, to) {
-        return from2.nodeType != to.nodeType || from2.nodeName != to.nodeName || getKey(from2) != getKey(to);
-    }
-    function swapElements(from2, to) {
-        if ($fd2717825660a9ff$var$shouldSkip(removing, from2)) return;
-        let toCloned = to.cloneNode(true);
-        if ($fd2717825660a9ff$var$shouldSkip(adding, toCloned)) return;
-        from2.replaceWith(toCloned);
-        removed(from2);
-        added(toCloned);
-    }
-    function patchNodeValue(from2, to) {
-        let value = to.nodeValue;
-        if (from2.nodeValue !== value) from2.nodeValue = value;
-    }
-    function patchAttributes(from2, to) {
-        if (from2._x_transitioning) return;
-        if (from2._x_isShown && !to._x_isShown) return;
-        if (!from2._x_isShown && to._x_isShown) return;
-        let domAttributes = Array.from(from2.attributes);
-        let toAttributes = Array.from(to.attributes);
-        for(let i = domAttributes.length - 1; i >= 0; i--){
-            let name = domAttributes[i].name;
-            if (!to.hasAttribute(name)) from2.removeAttribute(name);
-        }
-        for(let i = toAttributes.length - 1; i >= 0; i--){
-            let name = toAttributes[i].name;
-            let value = toAttributes[i].value;
-            if (from2.getAttribute(name) !== value) from2.setAttribute(name, value);
-        }
-    }
-    function patchChildren(from2, to) {
-        let fromKeys = keyToMap(from2.children);
-        let fromKeyHoldovers = {};
-        let currentTo = $fd2717825660a9ff$var$getFirstNode(to);
-        let currentFrom = $fd2717825660a9ff$var$getFirstNode(from2);
-        while(currentTo){
-            $fd2717825660a9ff$var$seedingMatchingId(currentTo, currentFrom);
-            let toKey = getKey(currentTo);
-            let fromKey = getKey(currentFrom);
-            if (!currentFrom) {
-                if (toKey && fromKeyHoldovers[toKey]) {
-                    let holdover = fromKeyHoldovers[toKey];
-                    from2.appendChild(holdover);
-                    currentFrom = holdover;
-                    fromKey = getKey(currentFrom);
-                } else {
-                    if (!$fd2717825660a9ff$var$shouldSkip(adding, currentTo)) {
-                        let clone = currentTo.cloneNode(true);
-                        from2.appendChild(clone);
-                        added(clone);
-                    }
-                    currentTo = $fd2717825660a9ff$var$getNextSibling(to, currentTo);
-                    continue;
-                }
-            }
-            let isIf = (node)=>node && node.nodeType === 8 && node.textContent === "[if BLOCK]><![endif]";
-            let isEnd = (node)=>node && node.nodeType === 8 && node.textContent === "[if ENDBLOCK]><![endif]";
-            if (isIf(currentTo) && isIf(currentFrom)) {
-                let nestedIfCount = 0;
-                let fromBlockStart = currentFrom;
-                while(currentFrom){
-                    let next = $fd2717825660a9ff$var$getNextSibling(from2, currentFrom);
-                    if (isIf(next)) nestedIfCount++;
-                    else if (isEnd(next) && nestedIfCount > 0) nestedIfCount--;
-                    else if (isEnd(next) && nestedIfCount === 0) {
-                        currentFrom = next;
-                        break;
-                    }
-                    currentFrom = next;
-                }
-                let fromBlockEnd = currentFrom;
-                nestedIfCount = 0;
-                let toBlockStart = currentTo;
-                while(currentTo){
-                    let next = $fd2717825660a9ff$var$getNextSibling(to, currentTo);
-                    if (isIf(next)) nestedIfCount++;
-                    else if (isEnd(next) && nestedIfCount > 0) nestedIfCount--;
-                    else if (isEnd(next) && nestedIfCount === 0) {
-                        currentTo = next;
-                        break;
-                    }
-                    currentTo = next;
-                }
-                let toBlockEnd = currentTo;
-                let fromBlock = new $fd2717825660a9ff$var$Block(fromBlockStart, fromBlockEnd);
-                let toBlock = new $fd2717825660a9ff$var$Block(toBlockStart, toBlockEnd);
-                patchChildren(fromBlock, toBlock);
-                continue;
-            }
-            if (currentFrom.nodeType === 1 && lookahead && !currentFrom.isEqualNode(currentTo)) {
-                let nextToElementSibling = $fd2717825660a9ff$var$getNextSibling(to, currentTo);
-                let found = false;
-                while(!found && nextToElementSibling){
-                    if (nextToElementSibling.nodeType === 1 && currentFrom.isEqualNode(nextToElementSibling)) {
-                        found = true;
-                        currentFrom = addNodeBefore(from2, currentTo, currentFrom);
-                        fromKey = getKey(currentFrom);
-                    }
-                    nextToElementSibling = $fd2717825660a9ff$var$getNextSibling(to, nextToElementSibling);
-                }
-            }
-            if (toKey !== fromKey) {
-                if (!toKey && fromKey) {
-                    fromKeyHoldovers[fromKey] = currentFrom;
-                    currentFrom = addNodeBefore(from2, currentTo, currentFrom);
-                    fromKeyHoldovers[fromKey].remove();
-                    currentFrom = $fd2717825660a9ff$var$getNextSibling(from2, currentFrom);
-                    currentTo = $fd2717825660a9ff$var$getNextSibling(to, currentTo);
-                    continue;
-                }
-                if (toKey && !fromKey) {
-                    if (fromKeys[toKey]) {
-                        currentFrom.replaceWith(fromKeys[toKey]);
-                        currentFrom = fromKeys[toKey];
-                        fromKey = getKey(currentFrom);
-                    }
-                }
-                if (toKey && fromKey) {
-                    let fromKeyNode = fromKeys[toKey];
-                    if (fromKeyNode) {
-                        fromKeyHoldovers[fromKey] = currentFrom;
-                        currentFrom.replaceWith(fromKeyNode);
-                        currentFrom = fromKeyNode;
-                        fromKey = getKey(currentFrom);
-                    } else {
-                        fromKeyHoldovers[fromKey] = currentFrom;
-                        currentFrom = addNodeBefore(from2, currentTo, currentFrom);
-                        fromKeyHoldovers[fromKey].remove();
-                        currentFrom = $fd2717825660a9ff$var$getNextSibling(from2, currentFrom);
-                        currentTo = $fd2717825660a9ff$var$getNextSibling(to, currentTo);
-                        continue;
-                    }
-                }
-            }
-            let currentFromNext = currentFrom && $fd2717825660a9ff$var$getNextSibling(from2, currentFrom);
-            patch(currentFrom, currentTo);
-            currentTo = currentTo && $fd2717825660a9ff$var$getNextSibling(to, currentTo);
-            currentFrom = currentFromNext;
-        }
-        let removals = [];
-        while(currentFrom){
-            if (!$fd2717825660a9ff$var$shouldSkip(removing, currentFrom)) removals.push(currentFrom);
-            currentFrom = $fd2717825660a9ff$var$getNextSibling(from2, currentFrom);
-        }
-        while(removals.length){
-            let domForRemoval = removals.shift();
-            domForRemoval.remove();
-            removed(domForRemoval);
-        }
-    }
-    function getKey(el) {
-        return el && el.nodeType === 1 && key(el);
-    }
-    function keyToMap(els) {
-        let map = {};
-        for (let el of els){
-            let theKey = getKey(el);
-            if (theKey) map[theKey] = el;
-        }
-        return map;
-    }
-    function addNodeBefore(parent, node, beforeMe) {
-        if (!$fd2717825660a9ff$var$shouldSkip(adding, node)) {
-            let clone = node.cloneNode(true);
-            parent.insertBefore(clone, beforeMe);
-            added(clone);
-            return clone;
-        }
-        return node;
-    }
-    assignOptions(options);
-    fromEl = from;
-    toEl = typeof toHtml === "string" ? $fd2717825660a9ff$var$createElement(toHtml) : toHtml;
-    if (window.Alpine && window.Alpine.closestDataStack && !from._x_dataStack) {
-        toEl._x_dataStack = window.Alpine.closestDataStack(from);
-        toEl._x_dataStack && window.Alpine.cloneNode(from, toEl);
-    }
-    patch(from, toEl);
-    fromEl = void 0;
-    toEl = void 0;
-    return from;
-}
-$fd2717825660a9ff$var$morph.step = ()=>{};
-$fd2717825660a9ff$var$morph.log = ()=>{};
-function $fd2717825660a9ff$var$shouldSkip(hook, ...args) {
-    let skip = false;
-    hook(...args, ()=>skip = true);
-    return skip;
-}
-var $fd2717825660a9ff$var$patched = false;
-function $fd2717825660a9ff$var$createElement(html) {
-    const template = document.createElement("template");
-    template.innerHTML = html;
-    return template.content.firstElementChild;
-}
-function $fd2717825660a9ff$var$textOrComment(el) {
-    return el.nodeType === 3 || el.nodeType === 8;
-}
-var $fd2717825660a9ff$var$Block = class {
-    constructor(start, end){
-        this.startComment = start;
-        this.endComment = end;
-    }
-    get children() {
-        let children = [];
-        let currentNode = this.startComment.nextSibling;
-        while(currentNode && currentNode !== this.endComment){
-            children.push(currentNode);
-            currentNode = currentNode.nextSibling;
-        }
-        return children;
-    }
-    appendChild(child) {
-        this.endComment.before(child);
-    }
-    get firstChild() {
-        let first = this.startComment.nextSibling;
-        if (first === this.endComment) return;
-        return first;
-    }
-    nextNode(reference) {
-        let next = reference.nextSibling;
-        if (next === this.endComment) return;
-        return next;
-    }
-    insertBefore(newNode, reference) {
-        reference.before(newNode);
-        return newNode;
-    }
-};
-function $fd2717825660a9ff$var$getFirstNode(parent) {
-    return parent.firstChild;
-}
-function $fd2717825660a9ff$var$getNextSibling(parent, reference) {
-    let next;
-    if (parent instanceof $fd2717825660a9ff$var$Block) next = parent.nextNode(reference);
-    else next = reference.nextSibling;
-    return next;
-}
-function $fd2717825660a9ff$var$monkeyPatchDomSetAttributeToAllowAtSymbols() {
-    if ($fd2717825660a9ff$var$patched) return;
-    $fd2717825660a9ff$var$patched = true;
-    let original = Element.prototype.setAttribute;
-    let hostDiv = document.createElement("div");
-    Element.prototype.setAttribute = function newSetAttribute(name, value) {
-        if (!name.includes("@")) return original.call(this, name, value);
-        hostDiv.innerHTML = `<span ${name}="${value}"></span>`;
-        let attr = hostDiv.firstElementChild.getAttributeNode(name);
-        hostDiv.firstElementChild.removeAttributeNode(attr);
-        this.setAttributeNode(attr);
-    };
-}
-function $fd2717825660a9ff$var$seedingMatchingId(to, from) {
-    let fromId = from && from._x_bindings && from._x_bindings.id;
-    if (!fromId) return;
-    if (!to.setAttribute) return;
-    to.setAttribute("id", fromId);
-    to.id = fromId;
-}
-// packages/morph/src/index.js
-function $fd2717825660a9ff$export$2e5e8c41f5d4e7c7(Alpine) {
-    Alpine.morph = $fd2717825660a9ff$var$morph;
-}
-// packages/morph/builds/module.js
-var $fd2717825660a9ff$export$2e2bcd8739ae039 = $fd2717825660a9ff$export$2e5e8c41f5d4e7c7;
-
-
 var $ae6560896f9c4f0c$exports = {};
 $ae6560896f9c4f0c$exports = JSON.parse("{\"CachePath\":\"local cache location\",\"CachePath_Description\":\"Local image cache location, default system temporary folder.\",\"CertFile\":\"CertFile\",\"CertFile_Description\":\"TLS/SSL certificate file path (default: , \\\"~/.config/.comigo/cert.crt\\\")\",\"ClearCacheExit\":\"Clean up on exit\",\"ClearCacheExit_Description\":\"When exiting the program, clear the web image cache.\",\"ClearDatabaseWhenExit\":\"Clear database books\",\"ClearDatabaseWhenExit_Description\":\"When the local database is enabled, non-existing books are purged after the scan is completed.\",\"ConfigManager\":\"Profile management\",\"ConfigManagerDeleteSuccess\":\"Configuration has been deleted.\",\"ConfigManagerDescription\":\"Clicking Save will upload the current configuration to the server and overwrite the existing configuration file.\",\"ConfigManagerSaveHint\":\"There is already a configuration file, please change the save location.\",\"ConfigManagerSaveSuccess\":\"Configuration saved.\",\"ConfigSaveTo\":\"Configure default save path\",\"Debug\":\"Turn on Debug mode\",\"Debug_Description\":\"Enable Debug function\",\"DisableLAN\":\"Disable LAN sharing\",\"DisableLAN_Description\":\"Reading services are only provided on this machine and are not shared externally. This configuration does not support hot reloading.\",\"EnableDatabase\":\"Enable database\",\"EnableDatabase_Description\":\"Enable local database to save scanned book data. \\nThis configuration does not support hot reload.\",\"EnableFrpcServer\":\"EnableFrpcServer\",\"EnableLogin\":\"Enable login\",\"EnableLogin_Description\":\"Whether to enable login. \\nNo login is required by default. \\nThis configuration does not support hot reload.\",\"EnableTLS\":\"Enable TLS\",\"EnableTLS_Description\":\"Whether to enable HTTPS protocol. \\nThe certificate needs to be set in the key file.\",\"EnableUpload\":\"Enable upload functionality\",\"EnableUpload_Description\":\"Enable upload functionality.\",\"ExcludePath\":\"exclude path\",\"ExcludePath_Description\":\"When scanning books, the names of files or folders that need to be excluded\",\"FrpClientConfig\":\"FrpClient settings\",\"GenerateBookMetadata\":\"Generate book metadata\",\"GenerateMetaData\":\"Generate metadata\",\"GenerateMetaData_Description\":\"Generate book metadata. \\nNot currently in effect.\",\"HomeDirectory\":\"HomeDirectory\",\"Host\":\"domain name\",\"Host_Description\":\"Customize the host name displayed by the QR code. \\nThe default is the network card IP.\",\"KeyFile\":\"KeyFile\",\"KeyFile_Description\":\"TLS/SSL key file path (default: \\\"~/.config/.comigo/key.key\\\")\",\"LocalStores\":\"library folder\",\"LocalStores_Description\":\"The library folder supports absolute and relative directories. \\nRelative directories are based on the current execution directory.\",\"LogFileName\":\"Log file name\",\"LogFileName_Description\":\"Log file name\",\"LogFilePath\":\"Log save location\",\"LogFilePath_Description\":\"Log file save location\",\"LogToFile\":\"Record Log to local\",\"LogToFile_Description\":\"Whether to save the program log to a local file. \\nNot saved by default.\",\"MaxScanDepth\":\"Maximum scan depth\",\"MaxScanDepth_Description\":\"Maximum scan depth. \\nFiles exceeding the depth will not be scanned. \\nThe current execution directory is the base.\",\"MinImageNum\":\"Minimum number of pictures\",\"MinImageNum_Description\":\"A compressed package or folder must contain at least a few pictures to be considered a book.\",\"OpenBrowser\":\"Open browser\",\"OpenBrowser_Description\":\"After the scan is completed, whether to open the browser at the same time. \\nThe default is true for windows and false for other platforms.\",\"Password\":\"password\",\"Password_Description\":\"After enabling login, the password used to log in.\",\"Port\":\"port\",\"Port_Description\":\"Web service port. This configuration does not support hot reloading.\",\"PrintAllPossibleQRCode\":\"More QR codes\",\"ProgramDirectory\":\"The directory where the program is located\",\"StartFrpClientInBackground\":\"Start FrpClient\",\"SupportFileType\":\"Supported compressed packages\",\"SupportFileType_Description\":\"When scanning a file, it is used to decide whether to skip or count it as a file suffix for book processing.\",\"SupportMediaType\":\"Supported image files\",\"SupportMediaType_Description\":\"Image file suffix used to count the number of images when scanning compressed packages\",\"Timeout\":\"Expiration\",\"TimeoutLimitForScan\":\"Scan timeout\",\"TimeoutLimitForScan_Description\":\"When scanning a file, if it takes more than a few seconds, it will give up scanning the file to avoid getting stuck on an overly large file.\",\"Timeout_Description\":\"Cookie expiration time after enabling login. \\nThe unit is minutes. \\nIt expires in 180 minutes by default.\",\"UploadPath\":\"Upload location\",\"UploadPath_Description\":\"Customize the storage location of the uploaded files, by default, the upload folder is created under the current execution directory or the first bookstore directory.\",\"UseCache\":\"Local image cache\",\"Username\":\"username\",\"Username_Description\":\"After enabling login, the username required for the login interface.\",\"WorkingDirectory\":\"current working directory\",\"ZipFileTextEncoding\":\"Not UTF-8\",\"ZipFileTextEncoding_Description\":\"Non-utf-8 encoded ZIP file, what encoding should be used to parse it. \\nDefault GBK.\",\"labs\":\"Labs\",\"all_page_num\":\"Total Pages: {0}\",\"author\":\"Author: {0}\",\"auto_crop\":\"Automatic edge trimming\",\"auto_double_page\":\"Auto Double Page (beta)\",\"auto_hide_toolbar\":\"Auto Hide Toolbar\",\"back-to-top\":\"Back to Top\",\"back_button\":\"Back Button\",\"back_to_bookshelf\":\"Back to Bookshelf\",\"book_shelf\":\"Bookshelf\",\"child_book_hint\":\"{0} books in the folder\",\"debug_mode\":\"Debug Mode\",\"do_you_reset_all_settings\":\"Do you want to reset to the default settings?\",\"double_page_mode\":\"Double Page Mode\",\"double_page_width\":\"Double Page Width:\",\"download_sample_config_file\":\"Download Sample Config File\",\"download_windows_reg_file\":\"Download Windows Reg File\",\"drop_to_upload\":\"Click or drag files to this area to upload\",\"energy_threshold\":\"Energy Threshold:\",\"epub_info\":\"ePub Information\",\"exit_fullscreen\":\"Exit Fullscreen Mode\",\"filesize\":\"File Size: {0}\",\"flip_mode\":\"Flip Mode\",\"flip_odd_even_page\":\"Flip Odd/Even Pages\",\"flip_odd_even_page_hint\":\"Click here if double pages do not align properly.\",\"found_read_history\":\"Local Reading History Found\",\"from_interrupt\":\"From Last Interruption\",\"full_screen_hint\":\"Fullscreen Button\",\"fullscreen\":\"Fullscreen\",\"good_job_and_byebye\":\"Good job! Goodbye.\",\"gray_image\":\"Grayscale Image\",\"hint\":\"hint\",\"hint_first_page\":\"You are on the first page and cannot turn forward.\",\"hint_last_page\":\"You are on the last page and cannot turn backward.\",\"hour\":\"hours\",\"image_width_limit\":\"Limit Width\",\"infinite_dropdown\":\"Infinite Dropdown\",\"interval\":\"Interval:\",\"left_screen_to_next\":\"Left to Right - Comic\",\"load_all_pages\":\"Load All Pages\",\"load_from_interrupt\":\"Load from last reading position (page XX)?\",\"login_success_hint\":\"Login successful. Returning to the previous page.\",\"logout\":\"Logout\",\"margin_bottom_on_scroll_mode\":\"Margin Bottom:\",\"margin_on_scroll_mode\":\"Page gap:\",\"max_width\":\"Max Width:\",\"minute\":\"minutes\",\"network\":\"Network\",\"no_book_found_hint\":\"No books found. Try uploading a file?\",\"no_support_upload_file\":\"File upload functionality has been disabled by the administrator.\",\"not_support_fullscreen\":\"This browser does not support fullscreen mode.\",\"now_is\":\"Now:\",\"number_of_online_books\":\"Number of Online Books:\",\"original_image\":\"Original Image\",\"original_pdf_link\":\"Original PDF Link\",\"page\":\"page\",\"page_turning_seconds\":\"Page Turn Interval:\",\"pagination_mode\":\"Pagination Mode\",\"pdf_hint_message\":\"Supports pure image PDFs. If loading is slow or errors occur, please try the following:\",\"please_enable_upload\":\"Please enable server upload support.\",\"please_enter_content\":\"Please enter content\",\"qrcode_hint\":\"Scan to read. Click to display QR code.\",\"raw_resolution\":\"Raw Resolution\",\"re_sort_book\":\"Resort Books\",\"re_sort_page\":\"Resort Pages\",\"reader_settings\":\"Reader Settings\",\"reading_progress_bar\":\"Reading Progress Bar\",\"refresh_page\":\"Refresh Page\",\"reset_all_settings\":\"Reset Settings\",\"resort_file\":\"Resort File\",\"right_screen_to_next\":\"Right to Left - Manga\",\"save_page_num\":\"Save Progress\",\"scan_qrcode\":\"Scan QR Code:\",\"scanned_hint\":\"Scanned XX books. Do you want to view them now?\",\"scroll_mode\":\"Scroll Mode\",\"second\":\"seconds\",\"select_language\":\"Select Language\",\"server_config\":\"Server Configuration\",\"server_setting\":\"Comigo Server Settings\",\"set_back_color\":\"Background Color:\",\"set_interface_color\":\"Interface Color:\",\"show_book_titles\":\"Show Book Titles\",\"show_file_type\":\"Show File Icons\",\"show_header\":\"Show Header\",\"show_page_num\":\"Show Page Number\",\"simplify_book_titles\":\"Simplify Book Titles\",\"single_page_mode\":\"Single Page Mode\",\"single_page_width\":\"Single Page Width:\",\"sort_by_default\":\"Default Sort\",\"sort_by_filename\":\"Sort by Filename (A-Z)\",\"sort_by_filename_reverse\":\"Sort by Filename (Z-A)\",\"sort_by_filesize\":\"Sort by Filesize (Large to Small)\",\"sort_by_filesize_reverse\":\"Sort by Filesize (Small to Large)\",\"sort_by_modify_time\":\"Sort by Modify Time (Newest to Oldest)\",\"sort_by_modify_time_reverse\":\"Sort by Modify Time (Oldest to Newest)\",\"sort_reverse\":\"(Reverse)\",\"start_sketch_message\":\"The countdown has begun. Have a nice day!\",\"start_sketch_mode\":\"Start Sketch\",\"starting_from_beginning\":\"Start from Beginning\",\"starting_from_beginning_hint\":\"Load from the first page\",\"stop_sketch_mode\":\"Stop Sketch\",\"submit\":\"submit\",\"success_fullscreen\":\"Entered Fullscreen Mode\",\"successfully_loaded_reading_progress\":\"Successfully Loaded Reading Progress\",\"switch_to_flip_mode\":\"Switch to Flip Mode\",\"switch_to_scrolling_mode\":\"Switch to Scroll Mode\",\"sync_page\":\"Remote Page Sync\",\"temp_future_hint\":\"Temporarily put some features that are not yet finished, under development and adjustment.\",\"test\":\"Test\",\"to_flip_mode\":\"Switch to Flip Mode\",\"to_infinite_dropdown_mode\":\"Switch to Infinite Dropdown Mode\",\"to_pagination_mode\":\"Switch to Pagination Mode\",\"to_scroll_mode\":\"Switch to Scroll Mode\",\"total_is\":\"Total:\",\"total_time\":\"Total Time:\",\"type_or_paste_content\":\"Type or paste content\",\"upload_file\":\"Upload File\",\"uploaded_folder_hint\":\"Files will be uploaded to the upload folder under the default library directory.\",\"width_use_fixed_value\":\"Landscape Mode Width: Fixed Value\",\"width_use_percent\":\"Landscape Mode Width: Percentage\"}");
 
@@ -19387,10 +15883,8 @@ if (!$fe9db8f8165fa827$var$nativeAPI) $fe9db8f8165fa827$var$screenfull = {
 var $fe9db8f8165fa827$export$2e2bcd8739ae039 = $fe9db8f8165fa827$var$screenfull;
 
 
-// 将 Alpine 实例添加到窗口对象中。
-window.Alpine = (0, $8c83eaf28779ff46$export$2e2bcd8739ae039);
-// Alpine Persist 插件，用于持久化存储。默认存储到 localStorage。
-// 详细用法参见： https://alpinejs.dev/plugins/persist
+window.Alpine = (0, $8c83eaf28779ff46$export$2e2bcd8739ae039 // 将 Alpine 实例添加到窗口对象中。
+);
 (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).plugin((0, $9b2f94dab0f686ea$export$2e2bcd8739ae039));
 (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).plugin((0, $fd2717825660a9ff$export$2e2bcd8739ae039));
 (0, $1bac384020b50752$export$2e2bcd8739ae039).use((0, $199830a05f92d3d0$export$2e2bcd8739ae039)).init({
@@ -19449,7 +15943,6 @@ if (document.getElementById('FullScreenIcon')) document.getElementById('FullScre
 });
 // 用Alpine Persist 注册全局变量
 // https://alpinejs.dev/plugins/persist#using-alpine-persist-global
-// global 全局设置
 (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store('global', {
     // bgPattern 背景花纹
     bgPattern: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist('grid-line').as('global.bgPattern'),
