@@ -1,50 +1,55 @@
-# Auto-generated config file for Air live-reloading tool.
-# See https://gowebly.org for more information.
 root = "."
 tmp_dir = "temp"
 testdata_dir = "testdata"
 
 [build]
-  args_bin = ["../test"]
-  bin = "./temp/comi"
-  delay = 1000
-  pre_cmd = ["rm -rf .parcel-cache","bun dev"]
-  cmd = "go run github.com/a-h/templ/cmd/templ@latest generate && go build -o ./temp/comi ."
-  exclude_dir = ["embed_files/static/", ".parcel-cache", "bin", "dist", "node_modules", "static", "tmp", "tests", "vendor"]
-  exclude_regex = ["_test\\.go", "_templ\\.go"]
-  exclude_unchanged = false
-  include_ext = ["go", "templ", "html", "json", "js", "ts", "css", "scss"]
-  follow_symlink = false
-  log = "build-errors-air.log"
-  poll = false
-  poll_interval = 500
-  kill_delay = 500
-  rerun = false
-  rerun_delay = 500
-  stop_on_error = true
-  send_interrupt = false
+args_bin = ["../test"]
+bin = "./temp/comi"
+pre_cmd = ["bun run dev"]
+cmd = "go run github.com/a-h/templ/cmd/templ@latest generate && go build -o ./temp/comi ."
+include_ext = ["go", "templ", "html", "json", "js", "ts", "css", "scss"]
+exclude_dir = [
+    "embed_files/static/",
+    ".parcel-cache",
+    "bin",
+    "dist",
+    "node_modules",
+    "static",
+    "tmp",
+    "tests",
+    "vendor",
+]
+exclude_regex = ["_test\\.go", "_templ\\.go"]
+exclude_unchanged = false
+follow_symlink = false
+log = "build-errors-air.log"
+poll = false
+poll_interval = 500
+delay = 1000
+stop_on_error = true
+send_interrupt = false
+kill_delay = 500
+rerun = false
+rerun_delay = 500
 
 [log]
-  main_only = false
-  silent = false
-  time = false
-
+main_only = false
+time = false
 
 [color]
-  app = ""
-  main = "magenta"
-  watcher = "cyan"
-  build = "yellow"
-  runner = "green"
+main = "magenta"
+watcher = "cyan"
+build = "yellow"
+runner = "green"
 
 [misc]
-  clean_on_exit = true
+clean_on_exit = true
 
 [proxy]
-  enabled = true
-  proxy_port = 7777
-  app_port = 1234
+enabled = true
+proxy_port = 7777
+app_port = 1234
 
 [screen]
-  clear_on_rebuild = true
-  keep_scroll = true
+clear_on_rebuild = true
+keep_scroll = true

@@ -283,6 +283,25 @@ file_name="comi_v${Version}_${OS_NAME}_${ARCH_NAME}.tar.gz"
 url="https://github.com/yumenaka/comigo/releases/download/${latest_tag}/${file_name}"
 print_message "downloading" "$url"
 
+
+# =====================
+# 下载404错误检测
+# =====================
+if [ "$download_tool" = "curl" ]; then
+    # -f 遇到HTTP非200就返回错误码，不写进文件
+    if ! curl -fSL -o "$file_name" "$url"; then
+        print_message "error_download_failed"
+        exit 1
+    fi
+else
+    # --tries 和 --timeout 可酌情添加
+    if ! wget --tries=3 --timeout=55 -O "$file_name" "$url"; then
+        print_message "error_download_failed"
+        exit 1
+    fi
+fi
+
+
 if [ "$download_tool" = "curl" ]; then
     curl -L -o "$file_name" "$url"
 else
@@ -291,6 +310,15 @@ fi
 
 if [[ ! -f "$file_name" ]]; then
     print_message "error_download_failed"
+    exit 1
+fi
+
+# =====================
+# 检查是否真的是 gzip 格式 无效时可能是文本（比如404页面：ASCII text, with no line terminators）
+# =====================
+if ! file "$file_name" | grep -q "gzip compressed data"; then
+    print_message "error_file_not_gzip"
+    rm -f "$file_name"  # 清理无效文件
     exit 1
 fi
 
