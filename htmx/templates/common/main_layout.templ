@@ -2,7 +2,7 @@ package common
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comigo/htmx/embed_files"
+	"github.com/yumenaka/comigo/htmx/embed"
 	"github.com/yumenaka/comigo/htmx/state"
 )
 func GetTheme() string {
@@ -23,14 +23,13 @@ templ MainLayout(c *gin.Context, s *state.GlobalState, bodyContent templ.Compone
 			<link rel="apple-touch-icon" href="/static/apple-touch-icon.png"/>
 			<link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon"/>
 			<link rel="icon" href="/static/favicon.png" sizes="any"/>
-			<script src="https://unpkg.com/@tailwindcss/browser@4"></script>
 			<!--  <script src="https://unpkg.com/@tailwindcss/browser@4"></script> -->
 			<!--  font-sans：https://tailwindcss.com/docs/font-family -->
 			if !s.StaticMode {
 				<link href="/static/styles.css" rel="stylesheet"/>
 			}
 			if s.StaticMode {
-				@templ.Raw("<style>" + embed_files.GetFileStr("static/styles.css") + "</style>")
+				@templ.Raw("<style>" + embed.GetFileStr("static/styles.css") + "</style>")
 			}
 		</head>
 		<!-- x-bind: Alpine.js的语法，声明全局主题 theme -->
@@ -46,14 +45,14 @@ templ MainLayout(c *gin.Context, s *state.GlobalState, bodyContent templ.Compone
 			<script src="/static/scripts.js"></script>
 		}
 		if s.StaticMode {
-			@templ.Raw("<script>" + embed_files.GetFileStr("static/scripts.js") + "</script>")
+			@templ.Raw("<script>" + embed.GetFileStr("static/scripts.js") + "</script>")
 		}
 		<!-- js代码,滚动到顶部,显示返回顶部按钮,获取鼠标位置,决定是否打开设置面板等 src="/static/flip.js"  -->
 		if !s.StaticMode && insertScript != "" {
 			<script src={ "/" + insertScript }></script>
 		}
 		if s.StaticMode && insertScript != "" {
-			@templ.Raw("<script>" + embed_files.GetFileStr(insertScript) + "</script>")
+			@templ.Raw("<script>" + embed.GetFileStr(insertScript) + "</script>")
 		}
 	</html>
 }

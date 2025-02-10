@@ -55,7 +55,7 @@ func ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirecto
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\"></label><!-- 配置选项区域：点击一个卡片，就设置隐藏字段的值。 --><div class=\"flex flex-row w-full mx-0 my-1\"><div data-save_to=\"WorkingDirectory\" class=\"flex flex-col items-center justify-center w-1/3 pt-2 mx-1 text-xs font-normal border border-gray-500 rounded min-h-20 cursor-pointer\" :class=\"selectedDir === &#39;WorkingDirectory&#39;?&#39;bg-cyan-200&#39;:&#39;&#39;\" @click=\"selectedDir = &#39;WorkingDirectory&#39;\"><img class=\"h-7 w-7\" src=\"/static/images/working_directory.png\"><div class=\"mt-1\" x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\"></label><!-- 配置选项区域：点击一个卡片，就设置隐藏字段的值。 --><div class=\"flex flex-row w-full mx-0 my-1\"><div data-save_to=\"WorkingDirectory\" class=\"flex flex-col items-center justify-center w-1/3 pt-2 mx-1 text-xs font-normal border border-gray-500 rounded min-h-20 cursor-pointer\" :class=\"selectedDir === &#39;WorkingDirectory&#39;?&#39;bg-cyan-200&#39;:&#39;&#39;\" @click=\"selectedDir = &#39;WorkingDirectory&#39;\"><img class=\"h-7 w-7\" src=\"/static/working_directory.png\"><div class=\"mt-1\" x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -91,7 +91,7 @@ func ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirecto
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div><div data-save_to=\"HomeDirectory\" class=\"flex flex-col items-center justify-center w-1/3 pt-2 mx-1 text-xs font-normal border border-gray-500 rounded min-h-20 cursor-pointer\" :class=\"selectedDir === &#39;HomeDirectory&#39;?&#39;bg-cyan-200&#39;:&#39;&#39;\" @click=\"selectedDir = &#39;HomeDirectory&#39;\"><img class=\"h-7 w-7\" src=\"/static/images/home_directory.png\"><div class=\"mt-1\" x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div><div data-save_to=\"HomeDirectory\" class=\"flex flex-col items-center justify-center w-1/3 pt-2 mx-1 text-xs font-normal border border-gray-500 rounded min-h-20 cursor-pointer\" :class=\"selectedDir === &#39;HomeDirectory&#39;?&#39;bg-cyan-200&#39;:&#39;&#39;\" @click=\"selectedDir = &#39;HomeDirectory&#39;\"><img class=\"h-7 w-7\" src=\"/static/home_directory.png\"><div class=\"mt-1\" x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -127,7 +127,7 @@ func ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirecto
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div><div data-save_to=\"ProgramDirectory\" class=\"flex flex-col items-center justify-center w-1/3 pt-2 mx-1 text-xs font-normal border border-gray-500 rounded min-h-20 cursor-pointer\" :class=\"selectedDir === &#39;ProgramDirectory&#39;?&#39;bg-cyan-200&#39;:&#39;&#39;\" @click=\"selectedDir = &#39;ProgramDirectory&#39;\"><img class=\"h-7 w-7\" src=\"/static/images/program_directory.png\"><div class=\"mt-1\" x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div><div data-save_to=\"ProgramDirectory\" class=\"flex flex-col items-center justify-center w-1/3 pt-2 mx-1 text-xs font-normal border border-gray-500 rounded min-h-20 cursor-pointer\" :class=\"selectedDir === &#39;ProgramDirectory&#39;?&#39;bg-cyan-200&#39;:&#39;&#39;\" @click=\"selectedDir = &#39;ProgramDirectory&#39;\"><img class=\"h-7 w-7\" src=\"/static/program_directory.png\"><div class=\"mt-1\" x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

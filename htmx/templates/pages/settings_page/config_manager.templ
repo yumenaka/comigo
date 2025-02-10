@@ -16,7 +16,7 @@ templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirect
 				:class="selectedDir === 'WorkingDirectory'?'bg-cyan-200':''"
 				@click="selectedDir = 'WorkingDirectory'"
 			>
-				<img class="h-7 w-7" src="/static/images/working_directory.png"/>
+				<img class="h-7 w-7" src="/static/working_directory.png"/>
 				<div class="mt-1" x-text={ getTranslations("WorkingDirectory") }>当前工作目录</div>
 				if WorkingDirectoryConfig != "" {
 					<div
@@ -30,7 +30,7 @@ templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirect
 				:class="selectedDir === 'HomeDirectory'?'bg-cyan-200':''"
 				@click="selectedDir = 'HomeDirectory'"
 			>
-				<img class="h-7 w-7" src="/static/images/home_directory.png"/>
+				<img class="h-7 w-7" src="/static/home_directory.png"/>
 				<div class="mt-1" x-text={ getTranslations("HomeDirectory") }>用户主目录</div>
 				if HomeDirectoryConfig != "" {
 					<div
@@ -44,7 +44,7 @@ templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirect
 				:class="selectedDir === 'ProgramDirectory'?'bg-cyan-200':''"
 				@click="selectedDir = 'ProgramDirectory'"
 			>
-				<img class="h-7 w-7" src="/static/images/program_directory.png"/>
+				<img class="h-7 w-7" src="/static/program_directory.png"/>
 				<div class="mt-1" x-text={ getTranslations("ProgramDirectory") }>程序所在目录</div>
 				if ProgramDirectoryConfig != "" {
 					<div

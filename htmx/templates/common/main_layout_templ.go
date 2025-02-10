@@ -10,7 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/yumenaka/comigo/htmx/embed_files"
+	"github.com/yumenaka/comigo/htmx/embed"
 	"github.com/yumenaka/comigo/htmx/state"
 )
 
@@ -53,7 +53,7 @@ func MainLayout(c *gin.Context, s *state.GlobalState, bodyContent templ.Componen
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><meta name=\"keywords\" content=\"Comigo  Comic Manga Reader 在线漫画 阅读器\"><meta name=\"description\" content=\"Simple Manga Reader in Linux，Windows，Mac OS\"><!--TODO:PWA模式  <link rel=\"manifest\" href=\"/static/manifest.webmanifest\"/>  --><link rel=\"apple-touch-icon\" href=\"/static/apple-touch-icon.png\"><link rel=\"shortcut icon\" href=\"/static/favicon.ico\" type=\"image/x-icon\"><link rel=\"icon\" href=\"/static/favicon.png\" sizes=\"any\"><script src=\"https://unpkg.com/@tailwindcss/browser@4\"></script><!--  <script src=\"https://unpkg.com/@tailwindcss/browser@4\"></script> --><!--  font-sans：https://tailwindcss.com/docs/font-family -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><meta name=\"keywords\" content=\"Comigo  Comic Manga Reader 在线漫画 阅读器\"><meta name=\"description\" content=\"Simple Manga Reader in Linux，Windows，Mac OS\"><!--TODO:PWA模式  <link rel=\"manifest\" href=\"/static/manifest.webmanifest\"/>  --><link rel=\"apple-touch-icon\" href=\"/static/apple-touch-icon.png\"><link rel=\"shortcut icon\" href=\"/static/favicon.ico\" type=\"image/x-icon\"><link rel=\"icon\" href=\"/static/favicon.png\" sizes=\"any\"><!--  <script src=\"https://unpkg.com/@tailwindcss/browser@4\"></script> --><!--  font-sans：https://tailwindcss.com/docs/font-family -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -64,7 +64,7 @@ func MainLayout(c *gin.Context, s *state.GlobalState, bodyContent templ.Componen
 			}
 		}
 		if s.StaticMode {
-			templ_7745c5c3_Err = templ.Raw("<style>"+embed_files.GetFileStr("static/styles.css")+"</style>").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = templ.Raw("<style>"+embed.GetFileStr("static/styles.css")+"</style>").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -92,7 +92,7 @@ func MainLayout(c *gin.Context, s *state.GlobalState, bodyContent templ.Componen
 			}
 		}
 		if s.StaticMode {
-			templ_7745c5c3_Err = templ.Raw("<script>"+embed_files.GetFileStr("static/scripts.js")+"</script>").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = templ.Raw("<script>"+embed.GetFileStr("static/scripts.js")+"</script>").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -109,7 +109,7 @@ func MainLayout(c *gin.Context, s *state.GlobalState, bodyContent templ.Componen
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs("/" + insertScript)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/common/main_layout.templ`, Line: 53, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/common/main_layout.templ`, Line: 52, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -121,7 +121,7 @@ func MainLayout(c *gin.Context, s *state.GlobalState, bodyContent templ.Componen
 			}
 		}
 		if s.StaticMode && insertScript != "" {
-			templ_7745c5c3_Err = templ.Raw("<script>"+embed_files.GetFileStr(insertScript)+"</script>").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = templ.Raw("<script>"+embed.GetFileStr(insertScript)+"</script>").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

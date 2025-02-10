@@ -3,7 +3,7 @@ package flip
 import (
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/htmx/state"
-	"github.com/yumenaka/comigo/htmx/embed_files"
+	"github.com/yumenaka/comigo/htmx/embed"
 )
 
 templ InsertData(bookData any, stateData any) {
@@ -20,9 +20,9 @@ templ MainArea(s *state.GlobalState, book *model.Book) {
 		<div class="manga_area" id="MangaMain">
 			<div class="manga_area_img_div">
 				<!-- 非自动拼合模式最简单,直接显示一张图 -->
-				<img id="NowImage" class="max-w-full max-h-screen m-0 rounded shadow-lg" src="/static/images/ball-triangle.svg" alt=""/>
+				<img id="NowImage" class="max-w-full max-h-screen m-0 rounded shadow-lg" src="/static/ball-triangle.svg" alt=""/>
 				<!-- 简单拼合双页,不管单双页什么的 -->
-				<img id="NextImage" x-show="$store.flip.doublePageMode && $store.flipnowPageNum < $store.flip.allPageNum" src="/static/images/ball-triangle.svg"/>
+				<img id="NextImage" x-show="$store.flip.doublePageMode && $store.flipnowPageNum < $store.flip.allPageNum" src="/static/ball-triangle.svg"/>
 			</div>
 		</div>
 	</div>
@@ -50,5 +50,5 @@ templ MainArea(s *state.GlobalState, book *model.Book) {
 			step="1"
 		/>
 	</div>
-	@templ.Raw("<style>" + embed_files.GetFileStr("static/flip.css") + "</style>")
+	@templ.Raw("<style>" + embed.GetFileStr("static/flip.css") + "</style>")
 }
