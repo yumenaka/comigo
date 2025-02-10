@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/htmx/comigo"
-	"github.com/yumenaka/comigo/htmx/embed_files"
+	"github.com/yumenaka/comigo/htmx/embed"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
@@ -46,14 +46,14 @@ func RunServer() (err error) {
 	router.MaxMultipartMemory = 5000 << 20 // 5000 MB
 
 	// 设置嵌入静态文件的文件系统
-	embed_files.StaticFS, err = fs.Sub(embed_files.Static, "static")
+	embed.StaticFS, err = fs.Sub(embed.Static, "static")
 	if err != nil {
 		logger.Infof("%s", err)
 	}
-	router.StaticFS("/static/", http.FS(embed_files.StaticFS))
+	router.StaticFS("/static/", http.FS(embed.StaticFS))
 	//favicon.ico
 	router.GET("/favicon.ico", func(c *gin.Context) {
-		file, err := embed_files.Static.ReadFile("/images/favicon.ico")
+		file, err := embed.Static.ReadFile("/images/favicon.ico")
 		if err != nil {
 			logger.Infof("%s", err)
 		}

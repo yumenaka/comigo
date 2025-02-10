@@ -1,3 +1,4 @@
+#git update-index --assume-unchanged .air.toml
 root = "."
 tmp_dir = "temp"
 testdata_dir = "testdata"
@@ -9,7 +10,7 @@ pre_cmd = ["bun run dev"]
 cmd = "go run github.com/a-h/templ/cmd/templ@latest generate && go build -o ./temp/comi ."
 include_ext = ["go", "templ", "html", "json", "js", "ts", "css", "scss"]
 exclude_dir = [
-    "embed_files/static/",
+    "static/static/",
     ".parcel-cache",
     "bin",
     "dist",

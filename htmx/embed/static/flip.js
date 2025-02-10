@@ -257,7 +257,7 @@ function onMouseMove(e) {
     let inSetArea = getInSetArea(e);
     if (inSetArea) {
         e.currentTarget.style.cursor =
-            "url(/static/images/SettingsOutline.png), pointer";
+            "url(/static/SettingsOutline.png), pointer";
     }
     if (!inSetArea) {
         if (clickX < innerWidth * 0.5) {
@@ -265,18 +265,18 @@ function onMouseMove(e) {
             if (Alpine.store('flip').rightToLeft && Alpine.store('flip').nowPageNum === 1) {
                 //右边翻下一页,且目前是第一页的时候,左边的鼠标指针,设置为禁止翻页
                 e.currentTarget.style.cursor =
-                    "url(/static/images/Prohibited28Filled.png), pointer";
+                    "url(/static/Prohibited28Filled.png), pointer";
             } else if (
                 !Alpine.store('flip').rightToLeft &&
                 Alpine.store('flip').nowPageNum === Alpine.store('flip').allPageNum
             ) {
                 //左边翻下一页,且目前是最后一页的时候,左边的鼠标指针,设置为禁止翻页
                 e.currentTarget.style.cursor =
-                    "url(/static/images/Prohibited28Filled.png), pointer";
+                    "url(/static/Prohibited28Filled.png), pointer";
             } else {
                 //正常情况下,左边是向左的箭头
                 e.currentTarget.style.cursor =
-                    "url(/static/images/ArrowLeft.png), pointer";
+                    "url(/static/ArrowLeft.png), pointer";
             }
         } else {
             //设置右边的鼠标指针
@@ -286,15 +286,15 @@ function onMouseMove(e) {
             ) {
                 //右边翻下一页,且目前是最后页的时候,右边的鼠标指针,设置为禁止翻页
                 e.currentTarget.style.cursor =
-                    "url(/static/images/Prohibited28Filled.png), pointer";
+                    "url(/static/Prohibited28Filled.png), pointer";
             } else if (!Alpine.store('flip').rightToLeft && Alpine.store('flip').nowPageNum === 1) {
                 //左边翻下一页,且目前是第一页的时候,右边的鼠标指针,设置为禁止翻页
                 e.currentTarget.style.cursor =
-                    "url(/static/images/Prohibited28Filled.png), pointer";
+                    "url(/static/Prohibited28Filled.png), pointer";
             } else {
                 //正常情况下,右边是向右的箭头
                 e.currentTarget.style.cursor =
-                    "url(/static/images/ArrowRight.png), pointer";
+                    "url(/static/ArrowRight.png), pointer";
             }
         }
     }
