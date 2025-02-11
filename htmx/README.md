@@ -24,7 +24,7 @@
  - [ ] 自定义js与css代码块功能。
  - [ ] [使用 Go1.24 的 os.Root 类型](https://antonz.org/go-1-24/)，将文件系统操作限制为特定目录，以防止用户访问系统文件
  - [ ] 等到go 1.24正式发布，[使用 Go1.24 的 go get -tool](https://antonz.org/go-1-24/)，添加工具依赖项
- - [ ] 等 [gowebly](https://github.com/gowebly/gowebly) 更新后，参考 gowebly 的模板，升级tailwindcss到4.0
+ - [x] 等 [gowebly](https://github.com/gowebly/gowebly) 更新后，参考 gowebly 的模板，升级tailwindcss到4.0
  - [ ] 自动发版功能 [goreleaser](https://goreleaser.com/)  [github-action](https://dev.to/hadlow/how-to-release-to-homebrew-with-goreleaser-github-actions-and-semantic-release-2gbb)
  - [ ] 设置页面：显示当前用户状态、阅读书籍、阅读进度、阅读时间、服务器状态的地方。
  - [ ] 可能的BUG：当前文件夹顶层无书籍的时候，首页为空或跳过规则不对？上一版有这个问题，目前有无问题还不确定。
