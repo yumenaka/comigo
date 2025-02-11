@@ -2256,6 +2256,10 @@
     max-height: 100vh;
   }
 
+  .min-h-15 {
+    min-height: calc(var(--spacing) * 15);
+  }
+
   .min-h-20 {
     min-height: calc(var(--spacing) * 20);
   }
@@ -2306,6 +2310,10 @@
 
   .w-2\.5 {
     width: calc(var(--spacing) * 2.5);
+  }
+
+  .w-2\/3 {
+    width: 66.6667%;
   }
 
   .w-3\/4 {
@@ -2908,6 +2916,10 @@
 
   .bg-blue-300 {
     background-color: var(--color-blue-300);
+  }
+
+  .bg-blue-400 {
+    background-color: var(--color-blue-400);
   }
 
   .bg-blue-500 {
@@ -3727,6 +3739,10 @@
 
     .hover\:text-gray-600:hover {
       color: var(--color-gray-600);
+    }
+
+    .hover\:text-gray-700:hover {
+      color: var(--color-gray-700);
     }
 
     .hover\:text-gray-900:hover {
