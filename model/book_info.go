@@ -140,9 +140,15 @@ func (b *BookInfo) ShortTitle() string {
 	shortTitle = domainReg.ReplaceAllString(shortTitle, "")
 	shortTitle = re4.ReplaceAllString(shortTitle, "")
 	shortTitle = re5.ReplaceAllString(shortTitle, "")
+	// [过度简化]如果标题长度小于 2，返回前 15 个字符
+	if len([]rune(shortTitle)) < 2 && len([]rune(b.Title)) > 15 {
+		return string([]rune(b.Title)[:15]) + "…"
+	}
+	// [简化标题]如果标题长度小于等于 15，返回标题
 	if len([]rune(shortTitle)) <= 15 {
 		return shortTitle
 	}
+	// [简化不完全]如果标题长度大于 15，返回前 15 个字符
 	return string([]rune(shortTitle)[:15]) + "…"
 }
 
@@ -272,7 +278,7 @@ func GetBookInfoListByID(BookID string, sortBy string) (*BookInfoList, error) {
 			return &infoList, nil
 		}
 	}
-	return nil, errors.New("cannot find bookshelf")
+	return nil, errors.New("cannot find BookInfo，ID：" + BookID)
 }
 
 // GetBookInfoListByParentFolder 根据父文件夹获取书籍列表

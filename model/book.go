@@ -80,7 +80,7 @@ func CheckBookExist(filePath string, bookType SupportFileType) bool {
 
 // CheckAllBookFileExist 检查内存中的书的源文件是否存在，不存在就删掉
 func CheckAllBookFileExist() {
-	logger.Infof("Checking if all book files exist...")
+	logger.Infof("Checking book files exist...")
 	var deletedBooks []string
 	// 遍历所有书籍
 	for _, value := range mapBooks.Range {

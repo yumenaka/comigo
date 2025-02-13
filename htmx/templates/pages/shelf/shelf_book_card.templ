@@ -19,7 +19,7 @@ templ BookCard(c echo.Context, s *state.GlobalState, book model.BookInfo) {
 	<a
 		:href={ getHref(book) }
 		target={ getTarget(book) }
-		x-data={ fmt.Sprintf("{ BookID: %s }", "\""+book.BookID+"\"") }
+		x-data={ fmt.Sprintf("{ BookID: %s }", "'"+book.BookID+"'") }
 		class={ backgroundImage(state.GetCloverBackgroundImageUrl(&book)) , "relative w-32 mx-4 my-4 bg-top bg-cover h-44 rounded drop-shadow-lg  ring-2 ring-gray-400 hover:ring hover:ring-blue-500 overflow-hidden" }
 	>
 		<!-- 根据书籍类型，选择显示的图标 -->

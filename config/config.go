@@ -57,6 +57,13 @@ type Config struct {
 	ZipFileTextEncoding    string          `json:"ZipFileTextEncoding" comment:"非utf-8编码的ZIP文件，尝试用什么编码解析，默认GBK"`
 }
 
+func (c *Config) GetTopStoreName() string {
+	if len(c.LocalStores) == 0 {
+		return "未设置书库"
+	}
+	return strings.Join(c.LocalStores, ", ")
+}
+
 // SetConfigValue 根据字段名和字符串形式的值，来更新 Config 的相应字段。
 // 如果字段名不存在，则返回错误。如果字段类型不在支持范围内，也返回错误。
 func (c *Config) SetConfigValue(fieldName, fieldValue string) error {

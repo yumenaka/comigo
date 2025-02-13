@@ -25,7 +25,7 @@ func Handler(c echo.Context) error {
 	indexTemplate := common.MainLayout(
 		c,
 		&state.Global,
-		error_page.NotFound404(c, &state.Global),
+		error_page.NotFound404(&state.Global),
 		"",
 	)
 
@@ -76,7 +76,7 @@ func Handler(c echo.Context) error {
 		}
 
 		// 翻页模式页面主体
-		FlipPage := FlipPage(c, &state.Global, book, &readingProgress)
+		FlipPage := FlipPage(&state.Global, book, &readingProgress)
 		// 拼接页面
 		indexTemplate = common.MainLayout(
 			c,

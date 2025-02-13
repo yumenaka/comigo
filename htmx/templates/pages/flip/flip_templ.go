@@ -9,14 +9,13 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/htmx/state"
 	"github.com/yumenaka/comigo/htmx/templates/common"
 	"github.com/yumenaka/comigo/model"
 )
 
 // FlipPage 定义 BodyHTML
-func FlipPage(c echo.Context, s *state.GlobalState, book *model.Book, readingProgress *model.ReadingProgress) templ.Component {
+func FlipPage(s *state.GlobalState, book *model.Book, readingProgress *model.ReadingProgress) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -42,7 +41,6 @@ func FlipPage(c echo.Context, s *state.GlobalState, book *model.Book, readingPro
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = common.Header(
-			c,
 			common.HeaderProps{
 				Title:             common.GetPageTitle(book.BookInfo.BookID),
 				ShowReturnIcon:    true,

@@ -1,17 +1,15 @@
 package flip
 
 import (
-	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/htmx/state"
 	"github.com/yumenaka/comigo/htmx/templates/common"
 )
 
 // FlipPage 定义 BodyHTML
-templ FlipPage(c echo.Context, s *state.GlobalState, book *model.Book, readingProgress *model.ReadingProgress) {
+templ FlipPage(s *state.GlobalState, book *model.Book, readingProgress *model.ReadingProgress) {
 	@InsertData(book, s)
 	@common.Header(
-		c,
 		common.HeaderProps{
 			Title:           common.GetPageTitle(book.BookInfo.BookID),
 			ShowReturnIcon:  true,
