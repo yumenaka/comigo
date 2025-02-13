@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 )
 
 var (
@@ -18,15 +18,15 @@ var (
 
 // startServer 启动一个在指定端口监听的HTTP服务器
 func startServer(port string) {
-	ginRouter := gin.Default()
-	ginRouter.GET("/", func(c *gin.Context) {
-		c.String(http.StatusOK, "Listening on port "+port)
+	e := echo.New()
+	e.GET("/", func(c echo.Context) error {
+		return c.String(http.StatusOK, "Listening on port "+port)
 	})
 
 	mutex.Lock()
 	server = &http.Server{
 		Addr:    ":" + port,
-		Handler: ginRouter,
+		Handler: e,
 	}
 	mutex.Unlock()
 

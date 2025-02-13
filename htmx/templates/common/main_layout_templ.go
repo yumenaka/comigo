@@ -9,7 +9,7 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/htmx/embed"
 	"github.com/yumenaka/comigo/htmx/state"
 )
@@ -19,7 +19,7 @@ func GetTheme() string {
 }
 
 // MainLayout 定义网页布局
-func MainLayout(c *gin.Context, s *state.GlobalState, bodyContent templ.Component, insertScript string) templ.Component {
+func MainLayout(c echo.Context, s *state.GlobalState, bodyContent templ.Component, insertScript string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {

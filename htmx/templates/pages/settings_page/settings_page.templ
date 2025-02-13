@@ -1,13 +1,13 @@
 package settings_page
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/htmx/state"
 	"github.com/yumenaka/comigo/htmx/templates/common"
 )
 
 // SettingsPage 设置页面
-templ SettingsPage(c *gin.Context, s *state.GlobalState) {
+templ SettingsPage(c echo.Context, s *state.GlobalState) {
 	@MainArea(&state.Global)
 	@common.Footer(s.Version)
 	@common.QRCode(s.ServerStatus.ServerHost)

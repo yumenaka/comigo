@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"github.com/angelofallars/htmx-go"
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/htmx/state"
 	"github.com/yumenaka/comigo/util/logger"
@@ -17,52 +17,43 @@ import (
 // 使用templ模板响应htmx请求
 // -------------------------
 
-func Tab1(c *gin.Context) {
-	template := tab1(&state.Global) // define body content
-	// 用模板渲染 html 元素
-	if renderErr := htmx.NewResponse().RenderTempl(c.Request.Context(), c.Writer, template); renderErr != nil {
-		// 如果出错，返回 HTTP 500 错误。
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
+func Tab1(c echo.Context) error {
+	template := tab1(&state.Global)
+	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, template); renderErr != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
+	return nil
 }
 
-func Tab2(c *gin.Context) {
-	template := tab2(&state.Global) // define body content
-	// 用模板渲染 html 元素
-	if renderErr := htmx.NewResponse().RenderTempl(c.Request.Context(), c.Writer, template); renderErr != nil {
-		// 如果出错，返回 HTTP 500 错误。
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
+func Tab2(c echo.Context) error {
+	template := tab2(&state.Global)
+	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, template); renderErr != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
+	return nil
 }
 
-func Tab3(c *gin.Context) {
-	template := tab3(&state.Global) // define body content
-	// 用模板渲染 html 元素
-	if renderErr := htmx.NewResponse().RenderTempl(c.Request.Context(), c.Writer, template); renderErr != nil {
-		// 如果出错，返回 HTTP 500 错误。
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
+func Tab3(c echo.Context) error {
+	template := tab3(&state.Global)
+	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, template); renderErr != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
+	return nil
 }
 
 // -------------------------
 // 抽取更新配置的公共逻辑
 // -------------------------
 
-// parseSingleHTMXFormPair 提取并返回表单中的“第一对” key/value。
-// 如果不是 HTMX 请求或解析失败等情况，返回对应的错误。
-func parseSingleHTMXFormPair(c *gin.Context) (string, string, error) {
-	// 手动测试错误
-	//return "", "", errors.New("test")
-	if !htmx.IsHTMX(c.Request) {
+// parseSingleHTMXFormPair 提取并返回表单中的"第一对" key/value
+func parseSingleHTMXFormPair(c echo.Context) (string, string, error) {
+	if !htmx.IsHTMX(c.Request()) {
 		return "", "", errors.New("non-htmx request")
 	}
-	if err := c.Request.ParseForm(); err != nil {
+	formData, err := c.FormParams()
+	if err != nil {
 		return "", "", fmt.Errorf("parseForm error: %v", err)
 	}
-	formData := c.Request.PostForm
 	if len(formData) == 0 {
 		return "", "", errors.New("no form data")
 	}
@@ -78,7 +69,7 @@ func parseSingleHTMXFormPair(c *gin.Context) (string, string, error) {
 }
 
 // updateConfigGeneric 抽取了更新配置的大部分公共逻辑，返回 name 和 newValue 等。
-func updateConfigGeneric(c *gin.Context) (string, string, error) {
+func updateConfigGeneric(c echo.Context) (string, string, error) {
 	name, newValue, err := parseSingleHTMXFormPair(c)
 	if err != nil {
 		return "", "", err
@@ -111,101 +102,81 @@ func updateConfigGeneric(c *gin.Context) (string, string, error) {
 // -------------------------
 
 // UpdateStringConfigHandler 处理 String 类型
-func UpdateStringConfigHandler(c *gin.Context) {
+func UpdateStringConfigHandler(c echo.Context) error {
 	name, newValue, err := updateConfigGeneric(c)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
-		return
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	// 渲染对应的模板
 	updatedHTML := StringConfig(name, newValue, name+"_Description")
-	if renderErr := htmx.NewResponse().RenderTempl(c.Request.Context(), c.Writer, updatedHTML); renderErr != nil {
-		c.AbortWithStatus(http.StatusInternalServerError)
+	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
+	return nil
 }
 
 // UpdateBoolConfigHandler 处理 Bool 类型
-func UpdateBoolConfigHandler(c *gin.Context) {
+func UpdateBoolConfigHandler(c echo.Context) error {
 	name, newValue, err := updateConfigGeneric(c)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
-		return
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	// 将字符串解析为 bool
 	boolVal, parseErr := strconv.ParseBool(newValue)
 	if parseErr != nil {
 		logger.Errorf("无法将 '%s' 解析为 bool: %v", newValue, parseErr)
-		c.String(http.StatusBadRequest, "parse bool error")
-		return
+		return echo.NewHTTPError(http.StatusBadRequest, "parse bool error")
 	}
-	// 渲染对应的模板
 	updatedHTML := BoolConfig(name, boolVal, name+"_Description")
-	if renderErr := htmx.NewResponse().RenderTempl(c.Request.Context(), c.Writer, updatedHTML); renderErr != nil {
-		c.AbortWithStatus(http.StatusInternalServerError)
+	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
+	return nil
 }
 
 // UpdateNumberConfigHandler 处理 Number 类型
-func UpdateNumberConfigHandler(c *gin.Context) {
+func UpdateNumberConfigHandler(c echo.Context) error {
 	name, newValue, err := updateConfigGeneric(c)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
-		return
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	// 将字符串解析为 int
 	intVal, parseErr := strconv.ParseInt(newValue, 10, 64)
 	if parseErr != nil {
 		logger.Errorf("无法将 '%s' 解析为 int: %v", newValue, parseErr)
-		c.String(http.StatusBadRequest, "parse int error")
-		return
+		return echo.NewHTTPError(http.StatusBadRequest, "parse int error")
 	}
 	// 渲染对应的模板
 	updatedHTML := NumberConfig(name, int(intVal), name+"_Description", 0, 65535)
-	if renderErr := htmx.NewResponse().RenderTempl(c.Request.Context(), c.Writer, updatedHTML); renderErr != nil {
-		c.AbortWithStatus(http.StatusInternalServerError)
+	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
+	return nil
 }
 
-func AddArrayConfigHandler(c *gin.Context) {
+func AddArrayConfigHandler(c echo.Context) error {
 	// 解析htmx的form数据
 	// 原始数据类似：configName=SupportMediaType&addValue=.test
 	// 解析后的数据类似：ConfigName=SupportMediaType, AddValue=.test
-	if !htmx.IsHTMX(c.Request) {
-		c.String(http.StatusBadRequest, "non-htmx request")
+	if !htmx.IsHTMX(c.Request()) {
+		return echo.NewHTTPError(http.StatusBadRequest, "non-htmx request")
 	}
-	if err := c.Request.ParseForm(); err != nil {
-		c.String(http.StatusBadRequest, "parseForm error")
-		return
-	}
-	formData := c.Request.PostForm
-	if len(formData) == 0 {
-		c.String(http.StatusBadRequest, "no form data")
-		return
-	}
-	var ConfigName, AddValue string
-	for key, values := range formData {
-		if key == "configName" {
-			ConfigName = values[0]
-		}
-		if key == "addValue" {
-			AddValue = values[0]
-		}
-	}
-	// 打印日志
-	logger.Infof("AddArrayConfigHandler: %s = %s\n", ConfigName, AddValue)
-	// 根据 ConfigName 找到对应配置，并添加 AddValue
-	values, err := doAdd(ConfigName, AddValue)
+
+	configName := c.FormValue("configName")
+	addValue := c.FormValue("addValue")
+
+	logger.Infof("AddArrayConfigHandler: %s = %s\n", configName, addValue)
+
+	values, err := doAdd(configName, addValue)
 	if err != nil {
-		c.String(http.StatusInternalServerError, "add error")
-		return
+		return echo.NewHTTPError(http.StatusInternalServerError, "add error")
 	}
-	// 返回更新后的片段
-	updatedHTML := StringArrayConfig(ConfigName, values, ConfigName+"_Description")
-	if renderErr := htmx.NewResponse().RenderTempl(c.Request.Context(), c.Writer, updatedHTML); renderErr != nil {
-		c.AbortWithStatus(http.StatusInternalServerError)
+
+	updatedHTML := StringArrayConfig(configName, values, configName+"_Description")
+	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
+	return nil
 }
 
 func doAdd(configName, addValue string) ([]string, error) {
@@ -228,46 +199,26 @@ func doAdd(configName, addValue string) ([]string, error) {
 }
 
 // DeleteArrayConfigHandler 处理删除数组元素
-func DeleteArrayConfigHandler(c *gin.Context) {
-	// 解析htmx的form数据
-	// 原始数据类似：configName=SupportMediaType&deleteValue=.test
-	// 解析后的数据类似：ConfigName=SupportMediaType, DeleteValue=.test
-	if !htmx.IsHTMX(c.Request) {
-		c.String(http.StatusBadRequest, "non-htmx request")
+func DeleteArrayConfigHandler(c echo.Context) error {
+	if !htmx.IsHTMX(c.Request()) {
+		return echo.NewHTTPError(http.StatusBadRequest, "non-htmx request")
 	}
-	if err := c.Request.ParseForm(); err != nil {
-		c.String(http.StatusBadRequest, "parseForm error")
-		return
-	}
-	formData := c.Request.PostForm
-	if len(formData) == 0 {
-		c.String(http.StatusBadRequest, "no form data")
-		return
-	}
-	var ConfigName, DeleteValue string
-	for key, values := range formData {
-		if key == "configName" {
-			ConfigName = values[0]
-		}
-		if key == "deleteValue" {
-			DeleteValue = values[0]
-		}
-	}
-	// 打印日志
-	logger.Infof("DeleteArrayConfigHandler: %s = %s\n", ConfigName, DeleteValue)
 
-	// 根据 ConfigName 找到对应配置，
-	// 然后根据 Index 与 DeleteValue 删除该元素
-	values, err := doDelete(ConfigName, DeleteValue)
+	configName := c.FormValue("configName")
+	deleteValue := c.FormValue("deleteValue")
+
+	logger.Infof("DeleteArrayConfigHandler: %s = %s\n", configName, deleteValue)
+
+	values, err := doDelete(configName, deleteValue)
 	if err != nil {
-		c.String(http.StatusInternalServerError, ConfigName+" delete Failed")
-		return
+		return echo.NewHTTPError(http.StatusInternalServerError, configName+" delete Failed")
 	}
-	// 最后把更新后的同一段 HTML 片段返回给前端
-	updatedHTML := StringArrayConfig(ConfigName, values, ConfigName+"_Description")
-	if renderErr := htmx.NewResponse().RenderTempl(c.Request.Context(), c.Writer, updatedHTML); renderErr != nil {
-		c.AbortWithStatus(http.StatusInternalServerError)
+
+	updatedHTML := StringArrayConfig(configName, values, configName+"_Description")
+	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
+	return nil
 }
 
 func doDelete(configName string, deleteValue string) ([]string, error) {
@@ -290,61 +241,51 @@ func doDelete(configName string, deleteValue string) ([]string, error) {
 }
 
 // HandleConfigSave 处理 /api/config-save 的 POST 请求
-func HandleConfigSave(c *gin.Context) {
-	if !htmx.IsHTMX(c.Request) {
-		c.String(http.StatusBadRequest, "non-htmx request")
+func HandleConfigSave(c echo.Context) error {
+	if !htmx.IsHTMX(c.Request()) {
+		return echo.NewHTTPError(http.StatusBadRequest, "non-htmx request")
 	}
-	// 从表单获取选中的目录
-	selectedDir := c.PostForm("selectedDir")
+	// 保存到什么文件夹
+	selectedDir := c.FormValue("selectedDir")
 	if selectedDir == "" {
-		// 如果前端没传，返回错误信息
-		c.String(http.StatusBadRequest, "No directory selected")
-		return
+		return echo.NewHTTPError(http.StatusBadRequest, "No directory selected")
 	}
 	if selectedDir != config.WorkingDirectory && selectedDir != config.HomeDirectory && selectedDir != config.ProgramDirectory {
-		// 如果不是三个目录之一，就不能保存
-		c.String(http.StatusBadRequest, "Invalid directory selected")
-		return
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid directory selected")
 	}
+	// 保存失败时
 	if err := config.SaveConfig(selectedDir); err != nil {
-		// 保存失败，返回错误信息
-		c.String(http.StatusInternalServerError, "Failed to save config")
-		return
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to save config")
 	}
-	// 最后把更新后的同一段 HTML 片段返回给前端
+	// 更新后的HTML片段
 	updatedHTML := ConfigManager(config.DefaultConfigLocation(), config.GetWorkingDirectoryConfig(), config.GetHomeDirectoryConfig(), config.GetProgramDirectoryConfig())
-	if renderErr := htmx.NewResponse().RenderTempl(c.Request.Context(), c.Writer, updatedHTML); renderErr != nil {
-		c.AbortWithStatus(http.StatusInternalServerError)
+	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
+	return nil
 }
 
 // HandleConfigDelete 处理 /api/config-delete 的 POST 请求
-func HandleConfigDelete(c *gin.Context) {
-	if !htmx.IsHTMX(c.Request) {
-		c.String(http.StatusBadRequest, "non-htmx request")
+func HandleConfigDelete(c echo.Context) error {
+	if !htmx.IsHTMX(c.Request()) {
+		return echo.NewHTTPError(http.StatusBadRequest, "non-htmx request")
 	}
-	// 从表单获取选中的目录
-	selectedDir := c.PostForm("selectedDir")
+	// 保存到什么文件夹
+	selectedDir := c.FormValue("selectedDir")
 	if selectedDir == "" {
-		// 如果前端没传，返回错误信息
-		c.String(http.StatusBadRequest, "No directory selected")
-		return
+		return echo.NewHTTPError(http.StatusBadRequest, "No directory selected")
 	}
 	if selectedDir != config.WorkingDirectory && selectedDir != config.HomeDirectory && selectedDir != config.ProgramDirectory {
-		// 如果不是三个目录之一，就不能保存
-		c.String(http.StatusBadRequest, "Invalid directory selected")
-		return
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid directory selected")
 	}
+
 	if err := config.DeleteConfigIn(selectedDir); err != nil {
-		// 删除失败，返回错误信息
-		c.String(http.StatusInternalServerError, "Failed to save config")
-		return
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to save config")
 	}
-	// 最后把更新后的同一段 HTML 片段返回给前端
+	// 更新后的HTML片段
 	updatedHTML := ConfigManager(config.DefaultConfigLocation(), config.GetWorkingDirectoryConfig(), config.GetHomeDirectoryConfig(), config.GetProgramDirectoryConfig())
-	logger.Infof("11111111111111111111111111111")
-	logger.Infof("ConfigManager: %v%v%v%v", config.DefaultConfigLocation(), config.GetWorkingDirectoryConfig(), config.GetHomeDirectoryConfig(), config.GetProgramDirectoryConfig())
-	if renderErr := htmx.NewResponse().RenderTempl(c.Request.Context(), c.Writer, updatedHTML); renderErr != nil {
-		c.AbortWithStatus(http.StatusInternalServerError)
+	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
+	return nil
 }

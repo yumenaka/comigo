@@ -3,16 +3,17 @@ package logger
 import (
 	"bytes"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
-	"github.com/rifflock/lfshook"
-	"github.com/sirupsen/logrus"
 	"io"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/labstack/echo/v4"
+	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
+	"github.com/rifflock/lfshook"
+	"github.com/sirupsen/logrus"
 )
 
 // 对外暴露的 log 接口
@@ -27,9 +28,11 @@ var (
 )
 
 // 全局 logger
-var logger *logrus.Logger
-var logLevel = logrus.DebugLevel
-var ReportCaller bool
+var (
+	logger       *logrus.Logger
+	logLevel     = logrus.DebugLevel
+	ReportCaller bool
+)
 
 func init() {
 	logger = logrus.New()
@@ -106,7 +109,7 @@ func (f *CustomFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	return b.Bytes(), nil
 }
 
-// 根据你的需求对函数名进行简单截断，比如取最后一个“.”之后的部分
+// 根据你的需求对函数名进行简单截断，比如取最后一个"."之后的部分
 func trimFuncName(funcName string) string {
 	// 例子：funcName = "github.com/xxx/xxx/pkg.Foo"
 	// 我们想得到 "Foo"
@@ -117,9 +120,9 @@ func trimFuncName(funcName string) string {
 	return parts[len(parts)-1]
 }
 
-func GinLogHandler(LogToFile bool, LogFilePath string, LogFileName string, Debug bool) gin.HandlerFunc {
-	logger.SetLevel(logrus.DebugLevel) //设置最低的日志级别
-	logger.SetReportCaller(Debug)      //显示函数名和行号
+func EchoLogHandler(LogToFile bool, LogFilePath string, LogFileName string, Debug bool) echo.MiddlewareFunc {
+	logger.SetLevel(logrus.DebugLevel)
+	logger.SetReportCaller(Debug)
 	logger.SetFormatter(&CustomFormatter{
 		FullTimestamp:   false,
 		TimestampFormat: "2006-01-02 15:04:05",
@@ -160,35 +163,30 @@ func GinLogHandler(LogToFile bool, LogFilePath string, LogFileName string, Debug
 			TimestampFormat: "2006-01-02 03:04:05",
 		}))
 	}
-	//自定义gin处理函数
-	return func(c *gin.Context) {
-		//开始时间
-		startTime := time.Now()
-		// 先让请求继续处理
-		c.Next()
-		// 请求结束后，计算所需的时间并记录日志
-		endTime := time.Now()
-		latencyTime := float64(endTime.Sub(startTime).Microseconds()) / 1000
-		reqMethod := c.Request.Method
-		reqURI := c.Request.RequestURI
-		statusCode := c.Writer.Status()
-		// 日志格式 https://www.runoob.com/go/go-fmt-printf.html
-		// 格式化占位符的结构为：%[flags][width][.precision]verb
-		//     flags：用于控制格式化输出的标志（可选）。
-		//        -：左对齐。
-		//        +：始终显示数值的符号。
-		//        0：用零填充。
-		//        #：为二进制、八进制、十六进制等加上前缀。
-		//        空格：正数前加空格，负数前加 -。
-		//    width：输出宽度（可选）。
-		//    .precision：浮点数小数点后的位数（可选）。
-		//    verb：用于指定数据的格式化方式。
-		// %v	以默认格式输出变量
-		// %f	十进制浮点数
-		// %6.2f 表示输出浮点数，宽度为6，小数点后保留2位
-		logger.WithFields(logrus.Fields{
-			//"status_code":  statusCode,
-			//"client_ip":    c.ClientIP(),
-		}).Info(fmt.Sprintf("[%s:%d][%6.2fms][%s]%s", reqMethod, statusCode, latencyTime, c.ClientIP(), reqURI))
+	//自定义log处理函数
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			startTime := time.Now()
+
+			err := next(c)
+
+			endTime := time.Now()
+			latencyTime := float64(endTime.Sub(startTime).Microseconds()) / 1000
+			reqMethod := c.Request().Method
+			reqURI := c.Request().RequestURI
+			statusCode := c.Response().Status
+
+			logger.WithFields(logrus.Fields{}).Info(
+				fmt.Sprintf("[%s:%d][%6.2fms][%s]%s",
+					reqMethod,
+					statusCode,
+					latencyTime,
+					c.RealIP(),
+					reqURI,
+				),
+			)
+
+			return err
+		}
 	}
 }

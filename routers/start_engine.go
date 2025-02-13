@@ -7,25 +7,24 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/config"
 )
 
-// startEngine 7、启动网页服务
-func startEngine(engine *gin.Engine) {
-	//是否对外服务
+// startEngine 启动网页服务
+func startEngine(e *echo.Echo) {
+	// 是否对外服务
 	webHost := ":"
 	if config.GetDisableLAN() {
 		webHost = "localhost:"
 	}
-	//是否启用TLS
+	// 是否启用TLS
 	enableTls := config.GetCertFile() != "" && config.GetKeyFile() != ""
 	config.Srv = &http.Server{
 		Addr:    webHost + strconv.Itoa(config.GetPort()),
-		Handler: engine, //gin.Engine本身可以作为一个Handler传递到http包,用于启动服务器
+		Handler: e, // echo.Echo 实现了 http.Handler 接口
 	}
-	//在 goroutine 中初始化服务器，这样它就不会阻塞关闭处理
-	//从端口启动开始,后续的所有工作都是http包来完成的 https://go.sai.show/PART02.%20Server/0.1-server-xiang-jie-yu-mian-shi-yao-dian
+	// 在 goroutine 中初始化服务器，这样它就不会阻塞关闭处理
 	go func() {
 		// 监听并启动服务(TLS)
 		if enableTls {

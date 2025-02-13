@@ -3,16 +3,15 @@ package config_handlers
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/config"
 )
 
 // GetConfigStatus 获取json格式的当前配置
-func GetConfigStatus(c *gin.Context) {
+func GetConfigStatus(c echo.Context) error {
 	err := config.CfgStatus.SetConfigStatus()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get config"})
-		return
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to get config"})
 	}
-	c.IndentedJSON(http.StatusOK, config.CfgStatus)
+	return c.JSON(http.StatusOK, config.CfgStatus)
 }

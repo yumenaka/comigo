@@ -4,7 +4,7 @@ import (
     "fmt"
     "strconv"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/htmx/state"
 )
@@ -13,7 +13,7 @@ css backgroundImage(imageUrl string) {
 	background-image: { "url(" + imageUrl + ")" };
 }
 
-templ BookCard(c *gin.Context, s *state.GlobalState, book model.BookInfo) {
+templ BookCard(c echo.Context, s *state.GlobalState, book model.BookInfo) {
 	<!-- 用go-templ，创建Alpine的x-data。 -->
 	<!-- 如果把链接的 target 属性设置为 "_blank"，该链接会在新窗口中打开。 -->
 	<a

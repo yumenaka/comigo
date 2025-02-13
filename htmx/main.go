@@ -1,22 +1,23 @@
 package main
 
 import (
+	"io"
+	"log/slog"
+	"os"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/x/term"
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/cmd"
 	"github.com/yumenaka/comigo/htmx/router"
 	"github.com/yumenaka/comigo/htmx/tui"
 	"github.com/yumenaka/comigo/routers"
 	"github.com/yumenaka/comigo/util/logger"
-	"io"
-	"log/slog"
-	"os"
 )
 
 func main() {
-	// 禁止Gin自带的控制台输出
-	gin.DefaultWriter = io.Discard
+	// 禁止Echo自带的控制台输出
+	echo.New().Logger.SetOutput(io.Discard)
 	// TODO: mac 测试 TUI 界面，无法使用air热加载（无法绑定端口？）。需要使用 go run 运行。BUG原因未知。
 	// go runTui()
 	// 运行 Comigo 服务器

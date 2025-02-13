@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 	"github.com/spf13/viper"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/util"
@@ -15,12 +15,11 @@ import (
 )
 
 // UpdateConfig 修改服务器配置(post json)
-func UpdateConfig(c *gin.Context) {
+func UpdateConfig(c echo.Context) error {
 	// 读取请求体中的JSON数据
-	body, err := io.ReadAll(c.Request.Body)
+	body, err := io.ReadAll(c.Request().Body)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to read request body"})
-		return
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Failed to read request body"})
 	}
 	// 将JSON数据转换为字符串并打印
 	jsonString := string(body)
@@ -31,8 +30,7 @@ func UpdateConfig(c *gin.Context) {
 	err = config.UpdateConfigByJson(jsonString)
 	if err != nil {
 		logger.Infof("%s", err.Error())
-		c.JSON(http.StatusMethodNotAllowed, gin.H{"error": "Failed to parse JSON data"})
-		return
+		return c.JSON(http.StatusMethodNotAllowed, map[string]string{"error": "Failed to parse JSON data"})
 	}
 	err = config.WriteConfigFile()
 	if err != nil {
@@ -41,7 +39,7 @@ func UpdateConfig(c *gin.Context) {
 	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等
 	BeforeConfigUpdate(&oldConfig, config.GetCfg())
 	// 返回成功消息
-	c.JSON(http.StatusOK, gin.H{"message": "Server settings updated successfully"})
+	return c.JSON(http.StatusOK, map[string]string{"message": "Server settings updated successfully"})
 }
 
 // BeforeConfigUpdate 根据配置的变化，判断是否需要打开浏览器重新扫描等
