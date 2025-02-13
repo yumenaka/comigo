@@ -5,7 +5,7 @@ import (
 	"net/url"
 
 	"github.com/angelofallars/htmx-go"
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/htmx/state"
 	"github.com/yumenaka/comigo/htmx/templates/common"
 	"github.com/yumenaka/comigo/model"
@@ -13,9 +13,15 @@ import (
 )
 
 // Handler 书架页面的处理程序。
-func Handler(c *gin.Context) {
+func Handler(c echo.Context) error {
+	// Set the response content type to HTML.
+	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
+
 	// 获取查询参数并指定默认值 ?age=value
-	sortBy := c.DefaultQuery("sortBy", "default")
+	sortBy := c.QueryParam("sortBy") // 使用 echo 的查询参数方法
+	if sortBy == "" {
+		sortBy = "default"
+	}
 
 	// 读取url参数，获取书籍ID
 	bookID := c.Param("id")
@@ -24,7 +30,7 @@ func Handler(c *gin.Context) {
 		var err error
 		model.CheckAllBookFileExist()
 		state.Global.ShelfBookList, err = model.TopOfShelfInfo(sortBy)
-		//TODO: 没有图书的提示（上传压缩包\远程下载示例漫画）
+		// TODO: 没有图书的提示（上传压缩包\远程下载示例漫画）
 		if err != nil {
 			logger.Infof("TopOfShelfInfo: %v", err)
 		}
@@ -34,10 +40,10 @@ func Handler(c *gin.Context) {
 		var err error
 		model.CheckAllBookFileExist()
 		state.Global.ShelfBookList, err = model.GetBookInfoListByID(bookID, sortBy)
-		//TODO: 没有图书的提示（返回主页\上传压缩包\远程下载示例漫画）
+		// TODO: 没有图书的提示（返回主页\上传压缩包\远程下载示例漫画）
 		if err != nil {
 			logger.Infof("GetBookShelf Error: %v", err)
-			return
+			return nil
 		}
 	}
 
@@ -49,11 +55,11 @@ func Handler(c *gin.Context) {
 		"static/shelf.js")
 
 	// 用模板渲染书架页面(htmx-go)
-	if err := htmx.NewResponse().RenderTempl(c.Request.Context(), c.Writer, indexTemplate); err != nil {
+	if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate); err != nil {
 		// 如果出错，返回 HTTP 500 错误。
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
+		return c.NoContent(http.StatusInternalServerError)
 	}
+	return nil
 }
 
 func getHref(book model.BookInfo) string {

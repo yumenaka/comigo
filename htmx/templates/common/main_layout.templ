@@ -1,7 +1,7 @@
 package common
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/htmx/embed"
 	"github.com/yumenaka/comigo/htmx/state"
 )
@@ -9,7 +9,7 @@ func GetTheme() string {
     return "{theme}"
 }
 // MainLayout 定义网页布局
-templ MainLayout(c *gin.Context, s *state.GlobalState, bodyContent templ.Component, insertScript string) {
+templ MainLayout(c echo.Context, s *state.GlobalState, bodyContent templ.Component, insertScript string) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>

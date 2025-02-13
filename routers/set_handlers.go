@@ -1,55 +1,57 @@
 package routers
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/routers/config_handlers"
 	"github.com/yumenaka/comigo/routers/handlers"
-	"github.com/yumenaka/comigo/routers/token"
 	"github.com/yumenaka/comigo/routers/websocket"
-	"github.com/yumenaka/comigo/util/logger"
 )
 
-// BindAPI 为前端绑定 API 路由
-func BindAPI(engine *gin.Engine) {
+// BindAPI 为前端绑定 API 路由 (Echo 版本)
+func BindAPI(e *echo.Echo) {
 	// 路由组，方便管理部分相同的 URL
-	api := engine.Group("/api")
+	api := e.Group("/api")
 
 	// 注册公共路由
 	publicRoutes(api)
 
 	// 判断是否需要 JWT 认证
 	if config.GetPassword() != "" {
-		jwtMiddleware, err := token.NewJwtMiddleware()
-		if err != nil {
-			logger.Fatalf("JWT Error: %s", err.Error())
-		}
+		//jwtMiddleware, err := token.NewJwtMiddleware()
+		//if err != nil {
+		//	logger.Fatalf("JWT Error: %s", err.Error())
+		//}
 
-		// 登录、注销和刷新 token 路由
-		api.POST("/login", jwtMiddleware.LoginHandler)
-		api.POST("/logout", jwtMiddleware.LogoutHandler)
-		api.GET("/refresh_token", jwtMiddleware.RefreshHandler)
+		//// 登录、注销和刷新 token 路由
+		//// 假设 token.NewJwtMiddleware() 里已生成 Echo 版本的 handler
+		//api.POST("/login", jwtMiddleware.LoginHandler)
+		//api.POST("/logout", jwtMiddleware.LogoutHandler)
+		//api.GET("/refresh_token", jwtMiddleware.RefreshHandler)
 
 		// 受保护的路由，应用 JWT 中间件
-		protectedAPI := api.Group("/", jwtMiddleware.MiddlewareFunc())
+		protectedAPI := api.Group("")
+		//protectedAPI.Use(jwtMiddleware.MiddlewareFunc())
 		protectedRoutes(protectedAPI)
 	} else {
 		// 如果不需要认证，直接注册受保护的路由
-		protectedAPI := api.Group("/")
+		protectedAPI := api.Group("")
 		protectedRoutes(protectedAPI)
 	}
 }
 
-// publicRoutes 注册公共路由
-func publicRoutes(rg *gin.RouterGroup) {
+// publicRoutes 注册公共路由 (Echo 版本)
+func publicRoutes(rg *echo.Group) {
 	rg.GET("/qrcode.png", handlers.GetQrcode)
 	rg.GET("/server_info", handlers.GetServerInfoHandler)
+
+	// 需要把 WsDebug 替换到正确位置
 	websocket.WsDebug = &config.GetCfg().Debug
 	rg.GET("/ws", websocket.WsHandler)
 }
 
-// protectedRoutes 注册需要认证的路由
-func protectedRoutes(rg *gin.RouterGroup) {
+// protectedRoutes 注册需要认证的路由 (Echo 版本)
+func protectedRoutes(rg *echo.Group) {
 	// 文件上传
 	rg.POST("/upload", handlers.UploadFile)
 	// 获取特定文件

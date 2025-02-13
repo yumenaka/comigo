@@ -4,18 +4,17 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
-func GetRawFile(c *gin.Context) {
+func GetRawFile(c echo.Context) error {
 	bookID := c.Param("book_id")
 	b, err := model.GetBookByID(bookID, "")
 	// 打印文件名
 	if err != nil {
-		c.String(http.StatusNotFound, "404 page not found")
-		return
+		return c.String(http.StatusNotFound, "404 page not found")
 	}
 	fileName := c.Param("file_name")
 	logger.Infof("下载文件：%s", fileName)
@@ -23,14 +22,12 @@ func GetRawFile(c *gin.Context) {
 	// 获取文件信息
 	fileInfo, err := os.Stat(b.FilePath)
 	if err != nil {
-		c.String(http.StatusNotFound, "404 page not found")
-		return
+		return c.String(http.StatusNotFound, "404 page not found")
 	}
 	// 如果是目录，返回目录列表
 	if fileInfo.IsDir() {
-		c.String(http.StatusNotFound, "404 page not found")
-		return
+		return c.String(http.StatusNotFound, "404 page not found")
 	}
 	// 如果是文件，返回文件
-	c.File(b.FilePath)
+	return c.File(b.FilePath)
 }

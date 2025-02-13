@@ -1,13 +1,13 @@
 package shelf
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/htmx/state"
 	"github.com/yumenaka/comigo/htmx/templates/common"
 )
 
 // ShelfPage 书架页面
-templ ShelfPage(c *gin.Context, s *state.GlobalState) {
+templ ShelfPage(c echo.Context, s *state.GlobalState) {
 	@common.Header(
 		c,
 		common.HeaderProps{

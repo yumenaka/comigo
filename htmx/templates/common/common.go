@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/htmx/state"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
-// ServerHostBindStr  传递给前端，现实QRCode用的“主机域名”字符串
+// ServerHostBindStr  传递给前端，显示QRCode用的"主机域名"字符串
 func ServerHostBindStr(serverHost string) string {
 	return "{ serverHost: '" + serverHost + "' }"
 }
@@ -55,21 +55,22 @@ func GetReturnUrl(BookID string) string {
 	return "/shelf/" + info.BookID
 }
 
-func AddQuery(c *gin.Context, key string, value string) string {
-	// 获取当前请求的 URL
-	currentUrl := c.Request.URL
+func AddQuery(c echo.Context, key, value string) string {
+	// 获取当前请求的URL
+	req := c.Request()
+	currentURL := req.URL
 
-	// 解析 URL 参数
-	params := currentUrl.Query()
+	// 解析URL参数
+	params := currentURL.Query()
 
-	// 使用 Set 方法替换或添加新的查询参数 key=value
+	// 替换或添加新的查询参数 key=value
 	params.Set(key, value)
 
 	// 将修改后的查询参数重新编码
-	currentUrl.RawQuery = params.Encode()
+	currentURL.RawQuery = params.Encode()
 
-	// 输出修改后的 URL
-	return currentUrl.String()
+	// 返回修改后的URL
+	return currentURL.String()
 }
 
 func ShowQuickJumpBar(b *model.Book) (QuickJumpBar bool) {

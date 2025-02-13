@@ -1,13 +1,13 @@
 package upload_page
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/htmx/state"
 	"github.com/yumenaka/comigo/htmx/templates/common"
 )
 
 // UploadPage 上传页面
-templ UploadPage(c *gin.Context, s *state.GlobalState) {
+templ UploadPage(c echo.Context, s *state.GlobalState) {
 	@common.Header(
 		c,
 		common.HeaderProps{

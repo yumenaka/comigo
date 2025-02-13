@@ -3,7 +3,7 @@ package config_handlers
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/util/logger"
 )
@@ -14,24 +14,29 @@ const (
 	ProgramDirectory = "ProgramDirectory"
 )
 
-func DeleteConfig(c *gin.Context) {
+// DeleteConfig 删除配置文件
+func DeleteConfig(c echo.Context) error {
 	in := c.Param("in")
 	validDirs := []string{WorkingDirectory, HomeDirectory, ProgramDirectory}
 
 	if !contains(validDirs, in) {
-		logger.Infof("error: Failed save to %s directory", in)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed save to" + in + " directory"})
-		return
+		logger.Infof("error: Failed to delete config in %s directory", in)
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "Failed to delete config in " + in + " directory",
+		})
 	}
+
 	err := config.DeleteConfigIn(in)
 	if err != nil {
-		c.JSON(http.StatusMethodNotAllowed, gin.H{"error": "Failed to save config"})
-		return
+		return c.JSON(http.StatusMethodNotAllowed, map[string]string{
+			"error": "Failed to delete config",
+		})
 	}
-	GetConfigStatus(c)
+
+	return GetConfigStatus(c)
 }
 
-// contains 函数来检查切片是否包含特定字符串
+// contains 检查切片是否包含特定字符串
 func contains(slice []string, str string) bool {
 	for _, v := range slice {
 		if v == str {

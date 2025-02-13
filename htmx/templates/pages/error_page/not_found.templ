@@ -1,12 +1,12 @@
 package error_page
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/htmx/state"
 	"github.com/yumenaka/comigo/htmx/templates/common"
 )
 
-templ NotFound404(c *gin.Context, s *state.GlobalState) {
+templ NotFound404(c echo.Context, s *state.GlobalState) {
 	@common.Header(
 		c,
 		common.HeaderProps{

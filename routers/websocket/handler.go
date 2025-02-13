@@ -4,9 +4,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
+	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/util/locale"
 	"github.com/yumenaka/comigo/util/logger"
 )
@@ -19,12 +19,13 @@ func init() {
 // Message 定义一个对象来管理消息，反引号包含的文本是 Go 在对象和 JSON 之间进行序列化和反序列化时需要的元数据。
 type Message struct {
 	Type       string `json:"type"`
-	StatusCode int    `json:"status_code"` //参考http状态码： https://zh.wikipedia.org/zh-hans/HTTP%E7%8A%B6%E6%80%81%E7%A0%81
+	StatusCode int    `json:"status_code"` // 参考http状态码： https://zh.wikipedia.org/zh-hans/HTTP%E7%8A%B6%E6%80%81%E7%A0%81
 	UserID     string `json:"user_id"`
-	Token      string `json:"Token"` //认证用
+	Token      string `json:"Token"` // 认证用
 	Detail     string `json:"detail"`
-	DataString string `json:"data_string"` //附加的json字符串数据，服务器根据情况解析
+	DataString string `json:"data_string"` // 附加的json字符串数据，服务器根据情况解析
 }
+
 type MessageWithClientID struct {
 	Msg      Message
 	ClientID string
@@ -32,8 +33,8 @@ type MessageWithClientID struct {
 
 // 创建一个 upGrader 的实例。这只是一个对象，它具备一些方法，这些方法可以获取一个普通 HTTP 链接然后将其升级成一个 WebSocket
 var upGrader = websocket.Upgrader{
-	//ReadBufferSize:  4096,//读缓存区大小 单位是 bytes，依需求設定（设为 0，则不限制大小）
-	//WriteBufferSize: 1024,// 写缓存区大小 同上
+	// ReadBufferSize:  4096,//读缓存区大小 单位是 bytes，依需求設定（设为 0，则不限制大小）
+	// WriteBufferSize: 1024,// 写缓存区大小 同上
 	// use default options
 	// 检测请求来源 //检查是否跨域
 	CheckOrigin: func(r *http.Request) bool {
@@ -60,28 +61,29 @@ var broadcast = make(chan MessageWithClientID) // broadcast channel
 
 // WsHandler
 // 路由是 "/ws",即 ws://127.0.0.1:1234/api/ws
-func WsHandler(c *gin.Context) {
+func WsHandler(c echo.Context) error {
 	//Upgrade 函数将 http get请求升级到 WebSocket 协议。
 	//   responseHeader包含在对客户端升级请求的响应中。
 	//// 使用responseHeader指定cookie（Set-Cookie）和应用程序协商的子协议（Sec-WebSocket-Protocol）。
 	//// 如果升级失败，则升级将使用HTTP错误响应回复客户端
 	//// 返回一个 Conn 指针(wsConn)，拿到他后，可使用 Conn 读写数据与客户端通信。
-	wsConn, err := upGrader.Upgrade(c.Writer, c.Request, nil)
+	wsConn, err := upGrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
-		log.Print("Error during connection up gradation:", err) //连接升级出错
-		return
+		log.Print("Error during connection upgradation:", err) // 连接升级出错
+		return err
 	}
 	// 把新的客户端添加到全局的 "clients" 映射表中进行注册
-	var clientID = uuid.New().String()
+	clientID := uuid.New().String()
 	clients[wsConn] = clientID
 
-	//比 defer wsConn.Close() 更好?
-	//通知 Go 在函数返回的时候关闭 WebSocket。
+	// 比 defer wsConn.Close() 更好?
+	// 通知 Go 在函数返回的时候关闭 WebSocket。
 	defer func() {
 		closeSocketErr := wsConn.Close()
 		if closeSocketErr != nil {
-			logger.Infof("%s", err)
+			logger.Infof("%s", closeSocketErr)
 		}
+		delete(clients, wsConn)
 	}()
 
 	// 无限循环，等待要写入 WebSocket 的新消息，将其从 JSON 反序列化为 Detail 对象然后送入广播频道。
@@ -91,8 +93,7 @@ func WsHandler(c *gin.Context) {
 		err = wsConn.ReadJSON(&msg)
 		if err != nil {
 			logger.Infof(locale.GetString("websocket_error")+"%v", err)
-			//如果从 socket 中读取数据有误，我们假设客户端已经因为某种原因断开。我们记录错误并从全局的 “clients” 映射表里删除该客户端，这样一来，我们不会继续尝试与其通信。
-			delete(clients, wsConn)
+			// 如果从 socket 中读取数据有误，我们假设客户端已经因为某种原因断开。我们记录错误并从全局的 "clients" 映射表里删除该客户端，这样一来，我们不会继续尝试与其通信。
 			break
 		} else {
 			if *WsDebug {
@@ -103,13 +104,14 @@ func WsHandler(c *gin.Context) {
 			broadcast <- msgWithClientID
 		}
 	}
+	return nil
 }
 
-// 一个简单循环，从“broadcast”中连续读取数据，然后通过各自的 WebSocket 连接将消息传播到客户端。
+// 一个简单循环，从"broadcast"中连续读取数据，然后通过各自的 WebSocket 连接将消息传播到客户端。
 func handleMessages() {
 	for {
 		// Grab the next message from the broadcast channel
-		msgWithClientID := <-broadcast //广播频道
+		msgWithClientID := <-broadcast // 广播频道
 		// Send it out to every client that is currently connected
 		for client := range clients {
 			switch msgWithClientID.Msg.Type {
@@ -122,7 +124,7 @@ func handleMessages() {
 			case "scroll_mode_sync_page":
 				handSyncPageMessageToScrollMode(client, msgWithClientID.Msg, msgWithClientID.ClientID)
 			default:
-				//handDefaultMessage(client, msgWithClientID.Msg, msgWithClientID.ClientID)
+				// handDefaultMessage(client, msgWithClientID.Msg, msgWithClientID.ClientID)
 			}
 		}
 	}
