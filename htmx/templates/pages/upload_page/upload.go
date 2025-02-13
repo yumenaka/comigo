@@ -14,7 +14,7 @@ func Handler(c echo.Context) error {
 	indexTemplate := common.MainLayout(
 		c,
 		&state.Global,
-		UploadPage(c, &state.Global),
+		UploadPage(&state.Global),
 		"",
 	)
 	// 渲染页面

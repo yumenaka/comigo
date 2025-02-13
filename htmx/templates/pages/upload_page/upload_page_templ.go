@@ -9,13 +9,12 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/htmx/state"
 	"github.com/yumenaka/comigo/htmx/templates/common"
 )
 
 // UploadPage 上传页面
-func UploadPage(c echo.Context, s *state.GlobalState) templ.Component {
+func UploadPage(s *state.GlobalState) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -37,9 +36,8 @@ func UploadPage(c echo.Context, s *state.GlobalState) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = common.Header(
-			c,
 			common.HeaderProps{
-				Title:           "UploadPage 上传页面",
+				Title:           "UploadPage",
 				ShowReturnIcon:  true,
 				ReturnUrl:       "/",
 				SetDownLoadLink: false,

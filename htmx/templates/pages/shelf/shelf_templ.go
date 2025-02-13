@@ -37,13 +37,12 @@ func ShelfPage(c echo.Context, s *state.GlobalState) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = common.Header(
-			c,
 			common.HeaderProps{
 				Title:           common.GetPageTitle(c.Param("id")),
 				ShowReturnIcon:  c.Param("id") != "",
 				ReturnUrl:       common.GetReturnUrl(c.Param("id")),
 				SetDownLoadLink: false,
-				InShelf:         false,
+				InShelf:         true,
 				DownLoadLink:    "",
 				SetTheme:        true,
 			}).Render(ctx, templ_7745c5c3_Buffer)

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/htmx/state"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/util/logger"
@@ -18,7 +17,7 @@ func ServerHostBindStr(serverHost string) string {
 // GetPageTitle 获取页面标题
 func GetPageTitle(bookID string) string {
 	if bookID == "" {
-		return "Comigo " + state.Global.Version
+		return state.ServerConfig.GetTopStoreName()
 	}
 	groupBook, err := model.GetBookByID(bookID, "")
 	if err != nil {
@@ -53,24 +52,6 @@ func GetReturnUrl(BookID string) string {
 		return "/"
 	}
 	return "/shelf/" + info.BookID
-}
-
-func AddQuery(c echo.Context, key, value string) string {
-	// 获取当前请求的URL
-	req := c.Request()
-	currentURL := req.URL
-
-	// 解析URL参数
-	params := currentURL.Query()
-
-	// 替换或添加新的查询参数 key=value
-	params.Set(key, value)
-
-	// 将修改后的查询参数重新编码
-	currentURL.RawQuery = params.Encode()
-
-	// 返回修改后的URL
-	return currentURL.String()
 }
 
 func ShowQuickJumpBar(b *model.Book) (QuickJumpBar bool) {

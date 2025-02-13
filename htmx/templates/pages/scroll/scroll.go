@@ -35,7 +35,7 @@ func Handler(c echo.Context) error {
 	indexTemplate := common.MainLayout(
 		c,
 		&state.Global,
-		error_page.NotFound404(c, &state.Global),
+		error_page.NotFound404(&state.Global),
 		"",
 	)
 	book, err := model.GetBookByID(bookID, sortBy)
@@ -45,7 +45,7 @@ func Handler(c echo.Context) error {
 	}
 	if err == nil {
 		// 定义模板主体内容。
-		scrollPage := ScrollPage(c, &state.Global, book)
+		scrollPage := ScrollPage(&state.Global, book)
 		// 拼接页面
 		indexTemplate = common.MainLayout(
 			c,

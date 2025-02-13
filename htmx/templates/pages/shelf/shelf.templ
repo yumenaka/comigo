@@ -9,13 +9,12 @@ import (
 // ShelfPage 书架页面
 templ ShelfPage(c echo.Context, s *state.GlobalState) {
 	@common.Header(
-		c,
 		common.HeaderProps{
 			Title:           common.GetPageTitle(c.Param("id")),
 			ShowReturnIcon:  c.Param("id") != "",
 			ReturnUrl:       common.GetReturnUrl(c.Param("id")),
 			SetDownLoadLink: false,
-			InShelf:         false,
+			InShelf:         true,
 			DownLoadLink:    "",
 			SetTheme:        true,
 		})

@@ -1,17 +1,15 @@
 package scroll
 
 import (
-	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/htmx/state"
 	"github.com/yumenaka/comigo/htmx/templates/common"
 )
 
 // ScrollPage 定义 BodyHTML
-templ ScrollPage(c echo.Context, s *state.GlobalState, book *model.Book) {
+templ ScrollPage(s *state.GlobalState, book *model.Book) {
 	@InsertData(book, s)
 	@common.Header(
-		c,
 		common.HeaderProps{
 			Title:             common.GetPageTitle(book.BookInfo.BookID),
 			ShowReturnIcon:    true,

@@ -65,7 +65,7 @@ func Handler(c echo.Context) error {
 func getHref(book model.BookInfo) string {
 	// 如果是书籍组，就跳转到子书架
 	if book.Type == model.TypeBooksGroup {
-		return "\"/shelf/" + book.BookID + "/\""
+		return "\"/shelf/" + book.BookID + "\""
 	}
 	// 如果是视频、音频、未知文件，就在新窗口打开
 	if book.Type == model.TypeVideo || book.Type == model.TypeAudio || book.Type == model.TypeUnknownFile {

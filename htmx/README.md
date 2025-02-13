@@ -30,7 +30,6 @@
  - [ ] 可能的BUG：当前文件夹顶层无书籍的时候，首页为空或跳过规则不对？上一版有这个问题，目前有无问题还不确定。
  - [ ] gin -> chi或gin -> echo。chi无外部依赖,echo似乎与wails兼容性更好。此外还可以试试不用框架全原生。
  - [ ] 尝试wails3, https://v3alpha.wails.io/getting-started/installation/
- - [ ] 想办法干掉 htmx里的 AddQuery() 函数，减少c的传递
 ## 提示
 
 <https://github.com/angelofallars/htmx-go#triggers>  
