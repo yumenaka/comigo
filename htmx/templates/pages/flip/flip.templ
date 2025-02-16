@@ -7,7 +7,7 @@ import (
 )
 
 // FlipPage 定义 BodyHTML
-templ FlipPage(s *state.GlobalState, book *model.Book, readingProgress *model.ReadingProgress) {
+templ FlipPage(s *state.GlobalState, book *model.Book) {
 	@InsertData(book, s)
 	@common.Header(
 		common.HeaderProps{

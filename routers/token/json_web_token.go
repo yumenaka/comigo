@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/util/logger"
@@ -17,7 +17,7 @@ type User struct {
 	Password string `json:"password" binding:"required"`
 }
 
-// TODO：需要重写。JWTCustomClaims 自定义 JWT Claims
+// JWTCustomClaims  自定义 JWT Claims
 type JWTCustomClaims struct {
 	Username string `json:"username"`
 	jwt.RegisteredClaims

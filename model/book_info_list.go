@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"fmt"
 	"sort"
 
 	"github.com/yumenaka/comigo/util"
@@ -56,6 +57,10 @@ func (s *BookInfoList) SortBooks(sortBy string) {
 		}
 	case "modify_time": //根据修改时间排序 从新到旧
 		lessFunc = func(i, j int) bool {
+			if s.BookInfos[i].Type == TypeDir || s.BookInfos[j].Type == TypeDir {
+				fmt.Println("!!!!" + s.BookInfos[i].Title + "!!!modify_time:" + s.BookInfos[i].Modified.String())
+				fmt.Println("!!!!" + s.BookInfos[j].Title + "!!!modify_time:" + s.BookInfos[j].Modified.String())
+			}
 			return s.BookInfos[i].Modified.After(s.BookInfos[j].Modified)
 		}
 	case "modify_time_reverse": //根据修改时间排序 从旧到新

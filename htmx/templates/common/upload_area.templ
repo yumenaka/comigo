@@ -17,9 +17,9 @@ templ UploadArea(s *state.GlobalState) {
 			</ul>
 		</div>
 		<!-- 进度条背景 显示与隐藏有过渡效果，不可点击。-->
-		<div id="progress-bar" class="absolute pointer-events-none top-0 left-0 h-full transition-opacity duration-500 bg-blue-500 opacity-30" style="width: 0%;"></div>
+		<div id="progress-bar" class="absolute pointer-events-none top-0 left-0 h-full transition-opacity duration-500 bg-blue-500/30" style="width: 0%;"></div>
 		<!-- 上传按钮 -->
-		<button id="upload-button" class="w-full py-2 mt-6 text-white bg-blue-500 rounded hover:bg-blue-600 disabled:opacity-50" disabled>上传文件<p id="progress-text" class="mt-2 text-gray-700"></p></button>
+		<button id="upload-button" class="w-full py-2 mt-6 text-white bg-blue-500 rounded hover:bg-blue-600 disabled:og-blue-600/50" disabled>上传文件<p id="progress-text" class="mt-2 text-gray-700"></p></button>
 		<!-- 上传结果显示区域 -->
 		<div id="result" class="mt-4"></div>
 	</div>

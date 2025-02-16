@@ -10,11 +10,45 @@ import (
 
 // BindAPI 为前端绑定 API 路由 (Echo 版本)
 func BindAPI(e *echo.Echo) {
-	// 路由组，方便管理部分相同的 URL
-	api := e.Group("/api")
 
-	// 注册公共路由
+	// api统一都以 /api 开头
+	api := e.Group("/api")
+	////----------------------------------------------
+	//// 1) 公开路由（无论是否需要登录，此部分都对外开放）
+	////----------------------------------------------
+	//api.GET("/login", loginPageHandler)
+	//api.POST("/login", loginActionHandler)
+	//
+	////----------------------------------------------
+	//// 2) 需要登录的路由
+	////    当用户未设置 username/password 时，也会注册，但如果还未设置，就不会真正启用JWT校验
+	////----------------------------------------------
+	//// 注册时先判断“是否需要登录”，如果需要，就在路由上套 JWT 中间件；否则不加。
+	//if isAuthRequired() {
+	//	// 已设置用户名密码 -> 路由启用 JWT
+	//	api.GET("/dashboard", dashboardHandler, middleware.JWTWithConfig(middleware.JWTConfig{
+	//		Claims:                  &CustomJWTClaims{},
+	//		SigningKey:              globalConfig.JWTSecret,
+	//		TokenLookup:             "header:Authorization,cookie:jwt_token,query:token",
+	//		ErrorHandlerWithContext: jwtErrorChecker, // 用于控制 JWT 出错时的自定义处理
+	//	}))
+	//	api.GET("/logout", logoutHandler, middleware.JWTWithConfig(middleware.JWTConfig{
+	//		Claims:                  &CustomJWTClaims{},
+	//		SigningKey:              globalConfig.JWTSecret,
+	//		TokenLookup:             "header:Authorization,cookie:jwt_token,query:token",
+	//		ErrorHandlerWithContext: jwtErrorChecker,
+	//	}))
+	//
+	//} else {
+	//	// 未设置用户名密码 -> 此时所有接口开放，不启用 JWT
+	//	api.GET("/dashboard", dashboardHandler)
+	//	api.GET("/logout", logoutHandler)
+	//}
+
+	// 分组：不需要登录的路由组
 	publicRoutes(api)
+	// 分组：需要登录的路由组
+	privateAPI := api.Group("")
 
 	// 判断是否需要 JWT 认证
 	if config.GetPassword() != "" {
@@ -25,18 +59,22 @@ func BindAPI(e *echo.Echo) {
 
 		//// 登录、注销和刷新 token 路由
 		//// 假设 token.NewJwtMiddleware() 里已生成 Echo 版本的 handler
-		//api.POST("/login", jwtMiddleware.LoginHandler)
-		//api.POST("/logout", jwtMiddleware.LogoutHandler)
-		//api.GET("/refresh_token", jwtMiddleware.RefreshHandler)
+		//publicGroup.POST("/login", jwtMiddleware.LoginHandler)
+		//publicGroup.POST("/logout", jwtMiddleware.LogoutHandler)
+		//publicGroup.GET("/refresh_token", jwtMiddleware.RefreshHandler)
 
-		// 受保护的路由，应用 JWT 中间件
-		protectedAPI := api.Group("")
-		//protectedAPI.Use(jwtMiddleware.MiddlewareFunc())
-		protectedRoutes(protectedAPI)
+		//privateAPI.Use(middleware.JWTWithConfig(middleware.JWTConfig{
+		//	Claims:                  &CustomJWTClaims{},
+		//	SigningKey:              globalConfig.JWTSecret,
+		//	TokenLookup:             "header:Authorization,cookie:jwt_token,query:token",
+		//	ErrorHandlerWithContext: jwtErrorChecker,
+		//}))
+
+		//privateGroup.Use(jwtMiddleware.MiddlewareFunc())
+		protectedRoutes(privateAPI)
 	} else {
 		// 如果不需要认证，直接注册受保护的路由
-		protectedAPI := api.Group("")
-		protectedRoutes(protectedAPI)
+		protectedRoutes(privateAPI)
 	}
 }
 

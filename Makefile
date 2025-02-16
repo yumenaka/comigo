@@ -8,6 +8,13 @@
 # mingw32-make all VERSION=v0.9.9
 
 # make Windows_x86_64
+# 版本号含义
+# vMAJOR.MINOR.PATCH, 如 v1.2.3
+# MAJOR：主版本号，不兼容的 API 修改
+# MINOR：次版本号，向下兼容的功能性新增
+# PATCH：修订号，向下兼容的问题修正
+
+# 下一个版本是 v0.10.0
 
 # 我应该下载哪个版本？
 #

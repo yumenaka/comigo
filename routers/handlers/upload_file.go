@@ -84,7 +84,7 @@ func UploadFile(c echo.Context) error {
 			"application/x-rar":            true,
 			"application/x-rar-compressed": true,
 			"application/x-zip-compressed": true,
-			//"application/octet-stream":     true, //未知的应用程序文件
+			//"application/octet-stream":     true, //application/octet-stream 这是二进制文件的默认值。 由于这意味着未知的二进制文件，浏览器一般不会自动执行或询问执行
 		}
 		if !allowedTypes[file.Header.Get("Content-Type")] {
 			return c.JSON(http.StatusBadRequest, map[string]interface{}{
