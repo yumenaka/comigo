@@ -32,7 +32,7 @@ body::-webkit-scrollbar {
   display: none;
 }
 
-body,body::-webkit-scrollbar {
+body {
   /* 2. 针对 Firefox */
   scrollbar-width: none; /* Firefox */
   /* 3. 针对旧版 IE/Edge */
@@ -41,8 +41,8 @@ body,body::-webkit-scrollbar {
   /*overflow-y: scroll; !* 如果只需要纵向滚动 *!*/
   /* overflow-x: scroll; 如果需要横向滚动 */
   /* 或者直接使用: overflow: auto; */
-  /* 视需要自定义其他样式 */
   overflow: auto;
+  /* 视需要自定义其他样式 */
 }
 
 /* Alpine.js styles */

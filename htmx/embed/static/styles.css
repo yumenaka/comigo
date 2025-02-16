@@ -2922,6 +2922,10 @@
     background-color: var(--color-blue-500);
   }
 
+  .bg-blue-500\/30 {
+    background-color: color-mix(in oklab, var(--color-blue-500) 30%, transparent);
+  }
+
   .bg-blue-700 {
     background-color: var(--color-blue-700);
   }
@@ -3430,18 +3434,6 @@
     opacity: 0;
   }
 
-  .opacity-30 {
-    opacity: .3;
-  }
-
-  .opacity-80 {
-    opacity: .8;
-  }
-
-  .opacity-90 {
-    opacity: .9;
-  }
-
   .opacity-100 {
     opacity: 1;
   }
@@ -3520,6 +3512,11 @@
 
   .filter {
     filter: var(--tw-blur, ) var(--tw-brightness, ) var(--tw-contrast, ) var(--tw-grayscale, ) var(--tw-hue-rotate, ) var(--tw-invert, ) var(--tw-saturate, ) var(--tw-sepia, ) var(--tw-drop-shadow, );
+  }
+
+  .backdrop-blur-3xl {
+    --tw-backdrop-blur: blur(var(--blur-3xl));
+    backdrop-filter: var(--tw-backdrop-blur, ) var(--tw-backdrop-brightness, ) var(--tw-backdrop-contrast, ) var(--tw-backdrop-grayscale, ) var(--tw-backdrop-hue-rotate, ) var(--tw-backdrop-invert, ) var(--tw-backdrop-opacity, ) var(--tw-backdrop-saturate, ) var(--tw-backdrop-sepia, );
   }
 
   .backdrop-filter {
@@ -3815,10 +3812,6 @@
     overflow: visible;
   }
 
-  .disabled\:opacity-50:disabled {
-    opacity: .5;
-  }
-
   @media (width >= 40rem) {
     .sm\:text-sm {
       font-size: var(--text-sm);
@@ -4000,12 +3993,6 @@ body::-webkit-scrollbar {
 }
 
 body {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  overflow: auto;
-}
-
-body::-webkit-scrollbar {
   scrollbar-width: none;
   -ms-overflow-style: none;
   overflow: auto;

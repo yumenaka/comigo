@@ -284,7 +284,12 @@ func handleOtherArchiveFiles(filePath string, newBook *model.Book, scanOption Op
 
 // 扫描目录，并返回对应书籍
 func scanDirGetBook(dirPath string, storePath string, depth int, scanOption Option) (*model.Book, error) {
-	newBook, err := model.NewBook(dirPath, time.Now(), 0, storePath, depth, model.TypeDir)
+	// 获取文件夹信息
+	dirInfo, err := os.Stat(dirPath)
+	if err != nil {
+		return nil, err
+	}
+	newBook, err := model.NewBook(dirPath, dirInfo.ModTime(), dirInfo.Size(), storePath, depth, model.TypeDir)
 	if err != nil {
 		return nil, err
 	}
