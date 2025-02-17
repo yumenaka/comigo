@@ -2079,6 +2079,10 @@
     margin-bottom: calc(var(--spacing) * 2);
   }
 
+  .mb-2\.5 {
+    margin-bottom: calc(var(--spacing) * 2.5);
+  }
+
   .mb-4 {
     margin-bottom: calc(var(--spacing) * 4);
   }
@@ -2168,6 +2172,10 @@
     display: table;
   }
 
+  .h-1\.5 {
+    height: calc(var(--spacing) * 1.5);
+  }
+
   .h-1\/4 {
     height: 25%;
   }
@@ -2178,6 +2186,10 @@
 
   .h-2\.5 {
     height: calc(var(--spacing) * 2.5);
+  }
+
+  .h-3 {
+    height: calc(var(--spacing) * 3);
   }
 
   .h-4 {
@@ -2210,10 +2222,6 @@
 
   .h-12 {
     height: calc(var(--spacing) * 12);
-  }
-
-  .h-14 {
-    height: calc(var(--spacing) * 14);
   }
 
   .h-32 {
@@ -2294,6 +2302,10 @@
 
   .datatable-wrapper .datatable-table tbody tr {
     border-bottom: 1px solid var(--color-gray-200);
+  }
+
+  .w-0\.5 {
+    width: calc(var(--spacing) * .5);
   }
 
   .w-1\/2 {
@@ -2380,8 +2392,16 @@
     width: calc(var(--spacing) * 80);
   }
 
+  .w-\[2px\] {
+    width: 2px;
+  }
+
   .w-full {
     width: 100%;
+  }
+
+  .w-px {
+    width: 1px;
   }
 
   .max-w-2xl {
@@ -2679,6 +2699,10 @@
 
   .rounded-md {
     border-radius: var(--radius-md);
+  }
+
+  .rounded-xs {
+    border-radius: var(--radius-xs);
   }
 
   .rounded-l-lg {
@@ -3000,10 +3024,6 @@
 
   .bg-yellow-500 {
     background-color: var(--color-yellow-500);
-  }
-
-  .bg-yellow-800 {
-    background-color: var(--color-yellow-800);
   }
 
   .dark .selectedCell {
