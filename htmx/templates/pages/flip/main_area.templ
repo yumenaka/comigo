@@ -1,9 +1,9 @@
 package flip
 
 import (
-	"github.com/yumenaka/comigo/model"
-	"github.com/yumenaka/comigo/htmx/state"
 	"github.com/yumenaka/comigo/htmx/embed"
+	"github.com/yumenaka/comigo/htmx/state"
+	"github.com/yumenaka/comigo/model"
 )
 
 templ InsertData(bookData any, stateData any) {
@@ -14,7 +14,7 @@ templ InsertData(bookData any, stateData any) {
 templ MainArea(s *state.GlobalState, book *model.Book) {
 	<div
 		id="mouseMoveArea"
-		class="grid-line flex flex-col items-center justify-center flex-1 w-full max-w-full bg-base-100 text-base-content"
+		class="grid-line flex flex-col items-center justify-center flex-1 w-full max-w-full bg-base-100"
 		:class="(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') ? ($store.global.bgPattern !== 'none'?$store.global.bgPattern+' bg-base-300':'bg-base-300'):($store.global.bgPattern !== 'none'?$store.global.bgPattern:'')"
 	>
 		<div class="manga_area" id="MangaMain">
@@ -33,22 +33,60 @@ templ MainArea(s *state.GlobalState, book *model.Book) {
 	<!-- 使用 fixed 来定位一个元素相对于浏览器窗视口的位置。偏移量是相对于视口计算的，且该元素将作为绝对定位的子元素的位置参考。 -->
 	<!-- 控制 flex 和 grid 项目如何沿着容器的主轴定位:https://www.tailwindcss.cn/docs/justify-content -->
 	<!-- Tailwind 的容器不会自动居中，也没有任何内置的水平方向的内边距。要使一个容器居中，使用 mx-auto 功能类： -->
-	<div id="steps-range_area" onmouseover="showToolbar();" onmouseout="hideToolbar()" class="w-full px-2 overflow-hidden border border-blue-800 rounded toolbar h-14 bg-base-100/50 backdrop-blur-3xl" :class="Alpine.store('flip').autoHideToolbar? 'absolute fixed bottom-0':'flex flex-col justify-center'">
-		<label
-			for="steps-range"
-			class="block m-0 text-sm font-medium text-center text-gray-900 dark:text-white"
-			x-text="$store.flip.nowPageNum+'/'+$store.flip.allPageNum"
-		></label>
-		<input
-			id="steps-range"
-			class="w-full h-2 mb-2 bg-yellow-800 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
-			type="range"
-			min="1"
-			:max="$store.flip.allPageNum"
-			x-model="$store.flip.nowPageNum"
-			onchange="setImageSrc()"
-			step="1"
-		/>
+	<div id="steps-range_area" onmouseover="showToolbar();" onmouseout="hideToolbar()" class="bg-base-100 text-base-content font-semibold w-full px-2 overflow-hidden toolbar h-12 bg-base-100/50 backdrop-blur-3xl" :class="Alpine.store('flip').autoHideToolbar? 'absolute fixed bottom-0':'flex flex-col justify-center'">
+		<div class="relative w-full">
+			<input
+				id="steps-range"
+				class="w-full h-1.5 mb-2.5 bg-black/50 rounded appearance-none cursor-pointer"
+				type="range"
+				min="1"
+				:max="$store.flip.allPageNum"
+				x-model="$store.flip.nowPageNum"
+				onchange="setImageSrc()"
+				step="1"
+			/>
+			<div class="absolute w-full h-2 pointer-events-none" style="bottom: 8px;">
+				<template x-for="i in $store.flip.allPageNum" :key="i">
+					<div
+						class="absolute"
+						:style="`left: ${(i-1)/($store.flip.allPageNum-1)*100}%; transform: translateX(-50%);`"
+					>
+						<!-- 刻度:如果页数 < 50，则每 5 页刻度加粗；同时首页与末页也单独加粗显示 -->
+						<div
+							:class="(i === 1 || i === $store.flip.allPageNum)
+								? 'h-4 w-[2px] bg-gray-500 rounded-xs'
+								: (
+									$store.flip.allPageNum < 50
+										? (
+											i % 5 === 0
+												? 'h-3 w-0.5 bg-gray-500 rounded-xs'
+												: 'h-2 w-px bg-gray-400'
+										)
+										: (
+											i % 10 === 0
+												? 'h-3 w-0.5 bg-gray-500 rounded-xs'
+												: 'h-2 w-px bg-gray-400'
+										)
+								)"
+						></div>
+						<!-- 页码: 根据页数来显示页码，如果小于 50 则每 5 页显示一次。50~100 页，每10页显示一次。 100以上每20页显示一次。-->
+						<div
+							x-show="(
+								i === 1
+								|| i === $store.flip.allPageNum
+								|| ($store.flip.allPageNum < 50 && i % 5 === 0)
+								|| ($store.flip.allPageNum < 100 && i % 10 === 0)
+								|| ($store.flip.allPageNum >= 100 && i % 20 === 0)
+							)"
+							class="text-xs text-center"
+							style="position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%);"
+						>
+							<span x-text="i"></span>
+						</div>
+					</div>
+				</template>
+			</div>
+		</div>
 	</div>
 	@templ.Raw("<style>" + embed.GetFileStr("static/flip.css") + "</style>")
 }
