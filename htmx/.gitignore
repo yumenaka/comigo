@@ -19,6 +19,7 @@ bin/
 dist-ssr/
 dist/
 pb_data/
+dbs/
 
 # Node modules.
 node_modules/

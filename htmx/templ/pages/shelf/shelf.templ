@@ -1,0 +1,26 @@
+package shelf
+
+import (
+	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/htmx/state"
+	"github.com/yumenaka/comigo/htmx/templ/common"
+)
+
+// ShelfPage 书架页面
+templ ShelfPage(c echo.Context, s *state.GlobalState) {
+	@common.Header(
+		common.HeaderProps{
+			Title:           common.GetPageTitle(c.Param("id")),
+			ShowReturnIcon:  c.Param("id") != "",
+			ReturnUrl:       common.GetReturnUrl(c.Param("id")),
+			SetDownLoadLink: false,
+			InShelf:         true,
+			DownLoadLink:    "",
+			SetTheme:        true,
+		})
+	@MainArea(c, s)
+	@common.Footer(s.Version)
+	@common.Drawer(s.ServerStatus.ServerHost, ShelfDrawerSlot())
+	@common.QRCode(s.ServerStatus.ServerHost)
+	@common.Toast()
+}
