@@ -1,0 +1,49 @@
+http:
+  hostname: ""
+  port: 8000
+  readTimeout: "5s"
+  writeTimeout: "10s"
+  idleTimeout: "2m"
+  shutdownTimeout: "10s"
+  tls:
+    enabled: false
+    certificate: ""
+    key: ""
+
+app:
+  name: "Pagoda"
+  environment: "local"
+  # Change this on any live environments
+  encryptionKey: "?E(G+KbPeShVmYq3t6w9z$C&F)J@McQf"
+  timeout: "20s"
+  passwordToken:
+      expiration: "60m"
+      length: 64
+  emailVerificationTokenExpiration: "12h"
+
+cache:
+  capacity: 100000
+  expiration:
+    staticFile: "4380h"
+    page: "24h"
+
+database:
+  driver: "sqlite3"
+  connection: "dbs/main.db?_journal=WAL&_timeout=5000&_fk=true"
+  testConnection: ":memory:?_journal=WAL&_timeout=5000&_fk=true"
+
+files:
+  directory: "uploads"
+
+tasks:
+  goroutines: 1
+  releaseAfter: "15m"
+  cleanupInterval: "1h"
+  shutdownTimeout: "10s"
+
+mail:
+  hostname: "localhost"
+  port: 25
+  user: "admin"
+  password: "admin"
+  fromAddress: "admin@localhost"
