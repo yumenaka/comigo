@@ -19,7 +19,7 @@ RUN go build -ldflags="-s -w" -o comigo
 
 FROM scratch
 
-# Copy project's binary and templates from /build to the scratch container.
+# Copy project's binary and templ from /build to the scratch container.
 COPY --from=builder /build/comigo /
 COPY --from=builder /build/static /static
 

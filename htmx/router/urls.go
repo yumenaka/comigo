@@ -2,11 +2,11 @@ package router
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/yumenaka/comigo/htmx/templates/pages/flip"
-	"github.com/yumenaka/comigo/htmx/templates/pages/scroll"
-	"github.com/yumenaka/comigo/htmx/templates/pages/settings_page"
-	"github.com/yumenaka/comigo/htmx/templates/pages/shelf"
-	"github.com/yumenaka/comigo/htmx/templates/pages/upload_page"
+	"github.com/yumenaka/comigo/htmx/templ/pages/flip"
+	"github.com/yumenaka/comigo/htmx/templ/pages/scroll"
+	"github.com/yumenaka/comigo/htmx/templ/pages/settings_page"
+	"github.com/yumenaka/comigo/htmx/templ/pages/shelf"
+	"github.com/yumenaka/comigo/htmx/templ/pages/upload_page"
 )
 
 func setURLs(e *echo.Echo) {

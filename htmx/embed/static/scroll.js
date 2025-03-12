@@ -105,7 +105,7 @@ function onMouseClick(e) {
 //获取鼠标位置,决定是否打开设置面板
 function onMouseMove(e) {
     if (getInSetArea(e)) {
-        e.currentTarget.style.cursor = 'url(/static/SettingsOutline.png), pointer';
+        e.currentTarget.style.cursor = 'url(/images/SettingsOutline.png), pointer';
     } else {
         e.currentTarget.style.cursor = '';
     }

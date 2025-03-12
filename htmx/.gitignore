@@ -19,6 +19,8 @@ bin/
 dist-ssr/
 dist/
 pb_data/
+*/dbs/
+pagoda/uploads/*
 
 # Node modules.
 node_modules/

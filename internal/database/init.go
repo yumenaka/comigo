@@ -4,7 +4,6 @@ package database
 
 import (
 	"context"
-	"database/sql"
 	"database/sql/driver"
 	"fmt"
 	"path"
@@ -46,14 +45,11 @@ func (d sqliteDriver) Open(name string) (driver.Conn, error) {
 	return conn, nil
 }
 
-// 注册 sqlite
-func init() {
-	sql.Register("sqlite3", sqliteDriver{Driver: &sqlite.Driver{}})
-}
-
 var client *ent.Client
 
 func InitDatabase(configFilePath string) error {
+	//// 注册 sqlite3 驱动
+	//sql.Register("sqlite3", sqliteDriver{Driver: &sqlite.Driver{}})
 	if client != nil {
 		//logger.Infof("database already initialized")
 		return nil
