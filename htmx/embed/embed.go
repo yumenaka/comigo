@@ -13,6 +13,10 @@ import (
 var Static embed.FS
 var StaticFS fs.FS
 
+//go:embed all:images
+var Images embed.FS
+var ImagesFS fs.FS
+
 // GetFileStr 从Static获取字符串形式的脚本
 func GetFileStr(filePath string) string {
 	// 使用ReadFile从嵌入文件系统中读取文件内容

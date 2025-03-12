@@ -1,0 +1,37 @@
+package settings_page
+
+import (
+	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/htmx/state"
+	"github.com/yumenaka/comigo/htmx/templ/common"
+)
+
+// SettingsPage 设置页面
+templ SettingsPage(c echo.Context, s *state.GlobalState) {
+	@MainArea(&state.Global)
+	@common.Footer(s.Version)
+	@common.QRCode(s.ServerStatus.ServerHost)
+	@common.Toast()
+<script>
+    // htmx出错时报错（Toast）
+	document.addEventListener('htmx:responseError', (event) => {
+      showToast(event.detail.xhr.statusText+": "+event.detail.xhr.responseURL, 'error');
+    });
+    // 删除字符串数组配置中的元素。此处仅用作打印调试信息。删除操作是由 htmx 完成的。
+	function deleteStringConfigValue(e) {
+	    const configName = e.getAttribute('data-config-name');
+        const arrawIndex = e.getAttribute('data-arraw-index');
+        const deleteValue = e.getAttribute('data-delete-value');
+        console.log(configName, arrawIndex, deleteValue);
+	}
+	// 添加字符串数组配置中的元素
+	// 此函数的作用，是修改 hx-vals 的值。实际的提交操作是由 htmx 完成的
+	function addStringConfigValue(e) {
+        const buttonID = e.getAttribute('id');
+        const configName = buttonID.replace('AddButton', '');
+        const addValue = document.getElementById(configName+'AddInput').value;
+        console.log(configName, addValue);
+        e.setAttribute('hx-vals', JSON.stringify({configName: configName, addValue: addValue}));
+    }
+</script>
+}

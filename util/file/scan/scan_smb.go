@@ -216,15 +216,15 @@ func smbScanFile(filePath string, file *smb2.File, storePath string, depth int, 
 	//case types.TypeVideo:
 	//	newBook.PageCount = 1
 	//	newBook.InitComplete = true
-	//	newBook.Cover = types.ImageInfo{NameInArchive: "video.png", Url: "images/video.png"}
+	//	newBook.Cover = types.ImageInfo{NameInArchive: "video.png", Url: "/images/video.png"}
 	//case types.TypeAudio:
 	//	newBook.PageCount = 1
 	//	newBook.InitComplete = true
-	//	newBook.Cover = types.ImageInfo{NameInArchive: "audio.png", Url: "images/audio.png"}
+	//	newBook.Cover = types.ImageInfo{NameInArchive: "audio.png", Url: "/images/audio.png"}
 	//case types.TypeUnknownFile:
 	//	newBook.PageCount = 1
 	//	newBook.InitComplete = true
-	//	newBook.Cover = types.ImageInfo{NameInArchive: "unknown.png", Url: "images/unknown.png"}
+	//	newBook.Cover = types.ImageInfo{NameInArchive: "unknown.png", Url: "/images/unknown.png"}
 	//// 其他类型的压缩文件或文件夹
 	//default:
 	//	// archiver.FileSystem可以配合ctx了，加个默认超时时间

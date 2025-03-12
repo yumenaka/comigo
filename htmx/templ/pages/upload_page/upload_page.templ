@@ -1,0 +1,25 @@
+package upload_page
+
+import (
+	"github.com/yumenaka/comigo/htmx/state"
+	"github.com/yumenaka/comigo/htmx/templ/common"
+)
+
+// UploadPage 上传页面
+templ UploadPage(s *state.GlobalState) {
+	@common.Header(
+		common.HeaderProps{
+			Title:           "UploadPage",
+			ShowReturnIcon:  true,
+			ReturnUrl:       "/",
+			SetDownLoadLink: false,
+			InShelf:         false,
+			DownLoadLink:    "",
+			SetTheme:        true,
+		})
+	@common.UploadArea(&state.Global),
+	@common.Footer(s.Version)
+	@common.Drawer(s.ServerStatus.ServerHost, nil)
+	@common.QRCode(s.ServerStatus.ServerHost)
+	@common.Toast()
+}

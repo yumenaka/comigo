@@ -2,7 +2,6 @@ package router
 
 import (
 	"errors"
-	"github.com/yumenaka/comigo/htmx/comigo"
 	"io/fs"
 	"net/http"
 	"strconv"
@@ -11,6 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/htmx/comigo"
 	"github.com/yumenaka/comigo/htmx/embed"
 	"github.com/yumenaka/comigo/util/logger"
 )
@@ -52,16 +52,22 @@ func RunServer() (err error) {
 		logger.Infof("%s", err)
 	}
 	router.StaticFS("/static/", embed.StaticFS)
+	// 设置嵌入图片的文件系统
+	embed.ImagesFS, err = fs.Sub(embed.Images, "images")
+	if err != nil {
+		logger.Infof("%s", err)
+	}
+	router.StaticFS("/images/", embed.ImagesFS)
 
 	// favicon.ico
-	router.GET("/favicon.ico", func(c echo.Context) error {
-		file, err := embed.Static.ReadFile("/images/favicon.ico")
-		if err != nil {
-			logger.Infof("%s", err)
-			return err
-		}
-		return c.Blob(http.StatusOK, "image/x-icon", file)
-	})
+	//router.GET("/favicon.ico", func(c echo.Context) error {
+	//	file, err := embed.Images.ReadFile("/images/favicon.ico")
+	//	if err != nil {
+	//		logger.Infof("%s", err)
+	//		return err
+	//	}
+	//	return c.Blob(http.StatusOK, "image/x-icon", file)
+	//})
 
 	// 设置路由
 	setURLs(router)
