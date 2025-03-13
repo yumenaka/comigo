@@ -14,10 +14,10 @@ templ InsertData(bookData any, stateData any) {
 templ MainArea(s *state.GlobalState, book *model.Book) {
 	<div
 		id="mouseMoveArea"
-		class="grid-line flex flex-col items-center justify-center flex-1 w-full max-w-full bg-base-100"
+		class="flex flex-col items-center justify-center flex-1 w-full max-w-full bg-base-100"
 		:class="(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') ? ($store.global.bgPattern !== 'none'?$store.global.bgPattern+' bg-base-300':'bg-base-300'):($store.global.bgPattern !== 'none'?$store.global.bgPattern:'')"
 	>
-		<div class="manga_area" id="MangaMain">
+		<div class="manga_area">
 			<div class="manga_area_img_div">
 				<!-- 非自动拼合模式最简单,直接显示一张图 -->
 				<img id="NowImage" class="max-w-full max-h-screen m-0 rounded shadow-lg" src="/images/ball-triangle.svg" alt=""/>
