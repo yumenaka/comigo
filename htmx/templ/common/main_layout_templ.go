@@ -53,7 +53,7 @@ func MainLayout(c echo.Context, s *state.GlobalState, bodyContent templ.Componen
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><meta name=\"keywords\" content=\"Comigo  Comic Manga Reader 在线漫画 阅读器\"><meta name=\"description\" content=\"Simple Manga Reader in Linux，Windows，Mac OS\"><!--TODO:PWA模式  <link rel=\"manifest\" href=\"/static/manifest.webmanifest\"/>  --><link rel=\"apple-touch-icon\" href=\"/static/apple-touch-icon.png\"><link rel=\"shortcut icon\" href=\"/static/favicon.ico\" type=\"image/x-icon\"><link rel=\"icon\" href=\"/static/favicon.png\" sizes=\"any\"><!--  <script src=\"https://unpkg.com/@tailwindcss/browser@4\"></script> --><!--  font-sans：https://tailwindcss.com/docs/font-family -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><meta name=\"keywords\" content=\"Comigo  Comic Manga Reader 在线漫画 阅读器\"><meta name=\"description\" content=\"Simple Manga Reader in Linux，Windows，Mac OS\"><!--TODO:PWA模式  <link rel=\"manifest\" href=\"/static/manifest.webmanifest\"/>  --><link rel=\"apple-touch-icon\" href=\"/static/apple-touch-icon.png\"><link rel=\"shortcut icon\" href=\"/images/favicon.ico\" type=\"image/x-icon\"><link rel=\"icon\" href=\"/images/favicon.png\" sizes=\"any\"><!--  <script src=\"https://unpkg.com/@tailwindcss/browser@4\"></script> --><!--  font-sans：https://tailwindcss.com/docs/font-family -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -86,13 +86,13 @@ func MainLayout(c echo.Context, s *state.GlobalState, bodyContent templ.Componen
 			return templ_7745c5c3_Err
 		}
 		if !s.StaticMode {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<script src=\"/static/scripts.js\"></script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<script src=\"/static/main.js\"></script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
 		if s.StaticMode {
-			templ_7745c5c3_Err = templ.Raw("<script>"+embed.GetFileStr("static/scripts.js")+"</script>").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = templ.Raw("<script>"+embed.GetFileStr("static/main.js")+"</script>").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

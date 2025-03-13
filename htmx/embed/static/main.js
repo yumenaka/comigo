@@ -9913,3405 +9913,6 @@ var $68c8d9028d8b1de7$var$events = new (0, $4c6a2f83122c31a3$export$2e2bcd8739ae
 $68c8d9028d8b1de7$var$events.init();
 
 
-// packages/alpinejs/src/scheduler.js
-var $8c83eaf28779ff46$var$flushPending = false;
-var $8c83eaf28779ff46$var$flushing = false;
-var $8c83eaf28779ff46$var$queue = [];
-var $8c83eaf28779ff46$var$lastFlushedIndex = -1;
-function $8c83eaf28779ff46$var$scheduler(callback) {
-    $8c83eaf28779ff46$var$queueJob(callback);
-}
-function $8c83eaf28779ff46$var$queueJob(job) {
-    if (!$8c83eaf28779ff46$var$queue.includes(job)) $8c83eaf28779ff46$var$queue.push(job);
-    $8c83eaf28779ff46$var$queueFlush();
-}
-function $8c83eaf28779ff46$var$dequeueJob(job) {
-    let index = $8c83eaf28779ff46$var$queue.indexOf(job);
-    if (index !== -1 && index > $8c83eaf28779ff46$var$lastFlushedIndex) $8c83eaf28779ff46$var$queue.splice(index, 1);
-}
-function $8c83eaf28779ff46$var$queueFlush() {
-    if (!$8c83eaf28779ff46$var$flushing && !$8c83eaf28779ff46$var$flushPending) {
-        $8c83eaf28779ff46$var$flushPending = true;
-        queueMicrotask($8c83eaf28779ff46$var$flushJobs);
-    }
-}
-function $8c83eaf28779ff46$var$flushJobs() {
-    $8c83eaf28779ff46$var$flushPending = false;
-    $8c83eaf28779ff46$var$flushing = true;
-    for(let i = 0; i < $8c83eaf28779ff46$var$queue.length; i++){
-        $8c83eaf28779ff46$var$queue[i]();
-        $8c83eaf28779ff46$var$lastFlushedIndex = i;
-    }
-    $8c83eaf28779ff46$var$queue.length = 0;
-    $8c83eaf28779ff46$var$lastFlushedIndex = -1;
-    $8c83eaf28779ff46$var$flushing = false;
-}
-// packages/alpinejs/src/reactivity.js
-var $8c83eaf28779ff46$var$reactive;
-var $8c83eaf28779ff46$var$effect;
-var $8c83eaf28779ff46$var$release;
-var $8c83eaf28779ff46$var$raw;
-var $8c83eaf28779ff46$var$shouldSchedule = true;
-function $8c83eaf28779ff46$var$disableEffectScheduling(callback) {
-    $8c83eaf28779ff46$var$shouldSchedule = false;
-    callback();
-    $8c83eaf28779ff46$var$shouldSchedule = true;
-}
-function $8c83eaf28779ff46$var$setReactivityEngine(engine) {
-    $8c83eaf28779ff46$var$reactive = engine.reactive;
-    $8c83eaf28779ff46$var$release = engine.release;
-    $8c83eaf28779ff46$var$effect = (callback)=>engine.effect(callback, {
-            scheduler: (task)=>{
-                if ($8c83eaf28779ff46$var$shouldSchedule) $8c83eaf28779ff46$var$scheduler(task);
-                else task();
-            }
-        });
-    $8c83eaf28779ff46$var$raw = engine.raw;
-}
-function $8c83eaf28779ff46$var$overrideEffect(override) {
-    $8c83eaf28779ff46$var$effect = override;
-}
-function $8c83eaf28779ff46$var$elementBoundEffect(el) {
-    let cleanup2 = ()=>{};
-    let wrappedEffect = (callback)=>{
-        let effectReference = $8c83eaf28779ff46$var$effect(callback);
-        if (!el._x_effects) {
-            el._x_effects = /* @__PURE__ */ new Set();
-            el._x_runEffects = ()=>{
-                el._x_effects.forEach((i)=>i());
-            };
-        }
-        el._x_effects.add(effectReference);
-        cleanup2 = ()=>{
-            if (effectReference === void 0) return;
-            el._x_effects.delete(effectReference);
-            $8c83eaf28779ff46$var$release(effectReference);
-        };
-        return effectReference;
-    };
-    return [
-        wrappedEffect,
-        ()=>{
-            cleanup2();
-        }
-    ];
-}
-function $8c83eaf28779ff46$var$watch(getter, callback) {
-    let firstTime = true;
-    let oldValue;
-    let effectReference = $8c83eaf28779ff46$var$effect(()=>{
-        let value = getter();
-        JSON.stringify(value);
-        if (!firstTime) queueMicrotask(()=>{
-            callback(value, oldValue);
-            oldValue = value;
-        });
-        else oldValue = value;
-        firstTime = false;
-    });
-    return ()=>$8c83eaf28779ff46$var$release(effectReference);
-}
-// packages/alpinejs/src/mutation.js
-var $8c83eaf28779ff46$var$onAttributeAddeds = [];
-var $8c83eaf28779ff46$var$onElRemoveds = [];
-var $8c83eaf28779ff46$var$onElAddeds = [];
-function $8c83eaf28779ff46$var$onElAdded(callback) {
-    $8c83eaf28779ff46$var$onElAddeds.push(callback);
-}
-function $8c83eaf28779ff46$var$onElRemoved(el, callback) {
-    if (typeof callback === "function") {
-        if (!el._x_cleanups) el._x_cleanups = [];
-        el._x_cleanups.push(callback);
-    } else {
-        callback = el;
-        $8c83eaf28779ff46$var$onElRemoveds.push(callback);
-    }
-}
-function $8c83eaf28779ff46$var$onAttributesAdded(callback) {
-    $8c83eaf28779ff46$var$onAttributeAddeds.push(callback);
-}
-function $8c83eaf28779ff46$var$onAttributeRemoved(el, name, callback) {
-    if (!el._x_attributeCleanups) el._x_attributeCleanups = {};
-    if (!el._x_attributeCleanups[name]) el._x_attributeCleanups[name] = [];
-    el._x_attributeCleanups[name].push(callback);
-}
-function $8c83eaf28779ff46$var$cleanupAttributes(el, names) {
-    if (!el._x_attributeCleanups) return;
-    Object.entries(el._x_attributeCleanups).forEach(([name, value])=>{
-        if (names === void 0 || names.includes(name)) {
-            value.forEach((i)=>i());
-            delete el._x_attributeCleanups[name];
-        }
-    });
-}
-function $8c83eaf28779ff46$var$cleanupElement(el) {
-    el._x_effects?.forEach($8c83eaf28779ff46$var$dequeueJob);
-    while(el._x_cleanups?.length)el._x_cleanups.pop()();
-}
-var $8c83eaf28779ff46$var$observer = new MutationObserver($8c83eaf28779ff46$var$onMutate);
-var $8c83eaf28779ff46$var$currentlyObserving = false;
-function $8c83eaf28779ff46$var$startObservingMutations() {
-    $8c83eaf28779ff46$var$observer.observe(document, {
-        subtree: true,
-        childList: true,
-        attributes: true,
-        attributeOldValue: true
-    });
-    $8c83eaf28779ff46$var$currentlyObserving = true;
-}
-function $8c83eaf28779ff46$var$stopObservingMutations() {
-    $8c83eaf28779ff46$var$flushObserver();
-    $8c83eaf28779ff46$var$observer.disconnect();
-    $8c83eaf28779ff46$var$currentlyObserving = false;
-}
-var $8c83eaf28779ff46$var$queuedMutations = [];
-function $8c83eaf28779ff46$var$flushObserver() {
-    let records = $8c83eaf28779ff46$var$observer.takeRecords();
-    $8c83eaf28779ff46$var$queuedMutations.push(()=>records.length > 0 && $8c83eaf28779ff46$var$onMutate(records));
-    let queueLengthWhenTriggered = $8c83eaf28779ff46$var$queuedMutations.length;
-    queueMicrotask(()=>{
-        if ($8c83eaf28779ff46$var$queuedMutations.length === queueLengthWhenTriggered) while($8c83eaf28779ff46$var$queuedMutations.length > 0)$8c83eaf28779ff46$var$queuedMutations.shift()();
-    });
-}
-function $8c83eaf28779ff46$var$mutateDom(callback) {
-    if (!$8c83eaf28779ff46$var$currentlyObserving) return callback();
-    $8c83eaf28779ff46$var$stopObservingMutations();
-    let result = callback();
-    $8c83eaf28779ff46$var$startObservingMutations();
-    return result;
-}
-var $8c83eaf28779ff46$var$isCollecting = false;
-var $8c83eaf28779ff46$var$deferredMutations = [];
-function $8c83eaf28779ff46$var$deferMutations() {
-    $8c83eaf28779ff46$var$isCollecting = true;
-}
-function $8c83eaf28779ff46$var$flushAndStopDeferringMutations() {
-    $8c83eaf28779ff46$var$isCollecting = false;
-    $8c83eaf28779ff46$var$onMutate($8c83eaf28779ff46$var$deferredMutations);
-    $8c83eaf28779ff46$var$deferredMutations = [];
-}
-function $8c83eaf28779ff46$var$onMutate(mutations) {
-    if ($8c83eaf28779ff46$var$isCollecting) {
-        $8c83eaf28779ff46$var$deferredMutations = $8c83eaf28779ff46$var$deferredMutations.concat(mutations);
-        return;
-    }
-    let addedNodes = [];
-    let removedNodes = /* @__PURE__ */ new Set();
-    let addedAttributes = /* @__PURE__ */ new Map();
-    let removedAttributes = /* @__PURE__ */ new Map();
-    for(let i = 0; i < mutations.length; i++){
-        if (mutations[i].target._x_ignoreMutationObserver) continue;
-        if (mutations[i].type === "childList") {
-            mutations[i].removedNodes.forEach((node)=>{
-                if (node.nodeType !== 1) return;
-                if (!node._x_marker) return;
-                removedNodes.add(node);
-            });
-            mutations[i].addedNodes.forEach((node)=>{
-                if (node.nodeType !== 1) return;
-                if (removedNodes.has(node)) {
-                    removedNodes.delete(node);
-                    return;
-                }
-                if (node._x_marker) return;
-                addedNodes.push(node);
-            });
-        }
-        if (mutations[i].type === "attributes") {
-            let el = mutations[i].target;
-            let name = mutations[i].attributeName;
-            let oldValue = mutations[i].oldValue;
-            let add2 = ()=>{
-                if (!addedAttributes.has(el)) addedAttributes.set(el, []);
-                addedAttributes.get(el).push({
-                    name: name,
-                    value: el.getAttribute(name)
-                });
-            };
-            let remove = ()=>{
-                if (!removedAttributes.has(el)) removedAttributes.set(el, []);
-                removedAttributes.get(el).push(name);
-            };
-            if (el.hasAttribute(name) && oldValue === null) add2();
-            else if (el.hasAttribute(name)) {
-                remove();
-                add2();
-            } else remove();
-        }
-    }
-    removedAttributes.forEach((attrs, el)=>{
-        $8c83eaf28779ff46$var$cleanupAttributes(el, attrs);
-    });
-    addedAttributes.forEach((attrs, el)=>{
-        $8c83eaf28779ff46$var$onAttributeAddeds.forEach((i)=>i(el, attrs));
-    });
-    for (let node of removedNodes){
-        if (addedNodes.some((i)=>i.contains(node))) continue;
-        $8c83eaf28779ff46$var$onElRemoveds.forEach((i)=>i(node));
-    }
-    for (let node of addedNodes){
-        if (!node.isConnected) continue;
-        $8c83eaf28779ff46$var$onElAddeds.forEach((i)=>i(node));
-    }
-    addedNodes = null;
-    removedNodes = null;
-    addedAttributes = null;
-    removedAttributes = null;
-}
-// packages/alpinejs/src/scope.js
-function $8c83eaf28779ff46$var$scope(node) {
-    return $8c83eaf28779ff46$var$mergeProxies($8c83eaf28779ff46$var$closestDataStack(node));
-}
-function $8c83eaf28779ff46$var$addScopeToNode(node, data2, referenceNode) {
-    node._x_dataStack = [
-        data2,
-        ...$8c83eaf28779ff46$var$closestDataStack(referenceNode || node)
-    ];
-    return ()=>{
-        node._x_dataStack = node._x_dataStack.filter((i)=>i !== data2);
-    };
-}
-function $8c83eaf28779ff46$var$closestDataStack(node) {
-    if (node._x_dataStack) return node._x_dataStack;
-    if (typeof ShadowRoot === "function" && node instanceof ShadowRoot) return $8c83eaf28779ff46$var$closestDataStack(node.host);
-    if (!node.parentNode) return [];
-    return $8c83eaf28779ff46$var$closestDataStack(node.parentNode);
-}
-function $8c83eaf28779ff46$var$mergeProxies(objects) {
-    return new Proxy({
-        objects: objects
-    }, $8c83eaf28779ff46$var$mergeProxyTrap);
-}
-var $8c83eaf28779ff46$var$mergeProxyTrap = {
-    ownKeys ({ objects: objects }) {
-        return Array.from(new Set(objects.flatMap((i)=>Object.keys(i))));
-    },
-    has ({ objects: objects }, name) {
-        if (name == Symbol.unscopables) return false;
-        return objects.some((obj)=>Object.prototype.hasOwnProperty.call(obj, name) || Reflect.has(obj, name));
-    },
-    get ({ objects: objects }, name, thisProxy) {
-        if (name == "toJSON") return $8c83eaf28779ff46$var$collapseProxies;
-        return Reflect.get(objects.find((obj)=>Reflect.has(obj, name)) || {}, name, thisProxy);
-    },
-    set ({ objects: objects }, name, value, thisProxy) {
-        const target = objects.find((obj)=>Object.prototype.hasOwnProperty.call(obj, name)) || objects[objects.length - 1];
-        const descriptor = Object.getOwnPropertyDescriptor(target, name);
-        if (descriptor?.set && descriptor?.get) return descriptor.set.call(thisProxy, value) || true;
-        return Reflect.set(target, name, value);
-    }
-};
-function $8c83eaf28779ff46$var$collapseProxies() {
-    let keys = Reflect.ownKeys(this);
-    return keys.reduce((acc, key)=>{
-        acc[key] = Reflect.get(this, key);
-        return acc;
-    }, {});
-}
-// packages/alpinejs/src/interceptor.js
-function $8c83eaf28779ff46$var$initInterceptors(data2) {
-    let isObject2 = (val)=>typeof val === "object" && !Array.isArray(val) && val !== null;
-    let recurse = (obj, basePath = "")=>{
-        Object.entries(Object.getOwnPropertyDescriptors(obj)).forEach(([key, { value: value, enumerable: enumerable }])=>{
-            if (enumerable === false || value === void 0) return;
-            if (typeof value === "object" && value !== null && value.__v_skip) return;
-            let path = basePath === "" ? key : `${basePath}.${key}`;
-            if (typeof value === "object" && value !== null && value._x_interceptor) obj[key] = value.initialize(data2, path, key);
-            else if (isObject2(value) && value !== obj && !(value instanceof Element)) recurse(value, path);
-        });
-    };
-    return recurse(data2);
-}
-function $8c83eaf28779ff46$var$interceptor(callback, mutateObj = ()=>{}) {
-    let obj = {
-        initialValue: void 0,
-        _x_interceptor: true,
-        initialize (data2, path, key) {
-            return callback(this.initialValue, ()=>$8c83eaf28779ff46$var$get(data2, path), (value)=>$8c83eaf28779ff46$var$set(data2, path, value), path, key);
-        }
-    };
-    mutateObj(obj);
-    return (initialValue)=>{
-        if (typeof initialValue === "object" && initialValue !== null && initialValue._x_interceptor) {
-            let initialize = obj.initialize.bind(obj);
-            obj.initialize = (data2, path, key)=>{
-                let innerValue = initialValue.initialize(data2, path, key);
-                obj.initialValue = innerValue;
-                return initialize(data2, path, key);
-            };
-        } else obj.initialValue = initialValue;
-        return obj;
-    };
-}
-function $8c83eaf28779ff46$var$get(obj, path) {
-    return path.split(".").reduce((carry, segment)=>carry[segment], obj);
-}
-function $8c83eaf28779ff46$var$set(obj, path, value) {
-    if (typeof path === "string") path = path.split(".");
-    if (path.length === 1) obj[path[0]] = value;
-    else if (path.length === 0) throw error;
-    else {
-        if (obj[path[0]]) return $8c83eaf28779ff46$var$set(obj[path[0]], path.slice(1), value);
-        else {
-            obj[path[0]] = {};
-            return $8c83eaf28779ff46$var$set(obj[path[0]], path.slice(1), value);
-        }
-    }
-}
-// packages/alpinejs/src/magics.js
-var $8c83eaf28779ff46$var$magics = {};
-function $8c83eaf28779ff46$var$magic(name, callback) {
-    $8c83eaf28779ff46$var$magics[name] = callback;
-}
-function $8c83eaf28779ff46$var$injectMagics(obj, el) {
-    let memoizedUtilities = $8c83eaf28779ff46$var$getUtilities(el);
-    Object.entries($8c83eaf28779ff46$var$magics).forEach(([name, callback])=>{
-        Object.defineProperty(obj, `$${name}`, {
-            get () {
-                return callback(el, memoizedUtilities);
-            },
-            enumerable: false
-        });
-    });
-    return obj;
-}
-function $8c83eaf28779ff46$var$getUtilities(el) {
-    let [utilities, cleanup2] = $8c83eaf28779ff46$var$getElementBoundUtilities(el);
-    let utils = {
-        interceptor: $8c83eaf28779ff46$var$interceptor,
-        ...utilities
-    };
-    $8c83eaf28779ff46$var$onElRemoved(el, cleanup2);
-    return utils;
-}
-// packages/alpinejs/src/utils/error.js
-function $8c83eaf28779ff46$var$tryCatch(el, expression, callback, ...args) {
-    try {
-        return callback(...args);
-    } catch (e) {
-        $8c83eaf28779ff46$var$handleError(e, el, expression);
-    }
-}
-function $8c83eaf28779ff46$var$handleError(error2, el, expression) {
-    error2 = Object.assign(error2 ?? {
-        message: "No error message given."
-    }, {
-        el: el,
-        expression: expression
-    });
-    console.warn(`Alpine Expression Error: ${error2.message}
-
-${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
-    setTimeout(()=>{
-        throw error2;
-    }, 0);
-}
-// packages/alpinejs/src/evaluator.js
-var $8c83eaf28779ff46$var$shouldAutoEvaluateFunctions = true;
-function $8c83eaf28779ff46$var$dontAutoEvaluateFunctions(callback) {
-    let cache = $8c83eaf28779ff46$var$shouldAutoEvaluateFunctions;
-    $8c83eaf28779ff46$var$shouldAutoEvaluateFunctions = false;
-    let result = callback();
-    $8c83eaf28779ff46$var$shouldAutoEvaluateFunctions = cache;
-    return result;
-}
-function $8c83eaf28779ff46$var$evaluate(el, expression, extras = {}) {
-    let result;
-    $8c83eaf28779ff46$var$evaluateLater(el, expression)((value)=>result = value, extras);
-    return result;
-}
-function $8c83eaf28779ff46$var$evaluateLater(...args) {
-    return $8c83eaf28779ff46$var$theEvaluatorFunction(...args);
-}
-var $8c83eaf28779ff46$var$theEvaluatorFunction = $8c83eaf28779ff46$var$normalEvaluator;
-function $8c83eaf28779ff46$var$setEvaluator(newEvaluator) {
-    $8c83eaf28779ff46$var$theEvaluatorFunction = newEvaluator;
-}
-function $8c83eaf28779ff46$var$normalEvaluator(el, expression) {
-    let overriddenMagics = {};
-    $8c83eaf28779ff46$var$injectMagics(overriddenMagics, el);
-    let dataStack = [
-        overriddenMagics,
-        ...$8c83eaf28779ff46$var$closestDataStack(el)
-    ];
-    let evaluator = typeof expression === "function" ? $8c83eaf28779ff46$var$generateEvaluatorFromFunction(dataStack, expression) : $8c83eaf28779ff46$var$generateEvaluatorFromString(dataStack, expression, el);
-    return $8c83eaf28779ff46$var$tryCatch.bind(null, el, expression, evaluator);
-}
-function $8c83eaf28779ff46$var$generateEvaluatorFromFunction(dataStack, func) {
-    return (receiver = ()=>{}, { scope: scope2 = {}, params: params = [] } = {})=>{
-        let result = func.apply($8c83eaf28779ff46$var$mergeProxies([
-            scope2,
-            ...dataStack
-        ]), params);
-        $8c83eaf28779ff46$var$runIfTypeOfFunction(receiver, result);
-    };
-}
-var $8c83eaf28779ff46$var$evaluatorMemo = {};
-function $8c83eaf28779ff46$var$generateFunctionFromString(expression, el) {
-    if ($8c83eaf28779ff46$var$evaluatorMemo[expression]) return $8c83eaf28779ff46$var$evaluatorMemo[expression];
-    let AsyncFunction = Object.getPrototypeOf(async function() {}).constructor;
-    let rightSideSafeExpression = /^[\n\s]*if.*\(.*\)/.test(expression.trim()) || /^(let|const)\s/.test(expression.trim()) ? `(async()=>{ ${expression} })()` : expression;
-    const safeAsyncFunction = ()=>{
-        try {
-            let func2 = new AsyncFunction([
-                "__self",
-                "scope"
-            ], `with (scope) { __self.result = ${rightSideSafeExpression} }; __self.finished = true; return __self.result;`);
-            Object.defineProperty(func2, "name", {
-                value: `[Alpine] ${expression}`
-            });
-            return func2;
-        } catch (error2) {
-            $8c83eaf28779ff46$var$handleError(error2, el, expression);
-            return Promise.resolve();
-        }
-    };
-    let func = safeAsyncFunction();
-    $8c83eaf28779ff46$var$evaluatorMemo[expression] = func;
-    return func;
-}
-function $8c83eaf28779ff46$var$generateEvaluatorFromString(dataStack, expression, el) {
-    let func = $8c83eaf28779ff46$var$generateFunctionFromString(expression, el);
-    return (receiver = ()=>{}, { scope: scope2 = {}, params: params = [] } = {})=>{
-        func.result = void 0;
-        func.finished = false;
-        let completeScope = $8c83eaf28779ff46$var$mergeProxies([
-            scope2,
-            ...dataStack
-        ]);
-        if (typeof func === "function") {
-            let promise = func(func, completeScope).catch((error2)=>$8c83eaf28779ff46$var$handleError(error2, el, expression));
-            if (func.finished) {
-                $8c83eaf28779ff46$var$runIfTypeOfFunction(receiver, func.result, completeScope, params, el);
-                func.result = void 0;
-            } else promise.then((result)=>{
-                $8c83eaf28779ff46$var$runIfTypeOfFunction(receiver, result, completeScope, params, el);
-            }).catch((error2)=>$8c83eaf28779ff46$var$handleError(error2, el, expression)).finally(()=>func.result = void 0);
-        }
-    };
-}
-function $8c83eaf28779ff46$var$runIfTypeOfFunction(receiver, value, scope2, params, el) {
-    if ($8c83eaf28779ff46$var$shouldAutoEvaluateFunctions && typeof value === "function") {
-        let result = value.apply(scope2, params);
-        if (result instanceof Promise) result.then((i)=>$8c83eaf28779ff46$var$runIfTypeOfFunction(receiver, i, scope2, params)).catch((error2)=>$8c83eaf28779ff46$var$handleError(error2, el, value));
-        else receiver(result);
-    } else if (typeof value === "object" && value instanceof Promise) value.then((i)=>receiver(i));
-    else receiver(value);
-}
-// packages/alpinejs/src/directives.js
-var $8c83eaf28779ff46$var$prefixAsString = "x-";
-function $8c83eaf28779ff46$var$prefix(subject = "") {
-    return $8c83eaf28779ff46$var$prefixAsString + subject;
-}
-function $8c83eaf28779ff46$var$setPrefix(newPrefix) {
-    $8c83eaf28779ff46$var$prefixAsString = newPrefix;
-}
-var $8c83eaf28779ff46$var$directiveHandlers = {};
-function $8c83eaf28779ff46$var$directive(name, callback) {
-    $8c83eaf28779ff46$var$directiveHandlers[name] = callback;
-    return {
-        before (directive2) {
-            if (!$8c83eaf28779ff46$var$directiveHandlers[directive2]) {
-                console.warn(String.raw`Cannot find directive \`${directive2}\`. \`${name}\` will use the default order of execution`);
-                return;
-            }
-            const pos = $8c83eaf28779ff46$var$directiveOrder.indexOf(directive2);
-            $8c83eaf28779ff46$var$directiveOrder.splice(pos >= 0 ? pos : $8c83eaf28779ff46$var$directiveOrder.indexOf("DEFAULT"), 0, name);
-        }
-    };
-}
-function $8c83eaf28779ff46$var$directiveExists(name) {
-    return Object.keys($8c83eaf28779ff46$var$directiveHandlers).includes(name);
-}
-function $8c83eaf28779ff46$var$directives(el, attributes, originalAttributeOverride) {
-    attributes = Array.from(attributes);
-    if (el._x_virtualDirectives) {
-        let vAttributes = Object.entries(el._x_virtualDirectives).map(([name, value])=>({
-                name: name,
-                value: value
-            }));
-        let staticAttributes = $8c83eaf28779ff46$var$attributesOnly(vAttributes);
-        vAttributes = vAttributes.map((attribute)=>{
-            if (staticAttributes.find((attr)=>attr.name === attribute.name)) return {
-                name: `x-bind:${attribute.name}`,
-                value: `"${attribute.value}"`
-            };
-            return attribute;
-        });
-        attributes = attributes.concat(vAttributes);
-    }
-    let transformedAttributeMap = {};
-    let directives2 = attributes.map($8c83eaf28779ff46$var$toTransformedAttributes((newName, oldName)=>transformedAttributeMap[newName] = oldName)).filter($8c83eaf28779ff46$var$outNonAlpineAttributes).map($8c83eaf28779ff46$var$toParsedDirectives(transformedAttributeMap, originalAttributeOverride)).sort($8c83eaf28779ff46$var$byPriority);
-    return directives2.map((directive2)=>{
-        return $8c83eaf28779ff46$var$getDirectiveHandler(el, directive2);
-    });
-}
-function $8c83eaf28779ff46$var$attributesOnly(attributes) {
-    return Array.from(attributes).map($8c83eaf28779ff46$var$toTransformedAttributes()).filter((attr)=>!$8c83eaf28779ff46$var$outNonAlpineAttributes(attr));
-}
-var $8c83eaf28779ff46$var$isDeferringHandlers = false;
-var $8c83eaf28779ff46$var$directiveHandlerStacks = /* @__PURE__ */ new Map();
-var $8c83eaf28779ff46$var$currentHandlerStackKey = Symbol();
-function $8c83eaf28779ff46$var$deferHandlingDirectives(callback) {
-    $8c83eaf28779ff46$var$isDeferringHandlers = true;
-    let key = Symbol();
-    $8c83eaf28779ff46$var$currentHandlerStackKey = key;
-    $8c83eaf28779ff46$var$directiveHandlerStacks.set(key, []);
-    let flushHandlers = ()=>{
-        while($8c83eaf28779ff46$var$directiveHandlerStacks.get(key).length)$8c83eaf28779ff46$var$directiveHandlerStacks.get(key).shift()();
-        $8c83eaf28779ff46$var$directiveHandlerStacks.delete(key);
-    };
-    let stopDeferring = ()=>{
-        $8c83eaf28779ff46$var$isDeferringHandlers = false;
-        flushHandlers();
-    };
-    callback(flushHandlers);
-    stopDeferring();
-}
-function $8c83eaf28779ff46$var$getElementBoundUtilities(el) {
-    let cleanups = [];
-    let cleanup2 = (callback)=>cleanups.push(callback);
-    let [effect3, cleanupEffect] = $8c83eaf28779ff46$var$elementBoundEffect(el);
-    cleanups.push(cleanupEffect);
-    let utilities = {
-        Alpine: $8c83eaf28779ff46$var$alpine_default,
-        effect: effect3,
-        cleanup: cleanup2,
-        evaluateLater: $8c83eaf28779ff46$var$evaluateLater.bind($8c83eaf28779ff46$var$evaluateLater, el),
-        evaluate: $8c83eaf28779ff46$var$evaluate.bind($8c83eaf28779ff46$var$evaluate, el)
-    };
-    let doCleanup = ()=>cleanups.forEach((i)=>i());
-    return [
-        utilities,
-        doCleanup
-    ];
-}
-function $8c83eaf28779ff46$var$getDirectiveHandler(el, directive2) {
-    let noop = ()=>{};
-    let handler4 = $8c83eaf28779ff46$var$directiveHandlers[directive2.type] || noop;
-    let [utilities, cleanup2] = $8c83eaf28779ff46$var$getElementBoundUtilities(el);
-    $8c83eaf28779ff46$var$onAttributeRemoved(el, directive2.original, cleanup2);
-    let fullHandler = ()=>{
-        if (el._x_ignore || el._x_ignoreSelf) return;
-        handler4.inline && handler4.inline(el, directive2, utilities);
-        handler4 = handler4.bind(handler4, el, directive2, utilities);
-        $8c83eaf28779ff46$var$isDeferringHandlers ? $8c83eaf28779ff46$var$directiveHandlerStacks.get($8c83eaf28779ff46$var$currentHandlerStackKey).push(handler4) : handler4();
-    };
-    fullHandler.runCleanups = cleanup2;
-    return fullHandler;
-}
-var $8c83eaf28779ff46$var$startingWith = (subject, replacement)=>({ name: name, value: value })=>{
-        if (name.startsWith(subject)) name = name.replace(subject, replacement);
-        return {
-            name: name,
-            value: value
-        };
-    };
-var $8c83eaf28779ff46$var$into = (i)=>i;
-function $8c83eaf28779ff46$var$toTransformedAttributes(callback = ()=>{}) {
-    return ({ name: name, value: value })=>{
-        let { name: newName, value: newValue } = $8c83eaf28779ff46$var$attributeTransformers.reduce((carry, transform)=>{
-            return transform(carry);
-        }, {
-            name: name,
-            value: value
-        });
-        if (newName !== name) callback(newName, name);
-        return {
-            name: newName,
-            value: newValue
-        };
-    };
-}
-var $8c83eaf28779ff46$var$attributeTransformers = [];
-function $8c83eaf28779ff46$var$mapAttributes(callback) {
-    $8c83eaf28779ff46$var$attributeTransformers.push(callback);
-}
-function $8c83eaf28779ff46$var$outNonAlpineAttributes({ name: name }) {
-    return $8c83eaf28779ff46$var$alpineAttributeRegex().test(name);
-}
-var $8c83eaf28779ff46$var$alpineAttributeRegex = ()=>new RegExp(`^${$8c83eaf28779ff46$var$prefixAsString}([^:^.]+)\\b`);
-function $8c83eaf28779ff46$var$toParsedDirectives(transformedAttributeMap, originalAttributeOverride) {
-    return ({ name: name, value: value })=>{
-        let typeMatch = name.match($8c83eaf28779ff46$var$alpineAttributeRegex());
-        let valueMatch = name.match(/:([a-zA-Z0-9\-_:]+)/);
-        let modifiers = name.match(/\.[^.\]]+(?=[^\]]*$)/g) || [];
-        let original = originalAttributeOverride || transformedAttributeMap[name] || name;
-        return {
-            type: typeMatch ? typeMatch[1] : null,
-            value: valueMatch ? valueMatch[1] : null,
-            modifiers: modifiers.map((i)=>i.replace(".", "")),
-            expression: value,
-            original: original
-        };
-    };
-}
-var $8c83eaf28779ff46$var$DEFAULT = "DEFAULT";
-var $8c83eaf28779ff46$var$directiveOrder = [
-    "ignore",
-    "ref",
-    "data",
-    "id",
-    "anchor",
-    "bind",
-    "init",
-    "for",
-    "model",
-    "modelable",
-    "transition",
-    "show",
-    "if",
-    $8c83eaf28779ff46$var$DEFAULT,
-    "teleport"
-];
-function $8c83eaf28779ff46$var$byPriority(a, b) {
-    let typeA = $8c83eaf28779ff46$var$directiveOrder.indexOf(a.type) === -1 ? $8c83eaf28779ff46$var$DEFAULT : a.type;
-    let typeB = $8c83eaf28779ff46$var$directiveOrder.indexOf(b.type) === -1 ? $8c83eaf28779ff46$var$DEFAULT : b.type;
-    return $8c83eaf28779ff46$var$directiveOrder.indexOf(typeA) - $8c83eaf28779ff46$var$directiveOrder.indexOf(typeB);
-}
-// packages/alpinejs/src/utils/dispatch.js
-function $8c83eaf28779ff46$var$dispatch(el, name, detail = {}) {
-    el.dispatchEvent(new CustomEvent(name, {
-        detail: detail,
-        bubbles: true,
-        // Allows events to pass the shadow DOM barrier.
-        composed: true,
-        cancelable: true
-    }));
-}
-// packages/alpinejs/src/utils/walk.js
-function $8c83eaf28779ff46$var$walk(el, callback) {
-    if (typeof ShadowRoot === "function" && el instanceof ShadowRoot) {
-        Array.from(el.children).forEach((el2)=>$8c83eaf28779ff46$var$walk(el2, callback));
-        return;
-    }
-    let skip = false;
-    callback(el, ()=>skip = true);
-    if (skip) return;
-    let node = el.firstElementChild;
-    while(node){
-        $8c83eaf28779ff46$var$walk(node, callback, false);
-        node = node.nextElementSibling;
-    }
-}
-// packages/alpinejs/src/utils/warn.js
-function $8c83eaf28779ff46$var$warn(message, ...args) {
-    console.warn(`Alpine Warning: ${message}`, ...args);
-}
-// packages/alpinejs/src/lifecycle.js
-var $8c83eaf28779ff46$var$started = false;
-function $8c83eaf28779ff46$var$start() {
-    if ($8c83eaf28779ff46$var$started) $8c83eaf28779ff46$var$warn("Alpine has already been initialized on this page. Calling Alpine.start() more than once can cause problems.");
-    $8c83eaf28779ff46$var$started = true;
-    if (!document.body) $8c83eaf28779ff46$var$warn("Unable to initialize. Trying to load Alpine before `<body>` is available. Did you forget to add `defer` in Alpine's `<script>` tag?");
-    $8c83eaf28779ff46$var$dispatch(document, "alpine:init");
-    $8c83eaf28779ff46$var$dispatch(document, "alpine:initializing");
-    $8c83eaf28779ff46$var$startObservingMutations();
-    $8c83eaf28779ff46$var$onElAdded((el)=>$8c83eaf28779ff46$var$initTree(el, $8c83eaf28779ff46$var$walk));
-    $8c83eaf28779ff46$var$onElRemoved((el)=>$8c83eaf28779ff46$var$destroyTree(el));
-    $8c83eaf28779ff46$var$onAttributesAdded((el, attrs)=>{
-        $8c83eaf28779ff46$var$directives(el, attrs).forEach((handle)=>handle());
-    });
-    let outNestedComponents = (el)=>!$8c83eaf28779ff46$var$closestRoot(el.parentElement, true);
-    Array.from(document.querySelectorAll($8c83eaf28779ff46$var$allSelectors().join(","))).filter(outNestedComponents).forEach((el)=>{
-        $8c83eaf28779ff46$var$initTree(el);
-    });
-    $8c83eaf28779ff46$var$dispatch(document, "alpine:initialized");
-    setTimeout(()=>{
-        $8c83eaf28779ff46$var$warnAboutMissingPlugins();
-    });
-}
-var $8c83eaf28779ff46$var$rootSelectorCallbacks = [];
-var $8c83eaf28779ff46$var$initSelectorCallbacks = [];
-function $8c83eaf28779ff46$var$rootSelectors() {
-    return $8c83eaf28779ff46$var$rootSelectorCallbacks.map((fn)=>fn());
-}
-function $8c83eaf28779ff46$var$allSelectors() {
-    return $8c83eaf28779ff46$var$rootSelectorCallbacks.concat($8c83eaf28779ff46$var$initSelectorCallbacks).map((fn)=>fn());
-}
-function $8c83eaf28779ff46$var$addRootSelector(selectorCallback) {
-    $8c83eaf28779ff46$var$rootSelectorCallbacks.push(selectorCallback);
-}
-function $8c83eaf28779ff46$var$addInitSelector(selectorCallback) {
-    $8c83eaf28779ff46$var$initSelectorCallbacks.push(selectorCallback);
-}
-function $8c83eaf28779ff46$var$closestRoot(el, includeInitSelectors = false) {
-    return $8c83eaf28779ff46$var$findClosest(el, (element)=>{
-        const selectors = includeInitSelectors ? $8c83eaf28779ff46$var$allSelectors() : $8c83eaf28779ff46$var$rootSelectors();
-        if (selectors.some((selector)=>element.matches(selector))) return true;
-    });
-}
-function $8c83eaf28779ff46$var$findClosest(el, callback) {
-    if (!el) return;
-    if (callback(el)) return el;
-    if (el._x_teleportBack) el = el._x_teleportBack;
-    if (!el.parentElement) return;
-    return $8c83eaf28779ff46$var$findClosest(el.parentElement, callback);
-}
-function $8c83eaf28779ff46$var$isRoot(el) {
-    return $8c83eaf28779ff46$var$rootSelectors().some((selector)=>el.matches(selector));
-}
-var $8c83eaf28779ff46$var$initInterceptors2 = [];
-function $8c83eaf28779ff46$var$interceptInit(callback) {
-    $8c83eaf28779ff46$var$initInterceptors2.push(callback);
-}
-var $8c83eaf28779ff46$var$markerDispenser = 1;
-function $8c83eaf28779ff46$var$initTree(el, walker = $8c83eaf28779ff46$var$walk, intercept = ()=>{}) {
-    if ($8c83eaf28779ff46$var$findClosest(el, (i)=>i._x_ignore)) return;
-    $8c83eaf28779ff46$var$deferHandlingDirectives(()=>{
-        walker(el, (el2, skip)=>{
-            if (el2._x_marker) return;
-            intercept(el2, skip);
-            $8c83eaf28779ff46$var$initInterceptors2.forEach((i)=>i(el2, skip));
-            $8c83eaf28779ff46$var$directives(el2, el2.attributes).forEach((handle)=>handle());
-            if (!el2._x_ignore) el2._x_marker = $8c83eaf28779ff46$var$markerDispenser++;
-            el2._x_ignore && skip();
-        });
-    });
-}
-function $8c83eaf28779ff46$var$destroyTree(root, walker = $8c83eaf28779ff46$var$walk) {
-    walker(root, (el)=>{
-        $8c83eaf28779ff46$var$cleanupElement(el);
-        $8c83eaf28779ff46$var$cleanupAttributes(el);
-        delete el._x_marker;
-    });
-}
-function $8c83eaf28779ff46$var$warnAboutMissingPlugins() {
-    let pluginDirectives = [
-        [
-            "ui",
-            "dialog",
-            [
-                "[x-dialog], [x-popover]"
-            ]
-        ],
-        [
-            "anchor",
-            "anchor",
-            [
-                "[x-anchor]"
-            ]
-        ],
-        [
-            "sort",
-            "sort",
-            [
-                "[x-sort]"
-            ]
-        ]
-    ];
-    pluginDirectives.forEach(([plugin2, directive2, selectors])=>{
-        if ($8c83eaf28779ff46$var$directiveExists(directive2)) return;
-        selectors.some((selector)=>{
-            if (document.querySelector(selector)) {
-                $8c83eaf28779ff46$var$warn(`found "${selector}", but missing ${plugin2} plugin`);
-                return true;
-            }
-        });
-    });
-}
-// packages/alpinejs/src/nextTick.js
-var $8c83eaf28779ff46$var$tickStack = [];
-var $8c83eaf28779ff46$var$isHolding = false;
-function $8c83eaf28779ff46$var$nextTick(callback = ()=>{}) {
-    queueMicrotask(()=>{
-        $8c83eaf28779ff46$var$isHolding || setTimeout(()=>{
-            $8c83eaf28779ff46$var$releaseNextTicks();
-        });
-    });
-    return new Promise((res)=>{
-        $8c83eaf28779ff46$var$tickStack.push(()=>{
-            callback();
-            res();
-        });
-    });
-}
-function $8c83eaf28779ff46$var$releaseNextTicks() {
-    $8c83eaf28779ff46$var$isHolding = false;
-    while($8c83eaf28779ff46$var$tickStack.length)$8c83eaf28779ff46$var$tickStack.shift()();
-}
-function $8c83eaf28779ff46$var$holdNextTicks() {
-    $8c83eaf28779ff46$var$isHolding = true;
-}
-// packages/alpinejs/src/utils/classes.js
-function $8c83eaf28779ff46$var$setClasses(el, value) {
-    if (Array.isArray(value)) return $8c83eaf28779ff46$var$setClassesFromString(el, value.join(" "));
-    else if (typeof value === "object" && value !== null) return $8c83eaf28779ff46$var$setClassesFromObject(el, value);
-    else if (typeof value === "function") return $8c83eaf28779ff46$var$setClasses(el, value());
-    return $8c83eaf28779ff46$var$setClassesFromString(el, value);
-}
-function $8c83eaf28779ff46$var$setClassesFromString(el, classString) {
-    let split = (classString2)=>classString2.split(" ").filter(Boolean);
-    let missingClasses = (classString2)=>classString2.split(" ").filter((i)=>!el.classList.contains(i)).filter(Boolean);
-    let addClassesAndReturnUndo = (classes)=>{
-        el.classList.add(...classes);
-        return ()=>{
-            el.classList.remove(...classes);
-        };
-    };
-    classString = classString === true ? classString = "" : classString || "";
-    return addClassesAndReturnUndo(missingClasses(classString));
-}
-function $8c83eaf28779ff46$var$setClassesFromObject(el, classObject) {
-    let split = (classString)=>classString.split(" ").filter(Boolean);
-    let forAdd = Object.entries(classObject).flatMap(([classString, bool])=>bool ? split(classString) : false).filter(Boolean);
-    let forRemove = Object.entries(classObject).flatMap(([classString, bool])=>!bool ? split(classString) : false).filter(Boolean);
-    let added = [];
-    let removed = [];
-    forRemove.forEach((i)=>{
-        if (el.classList.contains(i)) {
-            el.classList.remove(i);
-            removed.push(i);
-        }
-    });
-    forAdd.forEach((i)=>{
-        if (!el.classList.contains(i)) {
-            el.classList.add(i);
-            added.push(i);
-        }
-    });
-    return ()=>{
-        removed.forEach((i)=>el.classList.add(i));
-        added.forEach((i)=>el.classList.remove(i));
-    };
-}
-// packages/alpinejs/src/utils/styles.js
-function $8c83eaf28779ff46$var$setStyles(el, value) {
-    if (typeof value === "object" && value !== null) return $8c83eaf28779ff46$var$setStylesFromObject(el, value);
-    return $8c83eaf28779ff46$var$setStylesFromString(el, value);
-}
-function $8c83eaf28779ff46$var$setStylesFromObject(el, value) {
-    let previousStyles = {};
-    Object.entries(value).forEach(([key, value2])=>{
-        previousStyles[key] = el.style[key];
-        if (!key.startsWith("--")) key = $8c83eaf28779ff46$var$kebabCase(key);
-        el.style.setProperty(key, value2);
-    });
-    setTimeout(()=>{
-        if (el.style.length === 0) el.removeAttribute("style");
-    });
-    return ()=>{
-        $8c83eaf28779ff46$var$setStyles(el, previousStyles);
-    };
-}
-function $8c83eaf28779ff46$var$setStylesFromString(el, value) {
-    let cache = el.getAttribute("style", value);
-    el.setAttribute("style", value);
-    return ()=>{
-        el.setAttribute("style", cache || "");
-    };
-}
-function $8c83eaf28779ff46$var$kebabCase(subject) {
-    return subject.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
-}
-// packages/alpinejs/src/utils/once.js
-function $8c83eaf28779ff46$var$once(callback, fallback = ()=>{}) {
-    let called = false;
-    return function() {
-        if (!called) {
-            called = true;
-            callback.apply(this, arguments);
-        } else fallback.apply(this, arguments);
-    };
-}
-// packages/alpinejs/src/directives/x-transition.js
-$8c83eaf28779ff46$var$directive("transition", (el, { value: value, modifiers: modifiers, expression: expression }, { evaluate: evaluate2 })=>{
-    if (typeof expression === "function") expression = evaluate2(expression);
-    if (expression === false) return;
-    if (!expression || typeof expression === "boolean") $8c83eaf28779ff46$var$registerTransitionsFromHelper(el, modifiers, value);
-    else $8c83eaf28779ff46$var$registerTransitionsFromClassString(el, expression, value);
-});
-function $8c83eaf28779ff46$var$registerTransitionsFromClassString(el, classString, stage) {
-    $8c83eaf28779ff46$var$registerTransitionObject(el, $8c83eaf28779ff46$var$setClasses, "");
-    let directiveStorageMap = {
-        "enter": (classes)=>{
-            el._x_transition.enter.during = classes;
-        },
-        "enter-start": (classes)=>{
-            el._x_transition.enter.start = classes;
-        },
-        "enter-end": (classes)=>{
-            el._x_transition.enter.end = classes;
-        },
-        "leave": (classes)=>{
-            el._x_transition.leave.during = classes;
-        },
-        "leave-start": (classes)=>{
-            el._x_transition.leave.start = classes;
-        },
-        "leave-end": (classes)=>{
-            el._x_transition.leave.end = classes;
-        }
-    };
-    directiveStorageMap[stage](classString);
-}
-function $8c83eaf28779ff46$var$registerTransitionsFromHelper(el, modifiers, stage) {
-    $8c83eaf28779ff46$var$registerTransitionObject(el, $8c83eaf28779ff46$var$setStyles);
-    let doesntSpecify = !modifiers.includes("in") && !modifiers.includes("out") && !stage;
-    let transitioningIn = doesntSpecify || modifiers.includes("in") || [
-        "enter"
-    ].includes(stage);
-    let transitioningOut = doesntSpecify || modifiers.includes("out") || [
-        "leave"
-    ].includes(stage);
-    if (modifiers.includes("in") && !doesntSpecify) modifiers = modifiers.filter((i, index)=>index < modifiers.indexOf("out"));
-    if (modifiers.includes("out") && !doesntSpecify) modifiers = modifiers.filter((i, index)=>index > modifiers.indexOf("out"));
-    let wantsAll = !modifiers.includes("opacity") && !modifiers.includes("scale");
-    let wantsOpacity = wantsAll || modifiers.includes("opacity");
-    let wantsScale = wantsAll || modifiers.includes("scale");
-    let opacityValue = wantsOpacity ? 0 : 1;
-    let scaleValue = wantsScale ? $8c83eaf28779ff46$var$modifierValue(modifiers, "scale", 95) / 100 : 1;
-    let delay = $8c83eaf28779ff46$var$modifierValue(modifiers, "delay", 0) / 1e3;
-    let origin = $8c83eaf28779ff46$var$modifierValue(modifiers, "origin", "center");
-    let property = "opacity, transform";
-    let durationIn = $8c83eaf28779ff46$var$modifierValue(modifiers, "duration", 150) / 1e3;
-    let durationOut = $8c83eaf28779ff46$var$modifierValue(modifiers, "duration", 75) / 1e3;
-    let easing = `cubic-bezier(0.4, 0.0, 0.2, 1)`;
-    if (transitioningIn) {
-        el._x_transition.enter.during = {
-            transformOrigin: origin,
-            transitionDelay: `${delay}s`,
-            transitionProperty: property,
-            transitionDuration: `${durationIn}s`,
-            transitionTimingFunction: easing
-        };
-        el._x_transition.enter.start = {
-            opacity: opacityValue,
-            transform: `scale(${scaleValue})`
-        };
-        el._x_transition.enter.end = {
-            opacity: 1,
-            transform: `scale(1)`
-        };
-    }
-    if (transitioningOut) {
-        el._x_transition.leave.during = {
-            transformOrigin: origin,
-            transitionDelay: `${delay}s`,
-            transitionProperty: property,
-            transitionDuration: `${durationOut}s`,
-            transitionTimingFunction: easing
-        };
-        el._x_transition.leave.start = {
-            opacity: 1,
-            transform: `scale(1)`
-        };
-        el._x_transition.leave.end = {
-            opacity: opacityValue,
-            transform: `scale(${scaleValue})`
-        };
-    }
-}
-function $8c83eaf28779ff46$var$registerTransitionObject(el, setFunction, defaultValue = {}) {
-    if (!el._x_transition) el._x_transition = {
-        enter: {
-            during: defaultValue,
-            start: defaultValue,
-            end: defaultValue
-        },
-        leave: {
-            during: defaultValue,
-            start: defaultValue,
-            end: defaultValue
-        },
-        in (before = ()=>{}, after = ()=>{}) {
-            $8c83eaf28779ff46$var$transition(el, setFunction, {
-                during: this.enter.during,
-                start: this.enter.start,
-                end: this.enter.end
-            }, before, after);
-        },
-        out (before = ()=>{}, after = ()=>{}) {
-            $8c83eaf28779ff46$var$transition(el, setFunction, {
-                during: this.leave.during,
-                start: this.leave.start,
-                end: this.leave.end
-            }, before, after);
-        }
-    };
-}
-window.Element.prototype._x_toggleAndCascadeWithTransitions = function(el, value, show, hide) {
-    const nextTick2 = document.visibilityState === "visible" ? requestAnimationFrame : setTimeout;
-    let clickAwayCompatibleShow = ()=>nextTick2(show);
-    if (value) {
-        if (el._x_transition && (el._x_transition.enter || el._x_transition.leave)) el._x_transition.enter && (Object.entries(el._x_transition.enter.during).length || Object.entries(el._x_transition.enter.start).length || Object.entries(el._x_transition.enter.end).length) ? el._x_transition.in(show) : clickAwayCompatibleShow();
-        else el._x_transition ? el._x_transition.in(show) : clickAwayCompatibleShow();
-        return;
-    }
-    el._x_hidePromise = el._x_transition ? new Promise((resolve, reject)=>{
-        el._x_transition.out(()=>{}, ()=>resolve(hide));
-        el._x_transitioning && el._x_transitioning.beforeCancel(()=>reject({
-                isFromCancelledTransition: true
-            }));
-    }) : Promise.resolve(hide);
-    queueMicrotask(()=>{
-        let closest = $8c83eaf28779ff46$var$closestHide(el);
-        if (closest) {
-            if (!closest._x_hideChildren) closest._x_hideChildren = [];
-            closest._x_hideChildren.push(el);
-        } else nextTick2(()=>{
-            let hideAfterChildren = (el2)=>{
-                let carry = Promise.all([
-                    el2._x_hidePromise,
-                    ...(el2._x_hideChildren || []).map(hideAfterChildren)
-                ]).then(([i])=>i?.());
-                delete el2._x_hidePromise;
-                delete el2._x_hideChildren;
-                return carry;
-            };
-            hideAfterChildren(el).catch((e)=>{
-                if (!e.isFromCancelledTransition) throw e;
-            });
-        });
-    });
-};
-function $8c83eaf28779ff46$var$closestHide(el) {
-    let parent = el.parentNode;
-    if (!parent) return;
-    return parent._x_hidePromise ? parent : $8c83eaf28779ff46$var$closestHide(parent);
-}
-function $8c83eaf28779ff46$var$transition(el, setFunction, { during: during, start: start2, end: end } = {}, before = ()=>{}, after = ()=>{}) {
-    if (el._x_transitioning) el._x_transitioning.cancel();
-    if (Object.keys(during).length === 0 && Object.keys(start2).length === 0 && Object.keys(end).length === 0) {
-        before();
-        after();
-        return;
-    }
-    let undoStart, undoDuring, undoEnd;
-    $8c83eaf28779ff46$var$performTransition(el, {
-        start () {
-            undoStart = setFunction(el, start2);
-        },
-        during () {
-            undoDuring = setFunction(el, during);
-        },
-        before: before,
-        end () {
-            undoStart();
-            undoEnd = setFunction(el, end);
-        },
-        after: after,
-        cleanup () {
-            undoDuring();
-            undoEnd();
-        }
-    });
-}
-function $8c83eaf28779ff46$var$performTransition(el, stages) {
-    let interrupted, reachedBefore, reachedEnd;
-    let finish = $8c83eaf28779ff46$var$once(()=>{
-        $8c83eaf28779ff46$var$mutateDom(()=>{
-            interrupted = true;
-            if (!reachedBefore) stages.before();
-            if (!reachedEnd) {
-                stages.end();
-                $8c83eaf28779ff46$var$releaseNextTicks();
-            }
-            stages.after();
-            if (el.isConnected) stages.cleanup();
-            delete el._x_transitioning;
-        });
-    });
-    el._x_transitioning = {
-        beforeCancels: [],
-        beforeCancel (callback) {
-            this.beforeCancels.push(callback);
-        },
-        cancel: $8c83eaf28779ff46$var$once(function() {
-            while(this.beforeCancels.length)this.beforeCancels.shift()();
-            finish();
-        }),
-        finish: finish
-    };
-    $8c83eaf28779ff46$var$mutateDom(()=>{
-        stages.start();
-        stages.during();
-    });
-    $8c83eaf28779ff46$var$holdNextTicks();
-    requestAnimationFrame(()=>{
-        if (interrupted) return;
-        let duration = Number(getComputedStyle(el).transitionDuration.replace(/,.*/, "").replace("s", "")) * 1e3;
-        let delay = Number(getComputedStyle(el).transitionDelay.replace(/,.*/, "").replace("s", "")) * 1e3;
-        if (duration === 0) duration = Number(getComputedStyle(el).animationDuration.replace("s", "")) * 1e3;
-        $8c83eaf28779ff46$var$mutateDom(()=>{
-            stages.before();
-        });
-        reachedBefore = true;
-        requestAnimationFrame(()=>{
-            if (interrupted) return;
-            $8c83eaf28779ff46$var$mutateDom(()=>{
-                stages.end();
-            });
-            $8c83eaf28779ff46$var$releaseNextTicks();
-            setTimeout(el._x_transitioning.finish, duration + delay);
-            reachedEnd = true;
-        });
-    });
-}
-function $8c83eaf28779ff46$var$modifierValue(modifiers, key, fallback) {
-    if (modifiers.indexOf(key) === -1) return fallback;
-    const rawValue = modifiers[modifiers.indexOf(key) + 1];
-    if (!rawValue) return fallback;
-    if (key === "scale") {
-        if (isNaN(rawValue)) return fallback;
-    }
-    if (key === "duration" || key === "delay") {
-        let match = rawValue.match(/([0-9]+)ms/);
-        if (match) return match[1];
-    }
-    if (key === "origin") {
-        if ([
-            "top",
-            "right",
-            "left",
-            "center",
-            "bottom"
-        ].includes(modifiers[modifiers.indexOf(key) + 2])) return [
-            rawValue,
-            modifiers[modifiers.indexOf(key) + 2]
-        ].join(" ");
-    }
-    return rawValue;
-}
-// packages/alpinejs/src/clone.js
-var $8c83eaf28779ff46$var$isCloning = false;
-function $8c83eaf28779ff46$var$skipDuringClone(callback, fallback = ()=>{}) {
-    return (...args)=>$8c83eaf28779ff46$var$isCloning ? fallback(...args) : callback(...args);
-}
-function $8c83eaf28779ff46$var$onlyDuringClone(callback) {
-    return (...args)=>$8c83eaf28779ff46$var$isCloning && callback(...args);
-}
-var $8c83eaf28779ff46$var$interceptors = [];
-function $8c83eaf28779ff46$var$interceptClone(callback) {
-    $8c83eaf28779ff46$var$interceptors.push(callback);
-}
-function $8c83eaf28779ff46$var$cloneNode(from, to) {
-    $8c83eaf28779ff46$var$interceptors.forEach((i)=>i(from, to));
-    $8c83eaf28779ff46$var$isCloning = true;
-    $8c83eaf28779ff46$var$dontRegisterReactiveSideEffects(()=>{
-        $8c83eaf28779ff46$var$initTree(to, (el, callback)=>{
-            callback(el, ()=>{});
-        });
-    });
-    $8c83eaf28779ff46$var$isCloning = false;
-}
-var $8c83eaf28779ff46$var$isCloningLegacy = false;
-function $8c83eaf28779ff46$var$clone(oldEl, newEl) {
-    if (!newEl._x_dataStack) newEl._x_dataStack = oldEl._x_dataStack;
-    $8c83eaf28779ff46$var$isCloning = true;
-    $8c83eaf28779ff46$var$isCloningLegacy = true;
-    $8c83eaf28779ff46$var$dontRegisterReactiveSideEffects(()=>{
-        $8c83eaf28779ff46$var$cloneTree(newEl);
-    });
-    $8c83eaf28779ff46$var$isCloning = false;
-    $8c83eaf28779ff46$var$isCloningLegacy = false;
-}
-function $8c83eaf28779ff46$var$cloneTree(el) {
-    let hasRunThroughFirstEl = false;
-    let shallowWalker = (el2, callback)=>{
-        $8c83eaf28779ff46$var$walk(el2, (el3, skip)=>{
-            if (hasRunThroughFirstEl && $8c83eaf28779ff46$var$isRoot(el3)) return skip();
-            hasRunThroughFirstEl = true;
-            callback(el3, skip);
-        });
-    };
-    $8c83eaf28779ff46$var$initTree(el, shallowWalker);
-}
-function $8c83eaf28779ff46$var$dontRegisterReactiveSideEffects(callback) {
-    let cache = $8c83eaf28779ff46$var$effect;
-    $8c83eaf28779ff46$var$overrideEffect((callback2, el)=>{
-        let storedEffect = cache(callback2);
-        $8c83eaf28779ff46$var$release(storedEffect);
-        return ()=>{};
-    });
-    callback();
-    $8c83eaf28779ff46$var$overrideEffect(cache);
-}
-// packages/alpinejs/src/utils/bind.js
-function $8c83eaf28779ff46$var$bind(el, name, value, modifiers = []) {
-    if (!el._x_bindings) el._x_bindings = $8c83eaf28779ff46$var$reactive({});
-    el._x_bindings[name] = value;
-    name = modifiers.includes("camel") ? $8c83eaf28779ff46$var$camelCase(name) : name;
-    switch(name){
-        case "value":
-            $8c83eaf28779ff46$var$bindInputValue(el, value);
-            break;
-        case "style":
-            $8c83eaf28779ff46$var$bindStyles(el, value);
-            break;
-        case "class":
-            $8c83eaf28779ff46$var$bindClasses(el, value);
-            break;
-        case "selected":
-        case "checked":
-            $8c83eaf28779ff46$var$bindAttributeAndProperty(el, name, value);
-            break;
-        default:
-            $8c83eaf28779ff46$var$bindAttribute(el, name, value);
-            break;
-    }
-}
-function $8c83eaf28779ff46$var$bindInputValue(el, value) {
-    if ($8c83eaf28779ff46$var$isRadio(el)) {
-        if (el.attributes.value === void 0) el.value = value;
-        if (window.fromModel) {
-            if (typeof value === "boolean") el.checked = $8c83eaf28779ff46$var$safeParseBoolean(el.value) === value;
-            else el.checked = $8c83eaf28779ff46$var$checkedAttrLooseCompare(el.value, value);
-        }
-    } else if ($8c83eaf28779ff46$var$isCheckbox(el)) {
-        if (Number.isInteger(value)) el.value = value;
-        else if (!Array.isArray(value) && typeof value !== "boolean" && ![
-            null,
-            void 0
-        ].includes(value)) el.value = String(value);
-        else if (Array.isArray(value)) el.checked = value.some((val)=>$8c83eaf28779ff46$var$checkedAttrLooseCompare(val, el.value));
-        else el.checked = !!value;
-    } else if (el.tagName === "SELECT") $8c83eaf28779ff46$var$updateSelect(el, value);
-    else {
-        if (el.value === value) return;
-        el.value = value === void 0 ? "" : value;
-    }
-}
-function $8c83eaf28779ff46$var$bindClasses(el, value) {
-    if (el._x_undoAddedClasses) el._x_undoAddedClasses();
-    el._x_undoAddedClasses = $8c83eaf28779ff46$var$setClasses(el, value);
-}
-function $8c83eaf28779ff46$var$bindStyles(el, value) {
-    if (el._x_undoAddedStyles) el._x_undoAddedStyles();
-    el._x_undoAddedStyles = $8c83eaf28779ff46$var$setStyles(el, value);
-}
-function $8c83eaf28779ff46$var$bindAttributeAndProperty(el, name, value) {
-    $8c83eaf28779ff46$var$bindAttribute(el, name, value);
-    $8c83eaf28779ff46$var$setPropertyIfChanged(el, name, value);
-}
-function $8c83eaf28779ff46$var$bindAttribute(el, name, value) {
-    if ([
-        null,
-        void 0,
-        false
-    ].includes(value) && $8c83eaf28779ff46$var$attributeShouldntBePreservedIfFalsy(name)) el.removeAttribute(name);
-    else {
-        if ($8c83eaf28779ff46$var$isBooleanAttr(name)) value = name;
-        $8c83eaf28779ff46$var$setIfChanged(el, name, value);
-    }
-}
-function $8c83eaf28779ff46$var$setIfChanged(el, attrName, value) {
-    if (el.getAttribute(attrName) != value) el.setAttribute(attrName, value);
-}
-function $8c83eaf28779ff46$var$setPropertyIfChanged(el, propName, value) {
-    if (el[propName] !== value) el[propName] = value;
-}
-function $8c83eaf28779ff46$var$updateSelect(el, value) {
-    const arrayWrappedValue = [].concat(value).map((value2)=>{
-        return value2 + "";
-    });
-    Array.from(el.options).forEach((option)=>{
-        option.selected = arrayWrappedValue.includes(option.value);
-    });
-}
-function $8c83eaf28779ff46$var$camelCase(subject) {
-    return subject.toLowerCase().replace(/-(\w)/g, (match, char)=>char.toUpperCase());
-}
-function $8c83eaf28779ff46$var$checkedAttrLooseCompare(valueA, valueB) {
-    return valueA == valueB;
-}
-function $8c83eaf28779ff46$var$safeParseBoolean(rawValue) {
-    if ([
-        1,
-        "1",
-        "true",
-        "on",
-        "yes",
-        true
-    ].includes(rawValue)) return true;
-    if ([
-        0,
-        "0",
-        "false",
-        "off",
-        "no",
-        false
-    ].includes(rawValue)) return false;
-    return rawValue ? Boolean(rawValue) : null;
-}
-var $8c83eaf28779ff46$var$booleanAttributes = /* @__PURE__ */ new Set([
-    "allowfullscreen",
-    "async",
-    "autofocus",
-    "autoplay",
-    "checked",
-    "controls",
-    "default",
-    "defer",
-    "disabled",
-    "formnovalidate",
-    "inert",
-    "ismap",
-    "itemscope",
-    "loop",
-    "multiple",
-    "muted",
-    "nomodule",
-    "novalidate",
-    "open",
-    "playsinline",
-    "readonly",
-    "required",
-    "reversed",
-    "selected",
-    "shadowrootclonable",
-    "shadowrootdelegatesfocus",
-    "shadowrootserializable"
-]);
-function $8c83eaf28779ff46$var$isBooleanAttr(attrName) {
-    return $8c83eaf28779ff46$var$booleanAttributes.has(attrName);
-}
-function $8c83eaf28779ff46$var$attributeShouldntBePreservedIfFalsy(name) {
-    return ![
-        "aria-pressed",
-        "aria-checked",
-        "aria-expanded",
-        "aria-selected"
-    ].includes(name);
-}
-function $8c83eaf28779ff46$var$getBinding(el, name, fallback) {
-    if (el._x_bindings && el._x_bindings[name] !== void 0) return el._x_bindings[name];
-    return $8c83eaf28779ff46$var$getAttributeBinding(el, name, fallback);
-}
-function $8c83eaf28779ff46$var$extractProp(el, name, fallback, extract = true) {
-    if (el._x_bindings && el._x_bindings[name] !== void 0) return el._x_bindings[name];
-    if (el._x_inlineBindings && el._x_inlineBindings[name] !== void 0) {
-        let binding = el._x_inlineBindings[name];
-        binding.extract = extract;
-        return $8c83eaf28779ff46$var$dontAutoEvaluateFunctions(()=>{
-            return $8c83eaf28779ff46$var$evaluate(el, binding.expression);
-        });
-    }
-    return $8c83eaf28779ff46$var$getAttributeBinding(el, name, fallback);
-}
-function $8c83eaf28779ff46$var$getAttributeBinding(el, name, fallback) {
-    let attr = el.getAttribute(name);
-    if (attr === null) return typeof fallback === "function" ? fallback() : fallback;
-    if (attr === "") return true;
-    if ($8c83eaf28779ff46$var$isBooleanAttr(name)) return !![
-        name,
-        "true"
-    ].includes(attr);
-    return attr;
-}
-function $8c83eaf28779ff46$var$isCheckbox(el) {
-    return el.type === "checkbox" || el.localName === "ui-checkbox" || el.localName === "ui-switch";
-}
-function $8c83eaf28779ff46$var$isRadio(el) {
-    return el.type === "radio" || el.localName === "ui-radio";
-}
-// packages/alpinejs/src/utils/debounce.js
-function $8c83eaf28779ff46$var$debounce(func, wait) {
-    var timeout;
-    return function() {
-        var context = this, args = arguments;
-        var later = function() {
-            timeout = null;
-            func.apply(context, args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-// packages/alpinejs/src/utils/throttle.js
-function $8c83eaf28779ff46$var$throttle(func, limit) {
-    let inThrottle;
-    return function() {
-        let context = this, args = arguments;
-        if (!inThrottle) {
-            func.apply(context, args);
-            inThrottle = true;
-            setTimeout(()=>inThrottle = false, limit);
-        }
-    };
-}
-// packages/alpinejs/src/entangle.js
-function $8c83eaf28779ff46$var$entangle({ get: outerGet, set: outerSet }, { get: innerGet, set: innerSet }) {
-    let firstRun = true;
-    let outerHash;
-    let innerHash;
-    let reference = $8c83eaf28779ff46$var$effect(()=>{
-        let outer = outerGet();
-        let inner = innerGet();
-        if (firstRun) {
-            innerSet($8c83eaf28779ff46$var$cloneIfObject(outer));
-            firstRun = false;
-        } else {
-            let outerHashLatest = JSON.stringify(outer);
-            let innerHashLatest = JSON.stringify(inner);
-            if (outerHashLatest !== outerHash) innerSet($8c83eaf28779ff46$var$cloneIfObject(outer));
-            else if (outerHashLatest !== innerHashLatest) outerSet($8c83eaf28779ff46$var$cloneIfObject(inner));
-        }
-        outerHash = JSON.stringify(outerGet());
-        innerHash = JSON.stringify(innerGet());
-    });
-    return ()=>{
-        $8c83eaf28779ff46$var$release(reference);
-    };
-}
-function $8c83eaf28779ff46$var$cloneIfObject(value) {
-    return typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value;
-}
-// packages/alpinejs/src/plugin.js
-function $8c83eaf28779ff46$var$plugin(callback) {
-    let callbacks = Array.isArray(callback) ? callback : [
-        callback
-    ];
-    callbacks.forEach((i)=>i($8c83eaf28779ff46$var$alpine_default));
-}
-// packages/alpinejs/src/store.js
-var $8c83eaf28779ff46$var$stores = {};
-var $8c83eaf28779ff46$var$isReactive = false;
-function $8c83eaf28779ff46$var$store(name, value) {
-    if (!$8c83eaf28779ff46$var$isReactive) {
-        $8c83eaf28779ff46$var$stores = $8c83eaf28779ff46$var$reactive($8c83eaf28779ff46$var$stores);
-        $8c83eaf28779ff46$var$isReactive = true;
-    }
-    if (value === void 0) return $8c83eaf28779ff46$var$stores[name];
-    $8c83eaf28779ff46$var$stores[name] = value;
-    $8c83eaf28779ff46$var$initInterceptors($8c83eaf28779ff46$var$stores[name]);
-    if (typeof value === "object" && value !== null && value.hasOwnProperty("init") && typeof value.init === "function") $8c83eaf28779ff46$var$stores[name].init();
-}
-function $8c83eaf28779ff46$var$getStores() {
-    return $8c83eaf28779ff46$var$stores;
-}
-// packages/alpinejs/src/binds.js
-var $8c83eaf28779ff46$var$binds = {};
-function $8c83eaf28779ff46$var$bind2(name, bindings) {
-    let getBindings = typeof bindings !== "function" ? ()=>bindings : bindings;
-    if (name instanceof Element) return $8c83eaf28779ff46$var$applyBindingsObject(name, getBindings());
-    else $8c83eaf28779ff46$var$binds[name] = getBindings;
-    return ()=>{};
-}
-function $8c83eaf28779ff46$var$injectBindingProviders(obj) {
-    Object.entries($8c83eaf28779ff46$var$binds).forEach(([name, callback])=>{
-        Object.defineProperty(obj, name, {
-            get () {
-                return (...args)=>{
-                    return callback(...args);
-                };
-            }
-        });
-    });
-    return obj;
-}
-function $8c83eaf28779ff46$var$applyBindingsObject(el, obj, original) {
-    let cleanupRunners = [];
-    while(cleanupRunners.length)cleanupRunners.pop()();
-    let attributes = Object.entries(obj).map(([name, value])=>({
-            name: name,
-            value: value
-        }));
-    let staticAttributes = $8c83eaf28779ff46$var$attributesOnly(attributes);
-    attributes = attributes.map((attribute)=>{
-        if (staticAttributes.find((attr)=>attr.name === attribute.name)) return {
-            name: `x-bind:${attribute.name}`,
-            value: `"${attribute.value}"`
-        };
-        return attribute;
-    });
-    $8c83eaf28779ff46$var$directives(el, attributes, original).map((handle)=>{
-        cleanupRunners.push(handle.runCleanups);
-        handle();
-    });
-    return ()=>{
-        while(cleanupRunners.length)cleanupRunners.pop()();
-    };
-}
-// packages/alpinejs/src/datas.js
-var $8c83eaf28779ff46$var$datas = {};
-function $8c83eaf28779ff46$var$data(name, callback) {
-    $8c83eaf28779ff46$var$datas[name] = callback;
-}
-function $8c83eaf28779ff46$var$injectDataProviders(obj, context) {
-    Object.entries($8c83eaf28779ff46$var$datas).forEach(([name, callback])=>{
-        Object.defineProperty(obj, name, {
-            get () {
-                return (...args)=>{
-                    return callback.bind(context)(...args);
-                };
-            },
-            enumerable: false
-        });
-    });
-    return obj;
-}
-// packages/alpinejs/src/alpine.js
-var $8c83eaf28779ff46$var$Alpine = {
-    get reactive () {
-        return $8c83eaf28779ff46$var$reactive;
-    },
-    get release () {
-        return $8c83eaf28779ff46$var$release;
-    },
-    get effect () {
-        return $8c83eaf28779ff46$var$effect;
-    },
-    get raw () {
-        return $8c83eaf28779ff46$var$raw;
-    },
-    version: "3.14.8",
-    flushAndStopDeferringMutations: $8c83eaf28779ff46$var$flushAndStopDeferringMutations,
-    dontAutoEvaluateFunctions: $8c83eaf28779ff46$var$dontAutoEvaluateFunctions,
-    disableEffectScheduling: $8c83eaf28779ff46$var$disableEffectScheduling,
-    startObservingMutations: $8c83eaf28779ff46$var$startObservingMutations,
-    stopObservingMutations: $8c83eaf28779ff46$var$stopObservingMutations,
-    setReactivityEngine: $8c83eaf28779ff46$var$setReactivityEngine,
-    onAttributeRemoved: $8c83eaf28779ff46$var$onAttributeRemoved,
-    onAttributesAdded: $8c83eaf28779ff46$var$onAttributesAdded,
-    closestDataStack: $8c83eaf28779ff46$var$closestDataStack,
-    skipDuringClone: $8c83eaf28779ff46$var$skipDuringClone,
-    onlyDuringClone: $8c83eaf28779ff46$var$onlyDuringClone,
-    addRootSelector: $8c83eaf28779ff46$var$addRootSelector,
-    addInitSelector: $8c83eaf28779ff46$var$addInitSelector,
-    interceptClone: $8c83eaf28779ff46$var$interceptClone,
-    addScopeToNode: $8c83eaf28779ff46$var$addScopeToNode,
-    deferMutations: $8c83eaf28779ff46$var$deferMutations,
-    mapAttributes: $8c83eaf28779ff46$var$mapAttributes,
-    evaluateLater: $8c83eaf28779ff46$var$evaluateLater,
-    interceptInit: $8c83eaf28779ff46$var$interceptInit,
-    setEvaluator: $8c83eaf28779ff46$var$setEvaluator,
-    mergeProxies: $8c83eaf28779ff46$var$mergeProxies,
-    extractProp: $8c83eaf28779ff46$var$extractProp,
-    findClosest: $8c83eaf28779ff46$var$findClosest,
-    onElRemoved: $8c83eaf28779ff46$var$onElRemoved,
-    closestRoot: $8c83eaf28779ff46$var$closestRoot,
-    destroyTree: $8c83eaf28779ff46$var$destroyTree,
-    interceptor: $8c83eaf28779ff46$var$interceptor,
-    transition: // INTERNAL: not public API and is subject to change without major release.
-    $8c83eaf28779ff46$var$transition,
-    setStyles: // INTERNAL
-    $8c83eaf28779ff46$var$setStyles,
-    mutateDom: // INTERNAL
-    $8c83eaf28779ff46$var$mutateDom,
-    directive: $8c83eaf28779ff46$var$directive,
-    entangle: $8c83eaf28779ff46$var$entangle,
-    throttle: $8c83eaf28779ff46$var$throttle,
-    debounce: $8c83eaf28779ff46$var$debounce,
-    evaluate: $8c83eaf28779ff46$var$evaluate,
-    initTree: $8c83eaf28779ff46$var$initTree,
-    nextTick: $8c83eaf28779ff46$var$nextTick,
-    prefixed: $8c83eaf28779ff46$var$prefix,
-    prefix: $8c83eaf28779ff46$var$setPrefix,
-    plugin: $8c83eaf28779ff46$var$plugin,
-    magic: $8c83eaf28779ff46$var$magic,
-    store: $8c83eaf28779ff46$var$store,
-    start: $8c83eaf28779ff46$var$start,
-    clone: $8c83eaf28779ff46$var$clone,
-    cloneNode: // INTERNAL
-    $8c83eaf28779ff46$var$cloneNode,
-    // INTERNAL
-    bound: $8c83eaf28779ff46$var$getBinding,
-    $data: $8c83eaf28779ff46$var$scope,
-    watch: $8c83eaf28779ff46$var$watch,
-    walk: $8c83eaf28779ff46$var$walk,
-    data: $8c83eaf28779ff46$var$data,
-    bind: $8c83eaf28779ff46$var$bind2
-};
-var $8c83eaf28779ff46$var$alpine_default = $8c83eaf28779ff46$var$Alpine;
-// node_modules/@vue/shared/dist/shared.esm-bundler.js
-function $8c83eaf28779ff46$var$makeMap(str, expectsLowerCase) {
-    const map = /* @__PURE__ */ Object.create(null);
-    const list = str.split(",");
-    for(let i = 0; i < list.length; i++)map[list[i]] = true;
-    return expectsLowerCase ? (val)=>!!map[val.toLowerCase()] : (val)=>!!map[val];
-}
-var $8c83eaf28779ff46$var$specialBooleanAttrs = `itemscope,allowfullscreen,formnovalidate,ismap,nomodule,novalidate,readonly`;
-var $8c83eaf28779ff46$var$isBooleanAttr2 = /* @__PURE__ */ $8c83eaf28779ff46$var$makeMap($8c83eaf28779ff46$var$specialBooleanAttrs + `,async,autofocus,autoplay,controls,default,defer,disabled,hidden,loop,open,required,reversed,scoped,seamless,checked,muted,multiple,selected`);
-var $8c83eaf28779ff46$var$EMPTY_OBJ = Object.freeze({});
-var $8c83eaf28779ff46$var$EMPTY_ARR = Object.freeze([]);
-var $8c83eaf28779ff46$var$hasOwnProperty = Object.prototype.hasOwnProperty;
-var $8c83eaf28779ff46$var$hasOwn = (val, key)=>$8c83eaf28779ff46$var$hasOwnProperty.call(val, key);
-var $8c83eaf28779ff46$var$isArray = Array.isArray;
-var $8c83eaf28779ff46$var$isMap = (val)=>$8c83eaf28779ff46$var$toTypeString(val) === "[object Map]";
-var $8c83eaf28779ff46$var$isString = (val)=>typeof val === "string";
-var $8c83eaf28779ff46$var$isSymbol = (val)=>typeof val === "symbol";
-var $8c83eaf28779ff46$var$isObject = (val)=>val !== null && typeof val === "object";
-var $8c83eaf28779ff46$var$objectToString = Object.prototype.toString;
-var $8c83eaf28779ff46$var$toTypeString = (value)=>$8c83eaf28779ff46$var$objectToString.call(value);
-var $8c83eaf28779ff46$var$toRawType = (value)=>{
-    return $8c83eaf28779ff46$var$toTypeString(value).slice(8, -1);
-};
-var $8c83eaf28779ff46$var$isIntegerKey = (key)=>$8c83eaf28779ff46$var$isString(key) && key !== "NaN" && key[0] !== "-" && "" + parseInt(key, 10) === key;
-var $8c83eaf28779ff46$var$cacheStringFunction = (fn)=>{
-    const cache = /* @__PURE__ */ Object.create(null);
-    return (str)=>{
-        const hit = cache[str];
-        return hit || (cache[str] = fn(str));
-    };
-};
-var $8c83eaf28779ff46$var$camelizeRE = /-(\w)/g;
-var $8c83eaf28779ff46$var$camelize = $8c83eaf28779ff46$var$cacheStringFunction((str)=>{
-    return str.replace($8c83eaf28779ff46$var$camelizeRE, (_, c)=>c ? c.toUpperCase() : "");
-});
-var $8c83eaf28779ff46$var$hyphenateRE = /\B([A-Z])/g;
-var $8c83eaf28779ff46$var$hyphenate = $8c83eaf28779ff46$var$cacheStringFunction((str)=>str.replace($8c83eaf28779ff46$var$hyphenateRE, "-$1").toLowerCase());
-var $8c83eaf28779ff46$var$capitalize = $8c83eaf28779ff46$var$cacheStringFunction((str)=>str.charAt(0).toUpperCase() + str.slice(1));
-var $8c83eaf28779ff46$var$toHandlerKey = $8c83eaf28779ff46$var$cacheStringFunction((str)=>str ? `on${$8c83eaf28779ff46$var$capitalize(str)}` : ``);
-var $8c83eaf28779ff46$var$hasChanged = (value, oldValue)=>value !== oldValue && (value === value || oldValue === oldValue);
-// node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js
-var $8c83eaf28779ff46$var$targetMap = /* @__PURE__ */ new WeakMap();
-var $8c83eaf28779ff46$var$effectStack = [];
-var $8c83eaf28779ff46$var$activeEffect;
-var $8c83eaf28779ff46$var$ITERATE_KEY = Symbol("iterate");
-var $8c83eaf28779ff46$var$MAP_KEY_ITERATE_KEY = Symbol("Map key iterate");
-function $8c83eaf28779ff46$var$isEffect(fn) {
-    return fn && fn._isEffect === true;
-}
-function $8c83eaf28779ff46$var$effect2(fn, options = $8c83eaf28779ff46$var$EMPTY_OBJ) {
-    if ($8c83eaf28779ff46$var$isEffect(fn)) fn = fn.raw;
-    const effect3 = $8c83eaf28779ff46$var$createReactiveEffect(fn, options);
-    if (!options.lazy) effect3();
-    return effect3;
-}
-function $8c83eaf28779ff46$var$stop(effect3) {
-    if (effect3.active) {
-        $8c83eaf28779ff46$var$cleanup(effect3);
-        if (effect3.options.onStop) effect3.options.onStop();
-        effect3.active = false;
-    }
-}
-var $8c83eaf28779ff46$var$uid = 0;
-function $8c83eaf28779ff46$var$createReactiveEffect(fn, options) {
-    const effect3 = function reactiveEffect() {
-        if (!effect3.active) return fn();
-        if (!$8c83eaf28779ff46$var$effectStack.includes(effect3)) {
-            $8c83eaf28779ff46$var$cleanup(effect3);
-            try {
-                $8c83eaf28779ff46$var$enableTracking();
-                $8c83eaf28779ff46$var$effectStack.push(effect3);
-                $8c83eaf28779ff46$var$activeEffect = effect3;
-                return fn();
-            } finally{
-                $8c83eaf28779ff46$var$effectStack.pop();
-                $8c83eaf28779ff46$var$resetTracking();
-                $8c83eaf28779ff46$var$activeEffect = $8c83eaf28779ff46$var$effectStack[$8c83eaf28779ff46$var$effectStack.length - 1];
-            }
-        }
-    };
-    effect3.id = $8c83eaf28779ff46$var$uid++;
-    effect3.allowRecurse = !!options.allowRecurse;
-    effect3._isEffect = true;
-    effect3.active = true;
-    effect3.raw = fn;
-    effect3.deps = [];
-    effect3.options = options;
-    return effect3;
-}
-function $8c83eaf28779ff46$var$cleanup(effect3) {
-    const { deps: deps } = effect3;
-    if (deps.length) {
-        for(let i = 0; i < deps.length; i++)deps[i].delete(effect3);
-        deps.length = 0;
-    }
-}
-var $8c83eaf28779ff46$var$shouldTrack = true;
-var $8c83eaf28779ff46$var$trackStack = [];
-function $8c83eaf28779ff46$var$pauseTracking() {
-    $8c83eaf28779ff46$var$trackStack.push($8c83eaf28779ff46$var$shouldTrack);
-    $8c83eaf28779ff46$var$shouldTrack = false;
-}
-function $8c83eaf28779ff46$var$enableTracking() {
-    $8c83eaf28779ff46$var$trackStack.push($8c83eaf28779ff46$var$shouldTrack);
-    $8c83eaf28779ff46$var$shouldTrack = true;
-}
-function $8c83eaf28779ff46$var$resetTracking() {
-    const last = $8c83eaf28779ff46$var$trackStack.pop();
-    $8c83eaf28779ff46$var$shouldTrack = last === void 0 ? true : last;
-}
-function $8c83eaf28779ff46$var$track(target, type, key) {
-    if (!$8c83eaf28779ff46$var$shouldTrack || $8c83eaf28779ff46$var$activeEffect === void 0) return;
-    let depsMap = $8c83eaf28779ff46$var$targetMap.get(target);
-    if (!depsMap) $8c83eaf28779ff46$var$targetMap.set(target, depsMap = /* @__PURE__ */ new Map());
-    let dep = depsMap.get(key);
-    if (!dep) depsMap.set(key, dep = /* @__PURE__ */ new Set());
-    if (!dep.has($8c83eaf28779ff46$var$activeEffect)) {
-        dep.add($8c83eaf28779ff46$var$activeEffect);
-        $8c83eaf28779ff46$var$activeEffect.deps.push(dep);
-        if ($8c83eaf28779ff46$var$activeEffect.options.onTrack) $8c83eaf28779ff46$var$activeEffect.options.onTrack({
-            effect: $8c83eaf28779ff46$var$activeEffect,
-            target: target,
-            type: type,
-            key: key
-        });
-    }
-}
-function $8c83eaf28779ff46$var$trigger(target, type, key, newValue, oldValue, oldTarget) {
-    const depsMap = $8c83eaf28779ff46$var$targetMap.get(target);
-    if (!depsMap) return;
-    const effects = /* @__PURE__ */ new Set();
-    const add2 = (effectsToAdd)=>{
-        if (effectsToAdd) effectsToAdd.forEach((effect3)=>{
-            if (effect3 !== $8c83eaf28779ff46$var$activeEffect || effect3.allowRecurse) effects.add(effect3);
-        });
-    };
-    if (type === "clear") depsMap.forEach(add2);
-    else if (key === "length" && $8c83eaf28779ff46$var$isArray(target)) depsMap.forEach((dep, key2)=>{
-        if (key2 === "length" || key2 >= newValue) add2(dep);
-    });
-    else {
-        if (key !== void 0) add2(depsMap.get(key));
-        switch(type){
-            case "add":
-                if (!$8c83eaf28779ff46$var$isArray(target)) {
-                    add2(depsMap.get($8c83eaf28779ff46$var$ITERATE_KEY));
-                    if ($8c83eaf28779ff46$var$isMap(target)) add2(depsMap.get($8c83eaf28779ff46$var$MAP_KEY_ITERATE_KEY));
-                } else if ($8c83eaf28779ff46$var$isIntegerKey(key)) add2(depsMap.get("length"));
-                break;
-            case "delete":
-                if (!$8c83eaf28779ff46$var$isArray(target)) {
-                    add2(depsMap.get($8c83eaf28779ff46$var$ITERATE_KEY));
-                    if ($8c83eaf28779ff46$var$isMap(target)) add2(depsMap.get($8c83eaf28779ff46$var$MAP_KEY_ITERATE_KEY));
-                }
-                break;
-            case "set":
-                if ($8c83eaf28779ff46$var$isMap(target)) add2(depsMap.get($8c83eaf28779ff46$var$ITERATE_KEY));
-                break;
-        }
-    }
-    const run = (effect3)=>{
-        if (effect3.options.onTrigger) effect3.options.onTrigger({
-            effect: effect3,
-            target: target,
-            key: key,
-            type: type,
-            newValue: newValue,
-            oldValue: oldValue,
-            oldTarget: oldTarget
-        });
-        if (effect3.options.scheduler) effect3.options.scheduler(effect3);
-        else effect3();
-    };
-    effects.forEach(run);
-}
-var $8c83eaf28779ff46$var$isNonTrackableKeys = /* @__PURE__ */ $8c83eaf28779ff46$var$makeMap(`__proto__,__v_isRef,__isVue`);
-var $8c83eaf28779ff46$var$builtInSymbols = new Set(Object.getOwnPropertyNames(Symbol).map((key)=>Symbol[key]).filter($8c83eaf28779ff46$var$isSymbol));
-var $8c83eaf28779ff46$var$get2 = /* @__PURE__ */ $8c83eaf28779ff46$var$createGetter();
-var $8c83eaf28779ff46$var$readonlyGet = /* @__PURE__ */ $8c83eaf28779ff46$var$createGetter(true);
-var $8c83eaf28779ff46$var$arrayInstrumentations = /* @__PURE__ */ $8c83eaf28779ff46$var$createArrayInstrumentations();
-function $8c83eaf28779ff46$var$createArrayInstrumentations() {
-    const instrumentations = {};
-    [
-        "includes",
-        "indexOf",
-        "lastIndexOf"
-    ].forEach((key)=>{
-        instrumentations[key] = function(...args) {
-            const arr = $8c83eaf28779ff46$var$toRaw(this);
-            for(let i = 0, l = this.length; i < l; i++)$8c83eaf28779ff46$var$track(arr, "get", i + "");
-            const res = arr[key](...args);
-            if (res === -1 || res === false) return arr[key](...args.map($8c83eaf28779ff46$var$toRaw));
-            else return res;
-        };
-    });
-    [
-        "push",
-        "pop",
-        "shift",
-        "unshift",
-        "splice"
-    ].forEach((key)=>{
-        instrumentations[key] = function(...args) {
-            $8c83eaf28779ff46$var$pauseTracking();
-            const res = $8c83eaf28779ff46$var$toRaw(this)[key].apply(this, args);
-            $8c83eaf28779ff46$var$resetTracking();
-            return res;
-        };
-    });
-    return instrumentations;
-}
-function $8c83eaf28779ff46$var$createGetter(isReadonly = false, shallow = false) {
-    return function get3(target, key, receiver) {
-        if (key === "__v_isReactive") return !isReadonly;
-        else if (key === "__v_isReadonly") return isReadonly;
-        else if (key === "__v_raw" && receiver === (isReadonly ? shallow ? $8c83eaf28779ff46$var$shallowReadonlyMap : $8c83eaf28779ff46$var$readonlyMap : shallow ? $8c83eaf28779ff46$var$shallowReactiveMap : $8c83eaf28779ff46$var$reactiveMap).get(target)) return target;
-        const targetIsArray = $8c83eaf28779ff46$var$isArray(target);
-        if (!isReadonly && targetIsArray && $8c83eaf28779ff46$var$hasOwn($8c83eaf28779ff46$var$arrayInstrumentations, key)) return Reflect.get($8c83eaf28779ff46$var$arrayInstrumentations, key, receiver);
-        const res = Reflect.get(target, key, receiver);
-        if ($8c83eaf28779ff46$var$isSymbol(key) ? $8c83eaf28779ff46$var$builtInSymbols.has(key) : $8c83eaf28779ff46$var$isNonTrackableKeys(key)) return res;
-        if (!isReadonly) $8c83eaf28779ff46$var$track(target, "get", key);
-        if (shallow) return res;
-        if ($8c83eaf28779ff46$var$isRef(res)) {
-            const shouldUnwrap = !targetIsArray || !$8c83eaf28779ff46$var$isIntegerKey(key);
-            return shouldUnwrap ? res.value : res;
-        }
-        if ($8c83eaf28779ff46$var$isObject(res)) return isReadonly ? $8c83eaf28779ff46$var$readonly(res) : $8c83eaf28779ff46$var$reactive2(res);
-        return res;
-    };
-}
-var $8c83eaf28779ff46$var$set2 = /* @__PURE__ */ $8c83eaf28779ff46$var$createSetter();
-function $8c83eaf28779ff46$var$createSetter(shallow = false) {
-    return function set3(target, key, value, receiver) {
-        let oldValue = target[key];
-        if (!shallow) {
-            value = $8c83eaf28779ff46$var$toRaw(value);
-            oldValue = $8c83eaf28779ff46$var$toRaw(oldValue);
-            if (!$8c83eaf28779ff46$var$isArray(target) && $8c83eaf28779ff46$var$isRef(oldValue) && !$8c83eaf28779ff46$var$isRef(value)) {
-                oldValue.value = value;
-                return true;
-            }
-        }
-        const hadKey = $8c83eaf28779ff46$var$isArray(target) && $8c83eaf28779ff46$var$isIntegerKey(key) ? Number(key) < target.length : $8c83eaf28779ff46$var$hasOwn(target, key);
-        const result = Reflect.set(target, key, value, receiver);
-        if (target === $8c83eaf28779ff46$var$toRaw(receiver)) {
-            if (!hadKey) $8c83eaf28779ff46$var$trigger(target, "add", key, value);
-            else if ($8c83eaf28779ff46$var$hasChanged(value, oldValue)) $8c83eaf28779ff46$var$trigger(target, "set", key, value, oldValue);
-        }
-        return result;
-    };
-}
-function $8c83eaf28779ff46$var$deleteProperty(target, key) {
-    const hadKey = $8c83eaf28779ff46$var$hasOwn(target, key);
-    const oldValue = target[key];
-    const result = Reflect.deleteProperty(target, key);
-    if (result && hadKey) $8c83eaf28779ff46$var$trigger(target, "delete", key, void 0, oldValue);
-    return result;
-}
-function $8c83eaf28779ff46$var$has(target, key) {
-    const result = Reflect.has(target, key);
-    if (!$8c83eaf28779ff46$var$isSymbol(key) || !$8c83eaf28779ff46$var$builtInSymbols.has(key)) $8c83eaf28779ff46$var$track(target, "has", key);
-    return result;
-}
-function $8c83eaf28779ff46$var$ownKeys(target) {
-    $8c83eaf28779ff46$var$track(target, "iterate", $8c83eaf28779ff46$var$isArray(target) ? "length" : $8c83eaf28779ff46$var$ITERATE_KEY);
-    return Reflect.ownKeys(target);
-}
-var $8c83eaf28779ff46$var$mutableHandlers = {
-    get: $8c83eaf28779ff46$var$get2,
-    set: $8c83eaf28779ff46$var$set2,
-    deleteProperty: $8c83eaf28779ff46$var$deleteProperty,
-    has: $8c83eaf28779ff46$var$has,
-    ownKeys: $8c83eaf28779ff46$var$ownKeys
-};
-var $8c83eaf28779ff46$var$readonlyHandlers = {
-    get: $8c83eaf28779ff46$var$readonlyGet,
-    set (target, key) {
-        console.warn(`Set operation on key "${String(key)}" failed: target is readonly.`, target);
-        return true;
-    },
-    deleteProperty (target, key) {
-        console.warn(`Delete operation on key "${String(key)}" failed: target is readonly.`, target);
-        return true;
-    }
-};
-var $8c83eaf28779ff46$var$toReactive = (value)=>$8c83eaf28779ff46$var$isObject(value) ? $8c83eaf28779ff46$var$reactive2(value) : value;
-var $8c83eaf28779ff46$var$toReadonly = (value)=>$8c83eaf28779ff46$var$isObject(value) ? $8c83eaf28779ff46$var$readonly(value) : value;
-var $8c83eaf28779ff46$var$toShallow = (value)=>value;
-var $8c83eaf28779ff46$var$getProto = (v)=>Reflect.getPrototypeOf(v);
-function $8c83eaf28779ff46$var$get$1(target, key, isReadonly = false, isShallow = false) {
-    target = target["__v_raw"];
-    const rawTarget = $8c83eaf28779ff46$var$toRaw(target);
-    const rawKey = $8c83eaf28779ff46$var$toRaw(key);
-    if (key !== rawKey) !isReadonly && $8c83eaf28779ff46$var$track(rawTarget, "get", key);
-    !isReadonly && $8c83eaf28779ff46$var$track(rawTarget, "get", rawKey);
-    const { has: has2 } = $8c83eaf28779ff46$var$getProto(rawTarget);
-    const wrap = isShallow ? $8c83eaf28779ff46$var$toShallow : isReadonly ? $8c83eaf28779ff46$var$toReadonly : $8c83eaf28779ff46$var$toReactive;
-    if (has2.call(rawTarget, key)) return wrap(target.get(key));
-    else if (has2.call(rawTarget, rawKey)) return wrap(target.get(rawKey));
-    else if (target !== rawTarget) target.get(key);
-}
-function $8c83eaf28779ff46$var$has$1(key, isReadonly = false) {
-    const target = this["__v_raw"];
-    const rawTarget = $8c83eaf28779ff46$var$toRaw(target);
-    const rawKey = $8c83eaf28779ff46$var$toRaw(key);
-    if (key !== rawKey) !isReadonly && $8c83eaf28779ff46$var$track(rawTarget, "has", key);
-    !isReadonly && $8c83eaf28779ff46$var$track(rawTarget, "has", rawKey);
-    return key === rawKey ? target.has(key) : target.has(key) || target.has(rawKey);
-}
-function $8c83eaf28779ff46$var$size(target, isReadonly = false) {
-    target = target["__v_raw"];
-    !isReadonly && $8c83eaf28779ff46$var$track($8c83eaf28779ff46$var$toRaw(target), "iterate", $8c83eaf28779ff46$var$ITERATE_KEY);
-    return Reflect.get(target, "size", target);
-}
-function $8c83eaf28779ff46$var$add(value) {
-    value = $8c83eaf28779ff46$var$toRaw(value);
-    const target = $8c83eaf28779ff46$var$toRaw(this);
-    const proto = $8c83eaf28779ff46$var$getProto(target);
-    const hadKey = proto.has.call(target, value);
-    if (!hadKey) {
-        target.add(value);
-        $8c83eaf28779ff46$var$trigger(target, "add", value, value);
-    }
-    return this;
-}
-function $8c83eaf28779ff46$var$set$1(key, value) {
-    value = $8c83eaf28779ff46$var$toRaw(value);
-    const target = $8c83eaf28779ff46$var$toRaw(this);
-    const { has: has2, get: get3 } = $8c83eaf28779ff46$var$getProto(target);
-    let hadKey = has2.call(target, key);
-    if (!hadKey) {
-        key = $8c83eaf28779ff46$var$toRaw(key);
-        hadKey = has2.call(target, key);
-    } else $8c83eaf28779ff46$var$checkIdentityKeys(target, has2, key);
-    const oldValue = get3.call(target, key);
-    target.set(key, value);
-    if (!hadKey) $8c83eaf28779ff46$var$trigger(target, "add", key, value);
-    else if ($8c83eaf28779ff46$var$hasChanged(value, oldValue)) $8c83eaf28779ff46$var$trigger(target, "set", key, value, oldValue);
-    return this;
-}
-function $8c83eaf28779ff46$var$deleteEntry(key) {
-    const target = $8c83eaf28779ff46$var$toRaw(this);
-    const { has: has2, get: get3 } = $8c83eaf28779ff46$var$getProto(target);
-    let hadKey = has2.call(target, key);
-    if (!hadKey) {
-        key = $8c83eaf28779ff46$var$toRaw(key);
-        hadKey = has2.call(target, key);
-    } else $8c83eaf28779ff46$var$checkIdentityKeys(target, has2, key);
-    const oldValue = get3 ? get3.call(target, key) : void 0;
-    const result = target.delete(key);
-    if (hadKey) $8c83eaf28779ff46$var$trigger(target, "delete", key, void 0, oldValue);
-    return result;
-}
-function $8c83eaf28779ff46$var$clear() {
-    const target = $8c83eaf28779ff46$var$toRaw(this);
-    const hadItems = target.size !== 0;
-    const oldTarget = $8c83eaf28779ff46$var$isMap(target) ? new Map(target) : new Set(target);
-    const result = target.clear();
-    if (hadItems) $8c83eaf28779ff46$var$trigger(target, "clear", void 0, void 0, oldTarget);
-    return result;
-}
-function $8c83eaf28779ff46$var$createForEach(isReadonly, isShallow) {
-    return function forEach(callback, thisArg) {
-        const observed = this;
-        const target = observed["__v_raw"];
-        const rawTarget = $8c83eaf28779ff46$var$toRaw(target);
-        const wrap = isShallow ? $8c83eaf28779ff46$var$toShallow : isReadonly ? $8c83eaf28779ff46$var$toReadonly : $8c83eaf28779ff46$var$toReactive;
-        !isReadonly && $8c83eaf28779ff46$var$track(rawTarget, "iterate", $8c83eaf28779ff46$var$ITERATE_KEY);
-        return target.forEach((value, key)=>{
-            return callback.call(thisArg, wrap(value), wrap(key), observed);
-        });
-    };
-}
-function $8c83eaf28779ff46$var$createIterableMethod(method, isReadonly, isShallow) {
-    return function(...args) {
-        const target = this["__v_raw"];
-        const rawTarget = $8c83eaf28779ff46$var$toRaw(target);
-        const targetIsMap = $8c83eaf28779ff46$var$isMap(rawTarget);
-        const isPair = method === "entries" || method === Symbol.iterator && targetIsMap;
-        const isKeyOnly = method === "keys" && targetIsMap;
-        const innerIterator = target[method](...args);
-        const wrap = isShallow ? $8c83eaf28779ff46$var$toShallow : isReadonly ? $8c83eaf28779ff46$var$toReadonly : $8c83eaf28779ff46$var$toReactive;
-        !isReadonly && $8c83eaf28779ff46$var$track(rawTarget, "iterate", isKeyOnly ? $8c83eaf28779ff46$var$MAP_KEY_ITERATE_KEY : $8c83eaf28779ff46$var$ITERATE_KEY);
-        return {
-            // iterator protocol
-            next () {
-                const { value: value, done: done } = innerIterator.next();
-                return done ? {
-                    value: value,
-                    done: done
-                } : {
-                    value: isPair ? [
-                        wrap(value[0]),
-                        wrap(value[1])
-                    ] : wrap(value),
-                    done: done
-                };
-            },
-            // iterable protocol
-            [Symbol.iterator] () {
-                return this;
-            }
-        };
-    };
-}
-function $8c83eaf28779ff46$var$createReadonlyMethod(type) {
-    return function(...args) {
-        {
-            const key = args[0] ? `on key "${args[0]}" ` : ``;
-            console.warn(`${$8c83eaf28779ff46$var$capitalize(type)} operation ${key}failed: target is readonly.`, $8c83eaf28779ff46$var$toRaw(this));
-        }
-        return type === "delete" ? false : this;
-    };
-}
-function $8c83eaf28779ff46$var$createInstrumentations() {
-    const mutableInstrumentations2 = {
-        get (key) {
-            return $8c83eaf28779ff46$var$get$1(this, key);
-        },
-        get size () {
-            return $8c83eaf28779ff46$var$size(this);
-        },
-        has: $8c83eaf28779ff46$var$has$1,
-        add: $8c83eaf28779ff46$var$add,
-        set: $8c83eaf28779ff46$var$set$1,
-        delete: $8c83eaf28779ff46$var$deleteEntry,
-        clear: $8c83eaf28779ff46$var$clear,
-        forEach: $8c83eaf28779ff46$var$createForEach(false, false)
-    };
-    const shallowInstrumentations2 = {
-        get (key) {
-            return $8c83eaf28779ff46$var$get$1(this, key, false, true);
-        },
-        get size () {
-            return $8c83eaf28779ff46$var$size(this);
-        },
-        has: $8c83eaf28779ff46$var$has$1,
-        add: $8c83eaf28779ff46$var$add,
-        set: $8c83eaf28779ff46$var$set$1,
-        delete: $8c83eaf28779ff46$var$deleteEntry,
-        clear: $8c83eaf28779ff46$var$clear,
-        forEach: $8c83eaf28779ff46$var$createForEach(false, true)
-    };
-    const readonlyInstrumentations2 = {
-        get (key) {
-            return $8c83eaf28779ff46$var$get$1(this, key, true);
-        },
-        get size () {
-            return $8c83eaf28779ff46$var$size(this, true);
-        },
-        has (key) {
-            return $8c83eaf28779ff46$var$has$1.call(this, key, true);
-        },
-        add: $8c83eaf28779ff46$var$createReadonlyMethod("add"),
-        set: $8c83eaf28779ff46$var$createReadonlyMethod("set"),
-        delete: $8c83eaf28779ff46$var$createReadonlyMethod("delete"),
-        clear: $8c83eaf28779ff46$var$createReadonlyMethod("clear"),
-        forEach: $8c83eaf28779ff46$var$createForEach(true, false)
-    };
-    const shallowReadonlyInstrumentations2 = {
-        get (key) {
-            return $8c83eaf28779ff46$var$get$1(this, key, true, true);
-        },
-        get size () {
-            return $8c83eaf28779ff46$var$size(this, true);
-        },
-        has (key) {
-            return $8c83eaf28779ff46$var$has$1.call(this, key, true);
-        },
-        add: $8c83eaf28779ff46$var$createReadonlyMethod("add"),
-        set: $8c83eaf28779ff46$var$createReadonlyMethod("set"),
-        delete: $8c83eaf28779ff46$var$createReadonlyMethod("delete"),
-        clear: $8c83eaf28779ff46$var$createReadonlyMethod("clear"),
-        forEach: $8c83eaf28779ff46$var$createForEach(true, true)
-    };
-    const iteratorMethods = [
-        "keys",
-        "values",
-        "entries",
-        Symbol.iterator
-    ];
-    iteratorMethods.forEach((method)=>{
-        mutableInstrumentations2[method] = $8c83eaf28779ff46$var$createIterableMethod(method, false, false);
-        readonlyInstrumentations2[method] = $8c83eaf28779ff46$var$createIterableMethod(method, true, false);
-        shallowInstrumentations2[method] = $8c83eaf28779ff46$var$createIterableMethod(method, false, true);
-        shallowReadonlyInstrumentations2[method] = $8c83eaf28779ff46$var$createIterableMethod(method, true, true);
-    });
-    return [
-        mutableInstrumentations2,
-        readonlyInstrumentations2,
-        shallowInstrumentations2,
-        shallowReadonlyInstrumentations2
-    ];
-}
-var [$8c83eaf28779ff46$var$mutableInstrumentations, $8c83eaf28779ff46$var$readonlyInstrumentations, $8c83eaf28779ff46$var$shallowInstrumentations, $8c83eaf28779ff46$var$shallowReadonlyInstrumentations] = /* @__PURE__ */ $8c83eaf28779ff46$var$createInstrumentations();
-function $8c83eaf28779ff46$var$createInstrumentationGetter(isReadonly, shallow) {
-    const instrumentations = shallow ? isReadonly ? $8c83eaf28779ff46$var$shallowReadonlyInstrumentations : $8c83eaf28779ff46$var$shallowInstrumentations : isReadonly ? $8c83eaf28779ff46$var$readonlyInstrumentations : $8c83eaf28779ff46$var$mutableInstrumentations;
-    return (target, key, receiver)=>{
-        if (key === "__v_isReactive") return !isReadonly;
-        else if (key === "__v_isReadonly") return isReadonly;
-        else if (key === "__v_raw") return target;
-        return Reflect.get($8c83eaf28779ff46$var$hasOwn(instrumentations, key) && key in target ? instrumentations : target, key, receiver);
-    };
-}
-var $8c83eaf28779ff46$var$mutableCollectionHandlers = {
-    get: /* @__PURE__ */ $8c83eaf28779ff46$var$createInstrumentationGetter(false, false)
-};
-var $8c83eaf28779ff46$var$readonlyCollectionHandlers = {
-    get: /* @__PURE__ */ $8c83eaf28779ff46$var$createInstrumentationGetter(true, false)
-};
-function $8c83eaf28779ff46$var$checkIdentityKeys(target, has2, key) {
-    const rawKey = $8c83eaf28779ff46$var$toRaw(key);
-    if (rawKey !== key && has2.call(target, rawKey)) {
-        const type = $8c83eaf28779ff46$var$toRawType(target);
-        console.warn(`Reactive ${type} contains both the raw and reactive versions of the same object${type === `Map` ? ` as keys` : ``}, which can lead to inconsistencies. Avoid differentiating between the raw and reactive versions of an object and only use the reactive version if possible.`);
-    }
-}
-var $8c83eaf28779ff46$var$reactiveMap = /* @__PURE__ */ new WeakMap();
-var $8c83eaf28779ff46$var$shallowReactiveMap = /* @__PURE__ */ new WeakMap();
-var $8c83eaf28779ff46$var$readonlyMap = /* @__PURE__ */ new WeakMap();
-var $8c83eaf28779ff46$var$shallowReadonlyMap = /* @__PURE__ */ new WeakMap();
-function $8c83eaf28779ff46$var$targetTypeMap(rawType) {
-    switch(rawType){
-        case "Object":
-        case "Array":
-            return 1;
-        case "Map":
-        case "Set":
-        case "WeakMap":
-        case "WeakSet":
-            return 2;
-        default:
-            return 0;
-    }
-}
-function $8c83eaf28779ff46$var$getTargetType(value) {
-    return value["__v_skip"] || !Object.isExtensible(value) ? 0 : $8c83eaf28779ff46$var$targetTypeMap($8c83eaf28779ff46$var$toRawType(value));
-}
-function $8c83eaf28779ff46$var$reactive2(target) {
-    if (target && target["__v_isReadonly"]) return target;
-    return $8c83eaf28779ff46$var$createReactiveObject(target, false, $8c83eaf28779ff46$var$mutableHandlers, $8c83eaf28779ff46$var$mutableCollectionHandlers, $8c83eaf28779ff46$var$reactiveMap);
-}
-function $8c83eaf28779ff46$var$readonly(target) {
-    return $8c83eaf28779ff46$var$createReactiveObject(target, true, $8c83eaf28779ff46$var$readonlyHandlers, $8c83eaf28779ff46$var$readonlyCollectionHandlers, $8c83eaf28779ff46$var$readonlyMap);
-}
-function $8c83eaf28779ff46$var$createReactiveObject(target, isReadonly, baseHandlers, collectionHandlers, proxyMap) {
-    if (!$8c83eaf28779ff46$var$isObject(target)) {
-        console.warn(`value cannot be made reactive: ${String(target)}`);
-        return target;
-    }
-    if (target["__v_raw"] && !(isReadonly && target["__v_isReactive"])) return target;
-    const existingProxy = proxyMap.get(target);
-    if (existingProxy) return existingProxy;
-    const targetType = $8c83eaf28779ff46$var$getTargetType(target);
-    if (targetType === 0) return target;
-    const proxy = new Proxy(target, targetType === 2 ? collectionHandlers : baseHandlers);
-    proxyMap.set(target, proxy);
-    return proxy;
-}
-function $8c83eaf28779ff46$var$toRaw(observed) {
-    return observed && $8c83eaf28779ff46$var$toRaw(observed["__v_raw"]) || observed;
-}
-function $8c83eaf28779ff46$var$isRef(r) {
-    return Boolean(r && r.__v_isRef === true);
-}
-// packages/alpinejs/src/magics/$nextTick.js
-$8c83eaf28779ff46$var$magic("nextTick", ()=>$8c83eaf28779ff46$var$nextTick);
-// packages/alpinejs/src/magics/$dispatch.js
-$8c83eaf28779ff46$var$magic("dispatch", (el)=>$8c83eaf28779ff46$var$dispatch.bind($8c83eaf28779ff46$var$dispatch, el));
-// packages/alpinejs/src/magics/$watch.js
-$8c83eaf28779ff46$var$magic("watch", (el, { evaluateLater: evaluateLater2, cleanup: cleanup2 })=>(key, callback)=>{
-        let evaluate2 = evaluateLater2(key);
-        let getter = ()=>{
-            let value;
-            evaluate2((i)=>value = i);
-            return value;
-        };
-        let unwatch = $8c83eaf28779ff46$var$watch(getter, callback);
-        cleanup2(unwatch);
-    });
-// packages/alpinejs/src/magics/$store.js
-$8c83eaf28779ff46$var$magic("store", $8c83eaf28779ff46$var$getStores);
-// packages/alpinejs/src/magics/$data.js
-$8c83eaf28779ff46$var$magic("data", (el)=>$8c83eaf28779ff46$var$scope(el));
-// packages/alpinejs/src/magics/$root.js
-$8c83eaf28779ff46$var$magic("root", (el)=>$8c83eaf28779ff46$var$closestRoot(el));
-// packages/alpinejs/src/magics/$refs.js
-$8c83eaf28779ff46$var$magic("refs", (el)=>{
-    if (el._x_refs_proxy) return el._x_refs_proxy;
-    el._x_refs_proxy = $8c83eaf28779ff46$var$mergeProxies($8c83eaf28779ff46$var$getArrayOfRefObject(el));
-    return el._x_refs_proxy;
-});
-function $8c83eaf28779ff46$var$getArrayOfRefObject(el) {
-    let refObjects = [];
-    $8c83eaf28779ff46$var$findClosest(el, (i)=>{
-        if (i._x_refs) refObjects.push(i._x_refs);
-    });
-    return refObjects;
-}
-// packages/alpinejs/src/ids.js
-var $8c83eaf28779ff46$var$globalIdMemo = {};
-function $8c83eaf28779ff46$var$findAndIncrementId(name) {
-    if (!$8c83eaf28779ff46$var$globalIdMemo[name]) $8c83eaf28779ff46$var$globalIdMemo[name] = 0;
-    return ++$8c83eaf28779ff46$var$globalIdMemo[name];
-}
-function $8c83eaf28779ff46$var$closestIdRoot(el, name) {
-    return $8c83eaf28779ff46$var$findClosest(el, (element)=>{
-        if (element._x_ids && element._x_ids[name]) return true;
-    });
-}
-function $8c83eaf28779ff46$var$setIdRoot(el, name) {
-    if (!el._x_ids) el._x_ids = {};
-    if (!el._x_ids[name]) el._x_ids[name] = $8c83eaf28779ff46$var$findAndIncrementId(name);
-}
-// packages/alpinejs/src/magics/$id.js
-$8c83eaf28779ff46$var$magic("id", (el, { cleanup: cleanup2 })=>(name, key = null)=>{
-        let cacheKey = `${name}${key ? `-${key}` : ""}`;
-        return $8c83eaf28779ff46$var$cacheIdByNameOnElement(el, cacheKey, cleanup2, ()=>{
-            let root = $8c83eaf28779ff46$var$closestIdRoot(el, name);
-            let id = root ? root._x_ids[name] : $8c83eaf28779ff46$var$findAndIncrementId(name);
-            return key ? `${name}-${id}-${key}` : `${name}-${id}`;
-        });
-    });
-$8c83eaf28779ff46$var$interceptClone((from, to)=>{
-    if (from._x_id) to._x_id = from._x_id;
-});
-function $8c83eaf28779ff46$var$cacheIdByNameOnElement(el, cacheKey, cleanup2, callback) {
-    if (!el._x_id) el._x_id = {};
-    if (el._x_id[cacheKey]) return el._x_id[cacheKey];
-    let output = callback();
-    el._x_id[cacheKey] = output;
-    cleanup2(()=>{
-        delete el._x_id[cacheKey];
-    });
-    return output;
-}
-// packages/alpinejs/src/magics/$el.js
-$8c83eaf28779ff46$var$magic("el", (el)=>el);
-// packages/alpinejs/src/magics/index.js
-$8c83eaf28779ff46$var$warnMissingPluginMagic("Focus", "focus", "focus");
-$8c83eaf28779ff46$var$warnMissingPluginMagic("Persist", "persist", "persist");
-function $8c83eaf28779ff46$var$warnMissingPluginMagic(name, magicName, slug) {
-    $8c83eaf28779ff46$var$magic(magicName, (el)=>$8c83eaf28779ff46$var$warn(`You can't use [$${magicName}] without first installing the "${name}" plugin here: https://alpinejs.dev/plugins/${slug}`, el));
-}
-// packages/alpinejs/src/directives/x-modelable.js
-$8c83eaf28779ff46$var$directive("modelable", (el, { expression: expression }, { effect: effect3, evaluateLater: evaluateLater2, cleanup: cleanup2 })=>{
-    let func = evaluateLater2(expression);
-    let innerGet = ()=>{
-        let result;
-        func((i)=>result = i);
-        return result;
-    };
-    let evaluateInnerSet = evaluateLater2(`${expression} = __placeholder`);
-    let innerSet = (val)=>evaluateInnerSet(()=>{}, {
-            scope: {
-                "__placeholder": val
-            }
-        });
-    let initialValue = innerGet();
-    innerSet(initialValue);
-    queueMicrotask(()=>{
-        if (!el._x_model) return;
-        el._x_removeModelListeners["default"]();
-        let outerGet = el._x_model.get;
-        let outerSet = el._x_model.set;
-        let releaseEntanglement = $8c83eaf28779ff46$var$entangle({
-            get () {
-                return outerGet();
-            },
-            set (value) {
-                outerSet(value);
-            }
-        }, {
-            get () {
-                return innerGet();
-            },
-            set (value) {
-                innerSet(value);
-            }
-        });
-        cleanup2(releaseEntanglement);
-    });
-});
-// packages/alpinejs/src/directives/x-teleport.js
-$8c83eaf28779ff46$var$directive("teleport", (el, { modifiers: modifiers, expression: expression }, { cleanup: cleanup2 })=>{
-    if (el.tagName.toLowerCase() !== "template") $8c83eaf28779ff46$var$warn("x-teleport can only be used on a <template> tag", el);
-    let target = $8c83eaf28779ff46$var$getTarget(expression);
-    let clone2 = el.content.cloneNode(true).firstElementChild;
-    el._x_teleport = clone2;
-    clone2._x_teleportBack = el;
-    el.setAttribute("data-teleport-template", true);
-    clone2.setAttribute("data-teleport-target", true);
-    if (el._x_forwardEvents) el._x_forwardEvents.forEach((eventName)=>{
-        clone2.addEventListener(eventName, (e)=>{
-            e.stopPropagation();
-            el.dispatchEvent(new e.constructor(e.type, e));
-        });
-    });
-    $8c83eaf28779ff46$var$addScopeToNode(clone2, {}, el);
-    let placeInDom = (clone3, target2, modifiers2)=>{
-        if (modifiers2.includes("prepend")) target2.parentNode.insertBefore(clone3, target2);
-        else if (modifiers2.includes("append")) target2.parentNode.insertBefore(clone3, target2.nextSibling);
-        else target2.appendChild(clone3);
-    };
-    $8c83eaf28779ff46$var$mutateDom(()=>{
-        placeInDom(clone2, target, modifiers);
-        $8c83eaf28779ff46$var$skipDuringClone(()=>{
-            $8c83eaf28779ff46$var$initTree(clone2);
-        })();
-    });
-    el._x_teleportPutBack = ()=>{
-        let target2 = $8c83eaf28779ff46$var$getTarget(expression);
-        $8c83eaf28779ff46$var$mutateDom(()=>{
-            placeInDom(el._x_teleport, target2, modifiers);
-        });
-    };
-    cleanup2(()=>$8c83eaf28779ff46$var$mutateDom(()=>{
-            clone2.remove();
-            $8c83eaf28779ff46$var$destroyTree(clone2);
-        }));
-});
-var $8c83eaf28779ff46$var$teleportContainerDuringClone = document.createElement("div");
-function $8c83eaf28779ff46$var$getTarget(expression) {
-    let target = $8c83eaf28779ff46$var$skipDuringClone(()=>{
-        return document.querySelector(expression);
-    }, ()=>{
-        return $8c83eaf28779ff46$var$teleportContainerDuringClone;
-    })();
-    if (!target) $8c83eaf28779ff46$var$warn(`Cannot find x-teleport element for selector: "${expression}"`);
-    return target;
-}
-// packages/alpinejs/src/directives/x-ignore.js
-var $8c83eaf28779ff46$var$handler = ()=>{};
-$8c83eaf28779ff46$var$handler.inline = (el, { modifiers: modifiers }, { cleanup: cleanup2 })=>{
-    modifiers.includes("self") ? el._x_ignoreSelf = true : el._x_ignore = true;
-    cleanup2(()=>{
-        modifiers.includes("self") ? delete el._x_ignoreSelf : delete el._x_ignore;
-    });
-};
-$8c83eaf28779ff46$var$directive("ignore", $8c83eaf28779ff46$var$handler);
-// packages/alpinejs/src/directives/x-effect.js
-$8c83eaf28779ff46$var$directive("effect", $8c83eaf28779ff46$var$skipDuringClone((el, { expression: expression }, { effect: effect3 })=>{
-    effect3($8c83eaf28779ff46$var$evaluateLater(el, expression));
-}));
-// packages/alpinejs/src/utils/on.js
-function $8c83eaf28779ff46$var$on(el, event, modifiers, callback) {
-    let listenerTarget = el;
-    let handler4 = (e)=>callback(e);
-    let options = {};
-    let wrapHandler = (callback2, wrapper)=>(e)=>wrapper(callback2, e);
-    if (modifiers.includes("dot")) event = $8c83eaf28779ff46$var$dotSyntax(event);
-    if (modifiers.includes("camel")) event = $8c83eaf28779ff46$var$camelCase2(event);
-    if (modifiers.includes("passive")) options.passive = true;
-    if (modifiers.includes("capture")) options.capture = true;
-    if (modifiers.includes("window")) listenerTarget = window;
-    if (modifiers.includes("document")) listenerTarget = document;
-    if (modifiers.includes("debounce")) {
-        let nextModifier = modifiers[modifiers.indexOf("debounce") + 1] || "invalid-wait";
-        let wait = $8c83eaf28779ff46$var$isNumeric(nextModifier.split("ms")[0]) ? Number(nextModifier.split("ms")[0]) : 250;
-        handler4 = $8c83eaf28779ff46$var$debounce(handler4, wait);
-    }
-    if (modifiers.includes("throttle")) {
-        let nextModifier = modifiers[modifiers.indexOf("throttle") + 1] || "invalid-wait";
-        let wait = $8c83eaf28779ff46$var$isNumeric(nextModifier.split("ms")[0]) ? Number(nextModifier.split("ms")[0]) : 250;
-        handler4 = $8c83eaf28779ff46$var$throttle(handler4, wait);
-    }
-    if (modifiers.includes("prevent")) handler4 = wrapHandler(handler4, (next, e)=>{
-        e.preventDefault();
-        next(e);
-    });
-    if (modifiers.includes("stop")) handler4 = wrapHandler(handler4, (next, e)=>{
-        e.stopPropagation();
-        next(e);
-    });
-    if (modifiers.includes("once")) handler4 = wrapHandler(handler4, (next, e)=>{
-        next(e);
-        listenerTarget.removeEventListener(event, handler4, options);
-    });
-    if (modifiers.includes("away") || modifiers.includes("outside")) {
-        listenerTarget = document;
-        handler4 = wrapHandler(handler4, (next, e)=>{
-            if (el.contains(e.target)) return;
-            if (e.target.isConnected === false) return;
-            if (el.offsetWidth < 1 && el.offsetHeight < 1) return;
-            if (el._x_isShown === false) return;
-            next(e);
-        });
-    }
-    if (modifiers.includes("self")) handler4 = wrapHandler(handler4, (next, e)=>{
-        e.target === el && next(e);
-    });
-    if ($8c83eaf28779ff46$var$isKeyEvent(event) || $8c83eaf28779ff46$var$isClickEvent(event)) handler4 = wrapHandler(handler4, (next, e)=>{
-        if ($8c83eaf28779ff46$var$isListeningForASpecificKeyThatHasntBeenPressed(e, modifiers)) return;
-        next(e);
-    });
-    listenerTarget.addEventListener(event, handler4, options);
-    return ()=>{
-        listenerTarget.removeEventListener(event, handler4, options);
-    };
-}
-function $8c83eaf28779ff46$var$dotSyntax(subject) {
-    return subject.replace(/-/g, ".");
-}
-function $8c83eaf28779ff46$var$camelCase2(subject) {
-    return subject.toLowerCase().replace(/-(\w)/g, (match, char)=>char.toUpperCase());
-}
-function $8c83eaf28779ff46$var$isNumeric(subject) {
-    return !Array.isArray(subject) && !isNaN(subject);
-}
-function $8c83eaf28779ff46$var$kebabCase2(subject) {
-    if ([
-        " ",
-        "_"
-    ].includes(subject)) return subject;
-    return subject.replace(/([a-z])([A-Z])/g, "$1-$2").replace(/[_\s]/, "-").toLowerCase();
-}
-function $8c83eaf28779ff46$var$isKeyEvent(event) {
-    return [
-        "keydown",
-        "keyup"
-    ].includes(event);
-}
-function $8c83eaf28779ff46$var$isClickEvent(event) {
-    return [
-        "contextmenu",
-        "click",
-        "mouse"
-    ].some((i)=>event.includes(i));
-}
-function $8c83eaf28779ff46$var$isListeningForASpecificKeyThatHasntBeenPressed(e, modifiers) {
-    let keyModifiers = modifiers.filter((i)=>{
-        return ![
-            "window",
-            "document",
-            "prevent",
-            "stop",
-            "once",
-            "capture",
-            "self",
-            "away",
-            "outside",
-            "passive"
-        ].includes(i);
-    });
-    if (keyModifiers.includes("debounce")) {
-        let debounceIndex = keyModifiers.indexOf("debounce");
-        keyModifiers.splice(debounceIndex, $8c83eaf28779ff46$var$isNumeric((keyModifiers[debounceIndex + 1] || "invalid-wait").split("ms")[0]) ? 2 : 1);
-    }
-    if (keyModifiers.includes("throttle")) {
-        let debounceIndex = keyModifiers.indexOf("throttle");
-        keyModifiers.splice(debounceIndex, $8c83eaf28779ff46$var$isNumeric((keyModifiers[debounceIndex + 1] || "invalid-wait").split("ms")[0]) ? 2 : 1);
-    }
-    if (keyModifiers.length === 0) return false;
-    if (keyModifiers.length === 1 && $8c83eaf28779ff46$var$keyToModifiers(e.key).includes(keyModifiers[0])) return false;
-    const systemKeyModifiers = [
-        "ctrl",
-        "shift",
-        "alt",
-        "meta",
-        "cmd",
-        "super"
-    ];
-    const selectedSystemKeyModifiers = systemKeyModifiers.filter((modifier)=>keyModifiers.includes(modifier));
-    keyModifiers = keyModifiers.filter((i)=>!selectedSystemKeyModifiers.includes(i));
-    if (selectedSystemKeyModifiers.length > 0) {
-        const activelyPressedKeyModifiers = selectedSystemKeyModifiers.filter((modifier)=>{
-            if (modifier === "cmd" || modifier === "super") modifier = "meta";
-            return e[`${modifier}Key`];
-        });
-        if (activelyPressedKeyModifiers.length === selectedSystemKeyModifiers.length) {
-            if ($8c83eaf28779ff46$var$isClickEvent(e.type)) return false;
-            if ($8c83eaf28779ff46$var$keyToModifiers(e.key).includes(keyModifiers[0])) return false;
-        }
-    }
-    return true;
-}
-function $8c83eaf28779ff46$var$keyToModifiers(key) {
-    if (!key) return [];
-    key = $8c83eaf28779ff46$var$kebabCase2(key);
-    let modifierToKeyMap = {
-        "ctrl": "control",
-        "slash": "/",
-        "space": " ",
-        "spacebar": " ",
-        "cmd": "meta",
-        "esc": "escape",
-        "up": "arrow-up",
-        "down": "arrow-down",
-        "left": "arrow-left",
-        "right": "arrow-right",
-        "period": ".",
-        "comma": ",",
-        "equal": "=",
-        "minus": "-",
-        "underscore": "_"
-    };
-    modifierToKeyMap[key] = key;
-    return Object.keys(modifierToKeyMap).map((modifier)=>{
-        if (modifierToKeyMap[modifier] === key) return modifier;
-    }).filter((modifier)=>modifier);
-}
-// packages/alpinejs/src/directives/x-model.js
-$8c83eaf28779ff46$var$directive("model", (el, { modifiers: modifiers, expression: expression }, { effect: effect3, cleanup: cleanup2 })=>{
-    let scopeTarget = el;
-    if (modifiers.includes("parent")) scopeTarget = el.parentNode;
-    let evaluateGet = $8c83eaf28779ff46$var$evaluateLater(scopeTarget, expression);
-    let evaluateSet;
-    if (typeof expression === "string") evaluateSet = $8c83eaf28779ff46$var$evaluateLater(scopeTarget, `${expression} = __placeholder`);
-    else if (typeof expression === "function" && typeof expression() === "string") evaluateSet = $8c83eaf28779ff46$var$evaluateLater(scopeTarget, `${expression()} = __placeholder`);
-    else evaluateSet = ()=>{};
-    let getValue = ()=>{
-        let result;
-        evaluateGet((value)=>result = value);
-        return $8c83eaf28779ff46$var$isGetterSetter(result) ? result.get() : result;
-    };
-    let setValue = (value)=>{
-        let result;
-        evaluateGet((value2)=>result = value2);
-        if ($8c83eaf28779ff46$var$isGetterSetter(result)) result.set(value);
-        else evaluateSet(()=>{}, {
-            scope: {
-                "__placeholder": value
-            }
-        });
-    };
-    if (typeof expression === "string" && el.type === "radio") $8c83eaf28779ff46$var$mutateDom(()=>{
-        if (!el.hasAttribute("name")) el.setAttribute("name", expression);
-    });
-    var event = el.tagName.toLowerCase() === "select" || [
-        "checkbox",
-        "radio"
-    ].includes(el.type) || modifiers.includes("lazy") ? "change" : "input";
-    let removeListener = $8c83eaf28779ff46$var$isCloning ? ()=>{} : $8c83eaf28779ff46$var$on(el, event, modifiers, (e)=>{
-        setValue($8c83eaf28779ff46$var$getInputValue(el, modifiers, e, getValue()));
-    });
-    if (modifiers.includes("fill")) {
-        if ([
-            void 0,
-            null,
-            ""
-        ].includes(getValue()) || $8c83eaf28779ff46$var$isCheckbox(el) && Array.isArray(getValue()) || el.tagName.toLowerCase() === "select" && el.multiple) setValue($8c83eaf28779ff46$var$getInputValue(el, modifiers, {
-            target: el
-        }, getValue()));
-    }
-    if (!el._x_removeModelListeners) el._x_removeModelListeners = {};
-    el._x_removeModelListeners["default"] = removeListener;
-    cleanup2(()=>el._x_removeModelListeners["default"]());
-    if (el.form) {
-        let removeResetListener = $8c83eaf28779ff46$var$on(el.form, "reset", [], (e)=>{
-            $8c83eaf28779ff46$var$nextTick(()=>el._x_model && el._x_model.set($8c83eaf28779ff46$var$getInputValue(el, modifiers, {
-                    target: el
-                }, getValue())));
-        });
-        cleanup2(()=>removeResetListener());
-    }
-    el._x_model = {
-        get () {
-            return getValue();
-        },
-        set (value) {
-            setValue(value);
-        }
-    };
-    el._x_forceModelUpdate = (value)=>{
-        if (value === void 0 && typeof expression === "string" && expression.match(/\./)) value = "";
-        window.fromModel = true;
-        $8c83eaf28779ff46$var$mutateDom(()=>$8c83eaf28779ff46$var$bind(el, "value", value));
-        delete window.fromModel;
-    };
-    effect3(()=>{
-        let value = getValue();
-        if (modifiers.includes("unintrusive") && document.activeElement.isSameNode(el)) return;
-        el._x_forceModelUpdate(value);
-    });
-});
-function $8c83eaf28779ff46$var$getInputValue(el, modifiers, event, currentValue) {
-    return $8c83eaf28779ff46$var$mutateDom(()=>{
-        if (event instanceof CustomEvent && event.detail !== void 0) return event.detail !== null && event.detail !== void 0 ? event.detail : event.target.value;
-        else if ($8c83eaf28779ff46$var$isCheckbox(el)) {
-            if (Array.isArray(currentValue)) {
-                let newValue = null;
-                if (modifiers.includes("number")) newValue = $8c83eaf28779ff46$var$safeParseNumber(event.target.value);
-                else if (modifiers.includes("boolean")) newValue = $8c83eaf28779ff46$var$safeParseBoolean(event.target.value);
-                else newValue = event.target.value;
-                return event.target.checked ? currentValue.includes(newValue) ? currentValue : currentValue.concat([
-                    newValue
-                ]) : currentValue.filter((el2)=>!$8c83eaf28779ff46$var$checkedAttrLooseCompare2(el2, newValue));
-            } else return event.target.checked;
-        } else if (el.tagName.toLowerCase() === "select" && el.multiple) {
-            if (modifiers.includes("number")) return Array.from(event.target.selectedOptions).map((option)=>{
-                let rawValue = option.value || option.text;
-                return $8c83eaf28779ff46$var$safeParseNumber(rawValue);
-            });
-            else if (modifiers.includes("boolean")) return Array.from(event.target.selectedOptions).map((option)=>{
-                let rawValue = option.value || option.text;
-                return $8c83eaf28779ff46$var$safeParseBoolean(rawValue);
-            });
-            return Array.from(event.target.selectedOptions).map((option)=>{
-                return option.value || option.text;
-            });
-        } else {
-            let newValue;
-            if ($8c83eaf28779ff46$var$isRadio(el)) {
-                if (event.target.checked) newValue = event.target.value;
-                else newValue = currentValue;
-            } else newValue = event.target.value;
-            if (modifiers.includes("number")) return $8c83eaf28779ff46$var$safeParseNumber(newValue);
-            else if (modifiers.includes("boolean")) return $8c83eaf28779ff46$var$safeParseBoolean(newValue);
-            else if (modifiers.includes("trim")) return newValue.trim();
-            else return newValue;
-        }
-    });
-}
-function $8c83eaf28779ff46$var$safeParseNumber(rawValue) {
-    let number = rawValue ? parseFloat(rawValue) : null;
-    return $8c83eaf28779ff46$var$isNumeric2(number) ? number : rawValue;
-}
-function $8c83eaf28779ff46$var$checkedAttrLooseCompare2(valueA, valueB) {
-    return valueA == valueB;
-}
-function $8c83eaf28779ff46$var$isNumeric2(subject) {
-    return !Array.isArray(subject) && !isNaN(subject);
-}
-function $8c83eaf28779ff46$var$isGetterSetter(value) {
-    return value !== null && typeof value === "object" && typeof value.get === "function" && typeof value.set === "function";
-}
-// packages/alpinejs/src/directives/x-cloak.js
-$8c83eaf28779ff46$var$directive("cloak", (el)=>queueMicrotask(()=>$8c83eaf28779ff46$var$mutateDom(()=>el.removeAttribute($8c83eaf28779ff46$var$prefix("cloak")))));
-// packages/alpinejs/src/directives/x-init.js
-$8c83eaf28779ff46$var$addInitSelector(()=>`[${$8c83eaf28779ff46$var$prefix("init")}]`);
-$8c83eaf28779ff46$var$directive("init", $8c83eaf28779ff46$var$skipDuringClone((el, { expression: expression }, { evaluate: evaluate2 })=>{
-    if (typeof expression === "string") return !!expression.trim() && evaluate2(expression, {}, false);
-    return evaluate2(expression, {}, false);
-}));
-// packages/alpinejs/src/directives/x-text.js
-$8c83eaf28779ff46$var$directive("text", (el, { expression: expression }, { effect: effect3, evaluateLater: evaluateLater2 })=>{
-    let evaluate2 = evaluateLater2(expression);
-    effect3(()=>{
-        evaluate2((value)=>{
-            $8c83eaf28779ff46$var$mutateDom(()=>{
-                el.textContent = value;
-            });
-        });
-    });
-});
-// packages/alpinejs/src/directives/x-html.js
-$8c83eaf28779ff46$var$directive("html", (el, { expression: expression }, { effect: effect3, evaluateLater: evaluateLater2 })=>{
-    let evaluate2 = evaluateLater2(expression);
-    effect3(()=>{
-        evaluate2((value)=>{
-            $8c83eaf28779ff46$var$mutateDom(()=>{
-                el.innerHTML = value;
-                el._x_ignoreSelf = true;
-                $8c83eaf28779ff46$var$initTree(el);
-                delete el._x_ignoreSelf;
-            });
-        });
-    });
-});
-// packages/alpinejs/src/directives/x-bind.js
-$8c83eaf28779ff46$var$mapAttributes($8c83eaf28779ff46$var$startingWith(":", $8c83eaf28779ff46$var$into($8c83eaf28779ff46$var$prefix("bind:"))));
-var $8c83eaf28779ff46$var$handler2 = (el, { value: value, modifiers: modifiers, expression: expression, original: original }, { effect: effect3, cleanup: cleanup2 })=>{
-    if (!value) {
-        let bindingProviders = {};
-        $8c83eaf28779ff46$var$injectBindingProviders(bindingProviders);
-        let getBindings = $8c83eaf28779ff46$var$evaluateLater(el, expression);
-        getBindings((bindings)=>{
-            $8c83eaf28779ff46$var$applyBindingsObject(el, bindings, original);
-        }, {
-            scope: bindingProviders
-        });
-        return;
-    }
-    if (value === "key") return $8c83eaf28779ff46$var$storeKeyForXFor(el, expression);
-    if (el._x_inlineBindings && el._x_inlineBindings[value] && el._x_inlineBindings[value].extract) return;
-    let evaluate2 = $8c83eaf28779ff46$var$evaluateLater(el, expression);
-    effect3(()=>evaluate2((result)=>{
-            if (result === void 0 && typeof expression === "string" && expression.match(/\./)) result = "";
-            $8c83eaf28779ff46$var$mutateDom(()=>$8c83eaf28779ff46$var$bind(el, value, result, modifiers));
-        }));
-    cleanup2(()=>{
-        el._x_undoAddedClasses && el._x_undoAddedClasses();
-        el._x_undoAddedStyles && el._x_undoAddedStyles();
-    });
-};
-$8c83eaf28779ff46$var$handler2.inline = (el, { value: value, modifiers: modifiers, expression: expression })=>{
-    if (!value) return;
-    if (!el._x_inlineBindings) el._x_inlineBindings = {};
-    el._x_inlineBindings[value] = {
-        expression: expression,
-        extract: false
-    };
-};
-$8c83eaf28779ff46$var$directive("bind", $8c83eaf28779ff46$var$handler2);
-function $8c83eaf28779ff46$var$storeKeyForXFor(el, expression) {
-    el._x_keyExpression = expression;
-}
-// packages/alpinejs/src/directives/x-data.js
-$8c83eaf28779ff46$var$addRootSelector(()=>`[${$8c83eaf28779ff46$var$prefix("data")}]`);
-$8c83eaf28779ff46$var$directive("data", (el, { expression: expression }, { cleanup: cleanup2 })=>{
-    if ($8c83eaf28779ff46$var$shouldSkipRegisteringDataDuringClone(el)) return;
-    expression = expression === "" ? "{}" : expression;
-    let magicContext = {};
-    $8c83eaf28779ff46$var$injectMagics(magicContext, el);
-    let dataProviderContext = {};
-    $8c83eaf28779ff46$var$injectDataProviders(dataProviderContext, magicContext);
-    let data2 = $8c83eaf28779ff46$var$evaluate(el, expression, {
-        scope: dataProviderContext
-    });
-    if (data2 === void 0 || data2 === true) data2 = {};
-    $8c83eaf28779ff46$var$injectMagics(data2, el);
-    let reactiveData = $8c83eaf28779ff46$var$reactive(data2);
-    $8c83eaf28779ff46$var$initInterceptors(reactiveData);
-    let undo = $8c83eaf28779ff46$var$addScopeToNode(el, reactiveData);
-    reactiveData["init"] && $8c83eaf28779ff46$var$evaluate(el, reactiveData["init"]);
-    cleanup2(()=>{
-        reactiveData["destroy"] && $8c83eaf28779ff46$var$evaluate(el, reactiveData["destroy"]);
-        undo();
-    });
-});
-$8c83eaf28779ff46$var$interceptClone((from, to)=>{
-    if (from._x_dataStack) {
-        to._x_dataStack = from._x_dataStack;
-        to.setAttribute("data-has-alpine-state", true);
-    }
-});
-function $8c83eaf28779ff46$var$shouldSkipRegisteringDataDuringClone(el) {
-    if (!$8c83eaf28779ff46$var$isCloning) return false;
-    if ($8c83eaf28779ff46$var$isCloningLegacy) return true;
-    return el.hasAttribute("data-has-alpine-state");
-}
-// packages/alpinejs/src/directives/x-show.js
-$8c83eaf28779ff46$var$directive("show", (el, { modifiers: modifiers, expression: expression }, { effect: effect3 })=>{
-    let evaluate2 = $8c83eaf28779ff46$var$evaluateLater(el, expression);
-    if (!el._x_doHide) el._x_doHide = ()=>{
-        $8c83eaf28779ff46$var$mutateDom(()=>{
-            el.style.setProperty("display", "none", modifiers.includes("important") ? "important" : void 0);
-        });
-    };
-    if (!el._x_doShow) el._x_doShow = ()=>{
-        $8c83eaf28779ff46$var$mutateDom(()=>{
-            if (el.style.length === 1 && el.style.display === "none") el.removeAttribute("style");
-            else el.style.removeProperty("display");
-        });
-    };
-    let hide = ()=>{
-        el._x_doHide();
-        el._x_isShown = false;
-    };
-    let show = ()=>{
-        el._x_doShow();
-        el._x_isShown = true;
-    };
-    let clickAwayCompatibleShow = ()=>setTimeout(show);
-    let toggle = $8c83eaf28779ff46$var$once((value)=>value ? show() : hide(), (value)=>{
-        if (typeof el._x_toggleAndCascadeWithTransitions === "function") el._x_toggleAndCascadeWithTransitions(el, value, show, hide);
-        else value ? clickAwayCompatibleShow() : hide();
-    });
-    let oldValue;
-    let firstTime = true;
-    effect3(()=>evaluate2((value)=>{
-            if (!firstTime && value === oldValue) return;
-            if (modifiers.includes("immediate")) value ? clickAwayCompatibleShow() : hide();
-            toggle(value);
-            oldValue = value;
-            firstTime = false;
-        }));
-});
-// packages/alpinejs/src/directives/x-for.js
-$8c83eaf28779ff46$var$directive("for", (el, { expression: expression }, { effect: effect3, cleanup: cleanup2 })=>{
-    let iteratorNames = $8c83eaf28779ff46$var$parseForExpression(expression);
-    let evaluateItems = $8c83eaf28779ff46$var$evaluateLater(el, iteratorNames.items);
-    let evaluateKey = $8c83eaf28779ff46$var$evaluateLater(el, // the x-bind:key expression is stored for our use instead of evaluated.
-    el._x_keyExpression || "index");
-    el._x_prevKeys = [];
-    el._x_lookup = {};
-    effect3(()=>$8c83eaf28779ff46$var$loop(el, iteratorNames, evaluateItems, evaluateKey));
-    cleanup2(()=>{
-        Object.values(el._x_lookup).forEach((el2)=>$8c83eaf28779ff46$var$mutateDom(()=>{
-                $8c83eaf28779ff46$var$destroyTree(el2);
-                el2.remove();
-            }));
-        delete el._x_prevKeys;
-        delete el._x_lookup;
-    });
-});
-function $8c83eaf28779ff46$var$loop(el, iteratorNames, evaluateItems, evaluateKey) {
-    let isObject2 = (i)=>typeof i === "object" && !Array.isArray(i);
-    let templateEl = el;
-    evaluateItems((items)=>{
-        if ($8c83eaf28779ff46$var$isNumeric3(items) && items >= 0) items = Array.from(Array(items).keys(), (i)=>i + 1);
-        if (items === void 0) items = [];
-        let lookup = el._x_lookup;
-        let prevKeys = el._x_prevKeys;
-        let scopes = [];
-        let keys = [];
-        if (isObject2(items)) items = Object.entries(items).map(([key, value])=>{
-            let scope2 = $8c83eaf28779ff46$var$getIterationScopeVariables(iteratorNames, value, key, items);
-            evaluateKey((value2)=>{
-                if (keys.includes(value2)) $8c83eaf28779ff46$var$warn("Duplicate key on x-for", el);
-                keys.push(value2);
-            }, {
-                scope: {
-                    index: key,
-                    ...scope2
-                }
-            });
-            scopes.push(scope2);
-        });
-        else for(let i = 0; i < items.length; i++){
-            let scope2 = $8c83eaf28779ff46$var$getIterationScopeVariables(iteratorNames, items[i], i, items);
-            evaluateKey((value)=>{
-                if (keys.includes(value)) $8c83eaf28779ff46$var$warn("Duplicate key on x-for", el);
-                keys.push(value);
-            }, {
-                scope: {
-                    index: i,
-                    ...scope2
-                }
-            });
-            scopes.push(scope2);
-        }
-        let adds = [];
-        let moves = [];
-        let removes = [];
-        let sames = [];
-        for(let i = 0; i < prevKeys.length; i++){
-            let key = prevKeys[i];
-            if (keys.indexOf(key) === -1) removes.push(key);
-        }
-        prevKeys = prevKeys.filter((key)=>!removes.includes(key));
-        let lastKey = "template";
-        for(let i = 0; i < keys.length; i++){
-            let key = keys[i];
-            let prevIndex = prevKeys.indexOf(key);
-            if (prevIndex === -1) {
-                prevKeys.splice(i, 0, key);
-                adds.push([
-                    lastKey,
-                    i
-                ]);
-            } else if (prevIndex !== i) {
-                let keyInSpot = prevKeys.splice(i, 1)[0];
-                let keyForSpot = prevKeys.splice(prevIndex - 1, 1)[0];
-                prevKeys.splice(i, 0, keyForSpot);
-                prevKeys.splice(prevIndex, 0, keyInSpot);
-                moves.push([
-                    keyInSpot,
-                    keyForSpot
-                ]);
-            } else sames.push(key);
-            lastKey = key;
-        }
-        for(let i = 0; i < removes.length; i++){
-            let key = removes[i];
-            if (!(key in lookup)) continue;
-            $8c83eaf28779ff46$var$mutateDom(()=>{
-                $8c83eaf28779ff46$var$destroyTree(lookup[key]);
-                lookup[key].remove();
-            });
-            delete lookup[key];
-        }
-        for(let i = 0; i < moves.length; i++){
-            let [keyInSpot, keyForSpot] = moves[i];
-            let elInSpot = lookup[keyInSpot];
-            let elForSpot = lookup[keyForSpot];
-            let marker = document.createElement("div");
-            $8c83eaf28779ff46$var$mutateDom(()=>{
-                if (!elForSpot) $8c83eaf28779ff46$var$warn(`x-for ":key" is undefined or invalid`, templateEl, keyForSpot, lookup);
-                elForSpot.after(marker);
-                elInSpot.after(elForSpot);
-                elForSpot._x_currentIfEl && elForSpot.after(elForSpot._x_currentIfEl);
-                marker.before(elInSpot);
-                elInSpot._x_currentIfEl && elInSpot.after(elInSpot._x_currentIfEl);
-                marker.remove();
-            });
-            elForSpot._x_refreshXForScope(scopes[keys.indexOf(keyForSpot)]);
-        }
-        for(let i = 0; i < adds.length; i++){
-            let [lastKey2, index] = adds[i];
-            let lastEl = lastKey2 === "template" ? templateEl : lookup[lastKey2];
-            if (lastEl._x_currentIfEl) lastEl = lastEl._x_currentIfEl;
-            let scope2 = scopes[index];
-            let key = keys[index];
-            let clone2 = document.importNode(templateEl.content, true).firstElementChild;
-            let reactiveScope = $8c83eaf28779ff46$var$reactive(scope2);
-            $8c83eaf28779ff46$var$addScopeToNode(clone2, reactiveScope, templateEl);
-            clone2._x_refreshXForScope = (newScope)=>{
-                Object.entries(newScope).forEach(([key2, value])=>{
-                    reactiveScope[key2] = value;
-                });
-            };
-            $8c83eaf28779ff46$var$mutateDom(()=>{
-                lastEl.after(clone2);
-                $8c83eaf28779ff46$var$skipDuringClone(()=>$8c83eaf28779ff46$var$initTree(clone2))();
-            });
-            if (typeof key === "object") $8c83eaf28779ff46$var$warn("x-for key cannot be an object, it must be a string or an integer", templateEl);
-            lookup[key] = clone2;
-        }
-        for(let i = 0; i < sames.length; i++)lookup[sames[i]]._x_refreshXForScope(scopes[keys.indexOf(sames[i])]);
-        templateEl._x_prevKeys = keys;
-    });
-}
-function $8c83eaf28779ff46$var$parseForExpression(expression) {
-    let forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/;
-    let stripParensRE = /^\s*\(|\)\s*$/g;
-    let forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/;
-    let inMatch = expression.match(forAliasRE);
-    if (!inMatch) return;
-    let res = {};
-    res.items = inMatch[2].trim();
-    let item = inMatch[1].replace(stripParensRE, "").trim();
-    let iteratorMatch = item.match(forIteratorRE);
-    if (iteratorMatch) {
-        res.item = item.replace(forIteratorRE, "").trim();
-        res.index = iteratorMatch[1].trim();
-        if (iteratorMatch[2]) res.collection = iteratorMatch[2].trim();
-    } else res.item = item;
-    return res;
-}
-function $8c83eaf28779ff46$var$getIterationScopeVariables(iteratorNames, item, index, items) {
-    let scopeVariables = {};
-    if (/^\[.*\]$/.test(iteratorNames.item) && Array.isArray(item)) {
-        let names = iteratorNames.item.replace("[", "").replace("]", "").split(",").map((i)=>i.trim());
-        names.forEach((name, i)=>{
-            scopeVariables[name] = item[i];
-        });
-    } else if (/^\{.*\}$/.test(iteratorNames.item) && !Array.isArray(item) && typeof item === "object") {
-        let names = iteratorNames.item.replace("{", "").replace("}", "").split(",").map((i)=>i.trim());
-        names.forEach((name)=>{
-            scopeVariables[name] = item[name];
-        });
-    } else scopeVariables[iteratorNames.item] = item;
-    if (iteratorNames.index) scopeVariables[iteratorNames.index] = index;
-    if (iteratorNames.collection) scopeVariables[iteratorNames.collection] = items;
-    return scopeVariables;
-}
-function $8c83eaf28779ff46$var$isNumeric3(subject) {
-    return !Array.isArray(subject) && !isNaN(subject);
-}
-// packages/alpinejs/src/directives/x-ref.js
-function $8c83eaf28779ff46$var$handler3() {}
-$8c83eaf28779ff46$var$handler3.inline = (el, { expression: expression }, { cleanup: cleanup2 })=>{
-    let root = $8c83eaf28779ff46$var$closestRoot(el);
-    if (!root._x_refs) root._x_refs = {};
-    root._x_refs[expression] = el;
-    cleanup2(()=>delete root._x_refs[expression]);
-};
-$8c83eaf28779ff46$var$directive("ref", $8c83eaf28779ff46$var$handler3);
-// packages/alpinejs/src/directives/x-if.js
-$8c83eaf28779ff46$var$directive("if", (el, { expression: expression }, { effect: effect3, cleanup: cleanup2 })=>{
-    if (el.tagName.toLowerCase() !== "template") $8c83eaf28779ff46$var$warn("x-if can only be used on a <template> tag", el);
-    let evaluate2 = $8c83eaf28779ff46$var$evaluateLater(el, expression);
-    let show = ()=>{
-        if (el._x_currentIfEl) return el._x_currentIfEl;
-        let clone2 = el.content.cloneNode(true).firstElementChild;
-        $8c83eaf28779ff46$var$addScopeToNode(clone2, {}, el);
-        $8c83eaf28779ff46$var$mutateDom(()=>{
-            el.after(clone2);
-            $8c83eaf28779ff46$var$skipDuringClone(()=>$8c83eaf28779ff46$var$initTree(clone2))();
-        });
-        el._x_currentIfEl = clone2;
-        el._x_undoIf = ()=>{
-            $8c83eaf28779ff46$var$mutateDom(()=>{
-                $8c83eaf28779ff46$var$destroyTree(clone2);
-                clone2.remove();
-            });
-            delete el._x_currentIfEl;
-        };
-        return clone2;
-    };
-    let hide = ()=>{
-        if (!el._x_undoIf) return;
-        el._x_undoIf();
-        delete el._x_undoIf;
-    };
-    effect3(()=>evaluate2((value)=>{
-            value ? show() : hide();
-        }));
-    cleanup2(()=>el._x_undoIf && el._x_undoIf());
-});
-// packages/alpinejs/src/directives/x-id.js
-$8c83eaf28779ff46$var$directive("id", (el, { expression: expression }, { evaluate: evaluate2 })=>{
-    let names = evaluate2(expression);
-    names.forEach((name)=>$8c83eaf28779ff46$var$setIdRoot(el, name));
-});
-$8c83eaf28779ff46$var$interceptClone((from, to)=>{
-    if (from._x_ids) to._x_ids = from._x_ids;
-});
-// packages/alpinejs/src/directives/x-on.js
-$8c83eaf28779ff46$var$mapAttributes($8c83eaf28779ff46$var$startingWith("@", $8c83eaf28779ff46$var$into($8c83eaf28779ff46$var$prefix("on:"))));
-$8c83eaf28779ff46$var$directive("on", $8c83eaf28779ff46$var$skipDuringClone((el, { value: value, modifiers: modifiers, expression: expression }, { cleanup: cleanup2 })=>{
-    let evaluate2 = expression ? $8c83eaf28779ff46$var$evaluateLater(el, expression) : ()=>{};
-    if (el.tagName.toLowerCase() === "template") {
-        if (!el._x_forwardEvents) el._x_forwardEvents = [];
-        if (!el._x_forwardEvents.includes(value)) el._x_forwardEvents.push(value);
-    }
-    let removeListener = $8c83eaf28779ff46$var$on(el, value, modifiers, (e)=>{
-        evaluate2(()=>{}, {
-            scope: {
-                "$event": e
-            },
-            params: [
-                e
-            ]
-        });
-    });
-    cleanup2(()=>removeListener());
-}));
-// packages/alpinejs/src/directives/index.js
-$8c83eaf28779ff46$var$warnMissingPluginDirective("Collapse", "collapse", "collapse");
-$8c83eaf28779ff46$var$warnMissingPluginDirective("Intersect", "intersect", "intersect");
-$8c83eaf28779ff46$var$warnMissingPluginDirective("Focus", "trap", "focus");
-$8c83eaf28779ff46$var$warnMissingPluginDirective("Mask", "mask", "mask");
-function $8c83eaf28779ff46$var$warnMissingPluginDirective(name, directiveName, slug) {
-    $8c83eaf28779ff46$var$directive(directiveName, (el)=>$8c83eaf28779ff46$var$warn(`You can't use [x-${directiveName}] without first installing the "${name}" plugin here: https://alpinejs.dev/plugins/${slug}`, el));
-}
-// packages/alpinejs/src/index.js
-$8c83eaf28779ff46$var$alpine_default.setEvaluator($8c83eaf28779ff46$var$normalEvaluator);
-$8c83eaf28779ff46$var$alpine_default.setReactivityEngine({
-    reactive: $8c83eaf28779ff46$var$reactive2,
-    effect: $8c83eaf28779ff46$var$effect2,
-    release: $8c83eaf28779ff46$var$stop,
-    raw: $8c83eaf28779ff46$var$toRaw
-});
-var $8c83eaf28779ff46$export$b7ee041e4ad2afec = $8c83eaf28779ff46$var$alpine_default;
-// packages/alpinejs/builds/module.js
-var $8c83eaf28779ff46$export$2e2bcd8739ae039 = $8c83eaf28779ff46$export$b7ee041e4ad2afec;
-
-
-// packages/persist/src/index.js
-function $9b2f94dab0f686ea$export$9a6132153fba2e0(Alpine) {
-    let persist = ()=>{
-        let alias;
-        let storage;
-        try {
-            storage = localStorage;
-        } catch (e) {
-            console.error(e);
-            console.warn("Alpine: $persist is using temporary storage since localStorage is unavailable.");
-            let dummy = /* @__PURE__ */ new Map();
-            storage = {
-                getItem: dummy.get.bind(dummy),
-                setItem: dummy.set.bind(dummy)
-            };
-        }
-        return Alpine.interceptor((initialValue, getter, setter, path, key)=>{
-            let lookup = alias || `_x_${path}`;
-            let initial = $9b2f94dab0f686ea$var$storageHas(lookup, storage) ? $9b2f94dab0f686ea$var$storageGet(lookup, storage) : initialValue;
-            setter(initial);
-            Alpine.effect(()=>{
-                let value = getter();
-                $9b2f94dab0f686ea$var$storageSet(lookup, value, storage);
-                setter(value);
-            });
-            return initial;
-        }, (func)=>{
-            func.as = (key)=>{
-                alias = key;
-                return func;
-            }, func.using = (target)=>{
-                storage = target;
-                return func;
-            };
-        });
-    };
-    Object.defineProperty(Alpine, "$persist", {
-        get: ()=>persist()
-    });
-    Alpine.magic("persist", persist);
-    Alpine.persist = (key, { get: get, set: set }, storage = localStorage)=>{
-        let initial = $9b2f94dab0f686ea$var$storageHas(key, storage) ? $9b2f94dab0f686ea$var$storageGet(key, storage) : get();
-        set(initial);
-        Alpine.effect(()=>{
-            let value = get();
-            $9b2f94dab0f686ea$var$storageSet(key, value, storage);
-            set(value);
-        });
-    };
-}
-function $9b2f94dab0f686ea$var$storageHas(key, storage) {
-    return storage.getItem(key) !== null;
-}
-function $9b2f94dab0f686ea$var$storageGet(key, storage) {
-    let value = storage.getItem(key, storage);
-    if (value === void 0) return;
-    return JSON.parse(value);
-}
-function $9b2f94dab0f686ea$var$storageSet(key, value, storage) {
-    storage.setItem(key, JSON.stringify(value));
-}
-// packages/persist/builds/module.js
-var $9b2f94dab0f686ea$export$2e2bcd8739ae039 = $9b2f94dab0f686ea$export$9a6132153fba2e0;
-
-
-// packages/morph/src/morph.js
-function $fd2717825660a9ff$var$morph(from, toHtml, options) {
-    $fd2717825660a9ff$var$monkeyPatchDomSetAttributeToAllowAtSymbols();
-    let fromEl;
-    let toEl;
-    let key, lookahead, updating, updated, removing, removed, adding, added;
-    function assignOptions(options2 = {}) {
-        let defaultGetKey = (el)=>el.getAttribute("key");
-        let noop = ()=>{};
-        updating = options2.updating || noop;
-        updated = options2.updated || noop;
-        removing = options2.removing || noop;
-        removed = options2.removed || noop;
-        adding = options2.adding || noop;
-        added = options2.added || noop;
-        key = options2.key || defaultGetKey;
-        lookahead = options2.lookahead || false;
-    }
-    function patch(from2, to) {
-        if (differentElementNamesTypesOrKeys(from2, to)) return swapElements(from2, to);
-        let updateChildrenOnly = false;
-        if ($fd2717825660a9ff$var$shouldSkip(updating, from2, to, ()=>updateChildrenOnly = true)) return;
-        if (from2.nodeType === 1 && window.Alpine) {
-            window.Alpine.cloneNode(from2, to);
-            if (from2._x_teleport && to._x_teleport) patch(from2._x_teleport, to._x_teleport);
-        }
-        if ($fd2717825660a9ff$var$textOrComment(to)) {
-            patchNodeValue(from2, to);
-            updated(from2, to);
-            return;
-        }
-        if (!updateChildrenOnly) patchAttributes(from2, to);
-        updated(from2, to);
-        patchChildren(from2, to);
-    }
-    function differentElementNamesTypesOrKeys(from2, to) {
-        return from2.nodeType != to.nodeType || from2.nodeName != to.nodeName || getKey(from2) != getKey(to);
-    }
-    function swapElements(from2, to) {
-        if ($fd2717825660a9ff$var$shouldSkip(removing, from2)) return;
-        let toCloned = to.cloneNode(true);
-        if ($fd2717825660a9ff$var$shouldSkip(adding, toCloned)) return;
-        from2.replaceWith(toCloned);
-        removed(from2);
-        added(toCloned);
-    }
-    function patchNodeValue(from2, to) {
-        let value = to.nodeValue;
-        if (from2.nodeValue !== value) from2.nodeValue = value;
-    }
-    function patchAttributes(from2, to) {
-        if (from2._x_transitioning) return;
-        if (from2._x_isShown && !to._x_isShown) return;
-        if (!from2._x_isShown && to._x_isShown) return;
-        let domAttributes = Array.from(from2.attributes);
-        let toAttributes = Array.from(to.attributes);
-        for(let i = domAttributes.length - 1; i >= 0; i--){
-            let name = domAttributes[i].name;
-            if (!to.hasAttribute(name)) from2.removeAttribute(name);
-        }
-        for(let i = toAttributes.length - 1; i >= 0; i--){
-            let name = toAttributes[i].name;
-            let value = toAttributes[i].value;
-            if (from2.getAttribute(name) !== value) from2.setAttribute(name, value);
-        }
-    }
-    function patchChildren(from2, to) {
-        let fromKeys = keyToMap(from2.children);
-        let fromKeyHoldovers = {};
-        let currentTo = $fd2717825660a9ff$var$getFirstNode(to);
-        let currentFrom = $fd2717825660a9ff$var$getFirstNode(from2);
-        while(currentTo){
-            $fd2717825660a9ff$var$seedingMatchingId(currentTo, currentFrom);
-            let toKey = getKey(currentTo);
-            let fromKey = getKey(currentFrom);
-            if (!currentFrom) {
-                if (toKey && fromKeyHoldovers[toKey]) {
-                    let holdover = fromKeyHoldovers[toKey];
-                    from2.appendChild(holdover);
-                    currentFrom = holdover;
-                    fromKey = getKey(currentFrom);
-                } else {
-                    if (!$fd2717825660a9ff$var$shouldSkip(adding, currentTo)) {
-                        let clone = currentTo.cloneNode(true);
-                        from2.appendChild(clone);
-                        added(clone);
-                    }
-                    currentTo = $fd2717825660a9ff$var$getNextSibling(to, currentTo);
-                    continue;
-                }
-            }
-            let isIf = (node)=>node && node.nodeType === 8 && node.textContent === "[if BLOCK]><![endif]";
-            let isEnd = (node)=>node && node.nodeType === 8 && node.textContent === "[if ENDBLOCK]><![endif]";
-            if (isIf(currentTo) && isIf(currentFrom)) {
-                let nestedIfCount = 0;
-                let fromBlockStart = currentFrom;
-                while(currentFrom){
-                    let next = $fd2717825660a9ff$var$getNextSibling(from2, currentFrom);
-                    if (isIf(next)) nestedIfCount++;
-                    else if (isEnd(next) && nestedIfCount > 0) nestedIfCount--;
-                    else if (isEnd(next) && nestedIfCount === 0) {
-                        currentFrom = next;
-                        break;
-                    }
-                    currentFrom = next;
-                }
-                let fromBlockEnd = currentFrom;
-                nestedIfCount = 0;
-                let toBlockStart = currentTo;
-                while(currentTo){
-                    let next = $fd2717825660a9ff$var$getNextSibling(to, currentTo);
-                    if (isIf(next)) nestedIfCount++;
-                    else if (isEnd(next) && nestedIfCount > 0) nestedIfCount--;
-                    else if (isEnd(next) && nestedIfCount === 0) {
-                        currentTo = next;
-                        break;
-                    }
-                    currentTo = next;
-                }
-                let toBlockEnd = currentTo;
-                let fromBlock = new $fd2717825660a9ff$var$Block(fromBlockStart, fromBlockEnd);
-                let toBlock = new $fd2717825660a9ff$var$Block(toBlockStart, toBlockEnd);
-                patchChildren(fromBlock, toBlock);
-                continue;
-            }
-            if (currentFrom.nodeType === 1 && lookahead && !currentFrom.isEqualNode(currentTo)) {
-                let nextToElementSibling = $fd2717825660a9ff$var$getNextSibling(to, currentTo);
-                let found = false;
-                while(!found && nextToElementSibling){
-                    if (nextToElementSibling.nodeType === 1 && currentFrom.isEqualNode(nextToElementSibling)) {
-                        found = true;
-                        currentFrom = addNodeBefore(from2, currentTo, currentFrom);
-                        fromKey = getKey(currentFrom);
-                    }
-                    nextToElementSibling = $fd2717825660a9ff$var$getNextSibling(to, nextToElementSibling);
-                }
-            }
-            if (toKey !== fromKey) {
-                if (!toKey && fromKey) {
-                    fromKeyHoldovers[fromKey] = currentFrom;
-                    currentFrom = addNodeBefore(from2, currentTo, currentFrom);
-                    fromKeyHoldovers[fromKey].remove();
-                    currentFrom = $fd2717825660a9ff$var$getNextSibling(from2, currentFrom);
-                    currentTo = $fd2717825660a9ff$var$getNextSibling(to, currentTo);
-                    continue;
-                }
-                if (toKey && !fromKey) {
-                    if (fromKeys[toKey]) {
-                        currentFrom.replaceWith(fromKeys[toKey]);
-                        currentFrom = fromKeys[toKey];
-                        fromKey = getKey(currentFrom);
-                    }
-                }
-                if (toKey && fromKey) {
-                    let fromKeyNode = fromKeys[toKey];
-                    if (fromKeyNode) {
-                        fromKeyHoldovers[fromKey] = currentFrom;
-                        currentFrom.replaceWith(fromKeyNode);
-                        currentFrom = fromKeyNode;
-                        fromKey = getKey(currentFrom);
-                    } else {
-                        fromKeyHoldovers[fromKey] = currentFrom;
-                        currentFrom = addNodeBefore(from2, currentTo, currentFrom);
-                        fromKeyHoldovers[fromKey].remove();
-                        currentFrom = $fd2717825660a9ff$var$getNextSibling(from2, currentFrom);
-                        currentTo = $fd2717825660a9ff$var$getNextSibling(to, currentTo);
-                        continue;
-                    }
-                }
-            }
-            let currentFromNext = currentFrom && $fd2717825660a9ff$var$getNextSibling(from2, currentFrom);
-            patch(currentFrom, currentTo);
-            currentTo = currentTo && $fd2717825660a9ff$var$getNextSibling(to, currentTo);
-            currentFrom = currentFromNext;
-        }
-        let removals = [];
-        while(currentFrom){
-            if (!$fd2717825660a9ff$var$shouldSkip(removing, currentFrom)) removals.push(currentFrom);
-            currentFrom = $fd2717825660a9ff$var$getNextSibling(from2, currentFrom);
-        }
-        while(removals.length){
-            let domForRemoval = removals.shift();
-            domForRemoval.remove();
-            removed(domForRemoval);
-        }
-    }
-    function getKey(el) {
-        return el && el.nodeType === 1 && key(el);
-    }
-    function keyToMap(els) {
-        let map = {};
-        for (let el of els){
-            let theKey = getKey(el);
-            if (theKey) map[theKey] = el;
-        }
-        return map;
-    }
-    function addNodeBefore(parent, node, beforeMe) {
-        if (!$fd2717825660a9ff$var$shouldSkip(adding, node)) {
-            let clone = node.cloneNode(true);
-            parent.insertBefore(clone, beforeMe);
-            added(clone);
-            return clone;
-        }
-        return node;
-    }
-    assignOptions(options);
-    fromEl = from;
-    toEl = typeof toHtml === "string" ? $fd2717825660a9ff$var$createElement(toHtml) : toHtml;
-    if (window.Alpine && window.Alpine.closestDataStack && !from._x_dataStack) {
-        toEl._x_dataStack = window.Alpine.closestDataStack(from);
-        toEl._x_dataStack && window.Alpine.cloneNode(from, toEl);
-    }
-    patch(from, toEl);
-    fromEl = void 0;
-    toEl = void 0;
-    return from;
-}
-$fd2717825660a9ff$var$morph.step = ()=>{};
-$fd2717825660a9ff$var$morph.log = ()=>{};
-function $fd2717825660a9ff$var$shouldSkip(hook, ...args) {
-    let skip = false;
-    hook(...args, ()=>skip = true);
-    return skip;
-}
-var $fd2717825660a9ff$var$patched = false;
-function $fd2717825660a9ff$var$createElement(html) {
-    const template = document.createElement("template");
-    template.innerHTML = html;
-    return template.content.firstElementChild;
-}
-function $fd2717825660a9ff$var$textOrComment(el) {
-    return el.nodeType === 3 || el.nodeType === 8;
-}
-var $fd2717825660a9ff$var$Block = class {
-    constructor(start, end){
-        this.startComment = start;
-        this.endComment = end;
-    }
-    get children() {
-        let children = [];
-        let currentNode = this.startComment.nextSibling;
-        while(currentNode && currentNode !== this.endComment){
-            children.push(currentNode);
-            currentNode = currentNode.nextSibling;
-        }
-        return children;
-    }
-    appendChild(child) {
-        this.endComment.before(child);
-    }
-    get firstChild() {
-        let first = this.startComment.nextSibling;
-        if (first === this.endComment) return;
-        return first;
-    }
-    nextNode(reference) {
-        let next = reference.nextSibling;
-        if (next === this.endComment) return;
-        return next;
-    }
-    insertBefore(newNode, reference) {
-        reference.before(newNode);
-        return newNode;
-    }
-};
-function $fd2717825660a9ff$var$getFirstNode(parent) {
-    return parent.firstChild;
-}
-function $fd2717825660a9ff$var$getNextSibling(parent, reference) {
-    let next;
-    if (parent instanceof $fd2717825660a9ff$var$Block) next = parent.nextNode(reference);
-    else next = reference.nextSibling;
-    return next;
-}
-function $fd2717825660a9ff$var$monkeyPatchDomSetAttributeToAllowAtSymbols() {
-    if ($fd2717825660a9ff$var$patched) return;
-    $fd2717825660a9ff$var$patched = true;
-    let original = Element.prototype.setAttribute;
-    let hostDiv = document.createElement("div");
-    Element.prototype.setAttribute = function newSetAttribute(name, value) {
-        if (!name.includes("@")) return original.call(this, name, value);
-        hostDiv.innerHTML = `<span ${name}="${value}"></span>`;
-        let attr = hostDiv.firstElementChild.getAttributeNode(name);
-        hostDiv.firstElementChild.removeAttributeNode(attr);
-        this.setAttributeNode(attr);
-    };
-}
-function $fd2717825660a9ff$var$seedingMatchingId(to, from) {
-    let fromId = from && from._x_bindings && from._x_bindings.id;
-    if (!fromId) return;
-    if (!to.setAttribute) return;
-    to.setAttribute("id", fromId);
-    to.id = fromId;
-}
-// packages/morph/src/index.js
-function $fd2717825660a9ff$export$2e5e8c41f5d4e7c7(Alpine) {
-    Alpine.morph = $fd2717825660a9ff$var$morph;
-}
-// packages/morph/builds/module.js
-var $fd2717825660a9ff$export$2e2bcd8739ae039 = $fd2717825660a9ff$export$2e5e8c41f5d4e7c7;
-
-
 const $1bac384020b50752$var$isString = (obj)=>typeof obj === 'string';
 const $1bac384020b50752$var$defer = ()=>{
     let res;
@@ -15547,7 +12148,8 @@ let $199830a05f92d3d0$var$hasLocalStorageSupport = null;
 const $199830a05f92d3d0$var$localStorageAvailable = ()=>{
     if ($199830a05f92d3d0$var$hasLocalStorageSupport !== null) return $199830a05f92d3d0$var$hasLocalStorageSupport;
     try {
-        $199830a05f92d3d0$var$hasLocalStorageSupport = window !== 'undefined' && window.localStorage !== null;
+        $199830a05f92d3d0$var$hasLocalStorageSupport = typeof window !== 'undefined' && window.localStorage !== null;
+        if (!$199830a05f92d3d0$var$hasLocalStorageSupport) return false;
         const testKey = 'i18next.translate.boo';
         window.localStorage.setItem(testKey, 'foo');
         window.localStorage.removeItem(testKey);
@@ -15574,7 +12176,8 @@ let $199830a05f92d3d0$var$hasSessionStorageSupport = null;
 const $199830a05f92d3d0$var$sessionStorageAvailable = ()=>{
     if ($199830a05f92d3d0$var$hasSessionStorageSupport !== null) return $199830a05f92d3d0$var$hasSessionStorageSupport;
     try {
-        $199830a05f92d3d0$var$hasSessionStorageSupport = window !== 'undefined' && window.sessionStorage !== null;
+        $199830a05f92d3d0$var$hasSessionStorageSupport = typeof window !== 'undefined' && window.sessionStorage !== null;
+        if (!$199830a05f92d3d0$var$hasSessionStorageSupport) return false;
         const testKey = 'i18next.translate.boo';
         window.sessionStorage.setItem(testKey, 'foo');
         window.sessionStorage.removeItem(testKey);
@@ -15754,6 +12357,3602 @@ var $fa2f411c6f0799ad$exports = {};
 $fa2f411c6f0799ad$exports = JSON.parse('{"CachePath":"\u30ED\u30FC\u30AB\u30EB\u30AD\u30E3\u30C3\u30B7\u30E5\u306E\u5834\u6240","CachePath_Description":"\u30ED\u30FC\u30AB\u30EB\u306E\u753B\u50CF\u30AD\u30E3\u30C3\u30B7\u30E5\u306E\u5834\u6240\u3001\u30C7\u30D5\u30A9\u30EB\u30C8\u306E\u30B7\u30B9\u30C6\u30E0\u4E00\u6642\u30D5\u30A9\u30EB\u30C0\u30FC\u3002","CertFile":"\u8A3C\u660E\u66F8\u30D5\u30A1\u30A4\u30EB","CertFile_Description":"TLS/SSL \u8A3C\u660E\u66F8\u30D5\u30A1\u30A4\u30EB\u306E\u30D1\u30B9 (\u30C7\u30D5\u30A9\u30EB\u30C8: \\"~/.config/.comigo/cert.crt\\")","ClearCacheExit":"\u7D42\u4E86\u6642\u306B\u30AF\u30EA\u30FC\u30F3\u30A2\u30C3\u30D7","ClearCacheExit_Description":"\u30D7\u30ED\u30B0\u30E9\u30E0\u3092\u7D42\u4E86\u3059\u308B\u3068\u304D\u306F\u3001Web \u753B\u50CF\u30AD\u30E3\u30C3\u30B7\u30E5\u3092\u30AF\u30EA\u30A2\u3057\u307E\u3059\u3002","ClearDatabaseWhenExit":"\u30C7\u30FC\u30BF\u30D9\u30FC\u30B9\u30D6\u30C3\u30AF\u3092\u30AF\u30EA\u30A2\u3059\u308B","ClearDatabaseWhenExit_Description":"\u30ED\u30FC\u30AB\u30EB \u30C7\u30FC\u30BF\u30D9\u30FC\u30B9\u304C\u6709\u52B9\u306B\u306A\u3063\u3066\u3044\u308B\u5834\u5408\u3001\u30B9\u30AD\u30E3\u30F3\u306E\u5B8C\u4E86\u5F8C\u306B\u5B58\u5728\u3057\u306A\u3044\u66F8\u7C4D\u306F\u6D88\u53BB\u3055\u308C\u307E\u3059\u3002","ConfigManager":"\u8A2D\u5B9A\u30D5\u30A1\u30A4\u30EB\u7BA1\u7406","ConfigManagerDeleteSuccess":"\u8A2D\u5B9A\u304C\u524A\u9664\u3055\u308C\u307E\u3057\u305F\u3002","ConfigManagerDescription":"Save\u3092\u30AF\u30EA\u30C3\u30AF\u3059\u308B\u3068\u3001\u73FE\u5728\u306E\u8A2D\u5B9A\u304C\u30B5\u30FC\u30D0\u30FC\u306B\u30A2\u30C3\u30D7\u30ED\u30FC\u30C9\u3055\u308C\u3001\u65E2\u5B58\u306E\u8A2D\u5B9A\u30D5\u30A1\u30A4\u30EB\u304C\u4E0A\u66F8\u304D\u3055\u308C\u307E\u3059\u3002","ConfigManagerSaveHint":"\u3059\u3067\u306B\u8A2D\u5B9A\u30D5\u30A1\u30A4\u30EB\u304C\u3042\u308B\u306E\u3067\u3001\u4FDD\u5B58\u5834\u6240\u3092\u5909\u66F4\u3057\u3066\u304F\u3060\u3055\u3044\u3002","ConfigManagerSaveSuccess":"\u8A2D\u5B9A\u304C\u4FDD\u5B58\u3055\u308C\u307E\u3057\u305F\u3002","ConfigSaveTo":"Config File Location","Debug":"\u30C7\u30D0\u30C3\u30B0\u30E2\u30FC\u30C9\u3092\u30AA\u30F3\u306B\u3059\u308B","Debug_Description":"\u30C7\u30D0\u30C3\u30B0\u6A5F\u80FD\u3092\u6709\u52B9\u306B\u3059\u308B","DisableLAN":"LAN\u5171\u6709\u3092\u7121\u52B9\u306B\u3059\u308B","DisableLAN_Description":"\u8AAD\u307F\u53D6\u308A\u30B5\u30FC\u30D3\u30B9\u306F\u3053\u306E\u30DE\u30B7\u30F3\u3067\u306E\u307F\u63D0\u4F9B\u3055\u308C\u3001\u5916\u90E8\u306B\u306F\u5171\u6709\u3055\u308C\u307E\u305B\u3093\u3002\u30DB\u30C3\u30C8\u30EA\u30ED\u30FC\u30C9\u3092\u30B5\u30DD\u30FC\u30C8\u3057\u3066\u3044\u307E\u305B\u3093\u3002","EnableDatabase":"\u30C7\u30FC\u30BF\u30D9\u30FC\u30B9\u3092\u6709\u52B9\u306B\u3059\u308B","EnableDatabase_Description":"\u30ED\u30FC\u30AB\u30EB\u30C7\u30FC\u30BF\u30D9\u30FC\u30B9\u306B\u30B9\u30AD\u30E3\u30F3\u3057\u305F\u66F8\u7C4D\u30C7\u30FC\u30BF\u3092\u4FDD\u5B58\u3067\u304D\u308B\u3088\u3046\u306B\u3057\u307E\u3059\u3002\u3053\u306E\u69CB\u6210\u306F\u30DB\u30C3\u30C8 \u30EA\u30ED\u30FC\u30C9\u3092\u30B5\u30DD\u30FC\u30C8\u3057\u307E\u305B\u3093\u3002","EnableFrpcServer":"Frpc\u30B5\u30FC\u30D0\u30FC\u3092\u6709\u52B9\u306B\u3059\u308B","EnableLogin":"Enable Login","EnableLogin_Description":"\u30ED\u30B0\u30A4\u30F3\u3092\u6709\u52B9\u306B\u3059\u308B\u304B\u3069\u3046\u304B\u3002\u30C7\u30D5\u30A9\u30EB\u30C8\u3067\u306F\u30ED\u30B0\u30A4\u30F3\u306F\u5FC5\u8981\u3042\u308A\u307E\u305B\u3093\u3002\u30DB\u30C3\u30C8\u30EA\u30ED\u30FC\u30C9\u3092\u30B5\u30DD\u30FC\u30C8\u3057\u307E\u305B\u3093\u3002","EnableTLS":"Enable TLS","EnableTLS_Description":"HTTPS \u30D7\u30ED\u30C8\u30B3\u30EB\u3092\u6709\u52B9\u306B\u3059\u308B\u304B\u3069\u3046\u304B\u3002\u8A3C\u660E\u66F8\u306F\u30AD\u30FC\u30D5\u30A1\u30A4\u30EB\u306B\u8A2D\u5B9A\u3059\u308B\u5FC5\u8981\u304C\u3042\u308A\u307E\u3059\u3002","EnableUpload":"\u30A2\u30C3\u30D7\u30ED\u30FC\u30C9\u6A5F\u80FD\u3092\u6709\u52B9\u306B\u3059\u308B","EnableUpload_Description":"\u30A2\u30C3\u30D7\u30ED\u30FC\u30C9\u6A5F\u80FD\u3092\u6709\u52B9\u306B\u3057\u307E\u3059\u3002","ExcludePath":"\u30D1\u30B9\u3092\u9664\u5916\u3059\u308B","ExcludePath_Description":"\u672C\u3092\u30B9\u30AD\u30E3\u30F3\u3059\u308B\u3068\u304D\u306B\u3001\u9664\u5916\u3059\u308B\u5FC5\u8981\u304C\u3042\u308B\u30D5\u30A1\u30A4\u30EB\u307E\u305F\u306F\u30D5\u30A9\u30EB\u30C0\u30FC\u306E\u540D\u524D","FrpClientConfig":"FrpClient\u8A2D\u5B9A","GenerateBookMetadata":"\u66F8\u7C4D\u306E\u30E1\u30BF\u30C7\u30FC\u30BF\u3092\u751F\u6210\u3059\u308B","GenerateMetaData":"\u30E1\u30BF\u30C7\u30FC\u30BF\u306E\u751F\u6210","GenerateMetaData_Description":"\u66F8\u7C4D\u306E\u30E1\u30BF\u30C7\u30FC\u30BF\u3092\u751F\u6210\u3057\u307E\u3059\u3002\u73FE\u5728\u306F\u6709\u52B9\u3067\u306F\u3042\u308A\u307E\u305B\u3093\u3002","HomeDirectory":"\u30DB\u30FC\u30E0\u30C7\u30A3\u30EC\u30AF\u30C8\u30EA","Host":"\u30C9\u30E1\u30A4\u30F3\u540D","Host_Description":"QR\u30B3\u30FC\u30C9\u3067\u8868\u793A\u3055\u308C\u308B\u30DB\u30B9\u30C8\u540D\u3092\u30AB\u30B9\u30BF\u30DE\u30A4\u30BA\u3057\u307E\u3059\u3002\\n\u30C7\u30D5\u30A9\u30EB\u30C8\u306F\u30CD\u30C3\u30C8\u30EF\u30FC\u30AF \u30AB\u30FC\u30C9\u306E IP \u3067\u3059\u3002","KeyFile":"\u30AD\u30FC\u30D5\u30A1\u30A4\u30EB","KeyFile_Description":"TLS/SSL \u30AD\u30FC \u30D5\u30A1\u30A4\u30EB \u30D1\u30B9 (\u30C7\u30D5\u30A9\u30EB\u30C8: \\"~/.config/.comigo/key.key\\")","LocalStores":"\u30E9\u30A4\u30D6\u30E9\u30EA\u30D5\u30A9\u30EB\u30C0\u30FC","LocalStores_Description":"\u7D76\u5BFE\u30C7\u30A3\u30EC\u30AF\u30C8\u30EA\u3068\u76F8\u5BFE\u30C7\u30A3\u30EC\u30AF\u30C8\u30EA\u304C\u30B5\u30DD\u30FC\u30C8\u3055\u308C\u3066\u3044\u308B\u3002 \u76F8\u5BFE\u30C7\u30A3\u30EC\u30AF\u30C8\u30EA\u306F\u5B9F\u884C\u30C7\u30A3\u30EC\u30AF\u30C8\u30EA\u3092\u57FA\u6E96\u3068\u3057\u307E\u3059\u3002","LogFileName":"\u30ED\u30B0\u30D5\u30A1\u30A4\u30EB\u540D","LogFileName_Description":"\u30ED\u30B0\u30D5\u30A1\u30A4\u30EB\u540D","LogFilePath":"\u30ED\u30B0\u306E\u4FDD\u5B58\u5834\u6240","LogFilePath_Description":"\u30ED\u30B0\u30D5\u30A1\u30A4\u30EB\u306E\u4FDD\u5B58\u5834\u6240","LogToFile":"\u30ED\u30B0\u3092\u30ED\u30FC\u30AB\u30EB\u306B\u8A18\u9332\u3059\u308B","LogToFile_Description":"\u30D7\u30ED\u30B0\u30E9\u30E0\u30ED\u30B0\u3092\u30ED\u30FC\u30AB\u30EB\u30D5\u30A1\u30A4\u30EB\u306B\u4FDD\u5B58\u3059\u308B\u304B\u3069\u3046\u304B\u3002\u30C7\u30D5\u30A9\u30EB\u30C8\u3067\u306F\u4FDD\u5B58\u3055\u308C\u307E\u305B\u3093\u3002","MaxScanDepth":"\u6700\u5927\u30B9\u30AD\u30E3\u30F3\u6DF1\u5EA6","MaxScanDepth_Description":"\u6700\u5927\u30B9\u30AD\u30E3\u30F3\u6DF1\u5EA6\u3002\\n\u6DF1\u3055\u3092\u8D85\u3048\u308B\u30D5\u30A1\u30A4\u30EB\u306F\u30B9\u30AD\u30E3\u30F3\u3055\u308C\u307E\u305B\u3093\u3002\\n\u73FE\u5728\u306E\u5B9F\u884C\u30C7\u30A3\u30EC\u30AF\u30C8\u30EA\u304C\u30D9\u30FC\u30B9\u3068\u306A\u308A\u307E\u3059\u3002","MinImageNum":"\u6700\u4F4E\u679A\u6570","MinImageNum_Description":"\u672C\u3068\u307F\u306A\u3055\u308C\u308B\u306B\u306F\u3001\u5C11\u306A\u304F\u3068\u3082\u6570\u679A\u306E\u753B\u50CF\u304C\u542B\u307E\u308C\u3066\u3044\u308B\u5FC5\u8981\u304C\u3042\u308A\u307E\u3059\u3002","OpenBrowser":"\u30D6\u30E9\u30A6\u30B6\u3092\u958B\u304F","OpenBrowser_Description":"windows\u306E\u30C7\u30D5\u30A9\u30EB\u30C8\u306Ftrue\u3001\u305D\u306E\u4ED6\u306E\u30D7\u30E9\u30C3\u30C8\u30D5\u30A9\u30FC\u30E0\u306E\u30C7\u30D5\u30A9\u30EB\u30C8\u306Ffalse\u3002","Password":"\u30D1\u30B9\u30EF\u30FC\u30C9","Password_Description":"\u30ED\u30B0\u30A4\u30F3\u3092\u6709\u52B9\u306B\u3057\u305F\u5F8C\u3001\u30ED\u30B0\u30A4\u30F3\u306B\u4F7F\u7528\u3055\u308C\u308B\u30D1\u30B9\u30EF\u30FC\u30C9\u3002","Port":"\u30DD\u30FC\u30C8","Port_Description":"Web \u30B5\u30FC\u30D3\u30B9 \u30DD\u30FC\u30C8\u3002\u3053\u306E\u69CB\u6210\u306F\u30DB\u30C3\u30C8 \u30EA\u30ED\u30FC\u30C9\u3092\u30B5\u30DD\u30FC\u30C8\u3057\u307E\u305B\u3093\u3002","PrintAllPossibleQRCode":"\u305D\u306E\u4ED6\u306E QR \u30B3\u30FC\u30C9","ProgramDirectory":"\u30D7\u30ED\u30B0\u30E9\u30E0\u30C7\u30A3\u30EC\u30AF\u30C8\u30EA","StartFrpClientInBackground":"Frp\u30AF\u30E9\u30A4\u30A2\u30F3\u30C8\u3092\u958B\u59CB\u3059\u308B","SupportFileType":"\u30B5\u30DD\u30FC\u30C8\u3055\u308C\u3066\u3044\u308B\u5727\u7E2E\u30D1\u30C3\u30B1\u30FC\u30B8","SupportFileType_Description":"\u30D5\u30A1\u30A4\u30EB\u3092\u30B9\u30AD\u30E3\u30F3\u3059\u308B\u3068\u304D\u306B\u3001\u305D\u308C\u3092\u30B9\u30AD\u30C3\u30D7\u3059\u308B\u304B\u3001\u30D6\u30C3\u30AF\u51E6\u7406\u306E\u30D5\u30A1\u30A4\u30EB\u306E\u63A5\u5C3E\u8F9E\u3068\u3057\u3066\u30AB\u30A6\u30F3\u30C8\u3059\u308B\u304B\u3092\u6C7A\u5B9A\u3059\u308B\u305F\u3081\u306B\u4F7F\u7528\u3055\u308C\u307E\u3059\u3002","SupportMediaType":"\u30B5\u30DD\u30FC\u30C8\u3055\u308C\u3066\u3044\u308B\u753B\u50CF\u30D5\u30A1\u30A4\u30EB","SupportMediaType_Description":"\u5727\u7E2E\u30D1\u30C3\u30B1\u30FC\u30B8\u3092\u30B9\u30AD\u30E3\u30F3\u3059\u308B\u3068\u304D\u306B\u753B\u50CF\u306E\u6570\u3092\u30AB\u30A6\u30F3\u30C8\u3059\u308B\u305F\u3081\u306B\u4F7F\u7528\u3055\u308C\u308B\u753B\u50CF\u30D5\u30A1\u30A4\u30EB\u306E\u63A5\u5C3E\u8F9E","Timeout":"\u6709\u52B9\u671F\u9650","TimeoutLimitForScan":"\u30B9\u30AD\u30E3\u30F3\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8","TimeoutLimitForScan_Description":"\u30D5\u30A1\u30A4\u30EB\u306E\u30B9\u30AD\u30E3\u30F3\u6642\u306B\u6570\u79D2\u4EE5\u4E0A\u304B\u304B\u308B\u5834\u5408\u3001\u5927\u304D\u3059\u304E\u308B\u30D5\u30A1\u30A4\u30EB\u3067\u30B9\u30BF\u30C3\u30AF\u3059\u308B\u3053\u3068\u3092\u907F\u3051\u308B\u305F\u3081\u306B\u30D5\u30A1\u30A4\u30EB\u306E\u30B9\u30AD\u30E3\u30F3\u3092\u4E2D\u6B62\u3057\u307E\u3059\u3002","Timeout_Description":"\u30ED\u30B0\u30A4\u30F3\u3092\u6709\u52B9\u306B\u3057\u305F\u5F8C\u306E Cookie \u306E\u6709\u52B9\u671F\u9650\u3002\u5358\u4F4D\u306F\u5206\u3067\u3059\u3002\u30C7\u30D5\u30A9\u30EB\u30C8\u3067\u306F 180 \u5206\u3067\u671F\u9650\u5207\u308C\u306B\u306A\u308A\u307E\u3059\u3002","UploadPath":"\u30A2\u30C3\u30D7\u30ED\u30FC\u30C9\u5834\u6240","UploadPath_Description":"\u30A2\u30C3\u30D7\u30ED\u30FC\u30C9\u3055\u308C\u305F\u30D5\u30A1\u30A4\u30EB\u306E\u4FDD\u5B58\u5834\u6240\u3092\u30AB\u30B9\u30BF\u30DE\u30A4\u30BA\u3057\u307E\u3059\u3002\u30C7\u30D5\u30A9\u30EB\u30C8\u3067\u306F\u3001\u30A2\u30C3\u30D7\u30ED\u30FC\u30C9\u30D5\u30A9\u30EB\u30C0\u306F\u73FE\u5728\u306E\u5B9F\u884C\u30C7\u30A3\u30EC\u30AF\u30C8\u30EA\u307E\u305F\u306F\u6700\u521D\u306E\u30D6\u30C3\u30AF\u30B9\u30C8\u30A2\u30C7\u30A3\u30EC\u30AF\u30C8\u30EA\u306E\u4E0B\u306B\u4F5C\u6210\u3055\u308C\u307E\u3059\u3002","UseCache":"\u30ED\u30FC\u30AB\u30EB\u753B\u50CF\u30AD\u30E3\u30C3\u30B7\u30E5","Username":"\u30E6\u30FC\u30B6\u30FC\u540D","Username_Description":"\u30ED\u30B0\u30A4\u30F3\u3092\u6709\u52B9\u306B\u3057\u305F\u5F8C\u3001\u30ED\u30B0\u30A4\u30F3 \u30A4\u30F3\u30BF\u30FC\u30D5\u30A7\u30A4\u30B9\u306B\u5FC5\u8981\u306A\u30E6\u30FC\u30B6\u30FC\u540D\u3002","WorkingDirectory":"\u4F5C\u696D\u30C7\u30A3\u30EC\u30AF\u30C8\u30EA","ZipFileTextEncoding":"UTF-8\u3067\u306F\u3042\u308A\u307E\u305B\u3093","ZipFileTextEncoding_Description":"utf-8 \u4EE5\u5916\u3067\u30A8\u30F3\u30B3\u30FC\u30C9\u3055\u308C\u305F ZIP \u30D5\u30A1\u30A4\u30EB\u3002\u89E3\u6790\u3059\u308B\u306B\u306F\u3069\u306E\u30A8\u30F3\u30B3\u30FC\u30C9\u3092\u4F7F\u7528\u3059\u308B\u5FC5\u8981\u304C\u3042\u308A\u307E\u3059\u3002\u30C7\u30D5\u30A9\u30EB\u30C8\u306EGBK\u3002","labs":"\u30E9\u30DC\u30BA","all_page_num":"\u7DCF\u30DA\u30FC\u30B8\u6570: {0}","author":"\u4F5C\u8005: {0}","auto_crop":"\u81EA\u52D5\u30A8\u30C3\u30B8\u30C8\u30EA\u30DF\u30F3\u30B0","auto_double_page":"\u81EA\u52D5\u898B\u958B\u304D\u30DA\u30FC\u30B8 (\u03B2)","auto_hide_toolbar":"\u30C4\u30FC\u30EB\u30D0\u30FC\u3092\u81EA\u52D5\u975E\u8868\u793A","back-to-top":"\u30DA\u30FC\u30B8\u30C8\u30C3\u30D7\u3078\u623B\u308B","back_button":"\u623B\u308B\u30DC\u30BF\u30F3","back_to_bookshelf":"\u672C\u68DA\u306B\u623B\u308B","book_shelf":"\u672C\u68DA","child_book_hint":"\u30D5\u30A9\u30EB\u30C0\u5185\u306B{0}\u518A\u306E\u66F8\u7C4D\u304C\u542B\u307E\u308C\u3066\u3044\u307E\u3059","debug_mode":"\u30C7\u30D0\u30C3\u30B0\u30E2\u30FC\u30C9","do_you_reset_all_settings":"\u3059\u3079\u3066\u306E\u8A2D\u5B9A\u3092\u521D\u671F\u5316\u3057\u307E\u3059\u304B\uFF1F","double_page_mode":"\u30C0\u30D6\u30EB\u30DA\u30FC\u30B8\u30E2\u30FC\u30C9","double_page_width":"\u898B\u958B\u304D\u30DA\u30FC\u30B8\u5E45:","download_sample_config_file":"\u8A2D\u5B9A\u30D5\u30A1\u30A4\u30EB\u3092\u30C0\u30A6\u30F3\u30ED\u30FC\u30C9","download_windows_reg_file":"REG\u30D5\u30A1\u30A4\u30EB\u3092\u30C0\u30A6\u30F3\u30ED\u30FC\u30C9","drop_to_upload":"\u30D5\u30A1\u30A4\u30EB\u3092\u30AF\u30EA\u30C3\u30AF\u3059\u308B\u304B\u3001\u3053\u306E\u30A8\u30EA\u30A2\u306B\u30C9\u30E9\u30C3\u30B0\uFF06\u30C9\u30ED\u30C3\u30D7\u3057\u3066\u30A2\u30C3\u30D7\u30ED\u30FC\u30C9","energy_threshold":"\u30A8\u30CD\u30EB\u30AE\u30FC\u95BE\u5024:","epub_info":"ePub\u60C5\u5831","exit_fullscreen":"\u30D5\u30EB\u30B9\u30AF\u30EA\u30FC\u30F3\u3092\u7D42\u4E86","filesize":"\u30D5\u30A1\u30A4\u30EB\u30B5\u30A4\u30BA: {0}","flip_mode":"\u30E8\u30B3\u8AAD\u307F\u30E2\u30FC\u30C9","flip_odd_even_page":"\u30DA\u30FC\u30B8\u9593\u306E\u30DE\u30C3\u30C1\u30F3\u30B0\u3092\u5909\u66F4","flip_odd_even_page_hint":"\u30DA\u30FC\u30B8\u5185\u5BB9\u304C\u4E00\u81F4\u3057\u306A\u3044\u5834\u5408\u306F\u3001\u30AF\u30EA\u30C3\u30AF\u3057\u3066\u4FEE\u6B63\u3092\u8A66\u307F\u3066\u304F\u3060\u3055\u3044","found_read_history":"\u8AAD\u66F8\u5C65\u6B74\u304C\u898B\u3064\u304B\u308A\u307E\u3057\u305F","from_interrupt":"\u9014\u4E2D\u304B\u3089\u518D\u958B","full_screen_hint":"\u30D5\u30EB\u30B9\u30AF\u30EA\u30FC\u30F3\u30DC\u30BF\u30F3","fullscreen":"\u30D5\u30EB\u30B9\u30AF\u30EA\u30FC\u30F3","good_job_and_byebye":"\u304A\u75B2\u308C\u69D8\u3067\u3057\u305F\u3002\u3055\u3088\u3046\u306A\u3089\u3002","gray_image":"\u30B0\u30EC\u30FC\u30B9\u30B1\u30FC\u30EB\u5316","hint":"Hint","hint_first_page":"\u6700\u521D\u306E\u30DA\u30FC\u30B8\u3067\u306F\u9032\u3081\u307E\u305B\u3093","hint_last_page":"\u3053\u308C\u304C\u6700\u5F8C\u306E\u30DA\u30FC\u30B8\u3067\u3059","hour":"\u6642\u9593","image_width_limit":"\u5E45\u306E\u30B5\u30A4\u30BA\u5236\u9650","infinite_dropdown":"\u7121\u9650\u30C9\u30ED\u30C3\u30D7\u30C0\u30A6\u30F3\u30E2\u30FC\u30C9","interval":"\u9593\u9694:","left_screen_to_next":"\u5DE6\u5411\u304D: \u30B3\u30DF\u30C3\u30AF","load_all_pages":"\u3059\u3079\u3066\u306E\u30DA\u30FC\u30B8\u3092\u8AAD\u307F\u8FBC\u3080","load_from_interrupt":"XX\u30DA\u30FC\u30B8\u304B\u3089\u8AAD\u307F\u8FBC\u307F\u3092\u958B\u59CB\u3057\u307E\u3059\u304B\uFF1F","login_success_hint":"\u30ED\u30B0\u30A4\u30F3\u306B\u6210\u529F\u3057\u307E\u3057\u305F\u3002\u524D\u306E\u30DA\u30FC\u30B8\u306B\u623B\u308A\u307E\u3059","logout":"\u30ED\u30B0\u30A2\u30A6\u30C8","margin_bottom_on_scroll_mode":"\u30DA\u30FC\u30B8\u9593\u306E\u4F59\u767D:","margin_on_scroll_mode":"\u30DA\u30FC\u30B8\u30AE\u30E3\u30C3\u30D7:","max_width":"\u6700\u5927\u5E45:","minute":"\u5206","network":"\u30C3\u30C8\u30EF\u30FC\u30AF","no_book_found_hint":"\u66F8\u7C4D\u304C\u898B\u3064\u304B\u308A\u307E\u305B\u3093\u3002\u30D5\u30A1\u30A4\u30EB\u3092\u30A2\u30C3\u30D7\u30ED\u30FC\u30C9\u3057\u3066\u307F\u3066\u304F\u3060\u3055\u3044\u3002","no_support_upload_file":"\u30D5\u30A1\u30A4\u30EB\u30A2\u30C3\u30D7\u30ED\u30FC\u30C9\u6A5F\u80FD\u306F\u7BA1\u7406\u8005\u306B\u3088\u308A\u7121\u52B9\u5316\u3055\u308C\u3066\u3044\u307E\u3059","not_support_fullscreen":"\u3053\u306E\u30D6\u30E9\u30A6\u30B6\u306F\u30D5\u30EB\u30B9\u30AF\u30EA\u30FC\u30F3\u3092\u30B5\u30DD\u30FC\u30C8\u3057\u3066\u3044\u307E\u305B\u3093","now_is":"\u73FE\u5728:","number_of_online_books":"\u30AA\u30F3\u30E9\u30A4\u30F3\u66F8\u7C4D\u6570\uFF1A","original_image":"\u30AA\u30EA\u30B8\u30CA\u30EB\u89E3\u50CF\u5EA6","original_pdf_link":"PDF\u30D5\u30A1\u30A4\u30EB\u306E\u30EA\u30F3\u30AF","page":"\u30DA\u30FC\u30B8","page_turning_seconds":"\u30DA\u30FC\u30B8\u3081\u304F\u308A\u6642\u9593:","pagination_mode":"\u30DA\u30FC\u30B8\u30F3\u30B0\u30E2\u30FC\u30C9","pdf_hint_message":"\u7D14\u7C8B\u306A\u753B\u50CFPDF\u306B\u5BFE\u5FDC\u3057\u3066\u3044\u307E\u3059\u3002\u8AAD\u307F\u8FBC\u307F\u304C\u9045\u3044\u5834\u5408\u3084\u30A8\u30E9\u30FC\u304C\u767A\u751F\u3057\u305F\u5834\u5408\u306F\u3001\u4EE5\u4E0B\u3092\u8A66\u3057\u3066\u304F\u3060\u3055\u3044\uFF1A","please_enable_upload":"\u30B5\u30FC\u30D0\u30FC\u306E\u30A2\u30C3\u30D7\u30ED\u30FC\u30C9\u6A5F\u80FD\u3092\u6709\u52B9\u306B\u3057\u3066\u304F\u3060\u3055\u3044","please_enter_content":"\u5185\u5BB9\u3092\u5165\u529B\u3057\u3066\u304F\u3060\u3055\u3044","qrcode_hint":"\u30AF\u30EA\u30C3\u30AF\u3057\u3066QR\u30B3\u30FC\u30C9\u3092\u8868\u793A","raw_resolution":"\u5143\u306E\u89E3\u50CF\u5EA6","re_sort_book":"\u66F8\u7C4D\u3092\u4E26\u3079\u66FF\u3048","re_sort_page":"\u30DA\u30FC\u30B8\u3092\u4E26\u3079\u66FF\u3048","reader_settings":"\u30EA\u30FC\u30C0\u30FC\u8A2D\u5B9A","reading_progress_bar":"\u8AAD\u66F8\u9032\u6357\u30D0\u30FC","refresh_page":"\u30DA\u30FC\u30B8\u3092\u66F4\u65B0","reset_all_settings":"\u3059\u3079\u3066\u306E\u8A2D\u5B9A\u3092\u30EA\u30BB\u30C3\u30C8","resort_file":"\u30D5\u30A1\u30A4\u30EB\u3092\u518D\u4E26\u3073\u66FF\u3048","right_screen_to_next":"\u53F3\u5411\u304D: \u30DE\u30F3\u30AC","save_page_num":"\u8AAD\u66F8\u9032\u6357\u3092\u4FDD\u5B58","scan_qrcode":"QR\u30B3\u30FC\u30C9\u3092\u30B9\u30AD\u30E3\u30F3:","scanned_hint":"XX\u518A\u898B\u3064\u304B\u308A\u307E\u3057\u305F\u3002\u8868\u793A\u3057\u307E\u3059\u304B\uFF1F","scroll_mode":"\u30BF\u30C6\u8AAD\u307F\u30E2\u30FC\u30C9","second":"\u79D2","select_language":"\u8A00\u8A9E\u3092\u9078\u629E","server_config":"\u30B5\u30FC\u30D0\u30FC\u8A2D\u5B9A","server_setting":"Comigo\u30B5\u30FC\u30D0\u30FC\u8A2D\u5B9A","set_back_color":"\u80CC\u666F\u8272\u3092\u8A2D\u5B9A:","set_interface_color":"UI\u30AB\u30E9\u30FC\u8A2D\u5B9A:","show_book_titles":"\u66F8\u7C4D\u30BF\u30A4\u30C8\u30EB\u3092\u8868\u793A","show_file_type":"\u30D5\u30A1\u30A4\u30EB\u30A2\u30A4\u30B3\u30F3\u3092\u8868\u793A","show_header":"\u30BF\u30A4\u30C8\u30EB\u3092\u8868\u793A","show_page_num":"\u30DA\u30FC\u30B8\u756A\u53F7\u3092\u8868\u793A","simplify_book_titles":"\u66F8\u7C4D\u30BF\u30A4\u30C8\u30EB\u3092\u7C21\u7565\u5316","single_page_mode":"\u30B7\u30F3\u30B0\u30EB\u30DA\u30FC\u30B8\u30E2\u30FC\u30C9","single_page_width":"\u30B7\u30F3\u30B0\u30EB\u30DA\u30FC\u30B8\u5E45:","sort_by_default":"\u30C7\u30D5\u30A9\u30EB\u30C8\u9806","sort_by_filename":"\u30D5\u30A1\u30A4\u30EB\u540D\u9806 (A-Z)","sort_by_filename_reverse":"\u30D5\u30A1\u30A4\u30EB\u540D\u9806 (Z-A)","sort_by_filesize":"\u30D5\u30A1\u30A4\u30EB\u30B5\u30A4\u30BA\u9806 (\u5927\u2192\u5C0F)","sort_by_filesize_reverse":"\u30D5\u30A1\u30A4\u30EB\u30B5\u30A4\u30BA\u9806 (\u5C0F\u2192\u5927)","sort_by_modify_time":"\u66F4\u65B0\u65E5\u6642\u9806 (\u65B0\u2192\u65E7)","sort_by_modify_time_reverse":"\u66F4\u65B0\u65E5\u6642\u9806 (\u65E7\u2192\u65B0)","sort_reverse":"\uFF08\u9006\u9806\uFF09","start_sketch_message":"\u30AF\u30ED\u30C3\u30AD\u30FC\u30E2\u30FC\u30C9\u304C\u958B\u59CB\u3055\u308C\u307E\u3057\u305F\u3002\u826F\u3044\u4E00\u65E5\u3092\uFF01","start_sketch_mode":"\u30AF\u30ED\u30C3\u30AD\u30FC\u30E2\u30FC\u30C9\u958B\u59CB","starting_from_beginning":"\u6700\u521D\u304B\u3089\u958B\u59CB","starting_from_beginning_hint":"\u6700\u521D\u306E\u30DA\u30FC\u30B8\u304B\u3089\u8AAD\u307F\u8FBC\u307F\u307E\u3059","stop_sketch_mode":"\u30AF\u30ED\u30C3\u30AD\u30FC\u30E2\u30FC\u30C9\u7D42\u4E86","submit":"\u9001\u4FE1","success_fullscreen":"\u30D5\u30EB\u30B9\u30AF\u30EA\u30FC\u30F3\u306B\u6210\u529F\u3057\u307E\u3057\u305F","successfully_loaded_reading_progress":"\u8AAD\u66F8\u9032\u6357\u3092\u6B63\u5E38\u306B\u8AAD\u307F\u8FBC\u307F\u307E\u3057\u305F","switch_to_flip_mode":"\u30DA\u30FC\u30B8\u3081\u304F\u308A\u30E2\u30FC\u30C9\u306B\u5207\u66FF","switch_to_scrolling_mode":"\u30B9\u30AF\u30ED\u30FC\u30EB\u30E2\u30FC\u30C9\u306B\u5207\u66FF","sync_page":"\u30EA\u30E2\u30FC\u30C8\u30DA\u30FC\u30B8\u540C\u671F","temp_future_hint":"\u307E\u3060\u5B8C\u6210\u3057\u3066\u3044\u306A\u3044\u3044\u304F\u3064\u304B\u306E\u6A5F\u80FD\u3092\u3001\u4E00\u6642\u7684\u306B\u306B\u7F6E\u304F\u3002","test":"\u30C6\u30B9\u30C8","to_flip_mode":"\u30E8\u30B3\u8AAD\u307F\u30E2\u30FC\u30C9\u3078","to_infinite_dropdown_mode":"\u7121\u9650\u30C9\u30ED\u30C3\u30D7\u30C0\u30A6\u30F3\u30E2\u30FC\u30C9\u3078","to_pagination_mode":"\u30DA\u30FC\u30B8\u30F3\u30B0\u30E2\u30FC\u30C9\u3078","to_scroll_mode":"\u30BF\u30C6\u8AAD\u30E2\u30FC\u30C9\u3078","total_is":"\u5408\u8A08:","total_time":"\u5408\u8A08\u6642\u9593:","type_or_paste_content":"\u5165\u529B\u307E\u305F\u306F\u8CBC\u308A\u4ED8\u3051","upload_file":"\u30D5\u30A1\u30A4\u30EB\u3092\u30A2\u30C3\u30D7\u30ED\u30FC\u30C9","uploaded_folder_hint":"\u30D5\u30A1\u30A4\u30EB\u306F\u5B9F\u884C\u30C7\u30A3\u30EC\u30AF\u30C8\u30EA\u5185\u306EComigoUpload\u30D5\u30A9\u30EB\u30C0\u306B\u30A2\u30C3\u30D7\u30ED\u30FC\u30C9\u3055\u308C\u307E\u3059","width_use_fixed_value":"\u6A2A\u5E45: \u56FA\u5B9A\u5024","width_use_percent":"\u6A2A\u5E45: \u30D1\u30FC\u30BB\u30F3\u30C6\u30FC\u30B8"}');
 
 
+(0, $1bac384020b50752$export$2e2bcd8739ae039).use((0, $199830a05f92d3d0$export$2e2bcd8739ae039)).init({
+    debug: false,
+    initImmediate: true,
+    supportedLngs: [
+        'en-US',
+        'ja-JP',
+        'zh-CN',
+        'en',
+        'zh',
+        'ja'
+    ],
+    fallbackLng: [
+        'en',
+        'zh',
+        'ja'
+    ],
+    resources: {
+        'en-US': {
+            translation: (0, (/*@__PURE__*/$parcel$interopDefault($bb767615b495769d$exports)))
+        },
+        en: {
+            translation: (0, (/*@__PURE__*/$parcel$interopDefault($bb767615b495769d$exports)))
+        },
+        'zh-CN': {
+            translation: (0, (/*@__PURE__*/$parcel$interopDefault($c199df056bb7354f$exports)))
+        },
+        zh: {
+            translation: (0, (/*@__PURE__*/$parcel$interopDefault($c199df056bb7354f$exports)))
+        },
+        'ja-JP': {
+            translation: (0, (/*@__PURE__*/$parcel$interopDefault($fa2f411c6f0799ad$exports)))
+        },
+        ja: {
+            translation: (0, (/*@__PURE__*/$parcel$interopDefault($fa2f411c6f0799ad$exports)))
+        }
+    }
+});
+window.i18next = (0, $1bac384020b50752$export$2e2bcd8739ae039 // 使i18next在全局作用域中可用 
+);
+
+
+// packages/alpinejs/src/scheduler.js
+var $8c83eaf28779ff46$var$flushPending = false;
+var $8c83eaf28779ff46$var$flushing = false;
+var $8c83eaf28779ff46$var$queue = [];
+var $8c83eaf28779ff46$var$lastFlushedIndex = -1;
+function $8c83eaf28779ff46$var$scheduler(callback) {
+    $8c83eaf28779ff46$var$queueJob(callback);
+}
+function $8c83eaf28779ff46$var$queueJob(job) {
+    if (!$8c83eaf28779ff46$var$queue.includes(job)) $8c83eaf28779ff46$var$queue.push(job);
+    $8c83eaf28779ff46$var$queueFlush();
+}
+function $8c83eaf28779ff46$var$dequeueJob(job) {
+    let index = $8c83eaf28779ff46$var$queue.indexOf(job);
+    if (index !== -1 && index > $8c83eaf28779ff46$var$lastFlushedIndex) $8c83eaf28779ff46$var$queue.splice(index, 1);
+}
+function $8c83eaf28779ff46$var$queueFlush() {
+    if (!$8c83eaf28779ff46$var$flushing && !$8c83eaf28779ff46$var$flushPending) {
+        $8c83eaf28779ff46$var$flushPending = true;
+        queueMicrotask($8c83eaf28779ff46$var$flushJobs);
+    }
+}
+function $8c83eaf28779ff46$var$flushJobs() {
+    $8c83eaf28779ff46$var$flushPending = false;
+    $8c83eaf28779ff46$var$flushing = true;
+    for(let i = 0; i < $8c83eaf28779ff46$var$queue.length; i++){
+        $8c83eaf28779ff46$var$queue[i]();
+        $8c83eaf28779ff46$var$lastFlushedIndex = i;
+    }
+    $8c83eaf28779ff46$var$queue.length = 0;
+    $8c83eaf28779ff46$var$lastFlushedIndex = -1;
+    $8c83eaf28779ff46$var$flushing = false;
+}
+// packages/alpinejs/src/reactivity.js
+var $8c83eaf28779ff46$var$reactive;
+var $8c83eaf28779ff46$var$effect;
+var $8c83eaf28779ff46$var$release;
+var $8c83eaf28779ff46$var$raw;
+var $8c83eaf28779ff46$var$shouldSchedule = true;
+function $8c83eaf28779ff46$var$disableEffectScheduling(callback) {
+    $8c83eaf28779ff46$var$shouldSchedule = false;
+    callback();
+    $8c83eaf28779ff46$var$shouldSchedule = true;
+}
+function $8c83eaf28779ff46$var$setReactivityEngine(engine) {
+    $8c83eaf28779ff46$var$reactive = engine.reactive;
+    $8c83eaf28779ff46$var$release = engine.release;
+    $8c83eaf28779ff46$var$effect = (callback)=>engine.effect(callback, {
+            scheduler: (task)=>{
+                if ($8c83eaf28779ff46$var$shouldSchedule) $8c83eaf28779ff46$var$scheduler(task);
+                else task();
+            }
+        });
+    $8c83eaf28779ff46$var$raw = engine.raw;
+}
+function $8c83eaf28779ff46$var$overrideEffect(override) {
+    $8c83eaf28779ff46$var$effect = override;
+}
+function $8c83eaf28779ff46$var$elementBoundEffect(el) {
+    let cleanup2 = ()=>{};
+    let wrappedEffect = (callback)=>{
+        let effectReference = $8c83eaf28779ff46$var$effect(callback);
+        if (!el._x_effects) {
+            el._x_effects = /* @__PURE__ */ new Set();
+            el._x_runEffects = ()=>{
+                el._x_effects.forEach((i)=>i());
+            };
+        }
+        el._x_effects.add(effectReference);
+        cleanup2 = ()=>{
+            if (effectReference === void 0) return;
+            el._x_effects.delete(effectReference);
+            $8c83eaf28779ff46$var$release(effectReference);
+        };
+        return effectReference;
+    };
+    return [
+        wrappedEffect,
+        ()=>{
+            cleanup2();
+        }
+    ];
+}
+function $8c83eaf28779ff46$var$watch(getter, callback) {
+    let firstTime = true;
+    let oldValue;
+    let effectReference = $8c83eaf28779ff46$var$effect(()=>{
+        let value = getter();
+        JSON.stringify(value);
+        if (!firstTime) queueMicrotask(()=>{
+            callback(value, oldValue);
+            oldValue = value;
+        });
+        else oldValue = value;
+        firstTime = false;
+    });
+    return ()=>$8c83eaf28779ff46$var$release(effectReference);
+}
+// packages/alpinejs/src/mutation.js
+var $8c83eaf28779ff46$var$onAttributeAddeds = [];
+var $8c83eaf28779ff46$var$onElRemoveds = [];
+var $8c83eaf28779ff46$var$onElAddeds = [];
+function $8c83eaf28779ff46$var$onElAdded(callback) {
+    $8c83eaf28779ff46$var$onElAddeds.push(callback);
+}
+function $8c83eaf28779ff46$var$onElRemoved(el, callback) {
+    if (typeof callback === "function") {
+        if (!el._x_cleanups) el._x_cleanups = [];
+        el._x_cleanups.push(callback);
+    } else {
+        callback = el;
+        $8c83eaf28779ff46$var$onElRemoveds.push(callback);
+    }
+}
+function $8c83eaf28779ff46$var$onAttributesAdded(callback) {
+    $8c83eaf28779ff46$var$onAttributeAddeds.push(callback);
+}
+function $8c83eaf28779ff46$var$onAttributeRemoved(el, name, callback) {
+    if (!el._x_attributeCleanups) el._x_attributeCleanups = {};
+    if (!el._x_attributeCleanups[name]) el._x_attributeCleanups[name] = [];
+    el._x_attributeCleanups[name].push(callback);
+}
+function $8c83eaf28779ff46$var$cleanupAttributes(el, names) {
+    if (!el._x_attributeCleanups) return;
+    Object.entries(el._x_attributeCleanups).forEach(([name, value])=>{
+        if (names === void 0 || names.includes(name)) {
+            value.forEach((i)=>i());
+            delete el._x_attributeCleanups[name];
+        }
+    });
+}
+function $8c83eaf28779ff46$var$cleanupElement(el) {
+    el._x_effects?.forEach($8c83eaf28779ff46$var$dequeueJob);
+    while(el._x_cleanups?.length)el._x_cleanups.pop()();
+}
+var $8c83eaf28779ff46$var$observer = new MutationObserver($8c83eaf28779ff46$var$onMutate);
+var $8c83eaf28779ff46$var$currentlyObserving = false;
+function $8c83eaf28779ff46$var$startObservingMutations() {
+    $8c83eaf28779ff46$var$observer.observe(document, {
+        subtree: true,
+        childList: true,
+        attributes: true,
+        attributeOldValue: true
+    });
+    $8c83eaf28779ff46$var$currentlyObserving = true;
+}
+function $8c83eaf28779ff46$var$stopObservingMutations() {
+    $8c83eaf28779ff46$var$flushObserver();
+    $8c83eaf28779ff46$var$observer.disconnect();
+    $8c83eaf28779ff46$var$currentlyObserving = false;
+}
+var $8c83eaf28779ff46$var$queuedMutations = [];
+function $8c83eaf28779ff46$var$flushObserver() {
+    let records = $8c83eaf28779ff46$var$observer.takeRecords();
+    $8c83eaf28779ff46$var$queuedMutations.push(()=>records.length > 0 && $8c83eaf28779ff46$var$onMutate(records));
+    let queueLengthWhenTriggered = $8c83eaf28779ff46$var$queuedMutations.length;
+    queueMicrotask(()=>{
+        if ($8c83eaf28779ff46$var$queuedMutations.length === queueLengthWhenTriggered) while($8c83eaf28779ff46$var$queuedMutations.length > 0)$8c83eaf28779ff46$var$queuedMutations.shift()();
+    });
+}
+function $8c83eaf28779ff46$var$mutateDom(callback) {
+    if (!$8c83eaf28779ff46$var$currentlyObserving) return callback();
+    $8c83eaf28779ff46$var$stopObservingMutations();
+    let result = callback();
+    $8c83eaf28779ff46$var$startObservingMutations();
+    return result;
+}
+var $8c83eaf28779ff46$var$isCollecting = false;
+var $8c83eaf28779ff46$var$deferredMutations = [];
+function $8c83eaf28779ff46$var$deferMutations() {
+    $8c83eaf28779ff46$var$isCollecting = true;
+}
+function $8c83eaf28779ff46$var$flushAndStopDeferringMutations() {
+    $8c83eaf28779ff46$var$isCollecting = false;
+    $8c83eaf28779ff46$var$onMutate($8c83eaf28779ff46$var$deferredMutations);
+    $8c83eaf28779ff46$var$deferredMutations = [];
+}
+function $8c83eaf28779ff46$var$onMutate(mutations) {
+    if ($8c83eaf28779ff46$var$isCollecting) {
+        $8c83eaf28779ff46$var$deferredMutations = $8c83eaf28779ff46$var$deferredMutations.concat(mutations);
+        return;
+    }
+    let addedNodes = [];
+    let removedNodes = /* @__PURE__ */ new Set();
+    let addedAttributes = /* @__PURE__ */ new Map();
+    let removedAttributes = /* @__PURE__ */ new Map();
+    for(let i = 0; i < mutations.length; i++){
+        if (mutations[i].target._x_ignoreMutationObserver) continue;
+        if (mutations[i].type === "childList") {
+            mutations[i].removedNodes.forEach((node)=>{
+                if (node.nodeType !== 1) return;
+                if (!node._x_marker) return;
+                removedNodes.add(node);
+            });
+            mutations[i].addedNodes.forEach((node)=>{
+                if (node.nodeType !== 1) return;
+                if (removedNodes.has(node)) {
+                    removedNodes.delete(node);
+                    return;
+                }
+                if (node._x_marker) return;
+                addedNodes.push(node);
+            });
+        }
+        if (mutations[i].type === "attributes") {
+            let el = mutations[i].target;
+            let name = mutations[i].attributeName;
+            let oldValue = mutations[i].oldValue;
+            let add2 = ()=>{
+                if (!addedAttributes.has(el)) addedAttributes.set(el, []);
+                addedAttributes.get(el).push({
+                    name: name,
+                    value: el.getAttribute(name)
+                });
+            };
+            let remove = ()=>{
+                if (!removedAttributes.has(el)) removedAttributes.set(el, []);
+                removedAttributes.get(el).push(name);
+            };
+            if (el.hasAttribute(name) && oldValue === null) add2();
+            else if (el.hasAttribute(name)) {
+                remove();
+                add2();
+            } else remove();
+        }
+    }
+    removedAttributes.forEach((attrs, el)=>{
+        $8c83eaf28779ff46$var$cleanupAttributes(el, attrs);
+    });
+    addedAttributes.forEach((attrs, el)=>{
+        $8c83eaf28779ff46$var$onAttributeAddeds.forEach((i)=>i(el, attrs));
+    });
+    for (let node of removedNodes){
+        if (addedNodes.some((i)=>i.contains(node))) continue;
+        $8c83eaf28779ff46$var$onElRemoveds.forEach((i)=>i(node));
+    }
+    for (let node of addedNodes){
+        if (!node.isConnected) continue;
+        $8c83eaf28779ff46$var$onElAddeds.forEach((i)=>i(node));
+    }
+    addedNodes = null;
+    removedNodes = null;
+    addedAttributes = null;
+    removedAttributes = null;
+}
+// packages/alpinejs/src/scope.js
+function $8c83eaf28779ff46$var$scope(node) {
+    return $8c83eaf28779ff46$var$mergeProxies($8c83eaf28779ff46$var$closestDataStack(node));
+}
+function $8c83eaf28779ff46$var$addScopeToNode(node, data2, referenceNode) {
+    node._x_dataStack = [
+        data2,
+        ...$8c83eaf28779ff46$var$closestDataStack(referenceNode || node)
+    ];
+    return ()=>{
+        node._x_dataStack = node._x_dataStack.filter((i)=>i !== data2);
+    };
+}
+function $8c83eaf28779ff46$var$closestDataStack(node) {
+    if (node._x_dataStack) return node._x_dataStack;
+    if (typeof ShadowRoot === "function" && node instanceof ShadowRoot) return $8c83eaf28779ff46$var$closestDataStack(node.host);
+    if (!node.parentNode) return [];
+    return $8c83eaf28779ff46$var$closestDataStack(node.parentNode);
+}
+function $8c83eaf28779ff46$var$mergeProxies(objects) {
+    return new Proxy({
+        objects: objects
+    }, $8c83eaf28779ff46$var$mergeProxyTrap);
+}
+var $8c83eaf28779ff46$var$mergeProxyTrap = {
+    ownKeys ({ objects: objects }) {
+        return Array.from(new Set(objects.flatMap((i)=>Object.keys(i))));
+    },
+    has ({ objects: objects }, name) {
+        if (name == Symbol.unscopables) return false;
+        return objects.some((obj)=>Object.prototype.hasOwnProperty.call(obj, name) || Reflect.has(obj, name));
+    },
+    get ({ objects: objects }, name, thisProxy) {
+        if (name == "toJSON") return $8c83eaf28779ff46$var$collapseProxies;
+        return Reflect.get(objects.find((obj)=>Reflect.has(obj, name)) || {}, name, thisProxy);
+    },
+    set ({ objects: objects }, name, value, thisProxy) {
+        const target = objects.find((obj)=>Object.prototype.hasOwnProperty.call(obj, name)) || objects[objects.length - 1];
+        const descriptor = Object.getOwnPropertyDescriptor(target, name);
+        if (descriptor?.set && descriptor?.get) return descriptor.set.call(thisProxy, value) || true;
+        return Reflect.set(target, name, value);
+    }
+};
+function $8c83eaf28779ff46$var$collapseProxies() {
+    let keys = Reflect.ownKeys(this);
+    return keys.reduce((acc, key)=>{
+        acc[key] = Reflect.get(this, key);
+        return acc;
+    }, {});
+}
+// packages/alpinejs/src/interceptor.js
+function $8c83eaf28779ff46$var$initInterceptors(data2) {
+    let isObject2 = (val)=>typeof val === "object" && !Array.isArray(val) && val !== null;
+    let recurse = (obj, basePath = "")=>{
+        Object.entries(Object.getOwnPropertyDescriptors(obj)).forEach(([key, { value: value, enumerable: enumerable }])=>{
+            if (enumerable === false || value === void 0) return;
+            if (typeof value === "object" && value !== null && value.__v_skip) return;
+            let path = basePath === "" ? key : `${basePath}.${key}`;
+            if (typeof value === "object" && value !== null && value._x_interceptor) obj[key] = value.initialize(data2, path, key);
+            else if (isObject2(value) && value !== obj && !(value instanceof Element)) recurse(value, path);
+        });
+    };
+    return recurse(data2);
+}
+function $8c83eaf28779ff46$var$interceptor(callback, mutateObj = ()=>{}) {
+    let obj = {
+        initialValue: void 0,
+        _x_interceptor: true,
+        initialize (data2, path, key) {
+            return callback(this.initialValue, ()=>$8c83eaf28779ff46$var$get(data2, path), (value)=>$8c83eaf28779ff46$var$set(data2, path, value), path, key);
+        }
+    };
+    mutateObj(obj);
+    return (initialValue)=>{
+        if (typeof initialValue === "object" && initialValue !== null && initialValue._x_interceptor) {
+            let initialize = obj.initialize.bind(obj);
+            obj.initialize = (data2, path, key)=>{
+                let innerValue = initialValue.initialize(data2, path, key);
+                obj.initialValue = innerValue;
+                return initialize(data2, path, key);
+            };
+        } else obj.initialValue = initialValue;
+        return obj;
+    };
+}
+function $8c83eaf28779ff46$var$get(obj, path) {
+    return path.split(".").reduce((carry, segment)=>carry[segment], obj);
+}
+function $8c83eaf28779ff46$var$set(obj, path, value) {
+    if (typeof path === "string") path = path.split(".");
+    if (path.length === 1) obj[path[0]] = value;
+    else if (path.length === 0) throw error;
+    else {
+        if (obj[path[0]]) return $8c83eaf28779ff46$var$set(obj[path[0]], path.slice(1), value);
+        else {
+            obj[path[0]] = {};
+            return $8c83eaf28779ff46$var$set(obj[path[0]], path.slice(1), value);
+        }
+    }
+}
+// packages/alpinejs/src/magics.js
+var $8c83eaf28779ff46$var$magics = {};
+function $8c83eaf28779ff46$var$magic(name, callback) {
+    $8c83eaf28779ff46$var$magics[name] = callback;
+}
+function $8c83eaf28779ff46$var$injectMagics(obj, el) {
+    let memoizedUtilities = $8c83eaf28779ff46$var$getUtilities(el);
+    Object.entries($8c83eaf28779ff46$var$magics).forEach(([name, callback])=>{
+        Object.defineProperty(obj, `$${name}`, {
+            get () {
+                return callback(el, memoizedUtilities);
+            },
+            enumerable: false
+        });
+    });
+    return obj;
+}
+function $8c83eaf28779ff46$var$getUtilities(el) {
+    let [utilities, cleanup2] = $8c83eaf28779ff46$var$getElementBoundUtilities(el);
+    let utils = {
+        interceptor: $8c83eaf28779ff46$var$interceptor,
+        ...utilities
+    };
+    $8c83eaf28779ff46$var$onElRemoved(el, cleanup2);
+    return utils;
+}
+// packages/alpinejs/src/utils/error.js
+function $8c83eaf28779ff46$var$tryCatch(el, expression, callback, ...args) {
+    try {
+        return callback(...args);
+    } catch (e) {
+        $8c83eaf28779ff46$var$handleError(e, el, expression);
+    }
+}
+function $8c83eaf28779ff46$var$handleError(error2, el, expression) {
+    error2 = Object.assign(error2 ?? {
+        message: "No error message given."
+    }, {
+        el: el,
+        expression: expression
+    });
+    console.warn(`Alpine Expression Error: ${error2.message}
+
+${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
+    setTimeout(()=>{
+        throw error2;
+    }, 0);
+}
+// packages/alpinejs/src/evaluator.js
+var $8c83eaf28779ff46$var$shouldAutoEvaluateFunctions = true;
+function $8c83eaf28779ff46$var$dontAutoEvaluateFunctions(callback) {
+    let cache = $8c83eaf28779ff46$var$shouldAutoEvaluateFunctions;
+    $8c83eaf28779ff46$var$shouldAutoEvaluateFunctions = false;
+    let result = callback();
+    $8c83eaf28779ff46$var$shouldAutoEvaluateFunctions = cache;
+    return result;
+}
+function $8c83eaf28779ff46$var$evaluate(el, expression, extras = {}) {
+    let result;
+    $8c83eaf28779ff46$var$evaluateLater(el, expression)((value)=>result = value, extras);
+    return result;
+}
+function $8c83eaf28779ff46$var$evaluateLater(...args) {
+    return $8c83eaf28779ff46$var$theEvaluatorFunction(...args);
+}
+var $8c83eaf28779ff46$var$theEvaluatorFunction = $8c83eaf28779ff46$var$normalEvaluator;
+function $8c83eaf28779ff46$var$setEvaluator(newEvaluator) {
+    $8c83eaf28779ff46$var$theEvaluatorFunction = newEvaluator;
+}
+function $8c83eaf28779ff46$var$normalEvaluator(el, expression) {
+    let overriddenMagics = {};
+    $8c83eaf28779ff46$var$injectMagics(overriddenMagics, el);
+    let dataStack = [
+        overriddenMagics,
+        ...$8c83eaf28779ff46$var$closestDataStack(el)
+    ];
+    let evaluator = typeof expression === "function" ? $8c83eaf28779ff46$var$generateEvaluatorFromFunction(dataStack, expression) : $8c83eaf28779ff46$var$generateEvaluatorFromString(dataStack, expression, el);
+    return $8c83eaf28779ff46$var$tryCatch.bind(null, el, expression, evaluator);
+}
+function $8c83eaf28779ff46$var$generateEvaluatorFromFunction(dataStack, func) {
+    return (receiver = ()=>{}, { scope: scope2 = {}, params: params = [] } = {})=>{
+        let result = func.apply($8c83eaf28779ff46$var$mergeProxies([
+            scope2,
+            ...dataStack
+        ]), params);
+        $8c83eaf28779ff46$var$runIfTypeOfFunction(receiver, result);
+    };
+}
+var $8c83eaf28779ff46$var$evaluatorMemo = {};
+function $8c83eaf28779ff46$var$generateFunctionFromString(expression, el) {
+    if ($8c83eaf28779ff46$var$evaluatorMemo[expression]) return $8c83eaf28779ff46$var$evaluatorMemo[expression];
+    let AsyncFunction = Object.getPrototypeOf(async function() {}).constructor;
+    let rightSideSafeExpression = /^[\n\s]*if.*\(.*\)/.test(expression.trim()) || /^(let|const)\s/.test(expression.trim()) ? `(async()=>{ ${expression} })()` : expression;
+    const safeAsyncFunction = ()=>{
+        try {
+            let func2 = new AsyncFunction([
+                "__self",
+                "scope"
+            ], `with (scope) { __self.result = ${rightSideSafeExpression} }; __self.finished = true; return __self.result;`);
+            Object.defineProperty(func2, "name", {
+                value: `[Alpine] ${expression}`
+            });
+            return func2;
+        } catch (error2) {
+            $8c83eaf28779ff46$var$handleError(error2, el, expression);
+            return Promise.resolve();
+        }
+    };
+    let func = safeAsyncFunction();
+    $8c83eaf28779ff46$var$evaluatorMemo[expression] = func;
+    return func;
+}
+function $8c83eaf28779ff46$var$generateEvaluatorFromString(dataStack, expression, el) {
+    let func = $8c83eaf28779ff46$var$generateFunctionFromString(expression, el);
+    return (receiver = ()=>{}, { scope: scope2 = {}, params: params = [] } = {})=>{
+        func.result = void 0;
+        func.finished = false;
+        let completeScope = $8c83eaf28779ff46$var$mergeProxies([
+            scope2,
+            ...dataStack
+        ]);
+        if (typeof func === "function") {
+            let promise = func(func, completeScope).catch((error2)=>$8c83eaf28779ff46$var$handleError(error2, el, expression));
+            if (func.finished) {
+                $8c83eaf28779ff46$var$runIfTypeOfFunction(receiver, func.result, completeScope, params, el);
+                func.result = void 0;
+            } else promise.then((result)=>{
+                $8c83eaf28779ff46$var$runIfTypeOfFunction(receiver, result, completeScope, params, el);
+            }).catch((error2)=>$8c83eaf28779ff46$var$handleError(error2, el, expression)).finally(()=>func.result = void 0);
+        }
+    };
+}
+function $8c83eaf28779ff46$var$runIfTypeOfFunction(receiver, value, scope2, params, el) {
+    if ($8c83eaf28779ff46$var$shouldAutoEvaluateFunctions && typeof value === "function") {
+        let result = value.apply(scope2, params);
+        if (result instanceof Promise) result.then((i)=>$8c83eaf28779ff46$var$runIfTypeOfFunction(receiver, i, scope2, params)).catch((error2)=>$8c83eaf28779ff46$var$handleError(error2, el, value));
+        else receiver(result);
+    } else if (typeof value === "object" && value instanceof Promise) value.then((i)=>receiver(i));
+    else receiver(value);
+}
+// packages/alpinejs/src/directives.js
+var $8c83eaf28779ff46$var$prefixAsString = "x-";
+function $8c83eaf28779ff46$var$prefix(subject = "") {
+    return $8c83eaf28779ff46$var$prefixAsString + subject;
+}
+function $8c83eaf28779ff46$var$setPrefix(newPrefix) {
+    $8c83eaf28779ff46$var$prefixAsString = newPrefix;
+}
+var $8c83eaf28779ff46$var$directiveHandlers = {};
+function $8c83eaf28779ff46$var$directive(name, callback) {
+    $8c83eaf28779ff46$var$directiveHandlers[name] = callback;
+    return {
+        before (directive2) {
+            if (!$8c83eaf28779ff46$var$directiveHandlers[directive2]) {
+                console.warn(String.raw`Cannot find directive \`${directive2}\`. \`${name}\` will use the default order of execution`);
+                return;
+            }
+            const pos = $8c83eaf28779ff46$var$directiveOrder.indexOf(directive2);
+            $8c83eaf28779ff46$var$directiveOrder.splice(pos >= 0 ? pos : $8c83eaf28779ff46$var$directiveOrder.indexOf("DEFAULT"), 0, name);
+        }
+    };
+}
+function $8c83eaf28779ff46$var$directiveExists(name) {
+    return Object.keys($8c83eaf28779ff46$var$directiveHandlers).includes(name);
+}
+function $8c83eaf28779ff46$var$directives(el, attributes, originalAttributeOverride) {
+    attributes = Array.from(attributes);
+    if (el._x_virtualDirectives) {
+        let vAttributes = Object.entries(el._x_virtualDirectives).map(([name, value])=>({
+                name: name,
+                value: value
+            }));
+        let staticAttributes = $8c83eaf28779ff46$var$attributesOnly(vAttributes);
+        vAttributes = vAttributes.map((attribute)=>{
+            if (staticAttributes.find((attr)=>attr.name === attribute.name)) return {
+                name: `x-bind:${attribute.name}`,
+                value: `"${attribute.value}"`
+            };
+            return attribute;
+        });
+        attributes = attributes.concat(vAttributes);
+    }
+    let transformedAttributeMap = {};
+    let directives2 = attributes.map($8c83eaf28779ff46$var$toTransformedAttributes((newName, oldName)=>transformedAttributeMap[newName] = oldName)).filter($8c83eaf28779ff46$var$outNonAlpineAttributes).map($8c83eaf28779ff46$var$toParsedDirectives(transformedAttributeMap, originalAttributeOverride)).sort($8c83eaf28779ff46$var$byPriority);
+    return directives2.map((directive2)=>{
+        return $8c83eaf28779ff46$var$getDirectiveHandler(el, directive2);
+    });
+}
+function $8c83eaf28779ff46$var$attributesOnly(attributes) {
+    return Array.from(attributes).map($8c83eaf28779ff46$var$toTransformedAttributes()).filter((attr)=>!$8c83eaf28779ff46$var$outNonAlpineAttributes(attr));
+}
+var $8c83eaf28779ff46$var$isDeferringHandlers = false;
+var $8c83eaf28779ff46$var$directiveHandlerStacks = /* @__PURE__ */ new Map();
+var $8c83eaf28779ff46$var$currentHandlerStackKey = Symbol();
+function $8c83eaf28779ff46$var$deferHandlingDirectives(callback) {
+    $8c83eaf28779ff46$var$isDeferringHandlers = true;
+    let key = Symbol();
+    $8c83eaf28779ff46$var$currentHandlerStackKey = key;
+    $8c83eaf28779ff46$var$directiveHandlerStacks.set(key, []);
+    let flushHandlers = ()=>{
+        while($8c83eaf28779ff46$var$directiveHandlerStacks.get(key).length)$8c83eaf28779ff46$var$directiveHandlerStacks.get(key).shift()();
+        $8c83eaf28779ff46$var$directiveHandlerStacks.delete(key);
+    };
+    let stopDeferring = ()=>{
+        $8c83eaf28779ff46$var$isDeferringHandlers = false;
+        flushHandlers();
+    };
+    callback(flushHandlers);
+    stopDeferring();
+}
+function $8c83eaf28779ff46$var$getElementBoundUtilities(el) {
+    let cleanups = [];
+    let cleanup2 = (callback)=>cleanups.push(callback);
+    let [effect3, cleanupEffect] = $8c83eaf28779ff46$var$elementBoundEffect(el);
+    cleanups.push(cleanupEffect);
+    let utilities = {
+        Alpine: $8c83eaf28779ff46$var$alpine_default,
+        effect: effect3,
+        cleanup: cleanup2,
+        evaluateLater: $8c83eaf28779ff46$var$evaluateLater.bind($8c83eaf28779ff46$var$evaluateLater, el),
+        evaluate: $8c83eaf28779ff46$var$evaluate.bind($8c83eaf28779ff46$var$evaluate, el)
+    };
+    let doCleanup = ()=>cleanups.forEach((i)=>i());
+    return [
+        utilities,
+        doCleanup
+    ];
+}
+function $8c83eaf28779ff46$var$getDirectiveHandler(el, directive2) {
+    let noop = ()=>{};
+    let handler4 = $8c83eaf28779ff46$var$directiveHandlers[directive2.type] || noop;
+    let [utilities, cleanup2] = $8c83eaf28779ff46$var$getElementBoundUtilities(el);
+    $8c83eaf28779ff46$var$onAttributeRemoved(el, directive2.original, cleanup2);
+    let fullHandler = ()=>{
+        if (el._x_ignore || el._x_ignoreSelf) return;
+        handler4.inline && handler4.inline(el, directive2, utilities);
+        handler4 = handler4.bind(handler4, el, directive2, utilities);
+        $8c83eaf28779ff46$var$isDeferringHandlers ? $8c83eaf28779ff46$var$directiveHandlerStacks.get($8c83eaf28779ff46$var$currentHandlerStackKey).push(handler4) : handler4();
+    };
+    fullHandler.runCleanups = cleanup2;
+    return fullHandler;
+}
+var $8c83eaf28779ff46$var$startingWith = (subject, replacement)=>({ name: name, value: value })=>{
+        if (name.startsWith(subject)) name = name.replace(subject, replacement);
+        return {
+            name: name,
+            value: value
+        };
+    };
+var $8c83eaf28779ff46$var$into = (i)=>i;
+function $8c83eaf28779ff46$var$toTransformedAttributes(callback = ()=>{}) {
+    return ({ name: name, value: value })=>{
+        let { name: newName, value: newValue } = $8c83eaf28779ff46$var$attributeTransformers.reduce((carry, transform)=>{
+            return transform(carry);
+        }, {
+            name: name,
+            value: value
+        });
+        if (newName !== name) callback(newName, name);
+        return {
+            name: newName,
+            value: newValue
+        };
+    };
+}
+var $8c83eaf28779ff46$var$attributeTransformers = [];
+function $8c83eaf28779ff46$var$mapAttributes(callback) {
+    $8c83eaf28779ff46$var$attributeTransformers.push(callback);
+}
+function $8c83eaf28779ff46$var$outNonAlpineAttributes({ name: name }) {
+    return $8c83eaf28779ff46$var$alpineAttributeRegex().test(name);
+}
+var $8c83eaf28779ff46$var$alpineAttributeRegex = ()=>new RegExp(`^${$8c83eaf28779ff46$var$prefixAsString}([^:^.]+)\\b`);
+function $8c83eaf28779ff46$var$toParsedDirectives(transformedAttributeMap, originalAttributeOverride) {
+    return ({ name: name, value: value })=>{
+        let typeMatch = name.match($8c83eaf28779ff46$var$alpineAttributeRegex());
+        let valueMatch = name.match(/:([a-zA-Z0-9\-_:]+)/);
+        let modifiers = name.match(/\.[^.\]]+(?=[^\]]*$)/g) || [];
+        let original = originalAttributeOverride || transformedAttributeMap[name] || name;
+        return {
+            type: typeMatch ? typeMatch[1] : null,
+            value: valueMatch ? valueMatch[1] : null,
+            modifiers: modifiers.map((i)=>i.replace(".", "")),
+            expression: value,
+            original: original
+        };
+    };
+}
+var $8c83eaf28779ff46$var$DEFAULT = "DEFAULT";
+var $8c83eaf28779ff46$var$directiveOrder = [
+    "ignore",
+    "ref",
+    "data",
+    "id",
+    "anchor",
+    "bind",
+    "init",
+    "for",
+    "model",
+    "modelable",
+    "transition",
+    "show",
+    "if",
+    $8c83eaf28779ff46$var$DEFAULT,
+    "teleport"
+];
+function $8c83eaf28779ff46$var$byPriority(a, b) {
+    let typeA = $8c83eaf28779ff46$var$directiveOrder.indexOf(a.type) === -1 ? $8c83eaf28779ff46$var$DEFAULT : a.type;
+    let typeB = $8c83eaf28779ff46$var$directiveOrder.indexOf(b.type) === -1 ? $8c83eaf28779ff46$var$DEFAULT : b.type;
+    return $8c83eaf28779ff46$var$directiveOrder.indexOf(typeA) - $8c83eaf28779ff46$var$directiveOrder.indexOf(typeB);
+}
+// packages/alpinejs/src/utils/dispatch.js
+function $8c83eaf28779ff46$var$dispatch(el, name, detail = {}) {
+    el.dispatchEvent(new CustomEvent(name, {
+        detail: detail,
+        bubbles: true,
+        // Allows events to pass the shadow DOM barrier.
+        composed: true,
+        cancelable: true
+    }));
+}
+// packages/alpinejs/src/utils/walk.js
+function $8c83eaf28779ff46$var$walk(el, callback) {
+    if (typeof ShadowRoot === "function" && el instanceof ShadowRoot) {
+        Array.from(el.children).forEach((el2)=>$8c83eaf28779ff46$var$walk(el2, callback));
+        return;
+    }
+    let skip = false;
+    callback(el, ()=>skip = true);
+    if (skip) return;
+    let node = el.firstElementChild;
+    while(node){
+        $8c83eaf28779ff46$var$walk(node, callback, false);
+        node = node.nextElementSibling;
+    }
+}
+// packages/alpinejs/src/utils/warn.js
+function $8c83eaf28779ff46$var$warn(message, ...args) {
+    console.warn(`Alpine Warning: ${message}`, ...args);
+}
+// packages/alpinejs/src/lifecycle.js
+var $8c83eaf28779ff46$var$started = false;
+function $8c83eaf28779ff46$var$start() {
+    if ($8c83eaf28779ff46$var$started) $8c83eaf28779ff46$var$warn("Alpine has already been initialized on this page. Calling Alpine.start() more than once can cause problems.");
+    $8c83eaf28779ff46$var$started = true;
+    if (!document.body) $8c83eaf28779ff46$var$warn("Unable to initialize. Trying to load Alpine before `<body>` is available. Did you forget to add `defer` in Alpine's `<script>` tag?");
+    $8c83eaf28779ff46$var$dispatch(document, "alpine:init");
+    $8c83eaf28779ff46$var$dispatch(document, "alpine:initializing");
+    $8c83eaf28779ff46$var$startObservingMutations();
+    $8c83eaf28779ff46$var$onElAdded((el)=>$8c83eaf28779ff46$var$initTree(el, $8c83eaf28779ff46$var$walk));
+    $8c83eaf28779ff46$var$onElRemoved((el)=>$8c83eaf28779ff46$var$destroyTree(el));
+    $8c83eaf28779ff46$var$onAttributesAdded((el, attrs)=>{
+        $8c83eaf28779ff46$var$directives(el, attrs).forEach((handle)=>handle());
+    });
+    let outNestedComponents = (el)=>!$8c83eaf28779ff46$var$closestRoot(el.parentElement, true);
+    Array.from(document.querySelectorAll($8c83eaf28779ff46$var$allSelectors().join(","))).filter(outNestedComponents).forEach((el)=>{
+        $8c83eaf28779ff46$var$initTree(el);
+    });
+    $8c83eaf28779ff46$var$dispatch(document, "alpine:initialized");
+    setTimeout(()=>{
+        $8c83eaf28779ff46$var$warnAboutMissingPlugins();
+    });
+}
+var $8c83eaf28779ff46$var$rootSelectorCallbacks = [];
+var $8c83eaf28779ff46$var$initSelectorCallbacks = [];
+function $8c83eaf28779ff46$var$rootSelectors() {
+    return $8c83eaf28779ff46$var$rootSelectorCallbacks.map((fn)=>fn());
+}
+function $8c83eaf28779ff46$var$allSelectors() {
+    return $8c83eaf28779ff46$var$rootSelectorCallbacks.concat($8c83eaf28779ff46$var$initSelectorCallbacks).map((fn)=>fn());
+}
+function $8c83eaf28779ff46$var$addRootSelector(selectorCallback) {
+    $8c83eaf28779ff46$var$rootSelectorCallbacks.push(selectorCallback);
+}
+function $8c83eaf28779ff46$var$addInitSelector(selectorCallback) {
+    $8c83eaf28779ff46$var$initSelectorCallbacks.push(selectorCallback);
+}
+function $8c83eaf28779ff46$var$closestRoot(el, includeInitSelectors = false) {
+    return $8c83eaf28779ff46$var$findClosest(el, (element)=>{
+        const selectors = includeInitSelectors ? $8c83eaf28779ff46$var$allSelectors() : $8c83eaf28779ff46$var$rootSelectors();
+        if (selectors.some((selector)=>element.matches(selector))) return true;
+    });
+}
+function $8c83eaf28779ff46$var$findClosest(el, callback) {
+    if (!el) return;
+    if (callback(el)) return el;
+    if (el._x_teleportBack) el = el._x_teleportBack;
+    if (!el.parentElement) return;
+    return $8c83eaf28779ff46$var$findClosest(el.parentElement, callback);
+}
+function $8c83eaf28779ff46$var$isRoot(el) {
+    return $8c83eaf28779ff46$var$rootSelectors().some((selector)=>el.matches(selector));
+}
+var $8c83eaf28779ff46$var$initInterceptors2 = [];
+function $8c83eaf28779ff46$var$interceptInit(callback) {
+    $8c83eaf28779ff46$var$initInterceptors2.push(callback);
+}
+var $8c83eaf28779ff46$var$markerDispenser = 1;
+function $8c83eaf28779ff46$var$initTree(el, walker = $8c83eaf28779ff46$var$walk, intercept = ()=>{}) {
+    if ($8c83eaf28779ff46$var$findClosest(el, (i)=>i._x_ignore)) return;
+    $8c83eaf28779ff46$var$deferHandlingDirectives(()=>{
+        walker(el, (el2, skip)=>{
+            if (el2._x_marker) return;
+            intercept(el2, skip);
+            $8c83eaf28779ff46$var$initInterceptors2.forEach((i)=>i(el2, skip));
+            $8c83eaf28779ff46$var$directives(el2, el2.attributes).forEach((handle)=>handle());
+            if (!el2._x_ignore) el2._x_marker = $8c83eaf28779ff46$var$markerDispenser++;
+            el2._x_ignore && skip();
+        });
+    });
+}
+function $8c83eaf28779ff46$var$destroyTree(root, walker = $8c83eaf28779ff46$var$walk) {
+    walker(root, (el)=>{
+        $8c83eaf28779ff46$var$cleanupElement(el);
+        $8c83eaf28779ff46$var$cleanupAttributes(el);
+        delete el._x_marker;
+    });
+}
+function $8c83eaf28779ff46$var$warnAboutMissingPlugins() {
+    let pluginDirectives = [
+        [
+            "ui",
+            "dialog",
+            [
+                "[x-dialog], [x-popover]"
+            ]
+        ],
+        [
+            "anchor",
+            "anchor",
+            [
+                "[x-anchor]"
+            ]
+        ],
+        [
+            "sort",
+            "sort",
+            [
+                "[x-sort]"
+            ]
+        ]
+    ];
+    pluginDirectives.forEach(([plugin2, directive2, selectors])=>{
+        if ($8c83eaf28779ff46$var$directiveExists(directive2)) return;
+        selectors.some((selector)=>{
+            if (document.querySelector(selector)) {
+                $8c83eaf28779ff46$var$warn(`found "${selector}", but missing ${plugin2} plugin`);
+                return true;
+            }
+        });
+    });
+}
+// packages/alpinejs/src/nextTick.js
+var $8c83eaf28779ff46$var$tickStack = [];
+var $8c83eaf28779ff46$var$isHolding = false;
+function $8c83eaf28779ff46$var$nextTick(callback = ()=>{}) {
+    queueMicrotask(()=>{
+        $8c83eaf28779ff46$var$isHolding || setTimeout(()=>{
+            $8c83eaf28779ff46$var$releaseNextTicks();
+        });
+    });
+    return new Promise((res)=>{
+        $8c83eaf28779ff46$var$tickStack.push(()=>{
+            callback();
+            res();
+        });
+    });
+}
+function $8c83eaf28779ff46$var$releaseNextTicks() {
+    $8c83eaf28779ff46$var$isHolding = false;
+    while($8c83eaf28779ff46$var$tickStack.length)$8c83eaf28779ff46$var$tickStack.shift()();
+}
+function $8c83eaf28779ff46$var$holdNextTicks() {
+    $8c83eaf28779ff46$var$isHolding = true;
+}
+// packages/alpinejs/src/utils/classes.js
+function $8c83eaf28779ff46$var$setClasses(el, value) {
+    if (Array.isArray(value)) return $8c83eaf28779ff46$var$setClassesFromString(el, value.join(" "));
+    else if (typeof value === "object" && value !== null) return $8c83eaf28779ff46$var$setClassesFromObject(el, value);
+    else if (typeof value === "function") return $8c83eaf28779ff46$var$setClasses(el, value());
+    return $8c83eaf28779ff46$var$setClassesFromString(el, value);
+}
+function $8c83eaf28779ff46$var$setClassesFromString(el, classString) {
+    let split = (classString2)=>classString2.split(" ").filter(Boolean);
+    let missingClasses = (classString2)=>classString2.split(" ").filter((i)=>!el.classList.contains(i)).filter(Boolean);
+    let addClassesAndReturnUndo = (classes)=>{
+        el.classList.add(...classes);
+        return ()=>{
+            el.classList.remove(...classes);
+        };
+    };
+    classString = classString === true ? classString = "" : classString || "";
+    return addClassesAndReturnUndo(missingClasses(classString));
+}
+function $8c83eaf28779ff46$var$setClassesFromObject(el, classObject) {
+    let split = (classString)=>classString.split(" ").filter(Boolean);
+    let forAdd = Object.entries(classObject).flatMap(([classString, bool])=>bool ? split(classString) : false).filter(Boolean);
+    let forRemove = Object.entries(classObject).flatMap(([classString, bool])=>!bool ? split(classString) : false).filter(Boolean);
+    let added = [];
+    let removed = [];
+    forRemove.forEach((i)=>{
+        if (el.classList.contains(i)) {
+            el.classList.remove(i);
+            removed.push(i);
+        }
+    });
+    forAdd.forEach((i)=>{
+        if (!el.classList.contains(i)) {
+            el.classList.add(i);
+            added.push(i);
+        }
+    });
+    return ()=>{
+        removed.forEach((i)=>el.classList.add(i));
+        added.forEach((i)=>el.classList.remove(i));
+    };
+}
+// packages/alpinejs/src/utils/styles.js
+function $8c83eaf28779ff46$var$setStyles(el, value) {
+    if (typeof value === "object" && value !== null) return $8c83eaf28779ff46$var$setStylesFromObject(el, value);
+    return $8c83eaf28779ff46$var$setStylesFromString(el, value);
+}
+function $8c83eaf28779ff46$var$setStylesFromObject(el, value) {
+    let previousStyles = {};
+    Object.entries(value).forEach(([key, value2])=>{
+        previousStyles[key] = el.style[key];
+        if (!key.startsWith("--")) key = $8c83eaf28779ff46$var$kebabCase(key);
+        el.style.setProperty(key, value2);
+    });
+    setTimeout(()=>{
+        if (el.style.length === 0) el.removeAttribute("style");
+    });
+    return ()=>{
+        $8c83eaf28779ff46$var$setStyles(el, previousStyles);
+    };
+}
+function $8c83eaf28779ff46$var$setStylesFromString(el, value) {
+    let cache = el.getAttribute("style", value);
+    el.setAttribute("style", value);
+    return ()=>{
+        el.setAttribute("style", cache || "");
+    };
+}
+function $8c83eaf28779ff46$var$kebabCase(subject) {
+    return subject.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
+}
+// packages/alpinejs/src/utils/once.js
+function $8c83eaf28779ff46$var$once(callback, fallback = ()=>{}) {
+    let called = false;
+    return function() {
+        if (!called) {
+            called = true;
+            callback.apply(this, arguments);
+        } else fallback.apply(this, arguments);
+    };
+}
+// packages/alpinejs/src/directives/x-transition.js
+$8c83eaf28779ff46$var$directive("transition", (el, { value: value, modifiers: modifiers, expression: expression }, { evaluate: evaluate2 })=>{
+    if (typeof expression === "function") expression = evaluate2(expression);
+    if (expression === false) return;
+    if (!expression || typeof expression === "boolean") $8c83eaf28779ff46$var$registerTransitionsFromHelper(el, modifiers, value);
+    else $8c83eaf28779ff46$var$registerTransitionsFromClassString(el, expression, value);
+});
+function $8c83eaf28779ff46$var$registerTransitionsFromClassString(el, classString, stage) {
+    $8c83eaf28779ff46$var$registerTransitionObject(el, $8c83eaf28779ff46$var$setClasses, "");
+    let directiveStorageMap = {
+        "enter": (classes)=>{
+            el._x_transition.enter.during = classes;
+        },
+        "enter-start": (classes)=>{
+            el._x_transition.enter.start = classes;
+        },
+        "enter-end": (classes)=>{
+            el._x_transition.enter.end = classes;
+        },
+        "leave": (classes)=>{
+            el._x_transition.leave.during = classes;
+        },
+        "leave-start": (classes)=>{
+            el._x_transition.leave.start = classes;
+        },
+        "leave-end": (classes)=>{
+            el._x_transition.leave.end = classes;
+        }
+    };
+    directiveStorageMap[stage](classString);
+}
+function $8c83eaf28779ff46$var$registerTransitionsFromHelper(el, modifiers, stage) {
+    $8c83eaf28779ff46$var$registerTransitionObject(el, $8c83eaf28779ff46$var$setStyles);
+    let doesntSpecify = !modifiers.includes("in") && !modifiers.includes("out") && !stage;
+    let transitioningIn = doesntSpecify || modifiers.includes("in") || [
+        "enter"
+    ].includes(stage);
+    let transitioningOut = doesntSpecify || modifiers.includes("out") || [
+        "leave"
+    ].includes(stage);
+    if (modifiers.includes("in") && !doesntSpecify) modifiers = modifiers.filter((i, index)=>index < modifiers.indexOf("out"));
+    if (modifiers.includes("out") && !doesntSpecify) modifiers = modifiers.filter((i, index)=>index > modifiers.indexOf("out"));
+    let wantsAll = !modifiers.includes("opacity") && !modifiers.includes("scale");
+    let wantsOpacity = wantsAll || modifiers.includes("opacity");
+    let wantsScale = wantsAll || modifiers.includes("scale");
+    let opacityValue = wantsOpacity ? 0 : 1;
+    let scaleValue = wantsScale ? $8c83eaf28779ff46$var$modifierValue(modifiers, "scale", 95) / 100 : 1;
+    let delay = $8c83eaf28779ff46$var$modifierValue(modifiers, "delay", 0) / 1e3;
+    let origin = $8c83eaf28779ff46$var$modifierValue(modifiers, "origin", "center");
+    let property = "opacity, transform";
+    let durationIn = $8c83eaf28779ff46$var$modifierValue(modifiers, "duration", 150) / 1e3;
+    let durationOut = $8c83eaf28779ff46$var$modifierValue(modifiers, "duration", 75) / 1e3;
+    let easing = `cubic-bezier(0.4, 0.0, 0.2, 1)`;
+    if (transitioningIn) {
+        el._x_transition.enter.during = {
+            transformOrigin: origin,
+            transitionDelay: `${delay}s`,
+            transitionProperty: property,
+            transitionDuration: `${durationIn}s`,
+            transitionTimingFunction: easing
+        };
+        el._x_transition.enter.start = {
+            opacity: opacityValue,
+            transform: `scale(${scaleValue})`
+        };
+        el._x_transition.enter.end = {
+            opacity: 1,
+            transform: `scale(1)`
+        };
+    }
+    if (transitioningOut) {
+        el._x_transition.leave.during = {
+            transformOrigin: origin,
+            transitionDelay: `${delay}s`,
+            transitionProperty: property,
+            transitionDuration: `${durationOut}s`,
+            transitionTimingFunction: easing
+        };
+        el._x_transition.leave.start = {
+            opacity: 1,
+            transform: `scale(1)`
+        };
+        el._x_transition.leave.end = {
+            opacity: opacityValue,
+            transform: `scale(${scaleValue})`
+        };
+    }
+}
+function $8c83eaf28779ff46$var$registerTransitionObject(el, setFunction, defaultValue = {}) {
+    if (!el._x_transition) el._x_transition = {
+        enter: {
+            during: defaultValue,
+            start: defaultValue,
+            end: defaultValue
+        },
+        leave: {
+            during: defaultValue,
+            start: defaultValue,
+            end: defaultValue
+        },
+        in (before = ()=>{}, after = ()=>{}) {
+            $8c83eaf28779ff46$var$transition(el, setFunction, {
+                during: this.enter.during,
+                start: this.enter.start,
+                end: this.enter.end
+            }, before, after);
+        },
+        out (before = ()=>{}, after = ()=>{}) {
+            $8c83eaf28779ff46$var$transition(el, setFunction, {
+                during: this.leave.during,
+                start: this.leave.start,
+                end: this.leave.end
+            }, before, after);
+        }
+    };
+}
+window.Element.prototype._x_toggleAndCascadeWithTransitions = function(el, value, show, hide) {
+    const nextTick2 = document.visibilityState === "visible" ? requestAnimationFrame : setTimeout;
+    let clickAwayCompatibleShow = ()=>nextTick2(show);
+    if (value) {
+        if (el._x_transition && (el._x_transition.enter || el._x_transition.leave)) el._x_transition.enter && (Object.entries(el._x_transition.enter.during).length || Object.entries(el._x_transition.enter.start).length || Object.entries(el._x_transition.enter.end).length) ? el._x_transition.in(show) : clickAwayCompatibleShow();
+        else el._x_transition ? el._x_transition.in(show) : clickAwayCompatibleShow();
+        return;
+    }
+    el._x_hidePromise = el._x_transition ? new Promise((resolve, reject)=>{
+        el._x_transition.out(()=>{}, ()=>resolve(hide));
+        el._x_transitioning && el._x_transitioning.beforeCancel(()=>reject({
+                isFromCancelledTransition: true
+            }));
+    }) : Promise.resolve(hide);
+    queueMicrotask(()=>{
+        let closest = $8c83eaf28779ff46$var$closestHide(el);
+        if (closest) {
+            if (!closest._x_hideChildren) closest._x_hideChildren = [];
+            closest._x_hideChildren.push(el);
+        } else nextTick2(()=>{
+            let hideAfterChildren = (el2)=>{
+                let carry = Promise.all([
+                    el2._x_hidePromise,
+                    ...(el2._x_hideChildren || []).map(hideAfterChildren)
+                ]).then(([i])=>i?.());
+                delete el2._x_hidePromise;
+                delete el2._x_hideChildren;
+                return carry;
+            };
+            hideAfterChildren(el).catch((e)=>{
+                if (!e.isFromCancelledTransition) throw e;
+            });
+        });
+    });
+};
+function $8c83eaf28779ff46$var$closestHide(el) {
+    let parent = el.parentNode;
+    if (!parent) return;
+    return parent._x_hidePromise ? parent : $8c83eaf28779ff46$var$closestHide(parent);
+}
+function $8c83eaf28779ff46$var$transition(el, setFunction, { during: during, start: start2, end: end } = {}, before = ()=>{}, after = ()=>{}) {
+    if (el._x_transitioning) el._x_transitioning.cancel();
+    if (Object.keys(during).length === 0 && Object.keys(start2).length === 0 && Object.keys(end).length === 0) {
+        before();
+        after();
+        return;
+    }
+    let undoStart, undoDuring, undoEnd;
+    $8c83eaf28779ff46$var$performTransition(el, {
+        start () {
+            undoStart = setFunction(el, start2);
+        },
+        during () {
+            undoDuring = setFunction(el, during);
+        },
+        before: before,
+        end () {
+            undoStart();
+            undoEnd = setFunction(el, end);
+        },
+        after: after,
+        cleanup () {
+            undoDuring();
+            undoEnd();
+        }
+    });
+}
+function $8c83eaf28779ff46$var$performTransition(el, stages) {
+    let interrupted, reachedBefore, reachedEnd;
+    let finish = $8c83eaf28779ff46$var$once(()=>{
+        $8c83eaf28779ff46$var$mutateDom(()=>{
+            interrupted = true;
+            if (!reachedBefore) stages.before();
+            if (!reachedEnd) {
+                stages.end();
+                $8c83eaf28779ff46$var$releaseNextTicks();
+            }
+            stages.after();
+            if (el.isConnected) stages.cleanup();
+            delete el._x_transitioning;
+        });
+    });
+    el._x_transitioning = {
+        beforeCancels: [],
+        beforeCancel (callback) {
+            this.beforeCancels.push(callback);
+        },
+        cancel: $8c83eaf28779ff46$var$once(function() {
+            while(this.beforeCancels.length)this.beforeCancels.shift()();
+            finish();
+        }),
+        finish: finish
+    };
+    $8c83eaf28779ff46$var$mutateDom(()=>{
+        stages.start();
+        stages.during();
+    });
+    $8c83eaf28779ff46$var$holdNextTicks();
+    requestAnimationFrame(()=>{
+        if (interrupted) return;
+        let duration = Number(getComputedStyle(el).transitionDuration.replace(/,.*/, "").replace("s", "")) * 1e3;
+        let delay = Number(getComputedStyle(el).transitionDelay.replace(/,.*/, "").replace("s", "")) * 1e3;
+        if (duration === 0) duration = Number(getComputedStyle(el).animationDuration.replace("s", "")) * 1e3;
+        $8c83eaf28779ff46$var$mutateDom(()=>{
+            stages.before();
+        });
+        reachedBefore = true;
+        requestAnimationFrame(()=>{
+            if (interrupted) return;
+            $8c83eaf28779ff46$var$mutateDom(()=>{
+                stages.end();
+            });
+            $8c83eaf28779ff46$var$releaseNextTicks();
+            setTimeout(el._x_transitioning.finish, duration + delay);
+            reachedEnd = true;
+        });
+    });
+}
+function $8c83eaf28779ff46$var$modifierValue(modifiers, key, fallback) {
+    if (modifiers.indexOf(key) === -1) return fallback;
+    const rawValue = modifiers[modifiers.indexOf(key) + 1];
+    if (!rawValue) return fallback;
+    if (key === "scale") {
+        if (isNaN(rawValue)) return fallback;
+    }
+    if (key === "duration" || key === "delay") {
+        let match = rawValue.match(/([0-9]+)ms/);
+        if (match) return match[1];
+    }
+    if (key === "origin") {
+        if ([
+            "top",
+            "right",
+            "left",
+            "center",
+            "bottom"
+        ].includes(modifiers[modifiers.indexOf(key) + 2])) return [
+            rawValue,
+            modifiers[modifiers.indexOf(key) + 2]
+        ].join(" ");
+    }
+    return rawValue;
+}
+// packages/alpinejs/src/clone.js
+var $8c83eaf28779ff46$var$isCloning = false;
+function $8c83eaf28779ff46$var$skipDuringClone(callback, fallback = ()=>{}) {
+    return (...args)=>$8c83eaf28779ff46$var$isCloning ? fallback(...args) : callback(...args);
+}
+function $8c83eaf28779ff46$var$onlyDuringClone(callback) {
+    return (...args)=>$8c83eaf28779ff46$var$isCloning && callback(...args);
+}
+var $8c83eaf28779ff46$var$interceptors = [];
+function $8c83eaf28779ff46$var$interceptClone(callback) {
+    $8c83eaf28779ff46$var$interceptors.push(callback);
+}
+function $8c83eaf28779ff46$var$cloneNode(from, to) {
+    $8c83eaf28779ff46$var$interceptors.forEach((i)=>i(from, to));
+    $8c83eaf28779ff46$var$isCloning = true;
+    $8c83eaf28779ff46$var$dontRegisterReactiveSideEffects(()=>{
+        $8c83eaf28779ff46$var$initTree(to, (el, callback)=>{
+            callback(el, ()=>{});
+        });
+    });
+    $8c83eaf28779ff46$var$isCloning = false;
+}
+var $8c83eaf28779ff46$var$isCloningLegacy = false;
+function $8c83eaf28779ff46$var$clone(oldEl, newEl) {
+    if (!newEl._x_dataStack) newEl._x_dataStack = oldEl._x_dataStack;
+    $8c83eaf28779ff46$var$isCloning = true;
+    $8c83eaf28779ff46$var$isCloningLegacy = true;
+    $8c83eaf28779ff46$var$dontRegisterReactiveSideEffects(()=>{
+        $8c83eaf28779ff46$var$cloneTree(newEl);
+    });
+    $8c83eaf28779ff46$var$isCloning = false;
+    $8c83eaf28779ff46$var$isCloningLegacy = false;
+}
+function $8c83eaf28779ff46$var$cloneTree(el) {
+    let hasRunThroughFirstEl = false;
+    let shallowWalker = (el2, callback)=>{
+        $8c83eaf28779ff46$var$walk(el2, (el3, skip)=>{
+            if (hasRunThroughFirstEl && $8c83eaf28779ff46$var$isRoot(el3)) return skip();
+            hasRunThroughFirstEl = true;
+            callback(el3, skip);
+        });
+    };
+    $8c83eaf28779ff46$var$initTree(el, shallowWalker);
+}
+function $8c83eaf28779ff46$var$dontRegisterReactiveSideEffects(callback) {
+    let cache = $8c83eaf28779ff46$var$effect;
+    $8c83eaf28779ff46$var$overrideEffect((callback2, el)=>{
+        let storedEffect = cache(callback2);
+        $8c83eaf28779ff46$var$release(storedEffect);
+        return ()=>{};
+    });
+    callback();
+    $8c83eaf28779ff46$var$overrideEffect(cache);
+}
+// packages/alpinejs/src/utils/bind.js
+function $8c83eaf28779ff46$var$bind(el, name, value, modifiers = []) {
+    if (!el._x_bindings) el._x_bindings = $8c83eaf28779ff46$var$reactive({});
+    el._x_bindings[name] = value;
+    name = modifiers.includes("camel") ? $8c83eaf28779ff46$var$camelCase(name) : name;
+    switch(name){
+        case "value":
+            $8c83eaf28779ff46$var$bindInputValue(el, value);
+            break;
+        case "style":
+            $8c83eaf28779ff46$var$bindStyles(el, value);
+            break;
+        case "class":
+            $8c83eaf28779ff46$var$bindClasses(el, value);
+            break;
+        case "selected":
+        case "checked":
+            $8c83eaf28779ff46$var$bindAttributeAndProperty(el, name, value);
+            break;
+        default:
+            $8c83eaf28779ff46$var$bindAttribute(el, name, value);
+            break;
+    }
+}
+function $8c83eaf28779ff46$var$bindInputValue(el, value) {
+    if ($8c83eaf28779ff46$var$isRadio(el)) {
+        if (el.attributes.value === void 0) el.value = value;
+        if (window.fromModel) {
+            if (typeof value === "boolean") el.checked = $8c83eaf28779ff46$var$safeParseBoolean(el.value) === value;
+            else el.checked = $8c83eaf28779ff46$var$checkedAttrLooseCompare(el.value, value);
+        }
+    } else if ($8c83eaf28779ff46$var$isCheckbox(el)) {
+        if (Number.isInteger(value)) el.value = value;
+        else if (!Array.isArray(value) && typeof value !== "boolean" && ![
+            null,
+            void 0
+        ].includes(value)) el.value = String(value);
+        else if (Array.isArray(value)) el.checked = value.some((val)=>$8c83eaf28779ff46$var$checkedAttrLooseCompare(val, el.value));
+        else el.checked = !!value;
+    } else if (el.tagName === "SELECT") $8c83eaf28779ff46$var$updateSelect(el, value);
+    else {
+        if (el.value === value) return;
+        el.value = value === void 0 ? "" : value;
+    }
+}
+function $8c83eaf28779ff46$var$bindClasses(el, value) {
+    if (el._x_undoAddedClasses) el._x_undoAddedClasses();
+    el._x_undoAddedClasses = $8c83eaf28779ff46$var$setClasses(el, value);
+}
+function $8c83eaf28779ff46$var$bindStyles(el, value) {
+    if (el._x_undoAddedStyles) el._x_undoAddedStyles();
+    el._x_undoAddedStyles = $8c83eaf28779ff46$var$setStyles(el, value);
+}
+function $8c83eaf28779ff46$var$bindAttributeAndProperty(el, name, value) {
+    $8c83eaf28779ff46$var$bindAttribute(el, name, value);
+    $8c83eaf28779ff46$var$setPropertyIfChanged(el, name, value);
+}
+function $8c83eaf28779ff46$var$bindAttribute(el, name, value) {
+    if ([
+        null,
+        void 0,
+        false
+    ].includes(value) && $8c83eaf28779ff46$var$attributeShouldntBePreservedIfFalsy(name)) el.removeAttribute(name);
+    else {
+        if ($8c83eaf28779ff46$var$isBooleanAttr(name)) value = name;
+        $8c83eaf28779ff46$var$setIfChanged(el, name, value);
+    }
+}
+function $8c83eaf28779ff46$var$setIfChanged(el, attrName, value) {
+    if (el.getAttribute(attrName) != value) el.setAttribute(attrName, value);
+}
+function $8c83eaf28779ff46$var$setPropertyIfChanged(el, propName, value) {
+    if (el[propName] !== value) el[propName] = value;
+}
+function $8c83eaf28779ff46$var$updateSelect(el, value) {
+    const arrayWrappedValue = [].concat(value).map((value2)=>{
+        return value2 + "";
+    });
+    Array.from(el.options).forEach((option)=>{
+        option.selected = arrayWrappedValue.includes(option.value);
+    });
+}
+function $8c83eaf28779ff46$var$camelCase(subject) {
+    return subject.toLowerCase().replace(/-(\w)/g, (match, char)=>char.toUpperCase());
+}
+function $8c83eaf28779ff46$var$checkedAttrLooseCompare(valueA, valueB) {
+    return valueA == valueB;
+}
+function $8c83eaf28779ff46$var$safeParseBoolean(rawValue) {
+    if ([
+        1,
+        "1",
+        "true",
+        "on",
+        "yes",
+        true
+    ].includes(rawValue)) return true;
+    if ([
+        0,
+        "0",
+        "false",
+        "off",
+        "no",
+        false
+    ].includes(rawValue)) return false;
+    return rawValue ? Boolean(rawValue) : null;
+}
+var $8c83eaf28779ff46$var$booleanAttributes = /* @__PURE__ */ new Set([
+    "allowfullscreen",
+    "async",
+    "autofocus",
+    "autoplay",
+    "checked",
+    "controls",
+    "default",
+    "defer",
+    "disabled",
+    "formnovalidate",
+    "inert",
+    "ismap",
+    "itemscope",
+    "loop",
+    "multiple",
+    "muted",
+    "nomodule",
+    "novalidate",
+    "open",
+    "playsinline",
+    "readonly",
+    "required",
+    "reversed",
+    "selected",
+    "shadowrootclonable",
+    "shadowrootdelegatesfocus",
+    "shadowrootserializable"
+]);
+function $8c83eaf28779ff46$var$isBooleanAttr(attrName) {
+    return $8c83eaf28779ff46$var$booleanAttributes.has(attrName);
+}
+function $8c83eaf28779ff46$var$attributeShouldntBePreservedIfFalsy(name) {
+    return ![
+        "aria-pressed",
+        "aria-checked",
+        "aria-expanded",
+        "aria-selected"
+    ].includes(name);
+}
+function $8c83eaf28779ff46$var$getBinding(el, name, fallback) {
+    if (el._x_bindings && el._x_bindings[name] !== void 0) return el._x_bindings[name];
+    return $8c83eaf28779ff46$var$getAttributeBinding(el, name, fallback);
+}
+function $8c83eaf28779ff46$var$extractProp(el, name, fallback, extract = true) {
+    if (el._x_bindings && el._x_bindings[name] !== void 0) return el._x_bindings[name];
+    if (el._x_inlineBindings && el._x_inlineBindings[name] !== void 0) {
+        let binding = el._x_inlineBindings[name];
+        binding.extract = extract;
+        return $8c83eaf28779ff46$var$dontAutoEvaluateFunctions(()=>{
+            return $8c83eaf28779ff46$var$evaluate(el, binding.expression);
+        });
+    }
+    return $8c83eaf28779ff46$var$getAttributeBinding(el, name, fallback);
+}
+function $8c83eaf28779ff46$var$getAttributeBinding(el, name, fallback) {
+    let attr = el.getAttribute(name);
+    if (attr === null) return typeof fallback === "function" ? fallback() : fallback;
+    if (attr === "") return true;
+    if ($8c83eaf28779ff46$var$isBooleanAttr(name)) return !![
+        name,
+        "true"
+    ].includes(attr);
+    return attr;
+}
+function $8c83eaf28779ff46$var$isCheckbox(el) {
+    return el.type === "checkbox" || el.localName === "ui-checkbox" || el.localName === "ui-switch";
+}
+function $8c83eaf28779ff46$var$isRadio(el) {
+    return el.type === "radio" || el.localName === "ui-radio";
+}
+// packages/alpinejs/src/utils/debounce.js
+function $8c83eaf28779ff46$var$debounce(func, wait) {
+    var timeout;
+    return function() {
+        var context = this, args = arguments;
+        var later = function() {
+            timeout = null;
+            func.apply(context, args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+// packages/alpinejs/src/utils/throttle.js
+function $8c83eaf28779ff46$var$throttle(func, limit) {
+    let inThrottle;
+    return function() {
+        let context = this, args = arguments;
+        if (!inThrottle) {
+            func.apply(context, args);
+            inThrottle = true;
+            setTimeout(()=>inThrottle = false, limit);
+        }
+    };
+}
+// packages/alpinejs/src/entangle.js
+function $8c83eaf28779ff46$var$entangle({ get: outerGet, set: outerSet }, { get: innerGet, set: innerSet }) {
+    let firstRun = true;
+    let outerHash;
+    let innerHash;
+    let reference = $8c83eaf28779ff46$var$effect(()=>{
+        let outer = outerGet();
+        let inner = innerGet();
+        if (firstRun) {
+            innerSet($8c83eaf28779ff46$var$cloneIfObject(outer));
+            firstRun = false;
+        } else {
+            let outerHashLatest = JSON.stringify(outer);
+            let innerHashLatest = JSON.stringify(inner);
+            if (outerHashLatest !== outerHash) innerSet($8c83eaf28779ff46$var$cloneIfObject(outer));
+            else if (outerHashLatest !== innerHashLatest) outerSet($8c83eaf28779ff46$var$cloneIfObject(inner));
+        }
+        outerHash = JSON.stringify(outerGet());
+        innerHash = JSON.stringify(innerGet());
+    });
+    return ()=>{
+        $8c83eaf28779ff46$var$release(reference);
+    };
+}
+function $8c83eaf28779ff46$var$cloneIfObject(value) {
+    return typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value;
+}
+// packages/alpinejs/src/plugin.js
+function $8c83eaf28779ff46$var$plugin(callback) {
+    let callbacks = Array.isArray(callback) ? callback : [
+        callback
+    ];
+    callbacks.forEach((i)=>i($8c83eaf28779ff46$var$alpine_default));
+}
+// packages/alpinejs/src/store.js
+var $8c83eaf28779ff46$var$stores = {};
+var $8c83eaf28779ff46$var$isReactive = false;
+function $8c83eaf28779ff46$var$store(name, value) {
+    if (!$8c83eaf28779ff46$var$isReactive) {
+        $8c83eaf28779ff46$var$stores = $8c83eaf28779ff46$var$reactive($8c83eaf28779ff46$var$stores);
+        $8c83eaf28779ff46$var$isReactive = true;
+    }
+    if (value === void 0) return $8c83eaf28779ff46$var$stores[name];
+    $8c83eaf28779ff46$var$stores[name] = value;
+    $8c83eaf28779ff46$var$initInterceptors($8c83eaf28779ff46$var$stores[name]);
+    if (typeof value === "object" && value !== null && value.hasOwnProperty("init") && typeof value.init === "function") $8c83eaf28779ff46$var$stores[name].init();
+}
+function $8c83eaf28779ff46$var$getStores() {
+    return $8c83eaf28779ff46$var$stores;
+}
+// packages/alpinejs/src/binds.js
+var $8c83eaf28779ff46$var$binds = {};
+function $8c83eaf28779ff46$var$bind2(name, bindings) {
+    let getBindings = typeof bindings !== "function" ? ()=>bindings : bindings;
+    if (name instanceof Element) return $8c83eaf28779ff46$var$applyBindingsObject(name, getBindings());
+    else $8c83eaf28779ff46$var$binds[name] = getBindings;
+    return ()=>{};
+}
+function $8c83eaf28779ff46$var$injectBindingProviders(obj) {
+    Object.entries($8c83eaf28779ff46$var$binds).forEach(([name, callback])=>{
+        Object.defineProperty(obj, name, {
+            get () {
+                return (...args)=>{
+                    return callback(...args);
+                };
+            }
+        });
+    });
+    return obj;
+}
+function $8c83eaf28779ff46$var$applyBindingsObject(el, obj, original) {
+    let cleanupRunners = [];
+    while(cleanupRunners.length)cleanupRunners.pop()();
+    let attributes = Object.entries(obj).map(([name, value])=>({
+            name: name,
+            value: value
+        }));
+    let staticAttributes = $8c83eaf28779ff46$var$attributesOnly(attributes);
+    attributes = attributes.map((attribute)=>{
+        if (staticAttributes.find((attr)=>attr.name === attribute.name)) return {
+            name: `x-bind:${attribute.name}`,
+            value: `"${attribute.value}"`
+        };
+        return attribute;
+    });
+    $8c83eaf28779ff46$var$directives(el, attributes, original).map((handle)=>{
+        cleanupRunners.push(handle.runCleanups);
+        handle();
+    });
+    return ()=>{
+        while(cleanupRunners.length)cleanupRunners.pop()();
+    };
+}
+// packages/alpinejs/src/datas.js
+var $8c83eaf28779ff46$var$datas = {};
+function $8c83eaf28779ff46$var$data(name, callback) {
+    $8c83eaf28779ff46$var$datas[name] = callback;
+}
+function $8c83eaf28779ff46$var$injectDataProviders(obj, context) {
+    Object.entries($8c83eaf28779ff46$var$datas).forEach(([name, callback])=>{
+        Object.defineProperty(obj, name, {
+            get () {
+                return (...args)=>{
+                    return callback.bind(context)(...args);
+                };
+            },
+            enumerable: false
+        });
+    });
+    return obj;
+}
+// packages/alpinejs/src/alpine.js
+var $8c83eaf28779ff46$var$Alpine = {
+    get reactive () {
+        return $8c83eaf28779ff46$var$reactive;
+    },
+    get release () {
+        return $8c83eaf28779ff46$var$release;
+    },
+    get effect () {
+        return $8c83eaf28779ff46$var$effect;
+    },
+    get raw () {
+        return $8c83eaf28779ff46$var$raw;
+    },
+    version: "3.14.9",
+    flushAndStopDeferringMutations: $8c83eaf28779ff46$var$flushAndStopDeferringMutations,
+    dontAutoEvaluateFunctions: $8c83eaf28779ff46$var$dontAutoEvaluateFunctions,
+    disableEffectScheduling: $8c83eaf28779ff46$var$disableEffectScheduling,
+    startObservingMutations: $8c83eaf28779ff46$var$startObservingMutations,
+    stopObservingMutations: $8c83eaf28779ff46$var$stopObservingMutations,
+    setReactivityEngine: $8c83eaf28779ff46$var$setReactivityEngine,
+    onAttributeRemoved: $8c83eaf28779ff46$var$onAttributeRemoved,
+    onAttributesAdded: $8c83eaf28779ff46$var$onAttributesAdded,
+    closestDataStack: $8c83eaf28779ff46$var$closestDataStack,
+    skipDuringClone: $8c83eaf28779ff46$var$skipDuringClone,
+    onlyDuringClone: $8c83eaf28779ff46$var$onlyDuringClone,
+    addRootSelector: $8c83eaf28779ff46$var$addRootSelector,
+    addInitSelector: $8c83eaf28779ff46$var$addInitSelector,
+    interceptClone: $8c83eaf28779ff46$var$interceptClone,
+    addScopeToNode: $8c83eaf28779ff46$var$addScopeToNode,
+    deferMutations: $8c83eaf28779ff46$var$deferMutations,
+    mapAttributes: $8c83eaf28779ff46$var$mapAttributes,
+    evaluateLater: $8c83eaf28779ff46$var$evaluateLater,
+    interceptInit: $8c83eaf28779ff46$var$interceptInit,
+    setEvaluator: $8c83eaf28779ff46$var$setEvaluator,
+    mergeProxies: $8c83eaf28779ff46$var$mergeProxies,
+    extractProp: $8c83eaf28779ff46$var$extractProp,
+    findClosest: $8c83eaf28779ff46$var$findClosest,
+    onElRemoved: $8c83eaf28779ff46$var$onElRemoved,
+    closestRoot: $8c83eaf28779ff46$var$closestRoot,
+    destroyTree: $8c83eaf28779ff46$var$destroyTree,
+    interceptor: $8c83eaf28779ff46$var$interceptor,
+    transition: // INTERNAL: not public API and is subject to change without major release.
+    $8c83eaf28779ff46$var$transition,
+    setStyles: // INTERNAL
+    $8c83eaf28779ff46$var$setStyles,
+    mutateDom: // INTERNAL
+    $8c83eaf28779ff46$var$mutateDom,
+    directive: $8c83eaf28779ff46$var$directive,
+    entangle: $8c83eaf28779ff46$var$entangle,
+    throttle: $8c83eaf28779ff46$var$throttle,
+    debounce: $8c83eaf28779ff46$var$debounce,
+    evaluate: $8c83eaf28779ff46$var$evaluate,
+    initTree: $8c83eaf28779ff46$var$initTree,
+    nextTick: $8c83eaf28779ff46$var$nextTick,
+    prefixed: $8c83eaf28779ff46$var$prefix,
+    prefix: $8c83eaf28779ff46$var$setPrefix,
+    plugin: $8c83eaf28779ff46$var$plugin,
+    magic: $8c83eaf28779ff46$var$magic,
+    store: $8c83eaf28779ff46$var$store,
+    start: $8c83eaf28779ff46$var$start,
+    clone: $8c83eaf28779ff46$var$clone,
+    cloneNode: // INTERNAL
+    $8c83eaf28779ff46$var$cloneNode,
+    // INTERNAL
+    bound: $8c83eaf28779ff46$var$getBinding,
+    $data: $8c83eaf28779ff46$var$scope,
+    watch: $8c83eaf28779ff46$var$watch,
+    walk: $8c83eaf28779ff46$var$walk,
+    data: $8c83eaf28779ff46$var$data,
+    bind: $8c83eaf28779ff46$var$bind2
+};
+var $8c83eaf28779ff46$var$alpine_default = $8c83eaf28779ff46$var$Alpine;
+// node_modules/@vue/shared/dist/shared.esm-bundler.js
+function $8c83eaf28779ff46$var$makeMap(str, expectsLowerCase) {
+    const map = /* @__PURE__ */ Object.create(null);
+    const list = str.split(",");
+    for(let i = 0; i < list.length; i++)map[list[i]] = true;
+    return expectsLowerCase ? (val)=>!!map[val.toLowerCase()] : (val)=>!!map[val];
+}
+var $8c83eaf28779ff46$var$specialBooleanAttrs = `itemscope,allowfullscreen,formnovalidate,ismap,nomodule,novalidate,readonly`;
+var $8c83eaf28779ff46$var$isBooleanAttr2 = /* @__PURE__ */ $8c83eaf28779ff46$var$makeMap($8c83eaf28779ff46$var$specialBooleanAttrs + `,async,autofocus,autoplay,controls,default,defer,disabled,hidden,loop,open,required,reversed,scoped,seamless,checked,muted,multiple,selected`);
+var $8c83eaf28779ff46$var$EMPTY_OBJ = Object.freeze({});
+var $8c83eaf28779ff46$var$EMPTY_ARR = Object.freeze([]);
+var $8c83eaf28779ff46$var$hasOwnProperty = Object.prototype.hasOwnProperty;
+var $8c83eaf28779ff46$var$hasOwn = (val, key)=>$8c83eaf28779ff46$var$hasOwnProperty.call(val, key);
+var $8c83eaf28779ff46$var$isArray = Array.isArray;
+var $8c83eaf28779ff46$var$isMap = (val)=>$8c83eaf28779ff46$var$toTypeString(val) === "[object Map]";
+var $8c83eaf28779ff46$var$isString = (val)=>typeof val === "string";
+var $8c83eaf28779ff46$var$isSymbol = (val)=>typeof val === "symbol";
+var $8c83eaf28779ff46$var$isObject = (val)=>val !== null && typeof val === "object";
+var $8c83eaf28779ff46$var$objectToString = Object.prototype.toString;
+var $8c83eaf28779ff46$var$toTypeString = (value)=>$8c83eaf28779ff46$var$objectToString.call(value);
+var $8c83eaf28779ff46$var$toRawType = (value)=>{
+    return $8c83eaf28779ff46$var$toTypeString(value).slice(8, -1);
+};
+var $8c83eaf28779ff46$var$isIntegerKey = (key)=>$8c83eaf28779ff46$var$isString(key) && key !== "NaN" && key[0] !== "-" && "" + parseInt(key, 10) === key;
+var $8c83eaf28779ff46$var$cacheStringFunction = (fn)=>{
+    const cache = /* @__PURE__ */ Object.create(null);
+    return (str)=>{
+        const hit = cache[str];
+        return hit || (cache[str] = fn(str));
+    };
+};
+var $8c83eaf28779ff46$var$camelizeRE = /-(\w)/g;
+var $8c83eaf28779ff46$var$camelize = $8c83eaf28779ff46$var$cacheStringFunction((str)=>{
+    return str.replace($8c83eaf28779ff46$var$camelizeRE, (_, c)=>c ? c.toUpperCase() : "");
+});
+var $8c83eaf28779ff46$var$hyphenateRE = /\B([A-Z])/g;
+var $8c83eaf28779ff46$var$hyphenate = $8c83eaf28779ff46$var$cacheStringFunction((str)=>str.replace($8c83eaf28779ff46$var$hyphenateRE, "-$1").toLowerCase());
+var $8c83eaf28779ff46$var$capitalize = $8c83eaf28779ff46$var$cacheStringFunction((str)=>str.charAt(0).toUpperCase() + str.slice(1));
+var $8c83eaf28779ff46$var$toHandlerKey = $8c83eaf28779ff46$var$cacheStringFunction((str)=>str ? `on${$8c83eaf28779ff46$var$capitalize(str)}` : ``);
+var $8c83eaf28779ff46$var$hasChanged = (value, oldValue)=>value !== oldValue && (value === value || oldValue === oldValue);
+// node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js
+var $8c83eaf28779ff46$var$targetMap = /* @__PURE__ */ new WeakMap();
+var $8c83eaf28779ff46$var$effectStack = [];
+var $8c83eaf28779ff46$var$activeEffect;
+var $8c83eaf28779ff46$var$ITERATE_KEY = Symbol("iterate");
+var $8c83eaf28779ff46$var$MAP_KEY_ITERATE_KEY = Symbol("Map key iterate");
+function $8c83eaf28779ff46$var$isEffect(fn) {
+    return fn && fn._isEffect === true;
+}
+function $8c83eaf28779ff46$var$effect2(fn, options = $8c83eaf28779ff46$var$EMPTY_OBJ) {
+    if ($8c83eaf28779ff46$var$isEffect(fn)) fn = fn.raw;
+    const effect3 = $8c83eaf28779ff46$var$createReactiveEffect(fn, options);
+    if (!options.lazy) effect3();
+    return effect3;
+}
+function $8c83eaf28779ff46$var$stop(effect3) {
+    if (effect3.active) {
+        $8c83eaf28779ff46$var$cleanup(effect3);
+        if (effect3.options.onStop) effect3.options.onStop();
+        effect3.active = false;
+    }
+}
+var $8c83eaf28779ff46$var$uid = 0;
+function $8c83eaf28779ff46$var$createReactiveEffect(fn, options) {
+    const effect3 = function reactiveEffect() {
+        if (!effect3.active) return fn();
+        if (!$8c83eaf28779ff46$var$effectStack.includes(effect3)) {
+            $8c83eaf28779ff46$var$cleanup(effect3);
+            try {
+                $8c83eaf28779ff46$var$enableTracking();
+                $8c83eaf28779ff46$var$effectStack.push(effect3);
+                $8c83eaf28779ff46$var$activeEffect = effect3;
+                return fn();
+            } finally{
+                $8c83eaf28779ff46$var$effectStack.pop();
+                $8c83eaf28779ff46$var$resetTracking();
+                $8c83eaf28779ff46$var$activeEffect = $8c83eaf28779ff46$var$effectStack[$8c83eaf28779ff46$var$effectStack.length - 1];
+            }
+        }
+    };
+    effect3.id = $8c83eaf28779ff46$var$uid++;
+    effect3.allowRecurse = !!options.allowRecurse;
+    effect3._isEffect = true;
+    effect3.active = true;
+    effect3.raw = fn;
+    effect3.deps = [];
+    effect3.options = options;
+    return effect3;
+}
+function $8c83eaf28779ff46$var$cleanup(effect3) {
+    const { deps: deps } = effect3;
+    if (deps.length) {
+        for(let i = 0; i < deps.length; i++)deps[i].delete(effect3);
+        deps.length = 0;
+    }
+}
+var $8c83eaf28779ff46$var$shouldTrack = true;
+var $8c83eaf28779ff46$var$trackStack = [];
+function $8c83eaf28779ff46$var$pauseTracking() {
+    $8c83eaf28779ff46$var$trackStack.push($8c83eaf28779ff46$var$shouldTrack);
+    $8c83eaf28779ff46$var$shouldTrack = false;
+}
+function $8c83eaf28779ff46$var$enableTracking() {
+    $8c83eaf28779ff46$var$trackStack.push($8c83eaf28779ff46$var$shouldTrack);
+    $8c83eaf28779ff46$var$shouldTrack = true;
+}
+function $8c83eaf28779ff46$var$resetTracking() {
+    const last = $8c83eaf28779ff46$var$trackStack.pop();
+    $8c83eaf28779ff46$var$shouldTrack = last === void 0 ? true : last;
+}
+function $8c83eaf28779ff46$var$track(target, type, key) {
+    if (!$8c83eaf28779ff46$var$shouldTrack || $8c83eaf28779ff46$var$activeEffect === void 0) return;
+    let depsMap = $8c83eaf28779ff46$var$targetMap.get(target);
+    if (!depsMap) $8c83eaf28779ff46$var$targetMap.set(target, depsMap = /* @__PURE__ */ new Map());
+    let dep = depsMap.get(key);
+    if (!dep) depsMap.set(key, dep = /* @__PURE__ */ new Set());
+    if (!dep.has($8c83eaf28779ff46$var$activeEffect)) {
+        dep.add($8c83eaf28779ff46$var$activeEffect);
+        $8c83eaf28779ff46$var$activeEffect.deps.push(dep);
+        if ($8c83eaf28779ff46$var$activeEffect.options.onTrack) $8c83eaf28779ff46$var$activeEffect.options.onTrack({
+            effect: $8c83eaf28779ff46$var$activeEffect,
+            target: target,
+            type: type,
+            key: key
+        });
+    }
+}
+function $8c83eaf28779ff46$var$trigger(target, type, key, newValue, oldValue, oldTarget) {
+    const depsMap = $8c83eaf28779ff46$var$targetMap.get(target);
+    if (!depsMap) return;
+    const effects = /* @__PURE__ */ new Set();
+    const add2 = (effectsToAdd)=>{
+        if (effectsToAdd) effectsToAdd.forEach((effect3)=>{
+            if (effect3 !== $8c83eaf28779ff46$var$activeEffect || effect3.allowRecurse) effects.add(effect3);
+        });
+    };
+    if (type === "clear") depsMap.forEach(add2);
+    else if (key === "length" && $8c83eaf28779ff46$var$isArray(target)) depsMap.forEach((dep, key2)=>{
+        if (key2 === "length" || key2 >= newValue) add2(dep);
+    });
+    else {
+        if (key !== void 0) add2(depsMap.get(key));
+        switch(type){
+            case "add":
+                if (!$8c83eaf28779ff46$var$isArray(target)) {
+                    add2(depsMap.get($8c83eaf28779ff46$var$ITERATE_KEY));
+                    if ($8c83eaf28779ff46$var$isMap(target)) add2(depsMap.get($8c83eaf28779ff46$var$MAP_KEY_ITERATE_KEY));
+                } else if ($8c83eaf28779ff46$var$isIntegerKey(key)) add2(depsMap.get("length"));
+                break;
+            case "delete":
+                if (!$8c83eaf28779ff46$var$isArray(target)) {
+                    add2(depsMap.get($8c83eaf28779ff46$var$ITERATE_KEY));
+                    if ($8c83eaf28779ff46$var$isMap(target)) add2(depsMap.get($8c83eaf28779ff46$var$MAP_KEY_ITERATE_KEY));
+                }
+                break;
+            case "set":
+                if ($8c83eaf28779ff46$var$isMap(target)) add2(depsMap.get($8c83eaf28779ff46$var$ITERATE_KEY));
+                break;
+        }
+    }
+    const run = (effect3)=>{
+        if (effect3.options.onTrigger) effect3.options.onTrigger({
+            effect: effect3,
+            target: target,
+            key: key,
+            type: type,
+            newValue: newValue,
+            oldValue: oldValue,
+            oldTarget: oldTarget
+        });
+        if (effect3.options.scheduler) effect3.options.scheduler(effect3);
+        else effect3();
+    };
+    effects.forEach(run);
+}
+var $8c83eaf28779ff46$var$isNonTrackableKeys = /* @__PURE__ */ $8c83eaf28779ff46$var$makeMap(`__proto__,__v_isRef,__isVue`);
+var $8c83eaf28779ff46$var$builtInSymbols = new Set(Object.getOwnPropertyNames(Symbol).map((key)=>Symbol[key]).filter($8c83eaf28779ff46$var$isSymbol));
+var $8c83eaf28779ff46$var$get2 = /* @__PURE__ */ $8c83eaf28779ff46$var$createGetter();
+var $8c83eaf28779ff46$var$readonlyGet = /* @__PURE__ */ $8c83eaf28779ff46$var$createGetter(true);
+var $8c83eaf28779ff46$var$arrayInstrumentations = /* @__PURE__ */ $8c83eaf28779ff46$var$createArrayInstrumentations();
+function $8c83eaf28779ff46$var$createArrayInstrumentations() {
+    const instrumentations = {};
+    [
+        "includes",
+        "indexOf",
+        "lastIndexOf"
+    ].forEach((key)=>{
+        instrumentations[key] = function(...args) {
+            const arr = $8c83eaf28779ff46$var$toRaw(this);
+            for(let i = 0, l = this.length; i < l; i++)$8c83eaf28779ff46$var$track(arr, "get", i + "");
+            const res = arr[key](...args);
+            if (res === -1 || res === false) return arr[key](...args.map($8c83eaf28779ff46$var$toRaw));
+            else return res;
+        };
+    });
+    [
+        "push",
+        "pop",
+        "shift",
+        "unshift",
+        "splice"
+    ].forEach((key)=>{
+        instrumentations[key] = function(...args) {
+            $8c83eaf28779ff46$var$pauseTracking();
+            const res = $8c83eaf28779ff46$var$toRaw(this)[key].apply(this, args);
+            $8c83eaf28779ff46$var$resetTracking();
+            return res;
+        };
+    });
+    return instrumentations;
+}
+function $8c83eaf28779ff46$var$createGetter(isReadonly = false, shallow = false) {
+    return function get3(target, key, receiver) {
+        if (key === "__v_isReactive") return !isReadonly;
+        else if (key === "__v_isReadonly") return isReadonly;
+        else if (key === "__v_raw" && receiver === (isReadonly ? shallow ? $8c83eaf28779ff46$var$shallowReadonlyMap : $8c83eaf28779ff46$var$readonlyMap : shallow ? $8c83eaf28779ff46$var$shallowReactiveMap : $8c83eaf28779ff46$var$reactiveMap).get(target)) return target;
+        const targetIsArray = $8c83eaf28779ff46$var$isArray(target);
+        if (!isReadonly && targetIsArray && $8c83eaf28779ff46$var$hasOwn($8c83eaf28779ff46$var$arrayInstrumentations, key)) return Reflect.get($8c83eaf28779ff46$var$arrayInstrumentations, key, receiver);
+        const res = Reflect.get(target, key, receiver);
+        if ($8c83eaf28779ff46$var$isSymbol(key) ? $8c83eaf28779ff46$var$builtInSymbols.has(key) : $8c83eaf28779ff46$var$isNonTrackableKeys(key)) return res;
+        if (!isReadonly) $8c83eaf28779ff46$var$track(target, "get", key);
+        if (shallow) return res;
+        if ($8c83eaf28779ff46$var$isRef(res)) {
+            const shouldUnwrap = !targetIsArray || !$8c83eaf28779ff46$var$isIntegerKey(key);
+            return shouldUnwrap ? res.value : res;
+        }
+        if ($8c83eaf28779ff46$var$isObject(res)) return isReadonly ? $8c83eaf28779ff46$var$readonly(res) : $8c83eaf28779ff46$var$reactive2(res);
+        return res;
+    };
+}
+var $8c83eaf28779ff46$var$set2 = /* @__PURE__ */ $8c83eaf28779ff46$var$createSetter();
+function $8c83eaf28779ff46$var$createSetter(shallow = false) {
+    return function set3(target, key, value, receiver) {
+        let oldValue = target[key];
+        if (!shallow) {
+            value = $8c83eaf28779ff46$var$toRaw(value);
+            oldValue = $8c83eaf28779ff46$var$toRaw(oldValue);
+            if (!$8c83eaf28779ff46$var$isArray(target) && $8c83eaf28779ff46$var$isRef(oldValue) && !$8c83eaf28779ff46$var$isRef(value)) {
+                oldValue.value = value;
+                return true;
+            }
+        }
+        const hadKey = $8c83eaf28779ff46$var$isArray(target) && $8c83eaf28779ff46$var$isIntegerKey(key) ? Number(key) < target.length : $8c83eaf28779ff46$var$hasOwn(target, key);
+        const result = Reflect.set(target, key, value, receiver);
+        if (target === $8c83eaf28779ff46$var$toRaw(receiver)) {
+            if (!hadKey) $8c83eaf28779ff46$var$trigger(target, "add", key, value);
+            else if ($8c83eaf28779ff46$var$hasChanged(value, oldValue)) $8c83eaf28779ff46$var$trigger(target, "set", key, value, oldValue);
+        }
+        return result;
+    };
+}
+function $8c83eaf28779ff46$var$deleteProperty(target, key) {
+    const hadKey = $8c83eaf28779ff46$var$hasOwn(target, key);
+    const oldValue = target[key];
+    const result = Reflect.deleteProperty(target, key);
+    if (result && hadKey) $8c83eaf28779ff46$var$trigger(target, "delete", key, void 0, oldValue);
+    return result;
+}
+function $8c83eaf28779ff46$var$has(target, key) {
+    const result = Reflect.has(target, key);
+    if (!$8c83eaf28779ff46$var$isSymbol(key) || !$8c83eaf28779ff46$var$builtInSymbols.has(key)) $8c83eaf28779ff46$var$track(target, "has", key);
+    return result;
+}
+function $8c83eaf28779ff46$var$ownKeys(target) {
+    $8c83eaf28779ff46$var$track(target, "iterate", $8c83eaf28779ff46$var$isArray(target) ? "length" : $8c83eaf28779ff46$var$ITERATE_KEY);
+    return Reflect.ownKeys(target);
+}
+var $8c83eaf28779ff46$var$mutableHandlers = {
+    get: $8c83eaf28779ff46$var$get2,
+    set: $8c83eaf28779ff46$var$set2,
+    deleteProperty: $8c83eaf28779ff46$var$deleteProperty,
+    has: $8c83eaf28779ff46$var$has,
+    ownKeys: $8c83eaf28779ff46$var$ownKeys
+};
+var $8c83eaf28779ff46$var$readonlyHandlers = {
+    get: $8c83eaf28779ff46$var$readonlyGet,
+    set (target, key) {
+        console.warn(`Set operation on key "${String(key)}" failed: target is readonly.`, target);
+        return true;
+    },
+    deleteProperty (target, key) {
+        console.warn(`Delete operation on key "${String(key)}" failed: target is readonly.`, target);
+        return true;
+    }
+};
+var $8c83eaf28779ff46$var$toReactive = (value)=>$8c83eaf28779ff46$var$isObject(value) ? $8c83eaf28779ff46$var$reactive2(value) : value;
+var $8c83eaf28779ff46$var$toReadonly = (value)=>$8c83eaf28779ff46$var$isObject(value) ? $8c83eaf28779ff46$var$readonly(value) : value;
+var $8c83eaf28779ff46$var$toShallow = (value)=>value;
+var $8c83eaf28779ff46$var$getProto = (v)=>Reflect.getPrototypeOf(v);
+function $8c83eaf28779ff46$var$get$1(target, key, isReadonly = false, isShallow = false) {
+    target = target["__v_raw"];
+    const rawTarget = $8c83eaf28779ff46$var$toRaw(target);
+    const rawKey = $8c83eaf28779ff46$var$toRaw(key);
+    if (key !== rawKey) !isReadonly && $8c83eaf28779ff46$var$track(rawTarget, "get", key);
+    !isReadonly && $8c83eaf28779ff46$var$track(rawTarget, "get", rawKey);
+    const { has: has2 } = $8c83eaf28779ff46$var$getProto(rawTarget);
+    const wrap = isShallow ? $8c83eaf28779ff46$var$toShallow : isReadonly ? $8c83eaf28779ff46$var$toReadonly : $8c83eaf28779ff46$var$toReactive;
+    if (has2.call(rawTarget, key)) return wrap(target.get(key));
+    else if (has2.call(rawTarget, rawKey)) return wrap(target.get(rawKey));
+    else if (target !== rawTarget) target.get(key);
+}
+function $8c83eaf28779ff46$var$has$1(key, isReadonly = false) {
+    const target = this["__v_raw"];
+    const rawTarget = $8c83eaf28779ff46$var$toRaw(target);
+    const rawKey = $8c83eaf28779ff46$var$toRaw(key);
+    if (key !== rawKey) !isReadonly && $8c83eaf28779ff46$var$track(rawTarget, "has", key);
+    !isReadonly && $8c83eaf28779ff46$var$track(rawTarget, "has", rawKey);
+    return key === rawKey ? target.has(key) : target.has(key) || target.has(rawKey);
+}
+function $8c83eaf28779ff46$var$size(target, isReadonly = false) {
+    target = target["__v_raw"];
+    !isReadonly && $8c83eaf28779ff46$var$track($8c83eaf28779ff46$var$toRaw(target), "iterate", $8c83eaf28779ff46$var$ITERATE_KEY);
+    return Reflect.get(target, "size", target);
+}
+function $8c83eaf28779ff46$var$add(value) {
+    value = $8c83eaf28779ff46$var$toRaw(value);
+    const target = $8c83eaf28779ff46$var$toRaw(this);
+    const proto = $8c83eaf28779ff46$var$getProto(target);
+    const hadKey = proto.has.call(target, value);
+    if (!hadKey) {
+        target.add(value);
+        $8c83eaf28779ff46$var$trigger(target, "add", value, value);
+    }
+    return this;
+}
+function $8c83eaf28779ff46$var$set$1(key, value) {
+    value = $8c83eaf28779ff46$var$toRaw(value);
+    const target = $8c83eaf28779ff46$var$toRaw(this);
+    const { has: has2, get: get3 } = $8c83eaf28779ff46$var$getProto(target);
+    let hadKey = has2.call(target, key);
+    if (!hadKey) {
+        key = $8c83eaf28779ff46$var$toRaw(key);
+        hadKey = has2.call(target, key);
+    } else $8c83eaf28779ff46$var$checkIdentityKeys(target, has2, key);
+    const oldValue = get3.call(target, key);
+    target.set(key, value);
+    if (!hadKey) $8c83eaf28779ff46$var$trigger(target, "add", key, value);
+    else if ($8c83eaf28779ff46$var$hasChanged(value, oldValue)) $8c83eaf28779ff46$var$trigger(target, "set", key, value, oldValue);
+    return this;
+}
+function $8c83eaf28779ff46$var$deleteEntry(key) {
+    const target = $8c83eaf28779ff46$var$toRaw(this);
+    const { has: has2, get: get3 } = $8c83eaf28779ff46$var$getProto(target);
+    let hadKey = has2.call(target, key);
+    if (!hadKey) {
+        key = $8c83eaf28779ff46$var$toRaw(key);
+        hadKey = has2.call(target, key);
+    } else $8c83eaf28779ff46$var$checkIdentityKeys(target, has2, key);
+    const oldValue = get3 ? get3.call(target, key) : void 0;
+    const result = target.delete(key);
+    if (hadKey) $8c83eaf28779ff46$var$trigger(target, "delete", key, void 0, oldValue);
+    return result;
+}
+function $8c83eaf28779ff46$var$clear() {
+    const target = $8c83eaf28779ff46$var$toRaw(this);
+    const hadItems = target.size !== 0;
+    const oldTarget = $8c83eaf28779ff46$var$isMap(target) ? new Map(target) : new Set(target);
+    const result = target.clear();
+    if (hadItems) $8c83eaf28779ff46$var$trigger(target, "clear", void 0, void 0, oldTarget);
+    return result;
+}
+function $8c83eaf28779ff46$var$createForEach(isReadonly, isShallow) {
+    return function forEach(callback, thisArg) {
+        const observed = this;
+        const target = observed["__v_raw"];
+        const rawTarget = $8c83eaf28779ff46$var$toRaw(target);
+        const wrap = isShallow ? $8c83eaf28779ff46$var$toShallow : isReadonly ? $8c83eaf28779ff46$var$toReadonly : $8c83eaf28779ff46$var$toReactive;
+        !isReadonly && $8c83eaf28779ff46$var$track(rawTarget, "iterate", $8c83eaf28779ff46$var$ITERATE_KEY);
+        return target.forEach((value, key)=>{
+            return callback.call(thisArg, wrap(value), wrap(key), observed);
+        });
+    };
+}
+function $8c83eaf28779ff46$var$createIterableMethod(method, isReadonly, isShallow) {
+    return function(...args) {
+        const target = this["__v_raw"];
+        const rawTarget = $8c83eaf28779ff46$var$toRaw(target);
+        const targetIsMap = $8c83eaf28779ff46$var$isMap(rawTarget);
+        const isPair = method === "entries" || method === Symbol.iterator && targetIsMap;
+        const isKeyOnly = method === "keys" && targetIsMap;
+        const innerIterator = target[method](...args);
+        const wrap = isShallow ? $8c83eaf28779ff46$var$toShallow : isReadonly ? $8c83eaf28779ff46$var$toReadonly : $8c83eaf28779ff46$var$toReactive;
+        !isReadonly && $8c83eaf28779ff46$var$track(rawTarget, "iterate", isKeyOnly ? $8c83eaf28779ff46$var$MAP_KEY_ITERATE_KEY : $8c83eaf28779ff46$var$ITERATE_KEY);
+        return {
+            // iterator protocol
+            next () {
+                const { value: value, done: done } = innerIterator.next();
+                return done ? {
+                    value: value,
+                    done: done
+                } : {
+                    value: isPair ? [
+                        wrap(value[0]),
+                        wrap(value[1])
+                    ] : wrap(value),
+                    done: done
+                };
+            },
+            // iterable protocol
+            [Symbol.iterator] () {
+                return this;
+            }
+        };
+    };
+}
+function $8c83eaf28779ff46$var$createReadonlyMethod(type) {
+    return function(...args) {
+        {
+            const key = args[0] ? `on key "${args[0]}" ` : ``;
+            console.warn(`${$8c83eaf28779ff46$var$capitalize(type)} operation ${key}failed: target is readonly.`, $8c83eaf28779ff46$var$toRaw(this));
+        }
+        return type === "delete" ? false : this;
+    };
+}
+function $8c83eaf28779ff46$var$createInstrumentations() {
+    const mutableInstrumentations2 = {
+        get (key) {
+            return $8c83eaf28779ff46$var$get$1(this, key);
+        },
+        get size () {
+            return $8c83eaf28779ff46$var$size(this);
+        },
+        has: $8c83eaf28779ff46$var$has$1,
+        add: $8c83eaf28779ff46$var$add,
+        set: $8c83eaf28779ff46$var$set$1,
+        delete: $8c83eaf28779ff46$var$deleteEntry,
+        clear: $8c83eaf28779ff46$var$clear,
+        forEach: $8c83eaf28779ff46$var$createForEach(false, false)
+    };
+    const shallowInstrumentations2 = {
+        get (key) {
+            return $8c83eaf28779ff46$var$get$1(this, key, false, true);
+        },
+        get size () {
+            return $8c83eaf28779ff46$var$size(this);
+        },
+        has: $8c83eaf28779ff46$var$has$1,
+        add: $8c83eaf28779ff46$var$add,
+        set: $8c83eaf28779ff46$var$set$1,
+        delete: $8c83eaf28779ff46$var$deleteEntry,
+        clear: $8c83eaf28779ff46$var$clear,
+        forEach: $8c83eaf28779ff46$var$createForEach(false, true)
+    };
+    const readonlyInstrumentations2 = {
+        get (key) {
+            return $8c83eaf28779ff46$var$get$1(this, key, true);
+        },
+        get size () {
+            return $8c83eaf28779ff46$var$size(this, true);
+        },
+        has (key) {
+            return $8c83eaf28779ff46$var$has$1.call(this, key, true);
+        },
+        add: $8c83eaf28779ff46$var$createReadonlyMethod("add"),
+        set: $8c83eaf28779ff46$var$createReadonlyMethod("set"),
+        delete: $8c83eaf28779ff46$var$createReadonlyMethod("delete"),
+        clear: $8c83eaf28779ff46$var$createReadonlyMethod("clear"),
+        forEach: $8c83eaf28779ff46$var$createForEach(true, false)
+    };
+    const shallowReadonlyInstrumentations2 = {
+        get (key) {
+            return $8c83eaf28779ff46$var$get$1(this, key, true, true);
+        },
+        get size () {
+            return $8c83eaf28779ff46$var$size(this, true);
+        },
+        has (key) {
+            return $8c83eaf28779ff46$var$has$1.call(this, key, true);
+        },
+        add: $8c83eaf28779ff46$var$createReadonlyMethod("add"),
+        set: $8c83eaf28779ff46$var$createReadonlyMethod("set"),
+        delete: $8c83eaf28779ff46$var$createReadonlyMethod("delete"),
+        clear: $8c83eaf28779ff46$var$createReadonlyMethod("clear"),
+        forEach: $8c83eaf28779ff46$var$createForEach(true, true)
+    };
+    const iteratorMethods = [
+        "keys",
+        "values",
+        "entries",
+        Symbol.iterator
+    ];
+    iteratorMethods.forEach((method)=>{
+        mutableInstrumentations2[method] = $8c83eaf28779ff46$var$createIterableMethod(method, false, false);
+        readonlyInstrumentations2[method] = $8c83eaf28779ff46$var$createIterableMethod(method, true, false);
+        shallowInstrumentations2[method] = $8c83eaf28779ff46$var$createIterableMethod(method, false, true);
+        shallowReadonlyInstrumentations2[method] = $8c83eaf28779ff46$var$createIterableMethod(method, true, true);
+    });
+    return [
+        mutableInstrumentations2,
+        readonlyInstrumentations2,
+        shallowInstrumentations2,
+        shallowReadonlyInstrumentations2
+    ];
+}
+var [$8c83eaf28779ff46$var$mutableInstrumentations, $8c83eaf28779ff46$var$readonlyInstrumentations, $8c83eaf28779ff46$var$shallowInstrumentations, $8c83eaf28779ff46$var$shallowReadonlyInstrumentations] = /* @__PURE__ */ $8c83eaf28779ff46$var$createInstrumentations();
+function $8c83eaf28779ff46$var$createInstrumentationGetter(isReadonly, shallow) {
+    const instrumentations = shallow ? isReadonly ? $8c83eaf28779ff46$var$shallowReadonlyInstrumentations : $8c83eaf28779ff46$var$shallowInstrumentations : isReadonly ? $8c83eaf28779ff46$var$readonlyInstrumentations : $8c83eaf28779ff46$var$mutableInstrumentations;
+    return (target, key, receiver)=>{
+        if (key === "__v_isReactive") return !isReadonly;
+        else if (key === "__v_isReadonly") return isReadonly;
+        else if (key === "__v_raw") return target;
+        return Reflect.get($8c83eaf28779ff46$var$hasOwn(instrumentations, key) && key in target ? instrumentations : target, key, receiver);
+    };
+}
+var $8c83eaf28779ff46$var$mutableCollectionHandlers = {
+    get: /* @__PURE__ */ $8c83eaf28779ff46$var$createInstrumentationGetter(false, false)
+};
+var $8c83eaf28779ff46$var$readonlyCollectionHandlers = {
+    get: /* @__PURE__ */ $8c83eaf28779ff46$var$createInstrumentationGetter(true, false)
+};
+function $8c83eaf28779ff46$var$checkIdentityKeys(target, has2, key) {
+    const rawKey = $8c83eaf28779ff46$var$toRaw(key);
+    if (rawKey !== key && has2.call(target, rawKey)) {
+        const type = $8c83eaf28779ff46$var$toRawType(target);
+        console.warn(`Reactive ${type} contains both the raw and reactive versions of the same object${type === `Map` ? ` as keys` : ``}, which can lead to inconsistencies. Avoid differentiating between the raw and reactive versions of an object and only use the reactive version if possible.`);
+    }
+}
+var $8c83eaf28779ff46$var$reactiveMap = /* @__PURE__ */ new WeakMap();
+var $8c83eaf28779ff46$var$shallowReactiveMap = /* @__PURE__ */ new WeakMap();
+var $8c83eaf28779ff46$var$readonlyMap = /* @__PURE__ */ new WeakMap();
+var $8c83eaf28779ff46$var$shallowReadonlyMap = /* @__PURE__ */ new WeakMap();
+function $8c83eaf28779ff46$var$targetTypeMap(rawType) {
+    switch(rawType){
+        case "Object":
+        case "Array":
+            return 1;
+        case "Map":
+        case "Set":
+        case "WeakMap":
+        case "WeakSet":
+            return 2;
+        default:
+            return 0;
+    }
+}
+function $8c83eaf28779ff46$var$getTargetType(value) {
+    return value["__v_skip"] || !Object.isExtensible(value) ? 0 : $8c83eaf28779ff46$var$targetTypeMap($8c83eaf28779ff46$var$toRawType(value));
+}
+function $8c83eaf28779ff46$var$reactive2(target) {
+    if (target && target["__v_isReadonly"]) return target;
+    return $8c83eaf28779ff46$var$createReactiveObject(target, false, $8c83eaf28779ff46$var$mutableHandlers, $8c83eaf28779ff46$var$mutableCollectionHandlers, $8c83eaf28779ff46$var$reactiveMap);
+}
+function $8c83eaf28779ff46$var$readonly(target) {
+    return $8c83eaf28779ff46$var$createReactiveObject(target, true, $8c83eaf28779ff46$var$readonlyHandlers, $8c83eaf28779ff46$var$readonlyCollectionHandlers, $8c83eaf28779ff46$var$readonlyMap);
+}
+function $8c83eaf28779ff46$var$createReactiveObject(target, isReadonly, baseHandlers, collectionHandlers, proxyMap) {
+    if (!$8c83eaf28779ff46$var$isObject(target)) {
+        console.warn(`value cannot be made reactive: ${String(target)}`);
+        return target;
+    }
+    if (target["__v_raw"] && !(isReadonly && target["__v_isReactive"])) return target;
+    const existingProxy = proxyMap.get(target);
+    if (existingProxy) return existingProxy;
+    const targetType = $8c83eaf28779ff46$var$getTargetType(target);
+    if (targetType === 0) return target;
+    const proxy = new Proxy(target, targetType === 2 ? collectionHandlers : baseHandlers);
+    proxyMap.set(target, proxy);
+    return proxy;
+}
+function $8c83eaf28779ff46$var$toRaw(observed) {
+    return observed && $8c83eaf28779ff46$var$toRaw(observed["__v_raw"]) || observed;
+}
+function $8c83eaf28779ff46$var$isRef(r) {
+    return Boolean(r && r.__v_isRef === true);
+}
+// packages/alpinejs/src/magics/$nextTick.js
+$8c83eaf28779ff46$var$magic("nextTick", ()=>$8c83eaf28779ff46$var$nextTick);
+// packages/alpinejs/src/magics/$dispatch.js
+$8c83eaf28779ff46$var$magic("dispatch", (el)=>$8c83eaf28779ff46$var$dispatch.bind($8c83eaf28779ff46$var$dispatch, el));
+// packages/alpinejs/src/magics/$watch.js
+$8c83eaf28779ff46$var$magic("watch", (el, { evaluateLater: evaluateLater2, cleanup: cleanup2 })=>(key, callback)=>{
+        let evaluate2 = evaluateLater2(key);
+        let getter = ()=>{
+            let value;
+            evaluate2((i)=>value = i);
+            return value;
+        };
+        let unwatch = $8c83eaf28779ff46$var$watch(getter, callback);
+        cleanup2(unwatch);
+    });
+// packages/alpinejs/src/magics/$store.js
+$8c83eaf28779ff46$var$magic("store", $8c83eaf28779ff46$var$getStores);
+// packages/alpinejs/src/magics/$data.js
+$8c83eaf28779ff46$var$magic("data", (el)=>$8c83eaf28779ff46$var$scope(el));
+// packages/alpinejs/src/magics/$root.js
+$8c83eaf28779ff46$var$magic("root", (el)=>$8c83eaf28779ff46$var$closestRoot(el));
+// packages/alpinejs/src/magics/$refs.js
+$8c83eaf28779ff46$var$magic("refs", (el)=>{
+    if (el._x_refs_proxy) return el._x_refs_proxy;
+    el._x_refs_proxy = $8c83eaf28779ff46$var$mergeProxies($8c83eaf28779ff46$var$getArrayOfRefObject(el));
+    return el._x_refs_proxy;
+});
+function $8c83eaf28779ff46$var$getArrayOfRefObject(el) {
+    let refObjects = [];
+    $8c83eaf28779ff46$var$findClosest(el, (i)=>{
+        if (i._x_refs) refObjects.push(i._x_refs);
+    });
+    return refObjects;
+}
+// packages/alpinejs/src/ids.js
+var $8c83eaf28779ff46$var$globalIdMemo = {};
+function $8c83eaf28779ff46$var$findAndIncrementId(name) {
+    if (!$8c83eaf28779ff46$var$globalIdMemo[name]) $8c83eaf28779ff46$var$globalIdMemo[name] = 0;
+    return ++$8c83eaf28779ff46$var$globalIdMemo[name];
+}
+function $8c83eaf28779ff46$var$closestIdRoot(el, name) {
+    return $8c83eaf28779ff46$var$findClosest(el, (element)=>{
+        if (element._x_ids && element._x_ids[name]) return true;
+    });
+}
+function $8c83eaf28779ff46$var$setIdRoot(el, name) {
+    if (!el._x_ids) el._x_ids = {};
+    if (!el._x_ids[name]) el._x_ids[name] = $8c83eaf28779ff46$var$findAndIncrementId(name);
+}
+// packages/alpinejs/src/magics/$id.js
+$8c83eaf28779ff46$var$magic("id", (el, { cleanup: cleanup2 })=>(name, key = null)=>{
+        let cacheKey = `${name}${key ? `-${key}` : ""}`;
+        return $8c83eaf28779ff46$var$cacheIdByNameOnElement(el, cacheKey, cleanup2, ()=>{
+            let root = $8c83eaf28779ff46$var$closestIdRoot(el, name);
+            let id = root ? root._x_ids[name] : $8c83eaf28779ff46$var$findAndIncrementId(name);
+            return key ? `${name}-${id}-${key}` : `${name}-${id}`;
+        });
+    });
+$8c83eaf28779ff46$var$interceptClone((from, to)=>{
+    if (from._x_id) to._x_id = from._x_id;
+});
+function $8c83eaf28779ff46$var$cacheIdByNameOnElement(el, cacheKey, cleanup2, callback) {
+    if (!el._x_id) el._x_id = {};
+    if (el._x_id[cacheKey]) return el._x_id[cacheKey];
+    let output = callback();
+    el._x_id[cacheKey] = output;
+    cleanup2(()=>{
+        delete el._x_id[cacheKey];
+    });
+    return output;
+}
+// packages/alpinejs/src/magics/$el.js
+$8c83eaf28779ff46$var$magic("el", (el)=>el);
+// packages/alpinejs/src/magics/index.js
+$8c83eaf28779ff46$var$warnMissingPluginMagic("Focus", "focus", "focus");
+$8c83eaf28779ff46$var$warnMissingPluginMagic("Persist", "persist", "persist");
+function $8c83eaf28779ff46$var$warnMissingPluginMagic(name, magicName, slug) {
+    $8c83eaf28779ff46$var$magic(magicName, (el)=>$8c83eaf28779ff46$var$warn(`You can't use [$${magicName}] without first installing the "${name}" plugin here: https://alpinejs.dev/plugins/${slug}`, el));
+}
+// packages/alpinejs/src/directives/x-modelable.js
+$8c83eaf28779ff46$var$directive("modelable", (el, { expression: expression }, { effect: effect3, evaluateLater: evaluateLater2, cleanup: cleanup2 })=>{
+    let func = evaluateLater2(expression);
+    let innerGet = ()=>{
+        let result;
+        func((i)=>result = i);
+        return result;
+    };
+    let evaluateInnerSet = evaluateLater2(`${expression} = __placeholder`);
+    let innerSet = (val)=>evaluateInnerSet(()=>{}, {
+            scope: {
+                "__placeholder": val
+            }
+        });
+    let initialValue = innerGet();
+    innerSet(initialValue);
+    queueMicrotask(()=>{
+        if (!el._x_model) return;
+        el._x_removeModelListeners["default"]();
+        let outerGet = el._x_model.get;
+        let outerSet = el._x_model.set;
+        let releaseEntanglement = $8c83eaf28779ff46$var$entangle({
+            get () {
+                return outerGet();
+            },
+            set (value) {
+                outerSet(value);
+            }
+        }, {
+            get () {
+                return innerGet();
+            },
+            set (value) {
+                innerSet(value);
+            }
+        });
+        cleanup2(releaseEntanglement);
+    });
+});
+// packages/alpinejs/src/directives/x-teleport.js
+$8c83eaf28779ff46$var$directive("teleport", (el, { modifiers: modifiers, expression: expression }, { cleanup: cleanup2 })=>{
+    if (el.tagName.toLowerCase() !== "template") $8c83eaf28779ff46$var$warn("x-teleport can only be used on a <template> tag", el);
+    let target = $8c83eaf28779ff46$var$getTarget(expression);
+    let clone2 = el.content.cloneNode(true).firstElementChild;
+    el._x_teleport = clone2;
+    clone2._x_teleportBack = el;
+    el.setAttribute("data-teleport-template", true);
+    clone2.setAttribute("data-teleport-target", true);
+    if (el._x_forwardEvents) el._x_forwardEvents.forEach((eventName)=>{
+        clone2.addEventListener(eventName, (e)=>{
+            e.stopPropagation();
+            el.dispatchEvent(new e.constructor(e.type, e));
+        });
+    });
+    $8c83eaf28779ff46$var$addScopeToNode(clone2, {}, el);
+    let placeInDom = (clone3, target2, modifiers2)=>{
+        if (modifiers2.includes("prepend")) target2.parentNode.insertBefore(clone3, target2);
+        else if (modifiers2.includes("append")) target2.parentNode.insertBefore(clone3, target2.nextSibling);
+        else target2.appendChild(clone3);
+    };
+    $8c83eaf28779ff46$var$mutateDom(()=>{
+        placeInDom(clone2, target, modifiers);
+        $8c83eaf28779ff46$var$skipDuringClone(()=>{
+            $8c83eaf28779ff46$var$initTree(clone2);
+        })();
+    });
+    el._x_teleportPutBack = ()=>{
+        let target2 = $8c83eaf28779ff46$var$getTarget(expression);
+        $8c83eaf28779ff46$var$mutateDom(()=>{
+            placeInDom(el._x_teleport, target2, modifiers);
+        });
+    };
+    cleanup2(()=>$8c83eaf28779ff46$var$mutateDom(()=>{
+            clone2.remove();
+            $8c83eaf28779ff46$var$destroyTree(clone2);
+        }));
+});
+var $8c83eaf28779ff46$var$teleportContainerDuringClone = document.createElement("div");
+function $8c83eaf28779ff46$var$getTarget(expression) {
+    let target = $8c83eaf28779ff46$var$skipDuringClone(()=>{
+        return document.querySelector(expression);
+    }, ()=>{
+        return $8c83eaf28779ff46$var$teleportContainerDuringClone;
+    })();
+    if (!target) $8c83eaf28779ff46$var$warn(`Cannot find x-teleport element for selector: "${expression}"`);
+    return target;
+}
+// packages/alpinejs/src/directives/x-ignore.js
+var $8c83eaf28779ff46$var$handler = ()=>{};
+$8c83eaf28779ff46$var$handler.inline = (el, { modifiers: modifiers }, { cleanup: cleanup2 })=>{
+    modifiers.includes("self") ? el._x_ignoreSelf = true : el._x_ignore = true;
+    cleanup2(()=>{
+        modifiers.includes("self") ? delete el._x_ignoreSelf : delete el._x_ignore;
+    });
+};
+$8c83eaf28779ff46$var$directive("ignore", $8c83eaf28779ff46$var$handler);
+// packages/alpinejs/src/directives/x-effect.js
+$8c83eaf28779ff46$var$directive("effect", $8c83eaf28779ff46$var$skipDuringClone((el, { expression: expression }, { effect: effect3 })=>{
+    effect3($8c83eaf28779ff46$var$evaluateLater(el, expression));
+}));
+// packages/alpinejs/src/utils/on.js
+function $8c83eaf28779ff46$var$on(el, event, modifiers, callback) {
+    let listenerTarget = el;
+    let handler4 = (e)=>callback(e);
+    let options = {};
+    let wrapHandler = (callback2, wrapper)=>(e)=>wrapper(callback2, e);
+    if (modifiers.includes("dot")) event = $8c83eaf28779ff46$var$dotSyntax(event);
+    if (modifiers.includes("camel")) event = $8c83eaf28779ff46$var$camelCase2(event);
+    if (modifiers.includes("passive")) options.passive = true;
+    if (modifiers.includes("capture")) options.capture = true;
+    if (modifiers.includes("window")) listenerTarget = window;
+    if (modifiers.includes("document")) listenerTarget = document;
+    if (modifiers.includes("debounce")) {
+        let nextModifier = modifiers[modifiers.indexOf("debounce") + 1] || "invalid-wait";
+        let wait = $8c83eaf28779ff46$var$isNumeric(nextModifier.split("ms")[0]) ? Number(nextModifier.split("ms")[0]) : 250;
+        handler4 = $8c83eaf28779ff46$var$debounce(handler4, wait);
+    }
+    if (modifiers.includes("throttle")) {
+        let nextModifier = modifiers[modifiers.indexOf("throttle") + 1] || "invalid-wait";
+        let wait = $8c83eaf28779ff46$var$isNumeric(nextModifier.split("ms")[0]) ? Number(nextModifier.split("ms")[0]) : 250;
+        handler4 = $8c83eaf28779ff46$var$throttle(handler4, wait);
+    }
+    if (modifiers.includes("prevent")) handler4 = wrapHandler(handler4, (next, e)=>{
+        e.preventDefault();
+        next(e);
+    });
+    if (modifiers.includes("stop")) handler4 = wrapHandler(handler4, (next, e)=>{
+        e.stopPropagation();
+        next(e);
+    });
+    if (modifiers.includes("once")) handler4 = wrapHandler(handler4, (next, e)=>{
+        next(e);
+        listenerTarget.removeEventListener(event, handler4, options);
+    });
+    if (modifiers.includes("away") || modifiers.includes("outside")) {
+        listenerTarget = document;
+        handler4 = wrapHandler(handler4, (next, e)=>{
+            if (el.contains(e.target)) return;
+            if (e.target.isConnected === false) return;
+            if (el.offsetWidth < 1 && el.offsetHeight < 1) return;
+            if (el._x_isShown === false) return;
+            next(e);
+        });
+    }
+    if (modifiers.includes("self")) handler4 = wrapHandler(handler4, (next, e)=>{
+        e.target === el && next(e);
+    });
+    if ($8c83eaf28779ff46$var$isKeyEvent(event) || $8c83eaf28779ff46$var$isClickEvent(event)) handler4 = wrapHandler(handler4, (next, e)=>{
+        if ($8c83eaf28779ff46$var$isListeningForASpecificKeyThatHasntBeenPressed(e, modifiers)) return;
+        next(e);
+    });
+    listenerTarget.addEventListener(event, handler4, options);
+    return ()=>{
+        listenerTarget.removeEventListener(event, handler4, options);
+    };
+}
+function $8c83eaf28779ff46$var$dotSyntax(subject) {
+    return subject.replace(/-/g, ".");
+}
+function $8c83eaf28779ff46$var$camelCase2(subject) {
+    return subject.toLowerCase().replace(/-(\w)/g, (match, char)=>char.toUpperCase());
+}
+function $8c83eaf28779ff46$var$isNumeric(subject) {
+    return !Array.isArray(subject) && !isNaN(subject);
+}
+function $8c83eaf28779ff46$var$kebabCase2(subject) {
+    if ([
+        " ",
+        "_"
+    ].includes(subject)) return subject;
+    return subject.replace(/([a-z])([A-Z])/g, "$1-$2").replace(/[_\s]/, "-").toLowerCase();
+}
+function $8c83eaf28779ff46$var$isKeyEvent(event) {
+    return [
+        "keydown",
+        "keyup"
+    ].includes(event);
+}
+function $8c83eaf28779ff46$var$isClickEvent(event) {
+    return [
+        "contextmenu",
+        "click",
+        "mouse"
+    ].some((i)=>event.includes(i));
+}
+function $8c83eaf28779ff46$var$isListeningForASpecificKeyThatHasntBeenPressed(e, modifiers) {
+    let keyModifiers = modifiers.filter((i)=>{
+        return ![
+            "window",
+            "document",
+            "prevent",
+            "stop",
+            "once",
+            "capture",
+            "self",
+            "away",
+            "outside",
+            "passive"
+        ].includes(i);
+    });
+    if (keyModifiers.includes("debounce")) {
+        let debounceIndex = keyModifiers.indexOf("debounce");
+        keyModifiers.splice(debounceIndex, $8c83eaf28779ff46$var$isNumeric((keyModifiers[debounceIndex + 1] || "invalid-wait").split("ms")[0]) ? 2 : 1);
+    }
+    if (keyModifiers.includes("throttle")) {
+        let debounceIndex = keyModifiers.indexOf("throttle");
+        keyModifiers.splice(debounceIndex, $8c83eaf28779ff46$var$isNumeric((keyModifiers[debounceIndex + 1] || "invalid-wait").split("ms")[0]) ? 2 : 1);
+    }
+    if (keyModifiers.length === 0) return false;
+    if (keyModifiers.length === 1 && $8c83eaf28779ff46$var$keyToModifiers(e.key).includes(keyModifiers[0])) return false;
+    const systemKeyModifiers = [
+        "ctrl",
+        "shift",
+        "alt",
+        "meta",
+        "cmd",
+        "super"
+    ];
+    const selectedSystemKeyModifiers = systemKeyModifiers.filter((modifier)=>keyModifiers.includes(modifier));
+    keyModifiers = keyModifiers.filter((i)=>!selectedSystemKeyModifiers.includes(i));
+    if (selectedSystemKeyModifiers.length > 0) {
+        const activelyPressedKeyModifiers = selectedSystemKeyModifiers.filter((modifier)=>{
+            if (modifier === "cmd" || modifier === "super") modifier = "meta";
+            return e[`${modifier}Key`];
+        });
+        if (activelyPressedKeyModifiers.length === selectedSystemKeyModifiers.length) {
+            if ($8c83eaf28779ff46$var$isClickEvent(e.type)) return false;
+            if ($8c83eaf28779ff46$var$keyToModifiers(e.key).includes(keyModifiers[0])) return false;
+        }
+    }
+    return true;
+}
+function $8c83eaf28779ff46$var$keyToModifiers(key) {
+    if (!key) return [];
+    key = $8c83eaf28779ff46$var$kebabCase2(key);
+    let modifierToKeyMap = {
+        "ctrl": "control",
+        "slash": "/",
+        "space": " ",
+        "spacebar": " ",
+        "cmd": "meta",
+        "esc": "escape",
+        "up": "arrow-up",
+        "down": "arrow-down",
+        "left": "arrow-left",
+        "right": "arrow-right",
+        "period": ".",
+        "comma": ",",
+        "equal": "=",
+        "minus": "-",
+        "underscore": "_"
+    };
+    modifierToKeyMap[key] = key;
+    return Object.keys(modifierToKeyMap).map((modifier)=>{
+        if (modifierToKeyMap[modifier] === key) return modifier;
+    }).filter((modifier)=>modifier);
+}
+// packages/alpinejs/src/directives/x-model.js
+$8c83eaf28779ff46$var$directive("model", (el, { modifiers: modifiers, expression: expression }, { effect: effect3, cleanup: cleanup2 })=>{
+    let scopeTarget = el;
+    if (modifiers.includes("parent")) scopeTarget = el.parentNode;
+    let evaluateGet = $8c83eaf28779ff46$var$evaluateLater(scopeTarget, expression);
+    let evaluateSet;
+    if (typeof expression === "string") evaluateSet = $8c83eaf28779ff46$var$evaluateLater(scopeTarget, `${expression} = __placeholder`);
+    else if (typeof expression === "function" && typeof expression() === "string") evaluateSet = $8c83eaf28779ff46$var$evaluateLater(scopeTarget, `${expression()} = __placeholder`);
+    else evaluateSet = ()=>{};
+    let getValue = ()=>{
+        let result;
+        evaluateGet((value)=>result = value);
+        return $8c83eaf28779ff46$var$isGetterSetter(result) ? result.get() : result;
+    };
+    let setValue = (value)=>{
+        let result;
+        evaluateGet((value2)=>result = value2);
+        if ($8c83eaf28779ff46$var$isGetterSetter(result)) result.set(value);
+        else evaluateSet(()=>{}, {
+            scope: {
+                "__placeholder": value
+            }
+        });
+    };
+    if (typeof expression === "string" && el.type === "radio") $8c83eaf28779ff46$var$mutateDom(()=>{
+        if (!el.hasAttribute("name")) el.setAttribute("name", expression);
+    });
+    var event = el.tagName.toLowerCase() === "select" || [
+        "checkbox",
+        "radio"
+    ].includes(el.type) || modifiers.includes("lazy") ? "change" : "input";
+    let removeListener = $8c83eaf28779ff46$var$isCloning ? ()=>{} : $8c83eaf28779ff46$var$on(el, event, modifiers, (e)=>{
+        setValue($8c83eaf28779ff46$var$getInputValue(el, modifiers, e, getValue()));
+    });
+    if (modifiers.includes("fill")) {
+        if ([
+            void 0,
+            null,
+            ""
+        ].includes(getValue()) || $8c83eaf28779ff46$var$isCheckbox(el) && Array.isArray(getValue()) || el.tagName.toLowerCase() === "select" && el.multiple) setValue($8c83eaf28779ff46$var$getInputValue(el, modifiers, {
+            target: el
+        }, getValue()));
+    }
+    if (!el._x_removeModelListeners) el._x_removeModelListeners = {};
+    el._x_removeModelListeners["default"] = removeListener;
+    cleanup2(()=>el._x_removeModelListeners["default"]());
+    if (el.form) {
+        let removeResetListener = $8c83eaf28779ff46$var$on(el.form, "reset", [], (e)=>{
+            $8c83eaf28779ff46$var$nextTick(()=>el._x_model && el._x_model.set($8c83eaf28779ff46$var$getInputValue(el, modifiers, {
+                    target: el
+                }, getValue())));
+        });
+        cleanup2(()=>removeResetListener());
+    }
+    el._x_model = {
+        get () {
+            return getValue();
+        },
+        set (value) {
+            setValue(value);
+        }
+    };
+    el._x_forceModelUpdate = (value)=>{
+        if (value === void 0 && typeof expression === "string" && expression.match(/\./)) value = "";
+        window.fromModel = true;
+        $8c83eaf28779ff46$var$mutateDom(()=>$8c83eaf28779ff46$var$bind(el, "value", value));
+        delete window.fromModel;
+    };
+    effect3(()=>{
+        let value = getValue();
+        if (modifiers.includes("unintrusive") && document.activeElement.isSameNode(el)) return;
+        el._x_forceModelUpdate(value);
+    });
+});
+function $8c83eaf28779ff46$var$getInputValue(el, modifiers, event, currentValue) {
+    return $8c83eaf28779ff46$var$mutateDom(()=>{
+        if (event instanceof CustomEvent && event.detail !== void 0) return event.detail !== null && event.detail !== void 0 ? event.detail : event.target.value;
+        else if ($8c83eaf28779ff46$var$isCheckbox(el)) {
+            if (Array.isArray(currentValue)) {
+                let newValue = null;
+                if (modifiers.includes("number")) newValue = $8c83eaf28779ff46$var$safeParseNumber(event.target.value);
+                else if (modifiers.includes("boolean")) newValue = $8c83eaf28779ff46$var$safeParseBoolean(event.target.value);
+                else newValue = event.target.value;
+                return event.target.checked ? currentValue.includes(newValue) ? currentValue : currentValue.concat([
+                    newValue
+                ]) : currentValue.filter((el2)=>!$8c83eaf28779ff46$var$checkedAttrLooseCompare2(el2, newValue));
+            } else return event.target.checked;
+        } else if (el.tagName.toLowerCase() === "select" && el.multiple) {
+            if (modifiers.includes("number")) return Array.from(event.target.selectedOptions).map((option)=>{
+                let rawValue = option.value || option.text;
+                return $8c83eaf28779ff46$var$safeParseNumber(rawValue);
+            });
+            else if (modifiers.includes("boolean")) return Array.from(event.target.selectedOptions).map((option)=>{
+                let rawValue = option.value || option.text;
+                return $8c83eaf28779ff46$var$safeParseBoolean(rawValue);
+            });
+            return Array.from(event.target.selectedOptions).map((option)=>{
+                return option.value || option.text;
+            });
+        } else {
+            let newValue;
+            if ($8c83eaf28779ff46$var$isRadio(el)) {
+                if (event.target.checked) newValue = event.target.value;
+                else newValue = currentValue;
+            } else newValue = event.target.value;
+            if (modifiers.includes("number")) return $8c83eaf28779ff46$var$safeParseNumber(newValue);
+            else if (modifiers.includes("boolean")) return $8c83eaf28779ff46$var$safeParseBoolean(newValue);
+            else if (modifiers.includes("trim")) return newValue.trim();
+            else return newValue;
+        }
+    });
+}
+function $8c83eaf28779ff46$var$safeParseNumber(rawValue) {
+    let number = rawValue ? parseFloat(rawValue) : null;
+    return $8c83eaf28779ff46$var$isNumeric2(number) ? number : rawValue;
+}
+function $8c83eaf28779ff46$var$checkedAttrLooseCompare2(valueA, valueB) {
+    return valueA == valueB;
+}
+function $8c83eaf28779ff46$var$isNumeric2(subject) {
+    return !Array.isArray(subject) && !isNaN(subject);
+}
+function $8c83eaf28779ff46$var$isGetterSetter(value) {
+    return value !== null && typeof value === "object" && typeof value.get === "function" && typeof value.set === "function";
+}
+// packages/alpinejs/src/directives/x-cloak.js
+$8c83eaf28779ff46$var$directive("cloak", (el)=>queueMicrotask(()=>$8c83eaf28779ff46$var$mutateDom(()=>el.removeAttribute($8c83eaf28779ff46$var$prefix("cloak")))));
+// packages/alpinejs/src/directives/x-init.js
+$8c83eaf28779ff46$var$addInitSelector(()=>`[${$8c83eaf28779ff46$var$prefix("init")}]`);
+$8c83eaf28779ff46$var$directive("init", $8c83eaf28779ff46$var$skipDuringClone((el, { expression: expression }, { evaluate: evaluate2 })=>{
+    if (typeof expression === "string") return !!expression.trim() && evaluate2(expression, {}, false);
+    return evaluate2(expression, {}, false);
+}));
+// packages/alpinejs/src/directives/x-text.js
+$8c83eaf28779ff46$var$directive("text", (el, { expression: expression }, { effect: effect3, evaluateLater: evaluateLater2 })=>{
+    let evaluate2 = evaluateLater2(expression);
+    effect3(()=>{
+        evaluate2((value)=>{
+            $8c83eaf28779ff46$var$mutateDom(()=>{
+                el.textContent = value;
+            });
+        });
+    });
+});
+// packages/alpinejs/src/directives/x-html.js
+$8c83eaf28779ff46$var$directive("html", (el, { expression: expression }, { effect: effect3, evaluateLater: evaluateLater2 })=>{
+    let evaluate2 = evaluateLater2(expression);
+    effect3(()=>{
+        evaluate2((value)=>{
+            $8c83eaf28779ff46$var$mutateDom(()=>{
+                el.innerHTML = value;
+                el._x_ignoreSelf = true;
+                $8c83eaf28779ff46$var$initTree(el);
+                delete el._x_ignoreSelf;
+            });
+        });
+    });
+});
+// packages/alpinejs/src/directives/x-bind.js
+$8c83eaf28779ff46$var$mapAttributes($8c83eaf28779ff46$var$startingWith(":", $8c83eaf28779ff46$var$into($8c83eaf28779ff46$var$prefix("bind:"))));
+var $8c83eaf28779ff46$var$handler2 = (el, { value: value, modifiers: modifiers, expression: expression, original: original }, { effect: effect3, cleanup: cleanup2 })=>{
+    if (!value) {
+        let bindingProviders = {};
+        $8c83eaf28779ff46$var$injectBindingProviders(bindingProviders);
+        let getBindings = $8c83eaf28779ff46$var$evaluateLater(el, expression);
+        getBindings((bindings)=>{
+            $8c83eaf28779ff46$var$applyBindingsObject(el, bindings, original);
+        }, {
+            scope: bindingProviders
+        });
+        return;
+    }
+    if (value === "key") return $8c83eaf28779ff46$var$storeKeyForXFor(el, expression);
+    if (el._x_inlineBindings && el._x_inlineBindings[value] && el._x_inlineBindings[value].extract) return;
+    let evaluate2 = $8c83eaf28779ff46$var$evaluateLater(el, expression);
+    effect3(()=>evaluate2((result)=>{
+            if (result === void 0 && typeof expression === "string" && expression.match(/\./)) result = "";
+            $8c83eaf28779ff46$var$mutateDom(()=>$8c83eaf28779ff46$var$bind(el, value, result, modifiers));
+        }));
+    cleanup2(()=>{
+        el._x_undoAddedClasses && el._x_undoAddedClasses();
+        el._x_undoAddedStyles && el._x_undoAddedStyles();
+    });
+};
+$8c83eaf28779ff46$var$handler2.inline = (el, { value: value, modifiers: modifiers, expression: expression })=>{
+    if (!value) return;
+    if (!el._x_inlineBindings) el._x_inlineBindings = {};
+    el._x_inlineBindings[value] = {
+        expression: expression,
+        extract: false
+    };
+};
+$8c83eaf28779ff46$var$directive("bind", $8c83eaf28779ff46$var$handler2);
+function $8c83eaf28779ff46$var$storeKeyForXFor(el, expression) {
+    el._x_keyExpression = expression;
+}
+// packages/alpinejs/src/directives/x-data.js
+$8c83eaf28779ff46$var$addRootSelector(()=>`[${$8c83eaf28779ff46$var$prefix("data")}]`);
+$8c83eaf28779ff46$var$directive("data", (el, { expression: expression }, { cleanup: cleanup2 })=>{
+    if ($8c83eaf28779ff46$var$shouldSkipRegisteringDataDuringClone(el)) return;
+    expression = expression === "" ? "{}" : expression;
+    let magicContext = {};
+    $8c83eaf28779ff46$var$injectMagics(magicContext, el);
+    let dataProviderContext = {};
+    $8c83eaf28779ff46$var$injectDataProviders(dataProviderContext, magicContext);
+    let data2 = $8c83eaf28779ff46$var$evaluate(el, expression, {
+        scope: dataProviderContext
+    });
+    if (data2 === void 0 || data2 === true) data2 = {};
+    $8c83eaf28779ff46$var$injectMagics(data2, el);
+    let reactiveData = $8c83eaf28779ff46$var$reactive(data2);
+    $8c83eaf28779ff46$var$initInterceptors(reactiveData);
+    let undo = $8c83eaf28779ff46$var$addScopeToNode(el, reactiveData);
+    reactiveData["init"] && $8c83eaf28779ff46$var$evaluate(el, reactiveData["init"]);
+    cleanup2(()=>{
+        reactiveData["destroy"] && $8c83eaf28779ff46$var$evaluate(el, reactiveData["destroy"]);
+        undo();
+    });
+});
+$8c83eaf28779ff46$var$interceptClone((from, to)=>{
+    if (from._x_dataStack) {
+        to._x_dataStack = from._x_dataStack;
+        to.setAttribute("data-has-alpine-state", true);
+    }
+});
+function $8c83eaf28779ff46$var$shouldSkipRegisteringDataDuringClone(el) {
+    if (!$8c83eaf28779ff46$var$isCloning) return false;
+    if ($8c83eaf28779ff46$var$isCloningLegacy) return true;
+    return el.hasAttribute("data-has-alpine-state");
+}
+// packages/alpinejs/src/directives/x-show.js
+$8c83eaf28779ff46$var$directive("show", (el, { modifiers: modifiers, expression: expression }, { effect: effect3 })=>{
+    let evaluate2 = $8c83eaf28779ff46$var$evaluateLater(el, expression);
+    if (!el._x_doHide) el._x_doHide = ()=>{
+        $8c83eaf28779ff46$var$mutateDom(()=>{
+            el.style.setProperty("display", "none", modifiers.includes("important") ? "important" : void 0);
+        });
+    };
+    if (!el._x_doShow) el._x_doShow = ()=>{
+        $8c83eaf28779ff46$var$mutateDom(()=>{
+            if (el.style.length === 1 && el.style.display === "none") el.removeAttribute("style");
+            else el.style.removeProperty("display");
+        });
+    };
+    let hide = ()=>{
+        el._x_doHide();
+        el._x_isShown = false;
+    };
+    let show = ()=>{
+        el._x_doShow();
+        el._x_isShown = true;
+    };
+    let clickAwayCompatibleShow = ()=>setTimeout(show);
+    let toggle = $8c83eaf28779ff46$var$once((value)=>value ? show() : hide(), (value)=>{
+        if (typeof el._x_toggleAndCascadeWithTransitions === "function") el._x_toggleAndCascadeWithTransitions(el, value, show, hide);
+        else value ? clickAwayCompatibleShow() : hide();
+    });
+    let oldValue;
+    let firstTime = true;
+    effect3(()=>evaluate2((value)=>{
+            if (!firstTime && value === oldValue) return;
+            if (modifiers.includes("immediate")) value ? clickAwayCompatibleShow() : hide();
+            toggle(value);
+            oldValue = value;
+            firstTime = false;
+        }));
+});
+// packages/alpinejs/src/directives/x-for.js
+$8c83eaf28779ff46$var$directive("for", (el, { expression: expression }, { effect: effect3, cleanup: cleanup2 })=>{
+    let iteratorNames = $8c83eaf28779ff46$var$parseForExpression(expression);
+    let evaluateItems = $8c83eaf28779ff46$var$evaluateLater(el, iteratorNames.items);
+    let evaluateKey = $8c83eaf28779ff46$var$evaluateLater(el, // the x-bind:key expression is stored for our use instead of evaluated.
+    el._x_keyExpression || "index");
+    el._x_prevKeys = [];
+    el._x_lookup = {};
+    effect3(()=>$8c83eaf28779ff46$var$loop(el, iteratorNames, evaluateItems, evaluateKey));
+    cleanup2(()=>{
+        Object.values(el._x_lookup).forEach((el2)=>$8c83eaf28779ff46$var$mutateDom(()=>{
+                $8c83eaf28779ff46$var$destroyTree(el2);
+                el2.remove();
+            }));
+        delete el._x_prevKeys;
+        delete el._x_lookup;
+    });
+});
+function $8c83eaf28779ff46$var$loop(el, iteratorNames, evaluateItems, evaluateKey) {
+    let isObject2 = (i)=>typeof i === "object" && !Array.isArray(i);
+    let templateEl = el;
+    evaluateItems((items)=>{
+        if ($8c83eaf28779ff46$var$isNumeric3(items) && items >= 0) items = Array.from(Array(items).keys(), (i)=>i + 1);
+        if (items === void 0) items = [];
+        let lookup = el._x_lookup;
+        let prevKeys = el._x_prevKeys;
+        let scopes = [];
+        let keys = [];
+        if (isObject2(items)) items = Object.entries(items).map(([key, value])=>{
+            let scope2 = $8c83eaf28779ff46$var$getIterationScopeVariables(iteratorNames, value, key, items);
+            evaluateKey((value2)=>{
+                if (keys.includes(value2)) $8c83eaf28779ff46$var$warn("Duplicate key on x-for", el);
+                keys.push(value2);
+            }, {
+                scope: {
+                    index: key,
+                    ...scope2
+                }
+            });
+            scopes.push(scope2);
+        });
+        else for(let i = 0; i < items.length; i++){
+            let scope2 = $8c83eaf28779ff46$var$getIterationScopeVariables(iteratorNames, items[i], i, items);
+            evaluateKey((value)=>{
+                if (keys.includes(value)) $8c83eaf28779ff46$var$warn("Duplicate key on x-for", el);
+                keys.push(value);
+            }, {
+                scope: {
+                    index: i,
+                    ...scope2
+                }
+            });
+            scopes.push(scope2);
+        }
+        let adds = [];
+        let moves = [];
+        let removes = [];
+        let sames = [];
+        for(let i = 0; i < prevKeys.length; i++){
+            let key = prevKeys[i];
+            if (keys.indexOf(key) === -1) removes.push(key);
+        }
+        prevKeys = prevKeys.filter((key)=>!removes.includes(key));
+        let lastKey = "template";
+        for(let i = 0; i < keys.length; i++){
+            let key = keys[i];
+            let prevIndex = prevKeys.indexOf(key);
+            if (prevIndex === -1) {
+                prevKeys.splice(i, 0, key);
+                adds.push([
+                    lastKey,
+                    i
+                ]);
+            } else if (prevIndex !== i) {
+                let keyInSpot = prevKeys.splice(i, 1)[0];
+                let keyForSpot = prevKeys.splice(prevIndex - 1, 1)[0];
+                prevKeys.splice(i, 0, keyForSpot);
+                prevKeys.splice(prevIndex, 0, keyInSpot);
+                moves.push([
+                    keyInSpot,
+                    keyForSpot
+                ]);
+            } else sames.push(key);
+            lastKey = key;
+        }
+        for(let i = 0; i < removes.length; i++){
+            let key = removes[i];
+            if (!(key in lookup)) continue;
+            $8c83eaf28779ff46$var$mutateDom(()=>{
+                $8c83eaf28779ff46$var$destroyTree(lookup[key]);
+                lookup[key].remove();
+            });
+            delete lookup[key];
+        }
+        for(let i = 0; i < moves.length; i++){
+            let [keyInSpot, keyForSpot] = moves[i];
+            let elInSpot = lookup[keyInSpot];
+            let elForSpot = lookup[keyForSpot];
+            let marker = document.createElement("div");
+            $8c83eaf28779ff46$var$mutateDom(()=>{
+                if (!elForSpot) $8c83eaf28779ff46$var$warn(`x-for ":key" is undefined or invalid`, templateEl, keyForSpot, lookup);
+                elForSpot.after(marker);
+                elInSpot.after(elForSpot);
+                elForSpot._x_currentIfEl && elForSpot.after(elForSpot._x_currentIfEl);
+                marker.before(elInSpot);
+                elInSpot._x_currentIfEl && elInSpot.after(elInSpot._x_currentIfEl);
+                marker.remove();
+            });
+            elForSpot._x_refreshXForScope(scopes[keys.indexOf(keyForSpot)]);
+        }
+        for(let i = 0; i < adds.length; i++){
+            let [lastKey2, index] = adds[i];
+            let lastEl = lastKey2 === "template" ? templateEl : lookup[lastKey2];
+            if (lastEl._x_currentIfEl) lastEl = lastEl._x_currentIfEl;
+            let scope2 = scopes[index];
+            let key = keys[index];
+            let clone2 = document.importNode(templateEl.content, true).firstElementChild;
+            let reactiveScope = $8c83eaf28779ff46$var$reactive(scope2);
+            $8c83eaf28779ff46$var$addScopeToNode(clone2, reactiveScope, templateEl);
+            clone2._x_refreshXForScope = (newScope)=>{
+                Object.entries(newScope).forEach(([key2, value])=>{
+                    reactiveScope[key2] = value;
+                });
+            };
+            $8c83eaf28779ff46$var$mutateDom(()=>{
+                lastEl.after(clone2);
+                $8c83eaf28779ff46$var$skipDuringClone(()=>$8c83eaf28779ff46$var$initTree(clone2))();
+            });
+            if (typeof key === "object") $8c83eaf28779ff46$var$warn("x-for key cannot be an object, it must be a string or an integer", templateEl);
+            lookup[key] = clone2;
+        }
+        for(let i = 0; i < sames.length; i++)lookup[sames[i]]._x_refreshXForScope(scopes[keys.indexOf(sames[i])]);
+        templateEl._x_prevKeys = keys;
+    });
+}
+function $8c83eaf28779ff46$var$parseForExpression(expression) {
+    let forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/;
+    let stripParensRE = /^\s*\(|\)\s*$/g;
+    let forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/;
+    let inMatch = expression.match(forAliasRE);
+    if (!inMatch) return;
+    let res = {};
+    res.items = inMatch[2].trim();
+    let item = inMatch[1].replace(stripParensRE, "").trim();
+    let iteratorMatch = item.match(forIteratorRE);
+    if (iteratorMatch) {
+        res.item = item.replace(forIteratorRE, "").trim();
+        res.index = iteratorMatch[1].trim();
+        if (iteratorMatch[2]) res.collection = iteratorMatch[2].trim();
+    } else res.item = item;
+    return res;
+}
+function $8c83eaf28779ff46$var$getIterationScopeVariables(iteratorNames, item, index, items) {
+    let scopeVariables = {};
+    if (/^\[.*\]$/.test(iteratorNames.item) && Array.isArray(item)) {
+        let names = iteratorNames.item.replace("[", "").replace("]", "").split(",").map((i)=>i.trim());
+        names.forEach((name, i)=>{
+            scopeVariables[name] = item[i];
+        });
+    } else if (/^\{.*\}$/.test(iteratorNames.item) && !Array.isArray(item) && typeof item === "object") {
+        let names = iteratorNames.item.replace("{", "").replace("}", "").split(",").map((i)=>i.trim());
+        names.forEach((name)=>{
+            scopeVariables[name] = item[name];
+        });
+    } else scopeVariables[iteratorNames.item] = item;
+    if (iteratorNames.index) scopeVariables[iteratorNames.index] = index;
+    if (iteratorNames.collection) scopeVariables[iteratorNames.collection] = items;
+    return scopeVariables;
+}
+function $8c83eaf28779ff46$var$isNumeric3(subject) {
+    return !Array.isArray(subject) && !isNaN(subject);
+}
+// packages/alpinejs/src/directives/x-ref.js
+function $8c83eaf28779ff46$var$handler3() {}
+$8c83eaf28779ff46$var$handler3.inline = (el, { expression: expression }, { cleanup: cleanup2 })=>{
+    let root = $8c83eaf28779ff46$var$closestRoot(el);
+    if (!root._x_refs) root._x_refs = {};
+    root._x_refs[expression] = el;
+    cleanup2(()=>delete root._x_refs[expression]);
+};
+$8c83eaf28779ff46$var$directive("ref", $8c83eaf28779ff46$var$handler3);
+// packages/alpinejs/src/directives/x-if.js
+$8c83eaf28779ff46$var$directive("if", (el, { expression: expression }, { effect: effect3, cleanup: cleanup2 })=>{
+    if (el.tagName.toLowerCase() !== "template") $8c83eaf28779ff46$var$warn("x-if can only be used on a <template> tag", el);
+    let evaluate2 = $8c83eaf28779ff46$var$evaluateLater(el, expression);
+    let show = ()=>{
+        if (el._x_currentIfEl) return el._x_currentIfEl;
+        let clone2 = el.content.cloneNode(true).firstElementChild;
+        $8c83eaf28779ff46$var$addScopeToNode(clone2, {}, el);
+        $8c83eaf28779ff46$var$mutateDom(()=>{
+            el.after(clone2);
+            $8c83eaf28779ff46$var$skipDuringClone(()=>$8c83eaf28779ff46$var$initTree(clone2))();
+        });
+        el._x_currentIfEl = clone2;
+        el._x_undoIf = ()=>{
+            $8c83eaf28779ff46$var$mutateDom(()=>{
+                $8c83eaf28779ff46$var$destroyTree(clone2);
+                clone2.remove();
+            });
+            delete el._x_currentIfEl;
+        };
+        return clone2;
+    };
+    let hide = ()=>{
+        if (!el._x_undoIf) return;
+        el._x_undoIf();
+        delete el._x_undoIf;
+    };
+    effect3(()=>evaluate2((value)=>{
+            value ? show() : hide();
+        }));
+    cleanup2(()=>el._x_undoIf && el._x_undoIf());
+});
+// packages/alpinejs/src/directives/x-id.js
+$8c83eaf28779ff46$var$directive("id", (el, { expression: expression }, { evaluate: evaluate2 })=>{
+    let names = evaluate2(expression);
+    names.forEach((name)=>$8c83eaf28779ff46$var$setIdRoot(el, name));
+});
+$8c83eaf28779ff46$var$interceptClone((from, to)=>{
+    if (from._x_ids) to._x_ids = from._x_ids;
+});
+// packages/alpinejs/src/directives/x-on.js
+$8c83eaf28779ff46$var$mapAttributes($8c83eaf28779ff46$var$startingWith("@", $8c83eaf28779ff46$var$into($8c83eaf28779ff46$var$prefix("on:"))));
+$8c83eaf28779ff46$var$directive("on", $8c83eaf28779ff46$var$skipDuringClone((el, { value: value, modifiers: modifiers, expression: expression }, { cleanup: cleanup2 })=>{
+    let evaluate2 = expression ? $8c83eaf28779ff46$var$evaluateLater(el, expression) : ()=>{};
+    if (el.tagName.toLowerCase() === "template") {
+        if (!el._x_forwardEvents) el._x_forwardEvents = [];
+        if (!el._x_forwardEvents.includes(value)) el._x_forwardEvents.push(value);
+    }
+    let removeListener = $8c83eaf28779ff46$var$on(el, value, modifiers, (e)=>{
+        evaluate2(()=>{}, {
+            scope: {
+                "$event": e
+            },
+            params: [
+                e
+            ]
+        });
+    });
+    cleanup2(()=>removeListener());
+}));
+// packages/alpinejs/src/directives/index.js
+$8c83eaf28779ff46$var$warnMissingPluginDirective("Collapse", "collapse", "collapse");
+$8c83eaf28779ff46$var$warnMissingPluginDirective("Intersect", "intersect", "intersect");
+$8c83eaf28779ff46$var$warnMissingPluginDirective("Focus", "trap", "focus");
+$8c83eaf28779ff46$var$warnMissingPluginDirective("Mask", "mask", "mask");
+function $8c83eaf28779ff46$var$warnMissingPluginDirective(name, directiveName, slug) {
+    $8c83eaf28779ff46$var$directive(directiveName, (el)=>$8c83eaf28779ff46$var$warn(`You can't use [x-${directiveName}] without first installing the "${name}" plugin here: https://alpinejs.dev/plugins/${slug}`, el));
+}
+// packages/alpinejs/src/index.js
+$8c83eaf28779ff46$var$alpine_default.setEvaluator($8c83eaf28779ff46$var$normalEvaluator);
+$8c83eaf28779ff46$var$alpine_default.setReactivityEngine({
+    reactive: $8c83eaf28779ff46$var$reactive2,
+    effect: $8c83eaf28779ff46$var$effect2,
+    release: $8c83eaf28779ff46$var$stop,
+    raw: $8c83eaf28779ff46$var$toRaw
+});
+var $8c83eaf28779ff46$export$b7ee041e4ad2afec = $8c83eaf28779ff46$var$alpine_default;
+// packages/alpinejs/builds/module.js
+var $8c83eaf28779ff46$export$2e2bcd8739ae039 = $8c83eaf28779ff46$export$b7ee041e4ad2afec;
+
+
+// packages/persist/src/index.js
+function $9b2f94dab0f686ea$export$9a6132153fba2e0(Alpine) {
+    let persist = ()=>{
+        let alias;
+        let storage;
+        try {
+            storage = localStorage;
+        } catch (e) {
+            console.error(e);
+            console.warn("Alpine: $persist is using temporary storage since localStorage is unavailable.");
+            let dummy = /* @__PURE__ */ new Map();
+            storage = {
+                getItem: dummy.get.bind(dummy),
+                setItem: dummy.set.bind(dummy)
+            };
+        }
+        return Alpine.interceptor((initialValue, getter, setter, path, key)=>{
+            let lookup = alias || `_x_${path}`;
+            let initial = $9b2f94dab0f686ea$var$storageHas(lookup, storage) ? $9b2f94dab0f686ea$var$storageGet(lookup, storage) : initialValue;
+            setter(initial);
+            Alpine.effect(()=>{
+                let value = getter();
+                $9b2f94dab0f686ea$var$storageSet(lookup, value, storage);
+                setter(value);
+            });
+            return initial;
+        }, (func)=>{
+            func.as = (key)=>{
+                alias = key;
+                return func;
+            }, func.using = (target)=>{
+                storage = target;
+                return func;
+            };
+        });
+    };
+    Object.defineProperty(Alpine, "$persist", {
+        get: ()=>persist()
+    });
+    Alpine.magic("persist", persist);
+    Alpine.persist = (key, { get: get, set: set }, storage = localStorage)=>{
+        let initial = $9b2f94dab0f686ea$var$storageHas(key, storage) ? $9b2f94dab0f686ea$var$storageGet(key, storage) : get();
+        set(initial);
+        Alpine.effect(()=>{
+            let value = get();
+            $9b2f94dab0f686ea$var$storageSet(key, value, storage);
+            set(value);
+        });
+    };
+}
+function $9b2f94dab0f686ea$var$storageHas(key, storage) {
+    return storage.getItem(key) !== null;
+}
+function $9b2f94dab0f686ea$var$storageGet(key, storage) {
+    let value = storage.getItem(key, storage);
+    if (value === void 0) return;
+    return JSON.parse(value);
+}
+function $9b2f94dab0f686ea$var$storageSet(key, value, storage) {
+    storage.setItem(key, JSON.stringify(value));
+}
+// packages/persist/builds/module.js
+var $9b2f94dab0f686ea$export$2e2bcd8739ae039 = $9b2f94dab0f686ea$export$9a6132153fba2e0;
+
+
+// packages/morph/src/morph.js
+function $fd2717825660a9ff$var$morph(from, toHtml, options) {
+    $fd2717825660a9ff$var$monkeyPatchDomSetAttributeToAllowAtSymbols();
+    let fromEl;
+    let toEl;
+    let key, lookahead, updating, updated, removing, removed, adding, added;
+    function assignOptions(options2 = {}) {
+        let defaultGetKey = (el)=>el.getAttribute("key");
+        let noop = ()=>{};
+        updating = options2.updating || noop;
+        updated = options2.updated || noop;
+        removing = options2.removing || noop;
+        removed = options2.removed || noop;
+        adding = options2.adding || noop;
+        added = options2.added || noop;
+        key = options2.key || defaultGetKey;
+        lookahead = options2.lookahead || false;
+    }
+    function patch(from2, to) {
+        if (differentElementNamesTypesOrKeys(from2, to)) return swapElements(from2, to);
+        let updateChildrenOnly = false;
+        let skipChildren = false;
+        if ($fd2717825660a9ff$var$shouldSkipChildren(updating, ()=>skipChildren = true, from2, to, ()=>updateChildrenOnly = true)) return;
+        if (from2.nodeType === 1 && window.Alpine) {
+            window.Alpine.cloneNode(from2, to);
+            if (from2._x_teleport && to._x_teleport) patch(from2._x_teleport, to._x_teleport);
+        }
+        if ($fd2717825660a9ff$var$textOrComment(to)) {
+            patchNodeValue(from2, to);
+            updated(from2, to);
+            return;
+        }
+        if (!updateChildrenOnly) patchAttributes(from2, to);
+        updated(from2, to);
+        if (!skipChildren) patchChildren(from2, to);
+    }
+    function differentElementNamesTypesOrKeys(from2, to) {
+        return from2.nodeType != to.nodeType || from2.nodeName != to.nodeName || getKey(from2) != getKey(to);
+    }
+    function swapElements(from2, to) {
+        if ($fd2717825660a9ff$var$shouldSkip(removing, from2)) return;
+        let toCloned = to.cloneNode(true);
+        if ($fd2717825660a9ff$var$shouldSkip(adding, toCloned)) return;
+        from2.replaceWith(toCloned);
+        removed(from2);
+        added(toCloned);
+    }
+    function patchNodeValue(from2, to) {
+        let value = to.nodeValue;
+        if (from2.nodeValue !== value) from2.nodeValue = value;
+    }
+    function patchAttributes(from2, to) {
+        if (from2._x_transitioning) return;
+        if (from2._x_isShown && !to._x_isShown) return;
+        if (!from2._x_isShown && to._x_isShown) return;
+        let domAttributes = Array.from(from2.attributes);
+        let toAttributes = Array.from(to.attributes);
+        for(let i = domAttributes.length - 1; i >= 0; i--){
+            let name = domAttributes[i].name;
+            if (!to.hasAttribute(name)) from2.removeAttribute(name);
+        }
+        for(let i = toAttributes.length - 1; i >= 0; i--){
+            let name = toAttributes[i].name;
+            let value = toAttributes[i].value;
+            if (from2.getAttribute(name) !== value) from2.setAttribute(name, value);
+        }
+    }
+    function patchChildren(from2, to) {
+        let fromKeys = keyToMap(from2.children);
+        let fromKeyHoldovers = {};
+        let currentTo = $fd2717825660a9ff$var$getFirstNode(to);
+        let currentFrom = $fd2717825660a9ff$var$getFirstNode(from2);
+        while(currentTo){
+            $fd2717825660a9ff$var$seedingMatchingId(currentTo, currentFrom);
+            let toKey = getKey(currentTo);
+            let fromKey = getKey(currentFrom);
+            if (!currentFrom) {
+                if (toKey && fromKeyHoldovers[toKey]) {
+                    let holdover = fromKeyHoldovers[toKey];
+                    from2.appendChild(holdover);
+                    currentFrom = holdover;
+                    fromKey = getKey(currentFrom);
+                } else {
+                    if (!$fd2717825660a9ff$var$shouldSkip(adding, currentTo)) {
+                        let clone = currentTo.cloneNode(true);
+                        from2.appendChild(clone);
+                        added(clone);
+                    }
+                    currentTo = $fd2717825660a9ff$var$getNextSibling(to, currentTo);
+                    continue;
+                }
+            }
+            let isIf = (node)=>node && node.nodeType === 8 && node.textContent === "[if BLOCK]><![endif]";
+            let isEnd = (node)=>node && node.nodeType === 8 && node.textContent === "[if ENDBLOCK]><![endif]";
+            if (isIf(currentTo) && isIf(currentFrom)) {
+                let nestedIfCount = 0;
+                let fromBlockStart = currentFrom;
+                while(currentFrom){
+                    let next = $fd2717825660a9ff$var$getNextSibling(from2, currentFrom);
+                    if (isIf(next)) nestedIfCount++;
+                    else if (isEnd(next) && nestedIfCount > 0) nestedIfCount--;
+                    else if (isEnd(next) && nestedIfCount === 0) {
+                        currentFrom = next;
+                        break;
+                    }
+                    currentFrom = next;
+                }
+                let fromBlockEnd = currentFrom;
+                nestedIfCount = 0;
+                let toBlockStart = currentTo;
+                while(currentTo){
+                    let next = $fd2717825660a9ff$var$getNextSibling(to, currentTo);
+                    if (isIf(next)) nestedIfCount++;
+                    else if (isEnd(next) && nestedIfCount > 0) nestedIfCount--;
+                    else if (isEnd(next) && nestedIfCount === 0) {
+                        currentTo = next;
+                        break;
+                    }
+                    currentTo = next;
+                }
+                let toBlockEnd = currentTo;
+                let fromBlock = new $fd2717825660a9ff$var$Block(fromBlockStart, fromBlockEnd);
+                let toBlock = new $fd2717825660a9ff$var$Block(toBlockStart, toBlockEnd);
+                patchChildren(fromBlock, toBlock);
+                continue;
+            }
+            if (currentFrom.nodeType === 1 && lookahead && !currentFrom.isEqualNode(currentTo)) {
+                let nextToElementSibling = $fd2717825660a9ff$var$getNextSibling(to, currentTo);
+                let found = false;
+                while(!found && nextToElementSibling){
+                    if (nextToElementSibling.nodeType === 1 && currentFrom.isEqualNode(nextToElementSibling)) {
+                        found = true;
+                        currentFrom = addNodeBefore(from2, currentTo, currentFrom);
+                        fromKey = getKey(currentFrom);
+                    }
+                    nextToElementSibling = $fd2717825660a9ff$var$getNextSibling(to, nextToElementSibling);
+                }
+            }
+            if (toKey !== fromKey) {
+                if (!toKey && fromKey) {
+                    fromKeyHoldovers[fromKey] = currentFrom;
+                    currentFrom = addNodeBefore(from2, currentTo, currentFrom);
+                    fromKeyHoldovers[fromKey].remove();
+                    currentFrom = $fd2717825660a9ff$var$getNextSibling(from2, currentFrom);
+                    currentTo = $fd2717825660a9ff$var$getNextSibling(to, currentTo);
+                    continue;
+                }
+                if (toKey && !fromKey) {
+                    if (fromKeys[toKey]) {
+                        currentFrom.replaceWith(fromKeys[toKey]);
+                        currentFrom = fromKeys[toKey];
+                        fromKey = getKey(currentFrom);
+                    }
+                }
+                if (toKey && fromKey) {
+                    let fromKeyNode = fromKeys[toKey];
+                    if (fromKeyNode) {
+                        fromKeyHoldovers[fromKey] = currentFrom;
+                        currentFrom.replaceWith(fromKeyNode);
+                        currentFrom = fromKeyNode;
+                        fromKey = getKey(currentFrom);
+                    } else {
+                        fromKeyHoldovers[fromKey] = currentFrom;
+                        currentFrom = addNodeBefore(from2, currentTo, currentFrom);
+                        fromKeyHoldovers[fromKey].remove();
+                        currentFrom = $fd2717825660a9ff$var$getNextSibling(from2, currentFrom);
+                        currentTo = $fd2717825660a9ff$var$getNextSibling(to, currentTo);
+                        continue;
+                    }
+                }
+            }
+            let currentFromNext = currentFrom && $fd2717825660a9ff$var$getNextSibling(from2, currentFrom);
+            patch(currentFrom, currentTo);
+            currentTo = currentTo && $fd2717825660a9ff$var$getNextSibling(to, currentTo);
+            currentFrom = currentFromNext;
+        }
+        let removals = [];
+        while(currentFrom){
+            if (!$fd2717825660a9ff$var$shouldSkip(removing, currentFrom)) removals.push(currentFrom);
+            currentFrom = $fd2717825660a9ff$var$getNextSibling(from2, currentFrom);
+        }
+        while(removals.length){
+            let domForRemoval = removals.shift();
+            domForRemoval.remove();
+            removed(domForRemoval);
+        }
+    }
+    function getKey(el) {
+        return el && el.nodeType === 1 && key(el);
+    }
+    function keyToMap(els) {
+        let map = {};
+        for (let el of els){
+            let theKey = getKey(el);
+            if (theKey) map[theKey] = el;
+        }
+        return map;
+    }
+    function addNodeBefore(parent, node, beforeMe) {
+        if (!$fd2717825660a9ff$var$shouldSkip(adding, node)) {
+            let clone = node.cloneNode(true);
+            parent.insertBefore(clone, beforeMe);
+            added(clone);
+            return clone;
+        }
+        return node;
+    }
+    assignOptions(options);
+    fromEl = from;
+    toEl = typeof toHtml === "string" ? $fd2717825660a9ff$var$createElement(toHtml) : toHtml;
+    if (window.Alpine && window.Alpine.closestDataStack && !from._x_dataStack) {
+        toEl._x_dataStack = window.Alpine.closestDataStack(from);
+        toEl._x_dataStack && window.Alpine.cloneNode(from, toEl);
+    }
+    patch(from, toEl);
+    fromEl = void 0;
+    toEl = void 0;
+    return from;
+}
+$fd2717825660a9ff$var$morph.step = ()=>{};
+$fd2717825660a9ff$var$morph.log = ()=>{};
+function $fd2717825660a9ff$var$shouldSkip(hook, ...args) {
+    let skip = false;
+    hook(...args, ()=>skip = true);
+    return skip;
+}
+function $fd2717825660a9ff$var$shouldSkipChildren(hook, skipChildren, ...args) {
+    let skip = false;
+    hook(...args, ()=>skip = true, skipChildren);
+    return skip;
+}
+var $fd2717825660a9ff$var$patched = false;
+function $fd2717825660a9ff$var$createElement(html) {
+    const template = document.createElement("template");
+    template.innerHTML = html;
+    return template.content.firstElementChild;
+}
+function $fd2717825660a9ff$var$textOrComment(el) {
+    return el.nodeType === 3 || el.nodeType === 8;
+}
+var $fd2717825660a9ff$var$Block = class {
+    constructor(start, end){
+        this.startComment = start;
+        this.endComment = end;
+    }
+    get children() {
+        let children = [];
+        let currentNode = this.startComment.nextSibling;
+        while(currentNode && currentNode !== this.endComment){
+            children.push(currentNode);
+            currentNode = currentNode.nextSibling;
+        }
+        return children;
+    }
+    appendChild(child) {
+        this.endComment.before(child);
+    }
+    get firstChild() {
+        let first = this.startComment.nextSibling;
+        if (first === this.endComment) return;
+        return first;
+    }
+    nextNode(reference) {
+        let next = reference.nextSibling;
+        if (next === this.endComment) return;
+        return next;
+    }
+    insertBefore(newNode, reference) {
+        reference.before(newNode);
+        return newNode;
+    }
+};
+function $fd2717825660a9ff$var$getFirstNode(parent) {
+    return parent.firstChild;
+}
+function $fd2717825660a9ff$var$getNextSibling(parent, reference) {
+    let next;
+    if (parent instanceof $fd2717825660a9ff$var$Block) next = parent.nextNode(reference);
+    else next = reference.nextSibling;
+    return next;
+}
+function $fd2717825660a9ff$var$monkeyPatchDomSetAttributeToAllowAtSymbols() {
+    if ($fd2717825660a9ff$var$patched) return;
+    $fd2717825660a9ff$var$patched = true;
+    let original = Element.prototype.setAttribute;
+    let hostDiv = document.createElement("div");
+    Element.prototype.setAttribute = function newSetAttribute(name, value) {
+        if (!name.includes("@")) return original.call(this, name, value);
+        hostDiv.innerHTML = `<span ${name}="${value}"></span>`;
+        let attr = hostDiv.firstElementChild.getAttributeNode(name);
+        hostDiv.firstElementChild.removeAttributeNode(attr);
+        this.setAttributeNode(attr);
+    };
+}
+function $fd2717825660a9ff$var$seedingMatchingId(to, from) {
+    let fromId = from && from._x_bindings && from._x_bindings.id;
+    if (!fromId) return;
+    if (!to.setAttribute) return;
+    to.setAttribute("id", fromId);
+    to.id = fromId;
+}
+// packages/morph/src/index.js
+function $fd2717825660a9ff$export$2e5e8c41f5d4e7c7(Alpine) {
+    Alpine.morph = $fd2717825660a9ff$var$morph;
+}
+// packages/morph/builds/module.js
+var $fd2717825660a9ff$export$2e2bcd8739ae039 = $fd2717825660a9ff$export$2e5e8c41f5d4e7c7;
+
+
+window.Alpine = (0, $8c83eaf28779ff46$export$2e2bcd8739ae039 // 将 Alpine 实例添加到窗口对象中。
+);
+(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).plugin((0, $9b2f94dab0f686ea$export$2e2bcd8739ae039));
+(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).plugin((0, $fd2717825660a9ff$export$2e2bcd8739ae039));
+
+
+// Alpine 使用 Persist 插件，用会话 cookie 作为存储
+// https://alpinejs.dev/plugins/persist#custom-storage
+// 定义自定义存储对象，公开 getItem 函数和 setItem 函数
+window.cookieStorage = {
+    getItem (key) {
+        let cookies = document.cookie.split(";");
+        for(let i = 0; i < cookies.length; i++){
+            let cookie = cookies[i].split("=");
+            if (key === cookie[0].trim()) return decodeURIComponent(cookie[1]);
+        }
+        return null;
+    },
+    setItem (key, value) {
+        document.cookie = `${key}=${encodeURIComponent(value)}; SameSite=Lax`; //SameSite设置默认值（Lax），防止控制台报错。加载图像或框架（frame）的请求将不会包含用户的 Cookie。
+    }
+} // // 然后就可以这样使用使用 cookieStorage 作为 Persist 插件的存储了
+ // Alpine.store('cookie', {
+ //     someCookieKey: Alpine.$persist(false).using(cookieStorage).as('someCookieKey'),
+ // })
+;
+
+
+// 用Alpine Persist 注册全局变量
+// https://alpinejs.dev/plugins/persist#using-alpine-persist-global
+Alpine.store('global', {
+    // bgPattern 背景花纹
+    bgPattern: Alpine.$persist('grid-line').as('global.bgPattern'),
+    autoCrop: Alpine.$persist(false).as('global.autoCrop'),
+    autoCropNum: Alpine.$persist(1).as('global.autoCropNum'),
+    // userID 当前用户ID  用于同步阅读进度 随机生成
+    userID: Alpine.$persist(Math.random().toString(36).substring(2)).as('global.userID'),
+    // debugMode 是否开启调试模式
+    debugMode: Alpine.$persist(true).as('global.debugMode'),
+    // readerMode 当前阅读模式
+    readMode: Alpine.$persist('scroll').as('global.readMode'),
+    //是否通过websocket同步翻页
+    syncPageByWS: Alpine.$persist(true).as('global.syncPageByWS'),
+    // bookSortBy 书籍排序方式 以按照文件名、修改时间、文件大小排序（或反向排序）
+    bookSortBy: Alpine.$persist('name').as('global.bookSortBy'),
+    // pageSortBy 书页排序顺序 以按照文件名、修改时间、文件大小排序（或反向排序）
+    pageSortBy: Alpine.$persist('name').as('global.pageSortBy'),
+    language: Alpine.$persist('en').as('global.language'),
+    toggleReadMode () {
+        this.readMode = this.readMode === 'flip' ? 'scroll' : 'flip';
+    }
+});
+
+
+// BookShelf 书架设置
+Alpine.store('shelf', {
+    bookCardMode: Alpine.$persist('gird').as('shelf.bookCardMode'),
+    showTitle: Alpine.$persist(true).as('shelf.showTitle'),
+    showFileType: Alpine.$persist(true).as('shelf.showFileType'),
+    simplifyTitle: Alpine.$persist(true).as('shelf.simplifyTitle'),
+    InfiniteDropdown: Alpine.$persist(false).as('shelf.InfiniteDropdown'),
+    bookCardShowTitleFlag: Alpine.$persist(true).as('shelf.bookCardShowTitleFlag'),
+    syncScrollFlag: false,
+    // 屏幕宽横比,inLandscapeMode的判断依据
+    aspectRatio: 1.2,
+    // 可见范围宽高的具体值
+    clientWidth: 0,
+    clientHeight: 0
+});
+
+
+// Scroll 卷轴模式
+Alpine.store('scroll', {
+    nowPageNum: 1,
+    simplifyTitle: Alpine.$persist(true).as('scroll.simplifyTitle'),
+    //下拉模式下，漫画页面的底部间距。单位px。
+    marginBottomOnScrollMode: Alpine.$persist(10).as('scroll.marginBottomOnScrollMode'),
+    //卷轴模式下，是否无限下拉
+    InfiniteDropdown: Alpine.$persist(true).as('scroll.InfiniteDropdown'),
+    syncScrollFlag: Alpine.$persist(false).as('scroll.syncScrollFlag'),
+    imageMaxWidth: 400,
+    // 屏幕宽横比,inLandscapeMode的判断依据
+    aspectRatio: 1.2,
+    // 可见范围宽高的具体值
+    clientWidth: 0,
+    clientHeight: 0,
+    //漫画页的单位,是否使用固定值
+    widthUseFixedValue: Alpine.$persist(true).as('scroll.widthUseFixedValue'),
+    //横屏(Landscape)状态的漫画页宽度,百分比
+    singlePageWidth_Percent: Alpine.$persist(60).as('scroll.singlePageWidth_Percent'),
+    doublePageWidth_Percent: Alpine.$persist(95).as('scroll.doublePageWidth_Percent'),
+    //横屏(Landscape)状态的漫画页宽度。px。
+    singlePageWidth_PX: Alpine.$persist(720).as('scroll.singlePageWidth_PX'),
+    doublePageWidth_PX: Alpine.$persist(1200).as('scroll.doublePageWidth_PX'),
+    //书籍数据,需要从远程拉取
+    //是否显示顶部页头
+    showHeaderFlag: true,
+    //是否显示页数
+    show_page_num: Alpine.$persist(false).as('scroll.show_page_num'),
+    //ws翻页相关
+    syncPageByWS: Alpine.$persist(false).as('scroll.syncPageByWS')
+});
+
+
+// Flip 翻页模式
+Alpine.store('flip', {
+    nowPageNum: 1,
+    allPageNum: 100,
+    imageMaxWidth: 400,
+    isLandscapeMode: true,
+    isPortraitMode: false,
+    //自动隐藏工具条
+    autoHideToolbar: Alpine.$persist(false).as('flip.autoHideToolbar'),
+    //是否显示页头
+    show_header: Alpine.$persist(true).as('flip.show_header'),
+    //是否显示页脚
+    showFooter: Alpine.$persist(true).as('flip.showFooter'),
+    //是否显示页数
+    show_page_num: Alpine.$persist(false).as('flip.show_page_num'),
+    //是否是右半屏翻页（从右到左）?日本漫画从左到右(false)
+    rightToLeft: Alpine.$persist(false).as('flip.rightToLeft'),
+    //双页模式
+    doublePageMode: Alpine.$persist(false).as('flip.doublePageMode'),
+    //自动拼合双页(TODO)
+    autoDoublePageMode: Alpine.$persist(false).as('flip.autoDoublePageModeFlag'),
+    //是否保存阅读进度（页数）
+    saveReadingProgress: Alpine.$persist(true).as('flip.saveReadingProgress'),
+    //素描模式标记
+    sketchModeFlag: false,
+    //是否显示素描提示
+    showPageHint: Alpine.$persist(false).as('flip.showPageHint'),
+    //翻页间隔时间
+    sketchFlipSecond: 30,
+    //计时用,从0开始
+    sketchSecondCount: 0
+});
+
+
+// 自定义主题
+Alpine.store('theme', {
+    theme: Alpine.$persist('light').as('theme'),
+    interfaceColor: '#F5F5E4',
+    backgroundColor: '#E0D9CD',
+    textColor: '#000000',
+    toggleTheme () {
+        this.theme = this.theme === 'light' ? 'dark' : 'light';
+    }
+});
+
+
 /* eslint-disable promise/prefer-await-to-then */ const $fe9db8f8165fa827$var$methodMap = [
     [
         'requestFullscreen',
@@ -15883,201 +16082,15 @@ if (!$fe9db8f8165fa827$var$nativeAPI) $fe9db8f8165fa827$var$screenfull = {
 var $fe9db8f8165fa827$export$2e2bcd8739ae039 = $fe9db8f8165fa827$var$screenfull;
 
 
-window.Alpine = (0, $8c83eaf28779ff46$export$2e2bcd8739ae039 // 将 Alpine 实例添加到窗口对象中。
-);
-(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).plugin((0, $9b2f94dab0f686ea$export$2e2bcd8739ae039));
-(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).plugin((0, $fd2717825660a9ff$export$2e2bcd8739ae039));
-(0, $1bac384020b50752$export$2e2bcd8739ae039).use((0, $199830a05f92d3d0$export$2e2bcd8739ae039)).init({
-    debug: false,
-    // // 在 setTimeout（默认异步行为）内的 init（） 中触发资源加载。如果您的后端同步加载资源，请将其设置为 false - 这样，
-    // // 可以在 init（） 之后调用 i18next.t（） 而无需依赖初始化回调。此选项仅适用于同步（阻塞）加载后端，例如 i18next-fs-backend 和 i18next-sync-fs-backend！
-    initImmediate: true,
-    //lng: 'en', // if you're using a language detector, do not define the lng option
-    // supportedLngs: ['en', 'cn', 'ja'],
-    supportedLngs: [
-        'en-US',
-        'ja-JP',
-        'zh-CN',
-        'en',
-        'zh',
-        'ja'
-    ],
-    fallbackLng: [
-        'en',
-        'zh',
-        'ja'
-    ],
-    resources: {
-        'en-US': {
-            translation: (0, (/*@__PURE__*/$parcel$interopDefault($bb767615b495769d$exports)))
-        },
-        en: {
-            translation: (0, (/*@__PURE__*/$parcel$interopDefault($bb767615b495769d$exports)))
-        },
-        'zh-CN': {
-            translation: (0, (/*@__PURE__*/$parcel$interopDefault($c199df056bb7354f$exports)))
-        },
-        zh: {
-            translation: (0, (/*@__PURE__*/$parcel$interopDefault($c199df056bb7354f$exports)))
-        },
-        'ja-JP': {
-            translation: (0, (/*@__PURE__*/$parcel$interopDefault($fa2f411c6f0799ad$exports)))
-        },
-        ja: {
-            translation: (0, (/*@__PURE__*/$parcel$interopDefault($fa2f411c6f0799ad$exports)))
-        }
-    }
-}).then(function(t) {
-//console.log(t('test'))
-// i18next.changeLanguage('en', (err, t) => {
-//     if (err) return console.log('something went wrong loading', err);
-//     console.log(t('test'));
-// });
-});
-window.i18next = (0, $1bac384020b50752$export$2e2bcd8739ae039 // 使i18next在全局作用域中可用
-);
 if (document.getElementById('FullScreenIcon')) document.getElementById('FullScreenIcon').addEventListener('click', ()=>{
     if ((0, $fe9db8f8165fa827$export$2e2bcd8739ae039).isEnabled) (0, $fe9db8f8165fa827$export$2e2bcd8739ae039).toggle();
     else // Ignore or do something else
-    (0, $1bac384020b50752$export$2e2bcd8739ae039).t('not_support_fullscreen');
+    i18next.t('not_support_fullscreen');
 });
-// 用Alpine Persist 注册全局变量
-// https://alpinejs.dev/plugins/persist#using-alpine-persist-global
-(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store('global', {
-    // bgPattern 背景花纹
-    bgPattern: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist('grid-line').as('global.bgPattern'),
-    autoCrop: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as('global.autoCrop'),
-    autoCropNum: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(1).as('global.autoCropNum'),
-    // userID 当前用户ID  用于同步阅读进度 随机生成
-    userID: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(Math.random().toString(36).substring(2)).as('global.userID'),
-    // debugMode 是否开启调试模式
-    debugMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as('global.debugMode'),
-    // readerMode 当前阅读模式
-    readMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist('scroll').as('global.readMode'),
-    //是否通过websocket同步翻页
-    syncPageByWS: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as('global.syncPageByWS'),
-    // bookSortBy 书籍排序方式 以按照文件名、修改时间、文件大小排序（或反向排序）
-    bookSortBy: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist('name').as('global.bookSortBy'),
-    // pageSortBy 书页排序顺序 以按照文件名、修改时间、文件大小排序（或反向排序）
-    pageSortBy: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist('name').as('global.pageSortBy'),
-    language: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist('en').as('global.language'),
-    toggleReadMode () {
-        this.readMode = this.readMode === 'flip' ? 'scroll' : 'flip';
-    }
-});
-// BookShelf 书架设置
-(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store('shelf', {
-    bookCardMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist('gird').as('shelf.bookCardMode'),
-    showTitle: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as('shelf.showTitle'),
-    showFileType: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as('shelf.showFileType'),
-    simplifyTitle: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as('shelf.simplifyTitle'),
-    InfiniteDropdown: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as('shelf.InfiniteDropdown'),
-    bookCardShowTitleFlag: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as('shelf.bookCardShowTitleFlag'),
-    syncScrollFlag: false,
-    // 屏幕宽横比,inLandscapeMode的判断依据
-    aspectRatio: 1.2,
-    // 可见范围宽高的具体值
-    clientWidth: 0,
-    clientHeight: 0
-});
-// Scroll 卷轴模式
-(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store('scroll', {
-    nowPageNum: 1,
-    simplifyTitle: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as('scroll.simplifyTitle'),
-    //下拉模式下，漫画页面的底部间距。单位px。
-    marginBottomOnScrollMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(10).as('scroll.marginBottomOnScrollMode'),
-    //卷轴模式下，是否无限下拉
-    InfiniteDropdown: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as('scroll.InfiniteDropdown'),
-    syncScrollFlag: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as('scroll.syncScrollFlag'),
-    imageMaxWidth: 400,
-    // 屏幕宽横比,inLandscapeMode的判断依据
-    aspectRatio: 1.2,
-    // 可见范围宽高的具体值
-    clientWidth: 0,
-    clientHeight: 0,
-    //漫画页的单位,是否使用固定值
-    widthUseFixedValue: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as('scroll.widthUseFixedValue'),
-    //横屏(Landscape)状态的漫画页宽度,百分比
-    singlePageWidth_Percent: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(60).as('scroll.singlePageWidth_Percent'),
-    doublePageWidth_Percent: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(95).as('scroll.doublePageWidth_Percent'),
-    //横屏(Landscape)状态的漫画页宽度。px。
-    singlePageWidth_PX: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(720).as('scroll.singlePageWidth_PX'),
-    doublePageWidth_PX: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(1200).as('scroll.doublePageWidth_PX'),
-    //书籍数据,需要从远程拉取
-    //是否显示顶部页头
-    showHeaderFlag: true,
-    //是否显示页数
-    show_page_num: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as('scroll.show_page_num'),
-    //ws翻页相关
-    syncPageByWS: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as('scroll.syncPageByWS')
-});
-// Flip 翻页模式
-(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store('flip', {
-    nowPageNum: 1,
-    allPageNum: 100,
-    imageMaxWidth: 400,
-    isLandscapeMode: true,
-    isPortraitMode: false,
-    //自动隐藏工具条
-    autoHideToolbar: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as('flip.autoHideToolbar'),
-    //是否显示页头
-    show_header: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as('flip.show_header'),
-    //是否显示页脚
-    showFooter: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as('flip.showFooter'),
-    //是否显示页数
-    show_page_num: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as('flip.show_page_num'),
-    //是否是右半屏翻页（从右到左）?日本漫画从左到右(false)
-    rightToLeft: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as('flip.rightToLeft'),
-    //双页模式
-    doublePageMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as('flip.doublePageMode'),
-    //自动拼合双页(TODO)
-    autoDoublePageMode: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as('flip.autoDoublePageModeFlag'),
-    //是否保存阅读进度（页数）
-    saveReadingProgress: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(true).as('flip.saveReadingProgress'),
-    //素描模式标记
-    sketchModeFlag: false,
-    //是否显示素描提示
-    showPageHint: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).as('flip.showPageHint'),
-    //翻页间隔时间
-    sketchFlipSecond: 30,
-    //计时用,从0开始
-    sketchSecondCount: 0
-});
-// 自定义主题
-(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store('theme', {
-    theme: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist('light').as('theme'),
-    interfaceColor: '#F5F5E4',
-    backgroundColor: '#E0D9CD',
-    textColor: '#000000',
-    toggleTheme () {
-        this.theme = this.theme === 'light' ? 'dark' : 'light';
-    }
-});
-// 由于 Cookie “cookie.someCookieKey”缺少正确的“sameSite”属性值，缺少“SameSite”或含有无效值的 Cookie
-// 即将被视作指定为“Lax”，该 Cookie 将无法发送至第三方上下文中。若您的应用程序依赖这组 Cookie 以在不同上下文中工作，
-// 请添加“SameSite=None”属性。若要了解“SameSite”属性的更多信息，请参阅：https://developer.mozilla.org/docs/Web/HTTP/Headers/Set-Cookie/SameSite
-// https://alpinejs.dev/plugins/persist#custom-storage
-// 定义自定义存储对象，公开 getItem 函数和 setItem 函数
-// 使用会话 cookie 作为存储
-window.cookieStorage = {
-    getItem (key) {
-        let cookies = document.cookie.split(";");
-        for(let i = 0; i < cookies.length; i++){
-            let cookie = cookies[i].split("=");
-            if (key === cookie[0].trim()) return decodeURIComponent(cookie[1]);
-        }
-        return null;
-    },
-    setItem (key, value) {
-        document.cookie = `${key}=${encodeURIComponent(value)}; SameSite=Lax`; //SameSite设置默认值（Lax），防止控制台报错。加载图像或框架（frame）的请求将不会包含用户的 Cookie。
-    }
-};
-// 使用 cookieStorage 作为存储
-(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).store('cookie', {
-    someCookieKey: (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).$persist(false).using(cookieStorage).as('cookie.someCookieKey')
-});
+
+
 //请求图片文件时，可添加的额外参数
-const $9a6ba028f1a982fb$var$imageParameters = {
+const $bbe0293ef6bc5e52$export$444dbc9dc04ca304 = {
     resize_width: -1,
     resize_height: -1,
     do_auto_resize: false,
@@ -16088,20 +16101,22 @@ const $9a6ba028f1a982fb$var$imageParameters = {
     gray: false
 };
 //添加各种字符串参数,不需要的话为空
-const $9a6ba028f1a982fb$var$resize_width_str = $9a6ba028f1a982fb$var$imageParameters.resize_width > 0 ? "&resize_width=" + $9a6ba028f1a982fb$var$imageParameters.resize_width : "";
-const $9a6ba028f1a982fb$var$resize_height_str = $9a6ba028f1a982fb$var$imageParameters.resize_height > 0 ? "&resize_height=" + $9a6ba028f1a982fb$var$imageParameters.resize_height : "";
-const $9a6ba028f1a982fb$var$gray_str = $9a6ba028f1a982fb$var$imageParameters.gray ? "&gray=true" : "";
-const $9a6ba028f1a982fb$var$do_auto_resize_str = $9a6ba028f1a982fb$var$imageParameters.do_auto_resize ? "&resize_max_width=" + $9a6ba028f1a982fb$var$imageParameters.resize_max_width : "";
-const $9a6ba028f1a982fb$var$resize_max_height_str = $9a6ba028f1a982fb$var$imageParameters.resize_max_height > 0 ? "&resize_max_height=" + $9a6ba028f1a982fb$var$imageParameters.resize_max_height : "";
-const $9a6ba028f1a982fb$var$auto_crop_str = $9a6ba028f1a982fb$var$imageParameters.do_auto_crop ? "&auto_crop=" + $9a6ba028f1a982fb$var$imageParameters.auto_crop_num : "";
+const $bbe0293ef6bc5e52$var$resize_width_str = $bbe0293ef6bc5e52$export$444dbc9dc04ca304.resize_width > 0 ? "&resize_width=" + $bbe0293ef6bc5e52$export$444dbc9dc04ca304.resize_width : "";
+const $bbe0293ef6bc5e52$var$resize_height_str = $bbe0293ef6bc5e52$export$444dbc9dc04ca304.resize_height > 0 ? "&resize_height=" + $bbe0293ef6bc5e52$export$444dbc9dc04ca304.resize_height : "";
+const $bbe0293ef6bc5e52$var$gray_str = $bbe0293ef6bc5e52$export$444dbc9dc04ca304.gray ? "&gray=true" : "";
+const $bbe0293ef6bc5e52$var$do_auto_resize_str = $bbe0293ef6bc5e52$export$444dbc9dc04ca304.do_auto_resize ? "&resize_max_width=" + $bbe0293ef6bc5e52$export$444dbc9dc04ca304.resize_max_width : "";
+const $bbe0293ef6bc5e52$var$resize_max_height_str = $bbe0293ef6bc5e52$export$444dbc9dc04ca304.resize_max_height > 0 ? "&resize_max_height=" + $bbe0293ef6bc5e52$export$444dbc9dc04ca304.resize_max_height : "";
+const $bbe0293ef6bc5e52$var$auto_crop_str = $bbe0293ef6bc5e52$export$444dbc9dc04ca304.do_auto_crop ? "&auto_crop=" + $bbe0293ef6bc5e52$export$444dbc9dc04ca304.auto_crop_num : "";
 //所有附加的转换参数
-let $9a6ba028f1a982fb$var$addStr = $9a6ba028f1a982fb$var$resize_width_str + $9a6ba028f1a982fb$var$resize_height_str + $9a6ba028f1a982fb$var$do_auto_resize_str + $9a6ba028f1a982fb$var$resize_max_height_str + $9a6ba028f1a982fb$var$auto_crop_str + $9a6ba028f1a982fb$var$gray_str;
-if ($9a6ba028f1a982fb$var$addStr !== "") {
-    $9a6ba028f1a982fb$var$addStr = "?" + $9a6ba028f1a982fb$var$addStr.substring(1);
-    console.log("addStr:", $9a6ba028f1a982fb$var$addStr);
+let $bbe0293ef6bc5e52$export$52550a8b6a1f2afe = $bbe0293ef6bc5e52$var$resize_width_str + $bbe0293ef6bc5e52$var$resize_height_str + $bbe0293ef6bc5e52$var$do_auto_resize_str + $bbe0293ef6bc5e52$var$resize_max_height_str + $bbe0293ef6bc5e52$var$auto_crop_str + $bbe0293ef6bc5e52$var$gray_str;
+if ($bbe0293ef6bc5e52$export$52550a8b6a1f2afe !== "") {
+    $bbe0293ef6bc5e52$export$52550a8b6a1f2afe = "?" + $bbe0293ef6bc5e52$export$52550a8b6a1f2afe.substring(1);
+    console.log("addStr:", $bbe0293ef6bc5e52$export$52550a8b6a1f2afe);
 }
+
+
 // Start Alpine.
-(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).start();
+Alpine.start();
 // Document ready function to ensure the DOM is fully loaded.
 document.addEventListener('DOMContentLoaded', function() {
     initFlowbite() // initialize Flowbite
@@ -16114,4 +16129,4 @@ document.body.addEventListener('htmx:afterSwap htmx:afterRequest htmx:afterSettl
 });
 
 })();
-//# sourceMappingURL=scripts.js.map
+//# sourceMappingURL=main.js.map

@@ -21,8 +21,8 @@ templ MainLayout(c echo.Context, s *state.GlobalState, bodyContent templ.Compone
 			<meta name="description" content="Simple Manga Reader in Linux，Windows，Mac OS"/>
 			<!--TODO:PWA模式  <link rel="manifest" href="/static/manifest.webmanifest"/>  -->
 			<link rel="apple-touch-icon" href="/static/apple-touch-icon.png"/>
-			<link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon"/>
-			<link rel="icon" href="/static/favicon.png" sizes="any"/>
+			<link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon"/>
+			<link rel="icon" href="/images/favicon.png" sizes="any"/>
 			<!--  <script src="https://unpkg.com/@tailwindcss/browser@4"></script> -->
 			<!--  font-sans：https://tailwindcss.com/docs/font-family -->
 			if !s.StaticMode {
@@ -42,10 +42,10 @@ templ MainLayout(c echo.Context, s *state.GlobalState, bodyContent templ.Compone
 		</body>
 		<!-- 通用js代码,初始化htmx、Alpine等第三方库  -->
 		if !s.StaticMode {
-			<script src="/static/scripts.js"></script>
+			<script src="/static/main.js"></script>
 		}
 		if s.StaticMode {
-			@templ.Raw("<script>" + embed.GetFileStr("static/scripts.js") + "</script>")
+			@templ.Raw("<script>" + embed.GetFileStr("static/main.js") + "</script>")
 		}
 		<!-- js代码,滚动到顶部,显示返回顶部按钮,获取鼠标位置,决定是否打开设置面板等 src="/static/flip.js"  -->
 		if !s.StaticMode && insertScript != "" {
