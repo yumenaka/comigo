@@ -100,7 +100,7 @@ func SaveBookToDatabase(save *model.Book) error {
 		SetDepth(save.BookInfo.Depth).
 		SetParentFolder(save.BookInfo.ParentFolder).
 		SetPageCount(save.BookInfo.PageCount).
-		SetFileSize(save.BookInfo.FileSize).
+		SetSize(save.BookInfo.FileSize).
 		SetAuthors(save.GetAuthor()).
 		SetISBN(save.BookInfo.ISBN).
 		SetPress(save.BookInfo.Press).
@@ -124,15 +124,13 @@ func SaveBookToDatabase(save *model.Book) error {
 			Create().
 			SetBookID(save.BookID).
 			SetPageNum(p.PageNum).
-			SetNameInArchive(p.NameInArchive).
+			SetName(p.Name).
 			SetURL(p.Url).
 			SetBlurHash(p.Blurhash).
 			SetHeight(p.Height).
 			SetWidth(p.Width).
-			SetModeTime(p.ModeTime).
-			SetFileSize(p.FileSize).
-			SetRealImageFilePATH(p.RealImageFilePATH).
-			SetImgType(p.ImgType)
+			SetModTime(p.ModTime).
+			SetSize(p.Size)
 	}
 	pages, err := client.SinglePageInfo.CreateBulk(bulk...).Save(ctx)
 	if b != nil && pages != nil {
@@ -167,7 +165,7 @@ func GetBookFromDatabase(filepath string) (*model.Book, error) {
 			Depth:           temp.Depth,
 			ParentFolder:    temp.ParentFolder,
 			PageCount:       temp.PageCount,
-			FileSize:        temp.FileSize,
+			FileSize:        temp.Size,
 			ISBN:            temp.ISBN,
 			Press:           temp.Press,
 			PublishedAt:     temp.PublishedAt,
@@ -188,17 +186,17 @@ func GetBookFromDatabase(filepath string) (*model.Book, error) {
 						Where(singlepageinfo.BookID(temp.BookID)).
 						All(ctx) // query and return.
 	for _, v := range pages {
-		b.Pages.Images = append(b.Pages.Images, model.ImageInfo{
-			PageNum:           v.PageNum,
-			NameInArchive:     v.NameInArchive,
-			Url:               v.URL,
-			Blurhash:          v.BlurHash,
-			Height:            v.Height,
-			Width:             v.Width,
-			ModeTime:          v.ModeTime,
-			FileSize:          v.FileSize,
-			RealImageFilePATH: v.RealImageFilePATH,
-			ImgType:           v.ImgType,
+		b.Pages.Images = append(b.Pages.Images, model.MediaFileInfo{
+			PageNum:  v.PageNum,
+			Name:     v.Name,
+			Url:      v.URL,
+			Blurhash: v.BlurHash,
+			Height:   v.Height,
+			Width:    v.Width,
+			ModTime:  v.ModTime,
+			Size:     v.Size,
+			Path:     v.Path,
+			ImgType:  v.ImgType,
 		})
 	}
 	//设置封面
@@ -236,7 +234,7 @@ func GetBooksFromDatabase() (list []*model.Book, err error) {
 				Depth:           temp.Depth,
 				ParentFolder:    temp.ParentFolder,
 				PageCount:       temp.PageCount,
-				FileSize:        temp.FileSize,
+				FileSize:        temp.Size,
 				ISBN:            temp.ISBN,
 				Press:           temp.Press,
 				PublishedAt:     temp.PublishedAt,
@@ -259,17 +257,17 @@ func GetBooksFromDatabase() (list []*model.Book, err error) {
 			logger.Infof("%s", err)
 		}
 		for _, v := range pages {
-			b.Pages.Images = append(b.Pages.Images, model.ImageInfo{
-				PageNum:           v.PageNum,
-				NameInArchive:     v.NameInArchive,
-				Url:               v.URL,
-				Blurhash:          v.BlurHash,
-				Height:            v.Height,
-				Width:             v.Width,
-				ModeTime:          v.ModeTime,
-				FileSize:          v.FileSize,
-				RealImageFilePATH: v.RealImageFilePATH,
-				ImgType:           v.ImgType,
+			b.Pages.Images = append(b.Pages.Images, model.MediaFileInfo{
+				PageNum:  v.PageNum,
+				Name:     v.Name,
+				Url:      v.URL,
+				Blurhash: v.BlurHash,
+				Height:   v.Height,
+				Width:    v.Width,
+				ModTime:  v.ModTime,
+				Size:     v.Size,
+				Path:     v.Path,
+				ImgType:  v.ImgType,
 			})
 		}
 		//设置封面
@@ -279,13 +277,13 @@ func GetBooksFromDatabase() (list []*model.Book, err error) {
 		//硬写一个封面
 		switch b.Type {
 		case model.TypePDF:
-			b.SetCover(model.ImageInfo{NameInArchive: "pdf.png", Url: "/images/pdf.png"})
+			b.SetCover(model.MediaFileInfo{Name: "pdf.png", Url: "/images/pdf.png"})
 		case model.TypeVideo:
-			b.SetCover(model.ImageInfo{NameInArchive: "video.png", Url: "/images/video.png"})
+			b.SetCover(model.MediaFileInfo{Name: "video.png", Url: "/images/video.png"})
 		case model.TypeAudio:
-			b.SetCover(model.ImageInfo{NameInArchive: "audio.png", Url: "/images/audio.png"})
+			b.SetCover(model.MediaFileInfo{Name: "audio.png", Url: "/images/audio.png"})
 		case model.TypeUnknownFile:
-			b.SetCover(model.ImageInfo{NameInArchive: "unknown.png", Url: "/images/unknown.png"})
+			b.SetCover(model.MediaFileInfo{Name: "unknown.png", Url: "/images/unknown.png"})
 		}
 		list = append(list, &b)
 	}

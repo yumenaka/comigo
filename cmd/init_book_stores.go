@@ -1,13 +1,13 @@
 package cmd
 
 import (
+	"github.com/yumenaka/comigo/util/scan"
 	"strconv"
 
 	"github.com/spf13/viper"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/internal/database"
 	"github.com/yumenaka/comigo/model"
-	"github.com/yumenaka/comigo/util/file/scan"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
@@ -31,21 +31,9 @@ func SetStore(args []string) {
 	SetStorePath(args)
 
 	//3、扫描配置文件里面的书库路径
-	option := scan.NewScanOption(
+	option := scan.NewOption(
 		true,
-		config.GetLocalStoresList(),
-		config.GetStores(),
-		config.GetMaxScanDepth(),
-		config.GetMinImageNum(),
-		config.GetTimeoutLimitForScan(),
-		config.GetExcludePath(),
-		config.GetSupportMediaType(),
-		config.GetSupportFileType(),
-		config.GetSupportTemplateFile(),
-		config.GetZipFileTextEncoding(),
-		config.GetEnableDatabase(),
-		config.GetClearDatabaseWhenExit(),
-		config.GetDebug(),
+		config.GetCfg(),
 	)
 	err := scan.AllStore(option)
 	if err != nil {

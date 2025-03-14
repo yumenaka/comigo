@@ -17,14 +17,14 @@ func (SinglePageInfo) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("BookID"),
 		field.Int("PageNum"),
-		field.String("NameInArchive"),
+		field.String("Path"),
+		field.String("Name"),
 		field.String("Url"),
 		field.String("BlurHash"),
 		field.Int("Height"),
 		field.Int("Width"),
-		field.Time("ModeTime").Default(time.Now),
-		field.Int64("FileSize"),
-		field.String("RealImageFilePATH"),
+		field.Time("ModTime").Default(time.Now),
+		field.Int64("Size"),
 		field.String("ImgType"),
 	}
 }

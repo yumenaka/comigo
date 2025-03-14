@@ -179,7 +179,7 @@ templ UploadArea(s *state.GlobalState) {
 
                     } else {
                         const errorData = JSON.parse(xhr.responseText);
-                        resultDiv.innerHTML = `<p class="text-red-500 text-lg text-center">${errorData.error || '上传失败'}</p>`;
+                        resultDiv.innerHTML = "<p class=\"text-red-500 text-lg text-center\">" + (errorData.error || '上传失败') + "</p>";
                     }
                 // 重置上传按钮和进度条
                 uploadButton.disabled = filesToUpload.length === 0;
@@ -189,7 +189,7 @@ templ UploadArea(s *state.GlobalState) {
                 };
                 // 监听错误
                 xhr.onerror = function() {
-                    resultDiv.innerHTML = `<p class="text-red-500">上传失败: 网络错误</p>`;
+                    resultDiv.innerHTML = "<p class=\"text-red-500\">上传失败: 网络错误</p>";
                     uploadButton.disabled = filesToUpload.length === 0;
                     uploadButton.textContent = '上传文件';
                     progressBar.style.width = '0%';

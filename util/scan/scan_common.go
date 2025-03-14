@@ -1,12 +1,12 @@
 package scan
 
 import (
-	"github.com/yumenaka/comigo/config/stores"
 	"io/fs"
 	"net/url"
 	"path"
 	"strings"
 
+	"github.com/yumenaka/comigo/config/stores"
 	"github.com/yumenaka/comigo/internal/database"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/util/file"
@@ -14,60 +14,39 @@ import (
 	"github.com/yumenaka/comigo/util/logger"
 )
 
+type Config interface {
+	GetLocalStores() []string
+	GetStores() []stores.Store
+	GetMaxScanDepth() int
+	GetMinImageNum() int
+	GetTimeoutLimitForScan() int
+	GetExcludePath() []string
+	GetSupportMediaType() []string
+	GetSupportFileType() []string
+	GetSupportTemplateFile() []string
+	GetZipFileTextEncoding() string
+	GetEnableDatabase() bool
+	GetClearDatabaseWhenExit() bool
+	GetDebug() bool
+}
 type Option struct {
-	ReScanFile            bool           // 是否重新扫描文件
-	LocalStores           []string       // 本地书库路径
-	RemoteStores          []stores.Store // 远程书库路径
-	MaxScanDepth          int            // 扫描深度
-	MinImageNum           int            // 最小图片数量
-	TimeoutLimitForScan   int            // 扫描超时时间
-	ExcludePath           []string       // 排除路径
-	SupportMediaType      []string       // 支持的媒体类型
-	SupportFileType       []string       // 支持的文件类型
-	SupportTemplateFile   []string       // 支持的模板文件类型，默认为html
-	ZipFileTextEncoding   string         // 非UTF-8编码的ZIP文件，尝试用什么编码解析，默认GBK
-	EnableDatabase        bool           // 启用数据库
-	ClearDatabaseWhenExit bool           // 启用数据库时，扫描完成后，清除不存在的书籍
-	Debug                 bool
+	ReScanFile bool // 是否重新扫描文件
+	Cfg        Config
 }
 
-func NewScanOption(
+func NewOption(
 	reScanFile bool,
-	localPath []string,
-	remoteStores []stores.Store,
-	maxScanDepth int,
-	minImageNum int,
-	timeoutLimitForScan int,
-	excludePath []string,
-	supportMediaType []string,
-	supportFileType []string,
-	supportTemplateFile []string, // 支持的模板文件类型，默认为html
-	zipFileTextEncoding string,
-	enableDatabase bool,
-	clearDatabaseWhenExit bool,
-	debug bool,
+	scanConfig Config,
 ) Option {
 	return Option{
-		ReScanFile:            reScanFile,
-		LocalStores:           localPath,
-		RemoteStores:          remoteStores,
-		MaxScanDepth:          maxScanDepth,
-		MinImageNum:           minImageNum,
-		TimeoutLimitForScan:   timeoutLimitForScan,
-		ExcludePath:           excludePath,
-		SupportMediaType:      supportMediaType,
-		SupportFileType:       supportFileType,
-		SupportTemplateFile:   supportTemplateFile,
-		ZipFileTextEncoding:   zipFileTextEncoding,
-		EnableDatabase:        enableDatabase,
-		ClearDatabaseWhenExit: clearDatabaseWhenExit,
-		Debug:                 debug,
+		ReScanFile: reScanFile,
+		Cfg:        scanConfig,
 	}
 }
 
 // IsSupportTemplate 判断压缩包内的文件是否是支持的模板文件
 func (o *Option) IsSupportTemplate(checkPath string) bool {
-	for _, ex := range o.SupportTemplateFile {
+	for _, ex := range o.Cfg.GetSupportTemplateFile() {
 		suffix := strings.ToLower(path.Ext(checkPath)) //strings.ToLower():某些文件会用大写文件名
 		if ex == suffix {
 			return true
@@ -76,9 +55,20 @@ func (o *Option) IsSupportTemplate(checkPath string) bool {
 	return false
 }
 
-// IsSupportMedia 判断压缩包内的文件是否需要展示（包括图片、音频、视频、PDF在内的媒体文件）
+// IsSupportMedia 判断文件是否需要展示
 func (o *Option) IsSupportMedia(checkPath string) bool {
-	for _, ex := range o.SupportMediaType {
+	for _, ex := range o.Cfg.GetSupportMediaType() {
+		suffix := strings.ToLower(path.Ext(checkPath)) //strings.ToLower():某些文件会用大写文件名
+		if ex == suffix {
+			return true
+		}
+	}
+	return false
+}
+
+// IsSupportFile 判断压缩包内的文件是否需要展示
+func (o *Option) IsSupportFile(checkPath string) bool {
+	for _, ex := range o.Cfg.GetSupportFileType() {
 		suffix := strings.ToLower(path.Ext(checkPath)) //strings.ToLower():某些文件会用大写文件名
 		if ex == suffix {
 			return true
@@ -89,7 +79,7 @@ func (o *Option) IsSupportMedia(checkPath string) bool {
 
 // IsSupportArchiver 是否是支持的压缩文件
 func (o *Option) IsSupportArchiver(checkPath string) bool {
-	for _, ex := range o.SupportFileType {
+	for _, ex := range o.Cfg.GetSupportFileType() {
 		suffix := path.Ext(checkPath)
 		if ex == suffix {
 			return true
@@ -100,7 +90,7 @@ func (o *Option) IsSupportArchiver(checkPath string) bool {
 
 // IsSkipDir  检查路径是否应该跳过（排除文件，文件夹列表）。
 func (o *Option) IsSkipDir(path string) bool {
-	for _, substr := range o.ExcludePath {
+	for _, substr := range o.Cfg.GetExcludePath() {
 		if strings.HasSuffix(path, substr) {
 			return true
 		}
@@ -109,24 +99,24 @@ func (o *Option) IsSkipDir(path string) bool {
 }
 
 // AllStore 3、扫描路径，取得路径里的书籍
-func AllStore(scanConfig Option) error {
+func AllStore(option Option) error {
 	// 重置所有书籍与书组信息
 	model.ClearAllBookData()
-	for _, localPath := range scanConfig.LocalStores {
-		addList, err := Local(localPath, scanConfig)
+	for _, localPath := range option.Cfg.GetLocalStores() {
+		addList, err := ScanDirectory(localPath, option)
 		if err != nil {
 			logger.Infof(locale.GetString("scan_error")+" path:%s %s", localPath, err)
 			continue
 		}
-		AddBooksToStore(addList, localPath, scanConfig.MinImageNum)
+		AddBooksToStore(addList, localPath, option.Cfg.GetMinImageNum())
 	}
-	//for _, server := range scanConfig.Stores {
-	//	addList, err := Smb(scanConfig)
+	//for _, server := range scanStores {
+	//	addList, err := Smb(option)
 	//	if err != nil {
 	//		logger.Infof("smb scan_error"+" path:%s %s", server.ShareName, err)
 	//		continue
 	//	}
-	//	AddBooksToStore(addList, server.ShareName, scanConfig.MinImageNum)
+	//	AddBooksToStore(addList, server.ShareName, scanMinImageNum)
 	//}
 	return nil
 }
@@ -164,20 +154,20 @@ func AddBooksToStore(bookList []*model.Book, basePath string, MinImageNum int) {
 	}
 }
 
-func scanNonUTF8ZipFile(filePath string, b *model.Book, scanOption Option) error {
+func scanNonUTF8ZipFile(filePath string, b *model.Book, option Option) error {
 	b.NonUTF8Zip = true
-	reader, err := file.ScanNonUTF8Zip(filePath, scanOption.ZipFileTextEncoding)
+	reader, err := file.ScanNonUTF8Zip(filePath, option.Cfg.GetZipFileTextEncoding())
 	if err != nil {
 		return err
 	}
 	for _, f := range reader.File {
-		if scanOption.IsSupportMedia(f.Name) {
+		if option.IsSupportMedia(f.Name) {
 			// 如果是压缩文件
 			// 替换特殊字符的时候，额外将“+替换成"%2b"，因为gin会将+解析为空格。
 			TempURL := "/api/get_file?id=" + b.BookID + "&filename=" + url.QueryEscape(f.Name)
-			b.Pages.Images = append(b.Pages.Images, model.ImageInfo{RealImageFilePATH: "", FileSize: f.FileInfo().Size(), ModeTime: f.FileInfo().ModTime(), NameInArchive: f.Name, Url: TempURL})
+			b.Pages.Images = append(b.Pages.Images, model.MediaFileInfo{Path: "", Size: f.FileInfo().Size(), ModTime: f.FileInfo().ModTime(), Name: f.Name, Url: TempURL})
 		} else {
-			if scanOption.Debug {
+			if option.Cfg.GetDebug() {
 				logger.Infof(locale.GetString("unsupported_file_type")+" %s", f.Name)
 			}
 		}
@@ -188,7 +178,7 @@ func scanNonUTF8ZipFile(filePath string, b *model.Book, scanOption Option) error
 
 // 手动写的递归查找，功能与fs.WalkDir()相同。发现一个Archiver/V4的BUG：zip文件的虚拟文件系统，找不到正确的多级文件夹？
 // https://books.studygolang.com/The-Golang-Standard-Library-by-Example/chapter06/06.3.html
-func walkUTF8ZipFs(fsys fs.FS, parent, base string, b *model.Book, scanOption Option) error {
+func walkUTF8ZipFs(fsys fs.FS, parent, base string, b *model.Book, option Option) error {
 	// 一般zip文件的处理流程
 	// logger.Infof("parent:" + parent + " base:" + base)
 	dirName := path.Join(parent, base)
@@ -210,14 +200,14 @@ func walkUTF8ZipFs(fsys fs.FS, parent, base string, b *model.Book, scanOption Op
 			default:
 			}
 			joinPath := path.Join(parent, name)
-			err = walkUTF8ZipFs(fsys, joinPath, base, b, scanOption)
-		} else if scanOption.IsSupportMedia(name) {
+			err = walkUTF8ZipFs(fsys, joinPath, base, b, option)
+		} else if option.IsSupportMedia(name) {
 			inArchiveName := path.Join(parent, f.Name())
 			TempURL := "/api/get_file?id=" + b.BookID + "&filename=" + url.QueryEscape(inArchiveName)
 			// 替换特殊字符的时候,不要用url.PathEscape()，PathEscape不会把“+“替换成"%2b"，会导致BUG，让gin会将+解析为空格。
-			b.Pages.Images = append(b.Pages.Images, model.ImageInfo{RealImageFilePATH: "", FileSize: f.Size(), ModeTime: f.ModTime(), NameInArchive: inArchiveName, Url: TempURL})
+			b.Pages.Images = append(b.Pages.Images, model.MediaFileInfo{Path: "", Size: f.Size(), ModTime: f.ModTime(), Name: inArchiveName, Url: TempURL})
 		} else {
-			if scanOption.Debug {
+			if option.Cfg.GetDebug() {
 				logger.Infof(locale.GetString("unsupported_file_type")+" %s", name)
 			}
 		}

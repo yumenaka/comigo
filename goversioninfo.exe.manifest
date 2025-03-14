@@ -2,8 +2,8 @@
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
   <assemblyIdentity
     type="win32"
-    name="yumenaka.net"
-    version="0.2.0.0"
+    name="comigo.xyz"
+    version="0.10.0.0"
     processorArchitecture="*"/>
  <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
    <security>

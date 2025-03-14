@@ -14,7 +14,7 @@ import (
 
 // TODO:SFTP扫描书籍
 func SFTP(scanOption Option) (newBookList []*model.Book, err error) {
-	conn, err := net.Dial("tcp", scanOption.RemoteStores[0].Smb.Host+":"+strconv.Itoa(scanOption.RemoteStores[0].Smb.Port))
+	conn, err := net.Dial("tcp", scanOption.Cfg.GetStores()[0].Smb.Host+":"+strconv.Itoa(scanOption.Cfg.GetStores()[0].Smb.Port))
 	if err != nil {
 		fmt.Println(err)
 		panic(err)
@@ -29,8 +29,8 @@ func SFTP(scanOption Option) (newBookList []*model.Book, err error) {
 
 	d := &smb2.Dialer{
 		Initiator: &smb2.NTLMInitiator{
-			User:     scanOption.RemoteStores[0].Smb.Username,
-			Password: scanOption.RemoteStores[0].Smb.Password,
+			User:     scanOption.Cfg.GetStores()[0].Smb.Username,
+			Password: scanOption.Cfg.GetStores()[0].Smb.Password,
 		},
 	}
 
@@ -45,7 +45,7 @@ func SFTP(scanOption Option) (newBookList []*model.Book, err error) {
 		}
 	}(s)
 
-	fs, err := s.Mount(scanOption.RemoteStores[0].Smb.ShareName)
+	fs, err := s.Mount(scanOption.Cfg.GetStores()[0].Smb.ShareName)
 	if err != nil {
 		panic(err)
 	}
@@ -90,7 +90,7 @@ func SFTP(scanOption Option) (newBookList []*model.Book, err error) {
 	//	logger.Infof("%s", err)
 	//}
 	//logger.Infof(locale.GetString("scan_start_hint")+"%s", storePathAbs)
-	//err = filepath.Walk(storePathAbs, func(walkPath string, fileInfo os.FileInfo, err error) error {
+	//err = filepath.Walk(storePathAbs, func(walkPath string, fileInfo os.MediaFileInfo, err error) error {
 	//	if !scanOption.ReScanFile {
 	//		for _, p := range types.GetArchiveBooks() {
 	//			AbsW, err := filepath.Abs(walkPath) // 取得绝对路径

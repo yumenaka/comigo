@@ -31,6 +31,8 @@
  - [ ] gin -> chi或gin -> echo。chi无外部依赖,echo似乎与wails兼容性更好。此外还可以试试不用框架全原生。
  - [ ] 尝试wails3, https://v3alpha.wails.io/getting-started/installation/
  - [ ] 合并htmx代码，参考[pagoda](https://github.com/mikestefanello/pagoda)，重新规划项目结构。我用的许多组件，最终都换成和这个模板一样的了，估计从这个项目里可以学到很多东西。[go-blueprint](https://docs.go-blueprint.dev/) 也是一个不错的参考，可以看看怎么集成websockets与templ。
+ - [ ] 注册，阅读记录，
+ - [ ] 添加[数据验证](https://dev.to/leapcell/validator-complex-structs-arrays-and-maps-validation-for-go-34ni)。
 ## 提示
 
 <https://github.com/angelofallars/htmx-go#triggers>  

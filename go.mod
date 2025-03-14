@@ -2,7 +2,10 @@ module github.com/yumenaka/comigo
 
 go 1.24
 
-tool github.com/josephspurrier/goversioninfo/cmd/goversioninfo
+tool (
+	entgo.io/ent/cmd/ent
+	github.com/josephspurrier/goversioninfo/cmd/goversioninfo
+)
 
 require (
 	entgo.io/ent v0.14.3
@@ -40,6 +43,7 @@ require (
 	github.com/hirochachacha/go-smb2 v1.1.0
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.13.3
+	github.com/mattn/go-sqlite3 v2.0.1+incompatible
 	github.com/minio/selfupdate v0.6.0
 	github.com/pdfcpu/pdfcpu v0.9.1
 	github.com/yumenaka/archives v0.0.0-20241222141717-1f2992f21052
@@ -52,6 +56,7 @@ require (
 	ariga.io/atlas v0.32.0 // indirect
 	github.com/STARRY-S/zip v0.2.2 // indirect
 	github.com/VividCortex/ewma v1.2.0 // indirect
+	github.com/a-h/templ v0.3.857 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/akavel/rsrc v0.10.2 // indirect
 	github.com/andybalholm/brotli v1.1.1 // indirect
@@ -66,7 +71,7 @@ require (
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/geoffgarside/ber v1.1.0 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
-	github.com/go-openapi/inflect v0.21.0 // indirect
+	github.com/go-openapi/inflect v0.21.1 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
@@ -99,6 +104,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/ncruces/go-strftime v0.1.9 // indirect
 	github.com/nwaples/rardecode/v2 v2.1.1 // indirect
+	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/pierrec/lz4/v4 v4.1.22 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect

@@ -34,8 +34,8 @@ const (
 	FieldParentFolder = "parent_folder"
 	// FieldPageCount holds the string denoting the pagecount field in the database.
 	FieldPageCount = "page_count"
-	// FieldFileSize holds the string denoting the filesize field in the database.
-	FieldFileSize = "file_size"
+	// FieldSize holds the string denoting the size field in the database.
+	FieldSize = "size"
 	// FieldAuthors holds the string denoting the authors field in the database.
 	FieldAuthors = "authors"
 	// FieldISBN holds the string denoting the isbn field in the database.
@@ -84,7 +84,7 @@ var Columns = []string{
 	FieldDepth,
 	FieldParentFolder,
 	FieldPageCount,
-	FieldFileSize,
+	FieldSize,
 	FieldAuthors,
 	FieldISBN,
 	FieldPress,
@@ -181,9 +181,9 @@ func ByPageCount(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPageCount, opts...).ToFunc()
 }
 
-// ByFileSize orders the results by the FileSize field.
-func ByFileSize(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldFileSize, opts...).ToFunc()
+// BySize orders the results by the Size field.
+func BySize(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSize, opts...).ToFunc()
 }
 
 // ByAuthors orders the results by the Authors field.

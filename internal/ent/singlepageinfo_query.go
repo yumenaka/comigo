@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -61,7 +62,7 @@ func (spiq *SinglePageInfoQuery) Order(o ...singlepageinfo.OrderOption) *SingleP
 // First returns the first SinglePageInfo entity from the query.
 // Returns a *NotFoundError when no SinglePageInfo was found.
 func (spiq *SinglePageInfoQuery) First(ctx context.Context) (*SinglePageInfo, error) {
-	nodes, err := spiq.Limit(1).All(setContextOp(ctx, spiq.ctx, "First"))
+	nodes, err := spiq.Limit(1).All(setContextOp(ctx, spiq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +85,7 @@ func (spiq *SinglePageInfoQuery) FirstX(ctx context.Context) *SinglePageInfo {
 // Returns a *NotFoundError when no SinglePageInfo ID was found.
 func (spiq *SinglePageInfoQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = spiq.Limit(1).IDs(setContextOp(ctx, spiq.ctx, "FirstID")); err != nil {
+	if ids, err = spiq.Limit(1).IDs(setContextOp(ctx, spiq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -107,7 +108,7 @@ func (spiq *SinglePageInfoQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one SinglePageInfo entity is found.
 // Returns a *NotFoundError when no SinglePageInfo entities are found.
 func (spiq *SinglePageInfoQuery) Only(ctx context.Context) (*SinglePageInfo, error) {
-	nodes, err := spiq.Limit(2).All(setContextOp(ctx, spiq.ctx, "Only"))
+	nodes, err := spiq.Limit(2).All(setContextOp(ctx, spiq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -135,7 +136,7 @@ func (spiq *SinglePageInfoQuery) OnlyX(ctx context.Context) *SinglePageInfo {
 // Returns a *NotFoundError when no entities are found.
 func (spiq *SinglePageInfoQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = spiq.Limit(2).IDs(setContextOp(ctx, spiq.ctx, "OnlyID")); err != nil {
+	if ids, err = spiq.Limit(2).IDs(setContextOp(ctx, spiq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -160,7 +161,7 @@ func (spiq *SinglePageInfoQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of SinglePageInfos.
 func (spiq *SinglePageInfoQuery) All(ctx context.Context) ([]*SinglePageInfo, error) {
-	ctx = setContextOp(ctx, spiq.ctx, "All")
+	ctx = setContextOp(ctx, spiq.ctx, ent.OpQueryAll)
 	if err := spiq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -182,7 +183,7 @@ func (spiq *SinglePageInfoQuery) IDs(ctx context.Context) (ids []int, err error)
 	if spiq.ctx.Unique == nil && spiq.path != nil {
 		spiq.Unique(true)
 	}
-	ctx = setContextOp(ctx, spiq.ctx, "IDs")
+	ctx = setContextOp(ctx, spiq.ctx, ent.OpQueryIDs)
 	if err = spiq.Select(singlepageinfo.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -200,7 +201,7 @@ func (spiq *SinglePageInfoQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (spiq *SinglePageInfoQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, spiq.ctx, "Count")
+	ctx = setContextOp(ctx, spiq.ctx, ent.OpQueryCount)
 	if err := spiq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -218,7 +219,7 @@ func (spiq *SinglePageInfoQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (spiq *SinglePageInfoQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, spiq.ctx, "Exist")
+	ctx = setContextOp(ctx, spiq.ctx, ent.OpQueryExist)
 	switch _, err := spiq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -454,7 +455,7 @@ func (spigb *SinglePageInfoGroupBy) Aggregate(fns ...AggregateFunc) *SinglePageI
 
 // Scan applies the selector query and scans the result into the given value.
 func (spigb *SinglePageInfoGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, spigb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, spigb.build.ctx, ent.OpQueryGroupBy)
 	if err := spigb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -502,7 +503,7 @@ func (spis *SinglePageInfoSelect) Aggregate(fns ...AggregateFunc) *SinglePageInf
 
 // Scan applies the selector query and scans the result into the given value.
 func (spis *SinglePageInfoSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, spis.ctx, "Select")
+	ctx = setContextOp(ctx, spis.ctx, ent.OpQuerySelect)
 	if err := spis.prepareQuery(ctx); err != nil {
 		return err
 	}

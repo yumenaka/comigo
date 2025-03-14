@@ -33,6 +33,9 @@ cache
 *.pdf
 main
 *.DS_Store
+*comigo.yaml
+*comigo.ini
+*comigo.db
 
 #项目相关配置或文件
 go_build_main_go
@@ -44,10 +47,6 @@ comic
 resource.syso
 \[*
 *upload
-
-*comigo.yaml
-*comigo.ini
-*comigo.db
 
 __*
 #routers/web_static
@@ -78,6 +77,5 @@ web/.idea
 go.env
 /.env
 /test/*
-# 试着这么写，看能不能避免在下载依赖的时候，下载不需要的文件
-#/app/*
 _temp
+*scan_results.json

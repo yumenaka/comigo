@@ -19,7 +19,7 @@ type BookInfo struct {
 	BookID          string          `json:"id"`             // 根据 FilePath 生成的唯一 ID
 	BookStorePath   string          `json:"-"`              // 在哪个子书库
 	ChildBookNum    int             `json:"child_book_num"` // 子书籍数量
-	Cover           ImageInfo       `json:"cover"`          // 封面图
+	Cover           MediaFileInfo   `json:"cover"`          // 封面图
 	Deleted         bool            `json:"deleted"`        // 源文件是否已删除
 	Depth           int             `json:"depth"`          // 书籍深度
 	ExtractPath     string          `json:"-"`              // 解压路径，7z 用，JSON 不解析
@@ -85,7 +85,7 @@ func (b *BookInfo) initBookID() *BookInfo {
 }
 
 // SetCover 设置封面
-func (b *BookInfo) SetCover(c ImageInfo) *BookInfo {
+func (b *BookInfo) SetCover(c MediaFileInfo) *BookInfo {
 	b.Cover = c
 	return b
 }
