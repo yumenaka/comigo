@@ -64,9 +64,14 @@ func PageNum(v int) predicate.SinglePageInfo {
 	return predicate.SinglePageInfo(sql.FieldEQ(FieldPageNum, v))
 }
 
-// NameInArchive applies equality check predicate on the "NameInArchive" field. It's identical to NameInArchiveEQ.
-func NameInArchive(v string) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldEQ(FieldNameInArchive, v))
+// Path applies equality check predicate on the "Path" field. It's identical to PathEQ.
+func Path(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldEQ(FieldPath, v))
+}
+
+// Name applies equality check predicate on the "Name" field. It's identical to NameEQ.
+func Name(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldEQ(FieldName, v))
 }
 
 // URL applies equality check predicate on the "Url" field. It's identical to URLEQ.
@@ -89,19 +94,14 @@ func Width(v int) predicate.SinglePageInfo {
 	return predicate.SinglePageInfo(sql.FieldEQ(FieldWidth, v))
 }
 
-// ModeTime applies equality check predicate on the "ModeTime" field. It's identical to ModeTimeEQ.
-func ModeTime(v time.Time) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldEQ(FieldModeTime, v))
+// ModTime applies equality check predicate on the "ModTime" field. It's identical to ModTimeEQ.
+func ModTime(v time.Time) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldEQ(FieldModTime, v))
 }
 
-// FileSize applies equality check predicate on the "FileSize" field. It's identical to FileSizeEQ.
-func FileSize(v int64) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldEQ(FieldFileSize, v))
-}
-
-// RealImageFilePATH applies equality check predicate on the "RealImageFilePATH" field. It's identical to RealImageFilePATHEQ.
-func RealImageFilePATH(v string) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldEQ(FieldRealImageFilePATH, v))
+// Size applies equality check predicate on the "Size" field. It's identical to SizeEQ.
+func Size(v int64) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldEQ(FieldSize, v))
 }
 
 // ImgType applies equality check predicate on the "ImgType" field. It's identical to ImgTypeEQ.
@@ -214,69 +214,134 @@ func PageNumLTE(v int) predicate.SinglePageInfo {
 	return predicate.SinglePageInfo(sql.FieldLTE(FieldPageNum, v))
 }
 
-// NameInArchiveEQ applies the EQ predicate on the "NameInArchive" field.
-func NameInArchiveEQ(v string) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldEQ(FieldNameInArchive, v))
+// PathEQ applies the EQ predicate on the "Path" field.
+func PathEQ(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldEQ(FieldPath, v))
 }
 
-// NameInArchiveNEQ applies the NEQ predicate on the "NameInArchive" field.
-func NameInArchiveNEQ(v string) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldNEQ(FieldNameInArchive, v))
+// PathNEQ applies the NEQ predicate on the "Path" field.
+func PathNEQ(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldNEQ(FieldPath, v))
 }
 
-// NameInArchiveIn applies the In predicate on the "NameInArchive" field.
-func NameInArchiveIn(vs ...string) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldIn(FieldNameInArchive, vs...))
+// PathIn applies the In predicate on the "Path" field.
+func PathIn(vs ...string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldIn(FieldPath, vs...))
 }
 
-// NameInArchiveNotIn applies the NotIn predicate on the "NameInArchive" field.
-func NameInArchiveNotIn(vs ...string) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldNotIn(FieldNameInArchive, vs...))
+// PathNotIn applies the NotIn predicate on the "Path" field.
+func PathNotIn(vs ...string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldNotIn(FieldPath, vs...))
 }
 
-// NameInArchiveGT applies the GT predicate on the "NameInArchive" field.
-func NameInArchiveGT(v string) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldGT(FieldNameInArchive, v))
+// PathGT applies the GT predicate on the "Path" field.
+func PathGT(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldGT(FieldPath, v))
 }
 
-// NameInArchiveGTE applies the GTE predicate on the "NameInArchive" field.
-func NameInArchiveGTE(v string) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldGTE(FieldNameInArchive, v))
+// PathGTE applies the GTE predicate on the "Path" field.
+func PathGTE(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldGTE(FieldPath, v))
 }
 
-// NameInArchiveLT applies the LT predicate on the "NameInArchive" field.
-func NameInArchiveLT(v string) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldLT(FieldNameInArchive, v))
+// PathLT applies the LT predicate on the "Path" field.
+func PathLT(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldLT(FieldPath, v))
 }
 
-// NameInArchiveLTE applies the LTE predicate on the "NameInArchive" field.
-func NameInArchiveLTE(v string) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldLTE(FieldNameInArchive, v))
+// PathLTE applies the LTE predicate on the "Path" field.
+func PathLTE(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldLTE(FieldPath, v))
 }
 
-// NameInArchiveContains applies the Contains predicate on the "NameInArchive" field.
-func NameInArchiveContains(v string) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldContains(FieldNameInArchive, v))
+// PathContains applies the Contains predicate on the "Path" field.
+func PathContains(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldContains(FieldPath, v))
 }
 
-// NameInArchiveHasPrefix applies the HasPrefix predicate on the "NameInArchive" field.
-func NameInArchiveHasPrefix(v string) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldHasPrefix(FieldNameInArchive, v))
+// PathHasPrefix applies the HasPrefix predicate on the "Path" field.
+func PathHasPrefix(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldHasPrefix(FieldPath, v))
 }
 
-// NameInArchiveHasSuffix applies the HasSuffix predicate on the "NameInArchive" field.
-func NameInArchiveHasSuffix(v string) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldHasSuffix(FieldNameInArchive, v))
+// PathHasSuffix applies the HasSuffix predicate on the "Path" field.
+func PathHasSuffix(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldHasSuffix(FieldPath, v))
 }
 
-// NameInArchiveEqualFold applies the EqualFold predicate on the "NameInArchive" field.
-func NameInArchiveEqualFold(v string) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldEqualFold(FieldNameInArchive, v))
+// PathEqualFold applies the EqualFold predicate on the "Path" field.
+func PathEqualFold(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldEqualFold(FieldPath, v))
 }
 
-// NameInArchiveContainsFold applies the ContainsFold predicate on the "NameInArchive" field.
-func NameInArchiveContainsFold(v string) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldContainsFold(FieldNameInArchive, v))
+// PathContainsFold applies the ContainsFold predicate on the "Path" field.
+func PathContainsFold(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldContainsFold(FieldPath, v))
+}
+
+// NameEQ applies the EQ predicate on the "Name" field.
+func NameEQ(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldEQ(FieldName, v))
+}
+
+// NameNEQ applies the NEQ predicate on the "Name" field.
+func NameNEQ(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldNEQ(FieldName, v))
+}
+
+// NameIn applies the In predicate on the "Name" field.
+func NameIn(vs ...string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldIn(FieldName, vs...))
+}
+
+// NameNotIn applies the NotIn predicate on the "Name" field.
+func NameNotIn(vs ...string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldNotIn(FieldName, vs...))
+}
+
+// NameGT applies the GT predicate on the "Name" field.
+func NameGT(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldGT(FieldName, v))
+}
+
+// NameGTE applies the GTE predicate on the "Name" field.
+func NameGTE(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldGTE(FieldName, v))
+}
+
+// NameLT applies the LT predicate on the "Name" field.
+func NameLT(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldLT(FieldName, v))
+}
+
+// NameLTE applies the LTE predicate on the "Name" field.
+func NameLTE(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldLTE(FieldName, v))
+}
+
+// NameContains applies the Contains predicate on the "Name" field.
+func NameContains(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldContains(FieldName, v))
+}
+
+// NameHasPrefix applies the HasPrefix predicate on the "Name" field.
+func NameHasPrefix(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldHasPrefix(FieldName, v))
+}
+
+// NameHasSuffix applies the HasSuffix predicate on the "Name" field.
+func NameHasSuffix(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldHasSuffix(FieldName, v))
+}
+
+// NameEqualFold applies the EqualFold predicate on the "Name" field.
+func NameEqualFold(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldEqualFold(FieldName, v))
+}
+
+// NameContainsFold applies the ContainsFold predicate on the "Name" field.
+func NameContainsFold(v string) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldContainsFold(FieldName, v))
 }
 
 // URLEQ applies the EQ predicate on the "Url" field.
@@ -489,149 +554,84 @@ func WidthLTE(v int) predicate.SinglePageInfo {
 	return predicate.SinglePageInfo(sql.FieldLTE(FieldWidth, v))
 }
 
-// ModeTimeEQ applies the EQ predicate on the "ModeTime" field.
-func ModeTimeEQ(v time.Time) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldEQ(FieldModeTime, v))
+// ModTimeEQ applies the EQ predicate on the "ModTime" field.
+func ModTimeEQ(v time.Time) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldEQ(FieldModTime, v))
 }
 
-// ModeTimeNEQ applies the NEQ predicate on the "ModeTime" field.
-func ModeTimeNEQ(v time.Time) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldNEQ(FieldModeTime, v))
+// ModTimeNEQ applies the NEQ predicate on the "ModTime" field.
+func ModTimeNEQ(v time.Time) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldNEQ(FieldModTime, v))
 }
 
-// ModeTimeIn applies the In predicate on the "ModeTime" field.
-func ModeTimeIn(vs ...time.Time) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldIn(FieldModeTime, vs...))
+// ModTimeIn applies the In predicate on the "ModTime" field.
+func ModTimeIn(vs ...time.Time) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldIn(FieldModTime, vs...))
 }
 
-// ModeTimeNotIn applies the NotIn predicate on the "ModeTime" field.
-func ModeTimeNotIn(vs ...time.Time) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldNotIn(FieldModeTime, vs...))
+// ModTimeNotIn applies the NotIn predicate on the "ModTime" field.
+func ModTimeNotIn(vs ...time.Time) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldNotIn(FieldModTime, vs...))
 }
 
-// ModeTimeGT applies the GT predicate on the "ModeTime" field.
-func ModeTimeGT(v time.Time) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldGT(FieldModeTime, v))
+// ModTimeGT applies the GT predicate on the "ModTime" field.
+func ModTimeGT(v time.Time) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldGT(FieldModTime, v))
 }
 
-// ModeTimeGTE applies the GTE predicate on the "ModeTime" field.
-func ModeTimeGTE(v time.Time) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldGTE(FieldModeTime, v))
+// ModTimeGTE applies the GTE predicate on the "ModTime" field.
+func ModTimeGTE(v time.Time) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldGTE(FieldModTime, v))
 }
 
-// ModeTimeLT applies the LT predicate on the "ModeTime" field.
-func ModeTimeLT(v time.Time) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldLT(FieldModeTime, v))
+// ModTimeLT applies the LT predicate on the "ModTime" field.
+func ModTimeLT(v time.Time) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldLT(FieldModTime, v))
 }
 
-// ModeTimeLTE applies the LTE predicate on the "ModeTime" field.
-func ModeTimeLTE(v time.Time) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldLTE(FieldModeTime, v))
+// ModTimeLTE applies the LTE predicate on the "ModTime" field.
+func ModTimeLTE(v time.Time) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldLTE(FieldModTime, v))
 }
 
-// FileSizeEQ applies the EQ predicate on the "FileSize" field.
-func FileSizeEQ(v int64) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldEQ(FieldFileSize, v))
+// SizeEQ applies the EQ predicate on the "Size" field.
+func SizeEQ(v int64) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldEQ(FieldSize, v))
 }
 
-// FileSizeNEQ applies the NEQ predicate on the "FileSize" field.
-func FileSizeNEQ(v int64) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldNEQ(FieldFileSize, v))
+// SizeNEQ applies the NEQ predicate on the "Size" field.
+func SizeNEQ(v int64) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldNEQ(FieldSize, v))
 }
 
-// FileSizeIn applies the In predicate on the "FileSize" field.
-func FileSizeIn(vs ...int64) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldIn(FieldFileSize, vs...))
+// SizeIn applies the In predicate on the "Size" field.
+func SizeIn(vs ...int64) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldIn(FieldSize, vs...))
 }
 
-// FileSizeNotIn applies the NotIn predicate on the "FileSize" field.
-func FileSizeNotIn(vs ...int64) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldNotIn(FieldFileSize, vs...))
+// SizeNotIn applies the NotIn predicate on the "Size" field.
+func SizeNotIn(vs ...int64) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldNotIn(FieldSize, vs...))
 }
 
-// FileSizeGT applies the GT predicate on the "FileSize" field.
-func FileSizeGT(v int64) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldGT(FieldFileSize, v))
+// SizeGT applies the GT predicate on the "Size" field.
+func SizeGT(v int64) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldGT(FieldSize, v))
 }
 
-// FileSizeGTE applies the GTE predicate on the "FileSize" field.
-func FileSizeGTE(v int64) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldGTE(FieldFileSize, v))
+// SizeGTE applies the GTE predicate on the "Size" field.
+func SizeGTE(v int64) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldGTE(FieldSize, v))
 }
 
-// FileSizeLT applies the LT predicate on the "FileSize" field.
-func FileSizeLT(v int64) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldLT(FieldFileSize, v))
+// SizeLT applies the LT predicate on the "Size" field.
+func SizeLT(v int64) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldLT(FieldSize, v))
 }
 
-// FileSizeLTE applies the LTE predicate on the "FileSize" field.
-func FileSizeLTE(v int64) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldLTE(FieldFileSize, v))
-}
-
-// RealImageFilePATHEQ applies the EQ predicate on the "RealImageFilePATH" field.
-func RealImageFilePATHEQ(v string) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldEQ(FieldRealImageFilePATH, v))
-}
-
-// RealImageFilePATHNEQ applies the NEQ predicate on the "RealImageFilePATH" field.
-func RealImageFilePATHNEQ(v string) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldNEQ(FieldRealImageFilePATH, v))
-}
-
-// RealImageFilePATHIn applies the In predicate on the "RealImageFilePATH" field.
-func RealImageFilePATHIn(vs ...string) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldIn(FieldRealImageFilePATH, vs...))
-}
-
-// RealImageFilePATHNotIn applies the NotIn predicate on the "RealImageFilePATH" field.
-func RealImageFilePATHNotIn(vs ...string) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldNotIn(FieldRealImageFilePATH, vs...))
-}
-
-// RealImageFilePATHGT applies the GT predicate on the "RealImageFilePATH" field.
-func RealImageFilePATHGT(v string) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldGT(FieldRealImageFilePATH, v))
-}
-
-// RealImageFilePATHGTE applies the GTE predicate on the "RealImageFilePATH" field.
-func RealImageFilePATHGTE(v string) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldGTE(FieldRealImageFilePATH, v))
-}
-
-// RealImageFilePATHLT applies the LT predicate on the "RealImageFilePATH" field.
-func RealImageFilePATHLT(v string) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldLT(FieldRealImageFilePATH, v))
-}
-
-// RealImageFilePATHLTE applies the LTE predicate on the "RealImageFilePATH" field.
-func RealImageFilePATHLTE(v string) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldLTE(FieldRealImageFilePATH, v))
-}
-
-// RealImageFilePATHContains applies the Contains predicate on the "RealImageFilePATH" field.
-func RealImageFilePATHContains(v string) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldContains(FieldRealImageFilePATH, v))
-}
-
-// RealImageFilePATHHasPrefix applies the HasPrefix predicate on the "RealImageFilePATH" field.
-func RealImageFilePATHHasPrefix(v string) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldHasPrefix(FieldRealImageFilePATH, v))
-}
-
-// RealImageFilePATHHasSuffix applies the HasSuffix predicate on the "RealImageFilePATH" field.
-func RealImageFilePATHHasSuffix(v string) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldHasSuffix(FieldRealImageFilePATH, v))
-}
-
-// RealImageFilePATHEqualFold applies the EqualFold predicate on the "RealImageFilePATH" field.
-func RealImageFilePATHEqualFold(v string) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldEqualFold(FieldRealImageFilePATH, v))
-}
-
-// RealImageFilePATHContainsFold applies the ContainsFold predicate on the "RealImageFilePATH" field.
-func RealImageFilePATHContainsFold(v string) predicate.SinglePageInfo {
-	return predicate.SinglePageInfo(sql.FieldContainsFold(FieldRealImageFilePATH, v))
+// SizeLTE applies the LTE predicate on the "Size" field.
+func SizeLTE(v int64) predicate.SinglePageInfo {
+	return predicate.SinglePageInfo(sql.FieldLTE(FieldSize, v))
 }
 
 // ImgTypeEQ applies the EQ predicate on the "ImgType" field.

@@ -3,12 +3,14 @@ package scan
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io/fs"
 	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/klauspost/compress/zip"
@@ -20,12 +22,87 @@ import (
 	"github.com/yumenaka/comigo/util/logger"
 )
 
-// Local 扫描路径，取得路径里的书籍
-func Local(storePath string, scanOption Option) ([]*model.Book, error) {
+// 全局变量：标记是否正在扫描，避免并发扫描
+var (
+	scanning  bool       // 标记是否正在扫描，避免并发扫描
+	scanMutex sync.Mutex // 保护 scanning 标志的锁
+)
+
+// 扫描目录的核心函数：递归遍历目录，忽略指定名称的文件夹，收集图片文件信息
+func ScanDirectoryNew(currentPath string, depth int, option Option) (model.DirNode, []string, []model.MediaFileInfo, error) {
+	node := model.DirNode{
+		Name: filepath.Base(currentPath), // filepath.Base():返回路径的最后一个元素
+		Path: currentPath,
+	}
+	var foundDirs []string
+	var foundFiles []model.MediaFileInfo
+
+	// 如果超过最大深度限制，直接返回空节点
+	if option.Cfg.GetMaxScanDepth() >= 0 && depth > option.Cfg.GetMaxScanDepth() {
+		return node, foundDirs, foundFiles, nil
+	}
+
+	entries, err := os.ReadDir(currentPath)
+	if err != nil {
+		return node, foundDirs, foundFiles, err
+	}
+
+	// 当前目录计入 foundDirs（用于记录树状结构）
+	foundDirs = append(foundDirs, currentPath)
+
+	for _, entry := range entries {
+		name := entry.Name()
+		fullPath := filepath.Join(currentPath, name)
+		if entry.IsDir() {
+			// 检查是否在忽略列表
+			if option.IsSkipDir(name) {
+				continue
+			}
+			// 递归扫描子目录
+			subNode, subDirs, subFiles, subErr := ScanDirectoryNew(fullPath, depth+1, option)
+			if subErr != nil {
+				// 忽略单个子目录出错，继续扫描其他目录
+				fmt.Println("扫描子目录出错:", subErr)
+				continue
+			}
+			node.SubDirs = append(node.SubDirs, subNode)
+			// 合并子目录扫描结果
+			foundDirs = append(foundDirs, subDirs...)
+			foundFiles = append(foundFiles, subFiles...)
+		} else {
+			// 文件：检查扩展名是否为支持的图片格式
+			ext := strings.ToLower(filepath.Ext(name))
+			// 非支持媒体或压缩包格式，跳过
+			if (!option.IsSupportMedia(ext)) && (!option.IsSupportFile(ext)) {
+				continue
+			}
+			// 获取文件信息
+			info, err := entry.Info()
+			if err != nil {
+				fmt.Println("获取文件信息失败:", err)
+				continue
+			}
+			size := info.Size()
+			modTime := info.ModTime()
+			// 说明: Go 的标准库 os.FileInfo 不直接提供创建时间。如果需要准确创建时间，可以使用第三方库获取。
+			mediaFileInfo := model.MediaFileInfo{
+				Name:    name,
+				Path:    fullPath,
+				Size:    size,
+				ModTime: modTime,
+			}
+			node.Files = append(node.Files, mediaFileInfo)
+			foundFiles = append(foundFiles, mediaFileInfo)
+		}
+	}
+	return node, foundDirs, foundFiles, nil
+}
+
+// ScanDirectory 扫描本地路径，取得路径里的书籍
+func ScanDirectory(storePath string, option Option) ([]*model.Book, error) {
 	if !util.PathExists(storePath) {
 		return nil, errors.New(locale.GetString("path_not_exist"))
 	}
-
 	storePathAbs, err := filepath.Abs(storePath)
 	if err != nil {
 		logger.Infof("Failed to get absolute path: %s", err)
@@ -65,27 +142,27 @@ func Local(storePath string, scanOption Option) ([]*model.Book, error) {
 			return err
 		}
 		depth := strings.Count(relPath, string(os.PathSeparator))
-		if depth > scanOption.MaxScanDepth {
-			logger.Infof(locale.GetString("exceeds_maximum_depth")+" %d, base: %s, scan: %s", scanOption.MaxScanDepth, storePathAbs, walkPath)
+		if depth > option.Cfg.GetMaxScanDepth() {
+			logger.Infof(locale.GetString("exceeds_maximum_depth")+" %d, base: %s, scan: %s", option.Cfg.GetMaxScanDepth(), storePathAbs, walkPath)
 			return filepath.SkipDir
 		}
 
-		if scanOption.IsSkipDir(walkPath) {
+		if option.IsSkipDir(walkPath) {
 			logger.Infof(locale.GetString("skip_path")+" %s", walkPath)
 			return filepath.SkipDir
 		}
 
 		if fileInfo == nil {
-			logger.Infof("FileInfo is nil for path: %s", walkPath)
+			logger.Infof("MediaFileInfo is nil for path: %s", walkPath)
 			return nil
 		}
 
 		// 如果是文件
 		if !fileInfo.IsDir() {
-			if !scanOption.IsSupportArchiver(walkPath) {
+			if !option.IsSupportArchiver(walkPath) {
 				return nil
 			}
-			book, err := scanFileGetBook(walkPath, storePathAbs, depth, scanOption)
+			book, err := scanFileGetBook(walkPath, storePathAbs, depth, option)
 			if err != nil {
 				logger.Infof("Failed to scan file: %s, error: %v", walkPath, err)
 				return nil
@@ -95,7 +172,7 @@ func Local(storePath string, scanOption Option) ([]*model.Book, error) {
 		// 如果是目录
 		if fileInfo.IsDir() {
 			// 如果是目录
-			book, err := scanDirGetBook(walkPath, storePathAbs, depth, scanOption)
+			book, err := scanDirGetBook(walkPath, storePathAbs, depth, option)
 			if err != nil {
 				logger.Infof("Failed to scan directory: %s, error: %v", walkPath, err)
 				return nil
@@ -160,21 +237,21 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 }
 
 // 处理 ZIP 和 EPUB 文件
-func handleZipAndEpubFiles(filePath string, newBook *model.Book, scanOption Option) error {
+func handleZipAndEpubFiles(filePath string, newBook *model.Book, option Option) error {
 	fsys, err := zip.OpenReader(filePath)
 	if err != nil {
 		return errors.New(locale.GetString("not_a_valid_zip_file") + filePath)
 	}
 	defer fsys.Close()
 
-	err = walkUTF8ZipFs(fsys, "", ".", newBook, scanOption)
+	err = walkUTF8ZipFs(fsys, "", ".", newBook, option)
 	if err != nil {
 		var pathError *fs.PathError
 		if errors.As(err, &pathError) {
-			if scanOption.Debug {
+			if option.Cfg.GetDebug() {
 				logger.Infof("NonUTF-8 ZIP: %s, Error: %s", filePath, err.Error())
 			}
-			err = scanNonUTF8ZipFile(filePath, newBook, scanOption)
+			err = scanNonUTF8ZipFile(filePath, newBook, option)
 		} else {
 			return err
 		}
@@ -211,13 +288,13 @@ func handlePdfFiles(filePath string, newBook *model.Book) error {
 	logger.Infof(locale.GetString("scan_pdf")+" %s: %d pages", filePath, pageCount)
 	newBook.PageCount = pageCount
 	newBook.InitComplete = true
-	newBook.SetCover(model.ImageInfo{Url: "/images/pdf.png"})
+	newBook.SetCover(model.MediaFileInfo{Url: "/images/pdf.png"})
 
 	for i := 1; i <= pageCount; i++ {
 		tempURL := "/api/get_file?id=" + newBook.BookID + "&filename=" + strconv.Itoa(i) + ".jpg"
-		newBook.Pages.Images = append(newBook.Pages.Images, model.ImageInfo{
-			NameInArchive: strconv.Itoa(i),
-			Url:           tempURL,
+		newBook.Pages.Images = append(newBook.Pages.Images, model.MediaFileInfo{
+			Name: strconv.Itoa(i),
+			Url:  tempURL,
 		})
 	}
 	return nil
@@ -227,11 +304,11 @@ func handlePdfFiles(filePath string, newBook *model.Book) error {
 func handleMediaFiles(newBook *model.Book, imageName, imageUrl string) {
 	newBook.PageCount = 1
 	newBook.InitComplete = true
-	newBook.SetCover(model.ImageInfo{NameInArchive: imageName, Url: imageUrl})
+	newBook.SetCover(model.MediaFileInfo{Name: imageName, Url: imageUrl})
 }
 
 // 处理其他类型的压缩文件
-func handleOtherArchiveFiles(filePath string, newBook *model.Book, scanOption Option) error {
+func handleOtherArchiveFiles(filePath string, newBook *model.Book, option Option) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -246,7 +323,7 @@ func handleOtherArchiveFiles(filePath string, newBook *model.Book, scanOption Op
 			return err
 		}
 
-		if scanOption.IsSkipDir(path) {
+		if option.IsSkipDir(path) {
 			logger.Infof("Skip Scan: %s", path)
 			return fs.SkipDir
 		}
@@ -257,23 +334,23 @@ func handleOtherArchiveFiles(filePath string, newBook *model.Book, scanOption Op
 			return fs.SkipDir
 		}
 
-		if scanOption.IsSupportMedia(path) {
+		if option.IsSupportMedia(path) {
 			archivedFile, ok := f.(archives.FileInfo)
 			var tempURL string
 			if ok {
 				tempURL = "/api/get_file?id=" + newBook.BookID + "&filename=" + url.QueryEscape(archivedFile.NameInArchive)
-				newBook.Pages.Images = append(newBook.Pages.Images, model.ImageInfo{
-					NameInArchive: archivedFile.NameInArchive,
-					Url:           tempURL,
+				newBook.Pages.Images = append(newBook.Pages.Images, model.MediaFileInfo{
+					Name: archivedFile.NameInArchive,
+					Url:  tempURL,
 				})
 			} else {
 				tempURL = "/api/get_file?id=" + newBook.BookID + "&filename=" + url.QueryEscape(path)
-				newBook.Pages.Images = append(newBook.Pages.Images, model.ImageInfo{
+				newBook.Pages.Images = append(newBook.Pages.Images, model.MediaFileInfo{
 					Url: tempURL,
 				})
 			}
 		} else {
-			if scanOption.Debug {
+			if option.Cfg.GetDebug() {
 				logger.Infof(locale.GetString("unsupported_file_type")+" %s", path)
 			}
 		}
@@ -283,7 +360,7 @@ func handleOtherArchiveFiles(filePath string, newBook *model.Book, scanOption Op
 }
 
 // 扫描目录，并返回对应书籍
-func scanDirGetBook(dirPath string, storePath string, depth int, scanOption Option) (*model.Book, error) {
+func scanDirGetBook(dirPath string, storePath string, depth int, option Option) (*model.Book, error) {
 	// 获取文件夹信息
 	dirInfo, err := os.Stat(dirPath)
 	if err != nil {
@@ -306,7 +383,7 @@ func scanDirGetBook(dirPath string, storePath string, depth int, scanOption Opti
 		}
 
 		fileName := entry.Name()
-		if !scanOption.IsSupportMedia(fileName) {
+		if !option.IsSupportMedia(fileName) {
 			continue
 		}
 
@@ -318,12 +395,12 @@ func scanDirGetBook(dirPath string, storePath string, depth int, scanOption Opti
 
 		absPath := filepath.Join(dirPath, fileName)
 		tempURL := "/api/get_file?id=" + newBook.BookID + "&filename=" + url.QueryEscape(fileName)
-		newBook.Pages.Images = append(newBook.Pages.Images, model.ImageInfo{
-			RealImageFilePATH: absPath,
-			FileSize:          fileInfo.Size(),
-			ModeTime:          fileInfo.ModTime(),
-			NameInArchive:     fileName,
-			Url:               tempURL,
+		newBook.Pages.Images = append(newBook.Pages.Images, model.MediaFileInfo{
+			Path:    absPath,
+			Size:    fileInfo.Size(),
+			ModTime: fileInfo.ModTime(),
+			Name:    fileName,
+			Url:     tempURL,
 		})
 	}
 

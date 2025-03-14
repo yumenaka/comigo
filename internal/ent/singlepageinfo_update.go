@@ -63,16 +63,30 @@ func (spiu *SinglePageInfoUpdate) AddPageNum(i int) *SinglePageInfoUpdate {
 	return spiu
 }
 
-// SetNameInArchive sets the "NameInArchive" field.
-func (spiu *SinglePageInfoUpdate) SetNameInArchive(s string) *SinglePageInfoUpdate {
-	spiu.mutation.SetNameInArchive(s)
+// SetPath sets the "Path" field.
+func (spiu *SinglePageInfoUpdate) SetPath(s string) *SinglePageInfoUpdate {
+	spiu.mutation.SetPath(s)
 	return spiu
 }
 
-// SetNillableNameInArchive sets the "NameInArchive" field if the given value is not nil.
-func (spiu *SinglePageInfoUpdate) SetNillableNameInArchive(s *string) *SinglePageInfoUpdate {
+// SetNillablePath sets the "Path" field if the given value is not nil.
+func (spiu *SinglePageInfoUpdate) SetNillablePath(s *string) *SinglePageInfoUpdate {
 	if s != nil {
-		spiu.SetNameInArchive(*s)
+		spiu.SetPath(*s)
+	}
+	return spiu
+}
+
+// SetName sets the "Name" field.
+func (spiu *SinglePageInfoUpdate) SetName(s string) *SinglePageInfoUpdate {
+	spiu.mutation.SetName(s)
+	return spiu
+}
+
+// SetNillableName sets the "Name" field if the given value is not nil.
+func (spiu *SinglePageInfoUpdate) SetNillableName(s *string) *SinglePageInfoUpdate {
+	if s != nil {
+		spiu.SetName(*s)
 	}
 	return spiu
 }
@@ -147,52 +161,38 @@ func (spiu *SinglePageInfoUpdate) AddWidth(i int) *SinglePageInfoUpdate {
 	return spiu
 }
 
-// SetModeTime sets the "ModeTime" field.
-func (spiu *SinglePageInfoUpdate) SetModeTime(t time.Time) *SinglePageInfoUpdate {
-	spiu.mutation.SetModeTime(t)
+// SetModTime sets the "ModTime" field.
+func (spiu *SinglePageInfoUpdate) SetModTime(t time.Time) *SinglePageInfoUpdate {
+	spiu.mutation.SetModTime(t)
 	return spiu
 }
 
-// SetNillableModeTime sets the "ModeTime" field if the given value is not nil.
-func (spiu *SinglePageInfoUpdate) SetNillableModeTime(t *time.Time) *SinglePageInfoUpdate {
+// SetNillableModTime sets the "ModTime" field if the given value is not nil.
+func (spiu *SinglePageInfoUpdate) SetNillableModTime(t *time.Time) *SinglePageInfoUpdate {
 	if t != nil {
-		spiu.SetModeTime(*t)
+		spiu.SetModTime(*t)
 	}
 	return spiu
 }
 
-// SetFileSize sets the "FileSize" field.
-func (spiu *SinglePageInfoUpdate) SetFileSize(i int64) *SinglePageInfoUpdate {
-	spiu.mutation.ResetFileSize()
-	spiu.mutation.SetFileSize(i)
+// SetSize sets the "Size" field.
+func (spiu *SinglePageInfoUpdate) SetSize(i int64) *SinglePageInfoUpdate {
+	spiu.mutation.ResetSize()
+	spiu.mutation.SetSize(i)
 	return spiu
 }
 
-// SetNillableFileSize sets the "FileSize" field if the given value is not nil.
-func (spiu *SinglePageInfoUpdate) SetNillableFileSize(i *int64) *SinglePageInfoUpdate {
+// SetNillableSize sets the "Size" field if the given value is not nil.
+func (spiu *SinglePageInfoUpdate) SetNillableSize(i *int64) *SinglePageInfoUpdate {
 	if i != nil {
-		spiu.SetFileSize(*i)
+		spiu.SetSize(*i)
 	}
 	return spiu
 }
 
-// AddFileSize adds i to the "FileSize" field.
-func (spiu *SinglePageInfoUpdate) AddFileSize(i int64) *SinglePageInfoUpdate {
-	spiu.mutation.AddFileSize(i)
-	return spiu
-}
-
-// SetRealImageFilePATH sets the "RealImageFilePATH" field.
-func (spiu *SinglePageInfoUpdate) SetRealImageFilePATH(s string) *SinglePageInfoUpdate {
-	spiu.mutation.SetRealImageFilePATH(s)
-	return spiu
-}
-
-// SetNillableRealImageFilePATH sets the "RealImageFilePATH" field if the given value is not nil.
-func (spiu *SinglePageInfoUpdate) SetNillableRealImageFilePATH(s *string) *SinglePageInfoUpdate {
-	if s != nil {
-		spiu.SetRealImageFilePATH(*s)
-	}
+// AddSize adds i to the "Size" field.
+func (spiu *SinglePageInfoUpdate) AddSize(i int64) *SinglePageInfoUpdate {
+	spiu.mutation.AddSize(i)
 	return spiu
 }
 
@@ -260,8 +260,11 @@ func (spiu *SinglePageInfoUpdate) sqlSave(ctx context.Context) (n int, err error
 	if value, ok := spiu.mutation.AddedPageNum(); ok {
 		_spec.AddField(singlepageinfo.FieldPageNum, field.TypeInt, value)
 	}
-	if value, ok := spiu.mutation.NameInArchive(); ok {
-		_spec.SetField(singlepageinfo.FieldNameInArchive, field.TypeString, value)
+	if value, ok := spiu.mutation.Path(); ok {
+		_spec.SetField(singlepageinfo.FieldPath, field.TypeString, value)
+	}
+	if value, ok := spiu.mutation.Name(); ok {
+		_spec.SetField(singlepageinfo.FieldName, field.TypeString, value)
 	}
 	if value, ok := spiu.mutation.URL(); ok {
 		_spec.SetField(singlepageinfo.FieldURL, field.TypeString, value)
@@ -281,17 +284,14 @@ func (spiu *SinglePageInfoUpdate) sqlSave(ctx context.Context) (n int, err error
 	if value, ok := spiu.mutation.AddedWidth(); ok {
 		_spec.AddField(singlepageinfo.FieldWidth, field.TypeInt, value)
 	}
-	if value, ok := spiu.mutation.ModeTime(); ok {
-		_spec.SetField(singlepageinfo.FieldModeTime, field.TypeTime, value)
+	if value, ok := spiu.mutation.ModTime(); ok {
+		_spec.SetField(singlepageinfo.FieldModTime, field.TypeTime, value)
 	}
-	if value, ok := spiu.mutation.FileSize(); ok {
-		_spec.SetField(singlepageinfo.FieldFileSize, field.TypeInt64, value)
+	if value, ok := spiu.mutation.Size(); ok {
+		_spec.SetField(singlepageinfo.FieldSize, field.TypeInt64, value)
 	}
-	if value, ok := spiu.mutation.AddedFileSize(); ok {
-		_spec.AddField(singlepageinfo.FieldFileSize, field.TypeInt64, value)
-	}
-	if value, ok := spiu.mutation.RealImageFilePATH(); ok {
-		_spec.SetField(singlepageinfo.FieldRealImageFilePATH, field.TypeString, value)
+	if value, ok := spiu.mutation.AddedSize(); ok {
+		_spec.AddField(singlepageinfo.FieldSize, field.TypeInt64, value)
 	}
 	if value, ok := spiu.mutation.ImgType(); ok {
 		_spec.SetField(singlepageinfo.FieldImgType, field.TypeString, value)
@@ -351,16 +351,30 @@ func (spiuo *SinglePageInfoUpdateOne) AddPageNum(i int) *SinglePageInfoUpdateOne
 	return spiuo
 }
 
-// SetNameInArchive sets the "NameInArchive" field.
-func (spiuo *SinglePageInfoUpdateOne) SetNameInArchive(s string) *SinglePageInfoUpdateOne {
-	spiuo.mutation.SetNameInArchive(s)
+// SetPath sets the "Path" field.
+func (spiuo *SinglePageInfoUpdateOne) SetPath(s string) *SinglePageInfoUpdateOne {
+	spiuo.mutation.SetPath(s)
 	return spiuo
 }
 
-// SetNillableNameInArchive sets the "NameInArchive" field if the given value is not nil.
-func (spiuo *SinglePageInfoUpdateOne) SetNillableNameInArchive(s *string) *SinglePageInfoUpdateOne {
+// SetNillablePath sets the "Path" field if the given value is not nil.
+func (spiuo *SinglePageInfoUpdateOne) SetNillablePath(s *string) *SinglePageInfoUpdateOne {
 	if s != nil {
-		spiuo.SetNameInArchive(*s)
+		spiuo.SetPath(*s)
+	}
+	return spiuo
+}
+
+// SetName sets the "Name" field.
+func (spiuo *SinglePageInfoUpdateOne) SetName(s string) *SinglePageInfoUpdateOne {
+	spiuo.mutation.SetName(s)
+	return spiuo
+}
+
+// SetNillableName sets the "Name" field if the given value is not nil.
+func (spiuo *SinglePageInfoUpdateOne) SetNillableName(s *string) *SinglePageInfoUpdateOne {
+	if s != nil {
+		spiuo.SetName(*s)
 	}
 	return spiuo
 }
@@ -435,52 +449,38 @@ func (spiuo *SinglePageInfoUpdateOne) AddWidth(i int) *SinglePageInfoUpdateOne {
 	return spiuo
 }
 
-// SetModeTime sets the "ModeTime" field.
-func (spiuo *SinglePageInfoUpdateOne) SetModeTime(t time.Time) *SinglePageInfoUpdateOne {
-	spiuo.mutation.SetModeTime(t)
+// SetModTime sets the "ModTime" field.
+func (spiuo *SinglePageInfoUpdateOne) SetModTime(t time.Time) *SinglePageInfoUpdateOne {
+	spiuo.mutation.SetModTime(t)
 	return spiuo
 }
 
-// SetNillableModeTime sets the "ModeTime" field if the given value is not nil.
-func (spiuo *SinglePageInfoUpdateOne) SetNillableModeTime(t *time.Time) *SinglePageInfoUpdateOne {
+// SetNillableModTime sets the "ModTime" field if the given value is not nil.
+func (spiuo *SinglePageInfoUpdateOne) SetNillableModTime(t *time.Time) *SinglePageInfoUpdateOne {
 	if t != nil {
-		spiuo.SetModeTime(*t)
+		spiuo.SetModTime(*t)
 	}
 	return spiuo
 }
 
-// SetFileSize sets the "FileSize" field.
-func (spiuo *SinglePageInfoUpdateOne) SetFileSize(i int64) *SinglePageInfoUpdateOne {
-	spiuo.mutation.ResetFileSize()
-	spiuo.mutation.SetFileSize(i)
+// SetSize sets the "Size" field.
+func (spiuo *SinglePageInfoUpdateOne) SetSize(i int64) *SinglePageInfoUpdateOne {
+	spiuo.mutation.ResetSize()
+	spiuo.mutation.SetSize(i)
 	return spiuo
 }
 
-// SetNillableFileSize sets the "FileSize" field if the given value is not nil.
-func (spiuo *SinglePageInfoUpdateOne) SetNillableFileSize(i *int64) *SinglePageInfoUpdateOne {
+// SetNillableSize sets the "Size" field if the given value is not nil.
+func (spiuo *SinglePageInfoUpdateOne) SetNillableSize(i *int64) *SinglePageInfoUpdateOne {
 	if i != nil {
-		spiuo.SetFileSize(*i)
+		spiuo.SetSize(*i)
 	}
 	return spiuo
 }
 
-// AddFileSize adds i to the "FileSize" field.
-func (spiuo *SinglePageInfoUpdateOne) AddFileSize(i int64) *SinglePageInfoUpdateOne {
-	spiuo.mutation.AddFileSize(i)
-	return spiuo
-}
-
-// SetRealImageFilePATH sets the "RealImageFilePATH" field.
-func (spiuo *SinglePageInfoUpdateOne) SetRealImageFilePATH(s string) *SinglePageInfoUpdateOne {
-	spiuo.mutation.SetRealImageFilePATH(s)
-	return spiuo
-}
-
-// SetNillableRealImageFilePATH sets the "RealImageFilePATH" field if the given value is not nil.
-func (spiuo *SinglePageInfoUpdateOne) SetNillableRealImageFilePATH(s *string) *SinglePageInfoUpdateOne {
-	if s != nil {
-		spiuo.SetRealImageFilePATH(*s)
-	}
+// AddSize adds i to the "Size" field.
+func (spiuo *SinglePageInfoUpdateOne) AddSize(i int64) *SinglePageInfoUpdateOne {
+	spiuo.mutation.AddSize(i)
 	return spiuo
 }
 
@@ -578,8 +578,11 @@ func (spiuo *SinglePageInfoUpdateOne) sqlSave(ctx context.Context) (_node *Singl
 	if value, ok := spiuo.mutation.AddedPageNum(); ok {
 		_spec.AddField(singlepageinfo.FieldPageNum, field.TypeInt, value)
 	}
-	if value, ok := spiuo.mutation.NameInArchive(); ok {
-		_spec.SetField(singlepageinfo.FieldNameInArchive, field.TypeString, value)
+	if value, ok := spiuo.mutation.Path(); ok {
+		_spec.SetField(singlepageinfo.FieldPath, field.TypeString, value)
+	}
+	if value, ok := spiuo.mutation.Name(); ok {
+		_spec.SetField(singlepageinfo.FieldName, field.TypeString, value)
 	}
 	if value, ok := spiuo.mutation.URL(); ok {
 		_spec.SetField(singlepageinfo.FieldURL, field.TypeString, value)
@@ -599,17 +602,14 @@ func (spiuo *SinglePageInfoUpdateOne) sqlSave(ctx context.Context) (_node *Singl
 	if value, ok := spiuo.mutation.AddedWidth(); ok {
 		_spec.AddField(singlepageinfo.FieldWidth, field.TypeInt, value)
 	}
-	if value, ok := spiuo.mutation.ModeTime(); ok {
-		_spec.SetField(singlepageinfo.FieldModeTime, field.TypeTime, value)
+	if value, ok := spiuo.mutation.ModTime(); ok {
+		_spec.SetField(singlepageinfo.FieldModTime, field.TypeTime, value)
 	}
-	if value, ok := spiuo.mutation.FileSize(); ok {
-		_spec.SetField(singlepageinfo.FieldFileSize, field.TypeInt64, value)
+	if value, ok := spiuo.mutation.Size(); ok {
+		_spec.SetField(singlepageinfo.FieldSize, field.TypeInt64, value)
 	}
-	if value, ok := spiuo.mutation.AddedFileSize(); ok {
-		_spec.AddField(singlepageinfo.FieldFileSize, field.TypeInt64, value)
-	}
-	if value, ok := spiuo.mutation.RealImageFilePATH(); ok {
-		_spec.SetField(singlepageinfo.FieldRealImageFilePATH, field.TypeString, value)
+	if value, ok := spiuo.mutation.AddedSize(); ok {
+		_spec.AddField(singlepageinfo.FieldSize, field.TypeInt64, value)
 	}
 	if value, ok := spiuo.mutation.ImgType(); ok {
 		_spec.SetField(singlepageinfo.FieldImgType, field.TypeString, value)

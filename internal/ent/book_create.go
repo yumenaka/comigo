@@ -89,9 +89,9 @@ func (bc *BookCreate) SetPageCount(i int) *BookCreate {
 	return bc
 }
 
-// SetFileSize sets the "FileSize" field.
-func (bc *BookCreate) SetFileSize(i int64) *BookCreate {
-	bc.mutation.SetFileSize(i)
+// SetSize sets the "Size" field.
+func (bc *BookCreate) SetSize(i int64) *BookCreate {
+	bc.mutation.SetSize(i)
 	return bc
 }
 
@@ -281,8 +281,8 @@ func (bc *BookCreate) check() error {
 			return &ValidationError{Name: "PageCount", err: fmt.Errorf(`ent: validator failed for field "Book.PageCount": %w`, err)}
 		}
 	}
-	if _, ok := bc.mutation.FileSize(); !ok {
-		return &ValidationError{Name: "FileSize", err: errors.New(`ent: missing required field "Book.FileSize"`)}
+	if _, ok := bc.mutation.Size(); !ok {
+		return &ValidationError{Name: "Size", err: errors.New(`ent: missing required field "Book.Size"`)}
 	}
 	if _, ok := bc.mutation.Authors(); !ok {
 		return &ValidationError{Name: "Authors", err: errors.New(`ent: missing required field "Book.Authors"`)}
@@ -383,9 +383,9 @@ func (bc *BookCreate) createSpec() (*Book, *sqlgraph.CreateSpec) {
 		_spec.SetField(book.FieldPageCount, field.TypeInt, value)
 		_node.PageCount = value
 	}
-	if value, ok := bc.mutation.FileSize(); ok {
-		_spec.SetField(book.FieldFileSize, field.TypeInt64, value)
-		_node.FileSize = value
+	if value, ok := bc.mutation.Size(); ok {
+		_spec.SetField(book.FieldSize, field.TypeInt64, value)
+		_node.Size = value
 	}
 	if value, ok := bc.mutation.Authors(); ok {
 		_spec.SetField(book.FieldAuthors, field.TypeString, value)

@@ -18,7 +18,7 @@ func SetComigoServer(e *echo.Echo) {
 	// 解析命令，扫描文件
 	cmd.SetStore(os.Args)
 	routers.BindAPI(e)
-	// Admin界面 TODO：用 Htmx 重写
+	// Admin界面
 	resource.EmbedAdmin(e)
 	// 设置临时文件夹
 	config.AutoSetCachePath()

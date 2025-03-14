@@ -34,7 +34,7 @@ func (Book) Fields() []ent.Field {
 		field.Int("PageCount").
 			NonNegative(). //内置校验器，非负数
 			Comment("总页数"),
-		field.Int64("FileSize"),
+		field.Int64("Size"),
 		field.String("Authors"),
 		field.String("ISBN"),
 		field.String("Press"),

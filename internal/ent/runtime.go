@@ -43,10 +43,10 @@ func init() {
 	book.DefaultModified = bookDescModified.Default.(func() time.Time)
 	singlepageinfoFields := schema.SinglePageInfo{}.Fields()
 	_ = singlepageinfoFields
-	// singlepageinfoDescModeTime is the schema descriptor for ModeTime field.
-	singlepageinfoDescModeTime := singlepageinfoFields[7].Descriptor()
-	// singlepageinfo.DefaultModeTime holds the default value on creation for the ModeTime field.
-	singlepageinfo.DefaultModeTime = singlepageinfoDescModeTime.Default.(func() time.Time)
+	// singlepageinfoDescModTime is the schema descriptor for ModTime field.
+	singlepageinfoDescModTime := singlepageinfoFields[8].Descriptor()
+	// singlepageinfo.DefaultModTime holds the default value on creation for the ModTime field.
+	singlepageinfo.DefaultModTime = singlepageinfoDescModTime.Default.(func() time.Time)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescName is the schema descriptor for name field.

@@ -32,9 +32,15 @@ func (spic *SinglePageInfoCreate) SetPageNum(i int) *SinglePageInfoCreate {
 	return spic
 }
 
-// SetNameInArchive sets the "NameInArchive" field.
-func (spic *SinglePageInfoCreate) SetNameInArchive(s string) *SinglePageInfoCreate {
-	spic.mutation.SetNameInArchive(s)
+// SetPath sets the "Path" field.
+func (spic *SinglePageInfoCreate) SetPath(s string) *SinglePageInfoCreate {
+	spic.mutation.SetPath(s)
+	return spic
+}
+
+// SetName sets the "Name" field.
+func (spic *SinglePageInfoCreate) SetName(s string) *SinglePageInfoCreate {
+	spic.mutation.SetName(s)
 	return spic
 }
 
@@ -62,29 +68,23 @@ func (spic *SinglePageInfoCreate) SetWidth(i int) *SinglePageInfoCreate {
 	return spic
 }
 
-// SetModeTime sets the "ModeTime" field.
-func (spic *SinglePageInfoCreate) SetModeTime(t time.Time) *SinglePageInfoCreate {
-	spic.mutation.SetModeTime(t)
+// SetModTime sets the "ModTime" field.
+func (spic *SinglePageInfoCreate) SetModTime(t time.Time) *SinglePageInfoCreate {
+	spic.mutation.SetModTime(t)
 	return spic
 }
 
-// SetNillableModeTime sets the "ModeTime" field if the given value is not nil.
-func (spic *SinglePageInfoCreate) SetNillableModeTime(t *time.Time) *SinglePageInfoCreate {
+// SetNillableModTime sets the "ModTime" field if the given value is not nil.
+func (spic *SinglePageInfoCreate) SetNillableModTime(t *time.Time) *SinglePageInfoCreate {
 	if t != nil {
-		spic.SetModeTime(*t)
+		spic.SetModTime(*t)
 	}
 	return spic
 }
 
-// SetFileSize sets the "FileSize" field.
-func (spic *SinglePageInfoCreate) SetFileSize(i int64) *SinglePageInfoCreate {
-	spic.mutation.SetFileSize(i)
-	return spic
-}
-
-// SetRealImageFilePATH sets the "RealImageFilePATH" field.
-func (spic *SinglePageInfoCreate) SetRealImageFilePATH(s string) *SinglePageInfoCreate {
-	spic.mutation.SetRealImageFilePATH(s)
+// SetSize sets the "Size" field.
+func (spic *SinglePageInfoCreate) SetSize(i int64) *SinglePageInfoCreate {
+	spic.mutation.SetSize(i)
 	return spic
 }
 
@@ -129,9 +129,9 @@ func (spic *SinglePageInfoCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (spic *SinglePageInfoCreate) defaults() {
-	if _, ok := spic.mutation.ModeTime(); !ok {
-		v := singlepageinfo.DefaultModeTime()
-		spic.mutation.SetModeTime(v)
+	if _, ok := spic.mutation.ModTime(); !ok {
+		v := singlepageinfo.DefaultModTime()
+		spic.mutation.SetModTime(v)
 	}
 }
 
@@ -143,8 +143,11 @@ func (spic *SinglePageInfoCreate) check() error {
 	if _, ok := spic.mutation.PageNum(); !ok {
 		return &ValidationError{Name: "PageNum", err: errors.New(`ent: missing required field "SinglePageInfo.PageNum"`)}
 	}
-	if _, ok := spic.mutation.NameInArchive(); !ok {
-		return &ValidationError{Name: "NameInArchive", err: errors.New(`ent: missing required field "SinglePageInfo.NameInArchive"`)}
+	if _, ok := spic.mutation.Path(); !ok {
+		return &ValidationError{Name: "Path", err: errors.New(`ent: missing required field "SinglePageInfo.Path"`)}
+	}
+	if _, ok := spic.mutation.Name(); !ok {
+		return &ValidationError{Name: "Name", err: errors.New(`ent: missing required field "SinglePageInfo.Name"`)}
 	}
 	if _, ok := spic.mutation.URL(); !ok {
 		return &ValidationError{Name: "Url", err: errors.New(`ent: missing required field "SinglePageInfo.Url"`)}
@@ -158,14 +161,11 @@ func (spic *SinglePageInfoCreate) check() error {
 	if _, ok := spic.mutation.Width(); !ok {
 		return &ValidationError{Name: "Width", err: errors.New(`ent: missing required field "SinglePageInfo.Width"`)}
 	}
-	if _, ok := spic.mutation.ModeTime(); !ok {
-		return &ValidationError{Name: "ModeTime", err: errors.New(`ent: missing required field "SinglePageInfo.ModeTime"`)}
+	if _, ok := spic.mutation.ModTime(); !ok {
+		return &ValidationError{Name: "ModTime", err: errors.New(`ent: missing required field "SinglePageInfo.ModTime"`)}
 	}
-	if _, ok := spic.mutation.FileSize(); !ok {
-		return &ValidationError{Name: "FileSize", err: errors.New(`ent: missing required field "SinglePageInfo.FileSize"`)}
-	}
-	if _, ok := spic.mutation.RealImageFilePATH(); !ok {
-		return &ValidationError{Name: "RealImageFilePATH", err: errors.New(`ent: missing required field "SinglePageInfo.RealImageFilePATH"`)}
+	if _, ok := spic.mutation.Size(); !ok {
+		return &ValidationError{Name: "Size", err: errors.New(`ent: missing required field "SinglePageInfo.Size"`)}
 	}
 	if _, ok := spic.mutation.ImgType(); !ok {
 		return &ValidationError{Name: "ImgType", err: errors.New(`ent: missing required field "SinglePageInfo.ImgType"`)}
@@ -204,9 +204,13 @@ func (spic *SinglePageInfoCreate) createSpec() (*SinglePageInfo, *sqlgraph.Creat
 		_spec.SetField(singlepageinfo.FieldPageNum, field.TypeInt, value)
 		_node.PageNum = value
 	}
-	if value, ok := spic.mutation.NameInArchive(); ok {
-		_spec.SetField(singlepageinfo.FieldNameInArchive, field.TypeString, value)
-		_node.NameInArchive = value
+	if value, ok := spic.mutation.Path(); ok {
+		_spec.SetField(singlepageinfo.FieldPath, field.TypeString, value)
+		_node.Path = value
+	}
+	if value, ok := spic.mutation.Name(); ok {
+		_spec.SetField(singlepageinfo.FieldName, field.TypeString, value)
+		_node.Name = value
 	}
 	if value, ok := spic.mutation.URL(); ok {
 		_spec.SetField(singlepageinfo.FieldURL, field.TypeString, value)
@@ -224,17 +228,13 @@ func (spic *SinglePageInfoCreate) createSpec() (*SinglePageInfo, *sqlgraph.Creat
 		_spec.SetField(singlepageinfo.FieldWidth, field.TypeInt, value)
 		_node.Width = value
 	}
-	if value, ok := spic.mutation.ModeTime(); ok {
-		_spec.SetField(singlepageinfo.FieldModeTime, field.TypeTime, value)
-		_node.ModeTime = value
+	if value, ok := spic.mutation.ModTime(); ok {
+		_spec.SetField(singlepageinfo.FieldModTime, field.TypeTime, value)
+		_node.ModTime = value
 	}
-	if value, ok := spic.mutation.FileSize(); ok {
-		_spec.SetField(singlepageinfo.FieldFileSize, field.TypeInt64, value)
-		_node.FileSize = value
-	}
-	if value, ok := spic.mutation.RealImageFilePATH(); ok {
-		_spec.SetField(singlepageinfo.FieldRealImageFilePATH, field.TypeString, value)
-		_node.RealImageFilePATH = value
+	if value, ok := spic.mutation.Size(); ok {
+		_spec.SetField(singlepageinfo.FieldSize, field.TypeInt64, value)
+		_node.Size = value
 	}
 	if value, ok := spic.mutation.ImgType(); ok {
 		_spec.SetField(singlepageinfo.FieldImgType, field.TypeString, value)

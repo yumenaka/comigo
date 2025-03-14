@@ -7,8 +7,8 @@ import (
 	"github.com/spf13/viper"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/util"
-	"github.com/yumenaka/comigo/util/file/scan"
 	"github.com/yumenaka/comigo/util/logger"
+	"github.com/yumenaka/comigo/util/scan"
 )
 
 // -------------------------
@@ -70,21 +70,9 @@ func checkReScanStatus(oldConfig *config.Config, newConfig *config.Config) (reSc
 // startReScan 扫描并相应地更新数据库
 func startReScan(reScanFile bool) {
 	config.InitCfgStores()
-	option := scan.NewScanOption(
+	option := scan.NewOption(
 		reScanFile,
-		config.GetLocalStoresList(),
-		config.GetStores(),
-		config.GetMaxScanDepth(),
-		config.GetMinImageNum(),
-		config.GetTimeoutLimitForScan(),
-		config.GetExcludePath(),
-		config.GetSupportMediaType(),
-		config.GetSupportFileType(),
-		config.GetSupportTemplateFile(),
-		config.GetZipFileTextEncoding(),
-		config.GetEnableDatabase(),
-		config.GetClearDatabaseWhenExit(),
-		config.GetDebug(),
+		config.GetCfg(),
 	)
 	if err := scan.AllStore(option); err != nil {
 		logger.Infof("Failed to scan store path: %v", err)

@@ -50,8 +50,8 @@ type BookMutation struct {
 	_ParentFolder     *string
 	_PageCount        *int
 	add_PageCount     *int
-	_FileSize         *int64
-	add_FileSize      *int64
+	_Size             *int64
+	add_Size          *int64
 	_Authors          *string
 	_ISBN             *string
 	_Press            *string
@@ -592,60 +592,60 @@ func (m *BookMutation) ResetPageCount() {
 	m.add_PageCount = nil
 }
 
-// SetFileSize sets the "FileSize" field.
-func (m *BookMutation) SetFileSize(i int64) {
-	m._FileSize = &i
-	m.add_FileSize = nil
+// SetSize sets the "Size" field.
+func (m *BookMutation) SetSize(i int64) {
+	m._Size = &i
+	m.add_Size = nil
 }
 
-// FileSize returns the value of the "FileSize" field in the mutation.
-func (m *BookMutation) FileSize() (r int64, exists bool) {
-	v := m._FileSize
+// Size returns the value of the "Size" field in the mutation.
+func (m *BookMutation) Size() (r int64, exists bool) {
+	v := m._Size
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldFileSize returns the old "FileSize" field's value of the Book entity.
+// OldSize returns the old "Size" field's value of the Book entity.
 // If the Book object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *BookMutation) OldFileSize(ctx context.Context) (v int64, err error) {
+func (m *BookMutation) OldSize(ctx context.Context) (v int64, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldFileSize is only allowed on UpdateOne operations")
+		return v, errors.New("OldSize is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldFileSize requires an ID field in the mutation")
+		return v, errors.New("OldSize requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldFileSize: %w", err)
+		return v, fmt.Errorf("querying old value for OldSize: %w", err)
 	}
-	return oldValue.FileSize, nil
+	return oldValue.Size, nil
 }
 
-// AddFileSize adds i to the "FileSize" field.
-func (m *BookMutation) AddFileSize(i int64) {
-	if m.add_FileSize != nil {
-		*m.add_FileSize += i
+// AddSize adds i to the "Size" field.
+func (m *BookMutation) AddSize(i int64) {
+	if m.add_Size != nil {
+		*m.add_Size += i
 	} else {
-		m.add_FileSize = &i
+		m.add_Size = &i
 	}
 }
 
-// AddedFileSize returns the value that was added to the "FileSize" field in this mutation.
-func (m *BookMutation) AddedFileSize() (r int64, exists bool) {
-	v := m.add_FileSize
+// AddedSize returns the value that was added to the "Size" field in this mutation.
+func (m *BookMutation) AddedSize() (r int64, exists bool) {
+	v := m.add_Size
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetFileSize resets all changes to the "FileSize" field.
-func (m *BookMutation) ResetFileSize() {
-	m._FileSize = nil
-	m.add_FileSize = nil
+// ResetSize resets all changes to the "Size" field.
+func (m *BookMutation) ResetSize() {
+	m._Size = nil
+	m.add_Size = nil
 }
 
 // SetAuthors sets the "Authors" field.
@@ -1203,8 +1203,8 @@ func (m *BookMutation) Fields() []string {
 	if m._PageCount != nil {
 		fields = append(fields, book.FieldPageCount)
 	}
-	if m._FileSize != nil {
-		fields = append(fields, book.FieldFileSize)
+	if m._Size != nil {
+		fields = append(fields, book.FieldSize)
 	}
 	if m._Authors != nil {
 		fields = append(fields, book.FieldAuthors)
@@ -1267,8 +1267,8 @@ func (m *BookMutation) Field(name string) (ent.Value, bool) {
 		return m.ParentFolder()
 	case book.FieldPageCount:
 		return m.PageCount()
-	case book.FieldFileSize:
-		return m.FileSize()
+	case book.FieldSize:
+		return m.Size()
 	case book.FieldAuthors:
 		return m.Authors()
 	case book.FieldISBN:
@@ -1320,8 +1320,8 @@ func (m *BookMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldParentFolder(ctx)
 	case book.FieldPageCount:
 		return m.OldPageCount(ctx)
-	case book.FieldFileSize:
-		return m.OldFileSize(ctx)
+	case book.FieldSize:
+		return m.OldSize(ctx)
 	case book.FieldAuthors:
 		return m.OldAuthors(ctx)
 	case book.FieldISBN:
@@ -1423,12 +1423,12 @@ func (m *BookMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetPageCount(v)
 		return nil
-	case book.FieldFileSize:
+	case book.FieldSize:
 		v, ok := value.(int64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetFileSize(v)
+		m.SetSize(v)
 		return nil
 	case book.FieldAuthors:
 		v, ok := value.(string)
@@ -1524,8 +1524,8 @@ func (m *BookMutation) AddedFields() []string {
 	if m.add_PageCount != nil {
 		fields = append(fields, book.FieldPageCount)
 	}
-	if m.add_FileSize != nil {
-		fields = append(fields, book.FieldFileSize)
+	if m.add_Size != nil {
+		fields = append(fields, book.FieldSize)
 	}
 	if m.add_ExtractNum != nil {
 		fields = append(fields, book.FieldExtractNum)
@@ -1547,8 +1547,8 @@ func (m *BookMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedDepth()
 	case book.FieldPageCount:
 		return m.AddedPageCount()
-	case book.FieldFileSize:
-		return m.AddedFileSize()
+	case book.FieldSize:
+		return m.AddedSize()
 	case book.FieldExtractNum:
 		return m.AddedExtractNum()
 	case book.FieldReadPercent:
@@ -1583,12 +1583,12 @@ func (m *BookMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddPageCount(v)
 		return nil
-	case book.FieldFileSize:
+	case book.FieldSize:
 		v, ok := value.(int64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddFileSize(v)
+		m.AddSize(v)
 		return nil
 	case book.FieldExtractNum:
 		v, ok := value.(int)
@@ -1661,8 +1661,8 @@ func (m *BookMutation) ResetField(name string) error {
 	case book.FieldPageCount:
 		m.ResetPageCount()
 		return nil
-	case book.FieldFileSize:
-		m.ResetFileSize()
+	case book.FieldSize:
+		m.ResetSize()
 		return nil
 	case book.FieldAuthors:
 		m.ResetAuthors()
@@ -1788,28 +1788,28 @@ func (m *BookMutation) ResetEdge(name string) error {
 // SinglePageInfoMutation represents an operation that mutates the SinglePageInfo nodes in the graph.
 type SinglePageInfoMutation struct {
 	config
-	op                 Op
-	typ                string
-	id                 *int
-	_BookID            *string
-	_PageNum           *int
-	add_PageNum        *int
-	_NameInArchive     *string
-	_Url               *string
-	_BlurHash          *string
-	_Height            *int
-	add_Height         *int
-	_Width             *int
-	add_Width          *int
-	_ModeTime          *time.Time
-	_FileSize          *int64
-	add_FileSize       *int64
-	_RealImageFilePATH *string
-	_ImgType           *string
-	clearedFields      map[string]struct{}
-	done               bool
-	oldValue           func(context.Context) (*SinglePageInfo, error)
-	predicates         []predicate.SinglePageInfo
+	op            Op
+	typ           string
+	id            *int
+	_BookID       *string
+	_PageNum      *int
+	add_PageNum   *int
+	_Path         *string
+	_Name         *string
+	_Url          *string
+	_BlurHash     *string
+	_Height       *int
+	add_Height    *int
+	_Width        *int
+	add_Width     *int
+	_ModTime      *time.Time
+	_Size         *int64
+	add_Size      *int64
+	_ImgType      *string
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*SinglePageInfo, error)
+	predicates    []predicate.SinglePageInfo
 }
 
 var _ ent.Mutation = (*SinglePageInfoMutation)(nil)
@@ -2002,40 +2002,76 @@ func (m *SinglePageInfoMutation) ResetPageNum() {
 	m.add_PageNum = nil
 }
 
-// SetNameInArchive sets the "NameInArchive" field.
-func (m *SinglePageInfoMutation) SetNameInArchive(s string) {
-	m._NameInArchive = &s
+// SetPath sets the "Path" field.
+func (m *SinglePageInfoMutation) SetPath(s string) {
+	m._Path = &s
 }
 
-// NameInArchive returns the value of the "NameInArchive" field in the mutation.
-func (m *SinglePageInfoMutation) NameInArchive() (r string, exists bool) {
-	v := m._NameInArchive
+// Path returns the value of the "Path" field in the mutation.
+func (m *SinglePageInfoMutation) Path() (r string, exists bool) {
+	v := m._Path
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldNameInArchive returns the old "NameInArchive" field's value of the SinglePageInfo entity.
+// OldPath returns the old "Path" field's value of the SinglePageInfo entity.
 // If the SinglePageInfo object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SinglePageInfoMutation) OldNameInArchive(ctx context.Context) (v string, err error) {
+func (m *SinglePageInfoMutation) OldPath(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldNameInArchive is only allowed on UpdateOne operations")
+		return v, errors.New("OldPath is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldNameInArchive requires an ID field in the mutation")
+		return v, errors.New("OldPath requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldNameInArchive: %w", err)
+		return v, fmt.Errorf("querying old value for OldPath: %w", err)
 	}
-	return oldValue.NameInArchive, nil
+	return oldValue.Path, nil
 }
 
-// ResetNameInArchive resets all changes to the "NameInArchive" field.
-func (m *SinglePageInfoMutation) ResetNameInArchive() {
-	m._NameInArchive = nil
+// ResetPath resets all changes to the "Path" field.
+func (m *SinglePageInfoMutation) ResetPath() {
+	m._Path = nil
+}
+
+// SetName sets the "Name" field.
+func (m *SinglePageInfoMutation) SetName(s string) {
+	m._Name = &s
+}
+
+// Name returns the value of the "Name" field in the mutation.
+func (m *SinglePageInfoMutation) Name() (r string, exists bool) {
+	v := m._Name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "Name" field's value of the SinglePageInfo entity.
+// If the SinglePageInfo object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SinglePageInfoMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "Name" field.
+func (m *SinglePageInfoMutation) ResetName() {
+	m._Name = nil
 }
 
 // SetURL sets the "Url" field.
@@ -2222,132 +2258,96 @@ func (m *SinglePageInfoMutation) ResetWidth() {
 	m.add_Width = nil
 }
 
-// SetModeTime sets the "ModeTime" field.
-func (m *SinglePageInfoMutation) SetModeTime(t time.Time) {
-	m._ModeTime = &t
+// SetModTime sets the "ModTime" field.
+func (m *SinglePageInfoMutation) SetModTime(t time.Time) {
+	m._ModTime = &t
 }
 
-// ModeTime returns the value of the "ModeTime" field in the mutation.
-func (m *SinglePageInfoMutation) ModeTime() (r time.Time, exists bool) {
-	v := m._ModeTime
+// ModTime returns the value of the "ModTime" field in the mutation.
+func (m *SinglePageInfoMutation) ModTime() (r time.Time, exists bool) {
+	v := m._ModTime
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldModeTime returns the old "ModeTime" field's value of the SinglePageInfo entity.
+// OldModTime returns the old "ModTime" field's value of the SinglePageInfo entity.
 // If the SinglePageInfo object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SinglePageInfoMutation) OldModeTime(ctx context.Context) (v time.Time, err error) {
+func (m *SinglePageInfoMutation) OldModTime(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldModeTime is only allowed on UpdateOne operations")
+		return v, errors.New("OldModTime is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldModeTime requires an ID field in the mutation")
+		return v, errors.New("OldModTime requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldModeTime: %w", err)
+		return v, fmt.Errorf("querying old value for OldModTime: %w", err)
 	}
-	return oldValue.ModeTime, nil
+	return oldValue.ModTime, nil
 }
 
-// ResetModeTime resets all changes to the "ModeTime" field.
-func (m *SinglePageInfoMutation) ResetModeTime() {
-	m._ModeTime = nil
+// ResetModTime resets all changes to the "ModTime" field.
+func (m *SinglePageInfoMutation) ResetModTime() {
+	m._ModTime = nil
 }
 
-// SetFileSize sets the "FileSize" field.
-func (m *SinglePageInfoMutation) SetFileSize(i int64) {
-	m._FileSize = &i
-	m.add_FileSize = nil
+// SetSize sets the "Size" field.
+func (m *SinglePageInfoMutation) SetSize(i int64) {
+	m._Size = &i
+	m.add_Size = nil
 }
 
-// FileSize returns the value of the "FileSize" field in the mutation.
-func (m *SinglePageInfoMutation) FileSize() (r int64, exists bool) {
-	v := m._FileSize
+// Size returns the value of the "Size" field in the mutation.
+func (m *SinglePageInfoMutation) Size() (r int64, exists bool) {
+	v := m._Size
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldFileSize returns the old "FileSize" field's value of the SinglePageInfo entity.
+// OldSize returns the old "Size" field's value of the SinglePageInfo entity.
 // If the SinglePageInfo object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SinglePageInfoMutation) OldFileSize(ctx context.Context) (v int64, err error) {
+func (m *SinglePageInfoMutation) OldSize(ctx context.Context) (v int64, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldFileSize is only allowed on UpdateOne operations")
+		return v, errors.New("OldSize is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldFileSize requires an ID field in the mutation")
+		return v, errors.New("OldSize requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldFileSize: %w", err)
+		return v, fmt.Errorf("querying old value for OldSize: %w", err)
 	}
-	return oldValue.FileSize, nil
+	return oldValue.Size, nil
 }
 
-// AddFileSize adds i to the "FileSize" field.
-func (m *SinglePageInfoMutation) AddFileSize(i int64) {
-	if m.add_FileSize != nil {
-		*m.add_FileSize += i
+// AddSize adds i to the "Size" field.
+func (m *SinglePageInfoMutation) AddSize(i int64) {
+	if m.add_Size != nil {
+		*m.add_Size += i
 	} else {
-		m.add_FileSize = &i
+		m.add_Size = &i
 	}
 }
 
-// AddedFileSize returns the value that was added to the "FileSize" field in this mutation.
-func (m *SinglePageInfoMutation) AddedFileSize() (r int64, exists bool) {
-	v := m.add_FileSize
+// AddedSize returns the value that was added to the "Size" field in this mutation.
+func (m *SinglePageInfoMutation) AddedSize() (r int64, exists bool) {
+	v := m.add_Size
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetFileSize resets all changes to the "FileSize" field.
-func (m *SinglePageInfoMutation) ResetFileSize() {
-	m._FileSize = nil
-	m.add_FileSize = nil
-}
-
-// SetRealImageFilePATH sets the "RealImageFilePATH" field.
-func (m *SinglePageInfoMutation) SetRealImageFilePATH(s string) {
-	m._RealImageFilePATH = &s
-}
-
-// RealImageFilePATH returns the value of the "RealImageFilePATH" field in the mutation.
-func (m *SinglePageInfoMutation) RealImageFilePATH() (r string, exists bool) {
-	v := m._RealImageFilePATH
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldRealImageFilePATH returns the old "RealImageFilePATH" field's value of the SinglePageInfo entity.
-// If the SinglePageInfo object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SinglePageInfoMutation) OldRealImageFilePATH(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldRealImageFilePATH is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldRealImageFilePATH requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldRealImageFilePATH: %w", err)
-	}
-	return oldValue.RealImageFilePATH, nil
-}
-
-// ResetRealImageFilePATH resets all changes to the "RealImageFilePATH" field.
-func (m *SinglePageInfoMutation) ResetRealImageFilePATH() {
-	m._RealImageFilePATH = nil
+// ResetSize resets all changes to the "Size" field.
+func (m *SinglePageInfoMutation) ResetSize() {
+	m._Size = nil
+	m.add_Size = nil
 }
 
 // SetImgType sets the "ImgType" field.
@@ -2427,8 +2427,11 @@ func (m *SinglePageInfoMutation) Fields() []string {
 	if m._PageNum != nil {
 		fields = append(fields, singlepageinfo.FieldPageNum)
 	}
-	if m._NameInArchive != nil {
-		fields = append(fields, singlepageinfo.FieldNameInArchive)
+	if m._Path != nil {
+		fields = append(fields, singlepageinfo.FieldPath)
+	}
+	if m._Name != nil {
+		fields = append(fields, singlepageinfo.FieldName)
 	}
 	if m._Url != nil {
 		fields = append(fields, singlepageinfo.FieldURL)
@@ -2442,14 +2445,11 @@ func (m *SinglePageInfoMutation) Fields() []string {
 	if m._Width != nil {
 		fields = append(fields, singlepageinfo.FieldWidth)
 	}
-	if m._ModeTime != nil {
-		fields = append(fields, singlepageinfo.FieldModeTime)
+	if m._ModTime != nil {
+		fields = append(fields, singlepageinfo.FieldModTime)
 	}
-	if m._FileSize != nil {
-		fields = append(fields, singlepageinfo.FieldFileSize)
-	}
-	if m._RealImageFilePATH != nil {
-		fields = append(fields, singlepageinfo.FieldRealImageFilePATH)
+	if m._Size != nil {
+		fields = append(fields, singlepageinfo.FieldSize)
 	}
 	if m._ImgType != nil {
 		fields = append(fields, singlepageinfo.FieldImgType)
@@ -2466,8 +2466,10 @@ func (m *SinglePageInfoMutation) Field(name string) (ent.Value, bool) {
 		return m.BookID()
 	case singlepageinfo.FieldPageNum:
 		return m.PageNum()
-	case singlepageinfo.FieldNameInArchive:
-		return m.NameInArchive()
+	case singlepageinfo.FieldPath:
+		return m.Path()
+	case singlepageinfo.FieldName:
+		return m.Name()
 	case singlepageinfo.FieldURL:
 		return m.URL()
 	case singlepageinfo.FieldBlurHash:
@@ -2476,12 +2478,10 @@ func (m *SinglePageInfoMutation) Field(name string) (ent.Value, bool) {
 		return m.Height()
 	case singlepageinfo.FieldWidth:
 		return m.Width()
-	case singlepageinfo.FieldModeTime:
-		return m.ModeTime()
-	case singlepageinfo.FieldFileSize:
-		return m.FileSize()
-	case singlepageinfo.FieldRealImageFilePATH:
-		return m.RealImageFilePATH()
+	case singlepageinfo.FieldModTime:
+		return m.ModTime()
+	case singlepageinfo.FieldSize:
+		return m.Size()
 	case singlepageinfo.FieldImgType:
 		return m.ImgType()
 	}
@@ -2497,8 +2497,10 @@ func (m *SinglePageInfoMutation) OldField(ctx context.Context, name string) (ent
 		return m.OldBookID(ctx)
 	case singlepageinfo.FieldPageNum:
 		return m.OldPageNum(ctx)
-	case singlepageinfo.FieldNameInArchive:
-		return m.OldNameInArchive(ctx)
+	case singlepageinfo.FieldPath:
+		return m.OldPath(ctx)
+	case singlepageinfo.FieldName:
+		return m.OldName(ctx)
 	case singlepageinfo.FieldURL:
 		return m.OldURL(ctx)
 	case singlepageinfo.FieldBlurHash:
@@ -2507,12 +2509,10 @@ func (m *SinglePageInfoMutation) OldField(ctx context.Context, name string) (ent
 		return m.OldHeight(ctx)
 	case singlepageinfo.FieldWidth:
 		return m.OldWidth(ctx)
-	case singlepageinfo.FieldModeTime:
-		return m.OldModeTime(ctx)
-	case singlepageinfo.FieldFileSize:
-		return m.OldFileSize(ctx)
-	case singlepageinfo.FieldRealImageFilePATH:
-		return m.OldRealImageFilePATH(ctx)
+	case singlepageinfo.FieldModTime:
+		return m.OldModTime(ctx)
+	case singlepageinfo.FieldSize:
+		return m.OldSize(ctx)
 	case singlepageinfo.FieldImgType:
 		return m.OldImgType(ctx)
 	}
@@ -2538,12 +2538,19 @@ func (m *SinglePageInfoMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetPageNum(v)
 		return nil
-	case singlepageinfo.FieldNameInArchive:
+	case singlepageinfo.FieldPath:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetNameInArchive(v)
+		m.SetPath(v)
+		return nil
+	case singlepageinfo.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
 		return nil
 	case singlepageinfo.FieldURL:
 		v, ok := value.(string)
@@ -2573,26 +2580,19 @@ func (m *SinglePageInfoMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetWidth(v)
 		return nil
-	case singlepageinfo.FieldModeTime:
+	case singlepageinfo.FieldModTime:
 		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetModeTime(v)
+		m.SetModTime(v)
 		return nil
-	case singlepageinfo.FieldFileSize:
+	case singlepageinfo.FieldSize:
 		v, ok := value.(int64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetFileSize(v)
-		return nil
-	case singlepageinfo.FieldRealImageFilePATH:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetRealImageFilePATH(v)
+		m.SetSize(v)
 		return nil
 	case singlepageinfo.FieldImgType:
 		v, ok := value.(string)
@@ -2618,8 +2618,8 @@ func (m *SinglePageInfoMutation) AddedFields() []string {
 	if m.add_Width != nil {
 		fields = append(fields, singlepageinfo.FieldWidth)
 	}
-	if m.add_FileSize != nil {
-		fields = append(fields, singlepageinfo.FieldFileSize)
+	if m.add_Size != nil {
+		fields = append(fields, singlepageinfo.FieldSize)
 	}
 	return fields
 }
@@ -2635,8 +2635,8 @@ func (m *SinglePageInfoMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedHeight()
 	case singlepageinfo.FieldWidth:
 		return m.AddedWidth()
-	case singlepageinfo.FieldFileSize:
-		return m.AddedFileSize()
+	case singlepageinfo.FieldSize:
+		return m.AddedSize()
 	}
 	return nil, false
 }
@@ -2667,12 +2667,12 @@ func (m *SinglePageInfoMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddWidth(v)
 		return nil
-	case singlepageinfo.FieldFileSize:
+	case singlepageinfo.FieldSize:
 		v, ok := value.(int64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddFileSize(v)
+		m.AddSize(v)
 		return nil
 	}
 	return fmt.Errorf("unknown SinglePageInfo numeric field %s", name)
@@ -2707,8 +2707,11 @@ func (m *SinglePageInfoMutation) ResetField(name string) error {
 	case singlepageinfo.FieldPageNum:
 		m.ResetPageNum()
 		return nil
-	case singlepageinfo.FieldNameInArchive:
-		m.ResetNameInArchive()
+	case singlepageinfo.FieldPath:
+		m.ResetPath()
+		return nil
+	case singlepageinfo.FieldName:
+		m.ResetName()
 		return nil
 	case singlepageinfo.FieldURL:
 		m.ResetURL()
@@ -2722,14 +2725,11 @@ func (m *SinglePageInfoMutation) ResetField(name string) error {
 	case singlepageinfo.FieldWidth:
 		m.ResetWidth()
 		return nil
-	case singlepageinfo.FieldModeTime:
-		m.ResetModeTime()
+	case singlepageinfo.FieldModTime:
+		m.ResetModTime()
 		return nil
-	case singlepageinfo.FieldFileSize:
-		m.ResetFileSize()
-		return nil
-	case singlepageinfo.FieldRealImageFilePATH:
-		m.ResetRealImageFilePATH()
+	case singlepageinfo.FieldSize:
+		m.ResetSize()
 		return nil
 	case singlepageinfo.FieldImgType:
 		m.ResetImgType()

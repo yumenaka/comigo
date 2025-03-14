@@ -105,9 +105,9 @@ func PageCount(v int) predicate.Book {
 	return predicate.Book(sql.FieldEQ(FieldPageCount, v))
 }
 
-// FileSize applies equality check predicate on the "FileSize" field. It's identical to FileSizeEQ.
-func FileSize(v int64) predicate.Book {
-	return predicate.Book(sql.FieldEQ(FieldFileSize, v))
+// Size applies equality check predicate on the "Size" field. It's identical to SizeEQ.
+func Size(v int64) predicate.Book {
+	return predicate.Book(sql.FieldEQ(FieldSize, v))
 }
 
 // Authors applies equality check predicate on the "Authors" field. It's identical to AuthorsEQ.
@@ -740,44 +740,44 @@ func PageCountLTE(v int) predicate.Book {
 	return predicate.Book(sql.FieldLTE(FieldPageCount, v))
 }
 
-// FileSizeEQ applies the EQ predicate on the "FileSize" field.
-func FileSizeEQ(v int64) predicate.Book {
-	return predicate.Book(sql.FieldEQ(FieldFileSize, v))
+// SizeEQ applies the EQ predicate on the "Size" field.
+func SizeEQ(v int64) predicate.Book {
+	return predicate.Book(sql.FieldEQ(FieldSize, v))
 }
 
-// FileSizeNEQ applies the NEQ predicate on the "FileSize" field.
-func FileSizeNEQ(v int64) predicate.Book {
-	return predicate.Book(sql.FieldNEQ(FieldFileSize, v))
+// SizeNEQ applies the NEQ predicate on the "Size" field.
+func SizeNEQ(v int64) predicate.Book {
+	return predicate.Book(sql.FieldNEQ(FieldSize, v))
 }
 
-// FileSizeIn applies the In predicate on the "FileSize" field.
-func FileSizeIn(vs ...int64) predicate.Book {
-	return predicate.Book(sql.FieldIn(FieldFileSize, vs...))
+// SizeIn applies the In predicate on the "Size" field.
+func SizeIn(vs ...int64) predicate.Book {
+	return predicate.Book(sql.FieldIn(FieldSize, vs...))
 }
 
-// FileSizeNotIn applies the NotIn predicate on the "FileSize" field.
-func FileSizeNotIn(vs ...int64) predicate.Book {
-	return predicate.Book(sql.FieldNotIn(FieldFileSize, vs...))
+// SizeNotIn applies the NotIn predicate on the "Size" field.
+func SizeNotIn(vs ...int64) predicate.Book {
+	return predicate.Book(sql.FieldNotIn(FieldSize, vs...))
 }
 
-// FileSizeGT applies the GT predicate on the "FileSize" field.
-func FileSizeGT(v int64) predicate.Book {
-	return predicate.Book(sql.FieldGT(FieldFileSize, v))
+// SizeGT applies the GT predicate on the "Size" field.
+func SizeGT(v int64) predicate.Book {
+	return predicate.Book(sql.FieldGT(FieldSize, v))
 }
 
-// FileSizeGTE applies the GTE predicate on the "FileSize" field.
-func FileSizeGTE(v int64) predicate.Book {
-	return predicate.Book(sql.FieldGTE(FieldFileSize, v))
+// SizeGTE applies the GTE predicate on the "Size" field.
+func SizeGTE(v int64) predicate.Book {
+	return predicate.Book(sql.FieldGTE(FieldSize, v))
 }
 
-// FileSizeLT applies the LT predicate on the "FileSize" field.
-func FileSizeLT(v int64) predicate.Book {
-	return predicate.Book(sql.FieldLT(FieldFileSize, v))
+// SizeLT applies the LT predicate on the "Size" field.
+func SizeLT(v int64) predicate.Book {
+	return predicate.Book(sql.FieldLT(FieldSize, v))
 }
 
-// FileSizeLTE applies the LTE predicate on the "FileSize" field.
-func FileSizeLTE(v int64) predicate.Book {
-	return predicate.Book(sql.FieldLTE(FieldFileSize, v))
+// SizeLTE applies the LTE predicate on the "Size" field.
+func SizeLTE(v int64) predicate.Book {
+	return predicate.Book(sql.FieldLTE(FieldSize, v))
 }
 
 // AuthorsEQ applies the EQ predicate on the "Authors" field.

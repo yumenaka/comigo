@@ -280,8 +280,8 @@ func GetBookByAuthor(author string, sortBy string) ([]*Book, error) {
 
 // Pages 定义页面结构
 type Pages struct {
-	Images []ImageInfo `json:"images"`
-	SortBy string      `json:"sort_by"`
+	Images []MediaFileInfo `json:"images"`
+	SortBy string          `json:"sort_by"`
 }
 
 // Len 返回页面数量
@@ -293,19 +293,19 @@ func (s Pages) Len() int {
 func (s Pages) Less(i, j int) bool {
 	switch s.SortBy {
 	case "filename":
-		return util.Compare(s.Images[i].NameInArchive, s.Images[j].NameInArchive)
+		return util.Compare(s.Images[i].Name, s.Images[j].Name)
 	case "filesize":
-		return s.Images[i].FileSize > s.Images[j].FileSize
+		return s.Images[i].Size > s.Images[j].Size
 	case "modify_time":
-		return s.Images[i].ModeTime.After(s.Images[j].ModeTime) // 根据修改时间排序 从新到旧
+		return s.Images[i].ModTime.After(s.Images[j].ModTime) // 根据修改时间排序 从新到旧
 	case "filename_reverse":
-		return !util.Compare(s.Images[i].NameInArchive, s.Images[j].NameInArchive)
+		return !util.Compare(s.Images[i].Name, s.Images[j].Name)
 	case "filesize_reverse":
-		return s.Images[i].FileSize < s.Images[j].FileSize
+		return s.Images[i].Size < s.Images[j].Size
 	case "modify_time_reverse":
-		return s.Images[i].ModeTime.Before(s.Images[j].ModeTime) // 根据修改时间排序 从旧到新
+		return s.Images[i].ModTime.Before(s.Images[j].ModTime) // 根据修改时间排序 从旧到新
 	default:
-		return util.Compare(s.Images[i].NameInArchive, s.Images[j].NameInArchive)
+		return util.Compare(s.Images[i].Name, s.Images[j].Name)
 	}
 }
 
@@ -332,10 +332,10 @@ func (b *Book) SortPagesByImageList(imageList []string) {
 		return
 	}
 	imageInfos := b.Pages.Images
-	var reSortList []ImageInfo
+	var reSortList []MediaFileInfo
 	for _, imgName := range imageList {
 		for _, imgInfo := range imageInfos {
-			if imgInfo.NameInArchive == imgName {
+			if imgInfo.Name == imgName {
 				reSortList = append(reSortList, imgInfo)
 				break
 			}
@@ -349,7 +349,7 @@ func (b *Book) SortPagesByImageList(imageList []string) {
 	for _, imgInfo := range imageInfos {
 		found := false
 		for _, imgName := range imageList {
-			if imgInfo.NameInArchive == imgName {
+			if imgInfo.Name == imgName {
 				found = true
 				break
 			}
@@ -464,7 +464,7 @@ func (b *Book) ScanAllImageGo() {
 }
 
 // analyzePageImages 解析漫画的分辨率与类型
-func analyzePageImages(p *ImageInfo, bookPath string) {
+func analyzePageImages(p *MediaFileInfo, bookPath string) {
 	err := p.analyzeImage(bookPath)
 	if err != nil {
 		logger.Infof(locale.GetString("check_image_error") + err.Error())

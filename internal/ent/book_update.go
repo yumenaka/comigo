@@ -190,24 +190,24 @@ func (bu *BookUpdate) AddPageCount(i int) *BookUpdate {
 	return bu
 }
 
-// SetFileSize sets the "FileSize" field.
-func (bu *BookUpdate) SetFileSize(i int64) *BookUpdate {
-	bu.mutation.ResetFileSize()
-	bu.mutation.SetFileSize(i)
+// SetSize sets the "Size" field.
+func (bu *BookUpdate) SetSize(i int64) *BookUpdate {
+	bu.mutation.ResetSize()
+	bu.mutation.SetSize(i)
 	return bu
 }
 
-// SetNillableFileSize sets the "FileSize" field if the given value is not nil.
-func (bu *BookUpdate) SetNillableFileSize(i *int64) *BookUpdate {
+// SetNillableSize sets the "Size" field if the given value is not nil.
+func (bu *BookUpdate) SetNillableSize(i *int64) *BookUpdate {
 	if i != nil {
-		bu.SetFileSize(*i)
+		bu.SetSize(*i)
 	}
 	return bu
 }
 
-// AddFileSize adds i to the "FileSize" field.
-func (bu *BookUpdate) AddFileSize(i int64) *BookUpdate {
-	bu.mutation.AddFileSize(i)
+// AddSize adds i to the "Size" field.
+func (bu *BookUpdate) AddSize(i int64) *BookUpdate {
+	bu.mutation.AddSize(i)
 	return bu
 }
 
@@ -523,11 +523,11 @@ func (bu *BookUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := bu.mutation.AddedPageCount(); ok {
 		_spec.AddField(book.FieldPageCount, field.TypeInt, value)
 	}
-	if value, ok := bu.mutation.FileSize(); ok {
-		_spec.SetField(book.FieldFileSize, field.TypeInt64, value)
+	if value, ok := bu.mutation.Size(); ok {
+		_spec.SetField(book.FieldSize, field.TypeInt64, value)
 	}
-	if value, ok := bu.mutation.AddedFileSize(); ok {
-		_spec.AddField(book.FieldFileSize, field.TypeInt64, value)
+	if value, ok := bu.mutation.AddedSize(); ok {
+		_spec.AddField(book.FieldSize, field.TypeInt64, value)
 	}
 	if value, ok := bu.mutation.Authors(); ok {
 		_spec.SetField(book.FieldAuthors, field.TypeString, value)
@@ -794,24 +794,24 @@ func (buo *BookUpdateOne) AddPageCount(i int) *BookUpdateOne {
 	return buo
 }
 
-// SetFileSize sets the "FileSize" field.
-func (buo *BookUpdateOne) SetFileSize(i int64) *BookUpdateOne {
-	buo.mutation.ResetFileSize()
-	buo.mutation.SetFileSize(i)
+// SetSize sets the "Size" field.
+func (buo *BookUpdateOne) SetSize(i int64) *BookUpdateOne {
+	buo.mutation.ResetSize()
+	buo.mutation.SetSize(i)
 	return buo
 }
 
-// SetNillableFileSize sets the "FileSize" field if the given value is not nil.
-func (buo *BookUpdateOne) SetNillableFileSize(i *int64) *BookUpdateOne {
+// SetNillableSize sets the "Size" field if the given value is not nil.
+func (buo *BookUpdateOne) SetNillableSize(i *int64) *BookUpdateOne {
 	if i != nil {
-		buo.SetFileSize(*i)
+		buo.SetSize(*i)
 	}
 	return buo
 }
 
-// AddFileSize adds i to the "FileSize" field.
-func (buo *BookUpdateOne) AddFileSize(i int64) *BookUpdateOne {
-	buo.mutation.AddFileSize(i)
+// AddSize adds i to the "Size" field.
+func (buo *BookUpdateOne) AddSize(i int64) *BookUpdateOne {
+	buo.mutation.AddSize(i)
 	return buo
 }
 
@@ -1157,11 +1157,11 @@ func (buo *BookUpdateOne) sqlSave(ctx context.Context) (_node *Book, err error) 
 	if value, ok := buo.mutation.AddedPageCount(); ok {
 		_spec.AddField(book.FieldPageCount, field.TypeInt, value)
 	}
-	if value, ok := buo.mutation.FileSize(); ok {
-		_spec.SetField(book.FieldFileSize, field.TypeInt64, value)
+	if value, ok := buo.mutation.Size(); ok {
+		_spec.SetField(book.FieldSize, field.TypeInt64, value)
 	}
-	if value, ok := buo.mutation.AddedFileSize(); ok {
-		_spec.AddField(book.FieldFileSize, field.TypeInt64, value)
+	if value, ok := buo.mutation.AddedSize(); ok {
+		_spec.AddField(book.FieldSize, field.TypeInt64, value)
 	}
 	if value, ok := buo.mutation.Authors(); ok {
 		_spec.SetField(book.FieldAuthors, field.TypeString, value)

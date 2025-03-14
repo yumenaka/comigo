@@ -57,6 +57,58 @@ type Config struct {
 	ZipFileTextEncoding    string          `json:"ZipFileTextEncoding" comment:"非utf-8编码的ZIP文件，尝试用什么编码解析，默认GBK"`
 }
 
+func (c *Config) GetLocalStores() []string {
+	return c.LocalStores
+}
+
+func (c *Config) GetStores() []stores.Store {
+	return c.Stores
+}
+
+func (c *Config) GetMaxScanDepth() int {
+	return c.MaxScanDepth
+}
+
+func (c *Config) GetMinImageNum() int {
+	return c.MinImageNum
+}
+
+func (c *Config) GetTimeoutLimitForScan() int {
+	return c.TimeoutLimitForScan
+}
+
+func (c *Config) GetExcludePath() []string {
+	return c.ExcludePath
+}
+
+func (c *Config) GetSupportMediaType() []string {
+	return c.SupportMediaType
+}
+
+func (c *Config) GetSupportFileType() []string {
+	return c.SupportFileType
+}
+
+func (c *Config) GetSupportTemplateFile() []string {
+	return c.SupportTemplateFile
+}
+
+func (c *Config) GetZipFileTextEncoding() string {
+	return c.ZipFileTextEncoding
+}
+
+func (c *Config) GetEnableDatabase() bool {
+	return c.EnableDatabase
+}
+
+func (c *Config) GetClearDatabaseWhenExit() bool {
+	return c.ClearDatabaseWhenExit
+}
+
+func (c *Config) GetDebug() bool {
+	return c.Debug
+}
+
 func (c *Config) GetTopStoreName() string {
 	if len(c.LocalStores) == 0 {
 		return "未设置书库"

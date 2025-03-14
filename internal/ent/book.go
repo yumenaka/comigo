@@ -37,8 +37,8 @@ type Book struct {
 	ParentFolder string `json:"ParentFolder,omitempty"`
 	// 总页数
 	PageCount int `json:"PageCount,omitempty"`
-	// FileSize holds the value of the "FileSize" field.
-	FileSize int64 `json:"FileSize,omitempty"`
+	// Size holds the value of the "Size" field.
+	Size int64 `json:"Size,omitempty"`
 	// Authors holds the value of the "Authors" field.
 	Authors string `json:"Authors,omitempty"`
 	// ISBN holds the value of the "ISBN" field.
@@ -94,7 +94,7 @@ func (*Book) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case book.FieldReadPercent:
 			values[i] = new(sql.NullFloat64)
-		case book.FieldID, book.FieldChildBookNum, book.FieldDepth, book.FieldPageCount, book.FieldFileSize, book.FieldExtractNum:
+		case book.FieldID, book.FieldChildBookNum, book.FieldDepth, book.FieldPageCount, book.FieldSize, book.FieldExtractNum:
 			values[i] = new(sql.NullInt64)
 		case book.FieldTitle, book.FieldBookID, book.FieldOwner, book.FieldFilePath, book.FieldBookStorePath, book.FieldType, book.FieldParentFolder, book.FieldAuthors, book.FieldISBN, book.FieldPress, book.FieldPublishedAt, book.FieldExtractPath, book.FieldZipTextEncoding:
 			values[i] = new(sql.NullString)
@@ -181,11 +181,11 @@ func (b *Book) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				b.PageCount = int(value.Int64)
 			}
-		case book.FieldFileSize:
+		case book.FieldSize:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field FileSize", values[i])
+				return fmt.Errorf("unexpected type %T for field Size", values[i])
 			} else if value.Valid {
-				b.FileSize = value.Int64
+				b.Size = value.Int64
 			}
 		case book.FieldAuthors:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -324,8 +324,8 @@ func (b *Book) String() string {
 	builder.WriteString("PageCount=")
 	builder.WriteString(fmt.Sprintf("%v", b.PageCount))
 	builder.WriteString(", ")
-	builder.WriteString("FileSize=")
-	builder.WriteString(fmt.Sprintf("%v", b.FileSize))
+	builder.WriteString("Size=")
+	builder.WriteString(fmt.Sprintf("%v", b.Size))
 	builder.WriteString(", ")
 	builder.WriteString("Authors=")
 	builder.WriteString(b.Authors)

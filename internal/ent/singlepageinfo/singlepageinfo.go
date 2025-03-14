@@ -17,8 +17,10 @@ const (
 	FieldBookID = "book_id"
 	// FieldPageNum holds the string denoting the pagenum field in the database.
 	FieldPageNum = "page_num"
-	// FieldNameInArchive holds the string denoting the nameinarchive field in the database.
-	FieldNameInArchive = "name_in_archive"
+	// FieldPath holds the string denoting the path field in the database.
+	FieldPath = "path"
+	// FieldName holds the string denoting the name field in the database.
+	FieldName = "name"
 	// FieldURL holds the string denoting the url field in the database.
 	FieldURL = "url"
 	// FieldBlurHash holds the string denoting the blurhash field in the database.
@@ -27,12 +29,10 @@ const (
 	FieldHeight = "height"
 	// FieldWidth holds the string denoting the width field in the database.
 	FieldWidth = "width"
-	// FieldModeTime holds the string denoting the modetime field in the database.
-	FieldModeTime = "mode_time"
-	// FieldFileSize holds the string denoting the filesize field in the database.
-	FieldFileSize = "file_size"
-	// FieldRealImageFilePATH holds the string denoting the realimagefilepath field in the database.
-	FieldRealImageFilePATH = "real_image_file_path"
+	// FieldModTime holds the string denoting the modtime field in the database.
+	FieldModTime = "mod_time"
+	// FieldSize holds the string denoting the size field in the database.
+	FieldSize = "size"
 	// FieldImgType holds the string denoting the imgtype field in the database.
 	FieldImgType = "img_type"
 	// Table holds the table name of the singlepageinfo in the database.
@@ -44,14 +44,14 @@ var Columns = []string{
 	FieldID,
 	FieldBookID,
 	FieldPageNum,
-	FieldNameInArchive,
+	FieldPath,
+	FieldName,
 	FieldURL,
 	FieldBlurHash,
 	FieldHeight,
 	FieldWidth,
-	FieldModeTime,
-	FieldFileSize,
-	FieldRealImageFilePATH,
+	FieldModTime,
+	FieldSize,
 	FieldImgType,
 }
 
@@ -77,8 +77,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultModeTime holds the default value on creation for the "ModeTime" field.
-	DefaultModeTime func() time.Time
+	// DefaultModTime holds the default value on creation for the "ModTime" field.
+	DefaultModTime func() time.Time
 )
 
 // OrderOption defines the ordering options for the SinglePageInfo queries.
@@ -99,9 +99,14 @@ func ByPageNum(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPageNum, opts...).ToFunc()
 }
 
-// ByNameInArchive orders the results by the NameInArchive field.
-func ByNameInArchive(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldNameInArchive, opts...).ToFunc()
+// ByPath orders the results by the Path field.
+func ByPath(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPath, opts...).ToFunc()
+}
+
+// ByName orders the results by the Name field.
+func ByName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
 // ByURL orders the results by the Url field.
@@ -124,19 +129,14 @@ func ByWidth(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldWidth, opts...).ToFunc()
 }
 
-// ByModeTime orders the results by the ModeTime field.
-func ByModeTime(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldModeTime, opts...).ToFunc()
+// ByModTime orders the results by the ModTime field.
+func ByModTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldModTime, opts...).ToFunc()
 }
 
-// ByFileSize orders the results by the FileSize field.
-func ByFileSize(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldFileSize, opts...).ToFunc()
-}
-
-// ByRealImageFilePATH orders the results by the RealImageFilePATH field.
-func ByRealImageFilePATH(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldRealImageFilePATH, opts...).ToFunc()
+// BySize orders the results by the Size field.
+func BySize(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSize, opts...).ToFunc()
 }
 
 // ByImgType orders the results by the ImgType field.

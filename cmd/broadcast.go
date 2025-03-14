@@ -5,9 +5,9 @@ import (
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/routers/handlers"
-	"github.com/yumenaka/comigo/util/file/scan"
 	"github.com/yumenaka/comigo/util/locale"
 	"github.com/yumenaka/comigo/util/logger"
+	scan2 "github.com/yumenaka/comigo/util/scan"
 )
 
 // 用于由客户端发送消息的队列，扮演通道的角色。后面定义了一个 goroutine 来从这个通道读取新消息，然后将它们发送给其它连接到服务器的客户端。
@@ -30,7 +30,7 @@ func waitRescanMessages() {
 			ReScanUploadPath()
 			//保存扫描结果到数据库
 			if config.GetEnableDatabase() {
-				err := scan.SaveResultsToDatabase(viper.ConfigFileUsed(), config.GetClearDatabaseWhenExit())
+				err := scan2.SaveResultsToDatabase(viper.ConfigFileUsed(), config.GetClearDatabaseWhenExit())
 				if err != nil {
 					return
 				}
@@ -55,27 +55,15 @@ func ReScanUploadPath() {
 
 func ReScanPath(path string, reScanFile bool) {
 	//扫描上传目录的文件
-	option := scan.NewScanOption(
+	option := scan2.NewOption(
 		reScanFile,
-		config.GetLocalStoresList(),
-		config.GetStores(),
-		config.GetMaxScanDepth(),
-		config.GetMinImageNum(),
-		config.GetTimeoutLimitForScan(),
-		config.GetExcludePath(),
-		config.GetSupportMediaType(),
-		config.GetSupportFileType(),
-		config.GetSupportTemplateFile(),
-		config.GetZipFileTextEncoding(),
-		config.GetEnableDatabase(),
-		config.GetClearDatabaseWhenExit(),
-		config.GetDebug(),
+		config.GetCfg(),
 	)
-	addList, err := scan.Local(path, option)
+	addList, err := scan2.ScanDirectory(path, option)
 	if err != nil {
 		logger.Infof(locale.GetString("scan_error")+"path:%s  %s", path, err)
 		return
 	}
-	scan.AddBooksToStore(addList, path, config.GetMinImageNum())
+	scan2.AddBooksToStore(addList, path, config.GetMinImageNum())
 	model.ResetBookGroupData()
 }

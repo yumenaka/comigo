@@ -1,3 +1,11 @@
+
+```bash
+go install entgo.io/ent/cmd/ent 
+ent generate ./internal/ent/schema
+```
+
+
+
 来自facebook，官方简介：
 https://github.com/ent/ent/blob/master/README_zh.md
 文档：
