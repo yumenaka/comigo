@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>图片浏览器</title>
+    <!-- TailwindCSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- htmx -->
+    <!--    <script src="https://unpkg.com/htmx.org@1.9.12"></script>-->
+
+    <!-- Alpine.js -->
+    <script src="https://unpkg.com/alpinejs@3.14.9/dist/cdn.min.js" defer></script>
+</head>
+<body class="bg-gray-100" x-data="imageBrowserApp()" x-init="init()">
+<div class="container mx-auto py-4">
+    <h1 class="text-2xl font-bold mb-4">图片浏览器</h1>
+
+    <!-- 扫描按钮 -->
+    <button @click="rescan" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mb-4">
+        重新扫描
+    </button>
+
+    <!-- 目录路径导航 -->
+    <div class="mb-2 flex items-center space-x-2">
+        <span class="text-gray-600">当前路径:</span>
+        <span class="font-semibold" x-text="currentPath"></span>
+    </div>
+
+    <!-- 返回上级目录 -->
+    <button @click="goParent" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-2 py-1 rounded mb-2">
+        返回上一级
+    </button>
+
+    <!-- 子目录列表 -->
+    <div class="mb-4">
+        <h2 class="font-semibold mb-2">子目录 (<span x-text="directories.length"></span>)</h2>
+        <div class="flex flex-wrap gap-2">
+            <template x-for="dir in directories" :key="dir.path">
+                <div @click="goSubdir(dir.path)"
+                     class="cursor-pointer p-2 bg-white shadow rounded border hover:bg-gray-50"
+                     title="点击进入该目录">
+                    <span class="font-medium">
+                        <svg class="inline-block w-5 h-5 mr-1 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                  d="M2 5a2 2 0 012-2h4.586a2 2 0 011.414.586l1.414 1.414H16a2 2 0 012 2v1H2V5zm0 2h16v8a2 2 0 01-2 2H4a2 2 0 01-2-2V7z"
+                                  clip-rule="evenodd"></path>
+                        </svg>
+                        <span x-text="dir.name"></span>
+                    </span>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- 图片列表 -->
+    <div>
+        <h2 class="font-semibold mb-2">图片 (<span x-text="images.length"></span> / <span x-text="totalImages"></span>)</h2>
+        <!-- 分页控制 -->
+        <div class="flex items-center space-x-2 mb-2">
+            <button @click="prevPage"
+                    class="px-2 py-1 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded"
+                    :disabled="page <= 1">
+                上一页
+            </button>
+            <span>第 <span x-text="page"></span> 页 / 大小 <span x-text="pageSize"></span></span>
+            <button @click="nextPage"
+                    class="px-2 py-1 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded"
+                    :disabled="images.length < pageSize">
+                下一页
+            </button>
+        </div>
+
+        <!-- 加载状态 -->
+        <div x-show="loading" class="text-center py-4">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+        </div>
+
+        <!-- 错误提示 -->
+        <div x-show="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+            <span class="block sm:inline" x-text="error"></span>
+        </div>
+
+        <!-- 图片缩略图列表 -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            <template x-for="img in images" :key="img.path">
+                <div class="bg-white rounded shadow border p-2 flex flex-col items-center">
+                    <!-- 直接使用本地路由 /raw?file=xxx 返回图片, 也可使用 e.Static("/images", rootPath) -->
+                    <img :src="getImageUrl(img.path)" class="object-cover w-full h-48" :alt="img.name">
+                    <div class="mt-2 text-center">
+                        <span class="text-sm break-all" x-text="img.name"></span>
+                        <br>
+                        <span class="text-xs text-gray-600">大小: <span x-text="humanSize(img.size)"></span></span>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+</div>
+
+<!-- Alpine.js 核心逻辑 -->
+<script>
+    function imageBrowserApp() {
+        return {
+            currentPath: '',
+            directories: [],
+            images: [],
+            totalImages: 0,
+            page: 1,
+            pageSize: 20,
+            loading: false,
+            error: null,
+
+            init() {
+                this.currentPath = ''
+                this.fetchList()
+            },
+
+            async fetchList() {
+                this.loading = true
+                this.error = null
+                
+                try {
+                    let url = '/api/list?path=' + encodeURIComponent(this.currentPath)
+                    url += '&page=' + this.page + '&pageSize=' + this.pageSize
+
+                    const response = await fetch(url)
+                    if (!response.ok) {
+                        throw new Error('网络请求失败')
+                    }
+                    
+                    const data = await response.json()
+                    this.directories = data.directories || []
+                    this.images = data.images || []
+                    this.totalImages = data.total_images || 0
+                } catch (err) {
+                    console.error('fetchList error:', err)
+                    this.error = '加载数据失败: ' + err.message
+                } finally {
+                    this.loading = false
+                }
+            },
+
+            goSubdir(path) {
+                this.currentPath = path
+                this.page = 1
+                this.fetchList()
+            },
+
+            goParent() {
+                // 如果当前已经是根目录，就不再向上
+                if (!this.currentPath || this.currentPath === '.' || this.currentPath === '/') {
+                    return
+                }
+                // 取父目录
+                let parent = this.currentPath
+                // 注意 Windows 与 Unix 路径分隔符。如果需要跨平台, 需在后端统一
+                parent = parent.replace(/\\/g, '/')
+                // 如果是 /a/b/c => /a/b
+                // 如果只剩一个 / => 就是根了
+                let slashIndex = parent.lastIndexOf('/')
+                if (slashIndex > 0) {
+                    parent = parent.slice(0, slashIndex)
+                } else {
+                    parent = '/'
+                }
+                this.currentPath = parent
+                this.page = 1
+                this.fetchList()
+            },
+
+            nextPage() {
+                this.page++
+                this.fetchList()
+            },
+            prevPage() {
+                if (this.page > 1) {
+                    this.page--
+                    this.fetchList()
+                }
+            },
+
+            humanSize(size) {
+                if (size < 1024) return size + ' B'
+                else if (size < 1024 * 1024) return (size / 1024).toFixed(1) + ' KB'
+                else if (size < 1024 * 1024 * 1024) return (size / 1024 / 1024).toFixed(1) + ' MB'
+                else return (size / 1024 / 1024 / 1024).toFixed(1) + ' GB'
+            },
+
+            // 返回实际可访问的图片 URL
+            // 这里假设我们另外注册一个 /raw 路由来读本地文件
+            getImageUrl(path) {
+                // 让后端按 ?file=xxx 或直接 /raw/xxx
+                return '/raw?file=' + encodeURIComponent(path)
+            },
+
+            // 手动触发重新扫描
+            async rescan() {
+                try {
+                    const response = await fetch('/api/rescan', {method: 'POST'})
+                    if (!response.ok) {
+                        throw new Error('重新扫描失败')
+                    }
+                    const data = await response.json()
+                    alert(data.message)
+                    this.fetchList() // 重新加载当前目录
+                } catch (err) {
+                    console.error('rescan error:', err)
+                    alert('重新扫描失败: ' + err.message)
+                }
+            }
+        }
+    }
+</script>
+</body>
+</html>
