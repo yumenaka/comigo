@@ -13,7 +13,7 @@ Alpine.store('flip', {
     showFooter: Alpine.$persist(true).as('flip.showFooter'),
     //是否显示页数
     show_page_num: Alpine.$persist(false).as('flip.show_page_num'),
-    //是否是右半屏翻页（从右到左）?日本漫画从左到右(false)
+    //是否是右半屏翻页（从右到左） 日本漫画从左到右(false)
     rightToLeft: Alpine.$persist(false).as('flip.rightToLeft'),
     //双页模式
     doublePageMode: Alpine.$persist(false).as('flip.doublePageMode'),

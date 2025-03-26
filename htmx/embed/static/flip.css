@@ -16,10 +16,10 @@
     height: 100vh;
     max-width: 100vw;
     padding: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: baseline;
+    /*display: flex;*/
+    /*flex-direction: column;*/
+    /*justify-content: center;*/
+    /*align-items: baseline;*/
     /* 不可以被选中 */
     user-select: none;
     /* 火狐 */

@@ -9,7 +9,7 @@ import (
 	"strconv"
 )
 
-// TODO:扫描书籍
+// TODO:扫描webdev书籍
 // https://pkg.go.dev/github.com/studio-b12/gowebdav ?
 func Webdav(scanOption Option) (newBookList []*model.Book, err error) {
 	conn, err := net.Dial("tcp", scanOption.Cfg.GetStores()[0].Smb.Host+":"+strconv.Itoa(scanOption.Cfg.GetStores()[0].Smb.Port))

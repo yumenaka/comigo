@@ -21,11 +21,11 @@
     "i18next": "latest",
     "i18next-browser-languagedetector": "latest",
     "screenfull": "latest",
-    "tailwindcss": "^4.0.13"
+    "tailwindcss": "^4.1.1"
   },
   "devDependencies": {
     "@parcel/transformer-sass": "latest",
-    "@tailwindcss/postcss": "^4.0.13",
+    "@tailwindcss/postcss": "^4.1.1",
     "autoprefixer": "latest",
     "parcel": "latest",
     "postcss": "^8.5.3",

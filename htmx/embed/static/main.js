@@ -18,7 +18,7 @@ function $parcel$interopDefault(a) {
 var $parcel$modules = {};
 var $parcel$inits = {};
 
-var parcelRequire = $parcel$global["parcelRequire94c2"];
+var parcelRequire = $parcel$global["parcelRequire5e53"];
 
 if (parcelRequire == null) {
   parcelRequire = function(id) {
@@ -42,7 +42,7 @@ if (parcelRequire == null) {
     $parcel$inits[id] = init;
   };
 
-  $parcel$global["parcelRequire94c2"] = parcelRequire;
+  $parcel$global["parcelRequire5e53"] = parcelRequire;
 }
 
 var parcelRegister = parcelRequire.register;
@@ -15922,7 +15922,7 @@ Alpine.store('flip', {
     showFooter: Alpine.$persist(true).as('flip.showFooter'),
     //是否显示页数
     show_page_num: Alpine.$persist(false).as('flip.show_page_num'),
-    //是否是右半屏翻页（从右到左）?日本漫画从左到右(false)
+    //是否是右半屏翻页（从右到左） 日本漫画从左到右(false)
     rightToLeft: Alpine.$persist(false).as('flip.rightToLeft'),
     //双页模式
     doublePageMode: Alpine.$persist(false).as('flip.doublePageMode'),

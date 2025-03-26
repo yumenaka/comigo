@@ -35,7 +35,7 @@ func SetStore(args []string) {
 		true,
 		config.GetCfg(),
 	)
-	err := scan.AllStore(option)
+	err := scan.InitAllStore(option)
 	if err != nil {
 		logger.Infof("Failed to scan store path: %v", err)
 	}
