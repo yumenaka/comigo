@@ -1,6 +1,7 @@
 package util
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net"
@@ -13,6 +14,8 @@ import (
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/yumenaka/comigo/util/locale"
 	"github.com/yumenaka/comigo/util/logger"
+	httpChecker "wait4x.dev/v3/checker/http"
+	"wait4x.dev/v3/waiter"
 )
 
 // TrackTIme 计算耗时
@@ -115,7 +118,49 @@ func GetOutboundIP() net.IP {
 	return localAddr.IP
 }
 
+// OpenBrowser 打开浏览器，为了防止阻塞，需要使用go关键字调用
 func OpenBrowser(uri string) {
+	// Create a context with cancellation
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	//// Create custom HTTP headers
+	//headers := http.Header{}
+	//headers.Add("Authorization", "Bearer my-token")
+	//headers.Add("Content-Type", "application/json")
+
+	//// Prepare a request body
+	//requestBody := strings.NewReader(`{"query": "status"}`)
+
+	// Create an HTTP checker with multiple validations
+	checker := httpChecker.New(
+		uri,
+		httpChecker.WithTimeout(3*time.Second),
+		httpChecker.WithExpectStatusCode(200),
+		//httpChecker.WithExpectBodyJSON("status"), // Check that 'status' field exists in JSON
+		//httpChecker.WithExpectBodyRegex(`"healthy":\s*true`), // Regex to check response
+		//httpChecker.WithExpectHeader("Content-Type=application/json"),
+		//httpChecker.WithRequestHeaders(headers),
+		//httpChecker.WithRequestBody(requestBody),
+		httpChecker.WithInsecureSkipTLSVerify(true), // Skip TLS verification
+	)
+
+	// Wait for the API to be available and responding correctly
+	fmt.Println("Waiting for API health endpoint...")
+
+	err := waiter.WaitContext(
+		ctx,
+		checker,
+		waiter.WithTimeout(2*time.Minute),
+		waiter.WithInterval(500*time.Millisecond),
+		waiter.WithBackoffPolicy(waiter.BackoffPolicyExponential),
+	)
+
+	if err != nil {
+		log.Fatalf("API health check failed: %v", err)
+	}
+	fmt.Println("Comigo API is healthy and ready!")
+
 	var cmd *exec.Cmd
 	if runtime.GOOS == "windows" {
 		cmd = exec.Command("CMD", "/C", "start", uri)

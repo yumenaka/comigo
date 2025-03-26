@@ -9,10 +9,10 @@ import (
 	"strconv"
 )
 
+// TODO:SFTP扫描书籍
 // https://github.com/moov-io/go-sftp  ?
 // https://github.com/spf13/afero  SftpFs
 
-// TODO:SFTP扫描书籍
 func SFTP(scanOption Option) (newBookList []*model.Book, err error) {
 	conn, err := net.Dial("tcp", scanOption.Cfg.GetStores()[0].Smb.Host+":"+strconv.Itoa(scanOption.Cfg.GetStores()[0].Smb.Port))
 	if err != nil {

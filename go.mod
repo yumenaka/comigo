@@ -8,9 +8,9 @@ tool (
 )
 
 require (
-	entgo.io/ent v0.14.3
+	entgo.io/ent v0.14.4
 	github.com/Baozisoftware/qrcode-terminal-go v0.0.0-20170407111555-c0650d8dff0f
-	github.com/BurntSushi/toml v1.4.0
+	github.com/BurntSushi/toml v1.5.0
 	github.com/bbrks/go-blurhash v1.1.1
 	github.com/cheggaaa/pb/v3 v3.1.7
 	github.com/disintegration/imaging v1.6.2
@@ -29,11 +29,11 @@ require (
 	github.com/sirupsen/logrus v1.9.3
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/spf13/cobra v1.9.1
-	github.com/spf13/viper v1.19.0
+	github.com/spf13/viper v1.20.1
 	github.com/xxjwxc/gowp v0.0.0-20240929033016-5be68d222389
-	golang.org/x/net v0.37.0
+	golang.org/x/net v0.38.0
 	golang.org/x/text v0.23.0
-	modernc.org/sqlite v1.36.0
+	modernc.org/sqlite v1.37.0
 )
 
 require (
@@ -43,12 +43,12 @@ require (
 	github.com/hirochachacha/go-smb2 v1.1.0
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.13.3
-	github.com/mattn/go-sqlite3 v2.0.1+incompatible
 	github.com/minio/selfupdate v0.6.0
 	github.com/pdfcpu/pdfcpu v0.9.1
 	github.com/yumenaka/archives v0.0.0-20241222141717-1f2992f21052
 	golang.org/x/image v0.25.0
 	golang.org/x/mod v0.24.0
+	wait4x.dev/v3 v3.2.0
 )
 
 require (
@@ -56,22 +56,27 @@ require (
 	ariga.io/atlas v0.32.0 // indirect
 	github.com/STARRY-S/zip v0.2.2 // indirect
 	github.com/VividCortex/ewma v1.2.0 // indirect
-	github.com/a-h/templ v0.3.857 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/akavel/rsrc v0.10.2 // indirect
 	github.com/andybalholm/brotli v1.1.1 // indirect
+	github.com/antchfx/htmlquery v1.3.4 // indirect
+	github.com/antchfx/xpath v1.3.3 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/bmatcuk/doublestar v1.3.4 // indirect
 	github.com/bodgit/plumbing v1.3.0 // indirect
 	github.com/bodgit/sevenzip v1.6.0 // indirect
 	github.com/bodgit/windows v1.0.1 // indirect
 	github.com/cloudsoda/sddl v0.0.0-20250224235906-926454e91efc // indirect
+	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dsnet/compress v0.0.2-0.20230904184137-39efe44ab707 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/geoffgarside/ber v1.1.0 // indirect
+	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
-	github.com/go-openapi/inflect v0.21.1 // indirect
+	github.com/go-openapi/inflect v0.21.2 // indirect
+	github.com/go-viper/mapstructure/v2 v2.2.1 // indirect
+	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
@@ -92,7 +97,7 @@ require (
 	github.com/klauspost/pgzip v1.2.6 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/lestrrat-go/strftime v1.1.0 // indirect
-	github.com/lufia/plan9stats v0.0.0-20250303091104-876f3ea5145d // indirect
+	github.com/lufia/plan9stats v0.0.0-20250317134145-8bc96cf8fc35 // indirect
 	github.com/magiconair/properties v1.8.9 // indirect
 	github.com/mandykoh/go-parallel v0.1.0 // indirect
 	github.com/mandykoh/prism v0.35.3 // indirect
@@ -107,25 +112,31 @@ require (
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/pierrec/lz4/v4 v4.1.22 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
-	github.com/sagikazarmark/locafero v0.7.0 // indirect
+	github.com/sagikazarmark/locafero v0.9.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
 	github.com/shoenig/go-m1cpu v0.1.6 // indirect
-	github.com/sorairolake/lzip-go v0.3.5 // indirect
+	github.com/sorairolake/lzip-go v0.3.7 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
-	github.com/spf13/afero v1.12.0 // indirect
+	github.com/spf13/afero v1.14.0 // indirect
 	github.com/spf13/cast v1.7.1 // indirect
 	github.com/spf13/pflag v1.0.6 // indirect
+	github.com/stretchr/objx v0.5.2 // indirect
+	github.com/stretchr/testify v1.10.0 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/therootcompany/xz v1.0.1 // indirect
+	github.com/tidwall/gjson v1.18.0 // indirect
+	github.com/tidwall/match v1.1.1 // indirect
+	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/tklauser/go-sysconf v0.3.15 // indirect
 	github.com/tklauser/numcpus v0.10.0 // indirect
 	github.com/ulikunitz/xz v0.5.12 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
-	github.com/xxjwxc/public v0.0.0-20250124084855-a0e71c7e0764 // indirect
+	github.com/xxjwxc/public v0.0.0-20250328104919-64d2f7032638 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	github.com/zclconf/go-cty v1.16.2 // indirect
 	github.com/zclconf/go-cty-yaml v1.1.0 // indirect
@@ -142,9 +153,9 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	modernc.org/libc v1.61.13 // indirect
+	modernc.org/libc v1.62.1 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
-	modernc.org/memory v1.8.2 // indirect
+	modernc.org/memory v1.9.1 // indirect
 )
 
 //替换依赖项：

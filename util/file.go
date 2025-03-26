@@ -2,11 +2,12 @@ package util
 
 import (
 	"errors"
-	"github.com/yumenaka/comigo/util/logger"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/yumenaka/comigo/util/logger"
 )
 
 // 规范化路径，确保路径格式一致

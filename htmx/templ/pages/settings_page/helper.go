@@ -35,7 +35,7 @@ func openBrowserIfNeeded(oldConfig *config.Config, newConfig *config.Config) {
 		if newConfig.EnableTLS {
 			protocol = "https://"
 		}
-		util.OpenBrowser(protocol + "localhost:" + strconv.Itoa(newConfig.Port))
+		go util.OpenBrowser(protocol + "localhost:" + strconv.Itoa(newConfig.Port))
 	}
 }
 
@@ -74,7 +74,7 @@ func startReScan(reScanFile bool) {
 		reScanFile,
 		config.GetCfg(),
 	)
-	if err := scan.AllStore(option); err != nil {
+	if err := scan.InitAllStore(option); err != nil {
 		logger.Infof("Failed to scan store path: %v", err)
 	}
 	if config.GetEnableDatabase() {

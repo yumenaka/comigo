@@ -19,7 +19,7 @@ func PrintAllReaderURL(Port int, OpenBrowserFlag bool, PrintAllPossibleQRCode bo
 	fmt.Println(locale.GetString("local_reading") + localURL + etcStr)
 	//打开浏览器
 	if OpenBrowserFlag {
-		OpenBrowser(protocol + "127.0.0.1:" + strconv.Itoa(Port) + etcStr)
+		go OpenBrowser(protocol + "127.0.0.1:" + strconv.Itoa(Port) + etcStr)
 	}
 	if !DisableLAN {
 		printURLAndQRCode(Port, PrintAllPossibleQRCode, ServerHost, protocol, etcStr)

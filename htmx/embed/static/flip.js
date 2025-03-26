@@ -19,8 +19,11 @@ function setImageSrc() {
     const totalImages = images.length;
 
     if (nowPageNum !== 0 && nowPageNum <= totalImages) {
+        console.log("setImageSrc: nowPageNum", nowPageNum);
+        console.log("setImageSrc: NowImage", images[nowPageNum - 1].url);
         // 加载当前图片
         document.getElementById('NowImage').src = images[nowPageNum - 1].url;
+
         preloadedImages.add(images[nowPageNum - 1].url);
         // 双页模式，加载下一张图片
         if (Alpine.store('flip').doublePageMode && nowPageNum < totalImages) {
@@ -134,7 +137,7 @@ function toPreviousPage() {
 // https://www.runoob.com/js/js-htmldom-events.html
 let hideTimeout;
 let header = document.getElementById("header");
-let range = document.getElementById("steps-range_area");
+let range = document.getElementById("StepsRangeArea");
 
 // 显示工具栏
 function showToolbar() {
@@ -206,7 +209,6 @@ function scrollToMangaMain() {
     }
 }
 
-
 //获取鼠标位置,决定是否打开设置面板
 function onMouseClick(e) {
     // // https://developer.mozilla.org/zh-CN/docs/Web/API/Event/stopPropagation
@@ -259,7 +261,20 @@ function onMouseMove(e) {
         e.currentTarget.style.cursor =
             "url(/images/SettingsOutline.png), pointer";
     }
-    if (!inSetArea) {
+    let stepsRangeArea = document.getElementById("StepsRangeArea").getBoundingClientRect();
+    //判断鼠标是否在翻页条上
+    let inRangeArea = (
+        clickX >= stepsRangeArea.left &&
+        clickX <= stepsRangeArea.right &&
+        e.y >= stepsRangeArea.top &&
+        e.y <= stepsRangeArea.bottom
+    );
+    // 判断鼠标是否在翻页条上,如果在翻页条上,就设置为默认的鼠标指针
+    if (inRangeArea) {
+        e.currentTarget.style.cursor = "default";
+    }
+
+    if (!inSetArea&&!inRangeArea) {
         if (clickX < innerWidth * 0.5) {
             //设置左边的鼠标指针
             if (Alpine.store('flip').rightToLeft && Alpine.store('flip').nowPageNum === 1) {
@@ -307,11 +322,12 @@ function getElementsRect() {
         rect2: range.getBoundingClientRect(),
         rect3: document.getElementById("ReSortDropdown").getBoundingClientRect(),
         rect4: document.getElementById("QuickJumpDropdown").getBoundingClientRect(),
+        rect5: document.getElementById("StepsRangeArea").getBoundingClientRect(),
     };
 }
 
 document.addEventListener('mousemove', function (event) {
-    const {rect1, rect2, rect3, rect4} = getElementsRect();
+    const {rect1, rect2, rect3, rect4, rect5} = getElementsRect();
     const x = event.clientX;
     const y = event.clientY;
     // 判断鼠标是否在元素 1 范围内(Header)
@@ -343,6 +359,14 @@ document.addEventListener('mousemove', function (event) {
         y <= rect4.bottom
     );
 
+    // 判断鼠标是否在元素 5 范围内(翻页条)
+    const isInElement5 = (
+        x >= rect5.left &&
+        x <= rect5.right &&
+        y >= rect5.top &&
+        y <= rect5.bottom
+    );
+
     //鼠标在设置区域
     let inSetArea = getInSetArea(event);
     if (inSetArea) {
@@ -355,7 +379,7 @@ document.addEventListener('mousemove', function (event) {
         }
     }
     // '鼠标在元素范围内'
-    if (isInElement1 || isInElement2 || isInElement3 || isInElement4 || inSetArea) {
+    if (isInElement1 || isInElement2 || isInElement3 || isInElement4 || isInElement5 ||inSetArea) {
         //console.log('鼠标在元素范围内');
         showToolbar();
     }
