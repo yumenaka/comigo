@@ -11,49 +11,20 @@
 
 /* 漫画div */
 .manga_area {
-    width: 100vw;
-    max-height: 100vh;
-    height: 100vh;
-    max-width: 100vw;
-    padding: 0;
-    /*display: flex;*/
-    /*flex-direction: column;*/
-    /*justify-content: center;*/
-    /*align-items: baseline;*/
     /* 不可以被选中 */
     user-select: none;
     /* 火狐 */
     -moz-user-select: none;
     /* 谷歌 */
     -webkit-user-select: none;
-    /* border-radius: 3px; */
-    /* box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); */
-}
-
-/* 漫画div中的图片div*/
-.manga_area_img_div {
-    width: 100vw;
-    /* height: v-bind(mangaAreaHeight); */
-    height: 100vh;
-    display: flex;
-    flex-direction: v-bind(get_flex_direction);
-    justify-content: center;
-    align-items: center;
-    margin: 0;
 }
 
 /* 最后的一或两张图片*/
-.manga_area_img_div img {
-    max-height: 100vh;
-    max-width: 100vw;
-    min-width: 0;
-    width: auto;
-    display: block;
+.manga_area img {
+    /* 不可以被选中 */
     user-select: none;
-    /* 下面两句，是设定高度为100%，同时保持比例缩放的关键（类似sketch small pages） */
-    min-height: 100vh;
-    object-fit: contain;
-    /* 两张图片之间不要留空间*/
-    padding: 0;
-    /* background-color: #aaa; */
+    /* 火狐 */
+    -moz-user-select: none;
+    /* 谷歌 */
+    -webkit-user-select: none;
 }

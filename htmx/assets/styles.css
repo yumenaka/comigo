@@ -22,27 +22,16 @@ body {
   margin: 0;
   display: flex;
   place-items: center;
-  min-width: 100vw;
-  min-height: 100vh;
 }
 
-/*隐藏滚动条但保持可滚动功能。不同浏览器的实现方式略有差异，需要结合使用几种属性才能尽可能兼容主流浏览器。*/
-/* 1. 针对 WebKit 内核（Chrome、Safari、Opera 等） */
-body::-webkit-scrollbar {
-  display: none;
-}
-
-body {
-  /* 2. 针对 Firefox */
-  scrollbar-width: none; /* Firefox */
-  /* 3. 针对旧版 IE/Edge */
-  -ms-overflow-style: none; /* IE 10+ */
-  /* 4. 需要保证元素实际可滚动 */
-  /*overflow-y: scroll; !* 如果只需要纵向滚动 *!*/
-  /* overflow-x: scroll; 如果需要横向滚动 */
-  /* 或者直接使用: overflow: auto; */
+/* 始终不显示滚动条 */
+* {
   overflow: auto;
-  /* 视需要自定义其他样式 */
+  scrollbar-width: none; /* Firefox */
+}
+
+*::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 /* Alpine.js styles */
