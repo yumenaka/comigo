@@ -69,7 +69,7 @@ func MainLayout(c echo.Context, s *state.GlobalState, bodyContent templ.Componen
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</head><!-- x-bind: Alpine.js的语法，声明全局主题 theme --><!-- $persist 可以存储原始值以及数组和对象。本地存储，默认的key是 _x_变量名 --><!-- ！！！当变量的类型发生变化时，必须手动清除 localStorage，否则相应数值将无法正确更新。！！！ --><!-- 详细用法参见： https://alpinejs.dev/plugins/persist --><body x-data=\"{ theme: $persist(&#39;retro&#39;) }\" x-bind:data-theme=\"theme\" class=\"text-gray-500 hover:text-gray-700 selected:text-blue-500 flex flex-col items-center justify-between w-full h-full min-h-screen p-0 m-0 font-sans\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</head><!-- x-bind: Alpine.js的语法，声明全局主题 theme --><!-- $persist 可以存储原始值以及数组和对象。本地存储，默认的key是 _x_变量名 --><!-- ！！！当变量的类型发生变化时，必须手动清除 localStorage，否则相应数值将无法正确更新。！！！ --><!-- 详细用法参见： https://alpinejs.dev/plugins/persist --><body x-data=\"{ theme: $persist(&#39;retro&#39;) }\" x-bind:data-theme=\"theme\" class=\"text-gray-500 hover:text-gray-700 selected:text-blue-500 flex flex-col items-center justify-between  h-full min-h-screen w-screen p-0 m-0 font-sans\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -109,7 +109,7 @@ func MainLayout(c echo.Context, s *state.GlobalState, bodyContent templ.Componen
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs("/" + insertScript)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/main_layout.templ`, Line: 52, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/main_layout.templ`, Line: 55, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {

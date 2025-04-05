@@ -22,12 +22,16 @@ function setImageSrc() {
         console.log("setImageSrc: nowPageNum", nowPageNum);
         console.log("setImageSrc: NowImage", images[nowPageNum - 1].url);
         // 加载当前图片
-        document.getElementById('NowImage').src = images[nowPageNum - 1].url;
+        document.getElementById('SinglePageModeNowImage').src = images[nowPageNum - 1].url;
+        document.getElementById('DoublePageModeNowImageLTR').src = images[nowPageNum - 1].url;
+        document.getElementById('DoublePageModeNowImageRTL').src = images[nowPageNum - 1].url;
 
         preloadedImages.add(images[nowPageNum - 1].url);
-        // 双页模式，加载下一张图片
-        if (Alpine.store('flip').doublePageMode && nowPageNum < totalImages) {
-            document.getElementById('NextImage').src = images[nowPageNum].url;
+        // 为双页模式，加载下一张图片。
+        // 因为用户有可能随时切换到双页模式，所以单页模式也预加载图片（尽管看不到）
+        if (nowPageNum < totalImages) {
+            document.getElementById('DoublePageModeNextImageLTR').src = images[nowPageNum].url;
+            document.getElementById('DoublePageModeNextImageRTL').src = images[nowPageNum].url;
             preloadedImages.add(images[nowPageNum].url);
         }
 
@@ -197,15 +201,17 @@ function getInSetArea(e) {
 //htmx翻页模式功能优化：不隐藏工具栏的时候。点击设置区域，自动漫画区域居中。
 function scrollToMangaMain() {
     if (!Alpine.store('flip').autoHideToolbar) {
-        // 1. 获取 MangaMain 元素
-        const mangaMain = document.getElementById('MangaMain');
-
-        // 2. 将 MangaMain 顶部对齐到浏览器可见区域顶部
+        // 1. 获取 manga_area 元素
+        const mangaMains = document.getElementsByClassName('manga_area');
+        // 2. 将 manga_area 顶部对齐到浏览器可见区域顶部
         //    这样它的高度（100vh）就能正好占满整个可见区域
-        mangaMain.scrollIntoView({
-            behavior: 'smooth', // 平滑滚动
-            block: 'start'      // 与可视区顶部对齐
-        });
+        for (let i = 0; i < mangaMains.length; i++) {
+            const mangaMain = mangaMains[i];
+            mangaMain.scrollIntoView({
+                behavior: 'smooth', // 平滑滚动
+                block: 'start'      // 与可视区顶部对齐
+            });
+        }
     }
 }
 
@@ -273,7 +279,7 @@ function onMouseMove(e) {
     if (inRangeArea) {
         e.currentTarget.style.cursor = "default";
     }
-
+    //设置鼠标指针
     if (!inSetArea&&!inRangeArea) {
         if (clickX < innerWidth * 0.5) {
             //设置左边的鼠标指针

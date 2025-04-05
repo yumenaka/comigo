@@ -14,15 +14,43 @@ templ InsertData(bookData any, stateData any) {
 templ MainArea(s *state.GlobalState, book *model.Book) {
 	<div
 		id="mouseMoveArea"
-		class="flex flex-col items-center justify-center flex-1 w-full max-w-full bg-base-100"
+		class="flex flex-col items-center justify-center flex-1 w-screen max-w-screen bg-base-100"
 		:class="(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') ? ($store.global.bgPattern !== 'none'?$store.global.bgPattern+' bg-base-300':'bg-base-300'):($store.global.bgPattern !== 'none'?$store.global.bgPattern:'')"
 	>
-		<div class="manga_area flex flex-row justify-center w-full item-center max-w-full m-0">
-			<!-- 非自动拼合模式最简单,直接显示一张图 -->
-			<img id="NowImage" class="max-w-full max-h-screen m-0 rounded shadow-lg" src="/images/ball-triangle.svg" alt=""/>
-			<!-- 简单拼合双页的另外一页 -->
-            <img id="NextImage" x-show="$store.flip.doublePageMode && $store.flip.nowPageNum < $store.flip.allPageNum"
-                class="max-w-full max-h-screen m-0 rounded shadow-lg" src="/images/ball-triangle.svg"/>
+		<!-- 单页模式 -->
+		<div x-show="!$store.flip.doublePageMode" class="manga_area flex flex-row w-full m-0 p-0 justify-center item-center">
+			<img
+				id="SinglePageModeNowImage"
+				class="select-none object-contain m-0 rounded max-w-screen max-h-screen h-full"
+			/>
+		</div>
+		<!-- 双页模式+日漫模式-->
+		<div x-show="$store.flip.doublePageMode && !$store.flip.rightToLeft" class="manga_area flex flex-row w-full m-0 p-0 justify-center-safe item-center">
+			<!-- 双页模式第二页 -->
+			<img
+				id="DoublePageModeNextImageLTR"
+				x-show="$store.flip.nowPageNum < $store.flip.allPageNum"
+				class="select-none object-contain m-0 rounded max-w-1/2 w-auto max-h-screen grow-0"
+			/>
+			<!-- 双页模式第一页 -->
+			<img
+				id="DoublePageModeNowImageLTR"
+				class="select-none object-contain m-0 rounded max-w-1/2 w-auto max-h-screen grow-0"
+			/>
+		</div>
+		<!-- 双页模式+美漫模式-->
+		<div x-show="$store.flip.doublePageMode && $store.flip.rightToLeft" class="manga_area flex flex-row w-full m-0 p-0 justify-center-safe item-center">
+			<!-- 双页模式第一页 -->
+			<img
+				id="DoublePageModeNowImageRTL"
+				class="select-none object-contain m-0 rounded max-w-1/2 w-auto max-h-screen grow-0 "
+			/>
+			<!-- 双页模式第二页 -->
+			<img
+				id="DoublePageModeNextImageRTL"
+				x-show="$store.flip.nowPageNum < $store.flip.allPageNum"
+				class="select-none object-contain m-0 rounded max-w-1/2 w-auto max-h-screen grow-0"
+			/>
 		</div>
 		<!-- 底部的阅读进度条 -->
 		<!-- https://flowbite.com/docs/forms/range/ -->
@@ -39,8 +67,8 @@ templ MainArea(s *state.GlobalState, book *model.Book) {
 			:class="Alpine.store('flip').autoHideToolbar? 'absolute fixed bottom-0':'flex flex-col justify-center bg-base-100/50'"
 		>
 			<div class="relative w-full" :class="Alpine.store('flip').autoHideToolbar? 'mt-2.5':''">
-			    <!-- cursor-pointer:鼠标显示链接的符号（手） -->
-			    <!-- appearance-none：删除浏览器默认样式-->
+				<!-- cursor-pointer:鼠标显示链接的符号（手） -->
+				<!-- appearance-none：删除浏览器默认样式-->
 				<input
 					id="steps-range"
 					class="w-full h-2 m-0 bg-black/40 appearance-none cursor-pointer"
