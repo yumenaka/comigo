@@ -31,7 +31,7 @@ func Drawer(serverHost string, slot templ.Component) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- drawer component --><!-- https://flowbite.com/docs/components/drawer/ --><div id=\"drawer-right\" x-data=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- Drawer component --><!-- https://flowbite.com/docs/components/drawer/ --><div id=\"drawer-right\" x-data=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
