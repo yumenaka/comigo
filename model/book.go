@@ -27,6 +27,28 @@ var (
 	MainStore = Store{}
 )
 
+// GetBookGroupByBookID 通过数组 ID 获取书组信息
+func GetBookGroupByBookID(id string) (*BookGroup, error) {
+	if value, ok := mapBookGroup.Load(id); ok {
+		return value.(*BookGroup), nil
+	}
+	return nil, errors.New("cannot find book, id=" + id)
+}
+
+// GetBookGroupIDByBookID 通过子书籍 ID 获取所属书组 ID
+func GetBookGroupIDByBookID(id string) (string, error) {
+	for _, value := range mapBookGroup.Range {
+		group := value.(*BookGroup)
+		for _, v := range group.ChildBook.Range {
+			b := v.(*BookInfo)
+			if b.BookID == id {
+				return group.BookID, nil
+			}
+		}
+	}
+	return "", errors.New("cannot find group, id=" + id)
+}
+
 // ClearAllBookData  清空所有书籍与虚拟书组数据
 func ClearAllBookData() {
 	ClearBookData()
@@ -122,13 +144,6 @@ func (b *Book) setPageNum() {
 	b.PageCount = len(b.Pages.Images)
 }
 
-// initCover 设置封面信息
-func (b *Book) initCover() {
-	if len(b.Pages.Images) >= 1 {
-		b.Cover = b.Pages.Images[0]
-	}
-}
-
 // AddBooks 添加一组书
 func AddBooks(list []*Book, basePath string, minPageNum int) error {
 	for _, b := range list {
@@ -165,7 +180,6 @@ func AddBook(b *Book, basePath string, minPageNum int) error {
 			logger.Infof("Error adding subfolder: %s", err)
 		}
 	}
-
 	mapBooks.Store(b.BookID, b)
 	return MainStore.AddBookToSubStore(basePath, &b.BookInfo)
 }
@@ -180,7 +194,7 @@ func GetBooksNumber() int {
 	// 用于计数的变量
 	var count int
 	// 遍历 map 并递增计数器
-	for _, _ = range mapBooks.Range {
+	for range mapBooks.Range {
 		count++
 	}
 	return count
@@ -231,20 +245,6 @@ func GetRandomBook() (*Book, error) {
 		return value, nil // 这里可以改为随机选择
 	}
 	return nil, errors.New("cannot find any book")
-}
-
-// GetBookGroupIDByBookID 通过子书籍 ID 获取所属书组 ID
-func GetBookGroupIDByBookID(id string) (string, error) {
-	for _, value := range mapBookGroup.Range {
-		group := value.(*BookGroup)
-		for _, v := range group.ChildBook.Range {
-			b := v.(*BookInfo)
-			if b.BookID == id {
-				return group.BookID, nil
-			}
-		}
-	}
-	return "", errors.New("cannot find group, id=" + id)
 }
 
 // GetBookGroupInfoByChildBookID 通过子书籍 ID 获取所属书组信息
@@ -323,7 +323,6 @@ func (b *Book) SortPages(s string) {
 		b.Pages.SortBy = s
 		sort.Sort(b.Pages)
 	}
-	b.initCover() // 重新排序后重新设置封面
 }
 
 // SortPagesByImageList 根据给定的文件列表排序页面（用于 EPUB）
@@ -359,7 +358,6 @@ func (b *Book) SortPagesByImageList(imageList []string) {
 		}
 	}
 	b.Pages.Images = reSortList
-	b.initCover()
 }
 
 // md5string 计算字符串的 MD5 值

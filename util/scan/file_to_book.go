@@ -38,12 +38,10 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 		if err != nil {
 			return nil, err
 		}
-	case model.TypeVideo:
-		handleMediaFiles(newBook, "video.png", "/images/video.png")
-	case model.TypeAudio:
-		handleMediaFiles(newBook, "audio.png", "/images/audio.png")
+	case model.TypeVideo, model.TypeAudio:
+		handleMediaFiles(newBook)
 	case model.TypeUnknownFile:
-		handleMediaFiles(newBook, "unknown.png", "/images/unknown.png")
+		handleMediaFiles(newBook)
 	default:
 		err = handleOtherArchiveFiles(filePath, newBook, scanOption)
 		if err != nil {

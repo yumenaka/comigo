@@ -199,10 +199,6 @@ func GetBookFromDatabase(filepath string) (*model.Book, error) {
 			ImgType:  v.ImgType,
 		})
 	}
-	//设置封面
-	if len(b.Pages.Images) > 0 {
-		b.SetCover(b.Pages.Images[0])
-	}
 	if err != nil {
 		logger.Infof("%s", err)
 	}
@@ -269,21 +265,6 @@ func GetBooksFromDatabase() (list []*model.Book, err error) {
 				Path:     v.Path,
 				ImgType:  v.ImgType,
 			})
-		}
-		//设置封面
-		if len(b.Pages.Images) > 0 {
-			b.SetCover(b.Pages.Images[0])
-		}
-		//硬写一个封面
-		switch b.Type {
-		case model.TypePDF:
-			b.SetCover(model.MediaFileInfo{Name: "pdf.png", Url: "/images/pdf.png"})
-		case model.TypeVideo:
-			b.SetCover(model.MediaFileInfo{Name: "video.png", Url: "/images/video.png"})
-		case model.TypeAudio:
-			b.SetCover(model.MediaFileInfo{Name: "audio.png", Url: "/images/audio.png"})
-		case model.TypeUnknownFile:
-			b.SetCover(model.MediaFileInfo{Name: "unknown.png", Url: "/images/unknown.png"})
 		}
 		list = append(list, &b)
 	}

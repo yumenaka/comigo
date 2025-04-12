@@ -38,23 +38,23 @@ templ Header(prop HeaderProps) {
 			if prop.ShowReturnIcon {
 				<!-- 返回箭头,点击返回上一页 -->
 				<a href={ templ.SafeURL(prop.ReturnUrl) }>
-					<div class="flex justify-center items-center w-8 h-10 mx-1 my-0 rounded hover:ring">
+					<div class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
 						@svg.Return()
 					</div>
 				</a>
 			}
 			<!-- 新服务器设置 -->
-			<a href="/settings" class="flex justify-center items-center w-8 h-10 mx-1 my-0 rounded hover:ring">
+			<a href="/settings" class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
 				@svg.ServerDisk()
 			</a>
             if prop.InShelf {
 				<!-- 上传按钮，点击进入上传页面 -->
-				<a href="/upload" class="w-8 pt-1 mx-1 my-0 rounded hover:ring ">
+				<a href="/upload" class="w-10 mx-1 my-0 rounded hover:ring ">
 					@svg.Upload()
 				</a>
 			}
 			<!-- 文件重排序 Dropdown Menu： https://flowbite.com/docs/components/dropdowns/ -->
-			<svg class="flex justify-center items-center w-8 h-10 mx-1 my-0 rounded hover:ring" id="dropdownHoverButton" data-dropdown-toggle="ReSortDropdown" data-dropdown-trigger="click" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24">
+			<svg class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring" id="dropdownHoverButton" data-dropdown-toggle="ReSortDropdown" data-dropdown-trigger="click" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24">
 				<path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z" fill="currentColor"></path>
 			</svg>
 			<div
@@ -105,33 +105,33 @@ templ Header(prop HeaderProps) {
 				<ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
 					<li>
 						<a href="#" @click.prevent="setCookie('filename')" x-text="i18next.t('sort_by_filename')" 
-                           :class="{'bg-gray-100 dark:bg-gray-600 font-bold border-1 rounded': currentSortBy === 'filename'}"
-                           class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"></a>
+                           :class="{'bg-gray-300 dark:bg-gray-600 font-bold border-1 rounded': currentSortBy === 'filename'}"
+                           class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white "></a>
 					</li>
 					<li>
 						<a href="#" @click.prevent="setCookie('modify_time')" x-text="i18next.t('sort_by_modify_time')" 
-                           :class="{'bg-gray-100 dark:bg-gray-600 font-bold border-1 rounded': currentSortBy === 'modify_time'}"
-                           class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"></a>
+                           :class="{'bg-gray-300 dark:bg-gray-600 font-bold border-1 rounded': currentSortBy === 'modify_time'}"
+                           class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"></a>
 					</li>
 					<li>
 						<a href="#" @click.prevent="setCookie('filesize')" x-text="i18next.t('sort_by_filesize')" 
-                           :class="{'bg-gray-100 dark:bg-gray-600 font-bold border-1 rounded': currentSortBy === 'filesize'}"
-                           class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"></a>
+                           :class="{'bg-gray-300 dark:bg-gray-600 font-bold border-1 rounded': currentSortBy === 'filesize'}"
+                           class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"></a>
 					</li>
 					<li>
 						<a href="#" @click.prevent="setCookie('filename_reverse')" x-text="i18next.t('sort_by_filename_reverse')" 
-                           :class="{'bg-gray-100 dark:bg-gray-600 font-bold border-1 rounded': currentSortBy === 'filename_reverse'}"
-                           class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"></a>
+                           :class="{'bg-gray-300 dark:bg-gray-600 font-bold border-1 rounded': currentSortBy === 'filename_reverse'}"
+                           class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"></a>
 					</li>
 					<li>
 						<a href="#" @click.prevent="setCookie('modify_time_reverse')" x-text="i18next.t('sort_by_modify_time_reverse')" 
-                           :class="{'bg-gray-100 dark:bg-gray-600 font-bold border-1 rounded': currentSortBy === 'modify_time_reverse'}"
-                           class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"></a>
+                           :class="{'bg-gray-300 dark:bg-gray-600 font-bold border-1 rounded': currentSortBy === 'modify_time_reverse'}"
+                           class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"></a>
 					</li>
 					<li>
 						<a href="#" @click.prevent="setCookie('filesize_reverse')" x-text="i18next.t('sort_by_filesize_reverse')" 
-                           :class="{'bg-gray-100 dark:bg-gray-600 font-bold border-1 rounded': currentSortBy === 'filesize_reverse'}"
-                           class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"></a>
+                           :class="{'bg-gray-300 dark:bg-gray-600 font-bold border-1 rounded': currentSortBy === 'filesize_reverse'}"
+                           class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"></a>
 					</li>
 				</ul>
 			</div>
@@ -159,11 +159,11 @@ templ Header(prop HeaderProps) {
 							for _, book := range prop.QuickJumpBarBooks.BookInfos {
 								if prop.FlipMode {
 									<li>
-										<a href={ templ.SafeURL("/flip/" + book.BookID) } class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{ book.Title }</a>
+										<a href={ templ.SafeURL("/flip/" + book.BookID) } class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white">{ book.Title }</a>
 									</li>
 								} else {
 									<li>
-										<a href={ templ.SafeURL("/scroll/" + book.BookID) } class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{ book.Title }</a>
+										<a href={ templ.SafeURL("/scroll/" + book.BookID) } class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white">{ book.Title }</a>
 									</li>
 								}
 							}
@@ -183,17 +183,17 @@ templ Header(prop HeaderProps) {
 		<!-- 溢出 overflow-x-auto :https://www.tailwindcss.cn/docs/overflow -->
 		<div class="flex justify-between p-0 m-0 max-w-64">
 			<!-- 图标：点击显示二维码 -->
-			<div data-modal-target="qrcode-modal" data-modal-toggle="qrcode-modal" class="flex justify-center items-center w-8 h-10 mx-1 my-0 rounded hover:ring">
+			<div data-modal-target="qrcode-modal" data-modal-toggle="qrcode-modal" class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
 				@svg.QRCode()
 			</div>
 			<!-- 全屏按钮 -->
-			<div id="FullScreenIcon" class="flex justify-center items-center w-8 h-10 mx-1 my-0 rounded hover:ring">
+			<div id="FullScreenIcon" class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
 				@svg.FullScreen()
 			</div>
 			<!-- 阅读器设定,点击屏幕中央也可以打开  可自定义方向 -->
 			<!-- data-drawer-body-scrolling="true"  允许鼠标穿透，滚动下面的页面，设置此项有个好处，就是打开抽屉时背景不抖动 -->
 			<!-- https://flowbite.com/docs/components/drawer/#body-scrolling -->
-			<div class="flex justify-center items-center w-8 h-10 mx-1 my-0 rounded hover:ring" id="OpenSettingButton" data-drawer-target="drawer-right" data-drawer-show="drawer-right" aria-controls="drawer-right" data-drawer-placement="right" data-drawer-body-scrolling="true">
+			<div class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring" id="OpenSettingButton" data-drawer-target="drawer-right" data-drawer-show="drawer-right" aria-controls="drawer-right" data-drawer-placement="right" data-drawer-body-scrolling="true">
 				@svg.Setting()
 			</div>
 		</div>

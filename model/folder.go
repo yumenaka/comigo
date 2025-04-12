@@ -86,10 +86,6 @@ func (s *subStore) AnalyzeFolder() error {
 			//初始化ChildBook
 			//然后把同一parent的书，都加进某个书籍组
 			for i, bookInList := range sameParentBookList {
-				//顺便设置一下封面，只设置一次
-				if i == 0 {
-					newBookGroup.SetCover(bookInList.Cover)
-				}
 				newBookGroup.ChildBook.Store(bookInList.BookID, &sameParentBookList[i])
 			}
 			newBookGroup.ChildBookNum = len(sameParentBookList)
