@@ -21,11 +21,11 @@ func Handler(c echo.Context) error {
 		logger.Infof("GetBookByID: %v", err)
 	}
 	// 没有找到书，显示 HTTP 404 错误
-	indexTemplate := common.MainLayout(
+	indexTemplate := common.Html(
 		c,
 		&state.Global,
 		error_page.NotFound404(&state.Global),
-		"",
+		[]string{},
 	)
 
 	//// TODO：加密链接的时候，设置Secure为true
@@ -77,11 +77,11 @@ func Handler(c echo.Context) error {
 		// 翻页模式页面主体
 		FlipPage := FlipPage(&state.Global, book)
 		// 拼接页面
-		indexTemplate = common.MainLayout(
+		indexTemplate = common.Html(
 			c,
 			&state.Global,
 			FlipPage, // define body content
-			"static/flip.js")
+			[]string{"static/flip.js"})
 	}
 
 	// 渲染404或者正常页面

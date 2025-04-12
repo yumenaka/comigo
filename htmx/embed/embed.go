@@ -17,6 +17,37 @@ var StaticFS fs.FS
 var Images embed.FS
 var ImagesFS fs.FS
 
+// GetCSS 在页面中插入需要的css代码
+func GetCSS(oneFileMode bool) (cssString string) {
+	if oneFileMode {
+		cssString = "<style>" + GetFileStr("static/styles.css") + "</style>\n"
+	} else {
+		cssString = "<link rel=\"stylesheet\" href=\"/static/styles.css\">\n"
+	}
+	//fmt.Println("cssString:", cssString)
+	return cssString
+}
+
+// GetJavaScript 在页面中插入需要的js代码
+func GetJavaScript(oneFileMode bool, insertScript []string) (jsString string) {
+	//<!-- 通用js代码,初始化htmx、Alpine等第三方库  -->
+	if oneFileMode {
+		jsString = "<script>" + GetFileStr("static/main.js") + "</script>\n"
+	} else {
+		jsString = "<script src=\"/static/main.js\"></script>\n"
+	}
+	for _, script := range insertScript {
+		if oneFileMode {
+			jsString += "<script>" + GetFileStr(script) + "</script>\n"
+
+		} else {
+			jsString += "<script src=\"/" + script + "\"></script>\n"
+		}
+	}
+	//fmt.Println("jsString:", jsString)
+	return jsString
+}
+
 // GetFileStr 从Static获取字符串形式的脚本
 func GetFileStr(filePath string) string {
 	// 使用ReadFile从嵌入文件系统中读取文件内容
