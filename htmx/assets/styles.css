@@ -7,6 +7,13 @@
 @plugin "flowbite/plugin";
 @source "../node_modules/flowbite";
 
+
+/*一个适用于所有块状元素的调试样式（仅在本地调试使用，不要上线）*/
+/** {*/
+/*  outline: 1px solid red; !* or一些其他明显的调试色 *!*/
+/*}*/
+
+
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -51,6 +58,8 @@ body {
 .scroll-hidden::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
 }
+
+
 
 /* Alpine.js styles */
 

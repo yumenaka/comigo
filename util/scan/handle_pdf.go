@@ -22,8 +22,6 @@ func handlePdfFiles(filePath string, newBook *model.Book) error {
 	logger.Infof(locale.GetString("scan_pdf")+" %s: %d pages", filePath, pageCount)
 	newBook.PageCount = pageCount
 	newBook.InitComplete = true
-	newBook.SetCover(model.MediaFileInfo{Url: "/images/pdf.png"})
-
 	for i := 1; i <= pageCount; i++ {
 		tempURL := "/api/get_file?id=" + newBook.BookID + "&filename=" + strconv.Itoa(i) + ".jpg"
 		newBook.Pages.Images = append(newBook.Pages.Images, model.MediaFileInfo{

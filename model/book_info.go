@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/jxskiss/base62"
 	"github.com/yumenaka/comigo/util"
@@ -46,7 +47,6 @@ func NewBaseInfo(b *Book) *BookInfo {
 		Author:          b.Author,
 		BookID:          b.BookID,
 		BookStorePath:   b.BookStorePath,
-		Cover:           b.Cover,
 		ChildBookNum:    b.ChildBookNum,
 		Deleted:         b.Deleted,
 		Depth:           b.Depth,
@@ -81,12 +81,6 @@ func (b *BookInfo) initBookID() *BookInfo {
 	// 4. 紧凑，生成的字符串比 Base32 短
 	b62 := base62.EncodeToString([]byte(md5string(md5string(tempStr))))
 	b.BookID = getShortBookID(b62, 7)
-	return b
-}
-
-// SetCover 设置封面
-func (b *BookInfo) SetCover(c MediaFileInfo) *BookInfo {
-	b.Cover = c
 	return b
 }
 
@@ -130,37 +124,64 @@ func (b *BookInfo) setTitle(filePath string) *BookInfo {
 	return b
 }
 
-// ShortTitle 返回简短的标题
-func (b *BookInfo) ShortTitle() string {
+var (
+	// 一次性移除所有括号（中英文括号、方括号等）及其中的内容
+	reBracket = regexp.MustCompile(`[\(\[（【][^)\]）】]+[)\]）】]`)
+
+	// 只删除结尾处的常见扩展名（如需全局移除可去掉 $）
+	reExt = regexp.MustCompile(`\.(zip|rar|cbr|cbz|tar|pdf|mp3|mp4|flv|gz|webm|gif|png|jpg|jpeg|webp|svg|psd|bmp|tif)$`)
+
+	// 如果只想移除开头的 domain 就保留 ^；想全局替换就去掉 ^
+	domainReg = regexp.MustCompile(`^(((ht|f)tps?)://)?([^!@#$%^&*?.\s-]([^!@#$%^&*?.\s]{0,63}[^!@#$%^&*?.\s])?\.)+[a-zA-Z]{2,6}/?`)
+
+	// 去除开头的所有空白
+	reLeadingSpace = regexp.MustCompile(`^\s+`)
+
+	// 去除开头的一连串标点符号
+	reLeadingPunct = regexp.MustCompile(`^[\-` + "`" + `~!@#$^&*()=|{}':;'@#￥……&*（）——|{}‘；：”“'。，、？]+`)
+)
+
+// ShortName 返回简短的标题（文件名）
+func (b *BookInfo) ShortName() string {
 	shortTitle := b.Title
-	// 使用预编译正则表达式进行替换
-	shortTitle = re1.ReplaceAllString(shortTitle, "")
-	shortTitle = re2.ReplaceAllString(shortTitle, "")
-	shortTitle = re3.ReplaceAllString(shortTitle, "")
+
+	// 1. 移除所有括号及内部描述
+	shortTitle = reBracket.ReplaceAllString(shortTitle, "")
+
+	// 2. 移除常见文件扩展名
+	shortTitle = reExt.ReplaceAllString(shortTitle, "")
+
+	// 3. 移除域名（可视需要决定是否保留 ^）
 	shortTitle = domainReg.ReplaceAllString(shortTitle, "")
-	shortTitle = re4.ReplaceAllString(shortTitle, "")
-	shortTitle = re5.ReplaceAllString(shortTitle, "")
-	// [过度简化]如果标题长度小于 2，返回前 15 个字符
-	if len([]rune(shortTitle)) < 2 && len([]rune(b.Title)) > 15 {
-		return string([]rune(b.Title)[:15]) + "…"
+
+	// 4. 去除开头空格
+	shortTitle = reLeadingSpace.ReplaceAllString(shortTitle, "")
+
+	// 5. 去除开头标点
+	shortTitle = reLeadingPunct.ReplaceAllString(shortTitle, "")
+
+	// 转成 rune，便于按字符截取
+	runes := []rune(shortTitle)
+
+	// [过度简化] 如果简化后标题过短，但原标题很长，则截原标题前 15 个字符带省略号
+	if len(runes) < 2 && utf8.RuneCountInString(b.Title) > 15 {
+		// 这里用 utf8.RuneCountInString(b.Title) 或直接 len([]rune(b.Title))
+		titleRunes := []rune(b.Title)
+		cutLen := 15
+		if len(titleRunes) < cutLen {
+			cutLen = len(titleRunes)
+		}
+		return string(titleRunes[:cutLen]) + "…"
 	}
-	// [简化标题]如果标题长度小于等于 15，返回标题
-	if len([]rune(shortTitle)) <= 15 {
+
+	// [简化标题]如果简化后长度 <= 15，直接返回
+	if len(runes) <= 15 {
 		return shortTitle
 	}
-	// [简化不完全]如果标题长度大于 15，返回前 15 个字符
-	return string([]rune(shortTitle)[:15]) + "…"
-}
 
-// 预编译正则表达式
-var (
-	re1       = regexp.MustCompile(`[\[(（【][A-Za-z0-9_\-×\s+\p{Han}\p{Hiragana}\p{Katakana}\p{Hangul}]+`)
-	re2       = regexp.MustCompile(`[]）】)]`)
-	re3       = regexp.MustCompile(`\.(zip|rar|cbr|cbz|tar|pdf|mp3|mp4|flv|gz|webm|gif|png|jpg|jpeg|webp|svg|psd|bmp|tif)`)
-	domainReg = regexp.MustCompile(`^(((ht|f)tps?)://)?([^!@#$%^&*?.\s-]([^!@#$%^&*?.\s]{0,63}[^!@#$%^&*?.\s])?\.)+[a-zA-Z]{2,6}/?`)
-	re4       = regexp.MustCompile(`^\s`)
-	re5       = regexp.MustCompile(`^[\-` + "`" + `~!@#$^&*()=|{}':;'@#￥……&*（）——|{}‘；：”“'。，、？]`)
-)
+	// [简化不完全] 超过 15 则截断加省略号
+	return string(runes[:15]) + "…"
+}
 
 // GetBookInfoListByDepth 根据深度获取书籍列表
 func GetBookInfoListByDepth(depth int, sortBy string) (*BookInfoList, error) {
@@ -246,12 +267,16 @@ func TopOfShelfInfo(sortBy string) (*BookInfoList, error) {
 		b := bookValue.(*Book)
 		if b.Depth == 0 {
 			info := NewBaseInfo(b)
+			// 设置封面图(为了兼容老版前端)TODO：升级新前端，去掉这部分
+			info.Cover = info.GetCover()
 			infoList.BookInfos = append(infoList.BookInfos, *info)
 		}
 	}
 	for _, groupValue := range mapBookGroup.Range {
 		group := groupValue.(*BookGroup)
 		if group.BookInfo.Depth == 0 {
+			// 设置封面图(为了兼容老版前端)TODO：升级新前端，去掉这部分
+			group.BookInfo.Cover = group.BookInfo.GetCover()
 			infoList.BookInfos = append(infoList.BookInfos, group.BookInfo)
 		}
 	}
@@ -296,4 +321,41 @@ func GetBookInfoListByParentFolder(parentFolder string, sortBy string) (*BookInf
 		return &infoList, nil
 	}
 	return nil, errors.New("cannot find book, parentFolder=" + parentFolder)
+}
+
+// GetCover 获取封面
+func (b *BookInfo) GetCover() MediaFileInfo {
+	switch b.Type {
+	// 书籍类型为书组的时候，遍历所有子书籍，然后获取第一个子书籍的封面
+	case TypeBooksGroup:
+		bookGroup, err := GetBookGroupByBookID(b.BookID)
+		if err != nil {
+			logger.Infof("Error getting book group: %s", err)
+			return MediaFileInfo{Name: "unknown.png", Url: "/images/unknown.png"}
+		}
+		for _, v := range bookGroup.ChildBook.Range {
+			b := v.(*BookInfo)
+			childBook, err := GetBookByID(b.BookID, "modify_time")
+			if err != nil {
+				return MediaFileInfo{Name: "unknown.png", Url: "/images/unknown.png"}
+			}
+			// 递归调用
+			return childBook.GetCover()
+		}
+	case TypeDir, TypeZip, TypeRar, TypeCbz, TypeCbr, TypeTar, TypeEpub:
+		tempBook, err := GetBookByID(b.BookID, "")
+		if err != nil || len(tempBook.Pages.Images) == 0 {
+			return MediaFileInfo{Name: "unknown.png", Url: "/images/unknown.png"}
+		}
+		return tempBook.Pages.Images[0]
+	case TypePDF:
+		return MediaFileInfo{Name: "1.jpg", Url: "/api/get_file?id=" + b.BookID + "&filename=" + "1.jpg"}
+	case TypeVideo:
+		return MediaFileInfo{Name: "video.png", Url: "/images/video.png"}
+	case TypeAudio:
+		return MediaFileInfo{Name: "audio.png", Url: "/images/audio.png"}
+	case TypeUnknownFile:
+		return MediaFileInfo{Name: "unknown.png", Url: "/images/unknown.png"}
+	}
+	return MediaFileInfo{Name: "unknown.png", Url: "/images/unknown.png"}
 }

@@ -1,8 +1,6 @@
 package state
 
 import (
-	"strings"
-
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/util"
@@ -42,12 +40,4 @@ func init() {
 	Global.ShelfBookList = nil
 	Global.ServerStatus = util.GetServerInfo(config.GetHost(), config.GetVersion(), config.GetPort(), config.GetEnableUpload(), 0)
 	ServerConfig = config.GetCfg()
-}
-
-func GetCloverBackgroundImageUrl(book *model.BookInfo) string {
-	imageUrl := book.Cover.Url
-	if strings.HasPrefix(book.Cover.Url, "/api") {
-		imageUrl = book.Cover.Url + "&resize_width=256&resize_height=360&thumbnail_mode=true"
-	}
-	return imageUrl
 }
