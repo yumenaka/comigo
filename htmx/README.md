@@ -34,7 +34,7 @@
  - [ ] 注册，阅读记录，
  - [ ] 添加[数据验证](https://dev.to/leapcell/validator-complex-structs-arrays-and-maps-validation-for-go-34ni)。
  - [ ] 优化打开浏览器与扫描逻辑，减少等待时间。可以使用[端口检测包](https://github.com/wait4x/wait4x)。
- - [ ] check：无参数的逻辑似乎不正常
+ - [ ] check：无参数的逻辑。epub页数解析似乎出现了问题。
  - [ ] SteamDeck支持（网页支持手柄操作）
 ## 提示
 
