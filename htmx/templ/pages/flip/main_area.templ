@@ -14,18 +14,31 @@ templ InsertData(bookData any, stateData any) {
 templ MainArea(s *state.GlobalState, book *model.Book) {
 	<div
 		id="mouseMoveArea"
-		class="flex flex-col items-center justify-center flex-1 w-screen max-w-screen bg-base-100"
+		class="flex flex-col items-center justify-center flex-1 w-full max-w-full h-full min-h-full bg-base-100"
 		:class="(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') ? ($store.global.bgPattern !== 'none'?$store.global.bgPattern+' bg-base-300':'bg-base-300'):($store.global.bgPattern !== 'none'?$store.global.bgPattern:'')"
 	>
 		<!-- 单页模式 -->
-		<div x-show="!$store.flip.doublePageMode" class="scroll-hidden manga_area flex flex-row w-full m-0 p-0 justify-center item-center">
-			<img
-				id="SinglePageModeNowImage"
-				class="select-none object-contain m-0 rounded max-w-screen max-h-screen h-full"
-			/>
+		<div x-show="!$store.flip.doublePageMode" class="manga_area scroll-hidden flex flex-row w-full h-full min-h-[100vh] m-0 p-0 justify-center item-center">
+			<div id="slider-container" class="relative w-full h-full flex justify-center items-center overflow-hidden">
+				<div id="slider" class="flex transition-transform duration-300 ease-out w-full h-full justify-center items-center">
+					<div id="prev-slide" draggable="false" class="slide w-full h-full flex justify-center items-center absolute">
+						<!-- 前一张图片 将在JS中动态加载 -->
+					</div>
+					<div id="current-slide" class="slide w-full h-full flex justify-center items-center absolute">
+						<img
+							id="SinglePageModeNowImage"
+							draggable="false"
+							class="object-contain m-0 rounded max-w-full max-h-full h-full"
+						/>
+					</div>
+					<div id="next-slide" draggable="false" class="slide w-full h-full flex justify-center items-center absolute">
+						<!-- 后一张图片 将在JS中动态加载 -->
+					</div>
+				</div>
+			</div>
 		</div>
 		<!-- 双页模式+日漫模式-->
-		<div x-show="$store.flip.doublePageMode && !$store.flip.rightToLeft" class="manga_area flex flex-row w-full m-0 p-0 justify-center-safe item-center">
+		<div x-show="$store.flip.doublePageMode && !$store.flip.rightToLeft" class="manga_area flex flex-row w-full h-full min-h-[100vh] m-0 p-0 justify-center-safe item-center">
 			<!-- 双页模式第二页 -->
 			<img
 				id="DoublePageModeNextImageLTR"
@@ -39,7 +52,7 @@ templ MainArea(s *state.GlobalState, book *model.Book) {
 			/>
 		</div>
 		<!-- 双页模式+美漫模式-->
-		<div x-show="$store.flip.doublePageMode && $store.flip.rightToLeft" class="manga_area flex flex-row w-full m-0 p-0 justify-center-safe item-center">
+		<div x-show="$store.flip.doublePageMode && $store.flip.rightToLeft" class="manga_area flex flex-row w-full h-full min-h-[100vh] m-0 p-0 justify-center-safe item-center">
 			<!-- 双页模式第一页 -->
 			<img
 				id="DoublePageModeNowImageRTL"
@@ -125,4 +138,54 @@ templ MainArea(s *state.GlobalState, book *model.Book) {
 		</div>
 	</div>
 	@templ.Raw("<style>" + embed.GetFileStr("static/flip.css") + "</style>")
+	<style>
+		/* 滑动切换相关样式 */
+		#slider-container {
+			touch-action: pan-y; /* 允许垂直滚动，但水平滑动会被捕获 */
+			user-select: none; /* 防止文本选择 */
+			min-height: 100vh; /* 至少占据视口高度的100% */
+		}
+		
+		#slider {
+			width: 100%;
+			height: 100%;
+			min-height: 100vh; /* 至少占据视口高度的100% */
+			will-change: transform; /* 优化动画性能 */
+		}
+		
+		.slide {
+			width: 100%;
+			height: 100%;
+			min-height: 100vh; /* 至少占据视口高度的100% */
+			flex-shrink: 0;
+			transform: translateX(0);
+		}
+		
+		/* 基本位置设置，会通过JavaScript动态调整 */
+		#prev-slide {
+			transform: translateX(-100%);
+		}
+		
+		#current-slide {
+			transform: translateX(0);
+		}
+		
+		#next-slide {
+			transform: translateX(100%);
+		}
+		
+		/* 滑动翻页模式下的样式 */
+		.swipe-enabled #slider-container {
+			cursor: grab;
+		}
+		
+		.swipe-enabled #slider-container:active {
+			cursor: grabbing;
+		}
+		
+		/* 确保manga_area有足够的高度 */
+		.manga_area {
+			min-height: 100vh !important; /* 强制设置最小高度 */
+		}
+	</style>
 }

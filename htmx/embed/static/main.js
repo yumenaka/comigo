@@ -15924,6 +15924,8 @@ Alpine.store('flip', {
     show_page_num: Alpine.$persist(false).as('flip.show_page_num'),
     //是否是右半屏翻页（从右到左） 日本漫画从左到右(false)
     rightToLeft: Alpine.$persist(false).as('flip.rightToLeft'),
+    //swipeTurn or clickTurn
+    swipeTurn: Alpine.$persist(true).as('flip.swipeTurn'),
     //双页模式
     doublePageMode: Alpine.$persist(false).as('flip.doublePageMode'),
     //自动拼合双页(TODO)

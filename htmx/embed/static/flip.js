@@ -1,12 +1,24 @@
-// 使用标准 <script> 标记插入的 JavaScript 代码
-//https://templ.guide/syntax-and-usage/script-templates/
-
 //https://www.runoob.com/js/js-strict.html
 "use strict";
 
 const book = JSON.parse(document.getElementById('NowBook').textContent);
 //console.log(book);
 // const globalState = JSON.parse(document.getElementById('GlobalState').textContent);
+
+// 滑动相关变量
+let touchStartX = 0;
+let touchEndX = 0;
+let isSwiping = false;
+let currentTranslate = 0;
+let startTime = 0;
+let animationID = 0;
+const sliderContainer = document.getElementById('slider-container');
+const slider = document.getElementById('slider');
+const prevSlide = document.getElementById('prev-slide');
+const currentSlide = document.getElementById('current-slide');
+const nextSlide = document.getElementById('next-slide');
+const threshold = 100; // 滑动阈值，超过这个值才会触发翻页
+const swipeTimeout = 300; // 滑动超时时间（毫秒）
 
 // 设置图片资源，预加载等
 // 需要 HTTP 响应头中允许缓存（没有使用 Cache-Control: no-cache），也就是 gin 不能用htmx/router/server.go 里面的noCache 中间件。
@@ -19,14 +31,17 @@ function setImageSrc() {
     const totalImages = images.length;
 
     if (nowPageNum !== 0 && nowPageNum <= totalImages) {
-        console.log("setImageSrc: nowPageNum", nowPageNum);
-        console.log("setImageSrc: NowImage", images[nowPageNum - 1].url);
+        // console.log("setImageSrc: nowPageNum", nowPageNum);
+        // console.log("setImageSrc: NowImage", images[nowPageNum - 1].url);
         // 加载当前图片
         document.getElementById('SinglePageModeNowImage').src = images[nowPageNum - 1].url;
         document.getElementById('DoublePageModeNowImageLTR').src = images[nowPageNum - 1].url;
         document.getElementById('DoublePageModeNowImageRTL').src = images[nowPageNum - 1].url;
 
         preloadedImages.add(images[nowPageNum - 1].url);
+        // 更新滑动容器中的图片
+        updateSliderImages(nowPageNum, images);
+        
         // 为双页模式，加载下一张图片。
         // 因为用户有可能随时切换到双页模式，所以单页模式也预加载图片（尽管看不到）
         if (nowPageNum < totalImages) {
@@ -52,6 +67,324 @@ function setImageSrc() {
     }
 }
 
+// 更新滑动容器中的图片
+function updateSliderImages(nowPageNum, images) {
+    const totalImages = images.length;
+    const isRTL = Alpine.store('flip').rightToLeft;
+    
+    // 根据阅读方向设置滑动元素的位置
+    if (slider) {
+        const prevSlideElement = document.getElementById('prev-slide');
+        const nextSlideElement = document.getElementById('next-slide');
+        
+        if (isRTL) {
+            // 美漫模式：prev在左侧，next在右侧
+            prevSlideElement.style.transform = 'translateX(-100%)';
+            nextSlideElement.style.transform = 'translateX(100%)';
+        } else {
+            // 日漫模式：prev在右侧，next在左侧
+            prevSlideElement.style.transform = 'translateX(100%)';
+            nextSlideElement.style.transform = 'translateX(-100%)';
+        }
+    }
+    
+    // 添加前一张图片（如果存在）
+    if (nowPageNum > 1) {
+        const prevImg = document.createElement('img');
+        prevImg.src = images[nowPageNum - 2].url;
+        prevImg.className = 'object-contain m-0 rounded max-w-full max-h-full h-full';
+        prevImg.draggable=false;
+        prevSlide.innerHTML = '';
+        prevSlide.appendChild(prevImg);
+    } else {
+        prevSlide.innerHTML = '';
+    }
+    
+    // 更新当前图片 (确保当前图片也在这里更新，以防万一)
+    const currentImgElement = document.getElementById('SinglePageModeNowImage');
+    if (currentImgElement && nowPageNum >= 1 && nowPageNum <= totalImages) {
+         currentImgElement.src = images[nowPageNum - 1].url;
+    }
+
+    // 添加后一张图片（如果存在）
+    if (nowPageNum < totalImages) {
+        const nextImg = document.createElement('img');
+        nextImg.src = images[nowPageNum].url;
+        nextImg.className = 'object-contain m-0 rounded max-w-full max-h-full h-full';
+        nextImg.draggable=false;
+        nextSlide.innerHTML = '';
+        nextSlide.appendChild(nextImg);
+    } else {
+        nextSlide.innerHTML = '';
+    }
+    
+    // 确保滑动容器在更新图片后回到初始位置 (没有动画)
+    // 这一步很关键，因为内容已经换成了新页面
+    if (slider) {
+       slider.style.transition = 'none'; // 暂时禁用过渡效果，防止闪烁
+       slider.style.transform = 'translateX(0)';
+       // 强制浏览器重新计算样式，确保 `transition = 'none'` 生效
+       slider.offsetHeight; // 读取offsetHeight可以触发重排
+       slider.style.transition = ''; // 恢复过渡效果
+    }
+    resetSlider(); // 清理状态 (currentTranslate = 0, cancel animation)
+}
+
+// 重置滑动状态
+function resetSlider() {
+    if (slider) {
+        cancelAnimationFrame(animationID);
+        // 不再立即设置 transform
+        currentTranslate = 0;
+    }
+}
+
+// 触摸开始事件处理
+function touchStart(e) {
+    // 根据swipeTurn的值决定是否启用滑动翻页
+    if (!Alpine.store('flip').swipeTurn || Alpine.store('flip').doublePageMode === true) return;
+    
+    startTime = new Date().getTime();
+    isSwiping = true;
+    touchStartX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+
+    // 停止任何正在进行的动画
+    cancelAnimationFrame(animationID);
+}
+
+// 触摸移动事件处理
+function touchMove(e) {
+    if (!isSwiping || !Alpine.store('flip').swipeTurn || Alpine.store('flip').doublePageMode === true) return;
+    
+    const currentX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+    const diffX = currentX - touchStartX;
+    
+    // 判断是否应该阻止默认滚动
+    // 在第一页时不能向前翻，在最后一页时不能向后翻
+    const nowPageNum = Alpine.store('flip').nowPageNum;
+    const allPageNum = Alpine.store('flip').allPageNum;
+    const isRTL = Alpine.store('flip').rightToLeft;
+
+    if ((nowPageNum === 1 && ((diffX > 0 && !isRTL) || (diffX < 0 && isRTL))) ||
+        (nowPageNum === allPageNum && ((diffX < 0 && !isRTL) || (diffX > 0 && isRTL)))) {
+        // 如果是第一页尝试向前翻或最后一页尝试向后翻，则减小滑动效果
+        currentTranslate = diffX / 3;
+    } else {
+        currentTranslate = diffX;
+    }
+    
+    // 应用变换
+    slider.style.transform = `translateX(${currentTranslate}px)`;
+    
+    // 防止页面滚动
+    if (Math.abs(diffX) > 10) {
+        e.preventDefault();
+    }
+}
+
+// 触摸结束事件处理
+function touchEnd(e) {
+    // 根据swipeTurn的值决定是否滑动翻页
+    if (!isSwiping || !Alpine.store('flip').swipeTurn || Alpine.store('flip').doublePageMode === true) return;
+
+    isSwiping = false;
+    const endTime = new Date().getTime();
+    const timeElapsed = endTime - startTime;
+
+    touchEndX = e.type === 'touchend' ? e.changedTouches[0].clientX : e.clientX;
+    const diffX = touchEndX - touchStartX;
+    
+    const nowPageNum = Alpine.store('flip').nowPageNum;
+    const allPageNum = Alpine.store('flip').allPageNum;
+    const isRTL = Alpine.store('flip').rightToLeft;
+    
+    // 判断是否应该翻页（基于滑动距离和速度）
+    const isQuickSwipe = timeElapsed < swipeTimeout && Math.abs(diffX) > 50;
+    // 用于记录滑动方向
+    let direction = null;
+    if (diffX < -threshold || (isQuickSwipe && diffX < 0)){
+        // 向左滑动
+        direction = 'left';
+    } else if (diffX > threshold || (isQuickSwipe && diffX > 0))  {
+        // 向右滑动
+        direction = 'right';
+    }
+    // 如果是美漫模式，向左滑动是下一页，向右滑动是上一页
+    if(isRTL){
+        // 如果是最后一页尝试向后翻，禁止滑动
+        if (nowPageNum >= allPageNum && diffX < 0){
+            direction = null;
+        }
+        // 如果是第一页尝试向前翻，禁止滑动
+        if(nowPageNum === 1 && diffX > 0){
+            direction = null;
+        }
+    }
+    // 如果是日漫模式，向左滑动是上一页，向右滑动是下一页
+    if(!isRTL){
+        // 如果是最后一页尝试向后翻，禁止滑动
+        if (nowPageNum >= allPageNum && diffX > 0){
+            direction = null;
+        }
+        // 如果是第一页尝试向前翻，禁止滑动
+        if (nowPageNum === 1 && diffX < 0){
+            direction = null;
+        }
+    }
+    console.log("isRTL:", isRTL);
+    console.log("touchEnd: diffX", diffX);
+    console.log("touchEnd: direction", direction);
+    console.log("nowPageNum:", nowPageNum);
+    console.log("allPageNum:", allPageNum);
+
+    
+    if (direction) {
+        // 如果确定了滑动方向，执行滑动动画及后续翻页
+        animateSlide(direction); 
+    } else {
+        // 没有足够的滑动距离或在边界，回到原始位置
+        animateReset();
+    }
+}
+
+// 修改 animateSlideOut 为 animateSlide，处理滑动动画和翻页逻辑
+function animateSlide(direction) {
+    const width = window.innerWidth;
+
+    // 根据滑动方向确定目标位置
+    let targetPosition = direction === 'left' ? -width : width;
+    // 左滑是下一页（移到左侧），右滑是上一页（移到右侧）
+    const isRTL = Alpine.store('flip').rightToLeft;
+    
+    let startTime = null;
+    const duration = 300; // 动画持续时间，单位毫秒
+    const startPosition = currentTranslate; // 记录动画开始时的位置
+    
+    function animate(timestamp) {
+        if (!startTime) startTime = timestamp;
+        const elapsed = timestamp - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        // 使用缓动函数使动画更平滑
+        const easeProgress = easeOutCubic(progress);
+        
+        // 计算当前位置（从startPosition到targetPosition的过渡）
+        const position = startPosition + (targetPosition - startPosition) * easeProgress;
+        
+        // 应用变换
+        slider.style.transform = `translateX(${position}px)`;
+        
+        if (progress < 1) {
+            animationID = requestAnimationFrame(animate);
+        } else {
+            // 动画完成后执行翻页逻辑
+            // 1. 确定调用哪个翻页函数
+            let flipFunction = null;
+            if (isRTL) {
+                flipFunction = direction === 'left' ? toNextPage : toPreviousPage;
+            } else {
+                flipFunction = direction === 'left' ? toPreviousPage : toNextPage;
+            }
+            
+            // 2. 执行翻页 (这会触发页面号码更新和 setImageSrc -> updateSliderImages)
+            if (flipFunction) {
+               flipFunction(); 
+               // updateSliderImages 会负责加载新内容并将 slider transform 重置为 translateX(0)
+            } else {
+               // 以防万一没有确定翻页函数，动画重置回去
+               animateReset();
+            }
+        }
+    }
+    
+    // 启动动画
+    animationID = requestAnimationFrame(animate);
+}
+
+// 动画回到原始位置
+function animateReset() {
+    let startTime = null;
+    const duration = 400; // 动画持续时间，单位毫秒
+    const startPosition = currentTranslate;
+    
+    function animate(timestamp) {
+        if (!startTime) startTime = timestamp;
+        const elapsed = timestamp - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        // 使用缓动函数使动画更平滑
+        const easeProgress = easeOutCubic(progress);
+        
+        // 计算当前位置（从startPosition到0的过渡）
+        const position = startPosition * (1 - easeProgress);
+        
+        // 应用变换
+        slider.style.transform = `translateX(${position}px)`;
+        
+        if (progress < 1) {
+            animationID = requestAnimationFrame(animate);
+        } else {
+            // 动画完成后，确保transform为0并清理状态
+            if (slider) {
+                slider.style.transform = 'translateX(0)';
+            }
+            resetSlider(); // 清理状态 (currentTranslate = 0, cancel animation)
+        }
+    }
+
+    // 启动动画
+    animationID = requestAnimationFrame(animate);
+}
+
+// 缓动函数 - 使动画更自然
+function easeOutCubic(x) {
+    return 1 - Math.pow(1 - x, 3);
+}
+
+// 为滑动容器添加事件监听器
+document.addEventListener('DOMContentLoaded', function() {
+    // 初始化滑动相关元素
+    const sliderContainer = document.getElementById('slider-container');
+    const slider = document.getElementById('slider');
+    const prevSlide = document.getElementById('prev-slide');
+    const currentSlide = document.getElementById('current-slide');
+    const nextSlide = document.getElementById('next-slide');
+    
+    if (sliderContainer && slider) {
+        // 触摸事件（移动设备）
+        sliderContainer.addEventListener('touchstart', touchStart);
+        sliderContainer.addEventListener('touchmove', touchMove, { passive: false });
+        sliderContainer.addEventListener('touchend', touchEnd);
+        
+        // 鼠标事件（PC）
+        sliderContainer.addEventListener('mousedown', touchStart);
+        sliderContainer.addEventListener('mousemove', touchMove);
+        sliderContainer.addEventListener('mouseup', touchEnd);
+        sliderContainer.addEventListener('mouseleave', touchEnd);
+        
+        // 初始化滑动容器中的图片
+        const nowPageNum = Alpine.store('flip').nowPageNum;
+        const images = book.pages.images;
+        updateSliderImages(nowPageNum, images);
+        
+        // 确保立即设置滑动模式状态
+        updateSwipeState();
+    }
+});
+
+// 监听rightToLeft值的变化，动态更新滑动方向
+document.addEventListener('alpine:initialized', () => {
+    if (window.Alpine) {
+        // 当rightToLeft值变化时更新滑动方向
+        Alpine.effect(() => {
+            const isRTL = Alpine.store('flip').rightToLeft;
+            const nowPageNum = Alpine.store('flip').nowPageNum;
+            if (nowPageNum > 0) {
+                updateSliderImages(nowPageNum, book.pages.images);
+            }
+        });
+    }
+});
 
 //首次加载时
 setImageSrc();
@@ -163,7 +496,7 @@ function hideToolbar() {
 }
 
 function startHideTimer() {
-    hideTimeout = setTimeout(hideToolbar, 1000); // 3 seconds
+    hideTimeout = setTimeout(hideToolbar, 1500); // 1.5 seconds
 }
 
 if (Alpine.store('flip').autoHideToolbar) {
@@ -217,9 +550,11 @@ function scrollToMangaMain() {
 
 //获取鼠标位置,决定是否打开设置面板
 function onMouseClick(e) {
-    // // https://developer.mozilla.org/zh-CN/docs/Web/API/Event/stopPropagation
-    // // 相当于 Alpinejs的  @click.stop="onMouseMove()" ? https://alpinejs.dev/directives/on#prevent
-    // e.stopPropagation();
+    // 如果正在滑动，则不处理点击事件
+    if (isSwiping || Math.abs(currentTranslate) > 10) {
+        return;
+    }
+    
     let clickX = e.x; //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
     //浏览器的视口宽,不包括工具栏和滚动条:
     let innerWidth = window.innerWidth
@@ -540,4 +875,36 @@ function attemptReconnect() {
 // 页面加载完成后建立WebSocket连接
 window.onload = function () {
     connectWebSocket();
+    
+    // 确保滑动模式设置正确
+    updateSwipeState();
+    
+    // 延迟再次调整高度，以应对某些异步加载情况
+    setTimeout(() => {
+        updateSwipeState();
+    }, 500);
 };
+
+// 更新滑动相关状态
+function updateSwipeState() {
+    // 如果slider-container存在，则根据swipeTurn状态更新其样式
+    const sliderContainer = document.getElementById('slider-container');
+    if (sliderContainer) {
+        if (Alpine.store('flip').swipeTurn) {
+            sliderContainer.classList.add('swipe-enabled');
+        } else {
+            sliderContainer.classList.remove('swipe-enabled');
+        }
+    }
+}
+
+// 监听swipeTurn的变化
+document.addEventListener('alpine:initialized', () => {
+    if (window.Alpine) {
+        // 当swipeTurn值变化时更新样式
+        Alpine.effect(() => {
+            const isSwipe = Alpine.store('flip').swipeTurn;
+            updateSwipeState();
+        });
+    }
+});

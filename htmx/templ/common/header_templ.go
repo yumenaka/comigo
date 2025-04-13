@@ -48,7 +48,7 @@ func Header(prop HeaderProps) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		var templ_7745c5c3_Var2 = []any{"toolbar flex flex-row justify-between w-full h-12 p-1 border-b  bg-base-100 text-base-content border-slate-400", templ.KV("mx-auto bg-base-100/50 backdrop-blur-3xl", prop.FlipMode)}
+		var templ_7745c5c3_Var2 = []any{"z-10 toolbar flex flex-row justify-between w-full h-12 p-1 border-b bg-base-100 text-base-content border-slate-400", templ.KV("mx-auto bg-base-100/50 backdrop-blur-3xl", prop.FlipMode)}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err

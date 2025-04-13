@@ -29,7 +29,7 @@ templ Header(prop HeaderProps) {
 		if !prop.FlipMode {
 			x-data="{ FlipMode: false }"
 		}
-		class={ "toolbar flex flex-row justify-between w-full h-12 p-1 border-b  bg-base-100 text-base-content border-slate-400",templ.KV("mx-auto bg-base-100/50 backdrop-blur-3xl", prop.FlipMode) }
+		class={ "z-10 toolbar flex flex-row justify-between w-full h-12 p-1 border-b bg-base-100 text-base-content border-slate-400",templ.KV("mx-auto bg-base-100/50 backdrop-blur-3xl", prop.FlipMode) }
 		if prop.FlipMode {
 			:class="{ 'fixed absolute top-0 ': $store.flip.autoHideToolbar}"
 		}
