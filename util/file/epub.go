@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/xml"
 	"errors"
+	"fmt"
 	"io"
 	"net/url"
 	"os"
@@ -18,12 +19,12 @@ import (
 
 // 获取epub数据（html、xml等）
 func getDataFromEpub(epubPath string, needFile string) (data []byte, err error) {
-	//必须传值
+	// 必须传值
 	if needFile == "" {
 		return nil, errors.New("needFile is empty")
 	}
-	//打开文件，只读模式
-	file, err := os.OpenFile(epubPath, os.O_RDONLY, 0400) //Use mode 0400 for a read-only // file and 0600 for a readable+writable file.
+	// 打开文件，只读模式
+	file, err := os.OpenFile(epubPath, os.O_RDONLY, 0o400) // Use mode 0400 for a read-only // file and 0600 for a readable+writable file.
 	if err != nil {
 		return
 	}
@@ -33,42 +34,50 @@ func getDataFromEpub(epubPath string, needFile string) (data []byte, err error) 
 			logger.Infof("file.Close() Error: %s", err)
 		}
 	}(file)
-	//是否是压缩包
+	// 是否是压缩包
 	format, _, err := archives.Identify(context.Background(), epubPath, file)
 	if err != nil {
 		return nil, err
 	}
-	//如果是epub文件,文件编码为UTF-8，不需要特殊处理。
+	// 如果是epub文件,文件编码为UTF-8，不需要特殊处理。
 	if ex, ok := format.(archives.Zip); ok {
-		//特殊编码
-		//ex.TextEncoding = util.GetEncodingByName(textEncoding)
+		// 特殊编码
+		// ex.TextEncoding = util.GetEncodingByName(textEncoding)
 		ctx := context.Background()
-		//这里是file，而不是sourceArchive，否则会出错。
+		found := false
+		// 这这个用法，只根据file名获取，不加文件夹内二级路径
 		err := ex.Extract(ctx, file, func(ctx context.Context, f archives.FileInfo) error {
+			// 检查是否是需要的文件
+			if f.Name() != needFile {
+				return nil
+			}
+			//fmt.Println("file.Name():"+f.Name(), "needFile:", needFile)
+			found = true
 			// 取得特定压缩文件
 			file, err := f.Open()
 			if err != nil {
 				return err
 			}
-			defer func(file io.ReadCloser) {
-				err := file.Close()
-				if err != nil {
-					logger.Infof("file.Close() Error: %s", err)
-				}
-			}(file)
 			content, err := io.ReadAll(file)
 			if err != nil {
 				return err
 			}
 			data = content
-			return err
+			file.Close()
+			return nil
 		})
-		return data, err
+		if err != nil {
+			return nil, err
+		}
+		if !found {
+			return nil, fmt.Errorf("file not found in epub: %s", needFile)
+		}
+		return data, nil
 	}
 	return nil, errors.New("getDataFromEpub Error. epubPath:" + epubPath + "  needFile:" + needFile)
 }
 
-// Container 定义结构体、映射xml结构 was generated 2022-12-09 00:41:31 by https://xml-to-go.github.io/ in Ukraine.
+// Container was generated 2025-04-15 23:51:38 by https://xml-to-go.github.io/ in Ukraine.
 type Container struct {
 	XMLName   xml.Name `xml:"container"`
 	Text      string   `xml:",chardata"`
@@ -145,27 +154,30 @@ type Package struct {
 
 // 获取OPF文件的路径
 func getOPFPath(epubPath string) (opfPath string, err error) {
-	//data, err := os.ReadFile(ContainerXMLPath)
-	//if err != nil {
-	//	logger.Infof("ReadFile Error:", err)
-	//}
-	data, err := getDataFromEpub(epubPath, "META-INF/container.xml")
+	data, err := getDataFromEpub(epubPath, filepath.Base("META-INF/container.xml"))
 	if err != nil {
-		logger.Infof("%s", err)
-		return "", errors.New("getOPFPath Error epubPath:" + epubPath)
+		logger.Infof("获取container.xml失败: %s", err)
+		return "", fmt.Errorf("getOPFPath Error: %w", err)
+	}
+	if len(data) == 0 {
+		return "", errors.New("container.xml内容为空")
 	}
 	con := new(Container)
 	err = xml.Unmarshal(data, con)
 	if err != nil {
-		logger.Infof("XML Unmarshal Error:%s", err)
+		logger.Infof("解析container.xml失败: %s", err)
+		return "", fmt.Errorf("XML Unmarshal Error: %w", err)
 	}
 	opfPath = con.Rootfiles.Rootfile.FullPath
+	if opfPath == "" {
+		return "", errors.New("container.xml中未找到有效的OPF路径")
+	}
 	return
 }
 
 // 获取html文件里的第一个img标签
 func findAttrValue(r io.Reader, imgKey string) (value string) {
-	//NewTokenizer 为给定的 Reader 返回一个新的 HTML 分词器（Tokenizer）。假定输入是 UTF-8 编码
+	// NewTokenizer 为给定的 Reader 返回一个新的 HTML 分词器（Tokenizer）。假定输入是 UTF-8 编码
 	tokenizer := html.NewTokenizer(r)
 	for tokenizer.Token().Data != "html" {
 		tt := tokenizer.Next()
@@ -177,7 +189,7 @@ func findAttrValue(r io.Reader, imgKey string) (value string) {
 			return
 		}
 		tagName, _ := tokenizer.TagName()
-		//第一个img标签
+		// 第一个img标签
 		if string(tagName) == "img" {
 			attrKey, attrValue, _ := tokenizer.TagAttr()
 			if string(attrKey) == imgKey {
@@ -234,24 +246,21 @@ func GetImageListFromEpubFile(epubPath string) (imageList []string, err error) {
 	pack := new(Package)
 	opfPath, err := getOPFPath(epubPath)
 	if err != nil {
-		logger.Infof("getOPFPath Error: %s", err)
-		return
+		return nil, fmt.Errorf("failed to get OPF file path: %w", err)
 	}
-	b, err := getDataFromEpub(epubPath, opfPath)
+	b, err := getDataFromEpub(epubPath, filepath.Base(opfPath))
 	if err != nil {
-		logger.Infof("getDataFromEpub Error: %s", err)
-		return
+		return nil, fmt.Errorf("failed to read opf file: %w", err)
 	}
 	err = xml.Unmarshal(b, pack)
 	if err != nil {
-		logger.Infof("XML Unmarshal Error: %s", err)
-		return
+		return nil, fmt.Errorf("failed to parse OPF files: %w", err)
 	}
-	//顺序信息
+	// 顺序信息
 	itemRef := pack.Spine.Itemref
-	//资源列表
+	// 资源列表
 	item := pack.Manifest.Item
-	//获取Spine里面排好序的HTML文件ID，并生成Html文件列表
+	// 获取Spine里面排好序的HTML文件ID，并生成Html文件列表
 	var htmlList []string
 	for i := 0; i < len(itemRef); i++ {
 		id := itemRef[i].Idref
@@ -263,9 +272,9 @@ func GetImageListFromEpubFile(epubPath string) (imageList []string, err error) {
 			}
 		}
 	}
-	//根据有序的html列表，解析html，生成有序图片列表，供其他模块排序用
+	// 根据有序的html列表，解析html，生成有序图片列表，供其他模块排序用
 	for i := 0; i < len(htmlList); i++ {
-		data, err := getDataFromEpub(epubPath, htmlList[i])
+		data, err := getDataFromEpub(epubPath, filepath.Base(htmlList[i]))
 		if err != nil {
 			logger.Infof("%s", err)
 			continue
@@ -274,7 +283,7 @@ func GetImageListFromEpubFile(epubPath string) (imageList []string, err error) {
 		tempSrc := findAttrValue(reader, "src")
 		src := absUrl(tempSrc, htmlList[i])
 		imageList = append(imageList, src)
-		//logger.Infof(src)
+		// logger.Infof(src)
 	}
 	return imageList, err
 }
@@ -294,18 +303,18 @@ func GetEpubMetadata(epubPath string) (metadata EpubMetadata, err error) {
 	pack := new(Package)
 	opfPath, err := getOPFPath(epubPath)
 	if err != nil {
-		logger.Infof("getOPFPath Error: %s", err)
-		return
+		logger.Infof("获取OPF文件路径失败: %s", err)
+		return EpubMetadata{}, fmt.Errorf("获取元数据失败: %w", err)
 	}
-	b, err := getDataFromEpub(epubPath, opfPath)
+	b, err := getDataFromEpub(epubPath, filepath.Base(opfPath))
 	if err != nil {
-		logger.Infof("getDataFromEpub Error: %s", err)
-		return
+		logger.Infof("读取OPF文件失败: %s", err)
+		return EpubMetadata{}, fmt.Errorf("读取OPF文件失败: %w", err)
 	}
 	err = xml.Unmarshal(b, pack)
 	if err != nil {
-		logger.Infof("XML Unmarshal Error: %s", err)
-		return
+		logger.Infof("解析OPF文件失败: %s", err)
+		return EpubMetadata{}, fmt.Errorf("解析OPF文件失败: %w", err)
 	}
 	return EpubMetadata{
 		Title:     pack.Metadata.Title,

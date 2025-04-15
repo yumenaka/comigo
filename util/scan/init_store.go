@@ -29,7 +29,16 @@ func InitStore(storePath string, option Option) ([]*model.Book, error) {
 	//	existingBooks[book.FilePath] = struct{}{}
 	//}
 
-	// 使用 HandleDirectory 进行扫描
+	// 如果书库文件夹配置了一个文件，返回一本书
+	if util.IsFile(storePathAbs) {
+		book, err := scanFileGetBook(storePathAbs, storePathAbs, 0, option)
+		if err != nil {
+			return nil, err
+		}
+		return []*model.Book{book}, nil
+	}
+
+	// 如果书库文件夹配置了文件夹，使用 HandleDirectory（不支持扫描单个文件）进行扫描
 	rootDirectoryNode, foundDirs, foundFiles, err := HandleDirectory(storePathAbs, 0, option)
 	if err != nil {
 		return nil, err
