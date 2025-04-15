@@ -2,7 +2,7 @@
 /* https://developer.mozilla.org/zh-CN/docs/Web/CSS/CSS_transitions/Using_CSS_transitions */
 #header, #StepsRangeArea {
     opacity: 1;
-    transition: opacity 0.7s ease-in-out;
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
 }
 
 #header.hidden, #StepsRangeArea.hidden {

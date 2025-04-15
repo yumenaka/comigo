@@ -92,14 +92,14 @@ function updateSliderImages(nowPageNum, images) {
     if (nowPageNum > 1) {
         const prevImg = document.createElement('img');
         prevImg.src = images[nowPageNum - 2].url;
-        prevImg.className = 'object-contain m-0 rounded max-w-full max-h-full h-full';
+        prevImg.className = 'object-contain m-0 max-w-full max-h-full h-full';
         prevImg.draggable=false;
         prevSlide.innerHTML = '';
         prevSlide.appendChild(prevImg);
     } else {
         prevSlide.innerHTML = '';
     }
-    
+
     // 更新当前图片 (确保当前图片也在这里更新，以防万一)
     const currentImgElement = document.getElementById('SinglePageModeNowImage');
     if (currentImgElement && nowPageNum >= 1 && nowPageNum <= totalImages) {
@@ -110,7 +110,7 @@ function updateSliderImages(nowPageNum, images) {
     if (nowPageNum < totalImages) {
         const nextImg = document.createElement('img');
         nextImg.src = images[nowPageNum].url;
-        nextImg.className = 'object-contain m-0 rounded max-w-full max-h-full h-full';
+        nextImg.className = 'object-contain m-0 max-w-full max-h-full h-full';
         nextImg.draggable=false;
         nextSlide.innerHTML = '';
         nextSlide.appendChild(nextImg);
@@ -481,9 +481,13 @@ function showToolbar() {
     if (Alpine.store('flip').autoHideToolbar) {
         header.style.opacity = '0.9';
         range.style.opacity = '0.9';
+        header.style.transform = 'translateY(0)';
+        range.style.transform = 'translateY(0)';
     } else {
         header.style.opacity = '1';
         range.style.opacity = '1';
+        header.style.transform = 'translateY(0)';
+        range.style.transform = 'translateY(0)';
     }
 }
 
@@ -492,6 +496,8 @@ function hideToolbar() {
     if (Alpine.store('flip').autoHideToolbar) {
         header.style.opacity = '0';
         range.style.opacity = '0';
+        header.style.transform = 'translateY(-100%)';
+        range.style.transform = 'translateY(100%)';
     }
 }
 
@@ -659,53 +665,76 @@ function onMouseMove(e) {
 // 获取两个元素的边界信息
 function getElementsRect() {
     return {
-        rect1: header.getBoundingClientRect(),
-        rect2: range.getBoundingClientRect(),
-        rect3: document.getElementById("ReSortDropdown").getBoundingClientRect(),
-        rect4: document.getElementById("QuickJumpDropdown").getBoundingClientRect(),
-        rect5: document.getElementById("StepsRangeArea").getBoundingClientRect(),
+        rect1_header: header.getBoundingClientRect(),
+        rect2_range: range.getBoundingClientRect(),
+        rect3_sort_dropdown: document.getElementById("ReSortDropdown").getBoundingClientRect(),
+        rect4_dropdown_quick_jump: document.getElementById("QuickJumpDropdown").getBoundingClientRect(),
+        rect5_steps_range_area: document.getElementById("StepsRangeArea").getBoundingClientRect(),
     };
 }
 
 document.addEventListener('mousemove', function (event) {
-    const {rect1, rect2, rect3, rect4, rect5} = getElementsRect();
+    const {rect1_header, rect2_range, rect3_sort_dropdown, rect4_dropdown_quick_jump, rect5_steps_range_area} = getElementsRect();
     const x = event.clientX;
     const y = event.clientY;
-    // 判断鼠标是否在元素 1 范围内(Header)
-    const isInElement1 = (
-        x >= rect1.left &&
-        x <= rect1.right &&
-        y >= rect1.top &&
-        y <= rect1.bottom
-    );
-    // 判断鼠标是否在元素 2 范围内(导航条)
-    const isInElement2 = (
-        x >= rect2.left &&
-        x <= rect2.right &&
-        y >= rect2.top &&
-        y <= rect2.bottom
-    );
+    let inInElement1 = false
+    let inInElement2 = false
+    // 因为header需要收起来，所以不能用left、right、top、bottom判断y是否在header的范围内
+    if (Alpine.store('flip').autoHideToolbar) {
+        // 判断鼠标是否在元素 1 范围内(Header)。。
+        inInElement1 = (
+            y<= rect1_header.height - 20
+        );
+        // 判断鼠标是否在元素 2 范围内(导航条)。因为header可能隐藏，所以不能直接用left、right、top、bottom判断y是否在header的范围内。
+        inInElement2 = (
+            y >= window.innerHeight-rect2_range.height - 20
+        );
+    }
+    // 如果工具栏不自动隐藏，用left、right、top、bottom判断y是否在header的范围内
+    if (!Alpine.store('flip').autoHideToolbar) {
+        // 判断鼠标是否在元素 1 范围内(Header)
+        inInElement1 = (
+            x >= rect1_header.left &&
+            x <= rect1_header.right &&
+            y >= rect1_header.top &&
+            y <= rect1_header.bottom
+        );
+        // 判断鼠标是否在元素 2 范围内(导航条)
+        inInElement2 = (
+            x >= rect2_range.left &&
+            x <= rect2_range.right &&
+            y >= rect2_range.top &&
+            y <= rect2_range.bottom
+        );
+    }
+
+    // console.log("x:", x);
+    // console.log("y:", y);
+    // console.log("window.innerHeight:", window.innerHeight);
+    // console.log("inInElement1:", inInElement1);
+    // console.log("inInElement2:", inInElement2);
+
     // 判断鼠标是否在元素 3 范围内(页面重新排序的下拉菜单。在菜单上面的时候，导航条需要保持显示状态。)
-    const isInElement3 = (
-        x >= rect3.left &&
-        x <= rect3.right &&
-        y >= rect3.top &&
-        y <= rect3.bottom
+    const inInElement3 = (
+        x >= rect3_sort_dropdown.left &&
+        x <= rect3_sort_dropdown.right &&
+        y >= rect3_sort_dropdown.top &&
+        y <= rect3_sort_dropdown.bottom
     );
     // 判断鼠标是否在元素 4 范围内(快速跳转的下拉菜单。在菜单上面的时候，导航条需要保持显示状态。)
-    const isInElement4 = (
-        x >= rect4.left &&
-        x <= rect4.right &&
-        y >= rect4.top &&
-        y <= rect4.bottom
+    const inInElement4 = (
+        x >= rect4_dropdown_quick_jump.left &&
+        x <= rect4_dropdown_quick_jump.right &&
+        y >= rect4_dropdown_quick_jump.top &&
+        y <= rect4_dropdown_quick_jump.bottom
     );
 
     // 判断鼠标是否在元素 5 范围内(翻页条)
-    const isInElement5 = (
-        x >= rect5.left &&
-        x <= rect5.right &&
-        y >= rect5.top &&
-        y <= rect5.bottom
+    const inInElement5 = (
+        x >= rect5_steps_range_area.left &&
+        x <= rect5_steps_range_area.right &&
+        y >= rect5_steps_range_area.top &&
+        y <= rect5_steps_range_area.bottom
     );
 
     //鼠标在设置区域
@@ -714,13 +743,13 @@ document.addEventListener('mousemove', function (event) {
         showToolbar();
     }
     // '鼠标不在任何一个元素范围内'
-    if (!isInElement1 && !isInElement2 && !isInElement3) {
+    if (!inInElement1 && !inInElement2 && !inInElement3) {
         if (inSetArea === false) {
             hideToolbar();
         }
     }
     // '鼠标在元素范围内'
-    if (isInElement1 || isInElement2 || isInElement3 || isInElement4 || isInElement5 ||inSetArea) {
+    if (inInElement1 || inInElement2 || inInElement3 || inInElement4 || inInElement5 ||inSetArea) {
         //console.log('鼠标在元素范围内');
         showToolbar();
     }
