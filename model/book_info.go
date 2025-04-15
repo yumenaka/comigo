@@ -267,16 +267,14 @@ func TopOfShelfInfo(sortBy string) (*BookInfoList, error) {
 		b := bookValue.(*Book)
 		if b.Depth == 0 {
 			info := NewBaseInfo(b)
-			// 设置封面图(为了兼容老版前端)TODO：升级新前端，去掉这部分
-			info.Cover = info.GetCover()
+			info.Cover = info.GetCover() // 设置封面图(为了兼容老版前端)TODO：升级新前端，去掉这部分
 			infoList.BookInfos = append(infoList.BookInfos, *info)
 		}
 	}
 	for _, groupValue := range mapBookGroup.Range {
 		group := groupValue.(*BookGroup)
 		if group.BookInfo.Depth == 0 {
-			// 设置封面图(为了兼容老版前端)TODO：升级新前端，去掉这部分
-			group.BookInfo.Cover = group.BookInfo.GetCover()
+			group.BookInfo.Cover = group.BookInfo.GetCover() // 设置封面图(为了兼容老版前端)TODO：升级新前端，去掉这部分
 			infoList.BookInfos = append(infoList.BookInfos, group.BookInfo)
 		}
 	}
@@ -296,6 +294,7 @@ func GetBookInfoListByID(BookID string, sortBy string) (*BookInfoList, error) {
 		tempGroup := groupValue.(*BookGroup)
 		for _, bookValue := range tempGroup.ChildBook.Range {
 			b := bookValue.(*BookInfo)
+			b.Cover = b.GetCover() // 设置封面图(为了兼容老版前端) TODO：升级前端，去掉这部分
 			infoList.BookInfos = append(infoList.BookInfos, *b)
 		}
 		if len(infoList.BookInfos) > 0 {
@@ -313,6 +312,7 @@ func GetBookInfoListByParentFolder(parentFolder string, sortBy string) (*BookInf
 		b := bookValue.(*Book)
 		if b.ParentFolder == parentFolder {
 			info := NewBaseInfo(b)
+			info.Cover = info.GetCover() // 设置封面图(为了兼容老版前端) TODO：升级前端，去掉这部分
 			infoList.BookInfos = append(infoList.BookInfos, *info)
 		}
 	}
