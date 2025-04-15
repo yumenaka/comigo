@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/yumenaka/comigo/config/stores"
+	"github.com/yumenaka/comigo/util"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
@@ -460,31 +461,27 @@ var cfg = Config{
 	ZipFileTextEncoding: "",
 }
 
-// LocalStoresExits 检查本地书库路径是否可添加
-func LocalStoresExits(path string) bool {
-	// 如果 Stat 出错（文件/文件夹不存在等）或者该路径不是目录，则返回 false
-	info, err := os.Stat(path)
-	if err != nil {
-		logger.Infof("Error checking local store path: %v", err)
-		return true
+// CanAddLocalStores 检查本地书库路径是否可添加
+func CanAddLocalStores(path string) bool {
+	// 如果文件/文件夹不存在
+	if !util.PathExists(path) {
+		logger.Infof("Path not exists: %v", path)
+		return false
 	}
-	if !info.IsDir() {
-		logger.Infof("Error checking local store path: %s is not a directory", path)
-		return true
-	}
+
 	//检查本地书库路径是否已存在
 	for _, store := range cfg.Stores {
 		if store.Type == stores.Local && store.Local.Path == path {
-			logger.Infof("Local store path already exists: %s", path)
-			return true
+			logger.Infof("Local store already exists: %s", path)
+			return false
 		}
 	}
-	return false
+	return true
 }
 
 // AddLocalStore 添加本地书库(单个路径)
 func AddLocalStore(path string) {
-	if LocalStoresExits(path) {
+	if !CanAddLocalStores(path) {
 		return
 	}
 	cfg.Stores = append(cfg.Stores, stores.Store{
@@ -499,7 +496,7 @@ func AddLocalStore(path string) {
 // AddLocalStores 添加本地书库（多个路径）
 func AddLocalStores(path []string) {
 	for _, p := range path {
-		if !LocalStoresExits(p) {
+		if CanAddLocalStores(p) {
 			AddLocalStore(p)
 		}
 	}
