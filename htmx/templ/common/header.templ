@@ -17,7 +17,7 @@ type HeaderProps struct {
 	ShowQuickJumpBar  bool
 	QuickJumpBarBooks *model.BookInfoList
 }
-// bg-base-100/50 透明背景 backdrop-blur-3xl 模糊背景
+// bg-base-100/50 透明背景 Todo:backdrop-blur-sm 模糊背景(现在不生效？)
 templ Header(prop HeaderProps) {
 	<header
 		id="header"
@@ -29,7 +29,7 @@ templ Header(prop HeaderProps) {
 		if !prop.FlipMode {
 			x-data="{ FlipMode: false }"
 		}
-		class={ "z-10 toolbar flex flex-row justify-between w-full h-12 p-1 border-b bg-base-100 text-base-content border-slate-400",templ.KV("mx-auto bg-base-100/50 backdrop-blur-3xl", prop.FlipMode) }
+		class={ "z-10 toolbar flex flex-row justify-between w-full h-12 p-1 border-b bg-base-100 text-base-content border-slate-400",templ.KV("mx-auto bg-base-100/50", prop.FlipMode) }
 		if prop.FlipMode {
 			:class="{ 'fixed absolute top-0 ': $store.flip.autoHideToolbar}"
 		}
