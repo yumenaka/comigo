@@ -42,12 +42,14 @@ templ MainArea(s *state.GlobalState, book *model.Book) {
 			<!-- 双页模式第二页 -->
 			<img
 				id="DoublePageModeNextImageLTR"
+				draggable="false"
 				x-show="$store.flip.nowPageNum < $store.flip.allPageNum"
 				class="select-none object-contain m-0 max-w-1/2 w-auto max-h-screen grow-0"
 			/>
 			<!-- 双页模式第一页 -->
 			<img
 				id="DoublePageModeNowImageLTR"
+				draggable="false"
 				class="select-none object-contain m-0 max-w-1/2 w-auto max-h-screen grow-0"
 			/>
 		</div>

@@ -17,7 +17,7 @@ templ Drawer(serverHost string, slot templ.Component) {
 				class="inline-flex items-center mb-4 text-base font-semibold"
 			>
 				<div x-text="i18next.t('reader_settings')"></div>
-				<img class="shadow-xl mx-2 w-6 h-6 rounded-full border border-stone-500 border-dotted outline-offset-4" src="/static/favicon.png" alt="comigo favicon"/>
+				<img class="shadow-xl mx-2 w-6 h-6 rounded-full border border-stone-500 border-dotted outline-offset-4" draggable="false" src="/static/favicon.png" alt="favicon for comigo"/>
 			</h5>
 			<button
 				type="button"
@@ -35,7 +35,7 @@ templ Drawer(serverHost string, slot templ.Component) {
 			<div class="place-holder w-full flex-1"></div>
 			<!-- 二维码 -->
 			<div class="p-1 mt-4 mb-2 w-36 h-36" x-data="{ qrcodeSrc: '' }" x-init="qrcodeSrc = window.location.origin +'/api/qrcode.png?qrcode_str='+ encodeURIComponent(window.location.toString().replace(window.location.hostname,serverHost))">
-				<img id="QrcodeImage"  data-modal-target="qrcode-modal" data-modal-toggle="qrcode-modal"  class="w-32 h-32" :src="qrcodeSrc"/>
+				<img id="QrcodeImage" draggable="false" data-modal-target="qrcode-modal" data-modal-toggle="qrcode-modal"  class="w-32 h-32" :src="qrcodeSrc"/>
 			</div>
 			<!-- 选择主题的select -->
 			<select

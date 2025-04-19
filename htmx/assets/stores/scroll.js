@@ -3,7 +3,7 @@ Alpine.store('scroll', {
     nowPageNum: 1,
     simplifyFilename: Alpine.$persist(true).as('scroll.simplifyFilename'), //是否简化标题
     //下拉模式下，漫画页面的底部间距。单位px。
-    marginBottomOnScrollMode: Alpine.$persist(10).as(
+    marginBottomOnScrollMode: Alpine.$persist(0).as(
         'scroll.marginBottomOnScrollMode'
     ),
     //卷轴模式下，是否无限下拉

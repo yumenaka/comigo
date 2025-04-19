@@ -15836,7 +15836,9 @@ window.cookieStorage = {
 Alpine.store('global', {
     // bgPattern 背景花纹
     bgPattern: Alpine.$persist('grid-line').as('global.bgPattern'),
+    // 自动切边
     autoCrop: Alpine.$persist(false).as('global.autoCrop'),
+    // 自动切边阈值,范围是0~100。多数情况下 1 就够了。
     autoCropNum: Alpine.$persist(1).as('global.autoCropNum'),
     // userID 当前用户ID  用于同步阅读进度 随机生成
     userID: Alpine.$persist(Math.random().toString(36).substring(2)).as('global.userID'),

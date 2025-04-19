@@ -2,6 +2,7 @@ package scan
 
 import (
 	"errors"
+	"fmt"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/util"
 	"github.com/yumenaka/comigo/util/locale"
@@ -30,11 +31,12 @@ func InitStore(storePath string, option Option) ([]*model.Book, error) {
 	//}
 
 	// 如果书库文件夹配置了一个文件，返回一本书
-	if util.IsFile(storePathAbs) {
+	if util.IsFile(storePathAbs) && option.IsSupportFile(storePathAbs) {
 		book, err := scanFileGetBook(storePathAbs, storePathAbs, 0, option)
 		if err != nil {
 			return nil, err
 		}
+		fmt.Println("-------------found_in_path:", storePathAbs)
 		return []*model.Book{book}, nil
 	}
 

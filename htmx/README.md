@@ -35,7 +35,7 @@
  - [ ] 添加[数据验证](https://dev.to/leapcell/validator-complex-structs-arrays-and-maps-validation-for-go-34ni)。
  - [ ] 优化打开浏览器与扫描逻辑，减少等待时间。可以使用[端口检测包](https://github.com/wait4x/wait4x)。
  - [ ] check：无参数的逻辑。epub页数解析似乎出现了问题。
- - [ ] SteamDeck支持（网页支持手柄操作）
+ - [ ] SteamDeck支持（网页支持手柄操作）鼠标滚轮对应
 ## 提示
 
 <https://github.com/angelofallars/htmx-go#triggers>  

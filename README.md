@@ -36,6 +36,8 @@ bash <(wget -qO- https://raw.githubusercontent.com/yumenaka/comigo/master/get_co
 
 # 如果您已设置 Golang 环境（go 1.23 or higher），也可以这样安装：
 go install github.com/yumenaka/comigo/cmd/comi@latest
+# 效果相同，但文件体积较小：
+env CGO_ENABLED=0 go install -ldflags="-s -w" github.com/yumenaka/comigo/cmd/comi@latest
 ```
 
 **手动下载**
