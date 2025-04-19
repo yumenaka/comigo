@@ -667,7 +667,7 @@ function getElementsRect() {
     return {
         rect1_header: header.getBoundingClientRect(),
         rect2_range: range.getBoundingClientRect(),
-        rect3_sort_dropdown: document.getElementById("ReSortDropdown").getBoundingClientRect(),
+        rect3_sort_dropdown: document.getElementById("ReSortDropdownMenu").getBoundingClientRect(),
         rect4_dropdown_quick_jump: document.getElementById("QuickJumpDropdown").getBoundingClientRect(),
         rect5_steps_range_area: document.getElementById("StepsRangeArea").getBoundingClientRect(),
     };

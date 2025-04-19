@@ -58,7 +58,6 @@ func Handler(c echo.Context) error {
 		//if err != nil {
 		//	logger.Infof("TopOfShelfInfo: %v", err)
 		//}
-
 		//// 图片重排方式
 		//sortPageBy, err := c.Cookie("SortPageBy")
 		//if err != nil {

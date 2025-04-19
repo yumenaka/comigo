@@ -52,6 +52,7 @@ templ MainArea(s *state.GlobalState, book *model.Book) {
 					<img
 						x-data={ getImageXData(image.Url) }
 						class="w-full manga_image"
+						draggable="false"
 						:src="imageUrl"
 						@load="
                             if ($event.target.naturalWidth > $event.target.naturalHeight) {

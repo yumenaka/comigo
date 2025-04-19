@@ -43,17 +43,15 @@ func Handler(c echo.Context) error {
 		logger.Infof("GetBookByID: %v", err)
 		return c.NoContent(http.StatusNotFound)
 	}
-	if err == nil {
-		// 定义模板主体内容。
-		scrollPage := ScrollPage(&state.Global, book)
-		// 拼接页面
-		indexTemplate = common.Html(
-			c,
-			&state.Global,
-			scrollPage, // define body content
-			[]string{},
-		)
-	}
+	// 定义模板主体内容。
+	scrollPage := ScrollPage(&state.Global, book)
+	// 拼接页面
+	indexTemplate = common.Html(
+		c,
+		&state.Global,
+		scrollPage, // define body content
+		[]string{"static/scroll.js"},
+	)
 	// 渲染页面
 	if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate); err != nil {
 		// 渲染失败，返回 HTTP 500 错误。
