@@ -2,10 +2,9 @@
 module.exports = {
   // 监视这些文件的变化，然后编译CSS
   content: [
-    '**/*.{html,templ}',
-    './node_modules/flowbite/**/*.js',
-    './node_modules/@alpinejs/persist/dist/cdn.js',
-    './router/assets/scripts.js',
+    './**/*.{html,templ}',
+    '!./node_modules/**/*',
+    './router/script/scripts.js',
   ],
   theme: {
     extend: {},

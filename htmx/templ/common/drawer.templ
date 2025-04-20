@@ -7,23 +7,23 @@ templ Drawer(serverHost string, slot templ.Component) {
 	<div
 		id="drawer-right"
 		x-data={ ServerHostBindStr(serverHost) }
-		class="fixed flex flex-col top-0 right-0 z-40 w-64 h-dvh p-4 overflow-y-auto transition-transform translate-x-full bg-base-100 text-base-content"
+		class="fixed flex flex-col top-0 right-0 z-40 w-60 h-dvh min-h-full px-2 py-1 overflow-y-auto transition-transform translate-x-full bg-base-100 text-base-content border border-gray-300 rounded"
 		tabindex="-1"
 		aria-labelledby="drawer-right-label"
 	>
-		<div class="w-full m-0 p-0 cursor-pointer border-slate-500 border-double border-b-2">
+		<div class="w-full m-0 p-0 border-slate-500">
 			<h5
 				id="drawer-right-label"
-				class="inline-flex items-center mb-4 text-base font-semibold"
+				class="inline-flex items-center mt-2 mb-0 text-base font-semibold"
 			>
-				<div x-text="i18next.t('reader_settings')"></div>
-				<img class="shadow-xl mx-2 w-6 h-6 rounded-full border border-stone-500 border-dotted outline-offset-4" draggable="false" src="/static/favicon.png" alt="favicon for comigo"/>
+			    <img class="shadow-xl mx-2 w-6 h-6 rounded-full border border-stone-500 border-dotted outline-offset-4" draggable="false" src="/images/favicon.png" alt="favicon"/>
+				<div x-text="i18next.t('reader_settings')">阅读设置</div>
 			</h5>
 			<button
 				type="button"
 				data-drawer-hide="drawer-right"
 				aria-controls="drawer-right"
-				class="font-bold rounded text-sm w-8 h-8 absolute top-2.5 end-2.5 inline-flex items-center justify-center bg-transparent hover:ring dark:hover:text-white"
+				class="font-bold rounded text-sm w-8 h-8 absolute top-1 end-1 inline-flex items-center justify-center bg-transparent hover:ring dark:hover:text-white"
 			>
 				@svg.Close()
 			</button>
@@ -34,14 +34,14 @@ templ Drawer(serverHost string, slot templ.Component) {
 			}
 			<div class="place-holder w-full flex-1"></div>
 			<!-- 二维码 -->
-			<div class="p-1 mt-4 mb-2 w-36 h-36" x-data="{ qrcodeSrc: '' }" x-init="qrcodeSrc = window.location.origin +'/api/qrcode.png?qrcode_str='+ encodeURIComponent(window.location.toString().replace(window.location.hostname,serverHost))">
-				<img id="QrcodeImage" draggable="false" data-modal-target="qrcode-modal" data-modal-toggle="qrcode-modal"  class="w-32 h-32" :src="qrcodeSrc"/>
+			<div class="p-0 mt-2 mb-2 w-32 h-32" x-data="{ qrcodeSrc: '' }" x-init="qrcodeSrc = window.location.origin +'/api/qrcode.png?qrcode_str='+ encodeURIComponent(window.location.toString().replace(window.location.hostname,serverHost))">
+				<img id="QrcodeImage" draggable="false" data-modal-target="qrcode-modal" data-modal-toggle="qrcode-modal"  class="w-32 h-32 rounded" :src="qrcodeSrc"/>
 			</div>
 			<!-- 选择主题的select -->
 			<select
 				x-model="theme"
 				x-on:change="theme = $event.target.value;console.log(theme);"
-				class="w-full h-10 mt-auto mb-2 border rounded bg-base-100 text-accent-content focus:outline-none"
+				class="py-0 h-8 mt-auto mb-2 text-sm font-semibold w-full border rounded bg-base-100 text-accent-content focus:outline-none"
 			>
 				<option value="retro">Retro</option>
 				<option value="light">Light</option>
@@ -50,7 +50,7 @@ templ Drawer(serverHost string, slot templ.Component) {
 				<option value="cupcake">Cupcake</option>
 				<option value="cyberpunk">Cyberpunk</option>
 				<option value="valentine">Valentine</option>
-				<option value="aqua">Aqua</option>
+				<option value="cmyk">CMYK</option>
 				<option value="lofi">Lofi</option>
 				<option value="halloween">Halloween</option>
 				<option value="coffee">Coffee</option>
@@ -62,7 +62,7 @@ templ Drawer(serverHost string, slot templ.Component) {
 				x-show="$store.global.debugMode"
 				x-model="$store.global.bgPattern"
 				x-on:change="$store.global.bgPattern = $event.target.value;console.log($store.global.bgPattern);"
-				class="w-full h-10 mt-auto mb-2 border rounded bg-base-100 text-accent-content focus:outline-none"
+				class="py-0 h-8 mt-auto mb-2 text-sm font-semibold w-full border rounded bg-base-100 text-accent-content focus:outline-nonee"
 			>
 				<option value="none">None</option>
 				<option value="grid-line">Grid Line</option>
@@ -73,7 +73,7 @@ templ Drawer(serverHost string, slot templ.Component) {
 			<select
 				x-model="i18next.language"
 				x-on:change="i18next.changeLanguage($event.target.value).then(location.reload())"
-				class="w-full h-10 border rounded bg-base-100 text-accent-content focus:outline-none"
+				class="py-0 h-8 mt-auto mb-2 text-sm font-semibold w-full border rounded bg-base-100 text-accent-content focus:outline-none"
 			>
 				<option value="en-US">English</option>
 				<option value="zh-CN">中文</option>

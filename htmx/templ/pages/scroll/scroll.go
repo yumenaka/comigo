@@ -50,7 +50,7 @@ func Handler(c echo.Context) error {
 		c,
 		&state.Global,
 		scrollPage, // define body content
-		[]string{"static/scroll.js"},
+		[]string{"script/scroll.js"},
 	)
 	// 渲染页面
 	if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate); err != nil {

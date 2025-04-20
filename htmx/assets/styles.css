@@ -1,3 +1,5 @@
+/*此文件需要编译，相关指令请参考 package.json*/
+
 /*在 v4 中，使用常规 CSS @import 语句导入 Tailwind，而不是使用在 v3 中使用的 @tailwind 指令*/
 @import "tailwindcss";
 /* User styles */
@@ -97,23 +99,26 @@ body {
 /* css 主题设置 from: https://github.com/saadeghi/daisyui/blob/master/src/theming/themes.js TODO：细节优化  */
 /* ------------------------------------------------ */
 @layer base {
-  color-scheme: light;
-  --primary: #ef9995;
-  --primary-content: #282425;
-  --secondary: #a4cbb4;
-  --secondary-content: #282425;
-  --accent: #DC8850;
-  --accent-content: #282425;
-  --neutral: #2E282A;
-  --neutral-content: #EDE6D4;
-  --base-100: #ece3ca;
-  --base-200: #e4d8b4;
-  --base-300: #DBCA9A;
-  --base-content: #282425;
-  --info: #2563eb;
-  --success: #16a34a;
-  --warning: #d97706;
-  --error: #f35248;
+  :root {
+    color-scheme: light;
+    --primary: #ef9995;
+    --primary-content: #282425;
+    --secondary: #a4cbb4;
+    --secondary-content: #282425;
+    --accent: #DC8850;
+    --accent-content: #282425;
+    --neutral: #2E282A;
+    --neutral-content: #EDE6D4;
+    --base-100: #ece3ca;
+    --base-200: #e4d8b4;
+    --base-300: #DBCA9A;
+    --base-content: #282425;
+    --info: #2563eb;
+    --success: #16a34a;
+    --warning: #d97706;
+    --error: #f35248;
+  }
+  
   /* ====================== Aqua ====================== */
   [data-theme="aqua"] {
     color-scheme: dark;
@@ -123,6 +128,9 @@ body {
     --accent: #ffe999;
     --neutral: #3b8ac4;
     --base-100: #345da7;
+    --base-200: #2b4f8c;
+    --base-300: #1f3b6e;
+    --base-content: #f8f8f2;
     --info: #2563eb;
     --success: #16a34a;
     --warning: #d97706;

@@ -28,11 +28,11 @@ templ StepsRangeArea() {
 					step="1"
 				/>
 				<div class="absolute w-full h-2 pointer-events-none" style="bottom: 2px;">
-					<!-- alpinejs 的 x-for  从 1 循环到 allPageNum -->
+					<!-- alpinejs 的 x-for  从 1 循环到 ALL_PAGE_NUM -->
 					<template x-for="i in $store.flip.allPageNum" :key="i">
 						<div
 							class="absolute"
-							:style="$store.flip.rightToLeft?`right: ${(i-1)/($store.flip.allPageNum-1)*100}%; transform: translateX(-50%);`:`left: ${(i-1)/($store.flip.allPageNum-1)*100}%; transform: translateX(50%);`"
+							:style="$store.flip.mangaMode?`right: ${(i-1)/($store.flip.allPageNum-1)*100}%; transform: translateX(-50%);`:`left: ${(i-1)/($store.flip.allPageNum-1)*100}%; transform: translateX(50%);`"
 						>
 							<!-- 刻度:如果页数 < 50，则每 5 页刻度加粗；同时首页与末页也单独加粗显示 -->
 							<div
@@ -64,7 +64,7 @@ templ StepsRangeArea() {
 								class="text-xs text-center mb-0.5"
 								style="position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%);"
 							>
-								<span x-text="$store.flip.rightToLeft?($store.flip.allPageNum-i):i"></span>
+								<span x-text="$store.flip.mangaMode?($store.flip.allPageNum-i):i"></span>
 							</div>
 						</div>
 					</template>

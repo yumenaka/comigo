@@ -84,7 +84,7 @@ Tools:
 
 ```console
 .
-├── assets
+├── script
 │   ├── scripts.js
 │   └── styles.scss
 ├── static
@@ -123,9 +123,9 @@ Tools:
 
 The backend part is located in the `*.go` files in your project folder.
 
-The `./templates` folder contains Templ templates that you can use in your frontend part. Also, the `./assets` folder contains the `styles.scss` (main styles) and `scripts.js` (main scripts) files.
+The `./templates` folder contains Templ templates that you can use in your frontend part. Also, the `./script` folder contains the `styles.scss` (main styles) and `scripts.js` (main scripts) files.
 
-The `./static` folder contains all the static files: icons, images, PWA (Progressive Web App) manifest and other builded/minified assets.
+The `./static` folder contains all the static files: icons, images, PWA (Progressive Web App) manifest and other builded/minified script.
 
 ## Deploying your project
 
