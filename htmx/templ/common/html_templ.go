@@ -10,7 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/yumenaka/comigo/htmx/embed"
+	"github.com/yumenaka/comigo/htmx/assets"
 	"github.com/yumenaka/comigo/htmx/state"
 )
 
@@ -49,11 +49,11 @@ func Html(c echo.Context, s *state.GlobalState, bodyContent templ.Component, ins
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><meta name=\"keywords\" content=\"Comigo:Manga Reader Online 在线漫画阅读器\"><meta name=\"description\" content=\"Simple Manga Reader in Linux，Windows，Mac OS\"><!--TODO:PWA模式  <link rel=\"manifest\" href=\"/static/manifest.webmanifest\"/>  --><link rel=\"apple-touch-icon\" href=\"/static/apple-touch-icon.png\"><link rel=\"shortcut icon\" href=\"/images/favicon.ico\" type=\"image/x-icon\"><link rel=\"icon\" href=\"/images/favicon.png\" sizes=\"any\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><meta name=\"keywords\" content=\"Comigo:Manga Reader Online 在线漫画阅读器\"><meta name=\"description\" content=\"Simple Manga Reader in Linux，Windows，Mac OS\"><!--TODO:PWA模式  <link rel=\"manifest\" href=\"/images/manifest.webmanifest\"/>  --><link rel=\"apple-touch-icon\" href=\"/images/apple-touch-icon.png\"><link rel=\"shortcut icon\" href=\"/images/favicon.ico\" type=\"image/x-icon\"><link rel=\"icon\" href=\"/images/favicon.png\" sizes=\"any\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.Raw(embed.GetCSS(s.OneFileMode)).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = templ.Raw(assets.GetCSS(s.OneFileMode)).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -73,7 +73,7 @@ func Html(c echo.Context, s *state.GlobalState, bodyContent templ.Component, ins
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.Raw(embed.GetJavaScript(s.OneFileMode, insertScript)).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = templ.Raw(assets.GetJavaScript(s.OneFileMode, insertScript)).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

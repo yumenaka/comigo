@@ -6,9 +6,9 @@
   "browserslist": "> 0.5%, last 2 versions, not dead",
   "scripts": {
     "fmt": "prettier --write .",
-    "build": "parcel build assets/main.js ./assets/styles.css --dist-dir embed/static",
-    "dev": "parcel build assets/main.js ./assets/styles.css --dist-dir embed/static --no-optimize",
-    "watch": "parcel watch assets/main.js ./sassets/styles.css --dist-dir embed/static --no-optimize"
+    "build": "parcel build assets/main.js ./assets/styles.css --dist-dir assets/script",
+    "dev": "parcel build assets/main.js ./assets/styles.css --dist-dir assets/script --no-optimize",
+    "watch": "parcel watch assets/main.js ./assets/styles.css --dist-dir assets/script --no-optimize"
   },
   "dependencies": {
     "@alpinejs/morph": "latest",
@@ -21,14 +21,14 @@
     "i18next": "latest",
     "i18next-browser-languagedetector": "latest",
     "screenfull": "latest",
-    "tailwindcss": "^4.1.3"
+    "tailwindcss": "^4.1.4"
   },
   "devDependencies": {
-    "@parcel/transformer-sass": "latest",
-    "@tailwindcss/postcss": "^4.1.3",
+    "@parcel/transformer-sass": "^2.14.4",
+    "@tailwindcss/postcss": "latest",
     "autoprefixer": "latest",
     "parcel": "latest",
-    "postcss": "^8.5.3",
+    "postcss": "latest",
     "prettier": "latest"
   }
 }

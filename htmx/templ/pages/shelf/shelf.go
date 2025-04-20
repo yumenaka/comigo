@@ -58,7 +58,7 @@ func Handler(c echo.Context) error {
 		c,
 		&state.Global,
 		ShelfPage(c, &state.Global), // define body content
-		[]string{"static/shelf.js"},
+		[]string{"script/shelf.js"},
 	)
 
 	// 用模板渲染书架页面(htmx-go)

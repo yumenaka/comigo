@@ -1,7 +1,7 @@
 package flip
 
 import (
-	"github.com/yumenaka/comigo/htmx/embed"
+	"github.com/yumenaka/comigo/htmx/assets"
 	"github.com/yumenaka/comigo/htmx/state"
 	"github.com/yumenaka/comigo/model"
 )
@@ -17,59 +17,52 @@ templ MainArea(s *state.GlobalState, book *model.Book) {
 		class="flex flex-col items-center justify-center flex-1 w-full max-w-full h-full min-h-full bg-base-100"
 		:class="(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') ? ($store.global.bgPattern !== 'none'?$store.global.bgPattern+' bg-base-300':'bg-base-300'):($store.global.bgPattern !== 'none'?$store.global.bgPattern:'')"
 	>
-		<!-- 单页模式 -->
-		<div x-show="!$store.flip.doublePageMode" class="manga_area scroll-hidden flex flex-row w-full h-full min-h-[100vh] m-0 p-0 justify-center item-center">
+		<!-- 显示漫画的区域 -->
+		<div  class="manga_area scroll-hidden flex flex-row w-full h-full min-h-[100vh] m-0 p-0 justify-center item-center">
 			<div id="slider-container" class="relative w-full h-full flex justify-center items-center overflow-hidden">
 				<div id="slider" class="flex transition-transform duration-300 ease-out w-full h-full justify-center items-center">
-					<div id="prev-slide" draggable="false" class="slide w-full h-full flex justify-center items-center absolute">
+					<div id="left-slide" draggable="false" class="slide w-full h-full flex justify-center items-center absolute">
 						<!-- 前一张图片 将在JS中动态加载 -->
 					</div>
-					<div id="current-slide" class="slide w-full h-full flex justify-center items-center absolute">
+					<div id="middle-slide" class="slide w-full h-full flex justify-center items-center absolute">
 						<img
-							id="SinglePageModeNowImage"
+						    x-show="!$store.flip.doublePageMode"
+							id="Single-NowImage"
+							alt="Single-NowImage"
+							src=""
 							draggable="false"
 							class="object-contain m-0 max-w-full max-h-full h-full"
 						/>
+						<!-- 双页模式+日漫模式-->
+						<div x-show="$store.flip.doublePageMode" class="manga_area flex flex-row w-full h-full min-h-[100vh] m-0 p-0 justify-center-safe item-center">
+							<!-- 双页模式-当前屏幕-左页 -->
+							<img
+								id="Double-NowImage-Left"
+								alt="Double-NowImage-Left"
+								draggable="false"
+								x-show="$store.flip.nowPageNum < $store.flip.allPageNum"
+								src=""
+								class="select-none object-contain m-0 max-w-1/2 w-auto max-h-screen grow-0"
+							/>
+							<!-- 双页模式-当前屏幕-右页 -->
+							<img
+								id="Double-NowImage-Right"
+								alt="Double-NowImage-Right"
+								src=""
+								draggable="false"
+								class="select-none object-contain m-0 max-w-1/2 w-auto max-h-screen grow-0"
+							/>
+						</div>
 					</div>
-					<div id="next-slide" draggable="false" class="slide w-full h-full flex justify-center items-center absolute">
+					<div id="right-slide" draggable="false" class="slide w-full h-full flex justify-center items-center absolute">
 						<!-- 后一张图片 将在JS中动态加载 -->
 					</div>
 				</div>
 			</div>
 		</div>
-		<!-- 双页模式+日漫模式-->
-		<div x-show="$store.flip.doublePageMode && !$store.flip.rightToLeft" class="manga_area flex flex-row w-full h-full min-h-[100vh] m-0 p-0 justify-center-safe item-center">
-			<!-- 双页模式第二页 -->
-			<img
-				id="DoublePageModeNextImageLTR"
-				draggable="false"
-				x-show="$store.flip.nowPageNum < $store.flip.allPageNum"
-				class="select-none object-contain m-0 max-w-1/2 w-auto max-h-screen grow-0"
-			/>
-			<!-- 双页模式第一页 -->
-			<img
-				id="DoublePageModeNowImageLTR"
-				draggable="false"
-				class="select-none object-contain m-0 max-w-1/2 w-auto max-h-screen grow-0"
-			/>
-		</div>
-		<!-- 双页模式+美漫模式-->
-		<div x-show="$store.flip.doublePageMode && $store.flip.rightToLeft" class="manga_area flex flex-row w-full h-full min-h-[100vh] m-0 p-0 justify-center-safe item-center">
-			<!-- 双页模式第一页 -->
-			<img
-				id="DoublePageModeNowImageRTL"
-				class="select-none object-contain m-0 max-w-1/2 w-auto max-h-screen grow-0 "
-			/>
-			<!-- 双页模式第二页 -->
-			<img
-				id="DoublePageModeNextImageRTL"
-				x-show="$store.flip.nowPageNum < $store.flip.allPageNum"
-				class="select-none object-contain m-0 max-w-1/2 w-auto max-h-screen grow-0"
-			/>
-		</div>
-        @StepsRangeArea()
+		@StepsRangeArea()
 	</div>
-	@templ.Raw("<style>" + embed.GetFileStr("static/flip.css") + "</style>")
+	@templ.Raw("<style>" + assets.GetFileStr("script/flip.css") + "</style>")
 	<style>
 		/* 滑动切换相关样式 */
 		#slider-container {
@@ -94,30 +87,16 @@ templ MainArea(s *state.GlobalState, book *model.Book) {
 		}
 		
 		/* 基本位置设置，会通过JavaScript动态调整 */
-		#prev-slide {
+		#left-slide {
 			transform: translateX(-100%);
 		}
 		
-		#current-slide {
+		#middle-slide {
 			transform: translateX(0);
 		}
 		
-		#next-slide {
+		#right-slide {
 			transform: translateX(100%);
-		}
-		
-		/* 滑动翻页模式下的样式 */
-		.swipe-enabled #slider-container {
-			cursor: grab;
-		}
-		
-		.swipe-enabled #slider-container:active {
-			cursor: grabbing;
-		}
-		
-		/* 确保manga_area有足够的高度 */
-		.manga_area {
-			min-height: 100vh !important; /* 强制设置最小高度 */
 		}
 	</style>
 }

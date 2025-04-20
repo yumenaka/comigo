@@ -2,7 +2,7 @@ package common
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/yumenaka/comigo/htmx/embed"
+	"github.com/yumenaka/comigo/htmx/assets"
 	"github.com/yumenaka/comigo/htmx/state"
 )
 
@@ -17,11 +17,11 @@ templ Html(c echo.Context, s *state.GlobalState, bodyContent templ.Component, in
 			<title>{ GetPageTitle(c.Param("id")) }</title>
 			<meta name="keywords" content="Comigo:Manga Reader Online 在线漫画阅读器"/>
 			<meta name="description" content="Simple Manga Reader in Linux，Windows，Mac OS"/>
-			<!--TODO:PWA模式  <link rel="manifest" href="/static/manifest.webmanifest"/>  -->
-			<link rel="apple-touch-icon" href="/static/apple-touch-icon.png"/>
+			<!--TODO:PWA模式  <link rel="manifest" href="/images/manifest.webmanifest"/>  -->
+			<link rel="apple-touch-icon" href="/images/apple-touch-icon.png"/>
 			<link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon"/>
 			<link rel="icon" href="/images/favicon.png" sizes="any"/>
-			@templ.Raw(embed.GetCSS(s.OneFileMode))
+			@templ.Raw(assets.GetCSS(s.OneFileMode))
 		</head>
 		<!-- x-bind: Alpine.js的语法，声明全局主题 theme -->
 		<!-- $persist 可以存储原始值以及数组和对象。本地存储，默认的key是 _x_变量名 -->
@@ -35,6 +35,6 @@ templ Html(c echo.Context, s *state.GlobalState, bodyContent templ.Component, in
 			@bodyContent
 		</body>
 		<!-- 导入js代码,包含htmx、Alpine等第三方库  -->
-        @templ.Raw(embed.GetJavaScript(s.OneFileMode, insertScript))
+        @templ.Raw(assets.GetJavaScript(s.OneFileMode, insertScript))
 	</html>
 }

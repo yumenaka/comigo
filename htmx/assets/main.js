@@ -1,3 +1,5 @@
+//此文件需要编译，相关指令请参考 package.json
+
 import 'htmx.org'
 import 'flowbite'
 // 这种 import './config/i18n' 通常用于单纯执行该文件内的脚本或配置逻辑，确保它在程序启动或相关流程中被"触发"过。

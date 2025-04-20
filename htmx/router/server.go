@@ -10,8 +10,8 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/htmx/assets"
 	"github.com/yumenaka/comigo/htmx/comigo"
-	"github.com/yumenaka/comigo/htmx/embed"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
@@ -47,21 +47,21 @@ func RunServer() (err error) {
 	comigo.SetComigoServer(router)
 
 	// 设置嵌入静态文件的文件系统
-	embed.StaticFS, err = fs.Sub(embed.Static, "static")
+	assets.ScriptFS, err = fs.Sub(assets.Script, "script")
 	if err != nil {
 		logger.Infof("%s", err)
 	}
-	router.StaticFS("/static/", embed.StaticFS)
+	router.StaticFS("/script/", assets.ScriptFS)
 	// 设置嵌入图片的文件系统
-	embed.ImagesFS, err = fs.Sub(embed.Images, "images")
+	assets.ImagesFS, err = fs.Sub(assets.Images, "images")
 	if err != nil {
 		logger.Infof("%s", err)
 	}
-	router.StaticFS("/images/", embed.ImagesFS)
+	router.StaticFS("/images/", assets.ImagesFS)
 
 	// favicon.ico
 	//router.GET("/favicon.ico", func(c echo.Context) error {
-	//	file, err := embed.Images.ReadFile("/images/favicon.ico")
+	//	file, err := assets.Images.ReadFile("/images/favicon.ico")
 	//	if err != nil {
 	//		logger.Infof("%s", err)
 	//		return err
