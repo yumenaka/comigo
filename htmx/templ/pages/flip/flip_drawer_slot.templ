@@ -2,12 +2,12 @@ package flip
 
 templ DrawerSlot() {
 	<!-- 切换阅读模式 toggle -->
-	<label class="inline-flex items-center w-full my-2 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm">
+	<label class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm">
 		<input type="checkbox" x-bind="$store.global.readMode === 'scroll'" x-on:change="$store.global.toggleReadMode();toggleFlipScrollFlexible();" class="sr-only peer" checked/>
 		<div
 			class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
 		></div>
-		<span class="text-sm font-medium ms-3" x-text="$store.global.readMode === 'scroll'?i18next.t('scroll_mode'):i18next.t('flip_mode')"></span>
+		<span class="font-medium ms-3" x-text="$store.global.readMode === 'scroll'?i18next.t('scroll_mode'):i18next.t('flip_mode')"></span>
 	</label>
 	<script>
     	function toggleFlipScrollFlexible() {
@@ -30,7 +30,7 @@ templ DrawerSlot() {
 	<!-- 远程同步翻页 -->
 	<!-- toggle组件来自： https://flowbite.com/docs/forms/toggle/ -->
 	<label
-		class="inline-flex items-center w-full my-2 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
+		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
 	>
 		<input
 			type="checkbox"
@@ -41,11 +41,11 @@ templ DrawerSlot() {
 		<div
 			class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
 		></div>
-		<span class="text-sm font-medium ms-3" x-text="i18next.t('sync_page')"></span>
+		<span class="font-medium ms-3" x-text="i18next.t('sync_page')"></span>
 	</label>
 	<!-- 保存阅读进度 SaveReadingProgress -->
 	<label
-		class="inline-flex items-center w-full my-2 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
+		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
 	>
 		<input
 			type="checkbox"
@@ -56,11 +56,11 @@ templ DrawerSlot() {
 		<div
 			class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
 		></div>
-		<span class="text-sm font-medium ms-3" x-text="i18next.t('save_page_num')"></span>
+		<span class="font-medium ms-3" x-text="i18next.t('save_page_num')"></span>
 	</label>
 	<!-- 日漫模式（右开本）  -->
 	<label
-		class="inline-flex items-center w-full my-2 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
+		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
 	>
 		<input
 			type="checkbox"
@@ -72,13 +72,13 @@ templ DrawerSlot() {
 			class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
 		></div>
 		<span
-			class="text-sm font-medium ms-3"
+			class="font-medium ms-3"
 			x-text="$store.flip.mangaMode?i18next.t('manga_mode'):i18next.t('comic_mode')"
 		></span>
 	</label>
 	<!-- 单页模式  -->
 	<label
-		class="inline-flex items-center w-full my-2 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
+		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
 	>
 		<input
 			type="checkbox"
@@ -90,28 +90,28 @@ templ DrawerSlot() {
 			class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
 		></div>
 		<span
-			class="text-sm font-medium ms-3"
+			class="font-medium ms-3"
 			x-text="$store.flip.doublePageMode?i18next.t('double_page_mode'):i18next.t('single_page_mode')"
 		></span>
 	</label>
 	<!-- 显示页数  -->
 	<label
-		class="inline-flex items-center w-full my-2 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
+		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
 	>
 		<input
 			type="checkbox"
-			:value="$store.flip.show_page_num"
-			x-on:click="$store.flip.show_page_num =!$store.flip.show_page_num"
+			:value="$store.flip.showPageNum"
+			x-on:click="$store.flip.showPageNum =!$store.flip.showPageNum"
 			class="sr-only peer"
 		/>
 		<div
 			class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
 		></div>
-		<span class="text-sm font-medium ms-3" x-text="i18next.t('show_page_num')"></span>
+		<span class="font-medium ms-3" x-text="i18next.t('showPageNum')"></span>
 	</label>
 	<!-- 自动隐藏工具栏  -->
 	<label
-		class="inline-flex items-center w-full my-2 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
+		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
 	>
 		<input
 			type="checkbox"
@@ -122,6 +122,6 @@ templ DrawerSlot() {
 		<div
 			class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
 		></div>
-		<span class="text-sm font-medium ms-3" x-text="i18next.t('auto_hide_toolbar')"></span>
+		<span class="font-medium ms-3" x-text="i18next.t('auto_hide_toolbar')"></span>
 	</label>
 }

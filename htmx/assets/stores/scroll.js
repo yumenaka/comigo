@@ -1,7 +1,7 @@
 // Scroll 卷轴模式
 Alpine.store('scroll', {
     nowPageNum: 1,
-    simplifyFilename: Alpine.$persist(true).as('scroll.simplifyFilename'), //是否简化标题
+    simplifyTitle: Alpine.$persist(true).as('scroll.simplifyTitle'), //是否简化标题
     //下拉模式下，漫画页面的底部间距。单位px。
     marginBottomOnScrollMode: Alpine.$persist(0).as(
         'scroll.marginBottomOnScrollMode'
@@ -27,7 +27,7 @@ Alpine.store('scroll', {
     //是否显示顶部页头
     showHeaderFlag: true,
     //是否显示页数
-    show_page_num: Alpine.$persist(false).as('scroll.show_page_num'),
+    showPageNum: Alpine.$persist(false).as('scroll.showPageNum'),
     //ws翻页相关
     syncPageByWS: Alpine.$persist(false).as('scroll.syncPageByWS'), //是否通过websocket同步翻页
 }) 

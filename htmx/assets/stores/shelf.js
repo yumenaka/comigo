@@ -3,7 +3,7 @@ Alpine.store('shelf', {
     bookCardMode: Alpine.$persist('gird').as('shelf.bookCardMode'), //gird,list,text
     showFilename: Alpine.$persist(true).as('shelf.showFilename'), //是否显示文件名
     showFileIcon: Alpine.$persist(true).as('shelf.showFileIcon'), //是否显示文件图标
-    simplifyFilename: Alpine.$persist(true).as('shelf.simplifyFilename'), //是否简化文件名
+    simplifyTitle: Alpine.$persist(true).as('shelf.simplifyTitle'), //是否简化标题
     InfiniteDropdown: Alpine.$persist(false).as('shelf.InfiniteDropdown'), //卷轴模式下，是否无限下拉
     bookCardShowTitleFlag: Alpine.$persist(true).as('shelf.bookCardShowTitleFlag'), // 书库中的书籍是否显示文字版标题
     syncScrollFlag: false, // 同步滚动,目前还没做
