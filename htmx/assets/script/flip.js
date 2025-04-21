@@ -133,7 +133,7 @@ function updateSliderImages(nowPageNum, images) {
 	// ------------ 双页模式设置 ------------
 	if (Alpine.store('flip').doublePageMode) {
 		// 添加双页模式前一屏图片（如果存在）
-		if (nowPageNum - 2 === 0) {
+		if (nowPageNum  === 2) {
 			const prevImg = document.createElement('img')
 			prevImg.src = images[nowPageNum - 2].url
 			prevImg.className = 'object-contain m-0 max-w-full max-h-full h-full'
@@ -141,7 +141,7 @@ function updateSliderImages(nowPageNum, images) {
 			leftSlide.innerHTML = ''
 			leftSlide.appendChild(prevImg)
 		}
-		if (nowPageNum > 3) {
+		if (nowPageNum >= 3) {
 			const prevImg_1 = document.createElement('img')
 			prevImg_1.src = images[nowPageNum - 2].url
 			prevImg_1.className = 'select-none object-contain m-0 max-w-1/2 w-auto max-h-screen grow-0'
@@ -171,7 +171,7 @@ function updateSliderImages(nowPageNum, images) {
 			rightSlide.innerHTML = ''
 			rightSlide.appendChild(nextImg)
 		}
-		if (nowPageNum<= ALL_PAGE_NUM - 3) {
+		if (nowPageNum < ALL_PAGE_NUM - 3) {
 			const nextImg_1 = document.createElement('img')
 			nextImg_1.src = images[nowPageNum + 1].url
 			nextImg_1.className = 'select-none object-contain m-0 max-w-1/2 w-auto max-h-screen grow-0'
@@ -335,7 +335,7 @@ function animateSlide(direction) {
 	// 左滑是下一页（移到左侧），右滑是上一页（移到右侧）
 	const mangaMode = Alpine.store('flip').mangaMode
 	let startTime = null
-	const duration = 300 // 动画持续时间，单位毫秒
+	const duration = 700 // 动画持续时间，单位毫秒
 	const startPosition = currentTranslate // 记录动画开始时的位置
 
 	function animate(timestamp) {
@@ -473,6 +473,8 @@ function addPageNum(n = 1) {
 	// 翻页
 	Alpine.store('flip').nowPageNum = nowPageNum + num
 	setImageSrc()
+	// 设置标签页标题
+	setTitle();
 	// 通过ws通道发送翻页数据
 	if (Alpine.store('global').syncPageByWS === true) {
 		sendFlipData() // 发送翻页数据
@@ -858,3 +860,195 @@ mouseMoveArea.addEventListener('mousemove', onMouseMove)
 mouseMoveArea.addEventListener('click', onMouseClick)
 //离开的时候触发离开事件
 mouseMoveArea.addEventListener('mouseleave', onMouseLeave)
+
+// Websocket 连接和消息处理
+// https://www.ruanyifeng.com/blog/2017/05/websocket.html
+// https://developer.mozilla.org/zh-CN/docs/Web/API/WebSocket
+
+// 定义WebSocket变量和重连参数
+let socket
+let reconnectAttempts = 0
+const maxReconnectAttempts = 200
+const reconnectInterval = 3000 // 每次重连间隔3秒
+
+// 用户ID和令牌，假设已在其他地方定义
+const userID = Alpine.store('global').userID
+// 假设token是一个有效的令牌 TODO:使用真正的令牌
+const token = 'your_token'
+
+// 翻页数据，假设已在其他地方定义
+const flip_data = {
+	book_id: book.id,
+	now_page_num: Alpine.store('flip').nowPageNum,
+	need_double_page_mode: false,
+}
+
+// 建立WebSocket连接的函数
+function connectWebSocket() {
+	// 根据当前协议选择ws或wss
+	const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://'
+	const wsUrl = wsProtocol + window.location.host + '/api/ws'
+	socket = new WebSocket(wsUrl)
+
+	// 连接打开时的回调
+	socket.onopen = function () {
+		console.log('WebSocket连接已建立')
+		reconnectAttempts = 0 // 重置重连次数
+	}
+
+	// 收到消息时的回调
+	socket.onmessage = function (event) {
+		const message = JSON.parse(event.data)
+		handleMessage(message) // 调用处理函数
+	}
+
+	// 连接关闭时的回调
+	socket.onclose = function () {
+		console.log('WebSocket连接已关闭')
+		attemptReconnect() // 尝试重连
+	}
+
+	// 发生错误时的回调
+	socket.onerror = function (error) {
+		console.log('WebSocket发生错误：', error)
+		socket.close() // 关闭连接以触发重连
+	}
+}
+
+// 处理收到的翻页消息
+function handleMessage(message) {
+	// console.log("收到消息：", message);
+	// console.log("My userID：" + userID);
+	// console.log("Remote userID：" + message.user_id);
+	// 根据消息类型进行处理
+	if (message.type === 'flip_mode_sync_page' && message.user_id !== userID) {
+		// 解析翻页数据
+		const data = JSON.parse(message.data_string)
+		if (Alpine.store('global').syncPageByWS && data.book_id === book.id) {
+			//console.log("同步页数：", data);
+			// 更新翻页数据
+			flip_data.now_page_num = data.now_page_num
+			// 更新页面
+			jumpPageNum(data.now_page_num)
+		}
+	} else if (message.type === 'heartbeat') {
+		console.log('收到心跳消息')
+	} else {
+		//console.log("不处理此消息"+message);
+	}
+}
+
+// 发送翻页数据到服务器
+function sendFlipData() {
+	flip_data.now_page_num = Alpine.store('flip').nowPageNum
+	const flipMsg = {
+		type: 'flip_mode_sync_page', // 或 "heartbeat"
+		status_code: 200,
+		user_id: userID,
+		token: token,
+		detail: '翻页模式，发送数据',
+		data_string: JSON.stringify(flip_data),
+	}
+	if (socket.readyState === WebSocket.OPEN) {
+		socket.send(JSON.stringify(flipMsg))
+		//console.log("已发送翻页数据"+JSON.stringify(flipMsg));
+		//console.log("已发送翻页数据");
+	} else {
+		console.log('WebSocket未连接，无法发送消息')
+	}
+}
+
+// 尝试重连函数
+function attemptReconnect() {
+	if (reconnectAttempts < maxReconnectAttempts) {
+		reconnectAttempts++
+		console.log(`第 ${reconnectAttempts} 次重连...`)
+		setTimeout(() => {
+			connectWebSocket()
+		}, reconnectInterval)
+	} else {
+		console.log('已达到最大重连次数，停止重连')
+	}
+}
+
+// 页面加载完成后建立WebSocket连接
+window.onload = function () {
+	connectWebSocket()
+}
+
+// 设置标签页标题
+function setTitle(name) {
+	let numStr = ''
+	if (Alpine.store('flip').showPageNum){
+		numStr = ` ${Alpine.store('flip').nowPageNum}/${Alpine.store('flip').allPageNum} `
+	}
+	//简化标题
+	if(Alpine.store('shelf').simplifyTitle){
+		document.title = `${numStr}${shortName(book.title)}`;
+	}else {
+		document.title = `${numStr}${book.title}`;
+	}
+}
+setTitle();
+
+/**
+ * 生成简短标题
+ * @param {string} title – 原始标题
+ * @returns {string} – 处理后的短标题
+ */
+function shortName(title) {
+	let shortTitle = title;
+
+	/* 1. 移除常见文件扩展名（忽略大小写） */
+	shortTitle = shortTitle.replace(
+		/\.(epub|pdf|mobi|azw3|cbz|cbr|zip|rar|7z|txt|docx?)$/i,
+		""
+	);
+
+	/* 2. 顺序移除各种括号及其内容 */
+	shortTitle = shortTitle
+		.replace(/\([^)]*\)/g, "")   // ()
+		.replace(/\[[^\]]*\]/g, "")  // []
+		.replace(/（[^）]*）/g, "")   // （）
+		.replace(/【[^】]*】/g, "");  // 【】
+
+	/* 3. 移除域名（含 http/https 前缀） */
+	shortTitle = shortTitle.replace(/https?:\/\/[^\s/]+/gi, "");
+
+	/* 4 & 5. 去掉前后空白 */
+	shortTitle = shortTitle.trimStart();
+	shortTitle = shortTitle.trimEnd();
+
+	/* 6. 去除开头的标点符号（使用 Unicode 属性，需要 Node ≥ v10） */
+	shortTitle = shortTitle.replace(/^[\p{P}\p{S}]+/u, "");
+
+	/* 7. 最后再 trim 一次，防止前一步留下空格 */
+	shortTitle = shortTitle.trim();
+
+	/* 将字符串按 Unicode 码点拆分 */
+	const runes          = Array.from(shortTitle);
+	const originalRunes  = Array.from(title);
+
+	/* —— 与 Go 的长度判断逻辑保持完全一致 —— */
+
+	// 简化后过短（<2）
+	if (runes.length < 2) {
+		if (originalRunes.length > 15) {
+			return originalRunes.slice(0, 15).join("") + "…";
+		}
+		if (originalRunes.length > 0) {
+			return originalRunes.length <= 15
+				? title
+				: originalRunes.slice(0, 15).join("") + "…";
+		}
+		return "";
+	}
+
+	// 简化后 ≤15：直接返回
+	if (runes.length <= 15) {
+		return shortTitle;
+	}
+
+	// 超过 15：截断并加省略号
+	return runes.slice(0, 15).join("") + "…";
+}

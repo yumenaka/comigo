@@ -13,6 +13,7 @@ import (
 	"github.com/yumenaka/comigo/htmx/templ/common"
 )
 
+// 404 NotFound页面
 func NotFound404(s *state.GlobalState) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -36,7 +37,7 @@ func NotFound404(s *state.GlobalState) templ.Component {
 		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = common.Header(
 			common.HeaderProps{
-				Title:           "没找到这本书",
+				Title:           "",
 				ShowReturnIcon:  true,
 				ReturnUrl:       "/",
 				SetDownLoadLink: false,
@@ -47,7 +48,7 @@ func NotFound404(s *state.GlobalState) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex flex-col items-center justify-center flex-1 w-full p-8 text-center bg-base-100 text-base-content\" :class=\"(theme.toString() ===&#39;light&#39;||theme.toString() ===&#39;dark&#39;||theme.toString() ===&#39;retro&#39;||theme.toString() ===&#39;lofi&#39;||theme.toString() ===&#39;nord&#39;) ? ($store.global.bgPattern !== &#39;none&#39;?$store.global.bgPattern+&#39; bg-base-300&#39;:&#39;bg-base-300&#39;):($store.global.bgPattern !== &#39;none&#39;?$store.global.bgPattern:&#39;&#39;)\"><div class=\"text-4xl font-bold text-gray-500\">404</div><div class=\"text-2xl font-bold text-gray-500\">Not Found</div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex flex-col items-center justify-center flex-1 w-full p-8 text-center bg-base-100 text-base-content\" :class=\"(theme.toString() ===&#39;light&#39;||theme.toString() ===&#39;dark&#39;||theme.toString() ===&#39;retro&#39;||theme.toString() ===&#39;lofi&#39;||theme.toString() ===&#39;nord&#39;) ? ($store.global.bgPattern !== &#39;none&#39;?$store.global.bgPattern+&#39; bg-base-300&#39;:&#39;bg-base-300&#39;):($store.global.bgPattern !== &#39;none&#39;?$store.global.bgPattern:&#39;&#39;)\"><!-- TODO：404页面插画   --><div class=\"text-4xl font-bold text-gray-500\">404</div><div class=\"text-2xl font-bold text-gray-500\">Not Found</div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

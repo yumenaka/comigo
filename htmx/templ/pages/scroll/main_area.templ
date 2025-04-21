@@ -71,7 +71,7 @@ templ MainArea(s *state.GlobalState, book *model.Book) {
 						alt={ strconv.Itoa(key) }
 					/>
 				}
-				<template x-if="$store.scroll.show_page_num">
+				<template x-if="$store.scroll.showPageNum">
 					<div class="w-full mt-0 mb-1 text-sm font-semibold text-center page_hint ">{ fmt.Sprintf("%d / %d", key+1,book.BookInfo.PageCount) }</div>
 				</template>
 			</div>

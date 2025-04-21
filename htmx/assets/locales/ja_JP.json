@@ -158,7 +158,7 @@
   "show_filename": "ファイル名を表示",
   "show_file_icon": "ファイルアイコンを表示",
   "show_header": "タイトルを表示",
-  "show_page_num": "ページ番号を表示",
+  "showPageNum": "ページ番号を表示",
   "simplify_filename": "ファイル名を簡略化",
   "single_page_mode": "シングルページモード",
   "single_page_width": "シングルページ幅:",

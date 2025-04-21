@@ -12,7 +12,7 @@ Alpine.store('flip', {
     //是否显示页脚
     showFooter: Alpine.$persist(true).as('flip.showFooter'),
     //是否显示页数
-    show_page_num: Alpine.$persist(false).as('flip.show_page_num'),
+    showPageNum: Alpine.$persist(true).as('flip.showPageNum'),
     //是否是日本漫画【右半屏翻页,从左到右(true)】【右半屏翻页,从右到左(false)】
     mangaMode: Alpine.$persist(true).as('flip.mangaMode'),
     //swipeTurn or clickTurn

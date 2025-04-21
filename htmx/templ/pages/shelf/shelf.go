@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/htmx/state"
 	"github.com/yumenaka/comigo/htmx/templ/common"
+	"github.com/yumenaka/comigo/htmx/templ/pages/error_page"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/util/logger"
 )
@@ -41,6 +42,13 @@ func Handler(c echo.Context) error {
 			logger.Infof("TopOfShelfInfo: %v", err)
 		}
 	}
+	// 为首页定义模板布局。
+	indexTemplate := common.Html(
+		c,
+		&state.Global,
+		ShelfPage(c, &state.Global), // define body content
+		[]string{"script/shelf.js"},
+	)
 	// 如果指定了书籍ID，获取子书架信息。
 	if bookID != "" {
 		var err error
@@ -49,17 +57,15 @@ func Handler(c echo.Context) error {
 		// TODO: 没有图书的提示（返回主页\上传压缩包\远程下载示例漫画）
 		if err != nil {
 			logger.Infof("GetBookShelf Error: %v", err)
-			return nil
+			// HTTP 404 页面
+			indexTemplate = common.Html(
+				c,
+				&state.Global,
+				error_page.NotFound404(&state.Global),
+				[]string{},
+			)
 		}
 	}
-
-	// 为首页定义模板布局。
-	indexTemplate := common.Html(
-		c,
-		&state.Global,
-		ShelfPage(c, &state.Global), // define body content
-		[]string{"script/shelf.js"},
-	)
 
 	// 用模板渲染书架页面(htmx-go)
 	if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate); err != nil {

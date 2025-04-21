@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"unicode/utf8"
 
 	"github.com/jxskiss/base62"
 	"github.com/yumenaka/comigo/util"
@@ -125,56 +124,85 @@ func (b *BookInfo) setTitle(filePath string) *BookInfo {
 }
 
 var (
-	// 一次性移除所有括号（中英文括号、方括号等）及其中的内容
-	reBracket = regexp.MustCompile(`[\(\[（【][^)\]）】]+[)\]）】]`)
+	// 只删除结尾处的常见扩展名（忽略大小写）
+	reExt = regexp.MustCompile(`\.(?i)(zip|rar|cbr|cbz|tar|pdf|mp3|mp4|flv|gz|webm|gif|png|jpg|jpeg|webp|svg|psd|bmp|tif)$`)
 
-	// 只删除结尾处的常见扩展名（如需全局移除可去掉 $）
-	reExt = regexp.MustCompile(`\.(zip|rar|cbr|cbz|tar|pdf|mp3|mp4|flv|gz|webm|gif|png|jpg|jpeg|webp|svg|psd|bmp|tif)$`)
+	// 去除各种括号及其内容（非贪婪）
+	reRound         = regexp.MustCompile(`\([^()]*?\)`)   // 匹配 ()
+	reSquare        = regexp.MustCompile(`\[[^\[\]]*?\]`) // 匹配 []
+	reChineseRound  = regexp.MustCompile(`（[^（）]*?）`)     // 匹配 （）
+	reChineseSquare = regexp.MustCompile(`【[^【】]*?】`)     // 匹配 【】
 
 	// 如果只想移除开头的 domain 就保留 ^；想全局替换就去掉 ^
 	domainReg = regexp.MustCompile(`^(((ht|f)tps?)://)?([^!@#$%^&*?.\s-]([^!@#$%^&*?.\s]{0,63}[^!@#$%^&*?.\s])?\.)+[a-zA-Z]{2,6}/?`)
 
 	// 去除开头的所有空白
 	reLeadingSpace = regexp.MustCompile(`^\s+`)
+	// 去除结尾的所有空白
+	reTrailingSpace = regexp.MustCompile(`\s+$`)
 
-	// 去除开头的一连串标点符号
-	reLeadingPunct = regexp.MustCompile(`^[\-` + "`" + `~!@#$^&*()=|{}':;'@#￥……&*（）——|{}‘；：”“'。，、？]+`)
+	// 去除开头的一连串标点符号 (移除括号)
+	reLeadingPunct = regexp.MustCompile(`^[\-` + "`" + `~!@#$^&*=|{}':;'@#￥……&*——|{}‘；：”“'。，、？]+`)
 )
 
 // ShortName 返回简短的标题（文件名）
 func (b *BookInfo) ShortName() string {
 	shortTitle := b.Title
 
-	// 1. 移除所有括号及内部描述
-	shortTitle = reBracket.ReplaceAllString(shortTitle, "")
-
-	// 2. 移除常见文件扩展名
+	// 1. 移除常见文件扩展名 (忽略大小写)
 	shortTitle = reExt.ReplaceAllString(shortTitle, "")
 
-	// 3. 移除域名（可视需要决定是否保留 ^）
+	// 2. 顺序移除所有括号及内部描述
+	shortTitle = reRound.ReplaceAllString(shortTitle, "")         // 移除 ()
+	shortTitle = reSquare.ReplaceAllString(shortTitle, "")        // 移除 []
+	shortTitle = reChineseRound.ReplaceAllString(shortTitle, "")  // 移除 （）
+	shortTitle = reChineseSquare.ReplaceAllString(shortTitle, "") // 移除 【】
+
+	// 3. 移除域名
 	shortTitle = domainReg.ReplaceAllString(shortTitle, "")
 
 	// 4. 去除开头空格
 	shortTitle = reLeadingSpace.ReplaceAllString(shortTitle, "")
 
-	// 5. 去除开头标点
+	// 5. 去除结尾空格
+	shortTitle = reTrailingSpace.ReplaceAllString(shortTitle, "")
+
+	// 6. 去除开头标点
 	shortTitle = reLeadingPunct.ReplaceAllString(shortTitle, "")
+
+	// 7. 再次去除首尾空格（以防上述操作后留下空格）
+	shortTitle = reLeadingSpace.ReplaceAllString(shortTitle, "")
+	shortTitle = reTrailingSpace.ReplaceAllString(shortTitle, "")
 
 	// 转成 rune，便于按字符截取
 	runes := []rune(shortTitle)
+	originalRunes := []rune(b.Title) // 原始标题的 runes
 
-	// [过度简化] 如果简化后标题过短，但原标题很长，则截原标题前 15 个字符带省略号
-	if len(runes) < 2 && utf8.RuneCountInString(b.Title) > 15 {
-		// 这里用 utf8.RuneCountInString(b.Title) 或直接 len([]rune(b.Title))
-		titleRunes := []rune(b.Title)
-		cutLen := 15
-		if len(titleRunes) < cutLen {
-			cutLen = len(titleRunes)
+	// 如果简化后标题过短 (<2个字符)
+	if len(runes) < 2 {
+		// 但原标题很长 (>15个字符)，则截取原标题前15个字符 + ...
+		if len(originalRunes) > 15 {
+			cutLen := 15
+			// 如果原标题本身不足15，则取原标题长度
+			if len(originalRunes) < cutLen {
+				cutLen = len(originalRunes)
+			}
+			return string(originalRunes[:cutLen]) + "…"
 		}
-		return string(titleRunes[:cutLen]) + "…"
+		// 如果原标题不长，或者简化后长度为0但原标题不为0，返回原标题（或原标题截断）
+		if len(originalRunes) > 0 {
+			cutLen := 15
+			if len(originalRunes) < cutLen {
+				cutLen = len(originalRunes)
+				return string(originalRunes) // 如果原标题 <= 15, 直接返回原标题
+			}
+			return string(originalRunes[:cutLen]) + "…" // 返回截断的原标题
+		}
+		// 如果原标题也是空的，返回空字符串
+		return ""
 	}
 
-	// [简化标题]如果简化后长度 <= 15，直接返回
+	// [简化标题] 如果简化后长度 <= 15，直接返回
 	if len(runes) <= 15 {
 		return shortTitle
 	}

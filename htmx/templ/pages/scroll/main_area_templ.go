@@ -111,7 +111,7 @@ func MainArea(s *state.GlobalState, book *model.Book) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<template x-if=\"$store.scroll.show_page_num\"><div class=\"w-full mt-0 mb-1 text-sm font-semibold text-center page_hint \">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<template x-if=\"$store.scroll.showPageNum\"><div class=\"w-full mt-0 mb-1 text-sm font-semibold text-center page_hint \">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -30,12 +30,13 @@ func GetCSS(oneFileMode bool) (cssString string) {
 
 // GetJavaScript 在页面中插入需要的js代码
 func GetJavaScript(oneFileMode bool, insertScript []string) (jsString string) {
-	//<!-- 通用js代码,初始化htmx、Alpine等第三方库  -->
+	// <!-- 通用js代码,初始化htmx、Alpine等第三方库  -->
 	if oneFileMode {
 		jsString = "<script>" + GetFileStr("script/main.js") + "</script>\n"
 	} else {
 		jsString = "<script src=\"/script/main.js\"></script>\n"
 	}
+	// <!-- 每个页面的特殊js代码片段  -->
 	for _, script := range insertScript {
 		if oneFileMode {
 			jsString += "<script>" + GetFileStr(script) + "</script>\n"

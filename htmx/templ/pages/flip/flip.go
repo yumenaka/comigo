@@ -16,17 +16,22 @@ import (
 func Handler(c echo.Context) error {
 	model.CheckAllBookFileExist()
 	bookID := c.Param("id")
-	book, err := model.GetBookByID(bookID, "default")
-	if err != nil {
-		logger.Infof("GetBookByID: %v", err)
-	}
-	// 没有找到书，显示 HTTP 404 错误
+	// HTTP 404 页面
 	indexTemplate := common.Html(
 		c,
 		&state.Global,
 		error_page.NotFound404(&state.Global),
 		[]string{},
 	)
+	book, err := model.GetBookByID(bookID, "default")
+	if err != nil {
+		logger.Infof("GetBookByID: %v", err)
+		// 渲染页面
+		if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate); err != nil {
+			// 渲染失败，返回 HTTP 500 错误。
+			return c.NoContent(http.StatusInternalServerError)
+		}
+	}
 
 	// // TODO：加密链接的时候，设置Secure为true
 	// readingProgressStr.Value = `{"nowPageNum":0,"nowChapterNum":0,"readingTime":0}`
@@ -80,7 +85,7 @@ func Handler(c echo.Context) error {
 			c,
 			&state.Global,
 			FlipPage, // define body content
-			[]string{"script/flip.js", "script/flip_websocket.js"})
+			[]string{"script/flip.js", "script/flip_sketch.js"})
 	}
 
 	// 渲染404或者正常页面
