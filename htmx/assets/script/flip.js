@@ -38,6 +38,10 @@ let preloadedImages = new Set()
 //首次加载时
 setImageSrc()
 
+// === 新增：页面加载时读取本地存储的页码 ===
+loadPageNumFromLocalStorage();
+// ====================================
+
 // 加载图片资源
 function setImageSrc() {
 	const nowPageNum = Alpine.store('flip').nowPageNum
@@ -86,6 +90,21 @@ function setImageSrc() {
 	}
 }
 
+// === 保存当前页码到本地存储 ===
+function savePageNumToLocalStorage() {
+	if (!Alpine.store('flip').saveReadingProgress) {
+		return;
+	}
+    try {
+        const key = `pageNum_${book.id}`;
+        const nowPageNum = Alpine.store('flip').nowPageNum;
+        localStorage.setItem(key, nowPageNum);
+    } catch (e) {
+        console.error("Error saving page number to localStorage:", e);
+    }
+}
+// ====================================
+
 // 更新滑动容器图片
 function updateSliderImages(nowPageNum, images) {
 	// 根据阅读方向设置滑动元素的位置
@@ -114,10 +133,10 @@ function updateSliderImages(nowPageNum, images) {
 			leftSlide.innerHTML = ''
 		}
 		// // 更新当前图片 (确保当前图片也在这里更新，以防万一)
-		// const currentImgElement = document.getElementById('Single-NowImage')
-		// if (currentImgElement && nowPageNum >= 1 && nowPageNum <= ALL_PAGE_NUM) {
-		// 	currentImgElement.src = images[nowPageNum - 1].url
-		// }
+		const currentImgElement = document.getElementById('Single-NowImage')
+		if (currentImgElement && nowPageNum >= 1 && nowPageNum <= ALL_PAGE_NUM) {
+			currentImgElement.src = images[nowPageNum - 1].url
+		}
 		// 添加后一张图片（如果存在）
 		if (nowPageNum < ALL_PAGE_NUM) {
 			const nextImg = document.createElement('img')
@@ -335,7 +354,7 @@ function animateSlide(direction) {
 	// 左滑是下一页（移到左侧），右滑是上一页（移到右侧）
 	const mangaMode = Alpine.store('flip').mangaMode
 	let startTime = null
-	const duration = 700 // 动画持续时间，单位毫秒
+	const duration = 300 // 动画持续时间，单位毫秒
 	const startPosition = currentTranslate // 记录动画开始时的位置
 
 	function animate(timestamp) {
@@ -479,7 +498,32 @@ function addPageNum(n = 1) {
 	if (Alpine.store('global').syncPageByWS === true) {
 		sendFlipData() // 发送翻页数据
 	}
+    // === 调用保存函数 ===
+    savePageNumToLocalStorage();
+    // =======================
 }
+
+// === 从本地存储加载页码并跳转 ===
+function loadPageNumFromLocalStorage() {
+	if (!Alpine.store('flip').saveReadingProgress) {
+		return;
+	}
+    try {
+        const key = `pageNum_${book.id}`;
+        const savedPageNum = localStorage.getItem(key);
+        if (savedPageNum !== null && !isNaN(parseInt(savedPageNum))) {
+            const pageNum = parseInt(savedPageNum);
+            // 确保页码在有效范围内
+            if (pageNum > 0 && pageNum <= ALL_PAGE_NUM && pageNum !== Alpine.store('flip').nowPageNum) {
+                console.log(`加载到本地存储的页码: ${pageNum}`);
+                jumpPageNum(pageNum); // 使用跳转函数更新页面
+            }
+        }
+    } catch (e) {
+        console.error("Error loading page number from localStorage:", e);
+    }
+}
+// ====================================
 
 //翻页函数，跳转到指定页
 function jumpPageNum(jumpNum) {
@@ -490,6 +534,9 @@ function jumpPageNum(jumpNum) {
 	}
 	Alpine.store('flip').nowPageNum = num
 	setImageSrc()
+    // === 调用保存页数函数 ===
+    savePageNumToLocalStorage();
+    // =======================
 }
 
 // 翻页函数，下一页
