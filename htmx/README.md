@@ -36,6 +36,7 @@
  - [ ] 优化打开浏览器与扫描逻辑，减少等待时间。可以使用[端口检测包](https://github.com/wait4x/wait4x)。
  - [ ] check：无参数的逻辑。epub页数解析似乎出现了问题。
  - [ ] SteamDeck支持（网页支持手柄操作）鼠标滚轮对应
+ - [ ] 同步翻页 -> 全局多端同步跟踪页面状态，除了不同id的书籍，其他页面状态都可以同步。
 ## 提示
 
 <https://github.com/angelofallars/htmx-go#triggers>  

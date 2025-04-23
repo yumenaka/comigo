@@ -6,7 +6,6 @@
 const book = JSON.parse(document.getElementById('NowBook').textContent)
 const images = book.pages.images
 Alpine.store('flip').allPageNum = parseInt(book.page_count)
-const ALL_PAGE_NUM = Alpine.store('flip').allPageNum
 // // 打印调试信息
 // if (Alpine.store('global').debugMode) {
 // 	//console.log(book);
@@ -45,7 +44,7 @@ loadPageNumFromLocalStorage();
 // 加载图片资源
 function setImageSrc() {
 	const nowPageNum = Alpine.store('flip').nowPageNum
-	if (nowPageNum === 0 && nowPageNum >= ALL_PAGE_NUM) {
+	if (nowPageNum === 0 && nowPageNum >= Alpine.store('flip').allPageNum) {
 		console.log('setImageSrc: nowPageNum is 0 or out of range', nowPageNum)
 		return
 	}
@@ -67,7 +66,7 @@ function setImageSrc() {
 
 	// 为双页模式，加载下一张图片。
 	// 因为用户有可能随时切换到双页模式，所以单页模式也预加载图片（尽管看不到）
-	if (nowPageNum < ALL_PAGE_NUM) {
+	if (nowPageNum < Alpine.store('flip').allPageNum) {
 		if (Alpine.store('flip').mangaMode) {
 			document.getElementById('Double-NowImage-Left').src = images[nowPageNum].url;
 		} else {
@@ -79,7 +78,7 @@ function setImageSrc() {
 	// 预加载前一张和后十张图片
 	const preloadRange = 10 // 预加载范围，可以根据需要调整
 	for (let i = nowPageNum - 2; i <= nowPageNum + preloadRange; i++) {
-		if (i >= 0 && i < ALL_PAGE_NUM) {
+		if (i >= 0 && i < Alpine.store('flip').allPageNum) {
 			const imgUrl = images[i].url
 			if (!preloadedImages.has(imgUrl)) {
 				let img = new Image()
@@ -90,20 +89,19 @@ function setImageSrc() {
 	}
 }
 
-// === 保存当前页码到本地存储 ===
+// 保存当前页码到本地存储
 function savePageNumToLocalStorage() {
 	if (!Alpine.store('flip').saveReadingProgress) {
 		return;
 	}
-    try {
-        const key = `pageNum_${book.id}`;
-        const nowPageNum = Alpine.store('flip').nowPageNum;
-        localStorage.setItem(key, nowPageNum);
-    } catch (e) {
-        console.error("Error saving page number to localStorage:", e);
-    }
+	try {
+		const key = `pageNum_${book.id}`;
+		const nowPageNum = Alpine.store('flip').nowPageNum;
+		localStorage.setItem(key, nowPageNum);
+	} catch (e) {
+		console.error("Error saving page number to localStorage:", e);
+	}
 }
-// ====================================
 
 // 更新滑动容器图片
 function updateSliderImages(nowPageNum, images) {
@@ -134,11 +132,11 @@ function updateSliderImages(nowPageNum, images) {
 		}
 		// // 更新当前图片 (确保当前图片也在这里更新，以防万一)
 		const currentImgElement = document.getElementById('Single-NowImage')
-		if (currentImgElement && nowPageNum >= 1 && nowPageNum <= ALL_PAGE_NUM) {
+		if (currentImgElement && nowPageNum >= 1 && nowPageNum <= Alpine.store('flip').allPageNum) {
 			currentImgElement.src = images[nowPageNum - 1].url
 		}
 		// 添加后一张图片（如果存在）
-		if (nowPageNum < ALL_PAGE_NUM) {
+		if (nowPageNum < Alpine.store('flip').allPageNum) {
 			const nextImg = document.createElement('img')
 			nextImg.src = images[nowPageNum].url
 			nextImg.className = 'object-contain m-0 max-w-full max-h-full h-full'
@@ -152,7 +150,7 @@ function updateSliderImages(nowPageNum, images) {
 	// ------------ 双页模式设置 ------------
 	if (Alpine.store('flip').doublePageMode) {
 		// 添加双页模式前一屏图片（如果存在）
-		if (nowPageNum  === 2) {
+		if (nowPageNum === 2) {
 			const prevImg = document.createElement('img')
 			prevImg.src = images[nowPageNum - 2].url
 			prevImg.className = 'object-contain m-0 max-w-full max-h-full h-full'
@@ -182,7 +180,7 @@ function updateSliderImages(nowPageNum, images) {
 			leftSlide.innerHTML = ''
 		}
 		// 添加后一屏图片（如果存在）
-		if (nowPageNum  === ALL_PAGE_NUM - 3) {
+		if (nowPageNum === Alpine.store('flip').allPageNum - 3) {
 			const nextImg = document.createElement('img')
 			nextImg.src = images[nowPageNum - 2].url
 			nextImg.className = 'object-contain m-0 max-w-full max-h-full h-full'
@@ -190,7 +188,7 @@ function updateSliderImages(nowPageNum, images) {
 			rightSlide.innerHTML = ''
 			rightSlide.appendChild(nextImg)
 		}
-		if (nowPageNum < ALL_PAGE_NUM - 3) {
+		if (nowPageNum < Alpine.store('flip').allPageNum - 3) {
 			const nextImg_1 = document.createElement('img')
 			nextImg_1.src = images[nowPageNum + 1].url
 			nextImg_1.className = 'select-none object-contain m-0 max-w-1/2 w-auto max-h-screen grow-0'
@@ -208,7 +206,7 @@ function updateSliderImages(nowPageNum, images) {
 				rightSlide.appendChild(nextImg_2)
 			}
 		}
-		if (nowPageNum === ALL_PAGE_NUM - 1) {
+		if (nowPageNum === Alpine.store('flip').allPageNum - 1) {
 			rightSlide.innerHTML = ''
 		}
 	}
@@ -260,7 +258,7 @@ function shouldBlockScroll(diffX) {
 		}
 	}
 	// 如果是最后一页尝试向后翻
-	if (nowPageNum === ALL_PAGE_NUM) {
+	if (nowPageNum === Alpine.store('flip').allPageNum) {
 		// 日漫模式
 		if (diffX > 0 && mangaMode) {
 			blockScroll = true
@@ -281,7 +279,6 @@ function touchMove(e) {
 		return
 	const currentX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX
 	const diffX = currentX - touchStartX
-
 	// 在第一页时不能向前翻，在最后一页时不能向后翻
 	const nowPageNum = Alpine.store('flip').nowPageNum
 	const mangaMode = Alpine.store('flip').mangaMode
@@ -316,7 +313,6 @@ function touchEnd(e) {
 	const timeElapsed = endTime - startTime
 	touchEndX = e.type === 'touchend' ? e.changedTouches[0].clientX : e.clientX
 	const diffX = touchEndX - touchStartX
-
 	// 判断是否应该翻页（基于滑动距离和速度）
 	const isQuickSwipe = timeElapsed < swipeTimeout && Math.abs(diffX) > 50
 	// 用于记录滑动方向
@@ -333,7 +329,7 @@ function touchEnd(e) {
 	// 	console.log('touchEnd: diffX', diffX)
 	// 	console.log('touchEnd: direction', direction)
 	// 	console.log('nowPageNum:', nowPageNum)
-	// 	console.log('ALL_PAGE_NUM:', ALL_PAGE_NUM)
+	// 	console.log('Alpine.store('flip').allPageNum:', Alpine.store('flip').allPageNum)
 	// }
 	// 如果在第一页或最后一页尝试向前翻或向后翻，阻止默认滚动
 	if (shouldBlockScroll(diffX) || direction === null) {
@@ -348,7 +344,6 @@ function touchEnd(e) {
 // 修改 animateSlideOut 为 animateSlide，处理滑动动画和翻页逻辑
 function animateSlide(direction) {
 	const width = window.innerWidth
-
 	// 根据滑动方向确定目标位置
 	let targetPosition = direction === 'left' ? -width : width
 	// 左滑是下一页（移到左侧），右滑是上一页（移到右侧）
@@ -356,7 +351,7 @@ function animateSlide(direction) {
 	let startTime = null
 	const duration = 300 // 动画持续时间，单位毫秒
 	const startPosition = currentTranslate // 记录动画开始时的位置
-
+	// 定义动画函数
 	function animate(timestamp) {
 		if (!startTime) startTime = timestamp
 		const elapsed = timestamp - startTime
@@ -404,20 +399,17 @@ function animateReset() {
 	const duration = 400 // 动画持续时间，单位毫秒
 	const startPosition = currentTranslate
 
+	// 定义动画函数
 	function animate(timestamp) {
 		if (!startTime) startTime = timestamp
 		const elapsed = timestamp - startTime
 		const progress = Math.min(elapsed / duration, 1)
-
 		// 使用缓动函数使动画更平滑
 		const easeProgress = easeOutCubic(progress)
-
 		// 计算当前位置（从startPosition到0的过渡）
 		const position = startPosition * (1 - easeProgress)
-
 		// 应用变换
 		slider.style.transform = `translateX(${position}px)`
-
 		if (progress < 1) {
 			animationID = requestAnimationFrame(animate)
 		} else {
@@ -447,7 +439,6 @@ document.addEventListener('DOMContentLoaded', function () {
 	sliderContainer.addEventListener('touchmove', touchMove, {passive: false})
 	// 移动结束
 	sliderContainer.addEventListener('touchend', touchEnd)
-
 	// 鼠标事件（PC）
 	// 设置初始值
 	sliderContainer.addEventListener('mousedown', touchStart)
@@ -456,7 +447,6 @@ document.addEventListener('DOMContentLoaded', function () {
 	// 移动结束
 	sliderContainer.addEventListener('mouseup', touchEnd)
 	sliderContainer.addEventListener('mouseleave', touchEnd)
-
 	// 初始化滑动容器中的图片
 	const nowPageNum = Alpine.store('flip').nowPageNum
 	const images = book.pages.images
@@ -477,11 +467,11 @@ document.addEventListener('alpine:initialized', () => {
 
 //翻页函数，加页或减页
 function addPageNum(n = 1) {
-	//防止数字转换为字符串
+	// 防止数字转换为字符串
 	let num = parseInt(n)
 	let nowPageNum = parseInt(Alpine.store('flip').nowPageNum)
-	//    无法继续翻
-	if (nowPageNum + num > ALL_PAGE_NUM) {
+	// 无法继续翻
+	if (nowPageNum + num > Alpine.store('flip').allPageNum) {
 		showToast(i18next.t('hint_last_page'), 'error')
 		return
 	}
@@ -498,45 +488,42 @@ function addPageNum(n = 1) {
 	if (Alpine.store('global').syncPageByWS === true) {
 		sendFlipData() // 发送翻页数据
 	}
-    // === 调用保存函数 ===
-    savePageNumToLocalStorage();
-    // =======================
+	// 调用保存函数
+
 }
 
-// === 从本地存储加载页码并跳转 ===
+// 从本地存储加载页码并跳转
 function loadPageNumFromLocalStorage() {
 	if (!Alpine.store('flip').saveReadingProgress) {
 		return;
 	}
-    try {
-        const key = `pageNum_${book.id}`;
-        const savedPageNum = localStorage.getItem(key);
-        if (savedPageNum !== null && !isNaN(parseInt(savedPageNum))) {
-            const pageNum = parseInt(savedPageNum);
-            // 确保页码在有效范围内
-            if (pageNum > 0 && pageNum <= ALL_PAGE_NUM && pageNum !== Alpine.store('flip').nowPageNum) {
-                console.log(`加载到本地存储的页码: ${pageNum}`);
-                jumpPageNum(pageNum); // 使用跳转函数更新页面
-            }
-        }
-    } catch (e) {
-        console.error("Error loading page number from localStorage:", e);
-    }
+	try {
+		const key = `pageNum_${book.id}`;
+		const savedPageNum = localStorage.getItem(key);
+		if (savedPageNum !== null && !isNaN(parseInt(savedPageNum))) {
+			const pageNum = parseInt(savedPageNum);
+			// 确保页码在有效范围内
+			if (pageNum > 0 && pageNum <= Alpine.store('flip').allPageNum && pageNum !== Alpine.store('flip').nowPageNum) {
+				console.log(`加载到本地存储的页码: ${pageNum}`);
+				jumpPageNum(pageNum); // 使用跳转函数更新页面
+			}
+		}
+	} catch (e) {
+		console.error("Error loading page number from localStorage:", e);
+	}
 }
-// ====================================
 
 //翻页函数，跳转到指定页
 function jumpPageNum(jumpNum) {
 	let num = parseInt(jumpNum)
-	if (num <= 0 || num > ALL_PAGE_NUM) {
+	if (num <= 0 || num > Alpine.store('flip').allPageNum) {
 		alert(i18next.t('hintPageNumOutOfRange'))
 		return
 	}
 	Alpine.store('flip').nowPageNum = num
 	setImageSrc()
-    // === 调用保存页数函数 ===
-    savePageNumToLocalStorage();
-    // =======================
+	// 调用保存页数函数
+	savePageNumToLocalStorage();
 }
 
 // 翻页函数，下一页
@@ -545,13 +532,13 @@ function toNextPage() {
 	let nowPageNum = parseInt(Alpine.store('flip').nowPageNum)
 	// 单页模式
 	if (!doublePageMode) {
-		if (nowPageNum <= ALL_PAGE_NUM) {
+		if (nowPageNum <= Alpine.store('flip').allPageNum) {
 			addPageNum(1)
 		}
 	}
 	//双页模式
 	if (doublePageMode) {
-		if (nowPageNum < ALL_PAGE_NUM - 1) {
+		if (nowPageNum < Alpine.store('flip').allPageNum - 1) {
 			addPageNum(2)
 		} else {
 			addPageNum(1)
@@ -610,11 +597,9 @@ function hideToolbar() {
 		range.style.transform = 'translateY(100%)'
 	}
 }
-
 function startHideTimer() {
 	hideTimeout = setTimeout(hideToolbar, 1500) // 1.5 seconds
 }
-
 if (Alpine.store('flip').autoHideToolbar) {
 	startHideTimer()
 }
@@ -670,8 +655,8 @@ function onMouseClick(e) {
 	if (isSwiping || Math.abs(currentTranslate) > 10) {
 		return
 	}
-
-	let clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
+	//获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
+	let clickX = e.x
 	//浏览器的视口宽,不包括工具栏和滚动条:
 	let innerWidth = window.innerWidth
 	let inSetArea = getInSetArea(e)
@@ -710,7 +695,6 @@ function onMouseMove(e) {
 	let clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
 	// 浏览器的视口宽,不包括工具栏和滚动条:
 	let innerWidth = window.innerWidth
-
 	//在设置区域
 	let inSetArea = getInSetArea(e)
 	if (inSetArea) {
@@ -742,7 +726,7 @@ function onMouseMove(e) {
 					'url(/images/Prohibited28Filled.png), pointer'
 			} else if (
 				Alpine.store('flip').mangaMode &&
-				Alpine.store('flip').nowPageNum === ALL_PAGE_NUM
+				Alpine.store('flip').nowPageNum === Alpine.store('flip').allPageNum
 			) {
 				//左边翻下一页,且目前是最后一页的时候,左边的鼠标指针,设置为禁止翻页
 				e.currentTarget.style.cursor =
@@ -755,7 +739,7 @@ function onMouseMove(e) {
 			//设置右边的鼠标指针
 			if (
 				!Alpine.store('flip').mangaMode &&
-				Alpine.store('flip').nowPageNum === ALL_PAGE_NUM
+				Alpine.store('flip').nowPageNum === Alpine.store('flip').allPageNum
 			) {
 				//右边翻下一页,且目前是最后页的时候,右边的鼠标指针,设置为禁止翻页
 				e.currentTarget.style.cursor =
@@ -942,19 +926,16 @@ function connectWebSocket() {
 		console.log('WebSocket连接已建立')
 		reconnectAttempts = 0 // 重置重连次数
 	}
-
 	// 收到消息时的回调
 	socket.onmessage = function (event) {
 		const message = JSON.parse(event.data)
 		handleMessage(message) // 调用处理函数
 	}
-
 	// 连接关闭时的回调
 	socket.onclose = function () {
 		console.log('WebSocket连接已关闭')
 		attemptReconnect() // 尝试重连
 	}
-
 	// 发生错误时的回调
 	socket.onerror = function (error) {
 		console.log('WebSocket发生错误：', error)
@@ -998,10 +979,10 @@ function sendFlipData() {
 	}
 	if (socket.readyState === WebSocket.OPEN) {
 		socket.send(JSON.stringify(flipMsg))
-		//console.log("已发送翻页数据"+JSON.stringify(flipMsg));
-		//console.log("已发送翻页数据");
-	} else {
-		console.log('WebSocket未连接，无法发送消息')
+		return
+	}
+	if (Alpine.store('global').debugMode) {
+		//console.log('WebSocket连接已关闭，无法发送消息')
 	}
 }
 
@@ -1026,16 +1007,17 @@ window.onload = function () {
 // 设置标签页标题
 function setTitle(name) {
 	let numStr = ''
-	if (Alpine.store('flip').showPageNum){
+	if (Alpine.store('flip').showPageNum) {
 		numStr = ` ${Alpine.store('flip').nowPageNum}/${Alpine.store('flip').allPageNum} `
 	}
 	//简化标题
-	if(Alpine.store('shelf').simplifyTitle){
+	if (Alpine.store('shelf').simplifyTitle) {
 		document.title = `${numStr}${shortName(book.title)}`;
-	}else {
+	} else {
 		document.title = `${numStr}${book.title}`;
 	}
 }
+
 setTitle();
 
 /**
@@ -1073,11 +1055,8 @@ function shortName(title) {
 	shortTitle = shortTitle.trim();
 
 	/* 将字符串按 Unicode 码点拆分 */
-	const runes          = Array.from(shortTitle);
-	const originalRunes  = Array.from(title);
-
-	/* —— 与 Go 的长度判断逻辑保持完全一致 —— */
-
+	const runes = Array.from(shortTitle);
+	const originalRunes = Array.from(title);
 	// 简化后过短（<2）
 	if (runes.length < 2) {
 		if (originalRunes.length > 15) {
@@ -1090,12 +1069,131 @@ function shortName(title) {
 		}
 		return "";
 	}
-
 	// 简化后 ≤15：直接返回
 	if (runes.length <= 15) {
 		return shortTitle;
 	}
-
 	// 超过 15：截断并加省略号
 	return runes.slice(0, 15).join("") + "…";
 }
+
+// 设定键盘快捷键
+/* 记录方向键当前的按压状态 */
+// 1) 方向/动作当前状态
+const state = {up: false, down: false, left: false, right: false, fire: false};
+
+/* 2) 键 → 动作 的映射表
+ *   - 左边写 `event.key`（大小写无关，统一用小写）。
+ *   - 键盘键位表：https://developer.mozilla.org/zh-CN/docs/Web/API/UI_Events/Keyboard_event_key_values
+ *   - 右边写动作名称（小写）
+ *   - 这里的动作名称可以是任意字符串，建议用小写
+ *   - 同一个动作可以对应多组键：方向键 + WASD + 自定义
+ */
+const keyMap = {
+	// 方向键 ↑
+	arrowup: "up",
+	// 方向键 ↓
+	arrowdown: "down",
+	// 方向键 ←
+	arrowleft: "left",
+	// 方向键 →
+	arrowright: "right",
+	// 长得像方向键的键位当作方向键
+	"<": "left",
+	">": "right",
+	// 英语键盘上，与 < 键在一起
+	",": "left",
+	// 英语键盘上，与 > 键在一起
+	".": "right",
+	// vim键位 hjkl 当做方向键
+	h: "left",
+	j: "down",
+	k: "up",
+	l: "right",
+	// 游戏当中常用的 WSAD 当做方向键
+	w: "up",
+	s: "down",
+	a: "left",
+	d: "right",
+	// Home 键
+	home: "first_page",
+	// End 键
+	end: "last_page",
+	// PageUp 键
+	pageup: "pre_page",
+	// PageDown 键
+	pagedown: "next_page",
+	// 加减相关键位当作方翻页键
+	// + 键
+	"+": "next_page",
+	// - 键
+	"-": "pre_page",
+	// = 键 英语键盘，与 + 键在一起
+	"=": "next_page",
+	// —— 键 英语键盘，与 - 键在一起
+	"——": "pre_page",
+	// 空格键
+	" ": "next_page",
+};
+
+// 3) 通用按键处理器：down=true 表示按下，false 表示松开
+function handle(e, down) {
+	const k = e.key.toLowerCase();      // 统一小写
+	const act = keyMap[k];              // 查映射表
+	if (!act) return;                   // 映射表里没有，忽略
+	state[act] = down;                  // 更新状态
+	//e.preventDefault();                 // 阻止滚动等默认行为（可选）
+	// 上一页
+	if (act === "pre_page" && down) {
+		toPreviousPage()
+	}
+	// 下一页
+	if (act === "next_page" && down) {
+		toNextPage()
+	}
+	// 触按下相当于左方向键的按键的时候
+	if (act === "left" && down) {
+		if (Alpine.store('flip').mangaMode) {
+			toNextPage()
+		} else {
+			toPreviousPage()
+		}
+	}
+	// 触按下相当于右方向键的按键的时候
+	if (act === "right" && down) {
+		if (Alpine.store('flip').mangaMode) {
+			toPreviousPage()
+		} else {
+			toNextPage()
+		}
+	}
+	// 直接跳转到第一页,同时长按的时候不执行多次
+	if (act === "first_page" && down && !e.repeat) {
+		jumpPageNum(1)
+	}
+	// 直接跳转到最后一页,同时长按的时候不执行多次
+	if (act === "last_page" && down && !e.repeat) {
+		jumpPageNum(Alpine.store('flip').allPageNum)
+	}
+}
+
+// 4) 事件监听
+// 监听键盘事件
+// keydown 第一次按下和按住时会触发 //统一禁止长按： addEventListener("keydown", e => !e.repeat && handle(e, true));
+addEventListener("keydown", e => handle(e, true));
+// keyup 松开时触发
+addEventListener("keyup", e => handle(e, false));
+
+// // 2 手柄方向键 (Gamepad API) TODO
+// // https://developer.mozilla.org/zh-CN/docs/Web/API/Gamepad_API/Using_the_Gamepad_API
+// const gamepads = {};          // 按 index 存储 Gamepad 对象
+//
+// window.addEventListener("gamepadconnected",   e => {
+// 	gamepads[e.gamepad.index] = e.gamepad;
+// 	console.log("已连接:", e.gamepad.id);
+// });
+//
+// window.addEventListener("gamepaddisconnected", e => {
+// 	delete gamepads[e.gamepad.index];
+// 	console.log("已断开:", e.gamepad.id);
+// });
