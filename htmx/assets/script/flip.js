@@ -37,9 +37,9 @@ let preloadedImages = new Set()
 //首次加载时
 setImageSrc()
 
-// === 新增：页面加载时读取本地存储的页码 ===
+// 页面加载时读取本地存储的页码
 loadPageNumFromLocalStorage();
-// ====================================
+
 
 // 加载图片资源
 function setImageSrc() {
@@ -488,8 +488,8 @@ function addPageNum(n = 1) {
 	if (Alpine.store('global').syncPageByWS === true) {
 		sendFlipData() // 发送翻页数据
 	}
-	// 调用保存函数
-
+	// 调用保存页数函数
+	savePageNumToLocalStorage();
 }
 
 // 从本地存储加载页码并跳转
@@ -521,9 +521,9 @@ function jumpPageNum(jumpNum) {
 		return
 	}
 	Alpine.store('flip').nowPageNum = num
-	setImageSrc()
 	// 调用保存页数函数
 	savePageNumToLocalStorage();
+	setImageSrc()
 }
 
 // 翻页函数，下一页
@@ -1142,7 +1142,7 @@ function handle(e, down) {
 	const act = keyMap[k];              // 查映射表
 	if (!act) return;                   // 映射表里没有，忽略
 	state[act] = down;                  // 更新状态
-	//e.preventDefault();                 // 阻止滚动等默认行为（可选）
+	//e.preventDefault();               // 阻止滚动等默认行为（可选）
 	// 上一页
 	if (act === "pre_page" && down) {
 		toPreviousPage()
