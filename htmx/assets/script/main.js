@@ -2875,7 +2875,7 @@ parcelRegister("eZIU4", function(module, exports) {
 
 });
 
-//此文件需要编译，相关指令请参考 package.json
+//此文件需要编译，编译指令请参考 package.json
 parcelRequire("eZIU4");
 var $4c6a2f83122c31a3$var$Events = /** @class */ function() {
     function Events(eventType, eventFunctions) {
@@ -12378,11 +12378,11 @@ $199830a05f92d3d0$export$2e2bcd8739ae039.type = 'languageDetector';
 
 
 var $bb767615b495769d$exports = {};
-$bb767615b495769d$exports = JSON.parse("{\"CachePath\":\"local cache location\",\"CachePath_Description\":\"Local image cache location, default system temporary folder.\",\"CertFile\":\"CertFile\",\"CertFile_Description\":\"TLS/SSL certificate file path (default: , \\\"~/.config/.comigo/cert.crt\\\")\",\"ClearCacheExit\":\"Clean up on exit\",\"ClearCacheExit_Description\":\"When exiting the program, clear the web image cache.\",\"ClearDatabaseWhenExit\":\"Clear database books\",\"ClearDatabaseWhenExit_Description\":\"When the local database is enabled, non-existing books are purged after the scan is completed.\",\"ConfigManager\":\"Profile management\",\"ConfigManagerDeleteSuccess\":\"Configuration has been deleted.\",\"ConfigManagerDescription\":\"Clicking Save will upload the current configuration to the server and overwrite the existing configuration file.\",\"ConfigManagerSaveHint\":\"There is already a configuration file, please change the save location.\",\"ConfigManagerSaveSuccess\":\"Configuration saved.\",\"ConfigSaveTo\":\"Configure default save path\",\"Debug\":\"Turn on Debug mode\",\"Debug_Description\":\"Enable Debug function\",\"DisableLAN\":\"Disable LAN sharing\",\"DisableLAN_Description\":\"Reading services are only provided on this machine and are not shared externally. This configuration does not support hot reloading.\",\"EnableDatabase\":\"Enable database\",\"EnableDatabase_Description\":\"Enable local database to save scanned book data. \\nThis configuration does not support hot reload.\",\"EnableFrpcServer\":\"EnableFrpcServer\",\"EnableLogin\":\"Enable login\",\"EnableLogin_Description\":\"Whether to enable login. \\nNo login is required by default. \\nThis configuration does not support hot reload.\",\"EnableTLS\":\"Enable TLS\",\"EnableTLS_Description\":\"Whether to enable HTTPS protocol. \\nThe certificate needs to be set in the key file.\",\"EnableUpload\":\"Enable upload functionality\",\"EnableUpload_Description\":\"Enable upload functionality.\",\"ExcludePath\":\"exclude path\",\"ExcludePath_Description\":\"When scanning books, the names of files or folders that need to be excluded\",\"FrpClientConfig\":\"FrpClient settings\",\"GenerateBookMetadata\":\"Generate book metadata\",\"GenerateMetaData\":\"Generate metadata\",\"GenerateMetaData_Description\":\"Generate book metadata. \\nNot currently in effect.\",\"HomeDirectory\":\"HomeDirectory\",\"Host\":\"domain name\",\"Host_Description\":\"Customize the host name displayed by the QR code. \\nThe default is the network card IP.\",\"KeyFile\":\"KeyFile\",\"KeyFile_Description\":\"TLS/SSL key file path (default: \\\"~/.config/.comigo/key.key\\\")\",\"LocalStores\":\"library folder\",\"LocalStores_Description\":\"The library folder supports absolute and relative directories. \\nRelative directories are based on the current execution directory.\",\"LogFileName\":\"Log file name\",\"LogFileName_Description\":\"Log file name\",\"LogFilePath\":\"Log save location\",\"LogFilePath_Description\":\"Log file save location\",\"LogToFile\":\"Record Log to local\",\"LogToFile_Description\":\"Whether to save the program log to a local file. \\nNot saved by default.\",\"MaxScanDepth\":\"Maximum scan depth\",\"MaxScanDepth_Description\":\"Maximum scan depth. \\nFiles exceeding the depth will not be scanned. \\nThe current execution directory is the base.\",\"MinImageNum\":\"Minimum number of pictures\",\"MinImageNum_Description\":\"A compressed package or folder must contain at least a few pictures to be considered a book.\",\"OpenBrowser\":\"Open browser\",\"OpenBrowser_Description\":\"After the scan is completed, whether to open the browser at the same time. \\nThe default is true for windows and false for other platforms.\",\"Password\":\"password\",\"Password_Description\":\"After enabling login, the password used to log in.\",\"Port\":\"port\",\"Port_Description\":\"Web service port. This configuration does not support hot reloading.\",\"PrintAllPossibleQRCode\":\"More QR codes\",\"ProgramDirectory\":\"The directory where the program is located\",\"StartFrpClientInBackground\":\"Start FrpClient\",\"SupportFileType\":\"Supported compressed packages\",\"SupportFileType_Description\":\"When scanning a file, it is used to decide whether to skip or count it as a file suffix for book processing.\",\"SupportMediaType\":\"Supported image files\",\"SupportMediaType_Description\":\"Image file suffix used to count the number of images when scanning compressed packages\",\"Timeout\":\"Expiration\",\"TimeoutLimitForScan\":\"Scan timeout\",\"TimeoutLimitForScan_Description\":\"When scanning a file, if it takes more than a few seconds, it will give up scanning the file to avoid getting stuck on an overly large file.\",\"Timeout_Description\":\"Cookie expiration time after enabling login. \\nThe unit is minutes. \\nIt expires in 180 minutes by default.\",\"UploadPath\":\"Upload location\",\"UploadPath_Description\":\"Customize the storage location of the uploaded files, by default, the upload folder is created under the current execution directory or the first bookstore directory.\",\"UseCache\":\"Local image cache\",\"Username\":\"username\",\"Username_Description\":\"After enabling login, the username required for the login interface.\",\"WorkingDirectory\":\"current working directory\",\"ZipFileTextEncoding\":\"Not UTF-8\",\"ZipFileTextEncoding_Description\":\"Non-utf-8 encoded ZIP file, what encoding should be used to parse it. \\nDefault GBK.\",\"labs\":\"Labs\",\"all_page_num\":\"Total Pages: {0}\",\"author\":\"Author: {0}\",\"auto_crop\":\"Automatic edge trimming\",\"auto_double_page\":\"Auto Double Page (beta)\",\"auto_hide_toolbar\":\"Auto Hide Toolbar\",\"back-to-top\":\"Back to Top\",\"back_button\":\"Back Button\",\"back_to_bookshelf\":\"Back to Bookshelf\",\"book_shelf\":\"Bookshelf\",\"child_book_hint\":\"{0} books in the folder\",\"debug_mode\":\"Debug Mode\",\"do_you_reset_all_settings\":\"Do you want to reset to the default settings?\",\"double_page_mode\":\"Double Page Mode\",\"double_page_width\":\"Double Page Width:\",\"download_sample_config_file\":\"Download Sample Config File\",\"download_windows_reg_file\":\"Download Windows Reg File\",\"drop_to_upload\":\"Click or drag files to this area to upload\",\"energy_threshold\":\"Energy Threshold:\",\"epub_info\":\"ePub Information\",\"exit_fullscreen\":\"Exit Fullscreen Mode\",\"filesize\":\"File Size: {0}\",\"flip_mode\":\"Flip Mode\",\"flip_odd_even_page\":\"Flip Odd/Even Pages\",\"flip_odd_even_page_hint\":\"Click here if double pages do not align properly.\",\"found_read_history\":\"Local Reading History Found\",\"from_interrupt\":\"From Last Interruption\",\"full_screen_hint\":\"Fullscreen Button\",\"fullscreen\":\"Fullscreen\",\"good_job_and_byebye\":\"Good job! Goodbye.\",\"gray_image\":\"Grayscale Image\",\"hint\":\"hint\",\"hint_first_page\":\"You are on the first page and cannot turn forward.\",\"hint_last_page\":\"You are on the last page and cannot turn backward.\",\"hour\":\"hours\",\"image_width_limit\":\"Limit Width\",\"infinite_dropdown\":\"Infinite Dropdown\",\"interval\":\"Interval:\",\"manga_mode\":\"Manga(Right to Left)\",\"load_all_pages\":\"Load All Pages\",\"load_from_interrupt\":\"Load from last reading position (page XX)?\",\"login_success_hint\":\"Login successful. Returning to the previous page.\",\"logout\":\"Logout\",\"margin_bottom_on_scroll_mode\":\"Margin Bottom:\",\"margin_on_scroll_mode\":\"Page gap:\",\"max_width\":\"Max Width:\",\"minute\":\"minutes\",\"network\":\"Network\",\"no_book_found_hint\":\"No books found. Try uploading a file?\",\"no_support_upload_file\":\"File upload functionality has been disabled by the administrator.\",\"not_support_fullscreen\":\"This browser does not support fullscreen mode.\",\"now_is\":\"Now:\",\"number_of_online_books\":\"Number of Online Books:\",\"original_image\":\"Original Image\",\"original_pdf_link\":\"Original PDF Link\",\"page\":\"page\",\"page_turning_seconds\":\"Page Turn Interval:\",\"pagination_mode\":\"Pagination Mode\",\"pdf_hint_message\":\"Supports pure image PDFs. If loading is slow or errors occur, please try the following:\",\"please_enable_upload\":\"Please enable server upload support.\",\"please_enter_content\":\"Please enter content\",\"qrcode_hint\":\"Scan to read. Click to display QR code.\",\"raw_resolution\":\"Raw Resolution\",\"re_sort_book\":\"Resort Books\",\"re_sort_page\":\"Resort Pages\",\"reader_settings\":\"Reader Settings\",\"reading_progress_bar\":\"Reading Progress Bar\",\"refresh_page\":\"Refresh Page\",\"reset_all_settings\":\"Reset Settings\",\"resort_file\":\"Resort File\",\"comic_mode\":\"Comic(Left to Right)\",\"save_page_num\":\"Save Progress\",\"scan_qrcode\":\"Scan QR Code:\",\"scanned_hint\":\"Scanned XX books. Do you want to view them now?\",\"scroll_mode\":\"Scroll Mode\",\"second\":\"seconds\",\"select_language\":\"Select Language\",\"server_config\":\"Server Configuration\",\"server_setting\":\"Comigo Server Settings\",\"set_back_color\":\"Background Color:\",\"set_interface_color\":\"Interface Color:\",\"show_filename\":\"Show Filename\",\"show_file_icon\":\"Show Icon\",\"show_header\":\"Show Header\",\"showPageNum\":\"Show Page Number\",\"simplify_filename\":\"Simplify Filename\",\"single_page_mode\":\"Single Page Mode\",\"single_page_width\":\"Single Page Width:\",\"sort_by_default\":\"Default Sort\",\"sort_by_filename\":\"Sort by Filename (A-Z)\",\"sort_by_filename_reverse\":\"Sort by Filename (Z-A)\",\"sort_by_filesize\":\"Sort by Filesize (Large to Small)\",\"sort_by_filesize_reverse\":\"Sort by Filesize (Small to Large)\",\"sort_by_modify_time\":\"Sort by Modify Time (Newest to Oldest)\",\"sort_by_modify_time_reverse\":\"Sort by Modify Time (Oldest to Newest)\",\"sort_reverse\":\"(Reverse)\",\"start_sketch_message\":\"The countdown has begun. Have a nice day!\",\"start_sketch_mode\":\"Start Sketch\",\"starting_from_beginning\":\"Start from Beginning\",\"starting_from_beginning_hint\":\"Load from the first page\",\"stop_sketch_mode\":\"Stop Sketch\",\"submit\":\"submit\",\"success_fullscreen\":\"Entered Fullscreen Mode\",\"successfully_loaded_reading_progress\":\"Successfully Loaded Reading Progress\",\"switch_to_flip_mode\":\"Switch to Flip Mode\",\"switch_to_scrolling_mode\":\"Switch to Scroll Mode\",\"sync_page\":\"Remote Page Sync\",\"temp_future_hint\":\"Temporarily put some features that are not yet finished, under development and adjustment.\",\"test\":\"Test\",\"to_flip_mode\":\"Switch to Flip Mode\",\"to_infinite_dropdown_mode\":\"Switch to Infinite Dropdown Mode\",\"to_pagination_mode\":\"Switch to Pagination Mode\",\"to_scroll_mode\":\"Switch to Scroll Mode\",\"total_is\":\"Total:\",\"total_time\":\"Total Time:\",\"type_or_paste_content\":\"Type or paste content\",\"upload_file\":\"Upload File\",\"uploaded_folder_hint\":\"Files will be uploaded to the upload folder under the default library directory.\",\"width_use_fixed_value\":\"Landscape Mode Width: Fixed Value\",\"width_use_percent\":\"Landscape Mode Width: Percentage\"}");
+$bb767615b495769d$exports = JSON.parse("{\"CachePath\":\"local cache location\",\"CachePath_Description\":\"Local image cache location, default system temporary folder.\",\"CertFile\":\"CertFile\",\"CertFile_Description\":\"TLS/SSL certificate file path (default: , \\\"~/.config/.comigo/cert.crt\\\")\",\"ClearCacheExit\":\"Clean up on exit\",\"ClearCacheExit_Description\":\"When exiting the program, clear the web image cache.\",\"ClearDatabaseWhenExit\":\"Clear database books\",\"ClearDatabaseWhenExit_Description\":\"When the local database is enabled, non-existing books are purged after the scan is completed.\",\"ConfigManager\":\"Profile management\",\"ConfigManagerDeleteSuccess\":\"Configuration has been deleted.\",\"ConfigManagerDescription\":\"Clicking Save will upload the current configuration to the server and overwrite the existing configuration file.\",\"ConfigManagerSaveHint\":\"There is already a configuration file, please change the save location.\",\"ConfigManagerSaveSuccess\":\"Configuration saved.\",\"ConfigSaveTo\":\"Configure default save path\",\"Debug\":\"Turn on Debug mode\",\"Debug_Description\":\"Enable Debug function\",\"DisableLAN\":\"Disable LAN sharing\",\"DisableLAN_Description\":\"Reading services are only provided on this machine and are not shared externally. This configuration does not support hot reloading.\",\"EnableDatabase\":\"Enable database\",\"EnableDatabase_Description\":\"Enable local database to save scanned book data. \\nThis configuration does not support hot reload.\",\"EnableFrpcServer\":\"EnableFrpcServer\",\"EnableLogin\":\"Enable login\",\"EnableLogin_Description\":\"Whether to enable login. \\nNo login is required by default. \\nThis configuration does not support hot reload.\",\"EnableTLS\":\"Enable TLS\",\"EnableTLS_Description\":\"Whether to enable HTTPS protocol. \\nThe certificate needs to be set in the key file.\",\"EnableUpload\":\"Enable upload functionality\",\"EnableUpload_Description\":\"Enable upload functionality.\",\"ExcludePath\":\"exclude path\",\"ExcludePath_Description\":\"When scanning books, the names of files or folders that need to be excluded\",\"FrpClientConfig\":\"FrpClient settings\",\"GenerateBookMetadata\":\"Generate book metadata\",\"GenerateMetaData\":\"Generate metadata\",\"GenerateMetaData_Description\":\"Generate book metadata. \\nNot currently in effect.\",\"HomeDirectory\":\"HomeDirectory\",\"Host\":\"domain name\",\"Host_Description\":\"Customize the host name displayed by the QR code. \\nThe default is the network card IP.\",\"KeyFile\":\"KeyFile\",\"KeyFile_Description\":\"TLS/SSL key file path (default: \\\"~/.config/.comigo/key.key\\\")\",\"LocalStores\":\"library folder\",\"LocalStores_Description\":\"The library folder supports absolute and relative directories. \\nRelative directories are based on the current execution directory.\",\"LogFileName\":\"Log file name\",\"LogFileName_Description\":\"Log file name\",\"LogFilePath\":\"Log save location\",\"LogFilePath_Description\":\"Log file save location\",\"LogToFile\":\"Record Log to local\",\"LogToFile_Description\":\"Whether to save the program log to a local file. \\nNot saved by default.\",\"MaxScanDepth\":\"Maximum scan depth\",\"MaxScanDepth_Description\":\"Maximum scan depth. \\nFiles exceeding the depth will not be scanned. \\nThe current execution directory is the base.\",\"MinImageNum\":\"Minimum number of pictures\",\"MinImageNum_Description\":\"A compressed package or folder must contain at least a few pictures to be considered a book.\",\"OpenBrowser\":\"Open browser\",\"OpenBrowser_Description\":\"After the scan is completed, whether to open the browser at the same time. \\nThe default is true for windows and false for other platforms.\",\"Password\":\"password\",\"Password_Description\":\"After enabling login, the password used to log in.\",\"Port\":\"port\",\"Port_Description\":\"Web service port. This configuration does not support hot reloading.\",\"PrintAllPossibleQRCode\":\"More QR codes\",\"ProgramDirectory\":\"The directory where the program is located\",\"StartFrpClientInBackground\":\"Start FrpClient\",\"SupportFileType\":\"Supported compressed packages\",\"SupportFileType_Description\":\"When scanning a file, it is used to decide whether to skip or count it as a file suffix for book processing.\",\"SupportMediaType\":\"Supported image files\",\"SupportMediaType_Description\":\"Image file suffix used to count the number of images when scanning compressed packages\",\"Timeout\":\"Expiration\",\"TimeoutLimitForScan\":\"Scan timeout\",\"TimeoutLimitForScan_Description\":\"When scanning a file, if it takes more than a few seconds, it will give up scanning the file to avoid getting stuck on an overly large file.\",\"Timeout_Description\":\"Cookie expiration time after enabling login. \\nThe unit is minutes. \\nIt expires in 180 minutes by default.\",\"UploadPath\":\"Upload location\",\"UploadPath_Description\":\"Customize the storage location of the uploaded files, by default, the upload folder is created under the current execution directory or the first bookstore directory.\",\"UseCache\":\"Local image cache\",\"Username\":\"username\",\"Username_Description\":\"After enabling login, the username required for the login interface.\",\"WorkingDirectory\":\"current working directory\",\"ZipFileTextEncoding\":\"Not UTF-8\",\"ZipFileTextEncoding_Description\":\"Non-utf-8 encoded ZIP file, what encoding should be used to parse it. \\nDefault GBK.\",\"labs\":\"Labs\",\"all_page_num\":\"Total Pages: {0}\",\"author\":\"Author: {0}\",\"auto_crop\":\"Automatic edge trimming\",\"auto_double_page\":\"Auto Double Page (beta)\",\"auto_hide_toolbar\":\"Auto Hide Toolbar\",\"back-to-top\":\"Back to Top\",\"back_button\":\"Back Button\",\"back_to_bookshelf\":\"Back to Bookshelf\",\"book_shelf\":\"Bookshelf\",\"child_book_hint\":\"{0} books in the folder\",\"debug_mode\":\"DebugMode\",\"do_you_reset_all_settings\":\"Do you want to reset to the default settings?\",\"double_page_mode\":\"Double Page Mode\",\"double_page_width\":\"Double Page Width:\",\"download_sample_config_file\":\"Download Sample Config File\",\"download_windows_reg_file\":\"Download Windows Reg File\",\"drop_to_upload\":\"Click or drag files to this area to upload\",\"energy_threshold\":\"Energy Threshold:\",\"epub_info\":\"ePub Information\",\"exit_fullscreen\":\"Exit Fullscreen Mode\",\"filesize\":\"File Size: {0}\",\"flip_mode\":\"Flip Mode\",\"flip_odd_even_page\":\"Flip Odd/Even Pages\",\"flip_odd_even_page_hint\":\"Click here if double pages do not align properly.\",\"found_read_history\":\"Local Reading History Found\",\"from_interrupt\":\"From Last Interruption\",\"full_screen_hint\":\"Fullscreen Button\",\"fullscreen\":\"Fullscreen\",\"good_job_and_byebye\":\"Good job! Goodbye.\",\"gray_image\":\"Grayscale Image\",\"hint\":\"hint\",\"hint_first_page\":\"You are on the first page and cannot turn forward.\",\"hint_last_page\":\"You are on the last page and cannot turn backward.\",\"hour\":\"hours\",\"image_width_limit\":\"Limit Width\",\"infinite_dropdown\":\"Infinite Dropdown\",\"interval\":\"Interval:\",\"manga_mode\":\"Manga(Right to Left)\",\"load_all_pages\":\"Load All Pages\",\"load_from_interrupt\":\"Load from last reading position (page XX)?\",\"login_success_hint\":\"Login successful. Returning to the previous page.\",\"logout\":\"Logout\",\"margin_bottom_on_scroll_mode\":\"Margin Bottom:\",\"margin_on_scroll_mode\":\"Page gap:\",\"max_width\":\"Max Width:\",\"minute\":\"minutes\",\"network\":\"Network\",\"no_book_found_hint\":\"No books found. Try uploading a file?\",\"no_support_upload_file\":\"File upload functionality has been disabled by the administrator.\",\"not_support_fullscreen\":\"This browser does not support fullscreen mode.\",\"now_is\":\"Now:\",\"number_of_online_books\":\"Number of Online Books:\",\"original_image\":\"Original Image\",\"original_pdf_link\":\"Original PDF Link\",\"page\":\"page\",\"page_turning_seconds\":\"Page Turn Interval:\",\"pagination_mode\":\"Pagination Mode\",\"pdf_hint_message\":\"Supports pure image PDFs. If loading is slow or errors occur, please try the following:\",\"please_enable_upload\":\"Please enable server upload support.\",\"please_enter_content\":\"Please enter content\",\"qrcode_hint\":\"Scan to read. Click to display QR code.\",\"raw_resolution\":\"Raw Resolution\",\"re_sort_book\":\"Resort Books\",\"re_sort_page\":\"Resort Pages\",\"reader_settings\":\"Reader Settings\",\"reading_progress_bar\":\"Reading Progress Bar\",\"refresh_page\":\"Refresh Page\",\"reset_all_settings\":\"Reset Settings\",\"resort_file\":\"Resort File\",\"comic_mode\":\"Comic(Left to Right)\",\"save_page_num\":\"Save Progress\",\"scan_qrcode\":\"Scan QR Code:\",\"scanned_hint\":\"Scanned XX books. Do you want to view them now?\",\"scroll_mode\":\"Scroll Mode\",\"second\":\"seconds\",\"select_language\":\"Select Language\",\"server_config\":\"Server Configuration\",\"server_setting\":\"Comigo Server Settings\",\"set_back_color\":\"Background Color:\",\"set_interface_color\":\"Interface Color:\",\"show_filename\":\"Show Filename\",\"show_file_icon\":\"Show Icon\",\"show_header\":\"Show Header\",\"showPageNum\":\"Show Page Number\",\"simplify_filename\":\"Simplify Filename\",\"single_page_mode\":\"Single Page Mode\",\"single_page_width\":\"Single Page Width:\",\"sort_by_default\":\"Default Sort\",\"sort_by_filename\":\"Sort by Filename (A-Z)\",\"sort_by_filename_reverse\":\"Sort by Filename (Z-A)\",\"sort_by_filesize\":\"Sort by Filesize (Large to Small)\",\"sort_by_filesize_reverse\":\"Sort by Filesize (Small to Large)\",\"sort_by_modify_time\":\"Sort by Modify Time (Newest to Oldest)\",\"sort_by_modify_time_reverse\":\"Sort by Modify Time (Oldest to Newest)\",\"sort_reverse\":\"(Reverse)\",\"start_sketch_message\":\"The countdown has begun. Have a nice day!\",\"start_sketch_mode\":\"Start Sketch\",\"starting_from_beginning\":\"Start from Beginning\",\"starting_from_beginning_hint\":\"Load from the first page\",\"stop_sketch_mode\":\"Stop Sketch\",\"submit\":\"submit\",\"success_fullscreen\":\"Entered Fullscreen Mode\",\"successfully_loaded_reading_progress\":\"Successfully Loaded Reading Progress\",\"switch_to_flip_mode\":\"Switch to Flip Mode\",\"switch_to_scrolling_mode\":\"Switch to Scroll Mode\",\"sync_page\":\"Remote Page Sync\",\"temp_future_hint\":\"Temporarily put some features that are not yet finished, under development and adjustment.\",\"test\":\"Test\",\"to_flip_mode\":\"Switch to Flip Mode\",\"to_infinite_dropdown_mode\":\"Switch to Infinite Dropdown Mode\",\"to_pagination_mode\":\"Switch to Pagination Mode\",\"to_scroll_mode\":\"Switch to Scroll Mode\",\"total_is\":\"Total:\",\"total_time\":\"Total Time:\",\"type_or_paste_content\":\"Type or paste content\",\"upload_file\":\"Upload File\",\"uploaded_folder_hint\":\"Files will be uploaded to the upload folder under the default library directory.\",\"width_use_fixed_value\":\"Landscape Mode Width: Fixed Value\",\"width_use_percent\":\"Landscape Mode Width: Percentage\"}");
 
 
 var $c199df056bb7354f$exports = {};
-$c199df056bb7354f$exports = JSON.parse('{"CachePath":"\u672C\u5730\u7F13\u5B58\u4F4D\u7F6E","CachePath_Description":"\u672C\u5730\u56FE\u7247\u7F13\u5B58\u4F4D\u7F6E\uFF0C\u9ED8\u8BA4\u7CFB\u7EDF\u4E34\u65F6\u6587\u4EF6\u5939\u3002","CertFile":"CertFile","CertFile_Description":"TLS/SSL \u8BC1\u4E66\u6587\u4EF6\u8DEF\u5F84 (default: \u3001\\"~/.config/.comigo/cert.crt\\")","ClearCacheExit":"\u9000\u51FA\u65F6\u6E05\u7406","ClearCacheExit_Description":"\u9000\u51FA\u7A0B\u5E8F\u7684\u65F6\u5019\uFF0C\u6E05\u7406web\u56FE\u7247\u7F13\u5B58\u3002","ClearDatabaseWhenExit":"\u6E05\u9664\u6570\u636E\u5E93\u4E66\u7C4D","ClearDatabaseWhenExit_Description":"\u542F\u7528\u672C\u5730\u6570\u636E\u5E93\u65F6\uFF0C\u626B\u63CF\u5B8C\u6210\u540E\uFF0C\u6E05\u9664\u4E0D\u5B58\u5728\u7684\u4E66\u7C4D\u3002","ConfigManager":"\u914D\u7F6E\u6587\u4EF6\u7BA1\u7406","ConfigManagerDeleteSuccess":"\u914D\u7F6E\u5DF2\u5220\u9664\u3002","ConfigManagerDescription":"\u70B9\u51FBSave\uFF0C\u4F1A\u5C06\u5F53\u524D\u914D\u7F6E\u4E0A\u4F20\u5230\u670D\u52A1\u5668\uFF0C\u5E76\u8986\u76D6\u5DF2\u7ECF\u5B58\u5728\u7684\u8BBE\u5B9A\u6587\u4EF6\u3002","ConfigManagerSaveHint":"\u5DF2\u6709\u914D\u7F6E\u6587\u4EF6,\u8BF7\u5207\u6362\u4FDD\u5B58\u4F4D\u7F6E\u3002","ConfigManagerSaveSuccess":"\u914D\u7F6E\u5DF2\u4FDD\u5B58\u3002","ConfigSaveTo":"\u914D\u7F6E\u9ED8\u8BA4\u4FDD\u5B58\u8DEF\u5F84","Debug":"\u5F00\u542FDebug\u6A21\u5F0F","Debug_Description":"\u542F\u7528Debug\u529F\u80FD","DisableLAN":"\u7981\u6B62\u5C40\u57DF\u7F51\u5171\u4EAB","DisableLAN_Description":"\u53EA\u5728\u672C\u673A\u63D0\u4F9B\u9605\u8BFB\u670D\u52A1\uFF0C\u4E0D\u5BF9\u5916\u5171\u4EAB\uFF0C\u6B64\u9879\u914D\u7F6E\u4E0D\u652F\u6301\u70ED\u91CD\u8F7D","EnableDatabase":"\u542F\u7528\u6570\u636E\u5E93","EnableDatabase_Description":"\u542F\u7528\u672C\u5730\u6570\u636E\u5E93\uFF0C\u4FDD\u5B58\u626B\u63CF\u5230\u7684\u4E66\u7C4D\u6570\u636E\u3002\u6B64\u9879\u914D\u7F6E\u4E0D\u652F\u6301\u70ED\u91CD\u8F7D\u3002","EnableFrpcServer":"EnableFrpcServer","EnableLogin":"\u542F\u7528\u767B\u9646","EnableLogin_Description":"\u662F\u5426\u542F\u7528\u767B\u5F55\u3002\u9ED8\u8BA4\u4E0D\u9700\u8981\u767B\u9646\u3002\u6B64\u9879\u914D\u7F6E\u4E0D\u652F\u6301\u70ED\u91CD\u8F7D\u3002","EnableTLS":"Enable TLS","EnableTLS_Description":"\u662F\u5426\u542F\u7528HTTPS\u534F\u8BAE\u3002\u9700\u8981\u8BBE\u7F6E\u8BC1\u4E66\u4E8Ekey\u6587\u4EF6\u3002","EnableUpload":"\u542F\u7528\u4E0A\u4F20\u529F\u80FD","EnableUpload_Description":"\u542F\u7528\u4E0A\u4F20\u529F\u80FD\u3002","ExcludePath":"\u6392\u9664\u8DEF\u5F84","ExcludePath_Description":"\u626B\u63CF\u4E66\u7C4D\u7684\u65F6\u5019\uFF0C\u9700\u8981\u6392\u9664\u7684\u6587\u4EF6\u6216\u6587\u4EF6\u5939\u7684\u540D\u5B57","FrpClientConfig":"FrpClient\u8BBE\u7F6E","GenerateBookMetadata":"\u751F\u6210\u4E66\u7C4D\u5143\u6570\u636E","GenerateMetaData":"\u751F\u6210\u5143\u6570\u636E","GenerateMetaData_Description":"\u751F\u6210\u4E66\u7C4D\u5143\u6570\u636E\u3002\u5F53\u524D\u672A\u751F\u6548\u3002","HomeDirectory":"\u7528\u6237\u4E3B\u76EE\u5F55","Host":"\u57DF\u540D","Host_Description":"\u81EA\u5B9A\u4E49\u4E8C\u7EF4\u7801\u663E\u793A\u7684\u4E3B\u673A\u540D\u3002\u9ED8\u8BA4\u4E3A\u7F51\u5361IP\u3002","KeyFile":"KeyFile","KeyFile_Description":"TLS/SSL key\u6587\u4EF6\u8DEF\u5F84 (default: \\"~/.config/.comigo/key.key\\")","LocalStores":"\u4E66\u5E93\u6587\u4EF6\u5939","LocalStores_Description":"\u4E66\u5E93\u6587\u4EF6\u5939\uFF0C\u652F\u6301\u7EDD\u5BF9\u76EE\u5F55\u4E0E\u76F8\u5BF9\u76EE\u5F55\u3002\u76F8\u5BF9\u76EE\u5F55\u4EE5\u5F53\u524D\u6267\u884C\u76EE\u5F55\u4E3A\u57FA\u51C6","LogFileName":"Log\u6587\u4EF6\u540D","LogFileName_Description":"Log\u6587\u4EF6\u540D","LogFilePath":"Log\u4FDD\u5B58\u4F4D\u7F6E","LogFilePath_Description":"Log\u6587\u4EF6\u7684\u4FDD\u5B58\u4F4D\u7F6E","LogToFile":"\u8BB0\u5F55Log\u5230\u672C\u5730","LogToFile_Description":"\u662F\u5426\u4FDD\u5B58\u7A0B\u5E8FLog\u5230\u672C\u5730\u6587\u4EF6\u3002\u9ED8\u8BA4\u4E0D\u4FDD\u5B58\u3002","MaxScanDepth":"\u6700\u5927\u626B\u63CF\u6DF1\u5EA6","MaxScanDepth_Description":"\u6700\u5927\u626B\u63CF\u6DF1\u5EA6\u3002\u8D85\u8FC7\u6DF1\u5EA6\u7684\u6587\u4EF6\u4E0D\u4F1A\u88AB\u626B\u63CF\u3002\u5F53\u524D\u6267\u884C\u76EE\u5F55\u4E3A\u57FA\u51C6\u3002","MinImageNum":"\u6700\u5C0F\u56FE\u7247\u6570","MinImageNum_Description":"\u538B\u7F29\u5305\u6216\u6587\u4EF6\u5939\u5185\u81F3\u5C11\u6709\u51E0\u5F20\u56FE\u7247\uFF0C\u624D\u7B97\u4F5C\u4E66\u7C4D\u3002","OpenBrowser":"\u6253\u5F00\u6D4F\u89C8\u5668","OpenBrowser_Description":"\u626B\u63CF\u5B8C\u6210\u540E\uFF0C\u662F\u5426\u540C\u65F6\u6253\u5F00\u6D4F\u89C8\u5668\u3002windows\u9ED8\u8BA4true\uFF0C\u5176\u4ED6\u5E73\u53F0\u9ED8\u8BA4false\u3002","Password":"\u5BC6\u7801","Password_Description":"\u542F\u7528\u767B\u9646\u540E\uFF0C\u767B\u5F55\u7528\u7684\u5BC6\u7801\u3002","Port":"\u7AEF\u53E3","Port_Description":"\u7F51\u9875\u670D\u52A1\u7AEF\u53E3\uFF0C\u6B64\u9879\u914D\u7F6E\u4E0D\u652F\u6301\u70ED\u91CD\u8F7D","PrintAllPossibleQRCode":"\u66F4\u591A\u4E8C\u7EF4\u7801","ProgramDirectory":"\u7A0B\u5E8F\u6240\u5728\u76EE\u5F55","StartFrpClientInBackground":"\u542F\u52A8FrpClient","SupportFileType":"\u652F\u6301\u7684\u538B\u7F29\u5305","SupportFileType_Description":"\u626B\u63CF\u6587\u4EF6\u65F6\uFF0C\u7528\u4E8E\u51B3\u5B9A\u8DF3\u8FC7\uFF0C\u8FD8\u662F\u7B97\u4F5C\u4E66\u7C4D\u5904\u7406\u7684\u6587\u4EF6\u540E\u7F00","SupportMediaType":"\u652F\u6301\u7684\u56FE\u7247\u6587\u4EF6","SupportMediaType_Description":"\u626B\u63CF\u538B\u7F29\u5305\u65F6\uFF0C\u7528\u4E8E\u7EDF\u8BA1\u56FE\u7247\u6570\u91CF\u7684\u56FE\u7247\u6587\u4EF6\u540E\u7F00","Timeout":"\u8FC7\u671F\u65F6\u95F4","TimeoutLimitForScan":"\u626B\u63CF\u8D85\u65F6","TimeoutLimitForScan_Description":"\u626B\u63CF\u6587\u4EF6\u65F6\uFF0C\u8D85\u8FC7\u51E0\u79D2\u949F\uFF0C\u5C31\u653E\u5F03\u626B\u63CF\u8FD9\u4E2A\u6587\u4EF6\uFF0C\u907F\u514D\u5361\u5728\u8FC7\u5927\u6587\u4EF6\u4E0A\u3002","Timeout_Description":"\u542F\u7528\u767B\u9646\u540E\uFF0Ccookie\u8FC7\u671F\u65F6\u95F4\u3002\u5355\u4F4D\u4E3A\u5206\u949F\u3002\u9ED8\u8BA4180\u5206\u8FC7\u671F\u3002","UploadPath":"\u4E0A\u4F20\u4F4D\u7F6E","UploadPath_Description":"\u81EA\u5B9A\u4E49\u4E0A\u4F20\u6587\u4EF6\u5B58\u50A8\u4F4D\u7F6E\uFF0C\u9ED8\u8BA4\u5728\u5F53\u524D\u6267\u884C\u76EE\u5F55\u6216\u7B2C\u4E00\u4E2A\u4E66\u5E93\u76EE\u5F55\u4E0B\u9762\u521B\u5EFA upload \u6587\u4EF6\u5939\u3002","UseCache":"\u672C\u5730\u56FE\u7247\u7F13\u5B58","Username":"\u7528\u6237\u540D","Username_Description":"\u542F\u7528\u767B\u9646\u540E\uFF0C\u767B\u5F55\u754C\u9762\u9700\u8981\u7684\u7528\u6237\u540D\u3002","WorkingDirectory":"\u5F53\u524D\u5DE5\u4F5C\u76EE\u5F55","ZipFileTextEncoding":"\u975EUTF-8","ZipFileTextEncoding_Description":"\u975Eutf-8\u7F16\u7801ZIP\u6587\u4EF6\uFF0C\u5C1D\u8BD5\u7528\u4EC0\u4E48\u7F16\u7801\u89E3\u6790\u3002\u9ED8\u8BA4GBK\u3002","labs":"\u5B9E\u9A8C","all_page_num":"\u603B\u9875\u6570\uFF1A{0}","author":"\u4F5C\u8005\uFF1A{0}","auto_crop":"\u81EA\u52A8\u5207\u8FB9","auto_double_page":"\u81EA\u52A8\u5408\u5E76\u53CC\u9875\uFF08beta\uFF09","auto_hide_toolbar":"\u81EA\u52A8\u9690\u85CF\u5DE5\u5177\u680F","back-to-top":"\u8FD4\u56DE\u9876\u90E8","back_button":"\u8FD4\u56DE\u6309\u94AE","back_to_bookshelf":"\u8FD4\u56DE\u4E66\u67B6","book_shelf":"\u4E66\u5E93","child_book_hint":"\u6587\u4EF6\u5939\u5185\u6709{0}\u672C\u4E66","debug_mode":"\u8C03\u8BD5\u6A21\u5F0F","do_you_reset_all_settings":"\u662F\u5426\u8981\u91CD\u7F6E\u4E3A\u9ED8\u8BA4\u8BBE\u7F6E\uFF1F","double_page_mode":"\u53CC\u9875\u6A21\u5F0F","double_page_width":"\u6A2A\u5C4F\u53CC\u9875\u5BBD\u5EA6:","download_sample_config_file":"\u4E0B\u8F7D\u793A\u4F8B\u914D\u7F6E\u6587\u4EF6","download_windows_reg_file":"\u4E0B\u8F7D\u53F3\u952E\u6CE8\u518C\u6587\u4EF6","drop_to_upload":"\u70B9\u51FB\u6216\u5C06\u6587\u4EF6\u62D6\u52A8\u5230\u6B64\u533A\u57DF\u4EE5\u4E0A\u4F20","energy_threshold":"\u5207\u8FB9\u5F3A\u5EA6\uFF1A","epub_info":"ePub \u4FE1\u606F","exit_fullscreen":"\u9000\u51FA\u5168\u5C4F\u6A21\u5F0F","filesize":"\u5927\u5C0F\uFF1A{0}","flip_mode":"\u7FFB\u9875\u6A21\u5F0F","flip_odd_even_page":"\u66F4\u6539\u8DE8\u9875\u5339\u914D","flip_odd_even_page_hint":"\u5982\u679C\u8DE8\u9875\u5185\u5BB9\u4E0D\u5339\u914D\uFF0C\u53EF\u4EE5\u5C1D\u8BD5\u70B9\u51FB\u4FEE\u6B63","found_read_history":"\u53D1\u73B0\u672C\u5730\u9605\u8BFB\u8BB0\u5F55","from_interrupt":"\u4ECE\u4E2D\u65AD\u5904\u7EE7\u7EED","full_screen_hint":"\u5168\u5C4F\u6309\u94AE","fullscreen":"\u5207\u6362\u5168\u5C4F","good_job_and_byebye":"\u505A\u5F97\u4E0D\u9519\uFF0C\u518D\u89C1~","gray_image":"\u9ED1\u767D\u5316","hint":"\u63D0\u793A","hint_first_page":"\u5F53\u524D\u662F\u7B2C\u4E00\u9875\uFF0C\u65E0\u6CD5\u5411\u524D\u7FFB\u9875","hint_last_page":"\u5F53\u524D\u662F\u6700\u540E\u4E00\u9875\uFF0C\u65E0\u6CD5\u5411\u540E\u7FFB\u9875","hour":"\u5C0F\u65F6","image_width_limit":"\u9650\u5236\u5BBD\u5EA6","infinite_dropdown":"\u65E0\u9650\u4E0B\u62C9\u6A21\u5F0F","interval":"\u95F4\u9694:","manga_mode":"\u65E5\u6F2B\uFF08\u53F3\u5F00\u672C\uFF09","load_all_pages":"\u52A0\u8F7D\u6240\u6709\u9875\u9762","load_from_interrupt":"\u662F\u5426\u4ECE\u7B2CXX\u9875\u5F00\u59CB\u52A0\u8F7D\uFF1F","login_success_hint":"\u767B\u5F55\u6210\u529F\uFF0C\u8FD4\u56DE\u4E0A\u4E00\u9875\u9762","logout":"\u9000\u51FA\u767B\u5F55","margin_bottom_on_scroll_mode":"\u9875\u9762\u95F4\u8DDD:","margin_on_scroll_mode":"\u9875\u9762\u95F4\u9699:","max_width":"\u6700\u5927\u5BBD\u5EA6\uFF1A","minute":"\u5206","network":"\u7F51\u7EDC","no_book_found_hint":"\u672A\u627E\u5230\u4E66\u7C4D\uFF0C\u8BD5\u8BD5\u4E0A\u4F20\u6587\u4EF6\uFF1F","no_support_upload_file":"\u6587\u4EF6\u4E0A\u4F20\u529F\u80FD\u5DF2\u88AB\u7BA1\u7406\u5458\u5173\u95ED","not_support_fullscreen":"\u6B64\u6D4F\u89C8\u5668\u4E0D\u652F\u6301\u5168\u5C4F\u6A21\u5F0F","now_is":"\u5F53\u524D:","number_of_online_books":"\u5728\u7EBF\u4E66\u7C4D\u6570\u91CF\uFF1A","original_image":"\u663E\u793A\u539F\u56FE","original_pdf_link":"\u67E5\u770B\u539F\u59CBPDF","page":"\u9875","page_turning_seconds":"\u7FFB\u9875\u95F4\u9694:","pagination_mode":"\u5206\u9875\u52A0\u8F7D\u6A21\u5F0F","pdf_hint_message":"\u652F\u6301\u7EAF\u56FE\u7247PDF\uFF0C\u5982\u679C\u52A0\u8F7D\u7F13\u6162\u6216\u51FA\u9519\uFF0C\u8BF7\u5C1D\u8BD5\uFF1A","please_enable_upload":"\u8BF7\u542F\u7528\u670D\u52A1\u5668\u7684\u4E0A\u4F20\u529F\u80FD","please_enter_content":"\u8BF7\u8F93\u5165\u5185\u5BB9","qrcode_hint":"\u626B\u7801\u9605\u8BFB\uFF0C\u70B9\u51FB\u663E\u793A\u4E8C\u7EF4\u7801","raw_resolution":"\u539F\u59CB\u5206\u8FA8\u7387","re_sort_book":"\u91CD\u65B0\u6392\u5217\u4E66\u7C4D","re_sort_page":"\u91CD\u65B0\u6392\u5E8F\u9875\u9762","reader_settings":"\u9605\u8BFB\u8BBE\u7F6E","reading_progress_bar":"\u9605\u8BFB\u8FDB\u5EA6\u6761","refresh_page":"\u5237\u65B0\u9875\u9762","reset_all_settings":"\u91CD\u7F6E\u8BBE\u7F6E","resort_file":"\u91CD\u65B0\u6392\u5E8F\u6587\u4EF6","comic_mode":"\u7F8E\u6F2B\uFF08\u5DE6\u5F00\u672C\uFF09","save_page_num":"\u4FDD\u5B58\u9605\u8BFB\u8FDB\u5EA6","scan_qrcode":"\u626B\u7801\u9605\u8BFB\uFF1A","scanned_hint":"\u626B\u63CF\u5230XX\u672C\u4E66\uFF0C\u7ACB\u5373\u67E5\u770B\uFF1F","scroll_mode":"\u5377\u8F74\u6A21\u5F0F","second":"\u79D2","select_language":"\u9009\u62E9\u8BED\u8A00","server_config":"\u670D\u52A1\u5668\u8BBE\u7F6E","server_setting":"Comigo \u670D\u52A1\u5668\u8BBE\u7F6E","set_back_color":"\u80CC\u666F\u989C\u8272:","set_interface_color":"\u754C\u9762\u989C\u8272:","show_filename":"\u663E\u793A\u6587\u4EF6\u540D","show_file_icon":"\u663E\u793A\u6587\u4EF6\u56FE\u6807","show_header":"\u663E\u793A\u6807\u9898","showPageNum":"\u663E\u793A\u9875\u7801","simplify_filename":"\u7B80\u5316\u6587\u4EF6\u540D","single_page_mode":"\u5355\u9875\u6A21\u5F0F","single_page_width":"\u6A2A\u5C4F\u5355\u9875\u5BBD\u5EA6:","sort_by_default":"\u4FDD\u6301\u9ED8\u8BA4\u987A\u5E8F","sort_by_filename":"\u6309\u6587\u4EF6\u540D\u6392\u5E8F (A-Z)","sort_by_filename_reverse":"\u6309\u6587\u4EF6\u540D\u6392\u5E8F (Z-A)","sort_by_filesize":"\u6309\u6587\u4EF6\u5927\u5C0F\u6392\u5E8F (\u4ECE\u5927\u5230\u5C0F)","sort_by_filesize_reverse":"\u6309\u6587\u4EF6\u5927\u5C0F\u6392\u5E8F (\u4ECE\u5C0F\u5230\u5927)","sort_by_modify_time":"\u6309\u4FEE\u6539\u65F6\u95F4\u6392\u5E8F (\u4ECE\u65B0\u5230\u65E7)","sort_by_modify_time_reverse":"\u6309\u4FEE\u6539\u65F6\u95F4\u6392\u5E8F (\u4ECE\u65E7\u5230\u65B0)","sort_reverse":"\uFF08\u53CD\u5411\uFF09","start_sketch_message":"\u5012\u8BA1\u65F6\u901F\u5199\u5DF2\u5F00\u59CB\uFF0C\u795D\u4F60\u5FC3\u60C5\u6109\u5FEB\u3002","start_sketch_mode":"\u5F00\u59CB\u901F\u5199","starting_from_beginning":"\u4ECE\u5934\u5F00\u59CB","starting_from_beginning_hint":"\u4ECE\u5934\u5F00\u59CB\u52A0\u8F7D","stop_sketch_mode":"\u505C\u6B62\u901F\u5199","submit":"\u63D0\u4EA4","success_fullscreen":"\u5DF2\u8FDB\u5165\u5168\u5C4F\u6A21\u5F0F","successfully_loaded_reading_progress":"\u6210\u529F\u52A0\u8F7D\u9605\u8BFB\u8FDB\u5EA6","switch_to_flip_mode":"\u5207\u6362\u7FFB\u9875\u6A21\u5F0F","switch_to_scrolling_mode":"\u5207\u6362\u5377\u8F74\u6A21\u5F0F","sync_page":"\u8FDC\u7A0B\u540C\u6B65\u7FFB\u9875","temp_future_hint":"\u4E34\u65F6\u653E\u4E00\u4E9B\u8FD8\u672A\u5B8C\u6210\u7684\u529F\u80FD\uFF0C\u5F00\u53D1\u4E0E\u8C03\u6574\u4E2D\u3002","test":"\u6D4B\u8BD5","to_flip_mode":"\u5207\u6362\u5230\u7FFB\u9875\u6A21\u5F0F","to_infinite_dropdown_mode":"\u5207\u6362\u5230\u65E0\u9650\u4E0B\u62C9\u6A21\u5F0F","to_pagination_mode":"\u5207\u6362\u5230\u5206\u9875\u6A21\u5F0F","to_scroll_mode":"\u5207\u6362\u5377\u8F74\u6A21\u5F0F","total_is":"\u5B8C\u6210:","total_time":"\u603B\u65F6\u95F4:","type_or_paste_content":"\u952E\u5165\u6216\u7C98\u8D34\u5185\u5BB9","upload_file":"\u4E0A\u4F20\u6587\u4EF6","uploaded_folder_hint":"\u6587\u4EF6\u5C06\u4E0A\u4F20\u5230\u9ED8\u8BA4\u4E66\u5E93\u76EE\u5F55\u4E0B\u7684 upload \u6587\u4EF6\u5939\u3002","width_use_fixed_value":"\u6A2A\u5C4F\u5BBD\u5EA6: \u56FA\u5B9A\u503Cpx","width_use_percent":"\u6A2A\u5C4F\u5BBD\u5EA6: \u767E\u5206\u6BD4%"}');
+$c199df056bb7354f$exports = JSON.parse('{"CachePath":"\u672C\u5730\u7F13\u5B58\u4F4D\u7F6E","CachePath_Description":"\u672C\u5730\u56FE\u7247\u7F13\u5B58\u4F4D\u7F6E\uFF0C\u9ED8\u8BA4\u7CFB\u7EDF\u4E34\u65F6\u6587\u4EF6\u5939\u3002","CertFile":"CertFile","CertFile_Description":"TLS/SSL \u8BC1\u4E66\u6587\u4EF6\u8DEF\u5F84 (default: \u3001\\"~/.config/.comigo/cert.crt\\")","ClearCacheExit":"\u9000\u51FA\u65F6\u6E05\u7406","ClearCacheExit_Description":"\u9000\u51FA\u7A0B\u5E8F\u7684\u65F6\u5019\uFF0C\u6E05\u7406web\u56FE\u7247\u7F13\u5B58\u3002","ClearDatabaseWhenExit":"\u6E05\u9664\u6570\u636E\u5E93\u4E66\u7C4D","ClearDatabaseWhenExit_Description":"\u542F\u7528\u672C\u5730\u6570\u636E\u5E93\u65F6\uFF0C\u626B\u63CF\u5B8C\u6210\u540E\uFF0C\u6E05\u9664\u4E0D\u5B58\u5728\u7684\u4E66\u7C4D\u3002","ConfigManager":"\u914D\u7F6E\u6587\u4EF6\u7BA1\u7406","ConfigManagerDeleteSuccess":"\u914D\u7F6E\u5DF2\u5220\u9664\u3002","ConfigManagerDescription":"\u70B9\u51FBSave\uFF0C\u4F1A\u5C06\u5F53\u524D\u914D\u7F6E\u4E0A\u4F20\u5230\u670D\u52A1\u5668\uFF0C\u5E76\u8986\u76D6\u5DF2\u7ECF\u5B58\u5728\u7684\u8BBE\u5B9A\u6587\u4EF6\u3002","ConfigManagerSaveHint":"\u5DF2\u6709\u914D\u7F6E\u6587\u4EF6,\u8BF7\u5207\u6362\u4FDD\u5B58\u4F4D\u7F6E\u3002","ConfigManagerSaveSuccess":"\u914D\u7F6E\u5DF2\u4FDD\u5B58\u3002","ConfigSaveTo":"\u914D\u7F6E\u9ED8\u8BA4\u4FDD\u5B58\u8DEF\u5F84","Debug":"\u5F00\u542FDebug\u6A21\u5F0F","Debug_Description":"\u542F\u7528Debug\u529F\u80FD","DisableLAN":"\u7981\u6B62\u5C40\u57DF\u7F51\u5171\u4EAB","DisableLAN_Description":"\u53EA\u5728\u672C\u673A\u63D0\u4F9B\u9605\u8BFB\u670D\u52A1\uFF0C\u4E0D\u5BF9\u5916\u5171\u4EAB\uFF0C\u6B64\u9879\u914D\u7F6E\u4E0D\u652F\u6301\u70ED\u91CD\u8F7D","EnableDatabase":"\u542F\u7528\u6570\u636E\u5E93","EnableDatabase_Description":"\u542F\u7528\u672C\u5730\u6570\u636E\u5E93\uFF0C\u4FDD\u5B58\u626B\u63CF\u5230\u7684\u4E66\u7C4D\u6570\u636E\u3002\u6B64\u9879\u914D\u7F6E\u4E0D\u652F\u6301\u70ED\u91CD\u8F7D\u3002","EnableFrpcServer":"EnableFrpcServer","EnableLogin":"\u542F\u7528\u767B\u9646","EnableLogin_Description":"\u662F\u5426\u542F\u7528\u767B\u5F55\u3002\u9ED8\u8BA4\u4E0D\u9700\u8981\u767B\u9646\u3002\u6B64\u9879\u914D\u7F6E\u4E0D\u652F\u6301\u70ED\u91CD\u8F7D\u3002","EnableTLS":"Enable TLS","EnableTLS_Description":"\u662F\u5426\u542F\u7528HTTPS\u534F\u8BAE\u3002\u9700\u8981\u8BBE\u7F6E\u8BC1\u4E66\u4E8Ekey\u6587\u4EF6\u3002","EnableUpload":"\u542F\u7528\u4E0A\u4F20\u529F\u80FD","EnableUpload_Description":"\u542F\u7528\u4E0A\u4F20\u529F\u80FD\u3002","ExcludePath":"\u6392\u9664\u8DEF\u5F84","ExcludePath_Description":"\u626B\u63CF\u4E66\u7C4D\u7684\u65F6\u5019\uFF0C\u9700\u8981\u6392\u9664\u7684\u6587\u4EF6\u6216\u6587\u4EF6\u5939\u7684\u540D\u5B57","FrpClientConfig":"FrpClient\u8BBE\u7F6E","GenerateBookMetadata":"\u751F\u6210\u4E66\u7C4D\u5143\u6570\u636E","GenerateMetaData":"\u751F\u6210\u5143\u6570\u636E","GenerateMetaData_Description":"\u751F\u6210\u4E66\u7C4D\u5143\u6570\u636E\u3002\u5F53\u524D\u672A\u751F\u6548\u3002","HomeDirectory":"\u7528\u6237\u4E3B\u76EE\u5F55","Host":"\u57DF\u540D","Host_Description":"\u81EA\u5B9A\u4E49\u4E8C\u7EF4\u7801\u663E\u793A\u7684\u4E3B\u673A\u540D\u3002\u9ED8\u8BA4\u4E3A\u7F51\u5361IP\u3002","KeyFile":"KeyFile","KeyFile_Description":"TLS/SSL key\u6587\u4EF6\u8DEF\u5F84 (default: \\"~/.config/.comigo/key.key\\")","LocalStores":"\u4E66\u5E93\u6587\u4EF6\u5939","LocalStores_Description":"\u4E66\u5E93\u6587\u4EF6\u5939\uFF0C\u652F\u6301\u7EDD\u5BF9\u76EE\u5F55\u4E0E\u76F8\u5BF9\u76EE\u5F55\u3002\u76F8\u5BF9\u76EE\u5F55\u4EE5\u5F53\u524D\u6267\u884C\u76EE\u5F55\u4E3A\u57FA\u51C6","LogFileName":"Log\u6587\u4EF6\u540D","LogFileName_Description":"Log\u6587\u4EF6\u540D","LogFilePath":"Log\u4FDD\u5B58\u4F4D\u7F6E","LogFilePath_Description":"Log\u6587\u4EF6\u7684\u4FDD\u5B58\u4F4D\u7F6E","LogToFile":"\u8BB0\u5F55Log\u5230\u672C\u5730","LogToFile_Description":"\u662F\u5426\u4FDD\u5B58\u7A0B\u5E8FLog\u5230\u672C\u5730\u6587\u4EF6\u3002\u9ED8\u8BA4\u4E0D\u4FDD\u5B58\u3002","MaxScanDepth":"\u6700\u5927\u626B\u63CF\u6DF1\u5EA6","MaxScanDepth_Description":"\u6700\u5927\u626B\u63CF\u6DF1\u5EA6\u3002\u8D85\u8FC7\u6DF1\u5EA6\u7684\u6587\u4EF6\u4E0D\u4F1A\u88AB\u626B\u63CF\u3002\u5F53\u524D\u6267\u884C\u76EE\u5F55\u4E3A\u57FA\u51C6\u3002","MinImageNum":"\u6700\u5C0F\u56FE\u7247\u6570","MinImageNum_Description":"\u538B\u7F29\u5305\u6216\u6587\u4EF6\u5939\u5185\u81F3\u5C11\u6709\u51E0\u5F20\u56FE\u7247\uFF0C\u624D\u7B97\u4F5C\u4E66\u7C4D\u3002","OpenBrowser":"\u6253\u5F00\u6D4F\u89C8\u5668","OpenBrowser_Description":"\u626B\u63CF\u5B8C\u6210\u540E\uFF0C\u662F\u5426\u540C\u65F6\u6253\u5F00\u6D4F\u89C8\u5668\u3002windows\u9ED8\u8BA4true\uFF0C\u5176\u4ED6\u5E73\u53F0\u9ED8\u8BA4false\u3002","Password":"\u5BC6\u7801","Password_Description":"\u542F\u7528\u767B\u9646\u540E\uFF0C\u767B\u5F55\u7528\u7684\u5BC6\u7801\u3002","Port":"\u7AEF\u53E3","Port_Description":"\u7F51\u9875\u670D\u52A1\u7AEF\u53E3\uFF0C\u6B64\u9879\u914D\u7F6E\u4E0D\u652F\u6301\u70ED\u91CD\u8F7D","PrintAllPossibleQRCode":"\u66F4\u591A\u4E8C\u7EF4\u7801","ProgramDirectory":"\u7A0B\u5E8F\u6240\u5728\u76EE\u5F55","StartFrpClientInBackground":"\u542F\u52A8FrpClient","SupportFileType":"\u652F\u6301\u7684\u538B\u7F29\u5305","SupportFileType_Description":"\u626B\u63CF\u6587\u4EF6\u65F6\uFF0C\u7528\u4E8E\u51B3\u5B9A\u8DF3\u8FC7\uFF0C\u8FD8\u662F\u7B97\u4F5C\u4E66\u7C4D\u5904\u7406\u7684\u6587\u4EF6\u540E\u7F00","SupportMediaType":"\u652F\u6301\u7684\u56FE\u7247\u6587\u4EF6","SupportMediaType_Description":"\u626B\u63CF\u538B\u7F29\u5305\u65F6\uFF0C\u7528\u4E8E\u7EDF\u8BA1\u56FE\u7247\u6570\u91CF\u7684\u56FE\u7247\u6587\u4EF6\u540E\u7F00","Timeout":"\u8FC7\u671F\u65F6\u95F4","TimeoutLimitForScan":"\u626B\u63CF\u8D85\u65F6","TimeoutLimitForScan_Description":"\u626B\u63CF\u6587\u4EF6\u65F6\uFF0C\u8D85\u8FC7\u51E0\u79D2\u949F\uFF0C\u5C31\u653E\u5F03\u626B\u63CF\u8FD9\u4E2A\u6587\u4EF6\uFF0C\u907F\u514D\u5361\u5728\u8FC7\u5927\u6587\u4EF6\u4E0A\u3002","Timeout_Description":"\u542F\u7528\u767B\u9646\u540E\uFF0Ccookie\u8FC7\u671F\u65F6\u95F4\u3002\u5355\u4F4D\u4E3A\u5206\u949F\u3002\u9ED8\u8BA4180\u5206\u8FC7\u671F\u3002","UploadPath":"\u4E0A\u4F20\u4F4D\u7F6E","UploadPath_Description":"\u81EA\u5B9A\u4E49\u4E0A\u4F20\u6587\u4EF6\u5B58\u50A8\u4F4D\u7F6E\uFF0C\u9ED8\u8BA4\u5728\u5F53\u524D\u6267\u884C\u76EE\u5F55\u6216\u7B2C\u4E00\u4E2A\u4E66\u5E93\u76EE\u5F55\u4E0B\u9762\u521B\u5EFA upload \u6587\u4EF6\u5939\u3002","UseCache":"\u672C\u5730\u56FE\u7247\u7F13\u5B58","Username":"\u7528\u6237\u540D","Username_Description":"\u542F\u7528\u767B\u9646\u540E\uFF0C\u767B\u5F55\u754C\u9762\u9700\u8981\u7684\u7528\u6237\u540D\u3002","WorkingDirectory":"\u5F53\u524D\u5DE5\u4F5C\u76EE\u5F55","ZipFileTextEncoding":"\u975EUTF-8","ZipFileTextEncoding_Description":"\u975Eutf-8\u7F16\u7801ZIP\u6587\u4EF6\uFF0C\u5C1D\u8BD5\u7528\u4EC0\u4E48\u7F16\u7801\u89E3\u6790\u3002\u9ED8\u8BA4GBK\u3002","labs":"\u5B9E\u9A8C","all_page_num":"\u603B\u9875\u6570\uFF1A{0}","author":"\u4F5C\u8005\uFF1A{0}","auto_crop":"\u81EA\u52A8\u5207\u8FB9","auto_double_page":"\u81EA\u52A8\u5408\u5E76\u53CC\u9875\uFF08beta\uFF09","auto_hide_toolbar":"\u81EA\u52A8\u9690\u85CF\u5DE5\u5177\u680F","back-to-top":"\u8FD4\u56DE\u9876\u90E8","back_button":"\u8FD4\u56DE\u6309\u94AE","back_to_bookshelf":"\u8FD4\u56DE\u4E66\u67B6","book_shelf":"\u4E66\u5E93","child_book_hint":"\u6587\u4EF6\u5939\u5185\u6709{0}\u672C\u4E66","debug_mode":"\u8C03\u8BD5\u6A21\u5F0F","do_you_reset_all_settings":"\u662F\u5426\u8981\u91CD\u7F6E\u4E3A\u9ED8\u8BA4\u8BBE\u7F6E\uFF1F","double_page_mode":"\u53CC\u9875\u6A21\u5F0F","double_page_width":"\u6A2A\u5C4F\u53CC\u9875\u5BBD\u5EA6:","download_sample_config_file":"\u4E0B\u8F7D\u793A\u4F8B\u914D\u7F6E\u6587\u4EF6","download_windows_reg_file":"\u4E0B\u8F7D\u53F3\u952E\u6CE8\u518C\u6587\u4EF6","drop_to_upload":"\u70B9\u51FB\u6216\u5C06\u6587\u4EF6\u62D6\u52A8\u5230\u6B64\u533A\u57DF\u4EE5\u4E0A\u4F20","energy_threshold":"\u5207\u8FB9\u5F3A\u5EA6\uFF1A","epub_info":"ePub \u4FE1\u606F","exit_fullscreen":"\u9000\u51FA\u5168\u5C4F\u6A21\u5F0F","filesize":"\u5927\u5C0F\uFF1A{0}","flip_mode":"\u7FFB\u9875\u6A21\u5F0F","flip_odd_even_page":"\u66F4\u6539\u8DE8\u9875\u5339\u914D","flip_odd_even_page_hint":"\u5982\u679C\u8DE8\u9875\u5185\u5BB9\u4E0D\u5339\u914D\uFF0C\u53EF\u4EE5\u5C1D\u8BD5\u70B9\u51FB\u4FEE\u6B63","found_read_history":"\u53D1\u73B0\u672C\u5730\u9605\u8BFB\u8BB0\u5F55","from_interrupt":"\u4ECE\u4E2D\u65AD\u5904\u7EE7\u7EED","full_screen_hint":"\u5168\u5C4F\u6309\u94AE","fullscreen":"\u5207\u6362\u5168\u5C4F","good_job_and_byebye":"\u505A\u5F97\u4E0D\u9519\uFF0C\u518D\u89C1~","gray_image":"\u9ED1\u767D\u5316","hint":"\u63D0\u793A","hint_first_page":"\u5F53\u524D\u662F\u7B2C\u4E00\u9875\uFF0C\u65E0\u6CD5\u5411\u524D\u7FFB\u9875","hint_last_page":"\u5F53\u524D\u662F\u6700\u540E\u4E00\u9875\uFF0C\u65E0\u6CD5\u5411\u540E\u7FFB\u9875","hour":"\u5C0F\u65F6","image_width_limit":"\u9650\u5236\u5BBD\u5EA6","infinite_dropdown":"\u65E0\u9650\u4E0B\u62C9\u6A21\u5F0F","interval":"\u95F4\u9694:","manga_mode":"\u65E5\u6F2B\uFF08\u53F3\u5F00\u672C\uFF09","load_all_pages":"\u52A0\u8F7D\u6240\u6709\u9875\u9762","load_from_interrupt":"\u662F\u5426\u4ECE\u7B2CXX\u9875\u5F00\u59CB\u52A0\u8F7D\uFF1F","login_success_hint":"\u767B\u5F55\u6210\u529F\uFF0C\u8FD4\u56DE\u4E0A\u4E00\u9875\u9762","logout":"\u9000\u51FA\u767B\u5F55","margin_bottom_on_scroll_mode":"\u9875\u9762\u95F4\u8DDD:","margin_on_scroll_mode":"\u9875\u9762\u95F4\u9699:","max_width":"\u6700\u5927\u5BBD\u5EA6\uFF1A","minute":"\u5206","network":"\u7F51\u7EDC","no_book_found_hint":"\u672A\u627E\u5230\u4E66\u7C4D\uFF0C\u8BD5\u8BD5\u4E0A\u4F20\u6587\u4EF6\uFF1F","no_support_upload_file":"\u6587\u4EF6\u4E0A\u4F20\u529F\u80FD\u5DF2\u88AB\u7BA1\u7406\u5458\u5173\u95ED","not_support_fullscreen":"\u5F53\u524D\u6D4F\u89C8\u5668\u4E0D\u652F\u6301\u5168\u5C4F\u663E\u793A","now_is":"\u5F53\u524D:","number_of_online_books":"\u5728\u7EBF\u4E66\u7C4D\u6570\u91CF\uFF1A","original_image":"\u663E\u793A\u539F\u56FE","original_pdf_link":"\u67E5\u770B\u539F\u59CBPDF","page":"\u9875","page_turning_seconds":"\u7FFB\u9875\u95F4\u9694:","pagination_mode":"\u5206\u9875\u52A0\u8F7D\u6A21\u5F0F","pdf_hint_message":"\u652F\u6301\u7EAF\u56FE\u7247PDF\uFF0C\u5982\u679C\u52A0\u8F7D\u7F13\u6162\u6216\u51FA\u9519\uFF0C\u8BF7\u5C1D\u8BD5\uFF1A","please_enable_upload":"\u8BF7\u542F\u7528\u670D\u52A1\u5668\u7684\u4E0A\u4F20\u529F\u80FD","please_enter_content":"\u8BF7\u8F93\u5165\u5185\u5BB9","qrcode_hint":"\u626B\u7801\u9605\u8BFB\uFF0C\u70B9\u51FB\u663E\u793A\u4E8C\u7EF4\u7801","raw_resolution":"\u539F\u59CB\u5206\u8FA8\u7387","re_sort_book":"\u91CD\u65B0\u6392\u5217\u4E66\u7C4D","re_sort_page":"\u91CD\u65B0\u6392\u5E8F\u9875\u9762","reader_settings":"\u9605\u8BFB\u8BBE\u7F6E","reading_progress_bar":"\u9605\u8BFB\u8FDB\u5EA6\u6761","refresh_page":"\u5237\u65B0\u9875\u9762","reset_all_settings":"\u91CD\u7F6E\u8BBE\u7F6E","resort_file":"\u91CD\u65B0\u6392\u5E8F\u6587\u4EF6","comic_mode":"\u7F8E\u6F2B\uFF08\u5DE6\u5F00\u672C\uFF09","save_page_num":"\u4FDD\u5B58\u9605\u8BFB\u8FDB\u5EA6","scan_qrcode":"\u626B\u7801\u9605\u8BFB\uFF1A","scanned_hint":"\u626B\u63CF\u5230XX\u672C\u4E66\uFF0C\u7ACB\u5373\u67E5\u770B\uFF1F","scroll_mode":"\u5377\u8F74\u6A21\u5F0F","second":"\u79D2","select_language":"\u9009\u62E9\u8BED\u8A00","server_config":"\u670D\u52A1\u5668\u8BBE\u7F6E","server_setting":"Comigo \u670D\u52A1\u5668\u8BBE\u7F6E","set_back_color":"\u80CC\u666F\u989C\u8272:","set_interface_color":"\u754C\u9762\u989C\u8272:","show_filename":"\u663E\u793A\u6587\u4EF6\u540D","show_file_icon":"\u663E\u793A\u6587\u4EF6\u56FE\u6807","show_header":"\u663E\u793A\u6807\u9898","showPageNum":"\u663E\u793A\u9875\u7801","simplify_filename":"\u7B80\u5316\u6587\u4EF6\u540D","single_page_mode":"\u5355\u9875\u6A21\u5F0F","single_page_width":"\u6A2A\u5C4F\u5355\u9875\u5BBD\u5EA6:","sort_by_default":"\u4FDD\u6301\u9ED8\u8BA4\u987A\u5E8F","sort_by_filename":"\u6309\u6587\u4EF6\u540D\u6392\u5E8F (A-Z)","sort_by_filename_reverse":"\u6309\u6587\u4EF6\u540D\u6392\u5E8F (Z-A)","sort_by_filesize":"\u6309\u6587\u4EF6\u5927\u5C0F\u6392\u5E8F (\u4ECE\u5927\u5230\u5C0F)","sort_by_filesize_reverse":"\u6309\u6587\u4EF6\u5927\u5C0F\u6392\u5E8F (\u4ECE\u5C0F\u5230\u5927)","sort_by_modify_time":"\u6309\u4FEE\u6539\u65F6\u95F4\u6392\u5E8F (\u4ECE\u65B0\u5230\u65E7)","sort_by_modify_time_reverse":"\u6309\u4FEE\u6539\u65F6\u95F4\u6392\u5E8F (\u4ECE\u65E7\u5230\u65B0)","sort_reverse":"\uFF08\u53CD\u5411\uFF09","start_sketch_message":"\u5012\u8BA1\u65F6\u901F\u5199\u5DF2\u5F00\u59CB\uFF0C\u795D\u4F60\u5FC3\u60C5\u6109\u5FEB\u3002","start_sketch_mode":"\u5F00\u59CB\u901F\u5199","starting_from_beginning":"\u4ECE\u5934\u5F00\u59CB","starting_from_beginning_hint":"\u4ECE\u5934\u5F00\u59CB\u52A0\u8F7D","stop_sketch_mode":"\u505C\u6B62\u901F\u5199","submit":"\u63D0\u4EA4","success_fullscreen":"\u5DF2\u8FDB\u5165\u5168\u5C4F\u6A21\u5F0F","successfully_loaded_reading_progress":"\u6210\u529F\u52A0\u8F7D\u9605\u8BFB\u8FDB\u5EA6","switch_to_flip_mode":"\u5207\u6362\u7FFB\u9875\u6A21\u5F0F","switch_to_scrolling_mode":"\u5207\u6362\u5377\u8F74\u6A21\u5F0F","sync_page":"\u8FDC\u7A0B\u540C\u6B65\u7FFB\u9875","temp_future_hint":"\u4E34\u65F6\u653E\u4E00\u4E9B\u8FD8\u672A\u5B8C\u6210\u7684\u529F\u80FD\uFF0C\u5F00\u53D1\u4E0E\u8C03\u6574\u4E2D\u3002","test":"\u6D4B\u8BD5","to_flip_mode":"\u5207\u6362\u5230\u7FFB\u9875\u6A21\u5F0F","to_infinite_dropdown_mode":"\u5207\u6362\u5230\u65E0\u9650\u4E0B\u62C9\u6A21\u5F0F","to_pagination_mode":"\u5207\u6362\u5230\u5206\u9875\u6A21\u5F0F","to_scroll_mode":"\u5207\u6362\u5377\u8F74\u6A21\u5F0F","total_is":"\u5B8C\u6210:","total_time":"\u603B\u65F6\u95F4:","type_or_paste_content":"\u952E\u5165\u6216\u7C98\u8D34\u5185\u5BB9","upload_file":"\u4E0A\u4F20\u6587\u4EF6","uploaded_folder_hint":"\u6587\u4EF6\u5C06\u4E0A\u4F20\u5230\u9ED8\u8BA4\u4E66\u5E93\u76EE\u5F55\u4E0B\u7684 upload \u6587\u4EF6\u5939\u3002","width_use_fixed_value":"\u6A2A\u5C4F\u5BBD\u5EA6: \u56FA\u5B9A\u503Cpx","width_use_percent":"\u6A2A\u5C4F\u5BBD\u5EA6: \u767E\u5206\u6BD4%"}');
 
 
 var $fa2f411c6f0799ad$exports = {};
@@ -15841,154 +15841,6 @@ window.Alpine = (0, $8c83eaf28779ff46$export$2e2bcd8739ae039 // 将 Alpine 实�
 (0, $8c83eaf28779ff46$export$2e2bcd8739ae039).plugin((0, $fd2717825660a9ff$export$2e2bcd8739ae039));
 
 
-// Alpine 使用 Persist 插件，用会话 cookie 作为存储
-// https://alpinejs.dev/plugins/persist#custom-storage
-// 定义自定义存储对象，公开 getItem 函数和 setItem 函数
-window.cookieStorage = {
-    getItem (key) {
-        let cookies = document.cookie.split(";");
-        for(let i = 0; i < cookies.length; i++){
-            let cookie = cookies[i].split("=");
-            if (key === cookie[0].trim()) return decodeURIComponent(cookie[1]);
-        }
-        return null;
-    },
-    setItem (key, value) {
-        document.cookie = `${key}=${encodeURIComponent(value)}; SameSite=Lax`; //SameSite设置默认值（Lax），防止控制台报错。加载图像或框架（frame）的请求将不会包含用户的 Cookie。
-    }
-} // // 然后就可以这样使用使用 cookieStorage 作为 Persist 插件的存储了
- // Alpine.store('cookie', {
- //     someCookieKey: Alpine.$persist(false).using(cookieStorage).as('someCookieKey'),
- // })
-;
-
-
-// 用Alpine Persist 注册全局变量
-// https://alpinejs.dev/plugins/persist#using-alpine-persist-global
-Alpine.store('global', {
-    // bgPattern 背景花纹
-    bgPattern: Alpine.$persist('grid-line').as('global.bgPattern'),
-    // 自动切边
-    autoCrop: Alpine.$persist(false).as('global.autoCrop'),
-    // 自动切边阈值,范围是0~100。多数情况下 1 就够了。
-    autoCropNum: Alpine.$persist(1).as('global.autoCropNum'),
-    // userID 当前用户ID  用于同步阅读进度 随机生成
-    userID: Alpine.$persist(Math.random().toString(36).substring(2)).as('global.userID'),
-    // debugMode 是否开启调试模式
-    debugMode: Alpine.$persist(true).as('global.debugMode'),
-    // readerMode 当前阅读模式
-    readMode: Alpine.$persist('scroll').as('global.readMode'),
-    //是否通过websocket同步翻页
-    syncPageByWS: Alpine.$persist(true).as('global.syncPageByWS'),
-    // bookSortBy 书籍排序方式 以按照文件名、修改时间、文件大小排序（或反向排序）
-    bookSortBy: Alpine.$persist('name').as('global.bookSortBy'),
-    // pageSortBy 书页排序顺序 以按照文件名、修改时间、文件大小排序（或反向排序）
-    pageSortBy: Alpine.$persist('name').as('global.pageSortBy'),
-    language: Alpine.$persist('en').as('global.language'),
-    toggleReadMode () {
-        this.readMode = this.readMode === 'flip' ? 'scroll' : 'flip';
-    }
-});
-
-
-// BookShelf 书架设置
-Alpine.store('shelf', {
-    bookCardMode: Alpine.$persist('gird').as('shelf.bookCardMode'),
-    showFilename: Alpine.$persist(true).as('shelf.showFilename'),
-    showFileIcon: Alpine.$persist(true).as('shelf.showFileIcon'),
-    simplifyTitle: Alpine.$persist(true).as('shelf.simplifyTitle'),
-    InfiniteDropdown: Alpine.$persist(false).as('shelf.InfiniteDropdown'),
-    bookCardShowTitleFlag: Alpine.$persist(true).as('shelf.bookCardShowTitleFlag'),
-    syncScrollFlag: false,
-    // 屏幕宽横比,inLandscapeMode的判断依据
-    aspectRatio: 1.2,
-    // 可见范围宽高的具体值
-    clientWidth: 0,
-    clientHeight: 0
-});
-
-
-// Scroll 卷轴模式
-Alpine.store('scroll', {
-    nowPageNum: 1,
-    simplifyTitle: Alpine.$persist(true).as('scroll.simplifyTitle'),
-    //下拉模式下，漫画页面的底部间距。单位px。
-    marginBottomOnScrollMode: Alpine.$persist(0).as('scroll.marginBottomOnScrollMode'),
-    //卷轴模式下，是否无限下拉
-    InfiniteDropdown: Alpine.$persist(true).as('scroll.InfiniteDropdown'),
-    syncScrollFlag: Alpine.$persist(false).as('scroll.syncScrollFlag'),
-    imageMaxWidth: 400,
-    // 屏幕宽横比,inLandscapeMode的判断依据
-    aspectRatio: 1.2,
-    // 可见范围宽高的具体值
-    clientWidth: 0,
-    clientHeight: 0,
-    //漫画页的单位,是否使用固定值
-    widthUseFixedValue: Alpine.$persist(true).as('scroll.widthUseFixedValue'),
-    //横屏(Landscape)状态的漫画页宽度,百分比
-    singlePageWidth_Percent: Alpine.$persist(60).as('scroll.singlePageWidth_Percent'),
-    doublePageWidth_Percent: Alpine.$persist(95).as('scroll.doublePageWidth_Percent'),
-    //横屏(Landscape)状态的漫画页宽度。px。
-    singlePageWidth_PX: Alpine.$persist(720).as('scroll.singlePageWidth_PX'),
-    doublePageWidth_PX: Alpine.$persist(1200).as('scroll.doublePageWidth_PX'),
-    //书籍数据,需要从远程拉取
-    //是否显示顶部页头
-    showHeaderFlag: true,
-    //是否显示页数
-    showPageNum: Alpine.$persist(false).as('scroll.showPageNum'),
-    //ws翻页相关
-    syncPageByWS: Alpine.$persist(false).as('scroll.syncPageByWS')
-});
-
-
-// Flip 翻页模式
-Alpine.store('flip', {
-    nowPageNum: 1,
-    allPageNum: 100,
-    imageMaxWidth: 400,
-    isLandscapeMode: true,
-    isPortraitMode: false,
-    //自动隐藏工具条
-    autoHideToolbar: Alpine.$persist(false).as('flip.autoHideToolbar'),
-    //是否显示页头
-    show_header: Alpine.$persist(true).as('flip.show_header'),
-    //是否显示页脚
-    showFooter: Alpine.$persist(true).as('flip.showFooter'),
-    //是否显示页数
-    showPageNum: Alpine.$persist(true).as('flip.showPageNum'),
-    //是否是日本漫画【右半屏翻页,从左到右(true)】【右半屏翻页,从右到左(false)】
-    mangaMode: Alpine.$persist(true).as('flip.mangaMode'),
-    //swipeTurn or clickTurn
-    swipeTurn: Alpine.$persist(true).as('flip.swipeTurn'),
-    //双页模式
-    doublePageMode: Alpine.$persist(false).as('flip.doublePageMode'),
-    //自动拼合双页(TODO)
-    autoDoublePageMode: Alpine.$persist(false).as('flip.autoDoublePageModeFlag'),
-    //是否保存阅读进度（页数）
-    saveReadingProgress: Alpine.$persist(true).as('flip.saveReadingProgress'),
-    //素描模式标记
-    sketchModeFlag: false,
-    //是否显示素描提示
-    showPageHint: Alpine.$persist(false).as('flip.showPageHint'),
-    //翻页间隔时间
-    sketchFlipSecond: 30,
-    //计时用,从0开始
-    sketchSecondCount: 0
-});
-
-
-// 自定义主题
-Alpine.store('theme', {
-    theme: Alpine.$persist('light').as('theme'),
-    interfaceColor: '#F5F5E4',
-    backgroundColor: '#E0D9CD',
-    textColor: '#000000',
-    toggleTheme () {
-        this.theme = this.theme === 'light' ? 'dark' : 'light';
-    }
-});
-
-
 /* eslint-disable promise/prefer-await-to-then */ const $fe9db8f8165fa827$var$methodMap = [
     [
         'requestFullscreen',
@@ -16118,10 +15970,178 @@ if (!$fe9db8f8165fa827$var$nativeAPI) $fe9db8f8165fa827$var$screenfull = {
 var $fe9db8f8165fa827$export$2e2bcd8739ae039 = $fe9db8f8165fa827$var$screenfull;
 
 
-if (document.getElementById('FullScreenIcon')) document.getElementById('FullScreenIcon').addEventListener('click', ()=>{
-    if ((0, $fe9db8f8165fa827$export$2e2bcd8739ae039).isEnabled) (0, $fe9db8f8165fa827$export$2e2bcd8739ae039).toggle();
-    else // Ignore or do something else
-    i18next.t('not_support_fullscreen');
+window.Screenfull = (0, $fe9db8f8165fa827$export$2e2bcd8739ae039 // 将 screenfull 实例添加到窗口对象中。
+);
+
+
+// Alpine 使用 Persist 插件，用会话 cookie 作为存储
+// https://alpinejs.dev/plugins/persist#custom-storage
+// 定义自定义存储对象，公开 getItem 函数和 setItem 函数
+window.cookieStorage = {
+    getItem (key) {
+        let cookies = document.cookie.split(";");
+        for(let i = 0; i < cookies.length; i++){
+            let cookie = cookies[i].split("=");
+            if (key === cookie[0].trim()) return decodeURIComponent(cookie[1]);
+        }
+        return null;
+    },
+    setItem (key, value) {
+        document.cookie = `${key}=${encodeURIComponent(value)}; SameSite=Lax`; //SameSite设置默认值（Lax），防止控制台报错。加载图像或框架（frame）的请求将不会包含用户的 Cookie。
+    }
+} // // 然后就可以这样使用使用 cookieStorage 作为 Persist 插件的存储了
+ // Alpine.store('cookie', {
+ //     someCookieKey: Alpine.$persist(false).using(cookieStorage).as('someCookieKey'),
+ // })
+;
+
+
+// 用Alpine Persist 注册全局变量
+// https://alpinejs.dev/plugins/persist#using-alpine-persist-global
+Alpine.store('global', {
+    // bgPattern 背景花纹
+    bgPattern: Alpine.$persist('grid-line').as('global.bgPattern'),
+    // 自动切边
+    autoCrop: Alpine.$persist(false).as('global.autoCrop'),
+    // 自动切边阈值,范围是0~100。多数情况下 1 就够了。
+    autoCropNum: Alpine.$persist(1).as('global.autoCropNum'),
+    // userID 当前用户ID  用于同步阅读进度 随机生成
+    userID: Alpine.$persist(Math.random().toString(36).substring(2)).as('global.userID'),
+    // debugMode 是否开启调试模式
+    debugMode: Alpine.$persist(true).as('global.debugMode'),
+    // readerMode 当前阅读模式
+    readMode: Alpine.$persist('scroll').as('global.readMode'),
+    //是否通过websocket同步翻页
+    syncPageByWS: Alpine.$persist(true).as('global.syncPageByWS'),
+    // bookSortBy 书籍排序方式 以按照文件名、修改时间、文件大小排序（或反向排序）
+    bookSortBy: Alpine.$persist('name').as('global.bookSortBy'),
+    // pageSortBy 书页排序顺序 以按照文件名、修改时间、文件大小排序（或反向排序）
+    pageSortBy: Alpine.$persist('name').as('global.pageSortBy'),
+    language: Alpine.$persist('en').as('global.language'),
+    toggleReadMode () {
+        if (this.readMode === 'flip') this.readMode = 'scroll';
+        else this.readMode = 'flip';
+    },
+    // 竖屏模式
+    isPortrait: false,
+    // 横屏模式
+    isLandscape: true,
+    // 检测并设置视口方向
+    checkOrientation () {
+        const isPortrait = window.innerHeight > window.innerWidth;
+        this.isPortrait = isPortrait;
+        this.isLandscape = !isPortrait;
+        console.log(`\u{5F53}\u{524D}\u{89C6}\u{53E3}\u{65B9}\u{5411}: ${isPortrait ? "\u7AD6\u5C4F" : "\u6A2A\u5C4F"}`);
+    },
+    // 初始化方法
+    init () {
+        // 设置初始方向
+        this.checkOrientation();
+        // 添加视口变化监听
+        window.addEventListener('resize', ()=>{
+            this.checkOrientation();
+        });
+    }
+});
+// 初始化全局存储
+document.addEventListener('alpine:initialized', ()=>{
+    Alpine.store('global').init();
+});
+
+
+// BookShelf 书架设置
+Alpine.store('shelf', {
+    bookCardMode: Alpine.$persist('gird').as('shelf.bookCardMode'),
+    showFilename: Alpine.$persist(true).as('shelf.showFilename'),
+    showFileIcon: Alpine.$persist(true).as('shelf.showFileIcon'),
+    simplifyTitle: Alpine.$persist(true).as('shelf.simplifyTitle'),
+    InfiniteDropdown: Alpine.$persist(false).as('shelf.InfiniteDropdown'),
+    bookCardShowTitleFlag: Alpine.$persist(true).as('shelf.bookCardShowTitleFlag'),
+    syncScrollFlag: false,
+    // 屏幕宽横比,inLandscapeMode的判断依据
+    aspectRatio: 1.2,
+    // 可见范围宽高的具体值
+    clientWidth: 0,
+    clientHeight: 0
+});
+
+
+// Scroll 卷轴模式
+Alpine.store('scroll', {
+    nowPageNum: 1,
+    simplifyTitle: Alpine.$persist(true).as('scroll.simplifyTitle'),
+    //下拉模式下，漫画页面的底部间距。单位px。
+    marginBottomOnScrollMode: Alpine.$persist(0).as('scroll.marginBottomOnScrollMode'),
+    //卷轴模式下，是否无限下拉
+    InfiniteDropdown: Alpine.$persist(true).as('scroll.InfiniteDropdown'),
+    syncScrollFlag: Alpine.$persist(false).as('scroll.syncScrollFlag'),
+    imageMaxWidth: 400,
+    // 屏幕宽横比,inLandscapeMode的判断依据
+    aspectRatio: 1.2,
+    // 可见范围宽高的具体值
+    clientWidth: 0,
+    clientHeight: 0,
+    //漫画页的单位,是否使用固定值
+    widthUseFixedValue: Alpine.$persist(true).as('scroll.widthUseFixedValue'),
+    //横屏(Landscape)状态的漫画页宽度,百分比
+    singlePageWidth_Percent: Alpine.$persist(60).as('scroll.singlePageWidth_Percent'),
+    doublePageWidth_Percent: Alpine.$persist(95).as('scroll.doublePageWidth_Percent'),
+    //横屏(Landscape)状态的漫画页宽度。px。
+    singlePageWidth_PX: Alpine.$persist(720).as('scroll.singlePageWidth_PX'),
+    doublePageWidth_PX: Alpine.$persist(1200).as('scroll.doublePageWidth_PX'),
+    //书籍数据,需要从远程拉取
+    //是否显示顶部页头
+    showHeaderFlag: true,
+    //是否显示页数
+    showPageNum: Alpine.$persist(false).as('scroll.showPageNum'),
+    //ws翻页相关
+    syncPageByWS: Alpine.$persist(false).as('scroll.syncPageByWS')
+});
+
+
+// Flip 翻页模式
+Alpine.store('flip', {
+    nowPageNum: 1,
+    allPageNum: 100,
+    imageMaxWidth: 400,
+    //自动隐藏工具条
+    autoHideToolbar: Alpine.$persist(false).as('flip.autoHideToolbar'),
+    //是否显示页头
+    show_header: Alpine.$persist(true).as('flip.show_header'),
+    //是否显示页脚
+    showFooter: Alpine.$persist(true).as('flip.showFooter'),
+    //是否显示页数
+    showPageNum: Alpine.$persist(true).as('flip.showPageNum'),
+    //是否是日本漫画【右半屏翻页,从左到右(true)】【右半屏翻页,从右到左(false)】
+    mangaMode: Alpine.$persist(true).as('flip.mangaMode'),
+    //swipeTurn or clickTurn
+    swipeTurn: Alpine.$persist(true).as('flip.swipeTurn'),
+    //双页模式
+    doublePageMode: Alpine.$persist(false).as('flip.doublePageMode'),
+    //自动拼合双页(TODO)
+    autoDoublePageMode: Alpine.$persist(false).as('flip.autoDoublePageModeFlag'),
+    //是否保存阅读进度（页数）
+    saveReadingProgress: Alpine.$persist(true).as('flip.saveReadingProgress'),
+    //素描模式标记
+    sketchModeFlag: false,
+    //是否显示素描提示
+    showPageHint: Alpine.$persist(false).as('flip.showPageHint'),
+    //翻页间隔时间
+    sketchFlipSecond: 30,
+    //计时用,从0开始
+    sketchSecondCount: 0
+});
+
+
+// 自定义主题
+Alpine.store('theme', {
+    theme: Alpine.$persist('light').as('theme'),
+    interfaceColor: '#F5F5E4',
+    backgroundColor: '#E0D9CD',
+    textColor: '#000000',
+    toggleTheme () {
+        this.theme = this.theme === 'light' ? 'dark' : 'light';
+    }
 });
 
 

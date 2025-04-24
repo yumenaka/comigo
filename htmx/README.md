@@ -26,15 +26,14 @@
  - [x] go 1.24正式发布，[使用 Go1.24 的 go get -tool](https://antonz.org/go-1-24/)，添加工具依赖项
  - [x] 等 [gowebly](https://github.com/gowebly/gowebly) 更新后，参考 gowebly 的模板，升级tailwindcss到4.0
  - [ ] 自动发版功能 [goreleaser](https://goreleaser.com/)  [github-action](https://dev.to/hadlow/how-to-release-to-homebrew-with-goreleaser-github-actions-and-semantic-release-2gbb)
- - [ ] 设置页面：显示当前用户状态、阅读书籍、阅读进度、阅读时间、服务器状态的地方。
+ - [ ] comigo后台：有几台设备在线，阅读文件，阅读页数，当前用户状态、阅读书籍、阅读进度、阅读时间、服务器状态 注册，阅读记录，
  - [ ] 可能的BUG：当前文件夹顶层无书籍的时候，首页为空或跳过规则不对？上一版有这个问题，目前有无问题还不确定。
- - [ ] gin -> chi或gin -> echo。chi无外部依赖,echo似乎与wails兼容性更好。此外还可以试试不用框架全原生。
+ - [x] gin -> chi或gin -> echo。chi无外部依赖,echo似乎与wails兼容性更好。此外还可以试试不用框架全原生。
  - [ ] 尝试wails3, https://v3alpha.wails.io/getting-started/installation/
  - [ ] 合并htmx代码，参考[pagoda](https://github.com/mikestefanello/pagoda)，重新规划项目结构。我用的许多组件，最终都换成和这个模板一样的了，估计从这个项目里可以学到很多东西。[go-blueprint](https://docs.go-blueprint.dev/) 也是一个不错的参考，可以看看怎么集成websockets与templ。
- - [ ] 注册，阅读记录，
  - [ ] 添加[数据验证](https://dev.to/leapcell/validator-complex-structs-arrays-and-maps-validation-for-go-34ni)。
  - [ ] 优化打开浏览器与扫描逻辑，减少等待时间。可以使用[端口检测包](https://github.com/wait4x/wait4x)。
- - [ ] check：无参数的逻辑。epub页数解析似乎出现了问题。
+ - [x] check：无参数的逻辑。epub页数解析似乎出现了问题。
  - [ ] SteamDeck支持（网页支持手柄操作）鼠标滚轮对应
  - [ ] 同步翻页 -> 全局多端同步跟踪页面状态，除了不同id的书籍，其他页面状态都可以同步。
 ## 提示

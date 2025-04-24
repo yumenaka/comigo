@@ -223,7 +223,7 @@ templ Header(prop HeaderProps) {
 				@svg.QRCode()
 			</div>
 			<!-- 全屏按钮 -->
-			<div id="FullScreenIcon" class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
+			<div id="FullScreenIcon" onclick="if (Screenfull.isEnabled) {Screenfull.toggle()} else {showToast(i18next.t('not_support_fullscreen'))}" class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
 				@svg.FullScreen()
 			</div>
 			<!-- 阅读器设定,点击屏幕中央也可以打开  可自定义方向 -->

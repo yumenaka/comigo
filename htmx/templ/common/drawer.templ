@@ -1,4 +1,5 @@
 package common
+
 import "github.com/yumenaka/comigo/htmx/templ/common/svg"
 
 templ Drawer(serverHost string, slot templ.Component) {
@@ -16,7 +17,7 @@ templ Drawer(serverHost string, slot templ.Component) {
 				id="drawer-right-label"
 				class="inline-flex items-center mt-2 mb-0 text-base font-semibold"
 			>
-			    <img class="shadow-xl mx-2 w-6 h-6 rounded-full border border-stone-500 border-dotted outline-offset-4" draggable="false" src="/images/favicon.png" alt="favicon"/>
+				<img class="shadow-xl mx-2 w-6 h-6 rounded-full border border-stone-500 border-dotted outline-offset-4" draggable="false" src="/images/favicon.png" alt="favicon"/>
 				<div x-text="i18next.t('reader_settings')">阅读设置</div>
 			</h5>
 			<button
@@ -32,10 +33,16 @@ templ Drawer(serverHost string, slot templ.Component) {
 			if slot != nil {
 				@slot
 			}
+			<!-- 切换【debug mode】-->
+			<label class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm">
+				<input type="checkbox" :value="$store.global.debugMode" x-on:click="$store.global.debugMode =!$store.global.debugMode" class="sr-only peer"/>
+				<div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+				<span class="font-medium ms-3" x-text="i18next.t('debug_mode')"></span>
+			</label>
 			<div class="place-holder w-full flex-1"></div>
 			<!-- 二维码 -->
 			<div class="p-0 mt-2 mb-2 w-32 h-32" x-data="{ qrcodeSrc: '' }" x-init="qrcodeSrc = window.location.origin +'/api/qrcode.png?qrcode_str='+ encodeURIComponent(window.location.toString().replace(window.location.hostname,serverHost))">
-				<img id="QrcodeImage" draggable="false" data-modal-target="qrcode-modal" data-modal-toggle="qrcode-modal"  class="w-32 h-32 rounded" :src="qrcodeSrc"/>
+				<img id="QrcodeImage" draggable="false" data-modal-target="qrcode-modal" data-modal-toggle="qrcode-modal" class="w-32 h-32 rounded" :src="qrcodeSrc"/>
 			</div>
 			<!-- 选择主题的select -->
 			<select

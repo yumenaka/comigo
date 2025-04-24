@@ -1,4 +1,7 @@
-#git update-index --assume-unchanged .air.toml
+# 既に git 管理しているファイルをあえて無視したい:
+# git update-index --assume-unchanged .air.toml
+# Undo:
+# git update-index --no-assume-unchanged .air.toml
 root = "."
 tmp_dir = "temp"
 testdata_dir = "testdata"
@@ -7,7 +10,9 @@ testdata_dir = "testdata"
 args_bin = ["../test"]
 bin = "./temp/comi"
 pre_cmd = ["bun run dev"]
+post_cmd = []
 cmd = "go run github.com/a-h/templ/cmd/templ@latest generate && go build -o ./temp/comi ."
+full_bin = ""
 include_ext = ["go", "templ", "html", "json", "js", "ts", "css", "scss"]
 exclude_dir = [
     "static/static/",
@@ -23,28 +28,29 @@ exclude_dir = [
 exclude_regex = ["_test\\.go", "_templ\\.go"]
 exclude_unchanged = false
 follow_symlink = false
+kill_delay = "0s"
 log = "build-errors-air.log"
 poll = false
 poll_interval = 500
-delay = 1000
-stop_on_error = true
+delay = 4000
+rerun = true
+rerun_delay = 100
 send_interrupt = false
-kill_delay = 500
-rerun = false
-rerun_delay = 500
+stop_on_error = false
 
 [log]
-main_only = false
-time = false
-
+    main_only = false
+    silent = false
+    time = false
 [color]
-main = "magenta"
-watcher = "cyan"
+app = ""
 build = "yellow"
+main = "magenta"
 runner = "green"
+watcher = "cyan"
 
 [misc]
-clean_on_exit = true
+clean_on_exit = false
 
 [proxy]
 enabled = true
@@ -52,5 +58,5 @@ proxy_port = 7777
 app_port = 1234
 
 [screen]
-clear_on_rebuild = true
+clear_on_rebuild = false
 keep_scroll = true

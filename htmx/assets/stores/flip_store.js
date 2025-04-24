@@ -3,8 +3,6 @@ Alpine.store('flip', {
     nowPageNum: 1,
     allPageNum: 100,
     imageMaxWidth: 400,
-    isLandscapeMode: true,
-    isPortraitMode: false,
     //自动隐藏工具条
     autoHideToolbar: Alpine.$persist(false).as('flip.autoHideToolbar'),
     //是否显示页头

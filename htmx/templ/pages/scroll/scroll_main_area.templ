@@ -9,10 +9,9 @@ import (
 	"github.com/yumenaka/comigo/model"
 )
 
-// getImageXData 在Go函数里面计算图片的x-data属性
-// 渲染结果例：
+// ImageXData 在Go函数里面计算图片的x-data属性。渲染结果例：
 // x-data="{  isDoublePage: false, imageUrl: '/api/get_file?id=asxScIDD&filename=1.jpg' + ($store.global.autoCrop  ? &quot;&auto_crop=1&quot; : ”) }"
-func getImageXData(Url string) string {
+func ImageXData(Url string) string {
 	return fmt.Sprintf(`{ isDoublePage: false, imageUrl: '%s' + ($store.global.autoCrop?"&auto_crop=1":'')}`, Url)
 }
 
@@ -26,17 +25,8 @@ templ MainArea(s *state.GlobalState, book *model.Book) {
 	<div
 		id="mouseMoveArea"
 		x-data="{
-            imageWidth: '',
-            viewOrientation: '',
-            updateOrientation() {
-                // 在 Alpine.js v3 里，如果你在 x-data 中定义了某个属性（例如 viewOrientation），并想在方法里对其赋值，就需要显式地使用 this.xxx 的形式，否则会报错。
-                 this.viewOrientation = (window.innerWidth / window.innerHeight >= 1)
-                        ? 'landscape'
-                        : 'portrait';
-            }
+            imageWidth: '' //图片的宽度
         }"
-		x-init="updateOrientation();"
-		@resize.window="updateOrientation()"
 		class="flex flex-col items-center justify-center flex-1 w-full max-w-full pt-0 bg-base-100 text-base-content"
 		:class="(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') ? ($store.global.bgPattern !== 'none'?$store.global.bgPattern+' bg-base-300':'bg-base-300'):($store.global.bgPattern !== 'none'?$store.global.bgPattern:'')"
 	>
@@ -50,24 +40,12 @@ templ MainArea(s *state.GlobalState, book *model.Book) {
 				}
 				if !strings.Contains(image.Url, "hidden.")&& !strings.Contains(image.Url, ".html") {
 					<img
-						x-data={ getImageXData(image.Url) }
+						x-data={ ImageXData(image.Url) }
 						class="w-full manga_image"
 						draggable="false"
 						:src="imageUrl"
-						@load="
-                            if ($event.target.naturalWidth > $event.target.naturalHeight) {
-                                // 双页
-                                isDoublePage = true;
-                                $el.classList.add('double');
-                                $el.classList.remove('single');
-                            } else {
-                                // 单页
-                                isDoublePage = false;
-                                $el.classList.add('single');
-                                $el.classList.remove('double');
-                                //console.log(`naturalWidth: ${$event.target.naturalWidth}, naturalHeight: ${$event.target.naturalHeight}`);
-                            }"
-						:style="{ width: viewOrientation === 'landscape' ?(Alpine.store('scroll').widthUseFixedValue? (isDoublePage ? Alpine.store('scroll').doublePageWidth_PX +'px': Alpine.store('scroll').singlePageWidth_PX +'px'): (isDoublePage ? Alpine.store('scroll').doublePageWidth_Percent + '%': Alpine.store('scroll').singlePageWidth_Percent + '%')): '100%', maxWidth: '100%'}"
+						@load="isDoublePage=$event.target.naturalWidth > $event.target.naturalHeight;"
+						:style="{ width: Alpine.store('global').isLandscape?(Alpine.store('scroll').widthUseFixedValue? (isDoublePage ? Alpine.store('scroll').doublePageWidth_PX +'px': Alpine.store('scroll').singlePageWidth_PX +'px'): (isDoublePage ? Alpine.store('scroll').doublePageWidth_Percent + '%': Alpine.store('scroll').singlePageWidth_Percent + '%')): '100%', maxWidth: '100%'}"
 						alt={ strconv.Itoa(key) }
 					/>
 				}

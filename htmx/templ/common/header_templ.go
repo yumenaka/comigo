@@ -310,7 +310,7 @@ func Header(prop HeaderProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "</div><!-- 全屏按钮 --><div id=\"FullScreenIcon\" class=\"flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "</div><!-- 全屏按钮 --><div id=\"FullScreenIcon\" onclick=\"if (Screenfull.isEnabled) {Screenfull.toggle()} else {showToast(i18next.t(&#39;not_support_fullscreen&#39;))}\" class=\"flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

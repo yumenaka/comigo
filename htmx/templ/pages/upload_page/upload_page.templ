@@ -7,6 +7,7 @@ import (
 
 // UploadPage 上传页面
 templ UploadPage(s *state.GlobalState) {
+	@common.Toast()
 	@common.Header(
 		common.HeaderProps{
 			Title:           "UploadPage",
@@ -21,5 +22,5 @@ templ UploadPage(s *state.GlobalState) {
 	@common.Footer(s.Version)
 	@common.Drawer(s.ServerStatus.ServerHost, nil)
 	@common.QRCode(s.ServerStatus.ServerHost)
-	@common.Toast()
+
 }

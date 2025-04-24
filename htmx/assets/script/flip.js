@@ -21,10 +21,10 @@ let isSwiping = false
 let currentTranslate = 0
 let startTime = 0
 let animationID = 0
-const sliderContainer = document.getElementById('slider-container')
+const sliderContainer = document.getElementById('manga_area')
 const slider = document.getElementById('slider')
 const leftSlide = document.getElementById('left-slide')
-const middleSlide = document.getElementById('middle-slide')
+//const middleSlide = document.getElementById('middle-slide')
 const rightSlide = document.getElementById('right-slide')
 const threshold = 100 // 滑动阈值，超过这个值才会触发翻页
 const swipeTimeout = 300 // 滑动超时时间（毫秒）
@@ -39,6 +39,8 @@ setImageSrc()
 
 // 页面加载时读取本地存储的页码
 loadPageNumFromLocalStorage();
+//判断当前浏览器是不是Safari，暂时没啥用
+// const isSafari = navigator.userAgent.indexOf('Safari') !== -1 && navigator.userAgent.indexOf('Chrome') === -1
 
 
 // 加载图片资源
@@ -123,7 +125,7 @@ function updateSliderImages(nowPageNum, images) {
 		if (nowPageNum > 1) {
 			const prevImg = document.createElement('img')
 			prevImg.src = images[nowPageNum - 2].url
-			prevImg.className = 'object-contain m-0 max-w-full max-h-full h-full'
+			prevImg.className = Alpine.store('global').isPortrait? 'object-contain w-auto max-w-full h-screen':'h-screen w-auto max-w-full object-contain'
 			prevImg.draggable = false
 			leftSlide.innerHTML = ''
 			leftSlide.appendChild(prevImg)
@@ -139,7 +141,7 @@ function updateSliderImages(nowPageNum, images) {
 		if (nowPageNum < Alpine.store('flip').allPageNum) {
 			const nextImg = document.createElement('img')
 			nextImg.src = images[nowPageNum].url
-			nextImg.className = 'object-contain m-0 max-w-full max-h-full h-full'
+			nextImg.className = Alpine.store('global').isPortrait? 'object-contain w-auto max-w-full h-screen':'h-screen w-auto max-w-full object-contain'
 			nextImg.draggable = false
 			rightSlide.innerHTML = ''
 			rightSlide.appendChild(nextImg)
@@ -153,7 +155,7 @@ function updateSliderImages(nowPageNum, images) {
 		if (nowPageNum === 2) {
 			const prevImg = document.createElement('img')
 			prevImg.src = images[nowPageNum - 2].url
-			prevImg.className = 'object-contain m-0 max-w-full max-h-full h-full'
+			prevImg.className = 'object-contain m-0 max-w-full max-h-screen h-screen'
 			prevImg.draggable = false
 			leftSlide.innerHTML = ''
 			leftSlide.appendChild(prevImg)
@@ -183,7 +185,7 @@ function updateSliderImages(nowPageNum, images) {
 		if (nowPageNum === Alpine.store('flip').allPageNum - 3) {
 			const nextImg = document.createElement('img')
 			nextImg.src = images[nowPageNum - 2].url
-			nextImg.className = 'object-contain m-0 max-w-full max-h-full h-full'
+			nextImg.className = 'object-contain m-0 max-w-full max-h-screen h-screen'
 			nextImg.draggable = false
 			rightSlide.innerHTML = ''
 			rightSlide.appendChild(nextImg)
@@ -279,9 +281,6 @@ function touchMove(e) {
 		return
 	const currentX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX
 	const diffX = currentX - touchStartX
-	// 在第一页时不能向前翻，在最后一页时不能向后翻
-	const nowPageNum = Alpine.store('flip').nowPageNum
-	const mangaMode = Alpine.store('flip').mangaMode
 	// 设置当前滑动距离
 	currentTranslate = diffX
 	// 如果在第一页或最后一页尝试向前翻或向后翻，阻止默认滚动
@@ -305,8 +304,6 @@ function touchEnd(e) {
 	// 根据swipeTurn的值决定是否滑动翻页
 	if (!isSwiping || !Alpine.store('flip').swipeTurn)
 		return
-	const nowPageNum = Alpine.store('flip').nowPageNum
-	const mangaMode = Alpine.store('flip').mangaMode
 	// 取消滑动状态
 	isSwiping = false
 	const endTime = new Date().getTime()
@@ -467,20 +464,19 @@ document.addEventListener('alpine:initialized', () => {
 
 //翻页函数，加页或减页
 function addPageNum(n = 1) {
-	// 防止数字转换为字符串
-	let num = parseInt(n)
+	// 防止n为字符串，转换为数字
 	let nowPageNum = parseInt(Alpine.store('flip').nowPageNum)
 	// 无法继续翻
-	if (nowPageNum + num > Alpine.store('flip').allPageNum) {
+	if (nowPageNum + n > Alpine.store('flip').allPageNum) {
 		showToast(i18next.t('hint_last_page'), 'error')
 		return
 	}
-	if (nowPageNum + num < 1) {
+	if (nowPageNum + n < 1) {
 		showToast(i18next.t('hint_first_page'), 'error')
 		return
 	}
 	// 翻页
-	Alpine.store('flip').nowPageNum = nowPageNum + num
+	Alpine.store('flip').nowPageNum = nowPageNum + n
 	setImageSrc()
 	// 设置标签页标题
 	setTitle();
@@ -548,16 +544,14 @@ function toNextPage() {
 
 // 翻页函数，前一页
 function toPreviousPage() {
-	let doublePageMode = Alpine.store('flip').doublePageMode === true
-	let nowPageNum = parseInt(Alpine.store('flip').nowPageNum)
 	//错误值,第0或第1页。
-	if (nowPageNum <= 1) {
+	if (Alpine.store('flip').nowPageNum <= 1) {
 		showToast(i18next.t('hint_first_page'), 'error')
 		return
 	}
-	//简单合并模式
-	if (doublePageMode) {
-		if (nowPageNum - 2 > 0) {
+	//双页模式
+	if (Alpine.store('flip').doublePageMode) {
+		if (Alpine.store('flip').nowPageNum - 2 > 0) {
 			addPageNum(-2)
 		} else {
 			addPageNum(-1)
@@ -632,20 +626,15 @@ function getInSetArea(e) {
 	return inSetArea
 }
 
-// 翻页模式功能优化：不隐藏工具栏的时候。点击设置区域，自动漫画区域居中。
+// 翻页模式功能：显示工具栏时，点击设置区域，自动漫画区域居中。
 function scrollToMangaMain() {
 	if (!Alpine.store('flip').autoHideToolbar) {
-		// 1. 获取 manga_area 元素
-		const mangaMains = document.getElementsByClassName('manga_area')
-		// 2. 将 manga_area 顶部对齐到浏览器可见区域顶部
-		//        这样它的高度（100vh）就能正好占满整个可见区域
-		for (let i = 0; i < mangaMains.length; i++) {
-			const mangaMain = mangaMains[i]
-			mangaMain.scrollIntoView({
-				behavior: 'smooth', // 平滑滚动
-				block: 'start', // 与可视区顶部对齐
-			})
-		}
+		// 将 manga_area 顶部对齐到浏览器可见区域顶部
+		const mangaMain = document.getElementById('manga_area')
+		mangaMain.scrollIntoView({
+			behavior: 'smooth', // 平滑滚动
+			block: 'start', // 与可视区顶部对齐
+		})
 	}
 }
 

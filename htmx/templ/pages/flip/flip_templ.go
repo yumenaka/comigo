@@ -40,6 +40,10 @@ func FlipPage(s *state.GlobalState, book *model.Book) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
+		templ_7745c5c3_Err = common.Toast().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
 		templ_7745c5c3_Err = common.Header(
 			common.HeaderProps{
 				Title:             common.GetPageTitle(book.BookInfo.BookID),
@@ -65,10 +69,6 @@ func FlipPage(s *state.GlobalState, book *model.Book) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = common.QRCode(s.ServerStatus.ServerHost).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = common.Toast().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

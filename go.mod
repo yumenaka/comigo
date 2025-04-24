@@ -44,7 +44,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/minio/selfupdate v0.6.0
-	github.com/pdfcpu/pdfcpu v0.9.1
+	github.com/pdfcpu/pdfcpu v0.10.2
 	github.com/yumenaka/archives v0.0.0-20250415151013-1eb1364f1e13
 	golang.org/x/image v0.26.0
 	golang.org/x/mod v0.24.0
@@ -53,7 +53,7 @@ require (
 
 require (
 	aead.dev/minisign v0.3.0 // indirect
-	ariga.io/atlas v0.32.0 // indirect
+	ariga.io/atlas v0.32.1 // indirect
 	github.com/STARRY-S/zip v0.2.3 // indirect
 	github.com/VividCortex/ewma v1.2.0 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
@@ -85,6 +85,7 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.23.0 // indirect
 	github.com/hhrutter/lzw v1.0.0 // indirect
+	github.com/hhrutter/pkcs7 v0.2.0 // indirect
 	github.com/hhrutter/tiff v1.0.2 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jcmturner/aescts/v2 v2.0.0 // indirect
@@ -137,7 +138,7 @@ require (
 	github.com/ulikunitz/xz v0.5.12 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
-	github.com/xxjwxc/public v0.0.0-20250328104919-64d2f7032638 // indirect
+	github.com/xxjwxc/public v0.0.0-20250422135827-14480c824656 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	github.com/zclconf/go-cty v1.16.2 // indirect
 	github.com/zclconf/go-cty-yaml v1.1.0 // indirect
