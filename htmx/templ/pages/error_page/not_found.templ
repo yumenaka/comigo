@@ -6,6 +6,7 @@ import (
 )
 // 404 NotFound页面
 templ NotFound404(s *state.GlobalState) {
+    @common.Toast()
 	@common.Header(
 		common.HeaderProps{
 			Title:           "",
@@ -28,5 +29,4 @@ templ NotFound404(s *state.GlobalState) {
 	@common.Footer(s.Version)
 	@common.Drawer(s.ServerStatus.ServerHost, nil)
     @common.QRCode(s.ServerStatus.ServerHost)
-    @common.Toast()
 }

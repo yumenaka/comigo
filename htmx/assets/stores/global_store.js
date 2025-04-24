@@ -21,6 +21,35 @@ Alpine.store('global', {
     pageSortBy: Alpine.$persist('name').as('global.pageSortBy'),
     language: Alpine.$persist('en').as('global.language'),
     toggleReadMode() {
-        this.readMode = this.readMode === 'flip' ? 'scroll' : 'flip'
+      if (this.readMode === 'flip') {
+        this.readMode = 'scroll'
+      } else {
+        this.readMode = 'flip'
+      }
     },
-}) 
+    // 竖屏模式
+    isPortrait: false,
+    // 横屏模式
+    isLandscape: true,
+    // 检测并设置视口方向
+    checkOrientation() {
+        const isPortrait = window.innerHeight > window.innerWidth;
+        this.isPortrait = isPortrait;
+        this.isLandscape = !isPortrait;
+        console.log(`当前视口方向: ${isPortrait ? '竖屏' : '横屏'}`);
+    },
+    // 初始化方法
+    init() {
+        // 设置初始方向
+        this.checkOrientation();
+        // 添加视口变化监听
+        window.addEventListener('resize', () => {
+            this.checkOrientation();
+        });
+    }
+})
+
+// 初始化全局存储
+document.addEventListener('alpine:initialized', () => {
+    Alpine.store('global').init();
+}); 

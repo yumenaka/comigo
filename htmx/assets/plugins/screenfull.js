@@ -1,12 +1,3 @@
 import screenfull from 'screenfull'
 
-if(document.getElementById('FullScreenIcon')){
-    document.getElementById('FullScreenIcon').addEventListener('click', () => {
-        if (screenfull.isEnabled) {
-            screenfull.toggle()
-        } else {
-            // Ignore or do something else
-            i18next.t('not_support_fullscreen')
-        }
-    })
-} 
+window.Screenfull = screenfull // 将 screenfull 实例添加到窗口对象中。

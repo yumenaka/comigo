@@ -1,18 +1,17 @@
-//此文件需要编译，相关指令请参考 package.json
-
+//此文件需要编译，编译指令请参考 package.json
 import 'htmx.org'
 import 'flowbite'
-// 这种 import './config/i18n' 通常用于单纯执行该文件内的脚本或配置逻辑，确保它在程序启动或相关流程中被"触发"过。
-// 没有显式使用 import { ... } from ... 的原因就是：这个模块没提供需要拿来用的东西，而是仅仅为了执行模块内部的副作用代码。
-import './config/i18n'
-import './config/alpine'
-import './stores/cookie'
-import './stores/global'
-import './stores/shelf'
-import './stores/scroll'
-import './stores/flip'
-import './stores/theme'
+// 基础插件
+import './plugins/i18n' // 这种 import 通常用于单纯执行该文件内的脚本或配置逻辑，确保它在程序启动或相关流程中被"触发"过。
+import './plugins/alpine'
 import './plugins/screenfull'
+// 声明各种变量
+import './stores/cookie_store'
+import './stores/global_store'
+import './stores/shelf_store'
+import './stores/scroll_store'
+import './stores/flip_store'
+import './stores/theme_store'
 import './utils/imageParameters'
 
 // Start Alpine.

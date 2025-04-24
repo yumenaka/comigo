@@ -8,6 +8,7 @@ import (
 
 // ShelfPage 书架页面
 templ ShelfPage(c echo.Context, s *state.GlobalState) {
+	@common.Toast()
 	@common.Header(
 		common.HeaderProps{
 			Title:           common.GetPageTitle(c.Param("id")),
@@ -22,5 +23,4 @@ templ ShelfPage(c echo.Context, s *state.GlobalState) {
 	@common.Footer(s.Version)
 	@common.Drawer(s.ServerStatus.ServerHost, ShelfDrawerSlot())
 	@common.QRCode(s.ServerStatus.ServerHost)
-	@common.Toast()
 }

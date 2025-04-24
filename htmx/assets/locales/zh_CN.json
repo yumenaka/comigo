@@ -124,7 +124,7 @@
   "network": "网络",
   "no_book_found_hint": "未找到书籍，试试上传文件？",
   "no_support_upload_file": "文件上传功能已被管理员关闭",
-  "not_support_fullscreen": "此浏览器不支持全屏模式",
+  "not_support_fullscreen": "当前浏览器不支持全屏显示",
   "now_is": "当前:",
   "number_of_online_books": "在线书籍数量：",
   "original_image": "显示原图",

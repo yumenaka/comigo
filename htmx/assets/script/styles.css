@@ -2634,12 +2634,24 @@
     height: calc(100% - 1rem);
   }
 
+  .h-auto {
+    height: auto;
+  }
+
   .h-dvh {
     height: 100dvh;
   }
 
   .h-full {
     height: 100%;
+  }
+
+  .h-screen {
+    height: 100vh;
+  }
+
+  .max-h-fit {
+    max-height: fit-content;
   }
 
   .max-h-full {
@@ -2652,10 +2664,6 @@
 
   .min-h-15 {
     min-height: calc(var(--spacing) * 15);
-  }
-
-  .min-h-\[100vh\] {
-    min-height: 100vh;
   }
 
   .min-h-full {

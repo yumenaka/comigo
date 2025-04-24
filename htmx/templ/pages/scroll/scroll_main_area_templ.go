@@ -17,10 +17,9 @@ import (
 	"github.com/yumenaka/comigo/model"
 )
 
-// getImageXData 在Go函数里面计算图片的x-data属性
-// 渲染结果例：
+// ImageXData 在Go函数里面计算图片的x-data属性。渲染结果例：
 // x-data="{  isDoublePage: false, imageUrl: '/api/get_file?id=asxScIDD&filename=1.jpg' + ($store.global.autoCrop  ? &quot;&auto_crop=1&quot; : ”) }"
-func getImageXData(Url string) string {
+func ImageXData(Url string) string {
 	return fmt.Sprintf(`{ isDoublePage: false, imageUrl: '%s' + ($store.global.autoCrop?"&auto_crop=1":'')}`, Url)
 }
 
@@ -51,7 +50,7 @@ func MainArea(s *state.GlobalState, book *model.Book) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"mouseMoveArea\" x-data=\"{\n            imageWidth: &#39;&#39;,\n            viewOrientation: &#39;&#39;,\n            updateOrientation() {\n                // 在 Alpine.js v3 里，如果你在 x-data 中定义了某个属性（例如 viewOrientation），并想在方法里对其赋值，就需要显式地使用 this.xxx 的形式，否则会报错。\n                 this.viewOrientation = (window.innerWidth / window.innerHeight &gt;= 1)\n                        ? &#39;landscape&#39;\n                        : &#39;portrait&#39;;\n            }\n        }\" x-init=\"updateOrientation();\" @resize.window=\"updateOrientation()\" class=\"flex flex-col items-center justify-center flex-1 w-full max-w-full pt-0 bg-base-100 text-base-content\" :class=\"(theme.toString() ===&#39;light&#39;||theme.toString() ===&#39;dark&#39;||theme.toString() ===&#39;retro&#39;||theme.toString() ===&#39;lofi&#39;||theme.toString() ===&#39;nord&#39;) ? ($store.global.bgPattern !== &#39;none&#39;?$store.global.bgPattern+&#39; bg-base-300&#39;:&#39;bg-base-300&#39;):($store.global.bgPattern !== &#39;none&#39;?$store.global.bgPattern:&#39;&#39;)\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"mouseMoveArea\" x-data=\"{\n            imageWidth: &#39;&#39; //图片的宽度\n        }\" class=\"flex flex-col items-center justify-center flex-1 w-full max-w-full pt-0 bg-base-100 text-base-content\" :class=\"(theme.toString() ===&#39;light&#39;||theme.toString() ===&#39;dark&#39;||theme.toString() ===&#39;retro&#39;||theme.toString() ===&#39;lofi&#39;||theme.toString() ===&#39;nord&#39;) ? ($store.global.bgPattern !== &#39;none&#39;?$store.global.bgPattern+&#39; bg-base-300&#39;:&#39;bg-base-300&#39;):($store.global.bgPattern !== &#39;none&#39;?$store.global.bgPattern:&#39;&#39;)\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -68,7 +67,7 @@ func MainArea(s *state.GlobalState, book *model.Book) templ.Component {
 				var templ_7745c5c3_Var2 string
 				templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(image.Url)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/main_area.templ`, Line: 49, Col: 28}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 39, Col: 28}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 				if templ_7745c5c3_Err != nil {
@@ -85,22 +84,22 @@ func MainArea(s *state.GlobalState, book *model.Book) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var3 string
-				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(getImageXData(image.Url))
+				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(ImageXData(image.Url))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/main_area.templ`, Line: 53, Col: 39}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 43, Col: 36}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" class=\"w-full manga_image\" draggable=\"false\" :src=\"imageUrl\" @load=\"\n                            if ($event.target.naturalWidth &gt; $event.target.naturalHeight) {\n                                // 双页\n                                isDoublePage = true;\n                                $el.classList.add(&#39;double&#39;);\n                                $el.classList.remove(&#39;single&#39;);\n                            } else {\n                                // 单页\n                                isDoublePage = false;\n                                $el.classList.add(&#39;single&#39;);\n                                $el.classList.remove(&#39;double&#39;);\n                                //console.log(`naturalWidth: ${$event.target.naturalWidth}, naturalHeight: ${$event.target.naturalHeight}`);\n                            }\" :style=\"{ width: viewOrientation === &#39;landscape&#39; ?(Alpine.store(&#39;scroll&#39;).widthUseFixedValue? (isDoublePage ? Alpine.store(&#39;scroll&#39;).doublePageWidth_PX +&#39;px&#39;: Alpine.store(&#39;scroll&#39;).singlePageWidth_PX +&#39;px&#39;): (isDoublePage ? Alpine.store(&#39;scroll&#39;).doublePageWidth_Percent + &#39;%&#39;: Alpine.store(&#39;scroll&#39;).singlePageWidth_Percent + &#39;%&#39;)): &#39;100%&#39;, maxWidth: &#39;100%&#39;}\" alt=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" class=\"w-full manga_image\" draggable=\"false\" :src=\"imageUrl\" @load=\"isDoublePage=$event.target.naturalWidth &gt; $event.target.naturalHeight;\" :style=\"{ width: Alpine.store(&#39;global&#39;).isLandscape?(Alpine.store(&#39;scroll&#39;).widthUseFixedValue? (isDoublePage ? Alpine.store(&#39;scroll&#39;).doublePageWidth_PX +&#39;px&#39;: Alpine.store(&#39;scroll&#39;).singlePageWidth_PX +&#39;px&#39;): (isDoublePage ? Alpine.store(&#39;scroll&#39;).doublePageWidth_Percent + &#39;%&#39;: Alpine.store(&#39;scroll&#39;).singlePageWidth_Percent + &#39;%&#39;)): &#39;100%&#39;, maxWidth: &#39;100%&#39;}\" alt=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(key))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/main_area.templ`, Line: 71, Col: 29}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 49, Col: 29}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -118,7 +117,7 @@ func MainArea(s *state.GlobalState, book *model.Book) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d / %d", key+1, book.BookInfo.PageCount))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/main_area.templ`, Line: 75, Col: 135}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 53, Col: 135}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {

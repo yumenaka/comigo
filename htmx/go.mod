@@ -36,7 +36,7 @@ require (
 
 require (
 	aead.dev/minisign v0.3.0 // indirect
-	ariga.io/atlas v0.32.0 // indirect
+	ariga.io/atlas v0.32.1 // indirect
 	dario.cat/mergo v1.0.1 // indirect
 	entgo.io/ent v0.14.4 // indirect
 	github.com/Baozisoftware/qrcode-terminal-go v0.0.0-20170407111555-c0650d8dff0f // indirect
@@ -133,7 +133,7 @@ require (
 	github.com/ncruces/go-strftime v0.1.9 // indirect
 	github.com/nicksnyder/go-i18n/v2 v2.6.0 // indirect
 	github.com/nwaples/rardecode/v2 v2.1.1 // indirect
-	github.com/pdfcpu/pdfcpu v0.10.1 // indirect
+	github.com/pdfcpu/pdfcpu v0.10.2 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/pierrec/lz4/v4 v4.1.22 // indirect
@@ -170,7 +170,7 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/xxjwxc/gowp v0.0.0-20240929033016-5be68d222389 // indirect
-	github.com/xxjwxc/public v0.0.0-20250328104919-64d2f7032638 // indirect
+	github.com/xxjwxc/public v0.0.0-20250422135827-14480c824656 // indirect
 	github.com/yumenaka/archives v0.0.0-20250415151013-1eb1364f1e13 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	github.com/zclconf/go-cty v1.16.2 // indirect
@@ -192,7 +192,7 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	modernc.org/libc v1.63.0 // indirect
+	modernc.org/libc v1.64.0 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.10.0 // indirect
 	modernc.org/sqlite v1.37.0 // indirect

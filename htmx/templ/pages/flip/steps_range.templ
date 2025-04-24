@@ -11,7 +11,7 @@ templ StepsRangeArea() {
 			id="StepsRangeArea"
 			onmouseover="showToolbar();"
 			onmouseout="hideToolbar()"
-			class="StepsRangeArea bg-base-100 text-base-content font-semibold w-5/6 rounded px-4 overflow-hidden toolbar h-12 bg-base-100 backdrop-blur-3xl"
+			class="StepsRangeArea hidden bg-base-100 text-base-content font-semibold w-5/6 rounded px-4 overflow-hidden toolbar h-12 bg-base-100 backdrop-blur-3xl"
 			:class="Alpine.store('flip').autoHideToolbar? 'absolute fixed bottom-0':'flex flex-col justify-center bg-base-100/50'"
 		>
 			<div class="relative w-full" :class="Alpine.store('flip').autoHideToolbar? 'mt-2.5':''">

@@ -9,6 +9,7 @@ import (
 // FlipPage 定义 BodyHTML
 templ FlipPage(s *state.GlobalState, book *model.Book) {
 	@InsertData(book, s)
+	@common.Toast()
 	@common.Header(
 		common.HeaderProps{
 			Title:           common.GetPageTitle(book.BookInfo.BookID),
@@ -25,5 +26,4 @@ templ FlipPage(s *state.GlobalState, book *model.Book) {
 	@MainArea(s, book)
 	@common.Drawer(s.ServerStatus.ServerHost, DrawerSlot())
 	@common.QRCode(s.ServerStatus.ServerHost)
-	@common.Toast()
 }

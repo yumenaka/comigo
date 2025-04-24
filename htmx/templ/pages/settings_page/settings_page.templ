@@ -8,10 +8,10 @@ import (
 
 // SettingsPage 设置页面
 templ SettingsPage(c echo.Context, s *state.GlobalState) {
+    @common.Toast()
 	@MainArea(&state.Global)
 	@common.Footer(s.Version)
 	@common.QRCode(s.ServerStatus.ServerHost)
-	@common.Toast()
 <script>
     // htmx出错时报错（Toast）
 	document.addEventListener('htmx:responseError', (event) => {

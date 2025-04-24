@@ -36,6 +36,10 @@ func ShelfPage(c echo.Context, s *state.GlobalState) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = common.Toast().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
 		templ_7745c5c3_Err = common.Header(
 			common.HeaderProps{
 				Title:           common.GetPageTitle(c.Param("id")),
@@ -62,10 +66,6 @@ func ShelfPage(c echo.Context, s *state.GlobalState) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = common.QRCode(s.ServerStatus.ServerHost).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = common.Toast().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
