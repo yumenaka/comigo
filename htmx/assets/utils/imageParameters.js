@@ -2,7 +2,7 @@
 const imageParameters = {
     resize_width: -1, // 缩放图片,指定宽度
     resize_height: -1, // 指定高度,缩放图片
-    do_auto_resize: false,
+    do_compress_image: false,
     resize_max_width: 800, //图片宽度大于这个上限时缩小
     resize_max_height: -1, //图片高度大于这个上限时缩小
     do_auto_crop: false,
@@ -20,7 +20,7 @@ const resize_height_str =
         ? "&resize_height=" + imageParameters.resize_height
         : "";
 const gray_str = imageParameters.gray ? "&gray=true" : "";
-const do_auto_resize_str = imageParameters.do_auto_resize
+const do_compress_image_str = imageParameters.do_compress_image
     ? "&resize_max_width=" + imageParameters.resize_max_width
     : "";
 const resize_max_height_str =
@@ -35,7 +35,7 @@ const auto_crop_str = imageParameters.do_auto_crop
 let addStr =
     resize_width_str +
     resize_height_str +
-    do_auto_resize_str +
+    do_compress_image_str +
     resize_max_height_str +
     auto_crop_str +
     gray_str;

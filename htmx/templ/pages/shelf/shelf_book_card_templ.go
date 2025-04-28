@@ -52,7 +52,7 @@ func BookCard(c echo.Context, s *state.GlobalState, book model.BookInfo) templ.C
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var2 = []any{backgroundImage(book.GetCover().Url), "relative w-32 transition-transform duration-200 hover:scale-105 mx-4 my-4 bg-top bg-cover h-44 rounded drop-shadow-lg  ring-2 ring-gray-400 hover:ring-4 hover:ring-blue-500 overflow-hidden"}
+		var templ_7745c5c3_Var2 = []any{backgroundImage(book.GetCover().Url), "relative w-32 transition-transform duration-200 hover:scale-105 m-2 md:m-3 bg-top bg-cover h-44 rounded drop-shadow-lg  ring-2 ring-gray-400 hover:ring-4 hover:ring-blue-500 overflow-hidden"}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
