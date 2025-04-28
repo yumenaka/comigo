@@ -18,6 +18,7 @@ Alpine.store('scroll', {
     clientHeight: 0,
     //漫画页的单位,是否使用固定值
     widthUseFixedValue: Alpine.$persist(true).as('scroll.widthUseFixedValue'),
+    portraitWidthPercent: Alpine.$persist(100).as('scroll.portraitWidthPercent'),
     //横屏(Landscape)状态的漫画页宽度,百分比
     singlePageWidth_Percent: Alpine.$persist(60).as('scroll.singlePageWidth_Percent'),
     doublePageWidth_Percent: Alpine.$persist(95).as('scroll.doublePageWidth_Percent'),

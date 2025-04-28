@@ -78,6 +78,7 @@
   "all_page_num": "総ページ数: {0}",
   "author": "作者: {0}",
   "auto_crop": "自動エッジトリミング",
+  "auto_crop_num": "トリミング閾値: ",
   "auto_double_page": "自動見開きページ (β)",
   "auto_hide_toolbar": "ツールバーを自動非表示",
   "back-to-top": "ページトップへ戻る",
@@ -193,5 +194,6 @@
   "upload_file": "ファイルをアップロード",
   "uploaded_folder_hint": "ファイルは実行ディレクトリ内のComigoUploadフォルダにアップロードされます",
   "width_use_fixed_value": "横幅: 固定値",
-  "width_use_percent": "横幅: パーセンテージ"
+  "width_use_percent": "横幅: パーセンテージ",
+  "portrait_width_percent": "縦画面幅（パーセント）"
 }

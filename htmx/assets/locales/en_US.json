@@ -78,6 +78,7 @@
   "all_page_num": "Total Pages: {0}",
   "author": "Author: {0}",
   "auto_crop": "Automatic edge trimming",
+  "auto_crop_num": "Cropping threshold: ",
   "auto_double_page": "Auto Double Page (beta)",
   "auto_hide_toolbar": "Auto Hide Toolbar",
   "back-to-top": "Back to Top",
@@ -193,5 +194,6 @@
   "upload_file": "Upload File",
   "uploaded_folder_hint": "Files will be uploaded to the upload folder under the default library directory.",
   "width_use_fixed_value": "Landscape Mode Width: Fixed Value",
-  "width_use_percent": "Landscape Mode Width: Percentage"
+  "width_use_percent": "Landscape Mode Width: Percentage",
+  "portrait_width_percent": "portrait width (percent)"
 }
