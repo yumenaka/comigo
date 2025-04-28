@@ -78,6 +78,7 @@
   "all_page_num": "总页数：{0}",
   "author": "作者：{0}",
   "auto_crop": "自动切边",
+  "auto_crop_num": "切边阈值: ",
   "auto_double_page": "自动合并双页（beta）",
   "auto_hide_toolbar": "自动隐藏工具栏",
   "back-to-top": "返回顶部",
@@ -119,7 +120,7 @@
   "logout": "退出登录",
   "margin_bottom_on_scroll_mode": "页面间距:",
   "margin_on_scroll_mode": "页面间隙:",
-  "limit_width": "压缩限宽：",
+  "limit_width": "压缩（图片宽）：",
   "minute": "分",
   "network": "网络",
   "no_book_found_hint": "未找到书籍，试试上传文件？",
@@ -181,7 +182,7 @@
   "switch_to_flip_mode": "→ 翻页模式",
   "switch_to_scrolling_mode": "→ 卷轴模式",
   "sync_page": "远程同步翻页",
-  "temp_future_hint": "临时放一些还未完成的功能，开发与调整中。",
+  "temp_future_hint": "放一些还未完成的功能，开发与调整中。",
   "test": "测试",
   "to_flip_mode": "→ 切换翻页模式",
   "to_infinite_dropdown_mode": "→卷轴:切换无限下拉",
@@ -193,5 +194,6 @@
   "upload_file": "上传文件",
   "uploaded_folder_hint": "文件将上传到默认书库目录下的 upload 文件夹。",
   "width_use_fixed_value": "横屏宽度: 固定值px",
-  "width_use_percent": "横屏宽度: 百分比%"
+  "width_use_percent": "横屏宽度: 百分比%",
+  "portrait_width_percent": "竖屏宽度(百分比)"
 }

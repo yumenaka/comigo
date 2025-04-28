@@ -23,7 +23,14 @@ func Handler(c echo.Context) error {
 		error_page.NotFound404(&state.Global),
 		[]string{},
 	)
-	book, err := model.GetBookByID(bookID, "default")
+	// 图片排序方式
+	sortBy := "default"
+	// c.Cookie("key") 没找到，那么就会取到空值（nil），没处判断就直接访问 .Value 属性，会导致空指针引用错误。
+	sortBookBy, err := c.Cookie("FlipSortBy")
+	if err == nil {
+		sortBy = sortBookBy.Value
+	}
+	book, err := model.GetBookByID(bookID, sortBy)
 	if err != nil {
 		logger.Infof("GetBookByID: %v", err)
 		// 渲染页面

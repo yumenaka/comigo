@@ -2,6 +2,7 @@ package scroll
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/angelofallars/htmx-go"
 	"github.com/labstack/echo/v4"
@@ -15,20 +16,25 @@ import (
 // Handler 阅读界面（卷轴模式）
 func Handler(c echo.Context) error {
 	model.CheckAllBookFileExist()
-	// // 图片重排设定，存储在 cookie 里面，默认为"default"
-	// sortPageBy, err := c.Cookie("SortPageBy")
-	// if err != nil {
-	//	sortPageBy = "default"
-	//	//Secure 表示：不讓 Cookie 在 HTTP 之外的環境下被存取
-	//	//HttpOnly 表示：拒絕與 JavaScript 共享 Cookie！
-	//	//SameSite 表示：所有和 Cookie 來源不同的請求都不會帶上 Cookie
-	//	c.SetCookie("SortPageBy", sortPageBy, 60*60*24*356, "/", c.Request().Host, false, true)
-	// }
-	// 获取查询参数并指定默认值 ?age=value
-	sortBy := c.QueryParam("sortBy")
-	if sortBy == "" {
-		sortBy = "default"
+	// 图片排序方式
+	sortBy := "default"
+	sortBookBy, err := c.Cookie("ScrollSortBy")
+	if err == nil {
+		// c.Cookie("key") 没找到，那么就会取到空值（nil），
+		// 没处判断就直接访问 .Value 属性，会导致空指针引用错误。
+		sortBy = sortBookBy.Value
+		// fmt.Println("Scroll Mode Sort By:" + sortBy)
 	}
+	paginationIndex := 0
+	pagination, err := c.Cookie("PaginationIndex")
+	if err == nil {
+		index, err := strconv.Atoi(pagination.Value)
+		if err == nil {
+			logger.Infof("PaginationIndex: %v", err)
+			paginationIndex = index
+		}
+	}
+
 	// 读取url参数，获取书籍ID
 	bookID := c.Param("id")
 	// 没有找到书籍，显示 HTTP 404 错误
@@ -48,7 +54,7 @@ func Handler(c echo.Context) error {
 		}
 	}
 	// 定义模板主体内容。
-	scrollPage := ScrollPage(&state.Global, book)
+	scrollPage := ScrollPage(&state.Global, book, paginationIndex)
 	// 拼接页面
 	indexTemplate = common.Html(
 		c,

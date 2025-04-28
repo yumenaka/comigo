@@ -42,6 +42,17 @@ loadPageNumFromLocalStorage();
 //判断当前浏览器是不是Safari，暂时没啥用
 // const isSafari = navigator.userAgent.indexOf('Safari') !== -1 && navigator.userAgent.indexOf('Chrome') === -1
 
+function GetImageSrc(index)  {
+	if(index<0||index>= images.length){
+		console.log(`Error,cannot use this index: ${index}`);
+        return
+	}
+	const Url = images[index].url
+	const autoCrop = Alpine.store('global').autoCrop?"&auto_crop=1":''
+	const autoResize = Alpine.store('global').autoResize?"&resize_max_width="+Alpine.store('global').autoResizeWidth:''
+	const noCache = Alpine.store('global').noCache?"&no-cache=true":''
+	return `${Url}${autoCrop}${autoResize}${noCache}`
+}
 
 // 加载图片资源
 function setImageSrc() {
@@ -55,33 +66,33 @@ function setImageSrc() {
 	// console.log("setImageSrc: NowImage+1=", images[nowPageNum].url);
 	// 加载当前图片
 	document.getElementById('Single-NowImage').src =
-		images[nowPageNum - 1].url
+		GetImageSrc(nowPageNum - 1)
 	if (!Alpine.store('flip').mangaMode) {
-		document.getElementById('Double-NowImage-Left').src = images[nowPageNum - 1].url;
+		document.getElementById('Double-NowImage-Left').src = GetImageSrc(nowPageNum - 1);
 	} else {
-		document.getElementById('Double-NowImage-Right').src = images[nowPageNum - 1].url;
+		document.getElementById('Double-NowImage-Right').src = GetImageSrc(nowPageNum - 1);
 	}
 
-	preloadedImages.add(images[nowPageNum - 1].url)
+	preloadedImages.add(GetImageSrc(nowPageNum - 1))
 	// 更新滑动容器图片
-	updateSliderImages(nowPageNum, images)
+	updateSliderImages(nowPageNum)
 
 	// 为双页模式，加载下一张图片。
 	// 因为用户有可能随时切换到双页模式，所以单页模式也预加载图片（尽管看不到）
 	if (nowPageNum < Alpine.store('flip').allPageNum) {
 		if (Alpine.store('flip').mangaMode) {
-			document.getElementById('Double-NowImage-Left').src = images[nowPageNum].url;
+			document.getElementById('Double-NowImage-Left').src = GetImageSrc(nowPageNum);
 		} else {
-			document.getElementById('Double-NowImage-Right').src = images[nowPageNum].url;
+			document.getElementById('Double-NowImage-Right').src = GetImageSrc(nowPageNum);
 		}
-		preloadedImages.add(images[nowPageNum].url)
+		preloadedImages.add(GetImageSrc(nowPageNum))
 	}
 
 	// 预加载前一张和后十张图片
 	const preloadRange = 10 // 预加载范围，可以根据需要调整
 	for (let i = nowPageNum - 2; i <= nowPageNum + preloadRange; i++) {
 		if (i >= 0 && i < Alpine.store('flip').allPageNum) {
-			const imgUrl = images[i].url
+			const imgUrl = GetImageSrc(i)
 			if (!preloadedImages.has(imgUrl)) {
 				let img = new Image()
 				img.src = imgUrl
@@ -106,7 +117,7 @@ function savePageNumToLocalStorage() {
 }
 
 // 更新滑动容器图片
-function updateSliderImages(nowPageNum, images) {
+function updateSliderImages(nowPageNum) {
 	// 根据阅读方向设置滑动元素的位置
 	const prevSlideElement = document.getElementById('left-slide')
 	const nextSlideElement = document.getElementById('right-slide')
@@ -124,7 +135,7 @@ function updateSliderImages(nowPageNum, images) {
 		// 添加前一张图片（如果存在）
 		if (nowPageNum > 1) {
 			const prevImg = document.createElement('img')
-			prevImg.src = images[nowPageNum - 2].url
+			prevImg.src = GetImageSrc(nowPageNum - 2)
 			prevImg.className = Alpine.store('global').isPortrait? 'object-contain w-auto max-w-full h-screen':'h-screen w-auto max-w-full object-contain'
 			prevImg.draggable = false
 			leftSlide.innerHTML = ''
@@ -135,12 +146,12 @@ function updateSliderImages(nowPageNum, images) {
 		// // 更新当前图片 (确保当前图片也在这里更新，以防万一)
 		const currentImgElement = document.getElementById('Single-NowImage')
 		if (currentImgElement && nowPageNum >= 1 && nowPageNum <= Alpine.store('flip').allPageNum) {
-			currentImgElement.src = images[nowPageNum - 1].url
+			currentImgElement.src = GetImageSrc(nowPageNum - 1)
 		}
 		// 添加后一张图片（如果存在）
 		if (nowPageNum < Alpine.store('flip').allPageNum) {
 			const nextImg = document.createElement('img')
-			nextImg.src = images[nowPageNum].url
+			nextImg.src = GetImageSrc(nowPageNum)
 			nextImg.className = Alpine.store('global').isPortrait? 'object-contain w-auto max-w-full h-screen':'h-screen w-auto max-w-full object-contain'
 			nextImg.draggable = false
 			rightSlide.innerHTML = ''
@@ -154,7 +165,7 @@ function updateSliderImages(nowPageNum, images) {
 		// 添加双页模式前一屏图片（如果存在）
 		if (nowPageNum === 2) {
 			const prevImg = document.createElement('img')
-			prevImg.src = images[nowPageNum - 2].url
+			prevImg.src = GetImageSrc(nowPageNum - 2)
 			prevImg.className = 'object-contain m-0 max-w-full max-h-screen h-screen'
 			prevImg.draggable = false
 			leftSlide.innerHTML = ''
@@ -162,11 +173,11 @@ function updateSliderImages(nowPageNum, images) {
 		}
 		if (nowPageNum >= 3) {
 			const prevImg_1 = document.createElement('img')
-			prevImg_1.src = images[nowPageNum - 2].url
+			prevImg_1.src = GetImageSrc(nowPageNum - 2)
 			prevImg_1.className = 'select-none object-contain m-0 max-w-1/2 w-auto max-h-screen grow-0'
 			prevImg_1.draggable = false
 			const prevImg_2 = document.createElement('img')
-			prevImg_2.src = images[nowPageNum - 3].url
+			prevImg_2.src = GetImageSrc(nowPageNum - 3)
 			prevImg_2.className = 'select-none object-contain m-0 max-w-1/2 w-auto max-h-screen grow-0'
 			prevImg_2.draggable = false
 			leftSlide.innerHTML = ''
@@ -184,7 +195,7 @@ function updateSliderImages(nowPageNum, images) {
 		// 添加后一屏图片（如果存在）
 		if (nowPageNum === Alpine.store('flip').allPageNum - 3) {
 			const nextImg = document.createElement('img')
-			nextImg.src = images[nowPageNum - 2].url
+			nextImg.src = GetImageSrc(nowPageNum - 2)
 			nextImg.className = 'object-contain m-0 max-w-full max-h-screen h-screen'
 			nextImg.draggable = false
 			rightSlide.innerHTML = ''
@@ -192,11 +203,11 @@ function updateSliderImages(nowPageNum, images) {
 		}
 		if (nowPageNum < Alpine.store('flip').allPageNum - 3) {
 			const nextImg_1 = document.createElement('img')
-			nextImg_1.src = images[nowPageNum + 1].url
+			nextImg_1.src = GetImageSrc(nowPageNum + 1)
 			nextImg_1.className = 'select-none object-contain m-0 max-w-1/2 w-auto max-h-screen grow-0'
 			nextImg_1.draggable = false
 			const nextImg_2 = document.createElement('img')
-			nextImg_2.src = images[nowPageNum + 2].url
+			nextImg_2.src = GetImageSrc(nowPageNum + 2)
 			nextImg_2.className = 'select-none object-contain m-0 max-w-1/2 w-auto max-h-screen grow-0'
 			nextImg_2.draggable = false
 			rightSlide.innerHTML = ''
@@ -446,20 +457,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	sliderContainer.addEventListener('mouseleave', touchEnd)
 	// 初始化滑动容器中的图片
 	const nowPageNum = Alpine.store('flip').nowPageNum
-	const images = book.pages.images
-	updateSliderImages(nowPageNum, images)
-})
-
-// 监听mangaMode值的变化，动态更新滑动方向
-document.addEventListener('alpine:initialized', () => {
-	if (window.Alpine) {
-		// 当mangaMode值变化时更新滑动方向
-		Alpine.effect(() => {
-			if (nowPageNum > 0) {
-				updateSliderImages(Alpine.store('flip').nowPageNum, book.pages.images)
-			}
-		})
-	}
+	updateSliderImages(nowPageNum)
 })
 
 //翻页函数，加页或减页
@@ -591,11 +589,8 @@ function hideToolbar() {
 		range.style.transform = 'translateY(100%)'
 	}
 }
-function startHideTimer() {
-	hideTimeout = setTimeout(hideToolbar, 1500) // 1.5 seconds
-}
 if (Alpine.store('flip').autoHideToolbar) {
-	startHideTimer()
+	hideToolbar()
 }
 
 //鼠标是否在设置区域
@@ -653,6 +648,7 @@ function onMouseClick(e) {
 		//获取ID为 OpenSettingButton的元素，然后模拟点击
 		document.getElementById('OpenSettingButton').click()
 		scrollToMangaMain()
+		showToolbar()
 	}
 	if (!inSetArea) {
 		//决定如何翻页
@@ -672,9 +668,6 @@ function onMouseClick(e) {
 			}
 		}
 	}
-	if (inSetArea) {
-		showToolbar()
-	}
 }
 
 //获取鼠标位置,决定如何显示鼠标指针
@@ -688,6 +681,7 @@ function onMouseMove(e) {
 	let inSetArea = getInSetArea(e)
 	if (inSetArea) {
 		e.currentTarget.style.cursor = 'url(/images/SettingsOutline.png), pointer'
+		showToolbar()
 	}
 	let stepsRangeArea = document
 		.getElementById('StepsRangeArea')
@@ -780,9 +774,9 @@ document.addEventListener('mousemove', function (event) {
 	// 因为header需要收起来，所以不能用left、right、top、bottom判断y是否在header的范围内
 	if (Alpine.store('flip').autoHideToolbar) {
 		// 判断鼠标是否在元素 1 范围内(Header)。。
-		inInElement1 = y <= rect1_header.height - 20
+		inInElement1 = (y <= 40)
 		// 判断鼠标是否在元素 2 范围内(导航条)。因为header可能隐藏，所以不能直接用left、right、top、bottom判断y是否在header的范围内。
-		inInElement2 = y >= window.innerHeight - rect2_range.height - 20
+		inInElement2 = (y >= window.innerHeight- 40)
 	}
 	// 如果工具栏不自动隐藏，用left、right、top、bottom判断y是否在header的范围内
 	if (!Alpine.store('flip').autoHideToolbar) {
@@ -820,28 +814,15 @@ document.addEventListener('mousemove', function (event) {
 		y >= rect5_steps_range_area.top &&
 		y <= rect5_steps_range_area.bottom
 
-	//鼠标在设置区域
+	// 鼠标在设置区域
 	let inSetArea = getInSetArea(event)
-	if (inSetArea) {
+	// 鼠标不在设置区域 + 不在任何一个元素范围内
+	if (inSetArea||inInElement1||inInElement2||inInElement3||inInElement4||inInElement5) {
 		showToolbar()
-	}
-	// '鼠标不在任何一个元素范围内'
-	if (!inInElement1 && !inInElement2 && !inInElement3) {
-		if (inSetArea === false) {
-			hideToolbar()
-		}
-	}
-	// '鼠标在元素范围内'
-	if (
-		inInElement1 ||
-		inInElement2 ||
-		inInElement3 ||
-		inInElement4 ||
-		inInElement5 ||
-		inSetArea
-	) {
-		//console.log('鼠标在元素范围内');
-		showToolbar()
+	}else {
+		// '鼠标不在设置区域 + 不在任何一个元素范围内'
+		console.log(`inSetArea:${inSetArea}`)
+		hideToolbar()
 	}
 })
 

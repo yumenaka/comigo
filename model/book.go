@@ -32,7 +32,7 @@ func GetBookGroupByBookID(id string) (*BookGroup, error) {
 	if value, ok := mapBookGroup.Load(id); ok {
 		return value.(*BookGroup), nil
 	}
-	return nil, errors.New("cannot find book, id=" + id)
+	return nil, errors.New("GetBookGroupByBookID：cannot find book group, id=" + id)
 }
 
 // GetBookGroupIDByBookID 通过子书籍 ID 获取所属书组 ID
@@ -62,7 +62,7 @@ func ClearBookData() {
 
 // ClearBookGroupData  清空书组相关数据
 func ClearBookGroupData() {
-	//Clear 会删除所有条目，从而产生一个空的 Map。
+	// Clear 会删除所有条目，从而产生一个空的 Map。
 	mapBookGroup.Clear()
 	MainStore.SubStores.Clear()
 }
@@ -236,7 +236,7 @@ func GetBookByID(id string, sortBy string) (*Book, error) {
 		}
 		return &temp, nil
 	}
-	return nil, errors.New("cannot find book, id=" + id)
+	return nil, errors.New("GetBookByID：cannot find book, id=" + id)
 }
 
 // GetRandomBook 随机获取一本书

@@ -1,7 +1,6 @@
 package shelf
 
 import (
-	"fmt"
 	"net/http"
 	"net/url"
 
@@ -18,17 +17,13 @@ import (
 func Handler(c echo.Context) error {
 	// Set the response content type to HTML.
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
-
-	// 书籍重排方式
+	// 书籍排序方式
 	sortBy := "default"
 	sortBookBy, err := c.Cookie("ShelfSortBy")
 	if err == nil {
-		// 如果 c.Cookie("ShelfSortBy") 返回错误，那么 sortBookBy 可能是空值（nil），
-		// 没有正确处理这种情况就直接访问了 .Value 属性，会导致了空指针引用错误。
+		// c.Cookie("key") 没找到，那么就会取到空值（nil），
+		// 没处判断就直接访问 .Value 属性，会导致空指针引用错误。
 		sortBy = sortBookBy.Value
-		fmt.Println("sortBookBy:", sortBy)
-	} else {
-		fmt.Println("未设置书籍排序方式，使用默认排序:", sortBy)
 	}
 	// 读取url参数，获取书籍ID
 	bookID := c.Param("id")

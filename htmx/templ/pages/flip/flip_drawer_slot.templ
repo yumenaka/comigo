@@ -4,7 +4,7 @@ templ DrawerSlot() {
 	<!-- 切换【卷轴模式/翻页模式】-->
 	<button
 	    type="button"
-	    x-data="{ buttonText: $store.global.readMode === 'flip'?i18next.t('to_scroll_mode'):i18next.t('to_flip_mode') }"
+	    x-data="{ buttonText: i18next.t('to_scroll_mode') }"
 	    x-text="buttonText"
 	    x-on:click="$store.global.toggleReadMode();toggleFlipScrollFlexible();"
 	    class="px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
@@ -67,6 +67,7 @@ templ DrawerSlot() {
 			type="checkbox"
 			:value="$store.flip.mangaMode"
 			x-on:click="$store.flip.mangaMode =!$store.flip.mangaMode"
+			x-init="$watch('$store.flip.mangaMode', _ => setImageSrc())"
 			class="sr-only peer"
 		/>
 		<div
@@ -85,6 +86,7 @@ templ DrawerSlot() {
 			type="checkbox"
 			:value="$store.flip.doublePageMode"
 			x-on:click="$store.flip.doublePageMode =!$store.flip.doublePageMode"
+			x-init="$watch('$store.flip.doublePageMode', _ => setImageSrc())"
 			class="sr-only peer"
 		/>
 		<div
@@ -110,6 +112,40 @@ templ DrawerSlot() {
 		></div>
 		<span class="font-medium ms-3" x-text="i18next.t('showPageNum')"></span>
 	</label>
+	<!-- 【自动切边】 -->
+	<label
+		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
+	>
+		<input
+			type="checkbox"
+			:value="$store.global.autoCrop"
+			x-on:click="$store.global.autoCrop =!$store.global.autoCrop;"
+			x-init="$watch('$store.global.autoCrop', _ => setImageSrc())"
+			class="sr-only peer"
+		/>
+		<div
+			class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+		></div>
+		<span class="font-medium ms-3" x-text="i18next.t('auto_crop')"></span>
+	</label>
+	<!-- 【切边阈值】 -->
+	<div x-show="$store.global.autoCrop" x-transition class="relative w-full my-2 rounded-sm outline-offset-4 outline-double outline-2 hover:outline-3">
+		<label
+			for="autoCropNum"
+			class="block w-full mb-0 font-medium"
+			x-text="i18next.t('auto_crop_num') + $store.global.autoCropNum"
+		></label>
+		<input
+			id="autoCropNum"
+			type="range"
+			min="1"
+			max="5"
+			x-model="$store.global.autoCropNum"
+			x-init="$watch('$store.global.autoCrop', _ => setImageSrc())"
+			step="1"
+			class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+		/>
+	</div>
 	<!-- 自动隐藏工具栏  -->
 	<label
 		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
