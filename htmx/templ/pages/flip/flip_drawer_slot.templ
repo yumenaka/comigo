@@ -1,14 +1,15 @@
 package flip
 
 templ DrawerSlot() {
-	<!-- 切换阅读模式 toggle -->
-	<label class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm">
-		<input type="checkbox" x-bind="$store.global.readMode === 'scroll'" x-on:change="$store.global.toggleReadMode();toggleFlipScrollFlexible();" class="sr-only peer" checked/>
-		<div
-			class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
-		></div>
-		<span class="font-medium ms-3" x-text="$store.global.readMode === 'scroll'?i18next.t('scroll_mode'):i18next.t('flip_mode')"></span>
-	</label>
+	<!-- 切换【卷轴模式/翻页模式】-->
+	<button
+	    type="button"
+	    x-data="{ buttonText: $store.global.readMode === 'flip'?i18next.t('to_scroll_mode'):i18next.t('to_flip_mode') }"
+	    x-text="buttonText"
+	    x-on:click="$store.global.toggleReadMode();toggleFlipScrollFlexible();"
+	    class="px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+	    卷轴模式/翻页模式
+	</button>
 	<script>
     	function toggleFlipScrollFlexible() {
     	        // 切换阅读模式时，如果在阅读，就修改URL路径

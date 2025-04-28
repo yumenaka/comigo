@@ -15,6 +15,14 @@ func ImageXData(Url string) string {
 	return fmt.Sprintf(`{ isDoublePage: false, imageUrl: '%s' + ($store.global.autoCrop?"&auto_crop=1":'')}`, Url)
 }
 
+// 压缩尺寸，切白边，无缓存等选项，http://192.168.3.26:58642/api/get_file?id=xE2Nmdj&filename=001_By_zhonyk_cover.jpg&resize_max_width=200&no-cache=true
+func ImageSrc(Url string) string {
+	autoCrop := `$store.global.autoCrop?"&auto_crop=1":''`
+	autoResize := `$store.global.autoResize?"&resize_max_width="+$store.global.autoResizeWidth:''`
+	noCache := `$store.global.noCache?"&no-cache=true":''`
+	return fmt.Sprintf(`'%s' + (%s) + (%s) + (%s)`, Url, autoCrop, autoResize, noCache)
+}
+
 // ScrollMainArea 定义 BodyHTML
 // 需要更复杂的屏幕状态判断的时候，可以参考：https://developer.mozilla.org/zh-CN/docs/Web/API/Screen/orientation
 // orientation: (screen.orientation || {}).type ||  screen.mozOrientation || screen.msOrientation
@@ -43,7 +51,7 @@ templ MainArea(s *state.GlobalState, book *model.Book) {
 						x-data={ ImageXData(image.Url) }
 						class="w-full manga_image"
 						draggable="false"
-						:src="imageUrl"
+						:src={ ImageSrc(image.Url) }
 						@load="isDoublePage=$event.target.naturalWidth > $event.target.naturalHeight;"
 						:style="{ width: Alpine.store('global').isLandscape?(Alpine.store('scroll').widthUseFixedValue? (isDoublePage ? Alpine.store('scroll').doublePageWidth_PX +'px': Alpine.store('scroll').singlePageWidth_PX +'px'): (isDoublePage ? Alpine.store('scroll').doublePageWidth_Percent + '%': Alpine.store('scroll').singlePageWidth_Percent + '%')): '100%', maxWidth: '100%'}"
 						alt={ strconv.Itoa(key) }

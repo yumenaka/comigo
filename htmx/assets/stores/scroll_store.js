@@ -6,9 +6,10 @@ Alpine.store('scroll', {
     marginBottomOnScrollMode: Alpine.$persist(0).as(
         'scroll.marginBottomOnScrollMode'
     ),
-    //卷轴模式下，是否无限下拉
-    InfiniteDropdown: Alpine.$persist(true).as('scroll.InfiniteDropdown'),
-    syncScrollFlag: Alpine.$persist(false).as('scroll.syncScrollFlag'), // 同步滚动,目前还没做
+    //卷轴模式下，是否分页加载（反之则无限下拉）
+    Pagination: Alpine.$persist(true).as('scroll.Pagination'),
+    // 卷轴模式的同步滚动,目前还没做
+    syncScrollFlag: Alpine.$persist(false).as('scroll.syncScrollFlag'),
     imageMaxWidth: 400,
     // 屏幕宽横比,inLandscapeMode的判断依据
     aspectRatio: 1.2,

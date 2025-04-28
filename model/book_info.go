@@ -269,10 +269,10 @@ func GetBookInfoListByMaxDepth(depth int, sortBy string) (*BookInfoList, error) 
 
 // TopOfShelfInfo 获取顶层书架信息
 func TopOfShelfInfo(sortBy string) (*BookInfoList, error) {
-	//if len(*LocalStores) == 0 {
+	// if len(*LocalStores) == 0 {
 	//	return nil, errors.New("error: cannot find book in TopOfShelfInfo")
-	//}
-	//if len(*LocalStores) > 1 {
+	// }
+	// if len(*LocalStores) > 1 {
 	//	// 有多个书库
 	//	var infoList BookInfoList
 	//	for _, localPath := range *LocalStores {
@@ -288,7 +288,7 @@ func TopOfShelfInfo(sortBy string) (*BookInfoList, error) {
 	//		return &infoList, nil
 	//	}
 	//	return nil, errors.New("error: cannot find book in TopOfShelfInfo")
-	//}
+	// }
 	// 显示顶层书库的书籍
 	var infoList BookInfoList
 	for _, bookValue := range mapBooks.Range {
@@ -375,7 +375,9 @@ func (b *BookInfo) GetCover() MediaFileInfo {
 		if err != nil || len(tempBook.Pages.Images) == 0 {
 			return MediaFileInfo{Name: "unknown.png", Url: "/images/unknown.png"}
 		}
-		return tempBook.Pages.Images[0]
+		for _, v := range tempBook.Pages.Images {
+			return v
+		}
 	case TypePDF:
 		return MediaFileInfo{Name: "1.jpg", Url: "/api/get_file?id=" + b.BookID + "&filename=" + "1.jpg"}
 	case TypeVideo:

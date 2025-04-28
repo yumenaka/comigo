@@ -1,12 +1,18 @@
 // 用Alpine Persist 注册全局变量
 // https://alpinejs.dev/plugins/persist#using-alpine-persist-global
 Alpine.store('global', {
-    // bgPattern 背景花纹
-    bgPattern: Alpine.$persist('grid-line').as('global.bgPattern'),
     // 自动切边
     autoCrop: Alpine.$persist(false).as('global.autoCrop'),
     // 自动切边阈值,范围是0~100。多数情况下 1 就够了。
     autoCropNum: Alpine.$persist(1).as('global.autoCropNum'),
+    // 是否压缩图片
+    autoResize: Alpine.$persist(false).as('global.autoResize'),
+    // 压缩图片限宽
+    autoResizeWidth: Alpine.$persist(800).as('global.autoResizeWidth'),
+    // bgPattern 背景花纹
+    bgPattern: Alpine.$persist('grid-line').as('global.bgPattern'),
+    // 是否禁止缓存（TODO：缓存功能优化与测试）
+    noCache: Alpine.$persist(false).as('global.noCache'),
     // userID 当前用户ID  用于同步阅读进度 随机生成
     userID: Alpine.$persist(Math.random().toString(36).substring(2)).as('global.userID'),
     // debugMode 是否开启调试模式
