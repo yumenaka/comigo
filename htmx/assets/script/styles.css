@@ -2205,6 +2205,10 @@
     top: calc(var(--spacing) * 1);
   }
 
+  .top-2\.5 {
+    top: calc(var(--spacing) * 2.5);
+  }
+
   .top-5 {
     top: calc(var(--spacing) * 5);
   }
@@ -2233,6 +2237,10 @@
     bottom: calc(var(--spacing) * 0);
   }
 
+  .bottom-2 {
+    bottom: calc(var(--spacing) * 2);
+  }
+
   .bottom-4 {
     bottom: calc(var(--spacing) * 4);
   }
@@ -2247,6 +2255,10 @@
 
   .left-1\/2 {
     left: 50%;
+  }
+
+  .left-2 {
+    left: calc(var(--spacing) * 2);
   }
 
   .z-0 {
@@ -2369,10 +2381,6 @@
 
   .mt-2 {
     margin-top: calc(var(--spacing) * 2);
-  }
-
-  .mt-2\.5 {
-    margin-top: calc(var(--spacing) * 2.5);
   }
 
   .mt-4 {
@@ -2698,10 +2706,6 @@
     border-bottom: 1px solid var(--color-gray-200);
   }
 
-  .w-0\.5 {
-    width: calc(var(--spacing) * .5);
-  }
-
   .w-1\/2 {
     width: 50%;
   }
@@ -2720,10 +2724,6 @@
 
   .w-3\/4 {
     width: 75%;
-  }
-
-  .w-3\/5 {
-    width: 60%;
   }
 
   .w-4 {
@@ -2786,6 +2786,14 @@
     width: calc(var(--spacing) * 80);
   }
 
+  .w-\[0\.5px\] {
+    width: .5px;
+  }
+
+  .w-\[1\.5px\] {
+    width: 1.5px;
+  }
+
   .w-\[2px\] {
     width: 2px;
   }
@@ -2796,10 +2804,6 @@
 
   .w-full {
     width: 100%;
-  }
-
-  .w-px {
-    width: 1px;
   }
 
   .max-w-1\/2 {
@@ -2871,8 +2875,12 @@
     min-width: calc(var(--spacing) * 64);
   }
 
-  .min-w-\[24rem\] {
-    min-width: 24rem;
+  .min-w-\[20rem\] {
+    min-width: 20rem;
+  }
+
+  .min-w-\[22rem\] {
+    min-width: 22rem;
   }
 
   .flex-1 {
@@ -3069,6 +3077,10 @@
     align-self: center;
   }
 
+  .self-center-safe {
+    align-self: safe center;
+  }
+
   .truncate {
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -3077,6 +3089,10 @@
 
   .overflow-hidden {
     overflow: hidden;
+  }
+
+  .overflow-visible {
+    overflow: visible;
   }
 
   .datatable-wrapper .datatable-container, .overflow-x-auto {
@@ -3113,6 +3129,10 @@
 
   .rounded-sm {
     border-radius: var(--radius-sm);
+  }
+
+  .rounded-xl {
+    border-radius: var(--radius-xl);
   }
 
   .rounded-xs {
@@ -3354,16 +3374,6 @@
 
   .selectedCell {
     background-color: var(--color-gray-50);
-  }
-
-  .bg-black\/40 {
-    background-color: #0006;
-  }
-
-  @supports (color: color-mix(in lab, red, red)) {
-    .bg-black\/40 {
-      background-color: color-mix(in oklab, var(--color-black) 40%, transparent);
-    }
   }
 
   .bg-black\/50 {
@@ -4304,6 +4314,10 @@
       margin: calc(var(--spacing) * 3);
     }
 
+    .md\:w-3\/5 {
+      width: 60%;
+    }
+
     .md\:max-w-2xl {
       max-width: var(--container-2xl);
     }
@@ -4312,6 +4326,10 @@
       text-overflow: ellipsis;
       white-space: nowrap;
       overflow: hidden;
+    }
+
+    .md\:px-3 {
+      padding-inline: calc(var(--spacing) * 3);
     }
   }
 

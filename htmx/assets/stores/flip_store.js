@@ -5,6 +5,8 @@ Alpine.store('flip', {
     imageMaxWidth: 400,
     //自动隐藏工具条
     autoHideToolbar: Alpine.$persist(false).as('flip.autoHideToolbar'),
+    //自动对齐
+    autoAlign: Alpine.$persist(true).as('flip.autoAlignTop'),
     //是否显示页头
     show_header: Alpine.$persist(true).as('flip.show_header'),
     //是否显示页脚

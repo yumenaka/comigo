@@ -14,6 +14,9 @@ Alpine.store('flip').allPageNum = parseInt(book.page_count)
 // 	console.log('images.length:', images.length)
 // }
 
+// console.log(Alpine.store('flip').nowPageNum);
+// console.log(Alpine.store('flip').allPageNum -Alpine.store('flip').nowPageNum + 1);
+
 // 滑动相关变量
 let touchStartX = 0
 let touchEndX = 0
@@ -48,7 +51,7 @@ function GetImageSrc(index)  {
         return
 	}
 	const Url = images[index].url
-	const autoCrop = Alpine.store('global').autoCrop?"&auto_crop=1":''
+	const autoCrop = Alpine.store('global').autoCrop?"&auto_crop="+Alpine.store('global').autoCropNum:''
 	const autoResize = Alpine.store('global').autoResize?"&resize_max_width="+Alpine.store('global').autoResizeWidth:''
 	const noCache = Alpine.store('global').noCache?"&no-cache=true":''
 	return `${Url}${autoCrop}${autoResize}${noCache}`
@@ -245,6 +248,7 @@ function touchStart(e) {
 	// 根据swipeTurn的值决定是否启用滑动翻页
 	if (!Alpine.store('flip').swipeTurn)
 		return
+	console.log('touchStart,swipeTurn:'+Alpine.store('flip').swipeTurn)
 	startTime = new Date().getTime()
 	isSwiping = true
 	touchStartX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX
@@ -396,7 +400,6 @@ function animateSlide(direction) {
 			}
 		}
 	}
-
 	// 启动动画
 	animationID = requestAnimationFrame(animate)
 }
@@ -497,7 +500,7 @@ function loadPageNumFromLocalStorage() {
 		if (savedPageNum !== null && !isNaN(parseInt(savedPageNum))) {
 			const pageNum = parseInt(savedPageNum);
 			// 确保页码在有效范围内
-			if (pageNum > 0 && pageNum <= Alpine.store('flip').allPageNum && pageNum !== Alpine.store('flip').nowPageNum) {
+			if (pageNum > 0 && pageNum <= Alpine.store('flip').allPageNum) {
 				console.log(`加载到本地存储的页码: ${pageNum}`);
 				jumpPageNum(pageNum); // 使用跳转函数更新页面
 			}
@@ -507,9 +510,20 @@ function loadPageNumFromLocalStorage() {
 	}
 }
 
+
+//翻页函数，跳转到指定页
+function inputPageNum(event) {
+	const i = parseInt(event.target.value)
+	let num = Alpine.store('flip').mangaMode?(Alpine.store('flip').allPageNum -i + 1):i
+	//console.log(num)
+	jumpPageNum(num)
+}
+
+
 //翻页函数，跳转到指定页
 function jumpPageNum(jumpNum) {
 	let num = parseInt(jumpNum)
+
 	if (num <= 0 || num > Alpine.store('flip').allPageNum) {
 		alert(i18next.t('hintPageNumOutOfRange'))
 		return
@@ -647,7 +661,9 @@ function onMouseClick(e) {
 	if (inSetArea) {
 		//获取ID为 OpenSettingButton的元素，然后模拟点击
 		document.getElementById('OpenSettingButton').click()
-		scrollToMangaMain()
+		if (Alpine.store('flip').autoAlign){
+			scrollToMangaMain()
+		}
 		showToolbar()
 	}
 	if (!inSetArea) {
@@ -821,7 +837,7 @@ document.addEventListener('mousemove', function (event) {
 		showToolbar()
 	}else {
 		// '鼠标不在设置区域 + 不在任何一个元素范围内'
-		console.log(`inSetArea:${inSetArea}`)
+		//console.log(`inSetArea:${inSetArea}`)
 		hideToolbar()
 	}
 })

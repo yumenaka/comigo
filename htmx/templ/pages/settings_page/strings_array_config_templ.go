@@ -49,7 +49,7 @@ func StringArrayConfig(name string, values []string, description string) templ.C
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\"><label class=\"w-32 py-0\" for=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\"><label class=\"w-64 py-0\" for=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

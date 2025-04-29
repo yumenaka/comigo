@@ -21,7 +21,7 @@ templ BookCard(c echo.Context, s *state.GlobalState, book model.BookInfo) {
 		:href={ getHref(book) }
 		target={ getTarget(book) }
 		x-data={ fmt.Sprintf("{ BookID: %s }", "'"+book.BookID+"'") }
-		class={ backgroundImage(book.GetCover().Url) , "relative w-32 transition-transform duration-200 hover:scale-105 m-2 md:m-3 bg-top bg-cover h-44 rounded drop-shadow-lg  ring-2 ring-gray-400 hover:ring-4 hover:ring-blue-500 overflow-hidden" }
+		class={ backgroundImage(book.GetCover().Url) , "relative w-32 transition-transform duration-200 hover:scale-105 m-2 md:m-3 bg-top bg-cover h-44 rounded drop-shadow-lg ring-2 ring-gray-400 hover:ring-4 hover:ring-blue-500 overflow-hidden" }
 	>
 		<!-- 根据书籍类型，选择显示的图标 -->
 		<!-- 虽然此处理论上用 switch 语句更简洁，但是vscode目前无法格式化 templ 的switch语句，所以暂时不用 -->

@@ -77,7 +77,7 @@
   "labs": "Labs",
   "all_page_num": "Total Pages: {0}",
   "author": "Author: {0}",
-  "auto_crop": "Automatic edge trimming",
+  "auto_crop": "Edge trimming",
   "auto_crop_num": "Cropping threshold: ",
   "auto_double_page": "Auto Double Page (beta)",
   "auto_hide_toolbar": "Auto Hide Toolbar",
@@ -87,7 +87,7 @@
   "book_shelf": "Bookshelf",
   "child_book_hint": "{0} books in the folder",
   "debug_mode": "DebugMode",
-  "do_you_reset_all_settings": "Do you want to reset to the default settings?",
+  "do_you_reset_local_settings": "Do you want to reset to the default settings?",
   "double_page_mode": "Double Page Mode",
   "double_page_width": "Double Page Width:",
   "download_sample_config_file": "Download Sample Config File",
@@ -143,7 +143,7 @@
   "reader_settings": "Reader Settings",
   "reading_progress_bar": "Reading Progress Bar",
   "refresh_page": "Refresh Page",
-  "reset_all_settings": "Reset Settings",
+  "reset_local_settings": "Reset Settings",
   "resort_file": "Resort File",
   "comic_mode": "Comic(Left to Right)",
   "save_page_num": "Save Progress",
@@ -195,5 +195,7 @@
   "uploaded_folder_hint": "Files will be uploaded to the upload folder under the default library directory.",
   "width_use_fixed_value": "Landscape Mode Width: Fixed Value",
   "width_use_percent": "Landscape Mode Width: Percentage",
-  "portrait_width_percent": "portrait width (percent)"
+  "portrait_width_percent": "Portrait width (percent)",
+  "auto_align": "Auto align",
+  "swipe_turn": "Swipe Turn"
 }

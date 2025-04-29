@@ -32,7 +32,7 @@ func tab3(s *state.GlobalState) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex flex-col justify-start w-3/5 min-w-[24rem]\"><div class=\"flex flex-col w-full p-2 m-1 font-semibold rounded-md shadow-md hover:shadow-2xl justify-left items-left border bg-base-100 text-base-content border-slate-400\">临时放一些还未完成的功能，开发与调整中。</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex flex-col justify-start w-5/6 md:w-3/5 min-w-[22rem] \"><div class=\"flex flex-col w-full p-2 m-1 font-semibold rounded-md shadow-md hover:shadow-2xl justify-left items-left border bg-base-100 text-base-content border-slate-400\">临时放一些还未完成的功能，开发与调整中。</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
