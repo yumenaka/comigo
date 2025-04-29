@@ -8,37 +8,47 @@ templ Drawer(serverHost string, slot templ.Component) {
 	<div
 		id="drawer-right"
 		x-data={ ServerHostBindStr(serverHost) }
-		class="fixed flex flex-col top-0 right-0 z-40 w-64 h-dvh min-h-full px-2 py-1 overflow-y-auto transition-transform translate-x-full bg-base-100 text-base-content border-2 border-gray-300 rounded"
+		class="fixed top-0 right-0 z-40 flex flex-col w-64 min-h-full px-2 py-1 overflow-y-auto transition-transform translate-x-full border-2 border-gray-300 rounded h-dvh bg-base-100 text-base-content"
 		tabindex="-1"
 		aria-labelledby="drawer-right-label"
 	>
-		<div class="w-full m-0 p-0 border-slate-500">
+		<div class="w-full p-0 m-0 border-slate-500">
 			<h5
 				id="drawer-right-label"
 				class="inline-flex items-center mt-2 mb-0 text-base font-semibold"
 			>
-				<img class="shadow-xl mx-2 w-6 h-6 rounded-full border border-stone-500 border-dotted outline-offset-4" draggable="false" src="/images/favicon.png" alt="favicon"/>
+				<img class="w-6 h-6 mx-2 border border-dotted rounded-full shadow-xl border-stone-500 outline-offset-4" draggable="false" src="/images/favicon.png" alt="favicon"/>
 				<div x-text="i18next.t('reader_settings')">阅读设置</div>
 			</h5>
 			<button
 				type="button"
 				data-drawer-hide="drawer-right"
 				aria-controls="drawer-right"
-				class="font-bold rounded text-sm w-10 h-10 absolute top-1 end-2 inline-flex items-center justify-center bg-transparent hover:ring dark:hover:text-white"
+				class="absolute inline-flex items-center justify-center w-10 h-10 text-sm font-bold bg-transparent rounded top-1 end-2 hover:ring dark:hover:text-white"
 			>
 				@svg.Close()
 			</button>
 		</div>
-		<div class="drawer_slot flex flex-col flex-grow items-center justify-end p-1 my-2 rounded text-accent-content dark:text-white">
+		<div class="flex flex-col items-center justify-end flex-grow p-1 my-2 rounded drawer_slot text-accent-content dark:text-white">
 			if slot != nil {
 				@slot
 			}
 			<!-- 预留位置 -->
-			<div class="place-holder w-full flex-1"></div>
+			<div class="flex-1 w-full place-holder"></div>
 			<!-- 二维码 -->
-			<div class="p-0 mt-2 mb-2 w-32 h-32" x-data="{ qrcodeSrc: '' }" x-init="qrcodeSrc = window.location.origin +'/api/qrcode.png?qrcode_str='+ encodeURIComponent(window.location.toString().replace(window.location.hostname,serverHost))">
+			<div class="w-32 h-32 p-0 mt-2 mb-2" x-data="{ qrcodeSrc: '' }" x-init="qrcodeSrc = window.location.origin +'/api/qrcode.png?qrcode_str='+ encodeURIComponent(window.location.toString().replace(window.location.hostname,serverHost))">
 				<img id="QrcodeImage" draggable="false" data-modal-target="qrcode-modal" data-modal-toggle="qrcode-modal" class="w-32 h-32 rounded" :src="qrcodeSrc"/>
 			</div>
+			<!-- 清除localStorage保存的本地设置-->
+			<button
+				type="button"
+				x-data="{ buttonText: i18next.t('reset_local_settings') }"
+				x-text="buttonText"
+				x-on:click="localStorage.clear();location.reload();"
+				class="px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+			>
+				重置本地设置
+			</button>
 			<!-- 切换【debug mode】-->
 			<label class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm">
 				<input type="checkbox" :value="$store.global.debugMode" x-on:click="$store.global.debugMode =!$store.global.debugMode" class="sr-only peer"/>
@@ -49,7 +59,7 @@ templ Drawer(serverHost string, slot templ.Component) {
 			<select
 				x-model="i18next.language"
 				x-on:change="i18next.changeLanguage($event.target.value).then(location.reload())"
-				class="py-0 h-10 mt-auto mb-2 font-semibold w-full border rounded bg-base-100 text-accent-content focus:outline-none"
+				class="w-full h-10 py-0 mt-auto mb-2 font-semibold border rounded bg-base-100 text-accent-content focus:outline-none"
 			>
 				<option value="en-US">English</option>
 				<option value="zh-CN">中文</option>
@@ -59,7 +69,7 @@ templ Drawer(serverHost string, slot templ.Component) {
 			<select
 				x-model="theme"
 				x-on:change="theme = $event.target.value;console.log(theme);"
-				class="py-0 h-10 mt-auto mb-2 font-semibold w-full border rounded bg-base-100 text-accent-content focus:outline-none"
+				class="w-full h-10 py-0 mt-auto mb-2 font-semibold border rounded bg-base-100 text-accent-content focus:outline-none"
 			>
 				<option value="retro">Retro</option>
 				<option value="light">Light</option>
@@ -81,7 +91,7 @@ templ Drawer(serverHost string, slot templ.Component) {
 				x-transition
 				x-model="$store.global.bgPattern"
 				x-on:change="$store.global.bgPattern = $event.target.value;console.log($store.global.bgPattern);"
-				class="py-0 h-10 mt-auto mb-2 font-semibold w-full border rounded bg-base-100 text-accent-content focus:outline-nonee"
+				class="w-full h-10 py-0 mt-auto mb-2 font-semibold border rounded bg-base-100 text-accent-content focus:outline-nonee"
 			>
 				<option value="none">None</option>
 				<option value="grid-line">Grid Line</option>

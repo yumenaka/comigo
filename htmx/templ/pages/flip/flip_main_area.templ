@@ -69,6 +69,12 @@ templ MainArea(s *state.GlobalState, book *model.Book) {
 			</div>
 		</div>
 		@StepsRangeArea()
+		<!-- 屏幕左下角的灰色页码-->
+		<div
+		    x-show="$store.flip.showPageNum"
+		    class="fixed bottom-2 left-2 text-gray-500 text-sm pointer-events-none z-10"
+		    x-text="$store.flip.nowPageNum+'/'+$store.flip.allPageNum">
+		</div>
 	</div>
 	@templ.Raw("<style>" + assets.GetFileStr("script/flip.css") + "</style>")
 	<style>
