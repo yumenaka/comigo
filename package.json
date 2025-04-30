@@ -1,0 +1,33 @@
+{
+  "name": "comigo",
+  "version": "1.0.0",
+  "description": "Frontend for Comigo.",
+  "license": "MIT",
+  "browserslist": "> 0.5%, last 2 versions, not dead",
+  "scripts": {
+    "fmt": "prettier --write .",
+    "build": "parcel build ./assets/main.js ./assets/styles.css --dist-dir assets/script",
+    "dev": "parcel build ./assets/main.js ./assets/styles.css --dist-dir assets/script --no-optimize",
+    "watch": "parcel watch ./assets/main.js ./assets/styles.css --dist-dir assets/script --no-optimize"
+  },
+  "dependencies": {
+    "@alpinejs/morph": "latest",
+    "@alpinejs/persist": "latest",
+    "alpinejs": "latest",
+    "flowbite": "latest",
+    "htmx.org": "latest",
+    "i18next": "latest",
+    "i18next-browser-languagedetector": "latest",
+    "screenfull": "latest",
+    "tailwindcss": "latest"
+  },
+  "devDependencies": {
+    "@tailwindcss/forms": "latest",
+    "@tailwindcss/typography": "latest",
+    "@tailwindcss/postcss": "latest",
+    "@parcel/transformer-css": "latest",
+    "parcel": "latest",
+    "postcss": "latest",
+    "prettier": "latest"
+  }
+}

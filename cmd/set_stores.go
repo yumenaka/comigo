@@ -12,8 +12,8 @@ import (
 	"github.com/yumenaka/comigo/util/logger"
 )
 
-// SetStore 解析命令,扫描文件，设置书库等
-func SetStore(args []string) {
+// ScanStore 解析命令,扫描文件，设置书库等
+func ScanStore(args []string) {
 	// 1. 初始化数据库
 	if config.GetEnableDatabase() {
 		// 从数据库中读取书籍信息并持久化

@@ -1,0 +1,63 @@
+# 既に git 管理しているファイルをあえて無視したい:
+# git update-index --assume-unchanged .air.toml
+# Undo:
+# git update-index --no-assume-unchanged .air.toml
+root = "."
+testdata_dir = "test"
+tmp_dir = "test/temp"
+
+[build]
+## 运行的时候，需要传给二进制文件的参数。这里是测试文件夹。
+args_bin = ["./test"]
+#二进制文件
+bin = "./test/temp/comi"
+cmd = "go run github.com/a-h/templ/cmd/templ@latest generate && go build -o ./test/temp/comi ."
+delay = 4000
+exclude_dir = [
+  "app",
+  ".parcel-cache",
+  "bin",
+  "dist",
+  "web",
+  "node_modules",
+  "test",
+]
+exclude_regex = ["_test\\.go", "_templ\\.go"]
+exclude_unchanged = false
+follow_symlink = false
+full_bin = ""
+include_ext = ["go", "templ", "html", "json", "js", "ts", "css", "scss"]
+kill_delay = "0s"
+log = "test/temp/build-errors-air.log"
+poll = false
+poll_interval = 500
+post_cmd = []
+pre_cmd = ["bun run dev"]
+rerun = true
+rerun_delay = 2000
+send_interrupt = false
+stop_on_error = false
+
+[log]
+main_only = false
+silent = false
+time = false
+
+[color]
+app = ""
+build = "yellow"
+main = "magenta"
+runner = "green"
+watcher = "cyan"
+
+[misc]
+clean_on_exit = true
+
+[proxy]
+app_port = 1234
+enabled = true
+proxy_port = 7777
+
+[screen]
+clear_on_rebuild = false
+keep_scroll = true

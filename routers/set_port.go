@@ -10,8 +10,8 @@ import (
 	"github.com/yumenaka/comigo/util/logger"
 )
 
-// SetWebServerPort 设置服务端口
-func SetWebServerPort() {
+// SetHttpPort 设置服务端口
+func SetHttpPort() {
 	// 检测端口是否可用
 	if !util.CheckPort(config.GetPort()) {
 		// 端口被占用

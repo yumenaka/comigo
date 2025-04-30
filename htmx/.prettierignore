@@ -1,8 +1,0 @@
-# Auto-generated .gitignore file.
-# See https://gowebly.org for more information.
-
-# Ignore script files.
-assets/script/
-
-# Ignore templates.
-templates/

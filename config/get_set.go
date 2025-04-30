@@ -1,6 +1,5 @@
 package config
 
-import "C"
 import (
 	"os"
 	"path"
@@ -24,7 +23,7 @@ func GetConfigPath() string {
 }
 
 func SetConfigPath(path string) {
-	//检查路径是否存在
+	// 检查路径是否存在
 	if !util.PathExists(path) {
 		logger.Info("Invalid config file path.")
 		return
@@ -45,11 +44,11 @@ func SetCachePath(path string) {
 }
 
 func AutoSetCachePath() {
-	//手动设置的临时文件夹
+	// 手动设置的临时文件夹
 	if cfg.CachePath != "" && util.IsExist(cfg.CachePath) && util.ChickIsDir(cfg.CachePath) {
 		cfg.CachePath = path.Join(cfg.CachePath)
 	} else {
-		cfg.CachePath = path.Join(os.TempDir(), "comigo_cache") //使用系统文件夹
+		cfg.CachePath = path.Join(os.TempDir(), "comigo_cache") // 使用系统文件夹
 	}
 	err := os.MkdirAll(cfg.CachePath, os.ModePerm)
 	if err != nil {
@@ -200,6 +199,11 @@ func GetPort() int {
 
 func GetUsername() string {
 	return cfg.Username
+}
+
+// GetJwtSigningKey JWT令牌签名key，目前是用户名+密码
+func GetJwtSigningKey() string {
+	return cfg.Username + cfg.Password
 }
 
 func GetPassword() string {

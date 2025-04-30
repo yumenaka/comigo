@@ -38,12 +38,12 @@ var upGrader = websocket.Upgrader{
 	// use default options
 	// 检测请求来源 //检查是否跨域
 	CheckOrigin: func(r *http.Request) bool {
-		////验证方法，只支持Get的话这样写
-		//if r.Method != "GET" {
+		// //验证方法，只支持Get的话这样写
+		// if r.Method != "GET" {
 		//	logger.Infof("method is not GET")
 		//	return false
-		//}
-		//验证路径
+		// }
+		// 验证路径
 		if r.URL.Path != "/api/ws" {
 			logger.Info("path error\n")
 			return false
@@ -62,11 +62,11 @@ var broadcast = make(chan MessageWithClientID) // broadcast channel
 // WsHandler
 // 路由是 "/ws",即 ws://127.0.0.1:1234/api/ws
 func WsHandler(c echo.Context) error {
-	//Upgrade 函数将 http get请求升级到 WebSocket 协议。
+	// Upgrade 函数将 http get请求升级到 WebSocket 协议。
 	//   responseHeader包含在对客户端升级请求的响应中。
-	//// 使用responseHeader指定cookie（Set-Cookie）和应用程序协商的子协议（Sec-WebSocket-Protocol）。
-	//// 如果升级失败，则升级将使用HTTP错误响应回复客户端
-	//// 返回一个 Conn 指针(wsConn)，拿到他后，可使用 Conn 读写数据与客户端通信。
+	// // 使用responseHeader指定cookie（Set-Cookie）和应用程序协商的子协议（Sec-WebSocket-Protocol）。
+	// // 如果升级失败，则升级将使用HTTP错误响应回复客户端
+	// // 返回一个 Conn 指针(wsConn)，拿到他后，可使用 Conn 读写数据与客户端通信。
 	wsConn, err := upGrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
 		log.Print("Error during connection upgradation:", err) // 连接升级出错
@@ -88,7 +88,7 @@ func WsHandler(c echo.Context) error {
 
 	// 无限循环，等待要写入 WebSocket 的新消息，将其从 JSON 反序列化为 Detail 对象然后送入广播频道。
 	for {
-		////读取ws中的数据,反序列为json（序列化：将对象转化成字节序列的过程。 反序列化：就是讲字节序列转化成对象的过程。）
+		// //读取ws中的数据,反序列为json（序列化：将对象转化成字节序列的过程。 反序列化：就是讲字节序列转化成对象的过程。）
 		var msg Message // Read in a new message as JSON and map it to a Detail object
 		err = wsConn.ReadJSON(&msg)
 		if err != nil {

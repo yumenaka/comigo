@@ -16,7 +16,7 @@ type ReverseProxyOptions struct {
 	RewritePath string
 }
 
-// TODO: ReverseProxyHandle 使用 echo 中间件实现反向代理
+// ReverseProxyHandle TODO: 使用 echo 中间件实现反向代理
 func ReverseProxyHandle(path string, option ReverseProxyOptions) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {

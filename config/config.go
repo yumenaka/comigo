@@ -469,7 +469,7 @@ func CanAddLocalStores(path string) bool {
 		return false
 	}
 
-	//检查本地书库路径是否已存在
+	// 检查本地书库路径是否已存在
 	for _, store := range cfg.Stores {
 		if store.Type == stores.Local && store.Local.Path == path {
 			logger.Infof("Local store already exists: %s", path)
