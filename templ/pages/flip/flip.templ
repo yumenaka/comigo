@@ -1,0 +1,29 @@
+package flip
+
+import (
+	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/templ/state"
+	"github.com/yumenaka/comigo/templ/common"
+)
+
+// FlipPage 定义 BodyHTML
+templ FlipPage(s *state.GlobalState, book *model.Book) {
+	@InsertData(book, s)
+	@common.Toast()
+	@common.Header(
+		common.HeaderProps{
+			Title:           common.GetPageTitle(book.BookInfo.BookID),
+			ShowReturnIcon:  true,
+			ReturnUrl:       common.GetReturnUrl(book.BookInfo.BookID),
+			SetDownLoadLink: false,
+			InShelf:         false,
+			DownLoadLink:    "",
+			SetTheme:        true,
+			FlipMode:        true,
+			ShowQuickJumpBar:  common.ShowQuickJumpBar(book),
+            QuickJumpBarBooks: common.QuickJumpBarBooks(book),
+		})
+	@MainArea(s, book)
+	@common.Drawer(s.ServerStatus.ServerHost, DrawerSlot())
+	@common.QRCode(s.ServerStatus.ServerHost)
+}

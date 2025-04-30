@@ -1,13 +1,13 @@
 package routers
 
 import (
+	"io/fs"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/yumenaka/comigo/config"
-	"github.com/yumenaka/comigo/resource"
-	"github.com/yumenaka/comigo/util/locale"
+	"github.com/yumenaka/comigo/assets"
+	"github.com/yumenaka/comigo/util/logger"
 )
 
 var engine *echo.Echo
@@ -19,13 +19,17 @@ func init() {
 	engine.HideBanner = true
 }
 
-func GetEngine() *echo.Echo {
-	return engine
-}
-
-func SetEngine() {
-	// 使用 Recovery 中间件
+// SetMiddleware 设置 Echo 的中间件等
+func SetMiddleware() {
+	// Recovery 中间件。返回 500 错误，避免程序直接崩溃，同时记录错误日志。
 	engine.Use(middleware.Recover())
+
+	// 设置 Echo 的日志输出
+	SetEchoLogger(engine)
+
+	// 禁止缓存中间件。使用 noCache ，会导强制浏览器每次都重新加载页面。
+	// 与翻页模式的预加载功能冲突，所以除了测试和调试外，一般不启用。
+	// router.Use(noCache())
 
 	// CORS 中间件
 	engine.Use(middleware.CORSWithConfig(middleware.CORSConfig{
@@ -35,19 +39,44 @@ func SetEngine() {
 		ExposeHeaders:    []string{echo.HeaderContentLength},
 		AllowCredentials: true,
 	}))
+}
 
-	// 嵌入静态文件到二进制文件
-	resource.EmbedResoure(engine, locale.GetString("html_title")+config.GetVersion())
-
-	// 设置各种API
-	BindAPI(engine)
+// EmbedStaticFiles 绑定静态资源
+func EmbedStaticFiles() {
+	// 嵌入JavaScript与css脚本
+	var err error = nil
+	assets.ScriptFS, err = fs.Sub(assets.Script, "script")
+	if err != nil {
+		logger.Infof("%s", err)
+	}
+	engine.StaticFS("/script/", assets.ScriptFS)
+	// 嵌入图片资源
+	assets.ImagesFS, err = fs.Sub(assets.Images, "images")
+	if err != nil {
+		logger.Infof("%s", err)
+	}
+	engine.StaticFS("/images/", assets.ImagesFS)
 }
 
 // StartWebServer 启动web服务
 func StartWebServer() {
-	SetEngine()
-	// 显示QRCode
-	showQRCode()
+	// 设置网页端口
+	SetHttpPort()
+	EmbedStaticFiles()
+	// 设置中间件，绑定资源
+	BindURLs()
+	SetMiddleware()
 	// 监听并启动web服务
-	startEngine(engine)
+	StartEcho(engine)
+}
+
+// GetWebServer 获取echo.Echo (实现了 http.Handler 接口)
+func GetWebServer() *echo.Echo {
+	// 设置网页端口
+	SetHttpPort()
+	EmbedStaticFiles()
+	// 设置中间件，绑定资源
+	BindURLs()
+	SetMiddleware()
+	return engine
 }

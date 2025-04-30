@@ -1,11 +1,10 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/yumenaka/comigo/config"
-	"github.com/yumenaka/comigo/routers/handlers"
+	"github.com/yumenaka/comigo/routers/upload_api"
 	"github.com/yumenaka/comigo/util"
 	"github.com/yumenaka/comigo/util/logger"
 )
@@ -31,7 +30,9 @@ func SetStorePath(args []string) {
 			if key == 0 {
 				continue
 			}
-			fmt.Printf("args[%d]: %s\n", key, arg)
+			if config.GetDebug() {
+				logger.Infof("args[%d]: %s\n", key, arg)
+			}
 			config.AddLocalStore(arg)
 		}
 	}
@@ -61,6 +62,6 @@ func SetStorePath(args []string) {
 		}
 	}
 	// 把扫描路径设置，传递给handlers包
-	handlers.ConfigEnableUpload = &config.GetCfg().EnableUpload
-	handlers.ConfigUploadPath = &config.GetCfg().UploadPath
+	upload_api.ConfigEnableUpload = &config.GetCfg().EnableUpload
+	upload_api.ConfigUploadPath = &config.GetCfg().UploadPath
 }

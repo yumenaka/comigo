@@ -52,11 +52,13 @@ var rootCmd = &cobra.Command{
 		// 设置临时文件夹
 		config.AutoSetCachePath()
 		// 初始化书库，扫描文件
-		SetStore(args)
-		// SetWebServerPort
-		routers.SetWebServerPort()
+		ScanStore(args)
+		// SetHttpPort
+		routers.SetHttpPort()
 		// 设置书籍API
 		routers.StartWebServer()
+		// 显示QRCode
+		ShowQRCode()
 		// 退出时清理临时文件
 		SetShutdownHandler()
 	},

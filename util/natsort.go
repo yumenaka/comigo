@@ -1,6 +1,6 @@
 package util
 
-//Natural strings sorting: https://github.com/facette/natsort
+// 自然字符串排序库： https://github.com/facette/natsort
 import (
 	"regexp"
 	"sort"

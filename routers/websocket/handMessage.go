@@ -17,7 +17,7 @@ func handDefaultMessage(client *websocket.Conn, msg Message, clientID string) {
 	err := client.WriteJSON(msg)
 	if err != nil {
 		log.Printf("error: %v", err)
-		//如果写入 Websocket 时出现错误，关闭连接，并将其从“clients” 映射中删除。
+		// 如果写入 Websocket 时出现错误，关闭连接，并将其从“clients” 映射中删除。
 		err := client.Close()
 		if err != nil {
 			return
@@ -32,7 +32,7 @@ func handPingMessage(client *websocket.Conn, msg Message, clientID string) {
 	err := client.WriteJSON(msg)
 	if err != nil {
 		log.Printf("error: %v", err)
-		//如果写入 Websocket 时出现错误，关闭连接，并将其从“clients” 映射中删除。
+		// 如果写入 Websocket 时出现错误，关闭连接，并将其从“clients” 映射中删除。
 		err := client.Close()
 		if err != nil {
 			return
@@ -47,7 +47,7 @@ func handHeartbeatMessage(client *websocket.Conn, msg Message, clientID string) 
 	err := client.WriteJSON(msg)
 	if err != nil {
 		log.Printf("error: %v", err)
-		//如果写入 Websocket 时出现错误，关闭连接，并将其从“clients” 映射中删除。
+		// 如果写入 Websocket 时出现错误，关闭连接，并将其从“clients” 映射中删除。
 		err := client.Close()
 		if err != nil {
 			return
@@ -62,7 +62,7 @@ func handSyncPageMessageToFlipMode(client *websocket.Conn, msg Message, clientID
 	err := client.WriteJSON(msg)
 	if err != nil {
 		log.Printf("handSyncPageMessageToFlipMode error: %v", err)
-		//如果写入 Websocket 时出现错误，关闭连接，并将其从“clients” 映射中删除。
+		// 如果写入 Websocket 时出现错误，关闭连接，并将其从“clients” 映射中删除。
 		err := client.Close()
 		if err != nil {
 			return
@@ -73,7 +73,7 @@ func handSyncPageMessageToFlipMode(client *websocket.Conn, msg Message, clientID
 	type syncData struct {
 		BookID             string `json:"book_id"`
 		NowPageNum         int    `json:"now_page_num"`
-		NeedDoublePageMode bool   `json:"need_double_page_mode"` //需要切换为双页模式
+		NeedDoublePageMode bool   `json:"need_double_page_mode"` // 需要切换为双页模式
 	}
 	var data syncData
 	if err := json.Unmarshal([]byte(msg.DataString), &data); err != nil {
@@ -83,17 +83,17 @@ func handSyncPageMessageToFlipMode(client *websocket.Conn, msg Message, clientID
 	if *WsDebug {
 		logger.Infof(" SyncPage message toFlipMode: %s %s", data, clientID)
 	}
-	//验证收到的数据
+	// 验证收到的数据
 	if data.BookID == "" || data.NowPageNum < 0 || data.NowPageNum > math.MaxInt {
 		log.Printf("handSyncPage_ToFlipode data error: %v", data)
 		return
 	}
-	//向所有其他在线客户端发送翻页信息
+	// 向所有其他在线客户端发送翻页信息
 	for c := range clients {
-		//if id == clientID {
+		// if id == clientID {
 		//	log.Printf("跳过一个客户端 clientID: %v", id)
 		//	continue
-		//}
+		// }
 		err := c.WriteJSON(msg)
 		if err != nil {
 			log.Printf("error: %v", err)
@@ -137,12 +137,12 @@ func handSyncPageMessageToScrollMode(client *websocket.Conn, msg Message, client
 		log.Printf("handSyncPage_ToFlipode data error: %v", data)
 		return
 	}
-	//向所有其他在线客户端发送翻页信息
+	// 向所有其他在线客户端发送翻页信息
 	for c := range clients {
-		//if id == clientID {
+		// if id == clientID {
 		//	log.Printf("跳过一个客户端 clientID: %v", id)
 		//	continue
-		//}
+		// }
 		err := c.WriteJSON(msg)
 		if err != nil {
 			log.Printf("error: %v", err)

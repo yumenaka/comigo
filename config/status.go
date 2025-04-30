@@ -2,10 +2,11 @@ package config
 
 import (
 	"errors"
-	"github.com/yumenaka/comigo/util"
-	"github.com/yumenaka/comigo/util/logger"
 	"os"
 	"path"
+
+	"github.com/yumenaka/comigo/util"
+	"github.com/yumenaka/comigo/util/logger"
 )
 
 type Status struct {

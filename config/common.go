@@ -22,7 +22,7 @@ func WriteConfigFile() error {
 	if err != nil {
 		return err
 	}
-	//HomeDirectory
+	// HomeDirectory
 	confDir, err := os.UserConfigDir()
 	if err != nil {
 		return err
@@ -34,7 +34,7 @@ func WriteConfigFile() error {
 		}
 	}
 
-	//当前执行目录
+	// 当前执行目录
 	if util.FileExist("config.toml") {
 		err = os.WriteFile("config.toml", bytes, 0644)
 		if err != nil {
@@ -124,7 +124,7 @@ func fileExists(filename string) bool {
 }
 
 func SaveConfig(to string) error {
-	//保存配置
+	// 保存配置
 	bytes, errMarshal := toml.Marshal(cfg)
 	if errMarshal != nil {
 		return errMarshal
@@ -242,7 +242,7 @@ func GetQrcodeURL() string {
 	if enableTLS {
 		protocol = "https://"
 	}
-	//取得本机的首选出站IP
+	// 取得本机的首选出站IP
 	OutIP := util.GetOutboundIP().String()
 	if cfg.Host == "" {
 		return protocol + OutIP + ":" + strconv.Itoa(cfg.Port)
