@@ -1,0 +1,12 @@
+package login_page
+
+import (
+	"github.com/yumenaka/comigo/templ/state"
+	"github.com/yumenaka/comigo/templ/common"
+)
+
+// UploadPage 上传页面
+templ LoginPage(s *state.GlobalState) {
+	@common.Toast()
+	@LoginMainArea(&state.Global),
+}

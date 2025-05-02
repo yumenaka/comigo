@@ -49,7 +49,7 @@ type Config struct {
 	SupportFileType        []string        `json:"SupportFileType" comment:"支持的书籍压缩包后缀"`
 	SupportMediaType       []string        `json:"SupportMediaType" comment:"扫描压缩包时，用于统计图片数量的图片文件后缀"`
 	SupportTemplateFile    []string        `json:"SupportTemplateFile" comment:"支持的模板文件类型，默认为html"`
-	Timeout                int             `json:"Timeout" comment:"启用登陆后，cookie过期的时间。单位为分钟。默认180分钟后过期。"`
+	Timeout                int             `json:"Timeout" comment:"启用登陆后，cookie过期的时间。单位为分钟。默认60*24*30分钟后过期。"`
 	TimeoutLimitForScan    int             `json:"TimeoutLimitForScan" comment:"扫描文件时，超过几秒钟，就放弃扫描这个文件，避免卡在特殊文件上"`
 	UploadDirOption        UploadDirOption `json:"UploadDirOption" comment:"上传目录的位置选项：0-当前执行目录，1-第一个书库目录，2-指定上传路径"`
 	UploadPath             string          `json:"UploadPath" comment:"指定上传路径时，上传文件的存储位置"`
