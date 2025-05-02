@@ -33,7 +33,7 @@ func BindURLs() {
 	privateViewGroup := publicViewGroup.Group("")
 	privateAPI := publicAPI.Group("")
 
-	// echo 自带jwt简明教程，还有google登录示例：https://echo.labstack.com/docs/cookbook/jwt
+	// echo jwt简明教程，还有google登录示例：https://echo.labstack.com/docs/cookbook/jwt
 	if config.GetPassword() != "" {
 		// jwtConfig格式参考：https://echo.labstack.com/docs/middleware/jwt#configuration
 		jwtConfig := echojwt.Config{

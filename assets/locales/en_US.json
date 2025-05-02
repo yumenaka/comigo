@@ -197,5 +197,12 @@
   "width_use_percent": "Landscape Mode Width: Percentage",
   "portrait_width_percent": "Portrait width (percent)",
   "auto_align": "Auto align",
-  "swipe_turn": "Swipe Turn"
+  "swipe_turn": "Swipe Turn",
+  "login_title": "Login to Comigo",
+  "login_subtitle": "Please enter your username and password",
+  "login_failed": "Login failed, please check your username and password",
+  "logging_in": "Logging in...",
+  "login": "Login",
+  "other_information": "Other information",
+  "login_forgot_password_hint": "Forgot your password? Please contact the system administrator"
 }
