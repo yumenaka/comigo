@@ -1,0 +1,113 @@
+{
+  // 项目配置版本
+  "version": "",
+  // 项目名称
+  "name": "",
+  // 包含已编译资产的目录的相对路径，这通常是推断出来的，可以留空
+  "assetdir": "",
+  // 触发重新加载的附加目录（逗号分隔），这仅用于某些高级资产配置
+  "reloaddirs": "",
+  // 构建文件所在的目录。默认为 'build'
+  "build:dir": "",
+  // 前端目录的相对路径。默认为 'frontend'
+  "frontend:dir": "",
+  // 安装节点依赖项的命令，在前端目录中运行 - 通常是 `npm install`
+  "frontend:install": "",
+  // 构建资产的命令，在前端目录中运行 - 通常是 `npm run build`
+  "frontend:build": "",
+  // 此命令已被 frontend:dev:build 替换。如果未指定 frontend:dev:build，则回退到此命令。如果也未指定此命令，则回退到 frontend:build
+  "frontend:dev": "",
+  // 此命令是 frontend:build 的开发等效命令。如果未指定，则回退到 frontend:dev
+  "frontend:dev:build": "",
+  // 此命令是 frontend:install 的开发等效命令。如果未指定，则回退到 frontend:install
+  "frontend:dev:install": "",
+  // 此命令在 `wails dev` 上单独的进程中运行。对于第三方监视器或启动第三方开发服务器很有用
+  "frontend:dev:watcher": "",
+  // 用于提供资产的第三方开发服务器的 URL，例如 Vite。如果设置为 'auto'，则将从 Vite 输出推断 devServerUrl
+  "frontend:dev:serverUrl": "http://localhost:3000",
+  // 将自动生成的 JS 模块创建到的目录的相对路径
+  "wailsjsdir": "",
+  // 二进制文件的名称
+  "outputfilename": "",
+  // 开发服务器在检测到资产更改时等待重新加载的默认时间
+  "debounceMS": 100,
+  // 将 wails 开发服务器绑定到的地址。默认值：localhost:34115
+  "devServer": "localhost:34115",
+  // 在开发模式下以 shell 样式传递给应用程序的参数
+  "appargs": "",
+  // 定义是否应运行构建挂钩，即使它们是为主机操作系统以外的操作系统定义的。
+  "runNonNativeBuildHooks": false,
+  "preBuildHooks": {
+    // 将在指定 GOOS/GOARCH 的构建之前执行的命令：${platform} 将替换为 "GOOS/GOARCH"。 "GOOS/GOARCH" 挂钩在 "GOOS/*" 和 "*/*" 挂钩之前执行。
+    "GOOS/GOARCH": "",
+    // 将在指定 GOOS 的构建之前执行的命令：${platform} 将替换为 "GOOS/GOARCH"。 "GOOS/*" 挂钩在 "*/*" 挂钩之前执行。
+    "GOOS/*": "",
+    // 将在每次构建之前执行的命令：${platform} 将替换为 "GOOS/GOARCH"。
+    "*/*": ""
+  },
+  "postBuildHooks": {
+    // 将在指定 GOOS/GOARCH 的构建之后执行的命令：${platform} 将替换为 "GOOS/GOARCH"，${bin} 将替换为已编译二进制文件的路径。 "GOOS/GOARCH" 挂钩在 "GOOS/*" 和 "*/*" 挂钩之前执行。
+    "GOOS/GOARCH": "",
+    // 将在指定 GOOS 的构建之后执行的命令：${platform} 将替换为 "GOOS/GOARCH"，${bin} 将替换为已编译二进制文件的路径。 "GOOS/*" 挂钩在 "*/*" 挂钩之前执行。
+    "GOOS/*": "",
+    // 将在每次构建之后执行的命令：${platform} 将替换为 "GOOS/GOARCH"，${bin} 将替换为已编译二进制文件的路径。
+    "*/*": ""
+  },
+  // 用于填充清单和版本信息的数据。
+  "info": {
+    // 公司名称。默认值：[项目名称]
+    "companyName": "",
+    // 产品名称。默认值：[项目名称]
+    "productName": "",
+    // 产品版本。默认值：'1.0.0'
+    "productVersion": "",
+    // 产品版权。默认值：'Copyright.........'
+    "copyright": "",
+    // 应用程序的简短注释。默认值：'使用 Wails 构建 (https://wails.app)'
+    "comments": "",
+    // 应用程序的文件关联
+    "fileAssociations": [
+      {
+        // 扩展名（不带前导句点）。例如 png
+        "ext": "wails",
+        // 名称。例如 PNG 文件
+        "name": "Wails",
+        // 仅限 Windows。描述。它显示在 Windows 资源管理器的"类型"列上。
+        "description": "Wails 文件",
+        // 不带扩展名的图标名称。图标应位于 build 文件夹中。将从 .png 文件为 macOS 和 Windows 生成适当的图标）
+        "iconName": "fileIcon",
+        // 仅限 macOS。应用程序相对于类型的角色。对应于 CFBundleTypeRole。
+        "role": "Editor"
+      },
+    ],
+    // 应由应用程序打开的自定义 URI 协议
+    "protocols": [
+      {
+        // 协议方案。例如 myapp
+        "scheme": "myapp",
+        // 仅限 Windows。描述。它显示在 Windows 资源管理器的"类型"列上。
+        "description": "Myapp 协议",
+        // 仅限 macOS。应用程序相对于类型的角色。对应于 CFBundleTypeRole。
+        "role": "Editor"
+      }
+    ]
+  },
+  // 'multiple': 每个架构一个安装程序。 'single': 为正在构建的所有架构提供单个通用安装程序。默认值：'multiple'
+  "nsisType": "",
+  // 应用程序是否应被混淆。默认值：false
+  "obfuscated": "",
+  // 使用 obfuscated 标志时传递给 garble 命令的参数
+  "garbleargs": "",
+  // 绑定配置
+  "bindings": {
+    // model.ts 文件生成配置
+    "ts_generation": {
+      // 所有生成的 JavaScript 实体都将以此值作为前缀
+      "prefix": "",
+      // 所有生成的 JavaScript 实体都将以此值作为后缀
+      "suffix": "",
+      // 要生成的输出类型 (classes|interfaces)
+      "outputType": "classes",
+    }
+  }
+}

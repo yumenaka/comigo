@@ -1,0 +1,18 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "Comigo",
+  "outputfilename": "Comigo",
+  "frontend:install": "bun i",
+  "frontend:build": "parcel build ./assets/main.js ./assets/styles.css --dist-dir assets/script",
+  "frontend:dev:watcher": "templ generate --watch ./templ",
+  "frontend:dev:serverUrl": "http://localhost:1234",
+  "devServer": "localhost:34115",
+  "frontend:dir": "./",
+  "reloaddirs": "templ,cmd,routes",
+  "wailsjsdir": "assets",
+  "debounceMS": 100,
+  "author": {
+    "name": "yumenaka",
+    "email": "www.bailin.tv@gmail.com"
+  }
+}
