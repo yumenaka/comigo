@@ -11,7 +11,7 @@ tmp_dir = "test/temp"
 args_bin = ["./test"]
 #二进制文件
 bin = "./test/temp/comi"
-cmd = "go run github.com/a-h/templ/cmd/templ@latest generate && go build -o ./test/temp/comi ."
+cmd = "go run github.com/a-h/templ/cmd/templ@latest generate && go build -o ./test/temp/comi ./cmd/comi/main.go"
 delay = 4000
 exclude_dir = [
   "app",

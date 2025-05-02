@@ -12112,6 +12112,7 @@ const $199830a05f92d3d0$var$serializeCookie = function(name, val) {
                 throw new TypeError('option sameSite is invalid');
         }
     }
+    if (opt.partitioned) str += '; Partitioned';
     return str;
 };
 const $199830a05f92d3d0$var$cookie = {
