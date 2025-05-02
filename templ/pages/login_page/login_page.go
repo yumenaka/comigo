@@ -1,4 +1,4 @@
-package settings_page
+package login_page
 
 import (
 	"net/http"
@@ -9,16 +9,12 @@ import (
 	"github.com/yumenaka/comigo/templ/state"
 )
 
-func getTranslations(value string) string {
-	return "i18next.t(\"" + value + "\")"
-}
-
-// Handler 设定页面
+// Handler 上传文件页面
 func Handler(c echo.Context) error {
 	indexTemplate := common.Html(
 		c,
 		&state.Global,
-		SettingsPage(c, &state.Global),
+		LoginPage(&state.Global),
 		[]string{},
 	)
 	// 渲染页面

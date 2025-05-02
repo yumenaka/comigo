@@ -129,7 +129,7 @@ func GroupInfo(c echo.Context) error {
 	model.CheckAllBookFileExist()
 	sortBy := c.QueryParam("sort_by")
 	if sortBy == "" {
-		sortBy = "filename"
+		sortBy = "default"
 	}
 	id := c.QueryParam("id")
 	if id == "" {
@@ -154,7 +154,7 @@ func GroupInfoFilter(c echo.Context) error {
 	model.CheckAllBookFileExist()
 	sortBy := c.QueryParam("sort_by")
 	if sortBy == "" {
-		sortBy = "filename"
+		sortBy = "default"
 	}
 	id := c.QueryParam("id")
 	if id == "" {

@@ -13,8 +13,8 @@ import (
 	"github.com/yumenaka/comigo/util/logger"
 )
 
-// rootCmd 没有任何子命令的情况下时的基本命令
-var rootCmd = &cobra.Command{
+// RootCmd 没有任何子命令的情况下时的基本命令
+var RootCmd = &cobra.Command{
 	Use:     locale.GetString("comigo_use"),
 	Short:   locale.GetString("short_description"),
 	Example: locale.GetString("comigo_example"),
@@ -51,18 +51,35 @@ var rootCmd = &cobra.Command{
 		config.SetByExecutableFilename()
 		// 设置临时文件夹
 		config.AutoSetCachePath()
-		// 初始化书库，扫描文件
-		ScanStore(args)
-		// SetHttpPort
-		routers.SetHttpPort()
-		// 设置书籍API
+		// 扫描命令行指定的书库与文件
+		ScanStore(os.Args)
+		// 启动网页服务器（不阻塞）
 		routers.StartWebServer()
-		// 显示QRCode
+		// 在命令行显示QRCode
 		ShowQRCode()
 		// 退出时清理临时文件
 		SetShutdownHandler()
 	},
 }
+
+// // tui实验（TODO）
+// func RunTui() {
+//	if term.IsTerminal(os.Stdout.Fd()) {
+//		// 1. 初始化自定义的日志缓冲区
+//		logBuffer := tui.NewLogBuffer()
+//		// 将标准日志的输出重定向到 logBuffer
+//		logger.SetOutput(logBuffer)
+//
+//		// 2. 创建 Bubble Tea 程序
+//		m := tui.InitialModel(logBuffer)
+//		p := tea.NewProgram(m)
+//
+//		// 3. 运行 TUI 程序
+//		if _, err := p.Run(); err != nil {
+//			logger.Errorf("Error running tui interface: %v", err)
+//		}
+//	}
+// }
 
 // LoadConfigFile 读取顺序：RAM（代码当中设定的默认值）+命令行参数  -> HomeDirectory -> ProgramDirectory -> WorkingDirectory
 func LoadConfigFile() {
@@ -133,7 +150,7 @@ func Execute() {
 	// 初始化配置文件
 	cobra.OnInitialize(LoadConfigFile) // "OnInitialize"传入的函数，应该会在所有命令执行之前、包括rootCmd.Run之前执行。
 	// 执行命令
-	if err := rootCmd.Execute(); err != nil {
+	if err := RootCmd.Execute(); err != nil {
 		logger.Infof("%s", err)
 		time.Sleep(3 * time.Second)
 		os.Exit(1)

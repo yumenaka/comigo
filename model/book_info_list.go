@@ -32,7 +32,7 @@ func GetAllBookInfoList(sortBy string) (*BookInfoList, error) {
 // SortBooks 根据 sortBy 参数对 BookInfos 进行排序
 func (s *BookInfoList) SortBooks(sortBy string) {
 	if sortBy == "" {
-		sortBy = "filename"
+		sortBy = "default"
 	}
 
 	var lessFunc func(i, j int) bool
@@ -54,15 +54,15 @@ func (s *BookInfoList) SortBooks(sortBy string) {
 		lessFunc = func(i, j int) bool {
 			return !compareByFileSize(s.BookInfos[i], s.BookInfos[j])
 		}
-	case "modify_time": //根据修改时间排序 从新到旧
+	case "modify_time": // 根据修改时间排序 从新到旧
 		lessFunc = func(i, j int) bool {
-			//if s.BookInfos[i].Type == TypeDir || s.BookInfos[j].Type == TypeDir {
+			// if s.BookInfos[i].Type == TypeDir || s.BookInfos[j].Type == TypeDir {
 			//	fmt.Println("!!!!" + s.BookInfos[i].Title + "!!!modify_time:" + s.BookInfos[i].Modified.String())
 			//	fmt.Println("!!!!" + s.BookInfos[j].Title + "!!!modify_time:" + s.BookInfos[j].Modified.String())
-			//}
+			// }
 			return s.BookInfos[i].Modified.After(s.BookInfos[j].Modified)
 		}
-	case "modify_time_reverse": //根据修改时间排序 从旧到新
+	case "modify_time_reverse": // 根据修改时间排序 从旧到新
 		lessFunc = func(i, j int) bool {
 			return s.BookInfos[i].Modified.Before(s.BookInfos[j].Modified)
 
