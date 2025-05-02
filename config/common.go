@@ -116,7 +116,7 @@ func fileExists(filename string) bool {
 			return false
 		}
 		// 其它错误比如权限问题，也直接返回false
-		fmt.Println("Warning: cannot access file:", filename, "error:", err)
+		// fmt.Println("Warning: cannot access file:", filename, "error:", err)
 		return false
 	}
 	// 确实存在且不是目录

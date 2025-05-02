@@ -39,7 +39,7 @@ require (
 )
 
 require (
-	github.com/a-h/templ v0.3.857
+	github.com/a-h/templ v0.3.865
 	github.com/angelofallars/htmx-go v0.5.0
 	github.com/charmbracelet/bubbletea v1.3.5
 	github.com/cloudsoda/go-smb2 v0.0.0-20250228001242-d4c70e6251cc

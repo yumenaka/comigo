@@ -1,6 +1,8 @@
 package routers
 
 import (
+	"net/http"
+
 	"github.com/golang-jwt/jwt/v5"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
@@ -10,37 +12,58 @@ import (
 	"github.com/yumenaka/comigo/routers/login"
 	"github.com/yumenaka/comigo/routers/upload_api"
 	"github.com/yumenaka/comigo/routers/websocket"
+	"github.com/yumenaka/comigo/templ/pages/admin_page"
 	"github.com/yumenaka/comigo/templ/pages/flip"
+	"github.com/yumenaka/comigo/templ/pages/login_page"
 	"github.com/yumenaka/comigo/templ/pages/scroll"
-	"github.com/yumenaka/comigo/templ/pages/settings_page"
 	"github.com/yumenaka/comigo/templ/pages/shelf"
 	"github.com/yumenaka/comigo/templ/pages/upload_page"
 )
 
 // BindURLs 为前端绑定 API 路由
 func BindURLs() {
+	// 绑定公开页面与api
 	publicViewGroup := engine.Group("")
-	bindView(publicViewGroup)
-
 	// API 的URL统一以 /api 开头
-	api := engine.Group("/api")
-	// 无须登录的公开api
-	bindPublicAPI(api)
-	// 可能需要登录的api
-	privateAPI := api.Group("")
+	publicAPI := engine.Group("/api")
+	bindPublicView(publicViewGroup)
+	bindPublicAPI(publicAPI)
+
+	// 可能需要登录的页面
+	privateViewGroup := publicViewGroup.Group("")
+	privateAPI := publicAPI.Group("")
 
 	// echo 自带jwt简明教程，还有google登录示例：https://echo.labstack.com/docs/cookbook/jwt
 	if config.GetPassword() != "" {
-		// jwtConfig格式参考：https://echo.labstack.com/docs/middleware
+		// jwtConfig格式参考：https://echo.labstack.com/docs/middleware/jwt#configuration
 		jwtConfig := echojwt.Config{
 			NewClaimsFunc: func(c echo.Context) jwt.Claims {
 				return new(login.JwtCustomClaims)
 			},
 			SigningKey: []byte(config.GetJwtSigningKey()),
+			// 从Cookie中获取token
+			TokenLookup: "cookie:" + login.CookieName + ",header:Authorization:Bearer ",
+			// 处理验证错误
+			ErrorHandler: func(c echo.Context, err error) error {
+				// 更安全的方式判断API请求
+				path := c.Request().URL.Path
+				if len(path) >= 4 && path[:4] == "/api" {
+					return echo.NewHTTPError(http.StatusUnauthorized, "请先登录")
+				}
+				// 页面请求重定向到登录页
+				return c.Redirect(http.StatusFound, "/login")
+			},
 		}
 		privateAPI.Use(echojwt.WithConfig(jwtConfig))
+		privateViewGroup.Use(echojwt.WithConfig(jwtConfig))
 	}
+	bindProtectedView(privateViewGroup)
 	bindProtectedAPI(privateAPI)
+}
+
+// bindPublicView 注册公共页面
+func bindPublicView(group *echo.Group) {
+	group.GET("/login", login_page.Handler)
 }
 
 // bindPublicAPI 注册公共路由
@@ -49,6 +72,25 @@ func bindPublicAPI(group *echo.Group) {
 	group.GET("/qrcode.png", get_data_api.GetQrcode)
 	// 查看服务器状态（TODO：限制信息范围）
 	group.GET("/server_info", get_data_api.GetServerInfoHandler)
+	group.POST("/login", login.Login)
+	group.POST("/logout", login.Logout)
+}
+
+// bindProtectedView 注册需要登录的页面
+func bindProtectedView(group *echo.Group) {
+	// 主页
+	group.GET("/", shelf.Handler)
+	group.GET("/index.html", shelf.Handler)
+	// 书架
+	group.GET("/shelf/:id", shelf.Handler)
+	// 卷轴模式
+	group.GET("/scroll/:id", scroll.Handler)
+	// 翻页模式
+	group.GET("/flip/:id", flip.Handler)
+	// 上传页面
+	group.GET("/upload", upload_page.Handler)
+	// 设置页面
+	group.GET("/settings", admin_page.Handler)
 }
 
 // bindProtectedAPI 注册需要认证的路由
@@ -93,30 +135,14 @@ func bindProtectedAPI(group *echo.Group) {
 	group.GET("/ws", websocket.WsHandler)
 	// 新加的 HTMX 相关路由
 	group.GET("/shelf/:id", shelf.GetBookListHandler)
-	group.GET("/htmx/settings/tab1", settings_page.Tab1)
-	group.GET("/htmx/settings/tab2", settings_page.Tab2)
-	group.GET("/htmx/settings/tab3", settings_page.Tab3)
-	group.POST("/update-string_config", settings_page.UpdateStringConfigHandler)
-	group.POST("/update-bool-config", settings_page.UpdateBoolConfigHandler)
-	group.POST("/update-number-config", settings_page.UpdateNumberConfigHandler)
-	group.POST("/delete-array-config", settings_page.DeleteArrayConfigHandler)
-	group.POST("/add-array-config", settings_page.AddArrayConfigHandler)
-	group.POST("/config-save", settings_page.HandleConfigSave)
-	group.POST("/config-delete", settings_page.HandleConfigDelete)
-}
-
-func bindView(group *echo.Group) {
-	// 主页
-	group.GET("/", shelf.Handler)
-	group.GET("/index.html", shelf.Handler)
-	// 书架
-	group.GET("/shelf/:id", shelf.Handler)
-	// 卷轴模式
-	group.GET("/scroll/:id", scroll.Handler)
-	// 翻页模式
-	group.GET("/flip/:id", flip.Handler)
-	// 上传页面
-	group.GET("/upload", upload_page.Handler)
-	// 设置页面
-	group.GET("/settings", settings_page.Handler)
+	group.GET("/htmx/settings/tab1", admin_page.Tab1)
+	group.GET("/htmx/settings/tab2", admin_page.Tab2)
+	group.GET("/htmx/settings/tab3", admin_page.Tab3)
+	group.POST("/update-string_config", admin_page.UpdateStringConfigHandler)
+	group.POST("/update-bool-config", admin_page.UpdateBoolConfigHandler)
+	group.POST("/update-number-config", admin_page.UpdateNumberConfigHandler)
+	group.POST("/delete-array-config", admin_page.DeleteArrayConfigHandler)
+	group.POST("/add-array-config", admin_page.AddArrayConfigHandler)
+	group.POST("/config-save", admin_page.HandleConfigSave)
+	group.POST("/config-delete", admin_page.HandleConfigDelete)
 }
