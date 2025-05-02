@@ -197,5 +197,12 @@
   "width_use_percent": "横幅: パーセンテージ",
   "portrait_width_percent": "縦画面幅（パーセント）",
   "auto_align": "自動整列",
-  "swipe_turn": "スワイプページ送り"
+  "swipe_turn": "スワイプページ送り",
+  "login_title": "Comigoにログイン",
+  "login_subtitle": "ユーザー名とパスワードを入力してください",
+  "login_failed": "ログインに失敗しました。ユーザー名とパスワードを確認してください",
+  "logging_in": "ログイン中...",
+  "login": "ログイン",
+  "other_information": "その他情報",
+  "login_forgot_password_hint": "パスワードをお忘れですか？システム管理者にお問い合わせください"
 }
