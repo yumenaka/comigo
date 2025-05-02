@@ -197,5 +197,12 @@
   "width_use_percent": "横屏宽度: 百分比%",
   "portrait_width_percent": "竖屏宽度(百分比)",
   "auto_align": "自动对齐",
-  "swipe_turn": "滑动翻页"
+  "swipe_turn": "滑动翻页",
+  "login_title": "登录Comigo系统",
+  "login_subtitle": "请输入您的账号和密码",
+  "login_failed": "登录失败，请检查用户名和密码",
+  "logging_in": "登录中...",
+  "login": "登录",
+  "other_information": "其他信息",
+  "login_forgot_password_hint": "忘记密码？请联系系统管理员"
 }

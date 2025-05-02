@@ -1,7 +1,6 @@
 package login
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -28,11 +27,6 @@ func Login(c echo.Context) error {
 
 	// 如果未设置密码或密码错误，则不生成 JWT
 	if config.GetPassword() == "" || (username != config.GetUsername() && password != config.GetPassword()) {
-		fmt.Println("error: Failed to login")
-		fmt.Println("username:", username)
-		fmt.Println("password:", password)
-		fmt.Println("config username:", config.GetUsername())
-		fmt.Println("config password:", config.GetPassword())
 		return echo.ErrUnauthorized
 	}
 
