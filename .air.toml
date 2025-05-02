@@ -7,22 +7,15 @@ testdata_dir = "test"
 tmp_dir = "test/temp"
 
 [build]
-## 运行的时候，需要传给二进制文件的参数。这里是测试文件夹。
+## 运行的时候，需要传给二进制文件的参数。
+#  args_bin = ["./test","--username=aaa","--password=aaa"]
 args_bin = ["./test"]
 #二进制文件
 bin = "./test/temp/comi"
 cmd = "go run github.com/a-h/templ/cmd/templ@latest generate && go build -o ./test/temp/comi ./cmd/comi/main.go"
 delay = 4000
-exclude_dir = [
-  "app",
-  ".parcel-cache",
-  "bin",
-  "dist",
-  "web",
-  "node_modules",
-  "test",
-]
-exclude_regex = ["_test\\.go", "_templ\\.go"]
+exclude_dir = ["app", "test", ".parcel-cache", "node_modules", "tmp", "vendor", "testdata"]
+exclude_regex = ["_test\\.go", "node_modules", "_templ\\.go"]
 exclude_unchanged = false
 follow_symlink = false
 full_bin = ""
@@ -36,7 +29,7 @@ pre_cmd = ["bun run dev"]
 rerun = true
 rerun_delay = 2000
 send_interrupt = false
-stop_on_error = false
+stop_on_error = true
 
 [log]
 main_only = false
