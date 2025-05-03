@@ -37,7 +37,7 @@ func SetShutdownHandler() {
 	// 只能通过http.Server.Shutdown()/http.Server.Close()等http包里的方法去实现,没办法自己实现.
 	// 因为这样的设计即使你给自定义Server接口的实现类设计了Shutdown()方法,也调用不到.
 	// 本质上还是因为从端口启动开始,后续的所有工作都是http包来完成的,我们无法干涉这其中的步骤
-	if err := config.Srv.Shutdown(ctx); err != nil {
+	if err := config.Server.Shutdown(ctx); err != nil {
 		// logger.Infof("Comigo Server forced to shutdown: ", err)
 		// time.Sleep(3 * time.Second)
 		log.Fatal("Comigo Server forced to shutdown: ", err)

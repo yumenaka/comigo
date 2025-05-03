@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/routers"
 	"github.com/yumenaka/comigo/routers/upload_api"
 	"github.com/yumenaka/comigo/util/locale"
 	"github.com/yumenaka/comigo/util/logger"
@@ -35,6 +36,9 @@ func waitRescanMessages() {
 					return
 				}
 			}
+		case "restartWebServer":
+			logger.Infof("重启网络服务器：%s", msg)
+			routers.RestartWebServer()
 		case "AnotherPath":
 			logger.Infof("收到重新扫描消息：%s", msg)
 			ReScanPath(msg, false)
