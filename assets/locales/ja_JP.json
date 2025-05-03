@@ -132,7 +132,7 @@
   "original_pdf_link": "PDFファイルのリンク",
   "page": "ページ",
   "page_turning_seconds": "ページめくり時間:",
-  "pagination_mode": "ページングモード",
+  "scroll_pagination_loading": "タテ読みページング",
   "pdf_hint_message": "純粋な画像PDFに対応しています。読み込みが遅い場合やエラーが発生した場合は、以下を試してください：",
   "please_enable_upload": "サーバーのアップロード機能を有効にしてください",
   "please_enter_content": "内容を入力してください",

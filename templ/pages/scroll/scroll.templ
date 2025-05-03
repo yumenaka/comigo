@@ -7,7 +7,7 @@ import (
 )
 
 // ScrollPage 定义 BodyHTML
-templ ScrollPage(s *state.GlobalState, book *model.Book,paginationIndex int) {
+templ ScrollPage(s *state.GlobalState, book *model.Book, paginationIndex int) {
 	@InsertData(book, s)
 	@common.Header(
 		common.HeaderProps{
@@ -21,7 +21,7 @@ templ ScrollPage(s *state.GlobalState, book *model.Book,paginationIndex int) {
 			ShowQuickJumpBar:  common.ShowQuickJumpBar(book),
 			QuickJumpBarBooks: common.QuickJumpBarBooks(book),
 		})
-	@MainArea(s, book,paginationIndex)
+	@MainArea(s, book, paginationIndex)
 	@common.Footer(s.Version)
 	@common.Drawer(s.ServerStatus.ServerHost, DrawerSlot())
 	@common.QRCode(s.ServerStatus.ServerHost)

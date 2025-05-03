@@ -1,0 +1,54 @@
+package scroll
+
+import (
+	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/templ/state"
+)
+
+templ ScrollPagination(s *state.GlobalState, book *model.Book, paginationIndex int) {
+	<nav aria-label="Page navigation example">
+		<ul class="flex items-center my-1 -space-x-px h-8 text-sm">
+			for i := 1; i <= book.PageCount/32+1; i++ {
+				if i == 1 {
+					<li>
+						<a
+							href={ templ.SafeURL(getScrollPaginationURL(book, paginationIndex-1)) }
+							class="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+						>
+							<span class="sr-only">Previous</span>
+							<svg class="w-2.5 h-2.5 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+								<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 1 1 5l4 4"></path>
+							</svg>
+						</a>
+					</li>
+				}
+				<li>
+					<a
+						href={ templ.SafeURL(getScrollPaginationURL(book, i)) }
+						if i != paginationIndex {
+							class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+						}
+						if i == paginationIndex {
+							class="flex items-center justify-center px-3 h-8 leading-tight text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 hover:text-black dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white font-bold"
+						}
+					>
+						{ i }
+					</a>
+				</li>
+				if i == book.PageCount/32+1 {
+					<li>
+						<a
+							href={ templ.SafeURL(getScrollPaginationURL(book, paginationIndex+1)) }
+							class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+						>
+							<span class="sr-only">Next</span>
+							<svg class="w-2.5 h-2.5 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+								<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"></path>
+							</svg>
+						</a>
+					</li>
+				}
+			}
+		</ul>
+	</nav>
+}
