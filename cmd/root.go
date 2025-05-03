@@ -8,7 +8,6 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/yumenaka/comigo/config"
-	"github.com/yumenaka/comigo/routers"
 	"github.com/yumenaka/comigo/util/locale"
 	"github.com/yumenaka/comigo/util/logger"
 )
@@ -20,66 +19,17 @@ var RootCmd = &cobra.Command{
 	Example: locale.GetString("comigo_example"),
 	Version: config.GetVersion(),
 	Long:    locale.GetString("long_description"),
-	// // Run 函数按以下顺序执行：
-	// // PersistentPreRun() PreRun() Run() PostRun() PersistentPostRun()
-	// // 所有函数都获得相同的参数，即命令名称后面的参数。
-	// // 仅当声明了当前命令的 Run 函数时，才会执行 PreRun 和 PostRun 函数。
-	// PreRun: func(cmd *cobra.Command, args []string) {
-	//	//当前 stdout 连接到真实终端时，启动 TUI 界面
-	//	if term.IsTerminal(int(os.Stdout.Fd())) {
-	//		// 1. 初始化自定义的日志缓冲区
-	//		logBuffer := tui.NewLogBuffer()
-	//		// 将标准日志的输出重定向到 logBuffer
-	//		logger.SetOutput(logBuffer)
-	//
-	//		// 2. 创建 Bubble Tea 程序
-	//		m := tui.InitialModel(logBuffer)
-	//		p := tea.NewProgram(m)
-	//
-	//		// 3. 运行 TUI 程序
-	//		go func() {
-	//			if _, err := p.Run(); err != nil {
-	//				logger.Errorf("Error running tui interface: %v", err)
-	//			}
-	//		}()
-	//	}
-	//	//当前 stdout 非终端（可能是文件、管道或者重定向）时，不启动 TUI 界面
-	// },
-	// 实际运行的命令大多写在这里
+	// // Run 函数按以下顺序执行：PersistentPreRun() PreRun() Run() PostRun() PersistentPostRun()
+	// // 所有函数都能拿到相同的参数，即命令名称后面添加的参数。
+	// // 仅当设置了 Run 函数时，才会执行 PreRun 和 PostRun 函数。
+	// 因为参数设置已完成，实际运行的命令习惯写在这里
 	Run: func(cmd *cobra.Command, args []string) {
 		// 通过“可执行文件名”设置部分默认参数,目前不生效
 		config.SetByExecutableFilename()
 		// 设置临时文件夹
 		config.AutoSetCachePath()
-		// 扫描命令行指定的书库与文件
-		ScanStore(os.Args)
-		// 启动网页服务器（不阻塞）
-		routers.StartWebServer()
-		// 在命令行显示QRCode
-		ShowQRCode()
-		// 退出时清理临时文件
-		SetShutdownHandler()
 	},
 }
-
-// // tui实验（TODO）
-// func RunTui() {
-//	if term.IsTerminal(os.Stdout.Fd()) {
-//		// 1. 初始化自定义的日志缓冲区
-//		logBuffer := tui.NewLogBuffer()
-//		// 将标准日志的输出重定向到 logBuffer
-//		logger.SetOutput(logBuffer)
-//
-//		// 2. 创建 Bubble Tea 程序
-//		m := tui.InitialModel(logBuffer)
-//		p := tea.NewProgram(m)
-//
-//		// 3. 运行 TUI 程序
-//		if _, err := p.Run(); err != nil {
-//			logger.Errorf("Error running tui interface: %v", err)
-//		}
-//	}
-// }
 
 // LoadConfigFile 读取顺序：RAM（代码当中设定的默认值）+命令行参数  -> HomeDirectory -> ProgramDirectory -> WorkingDirectory
 func LoadConfigFile() {
@@ -142,8 +92,8 @@ func LoadConfigFile() {
 	// runtimeViper.OnConfigChange(handlerConfigReload)
 }
 
-// Execute 执行将所有子命令添加到根命令并适当设置标志。
-// 这是由 main.main() 调用的。 rootCmd 只需要执行一次。
+// Execute 将所有子命令添加到根命令并适当设置标志。
+// 由 main.main() 调用的。 rootCmd 只需要执行一次。
 func Execute() {
 	// 初始化命令行参数。不能放在初始化配置文件之后。
 	InitFlags()
