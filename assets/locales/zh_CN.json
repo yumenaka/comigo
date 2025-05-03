@@ -132,7 +132,7 @@
   "original_pdf_link": "查看原始PDF",
   "page": "页",
   "page_turning_seconds": "翻页间隔:",
-  "pagination_mode": "分页加载",
+  "scroll_pagination_loading": "卷轴分页",
   "pdf_hint_message": "支持纯图片PDF，如果加载缓慢或出错，请尝试：",
   "please_enable_upload": "请启用服务器的上传功能",
   "please_enter_content": "请输入内容",

@@ -37,6 +37,27 @@ Alpine.store('global', {
     isPortrait: false,
     // 横屏模式
     isLandscape: true,
+    // 获取cookie里面存储的值
+    getCookieValue(bookID,valueName) {
+      let pgCookie = "";
+      const paramName = (bookID === ""?`$${valueName}`:`${bookID}_${valueName}`);
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.startsWith(paramName)) {
+          pgCookie = decodeURIComponent(cookie.substring(paramName.length + 1));
+        }
+      }
+      return pgCookie;
+    },
+    setPaginationIndex(bookID, valueName,value) {
+      const paramName = (bookID === ""?`$${valueName}`:`${bookID}_${valueName}`);
+      // 设置cookie，过期时间为365天
+      const expirationDate = new Date();
+      expirationDate.setDate(expirationDate.getDate() + 365);
+      document.cookie = `${paramName}${encodeURIComponent(value)}; expires=${expirationDate.toUTCString()}; path=/; SameSite=Lax`;
+      window.location.reload();
+    },
     // 检测并设置视口方向
     checkOrientation() {
         const isPortrait = window.innerHeight > window.innerWidth;

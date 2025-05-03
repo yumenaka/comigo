@@ -132,7 +132,7 @@
   "original_pdf_link": "Original PDF Link",
   "page": "page",
   "page_turning_seconds": "Page Turn Interval:",
-  "pagination_mode": "Pagination Mode",
+  "scroll_pagination_loading": "Scroll Pagination",
   "pdf_hint_message": "Supports pure image PDFs. If loading is slow or errors occur, please try the following:",
   "please_enable_upload": "Please enable server upload support.",
   "please_enter_content": "Please enter content",

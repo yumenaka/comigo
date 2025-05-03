@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yumenaka/comigo/templ/state"
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/templ/state"
 )
 
 // ImageXData 在Go函数里面计算图片的x-data属性。渲染结果例：
@@ -29,7 +29,7 @@ func ImageSrc(Url string) string {
 // tips：hx-get 用于获取图片的URL，hx-trigger 用于触发加载，hx-swap 用于替换元素，innerHTML默认值，将内容放在目标元素内 outerHTML用返回的内容替换整个目标元素  hx-target 用于指定目标元素
 // https://htmx.org/docs/#triggers  https://htmx.org/docs/#swapping
 // tips： Alpine.js 动态CSS，只支持内联写法
-templ MainArea(s *state.GlobalState, book *model.Book,paginationIndex int) {
+templ MainArea(s *state.GlobalState, book *model.Book, paginationIndex int) {
 	<div
 		id="mouseMoveArea"
 		x-data="{
@@ -38,33 +38,41 @@ templ MainArea(s *state.GlobalState, book *model.Book,paginationIndex int) {
 		class="flex flex-col items-center justify-center flex-1 w-full max-w-full pt-0 bg-base-100 text-base-content"
 		:class="(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') ? ($store.global.bgPattern !== 'none'?$store.global.bgPattern+' bg-base-300':'bg-base-300'):($store.global.bgPattern !== 'none'?$store.global.bgPattern:'')"
 	>
+		if paginationIndex >= 1 && book.PageCount/32+1 != 1{
+		    @ScrollPagination(s, book, paginationIndex)
+		}
 		for key, image := range book.Pages.Images {
-			<div
-				class="flex flex-col justify-start w-full max-w-full m-0 rounded item-center"
-				:style="{ marginBottom: $store.scroll.marginBottomOnScrollMode + 'px' }"
-			>
-				if strings.Contains(image.Url, ".html")&& !strings.Contains(image.Url, "hidden.") {
-					<div hx-get={ image.Url } hx-trigger="load" hx-swap="innerHTML" class="w-full m-0"></div>
-				}
-				if !strings.Contains(image.Url, "hidden.")&& !strings.Contains(image.Url, ".html") {
-					<img
-						x-data={ ImageXData(image.Url) }
-						class="w-full manga_image"
-						draggable="false"
-						:src={ ImageSrc(image.Url) }
-						@load="isDoublePage=$event.target.naturalWidth > $event.target.naturalHeight;"
-						:style="{ width: $store.global.isLandscape?($store.scroll.widthUseFixedValue? (isDoublePage ? $store.scroll.doublePageWidth_PX +'px': $store.scroll.singlePageWidth_PX +'px'): (isDoublePage ? $store.scroll.doublePageWidth_Percent + '%':$store.scroll.singlePageWidth_Percent + '%')): $store.scroll.portraitWidthPercent+'%', maxWidth: '100%'}"
-						alt={ strconv.Itoa(key) }
-					/>
-				}
-				<template x-if="$store.scroll.showPageNum">
-					<div class="w-full mt-0 mb-1 text-sm font-semibold text-center page_hint ">{ fmt.Sprintf("%d / %d", key+1,book.BookInfo.PageCount) }</div>
-				</template>
-			</div>
+			if paginationIndex < 1 || (paginationIndex >= 1 && key/32 + 1 == paginationIndex) {
+				<div
+					class="flex flex-col justify-start w-full max-w-full m-0 rounded item-center"
+					:style="{ marginBottom: $store.scroll.marginBottomOnScrollMode + 'px' }"
+				>
+					if strings.Contains(image.Url, ".html")&& !strings.Contains(image.Url, "hidden.") {
+						<div hx-get={ image.Url } hx-trigger="load" hx-swap="innerHTML" class="w-full m-0"></div>
+					}
+					if !strings.Contains(image.Url, "hidden.")&& !strings.Contains(image.Url, ".html") {
+						<img
+							x-data={ ImageXData(image.Url) }
+							class="w-full manga_image"
+							draggable="false"
+							:src={ ImageSrc(image.Url) }
+							@load="isDoublePage=$event.target.naturalWidth > $event.target.naturalHeight;"
+							:style="{ width: $store.global.isLandscape?($store.scroll.widthUseFixedValue? (isDoublePage ? $store.scroll.doublePageWidth_PX +'px': $store.scroll.singlePageWidth_PX +'px'): (isDoublePage ? $store.scroll.doublePageWidth_Percent + '%':$store.scroll.singlePageWidth_Percent + '%')): $store.scroll.portraitWidthPercent+'%', maxWidth: '100%'}"
+							alt={ strconv.Itoa(key) }
+						/>
+					}
+					<template x-if="$store.scroll.showPageNum">
+						<div class="w-full mt-0 mb-1 text-sm font-semibold text-center page_hint ">{ fmt.Sprintf("%d / %d", key+1,book.BookInfo.PageCount) }</div>
+					</template>
+				</div>
+			}
+		}
+		if paginationIndex >= 1 && book.PageCount/32+1 != 1{
+		    @ScrollPagination(s, book, paginationIndex)
 		}
 	</div>
 	<button id="BackTopButton" style="display: none" class="fixed flex items-center justify-center w-10 h-10 text-white bg-blue-500 rounded-full shadow-lg bottom-4 right-4">
-		<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><path d="M256 48C141.13 48 48 141.13 48 256s93.13 208 208 208s208-93.13 208-208S370.87 48 256 48zm96 270.63l-96-96l-96 96L137.37 296L256 177.37L374.63 296z" fill="currentColor"></path></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256 48C141.13 48 48 141.13 48 256s93.13 208 208 208s208-93.13 208-208S370.87 48 256 48zm96 270.63l-96-96l-96 96L137.37 296L256 177.37L374.63 296z" fill="currentColor"></path></svg>
 	</button>
 	<style>
     /* https://developer.mozilla.org/zh-CN/docs/Web/CSS/object-fit */
