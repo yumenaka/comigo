@@ -25,16 +25,6 @@ func Handler(c echo.Context) error {
 		sortBy = sortBookBy.Value
 		// fmt.Println("Scroll Mode Sort By:" + sortBy)
 	}
-	paginationIndex := 0
-	pagination, err := c.Cookie("PaginationIndex")
-	if err == nil {
-		index, err := strconv.Atoi(pagination.Value)
-		if err == nil {
-			logger.Infof("PaginationIndex: %v", err)
-			paginationIndex = index
-		}
-	}
-
 	// 读取url参数，获取书籍ID
 	bookID := c.Param("id")
 	// 没有找到书籍，显示 HTTP 404 错误
@@ -53,6 +43,15 @@ func Handler(c echo.Context) error {
 			return c.NoContent(http.StatusInternalServerError)
 		}
 	}
+	// 读取分页索引
+	paginationIndex := -1
+	page := c.QueryParam("page")
+	if page != "" {
+		index, err := strconv.Atoi(page)
+		if err == nil {
+			paginationIndex = index
+		}
+	}
 	// 定义模板主体内容。
 	scrollPage := ScrollPage(&state.Global, book, paginationIndex)
 	// 拼接页面
@@ -68,4 +67,13 @@ func Handler(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 	return nil
+}
+
+// 跳转用分页链接 /scroll/4cTOjFm?page=1
+func getScrollPaginationURL(book *model.Book, page int) string {
+	readURL := `/scroll/` + book.BookID + `?page=` + strconv.Itoa(page)
+	if page < 1 || page > (book.PageCount/32+1) {
+		return `javascript:void(0);`
+	}
+	return readURL
 }

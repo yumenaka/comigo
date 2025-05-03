@@ -15,3 +15,9 @@ application/mobile/* linguist-vendored
 
 #排除测试文件
 test/* linguist-documentation
+
+#排除自动生成文件
+assets/script/main.js
+assets/script/styles.css
+assets/script/main.js.map
+assets/script/styles.css.map
