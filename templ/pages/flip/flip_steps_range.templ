@@ -70,13 +70,13 @@ templ StepsRangeArea() {
         .slider-base::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 16px;
-            height: 16px;
+            width: 18px;
+            height: 18px;
             background: white;
             border: 2px solid #3b82f6;
             border-radius: 80%;
             cursor: pointer;
-            margin-top: -4px;
+            /* margin-top: 0px; */
         }
         
         .slider-base::-moz-range-thumb {
@@ -169,22 +169,24 @@ templ StepsRangeArea() {
         								)"
 						></div>
 						<!-- 页码: 根据页数来显示页码，如果小于 50 则每 5 页显示一次。50~100 页，每10页显示一次。 100以上每20页显示一次。-->
-						<div
-							x-show="(
-        								i === 1
-        								|| i === $store.flip.allPageNum
-        								|| (!$store.flip.mangaMode && $store.flip.allPageNum < 50 && i % 5 === 0 && i<($store.flip.allPageNum-3))
-        								|| (!$store.flip.mangaMode && ($store.flip.allPageNum >= 50 && $store.flip.allPageNum < 100) && i % 10 === 0 && i<($store.flip.allPageNum-5))
-        								|| (!$store.flip.mangaMode && ($store.flip.allPageNum >= 100) && i % 20 === 0 && i<($store.flip.allPageNum-10))
-        								|| ($store.flip.mangaMode && $store.flip.allPageNum < 50 && i % 5 === 0 && i<($store.flip.allPageNum-3))
-                                        || ($store.flip.mangaMode && ($store.flip.allPageNum >= 50 && $store.flip.allPageNum < 100) && i % 10 === 0 && i<($store.flip.allPageNum-5))
-                                        || ($store.flip.mangaMode && $store.flip.allPageNum >= 100 && i % 20 === 0 && i<($store.flip.allPageNum-10))
-        							)"
-							class="text-xs text-center mb-0.5"
-							style="position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%);"
+						<template
+							x-if="(
+        						i === 1
+        						|| i === $store.flip.allPageNum
+        						|| (!$store.flip.mangaMode && $store.flip.allPageNum < 50 && i % 5 === 0 && i<($store.flip.allPageNum-3))
+        						|| (!$store.flip.mangaMode && ($store.flip.allPageNum >= 50 && $store.flip.allPageNum < 100) && i % 10 === 0 && i<($store.flip.allPageNum-5))
+        						|| (!$store.flip.mangaMode && ($store.flip.allPageNum >= 100) && i % 20 === 0 && i<($store.flip.allPageNum-5))
+        						|| ($store.flip.mangaMode && $store.flip.allPageNum < 50 && i % 5 === 0 && i<($store.flip.allPageNum-3))
+                                || ($store.flip.mangaMode && ($store.flip.allPageNum >= 50 && $store.flip.allPageNum < 100) && i % 10 === 0 && i<($store.flip.allPageNum-5))
+                                || ($store.flip.mangaMode && $store.flip.allPageNum >= 100 && i % 20 === 0 && i<($store.flip.allPageNum-5))
+        					)"
 						>
-							<span x-text="i"></span>
-						</div>
+							<div
+								class="text-xs text-center mb-0.5"
+								style="position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%);"
+								x-text="i"
+							></div>
+						</template>
 					</div>
 				</template>
 			</div>
