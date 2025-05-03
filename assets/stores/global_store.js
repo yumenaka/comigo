@@ -14,7 +14,7 @@ Alpine.store('global', {
     // 是否禁止缓存（TODO：缓存功能优化与测试）
     noCache: Alpine.$persist(false).as('global.noCache'),
     // userID 当前用户ID  用于同步阅读进度 随机生成
-    userID: Alpine.$persist(Math.random().toString(36).substring(2)).as('global.userID'),
+    userID: Alpine.$persist((Date.now() % 10000000).toString(36) + Math.random().toString(36).substring(2, 5)).as('global.userID'),
     // debugMode 是否开启调试模式
     debugMode: Alpine.$persist(true).as('global.debugMode'),
     // readerMode 当前阅读模式
