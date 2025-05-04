@@ -2,7 +2,6 @@ package scroll
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/yumenaka/comigo/model"
@@ -29,6 +28,7 @@ func ImageSrc(Url string) string {
 // tips：hx-get 用于获取图片的URL，hx-trigger 用于触发加载，hx-swap 用于替换元素，innerHTML默认值，将内容放在目标元素内 outerHTML用返回的内容替换整个目标元素  hx-target 用于指定目标元素
 // https://htmx.org/docs/#triggers  https://htmx.org/docs/#swapping
 // tips： Alpine.js 动态CSS，只支持内联写法
+// min-h-16 是为了图片未加载时，图片高度为0，导致页面不美观。极端设置下会导致图片变形。  text-center：居中 alert文字，因为需要等待css加载，所以现在没设置alt文字。
 templ MainArea(s *state.GlobalState, book *model.Book, paginationIndex int) {
 	<div
 		id="mouseMoveArea"
@@ -44,7 +44,7 @@ templ MainArea(s *state.GlobalState, book *model.Book, paginationIndex int) {
 		for key, image := range book.Pages.Images {
 			if paginationIndex < 1 || (paginationIndex >= 1 && key/32 + 1 == paginationIndex) {
 				<div
-					class="flex flex-col justify-start w-full max-w-full m-0 rounded item-center"
+					class="flex flex-col justify-start w-full max-w-full  m-0 rounded item-center"
 					:style="{ marginBottom: $store.scroll.marginBottomOnScrollMode + 'px' }"
 				>
 					if strings.Contains(image.Url, ".html")&& !strings.Contains(image.Url, "hidden.") {
@@ -53,12 +53,12 @@ templ MainArea(s *state.GlobalState, book *model.Book, paginationIndex int) {
 					if !strings.Contains(image.Url, "hidden.")&& !strings.Contains(image.Url, ".html") {
 						<img
 							x-data={ ImageXData(image.Url) }
-							class="w-full manga_image"
+							class="w-full manga_image min-h-16 text-center"
 							draggable="false"
 							:src={ ImageSrc(image.Url) }
 							@load="isDoublePage=$event.target.naturalWidth > $event.target.naturalHeight;"
 							:style="{ width: $store.global.isLandscape?($store.scroll.widthUseFixedValue? (isDoublePage ? $store.scroll.doublePageWidth_PX +'px': $store.scroll.singlePageWidth_PX +'px'): (isDoublePage ? $store.scroll.doublePageWidth_Percent + '%':$store.scroll.singlePageWidth_Percent + '%')): $store.scroll.portraitWidthPercent+'%', maxWidth: '100%'}"
-							alt={ strconv.Itoa(key) }
+							alt={ "" }
 						/>
 					}
 					<template x-if="$store.scroll.showPageNum">

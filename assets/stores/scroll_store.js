@@ -7,7 +7,7 @@ Alpine.store("scroll", {
 		"scroll.marginBottomOnScrollMode",
 	),
 	//卷轴模式下，是否分页加载（反之则无限下拉）
-	paginationLoading: Alpine.$persist(false).as("scroll.paginationLoading"),
+	fixedPagination: Alpine.$persist(false).as("scroll.fixedPagination"),
 	// 卷轴模式的同步滚动,目前还没做
 	syncScrollFlag: Alpine.$persist(false).as("scroll.syncScrollFlag"),
 	imageMaxWidth: 400,
