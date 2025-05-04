@@ -72,8 +72,12 @@ func Handler(c echo.Context) error {
 // 跳转用分页链接 /scroll/4cTOjFm?page=1
 func getScrollPaginationURL(book *model.Book, page int) string {
 	readURL := `/scroll/` + book.BookID + `?page=` + strconv.Itoa(page)
-	if page < 1 || page > (book.PageCount/32+1) {
-		return `javascript:void(0);`
+	// href="javascript:void(0)" 是“点了什么也不发生”的老式写法
+	if page < 1 {
+		return `javascript:showToast(i18next.t('hint_first_page'), 'warning');`
+	}
+	if page > (book.PageCount/32 + 1) {
+		return `javascript:showToast(i18next.t('hint_last_page'), 'warning')`
 	}
 	return readURL
 }

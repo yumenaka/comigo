@@ -9,6 +9,7 @@ import (
 // ScrollPage 定义 BodyHTML
 templ ScrollPage(s *state.GlobalState, book *model.Book, paginationIndex int) {
 	@InsertData(book, s)
+	@common.Toast()
 	@common.Header(
 		common.HeaderProps{
 			Title:             common.GetPageTitle(book.BookInfo.BookID),

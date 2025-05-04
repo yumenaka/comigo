@@ -40,6 +40,10 @@ func ScrollPage(s *state.GlobalState, book *model.Book, paginationIndex int) tem
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
+		templ_7745c5c3_Err = common.Toast().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
 		templ_7745c5c3_Err = common.Header(
 			common.HeaderProps{
 				Title:             common.GetPageTitle(book.BookInfo.BookID),
