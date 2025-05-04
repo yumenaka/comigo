@@ -11,14 +11,14 @@ import (
 
 // Handler 上传文件页面
 func Handler(c echo.Context) error {
-	indexTemplate := common.Html(
+	indexHtml := common.Html(
 		c,
 		&state.Global,
 		UploadPage(&state.Global),
 		[]string{},
 	)
 	// 渲染页面
-	if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate); err != nil {
+	if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexHtml); err != nil {
 		// 渲染失败，返回 HTTP 500 错误。
 		return c.NoContent(http.StatusInternalServerError)
 	}
