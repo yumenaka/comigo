@@ -12,6 +12,14 @@ templ DrawerSlot() {
 	>
 		卷轴模式/翻页模式
 	</button>
+	<!-- 【显示页数】 -->
+	<label class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm">
+		<input type="checkbox" x-model="$store.scroll.showPageNum" class="sr-only peer" checked/>
+		<div
+			class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+		></div>
+		<span class="font-medium ms-3" x-text="i18next.t('showPageNum')"></span>
+	</label>
 	<!--
 	<label class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm">
 		<input type="checkbox" x-bind="$store.global.readMode === 'scroll'" x-on:change="$store.global.toggleReadMode();toggleFlipScrollFlexible();" class="sr-only peer" checked/>
@@ -45,17 +53,14 @@ templ DrawerSlot() {
          // 获取当前URL对象
          const currentUrl = new URL(window.location.href);
          const hasPageParam = currentUrl.searchParams.has('page');
-
-         // 不需要跳转的时候（比如直接从url进来，导致url与当前状态不一致）
-         if (Alpine.store('scroll').paginationLoading === true && !hasPageParam) {
-             Alpine.store('scroll').paginationLoading = false;
-             return;
-         }
-         if (Alpine.store('scroll').paginationLoading === false && hasPageParam) {
-             Alpine.store('scroll').paginationLoading = true;
-             return;
-         }
          Alpine.store('scroll').paginationLoading = !Alpine.store('scroll').paginationLoading;
+         // 不需要跳转的时候（比如直接从url进来，导致url与当前状态不一致）
+         if (Alpine.store('scroll').paginationLoading === false && !hasPageParam) {
+             return;
+         }
+         if (Alpine.store('scroll').paginationLoading === true && hasPageParam) {
+             return;
+         }
          // 如果当前路径带有分页，就修改URL路径为不带分页的路径
          // 如果当前路径不带分页，就修改URL路径为带分页的路径（page=1）
          if (hasPageParam) {
@@ -71,19 +76,11 @@ templ DrawerSlot() {
 	</script>
 	<!-- 卷轴模式是否【分页加载】 -->
 	<label class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm">
-		<input type="checkbox" x-bind="$store.scroll.paginationLoading" @click="togglePaginationLoading();" class="sr-only peer" checked/>
+		<input type="checkbox" x-bind:value="$store.scroll.paginationLoading" @click="togglePaginationLoading();" class="sr-only peer" checked/>
 		<div
 			class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
 		></div>
 		<span class="font-medium ms-3" x-text="i18next.t('scroll_pagination_loading')"></span>
-	</label>
-	<!-- 【显示页数】 -->
-	<label class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm">
-		<input type="checkbox" x-model="$store.scroll.showPageNum" class="sr-only peer" checked/>
-		<div
-			class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
-		></div>
-		<span class="font-medium ms-3" x-text="i18next.t('showPageNum')"></span>
 	</label>
 	<!-- 【页面间距】 -->
 	<!-- range 组件参考：https://flowbite.com/docs/forms/range/-->
