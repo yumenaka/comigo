@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/yumenaka/comigo/assets"
+	"github.com/yumenaka/comigo/templ/pages/error_page"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
@@ -17,6 +18,8 @@ func init() {
 }
 
 func InitEcho() {
+	// ***共通的 404 页面，需要在创建路由之前就替换***
+	echo.NotFoundHandler = error_page.NotFoundCommon
 	// 创建新的 Echo 实例
 	engine = echo.New()
 	// 禁用 Echo 的 banner
