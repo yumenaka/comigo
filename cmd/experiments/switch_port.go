@@ -64,11 +64,11 @@ func switchPort(newPort string) {
 
 func main() {
 	// 在端口8080上启动服务器
-	go startServer("8080")
+	go startServer("18080")
 
 	// 假设在一段时间后需要切换到端口8081
 	time.Sleep(20 * time.Second)
-	switchPort("8081")
+	switchPort("18081")
 
 	// 为了示例，我们在这里阻塞主线程
 	// 在实际应用中，需要一个更复杂的逻辑来决定何时停止程序

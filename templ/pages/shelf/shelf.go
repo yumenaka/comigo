@@ -70,7 +70,7 @@ func Handler(c echo.Context) error {
 	return nil
 }
 
-func getHref(book model.BookInfo) string {
+func getReadURL(book model.BookInfo) string {
 	// 如果是书籍组，就跳转到子书架
 	if book.Type == model.TypeBooksGroup {
 		return "\"/shelf/" + book.BookID + "\""
@@ -79,8 +79,9 @@ func getHref(book model.BookInfo) string {
 	if book.Type == model.TypeVideo || book.Type == model.TypeAudio || book.Type == model.TypeUnknownFile {
 		return "\"/api/raw/" + book.BookID + "/" + url.QueryEscape(book.Title) + "\""
 	}
-	// 其他情况，跳转到阅读页面,
-	return "'/'+$store.global.readMode+ '/' + BookID"
+	// 其他情况，跳转到阅读页面，类似 /scroll/4cTOjFm?page=1
+	readURL := "'/'+$store.global.readMode+ '/' + BookID + ($store.global.readMode === 'scroll'?($store.scroll.fixedPagination?'?page=1':''):'')"
+	return readURL
 }
 
 func getTarget(book model.BookInfo) string {

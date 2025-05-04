@@ -13,10 +13,20 @@ import (
 var engine *echo.Echo
 
 func init() {
+	InitEcho()
+}
+
+func InitEcho() {
 	// 创建新的 Echo 实例
 	engine = echo.New()
 	// 禁用 Echo 的 banner
 	engine.HideBanner = true
+	// 设置中间件
+	SetMiddleware()
+	// 绑定路由：内嵌资源
+	EmbedStaticFiles()
+	// 绑定路由：页面与API
+	BindURLs()
 }
 
 // SetMiddleware 设置 Echo 的中间件等
@@ -27,8 +37,7 @@ func SetMiddleware() {
 	// 设置 Echo 的日志输出
 	SetEchoLogger(engine)
 
-	// 禁止缓存中间件。使用 noCache ，会导强制浏览器每次都重新加载页面。
-	// 与翻页模式的预加载功能冲突，所以除了测试和调试外，一般不启用。
+	// 禁止缓存中间件。使用 noCache ，会导强制浏览器每次都重新加载页面。除了测试和调试，一般不启用。
 	// router.Use(noCache())
 
 	// CORS 中间件
@@ -62,10 +71,6 @@ func EmbedStaticFiles() {
 func StartWebServer() {
 	// 设置网页端口
 	SetHttpPort()
-	EmbedStaticFiles()
-	// 设置中间件，绑定资源
-	BindURLs()
-	SetMiddleware()
 	// 监听并启动web服务
 	StartEcho(engine)
 }

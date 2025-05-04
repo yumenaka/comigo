@@ -27,7 +27,7 @@ poll_interval = 500
 post_cmd = []
 pre_cmd = ["bun run dev"]
 rerun = true
-rerun_delay = 2000
+rerun_delay = 1000
 send_interrupt = false
 stop_on_error = true
 

@@ -6,6 +6,11 @@
 const book = JSON.parse(document.getElementById('NowBook').textContent)
 const images = book.pages.images
 Alpine.store('flip').allPageNum = parseInt(book.page_count)
+// 用户ID和令牌，假设已在其他地方定义
+const userID = Alpine.store('global').userID
+// 假设token是一个有效的令牌 TODO:使用真正的令牌
+const token = 'your_token'
+
 // // 打印调试信息
 // if (Alpine.store('global').debugMode) {
 // 	//console.log(book);
@@ -248,7 +253,7 @@ function touchStart(e) {
 	// 根据swipeTurn的值决定是否启用滑动翻页
 	if (!Alpine.store('flip').swipeTurn)
 		return
-	console.log('touchStart,swipeTurn:' + Alpine.store('flip').swipeTurn)
+	//console.log('touchStart,swipeTurn:' + Alpine.store('flip').swipeTurn)
 	startTime = new Date().getTime()
 	isSwiping = true
 	touchStartX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX
@@ -502,7 +507,7 @@ function loadPageNumFromLocalStorage() {
 			// 确保页码在有效范围内
 			if (pageNum > 0 && pageNum <= Alpine.store('flip').allPageNum) {
 				console.log(`加载到本地存储的页码: ${pageNum}`);
-				jumpPageNum(pageNum); // 使用跳转函数更新页面
+				jumpPageNum(pageNum,false); // 使用跳转函数更新页面
 			}
 		}
 	} catch (e) {
@@ -521,7 +526,7 @@ function inputPageNum(event) {
 
 
 //翻页函数，跳转到指定页
-function jumpPageNum(jumpNum) {
+function jumpPageNum(jumpNum,sync = true) {
 	let num = parseInt(jumpNum)
 
 	if (num <= 0 || num > Alpine.store('flip').allPageNum) {
@@ -529,6 +534,12 @@ function jumpPageNum(jumpNum) {
 		return
 	}
 	Alpine.store('flip').nowPageNum = num
+  if (sync) {
+    // 通过ws通道发送翻页数据
+    if (Alpine.store('global').syncPageByWS === true) {
+      sendFlipData() // 发送翻页数据
+    }
+  }
 	// 调用保存页数函数
 	savePageNumToLocalStorage();
 	setImageSrc()
@@ -875,6 +886,8 @@ let mouseMoveArea = document.getElementById('mouseMoveArea')
 mouseMoveArea.addEventListener('mousemove', onMouseMove)
 //点击的时候触发点击事件
 mouseMoveArea.addEventListener('click', onMouseClick)
+// 触摸开始时触发点击事件
+mouseMoveArea.addEventListener('touchstart', onMouseClick)
 //离开的时候触发离开事件
 mouseMoveArea.addEventListener('mouseleave', onMouseLeave)
 
@@ -883,15 +896,11 @@ mouseMoveArea.addEventListener('mouseleave', onMouseLeave)
 // https://developer.mozilla.org/zh-CN/docs/Web/API/WebSocket
 
 // 定义WebSocket变量和重连参数
-let socket
+let socket = null // 初始化为 null
 let reconnectAttempts = 0
 const maxReconnectAttempts = 200
 const reconnectInterval = 3000 // 每次重连间隔3秒
 
-// 用户ID和令牌，假设已在其他地方定义
-const userID = Alpine.store('global').userID
-// 假设token是一个有效的令牌 TODO:使用真正的令牌
-const token = 'your_token'
 
 // 翻页数据，假设已在其他地方定义
 const flip_data = {
@@ -903,6 +912,12 @@ const flip_data = {
 // 建立WebSocket连接的函数
 function connectWebSocket() {
 	// 根据当前协议选择ws或wss
+	// 检查是否已存在连接或正在连接
+	if (socket && (socket.readyState === WebSocket.CONNECTING || socket.readyState === WebSocket.OPEN)) {
+		console.log("WebSocket 正在连接或已打开，跳过。");
+		return;
+	}
+
 	const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://'
 	const wsUrl = wsProtocol + window.location.host + '/api/ws'
 	socket = new WebSocket(wsUrl)
@@ -932,18 +947,16 @@ function connectWebSocket() {
 // 处理收到的翻页消息
 function handleMessage(message) {
 	// console.log("收到消息：", message);
-	// console.log("My userID：" + userID);
-	// console.log("Remote userID：" + message.user_id);
+	// console.log("Local user ID：" + userID);
+	// console.log("message_sender_id：" + message.user_id);// 用message_sender_id或许比较好区分？
 	// 根据消息类型进行处理
 	if (message.type === 'flip_mode_sync_page' && message.user_id !== userID) {
 		// 解析翻页数据
 		const data = JSON.parse(message.data_string)
 		if (Alpine.store('global').syncPageByWS && data.book_id === book.id) {
 			//console.log("同步页数：", data);
-			// 更新翻页数据
-			flip_data.now_page_num = data.now_page_num
-			// 更新页面
-			jumpPageNum(data.now_page_num)
+			// 更新页面(跳转到指定页，但是不发送翻页消息，因为这样会引起是循环)
+			jumpPageNum(data.now_page_num,false)
 		}
 	} else if (message.type === 'heartbeat') {
 		console.log('收到心跳消息')
@@ -954,7 +967,10 @@ function handleMessage(message) {
 
 // 发送翻页数据到服务器
 function sendFlipData() {
-	flip_data.now_page_num = Alpine.store('flip').nowPageNum
+  const flip_data = {
+    book_id: book.id,
+    now_page_num: Alpine.store('flip').nowPageNum,
+  }
 	const flipMsg = {
 		type: 'flip_mode_sync_page', // 或 "heartbeat"
 		status_code: 200,
@@ -963,12 +979,11 @@ function sendFlipData() {
 		detail: '翻页模式，发送数据',
 		data_string: JSON.stringify(flip_data),
 	}
-	if (socket.readyState === WebSocket.OPEN) {
+	// 确保 socket 已初始化并且处于 OPEN 状态
+	if (socket && socket.readyState === WebSocket.OPEN) {
 		socket.send(JSON.stringify(flipMsg))
-		return
-	}
-	if (Alpine.store('global').debugMode) {
-		//console.log('WebSocket连接已关闭，无法发送消息')
+	} else {
+		console.log('WebSocket 未连接或未准备好，无法发送消息。 State:', socket ? socket.readyState : 'null');
 	}
 }
 
@@ -986,9 +1001,9 @@ function attemptReconnect() {
 }
 
 // 页面加载完成后建立WebSocket连接
-window.onload = function () {
+document.addEventListener('DOMContentLoaded', () => {
 	connectWebSocket()
-}
+})
 
 // 设置标签页标题
 function setTitle(name) {
