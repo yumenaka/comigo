@@ -36,33 +36,39 @@ func FlipPage(s *state.GlobalState, book *model.Book) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = InsertData(book, s).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
 		templ_7745c5c3_Err = common.Toast().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = common.Header(
-			common.HeaderProps{
-				Title:             common.GetPageTitle(book.BookInfo.BookID),
-				ShowReturnIcon:    true,
-				ReturnUrl:         common.GetReturnUrl(book.BookInfo.BookID),
-				SetDownLoadLink:   false,
-				InShelf:           false,
-				DownLoadLink:      "",
-				SetTheme:          true,
-				FlipMode:          true,
-				ShowQuickJumpBar:  common.ShowQuickJumpBar(book),
-				QuickJumpBarBooks: common.QuickJumpBarBooks(book),
-			}).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = InsertData(book, s).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = MainArea(s, book).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
+		if book != nil {
+			templ_7745c5c3_Err = common.Header(
+				common.HeaderProps{
+					Title:             common.GetPageTitle(book.BookInfo.BookID),
+					ShowReturnIcon:    true,
+					ReturnUrl:         common.GetReturnUrl(book.BookInfo.BookID),
+					SetDownLoadLink:   false,
+					InShelf:           false,
+					DownLoadLink:      "",
+					SetTheme:          true,
+					FlipMode:          true,
+					ShowQuickJumpBar:  common.ShowQuickJumpBar(book),
+					QuickJumpBarBooks: common.QuickJumpBarBooks(book),
+				}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, " ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = MainArea(s, book).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
 		templ_7745c5c3_Err = common.Drawer(s.ServerStatus.ServerHost, DrawerSlot()).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {

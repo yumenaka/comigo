@@ -19,6 +19,8 @@ Alpine.store('global', {
     debugMode: Alpine.$persist(true).as('global.debugMode'),
     // readerMode 当前阅读模式
     readMode: Alpine.$persist('scroll').as('global.readMode'),
+    // readerMode 当前阅读模式
+    readModeIsScroll: Alpine.$persist(true).as('global.readModeIsScroll'),
     //是否通过websocket同步翻页
     syncPageByWS: Alpine.$persist(true).as('global.syncPageByWS'),
     // bookSortBy 书籍排序方式 以按照文件名、修改时间、文件大小排序（或反向排序）
@@ -29,8 +31,10 @@ Alpine.store('global', {
     toggleReadMode() {
       if (this.readMode === 'flip') {
         this.readMode = 'scroll'
+        this.readModeIsScroll = true
       } else {
         this.readMode = 'flip'
+        this.readModeIsScroll = false
       }
     },
     // 竖屏模式

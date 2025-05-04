@@ -3,13 +3,14 @@ package scan
 import (
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/util"
 	"github.com/yumenaka/comigo/util/locale"
 	"github.com/yumenaka/comigo/util/logger"
-	"os"
-	"path/filepath"
-	"strings"
 )
 
 // InitStore 扫描本地路径，取得路径里的书籍
@@ -24,11 +25,11 @@ func InitStore(storePath string, option Option) ([]*model.Book, error) {
 	}
 	logger.Infof(locale.GetString("scan_start_hint")+" %s", storePathAbs)
 
-	//// TODO:已存在书籍的集合，跳过已有书籍，提高查找效率
-	//existingBooks := make(map[string]struct{})
-	//for _, book := range model.GetAllBookList() {
+	// // TODO:已存在书籍的集合，跳过已有书籍，提高查找效率
+	// existingBooks := make(map[string]struct{})
+	// for _, book := range model.GetAllBookList() {
 	//	existingBooks[book.FilePath] = struct{}{}
-	//}
+	// }
 
 	// 如果书库文件夹配置了一个文件，返回一本书
 	if util.IsFile(storePathAbs) && option.IsSupportFile(storePathAbs) {
@@ -60,11 +61,11 @@ func InitStore(storePath string, option Option) ([]*model.Book, error) {
 
 	// 处理子目录
 	for _, dir := range foundDirs {
-		//// TODO：跳过已存在的书籍
-		//if _, exists := existingBooks[dir]; exists {
+		// // TODO：跳过已存在的书籍
+		// if _, exists := existingBooks[dir]; exists {
 		//	logger.Infof(locale.GetString("found_in_bookstore")+" %s", dir)
 		//	continue
-		//}
+		// }
 
 		absDir, err := filepath.Abs(dir)
 		if err != nil {
@@ -103,11 +104,11 @@ func InitStore(storePath string, option Option) ([]*model.Book, error) {
 
 	// 处理文件
 	for _, file := range foundFiles {
-		//// TODO：跳过已存在的书籍
-		//if _, exists := existingBooks[file.Path]; exists {
+		// // TODO：跳过已存在的书籍
+		// if _, exists := existingBooks[file.Path]; exists {
 		//	logger.Infof(locale.GetString("found_in_bookstore")+" %s", file.Path)
 		//	continue
-		//}
+		// }
 
 		if !option.IsSupportFile(file.Name) {
 			continue
@@ -130,7 +131,7 @@ func InitStore(storePath string, option Option) ([]*model.Book, error) {
 		// 扫描文件
 		book, err := scanFileGetBook(file.Path, storePathAbs, depth, option)
 		if err != nil {
-			logger.Infof("Failed to scan file: %s, error: %v", file.Path, err)
+			logger.Info(err)
 			continue
 		}
 		newBookList = append(newBookList, book)

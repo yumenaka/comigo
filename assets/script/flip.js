@@ -474,11 +474,11 @@ function addPageNum(n = 1) {
 	let nowPageNum = parseInt(Alpine.store('flip').nowPageNum)
 	// 无法继续翻
 	if (nowPageNum + n > Alpine.store('flip').allPageNum) {
-		showToast(i18next.t('hint_last_page'), 'error')
+		showToast(i18next.t('hint_last_page'), 'warning')
 		return
 	}
 	if (nowPageNum + n < 1) {
-		showToast(i18next.t('hint_first_page'), 'error')
+		showToast(i18next.t('hint_first_page'), 'warning')
 		return
 	}
 	// 翻页
@@ -569,7 +569,7 @@ function toNextPage() {
 function toPreviousPage() {
 	//错误值,第0或第1页。
 	if (Alpine.store('flip').nowPageNum <= 1) {
-		showToast(i18next.t('hint_first_page'), 'error')
+		showToast(i18next.t('hint_first_page'), 'warning')
 		return
 	}
 	//双页模式

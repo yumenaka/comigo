@@ -29,41 +29,41 @@ func Handler(c echo.Context) error {
 	bookID := c.Param("id")
 	// 如果没有指定书籍ID，获取顶层书架信息。
 	if bookID == "" {
-		var err error
 		model.CheckAllBookFileExist()
-		state.Global.ShelfBookList, err = model.TopOfShelfInfo(sortBy)
-		// TODO: 没有图书的提示（上传压缩包\远程下载示例漫画）
-		if err != nil {
-			logger.Infof("TopOfShelfInfo: %v", err)
-		}
+		state.Global.ShelfBookList, _ = model.TopOfShelfInfo(sortBy)
 	}
-	// 为首页定义模板布局。
-	indexTemplate := common.Html(
-		c,
-		&state.Global,
-		ShelfPage(c, &state.Global), // define body content
-		[]string{"script/shelf.js"},
-	)
+
 	// 如果指定了书籍ID，获取子书架信息。
 	if bookID != "" {
 		var err error
 		model.CheckAllBookFileExist()
 		state.Global.ShelfBookList, err = model.GetBookInfoListByID(bookID, sortBy)
-		// TODO: 没有图书的提示（返回主页\上传压缩包\远程下载示例漫画）
+		// TODO: 无图书的提示（返回主页\上传压缩包\远程下载示例漫画）
 		if err != nil {
 			logger.Infof("GetBookShelf Error: %v", err)
-			// HTTP 404 页面
-			indexTemplate = common.Html(
+			// 渲染 404 页面
+			indexHtml := common.Html(
 				c,
 				&state.Global,
 				error_page.NotFound404(&state.Global),
 				[]string{},
 			)
+			if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexHtml); err != nil {
+				// 如果出错，返回 HTTP 500 错误。
+				return c.NoContent(http.StatusInternalServerError)
+			}
+			return nil
 		}
 	}
-
-	// 用模板渲染书架页面(htmx-go)
-	if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate); err != nil {
+	// 为首页定义模板布局。
+	indexHtml := common.Html(
+		c,
+		&state.Global,
+		ShelfPage(c, &state.Global), // define body content
+		[]string{"script/shelf.js"},
+	)
+	// 用模板渲染书架页面
+	if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexHtml); err != nil {
 		// 如果出错，返回 HTTP 500 错误。
 		return c.NoContent(http.StatusInternalServerError)
 	}
@@ -80,7 +80,7 @@ func getReadURL(book model.BookInfo) string {
 		return "\"/api/raw/" + book.BookID + "/" + url.QueryEscape(book.Title) + "\""
 	}
 	// 其他情况，跳转到阅读页面，类似 /scroll/4cTOjFm?page=1
-	readURL := "'/'+$store.global.readMode+ '/' + BookID + ($store.global.readMode === 'scroll'?($store.scroll.paginationLoading?'?page=1':''):'')"
+	readURL := "'/'+$store.global.readMode+ '/' + BookID + ($store.global.readMode === 'scroll'?($store.scroll.fixedPagination?'?page=1':''):'')"
 	return readURL
 }
 
