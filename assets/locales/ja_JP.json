@@ -199,5 +199,9 @@
   "logging_in": "ログイン中...",
   "login": "ログイン",
   "other_information": "その他情報",
-  "login_forgot_password_hint": "パスワードをお忘れですか？システム管理者にお問い合わせください"
+  "login_forgot_password_hint": "パスワードをお忘れですか？システム管理者にお問い合わせください",
+  "no_pattern": "無地",
+  "grid_line": "グリッド線",
+  "grid_point": "グリッド点",
+  "mosaic": "モザイク"
 }
