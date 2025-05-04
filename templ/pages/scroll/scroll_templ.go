@@ -40,24 +40,34 @@ func ScrollPage(s *state.GlobalState, book *model.Book, paginationIndex int) tem
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = common.Header(
-			common.HeaderProps{
-				Title:             common.GetPageTitle(book.BookInfo.BookID),
-				ShowReturnIcon:    true,
-				ReturnUrl:         common.GetReturnUrl(book.BookInfo.BookID),
-				SetDownLoadLink:   false,
-				InShelf:           false,
-				DownLoadLink:      "",
-				SetTheme:          true,
-				ShowQuickJumpBar:  common.ShowQuickJumpBar(book),
-				QuickJumpBarBooks: common.QuickJumpBarBooks(book),
-			}).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.Toast().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = MainArea(s, book, paginationIndex).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
+		if book != nil {
+			templ_7745c5c3_Err = common.Header(
+				common.HeaderProps{
+					Title:             common.GetPageTitle(book.BookInfo.BookID),
+					ShowReturnIcon:    true,
+					ReturnUrl:         common.GetReturnUrl(book.BookInfo.BookID),
+					SetDownLoadLink:   false,
+					InShelf:           false,
+					DownLoadLink:      "",
+					SetTheme:          true,
+					ShowQuickJumpBar:  common.ShowQuickJumpBar(book),
+					QuickJumpBarBooks: common.QuickJumpBarBooks(book),
+				}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, " ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = MainArea(s, book, paginationIndex).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
 		templ_7745c5c3_Err = common.Footer(s.Version).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
@@ -96,13 +106,17 @@ func InsertData(bookData any, stateData any) templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templ.JSONScript("NowBook", bookData).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
+		if bookData != nil {
+			templ_7745c5c3_Err = templ.JSONScript("NowBook", bookData).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
-		templ_7745c5c3_Err = templ.JSONScript("GlobalState", stateData).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
+		if stateData != nil {
+			templ_7745c5c3_Err = templ.JSONScript("GlobalState", stateData).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
 		return nil
 	})
@@ -129,7 +143,7 @@ func InsertRawJSONScript(data string) templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<script>\n    @templ.Raw(data)\n  </script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<script>\n    @templ.Raw(data)\n    </script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -27,21 +27,22 @@ func Handler(c echo.Context) error {
 	}
 	// 读取url参数，获取书籍ID
 	bookID := c.Param("id")
-	// 没有找到书籍，显示 HTTP 404 错误
-	indexTemplate := common.Html(
-		c,
-		&state.Global,
-		error_page.NotFound404(&state.Global),
-		[]string{},
-	)
 	book, err := model.GetBookByID(bookID, sortBy)
 	if err != nil {
 		logger.Infof("GetBookByID: %v", err)
-		// 渲染页面
-		if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate); err != nil {
+		// 没有找到书，显示 HTTP 404 错误
+		indexHtml := common.Html(
+			c,
+			&state.Global,
+			error_page.NotFound404(&state.Global),
+			[]string{},
+		)
+		// 渲染 404 页面
+		if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexHtml); err != nil {
 			// 渲染失败，返回 HTTP 500 错误。
 			return c.NoContent(http.StatusInternalServerError)
 		}
+		return nil
 	}
 	// 读取分页索引
 	paginationIndex := -1
@@ -55,14 +56,14 @@ func Handler(c echo.Context) error {
 	// 定义模板主体内容。
 	scrollPage := ScrollPage(&state.Global, book, paginationIndex)
 	// 拼接页面
-	indexTemplate = common.Html(
+	indexHtml := common.Html(
 		c,
 		&state.Global,
 		scrollPage, // define body content
 		[]string{"script/scroll.js"},
 	)
 	// 渲染页面
-	if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate); err != nil {
+	if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexHtml); err != nil {
 		// 渲染失败，返回 HTTP 500 错误。
 		return c.NoContent(http.StatusInternalServerError)
 	}
@@ -72,8 +73,12 @@ func Handler(c echo.Context) error {
 // 跳转用分页链接 /scroll/4cTOjFm?page=1
 func getScrollPaginationURL(book *model.Book, page int) string {
 	readURL := `/scroll/` + book.BookID + `?page=` + strconv.Itoa(page)
-	if page < 1 || page > (book.PageCount/32+1) {
-		return `javascript:void(0);`
+	// href="javascript:void(0)" 是“点了什么也不发生”的老式写法
+	if page < 1 {
+		return `javascript:showToast(i18next.t('hint_first_page'), 'warning');`
+	}
+	if page > (book.PageCount/32 + 1) {
+		return `javascript:showToast(i18next.t('hint_last_page'), 'warning')`
 	}
 	return readURL
 }
