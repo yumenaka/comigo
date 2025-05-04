@@ -10,7 +10,7 @@ templ StepsRangeArea() {
 	<!-- Tailwind 的容器不会自动居中，也没有任何内置的水平方向的内边距。要使一个容器居中，使用 mx-auto 功能类： -->
 	<!-- 自定义 slider -->
 	<style>
-        /* 基础滑块样式 */
+        /* 基础 滑动条样式 */
         .slider-base {
             -webkit-appearance: none;
             appearance: none;
@@ -20,7 +20,7 @@ templ StepsRangeArea() {
             background: transparent; /* 确保基础背景是透明的 */
         }
         
-        /* 普通模式滑块样式 */
+        /* 普通模式 滑动条样式 */
         .slider-base::-webkit-slider-runnable-track {
             background: linear-gradient(to right, #3b82f6 0%, #3b82f6 var(--value-percent, 0%), white var(--value-percent, 0%), white 100%);
             height: 16px;
@@ -33,7 +33,7 @@ templ StepsRangeArea() {
             border-radius: 2px;
         }
         
-        /* 漫画模式滑块样式 - 颜色反转 */
+        /* 漫画模式 滑动条样式 - 颜色反转 */
         .manga-mode .slider-base::-webkit-slider-runnable-track {
             background: linear-gradient(to right, white 0%, white var(--value-percent, 0%), #3b82f6 var(--value-percent, 0%), #3b82f6 100%);
             height: 16px;
@@ -66,25 +66,25 @@ templ StepsRangeArea() {
             }
         }
         
-        /* 滑块拖动按钮样式 */
+        /* 拖动按钮样式 */
         .slider-base::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
             width: 18px;
             height: 18px;
             background: white;
-            border: 2px solid #3b82f6;
-            border-radius: 80%;
+            border: 1.5px solid #3b82f6;
+            border-radius: 10%;
             cursor: pointer;
             /* margin-top: 0px; */
         }
-        
+        /* 火狐：拖动按钮样式 */
         .slider-base::-moz-range-thumb {
-            width: 16px;
-            height: 16px;
+            width: 18px;
+            height: 18px;
             background: white;
-            border: 2px solid #3b82f6;
-            border-radius: 80%;
+            border: 1.5px solid #3b82f6;
+            border-radius: 10%;
             cursor: pointer;
         }
     </style>
@@ -153,18 +153,18 @@ templ StepsRangeArea() {
 						<div
 							:id="i"
 							:class="(i === 1 || i === $store.flip.allPageNum)
-        								? 'h-3 w-[2px] bg-gray-900 rounded-xs'
+        								? 'h-2.5 w-[1.5px] bg-gray-900 rounded-xs'
         								: (
         									$store.flip.allPageNum < 50
         										? (
         											i !== 1 && i % 5 === 0
-        												? 'h-2 w-[1.5px] bg-gray-900 rounded-xs'
-        												: 'h-2 w-[0.5px] bg-gray-600'
+        												? 'h-1 w-[1.5px] bg-gray-900 rounded-xs'
+        												: 'h-1 w-[0.5px] bg-gray-600'
         										)
         										: (
         											i !== 1 && i % 10 === 0
-        												? 'h-2 w-[1.5px] bg-gray-900 rounded-xs'
-        												: 'h-2 w-[0.5px] bg-gray-600'
+        												? 'h-1 w-[1.5px] bg-gray-900 rounded-xs'
+        												: 'h-1 w-[0.5px] bg-gray-600'
         										)
         								)"
 						></div>
@@ -175,14 +175,14 @@ templ StepsRangeArea() {
         						|| i === $store.flip.allPageNum
         						|| (!$store.flip.mangaMode && $store.flip.allPageNum < 50 && i % 5 === 0 && i<($store.flip.allPageNum-3))
         						|| (!$store.flip.mangaMode && ($store.flip.allPageNum >= 50 && $store.flip.allPageNum < 100) && i % 10 === 0 && i<($store.flip.allPageNum-5))
-        						|| (!$store.flip.mangaMode && ($store.flip.allPageNum >= 100) && i % 20 === 0 && i<($store.flip.allPageNum-5))
+        						|| (!$store.flip.mangaMode && ($store.flip.allPageNum >= 100) && i % 20 === 0 && i<($store.flip.allPageNum-9))
         						|| ($store.flip.mangaMode && $store.flip.allPageNum < 50 && i % 5 === 0 && i<($store.flip.allPageNum-3))
                                 || ($store.flip.mangaMode && ($store.flip.allPageNum >= 50 && $store.flip.allPageNum < 100) && i % 10 === 0 && i<($store.flip.allPageNum-5))
-                                || ($store.flip.mangaMode && $store.flip.allPageNum >= 100 && i % 20 === 0 && i<($store.flip.allPageNum-5))
+                                || ($store.flip.mangaMode && $store.flip.allPageNum >= 100 && i % 20 === 0 && i<($store.flip.allPageNum-9))
         					)"
 						>
 							<div
-								class="text-xs text-center mb-0.5"
+								class="text-xs text-center mb-0"
 								style="position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%);"
 								x-text="i"
 							></div>

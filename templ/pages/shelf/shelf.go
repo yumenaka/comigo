@@ -80,7 +80,7 @@ func getReadURL(book model.BookInfo) string {
 		return "\"/api/raw/" + book.BookID + "/" + url.QueryEscape(book.Title) + "\""
 	}
 	// 其他情况，跳转到阅读页面，类似 /scroll/4cTOjFm?page=1
-	readURL := "'/'+$store.global.readMode+ '/' + BookID + ($store.global.readMode === 'scroll'?($store.scroll.paginationLoading?'?page=1':''):'')"
+	readURL := "'/'+$store.global.readMode+ '/' + BookID + ($store.global.readMode === 'scroll'?($store.scroll.fixedPagination?'?page=1':''):'')"
 	return readURL
 }
 
