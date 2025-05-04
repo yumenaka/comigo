@@ -8,13 +8,15 @@ import (
 	"path"
 	"path/filepath"
 	"strconv"
+	"sync"
 
 	"github.com/pelletier/go-toml/v2"
 	"github.com/yumenaka/comigo/util"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
-var Srv *http.Server
+var Server *http.Server
+var Mutex sync.Mutex
 
 // WriteConfigFile 如果存在本地配置，更新本地配置
 func WriteConfigFile() error {

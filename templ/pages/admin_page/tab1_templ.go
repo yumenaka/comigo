@@ -42,10 +42,6 @@ func tab1(s *state.GlobalState) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = BoolConfig("OpenBrowser", state.ServerConfig.OpenBrowser, "OpenBrowser_Description").Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
 		templ_7745c5c3_Err = StringArrayConfig("LocalStores", state.ServerConfig.LocalStores, "LocalStores_Description").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -55,6 +51,10 @@ func tab1(s *state.GlobalState) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = NumberConfig("MinImageNum", state.ServerConfig.MinImageNum, "MinImageNum_Description", 0, 65535).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = BoolConfig("OpenBrowser", state.ServerConfig.OpenBrowser, "OpenBrowser_Description").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

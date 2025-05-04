@@ -18,7 +18,7 @@ templ BookCard(c echo.Context, s *state.GlobalState, book model.BookInfo) {
 	<!-- transition-transform duration-200 hover:scale-105  -->
 	<!-- 使用 transform 和 scale 实现“元素放大且不影响原有布局”的效果。核心思路是通过 CSS Transform 做放大动画，而不改变其占据的文档流空间。 -->
 	<a
-		:href={ getHref(book) }
+		:href={ getReadURL(book) }
 		target={ getTarget(book) }
 		x-data={ fmt.Sprintf("{ BookID: %s }", "'"+book.BookID+"'") }
 		class={ backgroundImage(book.GetCover().Url) , "relative w-32 transition-transform duration-200 hover:scale-105 m-2 md:m-3 bg-top bg-cover h-44 rounded drop-shadow-lg ring-2 ring-gray-400 hover:ring-4 hover:ring-blue-500 overflow-hidden" }
