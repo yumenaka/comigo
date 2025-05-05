@@ -11,16 +11,25 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/templ/state"
 )
 
-// 书籍卡片图片链接
+// 如果链接包含字符串“api/get_file?” 则在背景图片链接中添加参数“&resize_height=512”
+func getResizedImageUrl(imageUrl string) string {
+	if strings.Contains(imageUrl, "api/get_file?") {
+		imageUrl = imageUrl + "&resize_height=512"
+	}
+	return imageUrl
+}
+
+// 书籍卡片图片CSS背景
 func backgroundImage(imageUrl string) templ.CSSClass {
 	templ_7745c5c3_CSSBuilder := templruntime.GetBuilder()
-	templ_7745c5c3_CSSBuilder.WriteString(string(templ.SanitizeCSS(`background-image`, "url("+imageUrl+"&resize_height=512)")))
+	templ_7745c5c3_CSSBuilder.WriteString(string(templ.SanitizeCSS(`background-image`, "url("+getResizedImageUrl(imageUrl)+")")))
 	templ_7745c5c3_CSSID := templ.CSSID(`backgroundImage`, templ_7745c5c3_CSSBuilder.String())
 	return templ.ComponentCSSClass{
 		ID:    templ_7745c5c3_CSSID,
@@ -65,7 +74,7 @@ func BookCard(c echo.Context, s *state.GlobalState, book model.BookInfo) templ.C
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(getReadURL(book))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_book_card.templ`, Line: 21, Col: 26}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_book_card.templ`, Line: 30, Col: 26}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -78,7 +87,7 @@ func BookCard(c echo.Context, s *state.GlobalState, book model.BookInfo) templ.C
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(getTarget(book))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_book_card.templ`, Line: 22, Col: 26}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_book_card.templ`, Line: 31, Col: 26}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -91,7 +100,7 @@ func BookCard(c echo.Context, s *state.GlobalState, book model.BookInfo) templ.C
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("{ BookID: %s }", "'"+book.BookID+"'"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_book_card.templ`, Line: 23, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_book_card.templ`, Line: 32, Col: 61}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -162,7 +171,7 @@ func BookCard(c echo.Context, s *state.GlobalState, book model.BookInfo) templ.C
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(book.ChildBookNum))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_book_card.templ`, Line: 67, Col: 127}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_book_card.templ`, Line: 76, Col: 127}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -226,7 +235,7 @@ func BookCard(c echo.Context, s *state.GlobalState, book model.BookInfo) templ.C
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs("$store.shelf.simplifyTitle === true?'" + book.ShortName() + "':'" + book.Title + "'")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_book_card.templ`, Line: 191, Col: 153}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_book_card.templ`, Line: 200, Col: 153}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {

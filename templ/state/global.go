@@ -34,5 +34,6 @@ func init() {
 // GetStaticFileMode 是否开启静态模式，开启Debug模式时，静态模式会被强制开启
 // 需要避免 </script>或 </body> 提前截断script标签的问题
 func (s *GlobalState) GetStaticFileMode() bool {
+	// logger.Infof("GetStaticFileMode: %v", config.GetStaticFileMode())
 	return config.GetStaticFileMode()
 }
