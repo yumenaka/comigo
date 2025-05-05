@@ -97,6 +97,9 @@ func checkServerActions(oldConfig *config.Config, newConfig *config.Config) (reS
 	if oldConfig.DisableLAN != newConfig.DisableLAN {
 		reStartWebServer = true
 	}
+	// if oldConfig.StaticFileMode != newConfig.StaticFileMode {
+	// 	reStartWebServer = true
+	// }
 	return
 }
 

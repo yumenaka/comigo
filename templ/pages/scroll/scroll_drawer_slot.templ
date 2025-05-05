@@ -34,9 +34,9 @@ templ DrawerSlot(s *state.GlobalState, book *model.Book) {
 	</button> -->
 	<!-- 切换【卷轴模式/翻页模式】的toggle-->
 	<label class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm">
-		<input type="checkbox" x-bind="$store.global.readModeIsScroll" x-on:change="$store.global.toggleReadMode();toggleFlipScrollFlexible();" checked class="sr-only peer"/>
+		<input type="checkbox" x-bind:value="$store.global.readModeIsScroll" x-on:change="$store.global.toggleReadMode();toggleFlipScrollFlexible();" checked class="sr-only peer"/>
 		<div
-			class="relative w-11 h-6 bg-green-600 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+			class="relative w-11 min-w-[44px] h-6 bg-green-600 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
 		></div>
 		<span class="font-medium ms-3" x-text="$store.global.readModeIsScroll?i18next.t('scroll_mode')+i18next.t('click_to_toggle'):i18next.t('flip_mode')+i18next.t('click_to_toggle')"></span>
 	</label>
@@ -50,14 +50,17 @@ templ DrawerSlot(s *state.GlobalState, book *model.Book) {
                 const match = pathname.match(pattern);
                 if (match) {
                     const currentSegment = match[1]; // 'flip' 或 'scroll'
+                    if (currentSegment === 'flip' && !Alpine.store('global').readModeIsScroll) {
+                        return; // 如果当前路径是翻页模式，就不需要修改
+                    }
+                    if (currentSegment === 'scroll' && Alpine.store('global').readModeIsScroll) {
+                        return; // 如果当前路径是卷轴模式，也不需要修改
+                    }
                     const id = match[2]; // <id> 部分
                     const newSegment = currentSegment === 'flip' ? 'scroll' : 'flip';
                     const newPath = pathname.replace(`/` + currentSegment + `/` + id, `/${newSegment}/${id}`);
-                    // 如果路径发生了变化，更新URL
-                    if (currentUrl.pathname !== newPath) {
-                        currentUrl.pathname = newPath;
-                        window.location.href = currentUrl.toString();
-                    }
+                    currentUrl.pathname = newPath;
+                    window.location.href = currentUrl.toString();
                 }
         }
     </script>
@@ -65,7 +68,7 @@ templ DrawerSlot(s *state.GlobalState, book *model.Book) {
 	<label class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm">
 		<input type="checkbox" x-bind:value="$store.scroll.fixedPagination" @click="togglePaginationLoading();" class="sr-only peer" checked/>
 		<div
-			class="relative w-11 h-6 bg-green-600 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+			class="relative w-11 min-w-[44px] h-6 bg-green-600 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
 		></div>
 		<span class="font-medium ms-3" x-text="$store.scroll.fixedPagination?i18next.t('scroll_fixed_pagination')+i18next.t('click_to_toggle'):i18next.t('scroll_infinite_scroll')+i18next.t('click_to_toggle')"></span>
 	</label>
@@ -102,7 +105,7 @@ templ DrawerSlot(s *state.GlobalState, book *model.Book) {
 	<label class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm">
 		<input type="checkbox" x-model="$store.scroll.showPageNum" class="sr-only peer" checked/>
 		<div
-			class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+			class="relative w-11 min-w-[44px] h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
 		></div>
 		<span class="font-medium ms-3" x-text="i18next.t('showPageNum')"></span>
 	</label>
@@ -135,7 +138,7 @@ templ DrawerSlot(s *state.GlobalState, book *model.Book) {
 			class="sr-only peer"
 		/>
 		<div
-			class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+			class="relative w-11 min-w-[44px] h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
 		></div>
 		<span class="font-medium ms-3" x-text="i18next.t('auto_crop')"></span>
 	</label>
@@ -177,7 +180,7 @@ templ DrawerSlot(s *state.GlobalState, book *model.Book) {
 	<label x-show="$store.global.isLandscape" class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm">
 		<input type="checkbox" x-model="$store.scroll.widthUseFixedValue" class="sr-only peer" checked/>
 		<div
-			class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+			class="relative w-11 min-w-[44px] h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
 		></div>
 		<span
 			class="font-medium ms-3"
@@ -263,7 +266,7 @@ templ DrawerSlot(s *state.GlobalState, book *model.Book) {
 			class="sr-only peer"
 		/>
 		<div
-			class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+			class="relative w-11 min-w-[44px] h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
 		></div>
 		<span class="font-medium ms-3" x-text="i18next.t('compress_image')"></span>
 	</label>

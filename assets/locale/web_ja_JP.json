@@ -159,7 +159,7 @@
   "set_back_color": "背景色を設定:",
   "set_interface_color": "UIカラー設定:",
   "show_filename": "ファイル名を表示",
-  "show_file_icon": "ファイルアイコンを表示",
+  "show_file_icon": "ファイルアイコン",
   "show_header": "タイトルを表示",
   "showPageNum": "ページ番号を表示",
   "simplify_filename": "ファイル名を簡略化",
@@ -209,5 +209,8 @@
   "StaticFileMode": "静的ファイルモード",
   "StaticFileMode_Description": "静的ファイルモードを有効にするかどうか。静的モードでは、すべての画像とスクリプトが パッケージされ、単一のHTMLファイルとして直接保存できます（開発中）。",
   "confirm_logout": "ログアウトしてもよろしいですか？",
-  "confirm_reset_settings": "ローカル設定をリセットしてもよろしいですか？"
+  "confirm_reset_settings": "ローカル設定をリセットしてもよろしいですか？",
+  "current_dir_scope": "今のディレクトリで実行した場合（ローカル適用）",
+  "current_user_scope": "ログインユーザーに対して有効（グローバル適用）",
+  "portable_binary_scope": "当該バイナリに対して有効（ポータブルモード）"
 }

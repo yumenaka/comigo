@@ -209,5 +209,8 @@
   "StaticFileMode": "Static File Mode",
   "StaticFileMode_Description": "Enable static-file mode. In static mode, all images and scripts are bundled into the HTML file, so it can be saved directly as a single html file (in development).",
   "confirm_logout": "Are you sure you want to log out?",
-  "confirm_reset_settings": "Are you sure you want to reset local settings?"
+  "confirm_reset_settings": "Are you sure you want to reset local settings?",
+  "current_dir_scope": "When run in the current directory (local scope)",
+  "current_user_scope": "Effective for logged-in user (global scope)",
+  "portable_binary_scope": "Effective for this binary only (portable mode)"
 }
