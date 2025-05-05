@@ -42,16 +42,18 @@ func GetReturnUrl(BookID string) string {
 			return "/"
 		}
 	}
-	// 如果是书籍组，就跳转到子书架
-	info, err := model.GetBookGroupInfoByChildBookID(BookID)
+	// 如果是书籍组，就跳转到父书架
+	ParentBookInfo, err := model.GetBookGroupInfoByChildBookID(BookID)
 	if err != nil {
 		fmt.Println("ParentBookInfo not found")
 		return "/"
 	}
-	if info.Depth <= 0 {
+	// 	fmt.Println(ParentBookInfo)
+	// 	fmt.Println(ParentBookInfo.Depth)
+	if ParentBookInfo.Depth < 0 {
 		return "/"
 	}
-	return "/shelf/" + info.BookID
+	return "/shelf/" + ParentBookInfo.BookID
 }
 
 func ShowQuickJumpBar(b *model.Book) (QuickJumpBar bool) {

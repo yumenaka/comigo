@@ -60,7 +60,7 @@ templ MainArea(s *state.GlobalState, book *model.Book, paginationIndex int) {
 						if !s.GetStaticFileMode() {
 							<img
 								x-data={ ImageXData(image.Url) }
-								class="w-full manga_image min-h-16 text-center"
+								class="w-full manga_image min-h-16 text-center select-none"
 								draggable="false"
 								:src={ ImageSrc(image.Url) }
 								@load="isDoublePage=$event.target.naturalWidth > $event.target.naturalHeight;"
