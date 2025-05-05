@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"mime"
 	"path/filepath"
+	"strings"
 )
 
 //go:embed script/*
@@ -55,8 +56,12 @@ func GetFileStr(filePath string) string {
 	if err != nil {
 		return "Not Found Script:" + filePath
 	}
+	str := string(data)
+	// 在把文件内容注入模板之前做一次替换,避免</script>或 </body> 提前把 <script> 标签“截断”
+	safe := strings.ReplaceAll(str, "</script", "<\\/script")
+	safe = strings.ReplaceAll(str, "</body", "<\\/body")
 	// 将内容转换为字符串并返回
-	return string(data)
+	return safe
 }
 
 // GetImageSrc 从Static获取Base64编码的图片的src属性

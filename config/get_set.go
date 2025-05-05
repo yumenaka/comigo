@@ -4,9 +4,9 @@ import (
 	"os"
 	"path"
 
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config/stores"
 	"github.com/yumenaka/comigo/util"
-	"github.com/yumenaka/comigo/util/locale"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
@@ -67,6 +67,10 @@ func SetClearDatabaseWhenExit(clearDatabaseWhenExit bool) {
 
 func GetDebug() bool {
 	return cfg.Debug
+}
+
+func GetStaticFileMode() bool {
+	return cfg.StaticFileMode
 }
 
 func SetDebug(debug bool) {

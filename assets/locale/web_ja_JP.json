@@ -204,5 +204,6 @@
   "grid_line": "グリッド線",
   "grid_point": "グリッド点",
   "mosaic": "モザイク",
-  "open_pdf_in_browser": "ブラウザでPDFを開く"
+  "open_pdf_in_browser": "ブラウザでPDFを開く",
+  "StaticFileMode_Description": "静的ファイルモードを有効にするかどうか。静的モードでは、すべての画像とスクリプトが パッケージされ、単一のHTMLファイルとして直接保存できます（開発中）。"
 }

@@ -14,8 +14,8 @@ import (
 
 	"github.com/cheggaaa/pb/v3"
 	"github.com/xxjwxc/gowp/workpool"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/util"
-	"github.com/yumenaka/comigo/util/locale"
 	"github.com/yumenaka/comigo/util/logger"
 )
 

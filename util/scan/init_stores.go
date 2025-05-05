@@ -1,8 +1,8 @@
 package scan
 
 import (
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/model"
-	"github.com/yumenaka/comigo/util/locale"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
@@ -18,14 +18,14 @@ func InitAllStore(option Option) error {
 		}
 		AddBooksToStore(books, localPath, option.Cfg.GetMinImageNum())
 	}
-	//for _, server := range scanStores {
+	// for _, server := range scanStores {
 	//	addList, err := Smb(option)
 	//	if err != nil {
 	//		logger.Infof("smb scan_error"+" path:%s %s", server.ShareName, err)
 	//		continue
 	//	}
 	//	AddBooksToStore(addList, server.ShareName, scanMinImageNum)
-	//}
+	// }
 	return nil
 }
 

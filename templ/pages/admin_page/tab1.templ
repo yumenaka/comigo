@@ -14,6 +14,7 @@ templ tab1(s *state.GlobalState) {
     @StringArrayConfig("LocalStores", state.ServerConfig.LocalStores, "LocalStores_Description")
     @NumberConfig("MaxScanDepth", state.ServerConfig.MaxScanDepth,"MaxScanDepth_Description",0,65535)
     @NumberConfig("MinImageNum", state.ServerConfig.MinImageNum,"MinImageNum_Description",0,65535)
+    @BoolConfig("StaticFileMode",state.ServerConfig.StaticFileMode,"StaticFileMode_Description")
     @BoolConfig("OpenBrowser",state.ServerConfig.OpenBrowser, "OpenBrowser_Description")
     @BoolConfig("EnableUpload",state.ServerConfig.EnableUpload, "EnableUpload_Description")
     @StringConfig("UploadPath", state.ServerConfig.UploadPath, "UploadPath_Description")
