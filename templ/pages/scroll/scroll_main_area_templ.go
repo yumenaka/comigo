@@ -114,7 +114,7 @@ func MainArea(s *state.GlobalState, book *model.Book, paginationIndex int) templ
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" class=\"w-full manga_image min-h-16 text-center\" draggable=\"false\" :src=\"")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" class=\"w-full manga_image min-h-16 text-center select-none\" draggable=\"false\" :src=\"")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
