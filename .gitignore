@@ -130,3 +130,6 @@ build
 build/bin
 node_modules
 frontend/dist
+
+# deamon
+*.pid

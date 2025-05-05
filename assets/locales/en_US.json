@@ -203,5 +203,6 @@
   "no_pattern": "No Pattern",
   "grid_line": "Grid Line",
   "grid_point": "Grid Point",
-  "mosaic": "Mosaic"
+  "mosaic": "Mosaic",
+  "open_pdf_in_browser": "Open PDF in Browser"
 }
