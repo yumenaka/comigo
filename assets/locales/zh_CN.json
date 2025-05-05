@@ -203,5 +203,6 @@
   "no_pattern": "无花纹",
   "grid_line": "网格线",
   "grid_point": "网格点",
-  "mosaic": "马赛克"
+  "mosaic": "马赛克",
+  "open_pdf_in_browser": "用浏览器打开PDF"
 }
