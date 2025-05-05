@@ -1,8 +1,6 @@
 package model
 
 import (
-	"crypto/md5"
-	"encoding/hex"
 	"errors"
 	"os"
 	"path"
@@ -14,8 +12,8 @@ import (
 
 	"github.com/cheggaaa/pb/v3"
 	"github.com/xxjwxc/gowp/workpool"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/util"
-	"github.com/yumenaka/comigo/util/locale"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
@@ -358,12 +356,6 @@ func (b *Book) SortPagesByImageList(imageList []string) {
 		}
 	}
 	b.Pages.Images = reSortList
-}
-
-// md5string 计算字符串的 MD5 值
-func md5string(s string) string {
-	r := md5.Sum([]byte(s))
-	return hex.EncodeToString(r[:])
 }
 
 // getShortBookID 生成短的 BookID，避免冲突

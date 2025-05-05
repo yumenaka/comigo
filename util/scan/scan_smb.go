@@ -14,8 +14,8 @@ import (
 	"time"
 
 	"github.com/cloudsoda/go-smb2"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/model"
-	"github.com/yumenaka/comigo/util/locale"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
@@ -43,8 +43,8 @@ func Smb(scanOption Option) (newBookList []*model.Book, err error) {
 	}
 	defer fs.Umount()
 
-	//// iofs.WalkDir(fs.DirFS("."), ".", func...) 调用WalkDir函数遍历当前目录（以及其下的所有子目录）中的所有文件和目录。
-	//err = iofs.WalkDir(
+	// // iofs.WalkDir(fs.DirFS("."), ".", func...) 调用WalkDir函数遍历当前目录（以及其下的所有子目录）中的所有文件和目录。
+	// err = iofs.WalkDir(
 	//	//fs.DirFS(".") 指定特定目录作为遍历的起点。"." 表示当前工作目录。
 	//	fs.DirFS("test"),
 	//	".",
@@ -54,21 +54,21 @@ func Smb(scanOption Option) (newBookList []*model.Book, err error) {
 	//		fmt.Println("smb hint： smb://"+scanOption.Stores[0].Host+"/"+scanOption.Stores[0].ShareName+"/test/"+path, d.IsDir(), err)
 	//		return nil
 	//	})
-	//if err != nil {
+	// if err != nil {
 	//	panic(err)
-	//}
+	// }
 
 	err = iofs.WalkDir(
-		//fs.DirFS(".") 指定特定目录作为遍历的起点。"." 表示当前工作目录。
+		// fs.DirFS(".") 指定特定目录作为遍历的起点。"." 表示当前工作目录。
 		fs.DirFS("test"),
 		".",
-		//对于目录中的每一个项（无论是文件还是目录），指定的函数都会被调用。
+		// 对于目录中的每一个项（无论是文件还是目录），指定的函数都会被调用。
 		func(walkPath string, fileInfo iofs.DirEntry, err error) error {
 			smbFilePath := "smb://" + scanOption.Cfg.GetStores()[0].Smb.Host + "/" + scanOption.Cfg.GetStores()[0].Smb.ShareName + "/" + walkPath
 
 			for _, p := range model.GetArchiveBooks() {
 				if smbFilePath == p.FilePath {
-					//跳过已扫描文件
+					// 跳过已扫描文件
 					logger.Infof(locale.GetString("found_in_bookstore")+"%path", walkPath)
 					return nil
 				}
@@ -113,8 +113,8 @@ func Smb(scanOption Option) (newBookList []*model.Book, err error) {
 				}
 				newBookList = append(newBookList, getBook)
 			}
-			//// 如果是文件夹
-			//if fileInfo.IsDir() {
+			// // 如果是文件夹
+			// if fileInfo.IsDir() {
 			//	// 得到书籍文件数据
 			//	getBook, err := smbScanDir(walkPath, scanOption.Stores[0].ShareName, depth, scanOption)
 			//	if err != nil {
@@ -122,7 +122,7 @@ func Smb(scanOption Option) (newBookList []*model.Book, err error) {
 			//		return nil
 			//	}
 			//	newBookList = append(newBookList, getBook)
-			//}
+			// }
 			return nil
 		})
 	// 所有可用书籍，包括压缩包与文件夹
@@ -135,13 +135,13 @@ func Smb(scanOption Option) (newBookList []*model.Book, err error) {
 
 // 扫描本地路径，并返回对应书籍
 func smbScanFile(filePath string, file *smb2.File, storePath string, depth int, scanOption Option) (newBook *model.Book, err error) {
-	//设置了一个defer函数来捕获可能的panic
-	//defer func() {
+	// 设置了一个defer函数来捕获可能的panic
+	// defer func() {
 	//	if err := recover(); err != nil {
 	//		fmt.Println("Recovered from panic:", err)
 	//		// 可以在这里执行一些处理逻辑，比如记录日志、返回错误信息等
 	//	}
-	//}()
+	// }()
 	defer func(file *smb2.File) {
 		err := file.Close()
 		if err != nil {
@@ -149,22 +149,22 @@ func smbScanFile(filePath string, file *smb2.File, storePath string, depth int, 
 		}
 	}(file)
 	fmt.Println(file.Name())
-	//MediaFileInfo, err := file.Stat()
+	// MediaFileInfo, err := file.Stat()
 
 	return nil, err
-	//if err != nil {
+	// if err != nil {
 	//	logger.Infof("%s", err.Error())
 	//	return nil, err
-	//}
-	//// 初始化一本书，设置文件路径等等
-	//newBook, err := types.NewBook(filePath, MediaFileInfo.ModTime(), MediaFileInfo.Size(), storePath, depth, types.GetBookTypeByFilename(filePath))
-	//if err != nil {
+	// }
+	// // 初始化一本书，设置文件路径等等
+	// newBook, err := types.NewBook(filePath, MediaFileInfo.ModTime(), MediaFileInfo.Size(), storePath, depth, types.GetBookTypeByFilename(filePath))
+	// if err != nil {
 	//	return nil, err
-	//}
-	//// 根据文件类型，走不同的初始化流程
-	//switch newBook.Type {
-	//// 为解决archiver/v4的BUG “zip文件无法读取2级目录” 单独处理zip文件
-	//case types.TypeZip, types.TypeCbz, types.TypeEpub:
+	// }
+	// // 根据文件类型，走不同的初始化流程
+	// switch newBook.Type {
+	// // 为解决archiver/v4的BUG “zip文件无法读取2级目录” 单独处理zip文件
+	// case types.TypeZip, types.TypeCbz, types.TypeEpub:
 	//	// 使用Archiver的虚拟文件系统，无法处理非UTF-8编码
 	//	fsys, zipErr := zip.OpenReader(filePath)
 	//	if zipErr != nil {
@@ -198,8 +198,8 @@ func smbScanFile(filePath string, file *smb2.File, storePath string, depth int, 
 	//			newBook.Press = metaData.Publisher
 	//		}
 	//	}
-	//// TODO:服务器解压速度太慢，网页用PDF.js解析？
-	//case types.TypePDF:
+	// // TODO:服务器解压速度太慢，网页用PDF.js解析？
+	// case types.TypePDF:
 	//	pageCount, pdfErr := arch.CountPagesOfPDF(filePath)
 	//	if pdfErr != nil {
 	//		return nil, pdfErr
@@ -215,21 +215,21 @@ func smbScanFile(filePath string, file *smb2.File, storePath string, depth int, 
 	//		TempURL := "/api/get_file?id=" + newBook.BookID + "&filename=" + strconv.Itoa(i) + ".jpg"
 	//		newBook.Pages.Images = append(newBook.Pages.Images, types.MediaFileInfo{RealImageFilePATH: "", Size: MediaFileInfo.Size(), ModTime: MediaFileInfo.ModTime(), Name: strconv.Itoa(i), Url: TempURL})
 	//	}
-	//// TODO：简单的网页播放器
-	//case types.TypeVideo:
+	// // TODO：简单的网页播放器
+	// case types.TypeVideo:
 	//	newBook.PageCount = 1
 	//	newBook.InitComplete = true
 	//	newBook.Cover = types.MediaFileInfo{Name: "video.png", Url: "/images/video.png"}
-	//case types.TypeAudio:
+	// case types.TypeAudio:
 	//	newBook.PageCount = 1
 	//	newBook.InitComplete = true
 	//	newBook.Cover = types.MediaFileInfo{Name: "audio.png", Url: "/images/audio.png"}
-	//case types.TypeUnknownFile:
+	// case types.TypeUnknownFile:
 	//	newBook.PageCount = 1
 	//	newBook.InitComplete = true
 	//	newBook.Cover = types.MediaFileInfo{Name: "unknown.png", Url: "/images/unknown.png"}
-	//// 其他类型的压缩文件或文件夹
-	//default:
+	// // 其他类型的压缩文件或文件夹
+	// default:
 	//	// archiver.FileSystem可以配合ctx了，加个默认超时时间
 	//	const shortDuration = 10 * 1000 * time.Millisecond // 超时时间，10秒
 	//	ctx, cancel := context.WithTimeout(context.Background(), shortDuration)
@@ -276,10 +276,10 @@ func smbScanFile(filePath string, file *smb2.File, storePath string, depth int, 
 	//	if err != nil {
 	//		return nil, err
 	//	}
-	//}
-	//// 不管页数，直接返回：在添加到书库时判断页数
-	//newBook.SortPages("default")
-	//return newBook, err
+	// }
+	// // 不管页数，直接返回：在添加到书库时判断页数
+	// newBook.SortPages("default")
+	// return newBook, err
 }
 
 func smbScanDir(dirPath string, storePath string, depth int, scanOption Option) (*model.Book, error) {
@@ -288,7 +288,7 @@ func smbScanDir(dirPath string, storePath string, depth int, scanOption Option) 
 	if err != nil {
 		return nil, err
 	}
-	//// 获取目录中的文件和子目录的详细信息
+	// // 获取目录中的文件和子目录的详细信息
 	entries, err := os.ReadDir(dirPath)
 	if err != nil {
 		return nil, err
