@@ -26,6 +26,6 @@ templ FlipPage(s *state.GlobalState, book *model.Book) {
 			})
 		@MainArea(s, book)
 	}
-	@common.Drawer(s.ServerStatus.ServerHost, DrawerSlot())
+	@common.Drawer(s.ServerStatus.ServerHost, FlipDrawerSlot(s, book))
 	@common.QRCode(s.ServerStatus.ServerHost)
 }
