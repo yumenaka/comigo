@@ -8,15 +8,15 @@ import (
 	"path/filepath"
 
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/util"
-	"github.com/yumenaka/comigo/util/locale"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
 var (
-	LocalRescanBroadcast *chan string
-	ConfigEnableUpload   *bool
-	ConfigUploadPath     *string
+	RescanBroadcast    *chan string
+	ConfigEnableUpload *bool
+	ConfigUploadPath   *string
 )
 
 // UploadFile 上传文件
@@ -136,7 +136,7 @@ func UploadFile(c echo.Context) error {
 	}
 
 	// 通知重新扫描
-	*LocalRescanBroadcast <- "upload"
+	*RescanBroadcast <- "rescan_upload_path"
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "文件上传成功",

@@ -7,13 +7,9 @@ import (
 )
 
 type GlobalState struct {
-	Debug           bool
-	Version         string
-	SingleUserMode  bool
-	OneFileMode     bool
-	OnlineUserCount int
-	ShelfBookList   *model.BookInfoList
-	ServerStatus    *util.ServerStatus
+	Version       string
+	ShelfBookList *model.BookInfoList
+	ServerStatus  *util.ServerStatus
 }
 
 var ServerConfig *config.Config
@@ -29,15 +25,14 @@ func (g *GlobalState) GetAllBookNum() int {
 var Global GlobalState
 
 func init() {
-	Global.Debug = config.GetDebug()
 	Global.Version = config.GetVersion()
-	Global.SingleUserMode = false
-	// 是否为静态模式 默认为false
-	// 静态模式下，7777 端口的反代服务器无法正常加载静态JS资源，导致页面无法正常显示。
-	// 反代出错的原因不明，暂时不管了。调试静态模式的时候看1234就好。
-	Global.OneFileMode = false
-	Global.OnlineUserCount = 0
 	Global.ShelfBookList = nil
 	Global.ServerStatus = util.GetServerInfo(config.GetHost(), config.GetVersion(), config.GetPort(), config.GetEnableUpload(), 0)
 	ServerConfig = config.GetCfg()
+}
+
+// GetStaticFileMode 是否开启静态模式，开启Debug模式时，静态模式会被强制开启
+// 需要避免 </script>或 </body> 提前截断script标签的问题
+func (s *GlobalState) GetStaticFileMode() bool {
+	return config.GetStaticFileMode()
 }

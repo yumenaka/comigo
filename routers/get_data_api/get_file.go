@@ -68,7 +68,7 @@ func GetFile(c echo.Context) error {
 		)
 		if err == nil && cacheData != nil {
 			if base64Encode {
-				return sendBase64Data(c, cacheData, needFile)
+				return sendBase64Htmx(c, cacheData, needFile)
 			}
 			return c.Blob(http.StatusOK, ct, cacheData)
 		}
@@ -129,7 +129,7 @@ func GetFile(c echo.Context) error {
 
 	// 如果启用了 Base64 编码
 	if base64Encode {
-		return sendBase64Data(c, imgData, needFile)
+		return sendBase64Htmx(c, imgData, needFile)
 	}
 
 	// 返回图片数据
@@ -162,13 +162,24 @@ func getBoolQueryParam(c echo.Context, key string, defaultValue bool) bool {
 	return value
 }
 
-// sendBase64Data 将数据编码为 Base64 并发送
-func sendBase64Data(c echo.Context, data []byte, filename string) error {
+// sendBase64Htmx 将数据编码为 Base64 并通过 HTMX 接口替换 img 标签
+func sendBase64Htmx(c echo.Context, data []byte, filename string) error {
 	mimeType := mime.TypeByExtension(filepath.Ext(filename))
 	if mimeType == "" {
 		mimeType = "application/octet-stream"
 	}
-	base64Data := base64.StdEncoding.EncodeToString(data)
-	dataURI := "data:" + mimeType + ";base64," + base64Data
-	return c.String(http.StatusOK, dataURI)
+	dataURI := "data:" + mimeType + ";base64," + base64.StdEncoding.EncodeToString(data)
+
+	htmlContent := `<img
+		x-data="{ isDoublePage: false }"
+		class="w-full manga_image min-h-16 text-center"
+		draggable="false"
+		src="` + dataURI + `"
+		@load="isDoublePage=$event.target.naturalWidth > $event.target.naturalHeight;"
+		:style="{ width: $store.global.isLandscape?($store.scroll.widthUseFixedValue? (isDoublePage ? $store.scroll.doublePageWidth_PX +'px': $store.scroll.singlePageWidth_PX +'px'): (isDoublePage ? $store.scroll.doublePageWidth_Percent + '%' : $store.scroll.singlePageWidth_Percent + '%')): $store.scroll.portraitWidthPercent+'%', maxWidth: '100%' }"
+		alt=""
+	/>`
+
+	// 直接返回 HTML 片段，让 HTMX 用 outerHTML 替换
+	return c.HTML(http.StatusOK, htmlContent)
 }
