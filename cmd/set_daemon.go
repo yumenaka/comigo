@@ -9,7 +9,7 @@ import (
 	"github.com/yumenaka/comigo/util/logger"
 )
 
-// TODO: 实测macos可用，正确地实装，需要理解守护进程的概念
+// DemonFlag TODO: 实测macos可用，正确地实装，需要理解守护进程的概念
 // 需要去 cmd/init_flags.go 设置flag
 var DemonFlag bool
 var StopDaemonFlag bool
@@ -31,7 +31,7 @@ func SetDaemon() {
 		return
 	}
 	cntxt := &daemon.Context{
-		PidFileName: "comigo.pid",
+		PidFileName: "/var/run/comigo.pid",
 		PidFilePerm: 0644,
 		LogFileName: "comigo.log",
 		LogFilePerm: 0640,

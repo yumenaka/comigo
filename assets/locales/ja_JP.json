@@ -203,5 +203,6 @@
   "no_pattern": "無地",
   "grid_line": "グリッド線",
   "grid_point": "グリッド点",
-  "mosaic": "モザイク"
+  "mosaic": "モザイク",
+  "open_pdf_in_browser": "ブラウザでPDFを開く"
 }

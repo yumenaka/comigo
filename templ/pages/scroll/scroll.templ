@@ -26,7 +26,7 @@ templ ScrollPage(s *state.GlobalState, book *model.Book, paginationIndex int) {
 		@MainArea(s, book, paginationIndex)
 	}
 	@common.Footer(s.Version)
-	@common.Drawer(s.ServerStatus.ServerHost, DrawerSlot())
+	@common.Drawer(s.ServerStatus.ServerHost, DrawerSlot(s,book))
 	@common.QRCode(s.ServerStatus.ServerHost)
 }
 

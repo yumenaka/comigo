@@ -1,6 +1,25 @@
 package flip
 
-templ DrawerSlot() {
+import (
+    "fmt"
+    "net/url"
+
+	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/templ/state"
+)
+
+templ FlipDrawerSlot(s *state.GlobalState, book *model.Book) {
+    if (book != nil && book.Type == model.TypePDF) {
+	   <!-- PDF【在浏览器中打开】 -->
+	   <a
+		    type="button"
+		    target="_blank"
+		    href={ templ.SafeURL(fmt.Sprintf("/api/raw/%s/%s", book.BookID, url.QueryEscape(book.Title)))}
+		    class="px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+	        >
+		    用浏览器打开PDF
+	    </a>
+    }
 	<!-- 切换【卷轴模式/翻页模式】的toggle-->
 	<label class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm">
 		<input type="checkbox" x-bind="$store.global.readModeIsScroll" x-on:change="$store.global.toggleReadMode();toggleFlipScrollFlexible();" class="sr-only peer"/>
