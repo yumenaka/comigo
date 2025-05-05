@@ -1,4 +1,4 @@
-package admin_page
+package settings
 
 import (
 	"errors"
@@ -107,9 +107,16 @@ func UpdateStringConfigHandler(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	updatedHTML := StringConfig(name, newValue, name+"_Description")
-	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError)
+	if name == "RequiresLogin" || name == "Username" || name == "Password" || name == "Port" || name == "Host" || name == "DisableLAN" || name == "Timeout" {
+		updatedHTML := StringConfig(name, newValue, name+"_Description", true)
+		if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError)
+		}
+	} else {
+		updatedHTML := StringConfig(name, newValue, name+"_Description", false)
+		if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError)
+		}
 	}
 	return nil
 }
@@ -126,9 +133,16 @@ func UpdateBoolConfigHandler(c echo.Context) error {
 		logger.Errorf("无法将 '%s' 解析为 bool: %v", newValue, parseErr)
 		return echo.NewHTTPError(http.StatusBadRequest, "parse bool error")
 	}
-	updatedHTML := BoolConfig(name, boolVal, name+"_Description")
-	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError)
+	if name == "RequiresLogin" || name == "Username" || name == "Password" || name == "Port" || name == "Host" || name == "DisableLAN" || name == "Timeout" {
+		updatedHTML := BoolConfig(name, boolVal, name+"_Description", true)
+		if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError)
+		}
+	} else {
+		updatedHTML := BoolConfig(name, boolVal, name+"_Description", false)
+		if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError)
+		}
 	}
 	return nil
 }
@@ -146,11 +160,20 @@ func UpdateNumberConfigHandler(c echo.Context) error {
 		logger.Errorf("无法将 '%s' 解析为 int: %v", newValue, parseErr)
 		return echo.NewHTTPError(http.StatusBadRequest, "parse int error")
 	}
-	// 渲染对应的模板
-	updatedHTML := NumberConfig(name, int(intVal), name+"_Description", 0, 65535)
-	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError)
+	if name == "RequiresLogin" || name == "Username" || name == "Password" || name == "Port" || name == "Host" || name == "DisableLAN" || name == "Timeout" {
+		// 渲染对应的模板
+		updatedHTML := NumberConfig(name, int(intVal), name+"_Description", 0, 65535, true)
+		if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError)
+		}
+	} else {
+		// 渲染对应的模板
+		updatedHTML := NumberConfig(name, int(intVal), name+"_Description", 0, 65535, false)
+		if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError)
+		}
 	}
+
 	return nil
 }
 

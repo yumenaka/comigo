@@ -1,4 +1,4 @@
-package admin_page
+package settings
 
 import (
 	"reflect"
@@ -11,6 +11,10 @@ import (
 	"github.com/yumenaka/comigo/util/scan"
 )
 
+var (
+	RestartWebServerBroadcast *chan string
+)
+
 // -------------------------
 // 各种辅助函数
 // -------------------------
@@ -18,8 +22,14 @@ import (
 // beforeConfigUpdate 根据配置的变化，判断是否需要打开浏览器重新扫描等
 func beforeConfigUpdate(oldConfig *config.Config, newConfig *config.Config) {
 	openBrowserIfNeeded(oldConfig, newConfig)
-	reScanDir, reScanFile := checkReScanStatus(oldConfig, newConfig)
-	logger.Infof("reScanDir: %v, reScanFile: %v\n", reScanDir, reScanFile)
+	reScanDir, reScanFile, reStartWebServer := checkServerActions(oldConfig, newConfig)
+	logger.Infof("reScanDir: %v, reScanFile: %v reStartWebServer: %v ", reScanDir, reScanFile, reStartWebServer)
+	if reStartWebServer {
+		// 此处需要不能导入routers，因为会循环引用
+		// routers.RestartWebServer()
+		// 使用广播的方式来通知
+		*RestartWebServerBroadcast <- "restart_web_server"
+	}
 	if reScanDir {
 		startReScan(reScanFile)
 	} else {
@@ -39,8 +49,9 @@ func openBrowserIfNeeded(oldConfig *config.Config, newConfig *config.Config) {
 	}
 }
 
-// checkReScanStatus 检查旧的和新的配置是否需要更新，并返回需要重新扫描和重新扫描文件的布尔值
-func checkReScanStatus(oldConfig *config.Config, newConfig *config.Config) (reScanDir bool, reScanFile bool) {
+// checkServerActions 检查旧的和新的配置是否需要更新，并返回需要重启网页服务器、重新扫描整个书库、重新扫描所有文件的布尔值
+func checkServerActions(oldConfig *config.Config, newConfig *config.Config) (reScanDir bool, reScanFile bool, reStartWebServer bool) {
+	// 下面这些值修改的时候，需要扫描整个书库、或重新扫描所有文件
 	if !reflect.DeepEqual(oldConfig.LocalStores, newConfig.LocalStores) {
 		reScanDir = true
 	}
@@ -63,6 +74,28 @@ func checkReScanStatus(oldConfig *config.Config, newConfig *config.Config) (reSc
 	}
 	if oldConfig.EnableDatabase != newConfig.EnableDatabase {
 		reScanDir = true
+	}
+	// 下面这些值修改的时候，需要重启网页服务器
+	if oldConfig.RequiresLogin != newConfig.RequiresLogin {
+		reStartWebServer = true
+	}
+	if oldConfig.Port != newConfig.Port {
+		reStartWebServer = true
+	}
+	if oldConfig.Username != newConfig.Username {
+		reStartWebServer = true
+	}
+	if oldConfig.Password != newConfig.Password {
+		reStartWebServer = true
+	}
+	if oldConfig.Host != newConfig.Host {
+		reStartWebServer = true
+	}
+	if oldConfig.Timeout != newConfig.Timeout {
+		reStartWebServer = true
+	}
+	if oldConfig.DisableLAN != newConfig.DisableLAN {
+		reStartWebServer = true
 	}
 	return
 }

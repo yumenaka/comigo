@@ -14,9 +14,9 @@ import (
 )
 
 var (
-	LocalRescanBroadcast *chan string
-	ConfigEnableUpload   *bool
-	ConfigUploadPath     *string
+	RescanBroadcast    *chan string
+	ConfigEnableUpload *bool
+	ConfigUploadPath   *string
 )
 
 // UploadFile 上传文件
@@ -136,7 +136,7 @@ func UploadFile(c echo.Context) error {
 	}
 
 	// 通知重新扫描
-	*LocalRescanBroadcast <- "upload"
+	*RescanBroadcast <- "rescan_upload_path"
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "文件上传成功",

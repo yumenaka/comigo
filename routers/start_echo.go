@@ -51,8 +51,8 @@ func StopWebServer() error {
 	if config.Server == nil {
 		return nil
 	}
-	// 关闭服务器（延时1秒）
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	// 关闭服务器（deadline 5秒）
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	// Shutdown:一旦把服务器关机，就不能重复使用。将来的呼叫将返回”ErrServerClosed“。
 	if err := config.Server.Shutdown(ctx); err != nil {
