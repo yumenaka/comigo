@@ -3,14 +3,23 @@ package shelf
 import (
     "fmt"
     "strconv"
+    "strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/templ/state"
 )
-// 书籍卡片图片链接
+//
+// 如果链接包含字符串“api/get_file?” 则在背景图片链接中添加参数“&resize_height=512”
+func getResizedImageUrl(imageUrl string) string {
+    if strings.Contains(imageUrl, "api/get_file?") {
+        imageUrl = imageUrl + "&resize_height=512"
+    }
+    return imageUrl
+}
+// 书籍卡片图片CSS背景
 css backgroundImage(imageUrl string) {
-	background-image: { "url(" + imageUrl + "&resize_height=512)" };
+	background-image: { "url(" + getResizedImageUrl(imageUrl) + ")" };
 }
 
 templ BookCard(c echo.Context, s *state.GlobalState, book model.BookInfo) {
