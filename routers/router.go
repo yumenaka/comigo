@@ -13,10 +13,6 @@ import (
 
 var engine *echo.Echo
 
-func init() {
-	InitEcho()
-}
-
 func InitEcho() {
 	// ***共通的 404 页面，需要在创建路由之前就替换***
 	echo.NotFoundHandler = error_page.NotFoundCommon
@@ -72,6 +68,8 @@ func EmbedStaticFiles() {
 
 // StartWebServer 启动web服务
 func StartWebServer() {
+	// 初始化web服务器
+	InitEcho()
 	// 设置网页端口
 	SetHttpPort()
 	// 监听并启动web服务

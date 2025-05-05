@@ -1,4 +1,4 @@
-package admin_page
+package settings
 
 import (
 	"net/http"

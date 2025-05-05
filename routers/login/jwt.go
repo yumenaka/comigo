@@ -7,6 +7,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/util/logger"
 )
 
 // JwtCustomClaims 扩展默认的"JWT声明"。更多示例，请参见https://github.com/golang-jwt/jwt
@@ -24,9 +25,19 @@ const (
 func Login(c echo.Context) error {
 	username := c.FormValue("username")
 	password := c.FormValue("password")
-
+	// 检查是否需要登录
+	if !config.GetRequiresLogin() {
+		logger.Infof("RequiresLogin %v\n", config.GetRequiresLogin())
+		return echo.ErrTeapot
+	}
+	// // 空密码检查？
+	// if config.GetPassword() == "" {
+	// 	logger.Info("RequiresLogin is true, but password is empty\n")
+	// 	return echo.ErrUnauthorized
+	// }
 	// 如果未设置密码或密码错误，则不生成 JWT
-	if config.GetPassword() == "" || (username != config.GetUsername() && password != config.GetPassword()) {
+	if !config.GetRequiresLogin() || username != config.GetUsername() || password != config.GetPassword() {
+		logger.Infof("Login failed: %s-%s, %s-%s\n", username, config.GetUsername(), config.GetPassword(), password)
 		return echo.ErrUnauthorized
 	}
 
@@ -54,7 +65,7 @@ func Login(c echo.Context) error {
 	cookie.Value = t
 	cookie.Expires = time.Now().Add(24 * time.Hour * 30) // 30天有效期
 	cookie.Path = "/"
-	cookie.HttpOnly = true                 // 防止JavaScript访问
+	cookie.HttpOnly = false                // 防止JavaScript访问的话需要设置为true
 	cookie.Secure = c.Request().TLS != nil // 如果是HTTPS则设置Secure
 	cookie.SameSite = http.SameSiteLaxMode
 	c.SetCookie(cookie)

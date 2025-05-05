@@ -18,7 +18,7 @@ import (
 
 // Config Comigo全局配置
 type Config struct {
-	AutoRescan             bool            `json:"AutoRescan" comment:"刷新页面时，是否自动重新扫描"`
+	AutoRescan             bool            `json:"AutoRescan" comment:"刷新页面时，是否自动重新扫描书籍是否存在"`
 	CachePath              string          `json:"CachePath" comment:"本地图片缓存位置，默认系统临时文件夹"`
 	CertFile               string          `json:"CertFile" comment:"TLS/SSL 证书文件路径 (default: ~/.config/.comigo/cert.crt)"`
 	ClearCacheExit         bool            `json:"ClearCacheExit" comment:"退出程序的时候，清理web图片缓存"`
@@ -26,9 +26,9 @@ type Config struct {
 	ConfigPath             string          `json:"-" toml:"-" comment:"用户指定的的yaml设置文件路径"`
 	Debug                  bool            `json:"Debug" comment:"开启Debug模式"`
 	DefaultMode            string          `json:"DefaultMode" comment:"默认阅读模式，默认为空，可以设置为scroll或flip"`
-	DisableLAN             bool            `json:"DisableLAN" comment:"只在本机提供阅读服务，不对外共享，此项配置不支持热重载"`
-	EnableDatabase         bool            `json:"EnableDatabase" comment:"启用本地数据库，保存扫描到的书籍数据。此项配置不支持热重载。"`
-	EnableLogin            bool            `json:"EnableLogin" comment:"是否启用登录。默认不需要登陆。此项配置不支持热重载。"`
+	DisableLAN             bool            `json:"DisableLAN" comment:"只在本机提供阅读服务，不对外共享"`
+	EnableDatabase         bool            `json:"EnableDatabase" comment:"启用本地数据库，保存扫描到的书籍数据。"`
+	RequiresLogin          bool            `json:"RequiresLogin" comment:"是否启用登录。"`
 	EnableTLS              bool            `json:"EnableTLS" comment:"是否启用HTTPS协议。需要设置证书于key文件。"`
 	EnableUpload           bool            `json:"EnableUpload" comment:"启用上传功能"`
 	ExcludePath            []string        `json:"ExcludePath" comment:"扫描书籍的时候，需要排除的文件或文件夹的名字"`
@@ -43,7 +43,7 @@ type Config struct {
 	MinImageNum            int             `json:"MinImageNum" comment:"压缩包或文件夹内，至少有几张图片，才算作书籍"`
 	OpenBrowser            bool            `json:"OpenBrowser" comment:"是否同时打开浏览器，windows默认true，其他默认false"`
 	Password               string          `json:"Password" comment:"启用登陆后，登录界面需要的密码。"`
-	Port                   int             `json:"Port" comment:"Comigo设置文件(config.toml)，可保存在：HomeDirectory（$HOME/.config/comigo/config.toml）、WorkingDirectory（当前执行目录）、ProgramDirectory（程序所在目录）下。可用“comi --config-save”生成本文件\n网页服务端口，此项配置不支持热重载"`
+	Port                   int             `json:"Port" comment:"Comigo设置文件(config.toml)，可保存在：HomeDirectory（$HOME/.config/comigo/config.toml）、WorkingDirectory（当前执行目录）、ProgramDirectory（程序所在目录）下。可用“comi --config-save”生成本文件\n网页服务端口"`
 	PrintAllPossibleQRCode bool            `json:"PrintAllPossibleQRCode" comment:"扫描完成后，打印所有可能的阅读链接二维码"`
 	Stores                 []stores.Store  `json:"BookStores" toml:"-" comment:"书库设置"`
 	SupportFileType        []string        `json:"SupportFileType" comment:"支持的书籍压缩包后缀"`
@@ -55,7 +55,7 @@ type Config struct {
 	UploadDirOption        UploadDirOption `json:"UploadDirOption" comment:"上传目录的位置选项：0-当前执行目录，1-第一个书库目录，2-指定上传路径"`
 	UploadPath             string          `json:"UploadPath" comment:"指定上传路径时，上传文件的存储位置"`
 	UseCache               bool            `json:"UseCache" comment:"开启本地图片缓存，可以加快二次读取，但会占用硬盘空间"`
-	Username               string          `json:"Username" comment:"启用登陆后，登录界面需要的用户名。"`
+	Username               string          `json:"Username" comment:"启用登陆后，登录界用的用户名。"`
 	ZipFileTextEncoding    string          `json:"ZipFileTextEncoding" comment:"非utf-8编码的ZIP文件，尝试用什么编码解析，默认GBK"`
 }
 
@@ -377,6 +377,10 @@ func UpdateConfigByJson(jsonString string) error {
 		case "Debug":
 			if v, ok := value.(bool); ok {
 				cfg.Debug = v
+			}
+		case "RequiresLogin":
+			if v, ok := value.(bool); ok {
+				cfg.RequiresLogin = v
 			}
 		case "StaticFileMode":
 			if v, ok := value.(bool); ok {

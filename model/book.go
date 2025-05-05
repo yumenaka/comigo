@@ -1,8 +1,6 @@
 package model
 
 import (
-	"crypto/md5"
-	"encoding/hex"
 	"errors"
 	"os"
 	"path"
@@ -358,12 +356,6 @@ func (b *Book) SortPagesByImageList(imageList []string) {
 		}
 	}
 	b.Pages.Images = reSortList
-}
-
-// md5string 计算字符串的 MD5 值
-func md5string(s string) string {
-	r := md5.Sum([]byte(s))
-	return hex.EncodeToString(r[:])
 }
 
 // getShortBookID 生成短的 BookID，避免冲突

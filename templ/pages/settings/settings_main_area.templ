@@ -1,4 +1,4 @@
-package admin_page
+package settings
 
 import (
 	"github.com/yumenaka/comigo/templ/state"
@@ -24,11 +24,12 @@ templ MainArea(s *state.GlobalState) {
             @svg.Book()
             <span x-text="i18next.t('book_shelf')">Book</span>
         </button>
-        <button role="tab" aria-controls="tab-contents" aria-selected="false" hx-get="/api/htmx/settings/tab2"
+        <!-- 目前不需要tab2 -->
+        <!-- <button role="tab" aria-controls="tab-contents" aria-selected="false" hx-get="/api/htmx/settings/tab2"
             class="tabs flex items-center justify-center min-w-20 mx-0.5 my-2 h-9 rounded">
             @svg.Network()
             <span x-text="i18next.t('network')">Network</span>
-        </button>
+        </button> -->
         <button role="tab" aria-controls="tab-contents" aria-selected="false" hx-get="/api/htmx/settings/tab3"
             class="tabs flex items-center justify-center min-w-20 mx-0.5 my-2 h-9 rounded">
             @svg.Labs()

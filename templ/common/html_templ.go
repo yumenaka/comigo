@@ -53,7 +53,7 @@ func Html(c echo.Context, s *state.GlobalState, bodyContent templ.Component, ins
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.Raw(assets.GetCSS(s.StaticFileMode)).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = templ.Raw(assets.GetCSS(s.GetStaticFileMode())).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -73,7 +73,7 @@ func Html(c echo.Context, s *state.GlobalState, bodyContent templ.Component, ins
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.Raw(assets.GetJavaScript(s.StaticFileMode, insertScript)).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = templ.Raw(assets.GetJavaScript(s.GetStaticFileMode(), insertScript)).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
