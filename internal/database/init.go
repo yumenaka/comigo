@@ -10,8 +10,8 @@ import (
 	"path/filepath"
 
 	"entgo.io/ent/dialect"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/internal/ent"
-	"github.com/yumenaka/comigo/util/locale"
 	"github.com/yumenaka/comigo/util/logger"
 	"modernc.org/sqlite"
 )
@@ -48,36 +48,36 @@ func (d sqliteDriver) Open(name string) (driver.Conn, error) {
 var client *ent.Client
 
 func InitDatabase(configFilePath string) error {
-	//// 注册 sqlite3 驱动
-	//sql.Register("sqlite3", sqliteDriver{Driver: &sqlite.Driver{}})
+	// // 注册 sqlite3 驱动
+	// sql.Register("sqlite3", sqliteDriver{Driver: &sqlite.Driver{}})
 	if client != nil {
-		//logger.Infof("database already initialized")
+		// logger.Infof("database already initialized")
 		return nil
 	}
-	//链接或创建数据库
+	// 链接或创建数据库
 	var entOptions []ent.Option
-	//是否打印log
-	//entOptions = append(entOptions, ent.Debug())
-	//连接器
+	// 是否打印log
+	// entOptions = append(entOptions, ent.Debug())
+	// 连接器
 	var err error
 	dataSourceName := "file:comigo.sqlite?cache=shared"
-	//如果有配置文件的话，数据库文件，就在同一文件夹内
+	// 如果有配置文件的话，数据库文件，就在同一文件夹内
 	if configFilePath != "" {
-		configDir := filepath.Dir(configFilePath) //不能用path.Dir()，因为windows返回 "."
+		configDir := filepath.Dir(configFilePath) // 不能用path.Dir()，因为windows返回 "."
 		dataSourceName = "file:" + path.Join(configDir, "comigo.sqlite") + "?cache=shared"
 	}
 	logger.Infof(locale.GetString("init_database")+"%s", dataSourceName)
 	client, err = ent.Open(dialect.SQLite, dataSourceName, entOptions...)
 	if err != nil {
 		return fmt.Errorf("failed opening connection to sqlite: %v", err)
-		//time.Sleep(3 * time.Second)
-		//log.Fatalf("failed opening connection to sqlite: %v", err)
+		// time.Sleep(3 * time.Second)
+		// log.Fatalf("failed opening connection to sqlite: %v", err)
 	}
-	//defer client.Close()
+	// defer client.Close()
 	if err := client.Schema.Create(context.Background()); err != nil {
 		return fmt.Errorf("failed creating schema resources: %v", err)
-		//time.Sleep(3 * time.Second)
-		//log.Fatalf("failed creating schema resources: %v", err)
+		// time.Sleep(3 * time.Second)
+		// log.Fatalf("failed creating schema resources: %v", err)
 	}
 	return nil
 }

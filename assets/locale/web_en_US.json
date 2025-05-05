@@ -204,5 +204,6 @@
   "grid_line": "Grid Line",
   "grid_point": "Grid Point",
   "mosaic": "Mosaic",
-  "open_pdf_in_browser": "Open PDF in Browser"
+  "open_pdf_in_browser": "Open PDF in Browser",
+  "StaticFileMode_Description": "Enable static-file mode. In static mode, all images and scripts are bundled into the HTML file, so it can be saved directly as a single html file (in development)."
 }

@@ -2,11 +2,11 @@ package cmd
 
 import (
 	"github.com/spf13/viper"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/routers"
 	"github.com/yumenaka/comigo/routers/upload_api"
-	"github.com/yumenaka/comigo/util/locale"
 	"github.com/yumenaka/comigo/util/logger"
 	"github.com/yumenaka/comigo/util/scan"
 )

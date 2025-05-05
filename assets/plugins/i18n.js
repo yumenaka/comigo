@@ -1,8 +1,8 @@
 import i18next from 'i18next'
 import LanguageDetector from 'i18next-browser-languagedetector'
-import enLocale from '../locales/en_US.json'
-import zhLocale from '../locales/zh_CN.json'
-import jaLocale from '../locales/ja_JP.json'
+import enLocale from '../locale/web_en_US.json'
+import zhLocale from '../locale/web_zh_CN.json'
+import jaLocale from '../locale/web_ja_JP.json'
 
 i18next
     .use(LanguageDetector)

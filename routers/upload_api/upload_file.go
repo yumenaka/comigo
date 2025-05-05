@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/util"
-	"github.com/yumenaka/comigo/util/locale"
 	"github.com/yumenaka/comigo/util/logger"
 )
 

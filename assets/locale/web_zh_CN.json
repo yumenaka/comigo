@@ -204,5 +204,6 @@
   "grid_line": "网格线",
   "grid_point": "网格点",
   "mosaic": "马赛克",
-  "open_pdf_in_browser": "用浏览器打开PDF"
+  "open_pdf_in_browser": "用浏览器打开PDF",
+  "StaticFileMode_Description": "是否开启静态文件模式。静态模式下，所有图片与脚本都打包到html文件里，可以直接另存为单个网页文件（开发中）。"
 }

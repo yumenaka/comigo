@@ -38,7 +38,7 @@ func FlipDrawerSlot(s *state.GlobalState, book *model.Book) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		if book != nil && book.Type == model.TypePDF {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- PDF【在浏览器中打开】 --> <a type=\"button\" target=\"_blank\" href=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- PDF【在浏览器中打开】 --> <a type=\"button\" target=\"_blank\" x-text=\"i18next.t(&#39;open_pdf_in_browser&#39;)\" href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
