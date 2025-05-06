@@ -2,22 +2,22 @@
 
 #排除文档文件
 resource/CHANGELOG.md -linguist-documentation
-htmx/README.md -linguist-documentation
 
 # 排除目录
-resource/**/* linguist-vendored
-internal/ent/**/* linguist-vendored
-application/mobile/**/* linguist-vendored
-htmx/embed/**/* linguist-vendored
-htmx/static/**/* linguist-vendored
+assets/images/**/* linguist-vendored
+
 #排除手机项目
-application/mobile/* linguist-vendored
+app/**/* linguist-vendored
 
 #排除测试文件
 test/* linguist-documentation
 
 #排除自动生成文件
-assets/script/main.js
-assets/script/styles.css
-assets/script/main.js.map
-assets/script/styles.css.map
+internal/ent/**/* linguist-vendored
+assets/script/main.js  linguist-vendored
+assets/script/styles.css  linguist-vendored
+assets/script/main.js.map  linguist-vendored
+assets/script/styles.css.map  linguist-vendored
+assets/wailsjs   linguist-vendored
+
+*.templ linguist-language=Go
