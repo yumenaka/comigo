@@ -22,16 +22,15 @@ var (
 // beforeConfigUpdate 根据配置的变化，判断是否需要打开浏览器重新扫描等
 func beforeConfigUpdate(oldConfig *config.Config, newConfig *config.Config) {
 	openBrowserIfNeeded(oldConfig, newConfig)
-	reScanDir, reScanFile, reStartWebServer := checkServerActions(oldConfig, newConfig)
-	logger.Infof("reScanDir: %v, reScanFile: %v reStartWebServer: %v ", reScanDir, reScanFile, reStartWebServer)
+	reScanStores, reStartWebServer := checkServerActions(oldConfig, newConfig)
+	logger.Infof("reScanDir: %v, reStartWebServer: %v ", reScanStores, reStartWebServer)
 	if reStartWebServer {
-		// 此处需要不能导入routers，因为会循环引用
-		// routers.RestartWebServer()
-		// 使用广播的方式来通知
+		// 此处需要不能导入routers，因为会循环引用  routers.RestartWebServer() X
+		// 使用广播的方式来通知 :
 		*RestartWebServerBroadcast <- "restart_web_server"
 	}
-	if reScanDir {
-		startReScan(reScanFile)
+	if reScanStores {
+		startReScan()
 	} else {
 		if newConfig.Debug {
 			logger.Info("No changes in cfg, skipped rescan dir\n")
@@ -50,30 +49,28 @@ func openBrowserIfNeeded(oldConfig *config.Config, newConfig *config.Config) {
 }
 
 // checkServerActions 检查旧的和新的配置是否需要更新，并返回需要重启网页服务器、重新扫描整个书库、重新扫描所有文件的布尔值
-func checkServerActions(oldConfig *config.Config, newConfig *config.Config) (reScanDir bool, reScanFile bool, reStartWebServer bool) {
+func checkServerActions(oldConfig *config.Config, newConfig *config.Config) (reScanStores bool, reStartWebServer bool) {
 	// 下面这些值修改的时候，需要扫描整个书库、或重新扫描所有文件
 	if !reflect.DeepEqual(oldConfig.LocalStores, newConfig.LocalStores) {
-		reScanDir = true
+		reScanStores = true
 	}
 	if oldConfig.MaxScanDepth != newConfig.MaxScanDepth {
-		reScanDir = true
+		reScanStores = true
 	}
 	if !reflect.DeepEqual(oldConfig.SupportMediaType, newConfig.SupportMediaType) {
-		reScanDir = true
-		reScanFile = true
+		reScanStores = true
 	}
 	if !reflect.DeepEqual(oldConfig.SupportFileType, newConfig.SupportFileType) {
-		reScanDir = true
+		reScanStores = true
 	}
 	if oldConfig.MinImageNum != newConfig.MinImageNum {
-		reScanDir = true
-		reScanFile = true
+		reScanStores = true
 	}
 	if !reflect.DeepEqual(oldConfig.ExcludePath, newConfig.ExcludePath) {
-		reScanDir = true
+		reScanStores = true
 	}
 	if oldConfig.EnableDatabase != newConfig.EnableDatabase {
-		reScanDir = true
+		reScanStores = true
 	}
 	// 下面这些值修改的时候，需要重启网页服务器
 	if oldConfig.RequiresLogin != newConfig.RequiresLogin {
@@ -104,13 +101,9 @@ func checkServerActions(oldConfig *config.Config, newConfig *config.Config) (reS
 }
 
 // startReScan 扫描并相应地更新数据库
-func startReScan(reScanFile bool) {
+func startReScan() {
 	config.InitCfgStores()
-	option := scan.NewOption(
-		reScanFile,
-		config.GetCfg(),
-	)
-	if err := scan.InitAllStore(option); err != nil {
+	if err := scan.InitAllStore(scan.NewOption(config.GetCfg())); err != nil {
 		logger.Infof("Failed to scan store path: %v", err)
 	}
 	if config.GetEnableDatabase() {

@@ -212,5 +212,6 @@
   "confirm_reset_settings": "确认要重置本地设置吗？",
   "current_dir_scope": "在当前目录运行时（局部有效）",
   "current_user_scope": "当前登录用户有效（全局有效）",
-  "portable_binary_scope": "此二进制文件有效（便携模式）"
+  "portable_binary_scope": "此二进制文件有效（便携模式）",
+  "no_book_hint": "没有可读书籍，请添加书库路径。添加3秒后，页面将自动刷新。"
 }
