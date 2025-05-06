@@ -100,10 +100,7 @@ func ReScanUploadPath() {
 
 func ReScanPath(path string, reScanFile bool) {
 	// 扫描上传目录的文件
-	option := scan.NewOption(
-		reScanFile,
-		config.GetCfg(),
-	)
+	option := scan.NewOption(config.GetCfg())
 	books, err := scan.InitStore(path, option)
 	if err != nil {
 		logger.Infof(locale.GetString("scan_error")+"path:%s  %s", path, err)

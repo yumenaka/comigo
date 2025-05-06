@@ -2,6 +2,7 @@ package shelf
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/templ/pages/settings"
 	"github.com/yumenaka/comigo/templ/state"
 )
 
@@ -22,6 +23,44 @@ templ MainArea(c echo.Context, s *state.GlobalState) {
 		</div>
 	}
 	if s.GetAllBookNum() == 0 && c.Param("id") == "" {
-		<!-- TODO:没有书籍的时候跳转设置 -->
+		<!-- 没有任何书籍的时候 -->
+		<div
+			id="tab-contents"
+			role="tabpanel"
+			class="flex flex-col justify-start items-center flex-1 w-full h-full font-semibold text-lg text-base-content"
+			:class="(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') ? ($store.global.bgPattern !== 'none'?$store.global.bgPattern+' bg-base-300':'bg-base-300'):($store.global.bgPattern !== 'none'?$store.global.bgPattern:'')"
+		>
+			<div class="flex flex-col justify-start w-5/6 md:w-3/5 min-w-[20rem] ">
+				<div
+					x-text="i18next.t('no_book_hint')"
+					class="flex flex-col justify-start w-full p-2 m-1 text-normal font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+				>
+					没有可读书籍，请添加书库路径。添加完成3秒后，页面将自动刷新。
+				</div>
+				@settings.StringArrayConfig("LocalStores", state.ServerConfig.LocalStores, "LocalStores_Description", true)
+			</div>
+		</div>
+		<script>
+            // htmx出错时报错（Toast）
+        	document.addEventListener('htmx:responseError', (event) => {
+              showToast(event.detail.xhr.statusText+": "+event.detail.xhr.responseURL, 'error');
+            });
+            // 删除字符串数组配置中的元素。此处仅用作打印调试信息。删除操作是由 htmx 完成的。
+        	function deleteStringConfigValue(e) {
+        	    const configName = e.getAttribute('data-config-name');
+                const arrawIndex = e.getAttribute('data-arraw-index');
+                const deleteValue = e.getAttribute('data-delete-value');
+                console.log(configName, arrawIndex, deleteValue);
+        	}
+        	// 添加字符串数组配置中的元素
+        	// 此函数的作用，是修改 hx-vals 的值。实际的提交操作是由 htmx 完成的
+        	function addStringConfigValue(e) {
+                const buttonID = e.getAttribute('id');
+                const configName = buttonID.replace('AddButton', '');
+                const addValue = document.getElementById(configName+'AddInput').value;
+                console.log(configName, addValue);
+                e.setAttribute('hx-vals', JSON.stringify({configName: configName, addValue: addValue}));
+            }
+        </script>
 	}
 }

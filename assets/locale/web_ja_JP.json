@@ -212,5 +212,6 @@
   "confirm_reset_settings": "ローカル設定をリセットしてもよろしいですか？",
   "current_dir_scope": "今のディレクトリで実行した場合（ローカル適用）",
   "current_user_scope": "ログインユーザーに対して有効（グローバル適用）",
-  "portable_binary_scope": "当該バイナリに対して有効（ポータブルモード）"
+  "portable_binary_scope": "当該バイナリに対して有効（ポータブルモード）",
+  "no_book_hint": "読める書籍が見つかりません。書庫パスを追加してください。追加後 3 秒でページがリロードされます。"
 }

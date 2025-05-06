@@ -212,5 +212,6 @@
   "confirm_reset_settings": "Are you sure you want to reset local settings?",
   "current_dir_scope": "When run in the current directory (local scope)",
   "current_user_scope": "Effective for logged-in user (global scope)",
-  "portable_binary_scope": "Effective for this binary only (portable mode)"
+  "portable_binary_scope": "Effective for this binary only (portable mode)",
+  "no_book_hint": "No readable books were found. Please add a library path. The page will refresh 3 seconds after it is added."
 }

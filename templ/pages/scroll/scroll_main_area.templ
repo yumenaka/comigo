@@ -65,7 +65,6 @@ templ MainArea(s *state.GlobalState, book *model.Book, paginationIndex int) {
 								:src={ ImageSrc(image.Url) }
 								@load="isDoublePage=$event.target.naturalWidth > $event.target.naturalHeight;"
 								:style="{ width: $store.global.isLandscape?($store.scroll.widthUseFixedValue? (isDoublePage ? $store.scroll.doublePageWidth_PX +'px': $store.scroll.singlePageWidth_PX +'px'): (isDoublePage ? $store.scroll.doublePageWidth_Percent + '%':$store.scroll.singlePageWidth_Percent + '%')): $store.scroll.portraitWidthPercent+'%', maxWidth: '100%'}"
-								alt={ "" }
 							/>
 						} else {
 							@templ.Raw(HtmxStaticImage(image.Url))

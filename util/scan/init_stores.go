@@ -10,7 +10,11 @@ import (
 func InitAllStore(option Option) error {
 	// 重置所有书籍与书组信息
 	model.ClearAllBookData()
-	for _, localPath := range option.Cfg.GetLocalStores() {
+	stores := option.Cfg.GetLocalStores()
+	// fmt.Println("--------------------new stores------------------------------")
+	// fmt.Println(stores)
+	// fmt.Println("--------------------new stores------------------------------")
+	for _, localPath := range stores {
 		books, err := InitStore(localPath, option)
 		if err != nil {
 			logger.Infof(locale.GetString("scan_error")+" path:%s %s", localPath, err)
@@ -18,14 +22,6 @@ func InitAllStore(option Option) error {
 		}
 		AddBooksToStore(books, localPath, option.Cfg.GetMinImageNum())
 	}
-	// for _, server := range scanStores {
-	//	addList, err := Smb(option)
-	//	if err != nil {
-	//		logger.Infof("smb scan_error"+" path:%s %s", server.ShareName, err)
-	//		continue
-	//	}
-	//	AddBooksToStore(addList, server.ShareName, scanMinImageNum)
-	// }
 	return nil
 }
 
