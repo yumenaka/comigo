@@ -2,7 +2,7 @@
 # Window icon Need：go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo
 
 ##Release:
-# make all VERSION=v0.9.13
+# make all VERSION=v1.0.0
 
 ## Windows Release(Need MSYS2 or mingw32 + find.exe make.exe zip.exe upx.exe):
 # mingw32-make all VERSION=v0.9.9
@@ -167,7 +167,7 @@ MacOS_arm64:
 	GOARCH=arm64 GOOS=darwin $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME)
 	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME)
 	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
-	
+
 #Android，32位arm，Termux	
 Linux_arm_android:
 	GOARCH=arm GOOS=android $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME) 
@@ -180,3 +180,23 @@ Linux_arm64-android:
 	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME)
 	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
 	
+
+# MACOS arm64 Desktop App
+# make MacOS_arm64_desktop VERSION=v1.0.0
+# wails build -v 2 -platform darwin/arm64
+MacOS_arm64_desktop:
+	# mv main.go main.go.cli_backup && mv main.go.wails main.go
+	wails build -v 2 -platform darwin/arm64
+	mkdir -p build/Comigo_arm64_desktop
+	mv build/bin/Comigo.app build/Comigo_arm64_desktop/Comigo.app
+	mv main.go main.go.wails && mv main.go.cli_backup main.go
+
+windows_x86_64:
+	# mv main.go main.go.cli_backup && mv main.go.wails main.go
+-platform windows/amd64
+	GOARCH=amd64 GOOS=windows  go generate
+	wails build -v 2 -platform windows/amd64
+	mkdir -p build/Comigo_x86_64_desktop
+	GOARCH=amd64 GOOS=windows  go build -tags desktop,production -ldflags "-w -s -H windowsgui"
+	mv build/bin/Comigo.exe build/Comigo_x86_64_desktop/Comigo.exe
+	mv main.go main.go.wails && mv main.go.cli_backup main.go

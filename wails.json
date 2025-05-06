@@ -4,7 +4,7 @@
   "outputfilename": "Comigo",
   "frontend:install": "bun i",
   "frontend:build": "parcel build ./assets/main.js ./assets/styles.css --dist-dir assets/script",
-  "frontend:dev:watcher": "templ generate --watch ./templ",
+  "frontend:dev:watcher": "go run github.com/a-h/templ/cmd/templ@latest generate --watch ./templ",
   "frontend:dev:serverUrl": "http://localhost:1234",
   "devServer": "localhost:34115",
   "frontend:dir": "./",
