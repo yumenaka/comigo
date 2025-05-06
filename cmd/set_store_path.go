@@ -14,7 +14,7 @@ func SetStorePath(args []string) {
 	// 如果用户指定了扫描路径，就把指定的路径都加入到扫描路径里面
 	config.InitCfgStores()
 	// 没指定扫描路径,配置文件也没设置书库文件夹的时候，默认把【当前工作目录】作为扫描路径
-	if len(args) == 1 && len(config.GetLocalStoresList()) == 0 {
+	if len(args) == 0 && len(config.GetLocalStoresList()) == 0 {
 		// 获取当前工作目录
 		wd, err := os.Getwd()
 		if err != nil {
@@ -23,20 +23,13 @@ func SetStorePath(args []string) {
 		logger.Infof("Working directory:%s", wd)
 		config.AddLocalStore(wd)
 	}
-	// 指定了多个路径，就都扫描一遍
-	if len(args) > 1 {
-		for key, arg := range args {
-			// 第一个参数是可执行文件名
-			if key == 0 {
-				continue
-			}
-			if config.GetDebug() {
-				logger.Infof("args[%d]: %s\n", key, arg)
-			}
-			config.AddLocalStore(arg)
+	// 指定了路径，就都扫描一遍
+	for key, arg := range args {
+		if config.GetDebug() {
+			logger.Infof("args[%d]: %s\n", key, arg)
 		}
+		config.AddLocalStore(arg)
 	}
-
 	// 如果用户启用上传，且用户指定的上传路径不为空，就把上传路径也加入到扫描路径
 	if config.GetEnableUpload() {
 		if config.GetUploadPath() != "" {

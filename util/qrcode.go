@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	qrcodeTerminal "github.com/Baozisoftware/qrcode-terminal-go"
-	"github.com/yumenaka/comigo/util/locale"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
@@ -17,7 +17,7 @@ func PrintAllReaderURL(Port int, OpenBrowserFlag bool, PrintAllPossibleQRCode bo
 	}
 	localURL := protocol + "127.0.0.1:" + strconv.Itoa(Port) + etcStr
 	fmt.Println(locale.GetString("local_reading") + localURL + etcStr)
-	//打开浏览器
+	// 打开浏览器
 	if OpenBrowserFlag {
 		go OpenBrowser(protocol + "127.0.0.1:" + strconv.Itoa(Port) + etcStr)
 	}
@@ -27,14 +27,14 @@ func PrintAllReaderURL(Port int, OpenBrowserFlag bool, PrintAllPossibleQRCode bo
 }
 
 func printURLAndQRCode(port int, PrintAllPossibleQRCode bool, ServerHost string, protocol string, etcStr string) {
-	//打印指定的服务器地址
+	// 打印指定的服务器地址
 	if ServerHost != "" {
 		readURL := protocol + ServerHost + ":" + strconv.Itoa(port) + etcStr
 		fmt.Println(locale.GetString("reading_url_maybe") + readURL)
 		PrintQRCode(readURL)
 		return
 	}
-	//打印所有可用网卡IP
+	// 打印所有可用网卡IP
 	if PrintAllPossibleQRCode {
 		IPList, err := GetIPList()
 		if err != nil {
@@ -46,7 +46,7 @@ func printURLAndQRCode(port int, PrintAllPossibleQRCode bool, ServerHost string,
 			PrintQRCode(readURL)
 		}
 	} else {
-		//只打印本机的首选出站IP
+		// 只打印本机的首选出站IP
 		OutIP := GetOutboundIP().String()
 		readURL := protocol + OutIP + ":" + strconv.Itoa(port) + etcStr
 		fmt.Println(locale.GetString("reading_url_maybe") + readURL)

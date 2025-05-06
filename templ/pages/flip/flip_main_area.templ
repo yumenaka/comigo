@@ -35,9 +35,7 @@ templ MainArea(s *state.GlobalState, book *model.Book) {
 					<!-- 课题：给图片设置 max-h-fit 可以使其顶部对齐，但是safari不兼容此用法，原因未知 -->
 					<img
 						id="Single-NowImage"
-                    	:alt="$store.flip.nowPageNum"
 						x-show="!$store.flip.doublePageMode"
-						src=""
 						draggable="false"
 						:class="$store.global.isPortrait? 'object-contain w-auto  max-w-full h-screen':'object-contain h-screen w-auto max-w-full'"
 					/>
@@ -46,17 +44,13 @@ templ MainArea(s *state.GlobalState, book *model.Book) {
 						<!-- 双页模式-当前屏幕-左页 -->
 						<img
 							id="Double-NowImage-Left"
-							alt="Double-NowImage-Left"
 							draggable="false"
 							x-show="$store.flip.nowPageNum < $store.flip.allPageNum"
-							src=""
 							class="select-none object-contain m-0 max-w-1/2 w-auto h-auto max-h-screen grow-0"
 						/>
 						<!-- 双页模式-当前屏幕-右页 -->
 						<img
 							id="Double-NowImage-Right"
-							alt="Double-NowImage-Right"
-							src=""
 							draggable="false"
 							class="select-none object-contain m-0 max-w-1/2 w-auto max-h-screen grow-0"
 						/>

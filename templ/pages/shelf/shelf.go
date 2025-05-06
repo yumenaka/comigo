@@ -1,6 +1,7 @@
 package shelf
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 
@@ -77,7 +78,7 @@ func getReadURL(book model.BookInfo) string {
 	}
 	// 如果是视频、音频、未知文件，就在新窗口打开
 	if book.Type == model.TypeVideo || book.Type == model.TypeAudio || book.Type == model.TypeUnknownFile {
-		return "\"/api/raw/" + book.BookID + "/" + url.QueryEscape(book.Title) + "\""
+		return fmt.Sprintf("\"/api/raw/%s/%s\"", book.BookID, url.QueryEscape(book.Title))
 	}
 	// 其他情况，跳转到阅读页面，类似 /scroll/4cTOjFm?page=1
 	readURL := "'/'+$store.global.readMode+ '/' + BookID + ($store.global.readMode === 'scroll'?($store.scroll.fixedPagination?'?page=1':''):'')"

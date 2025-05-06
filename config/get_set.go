@@ -4,9 +4,10 @@ import (
 	"os"
 	"path"
 
+	"github.com/jxskiss/base62"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config/stores"
 	"github.com/yumenaka/comigo/util"
-	"github.com/yumenaka/comigo/util/locale"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
@@ -67,6 +68,10 @@ func SetClearDatabaseWhenExit(clearDatabaseWhenExit bool) {
 
 func GetDebug() bool {
 	return cfg.Debug
+}
+
+func GetStaticFileMode() bool {
+	return cfg.StaticFileMode
 }
 
 func SetDebug(debug bool) {
@@ -197,17 +202,32 @@ func GetPort() int {
 	return cfg.Port
 }
 
+// GetRequiresLogin 获取用户名
+func GetRequiresLogin() bool {
+	return cfg.RequiresLogin
+}
+
+// GetUsername 获取用户名
 func GetUsername() string {
 	return cfg.Username
 }
 
-// GetJwtSigningKey JWT令牌签名key，目前是用户名+密码
-func GetJwtSigningKey() string {
-	return cfg.Username + cfg.Password
-}
-
+// GetPassword 获取密码
 func GetPassword() string {
 	return cfg.Password
+}
+
+// GetJwtSigningKey JWT令牌签名key，目前是用户名+密码(如果两者都设置了的话)
+func GetJwtSigningKey() string {
+	if cfg.Username == "" || cfg.Password == "" {
+		logger.Infof("Username or password is empty. Using default Jwt Signing key.")
+		tempStr := cfg.Username + cfg.Password + GetVersion()
+		for _, store := range cfg.LocalStores {
+			tempStr = tempStr + store
+		}
+		base62.EncodeToString([]byte(util.Md5string(util.Md5string(tempStr))))
+	}
+	return cfg.Username + cfg.Password
 }
 
 func GetTimeout() int {

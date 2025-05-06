@@ -7,10 +7,12 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
-	"github.com/yumenaka/comigo/util/locale"
 	"github.com/yumenaka/comigo/util/logger"
 )
+
+var Args []string
 
 // RootCmd 没有任何子命令的情况下时的基本命令
 var RootCmd = &cobra.Command{
@@ -24,6 +26,7 @@ var RootCmd = &cobra.Command{
 	// // 仅当设置了 Run 函数时，才会执行 PreRun 和 PostRun 函数。
 	// 因为参数设置已完成，实际运行的命令习惯写在这里
 	Run: func(cmd *cobra.Command, args []string) {
+		Args = args
 		// 通过“可执行文件名”设置部分默认参数,目前不生效
 		config.SetByExecutableFilename()
 		// 设置临时文件夹

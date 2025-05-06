@@ -1,0 +1,194 @@
+package settings
+
+templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirectoryConfig string, ProgramDirectoryConfig string) {
+	<div
+		id="config-container"
+		class="flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+		x-data={ "{ selectedDir: '" + initSaveTo + "',initinitSaveTo:'" + initSaveTo + "'}" }
+	>
+		<!-- 标题 -->
+		<label class="w-full py-0" x-text={ getTranslations("ConfigManager") }></label>
+		<!-- 配置选项区域：点击一个卡片，就设置隐藏字段的值。 -->
+		<div class="flex flex-col w-full mx-0">
+			<div
+				class="flex flex-row items-center justify-between w-full p-2 my-1 text-xs font-normal border border-gray-500 rounded cursor-pointer WorkingDirectory min-h-15"
+				data-save_to="WorkingDirectory"
+				:class="selectedDir === 'WorkingDirectory'?'bg-cyan-200':''"
+				@click="selectedDir = 'WorkingDirectory'"
+			>
+				<div class="w-1/3 flex flex-col items-center justify-center p-1 m-1 bg-blue-300 rounded min-h-15">
+					<img class="h-7 w-7" src="/images/working_directory.png"/>
+					<div class="mt-1" x-text={ getTranslations("WorkingDirectory") }>当前工作目录</div>
+				</div>
+				if WorkingDirectoryConfig != "" {
+					<div
+						id="WorkingDirectoryConfigDiv"
+						class="w-2/3 flex items-center justify-center mx-1 my-1 text-xs line-clamp-2 bg-blue-300 rounded min-h-15"
+					>
+						{ WorkingDirectoryConfig }
+					</div>
+				} else {
+					<div
+					    id="WorkingDirectoryConfigDiv"
+					    x-text={ getTranslations("current_dir_scope") }
+					    class="w-2/3 flex items-center justify-center w-1/3 p-1 m-1 text-sm bg-blue-300 rounded min-h-15">在当前目录运行时（局部有效）</div>
+				}
+			</div>
+			<div
+				class="flex flex-row items-center justify-between w-full p-2 my-1 text-xs font-normal border border-gray-500 rounded cursor-pointer min-h-15"
+				data-save_to="HomeDirectory"
+				:class="selectedDir === 'HomeDirectory'?'bg-cyan-200':''"
+				@click="selectedDir = 'HomeDirectory'"
+			>
+				<div class="w-1/3 flex flex-col items-center justify-center p-1 m-1 bg-blue-300 rounded min-h-15">
+					<img class="h-7 w-7" src="/images/home_directory.png"/>
+					<div class="mt-1" x-text={ getTranslations("HomeDirectory") }>用户主目录</div>
+				</div>
+				if HomeDirectoryConfig != "" {
+					<div
+						id="HomeDirectoryConfigDiv"
+						class="w-2/3 flex items-center justify-center mx-1 my-1 text-xs line-clamp-2 bg-blue-300 rounded min-h-15"
+					>
+						{ HomeDirectoryConfig }
+					</div>
+				} else {
+					<div
+					    id="HomeDirectoryConfigDiv"
+					    x-text={ getTranslations("current_user_scope") }
+					    class="w-2/3 flex items-center justify-center p-1 m-1 text-sm bg-blue-300 rounded min-h-15">当前登录用户有效（全局有效）</div>
+				}
+			</div>
+			<div
+				class="flex flex-row items-center justify-between w-full p-2 my-1 text-xs font-normal border border-gray-500 rounded cursor-pointer min-h-15"
+				data-save_to="ProgramDirectory"
+				:class="selectedDir === 'ProgramDirectory'?'bg-cyan-200':''"
+				@click="selectedDir = 'ProgramDirectory'"
+			>
+				<div class="w-1/3 flex flex-col items-center justify-center  p-1 m-1 bg-blue-300 rounded min-h-15">
+					<img class="h-7 w-7" src="/images/program_directory.png"/>
+					<div class="mt-1" x-text={ getTranslations("ProgramDirectory") }>程序所在目录</div>
+				</div>
+				if ProgramDirectoryConfig != "" {
+					<div
+						id="ProgramDirectoryConfigDiv"
+						class="w-2/3 flex items-center justify-center mx-1 my-1 text-xs line-clamp-2 bg-blue-300 rounded min-h-15"
+					>
+						{ ProgramDirectoryConfig }
+					</div>
+				} else {
+					<div
+					    id="ProgramDirectoryConfigDiv"
+					    x-text={ getTranslations("portable_binary_scope") }
+					    class="w-2/3 flex justify-center items-center justify-center p-1 m-1 text-sm bg-blue-300 rounded min-h-15">此二进制文件有效（便携模式）</div>
+				}
+			</div>
+		</div>
+		<!-- 用来记录用户当前选择的隐藏字段（和Alpine双向绑定） -->
+		<input
+			id="selectedDir"
+			name="selectedDir"
+			type="hidden"
+			x-model="selectedDir"
+		/>
+		<!-- SAVE 按钮：发起 HTMX 请求到 /api/new_config-save -->
+		<div class="flex flex-row justify-center w-full">
+			<!-- hx-include 将 #selectedDir 表单值一并提交 -->
+			<!-- hx-target 将返回结果替换到本容器内 -->
+			<button
+				id="saveConfigButton"
+				class="w-24 h-10 mx-2 my-1 text-center transition bg-blue-400 border border-gray-500 rounded"
+				hx-post="/api/config-save"
+				hx-include="#selectedDir"
+				hx-target="#config-container"
+				hx-swap="outerHTML"
+			>
+				SAVE
+			</button>
+			<button
+				id="deleteConfigButton"
+				class="w-24 h-10 mx-2 my-1 text-center transition bg-red-300 border border-gray-500 rounded"
+				hx-post="/api/config-delete"
+				hx-include="#selectedDir"
+				hx-target="#config-container"
+				hx-swap="outerHTML"
+			>
+				DELETE
+			</button>
+		</div>
+		<!-- 设置管理功能的说明 -->
+		<div class="w-full py-1 text-xs text-gray-500" x-text={ getTranslations("ConfigManagerDescription") }>
+			点击Save，会将当前配置上传到服务器，并覆盖已经存在的设定文件。
+		</div>
+		<script>
+// 为保存按钮添加事件监听，拦截保存设置的 htmx 请求
+document.getElementById('saveConfigButton').addEventListener('htmx:beforeRequest', function (event) {
+    // 检查是否可以保存设置
+    let selectedDir = document.getElementById('selectedDir').value;
+    canSave = false;
+    if (selectedDir === 'WorkingDirectory') {
+        if (document.getElementById('ProgramDirectoryConfigDiv') === null && document.getElementById('HomeDirectoryConfigDiv') === null) {
+            canSave = true;
+        }
+    }
+    if (selectedDir === 'HomeDirectory') {
+        if (document.getElementById('ProgramDirectoryConfigDiv') === null && document.getElementById('WorkingDirectoryConfigDiv') === null) {
+            canSave = true;
+        }
+    }
+    if (selectedDir === 'ProgramDirectory') {
+        if (document.getElementById('HomeDirectoryConfigDiv') === null && document.getElementById('WorkingDirectoryConfigDiv') === null) {
+            canSave = true;
+        }
+    }
+    // 如果其他地方已经有配置了，则阻止请求并执行本地逻辑
+    if (!canSave) {
+        event.preventDefault();
+        showToast('请先删除其他位置的配置文件', 'warning');
+    }
+});
+document.getElementById('saveConfigButton').addEventListener('htmx:afterRequest', function (event) {
+    // 只对ID为myButton的请求进行监听
+    if (event.detail.successful) {
+        showToast('保存设置文件成功！', 'info');
+    } else {
+        showToast('保存设置文件失败', 'error');
+    }
+});
+
+// 为删除按钮添加事件监听，
+document.getElementById('deleteConfigButton').addEventListener('htmx:beforeRequest', function (event) {
+    // 检查是否可以删除配置
+    let selectedDir = document.getElementById('selectedDir').value;
+    canSelete = true;
+    if (selectedDir === 'WorkingDirectory') {
+        if (document.getElementById('WorkingDirectoryConfigDiv') === null) {
+            canSelete = false;
+        }
+    }
+    if (selectedDir === 'HomeDirectory') {
+        if (document.getElementById('HomeDirectoryConfigDiv') === null) {
+            canSelete = false;
+        }
+    }
+    if (selectedDir === 'ProgramDirectory') {
+        if (document.getElementById('ProgramDirectoryConfigDiv') === null) {
+            canSelete = false;
+        }
+    }
+    // 如果不满足条件，则阻止请求并执行本地逻辑
+    if (!canSelete) {
+        event.preventDefault();
+        showToast('当前选择的路径下，没有可删除的配置文件', 'warning');
+    }
+});
+document.getElementById('deleteConfigButton').addEventListener('htmx:afterRequest', function (event) {
+    // 只对ID为myButton的请求进行监听
+    if (event.detail.successful) {
+        showToast('删除设置文件成功！', 'info');
+    } else {
+        showToast('删除设置文件失败', 'error');
+    }
+});
+</script>
+	</div>
+}

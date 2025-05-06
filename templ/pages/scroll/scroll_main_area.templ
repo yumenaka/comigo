@@ -22,6 +22,12 @@ func ImageSrc(Url string) string {
 	return fmt.Sprintf(`'%s' + (%s) + (%s) + (%s)`, Url, autoCrop, autoResize, noCache)
 }
 
+func HtmxStaticImage(Url string) string {
+	hxGet := Url + "&base64=true"
+	HtmxStaticImage := fmt.Sprintf(`<div hx-get='%s' hx-trigger="load" hx-swap="innerHTML" class="w-full m-0"></div>`, hxGet)
+	return HtmxStaticImage
+}
+
 // ScrollMainArea 定义 BodyHTML
 // 需要更复杂的屏幕状态判断的时候，可以参考：https://developer.mozilla.org/zh-CN/docs/Web/API/Screen/orientation
 // orientation: (screen.orientation || {}).type ||  screen.mozOrientation || screen.msOrientation
@@ -38,8 +44,8 @@ templ MainArea(s *state.GlobalState, book *model.Book, paginationIndex int) {
 		class="flex flex-col items-center justify-center flex-1 w-full max-w-full pt-0 bg-base-100 text-base-content"
 		:class="(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') ? ($store.global.bgPattern !== 'none'?$store.global.bgPattern+' bg-base-300':'bg-base-300'):($store.global.bgPattern !== 'none'?$store.global.bgPattern:'')"
 	>
-		if paginationIndex >= 1 && book.PageCount/32+1 != 1{
-		    @ScrollPagination(s, book, paginationIndex)
+		if paginationIndex >= 1 && book.PageCount/32+1 != 1 {
+			@ScrollPagination(s, book, paginationIndex)
 		}
 		for key, image := range book.Pages.Images {
 			if paginationIndex < 1 || (paginationIndex >= 1 && key/32 + 1 == paginationIndex) {
@@ -51,15 +57,18 @@ templ MainArea(s *state.GlobalState, book *model.Book, paginationIndex int) {
 						<div hx-get={ image.Url } hx-trigger="load" hx-swap="innerHTML" class="w-full m-0"></div>
 					}
 					if !strings.Contains(image.Url, "hidden.")&& !strings.Contains(image.Url, ".html") {
-						<img
-							x-data={ ImageXData(image.Url) }
-							class="w-full manga_image min-h-16 text-center"
-							draggable="false"
-							:src={ ImageSrc(image.Url) }
-							@load="isDoublePage=$event.target.naturalWidth > $event.target.naturalHeight;"
-							:style="{ width: $store.global.isLandscape?($store.scroll.widthUseFixedValue? (isDoublePage ? $store.scroll.doublePageWidth_PX +'px': $store.scroll.singlePageWidth_PX +'px'): (isDoublePage ? $store.scroll.doublePageWidth_Percent + '%':$store.scroll.singlePageWidth_Percent + '%')): $store.scroll.portraitWidthPercent+'%', maxWidth: '100%'}"
-							alt={ "" }
-						/>
+						if !s.GetStaticFileMode() {
+							<img
+								x-data={ ImageXData(image.Url) }
+								class="w-full manga_image min-h-16 text-center select-none"
+								draggable="false"
+								:src={ ImageSrc(image.Url) }
+								@load="isDoublePage=$event.target.naturalWidth > $event.target.naturalHeight;"
+								:style="{ width: $store.global.isLandscape?($store.scroll.widthUseFixedValue? (isDoublePage ? $store.scroll.doublePageWidth_PX +'px': $store.scroll.singlePageWidth_PX +'px'): (isDoublePage ? $store.scroll.doublePageWidth_Percent + '%':$store.scroll.singlePageWidth_Percent + '%')): $store.scroll.portraitWidthPercent+'%', maxWidth: '100%'}"
+							/>
+						} else {
+							@templ.Raw(HtmxStaticImage(image.Url))
+						}
 					}
 					<template x-if="$store.scroll.showPageNum">
 						<div class="w-full mt-0 mb-1 text-sm font-semibold text-center page_hint ">{ fmt.Sprintf("%d / %d", key+1,book.BookInfo.PageCount) }</div>
@@ -67,12 +76,12 @@ templ MainArea(s *state.GlobalState, book *model.Book, paginationIndex int) {
 				</div>
 			}
 		}
-		if paginationIndex >= 1 && book.PageCount/32+1 != 1{
-		    @ScrollPagination(s, book, paginationIndex)
+		if paginationIndex >= 1 && book.PageCount/32+1 != 1 {
+			@ScrollPagination(s, book, paginationIndex)
 		}
 	</div>
 	<button id="BackTopButton" style="display: none" class="fixed flex items-center justify-center w-10 h-10 text-white bg-blue-500 rounded-full shadow-lg bottom-4 right-4">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256 48C141.13 48 48 141.13 48 256s93.13 208 208 208s208-93.13 208-208S370.87 48 256 48zm96 270.63l-96-96l-96 96L137.37 296L256 177.37L374.63 296z" fill="currentColor"></path></svg>
+		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256 48C141.13 48 48 141.13 48 256s93.13 208 208 208s208-93.13 208-208S370.87 48 256 48zm96 270.63l-96-96l-96 96L137.37 296L256 177.37L374.63 296z" fill="currentColor"></path></svg>
 	</button>
 	<style>
     /* https://developer.mozilla.org/zh-CN/docs/Web/CSS/object-fit */

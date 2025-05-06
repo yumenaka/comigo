@@ -9,10 +9,9 @@ templ LoginMainArea(s *state.GlobalState) {
 				<h2 class="mt-6 text-3xl font-extrabold text-gray-900" x-text="i18next.t('login_title')"></h2>
 				<p class="mt-2 text-sm text-gray-600" x-text="i18next.t('login_subtitle')"></p>
 			</div>
-			
 			<div x-data="{ error: '', loading: false }" class="mt-8">
 				<div x-show="error" x-transition class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-					<span class="block sm:inline" x-text="error"></span>
+					<div class="block sm:inline" x-html="error"></div>
 					<span class="absolute top-0 bottom-0 right-0 px-4 py-3" @click="error = ''">
 						<svg class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>关闭</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
 					</span>
@@ -33,12 +32,16 @@ templ LoginMainArea(s *state.GlobalState) {
 					})
 					.then(res => {
 						if (!res.ok) {
-							throw new Error(i18next.t('login_failed'));
+						    if (res.status === 418) {
+						        throw new Error(i18next.t('login_error_teapot'));
+                            }else{
+                                // 处理其他错误
+                        	    throw new Error(i18next.t('login_failed'));
+                            }
 						}
 						return res.json();
 					})
 					.then(data => {
-						// 不再需要存储token到localStorage
 						// 直接跳转到首页
 						window.location.href = '/';
 					})
@@ -49,14 +52,16 @@ templ LoginMainArea(s *state.GlobalState) {
 						loading = false;
 					})
 				">
+				    <!-- 目前允许账户与密码为空。以后禁止的话，加  required 即可 -->
 					<div class="rounded-md shadow-sm -space-y-px">
 						<div>
 							<label for="username" class="sr-only" x-text="i18next.t('Username')"></label>
-							<input id="username" x-ref="username" name="username" type="text" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" x-bind:placeholder="i18next.t('Username')"/>
+							<input id="username" x-ref="username" name="username" type="text" class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" x-bind:placeholder="i18next.t('Username')"/>
 						</div>
 						<div>
+
 							<label for="password" class="sr-only" x-text="i18next.t('Password')"></label>
-							<input id="password" x-ref="password" name="password" type="password" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" x-bind:placeholder="i18next.t('Password')"/>
+							<input id="password" x-ref="password" name="password" type="password" class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" x-bind:placeholder="i18next.t('Password')"/>
 						</div>
 					</div>
 					

@@ -78,7 +78,7 @@ func (b *BookInfo) initBookID() *BookInfo {
 	// 2. 仅包含字母数字符号，不包含特殊字符
 	// 3. 可以通过在任何文本编辑器和浏览器地址栏中双击鼠标来完全选择
 	// 4. 紧凑，生成的字符串比 Base32 短
-	b62 := base62.EncodeToString([]byte(md5string(md5string(tempStr))))
+	b62 := base62.EncodeToString([]byte(util.Md5string(util.Md5string(tempStr))))
 	b.BookID = getShortBookID(b62, 7)
 	return b
 }
@@ -375,9 +375,7 @@ func (b *BookInfo) GetCover() MediaFileInfo {
 		if err != nil || len(tempBook.Pages.Images) == 0 {
 			return MediaFileInfo{Name: "unknown.png", Url: "/images/unknown.png"}
 		}
-		for _, v := range tempBook.Pages.Images {
-			return v
-		}
+		return tempBook.GuestCover()
 	case TypePDF:
 		return MediaFileInfo{Name: "1.jpg", Url: "/api/get_file?id=" + b.BookID + "&filename=" + "1.jpg"}
 	case TypeVideo:

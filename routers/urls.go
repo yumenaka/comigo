@@ -12,10 +12,10 @@ import (
 	"github.com/yumenaka/comigo/routers/login"
 	"github.com/yumenaka/comigo/routers/upload_api"
 	"github.com/yumenaka/comigo/routers/websocket"
-	"github.com/yumenaka/comigo/templ/pages/admin_page"
 	"github.com/yumenaka/comigo/templ/pages/flip"
 	"github.com/yumenaka/comigo/templ/pages/login_page"
 	"github.com/yumenaka/comigo/templ/pages/scroll"
+	"github.com/yumenaka/comigo/templ/pages/settings"
 	"github.com/yumenaka/comigo/templ/pages/shelf"
 	"github.com/yumenaka/comigo/templ/pages/upload_page"
 )
@@ -34,7 +34,7 @@ func BindURLs() {
 	privateAPI := publicAPI.Group("")
 
 	// echo jwt简明教程，还有google登录示例：https://echo.labstack.com/docs/cookbook/jwt
-	if config.GetPassword() != "" {
+	if config.GetRequiresLogin() {
 		// jwtConfig格式参考：https://echo.labstack.com/docs/middleware/jwt#configuration
 		jwtConfig := echojwt.Config{
 			NewClaimsFunc: func(c echo.Context) jwt.Claims {
@@ -90,7 +90,7 @@ func bindProtectedView(group *echo.Group) {
 	// 上传页面
 	group.GET("/upload", upload_page.Handler)
 	// 设置页面
-	group.GET("/settings", admin_page.Handler)
+	group.GET("/settings", settings.Handler)
 }
 
 // bindProtectedAPI 注册需要认证的路由
@@ -135,14 +135,14 @@ func bindProtectedAPI(group *echo.Group) {
 	group.GET("/ws", websocket.WsHandler)
 	// 新加的 HTMX 相关路由
 	group.GET("/shelf/:id", shelf.GetBookListHandler)
-	group.GET("/htmx/settings/tab1", admin_page.Tab1)
-	group.GET("/htmx/settings/tab2", admin_page.Tab2)
-	group.GET("/htmx/settings/tab3", admin_page.Tab3)
-	group.POST("/update-string_config", admin_page.UpdateStringConfigHandler)
-	group.POST("/update-bool-config", admin_page.UpdateBoolConfigHandler)
-	group.POST("/update-number-config", admin_page.UpdateNumberConfigHandler)
-	group.POST("/delete-array-config", admin_page.DeleteArrayConfigHandler)
-	group.POST("/add-array-config", admin_page.AddArrayConfigHandler)
-	group.POST("/config-save", admin_page.HandleConfigSave)
-	group.POST("/config-delete", admin_page.HandleConfigDelete)
+	group.GET("/htmx/settings/tab1", settings.Tab1)
+	group.GET("/htmx/settings/tab2", settings.Tab2)
+	group.GET("/htmx/settings/tab3", settings.Tab3)
+	group.POST("/update-string_config", settings.UpdateStringConfigHandler)
+	group.POST("/update-bool-config", settings.UpdateBoolConfigHandler)
+	group.POST("/update-number-config", settings.UpdateNumberConfigHandler)
+	group.POST("/delete-array-config", settings.DeleteArrayConfigHandler)
+	group.POST("/add-array-config", settings.AddArrayConfigHandler)
+	group.POST("/config-save", settings.HandleConfigSave)
+	group.POST("/config-delete", settings.HandleConfigDelete)
 }
