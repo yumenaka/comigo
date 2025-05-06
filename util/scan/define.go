@@ -24,24 +24,19 @@ type ConfigInterface interface {
 }
 
 type Option struct {
-	ReScanFile bool // 是否重新扫描文件
-	Cfg        ConfigInterface
+	Cfg ConfigInterface
 }
 
-func NewOption(
-	reScanFile bool,
-	scanConfig ConfigInterface,
-) Option {
+func NewOption(scanConfig ConfigInterface) Option {
 	return Option{
-		ReScanFile: reScanFile,
-		Cfg:        scanConfig,
+		Cfg: scanConfig,
 	}
 }
 
 // IsSupportTemplate 判断压缩包内的文件是否是支持的模板文件
 func (o *Option) IsSupportTemplate(checkPath string) bool {
 	for _, ex := range o.Cfg.GetSupportTemplateFile() {
-		suffix := strings.ToLower(path.Ext(checkPath)) //strings.ToLower():某些文件会用大写文件名
+		suffix := strings.ToLower(path.Ext(checkPath)) // strings.ToLower():某些文件会用大写文件名
 		if ex == suffix {
 			return true
 		}
@@ -52,7 +47,7 @@ func (o *Option) IsSupportTemplate(checkPath string) bool {
 // IsSupportMedia 判断文件是否需要展示
 func (o *Option) IsSupportMedia(checkPath string) bool {
 	for _, ex := range o.Cfg.GetSupportMediaType() {
-		suffix := strings.ToLower(path.Ext(checkPath)) //strings.ToLower():某些文件会用大写文件名
+		suffix := strings.ToLower(path.Ext(checkPath)) // strings.ToLower():某些文件会用大写文件名
 		if ex == suffix {
 			return true
 		}
@@ -63,7 +58,7 @@ func (o *Option) IsSupportMedia(checkPath string) bool {
 // IsSupportFile 判断压缩包内的文件是否需要展示
 func (o *Option) IsSupportFile(checkPath string) bool {
 	for _, ex := range o.Cfg.GetSupportFileType() {
-		suffix := strings.ToLower(path.Ext(checkPath)) //strings.ToLower():某些文件会用大写文件名
+		suffix := strings.ToLower(path.Ext(checkPath)) // strings.ToLower():某些文件会用大写文件名
 		if ex == suffix {
 			return true
 		}

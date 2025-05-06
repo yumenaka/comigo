@@ -195,7 +195,7 @@ func AddArrayConfigHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "add error")
 	}
 
-	updatedHTML := StringArrayConfig(configName, values, configName+"_Description")
+	updatedHTML := StringArrayConfig(configName, values, configName+"_Description", false)
 	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
@@ -237,7 +237,7 @@ func DeleteArrayConfigHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, configName+" delete Failed")
 	}
 
-	updatedHTML := StringArrayConfig(configName, values, configName+"_Description")
+	updatedHTML := StringArrayConfig(configName, values, configName+"_Description", false)
 	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}

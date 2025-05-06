@@ -375,9 +375,7 @@ func (b *BookInfo) GetCover() MediaFileInfo {
 		if err != nil || len(tempBook.Pages.Images) == 0 {
 			return MediaFileInfo{Name: "unknown.png", Url: "/images/unknown.png"}
 		}
-		for _, v := range tempBook.Pages.Images {
-			return v
-		}
+		return tempBook.GuestCover()
 	case TypePDF:
 		return MediaFileInfo{Name: "1.jpg", Url: "/api/get_file?id=" + b.BookID + "&filename=" + "1.jpg"}
 	case TypeVideo:
