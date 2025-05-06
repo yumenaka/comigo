@@ -311,7 +311,7 @@ func Header(prop HeaderProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "</div><!-- 全屏按钮 --><div id=\"FullScreenIcon\" onclick=\"if (Screenfull.isEnabled) {Screenfull.toggle()} else {showToast(i18next.t(&#39;not_support_fullscreen&#39;))}\" class=\"flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "</div><!-- 全屏按钮 --><div id=\"FullScreenIcon\" onclick=\"\" class=\"flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -327,7 +327,7 @@ func Header(prop HeaderProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "</div></div></header>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "</div></div><script type=\"module\">\n          // 封装统一的全屏切换\n          async function toggleFullscreen() {\n            //  ──在 Wails 环境──────────────────────────\n            if(window.runtime){\n                // 判断是否在 Wails 环境中\n                window.runtime.WindowFullscreen()\n                if (window.runtime.isFullscreen()) {\n                    window.runtime.WindowUnfullscreen()\n                } else {\n                    window.runtime.WindowFullscreen()\n                }\n            }else{\n                // ──在普通浏览器──────────────────────────\n                if (Screenfull.isEnabled) {\n                    Screenfull.toggle()\n                    console.log(\"切换全屏成功\")\n                } else {\n                    showToast(i18next.t('not_support_fullscreen'))\n                }\n            }\n          }\n          // 绑到按钮\n          document.getElementById(\"FullScreenIcon\").addEventListener(\"click\", toggleFullscreen);\n        </script></header>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

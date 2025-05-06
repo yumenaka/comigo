@@ -224,7 +224,7 @@ templ Header(prop HeaderProps) {
 				@svg.QRCode()
 			</div>
 			<!-- 全屏按钮 -->
-			<div id="FullScreenIcon" onclick="if (Screenfull.isEnabled) {Screenfull.toggle()} else {showToast(i18next.t('not_support_fullscreen'))}" class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
+			<div id="FullScreenIcon" onclick="" class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
 				@svg.FullScreen()
 			</div>
 			<!-- 阅读器设定,点击屏幕中央也可以打开  可自定义方向 -->
@@ -234,5 +234,31 @@ templ Header(prop HeaderProps) {
 				@svg.Setting()
 			</div>
 		</div>
+		<script type="module">
+          // 封装统一的全屏切换
+          async function toggleFullscreen() {
+            //  ──在 Wails 环境──────────────────────────
+            if(window.runtime){
+                // 判断是否在 Wails 环境中
+                window.runtime.WindowFullscreen()
+                // MacOS 上的全屏模式无法退出全屏？
+                //if (window.runtime.isFullscreen()) {
+                //    window.runtime.WindowUnfullscreen()
+                //} else {
+                //    window.runtime.WindowFullscreen()
+                //}
+            }else{
+                // ──在普通浏览器──────────────────────────
+                if (Screenfull.isEnabled) {
+                    Screenfull.toggle()
+                    console.log("切换全屏成功")
+                } else {
+                    showToast(i18next.t('not_support_fullscreen'))
+                }
+            }
+          }
+          // 绑到按钮
+          document.getElementById("FullScreenIcon").addEventListener("click", toggleFullscreen);
+        </script>
 	</header>
 }

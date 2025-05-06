@@ -31,6 +31,12 @@ body::-webkit-scrollbar {
   display: none;
 }
 
+/*!*Overscroll 是当您滚动超出页面内容边界时有时会获得的“弹跳效果”。 这在移动应用程序中很常见。 用 CSS 禁用(会导致)：*!*/
+/*html {*/
+/*  height: 100%;*/
+/*  overflow: hidden;*/
+/*}*/
+
 body {
   /* 2. 针对 Firefox */
   scrollbar-width: none; /* Firefox */
