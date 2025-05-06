@@ -18,7 +18,7 @@ func SFTP(scanOption Option) (newBookList []*model.Book, err error) {
 	if err != nil {
 		fmt.Println(err)
 		panic(err)
-		//return nil, err
+		// return nil, err
 	}
 	defer func(conn net.Conn) {
 		err := conn.Close()
@@ -55,24 +55,24 @@ func SFTP(scanOption Option) (newBookList []*model.Book, err error) {
 			fmt.Println(err)
 		}
 	}(fs)
-	////fs.DirFS(".") 创建一个表示当前目录(".")的文件系统。"." 表示当前工作目录
-	//// iofs.Glob(fs.DirFS("."), "*") 调用Glob函数在当前目录下搜索匹配给定模式的文件名。"*" 模式意味着匹配所有文件和目录。
-	//matches, err := iofs.Glob(fs.DirFS("test"), "*")
-	//if err != nil {
+	// //fs.DirFS(".") 创建一个表示当前目录(".")的文件系统。"." 表示当前工作目录
+	// // iofs.Glob(fs.DirFS("."), "*") 调用Glob函数在当前目录下搜索匹配给定模式的文件名。"*" 模式意味着匹配所有文件和目录。
+	// matches, err := iofs.Glob(fs.DirFS("test"), "*")
+	// if err != nil {
 	//	panic(err)
-	//}
-	//for _, match := range matches {
+	// }
+	// for _, match := range matches {
 	//	fmt.Println(match)
-	//}
+	// }
 
 	// iofs.WalkDir(fs.DirFS("."), ".", func...) 调用WalkDir函数遍历当前目录（以及其下的所有子目录）中的所有文件和目录。
 	err = iofs.WalkDir(
-		//fs.DirFS(".") 指定特定目录作为遍历的起点。"." 表示当前工作目录。
+		// fs.DirFS(".") 指定特定目录作为遍历的起点。"." 表示当前工作目录。
 		fs.DirFS("test"),
 		".",
-		//对于目录中的每一个项（无论是文件还是目录），指定的函数都会被调用。
+		// 对于目录中的每一个项（无论是文件还是目录），指定的函数都会被调用。
 		func(path string, d iofs.DirEntry, err error) error {
-			//这个函数接收三个参数：path（项的路径），d（一个DirEntry对象，表示文件或目录的信息），和err（如果在访问该项时出现错误）
+			// 这个函数接收三个参数：path（项的路径），d（一个DirEntry对象，表示文件或目录的信息），和err（如果在访问该项时出现错误）
 			fmt.Println(path, d, err)
 			return nil
 		})
@@ -80,17 +80,17 @@ func SFTP(scanOption Option) (newBookList []*model.Book, err error) {
 		panic(err)
 	}
 
-	//// 路径不存在的Error，不过目前并不会打印出来
-	//if !util.PathExists(storePath) {
+	// // 路径不存在的Error，不过目前并不会打印出来
+	// if !util.PathExists(storePath) {
 	//	return nil, errors.New(locale.GetString("path_not_exist"))
-	//}
-	//storePathAbs, err := filepath.Abs(storePath)
-	//if err != nil {
+	// }
+	// storePathAbs, err := filepath.Abs(storePath)
+	// if err != nil {
 	//	storePathAbs = storePath
 	//	logger.Infof("%s", err)
-	//}
-	//logger.Infof(locale.GetString("scan_start_hint")+"%s", storePathAbs)
-	//err = filepath.Walk(storePathAbs, func(walkPath string, fileInfo os.MediaFileInfo, err error) error {
+	// }
+	// logger.Infof(locale.GetString("scan_start_hint")+"%s", storePathAbs)
+	// err = filepath.Walk(storePathAbs, func(walkPath string, fileInfo os.MediaFileInfo, err error) error {
 	//	if !scanOption.ReScanFile {
 	//		for _, p := range types.GetArchiveBooks() {
 	//			AbsW, err := filepath.Abs(walkPath) // 取得绝对路径
@@ -146,11 +146,11 @@ func SFTP(scanOption Option) (newBookList []*model.Book, err error) {
 	//		newBookList = append(newBookList, getBook)
 	//	}
 	//	return nil
-	//})
-	//// 所有可用书籍，包括压缩包与文件夹
-	//if len(newBookList) > 0 {
-	//	logger.Infof(locale.GetString("found_in_path"), len(newBookList), storePathAbs)
-	//}
-	//return newBookList, err
+	// })
+	// // 所有可用书籍，包括压缩包与文件夹
+	// if len(newBookList) > 0 {
+	//	logger.Infof(locale.GetString("found_in_path"), storePathAbs, len(newBookList))
+	// }
+	// return newBookList, err
 	return newBookList, err
 }
