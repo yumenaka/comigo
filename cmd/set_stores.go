@@ -31,11 +31,7 @@ func ScanStore(args []string) {
 	// 2、设置默认书库路径：扫描CMD指定的路径，或添加当前文件夹为默认路径。
 	SetStorePath(args)
 	// 3、扫描配置文件里面的书库路径
-	option := scan.NewOption(
-		true,
-		config.GetCfg(),
-	)
-	err := scan.InitAllStore(option)
+	err := scan.InitAllStore(scan.NewOption(config.GetCfg()))
 	if err != nil {
 		logger.Infof("Failed to scan store path: %v", err)
 	}
