@@ -12,7 +12,7 @@ import (
 
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/mem"
-	"github.com/yumenaka/comigo/util/locale"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/util/logger"
 	httpChecker "wait4x.dev/v3/checker/http"
 	"wait4x.dev/v3/waiter"
@@ -38,7 +38,7 @@ func CheckPort(port int) bool {
 		logger.Infof(locale.GetString("check_port_error"), port)
 		return false
 	}
-	//logger.Infof("TCP Port %q is available", port)
+	// logger.Infof("TCP Port %q is available", port)
 	return true
 }
 
@@ -124,24 +124,24 @@ func OpenBrowser(uri string) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	//// Create custom HTTP headers
-	//headers := http.Header{}
-	//headers.Add("Authorization", "Bearer my-token")
-	//headers.Add("Content-Type", "application/json")
+	// // Create custom HTTP headers
+	// headers := http.Header{}
+	// headers.Add("Authorization", "Bearer my-token")
+	// headers.Add("Content-Type", "application/json")
 
-	//// Prepare a request body
-	//requestBody := strings.NewReader(`{"query": "status"}`)
+	// // Prepare a request body
+	// requestBody := strings.NewReader(`{"query": "status"}`)
 
 	// Create an HTTP checker with multiple validations
 	checker := httpChecker.New(
 		uri,
 		httpChecker.WithTimeout(3*time.Second),
 		httpChecker.WithExpectStatusCode(200),
-		//httpChecker.WithExpectBodyJSON("status"), // Check that 'status' field exists in JSON
-		//httpChecker.WithExpectBodyRegex(`"healthy":\s*true`), // Regex to check response
-		//httpChecker.WithExpectHeader("Content-Type=application/json"),
-		//httpChecker.WithRequestHeaders(headers),
-		//httpChecker.WithRequestBody(requestBody),
+		// httpChecker.WithExpectBodyJSON("status"), // Check that 'status' field exists in JSON
+		// httpChecker.WithExpectBodyRegex(`"healthy":\s*true`), // Regex to check response
+		// httpChecker.WithExpectHeader("Content-Type=application/json"),
+		// httpChecker.WithRequestHeaders(headers),
+		// httpChecker.WithRequestBody(requestBody),
 		httpChecker.WithInsecureSkipTLSVerify(true), // Skip TLS verification
 	)
 
@@ -180,15 +180,15 @@ func OpenBrowser(uri string) {
 // SystemStatus Documentation: https://pkg.go.dev/github.com/shirou/gopsutil
 // 获取服务器当前状况
 type SystemStatus struct {
-	//CPU相关
+	// CPU相关
 	CPUNumLogical  int     `json:"cpu_num_logical_total"`
 	CPUNumPhysical int     `json:"cpu_num_physical"`
 	CPUUsedPercent float64 `json:"cpu_used_percent"`
-	//内存相关
+	// 内存相关
 	MemoryTotal       uint64  `json:"memory_total"`
 	MemoryFree        uint64  `json:"memory_free"`
 	MemoryUsedPercent float64 `json:"memory_used_percent"`
-	//设备描述
+	// 设备描述
 	Description string `json:"description"`
 }
 
@@ -202,7 +202,7 @@ func GetSystemStatus() SystemStatus {
 		MemoryFree:        0.0,
 		MemoryUsedPercent: 0,
 	}
-	//获取物理和逻辑核数,以及CPU、内存整体使用率
+	// 获取物理和逻辑核数,以及CPU、内存整体使用率
 	CPUNumLogical, err := cpu.Counts(true)
 	if err != nil {
 		logger.Infof("%s", err)
@@ -219,15 +219,15 @@ func GetSystemStatus() SystemStatus {
 	if err != nil {
 		logger.Infof("%s", err)
 	} else {
-		//p := 0.0
-		//if len(CPUUsedPercent) > 1 {
+		// p := 0.0
+		// if len(CPUUsedPercent) > 1 {
 		//	for _, value := range CPUUsedPercent {
 		//		p += value
 		//	}
 		//	p = p / float64(len(CPUUsedPercent))
-		//} else if len(CPUUsedPercent) == 1 {
+		// } else if len(CPUUsedPercent) == 1 {
 		//	p = CPUUsedPercent[0]
-		//}
+		// }
 		sys.CPUUsedPercent = CPUUsedPercent[0]
 	}
 	v, err := mem.VirtualMemory()
@@ -238,20 +238,20 @@ func GetSystemStatus() SystemStatus {
 		sys.MemoryFree = v.Free
 		sys.MemoryUsedPercent = v.UsedPercent
 	}
-	//// almost every return value is a struct
-	//logger.Infof("Total: %v, Free:%v, UsedPercent:%f%%\n", v.Total, v.Free, v.UsedPercent)
-	//// convert to JSON. String() is also implemented
-	//logger.Infof(v)
+	// // almost every return value is a struct
+	// logger.Infof("Total: %v, Free:%v, UsedPercent:%f%%\n", v.Total, v.Free, v.UsedPercent)
+	// // convert to JSON. String() is also implemented
+	// logger.Infof(v)
 
-	//hostname, err := os.Hostname()
-	//if err == nil {
+	// hostname, err := os.Hostname()
+	// if err == nil {
 	//	logger.Infof(hostname)
-	//}
+	// }
 	return sys
 }
 
-//// 获取mac地址列表,暂时用不着
-//func GetMacAddrList() (macAddrList []string) {
+// // 获取mac地址列表,暂时用不着
+// func GetMacAddrList() (macAddrList []string) {
 //	netInterfaces, err := net.Interfaces()
 //	if err != nil {
 //		logger.Infof(locale.GetString("check_mac_error")+": %v", err)
@@ -271,24 +271,24 @@ func GetSystemStatus() SystemStatus {
 //		}
 //	}
 //	return macAddrList
-//}
+// }
 
 // ServerStatus 服务器当前状况
 type ServerStatus struct {
-	ServerName            string       //服务器描述
+	ServerName            string       // 服务器描述
 	ServerHost            string       //
 	ServerPort            int          //
-	NumberOfBooks         int          //当前拥有的书籍总数
-	NumberOfOnLineUser    int          //TODO：在线用户数
-	NumberOfOnLineDevices int          //TODO：在线设备数
+	NumberOfBooks         int          // 当前拥有的书籍总数
+	NumberOfOnLineUser    int          // TODO：在线用户数
+	NumberOfOnLineDevices int          // TODO：在线设备数
 	SupportUploadFile     bool         //
-	ClientIP              string       //客户端IP
-	OSInfo                SystemStatus //系统信息
+	ClientIP              string       // 客户端IP
+	OSInfo                SystemStatus // 系统信息
 }
 
 func GetServerInfo(configHost string, comigoVersion string, configPort int, configEnableUpload bool, allBooksNumber int) *ServerStatus {
 	serverName := "Comigo " + comigoVersion
-	//本机首选出站IP
+	// 本机首选出站IP
 	OutIP := GetOutboundIP().String()
 	host := ""
 	if configHost == "" {
@@ -308,7 +308,7 @@ func GetServerInfo(configHost string, comigoVersion string, configPort int, conf
 
 func GetAllServerInfo(configHost string, comigoVersion string, configPort int, configEnableUpload bool, allBooksNumber int, clientIP string) *ServerStatus {
 	serverName := "Comigo " + comigoVersion
-	//本机首选出站IP
+	// 本机首选出站IP
 	host := ""
 	if configHost == "" {
 		host = GetOutboundIP().String()

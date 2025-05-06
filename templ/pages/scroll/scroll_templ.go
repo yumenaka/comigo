@@ -73,7 +73,7 @@ func ScrollPage(s *state.GlobalState, book *model.Book, paginationIndex int) tem
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = common.Drawer(s.ServerStatus.ServerHost, DrawerSlot()).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.Drawer(s.ServerStatus.ServerHost, DrawerSlot(s, book)).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

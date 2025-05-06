@@ -19,6 +19,21 @@ templ Drawer(serverHost string, slot templ.Component) {
 			>
 				<img class="w-6 h-6 mx-2 border border-dotted rounded-full shadow-xl border-stone-500 outline-offset-4" draggable="false" src="/images/favicon.png" alt="favicon"/>
 				<div x-text="i18next.t('reader_settings')">阅读设置</div>
+				<button
+                    type="button"
+					id="logout_button"
+                    class="ml-2 mb-0 px-1 py-1 text-xs text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                    @click="if(window.confirm(i18next.t('confirm_logout'))) { document.cookie = 'jwt_token=; Max-Age=-99999999; path=/;'; window.location.reload(); }"
+                    x-data="{ 
+                        isLoggedIn: false,
+                        checkLoginStatus() {
+                            const jwtCookie = document.cookie.split(';').find(c => c.trim().startsWith('jwt_token='));
+                            this.isLoggedIn = !!jwtCookie && jwtCookie.trim() !== 'jwt_token=';
+                        }
+                    }"
+                    x-init="checkLoginStatus()"
+                    x-show="isLoggedIn"
+                >logout</button>
 			</h5>
 			<button
 				type="button"
@@ -42,9 +57,10 @@ templ Drawer(serverHost string, slot templ.Component) {
 			<!-- 清除localStorage保存的本地设置-->
 			<button
 				type="button"
+				id="reset_local_settings_button"
 				x-data="{ buttonText: i18next.t('reset_local_settings') }"
 				x-text="buttonText"
-				x-on:click="localStorage.clear();location.reload();"
+				x-on:click="if(window.confirm(i18next.t('confirm_reset_settings'))) { localStorage.clear(); location.reload(); }"
 				class="mb-2 px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
 			>
 				重置本地设置

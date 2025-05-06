@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
-	"github.com/yumenaka/comigo/util/locale"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/util/logger"
 )
 

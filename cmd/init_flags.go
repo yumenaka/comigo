@@ -7,8 +7,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
-	"github.com/yumenaka/comigo/util/locale"
 )
 
 // cobra & viper sample:
@@ -27,12 +27,18 @@ func InitFlags() {
 	cfg := config.GetCfg()
 	cobra.MousetrapHelpText = ""       // 屏蔽鼠标提示，支持拖拽、双击运行
 	cobra.MousetrapDisplayDuration = 5 // "这是命令行程序"的提醒表示时间
-	RootCmd.PersistentFlags().BoolVar(&cfg.AutoRescan, "rescan", true, locale.GetString("rescan"))
+	// // 后台运行相关
+	// if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
+	// 	RootCmd.PersistentFlags().BoolVar(&DemonFlag, "start", false, locale.GetString("start_in_background"))
+	// 	RootCmd.PersistentFlags().BoolVar(&StopDaemonFlag, "stop", false, locale.GetString("stop_background"))
+	// }
 	// 启用登陆保护，需要输入用户名、密码。
-	RootCmd.PersistentFlags().BoolVar(&cfg.EnableLogin, "login", false, locale.GetString("enable_login"))
-	RootCmd.PersistentFlags().StringVarP(&cfg.Username, "username", "u", "admin", locale.GetString("username"))
+	RootCmd.PersistentFlags().BoolVar(&cfg.RequiresLogin, "login", false, locale.GetString("requires_login"))
+	RootCmd.PersistentFlags().StringVarP(&cfg.Username, "username", "u", "", locale.GetString("username"))
 	RootCmd.PersistentFlags().StringVarP(&cfg.Password, "password", "k", "", locale.GetString("password"))
 	RootCmd.PersistentFlags().IntVarP(&cfg.Timeout, "timeout", "t", 60*24*30, locale.GetString("timeout"))
+	// 启用自动扫描
+	RootCmd.PersistentFlags().BoolVar(&cfg.AutoRescan, "rescan", true, locale.GetString("rescan"))
 	// TLS设定
 	RootCmd.PersistentFlags().BoolVar(&cfg.EnableTLS, "tls", false, locale.GetString("tls_enable"))
 	RootCmd.PersistentFlags().StringVar(&cfg.CertFile, "tls-crt", "", locale.GetString("tls_crt"))
@@ -45,6 +51,8 @@ func InitFlags() {
 	RootCmd.PersistentFlags().IntVarP(&cfg.Port, "port", "p", 1234, locale.GetString("port"))
 	// 本地Host
 	RootCmd.PersistentFlags().StringVar(&cfg.Host, "host", "", locale.GetString("local_host"))
+	// 是否开启静态文件模式。静态模式下，所有图片与脚本都打包html文件里，可以另存为单个网页（试验性功能，开发中）。
+	RootCmd.PersistentFlags().BoolVar(&cfg.StaticFileMode, "static", false, locale.GetString("static_file_mode"))
 	// DEBUG
 	RootCmd.PersistentFlags().BoolVar(&cfg.Debug, "debug", false, locale.GetString("debug_mode"))
 	// 启用文件上传功能

@@ -8,7 +8,7 @@ tmp_dir = "test/temp"
 
 [build]
 ## 运行的时候，需要传给二进制文件的参数。
-#  args_bin = ["./test","--username=aaa","--password=aaa"]
+#  args_bin = ["./test","--login","--username=aaa","--password=aaa"]
 args_bin = ["./test"]
 #二进制文件
 bin = "./test/temp/comi"

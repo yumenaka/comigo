@@ -36,7 +36,7 @@ func UpdateConfig(c echo.Context) error {
 	if err != nil {
 		logger.Infof("Failed to update local config: %v", err)
 	}
-	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等
+	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描书库等
 	BeforeConfigUpdate(&oldConfig, config.GetCfg())
 	// 返回成功消息
 	return c.JSON(http.StatusOK, map[string]string{"message": "Server settings updated successfully"})
@@ -45,9 +45,9 @@ func UpdateConfig(c echo.Context) error {
 // BeforeConfigUpdate 根据配置的变化，判断是否需要打开浏览器重新扫描等
 func BeforeConfigUpdate(oldConfig *config.Config, newConfig *config.Config) {
 	openBrowserIfNeeded(oldConfig, newConfig)
-	needScan, reScanFile := checkReScanStatus(oldConfig, newConfig)
-	if needScan {
-		startReScan(reScanFile)
+	needReScan := checkNeedReScan(oldConfig, newConfig)
+	if needReScan {
+		StartReScan()
 	} else {
 		if newConfig.Debug {
 			logger.Info("No changes in cfg, skipped scan store path\n")
@@ -65,40 +65,35 @@ func openBrowserIfNeeded(oldConfig *config.Config, newConfig *config.Config) {
 	}
 }
 
-// checkReScanStatus 检查旧的和新的配置是否需要更新，并返回需要重新扫描和重新扫描文件的布尔值
-func checkReScanStatus(oldConfig *config.Config, newConfig *config.Config) (reScanDir bool, reScanFile bool) {
+// checkNeedReScan 检查旧的和新的配置是否需要更新，并返回需要重新扫描和重新扫描文件的布尔值
+func checkNeedReScan(oldConfig *config.Config, newConfig *config.Config) (reScanStores bool) {
 	if !reflect.DeepEqual(oldConfig.LocalStores, newConfig.LocalStores) {
-		reScanDir = true
+		reScanStores = true
 	}
 	if oldConfig.MaxScanDepth != newConfig.MaxScanDepth {
-		reScanDir = true
+		reScanStores = true
 	}
 	if !reflect.DeepEqual(oldConfig.SupportMediaType, newConfig.SupportMediaType) {
-		reScanDir = true
-		reScanFile = true
+		reScanStores = true
 	}
 	if !reflect.DeepEqual(oldConfig.SupportFileType, newConfig.SupportFileType) {
-		reScanDir = true
+		reScanStores = true
 	}
 	if oldConfig.MinImageNum != newConfig.MinImageNum {
-		reScanDir = true
-		reScanFile = true
+		reScanStores = true
 	}
 	if !reflect.DeepEqual(oldConfig.ExcludePath, newConfig.ExcludePath) {
-		reScanDir = true
+		reScanStores = true
 	}
 	if oldConfig.EnableDatabase != newConfig.EnableDatabase {
-		reScanDir = true
+		reScanStores = true
 	}
 	return
 }
 
-// startReScan 扫描并相应地更新数据库
-func startReScan(reScanFile bool) {
-	option := scan.NewOption(
-		reScanFile,
-		config.GetCfg())
-	if err := scan.InitAllStore(option); err != nil {
+// StartReScan 扫描并相应地更新数据库
+func StartReScan() {
+	if err := scan.InitAllStore(scan.NewOption(config.GetCfg())); err != nil {
 		logger.Infof("Failed to scan store path: %v", err)
 	}
 	if config.GetEnableDatabase() {

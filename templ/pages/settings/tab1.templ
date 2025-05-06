@@ -1,0 +1,32 @@
+package settings
+
+import "github.com/yumenaka/comigo/templ/state"
+import "github.com/yumenaka/comigo/config"
+
+// htmx 是一个用于构建现代 web 应用程序的库，它使用无需刷新页面的 AJAX 技术。请求是通过 HTTP 发送的，但是 htmx 会处理响应并更新页面的部分内容，而不是整个页面。
+// https://htmx.org/docs/#parameters
+// 默认情况下，引起请求的元素将包含其值（如果有）。如果元素是一个表单，它将包含其中所有输入的值。
+// 与 HTML 表单一样，输入的 name 属性用作 htmx 发送的请求中的参数名称。
+// 此外，如果该元素导致非 GET 请求，则将包含最近的封闭表单的所有输入的值。
+// 此外，还可以使用 hx-vals（like: hx-vals='{"myVal": "My Value"}'）在请求中包含额外的值
+templ tab1(s *state.GlobalState) {
+<div class="flex flex-col justify-start w-5/6 md:w-3/5 min-w-[20rem] ">
+    @StringArrayConfig("LocalStores", state.ServerConfig.LocalStores, "LocalStores_Description",false)
+    @NumberConfig("MaxScanDepth", state.ServerConfig.MaxScanDepth,"MaxScanDepth_Description",0,65535,false)
+    @NumberConfig("MinImageNum", state.ServerConfig.MinImageNum,"MinImageNum_Description",0,65535,false)
+    @StringConfig("Username",state.ServerConfig.Username, "Username_Description",false)
+    @StringConfig("Password",state.ServerConfig.Password, "Password_Description",false)
+    @BoolConfig("RequiresLogin",state.ServerConfig.RequiresLogin, "RequiresLogin_Description",true)
+    @NumberConfig("Port",state.ServerConfig.Port,"Port_Description",0,65535,true)
+    @StringConfig("Host",state.ServerConfig.Host,"Host_Description",true)
+    @BoolConfig("DisableLAN",state.ServerConfig.DisableLAN,"DisableLAN_Description",true)
+    @NumberConfig("Timeout",state.ServerConfig.Timeout,"Timeout_Description",0,65535,true)
+    @BoolConfig("OpenBrowser",state.ServerConfig.OpenBrowser, "OpenBrowser_Description",false)
+    @BoolConfig("EnableUpload",state.ServerConfig.EnableUpload, "EnableUpload_Description",false)
+    @StringConfig("UploadPath", state.ServerConfig.UploadPath, "UploadPath_Description",false)
+    @StringArrayConfig("ExcludePath", state.ServerConfig.ExcludePath, "ExcludePath_Description",false)
+    @StringArrayConfig("SupportMediaType", state.ServerConfig.SupportMediaType, "SupportMediaType_Description",false)
+    @StringArrayConfig("SupportFileType", state.ServerConfig.SupportFileType, "SupportFileType_Description",false)
+    @ConfigManager(config.DefaultConfigLocation(),config.GetWorkingDirectoryConfig(), config.GetHomeDirectoryConfig(), config.GetProgramDirectoryConfig())
+</div>
+}

@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/yumenaka/comigo/util/locale"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
