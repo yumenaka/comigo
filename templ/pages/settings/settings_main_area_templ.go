@@ -42,7 +42,7 @@ func MainArea(s *state.GlobalState) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</a><!-- examples: https://htmx.org/examples/tabs-javascript/--><div id=\"tabs\" class=\"tabs flex items-center justify-center flex-1 p-0 m-0 text-sm font-semibold text-center truncate w-80 drop-shadow focus:relative\"><button role=\"tab\" aria-controls=\"tab-contents\" aria-selected=\"true\" hx-get=\"/api/htmx/settings/tab1\" class=\"tabs selected flex items-center justify-center min-w-20 mx-0.5 my-2 h-9 rounded\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</a><!-- examples: https://htmx.org/examples/tabs-javascript/--><div id=\"tabs\" class=\"tabs flex items-center justify-center flex-1 p-0 m-0 text-sm font-semibold text-center truncate w-80 drop-shadow focus:relative\"><button role=\"tab\" aria-controls=\"tab-contents\" aria-selected=\"true\" hx-get=\"/api/htmx/settings/tab-book\" class=\"tabs selected flex items-center justify-center min-w-20 mx-0.5 my-2 h-9 rounded\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -50,7 +50,15 @@ func MainArea(s *state.GlobalState) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<span x-text=\"i18next.t(&#39;book_shelf&#39;)\">Book</span></button><!-- 目前不需要tab2 --><!-- <button role=\"tab\" aria-controls=\"tab-contents\" aria-selected=\"false\" hx-get=\"/api/htmx/settings/tab2\"\n            class=\"tabs flex items-center justify-center min-w-20 mx-0.5 my-2 h-9 rounded\">\n            @svg.Network()\n            <span x-text=\"i18next.t('network')\">Network</span>\n        </button> --><button role=\"tab\" aria-controls=\"tab-contents\" aria-selected=\"false\" hx-get=\"/api/htmx/settings/tab3\" class=\"tabs flex items-center justify-center min-w-20 mx-0.5 my-2 h-9 rounded\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<span x-text=\"i18next.t(&#39;book_shelf&#39;)\">Book</span></button><!-- tab_network --><button role=\"tab\" aria-controls=\"tab-contents\" aria-selected=\"false\" hx-get=\"/api/htmx/settings/tab-net\" class=\"tabs flex items-center justify-center min-w-20 mx-0.5 my-2 h-9 rounded\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = svg.Network().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<span x-text=\"i18next.t(&#39;network&#39;)\">Network</span></button> <button role=\"tab\" aria-controls=\"tab-contents\" aria-selected=\"false\" hx-get=\"/api/htmx/settings/tab-labs\" class=\"tabs flex items-center justify-center min-w-20 mx-0.5 my-2 h-9 rounded\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -58,7 +66,7 @@ func MainArea(s *state.GlobalState) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<span x-text=\"i18next.t(&#39;labs&#39;)\">Lab</span></button></div><style>\n        button.tabs {\n            background-color: #b1b5bb;\n            --tw-text-opacity: 1;\n            color: #6b7280;\n            /* text-gray-500 */\n        }\n\n        button.tabs:hover {\n            --tw-text-opacity: 1;\n            color: #374151\n                /* text-gray-700 */\n            ;\n        }\n\n        button.tabs.selected {\n            background-color: #f9f9f9;\n            --tw-text-opacity: 1;\n            color: #3b82f6;\n            /* text-blue-500 */\n        }\n    </style><!-- qrcode icon--><div data-modal-target=\"qrcode-modal\" data-modal-toggle=\"qrcode-modal\" class=\"flex items-center justify-center w-10 h-10 mx-1 my-0 rounded hover:ring\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<span x-text=\"i18next.t(&#39;labs&#39;)\">Lab</span></button></div><style>\n        button.tabs {\n            background-color: #b1b5bb;\n            --tw-text-opacity: 1;\n            color: #6b7280;\n            /* text-gray-500 */\n        }\n\n        button.tabs:hover {\n            --tw-text-opacity: 1;\n            color: #374151\n                /* text-gray-700 */\n            ;\n        }\n\n        button.tabs.selected {\n            background-color: #f9f9f9;\n            --tw-text-opacity: 1;\n            color: #3b82f6;\n            /* text-blue-500 */\n        }\n    </style><!-- qrcode icon--><div data-modal-target=\"qrcode-modal\" data-modal-toggle=\"qrcode-modal\" class=\"flex items-center justify-center w-10 h-10 mx-1 my-0 rounded hover:ring\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -66,7 +74,7 @@ func MainArea(s *state.GlobalState) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div></header><div id=\"tab-contents\" role=\"tabpanel\" hx-get=\"/api/htmx/settings/tab1\" hx-trigger=\"load\" class=\"flex flex-col justify-start items-center flex-1 w-full h-full font-semibold text-lg text-base-content\" :class=\"(theme.toString() ===&#39;light&#39;||theme.toString() ===&#39;dark&#39;||theme.toString() ===&#39;retro&#39;||theme.toString() ===&#39;lofi&#39;||theme.toString() ===&#39;nord&#39;) ? ($store.global.bgPattern !== &#39;none&#39;?$store.global.bgPattern+&#39; bg-base-300&#39;:&#39;bg-base-300&#39;):($store.global.bgPattern !== &#39;none&#39;?$store.global.bgPattern:&#39;&#39;)\">Loading...</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div></header><div id=\"tab-contents\" role=\"tabpanel\" hx-get=\"/api/htmx/settings/tab-book\" hx-trigger=\"load\" class=\"flex flex-col justify-start items-center flex-1 w-full h-full font-semibold text-lg text-base-content\" :class=\"(theme.toString() ===&#39;light&#39;||theme.toString() ===&#39;dark&#39;||theme.toString() ===&#39;retro&#39;||theme.toString() ===&#39;lofi&#39;||theme.toString() ===&#39;nord&#39;) ? ($store.global.bgPattern !== &#39;none&#39;?$store.global.bgPattern+&#39; bg-base-300&#39;:&#39;bg-base-300&#39;):($store.global.bgPattern !== &#39;none&#39;?$store.global.bgPattern:&#39;&#39;)\">Loading...</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

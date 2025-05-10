@@ -32,8 +32,7 @@ func InitFlags() {
 	// 	RootCmd.PersistentFlags().BoolVar(&DemonFlag, "start", false, locale.GetString("start_in_background"))
 	// 	RootCmd.PersistentFlags().BoolVar(&StopDaemonFlag, "stop", false, locale.GetString("stop_background"))
 	// }
-	// 启用登陆保护，需要输入用户名、密码。
-	RootCmd.PersistentFlags().BoolVar(&cfg.RequiresLogin, "login", false, locale.GetString("requires_login"))
+	// 启用登陆保护，需要设定用户名
 	RootCmd.PersistentFlags().StringVarP(&cfg.Username, "username", "u", "", locale.GetString("username"))
 	RootCmd.PersistentFlags().StringVarP(&cfg.Password, "password", "k", "", locale.GetString("password"))
 	RootCmd.PersistentFlags().IntVarP(&cfg.Timeout, "timeout", "t", 60*24*30, locale.GetString("timeout"))

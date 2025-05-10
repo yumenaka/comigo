@@ -34,7 +34,7 @@ func BindURLs() {
 	privateAPI := publicAPI.Group("")
 
 	// echo jwt简明教程，还有google登录示例：https://echo.labstack.com/docs/cookbook/jwt
-	if config.GetRequiresLogin() {
+	if config.GetUsername() != "" && config.GetPassword() != "" {
 		// jwtConfig格式参考：https://echo.labstack.com/docs/middleware/jwt#configuration
 		jwtConfig := echojwt.Config{
 			NewClaimsFunc: func(c echo.Context) jwt.Claims {
@@ -79,18 +79,18 @@ func bindPublicAPI(group *echo.Group) {
 // bindProtectedView 注册需要登录的页面
 func bindProtectedView(group *echo.Group) {
 	// 主页
-	group.GET("/", shelf.Handler)
-	group.GET("/index.html", shelf.Handler)
+	group.GET("/", shelf.PageHandler)
+	group.GET("/index.html", shelf.PageHandler)
 	// 书架
-	group.GET("/shelf/:id", shelf.Handler)
+	group.GET("/shelf/:id", shelf.PageHandler)
 	// 卷轴模式
-	group.GET("/scroll/:id", scroll.Handler)
+	group.GET("/scroll/:id", scroll.PageHandler)
 	// 翻页模式
-	group.GET("/flip/:id", flip.Handler)
+	group.GET("/flip/:id", flip.PageHandler)
 	// 上传页面
-	group.GET("/upload", upload_page.Handler)
+	group.GET("/upload", upload_page.PageHandler)
 	// 设置页面
-	group.GET("/settings", settings.Handler)
+	group.GET("/settings", settings.PageHandler)
 }
 
 // bindProtectedAPI 注册需要认证的路由
@@ -135,12 +135,13 @@ func bindProtectedAPI(group *echo.Group) {
 	group.GET("/ws", websocket.WsHandler)
 	// 新加的 HTMX 相关路由
 	group.GET("/shelf/:id", shelf.GetBookListHandler)
-	group.GET("/htmx/settings/tab1", settings.Tab1)
-	group.GET("/htmx/settings/tab2", settings.Tab2)
-	group.GET("/htmx/settings/tab3", settings.Tab3)
-	group.POST("/update-string_config", settings.UpdateStringConfigHandler)
+	group.GET("/htmx/settings/tab-book", settings.TabBook)
+	group.GET("/htmx/settings/tab-net", settings.TabNetwork)
+	group.GET("/htmx/settings/tab-labs", settings.TabLabs)
+	group.POST("/update-string-config", settings.UpdateStringConfigHandler)
 	group.POST("/update-bool-config", settings.UpdateBoolConfigHandler)
 	group.POST("/update-number-config", settings.UpdateNumberConfigHandler)
+	group.POST("/update-user-info", settings.UpdateUserInfoConfigHandler)
 	group.POST("/delete-array-config", settings.DeleteArrayConfigHandler)
 	group.POST("/add-array-config", settings.AddArrayConfigHandler)
 	group.POST("/config-save", settings.HandleConfigSave)

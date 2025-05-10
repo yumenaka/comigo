@@ -13,8 +13,8 @@ func getTranslations(value string) string {
 	return "i18next.t(\"" + value + "\")"
 }
 
-// Handler 设定页面
-func Handler(c echo.Context) error {
+// PageHandler 设定页面
+func PageHandler(c echo.Context) error {
 	indexHtml := common.Html(
 		c,
 		&state.Global,

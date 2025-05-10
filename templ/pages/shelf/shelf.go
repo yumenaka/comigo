@@ -14,8 +14,8 @@ import (
 	"github.com/yumenaka/comigo/util/logger"
 )
 
-// Handler 书架页面的处理程序。
-func Handler(c echo.Context) error {
+// PageHandler 书架页面的处理程序。
+func PageHandler(c echo.Context) error {
 	// Set the response content type to HTML.
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
 	// 书籍排序方式

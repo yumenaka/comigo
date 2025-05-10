@@ -13,8 +13,8 @@ import (
 	"github.com/yumenaka/comigo/util/logger"
 )
 
-// Handler 阅读界面（卷轴模式）
-func Handler(c echo.Context) error {
+// PageHandler 阅读界面（卷轴模式）
+func PageHandler(c echo.Context) error {
 	model.CheckAllBookFileExist()
 	// 图片排序方式
 	sortBy := "default"

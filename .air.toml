@@ -13,7 +13,7 @@ args_bin = ["./test"]
 #二进制文件
 bin = "./test/temp/comi"
 cmd = "go run github.com/a-h/templ/cmd/templ@latest generate && go build -o ./test/temp/comi ."
-delay = 4000
+delay = 3000
 exclude_dir = ["app", "test", ".parcel-cache", "node_modules", "tmp", "vendor", "testdata"]
 exclude_regex = ["_test\\.go", "node_modules", "_templ\\.go"]
 exclude_unchanged = false

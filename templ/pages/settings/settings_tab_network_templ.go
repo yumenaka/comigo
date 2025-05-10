@@ -11,7 +11,9 @@ import templruntime "github.com/a-h/templ/runtime"
 import "github.com/yumenaka/comigo/templ/state"
 import "github.com/yumenaka/comigo/config"
 
-func tab2(s *state.GlobalState) templ.Component {
+// @StringConfig("Username",state.ServerConfig.Username, "Username_Description",true)
+// @StringConfig("Password",state.ServerConfig.Password, "Password_Description",true)
+func tab_network(s *state.GlobalState) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -36,31 +38,19 @@ func tab2(s *state.GlobalState) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = BoolConfig("RequiresLogin", state.ServerConfig.RequiresLogin, "RequiresLogin_Description", true).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = NumberConfig("Port", state.ServerConfig.Port, "Port_Description", 0, 65535, false).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = StringConfig("Username", state.ServerConfig.Username, "Username_Description", true).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = StringConfig("Host", state.ServerConfig.Host, "Host_Description", false).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = StringConfig("Password", state.ServerConfig.Password, "Password_Description", true).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = BoolConfig("DisableLAN", state.ServerConfig.DisableLAN, "DisableLAN_Description", false).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = NumberConfig("Port", state.ServerConfig.Port, "Port_Description", 0, 65535, true).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = StringConfig("Host", state.ServerConfig.Host, "Host_Description", true).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = BoolConfig("DisableLAN", state.ServerConfig.DisableLAN, "DisableLAN_Description", true).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = NumberConfig("Timeout", state.ServerConfig.Timeout, "Timeout_Description", 0, 65535, true).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = NumberConfig("Timeout", state.ServerConfig.Timeout, "Timeout_Description", 0, 65535, false).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

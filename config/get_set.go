@@ -202,11 +202,6 @@ func GetPort() int {
 	return cfg.Port
 }
 
-// GetRequiresLogin 获取用户名
-func GetRequiresLogin() bool {
-	return cfg.RequiresLogin
-}
-
 // GetUsername 获取用户名
 func GetUsername() string {
 	return cfg.Username

@@ -73,9 +73,6 @@ func checkServerActions(oldConfig *config.Config, newConfig *config.Config) (reS
 		reScanStores = true
 	}
 	// 下面这些值修改的时候，需要重启网页服务器
-	if oldConfig.RequiresLogin != newConfig.RequiresLogin {
-		reStartWebServer = true
-	}
 	if oldConfig.Port != newConfig.Port {
 		reStartWebServer = true
 	}

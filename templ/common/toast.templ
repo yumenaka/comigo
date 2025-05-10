@@ -17,10 +17,9 @@ templ Toast() {
     function showToast(message, type = 'info') {
         // 检查是否已经存在相同的 toast
         const isDuplicate = activeToasts.some(toast => toast.message === message && toast.type === type);
-        
+        // 如果是重复的 toast，则只在控制台输出
+        console.log(`Toast (${type}): ${message}`);
         if (isDuplicate) {
-            // 如果是重复的 toast，则只在控制台输出
-            console.log(`Toast (${type}): ${message}`);
             return;
         }
         

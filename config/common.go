@@ -217,7 +217,7 @@ func GetProgramDirectoryConfig() string {
 }
 
 func DeleteConfigIn(in string) error {
-	logger.Infof("Delete cfg in %s", in)
+	logger.Infof("Try delete cfg in %s", in)
 	var configFile string
 	switch in {
 	case HomeDirectory:
