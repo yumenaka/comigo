@@ -2,7 +2,7 @@
 # Window icon Need：go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo
 
 ##Release:
-# make all VERSION=v0.9.13
+# make all VERSION=v1.0.0
 
 ## Windows Release(Need MSYS2 or mingw32 + find.exe make.exe zip.exe upx.exe):
 # mingw32-make all VERSION=v0.9.9

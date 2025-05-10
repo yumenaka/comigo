@@ -2,7 +2,6 @@ package scan
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -37,7 +36,7 @@ func InitStore(storePath string, option Option) ([]*model.Book, error) {
 		if err != nil {
 			return nil, err
 		}
-		fmt.Println("-------------found_in_path:", storePathAbs)
+		// fmt.Println("-------------found_in_path:", storePathAbs)
 		return []*model.Book{book}, nil
 	}
 
@@ -138,7 +137,7 @@ func InitStore(storePath string, option Option) ([]*model.Book, error) {
 	}
 
 	if len(newBookList) > 0 {
-		logger.Infof(locale.GetString("found_in_path"), len(newBookList), storePathAbs)
+		logger.Infof(locale.GetString("found_in_path"), storePathAbs, len(newBookList))
 	}
 	return newBookList, nil
 }
