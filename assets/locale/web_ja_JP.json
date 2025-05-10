@@ -52,7 +52,9 @@
   "OpenBrowser": "ブラウザを開く",
   "OpenBrowser_Description": "windowsのデフォルトはtrue、その他のプラットフォームのデフォルトはfalse。",
   "Password": "パスワード",
-  "Password_Description": "ログインを有効にした後、ログインに使用されるパスワード。",
+  "Password_Description": "ログインに使用されるパスワード。",
+  "ReEnterPassword": "パスワードを再入力",
+  "ReEnterPassword_Description": "パスワードを再入力します。",
   "Port": "ポート",
   "Port_Description": "Web サービス ポート。",
   "PrintAllPossibleQRCode": "その他の QR コード",
@@ -70,7 +72,7 @@
   "UploadPath_Description": "アップロードされたファイルの保存場所をカスタマイズします。デフォルトでは、アップロードフォルダは現在の実行ディレクトリまたは最初のブックストアディレクトリの下。",
   "UseCache": "ローカル画像キャッシュ",
   "Username": "ユーザー名",
-  "Username_Description": "ログインを有効にした後、ログイン インターフェイスに必要なユーザー名。",
+  "Username_Description": "ログイン インターフェイスに必要なユーザー名。",
   "WorkingDirectory": "作業ディレクトリ",
   "ZipFileTextEncoding": "UTF-8ではありません",
   "ZipFileTextEncoding_Description": "utf-8 以外でエンコードされた ZIP ファイル。解析するにはどのエンコードを使用する必要があります。デフォルトのGBK。",
@@ -213,5 +215,6 @@
   "current_dir_scope": "今のディレクトリで実行した場合（ローカル適用）",
   "current_user_scope": "ログインユーザーに対して有効（グローバル適用）",
   "portable_binary_scope": "当該バイナリに対して有効（ポータブルモード）",
+  "saveSuccessHint": "設定が保存されました。3秒後にページが自動的にリロードされます。",
   "no_book_hint": "読める書籍が見つかりません。書庫パスを追加してください。追加後 3 秒でページがリロードされます。"
 }

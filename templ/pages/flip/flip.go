@@ -13,8 +13,8 @@ import (
 	"github.com/yumenaka/comigo/util/logger"
 )
 
-// Handler 阅读界面（翻页模式）
-func Handler(c echo.Context) error {
+// PageHandler 阅读界面（翻页模式）
+func PageHandler(c echo.Context) error {
 	model.CheckAllBookFileExist()
 	bookID := c.Param("id")
 	fmt.Println("Flip Mode Book ID:" + bookID)

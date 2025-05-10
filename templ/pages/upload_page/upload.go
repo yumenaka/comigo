@@ -9,8 +9,8 @@ import (
 	"github.com/yumenaka/comigo/templ/state"
 )
 
-// Handler 上传文件页面
-func Handler(c echo.Context) error {
+// PageHandler 上传文件页面
+func PageHandler(c echo.Context) error {
 	indexHtml := common.Html(
 		c,
 		&state.Global,

@@ -52,7 +52,9 @@
   "OpenBrowser": "Open browser",
   "OpenBrowser_Description": "After the scan is completed, whether to open the browser at the same time. \nThe default is true for windows and false for other platforms.",
   "Password": "password",
-  "Password_Description": "After enabling login, the password used to log in.",
+  "Password_Description": "The password used to log in.",
+  "ReEnterPassword": "Re-enter password",
+  "ReEnterPassword_Description": "Re-enter the password to confirm.",
   "Port": "port",
   "Port_Description": "Web service port.",
   "PrintAllPossibleQRCode": "More QR codes",
@@ -70,7 +72,7 @@
   "UploadPath_Description": "Customize the storage location of the uploaded files, by default, the upload folder is created under the current execution directory or the first bookstore directory.",
   "UseCache": "Local image cache",
   "Username": "username",
-  "Username_Description": "After enabling login, the username required for the login interface.",
+  "Username_Description": "The username required for the login interface.",
   "WorkingDirectory": "current working directory",
   "ZipFileTextEncoding": "Not UTF-8",
   "ZipFileTextEncoding_Description": "Non-utf-8 encoded ZIP file, what encoding should be used to parse it. \nDefault GBK.",
@@ -213,5 +215,6 @@
   "current_dir_scope": "When run in the current directory (local scope)",
   "current_user_scope": "Effective for logged-in user (global scope)",
   "portable_binary_scope": "Effective for this binary only (portable mode)",
+  "saveSuccessHint": "Settings saved successfully. The page will refresh automatically in 3 seconds.",
   "no_book_hint": "No readable books were found. Please add a library path. The page will refresh 3 seconds after it is added."
 }

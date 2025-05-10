@@ -22,8 +22,7 @@ func GetConfigToml(c echo.Context) error {
 	tempConfig.OpenBrowser = false
 	tempConfig.EnableDatabase = true
 	tempConfig.LocalStores = []string{"C:\\test\\Comic", "D:\\some_path\\book", "/home/user/download"}
-	tempConfig.RequiresLogin = false
-	tempConfig.Username = "You_can_change_username~."
+	tempConfig.Username = "You_can_change_this_username"
 	tempConfig.Password = "Some_Secret-.PasswordNot_guessable"
 
 	bytes, err := toml.Marshal(tempConfig)

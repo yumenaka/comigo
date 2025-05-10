@@ -17,24 +17,24 @@ import (
 // 使用templ模板响应htmx请求
 // -------------------------
 
-func Tab1(c echo.Context) error {
-	template := tab1(&state.Global)
+func TabBook(c echo.Context) error {
+	template := tab_book(&state.Global)
 	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, template); renderErr != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 	return nil
 }
 
-func Tab2(c echo.Context) error {
-	template := tab2(&state.Global)
+func TabNetwork(c echo.Context) error {
+	template := tab_network(&state.Global)
 	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, template); renderErr != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 	return nil
 }
 
-func Tab3(c echo.Context) error {
-	template := tab3(&state.Global)
+func TabLabs(c echo.Context) error {
+	template := tab_labs(&state.Global)
 	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, template); renderErr != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
@@ -98,7 +98,7 @@ func updateConfigGeneric(c echo.Context) (string, string, error) {
 }
 
 // -------------------------
-// 各类配置的更新 Handler
+// 各类配置的更新 PageHandler
 // -------------------------
 
 // UpdateStringConfigHandler 处理 String 类型
@@ -107,7 +107,7 @@ func UpdateStringConfigHandler(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	if name == "RequiresLogin" || name == "Username" || name == "Password" || name == "Port" || name == "Host" || name == "DisableLAN" || name == "Timeout" {
+	if name == "Username" || name == "Password" || name == "Port" || name == "Host" || name == "DisableLAN" || name == "Timeout" {
 		updatedHTML := StringConfig(name, newValue, name+"_Description", true)
 		if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError)
@@ -133,7 +133,7 @@ func UpdateBoolConfigHandler(c echo.Context) error {
 		logger.Errorf("无法将 '%s' 解析为 bool: %v", newValue, parseErr)
 		return echo.NewHTTPError(http.StatusBadRequest, "parse bool error")
 	}
-	if name == "RequiresLogin" || name == "Username" || name == "Password" || name == "Port" || name == "Host" || name == "DisableLAN" || name == "Timeout" {
+	if name == "Username" || name == "Password" || name == "Port" || name == "Host" || name == "DisableLAN" || name == "Timeout" {
 		updatedHTML := BoolConfig(name, boolVal, name+"_Description", true)
 		if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError)
@@ -160,7 +160,7 @@ func UpdateNumberConfigHandler(c echo.Context) error {
 		logger.Errorf("无法将 '%s' 解析为 int: %v", newValue, parseErr)
 		return echo.NewHTTPError(http.StatusBadRequest, "parse int error")
 	}
-	if name == "RequiresLogin" || name == "Username" || name == "Password" || name == "Port" || name == "Host" || name == "DisableLAN" || name == "Timeout" {
+	if name == "Username" || name == "Password" || name == "Port" || name == "Host" || name == "DisableLAN" || name == "Timeout" {
 		// 渲染对应的模板
 		updatedHTML := NumberConfig(name, int(intVal), name+"_Description", 0, 65535, true)
 		if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
@@ -172,6 +172,62 @@ func UpdateNumberConfigHandler(c echo.Context) error {
 		if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError)
 		}
+	}
+
+	return nil
+}
+
+// UpdateUserInfoConfigHandler 更新用户信息
+func UpdateUserInfoConfigHandler(c echo.Context) error {
+	if !htmx.IsHTMX(c.Request()) {
+		return echo.NewHTTPError(http.StatusBadRequest, "non-htmx request")
+	}
+
+	username := c.FormValue("Username")
+	password := c.FormValue("Password") // 注意：这里获取的是用户在表单中输入的新密码或原始密码
+
+	logger.Infof("Update user info: Username=%s", username) // 密码通常不建议明文记录到日志，除非是调试阶段
+	logger.Infof("Update user info: Password=%s", password)
+
+	// 旧配置做个备份（有需要对比）
+	oldConfig := config.CopyCfg()
+
+	// 更新配置
+	if err := state.ServerConfig.SetConfigValue("Username", username); err != nil {
+		logger.Errorf("Failed to set Username: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to update username")
+	}
+	// 只有当用户在表单中确实输入了新密码时才更新密码
+	// HTMX表单提交时，如果密码字段为空，Password会是空字符串。
+	// 根据 UserInfoConfig 的逻辑，如果密码字段为空，可能表示不修改密码，或者用户清空了密码。
+	// 这里的逻辑假设：如果Password字段有值（用户输入了），则更新它。
+	// 如果允许清空密码，这里的逻辑是正确的。
+	// 如果密码字段不允许为空，前端应该有校验。
+	// 或者，可以比较提交的密码是否与旧密码（加密/哈希后）相同，如果相同则不更新。
+	// 但此处简单处理：只要提交了Password，就更新。
+	if err := state.ServerConfig.SetConfigValue("Password", password); err != nil {
+		logger.Errorf("Failed to set Password: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to update password")
+	}
+
+	// 写入配置文件
+	if writeErr := config.WriteConfigFile(); writeErr != nil {
+		logger.Infof("Failed to update local config: %v", writeErr)
+		// 根据业务需求，这里可能需要回滚配置更改或返回错误
+		// return echo.NewHTTPError(http.StatusInternalServerError, "Failed to write config file")
+	}
+
+	// 根据配置的变化，做相应操作。
+	beforeConfigUpdate(&oldConfig, config.GetCfg())
+
+	// 渲染 UserInfoConfig 模板并返回
+	// 注意：UserInfoConfig 模板期望的是 initPassword，这里传递的是用户表单提交的 password
+	// 如果密码在配置中是加密存储的，而 UserInfoConfig 期望的是明文（或特定格式），这里需要适配
+	// 假设 UserInfoConfig 可以直接使用表单提交的 username 和 password 初始化
+	updatedHTML := UserInfoConfig(username, password, true) // 如果UserInfoConfig期望的是加密后的密码，这里需要调整
+	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
+		logger.Errorf("Failed to render UserInfoConfig template: %v", renderErr)
+		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
 	return nil

@@ -26,17 +26,12 @@ func Login(c echo.Context) error {
 	username := c.FormValue("username")
 	password := c.FormValue("password")
 	// 检查是否需要登录
-	if !config.GetRequiresLogin() {
-		logger.Infof("RequiresLogin %v\n", config.GetRequiresLogin())
+	if config.GetUsername() == "" || config.GetPassword() == "" {
+		logger.Infof("Cannot set Username or Password\n")
 		return echo.ErrTeapot
 	}
-	// // 空密码检查？
-	// if config.GetPassword() == "" {
-	// 	logger.Info("RequiresLogin is true, but password is empty\n")
-	// 	return echo.ErrUnauthorized
-	// }
 	// 如果未设置密码或密码错误，则不生成 JWT
-	if !config.GetRequiresLogin() || username != config.GetUsername() || password != config.GetPassword() {
+	if username != config.GetUsername() || password != config.GetPassword() {
 		logger.Infof("Login failed: %s-%s, %s-%s\n", username, config.GetUsername(), config.GetPassword(), password)
 		return echo.ErrUnauthorized
 	}
