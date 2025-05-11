@@ -1,9 +1,10 @@
 package scan
 
 import (
-	"fmt"
 	"github.com/hirochachacha/go-smb2"
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/util/logger"
+
 	iofs "io/fs"
 	"net"
 	"strconv"
@@ -14,13 +15,13 @@ import (
 func Webdav(scanOption Option) (newBookList []*model.Book, err error) {
 	conn, err := net.Dial("tcp", scanOption.Cfg.GetStores()[0].Smb.Host+":"+strconv.Itoa(scanOption.Cfg.GetStores()[0].Smb.Port))
 	if err != nil {
-		fmt.Println(err)
+		logger.Info(err)
 		return nil, err
 	}
 	defer func(conn net.Conn) {
 		err := conn.Close()
 		if err != nil {
-			fmt.Println(err)
+			logger.Info(err)
 		}
 	}(conn)
 
@@ -38,7 +39,7 @@ func Webdav(scanOption Option) (newBookList []*model.Book, err error) {
 	defer func(s *smb2.Session) {
 		err := s.Logoff()
 		if err != nil {
-			fmt.Println(err)
+			logger.Info(err)
 		}
 	}(s)
 
@@ -49,7 +50,7 @@ func Webdav(scanOption Option) (newBookList []*model.Book, err error) {
 	defer func(fs *smb2.Share) {
 		err := fs.Umount()
 		if err != nil {
-			fmt.Println(err)
+			logger.Info(err)
 		}
 	}(fs)
 	// //fs.DirFS(".") 创建一个表示当前目录(".")的文件系统。"." 表示当前工作目录
@@ -59,7 +60,7 @@ func Webdav(scanOption Option) (newBookList []*model.Book, err error) {
 	//	panic(err)
 	// }
 	// for _, match := range matches {
-	//	fmt.Println(match)
+	//	logger.Info(match)
 	// }
 
 	// iofs.WalkDir(fs.DirFS("."), ".", func...) 调用WalkDir函数遍历当前目录（以及其下的所有子目录）中的所有文件和目录。
@@ -70,7 +71,7 @@ func Webdav(scanOption Option) (newBookList []*model.Book, err error) {
 		// 对于目录中的每一个项（无论是文件还是目录），指定的函数都会被调用。
 		func(path string, d iofs.DirEntry, err error) error {
 			// 这个函数接收三个参数：path（项的路径），d（一个DirEntry对象，表示文件或目录的信息），和err（如果在访问该项时出现错误）
-			fmt.Println(path, d, err)
+			logger.Info(path, d, err)
 			return nil
 		})
 	if err != nil {

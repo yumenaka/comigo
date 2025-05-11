@@ -1,7 +1,6 @@
 package flip
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/angelofallars/htmx-go"
@@ -17,7 +16,7 @@ import (
 func PageHandler(c echo.Context) error {
 	model.CheckAllBookFileExist()
 	bookID := c.Param("id")
-	fmt.Println("Flip Mode Book ID:" + bookID)
+	logger.Info("Flip Mode Book ID:" + bookID)
 	// 图片排序方式
 	sortBy := "default"
 	// c.Cookie("key") 没找到，那么就会取到空值（nil），没判断nil就直接访问 .Value 属性，会导致空指针引用错误。

@@ -23,7 +23,7 @@ func PageHandler(c echo.Context) error {
 		// c.Cookie("key") 没找到，那么就会取到空值（nil），
 		// 没处判断就直接访问 .Value 属性，会导致空指针引用错误。
 		sortBy = sortBookBy.Value
-		// fmt.Println("Scroll Mode Sort By:" + sortBy)
+		// logger.Info("Scroll Mode Sort By:" + sortBy)
 	}
 	// 读取url参数，获取书籍ID
 	bookID := c.Param("id")
