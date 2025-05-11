@@ -11,9 +11,9 @@ func InitAllStore(option Option) error {
 	// 重置所有书籍与书组信息
 	model.ClearAllBookData()
 	stores := option.Cfg.GetLocalStores()
-	// fmt.Println("--------------------new stores------------------------------")
-	// fmt.Println(stores)
-	// fmt.Println("--------------------new stores------------------------------")
+	// logger.Info("--------------------new stores------------------------------")
+	// logger.Info(stores)
+	// logger.Info("--------------------new stores------------------------------")
 	for _, localPath := range stores {
 		books, err := InitStore(localPath, option)
 		if err != nil {

@@ -1,13 +1,13 @@
 package scan
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/util/logger"
 )
 
 // 全局变量：标记是否正在扫描，避免并发扫描
@@ -50,7 +50,7 @@ func HandleDirectory(currentPath string, depth int, option Option) (model.DirNod
 			subNode, subDirs, subFiles, subErr := HandleDirectory(fullPath, depth+1, option)
 			if subErr != nil {
 				// 忽略单个子目录出错，继续扫描其他目录
-				fmt.Println("扫描子目录出错:", subErr)
+				logger.Info("扫描子目录出错:", subErr)
 				continue
 			}
 			node.SubDirs = append(node.SubDirs, subNode)
@@ -67,7 +67,7 @@ func HandleDirectory(currentPath string, depth int, option Option) (model.DirNod
 			// 获取文件信息
 			info, err := entry.Info()
 			if err != nil {
-				fmt.Println("获取文件信息失败:", err)
+				logger.Info("获取文件信息失败:", err)
 				continue
 			}
 			size := info.Size()

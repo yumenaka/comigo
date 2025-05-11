@@ -127,29 +127,29 @@ func EchoLogHandler(LogToFile bool, LogFilePath string, LogFileName string, Debu
 		FullTimestamp:   false,
 		TimestampFormat: "2006-01-02 15:04:05",
 	})
-	//设置输出
+	// 设置输出
 	if LogToFile {
-		//日志文件路径
+		// 日志文件路径
 		filename := path.Join(LogFilePath, LogFileName)
 		file, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
 		if err != nil {
-			fmt.Println("logger err:", err)
+			logger.Info("logger err:", err)
 		}
-		//设置多种输出类型(默认值“os.Stderr”)
+		// 设置多种输出类型(默认值“os.Stderr”)
 		logger.SetOutput(io.MultiWriter(os.Stdout, file))
-		//设置rotatelogs
+		// 设置rotatelogs
 		logWriter, err := rotatelogs.New(
-			//分割后的文件名
+			// 分割后的文件名
 			filename+"%Y%m%d.log",
-			//指向最新日志文件的软链接
+			// 指向最新日志文件的软链接
 			rotatelogs.WithLinkName(filename),
-			//最长保存时间
+			// 最长保存时间
 			rotatelogs.WithMaxAge(7*24*time.Hour),
-			//切割间隔时间
+			// 切割间隔时间
 			rotatelogs.WithRotationTime(24*time.Hour),
 		)
 		if err != nil {
-			fmt.Println("logger err:", err)
+			logger.Info("logger err:", err)
 		}
 		writeMap := lfshook.WriterMap{
 			logrus.InfoLevel:  logWriter,
@@ -163,7 +163,7 @@ func EchoLogHandler(LogToFile bool, LogFilePath string, LogFileName string, Debu
 			TimestampFormat: "2006-01-02 03:04:05",
 		}))
 	}
-	//自定义log处理函数
+	// 自定义log处理函数
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			startTime := time.Now()

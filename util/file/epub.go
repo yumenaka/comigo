@@ -51,7 +51,7 @@ func getDataFromEpub(epubPath string, needFile string) (data []byte, err error) 
 			if f.Name() != needFile {
 				return nil
 			}
-			//fmt.Println("file.Name():"+f.Name(), "needFile:", needFile)
+			// logger.Info("file.Name():"+f.Name(), "needFile:", needFile)
 			found = true
 			// 取得特定压缩文件
 			file, err := f.Open()

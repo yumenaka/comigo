@@ -1,7 +1,6 @@
 package common
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/yumenaka/comigo/model"
@@ -21,7 +20,7 @@ func GetPageTitle(bookID string) string {
 	}
 	groupBook, err := model.GetBookByID(bookID, "")
 	if err != nil {
-		fmt.Printf("GetBookByID: %v", err)
+		logger.Info("GetBookByID: %v", err)
 		return "Comigo " + state.Global.Version
 	}
 	return groupBook.Title
@@ -45,11 +44,11 @@ func GetReturnUrl(BookID string) string {
 	// 如果是书籍组，就跳转到父书架
 	ParentBookInfo, err := model.GetBookGroupInfoByChildBookID(BookID)
 	if err != nil {
-		fmt.Println("ParentBookInfo not found")
+		logger.Info("ParentBookInfo not found")
 		return "/"
 	}
-	// 	fmt.Println(ParentBookInfo)
-	// 	fmt.Println(ParentBookInfo.Depth)
+	// 	logger.Info(ParentBookInfo)
+	// 	flogger.Info(ParentBookInfo.Depth)
 	if ParentBookInfo.Depth < 0 {
 		return "/"
 	}

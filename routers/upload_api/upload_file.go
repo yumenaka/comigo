@@ -64,7 +64,7 @@ func UploadFile(c echo.Context) error {
 	}
 
 	var uploadedFiles []string
-	fmt.Println("上传文件数量:", len(files))
+	logger.Info("上传文件数量:", len(files))
 	// 遍历所有上传的文件
 	for _, file := range files {
 		// 验证文件大小（例如，不超过 5000 MB）

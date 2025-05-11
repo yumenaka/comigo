@@ -2,7 +2,6 @@ package util
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net"
 	"os/exec"
@@ -22,7 +21,7 @@ import (
 // 使用时只需要写一行：defer TrackTIme(time.Now())
 func TrackTIme(pre time.Time) time.Duration {
 	elapsed := time.Since(pre)
-	fmt.Print("耗时：", elapsed, "\n")
+	logger.Info("耗时：", elapsed, "\n")
 	return elapsed
 }
 
@@ -146,7 +145,7 @@ func OpenBrowser(uri string) {
 	)
 
 	// Wait for the API to be available and responding correctly
-	fmt.Println("Waiting for API health endpoint...")
+	logger.Info("Waiting for API health endpoint...")
 
 	err := waiter.WaitContext(
 		ctx,
@@ -159,7 +158,7 @@ func OpenBrowser(uri string) {
 	if err != nil {
 		log.Fatalf("API health check failed: %v", err)
 	}
-	fmt.Println("Comigo API is healthy and ready!")
+	logger.Info("Comigo API is healthy and ready!")
 
 	var cmd *exec.Cmd
 	if runtime.GOOS == "windows" {

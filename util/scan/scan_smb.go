@@ -3,7 +3,6 @@ package scan
 import (
 	"context"
 	"errors"
-	"fmt"
 	iofs "io/fs"
 	"net/url"
 	"os"
@@ -51,7 +50,7 @@ func Smb(scanOption Option) (newBookList []*model.Book, err error) {
 	//	//对于目录中的每一个项（无论是文件还是目录），指定的函数都会被调用。
 	//	func(path string, d iofs.DirEntry, err error) error {
 	//		//这个函数接收三个参数：path（项的路径），dialer（一个DirEntry对象，表示文件或目录的信息），和err（如果在访问该项时出现错误）
-	//		fmt.Println("smb hint： smb://"+scanOption.Stores[0].Host+"/"+scanOption.Stores[0].ShareName+"/test/"+path, d.IsDir(), err)
+	//		logger.Info("smb hint： smb://"+scanOption.Stores[0].Host+"/"+scanOption.Stores[0].ShareName+"/test/"+path, d.IsDir(), err)
 	//		return nil
 	//	})
 	// if err != nil {
@@ -138,7 +137,7 @@ func smbScanFile(filePath string, file *smb2.File, storePath string, depth int, 
 	// 设置了一个defer函数来捕获可能的panic
 	// defer func() {
 	//	if err := recover(); err != nil {
-	//		fmt.Println("Recovered from panic:", err)
+	//		logger.Info("Recovered from panic:", err)
 	//		// 可以在这里执行一些处理逻辑，比如记录日志、返回错误信息等
 	//	}
 	// }()
@@ -148,7 +147,7 @@ func smbScanFile(filePath string, file *smb2.File, storePath string, depth int, 
 			logger.Infof("%s", err)
 		}
 	}(file)
-	fmt.Println(file.Name())
+	logger.Info(file.Name())
 	// MediaFileInfo, err := file.Stat()
 
 	return nil, err

@@ -36,7 +36,7 @@ func InitStore(storePath string, option Option) ([]*model.Book, error) {
 		if err != nil {
 			return nil, err
 		}
-		// fmt.Println("-------------found_in_path:", storePathAbs)
+		// logger.Info("-------------found_in_path:", storePathAbs)
 		return []*model.Book{book}, nil
 	}
 

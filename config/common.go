@@ -2,7 +2,6 @@ package config
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"os"
 	"path"
@@ -47,14 +46,14 @@ func WriteConfigFile() error {
 	// 可执行程序自身的路径
 	executable, err := os.Executable()
 	if err != nil {
-		fmt.Println(executable)
+		logger.Info(executable)
 		return err
 	}
 	p := path.Join(path.Dir(executable), "config.toml")
 	if util.FileExist(p) {
 		err = os.WriteFile(p, bytes, 0644)
 		if err != nil {
-			fmt.Println(path.Join(executable, "config.toml"))
+			logger.Info(path.Join(executable, "config.toml"))
 			return err
 		}
 	}
@@ -80,7 +79,7 @@ func DefaultConfigLocation() string {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		// 获取Home失败就先记录一下，但不直接return，继续往后查
-		fmt.Println("Warning: failed to get HomeDir:", err)
+		logger.Info("Warning: failed to get HomeDir:", err)
 	} else {
 		homePath := path.Join(home, ".config", "comigo", "config.toml")
 		if fileExists(homePath) {
@@ -98,7 +97,7 @@ func DefaultConfigLocation() string {
 	executable, errExe := os.Executable()
 	if errExe != nil {
 		// 获取可执行文件路径出错，这种情况也比较少见，先打印日志
-		fmt.Println("Warning: failed to get Executable path:", errExe)
+		logger.Info("Warning: failed to get Executable path:", errExe)
 	} else {
 		progPath := path.Join(path.Dir(executable), "config.toml")
 		if fileExists(progPath) {
@@ -118,7 +117,7 @@ func fileExists(filename string) bool {
 			return false
 		}
 		// 其它错误比如权限问题，也直接返回false
-		// fmt.Println("Warning: cannot access file:", filename, "error:", err)
+		// logger.Info("Warning: cannot access file:", filename, "error:", err)
 		return false
 	}
 	// 确实存在且不是目录
@@ -154,13 +153,13 @@ func SaveConfig(to string) error {
 	case ProgramDirectory:
 		executable, err := os.Executable()
 		if err != nil {
-			fmt.Println(executable)
+			logger.Info(executable)
 			return err
 		}
 		p := path.Join(path.Dir(executable), "config.toml")
 		err = os.WriteFile(p, bytes, 0644)
 		if err != nil {
-			fmt.Println(path.Join(executable, "config.toml"))
+			logger.Info(path.Join(executable, "config.toml"))
 			return err
 		}
 	}
@@ -195,7 +194,7 @@ func GetHomeDirectoryConfig() string {
 		}
 	} else {
 		// 获取HomeDir失败，可以做个日志或忽略
-		fmt.Println("Warning: failed to get HomeDir:", err)
+		logger.Info("Warning: failed to get HomeDir:", err)
 	}
 	return HomeDirectoryConfig
 }
