@@ -31,7 +31,7 @@ func ImageSrc(Url string) string {
 }
 
 func HtmxStaticImage(Url string) string {
-	hxGet := Url + "&base64=true"
+	hxGet := Url + "&base64_htmx=true"
 	HtmxStaticImage := fmt.Sprintf(`<div hx-get='%s' hx-trigger="load" hx-swap="innerHTML" class="w-full m-0"></div>`, hxGet)
 	return HtmxStaticImage
 }
