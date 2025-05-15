@@ -40,7 +40,8 @@ func GetFile(c echo.Context) error {
 
 	// 读取查询参数
 	noCache := getBoolQueryParam(c, "no-cache", false)
-	base64Encode := getBoolQueryParam(c, "base64", false)
+	base64Htmx := getBoolQueryParam(c, "base64_htmx", false)
+	base64String := getBoolQueryParam(c, "base64_string", false)
 
 	// 读取图片处理参数
 	resizeWidth := getIntQueryParam(c, "resize_width", 0)
@@ -67,8 +68,12 @@ func GetFile(c echo.Context) error {
 			config.GetDebug(),
 		)
 		if err == nil && cacheData != nil {
-			if base64Encode {
+			// 如果启用了 Base64 编码
+			if base64Htmx {
 				return sendBase64Htmx(c, cacheData, needFile)
+			}
+			if base64String {
+				return sendBase64String(c, cacheData, needFile)
 			}
 			return c.Blob(http.StatusOK, ct, cacheData)
 		}
@@ -128,8 +133,11 @@ func GetFile(c echo.Context) error {
 	}
 
 	// 如果启用了 Base64 编码
-	if base64Encode {
+	if base64Htmx {
 		return sendBase64Htmx(c, imgData, needFile)
+	}
+	if base64String {
+		return sendBase64String(c, imgData, needFile)
 	}
 
 	// 返回图片数据
@@ -163,6 +171,17 @@ func getBoolQueryParam(c echo.Context, key string, defaultValue bool) bool {
 }
 
 // sendBase64Htmx 将数据编码为 Base64 并通过 HTMX 接口替换 img 标签
+func sendBase64String(c echo.Context, data []byte, filename string) error {
+	mimeType := mime.TypeByExtension(filepath.Ext(filename))
+	if mimeType == "" {
+		mimeType = "application/octet-stream"
+	}
+	dataURI := "data:" + mimeType + ";base64," + base64.StdEncoding.EncodeToString(data)
+	// 纯文本返回，Content-Type 设 text/plain 保证浏览器不当成 HTML
+	return c.String(http.StatusOK, dataURI)
+}
+
+// sendBase64Htmx 将数据编码为 Base64 并通过 HTMX 接口替换 img 标签
 func sendBase64Htmx(c echo.Context, data []byte, filename string) error {
 	mimeType := mime.TypeByExtension(filepath.Ext(filename))
 	if mimeType == "" {
@@ -179,7 +198,6 @@ func sendBase64Htmx(c echo.Context, data []byte, filename string) error {
 		:style="{ width: $store.global.isLandscape?($store.scroll.widthUseFixedValue? (isDoublePage ? $store.scroll.doublePageWidth_PX +'px': $store.scroll.singlePageWidth_PX +'px'): (isDoublePage ? $store.scroll.doublePageWidth_Percent + '%' : $store.scroll.singlePageWidth_Percent + '%')): $store.scroll.portraitWidthPercent+'%', maxWidth: '100%' }"
 		alt=""
 	/>`
-
 	// 直接返回 HTML 片段，让 HTMX 用 outerHTML 替换
 	return c.HTML(http.StatusOK, htmlContent)
 }

@@ -11,7 +11,6 @@ import "github.com/yumenaka/comigo/config"
 // 此外，还可以使用 hx-vals（like: hx-vals='{"myVal": "My Value"}'）在请求中包含额外的值
 templ tab_book(s *state.GlobalState) {
 <div class="flex flex-col justify-start w-5/6 md:w-3/5 min-w-[20rem] ">
-    @UserInfoConfig(state.ServerConfig.Username, state.ServerConfig.Password,false)
     @StringArrayConfig("LocalStores", state.ServerConfig.LocalStores, "LocalStores_Description",false)
     @NumberConfig("MaxScanDepth", state.ServerConfig.MaxScanDepth,"MaxScanDepth_Description",0,65535,false)
     @NumberConfig("MinImageNum", state.ServerConfig.MinImageNum,"MinImageNum_Description",0,65535,false)
