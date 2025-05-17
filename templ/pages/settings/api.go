@@ -107,17 +107,15 @@ func UpdateStringConfigHandler(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
+	saveSuccessHint := false
 	if name == "Username" || name == "Password" || name == "Port" || name == "Host" || name == "DisableLAN" || name == "Timeout" {
-		updatedHTML := StringConfig(name, newValue, name+"_Description", true)
-		if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError)
-		}
-	} else {
-		updatedHTML := StringConfig(name, newValue, name+"_Description", false)
-		if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError)
-		}
+		saveSuccessHint = true
 	}
+	updatedHTML := StringConfig(name, newValue, name+"_Description", saveSuccessHint)
+	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
 	return nil
 }
 
@@ -133,16 +131,13 @@ func UpdateBoolConfigHandler(c echo.Context) error {
 		logger.Errorf("无法将 '%s' 解析为 bool: %v", newValue, parseErr)
 		return echo.NewHTTPError(http.StatusBadRequest, "parse bool error")
 	}
+	saveSuccessHint := false
 	if name == "Username" || name == "Password" || name == "Port" || name == "Host" || name == "DisableLAN" || name == "Timeout" {
-		updatedHTML := BoolConfig(name, boolVal, name+"_Description", true)
-		if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError)
-		}
-	} else {
-		updatedHTML := BoolConfig(name, boolVal, name+"_Description", false)
-		if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError)
-		}
+		saveSuccessHint = true
+	}
+	updatedHTML := BoolConfig(name, boolVal, name+"_Description", saveSuccessHint)
+	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 	return nil
 }
@@ -160,18 +155,14 @@ func UpdateNumberConfigHandler(c echo.Context) error {
 		logger.Errorf("无法将 '%s' 解析为 int: %v", newValue, parseErr)
 		return echo.NewHTTPError(http.StatusBadRequest, "parse int error")
 	}
+	saveSuccessHint := false
 	if name == "Username" || name == "Password" || name == "Port" || name == "Host" || name == "DisableLAN" || name == "Timeout" {
-		// 渲染对应的模板
-		updatedHTML := NumberConfig(name, int(intVal), name+"_Description", 0, 65535, true)
-		if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError)
-		}
-	} else {
-		// 渲染对应的模板
-		updatedHTML := NumberConfig(name, int(intVal), name+"_Description", 0, 65535, false)
-		if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError)
-		}
+		saveSuccessHint = true
+	}
+	// 渲染对应的模板
+	updatedHTML := NumberConfig(name, int(intVal), name+"_Description", 0, 65535, saveSuccessHint)
+	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
 	return nil
@@ -250,8 +241,11 @@ func AddArrayConfigHandler(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "add error")
 	}
-
-	updatedHTML := StringArrayConfig(configName, values, configName+"_Description", false)
+	saveSuccessHint := false
+	if configName == "LocalStores" {
+		saveSuccessHint = true
+	}
+	updatedHTML := StringArrayConfig(configName, values, configName+"_Description", saveSuccessHint)
 	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
