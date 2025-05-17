@@ -17,7 +17,6 @@
   "clear_temp_file_start": "Starting to clean up temporary files.",
   "comigo_example": "  comi book.zip\n\nSet the web service port (default is 1234):\n  comi -p 2345 book.zip\n\nWithout opening a browser (Windows):\n  comi -o=false book.zip\n\nMultiple parameters:\n  comi -p 2345 --host example.com test.zip\n",
   "comigo_use": "comi",
-  "comigo_version": "",
   "completed_extract": "Decompression completed",
   "completed_ls": "Compressed file scan completed",
   "config": "Specify configuration file",
