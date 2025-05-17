@@ -56,11 +56,11 @@ func MainArea(c echo.Context, s *state.GlobalState) templ.Component {
 			}
 		}
 		if s.GetAllBookNum() == 0 && c.Param("id") == "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<!-- 没有任何书籍的时候 --> <div id=\"tab-contents\" role=\"tabpanel\" class=\"flex flex-col justify-start items-center flex-1 w-full h-full font-semibold text-lg text-base-content\" :class=\"(theme.toString() ===&#39;light&#39;||theme.toString() ===&#39;dark&#39;||theme.toString() ===&#39;retro&#39;||theme.toString() ===&#39;lofi&#39;||theme.toString() ===&#39;nord&#39;) ? ($store.global.bgPattern !== &#39;none&#39;?$store.global.bgPattern+&#39; bg-base-300&#39;:&#39;bg-base-300&#39;):($store.global.bgPattern !== &#39;none&#39;?$store.global.bgPattern:&#39;&#39;)\"><div class=\"flex flex-col justify-start w-5/6 md:w-3/5 min-w-[20rem] \"><div x-text=\"i18next.t(&#39;no_book_hint&#39;)\" class=\"flex flex-col justify-start w-full p-2 m-1 text-normal font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\">没有可读书籍，请添加书库路径。添加完成3秒后，页面将自动刷新。</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<!-- 没有任何书籍的时候 --> <div id=\"tab-contents\" role=\"tabpanel\" class=\"flex flex-col justify-start items-center flex-1 w-full h-full font-semibold text-lg text-base-content\" :class=\"(theme.toString() ===&#39;light&#39;||theme.toString() ===&#39;dark&#39;||theme.toString() ===&#39;retro&#39;||theme.toString() ===&#39;lofi&#39;||theme.toString() ===&#39;nord&#39;) ? ($store.global.bgPattern !== &#39;none&#39;?$store.global.bgPattern+&#39; bg-base-300&#39;:&#39;bg-base-300&#39;):($store.global.bgPattern !== &#39;none&#39;?$store.global.bgPattern:&#39;&#39;)\"><div class=\"flex flex-col justify-start w-5/6 md:w-3/5 min-w-[20rem] \"><div x-text=\"i18next.t(&#39;no_books_library_path_notice&#39;)\" class=\"flex flex-col justify-start w-full p-2 m-1 text-normal font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\">没有可读书籍，请设置书库路径。设置完成后，网页会自动刷新。</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = settings.StringArrayConfig("LocalStores", state.ServerConfig.LocalStores, "LocalStores_Description", true).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = settings.StringArrayConfig("LocalStores", state.ServerConfig.LocalStores, "LocalStores_Description", false).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
