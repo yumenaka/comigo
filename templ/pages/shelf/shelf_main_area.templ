@@ -35,9 +35,9 @@ templ MainArea(c echo.Context, s *state.GlobalState) {
 					x-text="i18next.t('no_book_hint')"
 					class="flex flex-col justify-start w-full p-2 m-1 text-normal font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 				>
-					没有可读书籍，请添加书库路径。添加完成3秒后，页面将自动刷新。
+					没有可读书籍，请添加书库路径。添加完成，请刷新网页。
 				</div>
-				@settings.StringArrayConfig("LocalStores", state.ServerConfig.LocalStores, "LocalStores_Description", true)
+				@settings.StringArrayConfig("LocalStores", state.ServerConfig.LocalStores, "LocalStores_Description", false)
 			</div>
 		</div>
 		<script>
