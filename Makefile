@@ -2,7 +2,7 @@
 # Window icon Need：go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo
 
 ##Release:
-# make all VERSION=v1.0.0
+# make all VERSION=v1.0.4
 
 ## Windows Release(Need MSYS2 or mingw32 + find.exe make.exe zip.exe upx.exe):
 # mingw32-make all VERSION=v0.9.9
@@ -40,8 +40,10 @@ MD5_TEXTFILE := $(BINDIR)/md5Sums.txt
 unexport GOBIN
 
 MAIN_FILE_DIR := ./
-# -ldflags 指定编译参数。-s 去掉符号信息。 -w去掉调试信息。
-GOBUILD=CGO_ENABLED=0 go build -ldflags "-s -w -X config.Version=${VERSION}"
+# 覆盖版本号，只有 string 可以直接覆盖 包路径必须和 go list 输出的完全一致，需要带 module 路径
+# -trimpath 去掉源码绝对路径，比如构建机目录
+# -ldflags 指定编译参数。-s 去掉符号信息  -w去掉调试信息 减小二进制体积
+GOBUILD=CGO_ENABLED=0 go build -trimpath -ldflags "-s -w -X 'github.com/yumenaka/comigo/config.version=${VERSION}'"
 
 ifeq ($(OS), Darwin)
   MD5_UTIL = md5
