@@ -3,8 +3,8 @@
   <br>ComiGo: わかりやすい漫画リーダー<br>
 </h2>
 
-![Windowssample](https://www.yumenaka.net/wp-content/uploads/2020/08/sample.gif "Windows示例")  
-
+![Windowssample](https://www.yumenaka.net/wp-content/uploads/2020/08/sample.gif "Windows Sample")  
+[中文文档](https://github.com/yumenaka/comigo/blob/master/README_CN.md)  [English](https://github.com/yumenaka/comigo/blob/master/README.md) [日本語](https://github.com/yumenaka/comigo/blob/master/README_JP.md)
 ### ダウンロード
 
 ```bash

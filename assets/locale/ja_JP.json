@@ -17,7 +17,6 @@
   "clear_temp_file_start": "---- キャッシュフォルダーのクリーンアップを開始 ----",
   "comigo_example": "  comi book.zip\n\nポートを設定します（デフォルトは1234）：\n  comi -p 2345 book.zip\n\nブラウザを開かずに（Windows）：\n  comi -o=false book.zip\n\n複数のパラメータ：\n  comi -p 2345  --host example.com test.zip\n",
   "comigo_use": "comi",
-  "comigo_version": "",
   "completed_extract": "解凍終了",
   "completed_ls": "圧縮ファイルのスキャン完了",
   "config": "設定ファイルの指定",

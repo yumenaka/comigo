@@ -1,6 +1,6 @@
 ## Starting your project
 
-> ❗️ 下面是开发必须工具和库:
+> ❗️ 下面是开发用工具与库:
 >
 > - `Templ（模板引擎）`: [https://templ.guide](https://templ.guide/)
 > - `Flowbite（组件库）`: [https://flowbite.com/docs/components/gallery/](https://flowbite.com/docs/components/gallery/)

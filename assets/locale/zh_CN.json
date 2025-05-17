@@ -17,7 +17,6 @@
   "clear_temp_file_start": "开始清理临时文件。",
   "comigo_example": "  comi book.zip\n\n设定网页服务端口（默认1234）：\n  comi -p 2345 book.zip\n\n不打开浏览器（windows）：\n  comi -o=false book.zip\n\n指定多个参数：\n  comi -p 2345 --host example.com test.zip\n",
   "comigo_use": "comi",
-  "comigo_version": "",
   "completed_extract": "解压完成：",
   "completed_ls": "压缩文件扫描完成",
   "config": "指定配置文件",
