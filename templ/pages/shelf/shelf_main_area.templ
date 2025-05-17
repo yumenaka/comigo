@@ -37,7 +37,7 @@ templ MainArea(c echo.Context, s *state.GlobalState) {
 				>
 					没有可读书籍，请添加书库路径。添加完成3秒后，页面将自动刷新。
 				</div>
-				@settings.StringArrayConfig("LocalStores", state.ServerConfig.LocalStores, "LocalStores_Description", true)
+				@settings.StringArrayConfig("LocalStores", state.ServerConfig.LocalStores, "LocalStores_Description", false)
 			</div>
 		</div>
 		<script>
