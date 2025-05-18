@@ -1,13 +1,14 @@
 package flip
 
 import (
+    "github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/templ/common"
 	"github.com/yumenaka/comigo/templ/state"
 )
 
 // FlipPage 定义 BodyHTML
-templ FlipPage(s *state.GlobalState, book *model.Book) {
+templ FlipPage(c echo.Context, s *state.GlobalState, book *model.Book) {
 	@common.Toast()
 	@InsertData(book, s)
 	if book != nil {
@@ -26,6 +27,6 @@ templ FlipPage(s *state.GlobalState, book *model.Book) {
 			})
 		@MainArea(s, book)
 	}
-	@common.Drawer(s.ServerStatus.ServerHost, FlipDrawerSlot(s, book))
+	@common.Drawer(c, s, book, FlipDrawerSlot(s, book))
 	@common.QRCode(s.ServerStatus.ServerHost)
 }

@@ -46,7 +46,7 @@ func PageHandler(c echo.Context) error {
 			indexHtml := common.Html(
 				c,
 				&state.Global,
-				error_page.NotFound404(&state.Global),
+				error_page.NotFound404(c, &state.Global),
 				[]string{},
 			)
 			if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexHtml); err != nil {

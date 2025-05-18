@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/templ/common"
 	"github.com/yumenaka/comigo/templ/state"
 )
 
 // ImageXData 在Go函数里面计算图片的x-data属性。渲染结果例：
-// x-data="{  isDoublePage: false, imageUrl: '/api/get_file?id=asxScIDD&filename=1.jpg' + ($store.global.autoCrop  ? &quot;&auto_crop=1&quot; : ”) }"
+// x-data="{  isDoublePage: false, imageUrl: '/api/get_file?id=asxScIDD&filename=1.jpg' + ($store.global.autoCrop  ? &quot;&auto_crop=1&quot; : ")"
 func ImageXData(Url string) string {
 	return fmt.Sprintf(`{ isDoublePage: false, imageUrl: '%s' + ($store.global.autoCrop?"&auto_crop=1":'')}`, Url)
 }
@@ -22,6 +24,7 @@ func ImageSrc(Url string) string {
 	return fmt.Sprintf(`'%s' + (%s) + (%s) + (%s)`, Url, autoCrop, autoResize, noCache)
 }
 
+// HtmxStaticImage 使用htmx获取静态图片，或许可以不这么用？
 func HtmxStaticImage(Url string) string {
 	hxGet := Url + "&base64_htmx=true"
 	HtmxStaticImage := fmt.Sprintf(`<div hx-get='%s' hx-trigger="load" hx-swap="innerHTML" class="w-full m-0"></div>`, hxGet)
@@ -35,7 +38,7 @@ func HtmxStaticImage(Url string) string {
 // https://htmx.org/docs/#triggers  https://htmx.org/docs/#swapping
 // tips： Alpine.js 动态CSS，只支持内联写法
 // min-h-16 是为了图片未加载时，图片高度为0，导致页面不美观。极端设置下会导致图片变形。  text-center：居中 alert文字，因为需要等待css加载，所以现在没设置alt文字。
-templ MainArea(s *state.GlobalState, book *model.Book, paginationIndex int) {
+templ MainArea(c echo.Context, s *state.GlobalState, book *model.Book, paginationIndex int) {
 	<div
 		id="mouseMoveArea"
 		x-data="{
@@ -57,7 +60,7 @@ templ MainArea(s *state.GlobalState, book *model.Book, paginationIndex int) {
 						<div hx-get={ image.Url } hx-trigger="load" hx-swap="innerHTML" class="w-full m-0"></div>
 					}
 					if !strings.Contains(image.Url, "hidden.")&& !strings.Contains(image.Url, ".html") {
-						if !s.GetStaticFileMode() {
+						if c.QueryParam("static") == "" {
 							<img
 								x-data={ ImageXData(image.Url) }
 								class="w-full manga_image min-h-16 text-center select-none"
@@ -67,7 +70,14 @@ templ MainArea(s *state.GlobalState, book *model.Book, paginationIndex int) {
 								:style="{ width: $store.global.isLandscape?($store.scroll.widthUseFixedValue? (isDoublePage ? $store.scroll.doublePageWidth_PX +'px': $store.scroll.singlePageWidth_PX +'px'): (isDoublePage ? $store.scroll.doublePageWidth_Percent + '%':$store.scroll.singlePageWidth_Percent + '%')): $store.scroll.portraitWidthPercent+'%', maxWidth: '100%'}"
 							/>
 						} else {
-							@templ.Raw(HtmxStaticImage(image.Url))
+							<img
+								x-data={ ImageXData(image.Url) }
+								class="w-full manga_image min-h-16 text-center select-none"
+								draggable="false"
+								src={ common.GetFileBase64Text(book.BookInfo.BookID, image.Name) }
+								@load="isDoublePage=$event.target.naturalWidth > $event.target.naturalHeight;"
+								:style="{ width: $store.global.isLandscape?($store.scroll.widthUseFixedValue? (isDoublePage ? $store.scroll.doublePageWidth_PX +'px': $store.scroll.singlePageWidth_PX +'px'): (isDoublePage ? $store.scroll.doublePageWidth_Percent + '%':$store.scroll.singlePageWidth_Percent + '%')): $store.scroll.portraitWidthPercent+'%', maxWidth: '100%'}"
+							/>
 						}
 					}
 					<template x-if="$store.scroll.showPageNum">

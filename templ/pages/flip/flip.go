@@ -45,7 +45,7 @@ func PageHandler(c echo.Context) error {
 		indexHtml := common.Html(
 			c,
 			&state.Global,
-			error_page.NotFound404(&state.Global),
+			error_page.NotFound404(c, &state.Global),
 			[]string{},
 		)
 		// 渲染 404 页面
@@ -90,7 +90,7 @@ func PageHandler(c echo.Context) error {
 	indexHtml := common.Html(
 		c,
 		&state.Global,
-		FlipPage(&state.Global, book),
+		FlipPage(c, &state.Global, book),
 		[]string{"script/flip.js", "script/flip_sketch.js"})
 	// 渲染正常页面
 	if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexHtml); err != nil {

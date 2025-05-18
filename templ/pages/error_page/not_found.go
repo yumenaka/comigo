@@ -15,7 +15,7 @@ func NotFoundCommon(c echo.Context) error {
 	indexHtml := common.Html(
 		c,
 		&state.Global,
-		NotFound404(&state.Global),
+		NotFound404(c, &state.Global),
 		[]string{},
 	)
 	// 渲染 404 页面

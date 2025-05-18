@@ -342,5 +342,7 @@
   "current_user_scope": "当前登录用户有效（全局有效）",
   "portable_binary_scope": "此二进制文件有效（便携模式）",
   "saveSuccessHint": "设置修改成功，3秒后自动刷新页面。",
-  "no_books_library_path_notice": "未检测到可阅读的书籍，请先配置书库路径。配置完成后，页面将自动刷新。"
+  "no_books_library_path_notice": "未检测到可阅读的书籍，请先配置书库路径。配置完成后，页面将自动刷新。",
+  "download_raw_archive": "下载原始压缩包文件",
+  "download_portable_web_file": "下载为便携网页文件"
 }

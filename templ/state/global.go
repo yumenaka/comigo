@@ -12,6 +12,8 @@ type GlobalState struct {
 	ServerStatus  *util.ServerStatus
 }
 
+var Global GlobalState
+
 var ServerConfig *config.Config
 
 // GetAllBookNum 获取所有书籍数量
@@ -22,18 +24,13 @@ func (g *GlobalState) GetAllBookNum() int {
 	return len(g.ShelfBookList.BookInfos)
 }
 
-var Global GlobalState
+func IsLogin() bool {
+	return config.GetUsername() != "" && config.GetPassword() != ""
+}
 
 func init() {
 	Global.Version = config.GetVersion()
 	Global.ShelfBookList = nil
 	Global.ServerStatus = util.GetServerInfo(config.GetHost(), config.GetVersion(), config.GetPort(), config.GetEnableUpload(), 0)
 	ServerConfig = config.GetCfg()
-}
-
-// GetStaticFileMode 是否开启静态模式，开启Debug模式时，静态模式会被强制开启
-// 需要避免 </script>或 </body> 提前截断script标签的问题
-func (s *GlobalState) GetStaticFileMode() bool {
-	// logger.Infof("GetStaticFileMode: %v", config.GetStaticFileMode())
-	return config.GetStaticFileMode()
 }

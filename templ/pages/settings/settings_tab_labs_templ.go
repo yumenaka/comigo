@@ -36,10 +36,6 @@ func tab_labs(s *state.GlobalState) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = BoolConfig("StaticFileMode", state.ServerConfig.StaticFileMode, "StaticFileMode_Description", false).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
 		templ_7745c5c3_Err = BoolConfig("Debug", state.ServerConfig.Debug, "Debug_Description", false).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err

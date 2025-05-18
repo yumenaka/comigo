@@ -14,7 +14,7 @@ func PageHandler(c echo.Context) error {
 	indexHtml := common.Html(
 		c,
 		&state.Global,
-		UploadPage(&state.Global),
+		UploadPage(c, &state.Global),
 		[]string{},
 	)
 	// 渲染页面

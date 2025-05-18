@@ -1,10 +1,15 @@
 package common
 
 import (
+	"encoding/base64"
+	"mime"
+	"path/filepath"
 	"strconv"
 
+	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/templ/state"
+	fileutil "github.com/yumenaka/comigo/util/file"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
@@ -71,4 +76,40 @@ func QuickJumpBarBooks(b *model.Book) (list *model.BookInfoList) {
 		return nil
 	}
 	return list
+}
+
+func GetFileBase64Text(bookID string, fileName string) string {
+	// 获取书籍信息
+	bookByID, err := model.GetBookByID(bookID, "")
+	if err != nil {
+		logger.Infof("GetBookByID error: %s", err)
+		return ""
+	}
+
+	// 获取图片数据的选项
+	option := fileutil.GetPictureDataOption{
+		PictureName:      fileName,
+		BookIsPDF:        bookByID.Type == model.TypePDF,
+		BookIsDir:        bookByID.Type == model.TypeDir,
+		BookIsNonUTF8Zip: bookByID.NonUTF8Zip,
+		BookFilePath:     bookByID.FilePath,
+		Debug:            config.GetDebug(),
+		UseCache:         config.GetUseCache(),
+	}
+
+	// 获取图片数据
+	imgData, _, err := fileutil.GetPictureData(option)
+	if err != nil {
+		logger.Infof("GetPictureData error: %s", err)
+		return ""
+	}
+
+	// 转换为Base64字符串
+	mimeType := mime.TypeByExtension(filepath.Ext(fileName))
+	if mimeType == "" {
+		mimeType = "application/octet-stream"
+	}
+	dataURI := "data:" + mimeType + ";base64," + base64.StdEncoding.EncodeToString(imgData)
+
+	return dataURI
 }

@@ -1,13 +1,14 @@
 package scroll
 
 import (
+    "github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/templ/common"
 	"github.com/yumenaka/comigo/templ/state"
 )
 
 // ScrollPage 定义 BodyHTML
-templ ScrollPage(s *state.GlobalState, book *model.Book, paginationIndex int) {
+templ ScrollPage(c echo.Context, s *state.GlobalState, book *model.Book, paginationIndex int) {
 	@InsertData(book, s)
 	@common.Toast()
 	if book != nil {
@@ -23,10 +24,10 @@ templ ScrollPage(s *state.GlobalState, book *model.Book, paginationIndex int) {
 				ShowQuickJumpBar:  common.ShowQuickJumpBar(book),
 				QuickJumpBarBooks: common.QuickJumpBarBooks(book),
 			})
-		@MainArea(s, book, paginationIndex)
+		@MainArea(c,s, book, paginationIndex)
 	}
 	@common.Footer(s.Version)
-	@common.Drawer(s.ServerStatus.ServerHost, DrawerSlot(s,book))
+	@common.Drawer(c, s, book, DrawerSlot(c,s,book))
 	@common.QRCode(s.ServerStatus.ServerHost)
 }
 
