@@ -3,16 +3,17 @@ package scan
 import (
 	"context"
 	"errors"
+	"io/fs"
+	"net/url"
+	"path"
+	"time"
+
 	"github.com/klauspost/compress/zip"
 	"github.com/yumenaka/archives"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/util/file"
 	"github.com/yumenaka/comigo/util/logger"
-	"io/fs"
-	"net/url"
-	"path"
-	"time"
 )
 
 // 处理 ZIP 和 EPUB 文件

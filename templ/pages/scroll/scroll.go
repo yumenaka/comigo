@@ -34,7 +34,7 @@ func PageHandler(c echo.Context) error {
 		indexHtml := common.Html(
 			c,
 			&state.Global,
-			error_page.NotFound404(&state.Global),
+			error_page.NotFound404(c, &state.Global),
 			[]string{},
 		)
 		// 渲染 404 页面
@@ -54,7 +54,7 @@ func PageHandler(c echo.Context) error {
 		}
 	}
 	// 定义模板主体内容。
-	scrollPage := ScrollPage(&state.Global, book, paginationIndex)
+	scrollPage := ScrollPage(c, &state.Global, book, paginationIndex)
 	// 拼接页面
 	indexHtml := common.Html(
 		c,

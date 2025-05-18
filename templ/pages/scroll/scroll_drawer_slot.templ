@@ -1,27 +1,43 @@
 package scroll
 
 import (
-    "fmt"
-    "net/url"
+	"fmt"
+	"net/url"
 
+    "github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/templ/state"
 )
 
 // 卷轴模式页面，放在侧栏里的【非共通设置】
-templ DrawerSlot(s *state.GlobalState, book *model.Book) {
-    if (book != nil && book.Type == model.TypePDF) {
-	   <!-- PDF【在浏览器中打开】 -->
-	   <a
-		    type="button"
-		    target="_blank"
-		    x-text="i18next.t('open_pdf_in_browser')"
-		    href={ templ.SafeURL(fmt.Sprintf("/api/raw/%s/%s", book.BookID, url.QueryEscape(book.Title)))}
-		    class="px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-	        >
-		    用浏览器打开PDF
-	    </a>
-    }
+templ DrawerSlot(c echo.Context, s *state.GlobalState, book *model.Book) {
+	if (book != nil && book.Type == model.TypePDF) {
+		<!-- 【用浏览器中打开PDF】 -->
+		<a
+			type="button"
+			target="_blank"
+			x-text="i18next.t('open_pdf_in_browser')"
+			href={ templ.SafeURL(fmt.Sprintf("/api/raw/%s/%s", book.BookID, url.QueryEscape(book.Title))) }
+			class="px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+		>
+			用浏览器打开PDF
+		</a>
+	}
+	<!-- 【下载为便携网页文件】按钮，固定分页模式与便携模式不可见 -->
+	<div class="flex justify-center w-full my-2 font-semibold" x-show="(!$store.scroll.fixedPagination)&&(!window.location.href.includes('file:///'))">
+		<a
+			href={ templ.SafeURL(fmt.Sprintf("%s?static="+book.BookInfo.Title+".html", c.Request().URL.Path)) }
+			download={ book.BookInfo.Title + ".html" }
+			class="inline-flex items-center px-4 py-2 text-white bg-blue-500 rounded-lg shadow-lg hover:bg-blue-600 transition-colors"
+			:title="i18next.t('download_portable_web_file')"
+			x-text="i18next.t('download_portable_web_file')"
+		>
+			<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+			</svg>
+			下载为便携网页文件
+		</a>
+	</div>
 	<!-- 切换【卷轴模式/翻页模式】的按钮-->
 	<!-- <button
 		type="button"
@@ -33,7 +49,10 @@ templ DrawerSlot(s *state.GlobalState, book *model.Book) {
 		切换到卷轴模式/翻页模式
 	</button> -->
 	<!-- 切换【卷轴模式/翻页模式】的toggle-->
-	<label class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm">
+	<label
+		x-show="!window.location.href.includes('file:///')"
+		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
+	>
 		<input type="checkbox" x-bind:value="$store.global.readModeIsScroll" x-on:change="$store.global.toggleReadMode();toggleFlipScrollFlexible();" checked class="sr-only peer"/>
 		<div
 			class="relative w-11 min-w-[44px] h-6 bg-green-600 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
@@ -65,14 +84,17 @@ templ DrawerSlot(s *state.GlobalState, book *model.Book) {
         }
     </script>
 	<!-- 卷轴模式:【固定分页/无限下拉】 -->
-	<label class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm">
+	<label
+		x-show="!window.location.href.includes('file:///')"
+		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
+	>
 		<input type="checkbox" x-bind:value="$store.scroll.fixedPagination" @click="togglePaginationLoading();" class="sr-only peer" checked/>
 		<div
 			class="relative w-11 min-w-[44px] h-6 bg-green-600 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
 		></div>
 		<span class="font-medium ms-3" x-text="$store.scroll.fixedPagination?i18next.t('scroll_fixed_pagination')+i18next.t('click_to_toggle'):i18next.t('scroll_infinite_scroll')+i18next.t('click_to_toggle')"></span>
 	</label>
-    <script>
+	<script>
     // 切换分页模式时，如果当前路径带有分页，就修改URL路径为不带分页的路径
     // 反之，如果当前路径不带分页，就修改URL路径为带分页的路径（page =1）
     // 当前路径类似于 /flip/<id>?page=1 或 /scroll/<id>?page=1
@@ -129,6 +151,7 @@ templ DrawerSlot(s *state.GlobalState, book *model.Book) {
 	</div>
 	<!-- 【自动切边】 -->
 	<label
+		x-show="!window.location.href.includes('file:///')"
 		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
 	>
 		<input
@@ -143,7 +166,11 @@ templ DrawerSlot(s *state.GlobalState, book *model.Book) {
 		<span class="font-medium ms-3" x-text="i18next.t('auto_crop')"></span>
 	</label>
 	<!-- 【切边阈值】 -->
-	<div x-show="$store.global.autoCrop" x-transition class="relative w-full my-2 rounded-sm outline-offset-4 outline-double outline-2 hover:outline-3">
+	<div
+		x-show="(!window.location.href.includes('file:///'))&&$store.global.autoCrop"
+		x-transition
+		class="relative w-full my-2 rounded-sm outline-offset-4 outline-double outline-2 hover:outline-3"
+	>
 		<label
 			for="autoCropNum"
 			class="block w-full mb-0 font-medium"
@@ -257,6 +284,7 @@ templ DrawerSlot(s *state.GlobalState, book *model.Book) {
 	</div>
 	<!-- 【压缩图片】 -->
 	<label
+		x-show="!window.location.href.includes('file:///')"
 		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
 	>
 		<input

@@ -21,6 +21,6 @@ templ ShelfPage(c echo.Context, s *state.GlobalState) {
 		})
 	@MainArea(c, s)
 	@common.Footer(s.Version)
-	@common.Drawer(s.ServerStatus.ServerHost, ShelfDrawerSlot())
+	@common.Drawer(c, s, nil, ShelfDrawerSlot())
 	@common.QRCode(s.ServerStatus.ServerHost)
 }

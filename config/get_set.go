@@ -70,10 +70,6 @@ func GetDebug() bool {
 	return cfg.Debug
 }
 
-func GetStaticFileMode() bool {
-	return cfg.StaticFileMode
-}
-
 func SetDebug(debug bool) {
 	cfg.Debug = debug
 }

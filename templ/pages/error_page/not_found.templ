@@ -1,11 +1,12 @@
 package error_page
 
 import (
+    "github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/templ/state"
 	"github.com/yumenaka/comigo/templ/common"
 )
 // 404 NotFound页面
-templ NotFound404(s *state.GlobalState) {
+templ NotFound404(c echo.Context, s *state.GlobalState) {
 	@common.Header(
 		common.HeaderProps{
 			Title:           "",
@@ -25,7 +26,7 @@ templ NotFound404(s *state.GlobalState) {
 		<div class="text-4xl font-bold text-gray-500">404</div>
 		<div class="text-2xl font-bold text-gray-500">Not Found</div>
 	</div>
-	@common.Drawer(s.ServerStatus.ServerHost, nil)
+	@common.Drawer(c, s, nil, nil)
     @common.QRCode(s.ServerStatus.ServerHost)
     @common.Footer(s.Version)
 }

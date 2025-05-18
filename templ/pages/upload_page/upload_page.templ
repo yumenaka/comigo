@@ -1,12 +1,13 @@
 package upload_page
 
 import (
+	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/templ/state"
 	"github.com/yumenaka/comigo/templ/common"
 )
 
 // UploadPage 上传页面
-templ UploadPage(s *state.GlobalState) {
+templ UploadPage(c echo.Context,s *state.GlobalState) {
 	@common.Toast()
 	@common.Header(
 		common.HeaderProps{
@@ -20,7 +21,7 @@ templ UploadPage(s *state.GlobalState) {
 		})
 	@common.UploadArea(&state.Global),
 	@common.Footer(s.Version)
-	@common.Drawer(s.ServerStatus.ServerHost, nil)
+	@common.Drawer(c, s, nil, nil)
 	@common.QRCode(s.ServerStatus.ServerHost)
 
 }

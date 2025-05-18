@@ -342,5 +342,7 @@
   "current_user_scope": "ログインユーザーに対して有効（グローバル適用）",
   "portable_binary_scope": "当該バイナリに対して有効（ポータブルモード）",
   "saveSuccessHint": "設定が保存されました。3秒後にページが自動的にリロードされます。",
-  "no_books_library_path_notice": "閲覧可能な書籍が見つかりません。ライブラリパスを設定してください。設定が完了すると、ページは自動的にリロードされます。"
+  "no_books_library_path_notice": "閲覧可能な書籍が見つかりません。ライブラリパスを設定してください。設定が完了すると、ページは自動的にリロードされます。",
+  "download_raw_archive": "圧縮ファイルをダウンロード",
+  "download_portable_web_file": "HTMLとしてダウンロード"
 }

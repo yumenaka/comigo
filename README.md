@@ -22,7 +22,7 @@
 - 🐧 **Cross-Platform**: Compatibility with Windows, Linux, and macOS
 - 📖 **Diverse Reading Modes**: Offers scroll, and page-turning modes
 - ⚙️ **Flexible Configuration**: Command-line operation with `config.toml` library settings
-- 🖼️ **Modern Image Formats**: Support for next-gen formats like `heic` and `avif`
+- 🖼️ **Modern Image Formats**: In addition to `jpg` and `png`, it also supports next-gen formats like `heic` and `avif`
 - ✂️ **Smart Optimization**: Automatic image cropping and compression for bandwidth saving
 - 🔄 **Sync Reading**: Synchronized page-turning across different devices
 
