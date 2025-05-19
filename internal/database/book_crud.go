@@ -1,4 +1,4 @@
-//go:build !(windows && 386)
+//go:build !((windows && 386) || js)
 
 package database // Package database 编译条件的注释和 package 语句之间一定要隔一行，不然无法识别编译条件。go:build 是1.18以后“条件编译”的推荐语法。
 
@@ -15,7 +15,7 @@ import (
 
 // ClearBookData   清空数据库的Book与SinglePageInfo表  // 后台并发执行，所以不能保证结果如预期，不用这个函数???
 func ClearBookData(clearBook *model.Book) {
-	//如何增删查改： https://entgo.io/zh/docs/crud
+	// 如何增删查改： https://entgo.io/zh/docs/crud
 	ctx := context.Background()
 	_, err := client.Book.
 		Delete().
@@ -38,7 +38,7 @@ func ClearBookData(clearBook *model.Book) {
 // DeleteAllBookInDatabase  清空数据库的Book与SinglePageInfo表
 // 后台并发执行，不能保证结果如预期，不用这个函数。
 func DeleteAllBookInDatabase(debug bool) {
-	//如何增删查改： https://entgo.io/zh/docs/crud
+	// 如何增删查改： https://entgo.io/zh/docs/crud
 	ctx := context.Background()
 	deleteBookNum, err := client.Book.
 		Delete().
@@ -86,7 +86,7 @@ func SaveBookListToDatabase(bookList []*model.Book) error {
 
 // SaveBookToDatabase 向数据库中插入一本书
 func SaveBookToDatabase(save *model.Book) error {
-	//如何增删查改： https://entgo.io/zh/docs/crud
+	// 如何增删查改： https://entgo.io/zh/docs/crud
 	ctx := context.Background()
 	b, err := client.Book.
 		Create().
@@ -113,11 +113,11 @@ func SaveBookToDatabase(save *model.Book) error {
 		SetExtractNum(save.BookInfo.ExtractNum).
 		Save(ctx) // 创建并返回 //还有一个SaveX(ctx)，和 Save() 不一样， SaveX 在出错时 panic。
 	if err != nil {
-		//log.Fatalf("failed creating book: %v", err)
+		// log.Fatalf("failed creating book: %v", err)
 		return err
 	}
 
-	//保存封面与页面信息
+	// 保存封面与页面信息
 	bulk := make([]*ent.SinglePageInfoCreate, len(save.Pages.Images))
 	for i, p := range save.Pages.Images {
 		bulk[i] = client.SinglePageInfo.
@@ -134,8 +134,8 @@ func SaveBookToDatabase(save *model.Book) error {
 	}
 	pages, err := client.SinglePageInfo.CreateBulk(bulk...).Save(ctx)
 	if b != nil && pages != nil {
-		//log.Println("book was created: ", b)
-		//log.Println("book pages info was created: ", pages)
+		// log.Println("book was created: ", b)
+		// log.Println("book pages info was created: ", pages)
 	}
 	return err
 }
@@ -179,8 +179,8 @@ func GetBookFromDatabase(filepath string) (*model.Book, error) {
 		},
 	}
 
-	//查询数据库里的封面与页面信息
-	//https://entgo.io/zh/docs/crud
+	// 查询数据库里的封面与页面信息
+	// https://entgo.io/zh/docs/crud
 	pages, err := client.SinglePageInfo. // UserClient.
 						Query(). // 用户查询生成器。
 						Where(singlepageinfo.BookID(temp.BookID)).
@@ -210,7 +210,7 @@ func GetBooksFromDatabase() (list []*model.Book, err error) {
 	ctx := context.Background()
 	books, err := client.Book. // UserClient.
 					Query(). // 用户查询生成器。
-		//Where(ent_book.Not(ent_book.Type("dir"))). //忽略文件夹型的书籍
+		// Where(ent_book.Not(ent_book.Type("dir"))). //忽略文件夹型的书籍
 		All(ctx) // query and return.
 	if err != nil {
 		logger.Infof("%s", err)
@@ -243,8 +243,8 @@ func GetBooksFromDatabase() (list []*model.Book, err error) {
 				ZipTextEncoding: temp.ZipTextEncoding,
 			},
 		}
-		//查询数据库里的封面与页面信息
-		//https://entgo.io/zh/docs/crud
+		// 查询数据库里的封面与页面信息
+		// https://entgo.io/zh/docs/crud
 		pages, err := client.SinglePageInfo. // UserClient.
 							Query(). // 用户查询生成器。
 							Where(singlepageinfo.BookID(temp.BookID)).

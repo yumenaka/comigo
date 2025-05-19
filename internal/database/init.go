@@ -1,4 +1,4 @@
-//go:build !(windows && 386)
+//go:build !((windows && 386) || js)
 
 package database
 

@@ -1,3 +1,5 @@
+//go:build !js
+
 package util
 
 import (
@@ -132,9 +134,9 @@ func doSelfUpdate(url string) error {
 
 	// 写入  tar.gz 或 zip文件到 tmpFile
 	if runtime.GOOS == "windows" {
-		//解压 zip文件
+		// 解压 zip文件
 	} else {
-		//解压 tar.gz文件
+		// 解压 tar.gz文件
 	}
 
 	// 取出可执行文件 comi
@@ -149,11 +151,11 @@ func doSelfUpdate(url string) error {
 	return nil
 }
 
-//func main() {
+// func main() {
 //	e := echo.New()
 //
 //	// 路径仅供参考，如需安全控制可加权限校验
 //	e.GET("/update", UpdateHandler)
 //
 //	e.Logger.Fatal(e.Start(":8080"))
-//}
+// }
