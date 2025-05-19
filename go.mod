@@ -12,7 +12,6 @@ tool (
 require (
 	entgo.io/ent v0.14.4
 	github.com/Baozisoftware/qrcode-terminal-go v0.0.0-20170407111555-c0650d8dff0f
-	github.com/BurntSushi/toml v1.5.0
 	github.com/bbrks/go-blurhash v1.1.1
 	github.com/cheggaaa/pb/v3 v3.1.7
 	github.com/disintegration/imaging v1.6.2
