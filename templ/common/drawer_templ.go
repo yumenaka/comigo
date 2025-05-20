@@ -13,7 +13,7 @@ import "github.com/yumenaka/comigo/model"
 import "github.com/yumenaka/comigo/templ/state"
 import "github.com/yumenaka/comigo/templ/common/svg"
 
-func Drawer(c echo.Context, s *state.GlobalState, book *model.Book, slot templ.Component) templ.Component {
+func Drawer(c echo.Context, book *model.Book, slot templ.Component) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -39,9 +39,9 @@ func Drawer(c echo.Context, s *state.GlobalState, book *model.Book, slot templ.C
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(ServerHostBindStr(s.ServerStatus.ServerHost))
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(ServerHostBindStr(state.ServerStatus.ServerHost))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/drawer.templ`, Line: 13, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/drawer.templ`, Line: 13, Col: 59}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {

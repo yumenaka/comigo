@@ -7,7 +7,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/templ/common"
-	"github.com/yumenaka/comigo/templ/state"
 )
 
 // ImageXData 在Go函数里面计算图片的x-data属性。渲染结果例：
@@ -38,7 +37,7 @@ func HtmxStaticImage(Url string) string {
 // https://htmx.org/docs/#triggers  https://htmx.org/docs/#swapping
 // tips： Alpine.js 动态CSS，只支持内联写法
 // min-h-16 是为了图片未加载时，图片高度为0，导致页面不美观。极端设置下会导致图片变形。  text-center：居中 alert文字，因为需要等待css加载，所以现在没设置alt文字。
-templ MainArea(c echo.Context, s *state.GlobalState, book *model.Book, paginationIndex int) {
+templ MainArea(c echo.Context,  book *model.Book, paginationIndex int) {
 	<div
 		id="mouseMoveArea"
 		x-data="{
@@ -48,7 +47,7 @@ templ MainArea(c echo.Context, s *state.GlobalState, book *model.Book, paginatio
 		:class="(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') ? ($store.global.bgPattern !== 'none'?$store.global.bgPattern+' bg-base-300':'bg-base-300'):($store.global.bgPattern !== 'none'?$store.global.bgPattern:'')"
 	>
 		if paginationIndex >= 1 && book.PageCount/32+1 != 1 {
-			@ScrollPagination(s, book, paginationIndex)
+			@ScrollPagination(book, paginationIndex)
 		}
 		for key, image := range book.Pages.Images {
 			if paginationIndex < 1 || (paginationIndex >= 1 && key/32 + 1 == paginationIndex) {
@@ -87,7 +86,7 @@ templ MainArea(c echo.Context, s *state.GlobalState, book *model.Book, paginatio
 			}
 		}
 		if paginationIndex >= 1 && book.PageCount/32+1 != 1 {
-			@ScrollPagination(s, book, paginationIndex)
+			@ScrollPagination(book, paginationIndex)
 		}
 	</div>
 	<button id="BackTopButton" style="display: none" class="fixed flex items-center justify-center w-10 h-10 text-white bg-blue-500 rounded-full shadow-lg bottom-4 right-4">

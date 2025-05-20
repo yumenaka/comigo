@@ -5,12 +5,12 @@ import "github.com/yumenaka/comigo/model"
 import "github.com/yumenaka/comigo/templ/state"
 import "github.com/yumenaka/comigo/templ/common/svg"
 
-templ Drawer(c echo.Context, s *state.GlobalState, book *model.Book, slot templ.Component) {
+templ Drawer(c echo.Context, book *model.Book, slot templ.Component) {
 	<!-- Drawer component -->
 	<!-- https://flowbite.com/docs/components/drawer/ -->
 	<div
 		id="drawer-right"
-		x-data={ ServerHostBindStr(s.ServerStatus.ServerHost) }
+		x-data={ ServerHostBindStr(state.ServerStatus.ServerHost) }
 		class="fixed top-0 right-0 z-40 flex flex-col w-64 min-h-full px-2 py-0 overflow-y-auto transition-transform translate-x-full border-l-2 border-gray-500 dark:border-gray-200 rounded h-dvh bg-base-100 text-base-content"
 		tabindex="-1"
 		aria-labelledby="drawer-right-label"

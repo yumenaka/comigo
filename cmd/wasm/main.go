@@ -4,6 +4,7 @@ import (
 	"github.com/yumenaka/comigo/routers"
 )
 
+// cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" static
 // env GOOS=js GOARCH=wasm CGO_ENABLED=0 go build -o your.wasm cmd/wasm/main.go
 
 // package command-line-arguments

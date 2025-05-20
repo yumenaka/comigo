@@ -7,7 +7,7 @@ import (
 )
 
 // UploadPage 上传页面
-templ UploadPage(c echo.Context,s *state.GlobalState) {
+templ UploadPage(c echo.Context,) {
 	@common.Toast()
 	@common.Header(
 		common.HeaderProps{
@@ -19,9 +19,9 @@ templ UploadPage(c echo.Context,s *state.GlobalState) {
 			DownLoadLink:    "",
 			SetTheme:        true,
 		})
-	@common.UploadArea(&state.Global),
-	@common.Footer(s.Version)
-	@common.Drawer(c, s, nil, nil)
-	@common.QRCode(s.ServerStatus.ServerHost)
+	@common.UploadArea(),
+	@common.Footer(state.Version)
+	@common.Drawer(c,  nil, nil)
+	@common.QRCode(state.ServerStatus.ServerHost)
 
 }

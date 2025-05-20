@@ -1,11 +1,10 @@
 package settings
 
 import (
-	"github.com/yumenaka/comigo/templ/state"
 	"github.com/yumenaka/comigo/templ/common/svg"
 )
 
-templ MainArea(s *state.GlobalState) {
+templ MainArea() {
 <header id="header" hx-target="#tab-contents" role="tablist" hx-on:htmx-after-on-load="let currentTab = document.querySelector('[aria-selected=true]');
                                            currentTab.setAttribute('aria-selected', 'false')
                                            currentTab.classList.remove('selected')

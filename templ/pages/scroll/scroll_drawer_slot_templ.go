@@ -14,11 +14,10 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/model"
-	"github.com/yumenaka/comigo/templ/state"
 )
 
 // 卷轴模式页面，放在侧栏里的【非共通设置】
-func DrawerSlot(c echo.Context, s *state.GlobalState, book *model.Book) templ.Component {
+func DrawerSlot(c echo.Context, book *model.Book) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -70,7 +69,7 @@ func DrawerSlot(c echo.Context, s *state.GlobalState, book *model.Book) templ.Co
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(book.BookInfo.Title + ".html")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_drawer_slot.templ`, Line: 30, Col: 43}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_drawer_slot.templ`, Line: 29, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {

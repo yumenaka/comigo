@@ -7,11 +7,11 @@ import (
 )
 
 // SettingsPage 设置页面
-templ SettingsPage(c echo.Context, s *state.GlobalState) {
+templ SettingsPage(c echo.Context, ) {
     @common.Toast()
-	@MainArea(&state.Global)
-	@common.Footer(s.Version)
-	@common.QRCode(s.ServerStatus.ServerHost)
+	@MainArea()
+	@common.Footer(state.Version)
+	@common.QRCode(state.ServerStatus.ServerHost)
 <script>
     // htmx出错时报错（Toast）
 	document.addEventListener('htmx:responseError', (event) => {

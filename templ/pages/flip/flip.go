@@ -8,7 +8,6 @@ import (
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/templ/common"
 	"github.com/yumenaka/comigo/templ/pages/error_page"
-	"github.com/yumenaka/comigo/templ/state"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
@@ -44,8 +43,7 @@ func PageHandler(c echo.Context) error {
 		// 没有找到书，显示 HTTP 404 错误
 		indexHtml := common.Html(
 			c,
-			&state.Global,
-			error_page.NotFound404(c, &state.Global),
+			error_page.NotFound404(c),
 			[]string{},
 		)
 		// 渲染 404 页面
@@ -81,7 +79,7 @@ func PageHandler(c echo.Context) error {
 	//	logger.Infof("GetReadingProgress: %v readingProgressStr: %s", err, readingProgressStr.Value)
 	// }
 	//
-	// state.Global.ShelfBookList, err = model.TopOfShelfInfo("name")
+	// state.NowBookList, err = model.TopOfShelfInfo("name")
 	// if err != nil {
 	//	logger.Infof("TopOfShelfInfo: %v", err)
 	// }
@@ -89,8 +87,8 @@ func PageHandler(c echo.Context) error {
 	// 翻页模式页面
 	indexHtml := common.Html(
 		c,
-		&state.Global,
-		FlipPage(c, &state.Global, book),
+
+		FlipPage(c, book),
 		[]string{"script/flip.js", "script/flip_sketch.js"})
 	// 渲染正常页面
 	if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexHtml); err != nil {

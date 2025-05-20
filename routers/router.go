@@ -72,7 +72,7 @@ func SetMiddleware() {
 			// 如果url里面包含了 .js 或者 .css 文件或 base64 这几个关键字
 			// 那么就启用 gzip 压缩
 			url := c.Request().URL.Path
-			if strings.Contains(url, ".js") || strings.Contains(url, ".css") || strings.Contains(url, "base64") {
+			if strings.Contains(url, ".js") || strings.Contains(url, ".css") || strings.Contains(url, ".wasm") || strings.Contains(url, ".htm") || strings.Contains(url, "base64") {
 				// 包含以上关键字，启用 gzip 压缩
 				return false
 			}

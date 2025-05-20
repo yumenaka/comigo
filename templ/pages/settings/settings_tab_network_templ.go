@@ -13,7 +13,7 @@ import "github.com/yumenaka/comigo/config"
 
 // @StringConfig("Username",state.ServerConfig.Username, "Username_Description",true)
 // @StringConfig("Password",state.ServerConfig.Password, "Password_Description",true)
-func tab_network(s *state.GlobalState) templ.Component {
+func tab_network() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {

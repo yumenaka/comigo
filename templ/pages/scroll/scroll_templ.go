@@ -16,7 +16,7 @@ import (
 )
 
 // ScrollPage 定义 BodyHTML
-func ScrollPage(c echo.Context, s *state.GlobalState, book *model.Book, paginationIndex int) templ.Component {
+func ScrollPage(c echo.Context, book *model.Book, paginationIndex int) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -37,7 +37,7 @@ func ScrollPage(c echo.Context, s *state.GlobalState, book *model.Book, paginati
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = InsertData(book, s).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = InsertData(book, state.ServerStatus).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -65,20 +65,20 @@ func ScrollPage(c echo.Context, s *state.GlobalState, book *model.Book, paginati
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = MainArea(c, s, book, paginationIndex).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = MainArea(c, book, paginationIndex).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = common.Footer(s.Version).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.Footer(state.Version).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = common.Drawer(c, s, book, DrawerSlot(c, s, book)).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.Drawer(c, book, DrawerSlot(c, book)).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = common.QRCode(s.ServerStatus.ServerHost).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.QRCode(state.ServerStatus.ServerHost).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -86,7 +86,7 @@ func ScrollPage(c echo.Context, s *state.GlobalState, book *model.Book, paginati
 	})
 }
 
-func InsertData(bookData any, stateData any) templ.Component {
+func InsertData(bookData any, serverStatus any) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -113,8 +113,8 @@ func InsertData(bookData any, stateData any) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		if stateData != nil {
-			templ_7745c5c3_Err = templ.JSONScript("GlobalState", stateData).Render(ctx, templ_7745c5c3_Buffer)
+		if serverStatus != nil {
+			templ_7745c5c3_Err = templ.JSONScript("ServerStatus", serverStatus).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

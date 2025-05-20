@@ -6,31 +6,36 @@ import (
 	"github.com/yumenaka/comigo/util"
 )
 
-type GlobalState struct {
-	Version       string
-	ShelfBookList *model.BookInfoList
-	ServerStatus  *util.ServerStatus
-}
+// 感觉这个抽象有点多余？
+// type GlobalState struct {
+// 	Version      string
+// 	NowBookList  *model.BookInfoList
+// 	ServerStatus *util.ServerStatus
+// }
+// var Global GlobalState
 
-var Global GlobalState
-
+var Version string
+var ServerStatus *util.ServerStatus
 var ServerConfig *config.Config
+var NowBookList *model.BookInfoList
 
-// GetAllBookNum 获取所有书籍数量
-func (g *GlobalState) GetAllBookNum() int {
-	if g.ShelfBookList == nil {
+// GetNowBookNum 获取当前显示书籍数量
+func GetNowBookNum() int {
+	if NowBookList == nil {
 		return 0
 	}
-	return len(g.ShelfBookList.BookInfos)
+	return len(NowBookList.BookInfos)
 }
 
+// IsLogin 判断是否登录
 func IsLogin() bool {
 	return config.GetUsername() != "" && config.GetPassword() != ""
 }
 
+// 初始化参数
 func init() {
-	Global.Version = config.GetVersion()
-	Global.ShelfBookList = nil
-	Global.ServerStatus = util.GetServerInfo(config.GetHost(), config.GetVersion(), config.GetPort(), config.GetEnableUpload(), 0)
+	Version = config.GetVersion()
+	NowBookList = nil
+	ServerStatus = util.GetServerInfo(config.GetHost(), config.GetVersion(), config.GetPort(), config.GetEnableUpload(), 0)
 	ServerConfig = config.GetCfg()
 }

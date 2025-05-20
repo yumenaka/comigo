@@ -18,7 +18,7 @@ import (
 // -------------------------
 
 func TabBook(c echo.Context) error {
-	template := tab_book(&state.Global)
+	template := tab_book()
 	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, template); renderErr != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
@@ -26,7 +26,7 @@ func TabBook(c echo.Context) error {
 }
 
 func TabNetwork(c echo.Context) error {
-	template := tab_network(&state.Global)
+	template := tab_network()
 	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, template); renderErr != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
@@ -34,7 +34,7 @@ func TabNetwork(c echo.Context) error {
 }
 
 func TabLabs(c echo.Context) error {
-	template := tab_labs(&state.Global)
+	template := tab_labs()
 	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, template); renderErr != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}

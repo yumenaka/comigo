@@ -7,7 +7,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/model"
-	"github.com/yumenaka/comigo/templ/state"
 )
 //
 // 如果链接包含字符串“api/get_file?” 则在背景图片链接中添加参数“&resize_height=512”
@@ -22,7 +21,7 @@ css backgroundImage(imageUrl string) {
 	background-image: { "url(" + getResizedImageUrl(imageUrl) + ")" };
 }
 
-templ BookCard(c echo.Context, s *state.GlobalState, book model.BookInfo) {
+templ BookCard(c echo.Context,  book model.BookInfo) {
 	<!-- 把链接的 target 属性设置为 "_blank"，该链接会在新窗口中打开。 -->
 	<!-- transition-transform duration-200 hover:scale-105  -->
 	<!-- 使用 transform 和 scale 实现“元素放大且不影响原有布局”的效果。核心思路是通过 CSS Transform 做放大动画，而不改变其占据的文档流空间。 -->

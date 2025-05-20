@@ -2,10 +2,9 @@ package scroll
 
 import (
 	"github.com/yumenaka/comigo/model"
-	"github.com/yumenaka/comigo/templ/state"
 )
 
-templ ScrollPagination(s *state.GlobalState, book *model.Book, paginationIndex int) {
+templ ScrollPagination(book *model.Book, paginationIndex int) {
 	<nav aria-label="Page navigation example">
 		<ul class="flex items-center my-1 -space-x-px h-8 text-sm">
 			for i := 1; i <= book.PageCount/32+1; i++ {
