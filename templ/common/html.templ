@@ -3,11 +3,10 @@ package common
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/assets"
-	"github.com/yumenaka/comigo/templ/state"
 )
 
 // Html 定义网页布局
-templ Html(c echo.Context, s *state.GlobalState, bodyContent templ.Component, insertScript []string) {
+templ Html(c echo.Context, bodyContent templ.Component, insertScript []string) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>

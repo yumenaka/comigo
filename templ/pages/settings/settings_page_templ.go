@@ -15,7 +15,7 @@ import (
 )
 
 // SettingsPage 设置页面
-func SettingsPage(c echo.Context, s *state.GlobalState) templ.Component {
+func SettingsPage(c echo.Context) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -40,15 +40,15 @@ func SettingsPage(c echo.Context, s *state.GlobalState) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = MainArea(&state.Global).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = MainArea().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = common.Footer(s.Version).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.Footer(state.Version).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = common.QRCode(s.ServerStatus.ServerHost).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.QRCode(state.ServerStatus.ServerHost).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

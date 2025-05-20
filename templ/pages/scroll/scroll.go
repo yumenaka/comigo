@@ -9,7 +9,6 @@ import (
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/templ/common"
 	"github.com/yumenaka/comigo/templ/pages/error_page"
-	"github.com/yumenaka/comigo/templ/state"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
@@ -33,8 +32,7 @@ func PageHandler(c echo.Context) error {
 		// 没有找到书，显示 HTTP 404 错误
 		indexHtml := common.Html(
 			c,
-			&state.Global,
-			error_page.NotFound404(c, &state.Global),
+			error_page.NotFound404(c),
 			[]string{},
 		)
 		// 渲染 404 页面
@@ -54,11 +52,11 @@ func PageHandler(c echo.Context) error {
 		}
 	}
 	// 定义模板主体内容。
-	scrollPage := ScrollPage(c, &state.Global, book, paginationIndex)
+	scrollPage := ScrollPage(c, book, paginationIndex)
 	// 拼接页面
 	indexHtml := common.Html(
 		c,
-		&state.Global,
+
 		scrollPage, // define body content
 		[]string{"script/scroll.js"},
 	)

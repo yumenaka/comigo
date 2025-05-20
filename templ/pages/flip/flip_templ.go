@@ -16,7 +16,7 @@ import (
 )
 
 // FlipPage 定义 BodyHTML
-func FlipPage(c echo.Context, s *state.GlobalState, book *model.Book) templ.Component {
+func FlipPage(c echo.Context, book *model.Book) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -41,7 +41,7 @@ func FlipPage(c echo.Context, s *state.GlobalState, book *model.Book) templ.Comp
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = InsertData(book, s).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = InsertData(book, state.ServerStatus).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -66,16 +66,16 @@ func FlipPage(c echo.Context, s *state.GlobalState, book *model.Book) templ.Comp
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = MainArea(s, book).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = MainArea(book).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = common.Drawer(c, s, book, FlipDrawerSlot(s, book)).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.Drawer(c, book, FlipDrawerSlot(book)).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = common.QRCode(s.ServerStatus.ServerHost).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.QRCode(state.ServerStatus.ServerHost).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

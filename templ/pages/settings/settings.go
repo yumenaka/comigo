@@ -6,7 +6,6 @@ import (
 	"github.com/angelofallars/htmx-go"
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/templ/common"
-	"github.com/yumenaka/comigo/templ/state"
 )
 
 func getTranslations(value string) string {
@@ -17,8 +16,7 @@ func getTranslations(value string) string {
 func PageHandler(c echo.Context) error {
 	indexHtml := common.Html(
 		c,
-		&state.Global,
-		SettingsPage(c, &state.Global),
+		SettingsPage(c),
 		[]string{},
 	)
 	// 渲染页面

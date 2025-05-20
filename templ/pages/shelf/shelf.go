@@ -31,22 +31,22 @@ func PageHandler(c echo.Context) error {
 	// 如果没有指定书籍ID，获取顶层书架信息。
 	if bookID == "" {
 		model.CheckAllBookFileExist()
-		state.Global.ShelfBookList, _ = model.TopOfShelfInfo(sortBy)
+		state.NowBookList, _ = model.TopOfShelfInfo(sortBy)
 	}
 
 	// 如果指定了书籍ID，获取子书架信息。
 	if bookID != "" {
 		var err error
 		model.CheckAllBookFileExist()
-		state.Global.ShelfBookList, err = model.GetBookInfoListByID(bookID, sortBy)
+		state.NowBookList, err = model.GetBookInfoListByID(bookID, sortBy)
 		// TODO: 无图书的提示（返回主页\上传压缩包\远程下载示例漫画）
 		if err != nil {
 			logger.Infof("GetBookShelf Error: %v", err)
 			// 渲染 404 页面
 			indexHtml := common.Html(
 				c,
-				&state.Global,
-				error_page.NotFound404(c, &state.Global),
+
+				error_page.NotFound404(c),
 				[]string{},
 			)
 			if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexHtml); err != nil {
@@ -59,8 +59,8 @@ func PageHandler(c echo.Context) error {
 	// 为首页定义模板布局。
 	indexHtml := common.Html(
 		c,
-		&state.Global,
-		ShelfPage(c, &state.Global), // define body content
+
+		ShelfPage(c), // define body content
 		[]string{"script/shelf.js"},
 	)
 	// 用模板渲染书架页面

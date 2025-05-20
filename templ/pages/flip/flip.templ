@@ -8,9 +8,9 @@ import (
 )
 
 // FlipPage 定义 BodyHTML
-templ FlipPage(c echo.Context, s *state.GlobalState, book *model.Book) {
+templ FlipPage(c echo.Context,  book *model.Book) {
 	@common.Toast()
-	@InsertData(book, s)
+	@InsertData(book, state.ServerStatus)
 	if book != nil {
 		@common.Header(
 			common.HeaderProps{
@@ -25,8 +25,8 @@ templ FlipPage(c echo.Context, s *state.GlobalState, book *model.Book) {
 				ShowQuickJumpBar:  common.ShowQuickJumpBar(book),
 				QuickJumpBarBooks: common.QuickJumpBarBooks(book),
 			})
-		@MainArea(s, book)
+		@MainArea(book)
 	}
-	@common.Drawer(c, s, book, FlipDrawerSlot(s, book))
-	@common.QRCode(s.ServerStatus.ServerHost)
+	@common.Drawer(c, book, FlipDrawerSlot(book))
+	@common.QRCode(state.ServerStatus.ServerHost)
 }

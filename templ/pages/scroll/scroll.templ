@@ -8,8 +8,8 @@ import (
 )
 
 // ScrollPage 定义 BodyHTML
-templ ScrollPage(c echo.Context, s *state.GlobalState, book *model.Book, paginationIndex int) {
-	@InsertData(book, s)
+templ ScrollPage(c echo.Context, book *model.Book, paginationIndex int) {
+	@InsertData(book, state.ServerStatus)
 	@common.Toast()
 	if book != nil {
 		@common.Header(
@@ -24,19 +24,19 @@ templ ScrollPage(c echo.Context, s *state.GlobalState, book *model.Book, paginat
 				ShowQuickJumpBar:  common.ShowQuickJumpBar(book),
 				QuickJumpBarBooks: common.QuickJumpBarBooks(book),
 			})
-		@MainArea(c,s, book, paginationIndex)
+		@MainArea(c, book, paginationIndex)
 	}
-	@common.Footer(s.Version)
-	@common.Drawer(c, s, book, DrawerSlot(c,s,book))
-	@common.QRCode(s.ServerStatus.ServerHost)
+	@common.Footer(state.Version)
+	@common.Drawer(c, book, DrawerSlot(c,book))
+	@common.QRCode(state.ServerStatus.ServerHost)
 }
 
-templ InsertData(bookData any, stateData any) {
+templ InsertData(bookData any, serverStatus any) {
 	if bookData != nil {
 		@templ.JSONScript("NowBook", bookData)
 	}
-	if stateData != nil {
-		@templ.JSONScript("GlobalState", stateData)
+	if serverStatus != nil {
+		@templ.JSONScript("ServerStatus", serverStatus)
 	}
 }
 

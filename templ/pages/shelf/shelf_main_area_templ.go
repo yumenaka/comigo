@@ -14,7 +14,7 @@ import (
 	"github.com/yumenaka/comigo/templ/state"
 )
 
-func MainArea(c echo.Context, s *state.GlobalState) templ.Component {
+func MainArea(c echo.Context) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -39,13 +39,13 @@ func MainArea(c echo.Context, s *state.GlobalState) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if s.GetAllBookNum() != 0 {
+		if state.GetNowBookNum() != 0 {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<!-- 有的颜色模板只有base-100 ，没有颜色更深的 base-200 base-300 --> <div x-data class=\"flex flex-row flex-1 w-full h-full bg-base-100\" :class=\"(theme.toString() ===&#39;light&#39;||theme.toString() ===&#39;dark&#39;||theme.toString() ===&#39;retro&#39;||theme.toString() ===&#39;lofi&#39;||theme.toString() ===&#39;nord&#39;) ? ($store.global.bgPattern !== &#39;none&#39;?$store.global.bgPattern+&#39; bg-base-300&#39;:&#39;bg-base-300&#39;):($store.global.bgPattern !== &#39;none&#39;?$store.global.bgPattern:&#39;&#39;)\"><div id=\"book-shelf\" class=\"flex flex-row flex-wrap content-start justify-center flex-1 w-full h-full text-base-content\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			for _, book := range s.ShelfBookList.BookInfos {
-				templ_7745c5c3_Err = BookCard(c, s, book).Render(ctx, templ_7745c5c3_Buffer)
+			for _, book := range state.NowBookList.BookInfos {
+				templ_7745c5c3_Err = BookCard(c, book).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -55,7 +55,7 @@ func MainArea(c echo.Context, s *state.GlobalState) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		if s.GetAllBookNum() == 0 && c.Param("id") == "" {
+		if state.GetNowBookNum() == 0 && c.Param("id") == "" {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<!-- 没有任何书籍的时候 --> <div id=\"tab-contents\" role=\"tabpanel\" class=\"flex flex-col justify-start items-center flex-1 w-full h-full font-semibold text-lg text-base-content\" :class=\"(theme.toString() ===&#39;light&#39;||theme.toString() ===&#39;dark&#39;||theme.toString() ===&#39;retro&#39;||theme.toString() ===&#39;lofi&#39;||theme.toString() ===&#39;nord&#39;) ? ($store.global.bgPattern !== &#39;none&#39;?$store.global.bgPattern+&#39; bg-base-300&#39;:&#39;bg-base-300&#39;):($store.global.bgPattern !== &#39;none&#39;?$store.global.bgPattern:&#39;&#39;)\"><div class=\"flex flex-col justify-start w-5/6 md:w-3/5 min-w-[20rem] \"><div x-text=\"i18next.t(&#39;no_books_library_path_notice&#39;)\" class=\"flex flex-col justify-start w-full p-2 m-1 text-normal font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\">没有可读书籍，请设置书库路径。设置完成后，网页会自动刷新。</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

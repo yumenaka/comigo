@@ -26,7 +26,7 @@ func GetPageTitle(bookID string) string {
 	groupBook, err := model.GetBookByID(bookID, "")
 	if err != nil {
 		logger.Info("GetBookByID: %v", err)
-		return "Comigo " + state.Global.Version
+		return "Comigo " + state.Version
 	}
 	return groupBook.Title
 }
@@ -38,10 +38,10 @@ func GetImageAlt(key int) string {
 
 // GetReturnUrl 阅读或书架页面，返回按钮实际使用的链接
 func GetReturnUrl(BookID string) string {
-	if BookID == "" || state.Global.ShelfBookList == nil {
+	if BookID == "" || state.NowBookList == nil {
 		return "/"
 	}
-	for _, book := range state.Global.ShelfBookList.BookInfos {
+	for _, book := range state.NowBookList.BookInfos {
 		if book.BookID == BookID {
 			return "/"
 		}

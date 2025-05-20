@@ -7,7 +7,7 @@ import (
 )
 
 // ShelfPage 书架页面
-templ ShelfPage(c echo.Context, s *state.GlobalState) {
+templ ShelfPage(c echo.Context,) {
 	@common.Toast()
 	@common.Header(
 		common.HeaderProps{
@@ -19,8 +19,8 @@ templ ShelfPage(c echo.Context, s *state.GlobalState) {
 			DownLoadLink:    "",
 			SetTheme:        true,
 		})
-	@MainArea(c, s)
-	@common.Footer(s.Version)
-	@common.Drawer(c, s, nil, ShelfDrawerSlot())
-	@common.QRCode(s.ServerStatus.ServerHost)
+	@MainArea(c)
+	@common.Footer(state.Version)
+	@common.Drawer(c, nil, ShelfDrawerSlot())
+	@common.QRCode(state.ServerStatus.ServerHost)
 }

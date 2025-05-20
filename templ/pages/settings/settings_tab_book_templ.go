@@ -17,7 +17,7 @@ import "github.com/yumenaka/comigo/config"
 // 与 HTML 表单一样，输入的 name 属性用作 htmx 发送的请求中的参数名称。
 // 此外，如果该元素导致非 GET 请求，则将包含最近的封闭表单的所有输入的值。
 // 此外，还可以使用 hx-vals（like: hx-vals='{"myVal": "My Value"}'）在请求中包含额外的值
-func tab_book(s *state.GlobalState) templ.Component {
+func tab_book() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {

@@ -6,15 +6,13 @@ import (
 	"github.com/angelofallars/htmx-go"
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/templ/common"
-	"github.com/yumenaka/comigo/templ/state"
 )
 
 // PageHandler 上传文件页面
 func PageHandler(c echo.Context) error {
 	indexHtml := common.Html(
 		c,
-		&state.Global,
-		UploadPage(c, &state.Global),
+		UploadPage(c),
 		[]string{},
 	)
 	// 渲染页面

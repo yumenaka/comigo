@@ -5,10 +5,9 @@ import (
     "net/url"
 
 	"github.com/yumenaka/comigo/model"
-	"github.com/yumenaka/comigo/templ/state"
 )
 
-templ FlipDrawerSlot(s *state.GlobalState, book *model.Book) {
+templ FlipDrawerSlot(book *model.Book) {
     if (book != nil && book.Type == model.TypePDF) {
 	   <!-- PDF【在浏览器中打开】 -->
 	   <a

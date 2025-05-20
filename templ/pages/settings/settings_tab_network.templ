@@ -6,7 +6,7 @@ import "github.com/yumenaka/comigo/config"
 //    @StringConfig("Username",state.ServerConfig.Username, "Username_Description",true)
 //    @StringConfig("Password",state.ServerConfig.Password, "Password_Description",true)
 
-templ tab_network(s *state.GlobalState) {
+templ tab_network() {
 <div class="flex flex-col justify-start w-5/6 md:w-3/5 min-w-[22rem] ">
     @UserInfoConfig(state.ServerConfig.Username, state.ServerConfig.Password,false)
     @NumberConfig("Port",state.ServerConfig.Port,"Port_Description",0,65535,false)
