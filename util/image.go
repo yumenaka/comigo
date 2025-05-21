@@ -3,12 +3,13 @@ package util
 import (
 	"bytes"
 	"errors"
-	"github.com/yumenaka/comigo/util/logger"
 	"image"
 	"image/color"
 	"image/draw"
 	"image/jpeg"
 	"strconv"
+
+	"github.com/yumenaka/comigo/util/logger"
 
 	"github.com/bbrks/go-blurhash"
 	"github.com/disintegration/imaging"
@@ -93,7 +94,7 @@ func GetImageDataBlurHashImage(loadedImage []byte, components int) []byte {
 		logger.Infof("%s", err)
 	}
 	buf2 := &bytes.Buffer{}
-	//将图片编码成jpeg
+	// 将图片编码成jpeg
 	err = imaging.Encode(buf2, img, imaging.JPEG)
 	if err != nil {
 		return loadedImage
@@ -112,10 +113,10 @@ func ImageResizeByWidth(loadedImage []byte, width int) []byte {
 	sourceWidth := decode.Bounds().Dx()
 	scalingRatio := float64(width) / float64(sourceWidth)
 	height := int(float64(decode.Bounds().Dy()) * scalingRatio)
-	//生成缩略图
+	// 生成缩略图
 	decode = imaging.Resize(decode, width, height, imaging.Lanczos)
 	buf2 := &bytes.Buffer{}
-	//将图片编码成jpeg
+	// 将图片编码成jpeg
 	err = imaging.Encode(buf2, decode, imaging.JPEG)
 	if err != nil {
 		return loadedImage
@@ -137,10 +138,10 @@ func ImageResizeByMaxWidth(loadedImage []byte, maxWidth int) ([]byte, error) {
 	}
 	scalingRatio := float64(maxWidth) / float64(sourceWidth)
 	height := int(float64(decode.Bounds().Dy()) * scalingRatio)
-	//生成缩略图
+	// 生成缩略图
 	decode = imaging.Resize(decode, maxWidth, height, imaging.Lanczos)
 	buf2 := &bytes.Buffer{}
-	//将图片编码成jpeg
+	// 将图片编码成jpeg
 	err = imaging.Encode(buf2, decode, imaging.JPEG)
 	if err != nil {
 		return nil, errors.New("imaging.Encode() Error")
@@ -164,7 +165,7 @@ func ImageResizeByMaxHeight(loadedImage []byte, maxHeight int) ([]byte, error) {
 	width := int(float64(decode.Bounds().Dx()) * scalingRatio)
 	decode = imaging.Resize(decode, width, maxHeight, imaging.Lanczos)
 	buf2 := &bytes.Buffer{}
-	//将图片编码成jpeg
+	// 将图片编码成jpeg
 	err = imaging.Encode(buf2, decode, imaging.JPEG)
 	if err != nil {
 		return nil, errors.New("imaging.Encode() Error")
@@ -185,7 +186,7 @@ func ImageResizeByHeight(loadedImage []byte, height int) []byte {
 	width := int(float64(decode.Bounds().Dx()) * scalingRatio)
 	decode = imaging.Resize(decode, width, height, imaging.Lanczos)
 	buf2 := &bytes.Buffer{}
-	//将图片编码成jpeg
+	// 将图片编码成jpeg
 	err = imaging.Encode(buf2, decode, imaging.JPEG)
 	if err != nil {
 		return loadedImage
@@ -195,17 +196,17 @@ func ImageResizeByHeight(loadedImage []byte, height int) []byte {
 
 // ImageResize 重设图片分辨率
 func ImageResize(loadedImage []byte, width int, height int) []byte {
-	//loadedImage, _ := ioutil.ReadFile("d:/1.jpg")
+	// loadedImage, _ := ioutil.ReadFile("d:/1.jpg")
 	buf := bytes.NewBuffer(loadedImage)
 	decode, err := imaging.Decode(buf)
 	if err != nil {
 		logger.Infof("%s", err)
 		return loadedImage
 	}
-	//生成缩略图，尺寸width*height
+	// 生成缩略图，尺寸width*height
 	decode = imaging.Resize(decode, width, height, imaging.Lanczos)
 	buf2 := &bytes.Buffer{}
-	//将图片编码成jpeg
+	// 将图片编码成jpeg
 	err = imaging.Encode(buf2, decode, imaging.JPEG)
 	if err != nil {
 		return loadedImage
@@ -221,10 +222,10 @@ func ImageThumbnail(loadedImage []byte, width int, height int) []byte {
 		logger.Infof("%s", err)
 		return loadedImage
 	}
-	//生成缩略图，尺寸width*height
+	// 生成缩略图，尺寸width*height
 	imageData = imaging.Thumbnail(imageData, width, height, imaging.Lanczos)
 	buf2 := &bytes.Buffer{}
-	//将图片编码成jpeg
+	// 将图片编码成jpeg
 	err = imaging.Encode(buf2, imageData, imaging.JPEG)
 	if err != nil {
 		return loadedImage
@@ -242,16 +243,16 @@ func ImageAutoCrop(loadedImage []byte, energyThreshold float32) []byte {
 		logger.Infof("%s", err)
 		return loadedImage
 	}
-	//使用 BoundsForThreshold 查找图像的自动裁剪边界
-	//croppedBounds := autocrop.BoundsForThreshold(image, energyThreshold/100)
+	// 使用 BoundsForThreshold 查找图像的自动裁剪边界
+	// croppedBounds := autocrop.BoundsForThreshold(image, energyThreshold/100)
 
 	nRGBAImg := image.NewNRGBA(image.Rect(0, 0, img.Bounds().Dx(), img.Bounds().Dy()))
 	draw.Draw(nRGBAImg, nRGBAImg.Bounds(), img, img.Bounds().Min, draw.Src)
 	result := autocrop.ToThreshold(nRGBAImg, energyThreshold/100)
-	//如果不需要边界，可以使用ToThreshold函数方便地获得裁剪图像
-	//croppedImg := autocrop.ToThreshold(image, energyThreshold)
+	// 如果不需要边界，可以使用ToThreshold函数方便地获得裁剪图像
+	// croppedImg := autocrop.ToThreshold(image, energyThreshold)
 	buf2 := &bytes.Buffer{}
-	//将图片编码成jpeg
+	// 将图片编码成jpeg
 	err = imaging.Encode(buf2, result, imaging.JPEG)
 	if err != nil {
 		return loadedImage
@@ -270,10 +271,10 @@ func ImageGray(loadedImage []byte) []byte {
 		return loadedImage
 	}
 	result := imaging.Grayscale(img)
-	//如果不需要边界，可以使用ToThreshold函数方便地获得裁剪图像
-	//croppedImg := autocrop.ToThreshold(image, energyThreshold)
+	// 如果不需要边界，可以使用ToThreshold函数方便地获得裁剪图像
+	// croppedImg := autocrop.ToThreshold(image, energyThreshold)
 	buf2 := &bytes.Buffer{}
-	//将图片编码成jpeg
+	// 将图片编码成jpeg
 	err = imaging.Encode(buf2, result, imaging.JPEG)
 	if err != nil {
 		return loadedImage

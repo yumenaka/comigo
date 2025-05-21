@@ -17,7 +17,7 @@ func ImageXData(Url string) string {
 	return fmt.Sprintf(`{ isDoublePage: false, imageUrl: '%s' + ($store.global.autoCrop?"&auto_crop=1":'')}`, Url)
 }
 
-templ MainArea( book *model.Book) {
+templ MainArea(book *model.Book) {
 	<div
 		id="mouseMoveArea"
 		class="flex flex-col items-start justify-start m-0 p-0 w-full h-full bg-base-100"

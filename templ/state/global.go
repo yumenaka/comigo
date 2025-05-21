@@ -14,10 +14,12 @@ import (
 // }
 // var Global GlobalState
 
-var Version string
-var ServerStatus *util.ServerStatus
-var ServerConfig *config.Config
-var NowBookList *model.BookInfoList
+var (
+	Version      string
+	ServerStatus *util.ServerStatus
+	ServerConfig *config.Config
+	NowBookList  *model.BookInfoList
+)
 
 // GetNowBookNum 获取当前显示书籍数量
 func GetNowBookNum() int {

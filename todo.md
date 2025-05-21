@@ -179,8 +179,7 @@ air
   ，以防止攻击者通过转义或相对路径非法访问文件
 - [x] go 1.24正式发布，[使用 Go1.24 的 go get -tool](https://antonz.org/go-1-24/)，添加工具依赖项
 - [x] 等 [gowebly](https://github.com/gowebly/gowebly) 更新后，参考 gowebly 的模板，升级tailwindcss到4.0
-- [ ] 
-  自动发版功能 [goreleaser](https://goreleaser.com/)  [github-action](https://dev.to/hadlow/how-to-release-to-homebrew-with-goreleaser-github-actions-and-semantic-release-2gbb)
+- [ ] 自动发版功能 [goreleaser](https://goreleaser.com/)  [github-action](https://dev.to/hadlow/how-to-release-to-homebrew-with-goreleaser-github-actions-and-semantic-release-2gbb)
 - [ ] comigo后台：有几台设备在线，阅读文件，阅读页数，当前用户状态、阅读书籍、阅读进度、阅读时间、服务器状态 注册，阅读记录，
 - [x] gin -> chi或gin -> echo。chi无外部依赖,echo似乎与wails兼容性更好。此外还可以试试不用框架全原生。
 - [x] 尝试wails, https://v3alpha.wails.io/getting-started/installation/
@@ -193,3 +192,7 @@ air
 - [ ] SteamDeck支持（网页支持手柄操作）鼠标滚轮对应
 - [ ] 同步翻页 -> 全局多端同步跟踪页面状态，除了不同id的书籍，其他页面状态都可以同步。
 - [ ] 后台运行功能：unix：https://github.com/sevlyar/go-daemon 支持Windows但是最近没更新：https://github.com/takama/daemon
+- [ ] 试一下这个UI库 templui https://github.com/axzilla/templui
+- [ ] 在终端显示图片 https://github.com/ploMP4/chafa-go
+- [ ] 文件监视器 https://github.com/helshabini/fsbroker/
+- [ ] 拆分内存存储与数据库存储，并为支持samba与S3等文件系统做准备。 参考：SOLID原则。 https://www.youtube.com/watch?v=o_yTAosQUGc

@@ -4,6 +4,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -36,6 +37,10 @@ var RootCmd = &cobra.Command{
 
 // LoadConfigFile 读取顺序：RAM（代码当中设定的默认值）+命令行参数  -> HomeDirectory -> ProgramDirectory -> WorkingDirectory
 func LoadConfigFile() {
+	// 在非js环境下
+	if runtime.GOOS == "js" {
+		return
+	}
 	home, err := os.UserHomeDir()
 	if err != nil {
 		logger.Infof("%s", err)

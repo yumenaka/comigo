@@ -6,6 +6,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"sync"
 
@@ -14,8 +15,10 @@ import (
 	"github.com/yumenaka/comigo/util/logger"
 )
 
-var Server *http.Server
-var Mutex sync.Mutex
+var (
+	Server *http.Server
+	Mutex  sync.Mutex
+)
 
 // WriteConfigFile 如果存在本地配置，更新本地配置
 func WriteConfigFile() error {
@@ -29,7 +32,7 @@ func WriteConfigFile() error {
 		return err
 	}
 	if util.FileExist(filepath.Join(confDir, "comigo", "config.toml")) {
-		err = os.WriteFile(filepath.Join(confDir, "comigo", "config.toml"), bytes, 0644)
+		err = os.WriteFile(filepath.Join(confDir, "comigo", "config.toml"), bytes, 0o644)
 		if err != nil {
 			return err
 		}
@@ -37,7 +40,7 @@ func WriteConfigFile() error {
 
 	// 当前执行目录
 	if util.FileExist("config.toml") {
-		err = os.WriteFile("config.toml", bytes, 0644)
+		err = os.WriteFile("config.toml", bytes, 0o644)
 		if err != nil {
 			return err
 		}
@@ -51,7 +54,7 @@ func WriteConfigFile() error {
 	}
 	p := path.Join(path.Dir(executable), "config.toml")
 	if util.FileExist(p) {
-		err = os.WriteFile(p, bytes, 0644)
+		err = os.WriteFile(p, bytes, 0o644)
 		if err != nil {
 			logger.Info(path.Join(executable, "config.toml"))
 			return err
@@ -75,6 +78,10 @@ const (
 //
 // 返回：location字符串
 func DefaultConfigLocation() string {
+	// 只有在非js环境下才需要检查配置文件位置
+	if runtime.GOOS == "js" {
+		return ""
+	}
 	// 1. 检查HomeDirectory
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -86,7 +93,6 @@ func DefaultConfigLocation() string {
 			return HomeDirectory
 		}
 	}
-
 	// 2. 检查WorkingDirectory
 	wdPath := "config.toml"
 	if fileExists(wdPath) {
@@ -125,6 +131,10 @@ func fileExists(filename string) bool {
 }
 
 func SaveConfig(to string) error {
+	// 在js环境下
+	if runtime.GOOS == "js" {
+		return nil
+	}
 	// 保存配置
 	bytes, errMarshal := toml.Marshal(cfg)
 	if errMarshal != nil {
@@ -141,12 +151,12 @@ func SaveConfig(to string) error {
 		if err != nil {
 			return err
 		}
-		err = os.WriteFile(path.Join(home, ".config/comigo/config.toml"), bytes, 0644)
+		err = os.WriteFile(path.Join(home, ".config/comigo/config.toml"), bytes, 0o644)
 		if err != nil {
 			return err
 		}
 	case WorkingDirectory:
-		err := os.WriteFile("config.toml", bytes, 0644)
+		err := os.WriteFile("config.toml", bytes, 0o644)
 		if err != nil {
 			return err
 		}
@@ -157,7 +167,7 @@ func SaveConfig(to string) error {
 			return err
 		}
 		p := path.Join(path.Dir(executable), "config.toml")
-		err = os.WriteFile(p, bytes, 0644)
+		err = os.WriteFile(p, bytes, 0o644)
 		if err != nil {
 			logger.Info(path.Join(executable, "config.toml"))
 			return err
@@ -180,6 +190,10 @@ func GetWorkingDirectoryConfig() string {
 }
 
 func GetHomeDirectoryConfig() string {
+	// 在js环境下
+	if runtime.GOOS == "js" {
+		return ""
+	}
 	HomeDirectoryConfig := ""
 	home, err := os.UserHomeDir()
 	if err == nil {
@@ -216,6 +230,10 @@ func GetProgramDirectoryConfig() string {
 }
 
 func DeleteConfigIn(in string) error {
+	// 在非js环境下
+	if runtime.GOOS == "js" {
+		return nil
+	}
 	logger.Infof("Try delete cfg in %s", in)
 	var configFile string
 	switch in {

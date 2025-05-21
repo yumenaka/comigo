@@ -8,7 +8,7 @@ import (
 )
 
 // FlipPage 定义 BodyHTML
-templ FlipPage(c echo.Context,  book *model.Book) {
+templ FlipPage(c echo.Context, book *model.Book) {
 	@common.Toast()
 	@InsertData(book, state.ServerStatus)
 	if book != nil {

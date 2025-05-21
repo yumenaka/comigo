@@ -34,11 +34,11 @@ require (
 	github.com/xxjwxc/gowp v0.0.0-20240929033016-5be68d222389
 	golang.org/x/net v0.40.0
 	golang.org/x/text v0.25.0
-	modernc.org/sqlite v1.37.0
+	modernc.org/sqlite v1.37.1
 )
 
 require (
-	github.com/a-h/templ v0.3.865
+	github.com/a-h/templ v0.3.887
 	github.com/angelofallars/htmx-go v0.5.0
 	github.com/charmbracelet/bubbletea v1.3.5
 	github.com/charmbracelet/x/term v0.2.1
@@ -48,19 +48,19 @@ require (
 	github.com/hirochachacha/go-smb2 v1.1.0
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo-jwt/v4 v4.3.1
-	github.com/labstack/echo/v4 v4.13.3
+	github.com/labstack/echo/v4 v4.13.4
 	github.com/minio/selfupdate v0.6.0
-	github.com/pdfcpu/pdfcpu v0.10.2
+	github.com/pdfcpu/pdfcpu v0.11.0
 	github.com/sevlyar/go-daemon v0.1.6
-	github.com/yumenaka/archives v0.0.0-20250428084829-7d8c21e071a9
+	github.com/yumenaka/archives v0.0.0-20250523120510-767d903fe28e
 	golang.org/x/image v0.27.0
 	golang.org/x/mod v0.24.0
-	wait4x.dev/v3 v3.3.0
+	wait4x.dev/v3 v3.3.1
 )
 
 require (
 	aead.dev/minisign v0.3.0 // indirect
-	ariga.io/atlas v0.33.1 // indirect
+	ariga.io/atlas v0.34.0 // indirect
 	dario.cat/mergo v1.0.1 // indirect
 	github.com/STARRY-S/zip v0.2.3 // indirect
 	github.com/VividCortex/ewma v1.2.0 // indirect
@@ -95,7 +95,7 @@ require (
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/geoffgarside/ber v1.1.0 // indirect
-	github.com/go-logr/logr v1.4.2 // indirect
+	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/go-openapi/inflect v0.21.2 // indirect
 	github.com/go-viper/mapstructure/v2 v2.2.1 // indirect
@@ -174,7 +174,7 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go4.org v0.0.0-20230225012048-214862532bf5 // indirect
 	golang.org/x/crypto v0.38.0 // indirect
-	golang.org/x/exp v0.0.0-20250506013437-ce4c2cf36ca6 // indirect
+	golang.org/x/exp v0.0.0-20250531010427-b6e5de432a8b // indirect
 	golang.org/x/sync v0.14.0 // indirect
 	golang.org/x/sys v0.33.0 // indirect
 	golang.org/x/time v0.11.0 // indirect
@@ -183,9 +183,9 @@ require (
 	gopkg.in/eapache/queue.v1 v1.1.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	modernc.org/libc v1.65.6 // indirect
+	modernc.org/libc v1.65.8 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
-	modernc.org/memory v1.10.0 // indirect
+	modernc.org/memory v1.11.0 // indirect
 )
 
 //替换依赖项：

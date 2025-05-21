@@ -6,7 +6,7 @@ type FrpClientConfig struct {
 	ServerAddr       string
 	ServerPort       int
 	Token            string
-	FrpType          string //本地转发端口设置
+	FrpType          string // 本地转发端口设置
 	RemotePort       int
 	RandomRemotePort bool
 }

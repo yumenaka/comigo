@@ -62,6 +62,7 @@ func AutoSetCachePath() {
 func GetClearDatabaseWhenExit() bool {
 	return cfg.ClearDatabaseWhenExit
 }
+
 func SetClearDatabaseWhenExit(clearDatabaseWhenExit bool) {
 	cfg.ClearDatabaseWhenExit = clearDatabaseWhenExit
 }

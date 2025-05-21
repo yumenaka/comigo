@@ -37,7 +37,7 @@ func HtmxStaticImage(Url string) string {
 // https://htmx.org/docs/#triggers  https://htmx.org/docs/#swapping
 // tips： Alpine.js 动态CSS，只支持内联写法
 // min-h-16 是为了图片未加载时，图片高度为0，导致页面不美观。极端设置下会导致图片变形。  text-center：居中 alert文字，因为需要等待css加载，所以现在没设置alt文字。
-templ MainArea(c echo.Context,  book *model.Book, paginationIndex int) {
+templ MainArea(c echo.Context, book *model.Book, paginationIndex int) {
 	<div
 		id="mouseMoveArea"
 		x-data="{
@@ -59,7 +59,7 @@ templ MainArea(c echo.Context,  book *model.Book, paginationIndex int) {
 						<div hx-get={ image.Url } hx-trigger="load" hx-swap="innerHTML" class="w-full m-0"></div>
 					}
 					if !strings.Contains(image.Url, "hidden.")&& !strings.Contains(image.Url, ".html") {
-						if c.QueryParam("static") == "" {
+						if c != nil && c.QueryParam("static") == "" {
 							<img
 								x-data={ ImageXData(image.Url) }
 								class="w-full manga_image min-h-16 text-center select-none"

@@ -56,7 +56,6 @@ func PageHandler(c echo.Context) error {
 	// 拼接页面
 	indexHtml := common.Html(
 		c,
-
 		scrollPage, // define body content
 		[]string{"script/scroll.js"},
 	)

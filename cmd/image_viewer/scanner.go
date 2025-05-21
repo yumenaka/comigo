@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/yumenaka/comigo/model"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
+
+	"github.com/yumenaka/comigo/model"
 )
 
 // 全局变量：标记是否正在扫描，避免并发扫描

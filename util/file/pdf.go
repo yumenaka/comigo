@@ -106,7 +106,7 @@ func ExportImageFromPDF(pdfFile string, pageNum int) {
 			continue
 		}
 		// 写入文件，如果文件不存在则创建，文件权限设置为 0644
-		err = os.WriteFile("example.jpeg", imgBytes, 0644)
+		err = os.WriteFile("example.jpeg", imgBytes, 0o644)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -172,10 +172,9 @@ func ExportAllImageFromPDF(pdfFile string) {
 			continue
 		}
 		// 写入文件，如果文件不存在则创建，文件权限设置为 0644
-		err = os.WriteFile("test/"+strconv.Itoa(i+1)+".jpg", imgBytes, 0644)
+		err = os.WriteFile("test/"+strconv.Itoa(i+1)+".jpg", imgBytes, 0o644)
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
-
 }

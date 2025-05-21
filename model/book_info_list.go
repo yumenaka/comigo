@@ -65,7 +65,6 @@ func (s *BookInfoList) SortBooks(sortBy string) {
 	case "modify_time_reverse": // 根据修改时间排序 从旧到新
 		lessFunc = func(i, j int) bool {
 			return s.BookInfos[i].Modified.Before(s.BookInfos[j].Modified)
-
 		}
 	case "author":
 		lessFunc = func(i, j int) bool {

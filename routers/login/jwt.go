@@ -46,6 +46,8 @@ func Login(c echo.Context) error {
 	}
 
 	// 用"JWT声明"创建令牌
+	// HS256 是对称的，这要求解码器也具有秘密私钥
+	// 可以换成非对称的jwt.SigningMethodRS512，需要两个密钥：一个公钥和一个必须保密的私钥 https://packagemain.tech/p/json-web-tokens-in-go
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	// 生成编码的jwt token

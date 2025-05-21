@@ -1,13 +1,13 @@
 package scan
 
 import (
-	"github.com/hirochachacha/go-smb2"
-	"github.com/yumenaka/comigo/model"
-	"github.com/yumenaka/comigo/util/logger"
-
 	iofs "io/fs"
 	"net"
 	"strconv"
+
+	"github.com/hirochachacha/go-smb2"
+	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/util/logger"
 )
 
 // TODO:SFTP扫描书籍
