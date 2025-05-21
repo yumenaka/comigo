@@ -4,12 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/yumenaka/comigo/model"
-	"github.com/yumenaka/comigo/util"
 	"os"
 	"path/filepath"
 	"sort"
 	"sync"
+
+	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/util"
 
 	"github.com/yumenaka/comigo/cmd/image_viewer/ent"
 	"github.com/yumenaka/comigo/cmd/image_viewer/ent/directory"

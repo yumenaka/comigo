@@ -7,7 +7,7 @@ import (
 )
 
 // UploadPage 上传页面
-templ UploadPage(c echo.Context,) {
+templ UploadPage(c echo.Context) {
 	@common.Toast()
 	@common.Header(
 		common.HeaderProps{
@@ -21,7 +21,7 @@ templ UploadPage(c echo.Context,) {
 		})
 	@common.UploadArea(),
 	@common.Footer(state.Version)
-	@common.Drawer(c,  nil, nil)
+	@common.Drawer(c, nil, nil)
 	@common.QRCode(state.ServerStatus.ServerHost)
 
 }

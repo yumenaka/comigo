@@ -11,9 +11,7 @@ import (
 	"github.com/yumenaka/comigo/util/scan"
 )
 
-var (
-	RestartWebServerBroadcast *chan string
-)
+var RestartWebServerBroadcast *chan string
 
 // -------------------------
 // 各种辅助函数

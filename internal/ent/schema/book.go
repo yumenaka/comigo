@@ -18,10 +18,10 @@ type Book struct {
 func (Book) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("Title").
-			MaxLen(1024). //限制长度
+			MaxLen(1024). // 限制长度
 			Comment("书名"),
 		field.String("BookID").
-			Unique().Comment("书籍ID"), //字段可以使用 Unique 方法定义为唯一字段。 注意：唯一字段不能有默认值。
+			Unique().Comment("书籍ID"), // 字段可以使用 Unique 方法定义为唯一字段。 注意：唯一字段不能有默认值。
 		field.String("Owner").
 			Default("admin").
 			Comment("拥有者"),
@@ -32,7 +32,7 @@ func (Book) Fields() []ent.Field {
 		field.Int("Depth").NonNegative(),
 		field.String("ParentFolder"),
 		field.Int("PageCount").
-			NonNegative(). //内置校验器，非负数
+			NonNegative(). // 内置校验器，非负数
 			Comment("总页数"),
 		field.Int64("Size"),
 		field.String("Authors"),
@@ -41,7 +41,7 @@ func (Book) Fields() []ent.Field {
 		field.String("PublishedAt"),
 		field.String("ExtractPath"),
 		field.Time("Modified").
-			Default(time.Now). //设置默认值
+			Default(time.Now). // 设置默认值
 			Comment("创建时间"),
 		field.Int("ExtractNum"),
 		field.Bool("InitComplete"),
@@ -54,6 +54,6 @@ func (Book) Fields() []ent.Field {
 // Edges of the Book.
 func (Book) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("PageInfos", SinglePageInfo.Type), //Type是一种虚拟方法，用于Edge(关系)声明。
+		edge.To("PageInfos", SinglePageInfo.Type), // Type是一种虚拟方法，用于Edge(关系)声明。
 	}
 }

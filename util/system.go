@@ -154,7 +154,6 @@ func OpenBrowser(uri string) {
 		waiter.WithInterval(500*time.Millisecond),
 		waiter.WithBackoffPolicy(waiter.BackoffPolicyExponential),
 	)
-
 	if err != nil {
 		log.Fatalf("API health check failed: %v", err)
 	}
@@ -295,7 +294,7 @@ func GetServerInfo(configHost string, comigoVersion string, configPort int, conf
 	} else {
 		host = configHost
 	}
-	var serverStatus = ServerStatus{
+	serverStatus := ServerStatus{
 		ServerName:        serverName,
 		ServerHost:        host,
 		ServerPort:        configPort,
@@ -314,7 +313,7 @@ func GetAllServerInfo(configHost string, comigoVersion string, configPort int, c
 	} else {
 		host = configHost
 	}
-	var serverStatus = ServerStatus{
+	serverStatus := ServerStatus{
 		ServerName:            serverName,
 		ServerHost:            host,
 		ServerPort:            configPort,

@@ -1,6 +1,6 @@
 package util
 
-//https://github.com/gookit/goutil/blob/master/fsutil/check.go
+// https://github.com/gookit/goutil/blob/master/fsutil/check.go
 import (
 	"bytes"
 	"io"
@@ -10,9 +10,9 @@ import (
 
 // perm for create dir or file
 var (
-	DefaultDirPerm   os.FileMode = 0775
-	DefaultFilePerm  os.FileMode = 0665
-	OnlyReadFilePerm os.FileMode = 0444
+	DefaultDirPerm   os.FileMode = 0o775
+	DefaultFilePerm  os.FileMode = 0o665
+	OnlyReadFilePerm os.FileMode = 0o444
 )
 
 var (
@@ -102,7 +102,6 @@ func IsZipFile(filepath string) bool {
 	defer func(f *os.File) {
 		err := f.Close()
 		if err != nil {
-
 		}
 	}(f)
 	buf := make([]byte, 4)

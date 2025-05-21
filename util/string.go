@@ -4,13 +4,14 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"errors"
-	"github.com/yumenaka/comigo/util/logger"
 	"io"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
 	"unicode/utf8"
+
+	"github.com/yumenaka/comigo/util/logger"
 )
 
 // DetectUTF8 检测 s 是否为有效的 UTF-8 字符串，以及该字符串是否必须被视为 UTF-8 编码（即，不兼容CP-437、ASCII 或任何其他常见编码）。
@@ -45,7 +46,7 @@ func MD5file(fName string) string {
 	_, e = io.Copy(h, f)
 	if e != nil {
 		logger.Infof("%s", e)
-		//log.Fatal(e)
+		// log.Fatal(e)
 	}
 	return hex.EncodeToString(h.Sum(nil))
 }
@@ -54,11 +55,11 @@ func MD5file(fName string) string {
 func getNumberFromString(s string) (int, error) {
 	var err error
 	num := 0
-	//同时设定倒计时秒数
+	// 同时设定倒计时秒数
 	valid := regexp.MustCompile("\\d+")
 	numbers := valid.FindAllStringSubmatch(s, -1)
 	if len(numbers) > 0 {
-		//循环取出多维数组
+		// 循环取出多维数组
 		for _, value := range numbers {
 			for _, v := range value {
 				temp, errTemp := strconv.Atoi(v)
@@ -69,7 +70,7 @@ func getNumberFromString(s string) (int, error) {
 				}
 			}
 		}
-		//logger.Infof("get Number:",num," form string:",s,"numbers[]=",numbers)
+		// logger.Infof("get Number:",num," form string:",s,"numbers[]=",numbers)
 	} else {
 		err = errors.New("number not found")
 		return 0, err
@@ -79,7 +80,7 @@ func getNumberFromString(s string) (int, error) {
 
 // 检测字符串中是否有关键字
 func haveKeyWord(checkString string, list []string) bool {
-	//转换为小写，使Sketch、DOUBLE也生效
+	// 转换为小写，使Sketch、DOUBLE也生效
 	checkString = strings.ToLower(checkString)
 	for _, key := range list {
 		if strings.Contains(checkString, key) {

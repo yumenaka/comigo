@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"runtime"
 
 	"github.com/joho/godotenv"
 	"github.com/yumenaka/comigo/util/logger"
@@ -9,13 +10,16 @@ import (
 
 // home目录 配置
 func init() {
-	// Find home directory.
-	home, err := os.UserHomeDir()
-	if err != nil {
-		logger.Infof("%s", err)
+	// 在非js环境下
+	if runtime.GOOS == "js" {
+		// Find home directory.
+		home, err := os.UserHomeDir()
+		if err != nil {
+			logger.Infof("%s", err)
+		}
+		cfg.LogFilePath = home
+		cfg.LogFileName = "comigo.log"
 	}
-	cfg.LogFilePath = home
-	cfg.LogFileName = "comigo.log"
 }
 
 // smb配置（TODO:SMB支持）

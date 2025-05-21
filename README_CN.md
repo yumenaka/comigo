@@ -89,7 +89,7 @@ Comigo 支持多种配置文件位置：
 - 通过 [Twitter](https://x.com/yumenaka7) 联系我
 
 ## 开发与TODO
-- [开发备忘](https://github.com/yumenaka/comigo/blob/master/Develop_Todo.md)
+- [开发备忘](https://github.com/yumenaka/comigo/blob/master/todo.md)
 
 ## 特别鸣谢
 

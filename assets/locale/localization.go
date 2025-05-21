@@ -14,9 +14,7 @@ import (
 
 // https://github.com/nicksnyder/go-i18n/blob/main/v2/i18n/example_test.go
 
-var (
-	Localizer *i18n.Localizer
-)
+var Localizer *i18n.Localizer
 
 //go:embed en_US.json
 var enBytes []byte

@@ -1,6 +1,6 @@
 package encoding
 
-//source: github.com/mholt/archiver/pull/149/files/92cf5d0fb45d7fa943e25fc83fc71cd2e734a4fb
+// source: github.com/mholt/archiver/pull/149/files/92cf5d0fb45d7fa943e25fc83fc71cd2e734a4fb
 import (
 	"errors"
 	"io"
@@ -57,23 +57,23 @@ var encodings = map[string]encoding.Encoding{
 }
 
 func GuessText(unknowString string) (string, error) {
-	//var GuestList = []string{"gbk", "gb18030", "big5", "eucjp", "iso2022jp", "shiftjis", "euckr", "utf16be", "utf16le"}
+	// var GuestList = []string{"gbk", "gb18030", "big5", "eucjp", "iso2022jp", "shiftjis", "euckr", "utf16be", "utf16le"}
 	if isGBK([]byte(unknowString)) {
-		utfString, err := simplifiedchinese.GBK.NewDecoder().Bytes([]byte(unknowString)) //将gbk转换为utf-8
+		utfString, err := simplifiedchinese.GBK.NewDecoder().Bytes([]byte(unknowString)) // 将gbk转换为utf-8
 		return string(utfString), err
 	} else {
-		utfString, err := japanese.ShiftJIS.NewDecoder().Bytes([]byte(unknowString)) //将ShiftJIS转换为utf-8
+		utfString, err := japanese.ShiftJIS.NewDecoder().Bytes([]byte(unknowString)) // 将ShiftJIS转换为utf-8
 		return string(utfString), err
 	}
 }
 
 func ShiftjisToUtf8(unknowString string) (string, error) {
-	utfString, err := japanese.ShiftJIS.NewDecoder().Bytes([]byte(unknowString)) //将ShiftJIS转换为utf-8
+	utfString, err := japanese.ShiftJIS.NewDecoder().Bytes([]byte(unknowString)) // 将ShiftJIS转换为utf-8
 	return string(utfString), err
 }
 
 func GbkToUtf8(unknowString string) (string, error) {
-	utfString, err := simplifiedchinese.GBK.NewDecoder().Bytes([]byte(unknowString)) //将gbk转换为utf-8
+	utfString, err := simplifiedchinese.GBK.NewDecoder().Bytes([]byte(unknowString)) // 将gbk转换为utf-8
 	return string(utfString), err
 }
 
@@ -98,14 +98,14 @@ func transformEncoding(rawReader io.Reader, trans transform.Transformer) (string
 
 func isGBK(data []byte) bool {
 	length := len(data)
-	var i = 0
+	i := 0
 	for i < length {
 		if data[i] <= 0x7f {
-			//编码0~127,只有一个字节的编码，兼容ASCII码
+			// 编码0~127,只有一个字节的编码，兼容ASCII码
 			i++
 			continue
 		} else {
-			//大于127的使用双字节编码，落在gbk编码范围内的字符
+			// 大于127的使用双字节编码，落在gbk编码范围内的字符
 			if data[i] >= 0x81 &&
 				data[i] <= 0xfe &&
 				data[i+1] >= 0x40 &&
@@ -135,7 +135,7 @@ func Decode(in []byte, charset string) ([]byte, error) {
 }
 
 func DecodeFileName(headerName string, ZipFilenameEncoding string) string {
-	if ZipFilenameEncoding != "" { //common.Config.ZipFileTextEncoding
+	if ZipFilenameEncoding != "" { // common.Config.ZipFileTextEncoding
 		if filename, err := Decode([]byte(headerName), ZipFilenameEncoding); err == nil {
 			return string(filename)
 		}

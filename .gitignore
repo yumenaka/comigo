@@ -8,6 +8,7 @@
 *.wasm
 # Test binary, built with `go test -c`
 *.test
+*wasm_exec.js
 
 # Output of the go coverage tools, specifically when used with LiteIDE
 *.out

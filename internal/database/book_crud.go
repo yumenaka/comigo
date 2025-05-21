@@ -65,7 +65,7 @@ func DeleteAllBookInDatabase(debug bool) {
 // SaveAllBookToDatabase 将Map里面的书籍信息，全部保存到本地数据库中
 func SaveAllBookToDatabase(m map[string]*model.Book) {
 	for _, b := range m {
-		var c = *b
+		c := *b
 		err := SaveBookToDatabase(&c)
 		if err != nil {
 			logger.Infof("SaveAllBookToDatabase error :%s", err.Error())

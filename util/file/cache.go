@@ -40,7 +40,7 @@ func SaveFileToCache(id, filename string, data []byte, queryString, contentType 
 
 	// 写入文件
 	filePath := filepath.Join(cacheDir, escapedFilename)
-	err = os.WriteFile(filePath, data, 0644)
+	err = os.WriteFile(filePath, data, 0o644)
 	if err != nil {
 		logger.Infof("Failed to write file to cache: %v", err)
 		return err

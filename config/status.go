@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"path"
+	"runtime"
 
 	"github.com/yumenaka/comigo/util"
 	"github.com/yumenaka/comigo/util/logger"
@@ -22,8 +23,11 @@ type Status struct {
 }
 
 func (c *Status) SetConfigStatus() error {
+	// 在js环境下
+	if runtime.GOOS == "js" {
+		return nil
+	}
 	logger.Info("Checking cfg ShareName")
-
 	// 初始化
 	c.In = "None"
 	c.Path.WorkingDirectory = ""

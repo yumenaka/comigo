@@ -5,7 +5,7 @@ import (
 	"github.com/yumenaka/comigo/util/logger"
 )
 
-//Go 每日一库之 fsnotify  https://darjun.github.io/2020/01/19/godailylib/fsnotify/
+// Go 每日一库之 fsnotify  https://darjun.github.io/2020/01/19/godailylib/fsnotify/
 
 // 监听配置文件变更
 // 优雅地重启或停止  https://learnku.com/docs/gin-gonic/1.7/examples-graceful-restart-or-stop/11376
