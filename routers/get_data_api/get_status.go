@@ -15,8 +15,8 @@ type ServerStatus struct {
 	ServerHost            string            // 服务器地址
 	ServerPort            int               // 服务器端口（程序运行的端口）
 	NumberOfBooks         int               // 当前拥有的书籍总数
-	NumberOfOnLineUser    int               // TODO：在线用户数
-	NumberOfOnLineDevices int               // TODO：在线设备数
+	NumberOfOnLineUser    int               // 在线用户数（未实现）
+	NumberOfOnLineDevices int               // 在线设备数（未实现）
 	SupportUploadFile     bool              // 是否支持上传文件
 	ClientIP              string            // 客户端IP
 	OSInfo                util.SystemStatus // 系统信息

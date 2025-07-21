@@ -73,7 +73,7 @@ func Smb(scanOption Option) (newBookList []*model.Book, err error) {
 				}
 			}
 
-			// TODO：SMB路径深度。这里的深度是指相对于扫描的根目录的深度。
+			// SMB路径深度。这里的深度是指相对于扫描的根目录的深度。
 			depth := strings.Count(walkPath, "/")
 			if runtime.GOOS == "windows" {
 				depth = strings.Count(walkPath, "\\")
@@ -197,7 +197,6 @@ func smbScanFile(filePath string, file *smb2.File, storePath string, depth int, 
 	//			newBook.Press = metaData.Publisher
 	//		}
 	//	}
-	// // TODO:服务器解压速度太慢，网页用PDF.js解析？
 	// case types.TypePDF:
 	//	pageCount, pdfErr := arch.CountPagesOfPDF(filePath)
 	//	if pdfErr != nil {
@@ -214,7 +213,6 @@ func smbScanFile(filePath string, file *smb2.File, storePath string, depth int, 
 	//		TempURL := "/api/get_file?id=" + newBook.BookID + "&filename=" + strconv.Itoa(i) + ".jpg"
 	//		newBook.Pages.Images = append(newBook.Pages.Images, types.MediaFileInfo{RealImageFilePATH: "", Size: MediaFileInfo.Size(), ModTime: MediaFileInfo.ModTime(), Name: strconv.Itoa(i), Url: TempURL})
 	//	}
-	// // TODO：简单的网页播放器
 	// case types.TypeVideo:
 	//	newBook.PageCount = 1
 	//	newBook.InitComplete = true

@@ -66,24 +66,6 @@ func PageHandler(c echo.Context) error {
 	// cookie.HttpOnly = false
 	// c.SetCookie(cookie)
 
-	// // TODO：当前书籍的阅读进度，存储在cookie里面，与服务器共享与交互 readingProgress
-	// readingProgressStr, err := c.Cookie("bookID:" + bookID)
-	// // 获取纯域名部分，不带端口号 ////Cookie.Domain 的规范：根据 RFC 6265，Cookie.Domain 不应该包含端口号。它只能包含域名或 IP 地址
-	// domain := c.Request().Host
-	// if idx := strings.IndexByte(domain, ':'); idx != -1 {
-	//	domain = domain[:idx] // 去掉端口号
-	// }
-	//
-	// readingProgress, err := model.GetReadingProgress(readingProgressStr.Value)
-	// if err != nil {
-	//	logger.Infof("GetReadingProgress: %v readingProgressStr: %s", err, readingProgressStr.Value)
-	// }
-	//
-	// state.NowBookList, err = model.TopOfShelfInfo("name")
-	// if err != nil {
-	//	logger.Infof("TopOfShelfInfo: %v", err)
-	// }
-
 	// 翻页模式页面
 	indexHtml := common.Html(
 		c,

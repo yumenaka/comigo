@@ -277,8 +277,8 @@ type ServerStatus struct {
 	ServerHost            string       //
 	ServerPort            int          //
 	NumberOfBooks         int          // 当前拥有的书籍总数
-	NumberOfOnLineUser    int          // TODO：在线用户数
-	NumberOfOnLineDevices int          // TODO：在线设备数
+	NumberOfOnLineUser    int          // 在线用户数（未实现）
+	NumberOfOnLineDevices int          // 在线设备数（未实现）
 	SupportUploadFile     bool         //
 	ClientIP              string       // 客户端IP
 	OSInfo                SystemStatus // 系统信息

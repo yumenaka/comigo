@@ -60,7 +60,7 @@ func (s *subStore) AnalyzeFolder() error {
 	for depth := maxDepth; depth >= 0; depth-- {
 		// 用父文件夹做key的parentMap，后面遍历用
 		parentTempMap := make(map[string][]BookInfo)
-		////遍历depth等于i的所有book
+		// //遍历depth等于i的所有book
 		for _, b := range depthBooksMap[depth] {
 			parentTempMap[b.ParentFolder] = append(parentTempMap[b.ParentFolder], b)
 		}
@@ -110,7 +110,7 @@ func (s *subStore) AnalyzeFolder() error {
 				continue
 			}
 			depthBooksMap[depth-1] = append(depthBooksMap[depth-1], newBookGroup.BookInfo)
-			newBookGroup.setAuthor()
+			newBookGroup.SetAuthor()
 			// 将这本书加到子书库的BookGroup表（Images.BookGroupMap）里面去
 			s.BookGroupMap.Store(newBookGroup.BookID, &newBookGroup.BookInfo)
 			// 将这本书加到BookGroup总表（mapBookGroup）里面去

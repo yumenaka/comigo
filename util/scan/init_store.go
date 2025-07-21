@@ -24,13 +24,7 @@ func InitStore(storePath string, option Option) ([]*model.Book, error) {
 	}
 	logger.Infof(locale.GetString("scan_start_hint")+" %s", storePathAbs)
 
-	// // TODO:已存在书籍的集合，跳过已有书籍，提高查找效率
-	// existingBooks := make(map[string]struct{})
-	// for _, book := range model.GetAllBookList() {
-	//	existingBooks[book.FilePath] = struct{}{}
-	// }
-
-	// 如果书库文件夹配置了一个文件，返回一本书
+	// 如果书库URL对应一个文件，返回一本书
 	if util.IsFile(storePathAbs) && option.IsSupportFile(storePathAbs) {
 		book, err := scanFileGetBook(storePathAbs, storePathAbs, 0, option)
 		if err != nil {
@@ -40,7 +34,7 @@ func InitStore(storePath string, option Option) ([]*model.Book, error) {
 		return []*model.Book{book}, nil
 	}
 
-	// 如果书库文件夹配置了文件夹，使用 HandleDirectory（不支持扫描单个文件）进行扫描
+	// 如果书库URL是一个文件夹，使用 HandleDirectory（不支持扫描单个文件）进行扫描
 	rootDirectoryNode, foundDirs, foundFiles, err := HandleDirectory(storePathAbs, 0, option)
 	if err != nil {
 		return nil, err
@@ -60,12 +54,6 @@ func InitStore(storePath string, option Option) ([]*model.Book, error) {
 
 	// 处理子目录
 	for _, dir := range foundDirs {
-		// // TODO：跳过已存在的书籍
-		// if _, exists := existingBooks[dir]; exists {
-		//	logger.Infof(locale.GetString("found_in_bookstore")+" %s", dir)
-		//	continue
-		// }
-
 		absDir, err := filepath.Abs(dir)
 		if err != nil {
 			logger.Infof("Failed to get absolute path: %s", err)
@@ -103,12 +91,6 @@ func InitStore(storePath string, option Option) ([]*model.Book, error) {
 
 	// 处理文件
 	for _, file := range foundFiles {
-		// // TODO：跳过已存在的书籍
-		// if _, exists := existingBooks[file.Path]; exists {
-		//	logger.Infof(locale.GetString("found_in_bookstore")+" %s", file.Path)
-		//	continue
-		// }
-
 		if !option.IsSupportFile(file.Name) {
 			continue
 		}

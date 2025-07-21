@@ -9,7 +9,7 @@ import (
 	"github.com/yumenaka/comigo/util/logger"
 )
 
-// DemonFlag TODO: 实测macos可用，正确地实装，需要理解守护进程的概念
+// DemonFlag 正确地实装，需要理解守护进程的概念
 // 需要去 cmd/init_flags.go 设置flag
 var (
 	DemonFlag      bool

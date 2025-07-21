@@ -1,4 +1,4 @@
-//go:build !((windows && 386) || js)
+//go:build !(windows && 386) || !js
 
 package database // Package database 编译条件的注释和 package 语句之间一定要隔一行，不然无法识别编译条件。go:build 是1.18以后“条件编译”的推荐语法。
 

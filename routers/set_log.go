@@ -10,7 +10,7 @@ import (
 func SetEchoLogger(e *echo.Echo) {
 	// 设置log中间件
 	logger.ReportCaller = config.GetDebug()
-	// TODO:输出到tui
+	// 输出到tui（未实现）
 	echoLogHandler := logger.EchoLogHandler(config.GetLogToFile(), config.GetLogFilePath(), config.GetLogFileName(), config.GetDebug())
 	e.Use(echoLogHandler)
 	// // 设置日志级别

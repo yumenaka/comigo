@@ -70,7 +70,7 @@ func bindPublicView(group *echo.Group) {
 func bindPublicAPI(group *echo.Group) {
 	// 生成QRCode
 	group.GET("/qrcode.png", get_data_api.GetQrcode)
-	// 查看服务器状态（TODO：限制信息范围）
+	// 查看服务器状态
 	group.GET("/server_info", get_data_api.GetServerInfoHandler)
 	group.POST("/login", login.Login)
 	group.POST("/logout", login.Logout)

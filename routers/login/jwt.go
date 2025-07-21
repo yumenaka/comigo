@@ -39,7 +39,7 @@ func Login(c echo.Context) error {
 	// 设置自定义"JWT声明"
 	claims := &JwtCustomClaims{
 		username,
-		true, // TODO：账号管理
+		true, // 账号管理（未实现）
 		jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * time.Duration(config.GetTimeout()))),
 		},

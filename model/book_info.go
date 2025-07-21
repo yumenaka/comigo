@@ -107,8 +107,8 @@ func (b *BookInfo) setParentFolder(filePath string) *BookInfo {
 	return b
 }
 
-// setAuthor 设置作者
-func (b *BookInfo) setAuthor() *BookInfo {
+// SetAuthor 设置作者
+func (b *BookInfo) SetAuthor() *BookInfo {
 	b.Author = util.GetAuthor(b.Title)
 	return b
 }

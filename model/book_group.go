@@ -24,6 +24,6 @@ func NewBookGroup(filePath string, modified time.Time, fileSize int64, storePath
 		},
 	}
 	// 设置属性：
-	group.setTitle(filePath).setFilePath(filePath).setAuthor().setParentFolder(filePath).initBookID()
+	group.setTitle(filePath).setFilePath(filePath).SetAuthor().setParentFolder(filePath).initBookID()
 	return &group, nil
 }

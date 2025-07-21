@@ -13,7 +13,7 @@ import (
 	"github.com/yumenaka/comigo/util/logger"
 )
 
-// SetShutdownHandler TODO:退出时清理临时文件的函数
+// SetShutdownHandler 退出时清理临时文件的函数
 func SetShutdownHandler() {
 	// 优雅地停止或重启： https://github.com/gin-gonic/examples/blob/master/graceful-shutdown/graceful-shutdown/notify-with-context/server.go
 	// 创建侦听来自操作系统的中断信号的上下文。

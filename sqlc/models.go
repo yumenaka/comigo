@@ -1,0 +1,82 @@
+package sqlc
+
+import (
+	"database/sql"
+)
+
+type Book struct {
+	ID              int64
+	Title           string
+	BookID          string
+	Owner           sql.NullString
+	FilePath        string
+	BookStorePath   string
+	Type            string
+	ChildBookNum    sql.NullInt64
+	Depth           sql.NullInt64
+	ParentFolder    sql.NullString
+	PageCount       sql.NullInt64
+	FileSize        sql.NullInt64
+	Author          sql.NullString
+	Isbn            sql.NullString
+	Press           sql.NullString
+	PublishedAt     sql.NullString
+	ExtractPath     sql.NullString
+	ModifiedTime    sql.NullTime
+	ExtractNum      sql.NullInt64
+	InitComplete    sql.NullBool
+	ReadPercent     sql.NullFloat64
+	NonUtf8zip      sql.NullBool
+	ZipTextEncoding sql.NullString
+	Deleted         sql.NullBool
+}
+
+type FileBackend struct {
+	ID           int64
+	Type         int64
+	Url          string
+	ServerHost   sql.NullString
+	ServerPort   sql.NullInt64
+	NeedAuth     sql.NullBool
+	AuthUsername sql.NullString
+	AuthPassword sql.NullString
+	SmbShareName sql.NullString
+	SmbPath      sql.NullString
+	CreatedAt    sql.NullTime
+	UpdatedAt    sql.NullTime
+}
+
+type MediaFile struct {
+	ID         int64
+	BookID     string
+	Name       string
+	Path       sql.NullString
+	Size       sql.NullInt64
+	ModTime    sql.NullTime
+	Url        sql.NullString
+	PageNum    sql.NullInt64
+	Blurhash   sql.NullString
+	Height     sql.NullInt64
+	Width      sql.NullInt64
+	ImgType    sql.NullString
+	InsertHtml sql.NullString
+}
+
+type Store struct {
+	ID            int64
+	Name          string
+	Description   sql.NullString
+	FileBackendID int64
+	CreatedAt     sql.NullTime
+	UpdatedAt     sql.NullTime
+}
+
+type User struct {
+	ID        int64
+	Username  string
+	Password  string
+	Email     sql.NullString
+	Role      sql.NullString
+	CreatedAt sql.NullTime
+	UpdatedAt sql.NullTime
+}
