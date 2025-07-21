@@ -39,13 +39,12 @@ func PageHandler(c echo.Context) error {
 		var err error
 		model.CheckAllBookFileExist()
 		state.NowBookList, err = model.GetBookInfoListByID(bookID, sortBy)
-		// TODO: 无图书的提示（返回主页\上传压缩包\远程下载示例漫画）
+		// 无图书的提示（返回主页\上传压缩包\远程下载示例漫画）
 		if err != nil {
 			logger.Infof("GetBookShelf Error: %v", err)
 			// 渲染 404 页面
 			indexHtml := common.Html(
 				c,
-
 				error_page.NotFound404(c),
 				[]string{},
 			)

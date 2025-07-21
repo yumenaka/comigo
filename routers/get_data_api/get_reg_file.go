@@ -11,7 +11,7 @@ import (
 	"github.com/yumenaka/comigo/util/logger"
 )
 
-// TODO：GetRegFile 设置注册表文件
+// GetRegFile 注册表文件
 func GetRegFile(c echo.Context) error {
 	// 获取当前可执行文件的路径
 	exePath, err := os.Executable()
