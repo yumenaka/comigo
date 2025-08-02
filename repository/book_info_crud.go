@@ -17,14 +17,14 @@ func GetCover(b *model.BookInfo) model.MediaFileInfo {
 			logger.Infof("Error getting book group: %s", err)
 			return model.MediaFileInfo{Name: "unknown.png", Url: "/images/unknown.png"}
 		}
-		for _, v := range bookGroup.ChildBook.Range {
-			b := v.(*model.BookInfo)
-			childBook, err := GetBookByID(b.BookID, "modify_time")
+		for _, childID := range bookGroup.ChildBooksID {
+			book, err := GetBookByID(childID, "modify_time")
 			if err != nil {
 				return model.MediaFileInfo{Name: "unknown.png", Url: "/images/unknown.png"}
 			}
+			info := book.GetBookInfo()
 			// 递归调用
-			return GetCover(&childBook.BookInfo)
+			return info.GetCover()
 		}
 	case model.TypeDir, model.TypeZip, model.TypeRar, model.TypeCbz, model.TypeCbr, model.TypeTar, model.TypeEpub:
 		tempBook, err := GetBookByID(b.BookID, "")
@@ -51,7 +51,7 @@ func GetBookInfoListByDepth(depth int, sortBy string) (*model.BookInfoList, erro
 	for _, bookValue := range MainStore.mapBooks.Range {
 		b := bookValue.(*model.Book)
 		if b.Depth == depth {
-			info := model.NewBaseInfo(b)
+			info := b.GetBookInfo()
 			infoList.BookInfos = append(infoList.BookInfos, *info)
 		}
 	}
@@ -79,7 +79,7 @@ func GetBookInfoListByMaxDepth(depth int, sortBy string) (*model.BookInfoList, e
 	for _, bookValue := range MainStore.mapBooks.Range {
 		b := bookValue.(*model.Book)
 		if b.Depth <= depth {
-			info := model.NewBaseInfo(b)
+			info := b.GetBookInfo()
 			infoList.BookInfos = append(infoList.BookInfos, *info)
 		}
 	}
@@ -102,41 +102,21 @@ func GetBookInfoListByMaxDepth(depth int, sortBy string) (*model.BookInfoList, e
 
 // TopOfShelfInfo 获取顶层书架信息
 func TopOfShelfInfo(sortBy string) (*model.BookInfoList, error) {
-	// if len(*StoreSettings) == 0 {
-	//	return nil, errors.New("error: cannot find book in TopOfShelfInfo")
-	// }
-	// if len(*StoreSettings) > 1 {
-	//	// 有多个书库
-	//	var infoList model.BookInfoList
-	//	for _, localPath := range *StoreSettings {
-	//		for _, groupValue := range mapBookGroup.Range {
-	//			group := groupValue.(*BookGroup)
-	//			if group.BookInfo.ParentFolder == localPath {
-	//				infoList.BookInfos = append(infoList.BookInfos, group.BookInfo)
-	//			}
-	//		}
-	//	}
-	//	if len(infoList.BookInfos) > 0 {
-	//		infoList.SortBooks(sortBy)
-	//		return &infoList, nil
-	//	}
-	//	return nil, errors.New("error: cannot find book in TopOfShelfInfo")
-	// }
 	// 显示顶层书库的书籍
 	var infoList model.BookInfoList
 	for _, bookValue := range MainStore.mapBooks.Range {
 		b := bookValue.(*model.Book)
 		if b.Depth == 0 {
-			info := model.NewBaseInfo(b)
+			info := b.GetBookInfo()
 			info.Cover = GetCover(info) // 设置封面图(为了兼容老版前端)TODO：升级新前端，去掉这部分
 			infoList.BookInfos = append(infoList.BookInfos, *info)
 		}
 	}
 	for _, groupValue := range MainStore.mapBookGroup.Range {
-		group := groupValue.(*model.BookGroup)
-		if group.BookInfo.Depth == 0 {
-			group.BookInfo.Cover = GetCover(&group.BookInfo) // 设置封面图(为了兼容老版前端)TODO：升级新前端，去掉这部分
-			infoList.BookInfos = append(infoList.BookInfos, group.BookInfo)
+		group := groupValue.(*model.BookInfo)
+		if group.Depth == 0 {
+			group.Cover = GetCover(group) // 设置封面图(为了兼容老版前端)TODO：升级新前端，去掉这部分
+			infoList.BookInfos = append(infoList.BookInfos, *group)
 		}
 	}
 	if len(infoList.BookInfos) > 0 {
@@ -152,11 +132,14 @@ func GetBookInfoListByID(BookID string, sortBy string) (*model.BookInfoList, err
 	var infoList model.BookInfoList
 	groupValue, ok := MainStore.mapBookGroup.Load(BookID)
 	if ok {
-		tempGroup := groupValue.(*model.BookGroup)
-		for _, bookValue := range tempGroup.ChildBook.Range {
-			b := bookValue.(*model.BookInfo)
-			b.Cover = GetCover(b) // 设置封面图(为了兼容老版前端) TODO：升级前端，去掉这部分
-			infoList.BookInfos = append(infoList.BookInfos, *b)
+		tempGroup := groupValue.(*model.BookInfo)
+		for _, childID := range tempGroup.ChildBooksID {
+			b, err := GetBookByID(childID, "")
+			if err != nil {
+				return nil, errors.New("GetParentBook: cannot find book by childID=" + childID)
+			}
+			info := b.GetBookInfo()
+			infoList.BookInfos = append(infoList.BookInfos, *info)
 		}
 		if len(infoList.BookInfos) > 0 {
 			infoList.SortBooks(sortBy)
@@ -172,7 +155,7 @@ func GetBookInfoListByParentFolder(parentFolder string, sortBy string) (*model.B
 	for _, bookValue := range MainStore.mapBooks.Range {
 		b := bookValue.(*model.Book)
 		if b.ParentFolder == parentFolder {
-			info := model.NewBaseInfo(b)
+			info := b.GetBookInfo()
 			info.Cover = GetCover(info) // 设置封面图(为了兼容老版前端) TODO：升级前端，去掉这部分
 			infoList.BookInfos = append(infoList.BookInfos, *info)
 		}

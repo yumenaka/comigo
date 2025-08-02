@@ -32,7 +32,7 @@ func AddBooksToStore(bookList []*model.Book, basePath string, MinImageNum int) {
 		logger.Infof(locale.GetString("AddBook_error")+"%s", basePath)
 	}
 	// 生成虚拟书籍组
-	if err := model.MainStore.AnalyzeStore(); err != nil {
+	if err := model.MainStore.GenerateBookGroup(); err != nil {
 		logger.Infof("%s", err)
 	}
 }

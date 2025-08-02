@@ -17,7 +17,7 @@ var (
 		{Name: "file_path", Type: field.TypeString},
 		{Name: "book_store_path", Type: field.TypeString},
 		{Name: "type", Type: field.TypeString},
-		{Name: "child_book_num", Type: field.TypeInt},
+		{Name: "child_books_num", Type: field.TypeInt},
 		{Name: "depth", Type: field.TypeInt},
 		{Name: "parent_folder", Type: field.TypeString},
 		{Name: "page_count", Type: field.TypeInt},

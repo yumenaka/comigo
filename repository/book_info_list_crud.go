@@ -12,7 +12,7 @@ func GetAllBookInfoList(sortBy string) (*model.BookInfoList, error) {
 	// 添加所有真实的书籍
 	for _, value := range MainStore.mapBooks.Range {
 		b := value.(*model.Book)
-		info := model.NewBaseInfo(b)
+		info := b.GetBookInfo()
 		infoList.BookInfos = append(infoList.BookInfos, *info)
 	}
 	if len(infoList.BookInfos) > 0 {

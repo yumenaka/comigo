@@ -29,8 +29,8 @@ type Book struct {
 	BookStorePath string `json:"BookStorePath,omitempty"`
 	// 书籍类型
 	Type string `json:"Type,omitempty"`
-	// ChildBookNum holds the value of the "ChildBookNum" field.
-	ChildBookNum int `json:"ChildBookNum,omitempty"`
+	// ChildBooksNum holds the value of the "ChildBooksNum" field.
+	ChildBooksNum int `json:"ChildBooksNum,omitempty"`
 	// Depth holds the value of the "Depth" field.
 	Depth int `json:"Depth,omitempty"`
 	// ParentFolder holds the value of the "ParentFolder" field.
@@ -159,9 +159,9 @@ func (b *Book) assignValues(columns []string, values []any) error {
 			}
 		case book.FieldChildBookNum:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field ChildBookNum", values[i])
+				return fmt.Errorf("unexpected type %T for field ChildBooksNum", values[i])
 			} else if value.Valid {
-				b.ChildBookNum = int(value.Int64)
+				b.ChildBooksNum = int(value.Int64)
 			}
 		case book.FieldDepth:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -312,8 +312,8 @@ func (b *Book) String() string {
 	builder.WriteString("Type=")
 	builder.WriteString(b.Type)
 	builder.WriteString(", ")
-	builder.WriteString("ChildBookNum=")
-	builder.WriteString(fmt.Sprintf("%v", b.ChildBookNum))
+	builder.WriteString("ChildBooksNum=")
+	builder.WriteString(fmt.Sprintf("%v", b.ChildBooksNum))
 	builder.WriteString(", ")
 	builder.WriteString("Depth=")
 	builder.WriteString(fmt.Sprintf("%v", b.Depth))

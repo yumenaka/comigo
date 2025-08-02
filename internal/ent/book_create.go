@@ -65,7 +65,7 @@ func (bc *BookCreate) SetType(s string) *BookCreate {
 	return bc
 }
 
-// SetChildBookNum sets the "ChildBookNum" field.
+// SetChildBookNum sets the "ChildBooksNum" field.
 func (bc *BookCreate) SetChildBookNum(i int) *BookCreate {
 	bc.mutation.SetChildBookNum(i)
 	return bc
@@ -254,12 +254,12 @@ func (bc *BookCreate) check() error {
 	if _, ok := bc.mutation.GetType(); !ok {
 		return &ValidationError{Name: "Type", err: errors.New(`ent: missing required field "Book.Type"`)}
 	}
-	if _, ok := bc.mutation.ChildBookNum(); !ok {
-		return &ValidationError{Name: "ChildBookNum", err: errors.New(`ent: missing required field "Book.ChildBookNum"`)}
+	if _, ok := bc.mutation.ChildBooksNum(); !ok {
+		return &ValidationError{Name: "ChildBooksNum", err: errors.New(`ent: missing required field "Book.ChildBooksNum"`)}
 	}
-	if v, ok := bc.mutation.ChildBookNum(); ok {
+	if v, ok := bc.mutation.ChildBooksNum(); ok {
 		if err := book.ChildBookNumValidator(v); err != nil {
-			return &ValidationError{Name: "ChildBookNum", err: fmt.Errorf(`ent: validator failed for field "Book.ChildBookNum": %w`, err)}
+			return &ValidationError{Name: "ChildBooksNum", err: fmt.Errorf(`ent: validator failed for field "Book.ChildBooksNum": %w`, err)}
 		}
 	}
 	if _, ok := bc.mutation.Depth(); !ok {
@@ -367,9 +367,9 @@ func (bc *BookCreate) createSpec() (*Book, *sqlgraph.CreateSpec) {
 		_spec.SetField(book.FieldType, field.TypeString, value)
 		_node.Type = value
 	}
-	if value, ok := bc.mutation.ChildBookNum(); ok {
+	if value, ok := bc.mutation.ChildBooksNum(); ok {
 		_spec.SetField(book.FieldChildBookNum, field.TypeInt, value)
-		_node.ChildBookNum = value
+		_node.ChildBooksNum = value
 	}
 	if value, ok := bc.mutation.Depth(); ok {
 		_spec.SetField(book.FieldDepth, field.TypeInt, value)

@@ -10,8 +10,7 @@ import (
 
 // 使用并发安全的 sync.Map 存储书籍和书组
 var (
-	mapBooks     sync.Map // 实际存在的书 key: string (BookID), value: *Book
-	mapBookGroup sync.Map // 虚拟书组    key: string (BookID), value: *BookGroup
+	mapBooks sync.Map // 实际存在的书 key: string (BookID), value: *Book
 	// MainStore 带有层级关系的总书组，用于前端展示
 	MainStore = Store{}
 )
@@ -47,17 +46,20 @@ func AddBooks(list []*Book, basePath string, minPageNum int) error {
 	return nil
 }
 
-// DeleteBookByID 删除一本书
-func DeleteBookByID(bookID string) {
+// DeleteBook 删除一本书
+func DeleteBook(bookID string) {
 	mapBooks.Delete(bookID)
 }
 
-// GetBooksNumber 获取书籍总数，不包括 BookGroup
+// GetBooksNumber 获取书籍总数，不包括 BookGroup 类型
 func GetBooksNumber() int {
 	// 用于计数的变量
 	var count int
 	// 遍历 map 并递增计数器
-	for range mapBooks.Range {
+	for _, b := range mapBooks.Range {
+		if b.(*Book).Type == TypeBooksGroup {
+			continue // 跳过书组类型
+		}
 		count++
 	}
 	return count
@@ -68,6 +70,9 @@ func GetAllBookList() []*Book {
 	var list []*Book
 	for _, value := range mapBooks.Range {
 		b := value.(*Book)
+		if b.Type == TypeBooksGroup {
+			continue // 跳过书组类型
+		}
 		list = append(list, b)
 	}
 	return list
@@ -92,28 +97,27 @@ func GetBookByID(id string, sortBy string) (*Book, error) {
 		b.SortPages(sortBy)
 		return b, nil
 	}
-	if value, ok := mapBookGroup.Load(id); ok {
-		group := value.(*BookGroup)
-		temp := Book{
-			BookInfo: group.BookInfo,
-		}
-		return &temp, nil
-	}
 	return nil, errors.New("GetBookByID：cannot find book, id=" + id)
 }
 
-// GetBookGroupInfoByChildBookID 通过子书籍 ID 获取所属书组信息
-func GetBookGroupInfoByChildBookID(id string) (*BookGroup, error) {
-	for _, value := range mapBookGroup.Range {
-		group := value.(*BookGroup)
-		for _, v := range group.ChildBook.Range {
-			b := v.(*BookInfo)
-			if b.BookID == id {
-				return group, nil
+// GetParentBook 通过子书籍 ID 获取所属书组信息
+func GetParentBook(childID string) (*Book, error) {
+	for _, value := range mapBooks.Range {
+		group := value.(*Book)
+		if group.Type != TypeBooksGroup {
+			continue // 只处理书组类型
+		}
+		for _, id := range group.ChildBooksID {
+			if id == childID {
+				b, err := GetBookByID(group.BookID, "")
+				if err != nil {
+					return nil, errors.New("GetParentBook: cannot find book by childID=" + id)
+				}
+				return b, nil
 			}
 		}
 	}
-	return nil, errors.New("cannot find group, id=" + id)
+	return nil, errors.New("cannot find group, child book ID=" + childID)
 }
 
 // GetBookByAuthor 获取同一作者的书籍

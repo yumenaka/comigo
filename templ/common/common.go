@@ -38,26 +38,14 @@ func GetImageAlt(key int) string {
 
 // GetReturnUrl 阅读或书架页面，返回按钮实际使用的链接
 func GetReturnUrl(BookID string) string {
-	if BookID == "" || state.NowBookList == nil {
-		return "/"
-	}
-	for _, book := range state.NowBookList.BookInfos {
-		if book.BookID == BookID {
-			return "/"
-		}
-	}
 	// 如果是书籍组，就跳转到父书架
-	ParentBookInfo, err := model.GetBookGroupInfoByChildBookID(BookID)
+	ParentBook, err := model.GetParentBook(BookID)
 	if err != nil {
-		logger.Info("ParentBookInfo not found")
+		logger.Info("ParentBook not found by BookID: %s, error: %v", BookID, err)
 		return "/"
 	}
-	// 	logger.Info(ParentBookInfo)
-	// 	flogger.Info(ParentBookInfo.Depth)
-	if ParentBookInfo.Depth < 0 {
-		return "/"
-	}
-	return "/shelf/" + ParentBookInfo.BookID
+
+	return "/shelf/" + ParentBook.BookID
 }
 
 func ShowQuickJumpBar(b *model.Book) (QuickJumpBar bool) {

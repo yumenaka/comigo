@@ -12,7 +12,7 @@ type Book struct {
 	FilePath        string
 	BookStorePath   string
 	Type            string
-	ChildBookNum    sql.NullInt64
+	ChildBooksNum   sql.NullInt64
 	Depth           sql.NullInt64
 	ParentFolder    sql.NullString
 	PageCount       sql.NullInt64

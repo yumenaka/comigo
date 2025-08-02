@@ -38,7 +38,7 @@ func PageHandler(c echo.Context) error {
 	if bookID != "" {
 		var err error
 		model.CheckAllBookFileExist()
-		state.NowBookList, err = model.GetBookInfoListByID(bookID, sortBy)
+		state.NowBookList, err = model.GetChildBooksInfo(bookID, sortBy)
 		// 无图书的提示（返回主页\上传压缩包\远程下载示例漫画）
 		if err != nil {
 			logger.Infof("GetBookShelf Error: %v", err)

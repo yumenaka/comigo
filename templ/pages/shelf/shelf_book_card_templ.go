@@ -168,7 +168,7 @@ func BookCard(c echo.Context, book model.BookInfo) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var7 string
-			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(book.ChildBookNum))
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(book.ChildBooksNum))
 			if templ_7745c5c3_Err != nil {
 				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_book_card.templ`, Line: 75, Col: 127}
 			}

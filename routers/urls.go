@@ -104,13 +104,11 @@ func bindProtectedAPI(group *echo.Group) {
 	// 查看服务器状态
 	group.GET("/server_info_all", get_data_api.GetAllServerInfoHandler)
 	// 获取书架信息
-	group.GET("/book_infos", get_data_api.GetBookInfos)
-	// 获取书架信息 2.0
 	group.GET("/top_shelf", get_data_api.GetTopOfShelfInfo)
 	// 查询书籍信息
 	group.GET("/get_book", get_data_api.GetBook)
 	// 查询父书籍信息
-	group.GET("/parent_book_info", get_data_api.GetParentBookInfo)
+	group.GET("/parent_book_info", get_data_api.GetParentBook)
 	// 返回同一文件夹的书籍 ID 列表
 	group.GET("/group_info", get_data_api.GroupInfo)
 	group.GET("/group_info_filter", get_data_api.GroupInfoFilter)

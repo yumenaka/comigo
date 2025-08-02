@@ -7,7 +7,7 @@ import (
 	"github.com/yumenaka/comigo/util"
 )
 
-// BookInfoList 表示 BookInfo 的列表
+// BookInfoList 表示 BookInfo 的列表，排序用
 type BookInfoList struct {
 	BookInfos []BookInfo
 }
@@ -18,7 +18,7 @@ func GetAllBookInfoList(sortBy string) (*BookInfoList, error) {
 	// 添加所有真实的书籍
 	for _, value := range mapBooks.Range {
 		b := value.(*Book)
-		info := NewBaseInfo(b)
+		info := b.GetBookInfo()
 		infoList.BookInfos = append(infoList.BookInfos, *info)
 	}
 
@@ -88,7 +88,7 @@ func compareByFileSize(a, b BookInfo) bool {
 	// 如果其中一本是书籍组，比较子书籍数量
 	if a.Type == TypeBooksGroup || b.Type == TypeBooksGroup {
 		if a.Type == TypeBooksGroup && b.Type == TypeBooksGroup {
-			return a.ChildBookNum > b.ChildBookNum
+			return a.ChildBooksNum > b.ChildBooksNum
 		}
 		return a.Type == TypeBooksGroup
 	}
