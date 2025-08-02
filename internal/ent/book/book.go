@@ -27,7 +27,7 @@ const (
 	// FieldType holds the string denoting the type field in the database.
 	FieldType = "type"
 	// FieldChildBookNum holds the string denoting the childbooknum field in the database.
-	FieldChildBookNum = "child_book_num"
+	FieldChildBookNum = "child_books_num"
 	// FieldDepth holds the string denoting the depth field in the database.
 	FieldDepth = "depth"
 	// FieldParentFolder holds the string denoting the parentfolder field in the database.
@@ -113,7 +113,7 @@ var (
 	TitleValidator func(string) error
 	// DefaultOwner holds the default value on creation for the "Owner" field.
 	DefaultOwner string
-	// ChildBookNumValidator is a validator for the "ChildBookNum" field. It is called by the builders before save.
+	// ChildBookNumValidator is a validator for the "ChildBooksNum" field. It is called by the builders before save.
 	ChildBookNumValidator func(int) error
 	// DepthValidator is a validator for the "Depth" field. It is called by the builders before save.
 	DepthValidator func(int) error
@@ -161,7 +161,7 @@ func ByType(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldType, opts...).ToFunc()
 }
 
-// ByChildBookNum orders the results by the ChildBookNum field.
+// ByChildBookNum orders the results by the ChildBooksNum field.
 func ByChildBookNum(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldChildBookNum, opts...).ToFunc()
 }

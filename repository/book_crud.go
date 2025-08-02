@@ -28,7 +28,7 @@ func getShortBookID(fullID string, minLength int) string {
 			}
 		}
 		for _, value := range MainStore.mapBookGroup.Range {
-			group := value.(*model.BookGroup)
+			group := value.(*model.BookInfo)
 			if group.BookID == shortID {
 				conflict = true
 				break
@@ -78,7 +78,6 @@ func AddBooks(list []*model.Book, basePath string, minPageNum int) error {
 		logger.Infof("%s", err)
 	}
 	return nil
-
 }
 
 // DeleteBookByID 删除一本书
@@ -87,9 +86,9 @@ func DeleteBookByID(bookID string) {
 }
 
 // GetBookGroupByBookID 通过数组 ID 获取书组信息
-func GetBookGroupByBookID(id string) (*model.BookGroup, error) {
+func GetBookGroupByBookID(id string) (*model.BookInfo, error) {
 	if value, ok := MainStore.mapBookGroup.Load(id); ok {
-		return value.(*model.BookGroup), nil
+		return value.(*model.BookInfo), nil
 	}
 	return nil, errors.New("GetBookGroupByBookID：cannot find book group, id=" + id)
 }
@@ -97,10 +96,9 @@ func GetBookGroupByBookID(id string) (*model.BookGroup, error) {
 // GetBookGroupIDByBookID 通过子书籍 ID 获取所属书组 ID
 func GetBookGroupIDByBookID(id string) (string, error) {
 	for _, value := range MainStore.mapBookGroup.Range {
-		group := value.(*model.BookGroup)
-		for _, v := range group.ChildBook.Range {
-			b := v.(*model.BookInfo)
-			if b.BookID == id {
+		group := value.(*model.BookInfo)
+		for _, childID := range group.ChildBooksID {
+			if childID == id {
 				return group.BookID, nil
 			}
 		}
@@ -108,7 +106,7 @@ func GetBookGroupIDByBookID(id string) (string, error) {
 	return "", errors.New("cannot find group, id=" + id)
 }
 
-// GetBooksNumber 获取书籍总数，不包括 BookGroup
+// GetBooksNumber 获取书籍总数，不包括 BookInfo
 func GetBooksNumber() int {
 	// 用于计数的变量
 	var count int
@@ -186,11 +184,10 @@ func GetBookByID(id string, sortBy string) (*model.Book, error) {
 		return b, nil
 	}
 	if value, ok := MainStore.mapBookGroup.Load(id); ok {
-		group := value.(*model.BookGroup)
-		temp := model.Book{
-			BookInfo: group.BookInfo,
-		}
-		return &temp, nil
+		group := value.(*model.BookInfo)
+		return &model.Book{
+			BookInfo: *group,
+		}, nil
 	}
 	return nil, errors.New("GetBookByID：cannot find book, id=" + id)
 }
@@ -204,12 +201,11 @@ func GetRandomBook() (*model.Book, error) {
 }
 
 // GetBookGroupInfoByChildBookID 通过子书籍 ID 获取所属书组信息
-func GetBookGroupInfoByChildBookID(id string) (*model.BookGroup, error) {
+func GetBookGroupInfoByChildBookID(id string) (*model.BookInfo, error) {
 	for _, value := range MainStore.mapBookGroup.Range {
-		group := value.(*model.BookGroup)
-		for _, v := range group.ChildBook.Range {
-			b := v.(*model.BookInfo)
-			if b.BookID == id {
+		group := value.(*model.BookInfo)
+		for _, childID := range group.ChildBooksID {
+			if childID == id {
 				return group, nil
 			}
 		}
@@ -343,7 +339,7 @@ func (s *subMemoryStore) AnalyzeFolder() error {
 			}
 			// 获取修改时间
 			modTime := pathInfo.ModTime()
-			newBookGroup, err := model.NewBookGroup(filepath.Dir(sameParentBookList[0].FilePath), modTime, 0, s.Path, depth-1, model.TypeBooksGroup)
+			newBookGroup, err := model.NewbookinfoBookgroup(filepath.Dir(sameParentBookList[0].FilePath), modTime, 0, s.Path, depth-1, model.TypeBooksGroup)
 			if err != nil {
 				logger.Infof("%s", err)
 				continue
@@ -354,18 +350,18 @@ func (s *subMemoryStore) AnalyzeFolder() error {
 			}
 			// 初始化ChildBook
 			// 然后把同一parent的书，都加进某个书籍组
-			for i, bookInList := range sameParentBookList {
-				newBookGroup.ChildBook.Store(bookInList.BookID, &sameParentBookList[i])
+			for _, bookInList := range sameParentBookList {
+				newBookGroup.ChildBooksID = append(newBookGroup.ChildBooksID, bookInList.BookID)
 			}
-			newBookGroup.ChildBookNum = len(sameParentBookList)
+			newBookGroup.ChildBooksNum = len(sameParentBookList)
 			// 如果书籍组的子书籍数量等于0，那么不需要添加
-			if newBookGroup.ChildBookNum == 0 {
+			if newBookGroup.ChildBooksNum == 0 {
 				continue
 			}
 			// 检测是否已经生成并添加过
 			Added := false
 			for _, value := range MainStore.mapBookGroup.Range {
-				group := value.(*model.BookGroup)
+				group := value.(*model.BookInfo)
 				if group.FilePath == newBookGroup.FilePath {
 					Added = true
 				}
@@ -378,10 +374,10 @@ func (s *subMemoryStore) AnalyzeFolder() error {
 			if (depth - 1) < 0 {
 				continue
 			}
-			depthBooksMap[depth-1] = append(depthBooksMap[depth-1], newBookGroup.BookInfo)
+			depthBooksMap[depth-1] = append(depthBooksMap[depth-1], *newBookGroup)
 			newBookGroup.SetAuthor()
 			// 将这本书加到子书库的BookGroup表（Images.BookGroupMap）里面去
-			s.BookGroupMap.Store(newBookGroup.BookID, &newBookGroup.BookInfo)
+			s.BookGroupMap.Store(newBookGroup.BookID, &newBookGroup)
 			// 将这本书加到BookGroup总表（mapBookGroup）里面去
 			MainStore.mapBookGroup.Store(newBookGroup.BookID, newBookGroup)
 		}

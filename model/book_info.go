@@ -15,57 +15,30 @@ import (
 
 // BookInfo 与 Book 唯一的区别是没有 AllPageInfo，而是封面图 URL，减小 JSON 文件的大小
 type BookInfo struct {
-	Author          string          `json:"author"`         // 作者
-	BookID          string          `json:"id"`             // 根据 FilePath 生成的唯一 ID
-	BookStorePath   string          `json:"-"`              // 在哪个子书库
-	ChildBookNum    int             `json:"child_book_num"` // 子书籍数量
-	Cover           MediaFileInfo   `json:"cover"`          // 封面图
-	Deleted         bool            `json:"deleted"`        // 源文件是否已删除
-	Depth           int             `json:"depth"`          // 书籍深度
-	ExtractPath     string          `json:"-"`              // 解压路径，7z 用，JSON 不解析
-	ExtractNum      int             `json:"-"`              // 文件解压数
-	FileSize        int64           `json:"file_size"`      // 文件大小
-	FilePath        string          `json:"-"`              // 文件绝对路径，JSON 不解析
-	ISBN            string          `json:"isbn"`           // ISBN
-	InitComplete    bool            `json:"-"`              // 是否解压完成
-	Modified        time.Time       `json:"modified_time"`  // 修改时间
-	NonUTF8Zip      bool            `json:"-"`              // 是否为特殊编码 zip
-	PageCount       int             `json:"page_count"`     // 总页数
-	ParentFolder    string          `json:"parent_folder"`  // 父文件夹
-	Press           string          `json:"press"`          // 出版社
-	PublishedAt     string          `json:"published_at"`   // 出版日期
-	ReadPercent     float64         `json:"read_percent"`   // 阅读进度
-	Title           string          `json:"title"`          // 书名
-	Type            SupportFileType `json:"type"`           // 书籍类型
-	ZipTextEncoding string          `json:"-"`              // zip 文件编码
-}
-
-// NewBaseInfo 创建新的 BookInfo 实例
-func NewBaseInfo(b *Book) *BookInfo {
-	return &BookInfo{
-		Author:          b.Author,
-		BookID:          b.BookID,
-		BookStorePath:   b.BookStorePath,
-		ChildBookNum:    b.ChildBookNum,
-		Deleted:         b.Deleted,
-		Depth:           b.Depth,
-		ExtractPath:     b.ExtractPath,
-		ExtractNum:      b.ExtractNum,
-		FilePath:        b.GetFilePath(),
-		FileSize:        b.FileSize,
-		ISBN:            b.ISBN,
-		InitComplete:    b.InitComplete,
-		Modified:        b.Modified,
-		NonUTF8Zip:      b.NonUTF8Zip,
-		PageCount:       b.GetPageCount(),
-		ParentFolder:    b.ParentFolder,
-		Press:           b.Press,
-		PublishedAt:     b.PublishedAt,
-		ReadPercent:     b.ReadPercent,
-		Type:            b.Type,
-		Title:           b.Title,
-		ZipTextEncoding: b.ZipTextEncoding,
-	}
+	Author          string          `json:"author"`          // 作者
+	BookID          string          `json:"id"`              // 根据 FilePath 生成的唯一 ID
+	BookStorePath   string          `json:"-"`               // 在哪个子书库
+	ChildBooksNum   int             `json:"child_books_num"` // 子书籍数量
+	ChildBooksID    []string        `json:"child_books_id"`  // 子书籍BookID
+	Cover           MediaFileInfo   `json:"cover"`           // 封面图
+	Deleted         bool            `json:"deleted"`         // 源文件是否已删除
+	Depth           int             `json:"depth"`           // 书籍深度
+	ExtractPath     string          `json:"-"`               // 解压路径，7z 用，JSON 不解析
+	ExtractNum      int             `json:"-"`               // 文件解压数
+	FileSize        int64           `json:"file_size"`       // 文件大小
+	FilePath        string          `json:"-"`               // 文件绝对路径，JSON 不解析
+	ISBN            string          `json:"isbn"`            // ISBN
+	InitComplete    bool            `json:"-"`               // 是否解压完成
+	Modified        time.Time       `json:"modified_time"`   // 修改时间
+	NonUTF8Zip      bool            `json:"-"`               // 是否为特殊编码 zip
+	PageCount       int             `json:"page_count"`      // 总页数
+	ParentFolder    string          `json:"parent_folder"`   // 父文件夹
+	Press           string          `json:"press"`           // 出版社
+	PublishedAt     string          `json:"published_at"`    // 出版日期
+	ReadPercent     float64         `json:"read_percent"`    // 阅读进度
+	Title           string          `json:"title"`           // 书名
+	Type            SupportFileType `json:"type"`            // 书籍类型
+	ZipTextEncoding string          `json:"-"`               // zip 文件编码
 }
 
 // initBookID 根据路径的 MD5，初始化书籍 ID
@@ -218,7 +191,7 @@ func GetBookInfoListByDepth(depth int, sortBy string) (*BookInfoList, error) {
 	for _, bookValue := range mapBooks.Range {
 		b := bookValue.(*Book)
 		if b.Depth == depth {
-			info := NewBaseInfo(b)
+			info := b.GetBookInfo()
 			infoList.BookInfos = append(infoList.BookInfos, *info)
 		}
 	}
@@ -239,14 +212,13 @@ func GetBookInfoListByDepth(depth int, sortBy string) (*BookInfoList, error) {
 	return nil, errors.New("error: cannot find bookshelf in GetBookInfoListByDepth")
 }
 
-// GetBookInfoListByMaxDepth 获取指定最大深度的书籍列表
 func GetBookInfoListByMaxDepth(depth int, sortBy string) (*BookInfoList, error) {
 	var infoList BookInfoList
 	// 首先加上所有真实的书籍
 	for _, bookValue := range mapBooks.Range {
 		b := bookValue.(*Book)
 		if b.Depth <= depth {
-			info := NewBaseInfo(b)
+			info := b.GetBookInfo()
 			infoList.BookInfos = append(infoList.BookInfos, *info)
 		}
 	}
@@ -277,7 +249,7 @@ func TopOfShelfInfo(sortBy string) (*BookInfoList, error) {
 	//	var infoList BookInfoList
 	//	for _, localPath := range *LocalStores {
 	//		for _, groupValue := range mapBookGroup.Range {
-	//			group := groupValue.(*BookGroup)
+	//			group := groupValue.(*BookInfo)
 	//			if group.BookInfo.ParentFolder == localPath {
 	//				infoList.BookInfos = append(infoList.BookInfos, group.BookInfo)
 	//			}
@@ -294,16 +266,9 @@ func TopOfShelfInfo(sortBy string) (*BookInfoList, error) {
 	for _, bookValue := range mapBooks.Range {
 		b := bookValue.(*Book)
 		if b.Depth == 0 {
-			info := NewBaseInfo(b)
+			info := b.GetBookInfo()
 			info.Cover = info.GetCover() // 设置封面图(为了兼容老版前端)TODO：升级新前端，去掉这部分
 			infoList.BookInfos = append(infoList.BookInfos, *info)
-		}
-	}
-	for _, groupValue := range mapBookGroup.Range {
-		group := groupValue.(*BookGroup)
-		if group.BookInfo.Depth == 0 {
-			group.BookInfo.Cover = group.BookInfo.GetCover() // 设置封面图(为了兼容老版前端)TODO：升级新前端，去掉这部分
-			infoList.BookInfos = append(infoList.BookInfos, group.BookInfo)
 		}
 	}
 	if len(infoList.BookInfos) > 0 {
@@ -314,23 +279,26 @@ func TopOfShelfInfo(sortBy string) (*BookInfoList, error) {
 	return nil, errors.New("error: cannot find book in TopOfShelfInfo")
 }
 
-// GetBookInfoListByID 根据 ID 获取书籍列表
-func GetBookInfoListByID(BookID string, sortBy string) (*BookInfoList, error) {
+// GetChildBooksInfo 根据 ID 获取书籍列表
+func GetChildBooksInfo(BookID string, sortBy string) (*BookInfoList, error) {
 	var infoList BookInfoList
-	groupValue, ok := mapBookGroup.Load(BookID)
+	groupValue, ok := mapBooks.Load(BookID)
 	if ok {
-		tempGroup := groupValue.(*BookGroup)
-		for _, bookValue := range tempGroup.ChildBook.Range {
-			b := bookValue.(*BookInfo)
-			b.Cover = b.GetCover() // 设置封面图(为了兼容老版前端) TODO：升级前端，去掉这部分
-			infoList.BookInfos = append(infoList.BookInfos, *b)
+		tempGroup := groupValue.(*Book)
+		for _, childID := range tempGroup.ChildBooksID {
+			b, err := GetBookByID(childID, "")
+			if err != nil {
+				return nil, errors.New("GetParentBook: cannot find book by childID=" + childID)
+			}
+			info := b.GetBookInfo()
+			infoList.BookInfos = append(infoList.BookInfos, *info)
 		}
 		if len(infoList.BookInfos) > 0 {
 			infoList.SortBooks(sortBy)
 			return &infoList, nil
 		}
 	}
-	return nil, errors.New("cannot find BookInfo，ID：" + BookID)
+	return nil, errors.New("cannot find child books info，BookID：" + BookID)
 }
 
 // GetBookInfoListByParentFolder 根据父文件夹获取书籍列表
@@ -339,7 +307,7 @@ func GetBookInfoListByParentFolder(parentFolder string, sortBy string) (*BookInf
 	for _, bookValue := range mapBooks.Range {
 		b := bookValue.(*Book)
 		if b.ParentFolder == parentFolder {
-			info := NewBaseInfo(b)
+			info := b.GetBookInfo()
 			info.Cover = info.GetCover() // 设置封面图(为了兼容老版前端) TODO：升级前端，去掉这部分
 			infoList.BookInfos = append(infoList.BookInfos, *info)
 		}
@@ -356,19 +324,19 @@ func (b *BookInfo) GetCover() MediaFileInfo {
 	switch b.Type {
 	// 书籍类型为书组的时候，遍历所有子书籍，然后获取第一个子书籍的封面
 	case TypeBooksGroup:
-		bookGroup, err := GetBookGroupByBookID(b.BookID)
+		bookGroup, err := GetBookByID(b.BookID, "")
 		if err != nil {
 			logger.Infof("Error getting book group: %s", err)
 			return MediaFileInfo{Name: "unknown.png", Url: "/images/unknown.png"}
 		}
-		for _, v := range bookGroup.ChildBook.Range {
-			b := v.(*BookInfo)
-			childBook, err := GetBookByID(b.BookID, "modify_time")
+		for _, childID := range bookGroup.ChildBooksID {
+			book, err := GetBookByID(childID, "modify_time")
 			if err != nil {
 				return MediaFileInfo{Name: "unknown.png", Url: "/images/unknown.png"}
 			}
+			info := book.GetBookInfo()
 			// 递归调用
-			return childBook.GetCover()
+			return info.GetCover()
 		}
 	case TypeDir, TypeZip, TypeRar, TypeCbz, TypeCbr, TypeTar, TypeEpub:
 		tempBook, err := GetBookByID(b.BookID, "")

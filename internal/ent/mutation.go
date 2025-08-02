@@ -388,14 +388,14 @@ func (m *BookMutation) ResetType() {
 	m._Type = nil
 }
 
-// SetChildBookNum sets the "ChildBookNum" field.
+// SetChildBookNum sets the "ChildBooksNum" field.
 func (m *BookMutation) SetChildBookNum(i int) {
 	m._ChildBookNum = &i
 	m.add_ChildBookNum = nil
 }
 
-// ChildBookNum returns the value of the "ChildBookNum" field in the mutation.
-func (m *BookMutation) ChildBookNum() (r int, exists bool) {
+// ChildBooksNum returns the value of the "ChildBooksNum" field in the mutation.
+func (m *BookMutation) ChildBooksNum() (r int, exists bool) {
 	v := m._ChildBookNum
 	if v == nil {
 		return
@@ -403,7 +403,7 @@ func (m *BookMutation) ChildBookNum() (r int, exists bool) {
 	return *v, true
 }
 
-// OldChildBookNum returns the old "ChildBookNum" field's value of the Book entity.
+// OldChildBookNum returns the old "ChildBooksNum" field's value of the Book entity.
 // If the Book object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *BookMutation) OldChildBookNum(ctx context.Context) (v int, err error) {
@@ -417,10 +417,10 @@ func (m *BookMutation) OldChildBookNum(ctx context.Context) (v int, err error) {
 	if err != nil {
 		return v, fmt.Errorf("querying old value for OldChildBookNum: %w", err)
 	}
-	return oldValue.ChildBookNum, nil
+	return oldValue.ChildBooksNum, nil
 }
 
-// AddChildBookNum adds i to the "ChildBookNum" field.
+// AddChildBookNum adds i to the "ChildBooksNum" field.
 func (m *BookMutation) AddChildBookNum(i int) {
 	if m.add_ChildBookNum != nil {
 		*m.add_ChildBookNum += i
@@ -429,7 +429,7 @@ func (m *BookMutation) AddChildBookNum(i int) {
 	}
 }
 
-// AddedChildBookNum returns the value that was added to the "ChildBookNum" field in this mutation.
+// AddedChildBookNum returns the value that was added to the "ChildBooksNum" field in this mutation.
 func (m *BookMutation) AddedChildBookNum() (r int, exists bool) {
 	v := m.add_ChildBookNum
 	if v == nil {
@@ -438,7 +438,7 @@ func (m *BookMutation) AddedChildBookNum() (r int, exists bool) {
 	return *v, true
 }
 
-// ResetChildBookNum resets all changes to the "ChildBookNum" field.
+// ResetChildBookNum resets all changes to the "ChildBooksNum" field.
 func (m *BookMutation) ResetChildBookNum() {
 	m._ChildBookNum = nil
 	m.add_ChildBookNum = nil
@@ -1260,7 +1260,7 @@ func (m *BookMutation) Field(name string) (ent.Value, bool) {
 	case book.FieldType:
 		return m.GetType()
 	case book.FieldChildBookNum:
-		return m.ChildBookNum()
+		return m.ChildBooksNum()
 	case book.FieldDepth:
 		return m.Depth()
 	case book.FieldParentFolder:

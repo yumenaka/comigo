@@ -95,7 +95,7 @@ func SaveBookToDatabase(save *model.Book) error {
 		SetOwner("").
 		SetFilePath(save.BookInfo.FilePath).
 		SetBookStorePath(save.BookInfo.BookStorePath).
-		SetChildBookNum(save.BookInfo.ChildBookNum).
+		SetChildBookNum(save.BookInfo.ChildBooksNum).
 		SetType(string(save.BookInfo.Type)).
 		SetDepth(save.BookInfo.Depth).
 		SetParentFolder(save.BookInfo.ParentFolder).
@@ -161,7 +161,7 @@ func GetBookFromDatabase(filepath string) (*model.Book, error) {
 			FilePath:        temp.FilePath,
 			BookStorePath:   temp.BookStorePath,
 			Type:            model.SupportFileType(temp.Type),
-			ChildBookNum:    temp.ChildBookNum,
+			ChildBooksNum:   temp.ChildBooksNum,
 			Depth:           temp.Depth,
 			ParentFolder:    temp.ParentFolder,
 			PageCount:       temp.PageCount,
@@ -226,7 +226,7 @@ func GetBooksFromDatabase() (list []*model.Book, err error) {
 				FilePath:        temp.FilePath,
 				BookStorePath:   temp.BookStorePath,
 				Type:            model.SupportFileType(temp.Type),
-				ChildBookNum:    temp.ChildBookNum,
+				ChildBooksNum:   temp.ChildBooksNum,
 				Depth:           temp.Depth,
 				ParentFolder:    temp.ParentFolder,
 				PageCount:       temp.PageCount,

@@ -28,7 +28,7 @@ func (Book) Fields() []ent.Field {
 		field.String("FilePath").Comment("文件路径"),
 		field.String("BookStorePath").Comment("书库路径"),
 		field.String("Type").Comment("书籍类型"),
-		field.Int("ChildBookNum").NonNegative(),
+		field.Int("ChildBooksNum").NonNegative(),
 		field.Int("Depth").NonNegative(),
 		field.String("ParentFolder"),
 		field.Int("PageCount").

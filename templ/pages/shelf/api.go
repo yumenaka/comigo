@@ -47,7 +47,7 @@ func GetBookListHandler(c echo.Context) error {
 	// 如果指定了书籍ID，获取子书架信息。
 	if bookID != "" {
 		var err error
-		state.NowBookList, err = model.GetBookInfoListByID(bookID, sortBy)
+		state.NowBookList, err = model.GetChildBooksInfo(bookID, sortBy)
 		if err != nil {
 			logger.Infof("GetBookShelf: %v", err)
 		}

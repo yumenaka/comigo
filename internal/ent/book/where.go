@@ -85,8 +85,8 @@ func Type(v string) predicate.Book {
 	return predicate.Book(sql.FieldEQ(FieldType, v))
 }
 
-// ChildBookNum applies equality check predicate on the "ChildBookNum" field. It's identical to ChildBookNumEQ.
-func ChildBookNum(v int) predicate.Book {
+// ChildBooksNum applies equality check predicate on the "ChildBooksNum" field. It's identical to ChildBookNumEQ.
+func ChildBooksNum(v int) predicate.Book {
 	return predicate.Book(sql.FieldEQ(FieldChildBookNum, v))
 }
 
@@ -555,42 +555,42 @@ func TypeContainsFold(v string) predicate.Book {
 	return predicate.Book(sql.FieldContainsFold(FieldType, v))
 }
 
-// ChildBookNumEQ applies the EQ predicate on the "ChildBookNum" field.
+// ChildBookNumEQ applies the EQ predicate on the "ChildBooksNum" field.
 func ChildBookNumEQ(v int) predicate.Book {
 	return predicate.Book(sql.FieldEQ(FieldChildBookNum, v))
 }
 
-// ChildBookNumNEQ applies the NEQ predicate on the "ChildBookNum" field.
+// ChildBookNumNEQ applies the NEQ predicate on the "ChildBooksNum" field.
 func ChildBookNumNEQ(v int) predicate.Book {
 	return predicate.Book(sql.FieldNEQ(FieldChildBookNum, v))
 }
 
-// ChildBookNumIn applies the In predicate on the "ChildBookNum" field.
+// ChildBookNumIn applies the In predicate on the "ChildBooksNum" field.
 func ChildBookNumIn(vs ...int) predicate.Book {
 	return predicate.Book(sql.FieldIn(FieldChildBookNum, vs...))
 }
 
-// ChildBookNumNotIn applies the NotIn predicate on the "ChildBookNum" field.
+// ChildBookNumNotIn applies the NotIn predicate on the "ChildBooksNum" field.
 func ChildBookNumNotIn(vs ...int) predicate.Book {
 	return predicate.Book(sql.FieldNotIn(FieldChildBookNum, vs...))
 }
 
-// ChildBookNumGT applies the GT predicate on the "ChildBookNum" field.
+// ChildBookNumGT applies the GT predicate on the "ChildBooksNum" field.
 func ChildBookNumGT(v int) predicate.Book {
 	return predicate.Book(sql.FieldGT(FieldChildBookNum, v))
 }
 
-// ChildBookNumGTE applies the GTE predicate on the "ChildBookNum" field.
+// ChildBookNumGTE applies the GTE predicate on the "ChildBooksNum" field.
 func ChildBookNumGTE(v int) predicate.Book {
 	return predicate.Book(sql.FieldGTE(FieldChildBookNum, v))
 }
 
-// ChildBookNumLT applies the LT predicate on the "ChildBookNum" field.
+// ChildBookNumLT applies the LT predicate on the "ChildBooksNum" field.
 func ChildBookNumLT(v int) predicate.Book {
 	return predicate.Book(sql.FieldLT(FieldChildBookNum, v))
 }
 
-// ChildBookNumLTE applies the LTE predicate on the "ChildBookNum" field.
+// ChildBookNumLTE applies the LTE predicate on the "ChildBooksNum" field.
 func ChildBookNumLTE(v int) predicate.Book {
 	return predicate.Book(sql.FieldLTE(FieldChildBookNum, v))
 }

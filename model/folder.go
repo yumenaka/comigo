@@ -22,8 +22,8 @@ type subStore struct {
 	BookGroupMap sync.Map // 拥有的书籍组,通过扫描书库生成，key是BookID,存储 *BookInfo。需要通过Depth从深到浅生成
 }
 
-// AnalyzeStore 分析并生成书籍组
-func (folder *Store) AnalyzeStore() (e error) {
+// GenerateBookGroup 分析并生成书籍组
+func (folder *Store) GenerateBookGroup() (e error) {
 	// 遍历所有子书库
 	for _, value := range folder.SubStores.Range {
 		s := value.(*subStore)
@@ -74,7 +74,7 @@ func (s *subStore) AnalyzeFolder() error {
 			}
 			// 获取修改时间
 			modTime := pathInfo.ModTime()
-			newBookGroup, err := NewBookGroup(filepath.Dir(sameParentBookList[0].FilePath), modTime, 0, s.Path, depth-1, TypeBooksGroup)
+			newBookGroup, err := NewbookinfoBookgroup(filepath.Dir(sameParentBookList[0].FilePath), modTime, 0, s.Path, depth-1, TypeBooksGroup)
 			if err != nil {
 				logger.Infof("%s", err)
 				continue
@@ -85,19 +85,19 @@ func (s *subStore) AnalyzeFolder() error {
 			}
 			// 初始化ChildBook
 			// 然后把同一parent的书，都加进某个书籍组
-			for i, bookInList := range sameParentBookList {
-				newBookGroup.ChildBook.Store(bookInList.BookID, &sameParentBookList[i])
+			for _, bookInList := range sameParentBookList {
+				newBookGroup.ChildBooksID = append(newBookGroup.ChildBooksID, bookInList.BookID)
 			}
-			newBookGroup.ChildBookNum = len(sameParentBookList)
+			newBookGroup.ChildBooksNum = len(sameParentBookList)
 			// 如果书籍组的子书籍数量等于0，那么不需要添加
-			if newBookGroup.ChildBookNum == 0 {
+			if newBookGroup.ChildBooksNum == 0 {
 				continue
 			}
 			// 检测是否已经生成并添加过
 			Added := false
-			for _, value := range mapBookGroup.Range {
-				group := value.(*BookGroup)
-				if group.FilePath == newBookGroup.FilePath {
+			for _, value := range mapBooks.Range {
+				bookGroup := value.(*Book)
+				if bookGroup.Type == TypeBooksGroup && bookGroup.FilePath == newBookGroup.FilePath {
 					Added = true
 				}
 			}
@@ -109,12 +109,12 @@ func (s *subStore) AnalyzeFolder() error {
 			if (depth - 1) < 0 {
 				continue
 			}
-			depthBooksMap[depth-1] = append(depthBooksMap[depth-1], newBookGroup.BookInfo)
+			depthBooksMap[depth-1] = append(depthBooksMap[depth-1], *newBookGroup)
 			newBookGroup.SetAuthor()
 			// 将这本书加到子书库的BookGroup表（Images.BookGroupMap）里面去
-			s.BookGroupMap.Store(newBookGroup.BookID, &newBookGroup.BookInfo)
+			s.BookGroupMap.Store(newBookGroup.BookID, &newBookGroup)
 			// 将这本书加到BookGroup总表（mapBookGroup）里面去
-			mapBookGroup.Store(newBookGroup.BookID, newBookGroup)
+			mapBooks.Store(newBookGroup.BookID, &Book{BookInfo: *newBookGroup})
 		}
 	}
 	return nil

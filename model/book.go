@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path"
 	"path/filepath"
@@ -13,50 +14,34 @@ import (
 	"github.com/yumenaka/comigo/util/logger"
 )
 
-// GetBookGroupByBookID 通过数组 ID 获取书组信息
-func GetBookGroupByBookID(id string) (*BookGroup, error) {
-	if value, ok := mapBookGroup.Load(id); ok {
-		return value.(*BookGroup), nil
-	}
-	return nil, errors.New("GetBookGroupByBookID：cannot find book group, id=" + id)
-}
-
-// GetBookGroupIDByBookID 通过子书籍 ID 获取所属书组 ID
-func GetBookGroupIDByBookID(id string) (string, error) {
-	for _, value := range mapBookGroup.Range {
-		group := value.(*BookGroup)
-		for _, v := range group.ChildBook.Range {
-			b := v.(*BookInfo)
-			if b.BookID == id {
+// GetParentBookID 通过子书籍 ID 获取所属书组 ID
+func GetParentBookID(childID string) (string, error) {
+	for _, value := range mapBooks.Range {
+		group := value.(*Book)
+		if group.Type != TypeBooksGroup {
+			continue // 只处理书组类型
+		}
+		for _, id := range group.ChildBooksID {
+			if id == childID {
+				fmt.Println("Found group for book ID:", childID, "Group ID:", group.BookID)
 				return group.BookID, nil
 			}
 		}
 	}
-	return "", errors.New("cannot find group, id=" + id)
+	return "", errors.New("cannot find group, id=" + childID)
 }
 
 // ClearAllBookData  清空所有书籍与虚拟书组数据
 func ClearAllBookData() {
-	ClearBookData()
-	ClearBookGroupData()
-}
-
-// ClearBookData 清空书籍数据
-func ClearBookData() {
+	// Clear 会删除所有条目，产生一个空 Map。
 	mapBooks.Clear()
-}
-
-// ClearBookGroupData  清空书组相关数据
-func ClearBookGroupData() {
-	// Clear 会删除所有条目，从而产生一个空的 Map。
-	mapBookGroup.Clear()
 	MainStore.SubStores.Clear()
 }
 
 // ResetBookGroupData 重置虚拟书库
 func ResetBookGroupData() {
-	ClearBookGroupData()
-	if err := MainStore.AnalyzeStore(); err != nil {
+	MainStore.SubStores.Clear()
+	if err := MainStore.GenerateBookGroup(); err != nil {
 		logger.Infof("Error initializing main folder: %s", err)
 	}
 }
@@ -65,6 +50,35 @@ func ResetBookGroupData() {
 type Book struct {
 	BookInfo
 	Pages Pages `json:"pages"`
+}
+
+// GetBookInfo 创建新的 BookInfo 实例
+func (b *Book) GetBookInfo() *BookInfo {
+	return &BookInfo{
+		Author:          b.Author,
+		BookID:          b.BookID,
+		BookStorePath:   b.BookStorePath,
+		ChildBooksNum:   b.ChildBooksNum,
+		ChildBooksID:    b.ChildBooksID,
+		Deleted:         b.Deleted,
+		Depth:           b.Depth,
+		ExtractPath:     b.ExtractPath,
+		ExtractNum:      b.ExtractNum,
+		FilePath:        b.GetFilePath(),
+		FileSize:        b.FileSize,
+		ISBN:            b.ISBN,
+		InitComplete:    b.InitComplete,
+		Modified:        b.Modified,
+		NonUTF8Zip:      b.NonUTF8Zip,
+		PageCount:       b.GetPageCount(),
+		ParentFolder:    b.ParentFolder,
+		Press:           b.Press,
+		PublishedAt:     b.PublishedAt,
+		ReadPercent:     b.ReadPercent,
+		Type:            b.Type,
+		Title:           b.Title,
+		ZipTextEncoding: b.ZipTextEncoding,
+	}
 }
 
 // GuestCover 猜测书籍的封面
@@ -119,7 +133,7 @@ func CheckAllBookFileExist() {
 		book := value.(*Book)
 		if _, err := os.Stat(book.FilePath); os.IsNotExist(err) {
 			deletedBooks = append(deletedBooks, book.FilePath)
-			DeleteBookByID(book.BookID)
+			DeleteBook(book.BookID)
 		}
 	}
 	// 删除不存在的书组
@@ -147,6 +161,22 @@ func NewBook(filePath string, modified time.Time, fileSize int64, storePath stri
 	// 设置文件路径、书名、BookID
 	book.setFilePath(filePath).setParentFolder(filePath).setTitle(filePath).SetAuthor().initBookID()
 	return book, nil
+}
+
+// NewbookinfoBookgroup   初始化BookGroup，设置文件路径、书名、BookID等等
+func NewbookinfoBookgroup(filePath string, modified time.Time, fileSize int64, storePath string, depth int, bookType SupportFileType) (*BookInfo, error) {
+	// 初始化书籍
+	bookInfo := BookInfo{
+		Modified:      modified,
+		FileSize:      fileSize,
+		InitComplete:  false,
+		Depth:         depth,
+		BookStorePath: storePath,
+		Type:          bookType,
+	}
+	// 设置属性：
+	bookInfo.setTitle(filePath).setFilePath(filePath).SetAuthor().setParentFolder(filePath).initBookID()
+	return &bookInfo, nil
 }
 
 // setPageNum 设置书籍的页数
@@ -222,13 +252,6 @@ func getShortBookID(fullID string, minLength int) string {
 		for _, value := range mapBooks.Range {
 			b := value.(*Book)
 			if b.BookID == shortID {
-				conflict = true
-				break
-			}
-		}
-		for _, value := range mapBookGroup.Range {
-			group := value.(*BookGroup)
-			if group.BookID == shortID {
 				conflict = true
 				break
 			}

@@ -113,14 +113,14 @@ func (bu *BookUpdate) SetNillableType(s *string) *BookUpdate {
 	return bu
 }
 
-// SetChildBookNum sets the "ChildBookNum" field.
+// SetChildBookNum sets the "ChildBooksNum" field.
 func (bu *BookUpdate) SetChildBookNum(i int) *BookUpdate {
 	bu.mutation.ResetChildBookNum()
 	bu.mutation.SetChildBookNum(i)
 	return bu
 }
 
-// SetNillableChildBookNum sets the "ChildBookNum" field if the given value is not nil.
+// SetNillableChildBookNum sets the "ChildBooksNum" field if the given value is not nil.
 func (bu *BookUpdate) SetNillableChildBookNum(i *int) *BookUpdate {
 	if i != nil {
 		bu.SetChildBookNum(*i)
@@ -128,7 +128,7 @@ func (bu *BookUpdate) SetNillableChildBookNum(i *int) *BookUpdate {
 	return bu
 }
 
-// AddChildBookNum adds i to the "ChildBookNum" field.
+// AddChildBookNum adds i to the "ChildBooksNum" field.
 func (bu *BookUpdate) AddChildBookNum(i int) *BookUpdate {
 	bu.mutation.AddChildBookNum(i)
 	return bu
@@ -454,9 +454,9 @@ func (bu *BookUpdate) check() error {
 			return &ValidationError{Name: "Title", err: fmt.Errorf(`ent: validator failed for field "Book.Title": %w`, err)}
 		}
 	}
-	if v, ok := bu.mutation.ChildBookNum(); ok {
+	if v, ok := bu.mutation.ChildBooksNum(); ok {
 		if err := book.ChildBookNumValidator(v); err != nil {
-			return &ValidationError{Name: "ChildBookNum", err: fmt.Errorf(`ent: validator failed for field "Book.ChildBookNum": %w`, err)}
+			return &ValidationError{Name: "ChildBooksNum", err: fmt.Errorf(`ent: validator failed for field "Book.ChildBooksNum": %w`, err)}
 		}
 	}
 	if v, ok := bu.mutation.Depth(); ok {
@@ -502,7 +502,7 @@ func (bu *BookUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := bu.mutation.GetType(); ok {
 		_spec.SetField(book.FieldType, field.TypeString, value)
 	}
-	if value, ok := bu.mutation.ChildBookNum(); ok {
+	if value, ok := bu.mutation.ChildBooksNum(); ok {
 		_spec.SetField(book.FieldChildBookNum, field.TypeInt, value)
 	}
 	if value, ok := bu.mutation.AddedChildBookNum(); ok {
@@ -717,14 +717,14 @@ func (buo *BookUpdateOne) SetNillableType(s *string) *BookUpdateOne {
 	return buo
 }
 
-// SetChildBookNum sets the "ChildBookNum" field.
+// SetChildBookNum sets the "ChildBooksNum" field.
 func (buo *BookUpdateOne) SetChildBookNum(i int) *BookUpdateOne {
 	buo.mutation.ResetChildBookNum()
 	buo.mutation.SetChildBookNum(i)
 	return buo
 }
 
-// SetNillableChildBookNum sets the "ChildBookNum" field if the given value is not nil.
+// SetNillableChildBookNum sets the "ChildBooksNum" field if the given value is not nil.
 func (buo *BookUpdateOne) SetNillableChildBookNum(i *int) *BookUpdateOne {
 	if i != nil {
 		buo.SetChildBookNum(*i)
@@ -732,7 +732,7 @@ func (buo *BookUpdateOne) SetNillableChildBookNum(i *int) *BookUpdateOne {
 	return buo
 }
 
-// AddChildBookNum adds i to the "ChildBookNum" field.
+// AddChildBookNum adds i to the "ChildBooksNum" field.
 func (buo *BookUpdateOne) AddChildBookNum(i int) *BookUpdateOne {
 	buo.mutation.AddChildBookNum(i)
 	return buo
@@ -1071,9 +1071,9 @@ func (buo *BookUpdateOne) check() error {
 			return &ValidationError{Name: "Title", err: fmt.Errorf(`ent: validator failed for field "Book.Title": %w`, err)}
 		}
 	}
-	if v, ok := buo.mutation.ChildBookNum(); ok {
+	if v, ok := buo.mutation.ChildBooksNum(); ok {
 		if err := book.ChildBookNumValidator(v); err != nil {
-			return &ValidationError{Name: "ChildBookNum", err: fmt.Errorf(`ent: validator failed for field "Book.ChildBookNum": %w`, err)}
+			return &ValidationError{Name: "ChildBooksNum", err: fmt.Errorf(`ent: validator failed for field "Book.ChildBooksNum": %w`, err)}
 		}
 	}
 	if v, ok := buo.mutation.Depth(); ok {
@@ -1136,7 +1136,7 @@ func (buo *BookUpdateOne) sqlSave(ctx context.Context) (_node *Book, err error) 
 	if value, ok := buo.mutation.GetType(); ok {
 		_spec.SetField(book.FieldType, field.TypeString, value)
 	}
-	if value, ok := buo.mutation.ChildBookNum(); ok {
+	if value, ok := buo.mutation.ChildBooksNum(); ok {
 		_spec.SetField(book.FieldChildBookNum, field.TypeInt, value)
 	}
 	if value, ok := buo.mutation.AddedChildBookNum(); ok {
