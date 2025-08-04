@@ -1,7 +1,6 @@
 package model
 
 import (
-	"errors"
 	"sort"
 
 	"github.com/yumenaka/comigo/util"
@@ -10,23 +9,6 @@ import (
 // BookInfoList 表示 BookInfo 的列表，排序用
 type BookInfoList struct {
 	BookInfos []BookInfo
-}
-
-// GetAllBookInfoList 获取所有 BookInfo，并根据 sortBy 参数进行排序
-func GetAllBookInfoList(sortBy string) (*BookInfoList, error) {
-	var infoList BookInfoList
-	// 添加所有真实的书籍
-	for _, value := range mapBooks.Range {
-		b := value.(*Book)
-		info := b.GetBookInfo()
-		infoList.BookInfos = append(infoList.BookInfos, *info)
-	}
-
-	if len(infoList.BookInfos) > 0 {
-		infoList.SortBooks(sortBy)
-		return &infoList, nil
-	}
-	return nil, errors.New("error: cannot find bookshelf in GetAllBookInfoList")
 }
 
 // SortBooks 根据 sortBy 参数对 BookInfos 进行排序

@@ -9,7 +9,7 @@ import (
 // InitAllStore 扫描书库路径，取得书籍
 func InitAllStore(option Option) error {
 	// 重置所有书籍与书组信息
-	model.ClearAllBookData()
+	model.MainStores.ClearAllBookData()
 	stores := option.Cfg.GetLocalStores()
 	// logger.Info("--------------------new stores------------------------------")
 	// logger.Info(stores)
@@ -27,12 +27,12 @@ func InitAllStore(option Option) error {
 
 // AddBooksToStore 添加一组书到书库
 func AddBooksToStore(bookList []*model.Book, basePath string, MinImageNum int) {
-	err := model.AddBooks(bookList, basePath, MinImageNum)
+	err := model.MainStores.AddBooks(bookList, basePath, MinImageNum)
 	if err != nil {
 		logger.Infof(locale.GetString("AddBook_error")+"%s", basePath)
 	}
 	// 生成虚拟书籍组
-	if err := model.MainStore.GenerateBookGroup(); err != nil {
+	if err := model.MainStores.GenerateAllBookGroup(); err != nil {
 		logger.Infof("%s", err)
 	}
 }

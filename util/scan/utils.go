@@ -12,7 +12,7 @@ func SaveResultsToDatabase(ConfigPath string, ClearDatabaseWhenExit bool) error 
 	if err != nil {
 		return err
 	}
-	saveErr := database.SaveBookListToDatabase(model.GetArchiveBooks())
+	saveErr := database.SaveBookListToDatabase(model.MainStores.GetArchiveBooks())
 	if saveErr != nil {
 		logger.Info(saveErr)
 		return saveErr
@@ -21,7 +21,7 @@ func SaveResultsToDatabase(ConfigPath string, ClearDatabaseWhenExit bool) error 
 }
 
 func ClearDatabaseWhenExit(ConfigPath string) {
-	AllBook := model.GetAllBookList()
+	AllBook := model.MainStores.GetAllBookList()
 	for _, b := range AllBook {
 		database.ClearBookData(b)
 	}

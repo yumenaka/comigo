@@ -20,7 +20,7 @@ func NewStoreRepository(db sqlc.DBTX) *StoreRepository {
 }
 
 // GetByID 根据ID获取书库
-func (r *StoreRepository) GetByID(ctx context.Context, id int) (*model.Store, error) {
+func (r *StoreRepository) GetByID(ctx context.Context, id int) (*model.StoreInfo, error) {
 	sqlcStore, err := r.queries.GetStoreByID(ctx, int64(id))
 	if err != nil {
 		return nil, err
@@ -29,7 +29,7 @@ func (r *StoreRepository) GetByID(ctx context.Context, id int) (*model.Store, er
 }
 
 // GetByName 根据名称获取书库
-func (r *StoreRepository) GetByName(ctx context.Context, name string) (*model.Store, error) {
+func (r *StoreRepository) GetByName(ctx context.Context, name string) (*model.StoreInfo, error) {
 	sqlcStore, err := r.queries.GetStoreByName(ctx, name)
 	if err != nil {
 		return nil, err
@@ -38,7 +38,7 @@ func (r *StoreRepository) GetByName(ctx context.Context, name string) (*model.St
 }
 
 // List 获取所有书库列表
-func (r *StoreRepository) List(ctx context.Context) ([]*model.Store, error) {
+func (r *StoreRepository) List(ctx context.Context) ([]*model.StoreInfo, error) {
 	sqlcStores, err := r.queries.ListStores(ctx)
 	if err != nil {
 		return nil, err
@@ -47,7 +47,7 @@ func (r *StoreRepository) List(ctx context.Context) ([]*model.Store, error) {
 }
 
 // GetWithBackend 获取书库及其后端信息
-func (r *StoreRepository) GetWithBackend(ctx context.Context, id int) (*model.Store, error) {
+func (r *StoreRepository) GetWithBackend(ctx context.Context, id int) (*model.StoreInfo, error) {
 	sqlcStoreWithBackend, err := r.queries.GetStoreWithBackend(ctx, int64(id))
 	if err != nil {
 		return nil, err
@@ -56,7 +56,7 @@ func (r *StoreRepository) GetWithBackend(ctx context.Context, id int) (*model.St
 }
 
 // ListWithBackend 获取所有书库及其后端信息
-func (r *StoreRepository) ListWithBackend(ctx context.Context) ([]*model.Store, error) {
+func (r *StoreRepository) ListWithBackend(ctx context.Context) ([]*model.StoreInfo, error) {
 	sqlcStoresWithBackend, err := r.queries.ListStoresWithBackend(ctx)
 	if err != nil {
 		return nil, err
@@ -65,14 +65,14 @@ func (r *StoreRepository) ListWithBackend(ctx context.Context) ([]*model.Store, 
 }
 
 // Create 创建新书库
-func (r *StoreRepository) Create(ctx context.Context, store *model.Store, fileBackendID int64) error {
+func (r *StoreRepository) Create(ctx context.Context, store *model.StoreInfo, fileBackendID int64) error {
 	params := model.ToSQLCCreateStoreParams(store, fileBackendID)
 	_, err := r.queries.CreateStore(ctx, params)
 	return err
 }
 
 // Update 更新书库信息
-func (r *StoreRepository) Update(ctx context.Context, store *model.Store, fileBackendID int64) error {
+func (r *StoreRepository) Update(ctx context.Context, store *model.StoreInfo, fileBackendID int64) error {
 	params := model.ToSQLCUpdateStoreParams(store, fileBackendID)
 	return r.queries.UpdateStore(ctx, params)
 }
@@ -90,7 +90,7 @@ func (r *StoreRepository) Count(ctx context.Context) (int64, error) {
 // CreateStoreWithBackend 创建书库及其文件后端（事务操作）
 // 注意：这里需要在实际使用时实现事务逻辑
 // 示例代码，实际使用时需要根据具体的数据库驱动实现事务
-func (r *StoreRepository) CreateStoreWithBackend(ctx context.Context, store *model.Store, fileBackend *model.FileBackend) error {
+func (r *StoreRepository) CreateStoreWithBackend(ctx context.Context, store *model.StoreInfo, fileBackend *model.FileBackend) error {
 	// 1. 创建文件后端
 	params := model.ToSQLCCreateFileBackendParams(fileBackend)
 	sqlcFileBackend, err := r.queries.CreateFileBackend(ctx, params)

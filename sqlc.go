@@ -40,7 +40,7 @@ func run() error {
 	}
 	log.Println(authors)
 
-	// create a Store
+	// create a StoreInfo
 	insertedStore, err := queries.CreateStore(ctx, sqlc.CreateStoreParams{
 		Name:          "Brian Kernighan",
 		Description:   sql.NullString{String: "The C Programming Language and The Go Programming Language", Valid: true},
@@ -51,7 +51,7 @@ func run() error {
 	}
 	log.Println(insertedStore)
 
-	// get the Store we just inserted
+	// get the StoreInfo we just inserted
 	fetchedStore, err := queries.GetStoreByID(ctx, insertedStore.ID)
 	if err != nil {
 		return err

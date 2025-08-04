@@ -2,10 +2,7 @@ package model
 
 import (
 	"errors"
-	"fmt"
-	"os"
 	"path"
-	"path/filepath"
 	"sort"
 	"strings"
 	"time"
@@ -13,38 +10,6 @@ import (
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/util/logger"
 )
-
-// GetParentBookID 通过子书籍 ID 获取所属书组 ID
-func GetParentBookID(childID string) (string, error) {
-	for _, value := range mapBooks.Range {
-		group := value.(*Book)
-		if group.Type != TypeBooksGroup {
-			continue // 只处理书组类型
-		}
-		for _, id := range group.ChildBooksID {
-			if id == childID {
-				fmt.Println("Found group for book ID:", childID, "Group ID:", group.BookID)
-				return group.BookID, nil
-			}
-		}
-	}
-	return "", errors.New("cannot find group, id=" + childID)
-}
-
-// ClearAllBookData  清空所有书籍与虚拟书组数据
-func ClearAllBookData() {
-	// Clear 会删除所有条目，产生一个空 Map。
-	mapBooks.Clear()
-	MainStore.SubStores.Clear()
-}
-
-// ResetBookGroupData 重置虚拟书库
-func ResetBookGroupData() {
-	MainStore.SubStores.Clear()
-	if err := MainStore.GenerateBookGroup(); err != nil {
-		logger.Infof("Error initializing main folder: %s", err)
-	}
-}
 
 // Book 定义书籍结构
 type Book struct {
@@ -57,6 +22,7 @@ func (b *Book) GetBookInfo() *BookInfo {
 	return &BookInfo{
 		Author:          b.Author,
 		BookID:          b.BookID,
+		Cover:           b.GuestCover(), // 使用 GuestCover 方法获取封面
 		BookStorePath:   b.BookStorePath,
 		ChildBooksNum:   b.ChildBooksNum,
 		ChildBooksID:    b.ChildBooksID,
@@ -105,46 +71,9 @@ func (b *Book) GuestCover() (cover MediaFileInfo) {
 	return cover // 返回找到的封面或空值
 }
 
-// CheckBookExist 查看内存中是否已经有了这本书，有了就返回 true，让调用者跳过
-func CheckBookExist(filePath string, bookType SupportFileType) bool {
-	if bookType == TypeDir || bookType == TypeBooksGroup {
-		return false
-	}
-	for _, value := range mapBooks.Range {
-		realBook := value.(*Book)
-		absFilePath, err := filepath.Abs(filePath)
-		if err != nil {
-			logger.Infof("Error getting absolute path: %v", err)
-			continue
-		}
-		if realBook.FilePath == absFilePath && realBook.Type == bookType {
-			return true
-		}
-	}
-	return false
-}
-
-// CheckAllBookFileExist 检查内存中的书的源文件是否存在，不存在就删掉
-func CheckAllBookFileExist() {
-	logger.Infof("Checking book files exist...")
-	var deletedBooks []string
-	// 遍历所有书籍
-	for _, value := range mapBooks.Range {
-		book := value.(*Book)
-		if _, err := os.Stat(book.FilePath); os.IsNotExist(err) {
-			deletedBooks = append(deletedBooks, book.FilePath)
-			DeleteBook(book.BookID)
-		}
-	}
-	// 删除不存在的书组
-	if len(deletedBooks) > 0 {
-		ResetBookGroupData()
-	}
-}
-
 // NewBook 初始化 Book，设置文件路径、书名、BookID 等
 func NewBook(filePath string, modified time.Time, fileSize int64, storePath string, depth int, bookType SupportFileType) (*Book, error) {
-	if CheckBookExist(filePath, bookType) {
+	if MainStores.CheckBookExist(filePath, bookType) {
 		return nil, errors.New("skip: " + filePath)
 	}
 	// 初始化书籍
@@ -163,8 +92,8 @@ func NewBook(filePath string, modified time.Time, fileSize int64, storePath stri
 	return book, nil
 }
 
-// NewbookinfoBookgroup   初始化BookGroup，设置文件路径、书名、BookID等等
-func NewbookinfoBookgroup(filePath string, modified time.Time, fileSize int64, storePath string, depth int, bookType SupportFileType) (*BookInfo, error) {
+// NewBookInfo   初始化BookGroup，设置文件路径、书名、BookID等等
+func NewBookInfo(filePath string, modified time.Time, fileSize int64, storePath string, depth int, bookType SupportFileType) (*BookInfo, error) {
 	// 初始化书籍
 	bookInfo := BookInfo{
 		Modified:      modified,
@@ -182,15 +111,6 @@ func NewbookinfoBookgroup(filePath string, modified time.Time, fileSize int64, s
 // setPageNum 设置书籍的页数
 func (b *Book) setPageNum() {
 	b.PageCount = len(b.Pages.Images)
-}
-
-// RestoreDatabaseBooks 从数据库中读取的书籍信息，放到内存中
-func RestoreDatabaseBooks(list []*Book) {
-	for _, b := range list {
-		if b.Type == TypeZip || b.Type == TypeRar || b.Type == TypeCbz || b.Type == TypeCbr || b.Type == TypeTar || b.Type == TypeEpub {
-			mapBooks.Store(b.BookID, b)
-		}
-	}
 }
 
 // SortPages 对页面进行排序
@@ -239,35 +159,6 @@ func (b *Book) SortPagesByImageList(imageList []string) {
 	b.Pages.Images = reSortList
 }
 
-// getShortBookID 生成短的 BookID，避免冲突
-func getShortBookID(fullID string, minLength int) string {
-	if len(fullID) <= minLength {
-		logger.Infof("Cannot shorten ID: %s", fullID)
-		return fullID
-	}
-	shortID := fullID[:minLength]
-	add := 0
-	for {
-		conflict := false
-		for _, value := range mapBooks.Range {
-			b := value.(*Book)
-			if b.BookID == shortID {
-				conflict = true
-				break
-			}
-		}
-		if !conflict {
-			break
-		}
-		add++
-		if minLength+add > len(fullID) {
-			break
-		}
-		shortID = fullID[:minLength+add]
-	}
-	return shortID
-}
-
 // GetBookID 获取书籍的 ID
 func (b *Book) GetBookID() string {
 	if b.BookID == "" {
@@ -311,24 +202,5 @@ func analyzePageImages(p *MediaFileInfo, bookPath string) {
 		p.ImgType = "DoublePage"
 	} else {
 		p.ImgType = "SinglePage"
-	}
-}
-
-// ClearTempFilesALL 清理所有缓存的临时图片
-func ClearTempFilesALL(debug bool, cacheFilePath string) {
-	for _, value := range mapBooks.Range {
-		book := value.(*Book)
-		clearTempFilesOne(debug, cacheFilePath, book)
-	}
-}
-
-// clearTempFilesOne 清理某一本书的缓存
-func clearTempFilesOne(debug bool, cacheFilePath string, book *Book) {
-	cachePath := path.Join(cacheFilePath, book.GetBookID())
-	err := os.RemoveAll(cachePath)
-	if err != nil {
-		logger.Infof("Error clearing temp files: %s", cachePath)
-	} else if debug {
-		logger.Infof("Cleared temp files: %s", cachePath)
 	}
 }

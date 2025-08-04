@@ -50,7 +50,7 @@ func Smb(scanOption Option) (newBookList []*model.Book, err error) {
 	//	//对于目录中的每一个项（无论是文件还是目录），指定的函数都会被调用。
 	//	func(path string, d iofs.DirEntry, err error) error {
 	//		//这个函数接收三个参数：path（项的路径），dialer（一个DirEntry对象，表示文件或目录的信息），和err（如果在访问该项时出现错误）
-	//		logger.Info("smb hint： smb://"+scanOption.Stores[0].Host+"/"+scanOption.Stores[0].ShareName+"/test/"+path, d.IsDir(), err)
+	//		logger.Info("smb hint： smb://"+scanOption.StoreGroup[0].Host+"/"+scanOption.StoreGroup[0].ShareName+"/test/"+path, d.IsDir(), err)
 	//		return nil
 	//	})
 	// if err != nil {
@@ -65,7 +65,7 @@ func Smb(scanOption Option) (newBookList []*model.Book, err error) {
 		func(walkPath string, fileInfo iofs.DirEntry, err error) error {
 			smbFilePath := "smb://" + scanOption.Cfg.GetStores()[0].Smb.Host + "/" + scanOption.Cfg.GetStores()[0].Smb.ShareName + "/" + walkPath
 
-			for _, p := range model.GetArchiveBooks() {
+			for _, p := range model.MainStores.GetArchiveBooks() {
 				if smbFilePath == p.FilePath {
 					// 跳过已扫描文件
 					logger.Infof(locale.GetString("found_in_bookstore")+"%path", walkPath)
@@ -115,7 +115,7 @@ func Smb(scanOption Option) (newBookList []*model.Book, err error) {
 			// // 如果是文件夹
 			// if fileInfo.IsDir() {
 			//	// 得到书籍文件数据
-			//	getBook, err := smbScanDir(walkPath, scanOption.Stores[0].ShareName, depth, scanOption)
+			//	getBook, err := smbScanDir(walkPath, scanOption.StoreGroup[0].ShareName, depth, scanOption)
 			//	if err != nil {
 			//		logger.Infof("%e", err)
 			//		return nil

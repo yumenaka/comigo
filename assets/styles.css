@@ -86,7 +86,7 @@ body {
 }
 
 /* ------------------------------------------------ */
-/* css 主题设置 from: https://github.com/saadeghi/daisyui/blob/master/src/theming/themes.js TODO：细节优化  */
+/* css 主题设置 from: https://github.com/saadeghi/daisyui/blob/master/src/theming/themes.js */
 /* ------------------------------------------------ */
 @layer base {
   :root {

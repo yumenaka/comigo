@@ -14,8 +14,8 @@ import (
 func ShowQRCode() {
 	// 如果只有一本书，URL 需要附加的参数
 	etcStr := ""
-	if model.GetBooksNumber() == 1 {
-		bookList, err := model.GetAllBookInfoList("name")
+	if model.MainStores.GetBooksNumber() == 1 {
+		bookList, err := model.MainStores.GetAllBookInfoList("name")
 		if err != nil {
 			logger.Infof("Error getting book list: %s", err)
 			return

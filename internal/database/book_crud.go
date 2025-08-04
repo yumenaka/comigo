@@ -270,5 +270,3 @@ func GetBooksFromDatabase() (list []*model.Book, err error) {
 	}
 	return list, err
 }
-
-// todo： 根据扫描完成的书籍数据，清理本地数据库当中不存在的书籍

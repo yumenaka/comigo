@@ -8,7 +8,7 @@ import (
 )
 
 // 需要两种数据存储库：
-// 存储扫描后书籍数据的ram map集合或数据库，本程序叫 Store
+// 存储扫描后书籍数据的ram map集合或数据库，本程序叫 StoreInfo
 // 存储书籍文件的文件系统或远程存储服务，本程序叫 存储库 Repositories
 
 // FileBackendType 文件存储类型

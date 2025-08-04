@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"strconv"
-
 	"github.com/yumenaka/comigo/util/scan"
 
 	"github.com/spf13/viper"
@@ -24,8 +22,14 @@ func ScanStore(args []string) {
 		if err != nil {
 			logger.Infof("%s", err)
 		} else {
-			model.RestoreDatabaseBooks(books)
-			logger.Infof("从数据库中读取书籍信息,一共有 %d 本书", strconv.Itoa(len(books)))
+			for _, book := range books {
+				err = model.MainStores.AddBook(book, book.BookStorePath, config.GetMinImageNum())
+				if err != nil {
+					logger.Infof("AddBook error: %s", err)
+				} else {
+					logger.Infof("Book %s added from database", book.BookID)
+				}
+			}
 		}
 	}
 	// 2、设置默认书库路径：扫描CMD指定的路径，或添加当前文件夹为默认路径。
