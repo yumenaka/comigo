@@ -107,5 +107,5 @@ func ReScanPath(path string, reScanFile bool) {
 		return
 	}
 	scan.AddBooksToStore(books, path, config.GetMinImageNum())
-	model.ResetBookGroupData()
+	model.MainStores.ResetBookGroupData()
 }

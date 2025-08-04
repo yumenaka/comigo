@@ -32,13 +32,13 @@ type BookRepositoryInterface interface {
 }
 
 type StoreRepositoryInterface interface {
-	GetByID(ctx context.Context, id int) (*model.Store, error)
-	GetByName(ctx context.Context, name string) (*model.Store, error)
-	List(ctx context.Context) ([]*model.Store, error)
-	GetWithBackend(ctx context.Context, id int) (*model.Store, error)
-	ListWithBackend(ctx context.Context) ([]*model.Store, error)
-	Create(ctx context.Context, store *model.Store) error
-	Update(ctx context.Context, store *model.Store) error
+	GetByID(ctx context.Context, id int) (*model.StoreInfo, error)
+	GetByName(ctx context.Context, name string) (*model.StoreInfo, error)
+	List(ctx context.Context) ([]*model.StoreInfo, error)
+	GetWithBackend(ctx context.Context, id int) (*model.StoreInfo, error)
+	ListWithBackend(ctx context.Context) ([]*model.StoreInfo, error)
+	Create(ctx context.Context, store *model.StoreInfo) error
+	Update(ctx context.Context, store *model.StoreInfo) error
 	Delete(ctx context.Context, id int) error
 	Count(ctx context.Context) (int64, error)
 	CountByType(ctx context.Context, storeType string) (int64, error)

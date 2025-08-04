@@ -80,7 +80,7 @@ func GetFile(c echo.Context) error {
 	}
 
 	// 获取书籍信息
-	bookByID, err := model.GetBookByID(id, "")
+	bookByID, err := model.MainStores.GetBookByID(id, "")
 	if err != nil {
 		logger.Infof("GetBookByID error: %s", err)
 		return c.JSON(http.StatusNotFound, map[string]string{"error": "Book not found"})

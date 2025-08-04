@@ -23,10 +23,10 @@ func GetBook(c echo.Context) error {
 	}
 	id := c.QueryParam("id")
 
-	model.CheckAllBookFileExist()
+	model.MainStores.CheckAllBookFileExist()
 
 	if author != "" {
-		bookList, err := model.GetBookByAuthor(author, sortBy)
+		bookList, err := model.MainStores.GetBookByAuthor(author, sortBy)
 		if err != nil {
 			logger.Infof("%s", err)
 		}
@@ -34,7 +34,7 @@ func GetBook(c echo.Context) error {
 	}
 
 	if id != "" {
-		b, err := model.GetBookByID(id, sortBy)
+		b, err := model.MainStores.GetBookByID(id, sortBy)
 		if err != nil {
 			logger.Infof("%s", err)
 			return c.JSON(http.StatusBadRequest, "id not found")

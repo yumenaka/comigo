@@ -32,10 +32,4 @@ func (SinglePageInfo) Fields() []ent.Field {
 // Edges of the SinglePageInfo.
 func (SinglePageInfo) Edges() []ent.Edge {
 	return nil
-	// TODO: 如何在这里加上这个关系？ https://entgo.io/zh/docs/tutorial-todo-crud
-	//return []ent.Edge{
-	//	edge.From("BookID", Book.Type).
-	//		Ref("Pages").
-	//		Unique(),
-	//}
 }

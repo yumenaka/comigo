@@ -1,7 +1,6 @@
 package model
 
 import (
-	"errors"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -52,7 +51,7 @@ func (b *BookInfo) initBookID() *BookInfo {
 	// 3. 可以通过在任何文本编辑器和浏览器地址栏中双击鼠标来完全选择
 	// 4. 紧凑，生成的字符串比 Base32 短
 	b62 := base62.EncodeToString([]byte(util.Md5string(util.Md5string(tempStr))))
-	b.BookID = getShortBookID(b62, 7)
+	b.BookID = MainStores.GetShortBookID(b62, 7)
 	return b
 }
 
@@ -184,153 +183,18 @@ func (b *BookInfo) ShortName() string {
 	return string(runes[:15]) + "…"
 }
 
-// GetBookInfoListByDepth 根据深度获取书籍列表
-func GetBookInfoListByDepth(depth int, sortBy string) (*BookInfoList, error) {
-	var infoList BookInfoList
-	// 首先加上所有真实的书籍
-	for _, bookValue := range mapBooks.Range {
-		b := bookValue.(*Book)
-		if b.Depth == depth {
-			info := b.GetBookInfo()
-			infoList.BookInfos = append(infoList.BookInfos, *info)
-		}
-	}
-	// 接下来还要加上扫描生成出来的书籍组
-	for _, folderValue := range MainStore.SubStores.Range {
-		bs := folderValue.(*subStore)
-		for _, groupValue := range bs.BookGroupMap.Range {
-			group := groupValue.(*BookInfo)
-			if group.Depth == depth {
-				infoList.BookInfos = append(infoList.BookInfos, *group)
-			}
-		}
-	}
-	if len(infoList.BookInfos) > 0 {
-		infoList.SortBooks(sortBy)
-		return &infoList, nil
-	}
-	return nil, errors.New("error: cannot find bookshelf in GetBookInfoListByDepth")
-}
-
-func GetBookInfoListByMaxDepth(depth int, sortBy string) (*BookInfoList, error) {
-	var infoList BookInfoList
-	// 首先加上所有真实的书籍
-	for _, bookValue := range mapBooks.Range {
-		b := bookValue.(*Book)
-		if b.Depth <= depth {
-			info := b.GetBookInfo()
-			infoList.BookInfos = append(infoList.BookInfos, *info)
-		}
-	}
-	// 扫描生成的书籍组
-	for _, folderValue := range MainStore.SubStores.Range {
-		bs := folderValue.(*subStore)
-		for _, groupValue := range bs.BookGroupMap.Range {
-			group := groupValue.(*BookInfo)
-			if group.Depth <= depth {
-				infoList.BookInfos = append(infoList.BookInfos, *group)
-			}
-		}
-	}
-	if len(infoList.BookInfos) > 0 {
-		infoList.SortBooks(sortBy)
-		return &infoList, nil
-	}
-	return nil, errors.New("error: cannot find bookshelf in GetBookInfoListByMaxDepth")
-}
-
-// TopOfShelfInfo 获取顶层书架信息
-func TopOfShelfInfo(sortBy string) (*BookInfoList, error) {
-	// if len(*LocalStores) == 0 {
-	//	return nil, errors.New("error: cannot find book in TopOfShelfInfo")
-	// }
-	// if len(*LocalStores) > 1 {
-	//	// 有多个书库
-	//	var infoList BookInfoList
-	//	for _, localPath := range *LocalStores {
-	//		for _, groupValue := range mapBookGroup.Range {
-	//			group := groupValue.(*BookInfo)
-	//			if group.BookInfo.ParentFolder == localPath {
-	//				infoList.BookInfos = append(infoList.BookInfos, group.BookInfo)
-	//			}
-	//		}
-	//	}
-	//	if len(infoList.BookInfos) > 0 {
-	//		infoList.SortBooks(sortBy)
-	//		return &infoList, nil
-	//	}
-	//	return nil, errors.New("error: cannot find book in TopOfShelfInfo")
-	// }
-	// 显示顶层书库的书籍
-	var infoList BookInfoList
-	for _, bookValue := range mapBooks.Range {
-		b := bookValue.(*Book)
-		if b.Depth == 0 {
-			info := b.GetBookInfo()
-			info.Cover = info.GetCover() // 设置封面图(为了兼容老版前端)TODO：升级新前端，去掉这部分
-			infoList.BookInfos = append(infoList.BookInfos, *info)
-		}
-	}
-	if len(infoList.BookInfos) > 0 {
-		infoList.SortBooks(sortBy)
-		return &infoList, nil
-	}
-	// 没找到任何书
-	return nil, errors.New("error: cannot find book in TopOfShelfInfo")
-}
-
-// GetChildBooksInfo 根据 ID 获取书籍列表
-func GetChildBooksInfo(BookID string, sortBy string) (*BookInfoList, error) {
-	var infoList BookInfoList
-	groupValue, ok := mapBooks.Load(BookID)
-	if ok {
-		tempGroup := groupValue.(*Book)
-		for _, childID := range tempGroup.ChildBooksID {
-			b, err := GetBookByID(childID, "")
-			if err != nil {
-				return nil, errors.New("GetParentBook: cannot find book by childID=" + childID)
-			}
-			info := b.GetBookInfo()
-			infoList.BookInfos = append(infoList.BookInfos, *info)
-		}
-		if len(infoList.BookInfos) > 0 {
-			infoList.SortBooks(sortBy)
-			return &infoList, nil
-		}
-	}
-	return nil, errors.New("cannot find child books info，BookID：" + BookID)
-}
-
-// GetBookInfoListByParentFolder 根据父文件夹获取书籍列表
-func GetBookInfoListByParentFolder(parentFolder string, sortBy string) (*BookInfoList, error) {
-	var infoList BookInfoList
-	for _, bookValue := range mapBooks.Range {
-		b := bookValue.(*Book)
-		if b.ParentFolder == parentFolder {
-			info := b.GetBookInfo()
-			info.Cover = info.GetCover() // 设置封面图(为了兼容老版前端) TODO：升级前端，去掉这部分
-			infoList.BookInfos = append(infoList.BookInfos, *info)
-		}
-	}
-	if len(infoList.BookInfos) > 0 {
-		infoList.SortBooks(sortBy)
-		return &infoList, nil
-	}
-	return nil, errors.New("cannot find book, parentFolder=" + parentFolder)
-}
-
 // GetCover 获取封面
 func (b *BookInfo) GetCover() MediaFileInfo {
 	switch b.Type {
 	// 书籍类型为书组的时候，遍历所有子书籍，然后获取第一个子书籍的封面
 	case TypeBooksGroup:
-		bookGroup, err := GetBookByID(b.BookID, "")
+		bookGroup, err := MainStores.GetBookByID(b.BookID, "")
 		if err != nil {
 			logger.Infof("Error getting book group: %s", err)
 			return MediaFileInfo{Name: "unknown.png", Url: "/images/unknown.png"}
 		}
 		for _, childID := range bookGroup.ChildBooksID {
-			book, err := GetBookByID(childID, "modify_time")
+			book, err := MainStores.GetBookByID(childID, "modify_time")
 			if err != nil {
 				return MediaFileInfo{Name: "unknown.png", Url: "/images/unknown.png"}
 			}
@@ -339,7 +203,7 @@ func (b *BookInfo) GetCover() MediaFileInfo {
 			return info.GetCover()
 		}
 	case TypeDir, TypeZip, TypeRar, TypeCbz, TypeCbr, TypeTar, TypeEpub:
-		tempBook, err := GetBookByID(b.BookID, "")
+		tempBook, err := MainStores.GetBookByID(b.BookID, "")
 		if err != nil || len(tempBook.Pages.Images) == 0 {
 			return MediaFileInfo{Name: "unknown.png", Url: "/images/unknown.png"}
 		}

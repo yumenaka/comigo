@@ -194,12 +194,12 @@ func ToSQLCUpdateFileBackendParams(fileBackend *FileBackend, id int64) sqlc.Upda
 	}
 }
 
-// ==================== Store 相关转换 ====================
+// ==================== StoreInfo 相关转换 ====================
 
-// FromSQLCStore 将sqlc.Store转换为model.Store
-func FromSQLCStore(sqlcStore sqlc.Store) *Store {
+// FromSQLCStore 将sqlc.Store转换为model.StoreInfo
+func FromSQLCStore(sqlcStore sqlc.Store) *StoreInfo {
 	return nil // TODO:这里需要根据实际情况实现转换逻辑
-	// return &Store{
+	// return &StoreInfo{
 	// 	ID:          int(sqlcStore.ID),
 	// 	Name:        sqlcStore.Name,
 	// 	Description: sqlcStore.Description.String,
@@ -210,7 +210,7 @@ func FromSQLCStore(sqlcStore sqlc.Store) *Store {
 }
 
 // ToSQLCCreateStoreParams 将model.Store转换为sqlc.CreateStoreParams
-func ToSQLCCreateStoreParams(store *Store, fileBackendID int64) sqlc.CreateStoreParams {
+func ToSQLCCreateStoreParams(store *StoreInfo, fileBackendID int64) sqlc.CreateStoreParams {
 	// TODO:这里需要根据实际情况实现转换逻辑
 	// return sqlc.CreateStoreParams{
 	// }
@@ -222,7 +222,7 @@ func ToSQLCCreateStoreParams(store *Store, fileBackendID int64) sqlc.CreateStore
 }
 
 // ToSQLCUpdateStoreParams 将model.Store转换为sqlc.UpdateStoreParams
-func ToSQLCUpdateStoreParams(store *Store, fileBackendID int64) sqlc.UpdateStoreParams {
+func ToSQLCUpdateStoreParams(store *StoreInfo, fileBackendID int64) sqlc.UpdateStoreParams {
 	return sqlc.UpdateStoreParams{
 		// Name:          store.Name,// TODO:这里需要根据实际情况实现转换逻辑
 		// Description:   sql.NullString{String: store.Description, Valid: store.Description != ""},
@@ -260,9 +260,9 @@ func FromSQLCFileBackends(sqlcFileBackends []sqlc.FileBackend) []*FileBackend {
 	return fileBackends
 }
 
-// FromSQLCStores 批量转换sqlc.Store为model.Store
-func FromSQLCStores(sqlcStores []sqlc.Store) []*Store {
-	stores := make([]*Store, len(sqlcStores))
+// FromSQLCStores 批量转换sqlc.Store为model.StoreInfo
+func FromSQLCStores(sqlcStores []sqlc.Store) []*StoreInfo {
+	stores := make([]*StoreInfo, len(sqlcStores))
 	for i, sqlcStore := range sqlcStores {
 		stores[i] = FromSQLCStore(sqlcStore)
 	}
@@ -271,9 +271,9 @@ func FromSQLCStores(sqlcStores []sqlc.Store) []*Store {
 
 // ==================== 关联查询结果转换 ====================
 
-// FromSQLCStoreWithBackendRow 将sqlc.GetStoreWithBackendRow转换为model.Store
-func FromSQLCStoreWithBackendRow(row sqlc.GetStoreWithBackendRow) *Store {
-	store := &Store{
+// FromSQLCStoreWithBackendRow 将sqlc.GetStoreWithBackendRow转换为model.StoreInfo
+func FromSQLCStoreWithBackendRow(row sqlc.GetStoreWithBackendRow) *StoreInfo {
+	store := &StoreInfo{
 		// ID:          int(row.ID),// TODO:这里需要根据实际情况实现转换逻辑
 		// Name:        row.Name,// TODO:这里需要根据实际情况实现转换逻辑
 		// Description: row.Description.String,
@@ -294,9 +294,9 @@ func FromSQLCStoreWithBackendRow(row sqlc.GetStoreWithBackendRow) *Store {
 	return store
 }
 
-// FromSQLCListStoresWithBackendRow 批量转换sqlc.ListStoresWithBackendRow为model.Store
-func FromSQLCListStoresWithBackendRow(rows []sqlc.ListStoresWithBackendRow) []*Store {
-	stores := make([]*Store, len(rows))
+// FromSQLCListStoresWithBackendRow 批量转换sqlc.ListStoresWithBackendRow为model.StoreInfo
+func FromSQLCListStoresWithBackendRow(rows []sqlc.ListStoresWithBackendRow) []*StoreInfo {
+	stores := make([]*StoreInfo, len(rows))
 	for i, row := range rows {
 		stores[i] = FromSQLCStoreWithBackendRow(sqlc.GetStoreWithBackendRow(row))
 	}

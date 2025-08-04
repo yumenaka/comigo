@@ -38,7 +38,7 @@ func GetBookListHandler(c echo.Context) error {
 	// 如果没有指定书籍ID，获取顶层书架信息。
 	if bookID == "" {
 		var err error
-		state.NowBookList, err = model.TopOfShelfInfo(sortBy)
+		state.NowBookList, err = model.MainStores.TopOfShelfInfo(sortBy)
 		if err != nil {
 			logger.Infof("TopOfShelfInfo: %v", err)
 			// TODO: 没有图书的情况（上传压缩包或远程下载示例漫画）
@@ -47,7 +47,7 @@ func GetBookListHandler(c echo.Context) error {
 	// 如果指定了书籍ID，获取子书架信息。
 	if bookID != "" {
 		var err error
-		state.NowBookList, err = model.GetChildBooksInfo(bookID, sortBy)
+		state.NowBookList, err = model.MainStores.GetChildBooksInfo(bookID, sortBy)
 		if err != nil {
 			logger.Infof("GetBookShelf: %v", err)
 		}
