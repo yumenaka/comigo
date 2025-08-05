@@ -8,12 +8,12 @@ import (
 )
 
 type BookRepositoryInterface interface {
-	GetByID(ctx context.Context, bookID string) (*model.Book, error)
-	GetByFilePath(ctx context.Context, filePath string) (*model.Book, error)
-	List(ctx context.Context) ([]*model.Book, error)
-	ListByType(ctx context.Context, bookType string) ([]*model.Book, error)
-	ListByStorePath(ctx context.Context, storePath string) ([]*model.Book, error)
-	SearchByTitle(ctx context.Context, title string) ([]*model.Book, error)
+	GetBookByID(ctx context.Context, bookID string) (*model.Book, error)
+	GetBookByFilePath(ctx context.Context, filePath string) (*model.Book, error)
+	ListBooks(ctx context.Context) ([]*model.Book, error)
+	ListBooksByType(ctx context.Context, bookType string) ([]*model.Book, error)
+	ListBooksByStorePath(ctx context.Context, storePath string) ([]*model.Book, error)
+	SearchBooksByTitle(ctx context.Context, title string) ([]*model.Book, error)
 	Create(ctx context.Context, book *model.Book) error
 	Update(ctx context.Context, book *model.Book) error
 	UpdateReadPercent(ctx context.Context, bookID string, readPercent float64) error
@@ -61,7 +61,7 @@ func NewBookService(bookRepo BookRepositoryInterface) *BookService {
 // GetBook 获取书籍信息（包含业务逻辑）
 func (s *BookService) GetBook(ctx context.Context, bookID string) (*model.Book, error) {
 	// 1. 从数据库获取书籍基本信息
-	book, err := s.bookRepo.GetByID(ctx, bookID)
+	book, err := s.bookRepo.GetBookByID(ctx, bookID)
 	if err != nil {
 		return nil, fmt.Errorf("获取书籍失败: %w", err)
 	}
@@ -94,7 +94,7 @@ func (s *BookService) CreateBook(ctx context.Context, book *model.Book) error {
 	}
 
 	// 2. 检查书籍是否已存在
-	existingBook, err := s.bookRepo.GetByID(ctx, book.BookID)
+	existingBook, err := s.bookRepo.GetBookByID(ctx, book.BookID)
 	if err == nil && existingBook != nil {
 		return fmt.Errorf("书籍已存在: %s", book.BookID)
 	}
@@ -124,7 +124,7 @@ func (s *BookService) UpdateReadProgress(ctx context.Context, bookID string, rea
 	}
 
 	// 2. 检查书籍是否存在
-	_, err := s.bookRepo.GetByID(ctx, bookID)
+	_, err := s.bookRepo.GetBookByID(ctx, bookID)
 	if err != nil {
 		return fmt.Errorf("书籍不存在: %w", err)
 	}
@@ -151,7 +151,7 @@ func (s *BookService) SearchBooks(ctx context.Context, title string) ([]*model.B
 	}
 
 	// 2. 执行搜索
-	books, err := s.bookRepo.SearchByTitle(ctx, title)
+	books, err := s.bookRepo.SearchBooksByTitle(ctx, title)
 	if err != nil {
 		return nil, fmt.Errorf("搜索书籍失败: %w", err)
 	}

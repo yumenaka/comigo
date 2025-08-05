@@ -234,10 +234,15 @@ func ToSQLCUpdateStoreParams(store *StoreInfo, fileBackendID int64) sqlc.UpdateS
 // ==================== 批量转换函数 ====================
 
 // FromSQLCBooks 批量转换sqlc.Book为model.Book
-func FromSQLCBooks(sqlcBooks []sqlc.Book) []*Book {
+func FromSQLCBooks(sqlcBooks []sqlc.Book, pagesMap map[string][]MediaFileInfo) []*Book {
 	books := make([]*Book, len(sqlcBooks))
 	for i, sqlcBook := range sqlcBooks {
 		books[i] = FromSQLCBook(sqlcBook)
+		if pages, exists := pagesMap[sqlcBook.BookID]; exists {
+			books[i].Pages.Images = pages
+		} else {
+			books[i].Pages.Images = []MediaFileInfo{} // 确保即使没有页面也不会出错
+		}
 	}
 	return books
 }

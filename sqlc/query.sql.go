@@ -666,7 +666,7 @@ SELECT id, title, book_id, owner, file_path, book_store_path, type, child_books_
 ORDER BY modified_time DESC
 `
 
-// List all books
+// ListBooks all books
 func (q *Queries) ListBooks(ctx context.Context) ([]Book, error) {
 	rows, err := q.db.QueryContext(ctx, listBooks)
 	if err != nil {
@@ -721,7 +721,7 @@ WHERE book_store_path = ?
 ORDER BY modified_time DESC
 `
 
-// List books by store path
+// ListBooks books by store path
 func (q *Queries) ListBooksByStorePath(ctx context.Context, bookStorePath string) ([]Book, error) {
 	rows, err := q.db.QueryContext(ctx, listBooksByStorePath, bookStorePath)
 	if err != nil {
@@ -776,7 +776,7 @@ WHERE type = ?
 ORDER BY modified_time DESC
 `
 
-// List books by type
+// ListBooks books by type
 func (q *Queries) ListBooksByType(ctx context.Context, type_ string) ([]Book, error) {
 	rows, err := q.db.QueryContext(ctx, listBooksByType, type_)
 	if err != nil {
@@ -830,7 +830,7 @@ SELECT id, type, url, server_host, server_port, need_auth, auth_username, auth_p
 ORDER BY created_at DESC
 `
 
-// List all file backends
+// ListBooks all file backends
 func (q *Queries) ListFileBackends(ctx context.Context) ([]FileBackend, error) {
 	rows, err := q.db.QueryContext(ctx, listFileBackends)
 	if err != nil {
@@ -873,7 +873,7 @@ WHERE type = ?
 ORDER BY created_at DESC
 `
 
-// List file backends by type
+// ListBooks file backends by type
 func (q *Queries) ListFileBackendsByType(ctx context.Context, type_ int64) ([]FileBackend, error) {
 	rows, err := q.db.QueryContext(ctx, listFileBackendsByType, type_)
 	if err != nil {
@@ -915,7 +915,7 @@ SELECT id, name, description, file_backend_id, created_at, updated_at FROM store
 ORDER BY created_at DESC
 `
 
-// List all stores
+// ListBooks all stores
 func (q *Queries) ListStores(ctx context.Context) ([]Store, error) {
 	rows, err := q.db.QueryContext(ctx, listStores)
 	if err != nil {
@@ -974,7 +974,7 @@ type ListStoresWithBackendRow struct {
 	SmbPath      sql.NullString
 }
 
-// List stores with file backend information
+// ListBooks stores with file backend information
 func (q *Queries) ListStoresWithBackend(ctx context.Context) ([]ListStoresWithBackendRow, error) {
 	rows, err := q.db.QueryContext(ctx, listStoresWithBackend)
 	if err != nil {

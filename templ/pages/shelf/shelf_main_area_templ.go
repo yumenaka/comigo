@@ -60,7 +60,7 @@ func MainArea(c echo.Context) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = settings.StringArrayConfig("LocalStores", state.ServerConfig.LocalStores, "LocalStores_Description", false).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = settings.StringArrayConfig("LocalStores", state.ServerConfig.StoreUrls, "LocalStores_Description", false).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
