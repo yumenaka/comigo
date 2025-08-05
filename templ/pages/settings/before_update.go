@@ -49,7 +49,7 @@ func openBrowserIfNeeded(oldConfig *config.Config, newConfig *config.Config) {
 // checkServerActions 检查旧的和新的配置是否需要更新，并返回需要重启网页服务器、重新扫描整个书库、重新扫描所有文件的布尔值
 func checkServerActions(oldConfig *config.Config, newConfig *config.Config) (reScanStores bool, reStartWebServer bool) {
 	// 下面这些值修改的时候，需要扫描整个书库、或重新扫描所有文件
-	if !reflect.DeepEqual(oldConfig.LocalStores, newConfig.LocalStores) {
+	if !reflect.DeepEqual(oldConfig.StoreUrls, newConfig.StoreUrls) {
 		reScanStores = true
 	}
 	if oldConfig.MaxScanDepth != newConfig.MaxScanDepth {

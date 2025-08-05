@@ -21,7 +21,7 @@ func GetConfigToml(c echo.Context) error {
 	tempConfig.LogFilePath = ""
 	tempConfig.OpenBrowser = false
 	tempConfig.EnableDatabase = true
-	tempConfig.LocalStores = []string{"C:\\test\\Comic", "D:\\some_path\\book", "/home/user/download"}
+	tempConfig.StoreUrls = []string{"C:\\test\\Comic", "D:\\some_path\\book", "/home/user/download"}
 	tempConfig.Username = "You_can_change_this_username"
 	tempConfig.Password = "Some_Secret-.PasswordNot_guessable"
 

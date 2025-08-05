@@ -3,13 +3,10 @@ package scan
 import (
 	"path"
 	"strings"
-
-	"github.com/yumenaka/comigo/config/stores"
 )
 
 type ConfigInterface interface {
-	GetLocalStores() []string
-	GetStores() []stores.Store
+	GetStoreUrls() []string
 	GetMaxScanDepth() int
 	GetMinImageNum() int
 	GetTimeoutLimitForScan() int

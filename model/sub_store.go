@@ -49,7 +49,7 @@ func (subStore *ChildStore) GenerateBookGroup() error {
 	}
 
 	// 从深往浅遍历
-	// 如果有几本书同时有同一个父文件夹，那么应该【新建]一本书(组)，并加入到depth-1层里面
+	// 如果有几本书同时有同一个父文件夹，那么应该【新建】一本书(组)，并加入到depth-1层里面
 	for depth := maxDepth; depth >= 0; depth-- {
 		// 用父文件夹做key的parentMap，后面遍历用
 		parentTempMap := make(map[string][]*Book)
@@ -91,7 +91,7 @@ func (subStore *ChildStore) GenerateBookGroup() error {
 			}
 			// 检测是否已经生成并添加过
 			Added := false
-			for _, bookGroup := range MainStores.List() {
+			for _, bookGroup := range MainStores.ListBooks() {
 				if bookGroup.Type == TypeBooksGroup {
 					continue // 只处理书籍组类型
 				}

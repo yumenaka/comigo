@@ -42,7 +42,7 @@ func tab_book() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = StringArrayConfig("LocalStores", state.ServerConfig.LocalStores, "LocalStores_Description", false).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = StringArrayConfig("LocalStores", state.ServerConfig.StoreUrls, "LocalStores_Description", false).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

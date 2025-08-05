@@ -11,7 +11,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yumenaka/comigo/config/stores"
 	"github.com/yumenaka/comigo/util"
 	"github.com/yumenaka/comigo/util/logger"
 )
@@ -34,7 +33,7 @@ type Config struct {
 	GenerateMetaData       bool            `json:"GenerateMetaData" toml:"GenerateMetaData" comment:"生成书籍元数据"`
 	Host                   string          `json:"Host" comment:"自定义二维码显示的主机名"`
 	KeyFile                string          `json:"KeyFile" comment:"TLS/SSL key文件路径 (default: ~/.config/.comigo/key.key)"`
-	LocalStores            []string        `json:"LocalStores" comment:"本地书库文件夹"`
+	StoreUrls              []string        `json:"StoreUrls" comment:"本地书库路径列表，支持多个路径。可以是本地文件夹或网络书库地址。"` // 书库地址列表
 	LogFileName            string          `json:"LogFileName" comment:"Log文件名"`
 	LogFilePath            string          `json:"LogFilePath" comment:"Log文件的保存位置"`
 	LogToFile              bool            `json:"LogToFile" comment:"是否保存程序Log到本地文件。默认不保存。"`
@@ -44,7 +43,6 @@ type Config struct {
 	Password               string          `json:"Password" comment:"登录界面需要的密码。"`
 	Port                   int             `json:"Port" comment:"Comigo设置文件(config.toml)，可保存在：HomeDirectory（$HOME/.config/comigo/config.toml）、WorkingDirectory（当前执行目录）、ProgramDirectory（程序所在目录）下。可用“comi --config-save”生成本文件\n网页服务端口"`
 	PrintAllPossibleQRCode bool            `json:"PrintAllPossibleQRCode" comment:"扫描完成后，打印所有可能的阅读链接二维码"`
-	Stores                 []stores.Store  `json:"BookStores" toml:"-" comment:"书库设置"`
 	SupportFileType        []string        `json:"SupportFileType" comment:"支持的书籍压缩包后缀"`
 	SupportMediaType       []string        `json:"SupportMediaType" comment:"扫描压缩包时，用于统计图片数量的图片文件后缀"`
 	SupportTemplateFile    []string        `json:"SupportTemplateFile" comment:"支持的模板文件类型，默认为html"`
@@ -57,12 +55,8 @@ type Config struct {
 	ZipFileTextEncoding    string          `json:"ZipFileTextEncoding" comment:"非utf-8编码的ZIP文件，尝试用什么编码解析，默认GBK"`
 }
 
-func (c *Config) GetLocalStores() []string {
-	return c.LocalStores
-}
-
-func (c *Config) GetStores() []stores.Store {
-	return c.Stores
+func (c *Config) GetStoreUrls() []string {
+	return c.StoreUrls
 }
 
 func (c *Config) GetMaxScanDepth() int {
@@ -110,10 +104,10 @@ func (c *Config) GetDebug() bool {
 }
 
 func (c *Config) GetTopStoreName() string {
-	if len(c.LocalStores) == 0 {
+	if len(c.StoreUrls) == 0 {
 		return "未设置书库"
 	}
-	return strings.Join(c.LocalStores, ", ")
+	return strings.Join(c.StoreUrls, ", ")
 }
 
 // SetConfigValue 根据字段名和字符串形式的值，来更新 Config 的相应字段。
@@ -268,15 +262,15 @@ func UpdateConfigByJson(jsonString string) error {
 			if v, ok := value.(string); ok {
 				cfg.Host = v
 			}
-		case "LocalStores":
+		case "StoreUrls":
 			if v, ok := value.([]interface{}); ok {
-				var storeList []string
+				var storeUrls []string
 				for _, s := range v {
 					if str, ok := s.(string); ok {
-						storeList = append(storeList, str)
+						storeUrls = append(storeUrls, str)
 					}
 				}
-				ReplaceLocalStores(storeList)
+				ReplaceStoreUrls(storeUrls)
 			}
 		case "UseCache":
 			if v, ok := value.(bool); ok {
@@ -439,25 +433,13 @@ var cfg = Config{
 	OpenBrowser:           true,
 	Port:                  1234,
 	Password:              "",
-	Stores: []stores.Store{
-		{
-			Type: stores.SMB,
-			Smb: stores.SMBOption{
-				Host:      os.Getenv("SMB_HOST"),
-				Port:      445,
-				Username:  os.Getenv("SMB_USER"),
-				Password:  os.Getenv("SMB_PASS"),
-				ShareName: os.Getenv("SMB_PATH"),
-			},
-		},
-	},
-	SupportFileType:     []string{".zip", ".tar", ".rar", ".cbr", ".cbz", ".epub", ".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".tar.xz", ".txz", ".tar.lz4", ".tlz4", ".tar.sz", ".tsz", ".bz2", ".gz", ".lz4", ".sz", ".xz", ".mp4", ".webm", ".pdf", ".m4v", ".flv", ".avi", ".mp3", ".wav", ".wma", ".ogg"},
-	SupportMediaType:    []string{".jpg", ".jpeg", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".gif", ".apng", ".bmp", ".webp", ".ico", ".heic", ".heif", ".avif"},
-	SupportTemplateFile: []string{".html"},
-	UseCache:            true,
-	UploadPath:          "",
-	Username:            "comigo",
-	ZipFileTextEncoding: "",
+	SupportFileType:       []string{".zip", ".tar", ".rar", ".cbr", ".cbz", ".epub", ".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".tar.xz", ".txz", ".tar.lz4", ".tlz4", ".tar.sz", ".tsz", ".bz2", ".gz", ".lz4", ".sz", ".xz", ".mp4", ".webm", ".pdf", ".m4v", ".flv", ".avi", ".mp3", ".wav", ".wma", ".ogg"},
+	SupportMediaType:      []string{".jpg", ".jpeg", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".gif", ".apng", ".bmp", ".webp", ".ico", ".heic", ".heif", ".avif"},
+	SupportTemplateFile:   []string{".html"},
+	UseCache:              true,
+	UploadPath:            "",
+	Username:              "comigo",
+	ZipFileTextEncoding:   "",
 }
 
 // CanAddLocalStores 检查本地书库路径是否可添加
@@ -467,10 +449,9 @@ func CanAddLocalStores(path string) bool {
 		logger.Infof("Path not exists: %v", path)
 		return false
 	}
-
-	// 检查本地书库路径是否已存在
-	for _, store := range cfg.Stores {
-		if store.Type == stores.Local && store.Local.Path == path {
+	// 检查本地书库url是否已存在
+	for _, url := range cfg.StoreUrls {
+		if url == path {
 			logger.Infof("Local store already exists: %s", path)
 			return false
 		}
@@ -483,13 +464,7 @@ func AddLocalStore(path string) {
 	if !CanAddLocalStores(path) {
 		return
 	}
-	cfg.Stores = append(cfg.Stores, stores.Store{
-		Type: stores.Local,
-		Local: stores.LocalOption{
-			Path: path,
-		},
-	})
-	cfg.LocalStores = GetLocalStoresList()
+	cfg.StoreUrls = append(cfg.StoreUrls, path)
 }
 
 // AddLocalStores 添加本地书库（多个路径）
@@ -503,28 +478,10 @@ func AddLocalStores(path []string) {
 
 // InitCfgStores 初始化配置文件中的书库
 func InitCfgStores() {
-	AddLocalStores(cfg.LocalStores)
+	AddLocalStores(cfg.StoreUrls)
 }
 
-// ReplaceLocalStores 替换现有的“本地”类型的书库，保留其他类型的书库
-func ReplaceLocalStores(pathList []string) {
-	var newStores []stores.Store
-	for _, store := range cfg.Stores {
-		if store.Type != stores.Local {
-			newStores = append(newStores, store)
-		}
-	}
-	cfg.Stores = newStores
-	AddLocalStores(pathList)
-	cfg.LocalStores = GetLocalStoresList()
-}
-
-func GetLocalStoresList() []string {
-	var localStoresList []string
-	for _, store := range cfg.Stores {
-		if store.Type == stores.Local {
-			localStoresList = append(localStoresList, store.Local.Path)
-		}
-	}
-	return localStoresList
+// ReplaceStoreUrls 替换现有的“本地”类型的书库，保留其他类型的书库
+func ReplaceStoreUrls(urls []string) {
+	cfg.StoreUrls = urls
 }

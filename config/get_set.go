@@ -6,7 +6,6 @@ import (
 
 	"github.com/jxskiss/base62"
 	"github.com/yumenaka/comigo/assets/locale"
-	"github.com/yumenaka/comigo/config/stores"
 	"github.com/yumenaka/comigo/util"
 	"github.com/yumenaka/comigo/util/logger"
 )
@@ -71,6 +70,10 @@ func GetDebug() bool {
 	return cfg.Debug
 }
 
+func GetStoreUrls() []string {
+	return cfg.StoreUrls
+}
+
 func SetDebug(debug bool) {
 	cfg.Debug = debug
 }
@@ -129,10 +132,6 @@ func GetLogFilePath() string {
 
 func GetLogFileName() string {
 	return cfg.LogFileName
-}
-
-func GetStores() []stores.Store {
-	return cfg.Stores
 }
 
 func GetMaxScanDepth() int {
@@ -214,7 +213,7 @@ func GetJwtSigningKey() string {
 	if cfg.Username == "" || cfg.Password == "" {
 		logger.Infof("Username or password is empty. Using default Jwt Signing key.")
 		tempStr := cfg.Username + cfg.Password + GetVersion()
-		for _, store := range cfg.LocalStores {
+		for _, store := range cfg.StoreUrls {
 			tempStr = tempStr + store
 		}
 		base62.EncodeToString([]byte(util.Md5string(util.Md5string(tempStr))))

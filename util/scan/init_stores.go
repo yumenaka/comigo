@@ -10,7 +10,7 @@ import (
 func InitAllStore(option Option) error {
 	// 重置所有书籍与书组信息
 	model.MainStores.ClearAllBookData()
-	stores := option.Cfg.GetLocalStores()
+	stores := option.Cfg.GetStoreUrls()
 	// logger.Info("--------------------new stores------------------------------")
 	// logger.Info(stores)
 	// logger.Info("--------------------new stores------------------------------")

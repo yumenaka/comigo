@@ -67,7 +67,7 @@ func openBrowserIfNeeded(oldConfig *config.Config, newConfig *config.Config) {
 
 // checkNeedReScan 检查旧的和新的配置是否需要更新，并返回需要重新扫描和重新扫描文件的布尔值
 func checkNeedReScan(oldConfig *config.Config, newConfig *config.Config) (reScanStores bool) {
-	if !reflect.DeepEqual(oldConfig.LocalStores, newConfig.LocalStores) {
+	if !reflect.DeepEqual(oldConfig.StoreUrls, newConfig.StoreUrls) {
 		reScanStores = true
 	}
 	if oldConfig.MaxScanDepth != newConfig.MaxScanDepth {

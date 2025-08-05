@@ -20,17 +20,24 @@ func NewBookRepository(db sqlc.DBTX) *BookRepository {
 	}
 }
 
-// GetByID 根据ID获取书籍
-func (r *BookRepository) GetByID(ctx context.Context, bookID string) (*model.Book, error) {
+// GetBookByID 根据ID获取书籍
+func (r *BookRepository) GetBookByID(ctx context.Context, bookID string) (*model.Book, error) {
 	sqlcBook, err := r.queries.GetBookByID(ctx, bookID)
 	if err != nil {
 		return nil, err
 	}
-	return model.FromSQLCBook(sqlcBook), nil
+	// 补充页面信息
+	book := model.FromSQLCBook(sqlcBook)
+	imagesSQL, err := r.queries.GetMediaFilesByBookID(ctx, sqlcBook.BookID)
+	if err == nil {
+		book.Pages.Images = model.FromSQLCMediaFiles(imagesSQL)
+		book.SortPages("filename") // 对页面进行排序
+	}
+	return book, nil
 }
 
-// GetByFilePath 根据文件路径获取书籍
-func (r *BookRepository) GetByFilePath(ctx context.Context, filePath string) (*model.Book, error) {
+// GetBookByFilePath 根据文件路径获取书籍
+func (r *BookRepository) GetBookByFilePath(ctx context.Context, filePath string) (*model.Book, error) {
 	sqlcBook, err := r.queries.GetBookByFilePath(ctx, filePath)
 	if err != nil {
 		return nil, err
@@ -38,41 +45,58 @@ func (r *BookRepository) GetByFilePath(ctx context.Context, filePath string) (*m
 	return model.FromSQLCBook(sqlcBook), nil
 }
 
+// GetImagesMap 获取书籍的媒体文件信息的工具函数
+func (r *BookRepository) GetImagesMap(ctx context.Context, sqlcBooks []sqlc.Book) map[string][]model.MediaFileInfo {
+	imagesMap := make(map[string][]model.MediaFileInfo)
+	for _, book := range sqlcBooks {
+		imagesSQL, err := r.queries.GetMediaFilesByBookID(ctx, book.BookID)
+		if err != nil {
+			continue // 如果获取媒体文件失败，跳过该书籍
+		}
+		imagesMap[book.BookID] = model.FromSQLCMediaFiles(imagesSQL)
+	}
+	return imagesMap
+}
+
 // List 获取所有书籍列表
-func (r *BookRepository) List(ctx context.Context) ([]*model.Book, error) {
+func (r *BookRepository) ListBooks(ctx context.Context) ([]*model.Book, error) {
 	sqlcBooks, err := r.queries.ListBooks(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return model.FromSQLCBooks(sqlcBooks), nil
+	imagesMap := r.GetImagesMap(ctx, sqlcBooks)
+	return model.FromSQLCBooks(sqlcBooks, imagesMap), nil
 }
 
 // ListByType 根据类型获取书籍列表
-func (r *BookRepository) ListByType(ctx context.Context, bookType string) ([]*model.Book, error) {
+func (r *BookRepository) ListBooksByType(ctx context.Context, bookType string) ([]*model.Book, error) {
 	sqlcBooks, err := r.queries.ListBooksByType(ctx, bookType)
 	if err != nil {
 		return nil, err
 	}
-	return model.FromSQLCBooks(sqlcBooks), nil
+	imagesMap := r.GetImagesMap(ctx, sqlcBooks)
+	return model.FromSQLCBooks(sqlcBooks, imagesMap), nil
 }
 
 // ListByStorePath 根据书库路径获取书籍列表
-func (r *BookRepository) ListByStorePath(ctx context.Context, storePath string) ([]*model.Book, error) {
+func (r *BookRepository) ListBooksByStorePath(ctx context.Context, storePath string) ([]*model.Book, error) {
 	sqlcBooks, err := r.queries.ListBooksByStorePath(ctx, storePath)
 	if err != nil {
 		return nil, err
 	}
-	return model.FromSQLCBooks(sqlcBooks), nil
+	imagesMap := r.GetImagesMap(ctx, sqlcBooks)
+	return model.FromSQLCBooks(sqlcBooks, imagesMap), nil
 }
 
 // SearchByTitle 根据标题搜索书籍
-func (r *BookRepository) SearchByTitle(ctx context.Context, title string) ([]*model.Book, error) {
+func (r *BookRepository) SearchBooksByTitle(ctx context.Context, title string) ([]*model.Book, error) {
 	titleParam := sql.NullString{String: title, Valid: title != ""}
 	sqlcBooks, err := r.queries.SearchBooksByTitle(ctx, titleParam)
 	if err != nil {
 		return nil, err
 	}
-	return model.FromSQLCBooks(sqlcBooks), nil
+	imagesMap := r.GetImagesMap(ctx, sqlcBooks)
+	return model.FromSQLCBooks(sqlcBooks, imagesMap), nil
 }
 
 // Create 创建新书籍
