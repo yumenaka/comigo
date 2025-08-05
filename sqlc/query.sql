@@ -37,18 +37,18 @@ ORDER BY modified_time DESC;
 -- name: CreateBook :one
 INSERT INTO books (
     title, book_id, owner, file_path, book_store_path, type,
-    child_book_num, depth, parent_folder, page_count, file_size,
+    child_books_num, child_books_id,depth, parent_folder, page_count, file_size,
     author, isbn, press, published_at, extract_path, extract_num,
     init_complete, read_percent, non_utf8zip, zip_text_encoding
 ) VALUES (
-    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
 ) RETURNING *;
 
 -- Update book information
 -- name: UpdateBook :exec
 UPDATE books SET
     title = ?, owner = ?, file_path = ?, book_store_path = ?, type = ?,
-    child_book_num = ?, depth = ?, parent_folder = ?, page_count = ?, file_size = ?,
+    child_books_num = ?, child_books_id = ?, depth = ?, parent_folder = ?, page_count = ?, file_size = ?,
     author = ?, isbn = ?, press = ?, published_at = ?, extract_path = ?, extract_num = ?,
     init_complete = ?, read_percent = ?, non_utf8zip = ?, zip_text_encoding = ?,
     modified_time = CURRENT_TIMESTAMP

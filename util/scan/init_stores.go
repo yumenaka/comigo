@@ -10,29 +10,29 @@ import (
 func InitAllStore(option Option) error {
 	// 重置所有书籍与书组信息
 	model.MainStores.ClearAllBookData()
-	stores := option.Cfg.GetStoreUrls()
+	storeUrls := option.Cfg.GetStoreUrls()
 	// logger.Info("--------------------new stores------------------------------")
 	// logger.Info(stores)
 	// logger.Info("--------------------new stores------------------------------")
-	for _, localPath := range stores {
-		books, err := InitStore(localPath, option)
+	for _, storeUrl := range storeUrls {
+		books, err := InitStore(storeUrl, option)
 		if err != nil {
-			logger.Infof(locale.GetString("scan_error")+" path:%s %s", localPath, err)
+			logger.Infof(locale.GetString("scan_error")+" path:%s %s", storeUrl, err)
 			continue
 		}
-		AddBooksToStore(books, localPath, option.Cfg.GetMinImageNum())
+		AddBooksToStore(storeUrl, books, option.Cfg.GetMinImageNum())
 	}
 	return nil
 }
 
 // AddBooksToStore 添加一组书到书库
-func AddBooksToStore(bookList []*model.Book, basePath string, MinImageNum int) {
-	err := model.MainStores.AddBooks(bookList, basePath, MinImageNum)
+func AddBooksToStore(storeUrl string, bookList []*model.Book, MinImageNum int) {
+	err := model.MainStores.AddBooks(storeUrl, bookList, MinImageNum)
 	if err != nil {
-		logger.Infof(locale.GetString("AddBook_error")+"%s", basePath)
+		logger.Infof(locale.GetString("AddBook_error")+"%s", storeUrl)
 	}
 	// 生成虚拟书籍组
-	if err := model.MainStores.GenerateAllBookGroup(); err != nil {
+	if err := model.MainStores.InitBookGroup(); err != nil {
 		logger.Infof("%s", err)
 	}
 }

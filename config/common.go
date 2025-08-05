@@ -20,8 +20,8 @@ var (
 	Mutex  sync.Mutex
 )
 
-// WriteConfigFile 如果存在本地配置，更新本地配置
-func WriteConfigFile() error {
+// UpdateConfigFile 如果存在本地配置，更新本地配置
+func UpdateConfigFile() error {
 	bytes, err := toml.Marshal(cfg)
 	if err != nil {
 		return err

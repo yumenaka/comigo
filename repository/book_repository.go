@@ -58,7 +58,7 @@ func (r *BookRepository) GetImagesMap(ctx context.Context, sqlcBooks []sqlc.Book
 	return imagesMap
 }
 
-// List 获取所有书籍列表
+// ListBooks 获取所有书籍列表
 func (r *BookRepository) ListBooks(ctx context.Context) ([]*model.Book, error) {
 	sqlcBooks, err := r.queries.ListBooks(ctx)
 	if err != nil {
@@ -68,7 +68,7 @@ func (r *BookRepository) ListBooks(ctx context.Context) ([]*model.Book, error) {
 	return model.FromSQLCBooks(sqlcBooks, imagesMap), nil
 }
 
-// ListByType 根据类型获取书籍列表
+// ListBooksByType 根据类型获取书籍列表
 func (r *BookRepository) ListBooksByType(ctx context.Context, bookType string) ([]*model.Book, error) {
 	sqlcBooks, err := r.queries.ListBooksByType(ctx, bookType)
 	if err != nil {
@@ -78,7 +78,7 @@ func (r *BookRepository) ListBooksByType(ctx context.Context, bookType string) (
 	return model.FromSQLCBooks(sqlcBooks, imagesMap), nil
 }
 
-// ListByStorePath 根据书库路径获取书籍列表
+// ListBooksByStorePath 根据书库路径获取书籍列表
 func (r *BookRepository) ListBooksByStorePath(ctx context.Context, storePath string) ([]*model.Book, error) {
 	sqlcBooks, err := r.queries.ListBooksByStorePath(ctx, storePath)
 	if err != nil {
@@ -88,7 +88,7 @@ func (r *BookRepository) ListBooksByStorePath(ctx context.Context, storePath str
 	return model.FromSQLCBooks(sqlcBooks, imagesMap), nil
 }
 
-// SearchByTitle 根据标题搜索书籍
+// SearchBooksByTitle 根据标题搜索书籍
 func (r *BookRepository) SearchBooksByTitle(ctx context.Context, title string) ([]*model.Book, error) {
 	titleParam := sql.NullString{String: title, Valid: title != ""}
 	sqlcBooks, err := r.queries.SearchBooksByTitle(ctx, titleParam)

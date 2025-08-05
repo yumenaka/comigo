@@ -1,13 +1,16 @@
 package cmd
 
 import (
-	"github.com/yumenaka/comigo/util/scan"
+	"os"
 
 	"github.com/spf13/viper"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/internal/database"
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/routers/upload_api"
+	"github.com/yumenaka/comigo/util"
 	"github.com/yumenaka/comigo/util/logger"
+	"github.com/yumenaka/comigo/util/scan"
 )
 
 // ScanStore 解析命令,扫描文件，设置书库等
@@ -23,7 +26,7 @@ func ScanStore(args []string) {
 			logger.Infof("%s", err)
 		} else {
 			for _, book := range books {
-				err = model.MainStores.AddBook(book, book.BookStorePath, config.GetMinImageNum())
+				err = model.MainStores.AddBook(book.BookStorePath, book, config.GetMinImageNum())
 				if err != nil {
 					logger.Infof("AddBook error: %s", err)
 				} else {
@@ -33,7 +36,7 @@ func ScanStore(args []string) {
 		}
 	}
 	// 2、设置默认书库路径：扫描CMD指定的路径，或添加当前文件夹为默认路径。
-	SetStorePath(args)
+	CreateLocalStores(args)
 	// 3、扫描配置文件里面的书库路径
 	err := scan.InitAllStore(scan.NewOption(config.GetCfg()))
 	if err != nil {
@@ -47,4 +50,47 @@ func ScanStore(args []string) {
 			return
 		}
 	}
+}
+
+// CreateLocalStores 添加默认扫描路径 args[1:]是用户指定的扫描路径
+func CreateLocalStores(args []string) {
+	// 如果用户指定了扫描路径，就把指定的路径都加入到扫描路径里面
+	config.GetCfg().InitStoreUrls()
+	// 没指定扫描路径,配置文件也没设置书库文件夹的时候，默认把【当前工作目录】作为扫描路径
+	if len(args) == 0 && len(config.GetCfg().GetStoreUrls()) == 0 {
+		// 获取当前工作目录
+		wd, err := os.Getwd()
+		if err != nil {
+			logger.Infof("Failed to get working directory:%s", err)
+		}
+		logger.Infof("Working directory:%s", wd)
+		config.GetCfg().AddStoreUrl(wd)
+	}
+	// 指定了书库路径，就都扫描一遍
+	for key, arg := range args {
+		if config.GetDebug() {
+			logger.Infof("args[%d]: %s\n", key, arg)
+		}
+		config.GetCfg().AddStoreUrl(arg)
+	}
+	// 如果用户启用上传，且用户指定的上传路径不为空，就把程序预先设定的【默认上传路径】当作书库
+	if config.GetEnableUpload() {
+		if config.GetUploadPath() != "" {
+			// 尝试把上传路径添加为书库里
+			config.GetCfg().AddStoreUrl(config.GetUploadPath())
+		}
+		// 如果用户启用上传，但没有指定上传路径，就把【本地存储】里面的第一个路径作为上传路径
+		if config.GetUploadPath() == "" {
+			for _, store := range config.GetStoreUrls() {
+				if util.IsExist(store) {
+					config.SetUploadPath(store)
+					config.GetCfg().AddStoreUrl(config.GetUploadPath())
+					break
+				}
+			}
+		}
+	}
+	// 把扫描路径设置，传递给handlers包
+	upload_api.ConfigEnableUpload = &config.GetCfg().EnableUpload
+	upload_api.ConfigUploadPath = &config.GetCfg().UploadPath
 }

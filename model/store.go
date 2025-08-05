@@ -9,29 +9,17 @@ import (
 	"github.com/yumenaka/comigo/util/logger"
 )
 
-// 对应某个扫描路径的子书库
-type ChildStore struct {
-	Path       string   // 扫描路径
-	SubBookMap sync.Map // 拥有的书籍,key是BookID,存储 *Book
+// Store 对应某个扫描路径的子书库，目前只支持本地书库
+type Store struct {
+	URL     string   // 本地书库文件夹路径，或远程书库URL
+	BookMap sync.Map // 拥有的书籍,key是BookID,存储 *Book
 }
 
-// GenerateAllBookGroup 分析并生成书籍组
-func (storeGroup *StoreGroup) GenerateAllBookGroup() (e error) {
-	// 遍历所有子书库
-	for _, value := range storeGroup.ChildStores.Range {
-		s := value.(*ChildStore)
-		err := s.GenerateBookGroup()
-		if err != nil {
-			e = err
-		}
-	}
-	return e
-}
-
-func (subStore *ChildStore) GenerateBookGroup() error {
-	// 计没有添加过任何书籍，这不需要生成书组信息
+// InitBookGroup 分析书库中已有书籍的路径，生成书籍组信息
+func (store *Store) InitBookGroup() error {
+	// 如果没有添加过任何书籍，则不需要生成书组信息
 	count := 0
-	for range subStore.SubBookMap.Range {
+	for range store.BookMap.Range {
 		count++
 	}
 	if count == 0 {
@@ -40,14 +28,13 @@ func (subStore *ChildStore) GenerateBookGroup() error {
 	depthBooksMap := make(map[int][]*Book) // key是Depth的临时map
 	// 计算最大深度
 	maxDepth := 0
-	for _, value := range subStore.SubBookMap.Range {
+	for _, value := range store.BookMap.Range {
 		b := value.(*Book)
 		depthBooksMap[b.Depth] = append(depthBooksMap[b.Depth], b)
 		if b.Depth > maxDepth {
 			maxDepth = b.Depth
 		}
 	}
-
 	// 从深往浅遍历
 	// 如果有几本书同时有同一个父文件夹，那么应该【新建】一本书(组)，并加入到depth-1层里面
 	for depth := maxDepth; depth >= 0; depth-- {
@@ -67,7 +54,7 @@ func (subStore *ChildStore) GenerateBookGroup() error {
 			}
 			// 获取修改时间
 			modTime := pathInfo.ModTime()
-			tempBookInfo, err := NewBookInfo(filepath.Dir(sameParentBookList[0].FilePath), modTime, 0, subStore.Path, depth-1, TypeBooksGroup)
+			tempBookInfo, err := NewBookInfo(filepath.Dir(sameParentBookList[0].FilePath), modTime, 0, store.URL, depth-1, TypeBooksGroup)
 			if err != nil {
 				logger.Infof("%s", err)
 				continue
@@ -99,7 +86,6 @@ func (subStore *ChildStore) GenerateBookGroup() error {
 					Added = true
 				}
 			}
-
 			// 添加过的不需要添加
 			if Added {
 				continue
@@ -110,39 +96,8 @@ func (subStore *ChildStore) GenerateBookGroup() error {
 			depthBooksMap[depth-1] = append(depthBooksMap[depth-1], newBookGroup)
 			newBookGroup.SetAuthor()
 			// 将这本书加到子书库的SubBookMap表里面去
-			subStore.SubBookMap.Store(newBookGroup.BookID, newBookGroup)
+			store.BookMap.Store(newBookGroup.BookID, newBookGroup)
 		}
 	}
 	return nil
-}
-
-// AddSubStore 创建一个新文件夹
-func (storeGroup *StoreGroup) AddSubStore(basePath string) error {
-	if _, ok := storeGroup.ChildStores.Load(basePath); ok {
-		// 已经有这个key了
-		return errors.New("add Bookstore Error： The key already exists [" + basePath + "]")
-	}
-	s := ChildStore{
-		Path: basePath,
-	}
-	storeGroup.ChildStores.Store(basePath, &s)
-	return nil
-}
-
-// AddBookToSubStore 将某一本书，放到BookMap里面去
-func (storeGroup *StoreGroup) AddBookToSubStore(searchPath string, b *Book) error {
-	if f, ok := storeGroup.ChildStores.Load(searchPath); !ok {
-		// 创建一个新子书库，并添加一本书
-		newSubStore := ChildStore{
-			Path: searchPath,
-		}
-		newSubStore.SubBookMap.Store(b.BookID, b)
-		storeGroup.ChildStores.Store(searchPath, &newSubStore)
-		return errors.New("add Bookstore Error： The key not found [" + searchPath + "]")
-	} else {
-		// 给已有子书库添加一本书
-		temp := f.(*ChildStore)
-		temp.SubBookMap.Store(b.BookID, b)
-		return nil
-	}
 }

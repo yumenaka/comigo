@@ -21,7 +21,8 @@ CREATE TABLE books
     file_path         TEXT        NOT NULL,               -- Absolute file path
     book_store_path   TEXT        NOT NULL,               -- Book store path
     type              TEXT        NOT NULL,               -- Book type
-    child_book_num    INTEGER  DEFAULT 0,                 -- Number of child books
+    child_books_num   INTEGER  DEFAULT 0,                 -- Number of child books
+    child_books_id    TEXT,                               -- Child book IDs (comma-separated)
     depth             INTEGER  DEFAULT 0,                 -- Book depth
     parent_folder     TEXT,                               -- Parent folder
     page_count        INTEGER  DEFAULT 0,                 -- Total page count
