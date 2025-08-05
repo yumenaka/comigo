@@ -53,9 +53,8 @@ func (f FileBackendType) String() string {
 // 或 ftp://<user>:<password>@<host>:<port>/<dir1>  ftps://<user>:<password>@<host>:<port>/<dir1>
 // 或 s3://<S3_endpoint>[:<port>]/<bucket_name>/[<S3_prefix>] [region=<S3_region>] [config=<config_file_location> | config_server=<url>] [section=<section_name>]
 type FileBackend struct {
-	ID           int64           `json:"id"`                // 文件后端ID
-	Type         FileBackendType `json:"file_backend_type"` // 文件后端类型 1: 本地文件夹，2: SMB共享，3: SFTP服务器，4: WebDAV服务器，5: S3存储，6: FTP服务器
 	URL          string          `json:"url"`               // 本地书库为文件路径（/home/pi/books C:\Users\用户名\books或  file://some_path/books），其他类型的书库是对应文件服务的 url 形式，
+	Type         FileBackendType `json:"file_backend_type"` // 文件后端类型 1: 本地文件夹，2: SMB共享，3: SFTP服务器，4: WebDAV服务器，5: S3存储，6: FTP服务器
 	ServerHost   string          `json:"server_host"`       // 文件服务的服务器地址，smb、ftp、sftp、webdav等类型的书库需要填写。
 	ServerPort   int             `json:"server_port"`       // 文件服务的端口号，smb、ftp、sftp、webdav等类型的书库需要填写。
 	NeedAuth     bool            `json:"need_auth"`         // 相关文件服务是否需要认证，smb、ftp、sftp、webdav等类型的书库需要填写。
@@ -264,7 +263,6 @@ func parseWebDAVURL(u *url.URL, backend *FileBackend) (*FileBackend, error) {
 			backend.AuthPassword = password
 		}
 	}
-
 	return backend, nil
 }
 

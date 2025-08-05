@@ -53,7 +53,6 @@ func scanDirGetBook(dirPath string, storePath string, depth int, option Option) 
 			Url:     tempURL,
 		})
 	}
-
 	newBook.SortPages("default")
 	return newBook, nil
 }

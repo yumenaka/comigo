@@ -121,7 +121,7 @@ type dim struct {
 	height float64
 }
 
-// 取得PDF页面分辨率
+// GetPageDimensions 取得PDF页面分辨率
 func GetPageDimensions(fileName string) []dim {
 	pageCount, _ := CountPagesOfPDF(fileName)
 	log.Printf("pagecount of %v was %v", fileName, pageCount)
@@ -146,7 +146,7 @@ func ExportAllImageFromPDF(pdfFile string) {
 		logger.Info(err)
 	}
 	defer file.Close()
-	pageCount, err := CountPagesOfPDF("01.pdf")
+	pageCount, err := CountPagesOfPDF(pdfFile)
 	if err != nil {
 		logger.Info(err)
 	}

@@ -13,10 +13,16 @@ import (
 	"github.com/yumenaka/comigo/util/logger"
 )
 
+// StoreGroup 内存书库，扫描后生成。可以有多个子书库。
+type StoreGroup struct {
+	StoreInfo
+	ChildStores sync.Map // key为路径 存储 *Store
+}
+
 // MainStores 扫描后生成。可以有多个子书库。内部使用并发安全的 sync.Map 存储书籍和书组
 var MainStores = StoreGroup{
 	StoreInfo: StoreInfo{
-		ID:            1,
+		URL:           "comigo://main", // 主书库的 URL
 		Name:          "Comigo StoreInfo",
 		Description:   "Comigo Main book store",
 		FileBackendID: -1,         // 默认书库组，没有特定的文件后端
@@ -27,28 +33,38 @@ var MainStores = StoreGroup{
 	ChildStores: sync.Map{}, // 子书库，储存层级关系
 }
 
-// StoreInfo 书库基本信息
-type StoreInfo struct {
-	ID            int64
-	Name          string
-	Description   string
-	FileBackendID int64 // 文件后端ID, -1 表示未设置
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
+// AddStore 创建一个新书库
+func (storeGroup *StoreGroup) AddStore(storeURL string) error {
+	if _, ok := storeGroup.ChildStores.Load(storeURL); ok {
+		// 已经有这个key了
+		return errors.New("add Bookstore Error： The key already exists [" + storeURL + "]")
+	}
+	s := Store{
+		URL: storeURL,
+	}
+	storeGroup.ChildStores.Store(storeURL, &s)
+	return nil
 }
 
-// StoreGroup 内存书库，扫描后生成。可以有多个子书库。
-type StoreGroup struct {
-	StoreInfo
-	ChildStores sync.Map // key为路径 存储 *ChildStore
+// InitBookGroup 分析并生成书籍组
+func (storeGroup *StoreGroup) InitBookGroup() (e error) {
+	// 遍历所有子书库
+	for _, value := range storeGroup.ChildStores.Range {
+		s := value.(*Store)
+		err := s.InitBookGroup()
+		if err != nil {
+			e = err
+		}
+	}
+	return e
 }
 
 func (storeGroup *StoreGroup) ListBooks() []*Book {
 	var books []*Book
 	// 遍历 ChildStores 中的所有书籍
 	for _, value := range storeGroup.ChildStores.Range {
-		childStore := value.(*ChildStore)
-		for _, value := range childStore.SubBookMap.Range {
+		childStore := value.(*Store)
+		for _, value := range childStore.BookMap.Range {
 			book := value.(*Book)
 			books = append(books, book)
 		}
@@ -57,28 +73,46 @@ func (storeGroup *StoreGroup) ListBooks() []*Book {
 }
 
 // AddBook 添加一本书
-func (storeGroup *StoreGroup) AddBook(b *Book, basePath string, minPageNum int) error {
+func (storeGroup *StoreGroup) AddBook(storeURL string, b *Book, minPageNum int) error {
 	if b.BookID == "" {
 		return errors.New("add book error: empty BookID")
 	}
 	if b.GetPageCount() < minPageNum {
 		return errors.New("add book error: minPageNum = " + strconv.Itoa(b.GetPageCount()))
 	}
-	if _, ok := storeGroup.ChildStores.Load(basePath); !ok {
-		if err := storeGroup.AddSubStore(basePath); err != nil {
+	if _, ok := storeGroup.ChildStores.Load(storeURL); !ok {
+		if err := storeGroup.AddStore(storeURL); err != nil {
 			logger.Infof("Error adding subfolder: %s", err)
 		}
 	}
-	return storeGroup.AddBookToSubStore(basePath, b)
+	return storeGroup.AddBookToSubStore(storeURL, b)
+}
+
+// AddBookToSubStore 将某一本书，放到BookMap里面去
+func (storeGroup *StoreGroup) AddBookToSubStore(storeURL string, b *Book) error {
+	if f, ok := storeGroup.ChildStores.Load(storeURL); !ok {
+		// 创建一个新子书库，并添加一本书
+		newSubStore := Store{
+			URL: storeURL,
+		}
+		newSubStore.BookMap.Store(b.BookID, b)
+		storeGroup.ChildStores.Store(storeURL, &newSubStore)
+		return errors.New("add Bookstore Error： The key not found [" + storeURL + "]")
+	} else {
+		// 给已有子书库添加一本书
+		temp := f.(*Store)
+		temp.BookMap.Store(b.BookID, b)
+		return nil
+	}
 }
 
 // AddBooks 添加一组书
-func (storeGroup *StoreGroup) AddBooks(list []*Book, basePath string, minPageNum int) error {
+func (storeGroup *StoreGroup) AddBooks(storeURL string, list []*Book, minPageNum int) error {
 	for _, b := range list {
 		if b.GetPageCount() < minPageNum {
 			continue
 		}
-		if err := storeGroup.AddBook(b, basePath, minPageNum); err != nil {
+		if err := storeGroup.AddBook(storeURL, b, minPageNum); err != nil {
 			return err
 		}
 	}
@@ -102,8 +136,8 @@ func (storeGroup *StoreGroup) CheckAllBookFileExist() {
 	}
 }
 
-// CheckBookExist 查看内存中是否已经有了这本书，有了就返回 true，让调用者跳过
-func (storeGroup *StoreGroup) CheckBookExist(filePath string, bookType SupportFileType) bool {
+// CheckRawFileExist 查看内存中是否已经有了这本书，有了就返回 true，让调用者跳过
+func (storeGroup *StoreGroup) CheckRawFileExist(filePath string, bookType SupportFileType) bool {
 	if bookType == TypeDir || bookType == TypeBooksGroup {
 		return false
 	}
@@ -146,7 +180,7 @@ func (storeGroup *StoreGroup) ClearAllBookData() {
 func (storeGroup *StoreGroup) ResetBookGroupData() {
 	// Clear 会删除所有条目，产生一个空 Map
 	storeGroup.ChildStores.Clear()
-	if err := storeGroup.GenerateAllBookGroup(); err != nil {
+	if err := storeGroup.InitBookGroup(); err != nil {
 		logger.Infof("Error initializing main folder: %s", err)
 	}
 }
@@ -155,8 +189,8 @@ func (storeGroup *StoreGroup) ResetBookGroupData() {
 func (storeGroup *StoreGroup) DeleteBook(bookID string) {
 	// 遍历 ChildStores ，删除指定 ID 的书籍
 	for _, value := range storeGroup.ChildStores.Range {
-		childStore := value.(*ChildStore)
-		childStore.SubBookMap.Delete(bookID)
+		childStore := value.(*Store)
+		childStore.BookMap.Delete(bookID)
 	}
 }
 
@@ -201,8 +235,8 @@ func (storeGroup *StoreGroup) GetArchiveBooks() []*Book {
 func (storeGroup *StoreGroup) GetBookByID(id string, sortBy string) (*Book, error) {
 	// 遍历 ChildStores ，删除指定 ID 的书籍
 	for _, value := range storeGroup.ChildStores.Range {
-		childStore := value.(*ChildStore)
-		if value, ok := childStore.SubBookMap.Load(id); ok {
+		childStore := value.(*Store)
+		if value, ok := childStore.BookMap.Load(id); ok {
 			b := value.(*Book)
 			b.SortPages(sortBy)
 			return b, nil
@@ -292,22 +326,6 @@ func (storeGroup *StoreGroup) GetShortBookID(fullID string, minLength int) strin
 	return shortID
 }
 
-func (storeGroup *StoreGroup) GetBookInfoListByMaxDepth(depth int, sortBy string) (*BookInfoList, error) {
-	var infoList BookInfoList
-	// 首先加上所有真实的书籍
-	for _, b := range storeGroup.ListBooks() {
-		if b.Depth <= depth {
-			info := b.GetBookInfo()
-			infoList.BookInfos = append(infoList.BookInfos, *info)
-		}
-	}
-	if len(infoList.BookInfos) > 0 {
-		infoList.SortBooks(sortBy)
-		return &infoList, nil
-	}
-	return nil, errors.New("error: cannot find bookshelf in GetBookInfoListByMaxDepth")
-}
-
 // TopOfShelfInfo 获取顶层书架信息
 func (storeGroup *StoreGroup) TopOfShelfInfo(sortBy string) (*BookInfoList, error) {
 	// 显示顶层书库的书籍
@@ -365,18 +383,30 @@ func (storeGroup *StoreGroup) GetBookInfoListByParentFolder(parentFolder string,
 	return nil, errors.New("cannot find book, parentFolder=" + parentFolder)
 }
 
-// GetAllBookInfoList 获取所有 BookInfo，并根据 sortBy 参数进行排序
-func (storeGroup *StoreGroup) GetAllBookInfoList(sortBy string) (*BookInfoList, error) {
-	var infoList BookInfoList
-	// 添加所有真实的书籍
-	for _, b := range storeGroup.ListBooks() {
-		info := b.GetBookInfo()
-		infoList.BookInfos = append(infoList.BookInfos, *info)
-	}
-
-	if len(infoList.BookInfos) > 0 {
-		infoList.SortBooks(sortBy)
-		return &infoList, nil
-	}
-	return nil, errors.New("error: cannot find bookshelf in GetAllBookInfoList")
-}
+// // GetAllBookInfoList 获取所有 BookInfo，并根据 sortBy 参数进行排序
+// func (storeGroup *StoreGroup) GetAllBookInfoList(sortBy string) *BookInfoList {
+// 	var infoList BookInfoList
+// 	// 添加所有真实的书籍
+// 	for _, b := range storeGroup.ListBooks() {
+// 		info := b.GetBookInfo()
+// 		infoList.BookInfos = append(infoList.BookInfos, *info)
+// 	}
+// 	infoList.SortBooks(sortBy)
+// 	return &infoList
+// }
+//
+// func (storeGroup *StoreGroup) GetBookInfoListByMaxDepth(depth int, sortBy string) (*BookInfoList, error) {
+// 	var infoList BookInfoList
+// 	// 首先加上所有真实的书籍
+// 	for _, b := range storeGroup.ListBooks() {
+// 		if b.Depth <= depth {
+// 			info := b.GetBookInfo()
+// 			infoList.BookInfos = append(infoList.BookInfos, *info)
+// 		}
+// 	}
+// 	if len(infoList.BookInfos) > 0 {
+// 		infoList.SortBooks(sortBy)
+// 		return &infoList, nil
+// 	}
+// 	return nil, errors.New("error: cannot find bookshelf in GetBookInfoListByMaxDepth")
+// }

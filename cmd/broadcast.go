@@ -106,6 +106,6 @@ func ReScanPath(path string, reScanFile bool) {
 		logger.Infof(locale.GetString("scan_error")+"path:%s  %s", path, err)
 		return
 	}
-	scan.AddBooksToStore(books, path, config.GetMinImageNum())
+	scan.AddBooksToStore(path, books, config.GetMinImageNum())
 	model.MainStores.ResetBookGroupData()
 }

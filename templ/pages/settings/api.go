@@ -87,7 +87,7 @@ func updateConfigGeneric(c echo.Context) (string, string, error) {
 	}
 
 	// 写入配置文件
-	if writeErr := config.WriteConfigFile(); writeErr != nil {
+	if writeErr := config.UpdateConfigFile(); writeErr != nil {
 		logger.Infof("Failed to update local config: %v", writeErr)
 	}
 
@@ -202,7 +202,7 @@ func UpdateUserInfoConfigHandler(c echo.Context) error {
 	}
 
 	// 写入配置文件
-	if writeErr := config.WriteConfigFile(); writeErr != nil {
+	if writeErr := config.UpdateConfigFile(); writeErr != nil {
 		logger.Infof("Failed to update local config: %v", writeErr)
 		// 根据业务需求，这里可能需要回滚配置更改或返回错误
 		// return echo.NewHTTPError(http.StatusInternalServerError, "Failed to write config file")
@@ -263,7 +263,7 @@ func doAdd(configName, addValue string) ([]string, error) {
 		return nil, err
 	}
 	// 写入配置文件
-	if writeErr := config.WriteConfigFile(); writeErr != nil {
+	if writeErr := config.UpdateConfigFile(); writeErr != nil {
 		logger.Infof("Failed to update local config: %v", writeErr)
 	}
 	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等
@@ -305,7 +305,7 @@ func doDelete(configName string, deleteValue string) ([]string, error) {
 	}
 
 	// 写入配置文件
-	if writeErr := config.WriteConfigFile(); writeErr != nil {
+	if writeErr := config.UpdateConfigFile(); writeErr != nil {
 		logger.Infof("Failed to update local config: %v", writeErr)
 	}
 	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等

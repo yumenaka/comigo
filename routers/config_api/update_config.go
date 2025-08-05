@@ -32,7 +32,7 @@ func UpdateConfig(c echo.Context) error {
 		logger.Infof("%s", err.Error())
 		return c.JSON(http.StatusMethodNotAllowed, map[string]string{"error": "Failed to parse JSON data"})
 	}
-	err = config.WriteConfigFile()
+	err = config.UpdateConfigFile()
 	if err != nil {
 		logger.Infof("Failed to update local config: %v", err)
 	}

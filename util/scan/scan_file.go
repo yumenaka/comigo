@@ -41,14 +41,14 @@ func scanFileGetBook(filePath string, storePath string, depth int, scanOption Op
 	case model.TypeVideo, model.TypeAudio:
 		handleMediaFiles(newBook)
 	case model.TypeUnknownFile:
-		handleMediaFiles(newBook)
+		handleOtherFiles(newBook)
 	default:
 		err = handleOtherArchiveFiles(filePath, newBook, scanOption)
 		if err != nil {
 			return nil, err
 		}
 	}
-
+	newBook.Cover = newBook.GetCover()
 	newBook.SortPages("default")
 	return newBook, nil
 }

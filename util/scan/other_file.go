@@ -7,3 +7,9 @@ func handleMediaFiles(newBook *model.Book) {
 	newBook.PageCount = 1
 	newBook.InitComplete = true
 }
+
+// 处理其他文件
+func handleOtherFiles(newBook *model.Book) {
+	newBook.PageCount = 1
+	newBook.InitComplete = true
+}

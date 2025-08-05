@@ -97,7 +97,7 @@ func checkServerActions(oldConfig *config.Config, newConfig *config.Config) (reS
 
 // startReScan 扫描并相应地更新数据库
 func startReScan() {
-	config.InitCfgStores()
+	config.GetCfg().InitStoreUrls()
 	if err := scan.InitAllStore(scan.NewOption(config.GetCfg())); err != nil {
 		logger.Infof("Failed to scan store path: %v", err)
 	}

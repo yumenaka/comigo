@@ -2,11 +2,26 @@ package model
 
 import (
 	"database/sql"
+	"strings"
 
 	"github.com/yumenaka/comigo/sqlc"
 )
 
 // ==================== Book 相关转换 ====================
+
+// ConvertCommaSeparatedString 将英文逗号分隔的字符串转换为 []string
+func ConvertCommaSeparatedString(nullString sql.NullString) []string {
+	if !nullString.Valid {
+		return []string{} // 如果字符串无效，返回空切片
+	}
+	// 使用 strings.Split 分割
+	parts := strings.Split(nullString.String, ",")
+	// 去除每个元素前后的空白字符
+	for i := range parts {
+		parts[i] = strings.TrimSpace(parts[i])
+	}
+	return parts
+}
 
 // FromSQLCBook 将sqlc.Book转换为model.Book
 func FromSQLCBook(sqlcBook sqlc.Book) *Book {
@@ -16,6 +31,7 @@ func FromSQLCBook(sqlcBook sqlc.Book) *Book {
 			BookID:          sqlcBook.BookID,
 			BookStorePath:   sqlcBook.BookStorePath,
 			ChildBooksNum:   int(sqlcBook.ChildBooksNum.Int64),
+			ChildBooksID:    ConvertCommaSeparatedString(sqlcBook.ChildBooksID),
 			Deleted:         sqlcBook.Deleted.Bool,
 			Depth:           int(sqlcBook.Depth.Int64),
 			ExtractPath:     sqlcBook.ExtractPath.String,
@@ -47,6 +63,7 @@ func ToSQLCCreateBookParams(book *Book) sqlc.CreateBookParams {
 		BookStorePath:   book.BookStorePath,
 		Type:            string(book.Type),
 		ChildBooksNum:   sql.NullInt64{Int64: int64(book.ChildBooksNum), Valid: true},
+		ChildBooksID:    sql.NullString{String: strings.Join(book.ChildBooksID, ", "), Valid: book.ChildBooksID != nil && len(book.ChildBooksID) > 0},
 		Depth:           sql.NullInt64{Int64: int64(book.Depth), Valid: true},
 		ParentFolder:    sql.NullString{String: book.ParentFolder, Valid: book.ParentFolder != ""},
 		PageCount:       sql.NullInt64{Int64: int64(book.PageCount), Valid: true},

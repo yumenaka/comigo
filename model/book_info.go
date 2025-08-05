@@ -194,7 +194,7 @@ func (b *BookInfo) GetCover() MediaFileInfo {
 			return MediaFileInfo{Name: "unknown.png", Url: "/images/unknown.png"}
 		}
 		for _, childID := range bookGroup.ChildBooksID {
-			book, err := MainStores.GetBookByID(childID, "modify_time")
+			book, err := MainStores.GetBookByID(childID, "")
 			if err != nil {
 				return MediaFileInfo{Name: "unknown.png", Url: "/images/unknown.png"}
 			}

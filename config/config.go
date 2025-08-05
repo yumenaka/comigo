@@ -11,7 +11,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yumenaka/comigo/util"
 	"github.com/yumenaka/comigo/util/logger"
 )
 
@@ -57,6 +56,35 @@ type Config struct {
 
 func (c *Config) GetStoreUrls() []string {
 	return c.StoreUrls
+}
+
+// StoreUrlIsExits 检查本地书库路径是否可添加
+func (c *Config) StoreUrlIsExits(url string) bool {
+	// 检查本地书库url是否已存在
+	for _, storeUrl := range c.StoreUrls {
+		if storeUrl == url {
+			logger.Infof("Store Url already exists: %s", storeUrl)
+			return true
+		}
+	}
+	return false
+}
+
+// AddStoreUrl 添加本地书库(单个路径)
+func (c *Config) AddStoreUrl(storeURL string) {
+	if c.StoreUrlIsExits(storeURL) {
+		return
+	}
+	cfg.StoreUrls = append(cfg.StoreUrls, storeURL)
+}
+
+// InitStoreUrls 初始化配置文件中的书库
+func (c *Config) InitStoreUrls() {
+	for _, storeUrl := range c.StoreUrls {
+		if !c.StoreUrlIsExits(storeUrl) {
+			c.AddStoreUrl(storeUrl)
+		}
+	}
 }
 
 func (c *Config) GetMaxScanDepth() int {
@@ -110,8 +138,7 @@ func (c *Config) GetTopStoreName() string {
 	return strings.Join(c.StoreUrls, ", ")
 }
 
-// SetConfigValue 根据字段名和字符串形式的值，来更新 Config 的相应字段。
-// 如果字段名不存在，则返回错误。如果字段类型不在支持范围内，也返回错误。
+// SetConfigValue 更新 Config 的相应字段，如果【fieldName】不存在、或【fieldValue】类型有问题，都返回错误。
 func (c *Config) SetConfigValue(fieldName, fieldValue string) error {
 	// 使用反射获得指向结构体的 Value
 	v := reflect.ValueOf(c).Elem()
@@ -270,7 +297,7 @@ func UpdateConfigByJson(jsonString string) error {
 						storeUrls = append(storeUrls, str)
 					}
 				}
-				ReplaceStoreUrls(storeUrls)
+				cfg.StoreUrls = storeUrls
 			}
 		case "UseCache":
 			if v, ok := value.(bool); ok {
@@ -440,48 +467,4 @@ var cfg = Config{
 	UploadPath:            "",
 	Username:              "comigo",
 	ZipFileTextEncoding:   "",
-}
-
-// CanAddLocalStores 检查本地书库路径是否可添加
-func CanAddLocalStores(path string) bool {
-	// 如果文件/文件夹不存在
-	if !util.PathExists(path) {
-		logger.Infof("Path not exists: %v", path)
-		return false
-	}
-	// 检查本地书库url是否已存在
-	for _, url := range cfg.StoreUrls {
-		if url == path {
-			logger.Infof("Local store already exists: %s", path)
-			return false
-		}
-	}
-	return true
-}
-
-// AddLocalStore 添加本地书库(单个路径)
-func AddLocalStore(path string) {
-	if !CanAddLocalStores(path) {
-		return
-	}
-	cfg.StoreUrls = append(cfg.StoreUrls, path)
-}
-
-// AddLocalStores 添加本地书库（多个路径）
-func AddLocalStores(path []string) {
-	for _, p := range path {
-		if CanAddLocalStores(p) {
-			AddLocalStore(p)
-		}
-	}
-}
-
-// InitCfgStores 初始化配置文件中的书库
-func InitCfgStores() {
-	AddLocalStores(cfg.StoreUrls)
-}
-
-// ReplaceStoreUrls 替换现有的“本地”类型的书库，保留其他类型的书库
-func ReplaceStoreUrls(urls []string) {
-	cfg.StoreUrls = urls
 }
