@@ -212,7 +212,7 @@ package scan
 // 	//	newBook.Cover = types.MediaFileInfo{RealImageFilePATH: "", Size: MediaFileInfo.Size(), ModTime: MediaFileInfo.ModTime(), Name: "", Url: "/images/pdf.png"}
 // 	//	for i := 1; i <= pageCount; i++ {
 // 	//		TempURL := "/api/get_file?id=" + newBook.BookID + "&filename=" + strconv.Itoa(i) + ".jpg"
-// 	//		newBook.Pages.Images = append(newBook.Pages.Images, types.MediaFileInfo{RealImageFilePATH: "", Size: MediaFileInfo.Size(), ModTime: MediaFileInfo.ModTime(), Name: strconv.Itoa(i), Url: TempURL})
+// 	//		newBook.Images = append(newBook.Images, types.MediaFileInfo{RealImageFilePATH: "", Size: MediaFileInfo.Size(), ModTime: MediaFileInfo.ModTime(), Name: strconv.Itoa(i), Url: TempURL})
 // 	//	}
 // 	// case types.TypeVideo:
 // 	//	newBook.PageCount = 1
@@ -259,14 +259,14 @@ package scan
 // 	//				//newBook.Pages = append(newBook.Pages, MediaFileInfo{RealImageFilePATH: "", Size: f.Size(), ModTime: f.ModTime(), Name: "", Url: "/cache/" + newBook.BookID + "/" + url.QueryEscape(path)})
 // 	//				//实验：用get_file接口提供文件服务
 // 	//				TempURL := "/api/get_file?id=" + newBook.BookID + "&filename=" + url.QueryEscape(path)
-// 	//				newBook.Pages.Images = append(newBook.Pages.Images, types.MediaFileInfo{RealImageFilePATH: "", Size: f.Size(), ModTime: f.ModTime(), Name: "", Url: TempURL})
+// 	//				newBook.Images = append(newBook.Images, types.MediaFileInfo{RealImageFilePATH: "", Size: f.Size(), ModTime: f.ModTime(), Name: "", Url: TempURL})
 // 	//				// logger.Infof(locale.GetString("unsupported_extract")+" %s", f)
 // 	//			} else {
 // 	//				// 替换特殊字符的时候，额外将“+替换成"%2b"，因为gin会将+解析为空格。
 // 	//				TempURL := "/api/get_file?id=" + newBook.BookID + "&filename=" + url.QueryEscape(u.Name)
 // 	//				// 不替换特殊字符
 // 	//				// TempURL := "/api/get_file?id=" + newBook.BookID + "&filename=" + u.Name
-// 	//				newBook.Pages.Images = append(newBook.Pages.Images, types.MediaFileInfo{RealImageFilePATH: "", Size: f.Size(), ModTime: f.ModTime(), Name: u.Name, Url: TempURL})
+// 	//				newBook.Images = append(newBook.Images, types.MediaFileInfo{RealImageFilePATH: "", Size: f.Size(), ModTime: f.ModTime(), Name: u.Name, Url: TempURL})
 // 	//			}
 // 	//		}
 // 	//		return nil
@@ -311,7 +311,7 @@ package scan
 // 		}
 // 		if scanOption.IsSupportMedia(file.Name()) {
 // 			TempURL := "/api/get_file?id=" + newBook.BookID + "&filename=" + url.QueryEscape(file.Name())
-// 			newBook.Pages.Images = append(newBook.Pages.Images, model.MediaFileInfo{Path: strAbsPath, Size: file.Size(), ModTime: file.ModTime(), Name: file.Name(), Url: TempURL})
+// 			newBook.Images = append(newBook.Images, model.MediaFileInfo{Path: strAbsPath, Size: file.Size(), ModTime: file.ModTime(), Name: file.Name(), Url: TempURL})
 // 		}
 // 	}
 // 	newBook.SortPages("default")

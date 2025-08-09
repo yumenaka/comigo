@@ -73,7 +73,7 @@ func (s *BookService) GetBook(ctx context.Context, bookID string) (*model.Book, 
 	}
 
 	// 3. 设置书籍的页面信息
-	book.Pages.Images = mediaFiles
+	book.Images = mediaFiles
 
 	// 4. 业务逻辑：设置封面
 	if len(mediaFiles) > 0 {
@@ -106,7 +106,7 @@ func (s *BookService) CreateBook(ctx context.Context, book *model.Book) error {
 	}
 
 	// 4. 保存媒体文件信息
-	for _, mediaFile := range book.Pages.Images {
+	for _, mediaFile := range book.Images {
 		err = s.bookRepo.CreateMediaFile(ctx, mediaFile, book.BookID)
 		if err != nil {
 			return fmt.Errorf("创建媒体文件记录失败: %w", err)
@@ -160,7 +160,7 @@ func (s *BookService) SearchBooks(ctx context.Context, title string) ([]*model.B
 	for _, book := range books {
 		mediaFiles, err := s.bookRepo.GetMediaFiles(ctx, book.BookID)
 		if err == nil && len(mediaFiles) > 0 {
-			book.Pages.Images = mediaFiles
+			book.Images = mediaFiles
 			book.Cover = book.GuestCover()
 		}
 	}

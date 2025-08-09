@@ -30,7 +30,7 @@ func (r *BookRepository) GetBookByID(ctx context.Context, bookID string) (*model
 	book := model.FromSQLCBook(sqlcBook)
 	imagesSQL, err := r.queries.GetMediaFilesByBookID(ctx, sqlcBook.BookID)
 	if err == nil {
-		book.Pages.Images = model.FromSQLCMediaFiles(imagesSQL)
+		book.Images = model.FromSQLCMediaFiles(imagesSQL)
 		book.SortPages("filename") // 对页面进行排序
 	}
 	return book, nil

@@ -14,7 +14,7 @@ import (
 // Book 定义书籍结构
 type Book struct {
 	BookInfo
-	Pages Pages `json:"pages"`
+	Pages `json:"pages"`
 }
 
 // GetBookInfo 创建新的 BookInfo 实例
@@ -50,9 +50,9 @@ func (b *Book) GetBookInfo() *BookInfo {
 // GuestCover 猜测书籍的封面
 func (b *Book) GuestCover() (cover MediaFileInfo) {
 	// 封面图片的命名规则
-	for i := range b.Pages.Images {
+	for i := range b.Images {
 		// 先转换为小写
-		filenameLower := strings.ToLower(b.Pages.Images[i].Name)
+		filenameLower := strings.ToLower(b.Images[i].Name)
 		// 再去掉后缀名
 		filenameWithoutExt := strings.TrimSuffix(filenameLower, path.Ext(filenameLower))
 		// 再去掉前置的0 ，例如00001 -> 1, 0 -> ""
@@ -60,13 +60,13 @@ func (b *Book) GuestCover() (cover MediaFileInfo) {
 		// 对原始不带前导0的文件名包含 "cover" 的检查
 		// 检查文件名（去除后缀和前导0）是否包含 "cover" 或等于 "" (原为 "0") 或 "1"
 		if strings.Contains(filenameWithoutExt, "cover") || filenameTrimmed == "" || filenameTrimmed == "1" {
-			cover = b.Pages.Images[i] // 获取实际元素的指针
-			return cover              // 找到封面，停止循环
+			cover = b.Images[i] // 获取实际元素的指针
+			return cover        // 找到封面，停止循环
 		}
 	}
 	// 如果通过名称规则没有找到封面，并且书至少有一页，则使用第一页作为封面
-	if len(b.Pages.Images) > 0 {
-		cover = b.Pages.Images[0]
+	if len(b.Images) > 0 {
+		cover = b.Images[0]
 	}
 	return cover // 返回找到的封面或空值
 }
@@ -110,7 +110,7 @@ func NewBookInfo(filePath string, modified time.Time, fileSize int64, storePath 
 
 // setPageNum 设置书籍的页数
 func (b *Book) setPageNum() {
-	b.PageCount = len(b.Pages.Images)
+	b.PageCount = len(b.Images)
 }
 
 // SortPages 对页面进行排序
@@ -119,7 +119,7 @@ func (b *Book) SortPages(s string) {
 		return
 	}
 	if s != "" {
-		b.Pages.SortBy = s
+		b.SortBy = s
 		sort.Sort(b.Pages)
 	}
 }
@@ -129,7 +129,7 @@ func (b *Book) SortPagesByImageList(imageList []string) {
 	if len(imageList) == 0 {
 		return
 	}
-	imageInfos := b.Pages.Images
+	imageInfos := b.Images
 	var reSortList []MediaFileInfo
 	for _, imgName := range imageList {
 		for _, imgInfo := range imageInfos {
@@ -156,7 +156,7 @@ func (b *Book) SortPagesByImageList(imageList []string) {
 			reSortList = append(reSortList, imgInfo)
 		}
 	}
-	b.Pages.Images = reSortList
+	b.Images = reSortList
 }
 
 // GetBookID 获取书籍的 ID
