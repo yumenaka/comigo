@@ -204,7 +204,7 @@ func (b *BookInfo) GetCover() MediaFileInfo {
 		}
 	case TypeDir, TypeZip, TypeRar, TypeCbz, TypeCbr, TypeTar, TypeEpub:
 		tempBook, err := MainStores.GetBookByID(b.BookID, "")
-		if err != nil || len(tempBook.Pages.Images) == 0 {
+		if err != nil || len(tempBook.Images) == 0 {
 			return MediaFileInfo{Name: "unknown.png", Url: "/images/unknown.png"}
 		}
 		return tempBook.GuestCover()

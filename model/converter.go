@@ -196,7 +196,7 @@ func ToSQLCCreateFileBackendParams(fileBackend *FileBackend) sqlc.CreateFileBack
 }
 
 // ToSQLCUpdateFileBackendParams 将model.FileBackend转换为sqlc.UpdateFileBackendParams
-func ToSQLCUpdateFileBackendParams(fileBackend *FileBackend, id int64) sqlc.UpdateFileBackendParams {
+func ToSQLCUpdateFileBackendParams(fileBackend *FileBackend) sqlc.UpdateFileBackendParams {
 	return sqlc.UpdateFileBackendParams{
 		Type:         int64(fileBackend.Type),
 		Url:          fileBackend.URL,
@@ -207,7 +207,6 @@ func ToSQLCUpdateFileBackendParams(fileBackend *FileBackend, id int64) sqlc.Upda
 		AuthPassword: sql.NullString{String: fileBackend.AuthPassword, Valid: fileBackend.AuthPassword != ""},
 		SmbShareName: sql.NullString{String: fileBackend.SMBShareName, Valid: fileBackend.SMBShareName != ""},
 		SmbPath:      sql.NullString{String: fileBackend.SMBPath, Valid: fileBackend.SMBPath != ""},
-		ID:           id,
 	}
 }
 
@@ -227,24 +226,23 @@ func FromSQLCStore(sqlcStore sqlc.Store) *StoreInfo {
 }
 
 // ToSQLCCreateStoreParams 将model.Store转换为sqlc.CreateStoreParams
-func ToSQLCCreateStoreParams(store *StoreInfo, fileBackendID int64) sqlc.CreateStoreParams {
+func ToSQLCCreateStoreParams(store *StoreInfo, url string) sqlc.CreateStoreParams {
 	// TODO:这里需要根据实际情况实现转换逻辑
 	// return sqlc.CreateStoreParams{
 	// }
 	return sqlc.CreateStoreParams{
 		// Name:          store.Name,
 		// Description:   sql.NullString{String: store.Description, Valid: store.Description != ""},
-		FileBackendID: fileBackendID,
+		Url: url,
 	}
 }
 
 // ToSQLCUpdateStoreParams 将model.Store转换为sqlc.UpdateStoreParams
-func ToSQLCUpdateStoreParams(store *StoreInfo, fileBackendID int64) sqlc.UpdateStoreParams {
+func ToSQLCUpdateStoreParams(store *StoreInfo, url string) sqlc.UpdateStoreParams {
 	return sqlc.UpdateStoreParams{
 		// Name:          store.Name,// TODO:这里需要根据实际情况实现转换逻辑
 		// Description:   sql.NullString{String: store.Description, Valid: store.Description != ""},
-		FileBackendID: fileBackendID,
-		// ID:            int64(store.ID),// TODO:这里需要根据实际情况实现转换逻辑
+		Url: url,
 	}
 }
 
@@ -256,9 +254,9 @@ func FromSQLCBooks(sqlcBooks []sqlc.Book, pagesMap map[string][]MediaFileInfo) [
 	for i, sqlcBook := range sqlcBooks {
 		books[i] = FromSQLCBook(sqlcBook)
 		if pages, exists := pagesMap[sqlcBook.BookID]; exists {
-			books[i].Pages.Images = pages
+			books[i].Images = pages
 		} else {
-			books[i].Pages.Images = []MediaFileInfo{} // 确保即使没有页面也不会出错
+			books[i].Images = []MediaFileInfo{} // 确保即使没有页面也不会出错
 		}
 	}
 	return books

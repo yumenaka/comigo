@@ -88,13 +88,13 @@ func handleOtherArchiveFiles(filePath string, newBook *model.Book, option Option
 			var tempURL string
 			if ok {
 				tempURL = "/api/get_file?id=" + newBook.BookID + "&filename=" + url.QueryEscape(archivedFile.NameInArchive)
-				newBook.Pages.Images = append(newBook.Pages.Images, model.MediaFileInfo{
+				newBook.Images = append(newBook.Images, model.MediaFileInfo{
 					Name: archivedFile.NameInArchive,
 					Url:  tempURL,
 				})
 			} else {
 				tempURL = "/api/get_file?id=" + newBook.BookID + "&filename=" + url.QueryEscape(path)
-				newBook.Pages.Images = append(newBook.Pages.Images, model.MediaFileInfo{
+				newBook.Images = append(newBook.Images, model.MediaFileInfo{
 					Url: tempURL,
 				})
 			}
@@ -119,7 +119,7 @@ func scanNonUTF8ZipFile(filePath string, b *model.Book, option Option) error {
 			// 如果是压缩文件
 			// 替换特殊字符的时候，额外将“+替换成"%2b"，因为gin会将+解析为空格。
 			TempURL := "/api/get_file?id=" + b.BookID + "&filename=" + url.QueryEscape(f.Name)
-			b.Pages.Images = append(b.Pages.Images, model.MediaFileInfo{Path: "", Size: f.FileInfo().Size(), ModTime: f.FileInfo().ModTime(), Name: f.Name, Url: TempURL})
+			b.Images = append(b.Images, model.MediaFileInfo{Path: "", Size: f.FileInfo().Size(), ModTime: f.FileInfo().ModTime(), Name: f.Name, Url: TempURL})
 		} else {
 			if option.Cfg.GetDebug() {
 				logger.Infof(locale.GetString("unsupported_file_type")+" %s", f.Name)
@@ -159,7 +159,7 @@ func walkUTF8ZipFs(fsys fs.FS, parent, base string, b *model.Book, option Option
 			inArchiveName := path.Join(parent, f.Name())
 			TempURL := "/api/get_file?id=" + b.BookID + "&filename=" + url.QueryEscape(inArchiveName)
 			// 替换特殊字符的时候,不要用url.PathEscape()，PathEscape不会把“+“替换成"%2b"，会导致BUG，让gin会将+解析为空格。
-			b.Pages.Images = append(b.Pages.Images, model.MediaFileInfo{Path: "", Size: f.Size(), ModTime: f.ModTime(), Name: inArchiveName, Url: TempURL})
+			b.Images = append(b.Images, model.MediaFileInfo{Path: "", Size: f.Size(), ModTime: f.ModTime(), Name: inArchiveName, Url: TempURL})
 		} else {
 			if option.Cfg.GetDebug() {
 				logger.Infof(locale.GetString("unsupported_file_type")+" %s", name)

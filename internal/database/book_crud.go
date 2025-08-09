@@ -118,8 +118,8 @@ func SaveBookToDatabase(save *model.Book) error {
 	}
 
 	// 保存封面与页面信息
-	bulk := make([]*ent.SinglePageInfoCreate, len(save.Pages.Images))
-	for i, p := range save.Pages.Images {
+	bulk := make([]*ent.SinglePageInfoCreate, len(save.Images))
+	for i, p := range save.Images {
 		bulk[i] = client.SinglePageInfo.
 			Create().
 			SetBookID(save.BookID).
@@ -186,7 +186,7 @@ func GetBookFromDatabase(filepath string) (*model.Book, error) {
 						Where(singlepageinfo.BookID(temp.BookID)).
 						All(ctx) // query and return.
 	for _, v := range pages {
-		b.Pages.Images = append(b.Pages.Images, model.MediaFileInfo{
+		b.Images = append(b.Images, model.MediaFileInfo{
 			PageNum:  v.PageNum,
 			Name:     v.Name,
 			Url:      v.URL,
@@ -253,7 +253,7 @@ func GetBooksFromDatabase() (list []*model.Book, err error) {
 			logger.Infof("%s", err)
 		}
 		for _, v := range pages {
-			b.Pages.Images = append(b.Pages.Images, model.MediaFileInfo{
+			b.Images = append(b.Images, model.MediaFileInfo{
 				PageNum:  v.PageNum,
 				Name:     v.Name,
 				Url:      v.URL,

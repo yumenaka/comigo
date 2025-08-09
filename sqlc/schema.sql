@@ -60,12 +60,22 @@ CREATE TABLE media_files
     FOREIGN KEY (book_id) REFERENCES books (book_id) ON DELETE CASCADE
 );
 
+-- Book stores table
+CREATE TABLE stores
+(
+    url         TEXT PRIMARY KEY NOT NULL,          -- Associated file backend ID
+    name        TEXT             NOT NULL,          -- Store name
+    description TEXT,                               -- Store description
+    created_at  DATETIME DEFAULT CURRENT_TIMESTAMP, -- Created time
+    updated_at  DATETIME DEFAULT CURRENT_TIMESTAMP, -- Updated time
+    FOREIGN KEY (url) REFERENCES file_backends (url) ON DELETE CASCADE
+);
+
 -- File backend storage configuration table
 CREATE TABLE file_backends
 (
-    id             INTEGER PRIMARY KEY AUTOINCREMENT,
-    type           INTEGER NOT NULL,                   -- File backend type (1: LocalDisk, 2: SMB, 3: SFTP, 4: WebDAV, 5: S3, 6: FTP)
-    url            TEXT    NOT NULL,                   -- Storage URL
+    url            TEXT PRIMARY KEY NOT NULL,          -- Store URL
+    type           INTEGER          NOT NULL,          -- File backend type (1: LocalDisk, 2: SMB, 3: SFTP, 4: WebDAV, 5: S3, 6: FTP)
     server_host    TEXT,                               -- Server host address
     server_port    INTEGER  DEFAULT 0,                 -- Server port number
     need_auth      BOOLEAN  DEFAULT FALSE,             -- Whether authentication is required
@@ -77,17 +87,6 @@ CREATE TABLE file_backends
     updated_at     DATETIME DEFAULT CURRENT_TIMESTAMP  -- Updated time
 );
 
--- Book stores table
-CREATE TABLE stores
-(
-    id              INTEGER PRIMARY KEY AUTOINCREMENT,
-    name            TEXT    NOT NULL,                   -- Store name
-    description     TEXT,                               -- Store description
-    file_backend_id INTEGER NOT NULL,                   -- Associated file backend ID
-    created_at      DATETIME DEFAULT CURRENT_TIMESTAMP, -- Created time
-    updated_at      DATETIME DEFAULT CURRENT_TIMESTAMP, -- Updated time
-    FOREIGN KEY (file_backend_id) REFERENCES file_backends (id) ON DELETE CASCADE
-);
 
 -- Create indexes for better query performance
 CREATE INDEX idx_books_book_id ON books (book_id);
@@ -96,7 +95,6 @@ CREATE INDEX idx_books_type ON books (type);
 CREATE INDEX idx_books_modified_time ON books (modified_time);
 CREATE INDEX idx_media_files_book_id ON media_files (book_id);
 CREATE INDEX idx_media_files_page_num ON media_files (book_id, page_num);
-CREATE INDEX idx_file_backends_type ON file_backends (type);
-CREATE INDEX idx_stores_name ON stores (name);
-CREATE INDEX idx_stores_file_backend_id ON stores (file_backend_id);
+CREATE INDEX idx_stores_url ON stores (url);
+CREATE INDEX idx_file_backends_url ON file_backends (url);
 

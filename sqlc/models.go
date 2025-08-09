@@ -37,9 +37,8 @@ type Book struct {
 }
 
 type FileBackend struct {
-	ID           int64
-	Type         int64
 	Url          string
+	Type         int64
 	ServerHost   sql.NullString
 	ServerPort   sql.NullInt64
 	NeedAuth     sql.NullBool
@@ -68,12 +67,11 @@ type MediaFile struct {
 }
 
 type Store struct {
-	ID            int64
-	Name          string
-	Description   sql.NullString
-	FileBackendID int64
-	CreatedAt     sql.NullTime
-	UpdatedAt     sql.NullTime
+	Url         string
+	Name        string
+	Description sql.NullString
+	CreatedAt   sql.NullTime
+	UpdatedAt   sql.NullTime
 }
 
 type User struct {
