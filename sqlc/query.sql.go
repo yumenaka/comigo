@@ -171,7 +171,7 @@ INSERT INTO file_backends (
     auth_password, smb_share_name, smb_path
 ) VALUES (
     ?, ?, ?, ?, ?, ?, ?, ?, ?
-) RETURNING id, type, url, server_host, server_port, need_auth, auth_username, auth_password, smb_share_name, smb_path, created_at, updated_at
+) RETURNING url, type, server_host, server_port, need_auth, auth_username, auth_password, smb_share_name, smb_path, created_at, updated_at
 `
 
 type CreateFileBackendParams struct {
@@ -201,9 +201,8 @@ func (q *Queries) CreateFileBackend(ctx context.Context, arg CreateFileBackendPa
 	)
 	var i FileBackend
 	err := row.Scan(
-		&i.ID,
-		&i.Type,
 		&i.Url,
+		&i.Type,
 		&i.ServerHost,
 		&i.ServerPort,
 		&i.NeedAuth,
@@ -278,27 +277,26 @@ func (q *Queries) CreateMediaFile(ctx context.Context, arg CreateMediaFileParams
 
 const createStore = `-- name: CreateStore :one
 INSERT INTO stores (
-    name, description, file_backend_id
+    name, description, url
 ) VALUES (
     ?, ?, ?
-) RETURNING id, name, description, file_backend_id, created_at, updated_at
+) RETURNING url, name, description, created_at, updated_at
 `
 
 type CreateStoreParams struct {
-	Name          string
-	Description   sql.NullString
-	FileBackendID int64
+	Name        string
+	Description sql.NullString
+	Url         string
 }
 
 // Create store
 func (q *Queries) CreateStore(ctx context.Context, arg CreateStoreParams) (Store, error) {
-	row := q.db.QueryRowContext(ctx, createStore, arg.Name, arg.Description, arg.FileBackendID)
+	row := q.db.QueryRowContext(ctx, createStore, arg.Name, arg.Description, arg.Url)
 	var i Store
 	err := row.Scan(
-		&i.ID,
+		&i.Url,
 		&i.Name,
 		&i.Description,
-		&i.FileBackendID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -316,12 +314,12 @@ func (q *Queries) DeleteBook(ctx context.Context, bookID string) error {
 }
 
 const deleteFileBackend = `-- name: DeleteFileBackend :exec
-DELETE FROM file_backends WHERE id = ?
+DELETE FROM file_backends WHERE url = ?
 `
 
 // Delete file backend
-func (q *Queries) DeleteFileBackend(ctx context.Context, id int64) error {
-	_, err := q.db.ExecContext(ctx, deleteFileBackend, id)
+func (q *Queries) DeleteFileBackend(ctx context.Context, url string) error {
+	_, err := q.db.ExecContext(ctx, deleteFileBackend, url)
 	return err
 }
 
@@ -336,12 +334,12 @@ func (q *Queries) DeleteMediaFilesByBookID(ctx context.Context, bookID string) e
 }
 
 const deleteStore = `-- name: DeleteStore :exec
-DELETE FROM stores WHERE id = ?
+DELETE FROM stores WHERE url = ?
 `
 
 // Delete store
-func (q *Queries) DeleteStore(ctx context.Context, id int64) error {
-	_, err := q.db.ExecContext(ctx, deleteStore, id)
+func (q *Queries) DeleteStore(ctx context.Context, url string) error {
+	_, err := q.db.ExecContext(ctx, deleteStore, url)
 	return err
 }
 
@@ -455,19 +453,18 @@ func (q *Queries) GetBookCover(ctx context.Context, bookID string) (MediaFile, e
 
 const getFileBackendByID = `-- name: GetFileBackendByID :one
 
-SELECT id, type, url, server_host, server_port, need_auth, auth_username, auth_password, smb_share_name, smb_path, created_at, updated_at FROM file_backends 
-WHERE id = ? LIMIT 1
+SELECT url, type, server_host, server_port, need_auth, auth_username, auth_password, smb_share_name, smb_path, created_at, updated_at FROM file_backends 
+WHERE url = ? LIMIT 1
 `
 
 // File backend related queries
-// Get file backend by ID
-func (q *Queries) GetFileBackendByID(ctx context.Context, id int64) (FileBackend, error) {
-	row := q.db.QueryRowContext(ctx, getFileBackendByID, id)
+// Get file backend by url
+func (q *Queries) GetFileBackendByID(ctx context.Context, url string) (FileBackend, error) {
+	row := q.db.QueryRowContext(ctx, getFileBackendByID, url)
 	var i FileBackend
 	err := row.Scan(
-		&i.ID,
-		&i.Type,
 		&i.Url,
+		&i.Type,
 		&i.ServerHost,
 		&i.ServerPort,
 		&i.NeedAuth,
@@ -560,30 +557,8 @@ func (q *Queries) GetMediaFilesByBookID(ctx context.Context, bookID string) ([]M
 	return items, nil
 }
 
-const getStoreByID = `-- name: GetStoreByID :one
-
-SELECT id, name, description, file_backend_id, created_at, updated_at FROM stores 
-WHERE id = ? LIMIT 1
-`
-
-// Store related queries
-// Get store by ID
-func (q *Queries) GetStoreByID(ctx context.Context, id int64) (Store, error) {
-	row := q.db.QueryRowContext(ctx, getStoreByID, id)
-	var i Store
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.Description,
-		&i.FileBackendID,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
 const getStoreByName = `-- name: GetStoreByName :one
-SELECT id, name, description, file_backend_id, created_at, updated_at FROM stores 
+SELECT url, name, description, created_at, updated_at FROM stores 
 WHERE name = ? LIMIT 1
 `
 
@@ -592,10 +567,30 @@ func (q *Queries) GetStoreByName(ctx context.Context, name string) (Store, error
 	row := q.db.QueryRowContext(ctx, getStoreByName, name)
 	var i Store
 	err := row.Scan(
-		&i.ID,
+		&i.Url,
 		&i.Name,
 		&i.Description,
-		&i.FileBackendID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getStoreByURL = `-- name: GetStoreByURL :one
+
+SELECT url, name, description, created_at, updated_at FROM stores 
+WHERE url = ? LIMIT 1
+`
+
+// Store related queries
+// Get store by URL
+func (q *Queries) GetStoreByURL(ctx context.Context, url string) (Store, error) {
+	row := q.db.QueryRowContext(ctx, getStoreByURL, url)
+	var i Store
+	err := row.Scan(
+		&i.Url,
+		&i.Name,
+		&i.Description,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -604,23 +599,22 @@ func (q *Queries) GetStoreByName(ctx context.Context, name string) (Store, error
 
 const getStoreWithBackend = `-- name: GetStoreWithBackend :one
 SELECT 
-    s.id, s.name, s.description, s.created_at, s.updated_at,
-    fb.id as backend_id, fb.type, fb.url, fb.server_host, fb.server_port,
+    s.url, s.name, s.description, s.created_at, s.updated_at,
+    fb.type, fb.url, fb.server_host, fb.server_port,
     fb.need_auth, fb.auth_username, fb.auth_password, fb.smb_share_name, fb.smb_path
 FROM stores s
-JOIN file_backends fb ON s.file_backend_id = fb.id
-WHERE s.id = ? LIMIT 1
+JOIN file_backends fb ON s.url = fb.url
+WHERE s.url = ? LIMIT 1
 `
 
 type GetStoreWithBackendRow struct {
-	ID           int64
+	Url          string
 	Name         string
 	Description  sql.NullString
 	CreatedAt    sql.NullTime
 	UpdatedAt    sql.NullTime
-	BackendID    int64
 	Type         int64
-	Url          string
+	Url_2        string
 	ServerHost   sql.NullString
 	ServerPort   sql.NullInt64
 	NeedAuth     sql.NullBool
@@ -631,18 +625,17 @@ type GetStoreWithBackendRow struct {
 }
 
 // Get store with file backend information
-func (q *Queries) GetStoreWithBackend(ctx context.Context, id int64) (GetStoreWithBackendRow, error) {
-	row := q.db.QueryRowContext(ctx, getStoreWithBackend, id)
+func (q *Queries) GetStoreWithBackend(ctx context.Context, url string) (GetStoreWithBackendRow, error) {
+	row := q.db.QueryRowContext(ctx, getStoreWithBackend, url)
 	var i GetStoreWithBackendRow
 	err := row.Scan(
-		&i.ID,
+		&i.Url,
 		&i.Name,
 		&i.Description,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.BackendID,
 		&i.Type,
-		&i.Url,
+		&i.Url_2,
 		&i.ServerHost,
 		&i.ServerPort,
 		&i.NeedAuth,
@@ -834,7 +827,7 @@ func (q *Queries) ListBooksByType(ctx context.Context, type_ string) ([]Book, er
 }
 
 const listFileBackends = `-- name: ListFileBackends :many
-SELECT id, type, url, server_host, server_port, need_auth, auth_username, auth_password, smb_share_name, smb_path, created_at, updated_at FROM file_backends 
+SELECT url, type, server_host, server_port, need_auth, auth_username, auth_password, smb_share_name, smb_path, created_at, updated_at FROM file_backends 
 ORDER BY created_at DESC
 `
 
@@ -849,9 +842,8 @@ func (q *Queries) ListFileBackends(ctx context.Context) ([]FileBackend, error) {
 	for rows.Next() {
 		var i FileBackend
 		if err := rows.Scan(
-			&i.ID,
-			&i.Type,
 			&i.Url,
+			&i.Type,
 			&i.ServerHost,
 			&i.ServerPort,
 			&i.NeedAuth,
@@ -876,7 +868,7 @@ func (q *Queries) ListFileBackends(ctx context.Context) ([]FileBackend, error) {
 }
 
 const listFileBackendsByType = `-- name: ListFileBackendsByType :many
-SELECT id, type, url, server_host, server_port, need_auth, auth_username, auth_password, smb_share_name, smb_path, created_at, updated_at FROM file_backends 
+SELECT url, type, server_host, server_port, need_auth, auth_username, auth_password, smb_share_name, smb_path, created_at, updated_at FROM file_backends 
 WHERE type = ? 
 ORDER BY created_at DESC
 `
@@ -892,9 +884,8 @@ func (q *Queries) ListFileBackendsByType(ctx context.Context, type_ int64) ([]Fi
 	for rows.Next() {
 		var i FileBackend
 		if err := rows.Scan(
-			&i.ID,
-			&i.Type,
 			&i.Url,
+			&i.Type,
 			&i.ServerHost,
 			&i.ServerPort,
 			&i.NeedAuth,
@@ -919,7 +910,7 @@ func (q *Queries) ListFileBackendsByType(ctx context.Context, type_ int64) ([]Fi
 }
 
 const listStores = `-- name: ListStores :many
-SELECT id, name, description, file_backend_id, created_at, updated_at FROM stores 
+SELECT url, name, description, created_at, updated_at FROM stores 
 ORDER BY created_at DESC
 `
 
@@ -934,10 +925,9 @@ func (q *Queries) ListStores(ctx context.Context) ([]Store, error) {
 	for rows.Next() {
 		var i Store
 		if err := rows.Scan(
-			&i.ID,
+			&i.Url,
 			&i.Name,
 			&i.Description,
-			&i.FileBackendID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -956,23 +946,22 @@ func (q *Queries) ListStores(ctx context.Context) ([]Store, error) {
 
 const listStoresWithBackend = `-- name: ListStoresWithBackend :many
 SELECT 
-    s.id, s.name, s.description, s.created_at, s.updated_at,
-    fb.id as backend_id, fb.type, fb.url, fb.server_host, fb.server_port,
+    s.url, s.name, s.description, s.created_at, s.updated_at,
+    fb.type, fb.url, fb.server_host, fb.server_port,
     fb.need_auth, fb.auth_username, fb.auth_password, fb.smb_share_name, fb.smb_path
 FROM stores s
-JOIN file_backends fb ON s.file_backend_id = fb.id
+JOIN file_backends fb ON s.url = fb.url
 ORDER BY s.created_at DESC
 `
 
 type ListStoresWithBackendRow struct {
-	ID           int64
+	Url          string
 	Name         string
 	Description  sql.NullString
 	CreatedAt    sql.NullTime
 	UpdatedAt    sql.NullTime
-	BackendID    int64
 	Type         int64
-	Url          string
+	Url_2        string
 	ServerHost   sql.NullString
 	ServerPort   sql.NullInt64
 	NeedAuth     sql.NullBool
@@ -993,14 +982,13 @@ func (q *Queries) ListStoresWithBackend(ctx context.Context) ([]ListStoresWithBa
 	for rows.Next() {
 		var i ListStoresWithBackendRow
 		if err := rows.Scan(
-			&i.ID,
+			&i.Url,
 			&i.Name,
 			&i.Description,
 			&i.CreatedAt,
 			&i.UpdatedAt,
-			&i.BackendID,
 			&i.Type,
-			&i.Url,
+			&i.Url_2,
 			&i.ServerHost,
 			&i.ServerPort,
 			&i.NeedAuth,
@@ -1160,7 +1148,7 @@ UPDATE file_backends SET
     type = ?, url = ?, server_host = ?, server_port = ?, need_auth = ?,
     auth_username = ?, auth_password = ?, smb_share_name = ?, smb_path = ?,
     updated_at = CURRENT_TIMESTAMP
-WHERE id = ?
+WHERE url = ?
 `
 
 type UpdateFileBackendParams struct {
@@ -1173,7 +1161,7 @@ type UpdateFileBackendParams struct {
 	AuthPassword sql.NullString
 	SmbShareName sql.NullString
 	SmbPath      sql.NullString
-	ID           int64
+	Url_2        string
 }
 
 // Update file backend
@@ -1188,7 +1176,7 @@ func (q *Queries) UpdateFileBackend(ctx context.Context, arg UpdateFileBackendPa
 		arg.AuthPassword,
 		arg.SmbShareName,
 		arg.SmbPath,
-		arg.ID,
+		arg.Url_2,
 	)
 	return err
 }
@@ -1254,16 +1242,16 @@ func (q *Queries) UpdateReadPercent(ctx context.Context, arg UpdateReadPercentPa
 
 const updateStore = `-- name: UpdateStore :exec
 UPDATE stores SET
-    name = ?, description = ?, file_backend_id = ?,
+    name = ?, description = ?, url = ?,
     updated_at = CURRENT_TIMESTAMP
-WHERE id = ?
+WHERE url = ?
 `
 
 type UpdateStoreParams struct {
-	Name          string
-	Description   sql.NullString
-	FileBackendID int64
-	ID            int64
+	Name        string
+	Description sql.NullString
+	Url         string
+	Url_2       string
 }
 
 // Update store
@@ -1271,8 +1259,8 @@ func (q *Queries) UpdateStore(ctx context.Context, arg UpdateStoreParams) error 
 	_, err := q.db.ExecContext(ctx, updateStore,
 		arg.Name,
 		arg.Description,
-		arg.FileBackendID,
-		arg.ID,
+		arg.Url,
+		arg.Url_2,
 	)
 	return err
 }

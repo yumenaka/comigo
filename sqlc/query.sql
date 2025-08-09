@@ -114,10 +114,10 @@ DELETE FROM media_files WHERE book_id = ?;
 
 -- File backend related queries
 
--- Get file backend by ID
+-- Get file backend by url
 -- name: GetFileBackendByID :one
 SELECT * FROM file_backends 
-WHERE id = ? LIMIT 1;
+WHERE url = ? LIMIT 1;
 
 -- List all file backends
 -- name: ListFileBackends :many
@@ -145,18 +145,18 @@ UPDATE file_backends SET
     type = ?, url = ?, server_host = ?, server_port = ?, need_auth = ?,
     auth_username = ?, auth_password = ?, smb_share_name = ?, smb_path = ?,
     updated_at = CURRENT_TIMESTAMP
-WHERE id = ?;
+WHERE url = ?;
 
 -- Delete file backend
 -- name: DeleteFileBackend :exec
-DELETE FROM file_backends WHERE id = ?;
+DELETE FROM file_backends WHERE url = ?;
 
 -- Store related queries
 
--- Get store by ID
--- name: GetStoreByID :one
+-- Get store by URL
+-- name: GetStoreByURL :one
 SELECT * FROM stores 
-WHERE id = ? LIMIT 1;
+WHERE url = ? LIMIT 1;
 
 -- Get store by name
 -- name: GetStoreByName :one
@@ -171,7 +171,7 @@ ORDER BY created_at DESC;
 -- Create store
 -- name: CreateStore :one
 INSERT INTO stores (
-    name, description, file_backend_id
+    name, description, url
 ) VALUES (
     ?, ?, ?
 ) RETURNING *;
@@ -179,32 +179,32 @@ INSERT INTO stores (
 -- Update store
 -- name: UpdateStore :exec
 UPDATE stores SET
-    name = ?, description = ?, file_backend_id = ?,
+    name = ?, description = ?, url = ?,
     updated_at = CURRENT_TIMESTAMP
-WHERE id = ?;
+WHERE url = ?;
 
 -- Delete store
 -- name: DeleteStore :exec
-DELETE FROM stores WHERE id = ?;
+DELETE FROM stores WHERE url = ?;
 
 -- Get store with file backend information
 -- name: GetStoreWithBackend :one
 SELECT 
-    s.id, s.name, s.description, s.created_at, s.updated_at,
-    fb.id as backend_id, fb.type, fb.url, fb.server_host, fb.server_port,
+    s.url, s.name, s.description, s.created_at, s.updated_at,
+    fb.type, fb.url, fb.server_host, fb.server_port,
     fb.need_auth, fb.auth_username, fb.auth_password, fb.smb_share_name, fb.smb_path
 FROM stores s
-JOIN file_backends fb ON s.file_backend_id = fb.id
-WHERE s.id = ? LIMIT 1;
+JOIN file_backends fb ON s.url = fb.url
+WHERE s.url = ? LIMIT 1;
 
 -- List stores with file backend information
 -- name: ListStoresWithBackend :many
 SELECT 
-    s.id, s.name, s.description, s.created_at, s.updated_at,
-    fb.id as backend_id, fb.type, fb.url, fb.server_host, fb.server_port,
+    s.url, s.name, s.description, s.created_at, s.updated_at,
+    fb.type, fb.url, fb.server_host, fb.server_port,
     fb.need_auth, fb.auth_username, fb.auth_password, fb.smb_share_name, fb.smb_path
 FROM stores s
-JOIN file_backends fb ON s.file_backend_id = fb.id
+JOIN file_backends fb ON s.url = fb.url
 ORDER BY s.created_at DESC;
 
 -- Statistics queries
