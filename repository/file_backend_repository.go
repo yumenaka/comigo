@@ -20,8 +20,8 @@ func NewFileBackendRepository(db sqlc.DBTX) *FileBackendRepository {
 }
 
 // GetByID 根据ID获取文件后端
-func (r *FileBackendRepository) GetByID(ctx context.Context, id int64) (*model.FileBackend, error) {
-	sqlcFileBackend, err := r.queries.GetFileBackendByID(ctx, id)
+func (r *FileBackendRepository) GetByID(ctx context.Context, url string) (*model.FileBackend, error) {
+	sqlcFileBackend, err := r.queries.GetFileBackendByID(ctx, url)
 	if err != nil {
 		return nil, err
 	}
@@ -57,14 +57,14 @@ func (r *FileBackendRepository) Create(ctx context.Context, fileBackend *model.F
 }
 
 // Update 更新文件后端信息
-func (r *FileBackendRepository) Update(ctx context.Context, fileBackend *model.FileBackend, id int64) error {
-	params := model.ToSQLCUpdateFileBackendParams(fileBackend, id)
+func (r *FileBackendRepository) Update(ctx context.Context, fileBackend *model.FileBackend) error {
+	params := model.ToSQLCUpdateFileBackendParams(fileBackend)
 	return r.queries.UpdateFileBackend(ctx, params)
 }
 
 // Delete 删除文件后端
-func (r *FileBackendRepository) Delete(ctx context.Context, id int64) error {
-	return r.queries.DeleteFileBackend(ctx, id)
+func (r *FileBackendRepository) Delete(ctx context.Context, url string) error {
+	return r.queries.DeleteFileBackend(ctx, url)
 }
 
 // CountByType 根据类型统计文件后端数量
