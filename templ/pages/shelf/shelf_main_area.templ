@@ -37,7 +37,7 @@ templ MainArea(c echo.Context, ) {
 				>
 					没有可读书籍，请设置书库路径。设置完成后，网页会自动刷新。
 				</div>
-				@settings.StringArrayConfig("LocalStores", state.ServerConfig.LocalStores, "LocalStores_Description", false)
+				@settings.StringArrayConfig("StoreUrls", state.ServerConfig.StoreUrls, "StoreUrls_Description", false)
 			</div>
 		</div>
 		<script>

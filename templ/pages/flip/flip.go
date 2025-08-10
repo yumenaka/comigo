@@ -13,7 +13,7 @@ import (
 
 // PageHandler 阅读界面（翻页模式）
 func PageHandler(c echo.Context) error {
-	model.MainStores.CheckAllBookFileExist()
+	model.MainStoreGroup.CheckAllBookFileExist()
 	bookID := c.Param("id")
 	logger.Info("Flip Mode Book ID:" + bookID)
 	// 图片排序方式
@@ -37,7 +37,7 @@ func PageHandler(c echo.Context) error {
 	// 	c.SetCookie(cookie)
 	// }
 	// 读取url参数，获取书籍ID
-	book, err := model.MainStores.GetBookByID(bookID, sortBy)
+	book, err := model.MainStoreGroup.GetBookByID(bookID, sortBy)
 	if err != nil {
 		logger.Infof("GetBookByID: %v", err)
 		// 没有找到书，显示 HTTP 404 错误

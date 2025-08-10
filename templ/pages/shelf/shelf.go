@@ -30,15 +30,15 @@ func PageHandler(c echo.Context) error {
 	bookID := c.Param("id")
 	// 如果没有指定书籍ID，获取顶层书架信息。
 	if bookID == "" {
-		model.MainStores.CheckAllBookFileExist()
-		state.NowBookList, _ = model.MainStores.TopOfShelfInfo(sortBy)
+		model.MainStoreGroup.CheckAllBookFileExist()
+		state.NowBookList, _ = model.MainStoreGroup.TopOfShelfInfo(sortBy)
 	}
 
 	// 如果指定了书籍ID，获取子书架信息。
 	if bookID != "" {
 		var err error
-		model.MainStores.CheckAllBookFileExist()
-		state.NowBookList, err = model.MainStores.GetChildBooksInfo(bookID, sortBy)
+		model.MainStoreGroup.CheckAllBookFileExist()
+		state.NowBookList, err = model.MainStoreGroup.GetChildBooksInfo(bookID, sortBy)
 		// 无图书的提示（返回主页\上传压缩包\远程下载示例漫画）
 		if err != nil {
 			logger.Infof("GetBookShelf Error: %v", err)

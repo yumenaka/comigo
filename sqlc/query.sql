@@ -78,7 +78,7 @@ DELETE FROM books WHERE book_id = ?;
 -- name: GetMediaFilesByBookID :many
 SELECT * FROM media_files 
 WHERE book_id = ? 
-ORDER BY page_num ASC;
+ORDER BY page_num;
 
 -- Get specific page by book ID and page number
 -- name: GetMediaFileByBookIDAndPage :one
@@ -116,24 +116,24 @@ DELETE FROM media_files WHERE book_id = ?;
 
 -- Get file backend by url
 -- name: GetFileBackendByID :one
-SELECT * FROM file_backends 
+SELECT * FROM file_backends
 WHERE url = ? LIMIT 1;
 
 -- List all file backends
 -- name: ListFileBackends :many
-SELECT * FROM file_backends 
+SELECT * FROM file_backends
 ORDER BY created_at DESC;
 
 -- List file backends by type
 -- name: ListFileBackendsByType :many
-SELECT * FROM file_backends 
-WHERE type = ? 
+SELECT * FROM file_backends
+WHERE type = ?
 ORDER BY created_at DESC;
 
 -- Create file backend
 -- name: CreateFileBackend :one
 INSERT INTO file_backends (
-    type, url, server_host, server_port, need_auth, auth_username,
+    url, type, server_host, server_port, need_auth, auth_username,
     auth_password, smb_share_name, smb_path
 ) VALUES (
     ?, ?, ?, ?, ?, ?, ?, ?, ?
@@ -142,7 +142,7 @@ INSERT INTO file_backends (
 -- Update file backend
 -- name: UpdateFileBackend :exec
 UPDATE file_backends SET
-    type = ?, url = ?, server_host = ?, server_port = ?, need_auth = ?,
+    url = ?, type = ?, server_host = ?, server_port = ?, need_auth = ?,
     auth_username = ?, auth_password = ?, smb_share_name = ?, smb_path = ?,
     updated_at = CURRENT_TIMESTAMP
 WHERE url = ?;
@@ -154,9 +154,9 @@ DELETE FROM file_backends WHERE url = ?;
 -- Store related queries
 
 -- Get store by URL
--- name: GetStoreByURL :one
+-- name: GetStoreByBackendURL :one
 SELECT * FROM stores 
-WHERE url = ? LIMIT 1;
+WHERE backend_url = ? LIMIT 1;
 
 -- Get store by name
 -- name: GetStoreByName :one
@@ -171,7 +171,7 @@ ORDER BY created_at DESC;
 -- Create store
 -- name: CreateStore :one
 INSERT INTO stores (
-    name, description, url
+    backend_url, name, description
 ) VALUES (
     ?, ?, ?
 ) RETURNING *;
@@ -179,32 +179,32 @@ INSERT INTO stores (
 -- Update store
 -- name: UpdateStore :exec
 UPDATE stores SET
-    name = ?, description = ?, url = ?,
+    name = ?, description = ?,
     updated_at = CURRENT_TIMESTAMP
-WHERE url = ?;
+WHERE backend_url = ?;
 
 -- Delete store
 -- name: DeleteStore :exec
-DELETE FROM stores WHERE url = ?;
+DELETE FROM stores WHERE backend_url = ?;
 
 -- Get store with file backend information
 -- name: GetStoreWithBackend :one
-SELECT 
-    s.url, s.name, s.description, s.created_at, s.updated_at,
+SELECT
+    s.backend_url, s.name, s.description, s.created_at, s.updated_at,
     fb.type, fb.url, fb.server_host, fb.server_port,
     fb.need_auth, fb.auth_username, fb.auth_password, fb.smb_share_name, fb.smb_path
 FROM stores s
-JOIN file_backends fb ON s.url = fb.url
-WHERE s.url = ? LIMIT 1;
+JOIN file_backends fb ON s.backend_url = fb.url
+WHERE s.backend_url = ? LIMIT 1;
 
 -- List stores with file backend information
 -- name: ListStoresWithBackend :many
-SELECT 
-    s.url, s.name, s.description, s.created_at, s.updated_at,
+SELECT
+    s.backend_url, s.name, s.description, s.created_at, s.updated_at,
     fb.type, fb.url, fb.server_host, fb.server_port,
     fb.need_auth, fb.auth_username, fb.auth_password, fb.smb_share_name, fb.smb_path
 FROM stores s
-JOIN file_backends fb ON s.url = fb.url
+JOIN file_backends fb ON s.backend_url = fb.url
 ORDER BY s.created_at DESC;
 
 -- Statistics queries
@@ -232,3 +232,66 @@ SELECT COUNT(*) FROM file_backends WHERE type = ?;
 -- Get total file size
 -- name: GetTotalFileSize :one
 SELECT SUM(file_size) FROM books WHERE deleted = FALSE;
+
+-- User related queries
+
+-- Get user by ID
+-- name: GetUserByID :one
+SELECT * FROM users 
+WHERE id = ? LIMIT 1;
+
+-- Get user by username
+-- name: GetUserByUsername :one
+SELECT * FROM users 
+WHERE username = ? LIMIT 1;
+
+-- Get user by email
+-- name: GetUserByEmail :one
+SELECT * FROM users 
+WHERE email = ? LIMIT 1;
+
+-- List all users
+-- name: ListUsers :many
+SELECT * FROM users 
+ORDER BY created_at DESC;
+
+-- Create new user
+-- name: CreateUser :one
+INSERT INTO users (
+    username, password, role, email, key, expires_at
+) VALUES (
+    ?, ?, ?, ?, ?, ?
+) RETURNING *;
+
+-- Update user information
+-- name: UpdateUser :exec
+UPDATE users SET
+    username = ?, password = ?, role = ?, email = ?, key = ?, expires_at = ?,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = ?;
+
+-- Update user password
+-- name: UpdateUserPassword :exec
+UPDATE users SET
+    password = ?,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = ?;
+
+-- Update user key and expiration
+-- name: UpdateUserKey :exec
+UPDATE users SET
+    key = ?, expires_at = ?,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = ?;
+
+-- Delete user
+-- name: DeleteUser :exec
+DELETE FROM users WHERE id = ?;
+
+-- Count total users
+-- name: CountUsers :one
+SELECT COUNT(*) FROM users;
+
+-- Count users by role
+-- name: CountUsersByRole :one
+SELECT COUNT(*) FROM users WHERE role = ?;
