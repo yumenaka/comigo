@@ -12,7 +12,7 @@ import (
 // Examples
 // https://github.com/charmbracelet/bubbletea/tree/main/examples
 
-// 存储程序的状态。可以是任何类型，但结构通常是合理的选择
+// 存储程序的状态。可以是任何类型，但结构体通常是合理的选择
 type model struct {
 	logBuffer *LogBuffer
 	logs      []string

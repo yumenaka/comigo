@@ -6,11 +6,12 @@ templ QRCode(serverHost string) {
 		<!-- QRCode Modal Content -->
 		<div class="relative w-64 h-64 p-1 m-1" x-data="{ qrcodeSrc: '' }" x-init="qrcodeSrc = window.location.origin +'/api/qrcode.png?base64=true&qrcode_str='+ encodeURIComponent(window.location.toString().replace(window.location.hostname,serverHost))">
 			<img
+			    id="qrcode-img"
 				draggable="false"
 				:hx-get="qrcodeSrc"
 				hx-trigger="load"
 				hx-swap="none"
-				hx-on="htmx:afterRequest: this.src = event.detail.xhr.responseText;"
+				hx-on-htmx-after-request="this.src = event.detail.xhr.responseText;"
 				class="w-64 h-64 rounded"
 			/>
 			<a x-ref="content" :href="window.location.toString().replace(window.location.hostname,serverHost)" target="_blank">

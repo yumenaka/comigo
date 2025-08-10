@@ -3,7 +3,6 @@ package model
 import (
 	"errors"
 	"path"
-	"sort"
 	"strings"
 	"time"
 
@@ -73,7 +72,7 @@ func (b *Book) GuestCover() (cover MediaFileInfo) {
 
 // NewBook 初始化 Book，设置文件路径、书名、BookID 等
 func NewBook(filePath string, modified time.Time, fileSize int64, storePath string, depth int, bookType SupportFileType) (*Book, error) {
-	if MainStores.CheckRawFileExist(filePath, bookType) {
+	if MainStoreGroup.CheckRawFileExist(filePath, bookType) {
 		return nil, errors.New("skip: " + filePath)
 	}
 	// 初始化书籍
@@ -119,8 +118,7 @@ func (b *Book) SortPages(s string) {
 		return
 	}
 	if s != "" {
-		b.SortBy = s
-		sort.Sort(b.Pages)
+		b.SortImages(s)
 	}
 }
 

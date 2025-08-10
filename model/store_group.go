@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"strconv"
 	"sync"
-	"time"
 
 	"github.com/yumenaka/comigo/util/logger"
 )
@@ -19,15 +18,12 @@ type StoreGroup struct {
 	ChildStores sync.Map // key为路径 存储 *Store
 }
 
-// MainStores 扫描后生成。可以有多个子书库。内部使用并发安全的 sync.Map 存储书籍和书组
-var MainStores = StoreGroup{
+// MainStoreGroup 扫描后生成。可以有多个子书库。内部使用并发安全的 sync.Map 存储书籍和书组
+var MainStoreGroup = StoreGroup{
 	StoreInfo: StoreInfo{
-		URL:           "comigo://main", // 主书库的 URL
-		Name:          "Comigo StoreInfo",
-		Description:   "Comigo Main book store",
-		FileBackendID: -1,         // 默认书库组，没有特定的文件后端
-		CreatedAt:     time.Now(), // 创建时间
-		UpdatedAt:     time.Now(), // 更新时间
+		BackendURL:  "comigo://main", // 主书库的 URL
+		Name:        "Comigo StoreInfo",
+		Description: "Comigo Main book store",
 	},
 	// 使用 sync.Map 存储书籍和子书库
 	ChildStores: sync.Map{}, // 子书库，储存层级关系
@@ -40,7 +36,11 @@ func (storeGroup *StoreGroup) AddStore(storeURL string) error {
 		return errors.New("add Bookstore Error： The key already exists [" + storeURL + "]")
 	}
 	s := Store{
-		URL: storeURL,
+		StoreInfo: StoreInfo{
+			BackendURL:  storeURL,
+			Name:        filepath.Base(storeURL), // 使用路径的最后一部分作为名称
+			Description: "Comigo StoreInfo for " + storeURL,
+		},
 	}
 	storeGroup.ChildStores.Store(storeURL, &s)
 	return nil
@@ -93,7 +93,11 @@ func (storeGroup *StoreGroup) AddBookToSubStore(storeURL string, b *Book) error 
 	if f, ok := storeGroup.ChildStores.Load(storeURL); !ok {
 		// 创建一个新子书库，并添加一本书
 		newSubStore := Store{
-			URL: storeURL,
+			StoreInfo: StoreInfo{
+				BackendURL:  storeURL,
+				Name:        filepath.Base(storeURL), // 使用路径的最后一部分作为名称
+				Description: "Comigo StoreInfo for " + storeURL,
+			},
 		}
 		newSubStore.BookMap.Store(b.BookID, b)
 		storeGroup.ChildStores.Store(storeURL, &newSubStore)
@@ -283,7 +287,7 @@ func (storeGroup *StoreGroup) GetBookByAuthor(author string, sortBy string) ([]*
 // ClearTempFilesALL 清理所有缓存的临时图片
 func (storeGroup *StoreGroup) ClearTempFilesALL(debug bool, cacheFilePath string) {
 	for _, book := range storeGroup.ListBooks() {
-		MainStores.ClearTempFilesOne(debug, cacheFilePath, book)
+		MainStoreGroup.ClearTempFilesOne(debug, cacheFilePath, book)
 	}
 }
 
@@ -332,8 +336,7 @@ func (storeGroup *StoreGroup) TopOfShelfInfo(sortBy string) (*BookInfoList, erro
 	var infoList BookInfoList
 	for _, b := range storeGroup.ListBooks() {
 		if b.Depth == 0 {
-			info := b.GetBookInfo()
-			infoList.BookInfos = append(infoList.BookInfos, *info)
+			infoList.BookInfos = append(infoList.BookInfos, b.BookInfo)
 		}
 	}
 	if len(infoList.BookInfos) > 0 {
@@ -352,12 +355,11 @@ func (storeGroup *StoreGroup) GetChildBooksInfo(BookID string, sortBy string) (*
 		return nil, errors.New("cannot find child books info，BookID：" + BookID)
 	}
 	for _, childID := range tempGroup.ChildBooksID {
-		b, err := MainStores.GetBookByID(childID, "")
+		b, err := MainStoreGroup.GetBookByID(childID, "")
 		if err != nil {
 			return nil, errors.New("GetParentBook: cannot find book by childID=" + childID)
 		}
-		info := b.GetBookInfo()
-		infoList.BookInfos = append(infoList.BookInfos, *info)
+		infoList.BookInfos = append(infoList.BookInfos, b.BookInfo)
 	}
 	if len(infoList.BookInfos) > 0 {
 		infoList.SortBooks(sortBy)
@@ -372,8 +374,7 @@ func (storeGroup *StoreGroup) GetBookInfoListByParentFolder(parentFolder string,
 	var infoList BookInfoList
 	for _, b := range storeGroup.ListBooks() {
 		if b.ParentFolder == parentFolder {
-			info := b.GetBookInfo()
-			infoList.BookInfos = append(infoList.BookInfos, *info)
+			infoList.BookInfos = append(infoList.BookInfos, b.BookInfo)
 		}
 	}
 	if len(infoList.BookInfos) > 0 {

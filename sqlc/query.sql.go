@@ -72,6 +72,30 @@ func (q *Queries) CountStores(ctx context.Context) (int64, error) {
 	return count, err
 }
 
+const countUsers = `-- name: CountUsers :one
+SELECT COUNT(*) FROM users
+`
+
+// Count total users
+func (q *Queries) CountUsers(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countUsers)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const countUsersByRole = `-- name: CountUsersByRole :one
+SELECT COUNT(*) FROM users WHERE role = ?
+`
+
+// Count users by role
+func (q *Queries) CountUsersByRole(ctx context.Context, role sql.NullString) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countUsersByRole, role)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createBook = `-- name: CreateBook :one
 INSERT INTO books (
     title, book_id, owner, file_path, book_store_path, type,
@@ -167,7 +191,7 @@ func (q *Queries) CreateBook(ctx context.Context, arg CreateBookParams) (Book, e
 
 const createFileBackend = `-- name: CreateFileBackend :one
 INSERT INTO file_backends (
-    type, url, server_host, server_port, need_auth, auth_username,
+    url, type, server_host, server_port, need_auth, auth_username,
     auth_password, smb_share_name, smb_path
 ) VALUES (
     ?, ?, ?, ?, ?, ?, ?, ?, ?
@@ -175,8 +199,8 @@ INSERT INTO file_backends (
 `
 
 type CreateFileBackendParams struct {
-	Type         int64
 	Url          string
+	Type         int64
 	ServerHost   sql.NullString
 	ServerPort   sql.NullInt64
 	NeedAuth     sql.NullBool
@@ -189,8 +213,8 @@ type CreateFileBackendParams struct {
 // Create file backend
 func (q *Queries) CreateFileBackend(ctx context.Context, arg CreateFileBackendParams) (FileBackend, error) {
 	row := q.db.QueryRowContext(ctx, createFileBackend,
-		arg.Type,
 		arg.Url,
+		arg.Type,
 		arg.ServerHost,
 		arg.ServerPort,
 		arg.NeedAuth,
@@ -277,26 +301,68 @@ func (q *Queries) CreateMediaFile(ctx context.Context, arg CreateMediaFileParams
 
 const createStore = `-- name: CreateStore :one
 INSERT INTO stores (
-    name, description, url
+    backend_url, name, description
 ) VALUES (
     ?, ?, ?
-) RETURNING url, name, description, created_at, updated_at
+) RETURNING backend_url, name, description, created_at, updated_at
 `
 
 type CreateStoreParams struct {
+	BackendUrl  string
 	Name        string
 	Description sql.NullString
-	Url         string
 }
 
 // Create store
 func (q *Queries) CreateStore(ctx context.Context, arg CreateStoreParams) (Store, error) {
-	row := q.db.QueryRowContext(ctx, createStore, arg.Name, arg.Description, arg.Url)
+	row := q.db.QueryRowContext(ctx, createStore, arg.BackendUrl, arg.Name, arg.Description)
 	var i Store
 	err := row.Scan(
-		&i.Url,
+		&i.BackendUrl,
 		&i.Name,
 		&i.Description,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const createUser = `-- name: CreateUser :one
+INSERT INTO users (
+    username, password, role, email, key, expires_at
+) VALUES (
+    ?, ?, ?, ?, ?, ?
+) RETURNING id, username, password, role, email, "key", expires_at, created_at, updated_at
+`
+
+type CreateUserParams struct {
+	Username  string
+	Password  string
+	Role      sql.NullString
+	Email     sql.NullString
+	Key       sql.NullString
+	ExpiresAt sql.NullTime
+}
+
+// Create new user
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, createUser,
+		arg.Username,
+		arg.Password,
+		arg.Role,
+		arg.Email,
+		arg.Key,
+		arg.ExpiresAt,
+	)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Password,
+		&i.Role,
+		&i.Email,
+		&i.Key,
+		&i.ExpiresAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -334,12 +400,22 @@ func (q *Queries) DeleteMediaFilesByBookID(ctx context.Context, bookID string) e
 }
 
 const deleteStore = `-- name: DeleteStore :exec
-DELETE FROM stores WHERE url = ?
+DELETE FROM stores WHERE backend_url = ?
 `
 
 // Delete store
-func (q *Queries) DeleteStore(ctx context.Context, url string) error {
-	_, err := q.db.ExecContext(ctx, deleteStore, url)
+func (q *Queries) DeleteStore(ctx context.Context, backendUrl string) error {
+	_, err := q.db.ExecContext(ctx, deleteStore, backendUrl)
+	return err
+}
+
+const deleteUser = `-- name: DeleteUser :exec
+DELETE FROM users WHERE id = ?
+`
+
+// Delete user
+func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, deleteUser, id)
 	return err
 }
 
@@ -453,7 +529,7 @@ func (q *Queries) GetBookCover(ctx context.Context, bookID string) (MediaFile, e
 
 const getFileBackendByID = `-- name: GetFileBackendByID :one
 
-SELECT url, type, server_host, server_port, need_auth, auth_username, auth_password, smb_share_name, smb_path, created_at, updated_at FROM file_backends 
+SELECT url, type, server_host, server_port, need_auth, auth_username, auth_password, smb_share_name, smb_path, created_at, updated_at FROM file_backends
 WHERE url = ? LIMIT 1
 `
 
@@ -515,7 +591,7 @@ const getMediaFilesByBookID = `-- name: GetMediaFilesByBookID :many
 
 SELECT id, book_id, name, path, size, mod_time, url, page_num, blurhash, height, width, img_type, insert_html FROM media_files 
 WHERE book_id = ? 
-ORDER BY page_num ASC
+ORDER BY page_num
 `
 
 // Media files related queries
@@ -557,17 +633,19 @@ func (q *Queries) GetMediaFilesByBookID(ctx context.Context, bookID string) ([]M
 	return items, nil
 }
 
-const getStoreByName = `-- name: GetStoreByName :one
-SELECT url, name, description, created_at, updated_at FROM stores 
-WHERE name = ? LIMIT 1
+const getStoreByBackendURL = `-- name: GetStoreByBackendURL :one
+
+SELECT backend_url, name, description, created_at, updated_at FROM stores 
+WHERE backend_url = ? LIMIT 1
 `
 
-// Get store by name
-func (q *Queries) GetStoreByName(ctx context.Context, name string) (Store, error) {
-	row := q.db.QueryRowContext(ctx, getStoreByName, name)
+// Store related queries
+// Get store by URL
+func (q *Queries) GetStoreByBackendURL(ctx context.Context, backendUrl string) (Store, error) {
+	row := q.db.QueryRowContext(ctx, getStoreByBackendURL, backendUrl)
 	var i Store
 	err := row.Scan(
-		&i.Url,
+		&i.BackendUrl,
 		&i.Name,
 		&i.Description,
 		&i.CreatedAt,
@@ -576,19 +654,17 @@ func (q *Queries) GetStoreByName(ctx context.Context, name string) (Store, error
 	return i, err
 }
 
-const getStoreByURL = `-- name: GetStoreByURL :one
-
-SELECT url, name, description, created_at, updated_at FROM stores 
-WHERE url = ? LIMIT 1
+const getStoreByName = `-- name: GetStoreByName :one
+SELECT backend_url, name, description, created_at, updated_at FROM stores 
+WHERE name = ? LIMIT 1
 `
 
-// Store related queries
-// Get store by URL
-func (q *Queries) GetStoreByURL(ctx context.Context, url string) (Store, error) {
-	row := q.db.QueryRowContext(ctx, getStoreByURL, url)
+// Get store by name
+func (q *Queries) GetStoreByName(ctx context.Context, name string) (Store, error) {
+	row := q.db.QueryRowContext(ctx, getStoreByName, name)
 	var i Store
 	err := row.Scan(
-		&i.Url,
+		&i.BackendUrl,
 		&i.Name,
 		&i.Description,
 		&i.CreatedAt,
@@ -598,23 +674,23 @@ func (q *Queries) GetStoreByURL(ctx context.Context, url string) (Store, error) 
 }
 
 const getStoreWithBackend = `-- name: GetStoreWithBackend :one
-SELECT 
-    s.url, s.name, s.description, s.created_at, s.updated_at,
+SELECT
+    s.backend_url, s.name, s.description, s.created_at, s.updated_at,
     fb.type, fb.url, fb.server_host, fb.server_port,
     fb.need_auth, fb.auth_username, fb.auth_password, fb.smb_share_name, fb.smb_path
 FROM stores s
-JOIN file_backends fb ON s.url = fb.url
-WHERE s.url = ? LIMIT 1
+JOIN file_backends fb ON s.backend_url = fb.url
+WHERE s.backend_url = ? LIMIT 1
 `
 
 type GetStoreWithBackendRow struct {
-	Url          string
+	BackendUrl   string
 	Name         string
 	Description  sql.NullString
 	CreatedAt    sql.NullTime
 	UpdatedAt    sql.NullTime
 	Type         int64
-	Url_2        string
+	Url          string
 	ServerHost   sql.NullString
 	ServerPort   sql.NullInt64
 	NeedAuth     sql.NullBool
@@ -625,17 +701,17 @@ type GetStoreWithBackendRow struct {
 }
 
 // Get store with file backend information
-func (q *Queries) GetStoreWithBackend(ctx context.Context, url string) (GetStoreWithBackendRow, error) {
-	row := q.db.QueryRowContext(ctx, getStoreWithBackend, url)
+func (q *Queries) GetStoreWithBackend(ctx context.Context, backendUrl string) (GetStoreWithBackendRow, error) {
+	row := q.db.QueryRowContext(ctx, getStoreWithBackend, backendUrl)
 	var i GetStoreWithBackendRow
 	err := row.Scan(
-		&i.Url,
+		&i.BackendUrl,
 		&i.Name,
 		&i.Description,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Type,
-		&i.Url_2,
+		&i.Url,
 		&i.ServerHost,
 		&i.ServerPort,
 		&i.NeedAuth,
@@ -657,6 +733,77 @@ func (q *Queries) GetTotalFileSize(ctx context.Context) (sql.NullFloat64, error)
 	var sum sql.NullFloat64
 	err := row.Scan(&sum)
 	return sum, err
+}
+
+const getUserByEmail = `-- name: GetUserByEmail :one
+SELECT id, username, password, role, email, "key", expires_at, created_at, updated_at FROM users 
+WHERE email = ? LIMIT 1
+`
+
+// Get user by email
+func (q *Queries) GetUserByEmail(ctx context.Context, email sql.NullString) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByEmail, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Password,
+		&i.Role,
+		&i.Email,
+		&i.Key,
+		&i.ExpiresAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getUserByID = `-- name: GetUserByID :one
+
+SELECT id, username, password, role, email, "key", expires_at, created_at, updated_at FROM users 
+WHERE id = ? LIMIT 1
+`
+
+// User related queries
+// Get user by ID
+func (q *Queries) GetUserByID(ctx context.Context, id int64) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByID, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Password,
+		&i.Role,
+		&i.Email,
+		&i.Key,
+		&i.ExpiresAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getUserByUsername = `-- name: GetUserByUsername :one
+SELECT id, username, password, role, email, "key", expires_at, created_at, updated_at FROM users 
+WHERE username = ? LIMIT 1
+`
+
+// Get user by username
+func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByUsername, username)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Password,
+		&i.Role,
+		&i.Email,
+		&i.Key,
+		&i.ExpiresAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
 const listBooks = `-- name: ListBooks :many
@@ -827,7 +974,7 @@ func (q *Queries) ListBooksByType(ctx context.Context, type_ string) ([]Book, er
 }
 
 const listFileBackends = `-- name: ListFileBackends :many
-SELECT url, type, server_host, server_port, need_auth, auth_username, auth_password, smb_share_name, smb_path, created_at, updated_at FROM file_backends 
+SELECT url, type, server_host, server_port, need_auth, auth_username, auth_password, smb_share_name, smb_path, created_at, updated_at FROM file_backends
 ORDER BY created_at DESC
 `
 
@@ -868,8 +1015,8 @@ func (q *Queries) ListFileBackends(ctx context.Context) ([]FileBackend, error) {
 }
 
 const listFileBackendsByType = `-- name: ListFileBackendsByType :many
-SELECT url, type, server_host, server_port, need_auth, auth_username, auth_password, smb_share_name, smb_path, created_at, updated_at FROM file_backends 
-WHERE type = ? 
+SELECT url, type, server_host, server_port, need_auth, auth_username, auth_password, smb_share_name, smb_path, created_at, updated_at FROM file_backends
+WHERE type = ?
 ORDER BY created_at DESC
 `
 
@@ -910,7 +1057,7 @@ func (q *Queries) ListFileBackendsByType(ctx context.Context, type_ int64) ([]Fi
 }
 
 const listStores = `-- name: ListStores :many
-SELECT url, name, description, created_at, updated_at FROM stores 
+SELECT backend_url, name, description, created_at, updated_at FROM stores 
 ORDER BY created_at DESC
 `
 
@@ -925,7 +1072,7 @@ func (q *Queries) ListStores(ctx context.Context) ([]Store, error) {
 	for rows.Next() {
 		var i Store
 		if err := rows.Scan(
-			&i.Url,
+			&i.BackendUrl,
 			&i.Name,
 			&i.Description,
 			&i.CreatedAt,
@@ -945,23 +1092,23 @@ func (q *Queries) ListStores(ctx context.Context) ([]Store, error) {
 }
 
 const listStoresWithBackend = `-- name: ListStoresWithBackend :many
-SELECT 
-    s.url, s.name, s.description, s.created_at, s.updated_at,
+SELECT
+    s.backend_url, s.name, s.description, s.created_at, s.updated_at,
     fb.type, fb.url, fb.server_host, fb.server_port,
     fb.need_auth, fb.auth_username, fb.auth_password, fb.smb_share_name, fb.smb_path
 FROM stores s
-JOIN file_backends fb ON s.url = fb.url
+JOIN file_backends fb ON s.backend_url = fb.url
 ORDER BY s.created_at DESC
 `
 
 type ListStoresWithBackendRow struct {
-	Url          string
+	BackendUrl   string
 	Name         string
 	Description  sql.NullString
 	CreatedAt    sql.NullTime
 	UpdatedAt    sql.NullTime
 	Type         int64
-	Url_2        string
+	Url          string
 	ServerHost   sql.NullString
 	ServerPort   sql.NullInt64
 	NeedAuth     sql.NullBool
@@ -982,13 +1129,13 @@ func (q *Queries) ListStoresWithBackend(ctx context.Context) ([]ListStoresWithBa
 	for rows.Next() {
 		var i ListStoresWithBackendRow
 		if err := rows.Scan(
-			&i.Url,
+			&i.BackendUrl,
 			&i.Name,
 			&i.Description,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.Type,
-			&i.Url_2,
+			&i.Url,
 			&i.ServerHost,
 			&i.ServerPort,
 			&i.NeedAuth,
@@ -996,6 +1143,45 @@ func (q *Queries) ListStoresWithBackend(ctx context.Context) ([]ListStoresWithBa
 			&i.AuthPassword,
 			&i.SmbShareName,
 			&i.SmbPath,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listUsers = `-- name: ListUsers :many
+SELECT id, username, password, role, email, "key", expires_at, created_at, updated_at FROM users 
+ORDER BY created_at DESC
+`
+
+// List all users
+func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
+	rows, err := q.db.QueryContext(ctx, listUsers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Username,
+			&i.Password,
+			&i.Role,
+			&i.Email,
+			&i.Key,
+			&i.ExpiresAt,
+			&i.CreatedAt,
+			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -1145,15 +1331,15 @@ func (q *Queries) UpdateBook(ctx context.Context, arg UpdateBookParams) error {
 
 const updateFileBackend = `-- name: UpdateFileBackend :exec
 UPDATE file_backends SET
-    type = ?, url = ?, server_host = ?, server_port = ?, need_auth = ?,
+    url = ?, type = ?, server_host = ?, server_port = ?, need_auth = ?,
     auth_username = ?, auth_password = ?, smb_share_name = ?, smb_path = ?,
     updated_at = CURRENT_TIMESTAMP
 WHERE url = ?
 `
 
 type UpdateFileBackendParams struct {
-	Type         int64
 	Url          string
+	Type         int64
 	ServerHost   sql.NullString
 	ServerPort   sql.NullInt64
 	NeedAuth     sql.NullBool
@@ -1167,8 +1353,8 @@ type UpdateFileBackendParams struct {
 // Update file backend
 func (q *Queries) UpdateFileBackend(ctx context.Context, arg UpdateFileBackendParams) error {
 	_, err := q.db.ExecContext(ctx, updateFileBackend,
-		arg.Type,
 		arg.Url,
+		arg.Type,
 		arg.ServerHost,
 		arg.ServerPort,
 		arg.NeedAuth,
@@ -1242,25 +1428,87 @@ func (q *Queries) UpdateReadPercent(ctx context.Context, arg UpdateReadPercentPa
 
 const updateStore = `-- name: UpdateStore :exec
 UPDATE stores SET
-    name = ?, description = ?, url = ?,
+    name = ?, description = ?,
     updated_at = CURRENT_TIMESTAMP
-WHERE url = ?
+WHERE backend_url = ?
 `
 
 type UpdateStoreParams struct {
 	Name        string
 	Description sql.NullString
-	Url         string
-	Url_2       string
+	BackendUrl  string
 }
 
 // Update store
 func (q *Queries) UpdateStore(ctx context.Context, arg UpdateStoreParams) error {
-	_, err := q.db.ExecContext(ctx, updateStore,
-		arg.Name,
-		arg.Description,
-		arg.Url,
-		arg.Url_2,
+	_, err := q.db.ExecContext(ctx, updateStore, arg.Name, arg.Description, arg.BackendUrl)
+	return err
+}
+
+const updateUser = `-- name: UpdateUser :exec
+UPDATE users SET
+    username = ?, password = ?, role = ?, email = ?, key = ?, expires_at = ?,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = ?
+`
+
+type UpdateUserParams struct {
+	Username  string
+	Password  string
+	Role      sql.NullString
+	Email     sql.NullString
+	Key       sql.NullString
+	ExpiresAt sql.NullTime
+	ID        int64
+}
+
+// Update user information
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
+	_, err := q.db.ExecContext(ctx, updateUser,
+		arg.Username,
+		arg.Password,
+		arg.Role,
+		arg.Email,
+		arg.Key,
+		arg.ExpiresAt,
+		arg.ID,
 	)
+	return err
+}
+
+const updateUserKey = `-- name: UpdateUserKey :exec
+UPDATE users SET
+    key = ?, expires_at = ?,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = ?
+`
+
+type UpdateUserKeyParams struct {
+	Key       sql.NullString
+	ExpiresAt sql.NullTime
+	ID        int64
+}
+
+// Update user key and expiration
+func (q *Queries) UpdateUserKey(ctx context.Context, arg UpdateUserKeyParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserKey, arg.Key, arg.ExpiresAt, arg.ID)
+	return err
+}
+
+const updateUserPassword = `-- name: UpdateUserPassword :exec
+UPDATE users SET
+    password = ?,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = ?
+`
+
+type UpdateUserPasswordParams struct {
+	Password string
+	ID       int64
+}
+
+// Update user password
+func (q *Queries) UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserPassword, arg.Password, arg.ID)
 	return err
 }

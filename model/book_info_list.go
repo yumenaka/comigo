@@ -7,6 +7,10 @@ import (
 )
 
 // BookInfoList 表示 BookInfo 的列表，排序用
+// 在 Go 中，方法接收器必须是命名类型，这是为了确保类型具有一个唯一的标识和类型身份，从而可以在包级作用域中明确地定义和调用这些方法。
+// 匿名类型（例如直接使用切片常量）没有显式的名称，无法保证方法在整个代码中的一致性和可追踪性，也无法满足 Go 编译器对方法集的解析要求。
+// 所以需要定义一个命名类型 BookInfoList 来包含 BookInfo 的切片，并提供排序方法。
+// 这样可以确保 BookInfoList 具有明确的类型身份，并且可以在包级作用域中使用和扩展。
 type BookInfoList struct {
 	BookInfos []BookInfo
 }

@@ -1,18 +1,20 @@
 -- User  information table
-CREATE TABLE users
+CREATE TABLE IF NOT EXISTS users
 (
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
     username   TEXT UNIQUE NOT NULL,               -- Username
     password   TEXT        NOT NULL,               -- Password (hashed)
-    email      TEXT UNIQUE,                        -- Email address
     role       TEXT     DEFAULT 'user',            -- User role (admin/user)
+    email      TEXT UNIQUE,                        -- Email address
+    key        TEXT,                               -- User key (for API access)
+    expires_at DATETIME,                           -- Key expiration time
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP, -- Created time
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP  -- Updated time
 );
 
 
 -- Book information table
-CREATE TABLE books
+CREATE TABLE IF NOT EXISTS books
 (
     id                INTEGER PRIMARY KEY AUTOINCREMENT,
     title             TEXT        NOT NULL,               -- Book title
@@ -42,7 +44,7 @@ CREATE TABLE books
 );
 
 -- Media files information table (for storing page image information)
-CREATE TABLE media_files
+CREATE TABLE IF NOT EXISTS media_files
 (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     book_id     TEXT NOT NULL,     -- Associated book ID
@@ -61,18 +63,18 @@ CREATE TABLE media_files
 );
 
 -- Book stores table
-CREATE TABLE stores
+CREATE TABLE IF NOT EXISTS stores
 (
-    url         TEXT PRIMARY KEY NOT NULL,          -- Associated file backend ID
+    backend_url TEXT PRIMARY KEY NOT NULL,          -- Associated file backend ID
     name        TEXT             NOT NULL,          -- Store name
     description TEXT,                               -- Store description
     created_at  DATETIME DEFAULT CURRENT_TIMESTAMP, -- Created time
     updated_at  DATETIME DEFAULT CURRENT_TIMESTAMP, -- Updated time
-    FOREIGN KEY (url) REFERENCES file_backends (url) ON DELETE CASCADE
+    FOREIGN KEY (backend_url) REFERENCES file_backends (url) ON DELETE CASCADE
 );
 
 -- File backend storage configuration table
-CREATE TABLE file_backends
+CREATE TABLE IF NOT EXISTS file_backends
 (
     url            TEXT PRIMARY KEY NOT NULL,          -- Store URL
     type           INTEGER          NOT NULL,          -- File backend type (1: LocalDisk, 2: SMB, 3: SFTP, 4: WebDAV, 5: S3, 6: FTP)
@@ -89,12 +91,12 @@ CREATE TABLE file_backends
 
 
 -- Create indexes for better query performance
-CREATE INDEX idx_books_book_id ON books (book_id);
-CREATE INDEX idx_books_file_path ON books (file_path);
-CREATE INDEX idx_books_type ON books (type);
-CREATE INDEX idx_books_modified_time ON books (modified_time);
-CREATE INDEX idx_media_files_book_id ON media_files (book_id);
-CREATE INDEX idx_media_files_page_num ON media_files (book_id, page_num);
-CREATE INDEX idx_stores_url ON stores (url);
-CREATE INDEX idx_file_backends_url ON file_backends (url);
+CREATE INDEX IF NOT EXISTS idx_books_book_id ON books (book_id);
+CREATE INDEX IF NOT EXISTS idx_books_file_path ON books (file_path);
+CREATE INDEX IF NOT EXISTS idx_books_type ON books (type);
+CREATE INDEX IF NOT EXISTS idx_books_modified_time ON books (modified_time);
+CREATE INDEX IF NOT EXISTS idx_media_files_book_id ON media_files (book_id);
+CREATE INDEX IF NOT EXISTS idx_media_files_page_num ON media_files (book_id, page_num);
+CREATE INDEX IF NOT EXISTS idx_stores_url ON stores (backend_url);
+CREATE INDEX IF NOT EXISTS idx_file_backends_url ON file_backends (url);
 

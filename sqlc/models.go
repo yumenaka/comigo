@@ -67,7 +67,7 @@ type MediaFile struct {
 }
 
 type Store struct {
-	Url         string
+	BackendUrl  string
 	Name        string
 	Description sql.NullString
 	CreatedAt   sql.NullTime
@@ -78,8 +78,10 @@ type User struct {
 	ID        int64
 	Username  string
 	Password  string
-	Email     sql.NullString
 	Role      sql.NullString
+	Email     sql.NullString
+	Key       sql.NullString
+	ExpiresAt sql.NullTime
 	CreatedAt sql.NullTime
 	UpdatedAt sql.NullTime
 }

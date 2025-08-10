@@ -16,9 +16,17 @@ var (
 	scanMutex sync.Mutex // 保护 scanning 标志的锁
 )
 
+// DirNode 表示目录树节点，用于表示文件系统中的目录结构。
+type DirNode struct {
+	Name    string                `json:"name"`
+	Path    string                `json:"path"`
+	SubDirs []DirNode             `json:"sub_dirs"` // 子目录列表
+	Files   []model.MediaFileInfo `json:"files"`    // 本目录下的图片文件列表
+}
+
 // HandleDirectory 扫描目录的核心函数：递归遍历目录，忽略指定名称的文件夹，收集图片文件信息
-func HandleDirectory(currentPath string, depth int, option Option) (model.DirNode, []string, []model.MediaFileInfo, error) {
-	node := model.DirNode{
+func HandleDirectory(currentPath string, depth int, option Option) (DirNode, []string, []model.MediaFileInfo, error) {
+	node := DirNode{
 		Name: filepath.Base(currentPath), // filepath.Base():返回路径的最后一个元素
 		Path: currentPath,
 	}

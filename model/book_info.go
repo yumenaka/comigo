@@ -51,7 +51,7 @@ func (b *BookInfo) initBookID() *BookInfo {
 	// 3. 可以通过在任何文本编辑器和浏览器地址栏中双击鼠标来完全选择
 	// 4. 紧凑，生成的字符串比 Base32 短
 	b62 := base62.EncodeToString([]byte(util.Md5string(util.Md5string(tempStr))))
-	b.BookID = MainStores.GetShortBookID(b62, 7)
+	b.BookID = MainStoreGroup.GetShortBookID(b62, 7)
 	return b
 }
 
@@ -100,10 +100,10 @@ var (
 	reExt = regexp.MustCompile(`\.(?i)(zip|rar|cbr|cbz|tar|pdf|mp3|mp4|flv|gz|webm|gif|png|jpg|jpeg|webp|svg|psd|bmp|tif)$`)
 
 	// 去除各种括号及其内容（非贪婪）
-	reRound         = regexp.MustCompile(`\([^()]*?\)`)   // 匹配 ()
-	reSquare        = regexp.MustCompile(`\[[^\[\]]*?\]`) // 匹配 []
-	reChineseRound  = regexp.MustCompile(`（[^（）]*?）`)     // 匹配 （）
-	reChineseSquare = regexp.MustCompile(`【[^【】]*?】`)     // 匹配 【】
+	reRound         = regexp.MustCompile(`\([^()]*?\)`)  // 匹配 ()
+	reSquare        = regexp.MustCompile(`\[[^\[\]]*?]`) // 匹配 []
+	reChineseRound  = regexp.MustCompile(`（[^（）]*?）`)    // 匹配 （）
+	reChineseSquare = regexp.MustCompile(`【[^【】]*?】`)    // 匹配 【】
 
 	// 如果只想移除开头的 domain 就保留 ^；想全局替换就去掉 ^
 	domainReg = regexp.MustCompile(`^(((ht|f)tps?)://)?([^!@#$%^&*?.\s-]([^!@#$%^&*?.\s]{0,63}[^!@#$%^&*?.\s])?\.)+[a-zA-Z]{2,6}/?`)
@@ -188,22 +188,21 @@ func (b *BookInfo) GetCover() MediaFileInfo {
 	switch b.Type {
 	// 书籍类型为书组的时候，遍历所有子书籍，然后获取第一个子书籍的封面
 	case TypeBooksGroup:
-		bookGroup, err := MainStores.GetBookByID(b.BookID, "")
+		bookGroup, err := MainStoreGroup.GetBookByID(b.BookID, "")
 		if err != nil {
 			logger.Infof("Error getting book group: %s", err)
 			return MediaFileInfo{Name: "unknown.png", Url: "/images/unknown.png"}
 		}
 		for _, childID := range bookGroup.ChildBooksID {
-			book, err := MainStores.GetBookByID(childID, "")
+			book, err := MainStoreGroup.GetBookByID(childID, "")
 			if err != nil {
 				return MediaFileInfo{Name: "unknown.png", Url: "/images/unknown.png"}
 			}
-			info := book.GetBookInfo()
 			// 递归调用
-			return info.GetCover()
+			return book.GetCover()
 		}
 	case TypeDir, TypeZip, TypeRar, TypeCbz, TypeCbr, TypeTar, TypeEpub:
-		tempBook, err := MainStores.GetBookByID(b.BookID, "")
+		tempBook, err := MainStoreGroup.GetBookByID(b.BookID, "")
 		if err != nil || len(tempBook.Images) == 0 {
 			return MediaFileInfo{Name: "unknown.png", Url: "/images/unknown.png"}
 		}
