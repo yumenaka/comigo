@@ -5,9 +5,9 @@ import (
 
 	"github.com/spf13/viper"
 	"github.com/yumenaka/comigo/config"
-	"github.com/yumenaka/comigo/internal/database"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/routers/upload_api"
+	"github.com/yumenaka/comigo/sqlc"
 	"github.com/yumenaka/comigo/util"
 	"github.com/yumenaka/comigo/util/logger"
 	"github.com/yumenaka/comigo/util/scan"
@@ -18,15 +18,15 @@ func ScanStore(args []string) {
 	// 1. 初始化数据库
 	if config.GetEnableDatabase() {
 		// 从数据库中读取书籍信息并持久化
-		if err := database.InitDatabase(viper.ConfigFileUsed()); err != nil {
+		if err := sqlc.OpenDatabase(viper.ConfigFileUsed()); err != nil {
 			logger.Infof("%s", err)
 		}
-		books, err := database.GetBooksFromDatabase()
+		books, err := sqlc.Repo.GetBooksFromDatabase()
 		if err != nil {
 			logger.Infof("%s", err)
 		} else {
 			for _, book := range books {
-				err = model.MainStores.AddBook(book.BookStorePath, book, config.GetMinImageNum())
+				err = model.MainStoreGroup.AddBook(book.BookStorePath, book, config.GetMinImageNum())
 				if err != nil {
 					logger.Infof("AddBook error: %s", err)
 				} else {
@@ -79,18 +79,19 @@ func CreateLocalStores(args []string) {
 			// 尝试把上传路径添加为书库里
 			config.GetCfg().AddStoreUrl(config.GetUploadPath())
 		}
-		// 如果用户启用上传，但没有指定上传路径，就把【本地存储】里面的第一个路径作为上传路径
+		// 如果用户启用上传，但没有指定上传路径
 		if config.GetUploadPath() == "" {
-			for _, store := range config.GetStoreUrls() {
-				if util.IsExist(store) {
-					config.SetUploadPath(store)
+			for _, storeUrl := range config.GetStoreUrls() {
+				// 把【本地存储】里面的第一个可用路径作为上传路径
+				if util.IsExist(storeUrl) {
+					config.SetUploadPath(storeUrl)
 					config.GetCfg().AddStoreUrl(config.GetUploadPath())
 					break
 				}
 			}
 		}
 	}
-	// 把扫描路径设置，传递给handlers包
+	// 扫描路径设置，传递给 router
 	upload_api.ConfigEnableUpload = &config.GetCfg().EnableUpload
 	upload_api.ConfigUploadPath = &config.GetCfg().UploadPath
 }
