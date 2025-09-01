@@ -4,11 +4,10 @@ import (
 	"reflect"
 	"strconv"
 
-	"github.com/spf13/viper"
 	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/routers/config_api"
 	"github.com/yumenaka/comigo/util"
 	"github.com/yumenaka/comigo/util/logger"
-	"github.com/yumenaka/comigo/util/scan"
 )
 
 var RestartWebServerBroadcast *chan string
@@ -23,12 +22,12 @@ func beforeConfigUpdate(oldConfig *config.Config, newConfig *config.Config) {
 	reScanStores, reStartWebServer := checkServerActions(oldConfig, newConfig)
 	logger.Infof("reScanDir: %v, reStartWebServer: %v ", reScanStores, reStartWebServer)
 	if reStartWebServer {
-		// 此处需要不能导入routers，因为会循环引用  routers.RestartWebServer() X
+		// 此处需要不能导入routers，因为会循环引用  routers.RestartWebServer()
 		// 使用广播的方式来通知 :
 		*RestartWebServerBroadcast <- "restart_web_server"
 	}
 	if reScanStores {
-		startReScan()
+		config_api.StartReScan()
 	} else {
 		if newConfig.Debug {
 			logger.Info("No changes in cfg, skipped rescan dir\n")
@@ -89,25 +88,5 @@ func checkServerActions(oldConfig *config.Config, newConfig *config.Config) (reS
 	if oldConfig.DisableLAN != newConfig.DisableLAN {
 		reStartWebServer = true
 	}
-	// if oldConfig.StaticFileMode != newConfig.StaticFileMode {
-	// 	reStartWebServer = true
-	// }
 	return
-}
-
-// startReScan 扫描并相应地更新数据库
-func startReScan() {
-	config.GetCfg().InitStoreUrls()
-	if err := scan.InitAllStore(scan.NewOption(config.GetCfg())); err != nil {
-		logger.Infof("Failed to scan store path: %v", err)
-	}
-	if config.GetEnableDatabase() {
-		saveResultsToDatabase(viper.ConfigFileUsed(), config.GetClearDatabaseWhenExit())
-	}
-}
-
-func saveResultsToDatabase(configPath string, clearDatabaseWhenExit bool) {
-	if err := scan.SaveResultsToDatabase(configPath, clearDatabaseWhenExit); err != nil {
-		logger.Infof("Failed to save results to database: %v", err)
-	}
 }

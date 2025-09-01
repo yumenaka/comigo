@@ -9,9 +9,17 @@ import (
 	"github.com/yumenaka/comigo/util/logger"
 )
 
+// StoreInfo 书库基本信息
+type StoreInfo struct {
+	BackendURL  string // 本地书库文件夹路径，或远程书库URL
+	Name        string
+	Description string
+	Backend
+}
+
 // Store 对应某个扫描路径的子书库，目前只支持本地书库
 type Store struct {
-	URL     string   // 本地书库文件夹路径，或远程书库URL
+	StoreInfo
 	BookMap sync.Map // 拥有的书籍,key是BookID,存储 *Book
 }
 
@@ -54,7 +62,7 @@ func (store *Store) InitBookGroup() error {
 			}
 			// 获取修改时间
 			modTime := pathInfo.ModTime()
-			tempBookInfo, err := NewBookInfo(filepath.Dir(sameParentBookList[0].FilePath), modTime, 0, store.URL, depth-1, TypeBooksGroup)
+			tempBookInfo, err := NewBookInfo(filepath.Dir(sameParentBookList[0].FilePath), modTime, 0, store.BackendURL, depth-1, TypeBooksGroup)
 			if err != nil {
 				logger.Infof("%s", err)
 				continue
@@ -78,7 +86,7 @@ func (store *Store) InitBookGroup() error {
 			}
 			// 检测是否已经生成并添加过
 			Added := false
-			for _, bookGroup := range MainStores.ListBooks() {
+			for _, bookGroup := range MainStoreGroup.ListBooks() {
 				if bookGroup.Type == TypeBooksGroup {
 					continue // 只处理书籍组类型
 				}

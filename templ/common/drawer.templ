@@ -72,7 +72,7 @@ templ Drawer(c echo.Context, book *model.Book, slot templ.Component) {
                 :hx-get="qrcodeSrc"
                 hx-trigger="load"
                 hx-swap="none"
-                hx-on="htmx:afterRequest: this.src = event.detail.xhr.responseText;"
+                hx-on-htmx-after-request="this.src = event.detail.xhr.responseText;"
                 class="w-32 h-32 rounded border border-gray-500 dark:border-gray-200"/>
 			</div>
 			<!-- 清除localStorage保存的本地设置-->

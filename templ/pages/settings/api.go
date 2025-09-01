@@ -242,7 +242,7 @@ func AddArrayConfigHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "add error")
 	}
 	saveSuccessHint := false
-	if configName == "LocalStores" {
+	if configName == "StoreUrls" {
 		saveSuccessHint = true
 	}
 	updatedHTML := StringArrayConfig(configName, values, configName+"_Description", saveSuccessHint)

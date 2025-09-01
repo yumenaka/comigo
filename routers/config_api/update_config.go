@@ -93,16 +93,13 @@ func checkNeedReScan(oldConfig *config.Config, newConfig *config.Config) (reScan
 
 // StartReScan 扫描并相应地更新数据库
 func StartReScan() {
+	config.GetCfg().InitStoreUrls()
 	if err := scan.InitAllStore(scan.NewOption(config.GetCfg())); err != nil {
 		logger.Infof("Failed to scan store path: %v", err)
 	}
 	if config.GetEnableDatabase() {
-		saveResultsToDatabase(viper.ConfigFileUsed(), config.GetClearDatabaseWhenExit())
-	}
-}
-
-func saveResultsToDatabase(configPath string, clearDatabaseWhenExit bool) {
-	if err := scan.SaveResultsToDatabase(configPath, clearDatabaseWhenExit); err != nil {
-		logger.Infof("Failed to save results to database: %v", err)
+		if err := scan.SaveResultsToDatabase(viper.ConfigFileUsed(), config.GetClearDatabaseWhenExit()); err != nil {
+			logger.Infof("Failed to save results to database: %v", err)
+		}
 	}
 }
