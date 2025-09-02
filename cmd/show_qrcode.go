@@ -1,13 +1,14 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/sanity-io/litter"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
-	"github.com/yumenaka/comigo/util"
+	"github.com/yumenaka/comigo/tools"
 )
 
 func ShowQRCode() {
@@ -24,10 +25,10 @@ func ShowQRCode() {
 	enableTLS := config.GetCertFile() != "" && config.GetKeyFile() != ""
 	outIP := config.GetHost()
 	if config.GetHost() == "" {
-		outIP = util.GetOutboundIP().String()
+		outIP = tools.GetOutboundIP().String()
 	}
 	// 打印二维码
-	util.PrintAllReaderURL(
+	tools.PrintAllReaderURL(
 		config.GetPort(),
 		config.GetOpenBrowser(),
 		config.GetPrintAllPossibleQRCode(),
@@ -43,4 +44,5 @@ func ShowQRCode() {
 	}
 	// ”如何快捷键退出“的文字提示
 	fmt.Println(locale.GetString("ctrl_c_hint"))
+	ShowQRCodeTailscale(context.Background())
 }

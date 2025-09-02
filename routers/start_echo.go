@@ -9,7 +9,8 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/config"
-	"github.com/yumenaka/comigo/util/logger"
+	"github.com/yumenaka/comigo/tools/logger"
+	"github.com/yumenaka/comigo/tools/tailscale_plugin"
 )
 
 // StartEcho 启动网页服务
@@ -25,7 +26,44 @@ func StartEcho(e *echo.Echo) {
 		Addr:    webHost + strconv.Itoa(config.GetPort()),
 		Handler: e, // echo.Echo 实现了 http.Handler 接口
 	}
-	// 在 goroutine 中初始化服务器，这样它就不会阻塞关闭处理
+	// 是否启动 Tailscale 服务
+	if config.GetTailscaleEnable() {
+		go func() {
+			// Funnel 模式，外网可访问，建议设置用户名与密码
+			if config.GetTailscaleFunnelMode() {
+				if err := tailscale_plugin.RunTailscale(
+					e,
+					tailscale_plugin.InitConfig{
+						Hostname:   config.GetTailscaleHostname(),
+						Port:       uint16(config.GetTailscalePort()),
+						FunnelMode: config.GetTailscaleFunnelMode(),
+						ConfigDir:  config.GetConfigPath(),
+					},
+				); err != nil {
+					logger.Errorf("Failed to run Tailscale: %v", err)
+				}
+			}
+			// 非Funnel模式，需要开启Tailscale服务才可以访问
+			if !config.GetTailscaleFunnelMode() {
+				if err := tailscale_plugin.RunTailscale(
+					e,
+					tailscale_plugin.InitConfig{
+						Hostname:   config.GetTailscaleHostname(),
+						Port:       uint16(config.GetTailscalePort()),
+						FunnelMode: config.GetTailscaleFunnelMode(),
+						ConfigDir:  config.GetConfigPath(),
+					},
+				); err != nil {
+					logger.Errorf("Failed to run Tailscale: %v", err)
+				}
+			}
+		}()
+	}
+	logger.Infof("Starting Server...", "on port", config.GetPort(), "...")
+	if enableTls {
+		logger.Infof("TLS enabled", "CertFile:", config.GetCertFile(), "KeyFile:", config.GetKeyFile())
+	}
+	// 在 goroutine 中初始化 HTTP 服务器，这样它就不会阻塞关闭处理
 	go func() {
 		// 监听并启动服务(TLS)
 		if enableTls {

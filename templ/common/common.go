@@ -9,8 +9,8 @@ import (
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/templ/state"
-	fileutil "github.com/yumenaka/comigo/util/file"
-	"github.com/yumenaka/comigo/util/logger"
+	fileutil "github.com/yumenaka/comigo/tools/file"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
 // ServerHostBindStr  传递给前端，显示QRCode用的"主机域名"字符串
@@ -41,7 +41,7 @@ func GetReturnUrl(BookID string) string {
 	// 如果是书籍组，就跳转到父书架
 	ParentBook, err := model.MainStoreGroup.GetParentBook(BookID)
 	if err != nil {
-		logger.Infof("ParentBook not found by BookID: %s, error: %v", BookID, err)
+		// logger.Infof("ParentBook not found by BookID: %s, error: %v", BookID, err)
 		return "/"
 	}
 

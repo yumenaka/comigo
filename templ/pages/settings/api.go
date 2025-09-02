@@ -10,7 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/templ/state"
-	"github.com/yumenaka/comigo/util/logger"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
 // -------------------------
@@ -103,6 +103,10 @@ func updateConfigGeneric(c echo.Context) (string, string, error) {
 
 // UpdateStringConfigHandler 处理 String 类型
 func UpdateStringConfigHandler(c echo.Context) error {
+	// 如果配置被锁定
+	if config.GetCfg().GetConfigLocked() {
+		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
+	}
 	name, newValue, err := updateConfigGeneric(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -121,6 +125,10 @@ func UpdateStringConfigHandler(c echo.Context) error {
 
 // UpdateBoolConfigHandler 处理 Bool 类型
 func UpdateBoolConfigHandler(c echo.Context) error {
+	// 如果配置被锁定
+	if config.GetCfg().GetConfigLocked() {
+		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
+	}
 	name, newValue, err := updateConfigGeneric(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -144,6 +152,10 @@ func UpdateBoolConfigHandler(c echo.Context) error {
 
 // UpdateNumberConfigHandler 处理 Number 类型
 func UpdateNumberConfigHandler(c echo.Context) error {
+	// 如果配置被锁定
+	if config.GetCfg().GetConfigLocked() {
+		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
+	}
 	name, newValue, err := updateConfigGeneric(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -172,6 +184,10 @@ func UpdateNumberConfigHandler(c echo.Context) error {
 func UpdateUserInfoConfigHandler(c echo.Context) error {
 	if !htmx.IsHTMX(c.Request()) {
 		return echo.NewHTTPError(http.StatusBadRequest, "non-htmx request")
+	}
+	// 如果配置被锁定
+	if config.GetCfg().GetConfigLocked() {
+		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
 	}
 
 	username := c.FormValue("Username")
@@ -231,7 +247,10 @@ func AddArrayConfigHandler(c echo.Context) error {
 	if !htmx.IsHTMX(c.Request()) {
 		return echo.NewHTTPError(http.StatusBadRequest, "non-htmx request")
 	}
-
+	// 如果配置被锁定
+	if config.GetCfg().GetConfigLocked() {
+		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
+	}
 	configName := c.FormValue("configName")
 	addValue := c.FormValue("addValue")
 
@@ -276,6 +295,10 @@ func DeleteArrayConfigHandler(c echo.Context) error {
 	if !htmx.IsHTMX(c.Request()) {
 		return echo.NewHTTPError(http.StatusBadRequest, "non-htmx request")
 	}
+	// 如果配置被锁定
+	if config.GetCfg().GetConfigLocked() {
+		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
+	}
 
 	configName := c.FormValue("configName")
 	deleteValue := c.FormValue("deleteValue")
@@ -318,6 +341,10 @@ func HandleConfigSave(c echo.Context) error {
 	if !htmx.IsHTMX(c.Request()) {
 		return echo.NewHTTPError(http.StatusBadRequest, "non-htmx request")
 	}
+	// 如果配置被锁定
+	if config.GetCfg().GetConfigLocked() {
+		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
+	}
 	// 保存到什么文件夹
 	selectedDir := c.FormValue("selectedDir")
 	if selectedDir == "" {
@@ -342,6 +369,10 @@ func HandleConfigSave(c echo.Context) error {
 func HandleConfigDelete(c echo.Context) error {
 	if !htmx.IsHTMX(c.Request()) {
 		return echo.NewHTTPError(http.StatusBadRequest, "non-htmx request")
+	}
+	// 如果配置被锁定
+	if config.GetCfg().GetConfigLocked() {
+		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
 	}
 	// 保存到什么文件夹
 	selectedDir := c.FormValue("selectedDir")

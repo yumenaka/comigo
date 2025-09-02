@@ -3,20 +3,20 @@ package state
 import (
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
-	"github.com/yumenaka/comigo/util"
+	"github.com/yumenaka/comigo/tools"
 )
 
 // 感觉这个抽象有点多余？
 // type GlobalState struct {
 // 	Version      string
 // 	NowBookList  *model.BookInfoList
-// 	ServerStatus *util.ServerStatus
+// 	ServerStatus *tools.ServerStatus
 // }
 // var Global GlobalState
 
 var (
 	Version      string
-	ServerStatus *util.ServerStatus
+	ServerStatus *tools.ServerStatus
 	ServerConfig *config.Config
 	NowBookList  *model.BookInfoList
 )
@@ -38,6 +38,6 @@ func IsLogin() bool {
 func init() {
 	Version = config.GetVersion()
 	NowBookList = nil
-	ServerStatus = util.GetServerInfo(config.GetHost(), config.GetVersion(), config.GetPort(), config.GetEnableUpload(), 0)
+	ServerStatus = tools.GetServerInfo(config.GetHost(), config.GetVersion(), config.GetPort(), config.GetEnableUpload(), 0)
 	ServerConfig = config.GetCfg()
 }

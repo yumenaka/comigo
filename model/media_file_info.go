@@ -9,8 +9,8 @@ import (
 	"github.com/bbrks/go-blurhash"
 	"github.com/disintegration/imaging"
 	"github.com/yumenaka/comigo/assets/locale"
-	"github.com/yumenaka/comigo/util/file"
-	"github.com/yumenaka/comigo/util/logger"
+	"github.com/yumenaka/comigo/tools/file"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
 // MediaFileInfo 单个媒体文件的信息
@@ -21,7 +21,7 @@ type MediaFileInfo struct {
 	ModTime    time.Time `json:"mod_time"` // 修改时间
 	Url        string    `json:"url"`      // 远程用户读取图片的URL，为了适应特殊字符，经过转义
 	PageNum    int       `json:"-"`        // 这个字段不解析
-	Blurhash   string    `json:"-"`        // `json:"blurhash"` //blurhash占位符。扫描图片生成（util.GetImageDataBlurHash）
+	Blurhash   string    `json:"-"`        // `json:"blurhash"` //blurhash占位符。扫描图片生成（tools.GetImageDataBlurHash）
 	Height     int       `json:"-"`        // 暂时用不着 这个字段不解析`json:"height"`   //blurhash用，图片高
 	Width      int       `json:"-"`        // 暂时用不着 这个字段不解析`json:"width"`    //blurhash用，图片宽
 	ImgType    string    `json:"-"`        // 这个字段不解析

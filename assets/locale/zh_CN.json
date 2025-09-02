@@ -164,8 +164,8 @@
   "Host_Description": "自定义二维码显示的主机名。默认为网卡IP。",
   "KeyFile": "KeyFile",
   "KeyFile_Description": "TLS/SSL key文件路径 (default: \"~/.config/.comigo/key.key\")",
-  "LocalStores": "书库文件夹",
-  "LocalStores_Description": "书库文件夹，支持绝对目录与相对目录。相对目录以当前执行目录为基准",
+  "StoreUrls": "书库文件夹",
+  "StoreUrls_Description": "书库文件夹，支持绝对目录与相对目录。相对目录以当前执行目录为基准",
   "LogFileName": "Log文件名",
   "LogFileName_Description": "Log文件名",
   "LogFilePath": "Log保存位置",
@@ -344,5 +344,16 @@
   "saveSuccessHint": "设置修改成功，3秒后自动刷新页面。",
   "no_books_library_path_notice": "未检测到可阅读的书籍，请先配置书库路径。配置完成后，页面将自动刷新。",
   "download_raw_archive": "下载原始压缩包文件",
-  "download_portable_web_file": "下载为便携网页文件"
+  "download_portable_web_file": "下载为便携网页文件",
+  "enable_tailscale": "启用Tailscale",
+  "tailscale_hostname": "Tailscale主机名",
+  "tailscale_port": "Tailscale监听端口",
+  "tailscale_funnel": "启用Tailscale Funnel模式（公网访问），需要在Tailscale管理后台开启Funnel功能",
+  "config_locked": "配置文件锁定",
+  "config_locked_description": "当前处于展示模式，配置已锁定",
+  "tailscale_auth_url_is": "要启动 Tailscale 服务器，请设置 TS_AUTHKEY 后重启，或访问认证链接：",
+  "tailscale_server_start": "Tailscale 已启动，正在获取 IP 地址……",
+  "tailscale_reading_url": "通过 Tailscale 访问的阅读链接为：",
+  "tailscale_not_connected_hint": "Tailscale 未连接，请检查网络或认证状态。",
+  "tailscale_not_enabled": "Tailscale 未启用，请先启用。"
 }

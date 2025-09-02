@@ -144,4 +144,5 @@ func bindProtectedAPI(group *echo.Group) {
 	group.POST("/add-array-config", settings.AddArrayConfigHandler)
 	group.POST("/config-save", settings.HandleConfigSave)
 	group.POST("/config-delete", settings.HandleConfigDelete)
+	group.GET("/tailscale_status", get_data_api.GetTailscaleStatus)
 }

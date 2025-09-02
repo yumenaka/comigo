@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
-	"github.com/yumenaka/comigo/util/logger"
+	"github.com/yumenaka/comigo/tools/logger"
 
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"

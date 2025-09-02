@@ -3,7 +3,7 @@ package model
 import (
 	"sort"
 
-	"github.com/yumenaka/comigo/util"
+	"github.com/yumenaka/comigo/tools"
 )
 
 // Pages 定义页面结构
@@ -21,11 +21,11 @@ func (p *Pages) SortImages(sortBy string) {
 	switch sortBy {
 	case "filename":
 		lessFunc = func(i, j int) bool {
-			return util.Compare(p.Images[i].Name, p.Images[j].Name)
+			return tools.Compare(p.Images[i].Name, p.Images[j].Name)
 		}
 	case "filename_reverse":
 		lessFunc = func(i, j int) bool {
-			return !util.Compare(p.Images[i].Name, p.Images[j].Name)
+			return !tools.Compare(p.Images[i].Name, p.Images[j].Name)
 		}
 	case "filesize":
 		lessFunc = func(i, j int) bool {
@@ -45,7 +45,7 @@ func (p *Pages) SortImages(sortBy string) {
 		}
 	default:
 		lessFunc = func(i, j int) bool {
-			return util.Compare(p.Images[i].Name, p.Images[j].Name)
+			return tools.Compare(p.Images[i].Name, p.Images[j].Name)
 		}
 	}
 	//  Go 1.8 及以上版本的 sort.Slice 函数。简化排序逻辑，无需再实现 Len、Less 和 Swap 方法。
@@ -62,19 +62,19 @@ func (p *Pages) SortImages(sortBy string) {
 // func (p Pages) Less(i, j int) bool {
 // 	switch p.SortBy {
 // 	case "filename":
-// 		return util.Compare(p.Images[i].Name, p.Images[j].Name)
+// 		return tools.Compare(p.Images[i].Name, p.Images[j].Name)
 // 	case "filesize":
 // 		return p.Images[i].Size > p.Images[j].Size
 // 	case "modify_time":
 // 		return p.Images[i].ModTime.After(p.Images[j].ModTime) // 根据修改时间排序 从新到旧
 // 	case "filename_reverse":
-// 		return !util.Compare(p.Images[i].Name, p.Images[j].Name)
+// 		return !tools.Compare(p.Images[i].Name, p.Images[j].Name)
 // 	case "filesize_reverse":
 // 		return p.Images[i].Size < p.Images[j].Size
 // 	case "modify_time_reverse":
 // 		return p.Images[i].ModTime.Before(p.Images[j].ModTime) // 根据修改时间排序 从旧到新
 // 	default:
-// 		return util.Compare(p.Images[i].Name, p.Images[j].Name)
+// 		return tools.Compare(p.Images[i].Name, p.Images[j].Name)
 // 	}
 // }
 //

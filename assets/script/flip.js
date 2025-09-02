@@ -2,6 +2,40 @@
 //https://www.runoob.com/js/js-strict.html
 'use strict'
 
+//隐藏工具栏的工具函数
+// https://www.runoob.com/js/js-htmldom-events.html
+let hideTimeout
+let header = document.getElementById('header')
+let range = document.getElementById('StepsRangeArea')
+// 显示工具栏
+function showToolbar() {
+	if (Alpine.store('flip').autoHideToolbar) {
+		header.style.opacity = '0.9'
+		range.style.opacity = '0.9'
+		header.style.transform = 'translateY(0)'
+		range.style.transform = 'translateY(0)'
+	} else {
+		header.style.opacity = '1'
+		range.style.opacity = '1'
+		header.style.transform = 'translateY(0)'
+		range.style.transform = 'translateY(0)'
+	}
+}
+
+// 隐藏工具栏
+function hideToolbar() {
+	if (Alpine.store('flip').autoHideToolbar) {
+		header.style.opacity = '0'
+		range.style.opacity = '0'
+		header.style.transform = 'translateY(-100%)'
+		range.style.transform = 'translateY(100%)'
+	}
+}
+// 初始化：如果autohidetoolbar为真,则自动隐藏工具栏
+if (Alpine.store('flip').autoHideToolbar) {
+	setTimeout(hideToolbar, 1000)
+}
+
 // Base64编码静态资源图片（鼠标图标）：
 // base64 -i SettingsOutline.svg ，然后// 把下面这行换成输出的
 const SettingsOutlineBase64 = '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'
@@ -595,39 +629,7 @@ function toPreviousPage() {
 	}
 }
 
-//隐藏工具栏的工具函数
-// https://www.runoob.com/js/js-htmldom-events.html
-let hideTimeout
-let header = document.getElementById('header')
-let range = document.getElementById('StepsRangeArea')
 
-// 显示工具栏
-function showToolbar() {
-	if (Alpine.store('flip').autoHideToolbar) {
-		header.style.opacity = '0.9'
-		range.style.opacity = '0.9'
-		header.style.transform = 'translateY(0)'
-		range.style.transform = 'translateY(0)'
-	} else {
-		header.style.opacity = '1'
-		range.style.opacity = '1'
-		header.style.transform = 'translateY(0)'
-		range.style.transform = 'translateY(0)'
-	}
-}
-
-// 隐藏工具栏
-function hideToolbar() {
-	if (Alpine.store('flip').autoHideToolbar) {
-		header.style.opacity = '0'
-		range.style.opacity = '0'
-		header.style.transform = 'translateY(-100%)'
-		range.style.transform = 'translateY(100%)'
-	}
-}
-if (Alpine.store('flip').autoHideToolbar) {
-	hideToolbar()
-}
 
 //鼠标是否在设置区域
 function getInSetArea(e) {
@@ -681,12 +683,18 @@ function onMouseClick(e) {
 	let innerWidth = window.innerWidth
 	let inSetArea = getInSetArea(e)
 	if (inSetArea) {
-		//获取ID为 OpenSettingButton的元素，然后模拟点击
-		document.getElementById('OpenSettingButton').click()
+		// 高度对齐
 		if (Alpine.store('flip').autoAlign) {
 			scrollToMangaMain()
 		}
-		showToolbar()
+		// 如果工具栏是隐藏的，点击只显示工具栏，不进行翻页或打开设置,
+		if (Alpine.store('flip').autoHideToolbar === true) {
+			// console.log('点击显示工具栏')
+			showToolbar()
+		} else {
+			//获取ID为 OpenSettingButton的元素，然后模拟点击
+			document.getElementById('OpenSettingButton').click()
+		}
 	}
 	if (!inSetArea) {
 		//决定如何翻页
@@ -719,7 +727,12 @@ function onMouseMove(e) {
 	//在设置区域
 	let inSetArea = getInSetArea(e)
 	if (inSetArea) {
-		e.currentTarget.style.cursor = `url("data:image/png;base64,${SettingsOutlineBase64}") 12 12, pointer`
+		if (Alpine.store('flip').autoHideToolbar === true) {
+			// https://developer.mozilla.org/zh-CN/docs/Web/CSS/cursor
+			e.currentTarget.style.cursor = 'default'
+		}else{
+			e.currentTarget.style.cursor = `url("data:image/png;base64,${SettingsOutlineBase64}") 12 12, pointer`
+		}
 		showToolbar()
 	}
 	let stepsRangeArea = document
@@ -811,11 +824,12 @@ document.addEventListener('mousemove', function (event) {
 	let inInElement1 = false
 	let inInElement2 = false
 	// 因为header需要收起来，所以不能用left、right、top、bottom判断y是否在header的范围内
+    // 现在设定为固定的80px高度，这样会比较自然
 	if (Alpine.store('flip').autoHideToolbar) {
 		// 判断鼠标是否在元素 1 范围内(Header)。。
-		inInElement1 = (y <= 40)
+		inInElement1 = (y <= 80)
 		// 判断鼠标是否在元素 2 范围内(导航条)。因为header可能隐藏，所以不能直接用left、right、top、bottom判断y是否在header的范围内。
-		inInElement2 = (y >= window.innerHeight - 40)
+		inInElement2 = (y >= window.innerHeight - 80)
 	}
 	// 如果工具栏不自动隐藏，用left、right、top、bottom判断y是否在header的范围内
 	if (!Alpine.store('flip').autoHideToolbar) {

@@ -4,7 +4,7 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/yumenaka/comigo/util/logger"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
 // home目录 配置

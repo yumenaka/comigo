@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/yumenaka/comigo/util/logger"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
 // StoreGroup 内存书库，扫描后生成。可以有多个子书库。
