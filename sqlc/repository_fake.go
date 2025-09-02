@@ -1,4 +1,4 @@
-//go:build !(windows && 386) && !js
+//go:build (windows && 386) || js
 
 package sqlc
 
@@ -7,10 +7,7 @@ import (
 	"database/sql"
 	_ "embed"
 	"fmt"
-	"path"
-	"path/filepath"
 
-	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/util/logger"
 )
@@ -36,49 +33,8 @@ func NewBookRepository(db DBTX) *Repository {
 }
 
 func OpenDatabase(configFilePath string) error {
-	// 使用内存数据库
-	// dataSourceName := ":memory:"
-	// 如果没有配置文件的话，默认在当前目录下创建一个数据库文件
-	dataSourceName := "file:comigo.sqlite?cache=shared"
-	// 如果有配置文件的话，把数据库文件在同一文件夹内: dataSourceName = "file:comigo.sqlite?cache=shared"
-	if configFilePath != "" {
-		// 如果有配置文件的话，数据库文件在同一文件夹内: dataSourceName = "file:comigo.sqlite?cache=shared"
-		configDir := filepath.Dir(configFilePath) // 不能用path.Dir()，因为windows返回 "."
-		dataSourceName = "file:" + path.Join(configDir, "comigo.sqlite") + "?cache=shared"
-		logger.Infof(locale.GetString("init_database")+"%s", dataSourceName)
-	}
-	ctx := context.Background()
-	var err error
-	client, err = sql.Open("sqlite", dataSourceName)
-	if err != nil {
-		logger.Infof("Failed to open database: %v", err)
-		return err
-	}
-
-	// Test database connection
-	if err = client.PingContext(ctx); err != nil {
-		logger.Infof("Failed to ping database: %v", err)
-		return err
-	}
-
-	// create tables - 现在使用 IF NOT EXISTS，所以即使表已存在也不会报错
-	if _, err := client.ExecContext(ctx, ddl); err != nil {
-		logger.Infof("Failed to create tables: %v", err)
-		// 即使创建表失败，我们也要尝试创建 DBQueries，因为表可能已经存在
-		// 只要数据库连接正常，就应该能正常工作
-	}
-
-	// 创建 Repository 实例
-	Repo = NewBookRepository(client)
-	logger.Infof("Database initialized successfully")
+	logger.Infof("Fake Database initialized skip")
 	return nil
-}
-
-func CloseDatabase() {
-	err := client.Close()
-	if err != nil {
-		logger.Infof("%s", err)
-	}
 }
 
 // CheckDBQueries 检查 queries 是否已初始化

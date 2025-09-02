@@ -1,4 +1,4 @@
-//go:build windows && 386
+//go:build (windows && 386) || (js && wasm)
 
 package sqlc
 
@@ -16,6 +16,10 @@ func InitDatabase(configFilePath string) error {
 
 func CloseDatabase() {
 	logger.Infof("%s", "Not Support DateBase")
+}
+
+func (repo *Repository) GetBooksFromDatabase() (list []*model.Book, err error) {
+	return nil, errors.New("Not Support DateBase")
 }
 
 // DeleteAllBookInDatabase  清空数据库的Book与SinglePageInfo表

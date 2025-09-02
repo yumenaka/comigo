@@ -10,6 +10,10 @@ import (
 
 // SaveConfigHandler 保存服务器配置到文件
 func SaveConfigHandler(c echo.Context) error {
+	// 如果配置被锁定，返回错误
+	if config.GetCfg().GetConfigLocked() {
+		return c.JSON(http.StatusMethodNotAllowed, map[string]string{"error": "Config is locked, cannot be modified"})
+	}
 	SaveTo := c.Param("to")
 	// 如果不是三个目录之一，就不能保存
 	if !(SaveTo == "WorkingDirectory" || SaveTo == "HomeDirectory" || SaveTo == "ProgramDirectory") {

@@ -35,7 +35,5 @@ templ Html(c echo.Context, bodyContent templ.Component, insertScript []string) {
 		</body>
 		<!-- 导入js代码,包含htmx、Alpine等第三方库  -->
 		@templ.Raw(assets.GetJavaScript(c.QueryParam("static") != "", insertScript))
-
-
 	</html>
 }

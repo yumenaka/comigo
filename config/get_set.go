@@ -198,6 +198,18 @@ func GetPort() int {
 	return cfg.Port
 }
 
+func GetTailscaleEnable() bool {
+	return cfg.EnableTailscale
+}
+
+func GetTailscaleHostname() string {
+	return cfg.TailscaleHostname
+}
+
+func GetTailscalePort() int {
+	return cfg.TailscalePort
+}
+
 // GetUsername 获取用户名
 func GetUsername() string {
 	return cfg.Username

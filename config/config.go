@@ -22,6 +22,7 @@ type Config struct {
 	ClearCacheExit         bool            `json:"ClearCacheExit" comment:"退出程序的时候，清理web图片缓存"`
 	ClearDatabaseWhenExit  bool            `json:"ClearDatabaseWhenExit" comment:"启用本地数据库时，扫描完成后，清除不存在的书籍。"`
 	ConfigPath             string          `json:"-" toml:"-" comment:"用户指定的的yaml设置文件路径"`
+	ConfigLocked           bool            `json:"ConfigLocked" comment:"配置文件锁定，防止被网页端修改，用于展示模式"`
 	Debug                  bool            `json:"Debug" comment:"开启Debug模式"`
 	DefaultMode            string          `json:"DefaultMode" comment:"默认阅读模式，默认为空，可以设置为scroll或flip"`
 	DisableLAN             bool            `json:"DisableLAN" comment:"只在本机提供阅读服务，不对外共享"`
@@ -51,6 +52,9 @@ type Config struct {
 	UploadPath             string          `json:"UploadPath" comment:"指定上传路径时，上传文件的存储位置"`
 	UseCache               bool            `json:"UseCache" comment:"开启本地图片缓存，可以加快二次读取，但会占用硬盘空间"`
 	Username               string          `json:"Username" comment:"登录界用的用户名。"`
+	EnableTailscale        bool            `json:"EnableTailscale" comment:"启用Tailscale网络支持"`
+	TailscaleHostname      string          `json:"TailscaleHostname" comment:"Tailscale网络的主机名，默认为comigo"`
+	TailscalePort          int             `json:"TailscalePort" comment:"Tailscale网络的端口，默认为443"`
 	ZipFileTextEncoding    string          `json:"ZipFileTextEncoding" comment:"非utf-8编码的ZIP文件，尝试用什么编码解析，默认GBK"`
 }
 
@@ -121,6 +125,22 @@ func (c *Config) GetZipFileTextEncoding() string {
 
 func (c *Config) GetEnableDatabase() bool {
 	return c.EnableDatabase
+}
+
+func (c *Config) GetEnableTailscale() bool {
+	return c.EnableTailscale
+}
+
+func (c *Config) GetTailscaleHostname() string {
+	return c.TailscaleHostname
+}
+
+func (c *Config) GetTailscalePort() int {
+	return c.TailscalePort
+}
+
+func (c *Config) GetConfigLocked() bool {
+	return c.ConfigLocked
 }
 
 func (c *Config) GetClearDatabaseWhenExit() bool {

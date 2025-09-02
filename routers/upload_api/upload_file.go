@@ -16,6 +16,7 @@ import (
 var (
 	RescanBroadcast    *chan string
 	ConfigEnableUpload *bool
+	ConfigLocked       *bool
 	ConfigUploadPath   *string
 )
 
@@ -23,7 +24,7 @@ var (
 // engine.MaxMultipartMemory = 60 << 20  // 60 MiB  只限制程序在上传文件时可以使用多少内存，而是不限制上传文件的大小。(default is 32 MiB)
 func UploadFile(c echo.Context) error {
 	// 是否开启上传功能
-	if !*ConfigEnableUpload {
+	if !*ConfigEnableUpload || !*ConfigLocked {
 		logger.Infof("%s", locale.GetString("upload_disable_hint"))
 		return c.JSON(http.StatusForbidden, map[string]interface{}{
 			"error": locale.GetString("upload_disable_hint"),

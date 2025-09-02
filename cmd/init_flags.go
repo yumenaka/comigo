@@ -87,4 +87,12 @@ func InitFlags() {
 	RootCmd.PersistentFlags().BoolVar(&cfg.ClearCacheExit, "cache-clean", true, locale.GetString("cache_file_clean"))
 	// 手动指定zip文件编码 gbk、shiftjis……
 	RootCmd.PersistentFlags().StringVar(&cfg.ZipFileTextEncoding, "zip-encode", "gbk", locale.GetString("zip_encode"))
+	// 启用Tailscale网络
+	RootCmd.PersistentFlags().BoolVar(&cfg.EnableTailscale, "tailscale", false, locale.GetString("enable_tailscale"))
+	// Tailscale网络的主机名,用于 Tailscale 网络中的标识节点
+	RootCmd.PersistentFlags().StringVar(&cfg.TailscaleHostname, "tailscale-hostname", "comigo", locale.GetString("tailscale_hostname"))
+	// Tailscale网络的端口
+	RootCmd.PersistentFlags().IntVar(&cfg.TailscalePort, "tailscale-port", 443, locale.GetString("tailscale_port"))
+	// ConfigLocked 配置文件锁定，防止被网页端修改，用于展示模式
+	RootCmd.PersistentFlags().BoolVar(&cfg.ConfigLocked, "config-locked", false, locale.GetString("config_locked"))
 }

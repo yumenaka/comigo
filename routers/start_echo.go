@@ -10,6 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/util/logger"
+	"github.com/yumenaka/comigo/util/tailscale"
 )
 
 // StartEcho 启动网页服务
@@ -24,6 +25,18 @@ func StartEcho(e *echo.Echo) {
 	config.Server = &http.Server{
 		Addr:    webHost + strconv.Itoa(config.GetPort()),
 		Handler: e, // echo.Echo 实现了 http.Handler 接口
+	}
+	// 启动 Tailscale 服务器
+	if config.GetTailscaleEnable() {
+		go func() {
+			if err := tailscale.RunTailscale(e, config.GetTailscaleHostname(), config.GetTailscalePort()); err != nil {
+				logger.Errorf("Failed to run Tailscale: %v", err)
+			}
+		}()
+	}
+	logger.Infof("Starting Server...", "on port", config.GetPort(), "...")
+	if enableTls {
+		logger.Infof("TLS enabled", "CertFile:", config.GetCertFile(), "KeyFile:", config.GetKeyFile())
 	}
 	// 在 goroutine 中初始化服务器，这样它就不会阻塞关闭处理
 	go func() {
