@@ -6,7 +6,7 @@ import (
 	"github.com/cheggaaa/pb/v3"
 	"github.com/xxjwxc/gowp/workpool"
 	"github.com/yumenaka/comigo/assets/locale"
-	"github.com/yumenaka/comigo/util/logger"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
 // ScanAllImage 服务器端分析分辨率、漫画单双页，只适合已解压文件

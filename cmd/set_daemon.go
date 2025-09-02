@@ -6,7 +6,7 @@ import (
 
 	"github.com/sevlyar/go-daemon"
 	"github.com/yumenaka/comigo/config"
-	"github.com/yumenaka/comigo/util/logger"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
 // DemonFlag 正确地实装，需要理解守护进程的概念

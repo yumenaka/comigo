@@ -6,12 +6,11 @@ import (
 	"github.com/spf13/viper"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
-	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/routers"
 	"github.com/yumenaka/comigo/routers/upload_api"
 	"github.com/yumenaka/comigo/templ/pages/settings"
-	"github.com/yumenaka/comigo/util/logger"
-	"github.com/yumenaka/comigo/util/scan"
+	"github.com/yumenaka/comigo/tools/logger"
+	"github.com/yumenaka/comigo/tools/scan"
 )
 
 // ---------------------------------------------------------------------------
@@ -98,14 +97,13 @@ func ReScanUploadPath() {
 	ReScanPath(config.GetUploadPath(), true)
 }
 
-func ReScanPath(path string, reScanFile bool) {
+func ReScanPath(storeUrl string, reScanFile bool) {
 	// 扫描上传目录的文件
 	option := scan.NewOption(config.GetCfg())
-	books, err := scan.InitStore(path, option)
+	books, err := scan.InitStore(storeUrl, option)
 	if err != nil {
-		logger.Infof(locale.GetString("scan_error")+"path:%s  %s", path, err)
+		logger.Infof(locale.GetString("scan_error")+"path:%s  %s", storeUrl, err)
 		return
 	}
-	scan.AddBooksToStore(path, books, config.GetMinImageNum())
-	model.MainStoreGroup.ResetBookGroupData()
+	scan.AddBooksToStore(storeUrl, books, config.GetMinImageNum())
 }

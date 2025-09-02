@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/pelletier/go-toml/v2"
 	"github.com/yumenaka/comigo/config"
-	"github.com/yumenaka/comigo/util/logger"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
 // GetConfig 获取json格式的当前配置，不做修改

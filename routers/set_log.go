@@ -3,7 +3,7 @@ package routers
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/config"
-	"github.com/yumenaka/comigo/util/logger"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
 // SetLogger 设置日志中间件

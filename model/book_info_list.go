@@ -3,7 +3,7 @@ package model
 import (
 	"sort"
 
-	"github.com/yumenaka/comigo/util"
+	"github.com/yumenaka/comigo/tools"
 )
 
 // BookInfoList 表示 BookInfo 的列表，排序用
@@ -26,11 +26,11 @@ func (s *BookInfoList) SortBooks(sortBy string) {
 	switch sortBy {
 	case "filename":
 		lessFunc = func(i, j int) bool {
-			return util.Compare(s.BookInfos[i].Title, s.BookInfos[j].Title)
+			return tools.Compare(s.BookInfos[i].Title, s.BookInfos[j].Title)
 		}
 	case "filename_reverse":
 		lessFunc = func(i, j int) bool {
-			return !util.Compare(s.BookInfos[i].Title, s.BookInfos[j].Title)
+			return !tools.Compare(s.BookInfos[i].Title, s.BookInfos[j].Title)
 		}
 	case "filesize":
 		lessFunc = func(i, j int) bool {
@@ -54,15 +54,15 @@ func (s *BookInfoList) SortBooks(sortBy string) {
 		}
 	case "author":
 		lessFunc = func(i, j int) bool {
-			return util.Compare(s.BookInfos[i].Author, s.BookInfos[j].Author)
+			return tools.Compare(s.BookInfos[i].Author, s.BookInfos[j].Author)
 		}
 	case "author_reverse":
 		lessFunc = func(i, j int) bool {
-			return !util.Compare(s.BookInfos[i].Author, s.BookInfos[j].Author)
+			return !tools.Compare(s.BookInfos[i].Author, s.BookInfos[j].Author)
 		}
 	default:
 		lessFunc = func(i, j int) bool {
-			return util.Compare(s.BookInfos[i].Title, s.BookInfos[j].Title)
+			return tools.Compare(s.BookInfos[i].Title, s.BookInfos[j].Title)
 		}
 	}
 	//  Go 1.8 及以上版本的 sort.Slice 函数。简化排序逻辑，无需再实现 Len、Less 和 Swap 方法。

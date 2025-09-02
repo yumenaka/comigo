@@ -9,7 +9,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/yumenaka/comigo/assets"
 	"github.com/yumenaka/comigo/templ/pages/error_page"
-	"github.com/yumenaka/comigo/util/logger"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
 var engine *echo.Echo

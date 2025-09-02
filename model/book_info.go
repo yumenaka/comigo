@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/jxskiss/base62"
-	"github.com/yumenaka/comigo/util"
-	"github.com/yumenaka/comigo/util/logger"
+	"github.com/yumenaka/comigo/tools"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
 // BookInfo 与 Book 唯一的区别是没有 AllPageInfo，而是封面图 URL，减小 JSON 文件的大小
@@ -50,7 +50,7 @@ func (b *BookInfo) initBookID() *BookInfo {
 	// 2. 仅包含字母数字符号，不包含特殊字符
 	// 3. 可以通过在任何文本编辑器和浏览器地址栏中双击鼠标来完全选择
 	// 4. 紧凑，生成的字符串比 Base32 短
-	b62 := base62.EncodeToString([]byte(util.Md5string(util.Md5string(tempStr))))
+	b62 := base62.EncodeToString([]byte(tools.Md5string(tools.Md5string(tempStr))))
 	b.BookID = MainStoreGroup.GetShortBookID(b62, 7)
 	return b
 }
@@ -81,7 +81,7 @@ func (b *BookInfo) setParentFolder(filePath string) *BookInfo {
 
 // SetAuthor 设置作者
 func (b *BookInfo) SetAuthor() *BookInfo {
-	b.Author = util.GetAuthor(b.Title)
+	b.Author = tools.GetAuthor(b.Title)
 	return b
 }
 

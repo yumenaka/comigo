@@ -164,8 +164,8 @@
   "Host_Description": "Customize the host name displayed by the QR code. \nThe default is the network card IP.",
   "KeyFile": "KeyFile",
   "KeyFile_Description": "TLS/SSL key file path (default: \"~/.config/.comigo/key.key\")",
-  "LocalStores": "library folder",
-  "LocalStores_Description": "The library folder supports absolute and relative directories. \nRelative directories are based on the current execution directory.",
+  "StoreUrls": "library folder",
+  "StoreUrls_Description": "The library folder supports absolute and relative directories. \nRelative directories are based on the current execution directory.",
   "LogFileName": "Log file name",
   "LogFileName_Description": "Log file name",
   "LogFilePath": "Log save location",
@@ -344,5 +344,16 @@
   "saveSuccessHint": "Settings saved successfully. The page will refresh automatically in 3 seconds.",
   "no_books_library_path_notice": "No readable books were found. Please configure a library path. The page will automatically refresh once the configuration is complete.",
   "download_raw_archive": "Download original archive file",
-  "download_portable_web_file": "Download as a portable HTML file"
+  "download_portable_web_file": "Download as a portable HTML file",
+  "enable_tailscale":"Enable Tailscale",
+  "tailscale_hostname": "Tailscale Hostname",
+  "tailscale_port":"Tailscale Port",
+  "tailscale_funnel": "Enable Tailscale Funnel mode (public network access), you need to enable Funnel function in the Tailscale management background",
+  "config_locked": "Configuration Locked",
+  "config_locked_description": "Currently in display mode, the configuration is locked.",
+  "tailscale_auth_url_is": "To start Tailscale service, restart with TS_AUTHKEY set, or go to: ",
+  "tailscale_server_start": "Tailscale service has started.",
+  "tailscale_reading_url": "Tailscale reading link: ",
+  "tailscale_not_connected_hint": "Tailscale is not connected. Please check your network or Tailscale settings.",
+  "tailscale_not_enabled": "Tailscale is not enabled. Please enable Tailscale first."
 }

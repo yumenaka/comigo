@@ -12,7 +12,7 @@ import (
 	"github.com/yumenaka/comigo/cmd"
 	"github.com/yumenaka/comigo/cmd/tui"
 	"github.com/yumenaka/comigo/routers"
-	"github.com/yumenaka/comigo/util/logger"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
 // 运行 Comigo 服务器
@@ -27,7 +27,6 @@ func main() {
 	cmd.ShowQRCode()
 	// 退出时清理临时文件的处理函数
 	cmd.SetShutdownHandler()
-
 	// RunTui()
 }
 

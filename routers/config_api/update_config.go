@@ -9,9 +9,9 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/spf13/viper"
 	"github.com/yumenaka/comigo/config"
-	"github.com/yumenaka/comigo/util"
-	"github.com/yumenaka/comigo/util/logger"
-	"github.com/yumenaka/comigo/util/scan"
+	"github.com/yumenaka/comigo/tools"
+	"github.com/yumenaka/comigo/tools/logger"
+	"github.com/yumenaka/comigo/tools/scan"
 )
 
 // UpdateConfig 修改服务器配置(post json)
@@ -24,9 +24,13 @@ func UpdateConfig(c echo.Context) error {
 	// 将JSON数据转换为字符串并打印
 	jsonString := string(body)
 	logger.Infof("Received JSON data: %s \n", jsonString)
-
-	// 解析JSON数据并更新服务器配置
+	// 如果配置被锁定，返回错误
+	if config.GetCfg().GetConfigLocked() {
+		return c.JSON(http.StatusMethodNotAllowed, map[string]string{"error": "Config is locked, cannot be modified"})
+	}
+	// 复制当前配置以便后续比较
 	oldConfig := config.CopyCfg()
+	// 解析JSON数据并更新服务器配置
 	err = config.UpdateConfigByJson(jsonString)
 	if err != nil {
 		logger.Infof("%s", err.Error())
@@ -61,7 +65,7 @@ func openBrowserIfNeeded(oldConfig *config.Config, newConfig *config.Config) {
 		if newConfig.EnableTLS {
 			protocol = "https://"
 		}
-		go util.OpenBrowser(protocol + "127.0.0.1:" + strconv.Itoa(newConfig.Port))
+		go tools.OpenBrowser(protocol + "127.0.0.1:" + strconv.Itoa(newConfig.Port))
 	}
 }
 

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/yumenaka/comigo/assets/locale"
-	"github.com/yumenaka/comigo/util/logger"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
 // Book 定义书籍结构

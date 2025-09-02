@@ -6,8 +6,8 @@ import (
 
 	"github.com/jxskiss/base62"
 	"github.com/yumenaka/comigo/assets/locale"
-	"github.com/yumenaka/comigo/util"
-	"github.com/yumenaka/comigo/util/logger"
+	"github.com/yumenaka/comigo/tools"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
 func GetCfg() *Config {
@@ -24,7 +24,7 @@ func GetConfigPath() string {
 
 func SetConfigPath(path string) {
 	// 检查路径是否存在
-	if !util.PathExists(path) {
+	if !tools.PathExists(path) {
 		logger.Info("Invalid config file path.")
 		return
 	}
@@ -36,7 +36,7 @@ func GetCachePath() string {
 }
 
 func SetCachePath(path string) {
-	if !util.PathExists(path) {
+	if !tools.PathExists(path) {
 		logger.Info("Invalid cache path.")
 		return
 	}
@@ -45,7 +45,7 @@ func SetCachePath(path string) {
 
 func AutoSetCachePath() {
 	// 手动设置的临时文件夹
-	if cfg.CachePath != "" && util.IsExist(cfg.CachePath) && util.ChickIsDir(cfg.CachePath) {
+	if cfg.CachePath != "" && tools.IsExist(cfg.CachePath) && tools.ChickIsDir(cfg.CachePath) {
 		cfg.CachePath = path.Join(cfg.CachePath)
 	} else {
 		cfg.CachePath = path.Join(os.TempDir(), "comigo_cache") // 使用系统文件夹
@@ -99,7 +99,7 @@ func GetUploadPath() string {
 }
 
 func SetUploadPath(path string) {
-	if (!util.IsDir(path)) || (!util.PathExists(path)) {
+	if (!tools.IsDir(path)) || (!tools.PathExists(path)) {
 		logger.Info("Invalid upload path.")
 		return
 	}
@@ -198,6 +198,18 @@ func GetPort() int {
 	return cfg.Port
 }
 
+func GetTailscaleEnable() bool {
+	return cfg.EnableTailscale
+}
+
+func GetTailscaleHostname() string {
+	return cfg.TailscaleHostname
+}
+
+func GetTailscalePort() int {
+	return cfg.TailscalePort
+}
+
 // GetUsername 获取用户名
 func GetUsername() string {
 	return cfg.Username
@@ -216,7 +228,7 @@ func GetJwtSigningKey() string {
 		for _, store := range cfg.StoreUrls {
 			tempStr = tempStr + store
 		}
-		base62.EncodeToString([]byte(util.Md5string(util.Md5string(tempStr))))
+		base62.EncodeToString([]byte(tools.Md5string(tools.Md5string(tempStr))))
 	}
 	return cfg.Username + cfg.Password
 }

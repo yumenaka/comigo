@@ -10,8 +10,8 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
-	fileutil "github.com/yumenaka/comigo/util/file"
-	"github.com/yumenaka/comigo/util/logger"
+	fileutil "github.com/yumenaka/comigo/tools/file"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
 // GetFile 示例 URL： 127.0.0.1:1234/get_file?id=2b17a13&filename=1.jpg

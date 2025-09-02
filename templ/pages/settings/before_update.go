@@ -6,8 +6,8 @@ import (
 
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/routers/config_api"
-	"github.com/yumenaka/comigo/util"
-	"github.com/yumenaka/comigo/util/logger"
+	"github.com/yumenaka/comigo/tools"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
 var RestartWebServerBroadcast *chan string
@@ -41,7 +41,7 @@ func openBrowserIfNeeded(oldConfig *config.Config, newConfig *config.Config) {
 		if newConfig.EnableTLS {
 			protocol = "https://"
 		}
-		go util.OpenBrowser(protocol + "localhost:" + strconv.Itoa(newConfig.Port))
+		go tools.OpenBrowser(protocol + "localhost:" + strconv.Itoa(newConfig.Port))
 	}
 }
 

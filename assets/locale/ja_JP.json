@@ -164,8 +164,8 @@
   "Host_Description": "QRコードで表示されるホスト名をカスタマイズします。\nデフォルトはネットワーク カードの IP です。",
   "KeyFile": "キーファイル",
   "KeyFile_Description": "TLS/SSL キー ファイル パス (デフォルト: \"~/.config/.comigo/key.key\")",
-  "LocalStores": "ライブラリフォルダー",
-  "LocalStores_Description": "絶対ディレクトリと相対ディレクトリがサポートされている。 相対ディレクトリは実行ディレクトリを基準とします。",
+  "StoreUrls": "ライブラリフォルダー",
+  "StoreUrls_Description": "絶対ディレクトリと相対ディレクトリがサポートされている。 相対ディレクトリは実行ディレクトリを基準とします。",
   "LogFileName": "ログファイル名",
   "LogFileName_Description": "ログファイル名",
   "LogFilePath": "ログの保存場所",
@@ -344,5 +344,16 @@
   "saveSuccessHint": "設定が保存されました。3秒後にページが自動的にリロードされます。",
   "no_books_library_path_notice": "閲覧可能な書籍が見つかりません。ライブラリパスを設定してください。設定が完了すると、ページは自動的にリロードされます。",
   "download_raw_archive": "圧縮ファイルをダウンロード",
-  "download_portable_web_file": "HTMLとしてダウンロード"
+  "download_portable_web_file": "HTMLとしてダウンロード",
+  "enable_tailscale":"Tailscaleを有効にする",
+  "tailscale_hostname": "Tailscale ホスト名",
+  "tailscale_port":"Tailscale ポート",
+  "tailscale_funnel": "Tailscale ファンネルを有効にする",
+  "config_locked": "設定ロック",
+  "config_locked_description": "現在、表示モードのため設定はロックされています。",
+  "tailscale_auth_url_is": "Tailscaleサーバーを起動するには、TS_AUTHKEYを設定した状態で再起動するか、 認証URLにアクセスしてください：",
+  "tailscale_server_start": "Tailscaleサーバーが起動しました",
+  "tailscale_reading_url": "Tailscale読書リンク：",
+  "tailscale_not_connected_hint": "Tailscaleが接続されていません。Tailscaleクライアントをインストールしてログインしてください。",
+  "tailscale_not_enabled": "Tailscaleが有効になっていません。"
 }

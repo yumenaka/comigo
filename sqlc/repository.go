@@ -1,3 +1,5 @@
+//go:build !(windows && 386) && !js
+
 package sqlc
 
 import (
@@ -10,7 +12,7 @@ import (
 
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/model"
-	"github.com/yumenaka/comigo/util/logger"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
 // 参考：

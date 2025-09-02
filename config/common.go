@@ -11,8 +11,8 @@ import (
 	"sync"
 
 	"github.com/pelletier/go-toml/v2"
-	"github.com/yumenaka/comigo/util"
-	"github.com/yumenaka/comigo/util/logger"
+	"github.com/yumenaka/comigo/tools"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
 var (
@@ -31,7 +31,7 @@ func UpdateConfigFile() error {
 	if err != nil {
 		return err
 	}
-	if util.FileExist(filepath.Join(confDir, "comigo", "config.toml")) {
+	if tools.FileExist(filepath.Join(confDir, "comigo", "config.toml")) {
 		err = os.WriteFile(filepath.Join(confDir, "comigo", "config.toml"), bytes, 0o644)
 		if err != nil {
 			return err
@@ -39,7 +39,7 @@ func UpdateConfigFile() error {
 	}
 
 	// 当前执行目录
-	if util.FileExist("config.toml") {
+	if tools.FileExist("config.toml") {
 		err = os.WriteFile("config.toml", bytes, 0o644)
 		if err != nil {
 			return err
@@ -53,7 +53,7 @@ func UpdateConfigFile() error {
 		return err
 	}
 	p := path.Join(path.Dir(executable), "config.toml")
-	if util.FileExist(p) {
+	if tools.FileExist(p) {
 		err = os.WriteFile(p, bytes, 0o644)
 		if err != nil {
 			logger.Info(path.Join(executable, "config.toml"))
@@ -252,7 +252,7 @@ func DeleteConfigIn(in string) error {
 		}
 		configFile = path.Join(path.Dir(executable), "config.toml")
 	}
-	return util.DeleteFileIfExist(configFile)
+	return tools.DeleteFileIfExist(configFile)
 }
 
 func GetQrcodeURL() string {
@@ -262,7 +262,7 @@ func GetQrcodeURL() string {
 		protocol = "https://"
 	}
 	// 取得本机的首选出站IP
-	OutIP := util.GetOutboundIP().String()
+	OutIP := tools.GetOutboundIP().String()
 	if cfg.Host == "" {
 		return protocol + OutIP + ":" + strconv.Itoa(cfg.Port)
 	}

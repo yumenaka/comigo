@@ -8,9 +8,9 @@ import (
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/routers/upload_api"
 	"github.com/yumenaka/comigo/sqlc"
-	"github.com/yumenaka/comigo/util"
-	"github.com/yumenaka/comigo/util/logger"
-	"github.com/yumenaka/comigo/util/scan"
+	"github.com/yumenaka/comigo/tools"
+	"github.com/yumenaka/comigo/tools/logger"
+	"github.com/yumenaka/comigo/tools/scan"
 )
 
 // ScanStore 解析命令,扫描文件，设置书库等
@@ -36,7 +36,7 @@ func ScanStore(args []string) {
 		}
 	}
 	// 2、设置默认书库路径：扫描CMD指定的路径，或添加当前文件夹为默认路径。
-	CreateLocalStores(args)
+	CreateStoreUrls(args)
 	// 3、扫描配置文件里面的书库路径
 	err := scan.InitAllStore(scan.NewOption(config.GetCfg()))
 	if err != nil {
@@ -52,8 +52,8 @@ func ScanStore(args []string) {
 	}
 }
 
-// CreateLocalStores 添加默认扫描路径 args[1:]是用户指定的扫描路径
-func CreateLocalStores(args []string) {
+// CreateStoreUrls 添加默认扫描路径 args[1:]是用户指定的扫描路径
+func CreateStoreUrls(args []string) {
 	// 如果用户指定了扫描路径，就把指定的路径都加入到扫描路径里面
 	config.GetCfg().InitStoreUrls()
 	// 没指定扫描路径,配置文件也没设置书库文件夹的时候，默认把【当前工作目录】作为扫描路径
@@ -83,7 +83,7 @@ func CreateLocalStores(args []string) {
 		if config.GetUploadPath() == "" {
 			for _, storeUrl := range config.GetStoreUrls() {
 				// 把【本地存储】里面的第一个可用路径作为上传路径
-				if util.IsExist(storeUrl) {
+				if tools.IsExist(storeUrl) {
 					config.SetUploadPath(storeUrl)
 					config.GetCfg().AddStoreUrl(config.GetUploadPath())
 					break
@@ -93,5 +93,6 @@ func CreateLocalStores(args []string) {
 	}
 	// 扫描路径设置，传递给 router
 	upload_api.ConfigEnableUpload = &config.GetCfg().EnableUpload
+	upload_api.ConfigLocked = &config.GetCfg().ConfigLocked
 	upload_api.ConfigUploadPath = &config.GetCfg().UploadPath
 }
