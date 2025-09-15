@@ -18,6 +18,7 @@ import (
 	"github.com/yumenaka/comigo/templ/pages/settings"
 	"github.com/yumenaka/comigo/templ/pages/shelf"
 	"github.com/yumenaka/comigo/templ/pages/upload_page"
+	sse_hub2 "github.com/yumenaka/comigo/tools/sse_hub"
 )
 
 // BindURLs 为前端绑定 API 路由
@@ -133,9 +134,7 @@ func bindProtectedAPI(group *echo.Group) {
 	group.GET("/ws", websocket.WsHandler)
 	// 新加的 HTMX 相关路由
 	group.GET("/shelf/:id", shelf.GetBookListHandler)
-	group.GET("/htmx/settings/tab-book", settings.TabBook)
-	group.GET("/htmx/settings/tab-net", settings.TabNetwork)
-	group.GET("/htmx/settings/tab-labs", settings.TabLabs)
+	//group.GET("/htmx/settings/all", settings.AllSetting)
 	group.POST("/update-string-config", settings.UpdateStringConfigHandler)
 	group.POST("/update-bool-config", settings.UpdateBoolConfigHandler)
 	group.POST("/update-number-config", settings.UpdateNumberConfigHandler)
@@ -145,4 +144,8 @@ func bindProtectedAPI(group *echo.Group) {
 	group.POST("/config-save", settings.HandleConfigSave)
 	group.POST("/config-delete", settings.HandleConfigDelete)
 	group.GET("/tailscale_status", get_data_api.GetTailscaleStatus)
+	// SSE 服务器发送事件
+	group.GET("/sse", sse_hub2.SSEHandler)
+	// SSE 广播接口
+	group.POST("/push", sse_hub2.PushHandler)
 }

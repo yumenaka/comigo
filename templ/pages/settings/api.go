@@ -11,35 +11,24 @@ import (
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/templ/state"
 	"github.com/yumenaka/comigo/tools/logger"
+	"github.com/yumenaka/comigo/tools/tailscale_plugin"
 )
 
 // -------------------------
 // 使用templ模板响应htmx请求
 // -------------------------
 
-func TabBook(c echo.Context) error {
-	template := tab_book()
-	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, template); renderErr != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError)
-	}
-	return nil
-}
-
-func TabNetwork(c echo.Context) error {
-	template := tab_network()
-	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, template); renderErr != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError)
-	}
-	return nil
-}
-
-func TabLabs(c echo.Context) error {
-	template := tab_labs()
-	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, template); renderErr != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError)
-	}
-	return nil
-}
+//func AllSetting(c echo.Context) error {
+//	tsStatus, err := tailscale_plugin.GetTailscaleStatus(c.Request().Context())
+//	if err != nil {
+//		return err
+//	}
+//	template := settings_all(tsStatus)
+//	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, template); renderErr != nil {
+//		return echo.NewHTTPError(http.StatusInternalServerError)
+//	}
+//	return nil
+//}
 
 // -------------------------
 // 抽取更新配置的公共逻辑
@@ -100,6 +89,15 @@ func updateConfigGeneric(c echo.Context) (string, string, error) {
 // -------------------------
 // 各类配置的更新 PageHandler
 // -------------------------
+
+// GetTailscaleStatus 处理Tailscale网络配置
+func GetTailscaleStatus(c echo.Context) error {
+	tailscaleStatus, err := tailscale_plugin.GetTailscaleStatus(c.Request().Context())
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, tailscaleStatus)
+}
 
 // UpdateStringConfigHandler 处理 String 类型
 func UpdateStringConfigHandler(c echo.Context) error {

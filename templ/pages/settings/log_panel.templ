@@ -1,0 +1,34 @@
+package settings
+
+// TailscaleConfig Tailscale 配置项
+templ LogPanel() {
+	<div id="log_panel" class="p-4 m-4 h-[300px] bg-gray-600 text-white rounded-md overflow-auto whitespace-pre-wrap"></div>
+	<div class="row">
+		<input id="msg" placeholder="要广播的消息" class="ml-4 p-1"/>
+		<button id="send" class="ml-2 p-1 h-10 mx-2 my-0 text-center text-gray-700 transition border border-gray-500 rounded bg-sky-300 hover:text-gray-900">POST</button>
+	</div>
+	<script>
+    const log = (s) => {
+      const box = document.getElementById('log_panel');
+      box.textContent += s + "\n";
+      box.scrollTop = box.scrollHeight;
+    };
+
+    const es = new EventSource('/api/sse', { withCredentials: true });
+    es.onopen    = () => log('[open] connected');
+    es.onerror   = (e) => log('[error] ' + (es.readyState === EventSource.CLOSED ? 'closed' : 'retrying...'));
+    es.onmessage = (e) => log('[message] ' + e.data); // 默认事件
+    // 监听自定义事件名：tick
+    es.addEventListener('tick', (e) => log('[tick] ' + e.data));
+
+    document.getElementById('send').onclick = async () => {
+      const message = document.getElementById('msg').value || 'Hello SSE';
+      await fetch('/api/push', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ message })
+      });
+      console.log('[send] ' + message);
+    };
+  </script>
+}

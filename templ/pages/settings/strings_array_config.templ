@@ -4,11 +4,33 @@ import "strconv"
 import "fmt"
 import "github.com/yumenaka/comigo/templ/common/svg"
 
-// TODO：出于安全考虑。onclick不能直接拼接函数，未来需要使用JSFuncCall
-// 等 https://github.com/a-h/templ/pull/1038 合并后，可以使用下面的代码
-// onclick={ templ.JSFuncCall("deleteStringValue", templ.JSExpression("e"), name, index) }
-// templ.JSUnsafeFuncCall
+var StringArrayOnceHandle = templ.NewOnceHandle()
+
+
+// 出于安全考虑。onclick不能直接拼接函数，需要使用 templ.JSFuncCall()
+// https://templ.guide/syntax-and-usage/script-templates/
 templ StringArrayConfig(name string, values []string, description string, saveSuccessHint bool) {
+ @StringArrayOnceHandle.Once() {
+			<script>
+			// 删除字符串数组配置中的元素。
+			// 此处仅用作打印调试信息。删除操作是由 htmx 完成的。
+			function deleteStringConfigValue(self) {
+				const configName = self.getAttribute('data-config-name');
+				const arrawIndex = self.getAttribute('data-arraw-index');
+				const deleteValue = self.getAttribute('data-delete-value');
+				console.log(configName, arrawIndex, deleteValue);
+			}
+			// 添加字符串数组配置中的元素
+			// 此函数的作用，是修改 hx-vals 的值。实际的提交操作由 htmx 完成
+			function  addStringConfigValue(self){
+				const buttonID = self.getAttribute('id');
+				const configName = buttonID.replace('AddButton', '');
+				const addValue = document.getElementById(configName + 'AddInput').value;
+				self.setAttribute('hx-vals', JSON.stringify({ configName: configName, addValue: addValue }));
+				console.log(configName, addValue);
+			}
+		</script>
+  }
 	if saveSuccessHint {
 		<div
 			class="hidden"
@@ -34,7 +56,7 @@ templ StringArrayConfig(name string, values []string, description string, saveSu
 						hx-target={ "#" + name + "-string-array-config" }
 						hx-swap="outerHTML"
 						hx-vals={ fmt.Sprintf(`{"configName":"%s","deleteValue":"%s"}`, name, value) }
-						onclick="deleteStringConfigValue(this)"
+						onclick={ templ.JSFuncCall("deleteStringConfigValue", templ.JSExpression("this")) }
 						class="flex justify-center items-center w-6 h-6 ml-1 mr-0.5 rounded hover:ring"
 					>
 						@svg.Delete()
@@ -58,7 +80,7 @@ templ StringArrayConfig(name string, values []string, description string, saveSu
 						hx-target={ "#" + name + "-string-array-config" }
 						hx-swap="outerHTML"
 						hx-vals={ fmt.Sprintf(`{"configName":"%s","addValue":"%s"}`, name, "") }
-						onclick="addStringConfigValue(this)"
+						onclick={ templ.JSFuncCall("addStringConfigValue", templ.JSExpression("this")) }
 						class="w-16 h-10 mx-2 my-0 text-center text-gray-700 transition border border-gray-500 rounded bg-sky-300 hover:text-gray-900"
 					>
 						提交

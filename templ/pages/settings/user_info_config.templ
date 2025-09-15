@@ -38,10 +38,10 @@ templ UserInfoConfig(initUsername string, initPassword string, saveSuccessHint b
 				this.originalUsername = this.$el.querySelector('#Username').value;
                 this.originalPassword = this.$el.querySelector('#Password').value;
 
-				console.log('Initial values in init():');
-				console.log('Username:', this.username, '| Original Username:', this.originalUsername);
-				console.log('Password:', this.password, '| Original Password:', this.originalPassword);
-				console.log('isFormChanged on init:', this.isFormChanged);
+				//console.log('Initial values in init():');
+				//console.log('Username:', this.username, '| Original Username:', this.originalUsername);
+				//console.log('Password:', this.password, '| Original Password:', this.originalPassword);
+				//console.log('isFormChanged on init:', this.isFormChanged);
 
 				this.$watch('username', value => {
 					this.isFormChanged = value !== this.originalUsername || this.password !== this.originalPassword;

@@ -17,6 +17,7 @@ type TailsClientInfo struct {
 	AccessTime        time.Time `json:"access_time"`         // 客户端访问开始、时间
 }
 
+// TailscaleStatus 保存 Tailscale 服务的状态信息
 type TailscaleStatus struct {
 	AuthURL      string            // 客户端授权用URL。如果节点已授权，则为空字符串。另外手动移除节点，不会重新生成新的AuthURL，直到下次重新运行tailscaled。
 	BackendState string            // BackendState: "NoState", "NeedsLogin", "NeedsMachineAuth", "Stopped", "Starting", "Running".	// 常见状态为 "Running"  "NeedsLogin"
@@ -27,6 +28,23 @@ type TailscaleStatus struct {
 	TailscaleIPs []netip.Addr      // 分配给此节点的 Tailscale IP(s)，第一个是 IPv4地址，第二个是 IPv6 地址
 	Version      string            // 当前Tailscale版本
 	mu           sync.Mutex        // Mutex lock
+}
+
+func (t *TailscaleStatus) GetTailscaleIP() string {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	if len(t.TailscaleIPs) == 1 {
+		return t.TailscaleIPs[0].String()
+	}
+	if len(t.TailscaleIPs) >= 2 {
+		// 优先返回 IPv4 地址
+		for _, ip := range t.TailscaleIPs {
+			if ip.Is4() {
+				return ip.String()
+			}
+		}
+	}
+	return ""
 }
 
 // AddClientInfo 添加客户端信息到状态中，需要避免重复添加

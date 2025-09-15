@@ -1,0 +1,17 @@
+package settings
+
+import (
+	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/templ/common"
+	"github.com/yumenaka/comigo/templ/state"
+	"github.com/yumenaka/comigo/tools/tailscale_plugin"
+)
+
+// SettingsPage 设置页面
+templ SettingsPage(c echo.Context, tsStatus *tailscale_plugin.TailscaleStatus) {
+    @Header()
+	@common.Toast()
+	@MainArea(tsStatus)
+	@common.Footer(state.Version)
+	@common.QRCode(state.ServerStatus.ServerHost)
+}

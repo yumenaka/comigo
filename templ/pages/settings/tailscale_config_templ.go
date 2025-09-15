@@ -8,14 +8,14 @@ package settings
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-// 关键 htmx 配置解说
-// hx-post 请求地址
-// hx-trigger 值发生变化后触发
-// hx-target用返回的 HTML 替换哪个 DOM 元素
-// hx-swap 替换方式
-// hx-params="*" 发送表单数据，包含所有 name/value
-// saveSuccessHint: 保存成功,三秒后刷新本页面
-func TailscaleConfig(initUsername string, initPassword string, saveSuccessHint bool) templ.Component {
+import (
+	"strconv"
+
+	"github.com/yumenaka/comigo/tools/tailscale_plugin"
+)
+
+// TailscaleConfig Tailscale 配置项
+func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -36,78 +36,111 @@ func TailscaleConfig(initUsername string, initPassword string, saveSuccessHint b
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		if saveSuccessHint {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"hidden\" x-init=\"showToast(i18next.t('saveSuccessHint'), 'info');setTimeout(() => {\n            window.location.reload();\n        }, 3000)\"></div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<form id=\"user_config_form\" class=\"flex flex-col justify-start w-full p-2 m-1 font-semibold\n            border rounded-md shadow-md hover:shadow-2xl\n            items-left bg-base-100 text-base-content border-slate-400\" x-data=\"{\n\t\t\tusername: '',\n\t\t\tpassword: '',\n\t\t\treEnterPassword: '',\n\t\t\tshowPassword: false,\n\t\t\tshowReEnterPassword: false,\n\t\t\tisFormChanged: false,\n\t\t\tpasswordError: false,\n\t\t\toriginalUsername: '',\n\t\t\toriginalPassword: '',\n\t\t\t\n\t\t\tinit() {\n\t\t\t\tthis.username = this.$el.querySelector('#Username').value;\n\t\t\t\tthis.password = this.$el.querySelector('#Password').value;\n\t\t\t\tthis.originalUsername = this.$el.querySelector('#Username').value;\n                this.originalPassword = this.$el.querySelector('#Password').value;\n\n\t\t\t\tconsole.log('Initial values in init():');\n\t\t\t\tconsole.log('Username:', this.username, '| Original Username:', this.originalUsername);\n\t\t\t\tconsole.log('Password:', this.password, '| Original Password:', this.originalPassword);\n\t\t\t\tconsole.log('isFormChanged on init:', this.isFormChanged);\n\n\t\t\t\tthis.$watch('username', value => {\n\t\t\t\t\tthis.isFormChanged = value !== this.originalUsername || this.password !== this.originalPassword;\n\t\t\t\t\tconsole.log('Username changed. isFormChanged:', this.isFormChanged, 'New username:', value, 'Original:', this.originalUsername);\n\t\t\t\t});\n\t\t\t\t\n\t\t\t\tthis.$watch('password', value => {\n\t\t\t\t\tthis.isFormChanged = this.username !== this.originalUsername || value !== this.originalPassword;\n\t\t\t\t\tthis.validatePasswords();\n\t\t\t\t\tconsole.log('Password changed. isFormChanged:', this.isFormChanged, 'New password:', value, 'Original:', this.originalPassword, 'Current username:', this.username);\n\t\t\t\t});\n\t\t\t\t\n\t\t\t\tthis.$watch('reEnterPassword', () => {\n\t\t\t\t\tthis.validatePasswords();\n\t\t\t\t});\n\t\t\t},\n\t\t\t\n\t\t\tvalidatePasswords() {\n\t\t\t\tthis.passwordError = this.password !== '' && this.reEnterPassword !== '' && this.password !== this.reEnterPassword;\n\t\t\t\tconsole.log('Validated passwords. Error:', this.passwordError);\n\t\t\t},\n\t\t\t\n\t\t\tresetForm() {\n\t\t\t\tconsole.log('Resetting form. Original username:', this.originalUsername, 'Original password:', this.originalPassword);\n\t\t\t\tthis.username = this.originalUsername;\n\t\t\t\tthis.password = this.originalPassword;\n\t\t\t\tthis.reEnterPassword = '';\n\t\t\t\tthis.isFormChanged = false;\n\t\t\t\tthis.passwordError = false;\n\t\t\t\tconsole.log('Form reset. Username:', this.username, 'Password:', this.password, 'isFormChanged:', this.isFormChanged);\n\t\t\t},\n\t\t\t\n\t\t\tcheckBeforeSave() {\n\t\t\t\tif (this.passwordError) {\n\t\t\t\t\talert('两次输入的密码不一致，请重新输入');\n\t\t\t\t\treturn false;\n\t\t\t\t}\n\t\t\t\tif (!this.isFormChanged) {\n\t\t\t\t\treturn false;\n\t\t\t\t}\n\t\t\t\tconsole.log('Check before save: OK to save. isFormChanged:', this.isFormChanged, 'passwordError:', this.passwordError);\n\t\t\t\treturn true;\n\t\t\t}\n\t\t}\"><!-- 用户名 --><label x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex flex-col justify-start w-full p-2 m-1 font-semibold\n            border rounded-md shadow-md hover:shadow-2xl\n            items-left bg-base-100 text-base-content border-slate-400\"><div>AuthURL:")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("Username"))
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(tsStatus.AuthURL)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 91, Col: 45}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 16, Col: 33}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" for=\"Username\" class=\"w-64\"></label> <input id=\"Username\" name=\"Username\" type=\"text\" placeholder=\"Username\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div><div>BackendState:")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(initUsername)
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(tsStatus.BackendState)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 97, Col: 23}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 17, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" x-model=\"username\" class=\"px-2.5 w-full rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm\"><!-- 密码 --><div class=\"relative\"><label x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><div>Clients Num:")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("Password"))
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(len(tsStatus.Clients)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 103, Col: 46}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 18, Col: 56}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" for=\"Password\" class=\"w-64\"></label><div class=\"relative\"><input id=\"Password\" name=\"Password\" :type=\"showPassword ? 'text' : 'password'\" placeholder=\"Password\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><div>OS:")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(initPassword)
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(tsStatus.OS)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 110, Col: 25}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 19, Col: 23}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" x-model=\"password\" class=\"px-2.5 w-full rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm\"> <button type=\"button\" class=\"absolute right-2 top-1/2 transform -translate-y-1/2\" @click=\"showPassword = !showPassword\"><svg x-show=\"!showPassword\" class=\"h-5 w-5 text-gray-500\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M15 12a3 3 0 11-6 0 3 3 0 016 0z\"></path> <path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z\"></path></svg> <svg x-show=\"showPassword\" class=\"h-5 w-5 text-gray-500\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21\"></path></svg></button></div></div><!-- 再次输入密码 --><div class=\"relative\"><label x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div><div>Online:")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var6 string
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("ReEnterPassword"))
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(tsStatus.Online)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 131, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 20, Col: 31}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" for=\"ReEnterPassword\" class=\"w-64\"></label><div class=\"relative\"><input id=\"ReEnterPassword\" name=\"ReEnterPassword\" :type=\"showReEnterPassword ? 'text' : 'password'\" placeholder=\"ReEnter Password\" x-model=\"reEnterPassword\" class=\"px-2.5 w-full rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm\" :class=\"{ 'border-red-500': passwordError }\"> <button type=\"button\" class=\"absolute right-2 top-1/2 transform -translate-y-1/2\" @click=\"showReEnterPassword = !showReEnterPassword\"><svg x-show=\"!showReEnterPassword\" class=\"h-5 w-5 text-gray-500\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M15 12a3 3 0 11-6 0 3 3 0 016 0z\"></path> <path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z\"></path></svg> <svg x-show=\"showReEnterPassword\" class=\"h-5 w-5 text-gray-500\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21\"></path></svg></button></div><!-- 密码不匹配错误提示 --><div x-show=\"passwordError\" class=\"text-red-500 text-xs mt-1\">两次输入的密码不一致</div></div><!-- 按钮组 --><div class=\"flex mt-4 space-x-2\"><button class=\"w-20 h-10 mx-2 my-0 text-center text-gray-700 transition border border-gray-500 rounded bg-sky-300 hover:text-gray-900\" :class=\"{ 'opacity-50 cursor-not-allowed': !isFormChanged || passwordError }\" :disabled=\"!isFormChanged || passwordError\" hx-post=\"/api/update-user-info\" hx-trigger=\"click\" hx-target=\"#user_config_form\" hx-swap=\"outerHTML\" hx-params=\"*\" @click=\"if(!checkBeforeSave()) $event.preventDefault()\">SAVE</button> <button x-show=\"isFormChanged\" class=\"w-20 h-10 mx-2 my-0 text-center text-gray-700 transition border border-gray-500 rounded bg-gray-300 hover:text-gray-900\" @click=\"resetForm()\" :class=\"{ 'opacity-50 cursor-not-allowed': !isFormChanged }\" :disabled=\"!isFormChanged\">CANCEL</button></div></form>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div><div>FQDN:")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var7 string
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(tsStatus.FQDN)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 21, Col: 27}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div><div>TailscaleIP:")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var8 string
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(tsStatus.GetTailscaleIP())
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 22, Col: 46}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div><div>Version:")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var9 string
+		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(tsStatus.Version)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 23, Col: 33}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

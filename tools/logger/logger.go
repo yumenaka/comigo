@@ -14,6 +14,7 @@ import (
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"github.com/rifflock/lfshook"
 	"github.com/sirupsen/logrus"
+	"github.com/yumenaka/comigo/tools/sse_hub"
 )
 
 // 对外暴露的 log 接口
@@ -40,7 +41,7 @@ func init() {
 	logger.SetReportCaller(ReportCaller)
 
 	// 设置自定义 formatter
-	logger.SetFormatter(&CustomFormatter{
+	logger.SetFormatter(&EchoLogFormatter{
 		FullTimestamp:   true,
 		TimestampFormat: "2006-01-02 15:04:05",
 	})
@@ -56,14 +57,14 @@ func init() {
 	Fatalf = logger.Fatalf
 }
 
-// CustomFormatter 可以根据自己需求自由命名
-type CustomFormatter struct {
+// EchoLogFormatter 可以根据自己需求自由命名
+type EchoLogFormatter struct {
 	FullTimestamp   bool
 	TimestampFormat string
 }
 
 // Format 实现 logrus.Formatter 接口
-func (f *CustomFormatter) Format(entry *logrus.Entry) ([]byte, error) {
+func (f *EchoLogFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	// 如果 entry.Buffer 不为空，就使用原有的 buffer
 	// 否则新建一个 bytes.Buffer
 	b := entry.Buffer
@@ -123,7 +124,7 @@ func trimFuncName(funcName string) string {
 func EchoLogHandler(LogToFile bool, LogFilePath string, LogFileName string, Debug bool) echo.MiddlewareFunc {
 	logger.SetLevel(logrus.DebugLevel)
 	logger.SetReportCaller(Debug)
-	logger.SetFormatter(&CustomFormatter{
+	logger.SetFormatter(&EchoLogFormatter{
 		FullTimestamp:   false,
 		TimestampFormat: "2006-01-02 15:04:05",
 	})
@@ -167,25 +168,27 @@ func EchoLogHandler(LogToFile bool, LogFilePath string, LogFileName string, Debu
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			startTime := time.Now()
-
 			err := next(c)
-
 			endTime := time.Now()
 			latencyTime := float64(endTime.Sub(startTime).Microseconds()) / 1000
 			reqMethod := c.Request().Method
 			reqURI := c.Request().RequestURI
 			statusCode := c.Response().Status
-
-			logger.WithFields(logrus.Fields{}).Info(
-				fmt.Sprintf("[%s:%d][%6.2fms][%s]%s",
-					reqMethod,
-					statusCode,
-					latencyTime,
-					c.RealIP(),
-					reqURI,
-				),
+			logMsg := fmt.Sprintf("[%s:%d][%6.2fms][%s]%s",
+				reqMethod,
+				statusCode,
+				latencyTime,
+				c.RealIP(),
+				reqURI,
 			)
-
+			sse_hub.MessageHub.Broadcast(sse_hub.Event{
+				Name: "log",
+				ID:   fmt.Sprintf("%d", time.Now().UnixNano()),
+				Data: logMsg,
+			})
+			logger.WithFields(logrus.Fields{}).Info(
+				logMsg,
+			)
 			return err
 		}
 	}
