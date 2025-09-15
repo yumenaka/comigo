@@ -2194,12 +2194,12 @@
     margin: calc(var(--spacing) * 2);
   }
 
-  .mx-0 {
-    margin-inline: calc(var(--spacing) * 0);
+  .m-4 {
+    margin: calc(var(--spacing) * 4);
   }
 
-  .mx-0\.5 {
-    margin-inline: calc(var(--spacing) * .5);
+  .mx-0 {
+    margin-inline: calc(var(--spacing) * 0);
   }
 
   .mx-1 {
@@ -2481,10 +2481,6 @@
     height: calc(var(--spacing) * 8);
   }
 
-  .h-9 {
-    height: calc(var(--spacing) * 9);
-  }
-
   .h-10 {
     height: calc(var(--spacing) * 10);
   }
@@ -2503,6 +2499,10 @@
 
   .h-64 {
     height: calc(var(--spacing) * 64);
+  }
+
+  .h-\[300px\] {
+    height: 300px;
   }
 
   .h-\[calc\(100\%-1rem\)\] {
@@ -2754,20 +2754,12 @@
     border-color: var(--color-blue-600);
   }
 
-  .min-w-20 {
-    min-width: calc(var(--spacing) * 20);
-  }
-
   .min-w-64 {
     min-width: calc(var(--spacing) * 64);
   }
 
   .min-w-\[20rem\] {
     min-width: 20rem;
-  }
-
-  .min-w-\[22rem\] {
-    min-width: 22rem;
   }
 
   .min-w-\[44px\] {
@@ -2998,6 +2990,10 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
+  }
+
+  .overflow-auto {
+    overflow: auto;
   }
 
   .overflow-hidden {
@@ -3626,6 +3622,10 @@
     padding-block: calc(var(--spacing) * 3);
   }
 
+  .py-4 {
+    padding-block: calc(var(--spacing) * 4);
+  }
+
   .py-12 {
     padding-block: calc(var(--spacing) * 12);
   }
@@ -3830,6 +3830,10 @@
   .font-semibold {
     --tw-font-weight: var(--font-weight-semibold);
     font-weight: var(--font-weight-semibold);
+  }
+
+  .whitespace-pre-wrap {
+    white-space: pre-wrap;
   }
 
   .datatable-wrapper .datatable-table thead th .datatable-sorter {

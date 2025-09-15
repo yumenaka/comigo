@@ -12,10 +12,11 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/templ/common"
 	"github.com/yumenaka/comigo/templ/state"
+	"github.com/yumenaka/comigo/tools/tailscale_plugin"
 )
 
 // SettingsPage 设置页面
-func SettingsPage(c echo.Context) templ.Component {
+func SettingsPage(c echo.Context, tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -36,11 +37,15 @@ func SettingsPage(c echo.Context) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = Header().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
 		templ_7745c5c3_Err = common.Toast().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = MainArea().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = MainArea(tsStatus).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -49,10 +54,6 @@ func SettingsPage(c echo.Context) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = common.QRCode(state.ServerStatus.ServerHost).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<script>\n    // htmx出错时报错（Toast）\n\tdocument.addEventListener('htmx:responseError', (event) => {\n      showToast(event.detail.xhr.statusText+\": \"+event.detail.xhr.responseURL, 'error');\n    });\n    // 删除字符串数组配置中的元素。此处仅用作打印调试信息。删除操作是由 htmx 完成的。\n\tfunction deleteStringConfigValue(e) {\n\t    const configName = e.getAttribute('data-config-name');\n        const arrawIndex = e.getAttribute('data-arraw-index');\n        const deleteValue = e.getAttribute('data-delete-value');\n        console.log(configName, arrawIndex, deleteValue);\n\t}\n\t// 添加字符串数组配置中的元素\n\t// 此函数的作用，是修改 hx-vals 的值。实际的提交操作是由 htmx 完成的\n\tfunction addStringConfigValue(e) {\n        const buttonID = e.getAttribute('id');\n        const configName = buttonID.replace('AddButton', '');\n        const addValue = document.getElementById(configName+'AddInput').value;\n        console.log(configName, addValue);\n        e.setAttribute('hx-vals', JSON.stringify({configName: configName, addValue: addValue}));\n    }\n</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

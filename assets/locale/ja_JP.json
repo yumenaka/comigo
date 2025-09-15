@@ -355,5 +355,10 @@
   "tailscale_server_start": "Tailscaleサーバーが起動しました",
   "tailscale_reading_url": "Tailscale読書リンク：",
   "tailscale_not_connected_hint": "Tailscaleが接続されていません。Tailscaleクライアントをインストールしてログインしてください。",
-  "tailscale_not_enabled": "Tailscaleが有効になっていません。"
+  "tailscale_not_enabled": "Tailscaleが有効になっていません。",
+  "ServerSettings": "サーバー設定",
+  "settings_stores": "書庫設定",
+  "settings_network": "ネットワーク設定",
+  "settings_extra": "実験的機能",
+  "remote_access": "リモートアクセス"
 }

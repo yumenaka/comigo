@@ -6,6 +6,7 @@ import (
 	"github.com/angelofallars/htmx-go"
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/templ/common"
+	"github.com/yumenaka/comigo/tools/tailscale_plugin"
 )
 
 func getTranslations(value string) string {
@@ -14,9 +15,13 @@ func getTranslations(value string) string {
 
 // PageHandler 设定页面
 func PageHandler(c echo.Context) error {
+	tsStatus, err := tailscale_plugin.GetTailscaleStatus(c.Request().Context())
+	if err != nil {
+		return err
+	}
 	indexHtml := common.Html(
 		c,
-		SettingsPage(c),
+		SettingsPage(c, tsStatus),
 		[]string{},
 	)
 	// 渲染页面

@@ -355,5 +355,10 @@
   "tailscale_server_start": "Tailscale service has started.",
   "tailscale_reading_url": "Tailscale reading link: ",
   "tailscale_not_connected_hint": "Tailscale is not connected. Please check your network or Tailscale settings.",
-  "tailscale_not_enabled": "Tailscale is not enabled. Please enable Tailscale first."
+  "tailscale_not_enabled": "Tailscale is not enabled. Please enable Tailscale first.",
+  "ServerSettings": "Server Settings",
+  "settings_stores": "Library Settings",
+  "settings_network": "Network Settings",
+  "settings_extra": "Experimental Features",
+  "remote_access": "Remote Access"
 }

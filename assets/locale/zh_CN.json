@@ -355,5 +355,10 @@
   "tailscale_server_start": "Tailscale 已启动，正在获取 IP 地址……",
   "tailscale_reading_url": "通过 Tailscale 访问的阅读链接为：",
   "tailscale_not_connected_hint": "Tailscale 未连接，请检查网络或认证状态。",
-  "tailscale_not_enabled": "Tailscale 未启用，请先启用。"
+  "tailscale_not_enabled": "Tailscale 未启用，请先启用。",
+  "ServerSettings": "服务器设置",
+  "settings_stores": "书库设置",
+  "settings_network": "网络设置",
+  "settings_extra": "实验功能",
+  "remote_access": "远程访问"
 }
