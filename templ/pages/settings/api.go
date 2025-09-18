@@ -178,8 +178,8 @@ func UpdateNumberConfigHandler(c echo.Context) error {
 	return nil
 }
 
-// UpdateUserInfoConfigHandler 更新用户信息
-func UpdateUserInfoConfigHandler(c echo.Context) error {
+// UpdateLoginSettingsHandler 更新登录相关信息
+func UpdateLoginSettingsHandler(c echo.Context) error {
 	if !htmx.IsHTMX(c.Request()) {
 		return echo.NewHTTPError(http.StatusBadRequest, "non-htmx request")
 	}
@@ -187,12 +187,41 @@ func UpdateUserInfoConfigHandler(c echo.Context) error {
 	if config.GetCfg().GetConfigLocked() {
 		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
 	}
-
 	username := c.FormValue("Username")
+	oldPassword := c.FormValue("OldPassword")
 	password := c.FormValue("Password") // 注意：这里获取的是用户在表单中输入的新密码或原始密码
+	reEnterPassword := c.FormValue("ReEnterPassword")
+	// 密码通常不明文记录到日志，除非是调试模式
+	if state.ServerConfig.Debug {
+		logger.Infof("Update user info: Username=%s", username)
+		logger.Infof("Update user info: OldPassword=%s", oldPassword)
+		logger.Infof("Update user info: Password=%s", password)
+		logger.Infof("Update user info: ReEnterPassword=%s", reEnterPassword) //ReEnterPassword
+	}
 
-	logger.Infof("Update user info: Username=%s", username) // 密码通常不建议明文记录到日志，除非是调试阶段
-	logger.Infof("Update user info: Password=%s", password)
+	// 两次输入的密码不一致
+	if password != reEnterPassword {
+		return echo.NewHTTPError(http.StatusBadRequest, "Passwords do not match")
+	}
+	// 用户名或密码为空
+	if username == "" || password == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Username and Password cannot be empty")
+	}
+	// 密码过短
+	if len(password) < 6 {
+		return echo.NewHTTPError(http.StatusBadRequest, "Password must be at least 6 characters long")
+	}
+	// 用户名过短
+	if len(username) < 3 {
+		return echo.NewHTTPError(http.StatusBadRequest, "Username must be at least 3 characters long")
+	}
+
+	if state.ServerConfig.Password != "" {
+		// 旧密码不正确
+		if state.ServerConfig.Password != oldPassword {
+			return echo.NewHTTPError(http.StatusBadRequest, "Old password is incorrect")
+		}
+	}
 
 	// 旧配置做个备份（有需要对比）
 	oldConfig := config.CopyCfg()

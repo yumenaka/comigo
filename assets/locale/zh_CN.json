@@ -360,5 +360,7 @@
   "settings_stores": "书库设置",
   "settings_network": "网络设置",
   "settings_extra": "实验功能",
-  "remote_access": "远程访问"
+  "remote_access": "远程访问",
+  "password_validated_error_1": "两次输入的密码不一致，请重新输入",
+  "password_validated_error_2": "请输入密码"
 }

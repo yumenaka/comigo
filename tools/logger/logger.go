@@ -181,10 +181,19 @@ func EchoLogHandler(LogToFile bool, LogFilePath string, LogFileName string, Debu
 				c.RealIP(),
 				reqURI,
 			)
+			logMsgWeb := fmt.Sprintf("[%s:%d]<span style=\"color:#d08700\">[%6.2fms]</span><span style=\"color:#0084d1\">[%s]</span>%s",
+				reqMethod,
+				statusCode,
+				latencyTime,
+				c.RealIP(),
+				reqURI,
+			)
+			// 把log发送给所有网页客户端 <span style="color:green">[GET:200]</span>
+			nowTimeStr := "<span style=\"color:oklch(62.7% 0.194 149.214)\">[" + time.Now().Format("2006-01-02 15:04:05") + "]</span>"
 			sse_hub.MessageHub.Broadcast(sse_hub.Event{
 				Name: "log",
 				ID:   fmt.Sprintf("%d", time.Now().UnixNano()),
-				Data: logMsg,
+				Data: fmt.Sprintf("%s%s", nowTimeStr, logMsgWeb),
 			})
 			logger.WithFields(logrus.Fields{}).Info(
 				logMsg,

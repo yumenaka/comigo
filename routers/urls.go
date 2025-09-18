@@ -18,7 +18,7 @@ import (
 	"github.com/yumenaka/comigo/templ/pages/settings"
 	"github.com/yumenaka/comigo/templ/pages/shelf"
 	"github.com/yumenaka/comigo/templ/pages/upload_page"
-	sse_hub2 "github.com/yumenaka/comigo/tools/sse_hub"
+	"github.com/yumenaka/comigo/tools/sse_hub"
 )
 
 // BindURLs 为前端绑定 API 路由
@@ -138,14 +138,14 @@ func bindProtectedAPI(group *echo.Group) {
 	group.POST("/update-string-config", settings.UpdateStringConfigHandler)
 	group.POST("/update-bool-config", settings.UpdateBoolConfigHandler)
 	group.POST("/update-number-config", settings.UpdateNumberConfigHandler)
-	group.POST("/update-user-info", settings.UpdateUserInfoConfigHandler)
+	group.POST("/update-login-settings", settings.UpdateLoginSettingsHandler)
 	group.POST("/delete-array-config", settings.DeleteArrayConfigHandler)
 	group.POST("/add-array-config", settings.AddArrayConfigHandler)
 	group.POST("/config-save", settings.HandleConfigSave)
 	group.POST("/config-delete", settings.HandleConfigDelete)
 	group.GET("/tailscale_status", get_data_api.GetTailscaleStatus)
 	// SSE 服务器发送事件
-	group.GET("/sse", sse_hub2.SSEHandler)
+	group.GET("/sse", sse_hub.SSEHandler)
 	// SSE 广播接口
-	group.POST("/push", sse_hub2.PushHandler)
+	group.POST("/push", sse_hub.PushHandler)
 }
