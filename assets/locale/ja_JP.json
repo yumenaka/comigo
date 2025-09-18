@@ -360,5 +360,7 @@
   "settings_stores": "書庫設定",
   "settings_network": "ネットワーク設定",
   "settings_extra": "実験的機能",
-  "remote_access": "リモートアクセス"
+  "remote_access": "リモートアクセス",
+  "password_validated_error_1": "入力したパスワードが一致しません。再度入力してください。",
+  "password_validated_error_2": "パスワードを入力してください"
 }

@@ -7,13 +7,13 @@ package settings
 // hx-swap 替换方式
 // hx-params="*" 发送表单数据，包含所有 name/value
 // saveSuccessHint: 保存成功,三秒后刷新本页面
-templ UserInfoConfig(initUsername string, initPassword string, saveSuccessHint bool) {
+templ UserInfoConfig(nowUsername string, nowPassword string, saveSuccessHint bool) {
 	if saveSuccessHint {
 		<div
-		    class="hidden"
+			class="hidden"
 			x-init="showToast(i18next.t('saveSuccessHint'), 'info');setTimeout(() => {
             window.location.reload();
-        }, 3000)"
+        }, 3000000)"
 		></div>
 	}
 	<form
@@ -23,66 +23,51 @@ templ UserInfoConfig(initUsername string, initPassword string, saveSuccessHint b
             items-left bg-base-100 text-base-content border-slate-400"
 		x-data="{
 			username: '',
+			old_password: '',
 			password: '',
-			reEnterPassword: '',
+			re_enter_password: '',
 			showPassword: false,
-			showReEnterPassword: false,
+			show_re_enter_password: false,
 			isFormChanged: false,
-			passwordError: false,
-			originalUsername: '',
-			originalPassword: '',
+			passwordOK: false,
 			
 			init() {
 				this.username = this.$el.querySelector('#Username').value;
+				this.old_password = this.$el.querySelector('#OldPassword') ? this.$el.querySelector('#OldPassword').value : '';
 				this.password = this.$el.querySelector('#Password').value;
-				this.originalUsername = this.$el.querySelector('#Username').value;
-                this.originalPassword = this.$el.querySelector('#Password').value;
-
-				//console.log('Initial values in init():');
-				//console.log('Username:', this.username, '| Original Username:', this.originalUsername);
-				//console.log('Password:', this.password, '| Original Password:', this.originalPassword);
-				//console.log('isFormChanged on init:', this.isFormChanged);
+                this.re_enter_password = this.$el.querySelector('#re_enter_password').value;
 
 				this.$watch('username', value => {
-					this.isFormChanged = value !== this.originalUsername || this.password !== this.originalPassword;
-					console.log('Username changed. isFormChanged:', this.isFormChanged, 'New username:', value, 'Original:', this.originalUsername);
+					this.isFormChanged = true; // 只要用户名框有变化，就认为表单被修改过
+					console.log('Username changed. isFormChanged:', this.isFormChanged, 'New username:', value);
 				});
 				
 				this.$watch('password', value => {
-					this.isFormChanged = this.username !== this.originalUsername || value !== this.originalPassword;
-					this.validatePasswords();
-					console.log('Password changed. isFormChanged:', this.isFormChanged, 'New password:', value, 'Original:', this.originalPassword, 'Current username:', this.username);
+					this.isFormChanged = true; // 只要密码框有变化，就认为表单被修改过
+					this.passwordOK = this.password !== '' && this.re_enter_password !== '' && this.password === this.re_enter_password;
+					console.log('Password changed. isFormChanged:', this.isFormChanged, 'New password:', value, 'Current username:', this.username);
 				});
 				
-				this.$watch('reEnterPassword', () => {
-					this.validatePasswords();
+				this.$watch('re_enter_password', value => {
+					this.passwordOK = this.password !== '' && this.re_enter_password !== '' && this.password === this.re_enter_password;
+					console.log('Password changed. isFormChanged:', this.isFormChanged, 'New re_enter_password:', value, 'Current username:', this.username);
 				});
 			},
 			
-			validatePasswords() {
-				this.passwordError = this.password !== '' && this.reEnterPassword !== '' && this.password !== this.reEnterPassword;
-				console.log('Validated passwords. Error:', this.passwordError);
-			},
-			
-			resetForm() {
-				console.log('Resetting form. Original username:', this.originalUsername, 'Original password:', this.originalPassword);
-				this.username = this.originalUsername;
-				this.password = this.originalPassword;
-				this.reEnterPassword = '';
-				this.isFormChanged = false;
-				this.passwordError = false;
-				console.log('Form reset. Username:', this.username, 'Password:', this.password, 'isFormChanged:', this.isFormChanged);
-			},
-			
-			checkBeforeSave() {
-				if (this.passwordError) {
-					alert('两次输入的密码不一致，请重新输入');
-					return false;
-				}
+			canSave() {
 				if (!this.isFormChanged) {
 					return false;
 				}
-				console.log('Check before save: OK to save. isFormChanged:', this.isFormChanged, 'passwordError:', this.passwordError);
+				// 两次输入的密码不一致，请重新输入'
+				if (this.password !== this.re_enter_password){
+                    alert(i18next.t('password_validated_error_1'));
+                    return false;
+				}
+				// 请输入密码
+				if(this.password !== '' && this.re_enter_password !== ''){
+				    alert(i18next.t('password_validated_error_2'));
+				    return false;
+				}
 				return true;
 			}
 		}"
@@ -94,11 +79,40 @@ templ UserInfoConfig(initUsername string, initPassword string, saveSuccessHint b
 			name="Username"
 			type="text"
 			placeholder="Username"
-			value={ initUsername }
+			value={ nowUsername }
 			x-model="username"
 			class="px-2.5 w-full rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm"
 		/>
-		<!-- 密码 -->
+		if nowPassword != "" {
+			<!-- 当前密码 -->
+			<div class="relative">
+				<label x-text={ getTranslations("OldPassword") } for="OldPassword" class="w-64"></label>
+				<div class="relative">
+					<input
+						id="OldPassword"
+						name="OldPassword"
+						:type="showPassword ? 'text' : 'password'"
+						placeholder="Old Password"
+						x-model="old_password"
+						class="px-2.5 w-full rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm"
+					/>
+					<button
+						type="button"
+						class="absolute right-2 top-1/2 transform -translate-y-1/2"
+						@click="showPassword = !showPassword"
+					>
+						<svg x-show="!showPassword" class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+						</svg>
+						<svg x-show="showPassword" class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+						</svg>
+					</button>
+				</div>
+			</div>
+		}
+		<!-- 新密码 -->
 		<div class="relative">
 			<label x-text={ getTranslations("Password") } for="Password" class="w-64"></label>
 			<div class="relative">
@@ -107,7 +121,6 @@ templ UserInfoConfig(initUsername string, initPassword string, saveSuccessHint b
 					name="Password"
 					:type="showPassword ? 'text' : 'password'"
 					placeholder="Password"
-					value={ initPassword }
 					x-model="password"
 					class="px-2.5 w-full rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm"
 				/>
@@ -128,54 +141,47 @@ templ UserInfoConfig(initUsername string, initPassword string, saveSuccessHint b
 		</div>
 		<!-- 再次输入密码 -->
 		<div class="relative">
-			<label x-text={ getTranslations("ReEnterPassword") } for="ReEnterPassword" class="w-64"></label>
+			<label x-text={ getTranslations("re_enter_password") } for="re_enter_password" class="w-64"></label>
 			<div class="relative">
 				<input
-					id="ReEnterPassword"
-					name="ReEnterPassword"
-					:type="showReEnterPassword ? 'text' : 'password'"
+					id="re_enter_password"
+					name="re_enter_password"
+					:type="show_re_enter_password ? 'text' : 'password'"
 					placeholder="ReEnter Password"
-					x-model="reEnterPassword"
+					x-model="re_enter_password"
 					class="px-2.5 w-full rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm"
-					:class="{ 'border-red-500': passwordError }"
+					:class="{ 'border-red-500': passwordOK }"
 				/>
 				<button
 					type="button"
 					class="absolute right-2 top-1/2 transform -translate-y-1/2"
-					@click="showReEnterPassword = !showReEnterPassword"
+					@click="show_re_enter_password = !show_re_enter_password"
 				>
-					<svg x-show="!showReEnterPassword" class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+					<svg x-show="!show_re_enter_password" class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
 					</svg>
-					<svg x-show="showReEnterPassword" class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+					<svg x-show="show_re_enter_password" class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
 					</svg>
 				</button>
 			</div>
 			<!-- 密码不匹配错误提示 -->
-			<div x-show="passwordError" class="text-red-500 text-xs mt-1">两次输入的密码不一致</div>
+			<div x-show="password !== re_enter_password" class="text-red-500 text-xs mt-1">两次输入的密码不一致</div>
 		</div>
-		<!-- 按钮组 -->
+		<!-- SAVE按钮 -->
 		<div class="flex mt-4 space-x-2">
 			<button
 				class="w-20 h-10 mx-2 my-0 text-center text-gray-700 transition border border-gray-500 rounded bg-sky-300 hover:text-gray-900"
-				:class="{ 'opacity-50 cursor-not-allowed': !isFormChanged || passwordError }"
-				:disabled="!isFormChanged || passwordError"
-				hx-post="/api/update-user-info"
+				:class="{ 'opacity-50 cursor-not-allowed': isFormChanged === false || passwordOK === false }"
+				:disabled="isFormChanged === false || passwordOK === false"
+				hx-post="/api/update-login-settings"
 				hx-trigger="click"
 				hx-target="#user_config_form"
 				hx-swap="outerHTML"
 				hx-params="*"
-				@click="if(!checkBeforeSave()) $event.preventDefault()"
+				@click="if(!canSave()) $event.preventDefault()"
 			>SAVE</button>
-			<button
-				x-show="isFormChanged"
-				class="w-20 h-10 mx-2 my-0 text-center text-gray-700 transition border border-gray-500 rounded bg-gray-300 hover:text-gray-900"
-				@click="resetForm()"
-				:class="{ 'opacity-50 cursor-not-allowed': !isFormChanged }"
-				:disabled="!isFormChanged"
-			>CANCEL</button>
 		</div>
 	</form>
 }

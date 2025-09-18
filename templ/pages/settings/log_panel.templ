@@ -2,27 +2,48 @@ package settings
 
 // TailscaleConfig Tailscale 配置项
 templ LogPanel() {
-	<div id="log_panel" class="p-4 m-4 h-[300px] bg-gray-600 text-white rounded-md overflow-auto whitespace-pre-wrap"></div>
+	<div id="log_panel"
+	    class="w-full h-[500px] p-4 m-8 bg-gray-900 text-sm text-white rounded-md overflow-auto whitespace-pre-line break-all">
+        <!-- 日志内容将通过 JavaScript 动态插入 -->
+	</div>
 	<div class="row">
 		<input id="msg" placeholder="要广播的消息" class="ml-4 p-1"/>
 		<button id="send" class="ml-2 p-1 h-10 mx-2 my-0 text-center text-gray-700 transition border border-gray-500 rounded bg-sky-300 hover:text-gray-900">POST</button>
 	</div>
 	<script>
+	// 日志内容着色函数
+	// text-green-600 : oklch(62.7% 0.194 149.214)
+    // text-red-600 oklch(57.7% 0.245 27.325)
+    // text-orange-600  oklch(64.6% 0.222 41.116)
+	function colorize(log) {
+      return log
+        .replace(/\[GET:200\]/g, '<span style="color:oklch(62.7% 0.194 149.214)">[GET:200]</span>')
+        .replace(/\[ERROR\]/g, '<span style="color:oklch(57.7% 0.245 27.325)">[ERROR]</span>')
+        .replace(/\[WARN\]/g, '<span style="color:oklch(64.6% 0.222 41.116)">[WARN]</span>')
+        .replace(/\[INFO\]/g, '<span style="color:oklch(62.7% 0.194 149.214)">[INFO]</span>')
+        .replace(/\[DEBUG\]/g, '<span style="color:gray">[DEBUG]</span>');
+    }
+    // 日志输出函数，追加日志并自动滚动到底部
     const log = (s) => {
+      s = colorize(s);
       const box = document.getElementById('log_panel');
-      box.textContent += s + "\n";
+      box.innerHTML += s + "\n";
       box.scrollTop = box.scrollHeight;
     };
-
+    // 创建 EventSource 连接到后端 SSE API,withCredentials:true 允许携带cookie
+    // https://developer.mozilla.org/zh-CN/docs/Web/API/EventSource
     const es = new EventSource('/api/sse', { withCredentials: true });
-    es.onopen    = () => log('[open] connected');
-    es.onerror   = (e) => log('[error] ' + (es.readyState === EventSource.CLOSED ? 'closed' : 'retrying...'));
-    es.onmessage = (e) => log('[message] ' + e.data); // 默认事件
+    es.onopen    = (e) => log(`<span style="color:oklch(62.7% 0.194 149.214)">[open]</span> connected`);
+    es.onerror   = (e) => log(`<span style="color:oklch(57.7% 0.245 27.325)">[error]</span> ` + (es.readyState === EventSource.CLOSED ? 'closed' : 'retrying...'));
+    es.onmessage = (e) => log(`<span style="color:oklch(62.7% 0.194 149.214)">[message]</span>` + e.data);
     // 监听自定义事件名：tick
     es.addEventListener('tick', (e) => log('[tick] ' + e.data));
+    // 监听后端日志事件：log（Echo 日志中间件通过 SSE 使用 event: log 推送）
+    es.addEventListener('log',  (e) => log(e.data));
 
+    // 发送消息按钮的点击事件
     document.getElementById('send').onclick = async () => {
-      const message = document.getElementById('msg').value || 'Hello SSE';
+      const message = document.getElementById('msg').value || 'Hello ~';
       await fetch('/api/push', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},

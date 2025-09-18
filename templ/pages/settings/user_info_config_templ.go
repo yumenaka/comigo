@@ -15,7 +15,7 @@ import templruntime "github.com/a-h/templ/runtime"
 // hx-swap 替换方式
 // hx-params="*" 发送表单数据，包含所有 name/value
 // saveSuccessHint: 保存成功,三秒后刷新本页面
-func UserInfoConfig(initUsername string, initPassword string, saveSuccessHint bool) templ.Component {
+func UserInfoConfig(nowUsername string, nowPassword string, saveSuccessHint bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -37,19 +37,19 @@ func UserInfoConfig(initUsername string, initPassword string, saveSuccessHint bo
 		}
 		ctx = templ.ClearChildren(ctx)
 		if saveSuccessHint {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"hidden\" x-init=\"showToast(i18next.t('saveSuccessHint'), 'info');setTimeout(() => {\n            window.location.reload();\n        }, 3000)\"></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"hidden\" x-init=\"showToast(i18next.t('saveSuccessHint'), 'info');setTimeout(() => {\n            window.location.reload();\n        }, 3000000)\"></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<form id=\"user_config_form\" class=\"flex flex-col justify-start w-full p-2 m-1 font-semibold\n            border rounded-md shadow-md hover:shadow-2xl\n            items-left bg-base-100 text-base-content border-slate-400\" x-data=\"{\n\t\t\tusername: '',\n\t\t\tpassword: '',\n\t\t\treEnterPassword: '',\n\t\t\tshowPassword: false,\n\t\t\tshowReEnterPassword: false,\n\t\t\tisFormChanged: false,\n\t\t\tpasswordError: false,\n\t\t\toriginalUsername: '',\n\t\t\toriginalPassword: '',\n\t\t\t\n\t\t\tinit() {\n\t\t\t\tthis.username = this.$el.querySelector('#Username').value;\n\t\t\t\tthis.password = this.$el.querySelector('#Password').value;\n\t\t\t\tthis.originalUsername = this.$el.querySelector('#Username').value;\n                this.originalPassword = this.$el.querySelector('#Password').value;\n\n\t\t\t\t//console.log('Initial values in init():');\n\t\t\t\t//console.log('Username:', this.username, '| Original Username:', this.originalUsername);\n\t\t\t\t//console.log('Password:', this.password, '| Original Password:', this.originalPassword);\n\t\t\t\t//console.log('isFormChanged on init:', this.isFormChanged);\n\n\t\t\t\tthis.$watch('username', value => {\n\t\t\t\t\tthis.isFormChanged = value !== this.originalUsername || this.password !== this.originalPassword;\n\t\t\t\t\tconsole.log('Username changed. isFormChanged:', this.isFormChanged, 'New username:', value, 'Original:', this.originalUsername);\n\t\t\t\t});\n\t\t\t\t\n\t\t\t\tthis.$watch('password', value => {\n\t\t\t\t\tthis.isFormChanged = this.username !== this.originalUsername || value !== this.originalPassword;\n\t\t\t\t\tthis.validatePasswords();\n\t\t\t\t\tconsole.log('Password changed. isFormChanged:', this.isFormChanged, 'New password:', value, 'Original:', this.originalPassword, 'Current username:', this.username);\n\t\t\t\t});\n\t\t\t\t\n\t\t\t\tthis.$watch('reEnterPassword', () => {\n\t\t\t\t\tthis.validatePasswords();\n\t\t\t\t});\n\t\t\t},\n\t\t\t\n\t\t\tvalidatePasswords() {\n\t\t\t\tthis.passwordError = this.password !== '' && this.reEnterPassword !== '' && this.password !== this.reEnterPassword;\n\t\t\t\tconsole.log('Validated passwords. Error:', this.passwordError);\n\t\t\t},\n\t\t\t\n\t\t\tresetForm() {\n\t\t\t\tconsole.log('Resetting form. Original username:', this.originalUsername, 'Original password:', this.originalPassword);\n\t\t\t\tthis.username = this.originalUsername;\n\t\t\t\tthis.password = this.originalPassword;\n\t\t\t\tthis.reEnterPassword = '';\n\t\t\t\tthis.isFormChanged = false;\n\t\t\t\tthis.passwordError = false;\n\t\t\t\tconsole.log('Form reset. Username:', this.username, 'Password:', this.password, 'isFormChanged:', this.isFormChanged);\n\t\t\t},\n\t\t\t\n\t\t\tcheckBeforeSave() {\n\t\t\t\tif (this.passwordError) {\n\t\t\t\t\talert('两次输入的密码不一致，请重新输入');\n\t\t\t\t\treturn false;\n\t\t\t\t}\n\t\t\t\tif (!this.isFormChanged) {\n\t\t\t\t\treturn false;\n\t\t\t\t}\n\t\t\t\tconsole.log('Check before save: OK to save. isFormChanged:', this.isFormChanged, 'passwordError:', this.passwordError);\n\t\t\t\treturn true;\n\t\t\t}\n\t\t}\"><!-- 用户名 --><label x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<form id=\"user_config_form\" class=\"flex flex-col justify-start w-full p-2 m-1 font-semibold\n            border rounded-md shadow-md hover:shadow-2xl\n            items-left bg-base-100 text-base-content border-slate-400\" x-data=\"{\n\t\t\tusername: '',\n\t\t\told_password: '',\n\t\t\tpassword: '',\n\t\t\tre_enter_password: '',\n\t\t\tshowPassword: false,\n\t\t\tshow_re_enter_password: false,\n\t\t\tisFormChanged: false,\n\t\t\tpasswordOK: false,\n\t\t\t\n\t\t\tinit() {\n\t\t\t\tthis.username = this.$el.querySelector('#Username').value;\n\t\t\t\tthis.old_password = this.$el.querySelector('#OldPassword') ? this.$el.querySelector('#OldPassword').value : '';\n\t\t\t\tthis.password = this.$el.querySelector('#Password').value;\n                this.re_enter_password = this.$el.querySelector('#re_enter_password').value;\n\n\t\t\t\tthis.$watch('username', value => {\n\t\t\t\t\tthis.isFormChanged = true; // 只要用户名框有变化，就认为表单被修改过\n\t\t\t\t\tconsole.log('Username changed. isFormChanged:', this.isFormChanged, 'New username:', value);\n\t\t\t\t});\n\t\t\t\t\n\t\t\t\tthis.$watch('password', value => {\n\t\t\t\t\tthis.isFormChanged = true; // 只要密码框有变化，就认为表单被修改过\n\t\t\t\t\tthis.passwordOK = this.password !== '' && this.re_enter_password !== '' && this.password === this.re_enter_password;\n\t\t\t\t\tconsole.log('Password changed. isFormChanged:', this.isFormChanged, 'New password:', value, 'Current username:', this.username);\n\t\t\t\t});\n\t\t\t\t\n\t\t\t\tthis.$watch('re_enter_password', value => {\n\t\t\t\t\tthis.passwordOK = this.password !== '' && this.re_enter_password !== '' && this.password === this.re_enter_password;\n\t\t\t\t\tconsole.log('Password changed. isFormChanged:', this.isFormChanged, 'New re_enter_password:', value, 'Current username:', this.username);\n\t\t\t\t});\n\t\t\t},\n\t\t\t\n\t\t\tcanSave() {\n\t\t\t\tif (!this.isFormChanged) {\n\t\t\t\t\treturn false;\n\t\t\t\t}\n\t\t\t\t// 两次输入的密码不一致，请重新输入'\n\t\t\t\tif (this.password !== this.re_enter_password){\n                    alert(i18next.t('password_validated_error_1'));\n                    return false;\n\t\t\t\t}\n\t\t\t\t// 请输入密码\n\t\t\t\tif(this.password !== '' && this.re_enter_password !== ''){\n\t\t\t\t    alert(i18next.t('password_validated_error_2'));\n\t\t\t\t    return false;\n\t\t\t\t}\n\t\t\t\treturn true;\n\t\t\t}\n\t\t}\"><!-- 用户名 --><label x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("Username"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 91, Col: 45}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 76, Col: 45}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -60,54 +60,64 @@ func UserInfoConfig(initUsername string, initPassword string, saveSuccessHint bo
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(initUsername)
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(nowUsername)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 97, Col: 23}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 82, Col: 22}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" x-model=\"username\" class=\"px-2.5 w-full rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm\"><!-- 密码 --><div class=\"relative\"><label x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" x-model=\"username\" class=\"px-2.5 w-full rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm\"> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("Password"))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 103, Col: 46}
+		if nowPassword != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<!-- 当前密码 --> <div class=\"relative\"><label x-text=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var4 string
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("OldPassword"))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 89, Col: 50}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" for=\"OldPassword\" class=\"w-64\"></label><div class=\"relative\"><input id=\"OldPassword\" name=\"OldPassword\" :type=\"showPassword ? 'text' : 'password'\" placeholder=\"Old Password\" x-model=\"old_password\" class=\"px-2.5 w-full rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm\"> <button type=\"button\" class=\"absolute right-2 top-1/2 transform -translate-y-1/2\" @click=\"showPassword = !showPassword\"><svg x-show=\"!showPassword\" class=\"h-5 w-5 text-gray-500\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M15 12a3 3 0 11-6 0 3 3 0 016 0z\"></path> <path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z\"></path></svg> <svg x-show=\"showPassword\" class=\"h-5 w-5 text-gray-500\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21\"></path></svg></button></div></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" for=\"Password\" class=\"w-64\"></label><div class=\"relative\"><input id=\"Password\" name=\"Password\" :type=\"showPassword ? 'text' : 'password'\" placeholder=\"Password\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<!-- 新密码 --><div class=\"relative\"><label x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(initPassword)
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("Password"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 110, Col: 25}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 117, Col: 46}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" x-model=\"password\" class=\"px-2.5 w-full rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm\"> <button type=\"button\" class=\"absolute right-2 top-1/2 transform -translate-y-1/2\" @click=\"showPassword = !showPassword\"><svg x-show=\"!showPassword\" class=\"h-5 w-5 text-gray-500\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M15 12a3 3 0 11-6 0 3 3 0 016 0z\"></path> <path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z\"></path></svg> <svg x-show=\"showPassword\" class=\"h-5 w-5 text-gray-500\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21\"></path></svg></button></div></div><!-- 再次输入密码 --><div class=\"relative\"><label x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" for=\"Password\" class=\"w-64\"></label><div class=\"relative\"><input id=\"Password\" name=\"Password\" :type=\"showPassword ? 'text' : 'password'\" placeholder=\"Password\" x-model=\"password\" class=\"px-2.5 w-full rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm\"> <button type=\"button\" class=\"absolute right-2 top-1/2 transform -translate-y-1/2\" @click=\"showPassword = !showPassword\"><svg x-show=\"!showPassword\" class=\"h-5 w-5 text-gray-500\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M15 12a3 3 0 11-6 0 3 3 0 016 0z\"></path> <path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z\"></path></svg> <svg x-show=\"showPassword\" class=\"h-5 w-5 text-gray-500\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21\"></path></svg></button></div></div><!-- 再次输入密码 --><div class=\"relative\"><label x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var6 string
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("ReEnterPassword"))
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("re_enter_password"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 131, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 144, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" for=\"ReEnterPassword\" class=\"w-64\"></label><div class=\"relative\"><input id=\"ReEnterPassword\" name=\"ReEnterPassword\" :type=\"showReEnterPassword ? 'text' : 'password'\" placeholder=\"ReEnter Password\" x-model=\"reEnterPassword\" class=\"px-2.5 w-full rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm\" :class=\"{ 'border-red-500': passwordError }\"> <button type=\"button\" class=\"absolute right-2 top-1/2 transform -translate-y-1/2\" @click=\"showReEnterPassword = !showReEnterPassword\"><svg x-show=\"!showReEnterPassword\" class=\"h-5 w-5 text-gray-500\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M15 12a3 3 0 11-6 0 3 3 0 016 0z\"></path> <path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z\"></path></svg> <svg x-show=\"showReEnterPassword\" class=\"h-5 w-5 text-gray-500\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21\"></path></svg></button></div><!-- 密码不匹配错误提示 --><div x-show=\"passwordError\" class=\"text-red-500 text-xs mt-1\">两次输入的密码不一致</div></div><!-- 按钮组 --><div class=\"flex mt-4 space-x-2\"><button class=\"w-20 h-10 mx-2 my-0 text-center text-gray-700 transition border border-gray-500 rounded bg-sky-300 hover:text-gray-900\" :class=\"{ 'opacity-50 cursor-not-allowed': !isFormChanged || passwordError }\" :disabled=\"!isFormChanged || passwordError\" hx-post=\"/api/update-user-info\" hx-trigger=\"click\" hx-target=\"#user_config_form\" hx-swap=\"outerHTML\" hx-params=\"*\" @click=\"if(!checkBeforeSave()) $event.preventDefault()\">SAVE</button> <button x-show=\"isFormChanged\" class=\"w-20 h-10 mx-2 my-0 text-center text-gray-700 transition border border-gray-500 rounded bg-gray-300 hover:text-gray-900\" @click=\"resetForm()\" :class=\"{ 'opacity-50 cursor-not-allowed': !isFormChanged }\" :disabled=\"!isFormChanged\">CANCEL</button></div></form>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" for=\"re_enter_password\" class=\"w-64\"></label><div class=\"relative\"><input id=\"re_enter_password\" name=\"re_enter_password\" :type=\"show_re_enter_password ? 'text' : 'password'\" placeholder=\"ReEnter Password\" x-model=\"re_enter_password\" class=\"px-2.5 w-full rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm\" :class=\"{ 'border-red-500': passwordOK }\"> <button type=\"button\" class=\"absolute right-2 top-1/2 transform -translate-y-1/2\" @click=\"show_re_enter_password = !show_re_enter_password\"><svg x-show=\"!show_re_enter_password\" class=\"h-5 w-5 text-gray-500\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M15 12a3 3 0 11-6 0 3 3 0 016 0z\"></path> <path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z\"></path></svg> <svg x-show=\"show_re_enter_password\" class=\"h-5 w-5 text-gray-500\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21\"></path></svg></button></div><!-- 密码不匹配错误提示 --><div x-show=\"password !== re_enter_password\" class=\"text-red-500 text-xs mt-1\">两次输入的密码不一致</div></div><!-- SAVE按钮 --><div class=\"flex mt-4 space-x-2\"><button class=\"w-20 h-10 mx-2 my-0 text-center text-gray-700 transition border border-gray-500 rounded bg-sky-300 hover:text-gray-900\" :class=\"{ 'opacity-50 cursor-not-allowed': isFormChanged === false || passwordOK === false }\" :disabled=\"isFormChanged === false || passwordOK === false\" hx-post=\"/api/update-login-settings\" hx-trigger=\"click\" hx-target=\"#user_config_form\" hx-swap=\"outerHTML\" hx-params=\"*\" @click=\"if(!canSave()) $event.preventDefault()\">SAVE</button></div></form>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

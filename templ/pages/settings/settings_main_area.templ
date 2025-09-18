@@ -34,7 +34,7 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 				showToast(event.detail.xhr.statusText + ": " + event.detail.xhr.responseURL, 'error');
 			});
 		    </script>
-		    @LogPanel()
+            @UserInfoConfig(state.ServerConfig.Username, state.ServerConfig.Password, false)
 			@TailscaleConfig(tsStatus)
 			@StringArrayConfig("StoreUrls", state.ServerConfig.StoreUrls, "StoreUrls_Description", false)
 			@NumberConfig("MaxScanDepth", state.ServerConfig.MaxScanDepth, "MaxScanDepth_Description", 0, 65535, false)
@@ -77,5 +77,6 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 				config.GetHomeDirectoryConfig(),
 				config.GetProgramDirectoryConfig())
 		</div>
+		@LogPanel()
 	</div>
 }
