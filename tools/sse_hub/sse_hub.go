@@ -51,6 +51,16 @@ func (h *Hub) Remove(id string) {
 	h.mu.Unlock()
 }
 
+// CloseAll 关闭所有客户端连接并清空列表（用于优雅关机）
+func (h *Hub) CloseAll() {
+	h.mu.Lock()
+	for id, ch := range h.clients {
+		close(ch)
+		delete(h.clients, id)
+	}
+	h.mu.Unlock()
+}
+
 // Broadcast 向所有注册的客户端广播事件
 func (h *Hub) Broadcast(ev Event) {
 	h.mu.RLock()

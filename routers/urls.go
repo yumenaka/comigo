@@ -134,15 +134,19 @@ func bindProtectedAPI(group *echo.Group) {
 	group.GET("/ws", websocket.WsHandler)
 	// 新加的 HTMX 相关路由
 	group.GET("/shelf/:id", shelf.GetBookListHandler)
-	//group.GET("/htmx/settings/all", settings.AllSetting)
+	// 字符串、布尔值、数字配置的更改
 	group.POST("/update-string-config", settings.UpdateStringConfigHandler)
 	group.POST("/update-bool-config", settings.UpdateBoolConfigHandler)
 	group.POST("/update-number-config", settings.UpdateNumberConfigHandler)
+	// 更改登录设置
 	group.POST("/update-login-settings", settings.UpdateLoginSettingsHandler)
+	// 字符串数组配置的增删改
 	group.POST("/delete-array-config", settings.DeleteArrayConfigHandler)
 	group.POST("/add-array-config", settings.AddArrayConfigHandler)
+	// 保存和删除配置
 	group.POST("/config-save", settings.HandleConfigSave)
 	group.POST("/config-delete", settings.HandleConfigDelete)
+	// 获取 tailscale 状态
 	group.GET("/tailscale_status", get_data_api.GetTailscaleStatus)
 	// SSE 服务器发送事件
 	group.GET("/sse", sse_hub.SSEHandler)
