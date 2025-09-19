@@ -10,6 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/tools/logger"
+	"github.com/yumenaka/comigo/tools/sse_hub"
 	"github.com/yumenaka/comigo/tools/tailscale_plugin"
 )
 
@@ -89,12 +90,19 @@ func StopWebServer() error {
 	if config.Server == nil {
 		return nil
 	}
+	// 主动关闭所有 SSE 客户端，避免优雅关闭时被长连接阻塞
+	sse_hub.MessageHub.CloseAll()
+	// 停止 Tailscale HTTP 服务器（如启用）
+	_ = tailscale_plugin.StopTailscale()
 	// 关闭服务器（deadline 5秒）
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	// Shutdown:一旦把服务器关机，就不能重复使用。将来的呼叫将返回”ErrServerClosed“。
 	if err := config.Server.Shutdown(ctx); err != nil {
-		return err
+		// 超时或其他错误时回退到强制关闭，避免整个进程退出
+		if closeErr := config.Server.Close(); closeErr != nil {
+			return closeErr
+		}
 	}
 	// 需要重新初始化服务器。也就是调用InitEcho()
 	config.Server = nil

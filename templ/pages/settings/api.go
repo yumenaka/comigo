@@ -201,20 +201,20 @@ func UpdateLoginSettingsHandler(c echo.Context) error {
 
 	// 两次输入的密码不一致
 	if password != reEnterPassword {
-		return echo.NewHTTPError(http.StatusBadRequest, "Passwords do not match")
+		return echo.NewHTTPError(http.StatusBadRequest, "Password do not match")
 	}
 	// 用户名或密码为空
 	if username == "" || password == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "Username and Password cannot be empty")
 	}
-	// 密码过短
-	if len(password) < 6 {
-		return echo.NewHTTPError(http.StatusBadRequest, "Password must be at least 6 characters long")
-	}
-	// 用户名过短
-	if len(username) < 3 {
-		return echo.NewHTTPError(http.StatusBadRequest, "Username must be at least 3 characters long")
-	}
+	//// 密码过短
+	//if len(password) < 6 {
+	//	return echo.NewHTTPError(http.StatusBadRequest, "Password must be at least 6 characters long")
+	//}
+	//// 用户名过短
+	//if len(username) < 3 {
+	//	return echo.NewHTTPError(http.StatusBadRequest, "Username must be at least 3 characters long")
+	//}
 
 	if state.ServerConfig.Password != "" {
 		// 旧密码不正确
@@ -225,6 +225,7 @@ func UpdateLoginSettingsHandler(c echo.Context) error {
 
 	// 旧配置做个备份（有需要对比）
 	oldConfig := config.CopyCfg()
+	//fmt.Printf("Old config: %+v\n", oldConfig)
 
 	// 更新配置
 	if err := state.ServerConfig.SetConfigValue("Username", username); err != nil {
@@ -253,6 +254,7 @@ func UpdateLoginSettingsHandler(c echo.Context) error {
 
 	// 根据配置的变化，做相应操作。
 	beforeConfigUpdate(&oldConfig, config.GetCfg())
+	//fmt.Printf("New config: %+v\n", config.GetCfg())
 
 	// 渲染 UserInfoConfig 模板并返回
 	// 注意：UserInfoConfig 模板期望的是 initPassword，这里传递的是用户表单提交的 password
