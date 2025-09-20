@@ -8,9 +8,12 @@ import (
 	"path/filepath"
 
 	"github.com/labstack/echo/v4"
+	"github.com/spf13/viper"
 	"github.com/yumenaka/comigo/assets/locale"
+	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
+	"github.com/yumenaka/comigo/tools/scan"
 )
 
 var (
@@ -136,9 +139,28 @@ func UploadFile(c echo.Context) error {
 		uploadedFiles = append(uploadedFiles, filename)
 	}
 
-	// 通知重新扫描
-	*RescanBroadcast <- "rescan_upload_path"
+	//// 通知重新扫描（不等待完成）
+	//*RescanBroadcast <- "rescan_upload_path"
 
+	// 同步执行扫描（等待完成）
+	// 扫描上传目录的文件
+	option := scan.NewOption(config.GetCfg())
+	books, err := scan.InitStore(config.GetUploadPath(), option)
+	if err != nil {
+		logger.Infof(locale.GetString("scan_error")+"path:%s  %s", config.GetUploadPath(), err)
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": fmt.Sprintf("扫描上传目录失败: %s", err),
+		})
+	}
+	scan.AddBooksToStore(config.GetUploadPath(), books, config.GetMinImageNum())
+	// 保存扫描结果到数据库（如果开启）
+	if config.GetEnableDatabase() {
+		if err := scan.SaveResultsToDatabase(viper.ConfigFileUsed(), config.GetClearDatabaseWhenExit()); err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+				"error": fmt.Sprintf("保存数据库失败: %s", err),
+			})
+		}
+	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "文件上传成功",
 		"files":   uploadedFiles,

@@ -24,8 +24,8 @@ func ShowQRCodeTailscale(ctx context.Context) {
 	// 1 秒后打印 Url（不会阻塞 main 线程）
 	time.AfterFunc(1*time.Second, func() {
 		// 前提： 启用 Tailscale 服务
-		if config.GetCfg().GetEnableTailscale() == false {
-			logger.Info(locale.GetString("tailscale_not_enabled"))
+		if config.GetCfg().GetEnableTailscale() == false && config.GetCfg().Debug {
+			logger.Info("Tailscale disabled in config")
 			return
 		}
 		// 获取 Tailscale 状态

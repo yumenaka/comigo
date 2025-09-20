@@ -32,7 +32,7 @@ func NumberConfig(name string, value int, description string, min int, max int, 
 		}
 		ctx = templ.ClearChildren(ctx)
 		if saveSuccessHint {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"hidden\" x-init=\"showToast(i18next.t('saveSuccessHint'), 'info');setTimeout(() => {\n            window.location.reload();\n        }, 3000)\"></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"hidden\" x-init=\"showToast(i18next.t('saveSuccessHint'), 'info');setTimeout(() => {\n            window.location.reload();\n        }, 2000)\"></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -63,14 +63,14 @@ func NumberConfig(name string, value int, description string, min int, max int, 
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"w-64\" x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"w-full py-0 text-left\" x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations(name))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/number_config.templ`, Line: 18, Col: 65}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/number_config.templ`, Line: 18, Col: 82}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -167,14 +167,14 @@ func NumberConfig(name string, value int, description string, min int, max int, 
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\" hx-swap=\"outerHTML\" hx-params=\"*\"><div class=\"w-3/4 py-1 text-xs text-gray-500\" x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\" hx-swap=\"outerHTML\" hx-params=\"*\"><div class=\"w-full py-1 text-left text-xs text-gray-500\" x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations(description))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/number_config.templ`, Line: 34, Col: 85}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/number_config.templ`, Line: 34, Col: 96}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {

@@ -41,14 +41,16 @@ templ Header(prop HeaderProps) {
 		<div class="flex flex-row">
 			<!-- 全屏按钮，便携模式 -->
 			<div
-			    id="FullScreenIcon"
-			    x-show="window.location.href.includes('file:///')"
-			    onclick="if (Screenfull.isEnabled) {Screenfull.toggle()} else {showToast(i18next.t('not_support_fullscreen'))}" class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
+				id="FullScreenIcon"
+				x-show="window.location.href.includes('file:///')"
+				onclick="if (Screenfull.isEnabled) {Screenfull.toggle()} else {showToast(i18next.t('not_support_fullscreen'))}"
+				class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
+			>
 				@svg.FullScreen()
 			</div>
 			if prop.ShowReturnIcon {
 				<!-- 返回箭头,点击返回上一页 -->
-				<a x-show="!window.location.href.includes('file:///')" href={ templ.SafeURL(prop.ReturnUrl) } >
+				<a x-show="!window.location.href.includes('file:///')" href={ templ.SafeURL(prop.ReturnUrl) }>
 					<div class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
 						@svg.Return()
 					</div>
@@ -67,7 +69,7 @@ templ Header(prop HeaderProps) {
 			<!-- 文件重排序 Dropdown Menu： https://flowbite.com/docs/components/dropdowns/ -->
 			<!-- data-dropdown-trigger="{hover|click}"  二选一-->
 			<svg
-			    x-show="!window.location.href.includes('file:///')"
+				x-show="!window.location.href.includes('file:///')"
 				class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
 				id="ResortButton"
 				data-dropdown-toggle="ReSortDropdownMenu"
@@ -203,19 +205,27 @@ templ Header(prop HeaderProps) {
 					</button>
 					<!-- Dropdown menu -->
 					<div
-					    id="QuickJumpDropdown"
-					    x-show="!window.location.href.includes('file:///')"
-					    class="max-w-full md:max-w-2xl md:truncate z-10 hidden divide-y divide-gray-100 rounded-lg shadow bg-white/90  dark:bg-gray-700">
+						id="QuickJumpDropdown"
+						x-show="!window.location.href.includes('file:///')"
+						class="max-w-full md:max-w-2xl md:truncate z-10 hidden divide-y divide-gray-100 rounded-lg shadow bg-white/90  dark:bg-gray-700"
+					>
 						<ul class="py-2 mt-0 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="quickJumpBarDropdownButton">
 							for _, book := range prop.QuickJumpBarBooks.BookInfos {
-								if prop.FlipMode {
+								if book.Type == model.TypeBooksGroup {
 									<li>
-										<a href={ templ.SafeURL("/flip/" + book.BookID) } class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white">{ book.Title }</a>
+										<a href={ templ.SafeURL("/shelf/" + book.BookID) } class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white">{ book.Title }</a>
 									</li>
-								} else {
-									<li>
-										<a href={ templ.SafeURL("/scroll/" + book.BookID) } class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white">{ book.Title }</a>
-									</li>
+								}
+								if book.Type != model.TypeBooksGroup {
+									if prop.FlipMode {
+										<li>
+											<a href={ templ.SafeURL("/flip/" + book.BookID) } class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white">{ book.Title }</a>
+										</li>
+									} else {
+										<li>
+											<a href={ templ.SafeURL("/scroll/" + book.BookID) } class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white">{ book.Title }</a>
+										</li>
+									}
 								}
 							}
 						</ul>
@@ -235,17 +245,20 @@ templ Header(prop HeaderProps) {
 		<div class="flex justify-between p-0 m-0 max-w-64">
 			<!-- 图标：点击显示二维码 -->
 			<div
-			    data-modal-target="qrcode-modal"
-			    data-modal-toggle="qrcode-modal"
-			    x-show="!window.location.href.includes('file:///')"
-			    class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
+				data-modal-target="qrcode-modal"
+				data-modal-toggle="qrcode-modal"
+				x-show="!window.location.href.includes('file:///')"
+				class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
+			>
 				@svg.QRCode()
 			</div>
 			<!-- 全屏按钮，非便携模式 -->
 			<div
-			    id="FullScreenIcon"
-			    x-show="!window.location.href.includes('file:///')"
-			    onclick="if (Screenfull.isEnabled) {Screenfull.toggle()} else {showToast(i18next.t('not_support_fullscreen'))}" class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
+				id="FullScreenIcon"
+				x-show="!window.location.href.includes('file:///')"
+				onclick="if (Screenfull.isEnabled) {Screenfull.toggle()} else {showToast(i18next.t('not_support_fullscreen'))}"
+				class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
+			>
 				@svg.FullScreen()
 			</div>
 			<!-- 阅读器设定,点击屏幕中央也可以打开  可自定义方向 -->

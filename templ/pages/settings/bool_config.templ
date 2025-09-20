@@ -13,12 +13,12 @@ templ BoolConfig(name string, value bool, description string, saveSuccessHint bo
 		    class="hidden"
 			x-init="showToast(i18next.t('saveSuccessHint'), 'info');setTimeout(() => {
             window.location.reload();
-        }, 3000)"
+        }, 2000)"
 		></div>
 	}
 	<div id={ "boolConfig_" + name } class="flex flex-col w-full p-2 m-1 font-semibold border rounded-md shadow-md hover:shadow-2xl justify-left items-left bg-base-100 text-base-content border-slate-400">
-		<div x-text={ getTranslations(name) } class="w-64"></div>
-		<!-- 隐藏域 -->
+		<div x-text={ getTranslations(name) } class="w-full py-0 text-left"></div>
+		<!-- 隐藏input -->
 		<input type="hidden" name={ name } value="false"/>
 		<label for={ name } class="relative h-8 cursor-pointer w-14">
 			<input
@@ -38,6 +38,6 @@ templ BoolConfig(name string, value bool, description string, saveSuccessHint bo
 			<span class="absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500"></span>
 			<span class="absolute inset-y-0 w-6 h-6 m-1 transition-all bg-white rounded-full start-0 peer-checked:start-6"></span>
 		</label>
-		<div x-text={ getTranslations(description) } class="w-3/4 py-1 text-xs text-gray-500"></div>
+		<div x-text={ getTranslations(description) } class="w-full py-1 text-left text-xs text-gray-500"></div>
 	</div>
 }

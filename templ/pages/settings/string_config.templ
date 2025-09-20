@@ -12,7 +12,7 @@ templ StringConfig(name string, value string, description string, saveSuccessHin
 		    class="hidden"
 			x-init="showToast(i18next.t('saveSuccessHint'), 'info');setTimeout(() => {
             window.location.reload();
-        }, 3000)"
+        }, 2000)"
 		></div>
 	}
 	<div
@@ -36,7 +36,7 @@ templ StringConfig(name string, value string, description string, saveSuccessHin
 			hx-params="*"
 		/>
 		<div
-			class="w-3/4 py-1 text-xs text-gray-500"
+			class="w-full py-1 text-xs text-gray-500"
 			x-text={ getTranslations(description) }
 		></div>
 		<div class="bg-red-600"></div>

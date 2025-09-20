@@ -87,14 +87,14 @@ func InitFlags() {
 	RootCmd.PersistentFlags().BoolVar(&cfg.ClearCacheExit, "cache-clean", true, locale.GetString("cache_file_clean"))
 	// 手动指定zip文件编码 gbk、shiftjis……
 	RootCmd.PersistentFlags().StringVar(&cfg.ZipFileTextEncoding, "zip-encode", "gbk", locale.GetString("zip_encode"))
-	// 启用Tailscale网络
-	RootCmd.PersistentFlags().BoolVar(&cfg.EnableTailscale, "tailscale_plugin", false, locale.GetString("enable_tailscale"))
-	// Tailscale网络的主机名,用于 Tailscale 网络中的标识节点
-	RootCmd.PersistentFlags().StringVar(&cfg.TailscaleHostname, "tailscale_plugin-hostname", "comigo", locale.GetString("tailscale_hostname"))
-	// Tailscale网络的端口
-	RootCmd.PersistentFlags().IntVar(&cfg.TailscalePort, "tailscale_plugin-port", 443, locale.GetString("tailscale_port"))
-	// Tailscale网络的Funnel模式
-	RootCmd.PersistentFlags().BoolVar(&cfg.TailscaleFunnelMode, "tailscale_plugin-funnel", false, locale.GetString("tailscale_funnel"))
+	// 启用Tailscale服务
+	RootCmd.PersistentFlags().BoolVar(&cfg.EnableTailscale, "tailscale_plugin", false, locale.GetString("EnableTailscale"))
+	// Tailscale服务 启用Funnel模式
+	RootCmd.PersistentFlags().BoolVar(&cfg.TailscaleFunnelMode, "tailscale_plugin-funnel", false, locale.GetString("TailscaleFunnelMode"))
+	// Tailscale服务主机名,用于 Tailscale 网络中的标识节点
+	RootCmd.PersistentFlags().StringVar(&cfg.TailscaleHostname, "tailscale_plugin-hostname", "comigo", locale.GetString("TailscaleHostname"))
+	// Tailscale服务端口号
+	RootCmd.PersistentFlags().IntVar(&cfg.TailscalePort, "tailscale_plugin-port", 443, locale.GetString("TailscalePort"))
 	// ConfigLocked 配置文件锁定，防止被网页端修改，用于展示模式
 	RootCmd.PersistentFlags().BoolVar(&cfg.ConfigLocked, "config-locked", false, locale.GetString("config_locked"))
 }

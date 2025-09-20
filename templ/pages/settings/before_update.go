@@ -3,6 +3,7 @@ package settings
 import (
 	"reflect"
 	"strconv"
+	"time"
 
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/routers/config_api"
@@ -19,19 +20,22 @@ var RestartWebServerBroadcast *chan string
 // beforeConfigUpdate 根据配置的变化，判断是否需要打开浏览器重新扫描等
 func beforeConfigUpdate(oldConfig *config.Config, newConfig *config.Config) {
 	openBrowserIfNeeded(oldConfig, newConfig)
-	reScanStores, reStartWebServer := checkServerActions(oldConfig, newConfig)
-	logger.Infof("reScanDir: %v, reStartWebServer: %v ", reScanStores, reStartWebServer)
-	if reStartWebServer {
-		// 此处需要不能导入routers，因为会循环引用  routers.RestartWebServer()
-		// 使用广播的方式来通知 :
+	action := checkServerActions(oldConfig, newConfig)
+	// 重启网页服务器
+	// 此处不能导入routers，因为会循环引用  routers.RestartWebServer()
+	logger.Infof("reScanDir: %v, reStartWebServer: %v ", action.ReScanStores, action.ReStartWebServer)
+	if action.ReStartWebServer {
 		*RestartWebServerBroadcast <- "restart_web_server"
+		// 等待服务器端口可用，确保重启完成后再继续
+		tools.WaitUntilServerReady("localhost", newConfig.Port, 15*time.Second)
 	}
-	if reScanStores {
+	// 重新扫描书库
+	if action.ReScanStores {
 		config_api.StartReScan()
-	} else {
-		if newConfig.Debug {
-			logger.Info("No changes in cfg, skipped rescan dir\n")
-		}
+	}
+	// 提示没有变化
+	if newConfig.Debug && !action.ReScanStores && !action.ReStartWebServer {
+		logger.Info("No changes in cfg, skipped rescan dir\n")
 	}
 }
 
@@ -45,48 +49,69 @@ func openBrowserIfNeeded(oldConfig *config.Config, newConfig *config.Config) {
 	}
 }
 
+type ConfigChangeAction struct {
+	ReScanStores     bool
+	ReStartWebServer bool
+}
+
 // checkServerActions 检查旧的和新的配置是否需要更新，并返回需要重启网页服务器、重新扫描整个书库、重新扫描所有文件的布尔值
-func checkServerActions(oldConfig *config.Config, newConfig *config.Config) (reScanStores bool, reStartWebServer bool) {
+func checkServerActions(oldConfig *config.Config, newConfig *config.Config) (action ConfigChangeAction) {
 	// 下面这些值修改的时候，需要扫描整个书库、或重新扫描所有文件
 	if !reflect.DeepEqual(oldConfig.StoreUrls, newConfig.StoreUrls) {
-		reScanStores = true
+		action.ReScanStores = true
 	}
 	if oldConfig.MaxScanDepth != newConfig.MaxScanDepth {
-		reScanStores = true
+		action.ReScanStores = true
 	}
 	if !reflect.DeepEqual(oldConfig.SupportMediaType, newConfig.SupportMediaType) {
-		reScanStores = true
+		action.ReScanStores = true
 	}
 	if !reflect.DeepEqual(oldConfig.SupportFileType, newConfig.SupportFileType) {
-		reScanStores = true
+		action.ReScanStores = true
 	}
 	if oldConfig.MinImageNum != newConfig.MinImageNum {
-		reScanStores = true
+		action.ReScanStores = true
 	}
 	if !reflect.DeepEqual(oldConfig.ExcludePath, newConfig.ExcludePath) {
-		reScanStores = true
+		action.ReScanStores = true
 	}
 	if oldConfig.EnableDatabase != newConfig.EnableDatabase {
-		reScanStores = true
+		action.ReScanStores = true
 	}
 	// 下面这些值修改的时候，需要重启网页服务器
 	if oldConfig.Port != newConfig.Port {
-		reStartWebServer = true
+		action.ReStartWebServer = true
 	}
 	if oldConfig.Username != newConfig.Username {
-		reStartWebServer = true
+		action.ReStartWebServer = true
 	}
 	if oldConfig.Password != newConfig.Password {
-		reStartWebServer = true
+		action.ReStartWebServer = true
 	}
 	if oldConfig.Host != newConfig.Host {
-		reStartWebServer = true
+		action.ReStartWebServer = true
 	}
 	if oldConfig.Timeout != newConfig.Timeout {
-		reStartWebServer = true
+		action.ReStartWebServer = true
 	}
 	if oldConfig.DisableLAN != newConfig.DisableLAN {
-		reStartWebServer = true
+		action.ReStartWebServer = true
+	}
+	// 如果EnableTailscale有变化，且开启了Tailscale，则需要重启Tailscale服务器
+	if oldConfig.EnableTailscale != newConfig.EnableTailscale {
+		action.ReStartWebServer = true
+	}
+	// 如果FunnelMode有变化，且开启了Tailscale，则需要重启Tailscale服务器
+	if oldConfig.TailscaleFunnelMode != newConfig.TailscaleFunnelMode && newConfig.EnableTailscale == true {
+		action.ReStartWebServer = true
+	}
+	// 如果Tailscale Hostname有变化，且开启了Tailscale，则需要重启Tailscale服务器
+	if oldConfig.TailscaleHostname != newConfig.TailscaleHostname && newConfig.EnableTailscale == true {
+		action.ReStartWebServer = true
+	}
+	// 如果Tailscale Port有变化，且开启了Tailscale，则需要重启Tailscale服务器
+	if oldConfig.TailscalePort != newConfig.TailscalePort && newConfig.EnableTailscale == true {
+		action.ReStartWebServer = true
 	}
 	return
 }

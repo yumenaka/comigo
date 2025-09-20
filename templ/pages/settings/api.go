@@ -138,7 +138,7 @@ func UpdateBoolConfigHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "parse bool error")
 	}
 	saveSuccessHint := false
-	if name == "Username" || name == "Password" || name == "Port" || name == "Host" || name == "DisableLAN" || name == "Timeout" {
+	if name == "Username" || name == "Password" || name == "Port" || name == "Host" || name == "DisableLAN" || name == "Timeout" || name == "Debug" {
 		saveSuccessHint = true
 	}
 	updatedHTML := BoolConfig(name, boolVal, name+"_Description", saveSuccessHint)
@@ -178,7 +178,7 @@ func UpdateNumberConfigHandler(c echo.Context) error {
 	return nil
 }
 
-// UpdateLoginSettingsHandler 更新登录相关信息
+// UpdateLoginSettingsHandler 登录相关设置
 func UpdateLoginSettingsHandler(c echo.Context) error {
 	if !htmx.IsHTMX(c.Request()) {
 		return echo.NewHTTPError(http.StatusBadRequest, "non-htmx request")
@@ -188,15 +188,15 @@ func UpdateLoginSettingsHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
 	}
 	username := c.FormValue("Username")
-	oldPassword := c.FormValue("OldPassword")
-	password := c.FormValue("Password") // 注意：这里获取的是用户在表单中输入的新密码或原始密码
+	currentPassword := c.FormValue("CurrentPassword")
+	password := c.FormValue("Password") // 新密码(初次设定) 或 原始密码（已有密码时）
 	reEnterPassword := c.FormValue("ReEnterPassword")
-	// 密码通常不明文记录到日志，除非是调试模式
+	// 除非是调试模式, 密码不明文记录到日志，
 	if state.ServerConfig.Debug {
 		logger.Infof("Update user info: Username=%s", username)
-		logger.Infof("Update user info: OldPassword=%s", oldPassword)
+		logger.Infof("Update user info: CurrentPassword=%s", currentPassword)
 		logger.Infof("Update user info: Password=%s", password)
-		logger.Infof("Update user info: ReEnterPassword=%s", reEnterPassword) //ReEnterPassword
+		logger.Infof("Update user info: ReEnterPassword=%s", reEnterPassword) // ReEnterPassword
 	}
 
 	// 两次输入的密码不一致
@@ -217,56 +217,205 @@ func UpdateLoginSettingsHandler(c echo.Context) error {
 	//}
 
 	if state.ServerConfig.Password != "" {
-		// 旧密码不正确
-		if state.ServerConfig.Password != oldPassword {
-			return echo.NewHTTPError(http.StatusBadRequest, "Old password is incorrect")
+		// 当前密码不正确
+		if state.ServerConfig.Password != currentPassword {
+			return echo.NewHTTPError(http.StatusBadRequest, "Current Password is incorrect")
 		}
 	}
 
-	// 旧配置做个备份（有需要对比）
+	// 旧配置做个备份（后面需要对比）
 	oldConfig := config.CopyCfg()
-	//fmt.Printf("Old config: %+v\n", oldConfig)
 
-	// 更新配置
+	// 更新用户名
 	if err := state.ServerConfig.SetConfigValue("Username", username); err != nil {
 		logger.Errorf("Failed to set Username: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to update username")
 	}
-	// 只有当用户在表单中确实输入了新密码时才更新密码
-	// HTMX表单提交时，如果密码字段为空，Password会是空字符串。
-	// 根据 UserInfoConfig 的逻辑，如果密码字段为空，可能表示不修改密码，或者用户清空了密码。
-	// 这里的逻辑假设：如果Password字段有值（用户输入了），则更新它。
-	// 如果允许清空密码，这里的逻辑是正确的。
-	// 如果密码字段不允许为空，前端应该有校验。
-	// 或者，可以比较提交的密码是否与旧密码（加密/哈希后）相同，如果相同则不更新。
-	// 但此处简单处理：只要提交了Password，就更新。
+	// 更新密码
 	if err := state.ServerConfig.SetConfigValue("Password", password); err != nil {
-		logger.Errorf("Failed to set Password: %v", err)
+		// logger.Errorf("Failed to set Password: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to update password")
 	}
 
 	// 写入配置文件
 	if writeErr := config.UpdateConfigFile(); writeErr != nil {
 		logger.Infof("Failed to update local config: %v", writeErr)
-		// 根据业务需求，这里可能需要回滚配置更改或返回错误
+		// 这里可能需要回滚配置更改或返回错误
 		// return echo.NewHTTPError(http.StatusInternalServerError, "Failed to write config file")
 	}
 
 	// 根据配置的变化，做相应操作。
 	beforeConfigUpdate(&oldConfig, config.GetCfg())
-	//fmt.Printf("New config: %+v\n", config.GetCfg())
+	// fmt.Printf("New config: %+v\n", config.GetCfg())
 
 	// 渲染 UserInfoConfig 模板并返回
-	// 注意：UserInfoConfig 模板期望的是 initPassword，这里传递的是用户表单提交的 password
-	// 如果密码在配置中是加密存储的，而 UserInfoConfig 期望的是明文（或特定格式），这里需要适配
-	// 假设 UserInfoConfig 可以直接使用表单提交的 username 和 password 初始化
-	updatedHTML := UserInfoConfig(username, password, true) // 如果UserInfoConfig期望的是加密后的密码，这里需要调整
+	updatedHTML := UserInfoConfig(config.GetCfg().Username, config.GetCfg().Password, true) // 如果UserInfoConfig期望的是加密后的密码，这里需要调整
 	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
 		logger.Errorf("Failed to render UserInfoConfig template: %v", renderErr)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
 	return nil
+}
+
+// UpdateTailscaleSettingsHandler 设置Tailscale相关信息
+func UpdateTailscaleSettingsHandler(c echo.Context) error {
+	if !htmx.IsHTMX(c.Request()) {
+		return echo.NewHTTPError(http.StatusBadRequest, "non-htmx request")
+	}
+	// 如果配置被锁定
+	if config.GetCfg().GetConfigLocked() {
+		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
+	}
+	// 旧配置做个备份（后面需要对比）
+	oldConfig := config.CopyCfg()
+
+	// 启用Tailscale
+	enableTailscale := c.FormValue("EnableTailscale") // 这里是字符串 "true" 或 "false"
+	if enableTailscale != "true" && enableTailscale != "false" {
+		return echo.NewHTTPError(http.StatusBadRequest, "EnableTailscale must be 'true' or 'false'")
+	}
+	// 除非是调试模式, 不明文记录到日志，
+	if state.ServerConfig.Debug {
+		logger.Infof("Update Tailscale Settings: EnableTailscale=%s", enableTailscale)
+	}
+	if enableTailscale == "true" {
+		// 1.  Tailscale主机名
+		tailscaleHostname := c.FormValue("TailscaleHostname")
+		if tailscaleHostname == "" {
+			return echo.NewHTTPError(http.StatusBadRequest, "TailscaleHostname cannot be empty")
+		}
+		// 2. Tailscale端口号
+		tailscalePort := c.FormValue("TailscalePort")
+		TailscalePort, err := strconv.Atoi(tailscalePort)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, "TailscalePort parse error")
+		}
+		if TailscalePort < 0 || TailscalePort > 65535 {
+			return echo.NewHTTPError(http.StatusBadRequest, "TailscalePort must be between 0 and 65535")
+		}
+		// 3. Funnel模式
+		tailscaleFunnelMode := c.FormValue("TailscaleFunnelMode")
+
+		// 实际更新 Tailscale主机名
+		if err := state.ServerConfig.SetConfigValue("TailscaleHostname", tailscaleHostname); err != nil {
+			logger.Errorf("Failed to set TailscaleHostname: %v", err)
+			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to update password")
+		}
+		// 实际更新 TailscalePort
+		if err := state.ServerConfig.SetConfigValue("TailscalePort", tailscalePort); err != nil {
+			logger.Errorf("Failed to set TailscalePort: %v", err)
+			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to update TailscalePort")
+		}
+		// 实际更新 TailscaleFunnelMode
+		if err := state.ServerConfig.SetConfigValue("TailscaleFunnelMode", tailscaleFunnelMode); err != nil {
+			logger.Errorf("Failed to set TailscaleFunnelMode: %v", err)
+			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to update TailscaleFunnelMode")
+		}
+		// 除非是调试模式, 不明文记录到日志，
+		if state.ServerConfig.Debug {
+			logger.Infof("Update Tailscale Settings: TailscaleHostname=%s", tailscaleHostname)
+			logger.Infof("Update Tailscale Settings: TailscalePort=%s", tailscalePort)
+			logger.Infof("Update Tailscale Settings: TailscaleFunnelMode=%s", tailscaleFunnelMode)
+		}
+	}
+	// 更新EnableTailscale
+	if err := state.ServerConfig.SetConfigValue("EnableTailscale", enableTailscale); err != nil {
+		logger.Errorf("Failed to set EnableTailscale: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to update EnableTailscale")
+	}
+	// 写入配置文件
+	if writeErr := config.UpdateConfigFile(); writeErr != nil {
+		logger.Infof("Failed to update local config: %v", writeErr)
+		// 这里可能需要回滚配置更改或返回错误
+		// return echo.NewHTTPError(http.StatusInternalServerError, "Failed to write config file")
+	}
+
+	// 根据配置的变化，做相应操作。
+	beforeConfigUpdate(&oldConfig, config.GetCfg())
+
+	// 渲染 RemoteAccessConfig 模板并返回
+	tsStatus, err := tailscale_plugin.GetTailscaleStatus(c.Request().Context())
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get Tailscale status")
+	}
+	updatedHTML := RemoteAccessConfig(tsStatus)
+	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
+		logger.Errorf("Failed to render UserInfoConfig template: %v", renderErr)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+	return nil
+}
+
+// UpdateTailscaleConfigJSONHandler 处理Tailscale配置更新的JSON API
+func UpdateTailscaleConfigJSONHandler(c echo.Context) error {
+	// 如果配置被锁定
+	if config.GetCfg().GetConfigLocked() {
+		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
+	}
+
+	// 解析JSON请求体
+	var request struct {
+		EnableTailscale     bool   `json:"enableTailscale"`
+		TailscaleHostname   string `json:"tailscaleHostname"`
+		TailscalePort       int    `json:"tailscalePort"`
+		TailscaleFunnelMode bool   `json:"tailscaleFunnelMode"`
+	}
+
+	if err := c.Bind(&request); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid JSON request")
+	}
+
+	// 验证输入
+	if request.EnableTailscale {
+		if request.TailscaleHostname == "" {
+			return echo.NewHTTPError(http.StatusBadRequest, "TailscaleHostname cannot be empty when Tailscale is enabled")
+		}
+		if request.TailscalePort < 0 || request.TailscalePort > 65535 {
+			return echo.NewHTTPError(http.StatusBadRequest, "TailscalePort must be between 0 and 65535")
+		}
+		if request.TailscaleFunnelMode && (request.TailscalePort != 443 && request.TailscalePort != 8443 && request.TailscalePort != 10000) {
+			return echo.NewHTTPError(http.StatusBadRequest, "Port must be 443, 8443, or 10000 when Funnel Mode is enabled")
+		}
+	}
+
+	// 旧配置做个备份（后面需要对比）
+	oldConfig := config.CopyCfg()
+
+	// 更新配置
+	if err := state.ServerConfig.SetConfigValue("EnableTailscale", strconv.FormatBool(request.EnableTailscale)); err != nil {
+		logger.Errorf("Failed to set EnableTailscale: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to update EnableTailscale")
+	}
+
+	if request.EnableTailscale {
+		if err := state.ServerConfig.SetConfigValue("TailscaleHostname", request.TailscaleHostname); err != nil {
+			logger.Errorf("Failed to set TailscaleHostname: %v", err)
+			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to update TailscaleHostname")
+		}
+		if err := state.ServerConfig.SetConfigValue("TailscalePort", strconv.Itoa(request.TailscalePort)); err != nil {
+			logger.Errorf("Failed to set TailscalePort: %v", err)
+			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to update TailscalePort")
+		}
+		if err := state.ServerConfig.SetConfigValue("TailscaleFunnelMode", strconv.FormatBool(request.TailscaleFunnelMode)); err != nil {
+			logger.Errorf("Failed to set TailscaleFunnelMode: %v", err)
+			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to update TailscaleFunnelMode")
+		}
+	}
+
+	// 写入配置文件
+	if writeErr := config.UpdateConfigFile(); writeErr != nil {
+		logger.Infof("Failed to update local config: %v", writeErr)
+	}
+
+	// 根据配置的变化，做相应操作
+	beforeConfigUpdate(&oldConfig, config.GetCfg())
+
+	// 返回成功响应
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"success": true,
+		"message": "Tailscale configuration updated successfully",
+	})
 }
 
 func AddArrayConfigHandler(c echo.Context) error {

@@ -12,6 +12,13 @@ import "github.com/yumenaka/comigo/tools/tailscale_plugin"
 import "github.com/yumenaka/comigo/templ/state"
 import "github.com/yumenaka/comigo/config"
 
+func x_data_debug_mode(debug bool) string {
+	if debug {
+		return "{debug_mode: true}"
+	}
+	return "{debug_mode: false}"
+}
+
 func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -33,17 +40,42 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"settingsMainArea\" class=\"flex flex-col justify-start items-center flex-1 w-full h-full font-semibold text-lg text-base-content\"><div class=\"flex flex-col justify-start w-5/6 md:w-3/5 min-w-[20rem] relative\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"settingsMainArea\" x-data=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var2 string
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(x_data_debug_mode(state.ServerConfig.Debug))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/settings_main_area.templ`, Line: 17, Col: 53}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"flex flex-col justify-start items-center flex-1 w-full h-full font-semibold text-lg text-base-content\"><div class=\"flex flex-col justify-start w-5/6 md:w-3/5 min-w-[20rem] relative\"><script>\n\t\t\t// htmx出错时报错（Toast）\n\t\t\tdocument.addEventListener('htmx:responseError', (event) => {\n\t\t\t\tjson = JSON.parse(event.detail.xhr.responseText);\n\t\t\t\tif (typeof json.message !== 'undefined'){\n                    showToast(json.message, 'error');\n                    console.error(\"Error:\", json.message);\n                }\n\t\t\t\telse{\n                    showToast(event.detail.xhr.statusText + \": \" + event.detail.xhr.responseURL, 'error');\n                }\n\t\t\t});\n\t\t    </script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if state.ServerConfig.ConfigLocked {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-screen h-full bg-black/50 flex items-start justify-center z-50 pointer-events-auto\"><div class=\"mt-32 p-2 font-semibold text-center border border-red-600 rounded-md bg-red-50 shadow-lg\"><span class=\"text-red-500\" x-text=\"i18next.t('config_locked_description')\">Configuration is locked.</span></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-screen h-full bg-black/50 flex items-start justify-center z-50 pointer-events-auto\"><div class=\"mt-32 p-2 font-semibold text-center border border-red-600 rounded-md bg-red-50 shadow-lg\"><span class=\"text-red-500\" x-text=\"i18next.t('config_locked_description')\">Configuration is locked.</span></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<!-- stores settings --><div id=\"settings_stores\" class=\"flex flex-col justify-start w-full py-4 px-4 mt-4 mb-0 mx-1 text-lg font-semibold border shadow-md items-left bg-base-100 text-base-content border-slate-400 text-center\"><span x-text=\"i18next.t('settings_stores')\">书库设置</span></div><script>\n\t\t\t// htmx出错时报错（Toast）\n\t\t\tdocument.addEventListener('htmx:responseError', (event) => {\n\t\t\t\tshowToast(event.detail.xhr.statusText + \": \" + event.detail.xhr.responseURL, 'error');\n\t\t\t});\n\t\t    </script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<!-- 管理账号密码 --><!-- @UserInfoConfig(state.ServerConfig.Username, state.ServerConfig.Password, false)  --><!-- 远程连接 -->")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = RemoteAccessConfig(tsStatus).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<!-- 服务器日志 -->")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = LogPanel().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -51,7 +83,20 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = TailscaleConfig(tsStatus).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<!-- 书库设置 --><div id=\"settings_stores\" class=\"flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-4 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\"><div x-text=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var3 string
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("settings_stores"))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/settings_main_area.templ`, Line: 57, Col: 52}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" class=\"w-full text-center\"></div><hr class=\"my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -83,8 +128,7 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = StringArrayConfig("SupportMediaType", state.ServerConfig.SupportMediaType, "SupportMediaType_Description",
-			false).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = StringArrayConfig("SupportMediaType", state.ServerConfig.SupportMediaType, "SupportMediaType_Description", false).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -92,11 +136,7 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<!-- networks settings --><div id=\"settings_network\" class=\"flex flex-col justify-start w-full py-4 px-4 mt-4 mb-0 mx-1 text-lg font-semibold border shadow-md items-left bg-base-100 text-base-content border-slate-400 text-center\"><span x-text=\"i18next.t('settings_network')\">网络设置</span></div>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = UserInfoConfig(state.ServerConfig.Username, state.ServerConfig.Password, false).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div><!-- 网络设置 --><div id=\"settings_network\" class=\"flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-4 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\"><div x-text=\"i18next.t('settings_network')\" class=\"w-full text-center\">网络设置</div><hr class=\"my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -116,36 +156,7 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<!-- extra settings --><div id=\"settings_labs\" class=\"flex flex-col justify-start w-full py-4 px-4 mt-4 mb-0 mx-1 text-lg font-semibold border shadow-md items-left bg-base-100 text-base-content border-slate-400 text-center\"><span x-text=\"i18next.t('settings_extra')\">实验功能</span></div>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = BoolConfig("Debug", state.ServerConfig.Debug, "Debug_Description", false).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = BoolConfig("LogToFile", state.ServerConfig.LogToFile, "LogToFile_Description", false).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = BoolConfig("GenerateMetaData", state.ServerConfig.GenerateMetaData, "GenerateMetaData_Description", false).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = BoolConfig("EnableDatabase", state.ServerConfig.EnableDatabase, "EEnableDatabase_Description", false).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = BoolConfig("ClearCacheExit", state.ServerConfig.ClearCacheExit, "ClearCacheExit_Description", false).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = StringConfig("CachePath", state.ServerConfig.CachePath, "CachePath_Description", false).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = StringConfig("ZipFileTextEncoding", state.ServerConfig.ZipFileTextEncoding, "ZipFileTextEncoding_Description",
-			false).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div><!-- 保存toml设置文件 -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -155,15 +166,84 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<!-- 实验功能 --><div id=\"settings_labs\" class=\"flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-4 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\"><div x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = LogPanel().Render(ctx, templ_7745c5c3_Buffer)
+		var templ_7745c5c3_Var4 string
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("settings_extra"))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/settings_main_area.templ`, Line: 90, Col: 51}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" class=\"w-full text-center\">实验功能</div><hr class=\"my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = BoolConfig("Debug", state.ServerConfig.Debug, "Debug_Description", false).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if state.ServerConfig.Debug {
+			templ_7745c5c3_Err = BoolConfig("LogToFile", state.ServerConfig.LogToFile, "LogToFile_Description", false).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, " ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = BoolConfig("GenerateMetaData", state.ServerConfig.GenerateMetaData, "GenerateMetaData_Description", false).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, " ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = BoolConfig("EnableDatabase", state.ServerConfig.EnableDatabase, "EnableDatabase_Description", false).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, " ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = BoolConfig("ClearCacheExit", state.ServerConfig.ClearCacheExit, "ClearCacheExit_Description", false).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, " ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = StringConfig("CachePath", state.ServerConfig.CachePath, "CachePath_Description", false).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, " ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = StringConfig("ZipFileTextEncoding", state.ServerConfig.ZipFileTextEncoding, "ZipFileTextEncoding_Description", false).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if state.ServerConfig.Debug {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<!-- 服务器日志 --> <!-- @LogPanel() -->")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

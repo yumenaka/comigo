@@ -132,14 +132,20 @@ func bindProtectedAPI(group *echo.Group) {
 	// TODO: 测试需要登录时的表现
 	websocket.WsDebug = &config.GetCfg().Debug
 	group.GET("/ws", websocket.WsHandler)
+
 	// 新加的 HTMX 相关路由
 	group.GET("/shelf/:id", shelf.GetBookListHandler)
 	// 字符串、布尔值、数字配置的更改
 	group.POST("/update-string-config", settings.UpdateStringConfigHandler)
 	group.POST("/update-bool-config", settings.UpdateBoolConfigHandler)
 	group.POST("/update-number-config", settings.UpdateNumberConfigHandler)
-	// 更改登录设置
+	// 更改Comigo登录设置
 	group.POST("/update-login-settings", settings.UpdateLoginSettingsHandler)
+	// 更改 Tailscale 设置
+	group.POST("/update-tailscale-config", settings.UpdateTailscaleSettingsHandler)
+	// Tailscale配置更新JSON API
+	group.POST("/tailscale-config", settings.UpdateTailscaleConfigJSONHandler)
+
 	// 字符串数组配置的增删改
 	group.POST("/delete-array-config", settings.DeleteArrayConfigHandler)
 	group.POST("/add-array-config", settings.AddArrayConfigHandler)
