@@ -1,14 +1,14 @@
 package settings
 
-// TailscaleConfig Tailscale 配置项
+// 服务器日志面板，使用 SSE 实时显示后端日志，并允许发送全局广播消息
 templ LogPanel() {
 	<div id="log_panel"
-	    class="w-full h-[500px] p-4 m-8 bg-gray-900 text-sm text-white rounded-md overflow-auto whitespace-pre-line break-all">
+	    class="w-full h-[400px] p-4 mx-2 mt-1.5 bg-gray-900 text-sm text-white rounded-md overflow-auto whitespace-pre-line break-all">
         <!-- 日志内容将通过 JavaScript 动态插入 -->
 	</div>
-	<div class="row">
-		<input id="msg" placeholder="要广播的消息" class="ml-4 p-1"/>
-		<button id="send" class="ml-2 p-1 h-10 mx-2 my-0 text-center text-gray-700 transition border border-gray-500 rounded bg-sky-300 hover:text-gray-900">POST</button>
+	<div class="row flex items-center justify-center w-5/6 p-2 my-2">
+		<input id="msg" placeholder="输入全局广播消息" class="ml-4 px-2 py-1 h-10 rounded-md"/>
+		<button id="send" class="ml-2 p-1 h-10 w-24 mx-2 my-0 text-center text-gray-700 transition border border-gray-500 rounded bg-sky-300 hover:text-gray-900">POST</button>
 	</div>
 	<script>
 	// 日志内容着色函数
@@ -33,9 +33,13 @@ templ LogPanel() {
     // 创建 EventSource 连接到后端 SSE API,withCredentials:true 允许携带cookie
     // https://developer.mozilla.org/zh-CN/docs/Web/API/EventSource
     const es = new EventSource('/api/sse', { withCredentials: true });
-    es.onopen    = (e) => log(`<span style="color:oklch(62.7% 0.194 149.214)">[open]</span> connected`);
+    es.onopen    = (e) => log(`<span style="color:oklch(62.7% 0.194 149.214)">[open]</span> log server connected`);
     es.onerror   = (e) => log(`<span style="color:oklch(57.7% 0.245 27.325)">[error]</span> ` + (es.readyState === EventSource.CLOSED ? 'closed' : 'retrying...'));
-    es.onmessage = (e) => log(`<span style="color:oklch(62.7% 0.194 149.214)">[message]</span>` + e.data);
+    // 全局消息事件
+    es.onmessage = (e) => {
+        showToast(e.data, 'info');
+        log(`<span style="color:oklch(62.7% 0.194 149.214)">[message]</span>` + e.data)
+    };
     // 监听自定义事件名：tick
     es.addEventListener('tick', (e) => log('[tick] ' + e.data));
     // 监听后端日志事件：log（Echo 日志中间件通过 SSE 使用 event: log 推送）

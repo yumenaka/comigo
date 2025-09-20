@@ -4,12 +4,33 @@ import "github.com/yumenaka/comigo/tools/tailscale_plugin"
 import "github.com/yumenaka/comigo/templ/state"
 import "github.com/yumenaka/comigo/config"
 
+func x_data_debug_mode(debug bool) (string) {
+    if debug {
+        return "{debug_mode: true}"
+    }
+    return "{debug_mode: false}"
+}
+
 templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 	<div
 		id="settingsMainArea"
+		x-data={x_data_debug_mode(state.ServerConfig.Debug)}
 		class="flex flex-col justify-start items-center flex-1 w-full h-full font-semibold text-lg text-base-content"
 	>
 		<div class="flex flex-col justify-start w-5/6 md:w-3/5 min-w-[20rem] relative">
+			<script>
+			// htmx出错时报错（Toast）
+			document.addEventListener('htmx:responseError', (event) => {
+				json = JSON.parse(event.detail.xhr.responseText);
+				if (typeof json.message !== 'undefined'){
+                    showToast(json.message, 'error');
+                    console.error("Error:", json.message);
+                }
+				else{
+                    showToast(event.detail.xhr.statusText + ": " + event.detail.xhr.responseURL, 'error');
+                }
+			});
+		    </script>
 			if state.ServerConfig.ConfigLocked {
 				<div
 					class="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-screen h-full bg-black/50 flex items-start justify-center z-50 pointer-events-auto"
@@ -21,62 +42,67 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 					</div>
 				</div>
 			}
-			<!-- stores settings -->
+			<!-- 管理账号密码 -->
+			<!-- @UserInfoConfig(state.ServerConfig.Username, state.ServerConfig.Password, false)  -->
+			<!-- 远程连接 -->
+			@RemoteAccessConfig(tsStatus)
+			<!-- 服务器日志 -->
+			@LogPanel()
+			@UserInfoConfig(state.ServerConfig.Username, state.ServerConfig.Password, false)
+			<!-- 书库设置 -->
 			<div
 				id="settings_stores"
-				class="flex flex-col justify-start w-full py-4 px-4 mt-4 mb-0 mx-1 text-lg font-semibold border shadow-md items-left bg-base-100 text-base-content border-slate-400 text-center"
+				class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-4 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 			>
-				<span x-text="i18next.t('settings_stores')">书库设置</span>
+				<div x-text={ getTranslations("settings_stores") } class="w-full text-center"></div>
+				<hr class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
+				@StringArrayConfig("StoreUrls", state.ServerConfig.StoreUrls, "StoreUrls_Description", false)
+				@NumberConfig("MaxScanDepth", state.ServerConfig.MaxScanDepth, "MaxScanDepth_Description", 0, 65535, false)
+				@NumberConfig("MinImageNum", state.ServerConfig.MinImageNum, "MinImageNum_Description", 0, 65535, false)
+				@BoolConfig("OpenBrowser", state.ServerConfig.OpenBrowser, "OpenBrowser_Description", false)
+				@BoolConfig("EnableUpload", state.ServerConfig.EnableUpload, "EnableUpload_Description", false)
+				@StringConfig("UploadPath", state.ServerConfig.UploadPath, "UploadPath_Description", false)
+				@StringArrayConfig("ExcludePath", state.ServerConfig.ExcludePath, "ExcludePath_Description", false)
+				@StringArrayConfig("SupportMediaType", state.ServerConfig.SupportMediaType, "SupportMediaType_Description", false)
+				@StringArrayConfig("SupportFileType", state.ServerConfig.SupportFileType, "SupportFileType_Description", false)
 			</div>
-			<script>
-			// htmx出错时报错（Toast）
-			document.addEventListener('htmx:responseError', (event) => {
-				showToast(event.detail.xhr.statusText + ": " + event.detail.xhr.responseURL, 'error');
-			});
-		    </script>
-            @UserInfoConfig(state.ServerConfig.Username, state.ServerConfig.Password, false)
-			@TailscaleConfig(tsStatus)
-			@StringArrayConfig("StoreUrls", state.ServerConfig.StoreUrls, "StoreUrls_Description", false)
-			@NumberConfig("MaxScanDepth", state.ServerConfig.MaxScanDepth, "MaxScanDepth_Description", 0, 65535, false)
-			@NumberConfig("MinImageNum", state.ServerConfig.MinImageNum, "MinImageNum_Description", 0, 65535, false)
-			@BoolConfig("OpenBrowser", state.ServerConfig.OpenBrowser, "OpenBrowser_Description", false)
-			@BoolConfig("EnableUpload", state.ServerConfig.EnableUpload, "EnableUpload_Description", false)
-			@StringConfig("UploadPath", state.ServerConfig.UploadPath, "UploadPath_Description", false)
-			@StringArrayConfig("ExcludePath", state.ServerConfig.ExcludePath, "ExcludePath_Description", false)
-			@StringArrayConfig("SupportMediaType", state.ServerConfig.SupportMediaType, "SupportMediaType_Description",
-				false)
-			@StringArrayConfig("SupportFileType", state.ServerConfig.SupportFileType, "SupportFileType_Description", false)
-			<!-- networks settings -->
+			<!-- 网络设置 -->
 			<div
 				id="settings_network"
-				class="flex flex-col justify-start w-full py-4 px-4 mt-4 mb-0 mx-1 text-lg font-semibold border shadow-md items-left bg-base-100 text-base-content border-slate-400 text-center"
+				class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-4 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 			>
-				<span x-text="i18next.t('settings_network')">网络设置</span>
+				<div x-text="i18next.t('settings_network')" class="w-full text-center">网络设置</div>
+				<hr class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
+				@NumberConfig("Port", state.ServerConfig.Port, "Port_Description", 0, 65535, false)
+				@StringConfig("Host", state.ServerConfig.Host, "Host_Description", false)
+				@BoolConfig("DisableLAN", state.ServerConfig.DisableLAN, "DisableLAN_Description", false)
+				@NumberConfig("Timeout", state.ServerConfig.Timeout, "Timeout_Description", 0, 65535, false)
 			</div>
-			@UserInfoConfig(state.ServerConfig.Username, state.ServerConfig.Password, false)
-			@NumberConfig("Port", state.ServerConfig.Port, "Port_Description", 0, 65535, false)
-			@StringConfig("Host", state.ServerConfig.Host, "Host_Description", false)
-			@BoolConfig("DisableLAN", state.ServerConfig.DisableLAN, "DisableLAN_Description", false)
-			@NumberConfig("Timeout", state.ServerConfig.Timeout, "Timeout_Description", 0, 65535, false)
-			<!-- extra settings -->
-			<div
-				id="settings_labs"
-				class="flex flex-col justify-start w-full py-4 px-4 mt-4 mb-0 mx-1 text-lg font-semibold border shadow-md items-left bg-base-100 text-base-content border-slate-400 text-center"
-			>
-				<span x-text="i18next.t('settings_extra')">实验功能</span>
-			</div>
-			@BoolConfig("Debug", state.ServerConfig.Debug, "Debug_Description", false)
-			@BoolConfig("LogToFile", state.ServerConfig.LogToFile, "LogToFile_Description", false)
-			@BoolConfig("GenerateMetaData", state.ServerConfig.GenerateMetaData, "GenerateMetaData_Description", false)
-			@BoolConfig("EnableDatabase", state.ServerConfig.EnableDatabase, "EEnableDatabase_Description", false)
-			@BoolConfig("ClearCacheExit", state.ServerConfig.ClearCacheExit, "ClearCacheExit_Description", false)
-			@StringConfig("CachePath", state.ServerConfig.CachePath, "CachePath_Description", false)
-			@StringConfig("ZipFileTextEncoding", state.ServerConfig.ZipFileTextEncoding, "ZipFileTextEncoding_Description",
-				false)
+			<!-- 保存toml设置文件 -->
 			@ConfigManager(config.DefaultConfigLocation(), config.GetWorkingDirectoryConfig(),
 				config.GetHomeDirectoryConfig(),
 				config.GetProgramDirectoryConfig())
+			<!-- 实验功能 -->
+			<div
+				id="settings_labs"
+				class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-4 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+			>
+				<div x-text={ getTranslations("settings_extra") } class="w-full text-center">实验功能</div>
+				<hr class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
+			    @BoolConfig("Debug", state.ServerConfig.Debug, "Debug_Description", false)
+			    if state.ServerConfig.Debug {
+			        @BoolConfig("LogToFile", state.ServerConfig.LogToFile, "LogToFile_Description", false)
+                    @BoolConfig("GenerateMetaData", state.ServerConfig.GenerateMetaData, "GenerateMetaData_Description", false)
+                    @BoolConfig("EnableDatabase", state.ServerConfig.EnableDatabase, "EnableDatabase_Description", false)
+                    @BoolConfig("ClearCacheExit", state.ServerConfig.ClearCacheExit, "ClearCacheExit_Description", false)
+                    @StringConfig("CachePath", state.ServerConfig.CachePath, "CachePath_Description", false)
+                    @StringConfig("ZipFileTextEncoding", state.ServerConfig.ZipFileTextEncoding, "ZipFileTextEncoding_Description",false)
+			    }
+			</div>
 		</div>
-		@LogPanel()
+		if state.ServerConfig.Debug {
+			<!-- 服务器日志 -->
+			<!-- @LogPanel() -->
+		}
 	</div>
 }

@@ -37,7 +37,7 @@ func BoolConfig(name string, value bool, description string, saveSuccessHint boo
 		}
 		ctx = templ.ClearChildren(ctx)
 		if saveSuccessHint {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"hidden\" x-init=\"showToast(i18next.t('saveSuccessHint'), 'info');setTimeout(() => {\n            window.location.reload();\n        }, 3000)\"></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"hidden\" x-init=\"showToast(i18next.t('saveSuccessHint'), 'info');setTimeout(() => {\n            window.location.reload();\n        }, 2000)\"></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -68,7 +68,7 @@ func BoolConfig(name string, value bool, description string, saveSuccessHint boo
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"w-64\"></div><!-- 隐藏域 --><input type=\"hidden\" name=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"w-full py-0 text-left\"></div><!-- 隐藏input --><input type=\"hidden\" name=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -169,7 +169,7 @@ func BoolConfig(name string, value bool, description string, saveSuccessHint boo
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" class=\"w-3/4 py-1 text-xs text-gray-500\"></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" class=\"w-full py-1 text-left text-xs text-gray-500\"></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

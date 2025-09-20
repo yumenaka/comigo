@@ -2,13 +2,14 @@ package cmd
 
 import (
 	"sync"
+	"time"
 
-	"github.com/spf13/viper"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/routers"
 	"github.com/yumenaka/comigo/routers/upload_api"
 	"github.com/yumenaka/comigo/templ/pages/settings"
+	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
 	"github.com/yumenaka/comigo/tools/scan"
 )
@@ -66,19 +67,28 @@ func waitSystemMessages() {
 		msg := <-SystemBroadcast // 广播频道
 		// Send it out to every client that is currently connected
 		switch msg {
-		case "rescan_upload_path":
-			logger.Infof("重新扫描上传文件夹：%s", msg)
-			ReScanUploadPath()
-			// 保存扫描结果到数据库
-			if config.GetEnableDatabase() {
-				err := scan.SaveResultsToDatabase(viper.ConfigFileUsed(), config.GetClearDatabaseWhenExit())
-				if err != nil {
-					return
-				}
-			}
+		//// 重新扫描上传目录
+		//case "rescan_upload_path":
+		//	logger.Infof("Rescan the upload folder：%s", msg)
+		//	if config.GetEnableUpload() {
+		//		ReScanPath(config.GetUploadPath(), true)
+		//	}
+		//	// 保存扫描结果到数据库
+		//	if config.GetEnableDatabase() {
+		//		err := scan.SaveResultsToDatabase(viper.ConfigFileUsed(), config.GetClearDatabaseWhenExit())
+		//		if err != nil {
+		//			return
+		//		}
+		//	}
+		// 重启网页服务器
 		case "restart_web_server":
 			logger.Infof("Config changed, restarting web server...\n", msg)
 			routers.RestartWebServer()
+			// 阻塞等待端口就绪，确保服务可用
+			tools.WaitUntilServerReady("localhost", config.GetPort(), 15*time.Second)
+			// 在命令行显示QRCode
+			ShowQRCode()
+		// 重新扫描指定目录
 		case "rescan_path_sample":
 			logger.Infof("收到重新扫描消息：%s", msg)
 			ReScanPath(msg, false)
@@ -88,15 +98,7 @@ func waitSystemMessages() {
 	}
 }
 
-// ReScanUploadPath 重新扫描上传目录,因为需要设置下载路径，gin 初始化后才能执行
-func ReScanUploadPath() {
-	// 没启用上传，则不扫描
-	if !config.GetEnableUpload() {
-		return
-	}
-	ReScanPath(config.GetUploadPath(), true)
-}
-
+// ReScanPath  重新扫描目录,因为需要设置下载路径，gin 初始化后才能执行
 func ReScanPath(storeUrl string, reScanFile bool) {
 	// 扫描上传目录的文件
 	option := scan.NewOption(config.GetCfg())

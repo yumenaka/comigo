@@ -27,39 +27,9 @@ func StartEcho(e *echo.Echo) {
 		Addr:    webHost + strconv.Itoa(config.GetPort()),
 		Handler: e, // echo.Echo 实现了 http.Handler 接口
 	}
-	// 是否启动 Tailscale 服务
-	if config.GetTailscaleEnable() {
-		go func() {
-			// Funnel 模式，外网可访问，建议设置用户名与密码
-			if config.GetTailscaleFunnelMode() {
-				if err := tailscale_plugin.RunTailscale(
-					e,
-					tailscale_plugin.InitConfig{
-						Hostname:   config.GetTailscaleHostname(),
-						Port:       uint16(config.GetTailscalePort()),
-						FunnelMode: config.GetTailscaleFunnelMode(),
-						ConfigDir:  config.GetConfigPath(),
-					},
-				); err != nil {
-					logger.Errorf("Failed to run Tailscale: %v", err)
-				}
-			}
-			// 非Funnel模式，需要开启Tailscale服务才可以访问
-			if !config.GetTailscaleFunnelMode() {
-				if err := tailscale_plugin.RunTailscale(
-					e,
-					tailscale_plugin.InitConfig{
-						Hostname:   config.GetTailscaleHostname(),
-						Port:       uint16(config.GetTailscalePort()),
-						FunnelMode: config.GetTailscaleFunnelMode(),
-						ConfigDir:  config.GetConfigPath(),
-					},
-				); err != nil {
-					logger.Errorf("Failed to run Tailscale: %v", err)
-				}
-			}
-		}()
-	}
+	// 启动或停止 Tailscale 服务（如启用）
+	SetTailscale(e)
+	// 记录日志并启动服务器
 	logger.Infof("Starting Server...", "on port", config.GetPort(), "...")
 	if enableTls {
 		logger.Infof("TLS enabled", "CertFile:", config.GetCertFile(), "KeyFile:", config.GetKeyFile())
@@ -93,7 +63,10 @@ func StopWebServer() error {
 	// 主动关闭所有 SSE 客户端，避免优雅关闭时被长连接阻塞
 	sse_hub.MessageHub.CloseAll()
 	// 停止 Tailscale HTTP 服务器（如启用）
-	_ = tailscale_plugin.StopTailscale()
+	err := tailscale_plugin.StopTailscale()
+	if err != nil {
+		logger.Errorf("Error stopping Tailscale server: %v", err)
+	}
 	// 关闭服务器（deadline 5秒）
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

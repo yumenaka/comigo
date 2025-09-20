@@ -61,8 +61,10 @@ func getLocale() (string, string) {
 	return defaultLang, defaultLoc
 }
 
+var bundle *i18n.Bundle
+
 func init() {
-	bundle := i18n.NewBundle(language.English)
+	bundle = i18n.NewBundle(language.English)
 	bundle.RegisterUnmarshalFunc("json", json.Unmarshal)
 	bundle.MustParseMessageFileBytes(enBytes, "en_US.json")
 	bundle.MustParseMessageFileBytes(cnBytes, "zh_CN.json")
@@ -84,4 +86,8 @@ func init() {
 
 func GetString(id string) string {
 	return Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: id})
+}
+
+func GetStringByLocal(id string, local string) string {
+	return i18n.NewLocalizer(bundle, local).MustLocalize(&i18n.LocalizeConfig{MessageID: id})
 }

@@ -14,7 +14,7 @@ import templruntime "github.com/a-h/templ/runtime"
 // hx-target用返回的 HTML 替换哪个 DOM 元素
 // hx-swap 替换方式
 // hx-params="*" 发送表单数据，包含所有 name/value
-// saveSuccessHint: 保存成功,三秒后刷新本页面
+// saveSuccessHint: 保存成功,三秒后执行各种动作
 func UserInfoConfig(nowUsername string, nowPassword string, saveSuccessHint bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -37,87 +37,191 @@ func UserInfoConfig(nowUsername string, nowPassword string, saveSuccessHint bool
 		}
 		ctx = templ.ClearChildren(ctx)
 		if saveSuccessHint {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"hidden\" x-init=\"showToast(i18next.t('saveSuccessHint'), 'info');setTimeout(() => {\n            window.location.reload();\n        }, 3000000)\"></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"hidden\" x-init=\"showToast(i18next.t('MsgLoginSettingsUpdated'), 'info');setTimeout(() => {\n            // 跳转到登录\n            window.location.href = '/';\n        }, 1500)\"></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<form id=\"user_config_form\" class=\"flex flex-col justify-start w-full p-2 m-1 font-semibold\n            border rounded-md shadow-md hover:shadow-2xl\n            items-left bg-base-100 text-base-content border-slate-400\" x-data=\"{\n\t\t\tusername: '',\n\t\t\told_password: '',\n\t\t\tpassword: '',\n\t\t\tReEnterPassword: '',\n\t\t\tshowPassword: false,\n\t\t\tisFormChanged: false,\n\t\t\tpasswordOK: false,\n\t\t\t\n\t\t\tinit() {\n\t\t\t\tthis.username = this.$el.querySelector('#Username').value;\n\t\t\t\tthis.old_password = this.$el.querySelector('#OldPassword') ? this.$el.querySelector('#OldPassword').value : '';\n\t\t\t\tthis.password = this.$el.querySelector('#Password').value;\n                this.ReEnterPassword = this.$el.querySelector('#ReEnterPassword').value;\n\n\t\t\t\tthis.$watch('username', value => {\n\t\t\t\t\tthis.isFormChanged = true; // 只要用户名框有变化，就认为表单被修改过\n\t\t\t\t\tconsole.log('Username changed. isFormChanged:', this.isFormChanged, 'New username:', value);\n\t\t\t\t});\n\t\t\t\t\n\t\t\t\tthis.$watch('password', value => {\n\t\t\t\t\tthis.isFormChanged = true; // 只要密码框有变化，就认为表单被修改过\n\t\t\t\t\tthis.passwordOK = this.password !== '' && this.ReEnterPassword !== '' && this.password === this.ReEnterPassword;\n\t\t\t\t\tconsole.log('Password changed. isFormChanged:', this.isFormChanged, 'New password:', value, 'Current username:', this.username);\n\t\t\t\t});\n\t\t\t\t\n\t\t\t\tthis.$watch('ReEnterPassword', value => {\n\t\t\t\t\tthis.passwordOK = this.password !== '' && this.ReEnterPassword !== '' && this.password === this.ReEnterPassword;\n\t\t\t\t\tconsole.log('Password changed. isFormChanged:', this.isFormChanged, 'New ReEnterPassword:', value, 'Current username:', this.username);\n\t\t\t\t});\n\t\t\t},\n\t\t\t\n\t\t\tcanSave() {\n\t\t\t\tif (!this.isFormChanged) {\n\t\t\t\t\treturn false;\n\t\t\t\t}\n\t\t\t\t// 两次输入的密码不一致，请重新输入'\n\t\t\t\tif (this.password !== this.ReEnterPassword){\n                    alert(i18next.t('password_validated_error_1'));\n                    return false;\n\t\t\t\t}\n\t\t\t\t// 请输入密码\n\t\t\t\tif(this.password === '' && this.ReEnterPassword === ''){\n\t\t\t\t    alert(i18next.t('password_validated_error_2'));\n\t\t\t\t    return false;\n\t\t\t\t}\n\t\t\t\treturn true;\n\t\t\t}\n\t\t}\"><!-- 用户名 --><label x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("Username"))
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs("user_config")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 75, Col: 45}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 20, Col: 24}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" for=\"Username\" class=\"w-64\"></label> <input id=\"Username\" name=\"Username\" type=\"text\" placeholder=\"Username\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" class=\"flex flex-col justify-start w-full px-2 py-2 mx-2 my-4 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\"><div x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(nowUsername)
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("AdminAccountSetup"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 81, Col: 22}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 21, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" x-model=\"username\" class=\"px-2.5 w-full rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm\"> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"w-full text-center\"></div><hr class=\"my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200\"><form id=\"user_config_form\" class=\"flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\" x-data=\"{\n\t\t\tusername: '',\n\t\t\tcurrent_password: '',\n\t\t\tpassword: '',\n\t\t\tReEnterPassword: '',\n\t\t\tshowPassword: false,\n\t\t\tisFormChanged: false,\n\t\t\tpasswordOK: false,\n\t\t\tinit() {\n\t\t\t\tthis.username = this.$el.querySelector('#Username').value;\n\t\t\t\tthis.current_password = this.$el.querySelector('#CurrentPassword') ? this.$el.querySelector('#CurrentPassword').value : '';\n\t\t\t\tthis.password = this.$el.querySelector('#Password').value;\n                this.ReEnterPassword = this.$el.querySelector('#ReEnterPassword').value;\n\n\t\t\t\tthis.$watch('username', value => {\n\t\t\t\t\tthis.isFormChanged = true; // 用户名有变化，表单被修改过\n\t\t\t\t\t//console.log('Username changed. isFormChanged:', this.isFormChanged, 'New username:', value);\n\t\t\t\t});\n\t\t\t\t\n\t\t\t\tthis.$watch('password', value => {\n\t\t\t\t\tthis.isFormChanged = true; // 密码框变化，表单被修改过\n\t\t\t\t\tthis.passwordOK = this.password !== '' && this.ReEnterPassword !== '' && this.password === this.ReEnterPassword;\n\t\t\t\t\t//console.log('Password changed. isFormChanged:', this.isFormChanged, 'New password:', value, 'Current username:', this.username);\n\t\t\t\t});\n\t\t\t\t\n\t\t\t\tthis.$watch('ReEnterPassword', value => {\n\t\t\t\t\tthis.passwordOK = this.password !== '' && this.ReEnterPassword !== '' && this.password === this.ReEnterPassword;\n\t\t\t\t\t//console.log('Password changed. isFormChanged:', this.isFormChanged, 'New ReEnterPassword:', value, 'Current username:', this.username);\n\t\t\t\t});\n\t\t\t},\n\t\t\t\n\t\t\tcanSave() {\n\t\t\t    // 没有修改表单，不能保存\n\t\t\t\tif (!this.isFormChanged) {\n\t\t\t\t\treturn false;\n\t\t\t\t}\n\t\t\t\t// 两次输入的密码不一致，请重新输入'\n\t\t\t\tif (this.password !== this.ReEnterPassword){\n\t\t\t\t    showToast(i18next.t('ErrPasswordMismatch'), 'info');\n                    return false;\n\t\t\t\t}\n\t\t\t\t// 请输入密码\n\t\t\t\tif(this.password === '' && this.ReEnterPassword === ''){\n\t\t\t\t    showToast(i18next.t('PromptSetPassword'), 'info');\n\t\t\t\t    return false;\n\t\t\t\t}\n\t\t\t\treturn true;\n\t\t\t}\n\t\t}\"><!-- 用户名 --><label x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if nowPassword != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<!-- 当前密码 --> <div class=\"relative\"><label x-text=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("OldPassword"))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 88, Col: 50}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" for=\"OldPassword\" class=\"w-64\"></label><div class=\"relative\"><input id=\"OldPassword\" name=\"OldPassword\" :type=\"showPassword ? 'text' : 'password'\" placeholder=\"Old Password\" x-model=\"old_password\" class=\"px-2.5 w-full rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm\"> <button type=\"button\" class=\"absolute right-2 top-1/2 transform -translate-y-1/2\" @click=\"showPassword = !showPassword\"><svg x-show=\"!showPassword\" class=\"h-5 w-5 text-gray-500\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M15 12a3 3 0 11-6 0 3 3 0 016 0z\"></path> <path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z\"></path></svg> <svg x-show=\"showPassword\" class=\"h-5 w-5 text-gray-500\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21\"></path></svg></button></div></div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
+		var templ_7745c5c3_Var4 string
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("Username"))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 77, Col: 46}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<!-- 新密码 --><div class=\"relative\"><label x-text=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" for=\"Username\" class=\"w-64\"></label> <input id=\"Username\" name=\"Username\" type=\"text\" :placeholder=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("Password"))
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("Username"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 116, Col: 46}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 82, Col: 46}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" for=\"Password\" class=\"w-64\"></label><div class=\"relative\"><input id=\"Password\" name=\"Password\" :type=\"showPassword ? 'text' : 'password'\" placeholder=\"Password\" x-model=\"password\" class=\"px-2.5 w-full rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm\"> <button type=\"button\" class=\"absolute right-2 top-1/2 transform -translate-y-1/2\" @click=\"showPassword = !showPassword\"><svg x-show=\"!showPassword\" class=\"h-5 w-5 text-gray-500\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M15 12a3 3 0 11-6 0 3 3 0 016 0z\"></path> <path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z\"></path></svg> <svg x-show=\"showPassword\" class=\"h-5 w-5 text-gray-500\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21\"></path></svg></button></div></div><!-- 再次输入密码 --><div class=\"relative\"><label x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var6 string
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("ReEnterPassword"))
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(nowUsername)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 143, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 83, Col: 23}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" for=\"ReEnterPassword\" class=\"w-64\"></label><div class=\"relative\"><input id=\"ReEnterPassword\" name=\"ReEnterPassword\" :type=\"showPassword ? 'text' : 'password'\" placeholder=\"ReEnter Password\" x-model=\"ReEnterPassword\" class=\"px-2.5 w-full rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm\" :class=\"{ 'border-red-500': passwordOK }\"> <button type=\"button\" class=\"absolute right-2 top-1/2 transform -translate-y-1/2\" @click=\"showPassword = !showPassword\"><svg x-show=\"!showPassword\" class=\"h-5 w-5 text-gray-500\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M15 12a3 3 0 11-6 0 3 3 0 016 0z\"></path> <path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z\"></path></svg> <svg x-show=\"showPassword\" class=\"h-5 w-5 text-gray-500\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21\"></path></svg></button></div><!-- 密码不匹配错误提示 --><div x-show=\"password !== ReEnterPassword\" class=\"text-red-500 text-xs mt-1\">两次输入的密码不一致</div></div><!-- SAVE按钮 --><div class=\"flex mt-4 space-x-2\"><button class=\"w-20 h-10 mx-2 my-0 text-center text-gray-700 transition border border-gray-500 rounded bg-sky-300 hover:text-gray-900\" :class=\"{ 'opacity-50 cursor-not-allowed': isFormChanged === false || passwordOK === false }\" :disabled=\"isFormChanged === false || passwordOK === false\" hx-post=\"/api/update-login-settings\" hx-trigger=\"click\" hx-target=\"#user_config_form\" hx-swap=\"outerHTML\" hx-params=\"*\" @click=\"if(!canSave()) $event.preventDefault()\">SAVE</button></div></form>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" x-model=\"username\" class=\"px-2.5 w-full rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm\"><!-- 当前密码 --><div class=\"relative\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if nowPassword == "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, " hidden")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, " x-data=\"{ open: false }\"><label x-text=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var7 string
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("CurrentPassword"))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 89, Col: 54}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" for=\"CurrentPassword\" class=\"w-64\"></label><div class=\"relative\"><input id=\"CurrentPassword\" name=\"CurrentPassword\" :type=\"showPassword ? 'text' : 'password'\" :placeholder=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var8 string
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("CurrentPassword"))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 95, Col: 55}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" x-model=\"current_password\" class=\"px-2.5 w-full rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm\"> <button type=\"button\" class=\"absolute right-2 top-1/2 transform -translate-y-1/2\" @click=\"showPassword = !showPassword\"><svg x-show=\"!showPassword\" class=\"h-5 w-5 text-gray-500\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M15 12a3 3 0 11-6 0 3 3 0 016 0z\"></path> <path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z\"></path></svg> <svg x-show=\"showPassword\" class=\"h-5 w-5 text-gray-500\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21\"></path></svg></button></div></div><!-- 新密码 --><div class=\"relative\"><label x-text=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var9 string
+		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("Password"))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 116, Col: 47}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\" for=\"Password\" class=\"w-64\"></label><div class=\"relative\"><input id=\"Password\" name=\"Password\" :type=\"showPassword ? 'text' : 'password'\" :placeholder=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var10 string
+		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("Password"))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 122, Col: 48}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" x-model=\"password\" class=\"px-2.5 w-full rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm\"> <button type=\"button\" class=\"absolute right-2 top-1/2 transform -translate-y-1/2\" @click=\"showPassword = !showPassword\"><svg x-show=\"!showPassword\" class=\"h-5 w-5 text-gray-500\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M15 12a3 3 0 11-6 0 3 3 0 016 0z\"></path> <path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z\"></path></svg> <svg x-show=\"showPassword\" class=\"h-5 w-5 text-gray-500\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21\"></path></svg></button></div></div><!-- 再次输入密码 --><div class=\"relative\"><label x-text=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var11 string
+		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("ReEnterPassword"))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 143, Col: 54}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" for=\"ReEnterPassword\" class=\"w-64\"></label><div class=\"relative\"><input id=\"ReEnterPassword\" name=\"ReEnterPassword\" :type=\"showPassword ? 'text' : 'password'\" :placeholder=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var12 string
+		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("ReEnterPassword"))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 149, Col: 55}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" x-model=\"ReEnterPassword\" class=\"px-2.5 w-full rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm\" :class=\"{ 'border-red-500': passwordOK }\"> <button type=\"button\" class=\"absolute right-2 top-1/2 transform -translate-y-1/2\" @click=\"showPassword = !showPassword\"><svg x-show=\"!showPassword\" class=\"h-5 w-5 text-gray-500\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M15 12a3 3 0 11-6 0 3 3 0 016 0z\"></path> <path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z\"></path></svg> <svg x-show=\"showPassword\" class=\"h-5 w-5 text-gray-500\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21\"></path></svg></button></div><!-- 密码不匹配错误提示 --><div x-show=\"password !== ReEnterPassword\" class=\"text-red-500 text-xs mt-1\">两次输入的密码不一致</div></div><!-- SAVE按钮 --><div class=\"flex justify-center items-center w-full my-2\"><button class=\"min-w-28 px-2 h-10 mx-2 my-0 text-center text-gray-700 transition border border-gray-500 rounded bg-sky-300 hover:text-gray-900\" :class=\"{ 'opacity-50 cursor-not-allowed': isFormChanged === false || passwordOK === false }\" :disabled=\"isFormChanged === false || passwordOK === false\" hx-post=\"/api/update-login-settings\" hx-trigger=\"click\" hx-target=\"#user_config_form\" hx-swap=\"outerHTML\" hx-params=\"*\" @click=\"if(!canSave()) $event.preventDefault()\" x-text=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var13 string
+		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("set_account_password"))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 183, Col: 53}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\">SAVE</button></div><div class=\"w-full py-1 text-xs text-gray-500\" x-text=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var14 string
+		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("AdminAccountSetupDescription"))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 188, Col: 60}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\"></div></form></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

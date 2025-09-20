@@ -3,11 +3,13 @@ package settings
 templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirectoryConfig string, ProgramDirectoryConfig string) {
 	<div
 		id="config-container"
-		class="flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+		class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-4 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 		x-data={ "{ selectedDir: '" + initSaveTo + "',initinitSaveTo:'" + initSaveTo + "'}" }
 	>
 		<!-- 标题 -->
-		<label class="w-full py-0" x-text={ getTranslations("ConfigManager") }></label>
+		<label x-text={ getTranslations("ConfigManager") } class="w-full text-center"></label>
+        <hr class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
+        <label x-text={ getTranslations("ConfigStorageLocationPrompt") } class="w-full"></label>
 		<!-- 配置选项区域：点击一个卡片，就设置隐藏字段的值。 -->
 		<div class="flex flex-col w-full mx-0">
 			<div
@@ -101,6 +103,7 @@ templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirect
 				hx-include="#selectedDir"
 				hx-target="#config-container"
 				hx-swap="outerHTML"
+				x-text={ getTranslations("save")}
 			>
 				SAVE
 			</button>
@@ -111,6 +114,7 @@ templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirect
 				hx-include="#selectedDir"
 				hx-target="#config-container"
 				hx-swap="outerHTML"
+				x-text={ getTranslations("delete")}
 			>
 				DELETE
 			</button>

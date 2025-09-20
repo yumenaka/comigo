@@ -66,13 +66,64 @@ func PageHandler(c echo.Context) error {
 	// cookie.HttpOnly = false
 	// c.SetCookie(cookie)
 
+	//// 如果是静态页面，就把所有图片都转为 base64 编码，嵌入到 HTML 里
+	//// 适合导出为单个 HTML 文件的场景
+	//// 但是会非常占用内存和 CPU，尤其是大文件
+	//// 使用方法：在 URL 后面加上 ?static=true
+	//// 比如：http://
+	//if c.QueryParam("static") == "true" {
+	//	newBook := *book
+	//	for i, file := range newBook.Pages.Images {
+	//		// 获取图片数据的选项
+	//		option := fileutil.GetPictureDataOption{
+	//			PictureName:      file.Name,
+	//			BookIsPDF:        newBook.Type == model.TypePDF,
+	//			BookIsDir:        newBook.Type == model.TypeDir,
+	//			BookIsNonUTF8Zip: newBook.NonUTF8Zip,
+	//			BookFilePath:     newBook.FilePath,
+	//			Debug:            config.GetDebug(),
+	//			UseCache:         config.GetUseCache(),
+	//			ResizeWidth:      -1,
+	//			ResizeHeight:     -1,
+	//			ResizeMaxWidth:   -1,
+	//			ResizeMaxHeight:  -1,
+	//			ThumbnailMode:    false,
+	//			AutoCrop:         -1,
+	//			Gray:             false,
+	//			BlurHash:         0,
+	//			BlurHashImage:    0,
+	//		}
+	//
+	//		// 获取图片数据
+	//		imgData, _, err := fileutil.GetPictureData(option)
+	//		if err != nil {
+	//			logger.Infof("GetPictureData error: %s", err)
+	//			return c.JSON(http.StatusBadRequest, map[string]string{"error": "GetPictureData error: " + err.Error()})
+	//		}
+	//		mimeType := mime.TypeByExtension(filepath.Ext(file.Name))
+	//		if mimeType == "" {
+	//			mimeType = "application/octet-stream"
+	//		}
+	//		newBook.Pages.Images[i].Url = "data:" + mimeType + ";base64," + base64.StdEncoding.EncodeToString(imgData)
+	//	}
+	//	// 翻页模式页面
+	//	indexHtml := common.Html(
+	//		c,
+	//		FlipPage(c, &newBook),
+	//		[]string{"script/flip.js", "script/flip_sketch.js"})
+	//	// 渲染翻页模式阅读页面
+	//	if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexHtml); err != nil {
+	//		// 如果渲染失败，返回 HTTP 500 错误
+	//		return c.NoContent(http.StatusInternalServerError)
+	//	}
+	//}
+
 	// 翻页模式页面
 	indexHtml := common.Html(
 		c,
-
 		FlipPage(c, book),
 		[]string{"script/flip.js", "script/flip_sketch.js"})
-	// 渲染正常页面
+	// 渲染翻页模式阅读页面
 	if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexHtml); err != nil {
 		// 如果渲染失败，返回 HTTP 500 错误
 		return c.NoContent(http.StatusInternalServerError)
