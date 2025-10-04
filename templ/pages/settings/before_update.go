@@ -1,6 +1,7 @@
 package settings
 
 import (
+	"encoding/json"
 	"reflect"
 	"strconv"
 	"time"
@@ -21,13 +22,27 @@ var RestartWebServerBroadcast *chan string
 func beforeConfigUpdate(oldConfig *config.Config, newConfig *config.Config) {
 	openBrowserIfNeeded(oldConfig, newConfig)
 	action := checkServerActions(oldConfig, newConfig)
-	// 重启网页服务器
-	// 此处不能导入routers，因为会循环引用  routers.RestartWebServer()
-	logger.Infof("reScanDir: %v, reStartWebServer: %v ", action.ReScanStores, action.ReStartWebServer)
+	// 记录需要执行的操作
+	actionString, err := json.Marshal(action)
+	if err != nil {
+		logger.Infof("Server action: %v,", action)
+	} else {
+		logger.Infof("Server action: %s", string(actionString))
+	}
+	// 重启网页服务器等，此处不能导入routers，因为会循环引用
 	if action.ReStartWebServer {
 		*RestartWebServerBroadcast <- "restart_web_server"
 		// 等待服务器端口可用，确保重启完成后再继续
 		tools.WaitUntilServerReady("localhost", newConfig.Port, 15*time.Second)
+	}
+	if action.StartTailscale {
+		*RestartWebServerBroadcast <- "start_tailscale"
+	}
+	if action.StopTailscale {
+		*RestartWebServerBroadcast <- "stop_tailscale"
+	}
+	if action.ReStartTailscale {
+		*RestartWebServerBroadcast <- "restart_tailscale"
 	}
 	// 重新扫描书库
 	if action.ReScanStores {
@@ -52,6 +67,9 @@ func openBrowserIfNeeded(oldConfig *config.Config, newConfig *config.Config) {
 type ConfigChangeAction struct {
 	ReScanStores     bool
 	ReStartWebServer bool
+	StartTailscale   bool
+	StopTailscale    bool
+	ReStartTailscale bool
 }
 
 // checkServerActions 检查旧的和新的配置是否需要更新，并返回需要重启网页服务器、重新扫描整个书库、重新扫描所有文件的布尔值
@@ -97,21 +115,39 @@ func checkServerActions(oldConfig *config.Config, newConfig *config.Config) (act
 	if oldConfig.DisableLAN != newConfig.DisableLAN {
 		action.ReStartWebServer = true
 	}
-	// 如果EnableTailscale有变化，且开启了Tailscale，则需要重启Tailscale服务器
-	if oldConfig.EnableTailscale != newConfig.EnableTailscale {
-		action.ReStartWebServer = true
+	// 如果开启了Tailscale，且Tailscale设置有变化，则需要重启Tailscale服务器
+	if newConfig.EnableTailscale == true {
+		if oldConfig.TailscaleAuthKey != newConfig.TailscaleAuthKey {
+			action.ReStartTailscale = true
+		}
+		if oldConfig.TailscaleFunnelMode != newConfig.TailscaleFunnelMode {
+			action.ReStartTailscale = true
+		}
+		if oldConfig.TailscaleHostname != newConfig.TailscaleHostname {
+			action.ReStartTailscale = true
+		}
+		if oldConfig.TailscalePort != newConfig.TailscalePort {
+			action.ReStartTailscale = true
+		}
+		if action.ReStartTailscale == true {
+			action.StartTailscale = false
+			action.StopTailscale = false
+			logger.Info("Tailscale config changed, will restart Tailscale server")
+		}
 	}
-	// 如果FunnelMode有变化，且开启了Tailscale，则需要重启Tailscale服务器
-	if oldConfig.TailscaleFunnelMode != newConfig.TailscaleFunnelMode && newConfig.EnableTailscale == true {
-		action.ReStartWebServer = true
+	// 什么情况下需要启动或停止Tailscale服务器
+	if oldConfig.EnableTailscale != newConfig.EnableTailscale && newConfig.EnableTailscale == true {
+		action.StartTailscale = true
+		action.StopTailscale = false
+		action.ReStartTailscale = false
+		logger.Info("Tailscale enabled, will start Tailscale server")
 	}
-	// 如果Tailscale Hostname有变化，且开启了Tailscale，则需要重启Tailscale服务器
-	if oldConfig.TailscaleHostname != newConfig.TailscaleHostname && newConfig.EnableTailscale == true {
-		action.ReStartWebServer = true
+	if oldConfig.EnableTailscale != newConfig.EnableTailscale && newConfig.EnableTailscale == false {
+		action.StartTailscale = false
+		action.StopTailscale = true
+		action.ReStartTailscale = false
+		logger.Info("Tailscale disabled, will stop Tailscale server")
 	}
-	// 如果Tailscale Port有变化，且开启了Tailscale，则需要重启Tailscale服务器
-	if oldConfig.TailscalePort != newConfig.TailscalePort && newConfig.EnableTailscale == true {
-		action.ReStartWebServer = true
-	}
-	return
+
+	return action
 }

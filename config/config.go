@@ -54,8 +54,9 @@ type Config struct {
 	Username               string          `json:"Username" comment:"登录界用的用户名。"`
 	EnableTailscale        bool            `json:"EnableTailscale" comment:"启用Tailscale网络支持"`
 	TailscaleHostname      string          `json:"TailscaleHostname" comment:"Tailscale网络的主机名，默认为comigo"`
-	TailscalePort          int             `json:"TailscalePort" comment:"Tailscale网络的端口，默认为443"`
 	TailscaleFunnelMode    bool            `json:"TailscaleFunnelMode" comment:"启用Tailscale的Funnel模式，允许通过Tailscale公开comigo服务到公网。"`
+	TailscalePort          int             `json:"TailscalePort" comment:"Tailscale网络的端口，默认为443"`
+	TailscaleAuthKey       string          `json:"TailscaleAuthKey" comment:"Tailscale身份验证密钥。另外，也可以将本地环境变量 TS_AUTHKEY 设置为身份验证密钥"`
 	ZipFileTextEncoding    string          `json:"ZipFileTextEncoding" comment:"非utf-8编码的ZIP文件，尝试用什么编码解析，默认GBK"`
 }
 

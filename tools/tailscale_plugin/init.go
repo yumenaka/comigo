@@ -9,21 +9,29 @@ import (
 	"tailscale.com/tsnet"
 )
 
-type InitConfig struct {
+type TailscaleConfig struct {
 	Hostname   string
 	Port       uint16
 	FunnelMode bool
 	ConfigDir  string
+	AuthKey    string
 }
 
-func InitTailscale(c InitConfig) error {
+func InitTailscale(c TailscaleConfig) error {
 	// 设置 Tailscale 服务器的主机名。此名称将用于 Tailscale 网络中的节点标识。
 	// 如果未设置，Tailscale 将使用机器的主机名。默认将会是二进制文件名。
 	tsServer = new(tsnet.Server)
 	// 用于Tailscale网络中的标识节点，不影响监听地址
 	tsServer.Hostname = c.Hostname
 	tsServer.Port = c.Port
-	tsServer.Dir = c.ConfigDir
+	// 如果提供了配置目录路径，则将其分配给 Tailscale 服务器的 Dir 字段。该目录用于存储 Tailscale 的状态和配置文件。
+	if c.ConfigDir != "" {
+		tsServer.Dir = c.ConfigDir
+	}
+	// 如果提供了身份验证密钥，则将其分配给 Tailscale 服务器的 AuthKey 字段。
+	if c.AuthKey != "" {
+		tsServer.AuthKey = c.AuthKey
+	}
 
 	// 监听器 ln 是一个 net.Listener 对象，它将处理来自 Tailscale网络的 TCP 连接。
 	// Tailscale的Listen方法要求host部分必须是空的或者是IP字面量，不能使用主机名

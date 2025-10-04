@@ -88,6 +88,17 @@ func waitSystemMessages() {
 			tools.WaitUntilServerReady("localhost", config.GetPort(), 15*time.Second)
 			// 在命令行显示QRCode
 			ShowQRCode()
+			// 重启网页服务器
+		case "start_tailscale":
+			logger.Infof("Config changed, starting tailscale...\n", msg)
+			routers.StartTailscale()
+		case "stop_tailscale":
+			logger.Infof("Config changed, stopping tailscale...\n", msg)
+			routers.StopTailscale()
+		case "restart_tailscale":
+			logger.Infof("Config changed, restart tailscale...\n", msg)
+			routers.StopTailscale()
+			routers.StartTailscale()
 		// 重新扫描指定目录
 		case "rescan_path_sample":
 			logger.Infof("收到重新扫描消息：%s", msg)

@@ -31,7 +31,9 @@ func ShowQRCodeTailscale(ctx context.Context) {
 		// 获取 Tailscale 状态
 		st, err := tailscale_plugin.GetTailscaleStatus(ctx)
 		if err != nil {
-			logger.Info("Failed to get Tailscale status:", err)
+			if config.GetCfg().Debug {
+				logger.Infof("Tailscale status not available yet: %v", err)
+			}
 			return
 		}
 		// 计数器+1

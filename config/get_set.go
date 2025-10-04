@@ -210,6 +210,10 @@ func GetTailscalePort() int {
 	return cfg.TailscalePort
 }
 
+func GetTailscaleAuthKey() string {
+	return cfg.TailscaleAuthKey
+}
+
 // GetUsername 获取用户名
 func GetUsername() string {
 	return cfg.Username

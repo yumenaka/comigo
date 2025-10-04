@@ -6,21 +6,19 @@ import (
 	"strconv"
 )
 
-
 // RemoteAccessConfig 远程连接配置项
 templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
-        if tsStatus != nil {
-    		@templ.JSONScript("tsStatus", tsStatus)
-    	}
+	if tsStatus != nil {
+		@templ.JSONScript("tsStatus", tsStatus)
+	}
 	<form
 		id="tailscale_config_form"
+		action="/api/submit-tailscale-config"
+		method="post"
 		class="flex flex-col justify-start w-full px-2 py-2 mx-2 my-4 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
-		hx-post="/api/tailscale-config"
-		hx-target="#tailscale_status_panel"
-		hx-swap="outerHTML"
-		onsubmit="return submitTailscaleConfig(event)"
-			x-data="{
+		x-data="{
 			    	enable_tailscale: true,
+			    	tailscale_auth_key: '',
                 	tailscale_hostname: '',
                 	tailscale_port: '',
                 	tailscale_funnel_mode: '',
@@ -31,8 +29,8 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
         			init() {
         			    // checked 表示该复选框是否被默认选中（当页面加载时）。它不表示这个复选框当前是否被选中：如果复选框的状态被改变，这个内容属性不反映这个变化。
                         this.enable_tailscale = this.$el.querySelector('#EnableTailscaleTemp').value === 'true'? true: false;
-                        console.log('EnableTailscale:', this.$el.querySelector('#EnableTailscaleTemp'));
-                        console.log('Initial enable_tailscale:', this.enable_tailscale);
+                        // console.log('Initial enable_tailscale:', this.enable_tailscale);
+                        this.tailscale_auth_key = this.$el.querySelector('#TailscaleAuthKey').value? this.$el.querySelector('#TailscaleAuthKey').value: '';
                         this.tailscale_hostname = this.$el.querySelector('#TailscaleHostname') .value? this.$el.querySelector('#TailscaleHostname') .value: 'comigo';
                         this.tailscale_port = this.$el.querySelector('#TailscalePort').value? this.$el.querySelector('#TailscalePort').value: '443';
                         this.tailscale_funnel_mode = this.$el.querySelector('#TailscaleFunnelMode').checked? this.$el.querySelector('#TailscaleFunnelMode').checked: false;
@@ -45,35 +43,7 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
                             this.isFormChanged = true; // 启用Tailscale 有变化，表单被修改过
                             console.log('tailscale_funnel_mode changed. :',  value);
                        });
-        			},
-
-        			canSave() {
-        			    // 没有修改表单，不能保存
-        				if (!this.isFormChanged) {
-        				    showToast(i18next.t('NoChangesDetected'), 'info');
-        					return false;
-        				}
-        				// 如果启用了 Tailscale，才需要验证相关字段
-        				if (this.enable_tailscale) {
-        				    // 验证主机名
-        				    if (this.tailscale_hostname.trim() === '') {
-        				        showToast('Hostname cannot be empty when Tailscale is enabled.', 'error');
-        				        return false;
-        				    }
-        				    // 验证端口
-        				    const port = parseInt(this.tailscale_port, 10);
-        				    if (isNaN(port) || port < 0 || port > 65535) {
-        				        showToast('Port must be a number between 0 and 65535.', 'error');
-        				        return false;
-        				    }
-        				    if (this.tailscale_funnel_mode && (this.tailscale_port != 443 && this.tailscale_port != 8443 && this.tailscale_port != 10000)){
-                                showToast('Port must be 443, 8443, or 10000 when Funnel Mode is enabled.', 'error');
-                                return false;
-                           }
-        				}
-        				return true;
-        			}
-        			}"
+        			}}"
 	>
 		<div x-text={ getTranslations("remote_access") } class="w-full text-center"></div>
 		<hr class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
@@ -84,14 +54,16 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 			<!-- 如果你想在复选框未被选中时提交一个默认值，你可以在表单中加入一个具有相同的 name 和 value 的 <input type="hidden"> 字段，它可以由 JavaScript 生成。 -->
 			<!-- https://developer.mozilla.org/zh-CN/docs/Web/HTML/Reference/Elements/input/checkbox -->
 			<!-- templ 使用变量或模板参数设置布尔属性，请在属性名称后使用问号来表示该属性是布尔值。 -->
-			<input type="hidden" id={ "EnableTailscaleTemp" }
-			if  state.ServerConfig.EnableTailscale {
-                value="true"
-            }  else{
-                value="false"
-            }
+			<input
+				type="hidden"
+				id={ "EnableTailscaleTemp" }
+				if  state.ServerConfig.EnableTailscale {
+					value="true"
+				} else {
+					value="false"
+				}
 			/>
-			<input type="hidden" name={ "EnableTailscale" } value="false"/>
+			<input type="hidden" name={ "EnableTailscale" } value="false" x-bind:disabled="enable_tailscale"/>
 			<label for={ "EnableTailscale" } class="relative h-8 cursor-pointer w-14">
 				<input
 					type="checkbox"
@@ -99,9 +71,9 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 					name={ "EnableTailscale" }
 					x-model="enable_tailscale"
 					if state.ServerConfig.EnableTailscale {
-					    checked
-                    }
-                    value="true"
+						checked
+					}
+					value="true"
 					class="sr-only peer"
 				/>
 				<span class="absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500"></span>
@@ -120,9 +92,9 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 				id={ "TailscaleHostname" }
 				name={ "TailscaleHostname" }
 				type="text"
-				placeholder={ getTranslations("TailscaleHostname") }
+				:placeholder={ getTranslations("TailscaleHostname") }
 				value={ state.ServerConfig.TailscaleHostname }
-				class="px-2.5  w-64 rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm"
+				class="px-2.5 w-64 rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm"
 			/>
 			<div
 				class="w-full py-1 text-xs text-gray-500"
@@ -158,13 +130,15 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 		>
 			<div x-text={ getTranslations("TailscaleFunnelMode") } class="w-64"></div>
 			<!-- 隐藏input -->
-			<input type="hidden" name={ "TailscaleFunnelMode" } value="false"/>
+			<input type="hidden" name={ "TailscaleFunnelMode" } value="false" x-bind:disabled="tailscale_funnel_mode"/>
 			<label for={ "TailscaleFunnelMode" } class="relative h-8 cursor-pointer w-14">
 				<input
 					type="checkbox"
 					id={ "TailscaleFunnelMode" }
 					name={ "TailscaleFunnelMode" }
+					x-model="tailscale_funnel_mode"
 					checked?={ state.ServerConfig.TailscaleFunnelMode }
+					value="true"
 					class="sr-only peer"
 				/>
 				<span class="absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500"></span>
@@ -172,178 +146,130 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 			</label>
 			<div x-text={ getTranslations("TailscaleFunnelMode_Description") } class="w-full py-1 text-xs text-gray-500"></div>
 		</div>
+		<!-- Tailscale预授权密钥 -->
+		<div
+			id={ "stringConfig_TailscaleAuthKey" }
+			x-show="enable_tailscale"
+			class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+		>
+			<label x-text={ getTranslations("TailscaleAuthKey") } for={ "TailscaleAuthKey" } class="w-64"></label>
+			<input
+				id={ "TailscaleAuthKey" }
+				name={ "TailscaleAuthKey" }
+				type="text"
+				:placeholder={ getTranslations("TailscaleAuthKey") }
+				value={ state.ServerConfig.TailscaleAuthKey }
+				class="px-2.5 w-64 rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm"
+			/>
+			<div
+				class="w-full py-1 text-xs text-gray-500"
+				x-text={ getTranslations("TailscaleAuthKeyDescription") }
+			></div>
+			<div class="bg-red-600"></div>
+		</div>
 		<!-- Tailscale状态面板 -->
-        @TailscaleStatusPanel(tsStatus)
+		@TailscaleStatusPanel(tsStatus)
 		<!-- 提交按钮 -->
 		<div class="flex flex-col justify-center items-center w-full my-2">
 			<button
 				id="tailscale-submit-btn"
-				type="submit"
+				type="button"
 				class="min-w-28 px-2 h-10 mx-2 my-0 text-center text-gray-700 transition border border-gray-500 rounded bg-sky-300 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
 				x-text={ getTranslations("submit") }
 			>Submit</button>
-			<!-- <div
-				class="w-full py-1 text-xs text-center text-gray-500"
-				id="tailscale-button-hint"
-				x-text="i18next.t('save')"
-			></div> -->
+			<script>
+				(function() {
+					const btn = document.getElementById('tailscale-submit-btn');
+					if (!btn) return;
+					btn.addEventListener('click', function(e) {
+						try {
+							if (e && typeof e.preventDefault === 'function') e.preventDefault();
+							const enable = (document.getElementById('EnableTailscale') && document.getElementById('EnableTailscale').checked) ? 'true' : 'false';
+							const auth_key = (document.getElementById('TailscaleAuthKey') && document.getElementById('TailscaleAuthKey').value) || '';
+							const host = (document.getElementById('TailscaleHostname') && document.getElementById('TailscaleHostname').value) || '';
+							const port = (document.getElementById('TailscalePort') && document.getElementById('TailscalePort').value) || '';
+							const funnel = (document.getElementById('TailscaleFunnelMode') && document.getElementById('TailscaleFunnelMode').checked) ? 'true' : 'false';
+
+							const params = new URLSearchParams();
+							params.set('EnableTailscale', enable);
+							params.set('TailscaleAuthKey', auth_key);
+							params.set('TailscaleHostname', host);
+							params.set('TailscalePort', port);
+							params.set('TailscaleFunnelMode', funnel);
+
+							fetch('/api/submit-tailscale-config', {
+								method: 'POST',
+								headers: {
+									'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+									'Accept': 'application/json'
+								},
+								body: params.toString()
+							}).then(res => {
+								if (!res.ok) throw new Error('HTTP ' + res.status);
+								return res.json().catch(() => ({}));
+							}).then(() => {
+								if (typeof UpdateTailscaleStatus === 'function') {
+									UpdateTailscaleStatus();
+								}
+							}).catch(err => {
+								console.error('submit tailscale config failed:', err);
+							});
+						} catch (err) {
+							console.error('submit tailscale config error:', err);
+						}
+					});
+				})();
+			</script>
 		</div>
-
 	</form>
-
-	<script>
-	// 全局变量存储表单状态
-	let isSubmitting = false;
-	const tailscaleStatus = JSON.parse(document.getElementById('tsStatus').textContent)
-
-	// 验证表单设置
-	function checkTailscaleSettings() {
-		const enableCheckbox = document.getElementById('EnableTailscale');
-		const hostnameInput = document.getElementById('TailscaleHostname');
-		const portInput = document.getElementById('TailscalePort');
-		const funnelCheckbox = document.getElementById('TailscaleFunnelMode');
-		
-		// 如果启用了 Tailscale，才需要验证相关字段
-		if (enableCheckbox && enableCheckbox.checked) {
-			// 验证主机名
-			if (!hostnameInput || hostnameInput.value.trim() === '') {
-				showToast('Hostname cannot be empty when Tailscale is enabled.', 'error');
-				return false;
-			}
-			
-			// 验证端口
-			const port = parseInt(portInput ? portInput.value : '', 10);
-			if (isNaN(port) || port < 0 || port > 65535) {
-				showToast('Port must be a number between 0 and 65535.', 'error');
-				return false;
-			}
-			
-			// 验证 Funnel 模式端口限制
-			if (funnelCheckbox && funnelCheckbox.checked && (port !== 443 && port !== 8443 && port !== 10000)) {
-				showToast('Port must be 443, 8443, or 10000 when Funnel Mode is enabled.', 'error');
-				return false;
-			}
-		}
-		
-		return true;
-	}
-	
-	// 提交 Tailscale 配置
-	async function submitTailscaleConfig(event) {
-		// 验证表单
-		if (!checkTailscaleSettings()) {
-			event.preventDefault();
-			return false;
-		}
-		
-		// 防止重复提交
-		if (isSubmitting) {
-			event.preventDefault();
-			return false;
-		}
-		
-		isSubmitting = true;
-		const submitBtn = event ? event.currentTarget : document.getElementById('tailscale-submit-btn');
-		
-		if (submitBtn) {
-			submitBtn.disabled = true;
-			submitBtn.textContent = 'Saving...';
-		}
-		
-		try {
-			// 获取表单数据
-			const enableCheckbox = document.getElementById('EnableTailscale');
-			const hostnameInput = document.getElementById('TailscaleHostname');
-			const portInput = document.getElementById('TailscalePort');
-			const funnelCheckbox = document.getElementById('TailscaleFunnelMode');
-			
-			const response = await fetch('/api/tailscale-config', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					enableTailscale: enableCheckbox ? enableCheckbox.checked : false,
-					tailscaleHostname: hostnameInput ? hostnameInput.value : '',
-					tailscalePort: portInput ? parseInt(portInput.value, 10) : 443,
-					tailscaleFunnelMode: funnelCheckbox ? funnelCheckbox.checked : false
-				})
-			});
-			
-			const result = await response.json();
-			
-			if (response.ok && result.success) {
-				showToast('Tailscale configuration updated successfully!', 'success');
-				// 刷新状态面板
-				refreshStatusPanel();
-			} else {
-				showToast(result.message || 'Failed to update configuration', 'error');
-			}
-		} catch (error) {
-			console.error('Error updating Tailscale config:', error);
-			showToast('Network error occurred', 'error');
-		} finally {
-			isSubmitting = false;
-			if (submitBtn) {
-				submitBtn.disabled = false;
-				submitBtn.textContent = getTranslations('submit');
-			}
-		}
-		
-		// 阻止默认表单提交，因为我们已经用 fetch 处理了
-		event.preventDefault();
-		return false;
-	}
-
-	</script>
-
 }
 
 // Tailscale状态面板
 templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
-
 	<div
 		id="tailscale_status_panel"
+		@click="UpdateTailscaleStatus"
+		x-init="UpdateTailscaleStatus()"
 		hx-trigger="load[document.visibilityState === 'visible',enable_tailscale] delay:1s"
 		class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-normal text-base border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 	>
 		<div x-text={ getTranslations("tailscale_status") } class="w-full text-center font-semibold"></div>
 		<table class="table table-auto w-full">
 			<tbody>
-				if tsStatus.AuthURL !="" {
-					<tr class="border-separate border-b-1 border-gray-500">
-						<td class="w-32 font-semibold align-top">验证</td>
-						<td>
-							请点击链接，验证Tailscale:
-							<a class="text-indigo-600 no-underline hover:underline" href={ tsStatus.AuthURL } target="_blank">{ tsStatus.AuthURL }</a>
-						</td>
-					</tr>
-				}
+				<tr id="ts-auth-row" class="border-separate border-b-1 border-gray-500" style="display:none">
+					<td class="w-32 font-semibold align-top">验证</td>
+					<td>
+						请点击链接，验证Tailscale:
+						<a id="ts-auth-link" class="text-indigo-600 no-underline hover:underline" href={ tsStatus.AuthURL } target="_blank">{ tsStatus.AuthURL }</a>
+					</td>
+				</tr>
 				<tr class="border-separate border-b-1 border-gray-400">
 					<td x-text={ getTranslations("service_status") } class="w-32 font-semibold">服务状态</td>
-					<td>{ tsStatus.BackendState }</td>
+					<td id="ts-state">{ tsStatus.BackendState }</td>
 				</tr>
 				<tr class="border-separate border-b-1 border-gray-400">
 					<td x-text={ getTranslations("client_count") } class="w-32 font-semibold">客户端数</td>
-					<td>{ strconv.Itoa(len(tsStatus.Clients)) }</td>
+					<td id="ts-clients">{ strconv.Itoa(len(tsStatus.Clients)) }</td>
 				</tr>
 				<tr class="border-separate border-b-1 border-gray-400">
 					<td x-text={ getTranslations("host_system") } class="w-32 font-semibold">宿主系统</td>
-					<td>{ tsStatus.OS }</td>
+					<td id="ts-os">{ tsStatus.OS }</td>
 				</tr>
 				<tr class="border-separate border-b-1 border-gray-400">
 					<td x-text={ getTranslations("connection_status") } class="w-32 font-semibold">连接状况</td>
 					<td>
-						if tsStatus.Online {
-							已连接
-						} else {
-							未连接
-						}
+						<span id="ts-online">
+							if tsStatus.Online {
+								已连接
+							} else {
+								未连接
+							}
+						</span>
 					</td>
 				</tr>
 				<tr class="border-separate border-b-1 border-gray-400">
 					<td x-text={ getTranslations("funnel_mode") } class="w-32 font-semibold">Funnel模式</td>
-					<td>
+					<td id="ts-funnel-mode">
 						if state.ServerConfig.TailscaleFunnelMode {
 							已启用
 						} else {
@@ -353,23 +279,123 @@ templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 				</tr>
 				<tr class="border-separate border-b-1 border-gray-400">
 					<td x-text={ getTranslations("ip_address") } class="w-32 font-semibold">IP地址</td>
-					<td>{ tsStatus.GetTailscaleIP() }</td>
+					<td id="ts-ip">{ tsStatus.GetTailscaleIP() }</td>
 				</tr>
 				<tr class="border-separate border-b-1 border-gray-400">
 					<td x-text={ getTranslations("service_version") } class="w-32 font-semibold">服务版本</td>
-					<td>{ tsStatus.Version }</td>
+					<td id="ts-version">{ tsStatus.Version }</td>
 				</tr>
-				<tr x-show={ tsStatus.FQDN != "" } class="border-separate border-b-1 border-gray-400">
+				<tr id="ts-fqdn-row" class="border-separate border-b-1 border-gray-400" style="display:none">
 					<td x-text={ getTranslations("read_link") } class="w-32 font-semibold">阅读链接</td>
 					<td>
 						if state.ServerConfig.TailscalePort == 443 || state.ServerConfig.TailscalePort == 8443 || state.ServerConfig.TailscalePort == 10000 {
-							<a class="text-indigo-600 no-underline hover:underline" href={ "https://" + tsStatus.FQDN } target="_blank">{ "https://"+tsStatus.FQDN }</a>
+							<a id="ts-fqdn-link" class="text-indigo-600 no-underline hover:underline" href={ "https://" + tsStatus.FQDN } target="_blank">{ "https://"+tsStatus.FQDN }</a>
 						} else {
-							<a class="text-indigo-600 no-underline hover:underline" href={ "http://" + tsStatus.FQDN } target="_blank">{ "https://"+tsStatus.FQDN }</a>
+							<a id="ts-fqdn-link" class="text-indigo-600 no-underline hover:underline" href={ "http://" + tsStatus.FQDN } target="_blank">{ "https://"+tsStatus.FQDN }</a>
 						}
 					</td>
 				</tr>
 			</tbody>
 		</table>
 	</div>
+	<script>
+	       // 更新Tailscale状态面板
+	       function UpdateTailscaleStatus(e) {
+	           try {
+	               if (e && typeof e.preventDefault === 'function') {
+	                   e.preventDefault();
+	               }
+	               const panel = document.getElementById('tailscale_status_panel');
+	               if (!panel) {
+	                   return;
+	               }
+	               // 设置文本内容的辅助函数
+	               const setText = (selector, text) => {
+	                   const el = panel.querySelector(selector);
+	                   if (el) {
+	                       el.textContent = text == null ? '' : String(text);
+	                   }
+	               };
+	               const url = '/api/tailscale_status';
+	               fetch(url, { headers: { 'Accept': 'application/json' } })
+	                   .then(res => {
+	                       if (!res.ok) throw new Error('HTTP ' + res.status);
+	                       return res.json();
+	                   })
+	                   .then(data => {
+	                       // AuthURL row
+	                       const authRow = panel.querySelector('#ts-auth-row');
+	                       if (authRow) {
+	                           const link = authRow.querySelector('#ts-auth-link');
+	                           if (data.AuthURL) {
+	                               authRow.style.display = '';
+	                               if (link) {
+	                                   link.href = data.AuthURL;
+	                                   link.textContent = data.AuthURL;
+	                               }
+	                           } else {
+	                               authRow.style.display = 'none';
+	                               if (link) {
+	                                   link.href = '';
+	                                   link.textContent = '';
+	                               }
+	                           }
+	                       }
+	                       // Basic fields
+	                       setText('#ts-state', data.BackendState || '');
+	                       let clientsCount = 0;
+	                       if (Array.isArray(data.Clients)) {
+	                           clientsCount = data.Clients.length;
+	                       } else if (data.Clients && typeof data.Clients === 'object') {
+	                           try { clientsCount = Object.keys(data.Clients).length; } catch (_) { clientsCount = 0; }
+	                       }
+	                       setText('#ts-clients', clientsCount);
+	                       setText('#ts-os', data.OS || '');
+	                       setText('#ts-online', data.Online ? '已连接' : '未连接');
+	                       // IP: show first IPv4 if possible, else first entry
+	                       let ipText = '';
+	                       if (Array.isArray(data.TailscaleIPs) && data.TailscaleIPs.length > 0) {
+	                           const ipv4 = data.TailscaleIPs.find(x => typeof x === 'string' && x.indexOf(':') === -1);
+	                           ipText = ipv4 || data.TailscaleIPs[0];
+	                       }
+	                       setText('#ts-ip', ipText);
+	                       setText('#ts-version', data.Version || '');
+	                       // FQDN row/link
+	                       const fqdnRow = panel.querySelector('#ts-fqdn-row');
+	                       const fqdnLink = panel.querySelector('#ts-fqdn-link');
+	                       if (data.FQDN) {
+	                           if (fqdnRow) fqdnRow.style.display = '';
+	                           if (fqdnLink) {
+	                               const portInput = document.getElementById('TailscalePort');
+	                               const port = portInput ? parseInt(portInput.value, 10) : 0;
+	                               const isHttps = (port === 443 || port === 8443 || port === 10000);
+	                               const proto = isHttps ? 'https' : 'http';
+	                               const href = proto + '://' + data.FQDN;
+	                               fqdnLink.href = href;
+	                               fqdnLink.textContent = href;
+	                           }
+	                       } else {
+	                           if (fqdnRow) fqdnRow.style.display = 'none';
+	                           if (fqdnLink) { fqdnLink.href = ''; fqdnLink.textContent = ''; }
+	                       }
+	                       // ts-funnel-mode
+	                       const funnelModeEl = panel.querySelector('#ts-funnel-mode');
+	                       if (funnelModeEl) {
+	                           funnelModeEl.textContent = (document.getElementById('TailscaleFunnelMode').checked) ? i18next.t('enable') : i18next.t('disable') ;
+                            }
+	                       // Update embedded JSON for other components if present
+	                       const scriptEl = document.getElementById('tsStatus');
+	                       if (scriptEl) {
+	                           try { scriptEl.textContent = JSON.stringify(data); } catch (_) {}
+	                       }
+	                   })
+	                   .catch(err => {
+	                       // Optionally report in console; keep UI silent
+	                       console.error('UpdateTailscaleStatus failed:', err);
+	                   });
+	           } catch (err) {
+	               console.error('UpdateTailscaleStatus error:', err);
+	           }
+	       }
+    </script>
 }

@@ -355,7 +355,7 @@
   "TailscalePort_Description": "Tailscale listening port. Default is 443, TLS is enabled automatically.",
   "TailscaleFunnelMode": "Enable Tailscale Funnel Mode",
   "TailscaleFunnelMode_Description": "Enable Tailscale Funnel mode (public access). You need to enable the Funnel feature in the Tailscale admin console. For non-public use, it is recommended to set password protection. Only ports 443, 8443, and 10000 are allowed, and TLS is enforced.",
-  "config_locked": "Configuration Locked",
+  "ConfigLocked": "Configuration Locked",
   "config_locked_description": "Currently in display mode, the configuration is locked.",
   "tailscale_auth_url_is": "To start Tailscale service, restart with TS_AUTHKEY set, or go to: ",
   "tailscale_server_start": "Tailscale service has started.",
@@ -389,5 +389,10 @@
   "disabled": "Disabled",
   "ip_address": "IP Address",
   "service_version": "Service Version",
-  "read_link": "Read Link"
+  "read_link": "Read Link",
+  "submiting": "Submitting...",
+  "enable": "Enable",
+  "disable": "Disable",
+  "TailscaleAuthKey": "Tailscale Auto Auth Key",
+  "TailscaleAuthKeyDescription": "Tailscale automatic authentication key (TS_AUTHKEY), used for authentication in environments without a browser."
 }
