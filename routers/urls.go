@@ -141,10 +141,10 @@ func bindProtectedAPI(group *echo.Group) {
 	group.POST("/update-number-config", settings.UpdateNumberConfigHandler)
 	// 更改Comigo登录设置
 	group.POST("/update-login-settings", settings.UpdateLoginSettingsHandler)
-	// 更改 Tailscale 设置
-	group.POST("/update-tailscale-config", settings.UpdateTailscaleSettingsHandler)
+	//// 更改 Tailscale 设置(HTMX)
+	//group.POST("/update-tailscale-config", settings.UpdateTailscaleSettingsHandler)
 	// Tailscale配置更新JSON API
-	group.POST("/tailscale-config", settings.UpdateTailscaleConfigJSONHandler)
+	group.POST("/submit-tailscale-config", settings.UpdateTailscaleConfigHandler)
 
 	// 字符串数组配置的增删改
 	group.POST("/delete-array-config", settings.DeleteArrayConfigHandler)

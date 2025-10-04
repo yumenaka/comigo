@@ -30,11 +30,11 @@ import (
 // Windows： %AppData% （like： C:\Users\[ユーザー名]\AppData）
 
 var (
-	tsServer    *tsnet.Server
-	netListener net.Listener
-	localClient *local.Client
-	httpServer  *http.Server
-	nowStatus   *TailscaleStatus
+	tsServer     *tsnet.Server
+	netListener  net.Listener
+	localClient  *local.Client
+	tsHttpServer *http.Server
+	nowStatus    *TailscaleStatus
 )
 
 func init() {
@@ -56,7 +56,7 @@ func withTailscaleContext(h http.Handler) http.Handler {
 }
 
 // RunTailscale 启动Tailscale网络服务器，统一使用echo处理请求
-func RunTailscale(e *echo.Echo, c InitConfig) error {
+func RunTailscale(e *echo.Echo, c TailscaleConfig) error {
 	// 初始化Tailscale服务器
 	if err := InitTailscale(c); err != nil {
 		return fmt.Errorf("failed to initialize Tailscale server: %w", err)
@@ -66,14 +66,14 @@ func RunTailscale(e *echo.Echo, c InitConfig) error {
 	e.Use(TailscaleAuthMiddleware())
 
 	// 创建HTTP服务器，使用echo.Echo作为处理器
-	httpServer = &http.Server{
+	tsHttpServer = &http.Server{
 		Addr:    c.Hostname + ":" + fmt.Sprint(c.Port),
 		Handler: withTailscaleContext(e), // echo.Echo (多包一层)
 	}
 	// 使用Tailscale网络监听器启动服务器
 	logger.Infof("Starting Tailscale HTTP server on %s:%d", c.Hostname, c.Port)
 	go func() {
-		if err := httpServer.Serve(netListener); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		if err := tsHttpServer.Serve(netListener); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			if !strings.Contains(err.Error(), "use of closed network connection") {
 				logger.Errorf("Tailscale HTTP server error: %v", err)
 			}
@@ -84,14 +84,11 @@ func RunTailscale(e *echo.Echo, c InitConfig) error {
 
 // StopTailscale 停止Tailscale服务器
 func StopTailscale() error {
-	if httpServer != nil {
-		logger.Infof("Stopping Tailscale HTTP server...")
-		if err := httpServer.Close(); err != nil {
-			logger.Errorf("Error closing HTTP server: %v", err)
-			return err
-		}
-		httpServer = nil
+	if tsServer == nil && tsHttpServer == nil && netListener == nil && localClient == nil {
+		return nil
 	}
+	logger.Infof("Tailscale server stopped successfully.")
+	// 关闭网络监听器
 	if netListener != nil {
 		if err := netListener.Close(); err != nil {
 			logger.Errorf("Error closing network listener: %v", err)
@@ -99,10 +96,19 @@ func StopTailscale() error {
 		}
 		netListener = nil
 	}
+	// 可选：关闭 HTTP 服务器（忽略错误），并置空引用
+	// if tsHttpServer != nil { _ = tsHttpServer.Close() }
+	tsHttpServer = nil
+	// 关闭 Tailscale 服务器
 	if tsServer != nil {
-		tsServer.Close()
+		if err := tsServer.Close(); err != nil {
+			logger.Errorf("Error closing Tailscale server: %v", err)
+			return err
+		}
 		tsServer = nil
 	}
+	// 清理本地客户端，避免后续调用误判为可用
+	localClient = nil
 	return nil
 }
 

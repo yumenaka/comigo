@@ -11,7 +11,7 @@ import (
 func GetTailscaleStatus(c echo.Context) error {
 	tailscaleStatus, err := tailscale_plugin.GetTailscaleStatus(c.Request().Context())
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 	return c.JSON(http.StatusOK, tailscaleStatus)
 }

@@ -2,7 +2,6 @@ package tailscale_plugin
 
 import (
 	"context"
-	"errors"
 	"net/netip"
 	"runtime"
 	"strings"
@@ -75,7 +74,15 @@ func (t *TailscaleStatus) CheckClientInfoExists(loginUserName, nodeComputedName 
 // GetTailscaleStatus 获取Tailscale服务状态 https://github.com/tailscale/golink/blob/b54cbbbb609ce8425193e7171a35af023cb5066d/golink.go#L787
 func GetTailscaleStatus(ctx context.Context) (*TailscaleStatus, error) {
 	if localClient == nil {
-		return nil, errors.New("localClient Not init")
+		// Tailscale 未启用或尚未初始化时，返回离线状态而不是错误，避免上层页面 500
+		nowStatus.AuthURL = ""
+		nowStatus.BackendState = "Stopped"
+		nowStatus.TailscaleIPs = nil
+		nowStatus.Version = ""
+		nowStatus.OS = runtime.GOOS
+		nowStatus.FQDN = ""
+		nowStatus.Online = false
+		return nowStatus, nil
 	}
 	// *ipnstate.Status
 	st, err := localClient.Status(ctx)

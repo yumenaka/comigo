@@ -27,8 +27,6 @@ func StartEcho(e *echo.Echo) {
 		Addr:    webHost + strconv.Itoa(config.GetPort()),
 		Handler: e, // echo.Echo 实现了 http.Handler 接口
 	}
-	// 启动或停止 Tailscale 服务（如启用）
-	SetTailscale(e)
 	// 记录日志并启动服务器
 	logger.Infof("Starting Server...", "on port", config.GetPort(), "...")
 	if enableTls {
