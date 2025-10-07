@@ -2403,6 +2403,10 @@
     margin-left: calc(var(--spacing) * 4);
   }
 
+  .ml-5 {
+    margin-left: calc(var(--spacing) * 5);
+  }
+
   .ml-auto {
     margin-left: auto;
   }
@@ -2705,6 +2709,10 @@
     max-width: calc(var(--spacing) * 64);
   }
 
+  .max-w-\[90\%\] {
+    max-width: 90%;
+  }
+
   .max-w-fit {
     max-width: fit-content;
   }
@@ -2874,6 +2882,10 @@
     list-style-position: inside;
   }
 
+  .list-decimal {
+    list-style-type: decimal;
+  }
+
   .list-disc {
     list-style-type: disc;
   }
@@ -2946,6 +2958,12 @@
     --tw-space-y-reverse: 0;
     margin-block-start: calc(-1px * var(--tw-space-y-reverse));
     margin-block-end: calc(-1px * calc(1 - var(--tw-space-y-reverse)));
+  }
+
+  :where(.space-y-1 > :not(:last-child)) {
+    --tw-space-y-reverse: 0;
+    margin-block-start: calc(calc(var(--spacing) * 1) * var(--tw-space-y-reverse));
+    margin-block-end: calc(calc(var(--spacing) * 1) * calc(1 - var(--tw-space-y-reverse)));
   }
 
   :where(.space-y-2 > :not(:last-child)) {
@@ -3350,6 +3368,16 @@
     background-color: var(--color-gray-50);
   }
 
+  .bg-black\/20 {
+    background-color: #0003;
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    .bg-black\/20 {
+      background-color: color-mix(in oklab, var(--color-black) 20%, transparent);
+    }
+  }
+
   .bg-black\/50 {
     background-color: #00000080;
   }
@@ -3357,6 +3385,16 @@
   @supports (color: color-mix(in lab, red, red)) {
     .bg-black\/50 {
       background-color: color-mix(in oklab, var(--color-black) 50%, transparent);
+    }
+  }
+
+  .bg-black\/60 {
+    background-color: #0009;
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    .bg-black\/60 {
+      background-color: color-mix(in oklab, var(--color-black) 60%, transparent);
     }
   }
 
@@ -3996,6 +4034,10 @@
 
   .no-underline {
     text-decoration-line: none;
+  }
+
+  .underline {
+    text-decoration-line: underline;
   }
 
   .placeholder-gray-500::placeholder {

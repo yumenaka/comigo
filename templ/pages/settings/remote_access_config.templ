@@ -114,37 +114,13 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 				id={ "TailscalePort" }
 				name={ "TailscalePort" }
 				type="number"
-				placeholder={ getTranslations("TailscalePort") }
+				:placeholder={ getTranslations("TailscalePort") }
 				value={ strconv.Itoa(state.ServerConfig.TailscalePort) }
 				max={ strconv.Itoa(65535) }
 				min={ strconv.Itoa(0) }
 			/>
 			<div class="w-full py-1 text-xs text-gray-500" x-text={ getTranslations("TailscalePort_Description") }></div>
 			<div class="bg-red-600"></div>
-		</div>
-		<!-- Tailscale 启用Funnel模式 -->
-		<div
-			id={ "boolConfig_TailscaleFunnelMode" }
-			class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
-			x-show="enable_tailscale"
-		>
-			<div x-text={ getTranslations("TailscaleFunnelMode") } class="w-64"></div>
-			<!-- 隐藏input -->
-			<input type="hidden" name={ "TailscaleFunnelMode" } value="false" x-bind:disabled="tailscale_funnel_mode"/>
-			<label for={ "TailscaleFunnelMode" } class="relative h-8 cursor-pointer w-14">
-				<input
-					type="checkbox"
-					id={ "TailscaleFunnelMode" }
-					name={ "TailscaleFunnelMode" }
-					x-model="tailscale_funnel_mode"
-					checked?={ state.ServerConfig.TailscaleFunnelMode }
-					value="true"
-					class="sr-only peer"
-				/>
-				<span class="absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500"></span>
-				<span class="absolute inset-y-0 w-6 h-6 m-1 transition-all bg-white rounded-full start-0 peer-checked:start-6"></span>
-			</label>
-			<div x-text={ getTranslations("TailscaleFunnelMode_Description") } class="w-full py-1 text-xs text-gray-500"></div>
 		</div>
 		<!-- Tailscale预授权密钥 -->
 		<div
@@ -166,6 +142,69 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 				x-text={ getTranslations("TailscaleAuthKeyDescription") }
 			></div>
 			<div class="bg-red-600"></div>
+		</div>
+		<!-- Funnel模式（公网访问） -->
+		<div
+			id={ "boolConfig_TailscaleFunnelMode" }
+			class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400 relative"
+			x-show="enable_tailscale"
+		>
+			<!-- Funnel ACL 权限未设置时的遮罩层 -->
+			<div
+				id="funnel-acl-overlay"
+				class="absolute inset-0 z-10 flex items-center justify-center rounded-md bg-black/20 text-white text-sm"
+				if tsStatus != nil {
+					if tsStatus.FunnelCapability {
+						style="display:none;"
+					} else {
+						style=""
+					}
+				} else {
+					style=""
+				}
+			>
+				<div class="max-w-[90%] bg-black/60 p-4 rounded-md text-left leading-relaxed">
+					<p x-text={ getTranslations("funnel_not_set_hint") }>Funnel 功能未设置。需要：</p>
+					<ol class="list-decimal ml-5 space-y-1">
+						<li><span x-text={ getTranslations("funnel_require_dns_1") }>在Tailscale控制台DNS面板</span>（<a href="https://login.tailscale.com/admin/dns" target="_blank" class="underline">https://login.tailscale.com/admin/dns</a>），<span x-text={ getTranslations("funnel_require_dns_2") }>开启MagicDNS功能与HTTPS功能</span></li>
+						<li><span x-text={ getTranslations("funnel_require_acl_1") }>在Tailscale控制台ACL面板</span>（<a href="https://login.tailscale.com/admin/acls/file" target="_blank" class="underline">https://login.tailscale.com/admin/acls/file</a>）<span x-text={ getTranslations("funnel_require_acl_2") }>在Tailscale控制台ACL面板</span><a id="download-funnel-acl-example" href="#" download="tailscale_acl.json" class="underline" x-text={ getTranslations("funnel_require_acl_3") }>点此下载示例JSON文件</a></li>
+					</ol>
+				</div>
+				<script>
+					(function() {
+						try {
+							var link = document.getElementById('download-funnel-acl-example');
+							if (!link) return;
+							var jsonText = '{\n  "groups": {\n    "group:funnel":  ["you-email@sample.com"]\n  },\n  "nodeAttrs": [\n    {\n      "target": ["group:funnel"],\n      "attr":   ["funnel"]\n    }\n  ],\n // Other ACL settings\n}\n';
+							var blob = new Blob([jsonText], { type: 'application/json;charset=utf-8' });
+							var url = URL.createObjectURL(blob);
+							link.href = url;
+							link.addEventListener('click', function() {
+								setTimeout(function() { URL.revokeObjectURL(url); }, 4000);
+							});
+						} catch (_) {}
+					})();
+				</script>
+			</div>
+			<div x-text={ getTranslations("TailscaleFunnelMode") } class="w-64"></div>
+			<!-- 隐藏input -->
+			<input type="hidden" name={ "TailscaleFunnelMode" } value="false" x-bind:disabled="tailscale_funnel_mode"/>
+			<label for={ "TailscaleFunnelMode" } class="relative h-8 cursor-pointer w-14">
+				<input
+					type="checkbox"
+					id={ "TailscaleFunnelMode" }
+					name={ "TailscaleFunnelMode" }
+					x-model="tailscale_funnel_mode"
+					if state.ServerConfig.TailscaleFunnelMode {
+						checked
+					}
+					value="true"
+					class="sr-only peer"
+				/>
+				<span class="absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500"></span>
+				<span class="absolute inset-y-0 w-6 h-6 m-1 transition-all bg-white rounded-full start-0 peer-checked:start-6"></span>
+			</label>
+			<div x-text={ getTranslations("TailscaleFunnelMode_Description") } class="w-full py-1 text-xs text-gray-500"></div>
 		</div>
 		<!-- Tailscale状态面板 -->
 		@TailscaleStatusPanel(tsStatus)
@@ -207,11 +246,19 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 							}).then(res => {
 								if (!res.ok) throw new Error('HTTP ' + res.status);
 								return res.json().catch(() => ({}));
-							}).then(() => {
-								if (typeof UpdateTailscaleStatus === 'function') {
-									UpdateTailscaleStatus();
-								}
-							}).catch(err => {
+						}).then(() => {
+						    // 提交后，定时刷新Tailscale状态面板，最多刷新10次
+							if (typeof UpdateTailscaleStatus === 'function') {
+								let __tsRefreshCount = 0;
+								const __tsRefreshTimer = setInterval(() => {
+									try { UpdateTailscaleStatus(); } catch (_) {}
+									__tsRefreshCount++;
+									if (__tsRefreshCount >= 10) {
+										clearInterval(__tsRefreshTimer);
+									}
+								}, 1500);
+							}
+						}).catch(err => {
 								console.error('submit tailscale config failed:', err);
 							});
 						} catch (err) {
@@ -238,7 +285,7 @@ templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 			<tbody>
 				<tr id="ts-auth-row" class="border-separate border-b-1 border-gray-500" style="display:none">
 					<td class="w-32 font-semibold align-top">验证</td>
-					<td>
+					<td x-text={ getTranslations("verify_tailscale") } class="align-top">
 						请点击链接，验证Tailscale:
 						<a id="ts-auth-link" class="text-indigo-600 no-underline hover:underline" href={ tsStatus.AuthURL } target="_blank">{ tsStatus.AuthURL }</a>
 					</td>
@@ -258,24 +305,31 @@ templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 				<tr class="border-separate border-b-1 border-gray-400">
 					<td x-text={ getTranslations("connection_status") } class="w-32 font-semibold">连接状况</td>
 					<td>
-						<span id="ts-online">
-							if tsStatus.Online {
-								已连接
-							} else {
-								未连接
-							}
-						</span>
+						if tsStatus.Online {
+							<span id="ts-online" x-text={ getTranslations("connected") }></span>
+						}
+						if !tsStatus.Online {
+							<span id="ts-online" x-text={ getTranslations("not_connected") }></span>
+						}
 					</td>
+				</tr>
+				<tr id="ts-funnel-capability-row" class="border-separate border-b-1 border-gray-400" style="display:none">
+					<td x-text={ getTranslations("funnel_setup") } class="w-32 font-semibold">Funnel ACL</td>
+					if tsStatus.FunnelCapability {
+						<td id="ts-funnel-capability" x-text={ getTranslations("funnel_setup_done") }></td>
+					}
+					if tsStatus.FunnelCapability == false {
+						<td id="ts-funnel-capability" x-text={ getTranslations("funnel_setup_not_done") }></td>
+					}
 				</tr>
 				<tr class="border-separate border-b-1 border-gray-400">
 					<td x-text={ getTranslations("funnel_mode") } class="w-32 font-semibold">Funnel模式</td>
-					<td id="ts-funnel-mode">
-						if state.ServerConfig.TailscaleFunnelMode {
-							已启用
-						} else {
-							未启用
-						}
-					</td>
+					if state.ServerConfig.TailscaleFunnelMode {
+						<td id="ts-funnel-mode" x-text={ getTranslations("enable") }></td>
+					}
+					if !state.ServerConfig.TailscaleFunnelMode {
+						<td id="ts-funnel-mode" x-text={ getTranslations("disable") }></td>
+					}
 				</tr>
 				<tr class="border-separate border-b-1 border-gray-400">
 					<td x-text={ getTranslations("ip_address") } class="w-32 font-semibold">IP地址</td>
@@ -288,11 +342,7 @@ templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 				<tr id="ts-fqdn-row" class="border-separate border-b-1 border-gray-400" style="display:none">
 					<td x-text={ getTranslations("read_link") } class="w-32 font-semibold">阅读链接</td>
 					<td>
-						if state.ServerConfig.TailscalePort == 443 || state.ServerConfig.TailscalePort == 8443 || state.ServerConfig.TailscalePort == 10000 {
-							<a id="ts-fqdn-link" class="text-indigo-600 no-underline hover:underline" href={ "https://" + tsStatus.FQDN } target="_blank">{ "https://"+tsStatus.FQDN }</a>
-						} else {
-							<a id="ts-fqdn-link" class="text-indigo-600 no-underline hover:underline" href={ "http://" + tsStatus.FQDN } target="_blank">{ "https://"+tsStatus.FQDN }</a>
-						}
+						<a id="ts-fqdn-link" class="text-indigo-600 no-underline hover:underline" href={ tsStatus.FQDN } target="_blank">{ tsStatus.FQDN }</a>
 					</td>
 				</tr>
 			</tbody>
@@ -360,6 +410,12 @@ templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 	                       }
 	                       setText('#ts-ip', ipText);
 	                       setText('#ts-version', data.Version || '');
+
+	                       // ts-funnel-mode
+	                       const funnelModeEl = panel.querySelector('#ts-funnel-mode');
+	                       if (funnelModeEl) {
+	                           funnelModeEl.textContent = (document.getElementById('TailscaleFunnelMode').checked) ? i18next.t('enable') : i18next.t('disable') ;
+                            }
 	                       // FQDN row/link
 	                       const fqdnRow = panel.querySelector('#ts-fqdn-row');
 	                       const fqdnLink = panel.querySelector('#ts-fqdn-link');
@@ -368,9 +424,13 @@ templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 	                           if (fqdnLink) {
 	                               const portInput = document.getElementById('TailscalePort');
 	                               const port = portInput ? parseInt(portInput.value, 10) : 0;
-	                               const isHttps = (port === 443 || port === 8443 || port === 10000);
-	                               const proto = isHttps ? 'https' : 'http';
-	                               const href = proto + '://' + data.FQDN;
+	                               const isHttps = (port === 443 || document.getElementById('TailscaleFunnelMode').checked);
+	                               const proto = isHttps ? 'https://' : 'http://';
+	                               let href = proto  + data.FQDN;
+	                               if (port !== 443 && port !== 80) {
+                                       href += ':' + port;
+                                   }
+                                   console.log('Setting FQDN link to:', href);
 	                               fqdnLink.href = href;
 	                               fqdnLink.textContent = href;
 	                           }
@@ -378,11 +438,37 @@ templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 	                           if (fqdnRow) fqdnRow.style.display = 'none';
 	                           if (fqdnLink) { fqdnLink.href = ''; fqdnLink.textContent = ''; }
 	                       }
-	                       // ts-funnel-mode
-	                       const funnelModeEl = panel.querySelector('#ts-funnel-mode');
-	                       if (funnelModeEl) {
-	                           funnelModeEl.textContent = (document.getElementById('TailscaleFunnelMode').checked) ? i18next.t('enable') : i18next.t('disable') ;
-                            }
+	                       // FunnelCapability
+	                       const funnelRow = panel.querySelector('#ts-funnel-capability-row');
+                           if (funnelRow) {
+	                           if (data.FunnelCapability) {
+	                               funnelRow.style.display = '';
+	                               const funnelCapEl = panel.querySelector('#ts-funnel-capability');
+	                               if (funnelCapEl) {
+	                                   if (data.FunnelCapability === true) {
+	                                       funnelCapEl.textContent = i18next.t('funnel_setup_done');
+	                                   } else {
+	                                       funnelCapEl.textContent = i18next.t('funnel_setup_not_done');
+	                                   }
+	                               }
+	                           } else {
+	                               funnelRow.style.display = 'none';
+	                               const funnelCapEl = panel.querySelector('#ts-funnel-capability');
+	                               if (funnelCapEl) {
+	                                   funnelCapEl.textContent = '';
+	                               }
+	                           }
+
+	                           // 控制 Funnel 模块遮罩层显示与否
+	                           const overlay = document.getElementById('funnel-acl-overlay');
+	                           if (overlay) {
+	                               if (data.FunnelCapability === true) {
+	                                   overlay.style.display = 'none';
+	                               } else {
+	                                   overlay.style.display = '';
+	                               }
+	                           }
+                           }
 	                       // Update embedded JSON for other components if present
 	                       const scriptEl = document.getElementById('tsStatus');
 	                       if (scriptEl) {

@@ -46,7 +46,8 @@ func InitTailscale(c TailscaleConfig) error {
 		}
 		netListener, err = tsServer.ListenFunnel("tcp", listenAddr)
 		if err != nil {
-			logger.Errorf("Failed to create Tailscale funnel listener on %s: %v", ":443")
+			logger.Errorf("Failed to create Tailscale funnel listener on %s: %v", listenAddr, err)
+			return err
 		}
 	}
 	if !c.FunnelMode {
@@ -63,7 +64,9 @@ func InitTailscale(c TailscaleConfig) error {
 	localClient, err = tsServer.LocalClient()
 	if err != nil {
 		logger.Errorf("Failed to create Tailscale local client: %v", err)
-		netListener.Close()
+		if netListener != nil {
+			_ = netListener.Close()
+		}
 		return err
 	}
 	// // 自动设置监听器 ln 的 TLS 证书

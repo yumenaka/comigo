@@ -7,6 +7,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"tailscale.com/tailcfg"
 )
 
 type TailsClientInfo struct {
@@ -18,15 +20,16 @@ type TailsClientInfo struct {
 
 // TailscaleStatus 保存 Tailscale 服务的状态信息
 type TailscaleStatus struct {
-	AuthURL      string            // 客户端授权用URL。如果节点已授权，则为空字符串。另外手动移除节点，不会重新生成新的AuthURL，直到下次重新运行tailscaled。
-	BackendState string            // BackendState: "NoState", "NeedsLogin", "NeedsMachineAuth", "Stopped", "Starting", "Running".	// 常见状态为 "Running"  "NeedsLogin"
-	Clients      []TailsClientInfo // 曾与此节点连接的Tailscale客户端信息列表。
-	OS           string            // "macOS" "windows" "linux" “android”，可能为空""（funnel-ingress-node）
-	Online       bool              // 在线状态
-	FQDN         string            // FQDN（Fully Qualified Domain Name 完全限定域名） = 子域名 + Domain → www.example.co.jp
-	TailscaleIPs []netip.Addr      // 分配给此节点的 Tailscale IP(s)，第一个是 IPv4地址，第二个是 IPv6 地址
-	Version      string            // 当前Tailscale版本
-	mu           sync.Mutex        // Mutex lock
+	AuthURL          string            // 客户端授权用URL。如果节点已授权，则为空字符串。另外手动移除节点，不会重新生成新的AuthURL，直到下次重新运行tailscaled。
+	BackendState     string            // BackendState: "NoState", "NeedsLogin", "NeedsMachineAuth", "Stopped", "Starting", "Running".	// 常见状态为 "Running"  "NeedsLogin"
+	Clients          []TailsClientInfo // 曾与此节点连接的Tailscale客户端信息列表。
+	OS               string            // "macOS" "windows" "linux" “android”，可能为空""（funnel-ingress-node）
+	Online           bool              // 在线状态
+	FQDN             string            // FQDN（Fully Qualified Domain Name 完全限定域名） = 子域名 + Domain → www.example.co.jp
+	TailscaleIPs     []netip.Addr      // 分配给此节点的 Tailscale IP(s)，第一个是 IPv4地址，第二个是 IPv6 地址
+	Version          string            // 当前Tailscale版本
+	FunnelCapability bool              // 是否支持 Funnel 功能
+	mu               sync.Mutex        // Mutex lock
 }
 
 func (t *TailscaleStatus) GetTailscaleIP() string {
@@ -82,6 +85,7 @@ func GetTailscaleStatus(ctx context.Context) (*TailscaleStatus, error) {
 		nowStatus.OS = runtime.GOOS
 		nowStatus.FQDN = ""
 		nowStatus.Online = false
+		nowStatus.FunnelCapability = false
 		return nowStatus, nil
 	}
 	// *ipnstate.Status
@@ -102,6 +106,12 @@ func GetTailscaleStatus(ctx context.Context) (*TailscaleStatus, error) {
 		nowStatus.OS = st.Self.OS
 		nowStatus.FQDN = fullyQualifiedDomainName
 		nowStatus.Online = st.Self.Online
+		nowStatus.FunnelCapability = false
+		// 检查是否支持 Funnel 功能
+		if st.Self.CapMap != nil {
+			// 检查 st.Self.CapMap[tailcfg.NodeAttrFunnel] 是否存在
+			nowStatus.FunnelCapability = st.Self.CapMap.Contains(tailcfg.NodeAttrFunnel)
+		}
 	}
 	if st.Self == nil {
 		nowStatus.OS = runtime.GOOS

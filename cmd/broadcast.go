@@ -84,6 +84,7 @@ func waitSystemMessages() {
 		case "restart_web_server":
 			logger.Infof("Config changed, restarting web server...\n", msg)
 			routers.RestartWebServer()
+			routers.StartTailscale()
 			// 阻塞等待端口就绪，确保服务可用
 			tools.WaitUntilServerReady("localhost", config.GetPort(), 15*time.Second)
 			// 在命令行显示QRCode

@@ -73,6 +73,10 @@ func RunTailscale(e *echo.Echo, c TailscaleConfig) error {
 	// 使用Tailscale网络监听器启动服务器
 	logger.Infof("Starting Tailscale HTTP server on %s:%d", c.Hostname, c.Port)
 	go func() {
+		if netListener == nil {
+			logger.Errorf("Tailscale netListener is nil; server will not start")
+			return
+		}
 		if err := tsHttpServer.Serve(netListener); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			if !strings.Contains(err.Error(), "use of closed network connection") {
 				logger.Errorf("Tailscale HTTP server error: %v", err)
