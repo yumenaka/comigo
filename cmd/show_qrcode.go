@@ -44,5 +44,6 @@ func ShowQRCode() {
 	}
 	// ”如何快捷键退出“的文字提示
 	fmt.Println(locale.GetString("ctrl_c_hint"))
+	// 打印 Tailscale 访问地址的二维码
 	ShowQRCodeTailscale(context.Background())
 }

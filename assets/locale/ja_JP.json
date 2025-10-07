@@ -353,8 +353,8 @@
   "TailscaleHostname_Description": "Tailscaleのホスト名部分です。完全なドメインは {hostname}.example.ts.net のようになります。",
   "TailscalePort": "Tailscale待ち受けポート",
   "TailscalePort_Description": "Tailscaleの待ち受けポートです。デフォルトは443で、自動的にTLSが有効になります。",
-  "TailscaleFunnelMode": "Tailscale Funnelモードを有効化",
-  "TailscaleFunnelMode_Description": "TailscaleのFunnelモード（公開アクセス）です。Tailscale管理コンソールでFunnel機能を有効化する必要があります。公開用途以外ではパスワード保護を設定することを推奨します。使用可能なポートは443、8443、10000のみで、TLSが強制的に有効化されます。",
+  "TailscaleFunnelMode": "Tailscale Funnelモード（パブリックアクセス）",
+  "TailscaleFunnelMode_Description": "TailscaleのFunnelモード（パブリックアクセス）を利用するには、TailscaleコンソールでFunnelを設定し、MagicDNSとHTTPS機能を有効にする必要があります。公開したくない場合は、パスワード保護を設定することを推奨します。Funnelモードでは443、8443、10000ポートのみ使用できます。",
   "ConfigLocked": "設定ロック",
   "config_locked_description": "現在、表示モードのため設定はロックされています。",
   "tailscale_auth_url_is": "Tailscaleサーバーを起動するには、TS_AUTHKEYを設定した状態で再起動するか、 認証URLにアクセスしてください：",
@@ -394,5 +394,15 @@
   "enable": "有効",
   "disable": "無効",
   "TailscaleAuthKey": "Tailscale自動認証キー",
-  "TailscaleAuthKeyDescription": "Tailscaleの自動認証キー（TS_AUTHKEY）。ブラウザのない環境で認証を行うために使用します。"
+  "TailscaleAuthKeyDescription": "Tailscaleの自動認証キー（TS_AUTHKEY）。ブラウザのない環境で認証を行うために使用します。",
+  "verify_tailscale": "リンクをクリックして、Tailscaleを認証してください:",
+  "funnel_setup": "Funnel ACL",
+  "funnel_setup_done": "Funnel機能が正常に設定されました。",
+  "funnel_setup_not_done": "Funnel機能がまだ設定されていません。",
+  "funnel_not_set_hint": "Funnel機能が未設定です。必要な操作：",
+  "funnel_require_dns_1": "TailscaleコンソールのDNSパネル",
+  "funnel_require_dns_2": "で、MagicDNS機能とHTTPS機能を有効化してください。，",
+  "funnel_require_acl_1": "TailscaleコンソールのACLパネル",
+  "funnel_require_acl_2": "でACL権限を編集し、funnel権限を追加してください",
+  "funnel_require_acl_3": "（サンプルJSONファイルをこちらからダウンロード可能）。"
 }

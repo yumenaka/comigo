@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"github.com/yumenaka/comigo/assets/locale"
@@ -17,17 +18,19 @@ var counter int = 0
 
 // ShowQRCodeTailscale 打印 Tailscale 访问地址的二维码
 func ShowQRCodeTailscale(ctx context.Context) {
+	// 前提： 启用 Tailscale 服务
+	if config.GetCfg().GetEnableTailscale() == false {
+		if config.GetCfg().Debug {
+			logger.Info("Tailscale is disabled, skipping ShowQRCodeTailscale function.")
+		}
+		return
+	}
 	if counter > 100 {
-		logger.Info("Tailscale status check exceeded 100 times, stopping further checks.")
+		logger.Info("Tailscale status check exceeded, stopping further checks.")
 		return
 	}
 	// 1 秒后打印 Url（不会阻塞 main 线程）
 	time.AfterFunc(1*time.Second, func() {
-		// 前提： 启用 Tailscale 服务
-		if config.GetCfg().GetEnableTailscale() == false && config.GetCfg().Debug {
-			logger.Info("Tailscale disabled in config")
-			return
-		}
 		// 获取 Tailscale 状态
 		st, err := tailscale_plugin.GetTailscaleStatus(ctx)
 		if err != nil {
@@ -42,9 +45,13 @@ func ShowQRCodeTailscale(ctx context.Context) {
 		if st.Online == true {
 			if st.FQDN != "" {
 				if readUrlPrinted == false {
-					readURL := "https://" + st.FQDN
-					if config.GetTailscalePort() != 443 && config.GetTailscalePort() != 8443 && config.GetTailscalePort() != 10000 {
-						readURL = "http://" + st.FQDN
+					proto := "http://"
+					if config.GetCfg().TailscalePort == 443 || config.GetCfg().TailscaleFunnelMode {
+						proto = "https://"
+					}
+					readURL := proto + st.FQDN
+					if config.GetCfg().TailscalePort != 80 && config.GetCfg().TailscalePort != 443 {
+						readURL = readURL + ":" + strconv.Itoa(config.GetCfg().TailscalePort)
 					}
 					logger.Info(locale.GetString("tailscale_reading_url") + readURL)
 					tools.PrintQRCode(readURL)
