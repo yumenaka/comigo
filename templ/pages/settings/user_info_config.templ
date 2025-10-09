@@ -7,16 +7,7 @@ package settings
 // hx-swap 替换方式
 // hx-params="*" 发送表单数据，包含所有 name/value
 // saveSuccessHint: 保存成功,三秒后执行各种动作
-templ UserInfoConfig(nowUsername string, nowPassword string, saveSuccessHint bool) {
-	if saveSuccessHint {
-		<div
-			class="hidden"
-			x-init="showToast(i18next.t('MsgLoginSettingsUpdated'), 'info');setTimeout(() => {
-            // 跳转到登录
-            window.location.href = '/';
-        }, 1500)"
-		></div>
-	}
+templ UserInfoConfig(nowUsername string, nowPassword string) {
 	<div id={ "user_config" } class="flex flex-col justify-start w-full px-2 py-2 mx-2 my-4 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400">
 		<div x-text={ getTranslations("AdminAccountSetup") } class="w-full text-center"></div>
 		<hr class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
@@ -54,7 +45,7 @@ templ UserInfoConfig(nowUsername string, nowPassword string, saveSuccessHint boo
 				});
 			},
 			
-			canSave() {
+			checkFormData() {
 			    // 没有修改表单，不能保存
 				if (!this.isFormChanged) {
 					return false;
@@ -69,6 +60,10 @@ templ UserInfoConfig(nowUsername string, nowPassword string, saveSuccessHint boo
 				    showToast(i18next.t('PromptSetPassword'), 'info');
 				    return false;
 				}
+				// 三秒后刷新页面
+                setTimeout(() => {
+                    location.reload();
+                }, 3000);
 				return true;
 			}
 		}"
@@ -176,10 +171,10 @@ templ UserInfoConfig(nowUsername string, nowPassword string, saveSuccessHint boo
 					:disabled="isFormChanged === false || passwordOK === false"
 					hx-post="/api/update-login-settings"
 					hx-trigger="click"
-					hx-target="#user_config_form"
+					hx-target="#user_config"
 					hx-swap="outerHTML"
 					hx-params="*"
-					@click="if(!canSave()) $event.preventDefault()"
+					@click="if(!checkFormData()) $event.preventDefault()"
 					x-text={ getTranslations("set_account_password") }
 				>SAVE</button>
 			</div>

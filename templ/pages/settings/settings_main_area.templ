@@ -43,12 +43,9 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 				</div>
 			}
 			<!-- 管理账号密码 -->
-			<!-- @UserInfoConfig(state.ServerConfig.Username, state.ServerConfig.Password, false)  -->
+			@UserInfoConfig(state.ServerConfig.Username, state.ServerConfig.Password)
 			<!-- 远程连接 -->
 			@RemoteAccessConfig(tsStatus)
-			<!-- 服务器日志 -->
-			@LogPanel()
-			@UserInfoConfig(state.ServerConfig.Username, state.ServerConfig.Password, false)
 			<!-- 书库设置 -->
 			<div
 				id="settings_stores"
@@ -102,7 +99,7 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 		</div>
 		if state.ServerConfig.Debug {
 			<!-- 服务器日志 -->
-			<!-- @LogPanel() -->
+			@LogPanel()
 		}
 	</div>
 }
