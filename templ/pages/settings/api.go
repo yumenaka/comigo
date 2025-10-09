@@ -240,7 +240,7 @@ func UpdateLoginSettingsHandler(c echo.Context) error {
 	// fmt.Printf("New config: %+v\n", config.GetCfg())
 
 	// 渲染 UserInfoConfig 模板并返回
-	updatedHTML := UserInfoConfig(config.GetCfg().Username, config.GetCfg().Password, true) // 如果UserInfoConfig期望的是加密后的密码，这里需要调整
+	updatedHTML := UserInfoConfig(config.GetCfg().Username, config.GetCfg().Password) // 如果UserInfoConfig期望的是加密后的密码，这里需要调整
 	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
 		logger.Errorf("Failed to render UserInfoConfig template: %v", renderErr)
 		return echo.NewHTTPError(http.StatusInternalServerError)

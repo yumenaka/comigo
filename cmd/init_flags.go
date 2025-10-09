@@ -90,7 +90,7 @@ func InitFlags() {
 	// 启用Tailscale服务
 	RootCmd.PersistentFlags().BoolVar(&cfg.EnableTailscale, "tailscale", false, locale.GetString("EnableTailscale"))
 	// Tailscale服务 启用Funnel模式
-	RootCmd.PersistentFlags().BoolVar(&cfg.TailscaleFunnelMode, "tailscale-funnel", true, locale.GetString("TailscaleFunnelMode"))
+	RootCmd.PersistentFlags().BoolVar(&cfg.TailscaleFunnelMode, "tailscale-funnel", false, locale.GetString("TailscaleFunnelMode"))
 	// Tailscale服务主机名,用于 Tailscale 网络中的标识节点
 	RootCmd.PersistentFlags().StringVar(&cfg.TailscaleHostname, "tailscale-hostname", "comigo", locale.GetString("TailscaleHostname"))
 	// Tailscale服务端口号

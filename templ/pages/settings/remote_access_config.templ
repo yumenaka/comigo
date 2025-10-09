@@ -284,26 +284,26 @@ templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 		<table class="table table-auto w-full">
 			<tbody>
 				<tr id="ts-auth-row" class="border-separate border-b-1 border-gray-500" style="display:none">
-					<td class="w-32 font-semibold align-top">验证</td>
+					<td class="w-48 font-semibold align-top">验证</td>
 					<td x-text={ getTranslations("verify_tailscale") } class="align-top">
 						请点击链接，验证Tailscale:
 						<a id="ts-auth-link" class="text-indigo-600 no-underline hover:underline" href={ tsStatus.AuthURL } target="_blank">{ tsStatus.AuthURL }</a>
 					</td>
 				</tr>
 				<tr class="border-separate border-b-1 border-gray-400">
-					<td x-text={ getTranslations("service_status") } class="w-32 font-semibold">服务状态</td>
+					<td x-text={ getTranslations("service_status") } class="w-48 font-semibold">服务状态</td>
 					<td id="ts-state">{ tsStatus.BackendState }</td>
 				</tr>
 				<tr class="border-separate border-b-1 border-gray-400">
-					<td x-text={ getTranslations("client_count") } class="w-32 font-semibold">客户端数</td>
+					<td x-text={ getTranslations("client_count") } class="w-48 font-semibold">客户端数</td>
 					<td id="ts-clients">{ strconv.Itoa(len(tsStatus.Clients)) }</td>
 				</tr>
 				<tr class="border-separate border-b-1 border-gray-400">
-					<td x-text={ getTranslations("host_system") } class="w-32 font-semibold">宿主系统</td>
+					<td x-text={ getTranslations("host_system") } class="w-48 font-semibold">宿主系统</td>
 					<td id="ts-os">{ tsStatus.OS }</td>
 				</tr>
 				<tr class="border-separate border-b-1 border-gray-400">
-					<td x-text={ getTranslations("connection_status") } class="w-32 font-semibold">连接状况</td>
+					<td x-text={ getTranslations("connection_status") } class="w-48 font-semibold">连接状况</td>
 					<td>
 						if tsStatus.Online {
 							<span id="ts-online" x-text={ getTranslations("connected") }></span>
@@ -401,7 +401,7 @@ templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 	                       }
 	                       setText('#ts-clients', clientsCount);
 	                       setText('#ts-os', data.OS || '');
-	                       setText('#ts-online', data.Online ? '已连接' : '未连接');
+	                       setText('#ts-online', data.Online ? i18next.t('connected') : i18next.t('not_connected') );
 	                       // IP: show first IPv4 if possible, else first entry
 	                       let ipText = '';
 	                       if (Array.isArray(data.TailscaleIPs) && data.TailscaleIPs.length > 0) {
