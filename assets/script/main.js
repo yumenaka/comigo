@@ -17608,7 +17608,14 @@ Alpine.store('flip', {
     allPageNum: 100,
     imageMaxWidth: 400,
     //自动隐藏工具条
-    autoHideToolbar: Alpine.$persist(true).as('flip.autoHideToolbar'),
+    autoHideToolbar: Alpine.$persist((()=>{
+        const ua = navigator.userAgent || '';
+        const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobi/i.test(ua);
+        const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 1;
+        //console.log('isMobileUA', isMobileUA);
+        //console.log('isTouch', isTouch);
+        return isMobileUA || isTouch;
+    })()).as('flip.autoHideToolbar'),
     //自动对齐
     autoAlign: Alpine.$persist(true).as('flip.autoAlignTop'),
     //是否显示页头

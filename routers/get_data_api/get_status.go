@@ -13,6 +13,7 @@ import (
 type ServerStatus struct {
 	ServerName            string             // 服务器描述
 	ServerHost            string             // 服务器地址
+	TailscaleHost         string             // Tailscale地址（如果有）
 	ServerPort            int                // 服务器端口（程序运行的端口）
 	NumberOfBooks         int                // 当前拥有的书籍总数
 	NumberOfOnLineUser    int                // 在线用户数（未实现）
