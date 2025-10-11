@@ -53,6 +53,9 @@
 - 浏览器快捷键支持
 
 ### 计划功能
+- [ ] 新官网,Discord频道,使用文档，学习一下 https://omarchy.org/
+- [ ] tailscale 集成
+- [ ] 解决tailscale带来的cgo编译问题：https://github.com/elastic/golang-crossbuild 或 https://github.com/goreleaser/goreleaser-cross
 - [ ] 示例漫画
 - [ ] PWA 支持
 - [ ] 高级阅读体验

@@ -29,7 +29,7 @@ func AddBooksToStore(storeUrl string, bookList []*model.Book, MinImageNum int) {
 		logger.Infof(locale.GetString("AddBook_error")+"%s", storeUrl)
 	}
 	// 生成虚拟书籍组
-	if err := model.MainStoreGroup.InitBookGroup(); err != nil {
+	if err := model.MainStoreGroup.GenerateAllBookGroup(); err != nil {
 		logger.Infof("%s", err)
 	}
 }

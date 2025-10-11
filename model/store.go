@@ -20,12 +20,13 @@ type StoreInfo struct {
 // Store 对应某个扫描路径的子书库，目前只支持本地书库
 type Store struct {
 	StoreInfo
-	BookMap sync.Map // 拥有的书籍,key是BookID,存储 *Book
+	BookMap sync.Map // 拥有的书籍,key是BookID,存储 *Book 与 *BooksGroup
 }
 
-// InitBookGroup 分析书库中已有书籍的路径，生成书籍组信息
-func (store *Store) InitBookGroup() error {
+// GenerateBookGroup 分析书库中已有书籍的路径，生成书籍组信息
+func (store *Store) GenerateBookGroup() error {
 	// 如果没有添加过任何书籍，则不需要生成书组信息
+	// sync.Map 本身没有内置 Len() 方法来直接获取元素数量。需要获取数量的时候，需要用 Range 遍历一次，计数累加
 	count := 0
 	for range store.BookMap.Range {
 		count++
@@ -33,6 +34,14 @@ func (store *Store) InitBookGroup() error {
 	if count == 0 {
 		return errors.New("empty Bookstore,skipping analysis")
 	}
+	// 遍历 BookMap ，删除所有 BooksGroup 类型的书籍
+	for _, value := range store.BookMap.Range {
+		b := value.(*Book)
+		if b.Type == TypeBooksGroup {
+			store.BookMap.Delete(b.BookID)
+		}
+	}
+	// 然后再重新生成 BooksGroup
 	depthBooksMap := make(map[int][]*Book) // key是Depth的临时map
 	// 计算最大深度
 	maxDepth := 0
@@ -103,7 +112,7 @@ func (store *Store) InitBookGroup() error {
 			}
 			depthBooksMap[depth-1] = append(depthBooksMap[depth-1], newBookGroup)
 			newBookGroup.SetAuthor()
-			// 将这本书加到子书库的SubBookMap表里面去
+			// 将这本书加到Store的 BookMap 表里面去
 			store.BookMap.Store(newBookGroup.BookID, newBookGroup)
 		}
 	}
