@@ -41,7 +41,7 @@ func ReloadConfigHandler(e fsnotify.Event) {
 	//	config.Config.ClearDatabaseWhenExit,
 	//	config.Config.Debug,
 	// )
-	// err := scan.InitBookGroup(option)
+	// err := scan.GenerateBookGroup(option)
 	// if err != nil {
 	//	logger.Infof("Failed to scan store path: %v", err)
 	// }

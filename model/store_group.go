@@ -46,12 +46,12 @@ func (storeGroup *StoreGroup) AddStore(storeURL string) error {
 	return nil
 }
 
-// InitBookGroup 分析并生成书籍组
-func (storeGroup *StoreGroup) InitBookGroup() (e error) {
+// GenerateAllBookGroup 分析所有子书库，并并生成书籍组
+func (storeGroup *StoreGroup) GenerateAllBookGroup() (e error) {
 	// 遍历所有子书库
 	for _, value := range storeGroup.ChildStores.Range {
 		s := value.(*Store)
-		err := s.InitBookGroup()
+		err := s.GenerateBookGroup()
 		if err != nil {
 			e = err
 		}
@@ -129,14 +129,17 @@ func (storeGroup *StoreGroup) CheckAllBookFileExist() {
 	var deletedBooks []string
 	// 遍历所有书籍
 	for _, book := range storeGroup.ListBooks() {
+		// 如果父文件夹存在，但书籍文件不存在，也说明这本书被删除了
 		if _, err := os.Stat(book.FilePath); os.IsNotExist(err) {
 			deletedBooks = append(deletedBooks, book.FilePath)
 			storeGroup.DeleteBook(book.BookID)
 		}
 	}
-	// 删除不存在的书组
+	// 重新生成书组
 	if len(deletedBooks) > 0 {
-		storeGroup.ResetBookGroupData()
+		if err := storeGroup.GenerateAllBookGroup(); err != nil {
+			logger.Infof("Error initializing main folder: %s", err)
+		}
 	}
 }
 
@@ -178,15 +181,6 @@ func (storeGroup *StoreGroup) GetParentBookID(childID string) (string, error) {
 func (storeGroup *StoreGroup) ClearAllBookData() {
 	// Clear 会删除所有条目，产生一个空 Map。
 	storeGroup.ChildStores.Clear()
-}
-
-// ResetBookGroupData 重新整理书库
-func (storeGroup *StoreGroup) ResetBookGroupData() {
-	// Clear 会删除所有条目，产生一个空 Map
-	storeGroup.ChildStores.Clear()
-	if err := storeGroup.InitBookGroup(); err != nil {
-		logger.Infof("Error initializing main folder: %s", err)
-	}
 }
 
 // DeleteBook 删除一本书
