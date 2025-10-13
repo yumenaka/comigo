@@ -120,7 +120,7 @@ func checkServerActions(oldConfig *config.Config, newConfig *config.Config) (act
 		if oldConfig.TailscaleAuthKey != newConfig.TailscaleAuthKey {
 			action.ReStartTailscale = true
 		}
-		if oldConfig.TailscaleFunnelMode != newConfig.TailscaleFunnelMode {
+		if oldConfig.FunnelTunnel != newConfig.FunnelTunnel {
 			action.ReStartTailscale = true
 		}
 		if oldConfig.TailscaleHostname != newConfig.TailscaleHostname {

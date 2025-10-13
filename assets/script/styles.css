@@ -1,4 +1,4 @@
-/*! tailwindcss v4.1.13 | MIT License | https://tailwindcss.com */
+/*! tailwindcss v4.1.14 | MIT License | https://tailwindcss.com */
 @layer properties {
   @supports (((-webkit-hyphens: none)) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color: rgb(from red r g b)))) {
     *, :before, :after, ::backdrop {
@@ -2669,10 +2669,6 @@
     width: calc(var(--spacing) * 32);
   }
 
-  .w-48 {
-    width: calc(var(--spacing) * 48);
-  }
-
   .w-64 {
     width: calc(var(--spacing) * 64);
   }
@@ -2711,10 +2707,6 @@
 
   .max-w-64 {
     max-width: calc(var(--spacing) * 64);
-  }
-
-  .max-w-\[90\%\] {
-    max-width: 90%;
   }
 
   .max-w-fit {
@@ -3392,16 +3384,6 @@
     }
   }
 
-  .bg-black\/60 {
-    background-color: #0009;
-  }
-
-  @supports (color: color-mix(in lab, red, red)) {
-    .bg-black\/60 {
-      background-color: color-mix(in oklab, var(--color-black) 60%, transparent);
-    }
-  }
-
   .bg-blue-300 {
     background-color: var(--color-blue-300);
   }
@@ -3813,6 +3795,11 @@
   .text-xs {
     font-size: var(--text-xs);
     line-height: var(--tw-leading, var(--text-xs--line-height));
+  }
+
+  .text-xs\/4 {
+    font-size: var(--text-xs);
+    line-height: calc(var(--spacing) * 4);
   }
 
   .apexcharts-canvas .apexcharts-datalabels .apexcharts-text.apexcharts-pie-label {
@@ -4516,6 +4503,11 @@
 
     .md\:px-8 {
       padding-inline: calc(var(--spacing) * 8);
+    }
+
+    .md\:text-sm\/6 {
+      font-size: var(--text-sm);
+      line-height: calc(var(--spacing) * 6);
     }
   }
 
