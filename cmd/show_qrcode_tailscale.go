@@ -46,7 +46,7 @@ func ShowQRCodeTailscale(ctx context.Context) {
 			if st.FQDN != "" {
 				if readUrlPrinted == false {
 					proto := "http://"
-					if config.GetCfg().TailscalePort == 443 || config.GetCfg().TailscaleFunnelMode {
+					if config.GetCfg().TailscalePort == 443 || config.GetCfg().FunnelTunnel {
 						proto = "https://"
 					}
 					readURL := proto + st.FQDN

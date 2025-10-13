@@ -257,11 +257,11 @@ func UpdateTailscaleConfigHandler(c echo.Context) error {
 
 	// 解析请求体（JSON 或 x-www-form-urlencoded）
 	var request struct {
-		EnableTailscale     bool   `json:"EnableTailscale"`
-		TailscaleAuthKey    string `json:"TailscaleAuthKey"`
-		TailscaleHostname   string `json:"TailscaleHostname"`
-		TailscalePort       int    `json:"TailscalePort"`
-		TailscaleFunnelMode bool   `json:"TailscaleFunnelMode"`
+		EnableTailscale   bool   `json:"EnableTailscale"`
+		TailscaleAuthKey  string `json:"TailscaleAuthKey"`
+		TailscaleHostname string `json:"TailscaleHostname"`
+		TailscalePort     int    `json:"TailscalePort"`
+		FunnelTunnel      bool   `json:"FunnelTunnel"`
 	}
 	contentType := c.Request().Header.Get("Content-Type")
 	if strings.Contains(contentType, "application/json") {
@@ -286,9 +286,9 @@ func UpdateTailscaleConfigHandler(c echo.Context) error {
 				request.TailscalePort = p
 			}
 		}
-		if v := c.FormValue("TailscaleFunnelMode"); v != "" {
+		if v := c.FormValue("FunnelTunnel"); v != "" {
 			if b, perr := strconv.ParseBool(v); perr == nil {
-				request.TailscaleFunnelMode = b
+				request.FunnelTunnel = b
 			}
 		}
 		// 对缺失字段使用现有配置作为默认值，避免零值覆盖
@@ -308,7 +308,7 @@ func UpdateTailscaleConfigHandler(c echo.Context) error {
 		if request.TailscalePort < 0 || request.TailscalePort > 65535 {
 			return echo.NewHTTPError(http.StatusBadRequest, "TailscalePort must be between 0 and 65535")
 		}
-		if request.TailscaleFunnelMode && (request.TailscalePort != 443 && request.TailscalePort != 8443 && request.TailscalePort != 10000) {
+		if request.FunnelTunnel && (request.TailscalePort != 443 && request.TailscalePort != 8443 && request.TailscalePort != 10000) {
 			return echo.NewHTTPError(http.StatusBadRequest, "Port must be 443, 8443, or 10000 when Funnel Mode is enabled")
 		}
 	}
@@ -319,7 +319,7 @@ func UpdateTailscaleConfigHandler(c echo.Context) error {
 	config.GetCfg().TailscaleAuthKey = request.TailscaleAuthKey
 	config.GetCfg().TailscaleHostname = request.TailscaleHostname
 	config.GetCfg().TailscalePort = request.TailscalePort
-	config.GetCfg().TailscaleFunnelMode = request.TailscaleFunnelMode
+	config.GetCfg().FunnelTunnel = request.FunnelTunnel
 	// 写入配置文件
 	if writeErr := config.UpdateConfigFile(); writeErr != nil {
 		logger.Infof("Failed to update local config: %v", writeErr)
