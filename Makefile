@@ -7,6 +7,9 @@
 ## Windows Release(Need MSYS2 or mingw32 + find.exe make.exe zip.exe upx.exe):
 # mingw32-make all VERSION=v0.9.9
 
+## 打印编译命令，而不实际执行
+# make -n Windows_i386_tailscale Windows_arm64_tailscale Linux_i386_tailscale
+
 # make Windows_x86_64
 # 版本号含义
 # vMAJOR.MINOR.PATCH, 如 v1.2.3
@@ -52,6 +55,8 @@ else
 endif
 
 all: compileAll_CGO md5SumThemAll
+
+## windows 可能不需要CGO就能支持Tailscale？
 
 # 因为sqlite（ent）库的关系，部分架构（Windows_i386）无法正常运行，需要写条件编译代码。但是最近似乎都Pass了，或许可以不再分架构：
 # ent库的编译检测状态： https://modern-c.appspot.com/-/builder/?importpath=modernc.org%2Fsqlite
@@ -205,7 +210,7 @@ darwin_x86_64_cgo_docker:
 	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE).tar.gz $(NAME)
 	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)
 
-#  make MacOS_arm64_cgo VERSION=v1.0.4
+#  make MacOS_arm64_cgo VERSION=v1.0.5
 MacOS_arm64_cgo:
 ifndef DOCKER
 	$(error "No docker found! Please install docker to build MacOS_arm64_cgo")
@@ -217,7 +222,7 @@ ifdef DOCKER
 	 -e CGO_ENABLED=1 \
 	 -e VERSION=$(VERSION) \
 	 -e FILE_LABLE="MacOS_arm64" \
-	 docker.elastic.co/beats-dev/golang-crossbuild:1.25.2-darwin-arm64-debian11 \
+	 docker.elastic.co/beats-dev/golang-crossbuild:1.25.2-darwin-arm64-debian10 \
 	 --build-cmd "make darwin_arm64_cgo_docker VERSION=$(VERSION)" \
 	 -p "darwin/arm64"
 endif

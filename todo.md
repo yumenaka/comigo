@@ -31,46 +31,51 @@
 
 ## 项目特性
 
-### 已实现功能
-- 多文件支持
-- 网页书架
-- 支持新一代图片格式（HEIC、AVIF）
-- 图片自动裁边、分割、拼接
-- QRCode 显示
-- 服务器设置
-- HTTPS 加密
-- 服务器信息显示
-- 章节快速导航
-- WebSocket 通信
-- 访问权限控制
-- 日志记录
-- 设置中心（支持热重载）
-- 卷轴模式分页
-- 配置文件（TOML 格式）
-- 预定义主题与颜色
-- 静态绑定模式
-- 二维码界面文本显示
-- 浏览器快捷键支持
+### 已实现
 
-### 计划功能
-- [ ] 新官网,Discord频道,使用文档，学习一下 https://omarchy.org/
-- [ ] tailscale 集成
-- [ ] 解决tailscale带来的cgo编译问题：https://github.com/elastic/golang-crossbuild 或 https://github.com/goreleaser/goreleaser-cross
+- [x] 章节快速导航
+- [x] 日志记录
+- [x] 卷轴模式分页
+- [x] 配置文件（TOML 格式）
+- [x] 预定义主题与颜色
+- [x] 浏览器快捷键
+- [x] 多文件支持
+- [x] 网页书架
+- [x] 新一代图片格式支持（heic avif）。
+- [x] 图片自动裁边，分割、拼接单双页。
+- [x] 网页端：分享功能
+- [x] 网页端：显示QRCode
+- [x] 网页端：多种展示模式
+- [x] 网页端：服务器设置
+- [x] 网页端：HTTPS加密
+- [x] 网页端：显示服务器信息
+- [x] 网页端：上一章、下一章,快速跳转。
+- [x] websocket通信（[参考](https://github.com/Unrud/remote-touchpad)）
+- [x] 访问权限设置，账号系统
+- [x] log记录
+- [x] 设置中心，设置热重载
+- [x] CPU、内存占用、状态监控
+
+### 开发中
+- [x] tailscale 集成
+- [x] 解决tailscale带来的cgo编译问题：https://github.com/elastic/golang-crossbuild 或 https://github.com/goreleaser/goreleaser-cross
+- [ ] “阅读历史记录（是否跳转到上一次阅读的最远页）”与“按照最近阅读时间排序”
+- [ ] 新官网,Discord频道,使用文档，参考 https://omarchy.org/ 。
+- [ ] 官网自动探测浏览器平台，提供合适的平台版本（参考Audacity） 
+- [ ] 注册为文件默认打开类型，简单托盘图标，gui界面。
+- [ ] 手动或自动检测新版本提示，然后可以试着自动更新新版本（win与macos），最后是各种linux软件源
 - [ ] 示例漫画
+- [ ] cli 交互，tui支持
+- [ ] 访问权限控制
 - [ ] PWA 支持
-- [ ] 高级阅读体验
-  - 防剧透效果
-  - 回忆模式
-  - 特殊背景
-  - 背景音乐
 - [ ] 系统监控（CPU、内存）
 - [ ] 嵌入 HTML
-  - [x] 转换为html
-  - [ ] wasm模式
+- [ ] 下载为单个html文件（50%）
+- [ ] wasm模式
 - [ ] 系统功能
   - 内置帮助文档
   - 网页端日志查看
-  - 跨平台 GUI（Flutter + GoMobile）
+  - 跨平台 GUI（Flutter + GoMobile或 Wails）
   - 自动更新
   - 文件监控
   - 数据持久化
@@ -82,7 +87,10 @@
   - EPUB/PDF 阅读优化、
   - 翻页模式：滚轮滑动翻页
   - 滑动模式：可快捷键调速的自动翻页
+- [ ] 高级阅读体验
+    - 防剧透效果、回忆模式、特殊背景、背景音乐etc
 
+  
 ## 开发环境搭建
 
 ### 前置要求
@@ -127,24 +135,7 @@ air
 - 使用 Templ 生成 HTML
 
 ### Todo
-- [x] 多文件支持
-- [x] 网页书架
-- [x] 优化打开速度
-- [x] 新一代图片格式支持（heic avif）。
-- [x] 图片自动裁边，分割、拼接单双页。
-- [x] 网页端：分享功能
-- [x] 网页端：显示QRCode
-- [x] 网页端：多种展示模式
-- [x] 网页端：服务器设置
-- [x] 网页端：HTTPS加密
-- [x] 网页端：显示服务器信息
-- [x] 网页端：上一章、下一章,快速跳转。
-- [x] websocket通信（[参考](https://github.com/Unrud/remote-touchpad)）
-- [x] 访问权限设置，账号系统
-- [x] log记录
-- [x] 设置中心，设置热重载
-- [x] CPU、内存占用、状态监控
-- [x] 网页端：卷轴模式分页。
+
 - [ ] 画个示例漫画。
 - [ ] PWA模式。
 - [x] 优化配置文件 （[参考](<https://toml.io/cn/v1.0.0）> (better config file formart).
@@ -178,7 +169,7 @@ air
 - [ ]  [self update 功能](https://github.com/minio/selfupdate)
 - [ ] 显示服务器log：[web终端示例](https://zenn.dev/ikedam/articles/2e078bfc2a4cb6)，设置页面功能
 - [x] 优化翻页模式
-- [x] -start 参数，后台运行。-stop参数，停止后台运行的进程。
+- [ ] -start 参数，后台运行。-stop参数，停止后台运行的进程。
 - [ ] 自定义js与css代码块功能。
 - [ ] [使用 Go1.24 的 os.Root 类型](https://antonz.org/go-1-24/)，将[文件操作限制在特定目录](https://go.dev/blog/osroot)
   ，以防止攻击者通过转义或相对路径非法访问文件
