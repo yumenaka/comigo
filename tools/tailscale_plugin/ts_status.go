@@ -28,7 +28,7 @@ type TailscaleStatus struct {
 	FQDN             string            // FQDN（Fully Qualified Domain Name 完全限定域名） = 子域名 + Domain → www.example.co.jp
 	TailscaleIPs     []netip.Addr      // 分配给此节点的 Tailscale IP(s)，第一个是 IPv4地址，第二个是 IPv6 地址
 	Version          string            // 当前Tailscale版本
-	FunnelCapability bool              // 是否支持 Funnel 功能
+	FunnelCapability string            // 是否支持 Funnel 功能 ,字符串：“true” “false” “unknown”
 	mu               sync.Mutex        // Mutex lock
 }
 
@@ -85,7 +85,7 @@ func GetTailscaleStatus(ctx context.Context) (*TailscaleStatus, error) {
 		nowStatus.OS = runtime.GOOS
 		nowStatus.FQDN = ""
 		nowStatus.Online = false
-		nowStatus.FunnelCapability = false
+		nowStatus.FunnelCapability = "unknown"
 		return nowStatus, nil
 	}
 	// *ipnstate.Status
@@ -106,11 +106,11 @@ func GetTailscaleStatus(ctx context.Context) (*TailscaleStatus, error) {
 		nowStatus.OS = st.Self.OS
 		nowStatus.FQDN = fullyQualifiedDomainName
 		nowStatus.Online = st.Self.Online
-		nowStatus.FunnelCapability = false
+		nowStatus.FunnelCapability = "false"
 		// 检查是否支持 Funnel 功能
-		if st.Self.CapMap != nil {
+		if st.Self.CapMap != nil && st.Self.CapMap.Contains(tailcfg.NodeAttrFunnel) {
 			// 检查 st.Self.CapMap[tailcfg.NodeAttrFunnel] 是否存在
-			nowStatus.FunnelCapability = st.Self.CapMap.Contains(tailcfg.NodeAttrFunnel)
+			nowStatus.FunnelCapability = "true"
 		}
 	}
 	if st.Self == nil {

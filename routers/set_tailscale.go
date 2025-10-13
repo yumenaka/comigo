@@ -18,7 +18,7 @@ func StartTailscale() {
 		tailscale_plugin.TailscaleConfig{
 			Hostname:   config.GetTailscaleHostname(),
 			Port:       uint16(config.GetTailscalePort()),
-			FunnelMode: config.GetTailscaleFunnelMode(), // Tailscale Funnel 模式，外网可访问，建议设置用户名与密码
+			FunnelMode: config.GetFunnelTunnel(), // Tailscale Funnel 模式，外网可访问，建议设置用户名与密码
 			ConfigDir:  config.GetCachePath(),
 			AuthKey:    config.GetTailscaleAuthKey(),
 		},
