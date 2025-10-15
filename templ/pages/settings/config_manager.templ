@@ -98,7 +98,7 @@ templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirect
 			<!-- hx-target 将返回结果替换到本容器内 -->
 			<button
 				id="saveConfigButton"
-				class="w-24 h-10 mx-2 my-1 text-center transition bg-blue-400 border border-gray-500 rounded"
+				class="w-24 h-10 mx-2 my-1 text-center transition bg-sky-300 active:bg-sky-500 border border-gray-500 rounded"
 				hx-post="/api/config-save"
 				hx-include="#selectedDir"
 				hx-target="#config-container"
@@ -109,7 +109,7 @@ templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirect
 			</button>
 			<button
 				id="deleteConfigButton"
-				class="w-24 h-10 mx-2 my-1 text-center transition bg-red-300 border border-gray-500 rounded"
+				class="w-24 h-10 mx-2 my-1 text-center transition bg-red-300 active:bg-red-500 border border-gray-500 rounded"
 				hx-post="/api/config-delete"
 				hx-include="#selectedDir"
 				hx-target="#config-container"
