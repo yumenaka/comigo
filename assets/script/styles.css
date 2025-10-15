@@ -3388,10 +3388,6 @@
     background-color: var(--color-blue-300);
   }
 
-  .bg-blue-400 {
-    background-color: var(--color-blue-400);
-  }
-
   .bg-blue-500 {
     background-color: var(--color-blue-500);
   }
@@ -4453,6 +4449,14 @@
   .focus\:outline-none:focus {
     --tw-outline-style: none;
     outline-style: none;
+  }
+
+  .active\:bg-red-500:active {
+    background-color: var(--color-red-500);
+  }
+
+  .active\:bg-sky-500:active {
+    background-color: var(--color-sky-500);
   }
 
   .disabled\:cursor-not-allowed:disabled {

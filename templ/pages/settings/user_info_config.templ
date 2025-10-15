@@ -166,7 +166,7 @@ templ UserInfoConfig(nowUsername string, nowPassword string) {
 			<!-- SAVE按钮 -->
 			<div class="flex justify-center items-center w-full my-2">
 				<button
-					class="min-w-28 px-2 h-10 mx-2 my-0 text-center text-gray-700 transition border border-gray-500 rounded bg-sky-300 hover:text-gray-900"
+					class="min-w-28 px-2 h-10 mx-2 my-0 text-center text-gray-700 transition border border-gray-500 rounded bg-sky-300 active:bg-sky-500 hover:text-gray-900"
 					:class="{ 'opacity-50 cursor-not-allowed': isFormChanged === false || passwordOK === false }"
 					:disabled="isFormChanged === false || passwordOK === false"
 					hx-post="/api/update-login-settings"
