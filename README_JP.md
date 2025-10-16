@@ -83,7 +83,7 @@ Comigo は複数の設定ファイルの場所をサポートしています：
 ご意見や問題がございましたら、以下からお気軽にご連絡ください：
 - [Issue](https://github.com/yumenaka/comigo/issues) を投稿
 - [Twitter](https://x.com/yumenaka7) でメッセージを送信
-
+- [Discord](https://discord.gg/c5q6d3dM8r) でディスカッションに参加ß
 ## 特別な感謝
 
 以下のオープンソースプロジェクトとその貢献者に感謝いたします：

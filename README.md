@@ -87,7 +87,7 @@ Comigo supports  configuration file locations:
 If you have any suggestions or encounter issues, feel free to:
 - Submit an [Issue](https://github.com/yumenaka/comigo/issues)
 - Contact me via [Twitter](https://x.com/yumenaka7)
-
+- Join the discussion on [Discord](https://discord.gg/c5q6d3dM8r)
 ## Special Thanks
 
 Thanks to the following open-source projects and their contributors:

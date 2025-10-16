@@ -87,7 +87,7 @@ Comigo 支持多种配置文件位置：
 如果您有任何建议或遇到问题，欢迎：
 - 提交 [Issue](https://github.com/yumenaka/comigo/issues)
 - 通过 [Twitter](https://x.com/yumenaka7) 联系我
-
+- Discord讨论群 [Discord](https://discord.gg/c5q6d3dM8r)
 ## 开发与TODO
 - [开发备忘](https://github.com/yumenaka/comigo/blob/master/todo.md)
 
