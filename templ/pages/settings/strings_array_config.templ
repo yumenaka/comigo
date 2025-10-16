@@ -6,12 +6,39 @@ import "github.com/yumenaka/comigo/templ/common/svg"
 
 var StringArrayOnceHandle = templ.NewOnceHandle()
 
-
 // 出于安全考虑。onclick不能直接拼接函数，需要使用 templ.JSFuncCall()
 // https://templ.guide/syntax-and-usage/script-templates/
 templ StringArrayConfig(name string, values []string, description string, saveSuccessHint bool) {
- @StringArrayOnceHandle.Once() {
-			<script>
+	@StringArrayOnceHandle.Once() {
+		<script>
+// 在htmx发送请求前进行验证，理解事件机制请参考event与htmx:afterRequest 的文档
+// https://htmx.org/docs/#events
+// https://htmx.org/events/#htmx:afterRequest
+document.body.addEventListener("htmx:beforeRequest", function (evt) {
+  // 获取触发事件的元素（通常是 form 或者触发的按钮）
+  const buttonID = evt.target.id;
+  // 不是添加按钮，直接返回
+  if (!buttonID || !buttonID.endsWith('AddButton')) {
+    return;
+  }
+  const configName = buttonID.replace('AddButton', '');
+  const addValue = document.getElementById(configName + 'AddInput').value.trim();
+  // 如果为空，则不提交
+  if (addValue === '') {
+	     // 设置项为空时，显示错误提示
+         showMessage({
+            message: '请输入内容后再提交。',
+            buttons: 'confirm',
+            onConfirm: function () {
+                // 点击确认后的回调函数
+                //console.log('User confirmed the message.');
+         }
+         });
+	event.preventDefault();
+  }
+});
+</script>
+		<script>
 			// 删除字符串数组配置中的元素。
 			// 此处仅用作打印调试信息。删除操作是由 htmx 完成的。
 			function deleteStringConfigValue(self) {
@@ -30,7 +57,7 @@ templ StringArrayConfig(name string, values []string, description string, saveSu
 				console.log(configName, addValue);
 			}
 		</script>
-  }
+	}
 	if saveSuccessHint {
 		<div
 			class="hidden"
@@ -56,7 +83,7 @@ templ StringArrayConfig(name string, values []string, description string, saveSu
 						hx-target={ "#" + name + "-string-array-config" }
 						hx-swap="outerHTML"
 						hx-vals={ fmt.Sprintf(`{"configName":"%s","deleteValue":"%s"}`, name, value) }
-						onclick={ templ.JSFuncCall("deleteStringConfigValue", templ.JSExpression("this")) }
+						onsubmit={ templ.JSFuncCall("deleteStringConfigValue", templ.JSExpression("this")) }
 						class="flex justify-center items-center w-6 h-6 ml-1 mr-0.5 rounded hover:ring"
 					>
 						@svg.Delete()
@@ -81,7 +108,7 @@ templ StringArrayConfig(name string, values []string, description string, saveSu
 						hx-swap="outerHTML"
 						hx-vals={ fmt.Sprintf(`{"configName":"%s","addValue":"%s"}`, name, "") }
 						onclick={ templ.JSFuncCall("addStringConfigValue", templ.JSExpression("this")) }
-						class="w-16 h-10 mx-2 my-0 text-center text-gray-700 transition border border-gray-500 rounded bg-sky-300 hover:text-gray-900"
+						class="w-16 h-10 mx-2 my-0 text-center text-gray-700 transition border border-gray-500 rounded bg-sky-300 active:bg-sky-500 hover:text-gray-900"
 					>
 						提交
 					</button>
