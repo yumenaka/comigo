@@ -378,7 +378,7 @@ func Header(prop HeaderProps) templ.Component {
 				}
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "</div><!-- 溢出 overflow-x-auto :https://www.tailwindcss.cn/docs/overflow --><div class=\"flex justify-between p-0 m-0 max-w-64\"><!-- 图标：点击显示二维码 --><div data-modal-target=\"qrcode-modal\" data-modal-toggle=\"qrcode-modal\" x-show=\"!window.location.href.includes('file:///')\" class=\"flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "</div><!-- 溢出 overflow-x-auto :https://www.tailwindcss.cn/docs/overflow --><div class=\"flex justify-between p-0 m-0 max-w-64\"><!-- 图标：点击显示二维码 --><div data-modal-target=\"qrcode-modal\" data-modal-toggle=\"qrcode-modal\" x-show=\"!window.location.href.includes('file:///')\" class=\"hidden md:flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

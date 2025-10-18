@@ -29,15 +29,10 @@ func GetNowBookNum() int {
 	return len(NowBookList.BookInfos)
 }
 
-// IsLogin 判断是否登录
-func IsLogin() bool {
-	return config.GetUsername() != "" && config.GetPassword() != ""
-}
-
 // 初始化参数
 func init() {
 	Version = config.GetVersion()
 	NowBookList = nil
-	ServerStatus = tools.GetServerInfo(config.GetHost(), config.GetVersion(), config.GetPort(), config.GetEnableUpload(), 0)
+	ServerStatus = tools.GetServerInfo(config.GetHost(), config.GetVersion(), uint16(config.GetCfg().Port), config.GetEnableUpload(), 0)
 	ServerConfig = config.GetCfg()
 }

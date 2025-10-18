@@ -136,7 +136,7 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = NumberConfig("Port", state.ServerConfig.Port, "Port_Description", 0, 65535, false).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = NumberConfig("Port", int(state.ServerConfig.Port), "Port_Description", 0, 65535, false).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

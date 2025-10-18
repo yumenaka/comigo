@@ -117,7 +117,7 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 				name={ "TailscalePort" }
 				type="number"
 				:placeholder={ getTranslations("TailscalePort") }
-				value={ strconv.Itoa(state.ServerConfig.TailscalePort) }
+				value={ strconv.Itoa(int(state.ServerConfig.TailscalePort)) }
 				max={ strconv.Itoa(65535) }
 				min={ strconv.Itoa(0) }
 			/>
@@ -249,6 +249,7 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 			<ol class="list-decimal ml-5 space-y-1">
 				<li><a x-text={ getTranslations("funnel_require_dns_1") } href="https://login.tailscale.com/admin/dns" target="_blank" class="underline">在控制台DNS面板</a>，<span x-text={ getTranslations("funnel_require_dns_2") }>开启MagicDNS功能与HTTPS功能</span></li>
 				<li><a x-text={ getTranslations("funnel_require_acl_1") } href="https://login.tailscale.com/admin/acls/file" target="_blank" class="underline">在控制台ACL面板</a><span x-text={ getTranslations("funnel_require_acl_2") }>在Tailscale控制台ACL面板</span><a id="download-funnel-acl-example" href="#" download="tailscale_acl.json" class="underline" x-text={ getTranslations("funnel_require_acl_3") }>点此下载示例JSON文件</a></li>
+			    <li x-text={ getTranslations("funnel_require_password_1") }></li>
 			</ol>
 			<script>
 					(function() {
@@ -290,14 +291,26 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
             const host = (document.getElementById('TailscaleHostname') && document.getElementById('TailscaleHostname').value) || '';
             const port = (document.getElementById('TailscalePort') && document.getElementById('TailscalePort').value) || '';
             const funnel = (document.getElementById('FunnelTunnel') && document.getElementById('FunnelTunnel').checked) ? 'true' : 'false';
-
+            const funnel_enforce_password = (document.getElementById('FunnelEnforcePassword') && document.getElementById('FunnelEnforcePassword').checked) ? 'true' : 'false';
+            // 如果页面上存在 id 为 "logout_button" 的元素，则 now_login 为 true，否则为 false。
+            const now_login = !!document.getElementById('logout_button');
+            if (funnel === 'true' && funnel_enforce_password && now_login === false) {
+                showMessage({
+                    message: i18next.t('funnel_enable_while_no_password_warning'),
+                    buttons: 'confirm'
+                });
+                // 恢复按钮可用
+                btn.disabled = false;
+                return;
+            }
+            // 构造 URLSearchParams 对象以编码数据
             const params = new URLSearchParams();
             params.set('EnableTailscale', enable);
             params.set('TailscaleAuthKey', auth_key);
             params.set('TailscaleHostname', host);
             params.set('TailscalePort', port);
             params.set('FunnelTunnel', funnel);
-
+            params.set('FunnelEnforcePassword', funnel_enforce_password);
             fetch('/api/submit-tailscale-config', {
                 method: 'POST',
                 headers: {

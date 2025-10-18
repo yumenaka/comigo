@@ -29,7 +29,7 @@ func ShowQRCode() {
 	}
 	// 打印二维码
 	tools.PrintAllReaderURL(
-		config.GetPort(),
+		config.GetCfg().Port,
 		config.GetOpenBrowser(),
 		config.GetPrintAllPossibleQRCode(),
 		outIP,

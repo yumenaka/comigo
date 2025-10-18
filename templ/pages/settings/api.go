@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/angelofallars/htmx-go"
 	"github.com/labstack/echo/v4"
@@ -93,7 +92,7 @@ func updateConfigGeneric(c echo.Context) (string, string, error) {
 // UpdateStringConfigHandler 处理 String 类型
 func UpdateStringConfigHandler(c echo.Context) error {
 	// 如果配置被锁定
-	if config.GetCfg().GetConfigLocked() {
+	if config.GetCfg().ConfigLocked {
 		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
 	}
 	name, newValue, err := updateConfigGeneric(c)
@@ -115,7 +114,7 @@ func UpdateStringConfigHandler(c echo.Context) error {
 // UpdateBoolConfigHandler 处理 Bool 类型
 func UpdateBoolConfigHandler(c echo.Context) error {
 	// 如果配置被锁定
-	if config.GetCfg().GetConfigLocked() {
+	if config.GetCfg().ConfigLocked {
 		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
 	}
 	name, newValue, err := updateConfigGeneric(c)
@@ -142,7 +141,7 @@ func UpdateBoolConfigHandler(c echo.Context) error {
 // UpdateNumberConfigHandler 处理 Number 类型
 func UpdateNumberConfigHandler(c echo.Context) error {
 	// 如果配置被锁定
-	if config.GetCfg().GetConfigLocked() {
+	if config.GetCfg().ConfigLocked {
 		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
 	}
 	name, newValue, err := updateConfigGeneric(c)
@@ -175,7 +174,7 @@ func UpdateLoginSettingsHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "non-htmx request")
 	}
 	// 如果配置被锁定
-	if config.GetCfg().GetConfigLocked() {
+	if config.GetCfg().ConfigLocked {
 		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
 	}
 	username := c.FormValue("Username")
@@ -202,16 +201,10 @@ func UpdateLoginSettingsHandler(c echo.Context) error {
 	//if len(password) < 6 {
 	//	return echo.NewHTTPError(http.StatusBadRequest, "Password must be at least 6 characters long")
 	//}
-	//// 用户名过短
-	//if len(username) < 3 {
-	//	return echo.NewHTTPError(http.StatusBadRequest, "Username must be at least 3 characters long")
-	//}
 
-	if state.ServerConfig.Password != "" {
-		// 当前密码不正确
-		if state.ServerConfig.Password != currentPassword {
-			return echo.NewHTTPError(http.StatusBadRequest, "Current Password is incorrect")
-		}
+	// 当前密码不正确
+	if state.ServerConfig.Password != currentPassword {
+		return echo.NewHTTPError(http.StatusBadRequest, "Current Password is incorrect")
 	}
 
 	// 旧配置做个备份（后面需要对比）
@@ -251,53 +244,20 @@ func UpdateLoginSettingsHandler(c echo.Context) error {
 // UpdateTailscaleConfigHandler 处理Tailscale配置更新的JSON API
 func UpdateTailscaleConfigHandler(c echo.Context) error {
 	// 如果配置被锁定
-	if config.GetCfg().GetConfigLocked() {
+	if config.GetCfg().ConfigLocked {
 		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
 	}
-
 	// 解析请求体（JSON 或 x-www-form-urlencoded）
 	var request struct {
-		EnableTailscale   bool   `json:"EnableTailscale"`
-		TailscaleAuthKey  string `json:"TailscaleAuthKey"`
-		TailscaleHostname string `json:"TailscaleHostname"`
-		TailscalePort     int    `json:"TailscalePort"`
-		FunnelTunnel      bool   `json:"FunnelTunnel"`
+		EnableTailscale       bool   `json:"EnableTailscale"`
+		TailscaleAuthKey      string `json:"TailscaleAuthKey"`
+		TailscaleHostname     string `json:"TailscaleHostname"`
+		TailscalePort         int    `json:"TailscalePort"`
+		FunnelTunnel          bool   `json:"FunnelTunnel"`
+		FunnelEnforcePassword bool   `json:"FunnelEnforcePassword"`
 	}
-	contentType := c.Request().Header.Get("Content-Type")
-	if strings.Contains(contentType, "application/json") {
-		if err := c.Bind(&request); err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, "Invalid JSON request")
-		}
-	} else {
-		// 表单解析（HTMX fetch 使用 x-www-form-urlencoded）
-		if v := c.FormValue("EnableTailscale"); v != "" {
-			if b, perr := strconv.ParseBool(v); perr == nil {
-				request.EnableTailscale = b
-			}
-		}
-		if v := c.FormValue("TailscaleAuthKey"); v != "" {
-			request.TailscaleAuthKey = v
-		}
-		if v := c.FormValue("TailscaleHostname"); v != "" {
-			request.TailscaleHostname = v
-		}
-		if v := c.FormValue("TailscalePort"); v != "" {
-			if p, perr := strconv.Atoi(v); perr == nil {
-				request.TailscalePort = p
-			}
-		}
-		if v := c.FormValue("FunnelTunnel"); v != "" {
-			if b, perr := strconv.ParseBool(v); perr == nil {
-				request.FunnelTunnel = b
-			}
-		}
-		// 对缺失字段使用现有配置作为默认值，避免零值覆盖
-		if request.TailscaleHostname == "" {
-			request.TailscaleHostname = config.GetTailscaleHostname()
-		}
-		if request.TailscalePort == 0 {
-			request.TailscalePort = config.GetTailscalePort()
-		}
+	if err := c.Bind(&request); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid JSON request")
 	}
 
 	// 验证输入
@@ -311,6 +271,12 @@ func UpdateTailscaleConfigHandler(c echo.Context) error {
 		if request.FunnelTunnel && (request.TailscalePort != 443 && request.TailscalePort != 8443 && request.TailscalePort != 10000) {
 			return echo.NewHTTPError(http.StatusBadRequest, "Port must be 443, 8443, or 10000 when Funnel Mode is enabled")
 		}
+		// 如果Funnel模式强制密码，但当前没有设置密码，则返回错误
+		if request.FunnelTunnel && request.FunnelEnforcePassword {
+			if !config.GetCfg().NeedLogin() {
+				return echo.NewHTTPError(http.StatusBadRequest, "Cannot Turn on FunnelMode when no password not set")
+			}
+		}
 	}
 	// 旧配置做个备份（后面需要对比）
 	oldConfig := config.CopyCfg()
@@ -320,6 +286,7 @@ func UpdateTailscaleConfigHandler(c echo.Context) error {
 	config.GetCfg().TailscaleHostname = request.TailscaleHostname
 	config.GetCfg().TailscalePort = request.TailscalePort
 	config.GetCfg().FunnelTunnel = request.FunnelTunnel
+	config.GetCfg().FunnelEnforcePassword = request.FunnelEnforcePassword
 	// 写入配置文件
 	if writeErr := config.UpdateConfigFile(); writeErr != nil {
 		logger.Infof("Failed to update local config: %v", writeErr)
@@ -343,7 +310,7 @@ func AddArrayConfigHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "non-htmx request")
 	}
 	// 如果配置被锁定
-	if config.GetCfg().GetConfigLocked() {
+	if config.GetCfg().ConfigLocked {
 		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
 	}
 	configName := c.FormValue("configName")
@@ -391,7 +358,7 @@ func DeleteArrayConfigHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "non-htmx request")
 	}
 	// 如果配置被锁定
-	if config.GetCfg().GetConfigLocked() {
+	if config.GetCfg().ConfigLocked {
 		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
 	}
 
@@ -437,7 +404,7 @@ func HandleConfigSave(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "non-htmx request")
 	}
 	// 如果配置被锁定
-	if config.GetCfg().GetConfigLocked() {
+	if config.GetCfg().ConfigLocked {
 		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
 	}
 	// 保存到什么文件夹
@@ -466,7 +433,7 @@ func HandleConfigDelete(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "non-htmx request")
 	}
 	// 如果配置被锁定
-	if config.GetCfg().GetConfigLocked() {
+	if config.GetCfg().ConfigLocked {
 		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
 	}
 	// 保存到什么文件夹

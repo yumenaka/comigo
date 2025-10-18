@@ -24,11 +24,11 @@ func StartEcho(e *echo.Echo) {
 	// 是否启用TLS
 	enableTls := config.GetCertFile() != "" && config.GetKeyFile() != ""
 	config.Server = &http.Server{
-		Addr:    webHost + strconv.Itoa(config.GetPort()),
+		Addr:    webHost + strconv.Itoa(config.GetCfg().Port),
 		Handler: e, // echo.Echo 实现了 http.Handler 接口
 	}
 	// 记录日志并启动服务器
-	logger.Infof("Starting Server...", "on port", config.GetPort(), "...")
+	logger.Infof("Starting Server...", "on port", config.GetCfg().Port, "...")
 	if enableTls {
 		logger.Infof("TLS enabled", "CertFile:", config.GetCertFile(), "KeyFile:", config.GetKeyFile())
 	}
@@ -85,7 +85,7 @@ func RestartWebServer() {
 	if err := StopWebServer(); err != nil {
 		logger.Fatalf("Server Shutdown Failed:%+v", err)
 	}
-	logger.Infof("Server Shutdown Successfully", "Starting Server...", "on port", config.GetPort(), "...")
+	logger.Infof("Server Shutdown Successfully", "Starting Server...", "on port", config.GetCfg().Port, "...")
 	// 重新初始化web服务器
 	InitEcho()
 	// 重新启动web服务器

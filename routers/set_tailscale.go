@@ -16,11 +16,11 @@ func StartTailscale() {
 	if err := tailscale_plugin.RunTailscale(
 		engine,
 		tailscale_plugin.TailscaleConfig{
-			Hostname:   config.GetTailscaleHostname(),
-			Port:       uint16(config.GetTailscalePort()),
-			FunnelMode: config.GetFunnelTunnel(), // Tailscale Funnel 模式，外网可访问，建议设置用户名与密码
-			ConfigDir:  config.GetCachePath(),
-			AuthKey:    config.GetTailscaleAuthKey(),
+			Hostname:   config.GetCfg().TailscaleHostname,
+			Port:       uint16(config.GetCfg().TailscalePort),
+			FunnelMode: config.GetCfg().FunnelTunnel, // Tailscale Funnel 模式，外网可访问，建议设置用户名与密码
+			ConfigDir:  config.GetCfg().ConfigPath,
+			AuthKey:    config.GetCfg().TailscaleAuthKey,
 		},
 	); err != nil {
 		logger.Errorf("Failed to run Tailscale: %v", err)

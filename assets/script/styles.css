@@ -4519,6 +4519,10 @@
       margin: calc(var(--spacing) * 3);
     }
 
+    .md\:flex {
+      display: flex;
+    }
+
     .md\:w-3\/5 {
       width: 60%;
     }
