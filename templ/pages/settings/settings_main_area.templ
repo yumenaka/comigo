@@ -70,7 +70,7 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 			>
 				<div x-text="i18next.t('settings_network')" class="w-full text-center">网络设置</div>
 				<hr class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
-				@NumberConfig("Port", state.ServerConfig.Port, "Port_Description", 0, 65535, false)
+				@NumberConfig("Port", int(state.ServerConfig.Port), "Port_Description", 0, 65535, false)
 				@StringConfig("Host", state.ServerConfig.Host, "Host_Description", false)
 				@BoolConfig("DisableLAN", state.ServerConfig.DisableLAN, "DisableLAN_Description", false)
 				@NumberConfig("Timeout", state.ServerConfig.Timeout, "Timeout_Description", 0, 65535, false)

@@ -86,7 +86,7 @@ func waitSystemMessages() {
 			routers.RestartWebServer()
 			routers.StartTailscale()
 			// 阻塞等待端口就绪，确保服务可用
-			tools.WaitUntilServerReady("localhost", config.GetPort(), 15*time.Second)
+			tools.WaitUntilServerReady("localhost", uint16(config.GetCfg().Port), 15*time.Second)
 			// 在命令行显示QRCode
 			ShowQRCode()
 			// 重启网页服务器

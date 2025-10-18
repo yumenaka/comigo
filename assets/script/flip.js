@@ -51,8 +51,8 @@ const ArrowRightBase64 = 'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0
 const book = JSON.parse(document.getElementById('NowBook').textContent)
 const images = book.pages.images
 Alpine.store('flip').allPageNum = parseInt(book.page_count)
-// 用户ID和令牌，假设已在其他地方定义
-const userID = Alpine.store('global').userID
+// 临时用户标签ID
+const tabID = (Date.now() % 10000000).toString(36) + Math.random().toString(36).substring(2, 5)
 // 假设token是一个有效的令牌 TODO:使用真正的令牌
 const token = 'your_token'
 
@@ -973,10 +973,10 @@ function connectWebSocket() {
 // 处理收到的翻页消息
 function handleMessage(message) {
 	// console.log("收到消息：", message);
-	// console.log("Local user ID：" + userID);
+	// console.log("Local Tab：" + tabID);
 	// console.log("message_sender_id：" + message.user_id);// 用message_sender_id或许比较好区分？
 	// 根据消息类型进行处理
-	if (message.type === 'flip_mode_sync_page' && message.user_id !== userID) {
+	if (message.type === 'flip_mode_sync_page' && message.tab_id !== tabID) {
 		// 解析翻页数据
 		const data = JSON.parse(message.data_string)
 		if (Alpine.store('global').syncPageByWS && data.book_id === book.id) {
@@ -1000,7 +1000,7 @@ function sendFlipData() {
 	const flipMsg = {
 		type: 'flip_mode_sync_page', // 或 "heartbeat"
 		status_code: 200,
-		user_id: userID,
+		tab_id: tabID,
 		token: token,
 		detail: '翻页模式，发送数据',
 		data_string: JSON.stringify(flip_data),

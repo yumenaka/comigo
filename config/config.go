@@ -61,37 +61,14 @@ type Config struct {
 	ZipFileTextEncoding    string          `json:"ZipFileTextEncoding" comment:"非utf-8编码的ZIP文件，尝试用什么编码解析，默认GBK"`
 }
 
+// ConfigInterface需要下面这些方法
+
+func (c *Config) GetDebug() bool {
+	return c.Debug
+}
+
 func (c *Config) GetStoreUrls() []string {
 	return c.StoreUrls
-}
-
-// StoreUrlIsExits 检查本地书库路径是否可添加
-func (c *Config) StoreUrlIsExits(url string) bool {
-	// 检查本地书库url是否已存在
-	for _, storeUrl := range c.StoreUrls {
-		if storeUrl == url {
-			logger.Infof("Store Url already exists: %s", storeUrl)
-			return true
-		}
-	}
-	return false
-}
-
-// AddStoreUrl 添加本地书库(单个路径)
-func (c *Config) AddStoreUrl(storeURL string) {
-	if c.StoreUrlIsExits(storeURL) {
-		return
-	}
-	cfg.StoreUrls = append(cfg.StoreUrls, storeURL)
-}
-
-// InitStoreUrls 初始化配置文件中的书库
-func (c *Config) InitStoreUrls() {
-	for _, storeUrl := range c.StoreUrls {
-		if !c.StoreUrlIsExits(storeUrl) {
-			c.AddStoreUrl(storeUrl)
-		}
-	}
 }
 
 func (c *Config) GetMaxScanDepth() int {
@@ -130,32 +107,42 @@ func (c *Config) GetEnableDatabase() bool {
 	return c.EnableDatabase
 }
 
-func (c *Config) GetEnableTailscale() bool {
-	return c.EnableTailscale
-}
-
-func (c *Config) GetTailscaleHostname() string {
-	return c.TailscaleHostname
-}
-
-func (c *Config) GetTailscalePort() int {
-	return c.TailscalePort
-}
-
-func GetFunnelTunnel() bool {
-	return cfg.FunnelTunnel
-}
-
-func (c *Config) GetConfigLocked() bool {
-	return c.ConfigLocked
-}
-
 func (c *Config) GetClearDatabaseWhenExit() bool {
 	return c.ClearDatabaseWhenExit
 }
 
-func (c *Config) GetDebug() bool {
-	return c.Debug
+// StoreUrlIsExits 检查本地书库路径是否可添加
+func (c *Config) StoreUrlIsExits(url string) bool {
+	// 检查本地书库url是否已存在
+	for _, storeUrl := range c.StoreUrls {
+		if storeUrl == url {
+			logger.Infof("Store Url already exists: %s", storeUrl)
+			return true
+		}
+	}
+	return false
+}
+
+// AddStoreUrl 添加本地书库(单个路径)
+func (c *Config) AddStoreUrl(storeURL string) {
+	if c.StoreUrlIsExits(storeURL) {
+		return
+	}
+	cfg.StoreUrls = append(cfg.StoreUrls, storeURL)
+}
+
+// InitStoreUrls 初始化配置文件中的书库
+func (c *Config) InitStoreUrls() {
+	for _, storeUrl := range c.StoreUrls {
+		if !c.StoreUrlIsExits(storeUrl) {
+			c.AddStoreUrl(storeUrl)
+		}
+	}
+}
+
+// NeedLogin 是否需要登录
+func (c *Config) NeedLogin() bool {
+	return cfg.Username != "" && cfg.Password != ""
 }
 
 func (c *Config) GetTopStoreName() string {
@@ -466,32 +453,4 @@ func SetByExecutableFilename() {
 		logger.Infof("Executable Name: %s", filenameWithoutSuffix)
 		logger.Infof("Executable Path: %s", executableDir)
 	}
-}
-
-// cfg 为全局配置,全局单实例
-var cfg = Config{
-	ConfigPath:            "",
-	CachePath:             "",
-	ClearCacheExit:        true,
-	ClearDatabaseWhenExit: true,
-	DisableLAN:            false,
-	DefaultMode:           "scroll",
-	EnableUpload:          true,
-	EnableDatabase:        false,
-	EnableTLS:             false,
-	ExcludePath:           []string{"$RECYCLE.BIN", "System Volume Information", ".cache", ".comigo", ".idea", ".vscode", ".git", "node_modules"},
-	Host:                  "",
-	LogToFile:             false,
-	MaxScanDepth:          4,
-	MinImageNum:           3,
-	OpenBrowser:           true,
-	Port:                  1234,
-	Password:              "",
-	SupportFileType:       []string{".zip", ".tar", ".rar", ".cbr", ".cbz", ".epub", ".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".tar.xz", ".txz", ".tar.lz4", ".tlz4", ".tar.sz", ".tsz", ".bz2", ".gz", ".lz4", ".sz", ".xz", ".mp4", ".webm", ".pdf", ".m4v", ".flv", ".avi", ".mp3", ".wav", ".wma", ".ogg"},
-	SupportMediaType:      []string{".jpg", ".jpeg", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".gif", ".apng", ".bmp", ".webp", ".ico", ".heic", ".heif", ".avif"},
-	SupportTemplateFile:   []string{".html"},
-	UseCache:              true,
-	UploadPath:            "",
-	Username:              "comigo",
-	ZipFileTextEncoding:   "",
 }

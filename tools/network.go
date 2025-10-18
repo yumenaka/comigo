@@ -9,9 +9,9 @@ import (
 )
 
 // WaitUntilServerReady 循环尝试与端口建立 TCP 连接，直到成功或超时
-func WaitUntilServerReady(host string, port int, timeout time.Duration) {
+func WaitUntilServerReady(host string, port uint16, timeout time.Duration) {
 	deadline := time.Now().Add(timeout)
-	addr := host + ":" + strconv.Itoa(port)
+	addr := host + ":" + strconv.Itoa(int(port))
 	for {
 		if time.Now().After(deadline) {
 			logger.Infof("Server not ready within %v, continue anyway", timeout)

@@ -35,7 +35,7 @@ func BindURLs() {
 	privateAPI := publicAPI.Group("")
 
 	// echo jwt简明教程，还有google登录示例：https://echo.labstack.com/docs/cookbook/jwt
-	if config.GetUsername() != "" && config.GetPassword() != "" {
+	if config.GetCfg().NeedLogin() {
 		// jwtConfig格式参考：https://echo.labstack.com/docs/middleware/jwt#configuration
 		jwtConfig := echojwt.Config{
 			NewClaimsFunc: func(c echo.Context) jwt.Claims {

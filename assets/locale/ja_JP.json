@@ -406,6 +406,7 @@
   "funnel_require_acl_1": "TailscaleコンソールのACLパネルで",
   "funnel_require_acl_2": "ACLルールを編集し、Funnel隧道を有効化します。",
   "funnel_require_acl_3": "（サンプルJSONファイルをこちらからダウンロード）。",
+  "funnel_require_password_1": "【ファネルパスワード保護】を有効にする場合、ファネルトンネルを使用するためにComigo管理者アカウントとパスワードを設定する必要があります。",
   "verify_link": "認証リンク",
   "copy_link": "リンクをコピー",
   "copy_success": "クリップボードにコピーしました",

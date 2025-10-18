@@ -19,7 +19,7 @@ var counter int = 0
 // ShowQRCodeTailscale 打印 Tailscale 访问地址的二维码
 func ShowQRCodeTailscale(ctx context.Context) {
 	// 前提： 启用 Tailscale 服务
-	if config.GetCfg().GetEnableTailscale() == false {
+	if config.GetCfg().EnableTailscale == false {
 		if config.GetCfg().Debug {
 			logger.Info("Tailscale is disabled, skipping ShowQRCodeTailscale function.")
 		}

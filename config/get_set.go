@@ -194,20 +194,12 @@ func GetPrintAllPossibleQRCode() bool {
 	return cfg.PrintAllPossibleQRCode
 }
 
-func GetPort() int {
-	return cfg.Port
-}
-
 func GetTailscaleEnable() bool {
 	return cfg.EnableTailscale
 }
 
 func GetTailscaleHostname() string {
 	return cfg.TailscaleHostname
-}
-
-func GetTailscalePort() int {
-	return cfg.TailscalePort
 }
 
 func GetTailscaleAuthKey() string {

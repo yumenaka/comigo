@@ -26,8 +26,8 @@ func TrackTIme(pre time.Time) time.Duration {
 }
 
 // CheckPort 检测端口是否可用
-func CheckPort(port int) bool {
-	ln, err := net.Listen("tcp", ":"+strconv.Itoa(port))
+func CheckPort(port uint16) bool {
+	ln, err := net.Listen("tcp", ":"+strconv.Itoa(int(port)))
 	if err != nil {
 		logger.Info(locale.GetString("cannot_listen"), port, err)
 		return false
@@ -275,7 +275,7 @@ func GetSystemStatus() SystemStatus {
 type ServerStatus struct {
 	ServerName            string       // 服务器描述
 	ServerHost            string       //
-	ServerPort            int          //
+	ServerPort            uint16       //
 	NumberOfBooks         int          // 当前拥有的书籍总数
 	NumberOfOnLineUser    int          // 在线用户数（未实现）
 	NumberOfOnLineDevices int          // 在线设备数（未实现）
@@ -284,7 +284,7 @@ type ServerStatus struct {
 	OSInfo                SystemStatus // 系统信息
 }
 
-func GetServerInfo(configHost string, comigoVersion string, configPort int, configEnableUpload bool, allBooksNumber int) *ServerStatus {
+func GetServerInfo(configHost string, comigoVersion string, configPort uint16, configEnableUpload bool, allBooksNumber int) *ServerStatus {
 	serverName := "Comigo " + comigoVersion
 	// 本机首选出站IP
 	OutIP := GetOutboundIP().String()
@@ -304,7 +304,7 @@ func GetServerInfo(configHost string, comigoVersion string, configPort int, conf
 	return &serverStatus
 }
 
-func GetAllServerInfo(configHost string, comigoVersion string, configPort int, configEnableUpload bool, allBooksNumber int, clientIP string) *ServerStatus {
+func GetAllServerInfo(configHost string, comigoVersion string, configPort uint16, configEnableUpload bool, allBooksNumber int, clientIP string) *ServerStatus {
 	serverName := "Comigo " + comigoVersion
 	// 本机首选出站IP
 	host := ""

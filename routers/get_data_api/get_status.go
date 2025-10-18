@@ -24,11 +24,11 @@ type ServerStatus struct {
 }
 
 func GetServerInfoHandler(c echo.Context) error {
-	serverStatus := tools.GetServerInfo(config.GetHost(), config.GetVersion(), config.GetPort(), config.GetEnableUpload(), model.MainStoreGroup.GetBooksNumber())
+	serverStatus := tools.GetServerInfo(config.GetHost(), config.GetVersion(), uint16(config.GetCfg().Port), config.GetEnableUpload(), model.MainStoreGroup.GetBooksNumber())
 	return c.JSON(http.StatusOK, serverStatus)
 }
 
 func GetAllServerInfoHandler(c echo.Context) error {
-	serverStatus := tools.GetAllServerInfo(config.GetHost(), config.GetVersion(), config.GetPort(), config.GetEnableUpload(), model.MainStoreGroup.GetBooksNumber(), c.RealIP())
+	serverStatus := tools.GetAllServerInfo(config.GetHost(), config.GetVersion(), uint16(config.GetCfg().Port), config.GetEnableUpload(), model.MainStoreGroup.GetBooksNumber(), c.RealIP())
 	return c.JSON(http.StatusOK, serverStatus)
 }

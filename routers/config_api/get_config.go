@@ -23,7 +23,7 @@ func GetConfigToml(c echo.Context) error {
 	tempConfig.EnableDatabase = true
 	tempConfig.StoreUrls = []string{"C:\\test\\Comic", "D:\\some_path\\book", "/home/user/download"}
 	tempConfig.Username = "You_can_change_this_username"
-	tempConfig.Password = "Some_Secret-.PasswordNot_guessable"
+	tempConfig.Password = "Some_Secret-.Password密码"
 
 	bytes, err := toml.Marshal(tempConfig)
 	if err != nil {

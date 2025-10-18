@@ -9,9 +9,19 @@ import (
 
 // SettingsPage 设置页面
 templ SettingsPage(c echo.Context, tsStatus *tailscale_plugin.TailscaleStatus) {
-    @Header()
+    @common.Header(
+    		common.HeaderProps{
+    			Title:           "SettingsPage",
+    			ShowReturnIcon:  true,
+    			ReturnUrl:       "/",
+    			SetDownLoadLink: false,
+    			InShelf:         false,
+    			DownLoadLink:    "",
+    			SetTheme:        true,
+    })
 	@common.Toast()
 	@MainArea(tsStatus)
+	@common.Drawer(c, nil, nil)
 	@common.Footer(state.Version)
 	@common.QRCode(state.ServerStatus.ServerHost)
 }
