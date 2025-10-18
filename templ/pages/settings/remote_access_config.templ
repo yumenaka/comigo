@@ -22,6 +22,7 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
                 	tailscale_hostname: '',
                 	tailscale_port: '',
                 	tailscale_enable_funnel: '',
+                	funnel_enforce_password: true,
         			nowTailscaleStatus: {
         			    AuthURL: '', BackendState: '', Clients: null, OS: 'unknown', Online: true, FQDN: '', TailscaleIPs: [], Version: ''
         			},
@@ -34,6 +35,7 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
                         this.tailscale_hostname = this.$el.querySelector('#TailscaleHostname') .value? this.$el.querySelector('#TailscaleHostname') .value: 'comigo';
                         this.tailscale_port = this.$el.querySelector('#TailscalePort').value? this.$el.querySelector('#TailscalePort').value: '443';
                         this.tailscale_enable_funnel = this.$el.querySelector('#FunnelTunnel').checked? this.$el.querySelector('#FunnelTunnel').checked: false;
+                        this.funnel_enforce_password = this.$el.querySelector('#FunnelEnforcePassword').checked? this.$el.querySelector('#FunnelEnforcePassword').checked: true;
                         this.nowTailscaleStatus = JSON.parse(document.getElementById('tsStatus').textContent)
         				this.$watch('enable_tailscale', value => {
         				    this.isFormChanged = true; // 启用Tailscale 有变化，表单被修改过
@@ -184,6 +186,49 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 			</label>
 			<div x-text={ getTranslations("FunnelTunnel_Description") } class="w-full py-1 text-xs text-gray-500"></div>
 		</div>
+
+		<!-- Funnel模式密码保护 -->
+		<div
+			id={ "boolConfig_FunnelEnforcePassword" }
+			class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400 relative"
+			x-show="enable_tailscale && tailscale_enable_funnel"
+		>
+			<!-- Funnel ACL 权限未设置时的遮罩层 -->
+			<div
+				id="funnel_enforce_password_overlay"
+				class="absolute inset-0 z-10 w-full h-full flex items-center justify-center rounded-md bg-black/20 text-white text-sm"
+				if tsStatus != nil {
+					if tsStatus.FunnelCapability == "false" {
+						style=""
+					}
+					if tsStatus.FunnelCapability == "true" || tsStatus.FunnelCapability == "unknown" {
+						style="display:none;"
+					}
+				} else {
+					style="display:none;"
+				}
+			></div>
+			<div x-text={ getTranslations("FunnelEnforcePassword") } class="w-64"></div>
+			<!-- 隐藏input -->
+			<input type="hidden" name={ "FunnelEnforcePassword" } value="false" x-bind:disabled="funnel_enforce_password"/>
+			<label for={ "FunnelEnforcePassword" } class="relative h-8 cursor-pointer w-14">
+				<input
+					type="checkbox"
+					id={ "FunnelEnforcePassword" }
+					name={ "FunnelEnforcePassword" }
+					x-model="funnel_enforce_password"
+					if state.ServerConfig.FunnelEnforcePassword {
+						checked
+					}
+					value="true"
+					class="sr-only peer"
+				/>
+				<span class="absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500"></span>
+				<span class="absolute inset-y-0 w-6 h-6 m-1 transition-all bg-white rounded-full start-0 peer-checked:start-6"></span>
+			</label>
+			<div x-text={ getTranslations("FunnelEnforcePassword_Description") } class="w-full py-1 text-xs text-gray-500"></div>
+		</div>
+
 		<!-- Funnel ACL 权限未设置时的提示 -->
 		<div
 			id="funnel-acl-hint"
@@ -264,9 +309,9 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
                 if (!res.ok) throw new Error('HTTP ' + res.status);
                 return res.json().catch(() => ({}));
             }).then(() => {
-                // 提示Tailscale设置已更新
+                // 提示Tailscale设置已提交
                 showMessage({
-                    message: 'Tailscale设置已提交，请查看Tailscale状态',
+                    message: i18next.t('tailscale_settings_submitted_check_status'),
                     buttons: 'confirm',
                     onConfirm: function () {
                         // 提交后，定时刷新Tailscale状态面板，最多刷新15次
@@ -499,6 +544,15 @@ function UpdateTailscaleStatus(e) {
                         }
                         if (data.FunnelCapability === "true" || data.FunnelCapability === "unknown") {
                             overlay.style.display = 'none';
+                        }
+                    }
+                    const enforce_password_overlay = document.getElementById('funnel_enforce_password_overlay');
+                    if (enforce_password_overlay) {
+                        if (data.FunnelCapability === "false") {
+                            enforce_password_overlay.style.display = '';
+                        }
+                        if (data.FunnelCapability === "true" || data.FunnelCapability === "unknown") {
+                            enforce_password_overlay.style.display = 'none';
                         }
                     }
                     // 控制 Funnel 提示模块显示与否

@@ -10,31 +10,43 @@ var StringArrayOnceHandle = templ.NewOnceHandle()
 // https://templ.guide/syntax-and-usage/script-templates/
 templ StringArrayConfig(name string, values []string, description string, saveSuccessHint bool) {
 	@StringArrayOnceHandle.Once() {
-		<script>
-// 在htmx发送请求前进行验证，理解事件机制请参考event与htmx:afterRequest 的文档
+<script>
+// 在htmx发送请求前进行验证，事件机制请参考 htmx event 与 htmx:afterRequest 文档
 // https://htmx.org/docs/#events
 // https://htmx.org/events/#htmx:afterRequest
 document.body.addEventListener("htmx:beforeRequest", function (evt) {
-  // 获取触发事件的元素（通常是 form 或者触发的按钮）
-  const buttonID = evt.target.id;
+  // 发送请求的元素（form 或者触发按钮）
+  const buttonID = evt.detail.elt.id;
   // 不是添加按钮，直接返回
-  if (!buttonID || !buttonID.endsWith('AddButton')) {
+  if (!buttonID || !buttonID.endsWith('StringArrayAddButton')) {
     return;
   }
-  const configName = buttonID.replace('AddButton', '');
+  const configName = buttonID.replace('StringArrayAddButton', '');
   const addValue = document.getElementById(configName + 'AddInput').value.trim();
-  // 如果为空，则不提交
+  // 如果已经有这个值了，阻止提交
+  const container = document.getElementById(configName + '-string-array-config');
+  if (container) {
+    const existingNodes = container.querySelectorAll('[data-delete-value]');
+    for (const node of existingNodes) {
+      const existingValue = (node.getAttribute('data-delete-value') || '').trim();
+      if (existingValue === addValue && addValue !== '') {
+        showMessage({
+           message: i18next.t('value_already_exists_do_not_add_again'),
+           buttons: 'confirm'
+        });
+        evt.preventDefault();
+        return;
+      }
+    }
+  }
+  // 如果为空，阻止提交
   if (addValue === '') {
 	     // 设置项为空时，显示错误提示
          showMessage({
-            message: '请输入内容后再提交。',
-            buttons: 'confirm',
-            onConfirm: function () {
-                // 点击确认后的回调函数
-                //console.log('User confirmed the message.');
-         }
+            message: i18next.t('content_empty_please_enter_before_submit'),
+            buttons: 'confirm'
          });
-	event.preventDefault();
+	evt.preventDefault();
   }
 });
 </script>
@@ -51,7 +63,7 @@ document.body.addEventListener("htmx:beforeRequest", function (evt) {
 			// 此函数的作用，是修改 hx-vals 的值。实际的提交操作由 htmx 完成
 			function  addStringConfigValue(self){
 				const buttonID = self.getAttribute('id');
-				const configName = buttonID.replace('AddButton', '');
+				const configName = buttonID.replace('StringArrayAddButton', '');
 				const addValue = document.getElementById(configName + 'AddInput').value;
 				self.setAttribute('hx-vals', JSON.stringify({ configName: configName, addValue: addValue }));
 				console.log(configName, addValue);
@@ -102,7 +114,7 @@ document.body.addEventListener("htmx:beforeRequest", function (evt) {
 					<button
 						x-text={ getTranslations("submit") }
 						type="button"
-						id={ name + "AddButton" }
+						id={ name + "StringArrayAddButton" }
 						hx-post="/api/add-array-config"
 						hx-target={ "#" + name + "-string-array-config" }
 						hx-swap="outerHTML"

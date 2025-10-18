@@ -4,11 +4,11 @@ templ MessageModal() {
 	<!-- 模态遮罩层 -->
 	<div id="modal-overlay" class="z-50 fixed inset-0 flex items-center justify-center hidden bg-black/50">
 		<!-- 模态窗口 -->
-		<div id="modal" class="max-w-sm p-6 mx-auto bg-white rounded-lg">
+		<div id="modal" class="max-w-sm min-w-80 min-h-32 h p-6 mx-auto bg-white rounded-lg">
 			<!-- 提示信息 -->
-			<p id="modal-message" class="text-lg text-gray-800"></p>
+			<p id="modal-message" class="text-lg text-gray-800 font-semibold w-full text-center"></p>
 			<!-- 按钮容器 -->
-			<div id="modal-buttons" class="flex justify-end mt-4 space-x-2">
+			<div id="modal-buttons" class="flex justify-center mt-4 space-x-2">
 				<!-- 按钮将动态插入 -->
 			</div>
 		</div>
@@ -20,16 +20,16 @@ function showMessage(options) {
   const buttonsContainer = document.getElementById('modal-buttons');
 
   // 设置提示信息
-  messageElem.textContent = options.message || '默认提示信息';
+  messageElem.textContent = options.message || i18next.t('default_prompt_message');
 
   // 清空之前的按钮
   buttonsContainer.innerHTML = '';
 
-  // 根据选项创建按钮
+  // 只有确认按钮
   if (options.buttons === 'confirm') {
     const confirmButton = document.createElement('button');
-    confirmButton.textContent = '确定';
-    confirmButton.className = 'px-4 py-2 bg-blue-500 text-white rounded';
+    confirmButton.textContent = i18next.t('confirm');
+    confirmButton.className = 'min-w-24 mx-4 px-4 py-2 bg-blue-400 hover:bg-blue-450 active:bg-blue-500 font-semibold  text-white rounded shadow-md';
     confirmButton.onclick = function() {
       hideModal();
       if (typeof options.onConfirm === 'function') {
@@ -37,24 +37,26 @@ function showMessage(options) {
       }
     };
     buttonsContainer.appendChild(confirmButton);
-  } else if (options.buttons === 'yesno') {
-    const yesButton = document.createElement('button');
-    yesButton.textContent = '是';
-    yesButton.className = 'px-4 py-2 bg-green-500 text-white rounded';
-    yesButton.onclick = function() {
+  }
+  // 确认(OK)或取消按钮
+  if (options.buttons === 'confirm_cancel') {
+    const confirmButton = document.createElement('button');
+    confirmButton.textContent =  i18next.t('ok');
+    confirmButton.className = 'min-w-24 mx-4 px-4 py-2 bg-red-400 hover:bg-red-450 active:bg-red-500 font-semibold  text-white rounded shadow-md';
+    confirmButton.onclick = function() {
       hideModal();
-      if (typeof options.onYes === 'function') {
-        options.onYes();
+      if (typeof options.onConfirm === 'function') {
+        options.onConfirm();
       }
     };
-    const noButton = document.createElement('button');
-    noButton.textContent = '否';
-    noButton.className = 'px-4 py-2 bg-gray-500 text-white rounded';
-    noButton.onclick = function() {
+    const cancelButton = document.createElement('button');
+    cancelButton.textContent =  i18next.t('cancel');
+    cancelButton.className = 'min-w-24 mx-4 px-4 py-2 bg-gray-500 hover:bg-gray-550 active:bg-gray-600 text-white rounded shadow-md';
+    cancelButton.onclick = function() {
       hideModal();
     };
-    buttonsContainer.appendChild(yesButton);
-    buttonsContainer.appendChild(noButton);
+    buttonsContainer.appendChild(confirmButton);
+    buttonsContainer.appendChild(cancelButton);
   }
 
   // 显示模态
