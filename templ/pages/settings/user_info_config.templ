@@ -161,7 +161,7 @@ templ UserInfoConfig(nowUsername string, nowPassword string) {
 					</button>
 				</div>
 				<!-- 密码不匹配错误提示 -->
-				<div x-show="password !== ReEnterPassword" class="text-red-500 text-xs mt-1">两次输入的密码不一致</div>
+				<div x-show="password !== ReEnterPassword" class="text-red-500 text-xs mt-1" x-text="i18next.t('passwords_not_match')">两次输入的密码不一致</div>
 			</div>
 			<!-- SAVE按钮 -->
 			<div class="flex justify-center items-center w-full my-2">

@@ -150,15 +150,16 @@ document.getElementById('saveConfigButton').addEventListener('htmx:beforeRequest
     // 如果其他地方已经有配置了，则阻止请求并执行本地逻辑
     if (!canSave) {
         event.preventDefault();
-        showToast('请先删除其他位置的配置文件', 'warning');
+        // 请先删除其他位置的配置文件
+        showToast(i18next.t('please_delete_other_config_first'), 'warning');
     }
 });
 document.getElementById('saveConfigButton').addEventListener('htmx:afterRequest', function (event) {
     // 只对ID为myButton的请求进行监听
     if (event.detail.successful) {
-        showToast('保存设置文件成功！', 'info');
+        showToast(i18next.t('save_config_success'), 'info');
     } else {
-        showToast('保存设置文件失败', 'error');
+        showToast(i18next.t('save_config_failed'), 'error');
     }
 });
 
@@ -185,15 +186,15 @@ document.getElementById('deleteConfigButton').addEventListener('htmx:beforeReque
     // 如果不满足条件，则阻止请求并执行本地逻辑
     if (!canSelete) {
         event.preventDefault();
-        showToast('当前选择的路径下，没有可删除的配置文件', 'warning');
+        showToast(i18next.t('no_config_file_to_delete_in_path'), 'warning');
     }
 });
 document.getElementById('deleteConfigButton').addEventListener('htmx:afterRequest', function (event) {
     // 只对ID为myButton的请求进行监听
     if (event.detail.successful) {
-        showToast('删除设置文件成功！', 'info');
+        showToast('i18next.t('delete_config_success'), 'info');
     } else {
-        showToast('删除设置文件失败', 'error');
+        showToast('i18next.t('delete_config_failed'), 'error');
     }
 });
 </script>

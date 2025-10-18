@@ -4,12 +4,12 @@ templ UploadArea() {
 	<div class="relative w-full max-w-2xl p-8 bg-white rounded shadow-md">
 		<!-- 文件选择与拖拽区域 -->
 		<div id="drop-area" class="px-6 py-24 text-center transition duration-300 border-4 border-gray-300 border-dashed rounded cursor-pointer hover:border-blue-500">
-			<p class="text-gray-500">将文件拖拽到此处或点击选择文件</p>
+			<p class="text-gray-500" x-text="i18next.t('drag_or_click_to_upload')">>将文件拖拽到此处或点击选择文件</p>
 			<input type="file" id="file-input" multiple class="hidden"/>
 		</div>
 		<!-- 预览选中文件列表 -->
 		<div id="preview" class="mt-6">
-			<h3 class="mb-4 text-lg font-semibold">选择的文件</h3>
+			<h3 class="mb-4 text-lg font-semibold" x-text="i18next.t('selected_file')">选择的文件</h3>
 			<ul class="divide-y divide-gray-200" id="file-list">
 				<!-- 动态插入文件项 -->
 			</ul>
@@ -17,7 +17,7 @@ templ UploadArea() {
 		<!-- 进度条背景 显示与隐藏有过渡效果，不可点击。-->
 		<div id="progress-bar" class="absolute pointer-events-none top-0 left-0 h-full transition-opacity duration-500 bg-blue-500/30" style="width: 0%;"></div>
 		<!-- 上传按钮 -->
-		<button id="upload-button" class="w-full py-2 mt-6 text-white bg-blue-500 rounded hover:bg-blue-600 disabled:og-blue-600/50" disabled>上传文件<p id="progress-text" class="mt-2 text-gray-700"></p></button>
+		<button id="upload-button" class="w-full py-2 mt-6 text-white bg-blue-500 rounded hover:bg-blue-600 disabled:og-blue-600/50" disabled x-text="i18next.t('upload_file')">上传文件<p id="progress-text" class="mt-2 text-gray-700"></p></button>
 		<!-- 上传结果显示区域 -->
 		<div id="result" class="mt-4"></div>
 	</div>
@@ -136,7 +136,7 @@ templ UploadArea() {
                 // 初始化进度条
                 progressBar.style.width = '0%';
                 progressBar.style.opacity = '0.3';
-                uploadButton.textContent = '上传文件'+'0%';
+                uploadButton.textContent = i18next.t('upload_file')+'0%';
                 // 创建 FormData
                 const formData = new FormData();
                 filesToUpload.forEach(file => {
@@ -151,7 +151,7 @@ templ UploadArea() {
                     if (e.lengthComputable) {
                         const percentComplete = (e.loaded / e.total) * 100;
                         progressBar.style.width = `${percentComplete}%`;
-                        uploadButton.textContent = '上传文件'+`${percentComplete.toFixed(2)}%`;
+                        uploadButton.textContent = i18next.t('upload_file')+`${percentComplete.toFixed(2)}%`;
                     }
                 });
                 // 监听请求完成
@@ -163,12 +163,12 @@ templ UploadArea() {
                             filesList += '<li>' + file + '</li>';
                         });
                         resultDiv.innerHTML = '<p class="text-green-500 text-lg text-center">' + 
-                            data.message + '</p><ul class="text-gray-700 list-disc list-inside">' + 
+                            i18next.t('file_uploaded_successfully') + '</p><ul class="text-gray-700 list-disc list-inside">' +
                             filesList + '</ul>';
                         
                         // 提示上传成功
                         showMessage({
-                            message: '成功上传' + filesToUpload.length + '个文件',
+                            message: filesToUpload.length+" "+i18next.t('file_uploaded_successfully'),
                             buttons: 'confirm',
                             onConfirm: function() {
                                 window.location.reload();
@@ -180,24 +180,24 @@ templ UploadArea() {
 
                     } else {
                         const errorData = JSON.parse(xhr.responseText);
-                        resultDiv.innerHTML = `<p class="text-red-500 text-lg text-center">${errorData.error || '上传失败'}</p>`;
+                        resultDiv.innerHTML = `<p class="text-red-500">`+i18next.t('upload_failed_network_error')+`</p>`;
                     }
                 // 重置上传按钮和进度条
                 uploadButton.disabled = filesToUpload.length === 0;
-                uploadButton.textContent = '上传文件';
+                uploadButton.textContent = i18next.t('upload_file');
                 // 隐藏进度条
                 progressBar.style.opacity = '0';
                 };
-                // 监听错误
+                // 上传失败: 网络错误
                 xhr.onerror = function() {
-                    resultDiv.innerHTML = `<p class="text-red-500">上传失败: 网络错误</p>`;
+                    resultDiv.innerHTML = `<p class="text-red-500">`+i18next.t('upload_failed_network_error')+`</p>`;
                     uploadButton.disabled = filesToUpload.length === 0;
-                    uploadButton.textContent = '上传文件';
+                    uploadButton.textContent = i18next.t('upload_file');
                     progressBar.style.width = '0%';
                 };
                 // 发送请求
                 uploadButton.disabled = true;
-                uploadButton.textContent = '上传中...';
+                uploadButton.textContent = i18next.t('uploading');
                 xhr.send(formData);
             });
         </script>

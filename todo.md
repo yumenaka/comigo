@@ -11,7 +11,7 @@
 
 ### 前端技术
 - **模板引擎**: [Templ](https://templ.guide/) - 高性能 Go 模板引擎
-- **UI 组件**: [Flowbite](https://flowbite.com/docs/components/gallery/) - 现代化 UI 组件库
+- **UI 组件**: [Flowbite](https://flowbite.com/docs/components/gallery/) - UI 组件库
 - **交互增强**: 
   - [htmx](https://htmx.org/examples) - 现代化 AJAX 库
   - [Alpine.js](https://alpinejs.dev) - 轻量级 JavaScript 框架
