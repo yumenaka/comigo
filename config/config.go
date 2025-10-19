@@ -55,7 +55,7 @@ type Config struct {
 	EnableTailscale        bool            `json:"EnableTailscale" comment:"启用Tailscale网络支持"`
 	TailscaleHostname      string          `json:"TailscaleHostname" comment:"Tailscale网络的主机名，默认为comigo"`
 	FunnelTunnel           bool            `json:"FunnelTunnel" comment:"启用Tailscale的Funnel模式，允许通过Tailscale公开comigo服务到公网。"`
-	FunnelEnforcePassword  bool            `json:"funnel_enforce_password" comment:"启用Funnel模式时，强制要求使用密码登录comigo服务。"`
+	FunnelLoginCheck       bool            `json:"funnel_enforce_password" comment:"启用Funnel模式时，强制要求使用密码登录comigo服务。"`
 	TailscalePort          int             `json:"TailscalePort" comment:"Tailscale网络的端口，默认为443"`
 	TailscaleAuthKey       string          `json:"TailscaleAuthKey" comment:"Tailscale身份验证密钥。另外，也可以将本地环境变量 TS_AUTHKEY 设置为身份验证密钥"`
 	ZipFileTextEncoding    string          `json:"ZipFileTextEncoding" comment:"非utf-8编码的ZIP文件，尝试用什么编码解析，默认GBK"`
@@ -140,8 +140,8 @@ func (c *Config) InitStoreUrls() {
 	}
 }
 
-// NeedLogin 是否需要登录
-func (c *Config) NeedLogin() bool {
+// RequiresAuth 是否需要登录
+func (c *Config) RequiresAuth() bool {
 	return cfg.Username != "" && cfg.Password != ""
 }
 

@@ -42,14 +42,14 @@ func RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Compon
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<form id=\"tailscale_config_form\" action=\"/api/submit-tailscale-config\" method=\"post\" class=\"flex flex-col justify-start w-full px-2 py-2 mx-2 my-4 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\" x-data=\"{\n\t\t\t    \tenable_tailscale: true,\n\t\t\t    \ttailscale_auth_key: '',\n                \ttailscale_hostname: '',\n                \ttailscale_port: '',\n                \ttailscale_enable_funnel: '',\n                \tfunnel_enforce_password: true,\n        \t\t\tnowTailscaleStatus: {\n        \t\t\t    AuthURL: '', BackendState: '', Clients: null, OS: 'unknown', Online: true, FQDN: '', TailscaleIPs: [], Version: ''\n        \t\t\t},\n        \t\t\tisFormChanged:false,\n        \t\t\tinit() {\n        \t\t\t    // checked 表示该复选框是否被默认选中（当页面加载时）。它不表示这个复选框当前是否被选中：如果复选框的状态被改变，这个内容属性不反映这个变化。\n                        this.enable_tailscale = this.$el.querySelector('#EnableTailscaleTemp').value === 'true'? true: false;\n                        // console.log('Initial enable_tailscale:', this.enable_tailscale);\n                        this.tailscale_auth_key = this.$el.querySelector('#TailscaleAuthKey').value? this.$el.querySelector('#TailscaleAuthKey').value: '';\n                        this.tailscale_hostname = this.$el.querySelector('#TailscaleHostname') .value? this.$el.querySelector('#TailscaleHostname') .value: 'comigo';\n                        this.tailscale_port = this.$el.querySelector('#TailscalePort').value? this.$el.querySelector('#TailscalePort').value: '443';\n                        this.tailscale_enable_funnel = this.$el.querySelector('#FunnelTunnel').checked? this.$el.querySelector('#FunnelTunnel').checked: false;\n                        this.funnel_enforce_password = this.$el.querySelector('#FunnelEnforcePassword').checked? this.$el.querySelector('#FunnelEnforcePassword').checked: true;\n                        this.nowTailscaleStatus = JSON.parse(document.getElementById('tsStatus').textContent)\n        \t\t\t\tthis.$watch('enable_tailscale', value => {\n        \t\t\t\t    this.isFormChanged = true; // 启用Tailscale 有变化，表单被修改过\n        \t\t\t\t\tconsole.log('enable_tailscale changed. :',  value);\n        \t\t\t\t});\n        \t\t\t\tthis.$watch('tailscale_enable_funnel', value => {\n                            this.isFormChanged = true; // 启用Tailscale 有变化，表单被修改过\n                            console.log('tailscale_enable_funnel changed. :',  value);\n                       });\n        \t\t\t}}\"><div x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<form id=\"tailscale_config_form\" action=\"/api/submit-tailscale-config\" method=\"post\" class=\"flex flex-col justify-start w-full px-2 py-2 mx-2 my-4 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\" x-data=\"{\n\t\t\t    \tenable_tailscale: true,\n\t\t\t    \ttailscale_auth_key: '',\n                \ttailscale_hostname: '',\n                \ttailscale_port: '',\n                \ttailscale_enable_funnel: '',\n                \tfunnel_password_protection: false,\n        \t\t\tnowTailscaleStatus: {\n        \t\t\t    AuthURL: '', BackendState: '', Clients: null, OS: 'unknown', Online: true, FQDN: '', TailscaleIPs: [], Version: ''\n        \t\t\t},\n        \t\t\tisFormChanged:false,\n        \t\t\tinit() {\n        \t\t\t    // 初始化数据\n                        this.enable_tailscale = this.$el.querySelector('#EnableTailscale').value === 'true';\n                        console.log('Initial enable_tailscale:', this.enable_tailscale);\n\n                        this.tailscale_auth_key = this.$el.querySelector('#TailscaleAuthKey').value? this.$el.querySelector('#TailscaleAuthKey').value: '';\n                        console.log('Initial tailscale_auth_key:', this.tailscale_auth_key);\n\n                        this.tailscale_hostname = this.$el.querySelector('#TailscaleHostname') .value? this.$el.querySelector('#TailscaleHostname') .value: 'comigo';\n                        console.log('Initial tailscale_hostname:', this.tailscale_hostname);\n\n                        this.tailscale_port = this.$el.querySelector('#TailscalePort').value? this.$el.querySelector('#TailscalePort').value: '443';\n                        console.log('Initial tailscale_port:', this.tailscale_port);\n\n                        this.tailscale_enable_funnel = this.$el.querySelector('#FunnelTunnel').value === 'true';\n                        console.log('Initial tailscale_enable_funnel:', this.tailscale_enable_funnel);\n\n                        this.funnel_password_protection = this.$el.querySelector('#FunnelLoginCheck').value === 'true';\n                        console.log('Initial funnel_password_protection:', this.funnel_password_protection);\n\n                        this.nowTailscaleStatus = JSON.parse(document.getElementById('tsStatus').textContent)\n                        console.log('Initial nowTailscaleStatus:', this.nowTailscaleStatus);\n\n        \t\t\t\tthis.$watch('enable_tailscale', value => {\n        \t\t\t\t    this.isFormChanged = true; // 启用Tailscale 有变化，表单被修改过\n        \t\t\t\t\tconsole.log('enable_tailscale changed. :',  value);\n        \t\t\t\t});\n        \t\t\t\tthis.$watch('tailscale_enable_funnel', value => {\n                            this.isFormChanged = true; // 启用Tailscale 有变化，表单被修改过\n                            console.log('tailscale_enable_funnel changed. :',  value);\n                       });\n        \t\t\t}}\"><div x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("remote_access"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 50, Col: 48}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 63, Col: 48}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -62,7 +62,7 @@ func RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Compon
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs("boolConfig_EnableTailscale")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 53, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 66, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -75,20 +75,20 @@ func RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Compon
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("EnableTailscale"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 54, Col: 51}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 67, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"w-64\"></div><!--  如果一个复选框在其表单被提交时没有被选中，就不会有任何代表其未被选中的状态（例如 value=unchecked）的值被提交给服务器——该值根本就没有被提交给服务器！--><!-- 如果你想在复选框未被选中时提交一个默认值，你可以在表单中加入一个具有相同的 name 和 value 的 <input type=\"hidden\"> 字段，它可以由 JavaScript 生成。 --><!-- https://developer.mozilla.org/zh-CN/docs/Web/HTML/Reference/Elements/input/checkbox --><!-- templ 使用变量或模板参数设置布尔属性，请在属性名称后使用问号来表示该属性是布尔值。 --><input type=\"hidden\" id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\"></div><!--  如果一个复选框在其表单被提交时没有被选中，就不会有任何代表其未被选中的状态（例如 value=unchecked）的值被提交给服务器——该值根本就没有被提交给服务器！--><!-- 如果你想在复选框未被选中时提交一个默认值，你可以在表单中加入一个具有相同的 name 和 value 的 <input type=\"hidden\"> 字段，它可以由 JavaScript 生成。 --><!-- https://developer.mozilla.org/zh-CN/docs/Web/HTML/Reference/Elements/input/checkbox --><!-- templ 使用变量或模板参数设置布尔属性，请在属性名称后使用问号来表示该属性是布尔值。 --><input type=\"hidden\" id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs("EnableTailscaleTemp")
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs("EnableTailscaleHidden")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 61, Col: 30}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 74, Col: 32}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -109,557 +109,549 @@ func RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Compon
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "> <input type=\"hidden\" name=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "> <label for=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs("EnableTailscale")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 68, Col: 48}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 81, Col: 33}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" value=\"false\" x-bind:disabled=\"enable_tailscale\"> <label for=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" class=\"relative h-8 cursor-pointer w-14\"><input type=\"checkbox\" id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs("EnableTailscale")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 69, Col: 33}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 84, Col: 27}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" class=\"relative h-8 cursor-pointer w-14\"><input type=\"checkbox\" id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" name=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs("EnableTailscale")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 72, Col: 27}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 85, Col: 29}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" name=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" x-model=\"enable_tailscale\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if state.ServerConfig.EnableTailscale {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, " checked")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, " value=\"true\" class=\"sr-only peer\"> <span class=\"absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500\"></span> <span class=\"absolute inset-y-0 w-6 h-6 m-1 transition-all bg-white rounded-full start-0 peer-checked:start-6\"></span></label><div x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var9 string
-		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs("EnableTailscale")
+		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("EnableTailscale_Description"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 73, Col: 29}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 96, Col: 63}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\" x-model=\"enable_tailscale\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if state.ServerConfig.EnableTailscale {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, " checked")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, " value=\"true\" class=\"sr-only peer\"> <span class=\"absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500\"></span> <span class=\"absolute inset-y-0 w-6 h-6 m-1 transition-all bg-white rounded-full start-0 peer-checked:start-6\"></span></label><div x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" class=\"w-full py-1 text-xs text-gray-500\"></div></div><!-- Tailscale服务主机名--><div id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var10 string
-		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("EnableTailscale_Description"))
+		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs("stringConfig_TailscaleHostname")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 84, Col: 63}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 100, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" class=\"w-full py-1 text-xs text-gray-500\"></div></div><!-- Tailscale服务主机名--><div id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" x-show=\"enable_tailscale\" class=\"flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\"><label x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var11 string
-		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs("stringConfig_TailscaleHostname")
+		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("TailscaleHostname"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 88, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 104, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" x-show=\"enable_tailscale\" class=\"flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\"><label x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" for=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var12 string
-		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("TailscaleHostname"))
+		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs("TailscaleHostname")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 92, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 104, Col: 83}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" for=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\"></label> <input id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs("TailscaleHostname")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 92, Col: 83}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 106, Col: 28}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\" class=\"w-64\"></label> <input id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\" name=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs("TailscaleHostname")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 94, Col: 28}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 107, Col: 30}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\" name=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\" type=\"text\" :placeholder=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var15 string
-		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs("TailscaleHostname")
+		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("TailscaleHostname"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 95, Col: 30}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 109, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "\" type=\"text\" :placeholder=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var16 string
-		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("TailscaleHostname"))
+		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(state.ServerConfig.TailscaleHostname)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 97, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 110, Col: 48}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\" class=\"px-2.5 w-64 rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm\"><div class=\"w-full py-1 text-xs text-gray-500\" x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var17 string
-		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(state.ServerConfig.TailscaleHostname)
+		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("TailscaleHostname_Description"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 98, Col: 48}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 115, Col: 61}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" class=\"px-2.5 w-64 rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm\"><div class=\"w-full py-1 text-xs text-gray-500\" x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\"></div><div class=\"bg-red-600\"></div></div><!-- Tailscale服务端口号--><div id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var18 string
-		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("TailscaleHostname_Description"))
+		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs("numberConfig_TailscalePort")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 103, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 121, Col: 36}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\"></div><div class=\"bg-red-600\"></div></div><!-- Tailscale服务端口号--><div id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\" class=\"flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\" x-show=\"enable_tailscale\"><label for=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var19 string
-		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs("numberConfig_TailscalePort")
+		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs("TailscalePort")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 109, Col: 36}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 125, Col: 31}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\" class=\"flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\" x-show=\"enable_tailscale\"><label for=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\" x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var20 string
-		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs("TailscalePort")
+		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("TailscalePort"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 113, Col: 31}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 125, Col: 76}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "\" class=\"w-64\" x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "\"></label> <input class=\"px-2.5 w-64 rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm\" id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var21 string
-		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("TailscalePort"))
+		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs("TailscalePort")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 113, Col: 88}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 128, Col: 24}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\"></label> <input class=\"px-2.5 w-64 rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm\" id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\" name=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var22 string
 		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs("TailscalePort")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 116, Col: 24}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 129, Col: 26}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "\" name=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "\" type=\"number\" :placeholder=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var23 string
-		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs("TailscalePort")
+		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("TailscalePort"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 117, Col: 26}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 131, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "\" type=\"number\" :placeholder=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var24 string
-		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("TailscalePort"))
+		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(state.ServerConfig.TailscalePort))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 119, Col: 51}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 132, Col: 58}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "\" max=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var25 string
-		templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(int(state.ServerConfig.TailscalePort)))
+		templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(65535))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 120, Col: 63}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 133, Col: 29}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "\" max=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "\" min=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var26 string
-		templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(65535))
+		templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(0))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 121, Col: 29}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 134, Col: 25}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "\" min=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "\"><div class=\"w-full py-1 text-xs text-gray-500\" x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var27 string
-		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(0))
+		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("TailscalePort_Description"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 122, Col: 25}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 136, Col: 103}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "\"><div class=\"w-full py-1 text-xs text-gray-500\" x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "\"></div><div class=\"bg-red-600\"></div></div><!-- Tailscale预授权密钥 --><div id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var28 string
-		templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("TailscalePort_Description"))
+		templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs("stringConfig_TailscaleAuthKey")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 124, Col: 103}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 141, Col: 39}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "\"></div><div class=\"bg-red-600\"></div></div><!-- Tailscale预授权密钥 --><div id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "\" x-show=\"enable_tailscale\" class=\"flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\"><label x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var29 string
-		templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs("stringConfig_TailscaleAuthKey")
+		templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("TailscaleAuthKey"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 129, Col: 39}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 145, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "\" x-show=\"enable_tailscale\" class=\"flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\"><label x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "\" for=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var30 string
-		templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("TailscaleAuthKey"))
+		templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs("TailscaleAuthKey")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 133, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 145, Col: 81}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "\" for=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "\"></label> <input id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var31 string
 		templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs("TailscaleAuthKey")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 133, Col: 81}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 147, Col: 27}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "\" class=\"w-64\"></label> <input id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "\" name=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var32 string
 		templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs("TailscaleAuthKey")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 135, Col: 27}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 148, Col: 29}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "\" name=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "\" type=\"text\" :placeholder=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var33 string
-		templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs("TailscaleAuthKey")
+		templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("TailscaleAuthKey"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 136, Col: 29}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 150, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "\" type=\"text\" :placeholder=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var34 string
-		templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("TailscaleAuthKey"))
+		templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(state.ServerConfig.TailscaleAuthKey)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 138, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 151, Col: 47}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "\" class=\"px-2.5 w-64 rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm\"><div class=\"w-full py-1 text-xs text-gray-500\" x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var35 string
-		templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(state.ServerConfig.TailscaleAuthKey)
+		templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("TailscaleAuthKeyDescription"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 139, Col: 47}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 156, Col: 59}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "\" class=\"px-2.5 w-64 rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm\"><div class=\"w-full py-1 text-xs text-gray-500\" x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "\"></div><div class=\"bg-red-600\"></div></div><!-- Funnel模式（公网访问） --><div id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var36 string
-		templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("TailscaleAuthKeyDescription"))
+		templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs("boolConfig_FunnelTunnel")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 144, Col: 59}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 162, Col: 33}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "\"></div><div class=\"bg-red-600\"></div></div><!-- Funnel模式（公网访问） --><div id=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var37 string
-		templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs("boolConfig_FunnelTunnel")
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 150, Col: 33}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var37))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "\" class=\"flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400 relative\" x-show=\"enable_tailscale\"><!-- Funnel ACL 权限未设置时的遮罩层 --><div id=\"funnel-acl-overlay\" class=\"absolute inset-0 z-10 w-full h-full flex items-center justify-center rounded-md bg-black/20 text-white text-sm\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "\" class=\"flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400 relative\" x-show=\"enable_tailscale\"><!-- Funnel ACL 权限未设置时的遮罩层 --><div id=\"funnel-acl-overlay\" class=\"absolute inset-0 z-10 w-full h-full flex items-center justify-center rounded-md bg-black/20 text-white text-sm\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if tsStatus != nil {
 			if tsStatus.FunnelCapability == "false" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, " style=\"\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, " style=\"\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
 			if tsStatus.FunnelCapability == "true" || tsStatus.FunnelCapability == "unknown" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, " style=\"display:none;\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, " style=\"display:none;\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, " style=\"display:none;\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, " style=\"display:none;\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "></div><div x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "></div><div x-text=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var37 string
+		templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("FunnelTunnel"))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 181, Col: 48}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var37))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "\"></div><!-- 隐藏input --><input type=\"hidden\" name=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var38 string
-		templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("FunnelTunnel"))
+		templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs("FunnelTunnel")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 169, Col: 48}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 183, Col: 45}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "\" class=\"w-64\"></div><!-- 隐藏input --><input type=\"hidden\" name=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "\" value=\"false\" x-bind:disabled=\"tailscale_enable_funnel\"> <label for=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var39 string
 		templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs("FunnelTunnel")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 171, Col: 45}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 184, Col: 30}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, "\" value=\"false\" x-bind:disabled=\"tailscale_enable_funnel\"> <label for=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, "\" class=\"relative h-8 cursor-pointer w-14\"><input type=\"checkbox\" id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var40 string
 		templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs("FunnelTunnel")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 172, Col: 30}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 187, Col: 24}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 49, "\" class=\"relative h-8 cursor-pointer w-14\"><input type=\"checkbox\" id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 49, "\" name=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var41 string
 		templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.JoinStringErrs("FunnelTunnel")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 175, Col: 24}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 188, Col: 26}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var41))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 50, "\" name=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 50, "\" x-model=\"tailscale_enable_funnel\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if state.ServerConfig.FunnelTunnel {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 51, " value=\"true\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 52, " value=\"false\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 53, " class=\"sr-only peer\"> <span class=\"absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500\"></span> <span class=\"absolute inset-y-0 w-6 h-6 m-1 transition-all bg-white rounded-full start-0 peer-checked:start-6\"></span></label><div x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var42 string
-		templ_7745c5c3_Var42, templ_7745c5c3_Err = templ.JoinStringErrs("FunnelTunnel")
+		templ_7745c5c3_Var42, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("FunnelTunnel_Description"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 176, Col: 26}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 200, Col: 60}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var42))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 51, "\" x-model=\"tailscale_enable_funnel\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if state.ServerConfig.FunnelTunnel {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 52, " checked")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 53, " value=\"true\" class=\"sr-only peer\"> <span class=\"absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500\"></span> <span class=\"absolute inset-y-0 w-6 h-6 m-1 transition-all bg-white rounded-full start-0 peer-checked:start-6\"></span></label><div x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 54, "\" class=\"w-full py-1 text-xs text-gray-500\"></div></div><!-- Funnel密码保护检查 --><div id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var43 string
-		templ_7745c5c3_Var43, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("FunnelTunnel_Description"))
+		templ_7745c5c3_Var43, templ_7745c5c3_Err = templ.JoinStringErrs("boolConfig_FunnelLoginCheck")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 187, Col: 60}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 205, Col: 37}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var43))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 54, "\" class=\"w-full py-1 text-xs text-gray-500\"></div></div><!-- Funnel模式密码保护 --><div id=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var44 string
-		templ_7745c5c3_Var44, templ_7745c5c3_Err = templ.JoinStringErrs("boolConfig_FunnelEnforcePassword")
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 192, Col: 42}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var44))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 55, "\" class=\"flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400 relative\" x-show=\"enable_tailscale && tailscale_enable_funnel\"><!-- Funnel ACL 权限未设置时的遮罩层 --><div id=\"funnel_enforce_password_overlay\" class=\"absolute inset-0 z-10 w-full h-full flex items-center justify-center rounded-md bg-black/20 text-white text-sm\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 55, "\" class=\"flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400 relative\" x-show=\"enable_tailscale\"><!-- Funnel ACL 权限未设置时的遮罩层 --><div id=\"funnel_password_protection_overlay\" class=\"absolute inset-0 z-10 w-full h-full flex items-center justify-center rounded-md bg-black/20 text-white text-sm\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -686,38 +678,38 @@ func RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Compon
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var45 string
-		templ_7745c5c3_Var45, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("FunnelEnforcePassword"))
+		var templ_7745c5c3_Var44 string
+		templ_7745c5c3_Var44, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("FunnelLoginCheck"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 211, Col: 57}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 224, Col: 52}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var44))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 60, "\"></div><!-- 隐藏input --><input type=\"hidden\" name=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var45 string
+		templ_7745c5c3_Var45, templ_7745c5c3_Err = templ.JoinStringErrs("FunnelLoginCheck")
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 226, Col: 49}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var45))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 60, "\" class=\"w-64\"></div><!-- 隐藏input --><input type=\"hidden\" name=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 61, "\" value=\"true\" x-bind:disabled=\"funnel_password_protection\"> <label for=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var46 string
-		templ_7745c5c3_Var46, templ_7745c5c3_Err = templ.JoinStringErrs("FunnelEnforcePassword")
+		templ_7745c5c3_Var46, templ_7745c5c3_Err = templ.JoinStringErrs("FunnelLoginCheck")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 213, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 227, Col: 34}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var46))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 61, "\" value=\"false\" x-bind:disabled=\"funnel_enforce_password\"> <label for=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var47 string
-		templ_7745c5c3_Var47, templ_7745c5c3_Err = templ.JoinStringErrs("FunnelEnforcePassword")
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 214, Col: 39}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var47))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -725,12 +717,12 @@ func RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Compon
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var48 string
-		templ_7745c5c3_Var48, templ_7745c5c3_Err = templ.JoinStringErrs("FunnelEnforcePassword")
+		var templ_7745c5c3_Var47 string
+		templ_7745c5c3_Var47, templ_7745c5c3_Err = templ.JoinStringErrs("FunnelLoginCheck")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 217, Col: 33}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 230, Col: 28}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var48))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var47))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -738,153 +730,171 @@ func RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Compon
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var49 string
-		templ_7745c5c3_Var49, templ_7745c5c3_Err = templ.JoinStringErrs("FunnelEnforcePassword")
+		var templ_7745c5c3_Var48 string
+		templ_7745c5c3_Var48, templ_7745c5c3_Err = templ.JoinStringErrs("FunnelLoginCheck")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 218, Col: 35}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 231, Col: 30}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var48))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 64, "\" x-model=\"funnel_password_protection\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if state.ServerConfig.FunnelLoginCheck {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 65, " value=\"true\" checked")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 66, " value=\"false\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 67, " class=\"sr-only peer\"> ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var49 string
+		templ_7745c5c3_Var49, templ_7745c5c3_Err = templ.JoinStringErrs(state.ServerConfig.FunnelLoginCheck)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 241, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var49))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 64, "\" x-model=\"funnel_enforce_password\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if state.ServerConfig.FunnelEnforcePassword {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 65, " checked")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 66, " value=\"true\" class=\"sr-only peer\"> <span class=\"absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500\"></span> <span class=\"absolute inset-y-0 w-6 h-6 m-1 transition-all bg-white rounded-full start-0 peer-checked:start-6\"></span></label><div x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 68, " <span class=\"absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500\"></span> <span class=\"absolute inset-y-0 w-6 h-6 m-1 transition-all bg-white rounded-full start-0 peer-checked:start-6\"></span></label><div x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var50 string
-		templ_7745c5c3_Var50, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("FunnelEnforcePassword_Description"))
+		templ_7745c5c3_Var50, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("FunnelLoginCheckDescription"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 229, Col: 69}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 245, Col: 63}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var50))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 67, "\" class=\"w-full py-1 text-xs text-gray-500\"></div></div><!-- Funnel ACL 权限未设置时的提示 --><div id=\"funnel-acl-hint\" x-show=\"enable_tailscale\" class=\"flex flex-col justify-start w-full mx-0 mt-0 mb-2 px-4 py-2 font-semibold items-left bg-base-100 text-base-content text-xs/4 md:text-sm/6 border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 69, "\" class=\"w-full py-1 text-xs text-gray-500\"></div></div><!-- 帮助面板：如何设置Funnel ACL 权限 --><div id=\"funnel-acl-hint\" x-show=\"enable_tailscale\" class=\"flex flex-col justify-start w-full mx-0 mt-0 mb-2 px-4 py-2 font-semibold items-left bg-base-100 text-base-content text-xs/4 md:text-sm/6 border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if tsStatus != nil {
 			if tsStatus.FunnelCapability == "false" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 68, " style=\"\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 70, " style=\"\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
 			if tsStatus.FunnelCapability == "true" || tsStatus.FunnelCapability == "unknown" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 69, " style=\"display:none;\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 71, " style=\"display:none;\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 70, " style=\"display:none;\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 72, " style=\"display:none;\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 71, "><p x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 73, "><p x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var51 string
 		templ_7745c5c3_Var51, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("funnel_not_set_hint"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 248, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 264, Col: 53}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var51))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 72, "\">Funnel 功能未设置。需要：</p><ol class=\"list-decimal ml-5 space-y-1\"><li><a x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 74, "\">Funnel 功能未设置。需要：</p><ol class=\"list-decimal ml-5 space-y-1\"><li><a x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var52 string
 		templ_7745c5c3_Var52, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("funnel_require_dns_1"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 250, Col: 59}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 266, Col: 59}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var52))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 73, "\" href=\"https://login.tailscale.com/admin/dns\" target=\"_blank\" class=\"underline\">在控制台DNS面板</a>，<span x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 75, "\" href=\"https://login.tailscale.com/admin/dns\" target=\"_blank\" class=\"underline\">在控制台DNS面板</a>，<span x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var53 string
 		templ_7745c5c3_Var53, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("funnel_require_dns_2"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 250, Col: 223}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 266, Col: 223}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var53))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 74, "\">开启MagicDNS功能与HTTPS功能</span></li><li><a x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 76, "\">开启MagicDNS功能与HTTPS功能</span></li><li><a x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var54 string
 		templ_7745c5c3_Var54, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("funnel_require_acl_1"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 251, Col: 59}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 267, Col: 59}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var54))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 75, "\" href=\"https://login.tailscale.com/admin/acls/file\" target=\"_blank\" class=\"underline\">在控制台ACL面板</a><span x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 77, "\" href=\"https://login.tailscale.com/admin/acls/file\" target=\"_blank\" class=\"underline\">在控制台ACL面板</a><span x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var55 string
 		templ_7745c5c3_Var55, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("funnel_require_acl_2"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 251, Col: 226}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 267, Col: 226}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var55))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 76, "\">在Tailscale控制台ACL面板</span><a id=\"download-funnel-acl-example\" href=\"#\" download=\"tailscale_acl.json\" class=\"underline\" x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 78, "\">在Tailscale控制台ACL面板</span><a id=\"download-funnel-acl-example\" href=\"#\" download=\"tailscale_acl.json\" class=\"underline\" x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var56 string
 		templ_7745c5c3_Var56, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("funnel_require_acl_3"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 251, Col: 407}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 267, Col: 407}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var56))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 77, "\">点此下载示例JSON文件</a></li><li x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 79, "\">点此下载示例JSON文件</a></li><li x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var57 string
 		templ_7745c5c3_Var57, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("funnel_require_password_1"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 252, Col: 64}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 268, Col: 64}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var57))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 78, "\"></li></ol><script>\n\t\t\t\t\t(function() {\n\t\t\t\t\t\ttry {\n\t\t\t\t\t\t\tvar link = document.getElementById('download-funnel-acl-example');\n\t\t\t\t\t\t\tif (!link) return;\n\t\t\t\t\t\t\tvar jsonText = '{\\n  \"groups\": {\\n    \"group:funnel\":  [\"you-email@sample.com\"]\\n  },\\n  \"nodeAttrs\": [\\n    {\\n      \"target\": [\"group:funnel\"],\\n      \"attr\":   [\"funnel\"]\\n    }\\n  ],\\n // Other ACL settings\\n}\\n';\n\t\t\t\t\t\t\tvar blob = new Blob([jsonText], { type: 'application/json;charset=utf-8' });\n\t\t\t\t\t\t\tvar url = URL.createObjectURL(blob);\n\t\t\t\t\t\t\tlink.href = url;\n\t\t\t\t\t\t\tlink.addEventListener('click', function() {\n\t\t\t\t\t\t\t\tsetTimeout(function() { URL.revokeObjectURL(url); }, 4000);\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t} catch (_) {}\n\t\t\t\t\t})();\n\t\t\t\t</script></div><!-- Tailscale状态面板 -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 80, "\"></li></ol><script>\n\t\t\t\t\t(function() {\n\t\t\t\t\t\ttry {\n\t\t\t\t\t\t\tvar link = document.getElementById('download-funnel-acl-example');\n\t\t\t\t\t\t\tif (!link) return;\n\t\t\t\t\t\t\tvar jsonText = '{\\n  \"groups\": {\\n    \"group:funnel\":  [\"you-email@sample.com\"]\\n  },\\n  \"nodeAttrs\": [\\n    {\\n      \"target\": [\"group:funnel\"],\\n      \"attr\":   [\"funnel\"]\\n    }\\n  ],\\n // Other ACL settings\\n}\\n';\n\t\t\t\t\t\t\tvar blob = new Blob([jsonText], { type: 'application/json;charset=utf-8' });\n\t\t\t\t\t\t\tvar url = URL.createObjectURL(blob);\n\t\t\t\t\t\t\tlink.href = url;\n\t\t\t\t\t\t\tlink.addEventListener('click', function() {\n\t\t\t\t\t\t\t\tsetTimeout(function() { URL.revokeObjectURL(url); }, 4000);\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t} catch (_) {}\n\t\t\t\t\t})();\n\t\t\t\t</script></div><!-- Tailscale状态面板 -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -892,20 +902,20 @@ func RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Compon
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 79, "<!-- 提交按钮 --><div class=\"flex flex-col justify-center items-center w-full my-2\"><button id=\"tailscale-submit-btn\" type=\"button\" class=\"min-w-28 px-2 h-10 mx-2 my-0 text-center text-gray-700 transition border border-gray-500 rounded bg-sky-300 active:bg-sky-500 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed\" x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 81, "<!-- 提交按钮 --><div class=\"flex flex-col justify-center items-center w-full my-2\"><button id=\"tailscale-submit-btn\" type=\"button\" class=\"min-w-28 px-2 h-10 mx-2 my-0 text-center text-gray-700 transition border border-gray-500 rounded bg-sky-300 active:bg-sky-500 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed\" x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var58 string
 		templ_7745c5c3_Var58, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("submit"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 278, Col: 38}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 294, Col: 38}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var58))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 80, "\">Submit</button><script>\n(function () {\n    const btn = document.getElementById('tailscale-submit-btn');\n    if (!btn) return;\n    btn.addEventListener('click', function (e) {\n        try {\n            if (e && typeof e.preventDefault === 'function') e.preventDefault();\n            // 在请求期间禁用提交按钮，防止重复提交\n            btn.disabled = true;\n            const enable = (document.getElementById('EnableTailscale') && document.getElementById('EnableTailscale').checked) ? 'true' : 'false';\n            const auth_key = (document.getElementById('TailscaleAuthKey') && document.getElementById('TailscaleAuthKey').value) || '';\n            const host = (document.getElementById('TailscaleHostname') && document.getElementById('TailscaleHostname').value) || '';\n            const port = (document.getElementById('TailscalePort') && document.getElementById('TailscalePort').value) || '';\n            const funnel = (document.getElementById('FunnelTunnel') && document.getElementById('FunnelTunnel').checked) ? 'true' : 'false';\n            const funnel_enforce_password = (document.getElementById('FunnelEnforcePassword') && document.getElementById('FunnelEnforcePassword').checked) ? 'true' : 'false';\n            // 如果页面上存在 id 为 \"logout_button\" 的元素，则 now_login 为 true，否则为 false。\n            const now_login = !!document.getElementById('logout_button');\n            if (funnel === 'true' && funnel_enforce_password && now_login === false) {\n                showMessage({\n                    message: i18next.t('funnel_enable_while_no_password_warning'),\n                    buttons: 'confirm'\n                });\n                // 恢复按钮可用\n                btn.disabled = false;\n                return;\n            }\n            // 构造 URLSearchParams 对象以编码数据\n            const params = new URLSearchParams();\n            params.set('EnableTailscale', enable);\n            params.set('TailscaleAuthKey', auth_key);\n            params.set('TailscaleHostname', host);\n            params.set('TailscalePort', port);\n            params.set('FunnelTunnel', funnel);\n            params.set('FunnelEnforcePassword', funnel_enforce_password);\n            fetch('/api/submit-tailscale-config', {\n                method: 'POST',\n                headers: {\n                    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',\n                    'Accept': 'application/json'\n                },\n                body: params.toString()\n            }).then(res => {\n                if (!res.ok) throw new Error('HTTP ' + res.status);\n                return res.json().catch(() => ({}));\n            }).then(() => {\n                // 提示Tailscale设置已提交\n                showMessage({\n                    message: i18next.t('tailscale_settings_submitted_check_status'),\n                    buttons: 'confirm',\n                    onConfirm: function () {\n                        // 提交后，定时刷新Tailscale状态面板，最多刷新15次\n                        if (typeof UpdateTailscaleStatus === 'function') {\n                            let __tsRefreshCount = 0;\n                            const __tsRefreshTimer = setInterval(() => {\n                                try { UpdateTailscaleStatus(); } catch (_) { }\n                                __tsRefreshCount++;\n                                if (__tsRefreshCount >= 15) {\n                                    clearInterval(__tsRefreshTimer);\n                                }\n                            }, 1500);\n                        }\n                    }\n                });\n            }).catch(err => {\n                console.error('submit tailscale config failed:', err);\n            }).finally(() => {\n                // 无论成功或失败，恢复按钮可用\n                btn.disabled = false;\n            });\n        } catch (err) {\n            console.error('submit tailscale config error:', err);\n            // JS 执行阶段的异常也要恢复按钮\n            btn.disabled = false;\n        }\n    });\n})();\n</script></div></form>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 82, "\">Submit</button><script>\n(function () {\n    const btn = document.getElementById('tailscale-submit-btn');\n    if (!btn) return;\n    btn.addEventListener('click', function (e) {\n        try {\n            if (e && typeof e.preventDefault === 'function') e.preventDefault();\n            // 在请求期间禁用提交按钮，防止重复提交\n            btn.disabled = true;\n            const enable = !!(document.getElementById('EnableTailscale') && document.getElementById('EnableTailscale').checked);\n            const auth_key = (document.getElementById('TailscaleAuthKey') && document.getElementById('TailscaleAuthKey').value) || '';\n            const host = (document.getElementById('TailscaleHostname') && document.getElementById('TailscaleHostname').value) || '';\n            const port = (document.getElementById('TailscalePort') && document.getElementById('TailscalePort').value) || '';\n            const portNum = parseInt(port, 10);\n            const funnel = !!(document.getElementById('FunnelTunnel') && document.getElementById('FunnelTunnel').checked);\n            const funnel_password_protection = !!(document.getElementById('FunnelLoginCheck') && document.getElementById('FunnelLoginCheck').checked);\n            console.log('Submitting Tailscale config:', { enable, auth_key, host, port: portNum, funnel, funnel_password_protection });\n            // 如果页面上存在 id 为 \"logout_button\" 的元素，则 now_login 为 true，否则为 false。\n            const now_login = !!document.getElementById('logout_button');\n            if (funnel === true && funnel_password_protection && now_login === false) {\n                showMessage({\n                    message: i18next.t('funnel_login_check_enabled_but_no_password'),\n                    buttons: 'confirm'\n                });\n                // 恢复按钮可用\n                btn.disabled = false;\n                return;\n            }\n            // 构造 JSON 数据\n            const payload = {\n                EnableTailscale: enable,\n                TailscaleAuthKey: auth_key,\n                TailscaleHostname: host,\n                TailscalePort: isNaN(portNum) ? 0 : portNum,\n                FunnelTunnel: funnel,\n                FunnelLoginCheck: funnel_password_protection\n            };\n            fetch('/api/submit-tailscale-config', {\n                method: 'POST',\n                headers: {\n                    'Content-Type': 'application/json',\n                    'Accept': 'application/json'\n                },\n                body: JSON.stringify(payload)\n            }).then(res => {\n                if (!res.ok) throw new Error('HTTP ' + res.status);\n                return res.json().catch(() => ({}));\n            }).then(() => {\n                // 提示Tailscale设置已提交\n                showMessage({\n                    message: i18next.t('tailscale_settings_submitted_check_status'),\n                    buttons: 'confirm',\n                    onConfirm: function () {\n                        // 提交后，定时刷新Tailscale状态面板，最多刷新15次\n                        if (typeof UpdateTailscaleStatus === 'function') {\n                            let __tsRefreshCount = 0;\n                            const __tsRefreshTimer = setInterval(() => {\n                                try { UpdateTailscaleStatus(); } catch (_) { }\n                                __tsRefreshCount++;\n                                if (__tsRefreshCount >= 15) {\n                                    clearInterval(__tsRefreshTimer);\n                                }\n                            }, 1500);\n                        }\n                    }\n                });\n            }).catch(err => {\n                console.error('submit tailscale config failed:', err);\n            }).finally(() => {\n                // 无论成功或失败，恢复按钮可用\n                btn.disabled = false;\n            });\n        } catch (err) {\n            console.error('submit tailscale config error:', err);\n            // JS 执行阶段的异常也要恢复按钮\n            btn.disabled = false;\n        }\n    });\n})();\n</script></div></form>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -935,107 +945,81 @@ func TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) templ.Comp
 			templ_7745c5c3_Var59 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 81, "<div id=\"tailscale_status_panel\" @click=\"UpdateTailscaleStatus\" x-init=\"UpdateTailscaleStatus()\" hx-trigger=\"load[document.visibilityState === 'visible',enable_tailscale] delay:1s\" class=\"flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-normal text-base border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\"><div x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 83, "<div id=\"tailscale_status_panel\" @click=\"UpdateTailscaleStatus\" x-init=\"UpdateTailscaleStatus()\" hx-trigger=\"load[document.visibilityState === 'visible',enable_tailscale] delay:1s\" class=\"flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-normal text-base border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\"><div x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var60 string
 		templ_7745c5c3_Var60, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("tailscale_status"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 370, Col: 51}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 389, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var60))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 82, "\" class=\"w-full text-center font-semibold\"></div><table class=\"table table-auto w-full\"><tbody><tr id=\"ts-auth-row\" class=\"border-separate border-b-1 border-gray-500\" style=\"display:none\"><td class=\"w-24 font-semibold align-top\" x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 84, "\" class=\"w-full text-center font-semibold\"></div><table class=\"table table-auto w-full\"><tbody><tr id=\"ts-auth-row\" class=\"border-separate border-b-1 border-gray-500\" style=\"display:none\"><td class=\"w-24 font-semibold align-top\" x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var61 string
 		templ_7745c5c3_Var61, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("verify_link"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 374, Col: 85}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 393, Col: 85}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var61))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 83, "\">验证链接</td><td class=\"align-top\"><a id=\"ts-auth-link\" class=\"text-indigo-600 no-underline hover:underline\" href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 85, "\">验证链接</td><td class=\"align-top\"><a id=\"ts-auth-link\" class=\"text-indigo-600 no-underline hover:underline\" href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var62 templ.SafeURL
 		templ_7745c5c3_Var62, templ_7745c5c3_Err = templ.JoinURLErrs(tsStatus.AuthURL)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 376, Col: 103}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 395, Col: 103}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var62))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 84, "\" target=\"_blank\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 86, "\" target=\"_blank\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var63 string
 		templ_7745c5c3_Var63, templ_7745c5c3_Err = templ.JoinStringErrs(tsStatus.AuthURL)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 376, Col: 140}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 395, Col: 140}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var63))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 85, "</a></td></tr><tr class=\"border-separate border-b-1 border-gray-400\"><td x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 87, "</a></td></tr><tr class=\"border-separate border-b-1 border-gray-400\"><td x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var64 string
 		templ_7745c5c3_Var64, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("service_status"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 380, Col: 51}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 399, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var64))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 86, "\" class=\"w-24 font-semibold\">服务状态</td><td id=\"ts-state\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 88, "\" class=\"w-24 font-semibold\">服务状态</td><td id=\"ts-state\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var65 string
 		templ_7745c5c3_Var65, templ_7745c5c3_Err = templ.JoinStringErrs(tsStatus.BackendState)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 381, Col: 46}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 400, Col: 46}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var65))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 87, "</td></tr><tr class=\"border-separate border-b-1 border-gray-400\"><td x-text=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var66 string
-		templ_7745c5c3_Var66, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("client_count"))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 384, Col: 49}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var66))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 88, "\" class=\"w-24 font-semibold\">客户端数</td><td id=\"ts-clients\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var67 string
-		templ_7745c5c3_Var67, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(len(tsStatus.Clients)))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 385, Col: 62}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var67))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1043,25 +1027,25 @@ func TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) templ.Comp
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var68 string
-		templ_7745c5c3_Var68, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("host_system"))
+		var templ_7745c5c3_Var66 string
+		templ_7745c5c3_Var66, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("client_count"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 388, Col: 48}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 403, Col: 49}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var68))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 90, "\" class=\"w-24 font-semibold\">宿主系统</td><td id=\"ts-os\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var66))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var69 string
-		templ_7745c5c3_Var69, templ_7745c5c3_Err = templ.JoinStringErrs(tsStatus.OS)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 90, "\" class=\"w-24 font-semibold\">客户端数</td><td id=\"ts-clients\">")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 389, Col: 33}
+			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var69))
+		var templ_7745c5c3_Var67 string
+		templ_7745c5c3_Var67, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(len(tsStatus.Clients)))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 404, Col: 62}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var67))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1069,104 +1053,111 @@ func TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) templ.Comp
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
+		var templ_7745c5c3_Var68 string
+		templ_7745c5c3_Var68, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("host_system"))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 407, Col: 48}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var68))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 92, "\" class=\"w-24 font-semibold\">宿主系统</td><td id=\"ts-os\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var69 string
+		templ_7745c5c3_Var69, templ_7745c5c3_Err = templ.JoinStringErrs(tsStatus.OS)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 408, Col: 33}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var69))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 93, "</td></tr><tr class=\"border-separate border-b-1 border-gray-400\"><td x-text=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
 		var templ_7745c5c3_Var70 string
 		templ_7745c5c3_Var70, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("connection_status"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 392, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 411, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var70))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 92, "\" class=\"w-24 font-semibold\">连接状况</td><td>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 94, "\" class=\"w-24 font-semibold\">连接状况</td><td>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if tsStatus.Online {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 93, "<span id=\"ts-online\" x-text=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 95, "<span id=\"ts-online\" x-text=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var71 string
 			templ_7745c5c3_Var71, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("connected"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 395, Col: 65}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 414, Col: 65}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var71))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 94, "\"></span> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 96, "\"></span> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
 		if !tsStatus.Online {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 95, "<span id=\"ts-online\" x-text=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 97, "<span id=\"ts-online\" x-text=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var72 string
 			templ_7745c5c3_Var72, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("not_connected"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 398, Col: 69}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 417, Col: 69}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var72))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 96, "\"></span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 98, "\"></span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 97, "</td></tr><tr id=\"ts-funnel-capability-row\" class=\"border-separate border-b-1 border-gray-400\" style=\"display:none\"><td x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 99, "</td></tr><tr id=\"ts-funnel-capability-row\" class=\"border-separate border-b-1 border-gray-400\" style=\"display:none\"><td x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var73 string
 		templ_7745c5c3_Var73, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("funnel_status"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 403, Col: 50}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 422, Col: 50}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var73))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 98, "\" class=\"w-24 font-semibold\">Funnel状态</td>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 100, "\" class=\"w-24 font-semibold\">Funnel状态</td>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if tsStatus.FunnelCapability == "true" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 99, "<td id=\"ts-funnel-capability\" x-text=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 101, "<td id=\"ts-funnel-capability\" x-text=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var74 string
 			templ_7745c5c3_Var74, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("funnel_setup_done"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 405, Col: 81}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 424, Col: 81}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var74))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 100, "\"></td>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if tsStatus.FunnelCapability == "false" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 101, "<td id=\"ts-funnel-capability\" x-text=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var75 string
-			templ_7745c5c3_Var75, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("funnel_setup_not_done"))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 408, Col: 85}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var75))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1175,53 +1166,53 @@ func TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) templ.Comp
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 103, "</tr><tr class=\"border-separate border-b-1 border-gray-400\"><td x-text=\"")
+		if tsStatus.FunnelCapability == "false" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 103, "<td id=\"ts-funnel-capability\" x-text=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var75 string
+			templ_7745c5c3_Var75, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("funnel_setup_not_done"))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 427, Col: 85}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var75))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 104, "\"></td>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 105, "</tr><tr class=\"border-separate border-b-1 border-gray-400\"><td x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var76 string
 		templ_7745c5c3_Var76, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("enable_funnel"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 412, Col: 50}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 431, Col: 50}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var76))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 104, "\" class=\"w-24 font-semibold\">Funnel模式</td>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 106, "\" class=\"w-24 font-semibold\">Funnel模式</td>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if state.ServerConfig.FunnelTunnel {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 105, "<td id=\"ts-funnel-mode\" x-text=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 107, "<td id=\"ts-funnel-mode\" x-text=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var77 string
 			templ_7745c5c3_Var77, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("enable"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 414, Col: 64}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 433, Col: 64}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var77))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 106, "\"></td>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if !state.ServerConfig.FunnelTunnel {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 107, "<td id=\"ts-funnel-mode\" x-text=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var78 string
-			templ_7745c5c3_Var78, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("disable"))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 417, Col: 65}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var78))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1230,98 +1221,117 @@ func TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) templ.Comp
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 109, "</tr><tr class=\"border-separate border-b-1 border-gray-400\"><td x-text=\"")
+		if !state.ServerConfig.FunnelTunnel {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 109, "<td id=\"ts-funnel-mode\" x-text=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var78 string
+			templ_7745c5c3_Var78, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("disable"))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 436, Col: 65}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var78))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 110, "\"></td>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 111, "</tr><tr class=\"border-separate border-b-1 border-gray-400\"><td x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var79 string
 		templ_7745c5c3_Var79, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("ip_address"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 421, Col: 47}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 440, Col: 47}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var79))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 110, "\" class=\"w-24 font-semibold\">IP地址</td><td id=\"ts-ip\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 112, "\" class=\"w-24 font-semibold\">IP地址</td><td id=\"ts-ip\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var80 string
 		templ_7745c5c3_Var80, templ_7745c5c3_Err = templ.JoinStringErrs(tsStatus.GetTailscaleIP())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 422, Col: 47}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 441, Col: 47}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var80))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 111, "</td></tr><tr class=\"border-separate border-b-1 border-gray-400\"><td x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 113, "</td></tr><tr class=\"border-separate border-b-1 border-gray-400\"><td x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var81 string
 		templ_7745c5c3_Var81, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("service_version"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 425, Col: 52}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 444, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var81))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 112, "\" class=\"w-24 font-semibold\">服务版本</td><td id=\"ts-version\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 114, "\" class=\"w-24 font-semibold\">服务版本</td><td id=\"ts-version\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var82 string
 		templ_7745c5c3_Var82, templ_7745c5c3_Err = templ.JoinStringErrs(tsStatus.Version)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 426, Col: 43}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 445, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var82))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 113, "</td></tr><tr id=\"ts-fqdn-row\" class=\"border-separate border-b-1 border-gray-400\" style=\"display:none\"><td x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 115, "</td></tr><tr id=\"ts-fqdn-row\" class=\"border-separate border-b-1 border-gray-400\" style=\"display:none\"><td x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var83 string
 		templ_7745c5c3_Var83, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("read_link"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 429, Col: 46}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 448, Col: 46}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var83))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 114, "\" class=\"w-24 font-semibold\">阅读链接</td><td><a id=\"ts-fqdn-link\" class=\"text-indigo-600 no-underline hover:underline\" href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 116, "\" class=\"w-24 font-semibold\">阅读链接</td><td><a id=\"ts-fqdn-link\" class=\"text-indigo-600 no-underline hover:underline\" href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var84 templ.SafeURL
 		templ_7745c5c3_Var84, templ_7745c5c3_Err = templ.JoinURLErrs(tsStatus.FQDN)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 431, Col: 100}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 450, Col: 100}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var84))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 115, "\" target=\"_blank\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 117, "\" target=\"_blank\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var85 string
 		templ_7745c5c3_Var85, templ_7745c5c3_Err = templ.JoinStringErrs(tsStatus.FQDN)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 431, Col: 134}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 450, Col: 134}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var85))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 116, "</a></td></tr></tbody></table></div><script>\n// 更新Tailscale状态面板\nfunction UpdateTailscaleStatus(e) {\n    try {\n        if (e && typeof e.preventDefault === 'function') {\n            e.preventDefault();\n        }\n        const panel = document.getElementById('tailscale_status_panel');\n        if (!panel) {\n            return;\n        }\n        // 设置文本内容的辅助函数\n        const setText = (selector, text) => {\n            const el = panel.querySelector(selector);\n            if (el) {\n                el.textContent = text == null ? '' : String(text);\n            }\n        };\n        const url = '/api/tailscale_status';\n        fetch(url, { headers: { 'Accept': 'application/json' } })\n            .then(res => {\n                if (!res.ok) throw new Error('HTTP ' + res.status);\n                return res.json();\n            })\n            .then(data => {\n                // AuthURL row\n                const authRow = panel.querySelector('#ts-auth-row');\n                if (authRow) {\n                    const link = authRow.querySelector('#ts-auth-link');\n                    if (data.AuthURL) {\n                        authRow.style.display = '';\n                        if (link) {\n                            link.href = data.AuthURL;\n                            link.textContent = data.AuthURL;\n                        }\n                    } else {\n                        authRow.style.display = 'none';\n                        if (link) {\n                            link.href = '';\n                            link.textContent = '';\n                        }\n                    }\n                }\n                // Basic fields\n                setText('#ts-state', data.BackendState || '');\n                let clientsCount = 0;\n                if (Array.isArray(data.Clients)) {\n                    clientsCount = data.Clients.length;\n                } else if (data.Clients && typeof data.Clients === 'object') {\n                    try { clientsCount = Object.keys(data.Clients).length; } catch (_) { clientsCount = 0; }\n                }\n                setText('#ts-clients', clientsCount);\n                setText('#ts-os', data.OS || '');\n                setText('#ts-online', data.Online ? i18next.t('connected') : i18next.t('not_connected'));\n                // IP: show first IPv4 if possible, else first entry\n                let ipText = '';\n                if (Array.isArray(data.TailscaleIPs) && data.TailscaleIPs.length > 0) {\n                    const ipv4 = data.TailscaleIPs.find(x => typeof x === 'string' && x.indexOf(':') === -1);\n                    ipText = ipv4 || data.TailscaleIPs[0];\n                }\n                setText('#ts-ip', ipText);\n                setText('#ts-version', data.Version || '');\n\n                // ts-funnel-mode\n                const funnelModeEl = panel.querySelector('#ts-funnel-mode');\n                if (funnelModeEl) {\n                    funnelModeEl.textContent = (document.getElementById('FunnelTunnel').checked) ? i18next.t('enable') : i18next.t('disable');\n                }\n                // FQDN row/link\n                const fqdnRow = panel.querySelector('#ts-fqdn-row');\n                const fqdnLink = panel.querySelector('#ts-fqdn-link');\n                if (data.FQDN) {\n                    if (fqdnRow) fqdnRow.style.display = '';\n                    if (fqdnLink) {\n                        const portInput = document.getElementById('TailscalePort');\n                        const port = portInput ? parseInt(portInput.value, 10) : 0;\n                        const isHttps = (port === 443 || document.getElementById('FunnelTunnel').checked);\n                        const proto = isHttps ? 'https://' : 'http://';\n                        let href = proto + data.FQDN;\n                        if (port !== 443 && port !== 80) {\n                            href += ':' + port;\n                        }\n                        console.log('Setting FQDN link to:', href);\n                        fqdnLink.href = href;\n                        fqdnLink.textContent = href;\n                    }\n                } else {\n                    if (fqdnRow) fqdnRow.style.display = 'none';\n                    if (fqdnLink) { fqdnLink.href = ''; fqdnLink.textContent = ''; }\n                }\n                // FunnelCapability\n                const funnelRow = panel.querySelector('#ts-funnel-capability-row');\n                if (funnelRow) {\n                    if (data.FunnelCapability) {\n                        funnelRow.style.display = '';\n                        const funnelCapEl = panel.querySelector('#ts-funnel-capability');\n                        if (funnelCapEl) {\n                            if (data.FunnelCapability === \"true\") {\n                                funnelCapEl.textContent = i18next.t('funnel_setup_done');\n                            }\n                            if (data.FunnelCapability === \"false\") {\n                                funnelCapEl.textContent = i18next.t('funnel_setup_not_done');\n                            }\n                            if (data.FunnelCapability === \"unknown\") {\n                                funnelCapEl.textContent = \"???\";\n                            }\n                        }\n                    } else {\n                        funnelRow.style.display = 'none';\n                        const funnelCapEl = panel.querySelector('#ts-funnel-capability');\n                        if (funnelCapEl) {\n                            funnelCapEl.textContent = '';\n                        }\n                    }\n\n                    // 控制 Funnel 模块遮罩层显示与否\n                    const overlay = document.getElementById('funnel-acl-overlay');\n                    if (overlay) {\n                        if (data.FunnelCapability === \"false\") {\n                            overlay.style.display = '';\n                        }\n                        if (data.FunnelCapability === \"true\" || data.FunnelCapability === \"unknown\") {\n                            overlay.style.display = 'none';\n                        }\n                    }\n                    const enforce_password_overlay = document.getElementById('funnel_enforce_password_overlay');\n                    if (enforce_password_overlay) {\n                        if (data.FunnelCapability === \"false\") {\n                            enforce_password_overlay.style.display = '';\n                        }\n                        if (data.FunnelCapability === \"true\" || data.FunnelCapability === \"unknown\") {\n                            enforce_password_overlay.style.display = 'none';\n                        }\n                    }\n                    // 控制 Funnel 提示模块显示与否\n                    const hint = document.getElementById('funnel-acl-hint');\n                    if (hint) {\n                        if (data.FunnelCapability === \"false\") {\n                            hint.style.display = '';\n                        }\n                        if (data.FunnelCapability === \"true\" || data.FunnelCapability === \"unknown\") {\n                            hint.style.display = 'none';\n                        }\n                    }\n                }\n                // Update embedded JSON for other components if present\n                const scriptEl = document.getElementById('tsStatus');\n                if (scriptEl) {\n                    try { scriptEl.textContent = JSON.stringify(data); } catch (_) { }\n                }\n            })\n            .catch(err => {\n                // Optionally report in console; keep UI silent\n                console.error('UpdateTailscaleStatus failed:', err);\n            });\n    } catch (err) {\n        console.error('UpdateTailscaleStatus error:', err);\n    }\n}\n</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 118, "</a></td></tr></tbody></table></div><script>\n// 更新Tailscale状态面板\nfunction UpdateTailscaleStatus(e) {\n    try {\n        if (e && typeof e.preventDefault === 'function') {\n            e.preventDefault();\n        }\n        const panel = document.getElementById('tailscale_status_panel');\n        if (!panel) {\n            return;\n        }\n        // 设置文本内容的辅助函数\n        const setText = (selector, text) => {\n            const el = panel.querySelector(selector);\n            if (el) {\n                el.textContent = text == null ? '' : String(text);\n            }\n        };\n        const url = '/api/tailscale_status';\n        fetch(url, { headers: { 'Accept': 'application/json' } })\n            .then(res => {\n                if (!res.ok) throw new Error('HTTP ' + res.status);\n                return res.json();\n            })\n            .then(data => {\n                // AuthURL row\n                const authRow = panel.querySelector('#ts-auth-row');\n                if (authRow) {\n                    const link = authRow.querySelector('#ts-auth-link');\n                    if (data.AuthURL) {\n                        authRow.style.display = '';\n                        if (link) {\n                            link.href = data.AuthURL;\n                            link.textContent = data.AuthURL;\n                        }\n                    } else {\n                        authRow.style.display = 'none';\n                        if (link) {\n                            link.href = '';\n                            link.textContent = '';\n                        }\n                    }\n                }\n                // Basic fields\n                setText('#ts-state', data.BackendState || '');\n                let clientsCount = 0;\n                if (Array.isArray(data.Clients)) {\n                    clientsCount = data.Clients.length;\n                } else if (data.Clients && typeof data.Clients === 'object') {\n                    try { clientsCount = Object.keys(data.Clients).length; } catch (_) { clientsCount = 0; }\n                }\n                setText('#ts-clients', clientsCount);\n                setText('#ts-os', data.OS || '');\n                setText('#ts-online', data.Online ? i18next.t('connected') : i18next.t('not_connected'));\n                // IP: show first IPv4 if possible, else first entry\n                let ipText = '';\n                if (Array.isArray(data.TailscaleIPs) && data.TailscaleIPs.length > 0) {\n                    const ipv4 = data.TailscaleIPs.find(x => typeof x === 'string' && x.indexOf(':') === -1);\n                    ipText = ipv4 || data.TailscaleIPs[0];\n                }\n                setText('#ts-ip', ipText);\n                setText('#ts-version', data.Version || '');\n\n                // ts-funnel-mode\n                const funnelModeEl = panel.querySelector('#ts-funnel-mode');\n                if (funnelModeEl) {\n                    funnelModeEl.textContent = (document.getElementById('FunnelTunnel').checked) ? i18next.t('enable') : i18next.t('disable');\n                }\n                // FQDN row/link\n                const fqdnRow = panel.querySelector('#ts-fqdn-row');\n                const fqdnLink = panel.querySelector('#ts-fqdn-link');\n                if (data.FQDN) {\n                    if (fqdnRow) fqdnRow.style.display = '';\n                    if (fqdnLink) {\n                        const portInput = document.getElementById('TailscalePort');\n                        const port = portInput ? parseInt(portInput.value, 10) : 0;\n                        const isHttps = (port === 443 || document.getElementById('FunnelTunnel').checked);\n                        const proto = isHttps ? 'https://' : 'http://';\n                        let href = proto + data.FQDN;\n                        if (port !== 443 && port !== 80) {\n                            href += ':' + port;\n                        }\n                        //console.log('Setting FQDN link to:', href);\n                        fqdnLink.href = href;\n                        fqdnLink.textContent = href;\n                    }\n                } else {\n                    if (fqdnRow) fqdnRow.style.display = 'none';\n                    if (fqdnLink) { fqdnLink.href = ''; fqdnLink.textContent = ''; }\n                }\n                // FunnelCapability\n                const funnelRow = panel.querySelector('#ts-funnel-capability-row');\n                if (funnelRow) {\n                    if (data.FunnelCapability) {\n                        funnelRow.style.display = '';\n                        const funnelCapEl = panel.querySelector('#ts-funnel-capability');\n                        if (funnelCapEl) {\n                            if (data.FunnelCapability === \"true\") {\n                                funnelCapEl.textContent = i18next.t('funnel_setup_done');\n                            }\n                            if (data.FunnelCapability === \"false\") {\n                                funnelCapEl.textContent = i18next.t('funnel_setup_not_done');\n                            }\n                            if (data.FunnelCapability === \"unknown\") {\n                                funnelCapEl.textContent = \"???\";\n                            }\n                        }\n                    } else {\n                        funnelRow.style.display = 'none';\n                        const funnelCapEl = panel.querySelector('#ts-funnel-capability');\n                        if (funnelCapEl) {\n                            funnelCapEl.textContent = '';\n                        }\n                    }\n\n                    // 控制 Funnel 模块遮罩层显示与否\n                    const overlay = document.getElementById('funnel-acl-overlay');\n                    if (overlay) {\n                        if (data.FunnelCapability === \"false\") {\n                            overlay.style.display = '';\n                        }\n                        if (data.FunnelCapability === \"true\" || data.FunnelCapability === \"unknown\") {\n                            overlay.style.display = 'none';\n                        }\n                    }\n                    const enforce_password_overlay = document.getElementById('funnel_password_protection_overlay');\n                    if (enforce_password_overlay) {\n                        if (data.FunnelCapability === \"false\") {\n                            enforce_password_overlay.style.display = '';\n                        }\n                        if (data.FunnelCapability === \"true\" || data.FunnelCapability === \"unknown\") {\n                            enforce_password_overlay.style.display = 'none';\n                        }\n                    }\n                    // 控制 Funnel 提示模块显示与否\n                    const hint = document.getElementById('funnel-acl-hint');\n                    if (hint) {\n                        if (data.FunnelCapability === \"false\") {\n                            hint.style.display = '';\n                        }\n                        if (data.FunnelCapability === \"true\" || data.FunnelCapability === \"unknown\") {\n                            hint.style.display = 'none';\n                        }\n                    }\n                }\n                // Update embedded JSON for other components if present\n                const scriptEl = document.getElementById('tsStatus');\n                if (scriptEl) {\n                    try { scriptEl.textContent = JSON.stringify(data); } catch (_) { }\n                }\n            })\n            .catch(err => {\n                // Optionally report in console; keep UI silent\n                console.error('UpdateTailscaleStatus failed:', err);\n            });\n    } catch (err) {\n        console.error('UpdateTailscaleStatus error:', err);\n    }\n}\n</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

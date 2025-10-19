@@ -22,21 +22,34 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
                 	tailscale_hostname: '',
                 	tailscale_port: '',
                 	tailscale_enable_funnel: '',
-                	funnel_enforce_password: true,
+                	funnel_password_protection: false,
         			nowTailscaleStatus: {
         			    AuthURL: '', BackendState: '', Clients: null, OS: 'unknown', Online: true, FQDN: '', TailscaleIPs: [], Version: ''
         			},
         			isFormChanged:false,
         			init() {
-        			    // checked 表示该复选框是否被默认选中（当页面加载时）。它不表示这个复选框当前是否被选中：如果复选框的状态被改变，这个内容属性不反映这个变化。
-                        this.enable_tailscale = this.$el.querySelector('#EnableTailscaleTemp').value === 'true'? true: false;
-                        // console.log('Initial enable_tailscale:', this.enable_tailscale);
+        			    // 初始化数据
+                        this.enable_tailscale = this.$el.querySelector('#EnableTailscale').value === 'true';
+                        console.log('Initial enable_tailscale:', this.enable_tailscale);
+
                         this.tailscale_auth_key = this.$el.querySelector('#TailscaleAuthKey').value? this.$el.querySelector('#TailscaleAuthKey').value: '';
+                        console.log('Initial tailscale_auth_key:', this.tailscale_auth_key);
+
                         this.tailscale_hostname = this.$el.querySelector('#TailscaleHostname') .value? this.$el.querySelector('#TailscaleHostname') .value: 'comigo';
+                        console.log('Initial tailscale_hostname:', this.tailscale_hostname);
+
                         this.tailscale_port = this.$el.querySelector('#TailscalePort').value? this.$el.querySelector('#TailscalePort').value: '443';
-                        this.tailscale_enable_funnel = this.$el.querySelector('#FunnelTunnel').checked? this.$el.querySelector('#FunnelTunnel').checked: false;
-                        this.funnel_enforce_password = this.$el.querySelector('#FunnelEnforcePassword').checked? this.$el.querySelector('#FunnelEnforcePassword').checked: true;
+                        console.log('Initial tailscale_port:', this.tailscale_port);
+
+                        this.tailscale_enable_funnel = this.$el.querySelector('#FunnelTunnel').value === 'true';
+                        console.log('Initial tailscale_enable_funnel:', this.tailscale_enable_funnel);
+
+                        this.funnel_password_protection = this.$el.querySelector('#FunnelLoginCheck').value === 'true';
+                        console.log('Initial funnel_password_protection:', this.funnel_password_protection);
+
                         this.nowTailscaleStatus = JSON.parse(document.getElementById('tsStatus').textContent)
+                        console.log('Initial nowTailscaleStatus:', this.nowTailscaleStatus);
+
         				this.$watch('enable_tailscale', value => {
         				    this.isFormChanged = true; // 启用Tailscale 有变化，表单被修改过
         					console.log('enable_tailscale changed. :',  value);
@@ -51,21 +64,20 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 		<hr class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
 		<!-- 启用Tailscale -->
 		<div id={ "boolConfig_EnableTailscale" } class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400">
-			<div x-text={ getTranslations("EnableTailscale") } class="w-64"></div>
+			<div x-text={ getTranslations("EnableTailscale") } ></div>
 			<!--  如果一个复选框在其表单被提交时没有被选中，就不会有任何代表其未被选中的状态（例如 value=unchecked）的值被提交给服务器——该值根本就没有被提交给服务器！-->
 			<!-- 如果你想在复选框未被选中时提交一个默认值，你可以在表单中加入一个具有相同的 name 和 value 的 <input type="hidden"> 字段，它可以由 JavaScript 生成。 -->
 			<!-- https://developer.mozilla.org/zh-CN/docs/Web/HTML/Reference/Elements/input/checkbox -->
 			<!-- templ 使用变量或模板参数设置布尔属性，请在属性名称后使用问号来表示该属性是布尔值。 -->
 			<input
 				type="hidden"
-				id={ "EnableTailscaleTemp" }
+				id={ "EnableTailscaleHidden" }
 				if  state.ServerConfig.EnableTailscale {
 					value="true"
 				} else {
 					value="false"
 				}
 			/>
-			<input type="hidden" name={ "EnableTailscale" } value="false" x-bind:disabled="enable_tailscale"/>
 			<label for={ "EnableTailscale" } class="relative h-8 cursor-pointer w-14">
 				<input
 					type="checkbox"
@@ -89,7 +101,7 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 			x-show="enable_tailscale"
 			class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 		>
-			<label x-text={ getTranslations("TailscaleHostname") } for={ "TailscaleHostname" } class="w-64"></label>
+			<label x-text={ getTranslations("TailscaleHostname") } for={ "TailscaleHostname" } ></label>
 			<input
 				id={ "TailscaleHostname" }
 				name={ "TailscaleHostname" }
@@ -110,14 +122,14 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 			class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 			x-show="enable_tailscale"
 		>
-			<label for={ "TailscalePort" } class="w-64" x-text={ getTranslations("TailscalePort") }></label>
+			<label for={ "TailscalePort" }  x-text={ getTranslations("TailscalePort") }></label>
 			<input
 				class="px-2.5 w-64 rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm"
 				id={ "TailscalePort" }
 				name={ "TailscalePort" }
 				type="number"
 				:placeholder={ getTranslations("TailscalePort") }
-				value={ strconv.Itoa(int(state.ServerConfig.TailscalePort)) }
+				value={ strconv.Itoa(state.ServerConfig.TailscalePort) }
 				max={ strconv.Itoa(65535) }
 				min={ strconv.Itoa(0) }
 			/>
@@ -130,7 +142,7 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 			x-show="enable_tailscale"
 			class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 		>
-			<label x-text={ getTranslations("TailscaleAuthKey") } for={ "TailscaleAuthKey" } class="w-64"></label>
+			<label x-text={ getTranslations("TailscaleAuthKey") } for={ "TailscaleAuthKey" } ></label>
 			<input
 				id={ "TailscaleAuthKey" }
 				name={ "TailscaleAuthKey" }
@@ -166,7 +178,7 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 					style="display:none;"
 				}
 			></div>
-			<div x-text={ getTranslations("FunnelTunnel") } class="w-64"></div>
+			<div x-text={ getTranslations("FunnelTunnel") } ></div>
 			<!-- 隐藏input -->
 			<input type="hidden" name={ "FunnelTunnel" } value="false" x-bind:disabled="tailscale_enable_funnel"/>
 			<label for={ "FunnelTunnel" } class="relative h-8 cursor-pointer w-14">
@@ -175,10 +187,11 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 					id={ "FunnelTunnel" }
 					name={ "FunnelTunnel" }
 					x-model="tailscale_enable_funnel"
-					if state.ServerConfig.FunnelTunnel {
-						checked
-					}
-					value="true"
+					if  state.ServerConfig.FunnelTunnel {
+    					value="true"
+    				} else {
+    					value="false"
+    				}
 					class="sr-only peer"
 				/>
 				<span class="absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500"></span>
@@ -187,15 +200,15 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 			<div x-text={ getTranslations("FunnelTunnel_Description") } class="w-full py-1 text-xs text-gray-500"></div>
 		</div>
 
-		<!-- Funnel模式密码保护 -->
+		<!-- Funnel密码保护检查 -->
 		<div
-			id={ "boolConfig_FunnelEnforcePassword" }
+			id={ "boolConfig_FunnelLoginCheck" }
 			class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400 relative"
-			x-show="enable_tailscale && tailscale_enable_funnel"
+			x-show="enable_tailscale"
 		>
 			<!-- Funnel ACL 权限未设置时的遮罩层 -->
 			<div
-				id="funnel_enforce_password_overlay"
+				id="funnel_password_protection_overlay"
 				class="absolute inset-0 z-10 w-full h-full flex items-center justify-center rounded-md bg-black/20 text-white text-sm"
 				if tsStatus != nil {
 					if tsStatus.FunnelCapability == "false" {
@@ -208,28 +221,31 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 					style="display:none;"
 				}
 			></div>
-			<div x-text={ getTranslations("FunnelEnforcePassword") } class="w-64"></div>
+			<div x-text={ getTranslations("FunnelLoginCheck") } ></div>
 			<!-- 隐藏input -->
-			<input type="hidden" name={ "FunnelEnforcePassword" } value="false" x-bind:disabled="funnel_enforce_password"/>
-			<label for={ "FunnelEnforcePassword" } class="relative h-8 cursor-pointer w-14">
+			<input type="hidden" name={ "FunnelLoginCheck" } value="true" x-bind:disabled="funnel_password_protection"/>
+			<label for={ "FunnelLoginCheck" } class="relative h-8 cursor-pointer w-14">
 				<input
 					type="checkbox"
-					id={ "FunnelEnforcePassword" }
-					name={ "FunnelEnforcePassword" }
-					x-model="funnel_enforce_password"
-					if state.ServerConfig.FunnelEnforcePassword {
-						checked
-					}
-					value="true"
+					id={ "FunnelLoginCheck" }
+					name={ "FunnelLoginCheck" }
+					x-model="funnel_password_protection"
+					if  state.ServerConfig.FunnelLoginCheck {
+    					value="true"
+    					checked
+    				} else {
+    					value="false"
+    				}
 					class="sr-only peer"
 				/>
+				{state.ServerConfig.FunnelLoginCheck}
 				<span class="absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500"></span>
 				<span class="absolute inset-y-0 w-6 h-6 m-1 transition-all bg-white rounded-full start-0 peer-checked:start-6"></span>
 			</label>
-			<div x-text={ getTranslations("FunnelEnforcePassword_Description") } class="w-full py-1 text-xs text-gray-500"></div>
+			<div x-text={ getTranslations("FunnelLoginCheckDescription") } class="w-full py-1 text-xs text-gray-500"></div>
 		</div>
 
-		<!-- Funnel ACL 权限未设置时的提示 -->
+		<!-- 帮助面板：如何设置Funnel ACL 权限 -->
 		<div
 			id="funnel-acl-hint"
 			x-show="enable_tailscale"
@@ -286,38 +302,41 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
             if (e && typeof e.preventDefault === 'function') e.preventDefault();
             // 在请求期间禁用提交按钮，防止重复提交
             btn.disabled = true;
-            const enable = (document.getElementById('EnableTailscale') && document.getElementById('EnableTailscale').checked) ? 'true' : 'false';
+            const enable = !!(document.getElementById('EnableTailscale') && document.getElementById('EnableTailscale').checked);
             const auth_key = (document.getElementById('TailscaleAuthKey') && document.getElementById('TailscaleAuthKey').value) || '';
             const host = (document.getElementById('TailscaleHostname') && document.getElementById('TailscaleHostname').value) || '';
             const port = (document.getElementById('TailscalePort') && document.getElementById('TailscalePort').value) || '';
-            const funnel = (document.getElementById('FunnelTunnel') && document.getElementById('FunnelTunnel').checked) ? 'true' : 'false';
-            const funnel_enforce_password = (document.getElementById('FunnelEnforcePassword') && document.getElementById('FunnelEnforcePassword').checked) ? 'true' : 'false';
+            const portNum = parseInt(port, 10);
+            const funnel = !!(document.getElementById('FunnelTunnel') && document.getElementById('FunnelTunnel').checked);
+            const funnel_password_protection = !!(document.getElementById('FunnelLoginCheck') && document.getElementById('FunnelLoginCheck').checked);
+            console.log('Submitting Tailscale config:', { enable, auth_key, host, port: portNum, funnel, funnel_password_protection });
             // 如果页面上存在 id 为 "logout_button" 的元素，则 now_login 为 true，否则为 false。
             const now_login = !!document.getElementById('logout_button');
-            if (funnel === 'true' && funnel_enforce_password && now_login === false) {
+            if (funnel === true && funnel_password_protection && now_login === false) {
                 showMessage({
-                    message: i18next.t('funnel_enable_while_no_password_warning'),
+                    message: i18next.t('funnel_login_check_enabled_but_no_password'),
                     buttons: 'confirm'
                 });
                 // 恢复按钮可用
                 btn.disabled = false;
                 return;
             }
-            // 构造 URLSearchParams 对象以编码数据
-            const params = new URLSearchParams();
-            params.set('EnableTailscale', enable);
-            params.set('TailscaleAuthKey', auth_key);
-            params.set('TailscaleHostname', host);
-            params.set('TailscalePort', port);
-            params.set('FunnelTunnel', funnel);
-            params.set('FunnelEnforcePassword', funnel_enforce_password);
+            // 构造 JSON 数据
+            const payload = {
+                EnableTailscale: enable,
+                TailscaleAuthKey: auth_key,
+                TailscaleHostname: host,
+                TailscalePort: isNaN(portNum) ? 0 : portNum,
+                FunnelTunnel: funnel,
+                FunnelLoginCheck: funnel_password_protection
+            };
             fetch('/api/submit-tailscale-config', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                    'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
-                body: params.toString()
+                body: JSON.stringify(payload)
             }).then(res => {
                 if (!res.ok) throw new Error('HTTP ' + res.status);
                 return res.json().catch(() => ({}));
@@ -516,7 +535,7 @@ function UpdateTailscaleStatus(e) {
                         if (port !== 443 && port !== 80) {
                             href += ':' + port;
                         }
-                        console.log('Setting FQDN link to:', href);
+                        //console.log('Setting FQDN link to:', href);
                         fqdnLink.href = href;
                         fqdnLink.textContent = href;
                     }
@@ -559,7 +578,7 @@ function UpdateTailscaleStatus(e) {
                             overlay.style.display = 'none';
                         }
                     }
-                    const enforce_password_overlay = document.getElementById('funnel_enforce_password_overlay');
+                    const enforce_password_overlay = document.getElementById('funnel_password_protection_overlay');
                     if (enforce_password_overlay) {
                         if (data.FunnelCapability === "false") {
                             enforce_password_overlay.style.display = '';

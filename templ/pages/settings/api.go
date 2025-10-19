@@ -247,18 +247,20 @@ func UpdateTailscaleConfigHandler(c echo.Context) error {
 	if config.GetCfg().ConfigLocked {
 		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
 	}
-	// 解析请求体（JSON 或 x-www-form-urlencoded）
+	// 解析请求体（JSON格式）
 	var request struct {
-		EnableTailscale       bool   `json:"EnableTailscale"`
-		TailscaleAuthKey      string `json:"TailscaleAuthKey"`
-		TailscaleHostname     string `json:"TailscaleHostname"`
-		TailscalePort         int    `json:"TailscalePort"`
-		FunnelTunnel          bool   `json:"FunnelTunnel"`
-		FunnelEnforcePassword bool   `json:"FunnelEnforcePassword"`
+		EnableTailscale   bool   `json:"EnableTailscale"`
+		TailscaleAuthKey  string `json:"TailscaleAuthKey"`
+		TailscaleHostname string `json:"TailscaleHostname"`
+		TailscalePort     int    `json:"TailscalePort"`
+		FunnelTunnel      bool   `json:"FunnelTunnel"`
+		FunnelLoginCheck  bool   `json:"FunnelLoginCheck"`
 	}
 	if err := c.Bind(&request); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid JSON request")
 	}
+	fmt.Printf("Received Tailscale config update: %+v\n", request)
+	//return echo.NewHTTPError(http.StatusBadRequest, "Debug Stop")
 
 	// 验证输入
 	if request.EnableTailscale {
@@ -272,10 +274,8 @@ func UpdateTailscaleConfigHandler(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusBadRequest, "Port must be 443, 8443, or 10000 when Funnel Mode is enabled")
 		}
 		// 如果Funnel模式强制密码，但当前没有设置密码，则返回错误
-		if request.FunnelTunnel && request.FunnelEnforcePassword {
-			if !config.GetCfg().NeedLogin() {
-				return echo.NewHTTPError(http.StatusBadRequest, "Cannot Turn on FunnelMode when no password not set")
-			}
+		if request.FunnelTunnel && request.FunnelLoginCheck && !config.GetCfg().RequiresAuth() {
+			return echo.NewHTTPError(http.StatusBadRequest, "Cannot Turn on FunnelMode when no password not set")
 		}
 	}
 	// 旧配置做个备份（后面需要对比）
@@ -286,7 +286,7 @@ func UpdateTailscaleConfigHandler(c echo.Context) error {
 	config.GetCfg().TailscaleHostname = request.TailscaleHostname
 	config.GetCfg().TailscalePort = request.TailscalePort
 	config.GetCfg().FunnelTunnel = request.FunnelTunnel
-	config.GetCfg().FunnelEnforcePassword = request.FunnelEnforcePassword
+	config.GetCfg().FunnelLoginCheck = request.FunnelLoginCheck
 	// 写入配置文件
 	if writeErr := config.UpdateConfigFile(); writeErr != nil {
 		logger.Infof("Failed to update local config: %v", writeErr)
@@ -446,7 +446,7 @@ func HandleConfigDelete(c echo.Context) error {
 	}
 
 	if err := config.DeleteConfigIn(selectedDir); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to save config")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to delete config")
 	}
 	// 更新后的HTML片段
 	updatedHTML := ConfigManager(config.DefaultConfigLocation(), config.GetWorkingDirectoryConfig(), config.GetHomeDirectoryConfig(), config.GetProgramDirectoryConfig())
