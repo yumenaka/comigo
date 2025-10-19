@@ -27,7 +27,7 @@ templ Drawer(c echo.Context, book *model.Book, slot templ.Component) {
 					alt="favicon"
 				/>
 				<div x-text="i18next.t('reader_settings')">阅读设置</div>
-				if state.ServerConfig.NeedLogin() {
+				if state.ServerConfig.RequiresAuth() {
 					<button
 						type="button"
 						id="logout_button"
