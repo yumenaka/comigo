@@ -22,6 +22,5 @@ templ UploadPage(c echo.Context) {
 	@common.UploadArea(),
 	@common.Footer(state.Version)
 	@common.Drawer(c, nil, nil)
-	@common.QRCode(state.ServerStatus.ServerHost)
-
+	@common.QRCode()
 }

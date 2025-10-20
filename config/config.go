@@ -61,6 +61,18 @@ type Config struct {
 	ZipFileTextEncoding    string          `json:"ZipFileTextEncoding" comment:"非utf-8编码的ZIP文件，尝试用什么编码解析，默认GBK"`
 }
 
+func (c *Config) GetHost() string {
+	return c.Host
+}
+
+func (c *Config) GetPort() int {
+	return c.Port
+}
+
+func (c *Config) GetEnableUpload() bool {
+	return c.EnableUpload
+}
+
 // ConfigInterface需要下面这些方法
 
 func (c *Config) GetDebug() bool {

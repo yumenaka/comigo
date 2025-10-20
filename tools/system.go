@@ -122,8 +122,6 @@ func OpenBrowser(uri string) {
 	// Create a context with cancellation
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-
-	// // Create custom HTTP headers
 	// headers := http.Header{}
 	// headers.Add("Authorization", "Bearer my-token")
 	// headers.Add("Content-Type", "application/json")
@@ -273,39 +271,35 @@ func GetSystemStatus() SystemStatus {
 
 // ServerStatus 服务器当前状况
 type ServerStatus struct {
-	ServerName            string       // 服务器描述
-	ServerHost            string       //
-	ServerPort            uint16       //
-	NumberOfBooks         int          // 当前拥有的书籍总数
-	NumberOfOnLineUser    int          // 在线用户数（未实现）
-	NumberOfOnLineDevices int          // 在线设备数（未实现）
-	SupportUploadFile     bool         //
-	ClientIP              string       // 客户端IP
-	OSInfo                SystemStatus // 系统信息
+	ServerName        string       // 服务器描述
+	ServerHost        string       // ServerHost 服务器主机或 IP 地址。
+	ServerPort        uint16       // ServerPort 服务运行的端口号。
+	TailscaleAuthURL  string       // Tailscale身份验证URL（如果适用）
+	TailscaleUrl      string       // Tailscale阅读地址（如果有）
+	NumberOfBooks     int          // 当前拥有的书籍总数
+	SupportUploadFile bool         // 是否支持上传文件
+	ClientIP          string       // 客户端IP
+	OSInfo            SystemStatus // 系统信息
 }
 
-func GetServerInfo(configHost string, comigoVersion string, configPort uint16, configEnableUpload bool, allBooksNumber int) *ServerStatus {
-	serverName := "Comigo " + comigoVersion
-	// 本机首选出站IP
-	OutIP := GetOutboundIP().String()
-	host := ""
-	if configHost == "" {
-		host = OutIP
-	} else {
-		host = configHost
-	}
-	serverStatus := ServerStatus{
-		ServerName:        serverName,
-		ServerHost:        host,
-		ServerPort:        configPort,
-		SupportUploadFile: configEnableUpload,
-		NumberOfBooks:     allBooksNumber,
-	}
-	return &serverStatus
+type ConfigInterface interface {
+	GetHost() string
+	GetPort() int
+	GetEnableUpload() bool
 }
 
-func GetAllServerInfo(configHost string, comigoVersion string, configPort uint16, configEnableUpload bool, allBooksNumber int, clientIP string) *ServerStatus {
-	serverName := "Comigo " + comigoVersion
+type ServerInfoParams struct {
+	Cfg            ConfigInterface
+	Version        string
+	AllBooksNumber int
+	ClientIP       string
+}
+
+func GetServerInfo(params ServerInfoParams) *ServerStatus {
+	serverName := "Comigo " + params.Version
+	configHost := params.Cfg.GetHost()
+	port := params.Cfg.GetPort()
+	enableUpload := params.Cfg.GetEnableUpload()
 	// 本机首选出站IP
 	host := ""
 	if configHost == "" {
@@ -314,15 +308,13 @@ func GetAllServerInfo(configHost string, comigoVersion string, configPort uint16
 		host = configHost
 	}
 	serverStatus := ServerStatus{
-		ServerName:            serverName,
-		ServerHost:            host,
-		ServerPort:            configPort,
-		SupportUploadFile:     configEnableUpload,
-		NumberOfBooks:         allBooksNumber,
-		NumberOfOnLineUser:    1,
-		NumberOfOnLineDevices: 1,
-		ClientIP:              clientIP,
-		OSInfo:                GetSystemStatus(),
+		ServerName:        serverName,
+		ServerHost:        host,
+		ServerPort:        uint16(port),
+		SupportUploadFile: enableUpload,
+		NumberOfBooks:     params.AllBooksNumber,
+		ClientIP:          params.ClientIP,
+		OSInfo:            GetSystemStatus(),
 	}
 	return &serverStatus
 }

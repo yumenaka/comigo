@@ -10,7 +10,7 @@ templ Drawer(c echo.Context, book *model.Book, slot templ.Component) {
 	<!-- https://flowbite.com/docs/components/drawer/ -->
 	<div
 		id="drawer-right"
-		x-data={ ServerHostBindStr(state.ServerStatus.ServerHost) }
+		x-data="{ serverHost: 'localhost' }"
 		class="fixed top-0 right-0 z-40 flex flex-col w-64 min-h-full px-2 py-0 overflow-y-auto transition-transform translate-x-full border-l-2 border-gray-500 dark:border-gray-200 rounded h-dvh bg-base-100 text-base-content"
 		tabindex="-1"
 		aria-labelledby="drawer-right-label"
@@ -65,7 +65,7 @@ templ Drawer(c echo.Context, book *model.Book, slot templ.Component) {
 				x-show="!window.location.href.includes('file:///')"
 				class="w-32 h-32 p-0 mt-2 mb-2"
 				x-data="{ qrcodeSrc: '' }"
-				x-init="qrcodeSrc = window.location.origin +'/api/qrcode.png?base64=true&qrcode_str='+ encodeURIComponent(window.location.toString().replace(window.location.hostname,serverHost))"
+				x-init="qrcodeSrc = window.location.origin +'/api/qrcode.png?base64=true&qrcode_str='+ encodeURIComponent(window.location.toString())"
 			>
 				<img
 					id="QrcodeImage"

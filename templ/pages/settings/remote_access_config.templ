@@ -30,33 +30,33 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
         			init() {
         			    // 初始化数据
                         this.enable_tailscale = this.$el.querySelector('#EnableTailscale').value === 'true';
-                        console.log('Initial enable_tailscale:', this.enable_tailscale);
+                        //console.log('Initial enable_tailscale:', this.enable_tailscale);
 
                         this.tailscale_auth_key = this.$el.querySelector('#TailscaleAuthKey').value? this.$el.querySelector('#TailscaleAuthKey').value: '';
-                        console.log('Initial tailscale_auth_key:', this.tailscale_auth_key);
+                        //console.log('Initial tailscale_auth_key:', this.tailscale_auth_key);
 
                         this.tailscale_hostname = this.$el.querySelector('#TailscaleHostname') .value? this.$el.querySelector('#TailscaleHostname') .value: 'comigo';
-                        console.log('Initial tailscale_hostname:', this.tailscale_hostname);
+                        //console.log('Initial tailscale_hostname:', this.tailscale_hostname);
 
                         this.tailscale_port = this.$el.querySelector('#TailscalePort').value? this.$el.querySelector('#TailscalePort').value: '443';
-                        console.log('Initial tailscale_port:', this.tailscale_port);
+                        //console.log('Initial tailscale_port:', this.tailscale_port);
 
                         this.tailscale_enable_funnel = this.$el.querySelector('#FunnelTunnel').value === 'true';
-                        console.log('Initial tailscale_enable_funnel:', this.tailscale_enable_funnel);
+                        //console.log('Initial tailscale_enable_funnel:', this.tailscale_enable_funnel);
 
                         this.funnel_password_protection = this.$el.querySelector('#FunnelLoginCheck').value === 'true';
-                        console.log('Initial funnel_password_protection:', this.funnel_password_protection);
+                        //console.log('Initial funnel_password_protection:', this.funnel_password_protection);
 
                         this.nowTailscaleStatus = JSON.parse(document.getElementById('tsStatus').textContent)
-                        console.log('Initial nowTailscaleStatus:', this.nowTailscaleStatus);
+                        //console.log('Initial nowTailscaleStatus:', this.nowTailscaleStatus);
 
         				this.$watch('enable_tailscale', value => {
         				    this.isFormChanged = true; // 启用Tailscale 有变化，表单被修改过
-        					console.log('enable_tailscale changed. :',  value);
+        					//console.log('enable_tailscale changed. :',  value);
         				});
         				this.$watch('tailscale_enable_funnel', value => {
                             this.isFormChanged = true; // 启用Tailscale 有变化，表单被修改过
-                            console.log('tailscale_enable_funnel changed. :',  value);
+                            //console.log('tailscale_enable_funnel changed. :',  value);
                        });
         			}}"
 	>
