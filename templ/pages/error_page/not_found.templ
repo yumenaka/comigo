@@ -25,6 +25,6 @@ templ NotFound404(c echo.Context) {
 		<div class="text-2xl font-bold text-gray-500">Not Found</div>
 	</div>
 	@common.Drawer(c,  nil, nil)
-    @common.QRCode(state.ServerStatus.ServerHost)
+    @common.QRCode()
     @common.Footer(state.Version)
 }

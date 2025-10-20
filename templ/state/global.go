@@ -6,14 +6,6 @@ import (
 	"github.com/yumenaka/comigo/tools"
 )
 
-// 感觉这个抽象有点多余？
-// type GlobalState struct {
-// 	Version      string
-// 	NowBookList  *model.BookInfoList
-// 	ServerStatus *tools.ServerStatus
-// }
-// var Global GlobalState
-
 var (
 	Version      string
 	ServerStatus *tools.ServerStatus
@@ -33,6 +25,6 @@ func GetNowBookNum() int {
 func init() {
 	Version = config.GetVersion()
 	NowBookList = nil
-	ServerStatus = tools.GetServerInfo(config.GetHost(), config.GetVersion(), uint16(config.GetCfg().Port), config.GetEnableUpload(), 0)
+	//ServerStatus = tools.GetServerInfo(config.GetHost(), config.GetVersion(), uint16(config.GetCfg().Port), config.GetEnableUpload(), 0, "")
 	ServerConfig = config.GetCfg()
 }

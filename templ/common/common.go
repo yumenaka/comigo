@@ -13,11 +13,6 @@ import (
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
-// ServerHostBindStr  传递给前端，显示QRCode用的"主机域名"字符串
-func ServerHostBindStr(serverHost string) string {
-	return "{ serverHost: '" + serverHost + "' }"
-}
-
 // GetPageTitle 获取页面标题
 func GetPageTitle(bookID string) string {
 	if bookID == "" {
