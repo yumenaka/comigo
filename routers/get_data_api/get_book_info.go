@@ -13,7 +13,7 @@ func GetParentBook(c echo.Context) error {
 	if id == "" {
 		return c.JSON(http.StatusBadRequest, "not set id param")
 	}
-	book, err := model.MainStoreGroup.GetParentBook(id)
+	book, err := model.IStore.GetParentBook(id)
 	if err != nil {
 		logger.Infof("%s", err)
 		return c.JSON(http.StatusBadRequest, "ParentBookInfo not found")
@@ -27,8 +27,8 @@ func GetTopOfShelfInfo(c echo.Context) error {
 	if sortBy == "" {
 		sortBy = "default"
 	}
-	model.MainStoreGroup.CheckAllBookFileExist()
-	bookInfoList, err := model.MainStoreGroup.TopOfShelfInfo(sortBy)
+	model.IStore.CheckAllNotExistBooks()
+	bookInfoList, err := model.IStore.TopOfShelfInfo(sortBy)
 	if err != nil {
 		logger.Infof("%s", err)
 		return c.JSON(http.StatusBadRequest, "GetTopOfShelfInfo Failed")
@@ -38,7 +38,7 @@ func GetTopOfShelfInfo(c echo.Context) error {
 
 // GroupInfo 示例 URL： http://127.0.0.1:1234/api/group_info?id=1215a&sort_by=filename
 func GroupInfo(c echo.Context) error {
-	model.MainStoreGroup.CheckAllBookFileExist()
+	model.IStore.CheckAllNotExistBooks()
 	sortBy := c.QueryParam("sort_by")
 	if sortBy == "" {
 		sortBy = "default"
@@ -48,12 +48,12 @@ func GroupInfo(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, "book id not set")
 	}
 	// sortBy: 根据压缩包原始顺序、时间、文件名排序
-	b, err := model.MainStoreGroup.GetBookByID(id, sortBy)
+	b, err := model.IStore.GetBookByID(id, sortBy)
 	if err != nil {
 		logger.Infof("%s", err)
 		return c.JSON(http.StatusBadRequest, "book id not found")
 	}
-	infoList, err := model.MainStoreGroup.GetBookInfoListByParentFolder(b.ParentFolder, sortBy)
+	infoList, err := model.IStore.GetBookInfoListByParentFolder(b.ParentFolder, sortBy)
 	if err != nil {
 		logger.Infof("%s", err)
 		return c.JSON(http.StatusBadRequest, "ParentFolder, not found")
@@ -63,7 +63,7 @@ func GroupInfo(c echo.Context) error {
 
 // GroupInfoFilter 示例 URL： http://127.0.0.1:1234/api/group_info_filter?id=1215a&sort_by=filename
 func GroupInfoFilter(c echo.Context) error {
-	model.MainStoreGroup.CheckAllBookFileExist()
+	model.IStore.CheckAllNotExistBooks()
 	sortBy := c.QueryParam("sort_by")
 	if sortBy == "" {
 		sortBy = "default"
@@ -73,12 +73,12 @@ func GroupInfoFilter(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, "book id not set")
 	}
 	// sortBy: 根据压缩包原始顺序、时间、文件名排序
-	b, err := model.MainStoreGroup.GetBookByID(id, sortBy)
+	b, err := model.IStore.GetBookByID(id, sortBy)
 	if err != nil {
 		logger.Infof("%s", err)
 		return c.JSON(http.StatusBadRequest, "book id not found")
 	}
-	infoList, err := model.MainStoreGroup.GetBookInfoListByParentFolder(b.ParentFolder, sortBy)
+	infoList, err := model.IStore.GetBookInfoListByParentFolder(b.ParentFolder, sortBy)
 	if err != nil {
 		logger.Infof("%s", err)
 		return c.JSON(http.StatusBadRequest, "ParentFolder, not found")

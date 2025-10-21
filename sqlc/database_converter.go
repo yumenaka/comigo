@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/store"
 )
 
 // ==================== Book 相关转换 ====================
@@ -166,9 +167,9 @@ func ToSQLCUpdateMediaFileParams(mediaFile model.MediaFileInfo, bookID string) U
 // ==================== Backend 相关转换 ====================
 
 // FromSQLCFileBackend 将sqlc.FileBackend转换为model.Backend
-func FromSQLCFileBackend(sqlcFileBackend FileBackend) *model.Backend {
-	return &model.Backend{
-		Type:         model.BackendType(sqlcFileBackend.Type),
+func FromSQLCFileBackend(sqlcFileBackend FileBackend) *store.Backend {
+	return &store.Backend{
+		Type:         store.BackendType(sqlcFileBackend.Type),
 		URL:          sqlcFileBackend.Url,
 		ServerHost:   sqlcFileBackend.ServerHost.String,
 		ServerPort:   int(sqlcFileBackend.ServerPort.Int64),
@@ -181,7 +182,7 @@ func FromSQLCFileBackend(sqlcFileBackend FileBackend) *model.Backend {
 }
 
 // ToSQLCCreateFileBackendParams 将model.FileBackend转换为sqlc.CreateFileBackendParams
-func ToSQLCCreateFileBackendParams(fileBackend *model.Backend) CreateFileBackendParams {
+func ToSQLCCreateFileBackendParams(fileBackend *store.Backend) CreateFileBackendParams {
 	return CreateFileBackendParams{
 		Type:         int64(fileBackend.Type),
 		Url:          fileBackend.URL,
@@ -196,7 +197,7 @@ func ToSQLCCreateFileBackendParams(fileBackend *model.Backend) CreateFileBackend
 }
 
 // ToSQLCUpdateFileBackendParams 将model.Backend转换为sqlc.UpdateFileBackendParams
-func ToSQLCUpdateFileBackendParams(fileBackend *model.Backend) UpdateFileBackendParams {
+func ToSQLCUpdateFileBackendParams(fileBackend *store.Backend) UpdateFileBackendParams {
 	return UpdateFileBackendParams{
 		Url:          fileBackend.URL,
 		Type:         int64(fileBackend.Type),
@@ -214,15 +215,15 @@ func ToSQLCUpdateFileBackendParams(fileBackend *model.Backend) UpdateFileBackend
 // ==================== StoreInfo 相关转换 ====================
 
 // FromSQLCStore 将sqlc.Store转换为model.StoreInfo
-func FromSQLCStore(sqlcStore Store) *model.StoreInfo {
-	backend := model.Backend{
+func FromSQLCStore(sqlcStore Store) *store.StoreInfo {
+	backend := store.Backend{
 		URL: sqlcStore.BackendUrl,
 	}
 	err := backend.ParseStoreURL(sqlcStore.BackendUrl)
 	if err != nil {
 		return nil
 	}
-	return &model.StoreInfo{
+	return &store.StoreInfo{
 		BackendURL:  sqlcStore.BackendUrl,
 		Name:        sqlcStore.Name,
 		Description: sqlcStore.Description.String,
@@ -231,7 +232,7 @@ func FromSQLCStore(sqlcStore Store) *model.StoreInfo {
 }
 
 // ToSQLCCreateStoreParams 将model.StoreInfo转换为sqlc.CreateStoreParams
-func ToSQLCCreateStoreParams(store *model.StoreInfo) CreateStoreParams {
+func ToSQLCCreateStoreParams(store *store.StoreInfo) CreateStoreParams {
 	return CreateStoreParams{
 		BackendUrl:  store.BackendURL,
 		Name:        store.Name,
@@ -240,7 +241,7 @@ func ToSQLCCreateStoreParams(store *model.StoreInfo) CreateStoreParams {
 }
 
 // ToSQLCUpdateStoreParams 将model.StoreInfo转换为sqlc.UpdateStoreParams
-func ToSQLCUpdateStoreParams(store *model.StoreInfo) UpdateStoreParams {
+func ToSQLCUpdateStoreParams(store *store.StoreInfo) UpdateStoreParams {
 	return UpdateStoreParams{
 		Name:        store.Name,
 		Description: sql.NullString{String: store.Description, Valid: store.Description != ""},
@@ -274,8 +275,8 @@ func FromSQLCMediaFiles(sqlcMediaFiles []MediaFile) []model.MediaFileInfo {
 }
 
 // FromSQLCFileBackends 批量转换sqlc.FileBackend为model.Backend
-func FromSQLCFileBackends(sqlcFileBackends []FileBackend) []*model.Backend {
-	fileBackends := make([]*model.Backend, len(sqlcFileBackends))
+func FromSQLCFileBackends(sqlcFileBackends []FileBackend) []*store.Backend {
+	fileBackends := make([]*store.Backend, len(sqlcFileBackends))
 	for i, sqlcFileBackend := range sqlcFileBackends {
 		fileBackends[i] = FromSQLCFileBackend(sqlcFileBackend)
 	}
@@ -283,8 +284,8 @@ func FromSQLCFileBackends(sqlcFileBackends []FileBackend) []*model.Backend {
 }
 
 // FromSQLCStores 批量转换sqlc.Store为model.StoreInfo
-func FromSQLCStores(sqlcStores []Store) []*model.StoreInfo {
-	stores := make([]*model.StoreInfo, len(sqlcStores))
+func FromSQLCStores(sqlcStores []Store) []*store.StoreInfo {
+	stores := make([]*store.StoreInfo, len(sqlcStores))
 	for i, sqlcStore := range sqlcStores {
 		stores[i] = FromSQLCStore(sqlcStore)
 	}
@@ -294,13 +295,13 @@ func FromSQLCStores(sqlcStores []Store) []*model.StoreInfo {
 // ==================== 关联查询结果转换 ====================
 
 // FromSQLCStoreWithBackendRow 将sqlc.GetStoreWithBackendRow转换为model.StoreInfo
-func FromSQLCStoreWithBackendRow(row GetStoreWithBackendRow) *model.StoreInfo {
-	store := &model.StoreInfo{
+func FromSQLCStoreWithBackendRow(row GetStoreWithBackendRow) *store.StoreInfo {
+	store := &store.StoreInfo{
 		BackendURL:  row.BackendUrl,
 		Name:        row.Name,
 		Description: row.Description.String,
-		Backend: model.Backend{
-			Type:         model.BackendType(row.Type),
+		Backend: store.Backend{
+			Type:         store.BackendType(row.Type),
 			URL:          row.Url,
 			ServerHost:   row.ServerHost.String,
 			ServerPort:   int(row.ServerPort.Int64),
@@ -315,8 +316,8 @@ func FromSQLCStoreWithBackendRow(row GetStoreWithBackendRow) *model.StoreInfo {
 }
 
 // FromSQLCListStoresWithBackendRow 批量转换sqlc.ListStoresWithBackendRow为model.StoreInfo
-func FromSQLCListStoresWithBackendRow(rows []ListStoresWithBackendRow) []*model.StoreInfo {
-	stores := make([]*model.StoreInfo, len(rows))
+func FromSQLCListStoresWithBackendRow(rows []ListStoresWithBackendRow) []*store.StoreInfo {
+	stores := make([]*store.StoreInfo, len(rows))
 	for i, row := range rows {
 		// 将ListStoresWithBackendRow转换为GetStoreWithBackendRow格式
 		convertedRow := GetStoreWithBackendRow{

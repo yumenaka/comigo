@@ -36,5 +36,5 @@ templ FlipPage(c echo.Context, book *model.Book) {
     		    x-text="$store.flip.nowPageNum+'/'+$store.flip.allPageNum">
     </div>
 	@common.Drawer(c, book, FlipDrawerSlot(book))
-	@common.QRCode(state.ServerStatus.ServerHost)
+	@common.QRCode()
 }

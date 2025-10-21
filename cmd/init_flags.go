@@ -9,6 +9,8 @@ import (
 	"github.com/spf13/viper"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/store"
 )
 
 // cobra & viper sample:
@@ -17,6 +19,8 @@ var runtimeViper *viper.Viper
 
 func init() {
 	runtimeViper = viper.New()
+	// 为了避免循环引用，把 model.IStore 指向 store.MainStoreGroup
+	model.IStore = &store.RamStore
 }
 
 func InitFlags() {
@@ -91,8 +95,8 @@ func InitFlags() {
 	RootCmd.PersistentFlags().BoolVar(&cfg.EnableTailscale, "tailscale", false, locale.GetString("EnableTailscale"))
 	// Tailscale服务 启用Funnel模式
 	RootCmd.PersistentFlags().BoolVar(&cfg.FunnelTunnel, "tailscale-funnel", false, locale.GetString("FunnelTunnel"))
-	// FunnelEnforcePassword Funnel模式强制密码验证,默认开启
-	RootCmd.PersistentFlags().BoolVar(&cfg.FunnelEnforcePassword, "funnel-enforce-password", true, locale.GetString("FunnelEnforcePassword"))
+	// FunnelLoginCheck Funnel密码保护检查
+	RootCmd.PersistentFlags().BoolVar(&cfg.FunnelLoginCheck, "funnel-password-check", true, locale.GetString("FunnelLoginCheck"))
 	// Tailscale服务主机名,用于 Tailscale 网络中的标识节点
 	RootCmd.PersistentFlags().StringVar(&cfg.TailscaleHostname, "tailscale-hostname", "comigo", locale.GetString("TailscaleHostname"))
 	// Tailscale服务端口号

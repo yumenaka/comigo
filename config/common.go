@@ -264,7 +264,7 @@ func GetQrcodeURL() string {
 	// 取得本机的首选出站IP
 	OutIP := tools.GetOutboundIP().String()
 	if cfg.Host == "" {
-		return protocol + OutIP + ":" + strconv.Itoa(cfg.Port)
+		return protocol + OutIP + ":" + strconv.Itoa(int(cfg.Port))
 	}
-	return protocol + cfg.Host + ":" + strconv.Itoa(cfg.Port)
+	return protocol + cfg.Host + ":" + strconv.Itoa(int(cfg.Port))
 }

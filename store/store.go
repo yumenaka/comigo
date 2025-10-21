@@ -1,4 +1,4 @@
-package model
+package store
 
 import (
 	"errors"
@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
@@ -36,17 +37,17 @@ func (store *Store) GenerateBookGroup() error {
 	}
 	// 遍历 BookMap ，删除所有 BooksGroup 类型的书籍
 	for _, value := range store.BookMap.Range {
-		b := value.(*Book)
-		if b.Type == TypeBooksGroup {
+		b := value.(*model.Book)
+		if b.Type == model.TypeBooksGroup {
 			store.BookMap.Delete(b.BookID)
 		}
 	}
 	// 然后再重新生成 BooksGroup
-	depthBooksMap := make(map[int][]*Book) // key是Depth的临时map
+	depthBooksMap := make(map[int][]*model.Book) // key是Depth的临时map
 	// 计算最大深度
 	maxDepth := 0
 	for _, value := range store.BookMap.Range {
-		b := value.(*Book)
+		b := value.(*model.Book)
 		depthBooksMap[b.Depth] = append(depthBooksMap[b.Depth], b)
 		if b.Depth > maxDepth {
 			maxDepth = b.Depth
@@ -56,7 +57,7 @@ func (store *Store) GenerateBookGroup() error {
 	// 如果有几本书同时有同一个父文件夹，那么应该【新建】一本书(组)，并加入到depth-1层里面
 	for depth := maxDepth; depth >= 0; depth-- {
 		// 用父文件夹做key的parentMap，后面遍历用
-		parentTempMap := make(map[string][]*Book)
+		parentTempMap := make(map[string][]*model.Book)
 		// //遍历depth等于i的所有book
 		for _, b := range depthBooksMap[depth] {
 			parentTempMap[b.ParentFolder] = append(parentTempMap[b.ParentFolder], b)
@@ -71,12 +72,12 @@ func (store *Store) GenerateBookGroup() error {
 			}
 			// 获取修改时间
 			modTime := pathInfo.ModTime()
-			tempBookInfo, err := NewBookInfo(filepath.Dir(sameParentBookList[0].FilePath), modTime, 0, store.BackendURL, depth-1, TypeBooksGroup)
+			tempBookInfo, err := model.NewBookInfo(filepath.Dir(sameParentBookList[0].FilePath), modTime, 0, store.BackendURL, depth-1, model.TypeBooksGroup)
 			if err != nil {
 				logger.Infof("%s", err)
 				continue
 			}
-			newBookGroup := &Book{
+			newBookGroup := &model.Book{
 				BookInfo: *tempBookInfo,
 			}
 			// 书名应该设置成parent
@@ -95,8 +96,8 @@ func (store *Store) GenerateBookGroup() error {
 			}
 			// 检测是否已经生成并添加过
 			Added := false
-			for _, bookGroup := range MainStoreGroup.ListBooks() {
-				if bookGroup.Type == TypeBooksGroup {
+			for _, bookGroup := range RamStore.ListBooks() {
+				if bookGroup.Type == model.TypeBooksGroup {
 					continue // 只处理书籍组类型
 				}
 				if bookGroup.FilePath == newBookGroup.FilePath {

@@ -25,7 +25,7 @@ func UpdateConfig(c echo.Context) error {
 	jsonString := string(body)
 	logger.Infof("Received JSON data: %s \n", jsonString)
 	// 如果配置被锁定，返回错误
-	if config.GetCfg().GetConfigLocked() {
+	if config.GetCfg().ConfigLocked {
 		return c.JSON(http.StatusMethodNotAllowed, map[string]string{"error": "Config is locked, cannot be modified"})
 	}
 	// 复制当前配置以便后续比较
@@ -65,7 +65,7 @@ func openBrowserIfNeeded(oldConfig *config.Config, newConfig *config.Config) {
 		if newConfig.EnableTLS {
 			protocol = "https://"
 		}
-		go tools.OpenBrowser(protocol + "127.0.0.1:" + strconv.Itoa(newConfig.Port))
+		go tools.OpenBrowser(protocol + "127.0.0.1:" + strconv.Itoa(int(newConfig.Port)))
 	}
 }
 

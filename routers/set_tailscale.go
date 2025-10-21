@@ -1,6 +1,7 @@
 package routers
 
 import (
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/tools/logger"
 	"github.com/yumenaka/comigo/tools/tailscale_plugin"
@@ -9,18 +10,23 @@ import (
 // StartTailscale 根据配置启动或停止 Tailscale 服务
 func StartTailscale() {
 	// 启动 Tailscale 服务的前提条件
-	if engine == nil || config.GetTailscaleEnable() == false {
+	if engine == nil || config.GetCfg().EnableTailscale == false {
+		return
+	}
+	// 如果启用了 Tailscale Funnel 模式且要求身份验证，但未设置用户名或密码，则记录错误并返回
+	if config.GetCfg().EnableTailscale && config.GetCfg().FunnelTunnel && config.GetCfg().FunnelLoginCheck && !config.GetCfg().RequiresAuth() {
+		logger.Errorf(locale.GetString("FunnelLoginCheckDescription"))
 		return
 	}
 	// 启动或重启 Tailscale 服务
 	if err := tailscale_plugin.RunTailscale(
 		engine,
 		tailscale_plugin.TailscaleConfig{
-			Hostname:   config.GetTailscaleHostname(),
-			Port:       uint16(config.GetTailscalePort()),
-			FunnelMode: config.GetFunnelTunnel(), // Tailscale Funnel 模式，外网可访问，建议设置用户名与密码
-			ConfigDir:  config.GetCachePath(),
-			AuthKey:    config.GetTailscaleAuthKey(),
+			Hostname:   config.GetCfg().TailscaleHostname,
+			Port:       uint16(config.GetCfg().TailscalePort),
+			FunnelMode: config.GetCfg().FunnelTunnel, // Tailscale Funnel 模式，外网可访问，建议设置用户名与密码
+			ConfigDir:  config.GetCfg().ConfigPath,
+			AuthKey:    config.GetCfg().TailscaleAuthKey,
 		},
 	); err != nil {
 		logger.Errorf("Failed to run Tailscale: %v", err)

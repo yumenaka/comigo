@@ -8,7 +8,7 @@ package common
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-func QRCode(serverHost string) templ.Component {
+func QRCode() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -29,20 +29,7 @@ func QRCode(serverHost string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- QRCode --><div x-data=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(ServerHostBindStr(serverHost))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/qrcode.templ`, Line: 5, Col: 44}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" id=\"qrcode-modal\" tabindex=\"-1\" class=\"hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full\"><!-- QRCode Modal Content --><div class=\"relative w-64 h-64 p-1 m-1\" x-data=\"{ qrcodeSrc: '' }\" x-init=\"qrcodeSrc = window.location.origin +'/api/qrcode.png?base64=true&qrcode_str='+ encodeURIComponent(window.location.toString().replace(window.location.hostname,serverHost))\"><img id=\"qrcode-img\" draggable=\"false\" :hx-get=\"qrcodeSrc\" hx-trigger=\"load\" hx-swap=\"none\" hx-on-htmx-after-request=\"this.src = event.detail.xhr.responseText;\" class=\"w-64 h-64 rounded\"> <a x-ref=\"content\" :href=\"window.location.toString().replace(window.location.hostname,serverHost)\" target=\"_blank\"><div class=\"min-w-64 p-1 mb-4 text-center text-white text-xs font-semibold\" x-text=\"window.location.toString().replace(window.location.hostname,serverHost)\"></div></a><!-- <button type=\"button\" class=\"absolute buttom-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-primary m-2 p-2 rounded text-sm self-center\" x-on:click=\"navigator.clipboard.writeText($refs.content.href);alert('You copy it');\"  >Copy URL</button> --></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- QRCode --><div x-data=\"{ serverHost: 'localhost' }\" id=\"qrcode-modal\" tabindex=\"-1\" class=\"hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full\"><!-- QRCode Modal Content --><!-- <div class=\"relative w-64 h-64 p-1 m-1\" x-data=\"{ qrcodeSrc: '' }\" x-init=\"qrcodeSrc = window.location.origin +'/api/qrcode.png?base64=true&qrcode_str='+ encodeURIComponent(window.location.toString().replace(window.location.hostname,serverHost))\">  --><div class=\"relative w-64 h-64 p-1 m-1\" x-data=\"{ qrcodeSrc: '' }\" x-init=\"qrcodeSrc = window.location.origin +'/api/qrcode.png?base64=true&qrcode_str='+ encodeURIComponent(window.location.toString())\"><img id=\"qrcode-img\" draggable=\"false\" :hx-get=\"qrcodeSrc\" hx-trigger=\"load\" hx-swap=\"none\" hx-on-htmx-after-request=\"this.src = event.detail.xhr.responseText;\" class=\"w-64 h-64 rounded\"> <a x-ref=\"content\" :href=\"window.location.toString()\" target=\"_blank\"><div class=\"min-w-64 p-1 mb-4 text-center text-white text-xs font-semibold\" x-text=\"window.location.toString()\"></div></a><!-- <button type=\"button\" class=\"absolute buttom-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-primary m-2 p-2 rounded text-sm self-center\" x-on:click=\"navigator.clipboard.writeText($refs.content.href);alert('You copy it');\"  >Copy URL</button> --></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

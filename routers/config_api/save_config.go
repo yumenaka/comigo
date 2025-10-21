@@ -11,7 +11,7 @@ import (
 // SaveConfigHandler 保存服务器配置到文件
 func SaveConfigHandler(c echo.Context) error {
 	// 如果配置被锁定，返回错误
-	if config.GetCfg().GetConfigLocked() {
+	if config.GetCfg().ConfigLocked {
 		return c.JSON(http.StatusMethodNotAllowed, map[string]string{"error": "Config is locked, cannot be modified"})
 	}
 	SaveTo := c.Param("to")

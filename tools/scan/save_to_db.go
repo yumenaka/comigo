@@ -13,12 +13,12 @@ import (
 
 // SaveResultsToDatabase 4，保存扫描结果到数据库，并清理不存在的书籍
 func SaveResultsToDatabase(ConfigPath string, ClearDatabaseWhenExit bool) error {
-	allBooks := model.MainStoreGroup.GetAllBookList()
-	saveErr := sqlc.Repo.SaveBookListToDatabase(allBooks)
+	books := model.IStore.GetAllBookSkipBookGroup()
+	saveErr := sqlc.Repo.SaveBookListToDatabase(books)
 	if saveErr != nil {
 		logger.Info(saveErr)
 		return saveErr
 	}
-	fmt.Println("SaveResultsToDatabase: Books saved to database successfully.!!!!!!!!!!!!" + strconv.Itoa(len(allBooks)))
+	fmt.Println("SaveResultsToDatabase: Books saved to database successfully.!!!!!!!!!!!!" + strconv.Itoa(len(books)))
 	return nil
 }

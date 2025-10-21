@@ -10,7 +10,8 @@ Alpine.store('flip', {
         const isTouch = (('ontouchstart' in window) || (navigator.maxTouchPoints > 1));
         //console.log('isMobileUA', isMobileUA);
         //console.log('isTouch', isTouch);
-        return isMobileUA || isTouch;
+        // return isMobileUA || isTouch;
+        return isMobileUA;
     })()).as('flip.autoHideToolbar'),
     //自动对齐
     autoAlign: Alpine.$persist(true).as('flip.autoAlignTop'),

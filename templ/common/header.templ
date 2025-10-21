@@ -248,7 +248,7 @@ templ Header(prop HeaderProps) {
 				data-modal-target="qrcode-modal"
 				data-modal-toggle="qrcode-modal"
 				x-show="!window.location.href.includes('file:///')"
-				class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
+				class="hidden md:flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
 			>
 				@svg.QRCode()
 			</div>

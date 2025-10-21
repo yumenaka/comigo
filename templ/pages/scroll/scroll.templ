@@ -28,7 +28,7 @@ templ ScrollPage(c echo.Context, book *model.Book, paginationIndex int) {
 	}
 	@common.Footer(state.Version)
 	@common.Drawer(c, book, DrawerSlot(c,book))
-	@common.QRCode(state.ServerStatus.ServerHost)
+	@common.QRCode()
 }
 
 templ InsertData(bookData any, serverStatus any) {

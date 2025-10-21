@@ -26,7 +26,7 @@ func ScanStore(args []string) {
 			logger.Infof("%s", err)
 		} else {
 			for _, book := range books {
-				err = model.MainStoreGroup.AddBook(book.BookStorePath, book, config.GetMinImageNum())
+				err = model.IStore.AddBook(book.BookStorePath, book, config.GetMinImageNum())
 				if err != nil {
 					logger.Infof("AddBook error: %s", err)
 				} else {
@@ -57,7 +57,7 @@ func CreateStoreUrls(args []string) {
 	// 如果用户指定了扫描路径，就把指定的路径都加入到扫描路径里面
 	config.GetCfg().InitStoreUrls()
 	// 没指定扫描路径,配置文件也没设置书库文件夹的时候，默认把【当前工作目录】作为扫描路径
-	if len(args) == 0 && len(config.GetCfg().GetStoreUrls()) == 0 {
+	if len(args) == 0 && len(config.GetCfg().StoreUrls) == 0 {
 		// 获取当前工作目录
 		wd, err := os.Getwd()
 		if err != nil {
