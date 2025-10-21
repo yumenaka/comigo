@@ -72,7 +72,7 @@ func (b *Book) GuestCover() (cover MediaFileInfo) {
 
 // NewBook 初始化 Book，设置文件路径、书名、BookID 等
 func NewBook(filePath string, modified time.Time, fileSize int64, storePath string, depth int, bookType SupportFileType) (*Book, error) {
-	if MainStoreGroup.CheckRawFileExist(filePath, bookType) {
+	if IStore.CheckRawFileExist(filePath, bookType) {
 		return nil, errors.New("skip: " + filePath)
 	}
 	// 初始化书籍

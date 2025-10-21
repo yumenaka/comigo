@@ -16,25 +16,25 @@ import (
 // 示例 URL： http://127.0.0.1:1234/api/get_book?id=1215a&sort_by=name
 // 示例 URL： http://127.0.0.1:1234/api/get_book?&author=Doe&name=book_name
 func GetBook(c echo.Context) error {
-	author := c.QueryParam("author")
+	//author := c.QueryParam("author")
 	sortBy := c.QueryParam("sort_by")
 	if sortBy == "" {
 		sortBy = "default"
 	}
 	id := c.QueryParam("id")
 
-	model.MainStoreGroup.CheckAllBookFileExist()
+	model.IStore.CheckAllNotExistBooks()
 
-	if author != "" {
-		bookList, err := model.MainStoreGroup.GetBookByAuthor(author, sortBy)
-		if err != nil {
-			logger.Infof("%s", err)
-		}
-		return c.JSON(http.StatusOK, bookList)
-	}
+	//if author != "" {
+	//	bookList, err := model.IStore.GetBookByAuthor(author, sortBy)
+	//	if err != nil {
+	//		logger.Infof("%s", err)
+	//	}
+	//	return c.JSON(http.StatusOK, bookList)
+	//}
 
 	if id != "" {
-		b, err := model.MainStoreGroup.GetBookByID(id, sortBy)
+		b, err := model.IStore.GetBookByID(id, sortBy)
 		if err != nil {
 			logger.Infof("%s", err)
 			return c.JSON(http.StatusBadRequest, "id not found")

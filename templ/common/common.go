@@ -18,7 +18,7 @@ func GetPageTitle(bookID string) string {
 	if bookID == "" {
 		return state.ServerConfig.GetTopStoreName()
 	}
-	groupBook, err := model.MainStoreGroup.GetBookByID(bookID, "")
+	groupBook, err := model.IStore.GetBookByID(bookID, "")
 	if err != nil {
 		logger.Info("GetBookByID: %v", err)
 		return "Comigo " + state.Version
@@ -34,7 +34,7 @@ func GetImageAlt(key int) string {
 // GetReturnUrl 阅读或书架页面，返回按钮实际使用的链接
 func GetReturnUrl(BookID string) string {
 	// 如果是书籍组，就跳转到父书架
-	ParentBook, err := model.MainStoreGroup.GetParentBook(BookID)
+	ParentBook, err := model.IStore.GetParentBook(BookID)
 	if err != nil {
 		// logger.Infof("ParentBook not found by BookID: %s, error: %v", BookID, err)
 		return "/"
@@ -44,7 +44,7 @@ func GetReturnUrl(BookID string) string {
 }
 
 func ShowQuickJumpBar(b *model.Book) (QuickJumpBar bool) {
-	_, err := model.MainStoreGroup.GetBookInfoListByParentFolder(b.ParentFolder, "")
+	_, err := model.IStore.GetBookInfoListByParentFolder(b.ParentFolder, "")
 	if err != nil {
 		logger.Infof("%s", err)
 		return false
@@ -53,7 +53,7 @@ func ShowQuickJumpBar(b *model.Book) (QuickJumpBar bool) {
 }
 
 func QuickJumpBarBooks(b *model.Book) (list *model.BookInfoList) {
-	list, err := model.MainStoreGroup.GetBookInfoListByParentFolder(b.ParentFolder, "")
+	list, err := model.IStore.GetBookInfoListByParentFolder(b.ParentFolder, "")
 	if err != nil {
 		logger.Infof("%s", err)
 		return nil
@@ -63,7 +63,7 @@ func QuickJumpBarBooks(b *model.Book) (list *model.BookInfoList) {
 
 func GetFileBase64Text(bookID string, fileName string) string {
 	// 获取书籍信息
-	bookByID, err := model.MainStoreGroup.GetBookByID(bookID, "")
+	bookByID, err := model.IStore.GetBookByID(bookID, "")
 	if err != nil {
 		logger.Infof("GetBookByID error: %s", err)
 		return ""

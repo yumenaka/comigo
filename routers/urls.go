@@ -107,6 +107,8 @@ func bindProtectedAPI(group *echo.Group) {
 	group.GET("/top_shelf", get_data_api.GetTopOfShelfInfo)
 	// 查询书籍信息
 	group.GET("/get_book", get_data_api.GetBook)
+	// 更新书签信息
+	group.POST("/update_bookmark", get_data_api.UpdateBookmark)
 	// 查询父书籍信息
 	group.GET("/parent_book_info", get_data_api.GetParentBook)
 	// 返回同一文件夹的书籍 ID 列表

@@ -1,14 +1,22 @@
 package model
 
-import "sync"
-
-// MainStoreGroup 扫描后生成。可以有多个子书库。内部使用并发安全的 sync.Map 存储书籍和书组
-var MainStoreGroup = StoreGroup{
-	StoreInfo: StoreInfo{
-		BackendURL:  "comigo://main", // 主书库的 URL
-		Name:        "Comigo StoreInfo",
-		Description: "Comigo Main book store",
-	},
-	// 使用 sync.Map 存储书籍和子书库
-	ChildStores: sync.Map{}, // 子书库，储存层级关系
+type StoreInterface interface {
+	ClearTempFilesALL(debug bool, cachePath string)
+	AddBook(storeURL string, b *Book, minPageNum int) error
+	GetBooksNumber() int
+	ListBooks() []*Book
+	CheckRawFileExist(filePath string, bookType SupportFileType) bool
+	GetBookByID(id string, sortBy string) (*Book, error)
+	GetShortBookID(fullID string, minLength int) string
+	CheckAllNotExistBooks()
+	GetParentBook(childID string) (*Book, error)
+	TopOfShelfInfo(sortBy string) (*BookInfoList, error)
+	GetBookInfoListByParentFolder(parentFolder string, sortBy string) (*BookInfoList, error)
+	GetChildBooksInfo(BookID string, sortBy string) (*BookInfoList, error)
+	AddBooks(storeURL string, list []*Book, minPageNum int) error
+	GenerateAllBookGroup() (e error)
+	ClearAllBookData()
+	GetAllBookSkipBookGroup() []*Book
 }
+
+var IStore StoreInterface

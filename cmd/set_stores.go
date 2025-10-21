@@ -26,7 +26,7 @@ func ScanStore(args []string) {
 			logger.Infof("%s", err)
 		} else {
 			for _, book := range books {
-				err = model.MainStoreGroup.AddBook(book.BookStorePath, book, config.GetMinImageNum())
+				err = model.IStore.AddBook(book.BookStorePath, book, config.GetMinImageNum())
 				if err != nil {
 					logger.Infof("AddBook error: %s", err)
 				} else {
