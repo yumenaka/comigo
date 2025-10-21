@@ -33,7 +33,7 @@ func beforeConfigUpdate(oldConfig *config.Config, newConfig *config.Config) {
 	if action.ReStartWebServer {
 		*RestartWebServerBroadcast <- "restart_web_server"
 		// 等待服务器端口可用，确保重启完成后再继续
-		tools.WaitUntilServerReady("localhost", newConfig.Port, 15*time.Second)
+		tools.WaitUntilServerReady("localhost", uint16(newConfig.Port), 15*time.Second)
 	}
 	if action.StartTailscale {
 		*RestartWebServerBroadcast <- "start_tailscale"
@@ -60,7 +60,7 @@ func openBrowserIfNeeded(oldConfig *config.Config, newConfig *config.Config) {
 		if newConfig.EnableTLS {
 			protocol = "https://"
 		}
-		go tools.OpenBrowser(protocol + "localhost:" + strconv.Itoa(newConfig.Port))
+		go tools.OpenBrowser(protocol + "localhost:" + strconv.Itoa(int(newConfig.Port)))
 	}
 }
 

@@ -192,9 +192,9 @@ document.getElementById('deleteConfigButton').addEventListener('htmx:beforeReque
 document.getElementById('deleteConfigButton').addEventListener('htmx:afterRequest', function (event) {
     // 只对ID为myButton的请求进行监听
     if (event.detail.successful) {
-        showToast('i18next.t('delete_config_success'), 'info');
+        showToast(i18next.t('delete_config_success'), 'info');
     } else {
-        showToast('i18next.t('delete_config_failed'), 'error');
+        showToast(i18next.t('delete_config_failed'), 'error');
     }
 });
 </script>

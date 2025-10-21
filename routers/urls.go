@@ -35,7 +35,7 @@ func BindURLs() {
 	privateAPI := publicAPI.Group("")
 
 	// echo jwt简明教程，还有google登录示例：https://echo.labstack.com/docs/cookbook/jwt
-	if config.GetUsername() != "" && config.GetPassword() != "" {
+	if config.GetCfg().RequiresAuth() {
 		// jwtConfig格式参考：https://echo.labstack.com/docs/middleware/jwt#configuration
 		jwtConfig := echojwt.Config{
 			NewClaimsFunc: func(c echo.Context) jwt.Claims {
@@ -71,8 +71,7 @@ func bindPublicView(group *echo.Group) {
 func bindPublicAPI(group *echo.Group) {
 	// 生成QRCode
 	group.GET("/qrcode.png", get_data_api.GetQrcode)
-	// 查看服务器状态
-	group.GET("/server_info", get_data_api.GetServerInfoHandler)
+
 	group.POST("/login", login.Login)
 	group.POST("/logout", login.Logout)
 }
@@ -96,18 +95,20 @@ func bindProtectedView(group *echo.Group) {
 
 // bindProtectedAPI 注册需要认证的路由
 func bindProtectedAPI(group *echo.Group) {
+	// 服务器状态
+	group.GET("/server_info", get_data_api.GetServerInfoHandler)
 	// 文件上传
 	group.POST("/upload", upload_api.UploadFile)
 	// 获取特定文件
 	group.GET("/get_file", get_data_api.GetFile)
 	// 直接下载原始文件
 	group.GET("/raw/:book_id/:file_name", get_data_api.GetRawFile)
-	// 查看服务器状态
-	group.GET("/server_info_all", get_data_api.GetAllServerInfoHandler)
 	// 获取书架信息
 	group.GET("/top_shelf", get_data_api.GetTopOfShelfInfo)
 	// 查询书籍信息
 	group.GET("/get_book", get_data_api.GetBook)
+	// 更新书签信息
+	group.POST("/update_bookmark", get_data_api.UpdateBookmark)
 	// 查询父书籍信息
 	group.GET("/parent_book_info", get_data_api.GetParentBook)
 	// 返回同一文件夹的书籍 ID 列表
