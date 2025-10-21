@@ -189,13 +189,13 @@ func (b *BookInfo) GetCover() MediaFileInfo {
 	switch b.Type {
 	// 书籍类型为书组的时候，遍历所有子书籍，然后获取第一个子书籍的封面
 	case TypeBooksGroup:
-		bookGroup, err := IStore.GetBookByID(b.BookID, "")
+		bookGroup, err := IStore.GetBook(b.BookID)
 		if err != nil {
 			logger.Infof("Error getting book group: %s", err)
 			return MediaFileInfo{Name: "unknown.png", Url: "/images/unknown.png"}
 		}
 		for _, childID := range bookGroup.ChildBooksID {
-			book, err := IStore.GetBookByID(childID, "")
+			book, err := IStore.GetBook(childID)
 			if err != nil {
 				return MediaFileInfo{Name: "unknown.png", Url: "/images/unknown.png"}
 			}
@@ -203,7 +203,7 @@ func (b *BookInfo) GetCover() MediaFileInfo {
 			return book.GetCover()
 		}
 	case TypeDir, TypeZip, TypeRar, TypeCbz, TypeCbr, TypeTar, TypeEpub:
-		tempBook, err := IStore.GetBookByID(b.BookID, "")
+		tempBook, err := IStore.GetBook(b.BookID)
 		if err != nil || len(tempBook.Images) == 0 {
 			return MediaFileInfo{Name: "unknown.png", Url: "/images/unknown.png"}
 		}

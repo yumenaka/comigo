@@ -458,7 +458,7 @@ func (q *Queries) GetBookByFilePath(ctx context.Context, filePath string) (Book,
 	return i, err
 }
 
-const getBookByID = `-- name: GetBookByID :one
+const getBookByID = `-- name: GetBook :one
 
 SELECT id, title, book_id, owner, file_path, book_store_path, type, child_books_num, child_books_id, depth, parent_folder, page_count, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, read_percent, non_utf8zip, zip_text_encoding, deleted FROM books 
 WHERE book_id = ? LIMIT 1

@@ -18,9 +18,9 @@ func GetPageTitle(bookID string) string {
 	if bookID == "" {
 		return state.ServerConfig.GetTopStoreName()
 	}
-	groupBook, err := model.IStore.GetBookByID(bookID, "")
+	groupBook, err := model.IStore.GetBook(bookID)
 	if err != nil {
-		logger.Info("GetBookByID: %v", err)
+		logger.Info("GetBook: %v", err)
 		return "Comigo " + state.Version
 	}
 	return groupBook.Title
@@ -63,9 +63,9 @@ func QuickJumpBarBooks(b *model.Book) (list *model.BookInfoList) {
 
 func GetFileBase64Text(bookID string, fileName string) string {
 	// 获取书籍信息
-	bookByID, err := model.IStore.GetBookByID(bookID, "")
+	bookByID, err := model.IStore.GetBook(bookID)
 	if err != nil {
-		logger.Infof("GetBookByID error: %s", err)
+		logger.Infof("GetBook error: %s", err)
 		return ""
 	}
 

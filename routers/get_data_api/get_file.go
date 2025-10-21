@@ -64,7 +64,7 @@ func GetFile(c echo.Context) error {
 			needFile,
 			fileutil.GetQueryString(query),
 			thumbnailMode,
-			config.GetConfigPath(),
+			config.GetCfg().CacheDir,
 			config.GetDebug(),
 		)
 		if err == nil && cacheData != nil {
@@ -80,9 +80,9 @@ func GetFile(c echo.Context) error {
 	}
 
 	// 获取书籍信息
-	bookByID, err := model.IStore.GetBookByID(id, "")
+	bookByID, err := model.IStore.GetBook(id)
 	if err != nil {
-		logger.Infof("GetBookByID error: %s", err)
+		logger.Infof("GetBook error: %s", err)
 		return c.JSON(http.StatusNotFound, map[string]string{"error": "Book not found"})
 	}
 
@@ -124,7 +124,7 @@ func GetFile(c echo.Context) error {
 			fileutil.GetQueryString(query),
 			contentType,
 			thumbnailMode,
-			config.GetConfigPath(),
+			config.GetCfg().CacheDir,
 			config.GetDebug(),
 		)
 		if errSave != nil {

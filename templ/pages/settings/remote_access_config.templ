@@ -2,6 +2,7 @@ package settings
 
 import (
 	"github.com/yumenaka/comigo/templ/state"
+	"github.com/yumenaka/comigo/templ/common/svg"
 	"github.com/yumenaka/comigo/tools/tailscale_plugin"
 	"strconv"
 )
@@ -84,9 +85,12 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 					id={ "EnableTailscale" }
 					name={ "EnableTailscale" }
 					x-model="enable_tailscale"
-					if state.ServerConfig.EnableTailscale {
-						checked
-					}
+					if  state.ServerConfig.EnableTailscale {
+    					value="true"
+    					checked
+    				} else {
+    					value="false"
+    				}
 					value="true"
 					class="sr-only peer"
 				/>
@@ -152,54 +156,10 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 				class="px-2.5 w-64 rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm"
 			/>
 			<div
-				class="w-full py-1 text-xs text-gray-500"
-				x-text={ getTranslations("TailscaleAuthKeyDescription") }
-			></div>
+				class="w-full py-1 text-xs text-blue-500 hover:text-blue-600 underline"
+			> <a href="https://login.tailscale.com/admin/settings/keys" target="_blank" x-text={ getTranslations("TailscaleAuthKeyDescription") }></a></div>
 			<div class="bg-red-600"></div>
 		</div>
-		<!-- Funnel模式（公网访问） -->
-		<div
-			id={ "boolConfig_FunnelTunnel" }
-			class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400 relative"
-			x-show="enable_tailscale"
-		>
-			<!-- Funnel ACL 权限未设置时的遮罩层 -->
-			<div
-				id="funnel-acl-overlay"
-				class="absolute inset-0 z-10 w-full h-full flex items-center justify-center rounded-md bg-black/20 text-white text-sm"
-				if tsStatus != nil {
-					if tsStatus.FunnelCapability == "false" {
-						style=""
-					}
-					if tsStatus.FunnelCapability == "true" || tsStatus.FunnelCapability == "unknown" {
-						style="display:none;"
-					}
-				} else {
-					style="display:none;"
-				}
-			></div>
-			<div x-text={ getTranslations("FunnelTunnel") } ></div>
-			<!-- 隐藏input -->
-			<input type="hidden" name={ "FunnelTunnel" } value="false" x-bind:disabled="tailscale_enable_funnel"/>
-			<label for={ "FunnelTunnel" } class="relative h-8 cursor-pointer w-14">
-				<input
-					type="checkbox"
-					id={ "FunnelTunnel" }
-					name={ "FunnelTunnel" }
-					x-model="tailscale_enable_funnel"
-					if  state.ServerConfig.FunnelTunnel {
-    					value="true"
-    				} else {
-    					value="false"
-    				}
-					class="sr-only peer"
-				/>
-				<span class="absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500"></span>
-				<span class="absolute inset-y-0 w-6 h-6 m-1 transition-all bg-white rounded-full start-0 peer-checked:start-6"></span>
-			</label>
-			<div x-text={ getTranslations("FunnelTunnel_Description") } class="w-full py-1 text-xs text-gray-500"></div>
-		</div>
-
 		<!-- Funnel密码保护检查 -->
 		<div
 			id={ "boolConfig_FunnelLoginCheck" }
@@ -244,6 +204,49 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 			</label>
 			<div x-text={ getTranslations("FunnelLoginCheckDescription") } class="w-full py-1 text-xs text-gray-500"></div>
 		</div>
+		<!-- Funnel模式（公网访问） -->
+		<div
+			id={ "boolConfig_FunnelTunnel" }
+			class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400 relative"
+			x-show="enable_tailscale"
+		>
+			<!-- Funnel ACL 权限未设置时的遮罩层 -->
+			<div
+				id="funnel-acl-overlay"
+				class="absolute inset-0 z-10 w-full h-full flex items-center justify-center rounded-md bg-black/20 text-white text-sm"
+				if tsStatus != nil {
+					if tsStatus.FunnelCapability == "false" {
+						style=""
+					}
+					if tsStatus.FunnelCapability == "true" || tsStatus.FunnelCapability == "unknown" {
+						style="display:none;"
+					}
+				} else {
+					style="display:none;"
+				}
+			></div>
+			<div x-text={ getTranslations("FunnelTunnel") } ></div>
+			<!-- 隐藏input -->
+			<input type="hidden" name={ "FunnelTunnel" } value="false" x-bind:disabled="tailscale_enable_funnel"/>
+			<label for={ "FunnelTunnel" } class="relative h-8 cursor-pointer w-14">
+				<input
+					type="checkbox"
+					id={ "FunnelTunnel" }
+					name={ "FunnelTunnel" }
+					x-model="tailscale_enable_funnel"
+					if  state.ServerConfig.FunnelTunnel {
+    					value="true"
+    				} else {
+    					value="false"
+    				}
+					class="sr-only peer"
+				/>
+				<span class="absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500"></span>
+				<span class="absolute inset-y-0 w-6 h-6 m-1 transition-all bg-white rounded-full start-0 peer-checked:start-6"></span>
+			</label>
+			<div x-text={ getTranslations("FunnelTunnel_Description") } class="w-full py-1 text-xs text-gray-500"></div>
+		</div>
+
 
 		<!-- 帮助面板：如何设置Funnel ACL 权限 -->
 		<div
@@ -286,7 +289,7 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 		<!-- Tailscale状态面板 -->
 		@TailscaleStatusPanel(tsStatus)
 		<!-- 提交按钮 -->
-		<div class="flex flex-col justify-center items-center w-full my-2">
+		<div class="flex flex-col justify-center items-center w-full my-2 z-10">
 			<button
 				id="tailscale-submit-btn"
 				type="button"
@@ -381,34 +384,38 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 	<div
 		id="tailscale_status_panel"
-		@click="UpdateTailscaleStatus"
 		x-init="UpdateTailscaleStatus()"
 		hx-trigger="load[document.visibilityState === 'visible',enable_tailscale] delay:1s"
-		class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-normal text-base border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+		class="flex flex-col justify-start w-full mx-0 my-2 px-4 pt-2 pb-4 font-normal text-base border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 	>
-		<div x-text={ getTranslations("tailscale_status") } class="w-full text-center font-semibold"></div>
+	    <div class="flex flex-row w-full mb-2 justify-center items-center" @click="UpdateTailscaleStatus">
+	        <div id="refresh-text" x-text={ getTranslations("tailscale_status") } class="text-center font-semibold"></div>
+            <div id="refresh-icon" x-show="!window.location.href.includes('file:///')"  class="flex justify-center items-center w-8 h-8 mx-1 my-0 rounded cursor-pointer">
+                 @svg.Refresh()
+            </div>
+	    </div>
 		<table class="table table-auto w-full">
 			<tbody>
 				<tr id="ts-auth-row" class="border-separate border-b-1 border-gray-500" style="display:none">
-					<td class="w-24 font-semibold align-top" x-text={ getTranslations("verify_link") }>验证链接</td>
+					<td class="min-w-24 font-semibold align-top" x-text={ getTranslations("verify_link") }>验证链接</td>
 					<td class="align-top">
 						<a id="ts-auth-link" class="text-indigo-600 no-underline hover:underline" href={ tsStatus.AuthURL } target="_blank">{ tsStatus.AuthURL }</a>
 					</td>
 				</tr>
 				<tr class="border-separate border-b-1 border-gray-400">
-					<td x-text={ getTranslations("service_status") } class="w-24 font-semibold">服务状态</td>
+					<td x-text={ getTranslations("service_status") } class="min-w-24 font-semibold">服务状态</td>
 					<td id="ts-state">{ tsStatus.BackendState }</td>
 				</tr>
 				<tr class="border-separate border-b-1 border-gray-400">
-					<td x-text={ getTranslations("client_count") } class="w-24 font-semibold">客户端数</td>
+					<td x-text={ getTranslations("client_count") } class="min-w-24 font-semibold">客户端数</td>
 					<td id="ts-clients">{ strconv.Itoa(len(tsStatus.Clients)) }</td>
 				</tr>
 				<tr class="border-separate border-b-1 border-gray-400">
-					<td x-text={ getTranslations("host_system") } class="w-24 font-semibold">宿主系统</td>
+					<td x-text={ getTranslations("host_system") } class="min-w-24 font-semibold">宿主系统</td>
 					<td id="ts-os">{ tsStatus.OS }</td>
 				</tr>
 				<tr class="border-separate border-b-1 border-gray-400">
-					<td x-text={ getTranslations("connection_status") } class="w-24 font-semibold">连接状况</td>
+					<td x-text={ getTranslations("connection_status") } class="min-w-24 font-semibold">连接状况</td>
 					<td>
 						if tsStatus.Online {
 							<span id="ts-online" x-text={ getTranslations("connected") }></span>
@@ -419,7 +426,7 @@ templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 					</td>
 				</tr>
 				<tr id="ts-funnel-capability-row" class="border-separate border-b-1 border-gray-400" style="display:none">
-					<td x-text={ getTranslations("funnel_status") } class="w-24 font-semibold">Funnel状态</td>
+					<td x-text={ getTranslations("funnel_status") } class="min-w-24 font-semibold">Funnel状态</td>
 					if tsStatus.FunnelCapability == "true" {
 						<td id="ts-funnel-capability" x-text={ getTranslations("funnel_setup_done") }></td>
 					}
@@ -428,7 +435,7 @@ templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 					}
 				</tr>
 				<tr class="border-separate border-b-1 border-gray-400">
-					<td x-text={ getTranslations("enable_funnel") } class="w-24 font-semibold">Funnel模式</td>
+					<td x-text={ getTranslations("enable_funnel") } class="min-w-24 font-semibold">Funnel模式</td>
 					if state.ServerConfig.FunnelTunnel {
 						<td id="ts-funnel-mode" x-text={ getTranslations("enable") }></td>
 					}
@@ -437,15 +444,15 @@ templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 					}
 				</tr>
 				<tr class="border-separate border-b-1 border-gray-400">
-					<td x-text={ getTranslations("ip_address") } class="w-24 font-semibold">IP地址</td>
+					<td x-text={ getTranslations("ip_address") } class="min-w-24 font-semibold">IP地址</td>
 					<td id="ts-ip">{ tsStatus.GetTailscaleIP() }</td>
 				</tr>
 				<tr class="border-separate border-b-1 border-gray-400">
-					<td x-text={ getTranslations("service_version") } class="w-24 font-semibold">服务版本</td>
+					<td x-text={ getTranslations("service_version") } class="min-w-24 font-semibold">服务版本</td>
 					<td id="ts-version">{ tsStatus.Version }</td>
 				</tr>
 				<tr id="ts-fqdn-row" class="border-separate border-b-1 border-gray-400" style="display:none">
-					<td x-text={ getTranslations("read_link") } class="w-24 font-semibold">阅读链接</td>
+					<td x-text={ getTranslations("read_link") } class="min-w-24 font-semibold">阅读链接</td>
 					<td>
 						<a id="ts-fqdn-link" class="text-indigo-600 no-underline hover:underline" href={ tsStatus.FQDN } target="_blank">{ tsStatus.FQDN }</a>
 					</td>
@@ -459,6 +466,53 @@ function UpdateTailscaleStatus(e) {
     try {
         if (e && typeof e.preventDefault === 'function') {
             e.preventDefault();
+        }
+        // 点击刷新时让刷新图标旋转一周（与请求成功与否无关）
+        if (e) {
+            try {
+                var icon = document.getElementById('refresh-icon');
+                var text = document.getElementById('tailscale_status_panel');
+                if (icon) {
+                    if (typeof icon.animate === 'function') {
+                        icon.animate(
+                            [{ transform: 'rotate(0deg)' }, { transform: 'rotate(360deg)' }],
+                            { duration: 800, easing: 'ease-in-out' }
+                        );
+                    } else {
+                        // Fallback: 使用过渡实现一次性旋转
+                        var originalTransition = icon.style.transition;
+                        var originalTransform = icon.style.transform;
+                        icon.style.transition = 'transform 0.8s ease-in-out';
+                        // 强制重绘，确保过渡生效
+                        icon.getBoundingClientRect();
+                        icon.style.transform = 'rotate(360deg)';
+                        setTimeout(function () {
+                            icon.style.transition = originalTransition;
+                            icon.style.transform = originalTransform || '';
+                        }, 850);
+                    }
+                }
+                // 文本淡化一次，与图标旋转同步
+                if (text) {
+                    if (typeof text.animate === 'function') {
+                        text.animate(
+                            [{ opacity: 1 }, { opacity: 0.4 }, { opacity: 1 }],
+                            { duration: 800, easing: 'ease-in-out' }
+                        );
+                    } else {
+                        var originalTextTransition = text.style.transition;
+                        var originalOpacity = text.style.opacity;
+                        text.style.transition = 'opacity 0.8s ease-in-out';
+                        // 强制重绘
+                        text.getBoundingClientRect();
+                        text.style.opacity = '0.4';
+                        setTimeout(function () {
+                            text.style.transition = originalTextTransition;
+                            text.style.opacity = originalOpacity || '';
+                        }, 850);
+                    }
+                }
+            } catch (_) {}
         }
         const panel = document.getElementById('tailscale_status_panel');
         if (!panel) {

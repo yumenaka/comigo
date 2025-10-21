@@ -9,7 +9,7 @@ import (
 // InitAllStore 扫描书库路径，取得书籍
 func InitAllStore(option Option) error {
 	// 重置所有书籍与书组信息
-	model.IStore.ClearAllBookData()
+	model.IStore.ClearAll()
 	storeUrls := option.Cfg.GetStoreUrls()
 	for _, storeUrl := range storeUrls {
 		books, err := InitStore(storeUrl, option)

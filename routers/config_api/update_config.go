@@ -101,7 +101,7 @@ func StartReScan() {
 	if err := scan.InitAllStore(scan.NewOption(config.GetCfg())); err != nil {
 		logger.Infof("Failed to scan store path: %v", err)
 	}
-	if config.GetEnableDatabase() {
+	if config.GetCfg().EnableDatabase {
 		if err := scan.SaveResultsToDatabase(viper.ConfigFileUsed(), config.GetClearDatabaseWhenExit()); err != nil {
 			logger.Infof("Failed to save results to database: %v", err)
 		}
