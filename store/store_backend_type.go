@@ -1,4 +1,4 @@
-package model
+package store
 
 // BackendType 文件存储类型
 type BackendType int

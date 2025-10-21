@@ -1,4 +1,4 @@
-package model
+package store
 
 import (
 	"errors"
@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
@@ -48,13 +49,13 @@ func (storeGroup *StoreGroup) GenerateAllBookGroup() (e error) {
 	return e
 }
 
-func (storeGroup *StoreGroup) ListBooks() []*Book {
-	var books []*Book
+func (storeGroup *StoreGroup) ListBooks() []*model.Book {
+	var books []*model.Book
 	// 遍历 ChildStores 中的所有书籍
 	for _, value := range storeGroup.ChildStores.Range {
 		childStore := value.(*Store)
 		for _, value := range childStore.BookMap.Range {
-			book := value.(*Book)
+			book := value.(*model.Book)
 			books = append(books, book)
 		}
 	}
@@ -62,7 +63,7 @@ func (storeGroup *StoreGroup) ListBooks() []*Book {
 }
 
 // AddBook 添加一本书
-func (storeGroup *StoreGroup) AddBook(storeURL string, b *Book, minPageNum int) error {
+func (storeGroup *StoreGroup) AddBook(storeURL string, b *model.Book, minPageNum int) error {
 	if b.BookID == "" {
 		return errors.New("add book error: empty BookID")
 	}
@@ -78,7 +79,7 @@ func (storeGroup *StoreGroup) AddBook(storeURL string, b *Book, minPageNum int) 
 }
 
 // AddBookToSubStore 将某一本书，放到BookMap里面去
-func (storeGroup *StoreGroup) AddBookToSubStore(storeURL string, b *Book) error {
+func (storeGroup *StoreGroup) AddBookToSubStore(storeURL string, b *model.Book) error {
 	if f, ok := storeGroup.ChildStores.Load(storeURL); !ok {
 		// 创建一个新子书库，并添加一本书
 		newSubStore := Store{
@@ -100,7 +101,7 @@ func (storeGroup *StoreGroup) AddBookToSubStore(storeURL string, b *Book) error 
 }
 
 // AddBooks 添加一组书
-func (storeGroup *StoreGroup) AddBooks(storeURL string, list []*Book, minPageNum int) error {
+func (storeGroup *StoreGroup) AddBooks(storeURL string, list []*model.Book, minPageNum int) error {
 	for _, b := range list {
 		if b.GetPageCount() < minPageNum {
 			continue
@@ -112,8 +113,8 @@ func (storeGroup *StoreGroup) AddBooks(storeURL string, list []*Book, minPageNum
 	return nil
 }
 
-// CheckAllBookFileExist 检查内存中的书的源文件是否存在，不存在就删掉
-func (storeGroup *StoreGroup) CheckAllBookFileExist() {
+// CheckAllNotExistBooks 检查内存中的书的源文件是否存在，不存在就删掉
+func (storeGroup *StoreGroup) CheckAllNotExistBooks() {
 	logger.Infof("Checking book files exist...")
 	var deletedBooks []string
 	// 遍历所有书籍
@@ -133,8 +134,8 @@ func (storeGroup *StoreGroup) CheckAllBookFileExist() {
 }
 
 // CheckRawFileExist 查看内存中是否已经有了这本书，有了就返回 true，让调用者跳过
-func (storeGroup *StoreGroup) CheckRawFileExist(filePath string, bookType SupportFileType) bool {
-	if bookType == TypeDir || bookType == TypeBooksGroup {
+func (storeGroup *StoreGroup) CheckRawFileExist(filePath string, bookType model.SupportFileType) bool {
+	if bookType == model.TypeDir || bookType == model.TypeBooksGroup {
 		return false
 	}
 	for _, realBook := range storeGroup.ListBooks() {
@@ -153,7 +154,7 @@ func (storeGroup *StoreGroup) CheckRawFileExist(filePath string, bookType Suppor
 // GetParentBookID 通过子书籍 ID 获取所属书组 ID
 func (storeGroup *StoreGroup) GetParentBookID(childID string) (string, error) {
 	for _, bookGroup := range storeGroup.ListBooks() {
-		if bookGroup.Type != TypeBooksGroup {
+		if bookGroup.Type != model.TypeBooksGroup {
 			continue // 只处理书组类型
 		}
 		for _, id := range bookGroup.ChildBooksID {
@@ -187,7 +188,7 @@ func (storeGroup *StoreGroup) GetBooksNumber() int {
 	var count int
 	// 遍历 map 并递增计数器
 	for _, b := range storeGroup.ListBooks() {
-		if b.Type == TypeBooksGroup {
+		if b.Type == model.TypeBooksGroup {
 			continue // 跳过书组类型
 		}
 		count++
@@ -196,10 +197,10 @@ func (storeGroup *StoreGroup) GetBooksNumber() int {
 }
 
 // GetAllBookList 获取所有书籍列表
-func (storeGroup *StoreGroup) GetAllBookList() []*Book {
-	var list []*Book
+func (storeGroup *StoreGroup) GetAllBookSkipBookGroup() []*model.Book {
+	var list []*model.Book
 	for _, b := range storeGroup.ListBooks() {
-		if b.Type == TypeBooksGroup {
+		if b.Type == model.TypeBooksGroup {
 			continue // 跳过书组类型
 		}
 		list = append(list, b)
@@ -208,10 +209,10 @@ func (storeGroup *StoreGroup) GetAllBookList() []*Book {
 }
 
 // GetArchiveBooks 获取所有压缩包格式的书籍
-func (storeGroup *StoreGroup) GetArchiveBooks() []*Book {
-	var list []*Book
+func (storeGroup *StoreGroup) GetArchiveBooks() []*model.Book {
+	var list []*model.Book
 	for _, b := range storeGroup.ListBooks() {
-		if b.Type == TypeZip || b.Type == TypeRar || b.Type == TypeCbz || b.Type == TypeCbr || b.Type == TypeTar || b.Type == TypeEpub {
+		if b.Type == model.TypeZip || b.Type == model.TypeRar || b.Type == model.TypeCbz || b.Type == model.TypeCbr || b.Type == model.TypeTar || b.Type == model.TypeEpub {
 			list = append(list, b)
 		}
 	}
@@ -219,12 +220,12 @@ func (storeGroup *StoreGroup) GetArchiveBooks() []*Book {
 }
 
 // GetBookByID 根据 BookID 获取书籍
-func (storeGroup *StoreGroup) GetBookByID(id string, sortBy string) (*Book, error) {
+func (storeGroup *StoreGroup) GetBookByID(id string, sortBy string) (*model.Book, error) {
 	// 遍历 ChildStores ，删除指定 ID 的书籍
 	for _, value := range storeGroup.ChildStores.Range {
 		childStore := value.(*Store)
 		if value, ok := childStore.BookMap.Load(id); ok {
-			b := value.(*Book)
+			b := value.(*model.Book)
 			b.SortPages(sortBy)
 			return b, nil
 		}
@@ -233,9 +234,9 @@ func (storeGroup *StoreGroup) GetBookByID(id string, sortBy string) (*Book, erro
 }
 
 // GetParentBook 通过子书籍的 BookID 获取父书组
-func (storeGroup *StoreGroup) GetParentBook(childID string) (*Book, error) {
+func (storeGroup *StoreGroup) GetParentBook(childID string) (*model.Book, error) {
 	for _, bookGroup := range storeGroup.ListBooks() {
-		if bookGroup.Type != TypeBooksGroup {
+		if bookGroup.Type != model.TypeBooksGroup {
 			continue // 只分析书组类型
 		}
 		for _, id := range bookGroup.ChildBooksID {
@@ -252,8 +253,8 @@ func (storeGroup *StoreGroup) GetParentBook(childID string) (*Book, error) {
 }
 
 // GetBookByAuthor 获取同一作者的书籍
-func (storeGroup *StoreGroup) GetBookByAuthor(author string, sortBy string) ([]*Book, error) {
-	var bookList []*Book
+func (storeGroup *StoreGroup) GetBookByAuthor(author string, sortBy string) ([]*model.Book, error) {
+	var bookList []*model.Book
 	for _, b := range storeGroup.ListBooks() {
 		if b.Author == author {
 			b.SortPages(sortBy)
@@ -267,21 +268,17 @@ func (storeGroup *StoreGroup) GetBookByAuthor(author string, sortBy string) ([]*
 	return nil, errors.New("cannot find book, author=" + author)
 }
 
-// ClearTempFilesALL 清理所有缓存的临时图片
+// ClearTempFilesALL 清理所有缓存图片
 func (storeGroup *StoreGroup) ClearTempFilesALL(debug bool, cacheFilePath string) {
 	for _, book := range storeGroup.ListBooks() {
-		MainStoreGroup.ClearTempFilesOne(debug, cacheFilePath, book)
-	}
-}
-
-// ClearTempFilesOne 清理某一本书的缓存
-func (storeGroup *StoreGroup) ClearTempFilesOne(debug bool, cacheFilePath string, book *Book) {
-	cachePath := path.Join(cacheFilePath, book.GetBookID())
-	err := os.RemoveAll(cachePath)
-	if err != nil {
-		logger.Infof("Error clearing temp files: %s", cachePath)
-	} else if debug {
-		logger.Infof("Cleared temp files: %s", cachePath)
+		//清理某一本书的缓存
+		cachePath := path.Join(cacheFilePath, book.GetBookID())
+		err := os.RemoveAll(cachePath)
+		if err != nil {
+			logger.Infof("Error clearing temp files: %s", cachePath)
+		} else if debug {
+			logger.Infof("Cleared temp files: %s", cachePath)
+		}
 	}
 }
 
@@ -314,9 +311,9 @@ func (storeGroup *StoreGroup) GetShortBookID(fullID string, minLength int) strin
 }
 
 // TopOfShelfInfo 获取顶层书架信息
-func (storeGroup *StoreGroup) TopOfShelfInfo(sortBy string) (*BookInfoList, error) {
+func (storeGroup *StoreGroup) TopOfShelfInfo(sortBy string) (*model.BookInfoList, error) {
 	// 显示顶层书库的书籍
-	var infoList BookInfoList
+	var infoList model.BookInfoList
 	for _, b := range storeGroup.ListBooks() {
 		if b.Depth == 0 {
 			infoList.BookInfos = append(infoList.BookInfos, b.BookInfo)
@@ -331,14 +328,14 @@ func (storeGroup *StoreGroup) TopOfShelfInfo(sortBy string) (*BookInfoList, erro
 }
 
 // GetChildBooksInfo 根据 ID 获取书籍列表
-func (storeGroup *StoreGroup) GetChildBooksInfo(BookID string, sortBy string) (*BookInfoList, error) {
-	var infoList BookInfoList
+func (storeGroup *StoreGroup) GetChildBooksInfo(BookID string, sortBy string) (*model.BookInfoList, error) {
+	var infoList model.BookInfoList
 	tempGroup, err := storeGroup.GetBookByID(BookID, sortBy)
 	if err != nil {
 		return nil, errors.New("cannot find child books info，BookID：" + BookID)
 	}
 	for _, childID := range tempGroup.ChildBooksID {
-		b, err := MainStoreGroup.GetBookByID(childID, "")
+		b, err := RamStore.GetBookByID(childID, "")
 		if err != nil {
 			return nil, errors.New("GetParentBook: cannot find book by childID=" + childID)
 		}
@@ -353,8 +350,8 @@ func (storeGroup *StoreGroup) GetChildBooksInfo(BookID string, sortBy string) (*
 }
 
 // GetBookInfoListByParentFolder 根据父文件夹获取书籍列表
-func (storeGroup *StoreGroup) GetBookInfoListByParentFolder(parentFolder string, sortBy string) (*BookInfoList, error) {
-	var infoList BookInfoList
+func (storeGroup *StoreGroup) GetBookInfoListByParentFolder(parentFolder string, sortBy string) (*model.BookInfoList, error) {
+	var infoList model.BookInfoList
 	for _, b := range storeGroup.ListBooks() {
 		if b.ParentFolder == parentFolder {
 			infoList.BookInfos = append(infoList.BookInfos, b.BookInfo)

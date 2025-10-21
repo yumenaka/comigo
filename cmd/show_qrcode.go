@@ -14,8 +14,8 @@ import (
 func ShowQRCode() {
 	// 如果只有一本书，二维码展示的 URL 需要附加参数，让读者可以直接去读这本书
 	etcStr := ""
-	if model.MainStoreGroup.GetBooksNumber() == 1 {
-		bookList := model.MainStoreGroup.ListBooks()
+	if model.IStore.GetBooksNumber() == 1 {
+		bookList := model.IStore.ListBooks()
 		if len(bookList) == 1 {
 			etcStr = fmt.Sprintf("/#/%s/%s", config.GetDefaultMode(), bookList[0].BookID)
 		}
