@@ -154,7 +154,7 @@ func UploadFile(c echo.Context) error {
 	}
 	scan.AddBooksToStore(config.GetUploadPath(), books, config.GetMinImageNum())
 	// 保存扫描结果到数据库（如果开启）
-	if config.GetEnableDatabase() {
+	if config.GetCfg().EnableDatabase {
 		if err := scan.SaveResultsToDatabase(viper.ConfigFileUsed(), config.GetClearDatabaseWhenExit()); err != nil {
 			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 				"error": fmt.Sprintf("保存数据库失败: %s", err),

@@ -3,7 +3,6 @@ package cmd
 import (
 	"os"
 
-	"github.com/spf13/viper"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/routers/upload_api"
@@ -15,11 +14,19 @@ import (
 
 // ScanStore 解析命令,扫描文件，设置书库等
 func ScanStore(args []string) {
+	// 从数据库中读取书籍信息并持久化
+	// 启动或重启 Tailscale 服务
+	configDir, err := config.GetConfigDir()
+	if err != nil {
+		logger.Errorf("Failed to get config dir: %v", err)
+		configDir = ""
+	}
 	// 1. 初始化数据库
-	if config.GetEnableDatabase() {
-		// 从数据库中读取书籍信息并持久化
-		if err := sqlc.OpenDatabase(viper.ConfigFileUsed()); err != nil {
-			logger.Infof("%s", err)
+	if config.GetCfg().EnableDatabase {
+
+		if err := sqlc.OpenDatabase(configDir); err != nil {
+			logger.Infof("OpenDatabase Error: %s", err)
+			return
 		}
 		books, err := sqlc.Repo.GetBooksFromDatabase()
 		if err != nil {
@@ -38,13 +45,13 @@ func ScanStore(args []string) {
 	// 2、设置默认书库路径：扫描CMD指定的路径，或添加当前文件夹为默认路径。
 	CreateStoreUrls(args)
 	// 3、扫描配置文件里面的书库路径
-	err := scan.InitAllStore(scan.NewOption(config.GetCfg()))
+	err = scan.InitAllStore(scan.NewOption(config.GetCfg()))
 	if err != nil {
 		logger.Infof("Failed to scan store path: %v", err)
 	}
 	// 4、保存扫描结果到数据库
-	if config.GetEnableDatabase() {
-		err = scan.SaveResultsToDatabase(viper.ConfigFileUsed(), config.GetClearDatabaseWhenExit())
+	if config.GetCfg().EnableDatabase {
+		err = scan.SaveResultsToDatabase()
 		if err != nil {
 			logger.Infof("Failed SaveResultsToDatabase: %v", err)
 			return
@@ -74,14 +81,14 @@ func CreateStoreUrls(args []string) {
 		config.GetCfg().AddStoreUrl(arg)
 	}
 	// 如果用户启用上传，且用户指定的上传路径不为空，就把程序预先设定的【默认上传路径】当作书库
-	if config.GetEnableUpload() {
+	if config.GetCfg().EnableUpload {
 		if config.GetUploadPath() != "" {
 			// 尝试把上传路径添加为书库里
 			config.GetCfg().AddStoreUrl(config.GetUploadPath())
 		}
 		// 如果用户启用上传，但没有指定上传路径
 		if config.GetUploadPath() == "" {
-			for _, storeUrl := range config.GetStoreUrls() {
+			for _, storeUrl := range config.GetCfg().StoreUrls {
 				// 把【本地存储】里面的第一个可用路径作为上传路径
 				if tools.IsExist(storeUrl) {
 					config.SetUploadPath(storeUrl)

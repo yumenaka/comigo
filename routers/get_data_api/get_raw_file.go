@@ -11,7 +11,7 @@ import (
 
 func GetRawFile(c echo.Context) error {
 	bookID := c.Param("book_id")
-	b, err := model.IStore.GetBookByID(bookID, "")
+	b, err := model.IStore.GetBook(bookID)
 	// 打印文件名
 	if err != nil {
 		return c.String(http.StatusNotFound, "404 page not found")

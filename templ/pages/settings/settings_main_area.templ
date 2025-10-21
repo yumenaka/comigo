@@ -92,7 +92,7 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
                     @BoolConfig("GenerateMetaData", state.ServerConfig.GenerateMetaData, "GenerateMetaData_Description", false)
                     @BoolConfig("EnableDatabase", state.ServerConfig.EnableDatabase, "EnableDatabase_Description", false)
                     @BoolConfig("ClearCacheExit", state.ServerConfig.ClearCacheExit, "ClearCacheExit_Description", false)
-                    @StringConfig("CachePath", state.ServerConfig.CachePath, "CachePath_Description", false)
+                    @StringConfig("CacheDir", state.ServerConfig.CacheDir, "CacheDir_Description", false)
                     @StringConfig("ZipFileTextEncoding", state.ServerConfig.ZipFileTextEncoding, "ZipFileTextEncoding_Description",false)
 			    }
 			</div>

@@ -2,7 +2,7 @@ package service
 
 //
 // type BookRepositoryInterface interface {
-// 	GetBookByID(ctx context.Context, bookID string) (*model.Book, error)
+// 	GetBook(ctx context.Context, bookID string) (*model.Book, error)
 // 	GetBookByFilePath(ctx context.Context, filePath string) (*model.Book, error)
 // 	ListBooks(ctx context.Context) ([]*model.Book, error)
 // 	ListBooksByType(ctx context.Context, bookType string) ([]*model.Book, error)
@@ -55,7 +55,7 @@ package service
 // // GetBook 获取书籍信息（包含业务逻辑）
 // func (s *BookService) GetBook(ctx context.Context, bookID string) (*model.Book, error) {
 // 	// 1. 从数据库获取书籍基本信息
-// 	book, err := s.bookRepo.GetBookByID(ctx, bookID)
+// 	book, err := s.bookRepo.GetBook(ctx, bookID)
 // 	if err != nil {
 // 		return nil, fmt.Errorf("获取书籍失败: %w", err)
 // 	}
@@ -88,7 +88,7 @@ package service
 // 	}
 //
 // 	// 2. 检查书籍是否已存在
-// 	existingBook, err := s.bookRepo.GetBookByID(ctx, book.BookID)
+// 	existingBook, err := s.bookRepo.GetBook(ctx, book.BookID)
 // 	if err == nil && existingBook != nil {
 // 		return fmt.Errorf("书籍已存在: %s", book.BookID)
 // 	}
@@ -118,7 +118,7 @@ package service
 // 	}
 //
 // 	// 2. 检查书籍是否存在
-// 	_, err := s.bookRepo.GetBookByID(ctx, bookID)
+// 	_, err := s.bookRepo.GetBook(ctx, bookID)
 // 	if err != nil {
 // 		return fmt.Errorf("书籍不存在: %w", err)
 // 	}

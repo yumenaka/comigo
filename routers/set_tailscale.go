@@ -19,17 +19,22 @@ func StartTailscale() {
 		return
 	}
 	// 启动或重启 Tailscale 服务
-	if err := tailscale_plugin.RunTailscale(
+	configDir, err := config.GetConfigDir()
+	if err != nil {
+		logger.Errorf("Failed to get config dir: %v", err)
+		configDir = ""
+	}
+	if tsError := tailscale_plugin.RunTailscale(
 		engine,
 		tailscale_plugin.TailscaleConfig{
 			Hostname:   config.GetCfg().TailscaleHostname,
 			Port:       uint16(config.GetCfg().TailscalePort),
 			FunnelMode: config.GetCfg().FunnelTunnel, // Tailscale Funnel 模式，外网可访问，建议设置用户名与密码
-			ConfigDir:  config.GetCfg().ConfigPath,
+			ConfigDir:  configDir,
 			AuthKey:    config.GetCfg().TailscaleAuthKey,
 		},
-	); err != nil {
-		logger.Errorf("Failed to run Tailscale: %v", err)
+	); tsError != nil {
+		logger.Errorf("Failed to run Tailscale: %v", tsError)
 	}
 }
 

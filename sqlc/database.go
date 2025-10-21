@@ -29,14 +29,14 @@ func (repo *Repository) ClearBookData(book *model.Book) {
 	// 清空该书籍的所有媒体文件记录
 	err := repo.queries.DeleteMediaFilesByBookID(ctx, book.BookID)
 	if err != nil {
-		logger.Infof("Clear book media files error: %s", err.Error())
+		logger.Infof("ClearAll book media files error: %s", err.Error())
 		return
 	}
 
 	// 清空书籍的 Images 切片
 	book.Images = []model.MediaFileInfo{}
 
-	logger.Infof("Clear book %s media files completed", book.BookID)
+	logger.Infof("ClearAll book %s media files completed", book.BookID)
 }
 
 // DeleteAllBookInDatabase  清空数据库所有 book 与 media_file_info
@@ -281,7 +281,7 @@ func (repo *Repository) GetBooksFromDatabase() (list []*model.Book, err error) {
 	// 批量转换
 	books := FromSQLCBooks(validBooks, pagesMap)
 
-	// 过滤掉文件夹型的书籍（根据注释要求）
+	// 过滤掉文件夹型的书籍
 	var result []*model.Book
 	for _, book := range books {
 		// 根据 SupportFileType 定义，文件夹型书籍的类型为 TypeDir

@@ -25,8 +25,7 @@ func UpdateBookmark(c echo.Context) error {
 	if request.BookID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "book_id is required")
 	}
-	model.IStore.CheckAllNotExistBooks()
-	book, err := model.IStore.GetBookByID(request.BookID, "")
+	book, err := model.IStore.GetBook(request.BookID)
 	if err != nil {
 		logger.Infof("%s", err)
 		return c.JSON(http.StatusBadRequest, "book not found, ID:"+request.BookID)

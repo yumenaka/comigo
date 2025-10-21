@@ -8,11 +8,11 @@ import (
 	_ "embed"
 	"fmt"
 	"path"
-	"path/filepath"
 
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools/logger"
+	_ "modernc.org/sqlite"
 )
 
 // 参考：
@@ -35,17 +35,18 @@ func NewBookRepository(db DBTX) *Repository {
 	}
 }
 
-func OpenDatabase(configFilePath string) error {
+func OpenDatabase(configDir string) error {
 	// 使用内存数据库
 	// dataSourceName := ":memory:"
 	// 如果没有配置文件的话，默认在当前目录下创建一个数据库文件
 	dataSourceName := "file:comigo.sqlite?cache=shared"
 	// 如果有配置文件的话，把数据库文件在同一文件夹内: dataSourceName = "file:comigo.sqlite?cache=shared"
-	if configFilePath != "" {
-		// 如果有配置文件的话，数据库文件在同一文件夹内: dataSourceName = "file:comigo.sqlite?cache=shared"
-		configDir := filepath.Dir(configFilePath) // 不能用path.Dir()，因为windows返回 "."
+	if configDir != "" {
 		dataSourceName = "file:" + path.Join(configDir, "comigo.sqlite") + "?cache=shared"
 		logger.Infof(locale.GetString("init_database")+"%s", dataSourceName)
+	}
+	if configDir == "" {
+		dataSourceName = "\":memory:\""
 	}
 	ctx := context.Background()
 	var err error

@@ -14,7 +14,6 @@ import (
 
 // PageHandler 阅读界面（卷轴模式）
 func PageHandler(c echo.Context) error {
-	model.IStore.CheckAllNotExistBooks()
 	// 图片排序方式
 	sortBy := "default"
 	sortBookBy, err := c.Cookie("ScrollSortBy")
@@ -26,9 +25,9 @@ func PageHandler(c echo.Context) error {
 	}
 	// 读取url参数，获取书籍ID
 	bookID := c.Param("id")
-	book, err := model.IStore.GetBookByID(bookID, sortBy)
+	book, err := model.IStore.GetBookAndSort(bookID, sortBy)
 	if err != nil {
-		logger.Infof("GetBookByID: %v", err)
+		logger.Infof("GetBook: %v", err)
 		// 没有找到书，显示 HTTP 404 错误
 		indexHtml := common.Html(
 			c,
