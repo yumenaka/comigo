@@ -112,6 +112,52 @@ WHERE book_id = ? AND page_num = ?;
 -- name: DeleteMediaFilesByBookID :exec
 DELETE FROM media_files WHERE book_id = ?;
 
+-- Bookmarks related queries
+
+-- List bookmarks by book ID
+-- name: ListBookmarksByBookID :many
+SELECT * FROM bookmarks 
+WHERE book_id = ? 
+ORDER BY created_at DESC;
+
+-- Get a bookmark by book ID and page index
+-- name: GetBookmarkByBookIDAndPage :one
+SELECT * FROM bookmarks 
+WHERE book_id = ? AND page_index = ? 
+LIMIT 1;
+
+-- Create a bookmark
+-- name: CreateBookmark :one
+INSERT INTO bookmarks (
+    book_id, page_index, description, position, created_at, updated_at
+) VALUES (
+    ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+) RETURNING *;
+
+-- Update a bookmark (by id)
+-- name: UpdateBookmark :exec
+UPDATE bookmarks SET
+    description = ?, position = ?, updated_at = CURRENT_TIMESTAMP
+WHERE id = ?;
+
+-- Update a bookmark by (book_id, page_index)
+-- name: UpdateBookmarkByBookIDAndPage :exec
+UPDATE bookmarks SET
+    description = ?, position = ?, updated_at = CURRENT_TIMESTAMP
+WHERE book_id = ? AND page_index = ?;
+
+-- Delete a bookmark (by id)
+-- name: DeleteBookmark :exec
+DELETE FROM bookmarks WHERE id = ?;
+
+-- Delete a bookmark by (book_id, page_index)
+-- name: DeleteBookmarkByBookIDAndPage :exec
+DELETE FROM bookmarks WHERE book_id = ? AND page_index = ?;
+
+-- Delete all bookmarks for a book
+-- name: DeleteBookmarksByBookID :exec
+DELETE FROM bookmarks WHERE book_id = ?;
+
 -- File backend related queries
 
 -- Get file backend by url

@@ -189,6 +189,42 @@ func (q *Queries) CreateBook(ctx context.Context, arg CreateBookParams) (Book, e
 	return i, err
 }
 
+const createBookmark = `-- name: CreateBookmark :one
+INSERT INTO bookmarks (
+    book_id, page_index, description, position, created_at, updated_at
+) VALUES (
+    ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+) RETURNING id, book_id, page_index, description, position, created_at, updated_at
+`
+
+type CreateBookmarkParams struct {
+	BookID      string
+	PageIndex   int64
+	Description sql.NullString
+	Position    sql.NullFloat64
+}
+
+// Create a bookmark
+func (q *Queries) CreateBookmark(ctx context.Context, arg CreateBookmarkParams) (Bookmark, error) {
+	row := q.db.QueryRowContext(ctx, createBookmark,
+		arg.BookID,
+		arg.PageIndex,
+		arg.Description,
+		arg.Position,
+	)
+	var i Bookmark
+	err := row.Scan(
+		&i.ID,
+		&i.BookID,
+		&i.PageIndex,
+		&i.Description,
+		&i.Position,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const createFileBackend = `-- name: CreateFileBackend :one
 INSERT INTO file_backends (
     url, type, server_host, server_port, need_auth, auth_username,
@@ -379,6 +415,41 @@ func (q *Queries) DeleteBook(ctx context.Context, bookID string) error {
 	return err
 }
 
+const deleteBookmark = `-- name: DeleteBookmark :exec
+DELETE FROM bookmarks WHERE id = ?
+`
+
+// Delete a bookmark (by id)
+func (q *Queries) DeleteBookmark(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, deleteBookmark, id)
+	return err
+}
+
+const deleteBookmarkByBookIDAndPage = `-- name: DeleteBookmarkByBookIDAndPage :exec
+DELETE FROM bookmarks WHERE book_id = ? AND page_index = ?
+`
+
+type DeleteBookmarkByBookIDAndPageParams struct {
+	BookID    string
+	PageIndex int64
+}
+
+// Delete a bookmark by (book_id, page_index)
+func (q *Queries) DeleteBookmarkByBookIDAndPage(ctx context.Context, arg DeleteBookmarkByBookIDAndPageParams) error {
+	_, err := q.db.ExecContext(ctx, deleteBookmarkByBookIDAndPage, arg.BookID, arg.PageIndex)
+	return err
+}
+
+const deleteBookmarksByBookID = `-- name: DeleteBookmarksByBookID :exec
+DELETE FROM bookmarks WHERE book_id = ?
+`
+
+// Delete all bookmarks for a book
+func (q *Queries) DeleteBookmarksByBookID(ctx context.Context, bookID string) error {
+	_, err := q.db.ExecContext(ctx, deleteBookmarksByBookID, bookID)
+	return err
+}
+
 const deleteFileBackend = `-- name: DeleteFileBackend :exec
 DELETE FROM file_backends WHERE url = ?
 `
@@ -458,7 +529,7 @@ func (q *Queries) GetBookByFilePath(ctx context.Context, filePath string) (Book,
 	return i, err
 }
 
-const getBookByID = `-- name: GetBook :one
+const getBookByID = `-- name: GetBookByID :one
 
 SELECT id, title, book_id, owner, file_path, book_store_path, type, child_books_num, child_books_id, depth, parent_folder, page_count, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, read_percent, non_utf8zip, zip_text_encoding, deleted FROM books 
 WHERE book_id = ? LIMIT 1
@@ -523,6 +594,33 @@ func (q *Queries) GetBookCover(ctx context.Context, bookID string) (MediaFile, e
 		&i.Width,
 		&i.ImgType,
 		&i.InsertHtml,
+	)
+	return i, err
+}
+
+const getBookmarkByBookIDAndPage = `-- name: GetBookmarkByBookIDAndPage :one
+SELECT id, book_id, page_index, description, position, created_at, updated_at FROM bookmarks 
+WHERE book_id = ? AND page_index = ? 
+LIMIT 1
+`
+
+type GetBookmarkByBookIDAndPageParams struct {
+	BookID    string
+	PageIndex int64
+}
+
+// Get a bookmark by book ID and page index
+func (q *Queries) GetBookmarkByBookIDAndPage(ctx context.Context, arg GetBookmarkByBookIDAndPageParams) (Bookmark, error) {
+	row := q.db.QueryRowContext(ctx, getBookmarkByBookIDAndPage, arg.BookID, arg.PageIndex)
+	var i Bookmark
+	err := row.Scan(
+		&i.ID,
+		&i.BookID,
+		&i.PageIndex,
+		&i.Description,
+		&i.Position,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
@@ -804,6 +902,46 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const listBookmarksByBookID = `-- name: ListBookmarksByBookID :many
+
+SELECT id, book_id, page_index, description, position, created_at, updated_at FROM bookmarks 
+WHERE book_id = ? 
+ORDER BY created_at DESC
+`
+
+// Bookmarks related queries
+// List bookmarks by book ID
+func (q *Queries) ListBookmarksByBookID(ctx context.Context, bookID string) ([]Bookmark, error) {
+	rows, err := q.db.QueryContext(ctx, listBookmarksByBookID, bookID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Bookmark
+	for rows.Next() {
+		var i Bookmark
+		if err := rows.Scan(
+			&i.ID,
+			&i.BookID,
+			&i.PageIndex,
+			&i.Description,
+			&i.Position,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const listBooks = `-- name: ListBooks :many
@@ -1325,6 +1463,48 @@ func (q *Queries) UpdateBook(ctx context.Context, arg UpdateBookParams) error {
 		arg.NonUtf8zip,
 		arg.ZipTextEncoding,
 		arg.BookID,
+	)
+	return err
+}
+
+const updateBookmark = `-- name: UpdateBookmark :exec
+UPDATE bookmarks SET
+    description = ?, position = ?, updated_at = CURRENT_TIMESTAMP
+WHERE id = ?
+`
+
+type UpdateBookmarkParams struct {
+	Description sql.NullString
+	Position    sql.NullFloat64
+	ID          int64
+}
+
+// Update a bookmark (by id)
+func (q *Queries) UpdateBookmark(ctx context.Context, arg UpdateBookmarkParams) error {
+	_, err := q.db.ExecContext(ctx, updateBookmark, arg.Description, arg.Position, arg.ID)
+	return err
+}
+
+const updateBookmarkByBookIDAndPage = `-- name: UpdateBookmarkByBookIDAndPage :exec
+UPDATE bookmarks SET
+    description = ?, position = ?, updated_at = CURRENT_TIMESTAMP
+WHERE book_id = ? AND page_index = ?
+`
+
+type UpdateBookmarkByBookIDAndPageParams struct {
+	Description sql.NullString
+	Position    sql.NullFloat64
+	BookID      string
+	PageIndex   int64
+}
+
+// Update a bookmark by (book_id, page_index)
+func (q *Queries) UpdateBookmarkByBookIDAndPage(ctx context.Context, arg UpdateBookmarkByBookIDAndPageParams) error {
+	_, err := q.db.ExecContext(ctx, updateBookmarkByBookIDAndPage,
+		arg.Description,
+		arg.Position,
+		arg.BookID,
+		arg.PageIndex,
 	)
 	return err
 }
