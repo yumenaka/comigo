@@ -36,6 +36,16 @@ type Book struct {
 	Deleted         sql.NullBool
 }
 
+type Bookmark struct {
+	ID          int64
+	BookID      string
+	PageIndex   int64
+	Description sql.NullString
+	Position    sql.NullFloat64
+	CreatedAt   sql.NullTime
+	UpdatedAt   sql.NullTime
+}
+
 type FileBackend struct {
 	Url          string
 	Type         int64

@@ -23,7 +23,6 @@ func ScanStore(args []string) {
 	}
 	// 1. 初始化数据库
 	if config.GetCfg().EnableDatabase {
-
 		if err := sqlc.OpenDatabase(configDir); err != nil {
 			logger.Infof("OpenDatabase Error: %s", err)
 			return

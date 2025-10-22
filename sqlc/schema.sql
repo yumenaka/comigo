@@ -62,6 +62,19 @@ CREATE TABLE IF NOT EXISTS media_files
     FOREIGN KEY (book_id) REFERENCES books (book_id) ON DELETE CASCADE
 );
 
+-- Bookmarks table
+CREATE TABLE IF NOT EXISTS bookmarks
+(
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    book_id     TEXT    NOT NULL,                  -- Associated book ID
+    page_index  INTEGER NOT NULL,                  -- Page index, starts from 0
+    description TEXT,                              -- User note
+    position    REAL   DEFAULT 0.0,                -- Position percentage (0.0 - 100.0)
+    created_at  DATETIME DEFAULT CURRENT_TIMESTAMP, -- Created time
+    updated_at  DATETIME DEFAULT CURRENT_TIMESTAMP, -- Updated time
+    FOREIGN KEY (book_id) REFERENCES books (book_id) ON DELETE CASCADE
+);
+
 -- Book stores table
 CREATE TABLE IF NOT EXISTS stores
 (
@@ -97,6 +110,8 @@ CREATE INDEX IF NOT EXISTS idx_books_type ON books (type);
 CREATE INDEX IF NOT EXISTS idx_books_modified_time ON books (modified_time);
 CREATE INDEX IF NOT EXISTS idx_media_files_book_id ON media_files (book_id);
 CREATE INDEX IF NOT EXISTS idx_media_files_page_num ON media_files (book_id, page_num);
+CREATE INDEX IF NOT EXISTS idx_bookmarks_book_id ON bookmarks (book_id);
+CREATE INDEX IF NOT EXISTS idx_bookmarks_book_page ON bookmarks (book_id, page_index);
 CREATE INDEX IF NOT EXISTS idx_stores_url ON stores (backend_url);
 CREATE INDEX IF NOT EXISTS idx_file_backends_url ON file_backends (url);
 

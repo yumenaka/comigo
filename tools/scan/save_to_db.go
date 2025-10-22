@@ -19,6 +19,6 @@ func SaveResultsToDatabase() error {
 		logger.Info(saveErr)
 		return saveErr
 	}
-	fmt.Println("SaveResultsToDatabase: Books saved to database successfully.!!!!!!!!!!!!" + strconv.Itoa(len(books)))
+	fmt.Println("SaveResultsToDatabase: Books saved to database successfully: " + strconv.Itoa(len(books)))
 	return nil
 }

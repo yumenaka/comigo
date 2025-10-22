@@ -7,7 +7,6 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo/v4"
-	"github.com/spf13/viper"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
@@ -102,7 +101,7 @@ func StartReScan() {
 		logger.Infof("Failed to scan store path: %v", err)
 	}
 	if config.GetCfg().EnableDatabase {
-		if err := scan.SaveResultsToDatabase(viper.ConfigFileUsed(), config.GetClearDatabaseWhenExit()); err != nil {
+		if err := scan.SaveResultsToDatabase(); err != nil {
 			logger.Infof("Failed to save results to database: %v", err)
 		}
 	}
