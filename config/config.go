@@ -73,8 +73,6 @@ func (c *Config) GetEnableUpload() bool {
 	return c.EnableUpload
 }
 
-// ConfigInterface需要下面这些方法
-
 func (c *Config) GetDebug() bool {
 	return c.Debug
 }

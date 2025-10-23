@@ -1,7 +1,6 @@
 package model
 
 import (
-	"errors"
 	"path"
 	"strings"
 	"time"
@@ -39,7 +38,7 @@ func (b *Book) GetBookInfo() *BookInfo {
 		ParentFolder:    b.ParentFolder,
 		Press:           b.Press,
 		PublishedAt:     b.PublishedAt,
-		ReadPercent:     b.ReadPercent,
+		LastReadPage:    b.LastReadPage,
 		Type:            b.Type,
 		Title:           b.Title,
 		ZipTextEncoding: b.ZipTextEncoding,
@@ -71,10 +70,7 @@ func (b *Book) GuestCover() (cover MediaFileInfo) {
 }
 
 // NewBook 初始化 Book，设置文件路径、书名、BookID 等
-func NewBook(filePath string, modified time.Time, fileSize int64, storePath string, depth int, bookType SupportFileType) (*Book, error) {
-	if IStore.CheckRawFileExist(filePath, bookType) {
-		return nil, errors.New("skip: " + filePath)
-	}
+func NewBook(filePath string, modified time.Time, fileSize int64, storePath string, depth int, bookType SupportFileType) *Book {
 	// 初始化书籍
 	book := &Book{
 		BookInfo: BookInfo{
@@ -88,11 +84,11 @@ func NewBook(filePath string, modified time.Time, fileSize int64, storePath stri
 	}
 	// 设置文件路径、书名、BookID
 	book.setFilePath(filePath).setParentFolder(filePath).setTitle(filePath).SetAuthor().initBookID()
-	return book, nil
+	return book
 }
 
 // NewBookInfo   初始化BookGroup，设置文件路径、书名、BookID等等
-func NewBookInfo(filePath string, modified time.Time, fileSize int64, storePath string, depth int, bookType SupportFileType) (*BookInfo, error) {
+func NewBookInfo(filePath string, modified time.Time, fileSize int64, storePath string, depth int, bookType SupportFileType) *BookInfo {
 	// 初始化书籍
 	bookInfo := BookInfo{
 		Modified:      modified,
@@ -104,7 +100,7 @@ func NewBookInfo(filePath string, modified time.Time, fileSize int64, storePath 
 	}
 	// 设置属性：
 	bookInfo.setTitle(filePath).setFilePath(filePath).SetAuthor().setParentFolder(filePath).initBookID()
-	return &bookInfo, nil
+	return &bookInfo
 }
 
 // setPageNum 设置书籍的页数

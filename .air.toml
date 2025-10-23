@@ -12,7 +12,7 @@ tmp_dir = "test/temp"
 args_bin = ["./test","--tailscale"]
 #二进制文件
 bin = "./test/temp/comi"
-cmd = "go run github.com/a-h/templ/cmd/templ@latest generate && go build -o ./test/temp/comi main.go"
+cmd = "go run github.com/a-h/templ/cmd/templ@latest fmt templ && go run github.com/a-h/templ/cmd/templ@latest generate && go build -o ./test/temp/comi main.go"
 delay = 3000
 exclude_dir = ["app", "test", ".parcel-cache", "node_modules", "tmp", "bin", "testdata"]
 exclude_regex = ["_test\\.go", "node_modules", "_templ\\.go", "tar.gz", "zip", "tgz", "exe", "app"]

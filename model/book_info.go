@@ -31,11 +31,11 @@ type BookInfo struct {
 	Modified        time.Time       `json:"modified_time"`   // 修改时间
 	NonUTF8Zip      bool            `json:"-"`               // 是否为特殊编码 zip
 	PageCount       int             `json:"page_count"`      // 总页数
+	LastReadPage    int             `json:"last_read_page"`  // 阅读进度
 	BookMarks       BookMarks       `json:"book_marks"`      // 书签列表
 	ParentFolder    string          `json:"parent_folder"`   // 父文件夹
 	Press           string          `json:"press"`           // 出版社
 	PublishedAt     string          `json:"published_at"`    // 出版日期
-	ReadPercent     float64         `json:"read_percent"`    // 阅读进度
 	Title           string          `json:"title"`           // 书名
 	Type            SupportFileType `json:"type"`            // 书籍类型
 	ZipTextEncoding string          `json:"-"`               // zip 文件编码

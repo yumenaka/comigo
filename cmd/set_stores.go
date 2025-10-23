@@ -32,7 +32,7 @@ func ScanStore(args []string) {
 			logger.Infof("%s", err)
 		} else {
 			for _, book := range books {
-				err = model.IStore.AddBook(book.BookStorePath, book, config.GetMinImageNum())
+				err = model.IStore.AddBook(book, config.GetCfg().MinImageNum)
 				if err != nil {
 					logger.Infof("AddBook error: %s", err)
 				} else {
@@ -44,13 +44,13 @@ func ScanStore(args []string) {
 	// 2、设置默认书库路径：扫描CMD指定的路径，或添加当前文件夹为默认路径。
 	CreateStoreUrls(args)
 	// 3、扫描配置文件里面的书库路径
-	err = scan.InitAllStore(scan.NewOption(config.GetCfg()))
+	err = scan.InitAllStore(config.GetCfg())
 	if err != nil {
 		logger.Infof("Failed to scan store path: %v", err)
 	}
 	// 4、保存扫描结果到数据库
 	if config.GetCfg().EnableDatabase {
-		err = scan.SaveResultsToDatabase()
+		err = scan.SaveResultsToDatabase(config.GetCfg())
 		if err != nil {
 			logger.Infof("Failed SaveResultsToDatabase: %v", err)
 			return
@@ -74,24 +74,24 @@ func CreateStoreUrls(args []string) {
 	}
 	// 指定了书库路径，就都扫描一遍
 	for key, arg := range args {
-		if config.GetDebug() {
+		if config.GetCfg().Debug {
 			logger.Infof("args[%d]: %s\n", key, arg)
 		}
 		config.GetCfg().AddStoreUrl(arg)
 	}
 	// 如果用户启用上传，且用户指定的上传路径不为空，就把程序预先设定的【默认上传路径】当作书库
 	if config.GetCfg().EnableUpload {
-		if config.GetUploadPath() != "" {
+		if config.GetCfg().UploadPath != "" {
 			// 尝试把上传路径添加为书库里
-			config.GetCfg().AddStoreUrl(config.GetUploadPath())
+			config.GetCfg().AddStoreUrl(config.GetCfg().UploadPath)
 		}
 		// 如果用户启用上传，但没有指定上传路径
-		if config.GetUploadPath() == "" {
+		if config.GetCfg().UploadPath == "" {
 			for _, storeUrl := range config.GetCfg().StoreUrls {
 				// 把【本地存储】里面的第一个可用路径作为上传路径
 				if tools.IsExist(storeUrl) {
 					config.SetUploadPath(storeUrl)
-					config.GetCfg().AddStoreUrl(config.GetUploadPath())
+					config.GetCfg().AddStoreUrl(config.GetCfg().UploadPath)
 					break
 				}
 			}

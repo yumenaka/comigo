@@ -8,9 +8,7 @@ package settings
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import (
-	"github.com/yumenaka/comigo/templ/common/svg"
-)
+import "github.com/yumenaka/comigo/templ/common/svg"
 
 func Header() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -41,7 +39,7 @@ func Header() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</a><!-- examples: https://htmx.org/examples/tabs-javascript/--><div id=\"ServerSettings\" x-data=\"{ ServerSettingsText: i18next.t('ServerSettings') }\" x-text=\"ServerSettingsText\" class=\"tabs flex items-center justify-center flex-1 p-0 m-0 text-2xl font-semibold text-center truncate w-80 drop-shadow focus:relative\">ServerSettings</div><style>\n\t\tbutton.tabs {\n\t\t\tbackground-color: #b1b5bb;\n\t\t\t--tw-text-opacity: 1;\n\t\t\tcolor: #6b7280;\n\t\t\t/* text-gray-500 */\n\t\t}\n\n\t\tbutton.tabs:hover {\n\t\t\t--tw-text-opacity: 1;\n\t\t\tcolor: #374151\n\t\t\t\t/* text-gray-700 */\n\t\t\t;\n\t\t}\n\n\t\tbutton.tabs.selected {\n\t\t\tbackground-color: #f9f9f9;\n\t\t\t--tw-text-opacity: 1;\n\t\t\tcolor: #3b82f6;\n\t\t\t/* text-blue-500 */\n\t\t}\n\t</style><!-- qrcode icon--><div data-modal-target=\"qrcode-modal\" data-modal-toggle=\"qrcode-modal\" class=\"flex items-center justify-center w-10 h-10 mx-1 my-0 rounded hover:ring\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</a><!-- examples: https://htmx.org/examples/tabs-javascript/--><div id=\"ServerSettings\" x-data=\"{ ServerSettingsText: i18next.t('ServerSettings') }\" x-text=\"ServerSettingsText\" class=\"tabs flex items-center justify-center flex-1 p-0 m-0 text-2xl font-semibold text-center truncate w-80 drop-shadow focus:relative\">ServerSettings</div><style>\n\t\t\tbutton.tabs {\n\t\t\t\tbackground-color: #b1b5bb;\n\t\t\t\t--tw-text-opacity: 1;\n\t\t\t\tcolor: #6b7280;\n\t\t\t\t/* text-gray-500 */\n\t\t\t}\n\n\t\t\tbutton.tabs:hover {\n\t\t\t\t--tw-text-opacity: 1;\n\t\t\t\tcolor: #374151 /* text-gray-700 */;\n\t\t\t}\n\n\t\t\tbutton.tabs.selected {\n\t\t\t\tbackground-color: #f9f9f9;\n\t\t\t\t--tw-text-opacity: 1;\n\t\t\t\tcolor: #3b82f6;\n\t\t\t\t/* text-blue-500 */\n\t\t\t}\n\t\t</style><!-- qrcode icon--><div data-modal-target=\"qrcode-modal\" data-modal-toggle=\"qrcode-modal\" class=\"flex items-center justify-center w-10 h-10 mx-1 my-0 rounded hover:ring\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

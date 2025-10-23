@@ -1,4 +1,4 @@
-//go:build (windows && 386) || (js && wasm)
+//go:build js && wasm
 
 package sqlc
 

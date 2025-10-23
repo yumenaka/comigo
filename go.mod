@@ -1,6 +1,6 @@
 module github.com/yumenaka/comigo
 
-go 1.25.1
+go 1.25.3
 
 tool (
 	entgo.io/ent/cmd/ent
@@ -20,7 +20,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/jxskiss/base62 v1.1.0
-	github.com/klauspost/compress v1.18.0
+	github.com/klauspost/compress v1.18.1
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/mandykoh/autocrop v0.4.7
 	github.com/nicksnyder/go-i18n/v2 v2.6.0
@@ -35,7 +35,7 @@ require (
 	github.com/xxjwxc/gowp v0.0.0-20240929033016-5be68d222389
 	golang.org/x/net v0.46.0
 	golang.org/x/text v0.30.0
-	modernc.org/sqlite v1.39.1 // indirect
+	modernc.org/sqlite v1.39.1
 )
 
 require (
@@ -48,13 +48,13 @@ require (
 	github.com/labstack/echo-jwt/v4 v4.3.1
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/minio/selfupdate v0.6.0
-	github.com/pdfcpu/pdfcpu v0.11.0
+	github.com/pdfcpu/pdfcpu v0.11.1
 	github.com/sevlyar/go-daemon v0.1.6
-	github.com/yumenaka/archives v0.0.0-20250725141309-68ce9a39e8c3
+	github.com/yumenaka/archives v0.0.0-20251023131944-54ef827cac47
 	golang.org/x/image v0.32.0
 	golang.org/x/mod v0.29.0
-	tailscale.com v1.88.4
-	wait4x.dev/v3 v3.5.1
+	tailscale.com v1.90.0
+	wait4x.dev/v3 v3.6.0
 )
 
 require (
@@ -244,6 +244,7 @@ require (
 	go4.org/netipx v0.0.0-20231129151722-fdeea329fbba // indirect
 	golang.org/x/crypto v0.43.0 // indirect
 	golang.org/x/exp v0.0.0-20251009144603-d2f985daa21b // indirect
+	golang.org/x/oauth2 v0.31.0 // indirect
 	golang.org/x/sync v0.17.0 // indirect
 	golang.org/x/sys v0.37.0 // indirect
 	golang.org/x/term v0.36.0 // indirect

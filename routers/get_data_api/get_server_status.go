@@ -16,7 +16,7 @@ func GetServerInfoHandler(c echo.Context) error {
 		tools.ServerInfoParams{
 			Cfg:            config.GetCfg(),
 			Version:        config.GetVersion(),
-			AllBooksNumber: model.IStore.GetBooksNumber(),
+			AllBooksNumber: model.IStore.GetAllBooksNumber(),
 			ClientIP:       c.RealIP(),
 		})
 	tailscaleStatus, err := tailscale_plugin.GetTailscaleStatus(c.Request().Context())

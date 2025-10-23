@@ -12,8 +12,9 @@ import (
 )
 
 // SaveResultsToDatabase 4，保存扫描结果到数据库，并清理不存在的书籍
-func SaveResultsToDatabase() error {
-	books := model.IStore.GetAllBookSkipBookGroup()
+func SaveResultsToDatabase(cfg ConfigInterface) error {
+	InitConfig(cfg)
+	books := model.IStore.ListBookSkipBookGroup()
 	saveErr := sqlc.Repo.SaveBookListToDatabase(books)
 	if saveErr != nil {
 		logger.Info(saveErr)

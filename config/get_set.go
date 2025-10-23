@@ -58,27 +58,6 @@ func GetConfigDir() (dir string, err error) {
 	return "", errors.New("config dir does not exist")
 }
 
-func SetConfigDir(dir string) {
-	// 检查路径是否存在
-	if !tools.PathExists(dir) {
-		logger.Info("Invalid config dir.")
-		return
-	}
-	cfg.ConfigFile = dir
-}
-
-func GetCacheDir() string {
-	return cfg.CacheDir
-}
-
-func SetCacheDir(path string) {
-	if !tools.PathExists(path) {
-		logger.Info("Invalid cache path.")
-		return
-	}
-	cfg.CacheDir = path
-}
-
 func AutoSetCacheDir() {
 	// 手动设置的临时文件夹
 	if cfg.CacheDir != "" && tools.IsExist(cfg.CacheDir) && tools.ChickIsDir(cfg.CacheDir) {
@@ -94,138 +73,12 @@ func AutoSetCacheDir() {
 	}
 }
 
-func GetClearDatabaseWhenExit() bool {
-	return cfg.ClearDatabaseWhenExit
-}
-
-func SetClearDatabaseWhenExit(clearDatabaseWhenExit bool) {
-	cfg.ClearDatabaseWhenExit = clearDatabaseWhenExit
-}
-
-func GetDebug() bool {
-	return cfg.Debug
-}
-
-func GetUploadPath() string {
-	return cfg.UploadPath
-}
-
 func SetUploadPath(path string) {
 	if (!tools.IsDir(path)) || (!tools.PathExists(path)) {
 		logger.Info("Invalid upload path.")
 		return
 	}
 	cfg.UploadPath = path
-}
-
-func GetUseCache() bool {
-	return cfg.UseCache
-}
-
-func SetUseCache(useCache bool) {
-	cfg.UseCache = useCache
-}
-
-func GetCertFile() string {
-	return cfg.CertFile
-}
-
-func GetClearCacheExit() bool {
-	return cfg.ClearCacheExit
-}
-
-func GetLogToFile() bool {
-	return cfg.LogToFile
-}
-
-func GetLogFilePath() string {
-	return cfg.LogFilePath
-}
-
-func GetLogFileName() string {
-	return cfg.LogFileName
-}
-
-func GetMaxScanDepth() int {
-	return cfg.MaxScanDepth
-}
-
-func SetClearCacheExit(clearCacheExit bool) {
-	cfg.ClearCacheExit = clearCacheExit
-}
-
-func GetDefaultMode() string {
-	return cfg.DefaultMode
-}
-
-func GetDisableLAN() bool {
-	return cfg.DisableLAN
-}
-
-func SetDisableLAN(disableLAN bool) {
-	cfg.DisableLAN = disableLAN
-}
-
-func GetMinImageNum() int {
-	return cfg.MinImageNum
-}
-
-func GetTimeoutLimitForScan() int {
-	return cfg.TimeoutLimitForScan
-}
-
-func GetExcludePath() []string {
-	return cfg.ExcludePath
-}
-
-func GetSupportMediaType() []string {
-	return cfg.SupportMediaType
-}
-
-func GetSupportFileType() []string {
-	return cfg.SupportFileType
-}
-
-func GetSupportTemplateFile() []string {
-	return cfg.SupportTemplateFile
-}
-
-func GetZipFileTextEncoding() string {
-	return cfg.ZipFileTextEncoding
-}
-
-func GetOpenBrowser() bool {
-	return cfg.OpenBrowser
-}
-
-func SetOpenBrowser(openBrowser bool) {
-	cfg.OpenBrowser = openBrowser
-}
-
-func GetPrintAllPossibleQRCode() bool {
-	return cfg.PrintAllPossibleQRCode
-}
-
-func GetTailscaleEnable() bool {
-	return cfg.EnableTailscale
-}
-
-func GetTailscaleHostname() string {
-	return cfg.TailscaleHostname
-}
-
-func GetTailscaleAuthKey() string {
-	return cfg.TailscaleAuthKey
-}
-
-// GetUsername 获取用户名
-func GetUsername() string {
-	return cfg.Username
-}
-
-// GetPassword 获取密码
-func GetPassword() string {
-	return cfg.Password
 }
 
 // GetJwtSigningKey JWT令牌签名key，目前是用户名+密码(如果两者都设置了的话)
@@ -241,29 +94,12 @@ func GetJwtSigningKey() string {
 	return cfg.Username + cfg.Password
 }
 
-func GetTimeout() int {
-	return cfg.Timeout
-}
-
 func SetPort(port int) {
 	if port < 0 || port > 65535 {
 		port = 1234
 		logger.Infof("Invalid port number. Using default port: %d", port)
 	}
 	cfg.Port = port
-}
-
-func GetHost() string {
-	return cfg.Host
-}
-
-func SetHost(host string) {
-	// 如果主机名为空，使用默认主机名
-	if host == "" {
-		host = ""
-		logger.Infof("Invalid host name. Using default host: %s", host)
-	}
-	cfg.Host = host
 }
 
 func GetKeyFile() string {

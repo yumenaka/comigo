@@ -26,13 +26,13 @@ func Login(c echo.Context) error {
 	username := c.FormValue("username")
 	password := c.FormValue("password")
 	// 检查是否需要登录
-	if config.GetUsername() == "" || config.GetPassword() == "" {
+	if config.GetCfg().Username == "" || config.GetCfg().Password == "" {
 		logger.Infof("Cannot set Username or Password\n")
 		return echo.ErrTeapot
 	}
 	// 如果未设置密码或密码错误，则不生成 JWT
-	if username != config.GetUsername() || password != config.GetPassword() {
-		logger.Infof("Login failed: %s-%s, %s-%s\n", username, config.GetUsername(), config.GetPassword(), password)
+	if username != config.GetCfg().Username || password != config.GetCfg().Password {
+		logger.Infof("Login failed: %s-%s, %s-%s\n", username, config.GetCfg().Username, config.GetCfg().Password, password)
 		return echo.ErrUnauthorized
 	}
 
@@ -41,7 +41,7 @@ func Login(c echo.Context) error {
 		username,
 		true, // 账号管理（未实现）
 		jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * time.Duration(config.GetTimeout()))),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * time.Duration(config.GetCfg().Timeout))),
 		},
 	}
 

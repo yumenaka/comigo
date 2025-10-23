@@ -182,13 +182,13 @@ func (repo *Repository) Update(ctx context.Context, book *model.Book) error {
 	return repo.queries.UpdateBook(ctx, params)
 }
 
-// UpdateReadPercent 更新阅读进度
-func (repo *Repository) UpdateReadPercent(ctx context.Context, bookID string, readPercent float64) error {
-	params := UpdateReadPercentParams{
-		ReadPercent: sql.NullFloat64{Float64: readPercent, Valid: true},
-		BookID:      bookID,
+// UpdateLastReadPage 更新阅读进度
+func (repo *Repository) UpdateLastReadPage(ctx context.Context, bookID string, lastReadPosition int) error {
+	params := UpdateLastReadPageParams{
+		LastReadPage: sql.NullInt64{Int64: int64(lastReadPosition), Valid: true},
+		BookID:       bookID,
 	}
-	return repo.queries.UpdateReadPercent(ctx, params)
+	return repo.queries.UpdateLastReadPage(ctx, params)
 }
 
 // MarkAsDeleted 标记书籍为已删除

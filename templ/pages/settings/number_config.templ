@@ -5,7 +5,7 @@ import "strconv"
 templ NumberConfig(name string, value int, description string, min int, max int, saveSuccessHint bool) {
 	if saveSuccessHint {
 		<div
-		    class="hidden"
+			class="hidden"
 			x-init="showToast(i18next.t('saveSuccessHint'), 'info');setTimeout(() => {
             window.location.reload();
         }, 2000)"
