@@ -62,7 +62,7 @@ func ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirecto
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("ConfigStorageLocationPrompt"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 12, Col: 70}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 12, Col: 64}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -111,7 +111,7 @@ func ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirecto
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("current_dir_scope"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 35, Col: 54}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 35, Col: 51}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -129,7 +129,7 @@ func ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirecto
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("HomeDirectory"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 47, Col: 64}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 48, Col: 64}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -147,7 +147,7 @@ func ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirecto
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(HomeDirectoryConfig)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 54, Col: 27}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 55, Col: 27}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -165,7 +165,7 @@ func ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirecto
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("current_user_scope"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 59, Col: 55}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 60, Col: 52}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -183,7 +183,7 @@ func ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirecto
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("ProgramDirectory"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 71, Col: 67}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 73, Col: 67}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -201,7 +201,7 @@ func ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirecto
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(ProgramDirectoryConfig)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 78, Col: 30}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 80, Col: 30}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -219,7 +219,7 @@ func ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirecto
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("portable_binary_scope"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 83, Col: 58}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 85, Col: 55}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
@@ -237,7 +237,7 @@ func ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirecto
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("save"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 106, Col: 36}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 109, Col: 36}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -250,7 +250,7 @@ func ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirecto
 		var templ_7745c5c3_Var15 string
 		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("delete"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 117, Col: 38}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 120, Col: 38}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
@@ -263,13 +263,13 @@ func ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirecto
 		var templ_7745c5c3_Var16 string
 		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("ConfigManagerDescription"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 123, Col: 101}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 126, Col: 101}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "\">点击Save，会将当前配置上传到服务器，并覆盖已经存在的设定文件。</div><script>\n// 为保存按钮添加事件监听，拦截保存设置的 htmx 请求\ndocument.getElementById('saveConfigButton').addEventListener('htmx:beforeRequest', function (event) {\n    // 检查是否可以保存设置\n    let selectedDir = document.getElementById('selectedDir').value;\n    let canSave = false;\n    if (selectedDir === 'WorkingDirectory') {\n        if (document.getElementById('ProgramDirectoryConfigDiv') === null && document.getElementById('HomeDirectoryConfigDiv') === null) {\n            console.log('WorkingDirectoryConfigDiv is null');\n            canSave = true;\n        }\n    }\n    if (selectedDir === 'HomeDirectory') {\n        if (document.getElementById('ProgramDirectoryConfigDiv') === null && document.getElementById('WorkingDirectoryConfigDiv') === null) {\n            console.log('HomeDirectoryConfigDiv is null');\n            canSave = true;\n        }\n    }\n    if (selectedDir === 'ProgramDirectory') {\n        if (document.getElementById('HomeDirectoryConfigDiv') === null && document.getElementById('WorkingDirectoryConfigDiv') === null) {\n            console.log('ProgramDirectoryConfigDiv is null');\n            canSave = true;\n        }\n    }\n    // 如果其他地方已经有配置了，则阻止请求并执行本地逻辑\n    if (!canSave) {\n        event.preventDefault();\n        // 请先删除其他位置的配置文件\n        showToast(i18next.t('please_delete_other_config_first'), 'warning');\n    }\n});\ndocument.getElementById('saveConfigButton').addEventListener('htmx:afterRequest', function (event) {\n    // 只对ID为myButton的请求进行监听\n    if (event.detail.successful) {\n        showToast(i18next.t('save_config_success'), 'info');\n    } else {\n        showToast(i18next.t('save_config_failed'), 'error');\n    }\n});\n\n// 为删除按钮添加事件监听，\ndocument.getElementById('deleteConfigButton').addEventListener('htmx:beforeRequest', function (event) {\n    // 检查是否可以删除配置\n    let selectedDir = document.getElementById('selectedDir').value;\n    canSelete = true;\n    if (selectedDir === 'WorkingDirectory') {\n        if (document.getElementById('WorkingDirectoryConfigDiv') === null) {\n            canSelete = false;\n        }\n    }\n    if (selectedDir === 'HomeDirectory') {\n        if (document.getElementById('HomeDirectoryConfigDiv') === null) {\n            canSelete = false;\n        }\n    }\n    if (selectedDir === 'ProgramDirectory') {\n        if (document.getElementById('ProgramDirectoryConfigDiv') === null) {\n            canSelete = false;\n        }\n    }\n    // 如果不满足条件，则阻止请求并执行本地逻辑\n    if (!canSelete) {\n        event.preventDefault();\n        showToast(i18next.t('no_config_file_to_delete_in_path'), 'warning');\n    }\n});\ndocument.getElementById('deleteConfigButton').addEventListener('htmx:afterRequest', function (event) {\n    // 只对ID为myButton的请求进行监听\n    if (event.detail.successful) {\n        showToast(i18next.t('delete_config_success'), 'info');\n    } else {\n        showToast(i18next.t('delete_config_failed'), 'error');\n    }\n});\n</script></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "\">点击Save，会将当前配置上传到服务器，并覆盖已经存在的设定文件。</div><script>\n\t\t\t// 为保存按钮添加事件监听，拦截保存设置的 htmx 请求\n\t\t\tdocument\n\t\t\t\t.getElementById(\"saveConfigButton\")\n\t\t\t\t.addEventListener(\"htmx:beforeRequest\", function (event) {\n\t\t\t\t\t// 检查是否可以保存设置\n\t\t\t\t\tlet selectedDir = document.getElementById(\"selectedDir\").value;\n\t\t\t\t\tlet canSave = false;\n\t\t\t\t\tif (selectedDir === \"WorkingDirectory\") {\n\t\t\t\t\t\tif (\n\t\t\t\t\t\t\tdocument.getElementById(\"ProgramDirectoryConfigDiv\") === null &&\n\t\t\t\t\t\t\tdocument.getElementById(\"HomeDirectoryConfigDiv\") === null\n\t\t\t\t\t\t) {\n\t\t\t\t\t\t\tconsole.log(\"WorkingDirectoryConfigDiv is null\");\n\t\t\t\t\t\t\tcanSave = true;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\tif (selectedDir === \"HomeDirectory\") {\n\t\t\t\t\t\tif (\n\t\t\t\t\t\t\tdocument.getElementById(\"ProgramDirectoryConfigDiv\") === null &&\n\t\t\t\t\t\t\tdocument.getElementById(\"WorkingDirectoryConfigDiv\") === null\n\t\t\t\t\t\t) {\n\t\t\t\t\t\t\tconsole.log(\"HomeDirectoryConfigDiv is null\");\n\t\t\t\t\t\t\tcanSave = true;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\tif (selectedDir === \"ProgramDirectory\") {\n\t\t\t\t\t\tif (\n\t\t\t\t\t\t\tdocument.getElementById(\"HomeDirectoryConfigDiv\") === null &&\n\t\t\t\t\t\t\tdocument.getElementById(\"WorkingDirectoryConfigDiv\") === null\n\t\t\t\t\t\t) {\n\t\t\t\t\t\t\tconsole.log(\"ProgramDirectoryConfigDiv is null\");\n\t\t\t\t\t\t\tcanSave = true;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\t// 如果其他地方已经有配置了，则阻止请求并执行本地逻辑\n\t\t\t\t\tif (!canSave) {\n\t\t\t\t\t\tevent.preventDefault();\n\t\t\t\t\t\t// 请先删除其他位置的配置文件\n\t\t\t\t\t\tshowToast(i18next.t(\"please_delete_other_config_first\"), \"warning\");\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\tdocument\n\t\t\t\t.getElementById(\"saveConfigButton\")\n\t\t\t\t.addEventListener(\"htmx:afterRequest\", function (event) {\n\t\t\t\t\t// 只对ID为myButton的请求进行监听\n\t\t\t\t\tif (event.detail.successful) {\n\t\t\t\t\t\tshowToast(i18next.t(\"save_config_success\"), \"info\");\n\t\t\t\t\t} else {\n\t\t\t\t\t\tshowToast(i18next.t(\"save_config_failed\"), \"error\");\n\t\t\t\t\t}\n\t\t\t\t});\n\n\t\t\t// 为删除按钮添加事件监听，\n\t\t\tdocument\n\t\t\t\t.getElementById(\"deleteConfigButton\")\n\t\t\t\t.addEventListener(\"htmx:beforeRequest\", function (event) {\n\t\t\t\t\t// 检查是否可以删除配置\n\t\t\t\t\tlet selectedDir = document.getElementById(\"selectedDir\").value;\n\t\t\t\t\tcanSelete = true;\n\t\t\t\t\tif (selectedDir === \"WorkingDirectory\") {\n\t\t\t\t\t\tif (document.getElementById(\"WorkingDirectoryConfigDiv\") === null) {\n\t\t\t\t\t\t\tcanSelete = false;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\tif (selectedDir === \"HomeDirectory\") {\n\t\t\t\t\t\tif (document.getElementById(\"HomeDirectoryConfigDiv\") === null) {\n\t\t\t\t\t\t\tcanSelete = false;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\tif (selectedDir === \"ProgramDirectory\") {\n\t\t\t\t\t\tif (document.getElementById(\"ProgramDirectoryConfigDiv\") === null) {\n\t\t\t\t\t\t\tcanSelete = false;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\t// 如果不满足条件，则阻止请求并执行本地逻辑\n\t\t\t\t\tif (!canSelete) {\n\t\t\t\t\t\tevent.preventDefault();\n\t\t\t\t\t\tshowToast(i18next.t(\"no_config_file_to_delete_in_path\"), \"warning\");\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\tdocument\n\t\t\t\t.getElementById(\"deleteConfigButton\")\n\t\t\t\t.addEventListener(\"htmx:afterRequest\", function (event) {\n\t\t\t\t\t// 只对ID为myButton的请求进行监听\n\t\t\t\t\tif (event.detail.successful) {\n\t\t\t\t\t\tshowToast(i18next.t(\"delete_config_success\"), \"info\");\n\t\t\t\t\t} else {\n\t\t\t\t\t\tshowToast(i18next.t(\"delete_config_failed\"), \"error\");\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t</script></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

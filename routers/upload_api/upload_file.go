@@ -143,18 +143,16 @@ func UploadFile(c echo.Context) error {
 
 	// 同步执行扫描（等待完成）
 	// 扫描上传目录的文件
-	option := scan.NewOption(config.GetCfg())
-	books, err := scan.InitStore(config.GetUploadPath(), option)
+	err = scan.InitStore(config.GetCfg().UploadPath, config.GetCfg())
 	if err != nil {
-		logger.Infof(locale.GetString("scan_error")+"path:%s  %s", config.GetUploadPath(), err)
+		logger.Infof(locale.GetString("scan_error")+"path:%s  %s", config.GetCfg().UploadPath, err)
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": fmt.Sprintf("扫描上传目录失败: %s", err),
 		})
 	}
-	scan.AddBooksToStore(config.GetUploadPath(), books, config.GetMinImageNum())
 	// 保存扫描结果到数据库（如果开启）
 	if config.GetCfg().EnableDatabase {
-		if err := scan.SaveResultsToDatabase(); err != nil {
+		if err := scan.SaveResultsToDatabase(config.GetCfg()); err != nil {
 			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 				"error": fmt.Sprintf("保存数据库失败: %s", err),
 			})

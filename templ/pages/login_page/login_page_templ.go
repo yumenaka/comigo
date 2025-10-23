@@ -8,9 +8,7 @@ package login_page
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import (
-	"github.com/yumenaka/comigo/templ/common"
-)
+import "github.com/yumenaka/comigo/templ/common"
 
 // UploadPage 上传页面
 func LoginPage() templ.Component {

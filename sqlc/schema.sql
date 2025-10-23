@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS books
     depth             INTEGER  DEFAULT 0,                 -- Book depth
     parent_folder     TEXT,                               -- Parent folder
     page_count        INTEGER  DEFAULT 0,                 -- Total page count
+    last_read_position      INTEGER  DEFAULT 0,           -- Last read position
     file_size         INTEGER  DEFAULT 0,                 -- File size
     author            TEXT,                               -- Author
     isbn              TEXT,                               -- ISBN
@@ -37,7 +38,6 @@ CREATE TABLE IF NOT EXISTS books
     modified_time     DATETIME DEFAULT CURRENT_TIMESTAMP, -- Modified time
     extract_num       INTEGER  DEFAULT 0,                 -- Extract number
     init_complete     BOOLEAN  DEFAULT FALSE,             -- Initialization complete flag
-    read_percent      REAL     DEFAULT 0.0,               -- Reading progress
     non_utf8zip       BOOLEAN  DEFAULT FALSE,             -- Non-UTF8 zip flag
     zip_text_encoding TEXT,                               -- Zip text encoding
     deleted           BOOLEAN  DEFAULT FALSE              -- Soft delete flag

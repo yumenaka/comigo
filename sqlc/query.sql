@@ -37,9 +37,9 @@ ORDER BY modified_time DESC;
 -- name: CreateBook :one
 INSERT INTO books (
     title, book_id, owner, file_path, book_store_path, type,
-    child_books_num, child_books_id,depth, parent_folder, page_count, file_size,
+    child_books_num, child_books_id,depth, parent_folder, page_count, last_read_position, file_size,
     author, isbn, press, published_at, extract_path, extract_num,
-    init_complete, read_percent, non_utf8zip, zip_text_encoding
+    init_complete, non_utf8zip, zip_text_encoding
 ) VALUES (
     ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
 ) RETURNING *;
@@ -48,16 +48,16 @@ INSERT INTO books (
 -- name: UpdateBook :exec
 UPDATE books SET
     title = ?, owner = ?, file_path = ?, book_store_path = ?, type = ?,
-    child_books_num = ?, child_books_id = ?, depth = ?, parent_folder = ?, page_count = ?, file_size = ?,
+    child_books_num = ?, child_books_id = ?, depth = ?, parent_folder = ?, page_count = ?, last_read_position = ?, file_size = ?,
     author = ?, isbn = ?, press = ?, published_at = ?, extract_path = ?, extract_num = ?,
-    init_complete = ?, read_percent = ?, non_utf8zip = ?, zip_text_encoding = ?,
+    init_complete = ?, non_utf8zip = ?, zip_text_encoding = ?,
     modified_time = CURRENT_TIMESTAMP
 WHERE book_id = ?;
 
 -- Update reading progress
--- name: UpdateReadPercent :exec
+-- name: UpdateLastReadPage :exec
 UPDATE books SET
-    read_percent = ?,
+    last_read_position  = ?,
     modified_time = CURRENT_TIMESTAMP
 WHERE book_id = ?;
 

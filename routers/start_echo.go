@@ -18,11 +18,11 @@ import (
 func StartEcho(e *echo.Echo) {
 	// 是否对外服务
 	webHost := ":"
-	if config.GetDisableLAN() {
+	if config.GetCfg().DisableLAN {
 		webHost = "localhost:"
 	}
 	// 是否启用TLS
-	enableTls := config.GetCertFile() != "" && config.GetKeyFile() != ""
+	enableTls := config.GetCfg().CertFile != "" && config.GetCfg().KeyFile != ""
 	config.Server = &http.Server{
 		Addr:    webHost + strconv.Itoa(config.GetCfg().Port),
 		Handler: e, // echo.Echo 实现了 http.Handler 接口
@@ -30,13 +30,13 @@ func StartEcho(e *echo.Echo) {
 	// 记录日志并启动服务器
 	logger.Infof("Starting Server...", "on port", config.GetCfg().Port, "...")
 	if enableTls {
-		logger.Infof("TLS enabled", "CertFile:", config.GetCertFile(), "KeyFile:", config.GetKeyFile())
+		logger.Infof("TLS enabled", "CertFile:", config.GetCfg().CertFile, "KeyFile:", config.GetCfg().KeyFile)
 	}
 	// 在 goroutine 中初始化 HTTP 服务器，这样它就不会阻塞关闭处理
 	go func() {
 		// 监听并启动服务(TLS)
 		if enableTls {
-			if err := config.Server.ListenAndServeTLS(config.GetCertFile(), config.GetKeyFile()); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			if err := config.Server.ListenAndServeTLS(config.GetCfg().CertFile, config.GetCfg().KeyFile); err != nil && !errors.Is(err, http.ErrServerClosed) {
 				time.Sleep(3 * time.Second)
 				logger.Fatalf("listen: %s\n", err)
 			}

@@ -25,7 +25,7 @@ type DirNode struct {
 }
 
 // HandleDirectory 扫描目录的核心函数：递归遍历目录，忽略指定名称的文件夹，收集图片文件信息
-func HandleDirectory(currentPath string, depth int, option Option) (DirNode, []string, []model.MediaFileInfo, error) {
+func HandleDirectory(currentPath string, depth int) (DirNode, []string, []model.MediaFileInfo, error) {
 	node := DirNode{
 		Name: filepath.Base(currentPath), // filepath.Base():返回路径的最后一个元素
 		Path: currentPath,
@@ -34,7 +34,7 @@ func HandleDirectory(currentPath string, depth int, option Option) (DirNode, []s
 	var foundFiles []model.MediaFileInfo
 
 	// 如果超过最大深度限制，直接返回空节点
-	if option.Cfg.GetMaxScanDepth() >= 0 && depth > option.Cfg.GetMaxScanDepth() {
+	if cfg.GetMaxScanDepth() >= 0 && depth > cfg.GetMaxScanDepth() {
 		return node, foundDirs, foundFiles, nil
 	}
 
@@ -51,11 +51,11 @@ func HandleDirectory(currentPath string, depth int, option Option) (DirNode, []s
 		fullPath := filepath.Join(currentPath, name)
 		if entry.IsDir() {
 			// 检查是否在忽略列表
-			if option.IsSkipDir(name) {
+			if IsSkipDir(name) {
 				continue
 			}
 			// 递归扫描子目录
-			subNode, subDirs, subFiles, subErr := HandleDirectory(fullPath, depth+1, option)
+			subNode, subDirs, subFiles, subErr := HandleDirectory(fullPath, depth+1)
 			if subErr != nil {
 				// 忽略单个子目录出错，继续扫描其他目录
 				logger.Info("扫描子目录出错:", subErr)
@@ -69,7 +69,7 @@ func HandleDirectory(currentPath string, depth int, option Option) (DirNode, []s
 			// 文件：检查扩展名是否为支持的格式
 			ext := strings.ToLower(filepath.Ext(name))
 			// 非支持媒体或压缩包格式，跳过
-			if (!option.IsSupportMedia(ext)) && (!option.IsSupportFile(ext)) {
+			if (!IsSupportMedia(ext)) && (!IsSupportFile(ext)) {
 				continue
 			}
 			// 获取文件信息

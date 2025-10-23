@@ -1,4 +1,4 @@
-//go:build !(windows && 386) && !js
+//go:build !js
 
 package sqlc // Package sqlc 编译条件的注释和 package 语句之间一定要隔一行，不然无法识别编译条件。go:build 是1.18以后"条件编译"的推荐语法。
 
@@ -29,14 +29,14 @@ func (repo *Repository) ClearBookData(book *model.Book) {
 	// 清空该书籍的所有媒体文件记录
 	err := repo.queries.DeleteMediaFilesByBookID(ctx, book.BookID)
 	if err != nil {
-		logger.Infof("ClearAll book media files error: %s", err.Error())
+		logger.Infof("ClearAllBook book media files error: %s", err.Error())
 		return
 	}
 
 	// 清空书籍的 Images 切片
 	book.Images = []model.MediaFileInfo{}
 
-	logger.Infof("ClearAll book %s media files completed", book.BookID)
+	logger.Infof("ClearAllBook book %s media files completed", book.BookID)
 }
 
 // DeleteAllBookInDatabase  清空数据库所有 book 与 media_file_info
@@ -172,7 +172,7 @@ func (repo *Repository) SaveBookToDatabase(save *model.Book) error {
 	return nil
 }
 
-// saveBookMediaFiles 保存书籍的媒体文件信息
+// SaveBookMediaFiles  保存书籍的媒体文件信息
 func (repo *Repository) SaveBookMediaFiles(ctx context.Context, bookID string, mediaFiles []model.MediaFileInfo) error {
 	// 先删除旧的媒体文件记录
 	err := repo.queries.DeleteMediaFilesByBookID(ctx, bookID)

@@ -1,29 +1,27 @@
 package model
 
 type StoreInterface interface {
-	// 1. 书库相关基本操作，可能需要优化
-	AddBook(storeURL string, b *Book, minPageNum int) error
-	AddBooks(storeURL string, list []*Book, minPageNum int) error
+	// 01-12 书库相关基本操作，可能需要优化
+	AddBook(b *Book, minPageNum int) error
+	AddBooks(list []*Book, minPageNum int) error
 	GetBook(id string) (*Book, error)
-	GetBookAndSort(id string, sortBy string) (*Book, error)
-	GetBooksNumber() int
+	UpdateBook(b *Book) error
 	ListBooks() []*Book
-	ClearAll()
-	GetAllBookSkipBookGroup() []*Book
+	ListBookSkipBookGroup() []*Book
+	GetAllBooksNumber() int
 	GetParentBook(childID string) (*Book, error)
 	GetChildBooksInfo(BookID string, sortBy string) (*BookInfoList, error)
+	ClearAllBook()
+	CheckBookFileExist(filePath string, bookType SupportFileType) bool // CheckRawFileExist 查看书库中是否已经有了这本书，有了就返回 true，让调用者跳过
+	GetBookInfoListByParentFolder(parentFolder string, sortBy string) (*BookInfoList, error)
 
-	// 2. 需要重写细节
+	// 13. TODO：重写
 	TopOfShelfInfo(sortBy string) (*BookInfoList, error) // 返回按照书库分组的数据
 
-	// 3. 需要研究函数的作用，看看能不能优化掉
-	CheckRawFileExist(filePath string, bookType SupportFileType) bool // CheckRawFileExist 查看内存中是否已经有了这本书，有了就返回 true，让调用者跳过
-	GetBookInfoListByParentFolder(parentFolder string, sortBy string) (*BookInfoList, error)
+	// 14-17. 研究函数的作用，移走或优化掉
 	GenerateAllBookGroup() (e error)
 	ClearBookNotExist()
 	GetShortBookID(fullID string, minLength int) string
-
-	// 4. 非泛用函数，想办法干掉
 	ClearTempFilesALL(debug bool, cachePath string)
 }
 

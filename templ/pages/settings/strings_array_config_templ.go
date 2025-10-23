@@ -49,7 +49,7 @@ func StringArrayConfig(name string, values []string, description string, saveSuc
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<script>\n// 在htmx发送请求前进行验证，事件机制请参考 htmx event 与 htmx:afterRequest 文档\n// https://htmx.org/docs/#events\n// https://htmx.org/events/#htmx:afterRequest\ndocument.body.addEventListener(\"htmx:beforeRequest\", function (evt) {\n  // 发送请求的元素（form 或者触发按钮）\n  const buttonID = evt.detail.elt.id;\n  // 不是添加按钮，直接返回\n  if (!buttonID || !buttonID.endsWith('StringArrayAddButton')) {\n    return;\n  }\n  const configName = buttonID.replace('StringArrayAddButton', '');\n  const addValue = document.getElementById(configName + 'AddInput').value.trim();\n  // 如果已经有这个值了，阻止提交\n  const container = document.getElementById(configName + '-string-array-config');\n  if (container) {\n    const existingNodes = container.querySelectorAll('[data-delete-value]');\n    for (const node of existingNodes) {\n      const existingValue = (node.getAttribute('data-delete-value') || '').trim();\n      if (existingValue === addValue && addValue !== '') {\n        showMessage({\n           message: i18next.t('value_already_exists_do_not_add_again'),\n           buttons: 'confirm'\n        });\n        evt.preventDefault();\n        return;\n      }\n    }\n  }\n  // 如果为空，阻止提交\n  if (addValue === '') {\n\t     // 设置项为空时，显示错误提示\n         showMessage({\n            message: i18next.t('content_empty_please_enter_before_submit'),\n            buttons: 'confirm'\n         });\n\tevt.preventDefault();\n  }\n});\n</script> <script>\n\t\t\t// 删除字符串数组配置中的元素。\n\t\t\t// 此处仅用作打印调试信息。删除操作是由 htmx 完成的。\n\t\t\tfunction deleteStringConfigValue(self) {\n\t\t\t\tconst configName = self.getAttribute('data-config-name');\n\t\t\t\tconst arrawIndex = self.getAttribute('data-arraw-index');\n\t\t\t\tconst deleteValue = self.getAttribute('data-delete-value');\n\t\t\t\tconsole.log(configName, arrawIndex, deleteValue);\n\t\t\t}\n\t\t\t// 添加字符串数组配置中的元素\n\t\t\t// 此函数的作用，是修改 hx-vals 的值。实际的提交操作由 htmx 完成\n\t\t\tfunction  addStringConfigValue(self){\n\t\t\t\tconst buttonID = self.getAttribute('id');\n\t\t\t\tconst configName = buttonID.replace('StringArrayAddButton', '');\n\t\t\t\tconst addValue = document.getElementById(configName + 'AddInput').value;\n\t\t\t\tself.setAttribute('hx-vals', JSON.stringify({ configName: configName, addValue: addValue }));\n\t\t\t\tconsole.log(configName, addValue);\n\t\t\t}\n\t\t</script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<script>\n\t\t\t// 在htmx发送请求前进行验证，事件机制请参考 htmx event 与 htmx:afterRequest 文档\n\t\t\t// https://htmx.org/docs/#events\n\t\t\t// https://htmx.org/events/#htmx:afterRequest\n\t\t\tdocument.body.addEventListener(\"htmx:beforeRequest\", function (evt) {\n\t\t\t\t// 发送请求的元素（form 或者触发按钮）\n\t\t\t\tconst buttonID = evt.detail.elt.id;\n\t\t\t\t// 不是添加按钮，直接返回\n\t\t\t\tif (!buttonID || !buttonID.endsWith(\"StringArrayAddButton\")) {\n\t\t\t\t\treturn;\n\t\t\t\t}\n\t\t\t\tconst configName = buttonID.replace(\"StringArrayAddButton\", \"\");\n\t\t\t\tconst addValue = document\n\t\t\t\t\t.getElementById(configName + \"AddInput\")\n\t\t\t\t\t.value.trim();\n\t\t\t\t// 如果已经有这个值了，阻止提交\n\t\t\t\tconst container = document.getElementById(\n\t\t\t\t\tconfigName + \"-string-array-config\",\n\t\t\t\t);\n\t\t\t\tif (container) {\n\t\t\t\t\tconst existingNodes = container.querySelectorAll(\n\t\t\t\t\t\t\"[data-delete-value]\",\n\t\t\t\t\t);\n\t\t\t\t\tfor (const node of existingNodes) {\n\t\t\t\t\t\tconst existingValue = (\n\t\t\t\t\t\t\tnode.getAttribute(\"data-delete-value\") || \"\"\n\t\t\t\t\t\t).trim();\n\t\t\t\t\t\tif (existingValue === addValue && addValue !== \"\") {\n\t\t\t\t\t\t\tshowMessage({\n\t\t\t\t\t\t\t\tmessage: i18next.t(\"value_already_exists_do_not_add_again\"),\n\t\t\t\t\t\t\t\tbuttons: \"confirm\",\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\tevt.preventDefault();\n\t\t\t\t\t\t\treturn;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\t// 如果为空，阻止提交\n\t\t\t\tif (addValue === \"\") {\n\t\t\t\t\t// 设置项为空时，显示错误提示\n\t\t\t\t\tshowMessage({\n\t\t\t\t\t\tmessage: i18next.t(\"content_empty_please_enter_before_submit\"),\n\t\t\t\t\t\tbuttons: \"confirm\",\n\t\t\t\t\t});\n\t\t\t\t\tevt.preventDefault();\n\t\t\t\t}\n\t\t\t});\n\t\t</script> <script>\n\t\t\t// 删除字符串数组配置中的元素。\n\t\t\t// 此处仅用作打印调试信息。删除操作是由 htmx 完成的。\n\t\t\tfunction deleteStringConfigValue(self) {\n\t\t\t\tconst configName = self.getAttribute(\"data-config-name\");\n\t\t\t\tconst arrawIndex = self.getAttribute(\"data-arraw-index\");\n\t\t\t\tconst deleteValue = self.getAttribute(\"data-delete-value\");\n\t\t\t\tconsole.log(configName, arrawIndex, deleteValue);\n\t\t\t}\n\t\t\t// 添加字符串数组配置中的元素\n\t\t\t// 此函数的作用，是修改 hx-vals 的值。实际的提交操作由 htmx 完成\n\t\t\tfunction addStringConfigValue(self) {\n\t\t\t\tconst buttonID = self.getAttribute(\"id\");\n\t\t\t\tconst configName = buttonID.replace(\"StringArrayAddButton\", \"\");\n\t\t\t\tconst addValue = document.getElementById(configName + \"AddInput\").value;\n\t\t\t\tself.setAttribute(\n\t\t\t\t\t\"hx-vals\",\n\t\t\t\t\tJSON.stringify({ configName: configName, addValue: addValue }),\n\t\t\t\t);\n\t\t\t\tconsole.log(configName, addValue);\n\t\t\t}\n\t\t</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -72,7 +72,7 @@ func StringArrayConfig(name string, values []string, description string, saveSuc
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(name + "-string-array-config")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 82, Col: 36}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 93, Col: 36}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -85,7 +85,7 @@ func StringArrayConfig(name string, values []string, description string, saveSuc
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations(name))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 85, Col: 66}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 96, Col: 66}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -98,7 +98,7 @@ func StringArrayConfig(name string, values []string, description string, saveSuc
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations(name))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 85, Col: 99}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 96, Col: 99}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -116,7 +116,7 @@ func StringArrayConfig(name string, values []string, description string, saveSuc
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(value)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 89, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 100, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -133,7 +133,7 @@ func StringArrayConfig(name string, values []string, description string, saveSuc
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 91, Col: 29}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 102, Col: 29}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -146,7 +146,7 @@ func StringArrayConfig(name string, values []string, description string, saveSuc
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(index))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 92, Col: 44}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 103, Col: 44}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -159,7 +159,7 @@ func StringArrayConfig(name string, values []string, description string, saveSuc
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(value)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 93, Col: 31}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 104, Col: 31}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -172,7 +172,7 @@ func StringArrayConfig(name string, values []string, description string, saveSuc
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs("#" + name + "-string-array-config")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 95, Col: 53}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 106, Col: 53}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -185,7 +185,7 @@ func StringArrayConfig(name string, values []string, description string, saveSuc
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(`{"configName":"%s","deleteValue":"%s"}`, name, value))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 97, Col: 82}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 108, Col: 82}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -220,7 +220,7 @@ func StringArrayConfig(name string, values []string, description string, saveSuc
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(name + "Array")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 106, Col: 31}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 117, Col: 31}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
@@ -233,7 +233,7 @@ func StringArrayConfig(name string, values []string, description string, saveSuc
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("type_or_paste_content"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 106, Col: 99}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 117, Col: 99}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -246,7 +246,7 @@ func StringArrayConfig(name string, values []string, description string, saveSuc
 		var templ_7745c5c3_Var15 string
 		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(name + "AddInput")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 109, Col: 27}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 120, Col: 27}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
@@ -259,7 +259,7 @@ func StringArrayConfig(name string, values []string, description string, saveSuc
 		var templ_7745c5c3_Var16 string
 		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("type_or_paste_content"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 110, Col: 60}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 121, Col: 60}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
@@ -280,7 +280,7 @@ func StringArrayConfig(name string, values []string, description string, saveSuc
 		var templ_7745c5c3_Var17 string
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("submit"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 115, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 126, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
@@ -293,7 +293,7 @@ func StringArrayConfig(name string, values []string, description string, saveSuc
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(name + "StringArrayAddButton")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 117, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 128, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
@@ -306,7 +306,7 @@ func StringArrayConfig(name string, values []string, description string, saveSuc
 		var templ_7745c5c3_Var19 string
 		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs("#" + name + "-string-array-config")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 119, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 130, Col: 53}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
@@ -319,7 +319,7 @@ func StringArrayConfig(name string, values []string, description string, saveSuc
 		var templ_7745c5c3_Var20 string
 		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(`{"configName":"%s","addValue":"%s"}`, name, ""))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 121, Col: 76}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 132, Col: 76}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
@@ -341,7 +341,7 @@ func StringArrayConfig(name string, values []string, description string, saveSuc
 		var templ_7745c5c3_Var22 string
 		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations(description))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 130, Col: 44}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 141, Col: 44}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 		if templ_7745c5c3_Err != nil {

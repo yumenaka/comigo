@@ -10,7 +10,7 @@ func hxBoolInclude(name string) string {
 templ BoolConfig(name string, value bool, description string, saveSuccessHint bool) {
 	if saveSuccessHint {
 		<div
-		    class="hidden"
+			class="hidden"
 			x-init="showToast(i18next.t('saveSuccessHint'), 'info');setTimeout(() => {
             window.location.reload();
         }, 2000)"

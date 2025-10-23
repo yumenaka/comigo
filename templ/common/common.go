@@ -76,8 +76,8 @@ func GetFileBase64Text(bookID string, fileName string) string {
 		BookIsDir:        bookByID.Type == model.TypeDir,
 		BookIsNonUTF8Zip: bookByID.NonUTF8Zip,
 		BookFilePath:     bookByID.FilePath,
-		Debug:            config.GetDebug(),
-		UseCache:         config.GetUseCache(),
+		Debug:            config.GetCfg().Debug,
+		UseCache:         config.GetCfg().UseCache,
 	}
 
 	// 获取图片数据

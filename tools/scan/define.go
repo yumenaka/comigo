@@ -20,19 +20,20 @@ type ConfigInterface interface {
 	GetDebug() bool
 }
 
-type Option struct {
-	Cfg ConfigInterface
-}
+var cfg ConfigInterface
+var minImageNum int
 
-func NewOption(scanConfig ConfigInterface) Option {
-	return Option{
-		Cfg: scanConfig,
-	}
+func init() {
+	minImageNum = 1
+}
+func InitConfig(c ConfigInterface) {
+	cfg = c
+	minImageNum = cfg.GetMinImageNum()
 }
 
 // IsSupportTemplate 判断压缩包内的文件是否是支持的模板文件
-func (o *Option) IsSupportTemplate(checkPath string) bool {
-	for _, ex := range o.Cfg.GetSupportTemplateFile() {
+func IsSupportTemplate(checkPath string) bool {
+	for _, ex := range cfg.GetSupportTemplateFile() {
 		suffix := strings.ToLower(path.Ext(checkPath)) // strings.ToLower():某些文件会用大写文件名
 		if ex == suffix {
 			return true
@@ -42,8 +43,8 @@ func (o *Option) IsSupportTemplate(checkPath string) bool {
 }
 
 // IsSupportMedia 判断文件是否需要展示
-func (o *Option) IsSupportMedia(checkPath string) bool {
-	for _, ex := range o.Cfg.GetSupportMediaType() {
+func IsSupportMedia(checkPath string) bool {
+	for _, ex := range cfg.GetSupportMediaType() {
 		suffix := strings.ToLower(path.Ext(checkPath)) // strings.ToLower():某些文件会用大写文件名
 		if ex == suffix {
 			return true
@@ -53,8 +54,8 @@ func (o *Option) IsSupportMedia(checkPath string) bool {
 }
 
 // IsSupportFile 判断压缩包内的文件是否需要展示
-func (o *Option) IsSupportFile(checkPath string) bool {
-	for _, ex := range o.Cfg.GetSupportFileType() {
+func IsSupportFile(checkPath string) bool {
+	for _, ex := range cfg.GetSupportFileType() {
 		suffix := strings.ToLower(path.Ext(checkPath)) // strings.ToLower():某些文件会用大写文件名
 		if ex == suffix {
 			return true
@@ -64,8 +65,8 @@ func (o *Option) IsSupportFile(checkPath string) bool {
 }
 
 // IsSupportArchiver 是否是支持的压缩文件
-func (o *Option) IsSupportArchiver(checkPath string) bool {
-	for _, ex := range o.Cfg.GetSupportFileType() {
+func IsSupportArchiver(checkPath string) bool {
+	for _, ex := range cfg.GetSupportFileType() {
 		suffix := path.Ext(checkPath)
 		if ex == suffix {
 			return true
@@ -75,8 +76,8 @@ func (o *Option) IsSupportArchiver(checkPath string) bool {
 }
 
 // IsSkipDir  检查路径是否应该跳过（排除文件，文件夹列表）。
-func (o *Option) IsSkipDir(path string) bool {
-	for _, substr := range o.Cfg.GetExcludePath() {
+func IsSkipDir(path string) bool {
+	for _, substr := range cfg.GetExcludePath() {
 		if strings.HasSuffix(path, substr) {
 			return true
 		}

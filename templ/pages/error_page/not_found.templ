@@ -1,10 +1,11 @@
 package error_page
 
 import (
-    "github.com/labstack/echo/v4"
-	"github.com/yumenaka/comigo/templ/state"
+	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/templ/common"
+	"github.com/yumenaka/comigo/templ/state"
 )
+
 // 404 NotFound页面
 templ NotFound404(c echo.Context) {
 	@common.Header(
@@ -17,14 +18,14 @@ templ NotFound404(c echo.Context) {
 			DownLoadLink:    "",
 			SetTheme:        true,
 		})
-
 	<div
-		class="flex flex-col items-center justify-center flex-1 w-full p-8 text-center text-base-content">
-	    <!-- TODO：404页面插画   -->
+		class="flex flex-col items-center justify-center flex-1 w-full p-8 text-center text-base-content"
+	>
+		<!-- TODO：404页面插画   -->
 		<div class="text-4xl font-bold text-gray-500">404</div>
 		<div class="text-2xl font-bold text-gray-500">Not Found</div>
 	</div>
-	@common.Drawer(c,  nil, nil)
-    @common.QRCode()
-    @common.Footer(state.Version)
+	@common.Drawer(c, nil, nil)
+	@common.QRCode()
+	@common.Footer(state.Version)
 }

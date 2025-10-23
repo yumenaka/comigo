@@ -1,6 +1,7 @@
 package scan
 
 import (
+	"errors"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -10,16 +11,16 @@ import (
 )
 
 // 扫描目录，并返回对应书籍
-func scanDirGetBook(dirPath string, storePath string, depth int, option Option) (*model.Book, error) {
+func scanDirGetBook(dirPath string, storePath string, depth int) (*model.Book, error) {
 	// 获取文件夹信息
 	dirInfo, err := os.Stat(dirPath)
 	if err != nil {
 		return nil, err
 	}
-	newBook, err := model.NewBook(dirPath, dirInfo.ModTime(), dirInfo.Size(), storePath, depth, model.TypeDir)
-	if err != nil {
-		return nil, err
+	if model.IStore.CheckBookFileExist(dirPath, model.TypeDir) {
+		return nil, errors.New("skip: " + dirPath)
 	}
+	newBook := model.NewBook(dirPath, dirInfo.ModTime(), dirInfo.Size(), storePath, depth, model.TypeDir)
 
 	entries, err := os.ReadDir(dirPath)
 	if err != nil {
@@ -33,7 +34,7 @@ func scanDirGetBook(dirPath string, storePath string, depth int, option Option) 
 		}
 
 		fileName := entry.Name()
-		if !option.IsSupportMedia(fileName) {
+		if !IsSupportMedia(fileName) {
 			continue
 		}
 

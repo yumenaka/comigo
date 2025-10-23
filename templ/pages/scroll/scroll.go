@@ -25,7 +25,7 @@ func PageHandler(c echo.Context) error {
 	}
 	// 读取url参数，获取书籍ID
 	bookID := c.Param("id")
-	book, err := model.IStore.GetBookAndSort(bookID, sortBy)
+	book, err := model.IStore.GetBook(bookID)
 	if err != nil {
 		logger.Infof("GetBook: %v", err)
 		// 没有找到书，显示 HTTP 404 错误
@@ -41,6 +41,7 @@ func PageHandler(c echo.Context) error {
 		}
 		return nil
 	}
+	book.SortPages(sortBy)
 	// 读取分页索引
 	paginationIndex := -1
 	page := c.QueryParam("page")

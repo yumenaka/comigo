@@ -113,11 +113,9 @@ func waitSystemMessages() {
 // ReScanPath  重新扫描目录,因为需要设置下载路径，gin 初始化后才能执行
 func ReScanPath(storeUrl string, reScanFile bool) {
 	// 扫描上传目录的文件
-	option := scan.NewOption(config.GetCfg())
-	books, err := scan.InitStore(storeUrl, option)
+	err := scan.InitStore(storeUrl, config.GetCfg())
 	if err != nil {
 		logger.Infof(locale.GetString("scan_error")+"path:%s  %s", storeUrl, err)
 		return
 	}
-	scan.AddBooksToStore(storeUrl, books, config.GetMinImageNum())
 }
