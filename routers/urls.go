@@ -8,7 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/routers/config_api"
-	"github.com/yumenaka/comigo/routers/get_data_api"
+	"github.com/yumenaka/comigo/routers/data_api"
 	"github.com/yumenaka/comigo/routers/login"
 	"github.com/yumenaka/comigo/routers/upload_api"
 	"github.com/yumenaka/comigo/routers/websocket"
@@ -70,7 +70,7 @@ func bindPublicView(group *echo.Group) {
 // bindPublicAPI 注册公共路由
 func bindPublicAPI(group *echo.Group) {
 	// 生成QRCode
-	group.GET("/qrcode.png", get_data_api.GetQrcode)
+	group.GET("/qrcode.png", data_api.GetQrcode)
 
 	group.POST("/login", login.Login)
 	group.POST("/logout", login.Logout)
@@ -96,27 +96,27 @@ func bindProtectedView(group *echo.Group) {
 // bindProtectedAPI 注册需要认证的路由
 func bindProtectedAPI(group *echo.Group) {
 	// 服务器状态
-	group.GET("/server_info", get_data_api.GetServerInfoHandler)
+	group.GET("/server_info", data_api.GetServerInfoHandler)
 	// 文件上传
 	group.POST("/upload", upload_api.UploadFile)
 	// 获取特定文件
-	group.GET("/get_file", get_data_api.GetFile)
+	group.GET("/get_file", data_api.GetFile)
 	// 直接下载原始文件
-	group.GET("/raw/:book_id/:file_name", get_data_api.GetRawFile)
+	group.GET("/raw/:book_id/:file_name", data_api.GetRawFile)
 	// 获取书架信息
-	group.GET("/top_shelf", get_data_api.GetTopOfShelfInfo)
+	group.GET("/top_shelf", data_api.GetTopOfShelfInfo)
 	// 查询书籍信息
-	group.GET("/get_book", get_data_api.GetBook)
+	group.GET("/get_book", data_api.GetBook)
 	// 更新书签信息
-	group.POST("/update_last_read_page", get_data_api.UpdateLastReadPage)
+	group.POST("/update_last_read_page", data_api.UpdateLastReadPage)
 	// 查询父书籍信息
-	group.GET("/parent_book_info", get_data_api.GetParentBook)
+	group.GET("/parent_book_info", data_api.GetParentBook)
 	// 下载 reg 设置文件
-	group.GET("/comigo.reg", get_data_api.GetRegFile)
+	group.GET("/comigo.reg", data_api.GetRegFile)
 	// 获取配置
 	group.GET("/config", config_api.GetConfig)
 	// 生成图片 http://localhost:1234/api/generate_image?height=220&width=160&text=12345&font_size=32
-	group.GET("/generate_image", get_data_api.GetGeneratedImage)
+	group.GET("/generate_image", data_api.GetGeneratedImage)
 	// 获取配置状态
 	group.GET("/config/status", config_api.GetConfigStatus)
 	// 更新配置
@@ -151,7 +151,7 @@ func bindProtectedAPI(group *echo.Group) {
 	group.POST("/config-save", settings.HandleConfigSave)
 	group.POST("/config-delete", settings.HandleConfigDelete)
 	// 获取 tailscale 状态
-	group.GET("/tailscale_status", get_data_api.GetTailscaleStatus)
+	group.GET("/tailscale_status", data_api.GetTailscaleStatus)
 	// SSE 服务器发送事件
 	group.GET("/sse", sse_hub.SSEHandler)
 	// SSE 广播接口

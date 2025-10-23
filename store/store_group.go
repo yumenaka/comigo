@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 	"strconv"
 	"sync"
@@ -115,7 +114,7 @@ func (storeGroup *StoreGroup) AddBooks(list []*model.Book, minPageNum int) error
 }
 
 // CheckAllNotExistBooks 检查内存中的书的源文件是否存在，不存在就删掉
-func (storeGroup *StoreGroup) ClearBookNotExist() {
+func (storeGroup *StoreGroup) DeleteBookNotExist() {
 	logger.Infof("Checking book files exist...")
 	var deletedBooks []string
 	// 遍历所有书籍
@@ -277,20 +276,6 @@ func (storeGroup *StoreGroup) GetBookByAuthor(author string, sortBy string) ([]*
 		return bookList, nil
 	}
 	return nil, errors.New("cannot find book, author=" + author)
-}
-
-// ClearTempFilesALL 清理所有缓存图片
-func (storeGroup *StoreGroup) ClearTempFilesALL(debug bool, cacheFilePath string) {
-	for _, book := range storeGroup.ListBooks() {
-		//清理某一本书的缓存
-		cachePath := path.Join(cacheFilePath, book.GetBookID())
-		err := os.RemoveAll(cachePath)
-		if err != nil {
-			logger.Infof("Error clearing temp files: %s", cachePath)
-		} else if debug {
-			logger.Infof("Cleared temp files: %s", cachePath)
-		}
-	}
 }
 
 // GetShortBookID 生成短的 BookID，避免冲突

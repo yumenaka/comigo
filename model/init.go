@@ -18,11 +18,10 @@ type StoreInterface interface {
 	// 13. TODO：重写
 	TopOfShelfInfo(sortBy string) (*BookInfoList, error) // 返回按照书库分组的数据
 
-	// 14-17. 研究函数的作用，移走或优化掉
+	// 14-16. 研究函数的作用，移走或优化
 	GenerateAllBookGroup() (e error)
-	ClearBookNotExist()
+	DeleteBookNotExist()
 	GetShortBookID(fullID string, minLength int) string
-	ClearTempFilesALL(debug bool, cachePath string)
 }
 
 var IStore StoreInterface
