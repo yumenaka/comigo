@@ -31,11 +31,11 @@ type BookInfo struct {
 	Modified        time.Time       `json:"modified_time"`   // 修改时间
 	NonUTF8Zip      bool            `json:"-"`               // 是否为特殊编码 zip
 	PageCount       int             `json:"page_count"`      // 总页数
+	LastReadPage    int             `json:"last_read_page"`  // 阅读进度
 	BookMarks       BookMarks       `json:"book_marks"`      // 书签列表
 	ParentFolder    string          `json:"parent_folder"`   // 父文件夹
 	Press           string          `json:"press"`           // 出版社
 	PublishedAt     string          `json:"published_at"`    // 出版日期
-	ReadPercent     float64         `json:"read_percent"`    // 阅读进度
 	Title           string          `json:"title"`           // 书名
 	Type            SupportFileType `json:"type"`            // 书籍类型
 	ZipTextEncoding string          `json:"-"`               // zip 文件编码
@@ -189,13 +189,13 @@ func (b *BookInfo) GetCover() MediaFileInfo {
 	switch b.Type {
 	// 书籍类型为书组的时候，遍历所有子书籍，然后获取第一个子书籍的封面
 	case TypeBooksGroup:
-		bookGroup, err := IStore.GetBookByID(b.BookID, "")
+		bookGroup, err := IStore.GetBook(b.BookID)
 		if err != nil {
 			logger.Infof("Error getting book group: %s", err)
 			return MediaFileInfo{Name: "unknown.png", Url: "/images/unknown.png"}
 		}
 		for _, childID := range bookGroup.ChildBooksID {
-			book, err := IStore.GetBookByID(childID, "")
+			book, err := IStore.GetBook(childID)
 			if err != nil {
 				return MediaFileInfo{Name: "unknown.png", Url: "/images/unknown.png"}
 			}
@@ -203,7 +203,7 @@ func (b *BookInfo) GetCover() MediaFileInfo {
 			return book.GetCover()
 		}
 	case TypeDir, TypeZip, TypeRar, TypeCbz, TypeCbr, TypeTar, TypeEpub:
-		tempBook, err := IStore.GetBookByID(b.BookID, "")
+		tempBook, err := IStore.GetBook(b.BookID)
 		if err != nil || len(tempBook.Images) == 0 {
 			return MediaFileInfo{Name: "unknown.png", Url: "/images/unknown.png"}
 		}

@@ -47,9 +47,9 @@ func InitFlags() {
 	RootCmd.PersistentFlags().StringVar(&cfg.CertFile, "tls-crt", "", locale.GetString("tls_crt"))
 	RootCmd.PersistentFlags().StringVar(&cfg.KeyFile, "tls-key", "", locale.GetString("tls_key"))
 	// 指定配置文件
-	RootCmd.PersistentFlags().StringVarP(&cfg.ConfigPath, "config", "c", "", locale.GetString("config"))
+	RootCmd.PersistentFlags().StringVarP(&cfg.ConfigFile, "config", "c", "", locale.GetString("config"))
 	// 启用数据库，保存扫描数据
-	RootCmd.PersistentFlags().BoolVarP(&cfg.EnableDatabase, "database", "e", false, locale.GetString("enable_database"))
+	RootCmd.PersistentFlags().BoolVarP(&cfg.EnableDatabase, "database", "e", true, locale.GetString("enable_database"))
 	// 服务端口
 	RootCmd.PersistentFlags().IntVarP(&cfg.Port, "port", "p", 1234, locale.GetString("port"))
 	// 本地Host
@@ -86,7 +86,7 @@ func InitFlags() {
 	// web图片缓存
 	RootCmd.PersistentFlags().BoolVar(&cfg.UseCache, "use-cache", false, locale.GetString("cache_file_enable"))
 	// 图片缓存路径
-	RootCmd.PersistentFlags().StringVar(&cfg.CachePath, "cache-path", "", locale.GetString("cache_file_path"))
+	RootCmd.PersistentFlags().StringVar(&cfg.CacheDir, "cache-dir", "", locale.GetString("cache_file_dir"))
 	// 退出时清除缓存
 	RootCmd.PersistentFlags().BoolVar(&cfg.ClearCacheExit, "cache-clean", true, locale.GetString("cache_file_clean"))
 	// 手动指定zip文件编码 gbk、shiftjis……

@@ -7,7 +7,6 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo/v4"
-	"github.com/spf13/viper"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
@@ -98,11 +97,11 @@ func checkNeedReScan(oldConfig *config.Config, newConfig *config.Config) (reScan
 // StartReScan 扫描并相应地更新数据库
 func StartReScan() {
 	config.GetCfg().InitStoreUrls()
-	if err := scan.InitAllStore(scan.NewOption(config.GetCfg())); err != nil {
+	if err := scan.InitAllStore(config.GetCfg()); err != nil {
 		logger.Infof("Failed to scan store path: %v", err)
 	}
-	if config.GetEnableDatabase() {
-		if err := scan.SaveResultsToDatabase(viper.ConfigFileUsed(), config.GetClearDatabaseWhenExit()); err != nil {
+	if config.GetCfg().EnableDatabase {
+		if err := scan.SaveResultsToDatabase(config.GetCfg()); err != nil {
 			logger.Infof("Failed to save results to database: %v", err)
 		}
 	}

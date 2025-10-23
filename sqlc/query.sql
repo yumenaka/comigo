@@ -37,9 +37,9 @@ ORDER BY modified_time DESC;
 -- name: CreateBook :one
 INSERT INTO books (
     title, book_id, owner, file_path, book_store_path, type,
-    child_books_num, child_books_id,depth, parent_folder, page_count, file_size,
+    child_books_num, child_books_id,depth, parent_folder, page_count, last_read_position, file_size,
     author, isbn, press, published_at, extract_path, extract_num,
-    init_complete, read_percent, non_utf8zip, zip_text_encoding
+    init_complete, non_utf8zip, zip_text_encoding
 ) VALUES (
     ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
 ) RETURNING *;
@@ -48,16 +48,16 @@ INSERT INTO books (
 -- name: UpdateBook :exec
 UPDATE books SET
     title = ?, owner = ?, file_path = ?, book_store_path = ?, type = ?,
-    child_books_num = ?, child_books_id = ?, depth = ?, parent_folder = ?, page_count = ?, file_size = ?,
+    child_books_num = ?, child_books_id = ?, depth = ?, parent_folder = ?, page_count = ?, last_read_position = ?, file_size = ?,
     author = ?, isbn = ?, press = ?, published_at = ?, extract_path = ?, extract_num = ?,
-    init_complete = ?, read_percent = ?, non_utf8zip = ?, zip_text_encoding = ?,
+    init_complete = ?, non_utf8zip = ?, zip_text_encoding = ?,
     modified_time = CURRENT_TIMESTAMP
 WHERE book_id = ?;
 
 -- Update reading progress
--- name: UpdateReadPercent :exec
+-- name: UpdateLastReadPage :exec
 UPDATE books SET
-    read_percent = ?,
+    last_read_position  = ?,
     modified_time = CURRENT_TIMESTAMP
 WHERE book_id = ?;
 
@@ -111,6 +111,52 @@ WHERE book_id = ? AND page_num = ?;
 -- Delete all media files for a book
 -- name: DeleteMediaFilesByBookID :exec
 DELETE FROM media_files WHERE book_id = ?;
+
+-- Bookmarks related queries
+
+-- List bookmarks by book ID
+-- name: ListBookmarksByBookID :many
+SELECT * FROM bookmarks 
+WHERE book_id = ? 
+ORDER BY created_at DESC;
+
+-- Get a bookmark by book ID and page index
+-- name: GetBookmarkByBookIDAndPage :one
+SELECT * FROM bookmarks 
+WHERE book_id = ? AND page_index = ? 
+LIMIT 1;
+
+-- Create a bookmark
+-- name: CreateBookmark :one
+INSERT INTO bookmarks (
+    book_id, page_index, description, position, created_at, updated_at
+) VALUES (
+    ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+) RETURNING *;
+
+-- Update a bookmark (by id)
+-- name: UpdateBookmark :exec
+UPDATE bookmarks SET
+    description = ?, position = ?, updated_at = CURRENT_TIMESTAMP
+WHERE id = ?;
+
+-- Update a bookmark by (book_id, page_index)
+-- name: UpdateBookmarkByBookIDAndPage :exec
+UPDATE bookmarks SET
+    description = ?, position = ?, updated_at = CURRENT_TIMESTAMP
+WHERE book_id = ? AND page_index = ?;
+
+-- Delete a bookmark (by id)
+-- name: DeleteBookmark :exec
+DELETE FROM bookmarks WHERE id = ?;
+
+-- Delete a bookmark by (book_id, page_index)
+-- name: DeleteBookmarkByBookIDAndPage :exec
+DELETE FROM bookmarks WHERE book_id = ? AND page_index = ?;
+
+-- Delete all bookmarks for a book
+-- name: DeleteBookmarksByBookID :exec
+DELETE FROM bookmarks WHERE book_id = ?;
 
 -- File backend related queries
 

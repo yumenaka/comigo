@@ -4,33 +4,35 @@ import "github.com/yumenaka/comigo/tools/tailscale_plugin"
 import "github.com/yumenaka/comigo/templ/state"
 import "github.com/yumenaka/comigo/config"
 
-func x_data_debug_mode(debug bool) (string) {
-    if debug {
-        return "{debug_mode: true}"
-    }
-    return "{debug_mode: false}"
+func x_data_debug_mode(debug bool) string {
+	if debug {
+		return "{debug_mode: true}"
+	}
+	return "{debug_mode: false}"
 }
 
 templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 	<div
 		id="settingsMainArea"
-		x-data={x_data_debug_mode(state.ServerConfig.Debug)}
+		x-data={ x_data_debug_mode(state.ServerConfig.Debug) }
 		class="flex flex-col justify-start items-center flex-1 w-full h-full font-semibold text-lg text-base-content"
 	>
 		<div class="flex flex-col justify-start w-5/6 md:w-3/5 min-w-[20rem] relative">
 			<script>
-			// htmx出错时报错（Toast）
-			document.addEventListener('htmx:responseError', (event) => {
-				json = JSON.parse(event.detail.xhr.responseText);
-				if (typeof json.message !== 'undefined'){
-                    showToast(json.message, 'error');
-                    console.error("Error:", json.message);
-                }
-				else{
-                    showToast(event.detail.xhr.statusText + ": " + event.detail.xhr.responseURL, 'error');
-                }
-			});
-		    </script>
+				// htmx出错时报错（Toast）
+				document.addEventListener("htmx:responseError", (event) => {
+					json = JSON.parse(event.detail.xhr.responseText);
+					if (typeof json.message !== "undefined") {
+						showToast(json.message, "error");
+						console.error("Error:", json.message);
+					} else {
+						showToast(
+							event.detail.xhr.statusText + ": " + event.detail.xhr.responseURL,
+							"error",
+						);
+					}
+				});
+			</script>
 			if state.ServerConfig.ConfigLocked {
 				<div
 					class="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-screen h-full bg-black/50 flex items-start justify-center z-50 pointer-events-auto"
@@ -86,15 +88,15 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 			>
 				<div x-text={ getTranslations("settings_extra") } class="w-full text-center">实验功能</div>
 				<hr class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
-			    @BoolConfig("Debug", state.ServerConfig.Debug, "Debug_Description", false)
-			    if state.ServerConfig.Debug {
-			        @BoolConfig("LogToFile", state.ServerConfig.LogToFile, "LogToFile_Description", false)
-                    @BoolConfig("GenerateMetaData", state.ServerConfig.GenerateMetaData, "GenerateMetaData_Description", false)
-                    @BoolConfig("EnableDatabase", state.ServerConfig.EnableDatabase, "EnableDatabase_Description", false)
-                    @BoolConfig("ClearCacheExit", state.ServerConfig.ClearCacheExit, "ClearCacheExit_Description", false)
-                    @StringConfig("CachePath", state.ServerConfig.CachePath, "CachePath_Description", false)
-                    @StringConfig("ZipFileTextEncoding", state.ServerConfig.ZipFileTextEncoding, "ZipFileTextEncoding_Description",false)
-			    }
+				@BoolConfig("Debug", state.ServerConfig.Debug, "Debug_Description", false)
+				if state.ServerConfig.Debug {
+					@BoolConfig("LogToFile", state.ServerConfig.LogToFile, "LogToFile_Description", false)
+					@BoolConfig("GenerateMetaData", state.ServerConfig.GenerateMetaData, "GenerateMetaData_Description", false)
+					@BoolConfig("EnableDatabase", state.ServerConfig.EnableDatabase, "EnableDatabase_Description", false)
+					@BoolConfig("ClearCacheExit", state.ServerConfig.ClearCacheExit, "ClearCacheExit_Description", false)
+					@StringConfig("CacheDir", state.ServerConfig.CacheDir, "CacheDir_Description", false)
+					@StringConfig("ZipFileTextEncoding", state.ServerConfig.ZipFileTextEncoding, "ZipFileTextEncoding_Description", false)
+				}
 			</div>
 		</div>
 		if state.ServerConfig.Debug {

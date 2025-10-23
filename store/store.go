@@ -7,7 +7,6 @@ import (
 	"sync"
 
 	"github.com/yumenaka/comigo/model"
-	"github.com/yumenaka/comigo/tools/logger"
 )
 
 // StoreInfo 书库基本信息
@@ -72,11 +71,8 @@ func (store *Store) GenerateBookGroup() error {
 			}
 			// 获取修改时间
 			modTime := pathInfo.ModTime()
-			tempBookInfo, err := model.NewBookInfo(filepath.Dir(sameParentBookList[0].FilePath), modTime, 0, store.BackendURL, depth-1, model.TypeBooksGroup)
-			if err != nil {
-				logger.Infof("%s", err)
-				continue
-			}
+			tempBookInfo := model.NewBookInfo(filepath.Dir(sameParentBookList[0].FilePath), modTime, 0, store.BackendURL, depth-1, model.TypeBooksGroup)
+
 			newBookGroup := &model.Book{
 				BookInfo: *tempBookInfo,
 			}

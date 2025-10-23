@@ -82,7 +82,7 @@ func MainArea(book *model.Book) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<style>\n\t\t/* 滑动切换相关样式 */\n\t\t#manga_area {\n\t\t\twill-change: transform; /* 优化动画性能 */\n\t\t\ttouch-action: pan-y; /* 允许垂直滚动，但水平滑动会被捕获 */\n\t\t}\n\t\t#slider {\n            user-select: none; /* 防止文本选择 */\n\t\t}\n\t\t\n\t\t.slide {\n\t\t\tflex-shrink: 0;\n\t\t\ttransform: translateX(0);\n\t\t}\n\t\t\n\t\t/* 基本位置设置，会通过JavaScript动态调整 */\n\t\t#left-slide {\n\t\t\ttransform: translateX(-100%);\n\t\t}\n\t\t\n\t\t#middle-slide {\n\t\t\ttransform: translateX(0);\n\t\t}\n\t\t\n\t\t#right-slide {\n\t\t\ttransform: translateX(100%);\n\t\t}\n\t</style>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<style>\n\t\t/* 滑动切换相关样式 */\n\t\t#manga_area {\n\t\t\twill-change: transform; /* 优化动画性能 */\n\t\t\ttouch-action: pan-y; /* 允许垂直滚动，但水平滑动会被捕获 */\n\t\t}\n\t\t#slider {\n\t\t\tuser-select: none; /* 防止文本选择 */\n\t\t}\n\n\t\t.slide {\n\t\t\tflex-shrink: 0;\n\t\t\ttransform: translateX(0);\n\t\t}\n\n\t\t/* 基本位置设置，会通过JavaScript动态调整 */\n\t\t#left-slide {\n\t\t\ttransform: translateX(-100%);\n\t\t}\n\n\t\t#middle-slide {\n\t\t\ttransform: translateX(0);\n\t\t}\n\n\t\t#right-slide {\n\t\t\ttransform: translateX(100%);\n\t\t}\n\t</style>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

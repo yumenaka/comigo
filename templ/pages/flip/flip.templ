@@ -1,7 +1,7 @@
 package flip
 
 import (
-    "github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/templ/common"
 	"github.com/yumenaka/comigo/templ/state"
@@ -29,12 +29,12 @@ templ FlipPage(c echo.Context, book *model.Book) {
 	}
 	<!-- 阅读进度条-->
 	@StepsRangeArea()
-    <!-- 屏幕左下角的灰色页码-->
-    <div
-    		    x-show="$store.flip.showPageNum"
-    		    class="fixed bottom-2 left-2 text-gray-500 text-sm pointer-events-none z-10"
-    		    x-text="$store.flip.nowPageNum+'/'+$store.flip.allPageNum">
-    </div>
+	<!-- 屏幕左下角的灰色页码-->
+	<div
+		x-show="$store.flip.showPageNum"
+		class="fixed bottom-2 left-2 text-gray-500 text-sm pointer-events-none z-10"
+		x-text="$store.flip.nowPageNum+'/'+$store.flip.allPageNum"
+	></div>
 	@common.Drawer(c, book, FlipDrawerSlot(book))
 	@common.QRCode()
 }

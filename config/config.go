@@ -17,11 +17,11 @@ import (
 // Config Comigo全局配置
 type Config struct {
 	AutoRescan             bool            `json:"AutoRescan" comment:"刷新页面时，是否自动重新扫描书籍是否存在"`
-	CachePath              string          `json:"CachePath" comment:"本地图片缓存位置，默认系统临时文件夹"`
+	CacheDir               string          `json:"CacheDir" comment:"本地图片缓存位置，默认系统临时文件夹"`
 	CertFile               string          `json:"CertFile" comment:"TLS/SSL 证书文件路径 (default: ~/.config/.comigo/cert.crt)"`
 	ClearCacheExit         bool            `json:"ClearCacheExit" comment:"退出程序的时候，清理web图片缓存"`
 	ClearDatabaseWhenExit  bool            `json:"ClearDatabaseWhenExit" comment:"启用本地数据库时，扫描完成后，清除不存在的书籍。"`
-	ConfigPath             string          `json:"-" toml:"-" comment:"用户指定的的yaml设置文件路径"`
+	ConfigFile             string          `json:"-" toml:"-" comment:"用户指定的的yaml设置文件路径"`
 	ConfigLocked           bool            `json:"ConfigLocked" comment:"配置文件锁定，防止被网页端修改，用于展示模式"`
 	Debug                  bool            `json:"Debug" comment:"开启Debug模式"`
 	DefaultMode            string          `json:"DefaultMode" comment:"默认阅读模式，默认为空，可以设置为scroll或flip"`
@@ -72,8 +72,6 @@ func (c *Config) GetPort() int {
 func (c *Config) GetEnableUpload() bool {
 	return c.EnableUpload
 }
-
-// ConfigInterface需要下面这些方法
 
 func (c *Config) GetDebug() bool {
 	return c.Debug
@@ -329,9 +327,9 @@ func UpdateConfigByJson(jsonString string) error {
 			if v, ok := value.(bool); ok {
 				cfg.UseCache = v
 			}
-		case "CachePath":
+		case "CacheDir":
 			if v, ok := value.(string); ok {
-				cfg.CachePath = v
+				cfg.CacheDir = v
 			}
 		case "ClearCacheExit":
 			if v, ok := value.(bool); ok {

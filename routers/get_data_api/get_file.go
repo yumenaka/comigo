@@ -55,7 +55,7 @@ func GetFile(c echo.Context) error {
 	gray := getBoolQueryParam(c, "gray", false)
 
 	// 如果启用了本地缓存
-	if config.GetUseCache() && !noCache {
+	if config.GetCfg().UseCache && !noCache {
 		// 获取所有的参数键值对
 		query := c.Request().URL.Query()
 		// 如果有缓存，直接读取本地获取缓存文件并返回
@@ -64,8 +64,8 @@ func GetFile(c echo.Context) error {
 			needFile,
 			fileutil.GetQueryString(query),
 			thumbnailMode,
-			config.GetConfigPath(),
-			config.GetDebug(),
+			config.GetCfg().CacheDir,
+			config.GetCfg().Debug,
 		)
 		if err == nil && cacheData != nil {
 			// 如果启用了 Base64 编码
@@ -80,9 +80,9 @@ func GetFile(c echo.Context) error {
 	}
 
 	// 获取书籍信息
-	bookByID, err := model.IStore.GetBookByID(id, "")
+	bookByID, err := model.IStore.GetBook(id)
 	if err != nil {
-		logger.Infof("GetBookByID error: %s", err)
+		logger.Infof("GetBook error: %s", err)
 		return c.JSON(http.StatusNotFound, map[string]string{"error": "Book not found"})
 	}
 
@@ -93,8 +93,8 @@ func GetFile(c echo.Context) error {
 		BookIsDir:        bookByID.Type == model.TypeDir,
 		BookIsNonUTF8Zip: bookByID.NonUTF8Zip,
 		BookFilePath:     bookByID.FilePath,
-		Debug:            config.GetDebug(),
-		UseCache:         config.GetUseCache(),
+		Debug:            config.GetCfg().Debug,
+		UseCache:         config.GetCfg().UseCache,
 		ResizeWidth:      resizeWidth,
 		ResizeHeight:     resizeHeight,
 		ResizeMaxWidth:   resizeMaxWidth,
@@ -114,7 +114,7 @@ func GetFile(c echo.Context) error {
 	}
 
 	// 缓存文件到本地，避免重复解压。如果书中的图片，来自本地目录，就不需要缓存。
-	if config.GetUseCache() && !noCache && bookByID.Type != model.TypeDir {
+	if config.GetCfg().UseCache && !noCache && bookByID.Type != model.TypeDir {
 		// 获取所有的参数键值对
 		query := c.Request().URL.Query()
 		errSave := fileutil.SaveFileToCache(
@@ -124,8 +124,8 @@ func GetFile(c echo.Context) error {
 			fileutil.GetQueryString(query),
 			contentType,
 			thumbnailMode,
-			config.GetConfigPath(),
-			config.GetDebug(),
+			config.GetCfg().CacheDir,
+			config.GetCfg().Debug,
 		)
 		if errSave != nil {
 			logger.Infof("SaveFileToCache error: %s", errSave)

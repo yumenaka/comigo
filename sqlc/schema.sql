@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS books
     depth             INTEGER  DEFAULT 0,                 -- Book depth
     parent_folder     TEXT,                               -- Parent folder
     page_count        INTEGER  DEFAULT 0,                 -- Total page count
+    last_read_position      INTEGER  DEFAULT 0,           -- Last read position
     file_size         INTEGER  DEFAULT 0,                 -- File size
     author            TEXT,                               -- Author
     isbn              TEXT,                               -- ISBN
@@ -37,7 +38,6 @@ CREATE TABLE IF NOT EXISTS books
     modified_time     DATETIME DEFAULT CURRENT_TIMESTAMP, -- Modified time
     extract_num       INTEGER  DEFAULT 0,                 -- Extract number
     init_complete     BOOLEAN  DEFAULT FALSE,             -- Initialization complete flag
-    read_percent      REAL     DEFAULT 0.0,               -- Reading progress
     non_utf8zip       BOOLEAN  DEFAULT FALSE,             -- Non-UTF8 zip flag
     zip_text_encoding TEXT,                               -- Zip text encoding
     deleted           BOOLEAN  DEFAULT FALSE              -- Soft delete flag
@@ -59,6 +59,19 @@ CREATE TABLE IF NOT EXISTS media_files
     width       INTEGER DEFAULT 0, -- Image width
     img_type    TEXT,              -- Image type
     insert_html TEXT,              -- Insert HTML
+    FOREIGN KEY (book_id) REFERENCES books (book_id) ON DELETE CASCADE
+);
+
+-- Bookmarks table
+CREATE TABLE IF NOT EXISTS bookmarks
+(
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    book_id     TEXT    NOT NULL,                  -- Associated book ID
+    page_index  INTEGER NOT NULL,                  -- Page index, starts from 0
+    description TEXT,                              -- User note
+    position    REAL   DEFAULT 0.0,                -- Position percentage (0.0 - 100.0)
+    created_at  DATETIME DEFAULT CURRENT_TIMESTAMP, -- Created time
+    updated_at  DATETIME DEFAULT CURRENT_TIMESTAMP, -- Updated time
     FOREIGN KEY (book_id) REFERENCES books (book_id) ON DELETE CASCADE
 );
 
@@ -97,6 +110,8 @@ CREATE INDEX IF NOT EXISTS idx_books_type ON books (type);
 CREATE INDEX IF NOT EXISTS idx_books_modified_time ON books (modified_time);
 CREATE INDEX IF NOT EXISTS idx_media_files_book_id ON media_files (book_id);
 CREATE INDEX IF NOT EXISTS idx_media_files_page_num ON media_files (book_id, page_num);
+CREATE INDEX IF NOT EXISTS idx_bookmarks_book_id ON bookmarks (book_id);
+CREATE INDEX IF NOT EXISTS idx_bookmarks_book_page ON bookmarks (book_id, page_index);
 CREATE INDEX IF NOT EXISTS idx_stores_url ON stores (backend_url);
 CREATE INDEX IF NOT EXISTS idx_file_backends_url ON file_backends (url);
 

@@ -5,87 +5,89 @@ templ Toast() {
 	<div id="toast-container" class="fixed z-50 space-y-2 top-5"></div>
 	<!-- Toast JavaScript -->
 	<script>
-    // 生成随机 ID（用于唯一标识每个 Toast）
-    function generateId() {
-        return '_' + Math.random().toString(36).substring(2, 9);
-    }
-    
-    // 跟踪当前显示的 toast 消息
-    const activeToasts = [];
-    
-    // 创建并显示 Toast
-    function showToast(message, type = 'info') {
-        // 检查是否已经存在相同的 toast
-        const isDuplicate = activeToasts.some(toast => toast.message === message && toast.type === type);
-        // 如果是重复的 toast，则只在控制台输出
-        console.log(`Toast (${type}): ${message}`);
-        if (isDuplicate) {
-            return;
-        }
-        
-        // 获取 Toast 容器和按钮
-        const toastContainer = document.getElementById('toast-container');
-        const showToastBtn = document.getElementById('show-toast');
-        const id = generateId();
-        // 设置不同类型的样式
-        let bgColor;
-        switch (type) {
-            case 'success':
-                bgColor = 'bg-green-500';
-                break;
-            case 'error':
-                bgColor = 'bg-red-500';
-                break;
-            case 'warning':
-                bgColor = 'bg-yellow-500';
-                break;
-            default:
-                bgColor = 'bg-blue-500';
-        }
+		// 生成随机 ID（用于唯一标识每个 Toast）
+		function generateId() {
+			return "_" + Math.random().toString(36).substring(2, 9);
+		}
 
-        // 创建 Toast 元素
-        const toast = document.createElement('div');
-        toast.id = id;
-        toast.className = `flex items-center ${bgColor} text-white px-4 py-3 rounded shadow-lg transition transform duration-300 ease-in-out`;
+		// 跟踪当前显示的 toast 消息
+		const activeToasts = [];
 
-        // Toast 内容
-        toast.innerHTML = `<span class="flex-1">${message}</span> <button class="ml-4 ${bgColor} text-white focus:outline-none">&times;</button>`;
+		// 创建并显示 Toast
+		function showToast(message, type = "info") {
+			// 检查是否已经存在相同的 toast
+			const isDuplicate = activeToasts.some(
+				(toast) => toast.message === message && toast.type === type,
+			);
+			// 如果是重复的 toast，则只在控制台输出
+			console.log(`Toast (${type}): ${message}`);
+			if (isDuplicate) {
+				return;
+			}
 
-        // 添加到 Toast 容器
-        toastContainer.appendChild(toast);
-        
-        // 将新 toast 添加到活动列表中
-        activeToasts.push({ id, message, type });
+			// 获取 Toast 容器和按钮
+			const toastContainer = document.getElementById("toast-container");
+			const showToastBtn = document.getElementById("show-toast");
+			const id = generateId();
+			// 设置不同类型的样式
+			let bgColor;
+			switch (type) {
+				case "success":
+					bgColor = "bg-green-500";
+					break;
+				case "error":
+					bgColor = "bg-red-500";
+					break;
+				case "warning":
+					bgColor = "bg-yellow-500";
+					break;
+				default:
+					bgColor = "bg-blue-500";
+			}
 
-        // 自动消失的定时器
-        const timeout = setTimeout(() => {
-            removeToast(id);
-        }, 3000);
+			// 创建 Toast 元素
+			const toast = document.createElement("div");
+			toast.id = id;
+			toast.className = `flex items-center ${bgColor} text-white px-4 py-3 rounded shadow-lg transition transform duration-300 ease-in-out`;
 
-        // 点击关闭按钮时移除 Toast
-        toast.querySelector('button').addEventListener('click', () => {
-            clearTimeout(timeout);
-            removeToast(id);
-        });
-    }
+			// Toast 内容
+			toast.innerHTML = `<span class="flex-1">${message}</span> <button class="ml-4 ${bgColor} text-white focus:outline-none">&times;</button>`;
 
-    // 移除 Toast
-    function removeToast(id) {
-        const toast = document.getElementById(id);
-        if (toast) {
-            // 从活动列表中移除
-            const index = activeToasts.findIndex(toast => toast.id === id);
-            if (index !== -1) {
-                activeToasts.splice(index, 1);
-            }
-            
-            // 添加淡出动画
-            toast.classList.add('opacity-0', 'translate-x-4');
-            // 动画完成后从 DOM 中移除
-            toast.addEventListener('transitionend', () => {
-                toast.remove();
-            });
-        }
-    }
-</script>
+			// 添加到 Toast 容器
+			toastContainer.appendChild(toast);
+
+			// 将新 toast 添加到活动列表中
+			activeToasts.push({ id, message, type });
+
+			// 自动消失的定时器
+			const timeout = setTimeout(() => {
+				removeToast(id);
+			}, 3000);
+
+			// 点击关闭按钮时移除 Toast
+			toast.querySelector("button").addEventListener("click", () => {
+				clearTimeout(timeout);
+				removeToast(id);
+			});
+		}
+
+		// 移除 Toast
+		function removeToast(id) {
+			const toast = document.getElementById(id);
+			if (toast) {
+				// 从活动列表中移除
+				const index = activeToasts.findIndex((toast) => toast.id === id);
+				if (index !== -1) {
+					activeToasts.splice(index, 1);
+				}
+
+				// 添加淡出动画
+				toast.classList.add("opacity-0", "translate-x-4");
+				// 动画完成后从 DOM 中移除
+				toast.addEventListener("transitionend", () => {
+					toast.remove();
+				});
+			}
+		}
+	</script>
 }
