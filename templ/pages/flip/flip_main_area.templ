@@ -69,23 +69,23 @@ templ MainArea(book *model.Book) {
 			touch-action: pan-y; /* 允许垂直滚动，但水平滑动会被捕获 */
 		}
 		#slider {
-            user-select: none; /* 防止文本选择 */
+			user-select: none; /* 防止文本选择 */
 		}
-		
+
 		.slide {
 			flex-shrink: 0;
 			transform: translateX(0);
 		}
-		
+
 		/* 基本位置设置，会通过JavaScript动态调整 */
 		#left-slide {
 			transform: translateX(-100%);
 		}
-		
+
 		#middle-slide {
 			transform: translateX(0);
 		}
-		
+
 		#right-slide {
 			transform: translateX(100%);
 		}

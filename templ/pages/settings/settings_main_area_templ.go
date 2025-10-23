@@ -47,13 +47,13 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(x_data_debug_mode(state.ServerConfig.Debug))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/settings_main_area.templ`, Line: 17, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/settings_main_area.templ`, Line: 17, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"flex flex-col justify-start items-center flex-1 w-full h-full font-semibold text-lg text-base-content\"><div class=\"flex flex-col justify-start w-5/6 md:w-3/5 min-w-[20rem] relative\"><script>\n\t\t\t// htmx出错时报错（Toast）\n\t\t\tdocument.addEventListener('htmx:responseError', (event) => {\n\t\t\t\tjson = JSON.parse(event.detail.xhr.responseText);\n\t\t\t\tif (typeof json.message !== 'undefined'){\n                    showToast(json.message, 'error');\n                    console.error(\"Error:\", json.message);\n                }\n\t\t\t\telse{\n                    showToast(event.detail.xhr.statusText + \": \" + event.detail.xhr.responseURL, 'error');\n                }\n\t\t\t});\n\t\t    </script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"flex flex-col justify-start items-center flex-1 w-full h-full font-semibold text-lg text-base-content\"><div class=\"flex flex-col justify-start w-5/6 md:w-3/5 min-w-[20rem] relative\"><script>\n\t\t\t\t// htmx出错时报错（Toast）\n\t\t\t\tdocument.addEventListener(\"htmx:responseError\", (event) => {\n\t\t\t\t\tjson = JSON.parse(event.detail.xhr.responseText);\n\t\t\t\t\tif (typeof json.message !== \"undefined\") {\n\t\t\t\t\t\tshowToast(json.message, \"error\");\n\t\t\t\t\t\tconsole.error(\"Error:\", json.message);\n\t\t\t\t\t} else {\n\t\t\t\t\t\tshowToast(\n\t\t\t\t\t\t\tevent.detail.xhr.statusText + \": \" + event.detail.xhr.responseURL,\n\t\t\t\t\t\t\t\"error\",\n\t\t\t\t\t\t);\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -86,7 +86,7 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("settings_stores"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/settings_main_area.templ`, Line: 54, Col: 52}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/settings_main_area.templ`, Line: 56, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -169,7 +169,7 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("settings_extra"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/settings_main_area.templ`, Line: 87, Col: 51}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/settings_main_area.templ`, Line: 89, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -216,7 +216,7 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = StringConfig("CachePath", state.ServerConfig.CachePath, "CachePath_Description", false).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = StringConfig("CacheDir", state.ServerConfig.CacheDir, "CacheDir_Description", false).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

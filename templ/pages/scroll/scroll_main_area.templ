@@ -43,7 +43,8 @@ templ MainArea(c echo.Context, book *model.Book, paginationIndex int) {
 		x-data="{
             imageWidth: '' //图片的宽度
         }"
-		class="flex flex-col items-center justify-center flex-1 w-full max-w-full pt-0 text-base-content">
+		class="flex flex-col items-center justify-center flex-1 w-full max-w-full pt-0 text-base-content"
+	>
 		if paginationIndex >= 1 && book.PageCount/32+1 != 1 {
 			@ScrollPagination(book, paginationIndex)
 		}
@@ -91,55 +92,58 @@ templ MainArea(c echo.Context, book *model.Book, paginationIndex int) {
 		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256 48C141.13 48 48 141.13 48 256s93.13 208 208 208s208-93.13 208-208S370.87 48 256 48zm96 270.63l-96-96l-96 96L137.37 296L256 177.37L374.63 296z" fill="currentColor"></path></svg>
 	</button>
 	<style>
-    /* https://developer.mozilla.org/zh-CN/docs/Web/CSS/object-fit */
-    .manga_image {
-        margin: auto;
-        box-shadow: 0px 6px 3px 0px rgba(0, 0, 0, 0.19);
-    }
+		/* https://developer.mozilla.org/zh-CN/docs/Web/CSS/object-fit */
+		.manga_image {
+			margin: auto;
+			box-shadow: 0px 6px 3px 0px rgba(0, 0, 0, 0.19);
+		}
 
-    .page_hint {
-        /* 文字颜色 */
-        color: #413d3d;
-        /* 文字阴影：https://www.w3school.com.cn/css/css3_shadows.asp*/
-        text-shadow: -1px 0 rgb(240, 229, 229), 0 1px rgb(253, 242, 242),
-            1px 0 rgb(206, 183, 183), 0 -1px rgb(196, 175, 175);
-    }
+		.page_hint {
+			/* 文字颜色 */
+			color: #413d3d;
+			/* 文字阴影：https://www.w3school.com.cn/css/css3_shadows.asp*/
+			text-shadow:
+				-1px 0 rgb(240, 229, 229),
+				0 1px rgb(253, 242, 242),
+				1px 0 rgb(206, 183, 183),
+				0 -1px rgb(196, 175, 175);
+		}
 
-    .LoadingImage {
-        width: 90vw;
-        max-width: 90vw;
-    }
+		.LoadingImage {
+			width: 90vw;
+			max-width: 90vw;
+		}
 
-    .ErrorImage {
-        width: 90vw;
-        max-width: 90vw;
-    }
+		.ErrorImage {
+			width: 90vw;
+			max-width: 90vw;
+		}
 
-    /* 横屏（显示区域）时的CSS样式,IE无效 */
-    @media screen and (min-aspect-ratio: 19/19) {
-        .SinglePageImage {
-            width: v-bind(sPWL);
-            max-width: 100%;
-        }
+		/* 横屏（显示区域）时的CSS样式,IE无效 */
+		@media screen and (min-aspect-ratio: 19/19) {
+			.SinglePageImage {
+				width: v-bind(sPWL);
+				max-width: 100%;
+			}
 
-        .DoublePageImage {
-            width: v-bind(dPWL);
-            max-width: 100%;
-        }
-    }
+			.DoublePageImage {
+				width: v-bind(dPWL);
+				max-width: 100%;
+			}
+		}
 
-    /* 竖屏(显示区域)CSS样式,IE无效 */
-    @media screen and (max-aspect-ratio: 19/19) {
-        .SinglePageImage {
-            width: v-bind(sPWP);
-            max-width: 100%;
-        }
+		/* 竖屏(显示区域)CSS样式,IE无效 */
+		@media screen and (max-aspect-ratio: 19/19) {
+			.SinglePageImage {
+				width: v-bind(sPWP);
+				max-width: 100%;
+			}
 
-        .DoublePageImage {
-            /* width: 100%; */
-            width: v-bind(dPWP);
-            max-width: 100%;
-        }
-    }
-    </style>
+			.DoublePageImage {
+				/* width: 100%; */
+				width: v-bind(dPWP);
+				max-width: 100%;
+			}
+		}
+	</style>
 }

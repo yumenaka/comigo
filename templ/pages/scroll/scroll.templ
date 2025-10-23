@@ -1,7 +1,7 @@
 package scroll
 
 import (
-    "github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/templ/common"
 	"github.com/yumenaka/comigo/templ/state"
@@ -27,7 +27,7 @@ templ ScrollPage(c echo.Context, book *model.Book, paginationIndex int) {
 		@MainArea(c, book, paginationIndex)
 	}
 	@common.Footer(state.Version)
-	@common.Drawer(c, book, DrawerSlot(c,book))
+	@common.Drawer(c, book, DrawerSlot(c, book))
 	@common.QRCode()
 }
 
@@ -42,6 +42,6 @@ templ InsertData(bookData any, serverStatus any) {
 
 templ InsertRawJSONScript(data string) {
 	<script>
-    @templ.Raw(data)
-    </script>
+		@templ.Raw(data)
+	</script>
 }

@@ -27,12 +27,12 @@ func UpdateConfigFile() error {
 		return err
 	}
 	// HomeDirectory
-	confDir, err := os.UserConfigDir()
+	userConfigDir, err := os.UserConfigDir()
 	if err != nil {
 		return err
 	}
-	if tools.FileExist(filepath.Join(confDir, "comigo", "config.toml")) {
-		err = os.WriteFile(filepath.Join(confDir, "comigo", "config.toml"), bytes, 0o644)
+	if tools.FileExist(filepath.Join(userConfigDir, "comigo", "config.toml")) {
+		err = os.WriteFile(filepath.Join(userConfigDir, "comigo", "config.toml"), bytes, 0o644)
 		if err != nil {
 			return err
 		}

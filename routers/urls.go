@@ -108,12 +108,9 @@ func bindProtectedAPI(group *echo.Group) {
 	// 查询书籍信息
 	group.GET("/get_book", get_data_api.GetBook)
 	// 更新书签信息
-	group.POST("/update_bookmark", get_data_api.UpdateBookmark)
+	group.POST("/update_last_read_page", get_data_api.UpdateLastReadPage)
 	// 查询父书籍信息
 	group.GET("/parent_book_info", get_data_api.GetParentBook)
-	// 返回同一文件夹的书籍 ID 列表
-	group.GET("/group_info", get_data_api.GroupInfo)
-	group.GET("/group_info_filter", get_data_api.GroupInfoFilter)
 	// 下载 reg 设置文件
 	group.GET("/comigo.reg", get_data_api.GetRegFile)
 	// 获取配置
