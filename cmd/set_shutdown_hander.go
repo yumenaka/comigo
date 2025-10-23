@@ -3,7 +3,9 @@ package cmd
 import (
 	"context"
 	"log"
+	"os"
 	"os/signal"
+	"path"
 	"syscall"
 	"time"
 
@@ -28,7 +30,16 @@ func SetShutdownHandler() {
 	// 清理临时文件
 	if config.GetCfg().ClearCacheExit {
 		logger.Infof("\r"+locale.GetString("start_clear_file")+" CacheDir:%s ", config.GetCfg().CacheDir)
-		model.IStore.ClearTempFilesALL(config.GetCfg().Debug, config.GetCfg().CacheDir)
+		for _, book := range model.IStore.ListBooks() {
+			//清理某一本书的缓存
+			cachePath := path.Join(config.GetCfg().CacheDir, book.GetBookID())
+			err := os.RemoveAll(cachePath)
+			if err != nil {
+				logger.Infof("Error clearing temp files: %s", cachePath)
+			} else if config.GetCfg().Debug {
+				logger.Infof("Cleared temp files: %s", cachePath)
+			}
+		}
 		logger.Infof("%s", locale.GetString("clear_temp_file_completed"))
 	}
 	// 上下文用于通知服务器它有 5 秒的时间来完成它当前正在处理的请求

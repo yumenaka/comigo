@@ -1,4 +1,4 @@
-package get_data_api
+package data_api
 
 import (
 	"net/http"
@@ -22,7 +22,7 @@ func GetBook(c echo.Context) error {
 	if id == "" {
 		return c.JSON(http.StatusBadRequest, "not set id param")
 	}
-	model.IStore.ClearBookNotExist()
+	model.IStore.DeleteBookNotExist()
 	// 获取书籍信息
 	b, err := model.IStore.GetBook(id)
 	if err != nil {

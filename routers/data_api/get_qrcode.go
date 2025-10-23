@@ -1,4 +1,4 @@
-package get_data_api
+package data_api
 
 import (
 	"encoding/base64"

@@ -1,4 +1,4 @@
-package get_data_api
+package data_api
 
 import (
 	"net/http"
@@ -27,7 +27,7 @@ func GetTopOfShelfInfo(c echo.Context) error {
 	if sortBy == "" {
 		sortBy = "default"
 	}
-	model.IStore.ClearBookNotExist()
+	model.IStore.DeleteBookNotExist()
 	bookInfoList, err := model.IStore.TopOfShelfInfo(sortBy)
 	if err != nil {
 		logger.Infof("%s", err)
