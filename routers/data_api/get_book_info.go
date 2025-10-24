@@ -5,20 +5,30 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/store"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
 func GetParentBook(c echo.Context) error {
-	id := c.QueryParam("id")
-	if id == "" {
+	childID := c.QueryParam("id")
+	if childID == "" {
 		return c.JSON(http.StatusBadRequest, "not set id param")
 	}
-	book, err := model.IStore.GetParentBook(id)
-	if err != nil {
-		logger.Infof("%s", err)
-		return c.JSON(http.StatusBadRequest, "ParentBookInfo not found")
+	for _, bookGroup := range model.IStore.ListBooks() {
+		if bookGroup.Type != model.TypeBooksGroup {
+			continue // 只分析书组类型
+		}
+		for _, id := range bookGroup.ChildBooksID {
+			if id == childID {
+				b, err := model.IStore.GetBook(bookGroup.BookID)
+				if err != nil {
+					return c.JSON(http.StatusBadRequest, "ParentBookInfo not found")
+				}
+				return c.JSON(http.StatusOK, b)
+			}
+		}
 	}
-	return c.JSON(http.StatusOK, book)
+	return c.JSON(http.StatusBadRequest, "ParentBookInfo not found")
 }
 
 func GetTopOfShelfInfo(c echo.Context) error {
@@ -27,8 +37,8 @@ func GetTopOfShelfInfo(c echo.Context) error {
 	if sortBy == "" {
 		sortBy = "default"
 	}
-	model.IStore.DeleteBookNotExist()
-	bookInfoList, err := model.IStore.TopOfShelfInfo(sortBy)
+	ClearBookNotExist()
+	bookInfoList, err := store.TopOfShelfInfo(sortBy)
 	if err != nil {
 		logger.Infof("%s", err)
 		return c.JSON(http.StatusBadRequest, "GetTopOfShelfInfo Failed")

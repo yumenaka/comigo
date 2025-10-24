@@ -14,12 +14,11 @@ import (
 func ShowQRCode() {
 	// 如果只有一本书，二维码展示的 URL 需要附加参数，让读者可以直接去读这本书
 	etcStr := ""
-	if model.IStore.GetAllBooksNumber() == 1 {
-		bookList := model.IStore.ListBooks()
-		if len(bookList) == 1 {
-			etcStr = fmt.Sprintf("/#/%s/%s", config.GetCfg().DefaultMode, bookList[0].BookID)
-		}
+	bookList := model.IStore.ListBooks()
+	if len(bookList) == 1 {
+		etcStr = fmt.Sprintf("/#/%s/%s", config.GetCfg().DefaultMode, bookList[0].BookID)
 	}
+
 	// 判断是否启用 TLS
 	// 如果配置文件中有证书和密钥文件，则启用 TLS
 	enableTLS := config.GetCfg().CertFile != "" && config.GetCfg().KeyFile != ""

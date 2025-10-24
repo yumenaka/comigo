@@ -11,12 +11,27 @@ import (
 	"github.com/yumenaka/comigo/tools/tailscale_plugin"
 )
 
+// GetBooksNumber 获取书籍总数，不包括 BookGroup 类型
+func GetAllBooksNumber() int {
+	// 用于计数的变量
+	var count int
+	// 遍历 map 并递增计数器
+	for _, b := range model.IStore.ListBooks() {
+		if b.Type == model.TypeBooksGroup {
+			continue // 跳过书组类型
+		}
+		count++
+	}
+	return count
+}
+
+// GetServerInfoHandler 获取服务器信息的API处理函数
 func GetServerInfoHandler(c echo.Context) error {
 	serverStatus := tools.GetServerInfo(
 		tools.ServerInfoParams{
 			Cfg:            config.GetCfg(),
 			Version:        config.GetVersion(),
-			AllBooksNumber: model.IStore.GetAllBooksNumber(),
+			AllBooksNumber: GetAllBooksNumber(),
 			ClientIP:       c.RealIP(),
 		})
 	tailscaleStatus, err := tailscale_plugin.GetTailscaleStatus(c.Request().Context())
