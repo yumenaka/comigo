@@ -52,7 +52,33 @@ func (b *BookInfo) initBookID() *BookInfo {
 	// 3. 可以通过在任何文本编辑器和浏览器地址栏中双击鼠标来完全选择
 	// 4. 紧凑，生成的字符串比 Base32 短
 	b62 := base62.EncodeToString([]byte(tools.Md5string(tools.Md5string(tempStr))))
-	b.BookID = IStore.GetShortBookID(b62, 7)
+	// 生成短的 BookID，并避免冲突
+	fullID := b62
+	minLength := 7
+	if len(fullID) <= minLength {
+		logger.Infof("Cannot shorten ID: %s", fullID)
+		b.BookID = fullID
+	}
+	shortID := fullID[:minLength]
+	add := 0
+	for {
+		conflict := false
+		for _, b := range IStore.ListBooks() {
+			if b.BookID == shortID {
+				conflict = true
+				break
+			}
+		}
+		if !conflict {
+			break
+		}
+		add++
+		if minLength+add > len(fullID) {
+			break
+		}
+		shortID = fullID[:minLength+add]
+	}
+	b.BookID = shortID
 	return b
 }
 
