@@ -32,7 +32,11 @@ func GetReturnUrl(BookID string) string {
 	if childID == "" {
 		return "/"
 	}
-	for _, bookGroup := range model.IStore.ListBooks() {
+	allBooks, err := model.IStore.ListBooks()
+	if err != nil {
+		logger.Infof("Error listing books: %s", err)
+	}
+	for _, bookGroup := range allBooks {
 		if bookGroup.Type != model.TypeBooksGroup {
 			continue // 只分析书组类型
 		}

@@ -37,7 +37,7 @@ ORDER BY modified_time DESC;
 -- name: CreateBook :one
 INSERT INTO books (
     title, book_id, owner, file_path, book_store_path, type,
-    child_books_num, child_books_id,depth, parent_folder, page_count, last_read_position, file_size,
+    child_books_num, child_books_id,depth, parent_folder, page_count, last_read_page, file_size,
     author, isbn, press, published_at, extract_path, extract_num,
     init_complete, non_utf8zip, zip_text_encoding
 ) VALUES (
@@ -48,7 +48,7 @@ INSERT INTO books (
 -- name: UpdateBook :exec
 UPDATE books SET
     title = ?, owner = ?, file_path = ?, book_store_path = ?, type = ?,
-    child_books_num = ?, child_books_id = ?, depth = ?, parent_folder = ?, page_count = ?, last_read_position = ?, file_size = ?,
+    child_books_num = ?, child_books_id = ?, depth = ?, parent_folder = ?, page_count = ?, last_read_page = ?, file_size = ?,
     author = ?, isbn = ?, press = ?, published_at = ?, extract_path = ?, extract_num = ?,
     init_complete = ?, non_utf8zip = ?, zip_text_encoding = ?,
     modified_time = CURRENT_TIMESTAMP
@@ -57,7 +57,7 @@ WHERE book_id = ?;
 -- Update reading progress
 -- name: UpdateLastReadPage :exec
 UPDATE books SET
-    last_read_position  = ?,
+    last_read_page  = ?,
     modified_time = CURRENT_TIMESTAMP
 WHERE book_id = ?;
 

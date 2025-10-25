@@ -9,14 +9,18 @@ import (
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
 func ShowQRCode() {
 	// 如果只有一本书，二维码展示的 URL 需要附加参数，让读者可以直接去读这本书
 	etcStr := ""
-	bookList := model.IStore.ListBooks()
-	if len(bookList) == 1 {
-		etcStr = fmt.Sprintf("/#/%s/%s", config.GetCfg().DefaultMode, bookList[0].BookID)
+	allBooks, err := model.IStore.ListBooks()
+	if err != nil {
+		logger.Infof("Error listing books: %s", err)
+	}
+	if len(allBooks) == 1 {
+		etcStr = fmt.Sprintf("/#/%s/%s", config.GetCfg().DefaultMode, allBooks[0].BookID)
 	}
 
 	// 判断是否启用 TLS

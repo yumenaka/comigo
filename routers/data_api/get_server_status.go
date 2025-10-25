@@ -8,6 +8,7 @@ import (
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools"
+	"github.com/yumenaka/comigo/tools/logger"
 	"github.com/yumenaka/comigo/tools/tailscale_plugin"
 )
 
@@ -16,7 +17,11 @@ func GetAllBooksNumber() int {
 	// 用于计数的变量
 	var count int
 	// 遍历 map 并递增计数器
-	for _, b := range model.IStore.ListBooks() {
+	allBooks, err := model.IStore.ListBooks()
+	if err != nil {
+		logger.Infof("Error listing books: %s", err)
+	}
+	for _, b := range allBooks {
 		if b.Type == model.TypeBooksGroup {
 			continue // 跳过书组类型
 		}

@@ -31,7 +31,6 @@ func InitStore(storePath string, cfg ConfigInterface) error {
 		if err != nil {
 			return err
 		}
-		// logger.Info("-------------found_in_path:", storePathAbs)
 		AddBooksToStore([]*model.Book{book})
 		return nil
 	}

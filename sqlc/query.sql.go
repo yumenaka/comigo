@@ -99,12 +99,12 @@ func (q *Queries) CountUsersByRole(ctx context.Context, role sql.NullString) (in
 const createBook = `-- name: CreateBook :one
 INSERT INTO books (
     title, book_id, owner, file_path, book_store_path, type,
-    child_books_num, child_books_id,depth, parent_folder, page_count, last_read_position, file_size,
+    child_books_num, child_books_id,depth, parent_folder, page_count, last_read_page, file_size,
     author, isbn, press, published_at, extract_path, extract_num,
     init_complete, non_utf8zip, zip_text_encoding
 ) VALUES (
     ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
-) RETURNING id, title, book_id, owner, file_path, book_store_path, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_position, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, non_utf8zip, zip_text_encoding, deleted
+) RETURNING id, title, book_id, owner, file_path, book_store_path, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, non_utf8zip, zip_text_encoding, deleted
 `
 
 type CreateBookParams struct {
@@ -491,7 +491,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
 }
 
 const getBookByFilePath = `-- name: GetBookByFilePath :one
-SELECT id, title, book_id, owner, file_path, book_store_path, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_position, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, non_utf8zip, zip_text_encoding, deleted FROM books 
+SELECT id, title, book_id, owner, file_path, book_store_path, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, non_utf8zip, zip_text_encoding, deleted FROM books 
 WHERE file_path = ? LIMIT 1
 `
 
@@ -531,7 +531,7 @@ func (q *Queries) GetBookByFilePath(ctx context.Context, filePath string) (Book,
 
 const getBookByID = `-- name: GetBookByID :one
 
-SELECT id, title, book_id, owner, file_path, book_store_path, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_position, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, non_utf8zip, zip_text_encoding, deleted FROM books 
+SELECT id, title, book_id, owner, file_path, book_store_path, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, non_utf8zip, zip_text_encoding, deleted FROM books 
 WHERE book_id = ? LIMIT 1
 `
 
@@ -945,7 +945,7 @@ func (q *Queries) ListBookmarksByBookID(ctx context.Context, bookID string) ([]B
 }
 
 const listBooks = `-- name: ListBooks :many
-SELECT id, title, book_id, owner, file_path, book_store_path, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_position, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, non_utf8zip, zip_text_encoding, deleted FROM books 
+SELECT id, title, book_id, owner, file_path, book_store_path, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, non_utf8zip, zip_text_encoding, deleted FROM books 
 ORDER BY modified_time DESC
 `
 
@@ -1000,7 +1000,7 @@ func (q *Queries) ListBooks(ctx context.Context) ([]Book, error) {
 }
 
 const listBooksByStorePath = `-- name: ListBooksByStorePath :many
-SELECT id, title, book_id, owner, file_path, book_store_path, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_position, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, non_utf8zip, zip_text_encoding, deleted FROM books 
+SELECT id, title, book_id, owner, file_path, book_store_path, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, non_utf8zip, zip_text_encoding, deleted FROM books 
 WHERE book_store_path = ? 
 ORDER BY modified_time DESC
 `
@@ -1056,7 +1056,7 @@ func (q *Queries) ListBooksByStorePath(ctx context.Context, bookStorePath string
 }
 
 const listBooksByType = `-- name: ListBooksByType :many
-SELECT id, title, book_id, owner, file_path, book_store_path, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_position, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, non_utf8zip, zip_text_encoding, deleted FROM books 
+SELECT id, title, book_id, owner, file_path, book_store_path, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, non_utf8zip, zip_text_encoding, deleted FROM books 
 WHERE type = ? 
 ORDER BY modified_time DESC
 `
@@ -1348,7 +1348,7 @@ func (q *Queries) MarkBookAsDeleted(ctx context.Context, bookID string) error {
 }
 
 const searchBooksByTitle = `-- name: SearchBooksByTitle :many
-SELECT id, title, book_id, owner, file_path, book_store_path, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_position, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, non_utf8zip, zip_text_encoding, deleted FROM books 
+SELECT id, title, book_id, owner, file_path, book_store_path, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, non_utf8zip, zip_text_encoding, deleted FROM books 
 WHERE title LIKE '%' || ? || '%' 
 ORDER BY modified_time DESC
 `
@@ -1406,7 +1406,7 @@ func (q *Queries) SearchBooksByTitle(ctx context.Context, dollar_1 sql.NullStrin
 const updateBook = `-- name: UpdateBook :exec
 UPDATE books SET
     title = ?, owner = ?, file_path = ?, book_store_path = ?, type = ?,
-    child_books_num = ?, child_books_id = ?, depth = ?, parent_folder = ?, page_count = ?, last_read_position = ?, file_size = ?,
+    child_books_num = ?, child_books_id = ?, depth = ?, parent_folder = ?, page_count = ?, last_read_page = ?, file_size = ?,
     author = ?, isbn = ?, press = ?, published_at = ?, extract_path = ?, extract_num = ?,
     init_complete = ?, non_utf8zip = ?, zip_text_encoding = ?,
     modified_time = CURRENT_TIMESTAMP
@@ -1549,7 +1549,7 @@ func (q *Queries) UpdateFileBackend(ctx context.Context, arg UpdateFileBackendPa
 
 const updateLastReadPage = `-- name: UpdateLastReadPage :exec
 UPDATE books SET
-    last_read_position  = ?,
+    last_read_page  = ?,
     modified_time = CURRENT_TIMESTAMP
 WHERE book_id = ?
 `

@@ -3,23 +3,27 @@
 package scan
 
 import (
-	"fmt"
 	"strconv"
 
-	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/sqlc"
+	"github.com/yumenaka/comigo/store"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
-// SaveResultsToDatabase 4，保存扫描结果到数据库，并清理不存在的书籍
-func SaveResultsToDatabase(cfg ConfigInterface) error {
+// SaveBooksToDatabase 4，保存扫描结果到数据库
+func SaveBooksToDatabase(cfg ConfigInterface) error {
 	InitConfig(cfg)
-	books := model.IStore.ListBooks()
-	saveErr := sqlc.Repo.SaveBookListToDatabase(books)
-	if saveErr != nil {
-		logger.Info(saveErr)
-		return saveErr
+	allBooks, err := store.RamStore.ListBooks()
+	if err != nil {
+		logger.Infof("Error listing books: %s", err)
 	}
-	fmt.Println("SaveResultsToDatabase: Books saved to database successfully: " + strconv.Itoa(len(books)))
+	for _, b := range allBooks {
+		saveErr := sqlc.DbStore.AddBook(b)
+		if saveErr != nil {
+			logger.Info(saveErr)
+			return saveErr
+		}
+	}
+	logger.Infof("SaveBooksToDatabase: Books saved to database successfully: " + strconv.Itoa(len(allBooks)))
 	return nil
 }

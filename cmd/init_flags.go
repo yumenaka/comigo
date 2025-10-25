@@ -20,7 +20,7 @@ var runtimeViper *viper.Viper
 func init() {
 	runtimeViper = viper.New()
 	// 为了避免循环引用，把 model.IStore 指向 store.MainStoreGroup
-	model.IStore = &store.RamStore
+	model.IStore = store.RamStore
 }
 
 func InitFlags() {

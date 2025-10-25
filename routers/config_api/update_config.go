@@ -101,7 +101,7 @@ func StartReScan() {
 		logger.Infof("Failed to scan store path: %v", err)
 	}
 	if config.GetCfg().EnableDatabase {
-		if err := scan.SaveResultsToDatabase(config.GetCfg()); err != nil {
+		if err := scan.SaveBooksToDatabase(config.GetCfg()); err != nil {
 			logger.Infof("Failed to save results to database: %v", err)
 		}
 	}

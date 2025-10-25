@@ -30,9 +30,13 @@ func SetShutdownHandler() {
 	// 清理临时文件
 	if config.GetCfg().ClearCacheExit {
 		logger.Infof("\r"+locale.GetString("start_clear_file")+" CacheDir:%s ", config.GetCfg().CacheDir)
-		for _, book := range model.IStore.ListBooks() {
+		allBooks, err := model.IStore.ListBooks()
+		if err != nil {
+			logger.Infof("Error listing books: %s", err)
+		}
+		for _, book := range allBooks {
 			//清理某一本书的缓存
-			cachePath := path.Join(config.GetCfg().CacheDir, book.GetBookID())
+			cachePath := path.Join(config.GetCfg().CacheDir, book.BookID)
 			err := os.RemoveAll(cachePath)
 			if err != nil {
 				logger.Infof("Error clearing temp files: %s", cachePath)

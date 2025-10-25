@@ -75,7 +75,7 @@ func waitSystemMessages() {
 		//	}
 		//	// 保存扫描结果到数据库
 		//	if config.GetEnableDatabase() {
-		//		err := scan.SaveResultsToDatabase(viper.ConfigFileUsed(), config.GetClearDatabaseWhenExit())
+		//		err := scan.SaveBooksToDatabase(viper.ConfigFileUsed(), config.GetClearDatabaseWhenExit())
 		//		if err != nil {
 		//			return
 		//		}
