@@ -16,7 +16,10 @@ func scanDirGetBook(dirPath string, storePath string, depth int) (*model.Book, e
 	if err != nil {
 		return nil, err
 	}
-	newBook := model.NewBook(dirPath, dirInfo.ModTime(), dirInfo.Size(), storePath, depth, model.TypeDir)
+	newBook, err := model.NewBook(dirPath, dirInfo.ModTime(), dirInfo.Size(), storePath, depth, model.TypeDir)
+	if err != nil {
+		return nil, err
+	}
 
 	entries, err := os.ReadDir(dirPath)
 	if err != nil {

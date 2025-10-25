@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
 // StoreInfo 书库基本信息
@@ -92,7 +93,11 @@ func (store *Store) GenerateBookGroup() error {
 			}
 			// 检测是否已经生成并添加过
 			Added := false
-			for _, bookGroup := range RamStore.ListBooks() {
+			allBooks, err := RamStore.ListBooks()
+			if err != nil {
+				logger.Infof("Error listing books: %s", err)
+			}
+			for _, bookGroup := range allBooks {
 				if bookGroup.Type == model.TypeBooksGroup {
 					continue // 只处理书籍组类型
 				}

@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS books
     depth             INTEGER  DEFAULT 0,                 -- Book depth
     parent_folder     TEXT,                               -- Parent folder
     page_count        INTEGER  DEFAULT 0,                 -- Total page count
-    last_read_position      INTEGER  DEFAULT 0,           -- Last read position
+    last_read_page      INTEGER  DEFAULT 0,           -- Last read position
     file_size         INTEGER  DEFAULT 0,                 -- File size
     author            TEXT,                               -- Author
     isbn              TEXT,                               -- ISBN

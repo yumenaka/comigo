@@ -1,6 +1,8 @@
 package model
 
 import (
+	"errors"
+	"fmt"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -42,7 +44,22 @@ type BookInfo struct {
 }
 
 // initBookID 根据路径的 MD5，初始化书籍 ID
-func (b *BookInfo) initBookID() *BookInfo {
+func (b *BookInfo) initBookID(bookPath string) (*BookInfo, error) {
+	//查看书库中是否已经有了这本书，有了就跳过
+	allBooks, err := IStore.ListBooks()
+	if err != nil {
+		logger.Infof("Error listing books: %s", err)
+	}
+	for _, exitBook := range allBooks {
+		path, err := filepath.Abs(bookPath)
+		if err != nil {
+			logger.Infof("Error getting absolute path: %v", err)
+			continue
+		}
+		if exitBook.FilePath == path && (exitBook.Type == b.Type) {
+			return nil, errors.New(fmt.Sprintf("Book already exists: %s  %s ", exitBook.BookID, bookPath))
+		}
+	}
 	// 生成 BookID 的字符串
 	tempStr := b.FilePath + strconv.Itoa(int(b.FileSize)) + string(b.Type) + b.ParentFolder + b.BookStorePath
 	// 两次 MD5 加密，然后转为 base62 编码
@@ -63,7 +80,11 @@ func (b *BookInfo) initBookID() *BookInfo {
 	add := 0
 	for {
 		conflict := false
-		for _, b := range IStore.ListBooks() {
+		allBooks, err := IStore.ListBooks()
+		if err != nil {
+			logger.Infof("Error listing books: %s", err)
+		}
+		for _, b := range allBooks {
 			if b.BookID == shortID {
 				conflict = true
 				break
@@ -79,7 +100,7 @@ func (b *BookInfo) initBookID() *BookInfo {
 		shortID = fullID[:minLength+add]
 	}
 	b.BookID = shortID
-	return b
+	return b, nil
 }
 
 // setFilePath 初始化 Book 时，设置 FilePath
@@ -141,7 +162,7 @@ var (
 	reTrailingSpace = regexp.MustCompile(`\s+$`)
 
 	// 去除开头的一连串标点符号 (移除括号)
-	reLeadingPunct = regexp.MustCompile(`^[\-` + "`" + `~!@#$^&*=|{}':;'@#￥……&*——|{}‘；：”“'。，、？]+`)
+	reLeadingPunctuation = regexp.MustCompile(`^[\-` + "`" + `~!@#$^&*=|{}':;'@#￥……&*——|{}‘；：”“'。，、？]+`)
 )
 
 // ShortName 返回简短的标题（文件名）
@@ -167,7 +188,7 @@ func (b *BookInfo) ShortName() string {
 	shortTitle = reTrailingSpace.ReplaceAllString(shortTitle, "")
 
 	// 6. 去除开头标点
-	shortTitle = reLeadingPunct.ReplaceAllString(shortTitle, "")
+	shortTitle = reLeadingPunctuation.ReplaceAllString(shortTitle, "")
 
 	// 7. 再次去除首尾空格（以防上述操作后留下空格）
 	shortTitle = reLeadingSpace.ReplaceAllString(shortTitle, "")

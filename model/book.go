@@ -28,7 +28,7 @@ func (b *Book) GetBookInfo() *BookInfo {
 		Depth:           b.Depth,
 		ExtractPath:     b.ExtractPath,
 		ExtractNum:      b.ExtractNum,
-		FilePath:        b.GetFilePath(),
+		FilePath:        b.FilePath,
 		FileSize:        b.FileSize,
 		ISBN:            b.ISBN,
 		InitComplete:    b.InitComplete,
@@ -70,7 +70,7 @@ func (b *Book) GuestCover() (cover MediaFileInfo) {
 }
 
 // NewBook 初始化 Book，设置文件路径、书名、BookID 等
-func NewBook(filePath string, modified time.Time, fileSize int64, storePath string, depth int, bookType SupportFileType) *Book {
+func NewBook(filePath string, modified time.Time, fileSize int64, storePath string, depth int, bookType SupportFileType) (*Book, error) {
 	// 初始化书籍
 	book := &Book{
 		BookInfo: BookInfo{
@@ -83,8 +83,8 @@ func NewBook(filePath string, modified time.Time, fileSize int64, storePath stri
 		},
 	}
 	// 设置文件路径、书名、BookID
-	book.setFilePath(filePath).setParentFolder(filePath).setTitle(filePath).SetAuthor().initBookID()
-	return book
+	_, err := book.setFilePath(filePath).setParentFolder(filePath).setTitle(filePath).SetAuthor().initBookID(filePath)
+	return book, err
 }
 
 // NewBookInfo   初始化BookGroup，设置文件路径、书名、BookID等等
@@ -99,7 +99,7 @@ func NewBookInfo(filePath string, modified time.Time, fileSize int64, storePath 
 		Type:          bookType,
 	}
 	// 设置属性：
-	bookInfo.setTitle(filePath).setFilePath(filePath).SetAuthor().setParentFolder(filePath).initBookID()
+	bookInfo.setTitle(filePath).setFilePath(filePath).SetAuthor().setParentFolder(filePath).initBookID(filePath)
 	return &bookInfo
 }
 
@@ -153,15 +153,6 @@ func (b *Book) SortPagesByImageList(imageList []string) {
 	b.Images = reSortList
 }
 
-// GetBookID 获取书籍的 ID
-func (b *Book) GetBookID() string {
-	if b.BookID == "" {
-		logger.Infof("BookID 未初始化，可能存在错误")
-		b.initBookID()
-	}
-	return b.BookID
-}
-
 // GetAuthor 获取作者信息
 func (b *Book) GetAuthor() string {
 	return b.Author
@@ -174,11 +165,6 @@ func (b *Book) GetPageCount() int {
 		b.InitComplete = true
 	}
 	return b.PageCount
-}
-
-// GetFilePath 获取文件路径
-func (b *Book) GetFilePath() string {
-	return b.FilePath
 }
 
 // analyzePageImages 解析漫画的分辨率与类型

@@ -55,7 +55,7 @@ func FromSQLCBook(sqlcBook Book) *model.Book {
 	}
 }
 
-// ToSQLCCreateBookParams 将model.Book转换为sqlc.CreateBookParams
+// ToSQLCCreateBookParams 将model.Book转换为sqlc.CreateBookParams //"Valid"必须是验证条件或true
 func ToSQLCCreateBookParams(book *model.Book) CreateBookParams {
 	return CreateBookParams{
 		Title:           book.Title,
@@ -67,23 +67,23 @@ func ToSQLCCreateBookParams(book *model.Book) CreateBookParams {
 		ChildBooksNum:   sql.NullInt64{Int64: int64(book.ChildBooksNum), Valid: true},
 		ChildBooksID:    sql.NullString{String: strings.Join(book.ChildBooksID, ", "), Valid: len(book.ChildBooksID) > 0},
 		Depth:           sql.NullInt64{Int64: int64(book.Depth), Valid: true},
-		ParentFolder:    sql.NullString{String: book.ParentFolder, Valid: true},
+		ParentFolder:    sql.NullString{String: book.ParentFolder, Valid: book.ParentFolder != ""},
 		PageCount:       sql.NullInt64{Int64: int64(book.PageCount), Valid: true},
 		LastReadPage:    sql.NullInt64{Int64: int64(book.LastReadPage), Valid: true},
 		FileSize:        sql.NullInt64{Int64: book.FileSize, Valid: true},
-		Author:          sql.NullString{String: book.Author},
-		Isbn:            sql.NullString{String: book.ISBN},
-		Press:           sql.NullString{String: book.Press},
-		PublishedAt:     sql.NullString{String: book.PublishedAt},
-		ExtractPath:     sql.NullString{String: book.ExtractPath},
+		Author:          sql.NullString{String: book.Author, Valid: book.Author != ""},
+		Isbn:            sql.NullString{String: book.ISBN, Valid: book.ISBN != ""},
+		Press:           sql.NullString{String: book.Press, Valid: book.Press != ""},
+		PublishedAt:     sql.NullString{String: book.PublishedAt, Valid: book.PublishedAt != ""},
+		ExtractPath:     sql.NullString{String: book.ExtractPath, Valid: book.ExtractPath != ""},
 		ExtractNum:      sql.NullInt64{Int64: int64(book.ExtractNum), Valid: true},
 		InitComplete:    sql.NullBool{Bool: book.InitComplete, Valid: true},
-		NonUtf8zip:      sql.NullBool{Bool: book.NonUTF8Zip},
-		ZipTextEncoding: sql.NullString{String: book.ZipTextEncoding},
+		NonUtf8zip:      sql.NullBool{Bool: book.NonUTF8Zip, Valid: true},
+		ZipTextEncoding: sql.NullString{String: book.ZipTextEncoding, Valid: book.ZipTextEncoding != ""},
 	}
 }
 
-// ToSQLCUpdateBookParams 将model.Book转换为sqlc.UpdateBookParams
+// ToSQLCUpdateBookParams 将model.Book转换为sqlc.UpdateBookParams //"Valid"必须是验证条件或true
 func ToSQLCUpdateBookParams(book *model.Book) UpdateBookParams {
 	return UpdateBookParams{
 		Title:           book.Title,
@@ -92,20 +92,21 @@ func ToSQLCUpdateBookParams(book *model.Book) UpdateBookParams {
 		BookStorePath:   book.BookStorePath,
 		Type:            string(book.Type),
 		ChildBooksNum:   sql.NullInt64{Int64: int64(book.ChildBooksNum), Valid: true},
+		ChildBooksID:    sql.NullString{String: strings.Join(book.ChildBooksID, ", "), Valid: len(book.ChildBooksID) > 0},
 		Depth:           sql.NullInt64{Int64: int64(book.Depth), Valid: true},
-		ParentFolder:    sql.NullString{String: book.ParentFolder},
+		ParentFolder:    sql.NullString{String: book.ParentFolder, Valid: book.ParentFolder != ""},
 		PageCount:       sql.NullInt64{Int64: int64(book.PageCount), Valid: true},
 		LastReadPage:    sql.NullInt64{Int64: int64(book.LastReadPage), Valid: true},
 		FileSize:        sql.NullInt64{Int64: book.FileSize, Valid: true},
-		Author:          sql.NullString{String: book.Author},
-		Isbn:            sql.NullString{String: book.ISBN},
-		Press:           sql.NullString{String: book.Press},
-		PublishedAt:     sql.NullString{String: book.PublishedAt},
-		ExtractPath:     sql.NullString{String: book.ExtractPath},
+		Author:          sql.NullString{String: book.Author, Valid: book.Author != ""},
+		Isbn:            sql.NullString{String: book.ISBN, Valid: book.ISBN != ""},
+		Press:           sql.NullString{String: book.Press, Valid: book.Press != ""},
+		PublishedAt:     sql.NullString{String: book.PublishedAt, Valid: book.PublishedAt != ""},
+		ExtractPath:     sql.NullString{String: book.ExtractPath, Valid: book.ExtractPath != ""},
 		ExtractNum:      sql.NullInt64{Int64: int64(book.ExtractNum), Valid: true},
-		InitComplete:    sql.NullBool{Bool: book.InitComplete},
-		NonUtf8zip:      sql.NullBool{Bool: book.NonUTF8Zip},
-		ZipTextEncoding: sql.NullString{String: book.ZipTextEncoding},
+		InitComplete:    sql.NullBool{Bool: book.InitComplete, Valid: true},
+		NonUtf8zip:      sql.NullBool{Bool: book.NonUTF8Zip, Valid: true},
+		ZipTextEncoding: sql.NullString{String: book.ZipTextEncoding, Valid: book.ZipTextEncoding != ""},
 		BookID:          book.BookID,
 	}
 }
@@ -129,37 +130,37 @@ func FromSQLCMediaFile(sqlcMediaFile MediaFile) model.MediaFileInfo {
 	}
 }
 
-// ToSQLCCreateMediaFileParams 将model.MediaFileInfo转换为sqlc.CreateMediaFileParams
+// ToSQLCCreateMediaFileParams 将model.MediaFileInfo转换为sqlc.CreateMediaFileParams //"Valid"必须是验证条件或true
 func ToSQLCCreateMediaFileParams(mediaFile model.MediaFileInfo, bookID string) CreateMediaFileParams {
 	return CreateMediaFileParams{
 		BookID:     bookID,
 		Name:       mediaFile.Name,
-		Path:       sql.NullString{String: mediaFile.Path},
+		Path:       sql.NullString{String: mediaFile.Path, Valid: mediaFile.Path != ""},
 		Size:       sql.NullInt64{Int64: mediaFile.Size, Valid: true},
-		ModTime:    sql.NullTime{Time: mediaFile.ModTime},
-		Url:        sql.NullString{String: mediaFile.Url},
+		ModTime:    sql.NullTime{Time: mediaFile.ModTime, Valid: !mediaFile.ModTime.IsZero()},
+		Url:        sql.NullString{String: mediaFile.Url, Valid: mediaFile.Url != ""},
 		PageNum:    sql.NullInt64{Int64: int64(mediaFile.PageNum), Valid: true},
-		Blurhash:   sql.NullString{String: mediaFile.Blurhash},
+		Blurhash:   sql.NullString{String: mediaFile.Blurhash, Valid: mediaFile.Blurhash != ""},
 		Height:     sql.NullInt64{Int64: int64(mediaFile.Height), Valid: true},
 		Width:      sql.NullInt64{Int64: int64(mediaFile.Width), Valid: true},
-		ImgType:    sql.NullString{String: mediaFile.ImgType},
-		InsertHtml: sql.NullString{String: mediaFile.InsertHtml},
+		ImgType:    sql.NullString{String: mediaFile.ImgType, Valid: mediaFile.ImgType != ""},
+		InsertHtml: sql.NullString{String: mediaFile.InsertHtml, Valid: mediaFile.InsertHtml != ""},
 	}
 }
 
-// ToSQLCUpdateMediaFileParams 将model.MediaFileInfo转换为sqlc.UpdateMediaFileParams
+// ToSQLCUpdateMediaFileParams 将model.MediaFileInfo转换为sqlc.UpdateMediaFileParams //"Valid"必须是验证条件或true
 func ToSQLCUpdateMediaFileParams(mediaFile model.MediaFileInfo, bookID string) UpdateMediaFileParams {
 	return UpdateMediaFileParams{
 		Name:       mediaFile.Name,
-		Path:       sql.NullString{String: mediaFile.Path},
+		Path:       sql.NullString{String: mediaFile.Path, Valid: mediaFile.Path != ""},
 		Size:       sql.NullInt64{Int64: mediaFile.Size, Valid: true},
-		ModTime:    sql.NullTime{Time: mediaFile.ModTime},
-		Url:        sql.NullString{String: mediaFile.Url},
-		Blurhash:   sql.NullString{String: mediaFile.Blurhash},
+		ModTime:    sql.NullTime{Time: mediaFile.ModTime, Valid: !mediaFile.ModTime.IsZero()},
+		Url:        sql.NullString{String: mediaFile.Url, Valid: mediaFile.Url != ""},
+		Blurhash:   sql.NullString{String: mediaFile.Blurhash, Valid: mediaFile.Blurhash != ""},
 		Height:     sql.NullInt64{Int64: int64(mediaFile.Height), Valid: true},
 		Width:      sql.NullInt64{Int64: int64(mediaFile.Width), Valid: true},
-		ImgType:    sql.NullString{String: mediaFile.ImgType},
-		InsertHtml: sql.NullString{String: mediaFile.InsertHtml},
+		ImgType:    sql.NullString{String: mediaFile.ImgType, Valid: mediaFile.ImgType != ""},
+		InsertHtml: sql.NullString{String: mediaFile.InsertHtml, Valid: mediaFile.InsertHtml != ""},
 		BookID:     bookID,
 	}
 }
@@ -181,33 +182,33 @@ func FromSQLCFileBackend(sqlcFileBackend FileBackend) *store.Backend {
 	}
 }
 
-// ToSQLCCreateFileBackendParams 将model.FileBackend转换为sqlc.CreateFileBackendParams
+// ToSQLCCreateFileBackendParams 将model.FileBackend转换为sqlc.CreateFileBackendParams //"Valid"必须是验证条件或true
 func ToSQLCCreateFileBackendParams(fileBackend *store.Backend) CreateFileBackendParams {
 	return CreateFileBackendParams{
 		Type:         int64(fileBackend.Type),
 		Url:          fileBackend.URL,
-		ServerHost:   sql.NullString{String: fileBackend.ServerHost},
-		ServerPort:   sql.NullInt64{Int64: int64(fileBackend.ServerPort)},
+		ServerHost:   sql.NullString{String: fileBackend.ServerHost, Valid: fileBackend.ServerHost != ""},
+		ServerPort:   sql.NullInt64{Int64: int64(fileBackend.ServerPort), Valid: fileBackend.ServerPort != 0},
 		NeedAuth:     sql.NullBool{Bool: fileBackend.NeedAuth, Valid: true},
-		AuthUsername: sql.NullString{String: fileBackend.AuthUsername},
-		AuthPassword: sql.NullString{String: fileBackend.AuthPassword},
-		SmbShareName: sql.NullString{String: fileBackend.SMBShareName},
-		SmbPath:      sql.NullString{String: fileBackend.SMBPath},
+		AuthUsername: sql.NullString{String: fileBackend.AuthUsername, Valid: fileBackend.AuthUsername != ""},
+		AuthPassword: sql.NullString{String: fileBackend.AuthPassword, Valid: fileBackend.AuthPassword != ""},
+		SmbShareName: sql.NullString{String: fileBackend.SMBShareName, Valid: fileBackend.SMBShareName != ""},
+		SmbPath:      sql.NullString{String: fileBackend.SMBPath, Valid: fileBackend.SMBPath != ""},
 	}
 }
 
-// ToSQLCUpdateFileBackendParams 将model.Backend转换为sqlc.UpdateFileBackendParams
+// ToSQLCUpdateFileBackendParams 将model.Backend转换为sqlc.UpdateFileBackendParams //"Valid"必须是验证条件或true
 func ToSQLCUpdateFileBackendParams(fileBackend *store.Backend) UpdateFileBackendParams {
 	return UpdateFileBackendParams{
 		Url:          fileBackend.URL,
 		Type:         int64(fileBackend.Type),
-		ServerHost:   sql.NullString{String: fileBackend.ServerHost},
-		ServerPort:   sql.NullInt64{Int64: int64(fileBackend.ServerPort)},
+		ServerHost:   sql.NullString{String: fileBackend.ServerHost, Valid: fileBackend.ServerHost != ""},
+		ServerPort:   sql.NullInt64{Int64: int64(fileBackend.ServerPort), Valid: fileBackend.ServerPort != 0},
 		NeedAuth:     sql.NullBool{Bool: fileBackend.NeedAuth, Valid: true},
-		AuthUsername: sql.NullString{String: fileBackend.AuthUsername},
-		AuthPassword: sql.NullString{String: fileBackend.AuthPassword},
-		SmbShareName: sql.NullString{String: fileBackend.SMBShareName},
-		SmbPath:      sql.NullString{String: fileBackend.SMBPath},
+		AuthUsername: sql.NullString{String: fileBackend.AuthUsername, Valid: fileBackend.AuthUsername != ""},
+		AuthPassword: sql.NullString{String: fileBackend.AuthPassword, Valid: fileBackend.AuthPassword != ""},
+		SmbShareName: sql.NullString{String: fileBackend.SMBShareName, Valid: fileBackend.SMBShareName != ""},
+		SmbPath:      sql.NullString{String: fileBackend.SMBPath, Valid: fileBackend.SMBPath != ""},
 		Url_2:        fileBackend.URL, // WHERE条件中的URL参数
 	}
 }
@@ -258,8 +259,6 @@ func FromSQLCBooks(sqlcBooks []Book, pagesMap map[string][]model.MediaFileInfo) 
 		books[i] = FromSQLCBook(sqlcBook)
 		if pages, exists := pagesMap[sqlcBook.BookID]; exists {
 			books[i].Images = pages
-		} else {
-			books[i].Images = []model.MediaFileInfo{} // 确保即使没有页面也不会出错
 		}
 	}
 	return books

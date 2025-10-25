@@ -31,11 +31,7 @@ func AddBooksToStore(books []*model.Book) {
 		}
 		book.PageCount = len(book.Images)
 		if err := model.IStore.AddBook(book); err != nil {
-			logger.Infof(locale.GetString("AddBook_error"))
+			logger.Infof("AddBook_error"+" bookID:%s %s", book.BookID, err)
 		}
-	}
-	// 生成虚拟书籍组
-	if err := store.GenerateAllBookGroup(); err != nil {
-		logger.Infof("%s", err)
 	}
 }
