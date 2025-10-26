@@ -19,17 +19,13 @@ func FromSQLCBookmark(sqlcBookmark Bookmark) model.BookMark {
 	if sqlcBookmark.UpdatedAt.Valid {
 		updatedAt = sqlcBookmark.UpdatedAt.Time
 	}
-	var position float64
-	if sqlcBookmark.Position.Valid {
-		position = sqlcBookmark.Position.Float64
-	}
+
 	return model.BookMark{
 		BookID:      sqlcBookmark.BookID,
 		PageIndex:   int(sqlcBookmark.PageIndex),
 		Description: sqlcBookmark.Description.String,
 		CreatedAt:   createdAt,
 		UpdatedAt:   updatedAt,
-		Position:    position,
 	}
 }
 
@@ -48,16 +44,15 @@ func ToSQLCCreateBookmarkParams(bookmark model.BookMark) CreateBookmarkParams {
 		BookID:      bookmark.BookID,
 		PageIndex:   int64(bookmark.PageIndex),
 		Description: sql.NullString{String: bookmark.Description, Valid: bookmark.Description != ""},
-		Position:    sql.NullFloat64{Float64: bookmark.Position, Valid: true},
 	}
 }
 
-// ToSQLCUpdateBookmarkByBookIDAndPageParams 将 model.BookMark 转换为 sqlc.UpdateBookmarkByBookIDAndPageParams
-func ToSQLCUpdateBookmarkByBookIDAndPageParams(bookmark model.BookMark) UpdateBookmarkByBookIDAndPageParams {
-	return UpdateBookmarkByBookIDAndPageParams{
-		Description: sql.NullString{String: bookmark.Description, Valid: bookmark.Description != ""},
-		Position:    sql.NullFloat64{Float64: bookmark.Position, Valid: true},
+// ToSQLCUpdateBookmarkParams 将 model.BookMark 转换为 sqlc.UpdateBookmarkParams
+func ToSQLCUpdateBookmarkParams(bookmark model.BookMark) UpdateBookmarkParams {
+	return UpdateBookmarkParams{
+		Type:        int64(bookmark.PageIndex),
 		BookID:      bookmark.BookID,
 		PageIndex:   int64(bookmark.PageIndex),
+		Description: sql.NullString{String: bookmark.Description, Valid: bookmark.Description != ""},
 	}
 }

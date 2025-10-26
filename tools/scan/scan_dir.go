@@ -26,7 +26,7 @@ func scanDirGetBook(dirPath string, storePath string, depth int) (*model.Book, e
 		logger.Infof("Failed to read directory: %s, error: %v", dirPath, err)
 		return nil, err
 	}
-
+	pageNum := 1
 	for _, entry := range entries {
 		if entry.IsDir() {
 			continue
@@ -51,7 +51,9 @@ func scanDirGetBook(dirPath string, storePath string, depth int) (*model.Book, e
 			ModTime: fileInfo.ModTime(),
 			Name:    fileName,
 			Url:     tempURL,
+			PageNum: pageNum,
 		})
+		pageNum++
 	}
 	newBook.SortPages("default")
 	return newBook, nil

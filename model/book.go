@@ -38,7 +38,6 @@ func (b *Book) GetBookInfo() *BookInfo {
 		ParentFolder:    b.ParentFolder,
 		Press:           b.Press,
 		PublishedAt:     b.PublishedAt,
-		LastReadPage:    b.LastReadPage,
 		Type:            b.Type,
 		Title:           b.Title,
 		ZipTextEncoding: b.ZipTextEncoding,

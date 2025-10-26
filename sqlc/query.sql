@@ -84,9 +84,10 @@ WHERE book_id = ?;
 
 -- Update reading progress
 -- name: UpdateLastReadPage :exec
-UPDATE books
-SET last_read_page = ?,
-    modified_time  = CURRENT_TIMESTAMP
+UPDATE bookmarks
+SET page_index = ?,
+    type  = ?,
+    updated_at  = CURRENT_TIMESTAMP
 WHERE book_id = ?;
 
 -- Mark book as deleted (soft delete)
@@ -119,13 +120,6 @@ WHERE book_id = ?
   AND page_num = ?
 LIMIT 1;
 
--- Get book cover (usually page 0 or 1)
--- name: GetBookCover :one
-SELECT *
-FROM media_files
-WHERE book_id = ?
-  AND (page_num = 0 OR page_num = 1)
-LIMIT 1;
 
 -- Create media file record
 -- name: CreateMediaFile :one
@@ -165,49 +159,27 @@ FROM bookmarks
 WHERE book_id = ?
 ORDER BY created_at DESC;
 
--- Get a bookmark by book ID and page index
--- name: GetBookmarkByBookIDAndPage :one
-SELECT *
-FROM bookmarks
-WHERE book_id = ?
-  AND page_index = ?
-LIMIT 1;
-
 -- Create a bookmark
 -- name: CreateBookmark :one
-INSERT INTO bookmarks (book_id, page_index, description, position, created_at, updated_at)
+INSERT INTO bookmarks (type, book_id, page_index, description, created_at, updated_at)
 VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 RETURNING *;
 
--- Update a bookmark (by id)
+-- Update a bookmark (by book_id, type)
 -- name: UpdateBookmark :exec
 UPDATE bookmarks
 SET description = ?,
-    position    = ?,
+    page_index  = ?,
+    description = ?,
     updated_at  = CURRENT_TIMESTAMP
-WHERE id = ?;
+WHERE book_id = ? and type = ?;
 
--- Update a bookmark by (book_id, page_index)
--- name: UpdateBookmarkByBookIDAndPage :exec
-UPDATE bookmarks
-SET description = ?,
-    position    = ?,
-    updated_at  = CURRENT_TIMESTAMP
-WHERE book_id = ?
-  AND page_index = ?;
-
--- Delete a bookmark (by id)
--- name: DeleteBookmark :exec
-DELETE
-FROM bookmarks
-WHERE id = ?;
-
--- Delete a bookmark by (book_id, page_index)
--- name: DeleteBookmarkByBookIDAndPage :exec
+-- Delete a bookmark by (book_id, type)
+-- name: DeleteBookmarkByBookIDAndType :exec
 DELETE
 FROM bookmarks
 WHERE book_id = ?
-  AND page_index = ?;
+  AND type = ?;
 
 -- Delete all bookmarks for a book
 -- name: DeleteBookmarksByBookID :exec
@@ -215,138 +187,6 @@ DELETE
 FROM bookmarks
 WHERE book_id = ?;
 
--- File backend related queries
-
--- Get file backend by url
--- name: GetFileBackendByID :one
-SELECT *
-FROM file_backends
-WHERE url = ?
-LIMIT 1;
-
--- List all file backends
--- name: ListFileBackends :many
-SELECT *
-FROM file_backends
-ORDER BY created_at DESC;
-
--- List file backends by type
--- name: ListFileBackendsByType :many
-SELECT *
-FROM file_backends
-WHERE type = ?
-ORDER BY created_at DESC;
-
--- Create file backend
--- name: CreateFileBackend :one
-INSERT INTO file_backends (url, type, server_host, server_port, need_auth, auth_username,
-                           auth_password, smb_share_name, smb_path)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-RETURNING *;
-
--- Update file backend
--- name: UpdateFileBackend :exec
-UPDATE file_backends
-SET url            = ?,
-    type           = ?,
-    server_host    = ?,
-    server_port    = ?,
-    need_auth      = ?,
-    auth_username  = ?,
-    auth_password  = ?,
-    smb_share_name = ?,
-    smb_path       = ?,
-    updated_at     = CURRENT_TIMESTAMP
-WHERE url = ?;
-
--- Delete file backend
--- name: DeleteFileBackend :exec
-DELETE
-FROM file_backends
-WHERE url = ?;
-
--- Store related queries
-
--- Get store by URL
--- name: GetStoreByBackendURL :one
-SELECT *
-FROM stores
-WHERE backend_url = ?
-LIMIT 1;
-
--- Get store by name
--- name: GetStoreByName :one
-SELECT *
-FROM stores
-WHERE name = ?
-LIMIT 1;
-
--- List all stores
--- name: ListStores :many
-SELECT *
-FROM stores
-ORDER BY created_at DESC;
-
--- Create store
--- name: CreateStore :one
-INSERT INTO stores (backend_url, name, description)
-VALUES (?, ?, ?)
-RETURNING *;
-
--- Update store
--- name: UpdateStore :exec
-UPDATE stores
-SET name        = ?,
-    description = ?,
-    updated_at  = CURRENT_TIMESTAMP
-WHERE backend_url = ?;
-
--- Delete store
--- name: DeleteStore :exec
-DELETE
-FROM stores
-WHERE backend_url = ?;
-
--- Get store with file backend information
--- name: GetStoreWithBackend :one
-SELECT s.backend_url,
-       s.name,
-       s.description,
-       s.created_at,
-       s.updated_at,
-       fb.type,
-       fb.url,
-       fb.server_host,
-       fb.server_port,
-       fb.need_auth,
-       fb.auth_username,
-       fb.auth_password,
-       fb.smb_share_name,
-       fb.smb_path
-FROM stores s
-         JOIN file_backends fb ON s.backend_url = fb.url
-WHERE s.backend_url = ?
-LIMIT 1;
-
--- List stores with file backend information
--- name: ListStoresWithBackend :many
-SELECT s.backend_url,
-       s.name,
-       s.description,
-       s.created_at,
-       s.updated_at,
-       fb.type,
-       fb.url,
-       fb.server_host,
-       fb.server_port,
-       fb.need_auth,
-       fb.auth_username,
-       fb.auth_password,
-       fb.smb_share_name,
-       fb.smb_path
-FROM stores s
-         JOIN file_backends fb ON s.backend_url = fb.url
-ORDER BY s.created_at DESC;
 
 -- Statistics queries
 
@@ -369,25 +209,7 @@ SELECT COUNT(*)
 FROM media_files
 WHERE book_id = ?;
 
--- Count total stores
--- name: CountStores :one
-SELECT COUNT(*)
-FROM stores;
-
--- Count file backends by type
--- name: CountFileBackendsByType :one
-SELECT COUNT(*)
-FROM file_backends
-WHERE type = ?;
-
--- Get total file size
--- name: GetTotalFileSize :one
-SELECT SUM(file_size)
-FROM books
-WHERE deleted = FALSE;
-
 -- User related queries
-
 -- Get user by ID
 -- name: GetUserByID :one
 SELECT *
