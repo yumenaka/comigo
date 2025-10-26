@@ -67,10 +67,8 @@ func (db *StoreDatabase) SaveBookMediaFiles(ctx context.Context, bookID string, 
 	}
 
 	// 插入新的媒体文件记录
-	for i, mediaFile := range mediaFiles {
+	for _, mediaFile := range mediaFiles {
 		// 设置页码
-		mediaFile.PageNum = i + 1
-
 		createParams := ToSQLCCreateMediaFileParams(mediaFile, bookID)
 		_, err := db.queries.CreateMediaFile(ctx, createParams)
 		if err != nil {
@@ -160,7 +158,7 @@ func (db *StoreDatabase) GenerateBookGroup() (e error) {
 		storeBooks := FromSQLCBooks(sqlcBook, nil)
 		// 遍历 BookMap ，删除所有 BooksGroup 类型的书籍
 		for _, b := range storeBooks {
-			if model.SupportFileType(b.Type) == model.TypeBooksGroup {
+			if b.Type == model.TypeBooksGroup {
 				err := db.DeleteBook(b.BookID)
 				if err != nil {
 					return err

@@ -1,8 +1,6 @@
 package data_api
 
 import (
-	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -32,18 +30,18 @@ func UpdateLastReadPage(c echo.Context) error {
 	if request.PageIndex <= 0 || request.PageIndex > book.PageCount {
 		return echo.NewHTTPError(http.StatusBadRequest, "page_index out of range")
 	}
-	book.LastReadPage = request.PageIndex
-	// 更新书籍信息
-	err = model.IStore.UpdateBook(book)
-	if err != nil {
-		logger.Infof("Failed to update bookmark: %s", err)
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to update bookmark")
-	}
-	// 输出调试信息
-	jsonByte, err := json.MarshalIndent(book, "", "  ")
-	if err == nil {
-		fmt.Println(string(jsonByte))
-	}
+	//book.LastReadPage = request.PageIndex
+	//// 更新书籍信息
+	//err = model.IStore.UpdateBook(book)
+	//if err != nil {
+	//	logger.Infof("Failed to update bookmark: %s", err)
+	//	return echo.NewHTTPError(http.StatusInternalServerError, "Failed to update bookmark")
+	//}
+	//// 输出调试信息
+	//jsonByte, err := json.MarshalIndent(book, "", "  ")
+	//if err == nil {
+	//	fmt.Println(string(jsonByte))
+	//}
 
 	// 返回成功响应
 	return c.JSON(http.StatusOK, map[string]string{"message": "bookmark updated successfully"})

@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/yumenaka/comigo/model"
-	"github.com/yumenaka/comigo/store"
 )
 
 // ==================== Book 相关转换 ====================
@@ -45,7 +44,6 @@ func FromSQLCBook(sqlcBook Book) *model.Book {
 			Modified:        sqlcBook.ModifiedTime.Time,
 			NonUTF8Zip:      sqlcBook.NonUtf8zip.Bool,
 			PageCount:       int(sqlcBook.PageCount.Int64),
-			LastReadPage:    int(sqlcBook.LastReadPage.Int64),
 			ParentFolder:    sqlcBook.ParentFolder.String,
 			Press:           sqlcBook.Press.String,
 			PublishedAt:     sqlcBook.PublishedAt.String,
@@ -69,7 +67,6 @@ func ToSQLCCreateBookParams(book *model.Book) CreateBookParams {
 		Depth:           sql.NullInt64{Int64: int64(book.Depth), Valid: true},
 		ParentFolder:    sql.NullString{String: book.ParentFolder, Valid: book.ParentFolder != ""},
 		PageCount:       sql.NullInt64{Int64: int64(book.PageCount), Valid: true},
-		LastReadPage:    sql.NullInt64{Int64: int64(book.LastReadPage), Valid: true},
 		FileSize:        sql.NullInt64{Int64: book.FileSize, Valid: true},
 		Author:          sql.NullString{String: book.Author, Valid: book.Author != ""},
 		Isbn:            sql.NullString{String: book.ISBN, Valid: book.ISBN != ""},
@@ -96,7 +93,6 @@ func ToSQLCUpdateBookParams(book *model.Book) UpdateBookParams {
 		Depth:           sql.NullInt64{Int64: int64(book.Depth), Valid: true},
 		ParentFolder:    sql.NullString{String: book.ParentFolder, Valid: book.ParentFolder != ""},
 		PageCount:       sql.NullInt64{Int64: int64(book.PageCount), Valid: true},
-		LastReadPage:    sql.NullInt64{Int64: int64(book.LastReadPage), Valid: book.LastReadPage != 0},
 		FileSize:        sql.NullInt64{Int64: book.FileSize, Valid: true},
 		Author:          sql.NullString{String: book.Author, Valid: book.Author != ""},
 		Isbn:            sql.NullString{String: book.ISBN, Valid: book.ISBN != ""},
@@ -165,91 +161,6 @@ func ToSQLCUpdateMediaFileParams(mediaFile model.MediaFileInfo, bookID string) U
 	}
 }
 
-// ==================== Backend 相关转换 ====================
-
-// FromSQLCFileBackend 将sqlc.FileBackend转换为model.Backend
-func FromSQLCFileBackend(sqlcFileBackend FileBackend) *store.Backend {
-	return &store.Backend{
-		Type:         store.BackendType(sqlcFileBackend.Type),
-		URL:          sqlcFileBackend.Url,
-		ServerHost:   sqlcFileBackend.ServerHost.String,
-		ServerPort:   int(sqlcFileBackend.ServerPort.Int64),
-		NeedAuth:     sqlcFileBackend.NeedAuth.Bool,
-		AuthUsername: sqlcFileBackend.AuthUsername.String,
-		AuthPassword: sqlcFileBackend.AuthPassword.String,
-		SMBShareName: sqlcFileBackend.SmbShareName.String,
-		SMBPath:      sqlcFileBackend.SmbPath.String,
-	}
-}
-
-// ToSQLCCreateFileBackendParams 将model.FileBackend转换为sqlc.CreateFileBackendParams //"Valid"必须是验证条件或true
-func ToSQLCCreateFileBackendParams(fileBackend *store.Backend) CreateFileBackendParams {
-	return CreateFileBackendParams{
-		Type:         int64(fileBackend.Type),
-		Url:          fileBackend.URL,
-		ServerHost:   sql.NullString{String: fileBackend.ServerHost, Valid: fileBackend.ServerHost != ""},
-		ServerPort:   sql.NullInt64{Int64: int64(fileBackend.ServerPort), Valid: fileBackend.ServerPort != 0},
-		NeedAuth:     sql.NullBool{Bool: fileBackend.NeedAuth, Valid: true},
-		AuthUsername: sql.NullString{String: fileBackend.AuthUsername, Valid: fileBackend.AuthUsername != ""},
-		AuthPassword: sql.NullString{String: fileBackend.AuthPassword, Valid: fileBackend.AuthPassword != ""},
-		SmbShareName: sql.NullString{String: fileBackend.SMBShareName, Valid: fileBackend.SMBShareName != ""},
-		SmbPath:      sql.NullString{String: fileBackend.SMBPath, Valid: fileBackend.SMBPath != ""},
-	}
-}
-
-// ToSQLCUpdateFileBackendParams 将model.Backend转换为sqlc.UpdateFileBackendParams //"Valid"必须是验证条件或true
-func ToSQLCUpdateFileBackendParams(fileBackend *store.Backend) UpdateFileBackendParams {
-	return UpdateFileBackendParams{
-		Url:          fileBackend.URL,
-		Type:         int64(fileBackend.Type),
-		ServerHost:   sql.NullString{String: fileBackend.ServerHost, Valid: fileBackend.ServerHost != ""},
-		ServerPort:   sql.NullInt64{Int64: int64(fileBackend.ServerPort), Valid: fileBackend.ServerPort != 0},
-		NeedAuth:     sql.NullBool{Bool: fileBackend.NeedAuth, Valid: true},
-		AuthUsername: sql.NullString{String: fileBackend.AuthUsername, Valid: fileBackend.AuthUsername != ""},
-		AuthPassword: sql.NullString{String: fileBackend.AuthPassword, Valid: fileBackend.AuthPassword != ""},
-		SmbShareName: sql.NullString{String: fileBackend.SMBShareName, Valid: fileBackend.SMBShareName != ""},
-		SmbPath:      sql.NullString{String: fileBackend.SMBPath, Valid: fileBackend.SMBPath != ""},
-		Url_2:        fileBackend.URL, // WHERE条件中的URL参数
-	}
-}
-
-// ==================== StoreInfo 相关转换 ====================
-
-// FromSQLCStore 将sqlc.Store转换为model.StoreInfo
-func FromSQLCStore(sqlcStore Store) *store.StoreInfo {
-	backend := store.Backend{
-		URL: sqlcStore.BackendUrl,
-	}
-	err := backend.ParseStoreURL(sqlcStore.BackendUrl)
-	if err != nil {
-		return nil
-	}
-	return &store.StoreInfo{
-		BackendURL:  sqlcStore.BackendUrl,
-		Name:        sqlcStore.Name,
-		Description: sqlcStore.Description.String,
-		Backend:     backend,
-	}
-}
-
-// ToSQLCCreateStoreParams 将model.StoreInfo转换为sqlc.CreateStoreParams
-func ToSQLCCreateStoreParams(store *store.StoreInfo) CreateStoreParams {
-	return CreateStoreParams{
-		BackendUrl:  store.BackendURL,
-		Name:        store.Name,
-		Description: sql.NullString{String: store.Description, Valid: store.Description != ""},
-	}
-}
-
-// ToSQLCUpdateStoreParams 将model.StoreInfo转换为sqlc.UpdateStoreParams
-func ToSQLCUpdateStoreParams(store *store.StoreInfo) UpdateStoreParams {
-	return UpdateStoreParams{
-		Name:        store.Name,
-		Description: sql.NullString{String: store.Description, Valid: store.Description != ""},
-		BackendUrl:  store.BackendURL,
-	}
-}
-
 // ==================== 批量转换函数 ====================
 
 // FromSQLCBooks 批量转换sqlc.Book为model.Book
@@ -271,73 +182,6 @@ func FromSQLCMediaFiles(sqlcMediaFiles []MediaFile) []model.MediaFileInfo {
 		mediaFiles[i] = FromSQLCMediaFile(sqlcMediaFile)
 	}
 	return mediaFiles
-}
-
-// FromSQLCFileBackends 批量转换sqlc.FileBackend为model.Backend
-func FromSQLCFileBackends(sqlcFileBackends []FileBackend) []*store.Backend {
-	fileBackends := make([]*store.Backend, len(sqlcFileBackends))
-	for i, sqlcFileBackend := range sqlcFileBackends {
-		fileBackends[i] = FromSQLCFileBackend(sqlcFileBackend)
-	}
-	return fileBackends
-}
-
-// FromSQLCStores 批量转换sqlc.Store为model.StoreInfo
-func FromSQLCStores(sqlcStores []Store) []*store.StoreInfo {
-	stores := make([]*store.StoreInfo, len(sqlcStores))
-	for i, sqlcStore := range sqlcStores {
-		stores[i] = FromSQLCStore(sqlcStore)
-	}
-	return stores
-}
-
-// ==================== 关联查询结果转换 ====================
-
-// FromSQLCStoreWithBackendRow 将sqlc.GetStoreWithBackendRow转换为model.StoreInfo
-func FromSQLCStoreWithBackendRow(row GetStoreWithBackendRow) *store.StoreInfo {
-	store := &store.StoreInfo{
-		BackendURL:  row.BackendUrl,
-		Name:        row.Name,
-		Description: row.Description.String,
-		Backend: store.Backend{
-			Type:         store.BackendType(row.Type),
-			URL:          row.Url,
-			ServerHost:   row.ServerHost.String,
-			ServerPort:   int(row.ServerPort.Int64),
-			NeedAuth:     row.NeedAuth.Bool,
-			AuthUsername: row.AuthUsername.String,
-			AuthPassword: row.AuthPassword.String,
-			SMBShareName: row.SmbShareName.String,
-			SMBPath:      row.SmbPath.String,
-		},
-	}
-	return store
-}
-
-// FromSQLCListStoresWithBackendRow 批量转换sqlc.ListStoresWithBackendRow为model.StoreInfo
-func FromSQLCListStoresWithBackendRow(rows []ListStoresWithBackendRow) []*store.StoreInfo {
-	stores := make([]*store.StoreInfo, len(rows))
-	for i, row := range rows {
-		// 将ListStoresWithBackendRow转换为GetStoreWithBackendRow格式
-		convertedRow := GetStoreWithBackendRow{
-			BackendUrl:   row.BackendUrl,
-			Name:         row.Name,
-			Description:  row.Description,
-			CreatedAt:    row.CreatedAt,
-			UpdatedAt:    row.UpdatedAt,
-			Type:         row.Type,
-			Url:          row.Url,
-			ServerHost:   row.ServerHost,
-			ServerPort:   row.ServerPort,
-			NeedAuth:     row.NeedAuth,
-			AuthUsername: row.AuthUsername,
-			AuthPassword: row.AuthPassword,
-			SmbShareName: row.SmbShareName,
-			SmbPath:      row.SmbPath,
-		}
-		stores[i] = FromSQLCStoreWithBackendRow(convertedRow)
-	}
-	return stores
 }
 
 // ==================== User 相关转换 ====================

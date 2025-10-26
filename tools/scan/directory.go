@@ -45,7 +45,7 @@ func HandleDirectory(currentPath string, depth int) (DirNode, []string, []model.
 
 	// 当前目录计入 foundDirs（用于记录树状结构）
 	foundDirs = append(foundDirs, currentPath)
-
+	pageNum := 1
 	for _, entry := range entries {
 		name := entry.Name()
 		fullPath := filepath.Join(currentPath, name)
@@ -86,7 +86,9 @@ func HandleDirectory(currentPath string, depth int) (DirNode, []string, []model.
 				Path:    fullPath,
 				Size:    size,
 				ModTime: modTime,
+				PageNum: pageNum,
 			}
+			pageNum++
 			node.Files = append(node.Files, mediaFileInfo)
 			foundFiles = append(foundFiles, mediaFileInfo)
 		}
