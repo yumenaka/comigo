@@ -1,7 +1,6 @@
 package store
 
 import (
-	"errors"
 	"os"
 	"path/filepath"
 	"sync"
@@ -27,16 +26,7 @@ type Store struct {
 
 // GenerateBookGroup 分析书库中已有书籍的路径，生成书籍组信息
 func (store *Store) GenerateBookGroup() error {
-	// 如果没有添加过任何书籍，则不需要生成书组信息
-	// sync.Map 本身没有内置 Len() 方法来直接获取元素数量。需要获取数量的时候，需要用 Range 遍历一次，计数累加
-	count := 0
-	for range store.BookMap.Range {
-		count++
-	}
-	if count == 0 {
-		return errors.New("empty Bookstore,skipping analysis")
-	}
-	// 遍历 BookMap ，删除所有 BooksGroup 类型的书籍
+	// 遍历 BookMap ，清理所有 BooksGroup 类型的书籍
 	for _, value := range store.BookMap.Range {
 		b := value.(*model.Book)
 		if b.Type == model.TypeBooksGroup {

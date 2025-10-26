@@ -12,7 +12,9 @@ import (
 
 const countBooks = `-- name: CountBooks :one
 
-SELECT COUNT(*) FROM books WHERE deleted = FALSE
+SELECT COUNT(*)
+FROM books
+WHERE deleted = FALSE
 `
 
 // Statistics queries
@@ -25,7 +27,10 @@ func (q *Queries) CountBooks(ctx context.Context) (int64, error) {
 }
 
 const countBooksByType = `-- name: CountBooksByType :one
-SELECT COUNT(*) FROM books WHERE type = ? AND deleted = FALSE
+SELECT COUNT(*)
+FROM books
+WHERE type = ?
+  AND deleted = FALSE
 `
 
 // Count books by type
@@ -37,7 +42,9 @@ func (q *Queries) CountBooksByType(ctx context.Context, type_ string) (int64, er
 }
 
 const countFileBackendsByType = `-- name: CountFileBackendsByType :one
-SELECT COUNT(*) FROM file_backends WHERE type = ?
+SELECT COUNT(*)
+FROM file_backends
+WHERE type = ?
 `
 
 // Count file backends by type
@@ -49,7 +56,9 @@ func (q *Queries) CountFileBackendsByType(ctx context.Context, type_ int64) (int
 }
 
 const countMediaFilesByBookID = `-- name: CountMediaFilesByBookID :one
-SELECT COUNT(*) FROM media_files WHERE book_id = ?
+SELECT COUNT(*)
+FROM media_files
+WHERE book_id = ?
 `
 
 // Count media files for a book
@@ -61,7 +70,8 @@ func (q *Queries) CountMediaFilesByBookID(ctx context.Context, bookID string) (i
 }
 
 const countStores = `-- name: CountStores :one
-SELECT COUNT(*) FROM stores
+SELECT COUNT(*)
+FROM stores
 `
 
 // Count total stores
@@ -73,7 +83,8 @@ func (q *Queries) CountStores(ctx context.Context) (int64, error) {
 }
 
 const countUsers = `-- name: CountUsers :one
-SELECT COUNT(*) FROM users
+SELECT COUNT(*)
+FROM users
 `
 
 // Count total users
@@ -85,7 +96,9 @@ func (q *Queries) CountUsers(ctx context.Context) (int64, error) {
 }
 
 const countUsersByRole = `-- name: CountUsersByRole :one
-SELECT COUNT(*) FROM users WHERE role = ?
+SELECT COUNT(*)
+FROM users
+WHERE role = ?
 `
 
 // Count users by role
@@ -97,14 +110,12 @@ func (q *Queries) CountUsersByRole(ctx context.Context, role sql.NullString) (in
 }
 
 const createBook = `-- name: CreateBook :one
-INSERT INTO books (
-    title, book_id, owner, book_path, store_url, type,
-    child_books_num, child_books_id,depth, parent_folder, page_count, last_read_page, file_size,
-    author, isbn, press, published_at, extract_path, extract_num,
-    init_complete, non_utf8zip, zip_text_encoding
-) VALUES (
-    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
-) RETURNING id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, non_utf8zip, zip_text_encoding, deleted
+INSERT INTO books (title, book_id, owner, book_path, store_url, type,
+                   child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size,
+                   author, isbn, press, published_at, extract_path, extract_num,
+                   init_complete, non_utf8zip, zip_text_encoding)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+RETURNING id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, non_utf8zip, zip_text_encoding, deleted
 `
 
 type CreateBookParams struct {
@@ -190,11 +201,9 @@ func (q *Queries) CreateBook(ctx context.Context, arg CreateBookParams) (Book, e
 }
 
 const createBookmark = `-- name: CreateBookmark :one
-INSERT INTO bookmarks (
-    book_id, page_index, description, position, created_at, updated_at
-) VALUES (
-    ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
-) RETURNING id, book_id, page_index, description, position, created_at, updated_at
+INSERT INTO bookmarks (book_id, page_index, description, position, created_at, updated_at)
+VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+RETURNING id, book_id, page_index, description, position, created_at, updated_at
 `
 
 type CreateBookmarkParams struct {
@@ -226,12 +235,10 @@ func (q *Queries) CreateBookmark(ctx context.Context, arg CreateBookmarkParams) 
 }
 
 const createFileBackend = `-- name: CreateFileBackend :one
-INSERT INTO file_backends (
-    url, type, server_host, server_port, need_auth, auth_username,
-    auth_password, smb_share_name, smb_path
-) VALUES (
-    ?, ?, ?, ?, ?, ?, ?, ?, ?
-) RETURNING url, type, server_host, server_port, need_auth, auth_username, auth_password, smb_share_name, smb_path, created_at, updated_at
+INSERT INTO file_backends (url, type, server_host, server_port, need_auth, auth_username,
+                           auth_password, smb_share_name, smb_path)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+RETURNING url, type, server_host, server_port, need_auth, auth_username, auth_password, smb_share_name, smb_path, created_at, updated_at
 `
 
 type CreateFileBackendParams struct {
@@ -277,12 +284,10 @@ func (q *Queries) CreateFileBackend(ctx context.Context, arg CreateFileBackendPa
 }
 
 const createMediaFile = `-- name: CreateMediaFile :one
-INSERT INTO media_files (
-    book_id, name, path, size, mod_time, url, page_num,
-    blurhash, height, width, img_type, insert_html
-) VALUES (
-    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
-) RETURNING id, book_id, name, path, size, mod_time, url, page_num, blurhash, height, width, img_type, insert_html
+INSERT INTO media_files (book_id, name, path, size, mod_time, url, page_num,
+                         blurhash, height, width, img_type, insert_html)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+RETURNING id, book_id, name, path, size, mod_time, url, page_num, blurhash, height, width, img_type, insert_html
 `
 
 type CreateMediaFileParams struct {
@@ -336,11 +341,9 @@ func (q *Queries) CreateMediaFile(ctx context.Context, arg CreateMediaFileParams
 }
 
 const createStore = `-- name: CreateStore :one
-INSERT INTO stores (
-    backend_url, name, description
-) VALUES (
-    ?, ?, ?
-) RETURNING backend_url, name, description, created_at, updated_at
+INSERT INTO stores (backend_url, name, description)
+VALUES (?, ?, ?)
+RETURNING backend_url, name, description, created_at, updated_at
 `
 
 type CreateStoreParams struct {
@@ -364,11 +367,9 @@ func (q *Queries) CreateStore(ctx context.Context, arg CreateStoreParams) (Store
 }
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (
-    username, password, role, email, key, expires_at
-) VALUES (
-    ?, ?, ?, ?, ?, ?
-) RETURNING id, username, password, role, email, "key", expires_at, created_at, updated_at
+INSERT INTO users (username, password, role, email, key, expires_at)
+VALUES (?, ?, ?, ?, ?, ?)
+RETURNING id, username, password, role, email, "key", expires_at, created_at, updated_at
 `
 
 type CreateUserParams struct {
@@ -406,7 +407,9 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 }
 
 const deleteBook = `-- name: DeleteBook :exec
-DELETE FROM books WHERE book_id = ?
+DELETE
+FROM books
+WHERE book_id = ?
 `
 
 // Delete book
@@ -416,7 +419,9 @@ func (q *Queries) DeleteBook(ctx context.Context, bookID string) error {
 }
 
 const deleteBookmark = `-- name: DeleteBookmark :exec
-DELETE FROM bookmarks WHERE id = ?
+DELETE
+FROM bookmarks
+WHERE id = ?
 `
 
 // Delete a bookmark (by id)
@@ -426,7 +431,10 @@ func (q *Queries) DeleteBookmark(ctx context.Context, id int64) error {
 }
 
 const deleteBookmarkByBookIDAndPage = `-- name: DeleteBookmarkByBookIDAndPage :exec
-DELETE FROM bookmarks WHERE book_id = ? AND page_index = ?
+DELETE
+FROM bookmarks
+WHERE book_id = ?
+  AND page_index = ?
 `
 
 type DeleteBookmarkByBookIDAndPageParams struct {
@@ -441,7 +449,9 @@ func (q *Queries) DeleteBookmarkByBookIDAndPage(ctx context.Context, arg DeleteB
 }
 
 const deleteBookmarksByBookID = `-- name: DeleteBookmarksByBookID :exec
-DELETE FROM bookmarks WHERE book_id = ?
+DELETE
+FROM bookmarks
+WHERE book_id = ?
 `
 
 // Delete all bookmarks for a book
@@ -451,7 +461,9 @@ func (q *Queries) DeleteBookmarksByBookID(ctx context.Context, bookID string) er
 }
 
 const deleteFileBackend = `-- name: DeleteFileBackend :exec
-DELETE FROM file_backends WHERE url = ?
+DELETE
+FROM file_backends
+WHERE url = ?
 `
 
 // Delete file backend
@@ -461,7 +473,9 @@ func (q *Queries) DeleteFileBackend(ctx context.Context, url string) error {
 }
 
 const deleteMediaFilesByBookID = `-- name: DeleteMediaFilesByBookID :exec
-DELETE FROM media_files WHERE book_id = ?
+DELETE
+FROM media_files
+WHERE book_id = ?
 `
 
 // Delete all media files for a book
@@ -471,7 +485,9 @@ func (q *Queries) DeleteMediaFilesByBookID(ctx context.Context, bookID string) e
 }
 
 const deleteStore = `-- name: DeleteStore :exec
-DELETE FROM stores WHERE backend_url = ?
+DELETE
+FROM stores
+WHERE backend_url = ?
 `
 
 // Delete store
@@ -481,7 +497,9 @@ func (q *Queries) DeleteStore(ctx context.Context, backendUrl string) error {
 }
 
 const deleteUser = `-- name: DeleteUser :exec
-DELETE FROM users WHERE id = ?
+DELETE
+FROM users
+WHERE id = ?
 `
 
 // Delete user
@@ -491,8 +509,10 @@ func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
 }
 
 const getBookByBookPath = `-- name: GetBookByBookPath :one
-SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, non_utf8zip, zip_text_encoding, deleted FROM books 
-WHERE book_path = ? LIMIT 1
+SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, non_utf8zip, zip_text_encoding, deleted
+FROM books
+WHERE book_path = ?
+LIMIT 1
 `
 
 // Get book by file path
@@ -531,8 +551,10 @@ func (q *Queries) GetBookByBookPath(ctx context.Context, bookPath string) (Book,
 
 const getBookByID = `-- name: GetBookByID :one
 
-SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, non_utf8zip, zip_text_encoding, deleted FROM books 
-WHERE book_id = ? LIMIT 1
+SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, non_utf8zip, zip_text_encoding, deleted
+FROM books
+WHERE book_id = ?
+LIMIT 1
 `
 
 // Book related queries
@@ -571,8 +593,10 @@ func (q *Queries) GetBookByID(ctx context.Context, bookID string) (Book, error) 
 }
 
 const getBookCover = `-- name: GetBookCover :one
-SELECT id, book_id, name, path, size, mod_time, url, page_num, blurhash, height, width, img_type, insert_html FROM media_files 
-WHERE book_id = ? AND (page_num = 0 OR page_num = 1) 
+SELECT id, book_id, name, path, size, mod_time, url, page_num, blurhash, height, width, img_type, insert_html
+FROM media_files
+WHERE book_id = ?
+  AND (page_num = 0 OR page_num = 1)
 LIMIT 1
 `
 
@@ -599,8 +623,10 @@ func (q *Queries) GetBookCover(ctx context.Context, bookID string) (MediaFile, e
 }
 
 const getBookmarkByBookIDAndPage = `-- name: GetBookmarkByBookIDAndPage :one
-SELECT id, book_id, page_index, description, position, created_at, updated_at FROM bookmarks 
-WHERE book_id = ? AND page_index = ? 
+SELECT id, book_id, page_index, description, position, created_at, updated_at
+FROM bookmarks
+WHERE book_id = ?
+  AND page_index = ?
 LIMIT 1
 `
 
@@ -627,8 +653,10 @@ func (q *Queries) GetBookmarkByBookIDAndPage(ctx context.Context, arg GetBookmar
 
 const getFileBackendByID = `-- name: GetFileBackendByID :one
 
-SELECT url, type, server_host, server_port, need_auth, auth_username, auth_password, smb_share_name, smb_path, created_at, updated_at FROM file_backends
-WHERE url = ? LIMIT 1
+SELECT url, type, server_host, server_port, need_auth, auth_username, auth_password, smb_share_name, smb_path, created_at, updated_at
+FROM file_backends
+WHERE url = ?
+LIMIT 1
 `
 
 // File backend related queries
@@ -653,8 +681,10 @@ func (q *Queries) GetFileBackendByID(ctx context.Context, url string) (FileBacke
 }
 
 const getMediaFileByBookIDAndPage = `-- name: GetMediaFileByBookIDAndPage :one
-SELECT id, book_id, name, path, size, mod_time, url, page_num, blurhash, height, width, img_type, insert_html FROM media_files 
-WHERE book_id = ? AND page_num = ? 
+SELECT id, book_id, name, path, size, mod_time, url, page_num, blurhash, height, width, img_type, insert_html
+FROM media_files
+WHERE book_id = ?
+  AND page_num = ?
 LIMIT 1
 `
 
@@ -687,8 +717,9 @@ func (q *Queries) GetMediaFileByBookIDAndPage(ctx context.Context, arg GetMediaF
 
 const getMediaFilesByBookID = `-- name: GetMediaFilesByBookID :many
 
-SELECT id, book_id, name, path, size, mod_time, url, page_num, blurhash, height, width, img_type, insert_html FROM media_files 
-WHERE book_id = ? 
+SELECT id, book_id, name, path, size, mod_time, url, page_num, blurhash, height, width, img_type, insert_html
+FROM media_files
+WHERE book_id = ?
 ORDER BY page_num
 `
 
@@ -733,8 +764,10 @@ func (q *Queries) GetMediaFilesByBookID(ctx context.Context, bookID string) ([]M
 
 const getStoreByBackendURL = `-- name: GetStoreByBackendURL :one
 
-SELECT backend_url, name, description, created_at, updated_at FROM stores 
-WHERE backend_url = ? LIMIT 1
+SELECT backend_url, name, description, created_at, updated_at
+FROM stores
+WHERE backend_url = ?
+LIMIT 1
 `
 
 // Store related queries
@@ -753,8 +786,10 @@ func (q *Queries) GetStoreByBackendURL(ctx context.Context, backendUrl string) (
 }
 
 const getStoreByName = `-- name: GetStoreByName :one
-SELECT backend_url, name, description, created_at, updated_at FROM stores 
-WHERE name = ? LIMIT 1
+SELECT backend_url, name, description, created_at, updated_at
+FROM stores
+WHERE name = ?
+LIMIT 1
 `
 
 // Get store by name
@@ -772,13 +807,24 @@ func (q *Queries) GetStoreByName(ctx context.Context, name string) (Store, error
 }
 
 const getStoreWithBackend = `-- name: GetStoreWithBackend :one
-SELECT
-    s.backend_url, s.name, s.description, s.created_at, s.updated_at,
-    fb.type, fb.url, fb.server_host, fb.server_port,
-    fb.need_auth, fb.auth_username, fb.auth_password, fb.smb_share_name, fb.smb_path
+SELECT s.backend_url,
+       s.name,
+       s.description,
+       s.created_at,
+       s.updated_at,
+       fb.type,
+       fb.url,
+       fb.server_host,
+       fb.server_port,
+       fb.need_auth,
+       fb.auth_username,
+       fb.auth_password,
+       fb.smb_share_name,
+       fb.smb_path
 FROM stores s
-JOIN file_backends fb ON s.backend_url = fb.url
-WHERE s.backend_url = ? LIMIT 1
+         JOIN file_backends fb ON s.backend_url = fb.url
+WHERE s.backend_url = ?
+LIMIT 1
 `
 
 type GetStoreWithBackendRow struct {
@@ -822,7 +868,9 @@ func (q *Queries) GetStoreWithBackend(ctx context.Context, backendUrl string) (G
 }
 
 const getTotalFileSize = `-- name: GetTotalFileSize :one
-SELECT SUM(file_size) FROM books WHERE deleted = FALSE
+SELECT SUM(file_size)
+FROM books
+WHERE deleted = FALSE
 `
 
 // Get total file size
@@ -834,8 +882,10 @@ func (q *Queries) GetTotalFileSize(ctx context.Context) (sql.NullFloat64, error)
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, username, password, role, email, "key", expires_at, created_at, updated_at FROM users 
-WHERE email = ? LIMIT 1
+SELECT id, username, password, role, email, "key", expires_at, created_at, updated_at
+FROM users
+WHERE email = ?
+LIMIT 1
 `
 
 // Get user by email
@@ -858,8 +908,10 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email sql.NullString) (Use
 
 const getUserByID = `-- name: GetUserByID :one
 
-SELECT id, username, password, role, email, "key", expires_at, created_at, updated_at FROM users 
-WHERE id = ? LIMIT 1
+SELECT id, username, password, role, email, "key", expires_at, created_at, updated_at
+FROM users
+WHERE id = ?
+LIMIT 1
 `
 
 // User related queries
@@ -882,8 +934,10 @@ func (q *Queries) GetUserByID(ctx context.Context, id int64) (User, error) {
 }
 
 const getUserByUsername = `-- name: GetUserByUsername :one
-SELECT id, username, password, role, email, "key", expires_at, created_at, updated_at FROM users 
-WHERE username = ? LIMIT 1
+SELECT id, username, password, role, email, "key", expires_at, created_at, updated_at
+FROM users
+WHERE username = ?
+LIMIT 1
 `
 
 // Get user by username
@@ -904,10 +958,40 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 	return i, err
 }
 
+const listAllBookStoreURLs = `-- name: ListAllBookStoreURLs :many
+SELECT DISTINCT store_url
+FROM books
+`
+
+// get all store_url for books
+func (q *Queries) ListAllBookStoreURLs(ctx context.Context) ([]string, error) {
+	rows, err := q.db.QueryContext(ctx, listAllBookStoreURLs)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var store_url string
+		if err := rows.Scan(&store_url); err != nil {
+			return nil, err
+		}
+		items = append(items, store_url)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listBookmarksByBookID = `-- name: ListBookmarksByBookID :many
 
-SELECT id, book_id, page_index, description, position, created_at, updated_at FROM bookmarks 
-WHERE book_id = ? 
+SELECT id, book_id, page_index, description, position, created_at, updated_at
+FROM bookmarks
+WHERE book_id = ?
 ORDER BY created_at DESC
 `
 
@@ -945,7 +1029,8 @@ func (q *Queries) ListBookmarksByBookID(ctx context.Context, bookID string) ([]B
 }
 
 const listBooks = `-- name: ListBooks :many
-SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, non_utf8zip, zip_text_encoding, deleted FROM books 
+SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, non_utf8zip, zip_text_encoding, deleted
+FROM books
 ORDER BY modified_time DESC
 `
 
@@ -1000,7 +1085,8 @@ func (q *Queries) ListBooks(ctx context.Context) ([]Book, error) {
 }
 
 const listBooksByStorePath = `-- name: ListBooksByStorePath :many
-SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, non_utf8zip, zip_text_encoding, deleted FROM books 
+SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, non_utf8zip, zip_text_encoding, deleted
+FROM books
 WHERE store_url = ?
 ORDER BY modified_time DESC
 `
@@ -1056,8 +1142,9 @@ func (q *Queries) ListBooksByStorePath(ctx context.Context, storeUrl string) ([]
 }
 
 const listBooksByType = `-- name: ListBooksByType :many
-SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, non_utf8zip, zip_text_encoding, deleted FROM books 
-WHERE type = ? 
+SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, non_utf8zip, zip_text_encoding, deleted
+FROM books
+WHERE type = ?
 ORDER BY modified_time DESC
 `
 
@@ -1112,7 +1199,8 @@ func (q *Queries) ListBooksByType(ctx context.Context, type_ string) ([]Book, er
 }
 
 const listFileBackends = `-- name: ListFileBackends :many
-SELECT url, type, server_host, server_port, need_auth, auth_username, auth_password, smb_share_name, smb_path, created_at, updated_at FROM file_backends
+SELECT url, type, server_host, server_port, need_auth, auth_username, auth_password, smb_share_name, smb_path, created_at, updated_at
+FROM file_backends
 ORDER BY created_at DESC
 `
 
@@ -1153,7 +1241,8 @@ func (q *Queries) ListFileBackends(ctx context.Context) ([]FileBackend, error) {
 }
 
 const listFileBackendsByType = `-- name: ListFileBackendsByType :many
-SELECT url, type, server_host, server_port, need_auth, auth_username, auth_password, smb_share_name, smb_path, created_at, updated_at FROM file_backends
+SELECT url, type, server_host, server_port, need_auth, auth_username, auth_password, smb_share_name, smb_path, created_at, updated_at
+FROM file_backends
 WHERE type = ?
 ORDER BY created_at DESC
 `
@@ -1195,7 +1284,8 @@ func (q *Queries) ListFileBackendsByType(ctx context.Context, type_ int64) ([]Fi
 }
 
 const listStores = `-- name: ListStores :many
-SELECT backend_url, name, description, created_at, updated_at FROM stores 
+SELECT backend_url, name, description, created_at, updated_at
+FROM stores
 ORDER BY created_at DESC
 `
 
@@ -1230,12 +1320,22 @@ func (q *Queries) ListStores(ctx context.Context) ([]Store, error) {
 }
 
 const listStoresWithBackend = `-- name: ListStoresWithBackend :many
-SELECT
-    s.backend_url, s.name, s.description, s.created_at, s.updated_at,
-    fb.type, fb.url, fb.server_host, fb.server_port,
-    fb.need_auth, fb.auth_username, fb.auth_password, fb.smb_share_name, fb.smb_path
+SELECT s.backend_url,
+       s.name,
+       s.description,
+       s.created_at,
+       s.updated_at,
+       fb.type,
+       fb.url,
+       fb.server_host,
+       fb.server_port,
+       fb.need_auth,
+       fb.auth_username,
+       fb.auth_password,
+       fb.smb_share_name,
+       fb.smb_path
 FROM stores s
-JOIN file_backends fb ON s.backend_url = fb.url
+         JOIN file_backends fb ON s.backend_url = fb.url
 ORDER BY s.created_at DESC
 `
 
@@ -1296,7 +1396,8 @@ func (q *Queries) ListStoresWithBackend(ctx context.Context) ([]ListStoresWithBa
 }
 
 const listUsers = `-- name: ListUsers :many
-SELECT id, username, password, role, email, "key", expires_at, created_at, updated_at FROM users 
+SELECT id, username, password, role, email, "key", expires_at, created_at, updated_at
+FROM users
 ORDER BY created_at DESC
 `
 
@@ -1335,8 +1436,8 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 }
 
 const markBookAsDeleted = `-- name: MarkBookAsDeleted :exec
-UPDATE books SET
-    deleted = TRUE,
+UPDATE books
+SET deleted       = TRUE,
     modified_time = CURRENT_TIMESTAMP
 WHERE book_id = ?
 `
@@ -1348,8 +1449,9 @@ func (q *Queries) MarkBookAsDeleted(ctx context.Context, bookID string) error {
 }
 
 const searchBooksByTitle = `-- name: SearchBooksByTitle :many
-SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, non_utf8zip, zip_text_encoding, deleted FROM books 
-WHERE title LIKE '%' || ? || '%' 
+SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, non_utf8zip, zip_text_encoding, deleted
+FROM books
+WHERE title LIKE '%' || ? || '%'
 ORDER BY modified_time DESC
 `
 
@@ -1404,12 +1506,29 @@ func (q *Queries) SearchBooksByTitle(ctx context.Context, dollar_1 sql.NullStrin
 }
 
 const updateBook = `-- name: UpdateBook :exec
-UPDATE books SET
-    title = ?, owner = ?, book_path = ?, store_url = ?, type = ?,
-    child_books_num = ?, child_books_id = ?, depth = ?, parent_folder = ?, page_count = ?, last_read_page = ?, file_size = ?,
-    author = ?, isbn = ?, press = ?, published_at = ?, extract_path = ?, extract_num = ?,
-    init_complete = ?, non_utf8zip = ?, zip_text_encoding = ?,
-    modified_time = CURRENT_TIMESTAMP
+UPDATE books
+SET title             = ?,
+    owner             = ?,
+    book_path         = ?,
+    store_url         = ?,
+    type              = ?,
+    child_books_num   = ?,
+    child_books_id    = ?,
+    depth             = ?,
+    parent_folder     = ?,
+    page_count        = ?,
+    last_read_page    = ?,
+    file_size         = ?,
+    author            = ?,
+    isbn              = ?,
+    press             = ?,
+    published_at      = ?,
+    extract_path      = ?,
+    extract_num       = ?,
+    init_complete     = ?,
+    non_utf8zip       = ?,
+    zip_text_encoding = ?,
+    modified_time     = CURRENT_TIMESTAMP
 WHERE book_id = ?
 `
 
@@ -1468,8 +1587,10 @@ func (q *Queries) UpdateBook(ctx context.Context, arg UpdateBookParams) error {
 }
 
 const updateBookmark = `-- name: UpdateBookmark :exec
-UPDATE bookmarks SET
-    description = ?, position = ?, updated_at = CURRENT_TIMESTAMP
+UPDATE bookmarks
+SET description = ?,
+    position    = ?,
+    updated_at  = CURRENT_TIMESTAMP
 WHERE id = ?
 `
 
@@ -1486,9 +1607,12 @@ func (q *Queries) UpdateBookmark(ctx context.Context, arg UpdateBookmarkParams) 
 }
 
 const updateBookmarkByBookIDAndPage = `-- name: UpdateBookmarkByBookIDAndPage :exec
-UPDATE bookmarks SET
-    description = ?, position = ?, updated_at = CURRENT_TIMESTAMP
-WHERE book_id = ? AND page_index = ?
+UPDATE bookmarks
+SET description = ?,
+    position    = ?,
+    updated_at  = CURRENT_TIMESTAMP
+WHERE book_id = ?
+  AND page_index = ?
 `
 
 type UpdateBookmarkByBookIDAndPageParams struct {
@@ -1510,10 +1634,17 @@ func (q *Queries) UpdateBookmarkByBookIDAndPage(ctx context.Context, arg UpdateB
 }
 
 const updateFileBackend = `-- name: UpdateFileBackend :exec
-UPDATE file_backends SET
-    url = ?, type = ?, server_host = ?, server_port = ?, need_auth = ?,
-    auth_username = ?, auth_password = ?, smb_share_name = ?, smb_path = ?,
-    updated_at = CURRENT_TIMESTAMP
+UPDATE file_backends
+SET url            = ?,
+    type           = ?,
+    server_host    = ?,
+    server_port    = ?,
+    need_auth      = ?,
+    auth_username  = ?,
+    auth_password  = ?,
+    smb_share_name = ?,
+    smb_path       = ?,
+    updated_at     = CURRENT_TIMESTAMP
 WHERE url = ?
 `
 
@@ -1548,9 +1679,9 @@ func (q *Queries) UpdateFileBackend(ctx context.Context, arg UpdateFileBackendPa
 }
 
 const updateLastReadPage = `-- name: UpdateLastReadPage :exec
-UPDATE books SET
-    last_read_page  = ?,
-    modified_time = CURRENT_TIMESTAMP
+UPDATE books
+SET last_read_page = ?,
+    modified_time  = CURRENT_TIMESTAMP
 WHERE book_id = ?
 `
 
@@ -1566,10 +1697,19 @@ func (q *Queries) UpdateLastReadPage(ctx context.Context, arg UpdateLastReadPage
 }
 
 const updateMediaFile = `-- name: UpdateMediaFile :exec
-UPDATE media_files SET
-    name = ?, path = ?, size = ?, mod_time = ?, url = ?,
-    blurhash = ?, height = ?, width = ?, img_type = ?, insert_html = ?
-WHERE book_id = ? AND page_num = ?
+UPDATE media_files
+SET name        = ?,
+    path        = ?,
+    size        = ?,
+    mod_time    = ?,
+    url         = ?,
+    blurhash    = ?,
+    height      = ?,
+    width       = ?,
+    img_type    = ?,
+    insert_html = ?
+WHERE book_id = ?
+  AND page_num = ?
 `
 
 type UpdateMediaFileParams struct {
@@ -1607,9 +1747,10 @@ func (q *Queries) UpdateMediaFile(ctx context.Context, arg UpdateMediaFileParams
 }
 
 const updateStore = `-- name: UpdateStore :exec
-UPDATE stores SET
-    name = ?, description = ?,
-    updated_at = CURRENT_TIMESTAMP
+UPDATE stores
+SET name        = ?,
+    description = ?,
+    updated_at  = CURRENT_TIMESTAMP
 WHERE backend_url = ?
 `
 
@@ -1626,8 +1767,13 @@ func (q *Queries) UpdateStore(ctx context.Context, arg UpdateStoreParams) error 
 }
 
 const updateUser = `-- name: UpdateUser :exec
-UPDATE users SET
-    username = ?, password = ?, role = ?, email = ?, key = ?, expires_at = ?,
+UPDATE users
+SET username   = ?,
+    password   = ?,
+    role       = ?,
+    email      = ?,
+    key        = ?,
+    expires_at = ?,
     updated_at = CURRENT_TIMESTAMP
 WHERE id = ?
 `
@@ -1657,8 +1803,9 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
 }
 
 const updateUserKey = `-- name: UpdateUserKey :exec
-UPDATE users SET
-    key = ?, expires_at = ?,
+UPDATE users
+SET key        = ?,
+    expires_at = ?,
     updated_at = CURRENT_TIMESTAMP
 WHERE id = ?
 `
@@ -1676,8 +1823,8 @@ func (q *Queries) UpdateUserKey(ctx context.Context, arg UpdateUserKeyParams) er
 }
 
 const updateUserPassword = `-- name: UpdateUserPassword :exec
-UPDATE users SET
-    password = ?,
+UPDATE users
+SET password   = ?,
     updated_at = CURRENT_TIMESTAMP
 WHERE id = ?
 `

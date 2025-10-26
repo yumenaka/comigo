@@ -37,7 +37,7 @@ func ClearBookNotExist() {
 				return
 			}
 		}
-		if err := store.RamStore.GenerateAllBookGroup(); err != nil {
+		if err := model.IStore.GenerateBookGroup(); err != nil {
 			logger.Infof("Error initializing main folder: %s", err)
 		}
 	}

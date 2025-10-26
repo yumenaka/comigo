@@ -55,7 +55,7 @@ func ScanStore(args []string) {
 			}
 		}
 	}
-	if err := store.RamStore.GenerateAllBookGroup(); err != nil {
+	if err := model.IStore.GenerateBookGroup(); err != nil {
 		logger.Infof("%s", err)
 	}
 	// 5、保存扫描结果到数据库

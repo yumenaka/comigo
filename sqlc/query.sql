@@ -27,6 +27,11 @@ FROM books
 WHERE type = ?
 ORDER BY modified_time DESC;
 
+-- get all store_url for books
+-- name: ListAllBookStoreURLs :many
+SELECT DISTINCT store_url
+FROM books;
+
 -- List books by store path
 -- name: ListBooksByStorePath :many
 SELECT *
