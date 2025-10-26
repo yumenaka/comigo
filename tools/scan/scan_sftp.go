@@ -101,7 +101,7 @@ package scan
 // 	//				AbsW = walkPath
 // 	//				logger.Info(err, AbsW)
 // 	//			}
-// 	//			if walkPath == p.FilePath || AbsW == p.FilePath {
+// 	//			if walkPath == p.BookPath || AbsW == p.BookPath {
 // 	//				//跳过已经在数据库里面的文件
 // 	//				logger.Infof(locale.GetString("found_in_bookstore")+"%s", walkPath)
 // 	//				return nil

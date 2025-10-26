@@ -14,7 +14,7 @@ func (b *Book) ScanAllImage() {
 	logger.Infof(locale.GetString("check_image_start"))
 	bar := pb.StartNew(b.GetPageCount())
 	for i := range b.Images {
-		analyzePageImages(&b.Images[i], b.FilePath)
+		analyzePageImages(&b.Images[i], b.BookPath)
 		bar.Increment()
 	}
 	bar.Finish()
@@ -30,7 +30,7 @@ func (b *Book) ScanAllImageGo() {
 	for i := range b.Images {
 		i := i // 避免闭包问题
 		wp.Do(func() error {
-			analyzePageImages(&b.Images[i], b.FilePath)
+			analyzePageImages(&b.Images[i], b.BookPath)
 			bar.Increment()
 			return nil
 		})

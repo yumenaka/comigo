@@ -6,6 +6,7 @@ import (
 	"github.com/angelofallars/htmx-go"
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/store"
 	"github.com/yumenaka/comigo/templ/state"
 	"github.com/yumenaka/comigo/tools/logger"
 )
@@ -38,19 +39,19 @@ func GetBookListHandler(c echo.Context) error {
 	// 如果没有指定书籍ID，获取顶层书架信息。
 	if bookID == "" {
 		var err error
-		state.NowBookList, err = model.IStore.TopOfShelfInfo(sortBy)
+		state.NowBookList, err = store.TopOfShelfInfo(sortBy)
 		if err != nil {
 			logger.Infof("TopOfShelfInfo: %v", err)
-			// TODO: 没有图书的情况（上传压缩包或远程下载示例漫画）
 		}
 	}
 	// 如果指定了书籍ID，获取子书架信息。
 	if bookID != "" {
 		var err error
-		state.NowBookList, err = model.IStore.GetChildBooksInfo(bookID, sortBy)
+		state.NowBookList, err = store.GetChildBooksInfo(bookID)
 		if err != nil {
 			logger.Infof("GetBookShelf: %v", err)
 		}
+		state.NowBookList.SortBooks(sortBy)
 	}
 
 	if state.NowBookList == nil {
