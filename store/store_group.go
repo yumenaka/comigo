@@ -33,8 +33,8 @@ func (ramStore *StoreInRam) AddStore(storeURL string) error {
 	return nil
 }
 
-// GenerateAllBookGroup 分析所有子书库，并并生成书籍组
-func (ramStore *StoreInRam) GenerateAllBookGroup() (e error) {
+// GenerateBookGroup 分析所有子书库，并并生成书籍组
+func (ramStore *StoreInRam) GenerateBookGroup() (e error) {
 	// 遍历所有子书库
 	for _, value := range ramStore.ChildStores.Range {
 		s := value.(*Store)
