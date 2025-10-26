@@ -67,7 +67,7 @@ package scan
 // 			smbFilePath := "smb://" + scanOption.Cfg.GetStores()[0].Smb.Host + "/" + scanOption.Cfg.GetStores()[0].Smb.ShareName + "/" + walkPath
 //
 // 			for _, p := range model.MainStores.GetArchiveBooks() {
-// 				if smbFilePath == p.FilePath {
+// 				if smbFilePath == p.BookPath {
 // 					// 跳过已扫描文件
 // 					logger.Infof(locale.GetString("found_in_bookstore")+"%path", walkPath)
 // 					return nil
@@ -183,14 +183,14 @@ package scan
 // 	//	}
 // 	//	// epub文件，需要根据 META-INF/container.xml 里面定义的rootfile （.opf文件）来重新排序
 // 	//	if newBook.Type == types.TypeEpub {
-// 	//		imageList, err := arch.GetImageListFromEpubFile(newBook.FilePath)
+// 	//		imageList, err := arch.GetImageListFromEpubFile(newBook.BookPath)
 // 	//		if err != nil {
 // 	//			logger.Infof("%s", err)
 // 	//		} else {
 // 	//			newBook.SortPagesByImageList(imageList)
 // 	//		}
 // 	//		// 根据metadata，改写书籍信息
-// 	//		metaData, err := arch.GetEpubMetadata(newBook.FilePath)
+// 	//		metaData, err := arch.GetEpubMetadata(newBook.BookPath)
 // 	//		if err != nil {
 // 	//			logger.Infof("%s", err)
 // 	//		} else {

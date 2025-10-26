@@ -16,7 +16,7 @@ type GetPictureDataOption struct {
 	BookIsDir        bool
 	BookIsPDF        bool
 	BookIsNonUTF8Zip bool
-	BookFilePath     string
+	BookPath         string
 	Debug            bool
 	UseCache         bool
 	ResizeWidth      int
@@ -32,17 +32,17 @@ type GetPictureDataOption struct {
 
 func GetPictureData(option GetPictureDataOption) (imgData []byte, contentType string, err error) {
 	pictureName := option.PictureName
-	bookFilePath := option.BookFilePath
+	bookPath := option.BookPath
 	// 如果是特殊编码的ZIP文件
 	if option.BookIsNonUTF8Zip {
-		imgData, err = GetSingleFile(bookFilePath, pictureName, "gbk")
+		imgData, err = GetSingleFile(bookPath, pictureName, "gbk")
 		if err != nil {
 			return nil, "", err
 		}
 	}
 	// 如果是一般压缩文件，如zip、rar。epub
 	if !option.BookIsNonUTF8Zip && !option.BookIsDir && !option.BookIsPDF {
-		imgData, err = GetSingleFile(bookFilePath, pictureName, "")
+		imgData, err = GetSingleFile(bookPath, pictureName, "")
 		if err != nil {
 			return nil, "", err
 		}
@@ -56,7 +56,7 @@ func GetPictureData(option GetPictureDataOption) (imgData []byte, contentType st
 		if err != nil {
 			return nil, "", err
 		}
-		imgData, err = GetImageFromPDF(bookFilePath, page, option.Debug)
+		imgData, err = GetImageFromPDF(bookPath, page, option.Debug)
 		if err != nil {
 			return nil, "", err
 		}
@@ -72,7 +72,7 @@ func GetPictureData(option GetPictureDataOption) (imgData []byte, contentType st
 	// 如果是本地文件夹
 	if option.BookIsDir {
 		// 直接读取磁盘文件
-		imgData, err = os.ReadFile(filepath.Join(bookFilePath, pictureName))
+		imgData, err = os.ReadFile(filepath.Join(bookPath, pictureName))
 		if err != nil {
 			return nil, "", err
 		}

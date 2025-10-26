@@ -20,7 +20,7 @@ func GetRawFile(c echo.Context) error {
 	logger.Infof("下载文件：%s", fileName)
 
 	// 获取文件信息
-	fileInfo, err := os.Stat(b.FilePath)
+	fileInfo, err := os.Stat(b.BookPath)
 	if err != nil {
 		return c.String(http.StatusNotFound, "404 page not found")
 	}
@@ -29,5 +29,5 @@ func GetRawFile(c echo.Context) error {
 		return c.String(http.StatusNotFound, "404 page not found")
 	}
 	// 如果是文件，返回文件
-	return c.File(b.FilePath)
+	return c.File(b.BookPath)
 }

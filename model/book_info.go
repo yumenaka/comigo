@@ -17,8 +17,8 @@ import (
 // BookInfo 与 Book 唯一的区别是没有 AllPageInfo，而是封面图 URL，减小 JSON 文件的大小
 type BookInfo struct {
 	Author          string          `json:"author"`          // 作者
-	BookID          string          `json:"id"`              // 根据 FilePath 生成的唯一 ID
-	BookStorePath   string          `json:"-"`               // 在哪个子书库
+	BookID          string          `json:"id"`              // 根据 BookPath 生成的唯一 ID
+	StoreUrl        string          `json:"-"`               // 在哪个子书库
 	ChildBooksNum   int             `json:"child_books_num"` // 子书籍数量
 	ChildBooksID    []string        `json:"child_books_id"`  // 子书籍BookID
 	Cover           MediaFileInfo   `json:"cover"`           // 封面图
@@ -27,7 +27,7 @@ type BookInfo struct {
 	ExtractPath     string          `json:"-"`               // 解压路径，7z 用，JSON 不解析
 	ExtractNum      int             `json:"-"`               // 文件解压数
 	FileSize        int64           `json:"file_size"`       // 文件大小
-	FilePath        string          `json:"-"`               // 文件绝对路径，JSON 不解析
+	BookPath        string          `json:"-"`               // 文件绝对路径，JSON 不解析
 	ISBN            string          `json:"isbn"`            // ISBN
 	InitComplete    bool            `json:"-"`               // 是否解压完成
 	Modified        time.Time       `json:"modified_time"`   // 修改时间
@@ -56,12 +56,12 @@ func (b *BookInfo) initBookID(bookPath string) (*BookInfo, error) {
 			logger.Infof("Error getting absolute path: %v", err)
 			continue
 		}
-		if exitBook.FilePath == path && (exitBook.Type == b.Type) {
+		if exitBook.BookPath == path && (exitBook.Type == b.Type) {
 			return nil, errors.New(fmt.Sprintf("Book already exists: %s  %s ", exitBook.BookID, bookPath))
 		}
 	}
 	// 生成 BookID 的字符串
-	tempStr := b.FilePath + strconv.Itoa(int(b.FileSize)) + string(b.Type) + b.ParentFolder + b.BookStorePath
+	tempStr := b.BookPath + strconv.Itoa(int(b.FileSize)) + string(b.Type) + b.ParentFolder + b.StoreUrl
 	// 两次 MD5 加密，然后转为 base62 编码
 	// 为什么选择 Base62?
 	// 1. 人类可读，可以目视或简单的 regexp 进行验证
@@ -103,15 +103,15 @@ func (b *BookInfo) initBookID(bookPath string) (*BookInfo, error) {
 	return b, nil
 }
 
-// setFilePath 初始化 Book 时，设置 FilePath
+// setFilePath 初始化 Book 时，设置 BookPath
 func (b *BookInfo) setFilePath(path string) *BookInfo {
 	fileAbsPath, err := filepath.Abs(path)
 	if err != nil {
 		// 因为权限问题，无法取得绝对路径的情况下，用相对路径
 		logger.Info(err, fileAbsPath)
-		b.FilePath = path
+		b.BookPath = path
 	} else {
-		b.FilePath = fileAbsPath
+		b.BookPath = fileAbsPath
 	}
 	return b
 }
@@ -127,8 +127,8 @@ func (b *BookInfo) setParentFolder(filePath string) *BookInfo {
 	return b
 }
 
-// SetAuthor 设置作者
-func (b *BookInfo) SetAuthor() *BookInfo {
+// setAuthor 设置作者
+func (b *BookInfo) setAuthor() *BookInfo {
 	b.Author = tools.GetAuthor(b.Title)
 	return b
 }

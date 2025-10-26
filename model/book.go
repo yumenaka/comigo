@@ -21,14 +21,14 @@ func (b *Book) GetBookInfo() *BookInfo {
 		Author:          b.Author,
 		BookID:          b.BookID,
 		Cover:           b.GuestCover(), // 使用 GuestCover 方法获取封面
-		BookStorePath:   b.BookStorePath,
+		StoreUrl:        b.StoreUrl,
 		ChildBooksNum:   b.ChildBooksNum,
 		ChildBooksID:    b.ChildBooksID,
 		Deleted:         b.Deleted,
 		Depth:           b.Depth,
 		ExtractPath:     b.ExtractPath,
 		ExtractNum:      b.ExtractNum,
-		FilePath:        b.FilePath,
+		BookPath:        b.BookPath,
 		FileSize:        b.FileSize,
 		ISBN:            b.ISBN,
 		InitComplete:    b.InitComplete,
@@ -70,37 +70,21 @@ func (b *Book) GuestCover() (cover MediaFileInfo) {
 }
 
 // NewBook 初始化 Book，设置文件路径、书名、BookID 等
-func NewBook(filePath string, modified time.Time, fileSize int64, storePath string, depth int, bookType SupportFileType) (*Book, error) {
+func NewBook(bookPath string, modified time.Time, fileSize int64, storePath string, depth int, bookType SupportFileType) (*Book, error) {
 	// 初始化书籍
 	book := &Book{
 		BookInfo: BookInfo{
-			Modified:      modified,
-			FileSize:      fileSize,
-			InitComplete:  false,
-			Depth:         depth,
-			BookStorePath: storePath,
-			Type:          bookType,
+			Modified:     modified,
+			FileSize:     fileSize,
+			InitComplete: false,
+			Depth:        depth,
+			StoreUrl:     storePath,
+			Type:         bookType,
 		},
 	}
 	// 设置文件路径、书名、BookID
-	_, err := book.setFilePath(filePath).setParentFolder(filePath).setTitle(filePath).SetAuthor().initBookID(filePath)
+	_, err := book.setFilePath(bookPath).setParentFolder(bookPath).setTitle(bookPath).setAuthor().initBookID(bookPath)
 	return book, err
-}
-
-// NewBookInfo   初始化BookGroup，设置文件路径、书名、BookID等等
-func NewBookInfo(filePath string, modified time.Time, fileSize int64, storePath string, depth int, bookType SupportFileType) *BookInfo {
-	// 初始化书籍
-	bookInfo := BookInfo{
-		Modified:      modified,
-		FileSize:      fileSize,
-		InitComplete:  false,
-		Depth:         depth,
-		BookStorePath: storePath,
-		Type:          bookType,
-	}
-	// 设置属性：
-	bookInfo.setTitle(filePath).setFilePath(filePath).SetAuthor().setParentFolder(filePath).initBookID(filePath)
-	return &bookInfo
 }
 
 // setPageNum 设置书籍的页数
@@ -134,7 +118,7 @@ func (b *Book) SortPagesByImageList(imageList []string) {
 		}
 	}
 	if len(reSortList) == 0 {
-		logger.Infof(locale.GetString("epub_cannot_resort")+"%s", b.FilePath)
+		logger.Infof(locale.GetString("epub_cannot_resort")+"%s", b.BookPath)
 		return
 	}
 	// 添加不在列表中的图片

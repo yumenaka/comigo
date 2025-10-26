@@ -64,12 +64,12 @@ func (ramStore *StoreInRam) AddBook(b *model.Book) error {
 	if b.BookID == "" {
 		return errors.New("add book error: empty BookID")
 	}
-	if _, ok := ramStore.ChildStores.Load(b.BookStorePath); !ok {
-		if err := ramStore.AddStore(b.BookStorePath); err != nil {
+	if _, ok := ramStore.ChildStores.Load(b.StoreUrl); !ok {
+		if err := ramStore.AddStore(b.StoreUrl); err != nil {
 			logger.Infof("Error adding subfolder: %s", err)
 		}
 	}
-	return ramStore.AddBookToSubStore(b.BookStorePath, b)
+	return ramStore.AddBookToSubStore(b.StoreUrl, b)
 }
 
 // AddBookToSubStore 将某一本书，放到BookMap里面去
