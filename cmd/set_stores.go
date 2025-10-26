@@ -7,6 +7,7 @@ import (
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/routers/upload_api"
 	"github.com/yumenaka/comigo/sqlc"
+	"github.com/yumenaka/comigo/store"
 	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
 	"github.com/yumenaka/comigo/tools/scan"
@@ -22,25 +23,17 @@ func ScanStore(args []string) {
 		configDir = ""
 	}
 	// 1. 初始化数据库
+	// 切换到DbStore会导致的已知问题：
+	// 书组相关跳转异常
 	if config.GetCfg().EnableDatabase {
 		if err := sqlc.OpenDatabase(configDir); err != nil {
 			logger.Infof("OpenDatabase Error: %s", err)
-			return
-		}
-		books, err := sqlc.Repo.GetBooksFromDatabase()
-		if err != nil {
-			logger.Infof("%s", err)
+			model.IStore = store.RamStore
 		} else {
-			for _, book := range books {
-				err = model.IStore.AddBook(book, config.GetCfg().MinImageNum)
-				if err != nil {
-					logger.Infof("AddBook error: %s", err)
-				} else {
-					logger.Infof("Book %s added from database", book.BookID)
-				}
-			}
+			model.IStore = sqlc.DbStore
 		}
 	}
+	//model.IStore = store.RamStore
 	// 2、设置默认书库路径：扫描CMD指定的路径，或添加当前文件夹为默认路径。
 	CreateStoreUrls(args)
 	// 3、扫描配置文件里面的书库路径
@@ -48,11 +41,28 @@ func ScanStore(args []string) {
 	if err != nil {
 		logger.Infof("Failed to scan store path: %v", err)
 	}
-	// 4、保存扫描结果到数据库
+
+	// 4、生成虚拟书籍组
 	if config.GetCfg().EnableDatabase {
-		err = scan.SaveResultsToDatabase(config.GetCfg())
+		allBooks, err := sqlc.DbStore.ListBooks()
 		if err != nil {
-			logger.Infof("Failed SaveResultsToDatabase: %v", err)
+			logger.Infof("Error listing books from database: %s", err)
+		} else {
+			// 拿到的书加回RamStore
+			err = store.RamStore.AddBooks(allBooks)
+			if err != nil {
+				return
+			}
+		}
+	}
+	if err := model.IStore.GenerateBookGroup(); err != nil {
+		logger.Infof("%s", err)
+	}
+	// 5、保存扫描结果到数据库
+	if config.GetCfg().EnableDatabase {
+		err = scan.SaveBooksToDatabase(config.GetCfg())
+		if err != nil {
+			logger.Infof("Failed SaveBooksToDatabase: %v", err)
 			return
 		}
 	}

@@ -4,10 +4,10 @@ import (
 	"encoding/base64"
 	"mime"
 	"path/filepath"
-	"strconv"
 
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/store"
 	"github.com/yumenaka/comigo/templ/state"
 	fileutil "github.com/yumenaka/comigo/tools/file"
 	"github.com/yumenaka/comigo/tools/logger"
@@ -26,25 +26,35 @@ func GetPageTitle(bookID string) string {
 	return groupBook.Title
 }
 
-// GetImageAlt 获取图片的 alt 属性
-func GetImageAlt(key int) string {
-	return strconv.Itoa(key)
-}
-
 // GetReturnUrl 阅读或书架页面，返回按钮实际使用的链接
 func GetReturnUrl(BookID string) string {
-	// 如果是书籍组，就跳转到父书架
-	ParentBook, err := model.IStore.GetParentBook(BookID)
-	if err != nil {
-		// logger.Infof("ParentBook not found by BookID: %s, error: %v", BookID, err)
+	childID := BookID
+	if childID == "" {
 		return "/"
 	}
-
-	return "/shelf/" + ParentBook.BookID
+	allBooks, err := model.IStore.ListBooks()
+	if err != nil {
+		logger.Infof("Error listing books: %s", err)
+	}
+	for _, bookGroup := range allBooks {
+		if bookGroup.Type != model.TypeBooksGroup {
+			continue // 只分析书组类型
+		}
+		for _, id := range bookGroup.ChildBooksID {
+			if id == childID {
+				b, err := model.IStore.GetBook(bookGroup.BookID)
+				if err != nil {
+					return "/"
+				}
+				return "/shelf/" + b.BookID
+			}
+		}
+	}
+	return "/"
 }
 
 func ShowQuickJumpBar(b *model.Book) (QuickJumpBar bool) {
-	_, err := model.IStore.GetBookInfoListByParentFolder(b.ParentFolder, "")
+	_, err := store.GetBookInfoListByParentFolder(b.ParentFolder)
 	if err != nil {
 		logger.Infof("%s", err)
 		return false
@@ -53,7 +63,7 @@ func ShowQuickJumpBar(b *model.Book) (QuickJumpBar bool) {
 }
 
 func QuickJumpBarBooks(b *model.Book) (list *model.BookInfoList) {
-	list, err := model.IStore.GetBookInfoListByParentFolder(b.ParentFolder, "")
+	list, err := store.GetBookInfoListByParentFolder(b.ParentFolder)
 	if err != nil {
 		logger.Infof("%s", err)
 		return nil
@@ -75,7 +85,7 @@ func GetFileBase64Text(bookID string, fileName string) string {
 		BookIsPDF:        bookByID.Type == model.TypePDF,
 		BookIsDir:        bookByID.Type == model.TypeDir,
 		BookIsNonUTF8Zip: bookByID.NonUTF8Zip,
-		BookFilePath:     bookByID.FilePath,
+		BookPath:         bookByID.BookPath,
 		Debug:            config.GetCfg().Debug,
 		UseCache:         config.GetCfg().UseCache,
 	}

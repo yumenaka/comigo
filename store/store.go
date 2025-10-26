@@ -1,12 +1,13 @@
 package store
 
 import (
-	"errors"
 	"os"
 	"path/filepath"
 	"sync"
 
+	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
 // StoreInfo 书库基本信息
@@ -25,16 +26,7 @@ type Store struct {
 
 // GenerateBookGroup 分析书库中已有书籍的路径，生成书籍组信息
 func (store *Store) GenerateBookGroup() error {
-	// 如果没有添加过任何书籍，则不需要生成书组信息
-	// sync.Map 本身没有内置 Len() 方法来直接获取元素数量。需要获取数量的时候，需要用 Range 遍历一次，计数累加
-	count := 0
-	for range store.BookMap.Range {
-		count++
-	}
-	if count == 0 {
-		return errors.New("empty Bookstore,skipping analysis")
-	}
-	// 遍历 BookMap ，删除所有 BooksGroup 类型的书籍
+	// 遍历 BookMap ，清理所有 BooksGroup 类型的书籍
 	for _, value := range store.BookMap.Range {
 		b := value.(*model.Book)
 		if b.Type == model.TypeBooksGroup {
@@ -65,17 +57,20 @@ func (store *Store) GenerateBookGroup() error {
 		for parent, sameParentBookList := range parentTempMap {
 			// 新建一本书,类型是书籍组
 			// 获取文件夹信息
-			pathInfo, err := os.Stat(sameParentBookList[0].FilePath)
+			pathInfo, err := os.Stat(sameParentBookList[0].BookPath)
 			if err != nil {
 				return err
 			}
 			// 获取修改时间
 			modTime := pathInfo.ModTime()
-			tempBookInfo := model.NewBookInfo(filepath.Dir(sameParentBookList[0].FilePath), modTime, 0, store.BackendURL, depth-1, model.TypeBooksGroup)
-
-			newBookGroup := &model.Book{
-				BookInfo: *tempBookInfo,
+			tempBook, err := model.NewBook(filepath.Dir(sameParentBookList[0].BookPath), modTime, 0, store.BackendURL, depth-1, model.TypeBooksGroup)
+			if err != nil {
+				if config.GetCfg().Debug {
+					logger.Infof("Error creating new book group: %s", err)
+				}
+				continue
 			}
+			newBookGroup := tempBook
 			// 书名应该设置成parent
 			if newBookGroup.Title != parent {
 				newBookGroup.Title = parent
@@ -92,11 +87,15 @@ func (store *Store) GenerateBookGroup() error {
 			}
 			// 检测是否已经生成并添加过
 			Added := false
-			for _, bookGroup := range RamStore.ListBooks() {
+			allBooks, err := RamStore.ListBooks()
+			if err != nil {
+				logger.Infof("Error listing books: %s", err)
+			}
+			for _, bookGroup := range allBooks {
 				if bookGroup.Type == model.TypeBooksGroup {
 					continue // 只处理书籍组类型
 				}
-				if bookGroup.FilePath == newBookGroup.FilePath {
+				if bookGroup.BookPath == newBookGroup.BookPath {
 					Added = true
 				}
 			}
@@ -108,7 +107,6 @@ func (store *Store) GenerateBookGroup() error {
 				continue
 			}
 			depthBooksMap[depth-1] = append(depthBooksMap[depth-1], newBookGroup)
-			newBookGroup.SetAuthor()
 			// 将这本书加到Store的 BookMap 表里面去
 			store.BookMap.Store(newBookGroup.BookID, newBookGroup)
 		}

@@ -18,17 +18,17 @@ CREATE TABLE IF NOT EXISTS books
 (
     id                INTEGER PRIMARY KEY AUTOINCREMENT,
     title             TEXT        NOT NULL,               -- Book title
-    book_id           TEXT UNIQUE NOT NULL,               -- Book ID, unique identifier generated from file path
+    book_id           TEXT UNIQUE NOT NULL,               -- Book ID, unique identifier generated from book path
     owner             TEXT     DEFAULT 'admin',           -- Owner
-    file_path         TEXT        NOT NULL,               -- Absolute file path
-    book_store_path   TEXT        NOT NULL,               -- Book store path
+    book_path         TEXT        NOT NULL,               -- Absolute book path
+    store_url         TEXT        NOT NULL,               -- Bookstore url
     type              TEXT        NOT NULL,               -- Book type
     child_books_num   INTEGER  DEFAULT 0,                 -- Number of child books
     child_books_id    TEXT,                               -- Child book IDs (comma-separated)
     depth             INTEGER  DEFAULT 0,                 -- Book depth
     parent_folder     TEXT,                               -- Parent folder
     page_count        INTEGER  DEFAULT 0,                 -- Total page count
-    last_read_position      INTEGER  DEFAULT 0,           -- Last read position
+    last_read_page    INTEGER  DEFAULT 0,                 -- Last read position
     file_size         INTEGER  DEFAULT 0,                 -- File size
     author            TEXT,                               -- Author
     isbn              TEXT,                               -- ISBN
@@ -66,10 +66,10 @@ CREATE TABLE IF NOT EXISTS media_files
 CREATE TABLE IF NOT EXISTS bookmarks
 (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    book_id     TEXT    NOT NULL,                  -- Associated book ID
-    page_index  INTEGER NOT NULL,                  -- Page index, starts from 0
-    description TEXT,                              -- User note
-    position    REAL   DEFAULT 0.0,                -- Position percentage (0.0 - 100.0)
+    book_id     TEXT    NOT NULL,                   -- Associated book ID
+    page_index  INTEGER NOT NULL,                   -- Page index, starts from 0
+    description TEXT,                               -- User note
+    position    REAL     DEFAULT 0.0,               -- Position percentage (0.0 - 100.0)
     created_at  DATETIME DEFAULT CURRENT_TIMESTAMP, -- Created time
     updated_at  DATETIME DEFAULT CURRENT_TIMESTAMP, -- Updated time
     FOREIGN KEY (book_id) REFERENCES books (book_id) ON DELETE CASCADE
@@ -105,7 +105,7 @@ CREATE TABLE IF NOT EXISTS file_backends
 
 -- Create indexes for better query performance
 CREATE INDEX IF NOT EXISTS idx_books_book_id ON books (book_id);
-CREATE INDEX IF NOT EXISTS idx_books_file_path ON books (file_path);
+CREATE INDEX IF NOT EXISTS idx_books_file_path ON books (book_path);
 CREATE INDEX IF NOT EXISTS idx_books_type ON books (type);
 CREATE INDEX IF NOT EXISTS idx_books_modified_time ON books (modified_time);
 CREATE INDEX IF NOT EXISTS idx_media_files_book_id ON media_files (book_id);

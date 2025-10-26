@@ -1,4 +1,4 @@
-package get_data_api
+package data_api
 
 import (
 	"encoding/base64"
@@ -92,7 +92,7 @@ func GetFile(c echo.Context) error {
 		BookIsPDF:        bookByID.Type == model.TypePDF,
 		BookIsDir:        bookByID.Type == model.TypeDir,
 		BookIsNonUTF8Zip: bookByID.NonUTF8Zip,
-		BookFilePath:     bookByID.FilePath,
+		BookPath:         bookByID.BookPath,
 		Debug:            config.GetCfg().Debug,
 		UseCache:         config.GetCfg().UseCache,
 		ResizeWidth:      resizeWidth,

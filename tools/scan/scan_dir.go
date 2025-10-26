@@ -1,7 +1,6 @@
 package scan
 
 import (
-	"errors"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -17,10 +16,10 @@ func scanDirGetBook(dirPath string, storePath string, depth int) (*model.Book, e
 	if err != nil {
 		return nil, err
 	}
-	if model.IStore.CheckBookFileExist(dirPath, model.TypeDir) {
-		return nil, errors.New("skip: " + dirPath)
+	newBook, err := model.NewBook(dirPath, dirInfo.ModTime(), dirInfo.Size(), storePath, depth, model.TypeDir)
+	if err != nil {
+		return nil, err
 	}
-	newBook := model.NewBook(dirPath, dirInfo.ModTime(), dirInfo.Size(), storePath, depth, model.TypeDir)
 
 	entries, err := os.ReadDir(dirPath)
 	if err != nil {

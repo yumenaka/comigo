@@ -1,7 +1,6 @@
 package scan
 
 import (
-	"errors"
 	"os"
 
 	"github.com/yumenaka/comigo/model"
@@ -16,17 +15,16 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*model.Book,
 		return nil, err
 	}
 	defer file.Close()
-
 	fileInfo, err := file.Stat()
 	if err != nil {
 		logger.Infof("Failed to get file info: %s, error: %v", filePath, err)
 		return nil, err
 	}
-	if model.IStore.CheckBookFileExist(filePath, model.GetBookTypeByFilename(filePath)) {
-		return nil, errors.New("skip: " + filePath)
+	// 创建新书籍
+	newBook, err := model.NewBook(filePath, fileInfo.ModTime(), fileInfo.Size(), storePath, depth, model.GetBookTypeByFilename(filePath))
+	if err != nil {
+		return nil, err
 	}
-	newBook := model.NewBook(filePath, fileInfo.ModTime(), fileInfo.Size(), storePath, depth, model.GetBookTypeByFilename(filePath))
-
 	switch newBook.Type {
 	case model.TypeZip, model.TypeCbz, model.TypeEpub:
 		err = handleZipAndEpubFiles(filePath, newBook)

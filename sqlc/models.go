@@ -13,8 +13,8 @@ type Book struct {
 	Title           string
 	BookID          string
 	Owner           sql.NullString
-	FilePath        string
-	BookStorePath   string
+	BookPath        string
+	StoreUrl        string
 	Type            string
 	ChildBooksNum   sql.NullInt64
 	ChildBooksID    sql.NullString

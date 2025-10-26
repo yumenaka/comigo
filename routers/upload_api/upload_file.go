@@ -152,7 +152,7 @@ func UploadFile(c echo.Context) error {
 	}
 	// 保存扫描结果到数据库（如果开启）
 	if config.GetCfg().EnableDatabase {
-		if err := scan.SaveResultsToDatabase(config.GetCfg()); err != nil {
+		if err := scan.SaveBooksToDatabase(config.GetCfg()); err != nil {
 			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 				"error": fmt.Sprintf("保存数据库失败: %s", err),
 			})

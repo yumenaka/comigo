@@ -32,7 +32,7 @@ func main() {
 	// RunTui()
 }
 
-// RunTui tui实验
+// tui实验
 func RunTui() {
 	// 判断是否在终端中运行
 	if term.IsTerminal(os.Stdout.Fd()) {

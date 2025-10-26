@@ -20,7 +20,7 @@ var runtimeViper *viper.Viper
 func init() {
 	runtimeViper = viper.New()
 	// 为了避免循环引用，把 model.IStore 指向 store.MainStoreGroup
-	model.IStore = &store.RamStore
+	model.IStore = store.RamStore
 }
 
 func InitFlags() {
@@ -37,9 +37,9 @@ func InitFlags() {
 	// 	RootCmd.PersistentFlags().BoolVar(&StopDaemonFlag, "stop", false, locale.GetString("stop_background"))
 	// }
 	// 启用登陆保护，需要设定用户名
-	RootCmd.PersistentFlags().StringVarP(&cfg.Username, "username", "u", "", locale.GetString("username"))
-	RootCmd.PersistentFlags().StringVarP(&cfg.Password, "password", "k", "", locale.GetString("password"))
-	RootCmd.PersistentFlags().IntVarP(&cfg.Timeout, "timeout", "t", 60*24*30, locale.GetString("timeout"))
+	RootCmd.PersistentFlags().StringVar(&cfg.Username, "username", "", locale.GetString("username"))
+	RootCmd.PersistentFlags().StringVar(&cfg.Password, "password", "", locale.GetString("password"))
+	RootCmd.PersistentFlags().IntVar(&cfg.Timeout, "timeout", 60*24*30, locale.GetString("timeout"))
 	// 启用自动扫描
 	RootCmd.PersistentFlags().BoolVar(&cfg.AutoRescan, "rescan", true, locale.GetString("rescan"))
 	// TLS设定
@@ -49,7 +49,7 @@ func InitFlags() {
 	// 指定配置文件
 	RootCmd.PersistentFlags().StringVarP(&cfg.ConfigFile, "config", "c", "", locale.GetString("config"))
 	// 启用数据库，保存扫描数据
-	RootCmd.PersistentFlags().BoolVarP(&cfg.EnableDatabase, "database", "e", true, locale.GetString("enable_database"))
+	RootCmd.PersistentFlags().BoolVar(&cfg.EnableDatabase, "database", false, locale.GetString("enable_database"))
 	// 服务端口
 	RootCmd.PersistentFlags().IntVarP(&cfg.Port, "port", "p", 1234, locale.GetString("port"))
 	// 本地Host
@@ -72,7 +72,7 @@ func InitFlags() {
 		cfg.OpenBrowser = true
 	}
 	// 不对局域网开放
-	RootCmd.PersistentFlags().BoolVarP(&cfg.DisableLAN, "disable-lan", "d", false, locale.GetString("disable_lan"))
+	RootCmd.PersistentFlags().BoolVar(&cfg.DisableLAN, "local", false, locale.GetString("disable_lan"))
 	// 文件搜索深度
 	RootCmd.PersistentFlags().IntVarP(&cfg.MaxScanDepth, "max-depth", "m", 5, locale.GetString("max_depth"))
 	// //服务器解析书籍元数据，如果生成blurhash，需要消耗大量资源
