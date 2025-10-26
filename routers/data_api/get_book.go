@@ -32,7 +32,7 @@ func GetBook(c echo.Context) error {
 	b.SortPages(sortBy)
 	// 如果是epub文件，重新按照Epub信息排序
 	if b.Type == model.TypeEpub && sortBy == "epub_info" {
-		imageList, err := file.GetImageListFromEpubFile(b.FilePath)
+		imageList, err := file.GetImageListFromEpubFile(b.BookPath)
 		if err != nil {
 			logger.Infof("%s", err)
 			return c.JSON(http.StatusOK, b)

@@ -20,8 +20,8 @@ func ClearBookNotExist() {
 	}
 	for _, book := range allBooks {
 		// 如果父文件夹存在，但书籍文件不存在，也说明这本书被删除了
-		if _, err := os.Stat(book.FilePath); os.IsNotExist(err) {
-			deletedBooks = append(deletedBooks, book.FilePath)
+		if _, err := os.Stat(book.BookPath); os.IsNotExist(err) {
+			deletedBooks = append(deletedBooks, book.BookPath)
 			err := model.IStore.DeleteBook(book.BookID)
 			if err != nil {
 				logger.Infof("Error deleting book %s: %s", book.BookID, err)

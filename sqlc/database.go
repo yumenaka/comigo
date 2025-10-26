@@ -17,7 +17,7 @@ func (db *StoreDatabase) AddBook(book *model.Book) error {
 		return fmt.Errorf("book is nil")
 	}
 	if book.BookID == "" {
-		return fmt.Errorf("book ID is empty" + book.FilePath)
+		return fmt.Errorf("book ID is empty" + book.BookPath)
 	}
 	if err := DbStore.CheckDBQueries(); err != nil {
 		return fmt.Errorf("AddBook: %v", err)
@@ -44,7 +44,7 @@ func (db *StoreDatabase) AddBook(book *model.Book) error {
 		if err != nil {
 			return fmt.Errorf("update book error: %v", err)
 		}
-		logger.Infof("Updated existing book: %s %s", book.BookID, book.FilePath)
+		logger.Infof("Updated existing book: %s %s", book.BookID, book.BookPath)
 	}
 	// 保存书籍的页面信息（媒体文件）
 	if len(book.Images) > 0 {

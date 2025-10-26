@@ -126,7 +126,9 @@ func (c *Config) StoreUrlIsExits(url string) bool {
 	// 检查本地书库url是否已存在
 	for _, storeUrl := range c.StoreUrls {
 		if storeUrl == url {
-			logger.Infof("Store Url already exists: %s", storeUrl)
+			if c.Debug {
+				logger.Infof("Store Url already exists: %s", storeUrl)
+			}
 			return true
 		}
 	}

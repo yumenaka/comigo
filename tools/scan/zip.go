@@ -38,19 +38,19 @@ func handleZipAndEpubFiles(filePath string, newBook *model.Book) error {
 	}
 
 	if newBook.Type == model.TypeEpub {
-		imageList, err := file.GetImageListFromEpubFile(newBook.FilePath)
+		imageList, err := file.GetImageListFromEpubFile(newBook.BookPath)
 		if err == nil {
 			newBook.SortPagesByImageList(imageList)
 		} else {
-			logger.Infof("Failed to get image list from EPUB: %s, error: %v", newBook.FilePath, err)
+			logger.Infof("Failed to get image list from EPUB: %s, error: %v", newBook.BookPath, err)
 		}
 
-		metaData, err := file.GetEpubMetadata(newBook.FilePath)
+		metaData, err := file.GetEpubMetadata(newBook.BookPath)
 		if err == nil {
 			newBook.Author = metaData.Creator
 			newBook.Press = metaData.Publisher
 		} else {
-			logger.Infof("Failed to get metadata from EPUB: %s, error: %v", newBook.FilePath, err)
+			logger.Infof("Failed to get metadata from EPUB: %s, error: %v", newBook.BookPath, err)
 		}
 	}
 	return nil

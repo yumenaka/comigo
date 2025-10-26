@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools/logger"
 )
@@ -66,17 +67,20 @@ func (store *Store) GenerateBookGroup() error {
 		for parent, sameParentBookList := range parentTempMap {
 			// 新建一本书,类型是书籍组
 			// 获取文件夹信息
-			pathInfo, err := os.Stat(sameParentBookList[0].FilePath)
+			pathInfo, err := os.Stat(sameParentBookList[0].BookPath)
 			if err != nil {
 				return err
 			}
 			// 获取修改时间
 			modTime := pathInfo.ModTime()
-			tempBookInfo := model.NewBookInfo(filepath.Dir(sameParentBookList[0].FilePath), modTime, 0, store.BackendURL, depth-1, model.TypeBooksGroup)
-
-			newBookGroup := &model.Book{
-				BookInfo: *tempBookInfo,
+			tempBook, err := model.NewBook(filepath.Dir(sameParentBookList[0].BookPath), modTime, 0, store.BackendURL, depth-1, model.TypeBooksGroup)
+			if err != nil {
+				if config.GetCfg().Debug {
+					logger.Infof("Error creating new book group: %s", err)
+				}
+				continue
 			}
+			newBookGroup := tempBook
 			// 书名应该设置成parent
 			if newBookGroup.Title != parent {
 				newBookGroup.Title = parent
@@ -101,7 +105,7 @@ func (store *Store) GenerateBookGroup() error {
 				if bookGroup.Type == model.TypeBooksGroup {
 					continue // 只处理书籍组类型
 				}
-				if bookGroup.FilePath == newBookGroup.FilePath {
+				if bookGroup.BookPath == newBookGroup.BookPath {
 					Added = true
 				}
 			}
@@ -113,7 +117,6 @@ func (store *Store) GenerateBookGroup() error {
 				continue
 			}
 			depthBooksMap[depth-1] = append(depthBooksMap[depth-1], newBookGroup)
-			newBookGroup.SetAuthor()
 			// 将这本书加到Store的 BookMap 表里面去
 			store.BookMap.Store(newBookGroup.BookID, newBookGroup)
 		}
