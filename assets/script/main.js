@@ -17470,6 +17470,45 @@ window.cookieStorage = {
 
 // 用Alpine Persist 注册全局变量
 // https://alpinejs.dev/plugins/persist#using-alpine-persist-global
+/**
+ * 解析UserAgent获取浏览器信息
+ * @returns {string} 浏览器名称
+ */ function $3d5cedefbd41a457$var$getBrowserInfo() {
+    const ua = navigator.userAgent;
+    let browser = 'Unknown';
+    if (ua.indexOf('Firefox') > -1) browser = 'Firefox';
+    else if (ua.indexOf('Edg') > -1) browser = 'Edge';
+    else if (ua.indexOf('Chrome') > -1) browser = 'Chrome';
+    else if (ua.indexOf('Safari') > -1) browser = 'Safari';
+    else if (ua.indexOf('Opera') > -1 || ua.indexOf('OPR') > -1) browser = 'Opera';
+    else if (ua.indexOf('Trident') > -1 || ua.indexOf('MSIE') > -1) browser = 'IE';
+    return browser;
+}
+/**
+ * 解析UserAgent获取系统信息
+ * @returns {string} 系统名称
+ */ function $3d5cedefbd41a457$var$getSystemInfo() {
+    const ua = navigator.userAgent;
+    let os = 'Unknown';
+    if (ua.indexOf('Win') > -1) os = 'Windows';
+    else if (ua.indexOf('Mac') > -1) os = 'MacOS';
+    else if (ua.indexOf('Linux') > -1) os = 'Linux';
+    else if (ua.indexOf('Android') > -1) os = 'Android';
+    else if (ua.indexOf('iOS') > -1 || ua.indexOf('iPhone') > -1 || ua.indexOf('iPad') > -1) os = 'iOS';
+    return os;
+}
+/**
+ * 生成随机字符串
+ * @returns {string} 随机字符串
+ */ function $3d5cedefbd41a457$var$generateRandomString() {
+    return (Date.now() % 10000000).toString(36) + Math.random().toString(36).substring(2, 5);
+}
+// 浏览器 系统信息 随机字符串
+const $3d5cedefbd41a457$var$browser = $3d5cedefbd41a457$var$getBrowserInfo();
+const $3d5cedefbd41a457$var$system = $3d5cedefbd41a457$var$getSystemInfo();
+const $3d5cedefbd41a457$var$randomString = $3d5cedefbd41a457$var$generateRandomString();
+// 生成userID: 使用UserAgent的哈希值 + 随机字符串，确保唯一性且长度适中
+const $3d5cedefbd41a457$var$initClientID = `Client_${$3d5cedefbd41a457$var$randomString}_${$3d5cedefbd41a457$var$system}_${$3d5cedefbd41a457$var$browser}`;
 Alpine.store('global', {
     // 自动切边
     autoCrop: Alpine.$persist(false).as('global.autoCrop'),
@@ -17483,8 +17522,8 @@ Alpine.store('global', {
     bgPattern: Alpine.$persist('grid-line').as('global.bgPattern'),
     // 是否禁止缓存（TODO：缓存功能优化与测试）
     noCache: Alpine.$persist(false).as('global.noCache'),
-    // userID 当前用户ID  用于同步阅读进度 随机生成
-    userID: Alpine.$persist((Date.now() % 10000000).toString(36) + Math.random().toString(36).substring(2, 5)).as('global.userID'),
+    // clientID 用于识别匿名用户与设备
+    clientID: Alpine.$persist($3d5cedefbd41a457$var$initClientID).as('global.clientID'),
     // debugMode 是否开启调试模式
     debugMode: Alpine.$persist(true).as('global.debugMode'),
     // readerMode 当前阅读模式

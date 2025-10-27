@@ -4,14 +4,11 @@ import (
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
-	"github.com/yumenaka/comigo/store"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
 // InitAllStore 扫描书库路径，取得书籍
 func InitAllStore(cfg ConfigInterface) error {
-	// /清空内存数据库的所有书籍与虚拟书组数据
-	store.RamStore.ChildStores.Clear()
 	storeUrls := cfg.GetStoreUrls()
 	for _, storeUrl := range storeUrls {
 		err := InitStore(storeUrl, cfg)

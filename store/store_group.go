@@ -72,13 +72,6 @@ func (ramStore *StoreInRam) SaveBooks() error {
 	}
 	savePath := filepath.Join(configDir, "books")
 
-	// 创建保存目录
-	err = os.MkdirAll(savePath, os.ModePerm)
-	if err != nil {
-		logger.Infof("Error creating book_data directory: %s", err)
-		return err
-	}
-
 	allBooks, err := ramStore.ListBooks()
 	if err != nil {
 		logger.Infof("Error listing books: %s", err)
@@ -93,9 +86,20 @@ func (ramStore *StoreInRam) SaveBooks() error {
 			logger.Infof("Error marshaling book %s: %s", book.BookID, err)
 			continue // 跳过这本书，继续处理其他书籍
 		}
-
+		storePathAbs, err := filepath.Abs(book.StoreUrl)
+		if err != nil {
+			logger.Infof("Failed to get absolute path: %s", err)
+			storePathAbs = book.StoreUrl
+		}
+		cacheDir := filepath.Join(savePath, base62.EncodeToString([]byte(storePathAbs)))
+		// 创建保存目录
+		err = os.MkdirAll(cacheDir, os.ModePerm)
+		if err != nil {
+			logger.Infof("Error creating book_data directory: %s", err)
+			return err
+		}
 		// 构造文件路径
-		fileName := filepath.Join(savePath, base62.EncodeToString([]byte(book.StoreUrl)), book.BookID+".json")
+		fileName := filepath.Join(cacheDir, book.BookID+".json")
 
 		// 写入文件
 		err = os.WriteFile(fileName, jsonData, 0o644)
@@ -115,14 +119,20 @@ func (ramStore *StoreInRam) LoadBooks() error {
 	if err != nil {
 		return err
 	}
+	savePath := filepath.Join(configDir, "books")
 	// 遍历所有 storeUrl 对应的目录
 	for _, storeUrl := range config.GetCfg().StoreUrls {
-		savePath := filepath.Join(configDir, "books", base62.EncodeToString([]byte(storeUrl)))
+		storePathAbs, err := filepath.Abs(storeUrl)
+		if err != nil {
+			logger.Infof("Failed to get absolute path: %s", err)
+			storePathAbs = storeUrl
+		}
+		cacheDir := filepath.Join(savePath, base62.EncodeToString([]byte(storePathAbs)))
 		// 检查目录是否存在
-		_, err = os.Stat(savePath)
+		_, err = os.Stat(cacheDir)
 		// 目录不存在是正常的（首次运行），不返回错误
 		if os.IsNotExist(err) {
-			logger.Infof("Book data directory does not exist yet: %s", savePath)
+			logger.Infof("Book data directory does not exist yet: %s", cacheDir)
 			continue
 		}
 		// 其他错误
@@ -131,7 +141,7 @@ func (ramStore *StoreInRam) LoadBooks() error {
 			continue
 		}
 		// 读取目录中的所有文件
-		entries, err := os.ReadDir(savePath)
+		entries, err := os.ReadDir(cacheDir)
 		if err != nil {
 			logger.Infof("Error reading book_data directory: %s", err)
 			return err
@@ -150,7 +160,7 @@ func (ramStore *StoreInRam) LoadBooks() error {
 				continue
 			}
 			// 读取文件内容
-			filePath := filepath.Join(savePath, fileName)
+			filePath := filepath.Join(cacheDir, fileName)
 			jsonData, err := os.ReadFile(filePath)
 			if err != nil {
 				logger.Infof("Error reading file %s: %s", fileName, err)
@@ -171,7 +181,7 @@ func (ramStore *StoreInRam) LoadBooks() error {
 			}
 			loadedCount++
 		}
-		logger.Infof("Successfully loaded %d books from %s", loadedCount, savePath)
+		logger.Infof("Successfully loaded %d books from %s", loadedCount, cacheDir)
 	}
 
 	return nil
