@@ -5,7 +5,6 @@ import (
 
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
-	"github.com/yumenaka/comigo/routers/upload_api"
 	"github.com/yumenaka/comigo/sqlc"
 	"github.com/yumenaka/comigo/store"
 	"github.com/yumenaka/comigo/tools"
@@ -36,11 +35,22 @@ func ScanStore(args []string) {
 	//model.IStore = store.RamStore
 	// 2、设置默认书库路径：扫描CMD指定的路径，或添加当前文件夹为默认路径。
 	CreateStoreUrls(args)
-	// 3、扫描配置文件里面的书库路径
+
+	// 从本地文件加载书籍信息到内存（调试用）
+	//err = store.RamStore.LoadBooks()
+	//if err != nil {
+	//	logger.Infof("LoadBooks_error %s", err)
+	//}
+	// 3、扫描配置文件里面的书库路径，取得书籍
 	err = scan.InitAllStore(config.GetCfg())
 	if err != nil {
 		logger.Infof("Failed to scan store path: %v", err)
 	}
+	// 保存书籍到本地文件（调试用）
+	//err = store.RamStore.SaveBooks()
+	//if err != nil {
+	//	logger.Infof("SaveBooks_error %s", err)
+	//}
 
 	// 4、生成虚拟书籍组
 	if config.GetCfg().EnableDatabase {
@@ -107,8 +117,4 @@ func CreateStoreUrls(args []string) {
 			}
 		}
 	}
-	// 扫描路径设置，传递给 router
-	upload_api.ConfigEnableUpload = &config.GetCfg().EnableUpload
-	upload_api.ConfigLocked = &config.GetCfg().ConfigLocked
-	upload_api.ConfigUploadPath = &config.GetCfg().UploadPath
 }
