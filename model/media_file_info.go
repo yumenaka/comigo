@@ -13,8 +13,8 @@ import (
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
-// MediaFileInfo 单个媒体文件的信息
-type MediaFileInfo struct {
+// PageInfo 单个媒体文件的信息
+type PageInfo struct {
 	Name       string    `json:"name"`     // 用于解压的压缩文件内文件路径，或图片名，为了适应特殊字符，经过一次转义
 	Path       string    `json:"path"`     // 文件路径
 	Size       int64     `json:"size"`     // 文件大小
@@ -29,7 +29,7 @@ type MediaFileInfo struct {
 }
 
 // analyzeImage 获取某页漫画的分辨率与blurhash
-func (i *MediaFileInfo) analyzeImage(bookPath string) (err error) {
+func (i *PageInfo) analyzeImage(bookPath string) (err error) {
 	var img image.Image
 	imgData, err := file.GetSingleFile(bookPath, i.Name, "gbk")
 	if err != nil {

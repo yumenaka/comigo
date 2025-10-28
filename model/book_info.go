@@ -21,7 +21,7 @@ type BookInfo struct {
 	StoreUrl        string          `json:"-"`               // 在哪个子书库
 	ChildBooksNum   int             `json:"child_books_num"` // 子书籍数量
 	ChildBooksID    []string        `json:"child_books_id"`  // 子书籍BookID
-	Cover           MediaFileInfo   `json:"cover"`           // 封面图
+	Cover           PageInfo        `json:"cover"`           // 封面图
 	Deleted         bool            `json:"deleted"`         // 源文件是否已删除
 	Depth           int             `json:"depth"`           // 书籍深度
 	ExtractPath     string          `json:"-"`               // 解压路径，7z 用，JSON 不解析
@@ -230,37 +230,37 @@ func (b *BookInfo) ShortName() string {
 }
 
 // GetCover 获取封面
-func (b *BookInfo) GetCover() MediaFileInfo {
+func (b *BookInfo) GetCover() PageInfo {
 	switch b.Type {
 	// 书籍类型为书组的时候，遍历所有子书籍，然后获取第一个子书籍的封面
 	case TypeBooksGroup:
 		bookGroup, err := IStore.GetBook(b.BookID)
 		if err != nil {
 			logger.Infof("Error getting book group: %s", err)
-			return MediaFileInfo{Name: "unknown.png", Url: "/images/unknown.png"}
+			return PageInfo{Name: "unknown.png", Url: "/images/unknown.png"}
 		}
 		for _, childID := range bookGroup.ChildBooksID {
 			book, err := IStore.GetBook(childID)
 			if err != nil {
-				return MediaFileInfo{Name: "unknown.png", Url: "/images/unknown.png"}
+				return PageInfo{Name: "unknown.png", Url: "/images/unknown.png"}
 			}
 			// 递归调用
 			return book.GetCover()
 		}
 	case TypeDir, TypeZip, TypeRar, TypeCbz, TypeCbr, TypeTar, TypeEpub:
 		tempBook, err := IStore.GetBook(b.BookID)
-		if err != nil || len(tempBook.Images) == 0 {
-			return MediaFileInfo{Name: "unknown.png", Url: "/images/unknown.png"}
+		if err != nil || len(tempBook.PageInfos) == 0 {
+			return PageInfo{Name: "unknown.png", Url: "/images/unknown.png"}
 		}
 		return tempBook.GuestCover()
 	case TypePDF:
-		return MediaFileInfo{Name: "1.jpg", Url: "/api/get_file?id=" + b.BookID + "&filename=" + "1.jpg"}
+		return PageInfo{Name: "1.jpg", Url: "/api/get_file?id=" + b.BookID + "&filename=" + "1.jpg"}
 	case TypeVideo:
-		return MediaFileInfo{Name: "video.png", Url: "/images/video.png"}
+		return PageInfo{Name: "video.png", Url: "/images/video.png"}
 	case TypeAudio:
-		return MediaFileInfo{Name: "audio.png", Url: "/images/audio.png"}
+		return PageInfo{Name: "audio.png", Url: "/images/audio.png"}
 	case TypeUnknownFile:
-		return MediaFileInfo{Name: "unknown.png", Url: "/images/unknown.png"}
+		return PageInfo{Name: "unknown.png", Url: "/images/unknown.png"}
 	}
-	return MediaFileInfo{Name: "unknown.png", Url: "/images/unknown.png"}
+	return PageInfo{Name: "unknown.png", Url: "/images/unknown.png"}
 }

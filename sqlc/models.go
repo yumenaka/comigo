@@ -46,7 +46,7 @@ type Bookmark struct {
 	UpdatedAt   sql.NullTime
 }
 
-type MediaFile struct {
+type PageInfo struct {
 	ID         int64
 	BookID     string
 	Name       string
