@@ -106,31 +106,31 @@ WHERE book_id = ?;
 -- Media files related queries
 
 -- Get all page information by book ID
--- name: GetMediaFilesByBookID :many
+-- name: GetPageInfosByBookID :many
 SELECT *
-FROM media_files
+FROM page_infos
 WHERE book_id = ?
 ORDER BY page_num;
 
 -- Get specific page by book ID and page number
--- name: GetMediaFileByBookIDAndPage :one
+-- name: GetPageInfoByBookIDAndPage :one
 SELECT *
-FROM media_files
+FROM page_infos
 WHERE book_id = ?
   AND page_num = ?
 LIMIT 1;
 
 
 -- Create media file record
--- name: CreateMediaFile :one
-INSERT INTO media_files (book_id, name, path, size, mod_time, url, page_num,
+-- name: CreatePageInfo :one
+INSERT INTO page_infos (book_id, name, path, size, mod_time, url, page_num,
                          blurhash, height, width, img_type, insert_html)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 RETURNING *;
 
 -- Update media file information
--- name: UpdateMediaFile :exec
-UPDATE media_files
+-- name: UpdatePageInfo :exec
+UPDATE page_infos
 SET name        = ?,
     path        = ?,
     size        = ?,
@@ -145,9 +145,9 @@ WHERE book_id = ?
   AND page_num = ?;
 
 -- Delete all media files for a book
--- name: DeleteMediaFilesByBookID :exec
+-- name: DeletePageInfosByBookID :exec
 DELETE
-FROM media_files
+FROM page_infos
 WHERE book_id = ?;
 
 -- Bookmarks related queries
@@ -204,9 +204,9 @@ WHERE type = ?
   AND deleted = FALSE;
 
 -- Count media files for a book
--- name: CountMediaFilesByBookID :one
+-- name: CountPageInfosByBookID :one
 SELECT COUNT(*)
-FROM media_files
+FROM page_infos
 WHERE book_id = ?;
 
 -- User related queries

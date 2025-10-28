@@ -43,8 +43,8 @@ CREATE TABLE IF NOT EXISTS books
     deleted           BOOLEAN  DEFAULT FALSE              -- Soft delete flag
 );
 
--- Media files information table (for storing page image information)
-CREATE TABLE IF NOT EXISTS media_files
+-- Pages information table (for storing page image information)
+CREATE TABLE IF NOT EXISTS page_infos
 (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     book_id     TEXT NOT NULL,                                         -- Associated book ID
@@ -81,8 +81,8 @@ CREATE INDEX IF NOT EXISTS idx_books_book_id ON books (book_id);
 CREATE INDEX IF NOT EXISTS idx_books_file_path ON books (book_path);
 CREATE INDEX IF NOT EXISTS idx_books_type ON books (type);
 CREATE INDEX IF NOT EXISTS idx_books_modified_time ON books (modified_time);
-CREATE INDEX IF NOT EXISTS idx_media_files_book_id ON media_files (book_id);
-CREATE INDEX IF NOT EXISTS idx_media_files_page_num ON media_files (book_id, page_num);
+CREATE INDEX IF NOT EXISTS idx_page_infos_book_id ON page_infos (book_id);
+CREATE INDEX IF NOT EXISTS idx_page_infos_page_num ON page_infos (book_id, page_num);
 CREATE INDEX IF NOT EXISTS idx_bookmarks_book_id ON bookmarks (book_id);
 CREATE INDEX IF NOT EXISTS idx_bookmarks_book_page ON bookmarks (book_id, page_index);
 

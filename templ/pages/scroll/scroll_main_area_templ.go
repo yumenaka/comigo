@@ -76,7 +76,7 @@ func MainArea(c echo.Context, book *model.Book, paginationIndex int) templ.Compo
 				return templ_7745c5c3_Err
 			}
 		}
-		for key, image := range book.Images {
+		for key, image := range book.PageInfos {
 			if paginationIndex < 1 || (paginationIndex >= 1 && key/32+1 == paginationIndex) {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"flex flex-col justify-start w-full max-w-full  m-0 rounded item-center\" :style=\"{ marginBottom: $store.scroll.marginBottomOnScrollMode + 'px' }\">")
 				if templ_7745c5c3_Err != nil {

@@ -107,56 +107,56 @@ func ToSQLCUpdateBookParams(book *model.Book) UpdateBookParams {
 	}
 }
 
-// ==================== MediaFileInfo 相关转换 ====================
+// ==================== PageInfo 相关转换 ====================
 
-// FromSQLCMediaFile 将sqlc.MediaFile转换为model.MediaFileInfo
-func FromSQLCMediaFile(sqlcMediaFile MediaFile) model.MediaFileInfo {
-	return model.MediaFileInfo{
-		Name:       sqlcMediaFile.Name,
-		Path:       sqlcMediaFile.Path.String,
-		Size:       sqlcMediaFile.Size.Int64,
-		ModTime:    sqlcMediaFile.ModTime.Time,
-		Url:        sqlcMediaFile.Url.String,
-		PageNum:    int(sqlcMediaFile.PageNum.Int64),
-		Blurhash:   sqlcMediaFile.Blurhash.String,
-		Height:     int(sqlcMediaFile.Height.Int64),
-		Width:      int(sqlcMediaFile.Width.Int64),
-		ImgType:    sqlcMediaFile.ImgType.String,
-		InsertHtml: sqlcMediaFile.InsertHtml.String,
+// FromSQLCPageInfo 将sqlc.PageInfo转换为model.PageInfo
+func FromSQLCPageInfo(sqlcPageInfo PageInfo) model.PageInfo {
+	return model.PageInfo{
+		Name:       sqlcPageInfo.Name,
+		Path:       sqlcPageInfo.Path.String,
+		Size:       sqlcPageInfo.Size.Int64,
+		ModTime:    sqlcPageInfo.ModTime.Time,
+		Url:        sqlcPageInfo.Url.String,
+		PageNum:    int(sqlcPageInfo.PageNum.Int64),
+		Blurhash:   sqlcPageInfo.Blurhash.String,
+		Height:     int(sqlcPageInfo.Height.Int64),
+		Width:      int(sqlcPageInfo.Width.Int64),
+		ImgType:    sqlcPageInfo.ImgType.String,
+		InsertHtml: sqlcPageInfo.InsertHtml.String,
 	}
 }
 
-// ToSQLCCreateMediaFileParams 将model.MediaFileInfo转换为sqlc.CreateMediaFileParams //"Valid"必须是验证条件或true
-func ToSQLCCreateMediaFileParams(mediaFile model.MediaFileInfo, bookID string) CreateMediaFileParams {
-	return CreateMediaFileParams{
+// ToSQLCCreatePageInfoParams 将model.PageInfo 转换为sqlc.CreatePageInfoParams //"Valid"必须是验证条件或true
+func ToSQLCCreatePageInfoParams(pageInfo model.PageInfo, bookID string) CreatePageInfoParams {
+	return CreatePageInfoParams{
 		BookID:     bookID,
-		Name:       mediaFile.Name,
-		Path:       sql.NullString{String: mediaFile.Path, Valid: mediaFile.Path != ""},
-		Size:       sql.NullInt64{Int64: mediaFile.Size, Valid: true},
-		ModTime:    sql.NullTime{Time: mediaFile.ModTime, Valid: !mediaFile.ModTime.IsZero()},
-		Url:        sql.NullString{String: mediaFile.Url, Valid: mediaFile.Url != ""},
-		PageNum:    sql.NullInt64{Int64: int64(mediaFile.PageNum), Valid: true},
-		Blurhash:   sql.NullString{String: mediaFile.Blurhash, Valid: mediaFile.Blurhash != ""},
-		Height:     sql.NullInt64{Int64: int64(mediaFile.Height), Valid: true},
-		Width:      sql.NullInt64{Int64: int64(mediaFile.Width), Valid: true},
-		ImgType:    sql.NullString{String: mediaFile.ImgType, Valid: mediaFile.ImgType != ""},
-		InsertHtml: sql.NullString{String: mediaFile.InsertHtml, Valid: mediaFile.InsertHtml != ""},
+		Name:       pageInfo.Name,
+		Path:       sql.NullString{String: pageInfo.Path, Valid: pageInfo.Path != ""},
+		Size:       sql.NullInt64{Int64: pageInfo.Size, Valid: true},
+		ModTime:    sql.NullTime{Time: pageInfo.ModTime, Valid: !pageInfo.ModTime.IsZero()},
+		Url:        sql.NullString{String: pageInfo.Url, Valid: pageInfo.Url != ""},
+		PageNum:    sql.NullInt64{Int64: int64(pageInfo.PageNum), Valid: true},
+		Blurhash:   sql.NullString{String: pageInfo.Blurhash, Valid: pageInfo.Blurhash != ""},
+		Height:     sql.NullInt64{Int64: int64(pageInfo.Height), Valid: true},
+		Width:      sql.NullInt64{Int64: int64(pageInfo.Width), Valid: true},
+		ImgType:    sql.NullString{String: pageInfo.ImgType, Valid: pageInfo.ImgType != ""},
+		InsertHtml: sql.NullString{String: pageInfo.InsertHtml, Valid: pageInfo.InsertHtml != ""},
 	}
 }
 
-// ToSQLCUpdateMediaFileParams 将model.MediaFileInfo转换为sqlc.UpdateMediaFileParams //"Valid"必须是验证条件或true
-func ToSQLCUpdateMediaFileParams(mediaFile model.MediaFileInfo, bookID string) UpdateMediaFileParams {
-	return UpdateMediaFileParams{
-		Name:       mediaFile.Name,
-		Path:       sql.NullString{String: mediaFile.Path, Valid: mediaFile.Path != ""},
-		Size:       sql.NullInt64{Int64: mediaFile.Size, Valid: true},
-		ModTime:    sql.NullTime{Time: mediaFile.ModTime, Valid: !mediaFile.ModTime.IsZero()},
-		Url:        sql.NullString{String: mediaFile.Url, Valid: mediaFile.Url != ""},
-		Blurhash:   sql.NullString{String: mediaFile.Blurhash, Valid: mediaFile.Blurhash != ""},
-		Height:     sql.NullInt64{Int64: int64(mediaFile.Height), Valid: true},
-		Width:      sql.NullInt64{Int64: int64(mediaFile.Width), Valid: true},
-		ImgType:    sql.NullString{String: mediaFile.ImgType, Valid: mediaFile.ImgType != ""},
-		InsertHtml: sql.NullString{String: mediaFile.InsertHtml, Valid: mediaFile.InsertHtml != ""},
+// ToSQLCUpdatePageInfoParams 将model.PageInfo转换为sqlc.UpdatePageInfoParams //"Valid"必须是验证条件或true
+func ToSQLCUpdatePageInfoParams(pageInfo model.PageInfo, bookID string) UpdatePageInfoParams {
+	return UpdatePageInfoParams{
+		Name:       pageInfo.Name,
+		Path:       sql.NullString{String: pageInfo.Path, Valid: pageInfo.Path != ""},
+		Size:       sql.NullInt64{Int64: pageInfo.Size, Valid: true},
+		ModTime:    sql.NullTime{Time: pageInfo.ModTime, Valid: !pageInfo.ModTime.IsZero()},
+		Url:        sql.NullString{String: pageInfo.Url, Valid: pageInfo.Url != ""},
+		Blurhash:   sql.NullString{String: pageInfo.Blurhash, Valid: pageInfo.Blurhash != ""},
+		Height:     sql.NullInt64{Int64: int64(pageInfo.Height), Valid: true},
+		Width:      sql.NullInt64{Int64: int64(pageInfo.Width), Valid: true},
+		ImgType:    sql.NullString{String: pageInfo.ImgType, Valid: pageInfo.ImgType != ""},
+		InsertHtml: sql.NullString{String: pageInfo.InsertHtml, Valid: pageInfo.InsertHtml != ""},
 		BookID:     bookID,
 	}
 }
@@ -164,24 +164,24 @@ func ToSQLCUpdateMediaFileParams(mediaFile model.MediaFileInfo, bookID string) U
 // ==================== 批量转换函数 ====================
 
 // FromSQLCBooks 批量转换sqlc.Book为model.Book
-func FromSQLCBooks(sqlcBooks []Book, pagesMap map[string][]model.MediaFileInfo) []*model.Book {
+func FromSQLCBooks(sqlcBooks []Book, pagesMap map[string][]model.PageInfo) []*model.Book {
 	books := make([]*model.Book, len(sqlcBooks))
 	for i, sqlcBook := range sqlcBooks {
 		books[i] = FromSQLCBook(sqlcBook)
 		if pages, exists := pagesMap[sqlcBook.BookID]; exists {
-			books[i].Images = pages
+			books[i].PageInfos = pages
 		}
 	}
 	return books
 }
 
-// FromSQLCMediaFiles 批量转换sqlc.MediaFile为model.MediaFileInfo
-func FromSQLCMediaFiles(sqlcMediaFiles []MediaFile) []model.MediaFileInfo {
-	mediaFiles := make([]model.MediaFileInfo, len(sqlcMediaFiles))
-	for i, sqlcMediaFile := range sqlcMediaFiles {
-		mediaFiles[i] = FromSQLCMediaFile(sqlcMediaFile)
+// FromSQLCPageInfos 批量转换sqlc.PageInfo为model.PageInfo
+func FromSQLCPageInfos(sqlcPageInfos []PageInfo) []model.PageInfo {
+	pageInfos := make([]model.PageInfo, len(sqlcPageInfos))
+	for i, sqlcPageInfo := range sqlcPageInfos {
+		pageInfos[i] = FromSQLCPageInfo(sqlcPageInfo)
 	}
-	return mediaFiles
+	return pageInfos
 }
 
 // ==================== User 相关转换 ====================

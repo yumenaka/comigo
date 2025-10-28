@@ -67,7 +67,7 @@ package service
 // 	}
 //
 // 	// 3. 设置书籍的页面信息
-// 	book.Images = mediaFiles
+// 	book.PageInfos = mediaFiles
 //
 // 	// 4. 业务逻辑：设置封面
 // 	if len(mediaFiles) > 0 {
@@ -100,7 +100,7 @@ package service
 // 	}
 //
 // 	// 4. 保存媒体文件信息
-// 	for _, mediaFile := range book.Images {
+// 	for _, mediaFile := range book.PageInfos {
 // 		err = s.bookRepo.CreateMediaFile(ctx, mediaFile, book.BookID)
 // 		if err != nil {
 // 			return fmt.Errorf("创建媒体文件记录失败: %w", err)
@@ -154,7 +154,7 @@ package service
 // 	for _, book := range books {
 // 		mediaFiles, err := s.bookRepo.GetMediaFiles(ctx, book.BookID)
 // 		if err == nil && len(mediaFiles) > 0 {
-// 			book.Images = mediaFiles
+// 			book.PageInfos = mediaFiles
 // 			book.Cover = book.GuestCover()
 // 		}
 // 	}

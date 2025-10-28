@@ -13,8 +13,8 @@ import (
 func (b *Book) ScanAllImage() {
 	logger.Infof(locale.GetString("check_image_start"))
 	bar := pb.StartNew(b.GetPageCount())
-	for i := range b.Images {
-		analyzePageImages(&b.Images[i], b.BookPath)
+	for i := range b.PageInfos {
+		analyzePageImages(&b.PageInfos[i], b.BookPath)
 		bar.Increment()
 	}
 	bar.Finish()
@@ -27,10 +27,10 @@ func (b *Book) ScanAllImageGo() {
 	wp := workpool.New(10) // 设置最大线程数
 	bar := pb.StartNew(b.GetPageCount())
 
-	for i := range b.Images {
+	for i := range b.PageInfos {
 		i := i // 避免闭包问题
 		wp.Do(func() error {
-			analyzePageImages(&b.Images[i], b.BookPath)
+			analyzePageImages(&b.PageInfos[i], b.BookPath)
 			bar.Increment()
 			return nil
 		})

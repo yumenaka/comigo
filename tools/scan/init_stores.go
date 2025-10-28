@@ -23,10 +23,10 @@ func InitAllStore(cfg ConfigInterface) error {
 // AddBooksToStore 添加一组书到书库
 func AddBooksToStore(books []*model.Book) {
 	for _, book := range books {
-		if len(book.Images) < config.GetCfg().MinImageNum {
+		if len(book.PageInfos) < config.GetCfg().MinImageNum {
 			continue
 		}
-		book.PageCount = len(book.Images)
+		book.PageCount = len(book.PageInfos)
 		if err := model.IStore.AddBook(book); err != nil {
 			logger.Infof("AddBook_error"+" bookID:%s %s", book.BookID, err)
 		}

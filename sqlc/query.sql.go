@@ -41,15 +41,15 @@ func (q *Queries) CountBooksByType(ctx context.Context, type_ string) (int64, er
 	return count, err
 }
 
-const countMediaFilesByBookID = `-- name: CountMediaFilesByBookID :one
+const countPageInfosByBookID = `-- name: CountPageInfosByBookID :one
 SELECT COUNT(*)
-FROM media_files
+FROM page_infos
 WHERE book_id = ?
 `
 
 // Count media files for a book
-func (q *Queries) CountMediaFilesByBookID(ctx context.Context, bookID string) (int64, error) {
-	row := q.db.QueryRowContext(ctx, countMediaFilesByBookID, bookID)
+func (q *Queries) CountPageInfosByBookID(ctx context.Context, bookID string) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countPageInfosByBookID, bookID)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
@@ -207,14 +207,14 @@ func (q *Queries) CreateBookmark(ctx context.Context, arg CreateBookmarkParams) 
 	return i, err
 }
 
-const createMediaFile = `-- name: CreateMediaFile :one
-INSERT INTO media_files (book_id, name, path, size, mod_time, url, page_num,
+const createPageInfo = `-- name: CreatePageInfo :one
+INSERT INTO page_infos (book_id, name, path, size, mod_time, url, page_num,
                          blurhash, height, width, img_type, insert_html)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 RETURNING id, book_id, name, path, size, mod_time, url, page_num, blurhash, height, width, img_type, insert_html
 `
 
-type CreateMediaFileParams struct {
+type CreatePageInfoParams struct {
 	BookID     string
 	Name       string
 	Path       sql.NullString
@@ -230,8 +230,8 @@ type CreateMediaFileParams struct {
 }
 
 // Create media file record
-func (q *Queries) CreateMediaFile(ctx context.Context, arg CreateMediaFileParams) (MediaFile, error) {
-	row := q.db.QueryRowContext(ctx, createMediaFile,
+func (q *Queries) CreatePageInfo(ctx context.Context, arg CreatePageInfoParams) (PageInfo, error) {
+	row := q.db.QueryRowContext(ctx, createPageInfo,
 		arg.BookID,
 		arg.Name,
 		arg.Path,
@@ -245,7 +245,7 @@ func (q *Queries) CreateMediaFile(ctx context.Context, arg CreateMediaFileParams
 		arg.ImgType,
 		arg.InsertHtml,
 	)
-	var i MediaFile
+	var i PageInfo
 	err := row.Scan(
 		&i.ID,
 		&i.BookID,
@@ -346,15 +346,15 @@ func (q *Queries) DeleteBookmarksByBookID(ctx context.Context, bookID string) er
 	return err
 }
 
-const deleteMediaFilesByBookID = `-- name: DeleteMediaFilesByBookID :exec
+const deletePageInfosByBookID = `-- name: DeletePageInfosByBookID :exec
 DELETE
-FROM media_files
+FROM page_infos
 WHERE book_id = ?
 `
 
 // Delete all media files for a book
-func (q *Queries) DeleteMediaFilesByBookID(ctx context.Context, bookID string) error {
-	_, err := q.db.ExecContext(ctx, deleteMediaFilesByBookID, bookID)
+func (q *Queries) DeletePageInfosByBookID(ctx context.Context, bookID string) error {
+	_, err := q.db.ExecContext(ctx, deletePageInfosByBookID, bookID)
 	return err
 }
 
@@ -454,23 +454,23 @@ func (q *Queries) GetBookByID(ctx context.Context, bookID string) (Book, error) 
 	return i, err
 }
 
-const getMediaFileByBookIDAndPage = `-- name: GetMediaFileByBookIDAndPage :one
+const getPageInfoByBookIDAndPage = `-- name: GetPageInfoByBookIDAndPage :one
 SELECT id, book_id, name, path, size, mod_time, url, page_num, blurhash, height, width, img_type, insert_html
-FROM media_files
+FROM page_infos
 WHERE book_id = ?
   AND page_num = ?
 LIMIT 1
 `
 
-type GetMediaFileByBookIDAndPageParams struct {
+type GetPageInfoByBookIDAndPageParams struct {
 	BookID  string
 	PageNum sql.NullInt64
 }
 
 // Get specific page by book ID and page number
-func (q *Queries) GetMediaFileByBookIDAndPage(ctx context.Context, arg GetMediaFileByBookIDAndPageParams) (MediaFile, error) {
-	row := q.db.QueryRowContext(ctx, getMediaFileByBookIDAndPage, arg.BookID, arg.PageNum)
-	var i MediaFile
+func (q *Queries) GetPageInfoByBookIDAndPage(ctx context.Context, arg GetPageInfoByBookIDAndPageParams) (PageInfo, error) {
+	row := q.db.QueryRowContext(ctx, getPageInfoByBookIDAndPage, arg.BookID, arg.PageNum)
+	var i PageInfo
 	err := row.Scan(
 		&i.ID,
 		&i.BookID,
@@ -489,25 +489,25 @@ func (q *Queries) GetMediaFileByBookIDAndPage(ctx context.Context, arg GetMediaF
 	return i, err
 }
 
-const getMediaFilesByBookID = `-- name: GetMediaFilesByBookID :many
+const getPageInfosByBookID = `-- name: GetPageInfosByBookID :many
 
 SELECT id, book_id, name, path, size, mod_time, url, page_num, blurhash, height, width, img_type, insert_html
-FROM media_files
+FROM page_infos
 WHERE book_id = ?
 ORDER BY page_num
 `
 
 // Media files related queries
 // Get all page information by book ID
-func (q *Queries) GetMediaFilesByBookID(ctx context.Context, bookID string) ([]MediaFile, error) {
-	rows, err := q.db.QueryContext(ctx, getMediaFilesByBookID, bookID)
+func (q *Queries) GetPageInfosByBookID(ctx context.Context, bookID string) ([]PageInfo, error) {
+	rows, err := q.db.QueryContext(ctx, getPageInfosByBookID, bookID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []MediaFile
+	var items []PageInfo
 	for rows.Next() {
-		var i MediaFile
+		var i PageInfo
 		if err := rows.Scan(
 			&i.ID,
 			&i.BookID,
@@ -1092,8 +1092,8 @@ func (q *Queries) UpdateLastReadPage(ctx context.Context, arg UpdateLastReadPage
 	return err
 }
 
-const updateMediaFile = `-- name: UpdateMediaFile :exec
-UPDATE media_files
+const updatePageInfo = `-- name: UpdatePageInfo :exec
+UPDATE page_infos
 SET name        = ?,
     path        = ?,
     size        = ?,
@@ -1108,7 +1108,7 @@ WHERE book_id = ?
   AND page_num = ?
 `
 
-type UpdateMediaFileParams struct {
+type UpdatePageInfoParams struct {
 	Name       string
 	Path       sql.NullString
 	Size       sql.NullInt64
@@ -1124,8 +1124,8 @@ type UpdateMediaFileParams struct {
 }
 
 // Update media file information
-func (q *Queries) UpdateMediaFile(ctx context.Context, arg UpdateMediaFileParams) error {
-	_, err := q.db.ExecContext(ctx, updateMediaFile,
+func (q *Queries) UpdatePageInfo(ctx context.Context, arg UpdatePageInfoParams) error {
+	_, err := q.db.ExecContext(ctx, updatePageInfo,
 		arg.Name,
 		arg.Path,
 		arg.Size,
