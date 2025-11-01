@@ -49,20 +49,20 @@ const ArrowRightBase64 = 'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0
 
 //设置初始值
 const book = JSON.parse(document.getElementById('NowBook').textContent)
-const images = book.pages.images
+// // 打印调试信息
+// if (Alpine.store('global').debugMode) {
+//     // const globalState = JSON.parse(document.getElementById('GlobalState').textContent);
+//     console.log('book', book)
+//     console.log('book.page_count:', book.page_count)
+// }
+const images = book.PageInfos
 Alpine.store('flip').allPageNum = parseInt(book.page_count)
 // 临时用户标签ID
 const tabID = (Date.now() % 10000000).toString(36) + Math.random().toString(36).substring(2, 5)
 // 假设token是一个有效的令牌 TODO:使用真正的令牌
 const token = 'your_token'
 
-// // 打印调试信息
-// if (Alpine.store('global').debugMode) {
-// 	//console.log(book);
-// 	// const globalState = JSON.parse(document.getElementById('GlobalState').textContent);
-// 	console.log('book.page_count:', book.page_count)
-// 	console.log('images.length:', images.length)
-// }
+
 
 // console.log(Alpine.store('flip').nowPageNum);
 // console.log(Alpine.store('flip').allPageNum -Alpine.store('flip').nowPageNum + 1);
