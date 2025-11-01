@@ -8,14 +8,15 @@ import (
 	"github.com/angelofallars/htmx-go"
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/store"
 	"github.com/yumenaka/comigo/templ/common"
 	"github.com/yumenaka/comigo/templ/pages/error_page"
 	"github.com/yumenaka/comigo/templ/state"
-	"github.com/yumenaka/comigo/util/logger"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
-// Handler 书架页面的处理程序。
-func Handler(c echo.Context) error {
+// PageHandler 书架页面的处理程序。
+func PageHandler(c echo.Context) error {
 	// Set the response content type to HTML.
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
 	// 书籍排序方式
@@ -30,23 +31,20 @@ func Handler(c echo.Context) error {
 	bookID := c.Param("id")
 	// 如果没有指定书籍ID，获取顶层书架信息。
 	if bookID == "" {
-		model.CheckAllBookFileExist()
-		state.Global.ShelfBookList, _ = model.TopOfShelfInfo(sortBy)
+		state.NowBookInfos, _ = store.TopOfShelfInfo(sortBy)
 	}
 
 	// 如果指定了书籍ID，获取子书架信息。
 	if bookID != "" {
 		var err error
-		model.CheckAllBookFileExist()
-		state.Global.ShelfBookList, err = model.GetBookInfoListByID(bookID, sortBy)
-		// TODO: 无图书的提示（返回主页\上传压缩包\远程下载示例漫画）
+		state.NowBookInfos, err = store.GetChildBooksInfo(bookID)
+		// 无图书的提示（返回主页\上传压缩包\远程下载示例漫画）
 		if err != nil {
 			logger.Infof("GetBookShelf Error: %v", err)
 			// 渲染 404 页面
 			indexHtml := common.Html(
 				c,
-				&state.Global,
-				error_page.NotFound404(&state.Global),
+				error_page.NotFound404(c),
 				[]string{},
 			)
 			if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexHtml); err != nil {
@@ -54,13 +52,15 @@ func Handler(c echo.Context) error {
 				return c.NoContent(http.StatusInternalServerError)
 			}
 			return nil
+		} else {
+			state.NowBookInfos.SortBooks(sortBy)
 		}
 	}
 	// 为首页定义模板布局。
 	indexHtml := common.Html(
 		c,
-		&state.Global,
-		ShelfPage(c, &state.Global), // define body content
+
+		ShelfPage(c), // define body content
 		[]string{"script/shelf.js"},
 	)
 	// 用模板渲染书架页面

@@ -1,73 +1,107 @@
 package settings
 
-import (
-	"github.com/yumenaka/comigo/templ/state"
-	"github.com/yumenaka/comigo/templ/common/svg"
-)
+import "github.com/yumenaka/comigo/tools/tailscale_plugin"
+import "github.com/yumenaka/comigo/templ/state"
+import "github.com/yumenaka/comigo/config"
 
-templ MainArea(s *state.GlobalState) {
-<header id="header" hx-target="#tab-contents" role="tablist" hx-on:htmx-after-on-load="let currentTab = document.querySelector('[aria-selected=true]');
-                                           currentTab.setAttribute('aria-selected', 'false')
-                                           currentTab.classList.remove('selected')
-                                           let newTab = event.target
-                                           newTab.setAttribute('aria-selected', 'true')
-                                           newTab.classList.add('selected')"
-    class="flex justify-between w-full h-12 py-1 border-b bg-base-100 text-base-content border-slate-400">
-    <a href="/" class="flex items-center justify-center w-10 h-10 mx-1 my-0 rounded hover:ring">
-        @svg.Return()
-    </a>
-    <!-- examples: https://htmx.org/examples/tabs-javascript/-->
-    <div id="tabs"
-        class="tabs flex items-center justify-center flex-1 p-0 m-0 text-sm font-semibold text-center truncate w-80 drop-shadow focus:relative">
-        <button role="tab" aria-controls="tab-contents" aria-selected="true" hx-get="/api/htmx/settings/tab1"
-            class="tabs selected flex items-center justify-center min-w-20 mx-0.5 my-2 h-9 rounded">
-            @svg.Book()
-            <span x-text="i18next.t('book_shelf')">Book</span>
-        </button>
-        <!-- 目前不需要tab2 -->
-        <!-- <button role="tab" aria-controls="tab-contents" aria-selected="false" hx-get="/api/htmx/settings/tab2"
-            class="tabs flex items-center justify-center min-w-20 mx-0.5 my-2 h-9 rounded">
-            @svg.Network()
-            <span x-text="i18next.t('network')">Network</span>
-        </button> -->
-        <button role="tab" aria-controls="tab-contents" aria-selected="false" hx-get="/api/htmx/settings/tab3"
-            class="tabs flex items-center justify-center min-w-20 mx-0.5 my-2 h-9 rounded">
-            @svg.Labs()
-            <span x-text="i18next.t('labs')">Lab</span>
-        </button>
-    </div>
-    <style>
-        button.tabs {
-            background-color: #b1b5bb;
-            --tw-text-opacity: 1;
-            color: #6b7280;
-            /* text-gray-500 */
-        }
+func x_data_debug_mode(debug bool) string {
+	if debug {
+		return "{debug_mode: true}"
+	}
+	return "{debug_mode: false}"
+}
 
-        button.tabs:hover {
-            --tw-text-opacity: 1;
-            color: #374151
-                /* text-gray-700 */
-            ;
-        }
-
-        button.tabs.selected {
-            background-color: #f9f9f9;
-            --tw-text-opacity: 1;
-            color: #3b82f6;
-            /* text-blue-500 */
-        }
-    </style>
-    <!-- qrcode icon-->
-    <div data-modal-target="qrcode-modal" data-modal-toggle="qrcode-modal"
-        class="flex items-center justify-center w-10 h-10 mx-1 my-0 rounded hover:ring">
-        @svg.QRCode()
-    </div>
-</header>
-<div
-    id="tab-contents" role="tabpanel" hx-get="/api/htmx/settings/tab1" hx-trigger="load"
-    class="flex flex-col justify-start items-center flex-1 w-full h-full font-semibold text-lg text-base-content"
-    :class="(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') ? ($store.global.bgPattern !== 'none'?$store.global.bgPattern+' bg-base-300':'bg-base-300'):($store.global.bgPattern !== 'none'?$store.global.bgPattern:'')">
-    Loading...
-</div>
+templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
+	<div
+		id="settingsMainArea"
+		x-data={ x_data_debug_mode(state.ServerConfig.Debug) }
+		class="flex flex-col justify-start items-center flex-1 w-full h-full font-semibold text-lg text-base-content"
+	>
+		<div class="flex flex-col justify-start w-5/6 md:w-3/5 min-w-[20rem] relative">
+			<script>
+				// htmx出错时报错（Toast）
+				document.addEventListener("htmx:responseError", (event) => {
+					json = JSON.parse(event.detail.xhr.responseText);
+					if (typeof json.message !== "undefined") {
+						showToast(json.message, "error");
+						console.error("Error:", json.message);
+					} else {
+						showToast(
+							event.detail.xhr.statusText + ": " + event.detail.xhr.responseURL,
+							"error",
+						);
+					}
+				});
+			</script>
+			if state.ServerConfig.ConfigLocked {
+				<div
+					class="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-screen h-full bg-black/50 flex items-start justify-center z-50 pointer-events-auto"
+				>
+					<div class="mt-32 p-2 font-semibold text-center border border-red-600 rounded-md bg-red-50 shadow-lg">
+						<span class="text-red-500" x-text="i18next.t('config_locked_description')">
+							Configuration is locked.
+						</span>
+					</div>
+				</div>
+			}
+			<!-- 管理账号密码 -->
+			@UserInfoConfig(state.ServerConfig.Username, state.ServerConfig.Password)
+			<!-- 远程连接 -->
+			@RemoteAccessConfig(tsStatus)
+			<!-- 书库设置 -->
+			<div
+				id="settings_stores"
+				class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-4 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+			>
+				<div x-text={ getTranslations("settings_stores") } class="w-full text-center"></div>
+				<hr class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
+				@StringArrayConfig("StoreUrls", state.ServerConfig.StoreUrls, "StoreUrls_Description", false)
+				@NumberConfig("MaxScanDepth", state.ServerConfig.MaxScanDepth, "MaxScanDepth_Description", 0, 65535, false)
+				@NumberConfig("MinImageNum", state.ServerConfig.MinImageNum, "MinImageNum_Description", 0, 65535, false)
+				@BoolConfig("OpenBrowser", state.ServerConfig.OpenBrowser, "OpenBrowser_Description", false)
+				@BoolConfig("EnableUpload", state.ServerConfig.EnableUpload, "EnableUpload_Description", false)
+				@StringConfig("UploadPath", state.ServerConfig.UploadPath, "UploadPath_Description", false)
+				@StringArrayConfig("ExcludePath", state.ServerConfig.ExcludePath, "ExcludePath_Description", false)
+				@StringArrayConfig("SupportMediaType", state.ServerConfig.SupportMediaType, "SupportMediaType_Description", false)
+				@StringArrayConfig("SupportFileType", state.ServerConfig.SupportFileType, "SupportFileType_Description", false)
+			</div>
+			<!-- 网络设置 -->
+			<div
+				id="settings_network"
+				class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-4 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+			>
+				<div x-text="i18next.t('settings_network')" class="w-full text-center">网络设置</div>
+				<hr class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
+				@NumberConfig("Port", int(state.ServerConfig.Port), "Port_Description", 0, 65535, false)
+				@StringConfig("Host", state.ServerConfig.Host, "Host_Description", false)
+				@BoolConfig("DisableLAN", state.ServerConfig.DisableLAN, "DisableLAN_Description", false)
+				@NumberConfig("Timeout", state.ServerConfig.Timeout, "Timeout_Description", 0, 65535, false)
+			</div>
+			<!-- 保存toml设置文件 -->
+			@ConfigManager(config.DefaultConfigLocation(), config.GetWorkingDirectoryConfig(),
+				config.GetHomeDirectoryConfig(),
+				config.GetProgramDirectoryConfig())
+			<!-- 实验功能 -->
+			<div
+				id="settings_labs"
+				class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-4 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+			>
+				<div x-text={ getTranslations("settings_extra") } class="w-full text-center">实验功能</div>
+				<hr class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
+				@BoolConfig("Debug", state.ServerConfig.Debug, "Debug_Description", false)
+				if state.ServerConfig.Debug {
+					@BoolConfig("LogToFile", state.ServerConfig.LogToFile, "LogToFile_Description", false)
+					@BoolConfig("GenerateMetaData", state.ServerConfig.GenerateMetaData, "GenerateMetaData_Description", false)
+					@BoolConfig("EnableDatabase", state.ServerConfig.EnableDatabase, "EnableDatabase_Description", false)
+					@BoolConfig("ClearCacheExit", state.ServerConfig.ClearCacheExit, "ClearCacheExit_Description", false)
+					@StringConfig("CacheDir", state.ServerConfig.CacheDir, "CacheDir_Description", false)
+					@StringConfig("ZipFileTextEncoding", state.ServerConfig.ZipFileTextEncoding, "ZipFileTextEncoding_Description", false)
+				}
+			</div>
+		</div>
+		if state.ServerConfig.Debug {
+			<!-- 服务器日志 -->
+			@LogPanel()
+		}
+	</div>
 }

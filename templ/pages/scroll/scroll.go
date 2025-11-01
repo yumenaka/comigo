@@ -9,13 +9,11 @@ import (
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/templ/common"
 	"github.com/yumenaka/comigo/templ/pages/error_page"
-	"github.com/yumenaka/comigo/templ/state"
-	"github.com/yumenaka/comigo/util/logger"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
-// Handler 阅读界面（卷轴模式）
-func Handler(c echo.Context) error {
-	model.CheckAllBookFileExist()
+// PageHandler 阅读界面（卷轴模式）
+func PageHandler(c echo.Context) error {
 	// 图片排序方式
 	sortBy := "default"
 	sortBookBy, err := c.Cookie("ScrollSortBy")
@@ -23,18 +21,17 @@ func Handler(c echo.Context) error {
 		// c.Cookie("key") 没找到，那么就会取到空值（nil），
 		// 没处判断就直接访问 .Value 属性，会导致空指针引用错误。
 		sortBy = sortBookBy.Value
-		// fmt.Println("Scroll Mode Sort By:" + sortBy)
+		// logger.Info("Scroll Mode Sort By:" + sortBy)
 	}
 	// 读取url参数，获取书籍ID
 	bookID := c.Param("id")
-	book, err := model.GetBookByID(bookID, sortBy)
+	book, err := model.IStore.GetBook(bookID)
 	if err != nil {
-		logger.Infof("GetBookByID: %v", err)
+		logger.Infof("GetBook: %v", err)
 		// 没有找到书，显示 HTTP 404 错误
 		indexHtml := common.Html(
 			c,
-			&state.Global,
-			error_page.NotFound404(&state.Global),
+			error_page.NotFound404(c),
 			[]string{},
 		)
 		// 渲染 404 页面
@@ -44,6 +41,7 @@ func Handler(c echo.Context) error {
 		}
 		return nil
 	}
+	book.SortPages(sortBy)
 	// 读取分页索引
 	paginationIndex := -1
 	page := c.QueryParam("page")
@@ -54,11 +52,10 @@ func Handler(c echo.Context) error {
 		}
 	}
 	// 定义模板主体内容。
-	scrollPage := ScrollPage(&state.Global, book, paginationIndex)
+	scrollPage := ScrollPage(c, book, paginationIndex)
 	// 拼接页面
 	indexHtml := common.Html(
 		c,
-		&state.Global,
 		scrollPage, // define body content
 		[]string{"script/scroll.js"},
 	)

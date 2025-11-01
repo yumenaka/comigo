@@ -11,60 +11,74 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yumenaka/comigo/config/stores"
-	"github.com/yumenaka/comigo/util"
-	"github.com/yumenaka/comigo/util/logger"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
 // Config Comigo全局配置
 type Config struct {
 	AutoRescan             bool            `json:"AutoRescan" comment:"刷新页面时，是否自动重新扫描书籍是否存在"`
-	CachePath              string          `json:"CachePath" comment:"本地图片缓存位置，默认系统临时文件夹"`
+	CacheDir               string          `json:"CacheDir" comment:"本地图片缓存位置，默认系统临时文件夹"`
 	CertFile               string          `json:"CertFile" comment:"TLS/SSL 证书文件路径 (default: ~/.config/.comigo/cert.crt)"`
 	ClearCacheExit         bool            `json:"ClearCacheExit" comment:"退出程序的时候，清理web图片缓存"`
 	ClearDatabaseWhenExit  bool            `json:"ClearDatabaseWhenExit" comment:"启用本地数据库时，扫描完成后，清除不存在的书籍。"`
-	ConfigPath             string          `json:"-" toml:"-" comment:"用户指定的的yaml设置文件路径"`
+	ConfigFile             string          `json:"-" toml:"-" comment:"用户指定的的yaml设置文件路径"`
+	ConfigLocked           bool            `json:"ConfigLocked" comment:"配置文件锁定，防止被网页端修改，用于展示模式"`
 	Debug                  bool            `json:"Debug" comment:"开启Debug模式"`
 	DefaultMode            string          `json:"DefaultMode" comment:"默认阅读模式，默认为空，可以设置为scroll或flip"`
 	DisableLAN             bool            `json:"DisableLAN" comment:"只在本机提供阅读服务，不对外共享"`
 	EnableDatabase         bool            `json:"EnableDatabase" comment:"启用本地数据库，保存扫描到的书籍数据。"`
-	RequiresLogin          bool            `json:"RequiresLogin" comment:"是否启用登录。"`
 	EnableTLS              bool            `json:"EnableTLS" comment:"是否启用HTTPS协议。需要设置证书于key文件。"`
 	EnableUpload           bool            `json:"EnableUpload" comment:"启用上传功能"`
 	ExcludePath            []string        `json:"ExcludePath" comment:"扫描书籍的时候，需要排除的文件或文件夹的名字"`
 	GenerateMetaData       bool            `json:"GenerateMetaData" toml:"GenerateMetaData" comment:"生成书籍元数据"`
 	Host                   string          `json:"Host" comment:"自定义二维码显示的主机名"`
 	KeyFile                string          `json:"KeyFile" comment:"TLS/SSL key文件路径 (default: ~/.config/.comigo/key.key)"`
-	LocalStores            []string        `json:"LocalStores" comment:"本地书库文件夹"`
+	StoreUrls              []string        `json:"StoreUrls" comment:"本地书库路径列表，支持多个路径。可以是本地文件夹或网络书库地址。"` // 书库地址列表
 	LogFileName            string          `json:"LogFileName" comment:"Log文件名"`
 	LogFilePath            string          `json:"LogFilePath" comment:"Log文件的保存位置"`
 	LogToFile              bool            `json:"LogToFile" comment:"是否保存程序Log到本地文件。默认不保存。"`
 	MaxScanDepth           int             `json:"MaxScanDepth" comment:"最大扫描深度"`
 	MinImageNum            int             `json:"MinImageNum" comment:"压缩包或文件夹内，至少有几张图片，才算作书籍"`
 	OpenBrowser            bool            `json:"OpenBrowser" comment:"是否同时打开浏览器，windows默认true，其他默认false"`
-	Password               string          `json:"Password" comment:"启用登陆后，登录界面需要的密码。"`
+	Password               string          `json:"Password" comment:"登录界面需要的密码。"`
 	Port                   int             `json:"Port" comment:"Comigo设置文件(config.toml)，可保存在：HomeDirectory（$HOME/.config/comigo/config.toml）、WorkingDirectory（当前执行目录）、ProgramDirectory（程序所在目录）下。可用“comi --config-save”生成本文件\n网页服务端口"`
 	PrintAllPossibleQRCode bool            `json:"PrintAllPossibleQRCode" comment:"扫描完成后，打印所有可能的阅读链接二维码"`
-	Stores                 []stores.Store  `json:"BookStores" toml:"-" comment:"书库设置"`
 	SupportFileType        []string        `json:"SupportFileType" comment:"支持的书籍压缩包后缀"`
 	SupportMediaType       []string        `json:"SupportMediaType" comment:"扫描压缩包时，用于统计图片数量的图片文件后缀"`
 	SupportTemplateFile    []string        `json:"SupportTemplateFile" comment:"支持的模板文件类型，默认为html"`
-	StaticFileMode         bool            `json:"StaticFileMode" comment:"是否开启静态文件模式。静态模式下，所有的图片与脚本都打包html文件里，可以直接另存为单个网页（试验性功能，开发中）。"`
-	Timeout                int             `json:"Timeout" comment:"启用登陆后，cookie过期的时间。单位为分钟。默认60*24*30分钟后过期。"`
+	Timeout                int             `json:"Timeout" comment:"cookie过期的时间。单位为分钟。默认60*24*30分钟后过期。"`
 	TimeoutLimitForScan    int             `json:"TimeoutLimitForScan" comment:"扫描文件时，超过几秒钟，就放弃扫描这个文件，避免卡在特殊文件上"`
 	UploadDirOption        UploadDirOption `json:"UploadDirOption" comment:"上传目录的位置选项：0-当前执行目录，1-第一个书库目录，2-指定上传路径"`
 	UploadPath             string          `json:"UploadPath" comment:"指定上传路径时，上传文件的存储位置"`
 	UseCache               bool            `json:"UseCache" comment:"开启本地图片缓存，可以加快二次读取，但会占用硬盘空间"`
-	Username               string          `json:"Username" comment:"启用登陆后，登录界用的用户名。"`
+	Username               string          `json:"Username" comment:"登录界用的用户名。"`
+	EnableTailscale        bool            `json:"EnableTailscale" comment:"启用Tailscale网络支持"`
+	TailscaleHostname      string          `json:"TailscaleHostname" comment:"Tailscale网络的主机名，默认为comigo"`
+	FunnelTunnel           bool            `json:"FunnelTunnel" comment:"启用Tailscale的Funnel模式，允许通过Tailscale公开comigo服务到公网。"`
+	FunnelLoginCheck       bool            `json:"funnel_enforce_password" comment:"启用Funnel模式时，强制要求使用密码登录comigo服务。"`
+	TailscalePort          int             `json:"TailscalePort" comment:"Tailscale网络的端口，默认为443"`
+	TailscaleAuthKey       string          `json:"TailscaleAuthKey" comment:"Tailscale身份验证密钥。另外，也可以将本地环境变量 TS_AUTHKEY 设置为身份验证密钥"`
 	ZipFileTextEncoding    string          `json:"ZipFileTextEncoding" comment:"非utf-8编码的ZIP文件，尝试用什么编码解析，默认GBK"`
 }
 
-func (c *Config) GetLocalStores() []string {
-	return c.LocalStores
+func (c *Config) GetHost() string {
+	return c.Host
 }
 
-func (c *Config) GetStores() []stores.Store {
-	return c.Stores
+func (c *Config) GetPort() int {
+	return c.Port
+}
+
+func (c *Config) GetEnableUpload() bool {
+	return c.EnableUpload
+}
+
+func (c *Config) GetDebug() bool {
+	return c.Debug
+}
+
+func (c *Config) GetStoreUrls() []string {
+	return c.StoreUrls
 }
 
 func (c *Config) GetMaxScanDepth() int {
@@ -107,19 +121,56 @@ func (c *Config) GetClearDatabaseWhenExit() bool {
 	return c.ClearDatabaseWhenExit
 }
 
-func (c *Config) GetDebug() bool {
-	return c.Debug
+// StoreUrlIsExits 检查书库URL是否可添加
+func (c *Config) StoreUrlIsExits(url string) bool {
+	// 检查书库URL是否已存在
+	for _, storeUrl := range c.StoreUrls {
+		if storeUrl == url {
+			if c.Debug {
+				logger.Infof("Store Url already exists: %s", storeUrl)
+			}
+			return true
+		}
+	}
+	return false
+}
+
+// AddStoreUrl 添加本地书库(单个路径)
+func (c *Config) AddStoreUrl(storeURL string) error {
+	if c.StoreUrlIsExits(storeURL) {
+		return fmt.Errorf("store Url already exists: %s", storeURL)
+	}
+	cfg.StoreUrls = append(cfg.StoreUrls, storeURL)
+	return nil
+}
+
+// InitStoreUrls 初始化配置文件中的书库
+func (c *Config) InitStoreUrls() {
+	for _, storeUrl := range c.StoreUrls {
+		if c.StoreUrlIsExits(storeUrl) {
+			logger.Infof("Store Url already exists in config: %s", storeUrl)
+			continue
+		}
+		err := c.AddStoreUrl(storeUrl)
+		if err != nil {
+			logger.Infof("Failed to add store url from config:%s", err)
+		}
+	}
+}
+
+// RequiresAuth 是否需要登录
+func (c *Config) RequiresAuth() bool {
+	return cfg.Username != "" && cfg.Password != ""
 }
 
 func (c *Config) GetTopStoreName() string {
-	if len(c.LocalStores) == 0 {
+	if len(c.StoreUrls) == 0 {
 		return "未设置书库"
 	}
-	return strings.Join(c.LocalStores, ", ")
+	return strings.Join(c.StoreUrls, ", ")
 }
 
-// SetConfigValue 根据字段名和字符串形式的值，来更新 Config 的相应字段。
-// 如果字段名不存在，则返回错误。如果字段类型不在支持范围内，也返回错误。
+// SetConfigValue 更新 Config 的相应字段，如果【fieldName】不存在、或【fieldValue】类型有问题，都返回错误。
 func (c *Config) SetConfigValue(fieldName, fieldValue string) error {
 	// 使用反射获得指向结构体的 Value
 	v := reflect.ValueOf(c).Elem()
@@ -270,23 +321,23 @@ func UpdateConfigByJson(jsonString string) error {
 			if v, ok := value.(string); ok {
 				cfg.Host = v
 			}
-		case "LocalStores":
+		case "StoreUrls":
 			if v, ok := value.([]interface{}); ok {
-				var storeList []string
+				var storeUrls []string
 				for _, s := range v {
 					if str, ok := s.(string); ok {
-						storeList = append(storeList, str)
+						storeUrls = append(storeUrls, str)
 					}
 				}
-				ReplaceLocalStores(storeList)
+				cfg.StoreUrls = storeUrls
 			}
 		case "UseCache":
 			if v, ok := value.(bool); ok {
 				cfg.UseCache = v
 			}
-		case "CachePath":
+		case "CacheDir":
 			if v, ok := value.(string); ok {
-				cfg.CachePath = v
+				cfg.CacheDir = v
 			}
 		case "ClearCacheExit":
 			if v, ok := value.(bool); ok {
@@ -378,14 +429,6 @@ func UpdateConfigByJson(jsonString string) error {
 			if v, ok := value.(bool); ok {
 				cfg.Debug = v
 			}
-		case "RequiresLogin":
-			if v, ok := value.(bool); ok {
-				cfg.RequiresLogin = v
-			}
-		case "StaticFileMode":
-			if v, ok := value.(bool); ok {
-				cfg.StaticFileMode = v
-			}
 		case "Username":
 			if v, ok := value.(string); ok {
 				cfg.Username = v
@@ -428,113 +471,4 @@ func SetByExecutableFilename() {
 		logger.Infof("Executable Name: %s", filenameWithoutSuffix)
 		logger.Infof("Executable Path: %s", executableDir)
 	}
-}
-
-// cfg 为全局配置,全局单实例
-var cfg = Config{
-	ConfigPath:            "",
-	CachePath:             "",
-	ClearCacheExit:        true,
-	ClearDatabaseWhenExit: true,
-	DisableLAN:            false,
-	DefaultMode:           "scroll",
-	EnableUpload:          true,
-	EnableDatabase:        false,
-	EnableTLS:             false,
-	ExcludePath:           []string{"$RECYCLE.BIN", "System Volume Information", ".cache", ".comigo", ".idea", ".vscode", ".git", "node_modules"},
-	Host:                  "",
-	LogToFile:             false,
-	MaxScanDepth:          4,
-	MinImageNum:           3,
-	OpenBrowser:           true,
-	Port:                  1234,
-	Password:              "",
-	Stores: []stores.Store{
-		{
-			Type: stores.SMB,
-			Smb: stores.SMBOption{
-				Host:      os.Getenv("SMB_HOST"),
-				Port:      445,
-				Username:  os.Getenv("SMB_USER"),
-				Password:  os.Getenv("SMB_PASS"),
-				ShareName: os.Getenv("SMB_PATH"),
-			},
-		},
-	},
-	SupportFileType:     []string{".zip", ".tar", ".rar", ".cbr", ".cbz", ".epub", ".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".tar.xz", ".txz", ".tar.lz4", ".tlz4", ".tar.sz", ".tsz", ".bz2", ".gz", ".lz4", ".sz", ".xz", ".mp4", ".webm", ".pdf", ".m4v", ".flv", ".avi", ".mp3", ".wav", ".wma", ".ogg"},
-	SupportMediaType:    []string{".jpg", ".jpeg", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".gif", ".apng", ".bmp", ".webp", ".ico", ".heic", ".heif", ".avif"},
-	SupportTemplateFile: []string{".html"},
-	UseCache:            true,
-	UploadPath:          "",
-	Username:            "comigo",
-	ZipFileTextEncoding: "",
-}
-
-// CanAddLocalStores 检查本地书库路径是否可添加
-func CanAddLocalStores(path string) bool {
-	// 如果文件/文件夹不存在
-	if !util.PathExists(path) {
-		logger.Infof("Path not exists: %v", path)
-		return false
-	}
-
-	// 检查本地书库路径是否已存在
-	for _, store := range cfg.Stores {
-		if store.Type == stores.Local && store.Local.Path == path {
-			logger.Infof("Local store already exists: %s", path)
-			return false
-		}
-	}
-	return true
-}
-
-// AddLocalStore 添加本地书库(单个路径)
-func AddLocalStore(path string) {
-	if !CanAddLocalStores(path) {
-		return
-	}
-	cfg.Stores = append(cfg.Stores, stores.Store{
-		Type: stores.Local,
-		Local: stores.LocalOption{
-			Path: path,
-		},
-	})
-	cfg.LocalStores = GetLocalStoresList()
-}
-
-// AddLocalStores 添加本地书库（多个路径）
-func AddLocalStores(path []string) {
-	for _, p := range path {
-		if CanAddLocalStores(p) {
-			AddLocalStore(p)
-		}
-	}
-}
-
-// InitCfgStores 初始化配置文件中的书库
-func InitCfgStores() {
-	AddLocalStores(cfg.LocalStores)
-}
-
-// ReplaceLocalStores 替换现有的“本地”类型的书库，保留其他类型的书库
-func ReplaceLocalStores(pathList []string) {
-	var newStores []stores.Store
-	for _, store := range cfg.Stores {
-		if store.Type != stores.Local {
-			newStores = append(newStores, store)
-		}
-	}
-	cfg.Stores = newStores
-	AddLocalStores(pathList)
-	cfg.LocalStores = GetLocalStoresList()
-}
-
-func GetLocalStoresList() []string {
-	var localStoresList []string
-	for _, store := range cfg.Stores {
-		if store.Type == stores.Local {
-			localStoresList = append(localStoresList, store.Local.Path)
-		}
-	}
-	return localStoresList
 }

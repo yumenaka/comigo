@@ -1,11 +1,13 @@
 package error_page
 
 import (
-	"github.com/yumenaka/comigo/templ/state"
+	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/templ/common"
+	"github.com/yumenaka/comigo/templ/state"
 )
+
 // 404 NotFound页面
-templ NotFound404(s *state.GlobalState) {
+templ NotFound404(c echo.Context) {
 	@common.Header(
 		common.HeaderProps{
 			Title:           "",
@@ -16,16 +18,14 @@ templ NotFound404(s *state.GlobalState) {
 			DownLoadLink:    "",
 			SetTheme:        true,
 		})
-
 	<div
-		class="flex flex-col items-center justify-center flex-1 w-full p-8 text-center bg-base-100 text-base-content"
-    	:class="(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') ? ($store.global.bgPattern !== 'none'?$store.global.bgPattern+' bg-base-300':'bg-base-300'):($store.global.bgPattern !== 'none'?$store.global.bgPattern:'')"
+		class="flex flex-col items-center justify-center flex-1 w-full p-8 text-center text-base-content"
 	>
-	    <!-- TODO：404页面插画   -->
+		<!-- TODO：404页面插画   -->
 		<div class="text-4xl font-bold text-gray-500">404</div>
 		<div class="text-2xl font-bold text-gray-500">Not Found</div>
 	</div>
-	@common.Drawer(s.ServerStatus.ServerHost, nil)
-    @common.QRCode(s.ServerStatus.ServerHost)
-    @common.Footer(s.Version)
+	@common.Drawer(c, nil, nil)
+	@common.QRCode()
+	@common.Footer(state.Version)
 }

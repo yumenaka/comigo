@@ -1,28 +1,29 @@
 package shelf
 
 import (
-    "fmt"
-    "strconv"
-    "strings"
+	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/model"
-	"github.com/yumenaka/comigo/templ/state"
 )
-//
+
 // 如果链接包含字符串“api/get_file?” 则在背景图片链接中添加参数“&resize_height=512”
 func getResizedImageUrl(imageUrl string) string {
-    if strings.Contains(imageUrl, "api/get_file?") {
-        imageUrl = imageUrl + "&resize_height=512"
-    }
-    return imageUrl
+	if strings.Contains(imageUrl, "api/get_file?") {
+		imageUrl = imageUrl + "&resize_height=512"
+	}
+	return imageUrl
 }
+
 // 书籍卡片图片CSS背景
+
 css backgroundImage(imageUrl string) {
 	background-image: { "url(" + getResizedImageUrl(imageUrl) + ")" };
 }
 
-templ BookCard(c echo.Context, s *state.GlobalState, book model.BookInfo) {
+templ BookCard(c echo.Context, book model.BookInfo) {
 	<!-- 把链接的 target 属性设置为 "_blank"，该链接会在新窗口中打开。 -->
 	<!-- transition-transform duration-200 hover:scale-105  -->
 	<!-- 使用 transform 和 scale 实现“元素放大且不影响原有布局”的效果。核心思路是通过 CSS Transform 做放大动画，而不改变其占据的文档流空间。 -->
@@ -73,7 +74,7 @@ templ BookCard(c echo.Context, s *state.GlobalState, book model.BookInfo) {
 			<div x-show="$store.shelf.showFileIcon" class="absolute top-0 z-10 text-black rounded right-1 hover:bg-gray-200 dark:hover:bg-gray-600">
 				<div class="flex text-xl font-black text-yellow-400" style="text-shadow: 0 1px black, 1px 0 black, -1px 0 black, 0 -1px black;">
 					<svg class="w-8 h-8" style="stroke: black; stroke-width: 0.5px;" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24"><g fill="none"><path d="M6.5 2A2.5 2.5 0 0 0 4 4.5v15A2.5 2.5 0 0 0 6.5 22h13.25a.75.75 0 0 0 0-1.5H6.5a1 1 0 0 1-1-1h14.25a.75.75 0 0 0 .75-.75V4.5A2.5 2.5 0 0 0 18 2H6.5zM8 5h8a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z" fill="currentColor"></path></g></svg>
-					<span class="h-8 font-black text-yellow-400 align-bottom align-text-bottom text-shadow">x{ strconv.Itoa(book.ChildBookNum) }</span>
+					<span class="h-8 font-black text-yellow-400 align-bottom align-text-bottom text-shadow">x{ strconv.Itoa(book.ChildBooksNum) }</span>
 				</div>
 			</div>
 		}

@@ -6,8 +6,9 @@ import (
 	"github.com/angelofallars/htmx-go"
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/store"
 	"github.com/yumenaka/comigo/templ/state"
-	"github.com/yumenaka/comigo/util/logger"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
 // GetBookListHandler 返回排序完毕的book list
@@ -38,28 +39,28 @@ func GetBookListHandler(c echo.Context) error {
 	// 如果没有指定书籍ID，获取顶层书架信息。
 	if bookID == "" {
 		var err error
-		state.Global.ShelfBookList, err = model.TopOfShelfInfo(sortBy)
+		state.NowBookInfos, err = store.TopOfShelfInfo(sortBy)
 		if err != nil {
 			logger.Infof("TopOfShelfInfo: %v", err)
-			// TODO: 没有图书的情况（上传压缩包或远程下载示例漫画）
 		}
 	}
 	// 如果指定了书籍ID，获取子书架信息。
 	if bookID != "" {
 		var err error
-		state.Global.ShelfBookList, err = model.GetBookInfoListByID(bookID, sortBy)
+		state.NowBookInfos, err = store.GetChildBooksInfo(bookID)
 		if err != nil {
 			logger.Infof("GetBookShelf: %v", err)
 		}
+		state.NowBookInfos.SortBooks(sortBy)
 	}
 
-	if state.Global.ShelfBookList == nil {
-		state.Global.ShelfBookList = &model.BookInfoList{}
+	if state.NowBookInfos == nil {
+		state.NowBookInfos = &model.BookInfos{}
 	}
 
 	// https://github.com/angelofallars/htmx-go#templ-integration
 	// 主体内容的模板(书籍列表)
-	template := MainArea(c, &state.Global) // define body content
+	template := MainArea(c) // define body content
 
 	// 用模板渲染 html 元素
 	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, template); renderErr != nil {

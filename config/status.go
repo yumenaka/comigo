@@ -4,9 +4,10 @@ import (
 	"errors"
 	"os"
 	"path"
+	"runtime"
 
-	"github.com/yumenaka/comigo/util"
-	"github.com/yumenaka/comigo/util/logger"
+	"github.com/yumenaka/comigo/tools"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
 type Status struct {
@@ -22,8 +23,11 @@ type Status struct {
 }
 
 func (c *Status) SetConfigStatus() error {
+	// 在js环境下
+	if runtime.GOOS == "js" {
+		return nil
+	}
 	logger.Info("Checking cfg ShareName")
-
 	// 初始化
 	c.In = "None"
 	c.Path.WorkingDirectory = ""
@@ -53,20 +57,20 @@ func (c *Status) SetConfigStatus() error {
 	// 添加搜索路径
 	configPaths = append(configPaths, configPath{
 		name: "HomeDirectory",
-		path: util.GetAbsPath(path.Join(homeDir, ".config/comigo/config.toml")),
+		path: tools.GetAbsPath(path.Join(homeDir, ".config/comigo/config.toml")),
 	})
 	configPaths = append(configPaths, configPath{
 		name: "ProgramDirectory",
-		path: util.GetAbsPath(path.Join(programDir, "config.toml")),
+		path: tools.GetAbsPath(path.Join(programDir, "config.toml")),
 	})
 	configPaths = append(configPaths, configPath{
 		name: "WorkingDirectory",
-		path: util.GetAbsPath("config.toml"),
+		path: tools.GetAbsPath("config.toml"),
 	})
 
 	// 按顺序检查配置文件是否存在
 	for _, cp := range configPaths {
-		if util.IsExist(cp.path) {
+		if tools.IsExist(cp.path) {
 			switch cp.name {
 			case "HomeDirectory":
 				c.Path.HomeDirectory = cp.path

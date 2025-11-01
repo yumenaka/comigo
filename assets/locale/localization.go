@@ -2,29 +2,27 @@ package locale
 
 import (
 	_ "embed"
+	"encoding/json"
 	"os"
 	"os/exec"
 	"runtime"
 	"strings"
 
-	"github.com/BurntSushi/toml"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/text/language"
 )
 
-//https://github.com/nicksnyder/go-i18n/blob/main/v2/i18n/example_test.go
+// https://github.com/nicksnyder/go-i18n/blob/main/v2/i18n/example_test.go
 
-var (
-	Localizer *i18n.Localizer
-)
+var Localizer *i18n.Localizer
 
-//go:embed en-us.toml
+//go:embed en_US.json
 var enBytes []byte
 
-//go:embed zh-cn.toml
+//go:embed zh_CN.json
 var cnBytes []byte
 
-//go:embed ja-jp.toml
+//go:embed ja_JP.json
 var jpBytes []byte
 
 func getLocale() (string, string) {
@@ -46,22 +44,6 @@ func getLocale() (string, string) {
 			}
 			return lang, loc
 		}
-	//case "darwin":
-	//	// On macOS.
-	//	cmd := exec.Command("sh", "osascript -e 'user locale of (get system info)'")
-	//	output, err := cmd.Output()
-	//	if err == nil {
-	//		langLocRaw := strings.TrimSpace(string(output))
-	//		langLoc := strings.Split(langLocRaw, "_")
-	//		lang := langLoc[0]
-	//		loc := lang
-	//		if len(langLoc) > 1 {
-	//			loc = langLoc[1]
-	//		}
-	//		return lang, loc
-	//	} else {
-	//		logger.Infof("获取系统语言失败：%s", err)
-	//	}
 	case "linux", "darwin":
 		envlang, ok := os.LookupEnv("LANG")
 		if ok {
@@ -79,26 +61,17 @@ func getLocale() (string, string) {
 	return defaultLang, defaultLoc
 }
 
-//func chcpToUTF8() {
-//	var cmd *exec.Cmd
-//	if runtime.GOOS == "windows" {
-//		cmd = exec.Command("CMD", "/C", "chcp.com", "65001")
-//		if err := cmd.Start(); err != nil {
-//			logger.Infof("设置Windows活动代码页失败")
-//			logger.Infof("%s", err.Error())
-//		}
-//	}
-//}
+var bundle *i18n.Bundle
 
 func init() {
-	bundle := i18n.NewBundle(language.English)
-	bundle.RegisterUnmarshalFunc("toml", toml.Unmarshal)
-	bundle.MustParseMessageFileBytes(enBytes, "en-us.toml")
-	bundle.MustParseMessageFileBytes(cnBytes, "zh-cn.toml")
-	bundle.MustParseMessageFileBytes(jpBytes, "ja-jp.toml")
+	bundle = i18n.NewBundle(language.English)
+	bundle.RegisterUnmarshalFunc("json", json.Unmarshal)
+	bundle.MustParseMessageFileBytes(enBytes, "en_US.json")
+	bundle.MustParseMessageFileBytes(cnBytes, "zh_CN.json")
+	bundle.MustParseMessageFileBytes(jpBytes, "ja_JP.json")
 
 	lang, _ := getLocale()
-	//logger.Infof("OK: language=%s, locale=%s\n", lang, loc)
+	// logger.Infof("OK: language=%s, locale=%s\n", lang, loc)
 	switch lang {
 	case "zh":
 		Localizer = i18n.NewLocalizer(bundle, "zh-CN")
@@ -113,4 +86,8 @@ func init() {
 
 func GetString(id string) string {
 	return Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: id})
+}
+
+func GetStringByLocal(id string, local string) string {
+	return i18n.NewLocalizer(bundle, local).MustLocalize(&i18n.LocalizeConfig{MessageID: id})
 }
