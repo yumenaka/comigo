@@ -1,6 +1,6 @@
 package model
 
-// x6 书库相关基本操作接口
+// StoreInterface 书库相关基本操作接口 x6
 type StoreInterface interface {
 	AddBook(b *Book) error
 	GetBook(id string) (*Book, error)

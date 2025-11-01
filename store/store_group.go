@@ -1,11 +1,16 @@
 package store
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 
+	"github.com/jxskiss/base62"
+	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools/logger"
 )
@@ -57,6 +62,129 @@ func (ramStore *StoreInRam) ListBooks() ([]*model.Book, error) {
 		}
 	}
 	return books, nil
+}
+
+// SaveBooks  保存书籍信息到本地硬盘
+func (ramStore *StoreInRam) SaveBooks() error {
+	configDir, err := config.GetConfigDir()
+	if err != nil {
+		return err
+	}
+	savePath := filepath.Join(configDir, "books")
+
+	allBooks, err := ramStore.ListBooks()
+	if err != nil {
+		logger.Infof("Error listing books: %s", err)
+		return err
+	}
+
+	// 遍历并保存每本书
+	for _, book := range allBooks {
+		// 序列化书籍为 JSON 格式
+		jsonData, err := json.MarshalIndent(book, "", "  ")
+		if err != nil {
+			logger.Infof("Error marshaling book %s: %s", book.BookID, err)
+			continue // 跳过这本书，继续处理其他书籍
+		}
+		storePathAbs, err := filepath.Abs(book.StoreUrl)
+		if err != nil {
+			logger.Infof("Failed to get absolute path: %s", err)
+			storePathAbs = book.StoreUrl
+		}
+		cacheDir := filepath.Join(savePath, base62.EncodeToString([]byte(storePathAbs)))
+		// 创建保存目录
+		err = os.MkdirAll(cacheDir, os.ModePerm)
+		if err != nil {
+			logger.Infof("Error creating book_data directory: %s", err)
+			return err
+		}
+		// 构造文件路径
+		fileName := filepath.Join(cacheDir, book.BookID+".json")
+
+		// 写入文件
+		err = os.WriteFile(fileName, jsonData, 0o644)
+		if err != nil {
+			logger.Infof("Error saving book %s to file: %s", book.BookID, err)
+			continue // 跳过这本书，继续处理其他书籍
+		}
+	}
+
+	logger.Infof("Successfully saved %d books to %s", len(allBooks), savePath)
+	return nil
+}
+
+// LoadBooks 从本地路径加载书籍信息
+func (ramStore *StoreInRam) LoadBooks() error {
+	configDir, err := config.GetConfigDir()
+	if err != nil {
+		return err
+	}
+	savePath := filepath.Join(configDir, "books")
+	// 遍历所有 storeUrl 对应的目录
+	for _, storeUrl := range config.GetCfg().StoreUrls {
+		storePathAbs, err := filepath.Abs(storeUrl)
+		if err != nil {
+			logger.Infof("Failed to get absolute path: %s", err)
+			storePathAbs = storeUrl
+		}
+		cacheDir := filepath.Join(savePath, base62.EncodeToString([]byte(storePathAbs)))
+		// 检查目录是否存在
+		_, err = os.Stat(cacheDir)
+		// 目录不存在是正常的（首次运行），不返回错误
+		if os.IsNotExist(err) {
+			logger.Infof("Book data directory does not exist yet: %s", cacheDir)
+			continue
+		}
+		// 其他错误
+		if err != nil {
+			logger.Infof("Error accessing book_data directory: %s", err)
+			continue
+		}
+		// 读取目录中的所有文件
+		entries, err := os.ReadDir(cacheDir)
+		if err != nil {
+			logger.Infof("Error reading book_data directory: %s", err)
+			return err
+		}
+		// 统计加载成功的书籍数量
+		loadedCount := 0
+		// 遍历所有文件
+		for _, entry := range entries {
+			// 跳过目录，只处理文件
+			if entry.IsDir() {
+				continue
+			}
+			// 只处理 .json 文件
+			fileName := entry.Name()
+			if !strings.HasSuffix(fileName, ".json") {
+				continue
+			}
+			// 读取文件内容
+			filePath := filepath.Join(cacheDir, fileName)
+			jsonData, err := os.ReadFile(filePath)
+			if err != nil {
+				logger.Infof("Error reading file %s: %s", fileName, err)
+				continue // 跳过这个文件，继续处理其他文件
+			}
+			// 反序列化为 Book 对象
+			var book model.Book
+			err = json.Unmarshal(jsonData, &book)
+			if err != nil {
+				logger.Infof("Warning: corrupted JSON file %s, skipping: %s", fileName, err)
+				continue // 跳过损坏的文件，继续处理其他文件
+			}
+			// 添加书籍到内存
+			err = ramStore.AddBook(&book)
+			if err != nil {
+				logger.Infof("Error adding book %s to store: %s", book.BookID, err)
+				continue // 跳过这本书，继续处理其他书籍
+			}
+			loadedCount++
+		}
+		logger.Infof("Successfully loaded %d books from %s", loadedCount, cacheDir)
+	}
+
+	return nil
 }
 
 // AddBook 添加一本书
@@ -196,38 +324,19 @@ func (ramStore *StoreInRam) GetBookByAuthor(author string, sortBy string) ([]*mo
 }
 
 // TopOfShelfInfo 获取顶层书架信息
-func TopOfShelfInfo(sortBy string) (*model.BookInfoList, error) {
+func TopOfShelfInfo(sortBy string) (*model.BookInfos, error) {
 	// 显示顶层书库的书籍
-	var infoList model.BookInfoList
+	var infoList model.BookInfos
 	allBooks, err := model.IStore.ListBooks()
-	//allBooksB, err := RamStore.ListBooks()
-	//// 比较两个书库的数量是否一致
-	//if err != nil {
-	//	logger.Infof("Error listing books: %s", err)
-	//}
-	//if len(allBooks) != len(allBooksB) {
-	//	logger.Infof("Warning: TopOfShelfInfo: the number of books in RamStore (%d) and IStore (%d) are not equal.", len(allBooksB), len(allBooks))
-	//}
-	//// 打印不一致的书籍ID
-	//bookIDMap := make(map[string]bool)
-	//for _, b := range allBooksB {
-	//	bookIDMap[b.BookID] = true
-	//}
-	//for _, b := range allBooks {
-	//	if _, ok := bookIDMap[b.BookID]; !ok {
-	//		logger.Infof("Warning: TopOfShelfInfo: BookID %s is in IStore but not in RamStore.", b.BookID)
-	//	}
-	//}
-
 	if err != nil {
 		logger.Infof("Error listing books: %s", err)
 	}
 	for _, b := range allBooks {
 		if b.Depth == 0 {
-			infoList.BookInfos = append(infoList.BookInfos, b.BookInfo)
+			infoList = append(infoList, b.BookInfo)
 		}
 	}
-	if len(infoList.BookInfos) > 0 {
+	if len(infoList) > 0 {
 		infoList.SortBooks(sortBy)
 		return &infoList, nil
 	}
@@ -236,8 +345,8 @@ func TopOfShelfInfo(sortBy string) (*model.BookInfoList, error) {
 }
 
 // GetChildBooksInfo 根据 ID 获取书籍列表
-func GetChildBooksInfo(BookID string) (*model.BookInfoList, error) {
-	var infoList model.BookInfoList
+func GetChildBooksInfo(BookID string) (*model.BookInfos, error) {
+	var infoList model.BookInfos
 	parentBook, err := model.IStore.GetBook(BookID)
 	if err != nil {
 		return nil, errors.New("cannot find child books info，BookID：" + BookID)
@@ -247,9 +356,9 @@ func GetChildBooksInfo(BookID string) (*model.BookInfoList, error) {
 		if err != nil {
 			return nil, errors.New("GetParentBook: cannot find book by childID=" + childID)
 		}
-		infoList.BookInfos = append(infoList.BookInfos, b.BookInfo)
+		infoList = append(infoList, b.BookInfo)
 	}
-	if len(infoList.BookInfos) > 0 {
+	if len(infoList) > 0 {
 		return &infoList, nil
 	} else {
 		return nil, errors.New("cannot find child books info，BookID：" + BookID)
@@ -257,48 +366,20 @@ func GetChildBooksInfo(BookID string) (*model.BookInfoList, error) {
 }
 
 // GetBookInfoListByParentFolder 根据父文件夹获取书籍列表
-func GetBookInfoListByParentFolder(parentFolder string) (*model.BookInfoList, error) {
-	var infoList model.BookInfoList
+func GetBookInfoListByParentFolder(parentFolder string) (*model.BookInfos, error) {
+	var infoList model.BookInfos
 	allBooks, err := model.IStore.ListBooks()
 	if err != nil {
 		logger.Infof("Error listing books: %s", err)
 	}
 	for _, b := range allBooks {
 		if b.ParentFolder == parentFolder {
-			infoList.BookInfos = append(infoList.BookInfos, b.BookInfo)
+			infoList = append(infoList, b.BookInfo)
 		}
 	}
-	if len(infoList.BookInfos) > 0 {
+	if len(infoList) > 0 {
 		infoList.SortBooks("filename")
 		return &infoList, nil
 	}
 	return nil, errors.New("cannot find book, parentFolder=" + parentFolder)
 }
-
-// // GetAllBookInfoList 获取所有 BookInfo，并根据 sortBy 参数进行排序
-// func (storeGroup *StoreInRam) GetAllBookInfoList(sortBy string) *BookInfoList {
-// 	var infoList BookInfoList
-// 	// 添加所有真实的书籍
-// 	for _, b := range storeGroup.ListBooks() {
-// 		info := b.GetBookInfo()
-// 		infoList.BookInfos = append(infoList.BookInfos, *info)
-// 	}
-// 	infoList.SortBooks(sortBy)
-// 	return &infoList
-// }
-//
-// func (storeGroup *StoreInRam) GetBookInfoListByMaxDepth(depth int, sortBy string) (*BookInfoList, error) {
-// 	var infoList BookInfoList
-// 	// 首先加上所有真实的书籍
-// 	for _, b := range storeGroup.ListBooks() {
-// 		if b.Depth <= depth {
-// 			info := b.GetBookInfo()
-// 			infoList.BookInfos = append(infoList.BookInfos, *info)
-// 		}
-// 	}
-// 	if len(infoList.BookInfos) > 0 {
-// 		infoList.SortBooks(sortBy)
-// 		return &infoList, nil
-// 	}
-// 	return nil, errors.New("error: cannot find bookshelf in GetBookInfoListByMaxDepth")
-// }

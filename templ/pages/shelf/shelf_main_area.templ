@@ -15,7 +15,7 @@ templ MainArea(c echo.Context) {
 			class="flex flex-row flex-1 w-full h-full"
 		>
 			<div id="book-shelf" class="flex flex-row flex-wrap content-start justify-center flex-1 w-full h-full text-base-content">
-				for _, book := range state.NowBookList.BookInfos {
+				for _, book := range *state.NowBookInfos {
 					@BookCard(c, book)
 				}
 			</div>

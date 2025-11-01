@@ -9,7 +9,7 @@ const book = JSON.parse(document.getElementById('NowBook').textContent)
 const images = book.pages.images
 Alpine.store('scroll').allPageNum = parseInt(book.page_count)
 // 用户ID和令牌，假设已在其他地方定义
-const userID = Alpine.store('global').userID
+const userID = Alpine.store('global').clientID
 // 最大页码
 const MaxPageNum = Math.floor(parseInt(book.page_count) / 32) + 1
 

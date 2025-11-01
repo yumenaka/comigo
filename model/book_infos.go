@@ -6,17 +6,13 @@ import (
 	"github.com/yumenaka/comigo/tools"
 )
 
-// BookInfoList 表示 BookInfo 的列表，排序用
+// BookInfos 表示 BookInfo 的列表，排序用
 // 在 Go 中，方法接收器必须是命名类型，这是为了确保类型具有一个唯一的标识和类型身份，从而可以在包级作用域中明确地定义和调用这些方法。
-// 匿名类型（例如直接使用切片常量）没有显式的名称，无法保证方法在整个代码中的一致性和可追踪性，也无法满足 Go 编译器对方法集的解析要求。
-// 所以需要定义一个命名类型 BookInfoList 来包含 BookInfo 的切片，并提供排序方法。
-// 这样可以确保 BookInfoList 具有明确的类型身份，并且可以在包级作用域中使用和扩展。
-type BookInfoList struct {
-	BookInfos []BookInfo
-}
+// 使用类型别名 BookInfos []BookInfo 来提供排序方法，这样可以确保 BookInfos 具有明确的类型身份，并且可以在包级作用域中使用和扩展。
+type BookInfos []BookInfo
 
 // SortBooks 根据 sortBy 参数对 BookInfos 进行排序
-func (s *BookInfoList) SortBooks(sortBy string) {
+func (s *BookInfos) SortBooks(sortBy string) {
 	if sortBy == "" {
 		sortBy = "default"
 	}
@@ -26,47 +22,47 @@ func (s *BookInfoList) SortBooks(sortBy string) {
 	switch sortBy {
 	case "filename":
 		lessFunc = func(i, j int) bool {
-			return tools.Compare(s.BookInfos[i].Title, s.BookInfos[j].Title)
+			return tools.Compare((*s)[i].Title, (*s)[j].Title)
 		}
 	case "filename_reverse":
 		lessFunc = func(i, j int) bool {
-			return !tools.Compare(s.BookInfos[i].Title, s.BookInfos[j].Title)
+			return !tools.Compare((*s)[i].Title, (*s)[j].Title)
 		}
 	case "filesize":
 		lessFunc = func(i, j int) bool {
-			return compareByFileSize(s.BookInfos[i], s.BookInfos[j])
+			return compareByFileSize((*s)[i], (*s)[j])
 		}
 	case "filesize_reverse":
 		lessFunc = func(i, j int) bool {
-			return !compareByFileSize(s.BookInfos[i], s.BookInfos[j])
+			return !compareByFileSize((*s)[i], (*s)[j])
 		}
 	case "modify_time": // 根据修改时间排序 从新到旧
 		lessFunc = func(i, j int) bool {
-			// if s.BookInfos[i].Type == TypeDir || s.BookInfos[j].Type == TypeDir {
-			//	logger.Info("!!!!" + s.BookInfos[i].Title + "!!!modify_time:" + s.BookInfos[i].Modified.String())
-			//	logger.Info("!!!!" + s.BookInfos[j].Title + "!!!modify_time:" + s.BookInfos[j].Modified.String())
+			// if (*s)[i].Type == TypeDir || (*s)[j].Type == TypeDir {
+			//	logger.Info("!!!!" + (*s)[i].Title + "!!!modify_time:" + (*s)[i].Modified.String())
+			//	logger.Info("!!!!" + (*s)[j].Title + "!!!modify_time:" + (*s)[j].Modified.String())
 			// }
-			return s.BookInfos[i].Modified.After(s.BookInfos[j].Modified)
+			return (*s)[i].Modified.After((*s)[j].Modified)
 		}
 	case "modify_time_reverse": // 根据修改时间排序 从旧到新
 		lessFunc = func(i, j int) bool {
-			return s.BookInfos[i].Modified.Before(s.BookInfos[j].Modified)
+			return (*s)[i].Modified.Before((*s)[j].Modified)
 		}
 	case "author":
 		lessFunc = func(i, j int) bool {
-			return tools.Compare(s.BookInfos[i].Author, s.BookInfos[j].Author)
+			return tools.Compare((*s)[i].Author, (*s)[j].Author)
 		}
 	case "author_reverse":
 		lessFunc = func(i, j int) bool {
-			return !tools.Compare(s.BookInfos[i].Author, s.BookInfos[j].Author)
+			return !tools.Compare((*s)[i].Author, (*s)[j].Author)
 		}
 	default:
 		lessFunc = func(i, j int) bool {
-			return tools.Compare(s.BookInfos[i].Title, s.BookInfos[j].Title)
+			return tools.Compare((*s)[i].Title, (*s)[j].Title)
 		}
 	}
 	//  Go 1.8 及以上版本的 sort.Slice 函数。简化排序逻辑，无需再实现 Len、Less 和 Swap 方法。
-	sort.Slice(s.BookInfos, lessFunc)
+	sort.Slice(*s, lessFunc)
 }
 
 // compareByFileSize 按文件大小比较两个 BookInfo

@@ -47,5 +47,5 @@ func GetTopOfShelfInfo(c echo.Context) error {
 		logger.Infof("%s", err)
 		return c.JSON(http.StatusBadRequest, "GetTopOfShelfInfo Failed")
 	}
-	return c.JSON(http.StatusOK, bookInfoList.BookInfos)
+	return c.JSON(http.StatusOK, *bookInfoList)
 }

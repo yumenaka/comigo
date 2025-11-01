@@ -24,7 +24,7 @@ type HeaderProps struct {
 	SetTheme          bool
 	FlipMode          bool
 	ShowQuickJumpBar  bool
-	QuickJumpBarBooks *model.BookInfoList
+	QuickJumpBarBooks *model.BookInfos
 }
 
 // bg-base-100/50 透明背景
@@ -218,7 +218,7 @@ func Header(prop HeaderProps) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				for _, book := range prop.QuickJumpBarBooks.BookInfos {
+				for _, book := range *prop.QuickJumpBarBooks {
 					if book.Type == model.TypeBooksGroup {
 						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<li><a href=\"")
 						if templ_7745c5c3_Err != nil {
