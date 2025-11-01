@@ -43,75 +43,46 @@ CREATE TABLE IF NOT EXISTS books
     deleted           BOOLEAN  DEFAULT FALSE              -- Soft delete flag
 );
 
--- Media files information table (for storing page image information)
-CREATE TABLE IF NOT EXISTS media_files
+-- Pages information table (for storing page image information)
+CREATE TABLE IF NOT EXISTS page_infos
 (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    book_id     TEXT NOT NULL,     -- Associated book ID
-    name        TEXT NOT NULL,     -- File name (for compressed file path or image name)
-    path        TEXT,              -- File path
-    size        INTEGER DEFAULT 0, -- File size
-    mod_time    DATETIME,          -- Modified time
-    url         TEXT,              -- Remote URL for reading images
-    page_num    INTEGER DEFAULT 0, -- Page number
-    blurhash    TEXT,              -- Blurhash placeholder
-    height      INTEGER DEFAULT 0, -- Image height
-    width       INTEGER DEFAULT 0, -- Image width
-    img_type    TEXT,              -- Image type
-    insert_html TEXT,              -- Insert HTML
-    FOREIGN KEY (book_id) REFERENCES books (book_id) ON DELETE CASCADE
+    book_id     TEXT NOT NULL,                                         -- Associated book ID
+    name        TEXT NOT NULL,                                         -- File name (for compressed file path or image name)
+    path        TEXT,                                                  -- File path
+    size        INTEGER DEFAULT 0,                                     -- File size
+    mod_time    DATETIME,                                              -- Modified time
+    url         TEXT,                                                  -- Remote URL for reading images
+    page_num    INTEGER DEFAULT 0,                                     -- Page number
+    blurhash    TEXT,                                                  -- Blurhash placeholder
+    height      INTEGER DEFAULT 0,                                     -- Image height
+    width       INTEGER DEFAULT 0,                                     -- Image width
+    img_type    TEXT,                                                  -- Image type
+    insert_html TEXT,                                                  -- Insert HTML
+    FOREIGN KEY (book_id) REFERENCES books (book_id) ON DELETE CASCADE -- 外键约束:当引用表（books）中某条记录被 删除 时，将会 自动删除 当前表中所有引用该记录的数据
 );
 
 -- Bookmarks table
 CREATE TABLE IF NOT EXISTS bookmarks
 (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    type        INTEGER NOT NULL,                   -- Bookmark type (1: Reading progress, 2: User note)
     book_id     TEXT    NOT NULL,                   -- Associated book ID
     page_index  INTEGER NOT NULL,                   -- Page index, starts from 0
     description TEXT,                               -- User note
-    position    REAL     DEFAULT 0.0,               -- Position percentage (0.0 - 100.0)
     created_at  DATETIME DEFAULT CURRENT_TIMESTAMP, -- Created time
-    updated_at  DATETIME DEFAULT CURRENT_TIMESTAMP, -- Updated time
-    FOREIGN KEY (book_id) REFERENCES books (book_id) ON DELETE CASCADE
-);
-
--- Book stores table
-CREATE TABLE IF NOT EXISTS stores
-(
-    backend_url TEXT PRIMARY KEY NOT NULL,          -- Associated file backend ID
-    name        TEXT             NOT NULL,          -- Store name
-    description TEXT,                               -- Store description
-    created_at  DATETIME DEFAULT CURRENT_TIMESTAMP, -- Created time
-    updated_at  DATETIME DEFAULT CURRENT_TIMESTAMP, -- Updated time
-    FOREIGN KEY (backend_url) REFERENCES file_backends (url) ON DELETE CASCADE
-);
-
--- File backend storage configuration table
-CREATE TABLE IF NOT EXISTS file_backends
-(
-    url            TEXT PRIMARY KEY NOT NULL,          -- Store URL
-    type           INTEGER          NOT NULL,          -- File backend type (1: LocalDisk, 2: SMB, 3: SFTP, 4: WebDAV, 5: S3, 6: FTP)
-    server_host    TEXT,                               -- Server host address
-    server_port    INTEGER  DEFAULT 0,                 -- Server port number
-    need_auth      BOOLEAN  DEFAULT FALSE,             -- Whether authentication is required
-    auth_username  TEXT,                               -- Authentication username
-    auth_password  TEXT,                               -- Authentication password
-    smb_share_name TEXT,                               -- SMB share name
-    smb_path       TEXT,                               -- SMB share path
-    created_at     DATETIME DEFAULT CURRENT_TIMESTAMP, -- Created time
-    updated_at     DATETIME DEFAULT CURRENT_TIMESTAMP  -- Updated time
+    updated_at  DATETIME DEFAULT CURRENT_TIMESTAMP -- Updated time
+    -- FOREIGN KEY (book_id) REFERENCES books (book_id) ON DELETE CASCADE
 );
 
 
--- Create indexes for better query performance
+-- Create indexes for better query performance / 创建索引以获得更好的查询性
 CREATE INDEX IF NOT EXISTS idx_books_book_id ON books (book_id);
 CREATE INDEX IF NOT EXISTS idx_books_file_path ON books (book_path);
 CREATE INDEX IF NOT EXISTS idx_books_type ON books (type);
 CREATE INDEX IF NOT EXISTS idx_books_modified_time ON books (modified_time);
-CREATE INDEX IF NOT EXISTS idx_media_files_book_id ON media_files (book_id);
-CREATE INDEX IF NOT EXISTS idx_media_files_page_num ON media_files (book_id, page_num);
+CREATE INDEX IF NOT EXISTS idx_page_infos_book_id ON page_infos (book_id);
+CREATE INDEX IF NOT EXISTS idx_page_infos_page_num ON page_infos (book_id, page_num);
 CREATE INDEX IF NOT EXISTS idx_bookmarks_book_id ON bookmarks (book_id);
 CREATE INDEX IF NOT EXISTS idx_bookmarks_book_page ON bookmarks (book_id, page_index);
-CREATE INDEX IF NOT EXISTS idx_stores_url ON stores (backend_url);
-CREATE INDEX IF NOT EXISTS idx_file_backends_url ON file_backends (url);
 

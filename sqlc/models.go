@@ -38,29 +38,15 @@ type Book struct {
 
 type Bookmark struct {
 	ID          int64
+	Type        int64
 	BookID      string
 	PageIndex   int64
 	Description sql.NullString
-	Position    sql.NullFloat64
 	CreatedAt   sql.NullTime
 	UpdatedAt   sql.NullTime
 }
 
-type FileBackend struct {
-	Url          string
-	Type         int64
-	ServerHost   sql.NullString
-	ServerPort   sql.NullInt64
-	NeedAuth     sql.NullBool
-	AuthUsername sql.NullString
-	AuthPassword sql.NullString
-	SmbShareName sql.NullString
-	SmbPath      sql.NullString
-	CreatedAt    sql.NullTime
-	UpdatedAt    sql.NullTime
-}
-
-type MediaFile struct {
+type PageInfo struct {
 	ID         int64
 	BookID     string
 	Name       string
@@ -74,14 +60,6 @@ type MediaFile struct {
 	Width      sql.NullInt64
 	ImgType    sql.NullString
 	InsertHtml sql.NullString
-}
-
-type Store struct {
-	BackendUrl  string
-	Name        string
-	Description sql.NullString
-	CreatedAt   sql.NullTime
-	UpdatedAt   sql.NullTime
 }
 
 type User struct {

@@ -44,7 +44,7 @@ func MainArea(c echo.Context) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			for _, book := range state.NowBookList.BookInfos {
+			for _, book := range *state.NowBookInfos {
 				templ_7745c5c3_Err = BookCard(c, book).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err

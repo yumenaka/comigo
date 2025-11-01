@@ -65,7 +65,7 @@ func handleOtherArchiveFiles(filePath string, newBook *model.Book) error {
 	if err != nil {
 		return err
 	}
-
+	pageNum := 1
 	err = fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			logger.Infof("Failed to access path %s in archive: %v", path, err)
@@ -88,16 +88,19 @@ func handleOtherArchiveFiles(filePath string, newBook *model.Book) error {
 			var tempURL string
 			if ok {
 				tempURL = "/api/get_file?id=" + newBook.BookID + "&filename=" + url.QueryEscape(archivedFile.NameInArchive)
-				newBook.Images = append(newBook.Images, model.MediaFileInfo{
-					Name: archivedFile.NameInArchive,
-					Url:  tempURL,
+				newBook.PageInfos = append(newBook.PageInfos, model.PageInfo{
+					Name:    archivedFile.NameInArchive,
+					Url:     tempURL,
+					PageNum: pageNum,
 				})
 			} else {
 				tempURL = "/api/get_file?id=" + newBook.BookID + "&filename=" + url.QueryEscape(path)
-				newBook.Images = append(newBook.Images, model.MediaFileInfo{
-					Url: tempURL,
+				newBook.PageInfos = append(newBook.PageInfos, model.PageInfo{
+					Url:     tempURL,
+					PageNum: pageNum,
 				})
 			}
+			pageNum++
 		} else {
 			if cfg.GetDebug() {
 				logger.Infof(locale.GetString("unsupported_file_type")+" %s", path)
@@ -114,12 +117,14 @@ func scanNonUTF8ZipFile(filePath string, b *model.Book) error {
 	if err != nil {
 		return err
 	}
+	pageNum := 1
 	for _, f := range reader.File {
 		if IsSupportMedia(f.Name) {
 			// 如果是压缩文件
 			// 替换特殊字符的时候，额外将“+替换成"%2b"，因为gin会将+解析为空格。
 			TempURL := "/api/get_file?id=" + b.BookID + "&filename=" + url.QueryEscape(f.Name)
-			b.Images = append(b.Images, model.MediaFileInfo{Path: "", Size: f.FileInfo().Size(), ModTime: f.FileInfo().ModTime(), Name: f.Name, Url: TempURL})
+			b.PageInfos = append(b.PageInfos, model.PageInfo{Path: "", Size: f.FileInfo().Size(), ModTime: f.FileInfo().ModTime(), Name: f.Name, Url: TempURL, PageNum: pageNum})
+			pageNum++
 		} else {
 			if cfg.GetDebug() {
 				logger.Infof(locale.GetString("unsupported_file_type")+" %s", f.Name)
@@ -137,6 +142,7 @@ func walkUTF8ZipFs(fsys fs.FS, parent, base string, b *model.Book) error {
 	// logger.Infof("parent:" + parent + " base:" + base)
 	dirName := path.Join(parent, base)
 	dirEntries, err := fs.ReadDir(fsys, dirName)
+	pageNum := 1
 	for _, dirEntry := range dirEntries {
 		name := dirEntry.Name()
 		f, errInfo := dirEntry.Info()
@@ -159,7 +165,8 @@ func walkUTF8ZipFs(fsys fs.FS, parent, base string, b *model.Book) error {
 			inArchiveName := path.Join(parent, f.Name())
 			TempURL := "/api/get_file?id=" + b.BookID + "&filename=" + url.QueryEscape(inArchiveName)
 			// 替换特殊字符的时候,不要用url.PathEscape()，PathEscape不会把“+“替换成"%2b"，会导致BUG，让gin会将+解析为空格。
-			b.Images = append(b.Images, model.MediaFileInfo{Path: "", Size: f.Size(), ModTime: f.ModTime(), Name: inArchiveName, Url: TempURL})
+			b.PageInfos = append(b.PageInfos, model.PageInfo{Path: "", Size: f.Size(), ModTime: f.ModTime(), Name: inArchiveName, Url: TempURL, PageNum: pageNum})
+			pageNum++
 		} else {
 			if cfg.GetDebug() {
 				logger.Infof(locale.GetString("unsupported_file_type")+" %s", name)

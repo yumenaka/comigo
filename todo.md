@@ -63,7 +63,7 @@
 - [x] 解决tailscale带来的cgo编译问题：https://github.com/elastic/golang-crossbuild 或 https://github.com/goreleaser/goreleaser-cross
 
 ### 开发中
-- [ ]网页端日志查看 50%
+- [ ] 网页端日志查看 50%
 - [ ] “阅读历史记录（是否跳转到上一次阅读的最远页）”与“按照最近阅读时间排序”
 - [ ] 文件持久化，meta文件，阅读历史与统计。
 - [ ] 新官网,Discord频道,使用文档，参考 https://omarchy.org/ 。内置帮助文档?
@@ -85,13 +85,12 @@
 - [ ] wasm模式
 - [ ] 拆分内存存储与数据库存储，并为支持samba与S3等文件系统做准备。
 - [ ] 自动更新
-- [ ]文件监控
-- [ ]用户系统增强
-- [ ]Shell 交互
-- [ ]文件管理
-- [ ]EPUB/PDF 阅读优化、
-- [ ] 高级阅读体验
-    - 防剧透效果、回忆模式、特殊背景、背景音乐etc
+- [ ] 文件监控
+- [ ] 用户系统增强
+- [ ] Shell 交互
+- [ ] 文件管理
+- [ ] EPUB/PDF 阅读优化、
+- [ ] 防剧透效果、回忆模式、特殊背景、背景音乐etc
 
   
 ## 开发环境搭建
@@ -140,36 +139,28 @@ air
 ### 长期计划
 - [ ] 嵌入html，防剧透效果。回忆模式，特殊背景，音乐etc
 - [ ] 网页端：优化图片预加载，长图片支持。
-- [ ] 网页端：网页前端查看log
 - [ ] 跨平台 GUI（Flutter + GoMobile或 Wails）PWA模式。
-- [ ] 更新提示，自动更新。包管理支持。
-- [ ] 文件夹监控(fsnotify)，自动更新(github.com/jpillora/overseer)
-- [ ] 用户系统、访问密码，流量限制等
+- [ ] 更新提示，自动更新自动更新(github.com/jpillora/overseer) 包管理支持。[self update 功能](https://github.com/minio/selfupdate)
+- [ ] 文件夹监控(fsnotify)，https://github.com/helshabini/fsbroker/
+- [ ] 用户系统、访问密码，流量限制 comigo后台：有几台设备在线，阅读文件，阅读页数，当前用户状态、阅读书籍、阅读进度、阅读时间、服务器状态 注册，阅读记录，
 - [ ] shell 互动（<https://github.com/rivo/tview> ）
 - [ ] 子命令，download rar2zip
 - [ ] 支持rar压缩包密码。处理损坏文件，扩展名错误的文件，固实压缩文件（7z）。更准确的文件类型判断。
 - [ ] 崩溃后恢复，恶意存档处理。
-- [ ] 使用新版压缩包处理库（https://github.com/mholt/archives）
 - [ ] 编写测试
 - [ ] 命令行交互
 - [ ] 调用第三方API
 - [ ] 文件管理，删除。
 - [ ] Debian，RPM包（<https://github.com/goreleaser/nfpm）>
 - [ ] 优化epub与PDF阅读体验，支持图文混排（pdf.js与epub.js）
-- [ ]  [self update 功能](https://github.com/minio/selfupdate)
 - [ ] 显示服务器log：[web终端示例](https://zenn.dev/ikedam/articles/2e078bfc2a4cb6)
 - [ ] -start 参数，后台运行。-stop参数，停止后台运行的进程。
 - [ ] 自定义js与css代码块功能。
 - [ ] [使用 Go1.24 的 os.Root 类型](https://antonz.org/go-1-24/)，将[文件操作限制在特定目录](https://go.dev/blog/osroot)，以防止攻击者通过转义或相对路径非法访问文件
 - [ ] 自动发版功能 [goreleaser](https://goreleaser.com/)  [github-action](https://dev.to/hadlow/how-to-release-to-homebrew-with-goreleaser-github-actions-and-semantic-release-2gbb)
-- [ ] comigo后台：有几台设备在线，阅读文件，阅读页数，当前用户状态、阅读书籍、阅读进度、阅读时间、服务器状态 注册，阅读记录，
-- [ ] 合并htmx代码，参考[pagoda](https://github.com/mikestefanello/pagoda)
-  ，重新规划项目结构。我用的许多组件，最终都换成和这个模板一样的了，估计从这个项目里可以学到很多东西。[go-blueprint](https://docs.go-blueprint.dev/)
-  也是一个不错的参考，可以看看怎么集成websockets与templ。
 - [ ] 添加[数据验证](https://dev.to/leapcell/validator-complex-structs-arrays-and-maps-validation-for-go-34ni)。
-- [ ] 优化打开浏览器与扫描逻辑，减少等待时间。可以使用[端口检测包](https://github.com/wait4x/wait4x)。
 - [ ] SteamDeck支持（网页支持手柄操作）鼠标滚轮对应
 - [ ] 同步翻页 -> 全局多端同步跟踪页面状态，除了不同id的书籍，其他页面状态都可以同步。
 - [ ] 后台运行功能：unix：https://github.com/sevlyar/go-daemon 支持Windows但是最近没更新：https://github.com/takama/daemon
 - [ ] 在终端显示图片 https://github.com/ploMP4/chafa-go
-- [ ] 文件监视器 https://github.com/helshabini/fsbroker/
+- [ ]  OpenID Connect 登录 https://github.com/zitadel/oidc  https://tailscale.com/community/community-projects/tsidp

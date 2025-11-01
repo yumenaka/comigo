@@ -24,9 +24,10 @@ func handlePdfFiles(filePath string, newBook *model.Book) error {
 	newBook.InitComplete = true
 	for i := 1; i <= pageCount; i++ {
 		tempURL := "/api/get_file?id=" + newBook.BookID + "&filename=" + strconv.Itoa(i) + ".jpg"
-		newBook.Images = append(newBook.Images, model.MediaFileInfo{
-			Name: strconv.Itoa(i),
-			Url:  tempURL,
+		newBook.PageInfos = append(newBook.PageInfos, model.PageInfo{
+			Name:    strconv.Itoa(i),
+			Url:     tempURL,
+			PageNum: i,
 		})
 	}
 	return nil

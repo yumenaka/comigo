@@ -49,8 +49,8 @@ func (db *StoreDatabase) AddBook(book *model.Book) error {
 		logger.Infof("Updated existing book: %s %s", book.BookID, book.BookPath)
 	}
 	// 保存书籍的页面信息（媒体文件）
-	if len(book.Images) > 0 {
-		err = db.SaveBookMediaFiles(ctx, book.BookID, book.Images)
+	if len(book.PageInfos) > 0 {
+		err = db.SaveBookPageInfos(ctx, book.BookID, book.PageInfos)
 		if err != nil {
 			return fmt.Errorf("book media files error: %v", err)
 		}
@@ -58,27 +58,25 @@ func (db *StoreDatabase) AddBook(book *model.Book) error {
 	return nil
 }
 
-// SaveBookMediaFiles  保存书籍的媒体文件信息
-func (db *StoreDatabase) SaveBookMediaFiles(ctx context.Context, bookID string, mediaFiles []model.MediaFileInfo) error {
+// SaveBookPageInfos  保存书籍的媒体文件信息
+func (db *StoreDatabase) SaveBookPageInfos(ctx context.Context, bookID string, pageInfos []model.PageInfo) error {
 	// 先删除旧的媒体文件记录
-	err := db.queries.DeleteMediaFilesByBookID(ctx, bookID)
+	err := db.queries.DeletePageInfosByBookID(ctx, bookID)
 	if err != nil {
 		return fmt.Errorf("delete old media files error: %v", err)
 	}
 
 	// 插入新的媒体文件记录
-	for i, mediaFile := range mediaFiles {
+	for _, pageInfo := range pageInfos {
 		// 设置页码
-		mediaFile.PageNum = i + 1
-
-		createParams := ToSQLCCreateMediaFileParams(mediaFile, bookID)
-		_, err := db.queries.CreateMediaFile(ctx, createParams)
+		createParams := ToSQLCCreatePageInfoParams(pageInfo, bookID)
+		_, err := db.queries.CreatePageInfo(ctx, createParams)
 		if err != nil {
-			return fmt.Errorf("create media file %s error: %v", mediaFile.Name, err)
+			return fmt.Errorf("create media file %s error: %v", pageInfo.Name, err)
 		}
 	}
 	if config.GetCfg().Debug {
-		logger.Infof("Saved %d media files for book %s", len(mediaFiles), bookID)
+		logger.Infof("Saved %d media files for book %s", len(pageInfos), bookID)
 	}
 	return nil
 }
@@ -96,18 +94,18 @@ func (db *StoreDatabase) ListBooks() (list []*model.Book, err error) {
 		return nil, fmt.Errorf("list books error: %v", err)
 	}
 	// 为每本书查询媒体文件信息
-	pagesMap := make(map[string][]model.MediaFileInfo)
+	pagesMap := make(map[string][]model.PageInfo)
 	for _, sqlcBook := range sqlcBooks {
 		// 过滤掉已删除的书籍
 		if sqlcBook.Deleted.Valid && sqlcBook.Deleted.Bool {
 			continue
 		}
-		sqlcMediaFiles, err := db.queries.GetMediaFilesByBookID(ctx, sqlcBook.BookID)
+		sqlcPageInfos, err := db.queries.GetPageInfosByBookID(ctx, sqlcBook.BookID)
 		if err != nil {
 			logger.Infof("Get media files for book %s error: %s", sqlcBook.BookID, err.Error())
-			pagesMap[sqlcBook.BookID] = []model.MediaFileInfo{}
+			pagesMap[sqlcBook.BookID] = []model.PageInfo{}
 		} else {
-			pagesMap[sqlcBook.BookID] = FromSQLCMediaFiles(sqlcMediaFiles)
+			pagesMap[sqlcBook.BookID] = FromSQLCPageInfos(sqlcPageInfos)
 		}
 	}
 
@@ -133,9 +131,9 @@ func (db *StoreDatabase) GetBook(bookID string) (*model.Book, error) {
 	}
 	// 补充页面信息
 	book := FromSQLCBook(sqlcBook)
-	imagesSQL, err := db.queries.GetMediaFilesByBookID(ctx, sqlcBook.BookID)
+	imagesSQL, err := db.queries.GetPageInfosByBookID(ctx, sqlcBook.BookID)
 	if err == nil {
-		book.Images = FromSQLCMediaFiles(imagesSQL)
+		book.PageInfos = FromSQLCPageInfos(imagesSQL)
 		book.SortPages("default") // 对页面进行排序
 	}
 	return book, nil
@@ -160,7 +158,7 @@ func (db *StoreDatabase) GenerateBookGroup() (e error) {
 		storeBooks := FromSQLCBooks(sqlcBook, nil)
 		// 遍历 BookMap ，删除所有 BooksGroup 类型的书籍
 		for _, b := range storeBooks {
-			if model.SupportFileType(b.Type) == model.TypeBooksGroup {
+			if b.Type == model.TypeBooksGroup {
 				err := db.DeleteBook(b.BookID)
 				if err != nil {
 					return err
@@ -272,7 +270,7 @@ func (db *StoreDatabase) DeleteBook(bookID string) error {
 		return fmt.Errorf("DeleteBook error: %v", err)
 	}
 	// 清理书籍相关的媒体文件记录
-	err = db.queries.DeleteMediaFilesByBookID(ctx, bookID)
+	err = db.queries.DeletePageInfosByBookID(ctx, bookID)
 	if err != nil {
 		return fmt.Errorf("DeleteBook media files error: %v", err)
 	}

@@ -41,42 +41,15 @@ func (q *Queries) CountBooksByType(ctx context.Context, type_ string) (int64, er
 	return count, err
 }
 
-const countFileBackendsByType = `-- name: CountFileBackendsByType :one
+const countPageInfosByBookID = `-- name: CountPageInfosByBookID :one
 SELECT COUNT(*)
-FROM file_backends
-WHERE type = ?
-`
-
-// Count file backends by type
-func (q *Queries) CountFileBackendsByType(ctx context.Context, type_ int64) (int64, error) {
-	row := q.db.QueryRowContext(ctx, countFileBackendsByType, type_)
-	var count int64
-	err := row.Scan(&count)
-	return count, err
-}
-
-const countMediaFilesByBookID = `-- name: CountMediaFilesByBookID :one
-SELECT COUNT(*)
-FROM media_files
+FROM page_infos
 WHERE book_id = ?
 `
 
 // Count media files for a book
-func (q *Queries) CountMediaFilesByBookID(ctx context.Context, bookID string) (int64, error) {
-	row := q.db.QueryRowContext(ctx, countMediaFilesByBookID, bookID)
-	var count int64
-	err := row.Scan(&count)
-	return count, err
-}
-
-const countStores = `-- name: CountStores :one
-SELECT COUNT(*)
-FROM stores
-`
-
-// Count total stores
-func (q *Queries) CountStores(ctx context.Context) (int64, error) {
-	row := q.db.QueryRowContext(ctx, countStores)
+func (q *Queries) CountPageInfosByBookID(ctx context.Context, bookID string) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countPageInfosByBookID, bookID)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
@@ -201,96 +174,47 @@ func (q *Queries) CreateBook(ctx context.Context, arg CreateBookParams) (Book, e
 }
 
 const createBookmark = `-- name: CreateBookmark :one
-INSERT INTO bookmarks (book_id, page_index, description, position, created_at, updated_at)
+INSERT INTO bookmarks (type, book_id, page_index, description, created_at, updated_at)
 VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-RETURNING id, book_id, page_index, description, position, created_at, updated_at
+RETURNING id, type, book_id, page_index, description, created_at, updated_at
 `
 
 type CreateBookmarkParams struct {
+	Type        int64
 	BookID      string
 	PageIndex   int64
 	Description sql.NullString
-	Position    sql.NullFloat64
 }
 
 // Create a bookmark
 func (q *Queries) CreateBookmark(ctx context.Context, arg CreateBookmarkParams) (Bookmark, error) {
 	row := q.db.QueryRowContext(ctx, createBookmark,
+		arg.Type,
 		arg.BookID,
 		arg.PageIndex,
 		arg.Description,
-		arg.Position,
 	)
 	var i Bookmark
 	err := row.Scan(
 		&i.ID,
+		&i.Type,
 		&i.BookID,
 		&i.PageIndex,
 		&i.Description,
-		&i.Position,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
 	return i, err
 }
 
-const createFileBackend = `-- name: CreateFileBackend :one
-INSERT INTO file_backends (url, type, server_host, server_port, need_auth, auth_username,
-                           auth_password, smb_share_name, smb_path)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-RETURNING url, type, server_host, server_port, need_auth, auth_username, auth_password, smb_share_name, smb_path, created_at, updated_at
-`
-
-type CreateFileBackendParams struct {
-	Url          string
-	Type         int64
-	ServerHost   sql.NullString
-	ServerPort   sql.NullInt64
-	NeedAuth     sql.NullBool
-	AuthUsername sql.NullString
-	AuthPassword sql.NullString
-	SmbShareName sql.NullString
-	SmbPath      sql.NullString
-}
-
-// Create file backend
-func (q *Queries) CreateFileBackend(ctx context.Context, arg CreateFileBackendParams) (FileBackend, error) {
-	row := q.db.QueryRowContext(ctx, createFileBackend,
-		arg.Url,
-		arg.Type,
-		arg.ServerHost,
-		arg.ServerPort,
-		arg.NeedAuth,
-		arg.AuthUsername,
-		arg.AuthPassword,
-		arg.SmbShareName,
-		arg.SmbPath,
-	)
-	var i FileBackend
-	err := row.Scan(
-		&i.Url,
-		&i.Type,
-		&i.ServerHost,
-		&i.ServerPort,
-		&i.NeedAuth,
-		&i.AuthUsername,
-		&i.AuthPassword,
-		&i.SmbShareName,
-		&i.SmbPath,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
-const createMediaFile = `-- name: CreateMediaFile :one
-INSERT INTO media_files (book_id, name, path, size, mod_time, url, page_num,
+const createPageInfo = `-- name: CreatePageInfo :one
+INSERT INTO page_infos (book_id, name, path, size, mod_time, url, page_num,
                          blurhash, height, width, img_type, insert_html)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 RETURNING id, book_id, name, path, size, mod_time, url, page_num, blurhash, height, width, img_type, insert_html
 `
 
-type CreateMediaFileParams struct {
+type CreatePageInfoParams struct {
 	BookID     string
 	Name       string
 	Path       sql.NullString
@@ -306,8 +230,8 @@ type CreateMediaFileParams struct {
 }
 
 // Create media file record
-func (q *Queries) CreateMediaFile(ctx context.Context, arg CreateMediaFileParams) (MediaFile, error) {
-	row := q.db.QueryRowContext(ctx, createMediaFile,
+func (q *Queries) CreatePageInfo(ctx context.Context, arg CreatePageInfoParams) (PageInfo, error) {
+	row := q.db.QueryRowContext(ctx, createPageInfo,
 		arg.BookID,
 		arg.Name,
 		arg.Path,
@@ -321,7 +245,7 @@ func (q *Queries) CreateMediaFile(ctx context.Context, arg CreateMediaFileParams
 		arg.ImgType,
 		arg.InsertHtml,
 	)
-	var i MediaFile
+	var i PageInfo
 	err := row.Scan(
 		&i.ID,
 		&i.BookID,
@@ -336,32 +260,6 @@ func (q *Queries) CreateMediaFile(ctx context.Context, arg CreateMediaFileParams
 		&i.Width,
 		&i.ImgType,
 		&i.InsertHtml,
-	)
-	return i, err
-}
-
-const createStore = `-- name: CreateStore :one
-INSERT INTO stores (backend_url, name, description)
-VALUES (?, ?, ?)
-RETURNING backend_url, name, description, created_at, updated_at
-`
-
-type CreateStoreParams struct {
-	BackendUrl  string
-	Name        string
-	Description sql.NullString
-}
-
-// Create store
-func (q *Queries) CreateStore(ctx context.Context, arg CreateStoreParams) (Store, error) {
-	row := q.db.QueryRowContext(ctx, createStore, arg.BackendUrl, arg.Name, arg.Description)
-	var i Store
-	err := row.Scan(
-		&i.BackendUrl,
-		&i.Name,
-		&i.Description,
-		&i.CreatedAt,
-		&i.UpdatedAt,
 	)
 	return i, err
 }
@@ -418,33 +316,21 @@ func (q *Queries) DeleteBook(ctx context.Context, bookID string) error {
 	return err
 }
 
-const deleteBookmark = `-- name: DeleteBookmark :exec
-DELETE
-FROM bookmarks
-WHERE id = ?
-`
-
-// Delete a bookmark (by id)
-func (q *Queries) DeleteBookmark(ctx context.Context, id int64) error {
-	_, err := q.db.ExecContext(ctx, deleteBookmark, id)
-	return err
-}
-
-const deleteBookmarkByBookIDAndPage = `-- name: DeleteBookmarkByBookIDAndPage :exec
+const deleteBookmarkByBookIDAndType = `-- name: DeleteBookmarkByBookIDAndType :exec
 DELETE
 FROM bookmarks
 WHERE book_id = ?
-  AND page_index = ?
+  AND type = ?
 `
 
-type DeleteBookmarkByBookIDAndPageParams struct {
-	BookID    string
-	PageIndex int64
+type DeleteBookmarkByBookIDAndTypeParams struct {
+	BookID string
+	Type   int64
 }
 
-// Delete a bookmark by (book_id, page_index)
-func (q *Queries) DeleteBookmarkByBookIDAndPage(ctx context.Context, arg DeleteBookmarkByBookIDAndPageParams) error {
-	_, err := q.db.ExecContext(ctx, deleteBookmarkByBookIDAndPage, arg.BookID, arg.PageIndex)
+// Delete a bookmark by (book_id, type)
+func (q *Queries) DeleteBookmarkByBookIDAndType(ctx context.Context, arg DeleteBookmarkByBookIDAndTypeParams) error {
+	_, err := q.db.ExecContext(ctx, deleteBookmarkByBookIDAndType, arg.BookID, arg.Type)
 	return err
 }
 
@@ -460,39 +346,15 @@ func (q *Queries) DeleteBookmarksByBookID(ctx context.Context, bookID string) er
 	return err
 }
 
-const deleteFileBackend = `-- name: DeleteFileBackend :exec
+const deletePageInfosByBookID = `-- name: DeletePageInfosByBookID :exec
 DELETE
-FROM file_backends
-WHERE url = ?
-`
-
-// Delete file backend
-func (q *Queries) DeleteFileBackend(ctx context.Context, url string) error {
-	_, err := q.db.ExecContext(ctx, deleteFileBackend, url)
-	return err
-}
-
-const deleteMediaFilesByBookID = `-- name: DeleteMediaFilesByBookID :exec
-DELETE
-FROM media_files
+FROM page_infos
 WHERE book_id = ?
 `
 
 // Delete all media files for a book
-func (q *Queries) DeleteMediaFilesByBookID(ctx context.Context, bookID string) error {
-	_, err := q.db.ExecContext(ctx, deleteMediaFilesByBookID, bookID)
-	return err
-}
-
-const deleteStore = `-- name: DeleteStore :exec
-DELETE
-FROM stores
-WHERE backend_url = ?
-`
-
-// Delete store
-func (q *Queries) DeleteStore(ctx context.Context, backendUrl string) error {
-	_, err := q.db.ExecContext(ctx, deleteStore, backendUrl)
+func (q *Queries) DeletePageInfosByBookID(ctx context.Context, bookID string) error {
+	_, err := q.db.ExecContext(ctx, deletePageInfosByBookID, bookID)
 	return err
 }
 
@@ -592,111 +454,23 @@ func (q *Queries) GetBookByID(ctx context.Context, bookID string) (Book, error) 
 	return i, err
 }
 
-const getBookCover = `-- name: GetBookCover :one
+const getPageInfoByBookIDAndPage = `-- name: GetPageInfoByBookIDAndPage :one
 SELECT id, book_id, name, path, size, mod_time, url, page_num, blurhash, height, width, img_type, insert_html
-FROM media_files
-WHERE book_id = ?
-  AND (page_num = 0 OR page_num = 1)
-LIMIT 1
-`
-
-// Get book cover (usually page 0 or 1)
-func (q *Queries) GetBookCover(ctx context.Context, bookID string) (MediaFile, error) {
-	row := q.db.QueryRowContext(ctx, getBookCover, bookID)
-	var i MediaFile
-	err := row.Scan(
-		&i.ID,
-		&i.BookID,
-		&i.Name,
-		&i.Path,
-		&i.Size,
-		&i.ModTime,
-		&i.Url,
-		&i.PageNum,
-		&i.Blurhash,
-		&i.Height,
-		&i.Width,
-		&i.ImgType,
-		&i.InsertHtml,
-	)
-	return i, err
-}
-
-const getBookmarkByBookIDAndPage = `-- name: GetBookmarkByBookIDAndPage :one
-SELECT id, book_id, page_index, description, position, created_at, updated_at
-FROM bookmarks
-WHERE book_id = ?
-  AND page_index = ?
-LIMIT 1
-`
-
-type GetBookmarkByBookIDAndPageParams struct {
-	BookID    string
-	PageIndex int64
-}
-
-// Get a bookmark by book ID and page index
-func (q *Queries) GetBookmarkByBookIDAndPage(ctx context.Context, arg GetBookmarkByBookIDAndPageParams) (Bookmark, error) {
-	row := q.db.QueryRowContext(ctx, getBookmarkByBookIDAndPage, arg.BookID, arg.PageIndex)
-	var i Bookmark
-	err := row.Scan(
-		&i.ID,
-		&i.BookID,
-		&i.PageIndex,
-		&i.Description,
-		&i.Position,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
-const getFileBackendByID = `-- name: GetFileBackendByID :one
-
-SELECT url, type, server_host, server_port, need_auth, auth_username, auth_password, smb_share_name, smb_path, created_at, updated_at
-FROM file_backends
-WHERE url = ?
-LIMIT 1
-`
-
-// File backend related queries
-// Get file backend by url
-func (q *Queries) GetFileBackendByID(ctx context.Context, url string) (FileBackend, error) {
-	row := q.db.QueryRowContext(ctx, getFileBackendByID, url)
-	var i FileBackend
-	err := row.Scan(
-		&i.Url,
-		&i.Type,
-		&i.ServerHost,
-		&i.ServerPort,
-		&i.NeedAuth,
-		&i.AuthUsername,
-		&i.AuthPassword,
-		&i.SmbShareName,
-		&i.SmbPath,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
-const getMediaFileByBookIDAndPage = `-- name: GetMediaFileByBookIDAndPage :one
-SELECT id, book_id, name, path, size, mod_time, url, page_num, blurhash, height, width, img_type, insert_html
-FROM media_files
+FROM page_infos
 WHERE book_id = ?
   AND page_num = ?
 LIMIT 1
 `
 
-type GetMediaFileByBookIDAndPageParams struct {
+type GetPageInfoByBookIDAndPageParams struct {
 	BookID  string
 	PageNum sql.NullInt64
 }
 
 // Get specific page by book ID and page number
-func (q *Queries) GetMediaFileByBookIDAndPage(ctx context.Context, arg GetMediaFileByBookIDAndPageParams) (MediaFile, error) {
-	row := q.db.QueryRowContext(ctx, getMediaFileByBookIDAndPage, arg.BookID, arg.PageNum)
-	var i MediaFile
+func (q *Queries) GetPageInfoByBookIDAndPage(ctx context.Context, arg GetPageInfoByBookIDAndPageParams) (PageInfo, error) {
+	row := q.db.QueryRowContext(ctx, getPageInfoByBookIDAndPage, arg.BookID, arg.PageNum)
+	var i PageInfo
 	err := row.Scan(
 		&i.ID,
 		&i.BookID,
@@ -715,25 +489,25 @@ func (q *Queries) GetMediaFileByBookIDAndPage(ctx context.Context, arg GetMediaF
 	return i, err
 }
 
-const getMediaFilesByBookID = `-- name: GetMediaFilesByBookID :many
+const getPageInfosByBookID = `-- name: GetPageInfosByBookID :many
 
 SELECT id, book_id, name, path, size, mod_time, url, page_num, blurhash, height, width, img_type, insert_html
-FROM media_files
+FROM page_infos
 WHERE book_id = ?
 ORDER BY page_num
 `
 
 // Media files related queries
 // Get all page information by book ID
-func (q *Queries) GetMediaFilesByBookID(ctx context.Context, bookID string) ([]MediaFile, error) {
-	rows, err := q.db.QueryContext(ctx, getMediaFilesByBookID, bookID)
+func (q *Queries) GetPageInfosByBookID(ctx context.Context, bookID string) ([]PageInfo, error) {
+	rows, err := q.db.QueryContext(ctx, getPageInfosByBookID, bookID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []MediaFile
+	var items []PageInfo
 	for rows.Next() {
-		var i MediaFile
+		var i PageInfo
 		if err := rows.Scan(
 			&i.ID,
 			&i.BookID,
@@ -762,125 +536,6 @@ func (q *Queries) GetMediaFilesByBookID(ctx context.Context, bookID string) ([]M
 	return items, nil
 }
 
-const getStoreByBackendURL = `-- name: GetStoreByBackendURL :one
-
-SELECT backend_url, name, description, created_at, updated_at
-FROM stores
-WHERE backend_url = ?
-LIMIT 1
-`
-
-// Store related queries
-// Get store by URL
-func (q *Queries) GetStoreByBackendURL(ctx context.Context, backendUrl string) (Store, error) {
-	row := q.db.QueryRowContext(ctx, getStoreByBackendURL, backendUrl)
-	var i Store
-	err := row.Scan(
-		&i.BackendUrl,
-		&i.Name,
-		&i.Description,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
-const getStoreByName = `-- name: GetStoreByName :one
-SELECT backend_url, name, description, created_at, updated_at
-FROM stores
-WHERE name = ?
-LIMIT 1
-`
-
-// Get store by name
-func (q *Queries) GetStoreByName(ctx context.Context, name string) (Store, error) {
-	row := q.db.QueryRowContext(ctx, getStoreByName, name)
-	var i Store
-	err := row.Scan(
-		&i.BackendUrl,
-		&i.Name,
-		&i.Description,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
-const getStoreWithBackend = `-- name: GetStoreWithBackend :one
-SELECT s.backend_url,
-       s.name,
-       s.description,
-       s.created_at,
-       s.updated_at,
-       fb.type,
-       fb.url,
-       fb.server_host,
-       fb.server_port,
-       fb.need_auth,
-       fb.auth_username,
-       fb.auth_password,
-       fb.smb_share_name,
-       fb.smb_path
-FROM stores s
-         JOIN file_backends fb ON s.backend_url = fb.url
-WHERE s.backend_url = ?
-LIMIT 1
-`
-
-type GetStoreWithBackendRow struct {
-	BackendUrl   string
-	Name         string
-	Description  sql.NullString
-	CreatedAt    sql.NullTime
-	UpdatedAt    sql.NullTime
-	Type         int64
-	Url          string
-	ServerHost   sql.NullString
-	ServerPort   sql.NullInt64
-	NeedAuth     sql.NullBool
-	AuthUsername sql.NullString
-	AuthPassword sql.NullString
-	SmbShareName sql.NullString
-	SmbPath      sql.NullString
-}
-
-// Get store with file backend information
-func (q *Queries) GetStoreWithBackend(ctx context.Context, backendUrl string) (GetStoreWithBackendRow, error) {
-	row := q.db.QueryRowContext(ctx, getStoreWithBackend, backendUrl)
-	var i GetStoreWithBackendRow
-	err := row.Scan(
-		&i.BackendUrl,
-		&i.Name,
-		&i.Description,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.Type,
-		&i.Url,
-		&i.ServerHost,
-		&i.ServerPort,
-		&i.NeedAuth,
-		&i.AuthUsername,
-		&i.AuthPassword,
-		&i.SmbShareName,
-		&i.SmbPath,
-	)
-	return i, err
-}
-
-const getTotalFileSize = `-- name: GetTotalFileSize :one
-SELECT SUM(file_size)
-FROM books
-WHERE deleted = FALSE
-`
-
-// Get total file size
-func (q *Queries) GetTotalFileSize(ctx context.Context) (sql.NullFloat64, error) {
-	row := q.db.QueryRowContext(ctx, getTotalFileSize)
-	var sum sql.NullFloat64
-	err := row.Scan(&sum)
-	return sum, err
-}
-
 const getUserByEmail = `-- name: GetUserByEmail :one
 SELECT id, username, password, role, email, "key", expires_at, created_at, updated_at
 FROM users
@@ -907,7 +562,6 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email sql.NullString) (Use
 }
 
 const getUserByID = `-- name: GetUserByID :one
-
 SELECT id, username, password, role, email, "key", expires_at, created_at, updated_at
 FROM users
 WHERE id = ?
@@ -989,7 +643,7 @@ func (q *Queries) ListAllBookStoreURLs(ctx context.Context) ([]string, error) {
 
 const listBookmarksByBookID = `-- name: ListBookmarksByBookID :many
 
-SELECT id, book_id, page_index, description, position, created_at, updated_at
+SELECT id, type, book_id, page_index, description, created_at, updated_at
 FROM bookmarks
 WHERE book_id = ?
 ORDER BY created_at DESC
@@ -1008,10 +662,10 @@ func (q *Queries) ListBookmarksByBookID(ctx context.Context, bookID string) ([]B
 		var i Bookmark
 		if err := rows.Scan(
 			&i.ID,
+			&i.Type,
 			&i.BookID,
 			&i.PageIndex,
 			&i.Description,
-			&i.Position,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -1184,203 +838,6 @@ func (q *Queries) ListBooksByType(ctx context.Context, type_ string) ([]Book, er
 			&i.NonUtf8zip,
 			&i.ZipTextEncoding,
 			&i.Deleted,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listFileBackends = `-- name: ListFileBackends :many
-SELECT url, type, server_host, server_port, need_auth, auth_username, auth_password, smb_share_name, smb_path, created_at, updated_at
-FROM file_backends
-ORDER BY created_at DESC
-`
-
-// List all file backends
-func (q *Queries) ListFileBackends(ctx context.Context) ([]FileBackend, error) {
-	rows, err := q.db.QueryContext(ctx, listFileBackends)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []FileBackend
-	for rows.Next() {
-		var i FileBackend
-		if err := rows.Scan(
-			&i.Url,
-			&i.Type,
-			&i.ServerHost,
-			&i.ServerPort,
-			&i.NeedAuth,
-			&i.AuthUsername,
-			&i.AuthPassword,
-			&i.SmbShareName,
-			&i.SmbPath,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listFileBackendsByType = `-- name: ListFileBackendsByType :many
-SELECT url, type, server_host, server_port, need_auth, auth_username, auth_password, smb_share_name, smb_path, created_at, updated_at
-FROM file_backends
-WHERE type = ?
-ORDER BY created_at DESC
-`
-
-// List file backends by type
-func (q *Queries) ListFileBackendsByType(ctx context.Context, type_ int64) ([]FileBackend, error) {
-	rows, err := q.db.QueryContext(ctx, listFileBackendsByType, type_)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []FileBackend
-	for rows.Next() {
-		var i FileBackend
-		if err := rows.Scan(
-			&i.Url,
-			&i.Type,
-			&i.ServerHost,
-			&i.ServerPort,
-			&i.NeedAuth,
-			&i.AuthUsername,
-			&i.AuthPassword,
-			&i.SmbShareName,
-			&i.SmbPath,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listStores = `-- name: ListStores :many
-SELECT backend_url, name, description, created_at, updated_at
-FROM stores
-ORDER BY created_at DESC
-`
-
-// List all stores
-func (q *Queries) ListStores(ctx context.Context) ([]Store, error) {
-	rows, err := q.db.QueryContext(ctx, listStores)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Store
-	for rows.Next() {
-		var i Store
-		if err := rows.Scan(
-			&i.BackendUrl,
-			&i.Name,
-			&i.Description,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listStoresWithBackend = `-- name: ListStoresWithBackend :many
-SELECT s.backend_url,
-       s.name,
-       s.description,
-       s.created_at,
-       s.updated_at,
-       fb.type,
-       fb.url,
-       fb.server_host,
-       fb.server_port,
-       fb.need_auth,
-       fb.auth_username,
-       fb.auth_password,
-       fb.smb_share_name,
-       fb.smb_path
-FROM stores s
-         JOIN file_backends fb ON s.backend_url = fb.url
-ORDER BY s.created_at DESC
-`
-
-type ListStoresWithBackendRow struct {
-	BackendUrl   string
-	Name         string
-	Description  sql.NullString
-	CreatedAt    sql.NullTime
-	UpdatedAt    sql.NullTime
-	Type         int64
-	Url          string
-	ServerHost   sql.NullString
-	ServerPort   sql.NullInt64
-	NeedAuth     sql.NullBool
-	AuthUsername sql.NullString
-	AuthPassword sql.NullString
-	SmbShareName sql.NullString
-	SmbPath      sql.NullString
-}
-
-// List stores with file backend information
-func (q *Queries) ListStoresWithBackend(ctx context.Context) ([]ListStoresWithBackendRow, error) {
-	rows, err := q.db.QueryContext(ctx, listStoresWithBackend)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []ListStoresWithBackendRow
-	for rows.Next() {
-		var i ListStoresWithBackendRow
-		if err := rows.Scan(
-			&i.BackendUrl,
-			&i.Name,
-			&i.Description,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.Type,
-			&i.Url,
-			&i.ServerHost,
-			&i.ServerPort,
-			&i.NeedAuth,
-			&i.AuthUsername,
-			&i.AuthPassword,
-			&i.SmbShareName,
-			&i.SmbPath,
 		); err != nil {
 			return nil, err
 		}
@@ -1589,115 +1046,54 @@ func (q *Queries) UpdateBook(ctx context.Context, arg UpdateBookParams) error {
 const updateBookmark = `-- name: UpdateBookmark :exec
 UPDATE bookmarks
 SET description = ?,
-    position    = ?,
+    page_index  = ?,
+    description = ?,
     updated_at  = CURRENT_TIMESTAMP
-WHERE id = ?
+WHERE book_id = ? and type = ?
 `
 
 type UpdateBookmarkParams struct {
-	Description sql.NullString
-	Position    sql.NullFloat64
-	ID          int64
+	Description   sql.NullString
+	PageIndex     int64
+	Description_2 sql.NullString
+	BookID        string
+	Type          int64
 }
 
-// Update a bookmark (by id)
+// Update a bookmark (by book_id, type)
 func (q *Queries) UpdateBookmark(ctx context.Context, arg UpdateBookmarkParams) error {
-	_, err := q.db.ExecContext(ctx, updateBookmark, arg.Description, arg.Position, arg.ID)
-	return err
-}
-
-const updateBookmarkByBookIDAndPage = `-- name: UpdateBookmarkByBookIDAndPage :exec
-UPDATE bookmarks
-SET description = ?,
-    position    = ?,
-    updated_at  = CURRENT_TIMESTAMP
-WHERE book_id = ?
-  AND page_index = ?
-`
-
-type UpdateBookmarkByBookIDAndPageParams struct {
-	Description sql.NullString
-	Position    sql.NullFloat64
-	BookID      string
-	PageIndex   int64
-}
-
-// Update a bookmark by (book_id, page_index)
-func (q *Queries) UpdateBookmarkByBookIDAndPage(ctx context.Context, arg UpdateBookmarkByBookIDAndPageParams) error {
-	_, err := q.db.ExecContext(ctx, updateBookmarkByBookIDAndPage,
+	_, err := q.db.ExecContext(ctx, updateBookmark,
 		arg.Description,
-		arg.Position,
-		arg.BookID,
 		arg.PageIndex,
-	)
-	return err
-}
-
-const updateFileBackend = `-- name: UpdateFileBackend :exec
-UPDATE file_backends
-SET url            = ?,
-    type           = ?,
-    server_host    = ?,
-    server_port    = ?,
-    need_auth      = ?,
-    auth_username  = ?,
-    auth_password  = ?,
-    smb_share_name = ?,
-    smb_path       = ?,
-    updated_at     = CURRENT_TIMESTAMP
-WHERE url = ?
-`
-
-type UpdateFileBackendParams struct {
-	Url          string
-	Type         int64
-	ServerHost   sql.NullString
-	ServerPort   sql.NullInt64
-	NeedAuth     sql.NullBool
-	AuthUsername sql.NullString
-	AuthPassword sql.NullString
-	SmbShareName sql.NullString
-	SmbPath      sql.NullString
-	Url_2        string
-}
-
-// Update file backend
-func (q *Queries) UpdateFileBackend(ctx context.Context, arg UpdateFileBackendParams) error {
-	_, err := q.db.ExecContext(ctx, updateFileBackend,
-		arg.Url,
+		arg.Description_2,
+		arg.BookID,
 		arg.Type,
-		arg.ServerHost,
-		arg.ServerPort,
-		arg.NeedAuth,
-		arg.AuthUsername,
-		arg.AuthPassword,
-		arg.SmbShareName,
-		arg.SmbPath,
-		arg.Url_2,
 	)
 	return err
 }
 
 const updateLastReadPage = `-- name: UpdateLastReadPage :exec
-UPDATE books
-SET last_read_page = ?,
-    modified_time  = CURRENT_TIMESTAMP
+UPDATE bookmarks
+SET page_index = ?,
+    type  = ?,
+    updated_at  = CURRENT_TIMESTAMP
 WHERE book_id = ?
 `
 
 type UpdateLastReadPageParams struct {
-	LastReadPage sql.NullInt64
-	BookID       string
+	PageIndex int64
+	Type      int64
+	BookID    string
 }
 
 // Update reading progress
 func (q *Queries) UpdateLastReadPage(ctx context.Context, arg UpdateLastReadPageParams) error {
-	_, err := q.db.ExecContext(ctx, updateLastReadPage, arg.LastReadPage, arg.BookID)
+	_, err := q.db.ExecContext(ctx, updateLastReadPage, arg.PageIndex, arg.Type, arg.BookID)
 	return err
 }
 
-const updateMediaFile = `-- name: UpdateMediaFile :exec
-UPDATE media_files
+const updatePageInfo = `-- name: UpdatePageInfo :exec
+UPDATE page_infos
 SET name        = ?,
     path        = ?,
     size        = ?,
@@ -1712,7 +1108,7 @@ WHERE book_id = ?
   AND page_num = ?
 `
 
-type UpdateMediaFileParams struct {
+type UpdatePageInfoParams struct {
 	Name       string
 	Path       sql.NullString
 	Size       sql.NullInt64
@@ -1728,8 +1124,8 @@ type UpdateMediaFileParams struct {
 }
 
 // Update media file information
-func (q *Queries) UpdateMediaFile(ctx context.Context, arg UpdateMediaFileParams) error {
-	_, err := q.db.ExecContext(ctx, updateMediaFile,
+func (q *Queries) UpdatePageInfo(ctx context.Context, arg UpdatePageInfoParams) error {
+	_, err := q.db.ExecContext(ctx, updatePageInfo,
 		arg.Name,
 		arg.Path,
 		arg.Size,
@@ -1743,26 +1139,6 @@ func (q *Queries) UpdateMediaFile(ctx context.Context, arg UpdateMediaFileParams
 		arg.BookID,
 		arg.PageNum,
 	)
-	return err
-}
-
-const updateStore = `-- name: UpdateStore :exec
-UPDATE stores
-SET name        = ?,
-    description = ?,
-    updated_at  = CURRENT_TIMESTAMP
-WHERE backend_url = ?
-`
-
-type UpdateStoreParams struct {
-	Name        string
-	Description sql.NullString
-	BackendUrl  string
-}
-
-// Update store
-func (q *Queries) UpdateStore(ctx context.Context, arg UpdateStoreParams) error {
-	_, err := q.db.ExecContext(ctx, updateStore, arg.Name, arg.Description, arg.BackendUrl)
 	return err
 }
 

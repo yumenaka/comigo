@@ -16,7 +16,7 @@ type HeaderProps struct {
 	SetTheme          bool
 	FlipMode          bool
 	ShowQuickJumpBar  bool
-	QuickJumpBarBooks *model.BookInfoList
+	QuickJumpBarBooks *model.BookInfos
 }
 
 // bg-base-100/50 透明背景
@@ -210,7 +210,7 @@ templ Header(prop HeaderProps) {
 						class="max-w-full md:max-w-2xl md:truncate z-10 hidden divide-y divide-gray-100 rounded-lg shadow bg-white/90  dark:bg-gray-700"
 					>
 						<ul class="py-2 mt-0 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="quickJumpBarDropdownButton">
-							for _, book := range prop.QuickJumpBarBooks.BookInfos {
+							for _, book := range *prop.QuickJumpBarBooks {
 								if book.Type == model.TypeBooksGroup {
 									<li>
 										<a href={ templ.SafeURL("/shelf/" + book.BookID) } class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white">{ book.Title }</a>
