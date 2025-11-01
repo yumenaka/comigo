@@ -121,9 +121,9 @@ func (c *Config) GetClearDatabaseWhenExit() bool {
 	return c.ClearDatabaseWhenExit
 }
 
-// StoreUrlIsExits 检查本地书库路径是否可添加
+// StoreUrlIsExits 检查书库URL是否可添加
 func (c *Config) StoreUrlIsExits(url string) bool {
-	// 检查本地书库url是否已存在
+	// 检查书库URL是否已存在
 	for _, storeUrl := range c.StoreUrls {
 		if storeUrl == url {
 			if c.Debug {
@@ -136,18 +136,24 @@ func (c *Config) StoreUrlIsExits(url string) bool {
 }
 
 // AddStoreUrl 添加本地书库(单个路径)
-func (c *Config) AddStoreUrl(storeURL string) {
+func (c *Config) AddStoreUrl(storeURL string) error {
 	if c.StoreUrlIsExits(storeURL) {
-		return
+		return fmt.Errorf("store Url already exists: %s", storeURL)
 	}
 	cfg.StoreUrls = append(cfg.StoreUrls, storeURL)
+	return nil
 }
 
 // InitStoreUrls 初始化配置文件中的书库
 func (c *Config) InitStoreUrls() {
 	for _, storeUrl := range c.StoreUrls {
-		if !c.StoreUrlIsExits(storeUrl) {
-			c.AddStoreUrl(storeUrl)
+		if c.StoreUrlIsExits(storeUrl) {
+			logger.Infof("Store Url already exists in config: %s", storeUrl)
+			continue
+		}
+		err := c.AddStoreUrl(storeUrl)
+		if err != nil {
+			logger.Infof("Failed to add store url from config:%s", err)
 		}
 	}
 }

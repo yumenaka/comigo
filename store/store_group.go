@@ -324,19 +324,19 @@ func (ramStore *StoreInRam) GetBookByAuthor(author string, sortBy string) ([]*mo
 }
 
 // TopOfShelfInfo 获取顶层书架信息
-func TopOfShelfInfo(sortBy string) (*model.BookInfoList, error) {
+func TopOfShelfInfo(sortBy string) (*model.BookInfos, error) {
 	// 显示顶层书库的书籍
-	var infoList model.BookInfoList
+	var infoList model.BookInfos
 	allBooks, err := model.IStore.ListBooks()
 	if err != nil {
 		logger.Infof("Error listing books: %s", err)
 	}
 	for _, b := range allBooks {
 		if b.Depth == 0 {
-			infoList.BookInfos = append(infoList.BookInfos, b.BookInfo)
+			infoList = append(infoList, b.BookInfo)
 		}
 	}
-	if len(infoList.BookInfos) > 0 {
+	if len(infoList) > 0 {
 		infoList.SortBooks(sortBy)
 		return &infoList, nil
 	}
@@ -345,8 +345,8 @@ func TopOfShelfInfo(sortBy string) (*model.BookInfoList, error) {
 }
 
 // GetChildBooksInfo 根据 ID 获取书籍列表
-func GetChildBooksInfo(BookID string) (*model.BookInfoList, error) {
-	var infoList model.BookInfoList
+func GetChildBooksInfo(BookID string) (*model.BookInfos, error) {
+	var infoList model.BookInfos
 	parentBook, err := model.IStore.GetBook(BookID)
 	if err != nil {
 		return nil, errors.New("cannot find child books info，BookID：" + BookID)
@@ -356,9 +356,9 @@ func GetChildBooksInfo(BookID string) (*model.BookInfoList, error) {
 		if err != nil {
 			return nil, errors.New("GetParentBook: cannot find book by childID=" + childID)
 		}
-		infoList.BookInfos = append(infoList.BookInfos, b.BookInfo)
+		infoList = append(infoList, b.BookInfo)
 	}
-	if len(infoList.BookInfos) > 0 {
+	if len(infoList) > 0 {
 		return &infoList, nil
 	} else {
 		return nil, errors.New("cannot find child books info，BookID：" + BookID)
@@ -366,18 +366,18 @@ func GetChildBooksInfo(BookID string) (*model.BookInfoList, error) {
 }
 
 // GetBookInfoListByParentFolder 根据父文件夹获取书籍列表
-func GetBookInfoListByParentFolder(parentFolder string) (*model.BookInfoList, error) {
-	var infoList model.BookInfoList
+func GetBookInfoListByParentFolder(parentFolder string) (*model.BookInfos, error) {
+	var infoList model.BookInfos
 	allBooks, err := model.IStore.ListBooks()
 	if err != nil {
 		logger.Infof("Error listing books: %s", err)
 	}
 	for _, b := range allBooks {
 		if b.ParentFolder == parentFolder {
-			infoList.BookInfos = append(infoList.BookInfos, b.BookInfo)
+			infoList = append(infoList, b.BookInfo)
 		}
 	}
-	if len(infoList.BookInfos) > 0 {
+	if len(infoList) > 0 {
 		infoList.SortBooks("filename")
 		return &infoList, nil
 	}

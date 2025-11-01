@@ -21,7 +21,8 @@ type StoreInfo struct {
 // Store 对应某个扫描路径的子书库，目前只支持本地书库
 type Store struct {
 	StoreInfo
-	BookMap sync.Map // 拥有的书籍,key是BookID,存储 *Book 与 *BooksGroup
+	BookMap      sync.Map // 拥有的书籍,key是BookID,存储 *Book 与 *BooksGroup
+	BookMarksMap sync.Map // 书签,key是BookID,存储 BookMarks
 }
 
 // GenerateBookGroup 分析书库中已有书籍的路径，生成书籍组信息

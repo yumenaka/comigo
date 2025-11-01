@@ -10,21 +10,21 @@ var (
 	Version      string
 	ServerStatus *tools.ServerStatus
 	ServerConfig *config.Config
-	NowBookList  *model.BookInfoList
+	NowBookInfos *model.BookInfos
 )
 
 // GetNowBookNum 获取当前显示书籍数量
 func GetNowBookNum() int {
-	if NowBookList == nil {
+	if NowBookInfos == nil {
 		return 0
 	}
-	return len(NowBookList.BookInfos)
+	return len(*NowBookInfos)
 }
 
 // 初始化参数
 func init() {
 	Version = config.GetVersion()
-	NowBookList = nil
+	NowBookInfos = nil
 	//ServerStatus = tools.GetServerInfo(config.GetHost(), config.GetVersion(), uint16(config.GetCfg().Port), config.GetEnableUpload(), 0, "")
 	ServerConfig = config.GetCfg()
 }

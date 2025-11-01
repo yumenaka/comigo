@@ -11,8 +11,8 @@ import (
 
 // Book 定义书籍结构
 type Book struct {
-	BookInfo
-	AllPage `json:"allpage"`
+	BookInfo  // 嵌入 BookInfo 结构体
+	PageInfos // 书籍内所有页面的信息
 }
 
 // GetBookInfo 创建新的 BookInfo 实例
@@ -97,7 +97,7 @@ func (b *Book) SortPages(s string) {
 		return
 	}
 	if s != "" {
-		b.SortImages(s)
+		b.PageInfos.SortImages(s)
 	}
 }
 
@@ -148,22 +148,4 @@ func (b *Book) GetPageCount() int {
 		b.InitComplete = true
 	}
 	return b.PageCount
-}
-
-// analyzePageImages 解析漫画的分辨率与类型
-func analyzePageImages(p *PageInfo, bookPath string) {
-	err := p.analyzeImage(bookPath)
-	if err != nil {
-		logger.Infof(locale.GetString("check_image_error") + err.Error())
-		return
-	}
-	if p.Width == 0 && p.Height == 0 {
-		p.ImgType = "Unknown"
-		return
-	}
-	if p.Width > p.Height {
-		p.ImgType = "DoublePage"
-	} else {
-		p.ImgType = "SinglePage"
-	}
 }

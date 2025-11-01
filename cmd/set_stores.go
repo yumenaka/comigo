@@ -90,20 +90,29 @@ func CreateStoreUrls(args []string) {
 			logger.Infof("Failed to get working directory:%s", err)
 		}
 		logger.Infof("Working directory:%s", wd)
-		config.GetCfg().AddStoreUrl(wd)
+		err = config.GetCfg().AddStoreUrl(wd)
+		if err != nil {
+			logger.Infof("Failed to add working directory to store urls:%s", err)
+		}
 	}
 	// 指定了书库路径，就都扫描一遍
 	for key, arg := range args {
 		if config.GetCfg().Debug {
 			logger.Infof("args[%d]: %s\n", key, arg)
 		}
-		config.GetCfg().AddStoreUrl(arg)
+		err := config.GetCfg().AddStoreUrl(arg)
+		if err != nil {
+			logger.Infof("Failed to add store url from args:%s", err)
+		}
 	}
 	// 如果用户启用上传，且用户指定的上传路径不为空，就把程序预先设定的【默认上传路径】当作书库
 	if config.GetCfg().EnableUpload {
 		if config.GetCfg().UploadPath != "" {
 			// 尝试把上传路径添加为书库里
-			config.GetCfg().AddStoreUrl(config.GetCfg().UploadPath)
+			err := config.GetCfg().AddStoreUrl(config.GetCfg().UploadPath)
+			if err != nil {
+				logger.Infof("Failed to add upload path to store urls:%s", err)
+			}
 		}
 		// 如果用户启用上传，但没有指定上传路径
 		if config.GetCfg().UploadPath == "" {
@@ -111,7 +120,10 @@ func CreateStoreUrls(args []string) {
 				// 把【本地存储】里面的第一个可用路径作为上传路径
 				if tools.IsExist(storeUrl) {
 					config.SetUploadPath(storeUrl)
-					config.GetCfg().AddStoreUrl(config.GetCfg().UploadPath)
+					err := config.GetCfg().AddStoreUrl(config.GetCfg().UploadPath)
+					if err != nil {
+						logger.Infof("Failed to add upload path to store urls:%s", err)
+					}
 					break
 				}
 			}
