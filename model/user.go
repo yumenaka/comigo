@@ -6,6 +6,6 @@ type User struct {
 	Password string `json:"password"`
 	Role     string `json:"role"` // 角色: admin, user, guest
 	Email    string `json:"email"`
-	Key      string `json:"key"`
+	Key      string `json:"key"` // login key
 	ExpireAt string `json:"expireAt"`
 }

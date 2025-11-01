@@ -62,7 +62,7 @@ func ShowQuickJumpBar(b *model.Book) (QuickJumpBar bool) {
 	return true
 }
 
-func QuickJumpBarBooks(b *model.Book) (list *model.BookInfoList) {
+func QuickJumpBarBooks(b *model.Book) (list *model.BookInfos) {
 	list, err := store.GetBookInfoListByParentFolder(b.ParentFolder)
 	if err != nil {
 		logger.Infof("%s", err)
