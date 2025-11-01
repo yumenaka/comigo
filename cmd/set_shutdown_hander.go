@@ -3,17 +3,19 @@ package cmd
 import (
 	"context"
 	"log"
+	"os"
 	"os/signal"
+	"path"
 	"syscall"
 	"time"
 
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
-	"github.com/yumenaka/comigo/util/logger"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
-// SetShutdownHandler TODO:退出时清理临时文件的函数
+// SetShutdownHandler 退出时清理临时文件的函数
 func SetShutdownHandler() {
 	// 优雅地停止或重启： https://github.com/gin-gonic/examples/blob/master/graceful-shutdown/graceful-shutdown/notify-with-context/server.go
 	// 创建侦听来自操作系统的中断信号的上下文。
@@ -26,9 +28,22 @@ func SetShutdownHandler() {
 	stop()
 	log.Println(locale.GetString("shutdown_hint"))
 	// 清理临时文件
-	if config.GetClearCacheExit() {
-		logger.Infof("\r"+locale.GetString("start_clear_file")+" CachePath:%s ", config.GetCachePath())
-		model.ClearTempFilesALL(config.GetDebug(), config.GetCachePath())
+	if config.GetCfg().ClearCacheExit {
+		logger.Infof("\r"+locale.GetString("start_clear_file")+" CacheDir:%s ", config.GetCfg().CacheDir)
+		allBooks, err := model.IStore.ListBooks()
+		if err != nil {
+			logger.Infof("Error listing books: %s", err)
+		}
+		for _, book := range allBooks {
+			//清理某一本书的缓存
+			cachePath := path.Join(config.GetCfg().CacheDir, book.BookID)
+			err := os.RemoveAll(cachePath)
+			if err != nil {
+				logger.Infof("Error clearing temp files: %s", cachePath)
+			} else if config.GetCfg().Debug {
+				logger.Infof("Cleared temp files: %s", cachePath)
+			}
+		}
 		logger.Infof("%s", locale.GetString("clear_temp_file_completed"))
 	}
 	// 上下文用于通知服务器它有 5 秒的时间来完成它当前正在处理的请求

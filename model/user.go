@@ -1,10 +1,11 @@
 package model
 
 type User struct {
-	ID        int    `json:"id"`
-	Username  string `json:"username"`
-	Password  string `json:"password"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	Email     string `json:"email"`
+	ID       int    `json:"id"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Role     string `json:"role"` // 角色: admin, user, guest
+	Email    string `json:"email"`
+	Key      string `json:"key"` // login key
+	ExpireAt string `json:"expireAt"`
 }

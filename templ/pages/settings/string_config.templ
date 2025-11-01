@@ -6,7 +6,15 @@ package settings
 // hx-target用返回的 HTML 替换哪个 DOM 元素
 // hx-swap 替换方式
 // hx-params="*" 发送表单数据，包含所有 name/value
-templ StringConfig(name string, value string, description string, reFreshWhenChange bool) {
+templ StringConfig(name string, value string, description string, saveSuccessHint bool) {
+	if saveSuccessHint {
+		<div
+			class="hidden"
+			x-init="showToast(i18next.t('saveSuccessHint'), 'info');setTimeout(() => {
+            window.location.reload();
+        }, 2000)"
+		></div>
+	}
 	<div
 		id={ "stringConfig_" + name }
 		class="flex flex-col justify-start w-full p-2 m-1 font-semibold
@@ -21,17 +29,14 @@ templ StringConfig(name string, value string, description string, reFreshWhenCha
 			placeholder={ name }
 			value={ value }
 			class="px-2.5  w-64 rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm"
-			hx-post="/api/update-string_config"
+			hx-post="/api/update-string-config"
 			hx-trigger="change"
 			hx-target={ "#stringConfig_" + name }
 			hx-swap="outerHTML"
 			hx-params="*"
-			if reFreshWhenChange {
-				onchange="setTimeout(function() { window.location.reload(); }, 3000)"
-			}
 		/>
 		<div
-			class="w-3/4 py-1 text-xs text-gray-500"
+			class="w-full py-1 text-xs text-gray-500"
 			x-text={ getTranslations(description) }
 		></div>
 		<div class="bg-red-600"></div>

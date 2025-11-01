@@ -9,6 +9,8 @@ import (
 	"github.com/spf13/viper"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/store"
 )
 
 // cobra & viper sample:
@@ -17,6 +19,8 @@ var runtimeViper *viper.Viper
 
 func init() {
 	runtimeViper = viper.New()
+	// 为了避免循环引用，把 model.IStore 指向 store.MainStoreGroup
+	model.IStore = store.RamStore
 }
 
 func InitFlags() {
@@ -32,11 +36,10 @@ func InitFlags() {
 	// 	RootCmd.PersistentFlags().BoolVar(&DemonFlag, "start", false, locale.GetString("start_in_background"))
 	// 	RootCmd.PersistentFlags().BoolVar(&StopDaemonFlag, "stop", false, locale.GetString("stop_background"))
 	// }
-	// 启用登陆保护，需要输入用户名、密码。
-	RootCmd.PersistentFlags().BoolVar(&cfg.RequiresLogin, "login", false, locale.GetString("requires_login"))
-	RootCmd.PersistentFlags().StringVarP(&cfg.Username, "username", "u", "", locale.GetString("username"))
-	RootCmd.PersistentFlags().StringVarP(&cfg.Password, "password", "k", "", locale.GetString("password"))
-	RootCmd.PersistentFlags().IntVarP(&cfg.Timeout, "timeout", "t", 60*24*30, locale.GetString("timeout"))
+	// 启用登陆保护，需要设定用户名
+	RootCmd.PersistentFlags().StringVar(&cfg.Username, "username", "", locale.GetString("username"))
+	RootCmd.PersistentFlags().StringVar(&cfg.Password, "password", "", locale.GetString("password"))
+	RootCmd.PersistentFlags().IntVar(&cfg.Timeout, "timeout", 60*24*30, locale.GetString("timeout"))
 	// 启用自动扫描
 	RootCmd.PersistentFlags().BoolVar(&cfg.AutoRescan, "rescan", true, locale.GetString("rescan"))
 	// TLS设定
@@ -44,15 +47,13 @@ func InitFlags() {
 	RootCmd.PersistentFlags().StringVar(&cfg.CertFile, "tls-crt", "", locale.GetString("tls_crt"))
 	RootCmd.PersistentFlags().StringVar(&cfg.KeyFile, "tls-key", "", locale.GetString("tls_key"))
 	// 指定配置文件
-	RootCmd.PersistentFlags().StringVarP(&cfg.ConfigPath, "config", "c", "", locale.GetString("config"))
+	RootCmd.PersistentFlags().StringVarP(&cfg.ConfigFile, "config", "c", "", locale.GetString("config"))
 	// 启用数据库，保存扫描数据
-	RootCmd.PersistentFlags().BoolVarP(&cfg.EnableDatabase, "database", "e", false, locale.GetString("enable_database"))
+	RootCmd.PersistentFlags().BoolVar(&cfg.EnableDatabase, "database", false, locale.GetString("enable_database"))
 	// 服务端口
 	RootCmd.PersistentFlags().IntVarP(&cfg.Port, "port", "p", 1234, locale.GetString("port"))
 	// 本地Host
 	RootCmd.PersistentFlags().StringVar(&cfg.Host, "host", "", locale.GetString("local_host"))
-	// 是否开启静态文件模式。静态模式下，所有图片与脚本都打包html文件里，可以另存为单个网页（试验性功能，开发中）。
-	RootCmd.PersistentFlags().BoolVar(&cfg.StaticFileMode, "static", false, locale.GetString("static_file_mode"))
 	// DEBUG
 	RootCmd.PersistentFlags().BoolVar(&cfg.Debug, "debug", false, locale.GetString("debug_mode"))
 	// 启用文件上传功能
@@ -71,7 +72,7 @@ func InitFlags() {
 		cfg.OpenBrowser = true
 	}
 	// 不对局域网开放
-	RootCmd.PersistentFlags().BoolVarP(&cfg.DisableLAN, "disable-lan", "d", false, locale.GetString("disable_lan"))
+	RootCmd.PersistentFlags().BoolVar(&cfg.DisableLAN, "local", false, locale.GetString("disable_lan"))
 	// 文件搜索深度
 	RootCmd.PersistentFlags().IntVarP(&cfg.MaxScanDepth, "max-depth", "m", 5, locale.GetString("max_depth"))
 	// //服务器解析书籍元数据，如果生成blurhash，需要消耗大量资源
@@ -85,9 +86,23 @@ func InitFlags() {
 	// web图片缓存
 	RootCmd.PersistentFlags().BoolVar(&cfg.UseCache, "use-cache", false, locale.GetString("cache_file_enable"))
 	// 图片缓存路径
-	RootCmd.PersistentFlags().StringVar(&cfg.CachePath, "cache-path", "", locale.GetString("cache_file_path"))
+	RootCmd.PersistentFlags().StringVar(&cfg.CacheDir, "cache-dir", "", locale.GetString("cache_file_dir"))
 	// 退出时清除缓存
 	RootCmd.PersistentFlags().BoolVar(&cfg.ClearCacheExit, "cache-clean", true, locale.GetString("cache_file_clean"))
 	// 手动指定zip文件编码 gbk、shiftjis……
 	RootCmd.PersistentFlags().StringVar(&cfg.ZipFileTextEncoding, "zip-encode", "gbk", locale.GetString("zip_encode"))
+	// 启用Tailscale服务
+	RootCmd.PersistentFlags().BoolVar(&cfg.EnableTailscale, "tailscale", false, locale.GetString("EnableTailscale"))
+	// Tailscale服务 启用Funnel模式
+	RootCmd.PersistentFlags().BoolVar(&cfg.FunnelTunnel, "tailscale-funnel", false, locale.GetString("FunnelTunnel"))
+	// FunnelLoginCheck Funnel密码保护检查
+	RootCmd.PersistentFlags().BoolVar(&cfg.FunnelLoginCheck, "funnel-password-check", true, locale.GetString("FunnelLoginCheck"))
+	// Tailscale服务主机名,用于 Tailscale 网络中的标识节点
+	RootCmd.PersistentFlags().StringVar(&cfg.TailscaleHostname, "tailscale-hostname", "comigo", locale.GetString("TailscaleHostname"))
+	// Tailscale服务端口号
+	RootCmd.PersistentFlags().IntVar(&cfg.TailscalePort, "tailscale-port", 443, locale.GetString("TailscalePort"))
+	// Tailscale AuthKey
+	RootCmd.PersistentFlags().StringVar(&cfg.TailscaleAuthKey, "tailscale-authKey", "", locale.GetString("TailscaleAuthKey"))
+	// ConfigLocked 配置文件锁定，防止被网页端修改，用于展示模式
+	RootCmd.PersistentFlags().BoolVar(&cfg.ConfigLocked, "config-locked", false, locale.GetString("ConfigLocked"))
 }

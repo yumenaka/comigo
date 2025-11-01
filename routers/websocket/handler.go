@@ -8,7 +8,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/assets/locale"
-	"github.com/yumenaka/comigo/util/logger"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
 func init() {
@@ -16,12 +16,12 @@ func init() {
 	go handleMessages()
 }
 
-// Message 定义一个对象来管理消息，反引号包含的文本是 Go 在对象和 JSON 之间进行序列化和反序列化时需要的元数据。
+// Message 定义一个结构体来定义消息
 type Message struct {
 	Type       string `json:"type"`
 	StatusCode int    `json:"status_code"` // 参考http状态码： https://zh.wikipedia.org/zh-hans/HTTP%E7%8A%B6%E6%80%81%E7%A0%81
-	UserID     string `json:"user_id"`
-	Token      string `json:"Token"` // 认证用
+	TabID      string `json:"tab_id"`      // 前端页面的 Tab ID
+	Token      string `json:"Token"`       // 认证用
 	Detail     string `json:"detail"`
 	DataString string `json:"data_string"` // 附加的json字符串数据，服务器根据情况解析
 }

@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/model"
-	"github.com/yumenaka/comigo/templ/state"
+	"github.com/yumenaka/comigo/templ/common"
 )
 
 // ImageXData 在Go函数里面计算图片的x-data属性。渲染结果例：
-// x-data="{  isDoublePage: false, imageUrl: '/api/get_file?id=asxScIDD&filename=1.jpg' + ($store.global.autoCrop  ? &quot;&auto_crop=1&quot; : ”) }"
+// x-data="{  isDoublePage: false, imageUrl: '/api/get_file?id=asxScIDD&filename=1.jpg' + ($store.global.autoCrop  ? &quot;&auto_crop=1&quot; : ")"
 func ImageXData(Url string) string {
 	return fmt.Sprintf(`{ isDoublePage: false, imageUrl: '%s' + ($store.global.autoCrop?"&auto_crop=1":'')}`, Url)
 }
@@ -22,8 +23,9 @@ func ImageSrc(Url string) string {
 	return fmt.Sprintf(`'%s' + (%s) + (%s) + (%s)`, Url, autoCrop, autoResize, noCache)
 }
 
+// HtmxStaticImage 使用htmx获取静态图片，或许可以不这么用？
 func HtmxStaticImage(Url string) string {
-	hxGet := Url + "&base64=true"
+	hxGet := Url + "&base64_htmx=true"
 	HtmxStaticImage := fmt.Sprintf(`<div hx-get='%s' hx-trigger="load" hx-swap="innerHTML" class="w-full m-0"></div>`, hxGet)
 	return HtmxStaticImage
 }
@@ -35,19 +37,18 @@ func HtmxStaticImage(Url string) string {
 // https://htmx.org/docs/#triggers  https://htmx.org/docs/#swapping
 // tips： Alpine.js 动态CSS，只支持内联写法
 // min-h-16 是为了图片未加载时，图片高度为0，导致页面不美观。极端设置下会导致图片变形。  text-center：居中 alert文字，因为需要等待css加载，所以现在没设置alt文字。
-templ MainArea(s *state.GlobalState, book *model.Book, paginationIndex int) {
+templ MainArea(c echo.Context, book *model.Book, paginationIndex int) {
 	<div
 		id="mouseMoveArea"
 		x-data="{
             imageWidth: '' //图片的宽度
         }"
-		class="flex flex-col items-center justify-center flex-1 w-full max-w-full pt-0 bg-base-100 text-base-content"
-		:class="(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') ? ($store.global.bgPattern !== 'none'?$store.global.bgPattern+' bg-base-300':'bg-base-300'):($store.global.bgPattern !== 'none'?$store.global.bgPattern:'')"
+		class="flex flex-col items-center justify-center flex-1 w-full max-w-full pt-0 text-base-content"
 	>
 		if paginationIndex >= 1 && book.PageCount/32+1 != 1 {
-			@ScrollPagination(s, book, paginationIndex)
+			@ScrollPagination(book, paginationIndex)
 		}
-		for key, image := range book.Pages.Images {
+		for key, image := range book.PageInfos {
 			if paginationIndex < 1 || (paginationIndex >= 1 && key/32 + 1 == paginationIndex) {
 				<div
 					class="flex flex-col justify-start w-full max-w-full  m-0 rounded item-center"
@@ -57,7 +58,7 @@ templ MainArea(s *state.GlobalState, book *model.Book, paginationIndex int) {
 						<div hx-get={ image.Url } hx-trigger="load" hx-swap="innerHTML" class="w-full m-0"></div>
 					}
 					if !strings.Contains(image.Url, "hidden.")&& !strings.Contains(image.Url, ".html") {
-						if !s.GetStaticFileMode() {
+						if c != nil && c.QueryParam("static") == "" {
 							<img
 								x-data={ ImageXData(image.Url) }
 								class="w-full manga_image min-h-16 text-center select-none"
@@ -67,7 +68,14 @@ templ MainArea(s *state.GlobalState, book *model.Book, paginationIndex int) {
 								:style="{ width: $store.global.isLandscape?($store.scroll.widthUseFixedValue? (isDoublePage ? $store.scroll.doublePageWidth_PX +'px': $store.scroll.singlePageWidth_PX +'px'): (isDoublePage ? $store.scroll.doublePageWidth_Percent + '%':$store.scroll.singlePageWidth_Percent + '%')): $store.scroll.portraitWidthPercent+'%', maxWidth: '100%'}"
 							/>
 						} else {
-							@templ.Raw(HtmxStaticImage(image.Url))
+							<img
+								x-data={ ImageXData(image.Url) }
+								class="w-full manga_image min-h-16 text-center select-none"
+								draggable="false"
+								src={ common.GetFileBase64Text(book.BookInfo.BookID, image.Name) }
+								@load="isDoublePage=$event.target.naturalWidth > $event.target.naturalHeight;"
+								:style="{ width: $store.global.isLandscape?($store.scroll.widthUseFixedValue? (isDoublePage ? $store.scroll.doublePageWidth_PX +'px': $store.scroll.singlePageWidth_PX +'px'): (isDoublePage ? $store.scroll.doublePageWidth_Percent + '%':$store.scroll.singlePageWidth_Percent + '%')): $store.scroll.portraitWidthPercent+'%', maxWidth: '100%'}"
+							/>
 						}
 					}
 					<template x-if="$store.scroll.showPageNum">
@@ -77,62 +85,65 @@ templ MainArea(s *state.GlobalState, book *model.Book, paginationIndex int) {
 			}
 		}
 		if paginationIndex >= 1 && book.PageCount/32+1 != 1 {
-			@ScrollPagination(s, book, paginationIndex)
+			@ScrollPagination(book, paginationIndex)
 		}
 	</div>
 	<button id="BackTopButton" style="display: none" class="fixed flex items-center justify-center w-10 h-10 text-white bg-blue-500 rounded-full shadow-lg bottom-4 right-4">
 		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256 48C141.13 48 48 141.13 48 256s93.13 208 208 208s208-93.13 208-208S370.87 48 256 48zm96 270.63l-96-96l-96 96L137.37 296L256 177.37L374.63 296z" fill="currentColor"></path></svg>
 	</button>
 	<style>
-    /* https://developer.mozilla.org/zh-CN/docs/Web/CSS/object-fit */
-    .manga_image {
-        margin: auto;
-        box-shadow: 0px 6px 3px 0px rgba(0, 0, 0, 0.19);
-    }
+		/* https://developer.mozilla.org/zh-CN/docs/Web/CSS/object-fit */
+		.manga_image {
+			margin: auto;
+			box-shadow: 0px 6px 3px 0px rgba(0, 0, 0, 0.19);
+		}
 
-    .page_hint {
-        /* 文字颜色 */
-        color: #413d3d;
-        /* 文字阴影：https://www.w3school.com.cn/css/css3_shadows.asp*/
-        text-shadow: -1px 0 rgb(240, 229, 229), 0 1px rgb(253, 242, 242),
-            1px 0 rgb(206, 183, 183), 0 -1px rgb(196, 175, 175);
-    }
+		.page_hint {
+			/* 文字颜色 */
+			color: #413d3d;
+			/* 文字阴影：https://www.w3school.com.cn/css/css3_shadows.asp*/
+			text-shadow:
+				-1px 0 rgb(240, 229, 229),
+				0 1px rgb(253, 242, 242),
+				1px 0 rgb(206, 183, 183),
+				0 -1px rgb(196, 175, 175);
+		}
 
-    .LoadingImage {
-        width: 90vw;
-        max-width: 90vw;
-    }
+		.LoadingImage {
+			width: 90vw;
+			max-width: 90vw;
+		}
 
-    .ErrorImage {
-        width: 90vw;
-        max-width: 90vw;
-    }
+		.ErrorImage {
+			width: 90vw;
+			max-width: 90vw;
+		}
 
-    /* 横屏（显示区域）时的CSS样式,IE无效 */
-    @media screen and (min-aspect-ratio: 19/19) {
-        .SinglePageImage {
-            width: v-bind(sPWL);
-            max-width: 100%;
-        }
+		/* 横屏（显示区域）时的CSS样式,IE无效 */
+		@media screen and (min-aspect-ratio: 19/19) {
+			.SinglePageImage {
+				width: v-bind(sPWL);
+				max-width: 100%;
+			}
 
-        .DoublePageImage {
-            width: v-bind(dPWL);
-            max-width: 100%;
-        }
-    }
+			.DoublePageImage {
+				width: v-bind(dPWL);
+				max-width: 100%;
+			}
+		}
 
-    /* 竖屏(显示区域)CSS样式,IE无效 */
-    @media screen and (max-aspect-ratio: 19/19) {
-        .SinglePageImage {
-            width: v-bind(sPWP);
-            max-width: 100%;
-        }
+		/* 竖屏(显示区域)CSS样式,IE无效 */
+		@media screen and (max-aspect-ratio: 19/19) {
+			.SinglePageImage {
+				width: v-bind(sPWP);
+				max-width: 100%;
+			}
 
-        .DoublePageImage {
-            /* width: 100%; */
-            width: v-bind(dPWP);
-            max-width: 100%;
-        }
-    }
-    </style>
+			.DoublePageImage {
+				/* width: 100%; */
+				width: v-bind(dPWP);
+				max-width: 100%;
+			}
+		}
+	</style>
 }

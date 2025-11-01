@@ -3,7 +3,6 @@ package flip
 import (
 	"fmt"
 	"github.com/yumenaka/comigo/assets"
-	"github.com/yumenaka/comigo/templ/state"
 	"github.com/yumenaka/comigo/model"
 )
 
@@ -18,11 +17,10 @@ func ImageXData(Url string) string {
 	return fmt.Sprintf(`{ isDoublePage: false, imageUrl: '%s' + ($store.global.autoCrop?"&auto_crop=1":'')}`, Url)
 }
 
-templ MainArea(s *state.GlobalState, book *model.Book) {
+templ MainArea(book *model.Book) {
 	<div
 		id="mouseMoveArea"
-		class="flex flex-col items-start justify-start m-0 p-0 w-full h-full bg-base-100"
-		:class="(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') ? ($store.global.bgPattern !== 'none'?$store.global.bgPattern+' bg-base-300':'bg-base-300'):($store.global.bgPattern !== 'none'?$store.global.bgPattern:'')"
+		class="flex flex-col items-start justify-start m-0 p-0 w-full h-full"
 	>
 		<!-- 漫画显示区域 + sliderContainer -->
 		<div id="manga_area" class="manga_area w-full h-full flex justify-center item-start overflow-hidden flex-row m-0 p-0">
@@ -62,13 +60,6 @@ templ MainArea(s *state.GlobalState, book *model.Book) {
 				</div>
 			</div>
 		</div>
-		@StepsRangeArea()
-		<!-- 屏幕左下角的灰色页码-->
-		<div
-		    x-show="$store.flip.showPageNum"
-		    class="fixed bottom-2 left-2 text-gray-500 text-sm pointer-events-none z-10"
-		    x-text="$store.flip.nowPageNum+'/'+$store.flip.allPageNum">
-		</div>
 	</div>
 	@templ.Raw("<style>" + assets.GetFileStr("script/flip.css") + "</style>")
 	<style>
@@ -78,23 +69,23 @@ templ MainArea(s *state.GlobalState, book *model.Book) {
 			touch-action: pan-y; /* 允许垂直滚动，但水平滑动会被捕获 */
 		}
 		#slider {
-            user-select: none; /* 防止文本选择 */
+			user-select: none; /* 防止文本选择 */
 		}
-		
+
 		.slide {
 			flex-shrink: 0;
 			transform: translateX(0);
 		}
-		
+
 		/* 基本位置设置，会通过JavaScript动态调整 */
 		#left-slide {
 			transform: translateX(-100%);
 		}
-		
+
 		#middle-slide {
 			transform: translateX(0);
 		}
-		
+
 		#right-slide {
 			transform: translateX(100%);
 		}

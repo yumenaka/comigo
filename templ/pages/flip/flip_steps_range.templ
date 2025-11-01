@@ -10,84 +10,108 @@ templ StepsRangeArea() {
 	<!-- Tailwind 的容器不会自动居中，也没有任何内置的水平方向的内边距。要使一个容器居中，使用 mx-auto 功能类： -->
 	<!-- 自定义 slider -->
 	<style>
-        /* 基础 滑动条样式 */
-        .slider-base {
-            -webkit-appearance: none;
-            appearance: none;
-            height: 16px;
-            outline: none;
-            border-radius: 2px;
-            background: transparent; /* 确保基础背景是透明的 */
-        }
-        
-        /* 普通模式 滑动条样式 */
-        .slider-base::-webkit-slider-runnable-track {
-            background: linear-gradient(to right, #3b82f6 0%, #3b82f6 var(--value-percent, 0%), white var(--value-percent, 0%), white 100%);
-            height: 16px;
-            border-radius: 2px;
-        }
-        
-        .slider-base::-moz-range-track {
-            background: linear-gradient(to right, #3b82f6 0%, #3b82f6 var(--value-percent, 0%), white var(--value-percent, 0%), white 100%);
-            height: 16px;
-            border-radius: 2px;
-        }
-        
-        /* 漫画模式 滑动条样式 - 颜色反转 */
-        .manga-mode .slider-base::-webkit-slider-runnable-track {
-            background: linear-gradient(to right, white 0%, white var(--value-percent, 0%), #3b82f6 var(--value-percent, 0%), #3b82f6 100%);
-            height: 16px;
-            border-radius: 2px;
-        }
-        
-        .manga-mode .slider-base::-moz-range-track {
-            background: linear-gradient(to right, white 0%, white var(--value-percent, 0%), #3b82f6 var(--value-percent, 0%), #3b82f6 100%) !important;
-            height: 16px;
-            border-radius: 2px;
-        }
-        
-        /* 特殊处理 Firefox提供了一个特殊的::-moz-range-progress选择器，可以单独控制已滑过部分的样式 */
-        /* 使用@-moz-document url-prefix()规则确保这些样式只会在Firefox浏览器中应用 */
-        @-moz-document url-prefix() {
-            /* 将基础背景设为透明，避免背景叠加问题 */
-            .manga-mode .slider-base {
-                background: transparent;
-            }
-            /* 为Firefox提供专用的纯色背景而非渐变 */
-            .manga-mode .slider-base::-moz-range-progress {
-                background-color: white;
-                height: 16px;
-                border-radius: 2px;
-            }
-            .manga-mode .slider-base::-moz-range-track {
-                background-color: #3b82f6;
-                height: 16px;
-                border-radius: 2px;
-            }
-        }
-        
-        /* 拖动按钮样式 */
-        .slider-base::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 18px;
-            height: 18px;
-            background: white;
-            border: 1.5px solid #3b82f6;
-            border-radius: 10%;
-            cursor: pointer;
-            /* margin-top: 0px; */
-        }
-        /* 火狐：拖动按钮样式 */
-        .slider-base::-moz-range-thumb {
-            width: 18px;
-            height: 18px;
-            background: white;
-            border: 1.5px solid #3b82f6;
-            border-radius: 10%;
-            cursor: pointer;
-        }
-    </style>
+		/* 基础 滑动条样式 */
+		.slider-base {
+			-webkit-appearance: none;
+			appearance: none;
+			height: 16px;
+			outline: none;
+			border-radius: 2px;
+			background: transparent; /* 确保基础背景是透明的 */
+		}
+
+		/* 普通模式 滑动条样式 */
+		.slider-base::-webkit-slider-runnable-track {
+			background: linear-gradient(
+				to right,
+				#3b82f6 0%,
+				#3b82f6 var(--value-percent, 0%),
+				white var(--value-percent, 0%),
+				white 100%
+			);
+			height: 16px;
+			border-radius: 2px;
+		}
+
+		.slider-base::-moz-range-track {
+			background: linear-gradient(
+				to right,
+				#3b82f6 0%,
+				#3b82f6 var(--value-percent, 0%),
+				white var(--value-percent, 0%),
+				white 100%
+			);
+			height: 16px;
+			border-radius: 2px;
+		}
+
+		/* 漫画模式 滑动条样式 - 颜色反转 */
+		.manga-mode .slider-base::-webkit-slider-runnable-track {
+			background: linear-gradient(
+				to right,
+				white 0%,
+				white var(--value-percent, 0%),
+				#3b82f6 var(--value-percent, 0%),
+				#3b82f6 100%
+			);
+			height: 16px;
+			border-radius: 2px;
+		}
+
+		.manga-mode .slider-base::-moz-range-track {
+			background: linear-gradient(
+				to right,
+				white 0%,
+				white var(--value-percent, 0%),
+				#3b82f6 var(--value-percent, 0%),
+				#3b82f6 100%
+			) !important;
+			height: 16px;
+			border-radius: 2px;
+		}
+
+		/* 特殊处理 Firefox提供了一个特殊的::-moz-range-progress选择器，可以单独控制已滑过部分的样式 */
+		/* 使用@-moz-document url-prefix()规则确保这些样式只会在Firefox浏览器中应用 */
+		@-moz-document url-prefix() {
+			/* 将基础背景设为透明，避免背景叠加问题 */
+			.manga-mode .slider-base {
+				background: transparent;
+			}
+			/* 为Firefox提供专用的纯色背景而非渐变 */
+			.manga-mode .slider-base::-moz-range-progress {
+				background-color: white;
+				height: 16px;
+				border-radius: 2px;
+			}
+			.manga-mode .slider-base::-moz-range-track {
+				background-color: #3b82f6;
+				height: 16px;
+				border-radius: 2px;
+			}
+		}
+
+		/* 拖动按钮样式 */
+		.slider-base::-webkit-slider-thumb {
+			-webkit-appearance: none;
+			appearance: none;
+			width: 18px;
+			height: 18px;
+			background: white;
+			border: 1.5px solid #3b82f6;
+			border-radius: 10%;
+			cursor: pointer;
+			/* margin-top: 0px; */
+		}
+		/* 火狐：拖动按钮样式 */
+		.slider-base::-moz-range-thumb {
+			width: 18px;
+			height: 18px;
+			background: white;
+			border: 1.5px solid #3b82f6;
+			border-radius: 10%;
+			cursor: pointer;
+		}
+	</style>
 	<!-- x-on:click.stop="" ：阻止事件冒泡，防止触发父组件上的翻页动作-->
 	<div
 		id="StepsRangeArea"

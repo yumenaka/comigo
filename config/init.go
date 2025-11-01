@@ -2,33 +2,49 @@ package config
 
 import (
 	"os"
+	"runtime"
 
-	"github.com/joho/godotenv"
-	"github.com/yumenaka/comigo/util/logger"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
 // home目录 配置
 func init() {
-	// Find home directory.
-	home, err := os.UserHomeDir()
-	if err != nil {
-		logger.Infof("%s", err)
+	// 在非js环境下
+	if runtime.GOOS != "js" {
+		// Find home directory.
+		home, err := os.UserHomeDir()
+		if err != nil {
+			logger.Infof("%s", err)
+		}
+		cfg.LogFilePath = home
+		cfg.LogFileName = "comigo.log"
 	}
-	cfg.LogFilePath = home
-	cfg.LogFileName = "comigo.log"
 }
 
-// smb配置（TODO:SMB支持）
-func init() {
-	err := godotenv.Load()
-	if err != nil {
-		if cfg.Debug {
-			logger.Infof("Not found .env file")
-		}
-	}
-	cfg.Stores[0].Smb.Host = os.Getenv("SMB_HOST")
-	cfg.Stores[0].Smb.Username = os.Getenv("SMB_USER")
-	cfg.Stores[0].Smb.Password = os.Getenv("SMB_PASS")
-	cfg.Stores[0].Smb.ShareName = os.Getenv("SMB_SHARE_NAME")
-	cfg.Stores[0].Smb.Path = os.Getenv("SMB_PATH")
+// cfg 为全局配置,全局单实例
+var cfg = Config{
+	ConfigFile:            "",
+	CacheDir:              "",
+	ClearCacheExit:        true,
+	ClearDatabaseWhenExit: true,
+	DisableLAN:            false,
+	DefaultMode:           "scroll",
+	EnableUpload:          true,
+	EnableDatabase:        false,
+	EnableTLS:             false,
+	ExcludePath:           []string{"$RECYCLE.BIN", "System Volume Information", "node_modules"},
+	Host:                  "",
+	LogToFile:             false,
+	MaxScanDepth:          4,
+	MinImageNum:           3,
+	OpenBrowser:           true,
+	Port:                  1234,
+	Password:              "",
+	SupportFileType:       []string{".zip", ".tar", ".rar", ".cbr", ".cbz", ".epub", ".mp4", ".webm", ".pdf", ".flv", ".avi", ".mp3", ".wav", ".wma", ".ogg"},
+	SupportMediaType:      []string{".jpg", ".jpeg", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".gif", ".apng", ".bmp", ".webp", ".ico", ".heic", ".heif", ".avif"},
+	SupportTemplateFile:   []string{".html"},
+	UseCache:              true,
+	UploadPath:            "",
+	Username:              "comigo",
+	ZipFileTextEncoding:   "",
 }

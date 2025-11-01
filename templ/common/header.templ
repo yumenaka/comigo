@@ -16,7 +16,7 @@ type HeaderProps struct {
 	SetTheme          bool
 	FlipMode          bool
 	ShowQuickJumpBar  bool
-	QuickJumpBarBooks *model.BookInfoList
+	QuickJumpBarBooks *model.BookInfos
 }
 
 // bg-base-100/50 透明背景
@@ -39,27 +39,37 @@ templ Header(prop HeaderProps) {
 		}
 	>
 		<div class="flex flex-row">
+			<!-- 全屏按钮，便携模式 -->
+			<div
+				id="FullScreenIcon"
+				x-show="window.location.href.includes('file:///')"
+				onclick="if (Screenfull.isEnabled) {Screenfull.toggle()} else {showToast(i18next.t('not_support_fullscreen'))}"
+				class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
+			>
+				@svg.FullScreen()
+			</div>
 			if prop.ShowReturnIcon {
 				<!-- 返回箭头,点击返回上一页 -->
-				<a href={ templ.SafeURL(prop.ReturnUrl) }>
+				<a x-show="!window.location.href.includes('file:///')" href={ templ.SafeURL(prop.ReturnUrl) }>
 					<div class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
 						@svg.Return()
 					</div>
 				</a>
 			}
 			<!-- 新服务器设置 -->
-			<a href="/settings" class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
+			<a x-show="!window.location.href.includes('file:///')" href="/settings" class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
 				@svg.ServerDisk()
 			</a>
 			if prop.InShelf {
 				<!-- 上传按钮，点击进入上传页面 -->
-				<a href="/upload" class="w-10 mx-1 my-0 rounded hover:ring ">
+				<a x-show="!window.location.href.includes('file:///')" href="/upload" class="w-10 mx-1 my-0 rounded hover:ring ">
 					@svg.Upload()
 				</a>
 			}
 			<!-- 文件重排序 Dropdown Menu： https://flowbite.com/docs/components/dropdowns/ -->
 			<!-- data-dropdown-trigger="{hover|click}"  二选一-->
 			<svg
+				x-show="!window.location.href.includes('file:///')"
 				class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
 				id="ResortButton"
 				data-dropdown-toggle="ReSortDropdownMenu"
@@ -72,6 +82,7 @@ templ Header(prop HeaderProps) {
 			</svg>
 			<div
 				id="ReSortDropdownMenu"
+				x-show="!window.location.href.includes('file:///')"
 				x-data="{
                     getCurrentSortBy() {
                         // 根据URL路径决定使用哪个cookie参数名
@@ -176,12 +187,14 @@ templ Header(prop HeaderProps) {
 		<!-- 标题-->
 		<div class="flex flex-col items-center justify-center flex-1 p-0 m-0 font-semibold text-center truncate">
 			<!-- 标题，快速跳转 or 可下载压缩包 or 只显示 -->
+			<span x-show="window.location.href.includes('file:///')" class="text-lg font-semibold">{ prop.Title }</span>
 			if (prop.InShelf) {
 				<span class="text-lg font-semibold">{ prop.Title }</span>
 			} else {
 				if (prop.ShowQuickJumpBar&&prop.QuickJumpBarBooks!=nil) {
 					<button
 						id="quickJumpBarDropdownButton"
+						x-show="!window.location.href.includes('file:///')"
 						data-dropdown-toggle="QuickJumpDropdown"
 						data-dropdown-trigger="click"
 						class="max-w-fit px-5 py-2.5 inline-flex  hover:bg-gray-400 rounded-lg font-semibold text-center items-center"
@@ -191,17 +204,28 @@ templ Header(prop HeaderProps) {
 						@svg.ArrowDown()
 					</button>
 					<!-- Dropdown menu -->
-					<div id="QuickJumpDropdown" class="max-w-full md:max-w-2xl md:truncate z-10 hidden divide-y divide-gray-100 rounded-lg shadow bg-white/90  dark:bg-gray-700">
+					<div
+						id="QuickJumpDropdown"
+						x-show="!window.location.href.includes('file:///')"
+						class="max-w-full md:max-w-2xl md:truncate z-10 hidden divide-y divide-gray-100 rounded-lg shadow bg-white/90  dark:bg-gray-700"
+					>
 						<ul class="py-2 mt-0 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="quickJumpBarDropdownButton">
-							for _, book := range prop.QuickJumpBarBooks.BookInfos {
-								if prop.FlipMode {
+							for _, book := range *prop.QuickJumpBarBooks {
+								if book.Type == model.TypeBooksGroup {
 									<li>
-										<a href={ templ.SafeURL("/flip/" + book.BookID) } class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white">{ book.Title }</a>
+										<a href={ templ.SafeURL("/shelf/" + book.BookID) } class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white">{ book.Title }</a>
 									</li>
-								} else {
-									<li>
-										<a href={ templ.SafeURL("/scroll/" + book.BookID) } class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white">{ book.Title }</a>
-									</li>
+								}
+								if book.Type != model.TypeBooksGroup {
+									if prop.FlipMode {
+										<li>
+											<a href={ templ.SafeURL("/flip/" + book.BookID) } class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white">{ book.Title }</a>
+										</li>
+									} else {
+										<li>
+											<a href={ templ.SafeURL("/scroll/" + book.BookID) } class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white">{ book.Title }</a>
+										</li>
+									}
 								}
 							}
 						</ul>
@@ -220,11 +244,21 @@ templ Header(prop HeaderProps) {
 		<!-- 溢出 overflow-x-auto :https://www.tailwindcss.cn/docs/overflow -->
 		<div class="flex justify-between p-0 m-0 max-w-64">
 			<!-- 图标：点击显示二维码 -->
-			<div data-modal-target="qrcode-modal" data-modal-toggle="qrcode-modal" class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
+			<div
+				data-modal-target="qrcode-modal"
+				data-modal-toggle="qrcode-modal"
+				x-show="!window.location.href.includes('file:///')"
+				class="hidden md:flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
+			>
 				@svg.QRCode()
 			</div>
-			<!-- 全屏按钮 -->
-			<div id="FullScreenIcon" onclick="" class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
+			<!-- 全屏按钮，非便携模式 -->
+			<div
+				id="FullScreenIcon"
+				x-show="!window.location.href.includes('file:///')"
+				onclick="if (Screenfull.isEnabled) {Screenfull.toggle()} else {showToast(i18next.t('not_support_fullscreen'))}"
+				class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
+			>
 				@svg.FullScreen()
 			</div>
 			<!-- 阅读器设定,点击屏幕中央也可以打开  可自定义方向 -->
@@ -234,31 +268,5 @@ templ Header(prop HeaderProps) {
 				@svg.Setting()
 			</div>
 		</div>
-		<script type="module">
-          // 封装统一的全屏切换
-          async function toggleFullscreen() {
-            //  ──在 Wails 环境──────────────────────────
-            if(window.runtime){
-                // 判断是否在 Wails 环境中
-                window.runtime.WindowFullscreen()
-                // MacOS 上的全屏模式无法退出全屏？
-                //if (window.runtime.isFullscreen()) {
-                //    window.runtime.WindowUnfullscreen()
-                //} else {
-                //    window.runtime.WindowFullscreen()
-                //}
-            }else{
-                // ──在普通浏览器──────────────────────────
-                if (Screenfull.isEnabled) {
-                    Screenfull.toggle()
-                    console.log("切换全屏成功")
-                } else {
-                    showToast(i18next.t('not_support_fullscreen'))
-                }
-            }
-          }
-          // 绑到按钮
-          document.getElementById("FullScreenIcon").addEventListener("click", toggleFullscreen);
-        </script>
 	</header>
 }

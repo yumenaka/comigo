@@ -6,13 +6,15 @@ import (
 
 	"github.com/sevlyar/go-daemon"
 	"github.com/yumenaka/comigo/config"
-	"github.com/yumenaka/comigo/util/logger"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
-// DemonFlag TODO: 实测macos可用，正确地实装，需要理解守护进程的概念
+// DemonFlag 正确地实装，需要理解守护进程的概念
 // 需要去 cmd/init_flags.go 设置flag
-var DemonFlag bool
-var StopDaemonFlag bool
+var (
+	DemonFlag      bool
+	StopDaemonFlag bool
+)
 
 // SetDaemon 设置守护进程, To terminate the daemon use: kill `cat comigo.pid`
 // 该函数会在Unix系统上将当前进程转化为守护进程，并在后台运行。
@@ -32,11 +34,11 @@ func SetDaemon() {
 	}
 	cntxt := &daemon.Context{
 		PidFileName: "/var/run/comigo.pid",
-		PidFilePerm: 0644,
+		PidFilePerm: 0o644,
 		LogFileName: "comigo.log",
-		LogFilePerm: 0640,
+		LogFilePerm: 0o640,
 		WorkDir:     "./",
-		Umask:       027,
+		Umask:       0o27,
 		Args:        []string{fmt.Sprintf("[comigo %s daemon]", config.GetVersion())},
 	}
 	// Reborn 会在指定的上下文中启动当前进程的第二个副本。

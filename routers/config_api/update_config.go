@@ -7,11 +7,10 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo/v4"
-	"github.com/spf13/viper"
 	"github.com/yumenaka/comigo/config"
-	"github.com/yumenaka/comigo/util"
-	"github.com/yumenaka/comigo/util/logger"
-	"github.com/yumenaka/comigo/util/scan"
+	"github.com/yumenaka/comigo/tools"
+	"github.com/yumenaka/comigo/tools/logger"
+	"github.com/yumenaka/comigo/tools/scan"
 )
 
 // UpdateConfig 修改服务器配置(post json)
@@ -24,15 +23,19 @@ func UpdateConfig(c echo.Context) error {
 	// 将JSON数据转换为字符串并打印
 	jsonString := string(body)
 	logger.Infof("Received JSON data: %s \n", jsonString)
-
-	// 解析JSON数据并更新服务器配置
+	// 如果配置被锁定，返回错误
+	if config.GetCfg().ConfigLocked {
+		return c.JSON(http.StatusMethodNotAllowed, map[string]string{"error": "Config is locked, cannot be modified"})
+	}
+	// 复制当前配置以便后续比较
 	oldConfig := config.CopyCfg()
+	// 解析JSON数据并更新服务器配置
 	err = config.UpdateConfigByJson(jsonString)
 	if err != nil {
 		logger.Infof("%s", err.Error())
 		return c.JSON(http.StatusMethodNotAllowed, map[string]string{"error": "Failed to parse JSON data"})
 	}
-	err = config.WriteConfigFile()
+	err = config.UpdateConfigFile()
 	if err != nil {
 		logger.Infof("Failed to update local config: %v", err)
 	}
@@ -61,13 +64,13 @@ func openBrowserIfNeeded(oldConfig *config.Config, newConfig *config.Config) {
 		if newConfig.EnableTLS {
 			protocol = "https://"
 		}
-		go util.OpenBrowser(protocol + "127.0.0.1:" + strconv.Itoa(newConfig.Port))
+		go tools.OpenBrowser(protocol + "127.0.0.1:" + strconv.Itoa(int(newConfig.Port)))
 	}
 }
 
 // checkNeedReScan 检查旧的和新的配置是否需要更新，并返回需要重新扫描和重新扫描文件的布尔值
 func checkNeedReScan(oldConfig *config.Config, newConfig *config.Config) (reScanStores bool) {
-	if !reflect.DeepEqual(oldConfig.LocalStores, newConfig.LocalStores) {
+	if !reflect.DeepEqual(oldConfig.StoreUrls, newConfig.StoreUrls) {
 		reScanStores = true
 	}
 	if oldConfig.MaxScanDepth != newConfig.MaxScanDepth {
@@ -93,16 +96,13 @@ func checkNeedReScan(oldConfig *config.Config, newConfig *config.Config) (reScan
 
 // StartReScan 扫描并相应地更新数据库
 func StartReScan() {
-	if err := scan.InitAllStore(scan.NewOption(config.GetCfg())); err != nil {
+	config.GetCfg().InitStoreUrls()
+	if err := scan.InitAllStore(config.GetCfg()); err != nil {
 		logger.Infof("Failed to scan store path: %v", err)
 	}
-	if config.GetEnableDatabase() {
-		saveResultsToDatabase(viper.ConfigFileUsed(), config.GetClearDatabaseWhenExit())
-	}
-}
-
-func saveResultsToDatabase(configPath string, clearDatabaseWhenExit bool) {
-	if err := scan.SaveResultsToDatabase(configPath, clearDatabaseWhenExit); err != nil {
-		logger.Infof("Failed to save results to database: %v", err)
+	if config.GetCfg().EnableDatabase {
+		if err := scan.SaveBooksToDatabase(config.GetCfg()); err != nil {
+			logger.Infof("Failed to save results to database: %v", err)
+		}
 	}
 }

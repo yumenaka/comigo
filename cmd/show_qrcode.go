@@ -1,50 +1,52 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/sanity-io/litter"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
-	"github.com/yumenaka/comigo/util"
-	"github.com/yumenaka/comigo/util/logger"
+	"github.com/yumenaka/comigo/tools"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
 func ShowQRCode() {
-	// 如果只有一本书，URL 需要附加的参数
+	// 如果只有一本书，二维码展示的 URL 需要附加参数，让读者可以直接去读这本书
 	etcStr := ""
-	if model.GetBooksNumber() == 1 {
-		bookList, err := model.GetAllBookInfoList("name")
-		if err != nil {
-			logger.Infof("Error getting book list: %s", err)
-			return
-		}
-		if len(bookList.BookInfos) == 1 {
-			etcStr = fmt.Sprintf("/#/%s/%s", config.GetDefaultMode(), bookList.BookInfos[0].BookID)
-		}
+	allBooks, err := model.IStore.ListBooks()
+	if err != nil {
+		logger.Infof("Error listing books: %s", err)
+	}
+	if len(allBooks) == 1 {
+		etcStr = fmt.Sprintf("/#/%s/%s", config.GetCfg().DefaultMode, allBooks[0].BookID)
 	}
 
-	enableTLS := config.GetCertFile() != "" && config.GetKeyFile() != ""
-	outIP := config.GetHost()
-	if config.GetHost() == "" {
-		outIP = util.GetOutboundIP().String()
+	// 判断是否启用 TLS
+	// 如果配置文件中有证书和密钥文件，则启用 TLS
+	enableTLS := config.GetCfg().CertFile != "" && config.GetCfg().KeyFile != ""
+	outIP := config.GetCfg().Host
+	if config.GetCfg().Host == "" {
+		outIP = tools.GetOutboundIP().String()
 	}
-
-	util.PrintAllReaderURL(
-		config.GetPort(),
-		config.GetOpenBrowser(),
-		config.GetPrintAllPossibleQRCode(),
+	// 打印二维码
+	tools.PrintAllReaderURL(
+		config.GetCfg().Port,
+		config.GetCfg().OpenBrowser,
+		config.GetCfg().PrintAllPossibleQRCode,
 		outIP,
-		config.GetDisableLAN(),
+		config.GetCfg().DisableLAN,
 		enableTLS,
 		etcStr,
 	)
 
 	// 打印配置，调试用
-	if config.GetDebug() {
+	if config.GetCfg().Debug {
 		litter.Dump(config.GetCfg())
 	}
-
+	// ”如何快捷键退出“的文字提示
 	fmt.Println(locale.GetString("ctrl_c_hint"))
+	// 打印 Tailscale 访问地址的二维码
+	ShowQRCodeTailscale(context.Background())
 }

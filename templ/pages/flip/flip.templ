@@ -1,15 +1,16 @@
 package flip
 
 import (
+	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/templ/common"
 	"github.com/yumenaka/comigo/templ/state"
 )
 
 // FlipPage 定义 BodyHTML
-templ FlipPage(s *state.GlobalState, book *model.Book) {
+templ FlipPage(c echo.Context, book *model.Book) {
 	@common.Toast()
-	@InsertData(book, s)
+	@InsertData(book, state.ServerStatus)
 	if book != nil {
 		@common.Header(
 			common.HeaderProps{
@@ -24,8 +25,16 @@ templ FlipPage(s *state.GlobalState, book *model.Book) {
 				ShowQuickJumpBar:  common.ShowQuickJumpBar(book),
 				QuickJumpBarBooks: common.QuickJumpBarBooks(book),
 			})
-		@MainArea(s, book)
+		@MainArea(book)
 	}
-	@common.Drawer(s.ServerStatus.ServerHost, FlipDrawerSlot(s, book))
-	@common.QRCode(s.ServerStatus.ServerHost)
+	<!-- 阅读进度条-->
+	@StepsRangeArea()
+	<!-- 屏幕左下角的灰色页码-->
+	<div
+		x-show="$store.flip.showPageNum"
+		class="fixed bottom-2 left-2 text-gray-500 text-sm pointer-events-none z-10"
+		x-text="$store.flip.nowPageNum+'/'+$store.flip.allPageNum"
+	></div>
+	@common.Drawer(c, book, FlipDrawerSlot(book))
+	@common.QRCode()
 }

@@ -2,12 +2,12 @@ package shelf
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/yumenaka/comigo/templ/state"
 	"github.com/yumenaka/comigo/templ/common"
+	"github.com/yumenaka/comigo/templ/state"
 )
 
 // ShelfPage 书架页面
-templ ShelfPage(c echo.Context, s *state.GlobalState) {
+templ ShelfPage(c echo.Context) {
 	@common.Toast()
 	@common.Header(
 		common.HeaderProps{
@@ -19,8 +19,8 @@ templ ShelfPage(c echo.Context, s *state.GlobalState) {
 			DownLoadLink:    "",
 			SetTheme:        true,
 		})
-	@MainArea(c, s)
-	@common.Footer(s.Version)
-	@common.Drawer(s.ServerStatus.ServerHost, ShelfDrawerSlot())
-	@common.QRCode(s.ServerStatus.ServerHost)
+	@MainArea(c)
+	@common.Footer(state.Version)
+	@common.Drawer(c, nil, ShelfDrawerSlot())
+	@common.QRCode()
 }

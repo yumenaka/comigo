@@ -5,8 +5,11 @@
 *.so
 *.dylib
 *comi
+*.wasm
 # Test binary, built with `go test -c`
 *.test
+*wasm_exec.js
+*test_build
 
 # Output of the go coverage tools, specifically when used with LiteIDE
 *.out

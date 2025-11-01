@@ -9,43 +9,43 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/assets/locale"
-	"github.com/yumenaka/comigo/util"
-	"github.com/yumenaka/comigo/util/logger"
+	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/tools"
+	"github.com/yumenaka/comigo/tools/logger"
+	"github.com/yumenaka/comigo/tools/scan"
 )
 
 var (
-	RescanBroadcast    *chan string
-	ConfigEnableUpload *bool
-	ConfigUploadPath   *string
+	RescanBroadcast *chan string
 )
 
 // UploadFile 上传文件
 // engine.MaxMultipartMemory = 60 << 20  // 60 MiB  只限制程序在上传文件时可以使用多少内存，而是不限制上传文件的大小。(default is 32 MiB)
 func UploadFile(c echo.Context) error {
 	// 是否开启上传功能
-	if !*ConfigEnableUpload {
+	if !config.GetCfg().EnableUpload || config.GetCfg().ConfigLocked {
 		logger.Infof("%s", locale.GetString("upload_disable_hint"))
 		return c.JSON(http.StatusForbidden, map[string]interface{}{
 			"error": locale.GetString("upload_disable_hint"),
 		})
 	}
 	// 默认的上传路径是否已设置
-	if *ConfigUploadPath == "" {
+	if config.GetCfg().UploadPath == "" {
 		logger.Infof("%s", "UPLOAD_PATH_NOT_SET")
 	}
 	// 创建上传目录（如果不存在）
-	if !util.IsExist(*ConfigUploadPath) {
+	if !tools.IsExist(config.GetCfg().UploadPath) {
 		// 创建文件夹
-		err := os.MkdirAll(*ConfigUploadPath, os.ModePerm)
+		err := os.MkdirAll(config.GetCfg().UploadPath, os.ModePerm)
 		if err != nil {
 			// 无法创建上传目录: %s
 			logger.Infof("mkdir failed![%s]\n", err)
 			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-				"error": fmt.Sprintf("无法创建上传目录: %s", *ConfigUploadPath),
+				"error": fmt.Sprintf("无法创建上传目录: %s", config.GetCfg().UploadPath),
 			})
 		}
 		// 创建上传目录成功: %s
-		logger.Infof("mkdir upload folder success!\n %s\n", *ConfigUploadPath)
+		logger.Infof("mkdir upload folder success!\n %s\n", config.GetCfg().UploadPath)
 	}
 
 	// 获取表单文件
@@ -64,7 +64,7 @@ func UploadFile(c echo.Context) error {
 	}
 
 	var uploadedFiles []string
-	fmt.Println("上传文件数量:", len(files))
+	logger.Info("上传文件数量:", len(files))
 	// 遍历所有上传的文件
 	for _, file := range files {
 		// 验证文件大小（例如，不超过 5000 MB）
@@ -96,7 +96,7 @@ func UploadFile(c echo.Context) error {
 		filename := filepath.Base(file.Filename)
 
 		// 确保文件名唯一（可选）
-		destPath := filepath.Join(*ConfigUploadPath, filename)
+		destPath := filepath.Join(config.GetCfg().UploadPath, filename)
 		// 如果文件已存在，追加编号
 		counter := 1
 		ext := filepath.Ext(filename)
@@ -106,7 +106,7 @@ func UploadFile(c echo.Context) error {
 				break
 			}
 			filename = fmt.Sprintf("%s_%d%s", name, counter, ext)
-			destPath = filepath.Join(*ConfigUploadPath, filename)
+			destPath = filepath.Join(config.GetCfg().UploadPath, filename)
 			counter++
 		}
 		// 保存文件
@@ -135,9 +135,26 @@ func UploadFile(c echo.Context) error {
 		uploadedFiles = append(uploadedFiles, filename)
 	}
 
-	// 通知重新扫描
-	*RescanBroadcast <- "rescan_upload_path"
+	//// 通知重新扫描（不等待完成）
+	//*RescanBroadcast <- "rescan_upload_path"
 
+	// 同步执行扫描（等待完成）
+	// 扫描上传目录的文件
+	err = scan.InitStore(config.GetCfg().UploadPath, config.GetCfg())
+	if err != nil {
+		logger.Infof(locale.GetString("scan_error")+"path:%s  %s", config.GetCfg().UploadPath, err)
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": fmt.Sprintf("扫描上传目录失败: %s", err),
+		})
+	}
+	// 保存扫描结果到数据库（如果开启）
+	if config.GetCfg().EnableDatabase {
+		if err := scan.SaveBooksToDatabase(config.GetCfg()); err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+				"error": fmt.Sprintf("保存数据库失败: %s", err),
+			})
+		}
+	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "文件上传成功",
 		"files":   uploadedFiles,

@@ -7,7 +7,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/config"
-	"github.com/yumenaka/comigo/util/logger"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
 // JwtCustomClaims 扩展默认的"JWT声明"。更多示例，请参见https://github.com/golang-jwt/jwt
@@ -26,31 +26,28 @@ func Login(c echo.Context) error {
 	username := c.FormValue("username")
 	password := c.FormValue("password")
 	// 检查是否需要登录
-	if !config.GetRequiresLogin() {
-		logger.Infof("RequiresLogin %v\n", config.GetRequiresLogin())
+	if config.GetCfg().Username == "" || config.GetCfg().Password == "" {
+		logger.Infof("Cannot set Username or Password\n")
 		return echo.ErrTeapot
 	}
-	// // 空密码检查？
-	// if config.GetPassword() == "" {
-	// 	logger.Info("RequiresLogin is true, but password is empty\n")
-	// 	return echo.ErrUnauthorized
-	// }
 	// 如果未设置密码或密码错误，则不生成 JWT
-	if !config.GetRequiresLogin() || username != config.GetUsername() || password != config.GetPassword() {
-		logger.Infof("Login failed: %s-%s, %s-%s\n", username, config.GetUsername(), config.GetPassword(), password)
+	if username != config.GetCfg().Username || password != config.GetCfg().Password {
+		logger.Infof("Login failed: %s-%s, %s-%s\n", username, config.GetCfg().Username, config.GetCfg().Password, password)
 		return echo.ErrUnauthorized
 	}
 
 	// 设置自定义"JWT声明"
 	claims := &JwtCustomClaims{
 		username,
-		true, // TODO：账号管理
+		true, // 账号管理（未实现）
 		jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * time.Duration(config.GetTimeout()))),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * time.Duration(config.GetCfg().Timeout))),
 		},
 	}
 
 	// 用"JWT声明"创建令牌
+	// HS256 是对称的，这要求解码器也具有秘密私钥
+	// 可以换成非对称的jwt.SigningMethodRS512，需要两个密钥：一个公钥和一个必须保密的私钥 https://packagemain.tech/p/json-web-tokens-in-go
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	// 生成编码的jwt token

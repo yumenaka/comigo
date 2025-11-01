@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
-	"github.com/yumenaka/comigo/util/logger"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
 // ReverseProxyOptions 用于配置反向代理选项
@@ -16,7 +16,7 @@ type ReverseProxyOptions struct {
 	RewritePath string
 }
 
-// ReverseProxyHandle TODO: 使用 echo 中间件实现反向代理
+// ReverseProxyHandle echo 中间件实现反向代理（未实现）
 func ReverseProxyHandle(path string, option ReverseProxyOptions) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
