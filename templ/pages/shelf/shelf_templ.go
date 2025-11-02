@@ -10,12 +10,13 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/templ/common"
-	"github.com/yumenaka/comigo/templ/state"
 )
 
 // ShelfPage 书架页面
-func ShelfPage(c echo.Context) templ.Component {
+func ShelfPage(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookInfo, childBookInfos []model.BookInfo) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -42,7 +43,7 @@ func ShelfPage(c echo.Context) templ.Component {
 		}
 		templ_7745c5c3_Err = common.Header(
 			common.HeaderProps{
-				Title:           common.GetPageTitle(c.Param("id")),
+				Title:           common.GetPageTitle(c.Param("id"), nowBookNum, storeBookInfos, childBookInfos),
 				ShowReturnIcon:  c.Param("id") != "",
 				ReturnUrl:       common.GetReturnUrl(c.Param("id")),
 				SetDownLoadLink: false,
@@ -53,11 +54,11 @@ func ShelfPage(c echo.Context) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = MainArea(c).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = MainArea(c, nowBookNum, storeBookInfos, childBookInfos).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = common.Footer(state.Version).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.Footer(config.GetVersion()).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

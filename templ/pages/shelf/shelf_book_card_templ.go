@@ -105,7 +105,7 @@ func BookCard(c echo.Context, book model.BookInfo) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" class=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" x-show=\"showBook\" class=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -170,7 +170,7 @@ func BookCard(c echo.Context, book model.BookInfo) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(book.ChildBooksNum))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_book_card.templ`, Line: 77, Col: 128}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_book_card.templ`, Line: 78, Col: 128}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -234,7 +234,7 @@ func BookCard(c echo.Context, book model.BookInfo) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs("$store.shelf.simplifyTitle === true?'" + book.ShortName() + "':'" + book.Title + "'")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_book_card.templ`, Line: 201, Col: 153}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_book_card.templ`, Line: 202, Col: 153}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {

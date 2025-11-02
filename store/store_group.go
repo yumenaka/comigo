@@ -71,7 +71,7 @@ func (ramStore *StoreInRam) SaveBooks() error {
 		return err
 	}
 	savePath := filepath.Join(configDir, "books")
-
+	logger.Infof("Saving books to %s", savePath)
 	allBooks, err := ramStore.ListBooks()
 	if err != nil {
 		logger.Infof("Error listing books: %s", err)
@@ -120,6 +120,7 @@ func (ramStore *StoreInRam) LoadBooks() error {
 		return err
 	}
 	savePath := filepath.Join(configDir, "books")
+	logger.Infof("Loading books from %s", savePath)
 	// 遍历所有 storeUrl 对应的目录
 	for _, storeUrl := range config.GetCfg().StoreUrls {
 		storePathAbs, err := filepath.Abs(storeUrl)
@@ -345,8 +346,7 @@ func TopOfShelfInfo(sortBy string) ([]model.StoreBookInfo, error) {
 			storePathAbs = storeUrl
 		}
 		newStoreBookInfo := model.StoreBookInfo{
-			StoreUrl:  storePathAbs,
-			BookInfos: model.BookInfos{},
+			StoreUrl: storePathAbs,
 		}
 		for _, topBook := range topBookList {
 			if topBook.StoreUrl == storePathAbs {
@@ -354,6 +354,14 @@ func TopOfShelfInfo(sortBy string) ([]model.StoreBookInfo, error) {
 			}
 		}
 		newStoreBookInfo.BookInfos.SortBooks(sortBy)
+		childBookNum := 0
+		for _, b := range allBooks {
+			if b.StoreUrl == storePathAbs && b.Type != model.TypeBooksGroup {
+				childBookNum++
+				//logger.Infof("[%v]Counting book %s in store %s, BookID=%s", childBookNum, b.Title, storePathAbs, b.BookID)
+			}
+		}
+		newStoreBookInfo.ChildBookNum = childBookNum
 		storeBookInfoList = append(storeBookInfoList, newStoreBookInfo)
 	}
 	if len(storeBookInfoList) > 0 {

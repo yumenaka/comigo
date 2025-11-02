@@ -10,9 +10,10 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/templ/common"
-	"github.com/yumenaka/comigo/templ/state"
+	"github.com/yumenaka/comigo/tools"
 )
 
 // ScrollPage 定义 BodyHTML
@@ -37,7 +38,13 @@ func ScrollPage(c echo.Context, book *model.Book, paginationIndex int) templ.Com
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = InsertData(book, state.ServerStatus).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = InsertData(book, tools.GetServerInfo(
+			tools.ServerInfoParams{
+				Cfg:            config.GetCfg(),
+				Version:        config.GetVersion(),
+				AllBooksNumber: model.GetAllBooksNumber(),
+				ClientIP:       c.RealIP(),
+			})).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -48,7 +55,7 @@ func ScrollPage(c echo.Context, book *model.Book, paginationIndex int) templ.Com
 		if book != nil {
 			templ_7745c5c3_Err = common.Header(
 				common.HeaderProps{
-					Title:             common.GetPageTitle(book.BookInfo.BookID),
+					Title:             common.GetBookTitle(book.BookInfo.BookID),
 					ShowReturnIcon:    true,
 					ReturnUrl:         common.GetReturnUrl(book.BookInfo.BookID),
 					SetDownLoadLink:   false,
@@ -70,7 +77,7 @@ func ScrollPage(c echo.Context, book *model.Book, paginationIndex int) templ.Com
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = common.Footer(state.Version).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.Footer(config.GetVersion()).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

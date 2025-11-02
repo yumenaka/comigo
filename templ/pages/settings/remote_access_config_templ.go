@@ -9,8 +9,8 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/templ/common/svg"
-	"github.com/yumenaka/comigo/templ/state"
 	"github.com/yumenaka/comigo/tools/tailscale_plugin"
 	"strconv"
 )
@@ -99,7 +99,7 @@ func RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Compon
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if state.ServerConfig.EnableTailscale {
+		if config.GetCfg().EnableTailscale {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, " value=\"true\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -153,7 +153,7 @@ func RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Compon
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if state.ServerConfig.EnableTailscale {
+		if config.GetCfg().EnableTailscale {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, " value=\"true\" checked")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -260,9 +260,9 @@ func RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Compon
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var16 string
-		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(state.ServerConfig.TailscaleHostname)
+		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(config.GetCfg().TailscaleHostname)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 114, Col: 48}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 114, Col: 45}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
@@ -364,9 +364,9 @@ func RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Compon
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var24 string
-		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(state.ServerConfig.TailscalePort))
+		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(config.GetCfg().TailscalePort))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 136, Col: 58}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 136, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 		if templ_7745c5c3_Err != nil {
@@ -494,9 +494,9 @@ func RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Compon
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var34 string
-		templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(state.ServerConfig.TailscaleAuthKey)
+		templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(config.GetCfg().TailscaleAuthKey)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 155, Col: 47}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 155, Col: 44}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
 		if templ_7745c5c3_Err != nil {
@@ -620,7 +620,7 @@ func RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Compon
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if state.ServerConfig.FunnelLoginCheck {
+		if config.GetCfg().FunnelLoginCheck {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 52, " value=\"true\" checked")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -636,9 +636,9 @@ func RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Compon
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var42 string
-		templ_7745c5c3_Var42, templ_7745c5c3_Err = templ.JoinStringErrs(state.ServerConfig.FunnelLoginCheck)
+		templ_7745c5c3_Var42, templ_7745c5c3_Err = templ.JoinStringErrs(config.GetCfg().FunnelLoginCheck)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 201, Col: 41}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/remote_access_config.templ`, Line: 201, Col: 38}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var42))
 		if templ_7745c5c3_Err != nil {
@@ -762,7 +762,7 @@ func RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Compon
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if state.ServerConfig.FunnelTunnel {
+		if config.GetCfg().FunnelTunnel {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 67, " value=\"true\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -1216,7 +1216,7 @@ func TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) templ.Comp
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if state.ServerConfig.FunnelTunnel {
+		if config.GetCfg().FunnelTunnel {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 109, "<td id=\"ts-funnel-mode\" x-text=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -1235,7 +1235,7 @@ func TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) templ.Comp
 				return templ_7745c5c3_Err
 			}
 		}
-		if !state.ServerConfig.FunnelTunnel {
+		if !config.GetCfg().FunnelTunnel {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 111, "<td id=\"ts-funnel-mode\" x-text=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

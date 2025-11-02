@@ -8,10 +8,12 @@ package common
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/labstack/echo/v4"
-import "github.com/yumenaka/comigo/model"
-import "github.com/yumenaka/comigo/templ/state"
-import "github.com/yumenaka/comigo/templ/common/svg"
+import (
+	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/templ/common/svg"
+)
 
 func Drawer(c echo.Context, book *model.Book, slot templ.Component) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -38,7 +40,7 @@ func Drawer(c echo.Context, book *model.Book, slot templ.Component) templ.Compon
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if state.ServerConfig.RequiresAuth() {
+		if config.GetCfg().RequiresAuth() {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<button type=\"button\" id=\"logout_button\" class=\"ml-2 mb-0 px-1 py-1 text-xs text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800\" @click=\"if(window.confirm(i18next.t('confirm_logout'))) { document.cookie = 'jwt_token=; Max-Age=-99999999; path=/;'; window.location.reload(); }\" x-data=\"{\n                                    isLoggedIn: false,\n                                    checkLoginStatus() {\n                                        const jwtCookie = document.cookie.split(';').find(c => c.trim().startsWith('jwt_token='));\n                                        this.isLoggedIn = !!jwtCookie && jwtCookie.trim() !== 'jwt_token=';\n                                    }\n                                }\" x-init=\"checkLoginStatus()\" x-show=\"isLoggedIn\">logout</button>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
