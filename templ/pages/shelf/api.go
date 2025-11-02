@@ -5,7 +5,6 @@ import (
 
 	"github.com/angelofallars/htmx-go"
 	"github.com/labstack/echo/v4"
-	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/store"
 	"github.com/yumenaka/comigo/templ/state"
 	"github.com/yumenaka/comigo/tools/logger"
@@ -39,24 +38,31 @@ func GetBookListHandler(c echo.Context) error {
 	// 如果没有指定书籍ID，获取顶层书架信息。
 	if bookID == "" {
 		var err error
-		state.NowBookInfos, err = store.TopOfShelfInfo(sortBy)
+		state.StoreBookInfos, err = store.TopOfShelfInfo(sortBy)
 		if err != nil {
 			logger.Infof("TopOfShelfInfo: %v", err)
 		}
 	}
 	// 如果指定了书籍ID，获取子书架信息。
 	if bookID != "" {
-		var err error
-		state.NowBookInfos, err = store.GetChildBooksInfo(bookID)
+		logger.Infof("Get child books for bookID %s", bookID)
+		childBooks, err := store.GetChildBooksInfo(bookID)
 		if err != nil {
 			logger.Infof("GetBookShelf: %v", err)
+		} else {
+			logger.Infof("Get %d child books for bookID %s", len(*childBooks), bookID)
+			state.ChildBookInfos = *childBooks
 		}
-		state.NowBookInfos.SortBooks(sortBy)
 	}
-
-	if state.NowBookInfos == nil {
-		state.NowBookInfos = &model.BookInfos{}
-	}
+	//// 读取url参数，获取StoreID(int类型)
+	//storeID := c.Param("store_id")
+	//if storeID != "" {
+	//	storeIDInt, convErr := strconv.Atoi(storeID)
+	//	if convErr != nil {
+	//		logger.Infof("Convert StoreID to int failed: %v", convErr)
+	//	}
+	//	state.CurrentStoreID = storeIDInt
+	//}
 
 	// https://github.com/angelofallars/htmx-go#templ-integration
 	// 主体内容的模板(书籍列表)

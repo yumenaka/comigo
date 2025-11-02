@@ -42,10 +42,10 @@ func GetTopOfShelfInfo(c echo.Context) error {
 		sortBy = "default"
 	}
 	ClearBookNotExist()
-	bookInfoList, err := store.TopOfShelfInfo(sortBy)
+	topOfShelfInfo, err := store.TopOfShelfInfo(sortBy)
 	if err != nil {
 		logger.Infof("%s", err)
 		return c.JSON(http.StatusBadRequest, "GetTopOfShelfInfo Failed")
 	}
-	return c.JSON(http.StatusOK, *bookInfoList)
+	return c.JSON(http.StatusOK, topOfShelfInfo)
 }

@@ -15,8 +15,8 @@ import (
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
-// PageHandler 书架页面的处理程序。
-func PageHandler(c echo.Context) error {
+// ShelfHandler 书架页面的处理程序。
+func ShelfHandler(c echo.Context) error {
 	// Set the response content type to HTML.
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
 	// 书籍排序方式
@@ -31,13 +31,17 @@ func PageHandler(c echo.Context) error {
 	bookID := c.Param("id")
 	// 如果没有指定书籍ID，获取顶层书架信息。
 	if bookID == "" {
-		state.NowBookInfos, _ = store.TopOfShelfInfo(sortBy)
+		state.StoreBookInfos, _ = store.TopOfShelfInfo(sortBy)
 	}
 
 	// 如果指定了书籍ID，获取子书架信息。
 	if bookID != "" {
-		var err error
-		state.NowBookInfos, err = store.GetChildBooksInfo(bookID)
+		logger.Infof("Get child books for bookID %s", bookID)
+		childBooks, err := store.GetChildBooksInfo(bookID)
+		if err == nil {
+			logger.Infof("Get %d child books for bookID %s", len(*childBooks), bookID)
+			state.ChildBookInfos = *childBooks
+		}
 		// 无图书的提示（返回主页\上传压缩包\远程下载示例漫画）
 		if err != nil {
 			logger.Infof("GetBookShelf Error: %v", err)
@@ -53,7 +57,7 @@ func PageHandler(c echo.Context) error {
 			}
 			return nil
 		} else {
-			state.NowBookInfos.SortBooks(sortBy)
+			//state.StoreBookInfos.SortBooks(sortBy)
 		}
 	}
 	// 为首页定义模板布局。

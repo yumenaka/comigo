@@ -1,28 +1,53 @@
 package shelf
 
 import (
+	"strconv"
+
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/templ/pages/settings"
 	"github.com/yumenaka/comigo/templ/state"
 )
 
 templ MainArea(c echo.Context) {
-	<!-- 显示书架 -->
-	if state.GetNowBookNum() != 0 {
+	<!-- 顶部书架 -->
+	if state.GetNowBookNum() != 0 && c.Param("id") == "" {
 		<!-- 有的颜色模板只有base-100 ，没有颜色更深的 base-200 base-300 -->
+		<div
+			x-data
+			class="flex flex-col flex-1 w-full h-full pt-6 pb-2 px-1 gap-2 overflow-y-auto"
+		>
+			for i, storeBooks := range state.StoreBookInfos {
+				<div
+					id={ "book-shelf-" + strconv.Itoa(i) }
+					class="w-full h-full mb-6 border-4 border-slate-400 rounded-2xl flex flex-row flex-wrap content-start justify-center text-base-content relative pt-8"
+				>
+					<div class="child_store absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2 flex flex-wrap justify-center items-center">
+						<span class="min-w:64 mt-0 p-2 bg-base-100 border-4 border-slate-400 text-base-content rounded-xl text-center text-sm font-semibold">
+							{ storeBooks.StoreUrl } &nbsp;(x{ len(storeBooks.BookInfos) })
+						</span>
+					</div>
+					for _, book := range storeBooks.BookInfos {
+						@BookCard(c, book)
+					}
+				</div>
+			}
+		</div>
+	}
+	<!-- 子书架 -->
+	if state.GetNowBookNum() != 0 && c.Param("id") != "" {
 		<div
 			x-data
 			class="flex flex-row flex-1 w-full h-full"
 		>
 			<div id="book-shelf" class="flex flex-row flex-wrap content-start justify-center flex-1 w-full h-full text-base-content">
-				for _, book := range *state.NowBookInfos {
+				for _, book := range state.ChildBookInfos {
 					@BookCard(c, book)
 				}
 			</div>
 		</div>
 	}
+	<!-- 没有任何书籍的时候 -->
 	if state.GetNowBookNum() == 0 && c.Param("id") == "" {
-		<!-- 没有任何书籍的时候 -->
 		<div
 			id="tab-contents"
 			role="tabpanel"
