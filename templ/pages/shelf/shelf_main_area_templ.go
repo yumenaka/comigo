@@ -12,11 +12,12 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/templ/pages/settings"
-	"github.com/yumenaka/comigo/templ/state"
 )
 
-func MainArea(c echo.Context) templ.Component {
+func MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookInfo, childBookInfos []model.BookInfo) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -41,12 +42,12 @@ func MainArea(c echo.Context) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if state.GetNowBookNum() != 0 && c.Param("id") == "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<!-- 有的颜色模板只有base-100 ，没有颜色更深的 base-200 base-300 --> <div x-data class=\"flex flex-col flex-1 w-full h-full pt-6 pb-2 px-1 gap-2 overflow-y-auto\">")
+		if nowBookNum != 0 && c.Param("id") == "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div x-data class=\"flex flex-col flex-1 w-full h-full pt-6 pb-2 px-1 gap-2 overflow-y-auto transition duration-700\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			for i, storeBooks := range state.StoreBookInfos {
+			for i, storeBooks := range storeBookInfos {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div id=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -60,14 +61,14 @@ func MainArea(c echo.Context) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"w-full h-full mb-6 border-4 border-slate-400 rounded-2xl flex flex-row flex-wrap content-start justify-center text-base-content relative pt-8\"><div class=\"child_store absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2 flex flex-wrap justify-center items-center\"><span class=\"min-w:64 mt-0 p-2 bg-base-100 border-4 border-slate-400 text-base-content rounded-xl text-center text-sm font-semibold\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" x-data=\"{ showBook: true }\" class=\"w-full h-full mb-6 border-4 border-slate-400 rounded-2xl flex flex-row flex-wrap content-start justify-center text-base-content relative pt-8\"><button @click=\"showBook = !showBook\" class=\"child_store flex flex-wrap justify-center items-center absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2 \"><span class=\"flex flex-row min-w:64 mt-0 p-2 bg-base-100 border-4 border-slate-400 text-base-content rounded-xl text-center text-sm font-semibold\"><span>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(storeBooks.StoreUrl)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_main_area.templ`, Line: 26, Col: 28}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_main_area.templ`, Line: 27, Col: 34}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -78,15 +79,15 @@ func MainArea(c echo.Context) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var4 string
-				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(len(storeBooks.BookInfos))
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(storeBooks.ChildBookNum)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_main_area.templ`, Line: 26, Col: 66}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_main_area.templ`, Line: 27, Col: 70}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, ")</span></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, ")&nbsp;</span> <svg class=\"w-3 h-6 transition-transform\" :class=\"{ 'rotate-90': !showBook }\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 10 6\"><path stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"m1 1 4 4 4-4\"></path></svg></span></button> ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -110,12 +111,12 @@ func MainArea(c echo.Context) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if state.GetNowBookNum() != 0 && c.Param("id") != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<div x-data class=\"flex flex-row flex-1 w-full h-full\"><div id=\"book-shelf\" class=\"flex flex-row flex-wrap content-start justify-center flex-1 w-full h-full text-base-content\">")
+		if nowBookNum != 0 && c.Param("id") != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<div x-data=\"{ showBook: true }\" class=\"flex flex-row flex-1 w-full h-full\"><div id=\"book-shelf\" class=\"flex flex-row flex-wrap content-start justify-center flex-1 w-full h-full text-base-content\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			for _, book := range state.ChildBookInfos {
+			for _, book := range childBookInfos {
 				templ_7745c5c3_Err = BookCard(c, book).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -130,12 +131,12 @@ func MainArea(c echo.Context) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if state.GetNowBookNum() == 0 && c.Param("id") == "" {
+		if nowBookNum == 0 && c.Param("id") == "" {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<div id=\"tab-contents\" role=\"tabpanel\" class=\"flex flex-col justify-start items-center flex-1 w-full h-full font-semibold text-lg text-base-content\" :class=\"(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') ? ($store.global.bgPattern !== 'none'?$store.global.bgPattern+' bg-base-300':'bg-base-300'):($store.global.bgPattern !== 'none'?$store.global.bgPattern:'')\"><div class=\"flex flex-col justify-start w-5/6 md:w-3/5 min-w-[20rem] \"><div x-text=\"i18next.t('no_books_library_path_notice')\" class=\"flex flex-col justify-start w-full p-2 m-1 text-normal font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\">没有可读书籍，请设置书库路径。设置完成后，网页会自动刷新。</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = settings.StringArrayConfig("StoreUrls", state.ServerConfig.StoreUrls, "StoreUrls_Description", false).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = settings.StringArrayConfig("StoreUrls", config.GetCfg().StoreUrls, "StoreUrls_Description", false).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

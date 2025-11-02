@@ -164,12 +164,19 @@ func ToSQLCUpdatePageInfoParams(pageInfo model.PageInfo, bookID string) UpdatePa
 // ==================== 批量转换函数 ====================
 
 // FromSQLCBooks 批量转换sqlc.Book为model.Book
-func FromSQLCBooks(sqlcBooks []Book, pagesMap map[string][]model.PageInfo) []*model.Book {
+func FromSQLCBooks(sqlcBooks []Book, pagesMap map[string][]model.PageInfo, bookmarksMap map[string]model.BookMarks) []*model.Book {
 	books := make([]*model.Book, len(sqlcBooks))
 	for i, sqlcBook := range sqlcBooks {
 		books[i] = FromSQLCBook(sqlcBook)
-		if pages, exists := pagesMap[sqlcBook.BookID]; exists {
-			books[i].PageInfos = pages
+		if pagesMap != nil {
+			if pages, exists := pagesMap[sqlcBook.BookID]; exists {
+				books[i].PageInfos = pages
+			}
+		}
+		if bookmarksMap != nil {
+			if marks, exists := bookmarksMap[sqlcBook.BookID]; exists {
+				books[i].BookMarks = marks
+			}
 		}
 	}
 	return books

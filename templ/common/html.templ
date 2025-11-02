@@ -13,7 +13,7 @@ templ Html(c echo.Context, bodyContent templ.Component, insertScript []string) {
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
-			<title>{ GetPageTitle(c.Param("id")) }</title>
+			<title>{ GetBookTitle(c.Param("id")) }</title>
 			<meta name="keywords" content="Comigo:Manga Reader Online 在线漫画阅读器"/>
 			<meta name="description" content="Simple Manga Reader in Linux，Windows，Mac OS"/>
 			<!--TODO:PWA模式  <link rel="manifest" href="/images/manifest.webmanifest"/>  -->

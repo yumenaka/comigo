@@ -31,6 +31,7 @@ templ BookCard(c echo.Context, book model.BookInfo) {
 		:href={ getReadURL(book) }
 		target={ getTarget(book) }
 		x-data={ fmt.Sprintf("{ BookID: %s }", "'"+book.BookID+"'") }
+		x-show="showBook"
 		class={ backgroundImage(book.GetCover().Url) , "relative w-32 transition-transform duration-200 hover:scale-105 m-2 md:m-3 bg-top bg-cover h-44 rounded drop-shadow-lg ring-2 ring-gray-400 hover:ring-4 hover:ring-blue-500 overflow-hidden" }
 	>
 		<!-- 根据书籍类型，选择显示的图标 -->
