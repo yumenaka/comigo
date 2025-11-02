@@ -7,24 +7,25 @@ import (
 )
 
 var (
-	Version      string
-	ServerStatus *tools.ServerStatus
-	ServerConfig *config.Config
-	NowBookInfos *model.BookInfos
+	Version        string
+	ServerStatus   *tools.ServerStatus
+	ServerConfig   *config.Config
+	StoreBookInfos []model.StoreBookInfo
+	ChildBookInfos []model.BookInfo
 )
 
 // GetNowBookNum 获取当前显示书籍数量
 func GetNowBookNum() int {
-	if NowBookInfos == nil {
+	if StoreBookInfos == nil {
 		return 0
 	}
-	return len(*NowBookInfos)
+	return len(StoreBookInfos)
 }
 
 // 初始化参数
 func init() {
 	Version = config.GetVersion()
-	NowBookInfos = nil
+	StoreBookInfos = nil
 	//ServerStatus = tools.GetServerInfo(config.GetHost(), config.GetVersion(), uint16(config.GetCfg().Port), config.GetEnableUpload(), 0, "")
 	ServerConfig = config.GetCfg()
 }

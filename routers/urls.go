@@ -79,10 +79,9 @@ func bindPublicAPI(group *echo.Group) {
 // bindProtectedView 注册需要登录的页面
 func bindProtectedView(group *echo.Group) {
 	// 主页
-	group.GET("/", shelf.PageHandler)
-	group.GET("/index.html", shelf.PageHandler)
-	// 书架
-	group.GET("/shelf/:id", shelf.PageHandler)
+	group.GET("/", shelf.ShelfHandler)
+	group.GET("/index.html", shelf.ShelfHandler)
+	group.GET("/shelf/:id", shelf.ShelfHandler)
 	// 卷轴模式
 	group.GET("/scroll/:id", scroll.PageHandler)
 	// 翻页模式
@@ -132,7 +131,6 @@ func bindProtectedAPI(group *echo.Group) {
 	group.GET("/ws", websocket.WsHandler)
 
 	// 新加的 HTMX 相关路由
-	group.GET("/shelf/:id", shelf.GetBookListHandler)
 	// 字符串、布尔值、数字配置的更改
 	group.POST("/update-string-config", settings.UpdateStringConfigHandler)
 	group.POST("/update-bool-config", settings.UpdateBoolConfigHandler)

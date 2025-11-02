@@ -324,21 +324,40 @@ func (ramStore *StoreInRam) GetBookByAuthor(author string, sortBy string) ([]*mo
 }
 
 // TopOfShelfInfo 获取顶层书架信息
-func TopOfShelfInfo(sortBy string) (*model.BookInfos, error) {
+func TopOfShelfInfo(sortBy string) ([]model.StoreBookInfo, error) {
 	// 显示顶层书库的书籍
-	var infoList model.BookInfos
+	var topBookList model.BookInfos
 	allBooks, err := model.IStore.ListBooks()
 	if err != nil {
 		logger.Infof("Error listing books: %s", err)
 	}
 	for _, b := range allBooks {
 		if b.Depth == 0 {
-			infoList = append(infoList, b.BookInfo)
+			topBookList = append(topBookList, b.BookInfo)
 		}
 	}
-	if len(infoList) > 0 {
-		infoList.SortBooks(sortBy)
-		return &infoList, nil
+	storeBookInfoList := []model.StoreBookInfo{}
+	storeUrls := config.GetCfg().StoreUrls
+	for _, storeUrl := range storeUrls {
+		storePathAbs, err := filepath.Abs(storeUrl)
+		if err != nil {
+			logger.Infof("Failed to get absolute path: %s", err)
+			storePathAbs = storeUrl
+		}
+		newStoreBookInfo := model.StoreBookInfo{
+			StoreUrl:  storePathAbs,
+			BookInfos: model.BookInfos{},
+		}
+		for _, topBook := range topBookList {
+			if topBook.StoreUrl == storePathAbs {
+				newStoreBookInfo.BookInfos = append(newStoreBookInfo.BookInfos, topBook)
+			}
+		}
+		newStoreBookInfo.BookInfos.SortBooks(sortBy)
+		storeBookInfoList = append(storeBookInfoList, newStoreBookInfo)
+	}
+	if len(storeBookInfoList) > 0 {
+		return storeBookInfoList, nil
 	}
 	// 没找到任何书
 	return nil, errors.New("error: cannot find book in TopOfShelfInfo")
