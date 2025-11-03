@@ -180,7 +180,7 @@ RETURNING id, type, book_id, page_index, description, created_at, updated_at
 `
 
 type CreateBookmarkParams struct {
-	Type        int64
+	Type        string
 	BookID      string
 	PageIndex   int64
 	Description sql.NullString
@@ -325,7 +325,7 @@ WHERE book_id = ?
 
 type DeleteBookmarkByBookIDAndTypeParams struct {
 	BookID string
-	Type   int64
+	Type   string
 }
 
 // Delete a bookmark by (book_id, type)
@@ -1057,7 +1057,7 @@ type UpdateBookmarkParams struct {
 	PageIndex     int64
 	Description_2 sql.NullString
 	BookID        string
-	Type          int64
+	Type          string
 }
 
 // Update a bookmark (by book_id, type)
@@ -1082,7 +1082,7 @@ WHERE book_id = ?
 
 type UpdateLastReadPageParams struct {
 	PageIndex int64
-	Type      int64
+	Type      string
 	BookID    string
 }
 

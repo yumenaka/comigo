@@ -9,7 +9,6 @@ import (
 	"github.com/angelofallars/htmx-go"
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/config"
-	"github.com/yumenaka/comigo/templ/state"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
@@ -69,7 +68,7 @@ func updateConfigGeneric(c echo.Context) (string, string, error) {
 	oldConfig := config.CopyCfg()
 
 	// 更新配置
-	if setErr := state.ServerConfig.SetConfigValue(name, newValue); setErr != nil {
+	if setErr := config.GetCfg().SetConfigValue(name, newValue); setErr != nil {
 		logger.Errorf("Failed to set config value: %v", setErr)
 		return "", "", setErr
 	}
@@ -182,7 +181,7 @@ func UpdateLoginSettingsHandler(c echo.Context) error {
 	password := c.FormValue("Password") // 新密码(初次设定) 或 原始密码（已有密码时）
 	reEnterPassword := c.FormValue("ReEnterPassword")
 	// 除非是调试模式, 密码不明文记录到日志，
-	if state.ServerConfig.Debug {
+	if config.GetCfg().Debug {
 		logger.Infof("Update user info: Username=%s", username)
 		logger.Infof("Update user info: CurrentPassword=%s", currentPassword)
 		logger.Infof("Update user info: Password=%s", password)
@@ -203,7 +202,7 @@ func UpdateLoginSettingsHandler(c echo.Context) error {
 	//}
 
 	// 当前密码不正确
-	if state.ServerConfig.Password != currentPassword {
+	if config.GetCfg().Password != currentPassword {
 		return echo.NewHTTPError(http.StatusBadRequest, "Current Password is incorrect")
 	}
 
@@ -211,12 +210,12 @@ func UpdateLoginSettingsHandler(c echo.Context) error {
 	oldConfig := config.CopyCfg()
 
 	// 更新用户名
-	if err := state.ServerConfig.SetConfigValue("Username", username); err != nil {
+	if err := config.GetCfg().SetConfigValue("Username", username); err != nil {
 		logger.Errorf("Failed to set Username: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to update username")
 	}
 	// 更新密码
-	if err := state.ServerConfig.SetConfigValue("Password", password); err != nil {
+	if err := config.GetCfg().SetConfigValue("Password", password); err != nil {
 		// logger.Errorf("Failed to set Password: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to update password")
 	}
@@ -384,7 +383,7 @@ func doDelete(configName string, deleteValue string) ([]string, error) {
 	oldConfig := config.CopyCfg()
 
 	// 更新配置
-	values, err := state.ServerConfig.DeleteStringArrayConfig(configName, deleteValue)
+	values, err := config.GetCfg().DeleteStringArrayConfig(configName, deleteValue)
 	if err != nil {
 		return nil, err
 	}

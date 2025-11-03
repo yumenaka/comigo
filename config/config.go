@@ -165,9 +165,13 @@ func (c *Config) RequiresAuth() bool {
 
 func (c *Config) GetTopStoreName() string {
 	if len(c.StoreUrls) == 0 {
-		return "未设置书库"
+		return "No Found Store"
 	}
-	return strings.Join(c.StoreUrls, ", ")
+	storeUrls := make([]string, len(c.StoreUrls))
+	for i, url := range c.StoreUrls {
+		storeUrls[i] = path.Base(url)
+	}
+	return strings.Join(storeUrls, ", ")
 }
 
 // SetConfigValue 更新 Config 的相应字段，如果【fieldName】不存在、或【fieldValue】类型有问题，都返回错误。

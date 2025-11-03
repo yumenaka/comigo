@@ -38,7 +38,7 @@ type Book struct {
 
 type Bookmark struct {
 	ID          int64
-	Type        int64
+	Type        string
 	BookID      string
 	PageIndex   int64
 	Description sql.NullString

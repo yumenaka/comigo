@@ -40,10 +40,10 @@ func (store *Store) GenerateBookGroup() error {
 	maxDepth := 0
 	for _, value := range store.BookMap.Range {
 		b := value.(*model.Book)
-		depthBooksMap[b.Depth] = append(depthBooksMap[b.Depth], b)
 		if b.Depth > maxDepth {
 			maxDepth = b.Depth
 		}
+		depthBooksMap[b.Depth] = append(depthBooksMap[b.Depth], b)
 	}
 	// 从深往浅遍历
 	// 如果有几本书同时有同一个父文件夹，那么应该【新建】一本书(组)，并加入到depth-1层里面
@@ -93,8 +93,8 @@ func (store *Store) GenerateBookGroup() error {
 				logger.Infof("Error listing books: %s", err)
 			}
 			for _, bookGroup := range allBooks {
-				if bookGroup.Type == model.TypeBooksGroup {
-					continue // 只处理书籍组类型
+				if bookGroup.Type != model.TypeBooksGroup {
+					continue // 只关心书籍组类型
 				}
 				if bookGroup.BookPath == newBookGroup.BookPath {
 					Added = true

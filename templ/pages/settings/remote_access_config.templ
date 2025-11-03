@@ -1,8 +1,8 @@
 package settings
 
 import (
+	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/templ/common/svg"
-	"github.com/yumenaka/comigo/templ/state"
 	"github.com/yumenaka/comigo/tools/tailscale_plugin"
 	"strconv"
 )
@@ -73,7 +73,7 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 			<input
 				type="hidden"
 				id={ "EnableTailscaleHidden" }
-				if  state.ServerConfig.EnableTailscale {
+				if  config.GetCfg().EnableTailscale {
 					value="true"
 				} else {
 					value="false"
@@ -85,7 +85,7 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 					id={ "EnableTailscale" }
 					name={ "EnableTailscale" }
 					x-model="enable_tailscale"
-					if  state.ServerConfig.EnableTailscale {
+					if  config.GetCfg().EnableTailscale {
 						value="true"
 						checked
 					} else {
@@ -111,7 +111,7 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 				name={ "TailscaleHostname" }
 				type="text"
 				:placeholder={ getTranslations("TailscaleHostname") }
-				value={ state.ServerConfig.TailscaleHostname }
+				value={ config.GetCfg().TailscaleHostname }
 				class="px-2.5 w-64 rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm"
 			/>
 			<div
@@ -133,7 +133,7 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 				name={ "TailscalePort" }
 				type="number"
 				:placeholder={ getTranslations("TailscalePort") }
-				value={ strconv.Itoa(state.ServerConfig.TailscalePort) }
+				value={ strconv.Itoa(config.GetCfg().TailscalePort) }
 				max={ strconv.Itoa(65535) }
 				min={ strconv.Itoa(0) }
 			/>
@@ -152,7 +152,7 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 				name={ "TailscaleAuthKey" }
 				type="text"
 				:placeholder={ getTranslations("TailscaleAuthKey") }
-				value={ state.ServerConfig.TailscaleAuthKey }
+				value={ config.GetCfg().TailscaleAuthKey }
 				class="px-2.5 w-64 rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm"
 			/>
 			<div
@@ -190,7 +190,7 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 					id={ "FunnelLoginCheck" }
 					name={ "FunnelLoginCheck" }
 					x-model="funnel_password_protection"
-					if  state.ServerConfig.FunnelLoginCheck {
+					if  config.GetCfg().FunnelLoginCheck {
 						value="true"
 						checked
 					} else {
@@ -198,7 +198,7 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 					}
 					class="sr-only peer"
 				/>
-				{ state.ServerConfig.FunnelLoginCheck }
+				{ config.GetCfg().FunnelLoginCheck }
 				<span class="absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500"></span>
 				<span class="absolute inset-y-0 w-6 h-6 m-1 transition-all bg-white rounded-full start-0 peer-checked:start-6"></span>
 			</label>
@@ -234,7 +234,7 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 					id={ "FunnelTunnel" }
 					name={ "FunnelTunnel" }
 					x-model="tailscale_enable_funnel"
-					if  state.ServerConfig.FunnelTunnel {
+					if  config.GetCfg().FunnelTunnel {
 						value="true"
 					} else {
 						value="false"
@@ -479,10 +479,10 @@ templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 				</tr>
 				<tr class="border-separate border-b-1 border-gray-400">
 					<td x-text={ getTranslations("enable_funnel") } class="min-w-24 font-semibold">Funnel模式</td>
-					if state.ServerConfig.FunnelTunnel {
+					if config.GetCfg().FunnelTunnel {
 						<td id="ts-funnel-mode" x-text={ getTranslations("enable") }></td>
 					}
-					if !state.ServerConfig.FunnelTunnel {
+					if !config.GetCfg().FunnelTunnel {
 						<td id="ts-funnel-mode" x-text={ getTranslations("disable") }></td>
 					}
 				</tr>
