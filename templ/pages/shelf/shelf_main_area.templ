@@ -20,8 +20,9 @@ templ MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookI
 				<div
 					id={ "book-shelf-" + strconv.Itoa(i) }
 					x-data="{ showBook: true }"
-					class="w-full h-full mb-6 border-4 border-slate-400 rounded-2xl flex flex-row flex-wrap content-start justify-center text-base-content relative pt-8"
+					class="w-full h-full mt-2 mb-6 border-4 border-slate-400 rounded-2xl flex flex-row flex-wrap content-start justify-center text-base-content relative pt-8"
 				>
+					<!-- 书架标题栏 -->
 					<button @click="showBook = !showBook" class="child_store flex flex-wrap justify-center items-center absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2 ">
 						<span class="flex flex-row min-w:64 mt-0 p-2 bg-base-100 border-4 border-slate-400 text-base-content rounded-xl text-center text-sm font-semibold">
 							<span>{ storeBooks.StoreUrl } &nbsp;(x{ storeBooks.ChildBookNum })&nbsp;</span>

@@ -39,6 +39,7 @@ func ShelfHandler(c echo.Context) error {
 	var childBookInfos []model.BookInfo
 	// 如果指定了书籍ID，获取子书架信息。
 	if bookID != "" {
+		model.ClearBookNotExist()
 		logger.Infof("Get child books for bookID %s", bookID)
 		childBooks, err := store.GetChildBooksInfo(bookID)
 		if err == nil {
