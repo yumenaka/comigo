@@ -16,29 +16,29 @@ import (
 
 // BookInfo 与 Book 唯一的区别是没有 AllPageInfo，而是封面图 URL，减小 JSON 文件的大小
 type BookInfo struct {
-	Author          string          `json:"author"`          // 作者
-	BookID          string          `json:"id"`              // 根据 BookPath 生成的唯一 ID
-	StoreUrl        string          `json:"-"`               // 在哪个子书库
-	ChildBooksNum   int             `json:"child_books_num"` // 子书籍数量
-	ChildBooksID    []string        `json:"child_books_id"`  // 子书籍BookID
-	Cover           PageInfo        `json:"cover"`           // 封面图
-	Deleted         bool            `json:"deleted"`         // 源文件是否已删除
-	Depth           int             `json:"depth"`           // 书籍深度
-	ExtractPath     string          `json:"-"`               // 解压路径，7z 用，JSON 不解析
-	ExtractNum      int             `json:"-"`               // 文件解压数
-	FileSize        int64           `json:"file_size"`       // 文件大小
-	BookPath        string          `json:"-"`               // 文件绝对路径，JSON 不解析
-	ISBN            string          `json:"isbn"`            // ISBN
-	InitComplete    bool            `json:"-"`               // 是否解压完成
-	Modified        time.Time       `json:"modified_time"`   // 修改时间
-	NonUTF8Zip      bool            `json:"-"`               // 是否为特殊编码 zip
-	PageCount       int             `json:"page_count"`      // 总页数
-	ParentFolder    string          `json:"parent_folder"`   // 父文件夹
-	Press           string          `json:"press"`           // 出版社
-	PublishedAt     string          `json:"published_at"`    // 出版日期
-	Title           string          `json:"title"`           // 书名
-	Type            SupportFileType `json:"type"`            // 书籍类型
-	ZipTextEncoding string          `json:"-"`               // zip 文件编码
+	Author          string          `json:"author"`            // 作者
+	BookID          string          `json:"id"`                // 根据 BookPath 生成的唯一 ID
+	StoreUrl        string          `json:"store_url"`         // 在哪个子书库
+	ChildBooksNum   int             `json:"child_books_num"`   // 子书籍数量
+	ChildBooksID    []string        `json:"child_books_id"`    // 子书籍BookID
+	Cover           PageInfo        `json:"cover"`             // 封面图
+	Deleted         bool            `json:"deleted"`           // 源文件是否已删除
+	Depth           int             `json:"depth"`             // 书籍深度
+	ExtractPath     string          `json:"extract_path"`      // 解压路径，7z 用，JSON 不解析
+	ExtractNum      int             `json:"extract_num"`       // 文件解压数
+	FileSize        int64           `json:"file_size"`         // 文件大小
+	BookPath        string          `json:"book_path"`         // 文件绝对路径，JSON 不解析
+	ISBN            string          `json:"isbn"`              // ISBN
+	InitComplete    bool            `json:"init_complete"`     // 是否解压完成
+	Modified        time.Time       `json:"modified_time"`     // 修改时间
+	NonUTF8Zip      bool            `json:"non_utf_8_zip"`     // 是否为特殊编码 zip
+	PageCount       int             `json:"page_count"`        // 总页数
+	ParentFolder    string          `json:"parent_folder"`     // 父文件夹
+	Press           string          `json:"press"`             // 出版社
+	PublishedAt     string          `json:"published_at"`      // 出版日期
+	Title           string          `json:"title"`             // 书名
+	Type            SupportFileType `json:"type"`              // 书籍类型
+	ZipTextEncoding string          `json:"zip_text_encoding"` // zip 文件编码
 }
 
 // initBookID 根据路径的 MD5，初始化书籍 ID

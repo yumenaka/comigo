@@ -37,20 +37,26 @@ func ScanStore(args []string) {
 	CreateStoreUrls(args)
 
 	// 从本地文件加载书籍信息到内存（调试用）
-	//err = store.RamStore.LoadBooks()
-	//if err != nil {
-	//	logger.Infof("LoadBooks_error %s", err)
-	//}
+	if !config.GetCfg().EnableDatabase {
+		err = store.RamStore.LoadBooks()
+		if err != nil {
+			logger.Infof("LoadBooks_error %s", err)
+		}
+	}
+
 	// 3、扫描配置文件里面的书库路径，取得书籍
 	err = scan.InitAllStore(config.GetCfg())
 	if err != nil {
 		logger.Infof("Failed to scan store path: %v", err)
 	}
-	// 保存书籍到本地文件（调试用）
-	//err = store.RamStore.SaveBooks()
-	//if err != nil {
-	//	logger.Infof("SaveBooks_error %s", err)
-	//}
+
+	if !config.GetCfg().EnableDatabase {
+		// 保存书籍到本地文件（调试用）
+		err = store.RamStore.SaveBooks()
+		if err != nil {
+			logger.Infof("SaveBooks_error %s", err)
+		}
+	}
 
 	// 4、生成虚拟书籍组
 	if config.GetCfg().EnableDatabase {

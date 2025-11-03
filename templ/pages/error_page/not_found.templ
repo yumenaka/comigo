@@ -2,8 +2,8 @@ package error_page
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/templ/common"
-	"github.com/yumenaka/comigo/templ/state"
 )
 
 // 404 NotFound页面
@@ -27,5 +27,5 @@ templ NotFound404(c echo.Context) {
 	</div>
 	@common.Drawer(c, nil, nil)
 	@common.QRCode()
-	@common.Footer(state.Version)
+	@common.Footer(config.GetVersion())
 }

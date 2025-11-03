@@ -13,6 +13,7 @@ import (
 type Book struct {
 	BookInfo  // 嵌入 BookInfo 结构体
 	PageInfos // 书籍内所有页面的信息
+	BookMarks // 书签信息
 }
 
 // GetBookInfo 创建新的 BookInfo 实例
@@ -148,4 +149,22 @@ func (b *Book) GetPageCount() int {
 		b.InitComplete = true
 	}
 	return b.PageCount
+}
+
+// GetAllBooksNumber  获取书籍总数，不包括 BookGroup 类型
+func GetAllBooksNumber() int {
+	// 用于计数的变量
+	var count int
+	// 遍历 map 并递增计数器
+	allBooks, err := IStore.ListBooks()
+	if err != nil {
+		logger.Infof("Error listing books: %s", err)
+	}
+	for _, b := range allBooks {
+		if b.Type == TypeBooksGroup {
+			continue // 跳过书组类型
+		}
+		count++
+	}
+	return count
 }

@@ -11,12 +11,11 @@ import (
 	"github.com/yumenaka/comigo/store"
 	"github.com/yumenaka/comigo/templ/common"
 	"github.com/yumenaka/comigo/templ/pages/error_page"
-	"github.com/yumenaka/comigo/templ/state"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
-// PageHandler 书架页面的处理程序。
-func PageHandler(c echo.Context) error {
+// ShelfHandler 书架页面的处理程序。
+func ShelfHandler(c echo.Context) error {
 	// Set the response content type to HTML.
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
 	// 书籍排序方式
@@ -30,14 +29,22 @@ func PageHandler(c echo.Context) error {
 	// 读取url参数，获取书籍ID
 	bookID := c.Param("id")
 	// 如果没有指定书籍ID，获取顶层书架信息。
+	var storeBookInfos []model.StoreBookInfo
 	if bookID == "" {
-		state.NowBookInfos, _ = store.TopOfShelfInfo(sortBy)
+		storeBookInfos, err = store.TopOfShelfInfo(sortBy)
+		if err != nil {
+			logger.Errorf("GetBookShelf Error: %v", err)
+		}
 	}
-
+	var childBookInfos []model.BookInfo
 	// 如果指定了书籍ID，获取子书架信息。
 	if bookID != "" {
-		var err error
-		state.NowBookInfos, err = store.GetChildBooksInfo(bookID)
+		logger.Infof("Get child books for bookID %s", bookID)
+		childBooks, err := store.GetChildBooksInfo(bookID)
+		if err == nil {
+			logger.Infof("Get %d child books for bookID %s", len(*childBooks), bookID)
+			childBookInfos = *childBooks
+		}
 		// 无图书的提示（返回主页\上传压缩包\远程下载示例漫画）
 		if err != nil {
 			logger.Infof("GetBookShelf Error: %v", err)
@@ -52,15 +59,12 @@ func PageHandler(c echo.Context) error {
 				return c.NoContent(http.StatusInternalServerError)
 			}
 			return nil
-		} else {
-			state.NowBookInfos.SortBooks(sortBy)
 		}
 	}
 	// 为首页定义模板布局。
 	indexHtml := common.Html(
 		c,
-
-		ShelfPage(c), // define body content
+		ShelfPage(c, model.GetAllBooksNumber(), storeBookInfos, childBookInfos), // define body content
 		[]string{"script/shelf.js"},
 	)
 	// 用模板渲染书架页面

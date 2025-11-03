@@ -10,8 +10,8 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/templ/common"
-	"github.com/yumenaka/comigo/templ/state"
 )
 
 // 404 NotFound页面
@@ -61,7 +61,7 @@ func NotFound404(c echo.Context) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = common.Footer(state.Version).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.Footer(config.GetVersion()).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

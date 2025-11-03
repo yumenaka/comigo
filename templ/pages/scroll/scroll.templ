@@ -2,19 +2,26 @@ package scroll
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/templ/common"
-	"github.com/yumenaka/comigo/templ/state"
+	"github.com/yumenaka/comigo/tools"
 )
 
 // ScrollPage 定义 BodyHTML
 templ ScrollPage(c echo.Context, book *model.Book, paginationIndex int) {
-	@InsertData(book, state.ServerStatus)
+	@InsertData(book, tools.GetServerInfo(
+		tools.ServerInfoParams{
+			Cfg:            config.GetCfg(),
+			Version:        config.GetVersion(),
+			AllBooksNumber: model.GetAllBooksNumber(),
+			ClientIP:       c.RealIP(),
+		}))
 	@common.Toast()
 	if book != nil {
 		@common.Header(
 			common.HeaderProps{
-				Title:             common.GetPageTitle(book.BookInfo.BookID),
+				Title:             common.GetBookTitle(book.BookInfo.BookID),
 				ShowReturnIcon:    true,
 				ReturnUrl:         common.GetReturnUrl(book.BookInfo.BookID),
 				SetDownLoadLink:   false,
@@ -26,7 +33,7 @@ templ ScrollPage(c echo.Context, book *model.Book, paginationIndex int) {
 			})
 		@MainArea(c, book, paginationIndex)
 	}
-	@common.Footer(state.Version)
+	@common.Footer(config.GetVersion())
 	@common.Drawer(c, book, DrawerSlot(c, book))
 	@common.QRCode()
 }
