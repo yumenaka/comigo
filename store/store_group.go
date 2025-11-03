@@ -86,12 +86,8 @@ func (ramStore *StoreInRam) SaveBooks() error {
 			logger.Infof("Error marshaling book %s: %s", book.BookID, err)
 			continue // 跳过这本书，继续处理其他书籍
 		}
-		storePathAbs, err := filepath.Abs(book.StoreUrl)
-		if err != nil {
-			logger.Infof("Failed to get absolute path: %s", err)
-			storePathAbs = book.StoreUrl
-		}
-		cacheDir := filepath.Join(savePath, base62.EncodeToString([]byte(storePathAbs)))
+		// StoreID是书库URL路径的 base62 编码
+		cacheDir := filepath.Join(savePath, book.GetStoreID())
 		// 创建保存目录
 		err = os.MkdirAll(cacheDir, os.ModePerm)
 		if err != nil {
@@ -123,11 +119,13 @@ func (ramStore *StoreInRam) LoadBooks() error {
 	logger.Infof("Loading books from %s", savePath)
 	// 遍历所有 storeUrl 对应的目录
 	for _, storeUrl := range config.GetCfg().StoreUrls {
+		// 计算 storeUrl 的绝对路径
 		storePathAbs, err := filepath.Abs(storeUrl)
 		if err != nil {
 			logger.Infof("Failed to get absolute path: %s", err)
 			storePathAbs = storeUrl
 		}
+		// 计算缓存目录路径
 		cacheDir := filepath.Join(savePath, base62.EncodeToString([]byte(storePathAbs)))
 		// 检查目录是否存在
 		_, err = os.Stat(cacheDir)
@@ -326,6 +324,7 @@ func (ramStore *StoreInRam) GetBookByAuthor(author string, sortBy string) ([]*mo
 
 // TopOfShelfInfo 获取顶层书架信息
 func TopOfShelfInfo(sortBy string) ([]model.StoreBookInfo, error) {
+	model.ClearBookNotExist()
 	// 显示顶层书库的书籍
 	var topBookList model.BookInfos
 	allBooks, err := model.IStore.ListBooks()
@@ -337,7 +336,7 @@ func TopOfShelfInfo(sortBy string) ([]model.StoreBookInfo, error) {
 			topBookList = append(topBookList, b.BookInfo)
 		}
 	}
-	storeBookInfoList := []model.StoreBookInfo{}
+	var storeBookInfoList []model.StoreBookInfo
 	storeUrls := config.GetCfg().StoreUrls
 	for _, storeUrl := range storeUrls {
 		storePathAbs, err := filepath.Abs(storeUrl)

@@ -1,10 +1,12 @@
 package model
 
 import (
+	"os"
 	"path"
 	"strings"
 	"time"
 
+	"github.com/jxskiss/base62"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools/logger"
 )
@@ -142,6 +144,11 @@ func (b *Book) GetAuthor() string {
 	return b.Author
 }
 
+// GetStoreID 获取编码后的书库ID，StoreID是书库URL路径的 base62 编码
+func (b *Book) GetStoreID() string {
+	return base62.EncodeToString([]byte(b.StoreUrl))
+}
+
 // GetPageCount 获取页数
 func (b *Book) GetPageCount() int {
 	if !b.InitComplete {
@@ -149,6 +156,38 @@ func (b *Book) GetPageCount() int {
 		b.InitComplete = true
 	}
 	return b.PageCount
+}
+
+func (b *Book) AddOrUpdateBookMark(mark *BookMark) {
+	switch mark.Type {
+	case UserMark:
+		// 用户书签的处理逻辑（如果有的话）
+		// 检查是否已经存在相同类型和页码的书签（假设用户书签可以有多个，但同一页只能有一个用户书签）
+		for i, existingMark := range b.BookMarks {
+			if existingMark.Type == mark.Type && existingMark.PageIndex == mark.PageIndex {
+				// 更新现有书签
+				b.BookMarks[i] = *mark
+				return
+			}
+		}
+		// 如果不存在，则添加新的书签
+		b.BookMarks = append(b.BookMarks, *mark)
+	case AutoMark:
+		// 自动书签的处理逻辑（如果有的话）
+		// 检查是否已经存在auto类型的书签（假设每本书只有一个自动书签）
+		for i, existingMark := range b.BookMarks {
+			if existingMark.Type == mark.Type {
+				// 更新现有书签
+				b.BookMarks[i] = *mark
+				return
+			}
+		}
+		// 如果不存在，则添加新的书签
+		b.BookMarks = append(b.BookMarks, *mark)
+	default:
+		// 其他类型书签的处理逻辑（如果有的话）
+		b.BookMarks = append(b.BookMarks, *mark)
+	}
 }
 
 // GetAllBooksNumber  获取书籍总数，不包括 BookGroup 类型
@@ -167,4 +206,31 @@ func GetAllBooksNumber() int {
 		count++
 	}
 	return count
+}
+
+// ClearBookNotExist  检查内存中的书的源文件是否存在，不存在就删掉
+func ClearBookNotExist() {
+	logger.Infof("Checking book files exist...")
+	var deletedBooks []string
+	// 遍历所有书籍
+	allBooks, err := IStore.ListBooks()
+	if err != nil {
+		logger.Infof("Error listing books: %s", err)
+	}
+	for _, book := range allBooks {
+		// 如果父文件夹存在，但书籍文件不存在，也说明这本书被删除了
+		if _, err := os.Stat(book.BookPath); os.IsNotExist(err) {
+			deletedBooks = append(deletedBooks, book.BookPath)
+			err := IStore.DeleteBook(book.BookID)
+			if err != nil {
+				logger.Infof("Error deleting book %s: %s", book.BookID, err)
+			}
+		}
+	}
+	// 重新生成书组
+	if len(deletedBooks) > 0 {
+		if err := IStore.GenerateBookGroup(); err != nil {
+			logger.Infof("Error initializing main folder: %s", err)
+		}
+	}
 }

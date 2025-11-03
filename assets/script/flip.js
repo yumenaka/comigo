@@ -528,6 +528,13 @@ function addPageNum(n = 1) {
 	}
 	// 翻页
 	Alpine.store('flip').nowPageNum = nowPageNum + n
+    // TODO: 调试代码：更新书签
+    // Alpine.store('global').UpdateBookmark({
+    //     type: 'auto',
+    //     bookId: book.id,
+    //     pageIndex: Alpine.store('flip').nowPageNum,
+    //     label: '调试书签'
+    // });
 	setImageSrc()
 	// 设置标签页标题
 	setTitle();

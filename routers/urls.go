@@ -107,7 +107,7 @@ func bindProtectedAPI(group *echo.Group) {
 	// 查询书籍信息
 	group.GET("/get_book", data_api.GetBook)
 	// 更新书签信息
-	group.POST("/update_last_read_page", data_api.UpdateLastReadPage)
+	group.POST("/update_bookmark", data_api.UpdateBookmark)
 	// 查询父书籍信息
 	group.GET("/parent_book_info", data_api.GetParentBook)
 	// 下载 reg 设置文件
@@ -137,8 +137,6 @@ func bindProtectedAPI(group *echo.Group) {
 	group.POST("/update-number-config", settings.UpdateNumberConfigHandler)
 	// 更改Comigo登录设置
 	group.POST("/update-login-settings", settings.UpdateLoginSettingsHandler)
-	//// 更改 Tailscale 设置(HTMX)
-	//group.POST("/update-tailscale-config", settings.UpdateTailscaleSettingsHandler)
 	// Tailscale配置更新JSON API
 	group.POST("/submit-tailscale-config", settings.UpdateTailscaleConfigHandler)
 

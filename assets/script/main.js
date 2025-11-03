@@ -17578,6 +17578,56 @@ Alpine.store('global', {
         document.cookie = `${paramName}${encodeURIComponent(value)}; expires=${expirationDate.toUTCString()}; path=/; SameSite=Lax`;
         window.location.reload();
     },
+    /**
+     * 调用后端 /api/update_bookmark 接口，更新书签信息
+     * @param {Object} params
+     * @param {string} params.type - 书签类型，例如 'auto'
+     * @param {string} params.bookId - 书籍ID
+     * @param {number} params.pageIndex - 页码（1 起始）
+     * @param {string} [params.label='自动书签'] - 书签名称，当前后端固定为自动书签，仅用于日志
+     * @returns {Promise<Object|string>} 后端返回的响应体
+     */ async UpdateBookmark ({ type: type = 'auto', bookId: bookId, pageIndex: pageIndex, label: label = "\u81EA\u52A8\u4E66\u7B7E" } = {}) {
+        if (!bookId) {
+            const error = new Error('UpdateBookmark: bookId is required');
+            if (this.debugMode) console.error(error);
+            throw error;
+        }
+        if (!Number.isInteger(pageIndex) || pageIndex <= 0) {
+            const error = new Error('UpdateBookmark: pageIndex must be a positive integer');
+            if (this.debugMode) console.error(error);
+            throw error;
+        }
+        const deviceDescription = `${$3d5cedefbd41a457$var$browser} in ${$3d5cedefbd41a457$var$system}`;
+        const payload = {
+            type: type,
+            book_id: bookId,
+            page_index: pageIndex,
+            description: deviceDescription
+        };
+        // if (this.debugMode) {
+        //     console.debug('[UpdateBookmark] request', { payload, label, deviceDescription });
+        // }
+        const response = await fetch('/api/update_bookmark', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify(payload)
+        });
+        const contentType = response.headers.get('content-type') || '';
+        const isJSON = contentType.includes('application/json');
+        const responseBody = isJSON ? await response.json() : await response.text();
+        if (!response.ok) {
+            const error = new Error(`UpdateBookmark failed: ${response.status} ${response.statusText}`);
+            if (this.debugMode) console.error('[UpdateBookmark] error', error, responseBody);
+            throw error;
+        }
+        // if (this.debugMode) {
+        //     console.debug('[UpdateBookmark] success', { response: responseBody, deviceDescription });
+        // }
+        return responseBody;
+    },
     // 检测并设置视口方向
     checkOrientation () {
         const isPortrait = window.innerHeight > window.innerWidth;
