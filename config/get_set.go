@@ -1,7 +1,6 @@
 package config
 
 import (
-	"errors"
 	"os"
 	"path"
 
@@ -21,41 +20,35 @@ func CopyCfg() Config {
 
 // GetConfigDir 获取配置文件所在目录
 func GetConfigDir() (dir string, err error) {
-	// 如果未设置配置文件路径，返回系统用户配置目录
-	if cfg.ConfigFile == "" {
-		// On Unix systems, it returns $XDG_CONFIG_HOME else $HOME/.config.
-		// On Darwin, it returns $HOME/Library/Application Support.
-		// On Windows, it returns %AppData%.
-		// On Plan 9, it returns $home/lib.
-		userConfigDir, err := os.UserConfigDir()
-		if err == nil {
-			userConfigDir = path.Join(userConfigDir, "comigo")
-			// 创建目录（如果不存在）
-			err = os.MkdirAll(userConfigDir, os.ModePerm)
-			if err != nil {
-				logger.Infof("Failed to create config dir: %s", err)
-				return "", err
-			}
-			return userConfigDir, nil
-		}
-		// 如果获取用户配置目录失败，使用临时目录 // 该目录既不能保证存在，也不能保证具有可访问权限
-		userConfigDir = os.TempDir()
-		if tools.PathExists(userConfigDir) {
-			userConfigDir = path.Join(userConfigDir, "comigo")
-			// 创建目录（如果不存在）
-			err = os.MkdirAll(userConfigDir, os.ModePerm)
-			if err != nil {
-				logger.Infof("Failed to create temp config dir: %s", err)
-				return "", err
-			}
-			return userConfigDir, nil
-		}
-	}
 	// 如果配置文件存在
 	if cfg.ConfigFile != "" && tools.PathExists(cfg.ConfigFile) {
 		return path.Dir(cfg.ConfigFile), nil
 	}
-	return "", errors.New("config dir does not exist")
+	//获取用户主目录
+	home, err := os.UserHomeDir()
+	if err != nil {
+		// 如果获取Home失败，使用临时目录
+		// 不过该目录既不能保证存在，也不能保证具有可访问权限
+		tempDir := os.TempDir()
+		if tools.PathExists(tempDir) {
+			configDir := path.Join(tempDir, "comigo")
+			// 创建目录（如果不存在）
+			err = os.MkdirAll(configDir, os.ModePerm)
+			if err != nil {
+				logger.Infof("Failed to create temp config dir: %s", err)
+				return "", err
+			}
+			return configDir, nil
+		}
+	}
+	configDir := path.Join(home, ".config", "comigo")
+	// 创建目录（如果不存在）
+	err = os.MkdirAll(configDir, os.ModePerm)
+	if err != nil {
+		logger.Infof("Failed to create config dir: %s", err)
+		return "", err
+	}
+	return configDir, nil
 }
 
 func AutoSetCacheDir() {
@@ -100,8 +93,4 @@ func SetPort(port int) {
 		logger.Infof("Invalid port number. Using default port: %d", port)
 	}
 	cfg.Port = port
-}
-
-func GetKeyFile() string {
-	return cfg.KeyFile
 }
