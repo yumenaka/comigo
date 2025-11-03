@@ -1,6 +1,9 @@
 package common
 
 import (
+	"fmt"
+
+	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/templ/common/svg"
 )
@@ -189,7 +192,17 @@ templ Header(prop HeaderProps) {
 			<!-- 标题，快速跳转 or 可下载压缩包 or 只显示 -->
 			<span x-show="window.location.href.includes('file:///')" class="text-lg font-semibold">{ prop.Title }</span>
 			if (prop.InShelf) {
-				<span class="text-lg font-semibold">{ prop.Title }</span>
+				<span
+					class="text-lg font-semibold"
+					x-data={ fmt.Sprintf("{ version: ' - Comigo %s' }", config.GetVersion()) }
+					x-init="
+					// $nextTick: 等到 Alpine 完全完成渲染后再执行某些代码
+                    $nextTick(() => {
+                        // 设置页面标题
+                        document.title = $el.innerText + version;
+                    });
+				"
+				>{ prop.Title }</span>
 			} else {
 				if (prop.ShowQuickJumpBar&&prop.QuickJumpBarBooks!=nil) {
 					<button
