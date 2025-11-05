@@ -245,6 +245,7 @@
   "interval": "Interval:",
   "manga_mode": "Manga(Right to Left)",
   "load_all_pages": "Load All Pages",
+  "skip_and_load_full": "Skip first %d pages. Tap below to load all.",
   "load_from_interrupt": "Load from last reading position (page XX)?",
   "login_success_hint": "Login successful. Returning to the previous page.",
   "logout": "Logout",
@@ -320,7 +321,7 @@
   "width_use_fixed_value": "Landscape Mode Width: Fixed Value",
   "width_use_percent": "Landscape Mode Width: Percentage",
   "portrait_width_percent": "Portrait width (percent)",
-  "auto_align": "Auto align",
+  "auto_align": "Auto align view",
   "swipe_turn": "Swipe Turn",
   "login_title": "Login to Comigo",
   "login_subtitle": "Please enter your username and password",
@@ -432,5 +433,15 @@
   "save_config_failed": "Failed to save configuration file.",
   "no_config_file_to_delete_in_path": "There is no configuration file to delete in the selected path.",
   "delete_config_success": "Configuration file deleted successfully.",
-  "delete_config_failed": "Failed to delete configuration file."
+  "delete_config_failed": "Failed to delete configuration file.",
+  "read": "Read",
+  "unread": "Unread",
+  "mark_all_as_read": "Mark All as Read",
+  "new_version_available": "A New Version is Available!",
+  "download_now": "Download Now",
+  "infinite_scroll": "Infinite Scroll (Load All)",
+  "paged_scroll": "Paged Scroll (32 Pages)",
+  "page_flip": "Flip Mode (Swipe)",
+  "reading_progress_percent": "Progress(%)",
+  "reading_progress_page": "Progress(num)"
 }

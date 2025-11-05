@@ -234,7 +234,7 @@ function getNowPageNum() {
 // 根据当前页码设置url并刷新，如果小于最小页码（1），打印错误并返回
 function toPreviousPage() {
     // 如果是无限下拉模式，不响应翻页，直接返回
-    if (!Alpine.store('scroll').fixedPagination){
+    if (!(Alpine.store('global').readMode === "paged_scroll")){
         return;
     }
     const currentPage = getNowPageNum();
@@ -252,7 +252,7 @@ function toPreviousPage() {
 // 根据当前页码设置url并刷新，如果大于最大页码（MaxPageNum），打印错误并返回
 function toNextPage() {
     // 如果是无限下拉模式，不响应翻页，直接返回
-    if (!Alpine.store('scroll').fixedPagination){
+    if (!(Alpine.store('global').readMode === "paged_scroll")){
         return;
     }
     const currentPage = getNowPageNum();
@@ -270,7 +270,7 @@ function toNextPage() {
 // 根据当前页码设置url并刷新，如果小于最小页码（1）或大于最大页码（MaxPageNum），打印错误并返回
 function jumpPageNum(pageNum) {
     // 如果是无限下拉模式，不响应翻页，直接返回
-    if (!Alpine.store('scroll').fixedPagination){
+    if (!(Alpine.store('global').readMode === "paged_scroll")){
         return;
     }
     if (pageNum < 1 || pageNum > MaxPageNum) {
@@ -280,4 +280,24 @@ function jumpPageNum(pageNum) {
     const url = new URL(window.location.href);
     url.searchParams.set('page', pageNum);
     window.location.href = url.toString();
-} 
+}
+
+// 延迟3秒后自动更新书签
+setTimeout(() => {
+    // 如果是无限下拉模式，不发送翻页信息
+    if (!(Alpine.store('global').readMode === "paged_scroll")){
+        return;
+    }
+    const url = new URL(window.location.href);
+    let pageNum = getNowPageNum();
+    let pageIndex = Math.floor(pageNum - 1) * 16;
+    if (pageIndex > 0) {
+        Alpine.store('global').UpdateBookmark({
+            type: 'auto',
+            bookId: book.id,
+            pageIndex: pageIndex,
+            label: '调试书签'
+        });
+        console.log('自动书签更新: ', Math.floor(pageNum - 1) * 16);
+    }
+}, "2000");

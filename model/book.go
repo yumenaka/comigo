@@ -14,37 +14,8 @@ import (
 // Book 定义书籍结构
 type Book struct {
 	BookInfo  // 嵌入 BookInfo 结构体
-	PageInfos // 书籍内所有页面的信息
 	BookMarks // 书签信息
-}
-
-// GetBookInfo 创建新的 BookInfo 实例
-func (b *Book) GetBookInfo() *BookInfo {
-	return &BookInfo{
-		Author:          b.Author,
-		BookID:          b.BookID,
-		Cover:           b.GuestCover(), // 使用 GuestCover 方法获取封面
-		StoreUrl:        b.StoreUrl,
-		ChildBooksNum:   b.ChildBooksNum,
-		ChildBooksID:    b.ChildBooksID,
-		Deleted:         b.Deleted,
-		Depth:           b.Depth,
-		ExtractPath:     b.ExtractPath,
-		ExtractNum:      b.ExtractNum,
-		BookPath:        b.BookPath,
-		FileSize:        b.FileSize,
-		ISBN:            b.ISBN,
-		InitComplete:    b.InitComplete,
-		Modified:        b.Modified,
-		NonUTF8Zip:      b.NonUTF8Zip,
-		PageCount:       b.GetPageCount(),
-		ParentFolder:    b.ParentFolder,
-		Press:           b.Press,
-		PublishedAt:     b.PublishedAt,
-		Type:            b.Type,
-		Title:           b.Title,
-		ZipTextEncoding: b.ZipTextEncoding,
-	}
+	PageInfos // 书籍内所有页面的信息
 }
 
 // GuestCover 猜测书籍的封面
@@ -139,11 +110,6 @@ func (b *Book) SortPagesByImageList(imageList []string) {
 	b.PageInfos = reSortList
 }
 
-// GetAuthor 获取作者信息
-func (b *Book) GetAuthor() string {
-	return b.Author
-}
-
 // GetStoreID 获取编码后的书库ID，StoreID是书库URL路径的 base62 编码
 func (b *Book) GetStoreID() string {
 	return base62.EncodeToString([]byte(b.StoreUrl))
@@ -156,38 +122,6 @@ func (b *Book) GetPageCount() int {
 		b.InitComplete = true
 	}
 	return b.PageCount
-}
-
-func (b *Book) AddOrUpdateBookMark(mark *BookMark) {
-	switch mark.Type {
-	case UserMark:
-		// 用户书签的处理逻辑（如果有的话）
-		// 检查是否已经存在相同类型和页码的书签（假设用户书签可以有多个，但同一页只能有一个用户书签）
-		for i, existingMark := range b.BookMarks {
-			if existingMark.Type == mark.Type && existingMark.PageIndex == mark.PageIndex {
-				// 更新现有书签
-				b.BookMarks[i] = *mark
-				return
-			}
-		}
-		// 如果不存在，则添加新的书签
-		b.BookMarks = append(b.BookMarks, *mark)
-	case AutoMark:
-		// 自动书签的处理逻辑（如果有的话）
-		// 检查是否已经存在auto类型的书签（假设每本书只有一个自动书签）
-		for i, existingMark := range b.BookMarks {
-			if existingMark.Type == mark.Type {
-				// 更新现有书签
-				b.BookMarks[i] = *mark
-				return
-			}
-		}
-		// 如果不存在，则添加新的书签
-		b.BookMarks = append(b.BookMarks, *mark)
-	default:
-		// 其他类型书签的处理逻辑（如果有的话）
-		b.BookMarks = append(b.BookMarks, *mark)
-	}
 }
 
 // GetAllBooksNumber  获取书籍总数，不包括 BookGroup 类型

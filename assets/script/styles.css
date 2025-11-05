@@ -2116,6 +2116,10 @@
     left: calc(var(--spacing) * 0);
   }
 
+  .left-1 {
+    left: calc(var(--spacing) * 1);
+  }
+
   .left-1\/2 {
     left: 50%;
   }
@@ -3783,10 +3787,6 @@
 
   .text-left {
     text-align: left;
-  }
-
-  .align-bottom {
-    vertical-align: bottom;
   }
 
   .align-middle {

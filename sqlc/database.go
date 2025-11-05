@@ -13,8 +13,8 @@ import (
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
-// AddBook 向数据库中插入一本书
-func (db *StoreDatabase) AddBook(book *model.Book) error {
+// StoreBook 向数据库中插入一本书
+func (db *StoreDatabase) StoreBook(book *model.Book) error {
 	if book == nil {
 		return fmt.Errorf("book is nil")
 	}
@@ -22,7 +22,7 @@ func (db *StoreDatabase) AddBook(book *model.Book) error {
 		return fmt.Errorf("book ID is empty: %s", book.BookPath)
 	}
 	if err := DbStore.CheckDBQueries(); err != nil {
-		return fmt.Errorf("AddBook: %v", err)
+		return fmt.Errorf("StoreBook: %v", err)
 	}
 	ctx := context.Background()
 	// 检查书籍是否已存在
@@ -59,6 +59,59 @@ func (db *StoreDatabase) AddBook(book *model.Book) error {
 		return fmt.Errorf("book bookmarks error: %v", err)
 	}
 	return nil
+}
+
+func (db *StoreDatabase) StoreBookMark(mark *model.BookMark) error {
+	// 获取书籍
+	b, err := db.GetBook(mark.BookID)
+	if err != nil {
+		return errors.New("StoreBookMark：cannot find book, id=" + mark.BookID)
+	}
+	switch mark.Type {
+	case model.UserMark:
+		// 用户书签的处理逻辑（用户书签可以有多个，但同一页只能有一个用户书签）
+		exits := false
+		for i, existingMark := range b.BookMarks {
+			if existingMark.Type == mark.Type && existingMark.PageIndex == mark.PageIndex {
+				// 更新现有书签
+				b.BookMarks[i] = *mark
+				exits = true
+			}
+		}
+		if !exits {
+			b.BookMarks = append(b.BookMarks, *mark)
+		}
+	case model.AutoMark:
+		// 自动书签的处理逻辑（每本书只有一个自动书签）
+		exits := false
+		for i, existingMark := range b.BookMarks {
+			if existingMark.Type == mark.Type {
+				// 更新现有书签
+				b.BookMarks[i] = *mark
+				exits = true
+			}
+		}
+		if !exits {
+			b.BookMarks = append(b.BookMarks, *mark)
+		}
+	default:
+		// 目前没有其他类型书签
+		return errors.New("StoreBookMark：unknown bookmark type")
+	}
+	err = db.StoreBook(b)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (db *StoreDatabase) GetBookMarks(bookID string) (*model.BookMarks, error) {
+	// 获取书籍
+	b, err := db.GetBook(bookID)
+	if err != nil {
+		return nil, errors.New("GetBookMark：cannot find book, id=" + bookID)
+	}
+	return &b.BookMarks, nil
 }
 
 // SaveBookPageInfos  保存书籍的媒体文件信息
@@ -274,7 +327,7 @@ func (db *StoreDatabase) GenerateBookGroup() (e error) {
 				}
 				depthBooksMap[depth-1] = append(depthBooksMap[depth-1], newBookGroup)
 				// 将这本书加到Store的 BookMap 表里面去
-				err = db.AddBook(newBookGroup)
+				err = db.StoreBook(newBookGroup)
 				if err != nil {
 					return err
 				}
@@ -285,12 +338,12 @@ func (db *StoreDatabase) GenerateBookGroup() (e error) {
 	return e
 }
 
-// UpdateBook 更新书籍信息
-func (db *StoreDatabase) UpdateBook(book *model.Book) error {
-	ctx := context.Background()
-	params := ToSQLCUpdateBookParams(book)
-	return db.queries.UpdateBook(ctx, params)
-}
+//// UpdateBook 更新书籍信息
+//func (db *StoreDatabase) UpdateBook(book *model.Book) error {
+//	ctx := context.Background()
+//	params := ToSQLCUpdateBookParams(book)
+//	return db.queries.UpdateBook(ctx, params)
+//}
 
 // DeleteBook 删除书籍信息
 func (db *StoreDatabase) DeleteBook(bookID string) error {
