@@ -92,7 +92,7 @@ func MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookIn
 					return templ_7745c5c3_Err
 				}
 				for _, book := range storeBooks.BookInfos {
-					templ_7745c5c3_Err = BookCard(c, book).Render(ctx, templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = BookCard(c, book, GetBookmarks(book.BookID)).Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -117,7 +117,7 @@ func MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookIn
 				return templ_7745c5c3_Err
 			}
 			for _, book := range childBookInfos {
-				templ_7745c5c3_Err = BookCard(c, book).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = BookCard(c, book, GetBookmarks(book.BookID)).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

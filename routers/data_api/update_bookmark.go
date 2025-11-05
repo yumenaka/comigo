@@ -5,11 +5,12 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
-func UpdateBookmark(c echo.Context) error {
+func StoreBookmark(c echo.Context) error {
 	// 解析请求体（JSON格式）
 	var request struct {
 		Type        string `json:"type"`        // 书签类型，例如 "auto" 表示自动书签
@@ -36,17 +37,17 @@ func UpdateBookmark(c echo.Context) error {
 	markType := model.MarkType(request.Type)
 	// 创建或更新书签
 	bookMark := model.NewBookMark(markType, book.BookID, book.GetStoreID(), request.PageIndex, request.Description)
-	book.AddOrUpdateBookMark(bookMark)
-	// 更新书籍信息
-	err = model.IStore.UpdateBook(book)
+	err = model.IStore.StoreBookMark(bookMark)
 	if err != nil {
-		logger.Infof("Failed to update bookmark: %s", err)
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to update bookmark")
+		logger.Infof("Failed to store bookmark: %s", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to store bookmark")
 	}
 	// 输出调试信息
-	jsonByte, err := json.MarshalIndent(book, "", "  ")
+	jsonByte, err := json.MarshalIndent(book.BookMarks, "", "  ")
 	if err == nil {
-		logger.Infof(string(jsonByte))
+		if config.GetCfg().Debug {
+			logger.Infof("Updated bookmarks for book ID %s: %s", book.BookID, string(jsonByte))
+		}
 	}
 	// 返回成功响应
 	return c.JSON(http.StatusOK, map[string]string{"message": "bookmark updated successfully"})

@@ -139,7 +139,7 @@ air
 ### 长期计划
 - [ ] 嵌入html，防剧透效果。回忆模式，特殊背景，音乐etc
 - [ ] 网页端：优化图片预加载，长图片支持。
-- [ ] 跨平台 GUI（Flutter + GoMobile或 Wails）PWA模式。
+- [ ] 跨平台 GUI（Flutter + GoMobile或 Wails）PWA模式。wail debug https://github.com/wailsapp/wails/issues/3050
 - [ ] 更新提示，自动更新自动更新(github.com/jpillora/overseer) 包管理支持。[self update 功能](https://github.com/minio/selfupdate)
 - [ ] 文件夹监控(fsnotify)，https://github.com/helshabini/fsbroker/
 - [ ] 用户系统、访问密码，流量限制 comigo后台：有几台设备在线，阅读文件，阅读页数，当前用户状态、阅读书籍、阅读进度、阅读时间、服务器状态 注册，阅读记录，

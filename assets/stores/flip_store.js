@@ -1,7 +1,5 @@
 // Flip 翻页模式
 Alpine.store('flip', {
-    nowPageNum: 1,
-    allPageNum: 100,
     imageMaxWidth: 400,
     //自动隐藏工具条
     autoHideToolbar: Alpine.$persist((() => {
@@ -31,8 +29,6 @@ Alpine.store('flip', {
     autoDoublePageMode: Alpine.$persist(false).as(
         'flip.autoDoublePageModeFlag'
     ),
-    //是否保存阅读进度（页数）
-    saveReadingProgress: Alpine.$persist(true).as('flip.saveReadingProgress'),
     //素描模式标记
     sketchModeFlag: false,
     //是否显示素描提示

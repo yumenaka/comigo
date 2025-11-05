@@ -32,7 +32,7 @@ templ MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookI
 						</span>
 					</button>
 					for _, book := range storeBooks.BookInfos {
-						@BookCard(c, book)
+						@BookCard(c, book, GetBookmarks(book.BookID))
 					}
 				</div>
 			}
@@ -46,7 +46,7 @@ templ MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookI
 		>
 			<div id="book-shelf" class="flex flex-row flex-wrap content-start justify-center flex-1 w-full h-full text-base-content">
 				for _, book := range childBookInfos {
-					@BookCard(c, book)
+					@BookCard(c, book, GetBookmarks(book.BookID))
 				}
 			</div>
 		</div>

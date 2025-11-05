@@ -60,6 +60,8 @@ const randomString = generateRandomString();
 // 生成userID: 使用UserAgent的哈希值 + 随机字符串，确保唯一性且长度适中
 const initClientID = `Client_${randomString}_${system}_${browser}`;
 Alpine.store('global', {
+    nowPageNum: 1,
+    allPageNum: 1,
     // 自动切边
     autoCrop: Alpine.$persist(false).as('global.autoCrop'),
     // 自动切边阈值,范围是0~100。多数情况下 1 就够了。
@@ -76,10 +78,6 @@ Alpine.store('global', {
     clientID: Alpine.$persist(initClientID).as('global.clientID'),
     // debugMode 是否开启调试模式
     debugMode: Alpine.$persist(true).as('global.debugMode'),
-    // readerMode 当前阅读模式
-    readMode: Alpine.$persist('scroll').as('global.readMode'),
-    // readerMode 当前阅读模式
-    readModeIsScroll: Alpine.$persist(true).as('global.readModeIsScroll'),
     //是否通过websocket同步翻页
     syncPageByWS: Alpine.$persist(true).as('global.syncPageByWS'),
     // bookSortBy 书籍排序方式 以按照文件名、修改时间、文件大小排序（或反向排序）
@@ -87,42 +85,147 @@ Alpine.store('global', {
     // pageSortBy 书页排序顺序 以按照文件名、修改时间、文件大小排序（或反向排序）
     pageSortBy: Alpine.$persist('name').as('global.pageSortBy'),
     language: Alpine.$persist('en').as('global.language'),
-    toggleReadMode() {
-      if (this.readMode === 'flip') {
-        this.readMode = 'scroll'
-        this.readModeIsScroll = true
-      } else {
-        this.readMode = 'flip'
-        this.readModeIsScroll = false
-      }
+    //是否保存阅读进度（页数）到本地存储
+    saveReadingProgress: Alpine.$persist(true).as('global.saveReadingProgress'),
+    // 从本地存储加载页码并跳转
+    loadPageNumFromLocalStorage(book_id, callbackFunction) {
+        if (!this.saveReadingProgress) {
+            return;
+        }
+        try {
+            const key = `pageNum_${book.id}`;
+            const savedPageNum = localStorage.getItem(key);
+            if (savedPageNum !== null && !isNaN(parseInt(savedPageNum))) {
+                const pageNum = parseInt(savedPageNum);
+                // 确保页码在有效范围内
+                if (pageNum > 0 && pageNum <= Alpine.store('global').allPageNum) {
+                    console.log(`加载到本地存储的页码: ${pageNum}`);
+                    callbackFunction(); // 跳转函数,或发送书签更新信息
+                }
+            }
+        } catch (e) {
+            console.error("Error loading page number from localStorage:", e);
+        }
+    },
+    // 保存当前页码到本地存储
+    savePageNumToLocalStorage() {
+        if (!this.saveReadingProgress) {
+            return;
+        }
+        try {
+            const key = `pageNum_${book.id}`;
+            const nowPageNum = Alpine.store('global').nowPageNum;
+            localStorage.setItem(key, nowPageNum);
+        } catch (e) {
+            console.error("Error saving page number to localStorage:", e);
+        }
+    },
+    // readerMode 当前阅读模式: infinite_scroll  paged_scroll  flip_page
+    readMode: Alpine.$persist('infinite_scroll').as('global.readMode'),
+    // 切换阅读模式
+    infiniteScrollLoadAllPage(mode) {
+        this.readMode = "infinite_scroll";
+        const url = new URL(window.location.href);
+        url.searchParams.delete("start");
+        window.location.href = url.href;
+    },
+    onChangeReadMode() {
+        // 切换阅读模式时，如果在阅读，就修改URL路径 参考文献：https://developer.mozilla.org/zh-CN/docs/Web/API/URL
+        const url = new URL(window.location.href);
+        const pathname = url.pathname;
+        // 使用 URLSearchParams 提取键值对
+        const params = new URLSearchParams(url.search);
+        // 分割路径为各层级关键词, filter(Boolean) 的作用是去除空字符串 如//aa/bb/ 会产生空字符串(虽然这里不会这么做)
+        const pathSegments = url.pathname.split('/').filter(Boolean); // like ["scroll", "id3DcA1v9"]
+        const book_id = pathSegments[1];
+        console.log(`切换阅读模式到: ${this.readMode}, 当前路径: ${pathname},${pathSegments}, 查询参数: ${params.toString()}`);
+        // 翻页模式
+        if (this.readMode === 'page_flip') {
+            // 如果已经是翻页模式
+            if (pathSegments[0] === "flip") {
+                console.log("已经是翻页模式，无需切换");
+                console.log(`${pathSegments[0]} , ${params.get("start")}`);
+                return;
+            }
+        }
+        // 卷轴(分页)模式
+        if (this.readMode === 'paged_scroll') {
+            // 如果已经是分页卷轴模式
+            if (pathSegments[0] === "scroll" && params.get("page") !== null) {
+                console.log(`${pathSegments[0]} , ${params.get("page")}`);
+                console.log("已经是分页卷轴模式，无需切换");
+                return;
+            }
+        }
+        // 卷轴(无限)模式
+        if (this.readMode === 'infinite_scroll') {
+            // 如果已经是无限卷轴模式
+            if (pathSegments[0] === "scroll" && params.get("page") === null) {
+                console.log(`${pathSegments[0]} , ${params.get("page")}`);
+                console.log("已经是无限卷轴模式，无需切换");
+                return;
+            }
+        }
+        // 跳转到新的阅读模式URL
+        window.location.href = this.getReadURL(book_id, this.nowPageNum);
+    },
+    getReadURL(book_id, start_index) {
+        let PAGED_SIZE = 32;
+        // console.log(`生成阅读模式URL: ${this.readMode}`);
+        // console.log(`当前页码: ${start_index}`);
+        const url = new URL(window.location.href);
+        // 翻页(左右)
+        if (this.readMode === 'page_flip') {
+            let new_url = new URL(`/flip/${book_id}`, url.origin);
+            if (start_index > 1) {
+                new_url.searchParams.set("start", start_index.toString());
+            }
+            return new_url.href;
+        }
+        // 卷轴(分页)
+        if (this.readMode === 'paged_scroll') {
+            let new_url = new URL(`/scroll/${book_id}`, url.origin);
+            let page = Math.floor(start_index / PAGED_SIZE) + 1;
+            new_url.searchParams.set("page", page.toString());
+            return new_url.href;
+        }
+        // 卷轴(无限)
+        if (this.readMode === 'infinite_scroll') {
+            let new_url = new URL(`/scroll/${book_id}`, url.origin);
+            if (start_index > PAGED_SIZE) {
+                new_url.searchParams.set("start", start_index.toString());
+            }
+            return new_url.href;
+        }
+        return "";
     },
     // 竖屏模式
     isPortrait: false,
     // 横屏模式
     isLandscape: true,
     // 获取cookie里面存储的值
-    getCookieValue(bookID,valueName) {
-      let pgCookie = "";
-      const paramName = (bookID === ""?`$${valueName}`:`${bookID}_${valueName}`);
-      const cookies = document.cookie.split(";");
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.startsWith(paramName)) {
-          pgCookie = decodeURIComponent(cookie.substring(paramName.length + 1));
+    getCookieValue(bookID, valueName) {
+        let pgCookie = "";
+        const paramName = (bookID === "" ? `$${valueName}` : `${bookID}_${valueName}`);
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.startsWith(paramName)) {
+                pgCookie = decodeURIComponent(cookie.substring(paramName.length + 1));
+            }
         }
-      }
-      return pgCookie;
+        return pgCookie;
     },
-    setPaginationIndex(bookID, valueName,value) {
-      const paramName = (bookID === ""?`$${valueName}`:`${bookID}_${valueName}`);
-      // 设置cookie，过期时间为365天
-      const expirationDate = new Date();
-      expirationDate.setDate(expirationDate.getDate() + 365);
-      document.cookie = `${paramName}${encodeURIComponent(value)}; expires=${expirationDate.toUTCString()}; path=/; SameSite=Lax`;
-      window.location.reload();
+    setPaginationIndex(bookID, valueName, value) {
+        const paramName = (bookID === "" ? `$${valueName}` : `${bookID}_${valueName}`);
+        // 设置cookie，过期时间为365天
+        const expirationDate = new Date();
+        expirationDate.setDate(expirationDate.getDate() + 365);
+        document.cookie = `${paramName}${encodeURIComponent(value)}; expires=${expirationDate.toUTCString()}; path=/; SameSite=Lax`;
+        window.location.reload();
     },
     /**
-     * 调用后端 /api/update_bookmark 接口，更新书签信息
+     * 调用后端 /api/store_bookmark 接口，更新书签信息
      * @param {Object} params
      * @param {string} params.type - 书签类型，例如 'auto'
      * @param {string} params.bookId - 书籍ID
@@ -153,12 +256,7 @@ Alpine.store('global', {
             page_index: pageIndex,
             description: deviceDescription
         };
-
-        // if (this.debugMode) {
-        //     console.debug('[UpdateBookmark] request', { payload, label, deviceDescription });
-        // }
-
-        const response = await fetch('/api/update_bookmark', {
+        const response = await fetch('/api/store_bookmark', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -170,7 +268,6 @@ Alpine.store('global', {
         const contentType = response.headers.get('content-type') || '';
         const isJSON = contentType.includes('application/json');
         const responseBody = isJSON ? await response.json() : await response.text();
-
         if (!response.ok) {
             const error = new Error(`UpdateBookmark failed: ${response.status} ${response.statusText}`);
             if (this.debugMode) {
@@ -178,11 +275,6 @@ Alpine.store('global', {
             }
             throw error;
         }
-
-        // if (this.debugMode) {
-        //     console.debug('[UpdateBookmark] success', { response: responseBody, deviceDescription });
-        // }
-
         return responseBody;
     },
     // 检测并设置视口方向
