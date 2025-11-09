@@ -14,17 +14,14 @@ import (
 
 // ScanStore 解析命令,扫描文件，设置书库等
 func ScanStore(args []string) {
-	// 从数据库中读取书籍信息并持久化
-	// 启动或重启 Tailscale 服务
-	configDir, err := config.GetConfigDir()
-	if err != nil {
-		logger.Errorf("Failed to get config dir: %v", err)
-		configDir = ""
-	}
 	// 1. 初始化数据库
-	// 切换到DbStore会导致的已知问题：
-	// 书组相关跳转异常
 	if config.GetCfg().EnableDatabase {
+		// 从数据库中读取书籍信息并持久化
+		configDir, err := config.GetConfigDir()
+		if err != nil {
+			logger.Errorf("Failed to get config dir: %v", err)
+			configDir = ""
+		}
 		if err := sqlc.OpenDatabase(configDir); err != nil {
 			logger.Infof("OpenDatabase Error: %s", err)
 			model.IStore = store.RamStore
@@ -38,14 +35,14 @@ func ScanStore(args []string) {
 
 	// 从本地文件加载书籍信息到内存（调试用）
 	if !config.GetCfg().EnableDatabase {
-		err = store.RamStore.LoadBooks()
+		err := store.RamStore.LoadBooks()
 		if err != nil {
 			logger.Infof("LoadBooks_error %s", err)
 		}
 	}
 
 	// 3、扫描配置文件里面的书库路径，取得书籍
-	err = scan.InitAllStore(config.GetCfg())
+	err := scan.InitAllStore(config.GetCfg())
 	if err != nil {
 		logger.Infof("Failed to scan store path: %v", err)
 	}

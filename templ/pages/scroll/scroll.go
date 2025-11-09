@@ -12,8 +12,8 @@ import (
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
-// PageHandler 阅读界面（卷轴模式）
-func PageHandler(c echo.Context) error {
+// ScrollModeHandler 阅读界面（卷轴模式）
+func ScrollModeHandler(c echo.Context) error {
 	// 图片排序方式
 	sortBy := "default"
 	sortBookBy, err := c.Cookie("ScrollSortBy")
@@ -42,17 +42,25 @@ func PageHandler(c echo.Context) error {
 		return nil
 	}
 	book.SortPages(sortBy)
+	readMode := "infinite_scroll"
 	// 读取分页索引
-	paginationIndex := -1
+	pagedIndex := -1
 	page := c.QueryParam("page")
 	if page != "" {
+		readMode = "paged_scroll"
 		index, err := strconv.Atoi(page)
 		if err == nil {
-			paginationIndex = index
+			pagedIndex = index
 		}
 	}
+
+	startIndex, err := strconv.Atoi(c.QueryParam("start"))
+	if err != nil {
+		startIndex = 0
+	}
+
 	// 定义模板主体内容。
-	scrollPage := ScrollPage(c, book, paginationIndex)
+	scrollPage := ScrollPage(c, book, readMode, pagedIndex, startIndex)
 	// 拼接页面
 	indexHtml := common.Html(
 		c,

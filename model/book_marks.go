@@ -43,3 +43,12 @@ func (s *BookMarks) SortBookmarks(sortBy string) {
 	// 对解引用后的切片进行排序
 	sort.Slice(*s, lessFunc)
 }
+
+func (s *BookMarks) GetLastReadPage() int {
+	for _, mark := range *s {
+		if mark.Type == AutoMark {
+			return mark.PageIndex
+		}
+	}
+	return 0
+}

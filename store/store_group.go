@@ -77,39 +77,65 @@ func (ramStore *StoreInRam) SaveBooks() error {
 		logger.Infof("Error listing books: %s", err)
 		return err
 	}
-
 	// 遍历并保存每本书
 	for _, book := range allBooks {
-		// 序列化书籍为 JSON 格式
-		jsonData, err := json.MarshalIndent(book, "", "  ")
+		err := SaveBookJson(book)
 		if err != nil {
-			logger.Infof("Error marshaling book %s: %s", book.BookID, err)
-			continue // 跳过这本书，继续处理其他书籍
-		}
-		storePathAbs, err := filepath.Abs(book.StoreUrl)
-		if err != nil {
-			logger.Infof("Failed to get absolute path: %s", err)
-			storePathAbs = book.StoreUrl
-		}
-		cacheDir := filepath.Join(savePath, base62.EncodeToString([]byte(storePathAbs)))
-		// 创建保存目录
-		err = os.MkdirAll(cacheDir, os.ModePerm)
-		if err != nil {
-			logger.Infof("Error creating book_data directory: %s", err)
-			return err
-		}
-		// 构造文件路径
-		fileName := filepath.Join(cacheDir, book.BookID+".json")
-
-		// 写入文件
-		err = os.WriteFile(fileName, jsonData, 0o644)
-		if err != nil {
-			logger.Infof("Error saving book %s to file: %s", book.BookID, err)
-			continue // 跳过这本书，继续处理其他书籍
+			logger.Infof("Error saving book %s: %s", book.BookID, err)
 		}
 	}
-
 	logger.Infof("Successfully saved %d books to %s", len(allBooks), savePath)
+	return nil
+}
+
+func SaveBookJson(book *model.Book) error {
+	configDir, err := config.GetConfigDir()
+	savePath := filepath.Join(configDir, "books")
+	if err != nil {
+		return err
+	}
+	// 序列化书籍为 JSON 格式
+	jsonData, err := json.MarshalIndent(book, "", "  ")
+	if err != nil {
+		return err
+	}
+	// StoreID是书库URL路径的 base62 编码
+	cacheDir := filepath.Join(savePath, book.GetStoreID())
+	// 创建保存目录
+	err = os.MkdirAll(cacheDir, os.ModePerm)
+	if err != nil {
+		return err
+	}
+	// 构造文件路径
+	fileName := filepath.Join(cacheDir, book.BookID+".json")
+	// 写入文件
+	err = os.WriteFile(fileName, jsonData, 0o644)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func DeleteBookJson(book *model.Book) error {
+	configDir, err := config.GetConfigDir()
+	savePath := filepath.Join(configDir, "books")
+	if err != nil {
+		return err
+	}
+	// StoreID是书库URL路径的 base62 编码
+	cacheDir := filepath.Join(savePath, book.GetStoreID())
+	// 创建保存目录
+	err = os.MkdirAll(cacheDir, os.ModePerm)
+	if err != nil {
+		return err
+	}
+	// 构造文件路径
+	fileName := filepath.Join(cacheDir, book.BookID+".json")
+	// 写入文件
+	err = os.Remove(fileName)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -123,11 +149,13 @@ func (ramStore *StoreInRam) LoadBooks() error {
 	logger.Infof("Loading books from %s", savePath)
 	// 遍历所有 storeUrl 对应的目录
 	for _, storeUrl := range config.GetCfg().StoreUrls {
+		// 计算 storeUrl 的绝对路径
 		storePathAbs, err := filepath.Abs(storeUrl)
 		if err != nil {
 			logger.Infof("Failed to get absolute path: %s", err)
 			storePathAbs = storeUrl
 		}
+		// 计算缓存目录路径
 		cacheDir := filepath.Join(savePath, base62.EncodeToString([]byte(storePathAbs)))
 		// 检查目录是否存在
 		_, err = os.Stat(cacheDir)
@@ -175,7 +203,7 @@ func (ramStore *StoreInRam) LoadBooks() error {
 				continue // 跳过损坏的文件，继续处理其他文件
 			}
 			// 添加书籍到内存
-			err = ramStore.AddBook(&book)
+			err = ramStore.StoreBook(&book)
 			if err != nil {
 				logger.Infof("Error adding book %s to store: %s", book.BookID, err)
 				continue // 跳过这本书，继续处理其他书籍
@@ -189,14 +217,19 @@ func (ramStore *StoreInRam) LoadBooks() error {
 }
 
 // AddBook 添加一本书
-func (ramStore *StoreInRam) AddBook(b *model.Book) error {
+func (ramStore *StoreInRam) StoreBook(b *model.Book) error {
 	if b.BookID == "" {
 		return errors.New("add book error: empty BookID")
 	}
+	// Load 返回存储在映射中的键值，如果不存在值，则返回 nil。ok 结果指示是否在映射中找到了值。
 	if _, ok := ramStore.ChildStores.Load(b.StoreUrl); !ok {
 		if err := ramStore.AddStore(b.StoreUrl); err != nil {
 			logger.Infof("Error adding subfolder: %s", err)
 		}
+	}
+	err := SaveBookJson(b)
+	if err != nil {
+		logger.Infof("Error saving book %s to JSON: %s", b.BookID, err)
 	}
 	return ramStore.AddBookToSubStore(b.StoreUrl, b)
 }
@@ -226,8 +259,12 @@ func (ramStore *StoreInRam) AddBookToSubStore(storeURL string, b *model.Book) er
 // AddBooks 添加多本书
 func (ramStore *StoreInRam) AddBooks(books []*model.Book) error {
 	for _, b := range books {
-		if err := ramStore.AddBook(b); err != nil {
+		if err := ramStore.StoreBook(b); err != nil {
 			logger.Infof("Error adding book %s: %s", b.BookID, err)
+		}
+		err := SaveBookJson(b)
+		if err != nil {
+			logger.Infof("Error saving book %s to JSON: %s", b.BookID, err)
 		}
 	}
 	return nil
@@ -282,50 +319,93 @@ func (ramStore *StoreInRam) GetBook(id string) (*model.Book, error) {
 	return nil, errors.New("GetBook：cannot find book, id=" + id)
 }
 
+func (ramStore *StoreInRam) StoreBookMark(mark *model.BookMark) error {
+	// 获取书籍
+	b, err := ramStore.GetBook(mark.BookID)
+	if err != nil {
+		return errors.New("StoreBookMark：cannot find book, id=" + mark.BookID)
+	}
+	switch mark.Type {
+	case model.UserMark:
+		// 用户书签的处理逻辑(用户书签可以有多个，但同一页只能有一个用户书签）
+		exits := false
+		for i, existingMark := range b.BookMarks {
+			if existingMark.Type == mark.Type && existingMark.PageIndex == mark.PageIndex {
+				// 更新现有书签
+				b.BookMarks[i] = *mark
+				exits = true
+			}
+		}
+		if !exits {
+			b.BookMarks = append(b.BookMarks, *mark)
+		}
+	case model.AutoMark:
+		// 自动书签的处理逻辑（每本书只有一个自动书签）
+		exits := false
+		for i, existingMark := range b.BookMarks {
+			if existingMark.Type == mark.Type {
+				// 更新现有书签
+				b.BookMarks[i] = *mark
+				exits = true
+			}
+		}
+		if !exits {
+			b.BookMarks = append(b.BookMarks, *mark)
+		}
+	default:
+		// 目前没有其他类型书签
+		return errors.New("StoreBookMark：unknown bookmark type")
+	}
+	err = ramStore.StoreBook(b)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (ramStore *StoreInRam) GetBookMarks(bookID string) (*model.BookMarks, error) {
+	// 获取书籍
+	b, err := ramStore.GetBook(bookID)
+	if err != nil {
+		return nil, errors.New("GetBookMark：cannot find book, id=" + bookID)
+	}
+	return &b.BookMarks, nil
+}
+
 func (ramStore *StoreInRam) DeleteBook(id string) error {
 	for _, value := range ramStore.ChildStores.Range {
 		childStore := value.(*Store)
-		if _, ok := childStore.BookMap.Load(id); ok {
+		if b, ok := childStore.BookMap.Load(id); ok {
 			childStore.BookMap.Delete(id)
+			// 删除本地缓存的 JSON 文件
+			err := DeleteBookJson(b.(*model.Book))
+			if err != nil {
+				logger.Infof("Error deleting book %s JSON file: %s", id, err)
+			}
 			return nil
 		}
 	}
 	return errors.New("DeleteBook：cannot find book, id=" + id)
 }
 
-func (ramStore *StoreInRam) UpdateBook(b *model.Book) error {
-	for _, value := range ramStore.ChildStores.Range {
-		childStore := value.(*Store)
-		if _, ok := childStore.BookMap.Load(b.BookID); ok {
-			childStore.BookMap.Store(b.BookID, b)
-			return nil
-		}
-	}
-	return errors.New("UpdateBook：cannot find book, id=" + b.BookID)
-}
-
-// GetBookByAuthor 获取同一作者的书籍
-func (ramStore *StoreInRam) GetBookByAuthor(author string, sortBy string) ([]*model.Book, error) {
-	var bookList []*model.Book
-	allBooks, err := ramStore.ListBooks()
-	if err != nil {
-		logger.Infof("Error listing books: %s", err)
-	}
-	for _, b := range allBooks {
-		if b.Author == author {
-			b.SortPages(sortBy)
-			bookList = append(bookList, b)
-		}
-	}
-
-	if len(bookList) > 0 {
-		return bookList, nil
-	}
-	return nil, errors.New("cannot find book, author=" + author)
-}
+//func (ramStore *StoreInRam) UpdateBook(book *model.Book) error {
+//	for _, value := range ramStore.ChildStores.Range {
+//		childStore := value.(*Store)
+//		if _, ok := childStore.BookMap.Load(book.BookID); ok {
+//			childStore.BookMap.Store(book.BookID, book)
+//			err := SaveBookJson(book)
+//			if err != nil {
+//				logger.Infof("Error saving book %s to JSON: %s", book.BookID, err)
+//			}
+//			return nil
+//		}
+//	}
+//	return errors.New("UpdateBook：cannot find book, id=" + book.BookID)
+//}
 
 // TopOfShelfInfo 获取顶层书架信息
 func TopOfShelfInfo(sortBy string) ([]model.StoreBookInfo, error) {
+	model.ClearBookNotExist()
 	// 显示顶层书库的书籍
 	var topBookList model.BookInfos
 	allBooks, err := model.IStore.ListBooks()
@@ -337,7 +417,7 @@ func TopOfShelfInfo(sortBy string) ([]model.StoreBookInfo, error) {
 			topBookList = append(topBookList, b.BookInfo)
 		}
 	}
-	storeBookInfoList := []model.StoreBookInfo{}
+	var storeBookInfoList []model.StoreBookInfo
 	storeUrls := config.GetCfg().StoreUrls
 	for _, storeUrl := range storeUrls {
 		storePathAbs, err := filepath.Abs(storeUrl)
