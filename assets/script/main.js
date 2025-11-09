@@ -17625,6 +17625,11 @@ Alpine.store('global', {
         window.location.href = this.getReadURL(book_id, this.nowPageNum);
     },
     getReadURL (book_id, start_index) {
+        // TODO: 处理旧版本数据干扰的问题。若干个版本后大概就不需要了，到时候删除这段代码。
+        if (this.readMode !== 'page_flip' && this.readMode !== 'paged_scroll' && this.readMode !== 'infinite_scroll') {
+            console.error(`\u{672A}\u{77E5}\u{7684}\u{9605}\u{8BFB}\u{6A21}\u{5F0F}: ${this.readMode}, \u{53EF}\u{80FD}\u{662F}\u{65E7}\u{7248}\u{672C}\u{6570}\u{636E}\u{5E72}\u{6270}, \u{91CD}\u{7F6E}\u{4E3A} infinite_scroll`);
+            this.readMode = 'infinite_scroll';
+        }
         let PAGED_SIZE = 32;
         // console.log(`生成阅读模式URL: ${this.readMode}`);
         // console.log(`当前页码: ${start_index}`);
