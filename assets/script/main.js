@@ -17594,12 +17594,12 @@ Alpine.store('global', {
         const pathSegments = url.pathname.split('/').filter(Boolean); // like ["scroll", "id3DcA1v9"]
         const book_id = pathSegments[1];
         console.log(`\u{5207}\u{6362}\u{9605}\u{8BFB}\u{6A21}\u{5F0F}\u{5230}: ${this.readMode}, \u{5F53}\u{524D}\u{8DEF}\u{5F84}: ${pathname},${pathSegments}, \u{67E5}\u{8BE2}\u{53C2}\u{6570}: ${params.toString()}`);
-        // 翻页模式
-        if (this.readMode === 'page_flip') // 如果已经是翻页模式
+        // 卷轴(无限)模式
+        if (this.readMode === 'infinite_scroll') // 如果已经是无限卷轴模式
         {
-            if (pathSegments[0] === "flip") {
-                console.log("\u5DF2\u7ECF\u662F\u7FFB\u9875\u6A21\u5F0F\uFF0C\u65E0\u9700\u5207\u6362");
-                console.log(`${pathSegments[0]} , ${params.get("start")}`);
+            if (pathSegments[0] === "scroll" && params.get("page") === null) {
+                console.log(`${pathSegments[0]} , ${params.get("page")}`);
+                console.log("\u5DF2\u7ECF\u662F\u65E0\u9650\u5377\u8F74\u6A21\u5F0F\uFF0C\u65E0\u9700\u5207\u6362");
                 return;
             }
         }
@@ -17612,12 +17612,12 @@ Alpine.store('global', {
                 return;
             }
         }
-        // 卷轴(无限)模式
-        if (this.readMode === 'infinite_scroll') // 如果已经是无限卷轴模式
+        // 翻页模式
+        if (this.readMode === 'page_flip') // 如果已经是翻页模式
         {
-            if (pathSegments[0] === "scroll" && params.get("page") === null) {
-                console.log(`${pathSegments[0]} , ${params.get("page")}`);
-                console.log("\u5DF2\u7ECF\u662F\u65E0\u9650\u5377\u8F74\u6A21\u5F0F\uFF0C\u65E0\u9700\u5207\u6362");
+            if (pathSegments[0] === "flip") {
+                console.log("\u5DF2\u7ECF\u662F\u7FFB\u9875\u6A21\u5F0F\uFF0C\u65E0\u9700\u5207\u6362");
+                console.log(`${pathSegments[0]} , ${params.get("start")}`);
                 return;
             }
         }
@@ -17634,9 +17634,9 @@ Alpine.store('global', {
         // console.log(`生成阅读模式URL: ${this.readMode}`);
         // console.log(`当前页码: ${start_index}`);
         const url = new URL(window.location.href);
-        // 翻页(左右)
-        if (this.readMode === 'page_flip') {
-            let new_url = new URL(`/flip/${book_id}`, url.origin);
+        // 卷轴(无限)
+        if (this.readMode === 'infinite_scroll') {
+            let new_url = new URL(`/scroll/${book_id}`, url.origin);
             if (start_index > 1) new_url.searchParams.set("start", start_index.toString());
             return new_url.href;
         }
@@ -17647,10 +17647,10 @@ Alpine.store('global', {
             new_url.searchParams.set("page", page.toString());
             return new_url.href;
         }
-        // 卷轴(无限)
-        if (this.readMode === 'infinite_scroll') {
-            let new_url = new URL(`/scroll/${book_id}`, url.origin);
-            if (start_index > PAGED_SIZE) new_url.searchParams.set("start", start_index.toString());
+        // 翻页(左右)
+        if (this.readMode === 'page_flip') {
+            let new_url = new URL(`/flip/${book_id}`, url.origin);
+            if (start_index > 1) new_url.searchParams.set("start", start_index.toString());
             return new_url.href;
         }
         return "";
