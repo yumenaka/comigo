@@ -1,6 +1,7 @@
 package shelf
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -19,7 +20,7 @@ templ MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookI
 			for i, storeBooks := range storeBookInfos {
 				<div
 					id={ "book-shelf-" + strconv.Itoa(i) }
-					x-data="{ showBook: true }"
+					x-data={ fmt.Sprintf("{ showBook: $persist(true).as('showBook_%s') }", storeBooks.StoreUrl) }
 					class="w-full h-full mt-2 mb-6 border-4 border-slate-400 rounded-2xl flex flex-row flex-wrap content-start justify-center text-base-content relative pt-8"
 				>
 					<!-- 书架标题栏 -->
