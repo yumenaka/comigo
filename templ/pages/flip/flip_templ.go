@@ -86,11 +86,11 @@ func FlipPage(c echo.Context, book *model.Book) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<!-- 屏幕左下角的灰色页码--><div x-show=\"$store.flip.showPageNum\" class=\"fixed bottom-2 left-2 text-gray-500 text-sm pointer-events-none z-10\" x-text=\"$store.flip.nowPageNum+'/'+$store.flip.allPageNum\"></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<!-- 屏幕左下角的灰色页码--><div x-show=\"$store.flip.showPageNum\" class=\"fixed bottom-2 left-2 text-gray-500 text-sm pointer-events-none z-10\" x-text=\"$store.global.nowPageNum+'/'+$store.global.allPageNum\"></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = common.Drawer(c, book, FlipDrawerSlot(book)).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.Drawer(c, book, FlipDrawerSlot(c, book)).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

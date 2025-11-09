@@ -27,7 +27,7 @@ func AddBooksToStore(books []*model.Book) {
 			continue
 		}
 		book.PageCount = len(book.PageInfos)
-		if err := model.IStore.AddBook(book); err != nil {
+		if err := model.IStore.StoreBook(book); err != nil {
 			logger.Infof("AddBook_error"+" bookID:%s %s", book.BookID, err)
 		}
 	}

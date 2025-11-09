@@ -1,6 +1,9 @@
 package common
 
 import (
+	"fmt"
+
+	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/templ/common/svg"
 )
@@ -57,19 +60,19 @@ templ Header(prop HeaderProps) {
 				</a>
 			}
 			<!-- 新服务器设置 -->
-			<a x-show="!window.location.href.includes('file:///')" href="/settings" class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
+			<a x-show="!window.location.href.includes('file:///') && !window.location.href.includes('settings') && !window.location.href.includes('upload')" href="/settings" class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
 				@svg.ServerDisk()
 			</a>
 			if prop.InShelf {
 				<!-- 上传按钮，点击进入上传页面 -->
-				<a x-show="!window.location.href.includes('file:///')" href="/upload" class="w-10 mx-1 my-0 rounded hover:ring ">
+				<a x-show="!window.location.href.includes('file:///') && !window.location.href.includes('settings')" href="/upload" class="w-10 mx-1 my-0 rounded hover:ring ">
 					@svg.Upload()
 				</a>
 			}
 			<!-- 文件重排序 Dropdown Menu： https://flowbite.com/docs/components/dropdowns/ -->
 			<!-- data-dropdown-trigger="{hover|click}"  二选一-->
 			<svg
-				x-show="!window.location.href.includes('file:///')"
+				x-show="!window.location.href.includes('file:///') && !window.location.href.includes('settings') && !window.location.href.includes('upload')"
 				class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
 				id="ResortButton"
 				data-dropdown-toggle="ReSortDropdownMenu"
@@ -189,7 +192,17 @@ templ Header(prop HeaderProps) {
 			<!-- 标题，快速跳转 or 可下载压缩包 or 只显示 -->
 			<span x-show="window.location.href.includes('file:///')" class="text-lg font-semibold">{ prop.Title }</span>
 			if (prop.InShelf) {
-				<span class="text-lg font-semibold">{ prop.Title }</span>
+				<span
+					class="text-lg font-semibold"
+					x-data={ fmt.Sprintf("{ version: ' - Comigo %s' }", config.GetVersion()) }
+					x-init="
+					// $nextTick: 等到 Alpine 完全完成渲染后再执行某些代码
+                    $nextTick(() => {
+                        // 设置页面标题
+                        document.title = $el.innerText + version;
+                    });
+				"
+				>{ prop.Title }</span>
 			} else {
 				if (prop.ShowQuickJumpBar&&prop.QuickJumpBarBooks!=nil) {
 					<button

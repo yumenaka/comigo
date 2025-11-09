@@ -14,6 +14,11 @@ import (
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
+func GetBookmarks(bookID string) model.BookMarks {
+	bookMarks, _ := model.IStore.GetBookMarks(bookID)
+	return *bookMarks
+}
+
 // ShelfHandler 书架页面的处理程序。
 func ShelfHandler(c echo.Context) error {
 	// Set the response content type to HTML.
@@ -39,6 +44,7 @@ func ShelfHandler(c echo.Context) error {
 	var childBookInfos []model.BookInfo
 	// 如果指定了书籍ID，获取子书架信息。
 	if bookID != "" {
+		model.ClearBookNotExist()
 		logger.Infof("Get child books for bookID %s", bookID)
 		childBooks, err := store.GetChildBooksInfo(bookID)
 		if err == nil {
@@ -75,18 +81,17 @@ func ShelfHandler(c echo.Context) error {
 	return nil
 }
 
-func getReadURL(book model.BookInfo) string {
+func generateReadURL(book model.BookInfo, lastReadPage int) string {
 	// 如果是书籍组，就跳转到子书架
 	if book.Type == model.TypeBooksGroup {
-		return "\"/shelf/" + book.BookID + "\""
+		return fmt.Sprintf("\"/shelf/%s\"", book.BookID)
 	}
 	// 如果是视频、音频、未知文件，就在新窗口打开
 	if book.Type == model.TypeVideo || book.Type == model.TypeAudio || book.Type == model.TypeUnknownFile {
 		return fmt.Sprintf("\"/api/raw/%s/%s\"", book.BookID, url.QueryEscape(book.Title))
 	}
 	// 其他情况，跳转到阅读页面，类似 /scroll/4cTOjFm?page=1
-	readURL := "'/'+$store.global.readMode+ '/' + BookID + ($store.global.readMode === 'scroll'?($store.scroll.fixedPagination?'?page=1':''):'')"
-	return readURL
+	return fmt.Sprintf("$store.global.getReadURL(\"%s\",%d)", book.BookID, lastReadPage)
 }
 
 func getTarget(book model.BookInfo) string {

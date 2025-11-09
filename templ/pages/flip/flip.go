@@ -11,8 +11,8 @@ import (
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
-// PageHandler 阅读界面（翻页模式）
-func PageHandler(c echo.Context) error {
+// FlipModeHandler 阅读界面（翻页模式）
+func FlipModeHandler(c echo.Context) error {
 	bookID := c.Param("id")
 	logger.Info("Flip Mode Book ID:" + bookID)
 	// 图片排序方式
@@ -41,11 +41,28 @@ func PageHandler(c echo.Context) error {
 	}
 	book.SortPages(sortBy)
 
-	// 翻页模式页面
+	// 翻页模式
 	indexHtml := common.Html(
 		c,
 		FlipPage(c, book),
 		[]string{"script/flip.js", "script/flip_sketch.js"})
+	// 静态模式
+	staticMode := c.QueryParam("static") != ""
+	if staticMode {
+		// staticBook := *book 仅做浅拷贝，结构体中的 PageInfos 是切片，切片头被复制但底层数组仍与原对象共享，修改其元素会同步影响原书数据。
+		staticBook := *book
+		// 深拷贝 PageInfos 切片
+		staticBook.PageInfos = make([]model.PageInfo, len(book.PageInfos))
+		copy(staticBook.PageInfos, book.PageInfos)
+		// 静态模式下，使用 base64 图片数据
+		for i, image := range staticBook.PageInfos {
+			staticBook.PageInfos[i].Url = common.GetFileBase64Text(book.BookInfo.BookID, image.Name)
+		}
+		indexHtml = common.Html(
+			c,
+			FlipPage(c, &staticBook),
+			[]string{"script/flip.js", "script/flip_sketch.js"})
+	}
 	// 渲染翻页模式阅读页面
 	if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexHtml); err != nil {
 		// 如果渲染失败，返回 HTTP 500 错误

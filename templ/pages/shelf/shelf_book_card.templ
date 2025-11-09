@@ -23,12 +23,12 @@ css backgroundImage(imageUrl string) {
 	background-image: { "url(" + getResizedImageUrl(imageUrl) + ")" };
 }
 
-templ BookCard(c echo.Context, book model.BookInfo) {
+templ BookCard(c echo.Context, book model.BookInfo, bookMarks model.BookMarks) {
 	<!-- 把链接的 target 属性设置为 "_blank"，该链接会在新窗口中打开。 -->
 	<!-- transition-transform duration-200 hover:scale-105  -->
 	<!-- 使用 transform 和 scale 实现“元素放大且不影响原有布局”的效果。核心思路是通过 CSS Transform 做放大动画，而不改变其占据的文档流空间。 -->
 	<a
-		:href={ getReadURL(book) }
+		:href={ generateReadURL(book, bookMarks.GetLastReadPage()) }
 		target={ getTarget(book) }
 		x-data={ fmt.Sprintf("{ BookID: %s }", "'"+book.BookID+"'") }
 		x-show="showBook"
@@ -38,7 +38,7 @@ templ BookCard(c echo.Context, book model.BookInfo) {
 		<!-- 虽然此处理论上用 switch 语句更简洁，但是vscode目前无法格式化 templ 的switch语句，所以暂时不用 -->
 		<!-- Zip，Cbz压缩文件 使用 transform 和 scale 实现“元素放大且不影响原有布局”的效果。核心思路是通过 CSS Transform 做放大动画，而不改变其占据的文档流空间。transition-transform duration-200 hover:scale-105 -->
 		if book.Type == model.TypeZip || book.Type == model.TypeCbz {
-			<svg x-show="$store.shelf.showFileIcon" class="absolute top-0 z-0 w-8 h-8 text-black text-yellow-400 rounded right-1 hover:bg-gray-200 dark:hover:bg-gray-600" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24">
+			<svg x-show="$store.shelf.showFileIcon" class="absolute top-0 z-0 w-8 h-8 text-black text-yellow-400 rounded left-1 hover:bg-gray-200 dark:hover:bg-gray-600" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24">
 				<path stroke="black" stroke-width="0.5" d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-4 10h2v-2h-2v-2h2v-2h-2V8h4v10h-4v-2zm0 0h-2v2H4V6h5.17l2 2H14v2h2v2h-2v2h2v2z" fill="currentColor"></path>
 				<g id="Layer_Name">
 					<title>Layer Name</title>
@@ -48,7 +48,7 @@ templ BookCard(c echo.Context, book model.BookInfo) {
 		}
 		<!-- Rar，Cbr压缩文件 -->
 		if book.Type == model.TypeRar ||  book.Type == model.TypeCbr {
-			<svg x-show="$store.shelf.showFileIcon" class="absolute top-0 z-0 w-8 h-8 text-black text-yellow-400 rounded right-1 hover:bg-gray-200 dark:hover:bg-gray-600" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24">
+			<svg x-show="$store.shelf.showFileIcon" class="absolute top-0 z-0 w-8 h-8 text-black text-yellow-400 rounded left-1 hover:bg-gray-200 dark:hover:bg-gray-600" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24">
 				<path stroke="black" stroke-width="0.5" d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-4 10h2v-2h-2v-2h2v-2h-2V8h4v10h-4v-2zm0 0h-2v2H4V6h5.17l2 2H14v2h2v2h-2v2h2v2z" fill="currentColor"></path>
 				<g id="Layer_Name">
 					<title>Layer Name</title>
@@ -58,7 +58,7 @@ templ BookCard(c echo.Context, book model.BookInfo) {
 		}
 		<!-- Tar压缩文件 -->
 		if book.Type == model.TypeTar {
-			<svg x-show="$store.shelf.showFileIcon" class="absolute top-0 z-0 w-8 h-8 text-black text-yellow-400 rounded right-1 hover:bg-gray-200 dark:hover:bg-gray-600" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24">
+			<svg x-show="$store.shelf.showFileIcon" class="absolute top-0 z-0 w-8 h-8 text-black text-yellow-400 rounded left-1 hover:bg-gray-200 dark:hover:bg-gray-600" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24">
 				<path stroke="black" stroke-width="0.5" d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-4 10h2v-2h-2v-2h2v-2h-2V8h4v10h-4v-2zm0 0h-2v2H4V6h5.17l2 2H14v2h2v2h-2v2h2v2z" fill="currentColor"></path>
 				<g id="Layer_Name">
 					<title>Layer Name</title>
@@ -68,14 +68,14 @@ templ BookCard(c echo.Context, book model.BookInfo) {
 		}
 		<!-- epub文件图标 -->
 		if book.Type == model.TypeEpub {
-			<svg x-show="$store.shelf.showFileIcon" class="absolute top-0 z-10 w-8 h-8 text-black text-yellow-400 rounded right-1 hover:bg-gray-200 dark:hover:bg-gray-600" style="stroke: black; stroke-width: 0.5px;" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 20 20"><g fill="none"><path d="M18 4.75v5.507a5.495 5.495 0 0 0-1.5-.882V4.75a.25.25 0 0 0-.25-.25H12c-.69 0-1.25.56-1.25 1.25v4.727a5.502 5.502 0 0 0-1.5 2.379V5.75c0-.69-.56-1.25-1.25-1.25H3.75a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25H8c.421 0 .794-.208 1.02-.527c.049.574.186 1.123.398 1.634c-.414.25-.9.393-1.418.393H3.75A1.75 1.75 0 0 1 2 15.25V4.75C2 3.784 2.784 3 3.75 3H8c.788 0 1.499.331 2 .863A2.742 2.742 0 0 1 12 3h4.25c.966 0 1.75.784 1.75 1.75z" fill="currentColor"></path><path d="M13.01 14c.047-1.128.25-2.123.54-2.85c.167-.417.353-.722.535-.914c.18-.19.32-.236.415-.236c.094 0 .235.046.415.236c.182.192.368.497.535.914c.29.727.493 1.722.54 2.85h-2.98z" fill="currentColor"></path><path d="M12.621 10.779c.064-.16.134-.314.208-.459A4.504 4.504 0 0 0 10.027 14h1.982c.048-1.234.268-2.36.612-3.221z" fill="currentColor"></path><path d="M16.378 10.779a5.346 5.346 0 0 0-.207-.459A4.504 4.504 0 0 1 18.973 14H16.99c-.048-1.234-.268-2.36-.613-3.221z" fill="currentColor"></path><path d="M16.99 15h1.983a4.504 4.504 0 0 1-2.802 3.68c.074-.145.143-.299.207-.459c.345-.862.565-1.987.613-3.221z" fill="currentColor"></path><path d="M14.915 18.764c-.18.19-.32.236-.415.236c-.094 0-.235-.046-.415-.236c-.182-.192-.368-.497-.535-.914c-.29-.727-.493-1.722-.54-2.85h2.98c-.047 1.128-.25 2.123-.54 2.85c-.167.417-.353.722-.535.913z" fill="currentColor"></path><path d="M10.027 15a4.504 4.504 0 0 0 2.803 3.68a5.346 5.346 0 0 1-.209-.459c-.344-.862-.564-1.987-.612-3.221h-1.982z" fill="currentColor"></path></g></svg>
+			<svg x-show="$store.shelf.showFileIcon" class="absolute top-0 z-10 w-8 h-8 text-yellow-400 rounded left-1 hover:bg-gray-200 dark:hover:bg-gray-600" style="stroke: black; stroke-width: 0.5px;" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 20 20"><g fill="none"><path d="M18 4.75v5.507a5.495 5.495 0 0 0-1.5-.882V4.75a.25.25 0 0 0-.25-.25H12c-.69 0-1.25.56-1.25 1.25v4.727a5.502 5.502 0 0 0-1.5 2.379V5.75c0-.69-.56-1.25-1.25-1.25H3.75a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25H8c.421 0 .794-.208 1.02-.527c.049.574.186 1.123.398 1.634c-.414.25-.9.393-1.418.393H3.75A1.75 1.75 0 0 1 2 15.25V4.75C2 3.784 2.784 3 3.75 3H8c.788 0 1.499.331 2 .863A2.742 2.742 0 0 1 12 3h4.25c.966 0 1.75.784 1.75 1.75z" fill="currentColor"></path><path d="M13.01 14c.047-1.128.25-2.123.54-2.85c.167-.417.353-.722.535-.914c.18-.19.32-.236.415-.236c.094 0 .235.046.415.236c.182.192.368.497.535.914c.29.727.493 1.722.54 2.85h-2.98z" fill="currentColor"></path><path d="M12.621 10.779c.064-.16.134-.314.208-.459A4.504 4.504 0 0 0 10.027 14h1.982c.048-1.234.268-2.36.612-3.221z" fill="currentColor"></path><path d="M16.378 10.779a5.346 5.346 0 0 0-.207-.459A4.504 4.504 0 0 1 18.973 14H16.99c-.048-1.234-.268-2.36-.613-3.221z" fill="currentColor"></path><path d="M16.99 15h1.983a4.504 4.504 0 0 1-2.802 3.68c.074-.145.143-.299.207-.459c.345-.862.565-1.987.613-3.221z" fill="currentColor"></path><path d="M14.915 18.764c-.18.19-.32.236-.415.236c-.094 0-.235-.046-.415-.236c-.182-.192-.368-.497-.535-.914c-.29-.727-.493-1.722-.54-2.85h2.98c-.047 1.128-.25 2.123-.54 2.85c-.167.417-.353.722-.535.913z" fill="currentColor"></path><path d="M10.027 15a4.504 4.504 0 0 0 2.803 3.68a5.346 5.346 0 0 1-.209-.459c-.344-.862-.564-1.987-.612-3.221h-1.982z" fill="currentColor"></path></g></svg>
 		}
 		<!-- 书籍组图标x书籍数量 -->
 		if book.Type == model.TypeBooksGroup {
-			<div x-show="$store.shelf.showFileIcon" class="absolute top-0 z-10 text-black rounded right-1 hover:bg-gray-200 dark:hover:bg-gray-600">
+			<div x-show="$store.shelf.showFileIcon" class="absolute top-0 z-10 text-black rounded left-1 hover:bg-gray-200 dark:hover:bg-gray-600">
 				<div class="flex text-xl font-black text-yellow-400" style="text-shadow: 0 1px black, 1px 0 black, -1px 0 black, 0 -1px black;">
 					<svg class="w-8 h-8" style="stroke: black; stroke-width: 0.5px;" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24"><g fill="none"><path d="M6.5 2A2.5 2.5 0 0 0 4 4.5v15A2.5 2.5 0 0 0 6.5 22h13.25a.75.75 0 0 0 0-1.5H6.5a1 1 0 0 1-1-1h14.25a.75.75 0 0 0 .75-.75V4.5A2.5 2.5 0 0 0 18 2H6.5zM8 5h8a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z" fill="currentColor"></path></g></svg>
-					<span class="h-8 font-black text-yellow-400 align-bottom align-text-bottom text-shadow">x{ strconv.Itoa(book.ChildBooksNum) }</span>
+					<span class="h-8 font-black text-yellow-400 align-text-bottom text-shadow">x{ strconv.Itoa(book.ChildBooksNum) }</span>
 				</div>
 			</div>
 		}
@@ -176,7 +176,7 @@ templ BookCard(c echo.Context, book model.BookInfo) {
 		if book.Type == model.TypePDF {
 			<svg
 				x-show="$store.shelf.showFileIcon"
-				class="absolute z-10 w-8 h-8 m-0 text-black rounded shadow-2xl top-1 right-1 hover:bg-gray-200 dark:hover:bg-gray-600"
+				class="absolute z-10 w-8 h-8 m-0 text-black rounded shadow-2xl top-1 left-1 hover:bg-gray-200 dark:hover:bg-gray-600"
 				xmlns="http://www.w3.org/2000/svg"
 				xmlns:xlink="http://www.w3.org/1999/xlink"
 				viewBox="0 0 16 16"
@@ -194,7 +194,9 @@ templ BookCard(c echo.Context, book model.BookInfo) {
 		if book.Type == model.TypeUnknownFile {
 			<svg x-show="$store.shelf.showFileIcon" class="absolute z-10 w-8 h-8 m-0 text-black rounded shadow-2xl top-1 right-1 hover:bg-gray-200 dark:hover:bg-gray-600" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32"><circle cx="9" cy="28.5" r="1.5" fill="currentColor"></circle><path d="M10 25H8v-4h2a2 2 0 0 0 0-4H8a2.002 2.002 0 0 0-2 2v.5H4V19a4.005 4.005 0 0 1 4-4h2a4 4 0 0 1 0 8z" fill="currentColor"></path><path d="M27.7 9.3l-7-7A.908.908 0 0 0 20 2H10a2.006 2.006 0 0 0-2 2v8h2V4h8v6a2.006 2.006 0 0 0 2 2h6v16H14v2h12a2.006 2.006 0 0 0 2-2V10a.91.91 0 0 0-.3-.7zM20 10V4.4l5.6 5.6z" fill="currentColor"></path></svg>
 		}
-		<!-- 图书封面 -->
+		<!-- 阅读进度 -->
+		@ReadingProgress(book, bookMarks)
+		<!-- 书名显示栏 -->
 		<div
 			x-show="$store.shelf.showFilename"
 			class="absolute inset-x-0 bottom-0 text-sm font-semibold text-center text-black bg-gray-100/80 border-blue-800 rounded-b h-1/4"
@@ -202,4 +204,22 @@ templ BookCard(c echo.Context, book model.BookInfo) {
 			<span class="absolute inset-x-0 top-0 p-1 align-middle" x-text={ "$store.shelf.simplifyTitle === true?'" + book.ShortName() + "':'" + book.Title + "'" }></span>
 		</div>
 	</a>
+}
+
+templ ReadingProgress(book model.BookInfo, bookMarks model.BookMarks) {
+	if bookMarks != nil &&  bookMarks.GetLastReadPage() != 0 && bookMarks.GetLastReadPage() < book.PageCount {
+		<span x-text={ getReadPercentage(book, bookMarks) } class="absolute top-1 right-1 h-8 font-black text-yellow-400 align-text-bottom text-shadow" style="text-shadow: 0 1px black, 1px 0 black, -1px 0 black, 0 -1px black;">{ bookMarks.GetLastReadPage() }/{ book.PageCount }</span>
+	}
+	if bookMarks != nil &&  bookMarks.GetLastReadPage() != 0 && bookMarks.GetLastReadPage() == book.PageCount {
+		<span x-text="i18next.t('read')" class="absolute top-1 right-1 h-8 font-black text-yellow-400 align-text-bottom text-shadow" style="text-shadow: 0 1px black, 1px 0 black, -1px 0 black, 0 -1px black;">已读</span>
+	}
+}
+
+func getReadPercentage(book model.BookInfo, bookMarks model.BookMarks) string {
+	if bookMarks == nil || bookMarks.GetLastReadPage() == 0 || book.PageCount == 0 {
+		return "\"\""
+	}
+	percentage := fmt.Sprintf("'%.0f%%'", (float64(bookMarks.GetLastReadPage())/float64(book.PageCount))*100)
+	number := fmt.Sprintf("'%d/%d'", bookMarks.GetLastReadPage(), book.PageCount)
+	return "$store.shelf.readingProgressPercent ? " + percentage + " : " + number
 }

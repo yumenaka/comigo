@@ -41,7 +41,6 @@ func GetTopOfShelfInfo(c echo.Context) error {
 	if sortBy == "" {
 		sortBy = "default"
 	}
-	ClearBookNotExist()
 	topOfShelfInfo, err := store.TopOfShelfInfo(sortBy)
 	if err != nil {
 		logger.Infof("%s", err)

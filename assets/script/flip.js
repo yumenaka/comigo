@@ -56,16 +56,11 @@ const book = JSON.parse(document.getElementById('NowBook').textContent)
 //     console.log('book.page_count:', book.page_count)
 // }
 const images = book.PageInfos
-Alpine.store('flip').allPageNum = parseInt(book.page_count)
+Alpine.store('global').allPageNum = parseInt(book.page_count)
 // 临时用户标签ID
 const tabID = (Date.now() % 10000000).toString(36) + Math.random().toString(36).substring(2, 5)
 // 假设token是一个有效的令牌 TODO:使用真正的令牌
 const token = 'your_token'
-
-
-
-// console.log(Alpine.store('flip').nowPageNum);
-// console.log(Alpine.store('flip').allPageNum -Alpine.store('flip').nowPageNum + 1);
 
 // 滑动相关变量
 let touchStartX = 0
@@ -90,8 +85,22 @@ let preloadedImages = new Set()
 //首次加载时
 setImageSrc()
 
-// 页面加载时读取本地存储的页码
-loadPageNumFromLocalStorage();
+// 首次加载时，检查URL参数中是否有页码
+const url = new URL(window.location.href);
+const params = new URLSearchParams(url.search);
+if (params.has('start')) {
+    // 优先使用URL参数中的页码
+    let pageNum = parseInt(params.get('start'))
+    jumpPageNum(pageNum,false); // 使用跳转函数更新页面
+}else{
+    // 页面加载时读取本地存储的页码
+    Alpine.store('global').loadPageNumFromLocalStorage(book.id,()=>{
+        let pageNum =  parseInt(localStorage.getItem(`pageNum_${book.id}`))
+        jumpPageNum(pageNum,false); // 使用跳转函数更新页面
+    });
+}
+
+
 //判断当前浏览器是不是Safari，暂时没啥用
 // const isSafari = navigator.userAgent.indexOf('Safari') !== -1 && navigator.userAgent.indexOf('Chrome') === -1
 
@@ -109,8 +118,8 @@ function GetImageSrc(index) {
 
 // 加载图片资源
 function setImageSrc() {
-	const nowPageNum = Alpine.store('flip').nowPageNum
-	if (nowPageNum === 0 && nowPageNum >= Alpine.store('flip').allPageNum) {
+	const nowPageNum = Alpine.store('global').nowPageNum
+	if (nowPageNum === 0 && nowPageNum >= Alpine.store('global').allPageNum) {
 		console.log('setImageSrc: nowPageNum is 0 or out of range', nowPageNum)
 		return
 	}
@@ -132,7 +141,7 @@ function setImageSrc() {
 
 	// 为双页模式，加载下一张图片。
 	// 因为用户有可能随时切换到双页模式，所以单页模式也预加载图片（尽管看不到）
-	if (nowPageNum < Alpine.store('flip').allPageNum) {
+	if (nowPageNum < Alpine.store('global').allPageNum) {
 		if (Alpine.store('flip').mangaMode) {
 			document.getElementById('Double-NowImage-Left').src = GetImageSrc(nowPageNum);
 		} else {
@@ -144,7 +153,7 @@ function setImageSrc() {
 	// 预加载前一张和后十张图片
 	const preloadRange = 10 // 预加载范围，可以根据需要调整
 	for (let i = nowPageNum - 2; i <= nowPageNum + preloadRange; i++) {
-		if (i >= 0 && i < Alpine.store('flip').allPageNum) {
+		if (i >= 0 && i < Alpine.store('global').allPageNum) {
 			const imgUrl = GetImageSrc(i)
 			if (!preloadedImages.has(imgUrl)) {
 				let img = new Image()
@@ -155,19 +164,7 @@ function setImageSrc() {
 	}
 }
 
-// 保存当前页码到本地存储
-function savePageNumToLocalStorage() {
-	if (!Alpine.store('flip').saveReadingProgress) {
-		return;
-	}
-	try {
-		const key = `pageNum_${book.id}`;
-		const nowPageNum = Alpine.store('flip').nowPageNum;
-		localStorage.setItem(key, nowPageNum);
-	} catch (e) {
-		console.error("Error saving page number to localStorage:", e);
-	}
-}
+
 
 // 更新滑动容器图片
 function updateSliderImages(nowPageNum) {
@@ -198,11 +195,11 @@ function updateSliderImages(nowPageNum) {
 		}
 		// // 更新当前图片 (确保当前图片也在这里更新，以防万一)
 		const currentImgElement = document.getElementById('Single-NowImage')
-		if (currentImgElement && nowPageNum >= 1 && nowPageNum <= Alpine.store('flip').allPageNum) {
+		if (currentImgElement && nowPageNum >= 1 && nowPageNum <= Alpine.store('global').allPageNum) {
 			currentImgElement.src = GetImageSrc(nowPageNum - 1)
 		}
 		// 添加后一张图片（如果存在）
-		if (nowPageNum < Alpine.store('flip').allPageNum) {
+		if (nowPageNum < Alpine.store('global').allPageNum) {
 			const nextImg = document.createElement('img')
 			nextImg.src = GetImageSrc(nowPageNum)
 			nextImg.className = Alpine.store('global').isPortrait ? 'object-contain w-auto max-w-full h-screen' : 'h-screen w-auto max-w-full object-contain'
@@ -246,7 +243,7 @@ function updateSliderImages(nowPageNum) {
 			leftSlide.innerHTML = ''
 		}
 		// 添加后一屏图片（如果存在）
-		if (nowPageNum === Alpine.store('flip').allPageNum - 3) {
+		if (nowPageNum === Alpine.store('global').allPageNum - 3) {
 			const nextImg = document.createElement('img')
 			nextImg.src = GetImageSrc(nowPageNum - 2)
 			nextImg.className = 'object-contain h-screen max-w-full max-h-screen m-0'
@@ -254,7 +251,7 @@ function updateSliderImages(nowPageNum) {
 			rightSlide.innerHTML = ''
 			rightSlide.appendChild(nextImg)
 		}
-		if (nowPageNum < Alpine.store('flip').allPageNum - 3) {
+		if (nowPageNum < Alpine.store('global').allPageNum - 3) {
 			const nextImg_1 = document.createElement('img')
 			nextImg_1.src = GetImageSrc(nowPageNum + 1)
 			nextImg_1.className = 'object-contain w-auto max-h-screen m-0 select-none max-w-1/2 grow-0'
@@ -272,7 +269,7 @@ function updateSliderImages(nowPageNum) {
 				rightSlide.appendChild(nextImg_2)
 			}
 		}
-		if (nowPageNum === Alpine.store('flip').allPageNum - 1) {
+		if (nowPageNum === Alpine.store('global').allPageNum - 1) {
 			rightSlide.innerHTML = ''
 		}
 	}
@@ -310,7 +307,7 @@ function touchStart(e) {
 // 如果在第一页或最后一页尝试向前翻或向后翻，阻止默认滚动
 function shouldBlockScroll(diffX) {
 	const mangaMode = Alpine.store('flip').mangaMode
-	const nowPageNum = Alpine.store('flip').nowPageNum
+	const nowPageNum = Alpine.store('global').nowPageNum
 	// 判断是否应该阻止默认滚动
 	let blockScroll = false
 	// 如果是第一页尝试向前翻
@@ -325,7 +322,7 @@ function shouldBlockScroll(diffX) {
 		}
 	}
 	// 如果是最后一页尝试向后翻
-	if (nowPageNum === Alpine.store('flip').allPageNum) {
+	if (nowPageNum === Alpine.store('global').allPageNum) {
 		// 日漫模式
 		if (diffX > 0 && mangaMode) {
 			blockScroll = true
@@ -386,13 +383,6 @@ function touchEnd(e) {
 		// 向右滑动
 		direction = 'right'
 	}
-	// if (Alpine.store('global').debugMode) {
-	// 	console.log('mangaMode:', mangaMode)
-	// 	console.log('touchEnd: diffX', diffX)
-	// 	console.log('touchEnd: direction', direction)
-	// 	console.log('nowPageNum:', nowPageNum)
-	// 	console.log('Alpine.store('flip').allPageNum:', Alpine.store('flip').allPageNum)
-	// }
 	// 如果在第一页或最后一页尝试向前翻或向后翻，阻止默认滚动
 	if (shouldBlockScroll(diffX) || direction === null) {
 		// 没有足够的滑动距离或在边界，回到原始位置
@@ -509,16 +499,26 @@ document.addEventListener('DOMContentLoaded', function () {
 	sliderContainer.addEventListener('mouseup', touchEnd)
 	sliderContainer.addEventListener('mouseleave', touchEnd)
 	// 初始化滑动容器中的图片
-	const nowPageNum = Alpine.store('flip').nowPageNum
+	const nowPageNum = Alpine.store('global').nowPageNum
 	updateSliderImages(nowPageNum)
 })
+
+// 初次加载时的时间计数器，避免频繁自动保存书签
+let timeCounter = 0;
+setInterval(() => {
+    timeCounter += 1;
+    if (timeCounter >= 3) {
+        clearInterval(this);
+    }
+}, 1000);
+
 
 //翻页函数，加页或减页
 function addPageNum(n = 1) {
 	// 防止n为字符串，转换为数字
-	let nowPageNum = parseInt(Alpine.store('flip').nowPageNum)
+	let nowPageNum = parseInt(Alpine.store('global').nowPageNum)
 	// 无法继续翻
-	if (nowPageNum + n > Alpine.store('flip').allPageNum) {
+	if (nowPageNum + n > Alpine.store('global').allPageNum) {
 		showToast(i18next.t('hint_last_page'), 'warning')
 		return
 	}
@@ -527,7 +527,16 @@ function addPageNum(n = 1) {
 		return
 	}
 	// 翻页
-	Alpine.store('flip').nowPageNum = nowPageNum + n
+	Alpine.store('global').nowPageNum = nowPageNum + n
+    // 更新书签
+    if (timeCounter >= 3 && !window.location.href.includes('file:///')) {
+        Alpine.store('global').UpdateBookmark({
+            type: 'auto',
+            bookId: book.id,
+            pageIndex: Alpine.store('global').nowPageNum,
+            label: '调试书签'
+        });
+    }
 	setImageSrc()
 	// 设置标签页标题
 	setTitle();
@@ -536,35 +545,13 @@ function addPageNum(n = 1) {
 		sendFlipData() // 发送翻页数据
 	}
 	// 调用保存页数函数
-	savePageNumToLocalStorage();
+    Alpine.store('global').savePageNumToLocalStorage();
 }
-
-// 从本地存储加载页码并跳转
-function loadPageNumFromLocalStorage() {
-	if (!Alpine.store('flip').saveReadingProgress) {
-		return;
-	}
-	try {
-		const key = `pageNum_${book.id}`;
-		const savedPageNum = localStorage.getItem(key);
-		if (savedPageNum !== null && !isNaN(parseInt(savedPageNum))) {
-			const pageNum = parseInt(savedPageNum);
-			// 确保页码在有效范围内
-			if (pageNum > 0 && pageNum <= Alpine.store('flip').allPageNum) {
-				console.log(`加载到本地存储的页码: ${pageNum}`);
-				jumpPageNum(pageNum,false); // 使用跳转函数更新页面
-			}
-		}
-	} catch (e) {
-		console.error("Error loading page number from localStorage:", e);
-	}
-}
-
 
 //翻页函数，跳转到指定页
 function inputPageNum(event) {
 	const i = parseInt(event.target.value)
-	let num = Alpine.store('flip').mangaMode ? (Alpine.store('flip').allPageNum - i + 1) : i
+	let num = Alpine.store('flip').mangaMode ? (Alpine.store('global').allPageNum - i + 1) : i
 	//console.log(num)
 	jumpPageNum(num)
 }
@@ -574,35 +561,43 @@ function inputPageNum(event) {
 function jumpPageNum(jumpNum,sync = true) {
 	let num = parseInt(jumpNum)
 
-	if (num <= 0 || num > Alpine.store('flip').allPageNum) {
+	if (num <= 0 || num > Alpine.store('global').allPageNum) {
 		alert(i18next.t('hintPageNumOutOfRange'))
 		return
 	}
-	Alpine.store('flip').nowPageNum = num
-  if (sync) {
-    // 通过ws通道发送翻页数据
-    if (Alpine.store('global').syncPageByWS === true) {
-      sendFlipData() // 发送翻页数据
+	Alpine.store('global').nowPageNum = num
+    if(!window.location.href.includes('file:///')){
+        Alpine.store('global').UpdateBookmark({
+            type: 'auto',
+            bookId: book.id,
+            pageIndex: Alpine.store('global').nowPageNum,
+            label: '调试书签'
+        });
+        if (sync) {
+            // 通过ws通道发送翻页数据
+            if (Alpine.store('global').syncPageByWS === true) {
+                sendFlipData() // 发送翻页数据
+            }
+        }
     }
-  }
 	// 调用保存页数函数
-	savePageNumToLocalStorage();
+    Alpine.store('global').savePageNumToLocalStorage();
 	setImageSrc()
 }
 
 // 翻页函数，下一页
 function toNextPage() {
 	let doublePageMode = Alpine.store('flip').doublePageMode === true
-	let nowPageNum = parseInt(Alpine.store('flip').nowPageNum)
+	let nowPageNum = parseInt(Alpine.store('global').nowPageNum)
 	// 单页模式
 	if (!doublePageMode) {
-		if (nowPageNum <= Alpine.store('flip').allPageNum) {
+		if (nowPageNum <= Alpine.store('global').allPageNum) {
 			addPageNum(1)
 		}
 	}
 	//双页模式
 	if (doublePageMode) {
-		if (nowPageNum < Alpine.store('flip').allPageNum - 1) {
+		if (nowPageNum < Alpine.store('global').allPageNum - 1) {
 			addPageNum(2)
 		} else {
 			addPageNum(1)
@@ -613,13 +608,13 @@ function toNextPage() {
 // 翻页函数，前一页
 function toPreviousPage() {
 	//错误值,第0或第1页。
-	if (Alpine.store('flip').nowPageNum <= 1) {
+	if (Alpine.store('global').nowPageNum <= 1) {
 		showToast(i18next.t('hint_first_page'), 'warning')
 		return
 	}
 	//双页模式
 	if (Alpine.store('flip').doublePageMode) {
-		if (Alpine.store('flip').nowPageNum - 2 > 0) {
+		if (Alpine.store('global').nowPageNum - 2 > 0) {
 			addPageNum(-2)
 		} else {
 			addPageNum(-1)
@@ -687,14 +682,12 @@ function onMouseClick(e) {
 		if (Alpine.store('flip').autoAlign) {
 			scrollToMangaMain()
 		}
-		// 如果工具栏是隐藏的，点击只显示工具栏，不进行翻页或打开设置,
+		// 如果工具栏是隐藏的，点击设置区域时，显示工具栏
 		if (Alpine.store('flip').autoHideToolbar === true) {
-			// console.log('点击显示工具栏')
 			showToolbar()
-		} else {
-			//获取ID为 OpenSettingButton的元素，然后模拟点击
-			document.getElementById('OpenSettingButton').click()
 		}
+        //获取ID为 OpenSettingButton的元素，然后模拟点击
+        document.getElementById('OpenSettingButton').click()
 	}
 	if (!inSetArea) {
 		//决定如何翻页
@@ -726,13 +719,10 @@ function onMouseMove(e) {
 	let innerWidth = window.innerWidth
 	//在设置区域
 	let inSetArea = getInSetArea(e)
+    // https://developer.mozilla.org/zh-CN/docs/Web/CSS/cursor
+    //e.currentTarget.style.cursor = 'default'
 	if (inSetArea) {
-		if (Alpine.store('flip').autoHideToolbar === true) {
-			// https://developer.mozilla.org/zh-CN/docs/Web/CSS/cursor
-			e.currentTarget.style.cursor = 'default'
-		}else{
-			e.currentTarget.style.cursor = `url("data:image/png;base64,${SettingsOutlineBase64}") 12 12, pointer`
-		}
+        e.currentTarget.style.cursor = `url("data:image/png;base64,${SettingsOutlineBase64}") 12 12, pointer`
 		showToolbar()
 	}
 	let stepsRangeArea = document
@@ -754,14 +744,14 @@ function onMouseMove(e) {
 			//设置左边的鼠标指针
 			if (
 				!Alpine.store('flip').mangaMode &&
-				Alpine.store('flip').nowPageNum === 1
+				Alpine.store('global').nowPageNum === 1
 			) {
 				//右边翻下一页,且目前是第一页的时候,左边的鼠标指针,设置为禁止翻页
 				e.currentTarget.style.cursor =
 					`url("data:image/png;base64,${Prohibited28FilledBase64}") 12 12, pointer`
 			} else if (
 				Alpine.store('flip').mangaMode &&
-				Alpine.store('flip').nowPageNum === Alpine.store('flip').allPageNum
+				Alpine.store('global').nowPageNum === Alpine.store('global').allPageNum
 			) {
 				//左边翻下一页,且目前是最后一页的时候,左边的鼠标指针,设置为禁止翻页
 				e.currentTarget.style.cursor =
@@ -774,14 +764,14 @@ function onMouseMove(e) {
 			//设置右边的鼠标指针
 			if (
 				!Alpine.store('flip').mangaMode &&
-				Alpine.store('flip').nowPageNum === Alpine.store('flip').allPageNum
+				Alpine.store('global').nowPageNum === Alpine.store('global').allPageNum
 			) {
 				//右边翻下一页,且目前是最后页的时候,右边的鼠标指针,设置为禁止翻页
 				e.currentTarget.style.cursor =
 					`url("data:image/png;base64,${Prohibited28FilledBase64}") 12 12, pointer`
 			} else if (
 				Alpine.store('flip').mangaMode &&
-				Alpine.store('flip').nowPageNum === 1
+				Alpine.store('global').nowPageNum === 1
 			) {
 				//左边翻下一页,且目前是第一页的时候,右边的鼠标指针,设置为禁止翻页
 				e.currentTarget.style.cursor =
@@ -931,7 +921,7 @@ const reconnectInterval = 3000 // 每次重连间隔3秒
 // 翻页数据，假设已在其他地方定义
 const flip_data = {
 	book_id: book.id,
-	now_page_num: Alpine.store('flip').nowPageNum,
+	now_page_num: Alpine.store('global').nowPageNum,
 	need_double_page_mode: false,
 }
 
@@ -995,7 +985,7 @@ function handleMessage(message) {
 function sendFlipData() {
   const flip_data = {
     book_id: book.id,
-    now_page_num: Alpine.store('flip').nowPageNum,
+    now_page_num: Alpine.store('global').nowPageNum,
   }
 	const flipMsg = {
 		type: 'flip_mode_sync_page', // 或 "heartbeat"
@@ -1028,14 +1018,16 @@ function attemptReconnect() {
 
 // 页面加载完成后建立WebSocket连接
 document.addEventListener('DOMContentLoaded', () => {
-	connectWebSocket()
+    if(!window.location.href.includes('file:///')){
+        connectWebSocket()
+    }
 })
 
 // 设置标签页标题
 function setTitle(name) {
 	let numStr = ''
 	if (Alpine.store('flip').showPageNum) {
-		numStr = ` ${Alpine.store('flip').nowPageNum}/${Alpine.store('flip').allPageNum} `
+		numStr = ` ${Alpine.store('global').nowPageNum}/${Alpine.store('global').allPageNum} `
 	}
 	//简化标题
 	if (Alpine.store('shelf').simplifyTitle) {
@@ -1200,7 +1192,7 @@ function handle(e, down) {
 	}
 	// 直接跳转到最后一页,同时长按的时候不执行多次
 	if (act === "last_page" && down && !e.repeat) {
-		jumpPageNum(Alpine.store('flip').allPageNum)
+		jumpPageNum(Alpine.store('global').allPageNum)
 	}
 }
 

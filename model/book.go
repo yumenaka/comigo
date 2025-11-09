@@ -1,10 +1,12 @@
 package model
 
 import (
+	"os"
 	"path"
 	"strings"
 	"time"
 
+	"github.com/jxskiss/base62"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools/logger"
 )
@@ -12,37 +14,8 @@ import (
 // Book 定义书籍结构
 type Book struct {
 	BookInfo  // 嵌入 BookInfo 结构体
-	PageInfos // 书籍内所有页面的信息
 	BookMarks // 书签信息
-}
-
-// GetBookInfo 创建新的 BookInfo 实例
-func (b *Book) GetBookInfo() *BookInfo {
-	return &BookInfo{
-		Author:          b.Author,
-		BookID:          b.BookID,
-		Cover:           b.GuestCover(), // 使用 GuestCover 方法获取封面
-		StoreUrl:        b.StoreUrl,
-		ChildBooksNum:   b.ChildBooksNum,
-		ChildBooksID:    b.ChildBooksID,
-		Deleted:         b.Deleted,
-		Depth:           b.Depth,
-		ExtractPath:     b.ExtractPath,
-		ExtractNum:      b.ExtractNum,
-		BookPath:        b.BookPath,
-		FileSize:        b.FileSize,
-		ISBN:            b.ISBN,
-		InitComplete:    b.InitComplete,
-		Modified:        b.Modified,
-		NonUTF8Zip:      b.NonUTF8Zip,
-		PageCount:       b.GetPageCount(),
-		ParentFolder:    b.ParentFolder,
-		Press:           b.Press,
-		PublishedAt:     b.PublishedAt,
-		Type:            b.Type,
-		Title:           b.Title,
-		ZipTextEncoding: b.ZipTextEncoding,
-	}
+	PageInfos // 书籍内所有页面的信息
 }
 
 // GuestCover 猜测书籍的封面
@@ -137,9 +110,9 @@ func (b *Book) SortPagesByImageList(imageList []string) {
 	b.PageInfos = reSortList
 }
 
-// GetAuthor 获取作者信息
-func (b *Book) GetAuthor() string {
-	return b.Author
+// GetStoreID 获取编码后的书库ID，StoreID是书库URL路径的 base62 编码
+func (b *Book) GetStoreID() string {
+	return base62.EncodeToString([]byte(b.StoreUrl))
 }
 
 // GetPageCount 获取页数
@@ -167,4 +140,31 @@ func GetAllBooksNumber() int {
 		count++
 	}
 	return count
+}
+
+// ClearBookNotExist  检查内存中的书的源文件是否存在，不存在就删掉
+func ClearBookNotExist() {
+	logger.Infof("Checking book files exist...")
+	var deletedBooks []string
+	// 遍历所有书籍
+	allBooks, err := IStore.ListBooks()
+	if err != nil {
+		logger.Infof("Error listing books: %s", err)
+	}
+	for _, book := range allBooks {
+		// 如果父文件夹存在，但书籍文件不存在，也说明这本书被删除了
+		if _, err := os.Stat(book.BookPath); os.IsNotExist(err) {
+			deletedBooks = append(deletedBooks, book.BookPath)
+			err := IStore.DeleteBook(book.BookID)
+			if err != nil {
+				logger.Infof("Error deleting book %s: %s", book.BookID, err)
+			}
+		}
+	}
+	// 重新生成书组
+	if len(deletedBooks) > 0 {
+		if err := IStore.GenerateBookGroup(); err != nil {
+			logger.Infof("Error initializing main folder: %s", err)
+		}
+	}
 }
