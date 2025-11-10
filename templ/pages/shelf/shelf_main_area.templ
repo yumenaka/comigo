@@ -1,6 +1,7 @@
 package shelf
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -10,16 +11,17 @@ import (
 )
 
 templ MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookInfo, childBookInfos []model.BookInfo) {
-	<!-- 顶部书架 -->
+	<!-- 不包括Header与Footer的【书架主体部分】 -->
 	if nowBookNum != 0 && c.Param("id") == "" {
 		<div
 			x-data
-			class="flex flex-col flex-1 w-full h-full pt-6 pb-2 px-1 gap-2 overflow-y-auto transition duration-700"
+			class="flex flex-col flex-1 w-full h-full pt-6 pb-2 px-1 gap-2 overflow-y-auto bg-base-300"
+			:class="(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') ? ($store.global.bgPattern !== 'none'?$store.global.bgPattern+' bg-base-300':'bg-base-300'):($store.global.bgPattern !== 'none'?$store.global.bgPattern:'')"
 		>
 			for i, storeBooks := range storeBookInfos {
 				<div
 					id={ "book-shelf-" + strconv.Itoa(i) }
-					x-data="{ showBook: true }"
+					x-data={ fmt.Sprintf("{ showBook: $persist(true).as('showBook_%s') }", storeBooks.StoreUrl) }
 					class="w-full h-full mt-2 mb-6 border-4 border-slate-400 rounded-2xl flex flex-row flex-wrap content-start justify-center text-base-content relative pt-8"
 				>
 					<!-- 书架标题栏 -->
