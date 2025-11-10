@@ -42,15 +42,6 @@ templ Header(prop HeaderProps) {
 		}
 	>
 		<div class="flex flex-row">
-			<!-- 全屏按钮，便携模式 -->
-			<div
-				id="FullScreenIcon"
-				x-show="window.location.href.includes('file:///')"
-				onclick="if (Screenfull.isEnabled) {Screenfull.toggle()} else {showToast(i18next.t('not_support_fullscreen'))}"
-				class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
-			>
-				@svg.FullScreen()
-			</div>
 			if prop.ShowReturnIcon {
 				<!-- 返回箭头,点击返回上一页 -->
 				<a x-show="!window.location.href.includes('file:///')" href={ templ.SafeURL(prop.ReturnUrl) }>
@@ -190,7 +181,7 @@ templ Header(prop HeaderProps) {
 		<!-- 标题-->
 		<div class="flex flex-col items-center justify-center flex-1 p-0 m-0 font-semibold text-center truncate">
 			<!-- 标题，快速跳转 or 可下载压缩包 or 只显示 -->
-			<span x-show="window.location.href.includes('file:///')" class="text-lg font-semibold">{ prop.Title }</span>
+			<span x-show="window.location.href.includes('file:///')" class="text-lg font-semibold" x-text={ prop.Title }></span>
 			if (prop.InShelf) {
 				<span
 					class="text-lg font-semibold"
@@ -265,10 +256,9 @@ templ Header(prop HeaderProps) {
 			>
 				@svg.QRCode()
 			</div>
-			<!-- 全屏按钮，非便携模式 -->
+			<!-- 全屏按钮-->
 			<div
 				id="FullScreenIcon"
-				x-show="!window.location.href.includes('file:///')"
 				onclick="if (Screenfull.isEnabled) {Screenfull.toggle()} else {showToast(i18next.t('not_support_fullscreen'))}"
 				class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
 			>
