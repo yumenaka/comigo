@@ -53,21 +53,10 @@ func IsSupportMedia(checkPath string) bool {
 	return false
 }
 
-// IsSupportFile 判断压缩包内的文件是否需要展示
+// IsSupportFile 判断压缩包文件是否是支持的文件类型
 func IsSupportFile(checkPath string) bool {
 	for _, ex := range cfg.GetSupportFileType() {
 		suffix := strings.ToLower(path.Ext(checkPath)) // strings.ToLower():某些文件会用大写文件名
-		if ex == suffix {
-			return true
-		}
-	}
-	return false
-}
-
-// IsSupportArchiver 是否是支持的压缩文件
-func IsSupportArchiver(checkPath string) bool {
-	for _, ex := range cfg.GetSupportFileType() {
-		suffix := path.Ext(checkPath)
 		if ex == suffix {
 			return true
 		}

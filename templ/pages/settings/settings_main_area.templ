@@ -15,7 +15,8 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 	<div
 		id="settingsMainArea"
 		x-data={ x_data_debug_mode(config.GetCfg().Debug) }
-		class="flex flex-col justify-start items-center flex-1 w-full h-full font-semibold text-lg text-base-content"
+		class="flex flex-col justify-start items-center flex-1 w-full h-full font-semibold text-lg text-base-content bg-base-300"
+		:class="(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') ? ($store.global.bgPattern !== 'none'?$store.global.bgPattern+' bg-base-300':'bg-base-300'):($store.global.bgPattern !== 'none'?$store.global.bgPattern:'')"
 	>
 		<div class="flex flex-col justify-start w-5/6 md:w-3/5 min-w-[20rem] relative">
 			<script>

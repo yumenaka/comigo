@@ -139,12 +139,12 @@ Alpine.store('global', {
         const pathSegments = url.pathname.split('/').filter(Boolean); // like ["scroll", "id3DcA1v9"]
         const book_id = pathSegments[1];
         console.log(`切换阅读模式到: ${this.readMode}, 当前路径: ${pathname},${pathSegments}, 查询参数: ${params.toString()}`);
-        // 翻页模式
-        if (this.readMode === 'page_flip') {
-            // 如果已经是翻页模式
-            if (pathSegments[0] === "flip") {
-                console.log("已经是翻页模式，无需切换");
-                console.log(`${pathSegments[0]} , ${params.get("start")}`);
+        // 卷轴(无限)模式
+        if (this.readMode === 'infinite_scroll') {
+            // 如果已经是无限卷轴模式
+            if (pathSegments[0] === "scroll" && params.get("page") === null) {
+                console.log(`${pathSegments[0]} , ${params.get("page")}`);
+                console.log("已经是无限卷轴模式，无需切换");
                 return;
             }
         }
@@ -157,12 +157,12 @@ Alpine.store('global', {
                 return;
             }
         }
-        // 卷轴(无限)模式
-        if (this.readMode === 'infinite_scroll') {
-            // 如果已经是无限卷轴模式
-            if (pathSegments[0] === "scroll" && params.get("page") === null) {
-                console.log(`${pathSegments[0]} , ${params.get("page")}`);
-                console.log("已经是无限卷轴模式，无需切换");
+        // 翻页模式
+        if (this.readMode === 'page_flip') {
+            // 如果已经是翻页模式
+            if (pathSegments[0] === "flip") {
+                console.log("已经是翻页模式，无需切换");
+                console.log(`${pathSegments[0]} , ${params.get("start")}`);
                 return;
             }
         }
@@ -170,13 +170,18 @@ Alpine.store('global', {
         window.location.href = this.getReadURL(book_id, this.nowPageNum);
     },
     getReadURL(book_id, start_index) {
+        // TODO: 处理旧版本数据干扰的问题。若干个版本后大概就不需要了，到时候删除这段代码。
+        if (this.readMode !== 'page_flip'&& this.readMode !== 'paged_scroll' && this.readMode !== 'infinite_scroll') {
+            console.error(`未知的阅读模式: ${this.readMode}, 可能是旧版本数据干扰, 重置为 infinite_scroll`);
+            this.readMode = 'infinite_scroll';
+        }
         let PAGED_SIZE = 32;
         // console.log(`生成阅读模式URL: ${this.readMode}`);
         // console.log(`当前页码: ${start_index}`);
         const url = new URL(window.location.href);
-        // 翻页(左右)
-        if (this.readMode === 'page_flip') {
-            let new_url = new URL(`/flip/${book_id}`, url.origin);
+        // 卷轴(无限)
+        if (this.readMode === 'infinite_scroll') {
+            let new_url = new URL(`/scroll/${book_id}`, url.origin);
             if (start_index > 1) {
                 new_url.searchParams.set("start", start_index.toString());
             }
@@ -189,10 +194,10 @@ Alpine.store('global', {
             new_url.searchParams.set("page", page.toString());
             return new_url.href;
         }
-        // 卷轴(无限)
-        if (this.readMode === 'infinite_scroll') {
-            let new_url = new URL(`/scroll/${book_id}`, url.origin);
-            if (start_index > PAGED_SIZE) {
+        // 翻页(左右)
+        if (this.readMode === 'page_flip') {
+            let new_url = new URL(`/flip/${book_id}`, url.origin);
+            if (start_index > 1) {
                 new_url.searchParams.set("start", start_index.toString());
             }
             return new_url.href;

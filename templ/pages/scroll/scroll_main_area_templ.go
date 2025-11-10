@@ -104,7 +104,7 @@ func MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int,
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" x-init=\"$nextTick(() => { $store.global.nowPageNum = (pagedIndex-1)*PAGED_SIZE+1;console.log($store.global.nowPageNum); });\"></template>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" x-init=\"$nextTick(() => { $store.global.nowPageNum = (pagedIndex-1)*PAGED_SIZE+1;console.log({$store.global.nowPageNum}); });\"></template>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -123,7 +123,7 @@ func MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int,
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" x-init=\"$nextTick(() => { $store.global.nowPageNum = startIndex;console.log($store.global.nowPageNum); });\"></template>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" x-init=\"$nextTick(() => { $store.global.nowPageNum = startIndex;console.log({$store.global.nowPageNum}); });\"></template>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

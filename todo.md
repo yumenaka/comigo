@@ -18,16 +18,8 @@
 - **样式框架**: [Tailwind CSS](https://tailwindcss.com/docs/flex) - 实用优先的 CSS 框架
 - **国际化**: [i18next](https://www.i18next.com) - 国际化解决方案
 - **图标库**: [Xicons](https://www.xicons.org/#/) - 图标集合
-
-### 后端技术
-- **Web 框架**: [Gin](https://gin-gonic.com/zh-cn/docs/examples/) - 高性能 Go Web 框架
-- **HTMX 集成**: [htmx-go](https://github.com/angelofallars/htmx-go) - Go 语言 HTMX 集成
-
-### 开发工具
 - **热重载**: [Air](https://github.com/air-verse/air) - Go 应用热重载工具
-- **运行时**: [Bun](https://github.com/oven-sh/bun) - 高性能 JavaScript 运行时
-- **代码质量**: [golangci-lint](https://github.com/golangci/golangci-lint) - Go 代码质量检查工具
-- **代码格式化**: [Prettier](https://prettier.io/docs/en/index.html) - 代码格式化工具
+- **js运行时**: [Bun](https://github.com/oven-sh/bun) - 高性能 JavaScript 运行时
 
 ## 项目特性
 
@@ -61,29 +53,33 @@
 - [x] 服务器设置页面 v1.0
 - [x] tailscale 集成
 - [x] 解决tailscale带来的cgo编译问题：https://github.com/elastic/golang-crossbuild 或 https://github.com/goreleaser/goreleaser-cross
+- [x] 阅读历史记录（跳转到上一次阅读的最远页）
+- [x] 阅读历史持久化，meta文件，
+- [x] 下载为单个html文件
+- [x] 拆分内存存储与数据库存储，为支持samba与S3等文件系统做准备。
 
 ### 开发中
-- [ ] 网页端日志查看 50%
-- [ ] “阅读历史记录（是否跳转到上一次阅读的最远页）”与“按照最近阅读时间排序”
-- [ ] 文件持久化，meta文件，阅读历史与统计。
 - [ ] 新官网,Discord频道,使用文档，参考 https://omarchy.org/ 。内置帮助文档?
+- [ ] 侧栏加返回书架，切换全屏按钮，方便操作
+- [ ] 尝试用 go.work 解决wails的tailscale依赖冲突。
+- [ ] 示例漫画
+- [ ] 书架按照最近阅读时间排序，无阅读进度的书籍，以文件修改时间排序
+- [ ] 上传页面挪到设置页面-书库设置。
+- [ ] 改造上传功能，可选上传到下拉框指定的书库。没有默认书库则不可上传。
 - [ ] 官网自动探测浏览器平台，提供合适的平台版本（参考Audacity） 
 - [ ] 支持smb、webdav文件系统
+- [ ] 网页端日志查看 50%
 - [ ] 注册为文件默认打开类型，简单托盘图标，gui界面。
 - [ ] 手动或自动检测新版本提示，然后可以试着自动更新新版本（win与macos），最后是各种linux软件源
 - [ ] 网页端：浏览器快捷键(50%)。
-- [ ] 下载为单个html文件（50%）
-- [ ] 示例漫画
+
 - [ ] 翻页模式：滚轮滑动翻页
 - [ ] 滑动模式：可快捷键调速的自动翻页
 - [ ] cli 交互，tui支持
 - [ ] 访问权限控制
 - [ ] PWA 支持
 - [ ] 系统监控（CPU、内存）
-- [ ] 嵌入 HTML
-- [ ] 网页端：
 - [ ] wasm模式
-- [ ] 拆分内存存储与数据库存储，并为支持samba与S3等文件系统做准备。
 - [ ] 自动更新
 - [ ] 文件监控
 - [ ] 用户系统增强
