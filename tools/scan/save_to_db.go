@@ -1,4 +1,4 @@
-//go:build !(windows && 386) && !js
+//go:build !js
 
 package scan
 
