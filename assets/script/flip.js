@@ -515,16 +515,6 @@ document.addEventListener('DOMContentLoaded', function () {
     updateSliderImages(nowPageNum)
 })
 
-// 初次加载时的时间计数器，避免频繁自动保存书签
-let timeCounter = 0;
-setInterval(() => {
-    timeCounter += 1;
-    if (timeCounter >= 3) {
-        clearInterval(this);
-    }
-}, 1000);
-
-
 //翻页函数，加页或减页
 function addPageNum(n = 1) {
     // 防止n为字符串，转换为数字
@@ -541,7 +531,7 @@ function addPageNum(n = 1) {
     // 翻页
     Alpine.store('global').nowPageNum = nowPageNum + n
     // 更新书签
-    if (timeCounter >= 3 && !window.location.href.includes('file:///')) {
+    if (!!book && !!book.id &&!window.location.href.includes('file:///')) {
         Alpine.store('global').UpdateBookmark({
             type: 'auto',
             bookId: book.id,

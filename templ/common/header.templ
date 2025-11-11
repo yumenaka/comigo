@@ -50,16 +50,16 @@ templ Header(prop HeaderProps) {
 					</div>
 				</a>
 			}
-			<!-- 新服务器设置 -->
-			<a x-show="!window.location.href.includes('file:///') && !window.location.href.includes('settings') && !window.location.href.includes('upload')" href="/settings" class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
-				@svg.ServerDisk()
-			</a>
-			if prop.InShelf {
-				<!-- 上传按钮，点击进入上传页面 -->
-				<a x-show="!window.location.href.includes('file:///') && !window.location.href.includes('settings')" href="/upload" class="w-10 mx-1 my-0 rounded hover:ring ">
-					@svg.Upload()
+			if (prop.InShelf) {
+				<!-- 新服务器设置 -->
+				<a x-show="!window.location.href.includes('file:///') && !window.location.href.includes('settings') && !window.location.href.includes('upload')" href="/settings" class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
+					@svg.ServerDisk()
 				</a>
 			}
+			<!-- 上传按钮，点击进入上传页面 -->
+			<a x-show="!window.location.href.includes('file:///') && window.location.href.includes('settings')" href="/upload" class="w-10 mx-1 my-0 rounded hover:ring ">
+				@svg.Upload()
+			</a>
 			<!-- 文件重排序 Dropdown Menu： https://flowbite.com/docs/components/dropdowns/ -->
 			<!-- data-dropdown-trigger="{hover|click}"  二选一-->
 			<svg
@@ -181,7 +181,7 @@ templ Header(prop HeaderProps) {
 		<!-- 标题-->
 		<div class="flex flex-col items-center justify-center flex-1 p-0 m-0 font-semibold text-center truncate">
 			<!-- 标题，快速跳转 or 可下载压缩包 or 只显示 -->
-			<span x-show="window.location.href.includes('file:///')" class="text-lg font-semibold" x-text={ prop.Title }></span>
+			<span x-show="window.location.href.includes('file:///')" class="text-lg font-semibold" x-text={ "'" + prop.Title + "'" }></span>
 			if (prop.InShelf) {
 				<span
 					class="text-lg font-semibold"

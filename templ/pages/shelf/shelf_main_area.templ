@@ -26,9 +26,9 @@ templ MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookI
 				>
 					<!-- 书架标题栏 -->
 					<button @click="showBook = !showBook" class="child_store flex flex-wrap justify-center items-center absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2 ">
-						<span class="flex flex-row min-w:64 mt-0 p-2 bg-base-100 border-4 border-slate-400 text-base-content rounded-xl text-center text-sm font-semibold">
-							<span>{ storeBooks.StoreUrl } &nbsp;(x{ storeBooks.ChildBookNum })&nbsp;</span>
-							<svg class="w-3 h-6 transition-transform" :class="{ 'rotate-90': !showBook }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+						<span class="flex flex-row size-fit min-w-64 max-w-3/4 mt-0 p-2 bg-base-100 border-4 border-slate-400 text-base-content rounded-xl text-center text-sm font-semibold">
+							<span class="flex-10 mx-2">{ storeBooks.StoreUrl } &nbsp;(x{ storeBooks.ChildBookNum })&nbsp;</span>
+							<svg class="flex-1 w-3 h-6 transition-transform" :class="{ 'rotate-90': !showBook }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
 								<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"></path>
 							</svg>
 						</span>

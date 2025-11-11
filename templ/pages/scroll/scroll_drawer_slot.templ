@@ -28,7 +28,7 @@ templ DrawerSlot(c echo.Context, book *model.Book) {
 		<a
 			href={ templ.SafeURL(fmt.Sprintf("%s?static="+book.BookInfo.Title+".html", c.Request().URL.Path)) }
 			download={ book.BookInfo.Title + ".html" }
-			class="inline-flex items-center px-4 py-2 text-white bg-blue-500 rounded-lg shadow-lg hover:bg-blue-600 transition-colors"
+			class="inline-flex items-center px-4 py-2 text-white bg-blue-500 rounded shadow-lg hover:bg-blue-600 transition-colors"
 			:title="i18next.t('download_portable_web_file')"
 			x-text="i18next.t('download_portable_web_file')"
 		>
@@ -38,7 +38,7 @@ templ DrawerSlot(c echo.Context, book *model.Book) {
 			下载为便携网页文件
 		</a>
 	</div>
-	@common.ReadModeSelect(false)
+	@common.ReadModeSwitchButton()
 	<!-- 【显示页数】 -->
 	<label class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm">
 		<input type="checkbox" x-model="$store.scroll.showPageNum" class="sr-only peer" checked/>
