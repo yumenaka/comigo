@@ -41,7 +41,7 @@ func ShelfHandler(c echo.Context) error {
 			logger.Errorf("GetBookShelf Error: %v", err)
 		}
 	}
-	var childBookInfos []model.BookInfo
+	var childBookInfos model.BookInfos
 	// 如果指定了书籍ID，获取子书架信息。
 	if bookID != "" {
 		model.ClearBookNotExist()
@@ -51,6 +51,7 @@ func ShelfHandler(c echo.Context) error {
 			logger.Infof("Get %d child books for bookID %s", len(*childBooks), bookID)
 			childBookInfos = *childBooks
 		}
+		childBookInfos.SortBooks(sortBy)
 		// 无图书的提示（返回主页\上传压缩包\远程下载示例漫画）
 		if err != nil {
 			logger.Infof("GetBookShelf Error: %v", err)

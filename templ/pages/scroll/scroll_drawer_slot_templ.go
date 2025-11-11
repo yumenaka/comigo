@@ -84,11 +84,11 @@ func DrawerSlot(c echo.Context, book *model.Book) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" class=\"inline-flex items-center px-4 py-2 text-white bg-blue-500 rounded-lg shadow-lg hover:bg-blue-600 transition-colors\" :title=\"i18next.t('download_portable_web_file')\" x-text=\"i18next.t('download_portable_web_file')\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"w-6 h-6 mr-2\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4\"></path></svg> 下载为便携网页文件</a></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" class=\"inline-flex items-center px-4 py-2 text-white bg-blue-500 rounded shadow-lg hover:bg-blue-600 transition-colors\" :title=\"i18next.t('download_portable_web_file')\" x-text=\"i18next.t('download_portable_web_file')\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"w-6 h-6 mr-2\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4\"></path></svg> 下载为便携网页文件</a></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = common.ReadModeSelect(false).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.ReadModeSwitchButton().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

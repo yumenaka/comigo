@@ -75,14 +75,14 @@ func MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookIn
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" class=\"w-full h-full mt-2 mb-6 border-4 border-slate-400 rounded-2xl flex flex-row flex-wrap content-start justify-center text-base-content relative pt-8\"><!-- 书架标题栏 --><button @click=\"showBook = !showBook\" class=\"child_store flex flex-wrap justify-center items-center absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2 \"><span class=\"flex flex-row min-w:64 mt-0 p-2 bg-base-100 border-4 border-slate-400 text-base-content rounded-xl text-center text-sm font-semibold\"><span>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" class=\"w-full h-full mt-2 mb-6 border-4 border-slate-400 rounded-2xl flex flex-row flex-wrap content-start justify-center text-base-content relative pt-8\"><!-- 书架标题栏 --><button @click=\"showBook = !showBook\" class=\"child_store flex flex-wrap justify-center items-center absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2 \"><span class=\"flex flex-row size-fit min-w-64 max-w-3/4 mt-0 p-2 bg-base-100 border-4 border-slate-400 text-base-content rounded-xl text-center text-sm font-semibold\"><span class=\"flex-10 mx-2\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(storeBooks.StoreUrl)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_main_area.templ`, Line: 30, Col: 34}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_main_area.templ`, Line: 30, Col: 55}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -95,13 +95,13 @@ func MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookIn
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(storeBooks.ChildBookNum)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_main_area.templ`, Line: 30, Col: 70}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_main_area.templ`, Line: 30, Col: 91}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, ")&nbsp;</span> <svg class=\"w-3 h-6 transition-transform\" :class=\"{ 'rotate-90': !showBook }\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 10 6\"><path stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"m1 1 4 4 4-4\"></path></svg></span></button> ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, ")&nbsp;</span> <svg class=\"flex-1 w-3 h-6 transition-transform\" :class=\"{ 'rotate-90': !showBook }\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 10 6\"><path stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"m1 1 4 4 4-4\"></path></svg></span></button> ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

@@ -19,7 +19,7 @@ type BookInfo struct {
 	Author          string          `json:"author"`            // 作者
 	BookID          string          `json:"id"`                // 根据 BookPath 生成的唯一 ID
 	StoreUrl        string          `json:"store_url"`         // 在哪个子书库
-	ChildBooksNum   int             `json:"child_books_num"`   // 子书籍数量
+	ChildBooksNum   int             `json:"child_books_num"`   // 子书籍数量，只统计直接的子书籍
 	ChildBooksID    []string        `json:"child_books_id"`    // 子书籍BookID
 	Cover           PageInfo        `json:"cover"`             // 封面图
 	Deleted         bool            `json:"deleted"`           // 源文件是否已删除
@@ -39,6 +39,23 @@ type BookInfo struct {
 	Title           string          `json:"title"`             // 书名
 	Type            SupportFileType `json:"type"`              // 书籍类型
 	ZipTextEncoding string          `json:"zip_text_encoding"` // zip 文件编码
+}
+
+// GetAllChildBooksNum 递归获取所有子书籍的数量
+func (b *BookInfo) GetAllChildBooksNum() int {
+	total := 0
+	for _, childID := range b.ChildBooksID {
+		childBook, err := IStore.GetBook(childID)
+		if err != nil {
+			continue
+		}
+		if childBook.Type == TypeBooksGroup {
+			total += childBook.GetAllChildBooksNum()
+		} else {
+			total++
+		}
+	}
+	return total
 }
 
 // initBookID 根据路径的 MD5，初始化书籍 ID

@@ -59,14 +59,14 @@ templ MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int
 			<template
 				class="hidden"
 				x-data={ fmt.Sprintf(`{ pagedIndex: %d,PAGED_SIZE: %d}`, pagedIndex, PAGED_SIZE) }
-				x-init="$nextTick(() => { $store.global.nowPageNum = (pagedIndex-1)*PAGED_SIZE+1;console.log({$store.global.nowPageNum}); });"
+				x-init="$nextTick(() => { $store.global.nowPageNum = (pagedIndex-1)*PAGED_SIZE+1})"
 			></template>
 		}
 		if (readMode == "infinite_scroll" && startIndex >= 1) {
 			<template
 				class="hidden"
 				x-data={ fmt.Sprintf(`{ startIndex: %d,PAGED_SIZE: %d}`, startIndex, PAGED_SIZE) }
-				x-init="$nextTick(() => { $store.global.nowPageNum = startIndex;console.log({$store.global.nowPageNum}); });"
+				x-init="$nextTick(() => { $store.global.nowPageNum = startIndex})"
 			></template>
 		}
 		for key, image := range book.PageInfos {

@@ -27,17 +27,14 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 		<a
 			href={ templ.SafeURL(fmt.Sprintf("%s?static="+book.BookInfo.Title+".html", c.Request().URL.Path)) }
 			download={ book.BookInfo.Title + ".html" }
-			class="inline-flex items-center px-4 py-2 text-white bg-blue-500 rounded-lg shadow-lg hover:bg-blue-600 transition-colors"
+			class="inline-flex items-center px-4 py-2 text-white bg-blue-500 rounded shadow-lg hover:bg-blue-600 transition-colors"
 			:title="i18next.t('download_portable_web_file')"
 			x-text="i18next.t('download_portable_web_file')"
 		>
-			<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-			</svg>
 			下载为便携网页文件
 		</a>
 	</div>
-	@common.ReadModeSelect(false)
+	@common.ReadModeSwitchButton()
 	<!-- 远程同步翻页 -->
 	<!-- toggle组件来自： https://flowbite.com/docs/forms/toggle/ -->
 	<label
