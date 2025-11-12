@@ -160,3 +160,39 @@ air
 - [ ] 后台运行功能：unix：https://github.com/sevlyar/go-daemon 支持Windows但是最近没更新：https://github.com/takama/daemon
 - [ ] 在终端显示图片 https://github.com/ploMP4/chafa-go
 - [ ]  OpenID Connect 登录 https://github.com/zitadel/oidc  https://tailscale.com/community/community-projects/tsidp
+
+
+## history
+- 2025-11-12: v1.1.0 发布，支持下载为单个网页文件，Tailscale远程连接，多书架优化
+- **新功能：**
+1. 自动保存与恢复阅读进度，让阅读体验更加连贯。
+2. 内置 Tailscale 远程连接功能，轻松实现跨设备访问。
+3. 支持多个书库分批展示，加载更高效。
+
+**优化：**
+1. 同一浏览器的不同标签页之间也可同步翻页操作。
+2. 自动忽略以「.」开头的隐藏文件。
+3. 命令行模式下，打印帮助或版本信息后直接退出。
+4. 修复网络较慢时书架与设置页面出现闪烁的问题。
+
+**新機能：**
+1. 読書進捗の自動保存・復元に対応し、より快適な読書体験を実現。
+2. 内蔵の Tailscale リモート接続機能で、デバイス間アクセスがより簡単に。
+3. 複数の書庫を分割して表示し、読み込み効率を向上。
+
+**最適化：**
+1. 同一ブラウザ内の別タブ間でもページめくり操作を同期。
+2. 「.」で始まる隠しファイルを自動的に無視。
+3. コマンドラインでヘルプまたはバージョン情報を表示後、自動的に終了。
+4. ネットワーク速度が遅い場合に発生する書棚および設定ページのちらつき問題を修正。
+
+**New Features:**
+1. Automatically save and restore reading progress for a seamless experience.
+2. Built-in Tailscale remote connection for easy cross-device access.
+3. Support for displaying multiple libraries in batches for improved loading efficiency.
+
+**Improvements:**
+1. Page flipping is now synchronized across different tabs in the same browser.
+2. Hidden files (starting with “.”) are now automatically ignored.
+3. In command-line mode, the program now exits immediately after printing help or version info.
+4. Fixed flickering issues on the bookshelf and settings pages when the network is slow.
