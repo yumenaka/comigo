@@ -13370,7 +13370,9 @@ class $1bac384020b50752$var$I18n extends $1bac384020b50752$var$EventEmitter {
         return rtlLngs.indexOf(languageUtils.getLanguagePartFromCode(lng)) > -1 || lng.toLowerCase().indexOf('-arab') > 1 ? 'rtl' : 'ltr';
     }
     static createInstance(options = {}, callback) {
-        return new $1bac384020b50752$var$I18n(options, callback);
+        const instance = new $1bac384020b50752$var$I18n(options, callback);
+        instance.createInstance = $1bac384020b50752$var$I18n.createInstance;
+        return instance;
     }
     cloneInstance(options = {}, callback = $1bac384020b50752$var$noop) {
         const forkResourceStore = options.forkResourceStore;
@@ -13434,7 +13436,6 @@ class $1bac384020b50752$var$I18n extends $1bac384020b50752$var$EventEmitter {
     }
 }
 const $1bac384020b50752$export$2e2bcd8739ae039 = $1bac384020b50752$var$I18n.createInstance();
-$1bac384020b50752$export$2e2bcd8739ae039.createInstance = $1bac384020b50752$var$I18n.createInstance;
 const $1bac384020b50752$export$99152e8d49ca4e7d = $1bac384020b50752$export$2e2bcd8739ae039.createInstance;
 const $1bac384020b50752$export$147ec2801e896265 = $1bac384020b50752$export$2e2bcd8739ae039.dir;
 const $1bac384020b50752$export$2cd8252107eb640b = $1bac384020b50752$export$2e2bcd8739ae039.init;
@@ -17316,10 +17317,62 @@ function $fd2717825660a9ff$export$2e5e8c41f5d4e7c7(Alpine) {
 var $fd2717825660a9ff$export$2e2bcd8739ae039 = $fd2717825660a9ff$export$2e5e8c41f5d4e7c7;
 
 
+// packages/intersect/src/index.js
+function $b3c3dd74fa47ca5d$export$1f4807a235930d45(Alpine) {
+    Alpine.directive("intersect", Alpine.skipDuringClone((el, { value: value, expression: expression, modifiers: modifiers }, { evaluateLater: evaluateLater, cleanup: cleanup })=>{
+        let evaluate = evaluateLater(expression);
+        let options = {
+            rootMargin: $b3c3dd74fa47ca5d$var$getRootMargin(modifiers),
+            threshold: $b3c3dd74fa47ca5d$var$getThreshold(modifiers)
+        };
+        let observer = new IntersectionObserver((entries)=>{
+            entries.forEach((entry)=>{
+                if (entry.isIntersecting === (value === "leave")) return;
+                evaluate();
+                modifiers.includes("once") && observer.disconnect();
+            });
+        }, options);
+        observer.observe(el);
+        cleanup(()=>{
+            observer.disconnect();
+        });
+    }));
+}
+function $b3c3dd74fa47ca5d$var$getThreshold(modifiers) {
+    if (modifiers.includes("full")) return 0.99;
+    if (modifiers.includes("half")) return 0.5;
+    if (!modifiers.includes("threshold")) return 0;
+    let threshold = modifiers[modifiers.indexOf("threshold") + 1];
+    if (threshold === "100") return 1;
+    if (threshold === "0") return 0;
+    return Number(`.${threshold}`);
+}
+function $b3c3dd74fa47ca5d$var$getLengthValue(rawValue) {
+    let match = rawValue.match(/^(-?[0-9]+)(px|%)?$/);
+    return match ? match[1] + (match[2] || "px") : void 0;
+}
+function $b3c3dd74fa47ca5d$var$getRootMargin(modifiers) {
+    const key = "margin";
+    const fallback = "0px 0px 0px 0px";
+    const index = modifiers.indexOf(key);
+    if (index === -1) return fallback;
+    let values = [];
+    for(let i = 1; i < 5; i++)values.push($b3c3dd74fa47ca5d$var$getLengthValue(modifiers[index + i] || ""));
+    values = values.filter((v)=>v !== void 0);
+    return values.length ? values.join(" ").trim() : fallback;
+}
+// packages/intersect/builds/module.js
+var $b3c3dd74fa47ca5d$export$2e2bcd8739ae039 = $b3c3dd74fa47ca5d$export$1f4807a235930d45;
+
+
 window.Alpine = (0, $8c83eaf28779ff46$export$2e2bcd8739ae039 // 将 Alpine 实例添加到窗口对象中。
 );
-(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).plugin((0, $9b2f94dab0f686ea$export$2e2bcd8739ae039));
-(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).plugin((0, $fd2717825660a9ff$export$2e2bcd8739ae039));
+(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).plugin((0, $9b2f94dab0f686ea$export$2e2bcd8739ae039)) // 用于在本地存储中持久化数据的插件
+;
+(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).plugin((0, $fd2717825660a9ff$export$2e2bcd8739ae039)) // 不丢失 Alpine 页面状态的情况下，根据服务器请求更新 HTML
+;
+(0, $8c83eaf28779ff46$export$2e2bcd8739ae039).plugin((0, $b3c3dd74fa47ca5d$export$2e2bcd8739ae039)) //  Intersection Observer 的一个便捷封装，在元素进入视口时做出反应。
+;
 
 
 /* eslint-disable promise/prefer-await-to-then */ const $fe9db8f8165fa827$var$methodMap = [
@@ -17521,6 +17574,7 @@ const $3d5cedefbd41a457$var$initClientID = `Client_${$3d5cedefbd41a457$var$rando
 Alpine.store('global', {
     nowPageNum: 1,
     allPageNum: 1,
+    isHTTPServer: true,
     // 自动切边
     autoCrop: Alpine.$persist(false).as('global.autoCrop'),
     // 自动切边阈值,范围是0~100。多数情况下 1 就够了。
@@ -17743,6 +17797,9 @@ Alpine.store('global', {
 document.addEventListener('alpine:initialized', ()=>{
     Alpine.store('global').init();
 });
+const $3d5cedefbd41a457$var$url = new URL(window.location.href);
+if ($3d5cedefbd41a457$var$url.protocol === 'http:' || $3d5cedefbd41a457$var$url.protocol === 'https:') Alpine.store('global').isHTTPServer = true;
+else Alpine.store('global').isHTTPServer = false;
 
 
 // BookShelf 书架设置
