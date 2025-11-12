@@ -62,6 +62,7 @@ const initClientID = `Client_${randomString}_${system}_${browser}`;
 Alpine.store('global', {
     nowPageNum: 1,
     allPageNum: 1,
+    isHTTPServer: true,
     // 自动切边
     autoCrop: Alpine.$persist(false).as('global.autoCrop'),
     // 自动切边阈值,范围是0~100。多数情况下 1 就够了。
@@ -304,3 +305,11 @@ Alpine.store('global', {
 document.addEventListener('alpine:initialized', () => {
     Alpine.store('global').init();
 });
+
+const url = new URL(window.location.href);
+
+if (url.protocol === 'http:'||url.protocol === 'https:') {
+    Alpine.store('global').isHTTPServer=true;
+} else {
+    Alpine.store('global').isHTTPServer=false;
+}

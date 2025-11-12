@@ -64,7 +64,7 @@ templ Drawer(c echo.Context, book *model.Book, slot templ.Component) {
 			<div class="flex-1 w-full place-holder"></div>
 			<!-- 二维码 -->
 			<div
-				x-show="!window.location.href.includes('file:///')"
+				x-show="$store.global.isHTTPServer"
 				class="w-32 h-32 p-0 mt-2 mb-2"
 				x-data="{ qrcodeSrc: '' }"
 				x-init="qrcodeSrc = window.location.origin +'/api/qrcode.png?base64=true&qrcode_str='+ encodeURIComponent(window.location.toString())"

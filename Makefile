@@ -62,7 +62,7 @@ all: compileAll_CGO md5SumThemAll
 # ent库的编译检测状态： https://modern-c.appspot.com/-/builder/?importpath=modernc.org%2Fsqlite
 # 为了支持Tailscale，使用docker交叉编译
 compileAll: Windows_x86_64 Windows_i386  Windows_arm64 Linux_x86_64 Linux_i386 Linux_armv7 Linux_arm64 MacOS_x86_64 MacOS_arm64
-compileAll_CGO: Windows_x86_64_cgo Windows_i386_cgo  Windows_arm64_cgo Linux_x86_64_cgo Linux_i386_cgo Linux_armv7_cgo Linux_arm64_cgo MacOS_x86_64_cgo MacOS_arm64_cgo
+compileAll_CGO: Windows_x86_64 Windows_i386  Windows_arm64 Linux_x86_64_cgo Linux_i386_cgo Linux_armv7_cgo Linux_arm64_cgo MacOS_x86_64_cgo MacOS_arm64_cgo
 
 android: Linux_arm_android Linux_arm64-android
 

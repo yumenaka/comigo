@@ -531,7 +531,7 @@ function addPageNum(n = 1) {
     // 翻页
     Alpine.store('global').nowPageNum = nowPageNum + n
     // 更新书签
-    if (!!book && !!book.id &&!window.location.href.includes('file:///')) {
+    if (!!book && !!book.id && $store.global.isHTTPServer) {
         Alpine.store('global').UpdateBookmark({
             type: 'auto',
             bookId: book.id,
@@ -568,7 +568,7 @@ function jumpPageNum(jumpNum, sync = true) {
         return
     }
     Alpine.store('global').nowPageNum = num
-    if (!window.location.href.includes('file:///')) {
+    if (Alpine.store('global').isHTTPServer) {
         Alpine.store('global').UpdateBookmark({
             type: 'auto',
             bookId: book.id,
@@ -1019,7 +1019,7 @@ function attemptReconnect() {
 
 // 页面加载完成后建立WebSocket连接
 document.addEventListener('DOMContentLoaded', () => {
-    if (!window.location.href.includes('file:///')) {
+    if (Alpine.store('global').isHTTPServer) {
         connectWebSocket()
     }
 })

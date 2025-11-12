@@ -44,7 +44,7 @@ templ Header(prop HeaderProps) {
 		<div class="flex flex-row">
 			if prop.ShowReturnIcon {
 				<!-- 返回箭头,点击返回上一页 -->
-				<a x-show="!window.location.href.includes('file:///')" href={ templ.SafeURL(prop.ReturnUrl) }>
+				<a x-show="$store.global.isHTTPServer" href={ templ.SafeURL(prop.ReturnUrl) }>
 					<div class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
 						@svg.Return()
 					</div>
@@ -52,18 +52,18 @@ templ Header(prop HeaderProps) {
 			}
 			if (prop.InShelf) {
 				<!-- 新服务器设置 -->
-				<a x-show="!window.location.href.includes('file:///') && !window.location.href.includes('settings') && !window.location.href.includes('upload')" href="/settings" class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
+				<a x-show="$store.global.isHTTPServer && !window.location.href.includes('settings') && !window.location.href.includes('upload')" href="/settings" class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
 					@svg.ServerDisk()
 				</a>
 			}
 			<!-- 上传按钮，点击进入上传页面 -->
-			<a x-show="!window.location.href.includes('file:///') && window.location.href.includes('settings')" href="/upload" class="w-10 mx-1 my-0 rounded hover:ring ">
+			<a x-show="$store.global.isHTTPServer && window.location.href.includes('settings')" href="/upload" class="w-10 mx-1 my-0 rounded hover:ring ">
 				@svg.Upload()
 			</a>
 			<!-- 文件重排序 Dropdown Menu： https://flowbite.com/docs/components/dropdowns/ -->
 			<!-- data-dropdown-trigger="{hover|click}"  二选一-->
 			<svg
-				x-show="!window.location.href.includes('file:///') && !window.location.href.includes('settings') && !window.location.href.includes('upload')"
+				x-show="$store.global.isHTTPServer && !window.location.href.includes('settings') && !window.location.href.includes('upload')"
 				class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
 				id="ResortButton"
 				data-dropdown-toggle="ReSortDropdownMenu"
@@ -76,7 +76,7 @@ templ Header(prop HeaderProps) {
 			</svg>
 			<div
 				id="ReSortDropdownMenu"
-				x-show="!window.location.href.includes('file:///')"
+				x-show="$store.global.isHTTPServer"
 				x-data="{
                     getCurrentSortBy() {
                         // 根据URL路径决定使用哪个cookie参数名
@@ -181,7 +181,7 @@ templ Header(prop HeaderProps) {
 		<!-- 标题-->
 		<div class="flex flex-col items-center justify-center flex-1 p-0 m-0 font-semibold text-center truncate">
 			<!-- 标题，快速跳转 or 可下载压缩包 or 只显示 -->
-			<span x-show="window.location.href.includes('file:///')" class="text-lg font-semibold" x-text={ "'" + prop.Title + "'" }></span>
+			<span x-show="!$store.global.isHTTPServer" class="text-lg font-semibold" x-text={ "'" + prop.Title + "'" }></span>
 			if (prop.InShelf) {
 				<span
 					class="text-lg font-semibold"
@@ -198,7 +198,7 @@ templ Header(prop HeaderProps) {
 				if (prop.ShowQuickJumpBar&&prop.QuickJumpBarBooks!=nil) {
 					<button
 						id="quickJumpBarDropdownButton"
-						x-show="!window.location.href.includes('file:///')"
+						x-show="$store.global.isHTTPServer"
 						data-dropdown-toggle="QuickJumpDropdown"
 						data-dropdown-trigger="click"
 						class="max-w-fit px-5 py-2.5 inline-flex  hover:bg-gray-400 rounded-lg font-semibold text-center items-center"
@@ -210,7 +210,7 @@ templ Header(prop HeaderProps) {
 					<!-- Dropdown menu -->
 					<div
 						id="QuickJumpDropdown"
-						x-show="!window.location.href.includes('file:///')"
+						x-show="$store.global.isHTTPServer"
 						class="max-w-full md:max-w-2xl md:truncate z-10 hidden divide-y divide-gray-100 rounded-lg shadow bg-white/90  dark:bg-gray-700"
 					>
 						<ul class="py-2 mt-0 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="quickJumpBarDropdownButton">
@@ -251,7 +251,7 @@ templ Header(prop HeaderProps) {
 			<div
 				data-modal-target="qrcode-modal"
 				data-modal-toggle="qrcode-modal"
-				x-show="!window.location.href.includes('file:///')"
+				x-show="$store.global.isHTTPServer"
 				class="hidden md:flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
 			>
 				@svg.QRCode()
