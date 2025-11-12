@@ -281,23 +281,3 @@ function jumpPageNum(pageNum) {
     url.searchParams.set('page', pageNum);
     window.location.href = url.toString();
 }
-
-// 延迟3秒后自动更新书签
-setTimeout(() => {
-    // 如果是无限下拉模式，不发送翻页信息
-    if (!(Alpine.store('global').readMode === "paged_scroll")){
-        return;
-    }
-    const url = new URL(window.location.href);
-    let pageNum = getNowPageNum();
-    let pageIndex = Math.floor(pageNum - 1) * 16;
-    if (pageIndex > 0) {
-        Alpine.store('global').UpdateBookmark({
-            type: 'auto',
-            bookId: book.id,
-            pageIndex: pageIndex,
-            label: '调试书签'
-        });
-        console.log('自动书签更新: ', Math.floor(pageNum - 1) * 16);
-    }
-}, "2000");

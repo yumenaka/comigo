@@ -536,7 +536,7 @@ function addPageNum(n = 1) {
             type: 'auto',
             bookId: book.id,
             pageIndex: Alpine.store('global').nowPageNum,
-            label: '调试书签'
+            label: '自动书签'
         });
     }
     setImageSrc()
@@ -573,7 +573,7 @@ function jumpPageNum(jumpNum, sync = true) {
             type: 'auto',
             bookId: book.id,
             pageIndex: Alpine.store('global').nowPageNum,
-            label: '调试书签'
+            label: '自动书签'
         });
         if (sync) {
             // 通过ws通道发送翻页数据

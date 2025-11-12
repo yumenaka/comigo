@@ -36,8 +36,16 @@ templ MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int
 	<div
 		id="mouseMoveArea"
 		x-data="{
-            imageWidth: '' //图片的宽度
+            imageWidth: '', //图片的宽度
+            counter: 0 //计数器
         }"
+		x-init="let stoper= setInterval(() => {
+            counter++;
+            console.log('Wait.. Attempt: ' + counter);
+            if (counter > 3) {
+                clearInterval(stoper);
+            }
+        }, 1000);"
 		class="flex flex-col items-center justify-center flex-1 w-full max-w-full pt-0 text-base-content"
 	>
 		if readMode == "paged_scroll" && book.PageCount/PAGED_SIZE + 1 != 1 {
@@ -85,6 +93,7 @@ templ MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int
 								class="w-full manga_image min-h-16 text-center select-none"
 								draggable="false"
 								:src={ ImageSrc(image.Url) }
+								x-intersect={ fmt.Sprintf("if(counter>=2){$nextTick(() => { $store.global.UpdateBookmark({type: 'auto',bookId: book.id,pageIndex: %d,label: '自动书签'})})}", key+1) }
 								@load="isDoublePage=$event.target.naturalWidth > $event.target.naturalHeight;"
 								:style="{ width: $store.global.isLandscape?($store.scroll.widthUseFixedValue? (isDoublePage ? $store.scroll.doublePageWidth_PX +'px': $store.scroll.singlePageWidth_PX +'px'): (isDoublePage ? $store.scroll.doublePageWidth_Percent + '%':$store.scroll.singlePageWidth_Percent + '%')): $store.scroll.portraitWidthPercent+'%', maxWidth: '100%'}"
 							/>
