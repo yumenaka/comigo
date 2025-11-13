@@ -531,7 +531,7 @@ function addPageNum(n = 1) {
     // 翻页
     Alpine.store('global').nowPageNum = nowPageNum + n
     // 更新书签
-    if (!!book && !!book.id && $store.global.isHTTPServer) {
+    if (!!book && !!book.id && Alpine.store('global').isHTTPServer) {
         Alpine.store('global').UpdateBookmark({
             type: 'auto',
             bookId: book.id,
