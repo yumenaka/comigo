@@ -96,7 +96,7 @@ func intersectScript(pageIndex int) string {
 	if(!loaded || counter < 1){
         return;
     }
-	console.log({loaded});
+	//console.log({loaded});
     if (loaded && !updateBookmarkCompleted) {
         $store.global.UpdateBookmark(
             {
