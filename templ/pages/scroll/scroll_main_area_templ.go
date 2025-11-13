@@ -20,7 +20,7 @@ import (
 // ImageXData 在Go函数里面计算图片的x-data属性。渲染结果例：
 // x-data="{  isDoublePage: false, imageUrl: '/api/get_file?id=asxScIDD&filename=1.jpg' + ($store.global.autoCrop  ? &quot;&auto_crop=1&quot; : ")"
 func ImageXData(Url string) string {
-	return fmt.Sprintf(`{ isDoublePage: false, imageUrl: '%s' + ($store.global.autoCrop?"&auto_crop=1":'')}`, Url)
+	return fmt.Sprintf(`{ isDoublePage: false, loaded: false, updateBookmarkCompleted: false, imageUrl: '%s' + ($store.global.autoCrop?"&auto_crop=1":'')}`, Url)
 }
 
 // 压缩尺寸，切白边，无缓存等选项，http://192.168.3.26:58642/api/get_file?id=xE2Nmdj&filename=001_By_zhonyk_cover.jpg&resize_max_width=200&no-cache=true
@@ -61,7 +61,7 @@ func MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int,
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"mouseMoveArea\" x-data=\"{\n            imageWidth: '', //图片的宽度\n            counter: 0 //计数器\n        }\" x-init=\"let stoper= setInterval(() => {\n            counter++;\n            console.log('Wait.. Attempt: ' + counter);\n            if (counter > 3) {\n                clearInterval(stoper);\n            }\n        }, 1000);\" class=\"flex flex-col items-center justify-center flex-1 w-full max-w-full pt-0 text-base-content\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"mouseMoveArea\" x-data=\"{\n            imageWidth: '', //图片的宽度\n            counter: 0,//计数器\n            maxReadPageNum: 0 //读取的最大页码\n        }\" x-init=\"let stoper= setInterval(() => {\n            counter++;\n            console.log('Wait.. Attempt: ' + counter);\n            if (counter > 2) {\n                clearInterval(stoper);\n            }\n        }, 1000);\" class=\"flex flex-col items-center justify-center flex-1 w-full max-w-full pt-0 text-base-content\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -79,7 +79,7 @@ func MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int,
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("{skipPageNum : %d}", startIndex-1))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 57, Col: 60}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 58, Col: 60}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
@@ -98,7 +98,7 @@ func MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int,
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(`{ pagedIndex: %d,PAGED_SIZE: %d}`, pagedIndex, PAGED_SIZE))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 69, Col: 84}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 70, Col: 84}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -117,7 +117,7 @@ func MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int,
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(`{ startIndex: %d,PAGED_SIZE: %d}`, startIndex, PAGED_SIZE))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 76, Col: 84}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 77, Col: 84}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -142,7 +142,7 @@ func MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int,
 					var templ_7745c5c3_Var5 string
 					templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(image.Url)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 87, Col: 29}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 88, Col: 29}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 					if templ_7745c5c3_Err != nil {
@@ -162,7 +162,7 @@ func MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int,
 						var templ_7745c5c3_Var6 string
 						templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(ImageXData(image.Url))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 92, Col: 38}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 93, Col: 38}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 						if templ_7745c5c3_Err != nil {
@@ -175,26 +175,26 @@ func MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int,
 						var templ_7745c5c3_Var7 string
 						templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(ImageSrc(image.Url))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 95, Col: 34}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 96, Col: 34}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" x-intersect=\"")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" @load=\"isDoublePage=$event.target.naturalWidth > $event.target.naturalHeight;loaded = true;\" @error=\"loaded = false\" x-intersect:leave=\"")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 						var templ_7745c5c3_Var8 string
-						templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("if(counter>=2){$nextTick(() => { $store.global.UpdateBookmark({type: 'auto',bookId: book.id,pageIndex: %d,label: '自动书签'})})}", key+1))
+						templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(intersectScript(key + 1))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 96, Col: 176}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 99, Col: 52}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" @load=\"isDoublePage=$event.target.naturalWidth > $event.target.naturalHeight;\" :style=\"{ width: $store.global.isLandscape?($store.scroll.widthUseFixedValue? (isDoublePage ? $store.scroll.doublePageWidth_PX +'px': $store.scroll.singlePageWidth_PX +'px'): (isDoublePage ? $store.scroll.doublePageWidth_Percent + '%':$store.scroll.singlePageWidth_Percent + '%')): $store.scroll.portraitWidthPercent+'%', maxWidth: '100%'}\">")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" :style=\"{ width: $store.global.isLandscape?($store.scroll.widthUseFixedValue? (isDoublePage ? $store.scroll.doublePageWidth_PX +'px': $store.scroll.singlePageWidth_PX +'px'): (isDoublePage ? $store.scroll.doublePageWidth_Percent + '%':$store.scroll.singlePageWidth_Percent + '%')): $store.scroll.portraitWidthPercent+'%', maxWidth: '100%'}\">")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -206,7 +206,7 @@ func MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int,
 						var templ_7745c5c3_Var9 string
 						templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(ImageXData(image.Url))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 102, Col: 38}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 104, Col: 38}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 						if templ_7745c5c3_Err != nil {
@@ -219,7 +219,7 @@ func MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int,
 						var templ_7745c5c3_Var10 string
 						templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(common.GetFileBase64Text(book.BookInfo.BookID, image.Name))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 105, Col: 72}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 107, Col: 72}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 						if templ_7745c5c3_Err != nil {
@@ -238,7 +238,7 @@ func MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int,
 				var templ_7745c5c3_Var11 string
 				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d / %d", key+1, book.BookInfo.PageCount))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 112, Col: 136}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 114, Col: 136}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 				if templ_7745c5c3_Err != nil {

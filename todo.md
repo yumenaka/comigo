@@ -82,7 +82,7 @@
 - [ ] 系统监控（CPU、内存）
 - [ ] wasm模式
 - [ ] 自动更新
-- [ ] 文件监控
+- [ ] 文件监控 https://github.com/sgtdi/fswatcher
 - [ ] 用户系统增强
 - [ ] Shell 交互
 - [ ] 文件管理

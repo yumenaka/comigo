@@ -12,7 +12,7 @@ import (
 // ImageXData 在Go函数里面计算图片的x-data属性。渲染结果例：
 // x-data="{  isDoublePage: false, imageUrl: '/api/get_file?id=asxScIDD&filename=1.jpg' + ($store.global.autoCrop  ? &quot;&auto_crop=1&quot; : ")"
 func ImageXData(Url string) string {
-	return fmt.Sprintf(`{ isDoublePage: false, imageUrl: '%s' + ($store.global.autoCrop?"&auto_crop=1":'')}`, Url)
+	return fmt.Sprintf(`{ isDoublePage: false, loaded: false, updateBookmarkCompleted: false, imageUrl: '%s' + ($store.global.autoCrop?"&auto_crop=1":'')}`, Url)
 }
 
 // 压缩尺寸，切白边，无缓存等选项，http://192.168.3.26:58642/api/get_file?id=xE2Nmdj&filename=001_By_zhonyk_cover.jpg&resize_max_width=200&no-cache=true
@@ -37,12 +37,13 @@ templ MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int
 		id="mouseMoveArea"
 		x-data="{
             imageWidth: '', //图片的宽度
-            counter: 0 //计数器
+            counter: 0,//计数器
+            maxReadPageNum: 0 //读取的最大页码
         }"
 		x-init="let stoper= setInterval(() => {
             counter++;
             console.log('Wait.. Attempt: ' + counter);
-            if (counter > 3) {
+            if (counter > 2) {
                 clearInterval(stoper);
             }
         }, 1000);"
@@ -93,8 +94,9 @@ templ MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int
 								class="w-full manga_image min-h-16 text-center select-none"
 								draggable="false"
 								:src={ ImageSrc(image.Url) }
-								x-intersect={ fmt.Sprintf("if(counter>=2){$nextTick(() => { $store.global.UpdateBookmark({type: 'auto',bookId: book.id,pageIndex: %d,label: '自动书签'})})}", key+1) }
-								@load="isDoublePage=$event.target.naturalWidth > $event.target.naturalHeight;"
+								@load="isDoublePage=$event.target.naturalWidth > $event.target.naturalHeight;loaded = true;"
+								@error="loaded = false"
+								x-intersect:leave={ intersectScript(key + 1) }
 								:style="{ width: $store.global.isLandscape?($store.scroll.widthUseFixedValue? (isDoublePage ? $store.scroll.doublePageWidth_PX +'px': $store.scroll.singlePageWidth_PX +'px'): (isDoublePage ? $store.scroll.doublePageWidth_Percent + '%':$store.scroll.singlePageWidth_Percent + '%')): $store.scroll.portraitWidthPercent+'%', maxWidth: '100%'}"
 							/>
 						} else {
