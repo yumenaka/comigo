@@ -1,6 +1,7 @@
 package scroll
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -86,4 +87,27 @@ func getScrollPaginationURL(book *model.Book, page int) string {
 		return `javascript:showToast(i18next.t('hint_last_page'), 'warning')`
 	}
 	return readURL
+}
+
+// 自动书签脚本
+func intersectScript(pageIndex int) string {
+	return fmt.Sprintf(`
+    $nextTick(() => {
+	if(!loaded || counter < 1){
+        return;
+    }
+	console.log({loaded});
+    if (loaded && !updateBookmarkCompleted) {
+        $store.global.UpdateBookmark(
+            {
+                type: 'auto',
+                bookId: book.id,
+                pageIndex: %d,
+                label: '自动书签'
+            }
+        );
+        updateBookmarkCompleted = true;
+    }
+  })
+	`, pageIndex)
 }
