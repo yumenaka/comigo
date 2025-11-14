@@ -21,6 +21,15 @@ import (
 
 // 运行 Comigo 服务器
 func main() {
+	// 检查是否只是查看版本或帮助信息
+	for _, arg := range os.Args {
+		if arg == "-v" || arg == "--version" || arg == "-h" || arg == "--help" {
+			// 初始化命令行flag与args，环境变量与配置文件
+			cmd.Execute()
+			// 打印信息后直接退出
+			return
+		}
+	}
 	// Create an instance of the app structure
 	app := NewApp()
 	// 初始化命令行flag与args，环境变量与配置文件

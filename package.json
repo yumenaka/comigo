@@ -11,6 +11,7 @@
     "watch": "parcel watch ./assets/main.js ./assets/styles.css --dist-dir assets/script --no-optimize"
   },
   "dependencies": {
+    "@alpinejs/intersect": "^3.15.1",
     "@alpinejs/morph": "latest",
     "@alpinejs/persist": "latest",
     "alpinejs": "latest",

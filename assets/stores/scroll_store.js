@@ -1,6 +1,5 @@
 // Scroll 卷轴模式
 Alpine.store("scroll", {
-	nowPageNum: 1,
 	simplifyTitle: Alpine.$persist(true).as("scroll.simplifyTitle"), //是否简化标题
 	//下拉模式下，漫画页面的底部间距。单位px。
 	marginBottomOnScrollMode: Alpine.$persist(0).as(

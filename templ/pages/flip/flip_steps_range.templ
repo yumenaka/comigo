@@ -127,59 +127,59 @@ templ StepsRangeArea() {
 				class="slider-base w-full"
 				type="range"
 				min="1"
-				x-data="{initPageNum:$store.flip.mangaMode?($store.flip.allPageNum -$store.flip.nowPageNum + 1):$store.flip.nowPageNum}"
+				x-data="{initPageNum:$store.flip.mangaMode?($store.global.allPageNum -$store.global.nowPageNum + 1):$store.global.nowPageNum}"
 				x-init="
-			            $watch('$store.flip.nowPageNum', _ =>
+			            $watch('$store.global.nowPageNum', _ =>
 			             {
 			                if($store.flip.mangaMode) {
-			                    initPageNum = ($store.flip.allPageNum - $store.flip.nowPageNum + 1); }
+			                    initPageNum = ($store.global.allPageNum - $store.global.nowPageNum + 1); }
 			                else{
-			                    initPageNum = $store.flip.nowPageNum;
+			                    initPageNum = $store.global.nowPageNum;
 			                }
 			                
 			                // 更新CSS变量
-			                const percent = ((initPageNum - 1) / ($store.flip.allPageNum - 1)) * 100;
+			                const percent = ((initPageNum - 1) / ($store.global.allPageNum - 1)) * 100;
 			                $el.style.setProperty('--value-percent', percent + '%');
 			             }
 			            );
-                        $watch('$store.flip.allPageNum', _ =>
+                        $watch('$store.global.allPageNum', _ =>
 			             {
 			                if($store.flip.mangaMode) {
-			                    initPageNum = ($store.flip.allPageNum - $store.flip.nowPageNum + 1); }
+			                    initPageNum = ($store.global.allPageNum - $store.global.nowPageNum + 1); }
 			                else{
-			                    initPageNum = $store.flip.nowPageNum;
+			                    initPageNum = $store.global.nowPageNum;
 			                }
 			                
 			                // 更新CSS变量
-			                const percent = ((initPageNum - 1) / ($store.flip.allPageNum - 1)) * 100;
+			                const percent = ((initPageNum - 1) / ($store.global.allPageNum - 1)) * 100;
 			                $el.style.setProperty('--value-percent', percent + '%');
 			             }
 			            );
 			            
 			            // 初始设置CSS变量
-			            const initPercent = ((initPageNum - 1) / ($store.flip.allPageNum - 1)) * 100;
+			            const initPercent = ((initPageNum - 1) / ($store.global.allPageNum - 1)) * 100;
 			            $el.style.setProperty('--value-percent', initPercent + '%');
 			    "
-				@change="initPageNum=$event.target.value;inputPageNum($event); const percent = ((initPageNum - 1) / ($store.flip.allPageNum - 1)) * 100; $el.style.setProperty('--value-percent', percent + '%');"
-				@input="initPageNum=$event.target.value;inputPageNum($event); const percent = ((initPageNum - 1) / ($store.flip.allPageNum - 1)) * 100; $el.style.setProperty('--value-percent', percent + '%');"
-				:max="$store.flip.allPageNum"
+				@change="initPageNum=$event.target.value;inputPageNum($event); const percent = ((initPageNum - 1) / ($store.global.allPageNum - 1)) * 100; $el.style.setProperty('--value-percent', percent + '%');"
+				@input="initPageNum=$event.target.value;inputPageNum($event); const percent = ((initPageNum - 1) / ($store.global.allPageNum - 1)) * 100; $el.style.setProperty('--value-percent', percent + '%');"
+				:max="$store.global.allPageNum"
 				x-model="initPageNum"
 				step="1"
 			/>
 			<!-- ⚠️注意⚠️ alpinejs 的 x-for  从 1 开始，循环到 ALL_PAGE_NUM -->
 			<div class="absolute w-full h-2 pointer-events-none" style="bottom: 2px;">
-				<template x-for="i in $store.flip.allPageNum" :key="i">
+				<template x-for="i in $store.global.allPageNum" :key="i">
 					<div
 						class="absolute"
-						:style="!$store.flip.mangaMode?`left: ${(i-1)/($store.flip.allPageNum)*100}%; transform: translateX(50%);`:`left: ${($store.flip.allPageNum -i)/($store.flip.allPageNum)*100}%; transform: translateX(50%);`"
+						:style="!$store.flip.mangaMode?`left: ${(i-1)/($store.global.allPageNum)*100}%; transform: translateX(50%);`:`left: ${($store.global.allPageNum -i)/($store.global.allPageNum)*100}%; transform: translateX(50%);`"
 					>
 						<!-- 刻度:如果页数 < 50，则每 5 页刻度加粗；同时首页与末页也单独加粗显示 -->
 						<div
 							:id="i"
-							:class="(i === 1 || i === $store.flip.allPageNum)
+							:class="(i === 1 || i === $store.global.allPageNum)
         								? 'h-2.5 w-[1.5px] bg-gray-900 rounded-xs'
         								: (
-        									$store.flip.allPageNum < 50
+        									$store.global.allPageNum < 50
         										? (
         											i !== 1 && i % 5 === 0
         												? 'h-1 w-[1.5px] bg-gray-900 rounded-xs'
@@ -196,13 +196,13 @@ templ StepsRangeArea() {
 						<template
 							x-if="(
         						i === 1
-        						|| i === $store.flip.allPageNum
-        						|| (!$store.flip.mangaMode && $store.flip.allPageNum < 50 && i % 5 === 0 && i<($store.flip.allPageNum-3))
-        						|| (!$store.flip.mangaMode && ($store.flip.allPageNum >= 50 && $store.flip.allPageNum < 100) && i % 10 === 0 && i<($store.flip.allPageNum-5))
-        						|| (!$store.flip.mangaMode && ($store.flip.allPageNum >= 100) && i % 20 === 0 && i<($store.flip.allPageNum-9))
-        						|| ($store.flip.mangaMode && $store.flip.allPageNum < 50 && i % 5 === 0 && i<($store.flip.allPageNum-3))
-                                || ($store.flip.mangaMode && ($store.flip.allPageNum >= 50 && $store.flip.allPageNum < 100) && i % 10 === 0 && i<($store.flip.allPageNum-5))
-                                || ($store.flip.mangaMode && $store.flip.allPageNum >= 100 && i % 20 === 0 && i<($store.flip.allPageNum-9))
+        						|| i === $store.global.allPageNum
+        						|| (!$store.flip.mangaMode && $store.global.allPageNum < 50 && i % 5 === 0 && i<($store.global.allPageNum-3))
+        						|| (!$store.flip.mangaMode && ($store.global.allPageNum >= 50 && $store.global.allPageNum < 100) && i % 10 === 0 && i<($store.global.allPageNum-5))
+        						|| (!$store.flip.mangaMode && ($store.global.allPageNum >= 100) && i % 20 === 0 && i<($store.global.allPageNum-9))
+        						|| ($store.flip.mangaMode && $store.global.allPageNum < 50 && i % 5 === 0 && i<($store.global.allPageNum-3))
+                                || ($store.flip.mangaMode && ($store.global.allPageNum >= 50 && $store.global.allPageNum < 100) && i % 10 === 0 && i<($store.global.allPageNum-5))
+                                || ($store.flip.mangaMode && $store.global.allPageNum >= 100 && i % 20 === 0 && i<($store.global.allPageNum-9))
         					)"
 						>
 							<div

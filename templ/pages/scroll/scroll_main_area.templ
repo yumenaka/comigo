@@ -12,7 +12,7 @@ import (
 // ImageXData 在Go函数里面计算图片的x-data属性。渲染结果例：
 // x-data="{  isDoublePage: false, imageUrl: '/api/get_file?id=asxScIDD&filename=1.jpg' + ($store.global.autoCrop  ? &quot;&auto_crop=1&quot; : ")"
 func ImageXData(Url string) string {
-	return fmt.Sprintf(`{ isDoublePage: false, imageUrl: '%s' + ($store.global.autoCrop?"&auto_crop=1":'')}`, Url)
+	return fmt.Sprintf(`{ isDoublePage: false, loaded: false, updateBookmarkCompleted: false, imageUrl: '%s' + ($store.global.autoCrop?"&auto_crop=1":'')}`, Url)
 }
 
 // 压缩尺寸，切白边，无缓存等选项，http://192.168.3.26:58642/api/get_file?id=xE2Nmdj&filename=001_By_zhonyk_cover.jpg&resize_max_width=200&no-cache=true
@@ -23,12 +23,7 @@ func ImageSrc(Url string) string {
 	return fmt.Sprintf(`'%s' + (%s) + (%s) + (%s)`, Url, autoCrop, autoResize, noCache)
 }
 
-// HtmxStaticImage 使用htmx获取静态图片，或许可以不这么用？
-func HtmxStaticImage(Url string) string {
-	hxGet := Url + "&base64_htmx=true"
-	HtmxStaticImage := fmt.Sprintf(`<div hx-get='%s' hx-trigger="load" hx-swap="innerHTML" class="w-full m-0"></div>`, hxGet)
-	return HtmxStaticImage
-}
+var PAGED_SIZE = 32
 
 // ScrollMainArea 定义 BodyHTML
 // 需要更复杂的屏幕状态判断的时候，可以参考：https://developer.mozilla.org/zh-CN/docs/Web/API/Screen/orientation
@@ -37,19 +32,54 @@ func HtmxStaticImage(Url string) string {
 // https://htmx.org/docs/#triggers  https://htmx.org/docs/#swapping
 // tips： Alpine.js 动态CSS，只支持内联写法
 // min-h-16 是为了图片未加载时，图片高度为0，导致页面不美观。极端设置下会导致图片变形。  text-center：居中 alert文字，因为需要等待css加载，所以现在没设置alt文字。
-templ MainArea(c echo.Context, book *model.Book, paginationIndex int) {
+templ MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int, startIndex int) {
 	<div
 		id="mouseMoveArea"
 		x-data="{
-            imageWidth: '' //图片的宽度
+            imageWidth: '', //图片的宽度
+            counter: 0,//计数器
+            maxReadPageNum: 0 //读取的最大页码
         }"
+		x-init="let stoper= setInterval(() => {
+            counter++;
+            console.log('Wait.. Attempt: ' + counter);
+            if (counter > 2) {
+                clearInterval(stoper);
+            }
+        }, 1000);"
 		class="flex flex-col items-center justify-center flex-1 w-full max-w-full pt-0 text-base-content"
 	>
-		if paginationIndex >= 1 && book.PageCount/32+1 != 1 {
-			@ScrollPagination(book, paginationIndex)
+		if readMode == "paged_scroll" && book.PageCount/PAGED_SIZE + 1 != 1 {
+			@ScrollPagination(book, pagedIndex)
+		}
+		if (readMode == "infinite_scroll" && startIndex > 0) {
+			<div
+				class="w-full my-2 text-sm font-semibold text-center page_hint "
+				x-data={ fmt.Sprintf("{skipPageNum : %d}", startIndex-1) }
+				x-text="i18next.t('skip_and_load_full').replace('%d', skipPageNum)"
+			></div>
+			<button
+				class="px-4 py-2 mb-4 font-semibold text-white bg-blue-500 rounded hover:bg-blue-600"
+				@click="$store.global.infiniteScrollLoadAllPage();"
+				x-text="i18next.t('load_all_pages')"
+			>Load All</button>
+		}
+		if (readMode == "paged_scroll" && pagedIndex >= 1) {
+			<template
+				class="hidden"
+				x-data={ fmt.Sprintf(`{ pagedIndex: %d,PAGED_SIZE: %d}`, pagedIndex, PAGED_SIZE) }
+				x-init="$nextTick(() => { $store.global.nowPageNum = (pagedIndex-1)*PAGED_SIZE+1})"
+			></template>
+		}
+		if (readMode == "infinite_scroll" && startIndex >= 1) {
+			<template
+				class="hidden"
+				x-data={ fmt.Sprintf(`{ startIndex: %d,PAGED_SIZE: %d}`, startIndex, PAGED_SIZE) }
+				x-init="$nextTick(() => { $store.global.nowPageNum = startIndex})"
+			></template>
 		}
 		for key, image := range book.PageInfos {
-			if paginationIndex < 1 || (paginationIndex >= 1 && key/32 + 1 == paginationIndex) {
+			if (readMode == "paged_scroll" && key/PAGED_SIZE + 1 == pagedIndex) || (readMode == "infinite_scroll" && key >= startIndex) {
 				<div
 					class="flex flex-col justify-start w-full max-w-full  m-0 rounded item-center"
 					:style="{ marginBottom: $store.scroll.marginBottomOnScrollMode + 'px' }"
@@ -64,7 +94,9 @@ templ MainArea(c echo.Context, book *model.Book, paginationIndex int) {
 								class="w-full manga_image min-h-16 text-center select-none"
 								draggable="false"
 								:src={ ImageSrc(image.Url) }
-								@load="isDoublePage=$event.target.naturalWidth > $event.target.naturalHeight;"
+								@load="isDoublePage=$event.target.naturalWidth > $event.target.naturalHeight;loaded = true;"
+								@error="loaded = false"
+								x-intersect:leave={ intersectScript(key + 1) }
 								:style="{ width: $store.global.isLandscape?($store.scroll.widthUseFixedValue? (isDoublePage ? $store.scroll.doublePageWidth_PX +'px': $store.scroll.singlePageWidth_PX +'px'): (isDoublePage ? $store.scroll.doublePageWidth_Percent + '%':$store.scroll.singlePageWidth_Percent + '%')): $store.scroll.portraitWidthPercent+'%', maxWidth: '100%'}"
 							/>
 						} else {
@@ -84,8 +116,8 @@ templ MainArea(c echo.Context, book *model.Book, paginationIndex int) {
 				</div>
 			}
 		}
-		if paginationIndex >= 1 && book.PageCount/32+1 != 1 {
-			@ScrollPagination(book, paginationIndex)
+		if readMode == "paged_scroll" && book.PageCount/PAGED_SIZE+1 != 1 {
+			@ScrollPagination(book, pagedIndex)
 		}
 	</div>
 	<button id="BackTopButton" style="display: none" class="fixed flex items-center justify-center w-10 h-10 text-white bg-blue-500 rounded-full shadow-lg bottom-4 right-4">

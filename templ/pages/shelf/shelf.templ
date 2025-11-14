@@ -2,16 +2,17 @@ package shelf
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/templ/common"
-	"github.com/yumenaka/comigo/templ/state"
 )
 
 // ShelfPage 书架页面
-templ ShelfPage(c echo.Context) {
+templ ShelfPage(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookInfo, childBookInfos []model.BookInfo) {
 	@common.Toast()
 	@common.Header(
 		common.HeaderProps{
-			Title:           common.GetPageTitle(c.Param("id")),
+			Title:           common.GetPageTitle(c.Param("id"), nowBookNum, storeBookInfos, childBookInfos),
 			ShowReturnIcon:  c.Param("id") != "",
 			ReturnUrl:       common.GetReturnUrl(c.Param("id")),
 			SetDownLoadLink: false,
@@ -19,8 +20,8 @@ templ ShelfPage(c echo.Context) {
 			DownLoadLink:    "",
 			SetTheme:        true,
 		})
-	@MainArea(c)
-	@common.Footer(state.Version)
+	@MainArea(c, nowBookNum, storeBookInfos, childBookInfos)
+	@common.Footer(config.GetVersion())
 	@common.Drawer(c, nil, ShelfDrawerSlot())
 	@common.QRCode()
 }

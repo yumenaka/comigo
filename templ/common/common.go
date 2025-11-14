@@ -4,24 +4,37 @@ import (
 	"encoding/base64"
 	"mime"
 	"path/filepath"
+	"strconv"
 
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/store"
-	"github.com/yumenaka/comigo/templ/state"
 	fileutil "github.com/yumenaka/comigo/tools/file"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
 // GetPageTitle 获取页面标题
-func GetPageTitle(bookID string) string {
+func GetPageTitle(bookID string, nowBookNum int, storeBookInfos []model.StoreBookInfo, childBookInfos []model.BookInfo) string {
 	if bookID == "" {
-		return state.ServerConfig.GetTopStoreName()
+		return config.GetCfg().GetTopStoreName() + " (x" + strconv.Itoa(nowBookNum) + ")"
 	}
 	groupBook, err := model.IStore.GetBook(bookID)
 	if err != nil {
 		logger.Info("GetBook: %v", err)
-		return "Comigo " + state.Version
+		return "Comigo " + config.GetVersion()
+	}
+	return groupBook.Title
+}
+
+// GetBookTitle 获取页面标题
+func GetBookTitle(bookID string) string {
+	if bookID == "" {
+		return "Comigo " + config.GetVersion()
+	}
+	groupBook, err := model.IStore.GetBook(bookID)
+	if err != nil {
+		logger.Info("GetBook: %v", err)
+		return "Comigo " + config.GetVersion()
 	}
 	return groupBook.Title
 }

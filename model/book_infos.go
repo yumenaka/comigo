@@ -84,3 +84,9 @@ func compareByFileSize(a, b BookInfo) bool {
 	// 一般情况下，直接比较文件大小
 	return a.FileSize > b.FileSize
 }
+
+type StoreBookInfo struct {
+	StoreUrl     string    `json:"store_url"`
+	ChildBookNum int       `json:"child_book_num"`
+	BookInfos    BookInfos `json:"book_infos"`
+}

@@ -1,18 +1,17 @@
 // Flip 翻页模式
 Alpine.store('flip', {
-    nowPageNum: 1,
-    allPageNum: 100,
     imageMaxWidth: 400,
     //自动隐藏工具条
-    autoHideToolbar: Alpine.$persist((() => {
-        const ua = navigator.userAgent || '';
-        const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobi/i.test(ua);
-        const isTouch = (('ontouchstart' in window) || (navigator.maxTouchPoints > 1));
-        //console.log('isMobileUA', isMobileUA);
-        //console.log('isTouch', isTouch);
-        // return isMobileUA || isTouch;
-        return isMobileUA;
-    })()).as('flip.autoHideToolbar'),
+    autoHideToolbar: Alpine.$persist(false).as('flip.autoHideToolbar'),
+    // autoHideToolbar: Alpine.$persist((() => {
+    //     const ua = navigator.userAgent || '';
+    //     const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobi/i.test(ua);
+    //     const isTouch = (('ontouchstart' in window) || (navigator.maxTouchPoints > 1));
+    //     //console.log('isMobileUA', isMobileUA);
+    //     //console.log('isTouch', isTouch);
+    //     // return isMobileUA || isTouch;
+    //     return isMobileUA;
+    // })()).as('flip.autoHideToolbar'),
     //自动对齐
     autoAlign: Alpine.$persist(true).as('flip.autoAlignTop'),
     //是否显示页头
@@ -31,8 +30,6 @@ Alpine.store('flip', {
     autoDoublePageMode: Alpine.$persist(false).as(
         'flip.autoDoublePageModeFlag'
     ),
-    //是否保存阅读进度（页数）
-    saveReadingProgress: Alpine.$persist(true).as('flip.saveReadingProgress'),
     //素描模式标记
     sketchModeFlag: false,
     //是否显示素描提示
