@@ -33,11 +33,16 @@ func ScanStore(args []string) {
 	// 2、设置默认书库路径：扫描CMD指定的路径，或添加当前文件夹为默认路径。
 	CreateStoreUrls(args)
 
-	// 从本地文件加载书籍信息到内存（调试用）
+	// 从本地文件加载书籍信息到内存
 	if !config.GetCfg().EnableDatabase {
 		err := store.RamStore.LoadBooks()
 		if err != nil {
 			logger.Infof("LoadBooks_error %s", err)
+		}
+		model.ClearBookNotExist()
+		// 生成虚拟书籍组
+		if err := model.IStore.GenerateBookGroup(); err != nil {
+			logger.Infof("%s", err)
 		}
 	}
 

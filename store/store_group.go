@@ -200,9 +200,14 @@ func (ramStore *StoreInRam) LoadBooks() error {
 			err = json.Unmarshal(jsonData, &book)
 			if err != nil {
 				logger.Infof("Warning: corrupted JSON file %s, skipping: %s", fileName, err)
-				continue // 跳过损坏的文件，继续处理其他文件
+				// 尝试删除损坏的json文件
+				errDel := os.Remove(filePath)
+				if errDel != nil {
+					logger.Infof("Error deleting corrupted file %s: %s", fileName, errDel)
+				}
+				continue // 继续处理其他文件
 			}
-			// 添加书籍到内存
+			// 添加书籍到内存书库
 			err = ramStore.StoreBook(&book)
 			if err != nil {
 				logger.Infof("Error adding book %s to store: %s", book.BookID, err)
