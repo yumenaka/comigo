@@ -308,8 +308,10 @@ document.addEventListener('alpine:initialized', () => {
 
 const url = new URL(window.location.href);
 
-if (url.protocol === 'http:'||url.protocol === 'https:') {
-    Alpine.store('global').isHTTPServer=true;
-} else {
-    Alpine.store('global').isHTTPServer=false;
-}
+// if (url.protocol === 'http:'||url.protocol === 'https:') {
+//     Alpine.store('global').isHTTPServer=true;
+// } else {
+//     Alpine.store('global').isHTTPServer=false;
+// }
+
+Alpine.store('global').isHTTPServer=true;

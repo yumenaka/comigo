@@ -1,14 +1,9 @@
 package tailscale_plugin
 
 import (
-	"context"
 	"net/netip"
-	"runtime"
-	"strings"
 	"sync"
 	"time"
-
-	"tailscale.com/tailcfg"
 )
 
 type TailsClientInfo struct {
@@ -32,91 +27,92 @@ type TailscaleStatus struct {
 	mu               sync.Mutex        // Mutex lock
 }
 
-func (t *TailscaleStatus) GetTailscaleIP() string {
-	t.mu.Lock()
-	defer t.mu.Unlock()
-	if len(t.TailscaleIPs) == 1 {
-		return t.TailscaleIPs[0].String()
-	}
-	if len(t.TailscaleIPs) >= 2 {
-		// 优先返回 IPv4 地址
-		for _, ip := range t.TailscaleIPs {
-			if ip.Is4() {
-				return ip.String()
-			}
-		}
-	}
-	return ""
-}
-
-// AddClientInfo 添加客户端信息到状态中，需要避免重复添加
-func (t *TailscaleStatus) AddClientInfo(tsClient *TailsClientInfo) {
-	t.mu.Lock()
-	defer t.mu.Unlock()
-	// 已存在相同的用户和节点名称，跳过
-	for _, client := range t.Clients {
-		if client.LoginUserName == tsClient.LoginUserName && client.NodeComputedName == tsClient.NodeComputedName {
-			return
-		}
-	}
-	t.Clients = append(t.Clients, *tsClient)
-}
-
-func (t *TailscaleStatus) CheckClientInfoExists(loginUserName, nodeComputedName string, requestRemoteAddr string) bool {
-	t.mu.Lock()
-	defer t.mu.Unlock()
-	// 已存在相同的用户和节点名称+访问地址，返回 true
-	for _, client := range t.Clients {
-		if client.LoginUserName == loginUserName && client.NodeComputedName == nodeComputedName && client.RequestRemoteAddr == requestRemoteAddr {
-			return true
-		}
-	}
-	return false
-}
-
-// GetTailscaleStatus 获取Tailscale服务状态 https://github.com/tailscale/golink/blob/b54cbbbb609ce8425193e7171a35af023cb5066d/golink.go#L787
-func GetTailscaleStatus(ctx context.Context) (*TailscaleStatus, error) {
-	if localClient == nil {
-		// Tailscale 未启用或尚未初始化时，返回离线状态而不是错误，避免上层页面 500
-		nowStatus.AuthURL = ""
-		nowStatus.BackendState = "Stopped"
-		nowStatus.TailscaleIPs = nil
-		nowStatus.Version = ""
-		nowStatus.OS = runtime.GOOS
-		nowStatus.FQDN = ""
-		nowStatus.Online = false
-		nowStatus.FunnelCapability = "unknown"
-		return nowStatus, nil
-	}
-	// *ipnstate.Status
-	st, err := localClient.Status(ctx)
-	if err != nil {
-		return nil, err
-	}
-	// 刷新状态
-	nowStatus.AuthURL = st.AuthURL
-	nowStatus.BackendState = st.BackendState
-	nowStatus.TailscaleIPs = st.TailscaleIPs
-	nowStatus.Version = st.Version
-	if st.Self != nil {
-		fullyQualifiedDomainName := st.Self.DNSName
-		if strings.HasSuffix(fullyQualifiedDomainName, ".") {
-			fullyQualifiedDomainName = fullyQualifiedDomainName[:len(fullyQualifiedDomainName)-1]
-		}
-		nowStatus.OS = st.Self.OS
-		nowStatus.FQDN = fullyQualifiedDomainName
-		nowStatus.Online = st.Self.Online
-		nowStatus.FunnelCapability = "false"
-		// 检查是否支持 Funnel 功能
-		if st.Self.CapMap != nil && st.Self.CapMap.Contains(tailcfg.NodeAttrFunnel) {
-			// 检查 st.Self.CapMap[tailcfg.NodeAttrFunnel] 是否存在
-			nowStatus.FunnelCapability = "true"
-		}
-	}
-	if st.Self == nil {
-		nowStatus.OS = runtime.GOOS
-		nowStatus.FQDN = ""
-		nowStatus.Online = false
-	}
-	return nowStatus, nil
-}
+//
+//func (t *TailscaleStatus) GetTailscaleIP() string {
+//	t.mu.Lock()
+//	defer t.mu.Unlock()
+//	if len(t.TailscaleIPs) == 1 {
+//		return t.TailscaleIPs[0].String()
+//	}
+//	if len(t.TailscaleIPs) >= 2 {
+//		// 优先返回 IPv4 地址
+//		for _, ip := range t.TailscaleIPs {
+//			if ip.Is4() {
+//				return ip.String()
+//			}
+//		}
+//	}
+//	return ""
+//}
+//
+//// AddClientInfo 添加客户端信息到状态中，需要避免重复添加
+//func (t *TailscaleStatus) AddClientInfo(tsClient *TailsClientInfo) {
+//	t.mu.Lock()
+//	defer t.mu.Unlock()
+//	// 已存在相同的用户和节点名称，跳过
+//	for _, client := range t.Clients {
+//		if client.LoginUserName == tsClient.LoginUserName && client.NodeComputedName == tsClient.NodeComputedName {
+//			return
+//		}
+//	}
+//	t.Clients = append(t.Clients, *tsClient)
+//}
+//
+//func (t *TailscaleStatus) CheckClientInfoExists(loginUserName, nodeComputedName string, requestRemoteAddr string) bool {
+//	t.mu.Lock()
+//	defer t.mu.Unlock()
+//	// 已存在相同的用户和节点名称+访问地址，返回 true
+//	for _, client := range t.Clients {
+//		if client.LoginUserName == loginUserName && client.NodeComputedName == nodeComputedName && client.RequestRemoteAddr == requestRemoteAddr {
+//			return true
+//		}
+//	}
+//	return false
+//}
+//
+//// GetTailscaleStatus 获取Tailscale服务状态 https://github.com/tailscale/golink/blob/b54cbbbb609ce8425193e7171a35af023cb5066d/golink.go#L787
+//func GetTailscaleStatus(ctx context.Context) (*TailscaleStatus, error) {
+//	if localClient == nil {
+//		// Tailscale 未启用或尚未初始化时，返回离线状态而不是错误，避免上层页面 500
+//		nowStatus.AuthURL = ""
+//		nowStatus.BackendState = "Stopped"
+//		nowStatus.TailscaleIPs = nil
+//		nowStatus.Version = ""
+//		nowStatus.OS = runtime.GOOS
+//		nowStatus.FQDN = ""
+//		nowStatus.Online = false
+//		nowStatus.FunnelCapability = "unknown"
+//		return nowStatus, nil
+//	}
+//	// *ipnstate.Status
+//	st, err := localClient.Status(ctx)
+//	if err != nil {
+//		return nil, err
+//	}
+//	// 刷新状态
+//	nowStatus.AuthURL = st.AuthURL
+//	nowStatus.BackendState = st.BackendState
+//	nowStatus.TailscaleIPs = st.TailscaleIPs
+//	nowStatus.Version = st.Version
+//	if st.Self != nil {
+//		fullyQualifiedDomainName := st.Self.DNSName
+//		if strings.HasSuffix(fullyQualifiedDomainName, ".") {
+//			fullyQualifiedDomainName = fullyQualifiedDomainName[:len(fullyQualifiedDomainName)-1]
+//		}
+//		nowStatus.OS = st.Self.OS
+//		nowStatus.FQDN = fullyQualifiedDomainName
+//		nowStatus.Online = st.Self.Online
+//		nowStatus.FunnelCapability = "false"
+//		// 检查是否支持 Funnel 功能
+//		if st.Self.CapMap != nil && st.Self.CapMap.Contains(tailcfg.NodeAttrFunnel) {
+//			// 检查 st.Self.CapMap[tailcfg.NodeAttrFunnel] 是否存在
+//			nowStatus.FunnelCapability = "true"
+//		}
+//	}
+//	if st.Self == nil {
+//		nowStatus.OS = runtime.GOOS
+//		nowStatus.FQDN = ""
+//		nowStatus.Online = false
+//	}
+//	return nowStatus, nil
+//}
