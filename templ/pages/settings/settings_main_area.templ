@@ -1,7 +1,7 @@
 package settings
 
 import "github.com/yumenaka/comigo/tools/tailscale_plugin"
-import "github.com/yumenaka/comigo/templ/state"
+
 import "github.com/yumenaka/comigo/config"
 
 func x_data_debug_mode(debug bool) string {
@@ -14,8 +14,9 @@ func x_data_debug_mode(debug bool) string {
 templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 	<div
 		id="settingsMainArea"
-		x-data={ x_data_debug_mode(state.ServerConfig.Debug) }
-		class="flex flex-col justify-start items-center flex-1 w-full h-full font-semibold text-lg text-base-content"
+		x-data={ x_data_debug_mode(config.GetCfg().Debug) }
+		class="flex flex-col justify-start items-center flex-1 w-full h-full font-semibold text-lg text-base-content bg-base-300"
+		:class="(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') ? ($store.global.bgPattern !== 'none'?$store.global.bgPattern+' bg-base-300':'bg-base-300'):($store.global.bgPattern !== 'none'?$store.global.bgPattern:'')"
 	>
 		<div class="flex flex-col justify-start w-5/6 md:w-3/5 min-w-[20rem] relative">
 			<script>
@@ -33,7 +34,7 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 					}
 				});
 			</script>
-			if state.ServerConfig.ConfigLocked {
+			if config.GetCfg().ConfigLocked {
 				<div
 					class="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-screen h-full bg-black/50 flex items-start justify-center z-50 pointer-events-auto"
 				>
@@ -45,7 +46,7 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 				</div>
 			}
 			<!-- 管理账号密码 -->
-			@UserInfoConfig(state.ServerConfig.Username, state.ServerConfig.Password)
+			@UserInfoConfig(config.GetCfg().Username, config.GetCfg().Password)
 			<!-- 远程连接 -->
 			@RemoteAccessConfig(tsStatus)
 			<!-- 书库设置 -->
@@ -55,15 +56,15 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 			>
 				<div x-text={ getTranslations("settings_stores") } class="w-full text-center"></div>
 				<hr class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
-				@StringArrayConfig("StoreUrls", state.ServerConfig.StoreUrls, "StoreUrls_Description", false)
-				@NumberConfig("MaxScanDepth", state.ServerConfig.MaxScanDepth, "MaxScanDepth_Description", 0, 65535, false)
-				@NumberConfig("MinImageNum", state.ServerConfig.MinImageNum, "MinImageNum_Description", 0, 65535, false)
-				@BoolConfig("OpenBrowser", state.ServerConfig.OpenBrowser, "OpenBrowser_Description", false)
-				@BoolConfig("EnableUpload", state.ServerConfig.EnableUpload, "EnableUpload_Description", false)
-				@StringConfig("UploadPath", state.ServerConfig.UploadPath, "UploadPath_Description", false)
-				@StringArrayConfig("ExcludePath", state.ServerConfig.ExcludePath, "ExcludePath_Description", false)
-				@StringArrayConfig("SupportMediaType", state.ServerConfig.SupportMediaType, "SupportMediaType_Description", false)
-				@StringArrayConfig("SupportFileType", state.ServerConfig.SupportFileType, "SupportFileType_Description", false)
+				@StringArrayConfig("StoreUrls", config.GetCfg().StoreUrls, "StoreUrls_Description", false)
+				@NumberConfig("MaxScanDepth", config.GetCfg().MaxScanDepth, "MaxScanDepth_Description", 0, 65535, false)
+				@NumberConfig("MinImageNum", config.GetCfg().MinImageNum, "MinImageNum_Description", 0, 65535, false)
+				@BoolConfig("OpenBrowser", config.GetCfg().OpenBrowser, "OpenBrowser_Description", false)
+				@BoolConfig("EnableUpload", config.GetCfg().EnableUpload, "EnableUpload_Description", false)
+				@StringConfig("UploadPath", config.GetCfg().UploadPath, "UploadPath_Description", false)
+				@StringArrayConfig("ExcludePath", config.GetCfg().ExcludePath, "ExcludePath_Description", false)
+				@StringArrayConfig("SupportMediaType", config.GetCfg().SupportMediaType, "SupportMediaType_Description", false)
+				@StringArrayConfig("SupportFileType", config.GetCfg().SupportFileType, "SupportFileType_Description", false)
 			</div>
 			<!-- 网络设置 -->
 			<div
@@ -72,10 +73,10 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 			>
 				<div x-text="i18next.t('settings_network')" class="w-full text-center">网络设置</div>
 				<hr class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
-				@NumberConfig("Port", int(state.ServerConfig.Port), "Port_Description", 0, 65535, false)
-				@StringConfig("Host", state.ServerConfig.Host, "Host_Description", false)
-				@BoolConfig("DisableLAN", state.ServerConfig.DisableLAN, "DisableLAN_Description", false)
-				@NumberConfig("Timeout", state.ServerConfig.Timeout, "Timeout_Description", 0, 65535, false)
+				@NumberConfig("Port", int(config.GetCfg().Port), "Port_Description", 0, 65535, false)
+				@StringConfig("Host", config.GetCfg().Host, "Host_Description", false)
+				@BoolConfig("DisableLAN", config.GetCfg().DisableLAN, "DisableLAN_Description", false)
+				@NumberConfig("Timeout", config.GetCfg().Timeout, "Timeout_Description", 0, 65535, false)
 			</div>
 			<!-- 保存toml设置文件 -->
 			@ConfigManager(config.DefaultConfigLocation(), config.GetWorkingDirectoryConfig(),
@@ -88,18 +89,18 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 			>
 				<div x-text={ getTranslations("settings_extra") } class="w-full text-center">实验功能</div>
 				<hr class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
-				@BoolConfig("Debug", state.ServerConfig.Debug, "Debug_Description", false)
-				if state.ServerConfig.Debug {
-					@BoolConfig("LogToFile", state.ServerConfig.LogToFile, "LogToFile_Description", false)
-					@BoolConfig("GenerateMetaData", state.ServerConfig.GenerateMetaData, "GenerateMetaData_Description", false)
-					@BoolConfig("EnableDatabase", state.ServerConfig.EnableDatabase, "EnableDatabase_Description", false)
-					@BoolConfig("ClearCacheExit", state.ServerConfig.ClearCacheExit, "ClearCacheExit_Description", false)
-					@StringConfig("CacheDir", state.ServerConfig.CacheDir, "CacheDir_Description", false)
-					@StringConfig("ZipFileTextEncoding", state.ServerConfig.ZipFileTextEncoding, "ZipFileTextEncoding_Description", false)
+				@BoolConfig("Debug", config.GetCfg().Debug, "Debug_Description", false)
+				if config.GetCfg().Debug {
+					@BoolConfig("LogToFile", config.GetCfg().LogToFile, "LogToFile_Description", false)
+					@BoolConfig("GenerateMetaData", config.GetCfg().GenerateMetaData, "GenerateMetaData_Description", false)
+					@BoolConfig("EnableDatabase", config.GetCfg().EnableDatabase, "EnableDatabase_Description", false)
+					@BoolConfig("ClearCacheExit", config.GetCfg().ClearCacheExit, "ClearCacheExit_Description", false)
+					@StringConfig("CacheDir", config.GetCfg().CacheDir, "CacheDir_Description", false)
+					@StringConfig("ZipFileTextEncoding", config.GetCfg().ZipFileTextEncoding, "ZipFileTextEncoding_Description", false)
 				}
 			</div>
 		</div>
-		if state.ServerConfig.Debug {
+		if config.GetCfg().Debug {
 			<!-- 服务器日志 -->
 			@LogPanel()
 		}

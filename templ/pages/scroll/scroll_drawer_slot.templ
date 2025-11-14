@@ -6,6 +6,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/templ/common"
 )
 
 // 卷轴模式页面，放在侧栏里的【非共通设置】
@@ -22,12 +23,12 @@ templ DrawerSlot(c echo.Context, book *model.Book) {
 			用浏览器打开PDF
 		</a>
 	}
-	<!-- 【下载为便携网页文件】按钮，固定分页模式与便携模式不可见 -->
-	<div class="flex justify-center w-full my-2 font-semibold" x-show="(!$store.scroll.fixedPagination)&&(!window.location.href.includes('file:///'))">
+	<!-- 【下载为便携网页文件】按钮，便携模式不可见 -->
+	<div class="flex justify-center w-full my-1 font-semibold" x-show="(!window.location.href.startsWith('file:///'))">
 		<a
 			href={ templ.SafeURL(fmt.Sprintf("%s?static="+book.BookInfo.Title+".html", c.Request().URL.Path)) }
 			download={ book.BookInfo.Title + ".html" }
-			class="inline-flex items-center px-4 py-2 text-white bg-blue-500 rounded-lg shadow-lg hover:bg-blue-600 transition-colors"
+			class="inline-flex items-center px-4 py-2 text-white bg-blue-500 rounded shadow-lg hover:bg-blue-600 transition-colors"
 			:title="i18next.t('download_portable_web_file')"
 			x-text="i18next.t('download_portable_web_file')"
 		>
@@ -37,101 +38,7 @@ templ DrawerSlot(c echo.Context, book *model.Book) {
 			下载为便携网页文件
 		</a>
 	</div>
-	<!-- 切换【卷轴模式/翻页模式】的按钮-->
-	<!-- <button
-		type="button"
-		x-data="{ buttonText: i18next.t('to_flip_mode') }"
-		x-text="buttonText"
-		x-on:click="$store.global.toggleReadMode();toggleFlipScrollFlexible();"
-		class="px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-	>
-		切换到卷轴模式/翻页模式
-	</button> -->
-	<!-- 切换【卷轴模式/翻页模式】的toggle-->
-	<label
-		x-show="!window.location.href.includes('file:///')"
-		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
-	>
-		<input type="checkbox" x-bind:value="$store.global.readModeIsScroll" x-on:change="$store.global.toggleReadMode();toggleFlipScrollFlexible();" checked class="sr-only peer"/>
-		<div
-			class="relative w-11 min-w-[44px] h-6 bg-green-600 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
-		></div>
-		<span class="font-medium ms-3" x-text="$store.global.readModeIsScroll?i18next.t('scroll_mode')+i18next.t('click_to_toggle'):i18next.t('flip_mode')+i18next.t('click_to_toggle')"></span>
-	</label>
-	<script>
-		function toggleFlipScrollFlexible() {
-			// 切换阅读模式时，如果在阅读，就修改URL路径
-			const currentUrl = new URL(window.location.href);
-			const pathname = currentUrl.pathname;
-			// 定义匹配 /flip/<id> 或 /scroll/<id> 的正则表达式，允许它们出现在路径的任意位置
-			const pattern = /\/(flip|scroll)\/([^/]+)/;
-			const match = pathname.match(pattern);
-			if (match) {
-				const currentSegment = match[1]; // 'flip' 或 'scroll'
-				if (
-					currentSegment === "flip" &&
-					!Alpine.store("global").readModeIsScroll
-				) {
-					return; // 如果当前路径是翻页模式，就不需要修改
-				}
-				if (
-					currentSegment === "scroll" &&
-					Alpine.store("global").readModeIsScroll
-				) {
-					return; // 如果当前路径是卷轴模式，也不需要修改
-				}
-				const id = match[2]; // <id> 部分
-				const newSegment = currentSegment === "flip" ? "scroll" : "flip";
-				const newPath = pathname.replace(
-					`/` + currentSegment + `/` + id,
-					`/${newSegment}/${id}`,
-				);
-				currentUrl.pathname = newPath;
-				window.location.href = currentUrl.toString();
-			}
-		}
-	</script>
-	<!-- 卷轴模式:【固定分页/无限下拉】 -->
-	<label
-		x-show="!window.location.href.includes('file:///')"
-		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
-	>
-		<input type="checkbox" x-bind:value="$store.scroll.fixedPagination" @click="togglePaginationLoading();" class="sr-only peer" checked/>
-		<div
-			class="relative w-11 min-w-[44px] h-6 bg-green-600 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
-		></div>
-		<span class="font-medium ms-3" x-text="$store.scroll.fixedPagination?i18next.t('scroll_fixed_pagination')+i18next.t('click_to_toggle'):i18next.t('scroll_infinite_scroll')+i18next.t('click_to_toggle')"></span>
-	</label>
-	<script>
-		// 切换分页模式时，如果当前路径带有分页，就修改URL路径为不带分页的路径
-		// 反之，如果当前路径不带分页，就修改URL路径为带分页的路径（page =1）
-		// 当前路径类似于 /flip/<id>?page=1 或 /scroll/<id>?page=1
-		function togglePaginationLoading() {
-			// 获取当前URL对象
-			const currentUrl = new URL(window.location.href);
-			const hasPageParam = currentUrl.searchParams.has("page");
-			Alpine.store("scroll").fixedPagination =
-				!Alpine.store("scroll").fixedPagination;
-			// 不需要跳转的时候（比如直接从url进来，导致url与当前状态不一致）
-			if (Alpine.store("scroll").fixedPagination === false && !hasPageParam) {
-				return;
-			}
-			if (Alpine.store("scroll").fixedPagination === true && hasPageParam) {
-				return;
-			}
-			// 如果当前路径带有分页，就修改URL路径为不带分页的路径
-			// 如果当前路径不带分页，就修改URL路径为带分页的路径（page=1）
-			if (hasPageParam) {
-				currentUrl.searchParams.delete("page");
-			} else {
-				currentUrl.searchParams.set("page", "1");
-			}
-			// 刷新页面
-			window.location.href = currentUrl.toString();
-			//// 更新URL，不刷新页面
-			////window.history.pushState({}, '', currentUrl.toString());
-		}
-	</script>
+	@common.ReadModeSwitchButton()
 	<!-- 【显示页数】 -->
 	<label class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm">
 		<input type="checkbox" x-model="$store.scroll.showPageNum" class="sr-only peer" checked/>
@@ -160,7 +67,7 @@ templ DrawerSlot(c echo.Context, book *model.Book) {
 	</div>
 	<!-- 【自动切边】 -->
 	<label
-		x-show="!window.location.href.includes('file:///')"
+		x-show="!window.location.href.startsWith('file:///')"
 		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
 	>
 		<input
@@ -176,7 +83,7 @@ templ DrawerSlot(c echo.Context, book *model.Book) {
 	</label>
 	<!-- 【切边阈值】 -->
 	<div
-		x-show="(!window.location.href.includes('file:///'))&&$store.global.autoCrop"
+		x-show="(!window.location.href.startsWith('file:///'))&&$store.global.autoCrop"
 		x-transition
 		class="relative w-full my-2 rounded-sm outline-offset-4 outline-double outline-2 hover:outline-3"
 	>
@@ -293,7 +200,7 @@ templ DrawerSlot(c echo.Context, book *model.Book) {
 	</div>
 	<!-- 【压缩图片】 -->
 	<label
-		x-show="!window.location.href.includes('file:///')"
+		x-show="!window.location.href.startsWith('file:///')"
 		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
 	>
 		<input

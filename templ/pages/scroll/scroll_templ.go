@@ -10,13 +10,14 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/templ/common"
-	"github.com/yumenaka/comigo/templ/state"
+	"github.com/yumenaka/comigo/tools"
 )
 
 // ScrollPage 定义 BodyHTML
-func ScrollPage(c echo.Context, book *model.Book, paginationIndex int) templ.Component {
+func ScrollPage(c echo.Context, book *model.Book, readMode string, pagedIndex int, startIndex int) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -37,7 +38,13 @@ func ScrollPage(c echo.Context, book *model.Book, paginationIndex int) templ.Com
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = InsertData(book, state.ServerStatus).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = InsertData(book, tools.GetServerInfo(
+			tools.ServerInfoParams{
+				Cfg:            config.GetCfg(),
+				Version:        config.GetVersion(),
+				AllBooksNumber: model.GetAllBooksNumber(),
+				ClientIP:       c.RealIP(),
+			})).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -48,7 +55,7 @@ func ScrollPage(c echo.Context, book *model.Book, paginationIndex int) templ.Com
 		if book != nil {
 			templ_7745c5c3_Err = common.Header(
 				common.HeaderProps{
-					Title:             common.GetPageTitle(book.BookInfo.BookID),
+					Title:             common.GetBookTitle(book.BookInfo.BookID),
 					ShowReturnIcon:    true,
 					ReturnUrl:         common.GetReturnUrl(book.BookInfo.BookID),
 					SetDownLoadLink:   false,
@@ -65,12 +72,12 @@ func ScrollPage(c echo.Context, book *model.Book, paginationIndex int) templ.Com
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = MainArea(c, book, paginationIndex).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = MainArea(c, book, readMode, pagedIndex, startIndex).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = common.Footer(state.Version).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.Footer(config.GetVersion()).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

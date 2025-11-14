@@ -1,9 +1,11 @@
 package common
 
-import "github.com/labstack/echo/v4"
-import "github.com/yumenaka/comigo/model"
-import "github.com/yumenaka/comigo/templ/state"
-import "github.com/yumenaka/comigo/templ/common/svg"
+import (
+	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/templ/common/svg"
+)
 
 templ Drawer(c echo.Context, book *model.Book, slot templ.Component) {
 	<!-- Drawer component -->
@@ -27,7 +29,7 @@ templ Drawer(c echo.Context, book *model.Book, slot templ.Component) {
 					alt="favicon"
 				/>
 				<div x-text="i18next.t('reader_settings')">阅读设置</div>
-				if state.ServerConfig.RequiresAuth() {
+				if config.GetCfg().RequiresAuth() {
 					<button
 						type="button"
 						id="logout_button"
@@ -62,7 +64,7 @@ templ Drawer(c echo.Context, book *model.Book, slot templ.Component) {
 			<div class="flex-1 w-full place-holder"></div>
 			<!-- 二维码 -->
 			<div
-				x-show="!window.location.href.includes('file:///')"
+				x-show="$store.global.isHTTPServer"
 				class="w-32 h-32 p-0 mt-2 mb-2"
 				x-data="{ qrcodeSrc: '' }"
 				x-init="qrcodeSrc = window.location.origin +'/api/qrcode.png?base64=true&qrcode_str='+ encodeURIComponent(window.location.toString())"
@@ -86,7 +88,7 @@ templ Drawer(c echo.Context, book *model.Book, slot templ.Component) {
 				x-data="{ buttonText: i18next.t('reset_local_settings') }"
 				x-text="buttonText"
 				x-on:click="if(window.confirm(i18next.t('confirm_reset_settings'))) { localStorage.clear(); location.reload(); }"
-				class="mb-2 px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+				class="mb-2 px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
 			>
 				重置本地设置
 			</button>

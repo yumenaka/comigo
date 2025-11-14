@@ -2,8 +2,8 @@ package upload_page
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/templ/common"
-	"github.com/yumenaka/comigo/templ/state"
 )
 
 // UploadPage 上传页面
@@ -21,7 +21,7 @@ templ UploadPage(c echo.Context) {
 		})
 	@common.UploadArea()
 	,
-	@common.Footer(state.Version)
+	@common.Footer(config.GetVersion())
 	@common.Drawer(c, nil, nil)
 	@common.QRCode()
 }

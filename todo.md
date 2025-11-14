@@ -18,16 +18,8 @@
 - **样式框架**: [Tailwind CSS](https://tailwindcss.com/docs/flex) - 实用优先的 CSS 框架
 - **国际化**: [i18next](https://www.i18next.com) - 国际化解决方案
 - **图标库**: [Xicons](https://www.xicons.org/#/) - 图标集合
-
-### 后端技术
-- **Web 框架**: [Gin](https://gin-gonic.com/zh-cn/docs/examples/) - 高性能 Go Web 框架
-- **HTMX 集成**: [htmx-go](https://github.com/angelofallars/htmx-go) - Go 语言 HTMX 集成
-
-### 开发工具
 - **热重载**: [Air](https://github.com/air-verse/air) - Go 应用热重载工具
-- **运行时**: [Bun](https://github.com/oven-sh/bun) - 高性能 JavaScript 运行时
-- **代码质量**: [golangci-lint](https://github.com/golangci/golangci-lint) - Go 代码质量检查工具
-- **代码格式化**: [Prettier](https://prettier.io/docs/en/index.html) - 代码格式化工具
+- **js运行时**: [Bun](https://github.com/oven-sh/bun) - 高性能 JavaScript 运行时
 
 ## 项目特性
 
@@ -61,31 +53,37 @@
 - [x] 服务器设置页面 v1.0
 - [x] tailscale 集成
 - [x] 解决tailscale带来的cgo编译问题：https://github.com/elastic/golang-crossbuild 或 https://github.com/goreleaser/goreleaser-cross
+- [x] 阅读历史记录（跳转到上一次阅读的最远页）
+- [x] 阅读历史持久化，meta文件，
+- [x] 下载为单个html文件
+- [x] 拆分内存存储与数据库存储，为支持samba与S3等文件系统做准备。
 
 ### 开发中
-- [ ] 网页端日志查看 50%
-- [ ] “阅读历史记录（是否跳转到上一次阅读的最远页）”与“按照最近阅读时间排序”
-- [ ] 文件持久化，meta文件，阅读历史与统计。
+- [ ] 系统托盘图标、后台运行 https://github.com/getlantern/systray
 - [ ] 新官网,Discord频道,使用文档，参考 https://omarchy.org/ 。内置帮助文档?
+- [ ] 侧栏加返回书架，切换全屏按钮，方便操作。或者让Header的显示层级大于侧栏。
+- [ ] 尝试用 go.work 解决wails的tailscale依赖冲突。
+- [ ] 示例漫画
+- [ ] 书架按照最近阅读时间排序，无阅读进度的书籍，以文件修改时间排序
+- [ ] 上传页面挪到设置页面-书库设置。
+- [ ] 改造上传功能，可选上传到下拉框指定的书库。没有默认书库则不可上传。
 - [ ] 官网自动探测浏览器平台，提供合适的平台版本（参考Audacity） 
 - [ ] 支持smb、webdav文件系统
+- [ ] 网页端日志查看 50%
 - [ ] 注册为文件默认打开类型，简单托盘图标，gui界面。
 - [ ] 手动或自动检测新版本提示，然后可以试着自动更新新版本（win与macos），最后是各种linux软件源
 - [ ] 网页端：浏览器快捷键(50%)。
-- [ ] 下载为单个html文件（50%）
-- [ ] 示例漫画
+- [ ] 网页端：自动化测试，修改后自动测试基本功能。
+- [ ] 网页端：卷轴模式页数同步体验优化。
 - [ ] 翻页模式：滚轮滑动翻页
 - [ ] 滑动模式：可快捷键调速的自动翻页
 - [ ] cli 交互，tui支持
 - [ ] 访问权限控制
 - [ ] PWA 支持
 - [ ] 系统监控（CPU、内存）
-- [ ] 嵌入 HTML
-- [ ] 网页端：
 - [ ] wasm模式
-- [ ] 拆分内存存储与数据库存储，并为支持samba与S3等文件系统做准备。
 - [ ] 自动更新
-- [ ] 文件监控
+- [ ] 文件监控 https://github.com/sgtdi/fswatcher
 - [ ] 用户系统增强
 - [ ] Shell 交互
 - [ ] 文件管理
@@ -139,7 +137,7 @@ air
 ### 长期计划
 - [ ] 嵌入html，防剧透效果。回忆模式，特殊背景，音乐etc
 - [ ] 网页端：优化图片预加载，长图片支持。
-- [ ] 跨平台 GUI（Flutter + GoMobile或 Wails）PWA模式。
+- [ ] 跨平台 GUI（Flutter + GoMobile或 Wails）PWA模式。wail debug https://github.com/wailsapp/wails/issues/3050
 - [ ] 更新提示，自动更新自动更新(github.com/jpillora/overseer) 包管理支持。[self update 功能](https://github.com/minio/selfupdate)
 - [ ] 文件夹监控(fsnotify)，https://github.com/helshabini/fsbroker/
 - [ ] 用户系统、访问密码，流量限制 comigo后台：有几台设备在线，阅读文件，阅读页数，当前用户状态、阅读书籍、阅读进度、阅读时间、服务器状态 注册，阅读记录，
@@ -164,3 +162,39 @@ air
 - [ ] 后台运行功能：unix：https://github.com/sevlyar/go-daemon 支持Windows但是最近没更新：https://github.com/takama/daemon
 - [ ] 在终端显示图片 https://github.com/ploMP4/chafa-go
 - [ ]  OpenID Connect 登录 https://github.com/zitadel/oidc  https://tailscale.com/community/community-projects/tsidp
+
+
+## history
+- 2025-11-12: v1.1.0 发布，支持下载为单个网页文件，Tailscale远程连接，多书架优化
+- **新功能：**
+1. 自动保存与恢复阅读进度，让阅读体验更加连贯。
+2. 内置 Tailscale 远程连接功能，轻松实现跨设备访问。
+3. 支持多个书库分批展示，加载更高效。
+
+**优化：**
+1. 同一浏览器的不同标签页之间也可同步翻页操作。
+2. 自动忽略以「.」开头的隐藏文件。
+3. 命令行模式下，打印帮助或版本信息后直接退出。
+4. 修复网络较慢时书架与设置页面出现闪烁的问题。
+
+**新機能：**
+1. 読書進捗の自動保存・復元に対応し、より快適な読書体験を実現。
+2. 内蔵の Tailscale リモート接続機能で、デバイス間アクセスがより簡単に。
+3. 複数の書庫を分割して表示し、読み込み効率を向上。
+
+**最適化：**
+1. 同一ブラウザ内の別タブ間でもページめくり操作を同期。
+2. 「.」で始まる隠しファイルを自動的に無視。
+3. コマンドラインでヘルプまたはバージョン情報を表示後、自動的に終了。
+4. ネットワーク速度が遅い場合に発生する書棚および設定ページのちらつき問題を修正。
+
+**New Features:**
+1. Automatically save and restore reading progress for a seamless experience.
+2. Built-in Tailscale remote connection for easy cross-device access.
+3. Support for displaying multiple libraries in batches for improved loading efficiency.
+
+**Improvements:**
+1. Page flipping is now synchronized across different tabs in the same browser.
+2. Hidden files (starting with “.”) are now automatically ignored.
+3. In command-line mode, the program now exits immediately after printing help or version info.
+4. Fixed flickering issues on the bookshelf and settings pages when the network is slow.

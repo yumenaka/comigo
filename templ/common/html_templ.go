@@ -40,7 +40,7 @@ func Html(c echo.Context, bodyContent templ.Component, insertScript []string) te
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(GetPageTitle(c.Param("id")))
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(GetBookTitle(c.Param("id")))
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/html.templ`, Line: 16, Col: 39}
 		}

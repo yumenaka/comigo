@@ -1,6 +1,7 @@
 package scroll
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -12,8 +13,8 @@ import (
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
-// PageHandler 阅读界面（卷轴模式）
-func PageHandler(c echo.Context) error {
+// ScrollModeHandler 阅读界面（卷轴模式）
+func ScrollModeHandler(c echo.Context) error {
 	// 图片排序方式
 	sortBy := "default"
 	sortBookBy, err := c.Cookie("ScrollSortBy")
@@ -42,17 +43,25 @@ func PageHandler(c echo.Context) error {
 		return nil
 	}
 	book.SortPages(sortBy)
+	readMode := "infinite_scroll"
 	// 读取分页索引
-	paginationIndex := -1
+	pagedIndex := -1
 	page := c.QueryParam("page")
 	if page != "" {
+		readMode = "paged_scroll"
 		index, err := strconv.Atoi(page)
 		if err == nil {
-			paginationIndex = index
+			pagedIndex = index
 		}
 	}
+
+	startIndex, err := strconv.Atoi(c.QueryParam("start"))
+	if err != nil {
+		startIndex = 0
+	}
+
 	// 定义模板主体内容。
-	scrollPage := ScrollPage(c, book, paginationIndex)
+	scrollPage := ScrollPage(c, book, readMode, pagedIndex, startIndex)
 	// 拼接页面
 	indexHtml := common.Html(
 		c,
@@ -78,4 +87,27 @@ func getScrollPaginationURL(book *model.Book, page int) string {
 		return `javascript:showToast(i18next.t('hint_last_page'), 'warning')`
 	}
 	return readURL
+}
+
+// 自动书签脚本
+func intersectScript(pageIndex int) string {
+	return fmt.Sprintf(`
+    $nextTick(() => {
+	if(!loaded || counter < 1){
+        return;
+    }
+	//console.log({loaded});
+    if (loaded && !updateBookmarkCompleted) {
+        $store.global.UpdateBookmark(
+            {
+                type: 'auto',
+                bookId: book.id,
+                pageIndex: %d,
+                label: '自动书签'
+            }
+        );
+        updateBookmarkCompleted = true;
+    }
+  })
+	`, pageIndex)
 }

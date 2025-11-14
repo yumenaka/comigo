@@ -1,23 +1,9 @@
 package shelf
 
+import "github.com/yumenaka/comigo/templ/common"
+
 templ ShelfDrawerSlot() {
-	<!-- 切换【卷轴模式/翻页模式】-->
-	<!-- toggle组件参考： https://flowbite.com/docs/forms/toggle/ -->
-	<label class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm">
-		<input type="checkbox" :value="$store.global.readMode === 'scroll'" x-on:click="$store.global.toggleReadMode()" class="sr-only peer"/>
-		<div
-			class="relative w-11 min-w-[44px] h-6 bg-green-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
-		></div>
-		<span class="font-medium ms-3" x-text="$store.global.readMode === 'scroll'?i18next.t('scroll_mode'):i18next.t('flip_mode')">卷轴模式/翻页模式</span>
-	</label>
-	<!-- 卷轴模式:【固定分页/无限下拉】 -->
-	<label x-show="$store.global.readModeIsScroll" class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm">
-		<input type="checkbox" x-model="$store.scroll.fixedPagination" class="sr-only peer" checked/>
-		<div
-			class="relative w-11 min-w-[44px] h-6 bg-green-600 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
-		></div>
-		<span class="font-medium ms-3" x-text="$store.scroll.fixedPagination?i18next.t('scroll_fixed_pagination'):i18next.t('scroll_infinite_scroll')"></span>
-	</label>
+	@common.ReadModeSelect(true)
 	<!-- 切换【显示文件名】-->
 	<label class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm">
 		<input type="checkbox" :value="$store.shelf.showFilename" x-on:click="$store.shelf.showFilename =!$store.shelf.showFilename" class="sr-only peer"/>
@@ -35,5 +21,42 @@ templ ShelfDrawerSlot() {
 		<input type="checkbox" :value="$store.shelf.showFileIcon" x-on:click="$store.shelf.showFileIcon =!$store.shelf.showFileIcon" class="sr-only peer"/>
 		<div class="relative w-11 min-w-[44px] h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
 		<span class="font-medium ms-3" x-text="i18next.t('show_file_icon')"></span>
+	</label>
+	<!-- 阅读进度显示（百分比）  -->
+	<label
+		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
+	>
+		<input
+			type="checkbox"
+			:value="$store.shelf.readingProgressPercent"
+			x-on:click="$store.shelf.readingProgressPercent =!$store.shelf.readingProgressPercent"
+			class="sr-only peer"
+		/>
+		<div
+			class="relative w-11 min-w-[44px] h-6 bg-green-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+		></div>
+		<span
+			class="font-medium ms-3"
+			x-text="$store.shelf.readingProgressPercent?i18next.t('reading_progress_percent'):i18next.t('reading_progress_page')"
+		></span>
+	</label>
+}
+
+// SaveReadingProgress 定义 保存阅读进度到本地存储 的开关 暂时用不着
+templ SaveReadingProgress() {
+	<!-- 保存阅读进度到本地存储 SaveReadingProgress -->
+	<label
+		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
+	>
+		<input
+			type="checkbox"
+			:value="$store.global.saveReadingProgress"
+			x-on:click="$store.global.saveReadingProgress =!$store.global.saveReadingProgress"
+			class="sr-only peer"
+		/>
+		<div
+			class="relative w-11 min-w-[44px] h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+		></div>
+		<span class="font-medium ms-3" x-text="i18next.t('save_page_num')"></span>
 	</label>
 }

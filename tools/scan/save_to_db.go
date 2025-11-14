@@ -1,4 +1,4 @@
-//go:build !(windows && 386) && !js
+//go:build !js
 
 package scan
 
@@ -18,7 +18,7 @@ func SaveBooksToDatabase(cfg ConfigInterface) error {
 		logger.Infof("Error listing books: %s", err)
 	}
 	for _, b := range allBooks {
-		saveErr := sqlc.DbStore.AddBook(b)
+		saveErr := sqlc.DbStore.StoreBook(b)
 		if saveErr != nil {
 			logger.Info(saveErr)
 			return saveErr

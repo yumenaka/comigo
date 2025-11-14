@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS page_infos
 CREATE TABLE IF NOT EXISTS bookmarks
 (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    type        INTEGER NOT NULL,                   -- Bookmark type (1: Reading progress, 2: User note)
+    type        TEXT NOT NULL,                     -- Bookmark type (like: "auto", "user")
     book_id     TEXT    NOT NULL,                   -- Associated book ID
     page_index  INTEGER NOT NULL,                   -- Page index, starts from 0
     description TEXT,                               -- User note

@@ -22,7 +22,7 @@ func GetBook(c echo.Context) error {
 	if id == "" {
 		return c.JSON(http.StatusBadRequest, "not set id param")
 	}
-	ClearBookNotExist()
+	model.ClearBookNotExist()
 	// 获取书籍信息
 	b, err := model.IStore.GetBook(id)
 	if err != nil {

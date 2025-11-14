@@ -3,6 +3,7 @@ package scan
 import (
 	"errors"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -92,10 +93,13 @@ func InitStore(storePath string, cfg ConfigInterface) error {
 
 	// 处理文件
 	for _, file := range foundFiles {
+		////如果是以 . 开头的隐藏文件，跳过
+		if strings.HasPrefix(path.Base(file.Name), ".") {
+			continue
+		}
 		if !IsSupportFile(file.Name) {
 			continue
 		}
-
 		// 计算路径深度
 		relPath, err := filepath.Rel(storePathAbs, file.Path)
 		if err != nil {
