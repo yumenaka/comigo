@@ -10,13 +10,9 @@ import (
 templ NotFound404(c echo.Context) {
 	@common.Header(
 		common.HeaderProps{
-			Title:           "",
-			ShowReturnIcon:  true,
-			ReturnUrl:       "/",
-			SetDownLoadLink: false,
-			InShelf:         false,
-			DownLoadLink:    "",
-			SetTheme:        true,
+			Title:          "",
+			ShowReturnIcon: true,
+			ReturnUrl:      "/",
 		})
 	<div
 		class="flex flex-col items-center justify-center flex-1 w-full p-8 text-center text-base-content"

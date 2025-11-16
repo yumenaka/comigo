@@ -11,13 +11,9 @@ templ UploadPage(c echo.Context) {
 	@common.Toast()
 	@common.Header(
 		common.HeaderProps{
-			Title:           "UploadPage",
-			ShowReturnIcon:  true,
-			ReturnUrl:       "/",
-			SetDownLoadLink: false,
-			InShelf:         false,
-			DownLoadLink:    "",
-			SetTheme:        true,
+			Title:          "UploadPage",
+			ShowReturnIcon: true,
+			ReturnUrl:      "/",
 		})
 	@common.UploadArea()
 	,

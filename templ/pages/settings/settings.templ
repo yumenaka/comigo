@@ -11,13 +11,10 @@ import (
 templ SettingsPage(c echo.Context, tsStatus *tailscale_plugin.TailscaleStatus) {
 	@common.Header(
 		common.HeaderProps{
-			Title:           "SettingsPage",
-			ShowReturnIcon:  true,
-			ReturnUrl:       "/",
-			SetDownLoadLink: false,
-			InShelf:         false,
-			DownLoadLink:    "",
-			SetTheme:        true,
+			Title:          "SettingsPage",
+			ShowReturnIcon: true,
+			ShowUploadIcon: true,
+			ReturnUrl:      "/",
 		})
 	@common.Toast()
 	@MainArea(tsStatus)

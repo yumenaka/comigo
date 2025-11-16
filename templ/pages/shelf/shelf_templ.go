@@ -43,13 +43,11 @@ func ShelfPage(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookI
 		}
 		templ_7745c5c3_Err = common.Header(
 			common.HeaderProps{
-				Title:           common.GetPageTitle(c.Param("id"), nowBookNum, storeBookInfos, childBookInfos),
-				ShowReturnIcon:  c.Param("id") != "",
-				ReturnUrl:       common.GetReturnUrl(c.Param("id")),
-				SetDownLoadLink: false,
-				InShelf:         true,
-				DownLoadLink:    "",
-				SetTheme:        true,
+				Title:             common.GetPageTitle(c.Param("id"), nowBookNum, storeBookInfos, childBookInfos),
+				ShowReturnIcon:    c.Param("id") != "",
+				ShowReSortIcon:    true,
+				ShowServerSetting: true,
+				ReturnUrl:         common.GetReturnUrl(c.Param("id")),
 			}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
