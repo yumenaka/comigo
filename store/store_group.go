@@ -64,8 +64,8 @@ func (ramStore *StoreInRam) ListBooks() ([]*model.Book, error) {
 	return books, nil
 }
 
-// SaveBooks  保存书籍信息到本地硬盘
-func (ramStore *StoreInRam) SaveBooks() error {
+// SaveBooksToJson  保存书籍信息到本地硬盘（JSON 文件）
+func (ramStore *StoreInRam) SaveBooksToJson() error {
 	configDir, err := config.GetConfigDir()
 	if err != nil {
 		return err
@@ -88,6 +88,7 @@ func (ramStore *StoreInRam) SaveBooks() error {
 	return nil
 }
 
+// SaveBookJson 将单本书籍信息保存为 JSON 文件
 func SaveBookJson(book *model.Book) error {
 	configDir, err := config.GetConfigDir()
 	savePath := filepath.Join(configDir, "books")

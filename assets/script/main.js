@@ -4426,8 +4426,8 @@ var $946dcfd8fe0754f4$var$__assign = undefined && undefined.__assign || function
 };
 var $946dcfd8fe0754f4$var$Default = {
     alwaysOpen: false,
-    activeClasses: 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white',
-    inactiveClasses: 'text-gray-500 dark:text-gray-400',
+    activeClasses: 'bg-neutral-secondary-medium text-heading',
+    inactiveClasses: 'bg-neutral-primary text-body',
     onOpen: function() {},
     onClose: function() {},
     onToggle: function() {}
@@ -6906,7 +6906,7 @@ var $8d24653c8cdd4795$var$__assign = undefined && undefined.__assign || function
 };
 var $8d24653c8cdd4795$var$Default = {
     placement: 'center',
-    backdropClasses: 'bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 z-40',
+    backdropClasses: 'bg-dark-backdrop/70 fixed inset-0 z-40',
     backdrop: 'dynamic',
     closable: true,
     onHide: function() {},
@@ -7203,7 +7203,7 @@ var $c647e009fa86f7f0$var$Default = {
     backdrop: true,
     edge: false,
     edgeOffset: 'bottom-[60px]',
-    backdropClasses: 'bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 z-30',
+    backdropClasses: 'bg-dark-backdrop/70 fixed inset-0 z-30',
     onShow: function() {},
     onHide: function() {},
     onToggle: function() {}
@@ -7544,8 +7544,8 @@ var $ff078cf47b3c0903$var$__assign = undefined && undefined.__assign || function
 };
 var $ff078cf47b3c0903$var$Default = {
     defaultTabId: null,
-    activeClasses: 'text-blue-600 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-500 border-blue-600 dark:border-blue-500',
-    inactiveClasses: 'dark:border-transparent text-gray-500 hover:text-gray-600 dark:text-gray-400 border-gray-100 hover:border-gray-300 dark:border-gray-700 dark:hover:text-gray-300',
+    activeClasses: 'text-fg-brand hover:text-fg-brand border-brand',
+    inactiveClasses: 'border-transparent text-body hover:text-heading border-soft hover:border-default',
     onShow: function() {}
 };
 var $ff078cf47b3c0903$var$DefaultInstanceOptions = {
@@ -14260,7 +14260,14 @@ function $8c83eaf28779ff46$var$tryCatch(el, expression, callback, ...args) {
         $8c83eaf28779ff46$var$handleError(e, el, expression);
     }
 }
-function $8c83eaf28779ff46$var$handleError(error2, el, expression) {
+function $8c83eaf28779ff46$var$handleError(...args) {
+    return $8c83eaf28779ff46$var$errorHandler(...args);
+}
+var $8c83eaf28779ff46$var$errorHandler = $8c83eaf28779ff46$var$normalErrorHandler;
+function $8c83eaf28779ff46$var$setErrorHandler(handler4) {
+    $8c83eaf28779ff46$var$errorHandler = handler4;
+}
+function $8c83eaf28779ff46$var$normalErrorHandler(error2, el, expression) {
     error2 = Object.assign(error2 ?? {
         message: "No error message given."
     }, {
@@ -15423,7 +15430,7 @@ var $8c83eaf28779ff46$var$Alpine = {
     get raw () {
         return $8c83eaf28779ff46$var$raw;
     },
-    version: "3.15.1",
+    version: "3.15.2",
     flushAndStopDeferringMutations: $8c83eaf28779ff46$var$flushAndStopDeferringMutations,
     dontAutoEvaluateFunctions: $8c83eaf28779ff46$var$dontAutoEvaluateFunctions,
     disableEffectScheduling: $8c83eaf28779ff46$var$disableEffectScheduling,
@@ -15437,6 +15444,7 @@ var $8c83eaf28779ff46$var$Alpine = {
     onlyDuringClone: $8c83eaf28779ff46$var$onlyDuringClone,
     addRootSelector: $8c83eaf28779ff46$var$addRootSelector,
     addInitSelector: $8c83eaf28779ff46$var$addInitSelector,
+    setErrorHandler: $8c83eaf28779ff46$var$setErrorHandler,
     interceptClone: $8c83eaf28779ff46$var$interceptClone,
     addScopeToNode: $8c83eaf28779ff46$var$addScopeToNode,
     deferMutations: $8c83eaf28779ff46$var$deferMutations,
@@ -17810,7 +17818,7 @@ Alpine.store('shelf', {
     simplifyTitle: Alpine.$persist(true).as('shelf.simplifyTitle'),
     InfiniteDropdown: Alpine.$persist(false).as('shelf.InfiniteDropdown'),
     bookCardShowTitleFlag: Alpine.$persist(true).as('shelf.bookCardShowTitleFlag'),
-    readingProgressPercent: Alpine.$persist(true).as('shelf.readingProgressPercent'),
+    readingProgressPercent: Alpine.$persist(false).as('shelf.readingProgressPercent'),
     syncScrollFlag: false,
     // 屏幕宽横比,inLandscapeMode的判断依据
     aspectRatio: 1.2,

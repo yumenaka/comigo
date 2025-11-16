@@ -71,8 +71,8 @@ templ StepsRangeArea() {
 		}
 
 		/* 特殊处理 Firefox提供了一个特殊的::-moz-range-progress选择器，可以单独控制已滑过部分的样式 */
-		/* 使用@-moz-document url-prefix()规则确保这些样式只会在Firefox浏览器中应用 */
-		@-moz-document url-prefix() {
+		/* 使用 @supports (-moz-appearance:none) 规则确保这些样式仅在 Firefox 中生效 */
+		@supports (-moz-appearance: none) {
 			/* 将基础背景设为透明，避免背景叠加问题 */
 			.manga-mode .slider-base {
 				background: transparent;

@@ -4,9 +4,6 @@ import (
 	"os"
 
 	"github.com/yumenaka/comigo/config"
-	"github.com/yumenaka/comigo/model"
-	"github.com/yumenaka/comigo/sqlc"
-	"github.com/yumenaka/comigo/store"
 	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
 	"github.com/yumenaka/comigo/tools/scan"
@@ -14,75 +11,12 @@ import (
 
 // ScanStore 解析命令,扫描文件，设置书库等
 func ScanStore(args []string) {
-	// 1. 初始化数据库
-	if config.GetCfg().EnableDatabase {
-		// 从数据库中读取书籍信息并持久化
-		configDir, err := config.GetConfigDir()
-		if err != nil {
-			logger.Errorf("Failed to get config dir: %v", err)
-			configDir = ""
-		}
-		if err := sqlc.OpenDatabase(configDir); err != nil {
-			logger.Infof("OpenDatabase Error: %s", err)
-			model.IStore = store.RamStore
-		} else {
-			model.IStore = sqlc.DbStore
-		}
-	}
-	//model.IStore = store.RamStore
 	// 2、设置默认书库路径：扫描CMD指定的路径，或添加当前文件夹为默认路径。
 	CreateStoreUrls(args)
-
-	// 从本地文件加载书籍信息到内存
-	if !config.GetCfg().EnableDatabase {
-		err := store.RamStore.LoadBooks()
-		if err != nil {
-			logger.Infof("LoadBooks_error %s", err)
-		}
-		model.ClearBookNotExist()
-		// 生成虚拟书籍组
-		if err := model.IStore.GenerateBookGroup(); err != nil {
-			logger.Infof("%s", err)
-		}
-	}
-
 	// 3、扫描配置文件里面的书库路径，取得书籍
 	err := scan.InitAllStore(config.GetCfg())
 	if err != nil {
 		logger.Infof("Failed to scan store path: %v", err)
-	}
-
-	if !config.GetCfg().EnableDatabase {
-		// 保存书籍到本地文件（调试用）
-		err = store.RamStore.SaveBooks()
-		if err != nil {
-			logger.Infof("SaveBooks_error %s", err)
-		}
-	}
-
-	// 4、生成虚拟书籍组
-	if config.GetCfg().EnableDatabase {
-		allBooks, err := sqlc.DbStore.ListBooks()
-		if err != nil {
-			logger.Infof("Error listing books from database: %s", err)
-		} else {
-			// 拿到的书加回RamStore
-			err = store.RamStore.AddBooks(allBooks)
-			if err != nil {
-				return
-			}
-		}
-	}
-	if err := model.IStore.GenerateBookGroup(); err != nil {
-		logger.Infof("%s", err)
-	}
-	// 5、保存扫描结果到数据库
-	if config.GetCfg().EnableDatabase {
-		err = scan.SaveBooksToDatabase(config.GetCfg())
-		if err != nil {
-			logger.Infof("Failed SaveBooksToDatabase: %v", err)
-			return
-		}
 	}
 }
 
