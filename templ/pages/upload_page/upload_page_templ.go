@@ -42,13 +42,9 @@ func UploadPage(c echo.Context) templ.Component {
 		}
 		templ_7745c5c3_Err = common.Header(
 			common.HeaderProps{
-				Title:           "UploadPage",
-				ShowReturnIcon:  true,
-				ReturnUrl:       "/",
-				SetDownLoadLink: false,
-				InShelf:         false,
-				DownLoadLink:    "",
-				SetTheme:        true,
+				Title:          "UploadPage",
+				ShowReturnIcon: true,
+				ReturnUrl:      "/",
 			}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err

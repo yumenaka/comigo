@@ -39,13 +39,10 @@ func SettingsPage(c echo.Context, tsStatus *tailscale_plugin.TailscaleStatus) te
 		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = common.Header(
 			common.HeaderProps{
-				Title:           "SettingsPage",
-				ShowReturnIcon:  true,
-				ReturnUrl:       "/",
-				SetDownLoadLink: false,
-				InShelf:         false,
-				DownLoadLink:    "",
-				SetTheme:        true,
+				Title:          "SettingsPage",
+				ShowReturnIcon: true,
+				ShowUploadIcon: true,
+				ReturnUrl:      "/",
 			}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err

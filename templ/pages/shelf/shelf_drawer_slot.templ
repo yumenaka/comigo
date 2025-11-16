@@ -3,7 +3,6 @@ package shelf
 import "github.com/yumenaka/comigo/templ/common"
 
 templ ShelfDrawerSlot() {
-	@common.ReadModeSelect(true)
 	<!-- 切换【显示文件名】-->
 	<label class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm">
 		<input type="checkbox" :value="$store.shelf.showFilename" x-on:click="$store.shelf.showFilename =!$store.shelf.showFilename" class="sr-only peer"/>
@@ -40,6 +39,8 @@ templ ShelfDrawerSlot() {
 			x-text="$store.shelf.readingProgressPercent?i18next.t('reading_progress_percent'):i18next.t('reading_progress_page')"
 		></span>
 	</label>
+	<!-- 切换【无限卷轴/分页卷轴/翻页阅读】的select-->
+	@common.ReadModeSelect(true)
 }
 
 // SaveReadingProgress 定义 保存阅读进度到本地存储 的开关 暂时用不着

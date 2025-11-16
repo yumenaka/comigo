@@ -23,12 +23,8 @@ templ ScrollPage(c echo.Context, book *model.Book, readMode string, pagedIndex i
 			common.HeaderProps{
 				Title:             common.GetBookTitle(book.BookInfo.BookID),
 				ShowReturnIcon:    true,
+				ShowReSortIcon:    true,
 				ReturnUrl:         common.GetReturnUrl(book.BookInfo.BookID),
-				SetDownLoadLink:   false,
-				InShelf:           false,
-				DownLoadLink:      "",
-				SetTheme:          true,
-				ShowQuickJumpBar:  common.ShowQuickJumpBar(book),
 				QuickJumpBarBooks: common.QuickJumpBarBooks(book),
 			})
 		@MainArea(c, book, readMode, pagedIndex, startIndex)

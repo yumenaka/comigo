@@ -8,6 +8,7 @@ package common
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
+// 切换【无限卷轴/分页卷轴/翻页阅读】的select
 func ReadModeSelect(inShelf bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -29,7 +30,7 @@ func ReadModeSelect(inShelf bool) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- 切换【无限卷轴/分页卷轴/翻页阅读】的select--><!-- https://alpinejs.dev/directives/model#select-inputs --><!-- https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLElement/change_event --><select id=\"read_mode_select\" x-model=\"$store.global.readMode\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- https://alpinejs.dev/directives/model#select-inputs --><!-- https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLElement/change_event --><select id=\"read_mode_select\" x-model=\"$store.global.readMode\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

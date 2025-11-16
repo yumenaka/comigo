@@ -33,6 +33,12 @@ function hideToolbar() {
     }
 }
 
+let headerArea = document.getElementById('header');
+// 显示工具栏
+headerArea.addEventListener('mouseover', showToolbar);
+// 隐藏工具栏
+headerArea.addEventListener('mouseout', hideToolbar);
+
 // 初始化：如果autohidetoolbar为真,则自动隐藏工具栏
 if (Alpine.store('flip').autoHideToolbar) {
     setTimeout(hideToolbar, 1000)
