@@ -33,6 +33,10 @@ func InitConfig(c ConfigInterface) {
 
 // IsSupportTemplate 判断压缩包内的文件是否是支持的模板文件
 func IsSupportTemplate(checkPath string) bool {
+	// 如果是以 . 开头的隐藏文件，跳过
+	if strings.HasPrefix(path.Base(checkPath), ".") {
+		return false
+	}
 	for _, ex := range cfg.GetSupportTemplateFile() {
 		suffix := strings.ToLower(path.Ext(checkPath)) // strings.ToLower():某些文件会用大写文件名
 		if ex == suffix {
@@ -44,6 +48,10 @@ func IsSupportTemplate(checkPath string) bool {
 
 // IsSupportMedia 判断文件是否需要展示
 func IsSupportMedia(checkPath string) bool {
+	// 如果是以 . 开头的隐藏文件，跳过
+	if strings.HasPrefix(path.Base(checkPath), ".") {
+		return false
+	}
 	for _, ex := range cfg.GetSupportMediaType() {
 		suffix := strings.ToLower(path.Ext(checkPath)) // strings.ToLower():某些文件会用大写文件名
 		if ex == suffix {
