@@ -25,7 +25,6 @@ func ShowQRCode() {
 
 	// 判断是否启用 TLS
 	// 如果配置文件中有证书和密钥文件，则启用 TLS
-	enableTLS := config.GetCfg().CertFile != "" && config.GetCfg().KeyFile != ""
 	outIP := config.GetCfg().Host
 	if config.GetCfg().Host == "" {
 		outIP = tools.GetOutboundIP().String()
@@ -37,7 +36,8 @@ func ShowQRCode() {
 		config.GetCfg().PrintAllPossibleQRCode,
 		outIP,
 		config.GetCfg().DisableLAN,
-		enableTLS,
+		config.GetCfg().CertFile != "" && config.GetCfg().KeyFile != "",
+		config.GetCfg().AutoTLSCertificate,
 		etcStr,
 	)
 
