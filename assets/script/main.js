@@ -17845,13 +17845,14 @@ Alpine.store("scroll", {
     clientHeight: 0,
     //漫画页的单位,是否使用固定值
     widthUseFixedValue: Alpine.$persist(true).as("scroll.widthUseFixedValue"),
+    //竖屏(Portrait)状态的漫画页宽度,百分比
     portraitWidthPercent: Alpine.$persist(100).as("scroll.portraitWidthPercent"),
     //横屏(Landscape)状态的漫画页宽度,百分比
     singlePageWidth_Percent: Alpine.$persist(60).as("scroll.singlePageWidth_Percent"),
-    doublePageWidth_Percent: Alpine.$persist(95).as("scroll.doublePageWidth_Percent"),
+    doublePageWidth_Percent: Alpine.$persist(60).as("scroll.doublePageWidth_Percent"),
     //横屏(Landscape)状态的漫画页宽度。px。
-    singlePageWidth_PX: Alpine.$persist(720).as("scroll.singlePageWidth_PX"),
-    doublePageWidth_PX: Alpine.$persist(1200).as("scroll.doublePageWidth_PX"),
+    singlePageWidth_PX: Alpine.$persist(800).as("scroll.singlePageWidth_PX"),
+    doublePageWidth_PX: Alpine.$persist(800).as("scroll.doublePageWidth_PX"),
     //书籍数据,需要从远程拉取
     //是否显示顶部页头
     showHeaderFlag: true,

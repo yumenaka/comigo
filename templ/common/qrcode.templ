@@ -13,10 +13,11 @@ templ QRCode() {
 				hx-trigger="load"
 				hx-swap="none"
 				hx-on-htmx-after-request="this.src = event.detail.xhr.responseText;"
-				class="w-64 h-64 rounded"
+				class="w-64 h-64 rounded shadow-lg border border-gray-300"
+				alt="QR Code"
 			/>
-			<a x-ref="content" :href="window.location.toString()" target="_blank">
-				<div class="min-w-64 p-1 mb-4 text-center text-white text-xs font-semibold" x-text="window.location.toString()"></div>
+			<a x-ref="content" :href="window.location.toString()" class="" target="_blank">
+				<div class="min-w-64 p-1 mb-4 text-center text-black  rounded text-sm text-shadow-2xs font-semibold" x-text="window.location.toString()"></div>
 			</a>
 			<!-- <button type="button" class="absolute buttom-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-primary m-2 p-2 rounded text-sm self-center" x-on:click="navigator.clipboard.writeText($refs.content.href);alert('You copy it');"  >Copy URL</button> -->
 		</div>
