@@ -21,7 +21,6 @@ func StartTailscale() {
 	// 启动或重启 Tailscale 服务
 	configDir, err := config.GetConfigDir()
 	if err != nil {
-		logger.Errorf("Failed to get config dir: %v", err)
 		configDir = ""
 	}
 	if tsError := tailscale_plugin.RunTailscale(

@@ -36,26 +36,25 @@ func InitFlags() {
 	// 	RootCmd.PersistentFlags().BoolVar(&DemonFlag, "start", false, locale.GetString("start_in_background"))
 	// 	RootCmd.PersistentFlags().BoolVar(&StopDaemonFlag, "stop", false, locale.GetString("stop_background"))
 	// }
+	// 指定配置文件
+	RootCmd.PersistentFlags().StringVarP(&cfg.ConfigFile, "config", "c", "", locale.GetString("config"))
 	// 启用登陆保护，需要设定用户名
 	RootCmd.PersistentFlags().StringVar(&cfg.Username, "username", "", locale.GetString("username"))
 	RootCmd.PersistentFlags().StringVar(&cfg.Password, "password", "", locale.GetString("password"))
 	RootCmd.PersistentFlags().IntVar(&cfg.Timeout, "timeout", 60*24*30, locale.GetString("timeout"))
 	// 启用自动扫描
 	RootCmd.PersistentFlags().BoolVar(&cfg.AutoRescan, "rescan", true, locale.GetString("rescan"))
-	// TLS设定
-	RootCmd.PersistentFlags().BoolVar(&cfg.EnableTLS, "tls", false, locale.GetString("tls_enable"))
-	RootCmd.PersistentFlags().StringVar(&cfg.CertFile, "tls-crt", "", locale.GetString("tls_crt"))
-	RootCmd.PersistentFlags().StringVar(&cfg.KeyFile, "tls-key", "", locale.GetString("tls_key"))
-	// 指定配置文件
-	RootCmd.PersistentFlags().StringVarP(&cfg.ConfigFile, "config", "c", "", locale.GetString("config"))
 	// 启用数据库，保存扫描数据
 	RootCmd.PersistentFlags().BoolVar(&cfg.EnableDatabase, "database", false, locale.GetString("enable_database"))
 	// 服务端口
 	RootCmd.PersistentFlags().IntVarP(&cfg.Port, "port", "p", 1234, locale.GetString("port"))
 	// 本地Host
 	RootCmd.PersistentFlags().StringVar(&cfg.Host, "host", "", locale.GetString("local_host"))
-	// DEBUG
-	RootCmd.PersistentFlags().BoolVar(&cfg.Debug, "debug", false, locale.GetString("debug_mode"))
+	// TLS设定
+	RootCmd.PersistentFlags().BoolVar(&cfg.EnableTLS, "tls", false, locale.GetString("tls_enable"))
+	RootCmd.PersistentFlags().BoolVar(&cfg.AutoTLSCertificate, "auto-tls", false, locale.GetString("auto_https_cert"))
+	RootCmd.PersistentFlags().StringVar(&cfg.CertFile, "tls-crt", "", locale.GetString("tls_crt"))
+	RootCmd.PersistentFlags().StringVar(&cfg.KeyFile, "tls-key", "", locale.GetString("tls_key"))
 	// 启用文件上传功能
 	RootCmd.PersistentFlags().BoolVar(&cfg.EnableUpload, "enable-upload", true, locale.GetString("enable_file_upload"))
 	// 上传文件的保存路径
@@ -105,4 +104,6 @@ func InitFlags() {
 	RootCmd.PersistentFlags().StringVar(&cfg.TailscaleAuthKey, "tailscale-authKey", "", locale.GetString("TailscaleAuthKey"))
 	// ConfigLocked 配置文件锁定，防止被网页端修改，用于展示模式
 	RootCmd.PersistentFlags().BoolVar(&cfg.ConfigLocked, "config-locked", false, locale.GetString("ConfigLocked"))
+	// DEBUG
+	RootCmd.PersistentFlags().BoolVar(&cfg.Debug, "debug", false, locale.GetString("debug_mode"))
 }

@@ -18,7 +18,6 @@ import (
 type Config struct {
 	AutoRescan             bool            `json:"AutoRescan" comment:"刷新页面时，是否自动重新扫描书籍是否存在"`
 	CacheDir               string          `json:"CacheDir" comment:"本地图片缓存位置，默认系统临时文件夹"`
-	CertFile               string          `json:"CertFile" comment:"TLS/SSL 证书文件路径 (default: ~/.config/.comigo/cert.crt)"`
 	ClearCacheExit         bool            `json:"ClearCacheExit" comment:"退出程序的时候，清理web图片缓存"`
 	ClearDatabaseWhenExit  bool            `json:"ClearDatabaseWhenExit" comment:"启用本地数据库时，扫描完成后，清除不存在的书籍。"`
 	ConfigFile             string          `json:"-" toml:"-" comment:"用户指定的的yaml设置文件路径"`
@@ -28,11 +27,13 @@ type Config struct {
 	DisableLAN             bool            `json:"DisableLAN" comment:"只在本机提供阅读服务，不对外共享"`
 	EnableDatabase         bool            `json:"EnableDatabase" comment:"启用本地数据库，保存扫描到的书籍数据。"`
 	EnableTLS              bool            `json:"EnableTLS" comment:"是否启用HTTPS协议。需要设置证书于key文件。"`
+	AutoTLSCertificate     bool            `json:"AutoTLSCertificate" comment:"自动申请、签发 HTTPS 证书（Let's Encrypt）"`
+	Host                   string          `json:"Host" comment:"自定义二维码显示的主机名，如果为空，则使用自动检测到的局域网IP地址。自动申请HTTPS证书时，必须设置为公网可访问的域名"`
+	KeyFile                string          `json:"KeyFile" comment:"TLS/SSL key文件路径 (default: ~/.config/.comigo/key.key)"`
+	CertFile               string          `json:"CertFile" comment:"TLS/SSL 证书文件路径 (default: ~/.config/.comigo/cert.crt)"`
 	EnableUpload           bool            `json:"EnableUpload" comment:"启用上传功能"`
 	ExcludePath            []string        `json:"ExcludePath" comment:"扫描书籍的时候，需要排除的文件或文件夹的名字"`
 	GenerateMetaData       bool            `json:"GenerateMetaData" toml:"GenerateMetaData" comment:"生成书籍元数据"`
-	Host                   string          `json:"Host" comment:"自定义二维码显示的主机名"`
-	KeyFile                string          `json:"KeyFile" comment:"TLS/SSL key文件路径 (default: ~/.config/.comigo/key.key)"`
 	StoreUrls              []string        `json:"StoreUrls" comment:"本地书库路径列表，支持多个路径。可以是本地文件夹或网络书库地址。"` // 书库地址列表
 	LogFileName            string          `json:"LogFileName" comment:"Log文件名"`
 	LogFilePath            string          `json:"LogFilePath" comment:"Log文件的保存位置"`
@@ -41,7 +42,7 @@ type Config struct {
 	MinImageNum            int             `json:"MinImageNum" comment:"压缩包或文件夹内，至少有几张图片，才算作书籍"`
 	OpenBrowser            bool            `json:"OpenBrowser" comment:"是否同时打开浏览器，windows默认true，其他默认false"`
 	Password               string          `json:"Password" comment:"登录界面需要的密码。"`
-	Port                   int             `json:"Port" comment:"Comigo设置文件(config.toml)，可保存在：HomeDirectory（$HOME/.config/comigo/config.toml）、WorkingDirectory（当前执行目录）、ProgramDirectory（程序所在目录）下。可用“comi --config-save”生成本文件\n网页服务端口"`
+	Port                   int             `json:"Port" comment:"Comigo设置文件(config.toml)，可保存在：HomeDirectory（$HOME/.config/comigo/config.toml）、WorkingDirectory（当前执行目录）、ProgramDirectory（程序所在目录）下。可用“comi --config-save”生成本文件\n网页服务端口，启用auto TLS时强制使用443端口"`
 	PrintAllPossibleQRCode bool            `json:"PrintAllPossibleQRCode" comment:"扫描完成后，打印所有可能的阅读链接二维码"`
 	SupportFileType        []string        `json:"SupportFileType" comment:"支持的书籍压缩包后缀"`
 	SupportMediaType       []string        `json:"SupportMediaType" comment:"扫描压缩包时，用于统计图片数量的图片文件后缀"`

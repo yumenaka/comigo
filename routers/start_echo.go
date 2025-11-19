@@ -2,8 +2,10 @@ package routers
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"net/http"
+	"path"
 	"strconv"
 	"time"
 
@@ -12,37 +14,71 @@ import (
 	"github.com/yumenaka/comigo/tools/logger"
 	"github.com/yumenaka/comigo/tools/sse_hub"
 	"github.com/yumenaka/comigo/tools/tailscale_plugin"
+	"golang.org/x/crypto/acme"
+	"golang.org/x/crypto/acme/autocert"
 )
 
 // StartEcho 启动网页服务
 func StartEcho(e *echo.Echo) {
-	// 是否对外服务
+	// 是否仅监听本地回环地址
 	webHost := ":"
 	if config.GetCfg().DisableLAN {
 		webHost = "localhost:"
 	}
-	// 是否启用TLS
-	enableTls := config.GetCfg().CertFile != "" && config.GetCfg().KeyFile != ""
+	// 记录日志并启动服务器
+	logger.Infof("Starting Server...", "on port", config.GetCfg().Port, "...")
+	// 初始化 HTTP 服务器
 	config.Server = &http.Server{
 		Addr:    webHost + strconv.Itoa(config.GetCfg().Port),
 		Handler: e, // echo.Echo 实现了 http.Handler 接口
 	}
-	// 记录日志并启动服务器
-	logger.Infof("Starting Server...", "on port", config.GetCfg().Port, "...")
-	if enableTls {
-		logger.Infof("TLS enabled", "CertFile:", config.GetCfg().CertFile, "KeyFile:", config.GetCfg().KeyFile)
+	// 如果自定义 TLS 证书
+	customCertTlS := config.GetCfg().CertFile != "" && config.GetCfg().KeyFile != ""
+	// 如果自动申请 TLS 证书
+	SetAutoTLS(e)
+	if config.GetCfg().AutoTLSCertificate {
+		configDir, err := config.GetConfigDir()
+		if err != nil {
+			configDir = ""
+		}
+		autoTLSManager := autocert.Manager{
+			Prompt: autocert.AcceptTOS,
+			// Cache certificates to avoid issues with rate limits (https://letsencrypt.org/docs/rate-limits)
+			Cache:      autocert.DirCache(path.Join(configDir, "autotls_cache")),
+			HostPolicy: autocert.HostWhitelist(config.GetCfg().Host),
+		}
+		// 更新服务器配置以使用自动 TLS
+		logger.Infof("Auto TLS enabled for domain:", config.GetCfg().Host)
+		config.Server = &http.Server{
+			Addr:    ":443",
+			Handler: e, // set Echo as handler
+			TLSConfig: &tls.Config{
+				//Certificates: nil, // <-- s.ListenAndServeTLS will populate this field
+				GetCertificate: autoTLSManager.GetCertificate,
+				NextProtos:     []string{acme.ALPNProto},
+			},
+			//ReadTimeout: 30 * time.Second, // use custom timeouts
+		}
 	}
 	// 在 goroutine 中初始化 HTTP 服务器，这样它就不会阻塞关闭处理
 	go func() {
-		// 监听并启动服务(TLS)
-		if enableTls {
+		// 监听并启动服务(自定义TLS证书)
+		if config.GetCfg().CertFile != "" && config.GetCfg().KeyFile != "" {
+			logger.Infof("Custom TLS Cert", "CertFile:", config.GetCfg().CertFile, "KeyFile:", config.GetCfg().KeyFile)
 			if err := config.Server.ListenAndServeTLS(config.GetCfg().CertFile, config.GetCfg().KeyFile); err != nil && !errors.Is(err, http.ErrServerClosed) {
 				time.Sleep(3 * time.Second)
 				logger.Fatalf("listen: %s\n", err)
 			}
 		}
-		if !enableTls {
-			// 监听并启动服务(HTTP)
+		// 监听并启动服务(自动TLS)
+		if config.GetCfg().AutoTLSCertificate {
+			if err := config.Server.ListenAndServeTLS("", ""); err != nil && !errors.Is(err, http.ErrServerClosed) {
+				time.Sleep(3 * time.Second)
+				logger.Fatalf("listen: %s\n", err)
+			}
+		}
+		// 监听并启动服务(无TLS,普通HTTP)
+		if !customCertTlS && !config.GetCfg().AutoTLSCertificate {
 			if err := config.Server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 				time.Sleep(3 * time.Second)
 				logger.Fatalf("listen: %s\n", err)
