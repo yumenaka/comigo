@@ -90,8 +90,9 @@ templ Header(prop HeaderProps) {
 	</header>
 }
 
+// 根据阅读模式生成书籍链接，如果是“{}”，templ 可能会把 { something } 解析成模板语法，而不是输出字面量。用 `` 来包裹就不会报错了
 func BookURL(bookID string) string {
-	return "{" + fmt.Sprintf(`BookURL: $store.global.readMode === 'page_flip' ? "/flip/%s" : "/scroll/%s"`, bookID, bookID) + `}`
+	return fmt.Sprintf(`{BookURL: $store.global.readMode === 'page_flip' ? "/flip/%s" : "/scroll/%s"}`, bookID, bookID)
 }
 
 templ HeaderTitle(prop HeaderProps) {

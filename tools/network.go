@@ -2,6 +2,7 @@ package tools
 
 import (
 	"net"
+	"regexp"
 	"strconv"
 	"time"
 
@@ -24,4 +25,13 @@ func WaitUntilServerReady(host string, port uint16, timeout time.Duration) {
 		}
 		time.Sleep(300 * time.Millisecond)
 	}
+}
+
+var domainRegex = regexp.MustCompile(`^(?i)[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*$`)
+
+func IsValidDomain(host string) bool {
+	if len(host) == 0 || len(host) > 253 {
+		return false
+	}
+	return domainRegex.MatchString(host)
 }

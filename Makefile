@@ -2,10 +2,14 @@
 # Window icon Need：go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo
 
 ##Release:
-# make all VERSION=v1.1.3
+# make all VERSION=v1.1.5
 
 ## Windows Release(Need MSYS2 or mingw32 + find.exe make.exe zip.exe upx.exe):
 # mingw32-make all VERSION=v0.9.9
+
+## 仅编译指定架构
+# make Linux_x86_64_cgo VERSION=v1.1.5
+
 
 ## 打印编译命令，而不实际执行
 # make -n Windows_i386_tailscale Windows_arm64_tailscale Linux_i386_tailscale

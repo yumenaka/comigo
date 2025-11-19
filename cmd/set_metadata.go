@@ -16,7 +16,6 @@ func LoadMetadata() {
 		// 从数据库中读取书籍信息并持久化
 		configDir, err := config.GetConfigDir()
 		if err != nil {
-			logger.Errorf("Failed to get config dir: %v", err)
 			configDir = ""
 		}
 		if err := sqlc.OpenDatabase(configDir); err != nil {

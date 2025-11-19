@@ -60,6 +60,7 @@
 
 ### 开发中
 - [ ] 系统托盘图标、后台运行 https://github.com/getlantern/systray
+- [ ] 完整书签与阅读历史功能（https://github.com/dromara/carbon）
 - [ ] 新官网,Discord频道,使用文档，参考 https://omarchy.org/ 。内置帮助文档?
 - [ ] 侧栏加返回书架，切换全屏按钮，方便操作。或者让Header的显示层级大于侧栏。
 - [ ] 尝试用 go.work 解决wails的tailscale依赖冲突。
@@ -89,7 +90,8 @@
 - [ ] 文件管理
 - [ ] EPUB/PDF 阅读优化、
 - [ ] 防剧透效果、回忆模式、特殊背景、背景音乐etc
-
+- [ ] 第三方登录 https://github.com/markbates/goth
+- [ ] 多语言：中文、英文、日文版toml配置文件注释
   
 ## 开发环境搭建
 
