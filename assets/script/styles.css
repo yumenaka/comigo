@@ -55,6 +55,8 @@
       --tw-backdrop-sepia: initial;
       --tw-duration: initial;
       --tw-ease: initial;
+      --tw-text-shadow-color: initial;
+      --tw-text-shadow-alpha: 100%;
       --tw-content: "";
       --tw-scale-x: 1;
       --tw-scale-y: 1;
@@ -4128,6 +4130,10 @@
     user-select: none;
   }
 
+  .text-shadow-2xs {
+    text-shadow: 0px 1px 0px var(--tw-text-shadow-color, #00000026);
+  }
+
   @media (hover: hover) {
     .group-hover\:text-indigo-400:is(:where(.group):hover *) {
       color: var(--color-indigo-400);
@@ -5023,6 +5029,17 @@ input[type="range"]::-moz-range-thumb {
 @property --tw-ease {
   syntax: "*";
   inherits: false
+}
+
+@property --tw-text-shadow-color {
+  syntax: "*";
+  inherits: false
+}
+
+@property --tw-text-shadow-alpha {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 100%;
 }
 
 @property --tw-content {
