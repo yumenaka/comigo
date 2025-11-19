@@ -1,7 +1,7 @@
 /*此文件需要编译，相关指令请参考 package.json*/
 
 @import 'tailwindcss' source('../templ');
-@plugin '@tailwindcss/forms';
+/*@plugin '@tailwindcss/forms';*/  /* 重置表格样式的插件，会导致parcel编译报错，注释掉*/
 @plugin '@tailwindcss/typography';
 
 @plugin 'flowbite/plugin';
@@ -53,6 +53,39 @@ body {
   display: none; /* Chrome, Safari, Opera */
 }
 
+
+/* @tailwindcss/forms注释掉以后需要这些代码来保证滑动条正常 */
+input[type="range"]::-moz-range-progress {
+    background: #0000cc;
+}
+
+/* chrome 滑动条的滑动块*/
+input[type="range"]::-webkit-slider-thumb {
+    background: #fff;
+    appearance: auto;
+    cursor: pointer;
+    border-width: 1px;
+    border-radius: 9999px;
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+/* 火狐 滑动条的滑动块*/
+input[type="range"]::-moz-range-thumb {
+    background: #fff;
+    appearance: auto;
+    cursor: pointer;
+    border-width: 1px;
+    border-radius: 9999px;
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+
+
+
+
+
 /* Alpine.js styles */
 
 [x-cloak] {
@@ -84,6 +117,8 @@ body {
     background-position: 0 0, 0 10px, 10px -10px, -10px 0;
     background-size: 20px 20px;
 }
+
+
 
 /* ------------------------------------------------ */
 /* css 主题设置 from: https://github.com/saadeghi/daisyui/blob/master/src/theming/themes.js */
