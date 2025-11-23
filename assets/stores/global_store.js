@@ -239,7 +239,7 @@ Alpine.store('global', {
      * @param {string} [params.label='自动书签'] - 书签名称，当前后端固定为自动书签，仅用于日志
      * @returns {Promise<Object|string>} 后端返回的响应体
      */
-    async UpdateBookmark({ type = 'auto', bookId, pageIndex, label = '自动书签' } = {}) {
+    async UpdateBookmark({ type = 'auto', bookId, pageIndex, description = '' } = {}) {
         if (!bookId) {
             const error = new Error('UpdateBookmark: bookId is required');
             if (this.debugMode) {
@@ -254,13 +254,14 @@ Alpine.store('global', {
             }
             throw error;
         }
-
-        const deviceDescription = `${browser} in ${system}`;
+        if (description === '') {
+            description = `${browser} in ${system}`;
+        }
         const payload = {
             type,
             book_id: bookId,
             page_index: pageIndex,
-            description: deviceDescription
+            description: description
         };
         const response = await fetch('/api/store_bookmark', {
             method: 'POST',

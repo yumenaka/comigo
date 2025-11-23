@@ -28,10 +28,12 @@ func main() {
 	routers.StartWebServer()
 	// 启动或停止 Tailscale 服务（如启用）
 	routers.StartTailscale()
+	// 生成书库URL
+	cmd.CreateStoreUrls(cmd.Args)
 	// 加载书籍元数据
 	cmd.LoadMetadata()
 	// 扫描书库（命令行指定）
-	cmd.ScanStore(cmd.Args)
+	cmd.ScanStore()
 	// 保存书籍元数据
 	cmd.SaveMetadata()
 	// 在命令行显示QRCode

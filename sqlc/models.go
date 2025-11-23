@@ -30,6 +30,7 @@ type Book struct {
 	ExtractPath     sql.NullString
 	ModifiedTime    sql.NullTime
 	ExtractNum      sql.NullInt64
+	BookComplete    sql.NullBool
 	InitComplete    sql.NullBool
 	NonUtf8zip      sql.NullBool
 	ZipTextEncoding sql.NullString

@@ -9,18 +9,7 @@ import (
 	"github.com/yumenaka/comigo/tools/scan"
 )
 
-// ScanStore 解析命令,扫描文件，设置书库等
-func ScanStore(args []string) {
-	// 2、设置默认书库路径：扫描CMD指定的路径，或添加当前文件夹为默认路径。
-	CreateStoreUrls(args)
-	// 3、扫描配置文件里面的书库路径，取得书籍
-	err := scan.InitAllStore(config.GetCfg())
-	if err != nil {
-		logger.Infof("Failed to scan store path: %v", err)
-	}
-}
-
-// CreateStoreUrls 添加默认扫描路径 args[1:]是用户指定的扫描路径
+// CreateStoreUrls  解析命令,生成StoreUrls
 func CreateStoreUrls(args []string) {
 	// 如果用户指定了扫描路径，就把指定的路径都加入到扫描路径里面
 	config.GetCfg().InitStoreUrls()
@@ -70,5 +59,13 @@ func CreateStoreUrls(args []string) {
 				}
 			}
 		}
+	}
+}
+
+// ScanStore 扫描所有书库，取得书籍
+func ScanStore() {
+	err := scan.InitAllStore(config.GetCfg())
+	if err != nil {
+		logger.Infof("Failed to scan store path: %v", err)
 	}
 }

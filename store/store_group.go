@@ -147,9 +147,11 @@ func (ramStore *StoreInRam) LoadBooks() error {
 		return err
 	}
 	savePath := filepath.Join(configDir, "books")
-	logger.Infof("Loading books from %s", savePath)
+	logger.Infof("Loading books from: %s", savePath)
+	logger.Infof("Configured store URLs: %v", config.GetCfg().StoreUrls)
 	// 遍历所有 storeUrl 对应的目录
 	for _, storeUrl := range config.GetCfg().StoreUrls {
+		//logger.Infof("Loading books for storeUrl: %s", storeUrl)
 		// 计算 storeUrl 的绝对路径
 		storePathAbs, err := filepath.Abs(storeUrl)
 		if err != nil {
@@ -182,11 +184,13 @@ func (ramStore *StoreInRam) LoadBooks() error {
 		for _, entry := range entries {
 			// 跳过目录，只处理文件
 			if entry.IsDir() {
+				logger.Infof("Skipping directory %s", entry.Name())
 				continue
 			}
 			// 只处理 .json 文件
 			fileName := entry.Name()
 			if !strings.HasSuffix(fileName, ".json") {
+				logger.Infof("Skipping non-JSON file %s", fileName)
 				continue
 			}
 			// 读取文件内容

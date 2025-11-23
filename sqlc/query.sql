@@ -50,9 +50,9 @@ ORDER BY modified_time DESC;
 -- name: CreateBook :one
 INSERT INTO books (title, book_id, owner, book_path, store_url, type,
                    child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size,
-                   author, isbn, press, published_at, extract_path, extract_num,
+                   author, isbn, press, published_at, extract_path, extract_num,book_complete,
                    init_complete, non_utf8zip, zip_text_encoding)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 RETURNING *;
 
 -- Update book information
@@ -76,6 +76,7 @@ SET title             = ?,
     published_at      = ?,
     extract_path      = ?,
     extract_num       = ?,
+    book_complete     = ?,
     init_complete     = ?,
     non_utf8zip       = ?,
     zip_text_encoding = ?,
