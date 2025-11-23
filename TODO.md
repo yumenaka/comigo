@@ -59,7 +59,7 @@
 - [x] 拆分内存存储与数据库存储，为支持samba与S3等文件系统做准备。
 
 ### 开发中
-- [ ] 系统托盘图标、后台运行 https://github.com/getlantern/systray
+- [ ] windows:系统托盘图标、后台运行 https://github.com/getlantern/systray
 - [ ] 完整书签与阅读历史功能（https://github.com/dromara/carbon）
 - [ ] 新官网,Discord频道,使用文档，参考 https://omarchy.org/ 。内置帮助文档?
 - [ ] 侧栏加返回书架，切换全屏按钮，方便操作。或者让Header的显示层级大于侧栏。

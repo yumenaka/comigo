@@ -96,14 +96,12 @@ func intersectScript(pageIndex int) string {
 	if(!loaded || counter < 1){
         return;
     }
-	//console.log({loaded});
     if (loaded && !updateBookmarkCompleted) {
         $store.global.UpdateBookmark(
             {
                 type: 'auto',
                 bookId: book.id,
                 pageIndex: %d,
-                label: '自动书签'
             }
         );
         updateBookmarkCompleted = true;

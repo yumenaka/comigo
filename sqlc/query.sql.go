@@ -85,10 +85,10 @@ func (q *Queries) CountUsersByRole(ctx context.Context, role sql.NullString) (in
 const createBook = `-- name: CreateBook :one
 INSERT INTO books (title, book_id, owner, book_path, store_url, type,
                    child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size,
-                   author, isbn, press, published_at, extract_path, extract_num,
+                   author, isbn, press, published_at, extract_path, extract_num,book_complete,
                    init_complete, non_utf8zip, zip_text_encoding)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-RETURNING id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, non_utf8zip, zip_text_encoding, deleted
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+RETURNING id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, deleted
 `
 
 type CreateBookParams struct {
@@ -111,6 +111,7 @@ type CreateBookParams struct {
 	PublishedAt     sql.NullString
 	ExtractPath     sql.NullString
 	ExtractNum      sql.NullInt64
+	BookComplete    sql.NullBool
 	InitComplete    sql.NullBool
 	NonUtf8zip      sql.NullBool
 	ZipTextEncoding sql.NullString
@@ -138,6 +139,7 @@ func (q *Queries) CreateBook(ctx context.Context, arg CreateBookParams) (Book, e
 		arg.PublishedAt,
 		arg.ExtractPath,
 		arg.ExtractNum,
+		arg.BookComplete,
 		arg.InitComplete,
 		arg.NonUtf8zip,
 		arg.ZipTextEncoding,
@@ -165,6 +167,7 @@ func (q *Queries) CreateBook(ctx context.Context, arg CreateBookParams) (Book, e
 		&i.ExtractPath,
 		&i.ModifiedTime,
 		&i.ExtractNum,
+		&i.BookComplete,
 		&i.InitComplete,
 		&i.NonUtf8zip,
 		&i.ZipTextEncoding,
@@ -371,7 +374,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
 }
 
 const getBookByBookPath = `-- name: GetBookByBookPath :one
-SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, non_utf8zip, zip_text_encoding, deleted
+SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, deleted
 FROM books
 WHERE book_path = ?
 LIMIT 1
@@ -403,6 +406,7 @@ func (q *Queries) GetBookByBookPath(ctx context.Context, bookPath string) (Book,
 		&i.ExtractPath,
 		&i.ModifiedTime,
 		&i.ExtractNum,
+		&i.BookComplete,
 		&i.InitComplete,
 		&i.NonUtf8zip,
 		&i.ZipTextEncoding,
@@ -413,7 +417,7 @@ func (q *Queries) GetBookByBookPath(ctx context.Context, bookPath string) (Book,
 
 const getBookByID = `-- name: GetBookByID :one
 
-SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, non_utf8zip, zip_text_encoding, deleted
+SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, deleted
 FROM books
 WHERE book_id = ?
 LIMIT 1
@@ -446,6 +450,7 @@ func (q *Queries) GetBookByID(ctx context.Context, bookID string) (Book, error) 
 		&i.ExtractPath,
 		&i.ModifiedTime,
 		&i.ExtractNum,
+		&i.BookComplete,
 		&i.InitComplete,
 		&i.NonUtf8zip,
 		&i.ZipTextEncoding,
@@ -683,7 +688,7 @@ func (q *Queries) ListBookmarksByBookID(ctx context.Context, bookID string) ([]B
 }
 
 const listBooks = `-- name: ListBooks :many
-SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, non_utf8zip, zip_text_encoding, deleted
+SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, deleted
 FROM books
 ORDER BY modified_time DESC
 `
@@ -720,6 +725,7 @@ func (q *Queries) ListBooks(ctx context.Context) ([]Book, error) {
 			&i.ExtractPath,
 			&i.ModifiedTime,
 			&i.ExtractNum,
+			&i.BookComplete,
 			&i.InitComplete,
 			&i.NonUtf8zip,
 			&i.ZipTextEncoding,
@@ -739,7 +745,7 @@ func (q *Queries) ListBooks(ctx context.Context) ([]Book, error) {
 }
 
 const listBooksByStorePath = `-- name: ListBooksByStorePath :many
-SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, non_utf8zip, zip_text_encoding, deleted
+SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, deleted
 FROM books
 WHERE store_url = ?
 ORDER BY modified_time DESC
@@ -777,6 +783,7 @@ func (q *Queries) ListBooksByStorePath(ctx context.Context, storeUrl string) ([]
 			&i.ExtractPath,
 			&i.ModifiedTime,
 			&i.ExtractNum,
+			&i.BookComplete,
 			&i.InitComplete,
 			&i.NonUtf8zip,
 			&i.ZipTextEncoding,
@@ -796,7 +803,7 @@ func (q *Queries) ListBooksByStorePath(ctx context.Context, storeUrl string) ([]
 }
 
 const listBooksByType = `-- name: ListBooksByType :many
-SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, non_utf8zip, zip_text_encoding, deleted
+SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, deleted
 FROM books
 WHERE type = ?
 ORDER BY modified_time DESC
@@ -834,6 +841,7 @@ func (q *Queries) ListBooksByType(ctx context.Context, type_ string) ([]Book, er
 			&i.ExtractPath,
 			&i.ModifiedTime,
 			&i.ExtractNum,
+			&i.BookComplete,
 			&i.InitComplete,
 			&i.NonUtf8zip,
 			&i.ZipTextEncoding,
@@ -906,7 +914,7 @@ func (q *Queries) MarkBookAsDeleted(ctx context.Context, bookID string) error {
 }
 
 const searchBooksByTitle = `-- name: SearchBooksByTitle :many
-SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, init_complete, non_utf8zip, zip_text_encoding, deleted
+SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, deleted
 FROM books
 WHERE title LIKE '%' || ? || '%'
 ORDER BY modified_time DESC
@@ -944,6 +952,7 @@ func (q *Queries) SearchBooksByTitle(ctx context.Context, dollar_1 sql.NullStrin
 			&i.ExtractPath,
 			&i.ModifiedTime,
 			&i.ExtractNum,
+			&i.BookComplete,
 			&i.InitComplete,
 			&i.NonUtf8zip,
 			&i.ZipTextEncoding,
@@ -982,6 +991,7 @@ SET title             = ?,
     published_at      = ?,
     extract_path      = ?,
     extract_num       = ?,
+    book_complete     = ?,
     init_complete     = ?,
     non_utf8zip       = ?,
     zip_text_encoding = ?,
@@ -1008,6 +1018,7 @@ type UpdateBookParams struct {
 	PublishedAt     sql.NullString
 	ExtractPath     sql.NullString
 	ExtractNum      sql.NullInt64
+	BookComplete    sql.NullBool
 	InitComplete    sql.NullBool
 	NonUtf8zip      sql.NullBool
 	ZipTextEncoding sql.NullString
@@ -1035,6 +1046,7 @@ func (q *Queries) UpdateBook(ctx context.Context, arg UpdateBookParams) error {
 		arg.PublishedAt,
 		arg.ExtractPath,
 		arg.ExtractNum,
+		arg.BookComplete,
 		arg.InitComplete,
 		arg.NonUtf8zip,
 		arg.ZipTextEncoding,

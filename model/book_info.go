@@ -29,7 +29,8 @@ type BookInfo struct {
 	FileSize        int64           `json:"file_size"`         // 文件大小
 	BookPath        string          `json:"book_path"`         // 文件绝对路径，JSON 不解析
 	ISBN            string          `json:"isbn"`              // ISBN
-	InitComplete    bool            `json:"init_complete"`     // 是否解压完成
+	BookComplete    bool            `json:"book_complete"`     // 书籍是否阅读完成
+	InitComplete    bool            `json:"init_complete"`     // 是否初始化完成（todo：7z解压）
 	Modified        time.Time       `json:"modified_time"`     // 修改时间
 	NonUTF8Zip      bool            `json:"non_utf_8_zip"`     // 是否为特殊编码 zip
 	PageCount       int             `json:"page_count"`        // 总页数
