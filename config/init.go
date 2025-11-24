@@ -47,4 +47,5 @@ var cfg = Config{
 	UploadPath:            "",
 	Username:              "comigo",
 	ZipFileTextEncoding:   "",
+	EnableSingleInstance:  false,
 }

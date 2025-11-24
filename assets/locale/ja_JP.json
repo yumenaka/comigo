@@ -363,6 +363,7 @@
   "FunnelTunnel_Description": "Funnelモード（パブリックアクセス）。公開したくない場合は、パスワード保護を設定することを推奨します。Funnelモードでは443、8443、10000ポートのみ使用できます。",
   "ConfigLocked": "設定ロック",
   "config_locked_description": "現在、表示モードのため設定はロックされています。",
+  "enable_single_instance": "単一インスタンスモードを有効にし、同時に1つのプログラムインスタンスのみが実行されるようにします",
   "tailscale_auth_url_is": "Tailscaleサーバーを起動するには、TS_AUTHKEYを設定した状態で再起動するか、 認証URLにアクセスしてください：",
   "tailscale_server_start": "Tailscaleサーバーが起動しました",
   "tailscale_reading_url": "Tailscale読書リンク：",
