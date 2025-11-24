@@ -60,6 +60,7 @@ type Config struct {
 	TailscalePort          int             `json:"TailscalePort" comment:"Tailscale网络的端口，默认为443"`
 	TailscaleAuthKey       string          `json:"TailscaleAuthKey" comment:"Tailscale身份验证密钥。另外，也可以将本地环境变量 TS_AUTHKEY 设置为身份验证密钥"`
 	ZipFileTextEncoding    string          `json:"ZipFileTextEncoding" comment:"非utf-8编码的ZIP文件，尝试用什么编码解析，默认GBK"`
+	EnableSingleInstance   bool            `json:"EnableSingleInstance" comment:"启用单实例模式，确保同一时间只有一个程序实例运行"`
 }
 
 func (c *Config) GetHost() string {
