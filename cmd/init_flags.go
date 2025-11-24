@@ -104,6 +104,8 @@ func InitFlags() {
 	RootCmd.PersistentFlags().StringVar(&cfg.TailscaleAuthKey, "tailscale-authKey", "", locale.GetString("TailscaleAuthKey"))
 	// ConfigLocked 配置文件锁定，防止被网页端修改，用于展示模式
 	RootCmd.PersistentFlags().BoolVar(&cfg.ConfigLocked, "config-locked", false, locale.GetString("ConfigLocked"))
+	// EnableSingleInstance 启用单实例模式
+	RootCmd.PersistentFlags().BoolVar(&cfg.EnableSingleInstance, "single-instance", false, locale.GetString("enable_single_instance"))
 	// DEBUG
 	RootCmd.PersistentFlags().BoolVar(&cfg.Debug, "debug", false, locale.GetString("debug_mode"))
 }

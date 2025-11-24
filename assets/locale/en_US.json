@@ -363,6 +363,7 @@
   "FunnelTunnel_Description": "Funnel Tunnel (public access) . If you don’t want to publish publicly, it is recommended to set password protection. Funnel Tunnel can only use ports 443, 8443, and 10000.",
   "ConfigLocked": "Configuration Locked",
   "config_locked_description": "Currently in display mode, the configuration is locked.",
+  "enable_single_instance": "Enable single instance mode to ensure only one program instance runs at a time",
   "tailscale_auth_url_is": "To start Tailscale service, restart with TS_AUTHKEY set, or go to: ",
   "tailscale_server_start": "Tailscale service has started.",
   "tailscale_reading_url": "Tailscale reading link: ",
