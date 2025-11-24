@@ -363,6 +363,7 @@
   "FunnelTunnel_Description": "Funnel隧道（公网访问）。如果你不想要对外公开，建议设置密码保护。Funnel隧道只支持443, 8443, 10000端口。",
   "ConfigLocked": "配置文件锁定",
   "config_locked_description": "当前处于展示模式，配置已锁定",
+  "enable_single_instance": "启用单实例模式，确保同一时间只有一个程序实例运行",
   "tailscale_auth_url_is": "要启动 Tailscale 服务器，请设置 TS_AUTHKEY 后重启，或访问认证链接：",
   "tailscale_server_start": "Tailscale 已启动，正在获取 IP 地址……",
   "tailscale_reading_url": "通过 Tailscale 访问的阅读链接为：",
