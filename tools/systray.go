@@ -4,10 +4,13 @@ package tools
 
 import (
 	"embed"
+	"fmt"
 
-	"github.com/getlantern/systray"
+	"github.com/energye/systray"
 	"github.com/yumenaka/comigo/tools/logger"
 )
+
+// Sample：https://github.com/energye/systray/blob/main/example/main.go
 
 //go:embed icon.ico
 var iconData embed.FS
@@ -42,38 +45,51 @@ func onReady() {
 	} else {
 		systray.SetIcon(iconBytes)
 	}
+	// 设置托盘图标标题（占用空间太大，注释掉）
+	// systray.SetTitle(“Comigo”)
 
 	// 设置托盘工具提示
 	systray.SetTooltip("Comigo 漫画阅读器")
+	// 单击托盘图标时的回调
+	systray.SetOnClick(func(menu systray.IMenu) {
+		if menu != nil { // menu for linux nil
+			menu.ShowMenu()
+		}
+		fmt.Println("SetOnClick")
+	})
+	//// 双击托盘图标时的回调
+	//systray.SetOnDClick(func(menu systray.IMenu) {
+	//	if menu != nil { // menu for linux nil
+	//		menu.ShowMenu()
+	//	}
+	//	fmt.Println("SetOnDClick")
+	//})
 
 	// 创建菜单项
 	mOpenBrowser := systray.AddMenuItem("打开浏览器", "在浏览器中打开 Comigo")
+	//mOpenBrowser.Enable()
+	mOpenBrowser.Click(func() {
+		// 打开浏览器
+		if getURLFunc != nil {
+			url := getURLFunc()
+			go OpenBrowser(url)
+			logger.Infof("Opening browser: %s", url)
+		}
+	})
 	mQuit := systray.AddMenuItem("退出", "退出 Comigo")
 
-	// 在后台启动服务器
+	//mQuit.Enable()
+	mQuit.Click(func() {
+		fmt.Println("Requesting quit")
+		systray.Quit()
+		//systray.Quit()// macos error
+		//end() // macos error
+		fmt.Println("Finished quitting")
+	})
+	// 在后台启动Comigo服务
 	go func() {
 		if startServerFunc != nil {
 			startServerFunc()
-		}
-	}()
-
-	// 处理菜单点击事件
-	go func() {
-		for {
-			select {
-			case <-mOpenBrowser.ClickedCh:
-				// 打开浏览器
-				if getURLFunc != nil {
-					url := getURLFunc()
-					go OpenBrowser(url)
-					logger.Infof("Opening browser: %s", url)
-				}
-
-			case <-mQuit.ClickedCh:
-				// 退出程序
-				logger.Info("Quit requested from system tray")
-				systray.Quit()
-			}
 		}
 	}()
 }
