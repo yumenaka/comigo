@@ -4,7 +4,6 @@
 *.dll
 *.so
 *.dylib
-*comi
 *.wasm
 # Test binary, built with `go test -c`
 *.test
@@ -49,7 +48,6 @@ main
 go_build_main_go
 archives
 bin
-comic
 .config
 *md5Sums.txt
 resource.syso
