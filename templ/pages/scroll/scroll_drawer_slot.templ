@@ -83,7 +83,7 @@ templ DrawerSlot(c echo.Context, book *model.Book) {
 	</label>
 	<!-- 【切边阈值】 -->
 	<div
-		x-show="$store.global.onlineBook)&&$store.global.autoCrop"
+		x-show="$store.global.onlineBook&&$store.global.autoCrop"
 		x-transition
 		class="relative w-full my-2 rounded-sm outline-offset-4 outline-double outline-2 hover:outline-3"
 	>

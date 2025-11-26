@@ -57,12 +57,12 @@ const ArrowRightBase64 = 'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0
 
 //设置初始值
 const book = JSON.parse(document.getElementById('NowBook').textContent)
-// 打印调试信息
-if (Alpine.store('global').debugMode) {
-    // const globalState = JSON.parse(document.getElementById('GlobalState').textContent);
-    console.log('book', book)
-    console.log('book.page_count:', book.page_count)
-}
+// // 打印调试信息
+// if (Alpine.store('global').debugMode) {
+//     // const globalState = JSON.parse(document.getElementById('GlobalState').textContent);
+//     console.log('book', book)
+//     console.log('book.page_count:', book.page_count)
+// }
 const images = book.PageInfos
 Alpine.store('global').allPageNum = parseInt(book.page_count)
 // 临时用户标签ID
