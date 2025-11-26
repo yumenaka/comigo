@@ -433,7 +433,7 @@ templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 	>
 		<div class="flex flex-row w-full mb-2 justify-center items-center" @click="UpdateTailscaleStatus">
 			<div id="refresh-text" x-text={ getTranslations("tailscale_status") } class="text-center font-semibold"></div>
-			<div id="refresh-icon" x-show="$store.global.isHTTPServer" class="flex justify-center items-center w-8 h-8 mx-1 my-0 rounded cursor-pointer">
+			<div id="refresh-icon" x-show="$store.global.onlineBook" class="flex justify-center items-center w-8 h-8 mx-1 my-0 rounded cursor-pointer">
 				@svg.Refresh()
 			</div>
 		</div>

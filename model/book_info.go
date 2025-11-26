@@ -277,6 +277,8 @@ func (b *BookInfo) GetCover() PageInfo {
 		return PageInfo{Name: "video.png", Url: "/images/video.png"}
 	case TypeAudio:
 		return PageInfo{Name: "audio.png", Url: "/images/audio.png"}
+	case TypeHTML:
+		return PageInfo{Name: "audio.png", Url: "/images/html.png"}
 	case TypeUnknownFile:
 		return PageInfo{Name: "unknown.png", Url: "/images/unknown.png"}
 	}
