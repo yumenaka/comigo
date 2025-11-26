@@ -1,6 +1,6 @@
 //go:build !js
 
-package tools
+package system_tray
 
 import (
 	"embed"
@@ -11,6 +11,7 @@ import (
 	"github.com/atotto/clipboard"
 	"github.com/energye/systray"
 	"github.com/yumenaka/comigo/assets/locale"
+	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
@@ -39,7 +40,6 @@ var (
 		mLangJa       *systray.MenuItem
 		mOpenDir      *systray.MenuItem
 		mConfigDir    *systray.MenuItem
-		mRefreshDir   *systray.MenuItem
 		mStoreFolders []*systray.MenuItem
 		mQuit         *systray.MenuItem
 	}
@@ -90,6 +90,18 @@ func onReady() {
 	// 设置托盘图标旁边的文字（占用空间太大，注释掉，以后或许可以显示用户数什么的）
 	// systray.SetTitle(“Comigo”)
 
+	// 设置单击托盘图标时的回调
+	systray.SetOnClick(func(menu systray.IMenu) {
+		// 清理所有菜单项
+		systray.ResetMenu()
+		// 重新创建所有菜单项（使用最新的语言和书库链接）
+		initMenuItems()
+		// 显示菜单
+		if menu != nil { // menu for linux nil
+			menu.ShowMenu()
+		}
+	})
+
 	// 初始化菜单项
 	initMenuItems()
 
@@ -105,19 +117,13 @@ func onReady() {
 func initMenuItems() {
 	// 设置托盘工具提示
 	systray.SetTooltip(locale.GetString("systray_tooltip"))
-	// 单击托盘图标时的回调
-	systray.SetOnClick(func(menu systray.IMenu) {
-		if menu != nil { // menu for linux nil
-			menu.ShowMenu()
-		}
-	})
 
 	// 创建菜单项
 	menuItems.mOpenBrowser = systray.AddMenuItem(locale.GetString("systray_open_browser"), locale.GetString("systray_open_browser_tooltip"))
 	menuItems.mOpenBrowser.Click(func() {
 		if getURLFunc != nil {
 			url := getURLFunc()
-			go OpenBrowser(url)
+			go tools.OpenBrowser(url)
 			logger.Infof("Opening browser: %s", url)
 		}
 	})
@@ -147,10 +153,8 @@ func initMenuItems() {
 			if toggleTailscaleFunc != nil {
 				if err := toggleTailscaleFunc(); err != nil {
 					logger.Infof("Failed to toggle Tailscale: %v", err)
-				} else {
-					// 更新菜单标题
-					updateMenuTitles()
 				}
+				// 菜单会在下次点击托盘图标时自动更新，这里不需要手动更新
 			}
 		})
 	}
@@ -167,7 +171,7 @@ func initMenuItems() {
 				logger.Infof("Failed to set language: %v", err)
 			} else {
 				logger.Info("Language changed to Chinese")
-				updateMenuTitles()
+				// 菜单会在下次点击托盘图标时自动更新，这里不需要手动更新
 			}
 		}
 	})
@@ -177,7 +181,7 @@ func initMenuItems() {
 				logger.Infof("Failed to set language: %v", err)
 			} else {
 				logger.Info("Language changed to English")
-				updateMenuTitles()
+				// 菜单会在下次点击托盘图标时自动更新，这里不需要手动更新
 			}
 		}
 	})
@@ -187,7 +191,7 @@ func initMenuItems() {
 				logger.Infof("Failed to set language: %v", err)
 			} else {
 				logger.Info("Language changed to Japanese")
-				updateMenuTitles()
+				// 菜单会在下次点击托盘图标时自动更新，这里不需要手动更新
 			}
 		}
 	})
@@ -195,123 +199,7 @@ func initMenuItems() {
 	// 打开目录子菜单
 	menuItems.mOpenDir = systray.AddMenuItem(locale.GetString("systray_open_directory"), locale.GetString("systray_open_directory_tooltip"))
 
-	// 初始化目录子菜单（配置目录和书库文件夹）
-	refreshOpenDirSubMenu()
-
-	// 刷新按钮（配置目录和书库文件夹后）
-	menuItems.mRefreshDir = menuItems.mOpenDir.AddSubMenuItem(locale.GetString("systray_refresh_directories"), locale.GetString("systray_refresh_directories_tooltip"))
-	menuItems.mRefreshDir.Click(func() {
-		logger.Info("Refreshing directory menu...")
-		refreshOpenDirSubMenu()
-	})
-
-	// 退出
-	menuItems.mQuit = systray.AddMenuItem(locale.GetString("systray_quit"), locale.GetString("systray_quit_tooltip"))
-	menuItems.mQuit.Click(func() {
-		logger.Info("Requesting quit from system tray")
-		systray.Quit()
-	})
-}
-
-// updateMenuTitles 更新所有菜单项的标题
-func updateMenuTitles() {
-	// 更新托盘工具提示
-	systray.SetTooltip(locale.GetString("systray_tooltip"))
-
-	// 更新主菜单项
-	if menuItems.mOpenBrowser != nil {
-		menuItems.mOpenBrowser.SetTitle(locale.GetString("systray_open_browser"))
-		menuItems.mOpenBrowser.SetTooltip(locale.GetString("systray_open_browser"))
-	}
-	if menuItems.mCopyURL != nil {
-		menuItems.mCopyURL.SetTitle(locale.GetString("systray_copy_url"))
-		menuItems.mCopyURL.SetTooltip(locale.GetString("systray_copy_url_tooltip"))
-	}
-
-	// 更新 Tailscale 菜单项
-	if menuItems.mTailscale != nil && getTailscaleEnabledFunc != nil {
-		tailscaleEnabled := getTailscaleEnabledFunc()
-		if tailscaleEnabled {
-			menuItems.mTailscale.SetTitle(locale.GetString("systray_disable_tailscale"))
-			menuItems.mTailscale.SetTooltip(locale.GetString("systray_disable_tailscale"))
-		} else {
-			menuItems.mTailscale.SetTitle(locale.GetString("systray_enable_tailscale"))
-			menuItems.mTailscale.SetTooltip(locale.GetString("systray_enable_tailscale"))
-		}
-	}
-
-	// 更新语言切换菜单
-	if menuItems.mLanguage != nil {
-		menuItems.mLanguage.SetTitle(locale.GetString("systray_language"))
-		menuItems.mLanguage.SetTooltip(locale.GetString("systray_language"))
-	}
-	if menuItems.mLangZh != nil {
-		menuItems.mLangZh.SetTitle(locale.GetString("systray_language_zh"))
-		menuItems.mLangZh.SetTooltip(locale.GetString("systray_language_zh"))
-	}
-	if menuItems.mLangEn != nil {
-		menuItems.mLangEn.SetTitle(locale.GetString("systray_language_en"))
-		menuItems.mLangEn.SetTooltip(locale.GetString("systray_language_en"))
-	}
-	if menuItems.mLangJa != nil {
-		menuItems.mLangJa.SetTitle(locale.GetString("systray_language_ja"))
-		menuItems.mLangJa.SetTooltip(locale.GetString("systray_language_ja"))
-	}
-
-	// 更新打开目录菜单
-	if menuItems.mOpenDir != nil {
-		menuItems.mOpenDir.SetTitle(locale.GetString("systray_open_directory"))
-		menuItems.mOpenDir.SetTooltip(locale.GetString("systray_open_directory_tooltip"))
-	}
-	if menuItems.mConfigDir != nil {
-		menuItems.mConfigDir.SetTitle(locale.GetString("systray_config_directory"))
-		menuItems.mConfigDir.SetTooltip(locale.GetString("systray_config_directory_tooltip"))
-	}
-	if menuItems.mRefreshDir != nil {
-		menuItems.mRefreshDir.SetTitle(locale.GetString("systray_refresh_directories"))
-		menuItems.mRefreshDir.SetTooltip(locale.GetString("systray_refresh_directories_tooltip"))
-	}
-	// 书库文件夹与设置文件夹没有需要翻译的字段，只在点击刷新按钮后更新
-	// 更新退出菜单
-	if menuItems.mQuit != nil {
-		menuItems.mQuit.SetTitle(locale.GetString("systray_quit"))
-		menuItems.mQuit.SetTooltip(locale.GetString("systray_quit_tooltip"))
-	}
-}
-
-// onExit 系统托盘退出时的回调
-func onExit() {
-	// 执行清理逻辑
-	if shutdownServerFunc != nil {
-		shutdownServerFunc()
-	}
-}
-
-// refreshOpenDirSubMenu 刷新"打开目录"子菜单
-// 为了确保刷新按钮始终在最后，我们需要先隐藏刷新按钮，刷新目录，然后重新创建刷新按钮
-func refreshOpenDirSubMenu() {
-	// 保存刷新按钮的引用（如果存在）
-	refreshDirExists := menuItems.mRefreshDir != nil
-	if refreshDirExists {
-		menuItems.mRefreshDir.Hide()
-		menuItems.mRefreshDir = nil
-	}
-
-	// 隐藏并清理旧的配置目录菜单项
-	if menuItems.mConfigDir != nil {
-		menuItems.mConfigDir.Hide()
-		menuItems.mConfigDir = nil
-	}
-
-	// 隐藏并清理旧的书库文件夹菜单项
-	for _, mStore := range menuItems.mStoreFolders {
-		if mStore != nil {
-			mStore.Hide()
-		}
-	}
-	menuItems.mStoreFolders = make([]*systray.MenuItem, 0)
-
-	// 重新创建配置文件目录菜单项
+	// 配置文件目录
 	if getConfigDirFunc != nil {
 		configDir, err := getConfigDirFunc()
 		if err == nil && configDir != "" {
@@ -326,12 +214,11 @@ func refreshOpenDirSubMenu() {
 					openDirectory(configDir)
 				}
 			})
-		} else {
-			logger.Infof("Config directory not available: %v", err)
 		}
 	}
 
-	// 重新创建书库文件夹菜单项
+	// 书库文件夹
+	menuItems.mStoreFolders = make([]*systray.MenuItem, 0)
 	if getStoreUrlsFunc != nil {
 		storeUrls := getStoreUrlsFunc()
 		for _, storeUrl := range storeUrls {
@@ -350,13 +237,19 @@ func refreshOpenDirSubMenu() {
 		}
 	}
 
-	// 重新创建刷新按钮（放在最后）
-	if refreshDirExists {
-		menuItems.mRefreshDir = menuItems.mOpenDir.AddSubMenuItem(locale.GetString("systray_refresh_directories"), locale.GetString("systray_refresh_directories_tooltip"))
-		menuItems.mRefreshDir.Click(func() {
-			logger.Info("Refreshing directory menu...")
-			refreshOpenDirSubMenu()
-		})
+	// 退出
+	menuItems.mQuit = systray.AddMenuItem(locale.GetString("systray_quit"), locale.GetString("systray_quit_tooltip"))
+	menuItems.mQuit.Click(func() {
+		logger.Info("Requesting quit from system tray")
+		systray.Quit()
+	})
+}
+
+// onExit 系统托盘退出时的回调
+func onExit() {
+	// 执行清理逻辑
+	if shutdownServerFunc != nil {
+		shutdownServerFunc()
 	}
 }
 
