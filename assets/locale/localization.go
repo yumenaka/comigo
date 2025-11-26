@@ -91,3 +91,18 @@ func GetString(id string) string {
 func GetStringByLocal(id string, local string) string {
 	return i18n.NewLocalizer(bundle, local).MustLocalize(&i18n.LocalizeConfig{MessageID: id})
 }
+
+// SetLanguage 设置当前语言
+func SetLanguage(lang string) error {
+	switch lang {
+	case "zh-CN", "zh":
+		Localizer = i18n.NewLocalizer(bundle, "zh-CN")
+	case "en-US", "en":
+		Localizer = i18n.NewLocalizer(bundle, "en-US")
+	case "ja-JP", "ja":
+		Localizer = i18n.NewLocalizer(bundle, "ja-JP")
+	default:
+		Localizer = i18n.NewLocalizer(bundle, "en-US")
+	}
+	return nil
+}
