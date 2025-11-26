@@ -14,6 +14,7 @@ import (
 	"github.com/yumenaka/comigo/routers"
 	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
+	"github.com/yumenaka/comigo/tools/system_tray"
 )
 
 // 运行 Comigo 服务器
@@ -64,7 +65,7 @@ func main() {
 	defer tools.CleanupSingleInstance()
 
 	// 设置系统托盘并启动服务器
-	tools.SetupSystray(startServer, shutdownServer, getServerURL)
+	system_tray.SetupSystray(startServer, shutdownServer, getServerURL)
 }
 
 // startServer 启动服务器
