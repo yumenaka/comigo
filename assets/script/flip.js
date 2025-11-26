@@ -57,12 +57,12 @@ const ArrowRightBase64 = 'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0
 
 //设置初始值
 const book = JSON.parse(document.getElementById('NowBook').textContent)
-// // 打印调试信息
-// if (Alpine.store('global').debugMode) {
-//     // const globalState = JSON.parse(document.getElementById('GlobalState').textContent);
-//     console.log('book', book)
-//     console.log('book.page_count:', book.page_count)
-// }
+// 打印调试信息
+if (Alpine.store('global').debugMode) {
+    // const globalState = JSON.parse(document.getElementById('GlobalState').textContent);
+    console.log('book', book)
+    console.log('book.page_count:', book.page_count)
+}
 const images = book.PageInfos
 Alpine.store('global').allPageNum = parseInt(book.page_count)
 // 临时用户标签ID
@@ -128,10 +128,13 @@ function GetImageSrc(index) {
         return
     }
     const Url = images[index].url
-    const autoCrop = Alpine.store('global').autoCrop ? "&auto_crop=" + Alpine.store('global').autoCropNum : ''
-    const autoResize = Alpine.store('global').autoResize ? "&resize_max_width=" + Alpine.store('global').autoResizeWidth : ''
-    const noCache = Alpine.store('global').noCache ? "&no-cache=true" : ''
-    return `${Url}${autoCrop}${autoResize}${noCache}`
+    if (Alpine.store('global').onlineBook){
+        const autoCrop = Alpine.store('global').autoCrop ? "&auto_crop=" + Alpine.store('global').autoCropNum : ''
+        const autoResize = Alpine.store('global').autoResize ? "&resize_max_width=" + Alpine.store('global').autoResizeWidth : ''
+        const noCache = Alpine.store('global').noCache ? "&no-cache=true" : ''
+        return `${Url}${autoCrop}${autoResize}${noCache}`
+    }
+    return `${Url}`
 }
 
 // 加载图片资源
@@ -537,7 +540,7 @@ function addPageNum(n = 1) {
     // 翻页
     Alpine.store('global').nowPageNum = nowPageNum + n
     // 更新书签
-    if (!!book && !!book.id && Alpine.store('global').isHTTPServer) {
+    if (!!book && !!book.id && Alpine.store('global').onlineBook) {
         Alpine.store('global').UpdateBookmark({
             type: 'auto',
             bookId: book.id,
@@ -573,7 +576,7 @@ function jumpPageNum(jumpNum, sync = true) {
         return
     }
     Alpine.store('global').nowPageNum = num
-    if (Alpine.store('global').isHTTPServer) {
+    if (Alpine.store('global').onlineBook) {
         Alpine.store('global').UpdateBookmark({
             type: 'auto',
             bookId: book.id,
@@ -1023,7 +1026,7 @@ function attemptReconnect() {
 
 // 页面加载完成后建立WebSocket连接
 document.addEventListener('DOMContentLoaded', () => {
-    if (Alpine.store('global').isHTTPServer) {
+    if (Alpine.store('global').onlineBook) {
         connectWebSocket()
     }
 })

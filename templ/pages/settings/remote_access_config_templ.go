@@ -964,7 +964,7 @@ func TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) templ.Comp
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 85, "\" class=\"text-center font-semibold\"></div><div id=\"refresh-icon\" x-show=\"$store.global.isHTTPServer\" class=\"flex justify-center items-center w-8 h-8 mx-1 my-0 rounded cursor-pointer\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 85, "\" class=\"text-center font-semibold\"></div><div id=\"refresh-icon\" x-show=\"$store.global.onlineBook\" class=\"flex justify-center items-center w-8 h-8 mx-1 my-0 rounded cursor-pointer\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

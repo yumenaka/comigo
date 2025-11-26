@@ -18,6 +18,7 @@ const (
 	TypeTar         SupportFileType = ".tar"
 	TypeEpub        SupportFileType = ".epub"
 	TypePDF         SupportFileType = ".pdf"
+	TypeHTML        SupportFileType = ".html"
 	TypeVideo       SupportFileType = "video"
 	TypeAudio       SupportFileType = "audio"
 	TypeUnknownFile SupportFileType = "unknown"
@@ -41,6 +42,8 @@ func GetBookTypeByFilename(filename string) SupportFileType {
 		return TypeTar
 	case ".pdf":
 		return TypePDF
+	case ".html", ".htm":
+		return TypeHTML
 	case ".mp4", ".m4v", ".flv", ".avi", ".webm":
 		return TypeVideo
 	case ".mp3", ".wav", ".wma", ".ogg":

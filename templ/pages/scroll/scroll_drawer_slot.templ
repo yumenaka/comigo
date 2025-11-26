@@ -24,7 +24,7 @@ templ DrawerSlot(c echo.Context, book *model.Book) {
 		</a>
 	}
 	<!-- 【下载为便携网页文件】按钮，便携模式不可见 -->
-	<div class="flex justify-center w-full my-1 font-semibold" x-show="(!window.location.href.startsWith('file:///'))">
+	<div class="flex justify-center w-full my-1 font-semibold" x-show="$store.global.onlineBook">
 		<a
 			href={ templ.SafeURL(fmt.Sprintf("%s?static="+book.BookInfo.Title+".html", c.Request().URL.Path)) }
 			download={ book.BookInfo.Title + ".html" }
@@ -67,7 +67,7 @@ templ DrawerSlot(c echo.Context, book *model.Book) {
 	</div>
 	<!-- 【自动切边】 -->
 	<label
-		x-show="!window.location.href.startsWith('file:///')"
+		x-show="$store.global.onlineBook"
 		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
 	>
 		<input
@@ -83,7 +83,7 @@ templ DrawerSlot(c echo.Context, book *model.Book) {
 	</label>
 	<!-- 【切边阈值】 -->
 	<div
-		x-show="(!window.location.href.startsWith('file:///'))&&$store.global.autoCrop"
+		x-show="$store.global.onlineBook)&&$store.global.autoCrop"
 		x-transition
 		class="relative w-full my-2 rounded-sm outline-offset-4 outline-double outline-2 hover:outline-3"
 	>
@@ -200,7 +200,7 @@ templ DrawerSlot(c echo.Context, book *model.Book) {
 	</div>
 	<!-- 【压缩图片】 -->
 	<label
-		x-show="!window.location.href.startsWith('file:///')"
+		x-show="$store.global.onlineBook"
 		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
 	>
 		<input

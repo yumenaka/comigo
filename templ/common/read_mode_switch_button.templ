@@ -10,7 +10,7 @@ templ ReadModeSwitchButton() {
 				page_flip: ['infinite_scroll', 'paged_scroll'],
 			}
 		}"
-		x-show="!window.location.href.startsWith('file:///')"
+		x-show="$store.global.onlineBook"
 		class="flex gap-2 mt-2"
 	>
 		<template
