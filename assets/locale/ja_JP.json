@@ -132,6 +132,7 @@
   "websocket_error": "websocketエラー：",
   "websocket_messages": "WebSocketメッセージ：",
   "zip_encode": "ZIPファイルのエンコードを手動指定（gbk, shiftjisなど）",
+  "lang": "インターフェース言語設定（auto、zh、en、ja）、デフォルトはauto（自動検出）",
   "CacheDir": "ローカルキャッシュの場所",
   "CacheDir_Description": "ローカルの画像キャッシュの場所、デフォルトのシステム一時フォルダー。",
   "CertFile": "証明書ファイル",

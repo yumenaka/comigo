@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
@@ -34,6 +35,10 @@ func UpdateConfig(c echo.Context) error {
 	if err != nil {
 		logger.Infof("%s", err.Error())
 		return c.JSON(http.StatusMethodNotAllowed, map[string]string{"error": "Failed to parse JSON data"})
+	}
+	// 如果 Language 配置发生变化，重新初始化语言设置
+	if oldConfig.Language != config.GetCfg().Language {
+		locale.InitLanguageFromConfig(config.GetCfg().Language)
 	}
 	err = config.UpdateConfigFile()
 	if err != nil {

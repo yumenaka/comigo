@@ -70,6 +70,8 @@ func LoadConfigFile() {
 		logger.Infof("%s", err)
 		os.Exit(1)
 	}
+	// 根据配置重新初始化语言设置
+	locale.InitLanguageFromConfig(config.GetCfg().Language)
 	// //监听文件修改
 	// runtimeViper.WatchConfig()
 	// //文件修改时，执行重载设置、服务重启的函数

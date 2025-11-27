@@ -106,6 +106,8 @@ func InitFlags() {
 	RootCmd.PersistentFlags().BoolVar(&cfg.ConfigLocked, "config-locked", false, locale.GetString("ConfigLocked"))
 	// EnableSingleInstance 启用单实例模式
 	RootCmd.PersistentFlags().BoolVar(&cfg.EnableSingleInstance, "single-instance", true, locale.GetString("enable_single_instance"))
+	// Language 语言设置
+	RootCmd.PersistentFlags().StringVar(&cfg.Language, "lang", "auto", locale.GetString("lang"))
 	// DEBUG
 	RootCmd.PersistentFlags().BoolVar(&cfg.Debug, "debug", false, locale.GetString("debug_mode"))
 }
