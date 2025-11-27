@@ -132,6 +132,7 @@
   "websocket_error": "websocket错误：",
   "websocket_messages": "websocket信息：",
   "zip_encode": "指定zip文件编码（gbk、shiftjis等）",
+  "lang": "界面语言设置（auto、zh、en、ja），默认为auto（自动检测）",
   "CacheDir": "本地缓存位置",
   "CacheDir_Description": "本地图片缓存位置，默认系统临时文件夹。",
   "CertFile": "CertFile",

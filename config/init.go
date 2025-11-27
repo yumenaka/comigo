@@ -48,4 +48,5 @@ var cfg = Config{
 	Username:              "comigo",
 	ZipFileTextEncoding:   "",
 	EnableSingleInstance:  false,
+	Language:              "auto",
 }

@@ -61,6 +61,7 @@ type Config struct {
 	TailscaleAuthKey       string          `json:"TailscaleAuthKey" comment:"Tailscale身份验证密钥。另外，也可以将本地环境变量 TS_AUTHKEY 设置为身份验证密钥"`
 	ZipFileTextEncoding    string          `json:"ZipFileTextEncoding" comment:"非utf-8编码的ZIP文件，尝试用什么编码解析，默认GBK"`
 	EnableSingleInstance   bool            `json:"EnableSingleInstance" comment:"启用单实例模式，确保同一时间只有一个程序实例运行"`
+	Language               string          `json:"Language" comment:"界面语言设置，可选值：auto（自动检测）、zh（中文）、en（英文）、ja（日文），默认为auto"`
 }
 
 func (c *Config) GetHost() string {
@@ -450,6 +451,13 @@ func UpdateConfigByJson(jsonString string) error {
 		case "GenerateMetaData":
 			if v, ok := value.(bool); ok {
 				cfg.GenerateMetaData = v
+			}
+		case "Language":
+			if v, ok := value.(string); ok {
+				cfg.Language = v
+				// 更新语言后，重新初始化语言设置
+				// 注意：这里需要导入 locale 包，但为了避免循环依赖，我们延迟初始化
+				// 实际的语言初始化会在下次使用 locale 包时自动完成
 			}
 		default:
 			logger.Infof("Unknown config key: %s", key)

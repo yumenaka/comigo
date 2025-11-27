@@ -132,6 +132,7 @@
   "websocket_error": "websocket error:",
   "websocket_messages": "websocket messages:",
   "zip_encode": "Manually specify ZIP file encoding (e.g., gbk, shiftjis)",
+  "lang": "Interface language setting (auto, zh, en, ja), default is auto (auto-detect)",
   "CacheDir": "local cache location",
   "CacheDir_Description": "Local image cache location, default system temporary folder.",
   "CertFile": "CertFile",
