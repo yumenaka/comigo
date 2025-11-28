@@ -17,7 +17,7 @@ const (
 // DeleteConfig 删除配置文件
 func DeleteConfig(c echo.Context) error {
 	// 如果配置被锁定，返回错误
-	if config.GetCfg().ConfigLocked {
+	if config.GetCfg().ReadOnlyMode {
 		return c.JSON(http.StatusMethodNotAllowed, map[string]string{"error": "Config is locked, cannot be modified"})
 	}
 	in := c.Param("in")

@@ -57,7 +57,7 @@ func Header(prop HeaderProps) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<header id=\"header\" class=\"z-10 toolbar flex flex-row justify-between w-full h-12 p-1 border-b bg-base-100 text-base-content border-slate-400\" :class=\"{ 'absolute top-0 ': $store.flip.autoHideToolbar&&$store.global.readMode === 'page_flip','mx-auto bg-base-100/50': $store.global.readMode === 'page_flip'}\"><div class=\"flex flex-row\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<header id=\"header\" class=\"z-10 toolbar flex flex-row justify-between w-full h-12 p-1 border-b bg-base-100 text-base-content border-slate-400\" :class=\"{ 'absolute top-0 ': window.location.pathname.startsWith(`/flip`) && $store.flip.autoHideToolbar && $store.global.readMode === 'page_flip','mx-auto bg-base-100/50': window.location.pathname.startsWith(`/flip`) && $store.global.readMode === 'page_flip'}\"><div class=\"flex flex-row\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

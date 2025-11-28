@@ -57,8 +57,8 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if config.GetCfg().ConfigLocked {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-screen h-full bg-black/50 flex items-start justify-center z-50 pointer-events-auto\"><div class=\"mt-32 p-2 font-semibold text-center border border-red-600 rounded-md bg-red-50 shadow-lg\"><span class=\"text-red-500\" x-text=\"i18next.t('config_locked_description')\">Configuration is locked.</span></div></div>")
+		if config.GetCfg().ReadOnlyMode {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-screen h-full bg-black/50 flex items-start justify-center z-50 pointer-events-auto\"><div class=\"mt-32 p-2 font-semibold text-center border border-red-600 rounded-md bg-red-50 shadow-lg\"><span class=\"text-red-500\" x-text=\"i18next.t('read_only_mode_description')\">Configuration is locked.</span></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
