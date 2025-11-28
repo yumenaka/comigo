@@ -91,7 +91,7 @@ func updateConfigGeneric(c echo.Context) (string, string, error) {
 // UpdateStringConfigHandler 处理 String 类型
 func UpdateStringConfigHandler(c echo.Context) error {
 	// 如果配置被锁定
-	if config.GetCfg().ConfigLocked {
+	if config.GetCfg().ReadOnlyMode {
 		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
 	}
 	name, newValue, err := updateConfigGeneric(c)
@@ -113,7 +113,7 @@ func UpdateStringConfigHandler(c echo.Context) error {
 // UpdateBoolConfigHandler 处理 Bool 类型
 func UpdateBoolConfigHandler(c echo.Context) error {
 	// 如果配置被锁定
-	if config.GetCfg().ConfigLocked {
+	if config.GetCfg().ReadOnlyMode {
 		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
 	}
 	name, newValue, err := updateConfigGeneric(c)
@@ -140,7 +140,7 @@ func UpdateBoolConfigHandler(c echo.Context) error {
 // UpdateNumberConfigHandler 处理 Number 类型
 func UpdateNumberConfigHandler(c echo.Context) error {
 	// 如果配置被锁定
-	if config.GetCfg().ConfigLocked {
+	if config.GetCfg().ReadOnlyMode {
 		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
 	}
 	name, newValue, err := updateConfigGeneric(c)
@@ -173,7 +173,7 @@ func UpdateLoginSettingsHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "non-htmx request")
 	}
 	// 如果配置被锁定
-	if config.GetCfg().ConfigLocked {
+	if config.GetCfg().ReadOnlyMode {
 		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
 	}
 	username := c.FormValue("Username")
@@ -243,7 +243,7 @@ func UpdateLoginSettingsHandler(c echo.Context) error {
 // UpdateTailscaleConfigHandler 处理Tailscale配置更新的JSON API
 func UpdateTailscaleConfigHandler(c echo.Context) error {
 	// 如果配置被锁定
-	if config.GetCfg().ConfigLocked {
+	if config.GetCfg().ReadOnlyMode {
 		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
 	}
 	// 解析请求体（JSON格式）
@@ -309,7 +309,7 @@ func AddArrayConfigHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "non-htmx request")
 	}
 	// 如果配置被锁定
-	if config.GetCfg().ConfigLocked {
+	if config.GetCfg().ReadOnlyMode {
 		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
 	}
 	configName := c.FormValue("configName")
@@ -357,7 +357,7 @@ func DeleteArrayConfigHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "non-htmx request")
 	}
 	// 如果配置被锁定
-	if config.GetCfg().ConfigLocked {
+	if config.GetCfg().ReadOnlyMode {
 		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
 	}
 
@@ -403,7 +403,7 @@ func HandleConfigSave(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "non-htmx request")
 	}
 	// 如果配置被锁定
-	if config.GetCfg().ConfigLocked {
+	if config.GetCfg().ReadOnlyMode {
 		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
 	}
 	// 保存到什么文件夹
@@ -432,7 +432,7 @@ func HandleConfigDelete(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "non-htmx request")
 	}
 	// 如果配置被锁定
-	if config.GetCfg().ConfigLocked {
+	if config.GetCfg().ReadOnlyMode {
 		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
 	}
 	// 保存到什么文件夹

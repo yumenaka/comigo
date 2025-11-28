@@ -21,7 +21,7 @@ type Config struct {
 	ClearCacheExit         bool            `json:"ClearCacheExit" comment:"退出程序的时候，清理web图片缓存"`
 	ClearDatabaseWhenExit  bool            `json:"ClearDatabaseWhenExit" comment:"启用本地数据库时，扫描完成后，清除不存在的书籍。"`
 	ConfigFile             string          `json:"-" toml:"-" comment:"用户指定的的yaml设置文件路径"`
-	ConfigLocked           bool            `json:"ConfigLocked" comment:"配置文件锁定，防止被网页端修改，用于展示模式"`
+	ReadOnlyMode           bool            `json:"ReadOnlyMode" comment:"只读模式。禁止网页端更改配置或上传文件。"`
 	Debug                  bool            `json:"Debug" comment:"开启Debug模式"`
 	DefaultMode            string          `json:"DefaultMode" comment:"默认阅读模式，默认为空，可以设置为scroll或flip"`
 	DisableLAN             bool            `json:"DisableLAN" comment:"只在本机提供阅读服务，不对外共享"`

@@ -25,7 +25,7 @@ func UpdateConfig(c echo.Context) error {
 	jsonString := string(body)
 	logger.Infof("Received JSON data: %s \n", jsonString)
 	// 如果配置被锁定，返回错误
-	if config.GetCfg().ConfigLocked {
+	if config.GetCfg().ReadOnlyMode {
 		return c.JSON(http.StatusMethodNotAllowed, map[string]string{"error": "Config is locked, cannot be modified"})
 	}
 	// 复制当前配置以便后续比较

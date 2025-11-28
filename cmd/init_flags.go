@@ -102,8 +102,8 @@ func InitFlags() {
 	RootCmd.PersistentFlags().IntVar(&cfg.TailscalePort, "tailscale-port", 443, locale.GetString("TailscalePort"))
 	// Tailscale AuthKey
 	RootCmd.PersistentFlags().StringVar(&cfg.TailscaleAuthKey, "tailscale-authKey", "", locale.GetString("TailscaleAuthKey"))
-	// ConfigLocked 配置文件锁定，防止被网页端修改，用于展示模式
-	RootCmd.PersistentFlags().BoolVar(&cfg.ConfigLocked, "config-locked", false, locale.GetString("ConfigLocked"))
+	// ReadOnlyMode 只读模式，禁止网页端修改配置或上传文件
+	RootCmd.PersistentFlags().BoolVar(&cfg.ReadOnlyMode, "read-only", false, locale.GetString("read_only_mode"))
 	// EnableSingleInstance 启用单实例模式
 	RootCmd.PersistentFlags().BoolVar(&cfg.EnableSingleInstance, "single-instance", true, locale.GetString("enable_single_instance"))
 	// Language 语言设置
