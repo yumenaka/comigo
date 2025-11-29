@@ -480,5 +480,8 @@
   "systray_refresh_directories": "Refresh",
   "systray_refresh_directories_tooltip": "Refresh directory list",
   "systray_quit": "Quit",
-  "systray_quit_tooltip": "Quit Comigo"
+  "systray_quit_tooltip": "Quit Comigo",
+  "context_menu_open_with_comigo": "Open with Comigo",
+  "register_context_menu": "Register Windows Explorer folder context menu: Open with Comigo",
+  "unregister_context_menu": "Unregister Windows Explorer folder context menu: Open with Comigo"
 }

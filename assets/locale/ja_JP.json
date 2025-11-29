@@ -480,5 +480,8 @@
   "systray_refresh_directories": "更新",
   "systray_refresh_directories_tooltip": "ディレクトリリストを更新",
   "systray_quit": "終了",
-  "systray_quit_tooltip": "Comigoを終了"
+  "systray_quit_tooltip": "Comigoを終了",
+  "context_menu_open_with_comigo": "Comigoで開く",
+  "register_context_menu": "Windows エクスプローラーのフォルダー右クリックメニューを登録（Comigoで開く）",
+  "unregister_context_menu": "Windows エクスプローラーのフォルダー右クリックメニューを削除（Comigoで開く）"
 }

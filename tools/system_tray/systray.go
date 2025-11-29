@@ -34,6 +34,7 @@ var (
 		mOpenBrowser  *systray.MenuItem
 		mCopyURL      *systray.MenuItem
 		mTailscale    *systray.MenuItem
+		mContextMenu  *systray.MenuItem
 		mLanguage     *systray.MenuItem
 		mLangZh       *systray.MenuItem
 		mLangEn       *systray.MenuItem
@@ -156,6 +157,32 @@ func initMenuItems() {
 				}
 				// 菜单会在下次点击托盘图标时自动更新，这里不需要手动更新
 			}
+		})
+	}
+
+	// Windows 右键菜单注册/清理（仅在 Windows 下显示）
+	if runtime.GOOS == "windows" {
+		title := locale.GetString("register_context_menu")
+		if tools.HasComigoFolderContextMenu() {
+			title = locale.GetString("unregister_context_menu")
+		}
+		menuItems.mContextMenu = systray.AddMenuItem(title, locale.GetString("register_context_menu"))
+		menuItems.mContextMenu.Click(func() {
+			// 再次检测当前状态，决定是注册还是清理
+			if tools.HasComigoFolderContextMenu() {
+				if err := tools.RemoveComigoFromFolderContextMenu(); err != nil {
+					logger.Infof("Failed to clear Windows context menu: %v", err)
+				} else {
+					logger.Infof("%s", locale.GetString("unregister_context_menu"))
+				}
+			} else {
+				if err := tools.AddComigoToFolderContextMenu(); err != nil {
+					logger.Infof("Failed to register Windows context menu: %v", err)
+				} else {
+					logger.Infof("%s", locale.GetString("register_context_menu"))
+				}
+			}
+			// 标题更新依赖下次点击托盘图标时重新构建菜单
 		})
 	}
 
