@@ -483,5 +483,13 @@
   "systray_quit_tooltip": "Quit Comigo",
   "context_menu_open_with_comigo": "Open with Comigo",
   "register_context_menu": "Register context menu: Open with Comigo",
-  "unregister_context_menu": "Unregister context menu: Open with Comigo"
+  "unregister_context_menu": "Unregister context menu: Open with Comigo",
+  "systray_extra": "Extra",
+  "systray_extra_tooltip": "More integration options",
+  "systray_project": "Comigo Project Page",
+  "systray_project_tooltip": "Open Comigo GitHub repository",
+  "register_folder_context_menu": "Register folder context menu: Open with Comigo",
+  "unregister_folder_context_menu": "Unregister folder context menu: Open with Comigo",
+  "register_file_association": "Register archive file association (as a candidate)",
+  "unregister_file_association": "Unregister archive file association"
 }

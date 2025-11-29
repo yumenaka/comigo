@@ -31,3 +31,9 @@ func RemoveComigoFromFolderContextMenu() error {
 func HasComigoFolderContextMenu() bool {
 	return false
 }
+
+// HasComigoArchiveAssociation 是 Windows 专用功能的空实现。
+// 在非 Windows 平台上始终返回 false。
+func HasComigoArchiveAssociation(exts []string) bool {
+	return false
+}

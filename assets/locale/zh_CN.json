@@ -483,5 +483,13 @@
   "systray_quit_tooltip": "退出 Comigo",
   "context_menu_open_with_comigo": "使用Comigo打开",
   "register_context_menu": "注册右键菜单（“使用Comigo打开”）",
-  "unregister_context_menu": "清理右键菜单（“使用Comigo打开”）"
+  "unregister_context_menu": "清理右键菜单（“使用Comigo打开”）",
+  "systray_extra": "其他",
+  "systray_extra_tooltip": "更多系统集成功能",
+  "systray_project": "Comigo 项目地址",
+  "systray_project_tooltip": "打开 Comigo 在 GitHub 上的项目主页",
+  "register_folder_context_menu": "注册文件夹右键菜单（“使用Comigo打开”）",
+  "unregister_folder_context_menu": "清理文件夹右键菜单（“使用Comigo打开”）",
+  "register_file_association": "注册压缩文件类型关联（作为候选打开方式）",
+  "unregister_file_association": "清理压缩文件类型关联（移除Comigo候选项）"
 }
