@@ -491,5 +491,6 @@
   "register_folder_context_menu": "Register folder context menu: Open with Comigo",
   "unregister_folder_context_menu": "Unregister folder context menu: Open with Comigo",
   "register_file_association": "Register archive file association (as a candidate)",
-  "unregister_file_association": "Unregister archive file association"
+  "unregister_file_association": "Unregister archive file association",
+  "create_desktop_shortcut": "Create desktop shortcut"
 }

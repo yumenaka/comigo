@@ -5,6 +5,7 @@ package windows_registry
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"syscall"
 
@@ -385,7 +386,7 @@ func deleteRegistryKey(root registry.Key, path string) error {
 	return nil
 }
 
-// isNotFoundError 判断错误是否为“路径/键不存在”。
+// isNotFoundError 判断错误是否为"路径/键不存在"。
 func isNotFoundError(err error) bool {
 	if err == nil {
 		return false
@@ -395,4 +396,66 @@ func isNotFoundError(err error) bool {
 		return false
 	}
 	return errno == syscall.ERROR_FILE_NOT_FOUND || errno == syscall.ERROR_PATH_NOT_FOUND
+}
+
+// CreateDesktopShortcut 在桌面创建 Comigo 的快捷方式。
+// 使用 PowerShell 脚本创建快捷方式，如果快捷方式已存在则会被覆盖。
+func CreateDesktopShortcut() error {
+	exePath, err := currentExecutablePath()
+	if err != nil {
+		return fmt.Errorf("get executable path: %w", err)
+	}
+
+	// 获取桌面路径
+	desktopPath, err := getDesktopPath()
+	if err != nil {
+		return fmt.Errorf("get desktop path: %w", err)
+	}
+
+	// 快捷方式文件名
+	shortcutName := "Comigo.lnk"
+	shortcutPath := filepath.Join(desktopPath, shortcutName)
+
+	// 使用 PowerShell 创建快捷方式
+	// $WshShell = New-Object -ComObject WScript.Shell
+	// $Shortcut = $WshShell.CreateShortcut("路径")
+	// $Shortcut.TargetPath = "目标路径"
+	// $Shortcut.Save()
+	psScript := fmt.Sprintf(`$WshShell = New-Object -ComObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut("%s"); $Shortcut.TargetPath = "%s"; $Shortcut.WorkingDirectory = "%s"; $Shortcut.Save()`,
+		shortcutPath,
+		exePath,
+		filepath.Dir(exePath))
+
+	cmd := exec.Command("powershell", "-Command", psScript)
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("create shortcut: %w", err)
+	}
+
+	return nil
+}
+
+// getDesktopPath 获取当前用户的桌面路径。
+func getDesktopPath() (string, error) {
+	// 尝试从环境变量获取
+	userProfile := os.Getenv("USERPROFILE")
+	if userProfile != "" {
+		desktopPath := filepath.Join(userProfile, "Desktop")
+		if _, err := os.Stat(desktopPath); err == nil {
+			return desktopPath, nil
+		}
+	}
+
+	// 尝试从注册表获取
+	key, err := registry.OpenKey(registry.CURRENT_USER, `Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`, registry.QUERY_VALUE)
+	if err != nil {
+		return "", fmt.Errorf("open registry key: %w", err)
+	}
+	defer key.Close()
+
+	desktopPath, _, err := key.GetStringValue("Desktop")
+	if err != nil {
+		return "", fmt.Errorf("get desktop path from registry: %w", err)
+	}
+
+	return desktopPath, nil
 }

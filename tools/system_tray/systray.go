@@ -32,21 +32,22 @@ var (
 	getTailscaleEnabledFunc func() bool
 	// 菜单项引用，用于语言切换时更新
 	menuItems struct {
-		mOpenBrowser      *systray.MenuItem
-		mCopyURL          *systray.MenuItem
-		mTailscale        *systray.MenuItem
-		mExtra            *systray.MenuItem
-		mProject          *systray.MenuItem
-		mContextFolder    *systray.MenuItem
-		mContextFileAssoc *systray.MenuItem
-		mLanguage         *systray.MenuItem
-		mLangZh           *systray.MenuItem
-		mLangEn           *systray.MenuItem
-		mLangJa           *systray.MenuItem
-		mOpenDir          *systray.MenuItem
-		mConfigDir        *systray.MenuItem
-		mStoreFolders     []*systray.MenuItem
-		mQuit             *systray.MenuItem
+		mOpenBrowser           *systray.MenuItem
+		mCopyURL               *systray.MenuItem
+		mTailscale             *systray.MenuItem
+		mExtra                 *systray.MenuItem
+		mProject               *systray.MenuItem
+		mContextFolder         *systray.MenuItem
+		mContextFileAssoc      *systray.MenuItem
+		mCreateDesktopShortcut *systray.MenuItem
+		mLanguage              *systray.MenuItem
+		mLangZh                *systray.MenuItem
+		mLangEn                *systray.MenuItem
+		mLangJa                *systray.MenuItem
+		mOpenDir               *systray.MenuItem
+		mConfigDir             *systray.MenuItem
+		mStoreFolders          []*systray.MenuItem
+		mQuit                  *systray.MenuItem
 	}
 )
 
@@ -269,6 +270,16 @@ func initMenuItems() {
 				}
 			}
 			// 文本更新依赖下次点击托盘图标时重新构建菜单
+		})
+
+		// 子菜单：在桌面创建快捷方式
+		menuItems.mCreateDesktopShortcut = menuItems.mExtra.AddSubMenuItem(locale.GetString("create_desktop_shortcut"), locale.GetString("create_desktop_shortcut"))
+		menuItems.mCreateDesktopShortcut.Click(func() {
+			if err := windows_registry.CreateDesktopShortcut(); err != nil {
+				logger.Infof("Failed to create desktop shortcut: %v", err)
+			} else {
+				logger.Infof("%s", locale.GetString("create_desktop_shortcut"))
+			}
 		})
 
 		// 子菜单：文件类型关联注册/清理（候选打开方式）

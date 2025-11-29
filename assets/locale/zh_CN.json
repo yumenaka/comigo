@@ -491,5 +491,6 @@
   "register_folder_context_menu": "注册文件夹右键菜单（“使用Comigo打开”）",
   "unregister_folder_context_menu": "清理文件夹右键菜单（“使用Comigo打开”）",
   "register_file_association": "注册压缩文件类型关联（作为候选打开方式）",
-  "unregister_file_association": "清理压缩文件类型关联（移除Comigo候选项）"
+  "unregister_file_association": "清理压缩文件类型关联（移除Comigo候选项）",
+  "create_desktop_shortcut": "在桌面创建快捷方式"
 }

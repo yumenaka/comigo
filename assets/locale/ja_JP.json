@@ -491,5 +491,6 @@
   "register_folder_context_menu": "フォルダー右クリックメニューを登録（Comigoで開く）",
   "unregister_folder_context_menu": "フォルダー右クリックメニューを削除（Comigoで開く）",
   "register_file_association": "圧縮ファイルの関連付けを登録（候補として追加）",
-  "unregister_file_association": "圧縮ファイルの関連付けを解除"
+  "unregister_file_association": "圧縮ファイルの関連付けを解除",
+  "create_desktop_shortcut": "デスクトップにショートカットを作成"
 }
